@@ -1,0 +1,36 @@
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
+
+<tr>
+	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+		<a 
+			href="spy.make_help_box -name='reflection-statistics' -popout='False'" 
+			target="Help me with this">
+			<zimg border="0" src="info.png">
+		</a>	
+	</td>
+
+	<td VALIGN='center'  colspan='2'>
+		<font size='2'>
+			<input 
+				type="combo" 
+				bgcolor="$getVar(gui_html_input_bg_colour)" 
+				name= "SET_REFLECTION_STATISTICS" 
+				items="Wilson Plot" 
+				width='$eval(htmlpanelwidth()-120)' 
+				value = "Wilson Plot" 
+				height="18" 
+				readonly
+			>
+		<font size=2 VALIGN='right'>
+			<input 
+				type="button" 
+				name = "DISPLAY_REFLECTION_STATISTICS" 
+				width="70" 
+				value="Make Graph" 
+				onclick="wp>>">
+		</font>
+	</td>
+</tr>
+	
+
+<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->

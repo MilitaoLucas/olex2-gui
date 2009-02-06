@@ -1,0 +1,42 @@
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
+
+<tr>
+		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+			<zimg border="0" src="gui/images/toolbar-dimas.png"></td>
+		<td>
+			&nbsp;<a href="spy dimas info">Get Info on Current Structure</a></td>
+	</tr>
+
+	<tr>
+		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+			<zimg border="0" src="gui/images/toolbar-dimas.png"></td>
+		<td>
+		<font size='2'>
+		<input 
+			type="text" 
+			bgcolor="$getVar(gui_html_input_bg_colour)" 
+			name="id" float 
+			width="30" float 
+			height="18" 
+			value = "$GetVar(gui_archive_last)"
+		>
+		</font>
+		<input 
+			type="button" 
+			name = "load" 
+			width="35" 
+			height="18" 
+			value="Load"
+			onclick = "SetVar(gui_archive_last,GetValue(id))>>spy dimas load GetValue(id)"
+		>
+	</td>
+</tr>
+
+	<tr>
+		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+			<zimg border="0" src="gui/images/toolbar-dimas.png"></td>
+		<td>
+			&nbsp;<a href="spy dimas archive">Archive Files</a></td>
+	</tr>
+
+<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->

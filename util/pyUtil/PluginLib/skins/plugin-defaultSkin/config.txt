@@ -1,0 +1,53 @@
+#C The main colours defining the Skin. If no value is provided, automatic settings will apply.
+
+GUI_HTML_BASE_COLOUR=#6464a0
+GUI_HTML_BG_COLOUR=#ffffff
+GUI_HTML_LINK_COLOUR=#6f6f8b
+GUI_HTML_FONT_COLOUR=#6f6f8b
+GUI_HTML_TABLE_BG_COLOUR=#F3F3F3
+GUI_HTML_TABLE_FIRSTCOL_COLOUR=#E9E9E9
+GUI_HTML_INPUT_BG_COLOUR=#efefef
+GUI_TIMAGE_COLOUR=#6464a0
+GUI_TIMAGE_FONT_COLOUR=
+GUI_SNUMTITLE_COLOUR=#6464a0
+GUI_SNUMTITLE_FONT_COLOUR=
+GUI_TAB_FONT_COLOUR=
+GUI_HTML_HIGHLIGHT_COLOUR=#ff7800
+
+gui_grad_top_left=#05053c
+gui_grad_top_right=#05053c
+gui_grad_bottom_left=#ffffff
+gui_grad_bottom_right=#ffffff
+
+#C The settings for the InfoBox on the top of the screen. These are OpenGL Settings - experimentation is required
+gui_infobox_text=2309;0.7,0.7,0.7,1;1,1,1,1
+gui_infobox_plane=3077;0,0,0,1;1,1,1,0.5
+
+
+#C The main luminance adjustment values. If no value is provided, automatic settings will apply.
+
+L_GUI_HTML_BASE_COLOUR=
+L_GUI_HTML_BG_COLOUR=
+L_GUI_HTML_LINK_COLOUR=
+L_GUI_HTML_FONT_COLOUR=
+L_GUI_HTML_TABLE_BG_COLOUR=
+L_GUI_HTML_TABLE_FIRST_COL=
+L_GUI_HTML_INPUT_BG_COLOR=
+L_GUI_HTML_HIGHLIGHT_COLOUR=
+L_GUI_TIMAGE_COLOUR=
+L_GUI_TIMAGE_FONT_COLOUR=1.6
+L_GUI_SNUMTITLE_COLOUR=
+L_GUI_SNUMTITLE_FONT_COLOUR=
+L_GUI_TAB_FONT_COLOUR=
+
+
+
+#C Other settings defining the Skin.
+#C The FONT NAME is restricted to some select fonts only.
+GUI_HTMLPANELWIDTH= 320
+GUI_HTML_FONT_SIZE=2 
+GUI_HTML_FONT_NAME=Arial
+GUI_IMAGE_FONT_NAME= Vera
+GUI_HTML_ICON_SIZE=20
+GUI_SKIN_EXTENSION=1
+GUI_SKIN_LOGO_NAME=basedir()/util/pyUtil/PluginLib/skins/plugin-defaultSkin/default.png

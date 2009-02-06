@@ -1,0 +1,1 @@
+For legal reasons, we can not ship SHELX files. If you have obtained any SHELX executables by legal means, please place them here.

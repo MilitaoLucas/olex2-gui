@@ -1,0 +1,80 @@
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
+
+
+<tr ALIGN='left'>
+	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+		<a 
+			href="spy.make_help_box -name='quick-drawing-styles' -popout='False'" 
+			target="Help me with this">
+			<zimg border="0" src="info.png">
+		</a>	
+	</td>
+		<td></td>
+			<zimg border="0" src="gui/images/toolbar-ball-and-stick.png"> 
+		<td width = "50%">
+			<a href="pers>>sel -u">%Balls & Sticks%</a>
+		</td>
+		<td ></td>
+			<zimg border="0" src="gui/images/toolbar-anis.png"> 
+		<td width = "50%">
+			<a href="telp>>sel -u">%Ellipsoids%</a> | <a href="telph>>sel -u">%With H%</a>
+		</td>
+	</tr>
+	<tr>
+	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+	</td>
+	<td>
+			<zimg border="0" src="gui/images/toolbar-wireframe.png"> 
+		<td>
+			<a href="proj">%Wire Frame%</a>
+		</td>
+		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
+			<zimg border="0" src="gui/images/toolbar-sphere-packing.png"> 
+		<td>
+			<a href="sfil>>sel -u">%Sphere Packing%</a>
+		</td>
+	</tr>
+
+	<tr>
+	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+	</td>
+	<td>
+			<zimg border="0" src="gui/images/toolbar-bicoloured-bonds.png"> 
+		<td>
+			<a href="tubes>>sel -u">%Tubes%</a>
+		</td>
+		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
+			<zimg border="0" src="gui/images/toolbar-default.png"> 
+		<td>
+			<a href="default">%Default%</a> | <a href="bw">%B&W%</a>
+		</td>
+	</tr>
+
+<!--
+
+	<tr>
+		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
+		<td>
+			Perspective
+		</td>
+		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
+			<zimg border="0" src="gui/images/toolbar-default.png"> 
+		<td>
+			Zoom
+		</td>
+	</tr>
+	<tr>
+		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
+		<td>
+			<input type="slider" name = "perspec" float width="100" height="20" value="1" min="1" max="10" onchange = "echo perspective getvalue(perspec)>>perspective getvalue(perspec)">
+		</td>
+		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
+			<zimg border="0" src="gui/images/toolbar-default.png"> 
+		<td>
+			<input type="slider" name = "zoom" float width="100" height="20" value="1" min="1" max="10" onchange = "echo zoom getvalue(zoom)>>zoom(getvalue(zoom))">
+		</td>
+	</tr>
+-->
+
+
+<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->

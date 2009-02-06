@@ -1,0 +1,58 @@
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
+
+
+<tr>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+</td>
+	<td width='70' align='center'>
+		<a href="spy.BatchMatch GetValue(SET_BATCH_DIR) -t=GetValue(SET_BATCH_TYPE)">%Batch Match%</a>&nbsp;
+	</td>
+	<td>
+		<input 
+			bgcolor="$getVar(gui_html_input_bg_colour)" 
+			type="text" 
+			name="SET_BATCH_DIR" 
+			width="80" 
+			height="18" 
+			value="GetVar(batch_dir)"
+		>
+	</td>
+
+	<td align='center'>
+		<a href="SetValue(SET_BATCH_DIR, 'ChooseDir()')">Dir</a>
+	</td>
+
+	<td>
+				<font size='2'>
+				<input 
+					type='combo', 
+					width="35" 
+					height="17" 
+					name='SET_BATCH_TYPE', 
+					items='cif;res;ins;', 
+					value='cif' ,
+				>
+			</font>
+	</td>
+	<td>
+		<a href="exec explorer -o 'GetValue(SET_BATCH_DIR)\match.csv'">csv</a>
+	</td>
+
+</tr>
+<tr>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+</td>
+<td colspan='5'>
+<!-- #include batchmatchlist batchmatchlist.htm;1; -->
+</td>
+</tr>
+<tr>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+</td>
+<td colspan='5'>
+<!-- #include match match.htm;1; -->
+</td>
+</tr>
+
+</table>
+<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
