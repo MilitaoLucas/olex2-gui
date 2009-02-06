@@ -1034,6 +1034,8 @@ class timage(ImageTools):
     IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
     name = "olex_help_logo.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
+
+    
     
     #cut = 0, 0, 275, 55 #the total area of the logo image
     #crop =  im.crop(cut)
@@ -1143,6 +1145,7 @@ class timage(ImageTools):
                  font_size=6, 
                  font_colour=self.gui_html_font_colour)
     OlexVFS.save_image_to_olex(IM, name, 2)
+
     
     cut = 16*sf, 156*sf, 26*sf, 166*sf
     crop =  im.crop(cut)

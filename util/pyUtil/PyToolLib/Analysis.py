@@ -1,4 +1,6 @@
 #from __future__ import division
+# -*- coding: latin-1 -*-
+
 import math
 from itertools import izip
 import ExternalPrgParameters
@@ -287,6 +289,7 @@ class Graph(ImageTools):
       draw.rectangle(box, fill=self.gui_html_bg_colour, outline=(200, 200, 200))
     self.im = im
     self.width, self.height = self.im.size
+    self.draw = draw
     
   def draw_yAxis(self):
     yAxis = []
@@ -694,7 +697,46 @@ class Graph(ImageTools):
       if barHeight > wY * 2:
         self.draw.text((x + (barX - wX)/2, y + self.graphY * 0.01), "%s" %txt, font=font, fill="#222222")
       i += 1
+
       
+      
+class ShelXAnalysis():
+  
+  def __init__(self):
+    from Analysis import Analysis
+    OV.unregisterCallback("procout", self.ShelXL)
+    self.Analysis = Analysis(function='ShelXL', param=None)
+    self.Analysis.run()
+    self.xl_d = {}
+    self.new_graph_please = False
+    self.cycle = 0
+  
+  def ShelXL(self, line):
+    self.new_graph_please = False
+    mean_shift = 0
+    max_shift = 0
+    if "before cycle" in line:
+      self.cycle = int(line.split("before cycle")[1].strip().split()[0])
+      self.xl_d.setdefault("cycle_%i" %self.cycle, {})
+    elif "Mean shift/esd =" in line:
+      mean_shift = float(line.split("Mean shift/esd =")[1].strip().split()[0])
+      self.xl_d["cycle_%i" %self.cycle].setdefault('mean_shift',mean_shift)
+    elif "Max. shift = " in line:
+      max_shift = float(line.split("Max. shift =")[1].strip().split()[0])
+      max_shift_atom = line.split("for")[1].strip().split()[0]
+      self.xl_d["cycle_%i" %self.cycle].setdefault('max_shift',max_shift)
+      self.xl_d["cycle_%i" %self.cycle].setdefault('max_shift_atom',max_shift_atom)
+      self.new_graph_please = True
+
+    if self.new_graph_please:
+      self.make_ShelXL_graph()
+
+  def make_ShelXL_graph(self):
+    self.Analysis.run_ShelXL_graph(cycle=self.cycle, data=self.xl_d) 
+
+  def observe_shex_l(self):
+    OV.registerCallback("procout", self.ShelXL)
+
 class Analysis(Graph):
   def __init__(self, function=None, param=None):
     Graph.__init__(self)
@@ -726,6 +768,18 @@ class Analysis(Graph):
       }
       self.make_analysis_image()
       
+    elif fun == "ShelXL":
+      self.counter = 0
+      self.attempt = 1
+      self.item = fun
+      size = (int(OV.FindValue('gui_htmlpanelwidth'))- 32, 150)
+      self.graphInfo["Title"] = fun
+      self.graphInfo["imSize"] = size
+      self.graphInfo["FontScale"] = 0.03
+      self.graphInfo["TopRightTitle"] = OV.FileName()
+      self.graphInfo["n_cycles"] = OV.FindValue("snum_refinement_max_cycles")
+      self.make_analysis_image()
+    
     elif fun == "Charge Flipping":
       self.counter = 0
       self.attempt = 1
@@ -992,6 +1046,8 @@ class Analysis(Graph):
       self.make_f_obs_f_calc_plot()
     elif self.item == "Charge Flipping":
       self.make_charge_flipping_plot()
+    elif self.item == "ShelXL":
+      self.make_ShelXL_plot()
     image_location = "%s.png" %(self.item)
     
     ## This whole writing of files to a specific location was only a test, that's been left in by mistake. Sorry John!
@@ -1005,17 +1061,29 @@ class Analysis(Graph):
       else: # If all else fails assume evil windows
         testpicturepath = "C:/test.png"
       self.im.save("%s"%testpicturepath, "PNG")
+      
     OlexVFS.save_image_to_olex(self.im, image_location,  1)
     self.width, self.height = self.im.size
     self.popout()
     
   def make_charge_flipping_plot(self):
     self.make_empty_graph()
-    txt = self.XYChargeFlippingHtm()
+    program = self.SPD.programs["smtbx-solve"]
+    method = program.methods["Charge Flipping"]
+    img_name = "XY.png"
+    txt = self.ProgramHtml(program, method, "Solving", img_name)
     OlexVFS.write_to_olex('xy.htm', txt)
-    olexex.OnChargeFlippingStart(txt=txt)
+    olexex.PopProgram(txt=txt)
 
-  
+  def make_ShelXL_plot(self):
+    self.make_empty_graph()
+    program = self.RPD.programs["ShelXL"]
+    method = program.methods["CGLS"]
+    img_name = "ShelXL.png"
+    txt = self.ProgramHtml(program, method, "Refining", img_name)
+    OlexVFS.write_to_olex("ShelXL.htm", txt)
+    olexex.PopProgram(txt=txt)
+    
   def make_AutoChem_plot(self):
     filepath = self.file_reader("%s/%s.csv" %(self.datadir,"ac_stats"))
     self.get_simple_x_y_pair_data_from_file(filepath)
@@ -1262,37 +1330,141 @@ class Analysis(Graph):
     fill = tuple(fill)
     return fill
   
-  def XYChargeFlippingHtm(self):
+  def ProgramHtml(self, program, method, process, img_name):
     return_to_menu_txt = str(OV.Translate("Return to main menu"))
-    program = self.SPD.programs["smtbx-solve"]
-    method = program.methods["Charge Flipping"]
-    prg = program.name
-    name = method.name
+    if process == "Refining":
+      prg = OV.FindValue("snum_refinement_program",None)
+      method = OV.FindValue("snum_refinement_method",None)
+      program = self.RPD.programs[prg]
+    else:
+      prg = OV.FindValue("snum_solution_program",None)
+      method = OV.FindValue("snum_solution_method",None)
+      program = self.SPD.programs[prg]
+    name = method  
+    method = program.methods[method]
+      
     authors = program.author
     reference = program.reference
     help = OV.TranslatePhrase(method.help)
     info = OV.TranslatePhrase(method.info)
-    txt = r'''
-<!-- #include tool-top gui/blocks/help-top.htm;image=blank;1; -->
-<tr><td>
-  <font size="+2"><b>Solving %s with %s</b></font>
-</td></tr>
-<tr><td>
-  <b>%s</b> -
-  %s -
-  %s
-</td></tr>
-<tr><td align='center'>
-  <zimg border="0" src="XY.png">
-</td></tr>
-<tr><td>
-<a href="html.Hide pop_charge_flipping"><zimg border="0" src="delete_small.png"> Close this Window</a>
-</td></tr>
-
-</table>
-<!-- #include tool-footer gui/blocks/tool-footer.htm;1; -->
-''' %(self.filename, prg, name, authors, reference)
+    
+    txt = olexex.get_template("pop_program")
+    
+    if txt:
+      txt = txt %(process, self.filename, prg, name, authors, reference, img_name)
+    else:
+      txt = 'Please provide a template in folder basedir()/etc/gui/blocks/templates/'
     return txt
+  
+  
+  def run_ShelXL_graph(self, cycle, data):
+    
+    top = self.graph_top
+    marker_width = 5
+    title = self.graphInfo.get('Title', "")
+    size = self.graphInfo.get('imSize', "")
+    width = size[0]
+    height = size[1] - top
+    height = self.graph_bottom - self.graph_top
+    legend_top = height + 20
+    
+    bar_width = (width-2*self.bSides)/self.graphInfo["n_cycles"]
+    
+    mean_shift = data["cycle_%i" %cycle].get("mean_shift","n/a")
+    max_shift = data["cycle_%i" %cycle].get("max_shift","n/a")
+    max_shift_atom = data["cycle_%i" %cycle].get("max_shift_atom","n/a")
+    bar_left = ((cycle - 1) * bar_width) + self.bSides  
+    bar_right = bar_left + bar_width
+    bar_bottom = height + top
+    
+    number = 0
+    if mean_shift != "n/a":
+      number = mean_shift
+      txt = "Mean shift/esd"
+      wX, wY = self.draw.textsize(txt, font=self.font_large)
+      x = width - 2*self.bSides - wX
+      y = wY + 6
+      self.draw.text((x, y), "%s" %txt, font=self.font_large, fill="#888888")
+      
+      if mean_shift >= 1:
+        bar_top = top
+      else:
+        bar_top = height + top  - (mean_shift * (height))
+        
+      rR = int(255*mean_shift*2)
+      rG = int(255*(1.3-mean_shift*2))
+      rB = 0
+      
+      box = (bar_left,bar_top,bar_right,bar_bottom)
+      self.draw.rectangle(box, fill=(rR, rG, rB), outline=(100, 100, 100))
+
+      txt = str("%.3f" %mean_shift)
+      wX, wY = self.draw.textsize(txt, font=self.font_large)
+      if wX < bar_width:
+        x = bar_left + ( bar_width - wX/2 -wX) + self.bSides
+        x = bar_left + ( bar_width - wX)/2
+        
+        if mean_shift < 0.8:
+          y = bar_top - 14
+        else:
+          y = bar_top + 6
+        self.draw.text((x, y), "%s" %txt, font=self.font_large, fill="#888888")
+        
+      if mean_shift < 0.003:
+        txt = "OK"
+        wX, wY = self.draw.textsize(txt, font=self.font_large)
+        x = width - 2*self.bSides - wX
+        y = wY + 30
+        self.draw.text((x, y - 10), "%s" %txt, font=self.font_large, fill=self.gui_green)
+        #smile = OlexVFS.read_from_olex("tickok.png")
+        ##smile = Image.frombuffer('RGBA',(30,30), smile,'raw','RGBA',0,1)
+        #smile = Image.open("%s/tickok.png" %self.datadir)
+        #self.im.paste(smile, (x,y))
+      
+    elif max_shift != "n/a":
+      number = max_shift
+      txt = "Max shift in A"
+      wX, wY = self.draw.textsize(txt, font=self.font_large)
+      x = width - 2*self.bSides - wX
+      y = wY + 3
+      self.draw.text((x, y), "%s" %txt, font=self.font_large, fill="#888888")
+      if max_shift >= 1:
+        bar_top = top
+      else:
+        bar_top = height + top - (max_shift *(height - top))
+      
+      rR = int(255*max_shift*2)
+      rG = int(255*(1.3-max_shift*2))
+      rB = 0
+        
+      box = (bar_left,bar_top,bar_right,bar_bottom)
+      self.draw.rectangle(box, fill=(rR, rG, rB), outline=(100, 100, 100))
+      
+      txt = str(max_shift_atom)
+      wX, wY = self.draw.textsize(txt, font=self.font_large)
+      x = bar_left + wX/2 + self.bSides
+      y = bar_top - 13
+      self.draw.text((x, y), "%s" %txt, font=self.font_large, fill="#888888")
+
+      
+    legend_top = height + 20
+    m_offset = 5
+    ## Wipe the legend area
+    box = (0,legend_top,width,legend_top + 20)
+    self.draw.rectangle(box, fill=self.gui_html_bg_colour)
+
+    txt = str(number)
+    ## Draw Current Numbers
+    wX, wY = self.draw.textsize(txt, font=self.font_large)
+    x = width - wX - self.bSides
+    self.draw.text((x, legend_top), "%s" %txt, font=self.font_large, fill="#888888")
+      
+      
+    
+    image_location = "ShelXL.png"
+    OlexVFS.save_image_to_olex(self.im, image_location, 0)
+    olex.m("html.Reload pop_prg_analysis")
+  
   
   def run_charge_flipping_graph(self, flipping, solving, previous_state):
     top = self.graph_top
@@ -1375,9 +1547,8 @@ class Analysis(Graph):
       self.draw.text((x, legend_top), "%s" %txt, font=self.font_large, fill="#888888")
       
       image_location = "XY.png"
-      OlexVFS.save_image_to_olex(self.im, image_location,  0)
-      
-      olex.m("html.Reload pop_charge_flipping")
+      res = OlexVFS.save_image_to_olex(self.im, image_location,  0)
+      olex.m("html.Reload pop_prg_analysis")
       
   
 class Dataset(object):

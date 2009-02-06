@@ -61,6 +61,8 @@ def snumVariables():
   return {
     'snum_solution_program':Variable('?', PermittedValues(olexex.SPD.programs.keys()), onChange=olexex.onSolutionProgramChange),
     'snum_solution_method':Variable('?', onChange=olexex.onSolutionMethodChange),
+    'snum_solution_graphical_output':Variable(False),
+
     #'snum_refinement_formula':Variable(''),
     
     'snum_refinement_program':Variable('?', PermittedValues(olexex.RPD.programs.keys()), onChange=olexex.onRefinementProgramChange),
@@ -80,6 +82,7 @@ def snumVariables():
     'snum_refinement_auto_assemble':Variable(False),
     'snum_refinement_auto_tidy':Variable(False),
     'snum_refinement_last_R1':Variable('n/a'),
+    'snum_refinement_graphical_output':Variable(False),
     
     'snum_shelx_output':Variable(True),
    
@@ -215,7 +218,7 @@ def snumVariables():
     'snum_map_source':Variable('olex'),
     'snum_map_type':Variable('diff'),
     'snum_map_resolution':Variable(0.1),
-    
+    'snum_map_mask':Variable(True),
     #'snum_map_button_txt':'Calculate Electron Density',
     'snum_calcvoid_value':'-1',
     'snum_calcvoid_view':'wire',
