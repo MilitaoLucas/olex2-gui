@@ -1,4 +1,5 @@
 import sys
+import math
 import olx
 import time
 from History import *
@@ -12,30 +13,73 @@ except:
   olx.current_reflections = None
 
 import olex
-#import olex_core
 import time
 import cctbx_controller as cctbx_controller
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
-class OlexAtoms(object):
+
+class OlexRefinementModel(object):
   def __init__(self):
-    pass
-  def iterator(self):
+    olex_refinement_model = OV.GetRefinementModel(True)
+    self._atoms = {}
     self.id_for_name = {}
-    for i in xrange(int(olx.xf_au_GetAtomCount())):
-      name = str(olx.xf_au_GetAtomName(i))
-      type = (olx.xf_au_GetAtomType(i))
-      name_to_post = str("%s%i" %(type, i))
-      xyz = stt(olx.xf_au_GetAtomCrd(i))
-      u = stt(olx.xf_au_GetAtomU(i))
-      type = str(olx.xf_au_GetAtomType(i))
-      self.id_for_name.setdefault(name_to_post, i)
-      if name[:1] != "Q" and olx.xf_au_IsAtomDeleted(i) == "false":
-        yield name_to_post, xyz, u, type
-        
-        
+    asu = olex_refinement_model['aunit']
+    for residue in asu['residues']:
+      for atom in residue['atoms']:
+        i = atom['tag']
+        self._atoms.setdefault(i, atom)
+        element_type = atom['type']
+        name_to_post = str("%s%i" %(element_type, i))
+        self.id_for_name.setdefault(name_to_post, atom['aunit_id'])
+    self._cell = olex_refinement_model['aunit']['cell']
+    self.exptl = olex_refinement_model['exptl']
+    self._afix = olex_refinement_model['afix']
+    self._model= olex_refinement_model
+    #a = self.afix_iterator()
+    #r = self.restraint_iterator()
+
+  def iterator(self):
+    for i, atom in self._atoms.items():
+      name = atom['label']
+      element_type = atom['type']
+      name_to_post = str("%s%i" %(element_type, i))
+      xyz = atom['crd'][0]
+      adp = atom.get('adp',None)
+      if adp is None:
+        uiso = atom.get('uiso')[0]
+        u = (uiso,)
+      else: u = adp[0]
+      if name[:1] != "Q":
+        yield name_to_post, xyz, u, element_type
+
+  def afix_iterator(self):
+    for afix in self._afix:
+      mn = afix['afix']
+      m, n = divmod(mn, 10)
+      pivot = afix['pivot']
+      dependent = afix['dependent']
+      pivot_neighbours = [i for i in self._atoms[pivot]['neighbours'] if not i in dependent]
+      bond_length = afix['d']
+      uiso = afix['u']
+      yield m, n, pivot, dependent, pivot_neighbours, bond_length
+
+  def restraint_iterator(self):
+    for restraint_type in ('dfix','dang','flat','chiv'):
+      for restraint in self._model[restraint_type]:
+        kwds = dict(
+          i_seqs = [i[0] for i in restraint['atoms']],
+          sym_ops = [i[1] for i in restraint['atoms']],
+          value = restraint['value'],
+          weight = 1/math.pow(restraint['esd1'],2),
+        )
+        yield restraint_type, kwds
+
+  def getCell(self):
+    return [self._cell[param][0] for param in ('a','b','c','alpha','beta','gamma')]
+
+
 class OlexCctbxAdapter(object):
   def __init__(self, function, parameters):
     super(OlexCctbxAdapter, self).__init__(function, parameters)
@@ -65,25 +109,22 @@ class OlexCctbxAdapter(object):
         break
       #bit = item.split('=')
       #if bit[0] == 'c': self.max_cycles = int(bit[1])
+    self.olx_atoms = OlexRefinementModel()
     try:
       self.initialise_reflections()
     except Exception, err:
       print err
       return
-    self.olx_atoms = OlexAtoms()
     olx.OlexSetupRefineCctbxInstance = self
 
 
   def initialise_reflections(self):
-    cell = olx.xf_au_GetCell()
-    self.cell = stt(cell)
+    self.cell = self.olx_atoms.getCell()
     self.space_group = str(olx.xf_au_GetCellSymm())
-    #reflections = r"%s/%s.hkl" %(olx.FilePath(), olx.FileName())
     reflections = olx.HKLSrc()
     if reflections != olx.current_reflection_filename:
       olx.current_reflection_filename = reflections
       olx.current_reflections = cctbx_controller.reflections(self.cell, self.space_group, reflections)
-    #olx.current_reflections = None
     if olx.current_reflections:
       self.reflections = olx.current_reflections
     else:
@@ -91,19 +132,7 @@ class OlexCctbxAdapter(object):
         olx.current_reflections = cctbx_controller.reflections(self.cell, self.space_group, reflections)
       except Exception, err:
         print err
-      
       self.reflections = olx.current_reflections
-
-  #def ChargeFlippingGraph(self):
-    #from Analysis import XYPlot
-    #a = XYPlot(function=None, param=None)
-    #import ExternalPrgParameters
-    #self.SPD, self.RPD = ExternalPrgParameters.defineExternalPrograms()
-    #program = self.SPD.programs["smtbx-solve"]
-    #method = program.methods["Charge Flipping"]
-    #a.initialise(program, method)
-    #return a
-
   
   def runChargeFlippingSolution(self, hkl_path, verbose='highly', solving_interval=60):
     import time
@@ -269,6 +298,13 @@ class OlexCctbxAdapter(object):
                                          self.reflections)
       f_obs_f_calc = cctbx_controller.f_obs_vs_f_calc(model, self.reflections)
       return f_obs_f_calc
+    
+    elif self.fun == "sys_absent":
+      #model = create_xray_stucture_model(self.cell,
+                                         #self.space_group,
+                                         #self.olx_atoms.iterator(),
+                                         #self.reflections)
+      return cctbx_controller.sys_absent_intensity_distribution(self.reflections)
       
     elif self.fun == "refine":
       t0 = time.time()
@@ -282,11 +318,13 @@ class OlexCctbxAdapter(object):
         print err
       
       try:  
-        self.R1 = self.refinement.r1()
+        self.R1 = self.refinement.R1()[0]
+        #self.wR2, self.GooF = self.refinement.wR2_and_GooF()
+        self.refinement.show_final_summary()
         OV.SetVar('cctbx_R1',self.R1)
+        #OV.SetVar('cctbx_wR2',self.wR2)
       except Exception, err:
         print err
-        
 
       cctbxmap_type = 'None'
       cctbxmap_resolution = 0.4
@@ -447,22 +485,33 @@ class OlexCctbxAdapter(object):
     
 
   def refine_with_cctbx(self):
-    #reflections = olx.FileName()
-    self.refinement = cctbx_controller.refinement(self.cell, 
-                                                  self.space_group, 
-                                                  self.olx_atoms.iterator(), 
-                                                  self.reflections, 
-                                                  max_cycles = self.max_cycles)
+    log_file = open('%s/.olex/temp/%s.log' %(OV.FilePath(),OV.FileName()), 'w')
+    builder = cctbx_controller.create_cctbx_xray_structure(
+      self.cell,
+      self.space_group,
+      self.olx_atoms.iterator(),
+      restraint_iterator=self.olx_atoms.restraint_iterator())
+    lambda_ = self.olx_atoms.exptl.get('radiation', 0.71073)
+    verbose=1
+    self.refinement = cctbx_controller.refinement(
+      f_sq_obs=self.reflections.f_sq_obs,
+      xray_structure=builder.structure,
+      geometry_restraints_manager=builder.geometry_restraints_manager,
+      lambda_=lambda_,
+      max_cycles=self.max_cycles,
+      verbose=verbose,
+      log=log_file)
     self.refinement.on_cycle_finished = self.feed_olex
     self.cycle += 1
     try:
       self.refinement.start()
-      R1 = self.refinement.r1()
+      #R1 = self.refinement.r1()
     except Exception,err:
       print err
       if self.cycle < self.max_cycles:
         if self.do_refinement:
           self.refine_with_cctbx()
+    log_file.close()
 
   def post_single_peak(self, xyz, height, cutoff=1.0, auto_assign=False):
     if height/self.peak_normaliser < cutoff:
@@ -478,7 +527,7 @@ class OlexCctbxAdapter(object):
       max_Z = 0
       for element in auto_assign:
         Z = self.pt[element].get('Z', 0)
-        if self.pt[element].get('Z', 0) > max_Z: max_Z = Z 
+        if self.pt[element].get('Z', 0) > max_Z: max_Z = Z
       
       please_assign = False
       for element in auto_assign:
@@ -510,26 +559,16 @@ class OlexCctbxAdapter(object):
         olx.xf_au_SetAtomU(id, "0.06")
         
 
-  def post_peaks(self, fft_map):
-    from cctbx import maptbx
-    from  libtbx.itertbx import izip
-    fft_map.apply_volume_scaling()
-    peaks = fft_map.peak_search(
-      parameters=maptbx.peak_search_parameters(
-	peak_cutoff=0.1,
-	min_distance_sym_equiv=1.0,
-	max_clusters=30,
-	),
-      verify_symmetry=False
-      ).all()
-		
+  def post_peaks(self, fft_map, verbose=False):
+    from itertools import izip
+    peaks = self.refinement.peak_search()
+    
     i = 0
     for xyz, height in izip(peaks.sites(), peaks.heights()):
-      if i < 3:
+      if verbose and i < 3:
         print "Position of peak %s = %s, Height = %s" %(i, xyz, height)
       i += 1
       id = olx.xf_au_NewAtom("%.2f" %(height), *xyz)
-      #if olx.xf_au_SetAtomCrd(id, *xyz)=="true":
       if id != '-1':
         olx.xf_au_SetAtomU(id, "0.06")
       if i == 100:
@@ -540,37 +579,10 @@ class OlexCctbxAdapter(object):
     #olx.Compaq()
 
   def feed_olex(self, structure, minimiser):
+    self.refinement.show_cycle_summary(minimiser)
     self.auto = False
     self.cycle += 1
-    #formula = olx.xf_GetFormula('list')
-    #formula = formula.split(',')
-    #curr_formula = olexex.GetCurrentFormula()
-    #fl = []
-    #for bit in formula:
-      #bit = bit.split(':')
-      #symbol = bit[0]
-      #number = bit[1]
-      #if symbol == "H":
-        #continue
-      #fl.append((self.pt[symbol].get("mass"),symbol,number))
-    #fl.sort()
-    #element_d = {}
-    #i = 0
-    #for item in fl:
-      #element = item[1]
-      #max_number = round(float(item[2]))
-      #if i + 1 < len(fl):
-        #up = fl[i+1][1]
-      #else:
-        #up = element
-      #if i - 1 >= 0:
-        #down = fl[i-1][1]
-      #else:
-        #down = element
-      #i += 1
-      #element_d.setdefault(element, {'+1':up,'-1':down, 'max_number':max_number})
     
-    print "Refinement Cycle: %i" %(self.cycle-1)
     if self.film:
       n = str(self.cycle)
       if int(n) < 10:
@@ -636,8 +648,6 @@ class OlexCctbxAdapter(object):
             if self.debug: print " X"
     olx.Sel('-u')
     olx.xf_EndUpdate()
-#    print "testauto"
-#    olx.ATA()
     if reset_refinement:
       raise Exception("Atoms promoted")
 
@@ -743,10 +753,6 @@ def charge_flipping_loop(solving, verbose=True):
     previous_state = solving.state
 
 
-
-
-
-
 def on_twin_image_click(run_number, options):
   # arguments is a list
   # options is a dictionary
@@ -757,17 +763,6 @@ def on_twin_image_click(run_number, options):
   olx.Atreap(olx.FileFull())
   OV.UpdateHtml()
 
-
-def stt(str):
-  l = []
-  s = str.split(",")
-  for item in s:
-    l.append(float(item))
-  retval = tuple(l)
-  return retval
-
-
-
 if __name__ == "__main__":
   try:
     a = OlexCctbxAdapter('refine', 4)
@@ -776,16 +771,3 @@ if __name__ == "__main__":
     print "There was a problem in cctbx_olex_adapter"
     sys.stderr.formatExceptionInfo()
     print repr(ex)
-
-
-
-
-
-#def exercise_post_olex():
-  #post_olex(xs)
-
-#import cProfile
-#cProfile.run('exercise_post_olex()', 'post_olex.prof')
-#import pstats
-#stats = pstats.Stats('post_olex.prof')
-#stats.sort_stats('time').print_stats(10)
