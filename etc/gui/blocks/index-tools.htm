@@ -1,0 +1,19 @@
+<!-- #includeif IsFileType('ires') tools-tools gui\tools.htm;gui\blocks\tool-off.htm;image=tools;onclick=;2; -->
+<!-- #includeif IsFileType('ires') tools-OLEX-conres gui\OLEX-conres.htm;gui\blocks\tool-off.htm;image=OLEX-constraints-and-restraints;onclick='spy.restraint_builder(GetVar(snum_olex_conres,RRINGS))';2; -->
+<!-- #includeif IsFileType('ires') tools-SHELX-constraints gui\SHELX-constraints.htm;gui\blocks\tool-off.htm;image=SHELX-constraints;onclick='spy.restraint_builder(GetVar(gui_shelx_constraints))';2; -->
+<!-- #includeif IsFileType('ires') tools-SHELX-restraints gui\SHELX-restraints.htm;gui\blocks\tool-off.htm;image=SHELX-restraints;onclick='spy.restraint_builder(GetVar(gui_shelx_restraints))';2; -->
+<!-- #includeif isplugininstalled(plugin-autostructure) tools-auto-structure gui\auto-structure.htm;gui\blocks\tool-off.htm;image=auto-structure;onclick=;2; -->
+<!-- #includeif IsFileType('ires') work-hydrogen-atoms gui\hydrogen-atoms.htm;gui\blocks\tool-off.htm;image=hydrogen-atoms;onclick=;2; -->
+<!-- #includeif IsFileType('ires') work-disorder gui\disorder.htm;gui\blocks\tool-off.htm;image=disorder;onclick=;2; -->
+<!-- #include tool-calculate-voids gui\calculate-voids.htm;gui\blocks\tool-off.htm;image=calculate-voids;onclick=;2; -->
+<!-- #includeif file.Exists('HKLSrc()') tool-electron-density gui\electron-density.htm;gui\blocks\tool-off.htm;image=electron-density;onclick=;2; -->
+<!-- #includeif file.Exists('FilePath()\FileName().cif') tools-cif gui\cif.htm;gui\blocks\tool-off.htm;image=cif;onclick=;0; -->
+<!-- #includeif and(spy.IsPluginInstalled(plugin-cctbx),IsFileType('ires')) work-twinning gui\twinning.htm;gui\blocks\tool-off.htm;image=twinning;onclick=;2; -->
+<!-- #include tools-settings gui\settings.htm;gui\blocks\tool-off.htm;image=settings;onclick=;onclick=;2; -->
+<!-- #includeif or(IsFileType('ires'),IsFileType('cif')) tools-overlay gui\overlay.htm;gui\blocks\tool-off.htm;image=overlay;onclick=;onclick=;2; -->
+<!-- #includeif and(spy.IsPluginInstalled(plugin-cctbx),IsFileType('ires')) tools-cctbx gui\cctbx.htm;gui\blocks\tool-off.htm;image=cctbx;onclick=;onclick=;0; -->
+<!-- #includeif or(IsFileType('ires'),IsFileType('p4p')) tools-sg gui\space-groups.htm;gui\blocks\tool-off.htm;image=space-groups;onclick=sgd;0; -->
+<!-- #includeif isplugininstalled(plugin-brukersaint) tools-bs gui\bruker-saint.htm;gui\blocks\tool-off.htm;image=bruker-saint;onclick=BSINI;2; -->
+<!-- #includeif isplugininstalled(plugin-Batch) tools-batch gui\batch.htm;gui\blocks\tool-off.htm;image=batch;onclick=;onclick=;2; -->
+<!-- #includeif or(IsFileType('ires'),IsFileType('cif')) work-refinement gui\refinement.htm;gui\blocks\tool-off.htm;image=refinement;onclick=;0; -->
+<!-- #includeif or(IsFileType('ires'),IsFileType('crs')) work-solve gui\solve.htm;gui\blocks\tool-off.htm;image=solve;onclick='sg>>spy GuiTools single:solve';0; -->

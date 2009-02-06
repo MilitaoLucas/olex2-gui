@@ -1,0 +1,125 @@
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
+
+<tr>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+		<zimg border="0" src="gui/images/toolbar-move.png"> 
+	</td>	
+	<td VALIGN='center' colspan='3' width='100%'>
+		<a 
+			href="mode move sel"
+			target="%Move Near-target%">
+			<b>
+			<zimg border="0" src="button-move_near.png"> 
+		</a>
+		<a
+			href="mode move -c sel" 
+			target="%Copy Near-target%">
+			<b>
+			<zimg border="0" src="button-copy_near.png"> 
+		</a>
+		<a 
+			href="mode grow" 
+			target="%Mode Grow-target%">
+			<b>
+			<zimg border="0" src="button-grow_mode.png"> 
+		</a> 
+	</td>
+</tr>
+
+
+
+<tr>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+		<zimg border="0" src="gui/images/toolbar-center-on-cell.png"> 
+	</td>
+	<td VALIGN='center' colspan='3' width='100%'>
+		<a 
+			href="move" 
+			target="%Center on Cell-target%">
+			<b>
+			<zimg border="0" src="button-centre_on_cell.png"> 
+		</a>
+		<a 
+			href="move" 
+			target="%Center on Largest Fragment-target%">
+			<b>
+			<zimg border="0" src="button-largest_part.png"> 
+		</a>
+		<a 
+			href="compaq -a" 
+			target="%Assemble-target%">
+			<b>
+			<zimg border="0" src="button-assemble.png"> 
+		</a>
+	</td>
+</tr>
+
+<tr>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	</td>
+	<td VALIGN='center' width="100%">
+		<a 
+			href="basis" 
+			target="%Basis-target%">
+			<zimg border="0" src="button-show_basis.png"> 
+		</a>
+		<a 
+			href="cell" 
+			target="%Switshes the display of the cell on%">
+			<zimg border="0" src="button-show_cell.png"> 
+		</a>
+		<a 
+			href="fuse" 
+			target="%Resets all symmetry-generated atoms%">
+			<zimg border="0" src="button-fuse.png"> 
+		</a>
+		<a 
+			href="grow" 
+			target="%Grow All-target%">
+			<b>
+			<zimg border="0" src="button-grow_all.png"> 
+		</a>
+	</td>
+	<td VALIGN='center' ALIGN='right' width="20">
+		<input 
+			type="button" 
+			name = "qual" 
+			width="50" 
+			height="16" 
+			value="%Quality%" 
+			onup="setlabel(qual,'Q')>>qual -l" 
+			ondown="setlabel(qual,'quality')>>qual -h">
+	</td>
+</tr>
+</table>
+
+<table border="0" style="border-collapse: collapse" width="100%" id="table11" cellpadding="0" cellspacing="1" bgcolor="#F3F3F3"> <tr>
+<tr>  
+	<td width="18" bgcolor="#E9E9E9">
+			<input 
+				type="button" 
+				name = "Pack" 
+				width="20" 
+				height="17" 
+				value="Go" 
+				onclick="fuse >> pack getvalue(anpack) getvalue(appack) getvalue(bnpack) getvalue(bppack) getvalue(cnpack) getvalue(cppack) >> grow">
+	</td>
+	<td VALIGN='center'>
+		<font size=2>
+			<input type="button" name = "ma" width="20" height="17" value="a"  onclick = "matr 1">
+			<input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name = "anpack" float width="13" float height="17" value = "-0.5">
+			<input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name = "appack" float width="11" float height="17" value = "0.5">
+			<input type="button" name = "mb" width="20" height="17" value="b" onclick = "matr 2">
+			<input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name = "bnpack" float width="13" float height="17" value = "-0.5">
+			<input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name = "bppack" float width="11" float height="17" value = "0.5">
+			<input type="button" name = "mc" width="20" height="17" value="c" onclick = "matr 3">
+			<input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name = "cnpack" float width="13" float height="17" value = "-0.5">
+			<input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name = "cppack" float width="11" float height="17" value = "0.5">
+	</font>
+	</td>        
+</tr>
+
+<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
+
+
+

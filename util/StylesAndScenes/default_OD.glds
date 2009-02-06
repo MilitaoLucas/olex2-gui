@@ -1,0 +1,2544 @@
+﻿<style Name="" LinkFile="" 
+ <Materials 
+  <Prop0 "255;2155773566;2155773566;2155313015;2155313015;1.000,1.000,1.000,0.502;1.000,1.000,1.000,0.502;128;36">
+  <Prop1 "1279;1.000,0.000,0.000,0.502;2155773566;2155313015;2155313015;1.000,1.000,1.000,0.502;1.000,1.000,1.000,0.502;128;36">
+  <Prop2 "1279;0.000,1.000,0.000,0.502;2155773566;2155313015;2155313015;1.000,1.000,1.000,0.502;1.000,1.000,1.000,0.502;128;36">
+  <Prop3 "1279;0.000,0.000,1.000,0.502;2155773566;2155313015;2155313015;1.000,1.000,1.000,0.502;1.000,1.000,1.000,0.502;128;36">
+  <Prop4 "1;1.000,1.000,0.502,0.000">
+  <Prop5 "2048">
+  <Prop6 "2305;0.498,1.000,0.498,0.000">
+  <Prop7 "85;5394744;12632256;1.000,1.000,1.000,1.000;12">
+  <Prop8 "2049;2119126863">
+  <Prop9 "1039;2119126863;2119126863;2119126863;2119126863">
+  <Prop10 "3077;0.800,0.824,1.000,0.500;0.647,0.624,1.000,0.500">
+  <Prop11 "2053;4210816;2130706496">
+  <Prop12 "2309;0.502,0.502,1.000,0.000;0.000,0.000,1.000,0.500">
+  <Prop13 "85;5789784;12632256;1.000,1.000,1.000,1.000;12">
+  <Prop14 "341;4210752;6250335;1.000,1.000,1.000,1.000;12">
+  <Prop15 "85;1.000,1.000,1.000,0.000;10461087;1.000,1.000,1.000,1.000;12">
+  <Prop16 "85;32768;6283103;1.000,1.000,1.000,1.000;12">
+  <Prop17 "85;4802816;14671711;1.000,1.000,1.000,1.000;12">
+  <Prop18 "85;8421376;14671711;1.000,1.000,1.000,1.000;12">
+  <Prop19 "85;5475672;12632256;1.000,1.000,1.000,1.000;12">
+  <Prop20 "85;5374001;0.510,0.557,1.000,0.000;1.000,1.000,1.000,1.000;12">
+  <Prop21 "85;6160478;14639071;1.000,1.000,1.000,1.000;12">
+  <Prop22 "85;7995465;12632256;1.000,1.000,1.000,1.000;12">
+  <Prop23 "85;157;6250399;1.000,1.000,1.000,1.000;12">
+  <Prop24 "85;1.000,1.000,0.000,0.000;2105460;1.000,1.000,1.000,1.000;12">
+  <Prop25 "85;8126464;12632256;1.000,1.000,1.000,1.000;12">
+  <Prop26 "85;27136;6283103;1.000,1.000,1.000,1.000;12">
+  <Prop27 "85;60395;4551796;1.000,1.000,1.000,1.000;12">
+  <Prop28 "85;8388736;14639071;1.000,1.000,1.000,1.000;12">
+  <Prop29 "85;8404992;12632256;1.000,1.000,1.000,1.000;12">
+  <Prop30 "85;0.000,1.000,0.000,0.000;6283103;1.000,1.000,1.000,1.000;12">
+  <Prop31 "85;234;6250399;1.000,1.000,1.000,1.000;12">
+  <Prop32 "85;0.000,0.000,1.000,0.000;10444639;1.000,1.000,1.000,1.000;12">
+  <Prop33 "85;1.000,1.000,0.000,0.000;3750341;1.000,1.000,1.000,1.000;12">
+  <Prop34 "341;32768;6283103;1.000,1.000,1.000,1.000;12">
+  <Prop35 "341;1.000,1.000,0.000,0.000;6266783;1.000,1.000,1.000,1.000;12">
+  <Prop36 "341;8388608;14638943;1.000,1.000,1.000,1.000;12">
+  <Prop37 "341;8388736;14639071;1.000,1.000,1.000,1.000;12">
+  <Prop38 "341;1.000,0.000,0.000,0.000;6250399;1.000,1.000,1.000,1.000;12">
+  <Prop39 "341;0.000,0.000,1.000,0.000;10444639;1.000,1.000,1.000,1.000;12">
+  <Prop40 "341;8421376;14671711;1.000,1.000,1.000,1.000;12">
+  <Prop41 "341;0.200,0.200,1.000,0.000;10444639;1.000,1.000,1.000,1.000;12">
+  <Prop42 "341;1.000,1.000,1.000,0.000;10461087;1.000,1.000,1.000,1.000;12">
+  <Prop43 "63;2155773566;2155773566;2155313015;2155313015;50529027;50529027">
+  <Prop44 "63;1.000,0.000,0.000,0.502;2155773566;2155313015;2155313015;50529027;1.000,1.000,1.000,0.502">
+  <Prop45 "63;0.000,1.000,0.000,0.502;2155773566;2155313015;2155313015;50529027;1.000,1.000,1.000,0.502">
+  <Prop46 "63;0.000,0.000,1.000,0.502;2155773566;2155313015;2155313015;50529027;1.000,1.000,1.000,0.502">
+  <Prop47 "2111;0.000,0.000,1.000,0.502;2155773566;2155313015;2155313015;50529027;1.000,1.000,1.000,0.502">
+  <Prop48 "1;0">
+  <Prop49 "2049;0">
+  <Prop50 "2305;0.753,0.753,0.753,1.000">
+  <Prop51 "2049;1.000,1.000,0.000,0.000">
+  <Prop52 "2049;0.753,0.753,0.753,1.000">
+  <Prop53 "3;1.000,0.000,0.000,0.000;1.000,0.000,0.000,0.000">
+  <Prop54 "1029;0.000,0.000,1.000,0.840;1.000,0.000,0.502,0.840">
+  <Prop55 "255;0;0;6250335;6250335;1.000,1.000,1.000,1.000;1.000,1.000,1.000,1.000;12;12">
+  <Prop56 "255;1.000,1.000,1.000,0.000;1.000,1.000,1.000,0.000;10461087;10461087;1.000,1.000,1.000,1.000;1.000,1.000,1.000,1.000;12;12">
+  <Prop57 "1109;3389030271;3388997759;1.000,1.000,1.000,0.000;36">
+  <Prop58 "1109;1845526399;1845493887;1.000,1.000,1.000,0.000;36">
+  <Prop59 "1109;3389030014;3388997758;1.000,1.000,1.000,0.000;36">
+  <Prop60 "1109;3355475839;3355443327;1.000,1.000,1.000,0.000;36">
+  <Prop61 "1109;3070263167;3070230655;1.000,1.000,1.000,0.000;36">
+  <Prop62 "1109;2138996350;2138535799;1.000,1.000,1.000,0.500;36">
+  <Prop63 "1109;863927934;863467383;1.000,1.000,1.000,0.200;36">
+  <Prop64 "79;2130706432;2130706432;2139127936;2138535799;36">
+  <Prop65 "341;1.000,0.000,0.000,0.500;1.000,0.502,0.251,0.500;1.000,1.000,1.000,0.500;36">
+  <Prop66 "255;1.000,0.000,0.000,0.000;1.000,0.000,0.000,0.000;6250399;6250399;1.000,1.000,1.000,1.000;1.000,1.000,1.000,1.000;12;12">
+  <Prop67 "3073;1.000,1.000,1.000,1.000">
+  <Prop68 "3077;2148470543;2148470543">
+  <Prop69 "1279;0.000,1.000,0.000,0.498;0.000,1.000,0.000,0.498;1.000,0.000,0.000,0.498;1.000,0.000,0.000,0.498;1.000,1.000,1.000,0.502;1.000,1.000,1.000,0.502;128;128">
+  <Prop70 "1109;3288366975;3288334463;1.000,1.000,1.000,0.000;36">
+  <Prop71 "341;1.000,0.000,0.000,0.000;6250335;1.000,1.000,1.000,1.000;12">
+  <Prop72 "1535;2989568305;2986344448;2992594783;2992594783;1.000,1.000,1.000,0.700;1.000,1.000,1.000,0.700;12;12">
+  <Prop73 "255;1.000,0.000,0.000,0.000;1.000,0.000,0.000,0.000;6250400;6250400;1.000,1.000,1.000,1.000;1.000,1.000,1.000,1.000;12;12">
+  <Prop74 "341;1.000,0.000,0.000,0.000;6250400;1.000,1.000,1.000,1.000;12">
+  <Prop75 "255;1.000,1.000,1.000,0.000;1.000,1.000,1.000,0.000;10526880;10526880;1.000,1.000,1.000,1.000;1.000,1.000,1.000,1.000;12;12">
+  <Prop76 "1109;2063630207;2063597695;1.000,1.000,1.000,0.000;36">
+  <Prop77 "1109;2248179583;2248147071;1.000,1.000,1.000,0.000;36">
+  <Prop78 "1109;2214625151;2214592639;1.000,1.000,1.000,0.000;36">
+  <Prop79 "1109;3003154303;3003121791;1.000,1.000,1.000,0.000;36">
+  <Prop80 "1109;1342209919;1342177407;1.000,1.000,1.000,0.000;36">
+  <Prop81 "1109;3254812543;3254780031;1.000,1.000,1.000,0.000;36">
+  <Prop82 "1109;2734718847;2734686335;1.000,1.000,1.000,0.000;36">
+  <Prop83 "1109;2650832767;2650800255;1.000,1.000,1.000,0.000;36">
+  <Prop84 "5;0.000,1.000,0.000,0.000;2138535799">
+  <Prop85 "85;1.000,0.000,0.000,0.500;2138535799;1.000,1.000,1.000,0.500;36">
+  <Prop86 "1109;1719631743;1719105399;1.000,1.000,1.000,0.400;36">
+  <Prop87 "1109;32639;127;1.000,1.000,1.000,0.000;36">
+  <Prop88 "1109;2701164415;2701131903;1.000,1.000,1.000,0.000;36">
+  <Prop89 "5;1.000,0.000,0.000,0.000;2138535799">
+  <Prop90 "1109;1694531455;1694498943;1.000,1.000,1.000,0.000;36">
+  <Prop91 "1109;3338698623;3338666111;1.000,1.000,1.000,0.000;36">
+  <Prop92 "255;0.000,0.000,1.000,0.000;0.000,0.000,1.000,0.000;10510175;10510175;1.000,1.000,1.000,1.000;1.000,1.000,1.000,1.000;12;12">
+  <Prop93 "341;0.000,0.000,1.000,0.000;10510175;1.000,1.000,1.000,1.000;12">
+  <Prop94 "1109;520126335;520093823;1.000,1.000,1.000,0.000;36">
+  <Prop95 "1109;2919268223;2919235711;1.000,1.000,1.000,0.000;36">
+  <Prop96 "341;1.000,1.000,1.000,0.000;10526880;1.000,1.000,1.000,1.000;12">
+  <Prop97 "2049;0.498,1.000,0.498,0.000">
+  <Prop98 "1109;3389030271;3388997759;1.000,1.000,1.000,0.000;36">
+ >
+ <Root Name="Root" 
+  <SubStyles 
+   <S_0 Name="DBASIS" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop0 >
+    >
+    <S1 PName="ConeX" 
+     <Material style.Materials.Prop1 >
+    >
+    <S2 PName="DiskX" 
+     <Material style.Materials.Prop1 >
+    >
+    <S3 PName="CylinderX" 
+     <Material style.Materials.Prop1 >
+    >
+    <S4 PName="ConeY" 
+     <Material style.Materials.Prop2 >
+    >
+    <S5 PName="DiskY" 
+     <Material style.Materials.Prop2 >
+    >
+    <S6 PName="CylinderY" 
+     <Material style.Materials.Prop2 >
+    >
+    <S7 PName="ConeZ" 
+     <Material style.Materials.Prop3 >
+    >
+    <S8 PName="DiskZ" 
+     <Material style.Materials.Prop3 >
+    >
+    <S9 PName="CylinderZ" 
+     <Material style.Materials.Prop3 >
+    >
+   >
+   <S_1 Name="DUNITCELL" 
+    <S0 PName="Lines" 
+     <Material style.Materials.Prop4 >
+    >
+   >
+   <S_2 Name="DFRAME" 
+    <S0 PName="Lines" 
+     <Material style.Materials.Prop5 >
+    >
+   >
+   <S_3 Name="TGLCONSOLE" 
+    <S0 PName="Text" 
+     <Material style.Materials.Prop6 >
+    >
+   >
+   <S_4 Name="TXGLLABELS" 
+    <S0 PName="Text" 
+     <Material style.Materials.Prop7 >
+    >
+   >
+   <S_5 Name="AtomParams" Persistent="true" DefDS="2" DefElpM="5" DefNpdM="6.0" DefR="2" DefSphM="1.0" DefZ="1.0" QPeakScale="3.0" TelpP="1.5382" >
+   <S_6 Name="BondParams" Persistent="true" DefM="48" >
+   <S_7 Name="Background" A="16777215" B="16777215" C="10485760" D="10485760" 
+    <S0 PName="Plane" 
+     <Material style.Materials.Prop8 >
+    >
+   >
+   <S_8 Name="Ceiling" A="4194304" B="4194304" C="4194304" D="4194304" 
+    <S0 PName="Plane" 
+     <Material style.Materials.Prop9 >
+    >
+   >
+   <S_9 Name="HelpWindow" Left="0.0" Top="1" 
+    <S0 PName="Plane" 
+     <Material style.Materials.Prop10 >
+    >
+    <S1 PName="Text" 
+     <Material style.Materials.Prop11 >
+    >
+   >
+   <S_10 Name="InfoBox" Left="0" Top="1" 
+    <S0 PName="Plane" 
+     <Material style.Materials.Prop10 >
+    >
+    <S1 PName="Text" 
+     <Material style.Materials.Prop12 >
+    >
+   >
+   <S_11 Name="C_E" DS="2" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop13 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop14 >
+    >
+   >
+   <S_12 Name="H_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop15 >
+    >
+   >
+   <S_13 Name="Md_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_14 Name="Fm_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_15 Name="Lr_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_16 Name="No_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_17 Name="Es_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_18 Name="Cf_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_19 Name="Bk_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_20 Name="Cm_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_21 Name="Pu_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_22 Name="Am_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_23 Name="Np_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_24 Name="U_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_25 Name="Th_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_26 Name="Pa_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_27 Name="Ac_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_28 Name="Ra_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop17 >
+    >
+   >
+   <S_29 Name="Fr_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop18 >
+    >
+   >
+   <S_30 Name="Rn_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_31 Name="At_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop19 >
+    >
+   >
+   <S_32 Name="Bi_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop19 >
+    >
+   >
+   <S_33 Name="Po_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop19 >
+    >
+   >
+   <S_34 Name="Pb_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop19 >
+    >
+   >
+   <S_35 Name="Tl_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop19 >
+    >
+   >
+   <S_36 Name="Hg_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop20 >
+    >
+   >
+   <S_37 Name="Au_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop20 >
+    >
+   >
+   <S_38 Name="Pt_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop20 >
+    >
+   >
+   <S_39 Name="Ir_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop20 >
+    >
+   >
+   <S_40 Name="Os_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop20 >
+    >
+   >
+   <S_41 Name="Re_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop20 >
+    >
+   >
+   <S_42 Name="W_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop20 >
+    >
+   >
+   <S_43 Name="Ta_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop20 >
+    >
+   >
+   <S_44 Name="Hf_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop20 >
+    >
+   >
+   <S_45 Name="Lu_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_46 Name="Yb_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_47 Name="Tm_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_48 Name="Er_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_49 Name="Ho_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_50 Name="Dy_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_51 Name="Tb_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_52 Name="Gd_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_53 Name="Eu_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_54 Name="Sm_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_55 Name="Nd_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_56 Name="Pm_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_57 Name="Ce_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_58 Name="Pr_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_59 Name="La_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop20 >
+    >
+   >
+   <S_60 Name="Ba_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop17 >
+    >
+   >
+   <S_61 Name="Cs_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop18 >
+    >
+   >
+   <S_62 Name="Xe_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_63 Name="I_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop21 >
+    >
+   >
+   <S_64 Name="Te_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop19 >
+    >
+   >
+   <S_65 Name="Sb_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop19 >
+    >
+   >
+   <S_66 Name="Sn_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop19 >
+    >
+   >
+   <S_67 Name="In_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop19 >
+    >
+   >
+   <S_68 Name="Cd_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop22 >
+    >
+   >
+   <S_69 Name="Ag_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop22 >
+    >
+   >
+   <S_70 Name="Pd_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop22 >
+    >
+   >
+   <S_71 Name="Rh_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop22 >
+    >
+   >
+   <S_72 Name="Ru_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop22 >
+    >
+   >
+   <S_73 Name="Tc_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop22 >
+    >
+   >
+   <S_74 Name="Mo_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop22 >
+    >
+   >
+   <S_75 Name="Nb_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop22 >
+    >
+   >
+   <S_76 Name="Zr_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop22 >
+    >
+   >
+   <S_77 Name="Y_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop22 >
+    >
+   >
+   <S_78 Name="Sr_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop17 >
+    >
+   >
+   <S_79 Name="Rb_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop18 >
+    >
+   >
+   <S_80 Name="Kr_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_81 Name="Br_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop23 >
+    >
+   >
+   <S_82 Name="Se_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop24 >
+    >
+   >
+   <S_83 Name="As_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop19 >
+    >
+   >
+   <S_84 Name="Ge_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop19 >
+    >
+   >
+   <S_85 Name="Ga_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop19 >
+    >
+   >
+   <S_86 Name="Cu_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop25 >
+    >
+   >
+   <S_87 Name="Zn_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop25 >
+    >
+   >
+   <S_88 Name="Co_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop25 >
+    >
+   >
+   <S_89 Name="Ni_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop25 >
+    >
+   >
+   <S_90 Name="Fe_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop25 >
+    >
+   >
+   <S_91 Name="Mn_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop25 >
+    >
+   >
+   <S_92 Name="Cr_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop25 >
+    >
+   >
+   <S_93 Name="V_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop25 >
+    >
+   >
+   <S_94 Name="Ti_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop25 >
+    >
+   >
+   <S_95 Name="Sc_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop25 >
+    >
+   >
+   <S_96 Name="Ar_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_97 Name="Ca_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop17 >
+    >
+   >
+   <S_98 Name="K_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop18 >
+    >
+   >
+   <S_99 Name="Cl_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop26 >
+    >
+   >
+   <S_100 Name="S_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop27 >
+    >
+   >
+   <S_101 Name="P_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop28 >
+    >
+   >
+   <S_102 Name="Si_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop29 >
+    >
+   >
+   <S_103 Name="Al_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop18 >
+    >
+   >
+   <S_104 Name="Mg_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop17 >
+    >
+   >
+   <S_105 Name="Na_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop18 >
+    >
+   >
+   <S_106 Name="Ne_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_107 Name="F_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop30 >
+    >
+   >
+   <S_108 Name="O_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop31 >
+    >
+   >
+   <S_109 Name="N_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop32 >
+    >
+   >
+   <S_110 Name="C_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop13 >
+    >
+   >
+   <S_111 Name="B_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop33 >
+    >
+   >
+   <S_112 Name="Be_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop17 >
+    >
+   >
+   <S_113 Name="Li_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop18 >
+    >
+   >
+   <S_114 Name="He_S" DS="2.0" PMask="1.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+   >
+   <S_115 Name="Md_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_116 Name="Fm_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_117 Name="Lr_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_118 Name="No_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_119 Name="Es_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_120 Name="Cf_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_121 Name="Bk_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_122 Name="Cm_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_123 Name="Pu_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_124 Name="Am_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_125 Name="Np_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_126 Name="U_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_127 Name="Th_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_128 Name="Pa_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_129 Name="Ac_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_130 Name="Ra_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop17 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_131 Name="Fr_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop18 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_132 Name="Rn_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_133 Name="At_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_134 Name="Bi_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop19 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_135 Name="Po_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop19 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_136 Name="Pb_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop19 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_137 Name="Tl_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop19 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_138 Name="Hg_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop20 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop35 >
+    >
+   >
+   <S_139 Name="Au_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop20 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop35 >
+    >
+   >
+   <S_140 Name="Pt_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop20 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop36 >
+    >
+   >
+   <S_141 Name="Ir_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop20 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_142 Name="Os_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop20 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop36 >
+    >
+   >
+   <S_143 Name="Re_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop20 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_144 Name="W_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop20 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_145 Name="Ta_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop20 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_146 Name="Hf_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop20 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_147 Name="Lu_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_148 Name="Yb_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_149 Name="Tm_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_150 Name="Er_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_151 Name="Ho_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_152 Name="Dy_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_153 Name="Tb_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_154 Name="Gd_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_155 Name="Eu_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_156 Name="Sm_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_157 Name="Nd_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_158 Name="Pm_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_159 Name="Ce_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_160 Name="Pr_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_161 Name="La_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop20 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_162 Name="Ba_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop17 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_163 Name="Cs_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop18 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_164 Name="Xe_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_165 Name="I_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop21 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop37 >
+    >
+   >
+   <S_166 Name="Te_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop19 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_167 Name="Sb_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop19 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop38 >
+    >
+   >
+   <S_168 Name="Sn_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop19 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop35 >
+    >
+   >
+   <S_169 Name="In_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop19 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_170 Name="Cd_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop22 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_171 Name="Ag_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop22 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop36 >
+    >
+   >
+   <S_172 Name="Pd_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop22 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_173 Name="Rh_E" DS="2" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop22 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_174 Name="Ru_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop22 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop38 >
+    >
+   >
+   <S_175 Name="Tc_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop22 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_176 Name="Mo_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop22 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_177 Name="Nb_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop22 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_178 Name="Zr_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop22 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_179 Name="Y_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop22 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_180 Name="Sr_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop17 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_181 Name="Rb_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop18 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_182 Name="Kr_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_183 Name="Br_E" DS="2" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop23 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop38 >
+    >
+   >
+   <S_184 Name="Se_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop24 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop35 >
+    >
+   >
+   <S_185 Name="As_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop19 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_186 Name="Ge_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop19 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_187 Name="Ga_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop19 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_188 Name="Cu_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop25 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop38 >
+    >
+   >
+   <S_189 Name="Zn_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop25 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_190 Name="Co_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop25 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop39 >
+    >
+   >
+   <S_191 Name="Ni_E" DS="2" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop25 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_192 Name="Fe_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop25 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop38 >
+    >
+   >
+   <S_193 Name="Mn_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop25 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop40 >
+    >
+   >
+   <S_194 Name="Cr_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop25 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop37 >
+    >
+   >
+   <S_195 Name="V_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop25 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_196 Name="Ti_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop25 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_197 Name="Sc_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop25 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_198 Name="Ar_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_199 Name="Ca_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop17 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_200 Name="K_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop18 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop40 >
+    >
+   >
+   <S_201 Name="Cl_E" DS="2" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop26 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_202 Name="S_E" DS="2" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop27 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop35 >
+    >
+   >
+   <S_203 Name="P_E" DS="2" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop28 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop37 >
+    >
+   >
+   <S_204 Name="Si_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop29 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop38 >
+    >
+   >
+   <S_205 Name="Al_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop18 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop40 >
+    >
+   >
+   <S_206 Name="Mg_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop17 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_207 Name="Na_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop18 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop40 >
+    >
+   >
+   <S_208 Name="Ne_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_209 Name="F_E" DS="2" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop30 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_210 Name="O_E" DS="2" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop31 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop38 >
+    >
+   >
+   <S_211 Name="N_E" DS="2" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop32 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop41 >
+    >
+   >
+   <S_212 Name="B_E" DS="2" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop33 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop35 >
+    >
+   >
+   <S_213 Name="Be_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop17 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_214 Name="Li_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop18 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop37 >
+    >
+   >
+   <S_215 Name="He_E" DS="2.0" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop16 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop34 >
+    >
+   >
+   <S_216 Name="H_E" DS="2" PMask="5.0" Z="1.0" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop15 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop42 >
+    >
+   >
+   <S_217 Name="DBasis" 
+    <S0 PName="Sphere" 
+     <Material style.Materials.Prop43 >
+    >
+    <S1 PName="ConeX" 
+     <Material style.Materials.Prop44 >
+    >
+    <S2 PName="DiskX" 
+     <Material style.Materials.Prop44 >
+    >
+    <S3 PName="CylinderX" 
+     <Material style.Materials.Prop44 >
+    >
+    <S4 PName="ConeY" 
+     <Material style.Materials.Prop45 >
+    >
+    <S5 PName="DiskY" 
+     <Material style.Materials.Prop45 >
+    >
+    <S6 PName="CylinderY" 
+     <Material style.Materials.Prop45 >
+    >
+    <S7 PName="ConeZ" 
+     <Material style.Materials.Prop46 >
+    >
+    <S8 PName="DiskZ" 
+     <Material style.Materials.Prop46 >
+    >
+    <S9 PName="CylinderZ" 
+     <Material style.Materials.Prop46 >
+    >
+    <S10 PName="Label" 
+     <Material style.Materials.Prop47 >
+    >
+   >
+   <S_218 Name="DUnitCell" 
+    <S0 PName="Lines" 
+     <Material style.Materials.Prop48 >
+    >
+    <S1 PName="Label" 
+     <Material style.Materials.Prop49 >
+    >
+   >
+   <S_219 Name="DFrame" 
+    <S0 PName="Lines" 
+     <Material style.Materials.Prop5 >
+    >
+   >
+   <S_220 Name="Console" LineSpacing="0" LinesToShow="10" LineWidth="80" Prompt=">>" 
+    <S0 PName="Text" 
+     <Material style.Materials.Prop50 >
+    >
+   >
+   <S_221 Name="Cursor" Char="|" 
+    <S0 PName="Text" 
+     <Material style.Materials.Prop51 >
+    >
+    <S1 PName="On" 
+     <Material style.Materials.Prop51 >
+    >
+   >
+   <S_222 Name="Labels" 
+    <S0 PName="Text" 
+     <Material style.Materials.Prop52 >
+    >
+   >
+   <S_223 Name="XGrid" 
+    <S0 PName="gridPoints" 
+     <Material style.Materials.Prop53 >
+    >
+    <S1 PName="eMap" 
+     <Material style.Materials.Prop54 >
+    >
+   >
+   <S_224 Name="Atoms" DiskIR="0.0" DiskOR="1.02" DiskQ="30.0" DiskS="0.05" RimQ="30.0" RimR="1.02" RimW="0.05" SphereQ="30.0" >
+   <S_225 Name="Q" 
+    <SubStyles >
+   >
+   <S_226 Name="Bonds" ConeQ="30.0" ConeStipples="6.0" >
+   <S_227 Name="C_E-H_S" PMask="48.0" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop13 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop15 >
+    >
+    <S2 PName="Single cone" 
+     <Material style.Materials.Prop55 >
+    >
+    <S3 PName="Top disk" 
+     <Material style.Materials.Prop56 >
+    >
+    <S4 PName="Bottom disk" 
+     <Material style.Materials.Prop55 >
+    >
+   >
+   <S_228 Name="C_E-C_E" PMask="48.0" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop13 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop13 >
+    >
+    <S2 PName="Single cone" 
+     <Material style.Materials.Prop55 >
+    >
+    <S3 PName="Top disk" 
+     <Material style.Materials.Prop55 >
+    >
+    <S4 PName="Bottom disk" 
+     <Material style.Materials.Prop55 >
+    >
+   >
+   <S_229 Name="C_E-N_E" PMask="48.0" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop32 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop13 >
+    >
+   >
+   <S_230 Name="C_E-Q_S" PMask="48.0" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop13 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop98 >
+    >
+   >
+   <S_231 Name="Ir_E-N_E" PMask="48.0" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop20 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop32 >
+    >
+   >
+   <S_232 Name="N_E-Q_S" PMask="48.0" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop32 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop58 >
+    >
+   >
+   <S_233 Name="H_S-Q_S" PMask="48.0" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop15 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop98 >
+    >
+   >
+   <S_234 Name="Ir_E-Q_S" PMask="48.0" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop20 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop59 >
+    >
+   >
+   <S_235 Name="C_E-Ir_E" PMask="48.0" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop20 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop13 >
+    >
+   >
+   <S_236 Name="C_E-S_E" PMask="48.0" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop27 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop13 >
+    >
+   >
+   <S_237 Name="Q_S-Q_S" PMask="48.0" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop60 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop57 >
+    >
+   >
+   <S_238 Name="Q_S-S_E" PMask="48.0" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop27 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop61 >
+    >
+   >
+   <S_239 Name="COV" PMask="2098.0" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop62 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop63 >
+    >
+    <S2 PName="Label" 
+     <Material style.Materials.Prop49 >
+    >
+    <S3 PName="Top disk" 
+     <Material style.Materials.Prop64 >
+    >
+    <S4 PName="Balls bond" 
+     <Material style.Materials.Prop65 >
+    >
+   >
+   <S_240 Name="C_E-O_E" PMask="48" R="0.8" 
+    <S0 PName="Single cone" 
+     <Material style.Materials.Prop66 >
+    >
+    <S1 PName="Top disk" 
+     <Material style.Materials.Prop55 >
+    >
+    <S2 PName="Bottom disk" 
+     <Material style.Materials.Prop66 >
+    >
+    <S3 PName="Bottom cone" 
+     <Material style.Materials.Prop31 >
+    >
+    <S4 PName="Top cone" 
+     <Material style.Materials.Prop13 >
+    >
+   >
+   <S_241 Name="Fader" 
+    <S0 PName="Quad" 
+     <Material style.Materials.Prop67 >
+    >
+   >
+   <S_242 Name="H_S-O_E" PMask="48" R="0.8" 
+    <S0 PName="Single cone" 
+     <Material style.Materials.Prop66 >
+    >
+    <S1 PName="Top disk" 
+     <Material style.Materials.Prop56 >
+    >
+    <S2 PName="Bottom disk" 
+     <Material style.Materials.Prop66 >
+    >
+    <S3 PName="Bottom cone" 
+     <Material style.Materials.Prop31 >
+    >
+    <S4 PName="Top cone" 
+     <Material style.Materials.Prop15 >
+    >
+   >
+   <S_243 Name="XGrid_Legend" Left="0" Top="0" 
+    <S0 PName="Plane" 
+     <Material style.Materials.Prop68 >
+    >
+    <S1 PName="Text" 
+     <Material style.Materials.Prop6 >
+    >
+   >
+   <S_244 Name="Selection" 
+    <S0 PName="mat" 
+     <Material style.Materials.Prop69 >
+    >
+   >
+   <S_245 Name="working" Left="926" Top="31" Z="-9.99" 
+    <S0 PName="Plane" 
+     <Material style.Materials.Prop68 >
+    >
+   >
+   <S_246 Name="C_S-Q_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop13 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop57 >
+    >
+   >
+   <S_247 Name="C_S-C_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop13 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop13 >
+    >
+   >
+   <S_248 Name="refine" Left="926" Top="31" Z="-9.99" 
+    <S0 PName="Plane" 
+     <Material style.Materials.Prop68 >
+    >
+   >
+   <S_249 Name="H_S-O_E@H" PMask="2048" R="0.8" 
+    <S0 PName="Balls bond" 
+     <Material style.Materials.Prop31 >
+    >
+   >
+   <S_250 Name="C_S-H_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop13 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop15 >
+    >
+   >
+   <S_251 Name="C_S-O_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop31 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop13 >
+    >
+   >
+   <S_252 Name="H_S-O_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop31 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop15 >
+    >
+   >
+   <S_253 Name="C_S-O_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop31 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop13 >
+    >
+   >
+   <S_254 Name="O_E-Q_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop31 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop98 >
+    >
+   >
+   <S_255 Name="solve" Left="926" Top="49" Z="-9.98" 
+    <S0 PName="Plane" 
+     <Material style.Materials.Prop68 >
+    >
+   >
+   <S_256 Name="C_S-N_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop32 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop13 >
+    >
+   >
+   <S_257 Name="O_S-Q_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop31 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop70 >
+    >
+   >
+   <S_258 Name="C_N" DS="6" PMask="7" Z="1.0" 
+    <S0 PName="Small sphere" 
+     <Material style.Materials.Prop55 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop71 >
+    >
+    <S2 PName="Sphere" 
+     <Material style.Materials.Prop72 >
+    >
+   >
+   <S_259 Name="C_E-C_N" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop13 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop72 >
+    >
+   >
+   <S_260 Name="C_N-H_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop72 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop15 >
+    >
+   >
+   <S_261 Name="C_E-C_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop13 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop13 >
+    >
+   >
+   <S_262 Name="H_S-N_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop32 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop15 >
+    >
+   >
+   <S_263 Name="H_S-N_E@H" PMask="2048" R="0.8" 
+    <S0 PName="Balls bond" 
+     <Material style.Materials.Prop32 >
+    >
+   >
+   <S_264 Name="O_N" DS="6" PMask="6" Z="1.0" 
+    <S0 PName="Small sphere" 
+     <Material style.Materials.Prop73 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop74 >
+    >
+   >
+   <S_265 Name="C_E-O_N" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop73 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop55 >
+    >
+   >
+   <S_266 Name="H_S-O_N" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop73 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop75 >
+    >
+   >
+   <S_267 Name="C_N-O_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop31 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop72 >
+    >
+   >
+   <S_268 Name="C_N-Q_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop72 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop76 >
+    >
+   >
+   <S_269 Name="B_E-C_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop13 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop33 >
+    >
+   >
+   <S_270 Name="B_E-Rh_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop22 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop33 >
+    >
+   >
+   <S_271 Name="C_E-Rh_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop22 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop13 >
+    >
+   >
+   <S_272 Name="P_E-Rh_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop22 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop28 >
+    >
+   >
+   <S_273 Name="Cl_E-Rh_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop22 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop26 >
+    >
+   >
+   <S_274 Name="C_S-Rh_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop22 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop13 >
+    >
+   >
+   <S_275 Name="C_E-P_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop28 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop13 >
+    >
+   >
+   <S_276 Name="Q_S-Rh_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop22 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop77 >
+    >
+   >
+   <S_277 Name="Rh_S-Rh_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop22 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop22 >
+    >
+   >
+   <S_278 Name="P_S-Rh_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop22 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop28 >
+    >
+   >
+   <S_279 Name="P_S-Q_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop28 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop78 >
+    >
+   >
+   <S_280 Name="P_S-P_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop28 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop28 >
+    >
+   >
+   <S_281 Name="C_E-F_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop30 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop13 >
+    >
+   >
+   <S_282 Name="B_E-Q_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop33 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop79 >
+    >
+   >
+   <S_283 Name="Cl_E-Q_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop26 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop80 >
+    >
+   >
+   <S_284 Name="Q_S-Rh_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop22 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop81 >
+    >
+   >
+   <S_285 Name="P_E-Q_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop28 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop57 >
+    >
+   >
+   <S_286 Name="F_E-Q_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop30 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop60 >
+    >
+   >
+   <S_287 Name="C_E-Cl_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop26 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop13 >
+    >
+   >
+   <S_288 Name="H_S-H_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop15 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop15 >
+    >
+   >
+   <S_289 Name="O_S-O_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop31 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop31 >
+    >
+   >
+   <S_290 Name="H_S-O_S@H" PMask="2048" R="0.8" 
+    <S0 PName="Balls bond" 
+     <Material style.Materials.Prop31 >
+    >
+   >
+   <S_291 Name="C_S-N_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop32 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop13 >
+    >
+   >
+   <S_292 Name="N_S-Q_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop32 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop82 >
+    >
+   >
+   <S_293 Name="C_S-F_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop30 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop13 >
+    >
+   >
+   <S_294 Name="F_S-Q_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop30 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop83 >
+    >
+   >
+   <S_295 Name="SI" PMask="4352" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop84 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop84 >
+    >
+    <S2 PName="Line" 
+     <Material style.Materials.Prop85 >
+    >
+    <S3 PName="Stippled line" 
+     <Material style.Materials.Prop84 >
+    >
+    <S4 PName="Balls bond" 
+     <Material style.Materials.Prop31 >
+    >
+    <S5 PName="Stipple cone" 
+     <Material style.Materials.Prop86 >
+    >
+   >
+   <S_296 Name="N_E-N_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop32 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop32 >
+    >
+   >
+   <S_297 Name="C_E-Q_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop13 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop87 >
+    >
+   >
+   <S_298 Name="C_N-Q_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop72 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop87 >
+    >
+   >
+   <S_299 Name="C_N-C_N" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop72 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop72 >
+    >
+   >
+   <S_300 Name="C_N-O_N" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop73 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop55 >
+    >
+   >
+   <S_301 Name="C_E-Q_N" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop13 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop87 >
+    >
+   >
+   <S_302 Name="O_N-Q_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop73 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop88 >
+    >
+   >
+   <S_303 Name="H_S-Q_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop15 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop87 >
+    >
+   >
+   <S_304 Name="FragmentA" 
+    <S0 PName="mat" 
+     <Material style.Materials.Prop84 >
+    >
+   >
+   <S_305 Name="FragmentB" 
+    <S0 PName="mat" 
+     <Material style.Materials.Prop89 >
+    >
+   >
+   <S_306 Name="Q_E-Q_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop87 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop87 >
+    >
+   >
+   <S_307 Name="Cl_E-H_S@H" PMask="2048" R="0.8" 
+    <S0 PName="Balls bond" 
+     <Material style.Materials.Prop26 >
+    >
+   >
+   <S_308 Name="N_E-O_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop31 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop32 >
+    >
+   >
+   <S_309 Name="N_E-Ni_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop25 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop32 >
+    >
+   >
+   <S_310 Name="N_S-Ni_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop25 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop32 >
+    >
+   >
+   <S_311 Name="C_E-N_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop32 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop13 >
+    >
+   >
+   <S_312 Name="H_S-N_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop32 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop15 >
+    >
+   >
+   <S_313 Name="Cl_E-Ni_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop25 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop26 >
+    >
+   >
+   <S_314 Name="Ni_E-O_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop25 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop31 >
+    >
+   >
+   <S_315 Name="Ni_E-Q_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop25 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop90 >
+    >
+   >
+   <S_316 Name="Cl_E-O_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop26 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop31 >
+    >
+   >
+   <S_317 Name="Ni_S-Q_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop25 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop91 >
+    >
+   >
+   <S_318 Name="N_S-Ni_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop25 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop32 >
+    >
+   >
+   <S_319 Name="Cl_S-Q_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop26 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop91 >
+    >
+   >
+   <S_320 Name="Cl_S-Ni_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop25 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop26 >
+    >
+   >
+   <S_321 Name="C_S-Ni_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop25 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop13 >
+    >
+   >
+   <S_322 Name="C_S-Cl_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop26 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop13 >
+    >
+   >
+   <S_323 Name="Cl_S-O_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop26 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop31 >
+    >
+   >
+   <S_324 Name="Ni_S-O_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop25 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop31 >
+    >
+   >
+   <S_325 Name="Ni_E-O_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop25 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop31 >
+    >
+   >
+   <S_326 Name="N_N" DS="6" PMask="6" Z="1.0" 
+    <S0 PName="Small sphere" 
+     <Material style.Materials.Prop92 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop93 >
+    >
+   >
+   <S_327 Name="C_N-N_N" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop92 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop55 >
+    >
+   >
+   <S_328 Name="N_N-Q_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop92 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop94 >
+    >
+   >
+   <S_329 Name="Cl_E-O_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop26 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop31 >
+    >
+   >
+   <S_330 Name="N_E-N_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop32 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop32 >
+    >
+   >
+   <S_331 Name="N_S-O_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop31 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop32 >
+    >
+   >
+   <S_332 Name="H_E-O_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop31 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop15 >
+    >
+   >
+   <S_333 Name="H_E-Q_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop15 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop95 >
+    >
+   >
+   <S_334 Name="H_N" DS="6" PMask="6" Z="1.0" 
+    <S0 PName="Small sphere" 
+     <Material style.Materials.Prop75 >
+    >
+    <S1 PName="Rims" 
+     <Material style.Materials.Prop96 >
+    >
+   >
+   <S_335 Name="H_N-O_E" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop73 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop75 >
+    >
+   >
+   <S_336 Name="H_N-Q_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop75 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop57 >
+    >
+   >
+   <S_337 Name="C_E-O_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop31 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop13 >
+    >
+   >
+   <S_338 Name="C_N-O_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop31 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop72 >
+    >
+   >
+   <S_339 Name="C_N-C_S" PMask="48" R="0.8" 
+    <S0 PName="Bottom cone" 
+     <Material style.Materials.Prop13 >
+    >
+    <S1 PName="Top cone" 
+     <Material style.Materials.Prop72 >
+    >
+   >
+   <S_340 Name="Tooltip" Left="0" Top="0" 
+    <S0 PName="Plane" 
+     <Material style.Materials.Prop68 >
+    >
+    <S1 PName="Text" 
+     <Material style.Materials.Prop97 >
+    >
+   >
+  >
+ >
+>

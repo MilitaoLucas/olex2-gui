@@ -1,0 +1,22 @@
+
+<tr>
+	<td colspan='4'>
+		$FileFull()
+	</td>
+</tr>
+<tr>
+	<td colspan='4'>
+<!-- #includeif and(IsFileType('ires'),file.Exists(HKLSrc())) refl-info gui\blocks\refl-info.htm;1 -->
+</td>
+<tr>
+<!-- #includeif and(IsFileType('ires'),not(strcmp(Ins(TWIN),"n/a"))) twin-laws gui\blocks\twin-law.htm;1 -->
+
+<!-- include refl-info gui\blocks\refl-info.htm;1 -->
+</tr>
+
+<tr>
+<td colspan='4'>
+Space Group: <b>$SG(%h)</b>
+(Hall Symbol <b>$SG(%HS)</b>)
+</td>
+</tr>

@@ -1,0 +1,97 @@
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
+
+<tr>
+	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+		<a 
+			href="spy.make_help_box -name='select' -popout='False'" 
+			target="Help me with this">
+			<zimg border="0" src="info.png">
+		</a>	
+	</td>
+	<td width = "50%">
+		%Exclusive%:
+		<a href="sel -u>> sel $C">C</a>&nbsp;
+		<a href="sel -u>> sel $H">H</a>&nbsp;
+		<a href="sel -u>> sel $N">N</a>&nbsp;
+		<a href="sel -u>> sel $O">O</a>&nbsp;
+	</td>
+	<td width = "50%" colspan = 2>
+		%Additive%:
+		<a href="sel -a">%All%</a>&nbsp;
+		<a href="sel $C">C</a>&nbsp;
+		<a href="sel $H">H</a>&nbsp;
+		<a href="sel $N">N</a>&nbsp;
+		<a href="sel $O">O</a>&nbsp;
+	</td>
+</tr>
+
+<tr>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
+	<td colspan=3>
+		<b>%Selection%:</b>
+		<a href="sel -i">%Invert%</a>&nbsp;
+		<a href="sel -u">%Deselect%</a>&nbsp;
+		<a href="kill sel">%Delete%</a>&nbsp;
+		<a href="selback">%Previous%</a>&nbsp;
+	</td>
+</tr>
+
+<tr>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
+	<td VALIGN='center' >
+		%Select atoms where% <b>U<sub>iso</sub></b>
+	</td>
+	<td VALIGN='center'  colspan='2'>
+		<font size='2'>
+			<input 
+				type="combo" 
+				bgcolor="$getVar(gui_html_input_bg_colour)" 
+				name= "compare" 
+				items=">;=;<" 
+				width="35"  
+				value = ">" 
+				height="18" 
+				readonly
+			>
+			<input 
+				type="text" 
+				bgcolor="$getVar(gui_html_input_bg_colour)" 
+				name = "uiso"  
+				width="40"  
+				height="18" 
+				value = "0.06"
+			>
+		</font>
+		<font size=2>
+			<input 
+				type="button" 
+				name = "select-usio" 
+				width="25" 
+				value="Go" 
+				onclick="sel atoms where xatom.uiso getvalue(compare) getvalue(uiso)&&xatom.type!='Q'">
+		</font>
+	</td>
+</tr>
+
+<tr>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
+	<td VALIGN='center' >
+		<input 
+			type="combo" 
+			bgcolor="$getVar(gui_html_input_bg_colour)" 
+			label="%Rings% " 
+			name="RINGSELECT" 
+			items="--;C6;C5N;C5;C5O;" 
+			width="80" 
+			onchange="if strcmp(GetValue(RINGSELECT),--) then html.SetFocus(RINGSELECT) else 'sel -u'>>sel rings GetValue(RINGSELECT)" 
+			value="" 
+			height="18">
+	</td>
+	<td VALIGN='center' colspan='2'>
+		<a href="sel rings C6"><b>Phenyl</b></a>&nbsp;
+		<a href="sel rings C5N"><b>Pyridine</b></a>
+	</td>
+	
+	
+
+<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->

@@ -1,0 +1,114 @@
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
+
+<tr VALIGN='center' NAME='Tools'>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+		<a 
+			href="spy.make_help_box -name='quicktools' -popout='True'" 
+			target="Help me with this">
+			<zimg border="0" src="info.png">
+		</a>
+
+	</td>
+	<td colspan='2'>
+		<a 
+			href="name $Q C"
+			target="%Convert all Q-peaks to C% ">
+			<zimg name="qc" border="0" src="gui/images/toolbar-QC.png">
+		</a>
+		&nbsp;
+		<a 
+			href="clean"
+			target="%Tidy the Structure automatically% ">
+			<zimg border="0" src="gui/images/toolbar-tidy.png">
+		</a>
+		&nbsp;			
+		<a 
+			href="fixunit>>updatehtml"
+			target="%Change the formula in the files so it reflects what is on the screen% ">
+			<zimg border="0" src="gui/images/toolbar-OK.png">
+		</a>
+		
+		&nbsp;
+		&nbsp;
+		
+		<a 
+			href="mode hfix 43"
+			target="%Atoms clicked after clicking this button &#013;will be asociated with the ShelX command HFIX% 43">
+			<zimg border="0" src="gui/images/toolbar-sp2-1H.png">
+		</a>
+		&nbsp;
+		
+		<a href="mode hfix 13"
+			target="%Atoms clicked after clicking this button &#013;will be asociated with the ShelX command HFIX% 13">
+			<zimg border="0" src="gui/images/toolbar-sp3-1H.png">
+		</a>&nbsp;
+		
+		<a 
+			href="mode hfix 23"
+			target="%Atoms clicked after clicking this button &#013;will be asociated with the ShelX command HFIX% 23">
+			<zimg border="0" src="gui/images/toolbar-sp3-2H.png">
+		</a>&nbsp;
+		
+		<a 
+			href="mode hfix 137"
+			target="%Atoms clicked after clicking this button &#013;will be asociated with the ShelX command HFIX% 137">
+			<zimg border="0" src="gui/images/toolbar-sp3-3H.png">
+		</a>
+		&nbsp;
+		
+		<a 
+			href="kill $H"
+			target="%Kill all Hydrogen Atoms% ">
+			<zimg border="0" src="gui/images/toolbar-killH.png">
+		</a>
+
+		&nbsp;
+		&nbsp;
+		
+		<a 
+			href="showQ"
+			target="%Toggle Q-peaks ON > ON with bonds > OFF%">
+			<zimg border="0" src="gui/images/toolbar-Q.png">
+		</a>&nbsp;
+		
+		<a 
+			href="showH"
+			target="%Toggle H atoms ON > ON with H-bonds > OFF%">
+			<zimg border="0" src="gui/images/toolbar-H.png">
+		</a>
+	</td>
+</tr>	
+
+<tr VALIGN='center' NAME='Labels'>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+	</td>
+	<td width=20%>
+		<b>Labels</b>
+	</td>
+	
+	<td>
+		<input 
+			type='combo' 
+			width='$eval(htmlpanelwidth()-105)' 
+			height="17" 
+			name='set_label_content' 
+			value='' 
+			items='Toggle On/Off<-;Atom Names<-l;Occupancy (None if fully occupied)<-o;Parts<-p;Link-Code<-v;H Atom Labels<-h l;Fixed Parameters<-f;Variables<-v;Fixed Parameters<-f;AFIX Commands<-h a;Q Peak Intensities<-qi' 
+			label='' 
+			bgcolor="$getVar(gui_html_input_bg_colour)" 
+			onchange="spy.ChooseLabelContent(GetValue(set_label_content))"   
+			readonly='readonly'
+		>
+	</td>
+</tr>
+</table>
+
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$getVar(gui_html_table_bg_colour)">
+
+
+
+<!-- #include model-disorder gui\snippets\snippet-model-disorder.htm;1; -->
+<!-- #include editatoms gui\snippets\snippet-editatom.htm;1; -->
+<!-- #include close-contacts gui\snippets\snippet-close-contacts.htm;1; -->
+<!-- #include q-peak-slider gui\snippets\snippet-q-peak-slider.htm;1; -->
+<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->

@@ -1,0 +1,22 @@
+
+<html 
+ <objects 
+  <a value="10" data="" state="false" \>
+  <alp value="90" data="" state="false" \>
+  <b value="10" data="" state="false" \>
+  <bet value="90" data="" state="false" \>
+  <c value="10" data="" state="false" \>
+  <gam value="90" data="" state="false" \>
+  <id value="" data="" state="false" \>
+  <integ value="" data="integ" state="true" \>
+  <lcells_cell value="Search Cells" data="" state="false" \>
+  <lcells_title value="Search Names" data="" state="false" \>
+  <load value="Load" data="" state="false" \>
+  <name value="01srv123" data="" state="false" \>
+  <run_lcells value="Run LCells" data="" state="false" \>
+  <sad value="" data="sad" state="true" \>
+  <saint value="" data="saint" state="true" \>
+  <smart value="" data="smart" state="true" \>
+  <tol value="0.1" data="" state="false" \>
+ \>
+\>

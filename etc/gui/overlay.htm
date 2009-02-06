@@ -1,0 +1,77 @@
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
+
+<tr>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	</td>
+	<td colspan='1'>
+		<a 
+			href="match" 
+			target="Match All Fragments-target">
+			%Match All Fragments%
+		</a>
+	</td>
+	<td colspan='1'>
+		<a href="fuse">%UnMatch%</a>
+	</td>
+</tr>
+
+<tr>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	</td>
+	<td colspan='2'>
+<!-- #include match match.htm;1; -->
+<td>
+</tr>
+
+<tr>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	</td>
+	<td colspan='2'>
+		<a 
+			target="Match Selected Atoms-target" 
+			href="match sel">
+			%Match Selected Atoms%</a>
+	</td>
+</tr>
+<!--
+<tr>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	</td>
+	<td>
+		<a href="match sel -s='GetValue(SET_FRAG_SUFFIX)'">%Rename Matched Fragments%</a>
+	</td>
+	<td>
+				<font size='2'>
+				<input 
+					type='combo', 
+					width="35" 
+					height="17" 
+					name='SET_FRAG_SUFFIX', 
+					items='A;B;C;D;E;F', 
+					value='B' ,
+				>
+			</font>
+	</td>
+</tr>
+-->
+
+
+<tr>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	</td>
+	<td colspan='2'>
+		<a href="fuse>> @reap -*>>mode match">%Overlay Structure%</a>&nbsp;|
+		&nbsp;<a href="mode match">%Mode Match%</a>
+		&nbsp;<a href="delofile 0>>mode off">%Remove Overlay%</a>
+
+</td>
+</tr>
+<tr>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	</td>
+	<td colspan='2'>
+		%Mode Match-help%
+	</td>
+</tr>
+
+<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->

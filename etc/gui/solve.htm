@@ -1,0 +1,55 @@
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
+
+	<tr>
+		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+			<zimg border="0" src="gui/images/toolbar-xs.png">
+		</td>		
+		<td colspan='4'>
+			<a href="reset">%Reset%</a>&nbsp
+		</td>
+<!--
+		<td colspan = '3'>
+			<input type="text" name="resetFormula" width="170" height="17" value="
+<!-- #cmd xf.GetFormula(0) -->
+			">
+		</td>
+-->
+	</tr>
+
+	<tr>
+		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+			<zimg border="0" src="gui/images/toolbar-xs.png">
+		</td>
+		<td>
+			<a href="reset>>solve">%TREF%</a>&nbsp  
+		</td>
+		<td width='17%'>
+			<a href="reset patt>>solve">%PATT%</a>
+		</td>
+		<td colspan='2'>
+			<font color='#cdcdcd'><a xhref="reset patt>>solve">%[Dual Space (XD)]%</a></font>
+		</td>
+	</tr>
+	<tr VALIGN='center' ALIGN='center'>
+		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+			<zimg border="0" src="gui/images/toolbar-xs.png">
+		</td >
+
+		<td>
+			<font size='2'>
+			<input label='Fred ' valign='center' type="spin" bgcolor="$getVar(gui_html_input_bg_colour)" name="trefN" width="30" height="17" value=5>
+			</font>
+		</td>
+
+
+
+	<td ALIGN='center'" colspan='3'>
+			<a href="ref getvalue(trefN)">%More%</a>
+			<font size="-1"><a href='nextsolution'><b>%CLICK%</b></a> %to browse%, ENTER %to select%</font>
+		</td>	
+	</tr>
+	
+
+</table>
+
+<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->

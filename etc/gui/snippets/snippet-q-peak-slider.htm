@@ -1,0 +1,57 @@
+<tr VALIGN='center' NAME='Expand Short Contacts'>
+	<td valign='top' width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+		<!--<a -->
+			<!--href="tbxh 'Help-q-peak-slider' 360" -->
+			<!--target="Help me with this">-->
+			<!--<zimg border="0" src="infos.png">-->
+		<!--</a>	-->
+		<a 
+			href="spy.make_help_box -name='electron-density-peak-slider' -popout='True'" 
+			target="Help me with this">
+			<zimg border="0" src="info.png">
+		</a>
+	</td>
+	<td colspan = '1'>
+		<b>
+	<b>	
+		%Electon Density Peaks% (%%)</b>&nbsp
+		<a href="sel $q">%Select%</a>&nbsp;
+		<a href="sel $q>>kill sel">%Delete%</a>
+	</td>
+</tr>
+<tr>
+	<td width="8" VALIGN='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+	</td>
+	<td colspan='1'>
+		<input
+			type="slider"
+			name = "SlideQPeaks"
+			width="$eval(htmlpanelwidth()-75)"
+			height="20"
+			value="GetVar(SlideQPeaksVal,0)"
+			bgcolor="$GetVar(gui_html_table_bg_colour)"
+			fgcolor="$GetVar(gui_html_font_colour)"
+			min="-20"
+			max="20"
+			onchange="
+>>SetVar(SlideQPeaksVal,GetValue(SlideQPeaks))
+>>SetLabel(QPeaksValue,eval(abs\(spy.QPeaksSlide(GetValue(SlideQPeaks)))))
+>>ShowQ spy.QPeaksSlide(GetValue(SlideQPeaks))"
+		>
+		&nbsp;
+		<input 
+			type="label"
+			name = "QPeaksValue"
+			width="50"
+			height="20"
+			bgcolor="$GetVar(gui_html_table_bg_colour)"
+			fgcolor="$GetVar(gui_html_font_colour)"
+			value="eval(abs\(spy.QPeaksSlide(GetValue(SlideQPeaks))))"
+			label=""
+		>
+		</td>
+</tr>	
+
+<tr>
+		<zimg border="0" src="qwedges.png">
+</tr>

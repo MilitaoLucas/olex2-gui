@@ -1,0 +1,18 @@
+_diffrn_detector                      ?
+_diffrn_detector_area_resol_mean      ?
+_diffrn_detector_type                 ?
+
+_diffrn_measurement_device            ?
+_diffrn_measurement_device_type       ?
+_diffrn_measurement_method            ?
+
+_diffrn_radiation_collimation         ?
+_diffrn_radiation_monochromator       ?
+_diffrn_radiation_probe               ?
+_diffrn_radiation_type                ?
+_diffrn_radiation_xray_symbol         ?
+_diffrn_radiation_wavelength          ?
+
+_diffrn_source                        ?
+_diffrn_source_target                 ?
+_diffrn_source_type                   ?

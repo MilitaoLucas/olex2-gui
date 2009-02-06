@@ -1,0 +1,9 @@
+﻿<Plugin 
+ <plugin-AutoChem >
+ <plugin-MySQL >
+ <plugin-BNSkin >
+ <plugin-Batch >
+ <plugin-AutoChem >
+ <plugin-cctbx >
+ <plugin-cctbx-win >
+>

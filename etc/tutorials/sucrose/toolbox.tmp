@@ -1,0 +1,48 @@
+<table border="0" style="border-collapse: collapse" width="100%" id="Model-on" cellpadding="0" bgcolor="#F3F3F3">
+
+
+<tr>
+<td>
+<a href="reset>>solve">
+<img border="0" src="gui\images\toolbar-xs.png"></a>&nbsp;
+<a href="refine">
+<img border="0" src="gui\images\toolbar-refine.gif"></a>&nbsp;
+<a href="name $Q C">QC</a>
+<a href="sel -a>>anis sel"><font color="green">ANIS</font></a>
+<a href="sel -a>>isot sel"><font color="green">ISOT</font></a>
+</td>
+<td rowspan=3>
+<a href="refine">
+<img border="0" src="gui\images\button-refine.png"></a>&nbsp;
+</td>
+
+
+<tr>
+<td>
+<a href="labels -l">
+<img border="0" src="gui\images\toolbar-labels.gif"></a>&nbsp;
+
+<a href="labels -o">
+<img border="0" src="gui\images\toolbar-occ.png"></a>&nbsp;
+
+<a href="labels -p">
+<img border="0" src="gui\images\toolbar-part.png"></a>&nbsp;
+
+<a href="labels -f">
+<img border="0" src="gui\images\toolbar-fvar.png"></a>&nbsp;
+</td>
+</tr>
+
+
+<tr>
+<td>
+<b>
+<a href="mode name -t=C"><font color="gray">C</font></a>
+<a href="mode name -t=N"><font color="blue">N</font></a>
+<a href="mode name -t=O"><font color="red">O</font></a>
+<a href="mode name -t=F"><font color="green">F</font></a>
+</b>
+</td>
+</tr>
+
+</table>

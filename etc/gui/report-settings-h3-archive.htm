@@ -1,0 +1,50 @@
+<tr>
+  <td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+  <td width='70' align='left' colspan='2'>
+<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;1; -->
+
+<font color=$getVar(gui_html_font_colour)  size=$getVar(gui_html_font_size)>
+</tr>
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$getVar(gui_html_table_bg_colour)">
+<tr>
+  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+  <zimg border="0" src="gui/images/toolbar-dimas.png"></td>
+  <td>
+  &nbsp;<a href="spy dimas info">Get Info on Current Structure</a></td>
+  </tr>
+
+  <tr>
+  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+  <zimg border="0" src="gui/images/toolbar-dimas.png"></td>
+  <td><font size='2'>
+  <input 
+    type="text" 
+    bgcolor="$getVar(gui_html_input_bg_colour)" 
+    name="id" float 
+    width="30" float 
+    height="18" 
+    value="$GetVar(gui_archive_last)"
+  />
+  </font>
+  <input 
+    type="button" 
+    name = "load" 
+    width="35" 
+    height="18" 
+    value="Load"
+    onclick = "spy dimas load getvalue(id)"
+  />
+  </td>
+  </tr>
+
+  <tr>
+  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+  <zimg border="0" src="gui/images/toolbar-dimas.png"></td>
+  <td>
+  &nbsp;<a href="spy dimas archive">Archive Files</a></td>
+  </tr>
+
+</table>
+  </td>
+</tr>
+</font>

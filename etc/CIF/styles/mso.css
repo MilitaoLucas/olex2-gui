@@ -1,0 +1,66 @@
+table.CifTable
+	{
+		mso-yfti-tbllook:480;
+		mso-padding-alt:0cm 5.4pt 0cm 5.4pt
+		mso-style-name:"Table Normal";
+		mso-tstyle-rowband-size:0;
+		mso-tstyle-colband-size:0;
+		mso-style-noshow:yes;
+		mso-style-parent:"";
+		mso-padding-alt:0cm 5.4pt 0cm 5.4pt;
+		mso-para-margin:0cm;
+		mso-para-margin-bottom:.0001pt;
+		mso-pagination:widow-orphan;
+		mso-ansi-language:#0400;
+		mso-fareast-language:#0400;
+		mso-fareast-font-family:"Times New Roman";
+		mso-bidi-language:#0400;}
+	}
+
+table.CifTable td
+	{
+		mso-height-rule:exactly;
+	}
+	
+table.CifTable caption
+	{
+		margin-left:0em;
+		margin-right:0em;
+	}
+	
+p.chemComm
+ {
+		mso-line-height-rule:exactly;
+ }
+	
+p.chemComm_h2
+	{
+		mso-style-parent:"chemComm";
+	} 
+
+br 
+	{
+		page-break-before:auto;
+		mso-break-type:section-break;
+	}
+	
+/* Page Definitions */
+@page Section1
+	{
+		mso-header-margin:35.45pt;
+		mso-footer-margin:35.45pt;
+		mso-paper-source:0;
+	}
+@page Section2
+	{
+		mso-header-margin:35.45pt;
+		mso-footer-margin:35.45pt;
+		mso-paper-source:0;
+	}
+@page Section3
+	{
+		mso-header-margin:35.45pt;
+		mso-footer-margin:35.45pt;
+		mso-columns:2 even 36.0pt;
+		mso-paper-source:0;
+	}
