@@ -35,7 +35,7 @@
 <reap help="Load a Crystallographic File"
 	<body
 		<args
-			<arg1 name="file name" def="none">
+			<arg1 name="file name" def="">
 			<arg2 name="options" def="">
 			<arg3 name="width" def="htmlpanelwidth()">
 			<arg4 name="filename" def="filename()">
@@ -43,7 +43,6 @@
 			<arg6 name="ext" def="fileext()">
 			\>
 		<cmd
-			
 			<cmd0  "xgrid.Visible(false)">
 			<cmd1  "if strcmp(%4,'none') then none else 'spy.saveHistory()'">
 			<cmd2  "spy.pickleVVD(structure)">
@@ -69,6 +68,7 @@
 			<cmd19 "if and(isplugininstalled(plugin-brukersaint),IsFileType('p4p')) then BSINI else none">			
 			<cmd20 cmd1="if strcmp(%4,filename()) then none else 'clear'">
 			<cmd23 "syncbc">
+			<cmd24 "html.Hide pop_prg_analysis">
 			<cmd25 "if strcmp(%4,filename()) then updatehtml else htmlreload">
 			<cmd26 XXX="fade 1 0 -0.1">
 			<cmd27 XXX='waitfor fade'>
