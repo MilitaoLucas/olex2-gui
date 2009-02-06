@@ -1112,46 +1112,38 @@ def getPopBoxPosition():
   sTop = int(ws[1])
   return (sX, sY, sTop)
 
+def get_template(name):
+  template = r"%s/etc/gui/blocks/templates/%s.htm" %(olx.BaseDir(),name)
+  if os.path.exists(template):
+    rFile = open(template, 'r')
+    str = rFile.read()
+    return str
+  else:
+    return None
+
 def makeHtmlBottomPop(args, pb_height = 50):
-  txt = args.get('txt',"Test")
+  txt = args.get('txt',None)
   name = args.get('name',"test")
   
   import OlexVFS
   from ImageTools import ImageTools
   IM = ImageTools()
   metric = getPopBoxPosition()
-  template = r"%s/etc/gui/blocks/templates/pop_%s.htm" %(olx.BaseDir(),name)
-  if os.path.exists(template):
-    rFile = open(template, 'r')
-    str = rFile.read()
+  if not txt:
+    txt = get_template(name)
     str = str.replace(r"<MODENAME>",txt.upper())
-  else:
-    str = txt
-    #str = '''
-    #<html>
-    #<body bgcolor='$getVar(gui_html_highlight_colour)'>
-    #<table>
-            #<tr>
-            #<td colspan = 2>
-            #<font size='4'>%s</font>
-            #</td>
-            #</tr>
-    #<table>
-    #</body>
-    #</html>
-  #''' %txt
   pop_html = name
   pop_name = name
   htm_location = "%s.htm" %pop_html
-  OlexVFS.write_to_olex(htm_location, str)
+  OlexVFS.write_to_olex(htm_location, txt)
   width = int(IM.gui_htmlpanelwidth) - 22
   x = metric[0] + 10
   y = metric[1] - pb_height - 10
   pstr = "popup %s '%s' -t='%s' -w=%s -h=%s -x=%s  -y=%s" %(pop_name, htm_location, pop_name, width, pb_height, x, y)
+  print "popping now"
   olex.m(pstr)
   olx.html_SetBorders(pop_name,0)
-  olx.html_Reload(pop_name)
-  
+  #olx.html_Reload(pop_name)
 OV.registerMacro(makeHtmlBottomPop, 'txt-Text to display&;name-Name of the Bottom html popupbox')
   
 def OnModeChange(*args):
@@ -1166,10 +1158,15 @@ def OnModeChange(*args):
     olex.m("html.hide %s" %name)
 olex.registerCallback('modechange',OnModeChange)
 
-def OnChargeFlippingStart(txt="Fred"):
-  name = "pop_charge_flipping"
-  makeHtmlBottomPop({'txt':txt, 'name':name}, pb_height=230)
+def PopProgram(txt="Fred"):
+  name = "pop_prg_analysis"
+  makeHtmlBottomPop({'txt':txt, 'name':name}, pb_height=225)
 
+def HklStatsAnalysis():
+  import olex_core
+  stats = olex_core.GetHklStat()
+OV.registerFunction(HklStatsAnalysis)
+  
 
 def InstalledPlugins():
   import olex_core

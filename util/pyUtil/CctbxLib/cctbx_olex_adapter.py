@@ -739,7 +739,7 @@ def charge_flipping_loop(solving, verbose=True):
     elif solving.state is solving.finished:
       break
     
-    if HasGUI: a.run_charge_flipping_graph(flipping, solving,previous_state)
+    if HasGUI: a.run_charge_flipping_graph(flipping, solving, previous_state)
     previous_state = solving.state
 
 
