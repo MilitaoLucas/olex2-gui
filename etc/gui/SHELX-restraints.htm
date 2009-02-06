@@ -1,0 +1,26 @@
+
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
+
+<!--$spy.make_warning_html(6)-->
+
+
+<tr>
+	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+	</td>
+	<td width='20%'>
+		<input 
+			bgcolor="$getVar(gui_html_input_bg_colour)" 
+			type="combo" 
+			name="SET_GUI_SHELX_RESTRAINTS" 
+			items='DFIX;DANG;SADI;CHIV;FLAT;DELU;SIMU;ISOR;'
+			value="GetVar(gui_shelx_restraints)" 
+			width="55" 
+			onchange="SetVar(gui_shelx_restraints,GetValue(SET_GUI_SHELX_RESTRAINTS))>>spy.restraint_builder(GetVar(gui_shelx_restraints))"
+			height="17" 
+			label="Restraint"
+			readonly
+		>	
+	</td>
+
+<!-- #includeif fs.Exists(restraint-vars.htm) restraint-vars restraint-vars.htm;1; -->
+<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->

@@ -1,0 +1,86 @@
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
+
+
+<tr ALIGN='left'>
+	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+		<a 
+			href="spy.make_help_box -name='naming' -popout='False'" 
+			target="Help me with this">
+			<zimg border="0" src="info.png">
+		</a>	
+	</td>
+	</td >
+
+	<td  width=30%>
+			<input 
+				type="text" 
+				bgcolor="$getVar(gui_html_input_bg_colour)" 
+				label='%Start%&nbsp;' 
+				valign='center' 
+				name="MODE_NAME_NUMBER"  
+				width="35"  
+				height="18" 
+				value = "1">
+	</td>
+
+	<td width=30%>
+			<input 
+				type="text" 
+				bgcolor="$getVar(gui_html_input_bg_colour)" 
+				label='%Suffix%&nbsp;' 
+				valign='center' 
+				name = "MODE_NAME_SUFFIX"  
+				width="30" 
+				height="18" 
+				value = ""
+			>
+	</td>
+
+	<td width=30%>
+			<input 
+				type="text" 
+				bgcolor="$getVar(gui_html_input_bg_colour)" 
+				label='%Type%&nbsp;' 
+				valign='center' 
+				name = "MODE_NAME_TYPE"
+				width="30"  
+				height="18" 
+				value = ""
+			>
+	</td>
+	<td width=10%>
+			<input 
+				type="button" 
+				name = "naming-mode" 
+				width="35" 
+				value="Go" 
+				onup="setlabel(naming-mode,Go)>>mode off" 
+				ondown="setlabel(naming-mode,Done)>>guinames_m">
+	</td>
+</tr>
+<tr>
+	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+		<!--<a -->
+			<!--href="spy.make_help_box -name='naming' -popout='False'" -->
+			<!--target="Help me with this">-->
+			<!--<zimg border="0" src="info.png">-->
+		<!--</a>	-->
+	</td>
+
+	<td colspan=3>
+		Automatic Hydrogen Naming
+	</td>
+	<td width=10% align='right'>
+			<input
+				type="checkbox"
+				name = "auto-hydrogen-naming"
+				width="17"
+				height="17"
+				$GetVar('snum_auto_hydrogen_naming')
+				oncheck="SetVar(snum_auto_hydrogen_naming,checked)"
+				onuncheck="SetVar(snum_auto_hydrogen_naming,unchecked)">
+	</td>
+</tr>
+
+
+<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->

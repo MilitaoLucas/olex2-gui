@@ -1,0 +1,462 @@
+<xl_macro
+
+<a
+	<body
+		<args
+			<arg1 name='file' def='DataDir()\samples\sucrose\sucrose.res'> 
+		\>
+		<cmd 
+			<cmd10 "reap '%1'">
+		\>	
+	\>
+\>
+
+<b
+	<body
+		<args
+			<arg1 name='file' def='DataDir()\samples\THPP\thpp.res'> 
+		\>
+		<cmd 
+			<cmd10 "reap '%1'">
+		\>	
+	\>
+\>
+
+<c
+	<body
+		<args
+			<arg1 name='file' def='DataDir()\samples\Co110\Co110.res'> 
+		\>
+		<cmd 
+			<cmd10 "reap '%1'">
+		\>	
+	\>
+\>
+
+
+<onstartup help="Executes on program start"
+	<body
+		<args
+			<arg1 name="width" def='100'> 
+		\>
+		<cmd 
+			<cmd1 XXX="silent on">
+			<cmd2 "py.Export(datadir()/olx.py)">
+			<cmd3 "py.run 'basedir()/util/pyUtil/initpy.py'">
+			<cmd4 "if IsVar(defeditor) then none else setvar(defeditor,'gedit')">
+			<cmd5 "if IsVar(defexplorer) then none else setvar(defexplorer,'nautilus')">
+			<cmd6 "if IsVar(defbrowser) then none else setvar(defbrowser,'htmlview')">
+			<cmd7 cmd1="spy.InitialiseVariables(startup)">
+			<cmd8 "echo filepath()">
+			<cmd9 XXX="panel htmlpanelwidth()">
+			<cmd10 XXX="schedule 8 'UpdateFile olex2.exe'">
+		\>	
+
+		<onterminate
+			<cmd1 cmd1="clear"> 
+			<cmd2 "echo filepath()">
+		\>
+	\>
+\>
+
+<reap help="Load a Crystallographic File"
+	<body
+		<args
+			<arg1 name="file name" def="">
+			<arg2 name="options" def="">
+			<arg3 name="width" def="100">
+			<arg4 name="filename" def="filename()">
+			<arg5 name="base" def="basedir()">
+			<arg6 name="ext" def="fileext()">
+			\>
+		<cmd
+			<cmd1  "if strcmp(%4,'none') then none else 'spy.saveHistory()'">
+			<cmd2  "spy.pickleVVD(structure)">
+			<cmd3  cmd1="clear">
+			<cmd4  "@reap '%1'">
+			<cmd5 "spy.InitialiseVariables(reap)">
+			<cmd6 "spy.UnpickleVVD()">
+			<cmd7 "SetVar(snum_refinement_sg,sg(%n))">
+			<cmd8 "'SetVar(snum_refinement_max_peaks,Ins(QNUM))'">
+			<cmd9 "'SetVar(snum_refinement_max_cycles,Ins(LS))'">
+			<cmd10 "if File.Exists(strdir()/filename().vvd) then none else 'SetVar(snum_refinement_original_formula,xf.GetFormula())'">
+			<cmd11 "if and(strcmp(%4,filename()),strcmp(%6,fileext())) then none else 'spy.loadHistory()'">
+			<cmd12 "'if and(IsFileType(ires), not(File.Exists((strdir()/history-filename)))) then 'spy.create_history()'">
+			<cmd13 "if and(isplugininstalled(plugin-brukersaint),IsFileType('p4p')) then BSINI else none">			
+			<cmd14 cmd1="if strcmp(%4,filename()) then none else 'clear'">
+			\>
+		<onabort
+			<cmd "ceiling off">
+		>	
+	>
+>
+
+
+<onexit help="Executes on program exit"
+	<body
+		<args
+		\>
+
+		<cmd 
+			<cmd1  "echo Good Bye">
+			<cmd2  "spy.saveHistory()">
+			<cmd2  XXXX="spy history save none">
+			<cmd3  "spy.pickleVVD(structure)">
+			<cmd4  XXXX="storeparam startup filefull()">
+			<cmd26 "stop logging">
+	\>
+
+		<onterminate
+		\>
+	\>
+\>
+
+
+<sgd help="Determine the Space Group"
+	<body
+		<args
+		\>
+
+		<cmd
+			<cmd1 "cursor(busy,'Determining the Space Group...')">
+			<cmd2 "sg">
+			<cmd3 "cursor()">
+		/>
+	/>
+/>
+
+
+<spy help="run internal python"
+	<body
+		<args
+			<arg1 name="tool" def=" "> 
+			<arg2 name="fun" def=" "> 
+			<arg3 name="param1" def="None"> 
+			<arg4 name="param2" def="None"> 
+			<arg5 name="param3" def="None"> 
+			<arg6 name="param4" def="None"> 
+			<arg7 name="param5" def="None"> 
+			<arg8 name="param6" def="None"> 
+		\>
+
+		<cmd
+			<cmd1 "setvar(tool,'%1')">
+			<cmd2 "setvar(fun,'%2')">
+			<cmd3 "setvar(param,'%3;%4;%5;%6;%7;%8')">
+			<cmd4 "py.run 'basedir()/util/pyUtil/spy.py'">
+		/>
+	/>
+/>
+
+<report help="Creates structure report"
+	<body
+		<args
+		\>
+		<cmd 
+			<cmd0 "if file.Exists('FilePath()\FileName().cif') then None else 'SetVar(snum_refinement_method,Least Squares)'">
+			<cmd1 "if file.Exists('FilePath()\FileName().cif') then None else 'DelIns ACTA'">
+			<cmd2 "if file.Exists('FilePath()\FileName().cif') then None else 'AddIns ACTA'">
+			<cmd3 "if file.Exists('FilePath()\FileName().cif') then None else 'refine'">
+			<cmd4 XXX="cursor(busy, '%Checking for IMAGE file ...%')">
+			<cmd5 "if file.Exists(GetVar(report_image)) then 'SetVar(report_image,GetVar(report_image))' else 'SetVar(report_image,screenshot.png)'">
+			<cmd6 XXX="if not(strcmp(GetVar(report_image),screenshot.png)) then None else 'cursor(busy, &#2e;%Creating Image ...%&#2e;)>>pict -pq screenshot.png 1'">
+			<cmd7 XXX="cursor(busy, '%Updating% Cif ...')">
+			<cmd8 "spy cif info">
+			<cmd9 "spy metacif merge">
+			<cmd10 XXX="cursor(busy, '%Creating% Report')">
+			<cmd11 "cif2tab header acrd anis bnd ang htab tang hcrd footer">
+			<cmd12 XXX="shell tables.html">
+		\>
+		<onterminate
+			<cmd0 "cursor()">
+		\>
+		<onabort
+			<cmd0 "cursor()">
+		\>
+	\>
+\>
+
+<refine help="Launches refine program. Syntax: refine [l.s.=-1] [plan=-1]"
+	<body
+		<args
+			<arg0 name="l.s." def='-1'> 
+			<arg1 name="plan" def='-1'> 
+			<arg2 name="xl" def='xl'>
+		\>
+		<cmd 
+			<cmd0 CCC="xgrid.Visible(false)">
+			<cmd1 CCC="mode off">
+			<cmd2 CCC="ls %1">
+			<cmd3 CCC="plan %2">
+			<cmd4 "user('filepath')">
+			<cmd5 "file">
+			<cmd6 CCC="cursor(busy, 'Refining...')">
+			<cmd7 "spy RunPrg REFINE %1 %2">
+		\>
+		<onterminate
+			<cmd0 "cursor()">
+		\>
+		<onabort
+			<cmd0 "cursor()">
+		\>
+	\>
+\>
+
+<refineit help="Launches refine program. Syntax: refine [l.s.=-1] [plan=-1]"
+	<body
+		<args
+			<arg0 name="l.s." def='-1'\> 
+			<arg1 name="plan" def='-1'\> 
+			<arg2 name="REFINE" def='REFINE'\>
+			<arg2 name="tidy" def='-t'\>
+			\>
+		<cmd 
+			<cmd1  "mode off">
+			<cmd2  "sel -u">
+			<cmd3  "sel atoms where xatom.peak<2&&xatom.peak>0">
+			<cmd4  "kill sel">
+			<cmd5  "name $Q C">
+			<cmd6  "ls %1">
+			<cmd7  "plan %2">
+			<cmd8  "user 'filepath()'">
+			<cmd9  "file">
+			<cmd10 "cursor(busy, 'Refining...')">
+			<cmd11 cmd1="clear">
+			<cmd12 cmd1="lines -1">
+			<cmd13 "spy RunPrg REFINE t t t">
+		\>
+		<onterminate
+			<cmd1 "cursor()">
+			<cmd2 cmd1="lines 10">
+			<cmd3 cmd1="@reap 'filepath()\filename().res'"> 
+			<cmd4 cmd1="spy.create_history()">
+			<cmd4 cmdXXXX="spy history create lst(R1)">
+			<cmd5 cmdXXX="spy Analysis lst">
+			<cmd6 "tidy">
+			<cmd7 "kill sel">
+
+		\>
+		<onabort
+			<cmd1 "cursor()">
+			<cmd2 cmd1="lines 10">
+		\>
+	\>
+\>
+
+
+<solve help="Launches solution program XS"
+	<body
+		<args 
+			<arg1 name="SOLVE" def='SOLVE'\> 
+		\>
+		<cmd 
+			<cmd1 "spy RunPrg SOLVE">
+			<cmd2 cmd="spy.doProgramSettings(GetVar(snum_refinement_program),GetVar(snum_refinement_method),true)">
+			\>
+		<onterminate
+			<cmd1 cmd1="reap 'filepath()\filename().res'">
+		\>
+	\>
+\>
+
+
+<tidy help = "Automatically select things"
+	<body
+		<args 
+			<arg1 name="cutoff" def='0.07'> 
+		/>
+		<cmd 
+			<cmd1 "sel atoms where xatom.uiso > %1">
+			<cmd2 "sel atoms where xatom.peak<2&&xatom.peak>0">
+			<cmd3 "updatehtml">
+		/>
+	/>
+/>
+
+
+<edit help="Launches notepad for the file with name of current file and extension passed as parameter"
+	<body
+		<args
+			<arg1 name="File extension" def="ins">
+			<arg2 name="File path" def="filepath()">
+			<arg3 name="File name" def="filename()">
+		\>
+		<cmd
+			<cmd1 cmd1="silent on">
+			<cmd2 cmd1="echo %2%3.%1">
+			<cmd3 "file">
+			<cmd4 "if or(IsFileType(ires),IsFileType(cif)) then 'listen filepath()/filename().%1' else none">
+			<cmd5 "if strcmp(%1,hkl) then 'exec -o getvar(defeditor) &2E;hklsrc()&2E;' else 'exec -o getvar(defeditor) &2E;filepath()/filename().%1&2E;'">
+		\>
+		<onterminate
+			<cmd0 "silent off">
+			<cmd1 "stop"> 
+		\>
+		<onlisten
+			<cmd1 cmdXXX="'SetVar(snum_refinement_max_peaks,Ins(QNUM))'">
+			<cmd1 cmdXXX="'SetVar(snum_refinement_max_cycles,Ins(LS))'">
+			<cmd1 cmdXXX="spy.doProgramSettings(GetVar(snum_refinement_program),GetVar(snum_refinement_method))">
+			<cmd0 cmdXXX="updatehtml"> 
+		\>
+	\>
+\>
+
+
+
+<_reap_fade help="Load a Crystallographic File"
+	<body
+		<args
+			<arg0 name="file name" def="">
+			<arg1 name="options" def="">
+		\>
+		<cmd
+			<cmd1 "xgrid.Visible(false)">
+			<cmd2 "fade 0 1 0.1">
+			<cmd3 'waitfor fade'>
+			<cmd4 "@reap %1 %2">
+			<cmd5 "ceiling on">
+			<cmd6 "fade 1 0 -0.1">
+			<cmd7 'waitfor fade'>
+		\>
+		<onabort
+			<cmd1 "ceiling off">
+		\>
+	\>
+\>
+
+
+<atreap_no_fader help="Load a Crystallographic File"
+	<body
+		<args
+			<arg0 name="file name" def="">
+			<arg1 name="options" def="">
+		\>
+		<cmd
+			<cmd1 "@reap '%1'">
+		\>
+		<onabort
+		\>
+	\>
+\>
+
+
+<weight help="Use suggested weighting scheme"
+	<body
+		<args
+			<arg1 name="name" def="">
+			<arg2 name="type" def="">  
+		\>
+		<cmd
+			<cmd1 "updatewght">
+			<cmd2 "updatehtml">
+			<cmd3 "echo DONE">
+		\>
+	\>
+\>
+
+</ help="Add command to the ins file"
+	<body
+		<args
+			<arg1 name="name" def="">
+			<arg2 name="name" def="">
+			<arg3 name="name" def="">
+			<arg4 name="name" def="">
+			<arg5 name="name" def="">
+				\>
+		<cmd
+			<cmd1 "addins %1 %2 %3 %4 %5">
+		\>
+	\>
+\>
+
+
+<emf help='Edit a macro file (macro, auto, custom, ...)'
+	<body
+		<args
+			<arg1 name="filname" def="custom">
+		\>
+		<cmd
+			<cmd1 "exec -o getvar(defeditor) 'basedir()/%1.xld'">
+		\>
+	\>
+\>
+
+<log help='Shows the current log file'
+	<body
+		<args
+			<arg1 name="filname" def="custom">
+		\>
+		<cmd
+			<cmd1 "flush log">
+			<cmd2 "exec -o getvar(defeditor) 'DataDir()/olex2c.log'">
+		\>
+	\>
+\>
+
+<config help='Opens the config file'
+	<body
+		<args
+			<arg1 name="filname" def="custom">
+		\>
+		<cmd
+			<cmd1 "exec -o getvar(defeditor) 'BaseDir()/util/pyUtil/PluginLib/plugin-AutoChem/autochem_config.txt'">
+		\>
+	\>
+\>
+
+
+<profile help='Opens the profiler output'
+	<body
+		<args
+			<arg1 name="filname" def="custom">
+		\>
+		<cmd
+			<cmd1 "exec -o getvar(defeditor) 'DataDir()/profile.txt'">
+		\>
+	\>
+\>
+
+<dire help="Opens the current directory in Explorer"
+	<body
+		<cmd 
+			<cmd0 "exec -o getvar(defexplorer) 'filepath()'">
+		\>
+	\>
+\>
+
+<edt help="Edits a particular atom"
+	<body
+		<args
+			<arg1 name="atom" def="">
+		\>
+		<cmd 
+			<cmd1 "editatom %1">
+		\>
+	\>
+\>
+
+<oda help="Launches ac_run"
+	<body
+		<args 
+			<arg2 name="single" def="-s">
+			<arg2 name="single" def="">
+		\>
+		<cmd
+			<cmd6 "spy.ac_run solveit %1 %2"> 
+		\>
+	\>
+\>
+
+
+<start_autochem help="Launches ac_run"
+	<body
+		<args 
+			<arg1 name="filefull" def="'FileFull()'">
+		\>
+		<cmd
+			<cmd6 "spy.ac_run solveit -filefull='%1'"> 
+		\>
+	\>
+\>
+
+<#include "custom.xld">

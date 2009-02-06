@@ -1,0 +1,89 @@
+<font color=$getVar(gui_html_font_colour)  size=$getVar(gui_html_font_size)>
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$getVar(gui_html_table_bg_colour)">
+
+
+
+<tr>
+	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td width='50%' align='left' colspan='1'>
+	<a href="spy cif>>spy metacif view>>updatehtml" target="View cif items to be added"><b>View cif info</b></a>
+	</td>
+	<td width='50%%' align='left' colspan='1'>
+	<a href="spy cif>>
+if file.Exists('FilePath()\FileName().cif') then None else 'SetVar(snum_refinement_method,Least Squares)'>> 
+if file.Exists('FilePath()\FileName().cif') then None else 'DelIns ACTA'>> 
+if file.Exists('FilePath()\FileName().cif') then None else 'AddIns ACTA'>> 
+if file.Exists('FilePath()\FileName().cif') then None else 'refine'>>
+spy metacif merge edit>>
+"
+     target="Merge with cif file"><b>Merge cif</b></a>
+	</td>
+</tr>
+<tr VALIGN='center' ALIGN='left' NAME='SNUM_REPORT_TITLE'>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+
+	<td VALIGN='center' width="60%" colspan=1>
+			<b>%Report Title%</b>
+	</td>	
+
+	<td VALIGN='center' colspan=1>
+		<font size='2'> 
+			<input 
+				type='text',
+				width=120,
+				height="17" 
+				bgcolor="GetVar(gui_html_input_bg_colour)"
+				name='SET_SNUM_REPORT_TITLE',
+				value='GetVar(snum_report_title)'
+				label='', 
+				onleave="SetVar(snum_report_title,GetValue(SET_SNUM_REPORT_TITLE))"
+			>
+		</font>
+	</td>
+</tr>
+
+<tr VALIGN='center' ALIGN='left' NAME='USER_REPORT_STYLE'>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+
+	<td VALIGN='center' width="60%" colspan=1>
+			<b>%Report Style%</b>
+	</td>	
+
+	<td VALIGN='center' colspan=1>
+		<font size='2'> 
+			<input 
+				type='combo',
+				width=120,
+				height="17" 
+				bgcolor="GetVar(gui_html_input_bg_colour)"
+				name='SET_USER_REPORT_STYLE',
+				value='GetVar(user_report_style)'
+				items='default;mso;'
+				label='', 
+				onchange="SetVar(user_report_style,GetValue(SET_USER_REPORT_STYLE))"
+			>
+		</font>
+	</td>
+</tr>
+
+<!-- #include report-settings-h3-image gui\report-settings-h3-image.htm;gui\blocks\tool-h3-off.htm;image=report-settings-h3-image;onclick=;colspan=2;2; -->
+
+<!-- #include metadata-h3-collection gui\metadata-h3-collection.htm;gui\blocks\tool-h3-off.htm;image=metadata-h3-collection;onclick=;colspan=2;2; -->
+
+<!-- #include metadata-h3-diffraction gui\metadata-h3-diffraction.htm;gui\blocks\tool-h3-off.htm;image=metadata-h3-diffraction;onclick=;colspan=2;2; -->
+
+<!-- #include metadata-h3-crystal gui\metadata-h3-crystal.htm;gui\blocks\tool-h3-off.htm;image=metadata-h3-crystal;onclick=;colspan=2;2; -->
+
+<!-- #include report-settings-h3-publication gui\report-settings-h3-publication.htm;gui\blocks\tool-h3-off.htm;image=report-settings-h3-publication;onclick=;colspan=2;2; -->
+
+<!-- #include metadata-h3-progress gui\metadata-h3-progress.htm;gui\blocks\tool-h3-off.htm;image=metadata-h3-progress;onclick=;onclick=;colspan=2;2; -->
+
+<!-- #include metadata-h3-reference gui\metadata-h3-reference.htm;gui\blocks\tool-h3-off.htm;image=metadata-h3-reference;onclick=;onclick=;colspan=2;2; -->
+
+<!-- #include metadata-h3-source-files gui\metadata-h3-source-files.htm;gui\blocks\tool-h3-off.htm;image=metadata-h3-source-files;onclick=;onclick=;colspan=2;2; -->
+
+<!-- #includeif isplugininstalled(plugin-mysql) report-settings-h3-archive gui\report-settings-h3-archive.htm;gui\blocks\tool-h3-off.htm;image=report-settings-h3-archive;onclick=;onclick=;colspan=2;2; -->
+
+
+</table>	
+</font>

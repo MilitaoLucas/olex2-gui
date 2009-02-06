@@ -1,0 +1,11 @@
+<va help="Validate Auto"
+	<body
+		<args
+		\>
+
+		<cmd
+			<cmd0 cmd="ValidateAuto FileName().val"\>
+			<cmd1 cmd="edit val"\>
+		/>
+	/>
+/>
