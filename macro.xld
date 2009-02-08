@@ -35,7 +35,7 @@
 <reap help="Load a Crystallographic File"
 	<body
 		<args
-			<arg1 name="file name" def="none">
+			<arg1 name="file name" def="">
 			<arg2 name="options" def="">
 			<arg3 name="width" def="htmlpanelwidth()">
 			<arg4 name="filename" def="filename()">
