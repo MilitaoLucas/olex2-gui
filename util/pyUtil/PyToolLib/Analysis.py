@@ -1348,7 +1348,7 @@ class Analysis(Graph):
     help = OV.TranslatePhrase(method.help)
     info = OV.TranslatePhrase(method.info)
     
-    txt = olexex.get_template("pop_program")
+    txt = olexex.get_template("pop_prg_analysis")
     
     if txt:
       txt = txt %(process, self.filename, prg, name, authors, reference, img_name)
