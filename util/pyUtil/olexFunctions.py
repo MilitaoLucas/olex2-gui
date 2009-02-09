@@ -175,6 +175,12 @@ class OlexFunctions(inheritFunctions):
     olex.registerCallback(event,function,profiling)
     #olex.registerCallback(event,function)
     
+  def unregisterCallback(self,event,function,profiling=False):
+    g = self.func_wrap(function)
+    g.__name__ = function.__name__
+    olex.unregisterCallback(event,function,profiling)
+    #olex.registerCallback(event,function)
+
   def func_wrap(self,f):
     def func(*args, **kwds):
       try:
