@@ -1044,14 +1044,16 @@ class timage(ImageTools):
     button_names = ("Delete", 
                     "Select", 
                     "Balls & Sticks", 
+                    "blank", 
                     )
     for txt in button_names:
       #IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
       IM =  Image.new('RGBA', crop.size)
       IM.paste(crop_colouriszed, (0,0), crop)
       draw = ImageDraw.Draw(IM)
+      t = txt.replace("blank"," _ ") 
       self.write_text_to_draw(draw, 
-                   "%s" %txt, 
+                   "%s" %t,
                    top_left=(4, 6), 
                    font_name = 'Vera', 
                    font_size=40, 
@@ -1064,6 +1066,10 @@ class timage(ImageTools):
       name = "small-button-%s.png" %(txt.replace(" ", "_"))
       name = name.lower()
       OlexVFS.save_image_to_olex(IM, name, 2)
+      if name == "small-button-blank.png":
+        filename = r"%s/small-button-blank.png" %self.datadir
+        IM.save(filename)
+        
     
     
     
