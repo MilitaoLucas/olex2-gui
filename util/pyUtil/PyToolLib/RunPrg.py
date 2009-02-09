@@ -365,6 +365,12 @@ class RunPrg(ArgumentParser):
     OV.CreateBitmap('-r %s %s' %(self.bitmap, self.bitmap))
     self.setupFiles()
     if not self.terminate:
+      if OV.FindValue("snum_refinement_graphical_output"):
+        if fun == "REFINE":
+          if self.HasGUI:
+            from Analysis import ShelXAnalysis
+            SXA = ShelXAnalysis()
+            SXA.observe_shex_l()
       self.method.run(self)
     else: 
       self.endRun()

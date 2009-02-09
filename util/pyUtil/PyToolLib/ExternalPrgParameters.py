@@ -1,4 +1,5 @@
 # ExternalPrgParameters.py
+# -*- coding: latin-1 -*-
 
 import sys
 import olx
@@ -650,14 +651,14 @@ def defineExternalPrograms():
   ShelXD = Program(
     name='ShelXD', 
     author="G.M.Sheldrick", 
-    reference="University of Goettingen", 
+    reference="University of G&#246;ttingen", 
     execs=["shelxd.exe", "shelxd"]
   )
   
   XM = Program(
     name='XM', 
     author="G.M.Sheldrick/Bruker", 
-    reference="University of Goettingen/Bruker", 
+    reference="University of G&#246;ttingen/Bruker", 
     execs=["xm.exe", "xm"]
   )
   
@@ -677,11 +678,11 @@ def defineExternalPrograms():
   smtbx_solve.addMethod(charge_flipping)
   
   # define refinement programs
-  ShelXL = Program('ShelXL', "G.M.Sheldrick", "University of Goettingen", ["shelxl.exe", "shelxl"])
-  XL = Program('XL', "G.M.Sheldrick", "University of Goettingen/Bruker", ["xl.exe", "xl"])
-  ShelXH = Program('ShelXH', "G.M.Sheldrick", "University of Goettingen", ["shelxh.exe", "shelxh"])
-  XH = Program('XH', "G.M.Sheldrick", "University of Goettingen/Bruker", ["xh.exe", "xh"])
-  ShelXL_ifc = Program('ShelXL_ifc', "G.M.Sheldrick", "University of Goettingen", ["shelxl_ifc"])
+  ShelXL = Program('ShelXL', "G.M.Sheldrick", "University of G&#246;ttingen", ["shelxl.exe", "shelxl"])
+  XL = Program('XL', "G.M.Sheldrick", "University of G&#246;ttingen/Bruker", ["xl.exe", "xl"])
+  ShelXH = Program('ShelXH', "G.M.Sheldrick", "University of G&#246;ttingen", ["shelxh.exe", "shelxh"])
+  XH = Program('XH', "G.M.Sheldrick", "University of G&#246;ttingen/Bruker", ["xh.exe", "xh"])
+  ShelXL_ifc = Program('ShelXL_ifc', "G.M.Sheldrick", "University of G&#246;ttingen", ["shelxl_ifc"])
   smtbx_refine = Program('smtbx-refine', "L.J. Bourhis, R.W. Grosse-Kunstleve", "smtbx-refine (Bourhis, 2008)")
   
   for prg in (ShelXL, XL, ShelXH, XH, ShelXL_ifc):

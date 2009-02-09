@@ -176,6 +176,31 @@ target = "Do automatic tidying once - tick the box to do it after every refineme
 				>&nbsp;
 			</font>
 		</td>
+		
+
+<tr VALIGN='center' ALIGN='left' NAME='IGNORE_SETTINGS'>
+		<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+		  <td VALIGN='center'  colspan=3>
+				<b>
+					Graphical Output
+				</b>
+		  </td>
+		<td VALIGN='center' ALIGN='right'  colspan=1>
+				<font size='2'>
+				<input 
+					type='checkbox'  
+					width=12  
+					height=12 
+					name='SNUM_REFINEMENT_GRAPHICAL_OUTPUT' 
+					$spy.CheckBoxValue(snum_refinement_graphical_output) 
+					oncheck='SetVar(snum_refinement_graphical_output,true)' 
+					onuncheck='SetVar(snum_refinement_graphical_output,false)' 
+					value=''
+				>&nbsp;
+			</font>
+		</td>
+
+		
 </tr>
 
 <!--<tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_UPDATE_WEIGHT'>-->

@@ -60,7 +60,7 @@ class OlexCctbxAdapter(object):
       self.auto = True
       self.tidy = True
     for item in parameters:
-      if item and item != "None":
+      if item and item != "None" and item != "n/a":
         self.max_cycles = int(item)
         break
       #bit = item.split('=')
@@ -739,7 +739,7 @@ def charge_flipping_loop(solving, verbose=True):
     elif solving.state is solving.finished:
       break
     
-    if HasGUI: a.run_charge_flipping_graph(flipping, solving,previous_state)
+    if HasGUI: a.run_charge_flipping_graph(flipping, solving, previous_state)
     previous_state = solving.state
 
 
