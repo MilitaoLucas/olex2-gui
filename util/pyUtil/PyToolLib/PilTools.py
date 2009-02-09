@@ -1034,20 +1034,47 @@ class timage(ImageTools):
     IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
     name = "olex_help_logo.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
+
+    ## SMALL buttons
+    cut = 90*sf, 178*sf, 140*sf, 193*sf
+    max_width = cut[2] - cut[0]
+    crop =  im.crop(cut)
+    crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_base_colour,luminosity=1.9)) 
+    #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_highlight_colour,luminosity=1.3)) 
+    button_names = ("Delete", 
+                    "Select", 
+                    "Balls & Sticks", 
+                    "blank", 
+                    )
+    for txt in button_names:
+      #IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
+      IM =  Image.new('RGBA', crop.size)
+      IM.paste(crop_colouriszed, (0,0), crop)
+      draw = ImageDraw.Draw(IM)
+      t = txt.replace("blank"," _ ") 
+      self.write_text_to_draw(draw, 
+                   "%s" %t,
+                   top_left=(4, 6), 
+                   font_name = 'Vera', 
+                   font_size=40, 
+                   titleCase=True,                  
+                   font_colour=self.gui_html_font_colour,
+                   max_width = max_width,
+                   align='centre'
+                   )
+      IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
+      name = "small-button-%s.png" %(txt.replace(" ", "_"))
+      name = name.lower()
+      OlexVFS.save_image_to_olex(IM, name, 2)
+      if name == "small-button-blank.png":
+        filename = r"%s/small-button-blank.png" %self.datadir
+        IM.save(filename)
+        
     
-    #cut = 0, 0, 275, 55 #the total area of the logo image
-    #crop =  im.crop(cut)
-    #IM =  Image.new('RGBA', crop.size, self.gui_html_bg_colour)
-    #IM.paste(crop, (0,0), crop)
-    #cut = 100, 0, 275, 55 #the area of the little molecule picture
-    #crop =  im.crop(cut)
-    #crop_colouriszed = self.colourize(crop, (0,0,0), self.gui_timage_colour) 
-    #IM.paste(crop_colouriszed, (100,0), crop)
-    #name = "logo.png"
-    #OlexVFS.save_image_to_olex(IM, name, 2)
-    #self.info_bitmaps()
     
-    cut = 0*sf, 178*sf, 90*sf, 195*sf
+    
+    ## THREEE buttons in the HTMLpanelWIDTH
+    cut = 0*sf, 178*sf, 91*sf, 195*sf
     max_width = cut[2] - cut[0]
     crop =  im.crop(cut)
     #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_table_firstcol_colour,luminosity=0.7)) 
@@ -1064,9 +1091,18 @@ class timage(ImageTools):
                     "Show Cell",
                     "Fuse",
                     "Grow All",
+                    "Edit Atom(s)",
+                    "Edit Instructions",
+                    "Balls & Sticks", 
+                    "Wireframe", 
+                    "Tubes", 
+                    "Default Style", 
+                    "Sphere Packing", 
+                    "Ellipsoids | H", 
                     )
     for txt in button_names:
-      IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
+      #IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
+      IM =  Image.new('RGBA', crop.size)
       IM.paste(crop_colouriszed, (0,0), crop)
       draw = ImageDraw.Draw(IM)
       self.write_text_to_draw(draw, 
@@ -1143,6 +1179,7 @@ class timage(ImageTools):
                  font_size=6, 
                  font_colour=self.gui_html_font_colour)
     OlexVFS.save_image_to_olex(IM, name, 2)
+
     
     cut = 16*sf, 156*sf, 26*sf, 166*sf
     crop =  im.crop(cut)

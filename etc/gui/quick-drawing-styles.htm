@@ -12,12 +12,33 @@
 		<td></td>
 			<zimg border="0" src="gui/images/toolbar-ball-and-stick.png"> 
 		<td width = "50%">
-			<a href="pers>>sel -u">%Balls & Sticks%</a>
+			<a href="pers>>sel -u"><zimg border="0" src="button-balls_&_sticks.png"></a>
 		</td>
 		<td ></td>
 			<zimg border="0" src="gui/images/toolbar-anis.png"> 
 		<td width = "50%">
-			<a href="telp>>sel -u">%Ellipsoids%</a> | <a href="telph>>sel -u">%With H%</a>
+		
+		
+<!-- Button Part ELLIPSOIDS -->
+<map name="map_ellipsoids">
+		  <area shape="rect" 
+						coords="0,0,60,25" 
+						href="
+telp>>
+sel -u"
+						target="%Show Ellipsoids%">
+		
+<!-- Button Part H Uiso-->
+		  <area shape="rect" 
+						coords="60,0,500,25"
+						href="
+telph>>
+sel -u"
+						target="%Show Ellipsoids and Hydrogen atom Uiso%">
+		</map>	
+		
+		<zimg border="0" src="button-ellipsoids_|_h.png" usemap=#map_ellipsoids>
+		
 		</td>
 	</tr>
 	<tr>
@@ -26,12 +47,12 @@
 	<td>
 			<zimg border="0" src="gui/images/toolbar-wireframe.png"> 
 		<td>
-			<a href="proj">%Wire Frame%</a>
+			<a href="proj"><zimg border="0" src="button-wireframe.png"></a>
 		</td>
 		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
 			<zimg border="0" src="gui/images/toolbar-sphere-packing.png"> 
 		<td>
-			<a href="sfil>>sel -u">%Sphere Packing%</a>
+			<a href="sfil>>sel -u"><zimg border="0" src="button-sphere_packing.png"></a>
 		</td>
 	</tr>
 
@@ -41,12 +62,12 @@
 	<td>
 			<zimg border="0" src="gui/images/toolbar-bicoloured-bonds.png"> 
 		<td>
-			<a href="tubes>>sel -u">%Tubes%</a>
+			<a href="tubes>>sel -u"><zimg border="0" src="button-tubes.png"></a>
 		</td>
 		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
 			<zimg border="0" src="gui/images/toolbar-default.png"> 
 		<td>
-			<a href="default">%Default%</a> | <a href="bw">%B&W%</a>
+			<a href="default"><zimg border="0" src="button-default_style.png"></a>
 		</td>
 	</tr>
 
