@@ -367,12 +367,10 @@ class RunPrg(ArgumentParser):
     if not self.terminate:
       if OV.FindValue("snum_refinement_graphical_output"):
         if fun == "REFINE":
-          print "Import Analysis"
-          from Analysis import ShelXAnalysis
-          print "done"
-          SXA = ShelXAnalysis()
-          print "SXA initialised"
-          SXA.observe_shex_l()
+          if self.HasGUI:
+            from Analysis import ShelXAnalysis
+            SXA = ShelXAnalysis()
+            SXA.observe_shex_l()
       self.method.run(self)
     else: 
       self.endRun()
