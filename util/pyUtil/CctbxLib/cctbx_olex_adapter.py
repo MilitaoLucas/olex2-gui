@@ -60,7 +60,7 @@ class OlexCctbxAdapter(object):
       self.auto = True
       self.tidy = True
     for item in parameters:
-      if item and item != "None":
+      if item and item != "None" and item != "n/a":
         self.max_cycles = int(item)
         break
       #bit = item.split('=')
