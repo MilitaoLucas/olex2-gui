@@ -1156,7 +1156,7 @@ def OnModeChange(*args):
     makeHtmlBottomPop({'replace':mode, 'name':'pop_mode'}, pb_height=50)
   else:
     olex.m("html.hide pop_%s" %name)
-#olex.registerCallback('modechange',OnModeChange)
+olex.registerCallback('modechange',OnModeChange)
 
 def PopProgram(txt="Fred"):
   name = "pop_prg_analysis"
