@@ -1,21 +1,17 @@
-<tr VALIGN='center' NAME='Expand Short Contacts'>
-	<td valign='top' width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
-		<!--<a -->
-			<!--href="tbxh 'Help-Edit-Atoms' 300" -->
-			<!--target="Help me with this">-->
-			<!--<zimg border="0" src="infos.png">-->
-		<!--</a>	-->
-		<a 
-			href="spy.make_help_box -name='edit-atom' -popout='True'" 
-			target="Help me with this">
-			<zimg border="0" src="info.png">
-		</a>
+<!-- #include header gui\blocks\tool-table-header.htm;1; -->
+	<tr VALIGN='center' NAME='Expand Short Contacts'>
+		<td valign='top' width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+			<a 
+				href="spy.make_help_box -name='edit-atom' -popout='True'" 
+				target="Help me with this">
+				<zimg border="0" src="info.png">
+			</a>
 		</td>
-	<td colspan = '1'>
-
-	<b>	
-		<a href="editatom sel">%Edit Atom% (%selected atoms%)</a> | 
-		<a href="editins">%Instructions%</a>
-	</b>
-	</td>
-</tr>
+		<td colspan = '2'>
+			<b>	
+				<a href="editatom"><zimg border="0" src="button-edit_atom(s).png"></a>
+				<a href="editins"><zimg border="0" src="button-edit_instructions.png"></a>
+			</b>
+		</td>
+	</tr>
+</table>

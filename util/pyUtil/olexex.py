@@ -1124,6 +1124,7 @@ def get_template(name):
 def makeHtmlBottomPop(args, pb_height = 50):
   txt = args.get('txt',None)
   name = args.get('name',"test")
+  replace_str = args.get('replace',None)
   
   import OlexVFS
   from ImageTools import ImageTools
@@ -1131,7 +1132,7 @@ def makeHtmlBottomPop(args, pb_height = 50):
   metric = getPopBoxPosition()
   if not txt:
     txt = get_template(name)
-    str = str.replace(r"<MODENAME>",txt.upper())
+    txt = txt.replace(r"<MODENAME>",replace_str.upper())
   pop_html = name
   pop_name = name
   htm_location = "%s.htm" %pop_html
@@ -1140,7 +1141,6 @@ def makeHtmlBottomPop(args, pb_height = 50):
   x = metric[0] + 10
   y = metric[1] - pb_height - 10
   pstr = "popup %s '%s' -t='%s' -w=%s -h=%s -x=%s  -y=%s" %(pop_name, htm_location, pop_name, width, pb_height, x, y)
-  print "popping now"
   olex.m(pstr)
   olx.html_SetBorders(pop_name,0)
   #olx.html_Reload(pop_name)
@@ -1153,10 +1153,10 @@ def OnModeChange(*args):
     mode = mode + " " + item
   mode = mode.strip()
   if mode != "off":
-    makeHtmlBottomPop({'txt':mode, 'name':'mode'}, pb_height=50)
+    makeHtmlBottomPop({'replace':mode, 'name':'pop_mode'}, pb_height=50)
   else:
-    olex.m("html.hide %s" %name)
-olex.registerCallback('modechange',OnModeChange)
+    olex.m("html.hide pop_%s" %name)
+#olex.registerCallback('modechange',OnModeChange)
 
 def PopProgram(txt="Fred"):
   name = "pop_prg_analysis"
