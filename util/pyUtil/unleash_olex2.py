@@ -18,6 +18,13 @@ alterations = {'olex2.exe': ('olex-install', 'olex-update'),
                'Microsoft.VC80.CRT/msvcm80.dll': ('olex-install', 'olex-update'),
                'Microsoft.VC80.CRT/msvcp80.dll': ('olex-install', 'olex-update'),
                'Microsoft.VC80.CRT/msvcr80.dll': ('olex-install', 'olex-update'),
+               'etc/Fonts/olex2.fnt': ('olex-install', 'olex-update'),
+               'etc/gui/fonts/Vera.ttf': ('olex-install', 'olex-update'),
+               'etc/gui/fonts/VeraBd.ttf': ('olex-install', 'olex-update'),
+               'etc/gui/fonts/VeraBI.ttf': ('olex-install', 'olex-update'),
+               'etc/gui/fonts/VeraIt.ttf': ('olex-install', 'olex-update'),
+               'etc/gui/fonts/VeraSe.ttf': ('olex-install', 'olex-update'),
+               'etc/gui/fonts/VeraSeBd.ttf': ('olex-install', 'olex-update'),
                'olex2-mac.zip': ('olex-port', 'port-mac'),
                'olex2-suse101x32.zip': ('olex2-suse101x32.zip', 'olex-port', 'port-suse101x32')
                }
