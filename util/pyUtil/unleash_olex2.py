@@ -1,9 +1,23 @@
 #!/usr/bin/python
 
 """ Olex 2 distro management """
-
+# these to specify to created separate zip files
 plugins = ('mysql', 'cctbx-win', 'brukersaint', 'ODSkin', 'BNSkin', 'STOESkin', 'HPSkin', 'Batch', 'HotshotProfiler', 'Pysvn', 'Crypto', 'AutoChem') 
+# file name aliases
 web_for_working = {'olex2.exe': 'olex2.dll', 'launch.exe': 'olex2.exe'}
+# alteartions for binary files : name (properties...)
+alterations = {'olex2.exe': ('olex-install', 'olex-update'), 
+               'olex2c.exe': ('olex-install', 'olex-update'),
+               'launch.exe': ('olex-install', 'olex-update'),
+               'python25.dll': ('olex-install', 'olex-update'),
+               'msvcr71.dll': ('olex-install', 'olex-update'),
+               'splash.jpg': ('olex-install', 'olex-update'),
+               'acidb.db': ('olex-install', 'olex-update'),
+               'installer.exe': ('olex-top'),
+               'olex2-mac.zip': ('olex-port', 'port-mac'),
+               'olex2-suse101x32.zip': ('olex2-suse101x32.zip', 'olex-port', 'port-suse101x32')
+               }
+altered_files = set([])
 
 import os.path
 from optparse import OptionParser
@@ -46,6 +60,9 @@ parser.add_option('--working_directory',
 		  dest='working_directory',
 		  help='the path to the svn working directory to build'
 		       'the distro from')
+parser.add_option('--bin_directory',
+		  dest='bin_directory',
+		  help='the path where the binary files, not icnlcuded to svn reside')
 parser.add_option('--test',
 		  dest='test',
 		  action='store_true',
@@ -54,46 +71,51 @@ parser.add_option('--alpha',
 		  dest='alpha',
 		  action='store_true',
 		  help='whether to use the normal or the alpha web directory')
-parser.add_option('--olex',
-		  dest='olex_only',
-		  action='store_true',
-		  help='whether to use update olex2 executable only')
 parser.add_option('-f', '--file',
 		  dest='update_file',
                   default='',
 		  action='store',
-		  help='whether to use update olex2 executable only')
+		  help='whether to use update any particluare file only')
 option, args = parser.parse_args()
 
 working_directory = os.path.expanduser(option.working_directory
-				       or '~/Developer/olex/olex')
+				       or 'e:/tmp/test-svn')
 if not os.path.isdir(working_directory):
   print "ERROR: '%s' is not a directory" % working_directory
   parser.print_help()
 
 web_directory = os.path.expanduser(option.web_directory
-				   or '~/olex-distro/www')
+				   or 'e:/tmp/web')
+bin_directory = os.path.expanduser(option.bin_directory
+                                   or 'e:/tmp/bin-test')
+if not os.path.isdir(bin_directory):
+  print "ERROR: '%s' is not a directory" % bin_directory
+  parser.print_help()
+  #os.abort()
+  
 if option.test: web_directory += '-test'
 elif option.alpha: web_directory += '-alpha'
 if not os.path.isdir(os.path.dirname(web_directory)):
   print "ERROR: '%s' is not a directory" % working_directory
   parser.print_help()
 
+# remove the files from the repository: helps to find collisions
+for val, key in alterations.iteritems():
+  fn = working_directory + '/' + val
+  if os.path.exists(fn):
+    os.unlink(fn) 
+    print "Binary distribution file removed: " + fn
+
 client = pysvn.Client()
 
 try:
-  if option.olex_only:
-    print 'Updating olex2 executable only...'
-    n = client.update(working_directory + '/olex2.exe')
-    revision_number = n[0].number
-    print "SVN Revision Number %i" %revision_number
-  elif option.update_file:
+  if option.update_file:
     filepath = option.update_file
     print 'Updating %s only...' %filepath
     n = client.update(working_directory + filepath)
     revision_number = n[0].number
     print "SVN Revision Number %i" %revision_number
-  else:
+  elif True:
     n = client.update(working_directory)
     revision_number = n[0].number
     print "SVN Revision Number %i" %revision_number
@@ -132,8 +154,8 @@ files_for_plugin = dict(
      )
      for plugin in plugins ])
 cctbx_directory = working_directory + '/util/pyUtil/CctbxLib/cctbx_win'
-cctbx_zip_file = zipfile.ZipFile('%s/bundling/cctbx_winxp.zip'
-                                 % cctbx_directory)
+cctbx_zip_file = zipfile.ZipFile('%s/cctbx_winxp.zip'
+                                 % bin_directory)
 files_for_plugin['cctbx-win'].extend([ cctbx_directory + '/' + name 
                                    for name in cctbx_zip_file.namelist() 
                                    if not name.endswith('/') ])
@@ -151,13 +173,35 @@ for d in directories_to_create:
 update_directory = web_directory + '/update'
 update_directory_pat = re.compile(update_directory + '/?')
 
+# process binary files
+for val, key in alterations.iteritems():
+  fn = working_directory + '/' + val
+  if os.path.exists(fn):
+    print "File exist both on the svn and in the binary folder '" + fn + "' skipping..."
+    continue
+  if not os.path.exists(bin_directory + '/' + val):
+    print "Specified binary file does not exist '" + val + "' skipping..."
+  for i in range(0, len(key)):
+    if key[i] == 'olex-update' or key[i] == 'olex-port':
+      update_files.append(fn)
+    elif key[i] == 'olex-install':
+      installer_files.append(fn)
+    elif key[i] == 'olex-top':
+      top_files.append(fn)
+  shutil.copy2( bin_directory + '/' + val, working_directory + '/' + val);
+  stat = os.stat(working_directory + '/' + val)
+  os.utime(working_directory + '/' + val, (stat.st_atime, stat.st_mtime));
+  altered_files.add(fn)
+    
 # copy files into the web directory
 for f in top_files:
-  shutil.copy2(f, destination(f))
+  if os.path.exists(f):
+    shutil.copy2(f, destination(f))
 for f in itertools.chain(update_files, 
 			 *[ files_for_plugin[x] for x in files_for_plugin
                             if x != 'cctbx-win' ]):
-  shutil.copy2(f, destination(f, 'update'))
+  if os.path.exists(f):  
+    shutil.copy2(f, destination(f, 'update'))
 for f in files_for_plugin['cctbx-win']:
   if os.path.exists(f):
     shutil.copy2(f, destination(f, 'update'))
@@ -174,17 +218,23 @@ for f in files_for_plugin['cctbx-win']:
 def info(web_file_name, working_file_name):
   stats = os.stat(web_file_name)
   stats = (stats.st_mtime, stats.st_size)
-  try:
-    props = client.proplist(working_file_name)
-    if props:
-      props = tuple([ k for k in props[0][1].keys() if 'svn:' not in k ])
-    else:
-      props = ()
-  except:
-    if 'cctbx' in working_file_name:
-      props = ('plugin-cctbx-win',)
-    else:
-      props = None
+  #override the svn properties with the ones defined above
+  normalised_fn = working_file_name.replace('\\', '/')
+  if normalised_fn in altered_files:
+    normalised_fn = normalised_fn.replace(working_directory + '/', '')    
+    props = alterations.get(normalised_fn)
+  else:    
+    try:
+      props = client.proplist(working_file_name)
+      if props:
+        props = tuple([ k for k in props[0][1].keys() if 'svn:' not in k ])
+      else:
+        props = ()
+    except:
+      if 'cctbx' in working_file_name:
+        props = ('plugin-cctbx-win',)
+      else:
+        props = None
   return (stats, props)
   
 def format_info(stats, props):
@@ -199,9 +249,10 @@ def create_index(index_file_name, only_prop=None):
   for dir_path, dir_names, file_names in os.walk(update_directory):
     dir_names[:] = [ d for d in dir_names if not d.startswith('.') ]
     file_names[:] = [ d for d in file_names if not d.startswith('.') or d == ".version" ]
+    dir_path = dir_path.replace('\\', '/')    
     d = update_directory_pat.sub('', dir_path)
     indents = "\t"*d.count('/')
-    working_dir_path = os.path.join(working_directory, d)
+    working_dir_path = os.path.join(os.path.normpath(working_directory), d)
     if d:
       stats, props = info(dir_path, working_dir_path)
       if props is None: 
