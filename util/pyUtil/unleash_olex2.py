@@ -14,6 +14,10 @@ alterations = {'olex2.exe': ('olex-install', 'olex-update'),
                'splash.jpg': ('olex-install', 'olex-update'),
                'acidb.db': ('olex-install', 'olex-update'),
                'installer.exe': ('olex-top'),
+               'Microsoft.VC80.CRT/Microsoft.VC80.CRT.manifest': ('olex-install', 'olex-update'),
+               'Microsoft.VC80.CRT/msvcm80.dll': ('olex-install', 'olex-update'),
+               'Microsoft.VC80.CRT/msvcp80.dll': ('olex-install', 'olex-update'),
+               'Microsoft.VC80.CRT/msvcr80.dll': ('olex-install', 'olex-update'),
                'olex2-mac.zip': ('olex-port', 'port-mac'),
                'olex2-suse101x32.zip': ('olex2-suse101x32.zip', 'olex-port', 'port-suse101x32')
                }
@@ -115,7 +119,7 @@ try:
     n = client.update(working_directory + filepath)
     revision_number = n[0].number
     print "SVN Revision Number %i" %revision_number
-  elif True:
+  elif True:  #defuging can set it to false to leave the folder in tact
     n = client.update(working_directory)
     revision_number = n[0].number
     print "SVN Revision Number %i" %revision_number
@@ -160,20 +164,7 @@ files_for_plugin['cctbx-win'].extend([ cctbx_directory + '/' + name
                                    for name in cctbx_zip_file.namelist() 
                                    if not name.endswith('/') ])
 
-# create web directory structure (top + update)
-shutil.rmtree(web_directory, ignore_errors=True)
-directories_to_create = {web_directory: 1}
-directories_to_create.update(dict(
-  [ (os.path.dirname(destination(p, 'update')), 1) 
-    for p in itertools.chain(update_files, *files_for_plugin.values()) ]))
-directories_to_create = directories_to_create.keys()
-directories_to_create.sort()
-for d in directories_to_create:
-  os.makedirs(d)
-update_directory = web_directory + '/update'
-update_directory_pat = re.compile(update_directory + '/?')
-
-# process binary files
+# process binary files, new folders might get created, so the call is befire creating dirs
 for val, key in alterations.iteritems():
   fn = working_directory + '/' + val
   if os.path.exists(fn):
@@ -188,20 +179,37 @@ for val, key in alterations.iteritems():
       installer_files.append(fn)
     elif key[i] == 'olex-top':
       top_files.append(fn)
+  dest_dir = '/'.join((working_directory + '/' + val).split('/')[:-1])
+  if not os.path.exists(dest_dir):
+    os.makedirs(dest_dir)
   shutil.copy2( bin_directory + '/' + val, working_directory + '/' + val);
   stat = os.stat(working_directory + '/' + val)
   os.utime(working_directory + '/' + val, (stat.st_atime, stat.st_mtime));
   altered_files.add(fn)
+
+# create web directory structure (top + update)
+shutil.rmtree(web_directory, ignore_errors=True)
+directories_to_create = {web_directory: 1}
+directories_to_create.update(dict(
+  [ (os.path.dirname(destination(p, 'update')), 1) 
+    for p in itertools.chain(update_files, *files_for_plugin.values()) ]))
+directories_to_create = directories_to_create.keys()
+directories_to_create.sort()
+for d in directories_to_create:
+  os.makedirs(d)
+update_directory = web_directory + '/update'
+update_directory_pat = re.compile(update_directory + '/?')
     
 # copy files into the web directory
 for f in top_files:
-  if os.path.exists(f):
-    shutil.copy2(f, destination(f))
+  shutil.copy2(f, destination(f))
 for f in itertools.chain(update_files, 
 			 *[ files_for_plugin[x] for x in files_for_plugin
                             if x != 'cctbx-win' ]):
   if os.path.exists(f):  
     shutil.copy2(f, destination(f, 'update'))
+  else:
+    print "Invalid file '" + f + "' skipping"
 for f in files_for_plugin['cctbx-win']:
   if os.path.exists(f):
     shutil.copy2(f, destination(f, 'update'))
