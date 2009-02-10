@@ -25,8 +25,8 @@ alterations = {'olex2.exe': ('olex-install', 'olex-update'),
                'etc/gui/fonts/VeraIt.ttf': ('olex-install', 'olex-update'),
                'etc/gui/fonts/VeraSe.ttf': ('olex-install', 'olex-update'),
                'etc/gui/fonts/VeraSeBd.ttf': ('olex-install', 'olex-update'),
-               'olex2-mac.zip': ('olex-port', 'port-mac'),
-               'olex2-suse101x32.zip': ('olex2-suse101x32.zip', 'olex-port', 'port-suse101x32')
+               'olex2-mac.zip': ('olex-port', 'port-mac', 'action:extract'),
+               'olex2-suse101x32.zip': ('olex2-suse101x32.zip', 'olex-port', 'port-suse101x32', 'action:extract')
                }
 altered_files = set([])
 
