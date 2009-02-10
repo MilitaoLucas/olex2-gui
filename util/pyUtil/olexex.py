@@ -368,6 +368,7 @@ if haveGUI:
 
 def CopyVFSFile(copy_from, copy_to):
   f = olex.readImage(copy_from)
+  assert f is not None
   olex.writeImage(copy_to, f)
   return ""
 OV.registerFunction(CopyVFSFile)
@@ -556,7 +557,7 @@ def MapView(recalculate='0'):
   elif map_type == "fobs":
     map_type = "obs"
     
-  if mask == "true":
+  if mask:
     mask_val = "-m"
   else:
     mask_val = ""
@@ -1147,15 +1148,33 @@ def makeHtmlBottomPop(args, pb_height = 50):
 OV.registerMacro(makeHtmlBottomPop, 'txt-Text to display&;name-Name of the Bottom html popupbox')
   
 def OnModeChange(*args):
+  d = {
+    'move sel':'move_near',
+    'grow':'grow_mode',
+    'split':'move_atoms_or_model_disorder'
+  }
   name = 'mode'
   mode = ""
   for item in args:
     mode = mode + " " + item
   mode = mode.strip()
+  
+  # Deal with button images
+  for image_base in d.values():
+    copy_from = "button-%soff.png" %image_base
+    copy_to = "button-%s.png" %image_base
+    CopyVFSFile(copy_from, copy_to)
+  image_base = d.get(mode, None)
+  if image_base:
+    copy_from = "button-%son.png" %image_base
+    copy_to = "button-%s.png" %image_base
+    CopyVFSFile(copy_from, copy_to)
+  
   if mode != "off":
     makeHtmlBottomPop({'replace':mode, 'name':'pop_mode'}, pb_height=50)
   else:
     olex.m("html.hide pop_%s" %name)
+  olex.m("html.Reload")  
 olex.registerCallback('modechange',OnModeChange)
 
 def PopProgram(txt="Fred"):
