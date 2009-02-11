@@ -1151,6 +1151,7 @@ OV.registerMacro(makeHtmlBottomPop, 'txt-Text to display&;name-Name of the Botto
 def OnModeChange(*args):
   d = {
     'move sel':'move_near',
+    'move sel -c=':'copy_near',    
     'grow':'grow_mode',
     'split':'move_atoms_or_model_disorder'
   }
@@ -1170,7 +1171,8 @@ def OnModeChange(*args):
     copy_from = "button-%son.png" %image_base
     copy_to = "button-%s.png" %image_base
     CopyVFSFile(copy_from, copy_to)
-  
+  if mode == "grow -s=":
+    return
   if mode != "off":
     makeHtmlBottomPop({'replace':mode, 'name':'pop_mode'}, pb_height=50)
   else:
