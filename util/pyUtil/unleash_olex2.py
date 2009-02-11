@@ -13,7 +13,7 @@ alterations = {'olex2.exe': ('olex-install', 'olex-update'),
                'msvcr71.dll': ('olex-install', 'olex-update'),
                'splash.jpg': ('olex-install', 'olex-update'),
                'acidb.db': ('olex-install', 'olex-update'),
-               'installer.exe': ('olex-top'),
+               'installer.exe': ('olex-top',), #mind the comma!
                'Microsoft.VC80.CRT/Microsoft.VC80.CRT.manifest': ('olex-install', 'olex-update'),
                'Microsoft.VC80.CRT/msvcm80.dll': ('olex-install', 'olex-update'),
                'Microsoft.VC80.CRT/msvcp80.dll': ('olex-install', 'olex-update'),
@@ -138,8 +138,8 @@ try:
 except pysvn.ClientError, err:
   if str(err).find('locked'):
     client.cleanup(working_directory)
-    if option.olex_only:
-      client.update(working_directory + '/olex2.exe')
+    if option.update_file:
+      client.update(working_directory + '/' + option.update_file)
     else:
       client.update(working_directory)
   else:
