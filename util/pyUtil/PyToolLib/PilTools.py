@@ -1529,16 +1529,15 @@ class timage(ImageTools):
       font_name = "%s Bold" %font_name
       
     settings_button_width = 0
-    cbtn_buttons_height = 20
+    cbtn_buttons_height = 18
     
     all_cbtn_buttons = {
         'image_prefix':'cbtn',
         'height':cbtn_buttons_height,
-        'font_size':12,
         'font_name':font_name,
         'bgcolour':(60,80,140),
-        'fontcolouroff':self.adjust_colour(self.gui_timage_colour, luminosity = 0.9),
-        'bgcolouroff':self.adjust_colour(self.gui_timage_colour, luminosity = 1.7),
+        'fontcolouroff':self.adjust_colour(self.gui_timage_colour, luminosity = 1.1),
+        'bgcolouroff':self.adjust_colour(self.gui_timage_colour, luminosity = 1.8),
         'bgcolouron':self.gui_timage_colour,
         'fontcolouron':self.gui_html_highlight_colour,
         'fontcolourinactive':self.adjust_colour(self.gui_grey, luminosity = 2.0),
@@ -1546,10 +1545,13 @@ class timage(ImageTools):
         'states':['','on', 'off', 'inactive'],
         'grad_colour':(237,237,245),
         'vline':{'v_pos':0, 'height':16},
-#        'grad':{'grad_colour':self.adjust_colour(self.gui_timage_colour, luminosity = 2.1), 
-#                'fraction':0.85},
-        'valign':("middle", 0.6),
-        'top_left':(3,2),
+        'grad':{'grad_colour':self.adjust_colour(self.gui_timage_colour, luminosity = 3.8), 
+                'fraction':1,
+                'increment':0.5,
+                'step':1,
+                },
+        'valign':("middle", 0.7),
+        'top_left':(3,1),
         'align':'center',
         'titleCase':False,
         'lowerCase':True,
