@@ -29,6 +29,7 @@ alterations = {'olex2.exe': ('olex-install', 'olex-update'),
                'olex2-suse101x32.zip': ('olex2-suse101x32.zip', 'olex-port', 'port-suse101x32', 'action:extract')
                }
 altered_files = set([])
+altered_dirs = set([])
 
 import os.path
 from optparse import OptionParser
@@ -171,7 +172,7 @@ files_for_plugin['cctbx-win'].extend([ cctbx_directory + '/' + name
                                    for name in cctbx_zip_file.namelist() 
                                    if not name.endswith('/') ])
 
-# process binary files, new folders might get created, so the call is befire creating dirs
+# process binary files, new folders might get created, so the call is before creating dirs
 for val, key in alterations.iteritems():
   fn = working_directory + '/' + val
   if os.path.exists(fn):
@@ -179,6 +180,7 @@ for val, key in alterations.iteritems():
     continue
   if not os.path.exists(bin_directory + '/' + val):
     print "Specified binary file does not exist '" + val + "' skipping..."
+    os._exit(1)
   for i in range(0, len(key)):
     if key[i] == 'olex-update' or key[i] == 'olex-port':
       update_files.append(fn)
@@ -189,6 +191,13 @@ for val, key in alterations.iteritems():
   dest_dir = '/'.join((working_directory + '/' + val).split('/')[:-1])
   if not os.path.exists(dest_dir):
     os.makedirs(dest_dir)
+  # also remember the folders contaning the files
+  alt_dir = working_directory  
+  alt_dirs = val.split('/')[:-1]
+  for dir in alt_dirs:
+    alt_dir = alt_dir + '/' + dir
+    altered_dirs.add(alt_dir)
+  # end of the folder remembering
   shutil.copy2( bin_directory + '/' + val, working_directory + '/' + val);
   stat = os.stat(working_directory + '/' + val)
   os.utime(working_directory + '/' + val, (stat.st_atime, stat.st_mtime));
@@ -249,7 +258,10 @@ def info(web_file_name, working_file_name):
       if 'cctbx' in working_file_name:
         props = ('plugin-cctbx-win',)
       else:
-        props = None
+        if normalised_fn in altered_dirs:
+          props = ()
+        else:
+          props = None
   return (stats, props)
   
 def format_info(stats, props):
