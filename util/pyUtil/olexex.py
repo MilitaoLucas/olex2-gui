@@ -1099,6 +1099,7 @@ def GetACF():
     sys.path.append(r"%s/util/pyUtil/PluginLib/plugin-AutoChem" %olx.BaseDir())
     import entry_ac
     
+  OV.SetVar("HaveODAC", True)
   print "ODAC started OK"
 
   
