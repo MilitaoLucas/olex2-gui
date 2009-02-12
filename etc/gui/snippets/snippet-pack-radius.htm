@@ -1,0 +1,58 @@
+<!-- #include header gui\blocks\tool-table-header.htm;1; -->
+
+	<tr VALIGN='center' NAME='Pack Radius'>
+		<td valign='top' width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+			<a 
+				href="spy.make_help_box -name='pack-radius' -popout='True'" 
+				target="Help me with this">
+				<zimg border="0" src="info.png">
+			</a>
+			</td>
+		<td colspan = '2' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+			<b>
+		<b>	
+			%Pack within Radius of <i>n</i> &Aring;%
+		</b>
+		</td>
+	</tr>
+	<tr>
+		<td width="8" VALIGN='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+		</td>
+		<td colspan='1'>
+			<input 
+				type="slider" 
+				name = "SlidePackRadius" 
+				width="$eval(htmlpanelwidth()-80)" 
+				height="20" 
+				value="0" 
+				bgcolor="$GetVar(gui_html_table_bg_colour)"  
+				fgcolor="$GetVar(gui_html_font_colour)" 
+				min="0" 
+				max="20" 
+				onchange = "
+fader.InitFG()>>
+fader.visible(true)>>
+fade 0 1 0.05>>
+waitfor fade'>>
+showStr False>>
+fuse>>
+SetValue(PackRadius,getvalue(SlidePackRadius))>>
+pack getvalue(PackRadius)>>
+showStr True"
+			>
+		</td>
+		<td>
+				<input 
+				type="text" 
+				name = "PackRadius" 
+				width="32" 
+				height="20" 
+				bgcolor="$GetVar(gui_html_table_bg_colour)"  
+				fgcolor="$GetVar(gui_html_font_colour)" 
+				value="getvalue(SlidePackRadius)" 
+				onchange="SetValue(SlidePackRadius,GetValue(PackRadius))>>
+fuse>>
+pack GetValue(PackRadius)">
+			</td>
+	</tr>	
+</table>
