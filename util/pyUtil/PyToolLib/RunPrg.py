@@ -86,7 +86,7 @@ class RunPrg(ArgumentParser):
         olx.file_Copy(copy_from, copy_to)
  
   def doFileResInsMagic(self):
-    extensions = ['res', 'lst', 'cif', 'fcf', 'mat']
+    extensions = ['res', 'lst', 'cif', 'fcf', 'mat', 'pdb']
     if self.broadcast_mode:
       self.doBroadcast()
     for ext in extensions:
