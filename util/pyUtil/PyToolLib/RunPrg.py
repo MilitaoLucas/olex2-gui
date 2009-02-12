@@ -7,16 +7,12 @@
 import sys
 import olex
 import olx
-#import olex_core
 import os
 import pickle
 import olexex
 import FileSystem as FS
 from History import *
-#from GuiTools import MakeGuiTools
 import OlexVFS
-#from ExternalPrgParameters import DefineExternalPrgParameters
-#from PeriodicTable import PeriodicTable
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
@@ -26,17 +22,11 @@ import ExternalPrgParameters
 class RunPrg(ArgumentParser):
   def __init__(self, fun=None, param=None):
     super(RunPrg, self).__init__(fun, param)
-    #a = PeriodicTable()
-    #self.pt = a.PeriodicTable()
     self.fun = fun
     self.param = param
-    #self.vvd = {}
-#    self.promote = 0.02
 
     self.demote = False
-    #a = DefineExternalPrgParameters()
     self.SPD, self.RPD = ExternalPrgParameters.defineExternalPrograms()
-    #self.SPD, self.RPD = a.run()
     self.terminate = False
     self.tidy = False
     self.refine = False
@@ -94,10 +84,9 @@ class RunPrg(ArgumentParser):
     if os.path.isfile(copy_from):
       if copy_from.lower() != copy_to.lower():
         olx.file_Copy(copy_from, copy_to)
-  
-  
+ 
   def doFileResInsMagic(self):
-    extensions = ['res', 'lst', 'cif', 'fcf', 'mat',]
+    extensions = ['res', 'lst', 'cif', 'fcf', 'mat']
     if self.broadcast_mode:
       self.doBroadcast()
     for ext in extensions:
@@ -109,7 +98,6 @@ class RunPrg(ArgumentParser):
       if os.path.isfile(copy_from):
         if copy_from.lower() != copy_to.lower():
           olx.file_Copy(copy_from, copy_to)
-        #print '%s:  %s' %(ext,os.stat(copy_to)[8])
       
   def doHistoryCreation(self, type="normal"):
     if type == "first":
@@ -121,8 +109,6 @@ class RunPrg(ArgumentParser):
     
     if self.solve:
       OV.SetVar('snum_refinement_last_R1', 'Solution')
-      #hist = History('create', 'solve')
-      #hist.run()
       self.his_file = hist.create_history(solution=True)
       return self.his_file
     
@@ -140,10 +126,7 @@ class RunPrg(ArgumentParser):
         
     if R1:
       OV.SetVar('snum_refinement_last_R1', R1)
-      #olexex.GetRInfo()
       try:
-        #hist = History('create', "%.4f" %R1)
-        #self.his_file = hist.run()
         self.his_file = hist.create_history()
       except Exception, ex:
         print >> sys.stderr, "History could not be created"
@@ -156,7 +139,7 @@ class RunPrg(ArgumentParser):
     return self.his_file, R1
   
   def doAutoTidyBefore(self):
-    olx.Clean('-npd -aq=0.1 -at') # uncomment me!
+    olx.Clean('-npd -aq=0.1 -at')
     if self.snum_refinement_auto_assignQ:
       olx.Sel('atoms where xatom.peak>%s' %self.snum_refinement_auto_assignQ)
       olx.Name('sel C')
@@ -176,13 +159,12 @@ class RunPrg(ArgumentParser):
           uref = ueq
     try:
       pass
-      olx.Clean('-npd -aq=0.1 -at') # uncomment me!
-      #olx.Clean()
+      olx.Clean('-npd -aq=0.1 -at')
     except:
       pass
     
   def doAutoTidyAfter(self):
-    olx.Clean('-npd -aq=0.1 -at') # uncomment me!
+    olx.Clean('-npd -aq=0.1 -at')
     if self.tidy:
       olx.Sel('atoms where xatom.uiso>0.07')
       olx.Sel('atoms where xatom.peak<2&&xatom.peak>0')
@@ -204,14 +186,10 @@ class RunPrg(ArgumentParser):
       olx.Sel('-u')
     if self.snum_refinement_auto_assemble == True:
       olx.Compaq('-a')
-      olx.Move() # uncomment me!
+      olx.Move()
     else:
       pass
-    #try:
       olx.Clean('-npd -aq=0.1 -at')
-      ##olx.Clean()
-    #except:
-      #pass
     
   def post_refinement(self):
     if self.snum_refinement_auto_tidy:
@@ -276,7 +254,6 @@ class RunPrg(ArgumentParser):
       self.sg = olex.f(r'sg(%n)')
     except:
       self.sg = ""
-    #self.formula = self.snum_refinement_formula
     self.formula = olx.xf_GetFormula()
     self.solve = True
     self.bitmap = 'solve'
@@ -301,10 +278,8 @@ class RunPrg(ArgumentParser):
   def runAfterProcess(self):
     if 'smtbx' not in self.program.name:
       self.doFileResInsMagic()
-      #olx.Atreap(r"-b %s" %(r"%s/%s.res" %(self.filePath, self.curr_file)))
       reflections = OV.HKLSrc() #BEWARE DRAGONS
       OV.reloadStructureAtreap(self.filePath, self.curr_file)
-      #olex.m(r"reap_fader -b '%s'" %(r"%s/%s.res" %(self.filePath, self.curr_file)))
       OV.HKLSrc(reflections)
     else:
       if self.broadcast_mode:
@@ -313,11 +288,9 @@ class RunPrg(ArgumentParser):
       if os.path.exists(lstFile):
         os.remove(lstFile)
       olx.DelIns("TREF")
-      #OV.reloadStructureAtreap(self.filePath, self.curr_file)
       
     if OV.FindValue('snum_refinement_auto_max_peaks'):
       max_peaks = olexex.OlexAtoms().getExpectedPeaks()
-      #OV.SetVar('snum_refinement_max_peaks', max_peaks)
       if max_peaks <= 5:
         OV.SetVar('snum_refinement_auto_pruneQ', 0.5)
         OV.SetVar('snum_refinement_auto_assignQ', 6.0)
@@ -339,15 +312,13 @@ class RunPrg(ArgumentParser):
     self.getVariables('solution')
     self.getVariables('auto')
     self.getVariables('refinement')
-    #if self.snum_refinement_max_cycles == 0:
-      #print "Warning: Number of refinement cycles is 0"
     if not OV.FileName():
       print "No structure loaded"
       return
     self.original_filename = OV.FileName()
     fun = self.fun
     #olx.Sel('-u') # uncomment me!
-    olx.Stop('listen') # uncomment me!
+    olx.Stop('listen')
     
     self.program, self.method = self.getProgramMethod(fun)
     if not self.program or not self.method:
@@ -406,7 +377,6 @@ class RunPrg(ArgumentParser):
     return program, prgMethod
 
   def endRun(self):
-    #if self.HasGUI: 
     OV.Cursor()
     OV.DeleteBitmap('%s' %self.bitmap)
     return self.his_file
