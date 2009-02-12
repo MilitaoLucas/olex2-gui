@@ -30,15 +30,18 @@
 				min="0" 
 				max="20" 
 				onchange = "
-fader.InitFG()>>
-fader.visible(true)>>
-fade 0 1 0.05>>
-waitfor fade'>>
+-fade 0 1 0.1>>
+-waitfor fade>>
+-ceiling off>>
 showStr False>>
 fuse>>
 SetValue(PackRadius,getvalue(SlidePackRadius))>>
 pack getvalue(PackRadius)>>
-showStr True"
+showStr True>>
+-fade 1 0 0.1>>
+-waitfor fade>>
+-ceiling off
+"
 			>
 		</td>
 		<td>
