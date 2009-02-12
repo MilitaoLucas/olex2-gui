@@ -680,12 +680,13 @@ def defineExternalPrograms():
   # define refinement programs
   ShelXL = Program('ShelXL', "G.M.Sheldrick", "University of G&#246;ttingen", ["shelxl.exe", "shelxl"])
   XL = Program('XL', "G.M.Sheldrick", "University of G&#246;ttingen/Bruker", ["xl.exe", "xl"])
+  XLMP = Program('XLMP', "G.M.Sheldrick", "University of G&#246;ttingen/Bruker", ["xlmp.exe", "xlmp"])
   ShelXH = Program('ShelXH', "G.M.Sheldrick", "University of G&#246;ttingen", ["shelxh.exe", "shelxh"])
   XH = Program('XH', "G.M.Sheldrick", "University of G&#246;ttingen/Bruker", ["xh.exe", "xh"])
   ShelXL_ifc = Program('ShelXL_ifc', "G.M.Sheldrick", "University of G&#246;ttingen", ["shelxl_ifc"])
   smtbx_refine = Program('smtbx-refine', "L.J. Bourhis, R.W. Grosse-Kunstleve", "smtbx-refine (Bourhis, 2008)")
   
-  for prg in (ShelXL, XL, ShelXH, XH, ShelXL_ifc):
+  for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc):
     for method in (least_squares, cgls):
       prg.addMethod(method)
   smtbx_refine.addMethod(lbgfs)
@@ -695,7 +696,7 @@ def defineExternalPrograms():
     SPD.addProgram(prg)
     
   RPD = ExternalProgramDictionary()
-  for prg in (ShelXL, XL, ShelXH, XH, ShelXL_ifc, smtbx_refine):
+  for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc, smtbx_refine):
     RPD.addProgram(prg)
     
   return SPD, RPD
