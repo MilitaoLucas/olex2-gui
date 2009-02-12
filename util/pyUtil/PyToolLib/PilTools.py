@@ -1042,36 +1042,45 @@ class timage(ImageTools):
     cut = 90*sf, 178*sf, 140*sf, 193*sf
     max_width = cut[2] - cut[0]
     crop =  im.crop(cut)
-    crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_base_colour,luminosity=1.9)) 
     #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_highlight_colour,luminosity=1.3)) 
     button_names = ("Delete", 
                     "Select", 
                     "Balls & Sticks", 
                     "blank", 
+                    "Naming", 
                     )
-    for txt in button_names:
-      #IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
-      IM =  Image.new('RGBA', crop.size)
-      IM.paste(crop_colouriszed, (0,0), crop)
-      draw = ImageDraw.Draw(IM)
-      t = txt.replace("blank"," _ ") 
-      self.write_text_to_draw(draw, 
-                   "%s" %t,
-                   top_left=(4, 6), 
-                   font_name = 'Vera', 
-                   font_size=40, 
-                   titleCase=True,                  
-                   font_colour=self.gui_html_font_colour,
-                   max_width = max_width,
-                   align='centre'
-                   )
-      IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
-      name = "small-button-%s.png" %(txt.replace(" ", "_"))
-      name = name.lower()
-      OlexVFS.save_image_to_olex(IM, name, 2)
-      if name == "small-button-blank.png":
-        filename = r"%s/small-button-blank.png" %self.datadir
-        IM.save(filename)
+    states = ["on", "off", ""]
+    for state in states:
+      if state == "on":
+        colour = self.adjust_colour(self.gui_html_highlight_colour,luminosity=1.3)
+      elif state == "off":
+        colour = self.adjust_colour(self.gui_html_base_colour,luminosity=1.9)
+      elif state == "":
+        colour = self.adjust_colour(self.gui_html_base_colour,luminosity=1.9)
+      for txt in button_names:
+        #IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
+        crop_colouriszed = self.colourize(crop, (0,0,0), colour) 
+        IM =  Image.new('RGBA', crop.size)
+        IM.paste(crop_colouriszed, (0,0), crop)
+        draw = ImageDraw.Draw(IM)
+        t = txt.replace("blank"," _ ") 
+        self.write_text_to_draw(draw, 
+                     "%s" %t,
+                     top_left=(4, 6), 
+                     font_name = 'Vera', 
+                     font_size=40, 
+                     titleCase=True,                  
+                     font_colour=self.gui_html_font_colour,
+                     max_width = max_width,
+                     align='centre'
+                     )
+        IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
+        name = "small-button-%s%s.png" %(txt.replace(" ", "_"), state)
+        name = name.lower()
+        OlexVFS.save_image_to_olex(IM, name, 2)
+        if name == "small-button-blank.png":
+          filename = r"%s/small-button-blank.png" %self.datadir
+          IM.save(filename)
     
     
     ## THREEE buttons in the HTMLpanelWIDTH
@@ -1443,7 +1452,7 @@ class timage(ImageTools):
     olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
     textItems = []
     tabItems = []
-    directories = ["etc/gui", "etc/news", "etc/gui/blocks"]
+    directories = ["etc/gui", "etc/news", "etc/gui/blocks", "etc/gui/snippets"]
     rFile = open("%s/etc/gui/blocks/index-tabs.htm" %(self.basedir), 'r')
     for line in rFile:
       t = line.split("<!-- #include ")[1]
