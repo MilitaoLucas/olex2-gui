@@ -1150,31 +1150,38 @@ OV.registerMacro(makeHtmlBottomPop, 'txt-Text to display&;name-Name of the Botto
   
 def OnModeChange(*args):
   d = {
-    'move sel':'move_near',
-    'move sel -c=':'copy_near',    
-    'grow':'grow_mode',
-    'split':'move_atoms_or_model_disorder'
+    'move sel':'button-move_near',
+    'move sel -c=':'button-copy_near',    
+    'grow':'button-grow_mode',
+    'split':'button-move_atoms_or_model_disorder',
+    'name':'small-button-naming'
   }
   name = 'mode'
   mode = ""
+  i = 0
+  mode_disp = ""
+  args = args[0].split()
   for item in args:
+    i += 1
     mode = mode + " " + item
+    if i < 2:
+      mode_disp += " " + item
   mode = mode.strip()
   
   # Deal with button images
   for image_base in d.values():
-    copy_from = "button-%soff.png" %image_base
-    copy_to = "button-%s.png" %image_base
+    copy_from = "%soff.png" %image_base
+    copy_to = "%s.png" %image_base
     CopyVFSFile(copy_from, copy_to)
   image_base = d.get(mode, None)
   if image_base:
-    copy_from = "button-%son.png" %image_base
-    copy_to = "button-%s.png" %image_base
+    copy_from = "%son.png" %image_base
+    copy_to = "%s.png" %image_base
     CopyVFSFile(copy_from, copy_to)
   if mode == "grow -s=":
     return
   if mode != "off":
-    makeHtmlBottomPop({'replace':mode, 'name':'pop_mode'}, pb_height=50)
+    makeHtmlBottomPop({'replace':mode_disp, 'name':'pop_mode'}, pb_height=50)
   else:
     olex.m("html.hide pop_%s" %name)
   olex.m("html.Reload")  
