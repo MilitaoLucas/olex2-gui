@@ -28,6 +28,10 @@ alterations = {'olex2.exe': ('olex-install', 'olex-update'),
                'olex2-mac.zip': ('olex-port', 'port-mac', 'action:extract'),
                'olex2-suse101x32.zip': ('olex2-suse101x32.zip', 'olex-port', 'port-suse101x32', 'action:extract')
                }
+# special zip files {zip_name: (destination_dir, properties_to_set) }
+#zip_files = {'cctbx_win.zip': ('/util/pyUtil/CctbxLib/cctbx_win', 'cctbx-win'),
+#             'python.zip': ('/util/pyUtil/PythonLib', 'olex-install')
+#            }
 altered_files = set([])
 altered_dirs = set([])
 
@@ -197,10 +201,8 @@ for val, key in alterations.iteritems():
   for dir in alt_dirs:
     alt_dir = alt_dir + '/' + dir
     altered_dirs.add(alt_dir)
-  # end of the folder remembering
+  # end of the folder remembering, copy2 copies the stat as well
   shutil.copy2( bin_directory + '/' + val, working_directory + '/' + val);
-  stat = os.stat(working_directory + '/' + val)
-  os.utime(working_directory + '/' + val, (stat.st_atime, stat.st_mtime));
   altered_files.add(fn)
 
 # create web directory structure (top + update)
