@@ -60,11 +60,6 @@
 </tr>
 <tr>
 	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
-		<!--<a -->
-			<!--href="spy.make_help_box -name='naming' -popout='False'" -->
-			<!--target="Help me with this">-->
-			<!--<zimg border="0" src="info.png">-->
-		<!--</a>	-->
 	</td>
 
 	<td colspan=3>
@@ -81,6 +76,34 @@
 				onuncheck="SetVar(snum_auto_hydrogen_naming,unchecked)">
 	</td>
 </tr>
+
+<tr>
+	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+		<a 
+			href="spy.make_help_box -name='match-naming' -popout='False'" 
+			target="Help with copying naming schemes">
+			<zimg border="0" src="info.png">
+		</a>	
+	</td>
+
+	<td colspan=2>
+		<a href='match sel -n=getvalue(MATCH_NAME_SUFFIX)'>
+		Equivalent Fragments (Z' > 1)</a>
+	</td>
+	<td width=30%>
+			<input 
+				type="text" 
+				bgcolor="$getVar(gui_html_input_bg_colour)" 
+				label='%Suffix%&nbsp;' 
+				valign='center' 
+				name = "MATCH_NAME_SUFFIX"  
+				width="30" 
+				height="18" 
+				value = ""
+			>
+	</td>
+</tr>
+
 
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->

@@ -366,13 +366,6 @@ if haveGUI:
 #OV.registerFunction(suvvd)
 
 
-def CopyVFSFile(copy_from, copy_to):
-  f = olex.readImage(copy_from)
-  assert f is not None
-  olex.writeImage(copy_to, f)
-  return ""
-OV.registerFunction(CopyVFSFile)
-
 def ChooseLabelContent(cmd):
   s = ""
   switches = cmd.split()
@@ -464,7 +457,7 @@ def MakeElementButtonsFromFormula():
   
   hname = 'AddH'
   retStr += ''' 
-<a href="showH a true>>fuse>>HADD>>refine" target="Add Hydrogen">
+<a href="showH a true>>HADD>>refine" target="Add Hydrogen">
 <zimg border="0" src="element-%s.png"></a>
 ''' %hname
   
@@ -753,7 +746,7 @@ def setMainToolbarTabButtons(btn, state=""):
       CopyVFSFile("cbtn-%s%s.png" %(item[0],state),"cbtn-%s.png" %item[0])
       OV.SetVar('gui_MainToolbarTabButtonActive',btn)
     elif state != 'inactive' and not isCif:
-      CopyVFSFile("cbtn-%soff.png" %item[0],"cbtn-%s.png" %item[0])
+      OV.CopyVFSFile("cbtn-%soff.png" %item[0],"cbtn-%s.png" %item[0])
   return "Done"
 if haveGUI:
   OV.registerFunction(setMainToolbarTabButtons)
@@ -783,7 +776,7 @@ def setAllMainToolbarTabButtons():
           state = "on"
       else:
         state = 'off'
-    CopyVFSFile("cbtn-%s%s.png" %(btn,state),"cbtn-%s.png" %btn)
+    OV.CopyVFSFile("cbtn-%s%s.png" %(btn,state),"cbtn-%s.png" %btn)
     if state == 'on':
       OV.SetVar('gui_MainToolbarTabButtonActive',btn)
   return "Done"
@@ -1080,7 +1073,7 @@ def GetACF():
     cont = wFile.read()
     wFile.close()
     
-  debug = False
+  debug = True
   debug_deep1 = True
   debug_deep2 = True
     
@@ -1104,92 +1097,6 @@ def GetACF():
 
   
   
-def getPopBoxPosition():
-  ws = olx.GetWindowSize('html')
-  ws = ws.split(",")
-  WS = olx.GetWindowSize('main-cs', ws[0], int(ws[3]))
-  WS = WS.split(",")
-  sX = int(WS[0])
-  sY = int(WS[1]) -2
-  sTop = int(ws[1])
-  return (sX, sY, sTop)
-
-def get_template(name):
-  template = r"%s/etc/gui/blocks/templates/%s.htm" %(olx.BaseDir(),name)
-  if os.path.exists(template):
-    rFile = open(template, 'r')
-    str = rFile.read()
-    return str
-  else:
-    return None
-
-def makeHtmlBottomPop(args, pb_height = 50):
-  txt = args.get('txt',None)
-  name = args.get('name',"test")
-  replace_str = args.get('replace',None)
-  
-  import OlexVFS
-  from ImageTools import ImageTools
-  IM = ImageTools()
-  metric = getPopBoxPosition()
-  if not txt:
-    txt = get_template(name)
-    txt = txt.replace(r"<MODENAME>",replace_str.upper())
-  pop_html = name
-  pop_name = name
-  htm_location = "%s.htm" %pop_html
-  OlexVFS.write_to_olex(htm_location, txt)
-  width = int(IM.gui_htmlpanelwidth) - 22
-  x = metric[0] + 10
-  y = metric[1] - pb_height - 10
-  pstr = "popup %s '%s' -t='%s' -w=%s -h=%s -x=%s  -y=%s" %(pop_name, htm_location, pop_name, width, pb_height, x, y)
-  olex.m(pstr)
-  olx.html_SetBorders(pop_name,0)
-  #olx.html_Reload(pop_name)
-OV.registerMacro(makeHtmlBottomPop, 'txt-Text to display&;name-Name of the Bottom html popupbox')
-  
-def OnModeChange(*args):
-  d = {
-    'move sel':'button-move_near',
-    'move sel -c=':'button-copy_near',    
-    'grow':'button-grow_mode',
-    'split':'button-move_atoms_or_model_disorder',
-    'name':'small-button-naming'
-  }
-  name = 'mode'
-  mode = ""
-  i = 0
-  mode_disp = ""
-  args = args[0].split()
-  for item in args:
-    i += 1
-    mode = mode + " " + item
-    if i < 2:
-      mode_disp += " " + item
-  mode = mode.strip()
-  
-  # Deal with button images
-  for image_base in d.values():
-    copy_from = "%soff.png" %image_base
-    copy_to = "%s.png" %image_base
-    CopyVFSFile(copy_from, copy_to)
-  image_base = d.get(mode, None)
-  if image_base:
-    copy_from = "%son.png" %image_base
-    copy_to = "%s.png" %image_base
-    CopyVFSFile(copy_from, copy_to)
-  if mode == "grow -s=":
-    return
-  if mode != "off":
-    makeHtmlBottomPop({'replace':mode_disp, 'name':'pop_mode'}, pb_height=50)
-  else:
-    olex.m("html.hide pop_%s" %name)
-  olex.m("html.Reload")  
-olex.registerCallback('modechange',OnModeChange)
-
-def PopProgram(txt="Fred"):
-  name = "pop_prg_analysis"
-  makeHtmlBottomPop({'txt':txt, 'name':name}, pb_height=225)
 
 def HklStatsAnalysis():
   import olex_core

@@ -245,9 +245,9 @@ def make_help_box(args):
   boxWidth = 320
   length = len(helpTxt)
   #boxHeight = int(length/2.8)
-  boxHeight = int(length/3.8) + 100
-  if boxHeight > 700:
-    boxHeight = 700
+  boxHeight = int(length/2.9) + 100
+  if boxHeight > 500:
+    boxHeight = 500
   #boxHeight = 800
   
   x = 10
@@ -262,7 +262,11 @@ def make_help_box(args):
     else:
       x = mouseX - 10
   if popout:
-    olx.Popup("%s-help"% name, wFilePath, "-b=tc -t='%s' -w=%i -d='echo' -h=%i -x=%i -y=%i" %(name, boxWidth, boxHeight, x, y))
+    pop_name = "%s-help"% name
+    olx.Popup(pop_name, wFilePath, "-b=tc -t='%s' -w=%i -d='echo' -h=%i -x=%i -y=%i" %(name, boxWidth, boxHeight, x, y))
+    olx.html_SetBorders(pop_name,5)
+    olx.Popup(pop_name, wFilePath, "-b=tc -t='%s' -w=%i -d='echo' -h=%i -x=%i -y=%i" %(name, boxWidth, boxHeight, x, y))
+    olx.html_SetBorders(pop_name,5)
   else:
     olx.html_Load(wFilePath) 
 #  popup '%1-tbxh' 'basedir()/etc/gui/help/%1.htm' -b=tc -t='%1' -w=%3 -h=%2 -x=%4 -y=%5"> 
@@ -395,6 +399,20 @@ def make_input_button(d):
 def format_help(string):
   import re
   
+
+  ## find all occurances of strings between XX. These are command line entities.
+  regex = re.compile(r"  XX (.*?)( [^\XX\XX]* ) XX ", re.X)
+  m = regex.findall(string)
+  colour = OV.FindValue('gui_grey')
+  colour = "#aaaaaa"
+  if m:
+    #s = regex.sub(r"<tr bgcolor='$getVar(gui_html_table_firstcol_colour)><td><b><font color='%s'>\2</font></b> " %colour, string)
+    s = regex.sub(r"<tr bgcolor='#ffffee'><td><b><font size='2' color='%s'>>>\2</font></b></td></tr>" %colour, string)
+
+  else:
+    s = string
+  string = s
+  
   ## find all occurances of strings between ~. These are the entries for the table.
   regex = re.compile(r"  ~ (.*?)( [^\~\~]* ) ~ ", re.X)
   m = regex.findall(string)
@@ -488,3 +506,93 @@ def getStyles(fileName):
 </style>""" %css
   return styleHTML
 OV.registerFunction(getStyles)
+
+
+def getPopBoxPosition():
+  ws = olx.GetWindowSize('html')
+  ws = ws.split(",")
+  WS = olx.GetWindowSize('main-cs', ws[0], int(ws[3]))
+  WS = WS.split(",")
+  sX = int(WS[0])
+  sY = int(WS[1]) -2
+  sTop = int(ws[1])
+  return (sX, sY, sTop)
+
+def get_template(name):
+  template = r"%s/etc/gui/blocks/templates/%s.htm" %(olx.BaseDir(),name)
+  if os.path.exists(template):
+    rFile = open(template, 'r')
+    str = rFile.read()
+    return str
+  else:
+    return None
+
+def makeHtmlBottomPop(args, pb_height = 50):
+  txt = args.get('txt',None)
+  name = args.get('name',"test")
+  replace_str = args.get('replace',None)
+  
+  import OlexVFS
+  from ImageTools import ImageTools
+  IM = ImageTools()
+  metric = getPopBoxPosition()
+  if not txt:
+    txt = get_template(name)
+    txt = txt.replace(r"<MODENAME>",replace_str.upper())
+  pop_html = name
+  pop_name = name
+  htm_location = "%s.htm" %pop_html
+  OlexVFS.write_to_olex(htm_location, txt)
+  width = int(IM.gui_htmlpanelwidth) - 22
+  x = metric[0] + 10
+  y = metric[1] - pb_height - 8
+  pstr = "popup %s '%s' -t='%s' -w=%s -h=%s -x=%s  -y=%s" %(pop_name, htm_location, pop_name, width, pb_height, x, y)
+  olex.m(pstr)
+  olx.html_SetBorders(pop_name,0)
+  olex.m(pstr)
+  olx.html_SetBorders(pop_name,0)
+  #olx.html_Reload(pop_name)
+OV.registerMacro(makeHtmlBottomPop, 'txt-Text to display&;name-Name of the Bottom html popupbox')
+  
+def OnModeChange(*args):
+  d = {
+    'move sel':'button-move_near',
+    'move sel -c=':'button-copy_near',    
+    'grow':'button-grow_mode',
+    'split -r=EADP':'button-move_atoms_or_model_disorder',
+    'name':'small-button-naming'
+  }
+  name = 'mode'
+  mode = ""
+  i = 0
+  mode_disp = ""
+  args = args[0].split()
+  for item in args:
+    i += 1
+    mode = mode + " " + item
+    if i < 2:
+      mode_disp += " " + item
+  mode = mode.strip()
+  
+  # Deal with button images
+  for image_base in d.values():
+    copy_from = "%soff.png" %image_base
+    copy_to = "%s.png" %image_base
+    CopyVFSFile(copy_from, copy_to)
+  image_base = d.get(mode, None)
+  if image_base:
+    copy_from = "%son.png" %image_base
+    copy_to = "%s.png" %image_base
+    CopyVFSFile(copy_from, copy_to)
+  if mode == "grow -s=":
+    return
+  if mode != "off":
+    makeHtmlBottomPop({'replace':mode_disp, 'name':'pop_mode'}, pb_height=50)
+  else:
+    olex.m("html.hide pop_%s" %name)
+  #olex.m("html.Reload")  
+OV.registerCallback('modechange',OnModeChange)
+
+def PopProgram(txt="Fred"):
+  name = "pop_prg_analysis"
+  makeHtmlBottomPop({'txt':txt, 'name':name}, pb_height=225)
