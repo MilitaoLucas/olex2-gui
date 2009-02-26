@@ -547,9 +547,9 @@ def makeHtmlBottomPop(args, pb_height = 50):
   x = metric[0] + 10
   y = metric[1] - pb_height - 8
   pstr = "popup %s '%s' -t='%s' -w=%s -h=%s -x=%s  -y=%s" %(pop_name, htm_location, pop_name, width, pb_height, x, y)
-  olex.m(pstr)
+  OV.cmd(pstr)
   olx.html_SetBorders(pop_name,0)
-  olex.m(pstr)
+  OV.cmd(pstr)
   olx.html_SetBorders(pop_name,0)
   #olx.html_Reload(pop_name)
 OV.registerMacro(makeHtmlBottomPop, 'txt-Text to display&;name-Name of the Bottom html popupbox')
@@ -589,7 +589,7 @@ def OnModeChange(*args):
   if mode != "off":
     makeHtmlBottomPop({'replace':mode_disp, 'name':'pop_mode'}, pb_height=50)
   else:
-    olex.m("html.hide pop_%s" %name)
+    OV.cmd("html.hide pop_%s" %name)
   #olex.m("html.Reload")  
 OV.registerCallback('modechange',OnModeChange)
 
