@@ -776,7 +776,9 @@ WHERE (((submission.ID)="%s"));""" %sNum
     self.gradient_bgr(draw, width, height, colour = grad_colour, fraction=1, step=0.7)
     cache = {}
     pos = (('Rounded'),('Rounded'),('Square'),('Square'))
-    image = RoundedCorners.round_image(image, cache, 10, pos=pos)
+    #pos = (('Rounded'),('Rounded'),('Rounded'),('Rounded'))
+    #pos = (('Square'),('Square'),('Square'),('Square'))
+    image = RoundedCorners.round_image(image, cache, 2, pos=pos) #used to be 10
 
     #border_rad=20
     #self.make_border(rad=border_rad,
