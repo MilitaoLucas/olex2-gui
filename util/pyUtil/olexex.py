@@ -743,7 +743,7 @@ def setMainToolbarTabButtons(btn, state=""):
         state = "off"
       elif state == '0':
         state = "on"
-      CopyVFSFile("cbtn-%s%s.png" %(item[0],state),"cbtn-%s.png" %item[0])
+      OV.CopyVFSFile("cbtn-%s%s.png" %(item[0],state),"cbtn-%s.png" %item[0])
       OV.SetVar('gui_MainToolbarTabButtonActive',btn)
     elif state != 'inactive' and not isCif:
       OV.CopyVFSFile("cbtn-%soff.png" %item[0],"cbtn-%s.png" %item[0])
