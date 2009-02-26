@@ -8,7 +8,6 @@ import sys
 import programSettings
 import urllib
 URL = "http://dimas.dur.ac.uk/"
-#import userDictionaries
 sys.path.append(r".\src")
 import History
 
@@ -1006,7 +1005,7 @@ OV.registerFunction(runSadabs)
 
 def getKey(key_directory=None):
   if not key_directory:
-    key_directory = r"%s/OD" %olx.DataDir()
+    key_directory = r"%s/OD" %OV.DataDir()
   import glob
   g = glob.glob(r"%s/*.%s" %(key_directory, "priv"))
   for item in g:
@@ -1017,7 +1016,7 @@ def getKey(key_directory=None):
 def getKeys(key_directory=None):
   kl = []
   if not key_directory:
-    key_directory = r"%s/OD" %olx.DataDir()
+    key_directory = r"%s/OD" %OV.DataDir()
   import glob
   g = glob.glob(r"%s/*.%s" %(key_directory, "priv"))
   for item in g:
@@ -1033,10 +1032,10 @@ def GetHttpFile(f):
 def check_for_crypto():
   if olx.IsPluginInstalled(r"plugin-Crypto").lower() == 'false':
     import olex
-    wFile =open(r"%s/runonce-crypto.txm" %olx.BaseDir(), 'w')
+    wFile =open(r"%s/runonce-crypto.txm" %OV.BaseDir(), 'w')
     wFile.write(r"InstallPlugin plugin-Crypto")
     wFile.close()
-    sys.path.append(r"%s/util/pyUtil/PluginLib/plugin-Crypto" %olx.BaseDir())
+    sys.path.append(r"%s/util/pyUtil/PluginLib/plugin-Crypto" %OV.BaseDir())
     return True
   else:
     return False
@@ -1048,7 +1047,7 @@ def GetACF():
     return
   
   print "Starting ODAC..."
-  p = r"%s/util/pyUtil/PluginLib" %olx.BaseDir()
+  p = r"%s/util/pyUtil/PluginLib" %OV.BaseDir()
   name = "entry_ac"
   if not os.path.exists("%s/entry_ac.py" %p):
     #print "New File. Attempting to get %s" %("%s/olex-distro-odac/%s.py" %(URL, name))
