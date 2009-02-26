@@ -342,13 +342,15 @@ class OlexFunctions(inheritFunctions):
     except:
       val = "n/a"
     return val
-  
+
   def CopyVFSFile(self, copy_from, copy_to):
     f = olex.readImage(copy_from)
     #assert f is not None
     olex.writeImage(copy_to, f)
     return ""
 
-  
-  
+  def cmd(self, command):
+    olex.m(command)
+    return ""
+
 OV = OlexFunctions()
