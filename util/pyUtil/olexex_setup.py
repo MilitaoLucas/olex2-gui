@@ -6,8 +6,6 @@ import htmlTools
 import variableFunctions
 
 class SetupWizard(object):
-  def __init__(self):
-    super(SetupWizard, self).__init__()
     
   def tbxs(self, f):
     total_number = 6
@@ -97,7 +95,6 @@ OV.registerMacro(a.tbxs, 'n-The name of the setup screen')
 
 class ConfigSkin(object):
   def __init__(self):
-    super(ConfigSkin, self).__init__()
     from ImageTools import ImageTools
     self.IT = ImageTools()
 

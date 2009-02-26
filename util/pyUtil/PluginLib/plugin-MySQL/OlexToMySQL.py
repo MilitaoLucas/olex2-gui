@@ -424,7 +424,6 @@ class UploadOlexLanguageDictionary:
 
 class ExportHelp(object):
   def __init__(self, tool_fun=None, tool_param=None):
-    super(ExportHelp, self).__init__(tool_fun=None, tool_param=None)
     self.SQL = SQLFactory.SQLFactory()
 
   def run(self):

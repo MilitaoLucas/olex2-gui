@@ -2,7 +2,6 @@
 import sys
 import olex
 import olx
-#import olex_core
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
@@ -14,7 +13,6 @@ class SpyException:
 
 class Spy(object):
   def __init__(self, tool, fun, param):
-    super(Spy, self).__init__(tool, fun, param)
     self.basedir = ''
     self.tool = tool
     self.fun = fun
@@ -51,7 +49,6 @@ if __name__ == "__main__":
     else:
       a = Spy(tool, fun, param)
     a.run()
-    #OV.UpdateHtml()
   except Exception, ex:
     print >> sys.stderr, "There was an outer problem"
     sys.stderr.formatExceptionInfo()
