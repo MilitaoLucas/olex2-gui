@@ -578,12 +578,12 @@ def OnModeChange(*args):
   for image_base in d.values():
     copy_from = "%soff.png" %image_base
     copy_to = "%s.png" %image_base
-    CopyVFSFile(copy_from, copy_to)
+    OV.CopyVFSFile(copy_from, copy_to)
   image_base = d.get(mode, None)
   if image_base:
     copy_from = "%son.png" %image_base
     copy_to = "%s.png" %image_base
-    CopyVFSFile(copy_from, copy_to)
+    OV.CopyVFSFile(copy_from, copy_to)
   if mode == "grow -s=":
     return
   if mode != "off":
