@@ -8,7 +8,6 @@ import cProfile
 
 class Spy(object):
   def __init__(self, tool, fun, param):
-    super(Spy, self).__init__(tool, fun, param)
     self.basedir = ''
     self.tool = tool
     self.fun = fun
@@ -17,7 +16,6 @@ class Spy(object):
   def run(self):
     g = OV.cprofile_wrap(self.spy_run)
     g()
-    #g.__name__ = spy_run.__name__
     
     
   def spy_run(self):
@@ -25,7 +23,6 @@ class Spy(object):
       from pyTools import pyTools
       t = pyTools(self.tool, self.fun, self.param)
       t.run()
-      #OV.UpdateHtml()
     except Exception, ex:
       basedir = olx.BaseDir()
       rFile = open(r"%s/version.txt" %basedir)

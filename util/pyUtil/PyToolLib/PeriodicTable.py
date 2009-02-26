@@ -1,7 +1,5 @@
 import olx
 class PeriodicTable(object):
-  def __init__(self):
-    super(PeriodicTable, self).__init__(self)
   def PeriodicTable(self):
     rFile = open("%s/ptablex.dat" %olx.BaseDir())
     f = rFile.readlines()
