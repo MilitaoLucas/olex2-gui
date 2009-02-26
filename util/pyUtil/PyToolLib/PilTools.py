@@ -418,7 +418,6 @@ def fade_image(image, frames=5, overlay_colour=(255, 255, 255), filename="out.gi
 
 class BarMaker(object):
   def __init__(self, dx, dy, colour):
-    super(BarMaker, self).__init__(dx, dy, colour)
     self.dx = int(dx)
     self.dy = int(dy)
     self.colour = colour

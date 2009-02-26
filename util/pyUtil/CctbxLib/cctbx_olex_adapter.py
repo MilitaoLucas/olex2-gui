@@ -38,7 +38,6 @@ class OlexAtoms(object):
         
 class OlexCctbxAdapter(object):
   def __init__(self, function, parameters):
-    super(OlexCctbxAdapter, self).__init__(function, parameters)
     PT = PeriodicTable()
     self.pt = PT.PeriodicTable()
     self.olx = olx
@@ -47,7 +46,6 @@ class OlexCctbxAdapter(object):
     self.tidy = True
     self.auto = True
     self.debug = False
-    #self.film = olx.FileName()
     self.film = False
     self.max_cycles = 10
     self.peak_normaliser = 1200 #fudge factor to get cctbx peaks on the same scale as shelx peaks

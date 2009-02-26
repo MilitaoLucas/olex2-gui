@@ -8,7 +8,6 @@ OV = OlexFunctions()
 
 class Spy(object):
   def __init__(self, tool, fun, param):
-    super(Spy, self).__init__(tool, fun, param)
     self.basedir = ''
     self.tool = tool
     self.fun = fun
@@ -32,9 +31,6 @@ class Spy(object):
       stats.print_stats(20)
       outFile.close()
       sys.stdout = olex_output
-      #olex.m('exec -o getvar(defeditor) %')tex
-      #t.run()
-      #OV.UpdateHtml()
     except Exception, ex:
       print >> sys.stderr, "There is an inner problem"
       sys.stderr.formatExceptionInfo()
