@@ -3,21 +3,22 @@ import olex
 import sys
 
 debug = True
-if debug == True:
+if debug:
   try:
     import wingdbstub
   except:
     pass
 
-
+datadir = olex.f("DataDir()")
+basedir = olex.f("BaseDir()")
 if sys.platform[:3] == 'win':
   sys.path = []
-sys.path.insert(0, olex.f("DataDir()"))
-sys.path.append(r"%s/util/pyUtil" %olex.f("BaseDir()"))
-python_lib = r"%s/util/pyUtil/PythonLib" %olex.f("BaseDir()")
-#pyTool_lib = r"%s/util/pyUtil/PyToolLib" %olex.f("BaseDir()")
-#file_readers_lib = r"%s/FileReaders" %pyTool_lib
-sys.path.insert(0, python_lib)
+
+python_dir = "%s/Python26" %basedir
+sys.path.append("%s/DLLs" %python_dir)
+sys.path.append("%s/Lib" %python_dir)
+sys.path.append(datadir)
+#sys.path.insert(0, python_lib)
 #sys.path.insert(0, pyTool_lib)
 #sys.path.insert(0, file_readers_lib)
 stdout_redirection = True
@@ -123,19 +124,14 @@ def print_python_version():
   return version
 
 def set_olex_paths():
-  python_dir = "%s/util/pyUtil/PythonLib" %basedir
-  #python_dir = "%s/util/pyUtil/PythonLib2.6" %basedir
+  sys.path.append(python_dir)
+  sys.path.append("%s/Lib/site-packages" %python_dir)
+  sys.path.append("%s/Lib/site-packages/PIL" %python_dir)
   sys.path.append("%s" %basedir)
-  sys.path.append("%s" %datadir)
   sys.path.append("%s/util/pyUtil" %basedir)
   sys.path.append("%s/util/pyUtil/PyToolLib" %basedir)
   sys.path.append("%s/util/pyUtil/PyToolLib/FileReaders" %basedir)
   sys.path.append("%s/util/pyUtil/CctbxLib" %basedir)
-  sys.path.append("%s/MySQLdb" %python_dir)
-  sys.path.append("%s/encodings" %python_dir)
-  sys.path.append("%s/PIL" %python_dir)
-  sys.path.append(python_dir)
-  sys.path.append("%s/util/pyUtil/PluginLib" %basedir)
 
 def set_plugins_paths():  
   plugins = olexex.InstalledPlugins()
