@@ -1,23 +1,24 @@
 #!/usr/bin/python
 
 """ Olex 2 distro management """
-# these to specify to created separate zip files
-plugins = ('mysql', 'cctbx-win', 'brukersaint', 'ODSkin', 'BNSkin', 'STOESkin', 'HPSkin', 'Batch', 'HotshotProfiler', 'Pysvn', 'Crypto', 'AutoChem') 
+# these to specify to create separate zip files
+plugins = ('mysql', 'cctbx-win', 'brukersaint', 'ODSkin', 'BNSkin', 'STOESkin', 'HPSkin', 'Batch', 'Pysvn', 'Crypto', 'AutoChem') 
 # file name aliases
 web_for_working = {'olex2.exe': 'olex2.dll', 'launch.exe': 'olex2.exe'}
-# alteartions for binary files : name (properties...)
+# alterations for binary files : name (properties...)
 alterations = {'olex2.exe': ('olex-install', 'olex-update'), 
                'olex2c.exe': ('olex-install', 'olex-update'),
                'launch.exe': ('olex-install', 'olex-update'),
-               'python25.dll': ('olex-install', 'olex-update'),
-               'msvcr71.dll': ('olex-install', 'olex-update'),
+               'Python26.zip': ('olex-install', 'olex-update', 'action:extract'),
+               #'python25.dll': ('olex-install', 'olex-update'),
+               #'msvcr71.dll': ('olex-install', 'olex-update'),
                'splash.jpg': ('olex-install', 'olex-update'),
                'acidb.db': ('olex-install', 'olex-update'),
                'installer.exe': ('olex-top',), #mind the comma!
-               'Microsoft.VC80.CRT/Microsoft.VC80.CRT.manifest': ('olex-install', 'olex-update'),
-               'Microsoft.VC80.CRT/msvcm80.dll': ('olex-install', 'olex-update'),
-               'Microsoft.VC80.CRT/msvcp80.dll': ('olex-install', 'olex-update'),
-               'Microsoft.VC80.CRT/msvcr80.dll': ('olex-install', 'olex-update'),
+               'Microsoft.VC90.CRT/Microsoft.VC90.CRT.manifest': ('olex-install', 'olex-update'),
+               'Microsoft.VC90.CRT/msvcm90.dll': ('olex-install', 'olex-update'),
+               'Microsoft.VC90.CRT/msvcp90.dll': ('olex-install', 'olex-update'),
+               'Microsoft.VC90.CRT/msvcr90.dll': ('olex-install', 'olex-update'),
                'etc/Fonts/olex2.fnt': ('olex-install', 'olex-update'),
                'etc/gui/fonts/Vera.ttf': ('olex-install', 'olex-update'),
                'etc/gui/fonts/VeraBd.ttf': ('olex-install', 'olex-update'),
@@ -29,9 +30,10 @@ alterations = {'olex2.exe': ('olex-install', 'olex-update'),
                'olex2-suse101x32.zip': ('olex2-suse101x32.zip', 'olex-port', 'port-suse101x32', 'action:extract')
                }
 # special zip files {zip_name: (destination_dir, properties_to_set) }
-#zip_files = {'cctbx_win.zip': ('/util/pyUtil/CctbxLib/cctbx_win', 'cctbx-win'),
-#             'python.zip': ('/util/pyUtil/PythonLib', 'olex-install')
-#            }
+zip_files = {
+  'cctbx_winxp.zip': ('/util/pyUtil/CctbxLib/cctbx_win', 'cctbx-win'),
+  'Python26.zip': ( '/Python26', 'olex-install', 'olex-update', 'action:extract'),
+            }
 altered_files = set([])
 altered_dirs = set([])
 
@@ -91,7 +93,7 @@ parser.add_option('-f', '--file',
 		  dest='update_file',
                   default='',
 		  action='store',
-		  help='whether to use update any particluare file only')
+		  help='whether to use update any particular file only')
 option, args = parser.parse_args()
 
 working_directory = os.path.expanduser(option.working_directory
@@ -131,7 +133,7 @@ try:
     n = client.update(working_directory + filepath)
     revision_number = n[0].number
     print "SVN Revision Number %i" %revision_number
-  elif True:  #defuging can set it to false to leave the folder in tact
+  elif True:  #debugging can set it to false to leave the folder intact
     n = client.update(working_directory)
     revision_number = n[0].number
     print "SVN Revision Number %i" %revision_number
@@ -169,6 +171,14 @@ files_for_plugin = dict(
 		      recurse=True).keys())
      )
      for plugin in plugins ])
+files_for_zips = {}
+for zip_name, args in zip_files.items():
+  files_for_zips.setdefault(
+    zip_name,
+    [working_directory + zip_files[zip_name][0] + '/' + name
+     for name in zipfile.ZipFile(bin_directory + '/' + zip_name).namelist()
+     if not name.endswith('/')]) 
+
 cctbx_directory = working_directory + '/util/pyUtil/CctbxLib/cctbx_win'
 cctbx_zip_file = zipfile.ZipFile('%s/cctbx_winxp.zip'
                                  % bin_directory)
@@ -208,36 +218,38 @@ for val, key in alterations.iteritems():
 # create web directory structure (top + update)
 shutil.rmtree(web_directory, ignore_errors=True)
 directories_to_create = {web_directory: 1}
-directories_to_create.update(dict(
-  [ (os.path.dirname(destination(p, 'update')), 1) 
-    for p in itertools.chain(update_files, *files_for_plugin.values()) ]))
+for files_dict in [files_for_plugin, files_for_zips]:
+  directories_to_create.update(dict(
+    [ (os.path.dirname(destination(p, 'update')), 1)
+      for p in itertools.chain(update_files, *files_dict.values()) ]))
 directories_to_create = directories_to_create.keys()
 directories_to_create.sort()
 for d in directories_to_create:
   os.makedirs(d)
 update_directory = web_directory + '/update'
 update_directory_pat = re.compile(update_directory + '/?')
-    
+
 # copy files into the web directory
 for f in top_files:
   shutil.copy2(f, destination(f))
 for f in itertools.chain(update_files, 
 			 *[ files_for_plugin[x] for x in files_for_plugin
                             if x != 'cctbx-win' ]):
-  if os.path.exists(f):  
-    shutil.copy2(f, destination(f, 'update'))
-  else:
-    print "Invalid file '" + f + "' skipping"
-for f in files_for_plugin['cctbx-win']:
   if os.path.exists(f):
     shutil.copy2(f, destination(f, 'update'))
   else:
+    print "Invalid file '" + f + "' skipping"
+
+for zip_name, files in files_for_zips.items():
+  zip_file = zipfile.ZipFile(bin_directory + '/' + zip_name)
+  destination_directory = working_directory + zip_files[zip_name][0] + '/'
+  for f in files:
     name = destination(f, 'update')
     f1 = open(name, 'wb')
-    f_zip = f.replace(cctbx_directory + '/', '')
-    f1.write(cctbx_zip_file.read(f_zip))
+    f_zip = f.replace(destination_directory, '')
+    f1.write(zip_file.read(f_zip))
     f1.close()
-    t = time.mktime(cctbx_zip_file.getinfo(f_zip).date_time + (0,1,-1))
+    t = time.mktime(zip_file.getinfo(f_zip).date_time + (0,1,-1))
     os.utime(name, (t,t))
 
 # create the index file
@@ -265,7 +277,7 @@ def info(web_file_name, working_file_name):
         else:
           props = None
   return (stats, props)
-  
+
 def format_info(stats, props):
   if props:
     props = ';'.join(props)
@@ -300,7 +312,7 @@ def create_index(index_file_name, only_prop=None):
       print >> idx_file, indents + f
       print >> idx_file, indents + format_info(stats, props)
   idx_file.close()
-  
+
 create_index(update_directory + '/index.ind')
 zip_index_file_name = update_directory + '/zindex.ind'
 create_index(zip_index_file_name, only_prop='olex-install')
