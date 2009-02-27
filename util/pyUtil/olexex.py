@@ -1035,6 +1035,7 @@ def check_for_crypto():
     wFile =open(r"%s/runonce-crypto.txm" %OV.BaseDir(), 'w')
     wFile.write(r"InstallPlugin plugin-Crypto")
     wFile.close()
+    sys.path.append(r"%s/Python26/Lib/site-packages/Crypto" %OV.BaseDir())
     sys.path.append(r"%s/util/pyUtil/PluginLib/plugin-Crypto" %OV.BaseDir())
     return True
   else:
