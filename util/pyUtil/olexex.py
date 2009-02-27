@@ -1072,7 +1072,7 @@ def GetACF():
     cont = wFile.read()
     wFile.close()
     
-  debug = True
+  debug = False
   debug_deep1 = True
   debug_deep2 = True
     
