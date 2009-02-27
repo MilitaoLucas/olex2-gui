@@ -13,6 +13,7 @@ try:
   import olx
   import olex
   import olexex
+  import htmlTools
 except:
   pass
 
@@ -1073,7 +1074,7 @@ class Analysis(Graph):
     img_name = "XY.png"
     txt = self.ProgramHtml(program, method, "Solving", img_name)
     OlexVFS.write_to_olex('xy.htm', txt)
-    olexex.PopProgram(txt=txt)
+    htmlTools.PopProgram(txt=txt)
 
   def make_ShelXL_plot(self):
     self.make_empty_graph()
@@ -1082,7 +1083,7 @@ class Analysis(Graph):
     img_name = "ShelXL.png"
     txt = self.ProgramHtml(program, method, "Refining", img_name)
     OlexVFS.write_to_olex("ShelXL.htm", txt)
-    olexex.PopProgram(txt=txt)
+    htmlTools.PopProgram(txt=txt)
     
   def make_AutoChem_plot(self):
     filepath = self.file_reader("%s/%s.csv" %(self.datadir,"ac_stats"))
@@ -1348,7 +1349,7 @@ class Analysis(Graph):
     help = OV.TranslatePhrase(method.help)
     info = OV.TranslatePhrase(method.info)
     
-    txt = olexex.get_template("pop_prg_analysis")
+    txt = htmlTools.get_template("pop_prg_analysis")
     
     if txt:
       txt = txt %(process, self.filename, prg, name, authors, reference, img_name)
