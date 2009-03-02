@@ -6,34 +6,35 @@ plugins = ('mysql', 'cctbx-win', 'brukersaint', 'ODSkin', 'BNSkin', 'STOESkin', 
 # file name aliases
 web_for_working = {'olex2.exe': 'olex2.dll', 'launch.exe': 'olex2.exe'}
 # alterations for binary files : name (properties...)
-alterations = {'olex2.exe': ('olex-install', 'olex-update'), 
-               'olex2c.exe': ('olex-install', 'olex-update'),
-               'launch.exe': ('olex-install', 'olex-update'),
-               'Python26.zip': ('olex-install', 'olex-update', 'action:extract'),
-               #'python25.dll': ('olex-install', 'olex-update'),
-               #'msvcr71.dll': ('olex-install', 'olex-update'),
-               'splash.jpg': ('olex-install', 'olex-update'),
-               'acidb.db': ('olex-install', 'olex-update'),
-               'installer.exe': ('olex-top',), #mind the comma!
-               'Microsoft.VC90.CRT/Microsoft.VC90.CRT.manifest': ('olex-install', 'olex-update'),
-               'Microsoft.VC90.CRT/msvcm90.dll': ('olex-install', 'olex-update'),
-               'Microsoft.VC90.CRT/msvcp90.dll': ('olex-install', 'olex-update'),
-               'Microsoft.VC90.CRT/msvcr90.dll': ('olex-install', 'olex-update'),
-               'etc/Fonts/olex2.fnt': ('olex-install', 'olex-update'),
-               'etc/gui/fonts/Vera.ttf': ('olex-install', 'olex-update'),
-               'etc/gui/fonts/VeraBd.ttf': ('olex-install', 'olex-update'),
-               'etc/gui/fonts/VeraBI.ttf': ('olex-install', 'olex-update'),
-               'etc/gui/fonts/VeraIt.ttf': ('olex-install', 'olex-update'),
-               'etc/gui/fonts/VeraSe.ttf': ('olex-install', 'olex-update'),
-               'etc/gui/fonts/VeraSeBd.ttf': ('olex-install', 'olex-update'),
-               'olex2-mac.zip': ('olex-port', 'port-mac', 'action:extract'),
-               'olex2-suse101x32.zip': ('olex2-suse101x32.zip', 'olex-port', 'port-suse101x32', 'action:extract')
-               }
+alterations = {
+  'olex2.exe': ('olex-install', 'olex-update'), 
+  'olex2c.exe': ('olex-install', 'olex-update'),
+  'launch.exe': ('olex-install', 'olex-update'),
+  'Python26.zip': ('olex-install', 'olex-update', 'action:extract'),
+  #'python25.dll': ('olex-install', 'olex-update'),
+  #'msvcr71.dll': ('olex-install', 'olex-update'),
+  'splash.jpg': ('olex-install', 'olex-update'),
+  'acidb.db': ('olex-install', 'olex-update'),
+  'installer.exe': ('olex-top',), #mind the comma!
+  'Microsoft.VC90.CRT/Microsoft.VC90.CRT.manifest': ('olex-install', 'olex-update'),
+  'Microsoft.VC90.CRT/msvcm90.dll': ('olex-install', 'olex-update'),
+  'Microsoft.VC90.CRT/msvcp90.dll': ('olex-install', 'olex-update'),
+  'Microsoft.VC90.CRT/msvcr90.dll': ('olex-install', 'olex-update'),
+  'etc/Fonts/olex2.fnt': ('olex-install', 'olex-update'),
+  'etc/gui/fonts/Vera.ttf': ('olex-install', 'olex-update'),
+  'etc/gui/fonts/VeraBd.ttf': ('olex-install', 'olex-update'),
+  'etc/gui/fonts/VeraBI.ttf': ('olex-install', 'olex-update'),
+  'etc/gui/fonts/VeraIt.ttf': ('olex-install', 'olex-update'),
+  'etc/gui/fonts/VeraSe.ttf': ('olex-install', 'olex-update'),
+  'etc/gui/fonts/VeraSeBd.ttf': ('olex-install', 'olex-update'),
+  'olex2-mac.zip': ('olex-port', 'port-mac', 'action:extract'),
+  'olex2-suse101x32.zip': ('olex2-suse101x32.zip', 'olex-port', 'port-suse101x32', 'action:extract'),
+}
 # special zip files {zip_name: (destination_dir, properties_to_set) }
 zip_files = {
   'cctbx_winxp.zip': ('/util/pyUtil/CctbxLib/cctbx_win', 'cctbx-win'),
   'Python26.zip': ( '/Python26', 'olex-install', 'olex-update', 'action:extract'),
-            }
+}
 altered_files = set([])
 altered_dirs = set([])
 
@@ -339,7 +340,3 @@ for plugin, files in files_for_plugin.items():
       plugin_zip.write(destination(f,'update'),
 		       zip_destination(f))
   plugin_zip.close()
-  
-if __name__ == '__main__':
-  import sys
-  sys.argv.append('--test')
