@@ -1392,7 +1392,21 @@
 			<arg2 name="single" def="">
 		\>
 		<cmd
-			<cmd5 "cursor(busy, %1)">
+			<cmd5 "cursor(busy,'Starting ODAC')">
+			<cmd6 "spy.ac_run solveit %1 %2"> 
+		\>
+	\>
+\>
+
+
+<odac help="Launches ac_run"
+	<body
+		<args 
+			<arg2 name="single" def="-s">
+			<arg2 name="single" def="-fc">
+		\>
+		<cmd
+			<cmd5 "cursor(busy,'Starting ODAC with File Config')">
 			<cmd6 "spy.ac_run solveit %1 %2"> 
 		\>
 	\>

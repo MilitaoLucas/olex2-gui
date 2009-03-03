@@ -174,7 +174,8 @@ class t_History(ArgumentParser):
       if os.path.exists(lstFile):
         os.remove(lstFile)
     destination = "%s/%s.res" %(filepath, filename)
-    olx.Atreap('%s' %destination)
+    destination = "'%s'" %destination.strip('"').strip("'")
+    olx.Atreap("%s" %destination)
     
   def saveHistory(self):
     self._getItems()
