@@ -5,8 +5,8 @@ import olexex
 
 class decrypt_file():
 
-  def __init__(self, fileObj, src_directory, plugin_directory, key_directory):
-    self.fileObj = fileObj
+  def __init__(self, fileContent, src_directory, plugin_directory, key_directory):
+    self.fileContent = fileContent
     self.src_directory = src_directory
     self.plugin_directory = plugin_directory
     self.key_directory = key_directory
@@ -24,14 +24,8 @@ class decrypt_file():
     passding = "%s%s"%(cr1,cr2)
     k = ezPyCrypto.key(pubprivkey,passphrase=passding)
     
-    # Read in an encrypted file
-    rFile = self.fileObj
-    #rFile = open(r"%s/%s_d" %(self.src_directory, self.filename), 'rb')
-    encoded_script_text = rFile.read()
-    rFile.close()
-    
     # Decrypt this file
-    txt = k.decString(encoded_script_text)
+    txt = k.decString(self.fileContent)
     
     # Spill the beans
     return txt
