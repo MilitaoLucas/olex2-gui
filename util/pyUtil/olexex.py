@@ -1026,8 +1026,15 @@ def getKeys(key_directory=None):
   
   
 def GetHttpFile(f):
-  mysock = urllib.urlopen("%s/%s" %(URL, f))
-  return mysock
+  url = "%s/%s" %(URL, f)
+  path = urllib.URLopener()
+  path.addheader('pragma', 'no-cache')
+  conn = path.open(url)
+  content = conn.read()
+  conn.close()
+  
+  return content
+  
 
 def check_for_crypto():
   if olx.IsPluginInstalled(r"plugin-Crypto").lower() == 'false':
@@ -1041,45 +1048,44 @@ def check_for_crypto():
     return False
 
 def GetACF():
+  print "Starting ODAC..."
+
   please_restart_crypto = check_for_crypto()  
   if please_restart_crypto:
     print "Please restart Olex2. A new Plugin has been installed"
     return
   
-  print "Starting ODAC..."
-  p = r"%s/util/pyUtil/PluginLib" %OV.BaseDir()
-  name = "entry_ac"
-  if not os.path.exists("%s/entry_ac.py" %p):
-    #print "New File. Attempting to get %s" %("%s/olex-distro-odac/%s.py" %(URL, name))
-    rFile = GetHttpFile("/olex-distro-odac/%s.py" %name)
-    cont = rFile.read()
-    #print "Got file of length %s" %len(cont)
-    wFile = open("%s/%s.py" %(p, name),'w') 
-    wFile.write(cont)
-    wFile.close()
-  else:
-    try:
-      #print "Updating. Attempting to get %s" %("%s/repos/odac/%s.py" %(URL, name))
-      rFile = GetHttpFile("/olex-distro-odac/%s.py" %name)
-      cont = rFile.read()
-      #print "Got file of length %s" %len(cont)
-      wFile = open("%s/%s.py" %(p, name),'w') 
-      wFile.write(cont)
-      wFile.close()
-    except:
-      pass
-    wFile = open("%s/%s.py" %(p, name),'r')
-    cont = wFile.read()
-    wFile.close()
-    
-  debug = False
+  
+  debug = OV.FindValue('odac_fb', False)
+  #debug =True
   debug_deep1 = True
   debug_deep2 = True
     
   if not debug:
-    sys.path.append(r"%s/util/pyUtil/PluginLib" %olx.BaseDir())
+    p = r"%s/util/pyUtil/PluginLib" %OV.BaseDir()
+    name = "entry_ac"
+    if not os.path.exists("%s/entry_ac.py" %p):
+      cont = GetHttpFile("/olex-distro-odac/%s.py" %name)
+      wFile = open("%s/%s.py" %(p, name),'w') 
+      wFile.write(cont)
+      wFile.close()
+    else:
+      try:
+        cont = GetHttpFile("/olex-distro-odac/%s.py" %name)
+        wFile = open("%s/%s.py" %(p, name),'w') 
+        wFile.write(cont)
+        wFile.close()
+      except Exception, err:
+        print err
+      if not cont:
+        wFile = open("%s/%s.py" %(p, name),'r')
+        cont = wFile.read()
+        wFile.close()
+    #sys.path.append(r"%s/util/pyUtil/PluginLib" %olx.BaseDir())
     sys.modules[name] = types.ModuleType(name)
     exec cont in sys.modules[name].__dict__
+    #import entry_ac
+
   else:
     print "Debugging Mode is on. File System Based files will be used!"
     OV.SetVar("ac_debug", True)
@@ -1088,12 +1094,15 @@ def GetACF():
       OV.SetVar("ac_debug_deep1", True)
     if debug_deep2:
       OV.SetVar("ac_debug_deep2", True)
-    sys.path.append(r"%s/util/pyUtil/PluginLib/plugin-AutoChem" %olx.BaseDir())
-    import entry_ac
-    
+    #sys.path.append(r"%s/util/pyUtil/PluginLib/plugin-AutoChem" %olx.BaseDir())
+    sys.path.append(r"%s/util/pyUtil/PluginLib/plugin-AutoChemSRC" %olx.BaseDir())
+    import _entry_ac
+  
+  
   OV.SetVar("HaveODAC", True)
   print "ODAC started OK"
-
+  return "OK"
+OV.registerFunction(GetACF)
   
   
 

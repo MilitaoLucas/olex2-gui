@@ -34,6 +34,18 @@
 \>
 
 
+<d
+	<body
+		<args
+			<arg1 name='file' def='DataDir()\samples\ylid\aaexp_1.res'> 
+		\>
+		<cmd 
+			<cmd10 "reap '%1'">
+		\>	
+	\>
+\>
+
+
 <onstartup help="Executes on program start"
 	<body
 		<args
