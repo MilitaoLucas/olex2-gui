@@ -1112,7 +1112,7 @@ class timage(ImageTools):
                     "Default Style", 
                     "Sphere Packing", 
                     "Ellipsoids | H", 
-                    "Molecular Mass",
+                    "Atomic Mass",
                     "Atom Number",
                     "Atom Label",
                     "Mass & Label",
