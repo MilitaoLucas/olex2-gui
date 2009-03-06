@@ -986,6 +986,7 @@ class timage(ImageTools):
     self.imageSource = Image.open(image_source)
 
     sf = 4
+    self.sf = sf
     im = Image.open(image_source)
     cut = 0, 52*sf, 27*sf, 76*sf
     crop =  im.crop(cut)
@@ -1049,6 +1050,8 @@ class timage(ImageTools):
                     "Balls & Sticks", 
                     "blank", 
                     "Naming", 
+                    "Edit",
+                    "Go",
                     )
     states = ["on", "off", ""]
     for state in states:
@@ -1076,11 +1079,11 @@ class timage(ImageTools):
                      align='centre'
                      )
         IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
-        name = "small-button-%s%s.png" %(txt.replace(" ", "_"), state)
+        name = "button_small-%s%s.png" %(txt.replace(" ", "_"), state)
         name = name.lower()
         OlexVFS.save_image_to_olex(IM, name, 2)
-        if name == "small-button-blank.png":
-          filename = r"%s/small-button-blank.png" %self.datadir
+        if name == "button_small-blank.png":
+          filename = r"%s/button_small-blank.png" %self.datadir
           IM.save(filename)
     
     
@@ -1109,6 +1112,11 @@ class timage(ImageTools):
                     "Default Style", 
                     "Sphere Packing", 
                     "Ellipsoids | H", 
+                    "Molecular Mass",
+                    "Atom Number",
+                    "Atom Label",
+                    "Mass & Label",
+                    "Moieties"
                     )
     states = ["on", "off", ""]
     for state in states:
@@ -1135,7 +1143,8 @@ class timage(ImageTools):
                      max_width = max_width,
                      align='centre'
                      )
-        IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
+        sfs = sf * int(self.gui_htmlpanelwidth)/320
+        IM = self.resize_image(IM, (int((cut[2]-cut[0])/sfs), int((cut[3]-cut[1])/sfs)))
         name = "button-%s%s.png" %(txt.replace(" ", "_"), state)
         name = name.lower()
         OlexVFS.save_image_to_olex(IM, name, 2)
@@ -1145,6 +1154,7 @@ class timage(ImageTools):
     crop =  im.crop(cut)
     #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_table_firstcol_colour,luminosity=0.7)) 
     button_names = ("Move Atoms or Model Disorder", 
+                    "Separate Moieties", 
                     )
     states = ["on", "off", ""]
     for state in states:
@@ -1156,29 +1166,32 @@ class timage(ImageTools):
         colour = self.adjust_colour(self.gui_html_base_colour,luminosity=1.9)
       for txt in button_names:
         crop_colouriszed = self.colourize(crop, (0,0,0), colour) 
-        IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
+        #IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
+        IM =  Image.new('RGBA', crop.size)
+
         IM.paste(crop_colouriszed, (0,0), crop)
         draw = ImageDraw.Draw(IM)
         self.write_text_to_draw(draw, 
                      "%s" %txt, 
-                     top_left=(4, 6), 
+                     top_left=(4, 7), 
                      font_name = 'Vera', 
-                     font_size=42, 
+                     font_size=41, 
                      titleCase=True,                  
                      font_colour=self.adjust_colour(self.gui_html_font_colour,luminosity=0.9),
                      max_width = max_width,
                      align='centre'
                      )
-        IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
-        name = "button-%s%s.png" %(txt.replace(" ", "_"), state)
+        sfs = sf * int(self.gui_htmlpanelwidth)/320
+        IM = self.resize_image(IM, (int((cut[2]-cut[0])/sfs), int((cut[3]-cut[1])/sfs)))
+        name = "button_full-%s%s.png" %(txt.replace(" ", "_"), state)
         name = name.lower()
         OlexVFS.save_image_to_olex(IM, name, 2)
       
     
     cut = 0*sf, 152*sf, 15*sf, 167*sf
     crop =  im.crop(cut)
-    #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_table_firstcol_colour,luminosity=0.7)) 
-    crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_base_colour,luminosity=1.7)) 
+    crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_table_firstcol_colour,luminosity=0.98)) 
+    #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_base_colour,luminosity=1.7)) 
     IM =  Image.new('RGBA', crop.size, self.gui_html_table_firstcol_colour)
     IM.paste(crop_colouriszed, (0,0), crop)
     name = "info.png"
@@ -1189,12 +1202,12 @@ class timage(ImageTools):
                  top_left=(4, 0), 
                  font_name = 'Vera Bold', 
                  font_size=14, 
-                 font_colour=self.gui_html_font_colour)
+                 font_colour=self.adjust_colour(self.gui_html_table_firstcol_colour,luminosity=1))
     OlexVFS.save_image_to_olex(IM, name, 2)
     
     cut = 16*sf, 156*sf, 26*sf, 166*sf
     crop =  im.crop(cut)
-    crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_table_firstcol_colour,luminosity=0.7)) 
+    crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_table_firstcol_colour,luminosity=1.7)) 
     IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
     IM.paste(crop_colouriszed, (0,0), crop)
     IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
@@ -1241,24 +1254,18 @@ class timage(ImageTools):
     name = "info_tiny_new.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
 
-    
+    ## Create big circles with Writing In
     cut = 30*sf, 150*sf, 55*sf, 175*sf
     crop =  im.crop(cut)
     crop_colouriszed = self.colourize(crop, (0,0,0), self.gui_html_table_firstcol_colour) 
-    for i in xrange(7):
-      IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
-      IM.paste(crop_colouriszed, (0,0), crop)
-      IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
-      draw = ImageDraw.Draw(IM)
-      self.write_text_to_draw(draw, 
-                   "%s" %(i), 
-                   top_left=(5, 1), 
-                   font_name = 'Vera Bold', 
-                   font_size=19, 
-                   font_colour=self.gui_html_font_colour)
-      name = "circle_%s.png" %i
-      OlexVFS.save_image_to_olex(IM, name, 2)
-    
+    for i in xrange(12):
+      self.makeCharcterCircles(str(i), IM, crop, cut, crop_colouriszed,)
+
+    crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_green,saturation=0.7,luminosity=2.1)) 
+    l = ["a", "b", "c", "d", "e", "f"]
+    for letter in l:
+      self.makeCharcterCircles(letter, IM, crop, cut, crop_colouriszed)
+      
     cut = 55*sf, 150*sf, 80*sf, 175*sf
     crop =  im.crop(cut)
     IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
@@ -1300,7 +1307,7 @@ class timage(ImageTools):
     draw = ImageDraw.Draw(IM)
     self.write_text_to_draw(draw, 
                  "You are in a Mode", 
-                 top_left=(5, 2), 
+                 top_left=(5, 1), 
                  font_name = 'Vera Bold', 
                  font_size=90, 
                  font_colour=self.gui_html_font_colour,
@@ -1324,7 +1331,24 @@ class timage(ImageTools):
     
     
     self.info_bitmaps()
-  
+ 
+    
+  def makeCharcterCircles(self, character, IM, crop, cut, crop_colouriszed):
+    IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
+    IM.paste(crop_colouriszed, (0,0), crop)
+    IM = self.resize_image(IM, (int((cut[2]-cut[0])/self.sf), int((cut[3]-cut[1])/self.sf)))
+    draw = ImageDraw.Draw(IM)
+    self.write_text_to_draw(draw, 
+                 "%s" %(character), 
+                 top_left=(6, 2), 
+                 font_name = 'Vera Bold', 
+                 font_size=17, 
+                 font_colour=self.gui_html_font_colour)
+    name = "circle_%s.png" %character
+    OlexVFS.save_image_to_olex(IM, name, 2)
+
+    
+    
   def create_logo(self):
     factor = 4
     
@@ -1546,7 +1570,7 @@ class timage(ImageTools):
         'height':cbtn_buttons_height,
         'font_name':font_name,
         'bgcolour':(60,80,140),
-        'fontcolouroff':self.adjust_colour(self.gui_timage_colour, luminosity = 1.1),
+        'fontcolouroff':self.adjust_colour((237,237,237), luminosity = 0.6),
         'bgcolouroff':self.adjust_colour(self.gui_timage_colour, luminosity = 1.8),
         'bgcolouron':self.gui_timage_colour,
         'fontcolouron':self.gui_html_highlight_colour,

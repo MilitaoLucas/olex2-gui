@@ -485,6 +485,22 @@ def changeBoxColour(ctrl_name,colour):
   return ''
 OV.registerFunction(changeBoxColour)
 
+
+def switchButton(name,state):
+  if state == 'off':
+    copy_from = "%soff.png" %name
+    copy_to = "%s.png" %name
+    OV.CopyVFSFile(copy_from, copy_to)
+  else:
+    copy_from = "%son.png" %name
+    copy_to = "%s.png" %name
+    OV.CopyVFSFile(copy_from, copy_to)
+  OV.htmlReload()
+  return ""
+OV.registerFunction(switchButton)
+
+
+
 def bgcolor(ctrl_name):
   value = olx.GetValue(ctrl_name)
   if value == '?':
@@ -560,7 +576,7 @@ def OnModeChange(*args):
     'move sel -c=':'button-copy_near',    
     'grow':'button-grow_mode',
     'split -r=EADP':'button-move_atoms_or_model_disorder',
-    'name':'small-button-naming'
+    'name':'button_small-naming'
   }
   name = 'mode'
   mode = ""
@@ -596,3 +612,6 @@ OV.registerCallback('modechange',OnModeChange)
 def PopProgram(txt="Fred"):
   name = "pop_prg_analysis"
   makeHtmlBottomPop({'txt':txt, 'name':name}, pb_height=225)
+  
+  
+  
