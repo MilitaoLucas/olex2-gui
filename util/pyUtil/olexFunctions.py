@@ -122,6 +122,9 @@ class OlexFunctions(inheritFunctions):
   def Reset(self):
     olx.Reset()
     
+  def htmlReload(self):
+    olex.m("html.Reload")
+    
   def reloadStructureAtreap(self, path, file, fader=True):
     fader = self.FindValue('gui_use_fader')
     #print "AtReap %s/%s" %(path, file)
