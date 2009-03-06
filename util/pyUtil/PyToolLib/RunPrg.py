@@ -78,7 +78,7 @@ class RunPrg(ArgumentParser):
     if "smtbx" not in self.program.name:
       ext = "res"
     else:
-      ext = "ins"
+      ext = "res"
     copy_from = "%s/%s.%s" %(self.tempPath, refinealias, ext)
     copy_to = "%s/listen.res" %(self.datadir)
     if os.path.isfile(copy_from):
