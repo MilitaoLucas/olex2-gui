@@ -355,5 +355,8 @@ class OlexFunctions(inheritFunctions):
   def cmd(self, command):
     olex.m(command)
     return ""
+  
+  def setItemstate(self, txt):
+    olex.m("itemstate %s" %txt)
 
 OV = OlexFunctions()
