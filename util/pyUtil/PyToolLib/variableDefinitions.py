@@ -224,6 +224,7 @@ def snumVariables():
     'snum_calcvoid_view':'wire',
     #'snum_calcvoid_button_txt':'Calculate Voids',
     'snum_olex_conres':'RRINGS',
+    'snum_banner_slide':Variable(5),
   }
 
 def userVariables():

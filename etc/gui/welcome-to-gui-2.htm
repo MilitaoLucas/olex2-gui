@@ -1,75 +1,66 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
-
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-	<td valign='center' colspan='2'>
-		<b>This is the working version of the new GUI 2 for Olex2</b> This new GUI will be much clearer and easier to navigate than the current GUI.
+  <td>	
+    <zimg name="BANNER_IMAGE" border="0" src="banner.png">
 	</td>
 </tr>
+
+<table>
+
+<!-- #include tool-table-header gui\blocks\tool-table-header.htm;image=#image;1; -->
+
+	<tr>
+		<td width="8" VALIGN='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+		</td>
+		<td colspan='1'>
+			<input 
+				type="slider" 
+				name = "BANNER_SLIDE" 
+				width="$eval(htmlpanelwidth()-33)" 
+				height="20" 
+				value="GetVar(snum_banner_slide)" 
+				bgcolor="$GetVar(gui_html_table_bg_colour)"  
+				fgcolor="$GetVar(gui_html_font_colour)" 
+				min="0" 
+				max="79" 
+				onchange = "SetVar(snum_banner_slide,GetValue(BANNER_SLIDE))>>
+spy.doBanner(GetValue(BANNER_SLIDE))
+"
+			>
+		</td>
+	</tr>
+</table>
+
+<!-- #include tool-table-header gui\blocks\tool-table-header.htm;image=#image;1; -->
 
 <b>
 
 <tr>
 	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
 	</td>
-	<td valign='top' width="20">
+	<td valign='top'>
 		<zimg border="0" src="circle_1.png">
 	</td>
 	<td>
-		<a href="itemstate aio-* 0>>itemstate aio-prepare* 1">Prepare</a>
+		<a href="spy.doBanner(5)"">Start</a>
 	</td>
-</tr>
-
-
-<tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-	<td valign='top' width="20">
+	<td valign='top'>
 		<zimg border="0" src="circle_2.png">
 	</td>
 	<td>
-		<a href="itemstate aio-* 0>>itemstate aio-solve* 1">Solve</a>
+		<a href="spy.doBanner(22)">Solve</a>
 	</td>
-</tr>
-
-<tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
-	</td>
-	<td valign='top' width="20">
+	<td valign='top'>
 		<zimg border="0" src="circle_3.png">
 	</td>
 	<td>
-		<a href="itemstate aio-* 0>>itemstate aio-refine* 1">Refine</a>
+		<a href="spy.doBanner(37)">Refine</a>
 	</td>
-</tr>
-
-
-<tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-	<td valign='top' width="20">
+	<td valign='top'>
 		<zimg border="0" src="circle_4.png">
 	</td>
 	<td>
-		<a href="itemstate aio-* 0>>itemstate aio-image* 1">Images</a>
-	</td>
-</tr>
-
-<tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-	<td valign='top' width="20">
-		<zimg border="0" src="circle_5.png">
-	</td>
-	<td>
-		<a href="itemstate aio-* 0>>itemstate aio-table* 1">Tables</a>
-	</td>
-</tr>
-
-<tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-	<td valign='top' width="20">
-		<zimg border="0" src="circle_6.png">
-	</td>
-	<td>
-		<a href="itemstate aio-* 0>>itemstate aio-report* 1">Report</a>
+		<a href="spy.doBanner(55)">Analyze</a>
 	</td>
 </tr>
 
@@ -79,22 +70,14 @@
 		<zimg border="0" src="circle_a.png">
 	</td>
 	<td>
-		<a href="itemstate aio-disorder* 1">Disorder</a>
+		<a href="itemstate aio-disorder* 1">D/order</a>
 	</td>
-</tr>
-
-<tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 	<td valign='top' width="20">
 		<zimg border="0" src="circle_b.png">
 	</td>
 	<td>
 		<a href="itemstate aio-pack* 1">Pack</a>
 	</td>
-</tr>
-
-<tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 	<td valign='top' width="20">
 		<zimg border="0" src="circle_b.png">
 	</td>
@@ -102,6 +85,10 @@
 		<a href="itemstate aio-style* 1">Styles</a>
 	</td>
 </tr>
+
+</table>
+
+
 
 
 </b>

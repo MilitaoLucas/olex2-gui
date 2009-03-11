@@ -1040,6 +1040,59 @@ class timage(ImageTools):
     name = "olex_help_logo.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
 
+
+    cut = 140*sf, 154*sf, 220*sf, 175*sf
+    max_width = cut[2] - cut[0]
+    crop =  im.crop(cut)
+    txt_l= ("Prepare", 
+              "Solve", 
+              "Refine", 
+              "Analyze", )
+    states = ["on", "off", ""]
+    for state in states:
+      if state == "on":
+        colour = self.adjust_colour(self.gui_html_highlight_colour,luminosity=1.3)
+      elif state == "off":
+        colour = self.adjust_colour(self.gui_html_base_colour,luminosity=1.9)
+      elif state == "":
+        colour = self.adjust_colour(self.gui_html_base_colour,luminosity=1.9)
+      for txt in txt_l:
+        #IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
+        #crop_colouriszed = self.colourize(crop, (0,0,0), colour) 
+        crop_colouriszed = crop
+        IM =  Image.new('RGBA', crop.size)
+        circle = self.makeCharcterCircles(str('1'), im, self.gui_html_table_firstcol_colour, resize = False)
+        IM.paste(crop_colouriszed, (0,0), crop)
+        IM.paste(circle,(0,0), circle)
+        draw = ImageDraw.Draw(IM)
+        t = txt.replace("blank"," _ ") 
+        self.write_text_to_draw(draw, 
+                     "%s" %t,
+                     top_left=(10, 6), 
+                     font_name = 'Vera', 
+                     font_size=48, 
+                     titleCase=True,                  
+                     font_colour="#ff0000",
+                     max_width = max_width,
+                     align='centre'
+                     )
+        IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
+        name = "comp-%s%s.png" %(txt.replace(" ", "_"), state)
+        name = name.lower()
+        OlexVFS.save_image_to_olex(IM, name, 2)
+        if name == "button_small-blank.png":
+          filename = r"%s/button_small-blank.png" %self.datadir
+          IM.save(filename)
+
+    
+    IM =  Image.new('RGBA', crop.size)
+    IM.paste(crop, (0,0), crop)
+    IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
+    name = "test.png"
+    OlexVFS.save_image_to_olex(IM, name, 2)
+    
+    
+    
     ## SMALL buttons
     cut = 90*sf, 178*sf, 140*sf, 193*sf
     max_width = cut[2] - cut[0]
@@ -1255,16 +1308,16 @@ class timage(ImageTools):
     OlexVFS.save_image_to_olex(IM, name, 2)
 
     ## Create big circles with Writing In
-    cut = 30*sf, 150*sf, 55*sf, 175*sf
-    crop =  im.crop(cut)
-    crop_colouriszed = self.colourize(crop, (0,0,0), self.gui_html_table_firstcol_colour) 
+    #cut = 30*sf, 150*sf, 55*sf, 175*sf
+    #crop =  im.crop(cut)
+    #crop_colouriszed = self.colourize(crop, (0,0,0), self.gui_html_table_firstcol_colour) 
     for i in xrange(12):
-      self.makeCharcterCircles(str(i), IM, crop, cut, crop_colouriszed,)
+      self.makeCharcterCircles(str(i), im, self.gui_html_table_firstcol_colour)
 
-    crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_green,saturation=0.7,luminosity=2.1)) 
+    colo =  self.adjust_colour(self.gui_green,saturation=0.7,luminosity=2.1)
     l = ["a", "b", "c", "d", "e", "f"]
     for letter in l:
-      self.makeCharcterCircles(letter, IM, crop, cut, crop_colouriszed)
+      self.makeCharcterCircles(letter, im, colo)
       
     cut = 55*sf, 150*sf, 80*sf, 175*sf
     crop =  im.crop(cut)
@@ -1329,23 +1382,67 @@ class timage(ImageTools):
     name = "warning_big.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
     
-    
-    self.info_bitmaps()
+    try:
+      self.info_bitmaps()
+      self.makeTestBanner()
+    except Exception, err:
+      print "There has been an error: %s" %err
  
+  def makeTestBanner(self):
+    txt = '::         Prepare     Solve     Refine     Analyze     Publish           ::'
+    size = (1100,40)
+    IM =  Image.new('RGBA', size, self.gui_html_table_bg_colour)
+    #IM =  Image.new('RGBA', size, "#aaaa00")
+    draw = ImageDraw.Draw(IM)
+    self.write_text_to_draw(draw, 
+                 "%s" %(txt), 
+                 top_left=(24, 2), 
+                 font_name = 'Vera Bold', 
+                 font_size=30, 
+                 font_colour=self.gui_html_font_colour)
+    #IM = self.resize_image(IM, (int((cut[2]-cut[0])/self.sf), int((cut[3]-cut[1])/self.sf)))
+    width = int(self.gui_htmlpanelwidth) - 22
+    name = "banner.png"
+    for i in xrange(119):
+      step = 10
+      x1 = 0 + i * step
+      x2 = x1 + width
+      cut = (x1, 0, x2, 40)
+      crop =  IM.crop(cut)
+      draw = ImageDraw.Draw(crop)
+      begin = (width/2 - 5, 40)
+      middle = (width/2,34)
+      end = (width/2 + 5, 40)
+      draw.polygon((begin, middle, end), "#ff0000")
+      draw.line(((width/2,0),(width/2,40)), fill="#ff0000")
+      name = "banner_%s.png" %i
+      OlexVFS.save_image_to_olex(crop, name, 2)
+      if i == 0:
+        OlexVFS.save_image_to_olex(crop, "banner.png", 2)
+        
     
-  def makeCharcterCircles(self, character, IM, crop, cut, crop_colouriszed):
+    
+    
+    
+  def makeCharcterCircles(self, character, im, colour, resize = True):
+    cut = 30*self.sf, 150*self.sf, 55*self.sf, 175*self.sf
+    crop =  im.crop(cut)
     IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
+    #IM =  Image.new('RGBA', crop.size)
+    crop_colouriszed = self.colourize(crop, (0,0,0,0), colour) 
     IM.paste(crop_colouriszed, (0,0), crop)
-    IM = self.resize_image(IM, (int((cut[2]-cut[0])/self.sf), int((cut[3]-cut[1])/self.sf)))
     draw = ImageDraw.Draw(IM)
     self.write_text_to_draw(draw, 
                  "%s" %(character), 
-                 top_left=(6, 2), 
+                 top_left=(24, 6), 
                  font_name = 'Vera Bold', 
-                 font_size=17, 
+                 font_size=70, 
                  font_colour=self.gui_html_font_colour)
+    if resize:
+      IM = self.resize_image(IM, (int((cut[2]-cut[0])/self.sf), int((cut[3]-cut[1])/self.sf)))
     name = "circle_%s.png" %character
     OlexVFS.save_image_to_olex(IM, name, 2)
+    return IM
 
     
     
