@@ -543,7 +543,7 @@ def get_template(name):
   else:
     return None
 
-def makeHtmlBottomPop(args, pb_height = 50):
+def makeHtmlBottomPop(args, pb_height = 50, y = 0, panel_diff = 22):
   txt = args.get('txt',None)
   name = args.get('name',"test")
   replace_str = args.get('replace',None)
@@ -558,10 +558,11 @@ def makeHtmlBottomPop(args, pb_height = 50):
   pop_html = name
   pop_name = name
   htm_location = "%s.htm" %pop_html
-  OlexVFS.write_to_olex(htm_location, txt)
-  width = int(IM.gui_htmlpanelwidth) - 22
+  OlexVFS.write_to_olex(htm_location,txt)
+  width = int(IM.gui_htmlpanelwidth) - panel_diff
   x = metric[0] + 10
-  y = metric[1] - pb_height - 8
+  if not y:
+    y = metric[1] - pb_height - 8
   pstr = "popup %s '%s' -t='%s' -w=%s -h=%s -x=%s  -y=%s" %(pop_name, htm_location, pop_name, width, pb_height, x, y)
   OV.cmd(pstr)
   olx.html_SetBorders(pop_name,0)
@@ -613,5 +614,31 @@ def PopProgram(txt="Fred"):
   name = "pop_prg_analysis"
   makeHtmlBottomPop({'txt':txt, 'name':name}, pb_height=225)
   
+def PopBanner(txt='<zimg src="banner.png">'):
+  name = "pop_banner"
+  makeHtmlBottomPop({'txt':txt, 'name':name}, pb_height=65, y = 130,panel_diff=22)
+OV.registerFunction(PopBanner)
   
+  
+def doBanner(i):
+  i = int(i)
+  #olx.html_SetImage("BANNER_IMAGE","banner_%i.png" %i)
+  OV.CopyVFSFile("banner_%i.png" %i, "banner.png")
+  OV.SetVar('snum_banner_slide', i)
+  ist = ""
+  ist += "aio-* 0 aio-welcome* 1 "
+  if i < 10:
+    ist += "aio-*prepare 2"
+  elif i < 30:
+    ist += "aio-*solve 2"
+  elif i < 50:
+    ist += "aio-*refine 2"
+  elif i < 90:
+    ist += "aio-*analyze 2"
+  elif i < 120:
+    ist += "aio-*report 2"
+  OV.setItemstate(ist)
+  return ""
+  
+OV.registerFunction(doBanner)
   
