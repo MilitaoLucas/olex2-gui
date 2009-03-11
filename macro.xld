@@ -1581,7 +1581,7 @@
 	\>
 \>
 
-<gui2 help="Swap between start panels"
+<gui2 help="Switch to Gui2"
 	<body
 		<cmd 
 			<cmd2 "itemstate * 0">
@@ -1589,7 +1589,7 @@
 			<cmd2 "itemstate info-title 1">
 			<cmd2 "itemstate index-all-in-one 1">
 			<cmd2 "itemstate aio-* 0">
-			<cmd2 "itemstate aio-welcome* 1 ">
+			<cmd2 "itemstate aio-welcome* 1">
 		\>
 	\>
 \>
