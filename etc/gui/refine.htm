@@ -1,97 +1,52 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
 
-
-	<tr VALIGN='center' ALIGN='center'>
-		  <td width="8" bgcolor="#E9E9E9">
-					 <a href="refine getvalue(ls) getvalue(plan)">
-					 <zimg border="0" src="gui/images/toolbar-xl.png"></a>
-		  </td >
-
-		  <td VALIGN='center' width="15%">
-				 <b>L.S.</b>
-		  </td>	
-
-		  <td VALIGN='center' width="15%">
-					 <font size='2'> 
-		  		  		 <input type="spin" name="ls" width="40" height="17" value=
-<!-- #cmd ins(ls) -->
-		  			 ></font>
-		  </td>
-
-		  <td VALIGN='center' width="30%">
-					 <b>Q-Peaks</b>
-		  </td>
-
-		  <td VALIGN='center' width="15%">
-					 <font size='2'>
-					 <input type="spin" name="plan"  width="45"  height="17" value=
-<!-- #cmd ins(plan) -->
-					  ></font>
-		  </td>
-
-		  <td>  
-		    <a href="refine getvalue(ls) getvalue(plan)">Refine</a>
-		  </td>	
-	</tr>
-
-
-
 	<tr>
-
-		<td width="8" bgcolor="#E9E9E9"></td>
-			<a href="sel -a>>sel -i $H>>anis sel>>telp">
-			<zimg border="0" src="gui/images/toolbar-anis.png"></a>
-		<td colspan='5'>
-			<a href="sel -a>>sel -i $H>>anis sel>>telp"><b>ANIS</b> All</a>
-			<a href="sel -u>>sel $C>>anis sel>>telp">C</a>
-			<a href="sel -u>>sel $N>>anis sel>>telp">N</a>
-			<a href="sel -u>>sel $O>>anis sel>>telp">O</a>&nbsp;&nbsp;&nbsp;
-			<a href="sel -a>>isot sel>>pers"><b>ISOT</b> All</a>
-			<a href="sel -u>>sel $C>>isot sel>>pers">C</a>
-			<a href="sel -u>>sel $N>>isot sel>>pers">N</a>
-			<a href="sel -u>>sel $O>>isot sel>>pers">O</a>
-		</td>
-
-
+	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+		<a 
+			href="spy.make_help_box -name='refine' -popout='False'" 
+			target="Help me with this">
+			<zimg border="0" src="info.png">
+		</a>	
+	</td>
+	<td VALIGN='center'  colspan='2'>
+    <input
+			bgcolor="$GetVar(gui_html_table_bg_colour)"  
+			type="button" 
+			name="RUN_REFINE" 
+			image="button-refine.png"
+			onclick="refine>>echo 'Running Refinement Program'"
+		>
+	</td>
 	</tr>
+</table>
 
+<!-- #include tool-table-header gui\blocks\tool-table-header.htm;1; -->
 	<tr>
-		<td width="8" bgcolor="#E9E9E9"></td>
-			<a href="edit">
-			<zimg border="0" src="gui/images/toolbar-edit.png"></a>
-		<td colspan='5'>
-			<a href="edit">%Edit%</a> <a href="edit">.ins</a>&nbsp<a href="edit res">.res</a>&nbsp<a href="edit lst">.lst</a>&nbsp<a href="edit cif">.cif</a>&nbsp;&nbsp;
-			<a href="fixunit">%Adjust Formula%</a>
-		</td>
-	</tr>
+	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+		<a 
+			href="spy.make_help_box -name='refine' -popout='False'" 
+			target="Help me with this">
+			<zimg border="0" src="info.png">
+		</a>	
+	</td>
+	  <td>	
+	    <zimg border="0" name="REFINEMENT_IMG" src="FilePath()/.olex/Refinement.png">
+	  </td>
+	</tr>	
+</table>
 
 
-	<tr>
-		<td width="8" bgcolor="#E9E9E9"></td>
-		<td colspan='5'>
-		  <b>%Fix%:</b>
-		  <a href="mode fixXYZ">XYZ</a>&nbsp;|&nbsp;<a href="mode fixU">U</a>
-		  &nbsp;|&nbsp;<b>%Free Selected%:</b>
-		  <a href="free XYZ sel">XYZ</a>&nbsp;|&nbsp;<a href="free U sel">U</a>
-		</td>
-	</tr>
+<font color=$getVar(gui_html_font_colour)  size=$getVar(gui_html_font_size)>
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$getVar(gui_html_table_bg_colour)">
 
 
-	<tr>
-		<td width="8" bgcolor="#E9E9E9"></td>
-			<a href="edit">
-			<zimg border="0" src="gui/images/toolbar-weight.png"></a>
-		<td colspan='5'>
-			<a href="weight>>refine"><b>%Adjust Weight%</b> 
-<!-- #cmd ins(weight) -->
-			>>  	
-<!-- #cmd ins(weight1) -->
-			
-                </a>
-		</td>
-			
-			
-		</td>
-	</tr>
+<tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_PROGRAM'>
+	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 
-<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
+<!-- #include refinement-settings-h3-refinement-settings gui\refinement-settings-h3-refinement-settings.htm;gui\blocks\tool-h3-off.htm;image=refinement-settings-h3-refinement-settings;colspan=4;onclick=;onclick=;1 2; -->
+
+
+	
+</table>	
+</font>
+	

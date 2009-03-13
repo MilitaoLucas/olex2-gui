@@ -773,7 +773,7 @@ class Analysis(Graph):
       self.counter = 0
       self.attempt = 1
       self.item = fun
-      size = (int(OV.FindValue('gui_htmlpanelwidth'))- 32, 150)
+      size = (int(OV.FindValue('gui_htmlpanelwidth'))- 45, 100)
       self.graphInfo["Title"] = fun
       self.graphInfo["imSize"] = size
       self.graphInfo["FontScale"] = 0.03
@@ -785,7 +785,7 @@ class Analysis(Graph):
       self.counter = 0
       self.attempt = 1
       self.item = fun
-      size = (int(OV.FindValue('gui_htmlpanelwidth'))- 32, 150)
+      size = (int(OV.FindValue('gui_htmlpanelwidth'))- 45, 100)
       self.graphInfo["Title"] = fun
       self.graphInfo["imSize"] = size
       self.graphInfo["FontScale"] = 0.03
@@ -1074,7 +1074,7 @@ class Analysis(Graph):
     img_name = "XY.png"
     txt = self.ProgramHtml(program, method, "Solving", img_name)
     OlexVFS.write_to_olex('xy.htm', txt)
-    htmlTools.PopProgram(txt=txt)
+    #htmlTools.PopProgram(txt=txt)
 
   def make_ShelXL_plot(self):
     self.make_empty_graph()
@@ -1083,7 +1083,7 @@ class Analysis(Graph):
     img_name = "ShelXL.png"
     txt = self.ProgramHtml(program, method, "Refining", img_name)
     OlexVFS.write_to_olex("ShelXL.htm", txt)
-    htmlTools.PopProgram(txt=txt)
+    #htmlTools.PopProgram(txt=txt)
     
   def make_AutoChem_plot(self):
     filepath = self.file_reader("%s/%s.csv" %(self.datadir,"ac_stats"))
@@ -1464,7 +1464,9 @@ class Analysis(Graph):
     
     image_location = "ShelXL.png"
     OlexVFS.save_image_to_olex(self.im, image_location, 0)
-    olex.m("html.Reload pop_prg_analysis")
+    self.im.save("%s/.olex/Refinement.png" %self.filepath, "PNG")
+    olx.html_SetImage("REFINEMENT_IMG","ShelXL.png")
+    #olex.m("html.Reload pop_prg_analysis")
   
   
   def run_charge_flipping_graph(self, flipping, solving, previous_state):
@@ -1549,7 +1551,10 @@ class Analysis(Graph):
       
       image_location = "XY.png"
       res = OlexVFS.save_image_to_olex(self.im, image_location,  0)
-      olex.m("html.Reload pop_prg_analysis")
+      self.im.save("%s/.olex/Solution.png" %self.filepath, "PNG")
+
+      olx.html_SetImage("SOLUTION_IMG","XY.png")
+      #olex.m("html.Reload pop_prg_analysis")
       
   
 class Dataset(object):
