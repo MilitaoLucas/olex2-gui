@@ -486,6 +486,13 @@ class ImageTools(FontInstances):
     r,g,b,a = im.split()
     im = Image.composite(im,white, a) # Create a composite
     return im
+
+  def getTxtWidthAndHeight(self, txt, draw, font_name='Vera', font_size=12):
+    font = self.fonts[font_name]["fontInstance"].get(font_size,None)
+    if not font:
+      font = self.registerFontInstance(font_name, font_size)
+    wX, wY = draw.textsize(txt, font=font)
+    return wX, wY
   
   def make_pop_image(self, d):
     size = d.get('size')

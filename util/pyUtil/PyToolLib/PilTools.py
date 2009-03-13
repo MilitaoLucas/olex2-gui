@@ -20,7 +20,9 @@ IT = ImageTools()
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import olex_fs
+import olx
 
+olx.banner_slide = {}
 
 try:
   import olx
@@ -987,6 +989,9 @@ class timage(ImageTools):
 
     sf = 4
     self.sf = sf
+    
+    self.getImageItemsFromTextFile()
+    
     im = Image.open(image_source)
     cut = 0, 52*sf, 27*sf, 76*sf
     crop =  im.crop(cut)
@@ -1169,8 +1174,13 @@ class timage(ImageTools):
                     "Atom Number",
                     "Atom Label",
                     "Mass & Label",
-                    "Moieties"
+                    "Moieties",
+                    "Reset",
+                    "Reset & Solve",
+                    "SG Info",
+                    "Wilson Plot",
                     )
+    button_names = self.image_items_d.get("THREE_BUTTONS_PER_ROW", button_names)
     states = ["on", "off", ""]
     for state in states:
       if state == "on":
@@ -1196,7 +1206,7 @@ class timage(ImageTools):
                      max_width = max_width,
                      align='centre'
                      )
-        sfs = sf * int(self.gui_htmlpanelwidth)/320
+        sfs = sf * 320/int(self.gui_htmlpanelwidth)
         IM = self.resize_image(IM, (int((cut[2]-cut[0])/sfs), int((cut[3]-cut[1])/sfs)))
         name = "button-%s%s.png" %(txt.replace(" ", "_"), state)
         name = name.lower()
@@ -1389,39 +1399,149 @@ class timage(ImageTools):
       print "There has been an error: %s" %err
  
   def makeTestBanner(self):
-    txt = '::         Prepare     Solve     Refine     Analyze     Publish           ::'
-    size = (1100,40)
+    cmd_col = "#ff0000"
+    txt_items = [("Olex2",8,0),
+                 ("Prepare",28,0),
+                 ("Solve",55,0),
+                 ("Refine",80,0),
+                 ("Analyze",100,0),
+                 ("Publish",120,0),
+                 ]
+    
+    txt2_items = [("settings",11,0),
+                  ("reflections",28,0),
+                  ("formula",40,0),
+                  ("assign solution",60,cmd_col),
+                  ("assign",82,cmd_col),
+                  ("add hydrogen",92,cmd_col),
+                  ("disorder",110,0),
+                  ]
+                  
+    txt3_items = [
+                  ("setup",18,cmd_col),
+                  ("space group",33,0),
+                  ("solve now",55,cmd_col),
+                  ("refine now",78,cmd_col),
+                  ("anisotropic",86,cmd_col),
+                  ("atom naming",100,0),
+                  ("geometric measurements",120,0),
+                  ]
+    
+    height = 45
+    width = 1400
+    size = (width,height)
+    
+    bannerbg = "#fdff72"
     IM =  Image.new('RGBA', size, self.gui_html_table_bg_colour)
+    IM =  Image.new('RGBA', size, bannerbg)
     #IM =  Image.new('RGBA', size, "#aaaa00")
     draw = ImageDraw.Draw(IM)
-    self.write_text_to_draw(draw, 
+    for i in xrange(8):
+      lum = 1.00 - ((5-i) * (0.05))
+      draw.line(((0,i),(width,i)), fill=self.adjust_colour(bannerbg,luminosity=lum))
+    for i in xrange(8):
+      lum = 1.00 - ((5 -i) * (0.05))
+      draw.line(((0,height  - i),(width,height - i)), fill=self.adjust_colour(bannerbg,luminosity=lum))
+      
+    font_name = "Vera Bold"
+    font_size = 42
+    for item in txt_items:
+      txt = item[0]
+      x_pos = item[1] * 10
+      wX, wY = self.getTxtWidthAndHeight(txt, draw, font_name = font_name, font_size = font_size)
+      olex_pos = x_pos + wX/2 -150
+      olex_pos = "%.0f" %(olex_pos/10.0)
+      olx.banner_slide.setdefault(txt.lower(),int(olex_pos))
+      OV.SetVar("snum_slide_%s" %txt.lower(),olex_pos)
+      self.write_text_to_draw(draw, 
+#                   "%s(%s)" %(txt, olex_pos), 
+                   "%s" %(txt), 
+                   top_left=(x_pos,-4), 
+                   font_name = font_name, 
+                   font_size=font_size,
+                   titleCase=True,
+                   font_colour=self.adjust_colour(bannerbg,luminosity=0.65))
+    font_name = "Vera"
+    font_size = 13
+    font_colour = self.gui_html_font_colour
+    for item in txt2_items:
+      txt = item[0]
+      if item[2]:
+        font_colour = item[2]
+      x_pos = item[1] * 10
+      x_pos = item[1] * 10
+      wX, wY = IT.getTxtWidthAndHeight(txt, draw, font_name=font_name, font_size=font_size)
+      olex_pos = x_pos + wX/2 -150
+      olex_pos = "%.0f" %(olex_pos/10.0)
+      olx.banner_slide.setdefault(txt.lower(),int(olex_pos))
+      self.write_text_to_draw(draw, 
                  "%s" %(txt), 
-                 top_left=(24, 2), 
-                 font_name = 'Vera Bold', 
-                 font_size=30, 
-                 font_colour=self.gui_html_font_colour)
+                 top_left=(x_pos,16), 
+                 font_name = font_name, 
+                 font_size=font_size, 
+                 font_colour=font_colour)
+    for item in txt3_items:
+      txt = item[0]
+      if item[2]:
+        font_colour = item[2]
+      x_pos = item[1] * 10
+      x_pos = item[1] * 10
+      wX, wY = IT.getTxtWidthAndHeight(txt, draw, font_name=font_name, font_size=font_size)
+      olex_pos = x_pos + wX/2 -150
+      olex_pos = "%.0f" %(olex_pos/10.0)
+      olx.banner_slide.setdefault(txt.lower(),int(olex_pos))
+      self.write_text_to_draw(draw, 
+                 "%s" %(txt), 
+                 top_left=(x_pos,28), 
+                 font_name = font_name, 
+                 font_size=font_size, 
+                 font_colour=font_colour)
+      
+      
     #IM = self.resize_image(IM, (int((cut[2]-cut[0])/self.sf), int((cut[3]-cut[1])/self.sf)))
-    width = int(self.gui_htmlpanelwidth) - 22
+    width = int(self.gui_htmlpanelwidth) - 24
     name = "banner.png"
-    for i in xrange(119):
+    for i in xrange(129):
       step = 10
       x1 = 0 + i * step
       x2 = x1 + width
-      cut = (x1, 0, x2, 40)
+      cut = (x1, 0, x2, height)
       crop =  IM.crop(cut)
-      draw = ImageDraw.Draw(crop)
-      begin = (width/2 - 5, 40)
-      middle = (width/2,34)
-      end = (width/2 + 5, 40)
-      draw.polygon((begin, middle, end), "#ff0000")
-      draw.line(((width/2,0),(width/2,40)), fill="#ff0000")
+      crop = self.decorate_banner_image(crop,bannerbg, i)
       name = "banner_%s.png" %i
       OlexVFS.save_image_to_olex(crop, name, 2)
       if i == 0:
         OlexVFS.save_image_to_olex(crop, "banner.png", 2)
         
     
-    
+  def decorate_banner_image(self, crop,bannerbg, i):
+    width, height = crop.size
+    heigth = height -1 
+    draw = ImageDraw.Draw(crop)
+    begin = (width/2 - 5, height)
+    middle = (width/2,height -6)
+    end = (width/2 + 5, height)
+    draw.polygon((begin, middle, end), "#ff0000")
+    draw.line(((width/2,0),(width/2,height)), fill="#ff0000")
+    left = width/2
+    right = width/2
+    for j in xrange(40):
+      y1 = height -2 
+      if j % 2:
+        y1 = height - 3
+      right += 8
+      draw.line(((right,y1),(right,height)), fill="#ababab")
+      left -= 10
+      draw.line(((left,y1),(left,height)), fill="#ababab")
+    draw.line(((0,height),(width,height)), fill="#ababab")
+    draw.line(((0,height),(width,height)), fill="#ababab")
+    self.write_text_to_draw(draw, 
+                 "%s" %(str(i)), 
+                 top_left=(width -20, 3), 
+                 font_name = 'Vera', 
+                 font_size=12, 
+                 font_colour="#ff0000")
+    return crop
     
     
   def makeCharcterCircles(self, character, im, colour, resize = True):
@@ -1444,7 +1564,25 @@ class timage(ImageTools):
     OlexVFS.save_image_to_olex(IM, name, 2)
     return IM
 
-    
+  
+  def getImageItemsFromTextFile(self):
+    path = "%s/etc/gui/images/image_items.txt" %self.basedir
+    im_d = {}
+    if not os.path.exists(path):
+      return
+    rFile = open(path, 'r')
+    lines = rFile.readlines()
+    for line in lines:
+      if line.startswith("["):
+        key = line.strip().strip('[').strip(']')
+        im_d.setdefault(key,[])
+      elif line.startswith("#"):
+        continue
+      else:
+        if key:
+          im_d[key].append(line.strip())
+    self.image_items_d = im_d
+  
     
   def create_logo(self):
     factor = 4
