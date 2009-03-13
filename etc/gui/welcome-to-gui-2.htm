@@ -1,37 +1,5 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
-<tr>
-  <td>	
-    <zimg name="BANNER_IMAGE" border="0" src="banner.png">
-	</td>
-</tr>
 
-<table>
-
-<!-- #include tool-table-header gui\blocks\tool-table-header.htm;image=#image;1; -->
-
-	<tr>
-		<td width="8" VALIGN='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
-		</td>
-		<td colspan='1'>
-			<input 
-				type="slider" 
-				name = "BANNER_SLIDE" 
-				width="$eval(htmlpanelwidth()-33)" 
-				height="20" 
-				value="GetVar(snum_banner_slide)" 
-				bgcolor="$GetVar(gui_html_table_bg_colour)"  
-				fgcolor="$GetVar(gui_html_font_colour)" 
-				min="0" 
-				max="79" 
-				onchange = "SetVar(snum_banner_slide,GetValue(BANNER_SLIDE))>>
-spy.doBanner(GetValue(BANNER_SLIDE))
-"
-			>
-		</td>
-	</tr>
-</table>
-
-<!-- #include tool-table-header gui\blocks\tool-table-header.htm;image=#image;1; -->
 
 <b>
 
@@ -42,25 +10,25 @@ spy.doBanner(GetValue(BANNER_SLIDE))
 		<zimg border="0" src="circle_1.png">
 	</td>
 	<td>
-		<a href="spy.doBanner(5)"">Start</a>
+		<a href="spy.doBanner(GetVar(snum_slide_prepare))"">Start</a>
 	</td>
 	<td valign='top'>
 		<zimg border="0" src="circle_2.png">
 	</td>
 	<td>
-		<a href="spy.doBanner(22)">Solve</a>
+		<a href="spy.doBanner(GetVar(snum_slide_solve))">Solve</a>
 	</td>
 	<td valign='top'>
 		<zimg border="0" src="circle_3.png">
 	</td>
 	<td>
-		<a href="spy.doBanner(37)">Refine</a>
+		<a href="spy.doBanner(GetVar(snum_slide_refine))">Refine</a>
 	</td>
 	<td valign='top'>
 		<zimg border="0" src="circle_4.png">
 	</td>
 	<td>
-		<a href="spy.doBanner(55)">Analyze</a>
+		<a href="spy.doBanner(GetVar(snum_slide_analyze))">Analyze</a>
 	</td>
 </tr>
 
@@ -76,13 +44,13 @@ spy.doBanner(GetValue(BANNER_SLIDE))
 		<zimg border="0" src="circle_b.png">
 	</td>
 	<td>
-		<a href="itemstate aio-pack* 1">Pack</a>
+		<a href="itemstate aio-pack* 1 2">Pack</a>
 	</td>
 	<td valign='top' width="20">
 		<zimg border="0" src="circle_b.png">
 	</td>
 	<td>
-		<a href="itemstate aio-style* 1">Styles</a>
+		<a href="itemstate aio-style* 1 2">Styles</a>
 	</td>
 </tr>
 

@@ -577,11 +577,16 @@ if haveGUI:
   OV.registerFunction(MapView)
 
 def GetHklFileList():
-  g = glob.glob(r"%s/*.hkl" %OV.FilePath())
-  if sys.platform.startswith('linux'):
-    bigG = glob.glob(r"%s/*.HKL" %OV.FilePath())
-    # Added to make glob look for either case for Linux just incase the HKL isn't lowercase.
-    g += bigG
+  reflections_files = []
+  reflection_file_extensions = ["hkl", "raw"]
+  for extension in reflection_file_extensions:
+    g = glob.glob(r"%s/*.%s" %(OV.FilePath(),extension))
+    if sys.platform.startswith('linux'):
+      bigG = glob.glob(r"%s/*.%s" %(OV.FilePath(),extension))
+      # Added to make glob look for either case for Linux just incase the HKL isn't lowercase.
+      g += bigG
+    reflections_files += g
+  g = reflections_files
   g.sort()
   reflection_files = ""
   try:
@@ -603,7 +608,7 @@ def GetHklFileList():
       return
   most_recent_reflection_file = ""      
   for item in g:
-    reflection_files+="%s<-%s;" %(OV.FileName(item), item)
+    reflection_files+="%s.%s<-%s;" %(OV.FileName(item), OV.FileExt(item), item)
   return str(reflection_files)
 if haveGUI:
   OV.registerFunction(GetHklFileList)

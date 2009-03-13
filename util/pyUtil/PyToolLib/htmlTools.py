@@ -625,18 +625,57 @@ def doBanner(i):
   #olx.html_SetImage("BANNER_IMAGE","banner_%i.png" %i)
   OV.CopyVFSFile("banner_%i.png" %i, "banner.png")
   OV.SetVar('snum_banner_slide', i)
+  offset = 10
+  target = 2
   ist = ""
-  ist += "aio-* 0 aio-welcome* 1 "
-  if i < 10:
-    ist += "aio-*prepare 2"
-  elif i < 30:
-    ist += "aio-*solve 2"
-  elif i < 50:
-    ist += "aio-*refine 2"
-  elif i < 90:
-    ist += "aio-*analyze 2"
-  elif i < 120:
-    ist += "aio-*report 2"
+  ist += "aio-* 0 "
+
+  if i < olx.banner_slide.get("olex2",0) + offset:
+    ist += "aio-setting* 1 "
+    if olx.banner_slide.get("setup",0) - target < i < olx.banner_slide.get("setup",0) + target:
+      OV.cmd("setup")
+
+  elif i < olx.banner_slide.get("prepare",0) + offset:
+    ist += "aio-prepare* 2 "
+    if olx.banner_slide.get("reflection",0)- target < i < olx.banner_slide.get("reflections",0) + target:
+      ist += "aio-prepare-reflections* 1 "
+    if olx.banner_slide.get("formula",0)- target < i < olx.banner_slide.get("formula",0) + target:
+      ist += "aio-prepare-formula* 1 "
+    if olx.banner_slide.get("space group",0)- target < i < olx.banner_slide.get("space group",0) + target:
+      OV.cmd("sg")
+      ist += "aio-prepare-space-group* 1 "
+
+  elif i < olx.banner_slide.get("solve",0) + offset:
+    ist += "aio-solve* 2 "
+    if olx.banner_slide.get("solve now",0)- target < i < olx.banner_slide.get("solve now",0) + target:
+      OV.cmd("solve")
+    if olx.banner_slide.get("assign solution",0) - target < i < olx.banner_slide.get("assign solution",0) + target:
+      OV.cmd("vss(true)")
+
+  elif i < olx.banner_slide.get("refine",0) + offset:
+    ist += "aio-refine* 2 "
+    if olx.banner_slide.get("refine",0) - target < i < olx.banner_slide.get("refine",0) + target:
+      ist += "aio-refine-refine 1 "
+    if olx.banner_slide.get("refine now",0) - target < i < olx.banner_slide.get("refine now",0) + target:
+      OV.cmd("refine")
+    if  olx.banner_slide.get("assign",0) - target < i < olx.banner_slide.get("assign",0) + target:
+      OV.cmd("ata(1)")
+      OV.cmd("refine")
+      OV.cmd("ata(1)")
+    if  olx.banner_slide.get("anisotropic",0) - target < i < olx.banner_slide.get("anisotropic",0) + target:
+      OV.cmd("anis")
+      OV.cmd("refine")
+    if  olx.banner_slide.get("add hydrogen",0) - target < i < olx.banner_slide.get("add hydrogen",0) + target:
+      OV.cmd("hadd")
+      OV.cmd("refine")
+
+
+  elif i < olx.banner_slide.get("analyze",0) + offset:
+    ist += "aio-analyze* 2 "
+
+  elif i < olx.banner_slide.get("report",0) + offset:
+    ist += "aio-report* 2 "
+
   OV.setItemstate(ist)
   return ""
   

@@ -1,14 +1,47 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
 
-<!-- #include solution-settings gui\solution-settings-only.htm;0; -->
-	<tr>
-		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-			<zimg border="0" src="gui/images/toolbar-xs.png">
-		</td>		
-		<td colspan='4'>
-		</td>
+<tr>
+	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+		<a 
+			href="spy.make_help_box -name='solve' -popout='False'" 
+			target="Help me with this">
+			<zimg border="0" src="info.png">
+		</a>	
+	</td>
+	<td VALIGN='center'  colspan='2'>
+    <input
+			bgcolor="$GetVar(gui_html_table_bg_colour)"  
+			type="button" 
+			name="RUN_SOLVE" 
+			image="button-solve.png"
+			onclick="solve>>echo 'Running Solution Program'"
+		>
+	</td>
+</tr>
+</table>
 
-		<tr VALIGN='center' ALIGN='center'>
+<!-- #include tool-table-header gui\blocks\tool-table-header.htm;1; -->
+
+<tr>
+	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+		<a 
+			href="spy.make_help_box -name='solve' -popout='False'" 
+			target="Help me with this">
+			<zimg border="0" src="info.png">
+		</a>	
+	</td>
+	<td>	
+	    <zimg border="0" name="SOLUTION_IMG" src="FilePath()/.olex/Solution.png">
+	</td>
+</tr>	
+</table>
+
+<!-- #include solution-settings-aio gui\solution-settings-aio.htm;1; -->
+	
+
+
+<!--
+	<tr VALIGN='center' ALIGN='center'>
 		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 			<zimg border="0" src="gui/images/toolbar-xs.png">
 		</td >
@@ -26,8 +59,4 @@
 			<font size="-1"><a href='nextsolution'><b>%CLICK%</b></a> %to browse%, ENTER %to select%</font>
 		</td>	
 	</tr>
-	
-
-</table>
-
-<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
+-->	
