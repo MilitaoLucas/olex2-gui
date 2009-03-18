@@ -563,11 +563,11 @@ def makeHtmlBottomPop(args, pb_height = 50, y = 0, panel_diff = 22):
   x = metric[0] + 10
   if not y:
     y = metric[1] - pb_height - 8
-  pstr = "popup %s '%s' -t='%s' -w=%s -h=%s -x=%s  -y=%s" %(pop_name, htm_location, pop_name, width, pb_height, x, y)
-  OV.cmd(pstr)
-  olx.html_SetBorders(pop_name,0)
-  OV.cmd(pstr)
-  olx.html_SetBorders(pop_name,0)
+#  pstr = "popup %s '%s' -t='%s' -w=%s -h=%s -x=%s  -y=%s" %(pop_name, htm_location, pop_name, width, pb_height, x, y)
+#  OV.cmd(pstr)
+#  olx.html_SetBorders(pop_name,0)
+#  OV.cmd(pstr)
+#  olx.html_SetBorders(pop_name,0)
   #olx.html_Reload(pop_name)
 OV.registerMacro(makeHtmlBottomPop, 'txt-Text to display&;name-Name of the Bottom html popupbox')
   
@@ -624,60 +624,33 @@ def doBanner(i):
   i = int(i)
   #olx.html_SetImage("BANNER_IMAGE","banner_%i.png" %i)
   OV.CopyVFSFile("banner_%i.png" %i, "banner.png")
-  OV.SetVar('snum_banner_slide', i)
   offset = 10
   target = 2
   ist = ""
+  cmds = []
   ist += "aio-* 0 "
+  
+  d = olx.banner_slide.get(i,0)
+  if not d:
+    i = i + 1
+    d = olx.banner_slide.get(i,0)
+  if not d:
+    i = i -2
+    d = olx.banner_slide.get(i,0)
+  if not d:
+#    print i, "Nothing"
+    return
 
-  if i < olx.banner_slide.get("olex2",0) + offset:
-    ist += "aio-setting* 1 "
-    if olx.banner_slide.get("setup",0) - target < i < olx.banner_slide.get("setup",0) + target:
-      OV.cmd("setup")
-
-  elif i < olx.banner_slide.get("prepare",0) + offset:
-    ist += "aio-prepare* 2 "
-    if olx.banner_slide.get("reflection",0)- target < i < olx.banner_slide.get("reflections",0) + target:
-      ist += "aio-prepare-reflections* 1 "
-    if olx.banner_slide.get("formula",0)- target < i < olx.banner_slide.get("formula",0) + target:
-      ist += "aio-prepare-formula* 1 "
-    if olx.banner_slide.get("space group",0)- target < i < olx.banner_slide.get("space group",0) + target:
-      OV.cmd("sg")
-      ist += "aio-prepare-space-group* 1 "
-
-  elif i < olx.banner_slide.get("solve",0) + offset:
-    ist += "aio-solve* 2 "
-    if olx.banner_slide.get("solve now",0)- target < i < olx.banner_slide.get("solve now",0) + target:
-      OV.cmd("solve")
-    if olx.banner_slide.get("assign solution",0) - target < i < olx.banner_slide.get("assign solution",0) + target:
-      OV.cmd("vss(true)")
-
-  elif i < olx.banner_slide.get("refine",0) + offset:
-    ist += "aio-refine* 2 "
-    if olx.banner_slide.get("refine",0) - target < i < olx.banner_slide.get("refine",0) + target:
-      ist += "aio-refine-refine 1 "
-    if olx.banner_slide.get("refine now",0) - target < i < olx.banner_slide.get("refine now",0) + target:
-      OV.cmd("refine")
-    if  olx.banner_slide.get("assign",0) - target < i < olx.banner_slide.get("assign",0) + target:
-      OV.cmd("ata(1)")
-      OV.cmd("refine")
-      OV.cmd("ata(1)")
-    if  olx.banner_slide.get("anisotropic",0) - target < i < olx.banner_slide.get("anisotropic",0) + target:
-      OV.cmd("anis")
-      OV.cmd("refine")
-    if  olx.banner_slide.get("add hydrogen",0) - target < i < olx.banner_slide.get("add hydrogen",0) + target:
-      OV.cmd("hadd")
-      OV.cmd("refine")
-
-
-  elif i < olx.banner_slide.get("analyze",0) + offset:
-    ist += "aio-analyze* 2 "
-
-  elif i < olx.banner_slide.get("report",0) + offset:
-    ist += "aio-report* 2 "
-
+#  print i, d.get('name')
+  OV.SetVar('snum_refinement_banner_slide', i)
+  
+  ist += d.get('itemstate',0)
+  cmds += d.get('cmd',"").split(">>")
+  
   OV.setItemstate(ist)
-  return ""
+
+  for cmd in cmds:
+    OV.cmd(cmd)
   
 OV.registerFunction(doBanner)
   

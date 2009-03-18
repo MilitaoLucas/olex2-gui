@@ -1074,6 +1074,12 @@ class Analysis(Graph):
     img_name = "XY.png"
     txt = self.ProgramHtml(program, method, "Solving", img_name)
     OlexVFS.write_to_olex('xy.htm', txt)
+    OlexVFS.write_to_olex('solution_image.htm', txt)
+    OV.htmlReload()
+    #wFile = open("%s/.olex/solution_image.htm" %self.filepath,'w')
+    #wFile.write(txt)
+    #wFile.close()
+
     #htmlTools.PopProgram(txt=txt)
 
   def make_ShelXL_plot(self):
@@ -1083,6 +1089,11 @@ class Analysis(Graph):
     img_name = "ShelXL.png"
     txt = self.ProgramHtml(program, method, "Refining", img_name)
     OlexVFS.write_to_olex("ShelXL.htm", txt)
+    OlexVFS.write_to_olex("refinement_image.htm", txt)
+    OV.htmlReload()
+    #wFile = open("%s/.olex/refinement_image.htm" %self.filepath,'w')
+    #wFile.write(txt)
+    #wFile.close()
     #htmlTools.PopProgram(txt=txt)
     
   def make_AutoChem_plot(self):
@@ -1465,7 +1476,7 @@ class Analysis(Graph):
     image_location = "ShelXL.png"
     OlexVFS.save_image_to_olex(self.im, image_location, 0)
     self.im.save("%s/.olex/Refinement.png" %self.filepath, "PNG")
-    olx.html_SetImage("REFINEMENT_IMG","ShelXL.png")
+    olx.html_SetImage("POP_PRG_ANALYSIS","ShelXL.png")
     #olex.m("html.Reload pop_prg_analysis")
   
   
@@ -1553,7 +1564,7 @@ class Analysis(Graph):
       res = OlexVFS.save_image_to_olex(self.im, image_location,  0)
       self.im.save("%s/.olex/Solution.png" %self.filepath, "PNG")
 
-      olx.html_SetImage("SOLUTION_IMG","XY.png")
+      olx.html_SetImage("POP_PRG_ANALYSIS","XY.png")
       #olex.m("html.Reload pop_prg_analysis")
       
   
