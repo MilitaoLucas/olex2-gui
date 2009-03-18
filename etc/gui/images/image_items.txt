@@ -1,0 +1,32 @@
+[THREE_BUTTONS_PER_ROW]
+  Move Near 
+  Copy Near 
+  Add H 
+  Grow Mode 
+  Center on Cell 
+  Assemble 
+  Centre on Cell 
+  Largest Part
+  Show Basis
+  Show Cell
+  Fuse
+  Grow All
+  Edit Atom(s)
+  Edit Instructions
+  Balls & Sticks 
+  Wireframe 
+  Tubes 
+  Default Style 
+  Sphere Packing 
+  Ellipsoids | H 
+  Atomic Mass
+  Atom Number
+  Atom Label
+  Mass & Label
+  Moieties
+  Reset
+  Reset & Solve
+  SG Info
+  Wilson Plot
+  Solve
+  Refine
