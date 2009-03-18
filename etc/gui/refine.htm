@@ -18,38 +18,17 @@
 		>
 	</td>
 	</tr>
+
+
 </table>
+
+<!-- #includeif fs.Exists(refinement_image.htm) refinement_image refinement_image.htm;1; -->
+
 
 <!-- #include tool-table-header gui\blocks\tool-table-header.htm;1; -->
 
-<!-- #includeif File.Exists('FilePath()/.olex/refinement_image.htm') refinement_image 'FilePath()/.olex/refinement_image.htm';1; -->
-
-<!--
-	<tr>
-	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
-		<a 
-			href="spy.make_help_box -name='refine' -popout='False'" 
-			target="Help me with this">
-			<zimg border="0" src="info.png">
-		</a>	
-	</td>
-	  <td>	
-	    <zimg border="0" name="REFINEMENT_IMG" src="FilePath()/.olex/Refinement.png">
-	  </td>
-	</tr>	
--->	
-</table>
-
-
-<font color=$getVar(gui_html_font_colour)  size=$getVar(gui_html_font_size)>
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$getVar(gui_html_table_bg_colour)">
-
-
-<tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_PROGRAM'>
-	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 
 <!-- #include refinement-settings-h3-refinement-settings gui\refinement-settings-h3-refinement-settings.htm;gui\blocks\tool-h3-off.htm;image=refinement-settings-h3-refinement-settings;colspan=4;onclick=;onclick=;1 2; -->
-
 
 	
 </table>	
