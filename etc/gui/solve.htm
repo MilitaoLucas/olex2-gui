@@ -17,11 +17,17 @@
 			onclick="solve>>echo 'Running Solution Program'"
 		>
 	</td>
-</tr>
+	</tr>
 </table>
 
 <!-- #include tool-table-header gui\blocks\tool-table-header.htm;1; -->
+	
+<!-- #includeif fs.Exists(solution_image.htm) solution_image 'solution_image.htm';1; -->
 
+</table>
+
+
+<!--
 <tr>
 	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
 		<a 
@@ -35,8 +41,9 @@
 	</td>
 </tr>	
 </table>
+-->
 
-<!-- #include solution-settings-aio gui\solution-settings-aio.htm;1; -->
+<!-- #include solution-settings-h3-solution-settings gui\solution-settings-h3-solution-settings.htm;gui\blocks\tool-h3-off.htm;image=solution-settings-h3-solution-settings;colspan=4;onclick=;1 2; -->
 	
 
 
