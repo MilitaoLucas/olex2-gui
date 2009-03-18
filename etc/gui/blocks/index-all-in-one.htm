@@ -1,18 +1,18 @@
 <!-- #include element-buttons gui\snippets\snippet-element-buttons.htm;gui\blocks\tool-off.htm;1; -->
 <!-- #include snippet-banner gui\snippets\snippet-banner.htm;gui\blocks\tool-off.htm;1; -->
 
-<!-- #include aio-welcome gui\welcome-to-gui-2.htm;gui\blocks\tool-off.htm;image=welcome-to-gui-2;onclick=;1; -->
+<!-- #include aio-olex2-settings gui\settings.htm;gui\blocks\tool-off.htm;image=settings;onclick=;0; -->
 
 
-<!-- #include aio-setting-settings gui\settings.htm;gui\blocks\aio-off.htm;image=settings;onclick=;onclick=;0; -->
-
+<!-- #includeif IsFileType('ires') aio-olex2-history gui\history.htm;gui\blocks\tool-off.htm;image=history;onclick=;0; -->
+<!-- #include aio-olex2-recent-files gui\recent-files.htm;gui\blocks\tool-off.htm;image=recent-files;onclick=;0; -->
 
 <!-- #include aio-prepare-reflections gui\reflections.htm;gui\blocks\tool-off.htm;image=reflections;0; -->
 <!-- #include aio-prepare-space-group gui\space-group.htm;gui\blocks\tool-off.htm;image=space-group;onclick=sg;0; -->
 <!-- #include aio-prepare-formula gui\formula.htm;gui\blocks\tool-off.htm;image=formula;0; -->
 
 
-<!-- #includeif or(IsFileType('ires'),IsFileType('crs')) aio-solve gui\solve.htm;gui\blocks\tool-off.htm;image=solve;;0; -->
+<!-- #includeif or(IsFileType('ires'),IsFileType('crs')) aio-solve-solve gui\solve.htm;gui\blocks\tool-off.htm;image=solve;;0; -->
 
 
 <!-- #includeif or(IsFileType('ires'),IsFileType('cif')) aio-refine-refine gui\refine.htm;gui\blocks\tool-off.htm;image=refinement;onclick=;0; -->
@@ -21,42 +21,31 @@
 
 <!-- #include aio-refine-autochemu gui\autochem_user.htm;gui\blocks\tool-off.htm;image=autochem;0; -->
 
-<!-- #includeif IsFileType('ires') aio-OLEX-conres gui\OLEX-conres.htm;gui\blocks\tool-off.htm;image=OLEX-constraints-and-restraints;onclick='spy.restraint_builder(GetVar(snum_olex_conres,RRINGS))';0; -->
-<!-- #includeif IsFileType('ires') aio-SHELX-constraints gui\SHELX-constraints.htm;gui\blocks\tool-off.htm;image=SHELX-constraints;onclick='spy.restraint_builder(GetVar(gui_shelx_constraints))';0; -->
-<!-- #includeif IsFileType('ires') aio-SHELX-restraints gui\SHELX-restraints.htm;gui\blocks\tool-off.htm;image=SHELX-restraints;onclick='spy.restraint_builder(GetVar(gui_shelx_restraints))';0; -->
+<!-- #includeif IsFileType('ires') aio-disorder-disorder gui\disorder.htm;gui\blocks\tool-off.htm;image=disorder;onclick=;0; -->
+<!-- #includeif IsFileType('ires') aio-disorder-constraints gui\SHELX-constraints.htm;gui\blocks\tool-off.htm;image=SHELX-constraints;onclick='spy.restraint_builder(GetVar(gui_shelx_constraints))';0; -->
+<!-- #includeif IsFileType('ires') aio-disorder-restraints gui\SHELX-restraints.htm;gui\blocks\tool-off.htm;image=SHELX-restraints;onclick='spy.restraint_builder(GetVar(gui_shelx_restraints))';0; -->
 
 <!-- #include aio-analyze-calculate-voids gui\calculate-voids-analyze.htm;gui\blocks\tool-off.htm;image=calculate-voids;onclick=;0; -->
 <!-- #includeif file.Exists('HKLSrc()') aio-analyze-electron-density gui\electron-density.htm;gui\blocks\tool-off.htm;image=electron-density;onclick=;0; -->
 <!-- #includeif or(IsFileType('ires'),IsFileType('cif')) aio-analyze-geometry gui\geometry.htm;gui\blocks\tool-off.htm;image=geometry;onclick=;0; -->
 
+<!-- #includeif or(IsFileType('ires'),IsFileType('cif')) aio-analyze-overlay gui\overlay.htm;gui\blocks\tool-off.htm;image=overlay;onclick=;onclick=;0; -->
+<!-- #includeif IsFileType('ires') aio-analyze-tools gui\tools.htm;gui\blocks\tool-off.htm;image=tools;onclick=;0; -->
+
+<!-- #includeif or(IsFileType('ires'),IsFileType('cif')) aio-publish-naming gui\naming.htm;gui\blocks\tool-off.htm;image=naming;onclick=;0; -->
+<!-- #includeif IsFileType('ires') aio-publish-hydrogen-atoms gui\hydrogen-atoms.htm;gui\blocks\tool-off.htm;image=hydrogen-atoms;onclick=;0; -->
+<!-- #includeif or(IsFileType('ires'),IsFileType('cif')) aio-publish-sorting gui\sorting.htm;gui\blocks\tool-off.htm;image=sorting;onclick=;0; -->
 
 
 
-<!-- #include aio-main-toolbar gui\main-toolbar.htm;gui\blocks\tool-off.htm;image=main-toolbar;0; -->
-<!-- #include aio-interactive gui\interactive.htm;gui\blocks\tool-off.htm;image=interactive;onclick=;0; -->
-<!-- #include aio-toolbox gui\toolbox-work.htm;gui\blocks\tool-off.htm;image=toolbox-work;onclick=;0; -->
-<!-- #includeif IsFileType('ires') aio-history gui\history.htm;gui\blocks\tool-off.htm;image=history;onclick=;0; -->
 <!-- #includeif or(IsFileType('ires'),IsFileType('cif')) aio-select gui\select.htm;gui\blocks\tool-off.htm;image=select;onclick=;0; -->
-<!-- #includeif or(IsFileType('ires'),IsFileType('cif')) aio-naming gui\naming.htm;gui\blocks\tool-off.htm;image=naming;onclick=;0; -->
-<!-- #includeif and(isplugininstalled(plugin-brukersaint),IsFileType('p4p')) aio-bs gui\bruker-saint.htm;gui\blocks\tool-off.htm;image=bruker-saint;onclick=BSINI;0; -->
-<!-- #include aio-recent-files gui\recent-files.htm;gui\blocks\tool-off.htm;image=recent-files;onclick=;0; -->
-<!-- #includeif isplugininstalled(plugin-AutoChem) aio-autochem gui\autochem.htm;gui\blocks\tool-off.htm;image=autochem;onclick=;onclick=;0; -->
-<!-- #includeif IsFileType('ires') aio-diagnostics gui\diagnostics.htm;gui\blocks\tool-off.htm;image=diagnostics;button=diagnostics;onclick="spy Analysis lst none";0; -->
-<!-- #includeif IsFileType('ires') aio-tools gui\tools.htm;gui\blocks\tool-off.htm;image=tools;onclick=;0; -->
-<!-- #includeif isplugininstalled(plugin-autostructure) aio-auto-structure gui\auto-structure.htm;gui\blocks\tool-off.htm;image=auto-structure;onclick=;0; -->
-<!-- #includeif IsFileType('ires') aio-hydrogen-atoms gui\hydrogen-atoms.htm;gui\blocks\tool-off.htm;image=hydrogen-atoms;onclick=;0; -->
-<!-- #includeif IsFileType('ires') aio-disorder gui\disorder.htm;gui\blocks\tool-off.htm;image=disorder;onclick=;0; -->
 <!-- #includeif file.Exists('FilePath()\FileName().cif') aio-cif gui\cif.htm;gui\blocks\tool-off.htm;image=cif;onclick=;0; -->
 <!-- #includeif and(spy.IsPluginInstalled(plugin-cctbx),IsFileType('ires')) aio-twinning gui\twinning.htm;gui\blocks\tool-off.htm;image=twinning;onclick=;0; -->
-<!-- #includeif or(IsFileType('ires'),IsFileType('cif')) aio-overlay gui\overlay.htm;gui\blocks\tool-off.htm;image=overlay;onclick=;onclick=;0; -->
 <!-- #includeif and(spy.IsPluginInstalled(plugin-cctbx),IsFileType('ires')) aio-cctbx gui\cctbx.htm;gui\blocks\tool-off.htm;image=cctbx;onclick=;onclick=;0; -->
-<!-- #includeif or(IsFileType('ires'),IsFileType('p4p')) aio-sg gui\space-groups.htm;gui\blocks\tool-off.htm;image=space-groups;onclick=sgd;0; -->
-<!-- #includeif isplugininstalled(plugin-brukersaint) aio-bs gui\bruker-saint.htm;gui\blocks\tool-off.htm;image=bruker-saint;onclick=BSINI;0; -->
 <!-- #includeif isplugininstalled(plugin-Batch) aio-batch gui\batch.htm;gui\blocks\tool-off.htm;image=batch;onclick=;onclick=;0; -->
+
 <!-- #includeif or(IsFileType('ires'),IsFileType('cif')) aio-quick-drawing-styles gui\quick-drawing-styles.htm;gui\blocks\tool-off.htm;image=quick-drawing-styles;onclick=;0; -->
 <!-- #includeif or(IsFileType('ires'),IsFileType('cif')) aio-symmetry-generation-analyze gui\symmetry-generation.htm;gui\blocks\tool-off.htm;image=symmetry-generation;onclick=;0; -->
-<!-- #includeif or(IsFileType('ires'),IsFileType('cif')) aio-select gui\select.htm;gui\blocks\tool-off.htm;image=select;onclick=;0; -->
 <!-- #includeif or(IsFileType('ires'),IsFileType('cif')) aio-show gui\show.htm;gui\blocks\tool-off.htm;image=show;onclick=;0; -->
 <!-- #includeif or(IsFileType('ires'),IsFileType('cif')) aio-rotate gui\rotate.htm;gui\blocks\tool-off.htm;image=rotate;onclick=;0; -->
-<!-- #includeif or(IsFileType('ires'),IsFileType('cif')) aio-sorting gui\sorting.htm;gui\blocks\tool-off.htm;image=sorting;onclick=;0; -->
 
