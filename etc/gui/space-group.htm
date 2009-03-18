@@ -1,0 +1,89 @@
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
+
+<tr>
+	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+		<a 
+			href="spy.make_help_box -name='reflection-statistics' -popout='False'" 
+			target="Help me with this">
+			<zimg border="0" src="info.png">
+		</a>	
+	</td>
+
+
+	<td width="50%">
+		<font color="grey" size=2>
+			<b>Centrosymmetric</b>
+		</font>
+	</td>
+	<td width="50%">
+		<font color="grey" size=2>
+			<b>Non-Centrosymmetric</b>
+	</font>
+	</td>
+</tr>
+
+<font size=2>
+<!-- #include sg_info spacegroups.htm;1; -->
+</font>
+
+<tr>
+	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+		<a 
+			href="spy.make_help_box -name='reflection-statistics' -popout='False'" 
+			target="Help me with this">
+			<zimg border="0" src="info.png">
+		</a>	
+	</td>
+	<td>
+	Enter Space Group:
+	</td>
+	
+	<td colspan='1'>
+		<input 
+			type="text" 
+			bgcolor="$getVar(gui_html_input_bg_colour)" 
+			name="space_group" 
+			items='SGList()' 
+			label = ''
+			value="sg(%n)" 
+			width="120"  
+			height="17"
+		>
+	</td>
+</tr>
+
+<tr>
+	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+		<a 
+			href="spy.make_help_box -name='reflection-statistics' -popout='False'" 
+			target="Help me with this">
+			<zimg border="0" src="info.png">
+		</a>	
+	</td>
+
+	<td colspan='2'>
+    <input
+			bgcolor="$GetVar(gui_html_table_bg_colour)"  
+			type="button" 
+			name="RESET_SPACE_GROUP" 
+			image="button-reset.png"
+			onclick="reset -s=getvalue(space_group)>>echo 'The structure has been reset in $sg(%n). You probably want to solve this structure now.'"
+		>
+    <input
+			bgcolor="$GetVar(gui_html_table_bg_colour)"  
+			type="button" 
+			name="RESET_AND_SOLVE" 
+			image="button-reset_&_solve.png"
+			onclick="reset -s=getvalue(space_group)>>solve>>echo 'The structure has been reset in $sg(%n).'"
+		>
+    <input
+			bgcolor="$GetVar(gui_html_table_bg_colour)"  
+			type="button" 
+			name="SG_INFO" 
+			image="button-sg_info.png"
+			onclick="sginfo $sg(%n)"
+		>
+	</td>
+</tr>
+
+<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->

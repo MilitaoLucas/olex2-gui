@@ -1,0 +1,103 @@
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
+
+<tr>
+	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+		<a 
+			href="spy.make_help_box -name='autochem' -popout='False'" 
+			target="Help me with this">
+			<zimg border="0" src="info.png">
+		</a>	
+	</td>
+	<td colspan='2' align='left'>
+		<a href="spy.ac_run solveit -s"><zimg border="0" src="gui\images\note-autochem.png"></a>
+	</td>
+</tr>
+
+
+<tr>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td  colspan='2' align='left'>
+		<b>		
+			<a href="spy.ac_run solveit -s">Current</a> |
+		</b>
+		<a href="spy.stop_auto">Interrupt</a> | 
+		<a href="spy.ac_run solveit -r">Resume</a> |
+		<a href="spy.ac_run solveit -c">Ref Only</a> |
+		<a href="spy.ac_run solveit -so">SO</a> |
+		<a href="spy.ac_run -f html>>UpdateHtml">Update List</a>
+	</td>
+</tr>
+
+<tr>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td colspan='1'>
+		<input 
+			bgcolor="$getVar(gui_html_input_bg_colour)" 
+			type="combo" 
+			name="SET_AUTOCHEM_SOLUTION_PROGRAM" 
+			width='$eval(htmlpanelwidth()-eval(htmlpanelwidth()/2)-30)' 
+			height="18" 
+			manage
+			value="GetVar(autochem_solution_program)"
+			onchange="SetVar(autochem_solution_program,GetValue(SET_AUTOCHEM_SOLUTION_PROGRAM))"
+			label='Solution Program'
+		>
+	</td>
+	<td colspan='1'>
+		<input 
+			bgcolor="$getVar(gui_html_input_bg_colour)" 
+			type="combo" 
+			name="SET_AUTOCHEM_SOLUTION_METHOD" 
+			width='$eval(htmlpanelwidth()-eval(htmlpanelwidth()/2)-30)' 
+			height="18"
+			manage
+			value="GetVar(autochem_solution_method)"
+			onchange="SetVar(autochem_solution_method,GetValue(SET_AUTOCHEM_SOLUTION_METHOD))"
+			label='Solution Method'
+		>
+	</td>
+</tr>
+
+
+<tr>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td colspan='1'>
+		<input 
+			bgcolor="$getVar(gui_html_input_bg_colour)" 
+			type="combo" 
+			name="SET_AUTOCHEM_REFINEMENT_PROGRAM" 
+			width='$eval(htmlpanelwidth()-eval(htmlpanelwidth()/2)-35)' 
+			height="18" 
+			manage
+			value="GetVar(autochem_refinement_program)"
+			onchange="SetVar(autochem_refinement_program,GetValue(SET_AUTOCHEM_REFINEMENT_PROGRAM))"
+			label='Refinement Program'
+		>
+	</td>
+	<td colspan='1'>
+		<input 
+			bgcolor="$getVar(gui_html_input_bg_colour)" 
+			type="combo" 
+			name="SET_AUTOCHEM_REFINEMENT_METHOD" 
+			width='$eval(htmlpanelwidth()-eval(htmlpanelwidth()/2)-30)' 
+			height="18"
+			manage
+			value="GetVar(autochem_refinement_method)"
+			onchange="SetVar(autochem_refinement_method,GetValue(SET_AUTOCHEM_REFINEMENT_METHOD))"
+			label='Refinement Method '
+		>
+	</td>
+</tr>
+
+
+
+
+
+<tr>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td colspan='2'>
+<!-- #includeif file.Exists(FilePath()/.olex/autochem_single.htm) autochem_single_htm FilePath()/.olex/autochem_single.htm;1; -->
+	</td>
+</tr>
+
+<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
