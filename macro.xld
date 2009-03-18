@@ -1589,7 +1589,9 @@
 			<cmd2 "itemstate info-title 1">
 			<cmd2 "itemstate index-all-in-one 1">
 			<cmd2 "itemstate aio-* 0">
-			<cmd2 "itemstate aio-welcome* 1">
+			<cmd2 "spy.doBanner(GetVar(snum_refinement_banner_slide))">
+			<cmd2 "SetImage(BANNER_IMAGE,strcat(banner_,GetVar(snum_refinement_banner_slide).png))"	
+
 		\>
 	\>
 \>

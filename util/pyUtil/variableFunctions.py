@@ -29,6 +29,7 @@ class VVD:
     self.report = {}
     self.solution = {}
     self.auto = {}
+    self.workflow = {}
     
 class userVVD:
   def __init__(self):
@@ -140,6 +141,8 @@ def InitialiseVariables(arg):
         vvdItems.report.setdefault(varName)
       elif 'solution' in varName:
         vvdItems.solution.setdefault(varName)
+      elif 'workflow' in varName:
+        vvdItems.workflow.setdefault(varName)
         
     if not OV.IsVar('snum_cctbx_map_type'):
       OV.SetVar('snum_cctbx_map_type','--')
@@ -320,7 +323,7 @@ def UnpickleVVD():
   
   vvd = {}
   # Set default values for all variables
-  for item in ('refinement','dimas','metacif','history','solution','report'):
+  for item in ('refinement','dimas','metacif','history','solution','report','workflow'):
     dict = getattr(vvdItems,item)
     for var, value in dict.items():
       vvd[var] = value

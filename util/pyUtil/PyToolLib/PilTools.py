@@ -1399,106 +1399,131 @@ class timage(ImageTools):
       print "There has been an error: %s" %err
  
   def makeTestBanner(self):
-    cmd_col = "#ff0000"
-    txt_items = [("Olex2",8,0),
-                 ("Prepare",28,0),
-                 ("Solve",55,0),
-                 ("Refine",80,0),
-                 ("Analyze",100,0),
-                 ("Publish",120,0),
-                 ]
+    bannerbg = "#fdff72"
+    bannerbg = self.gui_base_colour
+    col_0 = self.adjust_colour(bannerbg,luminosity=0.85)
+    col_1 = self.adjust_colour(bannerbg,luminosity=1.7)
+    cmd_col = "#fff600"
     
-    txt2_items = [("settings",11,0),
-                  ("reflections",28,0),
-                  ("formula",40,0),
-                  ("assign solution",60,cmd_col),
-                  ("assign",82,cmd_col),
-                  ("add hydrogen",92,cmd_col),
-                  ("disorder",110,0),
-                  ]
-                  
-    txt3_items = [
-                  ("setup",18,cmd_col),
-                  ("space group",33,0),
-                  ("solve now",55,cmd_col),
-                  ("refine now",78,cmd_col),
-                  ("anisotropic",86,cmd_col),
-                  ("atom naming",100,0),
-                  ("geometric measurements",120,0),
-                  ]
-    
-    height = 45
-    width = 1400
+    txt_items = {"Olex2":{'name':'olex2','pix':0,'row':0,'colour':col_0,
+                          'itemstate':"aio-olex2* 1 "},
+                 "Prepare":{'name':'prepare','pix':150,'row':0,'colour':col_0,
+                            'itemstate':"aio-prepare* 2  "},
+                 "Solve":{'name':'solve','pix':390,'row':0,'colour':col_0,
+                          'itemstate':"aio-solve* 2 "},
+                 "Refine":{'name':'refine','pix':550,'row':0,'colour':col_0,
+                           'itemstate':"aio-refine* 2 "},
+                 "Analyze":{'name':'analyze','pix':750,'row':0,'colour':col_0,
+                            'itemstate':"aio-analyze* 2 "},
+                 "Publish":{'name':'publish','pix':1050,'row':0,'colour':col_0,
+                            'itemstate':"aio-report* 2 "},
+
+                 "recent":{'name':'recent','pix':-40,'row':1,'colour':col_1,
+                             'itemstate':"aio-olex2* 2 aio-olex2-recent* 1"},
+                 "history":{'name':'history','pix':-10,'row':2,'colour':col_1,
+                             'itemstate':"aio-olex2* 2 aio-olex2-history 1"},
+                 "setup":{'name':'setup','pix':20,'row':1,'colour':cmd_col,
+                          'itemstate':"aio-olex2* 2 ", 'cmd':'setup'},
+                 "configuration":{'name':'configuration','pix':40,'row':2,'colour':cmd_col,
+                          'itemstate':"aio-olex2* 2 ", 'cmd':'config'},
+                 "settings":{'name':'settings','pix':80,'row':1,'colour':col_1,
+                             'itemstate':"aio-olex2* 2 aio-olex2-settings 1"},
+
+                 "reflections":{'name':'reflections','pix':150,'row':1,'colour':col_1,
+                                'itemstate':"aio-prepare* 2 aio-prepare-reflections 1", 'cmd':""},
+                 "space group":{'name':'space group','pix':190,'row':2,'colour':col_1,
+                                'itemstate':"aio-prepare* 2 aio-prepare-space* 1", 'cmd':"sg"},
+                 "formula":{'name':'formula','pix':290,'row':1,'colour':col_1,'cmd':"",
+                            'itemstate':"aio-prepare* 2 aio-prepare-formula 1", 'cmd':""},
+
+                 "solve":{'name':'solve now','pix':370,'row':2,'colour':col_1,
+                              'itemstate':"aio-solve* 2 aio-solve-solve 1"},
+
+                 "assign solution":{'name':'assign solution','pix':430,'row':1,'colour':cmd_col,'cmd':"",
+                                    'itemstate':"aio-solve* 2 aio-solve-solve 1", 'cmd':"vss(True)"},
+
+                 "refine":{'name':'refine now','pix':530,'row':2,'colour':col_1,
+                               'itemstate':"aio-refine* 2 aio-refine-refine 1", 'Xcmd':"refine>>compaq"},
+                 "assemble":{'name':'refine now','pix':560,'row':1,'colour':cmd_col,
+                               'itemstate':"aio-refine* 2 aio-refine-refine 1", 'cmd':"compaq"},
+                 "assign":{'name':'assign','pix':600,'row':2,'colour':cmd_col,'cmd':"",
+                           'itemstate':"aio-refine* 2 aio-refine-refine 1", 'cmd':"ata(1)>>refine>>ata(1)>>compaq"},
+                 "anisotropic":{'name':'olex2','pix':630,'row':1,'colour':cmd_col,
+                                'itemstate':"aio-refine* 2 aio-refine-refine 1", 'cmd':"anis>>refine>>compaq"},
+                 "add hydrogen":{'name':'add hydrogen','pix':670,'row':2,'colour':cmd_col,'cmd':"",
+                                 'itemstate':"aio-refine* 2 aio-refine-refine 1", 'cmd':"hadd>>refine>>compaq"},
+
+                 "disorder":{'name':'disorder','pix':760,'row':2,'colour':col_1,'cmd':"",
+                             'itemstate':"aio-disorder* 2 aio-disorder-disorder 1", 'cmd':""},
+ 
+                 "contraints&restraints":{'name':'constraints&restraints','pix':850,'row':1,'colour':col_1,'cmd':"",
+                             'itemstate':"aio-disorder* 1 ", 'cmd':""},
+
+                 "name atoms":{'name':'atom naming','pix':950,'row':2,'colour':col_1,
+                                'itemstate':"aio-naming* 1", 'cmd':""},
+
+                 "measure":{'name':'geometric measurements','pix':1000,'row':1,'colour':col_1,
+                                           'itemstate':"aio-geometry* 1", 'cmd':""},
+
+                 "match":{'name':'matching','pix':1050,'row':2,'colour':col_1,
+                            'itemstate':"aio-analyze* 2 aio-analyze-match* 1", 'cmd':""},
+                 
+                 
+                 }    
+
+#    bannerbg = self.gui_html_font_colour
+    offset = 180
+    height = 44
+    width = 1700
     size = (width,height)
     
-    bannerbg = "#fdff72"
+    
     IM =  Image.new('RGBA', size, self.gui_html_table_bg_colour)
     IM =  Image.new('RGBA', size, bannerbg)
     #IM =  Image.new('RGBA', size, "#aaaa00")
     draw = ImageDraw.Draw(IM)
-    for i in xrange(8):
-      lum = 1.00 - ((5-i) * (0.05))
-      draw.line(((0,i),(width,i)), fill=self.adjust_colour(bannerbg,luminosity=lum))
-    for i in xrange(8):
-      lum = 1.00 - ((5 -i) * (0.05))
-      draw.line(((0,height  - i),(width,height - i)), fill=self.adjust_colour(bannerbg,luminosity=lum))
+    for i in xrange(22):
+      lum = 1.00 - ((5-i) * (0.02))
+      draw.line(((0,i),(width,i)), fill=self.adjust_colour(bannerbg,luminosity=lum,saturation = lum))
+    for i in xrange(22):
+      lum = 1.00 - ((5 -i) * (0.02))
+      draw.line(((0,height  - i),(width,height - i)), fill=self.adjust_colour(bannerbg,luminosity=lum, saturation = lum))
       
-    font_name = "Vera Bold"
-    font_size = 42
-    for item in txt_items:
-      txt = item[0]
-      x_pos = item[1] * 10
-      wX, wY = self.getTxtWidthAndHeight(txt, draw, font_name = font_name, font_size = font_size)
-      olex_pos = x_pos + wX/2 -150
-      olex_pos = "%.0f" %(olex_pos/10.0)
-      olx.banner_slide.setdefault(txt.lower(),int(olex_pos))
-      OV.SetVar("snum_slide_%s" %txt.lower(),olex_pos)
-      self.write_text_to_draw(draw, 
-#                   "%s(%s)" %(txt, olex_pos), 
-                   "%s" %(txt), 
-                   top_left=(x_pos,-4), 
-                   font_name = font_name, 
-                   font_size=font_size,
-                   titleCase=True,
-                   font_colour=self.adjust_colour(bannerbg,luminosity=0.65))
-    font_name = "Vera"
-    font_size = 13
-    font_colour = self.gui_html_font_colour
-    for item in txt2_items:
-      txt = item[0]
-      if item[2]:
-        font_colour = item[2]
-      x_pos = item[1] * 10
-      x_pos = item[1] * 10
-      wX, wY = IT.getTxtWidthAndHeight(txt, draw, font_name=font_name, font_size=font_size)
-      olex_pos = x_pos + wX/2 -150
-      olex_pos = "%.0f" %(olex_pos/10.0)
-      olx.banner_slide.setdefault(txt.lower(),int(olex_pos))
-      self.write_text_to_draw(draw, 
-                 "%s" %(txt), 
-                 top_left=(x_pos,16), 
-                 font_name = font_name, 
-                 font_size=font_size, 
-                 font_colour=font_colour)
-    for item in txt3_items:
-      txt = item[0]
-      if item[2]:
-        font_colour = item[2]
-      x_pos = item[1] * 10
-      x_pos = item[1] * 10
-      wX, wY = IT.getTxtWidthAndHeight(txt, draw, font_name=font_name, font_size=font_size)
-      olex_pos = x_pos + wX/2 -150
-      olex_pos = "%.0f" %(olex_pos/10.0)
-      olx.banner_slide.setdefault(txt.lower(),int(olex_pos))
-      self.write_text_to_draw(draw, 
-                 "%s" %(txt), 
-                 top_left=(x_pos,28), 
-                 font_name = font_name, 
-                 font_size=font_size, 
-                 font_colour=font_colour)
+    margin_top_l = [-3, 12, 26] 
+    font_size_l = [42, 13, 13]
+    font_l = ["Vera Bold", "Vera", "Vera"]
+    title_l = [True, False, False]
+    lower_l = [False, True, True]
+    
+    for i in xrange(3):
+      for item in txt_items:
+        row = txt_items[item].get("row",0)
+        if row != i:
+          continue
+        txt = item
+        x_pos = txt_items[item].get("pix",0) + offset
+        font_colour = txt_items[item].get("colour")
+        font_size = font_size_l[row]
+        font_name = font_l[row]
+        titleCase = title_l[row]
+        lower_case = lower_l[row]
+        
+        wX, wY = self.getTxtWidthAndHeight(txt, draw, font_name = font_name, font_size = font_size)
+        olex_pos = x_pos + wX/2 - (int(self.gui_htmlpanelwidth) - 24)/2
+        olex_pos = "%.0f" %(olex_pos/10.0)
+        if row != 0:
+          olx.banner_slide.setdefault(int(olex_pos),txt_items[item])
+        OV.SetVar("snum_slide_%s" %txt.lower(),olex_pos)
+        self.write_text_to_draw(draw, 
+                     "%s" %(txt), 
+                     top_left=(x_pos,margin_top_l[row]), 
+                     font_name = font_name, 
+                     font_size=font_size,
+                     titleCase=titleCase,
+                     lowerCase=lower_case,
+                     font_colour=font_colour)
+        
       
-      
-    #IM = self.resize_image(IM, (int((cut[2]-cut[0])/self.sf), int((cut[3]-cut[1])/self.sf)))
     width = int(self.gui_htmlpanelwidth) - 24
     name = "banner.png"
     for i in xrange(129):
@@ -1515,32 +1540,42 @@ class timage(ImageTools):
         
     
   def decorate_banner_image(self, crop,bannerbg, i):
+    #marker_colour = self.gui_html_highlight_colour
+    marker_colour = "#ff0000"
     width, height = crop.size
     heigth = height -1 
     draw = ImageDraw.Draw(crop)
     begin = (width/2 - 5, height)
     middle = (width/2,height -6)
     end = (width/2 + 5, height)
-    draw.polygon((begin, middle, end), "#ff0000")
-    draw.line(((width/2,0),(width/2,height)), fill="#ff0000")
+    draw.polygon((begin, middle, end), marker_colour)
+    begin = (width/2 - 5, 0)
+    middle = (width/2,6)
+    end = (width/2 + 5, 0)
+    draw.polygon((begin, middle, end), marker_colour)
+    draw.line(((width/2,0),(width/2,height)), fill=marker_colour)
+    
+    
+    divison_col = "#ababab"
+    divison_col = marker_colour
     left = width/2
     right = width/2
     for j in xrange(40):
-      y1 = height -2 
+      y1 = height - 3 
       if j % 2:
-        y1 = height - 3
+        y1 = height - 5
       right += 8
-      draw.line(((right,y1),(right,height)), fill="#ababab")
+      draw.line(((right,y1),(right,height)), fill=divison_col)
       left -= 10
-      draw.line(((left,y1),(left,height)), fill="#ababab")
-    draw.line(((0,height),(width,height)), fill="#ababab")
-    draw.line(((0,height),(width,height)), fill="#ababab")
-    self.write_text_to_draw(draw, 
-                 "%s" %(str(i)), 
-                 top_left=(width -20, 3), 
-                 font_name = 'Vera', 
-                 font_size=12, 
-                 font_colour="#ff0000")
+      draw.line(((left,y1),(left,height)), fill=divison_col)
+    draw.line(((0,height),(width,height)), fill=divison_col)
+    draw.line(((0,height),(width,height)), fill=divison_col)
+#    self.write_text_to_draw(draw, 
+#                 "%s" %(str(i)), 
+#                 top_left=(width -20, 3), 
+#                 font_name = 'Vera', 
+#                 font_size=12, 
+#                 font_colour="#ff0000")
     return crop
     
     
