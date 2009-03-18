@@ -1089,7 +1089,7 @@ class Analysis(Graph):
     img_name = "ShelXL.png"
     txt = self.ProgramHtml(program, method, "Refining", img_name)
     OlexVFS.write_to_olex("ShelXL.htm", txt)
-    OlexVFS.write_to_olex("refinement_image.htm", txt)
+    OlexVFS.write_to_olex('refinement_image.htm', txt)
     OV.htmlReload()
     #wFile = open("%s/.olex/refinement_image.htm" %self.filepath,'w')
     #wFile.write(txt)
