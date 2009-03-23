@@ -1476,7 +1476,8 @@ class Analysis(Graph):
     image_location = "ShelXL.png"
     OlexVFS.save_image_to_olex(self.im, image_location, 0)
     self.im.save("%s/.olex/Refinement.png" %self.filepath, "PNG")
-    olx.html_SetImage("POP_PRG_ANALYSIS","ShelXL.png")
+    if OV.FindValue('html_IsItem(POP_PRG_ANALYSIS)',False):
+      olx.html_SetImage("POP_PRG_ANALYSIS","ShelXL.png")
     #olex.m("html.Reload pop_prg_analysis")
   
   
@@ -1563,8 +1564,8 @@ class Analysis(Graph):
       image_location = "XY.png"
       res = OlexVFS.save_image_to_olex(self.im, image_location,  0)
       self.im.save("%s/.olex/Solution.png" %self.filepath, "PNG")
-
-      olx.html_SetImage("POP_PRG_ANALYSIS","XY.png")
+      if OV.FindValue('html_IsItem(POP_PRG_ANALYSIS)',False):
+        olx.html_SetImage("POP_PRG_ANALYSIS","XY.png")
       #olex.m("html.Reload pop_prg_analysis")
       
   
