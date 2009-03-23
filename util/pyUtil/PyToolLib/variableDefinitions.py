@@ -43,7 +43,7 @@ def guiVariables():
     gui_infobox_text='2053;2143326838;2143979345',
     gui_infobox_plane='2053;2136422952;2137144606',
     
-    gui_htmlpanelwidth='290',
+    gui_htmlpanelwidth=Variable(320),
     gui_grad_top_left='#05053c',
     gui_grad_top_right='#05053c',
     gui_grad_bottom_left='#ffffff',
@@ -247,4 +247,6 @@ def userVariables():
     'user_refinement_auto_tidy':Variable(True),
     'user_report_style':Variable('default'),
     'user_report_journal_style':Variable('rsc'),
+    'user_refinement_gui2':Variable(False),
+    'olex2_is_online':Variable(True),
   }

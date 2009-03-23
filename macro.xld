@@ -61,7 +61,7 @@
 			<cmd13 "SetVar(snum_refinement_sg,sg(%n))">
 			<cmd1 "spy.setAllMainToolbarTabButtons()">
 			<cmd25 "if strcmp(%4,filename()) then none else 'if html.IsPopup(wilson) then wp'">
-			<cmd15 "if strcmp(%4,filename()) then none else 'spy sNumTitle %3 GetVar(gui_timage_colour)'">
+			<cmd15 "if strcmp(%4,filename()) then none else 'spy.run_sNumTitle()'">
 			<cmd16 "if File.Exists(strdir()/filename().vvd) then none else 'SetVar(snum_refinement_original_formula,xf.GetFormula())'">
 			<cmd17 "if and(strcmp(%4,filename()),strcmp(%6,fileext())) then none else 'spy.loadHistory()'">
 			<cmd18 "'if and(IsFileType(ires), not(File.Exists((strdir()/history-filename)))) then 'spy.create_history()'">
@@ -973,11 +973,11 @@
 	<body
 		<args
 			<arg1 name="name" def="default"> 
-			<arg1 name="qualifier" def=""> 
+			<arg1 name="skin_extension" def=""> 
 		/>
 		<cmd 
 			<cmd1 "SetVar(gui_skin_name,%1)">
-			<cmd2 "spy GuiSkinChanger %2">
+			<cmd2 "spy.run_GuiSkinChanger %2">
 			<cmd3 "spy.setAllMainToolbarTabButtons()">
 			<cmd4 "spy.resize_to_panelwidth -i='news/news.png'">
 			<cmd5 "updatehtml">
@@ -994,7 +994,8 @@
 		>
 		<cmd 
 			<cmd1 "setVar(gui_htmlpanelwidth,'%1')">
-			<cmd2 "spy timage %1 %2">
+			<cmd2 XXX"spy timage %1 %2">
+			<cmd2 "spy.run_timage()">
 			<cmd4 "spy MakeAllRBars">
 			<cmd5 "htmlpanelwidth %1">
 			<cmd4 "spy.resize_skin_logo(%1)">
@@ -1011,8 +1012,8 @@
 		>
 		<cmd 
 			<cmd1 "setVar(gui_htmlpanelwidth,'%1')">
-			<cmd2 "spy timage %1 %2">
-			<cmd3 "spy sNumTitle %1 %2">
+			<cmd2 "spy.run_timage()">
+			<cmd3 "spy.run_sNumTitle()">
 			<cmd4 "spy MakeAllRBars">
 			<cmd5 "htmlpanelwidth %1">
 			<cmd4 "spy.resize_skin_logo(%1)">
@@ -1392,8 +1393,8 @@
 			<arg2 name="single" def="">
 		\>
 		<cmd
-			<cmd5 "cursor(busy,'Starting ODAC')">
-			<cmd6 "spy.ac_run solveit %1 %2"> 
+			<cmd5 XXX"cursor(busy,'Starting ODAC')">
+			<cmd6 "spy.runODAC('spy.ac_run solveit %1 %2')"> 
 		\>
 	\>
 \>
@@ -1407,7 +1408,7 @@
 		\>
 		<cmd
 			<cmd5 "cursor(busy,'Starting ODAC with File Config')">
-			<cmd6 "spy.ac_run solveit %1 %2"> 
+			<cmd6 "spy.runODAC('spy.ac_run solveit %1 %2)'"> 
 		\>
 	\>
 \>
@@ -1584,6 +1585,8 @@
 <gui2 help="Switch to Gui2"
 	<body
 		<cmd 
+			<cmd2 "SetVar('user_refinement_gui2',True)">
+			<cmd2 "spy.makeTestbanner()">
 			<cmd2 "itemstate * 0">
 			<cmd2 "itemstate logo1 1">
 			<cmd2 "itemstate info-title 1">
