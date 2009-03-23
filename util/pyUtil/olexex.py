@@ -1031,14 +1031,25 @@ def getKeys(key_directory=None):
   
   
 def GetHttpFile(f):
-  url = "%s/%s" %(URL, f)
-  path = urllib.URLopener()
-  path.addheader('pragma', 'no-cache')
-  conn = path.open(url)
-  content = conn.read()
-  conn.close()
-  
-  return content
+  retVal = None
+  go_online = OV.FindValue("olex2_is_online",True)
+  if go_online:
+    try:
+      url = "%s/%s" %(URL, f)
+      path = urllib.URLopener()
+      path.addheader('pragma', 'no-cache')
+      conn = path.open(url)
+      content = conn.read()
+      conn.close()
+      retVal = content
+    except:
+      OV.SetVar("olex2_is_online",False)
+      retVal = None
+      print "Olex2 can not reach the update server"
+  else:
+    retVal = None
+    
+  return retVal
   
 
 def check_for_crypto():
@@ -1053,43 +1064,63 @@ def check_for_crypto():
     return False
 
 def GetACF():
+  no_update = False
+#  no_update = True
   print "Starting ODAC..."
-
+  if no_update:
+    OV.SetVar('olex2_is_online',False)
+    print "Will not update ODAC Files"
   please_restart_crypto = check_for_crypto()  
   if please_restart_crypto:
     print "Please restart Olex2. A new Plugin has been installed"
     return
   
-  
+  cont = None
   debug = OV.FindValue('odac_fb', False)
-#  debug =True
+  debug = False
   debug_deep1 = True
   debug_deep2 = True
-    
+#  OV.SetVar("ac_verbose", True)
+  
   if not debug:
     p = r"%s/util/pyUtil/PluginLib" %OV.BaseDir()
     name = "entry_ac"
     if not os.path.exists("%s/entry_ac.py" %p):
       cont = GetHttpFile("/olex-distro-odac/%s.py" %name)
-      wFile = open("%s/%s.py" %(p, name),'w') 
-      wFile.write(cont)
-      wFile.close()
-    else:
-      try:
-        cont = GetHttpFile("/olex-distro-odac/%s.py" %name)
+      if cont:
         wFile = open("%s/%s.py" %(p, name),'w') 
         wFile.write(cont)
         wFile.close()
+      if not cont:
+        print "Olex2 was not able to go online and fetch a necessary file."
+        print "Please make sure that your computer is online and try again."
+        return
+    else:
+      try:
+        cont = GetHttpFile("/olex-distro-odac/%s.py" %name)
+        if cont:
+          wFile = open("%s/%s.py" %(p, name),'w') 
+          wFile.write(cont)
+          wFile.close()
       except Exception, err:
-        print err
+        print "Could not update ODAC file %s: %s" %(name, err)
       if not cont:
         wFile = open("%s/%s.py" %(p, name),'r')
         cont = wFile.read()
         wFile.close()
-    #sys.path.append(r"%s/util/pyUtil/PluginLib" %olx.BaseDir())
-    sys.modules[name] = types.ModuleType(name)
-    exec cont in sys.modules[name].__dict__
-    #import entry_ac
+        if not cont:
+          print "Olex2 can not access a necessary file."
+          print "Please make sure that your computer is online and try again."
+          return
+#        sys.path.append(r"%s/util/pyUtil/PluginLib" %olx.BaseDir())
+#        import entry_ac
+    try:    
+      sys.modules[name] = types.ModuleType(name)
+      exec cont in sys.modules[name].__dict__
+      odac_loaded = True
+    except Exception, err:
+      odac_loaded = False
+      print "ODAC failed to load correctly"
 
   else:
     print "Debugging Mode is on. File System Based files will be used!"
@@ -1099,17 +1130,31 @@ def GetACF():
       OV.SetVar("ac_debug_deep1", True)
     if debug_deep2:
       OV.SetVar("ac_debug_deep2", True)
-    #sys.path.append(r"%s/util/pyUtil/PluginLib/plugin-AutoChem" %olx.BaseDir())
     sys.path.append(r"%s/util/pyUtil/PluginLib/plugin-AutoChemSRC" %olx.BaseDir())
-    import _entry_ac
-  
-  
-  OV.SetVar("HaveODAC", True)
-  print "ODAC started OK"
-  return "OK"
+    try:
+      print "Debug: Import entry_ac"
+      import entry_ac
+      print "Debug: entry_ac imported OK"
+    except Exception, err:
+      print "Failed: %s" %err
+
+  if odac_loaded:
+    OV.SetVar("HaveODAC", True)
+    print "ODAC started OK"
 OV.registerFunction(GetACF)
   
+
+def runODAC(cmd):
+  if OV.FindValue('HaveODAC',False):
+    olex.m("cursor(busy,'Starting ODAC')")
+    olex.m(cmd)
+  else:
+    print "ODAC has failed to initialize or is not installed"
+
   
+OV.registerFunction(runODAC)
+  
+
 
 def HklStatsAnalysis():
   import olex_core
