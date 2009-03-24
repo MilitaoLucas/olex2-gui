@@ -2,12 +2,15 @@
 Various generic tools for creating and using HTML.
 """
 import os
+import sys
 
 import olx
 #import sys
 #sys.path.append(r".\src")
+
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+
 
 def makeHtmlTable(list):
   """ Pass a list of dictionaries, with one dictionary for each table row.
@@ -624,6 +627,7 @@ def doBanner(i):
   i = int(i)
   #olx.html_SetImage("BANNER_IMAGE","banner_%i.png" %i)
   OV.CopyVFSFile("banner_%i.png" %i, "banner.png")
+  OV.CopyVFSFile("banner_%i.htm" %i, "banner.htm")
   offset = 10
   target = 2
   ist = ""
@@ -653,4 +657,6 @@ def doBanner(i):
     OV.cmd(cmd)
   
 OV.registerFunction(doBanner)
-  
+
+
+

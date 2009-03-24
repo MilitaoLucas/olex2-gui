@@ -5,7 +5,7 @@ from ArgumentParser import ArgumentParser
 import Image
 import glob, os
 import copy
-import ImageDraw, ImageChops, ImageColor
+import ImageDraw, ImageChops, ImageColor, ImageEnhance
 import OlexVFS
 #import olex_core
 import pickle
@@ -34,6 +34,7 @@ try:
 #       _mkdir(newdir)
 except:
   pass
+
 
 
 class ButtonMaker(ImageTools):
@@ -172,7 +173,8 @@ class ButtonMaker(ImageTools):
                                       colour=whitespace_bottom.get('colour','#ffffff'))
         #image = self.add_whitespace(image=image, side='bottom', weight=1, colour = self.adjust_colour("bg", luminosity = 0.95))
         OlexVFS.save_image_to_olex(image,'%s-%s%s.png' %(image_prefix, name, state), 2)
-      
+
+  
 class GuiSkinChanger(ImageTools):
   def __init__(self, tool_fun=None, tool_arg=None):
     super(GuiSkinChanger, self).__init__()
@@ -217,10 +219,12 @@ class GuiSkinChanger(ImageTools):
     self.gui_grad_bottom_left = '#ffffff'
     self.gui_grad_bottom_right = '#ffffff' 
     self.gui_htmlpanelwidth = '320' 
+
     
-  def run(self):
+  def run_GuiSkinChanger(self):
     path = r"gui/images/src/default.png"
     skin = self.gui_skin_name
+    skin_extension = self.gui_skin_extension
     config = {}
     if "#" in skin:
       #self.getVariables('gui')
@@ -254,14 +258,17 @@ class GuiSkinChanger(ImageTools):
       self.setVariables("gui")
       skinpath = r"%s/util/pyUtil/PluginLib/skins/plugin-%sSkin" %(self.basedir, skin)
       # First try to load the skin extension.
-      try:
-        extensionFile = open(r"%s/config%s.txt" %(skinpath, self.param.strip()), 'r')
+      extensionFile = None
+      files = []
+      if skin_extension:
+        try:
+          extensionFile = open(r"%s/config%s.txt" %(skinpath, skin_extension, 'r'))
+          files.append(extensionFile)
+        except:
+          print "Skin definition file\n%s/config%s.txt\nnot found!" %(skinpath, skin_extension)
       # Then load the actual named skin.
-      except:
-        extensionFile = None
-        print "Skin definition file\n%s/config%s.txt\nnot found!" %(skinpath, self.param.strip())
       rFile = open(r"%s/config.txt" %(skinpath), 'r')
-      files = [extensionFile, rFile]
+      files.append(rFile)
       for file in files:
         for line in file:
           line= line.strip()
@@ -285,10 +292,8 @@ class GuiSkinChanger(ImageTools):
       self.setOlexColours()
     self.resize_skin_logo(self.gui_htmlpanelwidth)
     self.setVariables("gui")
-    a = PilTools.sNumTitle()
-    a.run()
-    a = PilTools.timage()
-    a.run()
+    #sNumTitle_instance.run_sNumTitle()
+    #timage_instance.run_timage()
     olx.HtmlPanelWidth(self.gui_htmlpanelwidth)
     self.setGuiProperties()
     OV.HtmlReload()
@@ -705,7 +710,16 @@ class sNumTitle(ImageTools):
       width = float(tool_arg)
     self.width = int((width) - 22)
 
-  def run(self):
+  def run_sNumTitle(self):
+    self.gui_base_colour = OV.FindValue('gui_base_colour')
+    self.width = int(OV.FindValue('gui_htmlpanelwidth')) - 22
+    self.basedir = OV.BaseDir()
+    self.filefull = OV.FileFull()
+    self.filepath = OV.FilePath()
+    self.filename = OV.FileName()
+    self.datadir = OV.DataDir()
+    self.sNum = self.filename
+    
     items = {}
     if self.filename != 'none':
       if self.have_connection:
@@ -963,12 +977,8 @@ class timage(ImageTools):
         width = float(width)
       except:
         width = float(tool_arg)
-    #self.gui_html_bg_colour = OV.FindValue("gui_html_bg_colour")
-    #self.gui_timage_colour = OV.FindValue("gui_timage_colour")
-    #self.gui_skin_name = OV.FindValue("gui_skin_name")
-    #self.gui_html_highlight_colour = OV.FindValue("gui_html_highlight_colour")
     self.font_name = "Vera"
-    self.timer = False
+    self.timer = True
     if self.timer:
       import time
       self.time = time
@@ -978,21 +988,66 @@ class timage(ImageTools):
         self.gui_base_colour = OV.FindValue('gui_base_colour')
       else:
         self.gui_base_colour = self.HTMLColorToRGB(args[0])
-      
     self.width = int((width) - 22)
     if self.width <= 0: self.width = 10
-    
     icon_source = "%s/etc/gui/images/src/icons.png" %self.basedir
     image_source = "%s/etc/gui/images/src/images.png" %self.basedir
     self.iconSource = Image.open(icon_source)
     self.imageSource = Image.open(image_source)
-
+    self.olex2_has_recently_updated = OV.FindValue('olex2_has_recently_updated',False)
     sf = 4
     self.sf = sf
     
+  def resize_news_image(self):
+    IT.resize_to_panelwidth({'i':'news/news.png'})
+    
+  def run_timage(self):
+    if not self.olex2_has_recently_updated:
+      if not OV.FindValue('olex2_force_images'):
+        return
+    self.getVariables('gui')
+      
+    self.gui_base_colour = OV.FindValue('gui_base_colour')
+    self.width = int(OV.FindValue('gui_htmlpanelwidth')) - 22
+    self.basedir = OV.BaseDir()
+    self.filefull = OV.FileFull()
+    self.filepath = OV.FilePath()
+    self.filename = OV.FileName()
+    self.datadir = OV.DataDir()
+    self.sNum = self.filename
+
+    do_these = ["make_generated_assorted_images",
+                "make_text_and_tab_items",
+                "make_label_items",
+                "make_button_items",
+                "make_cbtn_items",
+                "make_icon_items",
+                "make_image_items",
+                "make_note_items",
+                "make_images_from_fb_png",
+                "info_bitmaps",
+                "makeTestBanner",
+                "resize_news_image",
+                "create_logo"
+                ]
+    
+    for item in do_these:
+      if self.timer:
+        t1 = self.time.time()
+      a = getattr(self, item)
+      a()
+      if self.timer:
+        print "\t - %s took %.3f s to complete" %(item, self.time.time()-t1)
+    
+    
+    
+  def make_images_from_fb_png(self):
+    sf = self.sf
+    image_source = self.imageSource
     self.getImageItemsFromTextFile()
     
-    im = Image.open(image_source)
+
+    im = image_source
     cut = 0, 52*sf, 27*sf, 76*sf
     crop =  im.crop(cut)
     self.warning =  Image.new('RGBA', crop.size, self.gui_html_bg_colour)
@@ -1392,18 +1447,17 @@ class timage(ImageTools):
     name = "warning_big.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
     
-    try:
-      self.info_bitmaps()
-      self.makeTestBanner()
-    except Exception, err:
-      print "There has been an error: %s" %err
- 
   def makeTestBanner(self):
+    if not OV.FindValue('user_refinement_gui2'):
+      return
+
     bannerbg = "#fdff72"
     bannerbg = self.gui_base_colour
     col_0 = self.adjust_colour(bannerbg,luminosity=0.85)
     col_1 = self.adjust_colour(bannerbg,luminosity=1.7)
     cmd_col = "#fff600"
+    font_size_l = [42, 13, 13]
+    font_l = ["Vera Bold", "Vera", "Vera"]
     
     txt_items = {"Olex2":{'name':'olex2','pix':0,'row':0,'colour':col_0,
                           'itemstate':"aio-olex2* 1 "},
@@ -1448,7 +1502,7 @@ class timage(ImageTools):
                                'itemstate':"aio-refine* 2 aio-refine-refine 1", 'cmd':"compaq"},
                  "assign":{'name':'assign','pix':600,'row':2,'colour':cmd_col,'cmd':"",
                            'itemstate':"aio-refine* 2 aio-refine-refine 1", 'cmd':"ata(1)>>refine>>ata(1)>>compaq"},
-                 "anisotropic":{'name':'olex2','pix':630,'row':1,'colour':cmd_col,
+                 "anisotropic":{'name':'anisotropic','pix':630,'row':1,'colour':cmd_col,
                                 'itemstate':"aio-refine* 2 aio-refine-refine 1", 'cmd':"anis>>refine>>compaq"},
                  "add hydrogen":{'name':'add hydrogen','pix':670,'row':2,'colour':cmd_col,'cmd':"",
                                  'itemstate':"aio-refine* 2 aio-refine-refine 1", 'cmd':"hadd>>refine>>compaq"},
@@ -1460,16 +1514,24 @@ class timage(ImageTools):
                              'itemstate':"aio-disorder* 1 ", 'cmd':""},
 
                  "name atoms":{'name':'atom naming','pix':950,'row':2,'colour':col_1,
-                                'itemstate':"aio-naming* 1", 'cmd':""},
+                                'itemstate':"aio-publish* 2 aio-publish-naming* 1", 'cmd':""},
 
                  "measure":{'name':'geometric measurements','pix':1000,'row':1,'colour':col_1,
                                            'itemstate':"aio-geometry* 1", 'cmd':""},
 
                  "match":{'name':'matching','pix':1050,'row':2,'colour':col_1,
                             'itemstate':"aio-analyze* 2 aio-analyze-match* 1", 'cmd':""},
-                 
-                 
                  }    
+    
+    
+    for item in txt_items:
+      row = txt_items[item].get("row",0)
+      txt = item
+      font_size = font_size_l[row]
+      font_name = font_l[row]
+      txt_dimensions = self.getTxtWidthAndHeight(txt, font_name=font_name, font_size=font_size)
+      txt_items[item].setdefault('txt_dimensions',txt_dimensions)          
+    
 
 #    bannerbg = self.gui_html_font_colour
     offset = 180
@@ -1490,8 +1552,6 @@ class timage(ImageTools):
       draw.line(((0,height  - i),(width,height - i)), fill=self.adjust_colour(bannerbg,luminosity=lum, saturation = lum))
       
     margin_top_l = [-3, 12, 26] 
-    font_size_l = [42, 13, 13]
-    font_l = ["Vera Bold", "Vera", "Vera"]
     title_l = [True, False, False]
     lower_l = [False, True, True]
     
@@ -1507,8 +1567,8 @@ class timage(ImageTools):
         font_name = font_l[row]
         titleCase = title_l[row]
         lower_case = lower_l[row]
-        
-        wX, wY = self.getTxtWidthAndHeight(txt, draw, font_name = font_name, font_size = font_size)
+        wX = txt_items[item].get('txt_dimensions')[0]
+        wY = txt_items[item].get('txt_dimensions')[1]
         olex_pos = x_pos + wX/2 - (int(self.gui_htmlpanelwidth) - 24)/2
         olex_pos = "%.0f" %(olex_pos/10.0)
         if row != 0:
@@ -1522,29 +1582,177 @@ class timage(ImageTools):
                      titleCase=titleCase,
                      lowerCase=lower_case,
                      font_colour=font_colour)
-        
-      
     width = int(self.gui_htmlpanelwidth) - 24
     name = "banner.png"
-    for i in xrange(129):
+
+    size = (width, height)
+    self.banner_make_decoration_image(size)    
+    
+    for j in xrange(129):
+      self.banner_map = "<map name='banner_map'>"
       step = 10
-      x1 = 0 + i * step
+      x1 = 0 + j * step
       x2 = x1 + width
       cut = (x1, 0, x2, height)
       crop =  IM.crop(cut)
-      crop = self.decorate_banner_image(crop,bannerbg, i)
-      name = "banner_%s.png" %i
+      
+#      crop =  Image.new('RGBA', (width, height), bannerbg)
+      draw = ImageDraw.Draw(crop)
+
+      margin_top_l = [-3, 8, 24] 
+      font_size_l = [42, 13, 13]
+      font_l = ["Vera Bold", "Vera", "Vera"]
+      title_l = [True, False, False]
+      lower_l = [False, True, True]
+      
+      for i in xrange(3):
+        for item in txt_items:
+          row = txt_items[item].get("row",0)
+          if row != i:
+            continue
+          x_pos = (txt_items[item].get("pix",0) + offset) - (j * step)
+          y_pos = margin_top_l[row]
+          wX = txt_items[item].get('txt_dimensions')[0]
+          wY = txt_items[item].get('txt_dimensions')[1]
+          if row != 0:
+            self.banner_map_add_area(txt_items[item], x_pos, y_pos, wX, wY)
+            
+      self.banner_map_complete()
+      self.banner_write_file(j)
+      #crop = self.decorate_banner_image(crop, size, bannerbg, j)
+      crop.paste(self.banner_decoration_image[0], mask = self.banner_decoration_image[1])
+      name = "banner_%s.png" %j
       OlexVFS.save_image_to_olex(crop, name, 2)
-      if i == 0:
+      if j == 0:
         OlexVFS.save_image_to_olex(crop, "banner.png", 2)
+    return "Done"
+   
+  def banner_map_add_area(self, d, x_pos, y_pos, wX, wY):
+    itemstate = d.get('itemstate', "")
+    cmd = d.get('cmd', "")
+    name = d.get('name',"No Name Found")
+    txt = '''
+      <area shape="rect" 
+        coords="%s,%s,%s,%s" 
+        href="itemstate %s>>%s"
+        target="Change GUI2 state to %s">
+    '''%(x_pos, y_pos, (x_pos + wX), (y_pos + wY), itemstate, cmd, name)
+    self.banner_map += txt
         
+
+  def banner_map_complete(self):
+    txt = '''
+    </map>
+    <zimg name="BANNER_IMAGE" border="0" src="banner.png" usemap="banner_map">
+  <input 
+    type="slider" 
+    name = "BANNER_SLIDE" 
+    width="$eval(htmlpanelwidth()-24)" 
+    height="20" 
+    value="GetVar(snum_refinement_banner_slide)" 
+    bgcolor="$GetVar(gui_html_table_bg_colour)"  
+    fgcolor="$GetVar(gui_html_font_colour)" 
+    min="0" 
+    max="119" 
+    onchange = "SetImage(BANNER_IMAGE,strcat(banner_,GetValue(BANNER_SLIDE).png))"	
+    onmouseup = "SetVar(snum_refinement_banner_slide,GetValue(BANNER_SLIDE))>>
+spy.doBanner(GetVar(snum_refinement_banner_slide))
+"
+>
+'''
+    self.banner_map += txt
+
+  def banner_write_file(self, i):
+    htm_location = "banner_%i.htm" %i
+    OlexVFS.write_to_olex(htm_location, self.banner_map)
+    if i == 0:
+      htm_location = "banner.htm"
+      OlexVFS.write_to_olex(htm_location, self.banner_map)
     
-  def decorate_banner_image(self, crop,bannerbg, i):
-    #marker_colour = self.gui_html_highlight_colour
+      
+  def banner_make_decoration_image(self, size):
     marker_colour = "#ff0000"
-    width, height = crop.size
+    width, height = size
+    heigth = height -1 
+    IM =  Image.new('RGBA', size, (0,0,0,0))
+    draw = ImageDraw.Draw(IM)
+
+
+    #for i in xrange(22):
+      #trans = 255 - (2 * (22 - i))
+      #draw.line(((i,0),(i,height)), fill=(0,0,0, trans))
+    #for i in xrange(22):
+      #trans = 255 - (2 * i)
+      #draw.line(((width -i,0),(width - i,height)), fill=(0,0,0, trans))
+    
+    draw.line(((width/2 + 2,0),(width/2 + 2,height)), fill=(0,0,0,125))
+    
+    
+    #Draw triangle shadow
+    begin = (width/2 - 3, height)
+    middle = (width/2,height -6)
+    end = (width/2 + 7, height)
+    draw.polygon((begin, middle, end), (0,0,0,90))
+    
+    begin = (width/2 - 5, height)
+    middle = (width/2,height -6)
+    end = (width/2 + 5, height)
+    draw.polygon((begin, middle, end), marker_colour)
+    
+    begin = (width/2 - 3, 0)
+    middle = (width/2,6)
+    end = (width/2 + 7, 0)
+    draw.polygon((begin, middle, end), (0,0,0,90))
+
+    begin = (width/2 - 5, 0)
+    middle = (width/2,6)
+    end = (width/2 + 5, 0)
+    draw.polygon((begin, middle, end), marker_colour)
+    
+    draw.line(((width/2,0),(width/2,height)), fill=marker_colour)
+    
+    divison_col = self.gui_base_colour + (255,)
+    left = width/2
+    right = width/2
+    for j in xrange(40):
+      y1 = 1 
+      if j % 2:
+        y1 = 2
+      right += 8
+      draw.line(((right,(height/2)-y1), (right, (height/2)+y1)), fill=divison_col)
+      left -= 10
+      draw.line(((left,(height/2)-y1),(left,(height/2)+y1)), fill=divison_col)
+    r,g,b,a = IM.split()
+    #paste the overlay into the base image in the boundingBox using mask as a filter
+    self.banner_decoration_image = (IM,a)
+      
+  def decorate_banner_image(self, crop, size, bannerbg, i):
+    marker_colour = "#ff0000"
+    width, height = size
     heigth = height -1 
     draw = ImageDraw.Draw(crop)
+
+    #for j in xrange(22):
+      #region = (j,0,j+1,height)
+      #region_im =  crop.crop(region)
+      #region_im = region_im.point(lambda i: i * 1 - 0.01 * (22-j))
+      #region_im = ImageEnhance.Brightness(region_im).enhance(1 - j * 0.01)
+      #crop.paste(region_im, region)
+    #for j in xrange(22):
+      #region = (width - j - 2  ,0,width - j , height)
+      #region_im =  crop.crop(region)
+      #region_im = region_im.point(lambda i: i * 1 - 0.01 * j)
+      #crop.paste(region_im, region)
+    
+
+    ## Shadow Marker Line
+    region = (int(width/2) + 2,0,int(width/2) + 3,height)
+    region_im =  crop.crop(region)
+#    region_im = region_im.point(lambda i: i * 0.8)
+    region_im = ImageEnhance.Brightness(region_im).enhance(1.1)
+    crop.paste(region_im, region)
+    
+    
     begin = (width/2 - 5, height)
     middle = (width/2,height -6)
     end = (width/2 + 5, height)
@@ -1553,29 +1761,21 @@ class timage(ImageTools):
     middle = (width/2,6)
     end = (width/2 + 5, 0)
     draw.polygon((begin, middle, end), marker_colour)
+    
     draw.line(((width/2,0),(width/2,height)), fill=marker_colour)
     
-    
-    divison_col = "#ababab"
-    divison_col = marker_colour
+    #divison_col = "#ababab"
+    divison_col = self.gui_base_colour
     left = width/2
     right = width/2
     for j in xrange(40):
-      y1 = height - 3 
+      y1 = 1 
       if j % 2:
-        y1 = height - 5
+        y1 = 2
       right += 8
-      draw.line(((right,y1),(right,height)), fill=divison_col)
+      draw.line(((right,(height/2)-y1), (right, (height/2)+y1)), fill=divison_col)
       left -= 10
-      draw.line(((left,y1),(left,height)), fill=divison_col)
-    draw.line(((0,height),(width,height)), fill=divison_col)
-    draw.line(((0,height),(width,height)), fill=divison_col)
-#    self.write_text_to_draw(draw, 
-#                 "%s" %(str(i)), 
-#                 top_left=(width -20, 3), 
-#                 font_name = 'Vera', 
-#                 font_size=12, 
-#                 font_colour="#ff0000")
+      draw.line(((left,(height/2)-y1),(left,(height/2)+y1)), fill=divison_col)
     return crop
     
     
@@ -2343,9 +2543,9 @@ class timage(ImageTools):
     font_size = 9
     line = int(font_size + font_size * 0.18)
     width = self.width - 25
-    if needs_warning:
-      w = self.warning.size[0] + 8
-      width = width - w
+    #if needs_warning:
+    #  w = self.warning.size[0] + 8
+    #  width = width - w
 
     text = OV.TranslatePhrase(item[0])
     #if olx.IsCurrentLanguage('Chinese') == 'true':
@@ -2423,9 +2623,9 @@ class timage(ImageTools):
                    font_colour=font_colour)
       #draw.text((((width - text_width)/2), (line * i) + 1), "%s" %txt, font=font, fill=font_colour)
       i += 1
-    if needs_warning:
-      image = self.add_whitespace(image=image, side='left', weight=w, colour=self.gui_html_bg_colour)
-      image.paste(self.warning, (2,2), self.warning)
+    #if needs_warning:
+    #  image = self.add_whitespace(image=image, side='left', weight=w, colour=self.gui_html_bg_colour)
+    #  image.paste(self.warning, (2,2), self.warning)
 
     image = self.add_whitespace(image=image, side='top', weight=2, colour=self.gui_html_bg_colour)
 
@@ -2710,6 +2910,9 @@ class timage(ImageTools):
       #draw.line((begin ,end), fill=(R, G, B))
 
       
+      
+      
+      
 def resize_skin_logo(width):
   IT.resize_skin_logo(width)
   return "Done"
@@ -2765,6 +2968,23 @@ class Boxplot(ImageTools):
     draw.line((xupperQ,ymid,xupper,ymid), fill=outline)
     
     OlexVFS.save_image_to_olex(image, "boxplot.png", 0)
+
+
+#timage_instance = timage()
+#OV.registerFunction(timage_instance.makeTestBanner)    
+#OV.registerFunction(timage_instance.run_timage)    
+
+#GuiSkinChanger_instance = GuiSkinChanger()
+#OV.registerMacro(GuiSkinChanger_instance.run_GuiSkinChanger, 'skin_extension')    
+
+#sNumTitle_instance = sNumTitle()
+#OV.registerFunction(sNumTitle_instance.run_sNumTitle)    
+#OV.registerMacro(GuiSkinChanger_instance.run_GuiSkinChanger, 'skin_extension')    
+
+
+
+
+    
     
 if __name__ == "__main__":
   colour = "green"
