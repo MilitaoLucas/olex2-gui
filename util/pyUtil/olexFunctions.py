@@ -171,6 +171,11 @@ class OlexFunctions(inheritFunctions):
     g = self.func_wrap(function)
     g.__name__ = function.__name__
     olex.registerMacro(g,options,profiling)
+
+  def unregisterMacro(self,function,options,profiling=False):
+    g = self.func_wrap(function)
+    g.__name__ = function.__name__
+    olex_core.unregisterMacro(g,options,profiling)
     
   def registerCallback(self,event,function,profiling=False):
     g = self.func_wrap(function)

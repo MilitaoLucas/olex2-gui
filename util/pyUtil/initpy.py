@@ -280,13 +280,17 @@ if olx.IsPluginInstalled('plugin-MySQL') == "true":
 
 if olexex.getKey():
   olexex.GetACF()
-  
+
+olexex.check_for_recent_update()  
+
 if sys.platform[:3] == 'win':
   olx.SetVar('defeditor','notepad')
   olx.SetVar('defexplorer','explorer')
 #else:
   #olx.SetVar('defeditor','gedit')
   #olx.SetVar('defexplorer','nautilus')
-  
+
+if OV.HasGUI():
+  from Skin import Skin  
   
 print "Welcome to Olex2"

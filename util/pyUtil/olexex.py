@@ -11,6 +11,7 @@ URL = "http://dimas.dur.ac.uk/"
 sys.path.append(r".\src")
 import History
 
+
 import ExternalPrgParameters
 SPD, RPD = ExternalPrgParameters.defineExternalPrograms()
 
@@ -1051,6 +1052,17 @@ def GetHttpFile(f):
     
   return retVal
   
+def check_for_recent_update():
+  now = time.time()
+  path = "%s/usettings.dat" %OV.BaseDir()
+  rFile = open(path, 'r')
+  lines = rFile.readlines()
+  for line in lines:
+    if line.startswith('lastupdate'):
+      last_update = float(line.split("=")[1])
+      break
+  if now - last_update > 100:
+    OV.SetVar('olex2_has_recently_updated',True)
 
 def check_for_crypto():
   if olx.IsPluginInstalled(r"plugin-Crypto").lower() == 'false':
@@ -1242,6 +1254,8 @@ def StoreSingleParameter(var, args):
   if var:
     OV.StoreParameter(var)
 OV.registerMacro(StoreSingleParameter, "")
+
+
 
 
 if not haveGUI:
