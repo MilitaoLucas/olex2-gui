@@ -10,6 +10,9 @@ from olexFunctions import OlexFunctions
 from FontInstances import FontInstances
 OV = OlexFunctions()
 import os
+global sizedraw
+sizedraw_dummy_draw  = ImageDraw.Draw(Image.new('RGBA',(300, 300)))
+
 
 class ImageTools(FontInstances):
   def __init__(self):
@@ -487,11 +490,12 @@ class ImageTools(FontInstances):
     im = Image.composite(im,white, a) # Create a composite
     return im
 
-  def getTxtWidthAndHeight(self, txt, draw, font_name='Vera', font_size=12):
+  def getTxtWidthAndHeight(self, txt, font_name='Vera', font_size=12):
+    global sizedraw_dummy_draw
     font = self.fonts[font_name]["fontInstance"].get(font_size,None)
     if not font:
       font = self.registerFontInstance(font_name, font_size)
-    wX, wY = draw.textsize(txt, font=font)
+    wX, wY = sizedraw_dummy_draw.textsize(txt, font=font)
     return wX, wY
   
   def make_pop_image(self, d):

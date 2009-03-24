@@ -4,11 +4,11 @@ try:
   OV = OlexFunctions()
   import variableFunctions as VF
 except:
-  import sys
-  sys.path.append(r"../../PyToolLib")
-  sys.path.append(r"../PyToolLib")
-  sys.path.append(r"../")
-  sys.path.append(r"../../")
+  #import sys
+  #sys.path.append(r"../../PyToolLib")
+  #sys.path.append(r"../PyToolLib")
+  #sys.path.append(r"../")
+  #sys.path.append(r"../../")
   import olex
   from olexFunctions import OlexFunctions
   OV = OlexFunctions()
@@ -17,6 +17,7 @@ except:
 
 
 class ArgumentParser(object):
+  
 
   def __init__(self, args=None, tool_arg=None):
     try:

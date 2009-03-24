@@ -86,7 +86,6 @@ class sNumTitle(sNumTitle):
     return image
 
 
-
 class timage(timage):
 
   def __init__(self, width=290, tool_arg=None):

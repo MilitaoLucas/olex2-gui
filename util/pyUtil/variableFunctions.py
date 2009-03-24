@@ -6,7 +6,6 @@ try:
 except ImportError:
   import pickle # fall back on Python version
 import olex
-import olexex
 import userDictionaries
 import ExternalPrgParameters
 
