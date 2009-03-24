@@ -1051,23 +1051,39 @@ def GetHttpFile(f):
     retVal = None
     
   return retVal
-  
+
+
 def check_for_recent_update():
-  now = time.time()
-  path = "%s/usettings.dat" %OV.BaseDir()
+  path = "%s/version.txt" %OV.BaseDir()
   rFile = open(path, 'r')
-  lines = rFile.readlines()
-  for line in lines:
-    if line.startswith('lastupdate'):
-      last_update = float(line.split("=")[1])
-      break
-  if now - last_update < 100:
+  line = rFile.read()
+  version = int(line.split("SVN Revision No. ")[1])
+  last_version = int(OV.FindValue('olex2_last_version',0))
+  if version > last_version:
     OV.SetVar('olex2_has_recently_updated',True)
     print "Olex2 has recently been updated"
   else:
     OV.SetVar('olex2_has_recently_updated',False)
     print "Olex2 has not been updated"
-
+  OV.SetVar('olex2_last_version',version)
+  
+    #now = time.time()
+    #path = "%s/usettings.dat" %OV.BaseDir()
+    #rFile = open(path, 'r')
+    #lines = rFile.readlines()
+    #for line in lines:
+      #if line.startswith('lastupdate'):
+        #last_update = float(line.split("=")[1])
+        #break
+    #if now - last_update < 100:
+      #OV.SetVar('olex2_has_recently_updated',True)
+      #print "Olex2 has recently been updated"
+    #else:
+      #OV.SetVar('olex2_has_recently_updated',False)
+      #print "Olex2 has not been updated"
+  #except Exception, err:
+    #"Error in olexex.check_for_recent_update: %s" %err
+  
 
 def check_for_crypto():
   if olx.IsPluginInstalled(r"plugin-Crypto").lower() == 'false':
