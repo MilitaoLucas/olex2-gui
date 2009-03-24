@@ -978,7 +978,7 @@ class timage(ImageTools):
       except:
         width = float(tool_arg)
     self.font_name = "Vera"
-    self.timer = True
+    self.timer = False
     if self.timer:
       import time
       self.time = time
@@ -1004,6 +1004,7 @@ class timage(ImageTools):
   def run_timage(self):
     if not self.olex2_has_recently_updated:
       if not OV.FindValue('olex2_force_images'):
+        print "No updates, skipping image creation"
         return
     self.getVariables('gui')
       
