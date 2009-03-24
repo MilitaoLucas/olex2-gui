@@ -1061,8 +1061,13 @@ def check_for_recent_update():
     if line.startswith('lastupdate'):
       last_update = float(line.split("=")[1])
       break
-  if now - last_update > 100:
+  if now - last_update < 100:
     OV.SetVar('olex2_has_recently_updated',True)
+    print "Olex2 has recently been updated"
+  else:
+    OV.SetVar('olex2_has_recently_updated',False)
+    print "Olex2 has not been updated"
+
 
 def check_for_crypto():
   if olx.IsPluginInstalled(r"plugin-Crypto").lower() == 'false':
