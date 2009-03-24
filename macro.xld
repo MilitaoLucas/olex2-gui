@@ -997,7 +997,7 @@
 		>
 		<cmd 
 			<cmd1 "setVar(gui_htmlpanelwidth,'%1')">
-			<cmd2 "spy.run_skin(timage)">
+			<cmd2 "spy.run_skin timage">
 			<cmd4 XXX"spy MakeAllRBars">
 			<cmd5 "htmlpanelwidth %1">
 			<cmd4 "spy.resize_skin_logo(%1)">
