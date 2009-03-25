@@ -126,6 +126,8 @@ for val, key in alterations.iteritems():
 client = pysvn.Client()
 
 try:
+  n = client.update(working_directory + filepath)
+  revision_number = n[0].number
   print "SVN Revision Number %i" %revision_number
   wFile = open("%s/version.txt" %bin_directory, 'w')
   wFile.write("SVN Revision No. %s" %revision_number)
