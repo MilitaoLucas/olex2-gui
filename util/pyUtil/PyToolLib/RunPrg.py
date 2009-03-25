@@ -307,7 +307,7 @@ class RunPrg(ArgumentParser):
     OV.Cursor()
     OV.DeleteBitmap('%s' %self.bitmap)
       
-  def run(self):
+  def run_RunPrg(self, f, args):
     OV.SetVar('SlideQPeaksVal','0') # reset q peak slider to display all peaks
     self.getVariables('solution')
     self.getVariables('auto')
@@ -316,17 +316,17 @@ class RunPrg(ArgumentParser):
       print "No structure loaded"
       return
     self.original_filename = OV.FileName()
-    fun = self.fun
+    fun = f.lower()
     #olx.Sel('-u') # uncomment me!
     olx.Stop('listen')
     
     self.program, self.method = self.getProgramMethod(fun)
     if not self.program or not self.method:
       return
-    if fun == 'REFINE':
+    if fun == 'refine':
       olx.File("'%s/%s.ins'" %(OV.FilePath(),self.original_filename))
       self.setupRefine()
-    elif fun == 'SOLVE':
+    elif fun == 'solve':
       if OV.IsFileType('cif'):
         OV.Reap('%s/%s.ins' %(self.filepath,self.filename))
       self.setupSolve()
@@ -337,7 +337,7 @@ class RunPrg(ArgumentParser):
     self.setupFiles()
     if not self.terminate:
       if OV.FindValue("snum_refinement_graphical_output"):
-        if fun == "REFINE":
+        if fun == "refine":
           if self.HasGUI:
             from Analysis import ShelXAnalysis
             SXA = ShelXAnalysis()
@@ -354,7 +354,7 @@ class RunPrg(ArgumentParser):
     sys.stdout.graph = False
     
   def getProgramMethod(self, fun):
-    if fun == 'REFINE':
+    if fun == 'refine':
       prgType = 'refinement'
       prgDict = self.RPD
       prg = self.snum_refinement_program
@@ -386,3 +386,7 @@ class RunPrg(ArgumentParser):
     a = XYPlot(function=None, param=None)
     a.initialise(self.program, self.method)
     return a
+
+  
+RunPrg_instance = RunPrg()    
+OV.registerMacro(RunPrg_instance.run_RunPrg, '')
