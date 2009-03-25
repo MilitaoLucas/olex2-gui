@@ -1197,7 +1197,7 @@ class timage(ImageTools):
         name = name.lower()
         OlexVFS.save_image_to_olex(IM, name, 2)
         if name == "button_small-blank.png":
-          filename = r"%s/button_small-blank.png" %self.datadir
+          filename = r"button_small-blank.png"
           IM.save(filename)
     
     
