@@ -1168,8 +1168,10 @@ def GetACF():
       print "Debug: Import entry_ac"
       import entry_ac
       print "Debug: entry_ac imported OK"
+      odac_loaded = True
     except Exception, err:
       print "Failed: %s" %err
+      odac_loaded = False
 
   if odac_loaded:
     OV.SetVar("HaveODAC", True)
