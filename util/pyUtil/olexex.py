@@ -1061,10 +1061,10 @@ def check_for_recent_update():
   last_version = int(OV.FindValue('olex2_last_version',0))
   if version > last_version:
     OV.SetVar('olex2_has_recently_updated',True)
-    print "Olex2 has recently been updated"
+    #print "Olex2 has recently been updated"
   else:
     OV.SetVar('olex2_has_recently_updated',False)
-    print "Olex2 has not been updated"
+    #print "Olex2 has not been updated"
   OV.SetVar('olex2_last_version',version)
   
     #now = time.time()
