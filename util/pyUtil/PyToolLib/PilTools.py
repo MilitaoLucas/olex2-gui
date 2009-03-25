@@ -96,7 +96,7 @@ class ButtonMaker(ImageTools):
           width = (width/number-9)
           if vline:
             vline.setdefault('position', width - 15)
-            olx.SetVar("main_toolbar_vline_position, %s" %int(width - 15))
+            olx.SetVar("olex2_main_toolbar_vline_position, %s" %int(width - 15))
       except:
         width = int(width)
       size = (int(width), int(height))

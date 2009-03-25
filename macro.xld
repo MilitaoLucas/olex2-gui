@@ -93,6 +93,7 @@
 			<cmd3  "spy.pickleVVD(structure)">
 			<cmd4  "storeparam startup filefull()">
 			<cmd5  "storeparam olex2_last_version GetVar(olex2_last_version)">
+			<cmd5  "storeparam olex2_main_toolbar_vline_position GetVar(olex2_main_toolbar_vline_position)">
 
 			<cmd5  "spy.StoreParameters(gui)">
 			<cmd99 "stop logging">
