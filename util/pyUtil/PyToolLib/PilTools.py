@@ -1004,7 +1004,7 @@ class timage(ImageTools):
   def run_timage(self):
     if not self.olex2_has_recently_updated:
       if not OV.FindValue('olex2_force_images'):
-        print "No updates, skipping image creation"
+        #print "No updates, skipping image creation"
         return
     self.getVariables('gui')
       
