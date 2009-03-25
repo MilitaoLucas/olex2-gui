@@ -33,22 +33,24 @@ class Spy(object):
       print >> sys.stderr, "Tool: %s, Function: %s, Parameters: %s"
       sys.stderr.formatExceptionInfo()
 
-#if __name__ == "__main__":
-  #tool = OV.FindValue("tool")
-  #fun = OV.FindValue("fun")
-  #param = OV.FindValue("param")
-  #try:
-    ##if olx.IsPluginInstalled('plugin-HotshotProfiler') == 'true':
-      ##sys.path.append("%s/util/pyUtil/PluginLib/plugin-HotshotProfiler" %(olx.BaseDir()))
-      ##import spy_HotshotProfiler
-      ##a = spy_HotshotProfiler.Spy(tool, fun, param)
-    #if olx.IsPluginInstalled('plugin-CProfile') == 'true':
-      #sys.path.append("%s/util/pyUtil/PluginLib/plugin-CProfiler" %(olx.BaseDir()))
-      #import spy_CProfile
-      #a = spy_CProfile.Spy(tool, fun, param)
-    #else:
-      #a = Spy(tool, fun, param)
-    #a.run()
-  #except Exception, ex:
-    #print >> sys.stderr, "There was an outer problem"
-    #sys.stderr.formatExceptionInfo()
+if __name__ == "__main__":
+  tool = OV.FindValue("tool")
+  fun = OV.FindValue("fun")
+  param = OV.FindValue("param")
+  try:
+    #if olx.IsPluginInstalled('plugin-HotshotProfiler') == 'true':
+      #sys.path.append("%s/util/pyUtil/PluginLib/plugin-HotshotProfiler" %(olx.BaseDir()))
+      #import spy_HotshotProfiler
+      #a = spy_HotshotProfiler.Spy(tool, fun, param)
+    if olx.IsPluginInstalled('plugin-CProfile') == 'true':
+      sys.path.append("%s/util/pyUtil/PluginLib/plugin-CProfiler" %(olx.BaseDir()))
+      import spy_CProfile
+      a = spy_CProfile.Spy(tool, fun, param)
+    else:
+      a = Spy(tool, fun, param)
+    print "Running an old-style spy tool: %s" %tool  
+    print "You should not be seeing this line. If you do, please let us know immediately"
+    a.run()
+  except Exception, ex:
+    print >> sys.stderr, "There was an outer problem"
+    sys.stderr.formatExceptionInfo()
