@@ -140,8 +140,6 @@ def InitialiseVariables(arg):
         vvdItems.report.setdefault(varName)
       elif 'solution' in varName:
         vvdItems.solution.setdefault(varName)
-      elif 'workflow' in varName:
-        vvdItems.workflow.setdefault(varName)
         
     if not OV.IsVar('snum_cctbx_map_type'):
       OV.SetVar('snum_cctbx_map_type','--')

@@ -250,6 +250,4 @@ def userVariables():
     'user_refinement_gui2':Variable(False),
     'olex2_is_online':Variable(True),
     'olex2_has_recently_updated':Variable(False),
-    'olex2_last_version':Variable(0),
-    'olex2_main_toolbar_vline_position':Variable(0)
   }
