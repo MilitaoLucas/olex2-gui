@@ -1055,9 +1055,12 @@ def GetHttpFile(f):
 
 def check_for_recent_update():
   path = "%s/version.txt" %OV.BaseDir()
-  rFile = open(path, 'r')
-  line = rFile.read()
-  version = int(line.split("SVN Revision No. ")[1])
+  try:
+    rFile = open(path, 'r')
+    line = rFile.read()
+    version = int(line.split("SVN Revision No. ")[1])
+  except:
+    version = 1
   last_version = int(OV.FindValue('olex2_last_version',0))
   if version > last_version:
     OV.SetVar('olex2_has_recently_updated',True)
