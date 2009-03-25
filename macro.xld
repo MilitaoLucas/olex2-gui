@@ -216,8 +216,10 @@
 			<cmd4 "user 'filepath()'">
 			<cmd5 "file">
 			<cmd6 XXX="cursor(busy, 'Refining...')">
-			<cmd7 "spy RunPrg REFINE %1 %2">
-			<cmd8 "UpdateHtml">
+			<cmd7 "SetVar(snum_refinement_max_cycles,%1)">
+			<cmd8 "SetVar(snum_refinement_max_peaks,%2)">
+			<cmd10 "spy.run_RunPrg refine">
+			<cmd11 "UpdateHtml">
 		\>
 		<onterminate
 			<cmd0 XXX="cursor()">
@@ -227,48 +229,6 @@
 		\>
 	\>
 \>
-
-<refineit help="Launches refine program. Syntax: refine [l.s.=-1] [plan=-1]"
-	<body
-		<args
-			<arg0 name="l.s." def='-1'\> 
-			<arg1 name="plan" def='-1'\> 
-			<arg2 name="REFINE" def='REFINE'\>
-			<arg2 name="tidy" def='-t'\>
-			\>
-		<cmd 
-			<cmd1  "mode off">
-			<cmd2  "sel -u">
-			<cmd3  "sel atoms where xatom.peak<2&&xatom.peak>0">
-			<cmd4  "kill sel">
-			<cmd5  "name $Q C">
-			<cmd6  "ls %1">
-			<cmd7  "plan %2">
-			<cmd8  "user 'filepath()'">
-			<cmd9  "file">
-			<cmd10 XXX="cursor(busy, 'Refining...')">
-			<cmd11 cmd1="clear">
-			<cmd12 cmd1="lines -1">
-			<cmd13 "spy RunPrg REFINE t t t">
-		\>
-		<onterminate
-			<cmd1 "cursor()">
-			<cmd2 cmd1="lines 10">
-			<cmd3 cmd1="@reap 'filepath()\filename().res'"> 
-			<cmd4 cmd1="spy.create_history()">
-			<cmd4 cmdXXXX="spy history create lst(R1)">
-			<cmd5 cmdXXXX="spy Analysis lst">
-			<cmd6 "tidy">
-			<cmd7 "kill sel">
-
-		\>
-		<onabort
-			<cmd1 "cursor()">
-			<cmd2 cmd1="lines 10">
-		\>
-	\>
-\>
-
 
 
 <solve help="Launches solution program XS"
@@ -277,7 +237,7 @@
 			<arg1 name="SOLVE" def='SOLVE'\> 
 		\>
 		<cmd 
-			<cmd1 "spy RunPrg SOLVE">
+			<cmd10 "spy.run_RunPrg solve">
 			<cmd2 cmd="spy.doProgramSettings(GetVar(snum_refinement_program),GetVar(snum_refinement_method),true)">
 			\>
 		<onterminate
