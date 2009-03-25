@@ -688,8 +688,8 @@ class OlexCctbxAdapter(object):
 def charge_flipping_loop(solving, verbose=True):
   HasGUI = OV.HasGUI()
   if HasGUI:
-    from Analysis import Analysis
-    Analysis.Analysis_instance.run_Analysis('Charge Flipping', None)
+    import Analysis
+    Analysis.Analysis_instance.run_Analysis('Charge Flipping', {})
 #    a = Analysis(function='Charge Flipping', param=None)
 #    a.run('Char)
   
@@ -738,7 +738,7 @@ def charge_flipping_loop(solving, verbose=True):
     elif solving.state is solving.finished:
       break
     
-    if HasGUI: a.run_charge_flipping_graph(flipping, solving, previous_state)
+    if HasGUI: Analysis.Analysis_instance.run_charge_flipping_graph(flipping, solving, previous_state)
     previous_state = solving.state
 
 
