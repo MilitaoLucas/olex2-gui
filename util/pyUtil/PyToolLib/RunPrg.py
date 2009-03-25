@@ -317,6 +317,16 @@ class RunPrg(ArgumentParser):
       return
     self.original_filename = OV.FileName()
     fun = f.lower()
+    
+    if fun == "solve":
+      self.solve = True
+      self.refine = False
+    elif fun == "refine":
+      self.solve = False
+      self.refine = True
+
+      
+      
     #olx.Sel('-u') # uncomment me!
     olx.Stop('listen')
     
