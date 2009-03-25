@@ -13,6 +13,7 @@ alterations = {'olex2.exe': ('olex-install', 'olex-update'),
                'msvcr71.dll': ('olex-install', 'olex-update'),
                'splash.jpg': ('olex-install', 'olex-update'),
                'acidb.db': ('olex-install', 'olex-update'),
+               'version.txt': ('olex-install', 'olex-update'),
                'installer.exe': ('olex-top',), #mind the comma!
                'Microsoft.VC80.CRT/Microsoft.VC80.CRT.manifest': ('olex-install', 'olex-update'),
                'Microsoft.VC80.CRT/msvcm80.dll': ('olex-install', 'olex-update'),
@@ -125,19 +126,24 @@ for val, key in alterations.iteritems():
 client = pysvn.Client()
 
 try:
-  if option.update_file:
-    filepath = option.update_file
-    print 'Updating %s only...' %filepath
-    n = client.update(working_directory + filepath)
-    revision_number = n[0].number
-    print "SVN Revision Number %i" %revision_number
-  elif True:  #defuging can set it to false to leave the folder in tact
-    n = client.update(working_directory)
-    revision_number = n[0].number
-    print "SVN Revision Number %i" %revision_number
-    wFile = open("%s/version.txt" %working_directory, 'w')
-    wFile.write("SVN Revision No. %s" %revision_number)
-    wFile.close()
+  print "SVN Revision Number %i" %revision_number
+  wFile = open("%s/version.txt" %bin_directory, 'w')
+  wFile.write("SVN Revision No. %s" %revision_number)
+  wFile.close()
+
+  ##if option.update_file:
+    ##filepath = option.update_file
+    ##print 'Updating %s only...' %filepath
+    ##n = client.update(working_directory + filepath)
+    ##revision_number = n[0].number
+    ##print "SVN Revision Number %i" %revision_number
+  ##elif True:  #defuging can set it to false to leave the folder in tact
+    ##n = client.update(working_directory)
+    ##revision_number = n[0].number
+    ##print "SVN Revision Number %i" %revision_number
+    ##wFile = open("%s/version.txt" %working_directory, 'w')
+    ##wFile.write("SVN Revision No. %s" %revision_number)
+    ##wFile.close()
 #  revnum = pysvn.Revision( pysvn.opt_revision_kind.working )
 #  print revnum.number
 except pysvn.ClientError, err:
