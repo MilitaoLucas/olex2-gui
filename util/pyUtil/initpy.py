@@ -290,7 +290,10 @@ if sys.platform[:3] == 'win':
   #olx.SetVar('defeditor','gedit')
   #olx.SetVar('defexplorer','nautilus')
 
+## Thes imports will register macros and functions for spy.  
 if OV.HasGUI():
   from Skin import Skin  
-  
+  from Analysis import Analysis
+  from RunPrg import RunPrg
+
 print "Welcome to Olex2"

@@ -207,6 +207,7 @@ class Graph(ImageTools):
   def make_empty_graph(self, axis_x=False):
     import Image
     import ImageFont, ImageDraw, ImageChops
+    
     #import PngImagePlugin
     self.imX = self.graphInfo["imSize"][0]
     self.imY = self.graphInfo["imSize"][1]
@@ -707,7 +708,7 @@ class ShelXAnalysis():
     from Analysis import Analysis
     OV.unregisterCallback("procout", self.ShelXL)
     self.Analysis = Analysis(function='ShelXL', param=None)
-    self.Analysis.run()
+    self.Analysis.run_Analysis('ShelXL',{})
     self.xl_d = {}
     self.new_graph_please = False
     self.cycle = 0
@@ -752,8 +753,16 @@ class Analysis(Graph):
     self.fl = []
     self.item = ""
     
-  def run(self):
-    fun = self.function
+  def run_Analysis(self, f, args):
+    self.basedir = OV.BaseDir()
+    self.filefull = OV.FileFull()
+    self.filepath = OV.FilePath()
+    self.filename = OV.FileName()
+    self.datadir = OV.DataDir()
+    
+    fun = f
+    self.n_bins = abs(int(args.get('n_bins',0))) #Number of bins for Histograms
+    self.method = args.get('method','olex')      #Method by which graphs are generated
     if fun == "AutoChem":
       self.item = "AutoChem"
       self.graphInfo["imSize"] = (512, 256)
@@ -797,6 +806,7 @@ class Analysis(Graph):
       self.graphInfo["Title"] = "Wilson Plot"
       self.graphInfo["pop_html"] = "wilson"
       self.graphInfo["pop_name"] = "wilson"
+      self.graphInfo["TopRightTitle"] = OV.FileName()
       self.make_analysis_image()
       
     elif fun == "completeness":
@@ -1079,7 +1089,6 @@ class Analysis(Graph):
     #wFile = open("%s/.olex/solution_image.htm" %self.filepath,'w')
     #wFile.write(txt)
     #wFile.close()
-
     #htmlTools.PopProgram(txt=txt)
 
   def make_ShelXL_plot(self):
@@ -1104,6 +1113,7 @@ class Analysis(Graph):
     
   def make_completeness_plot(self):
     n_bins = abs(int(self.param[0]))
+    n_bins = self.n_bins
     self.cctbx_completeness_statistics(bins=n_bins)
     
     self.make_empty_graph(axis_x = True)
@@ -1161,8 +1171,9 @@ class Analysis(Graph):
     
 
   def make_wilson_plot(self):
-    n_bins = 2 * abs(int(self.param[1])) # multiply nbins by 2 to get approx same number as olex
-    if self.param[0] == 'cctbx':
+#    n_bins = 2 * abs(int(self.param[1])) # multiply nbins by 2 to get approx same number as olex
+    n_bins = 2 * self.n_bins # multiply nbins by 2 to get approx same number as olex
+    if self.method == 'cctbx':
       OV.timer_wrap(self.cctbx_wilson_statistics,bins=n_bins)
       #self.cctbx_wilson_statistics(bins=n_bins)
     else:
@@ -1736,6 +1747,12 @@ class Dataset(object):
     ##wFile.close()
     #OlexVFS.write_to_olex('xy.htm', txt)
 
+    
+Analysis_instance = Analysis()    
+OV.registerMacro(Analysis_instance.run_Analysis,
+                 'n_bins-Number of bins (for histograms only!)&;method-olex or cctbx')
+    
+    
 def array_scalar_multiplication(array, multiplier):
   return [i * multiplier for i in array]
 

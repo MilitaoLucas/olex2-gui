@@ -248,92 +248,6 @@
 \>
 
 
-<solveitm help="Launches solution program XS"
-	<body
-		<args 
-			<arg1 name="SOLVE" def='SOLVE'\> 
-		\>
-		<cmd 
-			<cmd1  cmd1="SetValue(SET_SNUM_REFINEMENT_METHOD,CGLS)"> 
-			<cmd2  cmd1="SetVar(snum_refinement_method,CGLS)"> 
-			<cmd3  "reset"> 
-			<cmd4  "spy RunPrg SOLVE">
-			<cmd5  "refine 5">
-			<cmd6  "compaq -a">
-			<cmd7  "testauto -p">
-			<cmd8  "fixunit">
-			<cmd9 "updatehtml">
-			<cmd10 "refine 2 20">
-			<cmd11 "testauto -p">
-			<cmd12 "fixunit">
-			<cmd13 "updatehtml">
-			<cmd14 "refine">
-			<cmd15 "testauto -p">
-			<cmd16 "fixunit">
-			<cmd17 "updatehtml">
-			<cmd18 "refine 2 20">
-			<cmd19 "testauto -p">
-			<cmd20 "fixunit">
-			<cmd21 "updatehtml">
-			<cmd22 "anis">
-			<cmd24 "refine 2 5">
-			<cmd25 "compaq -a">
-			<cmd26 XXX="compaq">
-			<cmd27 "testauto -p">
-			<cmd28 "fixunit">
-			<cmd29 "updatehtml">
-			<cmd30 "refine">
-			<cmd31 "hadd">
-			<cmd32 "refine">
-			<cmd33 "kill $h">
-			<cmd34 "testauto -p">
-			<cmd35 "fixunit">
-			<cmd36 "updatehtml">
-			<cmd37 "refine">
-			<cmd38 "hadd">
-			<cmd39 "refine">
-			<cmd40 "move">
-			<cmd41 "fixunit">
-			<cmd42 "updatehtml">
-			<cmd43 "compaq -a">
-			<cmd44 XXX="compaq">
-			<cmd45 "updatehtml">
-			
-			\>
-		<onterminate
-			<cmd1 cmd1="reap 'filepath()/filename().res'"> 
-		\>
-	\>
-\>
-
-
-<solveit help="AutoChem test cctbx"
-	<body
-		<args 
-			<arg1 name="SOLVE" def='SOLVE'\> 
-		\>
-		<cmd 
-			<cmd2 "file Filename().res"> 
-			<cmd3 "file Filename().ins"> 
-			<cmd4 XXX"SetVar(snum_solution_program,XS)"> 
-			<cmd4 XXX"SetVar(snum_solution_method,'Patterson Method')"> 
-			<cmd4 XXX"SetVar(snum_refinement_method,CGLS)"> 
-			<cmd5 "reset"> 
-			<cmd10 "cursor(busy, 'Solving Filename()')">
-			<cmd6 "spy RunPrg SOLVE">
-			<cmd6 "Clean">
-			<cmd6 "File">
-			<cmd10 "cursor(busy, 'Refining Filename()')">
-			<cmd8 "spy RA REFINE">
-			<cmd9 "fader.Visible(false)">
-		\>
-		<onterminate
-			<cmd1 cmd1="reap 'filepath()/filename().res'"> 
-		\>
-	\>
-\>
-
-
 
 <tidy help = "Automatically select things"
 	<body
@@ -356,7 +270,6 @@
 		\>
 	\>
 \>
-
 
 
 
@@ -1490,7 +1403,7 @@
 		\>
 		<cmd 
 			<cmd1 "if strcmp(%1,olex) then 'wilson -b=%2 -p' else none">
-			<cmd2 "spy Analysis wilson %1 %2">
+			<cmd2 "spy.run_Analysis wilson -n_bins=%2 -method=%1">
 		\>
 	\>
 \>
