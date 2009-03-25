@@ -575,11 +575,12 @@ def makeHtmlBottomPop(args, pb_height = 50, y = 0, panel_diff = 22):
 OV.registerMacro(makeHtmlBottomPop, 'txt-Text to display&;name-Name of the Bottom html popupbox')
   
 def OnModeChange(*args):
+  debug = OV.FindValue("olex2_debug",False)
   d = {
     'move sel':'button-move_near',
     'move sel -c=':'button-copy_near',    
     'grow':'button-grow_mode',
-    'split -r=EADP':'button-move_atoms_or_model_disorder',
+    'split -r=EADP':'button_full-move_atoms_or_model_disorder',
     'name':'button_small-naming'
   }
   name = 'mode'
@@ -598,11 +599,13 @@ def OnModeChange(*args):
   for image_base in d.values():
     copy_from = "%soff.png" %image_base
     copy_to = "%s.png" %image_base
+    if debug: print "Trying to copy %s > %s" %(copy_from, copy_to)
     OV.CopyVFSFile(copy_from, copy_to)
   image_base = d.get(mode, None)
   if image_base:
     copy_from = "%son.png" %image_base
     copy_to = "%s.png" %image_base
+    if debug: print "Trying to copy %s > %s" %(copy_from, copy_to)
     OV.CopyVFSFile(copy_from, copy_to)
   if mode == "grow -s=":
     return
