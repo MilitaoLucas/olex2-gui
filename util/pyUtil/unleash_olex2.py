@@ -126,13 +126,6 @@ for val, key in alterations.iteritems():
 client = pysvn.Client()
 
 try:
-  n = client.update(working_directory)
-  revision_number = n[0].number
-  wFile = open("%s/version.txt" %bin_directory, 'w')
-  wFile.write("SVN Revision No. %s" %revision_number)
-  wFile.close()
-  print "Written 'version.txt' file with number %i to %s" %(revision_number, bin_directory)
-
   if option.update_file:
     filepath = option.update_file
     print 'Updating %s only...' %filepath
@@ -143,7 +136,7 @@ try:
     n = client.update(working_directory)
     revision_number = n[0].number
     print "SVN Revision Number %i" %revision_number
-    wFile = open("%s/version.txt" %working_directory, 'w')
+    wFile = open("%s/version.txt" %bin_directory, 'w')
     wFile.write("SVN Revision No. %s" %revision_number)
     wFile.close()
 #  revnum = pysvn.Revision( pysvn.opt_revision_kind.working )
