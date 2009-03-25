@@ -1300,7 +1300,7 @@ class timage(ImageTools):
                      max_width = max_width,
                      align='centre'
                      )
-        sfs = sf * int(self.gui_htmlpanelwidth)/320
+        sfs = sf * 320/int(self.gui_htmlpanelwidth)
         IM = self.resize_image(IM, (int((cut[2]-cut[0])/sfs), int((cut[3]-cut[1])/sfs)))
         name = "button_full-%s%s.png" %(txt.replace(" ", "_"), state)
         name = name.lower()
