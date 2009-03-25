@@ -689,8 +689,9 @@ def charge_flipping_loop(solving, verbose=True):
   HasGUI = OV.HasGUI()
   if HasGUI:
     from Analysis import Analysis
-    a = Analysis(function='Charge Flipping', param=None)
-    a.run()
+    Analysis.Analysis_instance.run_Analysis('Charge Flipping', None)
+#    a = Analysis(function='Charge Flipping', param=None)
+#    a.run('Char)
   
   OV.SetVar('stop_current_process',False)
   
