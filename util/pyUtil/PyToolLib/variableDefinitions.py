@@ -224,7 +224,7 @@ def snumVariables():
     'snum_calcvoid_view':'wire',
     #'snum_calcvoid_button_txt':'Calculate Voids',
     'snum_olex_conres':'RRINGS',
-    'snum_refinement_banner_slide':Variable(1),
+    'snum_refinement_banner_slide':Variable(82),
   }
 
 def userVariables():
@@ -251,4 +251,5 @@ def userVariables():
     'olex2_is_online':Variable(True),
     'olex2_has_recently_updated':Variable(False),
     'olex2_last_version':Variable(0),
+    'olex2_main_toolbar_vline_position':Variable(0)
   }
