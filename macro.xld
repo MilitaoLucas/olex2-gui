@@ -847,7 +847,7 @@
 	<body
 		<args
 			<arg1 name="name" def="default"> 
-			<arg1 name="skin_extension" def=""> 
+			<arg1 name="skin_extension" def="n/a"> 
 		/>
 		<cmd 
 			<cmd1 "SetVar(gui_skin_name,%1)">
