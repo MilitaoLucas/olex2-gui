@@ -27,7 +27,7 @@ alterations = {'olex2.exe': ('olex-install', 'olex-update'),
                'etc/gui/fonts/VeraSe.ttf': ('olex-install', 'olex-update'),
                'etc/gui/fonts/VeraSeBd.ttf': ('olex-install', 'olex-update'),
                'olex2-mac.zip': ('olex-port', 'port-mac', 'action:extract'),
-               'olex2-suse101x32.zip': ('olex2-suse101x32.zip', 'olex-port', 'port-suse101x32', 'action:extract')
+               'olex2-suse101x32.zip': ('olex-port', 'port-suse101x32', 'action:extract')
                }
 # special zip files {zip_name: (destination_dir, properties_to_set) }
 #zip_files = {'cctbx_win.zip': ('/util/pyUtil/CctbxLib/cctbx_win', 'cctbx-win'),
