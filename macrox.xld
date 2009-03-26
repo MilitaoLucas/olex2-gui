@@ -59,7 +59,7 @@
 			<cmd5 "if IsVar(defexplorer) then none else setvar(defexplorer,'nautilus')">
 			<cmd6 "if IsVar(defbrowser) then none else setvar(defbrowser,'htmlview')">
 			<cmd7 cmd1="spy.InitialiseVariables(startup)">
-			<cmd8 "echo filepath()">
+			<cmd8 XXX="echo filepath()">
 			<cmd9 XXX="panel htmlpanelwidth()">
 			<cmd10 XXX="schedule 8 'UpdateFile olex2.exe'">
 		\>	
@@ -112,9 +112,8 @@
 		<cmd 
 			<cmd1  "echo Good Bye">
 			<cmd2  "spy.saveHistory()">
-			<cmd2  XXXX="spy history save none">
 			<cmd3  "spy.pickleVVD(structure)">
-			<cmd4  XXXX="storeparam startup filefull()">
+			<cmd4  "storeparam startup filefull()">
 			<cmd26 "stop logging">
 	\>
 
@@ -173,8 +172,8 @@
 			<cmd5 "if file.Exists(GetVar(report_image)) then 'SetVar(report_image,GetVar(report_image))' else 'SetVar(report_image,screenshot.png)'">
 			<cmd6 XXX="if not(strcmp(GetVar(report_image),screenshot.png)) then None else 'cursor(busy, &#2e;%Creating Image ...%&#2e;)>>pict -pq screenshot.png 1'">
 			<cmd7 XXX="cursor(busy, '%Updating% Cif ...')">
-			<cmd8 "spy cif info">
-			<cmd9 "spy metacif merge">
+			<cmd8 "spy.run_CifTools info">
+			<cmd9 "spy.runMetaCif merge">
 			<cmd10 XXX="cursor(busy, '%Creating% Report')">
 			<cmd11 "cif2tab header acrd anis bnd ang htab tang hcrd footer">
 			<cmd12 XXX="shell tables.html">
@@ -196,61 +195,17 @@
 			<arg2 name="xl" def='xl'>
 		\>
 		<cmd 
-			<cmd0 CCC="xgrid.Visible(false)">
-			<cmd1 CCC="mode off">
-			<cmd2 CCC="ls %1">
-			<cmd3 CCC="plan %2">
 			<cmd4 "user('filepath')">
 			<cmd5 "file">
-			<cmd6 CCC="cursor(busy, 'Refining...')">
-			<cmd7 "spy RunPrg REFINE %1 %2">
+			<cmd7 "SetVar(snum_refinement_max_cycles,%1)">
+			<cmd8 "SetVar(snum_refinement_max_peaks,%2)">
+			<cmd10 "spy.run_RunPrg refine">
 		\>
 		<onterminate
 			<cmd0 "cursor()">
 		\>
 		<onabort
 			<cmd0 "cursor()">
-		\>
-	\>
-\>
-
-<refineit help="Launches refine program. Syntax: refine [l.s.=-1] [plan=-1]"
-	<body
-		<args
-			<arg0 name="l.s." def='-1'\> 
-			<arg1 name="plan" def='-1'\> 
-			<arg2 name="REFINE" def='REFINE'\>
-			<arg2 name="tidy" def='-t'\>
-			\>
-		<cmd 
-			<cmd1  "mode off">
-			<cmd2  "sel -u">
-			<cmd3  "sel atoms where xatom.peak<2&&xatom.peak>0">
-			<cmd4  "kill sel">
-			<cmd5  "name $Q C">
-			<cmd6  "ls %1">
-			<cmd7  "plan %2">
-			<cmd8  "user 'filepath()'">
-			<cmd9  "file">
-			<cmd10 "cursor(busy, 'Refining...')">
-			<cmd11 cmd1="clear">
-			<cmd12 cmd1="lines -1">
-			<cmd13 "spy RunPrg REFINE t t t">
-		\>
-		<onterminate
-			<cmd1 "cursor()">
-			<cmd2 cmd1="lines 10">
-			<cmd3 cmd1="@reap 'filepath()\filename().res'"> 
-			<cmd4 cmd1="spy.create_history()">
-			<cmd4 cmdXXXX="spy history create lst(R1)">
-			<cmd5 cmdXXX="spy Analysis lst">
-			<cmd6 "tidy">
-			<cmd7 "kill sel">
-
-		\>
-		<onabort
-			<cmd1 "cursor()">
-			<cmd2 cmd1="lines 10">
 		\>
 	\>
 \>
@@ -262,7 +217,7 @@
 			<arg1 name="SOLVE" def='SOLVE'\> 
 		\>
 		<cmd 
-			<cmd1 "spy RunPrg SOLVE">
+			<cmd10 "spy.run_RunPrg solve">
 			<cmd2 cmd="spy.doProgramSettings(GetVar(snum_refinement_program),GetVar(snum_refinement_method),true)">
 			\>
 		<onterminate
