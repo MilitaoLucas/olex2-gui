@@ -3,7 +3,6 @@ OV = OlexFunctions()
 import sys
 
 
-
 class Skin():
   def __init__(self):
     self.change()
