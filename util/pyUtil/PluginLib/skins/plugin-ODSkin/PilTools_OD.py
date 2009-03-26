@@ -51,7 +51,7 @@ class sNumTitle(sNumTitle):
     gap = 0
     bgap = height - gap
     size = (int(width), int(height))
-    base = self.gui_base_colour
+    base = self.gui_html_base_colour
     base = self.gui_snumtitle_colour
     image = Image.new('RGBA', size, base)
     draw = ImageDraw.Draw(image)
