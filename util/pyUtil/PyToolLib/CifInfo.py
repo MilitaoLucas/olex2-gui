@@ -61,20 +61,13 @@ class MetacifFiles:
 		
 
 class MetaCif(ArgumentParser):
-	def __init__(self, args, tool_arg=None):
+	def __init__(self, args=None, tool_arg=None):
 		"""First argument should be 'view' or 'merge'.
 		
 		'view' brings up an internal text editor with the metacif information in cif format.
 		'merge' merges the metacif data with cif file from refinement, and brings up and external text editor with the merged cif file.
 		"""
 		super(MetaCif, self).__init__(args, tool_arg=None)
-		#import olx
-		#self.toInsert = args
-		#self.metacif = "%s/%s_meta.cif" %(self.filepath, self.filename)
-		#if not os.path.isfile(self.metacif):
-			#rFile = open(self.metacif, 'w')
-			#rFile.write("### This file was created by Olex2 for %s. Please do not delete it. ###\n" %self.filename)
-			#rFile.close()
 		try:
 			self.arg = args.split(',')[0]
 		except:
@@ -85,7 +78,10 @@ class MetaCif(ArgumentParser):
 			pass
 		
 			
-	def run(self):
+	def run_MetaCif(self, f, args):
+		self.arg = f
+		edit = bool(args.get('edit',False))
+		
 		if self.arg == 'view':
 			## view metacif information in internal text editor
 			self.viewCifInfoInOlex()
@@ -94,7 +90,7 @@ class MetaCif(ArgumentParser):
 			## merge metacif file with cif file from refinement
 			OV.CifMerge('meta.cif')
 			## open merged cif file in external text editor
-			if self.tool_arg == 'edit':
+			if edit:
 				OV.external_edit('filepath()/filename().cif')
 				#olex.m("external_edit 'filepath()/filename().cif'")
 	
@@ -359,6 +355,10 @@ class MetaCif(ArgumentParser):
 		joinstr =  "/"
 		dir_up = joinstr.join(self.filepath.split(joinstr)[:-1])
 		meta = []
+
+MetaCif_instance = MetaCif()
+OV.registerMacro(MetaCif_instance.run_MetaCif, 'edit-True/False')    
+		
 		
 		
 class CifTools(ArgumentParser):
@@ -381,7 +381,9 @@ class CifTools(ArgumentParser):
 		a = MetaCif(self.metacif, None)
 		a.run()
 
-	def cif_info(self):
+#	def cif_info(self, f, args={}):
+	def run_CifTools(self, f, args={}):
+		
 		merge = []
 		
 		filefull = self.filefull
@@ -874,6 +876,8 @@ class CifTools(ArgumentParser):
 	
 	############################################################
 
+CifTools_instance = CifTools()
+OV.registerMacro(CifTools_instance.run_CifTools, '')    
 
 def getOrUpdateDimasVar(getOrUpdate):
 	for var in [('snum_dimas_crystal_colour_base','_exptl_crystal_colour_primary'),
