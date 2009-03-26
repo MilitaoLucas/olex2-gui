@@ -294,6 +294,6 @@ if sys.platform[:3] == 'win':
 if OV.HasGUI():
   from Skin import Skin
   from Analysis import Analysis
-#from RunPrg import RunPrg
+from RunPrg import RunPrg
 
 print "Welcome to Olex2"
