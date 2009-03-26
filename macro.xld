@@ -872,7 +872,6 @@
 		<cmd 
 			<cmd1 "setVar(gui_htmlpanelwidth,'%1')">
 			<cmd2 "spy.run_skin timage">
-			<cmd4 XXX"spy MakeAllRBars">
 			<cmd5 "htmlpanelwidth %1">
 			<cmd4 "spy.resize_skin_logo(%1)">
 			<cmd4 "spy.resize_to_panelwidth -i='news/news.png'">
@@ -892,7 +891,6 @@
 			<cmd1 "setVar(olex2_force_images,True)">
 			<cmd2 "spy.run_skin timage">
 			<cmd3 "spy.run_skin sNumTitle">
-			<cmd4 XXX"spy MakeAllRBars">
 			<cmd5 "htmlpanelwidth %1">
 			<cmd4 "spy.resize_skin_logo(%1)">
 			<cmd6 "Updatehtml">
