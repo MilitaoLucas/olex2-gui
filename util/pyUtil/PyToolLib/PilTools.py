@@ -21,6 +21,7 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import olex_fs
 import olx
+import time
 
 olx.banner_slide = {}
 
@@ -1460,6 +1461,14 @@ class timage(ImageTools):
     if not OV.FindValue('user_refinement_gui2'):
       return
 
+    name = "banner.png"
+    
+    if not OV.FindValue('olex2_force_images'):
+      timestamp = olex_fs.Timestamp(name)
+      if timestamp:
+        if time.time() - timestamp < time.clock():
+          return
+    
     bannerbg = "#fdff72"
     bannerbg = self.gui_html_base_colour
     col_0 = self.adjust_colour(bannerbg,luminosity=0.85)
@@ -1592,7 +1601,6 @@ class timage(ImageTools):
                      lowerCase=lower_case,
                      font_colour=font_colour)
     width = int(self.gui_htmlpanelwidth) - 24
-    name = "banner.png"
 
     size = (width, height)
     self.banner_make_decoration_image(size)    
