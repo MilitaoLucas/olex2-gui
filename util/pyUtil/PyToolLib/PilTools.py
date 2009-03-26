@@ -598,7 +598,7 @@ class MakeAllRBars(BarGenerator):
     self.factor = 300
     #self.gui_html_bg_colour = OV.FindValue('gui_html_bg_colour')
 
-  def run(self):
+  def run_MakeAllRBars(self):
     name = "vscale.png"
     OlexVFS.save_image_to_olex(self.makeRBarScale(), name, 2)
     name = "vbar-sol.png"
@@ -672,6 +672,10 @@ class MakeAllRBars(BarGenerator):
 
     return image
 
+MakeAllRBars_instance = MakeAllRBars()
+OV.registerMacro(MakeAllRBars_instance.run_MakeAllRBars, '')    
+  
+  
 class sNumTitle(ImageTools):
   def __init__(self, width=None, tool_arg=None):
     super(sNumTitle, self).__init__()
@@ -1016,7 +1020,9 @@ class timage(ImageTools):
     self.filename = OV.FileName()
     self.datadir = OV.DataDir()
     self.sNum = self.filename
-
+    
+    MakeAllRBars_instance.run_MakeAllRBars()
+    
     do_these = ["make_generated_assorted_images",
                 "make_text_and_tab_items",
                 "make_label_items",
