@@ -1009,12 +1009,30 @@ class timage(ImageTools):
     IT.resize_to_panelwidth({'i':'news/news.png'})
     
   def run_timage(self):
+    do_these = []
     if not self.olex2_has_recently_updated:
       if not OV.FindValue('olex2_force_images'):
-        #print "No updates, skipping image creation"
-        return
-    self.getVariables('gui')
+        do_these = [
+                "make_cbtn_items",
+                "info_bitmaps",
+                ]
+    if not do_these:
+      do_these = ["make_generated_assorted_images",
+                  "make_text_and_tab_items",
+                  "make_label_items",
+                  "make_button_items",
+                  "make_cbtn_items",
+                  "make_icon_items",
+                  "make_image_items",
+                  "make_note_items",
+                  "make_images_from_fb_png",
+                  "info_bitmaps",
+                  "makeTestBanner",
+                  "resize_news_image",
+                  "create_logo"
+                  ]
       
+    self.getVariables('gui')
     self.gui_html_base_colour = OV.FindValue('gui_html_base_colour')
     self.width = int(OV.FindValue('gui_htmlpanelwidth')) - 22
     self.basedir = OV.BaseDir()
@@ -1026,20 +1044,6 @@ class timage(ImageTools):
     
     MakeAllRBars_instance.run_MakeAllRBars()
     
-    do_these = ["make_generated_assorted_images",
-                "make_text_and_tab_items",
-                "make_label_items",
-                "make_button_items",
-                "make_cbtn_items",
-                "make_icon_items",
-                "make_image_items",
-                "make_note_items",
-                "make_images_from_fb_png",
-                "info_bitmaps",
-                "makeTestBanner",
-                "resize_news_image",
-                "create_logo"
-                ]
     
     for item in do_these:
       if self.timer:
@@ -1418,6 +1422,16 @@ class timage(ImageTools):
     name = "delete_small.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
 
+    cut = 136*sf, 154*sf, 190*sf, 170*sf
+    crop =  im.crop(cut)
+    crop_colouriszed = self.colourize(crop, (0,0,0), self.gui_html_base_colour) 
+    IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
+    IM.paste(crop_colouriszed, (0,0), crop)
+    IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
+    name = "bottom.png"
+    OlexVFS.save_image_to_olex(IM, name, 2)
+    
+    
     cut = 120*sf, 154*sf, 135*sf, 175*sf
     crop =  im.crop(cut)
     IM =  Image.new('RGBA', crop.size)
