@@ -292,8 +292,8 @@ if sys.platform[:3] == 'win':
 
 ## Thes imports will register macros and functions for spy.  
 if OV.HasGUI():
-  from Skin import Skin  
+  from Skin import Skin
   from Analysis import Analysis
-  from RunPrg import RunPrg
+from RunPrg import RunPrg
 
 print "Welcome to Olex2"
