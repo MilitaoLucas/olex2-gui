@@ -207,7 +207,7 @@ class GuiSkinChanger(ImageTools):
     self.gui_table_rows = "#F3F3F3"
     self.gui_html_input_bg_colour="#efefef"
     self.gui_timage_colour = "#6464a0"
-    self.gui_base_colour = "#6464a0"
+    self.gui_html_base_colour = "#6464a0"
     self.gui_logo_colour = "#6464a0"
     self.gui_skin_logo_name = "basedir()\etc\gui\images\src\default.png"
     self.gui_skin_extension="n/a"
@@ -690,13 +690,13 @@ class sNumTitle(ImageTools):
     if tool_arg:
       args = tool_arg.split(";")
       if args[0] == "None":
-        self.gui_base_colour = OV.FindValue('gui_base_colour')
+        self.gui_html_base_colour = OV.FindValue('gui_html_base_colour')
       elif args[0][:1] == "#":
-        self.gui_base_colour = self.HTMLColorToRGB(args[0])
+        self.gui_html_base_colour = self.HTMLColorToRGB(args[0])
       else:
-        self.gui_base_colour = args[0]
+        self.gui_html_base_colour = args[0]
     else:
-        self.gui_base_colour = OV.FindValue('gui_base_colour')
+        self.gui_html_base_colour = OV.FindValue('gui_html_base_colour')
       
 
     if self.have_connection:
@@ -715,7 +715,7 @@ class sNumTitle(ImageTools):
     self.width = int((width) - 22)
 
   def run_sNumTitle(self):
-    self.gui_base_colour = OV.FindValue('gui_base_colour')
+    self.gui_html_base_colour = OV.FindValue('gui_html_base_colour')
     self.width = int(OV.FindValue('gui_htmlpanelwidth')) - 22
     self.basedir = OV.BaseDir()
     self.filefull = OV.FileFull()
@@ -971,6 +971,8 @@ class timage(ImageTools):
 
   def __init__(self, width=None, tool_arg=None):
     super(timage, self).__init__()
+    self.getVariables('gui')    
+    
     #from PilTools import ButtonMaker
     self.abort = False
     width = self.gui_htmlpanelwidth
@@ -989,9 +991,9 @@ class timage(ImageTools):
     if tool_arg:
       args = tool_arg.split(";")
       if args[0] == "None":
-        self.gui_base_colour = OV.FindValue('gui_base_colour')
+        self.gui_html_base_colour = OV.FindValue('gui_html_base_colour')
       else:
-        self.gui_base_colour = self.HTMLColorToRGB(args[0])
+        self.gui_html_base_colour = self.HTMLColorToRGB(args[0])
     self.width = int((width) - 22)
     if self.width <= 0: self.width = 10
     icon_source = "%s/etc/gui/images/src/icons.png" %self.basedir
@@ -1012,7 +1014,7 @@ class timage(ImageTools):
         return
     self.getVariables('gui')
       
-    self.gui_base_colour = OV.FindValue('gui_base_colour')
+    self.gui_html_base_colour = OV.FindValue('gui_html_base_colour')
     self.width = int(OV.FindValue('gui_htmlpanelwidth')) - 22
     self.basedir = OV.BaseDir()
     self.filefull = OV.FileFull()
@@ -1459,7 +1461,7 @@ class timage(ImageTools):
       return
 
     bannerbg = "#fdff72"
-    bannerbg = self.gui_base_colour
+    bannerbg = self.gui_html_base_colour
     col_0 = self.adjust_colour(bannerbg,luminosity=0.85)
     col_1 = self.adjust_colour(bannerbg,luminosity=1.7)
     cmd_col = "#fff600"
@@ -1717,8 +1719,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     draw.polygon((begin, middle, end), marker_colour)
     
     draw.line(((width/2,0),(width/2,height)), fill=marker_colour)
-    
-    divison_col = self.gui_base_colour + (255,)
+    division_col = IT.HTMLColorToRGB(self.gui_html_base_colour) + (255,)
     left = width/2
     right = width/2
     for j in xrange(40):
@@ -1726,9 +1727,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       if j % 2:
         y1 = 2
       right += 8
-      draw.line(((right,(height/2)-y1), (right, (height/2)+y1)), fill=divison_col)
+      draw.line(((right,(height/2)-y1), (right, (height/2)+y1)), fill=division_col)
       left -= 10
-      draw.line(((left,(height/2)-y1),(left,(height/2)+y1)), fill=divison_col)
+      draw.line(((left,(height/2)-y1),(left,(height/2)+y1)), fill=division_col)
     r,g,b,a = IM.split()
     #paste the overlay into the base image in the boundingBox using mask as a filter
     self.banner_decoration_image = (IM,a)
@@ -1771,8 +1772,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     
     draw.line(((width/2,0),(width/2,height)), fill=marker_colour)
     
-    #divison_col = "#ababab"
-    divison_col = self.gui_base_colour
+    #division_col = "#ababab"
+    division_col = self.gui_html_base_colour
     left = width/2
     right = width/2
     for j in xrange(40):
@@ -1780,9 +1781,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       if j % 2:
         y1 = 2
       right += 8
-      draw.line(((right,(height/2)-y1), (right, (height/2)+y1)), fill=divison_col)
+      draw.line(((right,(height/2)-y1), (right, (height/2)+y1)), fill=division_col)
       left -= 10
-      draw.line(((left,(height/2)-y1),(left,(height/2)+y1)), fill=divison_col)
+      draw.line(((left,(height/2)-y1),(left,(height/2)+y1)), fill=division_col)
     return crop
     
     
@@ -2977,9 +2978,8 @@ class Boxplot(ImageTools):
     OlexVFS.save_image_to_olex(image, "boxplot.png", 0)
 
 
-#timage_instance = timage()
-#OV.registerFunction(timage_instance.makeTestBanner)    
-#OV.registerFunction(timage_instance.run_timage)    
+timage_instance_TestBanner = timage()
+OV.registerFunction(timage_instance_TestBanner.makeTestBanner)    
 
 #GuiSkinChanger_instance = GuiSkinChanger()
 #OV.registerMacro(GuiSkinChanger_instance.run_GuiSkinChanger, 'skin_extension')    

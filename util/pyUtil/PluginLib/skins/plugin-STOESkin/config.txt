@@ -2,7 +2,7 @@
 # If no value is provided, automatic settings will apply.
 # Colour Values need to be in HTML format
 
-GUI_BASE_COLOUR=#fefefe
+GUI_HTML_BASE_COLOUR=#fefefe
 GUI_HTML_BG_COLOUR=
 GUI_HTML_TABLE_BG_COLOUR=
 GUI_HTML_TABLE_FIRSTCOL_COLOUR= 
