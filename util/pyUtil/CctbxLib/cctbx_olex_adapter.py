@@ -1,5 +1,6 @@
 import sys
 import olx
+import OlexVFS
 import time
 from History import *
 from my_refine_util import *
@@ -38,6 +39,7 @@ class OlexAtoms(object):
         
 class OlexCctbxAdapter(object):
   def __init__(self, function, parameters):
+    self.verbose = OV.FindValue('olex2_verbose',False)
     PT = PeriodicTable()
     self.pt = PT.PeriodicTable()
     self.olx = olx
@@ -454,6 +456,7 @@ class OlexCctbxAdapter(object):
     self.refinement.on_cycle_finished = self.feed_olex
     self.cycle += 1
     try:
+      self.update_refinement_info("Starting...")
       self.refinement.start()
       R1 = self.refinement.r1()
     except Exception,err:
@@ -524,7 +527,7 @@ class OlexCctbxAdapter(object):
     i = 0
     for xyz, height in izip(peaks.sites(), peaks.heights()):
       if i < 3:
-        print "Position of peak %s = %s, Height = %s" %(i, xyz, height)
+        if self.verbose: print "Position of peak %s = %s, Height = %s" %(i, xyz, height)
       i += 1
       id = olx.xf_au_NewAtom("%.2f" %(height), *xyz)
       #if olx.xf_au_SetAtomCrd(id, *xyz)=="true":
@@ -568,7 +571,11 @@ class OlexCctbxAdapter(object):
       #i += 1
       #element_d.setdefault(element, {'+1':up,'-1':down, 'max_number':max_number})
     
-    print "Refinement Cycle: %i" %(self.cycle-1)
+    msg = "Refinement Cycle: %i" %(self.cycle-1)
+    print msg
+    
+    self.update_refinement_info(msg=msg)
+    
     if self.film:
       n = str(self.cycle)
       if int(n) < 10:
@@ -677,6 +684,10 @@ class OlexCctbxAdapter(object):
                                       }
     return {"tbx":tbx,"tbx_li":tbx_li,"tools":tools}
 
+  def update_refinement_info(self, msg="Unknown"):
+    txt = "Last refinement with <b>smtbx-refine</b>: No refinement info available yet.<br>Status: %s" %msg
+    OlexVFS.write_to_olex('refinedata.htm', txt)
+  
   def make_gui(self):
     gui = self.twinning_gui_def()
     from GuiTools import MakeGuiTools 
