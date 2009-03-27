@@ -36,5 +36,5 @@ class Skin():
       self.timage_instance.run_timage()
       self.sNumTitle_instance.run_sNumTitle()
       
-Skin_instance = Skin()    
+Skin_instance = Skin()
 OV.registerMacro(Skin_instance.run_skin, 'function-The function to call')
