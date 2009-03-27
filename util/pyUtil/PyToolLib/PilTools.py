@@ -724,6 +724,12 @@ class sNumTitle(ImageTools):
     self.filename = OV.FileName()
     self.datadir = OV.DataDir()
     self.sNum = self.filename
+    self.space_group = OV.olex_function('sg(%h)')
+    id_string = self.space_group+self.filefull
+    curr_id = OV.FindValue("olex2_sNum_id_string","")
+    if id_string == curr_id:
+      return
+    OV.SetVar("olex2_sNum_id_string",id_string)
     
     items = {}
     if self.filename != 'none':

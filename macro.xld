@@ -60,7 +60,10 @@
 			<cmd13 "SetVar(snum_refinement_sg,sg(%n))">
 			<cmd1 "spy.setAllMainToolbarTabButtons()">
 			<cmd25 "if strcmp(%4,filename()) then none else 'if html.IsPopup(wilson) then wp'">
-			<cmd15 "if strcmp(%4,filename()) then none else 'spy.run_sNumTitle()'">
+			<cmd15 XXX="if strcmp(%4,filename()) then none else 'spy.run_sNumTitle()'">
+
+			<cmd15 "spy.run_skin sNumTitle">
+
 			<cmd16 "if File.Exists(strdir()/filename().vvd) then none else 'SetVar(snum_refinement_original_formula,xf.GetFormula())'">
 			<cmd17 "if and(strcmp(%4,filename()),strcmp(%6,fileext())) then none else 'spy.loadHistory()'">
 			<cmd18 "'if and(IsFileType(ires), not(File.Exists((strdir()/history-filename)))) then 'spy.create_history()'">
