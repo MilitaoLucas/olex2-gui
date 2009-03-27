@@ -1155,8 +1155,9 @@ class timage(ImageTools):
         name = name.lower()
         OlexVFS.save_image_to_olex(IM, name, 2)
         if name == "button_small-blank.png":
-          filename = r"%s/button_small-blank.png" %self.datadir
-          IM.save(filename)
+          OlexVFS.save_image_to_olex(IM, name, 2)
+#          filename = r"%s/button_small-blank.png" %self.datadir
+#          IM.save(filename)
 
     
     IM =  Image.new('RGBA', crop.size)
@@ -1425,7 +1426,7 @@ class timage(ImageTools):
     cut = 136*sf, 154*sf, 190*sf, 170*sf
     crop =  im.crop(cut)
     crop_colouriszed = self.colourize(crop, (0,0,0), self.gui_html_base_colour) 
-    IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
+    IM =  Image.new('RGBA', crop.size)
     IM.paste(crop_colouriszed, (0,0), crop)
     IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
     name = "bottom.png"
