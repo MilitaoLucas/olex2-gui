@@ -22,7 +22,9 @@ class Skin():
     except Exception, err:
       raise
     self.GuiSkinChanger_instance = PilTools.GuiSkinChanger()
+    self.GuiSkinChanger_instance.run_GuiSkinChanger()
     self.timage_instance = PilTools.timage()
+    OV.SetVar('olex2_sNum_id_string',"")
     self.sNumTitle_instance = PilTools.sNumTitle()
 
   def run_skin(self, f, args):
@@ -32,7 +34,7 @@ class Skin():
       self.sNumTitle_instance.run_sNumTitle()
     elif f == 'change':
       self.change()
-      self.GuiSkinChanger_instance.run_GuiSkinChanger()
+      #self.GuiSkinChanger_instance.run_GuiSkinChanger()
       self.timage_instance.run_timage()
       self.sNumTitle_instance.run_sNumTitle()
       
