@@ -211,7 +211,7 @@ class GuiSkinChanger(ImageTools):
     self.gui_html_base_colour = "#6464a0"
     self.gui_logo_colour = "#6464a0"
     self.gui_skin_logo_name = "basedir()\etc\gui\images\src\default.png"
-    self.gui_skin_extension="n/a"
+    self.gui_skin_extension=""
     self.gui_html_panelwidth = '350'
     self.gui_snumtitle_colour='#6464a0'
     self.gui_html_highlight_colour = '#ff7800'
@@ -1216,9 +1216,9 @@ class timage(ImageTools):
         name = "button_small-%s%s.png" %(txt.replace(" ", "_"), state)
         name = name.lower()
         OlexVFS.save_image_to_olex(IM, name, 2)
-        if name == "button_small-blank.png":
-          filename = r"button_small-blank.png"
-          IM.save(filename)
+#        if name == "button_small-blank.png":
+#          filename = r"button_small-blank.png"
+#          IM.save(filename)
     
     
     ## THREEE buttons in the HTMLpanelWIDTH
