@@ -211,7 +211,7 @@ class GuiSkinChanger(ImageTools):
     self.gui_html_base_colour = "#6464a0"
     self.gui_logo_colour = "#6464a0"
     self.gui_skin_logo_name = "basedir()\etc\gui\images\src\default.png"
-    self.gui_skin_extension=""
+    self.gui_skin_extension="None"
     self.gui_html_panelwidth = '350'
     self.gui_snumtitle_colour='#6464a0'
     self.gui_html_highlight_colour = '#ff7800'
@@ -223,9 +223,13 @@ class GuiSkinChanger(ImageTools):
 
     
   def run_GuiSkinChanger(self):
+    verbose = (OV.FindValue('olex2_verbose','False'))
+    if verbose == "True": verbose = True
+    if verbose == "False": verbose = False
     path = r"gui/images/src/default.png"
     skin = self.gui_skin_name
     skin_extension = self.gui_skin_extension
+    if skin_extension == "None": skin_extension = None
     config = {}
     if "#" in skin:
       #self.getVariables('gui')
@@ -263,7 +267,7 @@ class GuiSkinChanger(ImageTools):
       files = []
       if skin_extension:
         try:
-          extensionFile = open(r"%s/config%s.txt" %(skinpath, skin_extension, 'r'))
+          extensionFile = open(r"%s/config%s.txt" %(skinpath, skin_extension), 'r')
           files.append(extensionFile)
         except:
           print "Skin definition file\n%s/config%s.txt\nnot found!" %(skinpath, skin_extension)
@@ -281,9 +285,10 @@ class GuiSkinChanger(ImageTools):
       try:
         sys.path.append("%s/util/pyUtil/PluginLib/Skins/plugin-%sSkin" %(olx.BaseDir(), skin))
         PilTools = __import__("PilTools_%s" %skin)
-        print "Using %s skin." %"PilTools_%s" %(skin)
-      except ImportError:
-        print "Using Default PilTools"
+        if verbose:
+          print "Using %s skin." %"PilTools_%s" %(skin)
+      except ImportError, err:
+        print "Import Error: %s (Now Using Default PilTools)" %err
         import PilTools
       except Exception, err:
         raise
@@ -1007,7 +1012,9 @@ class timage(ImageTools):
     image_source = "%s/etc/gui/images/src/images.png" %self.basedir
     self.iconSource = Image.open(icon_source)
     self.imageSource = Image.open(image_source)
-    self.olex2_has_recently_updated = OV.FindValue('olex2_has_recently_updated',False)
+    olex2_has_recently_updated = OV.FindValue('olex2_has_recently_updated','False')
+    if olex2_has_recently_updated == "True": self.olex2_has_recently_updated = True
+    if olex2_has_recently_updated == "False": self.olex2_has_recently_updated = False
     sf = 4
     self.sf = sf
     

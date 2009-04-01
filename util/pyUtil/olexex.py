@@ -6,8 +6,16 @@ import time
 import olex_core
 import sys
 import programSettings
+
+import socket
 import urllib
 URL = "http://dimas.dur.ac.uk/"
+
+# timeout in seconds
+timeout = 3
+socket.setdefaulttimeout(timeout)
+
+
 sys.path.append(r".\src")
 import History
 
@@ -1061,32 +1069,17 @@ def check_for_recent_update():
     version = int(line.split("SVN Revision No. ")[1])
   except:
     version = 1
-  last_version = int(OV.FindValue('olex2_last_version',0))
+  last_version = int(OV.FindValue('olex2_last_version','0'))
+#  print "Last Version: %i"%last_version
   if version > last_version:
-    OV.SetVar('olex2_has_recently_updated',True)
-    #print "Olex2 has recently been updated"
+    OV.SetVar('olex2_has_recently_updated','True')
+#    print "Olex2 has recently been updated"
   else:
-    OV.SetVar('olex2_has_recently_updated',False)
-    #print "Olex2 has not been updated"
-  OV.SetVar('olex2_last_version',version)
-  
-    #now = time.time()
-    #path = "%s/usettings.dat" %OV.BaseDir()
-    #rFile = open(path, 'r')
-    #lines = rFile.readlines()
-    #for line in lines:
-      #if line.startswith('lastupdate'):
-        #last_update = float(line.split("=")[1])
-        #break
-    #if now - last_update < 100:
-      #OV.SetVar('olex2_has_recently_updated',True)
-      #print "Olex2 has recently been updated"
-    #else:
-      #OV.SetVar('olex2_has_recently_updated',False)
-      #print "Olex2 has not been updated"
-  #except Exception, err:
-    #"Error in olexex.check_for_recent_update: %s" %err
-  
+    OV.SetVar('olex2_has_recently_updated','False')
+#    print "Olex2 has not been updated"
+  OV.SetVar('olex2_last_version',str(version))
+#  print "Version: %s" %version
+#  print OV.FindValue('olex2_last_version','0')
 
 def check_for_crypto():
   if olx.IsPluginInstalled(r"plugin-Crypto").lower() == 'false':

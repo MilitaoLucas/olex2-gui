@@ -9,7 +9,7 @@ class Skin():
 
   def change(self):
     skin = OV.FindValue('gui_skin_name',None)
-    skin_extension = OV.FindValue('gui_skin_extension',None)
+    skin_extension = OV.FindValue('gui_skin_extension',"None")
     try:
       skin_path = "%s/util/pyUtil/PluginLib/skins/plugin-%sSkin" %(OV.BaseDir(), skin)
       if skin_path not in sys.path:
