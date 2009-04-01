@@ -29,6 +29,7 @@ class VVD:
     self.solution = {}
     self.auto = {}
     self.workflow = {}
+    self.olex2 = {}
     
 class userVVD:
   def __init__(self):
@@ -59,11 +60,14 @@ def InitialiseVariables(arg):
     }
     if OV.HasGUI():
       variables.update(variableDefinitions.guiVariables())
+      variables.update(variableDefinitions.olex2Variables())
     for varName, value in variables.items():
       if not OV.IsVar(varName):
         OV.SetVar(varName,value)
       if 'gui' in varName:
         vvdItems.gui.setdefault(varName)
+      if 'olex2' in varName:
+        vvdItems.olex2.setdefault(varName)
         
     #if OV.IsVar('startup'):
       #olex.m('reap getVar(startup)')
@@ -140,6 +144,8 @@ def InitialiseVariables(arg):
         vvdItems.report.setdefault(varName)
       elif 'solution' in varName:
         vvdItems.solution.setdefault(varName)
+      elif 'olex2' in varName:
+        vvdItems.olex2.setdefault(varName)
         
     if not OV.IsVar('snum_cctbx_map_type'):
       OV.SetVar('snum_cctbx_map_type','--')
