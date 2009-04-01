@@ -94,9 +94,10 @@
 			<cmd2  "spy.saveHistory()">
 			<cmd3  "spy.pickleVVD(structure)">
 			<cmd4  "storeparam startup filefull()">
-			<cmd5  "storeparam olex2_last_version GetVar(olex2_last_version)">
-			<cmd5  "storeparam olex2_main_toolbar_vline_position GetVar(olex2_main_toolbar_vline_position)">
+			<cmd5  XXX="storeparam olex2_last_version GetVar(olex2_last_version)">
+			<cmd5  XXX="storeparam olex2_main_toolbar_vline_position GetVar(olex2_main_toolbar_vline_position)">
 			<cmd5  "spy.StoreParameters(gui)">
+			<cmd5  "spy.StoreParameters(olex2)">
 			<cmd99 "stop logging">
 				
 	\>
@@ -850,7 +851,7 @@
 	<body
 		<args
 			<arg1 name="name" def="default"> 
-			<arg1 name="skin_extension" def="n/a"> 
+			<arg2 name="skin_extension" def="None"> 
 		/>
 		<cmd 
 			<cmd1 "SetVar(gui_skin_name,%1)">
