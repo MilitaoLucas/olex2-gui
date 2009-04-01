@@ -11,7 +11,7 @@ def guiVariables():
   return dict(
     gui_logo_colour=Variable('#6464a0'),
     gui_skin_name=Variable('default'),
-    gui_skin_extension=Variable(None),
+    gui_skin_extension=Variable("None"),
     gui_skin_logo_name=Variable(r'gui/images/src/default.png'),
     
     gui_purple='#a245a2',
@@ -227,6 +227,14 @@ def snumVariables():
     'snum_refinement_banner_slide':Variable(82),
   }
 
+def olex2Variables():
+  return {
+    'olex2_is_online':Variable('True'),
+    'olex2_has_recently_updated':Variable('False'),
+    'olex2_verbose':Variable('False'),
+    'olex2_last_version':Variable('12'),
+  }
+
 def userVariables():
   return {
     'user_alert_delete_history':Variable('Y'),
@@ -248,7 +256,4 @@ def userVariables():
     'user_report_style':Variable('default'),
     'user_report_journal_style':Variable('rsc'),
     'user_refinement_gui2':Variable(False),
-    'olex2_is_online':Variable(True),
-    'olex2_has_recently_updated':Variable(False),
-    'olex2_verbose':Variable(False),
   }
