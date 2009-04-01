@@ -49,5 +49,5 @@ GUI_HTML_FONT_SIZE=2
 GUI_HTML_FONT_NAME=Arial
 GUI_IMAGE_FONT_NAME= Vera
 GUI_HTML_ICON_SIZE=20
-GUI_SKIN_EXTENSION=1
+GUI_SKIN_EXTENSION=None
 GUI_SKIN_LOGO_NAME=basedir()/util/pyUtil/PluginLib/skins/plugin-defaultSkin/default.png
