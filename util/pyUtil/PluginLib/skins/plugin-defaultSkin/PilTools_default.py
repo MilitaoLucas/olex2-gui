@@ -27,7 +27,7 @@ class GuiSkinChanger(GuiSkinChanger):
         else:
           val = "#ff0000"
       setattr(self, item.lower(), val)
-      print "self.%s = %s" %(item.lower(), getattr(self, item.lower()))
+      #print "self.%s = %s" %(item.lower(), getattr(self, item.lower()))
       
 
   def setGuiProperties(self):
