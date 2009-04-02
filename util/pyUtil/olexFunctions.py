@@ -20,6 +20,7 @@ class OlexFunctions(inheritFunctions):
     self._HasGUI = olx.HasGUI()
     if self._HasGUI != "false":
       import olex_gui
+      self.olex_gui = olex_gui
 
     pass
     #self.demo_mode = self.FindValue('autochem_demo_mode',False)
@@ -360,7 +361,7 @@ class OlexFunctions(inheritFunctions):
     return ""
 
   def SetImage(self, zimg_name, image_file):
-    if olex_gui.IsControl(zimg_name):
+    if self.olex_gui.IsControl(zimg_name):
       olx.html_SetImage(zimg_name,image_file)
 
   

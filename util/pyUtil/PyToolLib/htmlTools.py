@@ -3,8 +3,9 @@ Various generic tools for creating and using HTML.
 """
 import os
 import sys
-
 import olx
+
+import time
 #import sys
 #sys.path.append(r".\src")
 
@@ -636,6 +637,47 @@ def OnModeChange(*args):
       last_mode = active_mode
 OV.registerCallback('modechange',OnModeChange)
 
+
+def SetStateImage(name):
+  d = {
+    'basisvis':'button-show_basis',
+    'cellvis':'button-show_cell',    
+  }
+  img_base = d.get(name, None)
+
+  if not img_base:
+    return False
+  
+  state = olx.CheckState(name)
+  if state == "true":
+    use_image= "%son.png" %img_base
+    OV.SetImage("IMG_%s" %img_base.upper(),use_image)
+    copy_to = "%s.png" %img_base
+    OV.CopyVFSFile(use_image, copy_to,2)
+  if state == "false":
+    use_image = "%soff.png" %img_base
+    OV.SetImage("IMG_%s" %img_base.upper(),use_image)
+    copy_to = "%s.png" %img_base
+    OV.CopyVFSFile(use_image, copy_to,2)
+  return True
+OV.registerFunction(SetStateImage)
+    
+
+
+def InActionButton(name,state):
+  
+  if state == "on":
+    use_image= "%son.png" %name
+    OV.SetImage("IMG_%s" %name.upper(),use_image)
+    
+  if state == "off":
+    use_image= "%soff.png" %name
+    OV.SetImage("IMG_%s" %name.upper(),use_image)
+  return True
+
+OV.registerFunction(InActionButton)
+  
+  
 def PopProgram(txt="Fred"):
   name = "pop_prg_analysis"
   makeHtmlBottomPop({'txt':txt, 'name':name}, pb_height=225)
