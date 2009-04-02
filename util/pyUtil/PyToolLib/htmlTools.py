@@ -11,6 +11,12 @@ import olx
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
+global active_mode
+active_mode = None
+
+global last_mode
+last_mode = None
+
 
 def makeHtmlTable(list):
   """ Pass a list of dictionaries, with one dictionary for each table row.
@@ -575,13 +581,16 @@ def makeHtmlBottomPop(args, pb_height = 50, y = 0, panel_diff = 22):
 OV.registerMacro(makeHtmlBottomPop, 'txt-Text to display&;name-Name of the Bottom html popupbox')
   
 def OnModeChange(*args):
+  global active_mode
+  global last_mode
   debug = OV.FindValue("olex2_debug",False)
   d = {
     'move sel':'button-move_near',
     'move sel -c=':'button-copy_near',    
     'grow':'button-grow_mode',
     'split -r=EADP':'button_full-move_atoms_or_model_disorder',
-    'name':'button_small-naming'
+    'name':'button_small-naming',
+    'off':None
   }
   name = 'mode'
   mode = ""
@@ -594,26 +603,37 @@ def OnModeChange(*args):
     if i < 2:
       mode_disp += " " + item
   mode = mode.strip()
+  mode_disp = mode_disp.strip()
   
+  active_mode = d.get(mode, None)
+#  if active_mode == last_mode:
+#    active_mode = None
+
   # Deal with button images
-  for image_base in d.values():
-    copy_from = "%soff.png" %image_base
-    copy_to = "%s.png" %image_base
-    if debug: print "Trying to copy %s > %s" %(copy_from, copy_to)
-    OV.CopyVFSFile(copy_from, copy_to)
-  image_base = d.get(mode, None)
-  if image_base:
-    copy_from = "%son.png" %image_base
-    copy_to = "%s.png" %image_base
-    if debug: print "Trying to copy %s > %s" %(copy_from, copy_to)
-    OV.CopyVFSFile(copy_from, copy_to)
-  if mode == "grow -s=":
-    return
-  if mode != "off":
-    makeHtmlBottomPop({'replace':mode_disp, 'name':'pop_mode'}, pb_height=50)
-  else:
+  if not active_mode: 
+    if not last_mode: return
+    use_image = "%soff.png" %last_mode
+    OV.SetImage("IMG_%s" %last_mode.upper(),use_image)
+    copy_to = "%s.png" %last_mode
+    OV.CopyVFSFile(use_image, copy_to,2)
     OV.cmd("html.hide pop_%s" %name)
-  #olex.m("html.Reload")  
+  else:
+    if last_mode:
+      use_image = "%soff.png" %last_mode
+      OV.SetImage("IMG_%s" %last_mode.upper(),use_image)
+      copy_to = "%s.png" %last_mode
+      OV.CopyVFSFile(use_image, copy_to,2)
+      OV.cmd("html.hide pop_%s" %name)
+      if active_mode == last_mode:
+        last_mode = None
+        active_mode = None
+    if active_mode:
+      use_image= "%son.png" %active_mode
+      OV.SetImage("IMG_%s" %active_mode.upper(),use_image)
+      copy_to = "%s.png" %active_mode
+      OV.CopyVFSFile(use_image, copy_to,2)
+      makeHtmlBottomPop({'replace':mode_disp, 'name':'pop_mode'}, pb_height=50)
+      last_mode = active_mode
 OV.registerCallback('modechange',OnModeChange)
 
 def PopProgram(txt="Fred"):
