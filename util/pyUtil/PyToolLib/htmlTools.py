@@ -609,7 +609,7 @@ def OnModeChange(*args):
   active_mode = d.get(mode, None)
 #  if active_mode == last_mode:
 #    active_mode = None
-
+  
   # Deal with button images
   if not active_mode: 
     if not last_mode: return
@@ -618,6 +618,8 @@ def OnModeChange(*args):
     copy_to = "%s.png" %last_mode
     OV.CopyVFSFile(use_image, copy_to,2)
     OV.cmd("html.hide pop_%s" %name)
+    last_mode = None
+    OV.SetVar('olex2_in_mode','False')
   else:
     if last_mode:
       use_image = "%soff.png" %last_mode
@@ -628,6 +630,8 @@ def OnModeChange(*args):
       if active_mode == last_mode:
         last_mode = None
         active_mode = None
+        OV.SetVar('olex2_in_mode','False')
+
     if active_mode:
       use_image= "%son.png" %active_mode
       OV.SetImage("IMG_%s" %active_mode.upper(),use_image)
@@ -635,6 +639,8 @@ def OnModeChange(*args):
       OV.CopyVFSFile(use_image, copy_to,1)
       makeHtmlBottomPop({'replace':mode_disp, 'name':'pop_mode'}, pb_height=50)
       last_mode = active_mode
+      OV.SetVar('olex2_in_mode','True')
+
 OV.registerCallback('modechange',OnModeChange)
 
 

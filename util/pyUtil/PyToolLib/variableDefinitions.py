@@ -233,6 +233,7 @@ def olex2Variables():
     'olex2_has_recently_updated':Variable('False'),
     'olex2_verbose':Variable('False'),
     'olex2_last_version':Variable('12'),
+    'olex2_in_mode':Variable('False'),
   }
 
 def userVariables():
