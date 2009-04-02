@@ -6,7 +6,6 @@ import olx
 import olex
 import olex_core
 import OlexVFS
-import olex_gui
 import cProfile
 
 import guiFunctions
@@ -19,6 +18,9 @@ else:
 class OlexFunctions(inheritFunctions):
   def __init__(self):
     self._HasGUI = olx.HasGUI()
+    if self._HasGUI != "false":
+      import olex_gui
+
     pass
     #self.demo_mode = self.FindValue('autochem_demo_mode',False)
     #self.no_input_mode = self.FindValue('autochem_no_input_mode',False)
