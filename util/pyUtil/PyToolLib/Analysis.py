@@ -806,6 +806,7 @@ class Analysis(Graph):
       self.graphInfo["Title"] = "Wilson Plot"
       self.graphInfo["pop_html"] = "wilson"
       self.graphInfo["pop_name"] = "wilson"
+      self.graphInfo["imSize"] = (900, 500)
       self.graphInfo["TopRightTitle"] = OV.FileName()
       self.make_analysis_image()
       
