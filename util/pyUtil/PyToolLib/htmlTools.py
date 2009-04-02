@@ -605,13 +605,14 @@ def OnModeChange(*args):
       mode_disp += " " + item
   mode = mode.strip()
   mode_disp = mode_disp.strip()
-  
+
+
   active_mode = d.get(mode, None)
-#  if active_mode == last_mode:
-#    active_mode = None
   
-  # Deal with button images
-  if not active_mode: 
+  
+  if mode == 'off':
+    OV.SetVar('olex2_in_mode','False')
+    OV.cmd("html.hide pop_%s" %name)
     if not last_mode: return
     use_image = "%soff.png" %last_mode
     OV.SetImage("IMG_%s" %last_mode.upper(),use_image)
@@ -619,28 +620,58 @@ def OnModeChange(*args):
     OV.CopyVFSFile(use_image, copy_to,2)
     OV.cmd("html.hide pop_%s" %name)
     last_mode = None
-    OV.SetVar('olex2_in_mode','False')
   else:
-    if last_mode:
-      use_image = "%soff.png" %last_mode
-      OV.SetImage("IMG_%s" %last_mode.upper(),use_image)
-      copy_to = "%s.png" %last_mode
-      OV.CopyVFSFile(use_image, copy_to,2)
-      OV.cmd("html.hide pop_%s" %name)
-      if active_mode == last_mode:
-        last_mode = None
-        active_mode = None
-        OV.SetVar('olex2_in_mode','False')
-
+    OV.SetVar('olex2_in_mode',mode.split("=")[0])
+    makeHtmlBottomPop({'replace':mode_disp, 'name':'pop_mode'}, pb_height=50)
     if active_mode:
       use_image= "%son.png" %active_mode
       OV.SetImage("IMG_%s" %active_mode.upper(),use_image)
       copy_to = "%s.png" %active_mode
       OV.CopyVFSFile(use_image, copy_to,1)
-      makeHtmlBottomPop({'replace':mode_disp, 'name':'pop_mode'}, pb_height=50)
-      last_mode = active_mode
-      OV.SetVar('olex2_in_mode',mode.split("=")[0])
+    if last_mode:
+      use_image = "%soff.png" %last_mode
+      OV.SetImage("IMG_%s" %last_mode.upper(),use_image)
+      copy_to = "%s.png" %last_mode
+      OV.CopyVFSFile(use_image, copy_to,2)
+      
+    last_mode = active_mode
+    OV.SetVar('olex2_in_mode',mode.split("=")[0])
+    last_mode = active_mode
+  
+  
+  
+##  if active_mode == last_mode:
+##    active_mode = None
+  
+  ## Deal with button images
+  #if not active_mode: 
+    #if not last_mode: return
+    #use_image = "%soff.png" %last_mode
+    #OV.SetImage("IMG_%s" %last_mode.upper(),use_image)
+    #copy_to = "%s.png" %last_mode
+    #OV.CopyVFSFile(use_image, copy_to,2)
+    #OV.cmd("html.hide pop_%s" %name)
+    #last_mode = None
+  #else:
+    #if last_mode:
+      #use_image = "%soff.png" %last_mode
+      #OV.SetImage("IMG_%s" %last_mode.upper(),use_image)
+      #copy_to = "%s.png" %last_mode
+      #OV.CopyVFSFile(use_image, copy_to,2)
+      #if active_mode == last_mode:
+        #last_mode = None
+        #active_mode = None
+        #OV.SetVar('olex2_in_mode','False')
+        #OV.cmd("html.hide pop_%s" %name)
 
+    #if active_mode:
+      #use_image= "%son.png" %active_mode
+      #OV.SetImage("IMG_%s" %active_mode.upper(),use_image)
+      #copy_to = "%s.png" %active_mode
+      #OV.CopyVFSFile(use_image, copy_to,1)
+      #last_mode = active_mode
+      #OV.SetVar('olex2_in_mode',mode.split("=")[0])
+    
 OV.registerCallback('modechange',OnModeChange)
 
 
