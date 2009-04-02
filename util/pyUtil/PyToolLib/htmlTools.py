@@ -632,7 +632,7 @@ def OnModeChange(*args):
       use_image= "%son.png" %active_mode
       OV.SetImage("IMG_%s" %active_mode.upper(),use_image)
       copy_to = "%s.png" %active_mode
-      OV.CopyVFSFile(use_image, copy_to,2)
+      OV.CopyVFSFile(use_image, copy_to,1)
       makeHtmlBottomPop({'replace':mode_disp, 'name':'pop_mode'}, pb_height=50)
       last_mode = active_mode
 OV.registerCallback('modechange',OnModeChange)
