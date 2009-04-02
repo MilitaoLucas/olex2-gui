@@ -6,19 +6,19 @@
 	</td>	
 	<td VALIGN='center' colspan='3' width='100%'>
 		<a 
-			href="if getvar(olex2_in_mode) then 'mode off' else 'mode move sel'"
+			href="if strcmp(getvar(olex2_in_mode),'move sel') then 'mode off' else 'mode move sel'"
 			target="%Move Near-target%">
 			<b>
 			<zimg name=IMG_BUTTON-MOVE_NEAR border="0" src="button-move_near.png"> 
 		</a>
 		<a
-			href="if getvar(olex2_in_mode) then 'mode off' else 'mode move -c sel'" 
+			href="if strcmp(getvar(olex2_in_mode),'move sel -c') then 'mode off' else 'mode move -c sel'" 
 			target="%Copy Near-target%">
 			<b>
 			<zimg name=IMG_BUTTON-COPY_NEAR border="0" src="button-copy_near.png"> 
 		</a>
 		<a 
-			href="if getvar(olex2_in_mode) then 'mode off' else 'mode grow'" 
+			href="if strcmp(getvar(olex2_in_mode),'grow') then 'mode off' else 'mode grow'" 
 			target="%Mode Grow-target%">
 			<b>
 			<zimg name=IMG_BUTTON-GROW_MODE border="0" src="button-grow_mode.png"> 
