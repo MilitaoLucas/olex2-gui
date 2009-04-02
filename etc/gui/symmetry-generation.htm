@@ -33,24 +33,30 @@
 		<zimg border="0" src="gui/images/toolbar-center-on-cell.png"> 
 	</td>
 	<td VALIGN='center' colspan='3' width='100%'>
-		<a 
-			href="move" 
-			target="%Center on Cell-target%">
-			<b>
-			<zimg border="0" src="button-centre_on_cell.png"> 
-		</a>
-		<a 
-			href="move" 
-			target="%Center on Largest Fragment-target%">
-			<b>
-			<zimg border="0" src="button-largest_part.png"> 
-		</a>
-		<a 
-			href="compaq -a" 
-			target="%Assemble-target%">
-			<b>
-			<zimg border="0" src="button-assemble.png"> 
-		</a>
+    <input
+			bgcolor="$GetVar(gui_html_table_bg_colour)"  
+			type="button" 
+			name="IMG_BUTTON-CENTRE_ON_CELL" 
+			image="button-centre_on_cell.png"
+			onclick="move>>echo 'The structure has been centered on the cell'"
+			>
+	
+    <input
+			bgcolor="$GetVar(gui_html_table_bg_colour)"  
+			type="button" 
+			name="IMG_BUTTON-LARGEST_FRAGMENT" 
+			image="button-largest_part.png"
+			onclick="move>>echo 'The structure has been centered on the largest fragment'"
+			>
+
+    <input
+			bgcolor="$GetVar(gui_html_table_bg_colour)"  
+			type="button" 
+			name="IMG_BUTTON-ASSEMBLE" 
+			image="button-assemble.png"
+			onclick="compaq -a>>echo 'If the structure was fragmented, it has now been assembled'"
+			>
+			
 	</td>
 </tr>
 
@@ -58,31 +64,37 @@
 	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 	<td VALIGN='center' colspan='3' width="100%">
 		<a 
-			href="basis" 
+			href="basis>>spy.SetStateImage(basisvis)" 
 			target="%Basis-target%">
-			<zimg border="0" src="button-show_basis.png"> 
+			<zimg name=IMG_BUTTON-SHOW_BASIS border="0" src="button-show_basis.png"> 
 		</a> 
 		<a 
-			href="cell" 
-			target="%Switshes the display of the cell on%">
-			<zimg border="0" src="button-show_cell.png"> 
+			href="cell>>spy.SetStateImage(cellvis)" 
+			target="%Switches the display of the cell on%">
+			<zimg name=IMG_BUTTON-SHOW_CELL border="0" src="button-show_cell.png"> 
 		</a> 
 	</td>
 </tr>
 <tr>
 	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 	<td VALIGN='center' colspan='3' width="100%">
-		<a 
-			href="fuse" 
-			target="%Resets all symmetry-generated atoms%">
-			<zimg border="0" src="button-fuse.png"> 
-		</a> 
-		<a 
-			href="grow" 
-			target="%Grow All-target%">
-			<b>
-			<zimg border="0" src="button-grow_all.png"> 
-		</a> 
+	
+    <input
+			bgcolor="$GetVar(gui_html_table_bg_colour)"  
+			type="button" 
+			name="IMG_BUTTON-FUSE" 
+			image="button-fuse.png"
+			onclick="fuse>>echo 'The asymmetric unit of your structure has been reloaded'"
+			>
+	
+    <input
+			bgcolor="$GetVar(gui_html_table_bg_colour)"  
+			type="button" 
+			name="IMG_BUTTON-GROW_ALL" 
+			image="button-grow_all.png"
+			onclick="grow>>echo 'The structure has been grown, if symmetry equivalent atoms exist'"
+			>
+
 	</td>
 </tr>
 <tr>
