@@ -6,7 +6,7 @@ import olx
 import olex
 import olex_core
 import OlexVFS
-
+import olex_gui
 import cProfile
 
 import guiFunctions
@@ -351,12 +351,19 @@ class OlexFunctions(inheritFunctions):
       val = "n/a"
     return val
 
-  def CopyVFSFile(self, copy_from, copy_to):
+  def CopyVFSFile(self, copy_from, copy_to, isPersistent=0):
     f = olex.readImage(copy_from)
     #assert f is not None
-    olex.writeImage(copy_to, f)
+    olex.writeImage(copy_to, f, isPersistent)
     return ""
 
+  def SetImage(self, zimg_name, image_file):
+    if olex_gui.IsControl(zimg_name):
+      olx.html_SetImage(zimg_name,image_file)
+
+  
+  
+  
   def cmd(self, command):
     olex.m(command)
     return ""
