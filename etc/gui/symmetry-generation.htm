@@ -38,7 +38,7 @@
 			type="button" 
 			name="IMG_BUTTON-CENTRE_ON_CELL" 
 			image="button-centre_on_cell.png"
-			onclick="move>>echo 'The structure has been centered on the cell'"
+			onclick="move>>compaq>>echo 'The structure has been centered on the cell'"
 			>
 	
     <input
@@ -64,12 +64,12 @@
 	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 	<td VALIGN='center' colspan='3' width="100%">
 		<a 
-			href="basis>>spy.SetStateImage(basisvis)" 
+			href="basis" 
 			target="%Basis-target%">
 			<zimg name=IMG_BUTTON-SHOW_BASIS border="0" src="button-show_basis.png"> 
 		</a> 
 		<a 
-			href="cell>>spy.SetStateImage(cellvis)" 
+			href="cell" 
 			target="%Switches the display of the cell on%">
 			<zimg name=IMG_BUTTON-SHOW_CELL border="0" src="button-show_cell.png"> 
 		</a> 
@@ -126,14 +126,14 @@
 	<td VALIGN='center'>
 		<font size=2>
 			<input type="button" name = "ma" width="20" height="17" value="a"  onclick = "matr 1">
-			<input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name = "anpack" float width="13" float height="17" value = "-0.5">
-			<input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name = "appack" float width="11" float height="17" value = "0.5">
+			<input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name = "anpack" float width="14" float height="17" value = "-0.5">
+			<input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name = "appack" float width="12" float height="17" value = "0.5">
 			<input type="button" name = "mb" width="20" height="17" value="b" onclick = "matr 2">
-			<input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name = "bnpack" float width="13" float height="17" value = "-0.5">
-			<input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name = "bppack" float width="11" float height="17" value = "0.5">
+			<input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name = "bnpack" float width="14" float height="17" value = "-0.5">
+			<input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name = "bppack" float width="12" float height="17" value = "0.5">
 			<input type="button" name = "mc" width="20" height="17" value="c" onclick = "matr 3">
-			<input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name = "cnpack" float width="13" float height="17" value = "-0.5">
-			<input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name = "cppack" float width="11" float height="17" value = "0.5">
+			<input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name = "cnpack" float width="14" float height="17" value = "-0.5">
+			<input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name = "cppack" float width="12" float height="17" value = "0.5">
 	</font>
 	</td>        
 </tr>

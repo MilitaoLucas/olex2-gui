@@ -638,7 +638,9 @@ def OnModeChange(*args):
 OV.registerCallback('modechange',OnModeChange)
 
 
-def SetStateImage(name):
+def OnStateChange(*args):
+  name = args[0]
+  state = args[1]
   d = {
     'basisvis':'button-show_basis',
     'cellvis':'button-show_cell',    
@@ -660,8 +662,8 @@ def SetStateImage(name):
     copy_to = "%s.png" %img_base
     OV.CopyVFSFile(use_image, copy_to,2)
   return True
-OV.registerFunction(SetStateImage)
-    
+  
+OV.registerCallback('statechange',OnStateChange)
 
 
 def InActionButton(name,state):
