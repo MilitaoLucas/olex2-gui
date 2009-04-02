@@ -639,7 +639,7 @@ def OnModeChange(*args):
       OV.CopyVFSFile(use_image, copy_to,1)
       makeHtmlBottomPop({'replace':mode_disp, 'name':'pop_mode'}, pb_height=50)
       last_mode = active_mode
-      OV.SetVar('olex2_in_mode','True')
+      OV.SetVar('olex2_in_mode',mode.split("=")[0])
 
 OV.registerCallback('modechange',OnModeChange)
 
