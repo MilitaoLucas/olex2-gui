@@ -123,10 +123,7 @@ def cumulative_intensity_distribution(model, reflections, n_bins=20):
   if (0 or verbose):
     f_obs.binner().show_summary()
     
-  return statistics.cumulative_intensity_distribution(f_obs, hkl_conditions=(
-    statistics.is_even,
-    statistics.is_even,
-    None)).xy_plot_info()
+  return statistics.cumulative_intensity_distribution(f_obs).xy_plot_info()
 
 def f_obs_vs_f_calc(model, reflections):
   f_obs = reflections.f_obs
