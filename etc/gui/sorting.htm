@@ -14,44 +14,24 @@
     <input
 			bgcolor="$GetVar(gui_html_table_bg_colour)"  
 			type="button" 
-			name="SORT_MW" 
-			image="button-atomic_mass.png"
-			onclick="sort mw>>info>>echo 'Atom list is now sorted by the atomic mass'"
+			name="SORT_MWL" 
+			image="button-mass_&_label.png"
+			onclick="sort +ml>>info>>echo 'Atom list is now sorted by atomic mass and atom labels'"
 			>
-	
     <input
 			bgcolor="$GetVar(gui_html_table_bg_colour)"  
 			type="button" 
 			name="SORT_L" 
-			image="button-atom_number.png"
-			onclick="sort L>>info>>echo 'Atom list is now sorted by the atom labels, taking numbering into acccount'"
-			>
-
-    <input
-			bgcolor="$GetVar(gui_html_table_bg_colour)"  
-			type="button" 
-			name="SORT_L1" 
 			image="button-atom_label.png"
-			onclick="sort L1>>info>>echo 'Atom list is now sorted alphanumerically by the atom labels'"
+			onclick="sort +l>>info>>echo 'Atom list is now sorted alphanumerically by the atom labels'"
 			>
-	</td>
-</tr>
-
-<tr ALIGN='left'>
-	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
-	</td>
-	
-
-	<td>
     <input
 			bgcolor="$GetVar(gui_html_table_bg_colour)"  
 			type="button" 
-			name="SORT_MWL" 
-			image="button-mass_&_label.png"
-			onclick="sort mwl GetData(SORT_HYDROGENS)>>info>>echo 'Atom list is now sorted by atomic mass and atom labels'"
+			name="SORT_M" 
+			image="button-atomic_mass.png"
+			onclick="sort +m>>info>>echo 'Atom list is now sorted by the atomic mass'"
 			>
-		<td>
-	
 	</td>
 </tr>
 
@@ -65,30 +45,15 @@
 		</a>	
 	</td>
 	
-	
 	<td>
     <input
 			bgcolor="$GetVar(gui_html_table_bg_colour)"  
 			type="button" 
 			name="SORT_MOIETY" 
 			image="button-moieties.png"
-			onclick="sort moety>>info>>echo 'The sorted list has been arranged such that atoms belonging to the same moiety staty together'"
-		>
-&nbsp;
-		<input 
-			type="checkbox" 
-			name= "SORT_HYDROGENS" 
-			bgcolor="$GetVar(gui_html_table_bg_colour)"  
-			fgcolor="$GetVar(gui_html_font_colour)" 
-			width="150" 
-			height="17" 
-			value="Treat H Independently"
-			data = ""
-			oncheck = "setdata(SORT_HYDROGENS,'h-')" 
-			onuncheck = "setdata(SORT_HYDROGENS,'')" 
+			onclick="sort moiety>>info>>echo 'The sorted list has been arranged such that atoms belonging to the same moiety staty together'"
 		>
 	</td>			
-			
 </tr>
 
 

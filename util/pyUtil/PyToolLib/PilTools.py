@@ -1289,7 +1289,7 @@ class timage(ImageTools):
                      max_width = max_width,
                      align='centre'
                      )
-        sfs = sf * 320/int(self.gui_htmlpanelwidth)
+        sfs = sf * 322/int(self.gui_htmlpanelwidth)
         IM = self.resize_image(IM, (int((cut[2]-cut[0])/sfs), int((cut[3]-cut[1])/sfs)))
         name = "button-%s%s.png" %(txt.replace(" ", "_"), state)
         name = name.lower()
@@ -1337,6 +1337,7 @@ class timage(ImageTools):
     cut = 0*sf, 152*sf, 15*sf, 167*sf
     crop =  im.crop(cut)
     crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_table_firstcol_colour,luminosity=0.98)) 
+    crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_green,luminosity=1.3,saturation=0.7))
     #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_base_colour,luminosity=1.7)) 
     IM =  Image.new('RGBA', crop.size, self.gui_html_table_firstcol_colour)
     IM.paste(crop_colouriszed, (0,0), crop)
