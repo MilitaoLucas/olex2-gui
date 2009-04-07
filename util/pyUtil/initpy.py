@@ -272,9 +272,10 @@ if olx.IsPluginInstalled('plugin-Batch') == "true":
   import plugin_batch_exex
 if olx.IsPluginInstalled('plugin-MySQL') == "true":
   try:
-    from OlexToMySQL import DownloadOlexLanguageDictionary
-    a = DownloadOlexLanguageDictionary()
-    olex.registerFunction(a.downloadTranslation)
+    import OlexToMySQL
+#    from OlexToMySQL import DownloadOlexLanguageDictionary
+#    a = DownloadOlexLanguageDictionary()
+#    olex.registerFunction(a.downloadTranslation)
   except:
     print "MySQL Plugin is installed but a connection to the default server could not be established."
 

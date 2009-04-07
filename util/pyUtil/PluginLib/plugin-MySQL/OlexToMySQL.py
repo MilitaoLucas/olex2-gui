@@ -9,6 +9,12 @@ import SQLFactory
 import string
 import time
 import codecs
+
+
+from olexFunctions import OlexFunctions
+OV = OlexFunctions()
+
+
 #from HTMLParser import HTMLParser
 
 #class MyParser(HTMLParser):
@@ -26,6 +32,8 @@ import codecs
       #return
     #self.translated_text = data[1:-1] # to remove the quotes
 
+    
+    
     
 class ImportDataIntoDB:
   def __init__(self):
@@ -230,7 +238,7 @@ class ImportDataIntoDB:
       if k != "VIEW":
         tablesInTargetDB.append(item['Tables_in_dimas_e'].lower())
     self.tablesInTargetDB = tablesInTargetDB
-  
+    
     
 class DownloadOlexLanguageDictionary:
   def __init__(self):
@@ -240,8 +248,8 @@ class DownloadOlexLanguageDictionary:
     self.basedir = olx.BaseDir()
     self.dictionary_l = []
     self.dictF = "%s/dictionary.txt" %self.basedir
-    from OlexToMySQL import UploadOlexLanguageDictionary
-    self.uploadD = UploadOlexLanguageDictionary()
+    #from OlexToMySQL import UploadOlexLanguageDictionary
+    #self.uploadD = UploadOlexLanguageDictionary()
   
     
   def GoogleTranslate(self, txt, langIn, langOut):
@@ -283,8 +291,43 @@ class DownloadOlexLanguageDictionary:
     p.feed(html_src)
     if p.translated_text:
       print p.translated_text
+
+  def EditHelpItem(self, OXD, language = "English"):
+    text = self.downloadSingleTerm(OXD, language)
+    inputText = OV.GetUserInput(0,'Modify text for help entry %s in %s' %(OXD, language), text)
+    if inputText and inputText != text:
+      self.uploadSingleTerm(OXD, language, inputText)
+    else:
+      print "Text has not changed"
+    print inputText
+      
+      
+  def downloadSingleTerm(self, OXD, language = "English"):
+    sql = "SELECT %s FROM translation WHERE oxd='%s'" %(language, OXD)
+    text = self.SQL.run_select_sql(sql)
+    if text:
+      text = text[0]
+      text = text.get(language,"")
+    else:
+      text = '''
+Line before a Table.
+&&
+
+~Headline~
+Body text
+XX command line text XX
+
+&&
+      '''
+    return text
   
-    
+  def uploadSingleTerm(self, OXD, field, value):
+    d = {"OXD":OXD, field:value}
+    sql = self.SQL.create_insert_or_update_sql(d, 'translation')
+    res = self.SQL.run_sql(sql)
+    print res, field, value
+      
+      
   def downloadTranslation(self):
     self.get_help()
     self.write_dict_file()
@@ -348,10 +391,17 @@ class DownloadOlexLanguageDictionary:
       wFile.write(line)
     wFile.close()
 
+    
+DownloadOlexLanguageDictionary_instance = DownloadOlexLanguageDictionary()
+OV.registerFunction(DownloadOlexLanguageDictionary_instance.EditHelpItem)
+OV.registerFunction(DownloadOlexLanguageDictionary_instance.downloadTranslation)
+    
+    
+    
 class UploadOlexLanguageDictionary:
   def __init__(self):
     self.SQL = SQLFactory.SQLFactory(db='OlexGuiDB')  
-    self.basedir = r"C:\Documents and Settings\Horst\Desktop\olex"
+    self.basedir = OV.BaseDir()
     self.dictionary_l = []
     self.dictF = "%s/dictionary.txt" %self.basedir
 
@@ -360,8 +410,6 @@ class UploadOlexLanguageDictionary:
     sql = self.SQL.create_insert_or_update_sql(d, 'translation')
     res = self.SQL.run_sql(sql)
     print res, field, value
-    
-    
     
   def run(self):
     self.read_dictionary()
@@ -382,6 +430,7 @@ class UploadOlexLanguageDictionary:
     #Q="INSERT INTO %s (%s) VALUES (%s);"  %(table, fields, values)
     #res = self.SQL.run_sql(Q)
     #print res
+    self.read_dictionary()
     fields = ['ID']
     fields += self.dictionary_l[0]
     fields += ['translationtypeID']
@@ -416,12 +465,17 @@ class UploadOlexLanguageDictionary:
       for field, value in zip(fields, values):
         d.setdefault(field, value)
       Q = self.SQL.create_insert_or_update_sql(d, 'translation')   
-      Q.replace("OlexID", "OXD")
+      Q = Q.replace("OlexID", "OXD")
       res = self.SQL.run_sql(Q)
       print res
+    return True
 
-    pass
 
+UploadOlexLanguageDictionary_instance = UploadOlexLanguageDictionary()
+OV.registerFunction(UploadOlexLanguageDictionary_instance.post_dictionary)
+  
+  
+  
 class ExportHelp(object):
   def __init__(self, tool_fun=None, tool_param=None):
     self.SQL = SQLFactory.SQLFactory()

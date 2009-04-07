@@ -30,3 +30,7 @@
   Wilson Plot
   Solve
   Refine
+  Tooltips
+  Help
+  White/Colour
+  Left/Right

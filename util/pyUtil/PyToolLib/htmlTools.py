@@ -252,7 +252,7 @@ def make_help_box(args):
   #str = unicode(str)#
   str = str.replace(u'\xc5', 'angstrom')
   OV.write_to_olex(wFilePath, str)
-  boxWidth = 320
+  boxWidth = 450
   length = len(helpTxt)
   #boxHeight = int(length/2.8)
   boxHeight = int(length/2.9) + 100
@@ -681,6 +681,9 @@ def OnStateChange(*args):
   d = {
     'basisvis':'button-show_basis',
     'cellvis':'button-show_cell',    
+    'tooltips':'button-tooltips',    
+    'helpvis':'button-help',
+    
   }
   img_base = d.get(name, None)
 
