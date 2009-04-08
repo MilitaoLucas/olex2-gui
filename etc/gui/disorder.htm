@@ -1,8 +1,9 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
 
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-		<zimg border="0" src="gui/images/toolbar-xl.png">
+
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=-link-selected;1; -->
+
 <map name="green">
 <area shape="rect" coords="0,0,10,10" href="refine">
 </map>		
@@ -17,8 +18,7 @@
 </tr> 
 
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-		<zimg border="0" src="gui/images/toolbar-xl.png">
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=-link-constraints;1; -->
 	</td>
 	<td VALIGN='center' width='100%' colspan='2'>
 		<b>Link Parts & Occupanies + </b> &nbsp;
@@ -49,8 +49,6 @@ labels -p -v -o
 
 <tr>
 	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-		<zimg border="0" src="gui/images/toolbar-xl.png">
-	</td>	
 	<td VALIGN='center' width='8'>
 		<a href="part sel getvalue(part)"><b>%Assign% <i>sel</i> to Part</b></a>
 	</td>
@@ -64,16 +62,13 @@ labels -p -v -o
 <tr>
 	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
 		<a href="refine">
-		<zimg border="0" src="gui/images/toolbar-xl.png"></a>
 	<td VALIGN='center' width='100%' colspan='2'>
 		<a href="part sel getvalue(part)"><b>%Assign% <i>sel</i> %to 2 parts in order%</b></a>&nbsp
 	</td>
 </tr> 
 
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
-		<a href="refine">
-		<zimg border="0" src="gui/images/toolbar-xl.png"></a>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=-show-parts;1; -->
 	<td VALIGN='center' width='100%' colspan='2'>
 		<b>%Show% PART </b>
 		<a href="showP 0 1">0 1</a>&nbsp

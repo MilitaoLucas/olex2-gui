@@ -297,6 +297,8 @@ class DownloadOlexLanguageDictionary:
     inputText = OV.GetUserInput(0,'Modify text for help entry %s in %s' %(OXD, language), text)
     if inputText and inputText != text:
       self.uploadSingleTerm(OXD, language, inputText)
+      self.downloadTranslation()
+      OV.cmd('reload dictionary')
     else:
       print "Text has not changed"
     print inputText
