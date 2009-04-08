@@ -180,8 +180,17 @@ def makeHtmlTableRow(dictionary):
   return htmlTableRowText
 
 def make_help_box(args):
+  remove_l = ['work-', 'view-', 'info-', 'tool-']
   str = ""
   name = args.get('name', None)
+  name_full = name
+  na = name.split("-")
+  if len(na) > 1:
+    for remove in remove_l:
+      if name.startswith(remove):
+        name = name.split(remove)[1]
+        break
+      
   popout = args.get('popout', False)
   if popout == 'false':
     popout = False
@@ -206,7 +215,9 @@ def make_help_box(args):
   helpTxt = OV.TranslatePhrase("%s-help" %help_src)
   helpTxt = helpTxt.replace("\r", "")
   helpTxt = format_help(helpTxt)
-  
+  editLink = ""
+  if OV.IsPluginInstalled('plugin-MySQL'):
+    editLink = "<a href='spy.EditHelpItem(%s-help)'>Edit</a>" %name
   if not popout:
     str += r'''
 <zimg border='0' src='olex_help_logo.png'>
@@ -246,8 +257,9 @@ def make_help_box(args):
 <td align='right'>
 %s
 </tr></td>
+%s
 <!-- #include tool-footer gui/blocks/tool-footer.htm;1; -->
-''' %(name, titleTxt, helpTxt, return_items)
+''' %(name, titleTxt, helpTxt, return_items, editLink)
   wFilePath = r"%s-help.htm" %name
   #str = unicode(str)#
   str = str.replace(u'\xc5', 'angstrom')
@@ -255,7 +267,7 @@ def make_help_box(args):
   boxWidth = 450
   length = len(helpTxt)
   #boxHeight = int(length/2.8)
-  boxHeight = int(length/2.9) + 100
+  boxHeight = int(length/(boxWidth/120)) + 100
   if boxHeight > 500:
     boxHeight = 500
   #boxHeight = 800
@@ -275,8 +287,8 @@ def make_help_box(args):
     pop_name = "%s-help"% name
     olx.Popup(pop_name, wFilePath, "-b=tc -t='%s' -w=%i -d='echo' -h=%i -x=%i -y=%i" %(name, boxWidth, boxHeight, x, y))
     olx.html_SetBorders(pop_name,5)
-    olx.Popup(pop_name, wFilePath, "-b=tc -t='%s' -w=%i -d='echo' -h=%i -x=%i -y=%i" %(name, boxWidth, boxHeight, x, y))
-    olx.html_SetBorders(pop_name,5)
+#    olx.Popup(pop_name, wFilePath, "-b=tc -t='%s' -w=%i -d='echo' -h=%i -x=%i -y=%i" %(name, boxWidth, boxHeight, x, y))
+#    olx.html_SetBorders(pop_name,5)
   else:
     olx.html_Load(wFilePath) 
 #  popup '%1-tbxh' 'basedir()/etc/gui/help/%1.htm' -b=tc -t='%1' -w=%3 -h=%2 -x=%4 -y=%5"> 
@@ -308,7 +320,7 @@ def make_table_first_col(make_help=False, help_image='large'):
 ''' %help
   return html
 
-def make_help_href(make_help, image='small'):
+def make_help_href(make_help, image='normal'):
   if image == 'small':
     image = 'info_tiny_fc.png'
   else:
@@ -409,7 +421,12 @@ def make_input_button(d):
 def format_help(string):
   import re
   
+  #string = "l[fd] fsafdes l[rr]"
 
+  ## find all occurances of strings between []. These are links to help popup boxes.
+  regex = re.compile(r"l \[ (.*?) \]", re.X)
+  string = regex.sub(r"<a href='spy.make_help_box -name=\1 -popout=False'>\1</a>", string)
+  
   ## find all occurances of strings between XX. These are command line entities.
   regex = re.compile(r"  XX (.*?)( [^\XX\XX]* ) XX ", re.X)
   m = regex.findall(string)
@@ -681,7 +698,7 @@ def OnStateChange(*args):
   d = {
     'basisvis':'button-show_basis',
     'cellvis':'button-show_cell',    
-    'tooltips':'button-tooltips',    
+    'htmlttvis':'button-tooltips',    
     'helpvis':'button-help',
     
   }
