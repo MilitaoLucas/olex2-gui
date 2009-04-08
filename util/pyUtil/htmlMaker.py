@@ -585,7 +585,7 @@ def restraint_builder(cmd):
   
   #Add the help info as the last row in the table
   html += "</td></tr>"
-  html += htmlTools.make_table_first_col(make_help=(name,'True'), help_image='small')
+  html += htmlTools.make_table_first_col(make_help=(name,'True'), help_image='normal')
   html += "<td colspan=%s bgcolor='%s'>%s</td></tr>" %(colspan, OV.FindValue('gui_html_table_firstcol_colour'), html_help, )
   if name in constraints:
     wFilePath = r"constraint-vars.htm"
