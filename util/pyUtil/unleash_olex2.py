@@ -2,7 +2,7 @@
 
 """ Olex 2 distro management """
 # these to specify to created separate zip files
-plugins = ('mysql', 'cctbx-win', 'brukersaint', 'ODSkin', 'BNSkin', 'STOESkin', 'HPSkin', 'Batch', 'HotshotProfiler', 'Pysvn', 'Crypto', 'AutoChem') 
+plugins = ('MySQL', 'cctbx-win', 'brukersaint', 'ODSkin', 'BNSkin', 'STOESkin', 'HPSkin', 'Batch', 'HotshotProfiler', 'Pysvn', 'Crypto', 'AutoChem') 
 # file name aliases
 web_for_working = {'olex2.exe': 'olex2.dll', 'launch.exe': 'olex2.exe'}
 # alteartions for binary files : name (properties...)
