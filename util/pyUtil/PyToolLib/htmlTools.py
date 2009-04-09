@@ -18,6 +18,8 @@ active_mode = None
 global last_mode
 last_mode = None
 
+global current_tooltip_number
+current_tooltip_number = 0
 
 def makeHtmlTable(list):
   """ Pass a list of dictionaries, with one dictionary for each table row.
@@ -423,6 +425,11 @@ def format_help(string):
   
   #string = "l[fd] fsafdes l[rr]"
 
+  
+  ## find all occurances of strings between t^..^t. These are the headers for tip of the day.
+  regex = re.compile(r"t \^ (.*?)  \^ t", re.X)
+  string = regex.sub(r"<font color='$getVar(gui_html_highlight_colour)'>\1</font> ", string)
+  
   ## find all occurances of strings between []. These are links to help popup boxes.
   regex = re.compile(r"l \[ (.*?) \]", re.X)
   string = regex.sub(r"<a href='spy.make_help_box -name=\1 -popout=False'>\1</a>", string)
@@ -433,8 +440,7 @@ def format_help(string):
   colour = OV.FindValue('gui_grey')
   colour = "#aaaaaa"
   if m:
-    #s = regex.sub(r"<tr bgcolor='$getVar(gui_html_table_firstcol_colour)><td><b><font color='%s'>\2</font></b> " %colour, string)
-    s = regex.sub(r"<tr bgcolor='#ffffee'><td><b><font size='2' color='%s'>>>\2</font></b></td></tr>" %colour, string)
+    s = regex.sub(r"<table><tr bgcolor='#ffffdd'><td><b><font size='2' color='%s'>>>\2</font></b></td></tr></table>" %colour, string)
 
   else:
     s = string
@@ -783,4 +789,29 @@ def doBanner(i):
 OV.registerFunction(doBanner)
 
 
+def getRandomTip():
+  from random import randint
+  global current_tooltip_number
+  txt = "tip-0"
+  while "tip-" in txt:
+    i = randint (1,10)
+    if i == current_tooltip_number: continue
+    txt = OV.TranslatePhrase("tip-%i" %i)
+  current_tooltip_number = i
+  txt = format_help(txt)
+  OV.SetVar("current_tooltip_number",i)
+  return txt
+OV.registerFunction(getRandomTip)
+
+
+def getNextTip():
+  global current_tooltip_number
+  next = current_tooltip_number + 1
+  txt = OV.TranslatePhrase("tip-%i" %i)
+  if "tip-" in txt:
+    i = 1
+    txt = OV.TranslatePhrase("tip-%i" %i)
+    txt += " | <font size=1>This is Tip %i</font>" %i
+  current_tooltip_number = i  
+  return txt
 
