@@ -182,17 +182,10 @@ def makeHtmlTableRow(dictionary):
   return htmlTableRowText
 
 def make_help_box(args):
-  remove_l = ['work-', 'view-', 'info-', 'tool-']
-  str = ""
+  
   name = args.get('name', None)
-  name_full = name
-  na = name.split("-")
-  if len(na) > 1:
-    for remove in remove_l:
-      if name.startswith(remove):
-        name = name.split(remove)[1]
-        break
-      
+  name = args.get('name', None)
+  name = getGenericSwitchName(name)
   popout = args.get('popout', False)
   if popout == 'false':
     popout = False
@@ -815,3 +808,24 @@ def getNextTip():
   current_tooltip_number = i  
   return txt
 
+def getGenericSwitchName(name):
+  remove_l = ['work-', 'view-', 'info-', 'tools-', 'aio-', 'home-']
+  str = ""
+  name_full = name
+  na = name.split("-")
+  if len(na) > 1:
+    for remove in remove_l:
+      if name.startswith(remove):
+        name = name.split(remove,1)[1]
+        break
+  return name
+OV.registerFunction(getGenericSwitchName)
+
+def getGenericSwitchNameTranslation(name):
+  name = getGenericSwitchName(name)
+  if name:
+    text = OV.TranslatePhrase(getGenericSwitchName(name))
+  else:
+    text = "No text!"
+  return text
+OV.registerFunction(getGenericSwitchNameTranslation)

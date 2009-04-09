@@ -333,6 +333,9 @@ XX command line text XX
   def downloadTranslation(self):
     self.get_help()
     self.write_dict_file()
+    print "Downloaded Dictionary from DB"
+    OV.cmd("Reload dictionary")
+    print "Reloaded Dictionary"
     return "Done"
 
   def get_help(self):
