@@ -440,7 +440,7 @@ def format_help(string):
   colour = OV.FindValue('gui_grey')
   colour = "#aaaaaa"
   if m:
-    s = regex.sub(r"<table><tr bgcolor='#ffffdd'><td><b><font size='2' color='%s'>>>\2</font></b></td></tr></table>" %colour, string)
+    s = regex.sub(r"<table width='100%%' border='0' cellpadding='0' cellspacing='4'><tr bgcolor='#ffffdd'><td><b><font size='2' color='%s'>>>\2</font></b></td></tr></table>" %colour, string)
 
   else:
     s = string
