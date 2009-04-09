@@ -86,6 +86,16 @@ class OlexFunctions(inheritFunctions):
       retStr = None
     return retStr
   
+  def TranslatePhrase(self,text):
+    try:
+      retStr = olx.TranslatePhrase(text)
+    except Exception, ex:
+      print >> sys.stderr, "An error occured whilst translating %s" %(text)
+      sys.stderr.formatExceptionInfo()
+      retStr = None
+    return retStr
+
+  
   def CurrentLanguageEncoding(self):
     try:
       retStr = olx.CurrentLanguageEncoding()
