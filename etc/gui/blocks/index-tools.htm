@@ -1,12 +1,12 @@
-<!-- #includeif IsFileType('ires') tools-tools gui\tools.htm;gui\blocks\tool-off.htm;image=tools;onclick=;2; -->
-<!-- #includeif IsFileType('ires') tools-OLEX-conres gui\OLEX-conres.htm;gui\blocks\tool-off.htm;image=OLEX-constraints-and-restraints;onclick='spy.restraint_builder(GetVar(snum_olex_conres,RRINGS))';2; -->
-<!-- #includeif IsFileType('ires') tools-SHELX-constraints gui\SHELX-constraints.htm;gui\blocks\tool-off.htm;image=SHELX-constraints;onclick='spy.restraint_builder(GetVar(gui_shelx_constraints))';2; -->
-<!-- #includeif IsFileType('ires') tools-SHELX-restraints gui\SHELX-restraints.htm;gui\blocks\tool-off.htm;image=SHELX-restraints;onclick='spy.restraint_builder(GetVar(gui_shelx_restraints))';2; -->
+<!-- #includeif IsFileType('ires') tools-chemical-tools gui\chemical-tools.htm;gui\blocks\tool-off.htm;image=chemical-tools;onclick=;2; -->
+<!-- #includeif IsFileType('ires') tools-OLEX2-conres gui\OLEX2-conres.htm;gui\blocks\tool-off.htm;image=OLEX2-constraints-and-restraints;onclick='spy.restraint_builder(GetVar(snum_olex_conres,RRINGS))';2; -->
+<!-- #includeif IsFileType('ires') tools-SHELX-compatible-constraints gui\SHELX-compatible-constraints.htm;gui\blocks\tool-off.htm;image=SHELX-compatible-constraints;onclick='spy.restraint_builder(GetVar(gui_shelx_constraints))';2; -->
+<!-- #includeif IsFileType('ires') tools-SHELX-compatible-restraints gui\SHELX-compatible-restraints.htm;gui\blocks\tool-off.htm;image=SHELX-compatible-restraints;onclick='spy.restraint_builder(GetVar(gui_shelx_restraints))';2; -->
 <!-- #includeif isplugininstalled(plugin-autostructure) tools-auto-structure gui\auto-structure.htm;gui\blocks\tool-off.htm;image=auto-structure;onclick=;2; -->
 <!-- #includeif IsFileType('ires') work-hydrogen-atoms gui\hydrogen-atoms.htm;gui\blocks\tool-off.htm;image=hydrogen-atoms;onclick=;2; -->
 <!-- #includeif IsFileType('ires') work-disorder gui\disorder.htm;gui\blocks\tool-off.htm;image=disorder;onclick=;2; -->
-<!-- #include tool-calculate-voids gui\calculate-voids.htm;gui\blocks\tool-off.htm;image=calculate-voids;onclick=;2; -->
-<!-- #includeif file.Exists('HKLSrc()') tool-electron-density gui\electron-density.htm;gui\blocks\tool-off.htm;image=electron-density;onclick=;2; -->
+<!-- #include tools-calculate-voids gui\calculate-voids.htm;gui\blocks\tool-off.htm;image=calculate-voids;onclick=;2; -->
+<!-- #includeif file.Exists('HKLSrc()') tools-electron-density gui\electron-density.htm;gui\blocks\tool-off.htm;image=electron-density;onclick=;2; -->
 <!-- #includeif file.Exists('FilePath()\FileName().cif') tools-cif gui\cif.htm;gui\blocks\tool-off.htm;image=cif;onclick=;0; -->
 <!-- #includeif and(spy.IsPluginInstalled(plugin-cctbx),IsFileType('ires')) work-twinning gui\twinning.htm;gui\blocks\tool-off.htm;image=twinning;onclick=;2; -->
 <!-- #include tools-settings gui\settings.htm;gui\blocks\tool-off.htm;image=settings;onclick=;onclick=;2; -->

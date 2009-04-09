@@ -14,23 +14,23 @@
     <input
 			bgcolor="$GetVar(gui_html_table_bg_colour)"  
 			type="button" 
-			name="SORT_MWL" 
+			name="SORT_ML" 
 			image="button-mass_&_label.png"
-			onclick="sort +ml>>info>>echo 'Atom list is now sorted by atomic mass and atom labels'"
+			onclick="sort +ml>>info>>echo %'sort_ml-msg'%"
 			>
     <input
 			bgcolor="$GetVar(gui_html_table_bg_colour)"  
 			type="button" 
 			name="SORT_L" 
 			image="button-atom_label.png"
-			onclick="sort +l>>info>>echo 'Atom list is now sorted alphanumerically by the atom labels'"
+			onclick="sort +l>>info>>echo '%sort_l-msg%'"
 			>
     <input
 			bgcolor="$GetVar(gui_html_table_bg_colour)"  
 			type="button" 
 			name="SORT_M" 
 			image="button-atomic_mass.png"
-			onclick="sort +m>>info>>echo 'Atom list is now sorted by the atomic mass'"
+			onclick="sort +m>>info>>echo '%sort_m-msg%'"
 			>
 	</td>
 </tr>
@@ -51,7 +51,7 @@
 			type="button" 
 			name="SORT_MOIETY" 
 			image="button-moieties.png"
-			onclick="sort moiety>>info>>echo 'The sorted list has been arranged such that atoms belonging to the same moiety staty together'"
+			onclick="sort moiety>>info>>echo '%sort_moiety-msg'"
 		>
 	</td>			
 </tr>
