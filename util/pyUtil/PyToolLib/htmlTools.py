@@ -818,7 +818,6 @@ def getGenericSwitchName(name):
       if name.startswith(remove):
         name = name.split(remove,1)[1]
         break
-  print name
   return name
 OV.registerFunction(getGenericSwitchName)
 
