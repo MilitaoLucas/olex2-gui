@@ -36,7 +36,6 @@
  <gui_red value="#aa0000" >
  <gui_shelx_constraints value="--" >
  <gui_shelx_restraints value="--" >
- <gui_skin_extension value="1" >
  <gui_skin_logo_name value="BaseDir()/util/pyUtil/PluginLib/skins/plugin-defaultSkin/default.png" >
  <gui_skin_name value="default" >
  <gui_snumtitle_colour value="#6464a0" >
