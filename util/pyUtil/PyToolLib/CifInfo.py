@@ -523,12 +523,6 @@ class CifTools(ArgumentParser):
 				import cif_reader
 				cif_def = cif_reader.reader(p).cifItems()
 				merge.append(cif_def)
-				
-		olexInfo = {}
-		olexInfo.setdefault('_computing_molecular_graphics',variableFunctions.getOlex2VersionInfo())
-		olexInfo.setdefault('_computing_publication_material',variableFunctions.getOlex2VersionInfo())
-		merge.append(olexInfo)
-		
 		self.setVariables(merge)
 		
 	def setVariables(self,info):
