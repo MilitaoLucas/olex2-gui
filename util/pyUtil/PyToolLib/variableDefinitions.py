@@ -114,8 +114,10 @@ def snumVariables():
     'snum_metacif_computing_cell_refinement':Variable('?'),
     'snum_metacif_computing_data_collection':Variable('?'),
     'snum_metacif_computing_data_reduction':Variable('?'),
-    'snum_metacif_computing_molecular_graphics':Variable(variableFunctions.getOlex2VersionInfo()),
-    'snum_metacif_computing_publication_material':Variable(variableFunctions.getOlex2VersionInfo()),
+    'snum_metacif_computing_molecular_graphics':Variable(
+      'OLEX2: a complete structure solution, refinement and analysis program. Dolomanov et al., J. Appl. Cryst. (2009). 42, 339-341'),
+    'snum_metacif_computing_publication_material':Variable(
+      'OLEX2: a complete structure solution, refinement and analysis program. Dolomanov et al., J. Appl. Cryst. (2009). 42, 339-341'),
     'snum_metacif_computing_structure_solution':Variable('?'),
     'snum_metacif_diffrn_ambient_temperature':Variable('?',Range(min=0.0)),
     'snum_metacif_diffrn_special_details':Variable('?'),
