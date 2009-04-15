@@ -112,9 +112,13 @@ class OlexFunctions(inheritFunctions):
       print >> sys.stderr, "An error occured whilst trying to find merge cif files"
       sys.stderr.formatExceptionInfo()
       
-  def write_to_olex(self,fileName,text):
+  def write_to_olex(self,fileName,text,copyToDisk = False):
     try:
       OlexVFS.write_to_olex(fileName, text)
+      if copyToDisk:
+        wFile = open("%s/%s" %(self.DataDir(),fileName),'w')
+        wFile.write(text)
+        wFile.close()
     except Exception, ex:
       print >> sys.stderr, "An error occured whilst trying to write to the VFS"
       sys.stderr.formatExceptionInfo()
@@ -357,6 +361,9 @@ class OlexFunctions(inheritFunctions):
   def GetCompilationInfo(self):
     return olx.GetCompilationInfo()
   
+  def GetHtmlPanelwidth(self):
+    return olx.HtmlPanelWidth()
+
   def XfAuGetValue(self, var=""):
     try:
       val = olex.f("xf.au.Get%s()" %var)

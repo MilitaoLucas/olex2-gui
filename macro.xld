@@ -21,6 +21,7 @@
 			<cmd8 "echo filepath()">
 			<cmd10 XXX="schedule 8 'UpdateFile olex2.exe'">
 			<cmd11 "bind wheel 'ShowQ -wheel='">
+			<cmd12 "spy.GetTip(0)">
 		\>	
 
 		<onterminate

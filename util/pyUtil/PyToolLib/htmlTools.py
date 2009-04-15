@@ -421,19 +421,20 @@ def format_help(string):
   
   ## find all occurances of strings between t^..^t. These are the headers for tip of the day.
   regex = re.compile(r"t \^ (.*?)  \^ t", re.X)
-  string = regex.sub(r"<font color='$getVar(gui_html_highlight_colour)'>\1</font> ", string)
+  string = regex.sub(r"<font color='$getVar(gui_html_highlight_colour)'><b>\1</b></font>", string)
   
   ## find all occurances of strings between []. These are links to help popup boxes.
   regex = re.compile(r"l \[ (.*?) \]", re.X)
   string = regex.sub(r"<a href='spy.make_help_box -name=\1 -popout=False'>\1</a>", string)
   
   ## find all occurances of strings between XX. These are command line entities.
+  width = int(OV.GetHtmlPanelwidth()) - 10
   regex = re.compile(r"  XX (.*?)( [^\XX\XX]* ) XX ", re.X)
   m = regex.findall(string)
-  colour = OV.FindValue('gui_grey')
-  colour = "#aaaaaa"
+  colour = "#888888"
   if m:
-    s = regex.sub(r"<table width='100%%' border='0' cellpadding='0' cellspacing='4'><tr bgcolor='#ffffdd'><td><b><font size='2' color='%s'>>>\2</font></b></td></tr></table>" %colour, string)
+    s = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='4'><tr bgcolor='#ffffdd'><td colspan='2'><b><font size='2' color='%s'><code>>>\2</code></font></b></td></tr></table>" %(width,colour), string)
+    #s = regex.sub(r"<tr bgcolor='#ffffaa'><td colspan='2'><b><font size='2' color='%s'>>>\2</font></b></td></tr>" %colour, string)
 
   else:
     s = string
@@ -465,7 +466,7 @@ def format_help(string):
   #regex = re.compile(r"  & (.*?)( [^\&\&]* ) & ", re.X)
   m = regex.findall(string)
   if m:
-    s = regex.sub(r"<table>\2</table>", string)
+    s = regex.sub(r"<table border='0'>\2</table>", string)
   else:
     s = string
     
@@ -782,31 +783,56 @@ def doBanner(i):
 OV.registerFunction(doBanner)
 
 
-def getRandomTip():
+def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next tip, otherwise get the named tip
   from random import randint
   global current_tooltip_number
-  txt = "tip-0"
-  while "tip-" in txt:
-    i = randint (1,10)
-    if i == current_tooltip_number: continue
+  max_i = 20
+  if number == '0':
+    txt = "tip-0"
+    while "tip-" in txt:
+      i = randint (1,max_i)
+      if i == current_tooltip_number: continue
+      txt = OV.TranslatePhrase("tip-%i" %i)
+  elif number == "+1":
+    i = current_tooltip_number + 1
+    txt = OV.TranslatePhrase("tip-%i" %i)
+    if "tip-" in txt:
+      i = 1
+      txt = OV.TranslatePhrase("tip-%i" %i)
+  elif number == "list":
+    txt = ""
+    for i in xrange(max_i):
+      if i == 0: continue
+      t = OV.TranslatePhrase("tip-%i" %i)
+      if "tip-" in t:
+        break
+      t = t.split("^t")[0]
+      t += "^t"
+      t = t.strip()
+      txt += "<b>%i.</b> <a href='spy.GetTip(%i)>>html.Reload'>%s</a><br>" %(i, i,t)
+    txt = txt.rstrip("<br>")
+  else:
+    i = int(number)
     txt = OV.TranslatePhrase("tip-%i" %i)
   current_tooltip_number = i
   txt = format_help(txt)
   OV.SetVar("current_tooltip_number",i)
-  return txt
-OV.registerFunction(getRandomTip)
+  OV.write_to_olex("tip-of-the-day-content.htm", txt)
+  return True
+OV.registerFunction(getTip)
 
-
-def getNextTip():
-  global current_tooltip_number
-  next = current_tooltip_number + 1
-  txt = OV.TranslatePhrase("tip-%i" %i)
-  if "tip-" in txt:
-    i = 1
-    txt = OV.TranslatePhrase("tip-%i" %i)
-    txt += " | <font size=1>This is Tip %i</font>" %i
-  current_tooltip_number = i  
-  return txt
+##TO GO!
+#def getNextTip():
+  #global current_tooltip_number
+  #next = current_tooltip_number + 1
+  #txt = OV.TranslatePhrase("tip-%i" %i)
+  #if "tip-" in txt:
+    #i = 1
+    #txt = OV.TranslatePhrase("tip-%i" %i)
+    #txt += " | <font size=1>This is Tip %i</font>" %i
+  #current_tooltip_number = i  
+  #OV.write_to_olex("tip-of-the-day.htm", txt)
+  #return True
 
 def getGenericSwitchName(name):
   remove_l = ['work-', 'view-', 'info-', 'tools-', 'aio-', 'home-']
