@@ -9,26 +9,30 @@
 	</td>
 </tr>
 -->
+
+
+
+<tr bgcolor="$getVar(gui_html_highlight_colour)" align='right'>
+<td VALIGN='right' bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+<td colspan='2' align='left'>
+<font color="#ffffff" bgcolor="#000000">
+	<b>&nbsp;This is Tip of the Day No.$getVar(current_tooltip_number) </b>&nbsp;|&nbsp;
+</font>	
+	<a href='spy.getTip(+1)>>html.reload'>Next</a> &nbsp;|&nbsp;
+	<a href='spy.getTip(0)>>html.reload'>Random</a> &nbsp;|&nbsp;
+	<a href='spy.getTip(list)>>html.reload'>List</a>
+</td>
+</tr>
+
 <tr align='left'>
 	<td width='6' VALIGN='left' bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 	<td align='center' colspan='2' bgcolor="$getVar(gui_html_highlight_colour)">
 		<table border="0" cellpadding="4" cellspacing="0" width='$eval(htmlpanelwidth()- 35)'>
 			<tr>
-				<td bgcolor="#ffffff">
-					<b>$spy.GetRandomTip()</b>
+				<td bgcolor="#ffffff" >
+<!-- #include tip-of-the-day-content tip-of-the-day-content.htm;1; -->
 				</td>
 			</tr>
 		</table>	
-		</td>	
-</tr>
-<tr bgcolor="$getVar(gui_html_highlight_colour)" align='right'>
-<td VALIGN='right' bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-
-<td colspan='2' align='right'>
-
-<font color="#ffffff">
-	This is Tip of the Day No.$getVar(current_tooltip_number) &nbsp;|&nbsp;
-</font>	
-	<a href=html.Reload>Random Tip</a>
-</td>
+	</td>	
 </tr>
