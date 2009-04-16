@@ -759,6 +759,7 @@ class Analysis(Graph):
     self.filepath = OV.FilePath()
     self.filename = OV.FileName()
     self.datadir = OV.DataDir()
+    self.data = {}
     
     fun = f
     self.n_bins = abs(int(args.get('n_bins',0))) #Number of bins for Histograms
@@ -1172,7 +1173,6 @@ class Analysis(Graph):
     
 
   def make_wilson_plot(self):
-#    n_bins = 2 * abs(int(self.param[1])) # multiply nbins by 2 to get approx same number as olex
     n_bins = 2 * self.n_bins # multiply nbins by 2 to get approx same number as olex
     if self.method == 'cctbx':
       OV.timer_wrap(self.cctbx_wilson_statistics,bins=n_bins)
@@ -1198,9 +1198,7 @@ class Analysis(Graph):
     text = []
     text.append("B = %.3f" %float(metadata.get("B")))
     text.append("K = %.3f" %float(metadata.get("K")))
-    t = "<|E^2-1|>"
-    t = self.get_unicode_characters(t)
-    text.append("%s = %.3f" %(t, float(metadata.get("<|E^2-1|>", 0))))
+    text.append("<|E^2-1|> = %.3f" %float(metadata.get("<|E^2-1|>", 0)))
     text.append(r"%%|E| > 2 = %.3f"%float(metadata.get(r"%|E| > 2", 0)))
     
     left = grad.size[0] + self.xSpace + imX * 0.04
@@ -1208,14 +1206,15 @@ class Analysis(Graph):
     top_original = top
     i = 0
     for txt in text:
-      wX, wY = draw.textsize(txt, font=self.font_tiny)
+      unicode_txt = self.get_unicode_characters(txt)
+      wX, wY = draw.textsize(unicode_txt, font=self.font_tiny)
       colour = "#444444"
       if "E^2" in txt:
         if float(estats) < float(self.wilson_grad_begin):
           colour = "#ff0000"
         elif float(estats) > float(self.wilson_grad_end):
           colour = "#ff0000"
-      draw.text((left, top), "%s" %txt, font=self.font_tiny, fill=colour)
+      draw.text((left, top), "%s" %unicode_txt, font=self.font_tiny, fill=colour)
       top += wY +2
       i += 1
       if i == 2:
