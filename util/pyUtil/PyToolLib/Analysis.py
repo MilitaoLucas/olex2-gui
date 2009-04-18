@@ -746,27 +746,6 @@ class Analysis(Graph):
       }
       self.make_analysis_image()
 
-    elif fun == "completeness":
-      self.item = "completeness"
-      self.graphInfo["Title"] = "Completeness Plot"
-      self.graphInfo["pop_html"] = "completeness"
-      self.graphInfo["pop_name"] = "completeness"
-      self.make_analysis_image()
-      
-    elif fun == "cumulative":
-      self.item = "cumulative"
-      self.graphInfo["Title"] = "Cumulative Intensity Distribution"
-      self.graphInfo["pop_html"] = "cumulative"
-      self.graphInfo["pop_name"] = "cumulative"
-      self.make_analysis_image()
-      
-    elif fun == "f_obs_f_calc":
-      self.item = "f_obs_f_calc"
-      self.graphInfo["Title"] = "Fobs vs Fcalc"
-      self.graphInfo["pop_html"] = "f_obs_f_calc"
-      self.graphInfo["pop_name"] = "f_obs_f_calc"
-      self.make_analysis_image()
-      
     elif fun == "lst":
       self.file_reader("%s/%s.lst" %(filepath, filename))
       self.analyse_lst()
@@ -808,32 +787,6 @@ class Analysis(Graph):
     self.imY = 256
     self.draw_bars()
     self.draw_yAxis()
-
-  def cctbx_completeness_statistics(self, bins=20):
-    from cctbx_olex_adapter import OlexCctbxAdapter
-    cctbx = OlexCctbxAdapter('completeness', '%s' %bins)
-    data_object = cctbx.run()
-    data_object.completeness.show()
-    #self.data = zip(data_object.x,[i*100 for i in data_object.y])
-    metadata = {}
-    metadata.setdefault("y_label", "Shell Completeness")
-    metadata.setdefault("x_label", "Resolution")
-    
-    self.metadata = metadata
-    self.data.setdefault('dataset1', Dataset(data_object.x,[i*100 for i in data_object.y],metadata))
-    
-  def cctbx_cumulative_distribution(self, bins=20):
-    from cctbx_olex_adapter import OlexCctbxAdapter
-    cctbx = OlexCctbxAdapter('cumulative', '%s' %bins)
-    xy_plot = cctbx.run()
-    #self.data = zip([i*100 for i in data_object.x],data_object.y)
-    #self.data = zip(data_object.x,data_object.y)
-    metadata = {}
-    metadata.setdefault("y_label", xy_plot.yLegend)
-    metadata.setdefault("x_label", xy_plot.xLegend)
-    
-    self.metadata = metadata
-    self.data.setdefault('dataset1', Dataset(xy_plot.x,[i*100 for i in xy_plot.y],metadata))
 
   def file_reader(self, filepath):
     fl = []
@@ -960,10 +913,6 @@ class Analysis(Graph):
       self.make_DisagreeReflections_graph()
     elif self.item == "AutoChem":
       self.make_AutoChem_plot()
-    elif self.item == "completeness":
-      self.make_completeness_plot()
-    elif self.item == "cumulative":
-      self.make_cumulative_distribution()
     elif self.item == "f_obs_f_calc":
       self.make_f_obs_f_calc_plot()
     image_location = "%s.png" %(self.item)
@@ -990,64 +939,6 @@ class Analysis(Graph):
     self.make_empty_graph(axis_x = True)
     self.draw_pairs()
     
-  def make_completeness_plot(self):
-    n_bins = abs(int(self.param[0]))
-    n_bins = self.n_bins
-    self.cctbx_completeness_statistics(bins=n_bins)
-    
-    self.make_empty_graph(axis_x = True)
-    self.draw_pairs(reverse_x=True)
-    
-  def make_f_obs_f_calc_plot(self):
-    from cctbx_olex_adapter import OlexCctbxAdapter
-    cctbx = OlexCctbxAdapter('f_obs_f_calc',None)
-    xy_plot = cctbx.run()
-    
-    data = Dataset(xy_plot.f_calc_sq,xy_plot.f_obs_sq,metadata={})
-    self.data.setdefault('dataset1', data)
-    
-    
-    self.make_empty_graph(axis_x = True)
-    self.draw_pairs()
-    
-  def make_cumulative_distribution(self):
-    self.auto_axes = False
-    n_bins = abs(int(self.param[0]))
-    self.cctbx_cumulative_distribution(bins=n_bins)
-    
-    self.make_empty_graph(axis_x = True)
-    
-    # centric distribution
-    self.plot_function(centric_distribution)
-    
-    # acentric distribution
-    self.plot_function(acentric_distribution)
-    
-    # twinned acentric distribution
-    # E. Stanley, J.Appl.Cryst (1972). 5, 191
-    self.plot_function(twinned_acentric_distribution)
-    
-    colour1 = self.graphInfo['plot_function']['colour1']
-    colour2 = self.graphInfo['plot_function']['colour2']
-    colour3 = self.graphInfo['plot_function']['colour3']
-    
-    key = self.draw_key({1:{'label':'Centric',
-                            'colour':colour1,
-                            },
-                         2:{'label':'Acentric',
-                            'colour':colour2,
-                            },
-                         3:{'label':'Twinned Acentric',
-                            'colour':colour3,
-                            },
-                         })
-    self.im.paste(key, 
-                  (int(self.graph_right-(key.size[0]+50)),
-                   int(self.graph_bottom-(key.size[1]+50)))
-                  )
-    
-    self.draw_pairs()
-
   def ProgramHtml(self, program, method, process, img_name):
     return_to_menu_txt = str(OV.Translate("Return to main menu"))
     if process == "Refining":
@@ -1550,9 +1441,160 @@ class ChargeFlippingPlot(Analysis):
         olx.html_SetImage("POP_PRG_ANALYSIS","XY.png")
       #olex.m("html.Reload pop_prg_analysis")
 
-#OV.registerMacro(WilsonPlot,
-  #'n_bins-Number of bins (for histograms only!)&;method-olex or cctbx')
-OV.registerFunction(WilsonPlot)  
+class CumulativeIntensityDistribution(Analysis):
+  def __init__(self, n_bins=20):
+    Analysis.__init__(self)
+    self.n_bins = abs(int(n_bins)) #Number of bins for Histograms
+    self.item = "cumulative"
+    self.graphInfo["Title"] = "Cumulative Intensity Distribution"
+    self.graphInfo["pop_html"] = "cumulative"
+    self.graphInfo["pop_name"] = "cumulative"
+    self.graphInfo["imSize"] = (900, 500)
+    self.graphInfo["TopRightTitle"] = self.filename
+    self.auto_axes = False
+    self.cctbx_cumulative_intensity_distribution()
+    
+    self.make_empty_graph(axis_x = True)
+    # centric distribution
+    self.plot_function(centric_distribution)
+    # acentric distribution
+    self.plot_function(acentric_distribution)
+    # twinned acentric distribution
+    # E. Stanley, J.Appl.Cryst (1972). 5, 191
+    self.plot_function(twinned_acentric_distribution)
+    
+    colour1 = self.graphInfo['plot_function']['colour1']
+    colour2 = self.graphInfo['plot_function']['colour2']
+    colour3 = self.graphInfo['plot_function']['colour3']
+    
+    key = self.draw_key({1:{'label':'Centric',
+                            'colour':colour1,
+                            },
+                         2:{'label':'Acentric',
+                            'colour':colour2,
+                            },
+                         3:{'label':'Twinned Acentric',
+                            'colour':colour3,
+                            },
+                         })
+    self.im.paste(key, 
+                  (int(self.graph_right-(key.size[0]+50)),
+                   int(self.graph_bottom-(key.size[1]+50)))
+                  )
+    
+    self.draw_pairs()
+    image_location = "%s.png" %(self.item)
+    OlexVFS.save_image_to_olex(self.im, image_location,  1)
+    self.width, self.height = self.im.size
+    self.popout()
+
+  def cctbx_cumulative_intensity_distribution(self):
+    from cctbx_olex_adapter import OlexCctbxAdapter
+    cctbx = OlexCctbxAdapter('cumulative', '%s' %self.n_bins)
+    xy_plot = cctbx.run()
+    metadata = {}
+    metadata.setdefault("y_label", xy_plot.yLegend)
+    metadata.setdefault("x_label", xy_plot.xLegend)
+    
+    self.metadata = metadata
+    #self.data.setdefault('dataset1', Dataset(xy_plot.x,[i*100 for i in xy_plot.y],metadata))
+    self.data.setdefault('dataset1', Dataset(xy_plot.x, xy_plot.y,metadata))
+    self.data['dataset1'].show_summary()
+
+class CompletenessPlot(Analysis):
+  def __init__(self, n_bins=20):
+    Analysis.__init__(self)
+    self.item = "completeness"
+    self.n_bins = abs(int(n_bins))
+    self.graphInfo["Title"] = "Completeness Plot"
+    self.graphInfo["pop_html"] = "completeness"
+    self.graphInfo["pop_name"] = "completeness"
+    self.graphInfo["imSize"] = (900, 500)
+    self.graphInfo["TopRightTitle"] = self.filename
+    self.auto_axes = False
+    
+    self.cctbx_completeness_statistics()
+    self.make_empty_graph(axis_x = True)
+    self.draw_pairs(reverse_x=True)
+    
+    image_location = "%s.png" %(self.item)
+    OlexVFS.save_image_to_olex(self.im, image_location,  1)
+    self.width, self.height = self.im.size
+    self.popout()
+
+  def cctbx_completeness_statistics(self):
+    from cctbx_olex_adapter import OlexCctbxAdapter
+    cctbx = OlexCctbxAdapter('completeness', '%s' %self.n_bins)
+    data_object = cctbx.run()
+    data_object.completeness.show()
+    metadata = {}
+    metadata.setdefault("y_label", "Shell Completeness")
+    metadata.setdefault("x_label", "Resolution")
+    self.metadata = metadata
+    self.data.setdefault('dataset1', Dataset(data_object.x,[i*100 for i in data_object.y],metadata))
+
+class SystematicAbsencesPlot(Analysis):
+  def __init__(self):
+    Analysis.__init__(self)
+    self.item = "sys_absences"
+    self.graphInfo["Title"] = "Systematic Absences Intensity Distribution"
+    self.graphInfo["pop_html"] = "sys_absences"
+    self.graphInfo["pop_name"] = "sys_absences"
+    self.graphInfo["imSize"] = (900, 500)
+    self.graphInfo["TopRightTitle"] = self.filename
+    self.auto_axes = False
+    self.cctbx_systematic_absences_plot()
+    image_location = "%s.png" %(self.item)
+    OlexVFS.save_image_to_olex(self.im, image_location,  1)
+    self.width, self.height = self.im.size
+    self.popout()
+    
+  def cctbx_systematic_absences_plot(self):
+    from cctbx_olex_adapter import OlexCctbxAdapter
+    cctbx = OlexCctbxAdapter('sys_absent',None)
+    xy_plot = cctbx.run()
+    
+    metadata = {}
+    metadata.setdefault("y_label", xy_plot.yLegend)
+    metadata.setdefault("x_label", xy_plot.xLegend)
+    self.metadata = metadata
+    self.data.setdefault('dataset1', Dataset(xy_plot.x, xy_plot.y, metadata))
+    self.data['dataset1'].show_summary()
+    self.draw_origin = True
+    self.make_empty_graph(axis_x = True)
+    self.graphInfo['marker']['size'] = int(self.im.size[0]/120)
+    ratio = 0.75
+    colour = self.graphInfo['marker']['colour']
+    border_colour = (int(colour[0] * ratio),
+                     int(colour[1] * ratio),
+                     int(colour[2] * ratio))
+    self.graphInfo['marker']['border_colour'] = border_colour
+    self.draw_pairs()
+    
+class Fobs_Fcalc_plot(Analysis):
+  def __init__(self):
+    Analysis.__init__(self)
+    self.item = "Fobs_Fcalc"
+    self.graphInfo["Title"] = "Fobs vs Fcalc"
+    self.graphInfo["pop_html"] = "Fobs_Fcalc"
+    self.graphInfo["pop_name"] = "Fobs_Fcalc"
+    self.graphInfo["imSize"] = (900, 500)
+    self.graphInfo["TopRightTitle"] = self.filename
+    self.auto_axes = False
+    self.make_f_obs_f_calc_plot()
+    image_location = "%s.png" %(self.item)
+    OlexVFS.save_image_to_olex(self.im, image_location,  1)
+    self.width, self.height = self.im.size
+    self.popout()
+
+  def make_f_obs_f_calc_plot(self):
+    from cctbx_olex_adapter import OlexCctbxAdapter
+    cctbx = OlexCctbxAdapter('f_obs_f_calc',None)
+    xy_plot = cctbx.run()
+    data = Dataset(xy_plot.f_calc_sq,xy_plot.f_obs_sq,metadata={})
+    self.data.setdefault('dataset1', data)
+    self.make_empty_graph(axis_x = True)
+    self.draw_pairs()
 
 class Dataset(object):
   def __init__(self, x, y, metadata):
@@ -1726,25 +1768,22 @@ Analysis_instance = Analysis()
 OV.registerMacro(Analysis_instance.run_Analysis,
                  'n_bins-Number of bins (for histograms only!)&;method-olex or cctbx')
 
+OV.registerFunction(WilsonPlot)
+OV.registerFunction(CumulativeIntensityDistribution)
+OV.registerFunction(CompletenessPlot)
+OV.registerFunction(SystematicAbsencesPlot)
+OV.registerFunction(Fobs_Fcalc_plot)
 
 def array_scalar_multiplication(array, multiplier):
   return [i * multiplier for i in array]
 
 def acentric_distribution(x):
-  return 100*(1-math.exp(-x))
-    
+  return 1-math.exp(-x)
+
 def centric_distribution(x):
-  return 100*(math.sqrt(erf(0.5*x)))
-    
+  return math.sqrt(erf(0.5*x))
+
 def twinned_acentric_distribution(x):
   ## twinned acentric distribution
   ## E. Stanley, J.Appl.Cryst (1972). 5, 191
-  return 100*(1-(1+2*x)*math.exp(-2*x))
-
-def sin(x):
-  return 10*(math.sin(x*10))
-def sin_(x):
-  return 7*(math.sin(x*14))
-
-def cos(x):
-  return 10*(math.cos(x*10))
+  return 1-(1+2*x)*math.exp(-2*x)
