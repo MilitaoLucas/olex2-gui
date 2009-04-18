@@ -971,6 +971,7 @@ class ShelXAnalysis(Analysis):
     self.counter = 0
     self.attempt = 1
     size = (int(OV.FindValue('gui_htmlpanelwidth'))- 45, 100)
+    self.item = "ShelXL"
     self.graphInfo["Title"] = "ShelXL"
     self.graphInfo["imSize"] = size
     self.graphInfo["FontScale"] = 0.03
@@ -1025,7 +1026,6 @@ class ShelXAnalysis(Analysis):
     height = size[1] - top
     height = self.graph_bottom - self.graph_top
     legend_top = height + 20
-    
     bar_width = (width-2*self.bSides)/self.graphInfo["n_cycles"]
     
     mean_shift = data["cycle_%i" %cycle].get("mean_shift","n/a")
@@ -1117,7 +1117,7 @@ class ShelXAnalysis(Analysis):
     x = width - wX - self.bSides
     self.draw.text((x, legend_top), "%s" %txt, font=self.font_large, fill="#888888")
     
-    image_location = "ShelXL.png"
+    image_location = "%s.png" %self.item
     OlexVFS.save_image_to_olex(self.im, image_location, 0)
     self.im.save("%s/.olex/Refinement.png" %self.filepath, "PNG")
     if OV.FindValue('html_IsItem(POP_PRG_ANALYSIS)',False):
