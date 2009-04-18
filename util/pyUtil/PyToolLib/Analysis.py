@@ -1511,7 +1511,6 @@ class CumulativeIntensityDistribution(Analysis):
     metadata = {}
     metadata.setdefault("y_label", xy_plot.yLegend)
     metadata.setdefault("x_label", xy_plot.xLegend)
-    
     self.metadata = metadata
     #self.data.setdefault('dataset1', Dataset(xy_plot.x,[i*100 for i in xy_plot.y],metadata))
     self.data.setdefault('dataset1', Dataset(xy_plot.x, xy_plot.y,metadata))
@@ -1615,168 +1614,15 @@ class Dataset(object):
     self.x = x
     self.y = y
     self._metadata = metadata
-    
+
   def xy_pairs(self):
     return izip(self.x,self.y)
-  
+
   def metadata(self):
     return self._metadata
-  
+
   def show_summary(self):
     print ''.join("%f, %f\n" %(x,y) for x,y in self.xy_pairs())
-    
-#class XYPlot(Analysis):
-  #def __init__(self, function, param):
-    #super(XYPlot, self).__init__()
-    #self.counter = 0
-    #self.attempt = 1
-    #self.SPD, self.RPD = ExternalPrgParameters.defineExternalPrograms()
-    
-  #def run(self, Str):
-    #top = self.graph_top
-    #marker_width = 5
-    #title = self.graphInfo.get('Title', "")
-    #size = self.graphInfo.get('imSize', "")
-    #width = size[0]
-    #height = size[1] - top
-    #height = self.graph_bottom - self.graph_top
-    #if title == "Charge Flipping":
-      #str_l = Str.split("|")
-      #if len(str_l) == 1:
-        #return
-      #else:
-        #try:
-          #y = str_l[-1:][0].strip()
-          #cc = float(y)
-        #except:
-          ##if "R1" in Str:
-          ##  self.draw.line(((self.counter, self.graph_top),(self.counter, self.graphY)), width=1, fill=(200, 200, 200))
-          #if "delta" in Str:
-            #t = "%s" %self.attempt
-            #wX, wY = self.draw.textsize(t, font=self.font_bold_large)
-            #x = self.counter + marker_width + 5
-            #self.draw.text((x, self.graph_bottom - wY -3), "%s" %t, font=self.font_bold_large, fill="#888888")
-            #self.attempt += 1
-            #if self.counter != 0:
-              #self.counter += 1
-              #self.draw.line(((self.counter + marker_width, self.graph_top),(self.counter + marker_width, self.graphY+self.graph_top - 2)), width=1, fill=(230, 230, 230))
-          #return
-        #self.counter+=marker_width
-        #if self.counter > width - 10:
-          #self.make_empty_graph()
-          #self.draw = ImageDraw.Draw(self.im)
-          #self.counter = self.bSides
-          #t = "...continued"
-          #wX, wY = self.draw.textsize(t, font=self.font_normal)
-          #x = width - wX - self.bSides - 3
-          #self.draw.text((x, 20), "%s" %t, font=self.font_normal, fill="#888888")
-        #x = self.counter
-        
-        ### Draw CC
-        #txt = "cc=%s" %y
-        #if cc > 1: cc = 1
-        #ccR = int(255*cc)
-        #ccG = int(255*(1.3-cc))
-        #ccB = 0
-        #cc = height*(1-cc) + top
-        #box = (x,cc,x+marker_width,cc+marker_width)
-        #self.draw.rectangle(box, fill=(ccR, ccG, ccB), outline=(ccR/2, ccG/2, 0))
-        
-        ### Draw R1
-        #R1 = str_l[-2:-1][0].strip()
-        #txt += ", R1=%s" %R1
-        #R1 = float(R1)
-        #rR = int(255*R1*2)
-        #rG = int(255*(1.3-R1*2))
-        #rB = 0
-        #R1 = height*(1-R1) + top
-        #box = (x,R1,x+marker_width,R1+2)
-        #self.draw.rectangle(box, fill=(rR, rG, rB), outline=(rR/2, rG/2, 0))
-        #font_name = "Vera"
-        #font_size = 10
-        #font = self.registerFontInstance(font_name, font_size)
-        
-        #legend_top = height + 20
-        #m_offset = 5
-        ### Wipe the legend area
-        #box = (0,legend_top,width,legend_top + 20)
-        #self.draw.rectangle(box, fill=self.gui_html_bg_colour)
-        
-        ### Draw CC Legend
-        #box = (10,legend_top +m_offset,10+marker_width, legend_top+marker_width + m_offset)
-        #self.draw.rectangle(box, fill=(ccR, ccG, ccB), outline=(ccR/2, ccG/2, 0))
-        #tt = "CC"
-        #self.draw.text((10+marker_width+3, legend_top), "%s" %tt, font=self.font_large, fill="#888888")
-        
-        ### Draw R1 Legend
-        #box = (40,legend_top + m_offset + 1,40+marker_width,legend_top + m_offset + 3)
-        #self.draw.rectangle(box, fill=(rR, rG, rB), outline=(rR/2, rG/2, 0))
-        #tt = "R1"
-        #self.draw.text((40+marker_width+3, legend_top), "%s" %tt, font=self.font_large, fill="#888888")
-        
-        ### Draw Current Numbers
-        #wX, wY = self.draw.textsize(txt, font=self.font_large)
-        #x = width - wX - self.bSides
-        #self.draw.text((x, legend_top), "%s" %txt, font=self.font_large, fill="#888888")
-        
-        #image_location = "XY.png"
-        #OlexVFS.save_image_to_olex(self.im, image_location,  0)
-        ##olex.m("html.Load filepath()/.olex/xy.htm")
-        #olex.m("html.Load xy.htm")
-    #pass
-
-  #def XYChargeFlippingHtm(self, program, method):
-    #return_to_menu_txt = str(OV.Translate("Return to main menu"))
-    ##authors = self.SPD["smtbx-solve"].get("author", "n/a")
-    ##reference = self.SPD["smtbx-solve"].get("reference", "n/a")
-    ##program = self.SPD.programs["smtbx-solve"]
-    ##method = program.methods["Charge Flipping"]
-    #prg = program.name
-    #name = method.name
-    #authors = program.author
-    #reference = program.reference
-    #help = OV.TranslatePhrase(method.help)
-    #info = OV.TranslatePhrase(method.info)
-    #txt = r'''
-#<!-- #include tool-top gui/blocks/help-top.htm;image=blank;1; -->
-  #<tr><td>
-    #<font size="+2"><b>Solving %s with %s<br></font>%s</b>
-  #</td></tr>
-  #<tr><td>
-    #%s
-  #</td></tr>
-  #<tr><td>
-    #%s
-  #</td></tr>
-  #<tr><td align='center'>
-    #<zimg border="0" src="XY.png">
-  #</td></tr>
-  #<tr><td>
-    #<a href="html.Load BaseDir()/etc/index.htm" target="%s"><zimg border="0" src="gui/images/toolbar-dot-arrow-left.png"></a>
-  #</td></tr>
-#</table>
-#<!-- #include tool-footer gui/blocks/tool-footer.htm;1; -->
-#''' %(self.filename, prg, name, authors, reference, return_to_menu_txt)
-    #return txt
-  
-  #def initialise(self, program, method, size=(270,150), title="Charge Flipping"):
-    #size = (int(OV.FindValue('gui_htmlpanelwidth'))-30, 150)
-    ##self.AnalysisInfo.setdefault("XY", {})
-    #self.graphInfo["Title"] = title
-    #self.graphInfo["imSize"] = size
-    #self.graphInfo["FontScale"] = 0.03
-    #self.graphInfo["TopRightTitle"] = OV.FileName()
-    #self.item = "XY"
-    #self.make_empty_graph()
-    #self.draw = ImageDraw.Draw(self.im)
-    ##program = self.SPD.programs["smtbx-solve"]
-    ##method = program.methods["Charge Flipping"]
-    #txt = self.XYChargeFlippingHtm(program, method)
-    ##wFile = open(r"%s/.olex/xy.htm" %self.filepath, 'w')
-    ##wFile.write (txt)
-    ##wFile.close()
-    #OlexVFS.write_to_olex('xy.htm', txt)
-
 
 Analysis_instance = Analysis()
 OV.registerMacro(Analysis_instance.run_Analysis,
