@@ -1396,8 +1396,8 @@
 <wp help="Creates and displays a Wilson Plot"
 	<body
 		<args
-			<arg1 name="src" def="olex">
-			<arg2 name="bins" def="10">
+			<arg1 name="method" def="olex">
+			<arg2 name="n_bins" def="10">
 			<arg3 name="width" def="1200">
 			<arg4 name="height" def="700">
 			<arg5 name="x" def="5">
@@ -1405,7 +1405,7 @@
 		\>
 		<cmd 
 			<cmd1 "if strcmp(%1,olex) then 'wilson -b=%2 -p' else none">
-			<cmd2 "spy.run_Analysis wilson -n_bins=%2 -method=%1">
+			<cmd2 "spy.WilsonPlot(%2,%1)">
 		\>
 	\>
 \>
