@@ -84,7 +84,7 @@ def wilson_statistics(model, reflections, n_bins=10):
   if (0 or verbose):
     f_obs.binner().show_summary()
     
-  wp = statistics.wilson_plot(f_obs, asu_contents)
+  wp = statistics.wilson_plot(f_obs, asu_contents, e_statistics=True)
   if (0 or verbose):
     print "wilson_k, wilson_b:", 1/wp.wilson_intensity_scale_factor, wp.wilson_b
     
@@ -93,40 +93,36 @@ def wilson_statistics(model, reflections, n_bins=10):
 def completeness_statistics(reflections, n_bins=20):  
   verbose = False
   f_obs=reflections.f_obs
-  
   f_sq_obs = reflections.f_sq_obs
   f_sq_obs.set_observation_type(None)
   f_sq_obs = f_sq_obs.eliminate_sys_absent().average_bijvoet_mates()
   f_obs = f_sq_obs.f_sq_as_f()
-  
   f_obs.setup_binner(
     #n_bins=n_bins
     auto_binning=True
   )
   if (0 or verbose):
     f_obs.binner().show_summary()
-    
   return statistics.completeness_plot(f_obs)
 
 def cumulative_intensity_distribution(model, reflections, n_bins=20):  
   verbose = False
   f_obs=reflections.f_obs
-  
   f_sq_obs = reflections.f_sq_obs
   f_sq_obs.set_observation_type(None)
   f_sq_obs = f_sq_obs.eliminate_sys_absent().average_bijvoet_mates()
   f_obs = f_sq_obs.f_sq_as_f()
-  
   f_obs.setup_binner(
     n_bins=n_bins
   )
   if (0 or verbose):
     f_obs.binner().show_summary()
-    
-  return statistics.cumulative_intensity_distribution(f_obs, hkl_conditions=(
-    statistics.is_even,
-    statistics.is_even,
-    None)).xy_plot_info()
+  return statistics.cumulative_intensity_distribution(f_obs).xy_plot_info()
+
+def sys_absent_intensity_distribution(reflections):
+  f_obs = reflections.f_obs
+  f_sq_obs = reflections.f_sq_obs
+  return statistics.sys_absent_intensity_distribution(f_sq_obs).xy_plot_info()
 
 def f_obs_vs_f_calc(model, reflections):
   f_obs = reflections.f_obs

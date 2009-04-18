@@ -269,6 +269,9 @@ class OlexCctbxAdapter(object):
                                          self.reflections)
       f_obs_f_calc = cctbx_controller.f_obs_vs_f_calc(model, self.reflections)
       return f_obs_f_calc
+
+    elif self.fun == "sys_absent":
+      return cctbx_controller.sys_absent_intensity_distribution(self.reflections)
       
     elif self.fun == "refine":
       t0 = time.time()

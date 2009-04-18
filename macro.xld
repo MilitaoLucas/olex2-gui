@@ -1410,13 +1410,13 @@
 	\>
 \>
 
-<_comp help="Calculates completeness and displays a completeness plot"
+<_completeness help="Calculates and displays a completeness plot"
 	<body
 		<args
-			<arg1 name="bins" def="20">
+			<arg1 name="n_bins" def="20">
 		\>
 		<cmd 
-			<cmd1 "spy Analysis completeness %1">
+			<cmd1 "spy.CompletenessPlot(%1)">
 		\>
 	\>
 \>
@@ -1424,32 +1424,26 @@
 <_cumulative help="Calculates and displays the cumulative intensity distribution"
 	<body
 		<args
-			<arg1 name="bins" def="20">
+			<arg1 name="n_bins" def="20">
 		\>
 		<cmd 
-			<cmd1 "spy Analysis cumulative %1">
+			<cmd1 "spy.CumulativeIntensityDistribution(%1)">
 		\>
 	\>
 \>
 
-<_sys_absent help="Calculates and displays the systematic absences intensity distribution"
+<_sys_absences help="Calculates and displays the systematic absences intensity distribution"
 	<body
-		<args
-			<arg1 name="bins" def="20">
-		\>
 		<cmd 
-			<cmd1 "spy Analysis sys_absent %1">
+			<cmd1 "spy.SystematicAbsencesPlot()">
 		\>
 	\>
 \>
 
-<_fobs_fcalc help="Calculates and displays the cumulative intensity distribution"
+<_Fobs_Fcalc help="Calculates and displays an Fobs vs Fcalc plot"
 	<body
-		<args
-			<arg1 name="bins" def="20">
-		\>
 		<cmd 
-			<cmd1 "spy Analysis f_obs_f_calc">
+			<cmd1 "spy.Fobs_Fcalc_plot()">
 		\>
 	\>
 \>
