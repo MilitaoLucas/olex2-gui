@@ -964,6 +964,22 @@ class Analysis(Graph):
       txt = 'Please provide a template in folder basedir()/etc/gui/blocks/templates/'
     return txt
 
+  def output_data_as_csv(self, filename=None):
+    if not OV.IsPluginInstalled('plugin-cctbx'):
+      print "Sorry, you need to install the cctbx plugin to do this"
+      return
+    from iotbx import csv_utils
+    if filename is None:
+      filename = '%s-%s.csv' %(self.filename,self.item)
+    filefull = '%s/%s' %(self.filepath,filename)
+    f = open(filefull, 'w')
+    for dataset in self.data.values():
+      fieldnames = (dataset.metadata().get('x_label', 'x'),
+                    dataset.metadata().get('y_label', 'y'))
+      csv_utils.writer(f, (dataset.x,dataset.y), fieldnames)
+    f.close()
+    print "%s was created" %filefull
+
 class ShelXAnalysis(Analysis):
   
   def __init__(self):
@@ -1435,7 +1451,7 @@ class ChargeFlippingPlot(Analysis):
       #olex.m("html.Reload pop_prg_analysis")
 
 class CumulativeIntensityDistribution(Analysis):
-  def __init__(self, n_bins=20):
+  def __init__(self, n_bins=20, output_csv_file=False):
     Analysis.__init__(self)
     self.n_bins = abs(int(n_bins)) #Number of bins for Histograms
     self.item = "cumulative"
@@ -1446,10 +1462,21 @@ class CumulativeIntensityDistribution(Analysis):
     self.auto_axes = False
     self.make_cumulative_intensity_distribution()
     self.popout()
+    if output_csv_file in (True, 'true', 'True'):
+      self.output_data_as_csv()
 
   def make_cumulative_intensity_distribution(self):
+    # Ideal distributions
+    def acentric_distribution(x):
+      return 1-math.exp(-x)
+    def centric_distribution(x):
+      return math.sqrt(erf(0.5*x))
+    def twinned_acentric_distribution(x):
+      ## twinned acentric distribution
+      ## E. Stanley, J.Appl.Cryst (1972). 5, 191
+      return 1-(1+2*x)*math.exp(-2*x)
+
     self.cctbx_cumulative_intensity_distribution()
-    
     self.make_empty_graph(axis_x = True)
     self.plot_function(centric_distribution)
     self.plot_function(acentric_distribution)
@@ -1491,7 +1518,7 @@ class CumulativeIntensityDistribution(Analysis):
     self.data['dataset1'].show_summary()
 
 class CompletenessPlot(Analysis):
-  def __init__(self, n_bins=20):
+  def __init__(self, n_bins=20, output_csv_file=False):
     Analysis.__init__(self)
     self.item = "completeness"
     self.n_bins = abs(int(n_bins))
@@ -1500,11 +1527,12 @@ class CompletenessPlot(Analysis):
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.filename
     self.auto_axes = False
-    
     self.cctbx_completeness_statistics()
     self.make_empty_graph(axis_x = True)
     self.draw_pairs(reverse_x=True)
     self.popout()
+    if output_csv_file in (True, 'true', 'True'):
+      self.output_data_as_csv()
 
   def cctbx_completeness_statistics(self):
     from cctbx_olex_adapter import OlexCctbxAdapter
@@ -1518,7 +1546,7 @@ class CompletenessPlot(Analysis):
     self.data.setdefault('dataset1', Dataset(data_object.x,[i*100 for i in data_object.y],metadata))
 
 class SystematicAbsencesPlot(Analysis):
-  def __init__(self):
+  def __init__(self, output_csv_file=False):
     Analysis.__init__(self)
     self.item = "sys_absences"
     self.graphInfo["Title"] = "Systematic Absences Intensity Distribution"
@@ -1529,6 +1557,8 @@ class SystematicAbsencesPlot(Analysis):
     self.cctbx_systematic_absences_plot()
     if self.have_data:
       self.popout()
+      if output_csv_file in (True, 'true', 'True'):
+        self.output_data_as_csv()
 
   def cctbx_systematic_absences_plot(self):
     from cctbx_olex_adapter import OlexCctbxAdapter
@@ -1558,7 +1588,7 @@ class SystematicAbsencesPlot(Analysis):
     self.draw_pairs()
 
 class Fobs_Fcalc_plot(Analysis):
-  def __init__(self):
+  def __init__(self, output_csv_file=False):
     Analysis.__init__(self)
     self.item = "Fobs_Fcalc"
     self.graphInfo["Title"] = "Fobs vs Fcalc"
@@ -1568,6 +1598,8 @@ class Fobs_Fcalc_plot(Analysis):
     self.auto_axes = False
     self.make_f_obs_f_calc_plot()
     self.popout()
+    if output_csv_file in (True, 'true', 'True'):
+      self.output_data_as_csv()
 
   def make_f_obs_f_calc_plot(self):
     from cctbx_olex_adapter import OlexCctbxAdapter
@@ -1758,14 +1790,3 @@ OV.registerFunction(Fobs_Fcalc_plot)
 
 def array_scalar_multiplication(array, multiplier):
   return [i * multiplier for i in array]
-
-def acentric_distribution(x):
-  return 1-math.exp(-x)
-
-def centric_distribution(x):
-  return math.sqrt(erf(0.5*x))
-
-def twinned_acentric_distribution(x):
-  ## twinned acentric distribution
-  ## E. Stanley, J.Appl.Cryst (1972). 5, 191
-  return 1-(1+2*x)*math.exp(-2*x)
