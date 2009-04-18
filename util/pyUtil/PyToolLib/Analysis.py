@@ -290,7 +290,6 @@ class Graph(ImageTools):
       box = (box[0] + self.line_width, box[1] + self.line_width, box[2] - self.line_width, box[3] -self.line_width)
       draw.rectangle(box, fill=self.gui_html_bg_colour, outline=(200, 200, 200))
     self.im = im
-    self.width, self.height = self.im.size
     self.draw = draw
     
   def draw_yAxis(self):
@@ -718,7 +717,7 @@ class Analysis(Graph):
       self.param = param.split(';')
     #self.file = ""
     self.fl = []
-    self.item = ""
+    self.item = None
     
   def run_Analysis(self, f, args):
     self.basedir = OV.BaseDir()
@@ -828,6 +827,10 @@ class Analysis(Graph):
     self.metadata = metadata
 
   def popout(self):
+    assert self.item is not None
+    image_location = "%s.png" %(self.item)
+    OlexVFS.save_image_to_olex(self.im, image_location, 1)
+    width, height = self.im.size
     pop_html = self.graphInfo.get("pop_html", None)
     pop_name = self.graphInfo.get("pop_name", None)
     if not pop_html or not pop_name:
@@ -845,7 +848,8 @@ class Analysis(Graph):
     OlexVFS.write_to_olex(htm_location, str)
     extraX = 29
     extraY = 48
-    pstr = "popup %s '%s' -b=stcr -t='%s' -w=%s -h=%s -x=1 -y=50" %(pop_name, htm_location, pop_name, self.width +extraX, self.height + extraY)
+    pstr = "popup %s '%s' -b=stcr -t='%s' -w=%s -h=%s -x=1 -y=50" %(
+      pop_name, htm_location, pop_name, width +extraX, height + extraY)
     olex.m(pstr)
     olx.html_SetBorders(pop_name,0)
     olx.html_Reload(pop_name)
@@ -913,9 +917,6 @@ class Analysis(Graph):
       self.make_DisagreeReflections_graph()
     elif self.item == "AutoChem":
       self.make_AutoChem_plot()
-    elif self.item == "f_obs_f_calc":
-      self.make_f_obs_f_calc_plot()
-    image_location = "%s.png" %(self.item)
     
     ## This whole writing of files to a specific location was only a test, that's been left in by mistake. Sorry John!
     if self.debug:
@@ -929,8 +930,6 @@ class Analysis(Graph):
         testpicturepath = "C:/test.png"
       self.im.save("%s"%testpicturepath, "PNG")
       
-    OlexVFS.save_image_to_olex(self.im, image_location,  1)
-    self.width, self.height = self.im.size
     self.popout()
 
   def make_AutoChem_plot(self):
@@ -990,9 +989,6 @@ class ShelXAnalysis(Analysis):
     OlexVFS.write_to_olex("ShelXL.htm", txt)
     OlexVFS.write_to_olex('refinement_image.htm', txt)
     OV.htmlReload()
-    image_location = "%s.png" %(self.item)
-    OlexVFS.save_image_to_olex(self.im, image_location,  1)
-    self.width, self.height = self.im.size
     self.popout()
   
   def ShelXL(self, line):
@@ -1135,14 +1131,15 @@ class WilsonPlot(Analysis):
     self.method = method      #Method by which graphs are generated
     self.item = "wilson"
     self.graphInfo["Title"] = "Wilson Plot"
-    self.graphInfo["pop_html"] = "wilson"
-    self.graphInfo["pop_name"] = "wilson"
-    self.graphInfo["imSize"] = (900, 500)
+    self.graphInfo["pop_html"] = self.item
+    self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.filename
-    n_bins = 2 * self.n_bins # multiply nbins by 2 to get approx same number as olex
+    self.make_wilson_plot()
+    self.popout()
+
+  def make_wilson_plot(self):
     if self.method == 'cctbx':
-      #OV.timer_wrap(self.cctbx_wilson_statistics,bins=n_bins)
-      self.cctbx_wilson_statistics(bins=n_bins)
+      self.cctbx_wilson_statistics()
     else:
       filepath = "%s/%s.%s.csv" %(self.filepath,self.filename,"wilson")
       self.get_simple_x_y_pair_data_from_file(filepath)
@@ -1187,14 +1184,10 @@ class WilsonPlot(Analysis):
         top = top_original
         left = int(grad.size[0] + self.xSpace + imX * 0.14)
     self.im = new
-    image_location = "%s.png" %(self.item)
-    OlexVFS.save_image_to_olex(self.im, image_location,  1)
-    self.width, self.height = self.im.size
-    self.popout()
 
-  def cctbx_wilson_statistics(self, bins=10):  
+  def cctbx_wilson_statistics(self):  
     from cctbx_olex_adapter import OlexCctbxAdapter
-    cctbx = OlexCctbxAdapter('wilson', '%s' %bins)
+    cctbx = OlexCctbxAdapter('wilson', '%s' %(2*self.n_bins))
     wp = cctbx.run()
     metadata = {}
     metadata.setdefault("K", 1/wp.wilson_intensity_scale_factor)
@@ -1447,19 +1440,19 @@ class CumulativeIntensityDistribution(Analysis):
     self.n_bins = abs(int(n_bins)) #Number of bins for Histograms
     self.item = "cumulative"
     self.graphInfo["Title"] = "Cumulative Intensity Distribution"
-    self.graphInfo["pop_html"] = "cumulative"
-    self.graphInfo["pop_name"] = "cumulative"
-    self.graphInfo["imSize"] = (900, 500)
+    self.graphInfo["pop_html"] = self.item
+    self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.filename
     self.auto_axes = False
+    self.make_cumulative_intensity_distribution()
+    self.popout()
+
+  def make_cumulative_intensity_distribution(self):
     self.cctbx_cumulative_intensity_distribution()
     
     self.make_empty_graph(axis_x = True)
-    # centric distribution
     self.plot_function(centric_distribution)
-    # acentric distribution
     self.plot_function(acentric_distribution)
-    # twinned acentric distribution
     # E. Stanley, J.Appl.Cryst (1972). 5, 191
     self.plot_function(twinned_acentric_distribution)
     
@@ -1483,10 +1476,6 @@ class CumulativeIntensityDistribution(Analysis):
                   )
     
     self.draw_pairs()
-    image_location = "%s.png" %(self.item)
-    OlexVFS.save_image_to_olex(self.im, image_location,  1)
-    self.width, self.height = self.im.size
-    self.popout()
 
   def cctbx_cumulative_intensity_distribution(self):
     from cctbx_olex_adapter import OlexCctbxAdapter
@@ -1507,19 +1496,14 @@ class CompletenessPlot(Analysis):
     self.item = "completeness"
     self.n_bins = abs(int(n_bins))
     self.graphInfo["Title"] = "Completeness Plot"
-    self.graphInfo["pop_html"] = "completeness"
-    self.graphInfo["pop_name"] = "completeness"
-    self.graphInfo["imSize"] = (900, 500)
+    self.graphInfo["pop_html"] = self.item
+    self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.filename
     self.auto_axes = False
     
     self.cctbx_completeness_statistics()
     self.make_empty_graph(axis_x = True)
     self.draw_pairs(reverse_x=True)
-    
-    image_location = "%s.png" %(self.item)
-    OlexVFS.save_image_to_olex(self.im, image_location,  1)
-    self.width, self.height = self.im.size
     self.popout()
 
   def cctbx_completeness_statistics(self):
@@ -1538,17 +1522,13 @@ class SystematicAbsencesPlot(Analysis):
     Analysis.__init__(self)
     self.item = "sys_absences"
     self.graphInfo["Title"] = "Systematic Absences Intensity Distribution"
-    self.graphInfo["pop_html"] = "sys_absences"
-    self.graphInfo["pop_name"] = "sys_absences"
-    self.graphInfo["imSize"] = (900, 500)
+    self.graphInfo["pop_html"] = self.item
+    self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.filename
     self.auto_axes = False
     self.cctbx_systematic_absences_plot()
-    image_location = "%s.png" %(self.item)
-    OlexVFS.save_image_to_olex(self.im, image_location,  1)
-    self.width, self.height = self.im.size
     self.popout()
-    
+
   def cctbx_systematic_absences_plot(self):
     from cctbx_olex_adapter import OlexCctbxAdapter
     cctbx = OlexCctbxAdapter('sys_absent',None)
@@ -1570,21 +1550,17 @@ class SystematicAbsencesPlot(Analysis):
                      int(colour[2] * ratio))
     self.graphInfo['marker']['border_colour'] = border_colour
     self.draw_pairs()
-    
+
 class Fobs_Fcalc_plot(Analysis):
   def __init__(self):
     Analysis.__init__(self)
     self.item = "Fobs_Fcalc"
     self.graphInfo["Title"] = "Fobs vs Fcalc"
-    self.graphInfo["pop_html"] = "Fobs_Fcalc"
-    self.graphInfo["pop_name"] = "Fobs_Fcalc"
-    self.graphInfo["imSize"] = (900, 500)
+    self.graphInfo["pop_html"] = self.item
+    self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.filename
     self.auto_axes = False
     self.make_f_obs_f_calc_plot()
-    image_location = "%s.png" %(self.item)
-    OlexVFS.save_image_to_olex(self.im, image_location,  1)
-    self.width, self.height = self.im.size
     self.popout()
 
   def make_f_obs_f_calc_plot(self):
