@@ -410,6 +410,7 @@ class Graph(ImageTools):
     max_xs = []
     max_ys = []
     
+    assert len(self.data) > 0
     for dataset in self.data.values():
       if self.auto_axes:
         min_xs.append(min(dataset.x))
@@ -700,48 +701,14 @@ class Graph(ImageTools):
         self.draw.text((x + (barX - wX)/2, y + self.graphY * 0.01), "%s" %txt, font=font, fill="#222222")
       i += 1
 
-      
-      
-class ShelXAnalysis():
-  
-  def __init__(self):
-    from Analysis import Analysis
-    OV.unregisterCallback("procout", self.ShelXL)
-    self.Analysis = Analysis(function='ShelXL', param=None)
-    self.Analysis.run_Analysis('ShelXL',{})
-    self.xl_d = {}
-    self.new_graph_please = False
-    self.cycle = 0
-  
-  def ShelXL(self, line):
-    self.new_graph_please = False
-    mean_shift = 0
-    max_shift = 0
-    if "before cycle" in line:
-      self.cycle = int(line.split("before cycle")[1].strip().split()[0])
-      self.xl_d.setdefault("cycle_%i" %self.cycle, {})
-    elif "Mean shift/esd =" in line:
-      mean_shift = float(line.split("Mean shift/esd =")[1].strip().split()[0])
-      self.xl_d["cycle_%i" %self.cycle].setdefault('mean_shift',mean_shift)
-    elif "Max. shift = " in line:
-      max_shift = float(line.split("Max. shift =")[1].strip().split()[0])
-      max_shift_atom = line.split("for")[1].strip().split()[0]
-      self.xl_d["cycle_%i" %self.cycle].setdefault('max_shift',max_shift)
-      self.xl_d["cycle_%i" %self.cycle].setdefault('max_shift_atom',max_shift_atom)
-      self.new_graph_please = True
-
-    if self.new_graph_please:
-      self.make_ShelXL_graph()
-
-  def make_ShelXL_graph(self):
-    self.Analysis.run_ShelXL_graph(cycle=self.cycle, data=self.xl_d) 
-
-  def observe_shex_l(self):
-    OV.registerCallback("procout", self.ShelXL)
-
 class Analysis(Graph):
   def __init__(self, function=None, param=None):
     Graph.__init__(self)
+    self.basedir = OV.BaseDir()
+    self.filefull = OV.FileFull()
+    self.filepath = OV.FilePath()
+    self.filename = OV.FileName()
+    self.datadir = OV.DataDir()
     self.gui_html_bg_colour = OV.FindValue('gui_html_bg_colour')
     self.gui_html_highlight_colour = OV.FindValue('gui_html_highlight_colour')
     self.SPD, self.RPD = ExternalPrgParameters.defineExternalPrograms()
@@ -778,39 +745,7 @@ class Analysis(Graph):
         'border_colour':(254/2,150/2,50/2)
       }
       self.make_analysis_image()
-      
-    elif fun == "ShelXL":
-      self.counter = 0
-      self.attempt = 1
-      self.item = fun
-      size = (int(OV.FindValue('gui_htmlpanelwidth'))- 45, 100)
-      self.graphInfo["Title"] = fun
-      self.graphInfo["imSize"] = size
-      self.graphInfo["FontScale"] = 0.03
-      self.graphInfo["TopRightTitle"] = OV.FileName()
-      self.graphInfo["n_cycles"] = OV.FindValue("snum_refinement_max_cycles")
-      self.make_analysis_image()
-    
-    elif fun == "Charge Flipping":
-      self.counter = 0
-      self.attempt = 1
-      self.item = fun
-      size = (int(OV.FindValue('gui_htmlpanelwidth'))- 45, 100)
-      self.graphInfo["Title"] = fun
-      self.graphInfo["imSize"] = size
-      self.graphInfo["FontScale"] = 0.03
-      self.graphInfo["TopRightTitle"] = OV.FileName()
-      self.make_analysis_image()
-      
-    elif fun == "wilson":
-      self.item = "wilson"
-      self.graphInfo["Title"] = "Wilson Plot"
-      self.graphInfo["pop_html"] = "wilson"
-      self.graphInfo["pop_name"] = "wilson"
-      self.graphInfo["imSize"] = (900, 500)
-      self.graphInfo["TopRightTitle"] = OV.FileName()
-      self.make_analysis_image()
-      
+
     elif fun == "completeness":
       self.item = "completeness"
       self.graphInfo["Title"] = "Completeness Plot"
@@ -843,29 +778,7 @@ class Analysis(Graph):
         
     else:
       raise Exception("Unknown command: expected 'lst'")
-    
-  def popout(self):
-    pop_html = self.graphInfo.get("pop_html", None)
-    pop_name = self.graphInfo.get("pop_name", None)
-    if not pop_html or not pop_name:
-      return
-    
-    str = '''
-<html>
-<body>
-%s
-<zimg border="0" src="%s.png" usemap=#map_analysis>
-</body>
-</html>
-''' %(self.map_txt, self.item)
-    htm_location = "%s.htm" %pop_html
-    OlexVFS.write_to_olex(htm_location, str)
-    extraX = 29
-    extraY = 48
-    pstr = "popup %s '%s' -b=stcr -t='%s' -w=%s -h=%s -x=1 -y=50" %(pop_name, htm_location, pop_name, self.width +extraX, self.height + extraY)
-    olex.m(pstr)
-    olx.html_SetBorders(pop_name,0)
-    olx.html_Reload(pop_name)
+
     
   def make_simple_x_y_pair_plot(self, imX=512, imY=256):
     self.imX = imX
@@ -896,40 +809,6 @@ class Analysis(Graph):
     self.draw_bars()
     self.draw_yAxis()
 
-
-  def file_reader(self, filepath):
-    fl = []
-    try:
-      rfile = open(filepath, 'r')
-      for li in rfile:
-        fl.append(li)
-    except:
-      pass
-    return fl
-  
-  def cctbx_wilson_statistics(self, bins=10):  
-    from cctbx_olex_adapter import OlexCctbxAdapter
-    cctbx = OlexCctbxAdapter('wilson', '%s' %bins)
-    wp = cctbx.run()
-    
-    metadata = {}
-    metadata.setdefault("K", 1/wp.wilson_intensity_scale_factor)
-    metadata.setdefault("B", wp.wilson_b)
-    metadata.setdefault("y_label", "sin^2(theta)/lambda^2")
-    metadata.setdefault("x_label", "ln(<Fo2>).Fexp2)")
-    # convert axes in formula
-    metadata.setdefault("fit_slope", 1/wp.fit_slope)
-    metadata.setdefault("fit_y_intercept", -wp.fit_y_intercept/wp.fit_slope)
-    metadata.setdefault("<|E^2-1|>", wp.mean_e_sq_minus_1)
-    metadata.setdefault("%|E| > 2", wp.percent_e_sq_gt_2)
-    
-    self.metadata = metadata
-    
-    self.data.setdefault('dataset1', Dataset(wp.y,wp.x,metadata))
-    
-    #self.data = zip(wp.y,wp.x)
-    #self.data = zip(wp.x,wp.y)
-    
   def cctbx_completeness_statistics(self, bins=20):
     from cctbx_olex_adapter import OlexCctbxAdapter
     cctbx = OlexCctbxAdapter('completeness', '%s' %bins)
@@ -955,8 +834,17 @@ class Analysis(Graph):
     
     self.metadata = metadata
     self.data.setdefault('dataset1', Dataset(xy_plot.x,[i*100 for i in xy_plot.y],metadata))
-    self.data['dataset1'].show_summary()
-    
+
+  def file_reader(self, filepath):
+    fl = []
+    try:
+      rfile = open(filepath, 'r')
+      for li in rfile:
+        fl.append(li)
+    except:
+      pass
+    return fl
+
   def get_simple_x_y_pair_data_from_file(self, filepath):
     file_data = self.file_reader(filepath)
     x = []
@@ -985,7 +873,30 @@ class Analysis(Graph):
         
     self.data.setdefault('dataset1',Dataset(x,y,metadata))
     self.metadata = metadata
+
+  def popout(self):
+    pop_html = self.graphInfo.get("pop_html", None)
+    pop_name = self.graphInfo.get("pop_name", None)
+    if not pop_html or not pop_name:
+      return
     
+    str = '''
+<html>
+<body>
+%s
+<zimg border="0" src="%s.png" usemap=#map_analysis>
+</body>
+</html>
+''' %(self.map_txt, self.item)
+    htm_location = "%s.htm" %pop_html
+    OlexVFS.write_to_olex(htm_location, str)
+    extraX = 29
+    extraY = 48
+    pstr = "popup %s '%s' -b=stcr -t='%s' -w=%s -h=%s -x=1 -y=50" %(pop_name, htm_location, pop_name, self.width +extraX, self.height + extraY)
+    olex.m(pstr)
+    olx.html_SetBorders(pop_name,0)
+    olx.html_Reload(pop_name)
+
   def analyse_lst(self):
     fl = self.fl
     i = 0
@@ -1047,8 +958,6 @@ class Analysis(Graph):
       self.make_K_graph()
     elif self.item == "DisagreeReflections":
       self.make_DisagreeReflections_graph()
-    elif self.item == "wilson":
-      self.make_wilson_plot()
     elif self.item == "AutoChem":
       self.make_AutoChem_plot()
     elif self.item == "completeness":
@@ -1057,10 +966,6 @@ class Analysis(Graph):
       self.make_cumulative_distribution()
     elif self.item == "f_obs_f_calc":
       self.make_f_obs_f_calc_plot()
-    elif self.item == "Charge Flipping":
-      self.make_charge_flipping_plot()
-    elif self.item == "ShelXL":
-      self.make_ShelXL_plot()
     image_location = "%s.png" %(self.item)
     
     ## This whole writing of files to a specific location was only a test, that's been left in by mistake. Sorry John!
@@ -1078,35 +983,7 @@ class Analysis(Graph):
     OlexVFS.save_image_to_olex(self.im, image_location,  1)
     self.width, self.height = self.im.size
     self.popout()
-    
-  def make_charge_flipping_plot(self):
-    self.make_empty_graph()
-    program = self.SPD.programs["smtbx-solve"]
-    method = program.methods["Charge Flipping"]
-    img_name = "XY.png"
-    txt = self.ProgramHtml(program, method, "Solving", img_name)
-    OlexVFS.write_to_olex('xy.htm', txt)
-    OlexVFS.write_to_olex('solution_image.htm', txt)
-    OV.htmlReload()
-    #wFile = open("%s/.olex/solution_image.htm" %self.filepath,'w')
-    #wFile.write(txt)
-    #wFile.close()
-    #htmlTools.PopProgram(txt=txt)
 
-  def make_ShelXL_plot(self):
-    self.make_empty_graph()
-    program = self.RPD.programs["ShelXL"]
-    method = program.methods["CGLS"]
-    img_name = "ShelXL.png"
-    txt = self.ProgramHtml(program, method, "Refining", img_name)
-    OlexVFS.write_to_olex("ShelXL.htm", txt)
-    OlexVFS.write_to_olex('refinement_image.htm', txt)
-    OV.htmlReload()
-    #wFile = open("%s/.olex/refinement_image.htm" %self.filepath,'w')
-    #wFile.write(txt)
-    #wFile.close()
-    #htmlTools.PopProgram(txt=txt)
-    
   def make_AutoChem_plot(self):
     filepath = self.file_reader("%s/%s.csv" %(self.datadir,"ac_stats"))
     self.get_simple_x_y_pair_data_from_file(filepath)
@@ -1170,189 +1047,7 @@ class Analysis(Graph):
                   )
     
     self.draw_pairs()
-    
 
-  def make_wilson_plot(self):
-    n_bins = 2 * self.n_bins # multiply nbins by 2 to get approx same number as olex
-    if self.method == 'cctbx':
-      OV.timer_wrap(self.cctbx_wilson_statistics,bins=n_bins)
-      #self.cctbx_wilson_statistics(bins=n_bins)
-    else:
-      filepath = "%s/%s.%s.csv" %(self.filepath,self.filename,"wilson")
-      self.get_simple_x_y_pair_data_from_file(filepath)
-    self.make_empty_graph(axis_x = True)
-    self.draw_pairs(reverse_y = True)
-    grad = self.make_gradient_box(size = ((int(self.imX * 0.64), int(self.imY * 0.1))))
-    size = ((self.im.size[0]), (self.im.size[1] + grad.size[1]))
-    colour = self.gui_html_bg_colour
-    new = Image.new('RGB', size, colour)
-    new.paste(self.im, (0,0))
-    new.paste(grad, (int(self.xSpace+self.bSides),int(self.im.size[1]-20)))
-    draw = ImageDraw.Draw(new)
-    
-    imX, imY = new.size
-    
-    metadata = self.data['dataset1'].metadata()
-    estats = metadata.get("<|E^2-1|>", 'n/a')
-    
-    text = []
-    text.append("B = %.3f" %float(metadata.get("B")))
-    text.append("K = %.3f" %float(metadata.get("K")))
-    text.append("<|E^2-1|> = %.3f" %float(metadata.get("<|E^2-1|>", 0)))
-    text.append(r"%%|E| > 2 = %.3f"%float(metadata.get(r"%|E| > 2", 0)))
-    
-    left = grad.size[0] + self.xSpace + imX * 0.04
-    top = self.im.size[1] - imY * 0.02
-    top_original = top
-    i = 0
-    for txt in text:
-      unicode_txt = self.get_unicode_characters(txt)
-      wX, wY = draw.textsize(unicode_txt, font=self.font_tiny)
-      colour = "#444444"
-      if "E^2" in txt:
-        if float(estats) < float(self.wilson_grad_begin):
-          colour = "#ff0000"
-        elif float(estats) > float(self.wilson_grad_end):
-          colour = "#ff0000"
-      draw.text((left, top), "%s" %unicode_txt, font=self.font_tiny, fill=colour)
-      top += wY +2
-      i += 1
-      if i == 2:
-        top = top_original
-        left = int(grad.size[0] + self.xSpace + imX * 0.14)
-    self.im = new
-    
-  def make_gradient_box(self, size = (320, 35)):
-    boxWidth = size[0]
-    boxHeight = size[1]*0.4
-    boxTopOffset = self.imY * 0.035
-    colour = self.gui_html_bg_colour
-    im = Image.new('RGB', size, colour)
-    draw = ImageDraw.Draw(im)
-    #target_left = (0,0,255)
-    #target_right = (0,255,0)
-    middle = boxWidth/2
-    box = (0,boxTopOffset,boxWidth-1,boxTopOffset+boxHeight-1)
-    draw.rectangle(box, fill=self.gui_html_bg_colour, outline=(200, 200, 200))
-    margin_left = int((boxWidth/4))
-    margin_right = int((boxWidth/4)*3)
-    
-    scale = float((0.968-0.736)/(boxWidth - (margin_right - margin_left)))
-    metadata = self.data['dataset1'].metadata()
-    value = float(metadata.get("<|E^2-1|>", 0))
-    
-    begin = (0.736 - margin_left * scale)
-    end = (0.968 + margin_left * scale)
-    self.wilson_grad_begin = begin
-    self.wilson_grad_end = end
-    
-    if value < (0.736 - 0.736*0.2):
-      max1 = 128.0
-      c1 = (255.0, 0 , 0)
-      max2 = 128.0
-      c2 = (0, 0, 0)
-    elif (0.736 - 0.736*0.1) < value < (0.736 + 0.736*0.1):
-      max1 = 128.0
-      c1 = (0, 255.0 , 0)
-      max2 = 128.0
-      c2 = (0, 0, 0)
-    elif (0.736 + 0.736*0.1) <= value <= (0.968 - 0.968*0.1):
-      max1 = 128.0
-      c1 = (255.0, 0, 0)
-      max2 = 128.0
-      c2 = (255.0, 0, 0)
-    elif (0.968 - 0.968*0.1) < value < (0.968 + 0.968*0.1):
-      max1 = 128.0
-      c1 = (0, 0, 0)
-      max2 = 128.0
-      c2 = (0, 255.0, 0)
-    elif value > (0.968 + 0.968*0.1):
-      max1 = 128.0
-      c1 = (0, 0, 0)
-      max2 = 128.0
-      c2 = (255.0, 0, 0)
-    else:
-      max1 = 128.0
-      c1 = (255.0, 0, 0)
-      max2 = 128.0
-      c2 = (255.0, 0, 0)
-      
-    
-    for i in xrange(boxWidth-2):
-      i += 1
-        
-      if i == margin_left:
-        txt = "non-centrosymmetric"
-        wX, wY = draw.textsize(txt, font=self.font_tiny)
-        draw.text((i-int(wX/2), 0), "%s" %txt, font=self.font_tiny, fill=self.gui_html_highlight_colour)
-        txt = "0.736"
-        wX, wY = draw.textsize(txt, font=self.font_tiny)
-        draw.text((i-int(wX/2), boxTopOffset+boxHeight-1), "%s" %txt, font=self.font_tiny, fill=self.titleColour)
-      if i == (margin_right):
-        txt = "centrosymmetric"
-        wX, wY = draw.textsize(txt, font=self.font_tiny)
-        draw.text((i-int(wX/2), 0), "%s" %txt, font=self.font_tiny, fill=self.gui_html_highlight_colour)
-        txt = "0.968"
-        wX, wY = draw.textsize(txt, font=self.font_small)
-        draw.text((i-int(wX/2), boxTopOffset+boxHeight-1), "%s" %txt, font=self.font_tiny, fill=self.titleColour)
-        
-      top =  int(boxTopOffset+1)
-      bottom = int(boxTopOffset+boxHeight-2)
-      
-      
-      if i < margin_left:
-        step = (max1)/margin_left
-        col = max1+step*(margin_left - i)
-        col = int(col)
-        fill = self.grad_fill(max1, c1, col)
-        draw.line(((i, top),(i, bottom)), fill=fill)
-      elif i == margin_left:
-        draw.line(((i, top),(i, bottom)), fill=(200, 200, 200))
-      elif i < middle:
-        step = (max1)/(middle-margin_left)
-        col = max1+step*(i - margin_left)
-        col = int(col)
-        fill = self.grad_fill(max1, c1, col)
-        draw.line(((i, top),(i, bottom)), fill=fill)
-      elif i == middle:
-        draw.line(((i, top),(i, bottom)), fill=(200, 200, 200))
-      elif i > middle and i < (margin_right):
-        step = (max2)/(margin_right-middle)
-        col = max2+step*(margin_right - i)
-        col = int(col)
-        fill = self.grad_fill(max2, c2, col)
-        draw.line(((i, top),(i, bottom)), fill=fill)
-      elif i == (margin_right):
-        draw.line(((i, top),(i, bottom)), fill=(200, 200, 200))
-      else:
-        step = ((max2)/(boxWidth-margin_right))
-        col = max2+step*(i - margin_right)
-        col = int(col)
-        fill = self.grad_fill(max2, c2, col)
-        draw.line(((i, top),(i, bottom)), fill=fill)
-        
-    val = int((value - begin) / scale)
-    txt = unichr(8226)
-    wX, wY = draw.textsize(txt, font=self.font_bold_normal)
-#    draw.line(((val, boxTopOffset+1),(val, boxTopOffset+boxHeight-1)), width=wX , fill=(255,235,10))
-    draw.ellipse(((val-int(wX/2), boxTopOffset+3),(val+int(wX/2), boxTopOffset+boxHeight-3)), fill=(255,235,10))
-    draw.text((val-int(wX/2), boxTopOffset-self.imY*0.001), "%s" %txt, font=self.font_bold_normal, fill="#ff0000")
-    image_location = "%s.png" %("grad")
-#    im.save("C:/grad.png", "PNG")
-    OlexVFS.save_image_to_olex(im, image_location,  1)
-    return im
-  
-  def grad_fill(self, max, c1, col):
-    fill = []
-    for c in c1:
-      if not c:
-        c = col
-        fill.append(int(col))
-      else:
-        fill.append(int(c))
-    fill = tuple(fill)
-    return fill
-  
   def ProgramHtml(self, program, method, process, img_name):
     return_to_menu_txt = str(OV.Translate("Return to main menu"))
     if process == "Refining":
@@ -1378,10 +1073,63 @@ class Analysis(Graph):
     else:
       txt = 'Please provide a template in folder basedir()/etc/gui/blocks/templates/'
     return txt
+
+class ShelXAnalysis(Analysis):
   
-  
-  def run_ShelXL_graph(self, cycle, data):
+  def __init__(self):
+    Analysis.__init__(self)
+    self.counter = 0
+    self.attempt = 1
+    size = (int(OV.FindValue('gui_htmlpanelwidth'))- 45, 100)
+    self.graphInfo["Title"] = "ShelXL"
+    self.graphInfo["imSize"] = size
+    self.graphInfo["FontScale"] = 0.03
+    self.graphInfo["TopRightTitle"] = self.filename
+    self.graphInfo["n_cycles"] = OV.FindValue("snum_refinement_max_cycles")
+    OV.unregisterCallback("procout", self.ShelXL)
+    self.xl_d = {}
+    self.new_graph_please = False
+    self.cycle = 0
     
+    self.make_empty_graph()
+    program = self.RPD.programs["ShelXL"]
+    method = program.methods["CGLS"]
+    img_name = "ShelXL.png"
+    txt = self.ProgramHtml(program, method, "Refining", img_name)
+    OlexVFS.write_to_olex("ShelXL.htm", txt)
+    OlexVFS.write_to_olex('refinement_image.htm', txt)
+    OV.htmlReload()
+    image_location = "%s.png" %(self.item)
+    OlexVFS.save_image_to_olex(self.im, image_location,  1)
+    self.width, self.height = self.im.size
+    self.popout()
+  
+  def ShelXL(self, line):
+    self.new_graph_please = False
+    mean_shift = 0
+    max_shift = 0
+    if "before cycle" in line:
+      self.cycle = int(line.split("before cycle")[1].strip().split()[0])
+      self.xl_d.setdefault("cycle_%i" %self.cycle, {})
+    elif "Mean shift/esd =" in line:
+      mean_shift = float(line.split("Mean shift/esd =")[1].strip().split()[0])
+      self.xl_d["cycle_%i" %self.cycle].setdefault('mean_shift',mean_shift)
+    elif "Max. shift = " in line:
+      max_shift = float(line.split("Max. shift =")[1].strip().split()[0])
+      max_shift_atom = line.split("for")[1].strip().split()[0]
+      self.xl_d["cycle_%i" %self.cycle].setdefault('max_shift',max_shift)
+      self.xl_d["cycle_%i" %self.cycle].setdefault('max_shift_atom',max_shift_atom)
+      self.new_graph_please = True
+
+    if self.new_graph_please:
+      self.run_ShelXL_graph()
+
+  def observe_shex_l(self):
+    OV.registerCallback("procout", self.ShelXL)
+
+  def run_ShelXL_graph(self):
+    cycle = self.cycle
+    data = self.xl_d
     top = self.graph_top
     marker_width = 5
     title = self.graphInfo.get('Title', "")
@@ -1481,8 +1229,6 @@ class Analysis(Graph):
     wX, wY = self.draw.textsize(txt, font=self.font_large)
     x = width - wX - self.bSides
     self.draw.text((x, legend_top), "%s" %txt, font=self.font_large, fill="#888888")
-      
-      
     
     image_location = "ShelXL.png"
     OlexVFS.save_image_to_olex(self.im, image_location, 0)
@@ -1490,8 +1236,233 @@ class Analysis(Graph):
     if OV.FindValue('html_IsItem(POP_PRG_ANALYSIS)',False):
       olx.html_SetImage("POP_PRG_ANALYSIS","ShelXL.png")
     #olex.m("html.Reload pop_prg_analysis")
+
+class WilsonPlot(Analysis):
+  def __init__(self, n_bins=10, method="olex"):
+    Analysis.__init__(self)
+    self.n_bins = abs(int(n_bins)) #Number of bins for Histograms
+    self.method = method      #Method by which graphs are generated
+    self.item = "wilson"
+    self.graphInfo["Title"] = "Wilson Plot"
+    self.graphInfo["pop_html"] = "wilson"
+    self.graphInfo["pop_name"] = "wilson"
+    self.graphInfo["imSize"] = (900, 500)
+    self.graphInfo["TopRightTitle"] = self.filename
+    n_bins = 2 * self.n_bins # multiply nbins by 2 to get approx same number as olex
+    if self.method == 'cctbx':
+      #OV.timer_wrap(self.cctbx_wilson_statistics,bins=n_bins)
+      self.cctbx_wilson_statistics(bins=n_bins)
+    else:
+      filepath = "%s/%s.%s.csv" %(self.filepath,self.filename,"wilson")
+      self.get_simple_x_y_pair_data_from_file(filepath)
+    self.make_empty_graph(axis_x = True)
+    self.draw_pairs(reverse_y = True)
+    grad = self.make_gradient_box(size = ((int(self.imX * 0.64), int(self.imY * 0.1))))
+    size = ((self.im.size[0]), (self.im.size[1] + grad.size[1]))
+    colour = self.gui_html_bg_colour
+    new = Image.new('RGB', size, colour)
+    new.paste(self.im, (0,0))
+    new.paste(grad, (int(self.xSpace+self.bSides),int(self.im.size[1]-20)))
+    draw = ImageDraw.Draw(new)
+    
+    imX, imY = new.size
+    
+    metadata = self.data['dataset1'].metadata()
+    estats = metadata.get("<|E^2-1|>", 'n/a')
+    
+    text = []
+    text.append("B = %.3f" %float(metadata.get("B")))
+    text.append("K = %.3f" %float(metadata.get("K")))
+    text.append("<|E^2-1|> = %.3f" %float(metadata.get("<|E^2-1|>", 0)))
+    text.append(r"%%|E| > 2 = %.3f"%float(metadata.get(r"%|E| > 2", 0)))
+    
+    left = grad.size[0] + self.xSpace + imX * 0.04
+    top = self.im.size[1] - imY * 0.02
+    top_original = top
+    i = 0
+    for txt in text:
+      unicode_txt = self.get_unicode_characters(txt)
+      wX, wY = draw.textsize(unicode_txt, font=self.font_tiny)
+      colour = "#444444"
+      if "E^2" in txt:
+        if float(estats) < float(self.wilson_grad_begin):
+          colour = "#ff0000"
+        elif float(estats) > float(self.wilson_grad_end):
+          colour = "#ff0000"
+      draw.text((left, top), "%s" %unicode_txt, font=self.font_tiny, fill=colour)
+      top += wY +2
+      i += 1
+      if i == 2:
+        top = top_original
+        left = int(grad.size[0] + self.xSpace + imX * 0.14)
+    self.im = new
+    image_location = "%s.png" %(self.item)
+    OlexVFS.save_image_to_olex(self.im, image_location,  1)
+    self.width, self.height = self.im.size
+    self.popout()
+
+  def cctbx_wilson_statistics(self, bins=10):  
+    from cctbx_olex_adapter import OlexCctbxAdapter
+    cctbx = OlexCctbxAdapter('wilson', '%s' %bins)
+    wp = cctbx.run()
+    metadata = {}
+    metadata.setdefault("K", 1/wp.wilson_intensity_scale_factor)
+    metadata.setdefault("B", wp.wilson_b)
+    metadata.setdefault("y_label", "sin^2(theta)/lambda^2")
+    metadata.setdefault("x_label", "ln(<Fo2>).Fexp2)")
+    # convert axes in formula
+    metadata.setdefault("fit_slope", 1/wp.fit_slope)
+    metadata.setdefault("fit_y_intercept", -wp.fit_y_intercept/wp.fit_slope)
+    metadata.setdefault("<|E^2-1|>", wp.mean_e_sq_minus_1)
+    metadata.setdefault("%|E| > 2", wp.percent_e_sq_gt_2)
+    self.metadata = metadata
+    self.data.setdefault('dataset1', Dataset(wp.y,wp.x,metadata))
+
+  def make_gradient_box(self, size = (320, 35)):
+    boxWidth = size[0]
+    boxHeight = size[1]*0.4
+    boxTopOffset = self.imY * 0.035
+    colour = self.gui_html_bg_colour
+    im = Image.new('RGB', size, colour)
+    draw = ImageDraw.Draw(im)
+    #target_left = (0,0,255)
+    #target_right = (0,255,0)
+    middle = boxWidth/2
+    box = (0,boxTopOffset,boxWidth-1,boxTopOffset+boxHeight-1)
+    draw.rectangle(box, fill=self.gui_html_bg_colour, outline=(200, 200, 200))
+    margin_left = int((boxWidth/4))
+    margin_right = int((boxWidth/4)*3)
+    
+    scale = float((0.968-0.736)/(boxWidth - (margin_right - margin_left)))
+    metadata = self.data['dataset1'].metadata()
+    value = float(metadata.get("<|E^2-1|>", 0))
+    
+    begin = (0.736 - margin_left * scale)
+    end = (0.968 + margin_left * scale)
+    self.wilson_grad_begin = begin
+    self.wilson_grad_end = end
+    
+    if value < (0.736 - 0.736*0.2):
+      max1 = 128.0
+      c1 = (255.0, 0 , 0)
+      max2 = 128.0
+      c2 = (0, 0, 0)
+    elif (0.736 - 0.736*0.1) < value < (0.736 + 0.736*0.1):
+      max1 = 128.0
+      c1 = (0, 255.0 , 0)
+      max2 = 128.0
+      c2 = (0, 0, 0)
+    elif (0.736 + 0.736*0.1) <= value <= (0.968 - 0.968*0.1):
+      max1 = 128.0
+      c1 = (255.0, 0, 0)
+      max2 = 128.0
+      c2 = (255.0, 0, 0)
+    elif (0.968 - 0.968*0.1) < value < (0.968 + 0.968*0.1):
+      max1 = 128.0
+      c1 = (0, 0, 0)
+      max2 = 128.0
+      c2 = (0, 255.0, 0)
+    elif value > (0.968 + 0.968*0.1):
+      max1 = 128.0
+      c1 = (0, 0, 0)
+      max2 = 128.0
+      c2 = (255.0, 0, 0)
+    else:
+      max1 = 128.0
+      c1 = (255.0, 0, 0)
+      max2 = 128.0
+      c2 = (255.0, 0, 0)
+      
+    for i in xrange(boxWidth-2):
+      i += 1
+      if i == margin_left:
+        txt = "non-centrosymmetric"
+        wX, wY = draw.textsize(txt, font=self.font_tiny)
+        draw.text((i-int(wX/2), 0), "%s" %txt, font=self.font_tiny, fill=self.gui_html_highlight_colour)
+        txt = "0.736"
+        wX, wY = draw.textsize(txt, font=self.font_tiny)
+        draw.text((i-int(wX/2), boxTopOffset+boxHeight-1), "%s" %txt, font=self.font_tiny, fill=self.titleColour)
+      if i == (margin_right):
+        txt = "centrosymmetric"
+        wX, wY = draw.textsize(txt, font=self.font_tiny)
+        draw.text((i-int(wX/2), 0), "%s" %txt, font=self.font_tiny, fill=self.gui_html_highlight_colour)
+        txt = "0.968"
+        wX, wY = draw.textsize(txt, font=self.font_small)
+        draw.text((i-int(wX/2), boxTopOffset+boxHeight-1), "%s" %txt, font=self.font_tiny, fill=self.titleColour)
+      top =  int(boxTopOffset+1)
+      bottom = int(boxTopOffset+boxHeight-2)
+      if i < margin_left:
+        step = (max1)/margin_left
+        col = max1+step*(margin_left - i)
+        col = int(col)
+        fill = self.grad_fill(max1, c1, col)
+        draw.line(((i, top),(i, bottom)), fill=fill)
+      elif i == margin_left:
+        draw.line(((i, top),(i, bottom)), fill=(200, 200, 200))
+      elif i < middle:
+        step = (max1)/(middle-margin_left)
+        col = max1+step*(i - margin_left)
+        col = int(col)
+        fill = self.grad_fill(max1, c1, col)
+        draw.line(((i, top),(i, bottom)), fill=fill)
+      elif i == middle:
+        draw.line(((i, top),(i, bottom)), fill=(200, 200, 200))
+      elif i > middle and i < (margin_right):
+        step = (max2)/(margin_right-middle)
+        col = max2+step*(margin_right - i)
+        col = int(col)
+        fill = self.grad_fill(max2, c2, col)
+        draw.line(((i, top),(i, bottom)), fill=fill)
+      elif i == (margin_right):
+        draw.line(((i, top),(i, bottom)), fill=(200, 200, 200))
+      else:
+        step = ((max2)/(boxWidth-margin_right))
+        col = max2+step*(i - margin_right)
+        col = int(col)
+        fill = self.grad_fill(max2, c2, col)
+        draw.line(((i, top),(i, bottom)), fill=fill)
+    val = int((value - begin) / scale)
+    txt = unichr(8226)
+    wX, wY = draw.textsize(txt, font=self.font_bold_normal)
+#    draw.line(((val, boxTopOffset+1),(val, boxTopOffset+boxHeight-1)), width=wX , fill=(255,235,10))
+    draw.ellipse(((val-int(wX/2), boxTopOffset+3),(val+int(wX/2), boxTopOffset+boxHeight-3)), fill=(255,235,10))
+    draw.text((val-int(wX/2), boxTopOffset-self.imY*0.001), "%s" %txt, font=self.font_bold_normal, fill="#ff0000")
+    image_location = "%s.png" %("grad")
+#    im.save("C:/grad.png", "PNG")
+    OlexVFS.save_image_to_olex(im, image_location,  1)
+    return im
   
-  
+  def grad_fill(self, max, c1, col):
+    fill = []
+    for c in c1:
+      if not c:
+        c = col
+        fill.append(int(col))
+      else:
+        fill.append(int(c))
+    fill = tuple(fill)
+    return fill
+
+class ChargeFlippingPlot(Analysis):
+  def __init__(self):
+    Analysis.__init__(self)
+    self.counter = 0
+    self.attempt = 1
+    size = (int(OV.FindValue('gui_htmlpanelwidth'))- 45, 100)
+    self.graphInfo["Title"] = "Charge Flipping"
+    self.graphInfo["imSize"] = size
+    self.graphInfo["FontScale"] = 0.03
+    self.graphInfo["TopRightTitle"] = self.filename
+    
+    self.make_empty_graph()
+    program = self.SPD.programs["smtbx-solve"]
+    method = program.methods["Charge Flipping"]
+    img_name = "XY.png"
+    txt = self.ProgramHtml(program, method, "Solving", img_name)
+    OlexVFS.write_to_olex('xy.htm', txt)
+    OlexVFS.write_to_olex('solution_image.htm', txt)
+    OV.htmlReload()
+
   def run_charge_flipping_graph(self, flipping, solving, previous_state):
     top = self.graph_top
     marker_width = 5
@@ -1578,8 +1549,11 @@ class Analysis(Graph):
       if OV.FindValue('html_IsItem(POP_PRG_ANALYSIS)',False):
         olx.html_SetImage("POP_PRG_ANALYSIS","XY.png")
       #olex.m("html.Reload pop_prg_analysis")
-      
-  
+
+#OV.registerMacro(WilsonPlot,
+  #'n_bins-Number of bins (for histograms only!)&;method-olex or cctbx')
+OV.registerFunction(WilsonPlot)  
+
 class Dataset(object):
   def __init__(self, x, y, metadata):
     self.x = x
@@ -1747,12 +1721,12 @@ class Dataset(object):
     ##wFile.close()
     #OlexVFS.write_to_olex('xy.htm', txt)
 
-    
-Analysis_instance = Analysis()    
+
+Analysis_instance = Analysis()
 OV.registerMacro(Analysis_instance.run_Analysis,
                  'n_bins-Number of bins (for histograms only!)&;method-olex or cctbx')
-    
-    
+
+
 def array_scalar_multiplication(array, multiplier):
   return [i * multiplier for i in array]
 

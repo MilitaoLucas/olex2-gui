@@ -700,7 +700,8 @@ def charge_flipping_loop(solving, verbose=True):
   HasGUI = OV.HasGUI()
   if HasGUI:
     import Analysis
-    Analysis.Analysis_instance.run_Analysis('Charge Flipping', {})
+    #Analysis.Analysis_instance.run_Analysis('Charge Flipping', {})
+    plot = Analysis.ChargeFlippingPlot()
 #    a = Analysis(function='Charge Flipping', param=None)
 #    a.run('Char)
   
@@ -749,7 +750,7 @@ def charge_flipping_loop(solving, verbose=True):
     elif solving.state is solving.finished:
       break
     
-    if HasGUI: Analysis.Analysis_instance.run_charge_flipping_graph(flipping, solving, previous_state)
+    if HasGUI: plot.run_charge_flipping_graph(flipping, solving, previous_state)
     previous_state = solving.state
 
 
