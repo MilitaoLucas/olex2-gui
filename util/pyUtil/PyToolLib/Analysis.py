@@ -1527,7 +1527,8 @@ class SystematicAbsencesPlot(Analysis):
     self.graphInfo["TopRightTitle"] = self.filename
     self.auto_axes = False
     self.cctbx_systematic_absences_plot()
-    self.popout()
+    if self.have_data:
+      self.popout()
 
   def cctbx_systematic_absences_plot(self):
     from cctbx_olex_adapter import OlexCctbxAdapter
@@ -1538,6 +1539,11 @@ class SystematicAbsencesPlot(Analysis):
     metadata.setdefault("y_label", xy_plot.yLegend)
     metadata.setdefault("x_label", xy_plot.xLegend)
     self.metadata = metadata
+    if xy_plot.x is None:
+      self.have_data = False
+      print "No systematic absences present"
+      return
+    self.have_data = True
     self.data.setdefault('dataset1', Dataset(xy_plot.x, xy_plot.y, metadata))
     self.data['dataset1'].show_summary()
     self.draw_origin = True
