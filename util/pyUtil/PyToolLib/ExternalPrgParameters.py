@@ -423,14 +423,10 @@ class Method_cctbx_ChargeFlip(Method_solution):
     Method_solution.__init__(self, name, cmd, args, atom_sites_solution)
     
   def run(self, RunPrgObject):
-    #import time
-    #t1 = time.time()
     from cctbx_olex_adapter import OlexCctbxAdapter
-    #t2 = time.time()
-    #print 'import took %0.3f ms' %((t2-t1)*1000.0)
     print 'STARTING cctbx Charge Flip'
     RunPrgObject.solve = True
-    cctbx = OlexCctbxAdapter('refine', RunPrgObject.snum_refinement_max_cycles)
+    cctbx = OlexCctbxAdapter('solve', None)
     
     solving_interval = int(float(self.getArgs().split()[1]))
     
