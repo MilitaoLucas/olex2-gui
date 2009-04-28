@@ -855,3 +855,16 @@ def getGenericSwitchNameTranslation(name):
     text = "No text!"
   return text
 OV.registerFunction(getGenericSwitchNameTranslation)
+
+
+def testingthis():
+  
+  rFile = open("%s/%s.res" %(olx.FilePath(),olx.FileName()))
+  lines = rFile.readlines()
+  rFile.close()
+  
+  for line in lines:
+    print line
+  return True
+OV.registerFunction(testingthis)
+  

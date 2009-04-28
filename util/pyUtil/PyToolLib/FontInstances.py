@@ -130,7 +130,7 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
-      "VeraSE":{
+      "VeraSE Bold":{
         "font_src":(
           r"%s/etc/gui/fonts/VeraSeBd.ttf" %self.basedir,
           "verdanab.ttf",
