@@ -53,100 +53,99 @@
   <Prop50 "255;8388608;8388608;14638943;14638943;1.000,1.000,1.000,1.000;1.000,1.000,1.000,1.000;12;12" >
   <Prop51 "1109;8323199;127;1.000,1.000,1.000,0.000;36" >
   <Prop52 "1109;32639;127;1.000,1.000,1.000,0.000;36" >
-  <Prop53 "85;8404992;12632256;1.000,1.000,1.000,1.000;12" >
-  <Prop54 "341;1.000,0.000,0.000,0.000;6250335;1.000,1.000,1.000,1.000;12" >
-  <Prop55 "1109;805339007;805306495;1.000,1.000,1.000,0.000;36" >
-  <Prop56 "1109;3103817599;3103785087;1.000,1.000,1.000,0.000;36" >
-  <Prop57 "1109;1174437759;1174405247;1.000,1.000,1.000,0.000;36" >
-  <Prop58 "1039;2119126863;2119126863;2119126863;2119126863" >
-  <Prop59 "1109;3321921407;3321888895;1.000,1.000,1.000,0.000;36" >
-  <Prop60 "85;2155839359;2155313015;1.000,1.000,1.000,0.502;36" >
-  <Prop61 "1109;1191214975;1191182463;1.000,1.000,1.000,0.000;36" >
-  <Prop62 "341;0.000,0.000,1.000,0.000;10444639;1.000,1.000,1.000,1.000;12" >
-  <Prop63 "341;0.000,0.000,1.000,0.000;10510175;1.000,1.000,1.000,1.000;12" >
-  <Prop64 "1109;2936045439;2936012927;1.000,1.000,1.000,0.000;36" >
-  <Prop65 "2305;0.753,0.753,0.753,1.000" >
-  <Prop66 "1109;2138996350;2138535799;1.000,1.000,1.000,0.500;36" >
-  <Prop67 "1109;863927934;863467383;1.000,1.000,1.000,0.200;36" >
-  <Prop68 "2049;0" >
-  <Prop69 "79;2130706432;2130706432;2139127936;2138535799;36" >
-  <Prop70 "341;1.000,0.000,0.000,0.500;1.000,0.502,0.251,0.500;1.000,1.000,1.000,0.500;36" >
-  <Prop71 "341;8388736;14639071;1.000,1.000,1.000,1.000;12" >
-  <Prop72 "1109;1073774463;1073741951;1.000,1.000,1.000,0.000;36" >
-  <Prop73 "1109;2768273279;2768240767;1.000,1.000,1.000,0.000;36" >
-  <Prop74 "1109;2969599871;2969567359;1.000,1.000,1.000,0.000;36" >
-  <Prop75 "2049;1.000,1.000,0.000,0.000" >
-  <Prop76 "255;2155773566;2155773566;2155313015;2155313015;1.000,1.000,1.000,0.502;1.000,1.000,1.000,0.502;128;36" >
-  <Prop77 "1279;1.000,0.000,0.000,0.502;2155773566;2155313015;2155313015;1.000,1.000,1.000,0.502;1.000,1.000,1.000,0.502;128;36" >
-  <Prop78 "1279;0.000,1.000,0.000,0.502;2155773566;2155313015;2155313015;1.000,1.000,1.000,0.502;1.000,1.000,1.000,0.502;128;36" >
-  <Prop79 "1279;0.000,0.000,1.000,0.502;2155773566;2155313015;2155313015;1.000,1.000,1.000,0.502;1.000,1.000,1.000,0.502;128;36" >
-  <Prop80 "2111;0.000,0.000,1.000,0.502;2155773566;2155313015;2155313015;50529027;1.000,1.000,1.000,0.502" >
-  <Prop81 "63;2155773566;2155773566;2155313015;2155313015;50529027;50529027" >
-  <Prop82 "63;1.000,0.000,0.000,0.502;2155773566;2155313015;2155313015;50529027;1.000,1.000,1.000,0.502" >
-  <Prop83 "63;0.000,1.000,0.000,0.502;2155773566;2155313015;2155313015;50529027;1.000,1.000,1.000,0.502" >
-  <Prop84 "63;0.000,0.000,1.000,0.502;2155773566;2155313015;2155313015;50529027;1.000,1.000,1.000,0.502" >
-  <Prop85 "2048" >
-  <Prop86 "1;1.000,1.000,0.502,0.000" >
-  <Prop87 "1;0" >
-  <Prop88 "1109;2751496063;2751463551;1.000,1.000,1.000,0.000;36" >
-  <Prop89 "1109;2634055551;2634023039;1.000,1.000,1.000,0.000;36" >
-  <Prop90 "1109;3120594815;3120562303;1.000,1.000,1.000,0.000;36" >
-  <Prop91 "3073;1.000,1.000,1.000,1.000" >
-  <Prop92 "1109;2667609983;2667577471;1.000,1.000,1.000,0.000;36" >
-  <Prop93 "1109;3271589759;3271557247;1.000,1.000,1.000,0.000;36" >
-  <Prop94 "5;0.000,1.000,0.000,0.000;2138535799" >
-  <Prop95 "5;1.000,0.000,0.000,0.000;2138535799" >
-  <Prop96 "341;1.000,1.000,1.000,0.000;10461087;1.000,1.000,1.000,1.000;12" >
-  <Prop97 "1109;2919268223;2919235711;1.000,1.000,1.000,0.000;36" >
-  <Prop98 "341;1.000,1.000,1.000,0.000;10526880;1.000,1.000,1.000,1.000;12" >
-  <Prop99 "2053;2136422952;2137144606" >
-  <Prop100 "2053;4210816;2130706496" >
-  <Prop101 "1109;3003154303;3003121791;1.000,1.000,1.000,0.000;36" >
-  <Prop102 "1109;2499837823;2499805311;1.000,1.000,1.000,0.000;36" >
-  <Prop103 "2053;2143326838;2143979345" >
-  <Prop104 "1109;100695935;100663423;1.000,1.000,1.000,0.000;36" >
-  <Prop105 "1109;2550169471;2550136959;1.000,1.000,1.000,0.000;36" >
-  <Prop106 "2053;1.000,1.000,0.000,1.000;2138535799" >
-  <Prop107 "1109;1728085887;1728053375;1.000,1.000,1.000,0.000;36" >
-  <Prop108 "1109;3254812543;3254780031;1.000,1.000,1.000,0.000;36" >
-  <Prop109 "341;0.200,0.200,1.000,0.000;10444639;1.000,1.000,1.000,1.000;12" >
-  <Prop110 "1109;520126335;520093823;1.000,1.000,1.000,0.000;36" >
-  <Prop111 "1109;3170926463;3170893951;1.000,1.000,1.000,0.000;36" >
-  <Prop112 "1109;2852159359;2852126847;1.000,1.000,1.000,0.000;36" >
-  <Prop113 "1109;2986377087;2986344575;1.000,1.000,1.000,0.000;36" >
-  <Prop114 "1109;1241546623;1241514111;1.000,1.000,1.000,0.000;36" >
-  <Prop115 "1109;3070263167;3070230655;1.000,1.000,1.000,0.000;36" >
-  <Prop116 "1109;2432728959;2432696447;1.000,1.000,1.000,0.000;36" >
-  <Prop117 "1109;1912635263;1912602751;1.000,1.000,1.000,0.000;36" >
-  <Prop118 "1109;1895858047;1895825535;1.000,1.000,1.000,0.000;36" >
-  <Prop119 "1109;2415951743;2415919231;1.000,1.000,1.000,0.000;36" >
-  <Prop120 "1109;2868936575;2868904063;1.000,1.000,1.000,0.000;36" >
-  <Prop121 "1109;1392541567;1392509055;1.000,1.000,1.000,0.000;36" >
-  <Prop122 "1109;3221258111;3221225599;1.000,1.000,1.000,0.000;36" >
-  <Prop123 "1109;1006665599;1006633087;1.000,1.000,1.000,0.000;36" >
-  <Prop124 "1109;3019931519;3019899007;1.000,1.000,1.000,0.000;36" >
-  <Prop125 "1109;2617278335;2617245823;1.000,1.000,1.000,0.000;36" >
-  <Prop126 "1109;989888383;989855871;1.000,1.000,1.000,0.000;36" >
-  <Prop127 "1109;2785050495;2785017983;1.000,1.000,1.000,0.000;36" >
-  <Prop128 "1109;1375764351;1375731839;1.000,1.000,1.000,0.000;36" >
-  <Prop129 "1109;1929412479;1929379967;1.000,1.000,1.000,0.000;36" >
-  <Prop130 "3077;2148470543;2148470543" >
-  <Prop131 "85;1.000,1.000,0.000,0.000;2105460;1.000,1.000,1.000,1.000;12" >
-  <Prop132 "1279;0.000,1.000,0.000,0.498;0.000,1.000,0.000,0.498;1.000,0.000,0.000,0.498;1.000,0.000,0.000,0.498;1.000,1.000,1.000,0.502;1.000,1.000,1.000,0.502;128;128" >
-  <Prop133 "85;1.000,0.000,0.000,0.500;2138535799;1.000,1.000,1.000,0.500;36" >
-  <Prop134 "1109;1719631743;1719105399;1.000,1.000,1.000,0.400;36" >
-  <Prop135 "2305;0.498,1.000,0.498,0.000" >
-  <Prop136 "2049;0.498,1.000,0.498,0.000" >
-  <Prop137 "85;5394744;12632256;1.000,1.000,1.000,1.000;12" >
-  <Prop138 "3;1.000,0.000,0.000,0.000;1.000,0.000,0.000,0.000" >
-  <Prop139 "501;3204481024;0.502,1.000,0.000,0.750;1.000,1.000,1.000,0.750;1.000,1.000,1.000,0.750;80;36" >
-  <Prop140 "85;0.000,1.000,0.000,0.850;3632300160;1.000,1.000,1.000,0.500;36" >
-  <Prop141 "85;1.000,0.000,0.000,0.850;3632300160;1.000,1.000,1.000,0.500;36" >
-  <Prop142 "1109;2080407423;2080374911;1.000,1.000,1.000,0.000;36" >
-  <Prop143 "1109;3389030271;3388997759;1.000,1.000,1.000,0.000;36" >
-  <Prop144 "1109;2332065663;2332033151;1.000,1.000,1.000,0.000;36" >
-  <Prop145 "3073;2131693327" >
-  <Prop146 "2049;12615680" >
+  <Prop53 "1109;2332065663;2332033151;1.000,1.000,1.000,0.000;36" >
+  <Prop54 "85;8404992;12632256;1.000,1.000,1.000,1.000;12" >
+  <Prop55 "341;1.000,0.000,0.000,0.000;6250335;1.000,1.000,1.000,1.000;12" >
+  <Prop56 "1109;805339007;805306495;1.000,1.000,1.000,0.000;36" >
+  <Prop57 "1109;3103817599;3103785087;1.000,1.000,1.000,0.000;36" >
+  <Prop58 "1109;1174437759;1174405247;1.000,1.000,1.000,0.000;36" >
+  <Prop59 "1039;2119126863;2119126863;2119126863;2119126863" >
+  <Prop60 "1109;3321921407;3321888895;1.000,1.000,1.000,0.000;36" >
+  <Prop61 "85;2155839359;2155313015;1.000,1.000,1.000,0.502;36" >
+  <Prop62 "1109;1191214975;1191182463;1.000,1.000,1.000,0.000;36" >
+  <Prop63 "341;0.000,0.000,1.000,0.000;10444639;1.000,1.000,1.000,1.000;12" >
+  <Prop64 "341;0.000,0.000,1.000,0.000;10510175;1.000,1.000,1.000,1.000;12" >
+  <Prop65 "1109;2936045439;2936012927;1.000,1.000,1.000,0.000;36" >
+  <Prop66 "2305;0.753,0.753,0.753,1.000" >
+  <Prop67 "1109;2138996350;2138535799;1.000,1.000,1.000,0.500;36" >
+  <Prop68 "1109;863927934;863467383;1.000,1.000,1.000,0.200;36" >
+  <Prop69 "2049;0" >
+  <Prop70 "79;2130706432;2130706432;2139127936;2138535799;36" >
+  <Prop71 "341;1.000,0.000,0.000,0.500;1.000,0.502,0.251,0.500;1.000,1.000,1.000,0.500;36" >
+  <Prop72 "341;8388736;14639071;1.000,1.000,1.000,1.000;12" >
+  <Prop73 "1109;1073774463;1073741951;1.000,1.000,1.000,0.000;36" >
+  <Prop74 "1109;2768273279;2768240767;1.000,1.000,1.000,0.000;36" >
+  <Prop75 "1109;2969599871;2969567359;1.000,1.000,1.000,0.000;36" >
+  <Prop76 "2049;1.000,1.000,0.000,0.000" >
+  <Prop77 "255;2155773566;2155773566;2155313015;2155313015;1.000,1.000,1.000,0.502;1.000,1.000,1.000,0.502;128;36" >
+  <Prop78 "1279;1.000,0.000,0.000,0.502;2155773566;2155313015;2155313015;1.000,1.000,1.000,0.502;1.000,1.000,1.000,0.502;128;36" >
+  <Prop79 "1279;0.000,1.000,0.000,0.502;2155773566;2155313015;2155313015;1.000,1.000,1.000,0.502;1.000,1.000,1.000,0.502;128;36" >
+  <Prop80 "1279;0.000,0.000,1.000,0.502;2155773566;2155313015;2155313015;1.000,1.000,1.000,0.502;1.000,1.000,1.000,0.502;128;36" >
+  <Prop81 "2111;0.000,0.000,1.000,0.502;2155773566;2155313015;2155313015;50529027;1.000,1.000,1.000,0.502" >
+  <Prop82 "63;2155773566;2155773566;2155313015;2155313015;50529027;50529027" >
+  <Prop83 "63;1.000,0.000,0.000,0.502;2155773566;2155313015;2155313015;50529027;1.000,1.000,1.000,0.502" >
+  <Prop84 "63;0.000,1.000,0.000,0.502;2155773566;2155313015;2155313015;50529027;1.000,1.000,1.000,0.502" >
+  <Prop85 "63;0.000,0.000,1.000,0.502;2155773566;2155313015;2155313015;50529027;1.000,1.000,1.000,0.502" >
+  <Prop86 "2048" >
+  <Prop87 "1;1.000,1.000,0.502,0.000" >
+  <Prop88 "1;0" >
+  <Prop89 "1109;2751496063;2751463551;1.000,1.000,1.000,0.000;36" >
+  <Prop90 "1109;2634055551;2634023039;1.000,1.000,1.000,0.000;36" >
+  <Prop91 "1109;3120594815;3120562303;1.000,1.000,1.000,0.000;36" >
+  <Prop92 "3073;1.000,1.000,1.000,1.000" >
+  <Prop93 "1109;2667609983;2667577471;1.000,1.000,1.000,0.000;36" >
+  <Prop94 "1109;3271589759;3271557247;1.000,1.000,1.000,0.000;36" >
+  <Prop95 "5;0.000,1.000,0.000,0.000;2138535799" >
+  <Prop96 "5;1.000,0.000,0.000,0.000;2138535799" >
+  <Prop97 "341;1.000,1.000,1.000,0.000;10461087;1.000,1.000,1.000,1.000;12" >
+  <Prop98 "1109;2919268223;2919235711;1.000,1.000,1.000,0.000;36" >
+  <Prop99 "341;1.000,1.000,1.000,0.000;10526880;1.000,1.000,1.000,1.000;12" >
+  <Prop100 "3077;0.000,0.000,0.000,1.000;1.000,1.000,1.000,0.500" >
+  <Prop101 "2053;4210816;2130706496" >
+  <Prop102 "1109;3003154303;3003121791;1.000,1.000,1.000,0.000;36" >
+  <Prop103 "1109;2499837823;2499805311;1.000,1.000,1.000,0.000;36" >
+  <Prop104 "2309;0.700,0.700,0.700,1.000;1.000,1.000,1.000,1.000" >
+  <Prop105 "1109;100695935;100663423;1.000,1.000,1.000,0.000;36" >
+  <Prop106 "1109;2550169471;2550136959;1.000,1.000,1.000,0.000;36" >
+  <Prop107 "2053;1.000,1.000,0.000,1.000;2138535799" >
+  <Prop108 "1109;1728085887;1728053375;1.000,1.000,1.000,0.000;36" >
+  <Prop109 "1109;3254812543;3254780031;1.000,1.000,1.000,0.000;36" >
+  <Prop110 "341;0.200,0.200,1.000,0.000;10444639;1.000,1.000,1.000,1.000;12" >
+  <Prop111 "1109;520126335;520093823;1.000,1.000,1.000,0.000;36" >
+  <Prop112 "1109;3170926463;3170893951;1.000,1.000,1.000,0.000;36" >
+  <Prop113 "1109;2852159359;2852126847;1.000,1.000,1.000,0.000;36" >
+  <Prop114 "1109;2986377087;2986344575;1.000,1.000,1.000,0.000;36" >
+  <Prop115 "1109;1241546623;1241514111;1.000,1.000,1.000,0.000;36" >
+  <Prop116 "1109;3070263167;3070230655;1.000,1.000,1.000,0.000;36" >
+  <Prop117 "3073;2131693327" >
+  <Prop118 "2049;12615680" >
+  <Prop119 "1109;2432728959;2432696447;1.000,1.000,1.000,0.000;36" >
+  <Prop120 "1109;1912635263;1912602751;1.000,1.000,1.000,0.000;36" >
+  <Prop121 "1109;1895858047;1895825535;1.000,1.000,1.000,0.000;36" >
+  <Prop122 "1109;2080407423;2080374911;1.000,1.000,1.000,0.000;36" >
+  <Prop123 "1109;2415951743;2415919231;1.000,1.000,1.000,0.000;36" >
+  <Prop124 "1109;2868936575;2868904063;1.000,1.000,1.000,0.000;36" >
+  <Prop125 "1109;1392541567;1392509055;1.000,1.000,1.000,0.000;36" >
+  <Prop126 "1109;3221258111;3221225599;1.000,1.000,1.000,0.000;36" >
+  <Prop127 "1109;1006665599;1006633087;1.000,1.000,1.000,0.000;36" >
+  <Prop128 "1109;3019931519;3019899007;1.000,1.000,1.000,0.000;36" >
+  <Prop129 "1109;2617278335;2617245823;1.000,1.000,1.000,0.000;36" >
+  <Prop130 "1109;989888383;989855871;1.000,1.000,1.000,0.000;36" >
+  <Prop131 "1109;2785050495;2785017983;1.000,1.000,1.000,0.000;36" >
+  <Prop132 "1109;1375764351;1375731839;1.000,1.000,1.000,0.000;36" >
+  <Prop133 "1109;1929412479;1929379967;1.000,1.000,1.000,0.000;36" >
+  <Prop134 "3077;2148470543;2148470543" >
+  <Prop135 "85;1.000,1.000,0.000,0.000;2105460;1.000,1.000,1.000,1.000;12" >
+  <Prop136 "1279;0.000,1.000,0.000,0.498;0.000,1.000,0.000,0.498;1.000,0.000,0.000,0.498;1.000,0.000,0.000,0.498;1.000,1.000,1.000,0.502;1.000,1.000,1.000,0.502;128;128" >
+  <Prop137 "85;1.000,0.000,0.000,0.500;2138535799;1.000,1.000,1.000,0.500;36" >
+  <Prop138 "1109;1719631743;1719105399;1.000,1.000,1.000,0.400;36" >
+  <Prop139 "2305;0.498,1.000,0.498,0.000" >
+  <Prop140 "2049;0.498,1.000,0.498,0.000" >
+  <Prop141 "85;5394744;12632256;1.000,1.000,1.000,1.000;12" >
+  <Prop142 "3;1.000,0.000,0.000,0.000;1.000,0.000,0.000,0.000" >
+  <Prop143 "501;3204481024;0.502,1.000,0.000,0.750;1.000,1.000,1.000,0.750;1.000,1.000,1.000,0.750;80;36" >
+  <Prop144 "85;0.000,1.000,0.000,0.850;3632300160;1.000,1.000,1.000,0.500;36" >
+  <Prop145 "85;1.000,0.000,0.000,0.850;3632300160;1.000,1.000,1.000,0.500;36" >
  >
  <Root Name="Root" 
   <SubStyles 
@@ -1362,7 +1361,7 @@
      <Material style.Materials.Prop40 >
     >
    >
-   <S_157 Name="Background" A="16777215" B="16777215" C="5714463" D="5714463" 
+   <S_157 Name="Background" A="16777215" B="16777215" C="3933445" D="3933445" 
     <S0 PName="Plane" 
      <Material style.Materials.Prop41 >
     >
@@ -2091,7 +2090,7 @@
      <Material style.Materials.Prop46 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop144 >
+     <Material style.Materials.Prop53 >
     >
    >
    <S_245 Name="C_E-Re_E" PMask="48" R="0.8" 
@@ -2142,7 +2141,7 @@
      <Material style.Materials.Prop22 >
     >
    >
-   <S_251 Name="C_E-S_E" PMask="48" R="0.8" 
+   <S_251 Name="C_E-S_E" 
     <S0 PName="Bottom cone" 
      <Material style.Materials.Prop21 >
     >
@@ -2166,7 +2165,7 @@
    >
    <S_253 Name="C_E-Si_E" PMask="48" R="0.8" 
     <S0 PName="Bottom cone" 
-     <Material style.Materials.Prop53 >
+     <Material style.Materials.Prop54 >
     >
     <S1 PName="Top cone" 
      <Material style.Materials.Prop4 >
@@ -2201,7 +2200,7 @@
      <Material style.Materials.Prop22 >
     >
     <S1 PName="Rims" 
-     <Material style.Materials.Prop54 >
+     <Material style.Materials.Prop55 >
     >
     <S2 PName="Sphere" 
      <Material style.Materials.Prop11 >
@@ -2436,7 +2435,7 @@
      <Material style.Materials.Prop11 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop55 >
+     <Material style.Materials.Prop56 >
     >
    >
    <S_287 Name="C_N-Re_E" PMask="48" R="0.8" 
@@ -2497,7 +2496,7 @@
    >
    <S_294 Name="C_N-Si_E" PMask="48" R="0.8" 
     <S0 PName="Bottom cone" 
-     <Material style.Materials.Prop53 >
+     <Material style.Materials.Prop54 >
     >
     <S1 PName="Top cone" 
      <Material style.Materials.Prop11 >
@@ -2865,7 +2864,7 @@
      <Material style.Materials.Prop4 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop56 >
+     <Material style.Materials.Prop57 >
     >
    >
    <S_341 Name="C_S-Re_E" PMask="48" R="0.8" 
@@ -2966,7 +2965,7 @@
    >
    <S_353 Name="C_S-Si_E" PMask="48" R="0.8" 
     <S0 PName="Bottom cone" 
-     <Material style.Materials.Prop53 >
+     <Material style.Materials.Prop54 >
     >
     <S1 PName="Top cone" 
      <Material style.Materials.Prop4 >
@@ -2982,7 +2981,7 @@
    >
    <S_355 Name="C_S-Si_S" PMask="48" R="0.8" 
     <S0 PName="Bottom cone" 
-     <Material style.Materials.Prop53 >
+     <Material style.Materials.Prop54 >
     >
     <S1 PName="Top cone" 
      <Material style.Materials.Prop4 >
@@ -3086,7 +3085,7 @@
      <Material style.Materials.Prop40 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop57 >
+     <Material style.Materials.Prop58 >
     >
    >
    <S_369 Name="Cd_E" DS="2.0" PMask="5.0" Z="1.0" 
@@ -3117,7 +3116,7 @@
    >
    <S_373 Name="Ceiling" A="16777215" B="16777215" C="16777215" D="16777215" 
     <S0 PName="Plane" 
-     <Material style.Materials.Prop58 >
+     <Material style.Materials.Prop59 >
     >
    >
    <S_374 Name="Cf_E" DS="2.0" PMask="5.0" Z="1.0" 
@@ -3303,7 +3302,7 @@
      <Material style.Materials.Prop5 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop59 >
+     <Material style.Materials.Prop60 >
     >
    >
    <S_398 Name="Cl_E-Re_E" PMask="48" R="0.8" 
@@ -3404,7 +3403,7 @@
    >
    <S_410 Name="Cl_N-H_S@H" PMask="2048" R="0.8" 
     <S0 PName="Balls bond" 
-     <Material style.Materials.Prop60 >
+     <Material style.Materials.Prop61 >
     >
    >
    <S_411 Name="Cl_N-I_N" PMask="48" R="0.8" 
@@ -3540,7 +3539,7 @@
      <Material style.Materials.Prop12 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop61 >
+     <Material style.Materials.Prop62 >
     >
    >
    <S_428 Name="Cl_N-Re_E" PMask="48" R="0.8" 
@@ -3774,12 +3773,12 @@
      <Material style.Materials.Prop0 >
     >
    >
-   <S_458 Name="Co_E" DS="2" PMask="5" Z="1.0" 
+   <S_458 Name="Co_E" 
     <S0 PName="Sphere" 
      <Material style.Materials.Prop33 >
     >
     <S1 PName="Rims" 
-     <Material style.Materials.Prop62 >
+     <Material style.Materials.Prop63 >
     >
    >
    <S_459 Name="Co_E-Co_E" PMask="48" R="0.8" 
@@ -3822,7 +3821,7 @@
      <Material style.Materials.Prop34 >
     >
    >
-   <S_464 Name="Co_E-N_E" PMask="48" R="0.8" 
+   <S_464 Name="Co_E-N_E" 
     <S0 PName="Bottom cone" 
      <Material style.Materials.Prop33 >
     >
@@ -3881,7 +3880,7 @@
      <Material style.Materials.Prop33 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop56 >
+     <Material style.Materials.Prop57 >
     >
    >
    <S_471 Name="Co_N" DS="6" PMask="6" Z="1" 
@@ -3889,7 +3888,7 @@
      <Material style.Materials.Prop16 >
     >
     <S1 PName="Rims" 
-     <Material style.Materials.Prop63 >
+     <Material style.Materials.Prop64 >
     >
    >
    <S_472 Name="Co_S" DS="2.0" PMask="1.0" Z="1.0" 
@@ -3974,7 +3973,7 @@
      <Material style.Materials.Prop33 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop64 >
+     <Material style.Materials.Prop65 >
     >
    >
    <S_483 Name="Co_S-S_S" PMask="48" R="0.8" 
@@ -3987,24 +3986,24 @@
    >
    <S_484 Name="Console" LineSpacing="0" LinesToShow="-1" LineWidth="80" Prompt=">>" 
     <S0 PName="Text" 
-     <Material style.Materials.Prop65 >
+     <Material style.Materials.Prop66 >
     >
    >
    <S_485 Name="COV" PMask="2098.0" R="0.8" 
     <S0 PName="Bottom cone" 
-     <Material style.Materials.Prop66 >
-    >
-    <S1 PName="Top cone" 
      <Material style.Materials.Prop67 >
     >
-    <S2 PName="Label" 
+    <S1 PName="Top cone" 
      <Material style.Materials.Prop68 >
     >
-    <S3 PName="Top disk" 
+    <S2 PName="Label" 
      <Material style.Materials.Prop69 >
     >
-    <S4 PName="Balls bond" 
+    <S3 PName="Top disk" 
      <Material style.Materials.Prop70 >
+    >
+    <S4 PName="Balls bond" 
+     <Material style.Materials.Prop71 >
     >
    >
    <S_486 Name="Cr_E" DS="2" PMask="5.0" Z="1.0" 
@@ -4012,7 +4011,7 @@
      <Material style.Materials.Prop33 >
     >
     <S1 PName="Rims" 
-     <Material style.Materials.Prop71 >
+     <Material style.Materials.Prop72 >
     >
    >
    <S_487 Name="Cr_E-Cr_E" PMask="48" R="0.8" 
@@ -4044,7 +4043,7 @@
      <Material style.Materials.Prop33 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop72 >
+     <Material style.Materials.Prop73 >
     >
    >
    <S_491 Name="Cr_S" DS="2.0" PMask="1.0" Z="1.0" 
@@ -4073,7 +4072,7 @@
      <Material style.Materials.Prop33 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop73 >
+     <Material style.Materials.Prop74 >
     >
    >
    <S_495 Name="Cs_E" DS="2.0" PMask="5.0" Z="1.0" 
@@ -4110,7 +4109,7 @@
      <Material style.Materials.Prop33 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop74 >
+     <Material style.Materials.Prop75 >
     >
    >
    <S_500 Name="Cu_S" DS="2.0" PMask="1.0" Z="1.0" 
@@ -4120,10 +4119,10 @@
    >
    <S_501 Name="Cursor" Char="|" 
     <S0 PName="Text" 
-     <Material style.Materials.Prop75 >
+     <Material style.Materials.Prop76 >
     >
     <S1 PName="On" 
-     <Material style.Materials.Prop75 >
+     <Material style.Materials.Prop76 >
     >
    >
    <S_502 Name="D_S" DS="1" PMask="1" Z="1" 
@@ -4136,103 +4135,103 @@
      <Material style.Materials.Prop23 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop74 >
+     <Material style.Materials.Prop75 >
     >
    >
    <S_504 Name="DBASIS" 
     <S0 PName="Sphere" 
-     <Material style.Materials.Prop76 >
+     <Material style.Materials.Prop77 >
     >
     <S1 PName="ConeX" 
-     <Material style.Materials.Prop77 >
+     <Material style.Materials.Prop78 >
     >
     <S2 PName="DiskX" 
-     <Material style.Materials.Prop77 >
+     <Material style.Materials.Prop78 >
     >
     <S3 PName="CylinderX" 
-     <Material style.Materials.Prop77 >
+     <Material style.Materials.Prop78 >
     >
     <S4 PName="ConeY" 
-     <Material style.Materials.Prop78 >
+     <Material style.Materials.Prop79 >
     >
     <S5 PName="DiskY" 
-     <Material style.Materials.Prop78 >
+     <Material style.Materials.Prop79 >
     >
     <S6 PName="CylinderY" 
-     <Material style.Materials.Prop78 >
+     <Material style.Materials.Prop79 >
     >
     <S7 PName="ConeZ" 
-     <Material style.Materials.Prop79 >
+     <Material style.Materials.Prop80 >
     >
     <S8 PName="DiskZ" 
-     <Material style.Materials.Prop79 >
+     <Material style.Materials.Prop80 >
     >
     <S9 PName="CylinderZ" 
-     <Material style.Materials.Prop79 >
+     <Material style.Materials.Prop80 >
     >
     <S10 PName="Label" 
-     <Material style.Materials.Prop80 >
+     <Material style.Materials.Prop81 >
     >
    >
    <S_505 Name="DBasis" 
     <S0 PName="Sphere" 
-     <Material style.Materials.Prop81 >
+     <Material style.Materials.Prop82 >
     >
     <S1 PName="ConeX" 
-     <Material style.Materials.Prop82 >
+     <Material style.Materials.Prop83 >
     >
     <S2 PName="DiskX" 
-     <Material style.Materials.Prop82 >
+     <Material style.Materials.Prop83 >
     >
     <S3 PName="CylinderX" 
-     <Material style.Materials.Prop82 >
+     <Material style.Materials.Prop83 >
     >
     <S4 PName="ConeY" 
-     <Material style.Materials.Prop83 >
+     <Material style.Materials.Prop84 >
     >
     <S5 PName="DiskY" 
-     <Material style.Materials.Prop83 >
+     <Material style.Materials.Prop84 >
     >
     <S6 PName="CylinderY" 
-     <Material style.Materials.Prop83 >
+     <Material style.Materials.Prop84 >
     >
     <S7 PName="ConeZ" 
-     <Material style.Materials.Prop84 >
+     <Material style.Materials.Prop85 >
     >
     <S8 PName="DiskZ" 
-     <Material style.Materials.Prop84 >
+     <Material style.Materials.Prop85 >
     >
     <S9 PName="CylinderZ" 
-     <Material style.Materials.Prop84 >
+     <Material style.Materials.Prop85 >
     >
     <S10 PName="Label" 
-     <Material style.Materials.Prop80 >
+     <Material style.Materials.Prop81 >
     >
    >
    <S_506 Name="DFRAME" 
     <S0 PName="Lines" 
-     <Material style.Materials.Prop85 >
+     <Material style.Materials.Prop86 >
     >
    >
    <S_507 Name="DFrame" 
     <S0 PName="Lines" 
-     <Material style.Materials.Prop85 >
+     <Material style.Materials.Prop86 >
     >
    >
    <S_508 Name="DUNITCELL" 
     <S0 PName="Lines" 
-     <Material style.Materials.Prop86 >
+     <Material style.Materials.Prop87 >
     >
     <S1 PName="Label" 
-     <Material style.Materials.Prop68 >
+     <Material style.Materials.Prop69 >
     >
    >
    <S_509 Name="DUnitCell" 
     <S0 PName="Lines" 
-     <Material style.Materials.Prop87 >
+     <Material style.Materials.Prop88 >
     >
     <S1 PName="Label" 
-     <Material style.Materials.Prop68 >
+     <Material style.Materials.Prop69 >
     >
    >
    <S_510 Name="Dy_E" DS="2.0" PMask="5.0" Z="1.0" 
@@ -4409,7 +4408,7 @@
      <Material style.Materials.Prop13 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop88 >
+     <Material style.Materials.Prop89 >
     >
    >
    <S_534 Name="F_E-Re_E" PMask="48" R="0.8" 
@@ -4470,7 +4469,7 @@
    >
    <S_541 Name="F_N-H_S@H" PMask="2048" R="0.8" 
     <S0 PName="Balls bond" 
-     <Material style.Materials.Prop60 >
+     <Material style.Materials.Prop61 >
     >
    >
    <S_542 Name="F_N-Ir_N" PMask="48" R="0.8" 
@@ -4558,7 +4557,7 @@
      <Material style.Materials.Prop12 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop89 >
+     <Material style.Materials.Prop90 >
     >
    >
    <S_553 Name="F_N-Re_E" PMask="48" R="0.8" 
@@ -4664,7 +4663,7 @@
      <Material style.Materials.Prop13 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop90 >
+     <Material style.Materials.Prop91 >
     >
    >
    <S_567 Name="F_S-Re_E" PMask="48" R="0.8" 
@@ -4709,7 +4708,7 @@
    >
    <S_572 Name="Fader" 
     <S0 PName="Quad" 
-     <Material style.Materials.Prop91 >
+     <Material style.Materials.Prop92 >
     >
    >
    <S_573 Name="Fe_E" DS="2" PMask="5.0" Z="1.0" 
@@ -4797,7 +4796,7 @@
      <Material style.Materials.Prop33 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop92 >
+     <Material style.Materials.Prop93 >
     >
    >
    <S_584 Name="Fe_N" DS="6" PMask="6" Z="1" 
@@ -4861,7 +4860,7 @@
      <Material style.Materials.Prop18 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop93 >
+     <Material style.Materials.Prop94 >
     >
    >
    <S_592 Name="Fe_S" DS="2.0" PMask="1.0" Z="1.0" 
@@ -4906,7 +4905,7 @@
      <Material style.Materials.Prop33 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop59 >
+     <Material style.Materials.Prop60 >
     >
    >
    <S_598 Name="Fm_E" DS="2.0" PMask="5.0" Z="1.0" 
@@ -4937,12 +4936,12 @@
    >
    <S_602 Name="FragmentA" 
     <S0 PName="mat" 
-     <Material style.Materials.Prop94 >
+     <Material style.Materials.Prop95 >
     >
    >
    <S_603 Name="FragmentB" 
     <S0 PName="mat" 
-     <Material style.Materials.Prop95 >
+     <Material style.Materials.Prop96 >
     >
    >
    <S_604 Name="Ga_E" DS="2.0" PMask="5.0" Z="1.0" 
@@ -4989,7 +4988,7 @@
      <Material style.Materials.Prop34 >
     >
     <S1 PName="Rims" 
-     <Material style.Materials.Prop96 >
+     <Material style.Materials.Prop97 >
     >
    >
    <S_611 Name="H_E-O_E" PMask="48" R="0.8" 
@@ -5005,7 +5004,7 @@
      <Material style.Materials.Prop34 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop97 >
+     <Material style.Materials.Prop98 >
     >
    >
    <S_613 Name="H_N" DS="6" PMask="6" Z="1.0" 
@@ -5013,7 +5012,7 @@
      <Material style.Materials.Prop23 >
     >
     <S1 PName="Rims" 
-     <Material style.Materials.Prop98 >
+     <Material style.Materials.Prop99 >
     >
    >
    <S_614 Name="H_N-O_E" PMask="48" R="0.8" 
@@ -5092,7 +5091,7 @@
    >
    <S_624 Name="H_S-N_N@H" PMask="2048" R="0.8" 
     <S0 PName="Balls bond" 
-     <Material style.Materials.Prop60 >
+     <Material style.Materials.Prop61 >
     >
    >
    <S_625 Name="H_S-N_S" PMask="48" R="0.8" 
@@ -5148,7 +5147,7 @@
    >
    <S_631 Name="H_S-O_N@H" PMask="2048" R="0.8" 
     <S0 PName="Balls bond" 
-     <Material style.Materials.Prop60 >
+     <Material style.Materials.Prop61 >
     >
    >
    <S_632 Name="H_S-O_S" PMask="48" R="0.8" 
@@ -5217,7 +5216,7 @@
      <Material style.Materials.Prop34 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop144 >
+     <Material style.Materials.Prop53 >
     >
    >
    <S_641 Name="H_S-Re_E" PMask="48" R="0.8" 
@@ -5283,7 +5282,7 @@
    >
    <S_649 Name="H_S-S_N@H" PMask="2048" R="0.8" 
     <S0 PName="Balls bond" 
-     <Material style.Materials.Prop60 >
+     <Material style.Materials.Prop61 >
     >
    >
    <S_650 Name="H_S-S_S@H" PMask="2048" R="0.8" 
@@ -5293,7 +5292,7 @@
    >
    <S_651 Name="H_S-Si_E" PMask="48" R="0.8" 
     <S0 PName="Bottom cone" 
-     <Material style.Materials.Prop53 >
+     <Material style.Materials.Prop54 >
     >
     <S1 PName="Top cone" 
      <Material style.Materials.Prop34 >
@@ -5322,10 +5321,10 @@
    >
    <S_655 Name="HelpWindow" Left="0.0" Top="1" 
     <S0 PName="Plane" 
-     <Material style.Materials.Prop99 >
+     <Material style.Materials.Prop100 >
     >
     <S1 PName="Text" 
-     <Material style.Materials.Prop100 >
+     <Material style.Materials.Prop101 >
     >
    >
    <S_656 Name="Hf_E" DS="2.0" PMask="5.0" Z="1.0" 
@@ -5372,7 +5371,7 @@
      <Material style.Materials.Prop35 >
     >
     <S1 PName="Rims" 
-     <Material style.Materials.Prop71 >
+     <Material style.Materials.Prop72 >
     >
    >
    <S_663 Name="I_E-I_N" PMask="48" R="0.8" 
@@ -5396,7 +5395,7 @@
      <Material style.Materials.Prop14 >
     >
     <S1 PName="Rims" 
-     <Material style.Materials.Prop71 >
+     <Material style.Materials.Prop72 >
     >
    >
    <S_666 Name="I_N-I_N" PMask="48" R="0.8" 
@@ -5428,7 +5427,7 @@
      <Material style.Materials.Prop14 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop101 >
+     <Material style.Materials.Prop102 >
     >
    >
    <S_670 Name="I_N-S_N" PMask="48" R="0.8" 
@@ -5465,7 +5464,7 @@
      <Material style.Materials.Prop35 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop102 >
+     <Material style.Materials.Prop103 >
     >
    >
    <S_675 Name="In_E" DS="2.0" PMask="5.0" Z="1.0" 
@@ -5483,10 +5482,10 @@
    >
    <S_677 Name="InfoBox" Left="0" Top="1" 
     <S0 PName="Plane" 
-     <Material style.Materials.Prop99 >
+     <Material style.Materials.Prop100 >
     >
     <S1 PName="Text" 
-     <Material style.Materials.Prop103 >
+     <Material style.Materials.Prop104 >
     >
    >
    <S_678 Name="Ir_E" DS="2" PMask="5.0" Z="1.0" 
@@ -5534,7 +5533,7 @@
      <Material style.Materials.Prop6 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop104 >
+     <Material style.Materials.Prop105 >
     >
    >
    <S_684 Name="Ir_E-S_E" PMask="48" R="0.8" 
@@ -5590,7 +5589,7 @@
      <Material style.Materials.Prop12 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop105 >
+     <Material style.Materials.Prop106 >
     >
    >
    <S_691 Name="Ir_N-S_N" PMask="48" R="0.8" 
@@ -5663,7 +5662,7 @@
    >
    <S_701 Name="Labels" 
     <S0 PName="Text" 
-     <Material style.Materials.Prop106 >
+     <Material style.Materials.Prop107 >
     >
    >
    <S_702 Name="Li_E" DS="2" PMask="5.0" Z="1.0" 
@@ -5671,7 +5670,7 @@
      <Material style.Materials.Prop8 >
     >
     <S1 PName="Rims" 
-     <Material style.Materials.Prop71 >
+     <Material style.Materials.Prop72 >
     >
    >
    <S_703 Name="Li_E-N_E" PMask="48" R="0.8" 
@@ -5885,7 +5884,7 @@
      <Material style.Materials.Prop2 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop107 >
+     <Material style.Materials.Prop108 >
     >
    >
    <S_732 Name="Mo_E-S_N" PMask="48" R="0.8" 
@@ -5973,7 +5972,7 @@
      <Material style.Materials.Prop12 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop108 >
+     <Material style.Materials.Prop109 >
     >
    >
    <S_743 Name="Mo_N-S_N" PMask="48" R="0.8" 
@@ -6034,7 +6033,7 @@
      <Material style.Materials.Prop2 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop108 >
+     <Material style.Materials.Prop109 >
     >
    >
    <S_751 Name="N_E" 
@@ -6042,7 +6041,7 @@
      <Material style.Materials.Prop15 >
     >
     <S1 PName="Rims" 
-     <Material style.Materials.Prop109 >
+     <Material style.Materials.Prop110 >
     >
    >
    <S_752 Name="N_E-N_E" PMask="48" R="0.8" 
@@ -6154,7 +6153,7 @@
      <Material style.Materials.Prop15 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop143 >
+     <Material style.Materials.Prop25 >
     >
    >
    <S_766 Name="N_E-Re_E" PMask="48" R="0.8" 
@@ -6197,7 +6196,7 @@
      <Material style.Materials.Prop15 >
     >
    >
-   <S_771 Name="N_E-S_E" PMask="48" R="0.8" 
+   <S_771 Name="N_E-S_E" 
     <S0 PName="Bottom cone" 
      <Material style.Materials.Prop21 >
     >
@@ -6232,7 +6231,7 @@
      <Material style.Materials.Prop16 >
     >
     <S1 PName="Rims" 
-     <Material style.Materials.Prop63 >
+     <Material style.Materials.Prop64 >
     >
    >
    <S_775 Name="N_N-N_N" PMask="48" R="0.8" 
@@ -6328,7 +6327,7 @@
      <Material style.Materials.Prop16 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop110 >
+     <Material style.Materials.Prop111 >
     >
    >
    <S_787 Name="N_N-Re_E" PMask="48" R="0.8" 
@@ -6469,7 +6468,7 @@
      <Material style.Materials.Prop15 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop111 >
+     <Material style.Materials.Prop112 >
     >
    >
    <S_805 Name="N_S-Re_E" PMask="48" R="0.8" 
@@ -6689,7 +6688,7 @@
      <Material style.Materials.Prop12 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop112 >
+     <Material style.Materials.Prop113 >
     >
    >
    <S_834 Name="Ni_S" DS="1" PMask="1.0" Z="1.0" 
@@ -6755,7 +6754,7 @@
      <Material style.Materials.Prop0 >
     >
    >
-   <S_843 Name="O_E" DS="2" PMask="5" Z="1" 
+   <S_843 Name="O_E" 
     <S0 PName="Sphere" 
      <Material style.Materials.Prop17 >
     >
@@ -6840,7 +6839,7 @@
      <Material style.Materials.Prop17 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop56 >
+     <Material style.Materials.Prop57 >
     >
    >
    <S_854 Name="O_E-Re_E" PMask="48" R="0.8" 
@@ -6883,7 +6882,7 @@
      <Material style.Materials.Prop18 >
     >
    >
-   <S_859 Name="O_E-S_E" PMask="48" R="0.8" 
+   <S_859 Name="O_E-S_E" 
     <S0 PName="Bottom cone" 
      <Material style.Materials.Prop21 >
     >
@@ -6913,7 +6912,7 @@
    >
    <S_861 Name="O_E-Si_E" PMask="48" R="0.8" 
     <S0 PName="Bottom cone" 
-     <Material style.Materials.Prop53 >
+     <Material style.Materials.Prop54 >
     >
     <S1 PName="Top cone" 
      <Material style.Materials.Prop17 >
@@ -7161,7 +7160,7 @@
      <Material style.Materials.Prop17 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop56 >
+     <Material style.Materials.Prop57 >
     >
    >
    <S_893 Name="O_S-Re_E" PMask="48" R="0.8" 
@@ -7246,7 +7245,7 @@
    >
    <S_903 Name="O_S-Si_S" PMask="48" R="0.8" 
     <S0 PName="Bottom cone" 
-     <Material style.Materials.Prop53 >
+     <Material style.Materials.Prop54 >
     >
     <S1 PName="Top cone" 
      <Material style.Materials.Prop17 >
@@ -7278,7 +7277,7 @@
      <Material style.Materials.Prop19 >
     >
     <S1 PName="Rims" 
-     <Material style.Materials.Prop71 >
+     <Material style.Materials.Prop72 >
     >
    >
    <S_908 Name="P_E-P_E" PMask="48" R="0.8" 
@@ -7334,7 +7333,7 @@
      <Material style.Materials.Prop19 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop113 >
+     <Material style.Materials.Prop114 >
     >
    >
    <S_915 Name="P_E-Rh_E" PMask="48" R="0.8" 
@@ -7398,7 +7397,7 @@
      <Material style.Materials.Prop19 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop53 >
+     <Material style.Materials.Prop54 >
     >
    >
    <S_923 Name="P_E-Si_N" PMask="48" R="0.8" 
@@ -7414,7 +7413,7 @@
      <Material style.Materials.Prop14 >
     >
     <S1 PName="Rims" 
-     <Material style.Materials.Prop71 >
+     <Material style.Materials.Prop72 >
     >
    >
    <S_925 Name="P_N-P_N" PMask="48" R="0.8" 
@@ -7547,7 +7546,7 @@
      <Material style.Materials.Prop19 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop114 >
+     <Material style.Materials.Prop115 >
     >
    >
    <S_942 Name="P_S-Rh_E" PMask="48" R="0.8" 
@@ -7653,7 +7652,7 @@
      <Material style.Materials.Prop2 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop115 >
+     <Material style.Materials.Prop116 >
     >
    >
    <S_956 Name="Pd_E-S_E" PMask="48" R="0.8" 
@@ -7730,7 +7729,7 @@
      <Material style.Materials.Prop2 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop115 >
+     <Material style.Materials.Prop116 >
     >
    >
    <S_966 Name="Pd_S-S_S" PMask="48" R="0.8" 
@@ -7743,10 +7742,10 @@
    >
    <S_967 Name="PLabels" Persistent="true" 
     <S0 PName="Plane" 
-     <Material style.Materials.Prop145 >
+     <Material style.Materials.Prop117 >
     >
     <S1 PName="Text" 
-     <Material style.Materials.Prop146 >
+     <Material style.Materials.Prop118 >
     >
    >
    <S_968 Name="Pm_E" DS="2.0" PMask="5.0" Z="1.0" 
@@ -7817,7 +7816,7 @@
      <Material style.Materials.Prop6 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop116 >
+     <Material style.Materials.Prop119 >
     >
    >
    <S_978 Name="Pt_N" DS="6" PMask="6" Z="1" 
@@ -7841,7 +7840,7 @@
      <Material style.Materials.Prop50 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop117 >
+     <Material style.Materials.Prop120 >
     >
    >
    <S_981 Name="Pt_S" DS="2.0" PMask="1.0" Z="1.0" 
@@ -7862,7 +7861,7 @@
      <Material style.Materials.Prop6 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop118 >
+     <Material style.Materials.Prop121 >
     >
    >
    <S_984 Name="Pu_E" DS="2.0" PMask="5.0" Z="1.0" 
@@ -7889,10 +7888,10 @@
    >
    <S_988 Name="Q_S-Q_S" 
     <S0 PName="Bottom cone" 
-     <Material style.Materials.Prop142 >
+     <Material style.Materials.Prop122 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop143 >
+     <Material style.Materials.Prop25 >
     >
    >
    <S_989 Name="Q_S-Re_E" PMask="48" R="0.8" 
@@ -7900,7 +7899,7 @@
      <Material style.Materials.Prop6 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop119 >
+     <Material style.Materials.Prop123 >
     >
    >
    <S_990 Name="Q_S-Re_N" PMask="48" R="0.8" 
@@ -7916,7 +7915,7 @@
      <Material style.Materials.Prop6 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop120 >
+     <Material style.Materials.Prop124 >
     >
    >
    <S_992 Name="Q_S-Rh_E" PMask="48" R="0.8" 
@@ -7924,7 +7923,7 @@
      <Material style.Materials.Prop2 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop113 >
+     <Material style.Materials.Prop114 >
     >
    >
    <S_993 Name="Q_S-Rh_S" PMask="48" R="0.8" 
@@ -7932,7 +7931,7 @@
      <Material style.Materials.Prop2 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop114 >
+     <Material style.Materials.Prop115 >
     >
    >
    <S_994 Name="Q_S-Ru_E" PMask="48" R="0.8" 
@@ -7940,7 +7939,7 @@
      <Material style.Materials.Prop2 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop121 >
+     <Material style.Materials.Prop125 >
     >
    >
    <S_995 Name="Q_S-Ru_N" PMask="48" R="0.8" 
@@ -7948,7 +7947,7 @@
      <Material style.Materials.Prop18 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop122 >
+     <Material style.Materials.Prop126 >
     >
    >
    <S_996 Name="Q_S-Ru_S" PMask="48" R="0.8" 
@@ -7956,7 +7955,7 @@
      <Material style.Materials.Prop2 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop123 >
+     <Material style.Materials.Prop127 >
     >
    >
    <S_997 Name="Q_S-S_E" PMask="48.0" R="0.8" 
@@ -7980,7 +7979,7 @@
      <Material style.Materials.Prop21 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop124 >
+     <Material style.Materials.Prop128 >
     >
    >
    <S_1000 Name="Q_S-Sb_E" PMask="48" R="0.8" 
@@ -7988,12 +7987,12 @@
      <Material style.Materials.Prop26 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop97 >
+     <Material style.Materials.Prop98 >
     >
    >
    <S_1001 Name="Q_S-Si_E" PMask="48" R="0.8" 
     <S0 PName="Bottom cone" 
-     <Material style.Materials.Prop53 >
+     <Material style.Materials.Prop54 >
     >
     <S1 PName="Top cone" 
      <Material style.Materials.Prop25 >
@@ -8004,15 +8003,15 @@
      <Material style.Materials.Prop18 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop125 >
+     <Material style.Materials.Prop129 >
     >
    >
    <S_1003 Name="Q_S-Si_S" PMask="48" R="0.8" 
     <S0 PName="Bottom cone" 
-     <Material style.Materials.Prop53 >
+     <Material style.Materials.Prop54 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop126 >
+     <Material style.Materials.Prop130 >
     >
    >
    <S_1004 Name="Q_S-Sn_E" PMask="48" R="0.8" 
@@ -8020,7 +8019,7 @@
      <Material style.Materials.Prop26 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop127 >
+     <Material style.Materials.Prop131 >
     >
    >
    <S_1005 Name="Q_S-Sn_S" PMask="48" R="0.8" 
@@ -8028,7 +8027,7 @@
      <Material style.Materials.Prop26 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop128 >
+     <Material style.Materials.Prop132 >
     >
    >
    <S_1006 Name="Q_S-W_E" PMask="48" R="0.8" 
@@ -8036,7 +8035,7 @@
      <Material style.Materials.Prop6 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop113 >
+     <Material style.Materials.Prop114 >
     >
    >
    <S_1007 Name="Q_S-W_N" PMask="48" R="0.8" 
@@ -8044,7 +8043,7 @@
      <Material style.Materials.Prop12 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop129 >
+     <Material style.Materials.Prop133 >
     >
    >
    <S_1008 Name="Ra_E" DS="2.0" PMask="5.0" Z="1.0" 
@@ -8136,7 +8135,7 @@
    >
    <S_1020 Name="refine" Left="896" Top="35" Z="-9.99" 
     <S0 PName="Plane" 
-     <Material style.Materials.Prop130 >
+     <Material style.Materials.Prop134 >
     >
    >
    <S_1021 Name="Rh_E" DS="2" PMask="5" Z="1.0" 
@@ -8168,7 +8167,7 @@
      <Material style.Materials.Prop2 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop53 >
+     <Material style.Materials.Prop54 >
     >
    >
    <S_1025 Name="Rh_N" DS="6" PMask="6" Z="1" 
@@ -8205,7 +8204,7 @@
      <Material style.Materials.Prop2 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop53 >
+     <Material style.Materials.Prop54 >
     >
    >
    <S_1030 Name="Rn_E" DS="2.0" PMask="5.0" Z="1.0" 
@@ -8298,7 +8297,7 @@
      <Material style.Materials.Prop2 >
     >
    >
-   <S_1042 Name="S_E" DS="2" PMask="5" Z="1.0" 
+   <S_1042 Name="S_E" 
     <S0 PName="Sphere" 
      <Material style.Materials.Prop21 >
     >
@@ -8327,7 +8326,7 @@
      <Material style.Materials.Prop21 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop53 >
+     <Material style.Materials.Prop54 >
     >
    >
    <S_1046 Name="S_E-Si_N" PMask="48" R="0.8" 
@@ -8403,7 +8402,7 @@
    >
    <S_1056 Name="Se_E" DS="2.0" PMask="5.0" Z="1.0" 
     <S0 PName="Sphere" 
-     <Material style.Materials.Prop131 >
+     <Material style.Materials.Prop135 >
     >
     <S1 PName="Rims" 
      <Material style.Materials.Prop27 >
@@ -8411,37 +8410,37 @@
    >
    <S_1057 Name="Se_S" DS="2.0" PMask="1.0" Z="1.0" 
     <S0 PName="Sphere" 
-     <Material style.Materials.Prop131 >
+     <Material style.Materials.Prop135 >
     >
    >
    <S_1058 Name="Selection" 
     <S0 PName="mat" 
-     <Material style.Materials.Prop132 >
+     <Material style.Materials.Prop136 >
     >
    >
    <S_1059 Name="SI" PMask="4352" R="0.8" 
     <S0 PName="Bottom cone" 
-     <Material style.Materials.Prop94 >
+     <Material style.Materials.Prop95 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop94 >
+     <Material style.Materials.Prop95 >
     >
     <S2 PName="Line" 
-     <Material style.Materials.Prop133 >
+     <Material style.Materials.Prop137 >
     >
     <S3 PName="Stippled line" 
-     <Material style.Materials.Prop94 >
+     <Material style.Materials.Prop95 >
     >
     <S4 PName="Balls bond" 
      <Material style.Materials.Prop17 >
     >
     <S5 PName="Stipple cone" 
-     <Material style.Materials.Prop134 >
+     <Material style.Materials.Prop138 >
     >
    >
    <S_1060 Name="Si_E" DS="2" PMask="5.0" Z="1.0" 
     <S0 PName="Sphere" 
-     <Material style.Materials.Prop53 >
+     <Material style.Materials.Prop54 >
     >
     <S1 PName="Rims" 
      <Material style.Materials.Prop42 >
@@ -8449,10 +8448,10 @@
    >
    <S_1061 Name="Si_E-Si_E" PMask="48" R="0.8" 
     <S0 PName="Bottom cone" 
-     <Material style.Materials.Prop53 >
+     <Material style.Materials.Prop54 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop53 >
+     <Material style.Materials.Prop54 >
     >
    >
    <S_1062 Name="Si_E-Si_N" PMask="48" R="0.8" 
@@ -8481,15 +8480,15 @@
    >
    <S_1065 Name="Si_S" DS="2.0" PMask="1.0" Z="1.0" 
     <S0 PName="Sphere" 
-     <Material style.Materials.Prop53 >
+     <Material style.Materials.Prop54 >
     >
    >
    <S_1066 Name="Si_S-Si_S" PMask="48" R="0.8" 
     <S0 PName="Bottom cone" 
-     <Material style.Materials.Prop53 >
+     <Material style.Materials.Prop54 >
     >
     <S1 PName="Top cone" 
-     <Material style.Materials.Prop53 >
+     <Material style.Materials.Prop54 >
     >
    >
    <S_1067 Name="Sm_E" DS="2.0" PMask="5.0" Z="1.0" 
@@ -8528,7 +8527,7 @@
    >
    <S_1072 Name="solve" Left="896" Top="35" Z="-9.99" 
     <S0 PName="Plane" 
-     <Material style.Materials.Prop130 >
+     <Material style.Materials.Prop134 >
     >
    >
    <S_1073 Name="Sr_E" DS="2.0" PMask="5.0" Z="1.0" 
@@ -8598,7 +8597,7 @@
    >
    <S_1083 Name="TGLCONSOLE" 
     <S0 PName="Text" 
-     <Material style.Materials.Prop135 >
+     <Material style.Materials.Prop139 >
     >
    >
    <S_1084 Name="Th_E" DS="2.0" PMask="5.0" Z="1.0" 
@@ -8655,15 +8654,15 @@
    >
    <S_1092 Name="Tooltip" Left="0" Top="0" 
     <S0 PName="Plane" 
-     <Material style.Materials.Prop130 >
+     <Material style.Materials.Prop134 >
     >
     <S1 PName="Text" 
-     <Material style.Materials.Prop136 >
+     <Material style.Materials.Prop140 >
     >
    >
    <S_1093 Name="TXGLLABELS" 
     <S0 PName="Text" 
-     <Material style.Materials.Prop137 >
+     <Material style.Materials.Prop141 >
     >
    >
    <S_1094 Name="U_E" DS="2.0" PMask="5.0" Z="1.0" 
@@ -8723,7 +8722,7 @@
    >
    <S_1102 Name="working" 
     <S0 PName="Plane" 
-     <Material style.Materials.Prop130 >
+     <Material style.Materials.Prop134 >
     >
    >
    <S_1103 Name="Xe_E" DS="2.0" PMask="5.0" Z="1.0" 
@@ -8741,31 +8740,31 @@
    >
    <S_1105 Name="XGrid" 
     <S0 PName="gridPoints" 
-     <Material style.Materials.Prop138 >
+     <Material style.Materials.Prop142 >
     >
     <S1 PName="eMap" 
-     <Material style.Materials.Prop139 >
+     <Material style.Materials.Prop143 >
     >
     <S2 PName="+Surface" 
-     <Material style.Materials.Prop140 >
+     <Material style.Materials.Prop144 >
     >
     <S3 PName="-Surface" 
-     <Material style.Materials.Prop141 >
+     <Material style.Materials.Prop145 >
     >
    >
    <S_1106 Name="XGrid_Legend" Left="0" Top="0" 
     <S0 PName="Plane" 
-     <Material style.Materials.Prop130 >
+     <Material style.Materials.Prop134 >
     >
     <S1 PName="Text" 
-     <Material style.Materials.Prop135 >
+     <Material style.Materials.Prop139 >
     >
    >
    <S_1107 Name="XY" 
     <SubStyles 
      <S_0 Name="png" 
       <S0 PName="Plane" 
-       <Material style.Materials.Prop130 >
+       <Material style.Materials.Prop134 >
       >
      >
     >
