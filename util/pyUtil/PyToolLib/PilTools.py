@@ -1336,20 +1336,23 @@ class timage(ImageTools):
     
     cut = 0*sf, 152*sf, 15*sf, 167*sf
     crop =  im.crop(cut)
-    crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_table_firstcol_colour,luminosity=0.98)) 
-    crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_green,luminosity=1.3,saturation=0.7))
+    crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_table_firstcol_colour,luminosity=1.98)) 
+    #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_green,luminosity=1.3,saturation=0.7))
     #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_base_colour,luminosity=1.7)) 
+    #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_base_colour,luminosity=1.5)) 
     IM =  Image.new('RGBA', crop.size, self.gui_html_table_firstcol_colour)
     IM.paste(crop_colouriszed, (0,0), crop)
     name = "info.png"
     IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
     draw = ImageDraw.Draw(IM)
+    txt = IT.get_unicode_characters('info')
+    #txt = "i"
     self.write_text_to_draw(draw, 
-                 "?", 
-                 top_left=(4, 0), 
-                 font_name = 'Vera Bold', 
+                 txt, 
+                 top_left=(5, 0), 
+                 font_name = 'Vera', 
                  font_size=14, 
-                 font_colour=self.adjust_colour(self.gui_html_table_firstcol_colour,luminosity=1))
+                 font_colour=self.adjust_colour(self.gui_html_table_firstcol_colour,luminosity=0.7))
     OlexVFS.save_image_to_olex(IM, name, 2)
     
     cut = 16*sf, 156*sf, 26*sf, 166*sf
@@ -1360,10 +1363,11 @@ class timage(ImageTools):
     IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
     name = "info_tiny.png"
     draw = ImageDraw.Draw(IM)
+    txt = IT.get_unicode_characters('info')
     self.write_text_to_draw(draw, 
-                 "i", 
+                 txt, 
                  top_left=(1, 1), 
-                 font_name = 'Vera Italic', 
+                 font_name = 'Vera', 
                  font_size=6, 
                  font_colour=self.gui_html_font_colour)
     OlexVFS.save_image_to_olex(IM, name, 2)
@@ -2240,6 +2244,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     iconIndex.setdefault("dot-arrow-left", (7, 1, {'colourise':'gui_green'}))
     iconIndex.setdefault("dot-arrow-down", (7, 2, {'colourise':'gui_green'}))
     iconIndex.setdefault("dot-arrow-up", (7, 3, {'colourise':'gui_green'}))
+    iconIndex.setdefault("polyhedra", (6, 9))
 
     for icon in iconIndex:
       image = self.icon_items(iconIndex[icon])
