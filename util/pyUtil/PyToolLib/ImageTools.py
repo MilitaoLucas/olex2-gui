@@ -33,11 +33,27 @@ class ImageTools(FontInstances):
     self.gui_tab_font_name = "%s Bold" %font
     self.gui_sNumTitle_font_name = "%s Bold" %font
     self.gui_button_font_name = "%s Bold" %font
+
+  def get_unicode_characters(self, txt):
+    txt = txt.replace("lambda", unichr(61548))
+    txt = txt.replace("theta", unichr(61553))
+    txt = txt.replace("sigma", unichr(61555))
+    txt = txt.replace("^2", unichr(178))
+    txt = txt.replace("^3", unichr(179))
+    txt = txt.replace(">", unichr(61681))
+    txt = txt.replace("<", unichr(61665))
+    txt = txt.replace("Fo2", "Fo%s" %(unichr(178)))
+    txt = txt.replace("Fexp", "F%s" %(unichr(2091)))
+    #txt  = txt.replace("info", unichr(65353))
+    txt  = txt.replace("info", unichr(61600))
+    return txt
+    
+    
   def centre_text(self, draw, txt, font, maxWidth):
     txt_size = draw.textsize(txt, font=font)
     hStart = int((maxWidth - txt_size[0])/2)
     return hStart
-
+  
   def align_text(self, draw, txt, font, maxWidth, align):
     if align == "centre":
       txt_size = draw.textsize(txt, font=font)

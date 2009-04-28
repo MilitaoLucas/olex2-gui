@@ -35,3 +35,4 @@
   White/Colour
   Left/Right
   Graduated
+  Polyhedra
