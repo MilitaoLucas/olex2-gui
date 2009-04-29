@@ -296,12 +296,17 @@ class DownloadOlexLanguageDictionary:
     text = self.downloadSingleTerm(OXD, language)
     inputText = OV.GetUserInput(0,'Modify text for help entry %s in %s' %(OXD, language), text)
     if inputText and inputText != text:
-      self.uploadSingleTerm(OXD, language, inputText)
-      self.downloadTranslation()
+      res = self.uploadSingleTerm(OXD, language, inputText)
+      print res
+      res = self.downloadTranslation()
+      print res
       OV.cmd('reload dictionary')
     else:
       print "Text has not changed"
-    print inputText
+      res = self.downloadTranslation()
+      print res
+      OV.cmd('reload dictionary')
+    #print inputText
       
       
   def downloadSingleTerm(self, OXD, language = "English"):
@@ -327,7 +332,8 @@ XX command line text XX
     d = {"OXD":OXD, field:value}
     sql = self.SQL.create_insert_or_update_sql(d, 'translation')
     res = self.SQL.run_sql(sql)
-    print res, field, value
+    #print res, field, value
+    return res
       
       
   def downloadTranslation(self):
