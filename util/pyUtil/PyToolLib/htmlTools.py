@@ -184,9 +184,9 @@ def makeHtmlTableRow(dictionary):
 def make_help_box(args):
   
   name = args.get('name', None)
-  name = args.get('name', None)
   name = getGenericSwitchName(name)
   popout = args.get('popout', False)
+  box_type = args.get('type', 'help')
   if popout == 'false':
     popout = False
   else:
@@ -207,12 +207,12 @@ def make_help_box(args):
     help_src = name
   titleTxt = OV.TranslatePhrase("%s" %title)
   titleTxt = titleTxt.title()
-  helpTxt = OV.TranslatePhrase("%s-help" %help_src)
+  helpTxt = OV.TranslatePhrase("%s-%s" %(help_src, box_type))
   helpTxt = helpTxt.replace("\r", "")
   helpTxt = format_help(helpTxt)
   editLink = ""
   if OV.IsPluginInstalled('plugin-MySQL'):
-    editLink = "<a href='spy.EditHelpItem(%s-help)'>Edit</a>" %name
+    editLink = "<a href='spy.EditHelpItem(%s-%s)'>Edit</a>" %(name, box_type)
   if not popout:
     str += r'''
 <zimg border='0' src='olex_help_logo.png'>
@@ -251,35 +251,50 @@ def make_help_box(args):
 <td colspan=1 width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 <td align='right'>
 %s
-</tr></td>
+</td></tr>
 %s
 <!-- #include tool-footer gui/blocks/tool-footer.htm;1; -->
 ''' %(name, titleTxt, helpTxt, return_items, editLink)
-  wFilePath = r"%s-help.htm" %name
+  wFilePath = r"%s-%s.htm" %(name, box_type)
   #str = unicode(str)#
   str = str.replace(u'\xc5', 'angstrom')
   OV.write_to_olex(wFilePath, str)
-  boxWidth = 450
-  length = len(helpTxt)
-  #boxHeight = int(length/2.8)
-  boxHeight = int(length/(boxWidth/120)) + 100
-  if boxHeight > 500:
-    boxHeight = 500
-  #boxHeight = 800
   
-  x = 10
-  y = 50
-  mouse = True
-  if mouse:
-    mouseX = int(olx.GetMouseX())
-    mouseY = int(olx.GetMouseY())
-    y = mouseY
-    if mouseX > 300:
-      x = mouseX + 10 - boxWidth
-    else:
-      x = mouseX - 10
+  if box_type == 'help':
+    boxWidth = 450
+    length = len(helpTxt)
+    #boxHeight = int(length/2.8)
+    boxHeight = int(length/(boxWidth/120)) + 100
+    if boxHeight > 500:
+      boxHeight = 500
+    #boxHeight = 800
+    
+    x = 10
+    y = 50
+    mouse = True
+    if mouse:
+      mouseX = int(olx.GetMouseX())
+      mouseY = int(olx.GetMouseY())
+      y = mouseY
+      if mouseX > 300:
+        x = mouseX + 10 - boxWidth
+      else:
+        x = mouseX - 10
+        
+  else:
+    ws = olx.GetWindowSize('gl')
+    ws = ws.split(',')
+    x = int(ws[0])
+    y = int(ws[1]) + 50
+    boxWidth = int(400)
+    boxHeight = int(ws[3]) - 80
+    
   if popout:
-    pop_name = "%s-help"% name
+    if box_type == 'tutorial':
+      pop_name = "Tutorial"
+      name = "Tutorial"
+    else:
+      pop_name = "%s-%s"%(name, box_type)
     olx.Popup(pop_name, wFilePath, "-b=tc -t='%s' -w=%i -d='echo' -h=%i -x=%i -y=%i" %(name, boxWidth, boxHeight, x, y))
     olx.html_SetBorders(pop_name,5)
 #    olx.Popup(pop_name, wFilePath, "-b=tc -t='%s' -w=%i -d='echo' -h=%i -x=%i -y=%i" %(name, boxWidth, boxHeight, x, y))
@@ -287,7 +302,8 @@ def make_help_box(args):
   else:
     olx.html_Load(wFilePath) 
 #  popup '%1-tbxh' 'basedir()/etc/gui/help/%1.htm' -b=tc -t='%1' -w=%3 -h=%2 -x=%4 -y=%5"> 
-OV.registerMacro(make_help_box, 'name-Name of the Help Box&;popout-True/False')
+OV.registerMacro(make_help_box, 'name-Name of the Box&;popout-True/False&;type-Type of Box (help or tutorial)')
+
 
 def make_warning_html(colspan):
   txt = "htmltool-warning"
@@ -418,14 +434,32 @@ def format_help(string):
   
   #string = "l[fd] fsafdes l[rr]"
 
+
+  ## find all occurances of <lb> and replace this with a line-break in a table.
+  regex = re.compile(r"<lb>", re.X)
+  string = regex.sub(r"</td></tr><tr><td>", string)
   
   ## find all occurances of strings between t^..^t. These are the headers for tip of the day.
   regex = re.compile(r"t \^ (.*?)  \^ t", re.X)
   string = regex.sub(r"<font color='$getVar(gui_html_highlight_colour)'><b>\1</b></font>", string)
+
+#  ## find all occurances of strings between n^..^n. These are the notes.
+#  regex = re.compile(r"n \^ (.*?)  \^ n", re.X)
+#  string = regex.sub(r"<table></td></tr><tr bgcolor=#efefef><td><font size=-1><b>Note: </b>\1</font></td></tr><tr>", string)
+
+  ## find all occurances of strings between n^..^n. These are the notes.
+  regex = re.compile(r"n \^ (.*?)  \^ n", re.X)
+  string = regex.sub(r"<table width='%s' border='0' cellpadding='2' cellspacing='4'><tr bgcolor=#efefef><td><font size=-1><b>Note: </b>\1</font></td></tr></table>", string)
+  
   
   ## find all occurances of strings between []. These are links to help popup boxes.
-  regex = re.compile(r"l \[ (.*?) \]", re.X)
-  string = regex.sub(r"<a href='spy.make_help_box -name=\1 -popout=False'>\1</a>", string)
+  regex = re.compile(r"l\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
+  string = regex.sub(r"<font size=+1 color='$getVar(gui_html_highlight_colour)'>&#187;</font><a target='Go to \g<linktext>' href='spy.make_help_box -name=\g<linkurl> -type=\g<linktype>'><b>\g<linktext></b></a>", string)
+  
+  #pat=re.compile(r"l\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\]")
+  #pat.sub(r"<a href='\g<linkurl>'>\g<linktext></a>", s)
+  
+  
   
   ## find all occurances of strings between XX. These are command line entities.
   width = int(OV.GetHtmlPanelwidth()) - 10
@@ -433,7 +467,7 @@ def format_help(string):
   m = regex.findall(string)
   colour = "#888888"
   if m:
-    s = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='4'><tr bgcolor='#ffffdd'><td colspan='2'><b><font size='2' color='%s'><code>>>\2</code></font></b></td></tr></table>" %(width,colour), string)
+    s = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='4'><tr bgcolor='#ffffdd'><td colspan='2'><a href='\2'><b><font size='2' color='%s'><code>>>\2</code></font></b></a></td></tr></table>" %(width,colour), string)
     #s = regex.sub(r"<tr bgcolor='#ffffaa'><td colspan='2'><b><font size='2' color='%s'>>>\2</font></b></td></tr>" %colour, string)
 
   else:
