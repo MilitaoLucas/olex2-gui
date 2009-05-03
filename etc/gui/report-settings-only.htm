@@ -6,7 +6,7 @@
 <tr>
 	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 	<td width='50%' align='left' colspan='1'>
-	<a href="spy.run_CifTools info>>spy.run_MetaCif view>>updatehtml" target="View cif items to be added"><b>View cif info</b></a>
+	<a href="spy.CifTools()>>spy.MetaCif()>>updatehtml" target="View cif items to be added"><b>View cif info</b></a>
 	</td>
 	<td width='50%%' align='left' colspan='1'>
 	<a href="spy.run_cif_info>>
@@ -14,7 +14,7 @@ if file.Exists('FilePath()\FileName().cif') then None else 'SetVar(snum_refineme
 if file.Exists('FilePath()\FileName().cif') then None else 'DelIns ACTA'>> 
 if file.Exists('FilePath()\FileName().cif') then None else 'AddIns ACTA'>> 
 if file.Exists('FilePath()\FileName().cif') then None else 'refine'>>
-spy.run_MetaCif merge -edit=True>>
+spy.MetaCif(True,True)>>
 "
      target="Merge with cif file"><b>Merge cif</b></a>
 	</td>
