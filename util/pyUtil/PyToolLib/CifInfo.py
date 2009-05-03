@@ -1,8 +1,6 @@
-import sys
 import os
 import string
 import glob
-#import FileSystem as FS
 
 from ArgumentParser import ArgumentParser
 import userDictionaries
@@ -10,20 +8,8 @@ import variableFunctions
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
-#from ExternalPrgParameters import DefineExternalPrgParameters
-#a = DefineExternalPrgParameters()
-#SPD, RPD = a.run()
 import ExternalPrgParameters
 SPD, RPD = ExternalPrgParameters.defineExternalPrograms()
-
-
-#from DimasInfo import dimas_cif
-#from Streams import Unbuffered
-#import dimas_info
-#sys.stdin = Unbuffered(sys.stdin)
-#sys.stdout = Unbuffered(sys.stdout)
-
-smart = {}
 
 class MetacifFiles:
 	def __init__(self):
@@ -58,50 +44,35 @@ class MetacifFiles:
 		self.list_frames = None
 		self.list_p4p = None
 		self.list_cif_od = None
-		
+
 
 class MetaCif(ArgumentParser):
-	def __init__(self, args=None, tool_arg=None):
+	def __init__(self, merge=False, edit=False):
 		"""First argument should be 'view' or 'merge'.
 		
 		'view' brings up an internal text editor with the metacif information in cif format.
 		'merge' merges the metacif data with cif file from refinement, and brings up and external text editor with the merged cif file.
 		"""
-		super(MetaCif, self).__init__(args, tool_arg=None)
-		try:
-			self.arg = args.split(',')[0]
-		except:
-			pass		
-		try:
-			self.tool_arg = tool_arg.split(';')[0]
-		except:
-			pass
-		
-			
-	def run_MetaCif(self, f, args):
-		self.arg = f
-		edit = bool(args.get('edit',False))
-		
-		if self.arg == 'view':
+		super(MetaCif, self).__init__()
+		merge = (merge not in ('False','false',False))
+		edit = (edit not in ('False','false',False))
+
+		if not merge:
 			## view metacif information in internal text editor
 			self.viewCifInfoInOlex()
-		elif self.arg == 'merge':
+		else:
 			self.writeMetacifFile()
 			## merge metacif file with cif file from refinement
 			OV.CifMerge('meta.cif')
 			## open merged cif file in external text editor
 			if edit:
 				OV.external_edit('filepath()/filename().cif')
-				#olex.m("external_edit 'filepath()/filename().cif'")
-	
+
 	def viewCifInfoInOlex(self):
 		"""Brings up popup text editor in olex containing the text to be added to the cif file."""
 		
 		metacifInfo = variableFunctions.getVVD('metacif')
-		
 		text = self.prepareCifItems(metacifInfo)
-		
-		#inputText = olex.f("""GetUserInput(0,'Items to be entered into cif file',"'%s'")""" %text)
 		inputText = OV.GetUserInput(0,'Items to be entered into cif file',text)
 		
 		if inputText and inputText != text:
@@ -110,21 +81,19 @@ class MetaCif(ArgumentParser):
 			inputText = text
 			
 		return inputText
-	
+
 	def writeMetacifFile(self):
 		"""Writes the file 'meta.cif' to the Olex virtual FS."""
 		
 		metacifInfo = variableFunctions.getVVD('metacif')
 		text = self.prepareCifItems(metacifInfo)
-		
 		## write file to virtual FS
 		OV.write_to_olex('meta.cif', text)
-		
+
 	def prepareCifItems(self,metacifInfo):
 		"""Returns a string in cif format of all items in a dictionary of cif items."""
 		
 		listText = []
-		
 		## Sort crystal dimensions
 		dimensions = []
 		for item in ('snum_metacif_exptl_crystal_size_min','snum_metacif_exptl_crystal_size_mid','snum_metacif_exptl_crystal_size_max'):
@@ -140,8 +109,6 @@ class MetaCif(ArgumentParser):
 				pass
 
 		for key, obj in metacifInfo.items():
-			#key = item[0]
-			#obj = item[1]
 			if 'file' not in key and 'snum_user_input' not in key:
 				if type(obj) not in (int,float,str,bool,unicode):
 					value = obj.value
@@ -154,7 +121,6 @@ class MetaCif(ArgumentParser):
 					if value == '?':
 						pass
 					elif cifName == '_publ_author_names' and OV.FindValue('snum_metacif_publ_author_names') != '?':
-						#publ_author_loop = ['loop_\n',' _publ_author_name\n',' _publ_author_email\n',' _publ_author_address\n\n',]
 						loop = [('_publ_author_name','_publ_author_email','_publ_author_address')]
 						names = value.split(';')
 						for name in names:
@@ -165,7 +131,6 @@ class MetaCif(ArgumentParser):
 								for line in add.split('\n'):
 									address += ' %s\n' %line
 								loop.append((name,email,address))
-							
 						loopText = self.prepareLoop(loop)
 						listText.append(loopText)
 					elif cifName == '_publ_contact_author_name':
@@ -188,7 +153,6 @@ class MetaCif(ArgumentParser):
 							letterText += ' %s\n' %line
 						letterText += ';\n'
 						listText.append(letterText)
-						
 					else:
 						if type(value) == float or type(value) == int:
 							s = "%s%s%s\n" %(cifName,separation,value)
@@ -208,18 +172,15 @@ class MetaCif(ArgumentParser):
 							listText.append(s)
 			else:
 				pass
-			
 		listText.sort() 
 		if listText != []:
 			text = ''.join(listText)
 		else:
 			text = "No cif information has been found"
-			
 		return text
-	
+
 	def prepareLoop(self,loop):
 		strList = ['loop_\n']
-		
 		for item in loop:
 			for line in item:
 				if '\n' in line:
@@ -229,7 +190,7 @@ class MetaCif(ArgumentParser):
 				else:
 					strList.append("%s\n" %line)
 		return ''.join(strList)
-	
+
 	def read_input_text(self, inputText):
 		"""Reads input text from internal text editor and saves as variables in Olex those that have changed.
 		
@@ -239,7 +200,6 @@ class MetaCif(ArgumentParser):
 		"""
 		
 		mcif = inputText.split('\n')
-		
 		meta = []
 		a = -1
 		for line in mcif:
@@ -262,7 +222,6 @@ class MetaCif(ArgumentParser):
 						value += "\n%s" %(mcif[a+i])
 						i+=1
 					value += "\n;"
-					
 					try:
 						oldValue = OV.FindValue('snum_metacif%s' %field).rstrip().lstrip()
 						if value != oldValue:
@@ -298,14 +257,13 @@ class MetaCif(ArgumentParser):
 					continue
 				else:
 					continue
-				
+
 	def read_meta_file(self, metacif):
 		rFile=open(metacif, 'r')
 		mcif = []
 		meta = []
 		for line in rFile:
 			mcif.append(line)
-
 		for line in mcif:
 			field = ""
 			apd=""
@@ -341,9 +299,8 @@ class MetaCif(ArgumentParser):
 				meta.append(apd)
 		rFile.close()
 		return meta
-	
+
 	def insert_item(self):
-		
 		metacifInfo = variableFunctions.getVVD('metacif')
 		listText = self.prepareCifItems(metacifInfo)
 		listText.sort() 
@@ -351,60 +308,25 @@ class MetaCif(ArgumentParser):
 		if listText != []:
 			for item in listText:
 				text += item
-				
 		joinstr =  "/"
 		dir_up = joinstr.join(self.filepath.split(joinstr)[:-1])
 		meta = []
 
-MetaCif_instance = MetaCif()
-OV.registerMacro(MetaCif_instance.run_MetaCif, 'edit-True/False')    
-		
-		
-		
+OV.registerFunction(MetaCif)
+
 class CifTools(ArgumentParser):
-	def __init__(self, args=None, tool_arg=None):
-		super(CifTools, self).__init__(args, tool_arg)
+	def __init__(self):
+		super(CifTools, self).__init__()
 		self.ignore = ["?", "'?'", ".", "'.'"]
 		self.versions = {"default":[],"smart":{},"saint":{},"shelxtl":{},"xprep":{},"sad":{}}
 		self.metacif = {}
-		self.tool_args = tool_arg
+		self.run()
 
 	def run(self):
-		self.cif_info()
-		
-	def insert_into_meta_cif(self):
-		for item in merge:
-			for bit in item:
-				if bit[:1] == "_":
-					self.metacif.setdefault(bit, string.strip(item[bit]))
-					self.metacif[bit] = string.strip(item[bit])
-		a = MetaCif(self.metacif, None)
-		a.run()
-
-#	def cif_info(self, f, args={}):
-	def run_CifTools(self, f, args={}):
-		
 		merge = []
-		
-		filefull = self.filefull
-		filepath = self.filepath
-		filename = self.filename
-		basedir = self.basedir
-		arguments = self.tool_args
 		self.userInputVariables = OV.FindValue("snum_user_input_variables")
-		
-		basename = filename
-		path = filepath
-		args = []
-		arguments = []
-		if not arguments:
-			args.append("smart")
-			args.append("saint")
-			args.append("integ")
-			args.append("sad")
-			args.append("cad4")
-			args.append("p4p")
-			
+		basename = self.filename
+		path = self.filepath
 		merge_cif_file = "%s/%s" %(path, "fileextract.cif")
 		cif_file = "%s/%s%s" %(path, basename, ".cif")
 		tmp = "%s/%s" %(path, "tmp.cif")
@@ -421,7 +343,6 @@ class CifTools(ArgumentParser):
 			current_refinement = solution_branch.historyBranch[History.tree.current_refinement]
 			solution_reference = SPD.programs[solution_branch.solution_program].reference
 			OV.SetVar('snum_metacif_computing_structure_solution', solution_reference)
-			
 			atom_sites_solution_primary = SPD.programs[solution_branch.solution_program].methods[solution_branch.solution_method].atom_sites_solution
 			OV.SetVar('snum_metacif_atom_sites_solution_primary', atom_sites_solution_primary)
 		except KeyError:
@@ -556,7 +477,6 @@ class CifTools(ArgumentParser):
 		if colour in "colourless;white;black;gray;brown;red;pink;orange;yellow;green;blue;violet" and "_exptl_crystal_colour_primary" not in userInputVariables:
 			OV.SetVar("snum_metacif_exptl_crystal_colour_primary", colour)
 			
-	
 	def get_defaults():
 		defs = {}
 		defs.setdefault("_exptl_crystal_density_meas","       'not measured'\n") 
@@ -737,14 +657,12 @@ class CifTools(ArgumentParser):
 	def write_merge_file(self, path, merge):
 		file = path
 		afile = open(file, 'w')
-		
 		for section in merge:
 			for item in section:
 				if item[:1] == "_":
 					spacers = 35 - len(item)
 					txt = "%s%s%s\n" %(item, " "*spacers, section[item])
 					afile.write(txt)
-	
 	
 	def sort_out_path(self, directory, tool):
 		"""Returns the path of the most recent file in the given directory of the given type.
@@ -783,7 +701,6 @@ class CifTools(ArgumentParser):
 		elif tool == "cif_od":
 			name = "exp"
 			extension = ".cif_od"
-	
 		else:
 			return "Tool not found"
 		
@@ -808,7 +725,7 @@ class CifTools(ArgumentParser):
 				
 				returnvalue = "File Not Found"        
 		return OV.standardizePath(returnvalue)
-	
+
 	def file_choice(self, info, tool):
 		"""Given a list of files, it will return the most recent file.
 		
@@ -851,7 +768,7 @@ class CifTools(ArgumentParser):
 		else:
 			pass
 		return returnvalue
-	
+
 	def get_def(self):
 		olexdir = self.basedir
 		versions = self.versions
@@ -867,11 +784,10 @@ class CifTools(ArgumentParser):
 				versiontext = line[3]
 				versions[prgname].setdefault(versionnumber, versiontext)
 		return versions            
-	
+
 	############################################################
 
-CifTools_instance = CifTools()
-OV.registerMacro(CifTools_instance.run_CifTools, '')    
+OV.registerFunction(CifTools)
 
 def getOrUpdateDimasVar(getOrUpdate):
 	for var in [('snum_dimas_crystal_colour_base','_exptl_crystal_colour_primary'),
@@ -892,13 +808,11 @@ def getOrUpdateDimasVar(getOrUpdate):
 			if getOrUpdate == 'get':
 				value = OV.FindValue(var[0]) 
 				OV.SetVar('snum_metacif%s' %var[-1],value)
-		
 			elif getOrUpdate == 'update':
 				value = OV.FindValue('snum_metacif%s' %var[-1])
 				OV.SetVar(var[0],value)
 		else: continue
-		
-	
+
 def get_info_from_p4p(p4p_file):
 	rFile = open(p4p_file, 'r')
 	p4p = []
@@ -918,7 +832,6 @@ def get_info_from_p4p(p4p_file):
 		value = string.strip(li.split(field)[1])
 		if field != "REF05":
 			p4p_key["raw"].setdefault(field, value)
-			
 	ciflist=["_diffrn_radiation_wavelength"]
 	have_cif_item = False
 	value = ""
@@ -926,7 +839,6 @@ def get_info_from_p4p(p4p_file):
 		if item == "_diffrn_radiation_wavelength":
 			if p4p_key["raw"]["SOURCE"]:
 				value = p4p_key["raw"]["SOURCE"].split()[0]
-				
 			if value:
 				p4p_key["cif"].setdefault(item, r"'%s K\a'" %value)
 				have_cif_item = True
@@ -940,7 +852,6 @@ def get_info_from_mls(file):
 	two_theta_min = 0
 	two_theta_max = 0
 	used = 0
-	
 	rFile = open(file, 'r')
 	mls = []
 	for line in rFile:
