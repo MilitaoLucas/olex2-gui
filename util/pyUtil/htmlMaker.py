@@ -7,6 +7,7 @@ OV = OlexFunctions()
 import htmlTools
 import olexex_setup
 #from htmlTools import *
+import variableFunctions
 
 def sourceFilesHtmlMaker():
   list = [
@@ -394,7 +395,7 @@ The paper will be submitted to %s.
     OV.SetVar('snum_metacif_publ_contact_letter', letterText)
   elif inputText != letterText:
     OV.SetVar('snum_metacif_publ_contact_letter', inputText)
-    AddVariableToUserInputList('snum_metacif_publ_contact_letter')
+    variableFunctions.AddVariableToUserInputList('snum_metacif_publ_contact_letter')
   elif 'snum_metacif_publ_contact_letter' not in OV.FindValue('snum_user_input_variables'):
     OV.SetVar('snum_metacif_publ_contact_letter', letterText)
   else:
