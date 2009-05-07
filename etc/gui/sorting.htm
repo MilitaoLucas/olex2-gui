@@ -11,27 +11,10 @@
 	</td>
 
 	<td>
-    <input
-			bgcolor="$GetVar(gui_html_table_bg_colour)"  
-			type="button" 
-			name="SORT_ML" 
-			image="button-mass_&_label.png"
-			onclick="sort +ml>>info>>echo %'sort_ml-msg'%"
-			>
-    <input
-			bgcolor="$GetVar(gui_html_table_bg_colour)"  
-			type="button" 
-			name="SORT_L" 
-			image="button-atom_label.png"
-			onclick="sort +l>>info>>echo '%sort_l-msg%'"
-			>
-    <input
-			bgcolor="$GetVar(gui_html_table_bg_colour)"  
-			type="button" 
-			name="SORT_M" 
-			image="button-atomic_mass.png"
-			onclick="sort +m>>info>>echo '%sort_m-msg%'"
-			>
+
+$spy.MakeActiveGuiButton(button-mass_&_label,'sort +ml>>info')
+$spy.MakeActiveGuiButton(button-atom_label,'sort +l>>info')		
+$spy.MakeActiveGuiButton(button-atomic_mass,'sort +m>>info')
 	</td>
 </tr>
 
@@ -44,15 +27,8 @@
 			<zimg border="0" src="info.png">
 		</a>	
 	</td>
-	
 	<td>
-    <input
-			bgcolor="$GetVar(gui_html_table_bg_colour)"  
-			type="button" 
-			name="SORT_MOIETY" 
-			image="button-moieties.png"
-			onclick="sort moiety>>info>>echo '%sort_moiety-msg'"
-		>
+$spy.MakeActiveGuiButton(button-moieties,'sort moiety>>info')
 	</td>			
 </tr>
 

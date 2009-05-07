@@ -2,14 +2,8 @@
 
 
 <tr ALIGN='left'>
-	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
-		<a 
-			href="spy.make_help_box -name='naming' -popout='False'" 
-			target="Help me with this">
-			<zimg border="0" src="info.png">
-		</a>	
-	</td>
-	</td >
+
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=;1; -->
 
 	<td  width=30%>
 			<input 
@@ -30,7 +24,7 @@
 				label='%Suffix%&nbsp;' 
 				valign='center' 
 				name = "MODE_NAME_SUFFIX"  
-				width="30" 
+				width="25" 
 				height="18" 
 				value = ""
 			>
@@ -43,19 +37,18 @@
 				label='%Type%&nbsp;' 
 				valign='center' 
 				name = "MODE_NAME_TYPE"
-				width="30"  
+				width="25"  
 				height="18" 
 				value = ""
 			>
 	</td>
-	<td width=10%>
-			<input 
-				type="button" 
-				name = "naming-mode" 
-				width="35" 
-				value="Go" 
-				onup="setlabel(naming-mode,Go)>>mode off" 
-				ondown="setlabel(naming-mode,Done)>>guinames_m">
+	<td width=15%>
+		<a 
+			href="if strcmp(getvar(olex2_short_mode),'name') then 'mode off'  else 'guinames_m'"
+			target="%name-target%">
+			<b>
+			<zimg name=IMG_BUTTON_SMALL-NAME border="0" src="button_small-name.png"> 
+		</a>
 	</td>
 </tr>
 <tr>
@@ -90,7 +83,7 @@
 		<a href='match sel -n=getvalue(MATCH_NAME_SUFFIX)'>
 		Equivalent Fragments (Z' > 1)</a>
 	</td>
-	<td width=30%>
+	<td colspan=2 >
 			<input 
 				type="text" 
 				bgcolor="$getVar(gui_html_input_bg_colour)" 
