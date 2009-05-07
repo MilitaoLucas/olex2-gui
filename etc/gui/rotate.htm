@@ -1,75 +1,59 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
 
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
-	<td colspan='2'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;1; -->
+		
+	<td width='20%'>
+		<b>%Rotate%:</b>
+	</td>
+	<td VALIGN='center'>
 		<font size='2'>
-		Fred
-			<input 
+
+	<input 
 				type="spin" 
 				name = "rx" 
-				width="50" 
+				width="42" 
 				height="18" 
 				value="90"
 			>
-			&nbsp
-			<input 
-				type="button" 
-				name = "brx" 
-				width="25" 
-				value="X" 
-				onclick="rota 1 getvalue(rx)"
-			>
-			&nbsp;&nbsp;&nbsp;&nbsp;
+$spy.MakeActiveGuiButton(button_tiny-x,'rota 1 getvalue\(rx)')
+&nbsp;
 			<input 
 				type="spin" 
 				name = "ry" 
-				width="50"  
+				width="42"  
 				height="18" 
 				bgcolor="$getVar(gui_html_input_bg_colour)" 
 				value="90"
 			>
-			&nbsp
-			<input 
-				type="button" 
-				name = "bry" 
-				width="25" 
-				value="Y" 
-				onclick = "rota 2 getvalue(ry)"
-			>
-			&nbsp;&nbsp;&nbsp;&nbsp;
+$spy.MakeActiveGuiButton(button_tiny-y,'rota 1 getvalue\(ry)')			
+&nbsp;
 			<input 
 				type="spin" 
 				name = "rz" 
-				width="50" 
+				width="42" 
 				height="18" 
 				bgcolor="$getVar(gui_html_input_bg_colour)" 
 				value="90"
 			>
-			&nbsp
-			<input 
-				type="button" 
-				name = "brz" 
-				width="25" 
-				value="Z" 
-				onclick = "rota 3 getvalue(rz)"
-			>
-		&nbsp;&nbsp;
+$spy.MakeActiveGuiButton(button_tiny-z,'rota 3 getvalue\(rz)')			
 	</font>
 	</td>
 </tr>
 
-
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
-	<td colspan='2'>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td width='20%'>
+		<b>%Auto%:</b>
+	</td>
+	<td VALIGN='center'>
 		<font size='2'>
 			<input 
 				type="checkbox"	
 				name = "x" 
 			bgcolor="$GetVar(gui_html_table_bg_colour)"  
 			fgcolor="$GetVar(gui_html_font_colour)" 
-				width="30" 
+				width="25" 
 				height="17" 
 				value="x" 
 				data = "0" 
@@ -82,7 +66,7 @@
 				name = "y" 
 			bgcolor="$GetVar(gui_html_table_bg_colour)"  
 			fgcolor="$GetVar(gui_html_font_colour)" 
-				width="30" 
+				width="25" 
 				height="17" 
 				value="y" 
 				data = "0" 
@@ -95,7 +79,7 @@
 				name = "z" 
 				bgcolor="$GetVar(gui_html_table_bg_colour)"  
 				fgcolor="$GetVar(gui_html_font_colour)" 
-				width="30" 
+				width="25" 
 				height="17" 
 				value="z" 
 				data = "0" 
@@ -105,7 +89,7 @@
 			<input 
 				type="slider" 
 				name = "speed" 
-				width="65" 
+				width="30"
 				height="20" 
 				bgcolor="$GetVar(gui_html_table_bg_colour)"  
 				fgcolor="$GetVar(gui_html_font_colour)" 
@@ -115,41 +99,13 @@
 				max="10" 
 				onchange = "rota getdata(x) getdata(y) getdata(z) 100000 eval(getvalue(speed)*0.1)">
 		</font>
+$spy.MakeActiveGuiButton(button_tiny-a,'matr 1',#switch_name)			
+			&nbsp
+$spy.MakeActiveGuiButton(button_tiny-b,'matr 2',#switch_name)			
+			&nbsp
+$spy.MakeActiveGuiButton(button_tiny-c,'matr 3',#switch_name)			
 </tr>
 
 
-<tr VALIGN='center' >
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-	<td width='40%'>
-		<b>%Align along%:</b>
-	</td>
-	<td VALIGN='center'>
-		<font size='2'>
-			<input 
-				type="button" 
-				name = "rotate-ma" 
-				width="40" 
-				value="a" 
-				onclick = "matr 1"
-			>
-			&nbsp
-			<input 
-				type="button" 
-				name = "rotate-mb" 
-				width="40" 
-				value="b" 
-				onclick = "matr 2"
-			>
-			&nbsp
-			<input 
-				type="button" 
-				name = "rotate-mc" 
-				width="40"
-				value="c"
-				onclick = "matr 3"
-			>
-		</font>
-	</td>
-</tr>
 
 <!-- #include tool-footer gui/blocks/tool-footer.htm;1; -->
