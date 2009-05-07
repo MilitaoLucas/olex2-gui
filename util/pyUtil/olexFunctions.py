@@ -380,7 +380,11 @@ class OlexFunctions(inheritFunctions):
   def SetImage(self, zimg_name, image_file):
     if self.olex_gui.IsControl(zimg_name):
       olx.html_SetImage(zimg_name,image_file)
-
+    else:
+      try:
+        olx.html_SetImage(zimg_name,image_file)
+      except:
+        print "Failure!"
   
   
   

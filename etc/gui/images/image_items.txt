@@ -1,4 +1,4 @@
-[THREE_BUTTONS_PER_ROW]
+[THREE BUTTONS PER ROW]
   Move Near 
   Copy Near 
   Add H 
@@ -36,3 +36,31 @@
   Left/Right
   Graduated
   Polyhedra
+  Low Quality
+  Pack Cell
+  Pack Limits
+  
+  
+[SMALL BUTTONS]
+  Delete 
+  Select
+  Balls & Sticks 
+  blank 
+  Naming 
+  Edit
+  Go
+  Name
+  Ellipsoids
+  
+[FULL ROW]
+  Move Atoms or Model Disorder
+  Separate Moieties
+  
+[TINY BUTTONS]
+  a
+  b
+  c
+  x
+  y
+  z
+  H

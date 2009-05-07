@@ -1016,7 +1016,9 @@ class timage(ImageTools):
     if olex2_has_recently_updated == "True": self.olex2_has_recently_updated = True
     if olex2_has_recently_updated == "False": self.olex2_has_recently_updated = False
     sf = 4
+    sfs = sf * 322/int(self.gui_htmlpanelwidth)
     self.sf = sf
+    self.sfs = sfs
     
   def resize_news_image(self):
     IT.resize_to_panelwidth({'i':'news/news.png'})
@@ -1072,7 +1074,6 @@ class timage(ImageTools):
     sf = self.sf
     image_source = self.imageSource
     self.getImageItemsFromTextFile()
-    
 
     im = image_source
     cut = 0, 52*sf, 27*sf, 76*sf
@@ -1179,161 +1180,33 @@ class timage(ImageTools):
     name = "test.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
     
-    
-    
-    ## SMALL buttons
-    cut = 90*sf, 178*sf, 140*sf, 193*sf
+    ## TINY buttons
+    cut = 138*sf, 178*sf, 158*sf, 195*sf
     max_width = cut[2] - cut[0]
     crop =  im.crop(cut)
-    #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_highlight_colour,luminosity=1.3)) 
-    button_names = ("Delete", 
-                    "Select", 
-                    "Balls & Sticks", 
-                    "blank", 
-                    "Naming", 
-                    "Edit",
-                    "Go",
-                    )
-    states = ["on", "off", ""]
-    for state in states:
-      if state == "on":
-        colour = self.adjust_colour(self.gui_html_highlight_colour,luminosity=1.3)
-      elif state == "off":
-        colour = self.adjust_colour(self.gui_html_base_colour,luminosity=1.9)
-      elif state == "":
-        colour = self.adjust_colour(self.gui_html_base_colour,luminosity=1.9)
-      for txt in button_names:
-        #IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
-        crop_colouriszed = self.colourize(crop, (0,0,0), colour) 
-        IM =  Image.new('RGBA', crop.size)
-        IM.paste(crop_colouriszed, (0,0), crop)
-        draw = ImageDraw.Draw(IM)
-        t = txt.replace("blank"," _ ") 
-        self.write_text_to_draw(draw, 
-                     "%s" %t,
-                     top_left=(4, 6), 
-                     font_name = 'Vera', 
-                     font_size=40, 
-                     titleCase=True,                  
-                     font_colour=self.gui_html_font_colour,
-                     max_width = max_width,
-                     align='centre'
-                     )
-        IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
-        name = "button_small-%s%s.png" %(txt.replace(" ", "_"), state)
-        name = name.lower()
-        OlexVFS.save_image_to_olex(IM, name, 2)
-#        if name == "button_small-blank.png":
-#          filename = r"button_small-blank.png"
-#          IM.save(filename)
+    button_names = self.image_items_d.get("TINY BUTTONS")
+    self.produce_buttons(button_names, crop, cut, max_width,self.sf,"_tiny")
     
+    ## SMALL buttons
+    cut = 90*sf, 178*sf, 138*sf, 193*sf
+    max_width = cut[2] - cut[0]
+    crop =  im.crop(cut)
+    button_names = self.image_items_d.get("SMALL BUTTONS")
+    self.produce_buttons(button_names, crop, cut, max_width,self.sf,"_small")
     
     ## THREEE buttons in the HTMLpanelWIDTH
     cut = 0*sf, 178*sf, 91*sf, 195*sf
     max_width = cut[2] - cut[0]
     crop =  im.crop(cut)
-    #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_table_firstcol_colour,luminosity=0.7)) 
-    button_names = ("Move Near", 
-                    "Copy Near", 
-                    "Add H", 
-                    "Grow Mode", 
-                    "Center on Cell", 
-                    "Assemble", 
-                    "Centre on Cell", 
-                    "Largest Part",
-                    "Show Basis",
-                    "Show Cell",
-                    "Fuse",
-                    "Grow All",
-                    "Edit Atom(s)",
-                    "Edit Instructions",
-                    "Balls & Sticks", 
-                    "Wireframe", 
-                    "Tubes", 
-                    "Default Style", 
-                    "Sphere Packing", 
-                    "Ellipsoids | H", 
-                    "Atomic Mass",
-                    "Atom Number",
-                    "Atom Label",
-                    "Mass & Label",
-                    "Moieties",
-                    "Reset",
-                    "Reset & Solve",
-                    "SG Info",
-                    "Wilson Plot",
-                    )
-    button_names = self.image_items_d.get("THREE_BUTTONS_PER_ROW", button_names)
-    states = ["on", "off", ""]
-    for state in states:
-      if state == "on":
-        colour = self.adjust_colour(self.gui_html_highlight_colour,luminosity=1.3)
-      elif state == "off":
-        colour = self.adjust_colour(self.gui_html_base_colour,luminosity=1.9)
-      elif state == "":
-        colour = self.adjust_colour(self.gui_html_base_colour,luminosity=1.9)
-  
-      for txt in button_names:
-        crop_colouriszed = self.colourize(crop, (0,0,0), colour) 
-        #IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
-        IM =  Image.new('RGBA', crop.size)
-        IM.paste(crop_colouriszed, (0,0), crop)
-        draw = ImageDraw.Draw(IM)
-        self.write_text_to_draw(draw, 
-                     "%s" %txt, 
-                     top_left=(4, 7), 
-                     font_name = 'Vera', 
-                     font_size=41, 
-                     titleCase=True,                  
-                     font_colour=self.gui_html_font_colour,
-                     max_width = max_width,
-                     align='centre'
-                     )
-        sfs = sf * 322/int(self.gui_htmlpanelwidth)
-        IM = self.resize_image(IM, (int((cut[2]-cut[0])/sfs), int((cut[3]-cut[1])/sfs)))
-        name = "button-%s%s.png" %(txt.replace(" ", "_"), state)
-        name = name.lower()
-        OlexVFS.save_image_to_olex(IM, name, 2)
+    button_names = self.image_items_d.get("THREE BUTTONS PER ROW", button_names)
+    self.produce_buttons(button_names, crop, cut, max_width,self.sfs,"")
 
+    ## FULL ROW buttons in the HTMLpanelWIDTH
     cut = 0*sf, 193*sf, 275*sf, 211*sf
     max_width = cut[2] - cut[0]
     crop =  im.crop(cut)
-    #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_table_firstcol_colour,luminosity=0.7)) 
-    button_names = ("Move Atoms or Model Disorder", 
-                    "Separate Moieties", 
-                    )
-    states = ["on", "off", ""]
-    for state in states:
-      if state == "on":
-        colour = self.adjust_colour(self.gui_html_highlight_colour,luminosity=1.3)
-      elif state == "off":
-        colour = self.adjust_colour(self.gui_html_base_colour,luminosity=1.9)
-      elif state == "":
-        colour = self.adjust_colour(self.gui_html_base_colour,luminosity=1.9)
-      for txt in button_names:
-        crop_colouriszed = self.colourize(crop, (0,0,0), colour) 
-        #IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
-        IM =  Image.new('RGBA', crop.size)
-
-        IM.paste(crop_colouriszed, (0,0), crop)
-        draw = ImageDraw.Draw(IM)
-        self.write_text_to_draw(draw, 
-                     "%s" %txt, 
-                     top_left=(4, 7), 
-                     font_name = 'Vera', 
-                     font_size=41, 
-                     titleCase=True,                  
-                     font_colour=self.adjust_colour(self.gui_html_font_colour,luminosity=0.9),
-                     max_width = max_width,
-                     align='centre'
-                     )
-        sfs = sf * 320/int(self.gui_htmlpanelwidth)
-        IM = self.resize_image(IM, (int((cut[2]-cut[0])/sfs), int((cut[3]-cut[1])/sfs)))
-        name = "button_full-%s%s.png" %(txt.replace(" ", "_"), state)
-        name = name.lower()
-        OlexVFS.save_image_to_olex(IM, name, 2)
-      
-    
+    button_names = self.image_items_d.get("FULL ROW", button_names)
+    self.produce_buttons(button_names, crop, cut, max_width,self.sfs,"_full")
     cut = 0*sf, 152*sf, 15*sf, 167*sf
     crop =  im.crop(cut)
     crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_table_firstcol_colour,luminosity=1.98)) 
@@ -1490,6 +1363,37 @@ class timage(ImageTools):
     name = "warning_big.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
     
+  def produce_buttons(self, button_names, crop, cut, max_width,scale,btn_type):
+    states = ["on", "off", ""]
+    for state in states:
+      if state == "on":
+        colour = self.adjust_colour(self.gui_html_highlight_colour,luminosity=1.3)
+      elif state == "off":
+        colour = self.adjust_colour(self.gui_html_base_colour,luminosity=1.9)
+      elif state == "":
+        colour = self.adjust_colour(self.gui_html_base_colour,luminosity=1.9)
+      for txt in button_names:
+        #IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
+        crop_colouriszed = self.colourize(crop, (0,0,0), colour) 
+        IM =  Image.new('RGBA', crop.size)
+        IM.paste(crop_colouriszed, (0,0), crop)
+        draw = ImageDraw.Draw(IM)
+        t = txt.replace("blank"," _ ") 
+        self.write_text_to_draw(draw, 
+                     "%s" %t,
+                     top_left=(4, 6), 
+                     font_name = 'Vera', 
+                     font_size=40, 
+                     titleCase=False,                  
+                     font_colour=self.gui_html_font_colour,
+                     max_width = max_width,
+                     align='centre'
+                     )
+        IM = self.resize_image(IM, (int((cut[2]-cut[0])/scale), int((cut[3]-cut[1])/scale)))
+        name = "button%s-%s%s.png" %(btn_type, txt.replace(" ", "_"), state)
+        name = name.lower()
+        OlexVFS.save_image_to_olex(IM, name, 2)
+        
   def makeTestBanner(self):
     if not OV.FindValue('user_refinement_gui2'):
       return
