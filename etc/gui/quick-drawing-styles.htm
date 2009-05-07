@@ -11,33 +11,38 @@
 		<td></td>
 			<zimg border="0" src="gui/images/toolbar-ball-and-stick.png"> 
 		<td width = "50%">
-			<a href="pers>>sel -u"><zimg border="0" src="button-balls_&_sticks.png"></a>
+$spy.MakeActiveGuiButton(button-balls_&_sticks,'pers>>sel -u')
 		</td>
 		<td ></td>
 			<zimg border="0" src="gui/images/toolbar-anis.png"> 
 		<td width = "50%">
-		
+
 		
 <!-- Button Part ELLIPSOIDS -->
 <map name="map_ellipsoids">
 		  <area shape="rect" 
 						coords="0,0,60,25" 
-						href="
+						href="spy.InActionButton(button-ellipsoids_|_h,on)>>
+refresh>>
 telp>>
-sel -u"
+sel -u>>
+spy.InActionButton(button-ellipsoids_|_h,off)"
 						target="%Show Ellipsoids%">
 		
-<!-- Button Part H Uiso-->
+<!-- Button Part H Uiso -->
 		  <area shape="rect" 
 						coords="60,0,500,25"
-						href="
+						href="spy.InActionButton(button-ellipsoids_|_h,on)>>
+refresh>>
 telph>>
-sel -u"
+sel -u>>
+spy.InActionButton(button-ellipsoids_|_h,off)"
+
 						target="%Show Ellipsoids and Hydrogen atom Uiso%">
 		</map>	
 		
-		<zimg border="0" src="button-ellipsoids_|_h.png" usemap=#map_ellipsoids>
-		
+		<zimg border="0" name=IMG_BUTTON-ELLIPSOIDS_|_H src="button-ellipsoids_|_h.png" usemap=#map_ellipsoids>
+
 		</td>
 	</tr>
 	<tr>
@@ -46,12 +51,12 @@ sel -u"
 	<td>
 			<zimg border="0" src="gui/images/toolbar-wireframe.png"> 
 		<td>
-			<a href="proj"><zimg border="0" src="button-wireframe.png"></a>
+$spy.MakeActiveGuiButton(button-wireframe,'proj')
 		</td>
 		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
 			<zimg border="0" src="gui/images/toolbar-sphere-packing.png"> 
 		<td>
-			<a href="sfil>>sel -u"><zimg border="0" src="button-sphere_packing.png"></a>
+$spy.MakeActiveGuiButton(button-sphere_packing,'sfil>>sel -u')
 		</td>
 	</tr>
 
@@ -62,15 +67,14 @@ sel -u"
 	<td>
 			<zimg border="0" src="gui/images/toolbar-bicoloured-bonds.png"> 
 		<td>
-			<a href="tubes>>sel -u"><zimg border="0" src="button-tubes.png"></a>
+$spy.MakeActiveGuiButton(button-tubes,'tubes>>sel -u')
 		</td>
 		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
 			<zimg border="0" src="gui/images/toolbar-default.png"> 
 		<td>
-			<a href="default"><zimg border="0" src="button-default_style.png"></a>
+$spy.MakeActiveGuiButton(button-default_style,'default')
 		</td>
 	</tr>
-	
 	
 	
 	<tr>
@@ -79,10 +83,9 @@ sel -u"
 	<td>
 			<zimg border="0" src="gui/images/toolbar-polyhedra.png"> 
 		<td>
-			<a href="mask atoms 33>>sel -u"><zimg border="0" src="button-polyhedra.png"></a>
+$spy.MakeActiveGuiButton(button-polyhedra,'mask atoms 33>>sel -u')
 		</td>
 	</tr>
-
 	
 
 <!--
