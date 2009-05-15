@@ -1,5 +1,9 @@
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+
+import htmlTools
+
+
 import olex
 import olx
 import htmlTools
@@ -22,22 +26,25 @@ class SetupWizard(object):
       self.previous = str(current -1)
       self.next = str(current + 1)
       
-    #txt = r'''
-#<!-- #include logo gui\blocks\logo.htm;1; -->
-#<!-- #include tool-top gui/blocks/help-top.htm;image=blank;1; -->
-#<body link="$getVar(gui_html_link_colour)" bgcolor="$getVar(gui_html_bg_colour)">
-#<table border="0" style="border-collapse: collapse" width="100%" id="#tool" cellpadding="0" cellspacing="1">
-  #<tr>
-    #<td width="100%" bgcolor="$getVar(gui_html_font_colour)">
-    #</td>
-  #</tr>
-#</table>
-#<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$getVar(gui_html_table_bg_colour)">
-#'''
     txt = '''
-<!-- #include logo gui/blocks/logo.htm;1; -->
+
+<zimg border="0" src="gui/images/src/setup.png" usemap="#map_setup">
+
+<map name="map_setup">
+<!-- Button PREVIOUS -->
+    <area shape="rect" 
+      coords="250,0,295,60" 
+      href='spy.tbxs -n=%s' target='%%previous%%'>
+
+<!-- Button NEXT-->
+    <area shape="rect" 
+      coords="295,0,330,60" 
+      href='spy.tbxs -n=%s' target='%%next%%'>
+</map>
+
 <!-- #include tool-top gui/blocks/help-top.htm;image=blank;1; -->
-'''    
+
+'''% (self.previous, self.next)
     
     t = OV.TranslatePhrase('setup-txt-%s' %name)
     t = htmlTools.format_help(t)
@@ -45,21 +52,23 @@ class SetupWizard(object):
     txt += r'''
 <tr VALIGN='center' NAME='Setup Title'>
   <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-    <td width='80%%' colspan='1'>
+    <td width='80%%' colspan='2'>
       <font size = '4'>
         <b>	
           %%setup-title-%s%%
         </b>
       </font>
     </td> 
+ <!--   
     <td align = 'right' valign='top'>
       <a href='spy.tbxs -n=%s' target='%%previous%%'>
-        <zimg border="0" src="gui/images/toolbar-dot-arrow-left.png">
+        <zimg border="0" src="previous.png">
       </a>
       <a href='spy.tbxs -n=%s' target='%%next%%'>
-        <zimg border="0" src="gui/images/toolbar-dot-arrow-right.png">
+        <zimg border="0" src="next.png">
       </a>
     </td>
+  -->  
   </tr>
 <tr>
   <td valign='top' width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
@@ -72,12 +81,13 @@ class SetupWizard(object):
 
 <tr>
   <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-  <td colspan='2' align='right'>
+  <td colspan='2' align='right'>%s
+  
     <a href="html.Hide setup-box ">Close this Window</a>
   </td>
 </tr>
 
-'''%(name, self.previous, self.next, t)
+'''%(name, self.previous, self.next, t, htmlTools.make_edit_link("setup-txt", name))
       
       
     txt += r'''
@@ -86,6 +96,9 @@ class SetupWizard(object):
     wFilePath = r"setup-%s.htm" %name
     OV.write_to_olex(wFilePath, txt)
     olex.m("popup setup-box 'setup-%s.htm' -b=tc -t='%s' -w=340 -h=700 -x=50 -y=50 -d=echo''" %(name, 'Olex2 Setup'))
+    
+    olx.html_SetBorders('setup-box', 2)
+    olx.html_Reload('setup-box')
     return retVal
     
     

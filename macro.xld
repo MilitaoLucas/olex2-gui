@@ -350,8 +350,7 @@
 			<cmd3 "azoom 100">
 			<cmd1 "ads elp">
 			<cmd2 "arad isot">
-			<cmd3 "mask atoms 5 elp">
-			<cmd3 "mask atoms 1 sph">
+			<cmd3 "mask atoms 5">
 			<cmd4 "mask bonds 48">
 			<cmd5 "telpv %1">
 		\>
@@ -368,8 +367,7 @@
 			<cmd3 "azoom 100">
 			<cmd1 "ads elp">
 			<cmd2 "arad isoth">
-			<cmd3 "mask atoms 5 elp">
-			<cmd3 "mask atoms 1 sph">
+			<cmd3 "mask atoms 5">
 			<cmd4 "mask bonds 48">
 			<cmd5 "telpv %1">
 		\>
@@ -412,9 +410,10 @@
 		\>
 		<cmd
 			<cmd1 "individualise">
-			<cmd2 "mask atoms 0">
-			<cmd3 "mask bonds 192">
-			<cmd4 "mask atoms 16 std">
+			<cmd2 "mask atoms 16">
+			<cmd3 "ads std">
+			<cmd4 "arad pers">
+			<cmd5 "mask bonds 192">
 		\>
 	\>
 \>
