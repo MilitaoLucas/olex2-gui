@@ -181,6 +181,14 @@ def makeHtmlTableRow(dictionary):
 
   return htmlTableRowText
 
+def make_edit_link(name, box_type):
+  editLink = ""
+  if OV.IsPluginInstalled('plugin-MySQL'):
+    if OV.FindValue('olex2_is_online'):
+      editLink = "<a href='spy.EditHelpItem(%s-%s)'>Edit</a>" %(name, box_type)
+  return editLink
+
+
 def make_help_box(args):
   
   name = args.get('name', None)
@@ -210,9 +218,9 @@ def make_help_box(args):
   helpTxt = OV.TranslatePhrase("%s-%s" %(help_src, box_type))
   helpTxt = helpTxt.replace("\r", "")
   helpTxt = format_help(helpTxt)
-  editLink = ""
-  if OV.IsPluginInstalled('plugin-MySQL'):
-    editLink = "<a href='spy.EditHelpItem(%s-%s)'>Edit</a>" %(name, box_type)
+  editLink = make_edit_link(name, box_type)
+#  if OV.IsPluginInstalled('plugin-MySQL'):
+#    editLink = "<a href='spy.EditHelpItem(%s-%s)'>Edit</a>" %(name, box_type)
   if not popout:
     str += r'''
 <zimg border='0' src='olex_help_logo.png'>
@@ -850,10 +858,13 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
   max_i = 20
   if number == '0':
     txt = "tip-0"
+    j = 0
     while "tip-" in txt:
+      j += 1
       i = randint (1,max_i)
       if i == current_tooltip_number: continue
       txt = OV.TranslatePhrase("tip-%i" %i)
+      if j > max_i * 2: break
   elif number == "+1":
     i = current_tooltip_number + 1
     txt = OV.TranslatePhrase("tip-%i" %i)
