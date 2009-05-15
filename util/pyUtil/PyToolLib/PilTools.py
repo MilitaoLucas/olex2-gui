@@ -1314,7 +1314,7 @@ class timage(ImageTools):
     name = "delete_small.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
 
-    cut = 136*sf, 154*sf, 190*sf, 170*sf
+    cut = 136*sf, 154*sf, 185*sf, 170*sf
     crop =  im.crop(cut)
     crop_colouriszed = self.colourize(crop, (0,0,0), self.gui_html_base_colour) 
     IM =  Image.new('RGBA', crop.size)
@@ -1322,6 +1322,27 @@ class timage(ImageTools):
     IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
     name = "bottom.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
+    
+    cut = 185*sf, 154*sf, 205*sf, 170*sf
+    crop =  im.crop(cut)
+    crop_colouriszed = self.colourize(crop, (0,0,0), self.gui_html_highlight_colour) 
+    IM =  Image.new('RGBA', crop.size)
+    IM.paste(crop_colouriszed, (0,0), crop)
+    IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
+    name = "next.png"
+    OlexVFS.save_image_to_olex(IM, name, 2)
+
+    cut = 205*sf, 154*sf, 220*sf, 170*sf
+    crop =  im.crop(cut)
+    crop_colouriszed = self.colourize(crop, (0,0,0), self.gui_html_highlight_colour) 
+    IM =  Image.new('RGBA', crop.size)
+    IM.paste(crop_colouriszed, (0,0), crop)
+    IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
+    name = "previous.png"
+    OlexVFS.save_image_to_olex(IM, name, 2)
+
+    
+    
     
     
     cut = 120*sf, 154*sf, 135*sf, 175*sf
