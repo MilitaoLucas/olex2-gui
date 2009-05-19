@@ -47,8 +47,8 @@ from _socket import *
 
 _have_ssl = False
 try:
-    import _ssl
-    from _ssl import *
+    import ssl
+    from ssl import *
     _have_ssl = True
 except ImportError:
     pass

@@ -1,6 +1,9 @@
 # initpy.py
 import olex
 import sys
+import locale
+
+locale.setlocale(locale.LC_ALL, 'C') 
 
 debug = True
 if debug == True:
