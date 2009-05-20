@@ -16,7 +16,6 @@ timeout = 3
 socket.setdefaulttimeout(timeout)
 
 
-
 sys.path.append(r".\src")
 import History
 
@@ -1043,6 +1042,7 @@ def getKeys(key_directory=None):
 def GetHttpFile(f):
   retVal = None
   go_online = OV.FindValue("olex2_is_online",True)
+  
   if go_online:
     try:
       url = "%s/%s" %(URL, f)
@@ -1063,6 +1063,8 @@ def GetHttpFile(f):
 
 
 def check_for_recent_update():
+  retVal = False
+  global olex2_has_recently_updated
   path = "%s/version.txt" %OV.BaseDir()
   try:
     rFile = open(path, 'r')
@@ -1074,13 +1076,14 @@ def check_for_recent_update():
 #  print "Last Version: %i"%last_version
   if version > last_version:
     OV.SetVar('olex2_has_recently_updated','True')
+    retVal = True
 #    print "Olex2 has recently been updated"
   else:
     OV.SetVar('olex2_has_recently_updated','False')
-#    print "Olex2 has not been updated"
+    retVal = False
+    #    print "Olex2 has not been updated"
   OV.SetVar('olex2_last_version',str(version))
-#  print "Version: %s" %version
-#  print OV.FindValue('olex2_last_version','0')
+  return retVal
 
 def check_for_crypto():
   if olx.IsPluginInstalled(r"plugin-Crypto").lower() == 'false':
@@ -1094,6 +1097,7 @@ def check_for_crypto():
     return False
 
 def GetACF():
+  
   no_update = False
 #  no_update = True
   print "Starting ODAC..."
@@ -1107,7 +1111,7 @@ def GetACF():
   
   cont = None
   debug = OV.FindValue('odac_fb', False)
-  debug = True
+  debug = False
   debug_deep1 = True
   debug_deep2 = True
 #  OV.SetVar("ac_verbose", True)
@@ -1116,7 +1120,8 @@ def GetACF():
     p = r"%s/util/pyUtil/PluginLib" %OV.BaseDir()
     name = "entry_ac"
     if not os.path.exists("%s/entry_ac.py" %p):
-      cont = GetHttpFile("/olex-distro-odac/%s.py" %name)
+      if check_for_recent_update():
+        cont = GetHttpFile("/olex-distro-odac/%s.py" %name)
       if cont:
         wFile = open("%s/%s.py" %(p, name),'w') 
         wFile.write(cont)
@@ -1127,7 +1132,8 @@ def GetACF():
         return
     else:
       try:
-        cont = GetHttpFile("/olex-distro-odac/%s.py" %name)
+        if check_for_recent_update():
+          cont = GetHttpFile("/olex-distro-odac/%s.py" %name)
         if cont:
           wFile = open("%s/%s.py" %(p, name),'w') 
           wFile.write(cont)
