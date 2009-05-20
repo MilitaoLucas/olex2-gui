@@ -1182,7 +1182,6 @@ def runODAC(cmd):
     olex.m(cmd)
   else:
     print "ODAC has failed to initialize or is not installed"
-
   
 OV.registerFunction(runODAC)
   
