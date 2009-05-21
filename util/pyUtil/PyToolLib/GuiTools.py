@@ -482,6 +482,8 @@ class MakeGuiTools(object):
 		self.txt.append('</tr>')
 		self.txt.append('</table>')
 
+	
+		
 
 	def make_Tool_Solve(self):
 		name = "solve"

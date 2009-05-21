@@ -1041,6 +1041,7 @@ class timage(ImageTools):
                   "make_image_items",
                   "make_note_items",
                   "make_images_from_fb_png",
+                  "make_popup_banners",
                   "info_bitmaps",
                   "makeTestBanner",
                   "resize_news_image",
@@ -1067,8 +1068,28 @@ class timage(ImageTools):
       a()
       if self.timer:
         print "\t - %s took %.3f s to complete" %(item, self.time.time()-t1)
-    
-    
+
+  def make_popup_banners(self):
+    txt_l = [('setup',330), ('help',410), ('tutorial',375)]
+    image_source = "%s/etc/gui/images/src/banner.png" %self.basedir
+    for item in txt_l:
+      txt = item[0]
+      IM = Image.open(image_source)
+      width = int(item[1])
+      height = int(width * IM.size[1]/IM.size[0])
+      draw = ImageDraw.Draw(IM)
+      self.write_text_to_draw(draw, 
+                 "%s" %txt,
+                 top_left=(440, 32), 
+                 font_name = 'Vera', 
+                 font_size=42, 
+                 titleCase=False,                  
+                 font_colour="#525252",
+                 align='left'
+                 )
+      IM = self.resize_image(IM, (width, height))
+      name = "banner_%s.png" %txt
+      OlexVFS.save_image_to_olex(IM, name, 2)
     
   def make_images_from_fb_png(self):
     sf = self.sf
@@ -1341,16 +1362,33 @@ class timage(ImageTools):
     name = "previous.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
 
-    
-    
-    
-    
     cut = 120*sf, 154*sf, 135*sf, 175*sf
     crop =  im.crop(cut)
     IM =  Image.new('RGBA', crop.size)
     IM.paste(crop, (0,0), crop)
     IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
     name = "warning.png"
+    OlexVFS.save_image_to_olex(IM, name, 2)
+
+    cut = 140*sf, 98*sf, 400*sf, 140*sf
+    max_width = cut[2] - cut[0]
+    crop =  im.crop(cut)
+    crop_colouriszed = self.colourize(crop, (0,0,0), self.gui_html_highlight_colour) 
+    IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
+    IM.paste(crop_colouriszed, (0,0), crop)
+    draw = ImageDraw.Draw(IM)
+    self.write_text_to_draw(draw, 
+                 "You are in a Mode", 
+                 top_left=(5, 1), 
+                 font_name = 'Vera Bold', 
+                 font_size=90, 
+                 font_colour=self.gui_html_font_colour,
+                 align='centre',
+                 max_width=max_width
+                 )
+    sfm = sf*0.95
+    IM = self.resize_image(IM, (int((cut[2]-cut[0])/sfm), int((cut[3]-cut[1])/sfm)))
+    name = "pop_background.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
 
     cut = 140*sf, 98*sf, 400*sf, 140*sf
