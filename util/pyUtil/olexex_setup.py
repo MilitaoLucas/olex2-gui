@@ -28,7 +28,7 @@ class SetupWizard(object):
       
     txt = '''
 
-<zimg border="0" src="gui/images/src/setup.png" usemap="#map_setup">
+<zimg border="0" src="banner_setup.png" usemap="#map_setup">
 
 <map name="map_setup">
 <!-- Button PREVIOUS -->
