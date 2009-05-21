@@ -214,16 +214,20 @@ def make_help_box(args):
     title = name
     help_src = name
   titleTxt = OV.TranslatePhrase("%s" %title)
-  titleTxt = titleTxt.title()
+  #titleTxt = titleTxt.title()
   helpTxt = OV.TranslatePhrase("%s-%s" %(help_src, box_type))
   helpTxt = helpTxt.replace("\r", "")
   helpTxt = format_help(helpTxt)
   editLink = make_edit_link(name, box_type)
-#  if OV.IsPluginInstalled('plugin-MySQL'):
-#    editLink = "<a href='spy.EditHelpItem(%s-%s)'>Edit</a>" %(name, box_type)
+  
+  if box_type != "help":
+    banner_include = "<zimg border='0' src='banner_%s.png'>" %box_type
+  else:
+    banner_include = ""
+
+  
   if not popout:
-    str += r'''
-<zimg border='0' src='olex_help_logo.png'>
+    str = r'''
 <!-- #include help-%s gui\%s.htm;gui\blocks\tool-off.htm;image=%s;onclick=;1; -->
 ''' %(name, name, name)
     
@@ -236,6 +240,7 @@ def make_help_box(args):
     return_items = ""
     
   str += r'''
+%s
 <!-- #include tool-top gui/blocks/help-top.htm;image=blank;1; -->
 <tr VALIGN='center' NAME=%s bgcolor="$getVar(gui_html_table_firstcol_colour)">
       <td colspan=1 width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
@@ -262,7 +267,7 @@ def make_help_box(args):
 </td></tr>
 %s
 <!-- #include tool-footer gui/blocks/tool-footer.htm;1; -->
-''' %(name, titleTxt, helpTxt, return_items, editLink)
+''' %(banner_include, name, titleTxt, helpTxt, return_items, editLink)
   wFilePath = r"%s-%s.htm" %(name, box_type)
   #str = unicode(str)#
   str = str.replace(u'\xc5', 'angstrom')
@@ -443,6 +448,17 @@ def format_help(string):
   #string = "l[fd] fsafdes l[rr]"
 
 
+  ## find all occurances of strings between **..**. These should be comma separated things to highlight.
+  regex = re.compile(r"\*\* (.*?)  \*\*", re.X)
+  l = regex.findall(string)
+  if l:
+    l = l[0].split(",")
+    string = regex.sub(r"", string)
+  
+    for item in l:
+      regex = re.compile(r"((?P<left>\W) (?P<txt>%s) (?P<right>\W))" %item, re.X)
+      string = regex.sub(r"\g<left><font color='$getVar(gui_html_highlight_colour)'><b>\g<txt></b></font>\g<right>", string)
+  
   ## find all occurances of <lb> and replace this with a line-break in a table.
   regex = re.compile(r"<lb>", re.X)
   string = regex.sub(r"</td></tr><tr><td>", string)
@@ -450,7 +466,7 @@ def format_help(string):
   ## find all occurances of strings between t^..^t. These are the headers for tip of the day.
   regex = re.compile(r"t \^ (.*?)  \^ t", re.X)
   string = regex.sub(r"<font color='$getVar(gui_html_highlight_colour)'><b>\1</b></font>", string)
-
+  
   ## find all occurances of strings between n^..^n. These are the notes.
   regex = re.compile(r"n \^ (.*?)  \^ n", re.X)
   string = regex.sub(r"<table width='%s' border='0' cellpadding='2' cellspacing='4'><tr bgcolor=#efefef><td><font size=-1><b>Note: </b>\1</font></td></tr></table>", string)
@@ -927,6 +943,14 @@ def getGenericSwitchNameTranslation(name):
     text = "No text!"
   return text
 OV.registerFunction(getGenericSwitchNameTranslation)
+
+
+def makeFormulaForsNumInfo():
+  if olx.FileName() == "Periodic Table":
+    return "Periodic Table"
+  else:
+    return olx.xf_GetFormula('html',2)
+OV.registerFunction(makeFormulaForsNumInfo)
 
 
 def testingthis():
