@@ -79,7 +79,7 @@ def makeArgumentsHTML(dictionary):
   txt = ''
   first_col = htmlTools.make_table_first_col()
   txt += first_col
-  help = htmlTools.make_help_href(make_help=(dictionary['name'], 'false'))
+  help = htmlTools.make_help_href(make_help=(dictionary['name'], 'true'))
   
   argName = dictionary['name']
   
