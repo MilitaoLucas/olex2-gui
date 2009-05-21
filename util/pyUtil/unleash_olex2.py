@@ -7,7 +7,6 @@ plugins = ('MySQL', 'cctbx-win', 'brukersaint', 'ODSkin', 'BNSkin', 'STOESkin', 
 web_for_working = {'olex2.exe': 'olex2.dll', 'launch.exe': 'olex2.exe'}
 # alteartions for binary files : name (properties...)
 alterations = {'olex2.exe': ('olex-install', 'olex-update'), 
-               'olex2c.exe': ('olex-install', 'olex-update'),
                'launch.exe': ('olex-install', 'olex-update'),
                'python25.dll': ('olex-install', 'olex-update'),
                'msvcr71.dll': ('olex-install', 'olex-update'),
