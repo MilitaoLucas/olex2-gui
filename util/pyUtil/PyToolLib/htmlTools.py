@@ -462,10 +462,14 @@ def format_help(string):
   ## find all occurances of <lb> and replace this with a line-break in a table.
   regex = re.compile(r"<lb>", re.X)
   string = regex.sub(r"</td></tr><tr><td>", string)
+
+  ## find all occurances of '->' and replace this with an arrow.
+  regex = re.compile(r"->", re.X)
+  string = regex.sub(r"<b>&rarr;</b>", string)
   
-  ## find all occurances of strings between t^..^t. These are the headers for tip of the day.
+    ## find all occurances of strings between t^..^t. These are the headers for tip of the day.
   regex = re.compile(r"t \^ (.*?)  \^ t", re.X)
-  string = regex.sub(r"<font color='$getVar(gui_html_highlight_colour)'><b>\1</b></font>", string)
+  string = regex.sub(r"<font color='$getVar(gui_html_highlight_colour)'><b>\1</b></font>&nbsp;", string)
   
   ## find all occurances of strings between n^..^n. These are the notes.
   regex = re.compile(r"n \^ (.*?)  \^ n", re.X)
@@ -881,12 +885,15 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
       if i == current_tooltip_number: continue
       txt = OV.TranslatePhrase("tip-%i" %i)
       if j > max_i * 2: break
+    txt += "<tr><td align='right'>%s</td></tr>" %make_edit_link("tip", "%i" %i)
+
   elif number == "+1":
     i = current_tooltip_number + 1
     txt = OV.TranslatePhrase("tip-%i" %i)
     if "tip-" in txt:
       i = 1
       txt = OV.TranslatePhrase("tip-%i" %i)
+    txt += "<tr><td align='right'>%s</td></tr>" %make_edit_link("tip", "%i" %i)
   elif number == "list":
     txt = ""
     for i in xrange(max_i):
@@ -902,6 +909,7 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
   else:
     i = int(number)
     txt = OV.TranslatePhrase("tip-%i" %i)
+    txt += "<tr><td align='right'>%s</td></tr>" %make_edit_link("tip", "%i" %i)
   current_tooltip_number = i
   txt = format_help(txt)
   OV.SetVar("current_tooltip_number",i)
