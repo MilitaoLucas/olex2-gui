@@ -1,9 +1,6 @@
 # initpy.py
 import olex
 import sys
-import locale
-
-locale.setlocale(locale.LC_ALL, 'C') 
 
 debug = True
 if debug == True:
@@ -24,7 +21,12 @@ sys.path.insert(0, python_lib)
 #sys.path.insert(0, pyTool_lib)
 #sys.path.insert(0, file_readers_lib)
 stdout_redirection = True
+
 import os
+import locale
+locale.setlocale(locale.LC_ALL, 'C') 
+
+
 if os.environ.get('OLEX_DBG_NO_STDERR_REDIRECTION') is not None:
   stderr_redirection = False
 else:
