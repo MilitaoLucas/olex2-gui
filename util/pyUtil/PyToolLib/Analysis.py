@@ -20,7 +20,7 @@ except:
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
-if OV.IsPluginInstalled('plugin-cctbx'):
+if OV.IsPluginInstalled('plugin-cctbx-win'):
   from scitbx.math import erf
   
 class Graph(ImageTools):
@@ -965,7 +965,7 @@ class Analysis(Graph):
     return txt
 
   def output_data_as_csv(self, filename=None):
-    if not OV.IsPluginInstalled('plugin-cctbx'):
+    if not OV.IsPluginInstalled('plugin-cctbx-win'):
       print "Sorry, you need to install the cctbx plugin to do this"
       return
     from iotbx import csv_utils
