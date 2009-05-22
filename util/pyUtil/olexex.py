@@ -260,7 +260,7 @@ def GetAvailableRefinementProgs():
   retStr += "ShelXL CGLS;"
   retStr += "ShelXH L.S.;"
   retStr += "ShelXH CGLS;"
-  if OV.IsPluginInstalled('plugin-cctbx'):
+  if OV.IsPluginInstalled('plugin-cctbx-win'):
     retStr+= "cctbx LBFGS<-cctbx;"
   if OV.IsPluginInstalled('plugin-AutoChem'):
     retStr+= "cctbx AutoChem<-cctbx AutoChem"
@@ -274,7 +274,7 @@ def GetAvailableSolutionProgs():
     a = olx.file_Which('ShelXS.exe')
   if a:
     retStr += "ShelXS;"
-  if OV.IsPluginInstalled('plugin-cctbx'):
+  if OV.IsPluginInstalled('plugin-cctbx-win'):
     retStr+= "cctbx;"
   return retStr
 OV.registerFunction(GetAvailableSolutionProgs)
@@ -891,7 +891,7 @@ OV.registerFunction(getSolutionMethods)
 
 def which_program(prg):
   if "smtbx" in prg.name:
-    return OV.IsPluginInstalled("plugin-cctbx")
+    return OV.IsPluginInstalled("plugin-cctbx-win")
   
   if prg.name in SPD or prg.name in RPD:
     exec_l = prg.execs
@@ -971,7 +971,7 @@ def haveSelection():
   return retVal
 
 def install_plugin(plugin, args):
-  if plugin == 'plugin-cctbx':
+  if plugin == 'plugin-cctbx-win':
     if sys.platform.startswith('win'):
       plugin = 'plugin-cctbx-win'
       pass

@@ -254,7 +254,7 @@ if OV.HasGUI():
 
 olx.Clear()
 
-if OV.IsPluginInstalled('plugin-cctbx'):
+if OV.IsPluginInstalled('plugin-cctbx-win'):
   #set_cctbx_paths()
   try:
     setup_cctbx()
