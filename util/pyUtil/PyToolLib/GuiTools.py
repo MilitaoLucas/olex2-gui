@@ -594,7 +594,7 @@ image="%(image)s"
 			autoweight = ''
 			
 		lsm_items = 'L.S.;CGLS'
-		if OV.IsPluginInstalled('plugin-cctbx') == 'true':
+		if OV.IsPluginInstalled('plugin-cctbx-win') == 'true':
 			lsm_items += ";cctbx"
 		#if OV.FindValue('anis') == "True":
 		#	anis = 'checked'
