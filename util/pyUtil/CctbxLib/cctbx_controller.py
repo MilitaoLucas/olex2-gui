@@ -6,10 +6,11 @@ import math
 import scitbx.lbfgs
 from cctbx import miller
 from cctbx import statistics
+from smtbx import refinement
 
 class empty: pass
 
-class my_lbfgs(xray.minimization.lbfgs):
+class my_lbfgs(refinement.minimization.lbfgs):
   def __init__(self, delegate, **kwds):
     self.callback_after_step = delegate
     super(my_lbfgs, self).__init__(**kwds)
@@ -33,36 +34,36 @@ def test_i_over_sigma_and_completeness(reflections, n_bins=20):
   #data.make_table()
   data.show()
   #data.table
-  
+
 def test_statistics(reflections):
   import iotbx.command_line.reflection_statistics
   a = iotbx.command_line.reflection_statistics.array_cache(reflections.f_obs, 10, 3)
   a.show_completeness()
 
 
-def wilson_statistics(model, reflections, n_bins=10):  
+def wilson_statistics(model, reflections, n_bins=10):
   from cctbx import sgtbx
-  
+
   p1_space_group = sgtbx.space_group_info(symbol="P 1").group()
   reflections_per_bin=200
   verbose=False
-  
+
   asu_contents = {}
-  
+
   for scatterer in model.scatterers():
     if scatterer.scattering_type in asu_contents.keys():
       asu_contents[scatterer.scattering_type] += 1
     else:
       asu_contents.setdefault(scatterer.scattering_type, 1)
-      
-  if not asu_contents: 
+
+  if not asu_contents:
     asu_volume = model.unit_cell().volume()/float(model.space_group().order_z())
     number_carbons = asu_volume/18.0
     asu_contents.setdefault('C', number_carbons)
-    
+
   f_obs=reflections.f_obs
   f_obs.space_group = p1_space_group
-  
+
   f_sq_obs = reflections.f_sq_obs
   f_sq_obs.set_observation_type(None)
   #f_sq_obs = f_sq_obs.eliminate_sys_absent().average_bijvoet_mates()
@@ -71,10 +72,10 @@ def wilson_statistics(model, reflections, n_bins=10):
   f_sq_obs = f_sq_obs.average_bijvoet_mates()
   #f_sq_obs = merging.array()
   f_obs = f_sq_obs.f_sq_as_f()
-  
+
   #structure_factors = f_obs.structure_factors_from_scatterers(model, algorithm="direct",
                                                               #cos_sin_table=True)
-  
+
   f_obs.setup_binner(
     #d_min=f_obs.d_min(),
     #d_max=f_obs.d_max_min()[0],
@@ -83,14 +84,14 @@ def wilson_statistics(model, reflections, n_bins=10):
     n_bins=n_bins)
   if (0 or verbose):
     f_obs.binner().show_summary()
-    
+
   wp = statistics.wilson_plot(f_obs, asu_contents, e_statistics=True)
   if (0 or verbose):
     print "wilson_k, wilson_b:", 1/wp.wilson_intensity_scale_factor, wp.wilson_b
-    
+
   return wp
 
-def completeness_statistics(reflections, n_bins=20):  
+def completeness_statistics(reflections, n_bins=20):
   verbose = False
   f_obs=reflections.f_obs
   f_sq_obs = reflections.f_sq_obs
@@ -105,7 +106,7 @@ def completeness_statistics(reflections, n_bins=20):
     f_obs.binner().show_summary()
   return statistics.completeness_plot(f_obs)
 
-def cumulative_intensity_distribution(model, reflections, n_bins=20):  
+def cumulative_intensity_distribution(model, reflections, n_bins=20):
   verbose = False
   f_obs=reflections.f_obs
   f_sq_obs = reflections.f_sq_obs
@@ -128,17 +129,17 @@ def f_obs_vs_f_calc(model, reflections):
   f_obs = reflections.f_obs
   sf = xray.structure_factors.from_scatterers(miller_set=f_obs,cos_sin_table=True)
   f_calc = sf(model,f_obs).f_calc()
-  
+
   f_obs_sq = f_obs.f_as_f_sq()
   f_calc_sq = f_obs.f_as_f_sq()
-  
+
   plot = empty()
   plot.f_obs_sq = f_obs_sq.data()
   plot.f_calc_sq = f_calc_sq.data()
-  
+
   return plot
-  
-  
+
+
 class reflections(object):
   def __init__(self,  cell, spacegroup, reflection_file):
     """ reflections is the filename holding the reflections """
@@ -151,14 +152,16 @@ class reflections(object):
     )
     self.crystal_symmetry = cs
     self.f_sq_obs = reflections_server.get_miller_arrays(None)[0]
-    self.f_obs = self.f_sq_obs.f_sq_as_f() 
+    self.f_obs = self.f_sq_obs.f_sq_as_f()
 
 
 class refinement(object):
-  def __init__(self, cell, spacegroup, atom_iter, reflections, max_cycles=10):
+  def __init__(self, cell, spacegroup, atom_iter, reflections,
+               max_sites_pre_cycles=8, max_cycles=40):
     """ cell is a 6-uple, spacegroup a string and atom_iter yields tuples (label, xyz, u) """
     self.cs = crystal.symmetry(cell, spacegroup)
     self.xs = xray.structure(self.cs.special_position_settings())
+    self.max_sites_pre_cycles = max_sites_pre_cycles
     self.max_cycles = max_cycles
     self.reflections = reflections
     u_star = shelx_adp_converter(self.cs)
@@ -212,10 +215,10 @@ class refinement(object):
       label = a.label
       xyz = a.site
       symbol = a.scattering_type
-      if a.flags.use_u_iso(): 
+      if a.flags.use_u_iso():
         u = (a.u_iso,)
         u_eq = u[0]
-      if a.flags.use_u_aniso(): 
+      if a.flags.use_u_aniso():
         u_cif = adptbx.u_star_as_u_cart(self.xs.unit_cell(), a.u_star)
         u = u_cif
         u_eq = adptbx.u_star_as_u_iso(self.xs.unit_cell(), a.u_star)
@@ -277,6 +280,7 @@ class refinement(object):
       xray_structure=self.xs,
       #structure_factor_algorithm="direct",
       cos_sin_table=True,
+      lbfgs_sites_pre_minimisation_termination_params=scitbx.lbfgs.termination_parameters(max_iterations=self.max_sites_pre_cycles),
       lbfgs_termination_params = scitbx.lbfgs.termination_parameters(
         max_iterations=self.max_cycles),
       verbose=1
@@ -383,37 +387,37 @@ class refinement(object):
 if __name__ == '__main__':
   def gen_atoms():
     yield (
-      'O1', 
+      'O1',
       (-0.137150, 0.839571, 0.535618),
       (0.03920, 0.02479, 0.02102, -0.00359, 0.00749, -0.01039)
     )
     yield (
-      'O2',  
+      'O2',
       (0.196475, 0.880847, 0.239105),
       (0.02834, 0.02192, 0.02851, 0.00028, 0.01033, 0.00035)
     )
-    yield ( 
-      'N',  
+    yield (
+      'N',
       (0.044615, 0.885818, 0.395317),
       (0.01980, 0.01662, 0.01889, -0.00091, 0.00100, -0.00129)
     )
     yield (
-      'C1', 
+      'C1',
       (-0.067890, 0.803554, 0.453464),
       (0.02227, 0.01714, 0.01979, 0.00072, -0.00183, -0.00264)
     )
     yield (
-      'C2',  
+      'C2',
       (0.101242, 0.823488, 0.303320),
       (0.01814, 0.01616, 0.02174, -0.00007, 0.00138, 0.00220)
     )
     yield (
-      'C3',  
+      'C3',
       (0.022664, 0.677112, 0.299133),
       (0.02161, 0.01547, 0.02287, -0.00148, 0.00112, 0.00028)
     )
     yield (
-      'C4', 
+      'C4',
       (-0.088420, 0.663297, 0.399782),
       (0.02982, 0.01551, 0.02078, 0.00046, 0.00045, -0.00241)
     )
@@ -430,5 +434,4 @@ if __name__ == '__main__':
   #for q,h in r.iter_peaks():
     #print h, q
   #print '********************'
-  print r.r1()	
-
+  print r.r1()
