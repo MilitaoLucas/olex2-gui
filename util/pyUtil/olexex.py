@@ -1111,7 +1111,7 @@ def GetACF():
   
   cont = None
   debug = OV.FindValue('odac_fb', False)
-  debug = False
+  debug = True
   debug_deep1 = True
   debug_deep2 = True
 #  OV.SetVar("ac_verbose", True)
