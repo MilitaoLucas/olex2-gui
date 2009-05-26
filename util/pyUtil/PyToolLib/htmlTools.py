@@ -669,6 +669,7 @@ def OnModeChange(*args):
     'move sel -c=':'button-copy_near',    
     'grow':'button-grow_mode',
     'split -r=EADP':'button_full-move_atoms_or_model_disorder',
+    'split':'button_full-move_atoms_or_model_disorder',
     'name':'button_small-name',
     'off':None
   }
