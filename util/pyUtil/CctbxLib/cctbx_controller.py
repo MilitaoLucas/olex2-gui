@@ -157,7 +157,7 @@ class reflections(object):
 
 class refinement(object):
   def __init__(self, cell, spacegroup, atom_iter, reflections,
-               max_sites_pre_cycles=8, max_cycles=40):
+               max_sites_pre_cycles=20, max_cycles=40):
     """ cell is a 6-uple, spacegroup a string and atom_iter yields tuples (label, xyz, u) """
     self.cs = crystal.symmetry(cell, spacegroup)
     self.xs = xray.structure(self.cs.special_position_settings())
