@@ -187,7 +187,7 @@ class RunPrg(ArgumentParser):
     return program, prgMethod
 
   def endRun(self):
-    OV.Cursor()
+    #OV.Cursor()
     OV.DeleteBitmap('%s' %self.bitmap)
     return self.his_file
 
