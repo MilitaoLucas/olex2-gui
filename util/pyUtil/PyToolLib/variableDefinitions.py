@@ -35,6 +35,10 @@ def guiVariables():
     gui_image_font_name='Vera',
     gui_timage_colour='#6464a0',
     gui_timage_font_colour='#ff0000',
+
+    gui_button_colouring='#ff0000',
+    gui_button_writing='#00ff00',
+
     gui_snumtitle_colour='#6464a0',
     gui_snumtitle_font_colour='#ff0000',
     gui_tab_colour='#ff0000',

@@ -135,7 +135,14 @@ class OlexFunctions(inheritFunctions):
     else:
       path = '"%s"'
     return olex.m('reap %s' %path)
-    
+
+  def AtReap(self, path):
+    path = path.strip("'")
+    path = path.strip('"')
+    path = '"%s"' %path
+    return olex.m('@reap %s' %path)
+  
+  
   def Reset(self):
     olx.Reset()
     
