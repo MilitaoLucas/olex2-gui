@@ -495,7 +495,7 @@ def format_help(string):
   m = regex.findall(string)
   colour = "#888888"
   if m:
-    s = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='4'><tr bgcolor='#ffffdd'><td colspan='2'><a href='\2'><b><font size='2' color='%s'><code>>>\2</code></font></b></a></td></tr></table>" %(width,colour), string)
+    s = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='4'><tr bgcolor='$getVar(gui_html_code_bg_colour)'><td colspan='2'><a href='\2'><b><font size='2' color='%s'><code>>>\2</code></font></b></a></td></tr></table>" %(width,colour), string)
     #s = regex.sub(r"<tr bgcolor='#ffffaa'><td colspan='2'><b><font size='2' color='%s'>>>\2</font></b></td></tr>" %colour, string)
 
   else:
