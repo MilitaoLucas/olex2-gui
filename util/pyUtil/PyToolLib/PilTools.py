@@ -2243,6 +2243,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     name = r"gui/images/toolbar-collapse.png"
     OlexVFS.save_image_to_olex(image, name, 2)
 
+    
+    image = Image.new('RGBA', (1,1), (0,0,0,0))
+    OlexVFS.save_image_to_olex(image, "blank.png", 2)       
+    
     height = 15
     width = 2
     colour = self.gui_html_bg_colour
