@@ -1308,7 +1308,7 @@
 			<cmd3 "itemstate info-history 0">
 			<cmd4 "itemstate info-reflection-statistics 0">
 			<cmd5 "itemstate info-bad-reflections 0">
-			<cmd6 "itemstate info-q-peaks 0">
+			<cmd6 "itemstate info-electron-density-peaks 0">
 			<cmd7 "itemstate info-autochem 0">
 			<cmd8 "itemstate info-refinement-indicators 0">
 			<cmd9 "itemstate info-recent-files 0">
