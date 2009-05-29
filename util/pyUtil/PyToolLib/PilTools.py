@@ -1228,6 +1228,8 @@ class timage(ImageTools):
     crop =  im.crop(cut)
     button_names = self.image_items_d.get("FULL ROW", button_names)
     self.produce_buttons(button_names, crop, cut, max_width,self.sfs,"_full")
+  
+    
     cut = 0*sf, 152*sf, 15*sf, 167*sf
     crop =  im.crop(cut)
     crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_table_firstcol_colour,luminosity=1.98)) 
@@ -1428,9 +1430,11 @@ class timage(ImageTools):
       if state == "on":
         colour = self.adjust_colour(self.gui_html_highlight_colour,luminosity=1.3)
       elif state == "off":
-        colour = self.adjust_colour(self.gui_html_base_colour,luminosity=1.9)
+        #colour = self.adjust_colour(self.gui_html_base_colour,luminosity=1.9)
+        colour = self.gui_button_colouring
       elif state == "":
-        colour = self.adjust_colour(self.gui_html_base_colour,luminosity=1.9)
+        #colour = self.adjust_colour(self.gui_html_base_colour,luminosity=1.9)
+        colour = self.gui_button_colouring
       for txt in button_names:
         #IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
         crop_colouriszed = self.colourize(crop, (0,0,0), colour) 
@@ -1444,7 +1448,7 @@ class timage(ImageTools):
                      font_name = 'Vera', 
                      font_size=40, 
                      titleCase=False,                  
-                     font_colour=self.gui_html_font_colour,
+                     font_colour=self.gui_button_writing,
                      max_width = max_width,
                      align='centre'
                      )
@@ -2051,7 +2055,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         'image_prefix':'cbtn',
         'height':cbtn_buttons_height,
         'font_name':font_name,
-        'bgcolour':(60,80,140),
+        #'bgcolour':(60,80,140),
         'fontcolouroff':self.adjust_colour((237,237,237), luminosity = 0.6),
         'bgcolouroff':self.adjust_colour(self.gui_timage_colour, luminosity = 1.8),
         'bgcolouron':self.gui_timage_colour,
@@ -2061,11 +2065,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         'states':['','on', 'off', 'inactive'],
         'grad_colour':(237,237,245),
         'vline':{'v_pos':0, 'height':16},
-        'grad':{'grad_colour':self.adjust_colour(self.gui_timage_colour, luminosity = 3.8), 
-                'fraction':1,
-                'increment':0.5,
-                'step':1,
-                },
+        #'grad':{'grad_colour':self.adjust_colour(self.gui_timage_colour, luminosity = 1.8), 
+                #'fraction':1,
+                #'increment':0.5,
+                #'step':1,
+                #},
         'valign':("middle", 0.7),
         'top_left':(3,1),
         'align':'center',
@@ -2407,8 +2411,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
   def timage_style_1(self, item, state, font_name="Vera"):
     if self.gui_image_font_name:
       font_name = self.gui_image_font_name
+    
     width = self.width + 1
     height = 16
+    
     base = self.gui_timage_colour
     bg_colour = self.adjust_colour("base", luminosity = 1.6)
     #bg_colour = self.gui_timage_colour
@@ -2485,6 +2491,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     width = int((self.width)/len(self.tabItems)-2)
     height = 17
+
     base = self.gui_timage_colour
     font_colour = base
     size = (int(width), int(height))
