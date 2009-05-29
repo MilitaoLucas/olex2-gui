@@ -100,8 +100,7 @@
     <item title="Edit;Delete Selection <DEL>" macro="kill sel" before='Model'>
     <item title="Edit;Undo" macro="undo">
 
-    <check title="Plugins;Bruker SAINT Support" macro="spy.install_plugin plugin-brukersaint" statedependent="plugininstalled;plugin-brukersaint" before='Help'>
-    <check title="Plugins;CCTBX" macro="spy.install_plugin plugin-cctbx" statedependent="plugininstalled;plugin-cctbx" before='Help'>
+    <check title="Plugins;CCTBX" macro="spy.install_plugin plugin-cctbx" statedependent="plugininstalled;plugin-cctbx-win" before='Help'>
 
     <item title="Select;All \tCtrl+A" macro="sel -a" before='Help'>
     <item title="Select;None \tCtrl+U" macro="sel -u" before='Help'>
