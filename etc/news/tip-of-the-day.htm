@@ -1,18 +1,18 @@
 
 <tr bgcolor="$getVar(gui_html_table_firstcol_colour)" align='right'>
-<td VALIGN='right' bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-<td colspan='2' align='left'>
-	<b>&nbsp;This is Tip of the Day No.$getVar(current_tooltip_number) </b>&nbsp;|&nbsp;
-	<a href='spy.getTip(+1)>>html.reload'>Next</a> &nbsp;|&nbsp;
-	<a href='spy.getTip(0)>>html.reload'>Random</a> &nbsp;|&nbsp;
-	<a href='spy.getTip(list)>>html.reload'>List</a>
-</td>
+	<td VALIGN='right' bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td colspan='2' align='left'>
+		<b>&nbsp;This is Tip of the Day No.$getVar(current_tooltip_number) </b>&nbsp;|&nbsp;
+		<a href='spy.getTip(+1)>>html.reload'>Next</a> &nbsp;|&nbsp;
+		<a href='spy.getTip(0)>>html.reload'>Random</a> &nbsp;|&nbsp;
+		<a href='spy.getTip(list)>>html.reload'>List</a>
+	</td>
 </tr>
 
 <tr align='left'>
-	<td width='6' VALIGN='left' bgcolor="$getVar(gui_html_table_bg_colour)"></td>
+	<td width='6' VALIGN='left' bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 	<td align='center' colspan='2' bgcolor="$getVar(gui_html_highlight_colour)">
-		<table border="0" cellpadding="4" cellspacing="0" width='$eval(htmlpanelwidth()- 35)'>
+		<table border="0" cellpadding="4" cellspacing="0" width='100%'>
 			<tr>
 				<td bgcolor="$getVar(gui_html_table_bg_colour)" >
 <!-- #include tip-of-the-day-content tip-of-the-day-content.htm;1; -->

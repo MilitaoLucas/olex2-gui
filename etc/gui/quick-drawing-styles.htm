@@ -8,18 +8,21 @@
 			<zimg border="0" src="info.png">
 		</a>	
 	</td>
-		<td></td>
-			<zimg border="0" src="gui/images/toolbar-ball-and-stick.png"> 
-		<td width = "50%">
-$spy.MakeActiveGuiButton(button-balls_&_sticks,'pers>>sel -u')
-		</td>
-		<td ></td>
-			<zimg border="0" src="gui/images/toolbar-anis.png"> 
-		<td width = "50%">
+	<td>
+		<zimg border="0" src="gui/images/toolbar-ball-and-stick.png"> 
+	</td>
 
-		
+	<td width = "50%">
+$spy.MakeActiveGuiButton(button-balls_&_sticks,'pers>>sel -u')
+	</td>
+
+	<td>
+			<zimg border="0" src="gui/images/toolbar-anis.png"> 
+	</td>
+	
+	<td width = "50%">
 <!-- Button Part ELLIPSOIDS -->
-<map name="map_ellipsoids">
+	<map name="map_ellipsoids">
 		  <area shape="rect" 
 						coords="0,0,60,25" 
 						href="spy.InActionButton(button-ellipsoids_|_h,on)>>
@@ -40,21 +43,23 @@ spy.InActionButton(button-ellipsoids_|_h,off)"
 
 						target="%Show Ellipsoids and Hydrogen atom Uiso%">
 		</map>	
-		
-		<zimg border="0" name=IMG_BUTTON-ELLIPSOIDS_|_H src="button-ellipsoids_|_h.png" usemap=#map_ellipsoids>
-
+			<zimg border="0" name=IMG_BUTTON-ELLIPSOIDS_|_H src="button-ellipsoids_|_h.png" usemap=#map_ellipsoids>
 		</td>
 	</tr>
+
+	
 	<tr>
-	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
-	</td>
-	<td>
+		<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+		<td>
 			<zimg border="0" src="gui/images/toolbar-wireframe.png"> 
+		</td>
 		<td>
 $spy.MakeActiveGuiButton(button-wireframe,'proj')
 		</td>
-		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
+		
+		<td>
 			<zimg border="0" src="gui/images/toolbar-sphere-packing.png"> 
+		</td>
 		<td>
 $spy.MakeActiveGuiButton(button-sphere_packing,'sfil>>sel -u')
 		</td>
@@ -62,57 +67,32 @@ $spy.MakeActiveGuiButton(button-sphere_packing,'sfil>>sel -u')
 
 
 	<tr>
-	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
-	</td>
-	<td>
+		<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+		<td>
 			<zimg border="0" src="gui/images/toolbar-bicoloured-bonds.png"> 
+		</td>
 		<td>
 $spy.MakeActiveGuiButton(button-tubes,'tubes>>sel -u')
 		</td>
-		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
+		<td>
 			<zimg border="0" src="gui/images/toolbar-default.png"> 
+		</td>
 		<td>
 $spy.MakeActiveGuiButton(button-default_style,'default')
 		</td>
 	</tr>
 	
-	
+
 	<tr>
-	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
-	</td>
-	<td>
+		<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+		<td>
 			<zimg border="0" src="gui/images/toolbar-polyhedra.png"> 
+		</td>
 		<td>
 $spy.MakeActiveGuiButton(button-polyhedra,'mask atoms 33>>sel -u')
 		</td>
 	</tr>
 	
-
-<!--
-
-	<tr>
-		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
-		<td>
-			Perspective
-		</td>
-		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
-			<zimg border="0" src="gui/images/toolbar-default.png"> 
-		<td>
-			Zoom
-		</td>
-	</tr>
-	<tr>
-		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
-		<td>
-			<input type="slider" name = "perspec" float width="100" height="20" value="1" min="1" max="10" onchange = "echo perspective getvalue(perspec)>>perspective getvalue(perspec)">
-		</td>
-		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
-			<zimg border="0" src="gui/images/toolbar-default.png"> 
-		<td>
-			<input type="slider" name = "zoom" float width="100" height="20" value="1" min="1" max="10" onchange = "echo zoom getvalue(zoom)>>zoom(getvalue(zoom))">
-		</td>
-	</tr>
--->
 
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
