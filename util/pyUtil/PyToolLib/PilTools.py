@@ -1444,7 +1444,7 @@ class timage(ImageTools):
         t = txt.replace("blank"," _ ") 
         self.write_text_to_draw(draw, 
                      "%s" %t,
-                     top_left=(4, 6), 
+                     top_left=(4, 7), 
                      font_name = 'Vera', 
                      font_size=40, 
                      titleCase=False,                  
