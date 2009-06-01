@@ -46,15 +46,10 @@ def makeProgramSettingsGUI(program, method, prgtype):
   
   max_colspan = 6
   txt = r"""
-</table>
+<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=4;1; -->
     <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$getVar(gui_html_table_bg_colour)">
-      <tr>
-        <td valign="center" width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-        <td width='100%%' align='left' colspan=%s>
-<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=%s;1; -->
-        </td>
-      </tr>""" %(max_colspan, max_colspan)
-  
+"""
+
   txt += ''.join([makeArgumentsHTML(arg) for arg in method.args])
 
   txt += r'''
@@ -69,7 +64,6 @@ def makeProgramSettingsGUI(program, method, prgtype):
   %s
 </tr>
 </table>
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$getVar(gui_html_table_bg_colour)">
 ''' %(max_colspan, authors, reference, method.extraHtml())
   
   OlexVFS.write_to_olex(wFilePath, txt)
