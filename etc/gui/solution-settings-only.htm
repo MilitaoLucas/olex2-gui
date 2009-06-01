@@ -2,20 +2,17 @@
 
 <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$getVar(gui_html_table_bg_colour)">
 
-
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_SOLUTION_PROGRAM'>
 	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-
-	<td VALIGN='center' width="100" colspan=2>
-			<b>Solution Program</b>
-	</td>	
-
-	<td VALIGN='center' ALIGN='right' colspan=2>
-		<font size='2'> 
-			<input 
+	<td width='50%' VALIGN='center' colspan=2>
+		<b>Solution Program</b>
+	</td>
+	<td width='50%' VALIGN='center' ALIGN='right' colspan=2>
+		<font size='2'>
+			<input
 				type='combo',
-				width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)' 
-				height="17" 
+				width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)'
+				height="17"
 				bgcolor="GetVar(gui_html_input_bg_colour)"
 				name='SET_SNUM_SOLUTION_PROGRAM',
 				value='GetVar(snum_solution_program)'
@@ -30,22 +27,20 @@
 
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_SOLUTION_METHOD'>
 	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-
-	<td VALIGN='center' width="100" colspan=2>
-			<b>%Solution Method%</b>
-	</td>	
-
-	<td VALIGN='center' ALIGN='right' colspan=2>
-		<font size='2'> 
-			<input 
+	<td width='50%' VALIGN='center' colspan=2>
+		<b>%Solution Method%</b>
+	</td>
+	<td width='50%' VALIGN='center' ALIGN='right' colspan=2>
+		<font size='2'>
+			<input
 				type='combo',
-				width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)' 
-				height="17" 
+				width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)'
+				height="17"
 				bgcolor="GetVar(gui_html_input_bg_colour)"
 				name='SET_SNUM_SOLUTION_METHOD',
-				value='GetVar(snum_solution_method)', 
+				value='GetVar(snum_solution_method)',
 				items='$spy.getSolutionMethods(GetVar(snum_solution_program))'
-				label='', 
+				label='',
 				onchange="setVar(snum_solution_method,'GetValue(SET_SNUM_SOLUTION_METHOD)')>>UpdateHtml"
 				readonly='readonly'
 			>
@@ -53,118 +48,112 @@
 	</td>
 </tr>
 
-
-
 <tr VALIGN='center' ALIGN='left' NAME='SET_REFLECTIONS'>
 	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-		<td VALIGN='center' width="100"  colspan=2>
-				 <b>%Reflection File%</b>
-		</td>
-
-		<td VALIGN='center' ALIGN='right' colspan=2>
-			<font size='2'>
-				<input 
-					type='combo', 
-					width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)' 
-					height="17" 
-					bgcolor="GetVar(gui_html_input_bg_colour)"
-					name='SET_REFLECTIONS', 
-					items='$spy.GetHklFileList()', 
-					onchange='HKLSrc(GetValue(SET_REFLECTIONS))', 
-					value='FileName(HKLSrc())', 
-					readonly='readonly'
-				> 
-			</font>
-		</td>
+	<td width='50%' VALIGN='center' colspan=2>
+		<b>%Reflection File%</b>
+	</td>
+	<td width='50%' VALIGN='center' ALIGN='right' colspan=2>
+		<font size='2'>
+			<input
+				type='combo',
+				width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)'
+				height="17"
+				bgcolor="GetVar(gui_html_input_bg_colour)"
+				name='SET_REFLECTIONS',
+				items='$spy.GetHklFileList()',
+				onchange='HKLSrc(GetValue(SET_REFLECTIONS))',
+				value='FileName(HKLSrc())',
+				readonly='readonly'
+			>
+		</font>
+	</td>
 </tr>
+
 <tr VALIGN='center' ALIGN='left' NAME='SET_SNUM_REFINEMENT_FORMULA'>
 	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-		<td VALIGN='center' width="100"  colspan=2>
-				 <b>%Chemical Composition%</b>
-		</td>
-
-		<td VALIGN='center' ALIGN='right' colspan=2>
-			<font size='2'>
-				<input 
-					type='combo', 
-					width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)' 
-					height="17" 
-					bgcolor="GetVar(gui_html_input_bg_colour)"
-					name='SET_SNUM_REFINEMENT_FORMULA',
-					items='GetVar(snum_refinement_original_formula)' 
-					value='xf.GetFormula()', 
-					onchange='xf.SetFormula(GetValue(SET_SNUM_REFINEMENT_FORMULA))>>SetVar(snum_refinement_formula,"GetValue(SET_SNUM_REFINEMENT_FORMULA)")>>updatehtml'
-				> 
-			</font>
-		</td>
+	<td width='50%' VALIGN='center' colspan=2>
+		<b>%Chemical Composition%</b>
+	</td>
+	<td width='50%' VALIGN='center' ALIGN='right' colspan=2>
+		<font size='2'>
+			<input
+				type='combo',
+				width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)'
+				height="17"
+				bgcolor="GetVar(gui_html_input_bg_colour)"
+				name='SET_SNUM_REFINEMENT_FORMULA',
+				items='GetVar(snum_refinement_original_formula)'
+				value='xf.GetFormula()',
+				onchange='xf.SetFormula(GetValue(SET_SNUM_REFINEMENT_FORMULA))>>SetVar(snum_refinement_formula,"GetValue(SET_SNUM_REFINEMENT_FORMULA)")>>updatehtml'
+			>
+		</font>
+	</td>
 </tr>
+
 <tr VALIGN='center' ALIGN='left' NAME='Z'>
 	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-		<td VALIGN='center' colspan=3 width="100">
-				 <b>%Number of Formula Units%</b>
-		</td>
-
-		<td VALIGN='center' ALIGN='right' colspan=1>
-			<font size='2'>
-				<input 
-					type='spin' 
-					width=50 
-					height="17"
-					bgcolor="GetVar(gui_html_input_bg_colour)"
-					name='SET_Z'
-					min='1' 
-					value='xf.au.GetZ()' 
-					onchange="xf.au.SetZ(GetValue(SET_Z))>>updatehtml"  
-				> 
-			</font>
-		</td>
+	<td width='50%' VALIGN='center' colspan=3>
+		<b>%Number of Formula Units%</b>
+	</td>
+	<td width='50%' VALIGN='center' ALIGN='right' colspan=1>
+		<font size='2'>
+			<input
+				type='spin'
+				width=50
+				height="17"
+				bgcolor="GetVar(gui_html_input_bg_colour)"
+				name='SET_Z'
+				min='1'
+				value='xf.au.GetZ()'
+				onchange="xf.au.SetZ(GetValue(SET_Z))>>updatehtml" 
+			>
+		</font>
+	</td>
 </tr>
 
 <tr VALIGN='center' ALIGN='left' NAME='Z Prime'>
 	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-		<td VALIGN='center' colspan=3>
-					<b>%Number in Asymmetric Unit%</b>
-		</td>
-
-		<td VALIGN='center' ALIGN='right' colspan=1>
-			<font size='2'>
-				<input 
-					type='spin', 
-					width=50, 
-					height="17" 
-  				bgcolor="GetVar(gui_html_input_bg_colour)"
-					name='SET_Z_PRIME',
-					min='1', 
-					value='GetVar(snum_refinement_Z_prime)', 
-					onchange="SetVar(snum_refinement_Z_prime,GetValue(SET_Z_PRIME))>>updatehtml"  
-				>
-			</font>
-		</td>
-</tr>			
-
+	<td width='50%' VALIGN='center' colspan=3>
+		<b>%Number in Asymmetric Unit%</b>
+	</td>
+	<td width='50%' VALIGN='center' ALIGN='right' colspan=1>
+		<font size='2'>
+			<input
+				type='spin',
+				width=50,
+				height="17"
+				bgcolor="GetVar(gui_html_input_bg_colour)"
+				name='SET_Z_PRIME',
+				min='1',
+				value='GetVar(snum_refinement_Z_prime)',
+				onchange="SetVar(snum_refinement_Z_prime,GetValue(SET_Z_PRIME))>>updatehtml"
+			>
+		</font>
+	</td>
+</tr>
 
 <tr VALIGN='center' ALIGN='left' NAME='Atomic Volume'>
-		<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-		  <td VALIGN='center' colspan=3>
-					 <b>%Current Atomic Volume%</b>
-		  </td>
-
-		  <td VALIGN='center' ALIGN='right' colspan=1><b>
-			$GetVar(current_atomic_volume)</b>
-			&Aring;
-		  </td>
-	</tr>			
-
+	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td VALIGN='center' colspan=3>
+			<b>%Current Atomic Volume%</b>
+	</td>
+	<td VALIGN='center' ALIGN='right' colspan=1>
+		<b>
+			$GetVar(current_atomic_volume)
+		</b>
+		&Aring;
+	</td>
+</tr>
 
 <tr VALIGN='center' ALIGN='left' NAME='SPACE GROUP'>
 	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-		<td VALIGN='center' colspan=3>
-				 <b>%Space Group%</b>&nbsp;
-				 <a href='sg>>SetVar(snum_refinement_sg_list,SGList())>>html.Reload'><b>%Suggest SG%</b></a>
-		</td>
-
-		<td VALIGN='center' ALIGN='right' colspan=1>
-			<font size='2'>
+	<td VALIGN='center' colspan=3>
+		<b>%Space Group%</b>&nbsp;
+		<a href='sg>>SetVar(snum_refinement_sg_list,SGList())>>html.Reload'><b>%Suggest SG%</b></a>
+	</td>
+	<td VALIGN='center' ALIGN='right' colspan=1>
+		<font size='2'>
 			<input
 				type='combo',
 				width=71,
@@ -177,32 +166,31 @@
 			>
 		</font>
 	</td>
+</tr>
 
-	<tr VALIGN='center' ALIGN='left' NAME='IGNORE_SETTINGS'>
-		<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-		  <td VALIGN='center'  colspan=3>
-				<b>
-					Graphical Output
-				</b>
-		  </td>
+<tr VALIGN='center' ALIGN='left' NAME='IGNORE_SETTINGS'>
+	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td VALIGN='center' colspan=3>
+		<b>
+			Graphical Output
+		</b>
+	</td>
+	<td VALIGN='center' ALIGN='right'  colspan=1>
+		<font size='2'>
+			<input
+				type='checkbox'
+				width=12
+				height=12
+				name='SNUM_SOLUTION_GRAPHICAL_OUTPUT'
+				$spy.CheckBoxValue(snum_solution_graphical_output)
+				oncheck='SetVar(snum_solution_graphical_output,true)'
+				onuncheck='SetVar(snum_solution_graphical_output,false)'
+				value=''
+			>&nbsp;
+		</font>
+	</td>
+</tr>
 
-		  <td VALIGN='center' ALIGN='right'  colspan=1>
-				<font size='2'>
-				<input 
-					type='checkbox'  
-					width=12  
-					height=12 
-					name='SNUM_SOLUTION_GRAPHICAL_OUTPUT' 
-					$spy.CheckBoxValue(snum_solution_graphical_output) 
-					oncheck='SetVar(snum_solution_graphical_output,true)' 
-					onuncheck='SetVar(snum_solution_graphical_output,false)' 
-					value=''
-				>&nbsp;
-			</font>
-		</td>
-	
-	</tr>
-	
 <!--<tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_UPDATE_WEIGHT'>-->
 	<!--<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>-->
 	  <!--<td VALIGN='center'  colspan=4>-->
@@ -211,10 +199,10 @@
 			<!--</a>-->
 	  <!--</td>-->
 <!--</tr>-->
-	
+
 <!-- #includeif fs.Exists(solution-settings-h3-solution-settings-extra.htm) solution-settings-h3-solution-settings-extra solution-settings-h3-solution-settings-extra.htm;gui\blocks\tool-h3-off.htm;image=solution-settings-h3-solution-settings-extra;colspan=4;onclick=;onclick=;2; -->
-	
-	</table>	
+
+</table>
 </font>
 <!--<tr>-->
 <!--<!-- #includeif file.Exists('FilePath()/.olex/xy.htm') XY 'FilePath()/.olex/xy.htm';1; -->
