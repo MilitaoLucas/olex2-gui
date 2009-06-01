@@ -1,27 +1,23 @@
 <font color=$getVar(gui_html_font_colour) size=$getVar(gui_html_font_size) face=$getVar(gui_html_font_name)>
 
-
 <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$getVar(gui_html_table_bg_colour)">
-
 
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_PROGRAM'>
 	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-
-	<td VALIGN='center' width="100" colspan=2>
-			<b>Refinement Program</b>
-	</td>	
-
+	<td width='50%' align='left' colspan=2>
+		<b>Refinement Program</b>
+	</td>
 	<td VALIGN='center' colspan=2 align="right">
-		<font size='2'> 
-			<input 
+		<font size='2'>
+			<input
 				type='combo',
-				width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)' 
-				height="17" 
+				width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)'
+				height="17"
 				bgcolor="GetVar(gui_html_input_bg_colour)"
 				name='SET_SNUM_REFINEMENT_PROGRAM',
 				value='GetVar(snum_refinement_program)'
 				items='$spy.getRefinementPrgs()'
-				label='', 
+				label='',
 				onchange="SetVar(snum_refinement_program,GetValue(SET_SNUM_REFINEMENT_PROGRAM))>>UpdateHtml"
 				readonly='readonly'
 			>
@@ -31,11 +27,9 @@
 
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_METHOD'>
 	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-
-	<td VALIGN='center' width="100" colspan=2>
-			<b>Refinement Method</b>
+	<td width='50%' align='left' colspan=2>
+		<b>Refinement Method</b>
 	</td>	
-
 	<td VALIGN='center' colspan=2 align="right">
 		<font size='2'> 
 			<input 
@@ -56,9 +50,9 @@
 
 <tr VALIGN='center' ALIGN='left' NAME='SET_REFLECTIONS'>
 	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-		<td VALIGN='center' colspan=2 width="100">
-			<b>Reflection File</b>
-		</td>
+	<td width='50%' align='left' colspan=2>
+		<b>Reflection File</b>
+	</td>
 	<td VALIGN='center' colspan=2 align="right">
 		<font size='2'>
 			<input 
@@ -78,10 +72,10 @@
 
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_MAX_CYCLES'>
 <td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-	<td VALIGN='center' colspan='3'>
+	<td VALIGN='center' colspan=3>
 		<b>Maximum Refinement Iterations</b>
 	</td>
-	<td VALIGN='center' ALIGN='right' colspan='1'>
+	<td VALIGN='center' ALIGN='right' colspan=1>
 		<font size='2'>
 			<input 
 				type='spin', 
@@ -94,56 +88,55 @@
 			> 
 		</font>
 	</td>
-</tr>			
-	<tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_MAX_PEAKS'>
-		<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-		  <td VALIGN='center' colspan='3'>
-					 <b>Number of Residual Peaks</b>
-		  </td>
-		  <td VALIGN='right' ALIGN='right' colspan='1'>
-				<font size='2'>
-					<input 
-						type="spin" 
-						name="SET_SNUM_REFINEMENT_MAX_PEAKS"  
-						width="50" 
-						height="17" 
-						max='1000' 
-						bgcolor="GetVar(gui_html_input_bg_colour)"
-						value='GetVar(snum_refinement_max_peaks)'
-						onchange='SetVar(snum_refinement_max_peaks,GetValue(SET_SNUM_REFINEMENT_MAX_PEAKS))'
-					>
-				</font>
-		</td>
-	</tr>
+</tr>	
 
-	<tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_UPDATE_WEIGHT'>
-		<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-		  <td VALIGN='right' colspan=3>
-					 <b><a target="%Tick the box to automatically update%" href="weight">Weight: $spy.weightGuiDisplay()</a></b>
-		  </td>
+<tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_MAX_PEAKS'>
+	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td VALIGN='center' colspan=3>
+			 <b>Number of Residual Peaks</b>
+	</td>
+	<td VALIGN='right' ALIGN='right' colspan=1>
+		<font size='2'>
+			<input 
+				type="spin" 
+				name="SET_SNUM_REFINEMENT_MAX_PEAKS"  
+				width="50" 
+				height="17" 
+				max='1000' 
+				bgcolor="GetVar(gui_html_input_bg_colour)"
+				value='GetVar(snum_refinement_max_peaks)'
+				onchange='SetVar(snum_refinement_max_peaks,GetValue(SET_SNUM_REFINEMENT_MAX_PEAKS))'
+			>
+		</font>
+	</td>
+</tr>
 
-		  <td VALIGN='center' ALIGN='right'  colspan=1>
-				<font size='2'>
-				<input 
-type='checkbox'  
-width=12  
-height=12 
-name='SET_SNUM_REFINEMENT_UPDATE_WEIGHT' 
-$spy.CheckBoxValue(snum_refinement_update_weight) 
-oncheck='SetVar(snum_refinement_update_weight,true)' 
-onuncheck='SetVar(snum_refinement_update_weight,false)' 
-value='' 
->&nbsp;
-			</font>
-		</td>
-	</tr>
-	
+<tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_UPDATE_WEIGHT'>
+	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td VALIGN='right' colspan=3>
+		<b><a target="%Tick the box to automatically update%" href="weight">Weight: $spy.weightGuiDisplay()</a></b>
+	</td>
+	<td VALIGN='center' ALIGN='right'  colspan=1>
+		<font size='2'>
+			<input
+				type='checkbox'  
+				width=12  
+				height=12 
+				name='SET_SNUM_REFINEMENT_UPDATE_WEIGHT' 
+				$spy.CheckBoxValue(snum_refinement_update_weight) 
+				oncheck='SetVar(snum_refinement_update_weight,true)' 
+				onuncheck='SetVar(snum_refinement_update_weight,false)' 
+				value='' 
+			>&nbsp;
+		</font>
+	</td>
+</tr>
 
 <tr VALIGN='center' ALIGN='left' NAME='IGNORE_SETTINGS'>
-		<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-		  <td VALIGN='center'  colspan=3>
-				<b>
-				<a href="
+	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td VALIGN='center'  colspan=3>
+		<b>
+		<a href="
 sel atoms where xatom.peak<$GetVar(snum_refinement_auto_pruneQ)&&xatom.peak>0>>
 kill sel>>
 sel atoms where xatom.peak>$GetVar(snum_refinement_auto_assignQ)>>
@@ -154,55 +147,51 @@ sel atoms where xatom.uiso>$GetVar(snum_refinement_auto_pruneU)>>
 kill sel"
 target = "Do automatic tidying once - tick the box to do it after every refinement"
 >Autotidy
-				</a>
-				</b>
+		</a>
+		</b>
 		<a 
 			href="spy.make_help_box -name='refinement-settings-h3-autotidy-settings' -popout='True'" 
 			target="Help me with this">
 			<zimg border="0" src="info.png">
-		</a>	
-				
-		  </td>
-
-		  <td VALIGN='center' ALIGN='right'  colspan=1>
-				<font size='2'>
-				<input 
-					type='checkbox'  
-					width=12  
-					height=12 
-					name='SNUM_REFINEMENT_AUTO_TIDY' 
-					$spy.CheckBoxValue(snum_refinement_auto_tidy) 
-					oncheck='SetVar(snum_refinement_auto_tidy,true)' 
-					onuncheck='SetVar(snum_refinement_auto_tidy,false)' 
-					value=''
-				>&nbsp;
-			</font>
-		</td>
-		
+		</a>
+	</td>
+	<td VALIGN='center' ALIGN='right'  colspan=1>
+		<font size='2'>
+		<input 
+			type='checkbox'  
+			width=12  
+			height=12 
+			name='SNUM_REFINEMENT_AUTO_TIDY' 
+			$spy.CheckBoxValue(snum_refinement_auto_tidy) 
+			oncheck='SetVar(snum_refinement_auto_tidy,true)' 
+			onuncheck='SetVar(snum_refinement_auto_tidy,false)' 
+			value=''
+		>&nbsp;
+		</font>
+	</td>
+</tr>
 
 <tr VALIGN='center' ALIGN='left' NAME='IGNORE_SETTINGS'>
-		<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-		  <td VALIGN='center'  colspan=3>
-				<b>
-					Graphical Output
-				</b>
-		  </td>
-		<td VALIGN='center' ALIGN='right'  colspan=1>
-				<font size='2'>
-				<input 
-					type='checkbox'  
-					width=12  
-					height=12 
-					name='SNUM_REFINEMENT_GRAPHICAL_OUTPUT' 
-					$spy.CheckBoxValue(snum_refinement_graphical_output) 
-					oncheck='SetVar(snum_refinement_graphical_output,true)' 
-					onuncheck='SetVar(snum_refinement_graphical_output,false)' 
-					value=''
-				>&nbsp;
-			</font>
-		</td>
-
-		
+	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td VALIGN='center'  colspan=3>
+		<b>
+			Graphical Output
+		</b>
+	</td>
+	<td VALIGN='center' ALIGN='right'  colspan=1>
+		<font size='2'>
+			<input 
+				type='checkbox'  
+				width=12  
+				height=12 
+				name='SNUM_REFINEMENT_GRAPHICAL_OUTPUT' 
+				$spy.CheckBoxValue(snum_refinement_graphical_output) 
+				oncheck='SetVar(snum_refinement_graphical_output,true)' 
+				onuncheck='SetVar(snum_refinement_graphical_output,false)' 
+				value=''
+			>&nbsp;
+		</font>
+	</td>
 </tr>
 
 <!--<tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_UPDATE_WEIGHT'>-->
@@ -218,4 +207,4 @@ target = "Do automatic tidying once - tick the box to do it after every refineme
 	
 <!-- #includeif fs.Exists(refinement-settings-h3-refinement-settings-extra.htm) refinement-settings-h3-refinement-settings-extra refinement-settings-h3-refinement-settings-extra.htm;gui\blocks\tool-h3-off.htm;image=refinement-settings-h3-refinement-settings-extra;colspan=4;onclick=;onclick=;2; -->
 	
-</table>	
+</table>
