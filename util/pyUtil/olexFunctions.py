@@ -243,16 +243,12 @@ class OlexFunctions(inheritFunctions):
     
   def IsPluginInstalled(self,plugin):
     if plugin == 'plugin-cctbx-win':
-      if olx.IsPluginInstalled('plugin-cctbx-win') == 'true'\
-         and not os.environ.has_key('OLEX2_CCTBX_DIR'):
-        return False
-      elif os.environ.has_key('OLEX2_CCTBX_DIR') and os.path.isdir(os.environ.get('OLEX2_CCTBX_DIR')):
+      if os.environ.has_key('OLEX2_CCTBX_DIR') and os.path.isdir(os.environ.get('OLEX2_CCTBX_DIR')):
         return True
       elif sys.platform.startswith('win'):
         plugin = 'plugin-cctbx-win'
-        
     return olx.IsPluginInstalled(plugin) == 'true'
-  
+
   if olx.IsPluginInstalled('plugin-CProfile') == 'true':
     #import cProfile
     outFile = open('%s/profile.txt' %olx.DataDir(), 'w')
