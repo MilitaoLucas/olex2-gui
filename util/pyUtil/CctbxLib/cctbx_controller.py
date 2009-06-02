@@ -1,12 +1,13 @@
 # cctbx_controller.py
 
-#import wingdbstub
 from my_refine_util import *
 import math
 import scitbx.lbfgs
 from cctbx import miller
 from cctbx import statistics
 from smtbx import refinement
+from cctbx import uctbx
+from iotbx.shelx import builders
 
 class empty: pass
 
@@ -31,15 +32,12 @@ def twin_laws(reflections):
 def test_i_over_sigma_and_completeness(reflections, n_bins=20):
   from mmtbx.scaling.data_statistics import i_over_sigma_and_completeness
   data = i_over_sigma_and_completeness(reflections.f_obs)
-  #data.make_table()
   data.show()
-  #data.table
 
 def test_statistics(reflections):
   import iotbx.command_line.reflection_statistics
   a = iotbx.command_line.reflection_statistics.array_cache(reflections.f_obs, 10, 3)
   a.show_completeness()
-
 
 def wilson_statistics(model, reflections, n_bins=10):
   from cctbx import sgtbx
@@ -66,16 +64,10 @@ def wilson_statistics(model, reflections, n_bins=10):
 
   f_sq_obs = reflections.f_sq_obs
   f_sq_obs.set_observation_type(None)
-  #f_sq_obs = f_sq_obs.eliminate_sys_absent().average_bijvoet_mates()
   merging = f_sq_obs.merge_equivalents()
   merging.show_summary()
   f_sq_obs = f_sq_obs.average_bijvoet_mates()
-  #f_sq_obs = merging.array()
   f_obs = f_sq_obs.f_sq_as_f()
-
-  #structure_factors = f_obs.structure_factors_from_scatterers(model, algorithm="direct",
-                                                              #cos_sin_table=True)
-
   f_obs.setup_binner(
     #d_min=f_obs.d_min(),
     #d_max=f_obs.d_max_min()[0],
@@ -84,11 +76,9 @@ def wilson_statistics(model, reflections, n_bins=10):
     n_bins=n_bins)
   if (0 or verbose):
     f_obs.binner().show_summary()
-
   wp = statistics.wilson_plot(f_obs, asu_contents, e_statistics=True)
   if (0 or verbose):
     print "wilson_k, wilson_b:", 1/wp.wilson_intensity_scale_factor, wp.wilson_b
-
   return wp
 
 def completeness_statistics(reflections, n_bins=20):
@@ -154,45 +144,41 @@ class reflections(object):
     self.f_sq_obs = reflections_server.get_miller_arrays(None)[0]
     self.f_obs = self.f_sq_obs.f_sq_as_f()
 
+def create_cctbx_xray_structure(cell, spacegroup, atom_iter, restraint_iterator=None):
+  """ cell is a 6-uple, spacegroup a string and atom_iter yields tuples (label, xyz, u, element_type) """
+  builder = builders.crystal_structure_builder()
+  unit_cell = uctbx.unit_cell(cell)
+  builder.make_crystal_symmetry(cell, spacegroup)
+  builder.make_structure()
+  u_star = shelx_adp_converter(builder.crystal_symmetry)
+  for label, xyz, u, elt in atom_iter:
+    if len(u) != 1:
+      a = xray.scatterer(label, xyz, u_star(*u))
+      behaviour_of_variable = [0,0,0,1,0,0,0,0,0]
+    else:
+      a = xray.scatterer(label, xyz,u[0])
+      behaviour_of_variable = [0,0,0,1,0]
+    builder.add_scatterer(a, behaviour_of_variable)
+  return builder
 
 class refinement(object):
-  def __init__(self, cell, spacegroup, atom_iter, reflections,
-               max_sites_pre_cycles=20, max_cycles=40):
-    """ cell is a 6-uple, spacegroup a string and atom_iter yields tuples (label, xyz, u) """
-    self.cs = crystal.symmetry(cell, spacegroup)
-    self.xs = xray.structure(self.cs.special_position_settings())
+  def __init__(self,
+               f_obs=None,
+               f_sq_obs=None,
+               xray_structure=None,
+               lambda_=None,
+               max_sites_pre_cycles=20,
+               max_cycles=40):
+    self.f_sq_obs = f_sq_obs
     self.max_sites_pre_cycles = max_sites_pre_cycles
     self.max_cycles = max_cycles
-    self.reflections = reflections
-    u_star = shelx_adp_converter(self.cs)
-    for label, xyz, u, elt in atom_iter:
-      if len(u) != 1:
-        a = xray.scatterer(label, xyz, u_star(*u))
-#				a.flags.use_u_iso(True)
-#				a.flags.use_u_aniso(False)
-      else:
-        a = xray.scatterer(label, xyz,u[0])
-        #a.flags.use_u_iso(False)
-        #a.flags.use_u_aniso(True)
-
-      a.flags.set_grad_site(True)
-      if a.flags.use_u_iso() == True:
-        a.flags.set_grad_u_iso(True)
-        a.flags.set_grad_u_aniso(False)
-      if a.flags.use_u_aniso()== True:
-        a.flags.set_grad_u_aniso(True)
-        a.flags.set_grad_u_iso(False)
-      self.xs.add_scatterer(a)
-
+    self.xs = xray_structure
     from cctbx.eltbx import wavelengths, sasaki
-    lambda_ = wavelengths.characteristic('Mo').as_angstrom()
     for sc in self.xs.scatterers():
       if sc.scattering_type in ('H','D'):continue
       fp_fdp = sasaki.table(sc.scattering_type).at_angstrom(lambda_)
       sc.fp = fp_fdp.fp()
       sc.fdp = fp_fdp.fdp()
-
-
 
   def on_cycle_finished(self, xs, minimiser):
     """ called after each iteration of the given minimiser, xs being
@@ -200,12 +186,9 @@ class refinement(object):
 
   def start(self):
     """ Start the refinement """
-    #self.copy_cctbx_original_structure()
     self.filter_cctbx_reflections()
     self.xs0 = self.xs
     self.set_cctbx_refinement_flags()
-    #self.get_cctbx_reflections()
-    #self.filter_cctbx_reflections()
     self.setup_cctbx_refinement()
     self.start_cctbx_refinement()
 
@@ -225,25 +208,6 @@ class refinement(object):
 
       yield label, xyz, u, u_eq, symbol
 
-
-  def cell(self):
-    """ the cell as a 6-uple """
-    cell = property(cell)
-
-  #def space_group(self):
-    #""" the space-group as a Hermann-Mauguin or whatever you like """
-    #space_group = property(space_group)
-
-
-  #def copy_cctbx_original_structure(self):
-    #cs = self.cs
-    #xs0 = xray.structure(
-      #cs.special_position_settings(),
-      #flex.xray_scatterer((self.scatterers)))
-    #xs = xs0.deep_copy_scatterers()
-    #self.xs0 = xs0
-    #self.xs = xs
-
   def set_cctbx_refinement_flags(self):
     for a in self.xs.scatterers():
       a.flags.set_grad_site(True)
@@ -255,8 +219,7 @@ class refinement(object):
         a.flags.set_grad_u_iso(False)
 
   def filter_cctbx_reflections(self):
-    #f_obs = reflections_server.get_miller_arrays(None)[0].f_sq_as_f()
-    f_sq_obs = self.reflections.f_sq_obs # read the reflections from the file
+    f_sq_obs = self.f_sq_obs
     for i in xrange(f_sq_obs.size()):
       if f_sq_obs.data()[i] < -f_sq_obs.sigmas()[i]:
         f_sq_obs.data()[i] = -f_sq_obs.sigmas()[i]
@@ -289,7 +252,7 @@ class refinement(object):
 
   def f_obs_minus_f_calc_map(self, resolution):
     f_obs=self.f_obs
-    f_sq_obs = self.reflections.f_sq_obs
+    f_sq_obs = self.f_sq_obs
     f_sq_obs.set_observation_type(None)
     f_sq_obs = f_sq_obs.eliminate_sys_absent().average_bijvoet_mates()
     f_obs = f_sq_obs.f_sq_as_f()
@@ -366,7 +329,7 @@ class refinement(object):
       yield q,h
 
   def r1(self):
-    f_sq_obs = self.reflections.f_sq_obs
+    f_sq_obs = self.f_sq_obs
     merging = f_sq_obs.eliminate_sys_absent().merge_equivalents()
     #merging.show_summary()
     f_sq_obs = merging.array()

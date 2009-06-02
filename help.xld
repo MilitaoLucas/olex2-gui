@@ -214,7 +214,7 @@
    <Display \>
   \>
  \>
- <htmlpanelwidht help="Sets the width of the html panel in percent" 
+ <htmlpanelwidth help="Sets the width of the html panel in percent" 
   <category 
    <Display \>
   \>

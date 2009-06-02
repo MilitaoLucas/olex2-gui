@@ -382,14 +382,15 @@ class OlexFunctions(inheritFunctions):
         olx.html_SetImage(zimg_name,image_file)
       except:
         print "Failure!"
-  
-  
-  
+
   def cmd(self, command):
     olex.m(command)
     return ""
   
   def setItemstate(self, txt):
     olex.m("itemstate %s" %txt)
+
+  def GetRefinementModel(self,calculate_connectivity=False):
+    return olex_core.GetRefinementModel(calculate_connectivity)
 
 OV = OlexFunctions()
