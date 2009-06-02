@@ -9,17 +9,15 @@ if debug == True:
   except:
     pass
 
-
+datadir = olex.f("DataDir()")
+basedir = olex.f("BaseDir()")
 if sys.platform[:3] == 'win':
   sys.path = []
-sys.path.insert(0, olex.f("DataDir()"))
-sys.path.append(r"%s/util/pyUtil" %olex.f("BaseDir()"))
-python_lib = r"%s/util/pyUtil/PythonLib" %olex.f("BaseDir()")
-#pyTool_lib = r"%s/util/pyUtil/PyToolLib" %olex.f("BaseDir()")
-#file_readers_lib = r"%s/FileReaders" %pyTool_lib
-sys.path.insert(0, python_lib)
-#sys.path.insert(0, pyTool_lib)
-#sys.path.insert(0, file_readers_lib)
+
+python_dir = "%s/Python26" %basedir
+sys.path.append("%s/DLLs" %python_dir)
+sys.path.append("%s/Lib" %python_dir)
+sys.path.append(datadir)
 stdout_redirection = True
 
 import os
@@ -128,19 +126,14 @@ def print_python_version():
   return version
 
 def set_olex_paths():
-  python_dir = "%s/util/pyUtil/PythonLib" %basedir
-  #python_dir = "%s/util/pyUtil/PythonLib2.6" %basedir
+  sys.path.append(python_dir)
+  sys.path.append("%s/Lib/site-packages" %python_dir)
+  sys.path.append("%s/Lib/site-packages/PIL" %python_dir)
   sys.path.append("%s" %basedir)
-  sys.path.append("%s" %datadir)
   sys.path.append("%s/util/pyUtil" %basedir)
   sys.path.append("%s/util/pyUtil/PyToolLib" %basedir)
   sys.path.append("%s/util/pyUtil/PyToolLib/FileReaders" %basedir)
-  sys.path.append("%s/util/pyUtil/CctbxLib" %basedir)
-  sys.path.append("%s/MySQLdb" %python_dir)
-  sys.path.append("%s/encodings" %python_dir)
-  sys.path.append("%s/PIL" %python_dir)
-  sys.path.append(python_dir)
-  sys.path.append("%s/util/pyUtil/PluginLib" %basedir)
+  sys.path.append("%s/util/pyUtil/CctbxLib" %basedir)  
 
 def set_plugins_paths():  
   plugins = olexex.InstalledPlugins()
@@ -156,7 +149,7 @@ def setup_cctbx():
   if cctbx_dir and os.path.isdir(cctbx_dir):
     cctbxRoot = cctbx_dir
   else:
-    cctbxRoot = str("%s/util/pyUtil/CctbxLib/cctbx_win" %basedir)
+    cctbxRoot = str("%s/cctbx" %basedir)
   build_path = os.environ['LIBTBX_BUILD'] = os.path.normpath(str("%s/cctbx_build" % cctbxRoot))
   sys.path.append(str("%s/cctbx_sources/libtbx" % cctbxRoot)) # needed to work with old cctbx directory structure
   sys.path.append(str("%s/cctbx_sources/libtbx/pythonpath" % cctbxRoot)) # needed to work with new cctbx directory structure
@@ -181,7 +174,7 @@ def setup_cctbx():
       sys.stdout.write("""An incompatible version of the cctbx is installed.
       Please update to cctbx build '%s' or later.
       """ %cctbx_compatibale_version)
-      
+
   if need_cold_start:
     saved_cwd = os.getcwd()
     os.chdir(build_path)
@@ -202,27 +195,17 @@ def setup_cctbx():
   if not cctbx_dir:
     os.environ['OLEX2_CCTBX_DIR'] = cctbxRoot
   if os.environ.has_key(lib_path):
-    #print "%s key is present"%lib_path
     if not os.environ[lib_path] or os.environ[lib_path].endswith(lib_sep):
       os.environ[lib_path] += libtbx.env.lib_path
     else:
       os.environ[lib_path] += lib_sep + libtbx.env.lib_path
   else:
-    #print "%s is NOT present ADDING"%lib_path
-    #print "libtbx.env.lib_path = %s"%libtbx.env.lib_path
     os.environ[lib_path] = libtbx.env.lib_path
-    #print "State of os.environ %s"%os.environ[lib_path]
     
   # Import these files now to reduce time taken on running cctbx for the first time
   #import my_refine_util
   import cctbx_olex_adapter
   import cctbx_controller
-  
-# Org code!    
-#  if not os.environ[lib_path] or os.environ[lib_path].endswith(lib_sep):
-#    os.environ[lib_path] += libtbx.env.lib_path
-#  else:
-#    os.environ[lib_path] += lib_sep + libtbx.env.lib_path
 
 ''' Redirect prints to Olex '''
 sys.stdout = StreamRedirection(sys.stdout, stdout_redirection)
@@ -256,13 +239,11 @@ if OV.HasGUI():
 
 olx.Clear()
 
-if OV.IsPluginInstalled('plugin-cctbx-win'):
-  #set_cctbx_paths()
-  try:
-    setup_cctbx()
-  except Exception, err:
-    print "There is a problem with the cctbx"
-    print err
+try:
+  setup_cctbx()
+except Exception, err:
+  print "There is a problem with the cctbx"
+  print err
 
 #if debug:
 #       keys = os.environ.keys()
