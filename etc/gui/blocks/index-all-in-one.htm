@@ -41,8 +41,8 @@
 
 <!-- #includeif or(IsFileType('ires'),IsFileType('cif')) aio-select gui\select.htm;gui\blocks\tool-off.htm;image=select;onclick=;0; -->
 <!-- #includeif file.Exists('FilePath()\FileName().cif') aio-cif gui\cif.htm;gui\blocks\tool-off.htm;image=cif;onclick=;0; -->
-<!-- #includeif and(spy.IsPluginInstalled(plugin-cctbx),IsFileType('ires')) aio-twinning gui\twinning.htm;gui\blocks\tool-off.htm;image=twinning;onclick=;0; -->
-<!-- #includeif and(spy.IsPluginInstalled(plugin-cctbx),IsFileType('ires')) aio-cctbx gui\cctbx.htm;gui\blocks\tool-off.htm;image=cctbx;onclick=;onclick=;0; -->
+<!-- #includeif IsFileType('ires') aio-twinning gui\twinning.htm;gui\blocks\tool-off.htm;image=twinning;onclick=;0; -->
+<!-- #includeif IsFileType('ires') aio-cctbx gui\cctbx.htm;gui\blocks\tool-off.htm;image=cctbx;onclick=;onclick=;0; -->
 <!-- #includeif isplugininstalled(plugin-Batch) aio-batch gui\batch.htm;gui\blocks\tool-off.htm;image=batch;onclick=;onclick=;0; -->
 
 <!-- #includeif or(IsFileType('ires'),IsFileType('cif')) aio-quick-drawing-styles gui\quick-drawing-styles.htm;gui\blocks\tool-off.htm;image=quick-drawing-styles;onclick=;0; -->

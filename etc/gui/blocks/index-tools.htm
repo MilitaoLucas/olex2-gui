@@ -8,10 +8,10 @@
 <!-- #include tools-calculate-voids gui\calculate-voids.htm;gui\blocks\tool-off.htm;image=calculate-voids;onclick=;2; -->
 <!-- #includeif file.Exists('HKLSrc()') tools-electron-density gui\electron-density.htm;gui\blocks\tool-off.htm;image=electron-density;onclick=;2; -->
 <!-- #includeif file.Exists('FilePath()\FileName().cif') tools-cif gui\cif.htm;gui\blocks\tool-off.htm;image=cif;onclick=;0; -->
-<!-- #includeif and(spy.IsPluginInstalled(plugin-cctbx),IsFileType('ires')) work-twinning gui\twinning.htm;gui\blocks\tool-off.htm;image=twinning;onclick=;2; -->
+<!-- #includeif IsFileType('ires') work-twinning gui\twinning.htm;gui\blocks\tool-off.htm;image=twinning;onclick=;2; -->
 <!-- #include tools-settings gui\settings.htm;gui\blocks\tool-off.htm;image=settings;onclick=;onclick=;2; -->
 <!-- #includeif or(IsFileType('ires'),IsFileType('cif')) tools-overlay gui\overlay.htm;gui\blocks\tool-off.htm;image=overlay;onclick=;onclick=;2; -->
-<!-- #includeif and(spy.IsPluginInstalled(plugin-cctbx),IsFileType('ires')) tools-cctbx gui\cctbx.htm;gui\blocks\tool-off.htm;image=cctbx;onclick=;onclick=;0; -->
+<!-- #includeif IsFileType('ires') tools-cctbx gui\cctbx.htm;gui\blocks\tool-off.htm;image=cctbx;onclick=;onclick=;0; -->
 <!-- #includeif or(IsFileType('ires'),IsFileType('p4p')) tools-sg gui\space-groups.htm;gui\blocks\tool-off.htm;image=space-groups;onclick=sgd;0; -->
 <!-- #includeif isplugininstalled(plugin-brukersaint) tools-bs gui\bruker-saint.htm;gui\blocks\tool-off.htm;image=bruker-saint;onclick=BSINI;2; -->
 <!-- #includeif isplugininstalled(plugin-Batch) tools-batch gui\batch.htm;gui\blocks\tool-off.htm;image=batch;onclick=;onclick=;2; -->

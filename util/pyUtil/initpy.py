@@ -265,7 +265,7 @@ if olx.IsPluginInstalled('plugin-MySQL') == "true":
   except Exception, ex:
     print "MySQL Plugin is installed but a connection to the default server could not be established"
     print ex
-    
+
 if olexex.getKey():
   olexex.GetACF()
 
@@ -279,9 +279,9 @@ if sys.platform[:3] == 'win':
   #olx.SetVar('defexplorer','nautilus')
 
 print "Welcome to Olex2"
-  
-  
-## Thes imports will register macros and functions for spy.  
+
+
+## These imports will register macros and functions for spy.  
 if OV.HasGUI():
   from Skin import Skin
   from Analysis import Analysis

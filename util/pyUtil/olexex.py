@@ -255,27 +255,23 @@ def get_refine_ls_hydrogen_treatment():
 OV.registerFunction(get_refine_ls_hydrogen_treatment)
 
 def GetAvailableRefinementProgs():
-  retStr = ""
+  retStr = "cctbx LBFGS<-cctbx;"
   retStr += "ShelXL L.S.;"
   retStr += "ShelXL CGLS;"
   retStr += "ShelXH L.S.;"
   retStr += "ShelXH CGLS;"
-  if OV.IsPluginInstalled('plugin-cctbx-win'):
-    retStr+= "cctbx LBFGS<-cctbx;"
   if OV.IsPluginInstalled('plugin-AutoChem'):
     retStr+= "cctbx AutoChem<-cctbx AutoChem"
   return retStr
 OV.registerFunction(GetAvailableRefinementProgs)
 
 def GetAvailableSolutionProgs():
-  retStr = ""
+  retStr = "cctbx;"
   a = olx.file_Which('XS.exe')
   if a == "":
     a = olx.file_Which('ShelXS.exe')
   if a:
     retStr += "ShelXS;"
-  if OV.IsPluginInstalled('plugin-cctbx-win'):
-    retStr+= "cctbx;"
   return retStr
 OV.registerFunction(GetAvailableSolutionProgs)
 
@@ -891,8 +887,7 @@ OV.registerFunction(getSolutionMethods)
 
 def which_program(prg):
   if "smtbx" in prg.name:
-    return OV.IsPluginInstalled("plugin-cctbx-win")
-  
+    return True
   if prg.name in SPD or prg.name in RPD:
     exec_l = prg.execs
   else:
@@ -971,18 +966,6 @@ def haveSelection():
   return retVal
 
 def install_plugin(plugin, args):
-  if plugin == 'plugin-cctbx-win':
-    if sys.platform.startswith('win'):
-      plugin = 'plugin-cctbx-win'
-      pass
-    #elif sys.platform.startswith('darwin'):
-      ##plugin = 'plugin-cctbx-mac-x86'
-    #elif sys.platform.startswith('linux'):
-      ##plugin = 'plugin-cctbx-lin'
-    else:
-      print "Please vist our website at www.olex2.org for cctbx installation instructions."
-      #"%s is not a supported system" %(sys.platform)
-      return
   user_alert_uninstall_plugin = OV.FindValue('user_alert_uninstall_plugin')
   if not plugin: return
   poke = olx.IsPluginInstalled("%s" %plugin)
