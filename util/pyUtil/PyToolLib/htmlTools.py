@@ -120,13 +120,6 @@ def makeHtmlTableRow(dictionary):
     else:
       href = "%(function)sFileOpen('%(caption)s','%(filter)s','%(folder)s'))>>updatehtml" %chooseFile_dict
       pass
-    #chooseFileText = '''
-#<tr>
-  #<a href="SetVar(%(var)s,FileOpen('%(caption)s','%(filter)s','%(folder)s'))>>updatehtml">
-    #<zimg border="0" src="gui/images/toolbar-open.png">
-  #</a>
-#</tr>
-#''' %chooseFile_dict
     chooseFileText = '''
     <tr>
     <a href="%s">
@@ -156,9 +149,9 @@ def makeHtmlTableRow(dictionary):
     
     htmlTableRowText = '''
 <tr VALIGN="%(trVALIGN)s" ALIGN="%(trALIGN)s" NAME="%(ctrl_name)s">
-                     %(fieldText)s  
+                     %(fieldText)s
                      <td VALIGN="center" colspan=2>
-                     <font %(font)s> 
+                     <font %(font)s>
                      %(input)s
                      </font>
                      </td>
@@ -169,10 +162,10 @@ def makeHtmlTableRow(dictionary):
     htmlTableRowText = '''
 <tr VALIGN="%(trVALIGN)s" ALIGN="%(trALIGN)s" NAME="%(ctrl_name)s">
                      <td VALIGN="%(fieldVALIGN)s" ALIGN="%(fieldALIGN)s" width="%(fieldWidth)s" colspan=2>
-                     <b>%(itemName)s</b>	
-                     </td>   
+                     <b>%(itemName)s</b>
+                     </td>
                      <td VALIGN="center" colspan=2>
-                     <font %(font)s> 
+                     <font %(font)s>
                      %(input)s
                      </font>
                      </td>
