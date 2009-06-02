@@ -242,11 +242,6 @@ class OlexFunctions(inheritFunctions):
       return func
     
   def IsPluginInstalled(self,plugin):
-    if plugin == 'plugin-cctbx-win':
-      if os.environ.has_key('OLEX2_CCTBX_DIR') and os.path.isdir(os.environ.get('OLEX2_CCTBX_DIR')):
-        return True
-      elif sys.platform.startswith('win'):
-        plugin = 'plugin-cctbx-win'
     return olx.IsPluginInstalled(plugin) == 'true'
 
   if olx.IsPluginInstalled('plugin-CProfile') == 'true':

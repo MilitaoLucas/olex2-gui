@@ -20,9 +20,8 @@ except:
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
-if OV.IsPluginInstalled('plugin-cctbx-win'):
-  from scitbx.math import erf
-  
+from scitbx.math import erf
+
 class Graph(ImageTools):
   def __init__(self):
     ImageTools.__init__(self)
@@ -51,7 +50,7 @@ class Graph(ImageTools):
         'colour3':(255,0,0),
         },
     }
-    
+  
   def plot_function(self, function, n_points=50):
     self.get_division_spacings_and_scale()
     spacing = self.delta_x/n_points
@@ -965,9 +964,6 @@ class Analysis(Graph):
     return txt
 
   def output_data_as_csv(self, filename=None):
-    if not OV.IsPluginInstalled('plugin-cctbx-win'):
-      print "Sorry, you need to install the cctbx plugin to do this"
-      return
     from iotbx import csv_utils
     if filename is None:
       filename = '%s-%s.csv' %(self.filename,self.item)
