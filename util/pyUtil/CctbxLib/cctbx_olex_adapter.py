@@ -79,43 +79,27 @@ class OlexRefinementModel(object):
 
   def getCell(self):
     return [self._cell[param][0] for param in ('a','b','c','alpha','beta','gamma')]
-       
-        
+
+
 class OlexCctbxAdapter(object):
-  def __init__(self, function, parameters):
-    self.verbose = OV.FindValue('olex2_verbose',False)
-    PT = PeriodicTable()
-    self.pt = PT.PeriodicTable()
-    self.olx = olx
-    self.fun = function
-    self.cycle = 0
-    self.tidy = True
-    self.auto = True
-    self.debug = False
-    self.film = False
-    self.max_cycles = 10
-    self.peak_normaliser = 1200 #fudge factor to get cctbx peaks on the same scale as shelx peaks
-    self.do_refinement = True
-    parameters = str(parameters)
-    parameters = parameters.split(';')
-    self.param = parameters
-    if 'tidy' in parameters: self.tidy = True
-    if 'auto' in parameters:
-      self.auto = True
-      self.tidy = True
-    for item in parameters:
-      if item and item != "None" and item != "n/a":
-        self.max_cycles = int(item) * 10
-        break
-      #bit = item.split('=')
-      #if bit[0] == 'c': self.max_cycles = int(bit[1])
+  def __init__(self):
+    self._xray_structure = None
     self.olx_atoms = OlexRefinementModel()
     try:
       self.initialise_reflections()
     except Exception, err:
       print err
       return
-    olx.OlexSetupRefineCctbxInstance = self
+
+  def xray_structure(self):
+    if self._xray_structure is not None:
+      return self._xray_structure
+    else:
+      return cctbx_controller.create_cctbx_xray_structure(
+        self.cell,
+        self.space_group,
+        self.olx_atoms.iterator(),
+        restraint_iterator=self.olx_atoms.restraint_iterator())
 
   def initialise_reflections(self):
     self.cell = self.olx_atoms.getCell()
@@ -132,419 +116,6 @@ class OlexCctbxAdapter(object):
       except Exception, err:
         print err
       self.reflections = olx.current_reflections
-  
-  def runChargeFlippingSolution(self, hkl_path, verbose='highly', solving_interval=60):
-    import time
-    t1 = time.time()
-    from smtbx.ab_initio import charge_flipping
-    from iotbx import reflection_file_reader
-    from cctbx import maptbx
-    from  libtbx.itertbx import izip
-    try:
-      from crys3d import wx_map_viewer
-    except ImportError:
-      wx_map_viewer = None
-      
-    t2 = time.time()
-    print 'imports took %0.3f ms' %((t2-t1)*1000.0)
-    # Get the reflections from the specified path
-    f_obs = self.reflections.f_obs
-    data = self.reflections.f_sq_obs
-    #reflections = reflection_file_reader.any_reflection_file(
-      #'hklf+ins/res=' + hkl_path)
-    #data = reflections.as_miller_arrays()[0]
-    #if data.is_xray_intensity_array():
-      #f_obs = data.f_sq_as_f()
-      
-    # merge them (essential!!)
-    merging = f_obs.merge_equivalents()
-    f_obs = merging.array()
-    f_obs.show_summary()
-    
-    # charge flipping iterations
-    
-    if OV.HasGUI():
-      sys.stdout.refresh = True
-      #sys.stdout.graph = self.ChargeFlippingGraph()
-    flipping = charge_flipping.basic_iterator(f_obs, delta=None)
-    solving = charge_flipping.solving_iterator(
-      flipping,
-      yield_during_delta_guessing=True,
-      yield_solving_interval=solving_interval)
-    #charge_flipping.loop(solving, verbose=verbose)
-    charge_flipping_loop(solving, verbose=verbose)
-    sys.stdout.refresh = False
-    #sys.stdout.graph = False
-  
-    # play with the solutions
-    expected_peaks =  data.unit_cell().volume()/18.6/len(data.space_group())
-    expected_peaks += expected_peaks * 0.3
-    if solving.f_calc_solutions:
-      # actually only the supposedly best one
-      f_calc, shift, cc_peak_height = solving.f_calc_solutions[0]
-      fft_map = f_calc.fft_map(
-          symmetry_flags=maptbx.use_space_group_symmetry)
-      # 3D display of the electron density iso-contours
-      if wx_map_viewer is not None:
-        wx_map_viewer.display(fft_map)
-      # search and print Fourier peaks
-      peaks = fft_map.peak_search(
-        parameters=maptbx.peak_search_parameters(
-          min_distance_sym_equiv=1.0,
-          max_clusters=expected_peaks,),
-        verify_symmetry=False
-        ).all()
-      for q,h in izip(peaks.sites(), peaks.heights()):
-        yield q,h
-        #print "(%.3f, %.3f, %.3f) -> %.3f" % (q+(h,))
-        
-    else:
-      print "*** No solution found ***"
-      
-
-  def runChargeFlippingSolution_(self, max_iterations=2500):
-    from smtbx.ab_initio import charge_flipping
-    from libtbx import itertbx
-    from scitbx.array_family import flex
-    from cctbx import sgtbx
-    f_obs = self.reflections.f_obs
-    
-    #flipping = charge_flipping.basic_iterator(f_obs, delta=None)
-    flipping = charge_flipping.weak_reflection_improved_iterator(f_obs, delta=None)
-    # Guessing delta
-    while 1:
-      for i in xrange(10): flipping.next()
-      if 1:
-        rho = flipping.rho_map
-        c_tot = rho.c_tot()
-        c_flip = rho.c_flip(flipping.delta)
-        # to compare with superflip output
-        c_tot *= flipping.fft_scale; c_flip *= flipping.fft_scale
-        print "%10.4f | %10.3f | %10.1f | %10.1f | %10.2f"\
-              % (flipping.delta, flipping.r1_factor(),
-                 c_tot, c_flip, c_tot/c_flip)
-      flipping.adjust_delta()
-      if flipping.delta != flipping.old_delta:
-        flipping.restart()
-      else:
-        break
-  
-    # main charge flipping loop to solve the structure
-    if 1:
-      print
-      print "Solving..."
-      print "with delta=%.4f" % flipping.delta
-      print
-      print "%5s | %10s | %10s" % ('#', 'R1', 'c_tot/c_flip')
-      print '-'*33
-    r1_s = flex.double()
-    c_tot_over_c_flip_s = flex.double()
-    for i,state in itertbx.islice(enumerate(flipping), 0, max_iterations, 10):
-      r1 = state.r1_factor()
-      r = state.c_tot_over_c_flip()
-      r1_s.append(r1)
-      c_tot_over_c_flip_s.append(r)
-      if 1:
-        print "%5i | %10.3f | %10.3f" % (i, r1, r)
-    
-    # sharpen the map
-    polishing = charge_flipping.low_density_elimination_iterator(
-      f_obs, f_calc=flipping.f_calc, f_000=0, rho_c=flipping.rho_c)
-    for i,state in enumerate(itertbx.islice(polishing, 5)): pass
-    
-    # search shift
-    correlation_map_peak_search = polishing.search_origin()
-    highest_peak = correlation_map_peak_search.next()
-    if highest_peak.height < 0.9:
-      print "Highest correlation peak too weak: %.2f" % highest_peak.height
-    
-    # Peaks
-    self.post_peaks(polishing.f_calc.fft_map(symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
-                                             resolution_factor=0.4))
-
-  def run(self):
-    bitmap = 'working'
-    if self.film:
-      olx.Picta("%s01.bmp 1" %self.film)
-
-    if self.fun == "wilson":
-      model = create_xray_stucture_model(self.cell, 
-                                         self.space_group, 
-                                         self.olx_atoms.iterator(), 
-                                         self.reflections)
-      n_bins = int(self.param[0])
-      wilson = cctbx_controller.wilson_statistics(model, self.reflections, n_bins)
-      return wilson
-    
-    elif self.fun == "completeness":
-      n_bins = int(self.param[0])
-      completeness = cctbx_controller.completeness_statistics(self.reflections, n_bins)
-      return completeness
-    
-    elif self.fun == "cumulative":
-      model = create_xray_stucture_model(self.cell, 
-                                         self.space_group, 
-                                         self.olx_atoms.iterator(), 
-                                         self.reflections)
-      n_bins = int(self.param[0])
-      cumulative_distribution = cctbx_controller.cumulative_intensity_distribution(model, self.reflections, n_bins)
-      return cumulative_distribution
-    
-    elif self.fun == "f_obs_f_calc":
-      model = create_xray_stucture_model(self.cell, 
-                                         self.space_group, 
-                                         self.olx_atoms.iterator(), 
-                                         self.reflections)
-      f_obs_f_calc = cctbx_controller.f_obs_vs_f_calc(model, self.reflections)
-      return f_obs_f_calc
-
-    elif self.fun == "sys_absent":
-      return cctbx_controller.sys_absent_intensity_distribution(self.reflections)
-      
-    elif self.fun == "refine":
-      t0 = time.time()
-      olx.Kill('$Q')
-      print "++++ Refining using the CCTBX with a maximum of %i cycles++++" %self.max_cycles
-      #self.do_refinement = False
-      self.refine_with_cctbx()
-      try:
-        self.post_peaks(self.refinement.f_obs_minus_f_calc_map(0.4))
-      except Exception, err:
-        print err
-      
-      try:  
-        self.R1 = self.refinement.r1()
-        OV.SetVar('cctbx_R1',self.R1)
-      except Exception, err:
-        print err
-        
-
-      cctbxmap_type = 'None'
-      cctbxmap_resolution = 0.4
-      try:
-        cctbxmap_type = OV.FindValue('snum_cctbx_map_type')
-        if cctbxmap_type == "--":
-          cctbxmap_type = None
-        else:
-          cctbxmap_resolution = float(olx.GetValue('snum_cctbxmap_resolution'))
-      except:
-        pass
-      
-      olx.Compaq()
-      if cctbxmap_type and cctbxmap_type !='None': 
-        self.write_grid_file(cctbxmap_type, cctbxmap_resolution)
-      dt = time.time() - t0
-      print "++++ Finished in %.3f s" %dt
-      #print "++++ Refine in XL with L.S.0"
-      #olex.m('refine 0')
-      filename = olx.FileName()
-      olx.File('%s.res' %filename)
-      print "Done."
-    elif self.fun == "reflection_stats":
-      cctbx_controller.reflection_statistics(stt(olx.xf_au_GetCell()),
-                                             olx.xf_au_GetCellSymm(),
-                                             r"%s/%s" %(olx.FilePath(), olx.FileName()))
-    elif self.fun == "twin_laws":
-      from PilTools import MatrixMaker
-      a = MatrixMaker()
-      twin_laws = cctbx_controller.twin_laws(self.reflections)
-      r_list = []
-      l = 0
-      self.twin_law_gui_txt = ""
-      if not twin_laws:
-        print "There are no possible twin laws"
-        self.twin_law_gui_txt = "There are no possible twin laws"
-        self.make_gui()
-        return
-      lawcount = 0
-      self.twin_laws_d = {}
-      law_txt = ""
-      self.run_backup_shelx()
-      twin_double_laws = [(1, 0, 0, 0, 1, 0, 0, 0, 1)]
-      for twin_law in twin_laws:
-        law_double = twin_law.as_double_array()
-        twin_double_laws.append(law_double)
-      for twin_law in twin_double_laws:
-        lawcount += 1
-        self.twin_laws_d.setdefault(lawcount, {})
-        self.twin_law_gui_txt = ""
-#				law_double = twin_law.as_double_array()
-        r, basf, f_data = self.run_twin_ref_shelx(twin_law)
-        try:
-          float(r)
-        except:
-          r = 0.99
-        r_list.append((r, lawcount, basf))
-        name = "law%i" %lawcount
-        font_color = "#444444"
-        if basf == "n/a":
-          font_color_basf = "blue"
-        elif float(basf) < 0.1:
-          font_color_basf = "red"
-          basf = "%.2f" %float(basf)
-        else:
-          font_color_basf = "green"
-          basf = "%.2f" %float(basf)
-        txt = [{'txt':"R=%.2f%%" %(float(r)*100),
-                'font_colour':font_color}, 
-                {'txt':"basf=%s" %str(basf), 
-                 'font_colour':font_color_basf}]
-        image_name, img  = a.make_3x3_matrix_image(name, twin_law, txt)
-        #law_txt += "<zimg src=%s>" %image_name
-        law_straight = ""
-        for x in xrange(9):
-          law_straight += " %s" %(law_double)[x]
-
-        self.twin_laws_d[lawcount] = {'number':lawcount, 
-                                      'law':twin_law, 
-                                      'law_double':law_double, 
-                                      'law_straight':law_straight, 
-                                      'R1':r, 
-                                      'BASF':basf,
-                                      'law_image':img,
-                                      'law_txt':law_txt,
-                                      'law_image_name':image_name,
-                                      'name':name,
-                                      'ins_file':f_data
-                                    }
-        law_txt += "<a href='spy.on_twin_image_click %s'><zimg src=%s></a>&nbsp;" %(lawcount, image_name)
-        self.twin_law_gui_txt += "%s" %(law_txt)
-        self.make_gui()
-        l += 1
-      r_list.sort()
-      law_txt = ""
-      self.twin_law_gui_txt = ""
-      for r, run, basf in r_list:
-        image_name = self.twin_laws_d[run].get('law_image_name', "XX")
-        name = self.twin_laws_d[run].get('name', "XX")
-        law_txt = "<a href='spy.on_twin_image_click %s'><zimg src=%s></a>&nbsp;" %(run, image_name)
-        self.twin_law_gui_txt += "%s" %(law_txt)
-      olx.Wait(500)	
-      self.make_gui()
-
-    else:
-      pass
-    OV.DeleteBitmap('%s' %(bitmap))
-
-
-  def run_backup_shelx(self):
-    self.filename = olx.FileName()
-    olx.DelIns("TWIN")
-    olx.DelIns("BASF")
-    olx.File("notwin.ins")
-
-
-  def run_twin_ref_shelx(self, law):
-    print "Testing: %s" %str(law)
-
-    law_ins = ""
-    for i in xrange(9):
-      law_ins += " %s" %str(law[i])
-    olx.Atreap("-b notwin.ins")
-    olx.User("'%s'" %olx.FilePath())
-    if law != (1, 0, 0, 0, 1, 0, 0, 0, 1):
-      OV.AddIns("TWIN %s" %law_ins) 
-      OV.AddIns("BASF %s" %"0.5")
-    olx.LS('CGLS 1')
-    olx.File("%s.ins" %self.filename)
-    rFile = open(olx.FileFull(), 'r')
-    f_data = rFile.readlines()
-    olx.Exec(r"XL '%s'" %(olx.FileName()))
-    olx.WaitFor('process')
-    olx.Atreap(r"-b %s/%s.res" %(olx.FilePath(), olx.FileName()))
-    r = olx.Lst("R1")
-    basf = olx.Ins("BASF")
-    if r != 0:
-      hist.create_history()
-      #hist = History('create', r)
-      #hist.run()
-    return r, basf, f_data
-
-  def write_grid_file(self, type, resolution):
-    import olex_xgrid
-    if type == "DIFF":
-      m = self.refinement.get_difference_map(resolution)
-    elif type == "FOBS":
-      m = self.refinement.get_f_obs_map(resolution)
-    else:
-      return
-    s = m.last()
-    olex_xgrid.Init(s[0], s[1], s[2])
-    for i in range (s[0]-1):
-      for j in range (s[1]-1):
-        for k in range (s[2]-1):
-          olex_xgrid.SetValue( i,j,k,m[i,j,k])
-    olex_xgrid.InitSurface(True)
-    
-
-  def refine_with_cctbx(self):
-    builder = cctbx_controller.create_cctbx_xray_structure(
-      self.cell,
-      self.space_group,
-      self.olx_atoms.iterator(),
-      restraint_iterator=self.olx_atoms.restraint_iterator())
-    lambda_ = self.olx_atoms.exptl.get('radiation', 0.71073)
-    self.refinement = cctbx_controller.refinement(
-      f_sq_obs=self.reflections.f_sq_obs,
-      xray_structure=builder.structure,
-      lambda_=lambda_,
-      max_cycles=self.max_cycles)
-    self.refinement.on_cycle_finished = self.feed_olex
-    self.cycle += 1
-    try:
-      self.update_refinement_info("Starting...")
-      self.refinement.start()
-      R1 = self.refinement.r1()
-    except Exception,err:
-      print err
-      if self.cycle < self.max_cycles:
-        if self.do_refinement:
-          self.refine_with_cctbx()
-
-  def post_single_peak(self, xyz, height, cutoff=1.0, auto_assign=False):
-    if height/self.peak_normaliser < cutoff:
-      return
-    sp = (height/self.peak_normaliser)
-     
-    if not auto_assign:
-      id = olx.xf_au_NewAtom("%.2f" %(sp), *xyz)
-      #if olx.xf_au_SetAtomCrd(id, *xyz)=="true":
-      if id != '-1':
-        olx.xf_au_SetAtomU(id, "0.06")
-    else:
-      max_Z = 0
-      for element in auto_assign:
-        Z = self.pt[element].get('Z', 0)
-        if self.pt[element].get('Z', 0) > max_Z: max_Z = Z
-      please_assign = False
-      for element in auto_assign:
-        if element == "H":
-          continue
-        Z = self.pt[element].get('Z', 0)
-        if (sp-sp*0.1) < Z < (sp + sp*0.1):
-          please_assign = True
-          break
-        elif sp > Z and Z == max_Z:
-          please_assign = True
-          break
-      if please_assign:
-        id = olx.xf_au_NewAtom(element, *xyz)
-        #olx.xf_au_SetAtomCrd(id, *xyz)
-        #olx.xf_au_SetAtomOccu(id, 1)
-        auto_assign[element]['count'] -= 1
-        if auto_assign[element]['count'] == 0:
-          del auto_assign[element]
-          return
-      else:
-        if sp > 2:
-          id = olx.xf_au_NewAtom("C", *xyz)
-          #olx.xf_au_SetAtomCrd(id, *xyz)
-          return
-      id = olx.xf_au_NewAtom("%.2f" %(sp), *xyz)
-      #if olx.xf_au_SetAtomCrd(id, *xyz)=="true":
-      if id != '-1':
-        olx.xf_au_SetAtomU(id, "0.06")
-        
 
   def post_peaks(self, fft_map):
     from cctbx import maptbx
@@ -574,6 +145,78 @@ class OlexCctbxAdapter(object):
     olx.Compaq('-a')
     olx.Refresh()
     #olx.Compaq()
+
+class OlexCctbxRefine(OlexCctbxAdapter):
+  def __init__(self, max_cycles=None, verbose=False):
+    OlexCctbxAdapter.__init__(self)
+    self.verbose = verbose
+    PT = PeriodicTable()
+    self.pt = PT.PeriodicTable()
+    self.olx = olx
+    self.cycle = 0
+    self.tidy = True
+    self.auto = True
+    self.debug = False
+    self.film = False
+    self.max_cycles = max_cycles
+    self.do_refinement = True
+
+  def run(self):
+    t0 = time.time()
+    olx.Kill('$Q')
+    print "++++ Refining using the CCTBX with a maximum of %i cycles++++" %self.max_cycles
+    #self.do_refinement = False
+    self.refine_with_cctbx()
+    try:
+      self.post_peaks(self.refinement.f_obs_minus_f_calc_map(0.4))
+    except Exception, err:
+      print err
+    try:  
+      self.R1 = self.refinement.r1()
+      OV.SetVar('cctbx_R1',self.R1)
+    except Exception, err:
+      print err
+
+    cctbxmap_type = 'None'
+    cctbxmap_resolution = 0.4
+    try:
+      cctbxmap_type = OV.FindValue('snum_cctbx_map_type')
+      if cctbxmap_type == "--":
+        cctbxmap_type = None
+      else:
+        cctbxmap_resolution = float(olx.GetValue('snum_cctbxmap_resolution'))
+    except:
+      pass
+
+    olx.Compaq()
+    if cctbxmap_type and cctbxmap_type !='None': 
+      self.write_grid_file(cctbxmap_type, cctbxmap_resolution)
+    dt = time.time() - t0
+    print "++++ Finished in %.3f s" %dt
+    #print "++++ Refine in XL with L.S.0"
+    #olex.m('refine 0')
+    filename = olx.FileName()
+    olx.File('%s.res' %filename)
+    print "Done."
+
+  def refine_with_cctbx(self):
+    lambda_ = self.olx_atoms.exptl.get('radiation', 0.71073)
+    self.refinement = cctbx_controller.refinement(
+      f_sq_obs=self.reflections.f_sq_obs,
+      xray_structure=self.xray_structure(),
+      lambda_=lambda_,
+      max_cycles=self.max_cycles)
+    self.refinement.on_cycle_finished = self.feed_olex
+    self.cycle += 1
+    try:
+      self.update_refinement_info("Starting...")
+      self.refinement.start()
+      R1 = self.refinement.r1()
+    except Exception,err:
+      print err
+      if self.cycle < self.max_cycles:
+        if self.do_refinement:
+          self.refine_with_cctbx()
 
   def feed_olex(self, structure, minimiser):
     self.auto = False
@@ -651,6 +294,293 @@ class OlexCctbxAdapter(object):
     if reset_refinement:
       raise Exception("Atoms promoted")
 
+  def update_refinement_info(self, msg="Unknown"):
+    txt = "Last refinement with <b>smtbx-refine</b>: No refinement info available yet.<br>Status: %s" %msg
+    OlexVFS.write_to_olex('refinedata.htm', txt)
+
+  def write_grid_file(self, type, resolution):
+    import olex_xgrid
+    if type == "DIFF":
+      m = self.refinement.get_difference_map(resolution)
+    elif type == "FOBS":
+      m = self.refinement.get_f_obs_map(resolution)
+    else:
+      return
+    s = m.last()
+    olex_xgrid.Init(s[0], s[1], s[2])
+    for i in range (s[0]-1):
+      for j in range (s[1]-1):
+        for k in range (s[2]-1):
+          olex_xgrid.SetValue( i,j,k,m[i,j,k])
+    olex_xgrid.InitSurface(True)
+
+
+class OlexCctbxSolve(OlexCctbxAdapter):
+  def __init__(self):
+    OlexCctbxAdapter.__init__(self)
+    self.peak_normaliser = 1200 #fudge factor to get cctbx peaks on the same scale as shelx peaks
+
+  def runChargeFlippingSolution(self, hkl_path, verbose='highly', solving_interval=60):
+    import time
+    t1 = time.time()
+    from smtbx.ab_initio import charge_flipping
+    from iotbx import reflection_file_reader
+    from cctbx import maptbx
+    from  libtbx.itertbx import izip
+    try:
+      from crys3d import wx_map_viewer
+    except ImportError:
+      wx_map_viewer = None
+      
+    t2 = time.time()
+    print 'imports took %0.3f ms' %((t2-t1)*1000.0)
+    # Get the reflections from the specified path
+    f_obs = self.reflections.f_obs
+    data = self.reflections.f_sq_obs
+    #reflections = reflection_file_reader.any_reflection_file(
+      #'hklf+ins/res=' + hkl_path)
+    #data = reflections.as_miller_arrays()[0]
+    #if data.is_xray_intensity_array():
+      #f_obs = data.f_sq_as_f()
+      
+    # merge them (essential!!)
+    merging = f_obs.merge_equivalents()
+    f_obs = merging.array()
+    f_obs.show_summary()
+    
+    # charge flipping iterations
+    
+    if OV.HasGUI():
+      sys.stdout.refresh = True
+      #sys.stdout.graph = self.ChargeFlippingGraph()
+    flipping = charge_flipping.basic_iterator(f_obs, delta=None)
+    solving = charge_flipping.solving_iterator(
+      flipping,
+      yield_during_delta_guessing=True,
+      yield_solving_interval=solving_interval)
+    #charge_flipping.loop(solving, verbose=verbose)
+    charge_flipping_loop(solving, verbose=verbose)
+    sys.stdout.refresh = False
+    #sys.stdout.graph = False
+  
+    # play with the solutions
+    expected_peaks =  data.unit_cell().volume()/18.6/len(data.space_group())
+    expected_peaks += expected_peaks * 0.3
+    if solving.f_calc_solutions:
+      # actually only the supposedly best one
+      f_calc, shift, cc_peak_height = solving.f_calc_solutions[0]
+      fft_map = f_calc.fft_map(
+          symmetry_flags=maptbx.use_space_group_symmetry)
+      # 3D display of the electron density iso-contours
+      if wx_map_viewer is not None:
+        wx_map_viewer.display(fft_map)
+      # search and print Fourier peaks
+      peaks = fft_map.peak_search(
+        parameters=maptbx.peak_search_parameters(
+          min_distance_sym_equiv=1.0,
+          max_clusters=expected_peaks,),
+        verify_symmetry=False
+        ).all()
+      for q,h in izip(peaks.sites(), peaks.heights()):
+        yield q,h
+        #print "(%.3f, %.3f, %.3f) -> %.3f" % (q+(h,))
+        
+    else:
+      print "*** No solution found ***"
+
+  def post_single_peak(self, xyz, height, cutoff=1.0, auto_assign=False):
+    if height/self.peak_normaliser < cutoff:
+      return
+    sp = (height/self.peak_normaliser)
+     
+    if not auto_assign:
+      id = olx.xf_au_NewAtom("%.2f" %(sp), *xyz)
+      #if olx.xf_au_SetAtomCrd(id, *xyz)=="true":
+      if id != '-1':
+        olx.xf_au_SetAtomU(id, "0.06")
+    else:
+      max_Z = 0
+      for element in auto_assign:
+        Z = self.pt[element].get('Z', 0)
+        if self.pt[element].get('Z', 0) > max_Z: max_Z = Z
+      please_assign = False
+      for element in auto_assign:
+        if element == "H":
+          continue
+        Z = self.pt[element].get('Z', 0)
+        if (sp-sp*0.1) < Z < (sp + sp*0.1):
+          please_assign = True
+          break
+        elif sp > Z and Z == max_Z:
+          please_assign = True
+          break
+      if please_assign:
+        id = olx.xf_au_NewAtom(element, *xyz)
+        #olx.xf_au_SetAtomCrd(id, *xyz)
+        #olx.xf_au_SetAtomOccu(id, 1)
+        auto_assign[element]['count'] -= 1
+        if auto_assign[element]['count'] == 0:
+          del auto_assign[element]
+          return
+      else:
+        if sp > 2:
+          id = olx.xf_au_NewAtom("C", *xyz)
+          #olx.xf_au_SetAtomCrd(id, *xyz)
+          return
+      id = olx.xf_au_NewAtom("%.2f" %(sp), *xyz)
+      #if olx.xf_au_SetAtomCrd(id, *xyz)=="true":
+      if id != '-1':
+        olx.xf_au_SetAtomU(id, "0.06")
+
+
+class OlexCctbxGraphs(OlexCctbxAdapter):
+  def __init__(self, graph, n_bins=None):
+    OlexCctbxAdapter.__init__(self)
+    self.graph = graph
+    self.n_bins = n_bins
+
+  def run(self):
+    bitmap = 'working'
+
+    if self.graph == "wilson":
+      wilson = cctbx_controller.wilson_statistics(self.xray_structure(), self.reflections, self.n_bins)
+      return wilson
+
+    elif self.graph == "completeness":
+      completeness = cctbx_controller.completeness_statistics(self.reflections, self.n_bins)
+      return completeness
+
+    elif self.graph == "cumulative":
+      cumulative_distribution = cctbx_controller.cumulative_intensity_distribution(self.xray_structure(), self.reflections, self.n_bins)
+      return cumulative_distribution
+
+    elif self.graph == "f_obs_f_calc":
+      f_obs_f_calc = cctbx_controller.f_obs_vs_f_calc(self.xray_structure(), self.reflections)
+      return f_obs_f_calc
+
+    elif self.graph == "sys_absent":
+      return cctbx_controller.sys_absent_intensity_distribution(self.reflections)
+
+    #elif self.fun == "reflection_stats":
+      #cctbx_controller.reflection_statistics(stt(olx.xf_au_GetCell()),
+                                             #olx.xf_au_GetCellSymm(),
+                                             #r"%s/%s" %(olx.FilePath(), olx.FileName()))
+    else:
+      pass
+    OV.DeleteBitmap('%s' %(bitmap))
+
+class OlexSetupCctbxTwinLaws(OlexCctbxAdapter):
+  def __init__(self):
+    OlexCctbxAdapter.__init__()
+
+  def run(self):
+    from PilTools import MatrixMaker
+    a = MatrixMaker()
+    twin_laws = cctbx_controller.twin_laws(self.reflections)
+    r_list = []
+    l = 0
+    self.twin_law_gui_txt = ""
+    if not twin_laws:
+      print "There are no possible twin laws"
+      self.twin_law_gui_txt = "There are no possible twin laws"
+      self.make_gui()
+      return
+    lawcount = 0
+    self.twin_laws_d = {}
+    law_txt = ""
+    self.run_backup_shelx()
+    twin_double_laws = [(1, 0, 0, 0, 1, 0, 0, 0, 1)]
+    for twin_law in twin_laws:
+      law_double = twin_law.as_double_array()
+      twin_double_laws.append(law_double)
+    for twin_law in twin_double_laws:
+      lawcount += 1
+      self.twin_laws_d.setdefault(lawcount, {})
+      self.twin_law_gui_txt = ""
+      r, basf, f_data = self.run_twin_ref_shelx(twin_law)
+      try:
+        float(r)
+      except:
+        r = 0.99
+      r_list.append((r, lawcount, basf))
+      name = "law%i" %lawcount
+      font_color = "#444444"
+      if basf == "n/a":
+        font_color_basf = "blue"
+      elif float(basf) < 0.1:
+        font_color_basf = "red"
+        basf = "%.2f" %float(basf)
+      else:
+        font_color_basf = "green"
+        basf = "%.2f" %float(basf)
+      txt = [{'txt':"R=%.2f%%" %(float(r)*100),
+              'font_colour':font_color}, 
+              {'txt':"basf=%s" %str(basf), 
+               'font_colour':font_color_basf}]
+      image_name, img  = a.make_3x3_matrix_image(name, twin_law, txt)
+      #law_txt += "<zimg src=%s>" %image_name
+      law_straight = ""
+      for x in xrange(9):
+        law_straight += " %s" %(law_double)[x]
+
+      self.twin_laws_d[lawcount] = {'number':lawcount, 
+                                    'law':twin_law, 
+                                    'law_double':law_double, 
+                                    'law_straight':law_straight, 
+                                    'R1':r, 
+                                    'BASF':basf,
+                                    'law_image':img,
+                                    'law_txt':law_txt,
+                                    'law_image_name':image_name,
+                                    'name':name,
+                                    'ins_file':f_data
+                                  }
+      law_txt += "<a href='spy.on_twin_image_click %s'><zimg src=%s></a>&nbsp;" %(lawcount, image_name)
+      self.twin_law_gui_txt += "%s" %(law_txt)
+      self.make_gui()
+      l += 1
+    r_list.sort()
+    law_txt = ""
+    self.twin_law_gui_txt = ""
+    for r, run, basf in r_list:
+      image_name = self.twin_laws_d[run].get('law_image_name', "XX")
+      name = self.twin_laws_d[run].get('name', "XX")
+      law_txt = "<a href='spy.on_twin_image_click %s'><zimg src=%s></a>&nbsp;" %(run, image_name)
+      self.twin_law_gui_txt += "%s" %(law_txt)
+    olx.Wait(500)	
+    self.make_gui()
+
+  def run_backup_shelx(self):
+    self.filename = olx.FileName()
+    olx.DelIns("TWIN")
+    olx.DelIns("BASF")
+    olx.File("notwin.ins")
+
+  def run_twin_ref_shelx(self, law):
+    print "Testing: %s" %str(law)
+
+    law_ins = ""
+    for i in xrange(9):
+      law_ins += " %s" %str(law[i])
+    olx.Atreap("-b notwin.ins")
+    olx.User("'%s'" %olx.FilePath())
+    if law != (1, 0, 0, 0, 1, 0, 0, 0, 1):
+      OV.AddIns("TWIN %s" %law_ins) 
+      OV.AddIns("BASF %s" %"0.5")
+    olx.LS('CGLS 1')
+    olx.File("%s.ins" %self.filename)
+    rFile = open(olx.FileFull(), 'r')
+    f_data = rFile.readlines()
+    olx.Exec(r"XL '%s'" %(olx.FileName()))
+    olx.WaitFor('process')
+    olx.Atreap(r"-b %s/%s.res" %(olx.FilePath(), olx.FileName()))
+    r = olx.Lst("R1")
+    basf = olx.Ins("BASF")
+    if r != 0:
+      hist.create_history()
+      #hist = History('create', r)
+      #hist.run()
+    return r, basf, f_data
 
   def twinning_gui_def(self):
     if not self.twin_law_gui_txt:
@@ -689,18 +619,14 @@ class OlexCctbxAdapter(object):
                                       }
     return {"tbx":tbx,"tbx_li":tbx_li,"tools":tools}
 
-  def update_refinement_info(self, msg="Unknown"):
-    txt = "Last refinement with <b>smtbx-refine</b>: No refinement info available yet.<br>Status: %s" %msg
-    OlexVFS.write_to_olex('refinedata.htm', txt)
-  
   def make_gui(self):
     gui = self.twinning_gui_def()
     from GuiTools import MakeGuiTools 
     a = MakeGuiTools(tool_fun="single", tool_param=gui)
     a.run()
     OV.UpdateHtml()
-    
-    
+
+
 def charge_flipping_loop(solving, verbose=True):
   HasGUI = OV.HasGUI()
   if HasGUI:
@@ -768,12 +694,3 @@ def on_twin_image_click(run_number, options):
   wFile.close()
   olx.Atreap(olx.FileFull())
   OV.UpdateHtml()
-
-if __name__ == "__main__":
-  try:
-    a = OlexCctbxAdapter('refine', 4)
-    a.run()
-  except Exception, ex:
-    print "There was a problem in cctbx_olex_adapter"
-    sys.stderr.formatExceptionInfo()
-    print repr(ex)
