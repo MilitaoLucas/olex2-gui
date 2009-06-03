@@ -5,13 +5,13 @@ import math
 import scitbx.lbfgs
 from cctbx import miller
 from cctbx import statistics
-from smtbx import refinement
+from smtbx.refinement import minimization
 from cctbx import uctbx
 from iotbx.shelx import builders
 
 class empty: pass
 
-class my_lbfgs(refinement.minimization.lbfgs):
+class my_lbfgs(minimization.lbfgs):
   def __init__(self, delegate, **kwds):
     self.callback_after_step = delegate
     super(my_lbfgs, self).__init__(**kwds)
@@ -63,7 +63,6 @@ def wilson_statistics(model, reflections, n_bins=10):
   f_obs.space_group = p1_space_group
 
   f_sq_obs = reflections.f_sq_obs
-  f_sq_obs.set_observation_type(None)
   merging = f_sq_obs.merge_equivalents()
   merging.show_summary()
   f_sq_obs = f_sq_obs.average_bijvoet_mates()
@@ -159,7 +158,7 @@ def create_cctbx_xray_structure(cell, spacegroup, atom_iter, restraint_iterator=
       a = xray.scatterer(label, xyz,u[0])
       behaviour_of_variable = [0,0,0,1,0]
     builder.add_scatterer(a, behaviour_of_variable)
-  return builder
+  return builder.structure
 
 class refinement(object):
   def __init__(self,
@@ -188,6 +187,7 @@ class refinement(object):
     """ Start the refinement """
     self.filter_cctbx_reflections()
     self.xs0 = self.xs
+    #self.set_cctbx_refinement_flags(fix_sites_H=True)
     self.set_cctbx_refinement_flags()
     self.setup_cctbx_refinement()
     self.start_cctbx_refinement()
@@ -208,15 +208,18 @@ class refinement(object):
 
       yield label, xyz, u, u_eq, symbol
 
-  def set_cctbx_refinement_flags(self):
-    for a in self.xs.scatterers():
-      a.flags.set_grad_site(True)
-      if a.flags.use_u_iso() == True:
-        a.flags.set_grad_u_iso(True)
-        a.flags.set_grad_u_aniso(False)
-      if a.flags.use_u_aniso()== True:
-        a.flags.set_grad_u_aniso(True)
-        a.flags.set_grad_u_iso(False)
+  def set_cctbx_refinement_flags(self, fix_sites_H=False):
+    scatterers = self.xs.scatterers()
+    use_u_aniso = scatterers.extract_use_u_aniso()
+    use_u_iso = scatterers.extract_use_u_iso()
+    if fix_sites_H:
+      grad_sites = ~self.xs.element_selection('H')
+    else:
+      grad_sites = flex.bool(self.xs.scatterers().size(), True)
+    scatterers.flags_set_grads(state=False)
+    scatterers.flags_set_grad_u_iso(use_u_iso.iselection())
+    scatterers.flags_set_grad_u_aniso(use_u_aniso.iselection())
+    scatterers.flags_set_grad_site(iselection=grad_sites.iselection())
 
   def filter_cctbx_reflections(self):
     f_sq_obs = self.f_sq_obs

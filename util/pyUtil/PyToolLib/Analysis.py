@@ -1198,8 +1198,8 @@ class WilsonPlot(Analysis):
     self.im = new
 
   def cctbx_wilson_statistics(self):  
-    from cctbx_olex_adapter import OlexCctbxAdapter
-    cctbx = OlexCctbxAdapter('wilson', '%s' %(2*self.n_bins))
+    from cctbx_olex_adapter import OlexCctbxGraphs
+    cctbx = OlexCctbxGraphs('wilson', n_bins=2*self.n_bins)
     wp = cctbx.run()
     metadata = {}
     metadata.setdefault("K", 1/wp.wilson_intensity_scale_factor)
@@ -1501,8 +1501,8 @@ class CumulativeIntensityDistribution(Analysis):
     self.draw_pairs()
 
   def cctbx_cumulative_intensity_distribution(self):
-    from cctbx_olex_adapter import OlexCctbxAdapter
-    cctbx = OlexCctbxAdapter('cumulative', '%s' %self.n_bins)
+    from cctbx_olex_adapter import OlexCctbxGraphs
+    cctbx = OlexCctbxGraphs('cumulative', n_bins=self.n_bins)
     xy_plot = cctbx.run()
     metadata = {}
     metadata.setdefault("y_label", xy_plot.yLegend)
@@ -1530,8 +1530,8 @@ class CompletenessPlot(Analysis):
       self.output_data_as_csv()
 
   def cctbx_completeness_statistics(self):
-    from cctbx_olex_adapter import OlexCctbxAdapter
-    cctbx = OlexCctbxAdapter('completeness', '%s' %self.n_bins)
+    from cctbx_olex_adapter import OlexCctbxGraphs
+    cctbx = OlexCctbxGraphs('completeness', n_bins=self.n_bins)
     data_object = cctbx.run()
     data_object.completeness.show()
     metadata = {}
@@ -1556,8 +1556,8 @@ class SystematicAbsencesPlot(Analysis):
         self.output_data_as_csv()
 
   def cctbx_systematic_absences_plot(self):
-    from cctbx_olex_adapter import OlexCctbxAdapter
-    cctbx = OlexCctbxAdapter('sys_absent',None)
+    from cctbx_olex_adapter import OlexCctbxGraphs
+    cctbx = OlexCctbxGraphs('sys_absent')
     xy_plot = cctbx.run()
     
     metadata = {}
@@ -1597,8 +1597,8 @@ class Fobs_Fcalc_plot(Analysis):
       self.output_data_as_csv()
 
   def make_f_obs_f_calc_plot(self):
-    from cctbx_olex_adapter import OlexCctbxAdapter
-    cctbx = OlexCctbxAdapter('f_obs_f_calc',None)
+    from cctbx_olex_adapter import OlexCctbxGraphs
+    cctbx = OlexCctbxGraphs('f_obs_f_calc')
     xy_plot = cctbx.run()
     data = Dataset(xy_plot.f_calc_sq,xy_plot.f_obs_sq,metadata={})
     self.data.setdefault('dataset1', data)

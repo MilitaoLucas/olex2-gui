@@ -412,9 +412,12 @@ class Method_cctbx_refinement(Method_refinement):
     Method_refinement.__init__(self, name, cmd, args, atom_sites_solution)
     
   def run(self, RunPrgObject):
-    from cctbx_olex_adapter import OlexCctbxAdapter
+    from cctbx_olex_adapter import OlexCctbxRefine
     print 'STARTING cctbx refinement'
-    cctbx = OlexCctbxAdapter('refine', RunPrgObject.snum_refinement_max_cycles)
+    verbose = OV.FindValue('olex2_verbose',False)
+    cctbx = OlexCctbxRefine(
+      max_cycles=RunPrgObject.snum_refinement_max_cycles,
+      verbose=verbose)
     cctbx.run()
     OV.DeleteBitmap('refine')
 
@@ -423,13 +426,13 @@ class Method_cctbx_ChargeFlip(Method_solution):
     Method_solution.__init__(self, name, cmd, args, atom_sites_solution)
     
   def run(self, RunPrgObject):
-    from cctbx_olex_adapter import OlexCctbxAdapter
+    from cctbx_olex_adapter import OlexCctbxSolve
     print 'STARTING cctbx Charge Flip'
     RunPrgObject.solve = True
-    cctbx = OlexCctbxAdapter('solve', None)
-    
+    cctbx = OlexCctbxSolve()
+
     solving_interval = int(float(self.getArgs().split()[1]))
-    
+
     formula_l = olx.xf_GetFormula('list')
     formula_l = formula_l.split(",")
     formula_d = {}
