@@ -1409,7 +1409,7 @@
 	\>
 \>
 
-<_completeness help="Calculates and displays a completeness plot"
+<completeness help="Calculates and displays a completeness plot"
 	<body
 		<args
 			<arg1 name="n_bins" def="20">
@@ -1421,7 +1421,7 @@
 	\>
 \>
 
-<_cumulative help="Calculates and displays the cumulative intensity distribution"
+<cumulative help="Calculates and displays the cumulative intensity distribution"
 	<body
 		<args
 			<arg1 name="n_bins" def="20">
@@ -1433,7 +1433,7 @@
 	\>
 \>
 
-<_sys_absences help="Calculates and displays the systematic absences intensity distribution"
+<sys_absences help="Calculates and displays the systematic absences intensity distribution"
 	<body
 		<args
 			<arg1 name="output_csv_file" def="False">
