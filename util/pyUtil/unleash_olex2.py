@@ -2,7 +2,7 @@
 
 """ Olex 2 distro management """
 # these to specify to created separate zip files
-plugins = ('MySQL', 'cctbx-win', 'brukersaint', 'ODSkin', 'BNSkin', 'STOESkin', 'HPSkin', 'Batch', 'HotshotProfiler', 'Pysvn', 'Crypto', 'AutoChem') 
+plugins = ('MySQL', 'brukersaint', 'ODSkin', 'BNSkin', 'STOESkin', 'HPSkin', 'Batch', 'HotshotProfiler', 'Pysvn', 'Crypto', 'AutoChem') 
 # file name aliases
 web_for_working = {'olex2.exe': 'olex2.dll', 'launch.exe': 'olex2.exe'}
 # alteartions for binary files : name (properties...)
@@ -26,12 +26,14 @@ alterations = {'olex2.exe': ('olex-install', 'olex-update'),
                'etc/gui/fonts/VeraSe.ttf': ('olex-install', 'olex-update'),
                'etc/gui/fonts/VeraSeBd.ttf': ('olex-install', 'olex-update'),
                'olex2-mac.zip': ('olex-port', 'port-mac', 'action:extract'),
-               'olex2-suse101x32.zip': ('olex-port', 'port-suse101x32', 'action:extract')
+               'olex2-suse101x32.zip': ('olex-port', 'port-suse101x32', 'action:extract', 'action:delete'),
+               'cctbx.zip': ('olex-update', 'action:extract', 'action:delete'),
+               'python26.zip': ('olex-update', 'action:extract', 'action:delete')
                }
-# special zip files {zip_name: (destination_dir, properties_to_set) }
-#zip_files = {'cctbx_win.zip': ('/util/pyUtil/CctbxLib/cctbx_win', 'cctbx-win'),
-#             'python.zip': ('/util/pyUtil/PythonLib', 'olex-install')
-#            }
+# special zip files (must have relevelnt structire), must exist ABOVE as well!!
+zip_files = ('cctbx.zip',
+             'python26.zip'
+            )
 altered_files = set([])
 altered_dirs = set([])
 
@@ -169,12 +171,6 @@ files_for_plugin = dict(
 		      recurse=True).keys())
      )
      for plugin in plugins ])
-cctbx_directory = working_directory + '/util/pyUtil/CctbxLib/cctbx_win'
-cctbx_zip_file = zipfile.ZipFile('%s/cctbx_winxp.zip'
-                                 % bin_directory)
-files_for_plugin['cctbx-win'].extend([ cctbx_directory + '/' + name 
-                                   for name in cctbx_zip_file.namelist() 
-                                   if not name.endswith('/') ])
 
 # process binary files, new folders might get created, so the call is before creating dirs
 for val, key in alterations.iteritems():
@@ -228,17 +224,6 @@ for f in itertools.chain(update_files,
     shutil.copy2(f, destination(f, 'update'))
   else:
     print "Invalid file '" + f + "' skipping"
-for f in files_for_plugin['cctbx-win']:
-  if os.path.exists(f):
-    shutil.copy2(f, destination(f, 'update'))
-  else:
-    name = destination(f, 'update')
-    f1 = open(name, 'wb')
-    f_zip = f.replace(cctbx_directory + '/', '')
-    f1.write(cctbx_zip_file.read(f_zip))
-    f1.close()
-    t = time.mktime(cctbx_zip_file.getinfo(f_zip).date_time + (0,1,-1))
-    os.utime(name, (t,t))
 
 # create the index file
 def info(web_file_name, working_file_name):
@@ -257,13 +242,10 @@ def info(web_file_name, working_file_name):
       else:
         props = ()
     except:
-      if 'cctbx' in working_file_name:
-        props = ('plugin-cctbx-win',)
+      if normalised_fn in altered_dirs:
+        props = ()
       else:
-        if normalised_fn in altered_dirs:
-          props = ()
-        else:
-          props = None
+        props = None
   return (stats, props)
   
 def format_info(stats, props):
@@ -300,7 +282,7 @@ def create_index(index_file_name, only_prop=None):
       print >> idx_file, indents + f
       print >> idx_file, indents + format_info(stats, props)
   idx_file.close()
-  
+
 create_index(update_directory + '/index.ind')
 zip_index_file_name = update_directory + '/zindex.ind'
 create_index(zip_index_file_name, only_prop='olex-install')
@@ -311,21 +293,18 @@ olex2_zip = zipfile.ZipFile(web_directory + '/olex2.zip',
 for f in installer_files:
   olex2_zip.write(f, zip_destination(f))
 olex2_zip.write(zip_index_file_name, 'index.ind')
+
+#process zip files - just extract - to add to the olex2.zip file 
+for zip_name in zip_files:
+  zip_file = zipfile.ZipFile(bin_directory + '/' + zip_name, 'r')
+  for zip_info in zip_file.infolist():
+    olex2_zip.writestr( zip_info.filename, zip_file.read(zip_info.filename) )
+
 olex2_zip.close()
 
 for plugin, files in files_for_plugin.items():
   plugin_zip = zipfile.ZipFile(web_directory + '/' + plugin + '.zip', 'w')
-  for f in files:
-    if plugin == 'cctbx-win' and not os.path.exists(f):
-      f_zip = f.replace(cctbx_directory + '/', '')
-      f_zip_info = cctbx_zip_file.getinfo(f_zip)
-      f_zip_info.filename = zip_destination(f)
-      plugin_zip.writestr(
-	f_zip_info,
-	cctbx_zip_file.read(f_zip))
-    else:
-      plugin_zip.write(destination(f,'update'),
-		       zip_destination(f))
+  plugin_zip.write(destination(f,'update'), zip_destination(f))
   plugin_zip.close()
   
 if __name__ == '__main__':
