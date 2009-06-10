@@ -71,7 +71,8 @@
 			<cmd19 "if and(isplugininstalled(plugin-brukersaint),IsFileType('p4p')) then BSINI else none">			
 			<cmd20 cmd1="if strcmp(%4,filename()) then none else 'clear'">
 			<cmd23 "syncbc">
-			<cmd24 "html.Hide pop_prg_analysis">
+			<cmd24 "spy.reset_file_in_OFS(solution_image.htm)">
+			<cmd24 "spy.reset_file_in_OFS(refinement_image.htm)">
 			<cmd25 "if strcmp(%4,filename()) then updatehtml else htmlreload">
 			<cmd26 XXX="fade 1 0 -0.1">
 			<cmd27 XXX='waitfor fade'>
@@ -1271,12 +1272,11 @@
 <oda help="Launches ac_run"
 	<body
 		<args 
-			<arg2 name="single" def="-s">
-			<arg2 name="single" def="">
+			<arg1 name="single" def="">
 		\>
 		<cmd
 			<cmd5 XXX"cursor(busy,'Starting ODAC')">
-			<cmd6 "spy.runODAC('spy.ac_run solveit %1 %2')"> 
+			<cmd6 "spy.runODAC('spy.ac_run solveit -%1')"> 
 		\>
 	\>
 \>
@@ -1294,6 +1294,18 @@
 		\>
 	\>
 \>
+
+<odac_config help='Opens the config file'
+	<body
+		<args
+			<arg1 name="filname" def="custom">
+		\>
+		<cmd
+			<cmd1 "exec -o getvar(defeditor) 'BaseDir()/util/pyUtil/PluginLib/plugin-AutoChem/autochem_config.txt'">
+		\>
+	\>
+\>
+
 
 
 

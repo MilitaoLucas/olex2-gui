@@ -1094,7 +1094,7 @@ def GetACF():
   
   cont = None
   debug = OV.FindValue('odac_fb', False)
-  debug = False
+  debug = True
   debug_deep1 = True
   debug_deep2 = True
 #  OV.SetVar("ac_verbose", True)
@@ -1167,8 +1167,15 @@ OV.registerFunction(GetACF)
 
 def runODAC(cmd):
   if OV.FindValue('HaveODAC',False):
+    cmd = cmd.rstrip(" -")
+    cmd += " -s"
     olex.m("cursor(busy,'Starting ODAC')")
-    olex.m(cmd)
+    res = olex.m(cmd)
+    if res != 1:
+      print "An Error occured with running ODAC"
+      olex.m("cursor()")
+      
+    
   else:
     print "ODAC has failed to initialize or is not installed"
   

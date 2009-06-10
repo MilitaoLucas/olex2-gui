@@ -141,7 +141,13 @@ class ConfigSkin(object):
         config.setdefault('Comment%s' %str(i), {'val':"%s<br>" %line[2:].strip(), 'num':i})
       l = line.split("=")
       if len(l) > 1:
-        config.setdefault(l[0], {'num':i, 'val':l[1]})
+        if "_COLOUR" in l[0]:
+          val = l[1]
+          if "(" in val:
+            val = self.IT.RGBToHTMLColor(eval(val))
+          config.setdefault(l[0], {'num':i, 'val':val})
+        else:
+          config.setdefault(l[0], {'num':i, 'val':l[1]})
     self.config = config
     
   def getVarFromOlex(self):
@@ -242,7 +248,7 @@ class ConfigSkin(object):
     
     #self.config = variableFunctions.getVVD('gui')
     self.read_config_file()
-    self.getVarFromOlex()
+    #self.getVarFromOlex()
     self.generate_config_box_text()
     self.create_config_box()
       
