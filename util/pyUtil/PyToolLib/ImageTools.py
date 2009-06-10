@@ -296,6 +296,8 @@ class ImageTools(FontInstances):
       mid_3 = 4
       direction = style[1]
       colour = style[2]
+      if "(" in colour:
+        colour = eval(colour)
       arrow_width = 6
       if direction == "right":
         begin = (width-beg_3,height-arrow_top)
@@ -483,6 +485,8 @@ class ImageTools(FontInstances):
     
     if not self.abort:
       try:
+        if "(" in font_colour:
+          font_colour = eval(font_colour)
         draw.text((left,int(top)), "%s" %txt, font=font, fill=font_colour)
       except:
         print "Text %s could not be drawn" %txt

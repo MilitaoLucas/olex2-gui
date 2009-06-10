@@ -149,6 +149,8 @@ class OlexCctbxAdapter(object):
 class OlexCctbxRefine(OlexCctbxAdapter):
   def __init__(self, max_cycles=None, verbose=False):
     OlexCctbxAdapter.__init__(self)
+    if verbose.lower() == "false":
+      verbose = False
     self.verbose = verbose
     PT = PeriodicTable()
     self.pt = PT.PeriodicTable()

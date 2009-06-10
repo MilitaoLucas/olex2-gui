@@ -30,7 +30,7 @@ def guiVariables():
     gui_html_highlight_colour=OV.FindValue('gui_html_highlight_colour','#ff7800'),
     gui_html_link_colour='#6f6f8b',
     gui_html_icon_size='22',
-    gui_html_font_size='2',
+    gui_html_font_size=2,
     gui_html_code_bg_colour="#ffffdd",
     
     gui_image_font_name='Vera',
