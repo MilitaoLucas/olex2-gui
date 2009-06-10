@@ -102,7 +102,7 @@ class reader:
       i = 0
       for line in lines:
         i += 1
-        if "Ralpha" and "Nqual" and "CFOM" in line:
+        if "Ralpha" in line and "Nqual" in line and "CFOM" in line:
           found_best = False
           l = lines[i:]
           for line in l:
