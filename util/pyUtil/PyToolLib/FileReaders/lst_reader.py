@@ -99,20 +99,25 @@ class reader:
     elif solution:
       self._values['R1'] = 'n/a'
       self._values['wR2'] = 'n/a'
+      i = 0
       for line in lines:
-        if '* ' in line:
-          try:
-            li = line.split()
-            Ralpha = float(li[1])
-            Nqual = float(li[2])
-            CFOM = float(li[5].strip('*'))
-            self._values['Ralpha'] = Ralpha
-            self._values['Nqual'] = Nqual
-            self._values['CFOM'] = CFOM
-            break
-          except:
-            continue
-          
+        i += 1
+        if "Ralpha" and "Nqual" and "CFOM" in line:
+          found_best = False
+          l = lines[i:]
+          for line in l:
+            if '*' in line:
+              try:
+                li = line.split()
+                Ralpha = float(li[1])
+                Nqual = float(li[2])
+                CFOM = float(li[5].strip('*'))
+                self._values['Ralpha'] = Ralpha
+                self._values['Nqual'] = Nqual
+                self._values['CFOM'] = CFOM
+                break
+              except:
+                continue
   def values(self):
     return self._values
   
