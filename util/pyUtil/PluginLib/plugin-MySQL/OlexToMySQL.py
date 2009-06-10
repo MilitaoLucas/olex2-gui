@@ -398,7 +398,13 @@ XX command line text XX
     wFile.close()
     wFile = codecs.open(self.dictF, 'a', 'utf-8')
     for line in self.dictionary_l:
-      line = unicode( line, "utf-8" )
+      try:
+        line = unicode( line, "utf-8" )
+      except UnicodeDecodeError, err:
+        print err
+        print line
+        continue
+        
       wFile.write(line)
     wFile.close()
 
