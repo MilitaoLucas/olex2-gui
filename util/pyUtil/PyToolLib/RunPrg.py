@@ -31,6 +31,12 @@ class RunPrg(ArgumentParser):
     if self.demo_mode:
       OV.demo_mode = True
 
+    if self.HasGUI:
+      from Analysis import PrgAnalysis
+      self.PrgAnalysis = PrgAnalysis
+      
+      
+      
     self.getVariables('auto')
     OV.SetVar('SlideQPeaksVal','0') # reset q peak slider to display all peaks
     if not self.filename:
@@ -207,6 +213,9 @@ class RunSolutionPrg(RunPrg):
     if self.terminate:
       self.endRun()
       return
+    if self.snum_solution_graphical_output and self.HasGUI:
+      SXA_solution = self.PrgAnalysis(prg=self.program.name)
+      SXA_solution.observe_prg()
     self.method.run(self)
     self.runAfterProcess()
     self.endRun()
@@ -252,9 +261,8 @@ class RunRefinementPrg(RunPrg):
       self.endRun()
       return
     if self.snum_refinement_graphical_output and self.HasGUI:
-      from Analysis import ShelXAnalysis
-      SXA = ShelXAnalysis()
-      SXA.observe_shex_l()
+      SXA_refinement = self.PrgAnalysis(prg=self.program.name)
+      SXA_refinement.observe_prg()
     self.method.run(self)
     self.runAfterProcess()
     self.endRun()

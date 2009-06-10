@@ -484,11 +484,14 @@ def format_help(string):
   
   ## find all occurances of strings between XX. These are command line entities.
   width = int(OV.GetHtmlPanelwidth()) - 10
+#  width = "100%"
   regex = re.compile(r"  XX (.*?)( [^\XX\XX]* ) XX ", re.X)
   m = regex.findall(string)
   colour = "#888888"
   if m:
-    s = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='4'><tr bgcolor='$getVar(gui_html_code_bg_colour)'><td colspan='2'><a href='\2'><b><font size='2' color='%s'><code>>>\2</code></font></b></a></td></tr></table>" %(width,colour), string)
+    s = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='4'><tr bgcolor='$getVar(gui_html_code_bg_colour)'><td><a href='\2'><b><font size='2' color='%s'><code>>>\2</code></font></b></a></td></tr></table>" %(width, colour), string)
+    #s = regex.sub(r"</td><tr bgcolor='$getVar(gui_html_code_bg_colour)'><td><a href='\2'><b><font size='2' color='%s'><code>>>\2</code></font></b></a></td></tr><td>" %(colour), string)
+    #s = regex.sub(r"<a href='\2'><b><font size='2' color='%s'><code>>>\2</code></font></b></a>" %(colour), string)
     #s = regex.sub(r"<tr bgcolor='#ffffaa'><td colspan='2'><b><font size='2' color='%s'>>>\2</font></b></td></tr>" %colour, string)
 
   else:
@@ -879,7 +882,7 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
       if i == current_tooltip_number: continue
       txt = OV.TranslatePhrase("tip-%i" %i)
       if j > max_i * 2: break
-    txt += "<tr><td align='right'>%s</td></tr>" %make_edit_link("tip", "%i" %i)
+    txt += "</td></tr><tr><td align='right'>%s</td></tr>" %make_edit_link("tip", "%i" %i)
 
   elif number == "+1":
     i = current_tooltip_number + 1
@@ -887,7 +890,7 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
     if "tip-" in txt:
       i = 1
       txt = OV.TranslatePhrase("tip-%i" %i)
-    txt += "<tr><td align='right'>%s</td></tr>" %make_edit_link("tip", "%i" %i)
+    txt += "</td></tr><tr><td align='right'>%s</td></tr>" %make_edit_link("tip", "%i" %i)
   elif number == "list":
     txt = ""
     for i in xrange(max_i):
@@ -903,7 +906,7 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
   else:
     i = int(number)
     txt = OV.TranslatePhrase("tip-%i" %i)
-    txt += "<tr><td align='right'>%s</td></tr>" %make_edit_link("tip", "%i" %i)
+    txt += "</td></tr><tr><td align='right'>%s</td></tr>" %make_edit_link("tip", "%i" %i)
   current_tooltip_number = i
   txt = format_help(txt)
   OV.SetVar("current_tooltip_number",i)
@@ -955,14 +958,8 @@ def makeFormulaForsNumInfo():
 OV.registerFunction(makeFormulaForsNumInfo)
 
 
-def testingthis():
-  
-  rFile = open("%s/%s.res" %(olx.FilePath(),olx.FileName()))
-  lines = rFile.readlines()
-  rFile.close()
-  
-  for line in lines:
-    print line
+def reset_file_in_OFS(fileName):
+  OV.reset_file_in_OFS(fileName)
   return True
-OV.registerFunction(testingthis)
+OV.registerFunction(reset_file_in_OFS)
   

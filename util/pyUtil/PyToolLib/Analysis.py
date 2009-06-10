@@ -267,7 +267,7 @@ class Graph(ImageTools):
     self.graphX = self.imX - (self.bSides + self.xSpace)
     self.graph_top = int(self.currY + 0.1 * self.imY) + self.yAxisSpace
     self.graphY = self.imY - 2*self.bTop - self.graph_top
-    self.graph_bottom = self.graphY + currY + 0.03*self.imY - self.yAxisSpace
+    self.graph_bottom = int(self.graphY + currY + 0.03*self.imY - self.yAxisSpace)
     self.line_width = int(self.imX * 0.002)
     
     dx = self.imX - 1*self.bSides
@@ -314,7 +314,7 @@ class Graph(ImageTools):
       txt = item
       wX, wY = self.draw.textsize(txt, font=self.font_small)
       x = int(self.bSides + i * barX + (barX - wX)/2)
-      y = int(self.graph_bottom + 1)
+      y = self.graph_bottom 
       self.draw.text((x, y), "%s" %txt, font=self.font_small, fill="#444444")
       i += 1
       
@@ -625,7 +625,7 @@ class Graph(ImageTools):
         txt = "%.0f" %item
         
       wX, wY = self.draw.textsize(txt, font=self.font_small)
-      y = int(self.graph_bottom + 3)
+      y = self.graph_bottom
       #if self.draw_origin:
         #y += (self.min_y * self.scale_y)
        
@@ -976,34 +976,58 @@ class Analysis(Graph):
     f.close()
     print "%s was created" %filefull
 
-class ShelXAnalysis(Analysis):
+class PrgAnalysis(Analysis):
   
-  def __init__(self):
+  def __init__(self,prg):
     Analysis.__init__(self)
     self.counter = 0
     self.attempt = 1
-    size = (int(OV.FindValue('gui_htmlpanelwidth'))- 45, 100)
-    self.item = "ShelXL"
-    self.graphInfo["Title"] = "ShelXL"
+    size = (int(OV.FindValue('gui_htmlpanelwidth'))- 30, 150)
+    self.item = prg
+    self.graphInfo["Title"] = self.item
     self.graphInfo["imSize"] = size
     self.graphInfo["FontScale"] = 0.03
     self.graphInfo["TopRightTitle"] = self.filename
     self.graphInfo["n_cycles"] = OV.FindValue("snum_refinement_max_cycles")
-    OV.unregisterCallback("procout", self.ShelXL)
+    if self.item == "ShelXL" or self.item == "smtbx-refine":
+      #OV.unregisterCallback("procout", self.ShelXL)
+      self.prg_type = "refinement"
+    elif self.item == "ShelXS" or self.item == "smtbx-solve":
+      #OV.unregisterCallback("procout", self.ShelXS)
+      self.prg_type = "solution"
+      
     self.xl_d = {}
     self.new_graph_please = False
     self.cycle = 0
+    self.new_graph = True
     
     self.make_empty_graph()
-    program = self.RPD.programs["ShelXL"]
-    method = program.methods["CGLS"]
-    img_name = "ShelXL.png"
-    txt = self.ProgramHtml(program, method, "Refining", img_name)
-    OlexVFS.write_to_olex("ShelXL.htm", txt)
-    OlexVFS.write_to_olex('refinement_image.htm', txt)
+    if self.prg_type == "refinement":
+      program = self.RPD.programs["%s" %self.item]
+    elif self.prg_type == "solution":
+      program = self.SPD.programs["%s" %self.item]
+      
+    method = OV.FindValue('snum_%s_method' % self.prg_type)
+    method = program.methods[method]
+    img_name = "%s.png" %self.item 
+    txt = self.ProgramHtml(program, method, "%s: " %self.prg_type.title(), img_name)
+    
+    OlexVFS.write_to_olex("%s_image.htm" % self.prg_type, txt)
+     
     OV.htmlReload()
     self.popout()
-  
+
+  def cctbx_refine(self, line):
+    self.new_graph_please = True
+    if self.new_graph_please:
+      self.run_ShelXS_graph()
+    
+  def ShelXS(self, line):
+    self.new_graph_please = True
+    if self.new_graph_please:
+      self.run_ShelXS_graph()
+    
+    
   def ShelXL(self, line):
     self.new_graph_please = False
     mean_shift = 0
@@ -1020,13 +1044,59 @@ class ShelXAnalysis(Analysis):
       self.xl_d["cycle_%i" %self.cycle].setdefault('max_shift',max_shift)
       self.xl_d["cycle_%i" %self.cycle].setdefault('max_shift_atom',max_shift_atom)
       self.new_graph_please = True
-
     if self.new_graph_please:
       self.run_ShelXL_graph()
 
-  def observe_shex_l(self):
-    OV.registerCallback("procout", self.ShelXL)
+  def observe_prg(self):
+    obs = self.item.replace("-", "_")
+    observer = getattr(self,"%s" %self.item)
+    OV.registerCallback("procout", observer)
 
+  def observe_shelx_s(self):
+    OV.registerCallback("procout", self.ShelXS)
+
+  def run_ShelXS_graph(self):
+    cycle = self.cycle
+    data = self.xl_d
+    top = self.graph_top
+    marker_width = 5
+    title = self.graphInfo.get('Title', "")
+    size = self.graphInfo.get('imSize', "")
+    width = size[0]
+    height = size[1] - top
+    height = self.graph_bottom - self.graph_top
+    legend_top = height + 20
+    
+    legend_top = height + 20
+    legend_top = self.graph_bottom + 2
+    m_offset = 5
+    ## Wipe the legend area
+    box = (0,legend_top,width,legend_top + 20)
+    self.draw.rectangle(box, fill=self.gui_html_bg_colour)
+
+    x = self.bSides
+    y = legend_top
+    txt = "No Graphical Output available at this time."
+    self.draw.text((x, y), "%s" %txt, font=self.font_large, fill=self.gui_red)
+
+    #txt = str(number)
+    ### Draw Current Numbers
+    #wX, wY = self.draw.textsize(txt, font=self.font_large)
+    #x = width - wX - self.bSides
+    #self.draw.text((x, legend_top), "%s" %txt, font=self.font_large, fill="#888888")
+    
+    image_location = "%s.png" %self.item
+    OlexVFS.save_image_to_olex(self.im, image_location, 0)
+    self.im.save("%s/.olex/ShelXS.png" %self.filepath, "PNG")
+    
+    if OV.IsControl('POP_PRG_ANALYSIS'):
+      olx.html_SetImage("POP_PRG_ANALYSIS","%s.png" %self.item)
+    if self.new_graph:
+      OV.htmlReload()
+      self.new_graph = False
+
+    
+    
   def run_ShelXL_graph(self):
     cycle = self.cycle
     data = self.xl_d
@@ -1038,14 +1108,14 @@ class ShelXAnalysis(Analysis):
     height = size[1] - top
     height = self.graph_bottom - self.graph_top
     legend_top = height + 20
-    bar_width = (width-2*self.bSides)/self.graphInfo["n_cycles"]
+    bar_width = int((width-2*self.bSides)/self.graphInfo["n_cycles"]) -1 
     
     mean_shift = data["cycle_%i" %cycle].get("mean_shift","n/a")
     max_shift = data["cycle_%i" %cycle].get("max_shift","n/a")
     max_shift_atom = data["cycle_%i" %cycle].get("max_shift_atom","n/a")
-    bar_left = ((cycle - 1) * bar_width) + self.bSides  
+    bar_left = ((cycle - 1) * bar_width) + self.bSides + 1
     bar_right = bar_left + bar_width
-    bar_bottom = height + top
+    bar_bottom = self.graph_bottom -1
     
     number = 0
     if mean_shift != "n/a":
@@ -1086,10 +1156,6 @@ class ShelXAnalysis(Analysis):
         x = width - 2*self.bSides - wX
         y = wY + 30
         self.draw.text((x, y - 10), "%s" %txt, font=self.font_large, fill=self.gui_green)
-        #smile = OlexVFS.read_from_olex("tickok.png")
-        ##smile = Image.frombuffer('RGBA',(30,30), smile,'raw','RGBA',0,1)
-        #smile = Image.open("%s/tickok.png" %self.datadir)
-        #self.im.paste(smile, (x,y))
       
     elif max_shift != "n/a":
       number = max_shift
@@ -1118,6 +1184,7 @@ class ShelXAnalysis(Analysis):
 
       
     legend_top = height + 20
+    legend_top = self.graph_bottom + 2
     m_offset = 5
     ## Wipe the legend area
     box = (0,legend_top,width,legend_top + 20)
@@ -1132,9 +1199,13 @@ class ShelXAnalysis(Analysis):
     image_location = "%s.png" %self.item
     OlexVFS.save_image_to_olex(self.im, image_location, 0)
     self.im.save("%s/.olex/Refinement.png" %self.filepath, "PNG")
-    if OV.FindValue('html_IsItem(POP_PRG_ANALYSIS)',False):
+    
+    if OV.IsControl('POP_PRG_ANALYSIS'):
       olx.html_SetImage("POP_PRG_ANALYSIS","ShelXL.png")
-    #olex.m("html.Reload pop_prg_analysis")
+    if self.new_graph:
+      OV.htmlReload()
+      self.new_graph = False
+    
 
 class WilsonPlot(Analysis):
   def __init__(self, n_bins=10, method="olex"):
@@ -1344,11 +1415,12 @@ class ChargeFlippingPlot(Analysis):
     Analysis.__init__(self)
     self.counter = 0
     self.attempt = 1
-    size = (int(OV.FindValue('gui_htmlpanelwidth'))- 45, 100)
+    size = (int(OV.FindValue('gui_htmlpanelwidth'))- 30, 150)
     self.graphInfo["Title"] = "Charge Flipping"
     self.graphInfo["imSize"] = size
     self.graphInfo["FontScale"] = 0.03
     self.graphInfo["TopRightTitle"] = self.filename
+    self.new_graph = True
     
     self.make_empty_graph()
     program = self.SPD.programs["smtbx-solve"]
@@ -1357,7 +1429,6 @@ class ChargeFlippingPlot(Analysis):
     txt = self.ProgramHtml(program, method, "Solving", img_name)
     OlexVFS.write_to_olex('xy.htm', txt)
     OlexVFS.write_to_olex('solution_image.htm', txt)
-    OV.htmlReload()
 
   def run_charge_flipping_graph(self, flipping, solving, previous_state):
     top = self.graph_top
@@ -1417,6 +1488,7 @@ class ChargeFlippingPlot(Analysis):
       font = self.registerFontInstance(font_name, font_size)
       
       legend_top = height + 20
+      legend_top = self.graph_bottom + 1
       m_offset = 5
       ## Wipe the legend area
       box = (0,legend_top,width,legend_top + 20)
@@ -1442,9 +1514,12 @@ class ChargeFlippingPlot(Analysis):
       image_location = "XY.png"
       res = OlexVFS.save_image_to_olex(self.im, image_location,  0)
       self.im.save("%s/.olex/Solution.png" %self.filepath, "PNG")
-      if OV.FindValue('html_IsItem(POP_PRG_ANALYSIS)',False):
+      
+      if OV.IsControl('POP_PRG_ANALYSIS'):
         olx.html_SetImage("POP_PRG_ANALYSIS","XY.png")
-      #olex.m("html.Reload pop_prg_analysis")
+      if self.new_graph:
+        OV.htmlReload()
+        self.new_graph = False
 
 class CumulativeIntensityDistribution(Analysis):
   def __init__(self, n_bins=20, output_csv_file=False):
