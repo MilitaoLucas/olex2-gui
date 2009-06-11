@@ -1017,11 +1017,16 @@ class PrgAnalysis(Analysis):
     OV.htmlReload()
     self.popout()
 
-  def cctbx_refine(self, line):
+  def smtbx_refine(self, line):
     self.new_graph_please = True
     if self.new_graph_please:
       self.run_ShelXS_graph()
-    
+
+  def smtbx_solve(self, line):
+    self.new_graph_please = True
+    if self.new_graph_please:
+      self.run_ShelXS_graph()
+      
   def ShelXS(self, line):
     self.new_graph_please = True
     if self.new_graph_please:
@@ -1049,7 +1054,7 @@ class PrgAnalysis(Analysis):
 
   def observe_prg(self):
     obs = self.item.replace("-", "_")
-    observer = getattr(self,"%s" %self.item)
+    observer = getattr(self,obs)
     OV.registerCallback("procout", observer)
 
   def observe_shelx_s(self):

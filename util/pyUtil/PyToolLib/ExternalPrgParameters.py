@@ -414,7 +414,7 @@ class Method_cctbx_refinement(Method_refinement):
   def run(self, RunPrgObject):
     from cctbx_olex_adapter import OlexCctbxRefine
     print 'STARTING cctbx refinement'
-    verbose = OV.FindValue('olex2_verbose',False)
+    verbose = OV.FindValue('olex2_verbose','False')
     cctbx = OlexCctbxRefine(
       max_cycles=RunPrgObject.snum_refinement_max_cycles,
       verbose=verbose)
