@@ -187,7 +187,7 @@ target = "Do automatic tidying once - tick the box to do it after every refineme
 				name='SNUM_REFINEMENT_GRAPHICAL_OUTPUT' 
 				$spy.CheckBoxValue(snum_refinement_graphical_output) 
 				oncheck='SetVar(snum_refinement_graphical_output,true)' 
-				onuncheck='SetVar(snum_refinement_graphical_output,false)' 
+				onuncheck='SetVar(snum_refinement_graphical_output,false)>>spy.reset_file_in_OFS(refinement_image.htm)>>UpdateHtml' 
 				value=''
 			>&nbsp;
 		</font>
