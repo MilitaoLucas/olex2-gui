@@ -937,11 +937,8 @@ class Analysis(Graph):
     self.make_empty_graph(axis_x = True)
     self.draw_pairs()
     
-  def ProgramHtml(self):
-    program = self.program
-    method = self.method
-    prg = self.item
-    prg_type = "%s: " %self.prg_type.title()
+  def ProgramHtml(self, program, method, process, img_name):
+    return_to_menu_txt = str(OV.Translate("Return to main menu"))
     authors = program.author
     reference = program.reference
     help = OV.TranslatePhrase(method.help)
@@ -950,7 +947,7 @@ class Analysis(Graph):
     txt = htmlTools.get_template("pop_prg_analysis")
     
     if txt:
-      txt = txt %(prg_type, self.filename, prg, self.method.name, authors, reference, self.img_name)
+      txt = txt %(process, self.filename, program.name, method.name, authors, reference, img_name)
     else:
       txt = 'Please provide a template in folder basedir()/etc/gui/blocks/templates/'
     return txt
@@ -970,62 +967,35 @@ class Analysis(Graph):
 
 class PrgAnalysis(Analysis):
   
-  def __init__(self,prg):
+  def __init__(self, program, method):
     Analysis.__init__(self)
     self.counter = 0
     self.attempt = 1
     size = (int(OV.FindValue('gui_htmlpanelwidth'))- 30, 150)
-    self.item = prg
+    self.item = program.name
     self.graphInfo["Title"] = self.item
     self.graphInfo["imSize"] = size
     self.graphInfo["FontScale"] = 0.03
     self.graphInfo["TopRightTitle"] = self.filename
     self.graphInfo["n_cycles"] = OV.FindValue("snum_refinement_max_cycles")
-    if self.item == "ShelXL" or self.item == "smtbx-refine":
-      #OV.unregisterCallback("procout", self.ShelXL)
-      self.prg_type = "refinement"
-    elif self.item == "ShelXS" or self.item == "smtbx-solve":
-      #OV.unregisterCallback("procout", self.ShelXS)
-      self.prg_type = "solution"
-      
+    self.progam = program
+    self.method = method
     self.xl_d = {}
     self.new_graph_please = False
     self.cycle = 0
     self.new_graph = True
-    
     self.make_empty_graph()
-    if self.prg_type == "refinement":
-      self.program = self.RPD.programs["%s" %self.item]
-    elif self.prg_type == "solution":
-      self.program = self.SPD.programs["%s" %self.item]
-      
-    method = OV.FindValue('snum_%s_method' % self.prg_type)
-    self.method = self.program.methods[method]
-    self.img_name = "%s.png" %self.item 
-    txt = self.ProgramHtml()
-    
-    OlexVFS.write_to_olex("%s_image.htm" % self.prg_type, txt)
-     
+    img_name = "%s.png" %self.item 
+    txt = self.ProgramHtml(program, method, "%s: " %program.program_type, img_name)
+    OlexVFS.write_to_olex("%s_image.htm" %program.program_type, txt)
     OV.htmlReload()
     self.popout()
 
-  def smtbx_refine(self, line):
-    self.new_graph_please = True
-    if self.new_graph_please:
-      self.run_smtbx_refine_graph()
+class ShelXL_graph(PrgAnalysis):
+  def __init__(self, program, method):
+    PrgAnalysis.__init__(self, program, method)
 
-  def smtbx_solve(self, line):
-    self.new_graph_please = True
-    if self.new_graph_please:
-      self.run_smtbx_solve_graph()
-      
-  def ShelXS(self, line):
-    self.new_graph_please = True
-    if self.new_graph_please:
-      self.run_ShelXS_graph()
-    
-  def ShelXL(self, line):
-    self.new_graph_please = False
+  def observe(self, line):
     mean_shift = 0
     max_shift = 0
     if "before cycle" in line:
@@ -1041,186 +1011,9 @@ class PrgAnalysis(Analysis):
       self.xl_d["cycle_%i" %self.cycle].setdefault('max_shift_atom',max_shift_atom)
       self.new_graph_please = True
     if self.new_graph_please:
-      self.run_ShelXL_graph()
+      self.make_ShelXL_graph()
 
-  def observe_prg(self):
-    self.new_graph_please = True
-    obs = self.item.replace("-", "_")
-    observer = getattr(self,obs)
-    current_obs = OV.FindValue("PrgAnalysis_current_observer")
-    if current_obs:
-      current_observer = getattr(self, current_obs)
-      OV.unregisterCallback("procout", current_observer)
-    OV.registerCallback("procout", observer)
-    OV.SetVar("PrgAnalysis_current_observer",obs)
-    
-  def run_smtbx_solve_graph(self, flipping, solving, previous_state):
-    top = self.graph_top
-    marker_width = 5
-    title = self.graphInfo.get('Title', "")
-    size = self.graphInfo.get('imSize', "")
-    width = size[0]
-    height = size[1] - top
-    height = self.graph_bottom - self.graph_top
-    
-    if solving.state is solving.guessing_delta:
-      if previous_state is not solving.guessing_delta:
-        t = "%s" %self.attempt
-        wX, wY = self.draw.textsize(t, font=self.font_bold_large)
-        x = self.counter + marker_width + 5
-        self.draw.text((x, self.graph_bottom - wY -3), "%s" %t, font=self.font_bold_large, fill="#888888")
-        self.attempt += 1
-        if self.counter != 0:
-          self.counter += 1
-          self.draw.line(((self.counter + marker_width, self.graph_top),(self.counter + marker_width, self.graphY+self.graph_top - 2)), width=1, fill=(230, 230, 230))
-        return
-    
-    elif solving.state is solving.solving:
-      cc = flipping.c_tot_over_c_flip()
-      R1 = flipping.r1_factor()
-      self.counter+=marker_width
-      if self.counter > width - 10:
-        self.make_empty_graph()
-        self.draw = ImageDraw.Draw(self.im)
-        self.counter = self.bSides
-        t = "...continued"
-        wX, wY = self.draw.textsize(t, font=self.font_normal)
-        x = width - wX - self.bSides - 3
-        self.draw.text((x, 20), "%s" %t, font=self.font_normal, fill="#888888")
-      x = self.counter
-      
-      ## Draw CC
-      txt = "cc=%.3f" %cc
-      if cc > 1: cc = 1
-      ccR = int(255*cc)
-      ccG = int(255*(1.3-cc))
-      ccB = 0
-      cc = height*(1-cc) + top
-      box = (x,cc,x+marker_width,cc+marker_width)
-      self.draw.rectangle(box, fill=(ccR, ccG, ccB), outline=(ccR/2, ccG/2, 0))
-      
-      ## Draw R1
-      txt += ", R1=%.3f" %R1
-      rR = int(255*R1*2)
-      rG = int(255*(1.3-R1*2))
-      rB = 0
-      R1 = height*(1-R1) + top
-      box = (x,R1,x+marker_width,R1+2)
-      self.draw.rectangle(box, fill=(rR, rG, rB), outline=(rR/2, rG/2, 0))
-      font_name = "Vera"
-      font_size = 10
-      font = self.registerFontInstance(font_name, font_size)
-      
-      legend_top = height + 20
-      legend_top = self.graph_bottom + 1
-      m_offset = 5
-      ## Wipe the legend area
-      box = (0,legend_top,width,legend_top + 20)
-      self.draw.rectangle(box, fill=self.gui_html_bg_colour)
-      
-      ## Draw CC Legend
-      box = (10,legend_top +m_offset,10+marker_width, legend_top+marker_width + m_offset)
-      self.draw.rectangle(box, fill=(ccR, ccG, ccB), outline=(ccR/2, ccG/2, 0))
-      tt = "CC"
-      self.draw.text((10+marker_width+3, legend_top), "%s" %tt, font=self.font_large, fill="#888888")
-      
-      ## Draw R1 Legend
-      box = (40,legend_top + m_offset + 1,40+marker_width,legend_top + m_offset + 3)
-      self.draw.rectangle(box, fill=(rR, rG, rB), outline=(rR/2, rG/2, 0))
-      tt = "R1"
-      self.draw.text((40+marker_width+3, legend_top), "%s" %tt, font=self.font_large, fill="#888888")
-      
-      ## Draw Current Numbers
-      wX, wY = self.draw.textsize(txt, font=self.font_large)
-      x = width - wX - self.bSides
-      self.draw.text((x, legend_top), "%s" %txt, font=self.font_large, fill="#888888")
-      
-      image_location = "XY.png"
-      res = OlexVFS.save_image_to_olex(self.im, image_location,  0)
-      self.im.save("%s/.olex/Solution.png" %self.filepath, "PNG")
-      
-      if OV.IsControl('POP_PRG_ANALYSIS'):
-        olx.html_SetImage("POP_PRG_ANALYSIS","XY.png")
-      if self.new_graph:
-        OV.htmlReload()
-        self.new_graph = False
-    
-    
-
-  def run_smtbx_refine_graph(self):
-    cycle = self.cycle
-    data = self.xl_d
-    top = self.graph_top
-    marker_width = 5
-    title = self.graphInfo.get('Title', "")
-    size = self.graphInfo.get('imSize', "")
-    self.width = size[0]
-    self.height = self.graph_bottom - self.graph_top
-    self.legend_top = self.graph_bottom + 2
-    m_offset = 5
-    
-    self.wipe_legend_area()
-    self.no_output_yet()
-    
-    #txt = str(number)
-    ### Draw Current Numbers
-    #wX, wY = self.draw.textsize(txt, font=self.font_large)
-    #x = width - wX - self.bSides
-    #self.draw.text((x, legend_top), "%s" %txt, font=self.font_large, fill="#888888")
-    
-    self.save_image()
-    self.update_gui()
-   
-    
-  def save_image(self):
-    image_location = "%s.png" %self.item
-    OlexVFS.save_image_to_olex(self.im, image_location, 0)
-    self.im.save("%s/.olex/%s.png" %(self.filepath,self.item), "PNG")
-
-  def update_gui(self):
-    if OV.IsControl('POP_PRG_ANALYSIS'):
-      olx.html_SetImage("POP_PRG_ANALYSIS","%s.png" %self.item)
-    if self.new_graph:
-      OV.htmlReload()
-      self.new_graph = False
-      
-  def no_output_yet(self):
-    x = self.bSides
-    y = self.legend_top
-    txt = "No output for %s/%s available yet." %(self.item, self.method.name)
-    self.draw.text((x, y), "%s" %txt, font=self.font_normal, fill=self.gui_red)
-
-  def wipe_legend_area(self):
-    width = self.width
-    box = (0,self.legend_top,width,self.legend_top + 20)
-    self.draw.rectangle(box, fill=self.gui_html_bg_colour)
-
-
-  def run_ShelXS_graph(self):
-    cycle = self.cycle
-    data = self.xl_d
-    top = self.graph_top
-    marker_width = 5
-    title = self.graphInfo.get('Title', "")
-    size = self.graphInfo.get('imSize', "")
-    self.width = size[0]
-    self.height = self.graph_bottom - self.graph_top
-    self.legend_top = self.graph_bottom + 2
-    m_offset = 5
-    
-    self.wipe_legend_area()
-    self.no_output_yet()
-
-    #txt = str(number)
-    ### Draw Current Numbers
-    #wX, wY = self.draw.textsize(txt, font=self.font_large)
-    #x = width - wX - self.bSides
-    #self.draw.text((x, legend_top), "%s" %txt, font=self.font_large, fill="#888888")
-    
-    self.save_image()
-    self.update_gui()
-    
-  def run_ShelXL_graph(self):
+  def make_ShelXL_graph(self):
     cycle = self.cycle
     data = self.xl_d
     top = self.graph_top
@@ -1305,7 +1098,6 @@ class PrgAnalysis(Analysis):
       y = bar_top - 13
       self.draw.text((x, y), "%s" %txt, font=self.font_large, fill="#888888")
 
-      
     legend_top = height + 20
     legend_top = self.graph_bottom + 2
     m_offset = 5
@@ -1318,10 +1110,65 @@ class PrgAnalysis(Analysis):
     wX, wY = self.draw.textsize(txt, font=self.font_large)
     x = width - wX - self.bSides
     self.draw.text((x, legend_top), "%s" %txt, font=self.font_large, fill="#888888")
+
+    image_location = "%s.png" %self.item
+    OlexVFS.save_image_to_olex(self.im, image_location, 0)
+    self.im.save("%s/.olex/Refinement.png" %self.filepath, "PNG")
+
+    if OV.IsControl('POP_PRG_ANALYSIS'):
+      olx.html_SetImage("POP_PRG_ANALYSIS", image_location)
+    if self.new_graph:
+      OV.htmlReload()
+      self.new_graph = False
     
-    self.save_image()
-    self.update_gui()
+class ShelXS_graph(PrgAnalysis):
+  def __init__(self, program, method):
+    PrgAnalysis.__init__(self, program, method)
+
+  def observe(self, line):
+    self.new_graph_please = True
+    if self.new_graph_please:
+      self.make_ShelXS_graph()
+
+  def make_ShelXS_graph(self):
+    cycle = self.cycle
+    data = self.xl_d
+    top = self.graph_top
+    marker_width = 5
+    title = self.graphInfo.get('Title', "")
+    size = self.graphInfo.get('imSize', "")
+    width = size[0]
+    height = size[1] - top
+    height = self.graph_bottom - self.graph_top
+    legend_top = height + 20
     
+    legend_top = height + 20
+    legend_top = self.graph_bottom + 2
+    m_offset = 5
+    ## Wipe the legend area
+    box = (0,legend_top,width,legend_top + 20)
+    self.draw.rectangle(box, fill=self.gui_html_bg_colour)
+
+    x = self.bSides
+    y = legend_top
+    txt = "No Graphical Output available at this time."
+    self.draw.text((x, y), "%s" %txt, font=self.font_large, fill=self.gui_red)
+
+    #txt = str(number)
+    ### Draw Current Numbers
+    #wX, wY = self.draw.textsize(txt, font=self.font_large)
+    #x = width - wX - self.bSides
+    #self.draw.text((x, legend_top), "%s" %txt, font=self.font_large, fill="#888888")
+    
+    image_location = "%s.png" %self.item
+    OlexVFS.save_image_to_olex(self.im, image_location, 0)
+    self.im.save("%s/.olex/ShelXS.png" %self.filepath, "PNG")
+    
+    if OV.IsControl('POP_PRG_ANALYSIS'):
+      olx.html_SetImage("POP_PRG_ANALYSIS","%s.png" %self.item)
+    if self.new_graph:
+      OV.htmlReload()
+      self.new_graph = False
 
 class WilsonPlot(Analysis):
   def __init__(self, n_bins=10, method="olex"):

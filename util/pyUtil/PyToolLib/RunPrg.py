@@ -168,6 +168,7 @@ class RunPrg(ArgumentParser):
       else:
         OV.SetVar('snum_refinement_auto_pruneQ', 1.5)
         OV.SetVar('snum_refinement_auto_assignQ', 2.0)
+    self.method.unregisterCallback()
 
   def getProgramMethod(self, fun):
     if fun == 'refine':
@@ -214,8 +215,7 @@ class RunSolutionPrg(RunPrg):
       self.endRun()
       return
     if self.snum_solution_graphical_output and self.HasGUI:
-      SXA_solution = self.PrgAnalysis(prg=self.program.name)
-      SXA_solution.observe_prg()
+      self.method.observe(self)
     self.method.run(self)
     self.runAfterProcess()
     self.endRun()
@@ -261,8 +261,7 @@ class RunRefinementPrg(RunPrg):
       self.endRun()
       return
     if self.snum_refinement_graphical_output and self.HasGUI:
-      SXA_refinement = self.PrgAnalysis(prg=self.program.name)
-      SXA_refinement.observe_prg()
+      self.method.observe(self)
     self.method.run(self)
     self.runAfterProcess()
     self.endRun()
