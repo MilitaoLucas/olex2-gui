@@ -634,7 +634,7 @@ def charge_flipping_loop(solving, verbose=True):
   if HasGUI:
     import Analysis
     #Analysis.Analysis_instance.run_Analysis('Charge Flipping', {})
-    plot = Analysis.ChargeFlippingPlot()
+    plot = Analysis.PrgAnalysis('smtbx-solve')
 #    a = Analysis(function='Charge Flipping', param=None)
 #    a.run('Char)
   
