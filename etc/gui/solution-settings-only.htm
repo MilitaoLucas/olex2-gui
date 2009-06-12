@@ -184,7 +184,7 @@
 				name='SNUM_SOLUTION_GRAPHICAL_OUTPUT'
 				$spy.CheckBoxValue(snum_solution_graphical_output)
 				oncheck='SetVar(snum_solution_graphical_output,true)'
-				onuncheck='SetVar(snum_solution_graphical_output,false)'
+				onuncheck='SetVar(snum_solution_graphical_output,false)>>spy.reset_file_in_OFS(solution_image.htm)>>UpdateHtml'
 				value=''
 			>&nbsp;
 		</font>

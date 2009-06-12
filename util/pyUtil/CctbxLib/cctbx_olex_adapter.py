@@ -631,15 +631,12 @@ class OlexSetupCctbxTwinLaws(OlexCctbxAdapter):
 
 def charge_flipping_loop(solving, verbose=True):
   HasGUI = OV.HasGUI()
-  if HasGUI:
+  plot = None
+  if HasGUI and OV.FindValue('snum_solution_graphical_output'):
     import Analysis
-    #Analysis.Analysis_instance.run_Analysis('Charge Flipping', {})
-    plot = Analysis.PrgAnalysis('smtbx-solve')
-#    a = Analysis(function='Charge Flipping', param=None)
-#    a.run('Char)
-  
+    plot = Analysis.ChargeFlippingPlot()
   OV.SetVar('stop_current_process',False)
-  
+
   previous_state = None
   for flipping in solving:
     if OV.FindValue('stop_current_process',False):
@@ -683,7 +680,7 @@ def charge_flipping_loop(solving, verbose=True):
     elif solving.state is solving.finished:
       break
     
-    if HasGUI: plot.run_charge_flipping_graph(flipping, solving, previous_state)
+    if plot is not None: plot.run_charge_flipping_graph(flipping, solving, previous_state)
     previous_state = solving.state
 
 

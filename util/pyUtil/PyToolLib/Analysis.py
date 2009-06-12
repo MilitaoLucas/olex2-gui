@@ -936,21 +936,6 @@ class Analysis(Graph):
     self.get_simple_x_y_pair_data_from_file(filepath)
     self.make_empty_graph(axis_x = True)
     self.draw_pairs()
-    
-  def ProgramHtml(self, program, method, process, img_name):
-    return_to_menu_txt = str(OV.Translate("Return to main menu"))
-    authors = program.author
-    reference = program.reference
-    help = OV.TranslatePhrase(method.help)
-    info = OV.TranslatePhrase(method.info)
-    
-    txt = htmlTools.get_template("pop_prg_analysis")
-    
-    if txt:
-      txt = txt %(process, self.filename, program.name, method.name, authors, reference, img_name)
-    else:
-      txt = 'Please provide a template in folder basedir()/etc/gui/blocks/templates/'
-    return txt
 
   def output_data_as_csv(self, filename=None):
     from iotbx import csv_utils
@@ -966,7 +951,6 @@ class Analysis(Graph):
     print "%s was created" %filefull
 
 class PrgAnalysis(Analysis):
-  
   def __init__(self, program, method):
     Analysis.__init__(self)
     self.counter = 0
@@ -978,18 +962,43 @@ class PrgAnalysis(Analysis):
     self.graphInfo["FontScale"] = 0.03
     self.graphInfo["TopRightTitle"] = self.filename
     self.graphInfo["n_cycles"] = OV.FindValue("snum_refinement_max_cycles")
-    self.progam = program
+    self.program = program
     self.method = method
     self.xl_d = {}
     self.new_graph_please = False
     self.cycle = 0
     self.new_graph = True
     self.make_empty_graph()
-    img_name = "%s.png" %self.item 
-    txt = self.ProgramHtml(program, method, "%s: " %program.program_type, img_name)
+    self.image_location = "%s.png" %self.item
+    txt = self.ProgramHtml()
     OlexVFS.write_to_olex("%s_image.htm" %program.program_type, txt)
-    OV.htmlReload()
+    self.update_image()
     self.popout()
+
+  def ProgramHtml(self):
+    return_to_menu_txt = str(OV.Translate("Return to main menu"))
+    authors = self.program.author
+    reference = self.program.reference
+    help = OV.TranslatePhrase(self.method.help)
+    info = OV.TranslatePhrase(self.method.info)
+    txt = htmlTools.get_template("pop_prg_analysis")
+    if txt:
+      txt = txt %(
+        self.program.program_type, self.filename, self.program.name, self.method.name,
+        authors, reference, self.program.program_type.upper(), self.image_location)
+    else:
+      txt = 'Please provide a template in folder basedir()/etc/gui/blocks/templates/'
+    return txt
+
+  def update_image(self):
+    OlexVFS.save_image_to_olex(self.im, self.image_location, 0)
+    #self.im.save("%s/.olex/Refinement.png" %self.filepath, "PNG")
+    if OV.IsControl('POP_%s_PRG_ANALYSIS' %self.program.program_type.upper()):
+      olx.html_SetImage(
+        'POP_%s_PRG_ANALYSIS' %self.program.program_type.upper(), self.image_location)
+    if self.new_graph:
+      OV.htmlReload()
+      self.new_graph = False
 
 class ShelXL_graph(PrgAnalysis):
   def __init__(self, program, method):
@@ -1110,16 +1119,7 @@ class ShelXL_graph(PrgAnalysis):
     wX, wY = self.draw.textsize(txt, font=self.font_large)
     x = width - wX - self.bSides
     self.draw.text((x, legend_top), "%s" %txt, font=self.font_large, fill="#888888")
-
-    image_location = "%s.png" %self.item
-    OlexVFS.save_image_to_olex(self.im, image_location, 0)
-    self.im.save("%s/.olex/Refinement.png" %self.filepath, "PNG")
-
-    if OV.IsControl('POP_PRG_ANALYSIS'):
-      olx.html_SetImage("POP_PRG_ANALYSIS", image_location)
-    if self.new_graph:
-      OV.htmlReload()
-      self.new_graph = False
+    self.update_image()
     
 class ShelXS_graph(PrgAnalysis):
   def __init__(self, program, method):
@@ -1159,16 +1159,9 @@ class ShelXS_graph(PrgAnalysis):
     #wX, wY = self.draw.textsize(txt, font=self.font_large)
     #x = width - wX - self.bSides
     #self.draw.text((x, legend_top), "%s" %txt, font=self.font_large, fill="#888888")
+
+    self.update_image()
     
-    image_location = "%s.png" %self.item
-    OlexVFS.save_image_to_olex(self.im, image_location, 0)
-    self.im.save("%s/.olex/ShelXS.png" %self.filepath, "PNG")
-    
-    if OV.IsControl('POP_PRG_ANALYSIS'):
-      olx.html_SetImage("POP_PRG_ANALYSIS","%s.png" %self.item)
-    if self.new_graph:
-      OV.htmlReload()
-      self.new_graph = False
 
 class WilsonPlot(Analysis):
   def __init__(self, n_bins=10, method="olex"):
@@ -1373,26 +1366,13 @@ class WilsonPlot(Analysis):
     fill = tuple(fill)
     return fill
 
-class ChargeFlippingPlot(Analysis):
+class ChargeFlippingPlot(PrgAnalysis):
   def __init__(self):
-    Analysis.__init__(self)
-    self.counter = 0
-    self.attempt = 1
-    size = (int(OV.FindValue('gui_htmlpanelwidth'))- 30, 150)
-    self.graphInfo["Title"] = "Charge Flipping"
-    self.graphInfo["imSize"] = size
-    self.graphInfo["FontScale"] = 0.03
-    self.graphInfo["TopRightTitle"] = self.filename
-    self.new_graph = True
-    
-    self.make_empty_graph()
-    program = self.SPD.programs["smtbx-solve"]
+    program = ExternalPrgParameters.defineExternalPrograms()[0].programs["smtbx-solve"]
     method = program.methods["Charge Flipping"]
-    img_name = "XY.png"
-    txt = self.ProgramHtml(program, method, "Solving", img_name)
-    OlexVFS.write_to_olex('xy.htm', txt)
-    OlexVFS.write_to_olex('solution_image.htm', txt)
-
+    self.item = "Charge Flipping"
+    PrgAnalysis.__init__(self, program, method)
+    
   def run_charge_flipping_graph(self, flipping, solving, previous_state):
     top = self.graph_top
     marker_width = 5
@@ -1473,16 +1453,7 @@ class ChargeFlippingPlot(Analysis):
       wX, wY = self.draw.textsize(txt, font=self.font_large)
       x = width - wX - self.bSides
       self.draw.text((x, legend_top), "%s" %txt, font=self.font_large, fill="#888888")
-      
-      image_location = "XY.png"
-      res = OlexVFS.save_image_to_olex(self.im, image_location,  0)
-      self.im.save("%s/.olex/Solution.png" %self.filepath, "PNG")
-      
-      if OV.IsControl('POP_PRG_ANALYSIS'):
-        olx.html_SetImage("POP_PRG_ANALYSIS","XY.png")
-      if self.new_graph:
-        OV.htmlReload()
-        self.new_graph = False
+      self.update_image()
 
 class CumulativeIntensityDistribution(Analysis):
   def __init__(self, n_bins=20, output_csv_file=False):
