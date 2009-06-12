@@ -31,8 +31,9 @@ class ExternalProgramDictionary(object):
   
 
 class Program(object):
-  def __init__(self, name, author, reference, execs=None, versions=None):
+  def __init__(self, name, program_type, author, reference, execs=None, versions=None):
     self.name = name
+    self.program_type = program_type
     self.author = author
     self.reference = reference
     self.execs = execs
@@ -63,6 +64,7 @@ class Method(object):
     self.help = '%s-help' %(self.name.lower().replace(' ', '-'))
     self.info = '%s-info' %(self.name.lower().replace(' ', '-'))
     self.atom_sites_solution = atom_sites_solution
+    self.observer = None
     
   def html_gui(self):
     pass
@@ -124,12 +126,19 @@ class Method(object):
     added to the program settings panel.
     """
     return ''
-  
-  
+
+  def observe(self, RunPrgObject):
+    pass
+
+  def unregisterCallback(self):
+    if self.observer is not None:
+      OV.unregisterCallback("procout", self.observer.observe)
+
+
 class Method_solution(Method):
   def __init__(self, name, cmd, args, atom_sites_solution=None):
     Method.__init__(self, name, cmd, args, atom_sites_solution)
-  
+
   def pre_solution(self, RunPrgObject):
     """Prepares the arguments required to reset the structure before running the
     structure solution program.
@@ -200,8 +209,8 @@ class Method_solution(Method):
       olx.Compaq('-a')
       olx.ShowStr("true")
     self.auto = True
-    
-  
+
+
 class Method_refinement(Method):
   def __init__(self, name, cmd, args, atom_sites_solution=None):
     Method.__init__(self, name, cmd, args, atom_sites_solution)
@@ -270,16 +279,20 @@ class Method_shelx(Method):
     olx.WaitFor('process') # uncomment me!
     #olex.m("User '%s'" %RunPrgObject.filePath)
     olx.User("'%s'" %RunPrgObject.filePath)
-    
- 
+
 
 class Method_shelx_solution(Method_shelx, Method_solution):
   """Inherits methods specific to shelx solution programs
   """
   def __init__(self, name, cmd, args, atom_sites_solution=None):
     Method_shelx.__init__(self, name, cmd, args, atom_sites_solution)
-  
-  
+
+  def observe(self, RunPrgObject):
+    import Analysis
+    self.observer = Analysis.ShelXS_graph(RunPrgObject.program, RunPrgObject.method)
+    OV.registerCallback("procout", self.observer.observe)
+
+
 class Method_shelx_refinement(Method_shelx, Method_refinement):
   """Inherits methods specific to shelx refinement programs
   """
@@ -300,6 +313,11 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
     except:
       pass
     Method_refinement.pre_refinement(self, RunPrgObject)
+
+  def observe(self, RunPrgObject):
+    import Analysis
+    self.observer = Analysis.ShelXL_graph(RunPrgObject.program, RunPrgObject.method)
+    OV.registerCallback("procout", self.observer.observe)
 
 
 class Method_shelx_direct_methods(Method_shelx_solution):
@@ -322,12 +340,12 @@ class Method_shelx_direct_methods(Method_shelx_solution):
     RunPrgObject.CFOM = lstValues.get('CFOM','')
     
     print RunPrgObject.Ralpha, RunPrgObject.Nqual, RunPrgObject.CFOM
-  
-  
+
+
 class Method_shelxd(Method_shelx_solution):
   def __init__(self, name, cmd, args, atom_sites_solution=None):
     Method_shelx_solution.__init__(self, name, cmd, args, atom_sites_solution)
-    
+
   def calculate_defaults(self):
     """Defines controls in Olex2 for each argument in self.args and then calculates
     sensible default values for PLOP and FIND based on the cell volume.
@@ -339,7 +357,7 @@ class Method_shelxd(Method_shelx_solution):
     nmin = int(n * 0.8)
     nmid = int(n * 1.2)
     nmax = int(n * 1.4)
-    
+
     try:
       OV.SetVar('settings_find_na', nmin)
       OV.SetVar('settings_plop_1', nmin)
@@ -347,7 +365,7 @@ class Method_shelxd(Method_shelx_solution):
       OV.SetVar('settings_plop_3', nmax)
     except:
       pass
-    
+
   def extraHtml(self):
     """Makes the HTML for a button to interrupt ShelXD.
     """
@@ -371,7 +389,7 @@ class Method_shelxd(Method_shelx_solution):
   </td>
   ''' %(htmlTools.make_table_first_col(), button_html)
     return html
-      
+
   def pre_solution(self, RunPrgObject):
     args = Method_shelx_solution.pre_solution(self, RunPrgObject)
     volume = float(olx.xf_au_GetCellVolume())
@@ -388,7 +406,7 @@ class Method_shelxd(Method_shelx_solution):
     if 'NTRY' not in args:
       args += 'NTRY 100\n'
     return args
-  
+
   def run(self, RunPrgObject):
     """Makes Olex listen to the temporary directory before running the executable
     so that intermediate solutions will be displayed onscreen.
@@ -406,11 +424,11 @@ class Method_shelxd(Method_shelx_solution):
     Method_shelx_solution.post_solution(self, RunPrgObject)
     for i in xrange(int(olx.xf_au_GetAtomCount())):
       olx.xf_au_SetAtomU(i, "0.06")
-  
+
 class Method_cctbx_refinement(Method_refinement):
   def __init__(self, name, cmd, args, atom_sites_solution=None):
     Method_refinement.__init__(self, name, cmd, args, atom_sites_solution)
-    
+
   def run(self, RunPrgObject):
     from cctbx_olex_adapter import OlexCctbxRefine
     print 'STARTING cctbx refinement'
@@ -418,13 +436,16 @@ class Method_cctbx_refinement(Method_refinement):
     cctbx = OlexCctbxRefine(
       max_cycles=RunPrgObject.snum_refinement_max_cycles,
       verbose=verbose)
+    olx.Kill('$Q')
     cctbx.run()
+    OV.SetVar('cctbx_R1',cctbx.R1)
+    olx.File('%s.res' %OV.FileName())
     OV.DeleteBitmap('refine')
 
 class Method_cctbx_ChargeFlip(Method_solution):
   def __init__(self, name, cmd, args, atom_sites_solution=None):
     Method_solution.__init__(self, name, cmd, args, atom_sites_solution)
-    
+
   def run(self, RunPrgObject):
     from cctbx_olex_adapter import OlexCctbxSolve
     print 'STARTING cctbx Charge Flip'
@@ -631,42 +652,36 @@ def defineExternalPrograms():
     args = {}
   )
 
-  
   # define solution programs
   ShelXS = Program(
     name='ShelXS',
+    program_type='solution',
     author="G.M.Sheldrick",
-    reference="SHELXS-97 (Sheldrick, 1990)", 
-    execs=["shelxs.exe", "shelxs"]
-  )
-  
+    reference="SHELXS-97 (Sheldrick, 1990)",
+    execs=["shelxs.exe", "shelxs"])
   XS = Program(
     name='XS',
-    author="G.M.Sheldrick/Bruker", 
+    program_type='solution',
+    author="G.M.Sheldrick/Bruker",
     reference="SHELXS-97 (Sheldrick, 1990)/Bruker",
-    execs=["xs.exe", "xs"]
-  )
-  
+    execs=["xs.exe", "xs"])
   ShelXD = Program(
-    name='ShelXD', 
+    name='ShelXD',
+    program_type='solution',
     author="G.M.Sheldrick", 
     reference="University of G&#246;ttingen", 
-    execs=["shelxd.exe", "shelxd"]
-  )
-  
+    execs=["shelxd.exe", "shelxd"])
   XM = Program(
-    name='XM', 
-    author="G.M.Sheldrick/Bruker", 
-    reference="University of G&#246;ttingen/Bruker", 
-    execs=["xm.exe", "xm"]
-  )
-  
+    name='XM',
+    program_type='solution',
+    author="G.M.Sheldrick/Bruker",
+    reference="University of G&#246;ttingen/Bruker",
+    execs=["xm.exe", "xm"])
   smtbx_solve = Program(
-    name='smtbx-solve', 
-    author="Luc Bourhis, Ralf Grosse-Kunstleve", 
-    reference="smtbx-flip (Bourhis, 2008)",
-    execs=None
-  )
+    name='smtbx-solve',
+    program_type='solution',
+    author="Luc Bourhis, Ralf Grosse-Kunstleve",
+    reference="smtbx-flip (Bourhis, 2008)")
   
   ShelXS.addMethod(direct_methods)
   ShelXS.addMethod(patterson)
@@ -677,27 +692,61 @@ def defineExternalPrograms():
   smtbx_solve.addMethod(charge_flipping)
   
   # define refinement programs
-  ShelXL = Program('ShelXL', "G.M.Sheldrick", "University of G&#246;ttingen", ["shelxl.exe", "shelxl"])
-  XL = Program('XL', "G.M.Sheldrick", "University of G&#246;ttingen/Bruker", ["xl.exe", "xl"])
-  XLMP = Program('XLMP', "G.M.Sheldrick", "University of G&#246;ttingen/Bruker", ["xlmp.exe", "xlmp"])
-  ShelXH = Program('ShelXH', "G.M.Sheldrick", "University of G&#246;ttingen", ["shelxh.exe", "shelxh"])
-  XH = Program('XH', "G.M.Sheldrick", "University of G&#246;ttingen/Bruker", ["xh.exe", "xh"])
-  ShelXL_ifc = Program('ShelXL_ifc', "G.M.Sheldrick", "University of G&#246;ttingen", ["shelxl_ifc"])
-  smtbx_refine = Program('smtbx-refine', "L.J. Bourhis, R.W. Grosse-Kunstleve", "smtbx-refine (Bourhis, 2008)")
-  
+  ShelXL = Program(
+    name='ShelXL',
+    program_type='refinement',
+    author="G.M.Sheldrick",
+    reference="University of G&#246;ttingen",
+    execs=["shelxl.exe", "shelxl"])
+  XL = Program(
+    name='XL',
+    program_type='refinement',
+    author="G.M.Sheldrick",
+    reference="University of G&#246;ttingen/Bruker",
+    execs=["xl.exe", "xl"])
+  XLMP = Program(
+    name='XLMP',
+    program_type='refinement',
+    author="G.M.Sheldrick",
+    reference="University of G&#246;ttingen/Bruker",
+    execs=["xlmp.exe", "xlmp"])
+  ShelXH = Program(
+    name='ShelXH',
+    program_type='refinement',
+    author="G.M.Sheldrick",
+    reference="University of G&#246;ttingen",
+    execs=["shelxh.exe", "shelxh"])
+  XH = Program(
+    name='XH',
+    program_type='refinement',
+    author="G.M.Sheldrick",
+    reference="University of G&#246;ttingen/Bruker",
+    execs=["xh.exe", "xh"])
+  ShelXL_ifc = Program(
+    name='ShelXL_ifc',
+    program_type='refinement',
+    author="G.M.Sheldrick",
+    reference="University of G&#246;ttingen",
+    execs=["shelxl_ifc"])
+  smtbx_refine = Program(
+    name='smtbx-refine',
+    program_type='refinement',
+    author="L.J. Bourhis, R.J. Gildea, R.W. Grosse-Kunstleve",
+    reference="smtbx-refine (Bourhis, 2008)")
+
   for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc):
     for method in (least_squares, cgls):
       prg.addMethod(method)
   smtbx_refine.addMethod(lbgfs)
-  
+
   SPD = ExternalProgramDictionary()
   for prg in (ShelXS, XS, ShelXD, XM, smtbx_solve):
     SPD.addProgram(prg)
-    
+
   RPD = ExternalProgramDictionary()
   for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc, smtbx_refine):
     RPD.addProgram(prg)
-    
+
   return SPD, RPD
 
 
