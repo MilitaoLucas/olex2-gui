@@ -5,20 +5,20 @@
 plugins = ('MySQL', 'brukersaint', 'ODSkin', 'BNSkin', 'STOESkin', 'HPSkin', 'Batch', 'HotshotProfiler', 'Pysvn', 'Crypto', 'AutoChem') 
 # file name aliases
 web_for_working = {'olex2.exe': 'olex2.dll', 'launch.exe': 'olex2.exe'}
-# alteartions for binary files : name (properties...)
-alterations = {'launch.exe': ('olex-install', 'olex-update', 'portable-false'),
-               'splash.jpg': ('olex-install', 'olex-update', 'portable-true'),
-               'version.txt': ('olex-install', 'olex-update', 'portable-true'),
+# alteartions for binary files : name (properties...), olex-port MUST be specified for non-portable files
+alterations = {'launch.exe': ('olex-install', 'olex-update', 'olex-port', 'port-win32'),
+               'splash.jpg': ('olex-install', 'olex-update'),
+               'version.txt': ('olex-install', 'olex-update'),
                'installer.exe': ('olex-top',), #mind the comma!
-               'olex2-mac.zip': ('olex-port', 'port-mac', 'action:extract', 'portable-false'),
-               'olex2-suse101x32.zip': ('olex-port', 'port-suse101x32', 'action:extract', 'action:delete', 'portable-false'),
-               'cctbx.zip': ('olex-update', 'action:extract', 'action:delete', 'portable-fa;se'),
-               'python26.zip': ('olex-update', 'action:extract', 'action:delete', 'portable-false'),
-               'msvcrt.zip': ('olex-update', 'action:extract', 'action:delete', 'portable-false'),
-               'fonts.zip': ('olex-update', 'action:extract', 'action:delete', 'portable-true'),
-               'olex2_fonts.zip': ('olex-update', 'action:extract', 'action:delete', 'portable-true'),
-               'acidb.zip': ('olex-update', 'action:extract', 'action:delete', 'portable-true'),
-               'olex2_exe.zip': ('olex-update', 'action:extract', 'action:delete', 'portable-false')
+               'olex2-mac.zip': ('olex-port', 'port-mac-intel', 'action:extract', 'action:delete'),
+               'olex2-suse101x32.zip': ('olex-port', 'port-suse101x32', 'action:extract', 'action:delete'),
+               'cctbx.zip': ('olex-port', 'port-win32', 'action:extract', 'action:delete'),
+               'python26.zip': ('olex-port', 'port-win32', 'action:extract', 'action:delete'),
+               'msvcrt.zip': ('olex-port', 'port-win32', 'action:extract', 'action:delete'),
+               'fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
+               'olex2_fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
+               'acidb.zip': ('olex-update', 'action:extract', 'action:delete'),
+               'olex2_exe.zip': ('olex-port', 'port-win32', 'action:extract', 'action:delete')
                }
 # special zip files (must have relevelnt structire), must exist ABOVE as well!!
 #if the associated value is false - the file is non-portable and will not end up in the portable-gui.zip
@@ -291,10 +291,8 @@ def create_index(index_file_name, only_prop=None, portable=False):
       if props is None: continue
       #skip non-portable files if required
       #this will tackle translated file names, like 'launch.exe' -> 'olex2.exe'
-      if portable and 'portable-false' in props:
-        continue
-      if portable and alterations.has_key(f):
-        if 'portable-true' not in props:
+      if portable and alterations.has_key(working_for_web.get(f,f)):
+        if 'olex-port' in props:
           continue
       elif f not in zip_files and (only_prop is not None and only_prop not in props): 
         continue
@@ -337,7 +335,7 @@ for f in installer_files:
 portable_gui_zip.write(zip_index_file_name, 'index.ind')
 #process zip files - just extract - to add to the zip file 
 for zip_name in zip_files:
-  if 'portable-true' not in alterations[zip_name]:
+  if 'olex-port' in alterations[zip_name]:
     print 'Skipping non-portable zip file: ' + zip_name
     continue
   zip_file = zipfile.ZipFile(bin_directory + '/' + zip_name, 'r')
