@@ -6,34 +6,32 @@ plugins = ('MySQL', 'brukersaint', 'ODSkin', 'BNSkin', 'STOESkin', 'HPSkin', 'Ba
 # file name aliases
 web_for_working = {'olex2.exe': 'olex2.dll', 'launch.exe': 'olex2.exe'}
 # alteartions for binary files : name (properties...)
-alterations = {'olex2.exe': ('olex-install', 'olex-update'), 
-               'launch.exe': ('olex-install', 'olex-update'),
-               'python25.dll': ('olex-install', 'olex-update'),
-               'msvcr71.dll': ('olex-install', 'olex-update'),
-               'splash.jpg': ('olex-install', 'olex-update'),
-               'acidb.db': ('olex-install', 'olex-update'),
-               'version.txt': ('olex-install', 'olex-update'),
+alterations = {'launch.exe': ('olex-install', 'olex-update', 'portable-false'),
+               'splash.jpg': ('olex-install', 'olex-update', 'portable-true'),
+               'version.txt': ('olex-install', 'olex-update', 'portable-true'),
                'installer.exe': ('olex-top',), #mind the comma!
-               'Microsoft.VC80.CRT/Microsoft.VC80.CRT.manifest': ('olex-install', 'olex-update'),
-               'Microsoft.VC80.CRT/msvcm80.dll': ('olex-install', 'olex-update'),
-               'Microsoft.VC80.CRT/msvcp80.dll': ('olex-install', 'olex-update'),
-               'Microsoft.VC80.CRT/msvcr80.dll': ('olex-install', 'olex-update'),
-               'etc/Fonts/olex2.fnt': ('olex-install', 'olex-update'),
-               'etc/gui/fonts/Vera.ttf': ('olex-install', 'olex-update'),
-               'etc/gui/fonts/VeraBd.ttf': ('olex-install', 'olex-update'),
-               'etc/gui/fonts/VeraBI.ttf': ('olex-install', 'olex-update'),
-               'etc/gui/fonts/VeraIt.ttf': ('olex-install', 'olex-update'),
-               'etc/gui/fonts/VeraSe.ttf': ('olex-install', 'olex-update'),
-               'etc/gui/fonts/VeraSeBd.ttf': ('olex-install', 'olex-update'),
-               'olex2-mac.zip': ('olex-port', 'port-mac', 'action:extract'),
-               'olex2-suse101x32.zip': ('olex-port', 'port-suse101x32', 'action:extract', 'action:delete'),
-               'cctbx.zip': ('olex-update', 'action:extract', 'action:delete'),
-               'python26.zip': ('olex-update', 'action:extract', 'action:delete')
+               'olex2-mac.zip': ('olex-port', 'port-mac', 'action:extract', 'portable-false'),
+               'olex2-suse101x32.zip': ('olex-port', 'port-suse101x32', 'action:extract', 'action:delete', 'portable-false'),
+               'cctbx.zip': ('olex-update', 'action:extract', 'action:delete', 'portable-fa;se'),
+               'python26.zip': ('olex-update', 'action:extract', 'action:delete', 'portable-false'),
+               'msvcrt.zip': ('olex-update', 'action:extract', 'action:delete', 'portable-false'),
+               'fonts.zip': ('olex-update', 'action:extract', 'action:delete', 'portable-true'),
+               'olex2_fonts.zip': ('olex-update', 'action:extract', 'action:delete', 'portable-true'),
+               'acidb.zip': ('olex-update', 'action:extract', 'action:delete', 'portable-true'),
+               'olex2_exe.zip': ('olex-update', 'action:extract', 'action:delete', 'portable-false')
                }
 # special zip files (must have relevelnt structire), must exist ABOVE as well!!
-zip_files = ('cctbx.zip',
-             'python26.zip'
-            )
+#if the associated value is false - the file is non-portable and will not end up in the portable-gui.zip
+zip_files = \
+set(  ['cctbx.zip',       #cctbx/cctb_sources,...
+      'python26.zip',    #Pyhton26/..., ..., + python26.dll!!!
+      'msvcrt.zip',      #Microsoft.VCxx.CRT/Microsoft.VCxx.CRT.manifest, ..
+      'fonts.zip',       #etc/gui/fonts/VeraBd.ttf, ...
+      'olex2_fonts.zip', #etc/Fonts.olex2.fnt, ...
+      'acidb.zip',       #acidb.zip
+      'olex2_exe.zip'    #olex2.dll, it will be veryfied first of all
+      ]    
+   )
 altered_files = set([])
 altered_dirs = set([])
 
@@ -124,6 +122,15 @@ for val, key in alterations.iteritems():
     os.unlink(fn) 
     print "Binary distribution file removed: " + fn
 
+#validate the executable zip file
+olex2_exe_zip = zipfile.ZipFile(bin_directory + '/' + 'olex2_exe.zip', 'r')
+if 'olex2.dll' not in olex2_exe_zip.namelist():
+  print 'olex2_exe file should contain olex2.dll file, aborting...'
+  olex2_exe_zip.close()
+  sys.exit(1)
+olex2_exe_zip.close()
+#end executable zip file validation
+  
 client = pysvn.Client()
 
 try:
@@ -179,7 +186,7 @@ for val, key in alterations.iteritems():
     print "File exist both on the svn and in the binary folder '" + fn + "' skipping..."
     continue
   if not os.path.exists(bin_directory + '/' + val):
-    print "Specified binary file does not exist '" + val + "' skipping..."
+    print "Specified binary file does not exist '" + val + "' aborting..."
     os._exit(1)
   for i in range(0, len(key)):
     if key[i] == 'olex-update' or key[i] == 'olex-port':
@@ -255,7 +262,8 @@ def format_info(stats, props):
     props = ''
   return "%i,%i,{%s}" % (stats+(props,))
 
-def create_index(index_file_name, only_prop=None):
+def create_index(index_file_name, only_prop=None, portable=False):
+  portable_files = set([])  
   idx_file = open(index_file_name, 'w')
   for dir_path, dir_names, file_names in os.walk(update_directory):
     dir_names[:] = [ d for d in dir_names if not d.startswith('.') ]
@@ -273,15 +281,30 @@ def create_index(index_file_name, only_prop=None):
       print >> idx_file, indents + os.path.basename(d)
       print >> idx_file, indents + format_info(stats, props)
       indents += '\t'
+    normalised_root_dir = working_dir_path.replace('\\', '/')
+    if normalised_root_dir[-1] != '/':
+      normalised_root_dir += '/'
     for f in file_names:
       stats, props = info(os.path.join(dir_path, f),
                           os.path.join(working_dir_path,
                                        working_for_web.get(f,f)))
       if props is None: continue
-      if only_prop is not None and only_prop not in props: continue
+      #skip non-portable files if required
+      #this will tackle translated file names, like 'launch.exe' -> 'olex2.exe'
+      if portable and 'portable-false' in props:
+        continue
+      if portable and alterations.has_key(f):
+        if 'portable-true' not in props:
+          continue
+      elif f not in zip_files and (only_prop is not None and only_prop not in props): 
+        continue
+      if portable:
+        portable_files.add(normalised_root_dir + f)
       print >> idx_file, indents + f
       print >> idx_file, indents + format_info(stats, props)
+      
   idx_file.close()
+  return portable_files
 
 create_index(update_directory + '/index.ind')
 zip_index_file_name = update_directory + '/zindex.ind'
@@ -294,13 +317,36 @@ for f in installer_files:
   olex2_zip.write(f, zip_destination(f))
 olex2_zip.write(zip_index_file_name, 'index.ind')
 
-#process zip files - just extract - to add to the olex2.zip file 
+#process zip files - just extract - to add to the zip file 
 for zip_name in zip_files:
   zip_file = zipfile.ZipFile(bin_directory + '/' + zip_name, 'r')
   for zip_info in zip_file.infolist():
     olex2_zip.writestr( zip_info.filename, zip_file.read(zip_info.filename) )
 
 olex2_zip.close()
+
+portable_files = create_index(zip_index_file_name, only_prop='olex-install', portable=True)
+
+# create the zip archives for portable GUI
+portable_gui_zip = zipfile.ZipFile(web_directory + '/portable-gui.zip',
+                            mode='w', compression=zipfile.ZIP_DEFLATED)
+for f in installer_files:
+  if f not in portable_files:
+    continue
+  portable_gui_zip.write(f, zip_destination(f))
+portable_gui_zip.write(zip_index_file_name, 'index.ind')
+#process zip files - just extract - to add to the zip file 
+for zip_name in zip_files:
+  if 'portable-true' not in alterations[zip_name]:
+    print 'Skipping non-portable zip file: ' + zip_name
+    continue
+  zip_file = zipfile.ZipFile(bin_directory + '/' + zip_name, 'r')
+  for zip_info in zip_file.infolist():
+    portable_gui_zip.writestr( zip_info.filename, zip_file.read(zip_info.filename) )
+
+portable_gui_zip.close()
+#delete the temporary index file
+os.unlink(zip_index_file_name)
 
 for plugin, files in files_for_plugin.items():
   plugin_zip = zipfile.ZipFile(web_directory + '/' + plugin + '.zip', 'w')
