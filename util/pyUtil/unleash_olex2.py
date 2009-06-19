@@ -10,8 +10,8 @@ alterations = {'launch.exe': ('olex-install', 'olex-update', 'olex-port', 'port-
                'splash.jpg': ('olex-install', 'olex-update'),
                'version.txt': ('olex-install', 'olex-update'),
                'installer.exe': ('olex-top',), #mind the comma!
-               'olex2-mac.zip': ('olex-port', 'port-mac-intel', 'action:extract', 'action:delete'),
-               'olex2-suse101x32.zip': ('olex-port', 'port-suse101x32', 'action:extract', 'action:delete'),
+               'olex2-mac.zip': ('olex-port', 'port-mac-intel-py26', 'action:extract', 'action:delete'),
+               'olex2-suse101x32.zip': ('olex-port', 'port-suse101x32-py26', 'action:extract', 'action:delete'),
                'cctbx.zip': ('olex-port', 'port-win32', 'action:extract', 'action:delete'),
                'python26.zip': ('olex-port', 'port-win32', 'action:extract', 'action:delete'),
                'msvcrt.zip': ('olex-port', 'port-win32', 'action:extract', 'action:delete'),
@@ -79,14 +79,14 @@ parser.add_option('--working_directory',
 parser.add_option('--bin_directory',
 		  dest='bin_directory',
 		  help='the path where the binary files, not icnlcuded to svn reside')
-parser.add_option('--test',
-		  dest='test',
+parser.add_option('--beta',
+		  dest='beta',
 		  action='store_true',
-		  help='whether to use the normal or the test web directory')
+		  help='whether to use the normal or the tag-beta web directory')
 parser.add_option('--alpha',
 		  dest='alpha',
 		  action='store_true',
-		  help='whether to use the normal or the alpha web directory')
+		  help='whether to use the normal or the tag-alpha web directory')
 parser.add_option('-f', '--file',
 		  dest='update_file',
                   default='',
@@ -109,7 +109,7 @@ if not os.path.isdir(bin_directory):
   parser.print_help()
   #os.abort()
   
-if option.test: web_directory += '-test'
+if option.beta: web_directory += '-beta'
 elif option.alpha: web_directory += '-alpha'
 if not os.path.isdir(os.path.dirname(web_directory)):
   print "ERROR: '%s' is not a directory" % working_directory
@@ -350,7 +350,20 @@ for plugin, files in files_for_plugin.items():
   plugin_zip = zipfile.ZipFile(web_directory + '/' + plugin + '.zip', 'w')
   plugin_zip.write(destination(f,'update'), zip_destination(f))
   plugin_zip.close()
+
+# update tags file
+web_directory = web_directory.replace('\\','/')
+if web_directory.endswith('/'):
+  web_directory = web_directory[:-1]
+up_dir = '/'.join(web_directory.split('/')[:-1])
+tags = os.listdir(up_dir)
+tags_file = open(up_dir + '/tags.txt', 'w')
+for dir in tags:
+  if dir != '.' and os.path.isdir(up_dir+'/'+dir):
+    print >> tags_file, dir
+tags_file.close()
+#
   
 if __name__ == '__main__':
   import sys
-  sys.argv.append('--test')
+  sys.argv.append('--beta')
