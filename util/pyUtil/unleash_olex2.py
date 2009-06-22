@@ -2,7 +2,7 @@
 
 """ Olex 2 distro management """
 # these to specify to created separate zip files
-plugins = ('MySQL', 'brukersaint', 'ODSkin', 'BNSkin', 'STOESkin', 'HPSkin', 'Batch', 'HotshotProfiler', 'Pysvn', 'Crypto', 'AutoChem') 
+plugins = ('MySQL', 'brukersaint', 'ODSkin', 'BNSkin', 'STOESkin', 'HPSkin', 'Batch', 'Pysvn', 'Crypto', 'AutoChem') 
 # file name aliases
 web_for_working = {'olex2.exe': 'olex2.dll', 'launch.exe': 'olex2.exe'}
 # alteartions for binary files : name (properties...), olex-port MUST be specified for non-portable files
@@ -129,6 +129,7 @@ for val, key in alterations.iteritems():
 
 # create olex2_exe.zip from olex2.exe, if exists...
 if os.path.exists(bin_directory + '/olex2.exe'):
+  print "Updating olex2_exe.zip file..."
   if os.path.exists(bin_directory + '/olex2.dll'):
     os.remove(bin_directory + '/olex2.dll')
   olex2_exe_zip = zipfile.ZipFile(bin_directory + '/olex2_exe.zip',
@@ -374,7 +375,8 @@ os.unlink(zip_index_file_name)
 
 for plugin, files in files_for_plugin.items():
   plugin_zip = zipfile.ZipFile(web_directory + '/' + plugin + '.zip', 'w')
-  plugin_zip.write(destination(f,'update'), zip_destination(f))
+  for f in files:
+    plugin_zip.write(destination(f,'update'), zip_destination(f))
   plugin_zip.close()
 
 # update tags file, the web_dir is transformed to correct form when creating olex2.tag file
