@@ -87,6 +87,10 @@ parser.add_option('--alpha',
 		  dest='alpha',
 		  action='store_true',
 		  help='whether to use the normal or the tag-alpha web directory')
+parser.add_option('--exp',
+		  dest='exp',
+		  action='store_true',
+		  help='whether to use the normal or the tag-experimental web directory')
 parser.add_option('-f', '--file',
 		  dest='update_file',
                   default='',
@@ -111,6 +115,7 @@ if not os.path.isdir(bin_directory):
   
 if option.beta: web_directory += '-beta'
 elif option.alpha: web_directory += '-alpha'
+elif option.exp: web_directory += '-experimental'
 if not os.path.isdir(os.path.dirname(web_directory)):
   print "ERROR: '%s' is not a directory" % working_directory
   parser.print_help()
@@ -122,14 +127,23 @@ for val, key in alterations.iteritems():
     os.unlink(fn) 
     print "Binary distribution file removed: " + fn
 
-#validate the executable zip file
-olex2_exe_zip = zipfile.ZipFile(bin_directory + '/' + 'olex2_exe.zip', 'r')
+# create olex2_exe.zip from olex2.exe, if exists...
+if os.path.exists(bin_directory + '/olex2.exe'):
+  if os.path.exists(bin_directory + '/olex2.dll'):
+    os.remove(bin_directory + '/olex2.dll')
+  olex2_exe_zip = zipfile.ZipFile(bin_directory + '/olex2_exe.zip',
+                            mode='w', compression=zipfile.ZIP_DEFLATED)
+  olex2_exe_zip.write(bin_directory + '/olex2.exe', 'olex2.dll')
+  olex2_exe_zip.close()
+  os.remove(bin_directory + '/olex2.exe')
+#validate the olex2_exe.zip file
+olex2_exe_zip = zipfile.ZipFile(bin_directory + '/olex2_exe.zip', 'r')
 if 'olex2.dll' not in olex2_exe_zip.namelist():
   print 'olex2_exe file should contain olex2.dll file, aborting...'
   olex2_exe_zip.close()
   sys.exit(1)
 olex2_exe_zip.close()
-#end executable zip file validation
+#end executable zip file validation and creation
   
 client = pysvn.Client()
 
@@ -308,12 +322,23 @@ create_index(update_directory + '/index.ind')
 zip_index_file_name = update_directory + '/zindex.ind'
 create_index(zip_index_file_name, only_prop='olex-install')
 
+#create olex2.tag file
+web_directory = web_directory.replace('\\','/')
+if web_directory.endswith('/'):
+  web_directory = web_directory[:-1]
+olex2_tag_file_name = web_directory+'/'+'olex2.tag'
+olex2_tag_file = open(olex2_tag_file_name, 'w+b')
+print >> olex2_tag_file, web_directory.split('/')[-1]
+olex2_tag_file.close()
+#end creating the tag file
+
 # create the zip archives
 olex2_zip = zipfile.ZipFile(web_directory + '/olex2.zip',
                             mode='w', compression=zipfile.ZIP_DEFLATED)
 for f in installer_files:
   olex2_zip.write(f, zip_destination(f))
 olex2_zip.write(zip_index_file_name, 'index.ind')
+olex2_zip.write(olex2_tag_file_name, 'olex2.tag')
 
 #process zip files - just extract - to add to the zip file 
 for zip_name in zip_files:
@@ -333,6 +358,7 @@ for f in installer_files:
     continue
   portable_gui_zip.write(f, zip_destination(f))
 portable_gui_zip.write(zip_index_file_name, 'index.ind')
+portable_gui_zip.write(olex2_tag_file_name, 'olex2.tag')
 #process zip files - just extract - to add to the zip file 
 for zip_name in zip_files:
   if 'olex-port' in alterations[zip_name]:
@@ -351,18 +377,18 @@ for plugin, files in files_for_plugin.items():
   plugin_zip.write(destination(f,'update'), zip_destination(f))
   plugin_zip.close()
 
-# update tags file
-web_directory = web_directory.replace('\\','/')
-if web_directory.endswith('/'):
-  web_directory = web_directory[:-1]
+# update tags file, the web_dir is transformed to correct form when creating olex2.tag file
 up_dir = '/'.join(web_directory.split('/')[:-1])
 tags = os.listdir(up_dir)
 tags_file = open(up_dir + '/tags.txt', 'w')
 for dir in tags:
   if dir != '.' and os.path.isdir(up_dir+'/'+dir):
+    if not os.path.exists(up_dir+'/'+dir+'/olex2.tag'):
+      print 'Skipping invalid TAG folder: ' + dir
+      continue
     print >> tags_file, dir
 tags_file.close()
-#
+#end update tags file
   
 if __name__ == '__main__':
   import sys
