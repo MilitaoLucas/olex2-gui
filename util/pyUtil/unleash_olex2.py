@@ -6,7 +6,7 @@ plugins = ('MySQL', 'brukersaint', 'ODSkin', 'BNSkin', 'STOESkin', 'HPSkin', 'Ba
 # file name aliases
 web_for_working = {'olex2.exe': 'olex2.dll', 'launch.exe': 'olex2.exe'}
 # alteartions for binary files : name (properties...), olex-port MUST be specified for non-portable files
-alterations = {'launch.exe': ('olex-install', 'olex-update', 'olex-port', 'port-win32'),
+alterations = {'launch.exe': ('olex-install', 'olex-port', 'port-win32'),
                'splash.jpg': ('olex-install', 'olex-update'),
                'version.txt': ('olex-install', 'olex-update'),
                'installer.exe': ('olex-top',), #mind the comma!
