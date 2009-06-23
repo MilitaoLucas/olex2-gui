@@ -2,7 +2,7 @@
 
 """ Olex 2 distro management """
 # these to specify to created separate zip files
-plugins = ('MySQL', 'brukersaint', 'ODSkin', 'BNSkin', 'STOESkin', 'HPSkin', 'Batch', 'Pysvn', 'Crypto', 'AutoChem') 
+plugins = ('MySQL', 'brukersaint', 'ODSkin', 'BNSkin', 'STOESkin', 'HPSkin', 'Batch', 'Crypto', 'AutoChem') 
 # file name aliases
 web_for_working = {'olex2.exe': 'olex2.dll', 'launch.exe': 'olex2.exe'}
 # alteartions for binary files : name (properties...), olex-port MUST be specified for non-portable files
@@ -277,15 +277,55 @@ def format_info(stats, props):
     props = ''
   return "%i,%i,{%s}" % (stats+(props,))
 
-def create_index(index_file_name, only_prop=None, portable=False):
+###############################################################################################
+#index file management
+class IndexEntry:
+  def __init__(self, parent, name, props, stats, folder):
+    self.name = name
+    self.parent = parent
+    self.props = props
+    self.stats = stats
+    self.folder = folder
+    self.items = {}
+  def ItemCount(self):
+    if not self.folder:
+      return 1
+    cnt = 0
+    for item in self.items.itervalues():
+      cnt += item.ItemCount()
+    return cnt;
+  def IsValid(self):
+    if self.folder and self.ItemCount() == 0:
+      return False
+    return True
+  def FromStrList(self, toks, props, stat, folder):
+    item = self
+    for token in toks:
+      if token in item.items:
+        item = item.items[token]
+      else:
+        item.items[token] = IndexEntry(item, token, props, stat, folder)
+  def SaveToFile(self, idx_file, indent=''):
+    if not self.IsValid():
+      return
+    if self.parent:
+      print >> idx_file, indent + self.name
+      print >> idx_file, indent + format_info(self.stats, self.props)
+      indent += '\t'
+    for item in self.items.itervalues():
+      item.SaveToFile(idx_file, indent)
+  
+def create_index(index_file_name, only_prop=None, portable=False, enforce_only_prop=False):
   portable_files = set([])  
   idx_file = open(index_file_name, 'w')
+  root_entry = IndexEntry(None, -1, None, None, True)
   for dir_path, dir_names, file_names in os.walk(update_directory):
     dir_names[:] = [ d for d in dir_names if not d.startswith('.') ]
-    file_names[:] = [ d for d in file_names if not d.startswith('.') or d == ".version" ]
+    file_names[:] = [ d for d in file_names if not d.startswith('.') ]
     dir_path = dir_path.replace('\\', '/')    
     d = update_directory_pat.sub('', dir_path)
     indents = "\t"*d.count('/')
+    
     working_dir_path = os.path.join(os.path.normpath(working_directory), d)
     if d:
       stats, props = info(dir_path, working_dir_path)
@@ -293,8 +333,9 @@ def create_index(index_file_name, only_prop=None, portable=False):
         dir_names[:] = []
         file_names[:] = []
         continue
-      print >> idx_file, indents + os.path.basename(d)
-      print >> idx_file, indents + format_info(stats, props)
+      root_entry.FromStrList(d.split('/'), props, stats, True)
+      #print >> idx_file, indents + os.path.basename(d)
+      #print >> idx_file, indents + format_info(stats, props)
       indents += '\t'
     normalised_root_dir = working_dir_path.replace('\\', '/')
     if normalised_root_dir[-1] != '/':
@@ -309,15 +350,23 @@ def create_index(index_file_name, only_prop=None, portable=False):
       if portable and alterations.has_key(working_for_web.get(f,f)):
         if 'olex-port' in props:
           continue
-      elif f not in zip_files and (only_prop is not None and only_prop not in props): 
+      elif (enforce_only_prop or f not in zip_files) and (only_prop is not None and only_prop not in props): 
         continue
       if portable:
         portable_files.add(normalised_root_dir + f)
-      print >> idx_file, indents + f
-      print >> idx_file, indents + format_info(stats, props)
-      
+      if d:      
+        toks = d.split('/')
+      else:
+        toks = []
+      toks.append(f);
+      root_entry.FromStrList(toks, props, stats, False)
+      #print >> idx_file, indents + f
+      #print >> idx_file, indents + format_info(stats, props)
+  root_entry.SaveToFile(idx_file)
   idx_file.close()
   return portable_files
+#####################################################################################################
+#end of index management procedures
 
 create_index(update_directory + '/index.ind')
 zip_index_file_name = update_directory + '/zindex.ind'
@@ -372,12 +421,18 @@ for zip_name in zip_files:
 portable_gui_zip.close()
 #delete the temporary index file
 os.unlink(zip_index_file_name)
-
+#create plug zips with indexes
+plugin_index_file_name = update_directory + 'plugin.ind'
 for plugin, files in files_for_plugin.items():
   plugin_zip = zipfile.ZipFile(web_directory + '/' + plugin + '.zip', 'w')
   for f in files:
     plugin_zip.write(destination(f,'update'), zip_destination(f))
+  create_index(zip_index_file_name, only_prop='plugin-'+plugin, enforce_only_prop=True)
+  plugin_zip.write(zip_index_file_name, 'index.ind')  
   plugin_zip.close()
+if os.path.exists(plugin_index_file_name):
+  os.remove(plugin_index_file_name)
+#end of th eplugin zips creation
 
 # update tags file, the web_dir is transformed to correct form when creating olex2.tag file
 up_dir = '/'.join(web_directory.split('/')[:-1])
