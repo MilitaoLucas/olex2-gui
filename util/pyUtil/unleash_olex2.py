@@ -424,7 +424,7 @@ os.unlink(zip_index_file_name)
 #create plug zips with indexes
 plugin_index_file_name = update_directory + 'plugin.ind'
 for plugin, files in files_for_plugin.items():
-  plugin_zip = zipfile.ZipFile(web_directory + '/' + plugin + '.zip', 'w')
+  plugin_zip = zipfile.ZipFile(web_directory + '/' + plugin + '.zip', 'w', compression=zipfile.ZIP_DEFLATED)
   for f in files:
     plugin_zip.write(destination(f,'update'), zip_destination(f))
   create_index(zip_index_file_name, only_prop='plugin-'+plugin, enforce_only_prop=True)
