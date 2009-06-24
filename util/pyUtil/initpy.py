@@ -138,7 +138,7 @@ def set_olex_paths():
 def set_plugins_paths():  
   plugins = olexex.InstalledPlugins()
   for plugin in plugins:
-    sys.path.append("%s/util/pyUtil/PluginLib/%s" %(basedir,plugin))
+    sys.path.append("%s/util/pyUtil/PluginLib/plugin-%s" %(basedir,plugin))
     
     ##Dependencies
     if plugin == "plugin-SQLAlchemy":
