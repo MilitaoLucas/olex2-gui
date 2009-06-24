@@ -12,7 +12,7 @@ import urllib
 URL = "http://dimas.dur.ac.uk/"
 
 # timeout in seconds
-timeout = 3
+timeout = 15
 socket.setdefaulttimeout(timeout)
 
 
@@ -260,7 +260,7 @@ def GetAvailableRefinementProgs():
   retStr += "ShelXL CGLS;"
   retStr += "ShelXH L.S.;"
   retStr += "ShelXH CGLS;"
-  if OV.IsPluginInstalled('plugin-AutoChem'):
+  if OV.IsPluginInstalled('AutoChem'):
     retStr+= "cctbx AutoChem<-cctbx AutoChem"
   return retStr
 OV.registerFunction(GetAvailableRefinementProgs)
@@ -1073,15 +1073,14 @@ def check_for_recent_update():
   return retVal
 
 def check_for_crypto():
-  if olx.IsPluginInstalled(r"plugin-Crypto").lower() == 'false':
+  if olx.IsPluginInstalled(r"Crypto").lower() == 'false':
     import olex
-    wFile =open(r"%s/runonce-crypto.txm" %OV.BaseDir(), 'w')
-    wFile.write(r"InstallPlugin plugin-Crypto")
-    wFile.close()
+    olex.m(r"InstallPlugin Crypto")
+    olex.m(r"InstallPlugin ODAC")
+    #wFile =open(r"%s/runonce-crypto.txm" %OV.BaseDir(), 'w')
+    #wFile.write(r"InstallPlugin Crypto")
+    #wFile.close()
     sys.path.append(r"%s/util/pyUtil/PluginLib/plugin-Crypto" %OV.BaseDir())
-    return True
-  else:
-    return False
 
 def GetACF():
   
@@ -1090,16 +1089,13 @@ def GetACF():
   if no_update:
     OV.SetVar('olex2_is_online','False')
     print "Will not update ODAC Files"
-  please_restart_crypto = check_for_crypto()  
-  if please_restart_crypto:
-    print "Please restart Olex2. A new Plugin has been installed"
-    return
+  check_for_crypto()  
   
   cont = None
   debug = OV.FindValue('odac_fb', False)
-  debug = False
+  debug = True
   debug_deep1 = True
-  debug_deep2 = False
+  debug_deep2 = True
 #  OV.SetVar("ac_verbose", True)
   
   if not debug:
@@ -1211,10 +1207,10 @@ def AvailablePlugins():
   for plugin in plugins:
     display = plugins[plugin].get('display', plugin)
     blurb = plugins[plugin].get('blurb', plugin)
-    if olx.IsPluginInstalled("plugin-%s" %plugin) == 'true':
-      s += "<font size='+1'><b>%s</b></font> <a href='spy.install_plugin plugin-%s>>html.reload setup-box'><font size='+1' color=%s>Uninstall</font></a><br>%s<br><br>" %(display, plugin, green, blurb)
+    if olx.IsPluginInstalled("%s" %plugin) == 'true':
+      s += "<font size='+1'><b>%s</b></font> <a href='spy.install_plugin %s>>html.reload setup-box'><font size='+1' color=%s>Uninstall</font></a><br>%s<br><br>" %(display, plugin, green, blurb)
     else:
-      s += "<font size='+1'><b>%s</b></font> <a href='spy.install_plugin plugin-%s>>html.reload setup-box'><font size='+1' color=%s>Install</font></a><br>%s<br><br>" %(display, plugin, red, blurb)
+      s += "<font size='+1'><b>%s</b></font> <a href='spy.install_plugin %s>>html.reload setup-box'><font size='+1' color=%s>Install</font></a><br>%s<br><br>" %(display, plugin, red, blurb)
   return s
 OV.registerFunction(AvailablePlugins)
 
