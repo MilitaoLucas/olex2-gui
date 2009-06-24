@@ -1000,15 +1000,20 @@ def runSadabs():
   #olx.WaitFor('process') # uncomment me!
 OV.registerFunction(runSadabs)
 
-def getKey(key_directory=None):
+def getKey(key_directory=None, specific_key = None):
   if not key_directory:
     key_directory = r"%s/OD" %OV.DataDir()
+  if specific_key:
+    g = glob.glob(r"%s/%s.%s" %(key_directory, specific_key, "priv"))
+    for item in g:
+      return item.split("\\")[-1:][0]
+
   import glob
   g = glob.glob(r"%s/*.%s" %(key_directory, "priv"))
   for item in g:
     keyname = item.split("\\")[-1:][0]
-    if keyname != "AC.priv":
-      return keyname.split(".")[0]
+    return keyname.split(".")[0]
+    
 
 def getKeys(key_directory=None):
   kl = []
@@ -1022,11 +1027,10 @@ def getKeys(key_directory=None):
   return kl
   
   
-def GetHttpFile(f):
+def GetHttpFile(f, force=False):
   retVal = None
-  go_online = OV.FindValue("olex2_is_online",True)
-  
-  if go_online:
+  go_online = OV.FindValue("olex2_is_online",False)
+  if go_online.lower() == "True" or force:
     try:
       url = "%s/%s" %(URL, f)
       path = urllib.URLopener()
@@ -1082,10 +1086,9 @@ def check_for_crypto():
 def GetACF():
   
   no_update = False
-#  no_update = True
   print "Starting ODAC..."
   if no_update:
-    OV.SetVar('olex2_is_online',False)
+    OV.SetVar('olex2_is_online','False')
     print "Will not update ODAC Files"
   please_restart_crypto = check_for_crypto()  
   if please_restart_crypto:
@@ -1094,17 +1097,17 @@ def GetACF():
   
   cont = None
   debug = OV.FindValue('odac_fb', False)
-  debug = True
+  debug = False
   debug_deep1 = True
-  debug_deep2 = True
+  debug_deep2 = False
 #  OV.SetVar("ac_verbose", True)
   
   if not debug:
     p = r"%s/util/pyUtil/PluginLib" %OV.BaseDir()
     name = "entry_ac"
+    f = "/olex-distro-odac/%s.py" %name
     if not os.path.exists("%s/entry_ac.py" %p):
-      if check_for_recent_update():
-        cont = GetHttpFile("/olex-distro-odac/%s.py" %name)
+      cont = GetHttpFile(f, force=True)
       if cont:
         wFile = open("%s/%s.py" %(p, name),'w') 
         wFile.write(cont)
@@ -1115,8 +1118,8 @@ def GetACF():
         return
     else:
       try:
-        if check_for_recent_update():
-          cont = GetHttpFile("/olex-distro-odac/%s.py" %name)
+        if check_for_recent_update() and not no_update:
+          cont = GetHttpFile(f)
         if cont:
           wFile = open("%s/%s.py" %(p, name),'w') 
           wFile.write(cont)
