@@ -1076,7 +1076,6 @@ def check_for_crypto():
   if olx.IsPluginInstalled(r"Crypto").lower() == 'false':
     import olex
     olex.m(r"InstallPlugin Crypto")
-    olex.m(r"InstallPlugin ODAC")
     #wFile =open(r"%s/runonce-crypto.txm" %OV.BaseDir(), 'w')
     #wFile.write(r"InstallPlugin Crypto")
     #wFile.close()
@@ -1093,7 +1092,7 @@ def GetACF():
   
   cont = None
   debug = OV.FindValue('odac_fb', False)
-  debug = True
+  debug = False
   debug_deep1 = True
   debug_deep2 = True
 #  OV.SetVar("ac_verbose", True)
