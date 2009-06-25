@@ -210,6 +210,11 @@ for val, key in alterations.iteritems():
       installer_files.append(fn)
     elif key[i] == 'olex-top':
       top_files.append(fn)
+    elif key[i].startswith('plugin-'):
+      if not files_for_plugin[key[i][7:]]:
+        files_for_plugin[key[i][7:]] = []
+      files_for_plugin[key[i][7:]].append(val)
+      
   dest_dir = '/'.join((working_directory + '/' + val).split('/')[:-1])
   if not os.path.exists(dest_dir):
     os.makedirs(dest_dir)
