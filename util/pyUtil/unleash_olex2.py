@@ -213,7 +213,7 @@ for val, key in alterations.iteritems():
     elif key[i].startswith('plugin-'):
       if not files_for_plugin[key[i][7:]]:
         files_for_plugin[key[i][7:]] = []
-      files_for_plugin[key[i][7:]].append(val)
+      files_for_plugin[key[i][7:]].append(fn)
       
   dest_dir = '/'.join((working_directory + '/' + val).split('/')[:-1])
   if not os.path.exists(dest_dir):
