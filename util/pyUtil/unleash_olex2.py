@@ -19,7 +19,6 @@ alterations = {'launch.exe': ('olex-install', 'olex-port', 'port-win32'),
                'olex2_fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
                'acidb.zip': ('olex-update', 'action:extract', 'action:delete'),
                'olex2_exe.zip': ('olex-port', 'port-win32', 'action:extract', 'action:delete'),
-               'olex2c_exe.zip': ('olex-port', 'port-win32', 'action:extract', 'action:delete'),
                'olex2c.exe': ('plugin-Headless', 'olex-port', 'port-win32')
                }
 # special zip files (must have relevelnt structire), must exist ABOVE as well!!
@@ -138,14 +137,7 @@ if os.path.exists(bin_directory + '/olex2.exe'):
   olex2_exe_zip.close()
   os.remove(bin_directory + '/olex2.exe')
 #validate the olex2_exe.zip file
-# create olex2c_exe.zip from olex2.exe, if exists...
-if os.path.exists(bin_directory + '/olex2c.exe'):
-  print "Updating olex2c_exe.zip file..."
-  olex2c_exe_zip = zipfile.ZipFile(bin_directory + '/olex2c_exe.zip',
-                            mode='w', compression=zipfile.ZIP_DEFLATED)
-  olex2c_exe_zip.write(bin_directory + '/olex2c.exe', 'olex2c.exe')
-  olex2c_exe_zip.close()
-#validate the olex2_exe.zip file
+
 olex2_exe_zip = zipfile.ZipFile(bin_directory + '/olex2_exe.zip', 'r')
 if 'olex2.dll' not in olex2_exe_zip.namelist():
   print 'olex2_exe file should contain olex2.dll file, aborting...'
