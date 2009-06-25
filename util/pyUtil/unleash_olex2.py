@@ -2,7 +2,7 @@
 
 """ Olex 2 distro management """
 # these to specify to created separate zip files
-plugins = ('MySQL', 'brukersaint', 'ODSkin', 'BNSkin', 'STOESkin', 'HPSkin', 'Batch', 'Crypto', 'AutoChem') 
+plugins = ('MySQL', 'brukersaint', 'ODSkin', 'BNSkin', 'STOESkin', 'HPSkin', 'Batch', 'Crypto', 'AutoChem', 'Headless') 
 # file name aliases
 web_for_working = {'olex2.exe': 'olex2.dll', 'launch.exe': 'olex2.exe'}
 # alteartions for binary files : name (properties...), olex-port MUST be specified for non-portable files
@@ -18,7 +18,9 @@ alterations = {'launch.exe': ('olex-install', 'olex-port', 'port-win32'),
                'fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
                'olex2_fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
                'acidb.zip': ('olex-update', 'action:extract', 'action:delete'),
-               'olex2_exe.zip': ('olex-port', 'port-win32', 'action:extract', 'action:delete')
+               'olex2_exe.zip': ('olex-port', 'port-win32', 'action:extract', 'action:delete'),
+               'olex2c_exe.zip': ('olex-port', 'port-win32', 'action:extract', 'action:delete'),
+               'olex2c.exe': ('plugin-Headless', 'olex-port', 'port-win32', 'olex-update')
                }
 # special zip files (must have relevelnt structire), must exist ABOVE as well!!
 #if the associated value is false - the file is non-portable and will not end up in the portable-gui.zip
