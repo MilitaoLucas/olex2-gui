@@ -20,7 +20,7 @@ alterations = {'launch.exe': ('olex-install', 'olex-port', 'port-win32'),
                'acidb.zip': ('olex-update', 'action:extract', 'action:delete'),
                'olex2_exe.zip': ('olex-port', 'port-win32', 'action:extract', 'action:delete'),
                'olex2c_exe.zip': ('olex-port', 'port-win32', 'action:extract', 'action:delete'),
-               'olex2c.exe': ('plugin-Headless', 'olex-port', 'port-win32', 'olex-update')
+               'olex2c.exe': ('plugin-Headless', 'olex-port', 'port-win32')
                }
 # special zip files (must have relevelnt structire), must exist ABOVE as well!!
 #if the associated value is false - the file is non-portable and will not end up in the portable-gui.zip
