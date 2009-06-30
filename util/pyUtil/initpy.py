@@ -256,7 +256,7 @@ except Exception, err:
     
 if olx.IsPluginInstalled('plugin-Batch') == "true":
   import plugin_batch_exex
-if olx.IsPluginInstalled('plugin-MySQL') == "true":
+if olx.IsPluginInstalled('MySQL') == "true":
   try:
     import OlexToMySQL
 #    from OlexToMySQL import DownloadOlexLanguageDictionary
