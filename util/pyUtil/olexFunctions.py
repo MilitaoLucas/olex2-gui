@@ -407,5 +407,14 @@ class OlexFunctions(inheritFunctions):
 
   def GetRefinementModel(self,calculate_connectivity=False):
     return olex_core.GetRefinementModel(calculate_connectivity)
+  
+  def GetTag(self):
+    try:
+      rFile = open("%s/olex2.tag" %self.BaseDir(),'r')
+      tag = rFile.readline().rstrip("\n")
+      return tag
+    except:
+      tag = None
+  
 
 OV = OlexFunctions()

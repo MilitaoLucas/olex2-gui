@@ -103,7 +103,7 @@ class pyTools(ArgumentParser):
       dispatching.setdefault('hadd', hadd)
 
     elif tool == "dimas":
-      if olx.IsPluginInstalled('plugin-MySQL')=='false':
+      if olx.IsPluginInstalled('MySQL')=='false':
         return
       try:
         from DimasInfo import dimas_info
