@@ -223,6 +223,7 @@ def ChangeMetaCif(item, value):
   return "Done"
 OV.registerFunction(ChangeMetaCif)
 
+   
 def get_refine_ls_hydrogen_treatment():
   afixes_present = []
   afixes = {0:'refall',
@@ -1001,8 +1002,9 @@ def runSadabs():
 OV.registerFunction(runSadabs)
 
 def getKey(key_directory=None, specific_key = None):
+  keyPath = "%s/Olex2u/OD/" %os.environ['ALLUSERSPROFILE']
   if not key_directory:
-    key_directory = r"%s/OD" %OV.DataDir()
+    key_directory = keyPath
   if specific_key:
     g = glob.glob(r"%s/%s.%s" %(key_directory, specific_key, "priv"))
     for item in g:
@@ -1016,9 +1018,10 @@ def getKey(key_directory=None, specific_key = None):
     
 
 def getKeys(key_directory=None):
+  keyPath = "%s/Olex2u/OD/" %os.environ['ALLUSERSPROFILE']
   kl = []
   if not key_directory:
-    key_directory = r"%s/OD" %OV.DataDir()
+    key_directory = keyPath
   import glob
   g = glob.glob(r"%s/*.%s" %(key_directory, "priv"))
   for item in g:
@@ -1026,23 +1029,27 @@ def getKeys(key_directory=None):
     kl.append(keyname.split(".")[0])
   return kl
   
-  
+
 def GetHttpFile(f, force=False):
   retVal = None
-  go_online = OV.FindValue("olex2_is_online",False)
+  go_online = OV.FindValue("olex2_is_online","False")
+  verbose = OV.FindValue("ac_verbose", "False")
   if go_online.lower() == "True" or force:
     try:
-      url = "%s/%s" %(URL, f)
+      url = "%s/%s" %(URL, f.replace(" ",r"%20"))
+      if verbose: print "--> Getting %s" %url,
       path = urllib.URLopener()
       path.addheader('pragma', 'no-cache')
       conn = path.open(url)
       content = conn.read()
+      if verbose: print "OK"
       conn.close()
       retVal = content
-    except:
+    except Exception, err:
       OV.SetVar("olex2_is_online",False)
       retVal = None
-      print "Olex2 can not reach the update server"
+      print "Olex2 can not reach the update server: %s" %err
+      print url
   else:
     retVal = None
     
@@ -1091,16 +1098,26 @@ def GetACF():
   check_for_crypto()  
   
   cont = None
+  tag = OV.GetTag()
+  if not tag:
+    print "You need to update Olex2 to at least version 1.0"
+    return
+  
   debug = OV.FindValue('odac_fb', False)
+  debug = True
   debug = False
   debug_deep1 = True
-  debug_deep2 = True
-#  OV.SetVar("ac_verbose", True)
+  debug_deep2 = False
+  OV.SetVar("ac_verbose", False)
+  keyname = getKey()
   
+
   if not debug:
-    p = r"%s/util/pyUtil/PluginLib" %OV.BaseDir()
+    p = "%s/Olex2u/OD/" %os.environ['ALLUSERSPROFILE']
+    if not os.path.exists(p):
+      os.makedirs(p)
     name = "entry_ac"
-    f = "/olex-distro-odac/%s.py" %name
+    f = "/olex-distro-odac/%s/%s/%s.py" %(tag, keyname, name)
     if not os.path.exists("%s/entry_ac.py" %p):
       cont = GetHttpFile(f, force=True)
       if cont:
@@ -1129,8 +1146,6 @@ def GetACF():
           print "Olex2 can not access a necessary file."
           print "Please make sure that your computer is online and try again."
           return
-#        sys.path.append(r"%s/util/pyUtil/PluginLib" %olx.BaseDir())
-#        import entry_ac
     try:    
       sys.modules[name] = types.ModuleType(name)
       exec cont in sys.modules[name].__dict__
@@ -1147,7 +1162,7 @@ def GetACF():
       OV.SetVar("ac_debug_deep1", True)
     if debug_deep2:
       OV.SetVar("ac_debug_deep2", True)
-    sys.path.append(r"%s/util/pyUtil/PluginLib/plugin-AutoChemSRC" %olx.BaseDir())
+    sys.path.append(r"%s/util/pyUtil/PluginLib/plugin-AutoChemSRC/%s/" %(olx.BaseDir(), tag))
     try:
       print "Debug: Import entry_ac"
       import entry_ac
