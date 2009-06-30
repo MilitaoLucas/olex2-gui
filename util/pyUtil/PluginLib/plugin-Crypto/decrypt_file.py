@@ -22,7 +22,7 @@ class decrypt_file():
     fd.close()
     
     # Create a key object, and auto-import private key
-    passding = "%s%s"%(cr1,cr2)
+    passding = "%s%s%s"%(cr1,cr2,self.keyname)
     k = ezPyCrypto.key(pubprivkey,passphrase=passding)
     
     # Decrypt this file
@@ -33,10 +33,11 @@ class decrypt_file():
   
   def sign_file(self, cr1, cr2, file_name):
     path = "%s/%s" %(self.key_directory, file_name)
+    
     fd = open(r"%s/%s.priv" %(self.key_directory, self.keyname), "rb")
     pubprivkey = fd.read()
     fd.close()
-    passding = "%s%s"%(cr1,cr2)
+    passding = "%s%s%s"%(cr1,cr2,self.keyname)
     k = ezPyCrypto.key(pubprivkey,passphrase=passding)
     
     wFile = open(path,'a')
@@ -59,7 +60,7 @@ class decrypt_file():
     fd = open(r"%s/%s.priv" %(self.key_directory, self.keyname), "rb")
     pubprivkey = fd.read()
     fd.close()
-    passding = "%s%s"%(cr1,cr2)
+    passding = "%s%s%s"%(cr1,cr2,self.keyname)
     k = ezPyCrypto.key(pubprivkey,passphrase=passding)
     
     if os.path.exists(path):
@@ -67,8 +68,10 @@ class decrypt_file():
       doc = fd.read()
       fd.close()
     else:
-      self.sign_file(cr1, cr2, file_name)
-      return self.fileContent
+      print "No demo licence file found."
+      return False
+#      self.sign_file(cr1, cr2, file_name)
+#      return self.fileContent
       
     
     # Read in the signature
