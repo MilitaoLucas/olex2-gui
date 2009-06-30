@@ -176,7 +176,7 @@ def makeHtmlTableRow(dictionary):
 
 def make_edit_link(name, box_type):
   editLink = ""
-  if OV.IsPluginInstalled('plugin-MySQL'):
+  if OV.IsPluginInstalled('MySQL'):
     if OV.FindValue('olex2_is_online'):
       editLink = "<a href='spy.EditHelpItem(%s-%s)'>Edit</a>" %(name, box_type)
   return editLink
