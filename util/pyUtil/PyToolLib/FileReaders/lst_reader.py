@@ -8,12 +8,6 @@ class reader:
     
     data = file_object.readlines()
     lines = data
-
-    #for line in lines:
-      #line = line.strip()
-      #if i != 0 and '+++++++++++' in lines[i-1] and line[0] == '+':
-        #header = line.strip('+').split('-')
-      #i += 1
       
     header = []
     program = None
@@ -70,32 +64,29 @@ class reader:
       if i >= len(lines):
         #print "Oooops, trying to go beyond the end of file here!"
         return
-        
       
     if refinement:
-      while not found:
-        try:
+      try:
+        while True:
+          line = data[i]        
+          if 'Final Structure Factor' in line:
+            break
+          else:
+            i += 1
+        while True:
           line = data[i]
-        except IndexError:
-          self._values['R1'] = 'n/a'
-          self._values['wR2'] = 'n/a'
-          break
-        
-        if 'Final Structure Factor' in line:
-          found = True
-        else:
           i += 1
-          
-      for x in range(50):
-        line = data[i+x]
-        if 'R1 =' in line:
-          r1 = line.split()[2]
-          self._values['R1'] = r1
-        elif 'wR2 =' in line:
-          wR2 = line.split()[2].strip(',')
-          self._values['wR2'] = wR2
-        else:
-          continue
+          if 'R1 =' in line:
+            self._values['R1'] = line.split()[2]
+          elif 'wR2 =' in line:
+            if self._values.has_key('R1'):
+              self._values['wR2'] = line.split()[2].strip(',')
+              break
+          else:
+            continue
+      except IndexError:
+        self._values['R1'] = 'n/a'
+        self._values['wR2'] = 'n/a'
     elif solution:
       self._values['R1'] = 'n/a'
       self._values['wR2'] = 'n/a'
@@ -120,11 +111,7 @@ class reader:
                 continue
   def values(self):
     return self._values
-  
+
 if __name__ == '__main__':
-  #a = Lst(r'\\crystal-02\home\d30m0u\Test folder\work\05srv267.lst')
-  #a = Lst(r'C:\Documents and Settings\Richard\Application Data\Olex2\samples\sucrose\sucrose.lst')
-  #a = Lst(r'\\crystal-02\home\d30m0u\problem.lst')
-  #values = a.readLst()
-  a = reader(open(r'C:\Documents and Settings\Richard\Application Data\Olex2\samples\sucrose\sucrose.lst'))
+  a = reader(open(r'C:\Users\Richard\AppData\Roaming\Olex2u\samples\sucrose\sucrose.lst'))
   print a.values()
