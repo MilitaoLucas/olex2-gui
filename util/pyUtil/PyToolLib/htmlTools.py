@@ -207,7 +207,19 @@ def make_help_box(args):
     title = name
     help_src = name
   titleTxt = OV.TranslatePhrase("%s" %title)
-  #titleTxt = titleTxt.title()
+  if box_type == "tutorial":
+    titleTxt = titleTxt.title()
+    t = titleTxt.split()
+    tt = ""
+    i = 0 
+    for word in t:
+      tt += word
+      if not i:
+        tt += ":"
+      tt += " "
+      i += 1
+    titleTxt = tt
+      
   helpTxt = OV.TranslatePhrase("%s-%s" %(help_src, box_type))
   helpTxt = helpTxt.replace("\r", "")
   helpTxt, d = format_help(helpTxt)
@@ -319,7 +331,7 @@ def make_help_box(args):
       name = "Tutorial"
     else:
       pop_name = "%s-%s"%(name, box_type)
-    olx.Popup(pop_name, wFilePath, "-b=tc -t='%s' -w=%i -d='echo' -h=%i -x=%i -y=%i" %(name, boxWidth, boxHeight, x, y))
+    olx.Popup(pop_name, wFilePath, "-b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(name, boxWidth, boxHeight, x, y))
     olx.html_SetBorders(pop_name,5)
 #    olx.Popup(pop_name, wFilePath, "-b=tc -t='%s' -w=%i -d='echo' -h=%i -x=%i -y=%i" %(name, boxWidth, boxHeight, x, y))
 #    olx.html_SetBorders(pop_name,5)
