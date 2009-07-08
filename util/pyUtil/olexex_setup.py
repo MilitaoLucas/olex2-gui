@@ -47,7 +47,7 @@ class SetupWizard(object):
 '''% (self.previous, self.next)
     
     t = OV.TranslatePhrase('setup-txt-%s' %name)
-    t = htmlTools.format_help(t)
+    t, d = htmlTools.format_help(t)
     
     txt += r'''
 <tr VALIGN='center' NAME='Setup Title'>

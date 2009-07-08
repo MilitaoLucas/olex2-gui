@@ -502,7 +502,7 @@ def restraint_builder(cmd):
       #html += "<td><b>%s</b></td>" %tem
     elif id == "help":
       html_help = OV.TranslatePhrase(tem)
-      html_help = htmlTools.format_help(html_help)
+      html_help, d = htmlTools.format_help(html_help)
     elif id == "var":
       ctrl_name = "%s_%s_TEXT_BOX" %(name, var)
       pre_onclick += "SetVar(%s_value,GetValue(%s))>>" %(ctrl_name,ctrl_name)
