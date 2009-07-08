@@ -1108,7 +1108,7 @@ def GetACF():
   debug = False
   debug_deep1 = True
   debug_deep2 = False
-  OV.SetVar("ac_verbose", False)
+  OV.SetVar("ac_verbose", True)
   keyname = getKey()
   
 

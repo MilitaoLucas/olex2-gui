@@ -210,11 +210,29 @@ def make_help_box(args):
   #titleTxt = titleTxt.title()
   helpTxt = OV.TranslatePhrase("%s-%s" %(help_src, box_type))
   helpTxt = helpTxt.replace("\r", "")
-  helpTxt = format_help(helpTxt)
+  helpTxt, d = format_help(helpTxt)
+  if not d:
+    d = {'next':name,'previous':name}
+  
   editLink = make_edit_link(name, box_type)
   
   if box_type != "help":
-    banner_include = "<zimg border='0' src='banner_%s.png'>" %box_type
+    banner_include = "<zimg border='0' src='banner_%s.png' usemap='map_tutorial'>" %box_type
+    banner_include += """
+    
+<map name="map_tutorial">
+<!-- Button PREVIOUS -->
+    <area shape="rect" usemap="#map_setup"
+      coords="290,0,340,60" 
+      href='spy.make_help_box -name=%(previous)s -type=tutorial' target='%%previous%%: %(previous)s'>
+
+<!-- Button NEXT-->
+    <area shape="rect" 
+      coords="340,0,400,60" 
+      href='spy.make_help_box -name=%(next)s -type=tutorial' target='%%next%%: %(next)s'>
+</map>    
+    """ %d
+    
   else:
     banner_include = ""
 
@@ -437,10 +455,7 @@ def make_input_button(d):
 
 def format_help(string):
   import re
-  
-  #string = "l[fd] fsafdes l[rr]"
-
-
+  d = {}
   ## find all occurances of strings between **..**. These should be comma separated things to highlight.
   regex = re.compile(r"\*\* (.*?)  \*\*", re.X)
   l = regex.findall(string)
@@ -451,7 +466,19 @@ def format_help(string):
     for item in l:
       regex = re.compile(r"((?P<left>\W) (?P<txt>%s) (?P<right>\W))" %item, re.X)
       string = regex.sub(r"\g<left><font color='$getVar(gui_html_highlight_colour)'><b>\g<txt></b></font>\g<right>", string)
-  
+
+  ## find all occurances of strings between {{..}}. This will be translated into a dictionary and returned with the string.
+  regex = re.compile(r"\{\{ (.*?)  \}\}", re.X)
+  dt = regex.findall(string)
+  if dt:
+    string = regex.sub(r"", string)
+    dt = dt[0]
+    dt = dt.replace(",", "','")
+    dt = dt.replace(":", "':'")
+    dt = "{'%s'}" %dt
+    d = eval(dt)
+      
+      
   ## find all occurances of <lb> and replace this with a line-break in a table.
   regex = re.compile(r"<lb>", re.X)
   string = regex.sub(r"</td></tr><tr><td>", string)
@@ -477,22 +504,14 @@ def format_help(string):
   string = regex.sub(r"<font size=+1 color='$getVar(gui_html_highlight_colour)'>&#187;</font><a target='Show Me' href='\g<linkurl>'><b>\g<linktext></b></a>", string)
   
   
-  #pat=re.compile(r"l\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\]")
-  #pat.sub(r"<a href='\g<linkurl>'>\g<linktext></a>", s)
-  
-  
   
   ## find all occurances of strings between XX. These are command line entities.
   width = int(OV.GetHtmlPanelwidth()) - 10
-#  width = "100%"
   regex = re.compile(r"  XX (.*?)( [^\XX\XX]* ) XX ", re.X)
   m = regex.findall(string)
   colour = "#888888"
   if m:
     s = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='4'><tr bgcolor='$getVar(gui_html_code_bg_colour)'><td><a href='\2'><b><font size='2' color='%s'><code>>>\2</code></font></b></a></td></tr></table>" %(width, colour), string)
-    #s = regex.sub(r"</td><tr bgcolor='$getVar(gui_html_code_bg_colour)'><td><a href='\2'><b><font size='2' color='%s'><code>>>\2</code></font></b></a></td></tr><td>" %(colour), string)
-    #s = regex.sub(r"<a href='\2'><b><font size='2' color='%s'><code>>>\2</code></font></b></a>" %(colour), string)
-    #s = regex.sub(r"<tr bgcolor='#ffffaa'><td colspan='2'><b><font size='2' color='%s'>>>\2</font></b></td></tr>" %colour, string)
 
   else:
     s = string
@@ -528,7 +547,7 @@ def format_help(string):
   else:
     s = string
     
-  return s
+  return s, d
 
 def reg_glossary(self, string):
   regex = re.compile(r"  \[ g \s (.*? \w+); ( [^\[\]]* ) \] ", re.X)  
@@ -908,7 +927,7 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
     txt = OV.TranslatePhrase("tip-%i" %i)
     txt += "</td></tr><tr><td align='right'>%s</td></tr>" %make_edit_link("tip", "%i" %i)
   current_tooltip_number = i
-  txt = format_help(txt)
+  txt, d = format_help(txt)
   OV.SetVar("current_tooltip_number",i)
   OV.write_to_olex("tip-of-the-day-content.htm", txt)
   return True
