@@ -183,7 +183,7 @@ def make_edit_link(name, box_type):
 
 
 def make_help_box(args):
-  
+  d = {}
   name = args.get('name', None)
   name = getGenericSwitchName(name)
   popout = args.get('popout', False)
@@ -209,22 +209,15 @@ def make_help_box(args):
   titleTxt = OV.TranslatePhrase("%s" %title)
   if box_type == "tutorial":
     titleTxt = titleTxt.title()
-    t = titleTxt.split()
-    tt = ""
-    i = 0 
-    for word in t:
-      tt += word
-      if not i:
-        tt += ":"
-      tt += " "
-      i += 1
-    titleTxt = tt
-      
+    t = titleTxt.split("_")
+    if len(t) > 1:
+      titleTxt = "%s: %s" %(t[0], t[1])
+    
   helpTxt = OV.TranslatePhrase("%s-%s" %(help_src, box_type))
   helpTxt = helpTxt.replace("\r", "")
   helpTxt, d = format_help(helpTxt)
-  if not d:
-    d = {'next':name,'previous':name}
+  d.setdefault('next',name)
+  d.setdefault('previous',name)
   
   editLink = make_edit_link(name, box_type)
   
@@ -467,7 +460,8 @@ def make_input_button(d):
 
 def format_help(string):
   import re
-  d = {}
+  d = {}  # initialise a dictionary, which will be used to store metadata.
+  
   ## find all occurances of strings between **..**. These should be comma separated things to highlight.
   regex = re.compile(r"\*\* (.*?)  \*\*", re.X)
   l = regex.findall(string)
@@ -477,7 +471,8 @@ def format_help(string):
   
     for item in l:
       regex = re.compile(r"((?P<left>\W) (?P<txt>%s) (?P<right>\W))" %item, re.X)
-      string = regex.sub(r"\g<left><font color='$getVar(gui_html_highlight_colour)'><b>\g<txt></b></font>\g<right>", string)
+#      string = regex.sub(r"\g<left><font color='$getVar(gui_html_highlight_colour)'><b>\g<txt></b></font>\g<right>", string)
+      string = regex.sub(r"\g<left><b>\g<txt></b>\g<right>", string)
 
   ## find all occurances of strings between {{..}}. This will be translated into a dictionary and returned with the string.
   regex = re.compile(r"\{\{ (.*?)  \}\}", re.X)
@@ -499,9 +494,13 @@ def format_help(string):
   regex = re.compile(r"->", re.X)
   string = regex.sub(r"<b>&rarr;</b>", string)
   
-    ## find all occurances of strings between t^..^t. These are the headers for tip of the day.
+  ## find all occurances of strings between t^..^t. These are the headers for tip of the day.
   regex = re.compile(r"t \^ (.*?)  \^ t", re.X)
   string = regex.sub(r"<font color='$getVar(gui_html_highlight_colour)'><b>\1</b></font>&nbsp;", string)
+
+  ## find all occurances of strings between <<..>>. These are keys to pressthe headers for tip of the day.
+  regex = re.compile(r"<< (.*?)  >>", re.X)
+  string = regex.sub(r"<b><code>\1</code></b>", string)
   
   ## find all occurances of strings between n^..^n. These are the notes.
   regex = re.compile(r"n \^ (.*?)  \^ n", re.X)
