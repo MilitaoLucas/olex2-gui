@@ -1083,9 +1083,9 @@ def check_for_crypto():
   if olx.IsPluginInstalled(r"Crypto").lower() == 'false':
     import olex
     olex.m(r"InstallPlugin Crypto")
-  if olx.IsPluginInstalled(r"ODAC").lower() == 'false':
+  if olx.IsPluginInstalled(r"AutoChem").lower() == 'false':
     import olex
-    olex.m(r"InstallPlugin ODAC")
+    olex.m(r"InstallPlugin AutoChem")
 
 def GetACF():
   
