@@ -1083,10 +1083,9 @@ def check_for_crypto():
   if olx.IsPluginInstalled(r"Crypto").lower() == 'false':
     import olex
     olex.m(r"InstallPlugin Crypto")
-    #wFile =open(r"%s/runonce-crypto.txm" %OV.BaseDir(), 'w')
-    #wFile.write(r"InstallPlugin Crypto")
-    #wFile.close()
-    sys.path.append(r"%s/util/pyUtil/PluginLib/plugin-Crypto" %OV.BaseDir())
+  if olx.IsPluginInstalled(r"ODAC").lower() == 'false':
+    import olex
+    olex.m(r"InstallPlugin ODAC")
 
 def GetACF():
   
