@@ -205,6 +205,7 @@ def snumVariables():
     'snum_metacif_list_frames_files':Variable('--'),
     'snum_metacif_list_integ_files':Variable('--'),
     'snum_metacif_list_cad4_files':Variable('--'),
+    'snum_metacif_user_input_variables':Variable('--'),
     
     'snum_report_date_collected':Variable('?'),
     'snum_report_date_submitted':Variable('?'),
@@ -215,7 +216,6 @@ def snumVariables():
     'snum_report_image':Variable('%s/screenshot.png' %OV.FilePath()),
     'snum_report_image_size':Variable(800,Range(min=0)),
     
-    'snum_user_input_variables':Variable('--'),
     'snum_eden_fine_value':Variable(0),
     'snum_eden_coarse_value':Variable(1),
     #'snum_map_type':'diff',

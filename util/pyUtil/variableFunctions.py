@@ -407,14 +407,14 @@ def convertVVD(vvd,whichVVD):
 
 def AddVariableToUserInputList(variable):
   """Adds the name of the variable to a list of user-edited variables."""
-  oldValue = OV.FindValue("snum_user_input_variables")
+  oldValue = OV.FindValue("snum_metacif_user_input_variables")
   if oldValue == 'None':
     newValue = variable
   elif variable in oldValue:
     newValue = oldValue
   else:
     newValue = oldValue + ";" + variable
-  OV.SetVar("snum_user_input_variables", newValue)
+  OV.SetVar("snum_metacif_user_input_variables", newValue)
   return ""
 OV.registerFunction(AddVariableToUserInputList)
 
