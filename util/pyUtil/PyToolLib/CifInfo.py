@@ -324,7 +324,7 @@ class CifTools(ArgumentParser):
 
 	def run(self):
 		merge = []
-		self.userInputVariables = OV.FindValue("snum_user_input_variables")
+		self.userInputVariables = OV.FindValue("snum_metacif_user_input_variables")
 		basename = self.filename
 		path = self.filepath
 		merge_cif_file = "%s/%s" %(path, "fileextract.cif")
@@ -448,7 +448,7 @@ class CifTools(ArgumentParser):
 		
 	def setVariables(self,info):
 		dataAdded = []
-		userInputVariables = OV.FindValue("snum_user_input_variables")
+		userInputVariables = OV.FindValue("snum_metacif_user_input_variables")
 		
 		for d in info:
 			cifLabels = ['diffrn','cell','symmetry','exptl','computing']
