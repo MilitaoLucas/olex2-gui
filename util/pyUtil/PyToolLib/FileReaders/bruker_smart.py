@@ -74,15 +74,8 @@ class reader:
 				elif lines[i][:5] == "/TEMP":
 					txt = lines[i].split('=')
 					self._cifItems.setdefault("_diffrn_ambient_temperature", txt[1])
-				#elif lines[i][:8] == "/DENSITY":
-					#txt = lines[i].split('=')
-					#self._cifItems.setdefault("crystal description", float(txt[1]))
-				#elif lines[i][:9] == "/DENSMETH":
-					#txt = lines[i].split('=')
-					#self._cifItems.setdefault("crystal description", float(txt[1]))
-					
+				
 			except:
-				#i += 1
 				pass
 			i += 1
 			
@@ -104,100 +97,7 @@ class reader:
 			
 	def cifItems(self):
 		return self._cifItems
-	
-#class bruker_smart:
-	#def __init__(self, path):
-		#self.path = path
 
-	#def read_smart(self):		
-		#"""Reads the smart.ini file with the given path.
-		
-		#Returns a dictionary of cif items found in the smart.ini file."""
-		
-		#smart = {}
-		#rfile = open(self.path, 'r')
-		#lines = {}
-		
-		#i = 0
-		#for line in rfile:
-			#lines[i] = line.strip()
-			#i += 1
-			
-		#i = 0
-		#for line in lines:
-			#try:
-				#if lines[i][:6] == "PGMNAM":
-					#smart.setdefault("prog_version", lines[i][-6:])
-					
-				#if lines[i][:9] == "/DISTANCE":
-					#txt = lines[i].split('=')
-					#smart.setdefault("distance", float(txt[1]))
-					
-				#elif lines[i] == "[HEMISPHERE ARRAY]":
-					#txt = "begin"
-					#j = 0
-					#while txt != "" and txt[0:1] != "[":
-						#i += 1
-						#j += 1
-						#if j == 1:
-							#txt = lines[i].split()
-							#smart.setdefault("scantime", txt[-1:][0])
-							#smart.setdefault("scanwidth", txt[-3:-2][0])
-						#txt = lines[i]
-					#smart.setdefault("scans", j)
-				#elif lines[i][:11] == "/WAVELENGTH":
-					#txt = lines[i].split('=')
-					#smart.setdefault("wavelength", float(txt[1]))
-				#elif lines[i][:7] == "/TARGET":
-					#txt = lines[i].split('=')
-					#smart.setdefault("_diffrn_source", txt[1])
-				#elif lines[i][:3] == "/KV":
-					#txt = lines[i].split('=')
-					#smart.setdefault("_diffrn_source_power", float(txt[1]))
-				#elif lines[i][:3] == "/MA":
-					#txt = lines[i].split('=')
-					#smart.setdefault("_diffrn_source_current", float(txt[1]))
-				#elif lines[i][:14] == "/MONOCHROMATOR":
-					#txt = lines[i].split('=')
-					#smart.setdefault("_diffrn_radiation_monochromator", txt[1])
-				#elif lines[i][:8] == "/FORMULA":
-					#txt = lines[i].split('=')
-					#smart.setdefault("formula", txt[1])
-				#elif lines[i][:6] == "/MORPH":
-					#txt = lines[i].split('=')
-					#smart.setdefault("_exptl_crystal_description", txt[1])
-				#elif lines[i][:5] == "/CCOL":
-					#txt = lines[i].split('=')
-					#smart.setdefault("_exptl_crystal_colour", txt[1])
-				#elif lines[i][:6] == "/CSIZ1":
-					#txt = lines[i].split('=')
-					#smart.setdefault("_exptl_crystal_size_min", float(txt[1]))
-				#elif lines[i][:6] == "/CSIZ2":
-					#txt = lines[i].split('=')
-					#smart.setdefault("_exptl_crystal_size_mid", float(txt[1]))
-				#elif lines[i][:6] == "/CSIZ3":
-					#txt = lines[i].split('=')
-					#smart.setdefault("_exptl_crystal_size_max", float(txt[1]))
-				#elif lines[i][:5] == "/TEMP":
-					#txt = lines[i].split('=')
-					#smart.setdefault("_diffrn_ambient_temperature", txt[1])
-				##elif lines[i][:8] == "/DENSITY":
-					##txt = lines[i].split('=')
-					##smart.setdefault("crystal description", float(txt[1]))
-				##elif lines[i][:9] == "/DENSMETH":
-					##txt = lines[i].split('=')
-					##smart.setdefault("crystal description", float(txt[1]))
-					
-			#except:
-				##i += 1
-				#pass
-			#i += 1
-			
-		#self.smart = smart 
-		#return smart
-	
 if __name__ == '__main__':
-	#a = bruker_smart('C:/datasets/08srv071/smart.ini')
-	#smart = a.read_smart()
 	a = reader('C:/datasets/08srv071/smart.ini')
 	print a.cifItems()

@@ -22,30 +22,31 @@ class pcf_reader:
 		i = 0
 		
 		items = [ 
-"_symmetry_cell_setting", \
-"_symmetry_space_group_name_H-M", \
-"_cell_measurement_temperature", \
-"_exptl_crystal_description", \
-"_exptl_crystal_colour", \
-"_exptl_crystal_size_min", \
-"_exptl_crystal_size_mid", \
-"_exptl_crystal_size_max", \
-"_exptl_crystal_density_meas", \
-"_exptl_crystal_density_method", \
-"_exptl_absorpt_correction_type", \
-"_diffrn_radiation_monochromator", \
-"_diffrn_source", \
-"_diffrn_radiation_type", \
-"_diffrn_measurement_device_type", \
-"_diffrn_measurement_method", \
-"_diffrn_detector_area_resol_mean", \
-"_diffrn_standards_number", \
-"_diffrn_standards_interval_count", \
-"_diffrn_standards_decay_%", \
-"_cell_measurement_reflns_used", \
-"_cell_measurement_theta_min", \
-"_cell_measurement_theta_max", \
-"_diffrn_ambient_temperature"]
+			"_symmetry_cell_setting",
+			"_symmetry_space_group_name_H-M",
+			#"_cell_measurement_temperature",
+			"_exptl_crystal_description",
+			"_exptl_crystal_colour",
+			"_exptl_crystal_size_min",
+			"_exptl_crystal_size_mid",
+			"_exptl_crystal_size_max",
+			"_exptl_crystal_density_meas",
+			"_exptl_crystal_density_method",
+			"_exptl_absorpt_correction_type",
+			"_diffrn_radiation_monochromator",
+			"_diffrn_source",
+			"_diffrn_radiation_type",
+			"_diffrn_measurement_device_type",
+			"_diffrn_measurement_method",
+			"_diffrn_detector_area_resol_mean",
+			"_diffrn_standards_number",
+			"_diffrn_standards_interval_count",
+			"_diffrn_standards_decay_%",
+			"_cell_measurement_reflns_used",
+			"_cell_measurement_theta_min",
+			"_cell_measurement_theta_max",
+			#"_diffrn_ambient_temperature",
+		]
 		
 		for line in lines:
 			for item in items:

@@ -347,7 +347,7 @@ def publicationMetadataHtmlMaker():
 OV.registerFunction(publicationMetadataHtmlMaker)
 
 def contactLetter():
-  if 'snum_metacif_publ_contact_letter' not in OV.FindValue('snum_user_input_variables'):
+  if 'snum_metacif_publ_contact_letter' not in OV.FindValue('snum_metacif_user_input_variables'):
     import datetime
     today = datetime.date.today()
     date = today.strftime("%x")
@@ -396,7 +396,7 @@ The paper will be submitted to %s.
   elif inputText != letterText:
     OV.SetVar('snum_metacif_publ_contact_letter', inputText)
     variableFunctions.AddVariableToUserInputList('snum_metacif_publ_contact_letter')
-  elif 'snum_metacif_publ_contact_letter' not in OV.FindValue('snum_user_input_variables'):
+  elif 'snum_metacif_publ_contact_letter' not in OV.FindValue('snum_metacif_user_input_variables'):
     OV.SetVar('snum_metacif_publ_contact_letter', letterText)
   else:
     pass
@@ -693,5 +693,3 @@ def getCellHTML():
   
   return html
 OV.registerFunction(getCellHTML)
-
-
