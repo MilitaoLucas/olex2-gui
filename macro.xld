@@ -84,8 +84,6 @@
 	>
 >
 
-
-
 <onexit help="Executes on program exit"
 	<body
 		<args
@@ -182,10 +180,10 @@
 		<args
 		\>
 		<cmd
-			<cmd0 "if file.Exists('FilePath()\FileName().cif') then None else 'SetVar(snum_refinement_method,Least Squares)'">
-			<cmd1 "if file.Exists('FilePath()\FileName().cif') then None else 'DelIns ACTA'">
-			<cmd2 "if file.Exists('FilePath()\FileName().cif') then None else 'AddIns ACTA'">
-			<cmd3 "if file.Exists('FilePath()\FileName().cif') then None else 'refine'">
+			<cmd0 "if file.Exists('FilePath()/FileName().cif') then None else 'SetVar(snum_refinement_method,Least Squares)'">
+			<cmd1 "if file.Exists('FilePath()/FileName().cif') then None else 'DelIns ACTA'">
+			<cmd2 "if file.Exists('FilePath()/FileName().cif') then None else 'AddIns ACTA'">
+			<cmd3 "if file.Exists('FilePath()/FileName().cif') then None else 'refine'">
 			<cmd4 "cursor(busy, '%Checking for IMAGE file ...%')">
 			<cmd5 "if file.Exists(GetVar(snum_report_image)) then 'SetVar(snum_report_image,GetVar(snum_report_image))' else 'SetVar(snum_report_image,FilePath()/screenshot.png)'">
 			<cmd6 "if not(strcmp(file.GetName(GetVar(snum_report_image)),screenshot.png)) then None else 'cursor(busy, &#2e;%Creating Image ...%&#2e;)>>pict -pq screenshot.png 1'">
@@ -247,7 +245,7 @@
 			<cmd2 cmd="spy.doProgramSettings(GetVar(snum_refinement_program),GetVar(snum_refinement_method),true)">
 			\>
 		<onterminate
-			<cmd1 cmd1="reap 'filepath()\filename().res'">
+			<cmd1 cmd1="reap 'filepath()/filename().res'">
 		\>
 	\>
 \>
@@ -954,9 +952,9 @@
 			\>
 		<cmd 
 			<cmd1 "Echo Starting pyTools with %1 %2 %3 %4 %5">
-			<cmd1 cmd1="listen %7\%8.res">
+			<cmd1 cmd1="listen %7/%8.res">
 			<cmd5 "cursor(busy, %1)">
-			<cmd4 "exec 'basedir()\Util\pyUtil\pyTools.exe' %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5"> 
+			<cmd4 "exec 'basedir()/Util/pyUtil/pyTools.exe' %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5"> 
 			
 			\>
 		<onlisten
@@ -989,7 +987,7 @@
 			\>
 		<cmd 
 			<cmd1 "cursor(busy, %1)">
-			<cmd2 "exec 'basedir()\Util\pyUtil\pyTools.exe' %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5"> 
+			<cmd2 "exec 'basedir()/Util/pyUtil/pyTools.exe' %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5"> 
 			<cmd3 "cursor()">
 			\>
 
@@ -1014,7 +1012,7 @@
 			\>
 		<cmd 
 			<cmd1 "cursor(busy, %1)">
-			<cmd2 "exec python C:\DS\durham_autosolve\horst\Olex_pyTools\pyTools.py %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5"> 
+			<cmd2 "exec python C:/DS/durham_autosolve/horst/Olex_pyTools/pyTools.py %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5"> 
 			<cmd3 "cursor()">
 			\>
 
@@ -1039,7 +1037,7 @@
 			\>
 		<cmd 
 			<cmd1 "cursor(busy, %1)">
-			<cmd2 "exec 'basedir()\Util\pyUtil\pyTools.exe' %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5"> 
+			<cmd2 "exec 'basedir()/Util/pyUtil/pyTools.exe' %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5"> 
 			<cmd3 "cursor()">
 			\>
 
@@ -1064,7 +1062,7 @@
 			<arg9 name="para" def="filename()">
 			\>
 		<cmd 
-			<cmd4 "exec 'basedir()\Util\pyUtil\pyTools.exe' history_%1:%2 '%6' '%7' '%8' '%9' "> 
+			<cmd4 "exec 'basedir()/Util/pyUtil/pyTools.exe' history_%1:%2 '%6' '%7' '%8' '%9' "> 
 			\>
 		<onterminate
 			<cmd2 "wait 200">
