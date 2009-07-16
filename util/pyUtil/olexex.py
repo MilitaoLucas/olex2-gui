@@ -1002,6 +1002,8 @@ def runSadabs():
 OV.registerFunction(runSadabs)
 
 def getKey(key_directory=None, specific_key = None):
+  if sys.platform[:3] != 'win':
+    return None
   keyPath = "%s/Olex2u/OD/" %os.environ['ALLUSERSPROFILE']
   if not key_directory:
     key_directory = keyPath
