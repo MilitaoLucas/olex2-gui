@@ -3,7 +3,7 @@
 <a
 	<body
 		<args
-			<arg1 name='file' def='DataDir()\samples\sucrose\sucrose.res'> 
+			<arg1 name='file' def='DataDir()/samples/sucrose/sucrose.res'> 
 		\>
 		<cmd 
 			<cmd10 "reap '%1'">
@@ -14,7 +14,7 @@
 <b
 	<body
 		<args
-			<arg1 name='file' def='DataDir()\samples\THPP\thpp.res'> 
+			<arg1 name='file' def='DataDir()/samples/THPP/thpp.res'> 
 		\>
 		<cmd 
 			<cmd10 "reap '%1'">
@@ -25,7 +25,7 @@
 <c
 	<body
 		<args
-			<arg1 name='file' def='DataDir()\samples\Co110\Co110.res'> 
+			<arg1 name='file' def='DataDir()/samples/Co110/Co110.res'> 
 		\>
 		<cmd 
 			<cmd10 "reap '%1'">
@@ -163,10 +163,10 @@
 		<args
 		\>
 		<cmd 
-			<cmd0 "if file.Exists('FilePath()\FileName().cif') then None else 'SetVar(snum_refinement_method,Least Squares)'">
-			<cmd1 "if file.Exists('FilePath()\FileName().cif') then None else 'DelIns ACTA'">
-			<cmd2 "if file.Exists('FilePath()\FileName().cif') then None else 'AddIns ACTA'">
-			<cmd3 "if file.Exists('FilePath()\FileName().cif') then None else 'refine'">
+			<cmd0 "if file.Exists('FilePath()/FileName().cif') then None else 'SetVar(snum_refinement_method,Least Squares)'">
+			<cmd1 "if file.Exists('FilePath()/FileName().cif') then None else 'DelIns ACTA'">
+			<cmd2 "if file.Exists('FilePath()/FileName().cif') then None else 'AddIns ACTA'">
+			<cmd3 "if file.Exists('FilePath()/FileName().cif') then None else 'refine'">
 			<cmd4 XXX="cursor(busy, '%Checking for IMAGE file ...%')">
 			<cmd5 "if file.Exists(GetVar(report_image)) then 'SetVar(report_image,GetVar(report_image))' else 'SetVar(report_image,screenshot.png)'">
 			<cmd6 XXX="if not(strcmp(GetVar(report_image),screenshot.png)) then None else 'cursor(busy, &#2e;%Creating Image ...%&#2e;)>>pict -pq screenshot.png 1'">
@@ -220,7 +220,7 @@
 			<cmd2 cmd="spy.doProgramSettings(GetVar(snum_refinement_program),GetVar(snum_refinement_method),true)">
 			\>
 		<onterminate
-			<cmd1 cmd1="reap 'filepath()\filename().res'">
+			<cmd1 cmd1="reap 'filepath()/filename().res'">
 		\>
 	\>
 \>
