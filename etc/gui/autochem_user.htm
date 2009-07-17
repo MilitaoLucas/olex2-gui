@@ -21,12 +21,20 @@
 			<a href="spy.ac_run solveit -s">Current</a> |
 		</b>
 		<a href="spy.stop_auto">Interrupt</a> | 
-		<a href="spy.ac_run solveit -r">Resume</a> |
-		<a href="spy.ac_run solveit -c">Ref Only</a> |
-		<a href="spy.ac_run solveit -so">SO</a> |
-		<a href="spy.ac_run -f html>>UpdateHtml">Update List</a>
+		<a href="spy.ac_run solveit -s -c">Refine Only</a> |
+		<a href="spy.ac_run solveit -s -so">Solve Only</a> |
 	</td>
 </tr>
+
+<tr>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td  colspan='2' align='left'>
+		<a href="vss(true)">Verify Structure Solution</a> | 
+		<a href="ata(1)">Atom Type Assignment</a> |
+	</td>
+</tr>
+
+
 
 <tr>
 	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
@@ -96,6 +104,7 @@
 <tr>
 	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 	<td colspan='2'>
+<!-- #includeif fs.Exists(solution_image.htm) solution_image solution_image.htm;1; -->
 <!-- #includeif file.Exists(FilePath()/.olex/autochem_single.htm) autochem_single_htm FilePath()/.olex/autochem_single.htm;1; -->
 	</td>
 </tr>
