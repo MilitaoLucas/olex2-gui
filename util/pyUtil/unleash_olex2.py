@@ -14,7 +14,7 @@ alterations = {'launch.exe': ('olex-install', 'olex-port', 'port-win32'),
                'olex2-suse101x32.zip': ('olex-port', 'port-suse101x32-py26', 'action:extract', 'action:delete'),
                'cctbx.zip': ('olex-port', 'port-win32', 'action:extract', 'action:delete'),
                'python26.zip': ('olex-port', 'port-win32', 'action:extract', 'action:delete'),
-               'msvcrt.zip': ('olex-port', 'port-win32', 'action:extract', 'action:delete'),
+               'vcredist_x86.exe': ('olex-install',),
                'fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
                'olex2_fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
                'acidb.zip': ('olex-update', 'action:extract', 'action:delete'),
@@ -26,7 +26,6 @@ alterations = {'launch.exe': ('olex-install', 'olex-port', 'port-win32'),
 zip_files = \
 set(  ['cctbx.zip',       #cctbx/cctb_sources,...
       'python26.zip',    #Pyhton26/..., ..., + python26.dll!!!
-      'msvcrt.zip',      #Microsoft.VCxx.CRT/Microsoft.VCxx.CRT.manifest, ..
       'fonts.zip',       #etc/gui/fonts/VeraBd.ttf, ...
       'olex2_fonts.zip', #etc/Fonts.olex2.fnt, ...
       'acidb.zip',       #acidb.zip
@@ -159,9 +158,16 @@ try:
     n = client.update(working_directory)
     revision_number = n[0].number
     print "SVN Revision Number %i" %revision_number
-    wFile = open("%s/version.txt" %bin_directory, 'w')
-    wFile.write("SVN Revision No. %s" %revision_number)
-    wFile.close()
+    nv_line = "SVN Revision No. %s" %revision_number
+    same_version = False
+    if os.path.exists(bin_directory + '/version.txt'):
+      ev_file = open(bin_directory + '/version.txt', 'rb')
+      ev_line = ev_file.readline()
+      same_version = (ev_line == nv_line)
+    if not same_version:
+      wFile = open("%s/version.txt" %bin_directory, 'w')
+      wFile.write(nv_line)
+      wFile.close()
 #  revnum = pysvn.Revision( pysvn.opt_revision_kind.working )
 #  print revnum.number
 except pysvn.ClientError, err:
