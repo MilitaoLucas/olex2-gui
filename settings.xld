@@ -37,8 +37,8 @@
     <item title="File;Exit" macro="quit">
 
     <check title="Mode;HFIX;13 (1 Hydrogen sp3)" macro="mode hfix 13" modedependent="HFIX;13" before='Help'>
-    <check title="Mode;HFIX;23 (2 Hydrogen sp3)" macro="mode hfix 23" modedependent="HFIX;23" before='Help'>
-    <check title="Mode;HFIX;137 (3 Hydrogen sp3)" macro="mode hfix 137" modedependent="HFIX;137" before='Help'>
+    <check title="Mode;HFIX;23 (2 Hydrogen sp3)" macro="mode hfix 23" modedependent="HFIX;23">
+    <check title="Mode;HFIX;137 (3 Hydrogen sp3)" macro="mode hfix 137" modedependent="HFIX;137">
     <check title="Mode;HFIX;#" macro="">
     <check title="Mode;HFIX;43 (1 Hydrogen sp2)" macro="mode hfix 43" modedependent="HFIX;43">
     <check title="Mode;HFIX;93 (2 Hydrogen sp2)" macro="mode hfix 93" modedependent="HFIX;93">
@@ -65,8 +65,8 @@
     <check title="Mode;TYPE;O" macro="mode name -t=O"  modedependent="TYPE;O">
     <check title="Mode;TYPE;F" macro="mode name -t=F"  modedependent="TYPE;F">
     <check title="Mode;Naming;Number Sequentially from 1" macro="mode name">
-    <check title="Mode;#" macro="">
-    <item title="Mode;Clear" macro="mode -1" before='Help'>
+    <item  title="Mode;#" macro="">
+    <item title="Mode;Clear" macro="mode -1">
     
     
     <item title="Tools;Options" macro="setup" before="Help">
@@ -101,10 +101,10 @@
     <item title="Edit;Undo" macro="undo">
 
     <item title="Select;All \tCtrl+A" macro="sel -a" before='Help'>
-    <item title="Select;None \tCtrl+U" macro="sel -u" before='Help'>
-    <item title="Select;Invert \tCtrl+I" macro="sel -i" before='Help'>
-    <item title="Select;#" macro="" before='Help'>
-    <item title="Select;Previous Sel" macro="selback" before='Help'>
+    <item title="Select;None \tCtrl+U" macro="sel -u">
+    <item title="Select;Invert \tCtrl+I" macro="sel -i">
+    <item title="Select;#" macro="">
+    <item title="Select;Previous Sel" macro="selback">
 
     <item title="View;Quick Drawing Styles;Default" macro="default" >
     <item title="View;Quick Drawing Styles;Black & White" macro="bw" >
