@@ -106,7 +106,7 @@ snum {
     sg = None
       .type = space_group
     sg_list = None
-      .type = strings
+      .type = str
     max_cycles = 4
       .type = int(value_min=0)
       .help = The maximum number of refinement cycles to be performed
