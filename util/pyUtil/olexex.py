@@ -218,12 +218,6 @@ def stt(str):
   retval = tuple(l)
   return retval
 
-def ChangeMetaCif(item, value):
-  OV.SetVar(item, value)
-  return "Done"
-OV.registerFunction(ChangeMetaCif)
-
-   
 def get_refine_ls_hydrogen_treatment():
   afixes_present = []
   afixes = {0:'refall',
@@ -411,7 +405,7 @@ def MakeElementButtonsFromFormula():
     return
   f = f.split(',')
   current_formula = OlexAtoms().currentFormula()
-  Z_prime = float(OV.FindValue('snum_refinement_Z_prime'))
+  Z_prime = OV.GetParam('snum.refinement.Z_prime')
   for element in f:
     symbol = element.split(':')[0]
     max = float(element.split(':')[1])
@@ -482,7 +476,7 @@ def MakeElementButtonsFromFormula():
   bm.run()
   cell_volume = 0
   Z = 1
-  Z_prime = float(OV.FindValue('snum_refinement_Z_prime'))
+  Z_prime = OV.GetParam('snum.refinement.Z_prime')
   try:
     cell_volume = float(olex.f('Cell(volume)'))
   except:
@@ -503,7 +497,10 @@ if haveGUI:
   OV.registerFunction(MakeElementButtonsFromFormula)
 
 def CheckBoxValue(var, def_val='false'):
-  value = OV.FindValue(var,def_val)
+  if '.' in var:
+    value = OV.GetParam(var)
+  else:
+    value = OV.FindValue(var,def_val) # XXX this should be gotten rid of
   if value in (True, 'True', 'true'):
     retVal = 'checked'
   else:
@@ -518,7 +515,7 @@ def VoidView(recalculate='0'):
     olx.SetState('SNUM_MAP_BUTTON','up')
     olx.SetLabel('SNUM_MAP_BUTTON',OV.Translate('Calculate'))
     
-  map_view =  OV.FindValue("snum_calcvoid_view")
+  map_view =  OV.GetParam("snum.calcvoid_view")
   
   if recalculate == "1":
     olex.m("calcVoid")
@@ -544,11 +541,11 @@ def MapView(recalculate='0'):
     olx.SetState('SNUM_CALCVOID_BUTTON','up')
     olx.SetLabel('SNUM_CALCVOID_BUTTON',OV.Translate('Calculate Voids'))
     
-  map_type =  OV.FindValue("snum_map_type")
-  map_source =  OV.FindValue("snum_map_source")
-  map_view =  OV.FindValue("snum_map_view")
-  map_resolution = OV.FindValue("snum_map_resolution", 0.1)
-  mask = OV.FindValue("snum_map_mask")
+  map_type =  OV.GetParam("snum.map.type")
+  map_source =  OV.GetParam("snum.map.source")
+  map_view =  OV.GetParam("snum.map.view")
+  map_resolution = OV.GetParam("snum.map.resolution")
+  mask = OV.GetParam("snum.map.mask")
   
   if map_type == "fcalc":
     map_type = "calc"
@@ -682,8 +679,8 @@ def GetRInfo(txt=""):
       except KeyError:
         R1 = 'n/a'
       except AttributeError:
-        tree.current_refinement = OV.FindValue('snum_refinement_current_refinement')
-        tree.current_solution = OV.FindValue('snum_refinement_current_solution')
+        tree.current_refinement = OV.GetParam('snum.refinement.current_refinement')
+        tree.current_solution = OV.GetParam('snum.refinement.current_solution')
         R1 = 'n/a'
       except:
         R1 = 'n/a'
@@ -793,29 +790,30 @@ def setAllMainToolbarTabButtons():
 if haveGUI:
   OV.registerFunction(setAllMainToolbarTabButtons)
 
-def onRefinementProgramChange():
-  if variableFunctions.initialisingVariables:
-    return
-  prg = OV.FindValue("snum_refinement_program")
-  if prg == '?':
-    return '?'
-  prg = RPD.programs[prg]
+def onRefinementProgramChange(prg_name):
+  #prg = OV.GetParam("snum.refinement.program")
+  #if prg is None:
+    #return
+  prg = RPD.programs[prg_name]
   default = sortDefaultMethod(prg)
-  OV.SetVar("snum_refinement_method", default)
+  OV.SetParam("snum.refinement.method", default)
+  onRefinementMethodChange(prg_name, default)
   return default
+OV.registerFunction(onRefinementProgramChange)
 
-def onRefinementMethodChange():
-  if variableFunctions.initialisingVariables:
-    return
-  method = OV.FindValue("snum_refinement_method")
-  prg = OV.FindValue("snum_refinement_program")
-  if method == '?' or prg == '?':
-    return
-  if method in RPD.programs[prg].methods:
-    programSettings.doProgramSettings(prg, method)
+def onRefinementMethodChange(prg_name, method):
+  #if variableFunctions.initialisingVariables:
+    #return
+  #method = OV.FindValue("snum_refinement_method")
+  #prg = OV.FindValue("snum_refinement_program")
+  #if method == '?' or prg == '?':
+    #return
+  if method in RPD.programs[prg_name].methods:
+    programSettings.doProgramSettings(prg_name, method)
   else:
-    print "Please choose a valid method for the refinement program %s" %prg
+    print "Please choose a valid method for the refinement program %s" %prg_name
   return "Done"
+OV.registerFunction(onRefinementMethodChange)
 
 def onCrystalColourChange():
   if variableFunctions.initialisingVariables:
@@ -826,30 +824,29 @@ def onCrystalColourChange():
   colour = ' '.join(item for item in (lustre,modifier,primary) if item != '?')
   if colour:
     OV.SetVar('snum_metacif_exptl_crystal_colour', colour)
-    
-def onSolutionProgramChange(prefix='snum'):
-  if variableFunctions.initialisingVariables:
-    return
-  prg = OV.FindValue("%s_solution_program" %prefix)
-  if prg == '?':
-    return '?'
-  prg = SPD.programs[prg]
-  default = sortDefaultMethod(prg)
-  OV.SetVar("snum_solution_method", default)
-  return default
+OV.registerFunction(onCrystalColourChange)
 
-def onSolutionMethodChange():
-  if variableFunctions.initialisingVariables:
-    return
-  prg = OV.FindValue('snum_solution_program')
-  method = OV.FindValue('snum_solution_method')
-  if method == '?' or prg == '?':
-    return
-  if method in SPD.programs[prg].methods:
-    programSettings.doProgramSettings(prg, method)
+def onSolutionProgramChange(prg_name):
+  prg = SPD.programs[prg_name]
+  default = sortDefaultMethod(prg)
+  OV.SetParam("snum.solution.method", default)
+  onSolutionMethodChange(prg_name, default)
+  return default
+OV.registerFunction(onSolutionProgramChange)
+
+def onSolutionMethodChange(prg_name, method):
+  #if variableFunctions.initialisingVariables:
+    #return
+  #prg = OV.FindValue('snum_solution_program')
+  #method = OV.FindValue('snum_solution_method')
+  #if method == '?' or prg == '?':
+    #return
+  if method in SPD.programs[prg_name].methods:
+    programSettings.doProgramSettings(prg_name, method)
   else:
-    print "Please choose a valid method for the solution program %s" %prg
+    print "Please choose a valid method for the solution program %s" %prg_name
   return
+OV.registerFunction(onSolutionMethodChange)
 
 def sortDefaultMethod(prg):
   methods = []
@@ -1034,7 +1031,7 @@ def getKeys(key_directory=None):
 
 def GetHttpFile(f, force=False):
   retVal = None
-  go_online = OV.FindValue("olex2_is_online","False")
+  go_online = OV.GetParam("olex2.is_online")
   verbose = OV.FindValue("ac_verbose", "False")
   if go_online.lower() == "True" or force:
     try:
@@ -1048,7 +1045,7 @@ def GetHttpFile(f, force=False):
       conn.close()
       retVal = content
     except Exception, err:
-      OV.SetVar("olex2_is_online",False)
+      OV.SetParam("olex2.is_online",False)
       retVal = None
       print "Olex2 can not reach the update server: %s" %err
       print url
@@ -1068,17 +1065,17 @@ def check_for_recent_update():
     version = int(line.split("SVN Revision No. ")[1])
   except:
     version = 1
-  last_version = int(OV.FindValue('olex2_last_version','0'))
+  last_version = int(OV.GetParam('olex2.last_version'))
 #  print "Last Version: %i"%last_version
   if version > last_version:
-    OV.SetVar('olex2_has_recently_updated','True')
+    OV.SetParam('olex2.has_recently_updated',True)
     retVal = True
 #    print "Olex2 has recently been updated"
   else:
-    OV.SetVar('olex2_has_recently_updated','False')
+    OV.SetVar('olex2.has_recently_updated',False)
     retVal = False
     #    print "Olex2 has not been updated"
-  OV.SetVar('olex2_last_version',str(version))
+  OV.SetVar('olex2.last_version',version)
   return retVal
 
 def check_for_crypto():
@@ -1094,7 +1091,7 @@ def GetACF():
   no_update = False
   print "Starting ODAC..."
   if no_update:
-    OV.SetVar('olex2_is_online','False')
+    OV.SetParam('olex2.is_online',False)
     print "Will not update ODAC Files"
   check_for_crypto()  
   
@@ -1263,7 +1260,7 @@ def AvailableExternalProgramsHtml():
   d.setdefault('solution', AvailableExternalPrograms('solution'))
   
 def getReportImageSrc():
-  imagePath = OV.FindValue('snum_report_image')
+  imagePath = OV.GetParam('snum.report.image')
   if OV.FilePath(imagePath) == OV.FilePath():
     return olx.file_GetName(imagePath)
   else:

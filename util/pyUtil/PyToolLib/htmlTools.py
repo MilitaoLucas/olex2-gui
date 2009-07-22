@@ -35,25 +35,25 @@ def makeHtmlTable(list):
   for input_d in list:
     row_d = {}
     row_d.setdefault('itemName',input_d['itemName'])
-    row_d.setdefault('ctrl_name', "SET_%s" %str.upper(input_d['varName']))
+    row_d.setdefault('ctrl_name', "SET_%s" %str.upper(input_d['varName']).replace('.','_'))
     
     boxText = ''
     for box in ['box1','box2','box3']:
       if box in input_d.keys():
         box_d = input_d[box]
-        box_d.setdefault('value', 'GetVar(%s)' %box_d['varName'])
-        box_d.setdefault('ctrl_name', "SET_%s" %str.upper(box_d['varName']))
+        box_d.setdefault('value', '$spy.GetParam(%s)' %box_d['varName'])
+        box_d.setdefault('ctrl_name', "SET_%s" %str.upper(box_d['varName']).replace('.','_'))
         box_d.setdefault('bgcolor','spy.bgcolor(%s)' %box_d['ctrl_name'])
-        box_d.setdefault('onchange',"spy.ChangeMetaCif(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
-        box_d.setdefault('onleave',"spy.ChangeMetaCif(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
+        box_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
+        box_d.setdefault('onleave',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
         boxText += makeHtmlInputBox(box_d)
     if boxText:
       row_d.setdefault('input',boxText)
     else:
-      input_d.setdefault('value', 'GetVar(%s)' %input_d['varName'])
-      input_d.setdefault('ctrl_name', "SET_%s" %str.upper(input_d['varName']))
-      input_d.setdefault('onchange',"spy.ChangeMetaCif(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
-      input_d.setdefault('onleave',"spy.ChangeMetaCif(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
+      input_d.setdefault('value', '$spy.GetParam(%s)' %input_d['varName'])
+      input_d.setdefault('ctrl_name', "SET_%s" %str.upper(input_d['varName']).replace('.','_'))
+      input_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
+      input_d.setdefault('onleave',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
       input_d.setdefault('bgcolor','spy.bgcolor(%s)' %input_d['ctrl_name'])
       row_d.setdefault('input',makeHtmlInputBox(input_d))
       row_d.update(input_d)
@@ -116,7 +116,7 @@ def makeHtmlTableRow(dictionary):
   if 'chooseFile' in dictionary.keys():
     chooseFile_dict = dictionary['chooseFile']
     if 'var' in chooseFile_dict.keys():
-      href = "SetVar(%(var)s,FileOpen('%(caption)s','%(filter)s','%(folder)s'))>>updatehtml" %chooseFile_dict
+      href = "spy.SetParam(%(var)s,FileOpen('%(caption)s','%(filter)s','%(folder)s'))>>updatehtml" %chooseFile_dict
     else:
       href = "%(function)sFileOpen('%(caption)s','%(filter)s','%(folder)s'))>>updatehtml" %chooseFile_dict
       pass
@@ -177,7 +177,7 @@ def makeHtmlTableRow(dictionary):
 def make_edit_link(name, box_type):
   editLink = ""
   if OV.IsPluginInstalled('MySQL'):
-    if OV.FindValue('olex2_is_online'):
+    if OV.GetParam('olex2.is_online'):
       editLink = "<a href='spy.EditHelpItem(%s-%s)'>Edit</a>" %(name, box_type)
   return editLink
 
@@ -422,7 +422,7 @@ def make_spin_input(d):
   height='%(height)s'
   max='%(max)s'
   bgcolor='GetVar(gui_html_input_bg_colour)'
-  value='GetVar(%(varName)s)'
+  value='$spy.GetParam(%(varName)s)'
   onchange='%(onchange)s'
   >""" %d
   return html
@@ -593,7 +593,7 @@ def reg_command(self, string):
   return s
 
 def changeBoxColour(ctrl_name,colour):
-  if olx.GetValue(ctrl_name) == '?':
+  if olx.GetValue(ctrl_name) in ('?',''):
     olx.html_SetBG(ctrl_name,colour)
   else:
     olx.html_SetBG(ctrl_name,OV.FindValue('gui_html_input_bg_colour'))
@@ -618,7 +618,7 @@ OV.registerFunction(switchButton)
 
 def bgcolor(ctrl_name):
   value = olx.GetValue(ctrl_name)
-  if value == '?':
+  if value in ('?',''):
     colour = 'rgb(255,220,220)'
   else:
     colour = OV.FindValue('gui_html_input_bg_colour')
@@ -637,6 +637,14 @@ def getStyles(fileName):
 </style>""" %css
   return styleHTML
 OV.registerFunction(getStyles)
+
+def getStylesList():
+  styles = os.listdir("%s/etc/CIF/styles" %OV.BaseDir())
+  exclude = ("rsc.css", "thesis.css", "custom.css")
+  stylesList = ";".join(style[:-4] for style in styles
+                        if style not in exclude and style.endswith('.css'))
+  return "default;" + stylesList
+OV.registerFunction(getStylesList)
 
 
 def getPopBoxPosition():
@@ -685,11 +693,11 @@ def makeHtmlBottomPop(args, pb_height = 50, y = 0, panel_diff = 22):
   olx.html_SetBorders(pop_name,0)
   olx.html_Reload(pop_name)
 OV.registerMacro(makeHtmlBottomPop, 'txt-Text to display&;name-Name of the Bottom html popupbox')
-  
+
 def OnModeChange(*args):
   global active_mode
   global last_mode
-  debug = OV.FindValue("olex2_debug",False)
+  debug = OV.GetParam("olex2.debug")
   d = {
     'move sel':'button-move_near',
     'move sel -c=':'button-copy_near',    
@@ -720,7 +728,7 @@ def OnModeChange(*args):
   
   
   if mode == 'off':
-    OV.SetVar('olex2_in_mode','False')
+    OV.SetParam('olex2_in_mode',False)
     OV.cmd("html.hide pop_%s" %name)
     if not last_mode: return
     use_image = "%soff.png" %last_mode
@@ -729,10 +737,10 @@ def OnModeChange(*args):
     OV.CopyVFSFile(use_image, copy_to,2)
     OV.cmd("html.hide pop_%s" %name)
     last_mode = None
-    OV.SetVar('olex2_in_mode','False')
-    OV.SetVar('olex2_short_mode','False')
+    OV.SetParam('olex2_in_mode',False)
+    OV.SetParam('olex2_short_mode',False)
   else:
-    OV.SetVar('olex2_in_mode',mode.split("=")[0])
+    OV.SetParam('olex2_in_mode',mode.split("=")[0])
     makeHtmlBottomPop({'replace':mode_disp, 'name':'pop_mode'}, pb_height=50)
     if active_mode:
       use_image= "%son.png" %active_mode
@@ -746,8 +754,8 @@ def OnModeChange(*args):
       OV.CopyVFSFile(use_image, copy_to,2)
       
     last_mode = active_mode
-    OV.SetVar('olex2_in_mode',mode.split("=")[0])
-    OV.SetVar('olex2_short_mode',mode_disp)
+    OV.SetParam('olex2_in_mode',mode.split("=")[0])
+    OV.SetParam('olex2_short_mode',mode_disp)
     last_mode = active_mode
   
   
@@ -886,7 +894,7 @@ def doBanner(i):
     return
 
 #  print i, d.get('name')
-  OV.SetVar('snum_refinement_banner_slide', i)
+  OV.SetParam('snum.refinement.banner_slide', i)
   
   ist += d.get('itemstate',0)
   cmds += d.get('cmd',"").split(">>")
@@ -979,7 +987,6 @@ def getGenericSwitchNameTranslation(name):
   return text
 OV.registerFunction(getGenericSwitchNameTranslation)
 
-
 def makeFormulaForsNumInfo():
   if olx.FileName() == "Periodic Table":
     return "Periodic Table"
@@ -987,9 +994,7 @@ def makeFormulaForsNumInfo():
     return olx.xf_GetFormula('html',2)
 OV.registerFunction(makeFormulaForsNumInfo)
 
-
 def reset_file_in_OFS(fileName):
   OV.reset_file_in_OFS(fileName)
   return True
 OV.registerFunction(reset_file_in_OFS)
-  

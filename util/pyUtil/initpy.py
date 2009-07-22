@@ -151,9 +151,13 @@ def setup_cctbx():
   else:
     cctbxRoot = str("%s/cctbx" %basedir)
   build_path = os.environ['LIBTBX_BUILD'] = os.path.normpath(str("%s/cctbx_build" % cctbxRoot))
-  sys.path.append(str("%s/cctbx_sources/libtbx" % cctbxRoot)) # needed to work with old cctbx directory structure
-  sys.path.append(str("%s/cctbx_sources/libtbx/pythonpath" % cctbxRoot)) # needed to work with new cctbx directory structure
-  sys.path.append(str("%s/cctbx_sources" % cctbxRoot)) # needed to work with new cctbx directory structure
+  if os.path.isdir("%s/cctbx_project" %cctbxRoot):
+    cctbxSources = "%s/cctbx_project" %cctbxRoot
+  else:
+    cctbxSources = "%s/cctbx_sources" %cctbxRoot
+  sys.path.append(str("%s/libtbx" % cctbxSources)) # needed to work with old cctbx directory structure
+  sys.path.append(str("%s/libtbx/pythonpath" % cctbxSources)) # needed to work with new cctbx directory structure
+  sys.path.append(str(cctbxSources)) # needed to work with new cctbx directory structure
   try:
     import libtbx.load_env
   except IOError, err:
@@ -163,10 +167,10 @@ def setup_cctbx():
       raise
   else:
     need_cold_start = not os.path.exists(libtbx.env.build_path)
-  cctbx_TAG_file_path = "%s/cctbx_sources/TAG" %cctbxRoot
-  if not os.path.isdir('%s/cctbx_sources/.svn' %cctbxRoot)\
+  cctbx_TAG_file_path = "%s/TAG" %cctbxSources
+  if not os.path.isdir('%s/.svn' %cctbxSources)\
      and os.path.exists(cctbx_TAG_file_path):
-    cctbx_TAG_file = open("%s/cctbx_sources/TAG" %cctbxRoot,'r')
+    cctbx_TAG_file = open("%s/TAG" %cctbxSources,'r')
     cctbx_compile_date = cctbx_TAG_file.readline().strip()
     cctbx_TAG_file.close()
     cctbx_compatibale_version = "2008_09_13_0905"
@@ -178,7 +182,7 @@ def setup_cctbx():
   if need_cold_start:
     saved_cwd = os.getcwd()
     os.chdir(build_path)
-    sys.argv = ['%s/cctbx_sources/libtbx/configure.py' % cctbxRoot, 'smtbx', 'iotbx']
+    sys.argv = ['%s/libtbx/configure.py' % cctbxSources, 'smtbx', 'iotbx']
     execfile(sys.argv[0])
     os.chdir(saved_cwd)
     import libtbx.load_env
@@ -218,8 +222,15 @@ datadir = olx.DataDir()
 
 set_olex_paths()
 
+try:
+  setup_cctbx()
+except Exception, err:
+  print "There is a problem with the cctbx"
+  print err
+
 import variableFunctions
 variableFunctions.InitialiseVariables('startup')
+variableFunctions.LoadParams()
 import olexex
 
 set_plugins_paths()
@@ -238,12 +249,6 @@ if OV.HasGUI():
   import htmlMaker
 
 olx.Clear()
-
-try:
-  setup_cctbx()
-except Exception, err:
-  print "There is a problem with the cctbx"
-  print err
 
 #if debug:
 #       keys = os.environ.keys()
@@ -269,7 +274,7 @@ if olx.IsPluginInstalled('MySQL') == "true":
 if olexex.getKey():
   olexex.GetACF()
 
-olexex.check_for_recent_update()  
+olexex.check_for_recent_update()
 
 if sys.platform[:3] == 'win':
   OV.SetVar('defeditor','notepad')

@@ -95,7 +95,10 @@ class Method(object):
     .ins file and sets the value of the GUI input boxes to reflect this.
     """
     for arg in self.args:
-      ins = olx.Ins(arg['name'])
+      if arg['name'] == 'TEMP':
+        ins = olx.xf_exptl_Temperature()
+      else:
+        ins = olx.Ins(arg['name'])
       if ins != 'n/a':
         OV.SetVar('settings_%s' %arg['name'], 'true')
         ins = ins.split()
@@ -105,9 +108,12 @@ class Method(object):
             val = ins[count]
             OV.SetVar('settings_%s_%s' %(arg['name'], value[0]), val)
             if value[0] == 'nls':
-              OV.SetVar('snum_refinement_max_cycles', val)
+              OV.SetParam('snum.refinement.max_cycles', val)
             elif value[0] == 'npeaks':
-              OV.SetVar('snum_refinement_max_peaks', val)
+              OV.SetParam('snum.refinement.max_peaks', val)
+            elif value[0] == 'T':
+              OV.SetParam('snum.metacif.diffrn_ambient_temperature',
+                        273.15 + float(val.strip('C')))
           except IndexError:
             break
           count += 1
@@ -115,10 +121,10 @@ class Method(object):
         if arg['default'] != 'true':
           OV.SetVar('settings_%s' %arg['name'], 'false')
         if arg['name'] in ('L.S.', 'CGLS'):
-          val = OV.FindValue('snum_refinement_max_cycles')
+          val = OV.GetParam('snum.refinement.max_cycles')
           OV.SetVar('settings_%s_nls' %arg['name'], val)
         elif arg['name'] == 'PLAN':
-          val = OV.FindValue('snum_refinement_max_peaks')
+          val = OV.GetParam('snum.refinement.max_peaks')
           OV.SetVar('settings_%s_npeaks' %arg['name'], val)
           
   def extraHtml(self):
@@ -147,7 +153,7 @@ class Method_solution(Method):
     if not args:
       args = self.cmd
     if not RunPrgObject.formula or RunPrgObject.formula == "None":
-      RunPrgObject.formula = RunPrgObject.snum_refinement_original_formula
+      RunPrgObject.formula = RunPrgObject.params.snum.refinement.original_formula
       
     formula = getFormulaAsDict(RunPrgObject.formula)
     if sum(formula.values()) == 0:
@@ -228,8 +234,7 @@ class Method_refinement(Method):
             args += ' %s' %value
           except ValueError:
             break
-        olx.DelIns(arg['name'])  # uncomment me!
-        #olx.AddIns(args)
+        olx.DelIns(arg['name'])
         OV.AddIns(args)
   
   def pre_refinement(self, RunPrgObject):
@@ -246,19 +251,17 @@ class Method_refinement(Method):
       #OV.File()
       return
     
-    if RunPrgObject.snum_refinement_auto_tidy:
+    if RunPrgObject.params.snum.refinement.auto.tidy:
       RunPrgObject.doAutoTidyBefore()
-    if RunPrgObject.snum_refinement_update_weight:
+    if RunPrgObject.params.snum.refinement.update_weight:
       olx.UpdateWght()
     if RunPrgObject.make_unique_names:
       olx.Sel('-a')
       olx.Name('sel 1 -c')
-    if OV.FindValue('snum_auto_hydrogen_naming') == 'checked': # uncomment me!
-      olx.FixHL() # uncomment me!
-      
-    #OV.File()
+    if RunPrgObject.params.snum.auto_hydrogen_naming == 'checked':
+      olx.FixHL()
 
-  
+
 class Method_shelx(Method):
   def __init__(self, name, cmd, args, atom_sites_solution=None):
     Method.__init__(self, name, cmd, args, atom_sites_solution)
@@ -273,7 +276,7 @@ class Method_shelx(Method):
     xl_ins_filename = RunPrgObject.hkl_src_name
     command = "%s '%s'" % (prgName, xl_ins_filename.lower()) #This is correct!!!!!!
     #sys.stdout.graph = RunPrgObject.Graph()
-    if not OV.FindValue('snum_shelx_output'):
+    if not RunPrgObject.params.snum.shelx_output:
       command = "-q " + command
     olx.Exec(command)
     olx.WaitFor('process') # uncomment me!
@@ -300,16 +303,16 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
     Method_shelx.__init__(self, name, cmd, args, atom_sites_solution)
   
   def pre_refinement(self, RunPrgObject):
-    _diffrn_ambient_temperature = OV.FindValue('snum_metacif_diffrn_ambient_temperature')
-    if '(' in _diffrn_ambient_temperature:
-      _diffrn_ambient_temperature = _diffrn_ambient_temperature.split('(')[0]
-    if 'K' in _diffrn_ambient_temperature:
-      _diffrn_ambient_temperature = _diffrn_ambient_temperature.split('K')[0]
+    diffrn_ambient_temperature = OV.FindValue('snum.metacif.diffrn_ambient_temperature')
+    if '(' in diffrn_ambient_temperature:
+      diffrn_ambient_temperature = diffrn_ambient_temperature.split('(')[0]
+    if 'K' in diffrn_ambient_temperature:
+      diffrn_ambient_temperature = diffrn_ambient_temperature.split('K')[0]
     try:
-      _diffrn_ambient_temperature = float(_diffrn_ambient_temperature)
-      _diffrn_ambient_temperature = _diffrn_ambient_temperature - 273.15
+      diffrn_ambient_temperature = float(diffrn_ambient_temperature)
+      diffrn_ambient_temperature = diffrn_ambient_temperature - 273.15
       OV.DelIns('TEMP')
-      OV.AddIns('TEMP %s' %_diffrn_ambient_temperature)
+      OV.AddIns('TEMP %s' %diffrn_ambient_temperature)
     except:
       pass
     Method_refinement.pre_refinement(self, RunPrgObject)
@@ -432,9 +435,9 @@ class Method_cctbx_refinement(Method_refinement):
   def run(self, RunPrgObject):
     from cctbx_olex_adapter import OlexCctbxRefine
     print 'STARTING cctbx refinement'
-    verbose = OV.FindValue('olex2_verbose','False')
+    verbose = OV.GetParam('olex2.verbose')
     cctbx = OlexCctbxRefine(
-      max_cycles=RunPrgObject.snum_refinement_max_cycles,
+      max_cycles=RunPrgObject.params.snum.refinement.max_cycles,
       verbose=verbose)
     olx.Kill('$Q')
     cctbx.run()
@@ -620,6 +623,10 @@ def defineExternalPrograms():
        'values':[['2thetafull', '']],
        'default':'false',
        },
+      {'name':'TEMP',
+       'values':[['T','']],
+       'default':'false',
+       },
    ),
   )
 
@@ -639,16 +646,16 @@ def defineExternalPrograms():
        'values':[['code', 2], ['axis', ''], ['n1', 53]],
        'default':'true',
        },
+      {'name':'TEMP',
+       'values':[['T','']],
+       'default':'false',
+       },
    ),
   )
 
   lbgfs = Method_cctbx_refinement(
-    name='LBFGS', 
-    cmd='LBFGS', 
-    #args = (
-      #{'arg':'maxTry', 'value':20, 'name':'Maximum Refinement Iterations', 'varName': 'snum_refinement_max_cycles', 'help':'cycles-help'},
-      #{'arg':'maxPeaks', 'value':20, 'name':'Number of Residual Peaks', 'varName': 'snum_refinement_max_peaks', 'help':'plan-help'},
-    #)
+    name='LBFGS',
+    cmd='LBFGS',
     args = {}
   )
 

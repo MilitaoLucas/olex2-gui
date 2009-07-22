@@ -7,8 +7,8 @@
   <td colspan = '1'>
     <a href="
 cursor(busy, '%Please Wait...%')
->>SetVar(snum_report_image,filesave('Save Image as', 'png|*.png|bitmap|*.bmp',filepath()))
->>pict -pq GetVar(snum_report_image) GetVar(snum_report_image_size)
+>>spy.SetParam(snum.report.image,filesave('Save Image as', 'png|*.png|bitmap|*.bmp',filepath()))
+>>pict -pq spy.GetParam(snum.report.image) spy.GetParam(snum.report.image_size)
 >>dire
 >>UpdateHtml
 >>Cursor()"
@@ -25,10 +25,10 @@ cursor(busy, '%Please Wait...%')
 			type="combo" 
 			name="SET_REPORT_IMAGE_SIZE" 
 			items="640;800;1024;1280"
-			onchange="SetVar(snum_report_image_size,GetValue(SET_REPORT_IMAGE_SIZE))"
+			onchange="spy.SetParam(snum.report.image_size,GetValue(SET_REPORT_IMAGE_SIZE))"
 			width="20%" 
 			height="18" 
-			value="GetVar(snum_report_image_size)"
+			value="$spy.GetParam(snum.report.image_size)"
 		>
 	</td>
 	<td colspan='4'>
@@ -38,10 +38,10 @@ cursor(busy, '%Please Wait...%')
 			name="SET_REPORT_IMAGE"
 			readonly
 			items='file.ListDirForGui(FilePath(),*.png;*.jpg;*.bmp)' 
-			onchange="SetVar(snum_report_image,GetValue(SET_REPORT_IMAGE))"
+			onchange="spy.SetParam(snum.report.image,GetValue(SET_REPORT_IMAGE))"
 			width="50%" 
 			height="18" 
-			value="file.GetName(GetVar(snum_report_image))"
+			value="file.GetName($spy.GetParam(snum.report.image))"
 		>
 	</td>
 </tr>
