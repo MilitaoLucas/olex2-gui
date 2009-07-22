@@ -19,10 +19,10 @@
 				height="17" 
 				bgcolor="GetVar(gui_html_input_bg_colour)"
 				name='SET_SNUM_REFINEMENT_PROGRAM',
-				value='GetVar(snum_refinement_program)'
+				value='$spy.GetParam(snum.refinement.program)'
 				items='$spy.getRefinementPrgs()'
 				label='', 
-				onchange="SetVar(snum_refinement_program,GetValue(SET_SNUM_REFINEMENT_PROGRAM))>>UpdateHtml"
+				onchange="spy.SetParam(snum.refinement.program,GetValue(SET_SNUM_REFINEMENT_PROGRAM))>>spy.onRefinementProgramChange(GetValue(SET_SNUM_REFINEMENT_PROGRAM))>>UpdateHtml"
 				readonly='readonly'
 			>
 		</font>
@@ -44,10 +44,10 @@
 				height="17"
 				bgcolor="GetVar(gui_html_input_bg_colour)"
 				name='SET_SNUM_REFINEMENT_METHOD',
-				value='GetVar(snum_refinement_method)', 
-				items='$spy.getRefinementMethods(GetVar(snum_refinement_program))'
+				value='$spy.GetParam(snum.refinement.method)', 
+				items='$spy.getRefinementMethods($spy.GetParam(snum.refinement.program))'
 				label='', 
-				onchange="setVar(snum_refinement_method,'GetValue(SET_SNUM_REFINEMENT_METHOD)')>>UpdateHtml" 
+				onchange="spy.SetParam(snum.refinement.method,'GetValue(SET_SNUM_REFINEMENT_METHOD)')>>UpdateHtml" 
 				readonly='readonly'
 			>
 		</font>
@@ -89,12 +89,12 @@
 				height="17"
 				bgcolor="GetVar(gui_html_input_bg_colour)"
 				name='SET_SNUM_REFINEMENT_MAX_CYCLES',
-				value='GetVar(snum_refinement_max_cycles)', 
-				onchange="setVar(snum_refinement_max_cycles,'GetValue(SET_SNUM_REFINEMENT_MAX_CYCLES)')"
+				value='$spy.GetParam(snum.refinement.max_cycles)', 
+				onchange="spy.SetParam(snum.refinement.max_cycles,'GetValue(SET_SNUM_REFINEMENT_MAX_CYCLES)')"
 			> 
 		</font>
 	</td>
-</tr>			
+</tr>
 	<tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_MAX_PEAKS'>
 		<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 		  <td VALIGN='center' colspan='3'>
@@ -102,15 +102,15 @@
 		  </td>
 		  <td VALIGN='right' ALIGN='right' colspan='1'>
 				<font size='2'>
-					<input 
-						type="spin" 
-						name="SET_SNUM_REFINEMENT_MAX_PEAKS"  
-						width="50" 
-						height="17" 
-						max='1000' 
+					<input
+						type="spin"
+						name="SET_SNUM_REFINEMENT_MAX_PEAKS"
+						width="50"
+						height="17"
+						max='1000'
 						bgcolor="GetVar(gui_html_input_bg_colour)"
-						value='GetVar(snum_refinement_max_peaks)'
-						onchange='SetVar(snum_refinement_max_peaks,GetValue(SET_SNUM_REFINEMENT_MAX_PEAKS))'
+						value='$spy.GetParam(snum.refinement.max_peaks)'
+						onchange='spy.SetParam(snum.refinement.max_peaks,GetValue(SET_SNUM_REFINEMENT_MAX_PEAKS))'
 					>
 				</font>
 		</td>
@@ -124,33 +124,33 @@
 
 		  <td VALIGN='center' ALIGN='right'  colspan=1>
 				<font size='2'>
-				<input 
-type='checkbox'  
-width=12  
-height=12 
-name='SET_SNUM_REFINEMENT_UPDATE_WEIGHT' 
-$spy.CheckBoxValue(snum_refinement_update_weight) 
-oncheck='SetVar(snum_refinement_update_weight,true)' 
-onuncheck='SetVar(snum_refinement_update_weight,false)' 
-value='' 
+				<input
+type='checkbox'
+width=12 
+height=12
+name='SET_SNUM_REFINEMENT_UPDATE_WEIGHT'
+$spy.CheckBoxValue(snum.refinement.update_weight)
+oncheck='spy.SetParam(snum.refinement.update_weight,true)'
+onuncheck='spy.SetParam(snum.refinement.update_weight,false)'
+value=''
 >&nbsp;
 			</font>
 		</td>
 	</tr>
-	
+
 
 <tr VALIGN='center' ALIGN='left' NAME='IGNORE_SETTINGS'>
 		<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 		  <td VALIGN='center'  colspan=3>
 				<b>
 				<a href="
-sel atoms where xatom.peak<$GetVar(snum_refinement_auto_pruneQ)&&xatom.peak>0>>
+sel atoms where xatom.peak<$spy.GetParam(snum.refinement.auto.pruneQ)&&xatom.peak>0>>
 kill sel>>
-sel atoms where xatom.peak>$GetVar(snum_refinement_auto_assignQ)>>
+sel atoms where xatom.peak>$spy.GetParam(snum.refinement.auto.assignQ)>>
 name sel C>>
 sel -a>>
 name sel 1 -c>>
-sel atoms where xatom.uiso>$GetVar(snum_refinement_auto_pruneU)>>
+sel atoms where xatom.uiso>$spy.GetParam(snum.refinement.auto.pruneU)>>
 kill sel"
 target = "Do automatic tidying once - tick the box to do it after every refinement"
 >Autotidy
@@ -171,9 +171,9 @@ target = "Do automatic tidying once - tick the box to do it after every refineme
 					width=12  
 					height=12 
 					name='SNUM_REFINEMENT_AUTO_TIDY' 
-					$spy.CheckBoxValue(snum_refinement_auto_tidy) 
-					oncheck='SetVar(snum_refinement_auto_tidy,true)' 
-					onuncheck='SetVar(snum_refinement_auto_tidy,false)' 
+					$spy.CheckBoxValue(snum.refinement.auto.tidy) 
+					oncheck='spy.SetParam(snum.refinement.auto.tidy,True)' 
+					onuncheck='spy.SetParam(snum.refinement.auto.tidy,False)' 
 					value=''
 				>&nbsp;
 			</font>
@@ -194,9 +194,9 @@ target = "Do automatic tidying once - tick the box to do it after every refineme
 					width=12  
 					height=12 
 					name='SNUM_REFINEMENT_GRAPHICAL_OUTPUT' 
-					$spy.CheckBoxValue(snum_refinement_graphical_output) 
-					oncheck='SetVar(snum_refinement_graphical_output,true)' 
-					onuncheck='SetVar(snum_refinement_graphical_output,false)' 
+					$spy.CheckBoxValue(snum.refinement.graphical_output) 
+					oncheck='spy.SetParam(snum.refinement.graphical_output,true)' 
+					onuncheck='spy.SetParam(snum.refinement.graphical_output,false)' 
 					value=''
 				>&nbsp;
 			</font>

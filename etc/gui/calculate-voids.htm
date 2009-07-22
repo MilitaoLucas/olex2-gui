@@ -10,11 +10,11 @@
 			type="combo" 
 			name="SET_SNUM_CALCVOID_VIEW" 
 			items='2D;surface;wire;points' 
-			value="GetVar(snum_calcvoid_view)" 
+			value="$spy.GetParam(snum.calcvoid_view)" 
 			width="70" 
 			height="18" 
 			label="View "
-			onchange="SetVar(snum_calcvoid_view,GetValue(SET_SNUM_CALCVOID_VIEW))>>
+			onchange="spy.SetParam(snum.calcvoid_view,GetValue(SET_SNUM_CALCVOID_VIEW))>>
 spy.VoidView(0)"
 			>
 	</td>		
@@ -30,14 +30,14 @@ spy.VoidView(0)"
 			name="SNUM_CALCVOID_SLIDE" 
 			width="$eval(htmlpanelwidth()-80)" 
 			height="18" 
-			value="$GetVar(snum_calcvoid_value)" 
+			value="$spy.GetParam(snum.calcvoid_value)" 
 			bgcolor="$GetVar(gui_html_table_bg_colour)"  
 			fgcolor="$GetVar(gui_html_font_colour)" 
 			min="-3" 
 			max="10" 
-			onchange="SetVar(snum_calcvoid_value,GetValue(SNUM_CALCVOID_SLIDE))>>
-SetValue(SNUM_CALCVOID_VALUE,GetVar(snum_calcvoid_value))>>
-xgrid.Scale(getvalue(snum_calcvoid_value))>>
+			onchange="spy.SetParam(snum.calcvoid_value,GetValue(SNUM_CALCVOID_SLIDE))>>
+SetValue(SNUM_CALCVOID_VALUE,GetValue(SNUM_CALCVOID_SLIDE))>>
+xgrid.Scale(GetValue(SNUM_CALCVOID_SLIDE))>>
 ">
 	<td colspan='1'>
 		<input 
@@ -47,9 +47,9 @@ xgrid.Scale(getvalue(snum_calcvoid_value))>>
 			height="18" 
 			bgcolor="$GetVar(gui_html_table_bg_colour)"  
 			fgcolor="$GetVar(gui_html_font_colour)" 
-			value="$GetVar(snum_calcvoid_value)" 
-			onchange="SetVar(snum_calcvoid_value,GetValue(SNUM_CALCVOID_VALUE))>>
-xgrid.Scale(getvalue(snum_calcvoid_value))
+			value="$spy.GetParam(snum.calcvoid_value)" 
+			onchange="spy.SetParam(snum.calcvoid_value,GetValue(SNUM_CALCVOID_VALUE))>>
+xgrid.Scale(GetValue(SNUM_CALCVOID_VALUE))
 SetValue(XGRID_SCALE,XGrid.Scale())
 ">
 		</td>

@@ -20,10 +20,10 @@
 				height="17" 
 				bgcolor="GetVar(gui_html_input_bg_colour)"
 				name='SET_SNUM_SOLUTION_PROGRAM',
-				value='GetVar(snum_solution_program)'
+				value='$spy.GetParam(snum.solution.program)'
 				items='$spy.getSolutionPrgs()'
 				label='', 
-				onchange="SetVar(snum_solution_program,GetValue(SET_SNUM_SOLUTION_PROGRAM))>>UpdateHtml"
+				onchange="spy.SetParam(snum.solution.program,GetValue(SET_SNUM_SOLUTION_PROGRAM))>>spy.onSolutionProgramChange(GetValue(SET_SNUM_SOLUTION_PROGRAM))>>UpdateHtml"
 				readonly='readonly'
 			>
 		</font>
@@ -34,7 +34,7 @@
 	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 
 	<td VALIGN='center' width="100" colspan=2>
-			<b>%Solution Method%</b>
+			<b>%Solution XXXXXXXXXXXXXXXX Method%</b>
 	</td>	
 
 	<td VALIGN='center' ALIGN='right' colspan=2>
@@ -45,10 +45,10 @@
 				height="17" 
 				bgcolor="GetVar(gui_html_input_bg_colour)"
 				name='SET_SNUM_SOLUTION_METHOD',
-				value='GetVar(snum_solution_method)', 
-				items='$spy.getSolutionMethods(GetVar(snum_solution_program))'
+				value='$spy.GetParam(snum.solution.method)', 
+				items='$spy.getSolutionMethods($spy.GetParam(snum.solution.program))'
 				label='', 
-				onchange="setVar(snum_solution_method,'GetValue(SET_SNUM_SOLUTION_METHOD)')>>UpdateHtml"
+				onchange="spy.SetParam(snum.solution.method,GetValue(SET_SNUM_SOLUTION_METHOD))>>UpdateHtml"
 				readonly='readonly'
 			>
 		</font>
@@ -73,9 +73,9 @@
 					width=12  
 					height=12 
 					name='SNUM_SOLUTION_GRAPHICAL_OUTPUT' 
-					$spy.CheckBoxValue(snum_solution_graphical_output) 
-					oncheck='SetVar(snum_solution_graphical_output,true)' 
-					onuncheck='SetVar(snum_solution_graphical_output,false)' 
+					$spy.CheckBoxValue(snum.solution.graphical_output) 
+					oncheck='spy.SetParam(snum.solution.graphical_output,true)' 
+					onuncheck='spy.SetParam(snum.solution.graphical_output,false)' 
 					value=''
 				>&nbsp;
 			</font>

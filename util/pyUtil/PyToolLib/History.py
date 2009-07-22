@@ -22,9 +22,9 @@ import ires_reader
 
 tree = None
 
-class t_History(ArgumentParser):
+class History(ArgumentParser):
   def __init__(self):
-    super(t_History, self).__init__()
+    super(History, self).__init__()
     
   def _getItems(self):
     
@@ -38,12 +38,16 @@ class t_History(ArgumentParser):
     self.filename = OV.FileName()
     self.strdir = OV.StrDir()
     self.datadir = OV.DataDir()      
-    self.getVariables('history')
-    self.getVariables('user_alert')
+    #self.getVariables('history')
+    #self.getVariables('user_alert')
+    self.params = olx.phil_handler.get_python_object()
     self.history_filepath = r'%s/%s.history' %(self.strdir,self.filename)
     self.rename = OV.FindValue('rename')
     self.his_file = None
-    
+
+  def setParams(self):
+    olx.phil_handler.update_from_python(self.params)
+
   def create_history(self, solution=False):
     self._getItems()
     
@@ -57,7 +61,7 @@ class t_History(ArgumentParser):
       
     filefull_lst = OV.file_ChangeExt(self.filefull, 'lst')
     if self.autochem or self.demo_mode:
-      branchName = self.snum_history_autochem_next_solution
+      branchName = self.params.snum.history.autochem_next_solution
     else:
       branchName = None
     if self.solve:
@@ -67,9 +71,7 @@ class t_History(ArgumentParser):
     self.his_file = "%s;%s" %(tree.current_solution, tree.current_refinement)
     
     self._make_history_bars()
-    
-    self.setVariables('history')
-    
+    self.setParams()
     return self.his_file
   
   def delete_history(self, args):
@@ -96,11 +98,12 @@ class t_History(ArgumentParser):
       
     if 'R' in delete and 'Y' in delete:
       self.user_alert_delete_history = 'RY'
-      self.setVariables('user_alert')
+      #self.setVariables('user_alert')
+      self.setParams()
       variableFunctions.save_user_parameters('alert')
-    
-    self.setVariables('history')
-    
+
+    self.setParams()
+
   def rename_history(self, args):
     self._getItems()
     old_solution_name = args.get('old','')
@@ -126,7 +129,8 @@ class t_History(ArgumentParser):
       
       if 'R' in rename:
         self.user_alert_overwrite_history = 'RY'
-        self.setVariables('user_alert')
+        #self.setVariables('user_alert')
+        self.setParams()
         variableFunctions.save_user_parameters('alert')
         
     else:
@@ -136,15 +140,16 @@ class t_History(ArgumentParser):
       tree.historyTree[solution_name] = tree.historyTree[old_solution_name]
       del tree.historyTree[old_solution_name]
       tree.current_solution = solution_name
-      self.snum_history_current_solution = solution_name
+      self.params.snum.history.current_solution = solution_name
     self._make_history_bars()
-    self.setVariables('history')
+    #self.setVariables('history')
     return
   
   def revert_history(self, args):
     self._getItems()
     self._revert_history(args)
-    self.setVariables('history')
+    #self.setVariables('history')
+    self.setParams()
     
   def _revert_history(self, args):
     solution = args.get('solution','')
@@ -176,11 +181,13 @@ class t_History(ArgumentParser):
     destination = "%s/%s.res" %(filepath, filename)
     destination = "'%s'" %destination.strip('"').strip("'")
     olx.Atreap("%s" %destination)
+    olx.File() ## needed to make new .ins file
     
   def saveHistory(self):
     self._getItems()
     variableFunctions.Pickle(tree,self.history_filepath)
-    self.setVariables('history')
+    #self.setVariables('history')
+    self.setParams()
     
   def loadHistory(self):
     self._getItems()
@@ -202,7 +209,8 @@ class t_History(ArgumentParser):
       
     if tree.current_solution:
       self._make_history_bars()
-    self.setVariables('history')
+    #self.setVariables('history')
+    self.setParams()
       
   def resetHistory(self):
     self._getItems()
@@ -224,10 +232,10 @@ class t_History(ArgumentParser):
           
     self.filefull = '%s/%s' %(OV.FilePath(), resetFile)
     olx.Atreap(self.filefull)
-    self.snum_history_current_solution = 'Solution 01'
-    self.snum_history_next_solution = 'Solution 01'
+    self.params.snum.history.current_solution = 'Solution 01'
+    self.params.snum.history.next_solution = 'Solution 01'
     self._createNewHistory()
-    self.setVariables('history')
+    self.setParams()
     
   def _createNewHistory(self):
     self.filename = olx.FileName()
@@ -292,7 +300,7 @@ class t_History(ArgumentParser):
       solution_keys.sort()
       tree.current_solution = solution_keys[-1]
       keys = tree.historyTree[tree.current_solution].historyBranch.keys()
-      self.snum_history_current_solution = tree.current_solution
+      self.params.snum.history.current_solution = tree.current_solution
     keys.sort()
     R1 = 1
     if 'solution' in keys:
@@ -331,7 +339,7 @@ class t_History(ArgumentParser):
     curr_history_branch = tree.historyTree[tree.current_solution]
     historyTextList.append("<br>")
     number_of_solutions = len(tree.historyTree.keys())
-    if number_of_solutions > 1 and 'Autochem' not in self.snum_history_current_solution:
+    if number_of_solutions > 1 and 'Autochem' not in self.params.snum.history.current_solution:
       historyTextList.append("<a href='spy.delete_history -solution=\"GetValue(SET_HISTORY_CURRENT_SOLUTION)\">>UpdateHtml' target='Delete current history'><zimg border='0' src='delete_small.png'></a>")
     if not self.demo_mode:
       historyTextList.append(' <b>%s</b> -  %s - %s' %(curr_history_branch.spaceGroup,curr_history_branch.solution_program,curr_history_branch.solution_method))
@@ -341,7 +349,7 @@ class t_History(ArgumentParser):
 #      historyText = ""
     OV.write_to_olex('history-info.htm',historyText)
   
-hist = t_History()
+hist = History()
 OV.registerMacro(hist.delete_history, 'solution')
 OV.registerMacro(hist.rename_history, 'old-Old refinement name&;new-New refinement name')
 OV.registerMacro(hist.revert_history, 'solution-&;refinement-')
@@ -374,10 +382,10 @@ class HistoryTree:
       self.saveOriginals(resPath, lstPath)
       
     if not branchName:
-      branchName = hist.snum_history_next_solution
+      branchName = hist.params.snum.history.next_solution
     self.historyTree[branchName] = HistoryBranch(resPath,lstPath,solution=solution)
     self.current_solution = branchName
-    hist.snum_history_current_solution = branchName
+    hist.params.snum.history.current_solution = branchName
     
     if 'Autochem' in branchName:
       # Sort out next Autochem solution name
@@ -391,7 +399,7 @@ class HistoryTree:
           next_sol_num += 1
         else:
           break
-      hist.snum_history_autochem_next_solution = next_sol_name
+      hist.params.snum.history.autochem_next_solution = next_sol_name
     
     else:
       next_sol_num = int(branchName.split()[-1]) + 1
@@ -404,10 +412,11 @@ class HistoryTree:
           next_sol_num += 1
         else:
           break
-      hist.snum_history_next_solution = next_sol_name
+      hist.params.snum.history.next_solution = next_sol_name
       
     hist._make_history_bars()
-    hist.setVariables('history')
+    #hist.setVariables('history')
+    hist.setParams()
     return self.current_solution
   
   def newLeaf(self,resPath,lstPath):
@@ -424,8 +433,8 @@ class HistoryBranch:
       self.historyBranch['solution'] = HistoryLeaf(resPath,lstPath)
     else:
       self.newLeaf(resPath,lstPath)
-    self.solution_program = OV.FindValue('snum_solution_program')
-    self.solution_method = OV.FindValue('snum_solution_method')
+    self.solution_program = OV.GetParam('snum.solution.program')
+    self.solution_method = OV.GetParam('snum.solution.method')
     self.name = None
     
   def newLeaf(self,resPath,lstPath):
@@ -450,16 +459,16 @@ class HistoryLeaf:
     self.res = None
     
     self.res = compressFile(resPath)
-    ref_program = OV.FindValue('snum_refinement_program')
-    sol_program = OV.FindValue('snum_solution_program')
+    ref_program = OV.GetParam('snum.refinement.program')
+    sol_program = OV.GetParam('snum.solution.program')
     if tree.current_refinement == 'solution' and 'smtbx' in sol_program:
       self.solution_program = sol_program
-      self.solution_method = OV.FindValue('snum_solution_method')
+      self.solution_method = OV.GetParam('snum.solution.method')
     elif tree.current_refinement != 'solution' and 'smtbx' in ref_program:
       self.refinement_program = ref_program
-      self.refinement_method = OV.FindValue('snum_refinement_method')
+      self.refinement_method = OV.GetParam('snum.refinement.method')
       try:
-        self.R1 = float(OV.FindValue('snum_refinement_last_R1'))
+        self.R1 = float(OV.GetParam('snum.refinement.last_R1'))
       except ValueError:
         pass
         
@@ -472,7 +481,9 @@ class HistoryLeaf:
   def getLeafInfo(self,filePath):
     if filePath[-4:] == '.lst':
       try:
-        lstValues = lst_reader.reader(open(filePath)).values()
+        lst_file = open(filePath)
+        lstValues = lst_reader.reader(lst_file).values()
+        lst_file.close()
       except:
         lstValues = {'R1':'','wR2':''}
       try:
@@ -483,11 +494,11 @@ class HistoryLeaf:
         self.wR2 = 'n/a'
         
       if self.R1 == 'n/a':
-        self.solution_program = OV.FindValue('snum_solution_program')
-        self.solution_method = OV.FindValue('snum_solution_method')
+        self.solution_program = OV.GetParam('snum.solution.program')
+        self.solution_method = OV.GetParam('snum.solution.method')
       else:
-        self.refinement_program = OV.FindValue('snum_refinement_program')
-        self.refinement_method = OV.FindValue('snum_refinement_method')
+        self.refinement_program = OV.GetParam('snum.refinement.program')
+        self.refinement_method = OV.GetParam('snum.refinement.method')
         
       self.program_version = lstValues.get('version',None)
       
@@ -496,7 +507,6 @@ class HistoryLeaf:
         iresValues = ires_reader.reader(open(filePath)).values()
       except:
         iresValues = {'R1':''}
-      #iresValues = InsRes(filePath).readInsOrRes()
       try:
         self.R1 = float(iresValues['R1'])
       except ValueError:
@@ -504,16 +514,17 @@ class HistoryLeaf:
       self.wR2 = 'n/a'
       self.refinement_method = 'n/a'
       self.refinement_program = 'n/a'
-    OV.SetVar('snum_refinement_last_R1', self.R1)
+    OV.SetParam('snum.refinement.last_R1', self.R1)
       
   def setLeafInfo(self):
-    OV.SetVar('snum_refinement_last_R1',self.R1)
-    OV.SetVar('snum_last_wR2',self.wR2)
+    OV.SetParam('snum.refinement.last_R1',self.R1)
+    OV.SetParam('snum.last_wR2',self.wR2)
     if self.refinement_program != 'n/a':
-      OV.SetVar('snum_refinement_program',self.refinement_program)
+      OV.SetParam('snum.refinement.program',self.refinement_program)
+      #olexex.onRefinementProgramChange(self.refinement_program)
     if self.refinement_method != 'n/a':
-      OV.SetVar('snum_refinement_method',self.refinement_method)
-  
+      OV.SetParam('snum.refinement.method',self.refinement_method)
+
 def compressFile(filePath):
   file = open(filePath)
   fileData = file.read()
@@ -548,14 +559,15 @@ def changeHistory(solution):
       
   tree.current_refinement = his_file
   hist.revert_history({'solution':tree.current_solution,'refinement':tree.current_refinement})
-  hist.snum_history_current_solution = solution
+  hist.params.snum.history.current_solution = solution
   hist._make_history_bars()
   hist.rename = False
-  hist.setVariables('history')
+  #hist.setVariables('history')
+  hist.setParams()
   #OV.UpdateHtml() # uncomment me!
   
 def historyChooserRenamer():
-  if 'Autochem' in OV.FindValue('snum_history_current_solution'):
+  if 'Autochem' in OV.GetParam('snum.history.current_solution'):
     autochem = True
   else:
     autochem = False
@@ -574,9 +586,9 @@ def historyChooserRenamer():
       type='combo'
       width='$eval(htmlpanelwidth()/2 -15)',
       height="17" 
-      bgcolor="GetVar(gui_html_input_bg_colour)"
+      bgcolor='$spy.GetParam(gui.html.input_bg_colour)'
       name='SET_HISTORY_CURRENT_SOLUTION',
-      value='GetVar(snum_history_current_solution)'
+      value='$spy.GetParam(snum.history.current_solution)'
       items='$spy.getAllHistories()'
       label='', 
       onchange='spy.changeHistory(GetValue(SET_HISTORY_CURRENT_SOLUTION))>>UpdateHtml'
@@ -615,11 +627,11 @@ def historyChooserRenamer():
       type='text',
       width='$eval(htmlpanelwidth()/2 -15)',
       height="17" 
-      bgcolor="GetVar(gui_html_input_bg_colour)"
+      bgcolor='$spy.GetParam(gui.html.input_bg_colour)'
       name='SET_SNUM_HISTORY_CURRENT_SOLUTION',
-      value='GetVar(snum_history_current_solution)'
+      value='$spy.GetParam(snum.history.current_solution)'
       label='', 
-      onchange="spy.rename_history -old=GetVar(snum_history_current_solution) -new=GetValue(SET_SNUM_HISTORY_CURRENT_SOLUTION)>>SetVar(rename,False)>>UpdateHtml"
+      onchange="spy.rename_history -old=$spy.GetParam(snum.history.current_solution) -new=GetValue(SET_SNUM_HISTORY_CURRENT_SOLUTION)>>SetVar(rename,False)>>UpdateHtml"
     >
     </font>
     </td>
@@ -630,7 +642,7 @@ def historyChooserRenamer():
       width="50" 
       height="18" 
       value="OK" 
-      onclick="spy.rename_history -old=GetVar(snum_history_current_solution) -new=GetValue(SET_SNUM_HISTORY_CURRENT_SOLUTION)>>SetVar(rename,False)>>UpdateHtml"
+      onclick="$spy.rename_history -old=$spy.GetParam(snum.history.current_solution) -new=GetValue(SET_SNUM_HISTORY_CURRENT_SOLUTION)>>SetVar(rename,False)>>UpdateHtml"
     >
     </td>
     """
