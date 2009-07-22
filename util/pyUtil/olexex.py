@@ -1033,7 +1033,7 @@ def GetHttpFile(f, force=False):
   retVal = None
   go_online = OV.GetParam("olex2.is_online")
   verbose = OV.FindValue("ac_verbose", "False")
-  if go_online.lower() == "True" or force:
+  if go_online or force:
     try:
       url = "%s/%s" %(URL, f.replace(" ",r"%20"))
       if verbose: print "--> Getting %s" %url,
@@ -1051,7 +1051,6 @@ def GetHttpFile(f, force=False):
       print url
   else:
     retVal = None
-    
   return retVal
 
 
