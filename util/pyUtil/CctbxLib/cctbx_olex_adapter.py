@@ -149,8 +149,6 @@ class OlexCctbxAdapter(object):
 class OlexCctbxRefine(OlexCctbxAdapter):
   def __init__(self, max_cycles=None, verbose=False):
     OlexCctbxAdapter.__init__(self)
-    if verbose.lower() == "false":
-      verbose = False
     self.verbose = verbose
     PT = PeriodicTable()
     self.pt = PT.PeriodicTable()
@@ -179,20 +177,21 @@ class OlexCctbxRefine(OlexCctbxAdapter):
     except Exception, err:
       print err
 
-    cctbxmap_type = 'None'
-    cctbxmap_resolution = 0.4
-    try:
-      cctbxmap_type = OV.FindValue('snum_cctbx_map_type')
-      if cctbxmap_type == "--":
-        cctbxmap_type = None
-      else:
-        cctbxmap_resolution = float(olx.GetValue('snum_cctbxmap_resolution'))
-    except:
-      pass
+    #cctbxmap_type = 'None'
+    #cctbxmap_resolution = 0.4
+    #try:
+      #cctbxmap_type = OV.FindValue('snum_cctbx_map_type')
+      #if cctbxmap_type == "--":
+        #cctbxmap_type = None
+      #else:
+        #cctbxmap_resolution = float(olx.GetValue('snum_cctbxmap_resolution'))
+    #except:
+      #pass
 
     olx.Compaq()
-    if cctbxmap_type and cctbxmap_type !='None': 
-      self.write_grid_file(cctbxmap_type, cctbxmap_resolution)
+    #if cctbxmap_type and cctbxmap_type !='None': 
+      #self.write_grid_file(cctbxmap_type, cctbxmap_resolution)
+
     dt = time.time() - t0
     print "++++ Finished in %.3f s" %dt
     #print "++++ Refine in XL with L.S.0"
@@ -632,7 +631,7 @@ class OlexSetupCctbxTwinLaws(OlexCctbxAdapter):
 def charge_flipping_loop(solving, verbose=True):
   HasGUI = OV.HasGUI()
   plot = None
-  if HasGUI and OV.FindValue('snum_solution_graphical_output'):
+  if HasGUI and OV.GetParam('snum.solution.graphical_output'):
     import Analysis
     plot = Analysis.ChargeFlippingPlot()
   OV.SetVar('stop_current_process',False)
