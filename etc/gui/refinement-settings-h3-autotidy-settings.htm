@@ -3,7 +3,7 @@
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_PRUNE_Q'>
 	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 	<td VALIGN='center'  colspan=3>
-		<b>Auto-<a href='sel atoms where xatom.peak<$GetVar(snum_refinement_auto_pruneQ)&&xatom.peak>0>>kill sel'>Prune Peaks</a> smaller than</b>
+		<b>Auto-<a href='sel atoms where xatom.peak<$spy.GetParam(snum.refinement.auto.pruneQ)&&xatom.peak>0>>kill sel'>Prune Peaks</a> smaller than</b>
 	</td>
 	<td VALIGN='center' ALIGN='center'  colspan=1>
 		<font size='2'>
@@ -11,10 +11,10 @@
 				type='combo'
 				width="50"
 				height="17"
-				name='SET_SNUM_refinement_auto_pruneQ',
+				name='SET_SNUM_REFINEMENT_AUTO_PRUNEQ',
 				items=' ;0.1;0.5;1.0;1.5;2.0'
-				value='GetVar(snum_refinement_auto_pruneQ)'
-				onchange='SetVar(snum_refinement_auto_pruneQ,GetValue(SET_SNUM_refinement_auto_pruneQ))' 
+				value='$spy.GetParam(snum.refinement.auto.pruneQ)'
+				onchange='spy.SetParam(snum.refinement.auto.pruneQ,GetValue(SET_SNUM_REFINEMENT_AUTO_PRUNEQ))' 
 			>
 		</font>
 	</td>
@@ -22,7 +22,7 @@
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_ASSIGN_Q'>
 	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 	<td VALIGN='center' colspan=3>
-		<b>Auto-<a href='sel atoms where xatom.peak>$GetVar(snum_refinement_auto_assignQ)>>name sel C>>sel -a>>name sel 1 -c'>Assign as C</a> Peaks > </b>
+		<b>Auto-<a href='sel atoms where xatom.peak>$spy.GetParam(snum.refinement.auto.assignQ)>>name sel C>>sel -a>>name sel 1 -c'>Assign as C</a> Peaks > </b>
 	</td>
 	<td VALIGN='center' ALIGN='center'  colspan=1>
 		<font size='2'>
@@ -30,10 +30,10 @@
 				type='combo'
 				width="50"
 				height="17"
-				name='SET_SNUM_refinement_auto_assignQ'
+				name='SET_SNUM_REFINEMENT_AUTO_ASSIGNQ'
 				items=' ;1.5;2.0;2.5;3.0'
-				value='GetVar(snum_refinement_auto_assignQ)'
-				onchange='SetVar(snum_refinement_auto_assignQ,GetValue(SET_SNUM_refinement_auto_assignQ))'
+				value='$spy.GetParam(snum.refinement.auto.assignQ)'
+				onchange='spy.SetParam(snum.refinement.auto.assignQ,GetValue(SET_SNUM_REFINEMENT_AUTO_ASSIGNQ))'
 			>
 		</font>
 	</td>
@@ -41,7 +41,7 @@
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_PRUNE_U'>
 	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 	<td VALIGN='center' colspan=3>
-		<b>Auto-<a href='sel atoms where xatom.uiso>$GetVar(snum_refinement_auto_pruneU)>>kill sel'>Prune Atoms</a> where U<sub>eq</sub> > </b>
+		<b>Auto-<a href='sel atoms where xatom.uiso>$spy.GetParam(snum.refinement.auto.pruneU)>>kill sel'>Prune Atoms</a> where U<sub>eq</sub> > </b>
 	</td>
 	<td VALIGN='center' ALIGN='center'  colspan=1>
 		<font size='2'>
@@ -49,15 +49,14 @@
 				type='combo',
 				width="50"
 				height="17"
-				name='SET_SNUM_refinement_auto_pruneU',
+				name='SET_SNUM_REFINEMENT_AUTO_PRUNEU',
 				items=' ;0.06;0.08;0.10;0.12',
-				value='GetVar(snum_refinement_auto_pruneU)',
-				onchange='SetVar(snum_refinement_auto_pruneU,GetValue(SET_SNUM_refinement_auto_pruneU))' 
+				value='$spy.GetParam(snum.refinement.auto.pruneU)',
+				onchange='spy.SetParam(snum.refinement.auto.pruneU,GetValue(SET_SNUM_REFINEMENT_AUTO_PRUNEU))' 
 			>
 		</font>
 	</td>
 </tr>
-
 <tr VALIGN='center' ALIGN='left' NAME='ASSEMBLE_STRUCTURE'>
 	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 	<td VALIGN='center'  colspan=3>
@@ -70,9 +69,9 @@
 				width=12
 				height=12
 				name='SET_SNUM_REFINEMENT_AUTO_ASSEMBLE'
-				$spy.CheckBoxValue(snum_refinement_auto_assemble)
-				oncheck='SetVar(snum_refinement_auto_assemble,true)'
-				onuncheck='SetVar(snum_refinement_auto_assemble,false)'
+				$spy.CheckBoxValue(snum.refinement.auto.assemble)
+				oncheck='spy.SetParam(snum.refinement.auto.assemble,true)'
+				onuncheck='spy.SetParam(snum.refinement.auto.assemble,false)'
 				value=''
 			>&nbsp;
 		</font>

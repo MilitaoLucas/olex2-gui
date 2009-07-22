@@ -13,9 +13,9 @@
 			type="combo" 
 			name="SET_OLEX_CONRES" 
 			items='RRINGS;TRIA;'
-			value="GetVar(snum_olex_conres)" 
+			value="$spy.GetParam(snum.olex_conres)" 
 			width="55" 
-			onchange="SetVar(snum_olex_conres,GetValue(SET_OLEX_CONRES))>>spy.restraint_builder(GetVar(snum_olex_conres))"
+			onchange="spy.SetParam(snum.olex_conres,GetValue(SET_OLEX_CONRES))>>spy.restraint_builder(GetValue(SET_OLEX_CONRES))"
 			height="17" 
 			label="Name"
 			readonly

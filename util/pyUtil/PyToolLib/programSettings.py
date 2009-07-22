@@ -106,10 +106,10 @@ def makeArgumentsHTML(dictionary):
     
     onchange = 'spy.addInstruction(%s)>>SetVar(%s,GetValue(SET_%s))' %(argName,varName,varName.upper())
     if name == 'nls':
-      maxCycles_onchange = '%s>>SetVar(snum_refinement_max_cycles,GetValue(SET_SETTINGS_%s_NLS))>>updatehtml' %(onchange,argName.upper())
+      maxCycles_onchange = '%s>>spy.SetParam(snum.refinement.max_cycles,GetValue(SET_SETTINGS_%s_NLS))>>updatehtml' %(onchange,argName.upper())
       d.setdefault('onleave', maxCycles_onchange)
     elif name == 'npeaks':
-      maxPeaks_onchange = '%s>>SetVar(snum_refinement_max_peaks,GetValue(SET_SETTINGS_%s_NPEAKS))>>updatehtml' %(onchange,argName.upper())
+      maxPeaks_onchange = '%s>>spy.SetParam(snum.refinement.max_peaks,GetValue(SET_SETTINGS_%s_NPEAKS))>>updatehtml' %(onchange,argName.upper())
       d.setdefault('onleave', maxPeaks_onchange)
     else:
       d.setdefault('onleave', onchange)
@@ -138,8 +138,8 @@ def make_ondown(dictionary):
 def addInstruction(instruction):
   if OV.FindValue('settings_%s' %instruction) != 'true':
     return
-  program = RPD.programs[OV.FindValue('snum_refinement_program')]
-  method = program.methods[OV.FindValue('snum_refinement_method')]
+  program = RPD.programs[OV.GetParam('snum.refinement.program')]
+  method = program.methods[OV.GetParam('snum.refinement.method')]
   
   for arg in method.args:
     if arg['name'] == instruction:
@@ -161,10 +161,10 @@ OV.registerFunction(addInstruction)
 def onMaxCyclesChange():
   if not OV.IsFileType('ires'):
     return
-  maxCycles = OV.FindValue('snum_refinement_max_cycles')
+  maxCycles = OV.GetParam('snum.refinement.max_cycles')
   try:
-    prg = RPD.programs[OV.FindValue('snum_refinement_program')]
-    method = prg.methods[OV.FindValue('snum_refinement_method')]
+    prg = RPD.programs[OV.GetParam('snum.refinement.program')]
+    method = prg.methods[OV.GetParam('snum.refinement.method')]
   except KeyError:
     return
   
@@ -182,10 +182,10 @@ OV.registerFunction(onMaxCyclesChange)
 def onMaxPeaksChange():
   if not OV.IsFileType('ires'):
     return
-  maxPeaks = OV.FindValue('snum_refinement_max_peaks')
+  maxPeaks = OV.GetParam('snum.refinement.max_peaks')
   try:
-    prg = RPD.programs[OV.FindValue('snum_refinement_program')]
-    method = prg.methods[OV.FindValue('snum_refinement_method')]
+    prg = RPD.programs[OV.GetParam('snum.refinement.program')]
+    method = prg.methods[OV.GetParam('snum.refinement.method')]
   except KeyError:
     return
   

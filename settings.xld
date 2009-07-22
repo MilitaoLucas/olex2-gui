@@ -24,8 +24,8 @@
   <shortcut key="Ctrl+2" macro="showP 2">
   <shortcut key="Ctrl+Shift+2" macro="showP 0 2">
   <shortcut key="Ctrl+Shift+r" macro="py.run basedir()\util\pyUtil\CctbxLib\cctbx_olex_adapter.py">
-  <shortcut key="Ctrl+Shift+y" macro="SetVar(snum_refinement_auto_tidy,true)>>updatehtml">
-  <shortcut key="Ctrl+y" macro="SetVar(snum_refinement_auto_tidy,false)>>updatehtml">
+  <shortcut key="Ctrl+Shift+y" macro="spy.SetParam(snum.refinement.auto.tidy,True)>>updatehtml">
+  <shortcut key="Ctrl+y" macro="spy.SetParam(snum.refinement.auto.tidy,False)>>updatehtml">
   <shortcut key="break" macro="SetVar(stop_current_process,True)">
 
 >

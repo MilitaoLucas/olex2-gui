@@ -37,13 +37,17 @@ class RunPrg(ArgumentParser):
       
       
       
-    self.getVariables('auto')
+    self.params = olx.phil_handler.get_python_object()
+    #self.getVariables('auto')
     OV.SetVar('SlideQPeaksVal','0') # reset q peak slider to display all peaks
     if not self.filename:
       print "No structure loaded"
       return
     self.original_filename = self.filename
     olx.Stop('listen')
+
+  def __del__(self):
+    olx.phil_handler.update_from_python(self.params)
 
   def which_shelx(self, type="xl"):
     a = olexex.which_program(type)
@@ -138,7 +142,7 @@ class RunPrg(ArgumentParser):
     print 'STARTING cctbx refinement'
     OV.reloadStructureAtreap(self.filePath, self.curr_file)
     #olx.Atreap(r"%s" %(r"%s/%s.ins" %(self.filePath, self.curr_file)))
-    cctbx = OlexSetupRefineCctbxAuto('refine', self.snum_refinement_max_cycles)
+    cctbx = OlexSetupRefineCctbxAuto('refine', self.params.snum.refinement.max_cycles)
     try:
       cctbx.run()
     except Exception, err:
@@ -160,27 +164,27 @@ class RunPrg(ArgumentParser):
         os.remove(lstFile)
       olx.DelIns("TREF")
       
-    if OV.FindValue('snum_refinement_auto_max_peaks'):
+    if self.params.snum.refinement.auto.max_peaks:
       max_peaks = olexex.OlexAtoms().getExpectedPeaks()
       if max_peaks <= 5:
-        OV.SetVar('snum_refinement_auto_pruneQ', 0.5)
-        OV.SetVar('snum_refinement_auto_assignQ', 6.0)
+        self.params.snum.refinement.auto.pruneQ = 0.5
+        self.params.snum.refinement.auto.assignQ = 6.0
       else:
-        OV.SetVar('snum_refinement_auto_pruneQ', 1.5)
-        OV.SetVar('snum_refinement_auto_assignQ', 2.0)
+        self.params.snum.refinement.auto.pruneQ = 1.5
+        self.params.snum.refinement.auto.assignQ = 2.0
     self.method.unregisterCallback()
 
   def getProgramMethod(self, fun):
     if fun == 'refine':
       prgType = 'refinement'
       prgDict = self.RPD
-      prg = self.snum_refinement_program
-      method = self.snum_refinement_method
+      prg = self.params.snum.refinement.program
+      method = self.params.snum.refinement.method
     else:
       prgType = 'solution'
       prgDict = self.SPD
-      prg = self.snum_solution_program
-      method = self.snum_solution_method
+      prg = self.params.snum.solution.program
+      method = self.params.snum.solution.method
     try:
       program = prgDict.programs[prg]
     except KeyError:
@@ -214,14 +218,15 @@ class RunSolutionPrg(RunPrg):
     if self.terminate:
       self.endRun()
       return
-    if self.snum_solution_graphical_output and self.HasGUI:
+    if self.params.snum.solution.graphical_output and self.HasGUI:
       self.method.observe(self)
     self.method.run(self)
     self.runAfterProcess()
     self.endRun()
     sys.stdout.refresh = False
     sys.stdout.graph = False
-    
+    olx.phil_handler.update_from_python(self.params)
+
   def runAfterProcess(self):
     RunPrg.runAfterProcess(self)
     self.method.post_solution(self)
@@ -240,18 +245,18 @@ class RunSolutionPrg(RunPrg):
     olx.Reset(args)
     
   def doHistoryCreation(self):
-    OV.SetVar('snum_refinement_last_R1', 'Solution')
+    self.params.snum.refinement.last_R1 = 'Solution'
     self.his_file = hist.create_history(solution=True)
     return self.his_file
-    
+
 
 class RunRefinementPrg(RunPrg):
   def __init__(self):
     RunPrg.__init__(self)
-    self.getVariables('refinement')
+    #self.getVariables('refinement')
     self.program, self.method = self.getProgramMethod('refine')
     self.run()
-    
+
   def run(self):
     olx.File("'%s/%s.ins'" %(OV.FilePath(),self.original_filename))
     self.setupRefine()
@@ -260,14 +265,14 @@ class RunRefinementPrg(RunPrg):
     if self.terminate:
       self.endRun()
       return
-    if self.snum_refinement_graphical_output and self.HasGUI:
+    if self.params.snum.refinement.graphical_output and self.HasGUI:
       self.method.observe(self)
     self.method.run(self)
     self.runAfterProcess()
     self.endRun()
     sys.stdout.refresh = False
     sys.stdout.graph = False
-    
+
   def setupRefine(self):
     self.bitmap = 'refine'
     self.method.pre_refinement(self)
@@ -278,10 +283,10 @@ class RunRefinementPrg(RunPrg):
 
   def doAutoTidyBefore(self):
     olx.Clean('-npd -aq=0.1 -at')
-    if self.snum_refinement_auto_assignQ:
-      olx.Sel('atoms where xatom.peak>%s' %self.snum_refinement_auto_assignQ)
+    if self.params.snum.refinement.auto_assignQ:
+      olx.Sel('atoms where xatom.peak>%s' %self.params.snum.refinement.auto_assignQ)
       olx.Name('sel C')
-    if self.snum_refinement_auto_pruneU:
+    if self.params.snum.refinement.auto_pruneU:
       i = 0
       uref = 0
       for i in xrange(int(olx.xf_au_GetAtomCount())):
@@ -290,7 +295,7 @@ class RunRefinementPrg(RunPrg):
           if uref == ueq:
             continue
           else:
-            olx.Sel('atoms where xatom.uiso>%s' %self.snum_refinement_auto_pruneU)
+            olx.Sel('atoms where xatom.uiso>%s' %self.params.snum.refinement.auto_pruneU)
             olx.Kill('sel')
             break
         else:
@@ -302,6 +307,7 @@ class RunRefinementPrg(RunPrg):
       pass
 
   def doAutoTidyAfter(self):
+    auto = self.params.snum.refinement.auto
     olx.Clean('-npd -aq=0.1 -at')
     if self.tidy:
       olx.Sel('atoms where xatom.uiso>0.07')
@@ -310,19 +316,19 @@ class RunRefinementPrg(RunPrg):
     if self.isAllQ:
       olx.Sel('atoms where xatom.uiso>0.07')
       olx.Kill('sel')
-    if self.snum_refinement_auto_pruneQ:
-      olx.Sel('atoms where xatom.peak<%.3f&&xatom.peak>0' %float(self.snum_refinement_auto_pruneQ))
+    if auto.pruneQ:
+      olx.Sel('atoms where xatom.peak<%.3f&&xatom.peak>0' %float(auto.pruneQ))
       olx.Kill('sel')
       #olx.ShowQ('a true') # uncomment me!
       #olx.ShowQ('b true') # uncomment me!
-    if self.snum_refinement_auto_pruneU:
-      olx.Sel('atoms where xatom.uiso>%s' %self.snum_refinement_auto_pruneU)
+    if auto.pruneU:
+      olx.Sel('atoms where xatom.uiso>%s' %auto.pruneU)
       olx.Kill('sel')
-    if self.snum_refinement_auto_assignQ:
-      olx.Sel('atoms where xatom.peak>%s' %self.snum_refinement_auto_assignQ)
+    if auto.assignQ:
+      olx.Sel('atoms where xatom.peak>%s' %auto.assignQ)
       olx.Name('sel C')
       olx.Sel('-u')
-    if self.snum_refinement_auto_assemble == True:
+    if auto.assemble == True:
       olx.Compaq('-a')
       olx.Move()
     else:
@@ -332,7 +338,7 @@ class RunRefinementPrg(RunPrg):
   def runAfterProcess(self):
     RunPrg.runAfterProcess(self)
     self.doHistoryCreation()
-    if self.snum_refinement_auto_tidy:
+    if self.params.snum.refinement.auto.tidy:
       self.doAutoTidyAfter()
       OV.File()
   
@@ -350,7 +356,7 @@ class RunRefinementPrg(RunPrg):
         R1 = False
         
     if R1:
-      OV.SetVar('snum_refinement_last_R1', R1)
+      self.params.snum.refinement.last_R1 = str(R1)
       try:
         self.his_file = hist.create_history()
       except Exception, ex:

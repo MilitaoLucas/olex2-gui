@@ -6,6 +6,7 @@ try:
 except ImportError:
   import pickle # fall back on Python version
 import olex
+import olx
 import userDictionaries
 import ExternalPrgParameters
 
@@ -16,6 +17,11 @@ import variableDefinitions
 from variables import *
 
 initialisingVariables = False
+
+import phil_interface
+
+import iotbx.phil
+import libtbx.phil.command_line
 
 class VVD:
   def __init__(self):
@@ -407,15 +413,15 @@ def convertVVD(vvd,whichVVD):
 
 def AddVariableToUserInputList(variable):
   """Adds the name of the variable to a list of user-edited variables."""
-  oldValue = OV.FindValue("snum_metacif_user_input_variables")
-  if oldValue == 'None':
-    newValue = variable
-  elif variable in oldValue:
-    newValue = oldValue
-  else:
-    newValue = oldValue + ";" + variable
-  OV.SetVar("snum_metacif_user_input_variables", newValue)
-  return ""
+  variable_list = OV.GetParam("snum.metacif.user_input_variables")
+  variable = str(variable) # get rid of unicode
+  if variable_list is None:
+    variable_list = variable
+    OV.SetParam("snum.metacif.user_input_variables", variable_list)
+  elif variable_list is not None and variable not in variable_list:
+    variable_list.append(variable)
+    variable_list = ' '.join('"%s"' %var for var in variable_list)
+    OV.SetParam("snum.metacif.user_input_variables", variable_list)
 OV.registerFunction(AddVariableToUserInputList)
 
 def SwitchAllAlertsOn():
@@ -434,3 +440,102 @@ def StoreParameters(type=""):
   else:
     print "Please provide the type of variable you want to save (e.g. gui, snum)"
 OV.registerFunction(StoreParameters)
+
+def VVD_to_phil():
+  phil_strings = []
+  structureVVDPath = r"%s/.olex/%s.vvd" %(OV.FilePath(),OV.FileName())
+  # Changed pickle file name from 'vvd.pickle' to 'OV.FileName().vvd'
+  oldPicklePath = r"%s/.olex/vvd.pickle" %OV.FilePath()
+  #snum_scopes = ('refinement','dimas','metacif','history','solution','report','workflow')
+  snum_scopes = ('refinement','metacif','history','solution','report')
+
+  if os.path.exists(structureVVDPath):  # Load structure-level stored values
+    structureFile = open(structureVVDPath)
+    structureVVD = pickle.load(structureFile)
+    structureFile.close()
+  elif os.path.exists(oldPicklePath):
+    # get vvd from old pickle file, save it to new file and then remove old file
+    oldFile = open(oldPicklePath)
+    structureVVD = pickle.load(oldFile)
+    pickleVVD(structureVVD)
+    oldFile.close()
+    os.remove(oldPicklePath)
+    structureFile = open(structureVVDPath)
+    structureVVD = pickle.load(structureFile)
+  else:
+    return
+  if structureVVD.has_key('refinement'):  # Convert old-format VVD
+    structureVVD = convertVVD(structureVVD,'structure')
+
+  for variable, value in structureVVD.items():  # Set values of all variables in Olex2
+    variable_name = variable[5:] # remove "snum_" from beginning of name
+    for scope in snum_scopes:
+      if variable_name.startswith(scope):
+        variable_name = variable_name.replace('%s_' %scope, '%s.' %scope).replace('-','_')
+        if 'auto_' in variable_name:
+          variable_name = variable_name.replace('auto_','auto.')
+        if value not in ('?','--','.'): # XXX
+          phil_strings.append('snum.%s="%s"' %(variable_name, value))
+        break
+  return '\n'.join(phil_strings)
+
+def get_user_phil():
+  user_phil_file = "%s/params.phil" %OV.DataDir()
+  if os.path.isfile(user_phil_file):
+    return iotbx.phil.parse(file_name=user_phil_file)
+  else:
+    return None
+
+def LoadParams():
+  master_phil = iotbx.phil.parse(
+    file_name="%s/params.phil" %OV.BaseDir())
+  solutionPrg, solutionMethod = getDefaultPrgMethod('Solution')
+  refinementPrg, refinementMethod = getDefaultPrgMethod('Refinement')
+  programs_phil =iotbx.phil.parse("""
+snum {
+  refinement.program = "%s"
+  refinement.method = "%s"
+  solution.program = "%s"
+  solution.method = "%s"
+}
+""" %(refinementPrg, refinementMethod, solutionPrg, solutionMethod))
+  sources = [programs_phil]
+  user_phil = get_user_phil()
+  if user_phil is not None:
+    sources.append(user_phil)
+  working_phil = master_phil.fetch(sources=sources)
+  phil_handler = phil_interface.phil_handler(master_phil=working_phil)
+  olx.phil_handler = phil_handler
+OV.registerFunction(LoadParams)
+
+def LoadStructureParams():
+  olx.phil_handler = olx.phil_handler.copy()
+  snum_phil = """
+snum {
+  report.title = "%s"
+  report.image = "%s/screenshot.png"
+  }
+""" %(OV.FileName(), OV.FilePath())
+  olx.phil_handler.update(snum_phil)
+  structure_phil_path = "%s/.olex/%s.phil" %(OV.FilePath(), OV.FileName())
+  if os.path.isfile(structure_phil_path):
+    structure_phil_file = open(structure_phil_path, 'r')
+    structure_phil = structure_phil_file.read()
+    structure_phil_file.close()
+  else:
+    # check if old-style vvd file is present
+    structure_phil = VVD_to_phil()
+    if structure_phil is None:
+      return
+  olx.phil_handler.update(structure_phil)
+  #olx.phil_handler.get_phil_help_string('snum.refinement.max_cycles')
+OV.registerFunction(LoadStructureParams)
+
+def SaveStructureParams():
+  if OV.FileName() != 'none':
+    structure_phil_file = "%s/.olex/%s.phil" %(OV.FilePath(), OV.FileName())
+    olx.phil_handler.save_param_file(file_name=structure_phil_file, diff_only=True)
+OV.registerFunction(SaveStructureParams)
+
+OV.registerFunction(OV.GetParam)
+OV.registerFunction(OV.SetParam)

@@ -6,40 +6,39 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import htmlTools
 import olexex_setup
-#from htmlTools import *
 import variableFunctions
 
 def sourceFilesHtmlMaker():
   list = [
-    {'varName':'snum_metacif_sad_file',
+    {'varName':'snum.metacif.sad_file',
      'itemName':'SADABS %File%',
      'chooseFile':{'filter':'*.abs'}
      },
-    {'varName':'snum_metacif_pcf_file',
+    {'varName':'snum.metacif.pcf_file',
      'itemName':'pcf %File%',
      'chooseFile':{'filter':'*.pcf'}
      },
-    {'varName':'snum_metacif_p4p_file',
+    {'varName':'snum.metacif.p4p_file',
      'itemName':'p4p %File%',
      'chooseFile':{'filter':'*.p4p'}
      },
-    {'varName':'snum_metacif_smart_file',
+    {'varName':'snum.metacif.smart_file',
      'itemName':'SMART %File%',
      'chooseFile':{'filter':'*.ini'}
      },                                      
-    {'varName':'snum_metacif_saint_file',
+    {'varName':'snum.metacif.saint_file',
      'itemName':'SAINT %File%',
      'chooseFile':{'filter':'*.ini'}
      },                      
-    {'varName':'snum_metacif_frames_file',
+    {'varName':'snum.metacif.frames_file',
      'itemName':'%Frame% %File%',
      'chooseFile':{'filter':'*.*'}
      },                      
-    {'varName':'snum_metacif_integ_file',
+    {'varName':'snum.metacif.integ_file',
      'itemName':'%Integration% %File%',
      'chooseFile':{'filter':'*._ls'}
      },                      
-    {'varName':'snum_metacif_cad4_file',
+    {'varName':'snum.metacif.cad4_file',
      'itemName':'cad4 %File%',
      'chooseFile':{'filter':'*.dat'}
      },                      
@@ -49,13 +48,13 @@ def sourceFilesHtmlMaker():
   x = 0
   for i in range(len(list)):
     d = list[x]
-    listFiles = 'snum_metacif_list_%s_files'  %d['varName'].split('_')[-2]
-    var = OV.FindValue(listFiles)
-    if var != '--':
+    listFiles = 'snum.metacif.list_%s_files'  %d['varName'].split('.')[-1].split('_')[-2]
+    var = OV.GetParam(listFiles)
+    if var is not None:
       if ';' in var:
-        d.setdefault('items', 'GetVar(%s)' %listFiles)
+        d.setdefault('items', 'spy.GetParam(%s)' %listFiles)
       x += 1
-      d.setdefault('onchange',"setVar(%s,'GetValue(SET_%s)')>>spy.AddVariableToUserInputList(%s)>>spy cif" %(d['varName'],str.upper(d['varName']),d['varName']))
+      d.setdefault('onchange',"spy.SetParam(%s,'GetValue(SET_%s)')>>spy.AddVariableToUserInputList(%s)>>spy cif" %(d['varName'],str.upper(d['varName']).replace('.','_'),d['varName']))
       d['chooseFile'].setdefault('folder',OV.FilePath())
       d['chooseFile'].setdefault('var',d['varName'])
       d['chooseFile'].setdefault('caption',d['itemName'])
@@ -73,7 +72,7 @@ OV.registerFunction(sourceFilesHtmlMaker)
 
 def diffractionMetadataHtmlMaker():
   list = (
-    {'varName':'snum_report_diffractometer',
+    {'varName':'snum.report.diffractometer',
      'readonly':'',
      'itemName':'%Diffractometer%',
      'items':userDictionaries.localList.getListDiffractometers(),
@@ -81,28 +80,28 @@ def diffractionMetadataHtmlMaker():
      },
   )
 
-  if OV.FindValue('snum_report_diffractometer') != '?':
+  if OV.GetParam('snum.report.diffractometer') != '?':
     list += (
-      {'varName':'snum_report_diffractometer_definition_file',
+      {'varName':'snum.report.diffractometer_definition_file',
        'itemName':'%Definition File%',
-       'value':userDictionaries.localList.getDiffractometerDefinitionFile(OV.FindValue('snum_report_diffractometer')),
+       'value':userDictionaries.localList.getDiffractometerDefinitionFile(OV.GetParam('snum.report.diffractometer')),
        'chooseFile':{
          'caption':'Choose definition file',
          'filter':'*.cif',
          'folder':'%s/Util/SiteSpecific' %OV.BaseDir(),
-         'function':'spy.setDiffractometerDefinitionFile(GetVar(snum_metacif_diffrn_measurement_device_type),'
+         'function':'spy.setDiffractometerDefinitionFile(spy.GetParam(snum.metacif.diffrn_measurement_device_type),'
          },
        },
     )
     
   list += (
-    {'varName':'snum_metacif_diffrn_ambient_temperature',
+    {'varName':'snum.metacif.diffrn_ambient_temperature',
      'itemName':'%Diffraction Temperature% (K)'
      },					
-    {'varName':'snum_metacif_cell_measurement_temperature',
+    {'varName':'snum.metacif.cell_measurement_temperature',
      'itemName':'%Cell Measurement Temperature% (K)'
      },
-    {'varName':'snum_metacif_diffrn_special_details',
+    {'varName':'snum.metacif.diffrn_special_details',
      'itemName':'%Special Details%',
      'multiline':'multiline'
      }
@@ -113,42 +112,42 @@ OV.registerFunction(diffractionMetadataHtmlMaker)
 
 def crystalMetadataHtmlMaker():
   list = (
-    {'varName':'snum_metacif_chemical_name_systematic',
+    {'varName':'snum.metacif.chemical_name_systematic',
      'itemName':'%Systematic Name%',
      },
-    {'varName':'snum_metacif_exptl_crystal_colour',
+    {'varName':'snum.metacif.exptl_crystal_colour',
      'itemName':'%Colour%',
-     'box1':{'varName':'snum_metacif_exptl_crystal_colour_lustre',
+     'box1':{'varName':'snum.metacif.exptl_crystal_colour_lustre',
              'items':'?;n/a;metallic;dull;clear'
              },
-     'box2':{'varName':'snum_metacif_exptl_crystal_colour_modifier',
+     'box2':{'varName':'snum.metacif.exptl_crystal_colour_modifier',
              'items':'?;n/a;light;dark;whitish;blackish;grayish;brownish;reddish;pinkish;orangish;yellowish;greenish;bluish'
              },
-     'box3':{'varName':'snum_metacif_exptl_crystal_colour_primary',
+     'box3':{'varName':'snum.metacif.exptl_crystal_colour_primary',
              'items':'?;colourless;white;black;gray;brown;red;pink;orange;yellow;green;blue;violet'
              },
      },
-    {'varName':'snum_metacif_exptl_crystal_size',
+    {'varName':'snum.metacif.exptl_crystal_size',
      'itemName':'%Size%',
-     'box1':{'varName':'snum_metacif_exptl_crystal_size_min',
+     'box1':{'varName':'snum.metacif.exptl_crystal_size_min',
              'width':'50'
              },
-     'box2':{'varName':'snum_metacif_exptl_crystal_size_mid',
+     'box2':{'varName':'snum.metacif.exptl_crystal_size_mid',
              'width':'50'
              },
-     'box3':{'varName':'snum_metacif_exptl_crystal_size_max',
+     'box3':{'varName':'snum.metacif.exptl_crystal_size_max',
              'width':'50'
              },
      },
-    {'varName':'snum_metacif_exptl_crystal_description',
+    {'varName':'snum.metacif.exptl_crystal_description',
      'itemName':'%Shape%',
      'items':'?;block;plate;needle;prism;irregular;cube;trapezoid;rect. Prism;rhombohedral;hexagonal;octahedral',
      },
-    {'varName':'snum_metacif_exptl_crystal_preparation',
+    {'varName':'snum.metacif.exptl_crystal_preparation',
      'itemName':'%Preparation Details%',
      'multiline':'multiline',
      },
-    {'varName':'snum_metacif_exptl_crystal_recrystallization_method',
+    {'varName':'snum.metacif.exptl_crystal_recrystallization_method',
      'itemName':'%Crystallisation Details%',
      'multiline':'multiline',
      },
@@ -159,22 +158,22 @@ OV.registerFunction(crystalMetadataHtmlMaker)
 
 def collectionMetadataHtmlMaker():
   list = (
-    {'varName':'snum_report_submitter',
+    {'varName':'snum.report.submitter',
      'itemName':'%Submitter%',
      'items':userDictionaries.people.getListPeople(),
      'readonly':'',
-     'onchange':"SetVar(snum_report_submitter,GetValue(SET_SNUM_REPORT_SUBMITTER))>>spy.addNewPerson(GetValue(SET_SNUM_REPORT_SUBMITTER))>>updatehtml",
+     'onchange':"spy.SetParam(snum.report.submitter,GetValue(SET_SNUM_REPORT_SUBMITTER))>>spy.addNewPerson(GetValue(SET_SNUM_REPORT_SUBMITTER))>>updatehtml",
      },
-    {'varName':'snum_report_operator',
+    {'varName':'snum.report.operator',
      'itemName':'%Operator%',
      'items':userDictionaries.people.getListPeople(),
      'readonly':'',
-     'onchange':"SetVar(snum_report_operator,GetValue(SET_SNUM_REPORT_OPERATOR))>>spy.addNewPerson(GetValue(SET_SNUM_REPORT_OPERATOR))>>updatehtml",
+     'onchange':"spy.SetParam(snum.report.operator,GetValue(SET_SNUM_REPORT_OPERATOR))>>spy.addNewPerson(GetValue(SET_SNUM_REPORT_OPERATOR))>>updatehtml",
      },
-    {'varName':'snum_report_date_submitted',
+    {'varName':'snum.report.date_submitted',
      'itemName':'%Date Submitted%',
      },
-    {'varName':'snum_report_date_collected',
+    {'varName':'snum.report.date_collected',
      'itemName':'%Date Collected%',
      },
   )
@@ -184,11 +183,11 @@ OV.registerFunction(collectionMetadataHtmlMaker)
 
 def progressMetadataHtmlMaker():
   list = (
-    {'varName':'snum_dimas_progress_status',
+    {'varName':'snum.dimas.progress_status',
      'itemName':'%Status%',
      'items':'No Entry;Aborted;Rejected;Withdrawn;Lost;In Queue;Collecting;Reduction;Solving;Refining;Pending;Processing;Finishing;Finished;Publishing;Published;Published Duplicate;Known structure'
      },
-    {'varName':'snum_dimas_progress_comment',
+    {'varName':'snum.dimas.progress_comment',
      'itemName':'%Comment%',
      'multiline':'multiline'
      },
@@ -198,26 +197,26 @@ OV.registerFunction(progressMetadataHtmlMaker)
 
 def referenceMetadataHtmlMaker():
   list = (
-    {'varName':'snum_dimas_reference_csd_refcode',
+    {'varName':'snum.dimas.reference_csd_refcode',
      'itemName':'%CSD% %Refcode%',
      },
-    {'varName':'snum_dimas_reference_publ_authors',
+    {'varName':'snum.dimas.reference_publ_authors',
      'itemName':'%Authors%',
      },
-    {'varName':'snum_dimas_reference_journal_name',
+    {'varName':'snum.dimas.reference_journal_name',
      'itemName':'%Journal%',
      'items':userDictionaries.localList.getListJournals()
      },
-    {'varName':'snum_dimas_reference_journal_volume',
+    {'varName':'snum.dimas.reference_journal_volume',
      'itemName':'%Volume%',
      },
-    {'varName':'snum_dimas_reference_journal_pages',
+    {'varName':'snum.dimas.reference_journal_pages',
      'itemName':'%Volume%',
      },
-    {'varName':'snum_dimas_reference_journal_year',
+    {'varName':'snum.dimas.reference_journal_year',
      'itemName':'%Year%',
      },
-    {'varName':'snum_dimas_reference_comment',
+    {'varName':'snum.dimas.reference_comment',
      'itemName':'%Comment%',
      'multiline':'multiline'
      },
@@ -227,13 +226,14 @@ OV.registerFunction(referenceMetadataHtmlMaker)
 
 def publicationMetadataHtmlMaker():
   list = [
-    {'varName':'snum_dimas_reference_ccdc_number',
+    {'varName':'snum.dimas.reference_ccdc_number',
      'itemName':'CCDC %Number%',
      },
-    {'varName':'snum_metacif_publ_contact_author_name',
+    {'varName':'snum.metacif.publ_contact_author_name',
      'itemName':'%Contact% %Author%',
      'items':userDictionaries.people.getListPeople(),
-     'readonly':''
+     'readonly':'',
+     'onchange':'spy.SetParam(snum.metacif.publ_contact_author_name,GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME))>>spy.AddVariableToUserInputList(publ_contact_author_name)>>UpdateHtml'
      },
     {'varName':'publ_contact_author_address',
      'itemName':'%Contact% %Author% %Address%',
@@ -252,14 +252,14 @@ def publicationMetadataHtmlMaker():
      'onleave':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME),phone,GetValue(SET_PUBL_CONTACT_AUTHOR_PHONE))>>updatehtml'
      },
   ]
-  listAuthors = OV.FindValue('snum_metacif_publ_author_names')
-  if listAuthors == '?':
+  listAuthors = OV.GetParam('snum.metacif.publ_author_names')
+  if listAuthors is None:
     numberAuthors = 0
   else:
     numberAuthors = len(listAuthors.split(';'))
   for i in range(1,numberAuthors+1):
     authorRow = {
-      'varName':'snum_metacif_publ_author_names',
+      'varName':'snum.metacif.publ_author_names',
       'ctrl_name':'SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s' %i,
       'readonly':'readonly',
       'value':"%s" %listAuthors.split(';')[i-1],
@@ -304,7 +304,7 @@ def publicationMetadataHtmlMaker():
        }
     )
   list.append(    
-    {'varName':'snum_metacif_publ_author_names',
+    {'varName':'snum.metacif.publ_author_names',
      'ctrl_name':'ADD_PUBL_AUTHOR_NAME',
      'readonly':'',
      'itemName':'%Add% %Author%',
@@ -316,16 +316,17 @@ def publicationMetadataHtmlMaker():
   )
 
   for d in list:
-    d.setdefault('ctrl_name','SET_%s' %str.upper(d['varName']))
+    d.setdefault('ctrl_name','SET_%s' %str.upper(d['varName']).replace('.','_'))
     if 'ctrl_name' in d['varName']:
-      d.setdefault('onchange',"spy.ChangeMetaCif(%(varName)s,GetValue(%(ctrl_name)s))>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)>>updatehtml" %d)
-    elif 'author' in d['varName']:
+      d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)>>updatehtml" %d)
+    elif 'author_name' in d['varName']:
       d.setdefault('onchange','')
+    elif 'author' in d['varName']:
       d.setdefault('onleave','')
   retstr = htmlTools.makeHtmlTable(list)
 
   list = [
-    {'varName':'snum_metacif_publ_requested_journal',
+    {'varName':'snum.metacif.publ_requested_journal',
      'itemName':'%Requested% %Journal%',
      'items':userDictionaries.localList.getListJournals(),
      'readonly':'',
@@ -347,16 +348,20 @@ def publicationMetadataHtmlMaker():
 OV.registerFunction(publicationMetadataHtmlMaker)
 
 def contactLetter():
-  if 'snum_metacif_publ_contact_letter' not in OV.FindValue('snum_metacif_user_input_variables'):
+  user_input_variables = OV.GetParam('snum.metacif.user_input_variables')
+  if user_input_variables is None or 'publ_contact_letter' not in user_input_variables:
     import datetime
     today = datetime.date.today()
     date = today.strftime("%x")
-    journal = OV.FindValue('snum_metacif_publ_requested_journal')
+    journal = OV.GetParam('snum.metacif.publ_requested_journal')
     fileName = olx.FileName()
-    authorList = OV.FindValue('snum_metacif_publ_author_names')
+    authorList = OV.GetParam('snum.metacif.publ_author_names')
     authors = ''
-    authorList = authorList.split(';')
-    numberAuthors = len(authorList)
+    if authorList is None:
+      numberAuthors = 0
+    else:
+      authorList = authorList.split(';')
+      numberAuthors = len(authorList)
     for i in range(numberAuthors):
       author = authorList[i]
       if ',' in author:
@@ -388,37 +393,37 @@ The paper will be submitted to %s.
 """ %(date,fileName,authors,journal)
 
   else:
-    letterText = OV.FindValue('snum_metacif_publ_contact_letter')
+    letterText = OV.GetParam('snum.metacif.publ_contact_letter')
     
   inputText = OV.GetUserInput(0,'_publ_contact_letter',letterText)
   if inputText == '':
-    OV.SetVar('snum_metacif_publ_contact_letter', letterText)
+    OV.SetParam('snum.metacif.publ_contact_letter', letterText)
   elif inputText != letterText:
-    OV.SetVar('snum_metacif_publ_contact_letter', inputText)
-    variableFunctions.AddVariableToUserInputList('snum_metacif_publ_contact_letter')
-  elif 'snum_metacif_publ_contact_letter' not in OV.FindValue('snum_metacif_user_input_variables'):
-    OV.SetVar('snum_metacif_publ_contact_letter', letterText)
+    OV.SetParam('snum.metacif.publ_contact_letter', inputText)
+    variableFunctions.AddVariableToUserInputList('publ_contact_letter')
+  elif 'publ_contact_letter' not in OV.GetParam('snum.metacif.user_input_variables'):
+    OV.SetParam('snum.metacif.publ_contact_letter', letterText)
   else:
     pass
   return ""
 OV.registerFunction(contactLetter)
 
 def AddNameToAuthorList(newName):
-  oldValue = OV.FindValue("snum_metacif_publ_author_names")
+  oldValue = OV.GetParam("snum.metacif.publ_author_names")
   if newName != '?':
-    if oldValue == '?':
+    if oldValue is None:
       newValue = newName
     elif newName in oldValue:
       newValue = oldValue
       print "%s is already in the list of authors" %newName
     else:
       newValue = oldValue + ";" + newName
-    OV.SetVar("snum_metacif_publ_author_names", newValue)
+    OV.SetParam("snum.metacif.publ_author_names", newValue)
   return ""
 OV.registerFunction(AddNameToAuthorList)
 
 def move(arg,name):
-  listNames = OV.FindValue('snum_metacif_publ_author_names').split(';')
+  listNames = OV.GetParam('snum.metacif.publ_author_names').split(';')
   name_i = olx.GetValue(name)
   i = listNames.index(name_i)
   
@@ -444,7 +449,7 @@ def move(arg,name):
   names = ';'.join(listNames)
   if not names:
     names = '?'
-  OV.SetVar('snum_metacif_publ_author_names', names)
+  OV.SetParam('snum.metacif.publ_author_names', names)
   
   return ''
 OV.registerFunction(move)

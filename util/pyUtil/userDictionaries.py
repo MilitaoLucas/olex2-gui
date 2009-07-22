@@ -7,7 +7,7 @@ import olx
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
-import variableFunctions
+#import variableFunctions
 
 people = None
 localList = None
@@ -51,11 +51,11 @@ class People:
 	
 	def addNewPerson(self,person):
 		currentPersonInfo = {'email':'?','phone':'?','address':'?'}
-		self.dictionary['people'][person] = currentPersonInfo
+		self.dictionary['people'].setdefault(person, currentPersonInfo)
 		listPeople = ''
 		for item in self.dictionary['people'].keys():
 			listPeople += '%s;' %item
-		OV.SetVar('snum_metacif_list_people', listPeople)
+		OV.SetParam('snum.metacif.list_people', listPeople)
 		saveLocalDictionary(self.dictionary)
 	
 	def getListPeople(self):
@@ -96,12 +96,12 @@ class LocalList:
 				saveLocalDictionary(saveDict)
 				
 			if whatList == 'diffractometers':
-				OV.SetVar('snum_report_diffractometer', newValue)
+				OV.SetParam('snum.report.diffractometer', newValue)
 				if not os.path.exists(self.getDiffractometerDefinitionFile(newValue)):
-					OV.SetVar('snum_metacif_diffrn_measurement_device_type', newValue)
+					OV.SetParam('snum.metacif.diffrn_measurement_device_type', newValue)
 			elif whatList == 'journals':
 				if journalType == 'requested':
-					OV.SetVar('snum_metacif_publ_requested_journal', newValue)
+					OV.SetParam('snum.metacif.publ_requested_journal', newValue)
 				elif journalType == 'reference':
 					OV.SetVar('snum_dimas_reference_journal_name', newValue)				
 		else:
@@ -121,7 +121,7 @@ class LocalList:
 		return retStr
 	
 	def setDiffractometerDefinitionFile(self,diffractometer,filepath):
-		if diffractometer != '?':
+		if diffractometer not in ('?',''):
 			if os.path.exists(filepath):
 				self.dictionary['diffractometers'][diffractometer]['cif_def'] = filepath
 				saveDict = {'diffractometers':self.dictionary['diffractometers']}
@@ -159,24 +159,26 @@ def convertDiffractometerDictionary(dictionary):
 	return dictionary
 
 def createNewLocalDictionary(whichDict):
+	import variableFunctions
 	picklePath = getPicklePath(whichDict)
 	if whichDict == 'people':
 		dictionary = {
 			'people':{
-				'?':
-				{'email':'?',
-				 'phone':'?',
-				 'address':'?',
-				 },
+				#'?':
+				#{'email':'?',
+				 #'phone':'?',
+				 #'address':'?',
+				 #},
 				},
 		}
 	elif whichDict == 'diffractometers':
 		dictionary = {
-			'diffractometers':{'?':
-												 {'cif_def':'?',
-													},
-												 },
-			}
+			'diffractometers':{
+				#'?':
+				#{'cif_def':'?',
+				 #},
+				},
+		}
 	elif whichDict == 'journals':
 		dictionary = {
 			'journals':{'?':'',
@@ -246,6 +248,7 @@ def createNewLocalDictionary(whichDict):
 	variableFunctions.Pickle(dictionary,picklePath)
 
 def saveLocalDictionary(dictionary):
+	import variableFunctions
 	if dictionary.has_key('people'):
 		picklePath = getPicklePath('people')
 	elif dictionary.has_key('journals'):

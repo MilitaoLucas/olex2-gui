@@ -45,7 +45,8 @@
 		<cmd
 			<cmd0  "xgrid.Visible(false)">
 			<cmd1  "if strcmp(%4,'none') then none else 'spy.saveHistory()'">
-			<cmd2  "spy.pickleVVD(structure)">
+			<cmd2  XXX="spy.pickleVVD(structure)">
+			<cmd2  "spy.SaveStructureParams()">
 			<cmd3  cmd1="silent on">
 			<cmd4  cmd1="clear">
 			<cmd5  XXXcmd1="fader.InitFG()">
@@ -53,19 +54,20 @@
 			<cmd7  XXX="fade 0 1 0.05">
 			<cmd8  XXX='waitfor fade'>
 			<cmd9  "@reap '%1' %2">
-			<cmd10 "spy.InitialiseVariables(reap)">
+			<cmd10 XXX="spy.InitialiseVariables(reap)">
+			<cmd10 "spy.LoadStructureParams()">
 			<cmd10 "SetVar(SlideQPeaksVal,0)">
 			<cmd11 XXX="ceiling on">
 			<cmd12 "storeparam startup filefull() true">
-			<cmd14 "spy.UnpickleVVD()">
-			<cmd13 "SetVar(snum_refinement_sg,sg(%n))">
+			<cmd14 XXX="spy.UnpickleVVD()">
+			<cmd13 "spy.SetParam(snum.refinement.sg,sg(%n))">
 			<cmd1 "spy.setAllMainToolbarTabButtons()">
 			<cmd25 "if strcmp(%4,filename()) then none else 'if html.IsPopup(wilson) then wp'">
 			<cmd15 XXX="if strcmp(%4,filename()) then none else 'spy.run_sNumTitle()'">
 
 			<cmd15 "spy.run_skin sNumTitle">
 
-			<cmd16 "if File.Exists(strdir()/filename().vvd) then none else 'SetVar(snum_refinement_original_formula,xf.GetFormula())'">
+			<cmd16 "if File.Exists(strdir()/filename().vvd) then none else 'spy.SetParam(snum.refinement.original_formula,xf.GetFormula())'">
 			<cmd17 "if and(strcmp(%4,filename()),strcmp(%6,fileext())) then none else 'spy.loadHistory()'">
 			<cmd18 "'if and(IsFileType(ires), not(File.Exists((strdir()/history-filename)))) then 'spy.create_history()'">
 			<cmd19 "if and(isplugininstalled(plugin-brukersaint),IsFileType('p4p')) then BSINI else none">			
@@ -81,6 +83,31 @@
 		<onabort
 			<cmd "ceiling off">
 		>	
+	>
+>
+
+<GetParam
+	<body
+		<args
+			<arg1 name="variable">
+		\>
+
+		<cmd
+			<cmd1 "echo spy.GetParam(%1)">
+		\>
+	>
+>
+
+<SetParam
+	<body
+		<args
+			<arg1 name="variable">
+			<arg2 name="value">
+		\>
+
+		<cmd
+			<cmd1 "spy.SetParam(%1,%2)">
+		\>
 	>
 >
 
@@ -180,20 +207,20 @@
 		<args
 		\>
 		<cmd
-			<cmd0 "if file.Exists('FilePath()/FileName().cif') then None else 'SetVar(snum_refinement_method,Least Squares)'">
+			<cmd0 "if file.Exists('FilePath()/FileName().cif') then None else 'spy.SetParam(snum.refinement.method,Least Squares)'">
 			<cmd1 "if file.Exists('FilePath()/FileName().cif') then None else 'DelIns ACTA'">
 			<cmd2 "if file.Exists('FilePath()/FileName().cif') then None else 'AddIns ACTA'">
 			<cmd3 "if file.Exists('FilePath()/FileName().cif') then None else 'refine'">
 			<cmd4 "cursor(busy, '%Checking for IMAGE file ...%')">
-			<cmd5 "if file.Exists(GetVar(snum_report_image)) then 'SetVar(snum_report_image,GetVar(snum_report_image))' else 'SetVar(snum_report_image,FilePath()/screenshot.png)'">
-			<cmd6 "if not(strcmp(file.GetName(GetVar(snum_report_image)),screenshot.png)) then None else 'cursor(busy, &#2e;%Creating Image ...%&#2e;)>>pict -pq screenshot.png 1'">
+			<cmd5 "if file.Exists(spy.GetParam(snum.report.image)) then None else 'spy.SetParam(snum.report.image,FilePath()/screenshot.png)'">
+			<cmd6 "if not(strcmp(file.GetName(spy.GetParam(snum.report.image)),screenshot.png)) then None else 'cursor(busy, &#2e;%Creating Image ...%&#2e;)>>pict -pq screenshot.png 1'">
 			<cmd7 "cursor(busy, '%Updating% Cif ...')">
 			<cmd8 "spy.CifTools()">
 			<cmd9 "spy.MetaCif(True)">
 			<cmd9a "custom_on_report">
 			<cmd10 "cursor(busy, '%Creating% Report')">
-			<cmd11 "cif2tab header acrd anis bnd ang htab tang hcrd footer -n=GetVar(snum_report_title)_tables">
-			<cmd12 "shell GetVar(snum_report_title)_tables.html">
+			<cmd11 "cif2tab header acrd anis bnd ang htab tang hcrd footer -n=spy.GetParam(snum.report.title)_tables">
+			<cmd12 "shell spy.GetParam(snum.report.title)_tables.html">
 			<cmd13 "cursor()">
 		\>
 		<onterminate
@@ -208,20 +235,20 @@
 <refine help="Launches refine program. Syntax: refine [l.s.=-1] [plan=-1]"
 	<body
 		<args
-			<arg0 name="l.s." def='-1'> 
-			<arg1 name="plan" def='-1'> 
+			<arg0 name="l.s." def='-1'>
+			<arg1 name="plan" def='-1'>
 			<arg2 name="xl" def='xl'>
 		\>
 		<cmd 
 			<cmd0 "xgrid.Visible(false)">
 			<cmd1 "mode off">
-			<cmd2 "ls %1">
-			<cmd3 "plan %2">
+			<cmd2 "if strcmp(%1,'-1') then None else ls %1">
+			<cmd3 "if strcmp(%1,'-1') then None else plan %2">
 			<cmd4 "user 'filepath()'">
 			<cmd5 "file">
 			<cmd6 XXX="cursor(busy, 'Refining...')">
-			<cmd7 "SetVar(snum_refinement_max_cycles,%1)">
-			<cmd8 "SetVar(snum_refinement_max_peaks,%2)">
+			<cmd7 "if strcmp(%1,'-1') then None else spy.SetParam(snum.refinement.max_cycles,%1)">
+			<cmd8 "if strcmp(%1,'-1') then None else spy.SetParam(snum.refinement.max_peaks,%2)">
 			<cmd10 "spy.RunRefinementPrg()">
 			<cmd11 "UpdateHtml">
 		\>
@@ -242,7 +269,7 @@
 		\>
 		<cmd 
 			<cmd10 "spy.RunSolutionPrg()">
-			<cmd2 cmd="spy.doProgramSettings(GetVar(snum_refinement_program),GetVar(snum_refinement_method),true)">
+			<cmd2 cmd="spy.doProgramSettings(spy.GetParam(snum.refinement.program),spy.GetParam(snum.refinement.method),true)">
 			\>
 		<onterminate
 			<cmd1 cmd1="reap 'filepath()/filename().res'">
@@ -295,9 +322,9 @@
 			<cmd1 "stop"> 
 		\>
 		<onlisten
-			<cmd1 "'SetVar(snum_refinement_max_peaks,Ins(QNUM))'">
-			<cmd1 "'SetVar(snum_refinement_max_cycles,Ins(LS))'">
-			<cmd1 "spy.doProgramSettings(GetVar(snum_refinement_program),GetVar(snum_refinement_method))">
+			<cmd1 "'spy.SetParam(snum.refinement.max_peaks,Ins(QNUM))'">
+			<cmd1 "'spy.SetParam(snum.refinement.max_cycles,Ins(LS))'">
+			<cmd1 "spy.doProgramSettings(spy.GetParam(snum.refinement.program),spy.GetParam(snum.refinement.method))">
 			<cmd0 "updatehtml"> 
 		\>
 	\>
@@ -1486,8 +1513,8 @@
 			<cmd2 "itemstate info-title 1">
 			<cmd2 "itemstate index-all-in-one 1">
 			<cmd2 "itemstate aio-* 0">
-			<cmd2 "spy.doBanner(GetVar(snum_refinement_banner_slide))">
-			<cmd2 "SetImage(BANNER_IMAGE,strcat(banner_,GetVar(snum_refinement_banner_slide).png))">
+			<cmd2 "spy.doBanner(spy.GetParam(snum.refinement.banner_slide))">
+			<cmd2 "SetImage(BANNER_IMAGE,strcat(banner_,spy.GetParam(snum.refinement.banner_slide).png))">
 		\>
 	\>
 \>

@@ -9,7 +9,7 @@
 	</td>
 	<td width='50%' align='left' colspan='1'>
 		<a href="spy.run_cif_info>>
-if file.Exists('FilePath()\FileName().cif') then None else 'SetVar(snum_refinement_method,Least Squares)'>> 
+if file.Exists('FilePath()\FileName().cif') then None else 'spy.SetParam(snum.refinement.method,Least Squares)'>> 
 if file.Exists('FilePath()\FileName().cif') then None else 'DelIns ACTA'>> 
 if file.Exists('FilePath()\FileName().cif') then None else 'AddIns ACTA'>> 
 if file.Exists('FilePath()\FileName().cif') then None else 'refine'>>
@@ -32,9 +32,9 @@ spy.MetaCif(True,True)>>
 				height="17"
 				bgcolor="GetVar(gui_html_input_bg_colour)"
 				name='SET_SNUM_REPORT_TITLE',
-				value='GetVar(snum_report_title)'
+				value='$spy.GetParam(snum.report.title)'
 				label='',
-				onleave="SetVar(snum_report_title,GetValue(SET_SNUM_REPORT_TITLE))"
+				onleave="spy.SetParam(snum.report.title,GetValue(SET_SNUM_REPORT_TITLE))"
 			>
 		</font>
 	</td>
@@ -53,10 +53,10 @@ spy.MetaCif(True,True)>>
 				height="17"
 				bgcolor="GetVar(gui_html_input_bg_colour)"
 				name='SET_USER_REPORT_STYLE',
-				value='GetVar(user_report_style)'
-				items='default;mso;'
+				value='$spy.GetParam(user.report_style)'
+				items='spy.getStylesList()'
 				label='',
-				onchange="SetVar(user_report_style,GetValue(SET_USER_REPORT_STYLE))"
+				onchange="spy.SetParam(user.report_style,GetValue(SET_USER_REPORT_STYLE))"
 			>
 		</font>
 	</td>

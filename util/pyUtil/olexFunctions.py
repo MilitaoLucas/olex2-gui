@@ -38,7 +38,31 @@ class OlexFunctions(inheritFunctions):
     except Exception, ex:
       print >> sys.stderr, "Variable %s could not be set with value %s" %(variable,value)
       sys.stderr.formatExceptionInfo()
-    
+
+  def SetParam(self,variable,value):
+    try:
+      if type(value) in (str,unicode) and "'" in value:
+        value = value.replace("'", "\\'")
+      olx.phil_handler.update(phil_string=str("%s='%s'" %(variable, value)))
+    except Exception, ex:
+      print >> sys.stderr, "Variable %s could not be set with value %s" %(variable,value)
+      sys.stderr.formatExceptionInfo()
+
+  def GetParam(self,variable):
+    try:
+      retVal = olx.phil_handler.get_validated_param(variable)
+    except Exception, ex:
+      print >> sys.stderr, "Variable %s could not be found" %(variable)
+      sys.stderr.formatExceptionInfo()
+      retVal = ''
+    return retVal
+
+  def Params(self):
+    if hasattr(olx, 'phil_handler'):
+      return olx.phil_handler.get_python_object()
+    else:
+      return None
+
   def FindValue(self,variable,default=u''):
     try:
       retVal = olex_core.FindValue(variable, default)
@@ -122,7 +146,6 @@ class OlexFunctions(inheritFunctions):
     except Exception, ex:
       print >> sys.stderr, "An error occured whilst trying to write to the VFS"
       sys.stderr.formatExceptionInfo()
-    
       
   def write_to_olex(self,fileName,text,copyToDisk = False):
     try:
@@ -134,7 +157,7 @@ class OlexFunctions(inheritFunctions):
     except Exception, ex:
       print >> sys.stderr, "An error occured whilst trying to write to the VFS"
       sys.stderr.formatExceptionInfo()
-      
+
   def external_edit(self,filePath):
     try:
       olex.m("external_edit %s" %filePath)

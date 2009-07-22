@@ -1,10 +1,10 @@
 <html> 
 
 <head>
-	<title>%$getVar(snum_report_title)%</title>
+	<title>%$spy.GetParam(snum.report.title)%</title>
 	%$spy.getStyles(thesis)%
-	%$spy.getStyles(getVar(user_report_journal_style))%
-	%$spy.getStyles(getVar(user_report_style))%
+	%$spy.getStyles(spy.GetParam(user.report_journal_style))%
+	%$spy.getStyles(spy.GetParam(user.report_style))%
 </head>
 
 <body lang=EN-US>
@@ -12,7 +12,7 @@
 <div class=Content>
 <div class=Section1>
 <div class=Title>
-<h1>%$getVar(snum_report_title)% </h1>
+<h1>%$spy.GetParam(snum.report.title)% </h1>
 </div>
 <div class=Submission>
 <table class=Submission border=0 cellspacing=0 cellpadding=0>
@@ -20,25 +20,25 @@
 		<td>Crystal submitted by:</td>
 	</tr>
 	<tr>
-		<td>%$getVar(snum_report_submitter)%</td>
+		<td>%$spy.GetParam(snum.report.submitter)%</td>
 	</tr>
 	<tr>		
 		<td>Crystal submitted on:</td>
 	</tr>
 	<tr>
-		<td>%$getVar(snum_report_date_submitted)%</td>
+		<td>%$spy.GetParam(snum.report.date_submitted)%</td>
 	</tr>
 	<tr>	
 		<td>Data collected on:</td>
 	</tr>
 	<tr>
-		<td>%$getVar(snum_report_date_collected)%</td>
+		<td>%$spy.GetParam(snum.report.date_collected)%</td>
 	</tr>
 	<tr>
 		<td>Structure solved by:</td>
 	</tr>
 	<tr>
-		<td>%$getVar(snum_report_operator)%</td>
+		<td>%$spy.GetParam(snum.report.operator)%</td>
 	</tr>
 </table>
 </div>
@@ -52,14 +52,14 @@
 
 <table class=CifTable border=0 cellspacing=0 cellpadding=0>
 	<caption>
-		Table 1&nbsp;Crystal data and structure refinement for %$getVar(snum_report_title)%
+		Table 1&nbsp;Crystal data and structure refinement for %$spy.GetParam(snum.report.title)%
 	</caption>
 	<tr>
 		<td class="leftcol">
 			Identification code
 		</td>
 		<td class="data">
-			%$getVar(snum_report_title)%
+			%$spy.GetParam(snum.report.title)%
 		</td>
 	</tr>
 	<tr>
@@ -80,7 +80,7 @@
 	</tr>
 	<tr>
 		<td class="lefcol">
-			Temperature
+			Temperature/K
 		</td>
 		<td class="data">
 			%27%
@@ -113,7 +113,7 @@
 
 	<tr>
 		<td class="lefcol">
-			&#945;/&deg;, &#946;/&deg;, &#947;/&deg;,
+			&#945;/&deg;, &#946;/&deg;, &#947;/&deg;
 		</td>
 		<td class="data">
 			%8%, %9%, %10%
@@ -162,7 +162,7 @@
 	</tr>
 	<tr>
 		<td class="lefcol">
-			Crystal size
+			Crystal size/mm<sup>3</sup>
 		</td>
 		<td class="data">
 			%23% &times; %24% &times; %25%
@@ -241,7 +241,7 @@
 	</tr>
 	<tr>
 		<td class="lefcol">
-			Largest diff. peak/hole
+			Largest diff. peak/hole / e &Aring;<sup>-3</sup>
 		</td>
 		<td class="data">
 			%59%/%60%

@@ -15,10 +15,10 @@
 				height="17"
 				bgcolor="GetVar(gui_html_input_bg_colour)"
 				name='SET_SNUM_SOLUTION_PROGRAM',
-				value='GetVar(snum_solution_program)'
+				value='$spy.GetParam(snum.solution.program)'
 				items='$spy.getSolutionPrgs()'
 				label='', 
-				onchange="SetVar(snum_solution_program,GetValue(SET_SNUM_SOLUTION_PROGRAM))>>UpdateHtml"
+				onchange="spy.SetParam(snum.solution.program,GetValue(SET_SNUM_SOLUTION_PROGRAM))>>spy.onSolutionProgramChange(GetValue(SET_SNUM_SOLUTION_PROGRAM))>>UpdateHtml"
 				readonly='readonly'
 			>
 		</font>
@@ -38,10 +38,10 @@
 				height="17"
 				bgcolor="GetVar(gui_html_input_bg_colour)"
 				name='SET_SNUM_SOLUTION_METHOD',
-				value='GetVar(snum_solution_method)',
-				items='$spy.getSolutionMethods(GetVar(snum_solution_program))'
+				value='$spy.GetParam(snum.solution.method)',
+				items='$spy.getSolutionMethods($spy.GetParam(snum.solution.program))'
 				label='',
-				onchange="setVar(snum_solution_method,'GetValue(SET_SNUM_SOLUTION_METHOD)')>>UpdateHtml"
+				onchange="spy.SetParam(snum.solution.method,'GetValue(SET_SNUM_SOLUTION_METHOD)')>>UpdateHtml"
 				readonly='readonly'
 			>
 		</font>
@@ -83,9 +83,9 @@
 				height="17"
 				bgcolor="GetVar(gui_html_input_bg_colour)"
 				name='SET_SNUM_REFINEMENT_FORMULA',
-				items='GetVar(snum_refinement_original_formula)'
+				items='$spy.GetParam(snum.refinement.original_formula)'
 				value='xf.GetFormula()',
-				onchange='xf.SetFormula(GetValue(SET_SNUM_REFINEMENT_FORMULA))>>SetVar(snum_refinement_formula,"GetValue(SET_SNUM_REFINEMENT_FORMULA)")>>updatehtml'
+				onchange='xf.SetFormula(GetValue(SET_SNUM_REFINEMENT_FORMULA))>>spy.SetParam(snum.refinement.formula,"GetValue(SET_SNUM_REFINEMENT_FORMULA)")>>updatehtml'
 			>
 		</font>
 	</td>
@@ -126,8 +126,8 @@
 				bgcolor="GetVar(gui_html_input_bg_colour)"
 				name='SET_Z_PRIME',
 				min='1',
-				value='GetVar(snum_refinement_Z_prime)',
-				onchange="SetVar(snum_refinement_Z_prime,GetValue(SET_Z_PRIME))>>updatehtml"
+				value='$spy.GetParam(snum.refinement.Z_prime)',
+				onchange="spy.SetParam(snum.refinement.Z_prime,GetValue(SET_Z_PRIME))>>updatehtml"
 			>
 		</font>
 	</td>
@@ -150,7 +150,7 @@
 	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 	<td VALIGN='center' colspan=3>
 		<b>%Space Group%</b>&nbsp;
-		<a href='sg>>SetVar(snum_refinement_sg_list,SGList())>>html.Reload'><b>%Suggest SG%</b></a>
+		<a href='sg>>spy.SetParam(snum.refinement.sg_list,SGList())>>html.Reload'><b>%Suggest SG%</b></a>
 	</td>
 	<td VALIGN='center' ALIGN='right' colspan=1>
 		<font size='2'>
@@ -160,9 +160,9 @@
 				height="17"
 				bgcolor="GetVar(gui_html_input_bg_colour)"
 				name='SET_SNUM_REFINEMENT_SPACE_GROUP',
-				items='GetVar(snum_refinement_sg_list)',
+				items='$spy.GetParam(snum.refinement.sg_list)',
 				value='$sg(%n)',
-				onchange="reset -s=GetValue(SET_SNUM_REFINEMENT_SPACE_GROUP) -c=GetValue(SET_SNUM_REFINEMENT_FORMULA)>>spy.run_skin sNumTitle>>updatehtml"
+				onchange="reset -s=GetValue(SET_SNUM_REFINEMENT_SPACE_GROUP) -c=GetValue(SET_SNUM_REFINEMENT_FORMULA)>>spy.Skin sNumTitle>>updatehtml"
 			>
 		</font>
 	</td>
@@ -182,23 +182,14 @@
 				width=12
 				height=12
 				name='SNUM_SOLUTION_GRAPHICAL_OUTPUT'
-				$spy.CheckBoxValue(snum_solution_graphical_output)
-				oncheck='SetVar(snum_solution_graphical_output,true)'
-				onuncheck='SetVar(snum_solution_graphical_output,false)>>spy.reset_file_in_OFS(solution_image.htm)>>UpdateHtml'
+				$spy.CheckBoxValue(snum.solution.graphical_output)
+				oncheck='spy.SetParam(snum.solution.graphical_output,true)'
+				onuncheck='spy.SetParam(snum.solution.graphical_output,false)>>spy.reset_file_in_OFS(solution_image.htm)>>UpdateHtml'
 				value=''
 			>&nbsp;
 		</font>
 	</td>
 </tr>
-
-<!--<tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_UPDATE_WEIGHT'>-->
-	<!--<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>-->
-	  <!--<td VALIGN='center'  colspan=4>-->
-			<!--<a href="spy.save_user_parameters(solution)">-->
-				<!--<b>Save these settings as user default</b>-->
-			<!--</a>-->
-	  <!--</td>-->
-<!--</tr>-->
 
 <!-- #includeif fs.Exists(solution-settings-h3-solution-settings-extra.htm) solution-settings-h3-solution-settings-extra solution-settings-h3-solution-settings-extra.htm;gui\blocks\tool-h3-off.htm;image=solution-settings-h3-solution-settings-extra;colspan=4;onclick=;onclick=;2; -->
 
