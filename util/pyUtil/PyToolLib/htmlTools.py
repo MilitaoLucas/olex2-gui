@@ -280,7 +280,7 @@ def make_help_box(args):
 <td colspan=1 width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 <td align='right'>
 %s
-</td></tr>
+no</td></tr>
 %s
 <!-- #include tool-footer gui/blocks/tool-footer.htm;1; -->
 ''' %(banner_include, name, titleTxt, helpTxt, return_items, editLink)

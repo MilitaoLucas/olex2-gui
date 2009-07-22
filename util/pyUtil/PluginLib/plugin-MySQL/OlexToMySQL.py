@@ -293,6 +293,9 @@ class DownloadOlexLanguageDictionary:
       print p.translated_text
 
   def EditHelpItem(self, OXD, language = "English"):
+    import olex_logon
+    #text = olex_logon.web_translation_item(OXD, language)
+    
     text = self.downloadSingleTerm(OXD, language)
     inputText = OV.GetUserInput(0,'Modify text for help entry %s in %s' %(OXD, language), text)
     if inputText and inputText != text:
@@ -310,12 +313,15 @@ class DownloadOlexLanguageDictionary:
       
       
   def downloadSingleTerm(self, OXD, language = "English"):
+    import olex_logon
+    
     sql = "SELECT %s FROM translation WHERE oxd='%s'" %(language, OXD)
-    text = self.SQL.run_select_sql(sql)
-    if text:
-      text = text[0]
-      text = text.get(language,"")
-    else:
+    text = olex_logon.web_run_sql(sql)
+    
+    if text == "Unauthorised":
+      return
+    #text = self.SQL.run_select_sql(sql)
+    if not text:
       text = '''
 Line before a Table.
 &&
@@ -331,9 +337,13 @@ XX command line text XX
   def uploadSingleTerm(self, OXD, field, value):
     d = {"OXD":OXD, field:value}
     sql = self.SQL.create_insert_or_update_sql(d, 'translation')
-    res = self.SQL.run_sql(sql)
+    
+    import olex_logon
+    text = olex_logon.web_run_sql(sql)
+        
+    #res = self.SQL.run_sql(sql)
     #print res, field, value
-    return res
+    return text
       
       
   def downloadTranslation(self):
