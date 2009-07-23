@@ -22,8 +22,8 @@
 				name='SET_SNUM_SOLUTION_PROGRAM',
 				value='$spy.GetParam(snum.solution.program)'
 				items='$spy.getSolutionPrgs()'
-				label='', 
-				onchange="spy.SetParam(snum.solution.program,GetValue(SET_SNUM_SOLUTION_PROGRAM))>>spy.onSolutionProgramChange(GetValue(SET_SNUM_SOLUTION_PROGRAM))>>UpdateHtml"
+				label='',
+				onchange="spy.SetSolutionProgram(GetValue(SET_SNUM_SOLUTION_PROGRAM))>>UpdateHtml"
 				readonly='readonly'
 			>
 		</font>
