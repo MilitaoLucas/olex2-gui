@@ -77,7 +77,7 @@
     <check title="Tools;Settings;Show Info Bar" macro="showwindow info" statedependent="infovis" >
     <check title="Tools;Settings;Show Help" macro="showwindow help" statedependent="helpvis" >
     <check title="Tools;Settings;Show Tooltips" macro="html.tooltips" statedependent="htmlttvis" >
-    <item title="Tools;Settings;Show Alerts" macro="spy.SwitchAllAlertsOn()>>spy.save_user_parameters('alert')" >
+    <item title="Tools;Settings;Show Alerts" macro="spy.SwitchAllAlertsOn()" >
     <check title="Tools;Settings;External CMD line" macro="showwindow cmdline" statedependent="cmdlinevis" >
     <item title="Tools;Skin Setttings" macro="config">
 

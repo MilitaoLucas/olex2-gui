@@ -425,10 +425,10 @@ def AddVariableToUserInputList(variable):
 OV.registerFunction(AddVariableToUserInputList)
 
 def SwitchAllAlertsOn():
-  alerts = ['user_alert_delete_history',
-            'user_alert_overwrite_history']
+  alerts = ['user.alert_delete_history',
+            'user.alert_overwrite_history']
   for item in alerts:
-    OV.SetVar(item,'Y')
+    OV.SetParam(item,'Y')
   return ''
 OV.registerFunction(SwitchAllAlertsOn)
 
