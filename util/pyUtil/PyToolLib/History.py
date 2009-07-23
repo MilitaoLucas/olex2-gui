@@ -520,10 +520,10 @@ class HistoryLeaf:
     OV.SetParam('snum.refinement.last_R1',self.R1)
     OV.SetParam('snum.last_wR2',self.wR2)
     if self.refinement_program != 'n/a':
-      OV.SetParam('snum.refinement.program',self.refinement_program)
-      #olexex.onRefinementProgramChange(self.refinement_program)
-    if self.refinement_method != 'n/a':
-      OV.SetParam('snum.refinement.method',self.refinement_method)
+      if self.refinement_method != 'n/a':
+        OV.SetRefinementProgram(self.refinement_program, self.refinement_method)
+      else:
+        OV.SetRefinementProgram(self.refinement_program)
 
 def compressFile(filePath):
   file = open(filePath)

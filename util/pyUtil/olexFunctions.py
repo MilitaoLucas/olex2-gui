@@ -63,6 +63,24 @@ class OlexFunctions(inheritFunctions):
     else:
       return None
 
+  def SetSolutionProgram(self, program, method=None):
+    try:
+      import olexex
+      self.SetParam('snum.solution.program', program)
+      olexex.onSolutionProgramChange(program, method)
+    except Exception, ex:
+      print >> sys.stderr, "Program %s could not be set" %(program)
+      sys.stderr.formatExceptionInfo()
+
+  def SetRefinementProgram(self, program, method=None):
+    try:
+      import olexex
+      self.SetParam('snum.refinement.program', program)
+      olexex.onRefinementProgramChange(program, method)
+    except Exception, ex:
+      print >> sys.stderr, "Program %s could not be set" %(program)
+      sys.stderr.formatExceptionInfo()
+
   def FindValue(self,variable,default=u''):
     try:
       retVal = olex_core.FindValue(variable, default)

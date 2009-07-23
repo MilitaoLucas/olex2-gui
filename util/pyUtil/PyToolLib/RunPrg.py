@@ -205,7 +205,7 @@ class RunPrg(ArgumentParser):
 class RunSolutionPrg(RunPrg):
   def __init__(self):
     RunPrg.__init__(self)
-    self.getVariables('solution')
+    #self.getVariables('solution')
     self.program, self.method = self.getProgramMethod('solve')
     self.run()
     

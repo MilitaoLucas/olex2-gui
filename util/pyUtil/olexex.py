@@ -790,31 +790,6 @@ def setAllMainToolbarTabButtons():
 if haveGUI:
   OV.registerFunction(setAllMainToolbarTabButtons)
 
-def onRefinementProgramChange(prg_name):
-  #prg = OV.GetParam("snum.refinement.program")
-  #if prg is None:
-    #return
-  prg = RPD.programs[prg_name]
-  default = sortDefaultMethod(prg)
-  OV.SetParam("snum.refinement.method", default)
-  onRefinementMethodChange(prg_name, default)
-  return default
-OV.registerFunction(onRefinementProgramChange)
-
-def onRefinementMethodChange(prg_name, method):
-  #if variableFunctions.initialisingVariables:
-    #return
-  #method = OV.FindValue("snum_refinement_method")
-  #prg = OV.FindValue("snum_refinement_program")
-  #if method == '?' or prg == '?':
-    #return
-  if method in RPD.programs[prg_name].methods:
-    programSettings.doProgramSettings(prg_name, method)
-  else:
-    print "Please choose a valid method for the refinement program %s" %prg_name
-  return "Done"
-OV.registerFunction(onRefinementMethodChange)
-
 def onCrystalColourChange():
   if variableFunctions.initialisingVariables:
     return
@@ -826,21 +801,30 @@ def onCrystalColourChange():
     OV.SetVar('snum_metacif_exptl_crystal_colour', colour)
 OV.registerFunction(onCrystalColourChange)
 
-def onSolutionProgramChange(prg_name):
+def onRefinementProgramChange(prg_name, method=None):
+  prg = RPD.programs[prg_name]
+  if method is None:
+    method = sortDefaultMethod(prg)
+  OV.SetParam("snum.refinement.method", method)
+  onRefinementMethodChange(prg_name, method)
+OV.registerFunction(OV.SetRefinementProgram)
+
+def onRefinementMethodChange(prg_name, method):
+  if method in RPD.programs[prg_name].methods:
+    programSettings.doProgramSettings(prg_name, method)
+  else:
+    print "Please choose a valid method for the refinement program %s" %prg_name
+OV.registerFunction(onRefinementMethodChange)
+
+def onSolutionProgramChange(prg_name, method=None):
   prg = SPD.programs[prg_name]
-  default = sortDefaultMethod(prg)
-  OV.SetParam("snum.solution.method", default)
-  onSolutionMethodChange(prg_name, default)
-  return default
-OV.registerFunction(onSolutionProgramChange)
+  if method is None:
+    method = sortDefaultMethod(prg)
+  OV.SetParam("snum.solution.method", method)
+  onSolutionMethodChange(prg_name, method)
+OV.registerFunction(OV.SetSolutionProgram)
 
 def onSolutionMethodChange(prg_name, method):
-  #if variableFunctions.initialisingVariables:
-    #return
-  #prg = OV.FindValue('snum_solution_program')
-  #method = OV.FindValue('snum_solution_method')
-  #if method == '?' or prg == '?':
-    #return
   if method in SPD.programs[prg_name].methods:
     programSettings.doProgramSettings(prg_name, method)
   else:
