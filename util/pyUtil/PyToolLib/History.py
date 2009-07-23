@@ -97,6 +97,7 @@ class History(ArgumentParser):
     if 'R' in delete and 'Y' in delete:
       self.params.user.alert_delete_history = 'RY'
       self.setParams()
+      variableFunctions.SaveUserParams()
 
     self.setParams()
 
@@ -124,6 +125,8 @@ class History(ArgumentParser):
         return
       if 'R' in rename:
         self.params.user.alert_overwrite_history = 'RY'
+        self.setParams()
+        variableFunctions.SaveUserParams()
     else:
       solution_name = new_solution_name
       
