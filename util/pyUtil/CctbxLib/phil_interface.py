@@ -26,6 +26,8 @@ class phil_handler(object):
     self._params = self.working_phil.extract()
 
   def save_param_file(self, file_name, scope_name=None, sources=[], diff_only=False):
+    if scope_name is not None:
+      assert '.' not in scope_name # can only save top-level scopes
     if len(sources) > 0:
       for source in sources:
         self.merge_phil(phil_object=source, overwrite_params=False,
@@ -39,7 +41,17 @@ class phil_handler(object):
     else:
       output_phil = final_phil
     if scope_name is not None:
-      pass
+      scope_output_phil = None
+      for scope in output_phil.master_active_objects():
+        if scope.name == scope_name:
+          scope_output_phil = scope
+          break
+      if scope_output_phil is None:
+        f = open(file_name, "w")
+        f.close()
+        return # diff is empty -> write empty file
+      else:
+        output_phil = scope_output_phil
     f = open(file_name, "w")
     output_phil.show(out=f)
     f.close()
