@@ -53,7 +53,7 @@ class phil_handler(object):
       else:
         output_phil = scope_output_phil
     f = open(file_name, "w")
-    output_phil.show(out=f)
+    output_phil.show(out=f, expert_level=3)
     f.close()
 
   def get_diff(self):

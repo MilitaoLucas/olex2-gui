@@ -546,5 +546,10 @@ def SaveUserParams():
     file_name=user_phil_file, scope_name='user', diff_only=True)
 OV.registerFunction(SaveUserParams)
 
+def ShowParams(expert_level=0, attributes_level=0):
+  olx.phil_handler.working_phil.show(
+    expert_level=int(expert_level), attributes_level=int(attributes_level))
+OV.registerFunction(ShowParams)
+
 OV.registerFunction(OV.GetParam)
 OV.registerFunction(OV.SetParam)

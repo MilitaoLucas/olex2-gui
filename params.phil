@@ -112,28 +112,40 @@ snum {
       .help = The maximum number of refinement cycles to be performed
     max_peaks = 20
       .type = int(value_min=0)
+      .help = The maximum number of electron density peaks to be returned \
+              after refinement
     update_weight = False
       .type = bool
+      .help = Automatically update the weight instruction before the next \
+              refinement
     original_formula = None
       .type = str
+      .expert_level = 2
     Z_prime = 1.0
       .type = float(value_min=0.0)
 
     auto {
       assignQ = 2.0
         .type = float(value_min=0.0)
-      max_peaks = False
-        .type = bool
+        .help = Assign all residual electron density peaks greater than the \
+                given cutoff value as a Carbon atom
       pruneU = 0.1
         .type = float(value_min=0.0)
+        .help = Delete all atoms where the Ueq is greater than the given cutoff
       pruneQ = 1.5
         .type = float(value_min=0.0)
+        .help = Delete all residual electron density peaks smaller than \
+                the given cutoff value
       promote = 0.1
         .type = float
       assemble = False
         .type = bool
+        .help = Move all atoms or fragments of the asymmetric unit as \
+                close together as possible
       tidy = False
         .type = bool
+        .help = Automatically tidy the structure after refinement according \
+                to the settings
     }
 
     last_R1 = n/a
@@ -148,10 +160,13 @@ snum {
   history {
     current_solution = "Solution 01"
       .type = str
+      .expert_level = 2
     next_solution = "Solution 01"
       .type = str
+      .expert_level = 2
     autochem_next_solution = "Autochem 01"
       .type = str
+      .expert_level = 2
   }
 
   autochem_current_solution = "Autochem 01"
@@ -315,20 +330,28 @@ snum {
       .type = str
     sad_file = None
       .type = path
+      .expert_level = 1
     pcf_file = None
       .type = path
+      .expert_level = 1
     p4p_file = None
       .type = path
+      .expert_level = 1
     smart_file = None
       .type = path
+      .expert_level = 1
     saint_file = None
       .type = path
+      .expert_level = 1
     frames_file = None
       .type = path
+      .expert_level = 1
     integ_file = None
       .type = path
+      .expert_level = 1
     cad4_file = None
       .type = path
+      .expert_level = 1
     #'snum_report_diffractometer_definition_file':Variable('?'),
     publ_contact_author_name = None
       .type = str
@@ -342,22 +365,31 @@ snum {
       .type = str
     list_sad_files = None
       .type = strings
+      .expert_level = 2
     list_pcf_files = None
       .type = strings
+      .expert_level = 2
     list_p4p_files = None
       .type = strings
+      .expert_level = 2
     list_smart_files = None
       .type = strings
+      .expert_level = 2
     list_saint_files = None
       .type = strings
+      .expert_level = 2
     list_frames_files = None
       .type = strings
+      .expert_level = 2
     list_integ_files = None
       .type = strings
+      .expert_level = 2
     list_cad4_files = None
       .type = strings
+      .expert_level = 2
     user_input_variables = None
       .type = strings
+      .expert_level = 2
   }
 
   report {
@@ -409,7 +441,9 @@ snum {
     .type = int
 }
 
-olex2 {
+olex2
+  .expert_level = 2
+{
   is_online = True
     .type = bool
   has_recently_updated = False
@@ -429,29 +463,17 @@ olex2 {
 user {
   alert_delete_history = Y
     .type = str
+    .expert_level = 1
   alert_overwrite_history = Y
     .type = str
+    .expert_level = 1
   alert_uninstall_plugin = Y
     .type = str
+    .expert_level = 1
   report_style = default
     .type = str
   report_journal_style = rsc
     .type = str
-
-  #refinement_program':Variable('ShelXL'),
-  #refinement_method':Variable('Least Squares'),
-  #solution_program':Variable('ShelXS'),
-  #solution_method':Variable('Direct Methods'),
-  #refinement_max_cycles':Variable(4,Range(min=0)),
-  #refinement_max_peaks':Variable(20,Range(min=0)),
-  #refinement_update_weight':Variable(False),
-  #refinement_auto_assignQ':Variable(2.0,Range(min=0.0)),
-  #refinement_auto_pruneU':Variable(0.1,Range(min=0.0)),
-  #refinement_auto_pruneQ':Variable(1.5,Range(min=0.0)),
-  #refinement_auto_assemble':Variable(False),
-  #refinement_auto_promote':Variable(0.1),
-  #refinement_auto_tidy':Variable(True),
-  #refinement_gui2':Variable(False),
 }
 
 cctbx {
