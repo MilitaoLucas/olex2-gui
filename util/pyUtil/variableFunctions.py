@@ -429,7 +429,7 @@ def SwitchAllAlertsOn():
             'user.alert_overwrite_history']
   for item in alerts:
     OV.SetParam(item,'Y')
-  return ''
+  SaveUserParams()
 OV.registerFunction(SwitchAllAlertsOn)
 
 def StoreParameters(type=""):
@@ -480,9 +480,12 @@ def VVD_to_phil():
   return '\n'.join(phil_strings)
 
 def get_user_phil():
-  user_phil_file = "%s/params.phil" %OV.DataDir()
+  user_phil_file = "%s/user.phil" %OV.DataDir()
   if os.path.isfile(user_phil_file):
-    return iotbx.phil.parse(file_name=user_phil_file)
+    f = open(user_phil_file, 'r')
+    phil = f.read()
+    f.close()
+    return phil
   else:
     return None
 
@@ -499,17 +502,17 @@ snum {
   solution.method = "%s"
 }
 """ %(refinementPrg, refinementMethod, solutionPrg, solutionMethod))
-  sources = [programs_phil]
-  user_phil = get_user_phil()
-  if user_phil is not None:
-    sources.append(user_phil)
-  working_phil = master_phil.fetch(sources=sources)
+  source = programs_phil
+  working_phil = master_phil.fetch(source=source)
   phil_handler = phil_interface.phil_handler(master_phil=working_phil)
   olx.phil_handler = phil_handler
 OV.registerFunction(LoadParams)
 
 def LoadStructureParams():
   olx.phil_handler = olx.phil_handler.copy()
+  user_phil = get_user_phil()
+  if user_phil:
+    olx.phil_handler.update(user_phil)
   snum_phil = """
 snum {
   report.title = "%s"
@@ -528,14 +531,20 @@ snum {
     if structure_phil is None:
       return
   olx.phil_handler.update(structure_phil)
-  #olx.phil_handler.get_phil_help_string('snum.refinement.max_cycles')
 OV.registerFunction(LoadStructureParams)
 
 def SaveStructureParams():
   if OV.FileName() != 'none':
     structure_phil_file = "%s/.olex/%s.phil" %(OV.FilePath(), OV.FileName())
-    olx.phil_handler.save_param_file(file_name=structure_phil_file, diff_only=True)
+    olx.phil_handler.save_param_file(
+      file_name=structure_phil_file, scope_name='snum', diff_only=True)
 OV.registerFunction(SaveStructureParams)
+
+def SaveUserParams():
+  user_phil_file = "%s/user.phil" %(OV.DataDir())
+  olx.phil_handler.save_param_file(
+    file_name=user_phil_file, scope_name='user', diff_only=True)
+OV.registerFunction(SaveUserParams)
 
 OV.registerFunction(OV.GetParam)
 OV.registerFunction(OV.SetParam)
