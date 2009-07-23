@@ -37,9 +37,7 @@ class History(ArgumentParser):
     self.filepath = OV.FilePath()
     self.filename = OV.FileName()
     self.strdir = OV.StrDir()
-    self.datadir = OV.DataDir()      
-    #self.getVariables('history')
-    #self.getVariables('user_alert')
+    self.datadir = OV.DataDir()
     self.params = olx.phil_handler.get_python_object()
     self.history_filepath = r'%s/%s.history' %(self.strdir,self.filename)
     self.rename = OV.FindValue('rename')
@@ -79,9 +77,9 @@ class History(ArgumentParser):
     del_solution = args.get('solution')
     if not del_solution.strip():
       return
-    if self.user_alert_delete_history[0] == 'R':
-      delete = self.user_alert_delete_history[-1]
-    elif self.user_alert_delete_history == 'Y':
+    if self.params.user.alert_delete_history[0] == 'R':
+      delete = self.params.user.alert_delete_history[-1]
+    elif self.params.user.alert_delete_history == 'Y':
       delete = OV.Alert('Olex2', "Are you sure you want to delete\nthe solution '%s'?" %del_solution, 'YNIR', "(Don't show this warning again)")
     else:
       return
@@ -97,10 +95,8 @@ class History(ArgumentParser):
         print "Could not delete history '%s' " %del_solution
       
     if 'R' in delete and 'Y' in delete:
-      self.user_alert_delete_history = 'RY'
-      #self.setVariables('user_alert')
+      self.params.user.alert_delete_history = 'RY'
       self.setParams()
-      variableFunctions.save_user_parameters('alert')
 
     self.setParams()
 
@@ -108,16 +104,16 @@ class History(ArgumentParser):
     self._getItems()
     old_solution_name = args.get('old','')
     new_solution_name = args.get('new','')
+    OV.SetVar('rename',False)
     if not new_solution_name.strip():
       print "Please provide a valid name"
     elif new_solution_name == old_solution_name:
       return
-    OV.SetVar('rename',False)
     self._getItems()
     if new_solution_name in tree.historyTree.keys():
-      if self.user_alert_overwrite_history[0] == 'R':
-        rename = self.user_alert_overwrite_history[-1]
-      elif self.user_alert_overwrite_history == 'Y':
+      if self.params.user.alert_overwrite_history[0] == 'R':
+        rename = self.params.user.alert_overwrite_history[-1]
+      elif self.params.user.alert_overwrite_history == 'Y':
         rename = OV.Alert('Olex2', "There is already a solution named '%s'.\nDo you want to overwrite this solution?" %new_solution_name, 'YNIR', "(Don't show this warning again)")
       else:
         return
@@ -126,13 +122,8 @@ class History(ArgumentParser):
         solution_name = new_solution_name
       else:
         return
-      
       if 'R' in rename:
-        self.user_alert_overwrite_history = 'RY'
-        #self.setVariables('user_alert')
-        self.setParams()
-        variableFunctions.save_user_parameters('alert')
-        
+        self.params.user.alert_overwrite_history = 'RY'
     else:
       solution_name = new_solution_name
       
@@ -142,13 +133,12 @@ class History(ArgumentParser):
       tree.current_solution = solution_name
       self.params.snum.history.current_solution = solution_name
     self._make_history_bars()
-    #self.setVariables('history')
+    self.setParams()
     return
   
   def revert_history(self, args):
     self._getItems()
     self._revert_history(args)
-    #self.setVariables('history')
     self.setParams()
     
   def _revert_history(self, args):
@@ -186,7 +176,6 @@ class History(ArgumentParser):
   def saveHistory(self):
     self._getItems()
     variableFunctions.Pickle(tree,self.history_filepath)
-    #self.setVariables('history')
     self.setParams()
     
   def loadHistory(self):
@@ -209,7 +198,6 @@ class History(ArgumentParser):
       
     if tree.current_solution:
       self._make_history_bars()
-    #self.setVariables('history')
     self.setParams()
       
   def resetHistory(self):
@@ -415,7 +403,6 @@ class HistoryTree:
       hist.params.snum.history.next_solution = next_sol_name
       
     hist._make_history_bars()
-    #hist.setVariables('history')
     hist.setParams()
     return self.current_solution
   
@@ -562,7 +549,6 @@ def changeHistory(solution):
   hist.params.snum.history.current_solution = solution
   hist._make_history_bars()
   hist.rename = False
-  #hist.setVariables('history')
   hist.setParams()
   #OV.UpdateHtml() # uncomment me!
   
@@ -586,7 +572,7 @@ def historyChooserRenamer():
       type='combo'
       width='$eval(htmlpanelwidth()/2 -15)',
       height="17" 
-      bgcolor='$spy.GetParam(gui.html.input_bg_colour)'
+      bgcolor='$GetVar(gui_html_input_bg_colour)'
       name='SET_HISTORY_CURRENT_SOLUTION',
       value='$spy.GetParam(snum.history.current_solution)'
       items='$spy.getAllHistories()'
@@ -619,19 +605,18 @@ def historyChooserRenamer():
   else:
     text = """<td VALIGN='center' width="40%%" colspan=1>
     <b>%Rename Solution%</b>
-    </td>	
+    </td>
     
     <td VALIGN='center' colspan=1>
-    <font size='2'> 
-    <input 
+    <font size='2'>
+    <input
       type='text',
       width='$eval(htmlpanelwidth()/2 -15)',
-      height="17" 
-      bgcolor='$spy.GetParam(gui.html.input_bg_colour)'
+      height="17"
+      bgcolor='$GetVar(gui_html_input_bg_colour)'
       name='SET_SNUM_HISTORY_CURRENT_SOLUTION',
       value='$spy.GetParam(snum.history.current_solution)'
-      label='', 
-      onchange="spy.rename_history -old=$spy.GetParam(snum.history.current_solution) -new=GetValue(SET_SNUM_HISTORY_CURRENT_SOLUTION)>>SetVar(rename,False)>>UpdateHtml"
+      label='',
     >
     </font>
     </td>
@@ -642,7 +627,7 @@ def historyChooserRenamer():
       width="50" 
       height="18" 
       value="OK" 
-      onclick="$spy.rename_history -old=$spy.GetParam(snum.history.current_solution) -new=GetValue(SET_SNUM_HISTORY_CURRENT_SOLUTION)>>SetVar(rename,False)>>UpdateHtml"
+      onclick="spy.rename_history -old='spy.GetParam(snum.history.current_solution)' -new='GetValue(SET_SNUM_HISTORY_CURRENT_SOLUTION)'>>SetVar(rename,False)>>UpdateHtml"
     >
     </td>
     """
