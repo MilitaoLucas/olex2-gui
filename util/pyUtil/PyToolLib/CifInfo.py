@@ -755,7 +755,7 @@ class CifTools(ArgumentParser):
     i = 0
     listFiles = []
     returnvalue = ""
-    if "%s_file" %tool not in self.userInputVariables:
+    if self.userInputVariables is not None and "%s_file" %tool not in self.userInputVariables:
       for date, file in info:
         a = file.split('/')[-2:]
         shortFilePath = ""
