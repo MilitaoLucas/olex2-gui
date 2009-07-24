@@ -920,7 +920,8 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
       if i == current_tooltip_number: continue
       txt = OV.TranslatePhrase("tip-%i" %i)
       if j > max_i * 2: break
-    txt += "</td></tr><tr><td align='right'>%s</td></tr>" %make_edit_link("tip", "%i" %i)
+    #txt += "</td></tr><tr><td align='right'>%s</td></tr>" %make_edit_link("tip", "%i" %i)
+    txt += "</td></tr><b>&#187;</b>%s" %make_edit_link("tip", "%i" %i)
 
   elif number == "+1":
     i = current_tooltip_number + 1
@@ -928,7 +929,8 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
     if "tip-" in txt:
       i = 1
       txt = OV.TranslatePhrase("tip-%i" %i)
-    txt += "</td></tr><tr><td align='right'>%s</td></tr>" %make_edit_link("tip", "%i" %i)
+    #txt += "</td></tr><tr><td align='right'>%s</td></tr>" %make_edit_link("tip", "%i" %i)
+    txt += "</td></tr><b>&#187;</b>%s" %make_edit_link("tip", "%i" %i)
   elif number == "list":
     txt = ""
     for i in xrange(max_i):
