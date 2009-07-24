@@ -283,10 +283,10 @@ class RunRefinementPrg(RunPrg):
 
   def doAutoTidyBefore(self):
     olx.Clean('-npd -aq=0.1 -at')
-    if self.params.snum.refinement.auto_assignQ:
-      olx.Sel('atoms where xatom.peak>%s' %self.params.snum.refinement.auto_assignQ)
+    if self.params.snum.refinement.auto.assignQ:
+      olx.Sel('atoms where xatom.peak>%s' %self.params.snum.refinement.auto.assignQ)
       olx.Name('sel C')
-    if self.params.snum.refinement.auto_pruneU:
+    if self.params.snum.refinement.auto.pruneU:
       i = 0
       uref = 0
       for i in xrange(int(olx.xf_au_GetAtomCount())):
@@ -295,7 +295,7 @@ class RunRefinementPrg(RunPrg):
           if uref == ueq:
             continue
           else:
-            olx.Sel('atoms where xatom.uiso>%s' %self.params.snum.refinement.auto_pruneU)
+            olx.Sel('atoms where xatom.uiso>%s' %self.params.snum.refinement.auto.pruneU)
             olx.Kill('sel')
             break
         else:
