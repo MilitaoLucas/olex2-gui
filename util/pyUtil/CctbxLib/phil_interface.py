@@ -5,6 +5,87 @@ import libtbx.phil
 from libtbx.phil import scope_extract_attribute_error
 
 #
+# Begin temporary cut-and-paste from libtbx.phil
+#
+class _check_value_base(object):
+
+  def _check_value(self, value, path_producer, words=None):
+    def where_str():
+      if (words is None): return ""
+      return words[0].where_str()
+    if (self.value_min is not None and value < self.value_min):
+      raise RuntimeError(
+        "%s element is less than the minimum allowed value:"
+        " %s < %s%s"
+          % (path_producer(), self._value_as_str(value=value),
+             self._value_as_str(value=self.value_min), where_str()))
+    if (self.value_max is not None and value > self.value_max):
+      raise RuntimeError(
+        "%s element is greater than the maximum allowed value:"
+        " %s > %s%s"
+          % (path_producer(), self._value_as_str(value=value),
+             self._value_as_str(value=self.value_max), where_str()))
+
+class number_converters_base(_check_value_base):
+
+  def __init__(self,
+      value_min=None,
+      value_max=None):
+    if (value_min is not None and value_max is not None):
+      assert value_min <= value_max
+    self.value_min = value_min
+    self.value_max = value_max
+
+  def __str__(self):
+    kwds = []
+    if (self.value_min is not None):
+      kwds.append("value_min=" + self._value_as_str(value=self.value_min))
+    if (self.value_max is not None):
+      kwds.append("value_max=" + self._value_as_str(value=self.value_max))
+    if (len(kwds) != 0):
+      return self.phil_type + "(" + ", ".join(kwds) + ")"
+    return self.phil_type
+
+  def from_words(self, words, master):
+    path = master.full_path()
+    value = self._value_from_words(words=words, path=master.full_path())
+    if (value is None or value is libtbx.phil.Auto): return value
+    self._check_value(
+      value=value, path_producer=master.full_path, words=words)
+    return value
+
+  def as_words(self, python_object, master):
+    if (python_object is None):
+      return [libtbx.phil.tokenizer.word(value="None")]
+    if (python_object is libtbx.phil.Auto):
+      return [libtbx.phil.tokenizer.word(value="Auto")]
+    return [libtbx.phil.tokenizer.word(value=self._value_as_str(value=python_object))]
+
+class int_converters(number_converters_base):
+
+  phil_type = "int"
+
+  def _value_from_words(self, words, path):
+    return libtbx.phil.int_from_words(words=words, path=path)
+
+  def _value_as_str(self, value):
+    return "%d" % value
+
+class float_converters(number_converters_base):
+
+  phil_type = "float"
+
+  def _value_from_words(self, words, path):
+    return libtbx.phil.float_from_words(words=words, path=path)
+
+  def _value_as_str(self, value):
+    return "%.10g" % value
+#
+# End temporary cut-and-paste from libtbx.phil
+#
+
+
+#
 # Main interface to Phil
 # Shamefully borrowed from Phenix PhilInterface.py
 #
@@ -53,7 +134,7 @@ class phil_handler(object):
       else:
         output_phil = scope_output_phil
     f = open(file_name, "w")
-    output_phil.show(out=f, expert_level=3)
+    output_phil.show(out=f)
     f.close()
 
   def get_diff(self):

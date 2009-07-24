@@ -490,8 +490,13 @@ def get_user_phil():
     return None
 
 def LoadParams():
+  converter_registry = libtbx.phil.extended_converter_registry(
+    additional_converters=[phil_interface.float_converters,
+                           phil_interface.int_converters],
+    base_registry=iotbx.phil.default_converter_registry)
   master_phil = iotbx.phil.parse(
-    file_name="%s/params.phil" %OV.BaseDir())
+    file_name="%s/params.phil" %OV.BaseDir(),
+    converter_registry=converter_registry)
   solutionPrg, solutionMethod = getDefaultPrgMethod('Solution')
   refinementPrg, refinementMethod = getDefaultPrgMethod('Refinement')
   programs_phil =iotbx.phil.parse("""
