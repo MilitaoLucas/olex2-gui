@@ -223,9 +223,7 @@ class GuiSkinChanger(ImageTools):
 
     
   def run_GuiSkinChanger(self):
-    verbose = (OV.FindValue('olex2_verbose','False'))
-    if verbose == "True": verbose = True
-    if verbose == "False": verbose = False
+    verbose = OV.GetParam('olex2.verbose')
     path = r"gui/images/src/default.png"
     skin = self.gui_skin_name
     skin_extension = self.gui_skin_extension
@@ -1012,9 +1010,7 @@ class timage(ImageTools):
     image_source = "%s/etc/gui/images/src/images.png" %self.basedir
     self.iconSource = Image.open(icon_source)
     self.imageSource = Image.open(image_source)
-    olex2_has_recently_updated = OV.FindValue('olex2_has_recently_updated','False')
-    if olex2_has_recently_updated == "True": self.olex2_has_recently_updated = True
-    if olex2_has_recently_updated == "False": self.olex2_has_recently_updated = False
+    self.olex2_has_recently_updated = OV.GetParam('olex2.has_recently_updated')
     sf = 4
     sfs = sf * 322/int(self.gui_htmlpanelwidth)
     self.sf = sf
