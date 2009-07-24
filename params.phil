@@ -125,6 +125,8 @@ snum {
       .type = float(value_min=0.0)
 
     auto {
+      max_peaks = False
+        .type = bool
       assignQ = 2.0
         .type = float(value_min=0.0)
         .help = Assign all residual electron density peaks greater than the \
