@@ -1,3 +1,5 @@
+
+
 import sys
 sys.path.append(r"../plugin-MySQL")
 sys.path.append(r"../../PyToolLib")
@@ -9,11 +11,12 @@ import SQLFactory
 import string
 import time
 import codecs
+import olex_logon
 
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
-
+import olx
 
 #from HTMLParser import HTMLParser
 
@@ -295,8 +298,10 @@ class DownloadOlexLanguageDictionary:
   def EditHelpItem(self, OXD, language = "English"):
     import olex_logon
     #text = olex_logon.web_translation_item(OXD, language)
-    
+    language = olx.CurrentLanguage()
     text = self.downloadSingleTerm(OXD, language)
+    if not text:
+      return
     inputText = OV.GetUserInput(0,'Modify text for help entry %s in %s' %(OXD, language), text)
     if inputText and inputText != text:
       res = self.uploadSingleTerm(OXD, language, inputText)
@@ -306,8 +311,8 @@ class DownloadOlexLanguageDictionary:
       OV.cmd('reload dictionary')
     else:
       print "Text has not changed"
-      res = self.downloadTranslation()
-      print res
+      #res = self.downloadTranslation()
+      #print res
       OV.cmd('reload dictionary')
     #print inputText
       
@@ -315,14 +320,28 @@ class DownloadOlexLanguageDictionary:
   def downloadSingleTerm(self, OXD, language = "English"):
     import olex_logon
     
-    sql = "SELECT %s FROM translation WHERE oxd='%s'" %(language, OXD)
-    text = olex_logon.web_run_sql(sql)
+    sql = "SELECT * FROM translation WHERE oxd='%s'" %(OXD)
+    res = olex_logon.web_run_sql(sql)
     
-    if text == "Unauthorised":
+    if res == "Unauthorised":
       return
-    #text = self.SQL.run_select_sql(sql)
-    if not text:
-      text = '''
+    
+    d = res[0]
+    
+    txt = d.get(language)
+    
+    if not txt:
+      txt = "#######################################################\n"
+      txt += "This is the <b>%s</b> translation of this item in progress.\n" %language
+      txt += "You are the first person to work on a translation of this item\n"
+      txt += "Please insert your translation here.\n"
+      txt += "If you are finished, please delete these lines.\n"
+      txt += "#######################################################\n\n"
+      
+      txt += d.get('English')
+    
+    if not txt:
+      txt = '''
 Line before a Table.
 &&
 
@@ -332,7 +351,7 @@ XX command line text XX
 
 &&
       '''
-    return text
+    return txt
   
   def uploadSingleTerm(self, OXD, field, value):
     d = {"OXD":OXD, field:value}
@@ -356,8 +375,18 @@ XX command line text XX
 
   def get_help(self):
     placeholder = "."
-    Q = "Select * from translation"
-    res = self.SQL.run_select_sql(Q)
+    Q = "SELECT * FROM translation"
+
+    #res = self.SQL.run_select_sql(Q)
+    res = olex_logon.web_run_sql(script='run_sql', sql = Q)
+    if res == "Unauthorised":
+      return
+    
+
+    #lines = res.split("\n")
+    #for line in lines:
+    #  self.dictionary_l.append(line)
+    
     languages = [('OXD',''),
                  ('English','en'),
                  ('French','fr'),
@@ -368,7 +397,11 @@ XX command line text XX
                  ('Spanish','es'), 
                  ('Chinese','zh-CN'), 
                  ('Greek','el')]
+    i = 0
     for entry in res:
+      i += 1
+#      if i == 1:
+#        continue
       line = ""
       ID = entry.get('ID')
       if ID == "0":
@@ -400,6 +433,9 @@ XX command line text XX
       line += "\n"
       line = line.replace("\t\n", "\t.\n")
       line = line.replace("OXD", "OlexID")
+      
+      
+      
       self.dictionary_l.append(line)
 
   def write_dict_file(self):

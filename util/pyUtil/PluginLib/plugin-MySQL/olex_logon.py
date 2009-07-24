@@ -1,7 +1,9 @@
+#-*- coding:utf8 -*-
 
 import os.path
 import urllib2
 import urllib
+import pickle
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
@@ -26,7 +28,11 @@ def print_response(response):
   wFile.close()
 
 def make_logon_html():
-  txt='''
+  pop_name = "Logon"
+  if OV.IsControl('%s.WEB_USERNAME'%pop_name):
+    olx.html_ShowModal(pop_name)
+  else:
+    txt='''
   <body link="$getVar(gui_html_link_colour)" bgcolor="$getVar(gui_html_bg_colour)">
   <font color=$getVar(gui_html_font_colour)  size=$getVar(gui_html_font_size) face="$getVar(gui_html_font_name)">
   <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$getVar(gui_html_table_bg_colour)">
@@ -40,7 +46,8 @@ def make_logon_html():
          type="text" 
          bgcolor="$getVar(gui_html_input_bg_colour)" 
          valign='center' 
-         name="WEB_USERNAME"  
+         name="WEB_USERNAME"
+         reuse
          width="90"  
          height="18" 
          value = "">
@@ -57,20 +64,23 @@ def make_logon_html():
          valign='center' 
          name="WEB_PASSWORD"
          password
+         reuse
          width="90"  
          height="18" 
          value = "">
      </td>
      </tr>
-     <tr h-align='centre'>
-     <td colspan = '2' h-align='centre'>
+     <tr>
+     <td>
+     </td>
+     <td valign='centre'>
        <input 
          type="button" 
          bgcolor="$getVar(gui_html_input_bg_colour)" 
          valign='center' 
-         name="WEB_OK"
          width="60"  
-         height="22" 
+         height="22"
+         onclick="html.EndModal(Logon,1)"
          value = "OK">
      </td>
      </tr>
@@ -80,52 +90,56 @@ def make_logon_html():
      </body>
      '''
   
-  OV.write_to_olex("logon.htm", txt)
-  pop_name = "Logon"
-  boxWidth = 300
-  boxHeight = 200
-  x = 400
-  y = 400
-  olx.Popup(pop_name, 'logon.htm', "-b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(pop_name, boxWidth, boxHeight, x, y))
-
-
+    OV.write_to_olex("logon.htm", txt)
+    boxWidth = 300
+    boxHeight = 200
+    x = 400
+    y = 400
+    olx.Popup(pop_name, 'logon.htm', "-s -b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(pop_name, boxWidth, boxHeight, x, y))
+    olx.Echo('html.ShowModal(%s)' %pop_name)
+    
+  
 def web_authenticate():
   global username
   global password
-  arg = 1
   if not username:
     make_logon_html()
-#    title = "Username"
-#    contentText = "Please type the username you use to log on to the Olex2 portal\n"
-#    username = OV.GetUserInput(arg, title, contentText)
-#  if not password:
-#    title = "Password"
-#    contentText = "Please type your password\n"
-#    password = OV.GetUserInput(arg, title, contentText)
+    username = olx.GetValue('Logon.WEB_USERNAME')
+    password = olx.GetValue('Logon.WEB_PASSWORD')
+    print username
 OV.registerFunction(web_authenticate)
 
 
 def web_run_sql(sql = None, script = 'run_sql'):
+  """ This returns a dictionary with the content of the db query result """
   global password
   global username
   if not sql:
     return None
   web_authenticate()
+  
+#  sql = u"%s" %sql
+  sql = sql.encode('utf-8')
+  
   url = "http://www.olex2.org/content/DB/%s" %script
+  url = "http://www.olex2.org/%s" %script
   values = {'__ac_password':password,
             '__ac_name':username,
-            'sql':sql,
+            'sqlQ':sql,
             }
   data = urllib.urlencode(values)
   req = urllib2.Request(url)
   response = urllib2.urlopen(req,data)
-  text = response.read()
-
-  if "<!DOCTYPE html PUBLIC" in text:
-    username = ""
+  
+  
+  try:
+    d = pickle.load(response)
+  except:
+    username =""
     password = ""
     return "Unauthorised"
-  return text
+
+  return d
 
 
 
