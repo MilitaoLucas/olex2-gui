@@ -7,6 +7,7 @@ from libtbx.phil import scope_extract_attribute_error
 #
 # Begin temporary cut-and-paste from libtbx.phil
 #
+
 class _check_value_base(object):
 
   def _check_value(self, value, path_producer, words=None):
@@ -80,6 +81,12 @@ class float_converters(number_converters_base):
 
   def _value_as_str(self, value):
     return "%.10g" % value
+
+converter_registry = libtbx.phil.extended_converter_registry(
+  additional_converters=[float_converters,
+                         int_converters],
+  base_registry=iotbx.phil.default_converter_registry)
+
 #
 # End temporary cut-and-paste from libtbx.phil
 #
