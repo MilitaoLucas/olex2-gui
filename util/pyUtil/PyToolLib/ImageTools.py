@@ -1,3 +1,5 @@
+#-*- coding:utf8 -*-
+
 from __future__ import division
 #import PngImagePlugin
 import Image
@@ -12,6 +14,7 @@ OV = OlexFunctions()
 import os
 global sizedraw
 sizedraw_dummy_draw  = ImageDraw.Draw(Image.new('RGBA',(300, 300)))
+import olx
 
 
 class ImageTools(FontInstances):
@@ -382,7 +385,7 @@ class ImageTools(FontInstances):
   def sort_out_encoding():
     font = ImageFont.truetype("%s" %font_file, font_size, encoding=self.test_encoding("unic")) ##Leave in for Debug!
     try:  
-      font_file = self.fonts.get(font_name, "aarialuni.ttf")
+      font_file = self.fonts.get(font_name, "arialuni.ttf")
       font = ImageFont.truetype("%s" %font_file, font_size, encoding=self.test_encoding("unic"))
      
     except:
@@ -458,16 +461,52 @@ class ImageTools(FontInstances):
         else:
           increase = False
     
-    good_encodings = ["ISO8859-1", "ISO8859-2", "ISO8859-7"]      
+    good_encodings = ["ISO8859-1", "ISO8859-2", "ISO8859-7"]
+    self.gui_language_encoding=olx.CurrentLanguageEncoding()
     if self.gui_language_encoding not in good_encodings:
-      font_name = 'Arial UTF'
+      #font_name = 'Arial UTF'
+      font_name = "Chinese"
+      #font_name = "Simsun TTF"
+      #font_name = "Simsun TTC"
+      original_font_size = font_size
+      
+      try:
+        txt.decode('utf-8')
+        font_name = 'Vera'
+        font_size = original_font_size
+      except:
+        top -= 1
+        pass      
+      #txt = u'%s' % txt
+      #txt = txt.encode('utf-8')
+      #txt = txt.encode(self.gui_language_encoding)
       #try:
-        #unicode(txt, "utf-8")
+        #pass
+        ##txt = unicode(txt, "utf-8")
       #except:
-        #font_name = 'Arial UTF'
-        #txt = txt.decode(self.gui_language_encoding)
-        #font_size=13
-        #top_left=(top_left[0], top_left[1] -1)
+        #txt = "!FAIL"
+        #pass
+      ##import ImageFont
+      #font = ImageFont.truetype('simsun.ttc',15)
+#      draw.text( (0,50), unicode(txt,'UTF-8'), font=font)
+#      draw.text((left,int(top)), unicode(txt,'UTF-8'), font=font, fill=font_colour)
+      #draw.text((left,int(top)), txt, font=font, fill=font_colour)
+      #return
+      
+      
+#      try:
+#        txt = unicode(txt, 'utf-8')
+#      except:
+#        txt = "FRED"
+      #txt = "FRED"
+#      try:
+#        unicode(txt, "utf-8")
+#      except:
+#        txt = "Fred2"
+#        font_name = 'Arial UTF'
+#        txt = txt.decode(self.gui_language_encoding)
+#        font_size=13
+#        top_left=(top_left[0], top_left[1] -1)
     #font_name = 'Arial UTF'
     try:
       font = self.fonts[font_name]["fontInstance"].get(font_size,None)
@@ -487,7 +526,7 @@ class ImageTools(FontInstances):
       try:
         if "(" in font_colour:
           font_colour = eval(font_colour)
-        draw.text((left,int(top)), "%s" %txt, font=font, fill=font_colour)
+        draw.text((left,int(top)), txt, font=font, fill=font_colour)
       except:
         print "Text %s could not be drawn" %txt
     else:

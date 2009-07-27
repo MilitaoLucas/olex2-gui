@@ -1,3 +1,5 @@
+#-*- coding:utf8 -*-
+
 """
 Various generic tools for creating and using HTML.
 """
@@ -948,7 +950,23 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
     txt = OV.TranslatePhrase("tip-%i" %i)
     txt += "</td></tr><tr><td align='right'>%s</td></tr>" %make_edit_link("tip", "%i" %i)
   current_tooltip_number = i
+
+#  txt = txt.encode('utf-8')
+#  txt = unicode(txt, 'utf-8')
+
+  
+#  txt = unicode(txt, 'utf-8')
+ 
+  
+  #import array
+  #txt = array.array.fromstring(txt).tostring()
+  #txt = txt.encode('raw')
+  
   txt, d = format_help(txt)
+
+  import pickle
+  txt = pickle.dumps(txt)
+  
   OV.SetVar("current_tooltip_number",i)
   OV.write_to_olex("tip-of-the-day-content.htm", txt)
   return True

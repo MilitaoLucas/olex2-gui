@@ -35,8 +35,6 @@ class RunPrg(ArgumentParser):
       from Analysis import PrgAnalysis
       self.PrgAnalysis = PrgAnalysis
       
-      
-      
     self.params = olx.phil_handler.get_python_object()
     #self.getVariables('auto')
     OV.SetVar('SlideQPeaksVal','0') # reset q peak slider to display all peaks

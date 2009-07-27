@@ -163,7 +163,33 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
+      
+      ##################################################### Chinese
+      "Chinese":{
+        #"font_src":"arialbd.ttf",
+        "font_src":(
+          r"%s/etc/gui/fonts/HDZB_7.ttf" %self.basedir,
+          ),
+        "fontInstance":{}
+          },
+      
+      "Simsun TTC":{
+        "font_src":(
+          "simsun.ttc",
+          "simsun.ttc"
+          ),
+        "fontInstance":{}
+          },
 
+      "Simsun TTF":{
+        "font_src":(
+          "simsun.ttf",
+          "simsun.ttf"
+          ),
+        "fontInstance":{}
+          },
+      
+      
       ##################################################### Trebuchet
       "Trebuchet":{
         "font_src":(

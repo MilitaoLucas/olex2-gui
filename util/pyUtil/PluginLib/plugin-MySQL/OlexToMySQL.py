@@ -1,4 +1,4 @@
-
+#-*- coding:utf8 -*-
 
 import sys
 sys.path.append(r"../plugin-MySQL")
@@ -7,7 +7,7 @@ sys.path.append(r"../../../pyUtil")
 #import initpy
 
 #from ArgumentParser import ArgumentParser
-import SQLFactory
+#import SQLFactory
 import string
 import time
 import codecs
@@ -246,7 +246,7 @@ class ImportDataIntoDB:
 class DownloadOlexLanguageDictionary:
   def __init__(self):
     import olx
-    self.SQL = SQLFactory.SQLFactory(db='OlexGuiDB')  
+    #self.SQL = SQLFactory.SQLFactory(db='OlexGuiDB')  
     #self.basedir = r"C:\Documents and Settings\Horst\Desktop\olex"
     self.basedir = olx.BaseDir()
     self.dictionary_l = []
@@ -300,9 +300,20 @@ class DownloadOlexLanguageDictionary:
     #text = olex_logon.web_translation_item(OXD, language)
     language = olx.CurrentLanguage()
     text = self.downloadSingleTerm(OXD, language)
+    text = unicode(text, 'utf-8')
+#    try:
+#      text = text.encode('utf-8')
+#    except Exception, err:
+#      print err
+    
     if not text:
       return
     inputText = OV.GetUserInput(0,'Modify text for help entry %s in %s' %(OXD, language), text)
+#    try:
+#      inputText = inputText.encode('utf-8')
+#    except Exception, err:
+#      print err
+      
     if inputText and inputText != text:
       res = self.uploadSingleTerm(OXD, language, inputText)
       print res
@@ -463,7 +474,7 @@ OV.registerFunction(DownloadOlexLanguageDictionary_instance.downloadTranslation)
     
 class UploadOlexLanguageDictionary:
   def __init__(self):
-    self.SQL = SQLFactory.SQLFactory(db='OlexGuiDB')  
+    #self.SQL = SQLFactory.SQLFactory(db='OlexGuiDB')  
     self.basedir = OV.BaseDir()
     self.dictionary_l = []
     self.dictF = "%s/dictionary.txt" %self.basedir

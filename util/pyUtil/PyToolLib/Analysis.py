@@ -961,7 +961,7 @@ class PrgAnalysis(Analysis):
     self.graphInfo["imSize"] = size
     self.graphInfo["FontScale"] = 0.03
     self.graphInfo["TopRightTitle"] = self.filename
-    self.graphInfo["n_cycles"] = OV.FindValue("snum_refinement_max_cycles")
+    self.graphInfo["n_cycles"] = OV.GetParam("snum.refinement.max_cycles")
     self.program = program
     self.method = method
     self.xl_d = {}
