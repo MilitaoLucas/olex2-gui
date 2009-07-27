@@ -90,19 +90,27 @@
 
 snum {
   solution {
-    program = ShelXS XS 'smtbx-solve' XM ShelXD
-      .type = choice
-    method = 'Dual Space' 'Charge Flipping' 'Direct Methods' 'Patterson Method'
-      .type = choice
+    #program = ShelXS XS 'smtbx-solve' XM ShelXD
+    #  .type = choice
+    #method = 'Dual Space' 'Charge Flipping' 'Direct Methods' 'Patterson Method'
+    #  .type = choice
+    program = None
+      .type = str
+    method = None
+      .type = str
     graphical_output = False
       .type = bool
   }
 
   refinement {
-    program = ShelXL XL XH ShelXH 'smtbx-refine'
-      .type = choice
-    method = 'Least Squares' CGLS LBFGS
-      .type = choice
+    #program = ShelXL XL XH ShelXH 'smtbx-refine'
+    #  .type = choice
+    #method = 'Least Squares' CGLS LBFGS
+    #  .type = choice
+    program = None
+      .type = str
+    method = None
+      .type = str
     sg = None
       .type = space_group
     sg_list = None
