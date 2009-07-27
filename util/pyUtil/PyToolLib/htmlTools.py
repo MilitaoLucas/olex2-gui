@@ -963,9 +963,6 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
   #txt = txt.encode('raw')
   
   txt, d = format_help(txt)
-
-  import pickle
-  txt = pickle.dumps(txt)
   
   OV.SetVar("current_tooltip_number",i)
   OV.write_to_olex("tip-of-the-day-content.htm", txt)
