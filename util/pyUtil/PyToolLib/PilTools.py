@@ -1012,7 +1012,7 @@ class timage(ImageTools):
     self.imageSource = Image.open(image_source)
     self.olex2_has_recently_updated = OV.GetParam('olex2.has_recently_updated')
     sf = 4
-    sfs = sf * 322/int(self.gui_htmlpanelwidth)
+    sfs = sf * 360/int(self.gui_htmlpanelwidth)
     self.sf = sf
     self.sfs = sfs
     
