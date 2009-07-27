@@ -1040,7 +1040,6 @@ def GetHttpFile(f, force=False):
 
 def check_for_recent_update():
   retVal = False
-  global olex2_has_recently_updated
   path = "%s/version.txt" %OV.BaseDir()
   try:
     rFile = open(path, 'r')
@@ -1055,10 +1054,10 @@ def check_for_recent_update():
     retVal = True
 #    print "Olex2 has recently been updated"
   else:
-    OV.SetVar('olex2.has_recently_updated',False)
+    OV.SetParam('olex2.has_recently_updated',False)
     retVal = False
     #    print "Olex2 has not been updated"
-  OV.SetVar('olex2.last_version',version)
+  OV.SetParam('olex2.last_version',version)
   return retVal
 
 def check_for_crypto():
