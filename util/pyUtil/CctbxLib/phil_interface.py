@@ -106,6 +106,19 @@ class phil_handler(object):
     self._build_index(collect_multiple=True)
     self._params = self.working_phil.extract()
 
+  def adopt_phil(self, phil_object=None, phil_string=None, phil_file=None):
+    assert [phil_object, phil_string, phil_file].count(None) == 2
+    if phil_string:
+      phil_object = iotbx.phil.parse(phil_string)
+    elif phil_file:
+      phil_object = iotbx.phil.parse(file_name=phil_file)
+    if phil_object:
+      for object in phil_object.objects:
+        self.master_phil.adopt(object)
+      self.working_phil = self.master_phil.fetch(sources=[self.working_phil])
+      self._rebuild_index()
+      self._params = self.working_phil.extract()
+
   def save_param_file(self, file_name, scope_name=None, sources=[], diff_only=False):
     if scope_name is not None:
       assert '.' not in scope_name # can only save top-level scopes
