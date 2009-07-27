@@ -173,8 +173,8 @@ snum {
 
   autochem_current_solution = "Autochem 01"
     .type = str
-  auto_hydrogen_naming = checked
-    .type = str
+  auto_hydrogen_naming = True
+    .type = bool
 
   dimas {
     progress_status = None

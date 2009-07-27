@@ -64,9 +64,9 @@
 				name = "auto-hydrogen-naming"
 				width="17"
 				height="17"
-				$GetVar('snum_auto_hydrogen_naming')
-				oncheck="spy.SetParam(snum.auto_hydrogen_naming,checked)"
-				onuncheck="spy.SetParam(snum.auto_hydrogen_naming,unchecked)">
+				$spy.CheckBoxValue(snum.auto_hydrogen_naming)
+				oncheck="spy.SetParam(snum.auto_hydrogen_naming,True)"
+				onuncheck="spy.SetParam(snum.auto_hydrogen_naming,False)">
 	</td>
 </tr>
 
