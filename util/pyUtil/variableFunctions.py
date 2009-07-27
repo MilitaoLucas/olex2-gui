@@ -482,21 +482,14 @@ def VVD_to_phil():
 def get_user_phil():
   user_phil_file = "%s/user.phil" %OV.DataDir()
   if os.path.isfile(user_phil_file):
-    f = open(user_phil_file, 'r')
-    phil = f.read()
-    f.close()
-    return phil
+    return user_phil_file
   else:
     return None
 
 def LoadParams():
-  converter_registry = libtbx.phil.extended_converter_registry(
-    additional_converters=[phil_interface.float_converters,
-                           phil_interface.int_converters],
-    base_registry=iotbx.phil.default_converter_registry)
   master_phil = iotbx.phil.parse(
     file_name="%s/params.phil" %OV.BaseDir(),
-    converter_registry=converter_registry)
+    converter_registry=phil_interface.converter_registry)
   solutionPrg, solutionMethod = getDefaultPrgMethod('Solution')
   refinementPrg, refinementMethod = getDefaultPrgMethod('Refinement')
   programs_phil =iotbx.phil.parse("""
@@ -517,14 +510,14 @@ def LoadStructureParams():
   olx.phil_handler = olx.phil_handler.copy()
   user_phil = get_user_phil()
   if user_phil:
-    olx.phil_handler.update(user_phil)
+    olx.phil_handler.update(phil_file=user_phil)
   snum_phil = """
 snum {
   report.title = "%s"
   report.image = "%s/screenshot.png"
   }
 """ %(OV.FileName(), OV.FilePath())
-  olx.phil_handler.update(snum_phil)
+  olx.phil_handler.update(phil_string=snum_phil)
   structure_phil_path = "%s/.olex/%s.phil" %(OV.FilePath(), OV.FileName())
   if os.path.isfile(structure_phil_path):
     structure_phil_file = open(structure_phil_path, 'r')
@@ -535,7 +528,7 @@ snum {
     structure_phil = VVD_to_phil()
     if structure_phil is None:
       return
-  olx.phil_handler.update(structure_phil)
+  olx.phil_handler.update(phil_string=structure_phil)
 OV.registerFunction(LoadStructureParams)
 
 def SaveStructureParams():

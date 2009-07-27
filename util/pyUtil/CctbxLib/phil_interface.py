@@ -354,7 +354,7 @@ class phil_handler(object):
     phil_scope = self.getRootScope()
     _reindex_phil_objects(phil_scope, path_index)
     self._full_path_index = path_index
-  
+
   def merge_phil(self, phil_object=None, phil_string=None, phil_file=None,
                  overwrite_params=True, rebuild_index=True):
     if phil_string:
@@ -380,14 +380,21 @@ class phil_handler(object):
     #except Exception, e:
       #try
 
-  def update(self, phil_string):
-    try:
-      phil_object = iotbx.phil.parse(input_string=phil_string)
-      new_phil = self.master_phil.fetch(source=phil_object)
-    except Exception, e:
-      pass
+  def update(self, phil_object=None, phil_string=None, phil_file=None):
+    assert [phil_object, phil_string, phil_file].count(None) == 2
+    if phil_string:
+      phil_object = iotbx.phil.parse(phil_string)
+    elif phil_file:
+      phil_object = iotbx.phil.parse(file_name=phil_file)
     else:
-      self.merge_phil(phil_object=phil_object)
+      phil_object = iotbx.phil.parse(input_string=phil_string)
+    if phil_object:
+      try:
+        new_phil = self.master_phil.fetch(source=phil_object)
+      except Exception, e:
+        pass
+      else:
+        self.merge_phil(phil_object=phil_object)
 
   def update_from_python(self, python_object):
     self.working_phil = self.master_phil.format(python_object=python_object)
