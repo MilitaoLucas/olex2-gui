@@ -1047,7 +1047,7 @@ def check_for_recent_update():
     version = int(line.split("SVN Revision No. ")[1])
   except:
     version = 1
-  last_version = int(OV.GetParam('olex2.last_version'))
+  last_version = int(OV.FindValue('last_version',0))
 #  print "Last Version: %i"%last_version
   if version > last_version:
     OV.SetParam('olex2.has_recently_updated',True)
@@ -1057,7 +1057,7 @@ def check_for_recent_update():
     OV.SetParam('olex2.has_recently_updated',False)
     retVal = False
     #    print "Olex2 has not been updated"
-  OV.SetParam('olex2.last_version',version)
+  OV.SetVar('last_version',version)
   return retVal
 
 def check_for_crypto():
@@ -1085,8 +1085,8 @@ def GetACF():
   
   debug = OV.FindValue('odac_fb', False)
   debug = True
-  debug = False
-  debug_deep1 = True
+  #debug = False
+  debug_deep1 = False
   debug_deep2 = False
   OV.SetVar("ac_verbose", False)
   keyname = getKey()
