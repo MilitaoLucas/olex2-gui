@@ -178,7 +178,7 @@ def makeHtmlTableRow(dictionary):
 
 def make_edit_link(name, box_type):
   editLink = ""
-  if OV.IsPluginInstalled('MySQL'):
+  if OV.IsPluginInstalled('Olex2Portal'):
     if OV.GetParam('olex2.is_online'):
       editLink = "<a href='spy.EditHelpItem(%s-%s)'>Edit</a>" %(name, box_type)
   return editLink
@@ -282,7 +282,7 @@ def make_help_box(args):
 <td colspan=1 width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 <td align='right'>
 %s
-no</td></tr>
+</td></tr>
 %s
 <!-- #include tool-footer gui/blocks/tool-footer.htm;1; -->
 ''' %(banner_include, name, titleTxt, helpTxt, return_items, editLink)
@@ -515,7 +515,6 @@ def format_help(string):
   ## find all occurances of strings between gui[]. These are links make something happen on the GUI.
   regex = re.compile(r"gui\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
   string = regex.sub(r"<font size=+1 color='$getVar(gui_html_highlight_colour)'>&#187;</font><a target='Show Me' href='\g<linkurl>'><b>\g<linktext></b></a>", string)
-  
   
   
   ## find all occurances of strings between XX. These are command line entities.

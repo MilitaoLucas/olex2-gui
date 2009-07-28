@@ -261,6 +261,11 @@ olx.Clear()
     
 if olx.IsPluginInstalled('plugin-Batch') == "true":
   import plugin_batch_exex
+
+if olx.IsPluginInstalled('Olex2Portal') == "true":
+    import olex_logon
+  
+  
 if olx.IsPluginInstalled('MySQL') == "true":
   try:
     import OlexToMySQL
