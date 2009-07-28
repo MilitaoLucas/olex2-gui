@@ -184,6 +184,14 @@ def make_edit_link(name, box_type):
   return editLink
 
 
+def make_gui_edit_link(name):
+  editLink = ""
+  if OV.IsPluginInstalled('Olex2Portal'):
+    editLink = "<a href='spy.EditGuiItem(%s)'>Edit</a>" %(name)
+  return editLink
+OV.registerFunction(make_gui_edit_link)
+
+
 def make_help_box(args):
   d = {}
   name = args.get('name', None)
