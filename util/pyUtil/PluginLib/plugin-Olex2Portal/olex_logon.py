@@ -313,6 +313,8 @@ class DownloadOlexLanguageDictionary:
     if inputText and inputText != text:
       wFile = open(gui_file,'w')
       wFile.write(inputText)
+    else:
+      inputText = text
       
     if language != 'English':
       import re
