@@ -1084,7 +1084,7 @@ def GetACF():
     return
   
   debug = OV.FindValue('odac_fb', False)
-  debug = True
+  debug = False
   #debug = False
   debug_deep1 = False
   debug_deep2 = False
