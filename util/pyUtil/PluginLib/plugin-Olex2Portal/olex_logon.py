@@ -30,6 +30,84 @@ def print_response(response):
   wFile.write(response.read())
   wFile.close()
 
+
+def make_translate_gui_items_html(item_l):
+  pop_name = "Translate"
+  boxHeight = 100
+  if OV.IsControl('%s.WEB_USERNAME'%pop_name):
+    olx.html_ShowModal(pop_name)
+  else:
+    txt='''
+  <body link="$getVar(gui_html_link_colour)" bgcolor="$getVar(gui_html_bg_colour)">
+  <font color=$getVar(gui_html_font_colour)  size=$getVar(gui_html_font_size) face="$getVar(gui_html_font_name)">
+  <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$getVar(gui_html_table_bg_colour)">
+  '''
+    
+  for item in item_l:
+    boxHeight += 30
+    value = OV.TranslatePhrase(item)
+    txt += '''
+  
+  <tr>
+    <td>
+    %s: 
+    </td>
+     <td>
+       <input 
+         type="text" 
+         bgcolor="$getVar(gui_html_input_bg_colour)" 
+         valign='center' 
+         name="%s"
+         reuse
+         width="300"  
+         height="20" 
+         value = "%s">
+     </td>
+     </tr>
+     ''' %(item, item, value)
+    
+  txt += '''
+     <tr>
+     <td>
+     </td>
+     <td valign='centre'>
+       <input 
+         type="button" 
+         bgcolor="$getVar(gui_html_input_bg_colour)" 
+         valign='center' 
+         width="60"  
+         height="22"
+         onclick="html.EndModal(Translate,1)"
+         name="TRANSLATE OK"
+         value = "OK">
+       <input 
+         type="button" 
+         bgcolor="$getVar(gui_html_input_bg_colour)" 
+         valign='center' 
+         width="60"  
+         height="22"
+         onclick="html.EndModal(Translate,0)"
+         name="TRANSLATE CANCEL"
+         value = "Cancel">
+     </td>
+     </tr>
+     
+     </table>
+     </font>
+     </body>
+  '''
+  try:
+    txt = txt.encode('utf-8')
+  except:
+    pass
+  OV.write_to_olex("Translate.htm", txt)
+  boxWidth = 500
+  x = 200
+  y = 200
+  olx.Popup(pop_name, 'Translate.htm', "-s -b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(pop_name, boxWidth, boxHeight, x, y))
+  olx.Echo('html.ShowModal(%s)' %pop_name)
+  
+  
 def make_logon_html():
   pop_name = "Logon"
   if OV.IsControl('%s.WEB_USERNAME'%pop_name):
@@ -86,6 +164,14 @@ def make_logon_html():
          height="22"
          onclick="html.EndModal(Logon,1)"
          value = "OK">
+       <input 
+         type="button" 
+         bgcolor="$getVar(gui_html_input_bg_colour)" 
+         valign='center' 
+         width="60"  
+         height="22"
+         onclick="html.EndModal(Logon,0)"
+         value = "Cancel">
      </td>
      </tr>
      
@@ -107,10 +193,11 @@ def web_authenticate():
   global username
   global password
   if not username:
-    make_logon_html()
+    res = make_logon_html()
     username = olx.GetValue('Logon.WEB_USERNAME')
     password = olx.GetValue('Logon.WEB_PASSWORD')
     print username
+    return True
 OV.registerFunction(web_authenticate)
 
 
@@ -121,7 +208,6 @@ def web_run_sql(sql = None, script = 'run_sql'):
   if not sql:
     return None
   web_authenticate()
-  
 #  sql = u"%s" %sql
   sql = sql.encode('utf-8')
   
@@ -208,8 +294,42 @@ class DownloadOlexLanguageDictionary:
     else:
       print "Text has not changed"
       OV.cmd('reload dictionary')
+
+  def EditGuiItem(self,OXD,language="English"):
+    res = web_authenticate()
+    if not username:
+      return
+    language = olx.CurrentLanguage()
+    gui_file = "%s/etc/%s" % (olx.BaseDir(),OXD)
+    tool_name = OXD.split("\\")[1].split(".")[0]
+    #text = olex_logon.web_translation_item(OXD, language)
+    language = olx.CurrentLanguage()
+    rFile = open(gui_file,'r')
+    text = rFile.read()
+    if not text:
+      return
+    
+    inputText = OV.GetUserInput(0,'Modify text for help entry %s in %s' %(OXD, language), text)
+    if inputText and inputText != text:
+      wFile = open(gui_file,'w')
+      wFile.write(inputText)
+      
+    if language != 'English':
+      import re
+      regex = re.compile(r"\% (.*?)  \%", re.X)
+      m = regex.findall(inputText)
+      m.append(tool_name)
+      m = list(set(m))
+      
+      make_translate_gui_items_html(m)
+    
+      for item in m:
+        value = olx.GetValue('Translate.%s' %item)
+        res = self.uploadSingleTerm(item, language, value)
         
-        
+      self.downloadTranslation()
+      OV.htmlReload()
+
   def downloadSingleTerm(self, OXD, language = "English"):
       
     sql = "SELECT * FROM translation WHERE oxd='%s'" %(OXD)
@@ -299,7 +419,8 @@ class DownloadOlexLanguageDictionary:
       try:
         en = (entry.get('English', 'no entry')).strip()
       except AttributeError, err:
-        raise err
+        pass
+        #raise err
       
       
       for language in languages:
@@ -328,20 +449,28 @@ class DownloadOlexLanguageDictionary:
       self.dictionary_l.append(line)
   
   def write_dict_file(self):
-    wFile = open(self.dictF, 'w')
-    wFile.write(codecs.BOM_UTF8 )
-    wFile.close()
-    wFile = codecs.open(self.dictF, 'a', 'utf-8')
-    for line in self.dictionary_l:
-      try:
-        line = unicode( line, "utf-8" )
-      except UnicodeDecodeError, err:
-        print err
-        print line
-        continue
-        
-      wFile.write(line)
-    wFile.close()
+    rFile = open(self.dictF, 'r')
+    old = rFile.read()
+    try:
+      wFile = open(self.dictF, 'w')
+      wFile.write(codecs.BOM_UTF8 )
+      wFile.close()
+      wFile = codecs.open(self.dictF, 'a', 'utf-8')
+      for line in self.dictionary_l:
+        try:
+          line = unicode( line, "utf-8" )
+        except UnicodeDecodeError, err:
+          print err
+          print line
+          continue
+        wFile.write(line)
+      wFile.close()
+    except Exception, err:
+      print err
+      wFile = open(self.dictF, 'w')
+      wFile.write(old)
+      wFile.close()
+      
 
   def create_insert_or_update_sql(self, value_for_key, table):
     ''' value_for_key is a dictionary with key:value '''
@@ -358,6 +487,7 @@ class DownloadOlexLanguageDictionary:
     
 DownloadOlexLanguageDictionary_instance = DownloadOlexLanguageDictionary()
 OV.registerFunction(DownloadOlexLanguageDictionary_instance.EditHelpItem)
+OV.registerFunction(DownloadOlexLanguageDictionary_instance.EditGuiItem)
 OV.registerFunction(DownloadOlexLanguageDictionary_instance.downloadTranslation)
 
 
