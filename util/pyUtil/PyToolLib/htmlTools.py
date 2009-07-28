@@ -953,10 +953,7 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
 
 #  txt = txt.encode('utf-8')
 #  txt = unicode(txt, 'utf-8')
-
-  
 #  txt = unicode(txt, 'utf-8')
- 
   
   #import array
   #txt = array.array.fromstring(txt).tostring()
@@ -965,7 +962,7 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
   txt, d = format_help(txt)
   
   OV.SetVar("current_tooltip_number",i)
-  OV.write_to_olex("tip-of-the-day-content.htm", txt)
+  OV.write_to_olex("tip-of-the-day-content.htm", txt.encode('utf-8'))
   return True
 OV.registerFunction(getTip)
 

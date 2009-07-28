@@ -74,7 +74,7 @@ class ButtonMaker(ImageTools):
       fontcolouron = d.get("fontcolouron", None)
       grad = d.get('grad', False)
       grad_colour = self.adjust_colour(self.gui_timage_colour, luminosity = 2.1)
-      outline_colour = self.gui_html_table_bg_colour
+      outline_colour = d.get("outline_colour", self.gui_html_table_bg_colour)
       continue_mark = d.get('continue_mark', False)
       states = d.get('states', [""])
       vline = d.get('vline', False)
@@ -96,8 +96,8 @@ class ButtonMaker(ImageTools):
           width = int(self.gui_htmlpanelwidth)-(number * minus)
           width = (width/number-9)
           if vline:
-            vline.setdefault('position', width - 15)
-            olx.SetVar("olex2_main_toolbar_vline_position, %s" %int(width - 15))
+            vline.setdefault('position', width - 20)
+            olx.SetVar("olex2_main_toolbar_vline_position, %s" %int(width - 20))
       except:
         width = int(width)
       size = (int(width), int(height))
@@ -128,17 +128,17 @@ class ButtonMaker(ImageTools):
             self.add_continue_triangles(draw, width, height, style=('single', 'down', font_colour))
         if arrow:
           if state == "off":
-            self.create_arrows(draw, height, direction="down", h_space=4, v_space=6, colour=font_colour, type='simple')
+            self.create_arrows(draw, height, direction="down", h_space=8, v_space=8, colour=font_colour, type='simple')
           elif state == "on":
-            self.create_arrows(draw, height, direction="up", h_space=4, v_space=6, colour=font_colour, type='simple')
+            self.create_arrows(draw, height, direction="up", h_space=8, v_space=8, colour=font_colour, type='simple')
           elif state == "inactive":
-            self.create_arrows(draw, height, direction="down", h_space=4, v_space=6, colour=font_colour, type='simple')
+            self.create_arrows(draw, height, direction="down", h_space=8, v_space=8, colour=font_colour, type='simple')
         if vline:
           if state == "on" or state == "off":
             if grad:
-              colour = self.adjust_colour(grad_colour, luminosity=0.8)
+              colour = self.adjust_colour(grad_colour, luminosity=1)
             else:
-              colour = fontcolouroff
+              colour = outline_colour
             self.add_vline(draw, height=vline.get('height',10), h_pos=vline.get('position',10), v_pos=vline.get('v_pos',2), colour = colour, weight=1,) # colour = IT.adjust_colour(bgcolour, luminosity=1.8))
           else:
             self.add_vline(draw, height=vline.get('height',10), h_pos=vline.get('position',10), v_pos=vline.get('v_pos',2), colour = font_colour, weight=1,) 
@@ -2045,22 +2045,26 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       font_name = "%s Bold" %font_name
       
     settings_button_width = 0
-    cbtn_buttons_height = 18
+    cbtn_buttons_height = 20
     
     all_cbtn_buttons = {
         'image_prefix':'cbtn',
         'height':cbtn_buttons_height,
         'font_name':font_name,
-        #'bgcolour':(60,80,140),
-        'fontcolouroff':self.adjust_colour(self.gui_timage_colour, luminosity = 1.6),
-        'bgcolouroff':self.adjust_colour(self.gui_timage_colour, luminosity = 1.0),
-        'bgcolouron':self.gui_timage_colour,
+        #'bgcolouroff':self.adjust_colour(self.gui_timage_colour, luminosity = 1.0),
+        #'bgcolouron':self.gui_timage_colour,
+        #'fontcolouroff':self.adjust_colour(self.gui_timage_colour, luminosity = 1.6),
+        #'fontcolouron':self.gui_html_highlight_colour,
+        'bgcolouroff':self.gui_html_bg_colour,
+        'bgcolouron':self.gui_html_bg_colour,
+        'fontcolouroff':self.gui_timage_colour,
         'fontcolouron':self.gui_html_highlight_colour,
         'fontcolourinactive':self.adjust_colour(self.gui_grey, luminosity = 2.0),
         'bgcolourinactive':self.adjust_colour(self.gui_grey, luminosity = 2.0),
         'states':['','on', 'off', 'inactive'],
+        'outline_colour':self.adjust_colour(self.gui_html_table_bg_colour, luminosity = 0.8),
         'grad_colour':(237,237,245),
-        'vline':{'v_pos':0, 'height':16},
+        'vline':{'v_pos':0, 'height':18},
         #'grad':{'grad_colour':self.adjust_colour(self.gui_timage_colour, luminosity = 1.8), 
                 #'fraction':1,
                 #'increment':0.5,
@@ -2350,7 +2354,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if self.gui_image_font_name:
       font_name = self.gui_image_font_name
     width = self.width - 8
-    height = 16
+    
+    if "GB" in self.gui_language_encoding:
+      height = 18
+    else:
+      height = 16
     base = self.gui_timage_colour
     base = self.gui_timage_colour
     bg_colour = self.adjust_colour("base", luminosity=bg_luminosity, saturation=bg_saturation)
@@ -2413,7 +2421,12 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       font_name = self.gui_image_font_name
     
     width = self.width + 1
-    height = 16
+    
+    if "GB" in self.gui_language_encoding:
+      height = 18
+    else:
+      height = 16
+
     
     base = self.gui_timage_colour
     bg_colour = self.adjust_colour("base", luminosity = 1.6)
@@ -2451,20 +2464,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       cache = {}
       rad = 3
       image = RoundedCorners.round_image(image, cache, rad)
-      #self.make_border(rad=9,
-              #draw=draw,
-              #width=width,
-              #height=height,
-              #bg_colour=bg_colour,
-              #border_colour=bg_colour,
-              #border_hls = (0, 0.95, 1),
-              #shift = 0,
-              #cBottomLeft=False,
-              #cBottomRight=False,
-              #cTopLeft=False,
-              #cTopRight=False
-            #)
-
+      
     if state == "off":
       fill=self.adjust_colour("bg", luminosity=0.6)
       self.create_arrows(draw, height, direction="right", colour=fill, type='simple')
@@ -2472,12 +2472,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     else:
       fill = self.adjust_colour("highlight",  luminosity = 1.0)
       self.create_arrows(draw, height, direction="up", colour=fill, type='simple')
-#    im = image
-#    mark = Image.new('RGBA', (10,10), (255,255,255,255))
-#    im = self.watermark(im, mark, 'tile', 0.5)
-#    im = self.watermark(im, mark, 'scale', 1.0)
-#    im = self.watermark(im, mark, (1, 1), 1)      
-#    image = im  
+      
     image = self.add_whitespace(image=image, side='bottom', margin_left=rad, weight=1, colour = self.adjust_colour("bg", luminosity = 0.90))
     image = self.add_whitespace(image=image, side='bottom', margin_left=rad, weight=1, colour = self.adjust_colour("bg", luminosity = 0.95))
     filename = item
@@ -2490,7 +2485,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       font_name = "%s Bold" %font_name
 
     width = int((self.width)/len(self.tabItems)-2)
-    height = 17
+    if "GB" in self.gui_language_encoding:
+      height = 22
+    else:
+      height = 20
 
     base = self.gui_timage_colour
     font_colour = base
@@ -2540,7 +2538,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                             font_colour=font_colour,
                             image_size = image.size,
                             lowerCase = True,
-                            valign=(middle,0.8)
+                            valign=(middle,0.7)
                           )
 
 

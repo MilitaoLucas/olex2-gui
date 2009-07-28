@@ -266,16 +266,16 @@ class ImageTools(FontInstances):
     return IM
 
   
-  def add_continue_triangles(self, draw, width, height, shift_up = 4, style=('multiple')):
+  def add_continue_triangles(self, draw, width, height, shift_up = 4, shift_left = 5, style=('multiple')):
     arrow_top = 8 + shift_up
     arrow_middle = 5 + shift_up
     arrow_bottom = 2 + shift_up
-    beg_1 = 20
-    mid_1 = 16
-    beg_2 = 13
-    mid_2 = 9
-    beg_3 = 7
-    mid_3 = 3
+    beg_1 = 20 + shift_left
+    mid_1 = 16 + shift_left
+    beg_2 = 13 + shift_left
+    mid_2 = 9 + shift_left
+    beg_3 = 7 + shift_left
+    mid_3 = 3 + shift_left
 
     if 'multiple' in style:
       colour = (150, 190, 230)
@@ -294,14 +294,15 @@ class ImageTools(FontInstances):
       middle = (width-mid_3,height-arrow_middle)
       end = (width-beg_3, height-arrow_bottom)
       draw.polygon((begin, middle, end), colour)
+
     elif 'single' in style:
-      beg_3 = 10
-      mid_3 = 4
+      beg_3 = 10 + shift_left
+      mid_3 = 4 + shift_left
       direction = style[1]
       colour = style[2]
       if "(" in colour:
         colour = eval(colour)
-      arrow_width = 6
+      arrow_width = 12
       if direction == "right":
         begin = (width-beg_3,height-arrow_top)
         middle = (width-mid_3,height-arrow_middle)
@@ -415,6 +416,34 @@ class ImageTools(FontInstances):
       txt = txt.lower()
     top = top_left[1]
     left = top_left[0]
+
+    
+    good_encodings = ["ISO8859-1", "ISO8859-2", "ISO8859-7"]
+    good_encodings = ["ISO8859-1", "ISO8859-2"]
+    self.gui_language_encoding = olx.CurrentLanguageEncoding()
+    self.gui_current_language = olx.CurrentLanguage()
+    encoding = 'unic'
+    if self.gui_language_encoding not in good_encodings:
+      self.gui_language_encoding = "unic"
+      encoding = 'unic'
+      font_name = 'Arial UTF'
+      #font_name = "Simhei TTF"
+      #font_name = "Chinese"
+      #font_name = "Simsun TTF"
+      #font_name = "Simsun TTC"
+      original_font_size = font_size
+      
+      #if font_size < 18:
+      #  font_size = 18
+      
+      try:
+        txt.decode('utf-8')
+        font_name = 'Vera'
+        font_size = original_font_size
+      except:
+        top -= 1
+        pass
+    
     
 
     if valign:
@@ -440,7 +469,17 @@ class ImageTools(FontInstances):
                       "rel_adjust":+0.1},
         "Vera":{"top_adjust":0,
                       "rel_adjust":-0.1},
+        "Simhei TTF":{"top_adjust":-0.2,
+                      "rel_adjust":+0.3},
         }
+      
+      if self.gui_current_language == "Chinese":
+        font_peculiarities.setdefault("Arial UTF",{"top_adjust":-0.7,
+                                            "rel_adjust":+0.6})
+        
+      elif self.gui_current_language == "Greek":
+        font_peculiarities.setdefault("Arial UTF",{"top_adjust":-1,
+                                            "rel_adjust":+0.4})
 
       top_adjust = 0
       rel_adjust = 0
@@ -461,59 +500,14 @@ class ImageTools(FontInstances):
         else:
           increase = False
     
-    good_encodings = ["ISO8859-1", "ISO8859-2", "ISO8859-7"]
-    self.gui_language_encoding=olx.CurrentLanguageEncoding()
-    if self.gui_language_encoding not in good_encodings:
-      #font_name = 'Arial UTF'
-      font_name = "Chinese"
-      #font_name = "Simsun TTF"
-      #font_name = "Simsun TTC"
-      original_font_size = font_size
-      
-      try:
-        txt.decode('utf-8')
-        font_name = 'Vera'
-        font_size = original_font_size
-      except:
-        top -= 1
-        pass      
-      #txt = u'%s' % txt
-      #txt = txt.encode('utf-8')
-      #txt = txt.encode(self.gui_language_encoding)
-      #try:
-        #pass
-        ##txt = unicode(txt, "utf-8")
-      #except:
-        #txt = "!FAIL"
-        #pass
-      ##import ImageFont
-      #font = ImageFont.truetype('simsun.ttc',15)
-#      draw.text( (0,50), unicode(txt,'UTF-8'), font=font)
-#      draw.text((left,int(top)), unicode(txt,'UTF-8'), font=font, fill=font_colour)
-      #draw.text((left,int(top)), txt, font=font, fill=font_colour)
-      #return
-      
-      
-#      try:
-#        txt = unicode(txt, 'utf-8')
-#      except:
-#        txt = "FRED"
-      #txt = "FRED"
-#      try:
-#        unicode(txt, "utf-8")
-#      except:
-#        txt = "Fred2"
-#        font_name = 'Arial UTF'
-#        txt = txt.decode(self.gui_language_encoding)
-#        font_size=13
-#        top_left=(top_left[0], top_left[1] -1)
-    #font_name = 'Arial UTF'
+    
+
     try:
       font = self.fonts[font_name]["fontInstance"].get(font_size,None)
     except:
       font = self.registerFontInstance(font_name, font_size)
     if not font:
-      font = self.registerFontInstance(font_name, font_size)
+      font = self.registerFontInstance(font_name, font_size, encoding=encoding)
     
       
     if align == "centre":
@@ -619,9 +613,9 @@ class ImageTools(FontInstances):
       if direction == 'up':
         h_space -= 2
         v_space += 2
-        begin = (h_space, height-v_space+1)
-        middle = (h_space + arrow_half, v_space -1 )
-        end = (h_space + arrow_width, height-v_space+1)
+        begin = (h_space, height-v_space + 1)
+        middle = (h_space + arrow_half, v_space - 1)
+        end = (h_space + arrow_width, height-v_space + 1)
       elif direction == 'down':
         h_space -= 1
         v_space += 1
