@@ -176,11 +176,20 @@ class FontInstances(ArgumentParser):
       "Simsun TTC":{
         "font_src":(
           "simsun.ttc",
-          "simsun.ttc"
+          "arialuni.ttf"
           ),
         "fontInstance":{}
           },
 
+      "Simhei TTF":{
+        "font_src":(
+          "simhei.ttf",
+          "arialuni.ttf"
+          ),
+        "fontInstance":{}
+          },
+      
+      
       "Simsun TTF":{
         "font_src":(
           "simsun.ttf",
@@ -333,14 +342,12 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
-
-        
         }
     #for font_name in self.fonts:
       #self.registerFontInstance(font_name, 10)
     return self.fonts
 
-  def registerFontInstance(self, font_name, font_size):
+  def registerFontInstance(self, font_name, font_size, encoding='unic'):
     #font_src = r"%s\etc\gui\fonts\Vera.ttf" %self.basedir
     #f = open(font_src)
     #fontInstance = ImageFont.truetype(f, font_size, encoding=self.gui_language_encoding)
@@ -353,11 +360,11 @@ class FontInstances(ArgumentParser):
       self.fonts.setdefault(font_name,{})
       self.fonts[font_name].setdefault("fontInstance",{})
       try:
-        fontInstance = ImageFont.truetype(font_name, font_size, encoding=self.gui_language_encoding)
+        fontInstance = ImageFont.truetype(font_name, font_size, encoding=encoding)
       except IOError, err:
         print err
       failsafe = r"%s/etc/gui/fonts/Vera.ttf" %self.basedir
-      fontInstance = ImageFont.truetype(failsafe, font_size, encoding=self.gui_language_encoding)
+      fontInstance = ImageFont.truetype(failsafe, font_size, encoding=encoding)
       self.fonts[font_name]["fontInstance"].setdefault(font_size,fontInstance)
   
     pleasePickleMe = False
@@ -366,24 +373,15 @@ class FontInstances(ArgumentParser):
     if not fontInstance:
       try:
         first_choice = font_src_t[0]
-        fontInstance = ImageFont.truetype(first_choice, font_size, encoding=self.gui_language_encoding)
+        fontInstance = ImageFont.truetype(first_choice, font_size, encoding=encoding)
         self.fonts[font_name]["fontInstance"].setdefault(font_size,fontInstance)
       except:
         try:
           failsafe = font_src_t[-1]
-          fontInstance = ImageFont.truetype(failsafe, font_size, encoding=self.gui_language_encoding)
+          fontInstance = ImageFont.truetype(failsafe, font_size, encoding=encoding)
           self.fonts[font_name]["fontInstance"].setdefault(font_size,fontInstance)
         except:
           failsafe = r"%s/etc/gui/fonts/Vera.ttf" %self.basedir
-          fontInstance = ImageFont.truetype(failsafe, font_size, encoding=self.gui_language_encoding)
+          fontInstance = ImageFont.truetype(failsafe, font_size, encoding=encoding)
           self.fonts[font_name]["fontInstance"].setdefault(font_size,fontInstance)     
-#      for font_src in font_src_t:
-#        try:
-#          fontInstance = ImageFont.truetype(font_src, font_size, encoding=self.gui_language_encoding)
-#          self.fonts[font_name]["fontInstance"].setdefault(font_size,fontInstance)
-#        except:
-#          pass
-          #print "Target font not found, searching for alternative font"
-#        if fontInstance:
-#          break
     return fontInstance
