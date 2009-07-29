@@ -7,8 +7,10 @@ import olex_core
 import sys
 import programSettings
 
+
 import socket
 import urllib
+import urllib2
 URL = "http://dimas.dur.ac.uk/"
 
 # timeout in seconds
@@ -1064,10 +1066,56 @@ def check_for_crypto():
   if olx.IsPluginInstalled(r"Crypto").lower() == 'false':
     import olex
     olex.m(r"InstallPlugin Crypto")
-  if olx.IsPluginInstalled(r"AutoChem").lower() == 'false':
+  if olx.IsPluginInstalled(r"ODAC").lower() == 'false':
     import olex
-    olex.m(r"InstallPlugin AutoChem")
+    olex.m(r"InstallPlugin ODAC")
 
+    
+def updateACF():
+  mac_address = OV.GetMacAddress()
+  username, computer_name = OV.GetUserComputerName()
+  keyname = getKey()
+  olex2_tag = OV.GetTag()
+  
+  username = "updater"
+  password = "update456R"
+  institution = keyname.split("-")[0]
+  type_of_key = keyname.split("-")[-1]
+  
+  url = "http://www.olex2.org/odac/KeyGen/run_update_distro"
+  url = "http://www.olex2.org/odac/KeyGen/update_distro"
+  values = {'__ac_password':password,
+            '__ac_name':username,
+            'institution':institution,
+            'olex2Tag':olex2_tag,
+            'typeOfKey':type_of_key,
+            'computerName':computer_name,
+            'macAddress':mac_address,
+            }
+  data = urllib.urlencode(values)
+  req = urllib2.Request(url)
+  response = urllib2.urlopen(req,data)
+  import pickle
+  try:
+    l = pickle.load(response)
+    p = "%s/Olex2u/OD/" %os.environ['ALLUSERSPROFILE']
+
+    for f in l:
+      f = f.replace(r'/var/distro/www/', 'olex-')
+      cont = GetHttpFile(f, force=True)
+      name = f.split(r'/')[-1]
+      if cont:
+        wFile = open("%s/%s" %(p, name),'w') 
+        wFile.write(cont)
+        wFile.close()
+        print "Written %s/%s" %(p, name)
+  except:
+    print "Empty response!"
+
+
+OV.registerFunction(updateACF)
+    
+    
 def GetACF():
   
   no_update = False
@@ -1084,11 +1132,11 @@ def GetACF():
     return
   
   debug = OV.FindValue('odac_fb', False)
-  debug = False
-  #debug = False
-  debug_deep1 = False
-  debug_deep2 = False
-  OV.SetVar("ac_verbose", False)
+  
+  debug = [False, True][0]
+  debug_deep1 = [False, True][1]
+  debug_deep2 = [False, True][0]
+  OV.SetVar("ac_verbose", [False, True][0])
   keyname = getKey()
   
 
