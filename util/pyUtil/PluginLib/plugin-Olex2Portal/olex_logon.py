@@ -105,7 +105,9 @@ def make_translate_gui_items_html(item_l):
   x = 200
   y = 200
   olx.Popup(pop_name, 'Translate.htm', "-s -b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(pop_name, boxWidth, boxHeight, x, y))
-  olx.Echo('html.ShowModal(%s)' %pop_name)
+  res = olx.html_ShowModal(pop_name)
+  res = int(res)
+  return res
   
   
 def make_logon_html():
@@ -186,7 +188,9 @@ def make_logon_html():
     x = 200
     y = 200
     olx.Popup(pop_name, 'logon.htm', "-s -b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(pop_name, boxWidth, boxHeight, x, y))
-    olx.Echo('html.ShowModal(%s)' %pop_name)
+    res = olx.html_ShowModal(pop_name)
+    res = int(res)
+    return res
     
   
 def web_authenticate():
@@ -194,10 +198,13 @@ def web_authenticate():
   global password
   if not username:
     res = make_logon_html()
-    username = olx.GetValue('Logon.WEB_USERNAME')
-    password = olx.GetValue('Logon.WEB_PASSWORD')
-    print username
-    return True
+    if res:
+      username = olx.GetValue('Logon.WEB_USERNAME')
+      password = olx.GetValue('Logon.WEB_PASSWORD')
+      print username
+      return True
+    else:
+      return False
 OV.registerFunction(web_authenticate)
 
 
@@ -323,14 +330,13 @@ class DownloadOlexLanguageDictionary:
       m.append(tool_name)
       m = list(set(m))
       
-      make_translate_gui_items_html(m)
-    
-      for item in m:
-        value = olx.GetValue('Translate.%s' %item)
-        res = self.uploadSingleTerm(item, language, value)
-        
-      self.downloadTranslation()
-      OV.htmlReload()
+      res = make_translate_gui_items_html(m)
+      if res:
+        for item in m:
+          value = olx.GetValue('Translate.%s' %item)
+          res = self.uploadSingleTerm(item, language, value)
+        self.downloadTranslation()
+        OV.htmlReload()
 
   def downloadSingleTerm(self, OXD, language = "English"):
       
