@@ -17,6 +17,8 @@ URL = "http://dimas.dur.ac.uk/"
 timeout = 15
 socket.setdefaulttimeout(timeout)
 
+global _is_online
+_is_online = False
 
 sys.path.append(r".\src")
 import History
@@ -1016,8 +1018,9 @@ def getKeys(key_directory=None):
   
 
 def GetHttpFile(f, force=False):
+  global _is_online
   retVal = None
-  go_online = OV.GetParam("olex2.is_online")
+  go_online = _is_online
   verbose = OV.FindValue("ac_verbose", "False")
   if go_online or force:
     try:
@@ -1031,7 +1034,7 @@ def GetHttpFile(f, force=False):
       conn.close()
       retVal = content
     except Exception, err:
-      OV.SetParam("olex2.is_online",False)
+      _is_online = False
       retVal = None
       print "Olex2 can not reach the update server: %s" %err
       print url
@@ -1133,11 +1136,11 @@ OV.registerFunction(updateACF)
     
     
 def GetACF():
-  
+  global _is_online
   no_update = False
   print "Starting ODAC..."
   if no_update:
-    OV.SetParam('olex2.is_online',False)
+    _is_online = False
     print "Will not update ODAC Files"
   check_for_crypto()  
   
