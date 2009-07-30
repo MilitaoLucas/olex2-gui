@@ -1077,60 +1077,60 @@ def check_for_crypto():
     olex.m(r"InstallPlugin AutoChem")
 
     
-def updateACF():
-  
+def updateACF(force=False):
   rFile = open(r"%s/util/pyUtil/PluginLib/odac_update.txt" %OV.BaseDir())
   txt = rFile.read()
   rFile.close()
-  if txt == "False":
+  if force:
+    print "Update is forced"
+  elif txt == "False":
     print "No update required"
     return
-  else:
-    print "Now Updating..."
-    mac_address = OV.GetMacAddress()
-    username, computer_name = OV.GetUserComputerName()
-    keyname = getKey()
-    olex2_tag = OV.GetTag()
-    
-    username = "updater"
-    password = "update456R"
-    institution = keyname.split("-")[0]
-    type_of_key = keyname.split("-")[-1]
-    
-    url = "http://www.olex2.org/odac/KeyGen/run_update_distro"
-    url = "http://www.olex2.org/odac/KeyGen/update_distro"
-    values = {'__ac_password':password,
-              '__ac_name':username,
-              'institution':institution,
-              'olex2Tag':olex2_tag,
-              'typeOfKey':type_of_key,
-              'computerName':computer_name,
-              'macAddress':mac_address,
-              }
-    data = urllib.urlencode(values)
-    req = urllib2.Request(url)
-    response = urllib2.urlopen(req,data)
-    import pickle
-    try:
-      l = pickle.load(response)
-      p = "%s/Olex2u/OD/" %os.environ['ALLUSERSPROFILE']
+  print "Now Updating..."
+  mac_address = OV.GetMacAddress()
+  username, computer_name = OV.GetUserComputerName()
+  keyname = getKey()
+  olex2_tag = OV.GetTag()
   
-      for f in l:
-        f = f.replace(r'/var/distro/www/', 'olex-')
-        cont = GetHttpFile(f, force=True)
-        name = f.split(r'/')[-1]
-        if cont:
-          wFile = open("%s/%s" %(p, name),'w') 
-          wFile.write(cont)
-          wFile.close()
-          print "Written %s/%s" %(p, name)
-      wFile = open(r"%s/util/pyUtil/PluginLib/odac_update.txt" %OV.BaseDir(),'w')
-      wFile.write("False")
-      rFile.close()
-      print "Updated"
-    
-    except Exception, err:
-      print "Empty response: %s" %err
+  username = "updater"
+  password = "update456R"
+  institution = keyname.split("-")[0]
+  type_of_key = keyname.split("-")[-1]
+  
+  url = "http://www.olex2.org/odac/KeyGen/run_update_distro"
+  url = "http://www.olex2.org/odac/KeyGen/update_distro"
+  values = {'__ac_password':password,
+            '__ac_name':username,
+            'institution':institution,
+            'olex2Tag':olex2_tag,
+            'typeOfKey':type_of_key,
+            'computerName':computer_name,
+            'macAddress':mac_address,
+            }
+  data = urllib.urlencode(values)
+  req = urllib2.Request(url)
+  response = urllib2.urlopen(req,data)
+  import pickle
+  try:
+    l = pickle.load(response)
+    p = "%s/Olex2u/OD/" %os.environ['ALLUSERSPROFILE']
+
+    for f in l:
+      f = f.replace(r'/var/distro/www/', 'olex-')
+      cont = GetHttpFile(f, force=True)
+      name = f.split(r'/')[-1]
+      if cont:
+        wFile = open("%s/%s" %(p, name),'w') 
+        wFile.write(cont)
+        wFile.close()
+        print "Written %s/%s" %(p, name)
+    wFile = open(r"%s/util/pyUtil/PluginLib/odac_update.txt" %OV.BaseDir(),'w')
+    wFile.write("False")
+    rFile.close()
+    print "Updated"
+  
+  except Exception, err:
+    print "Empty response: %s" %err
 
 OV.registerFunction(updateACF)
     
@@ -1157,7 +1157,7 @@ def GetACF():
   debug = [False, True][0]
   debug_deep1 = [False, True][1]
   debug_deep2 = [False, True][1]
-  OV.SetVar("ac_verbose", [False, True][0])
+  OV.SetVar("ac_verbose", [False, True][1])
   keyname = getKey()
   
 
@@ -1223,7 +1223,7 @@ def GetACF():
 
   if odac_loaded:
     OV.SetVar("HaveODAC", True)
-    print "ODAC started OK"
+    #print "ODAC started OK"
 OV.registerFunction(GetACF)
   
 
