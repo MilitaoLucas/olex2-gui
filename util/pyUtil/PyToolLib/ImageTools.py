@@ -481,6 +481,11 @@ class ImageTools(FontInstances):
         font_peculiarities.setdefault("Arial UTF",{"top_adjust":-1,
                                             "rel_adjust":+0.4})
 
+      elif self.gui_current_language == "Russian":
+        font_peculiarities.setdefault("Arial UTF",{"top_adjust":-1,
+                                            "rel_adjust":+0.4})
+        
+        
       top_adjust = 0
       rel_adjust = 0
       for f in font_peculiarities:

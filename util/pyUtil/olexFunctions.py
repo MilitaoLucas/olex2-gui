@@ -482,6 +482,5 @@ class OlexFunctions(inheritFunctions):
           mac = line.split()[4] 
           break 
     return mac   
-  
     
 OV = OlexFunctions()
