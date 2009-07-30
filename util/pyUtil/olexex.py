@@ -1080,8 +1080,10 @@ def updateACF():
   txt = rFile.read()
   rFile.close()
   if txt == "False":
+    print "No update required"
     return
   else:
+    print "Now Updating..."
     mac_address = OV.GetMacAddress()
     username, computer_name = OV.GetUserComputerName()
     keyname = getKey()
@@ -1125,7 +1127,7 @@ def updateACF():
     
     except:
       print "Empty response!"
-      
+    print "Updated"
 
 OV.registerFunction(updateACF)
     
@@ -1151,7 +1153,7 @@ def GetACF():
   debug = OV.FindValue('odac_fb', False)
   debug = [False, True][0]
   debug_deep1 = [False, True][1]
-  debug_deep2 = [False, True][0]
+  debug_deep2 = [False, True][1]
   OV.SetVar("ac_verbose", [False, True][0])
   keyname = getKey()
   
@@ -1226,11 +1228,8 @@ def runODAC(cmd):
   if OV.FindValue('HaveODAC',False):
     cmd = cmd.rstrip(" -")
     cmd += " -s"
-    olex.m("cursor(busy,'Starting ODAC')")
+    OV.Cursor('Starting ODAC')
     res = olex.m(cmd)
-    if res != 1:
-      print "An Error occured with running ODAC"
-      olex.m("cursor()")
       
     
   else:
