@@ -1124,10 +1124,10 @@ def updateACF():
       wFile = open(r"%s/util/pyUtil/PluginLib/odac_update.txt" %OV.BaseDir(),'w')
       wFile.write("False")
       rFile.close()
+      print "Updated"
     
-    except:
-      print "Empty response!"
-    print "Updated"
+    except Exception, err:
+      print "Empty response: %s" %err
 
 OV.registerFunction(updateACF)
     
