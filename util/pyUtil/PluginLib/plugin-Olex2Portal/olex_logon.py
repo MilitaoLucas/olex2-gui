@@ -307,6 +307,7 @@ class DownloadOlexLanguageDictionary:
     if not username:
       return
     language = olx.CurrentLanguage()
+    self.language = language
     gui_file = "%s/etc/%s" % (olx.BaseDir(),OXD)
     tool_name = OXD.split("\\")[1].split(".")[0]
     #text = olex_logon.web_translation_item(OXD, language)
@@ -323,21 +324,30 @@ class DownloadOlexLanguageDictionary:
     else:
       inputText = text
       
-    if language != 'English':
-      import re
-      regex = re.compile(r"\% (.*?)  \%", re.X)
-      m = regex.findall(inputText)
-      m.append(tool_name)
-      m = list(set(m))
+    import re
+    regex = re.compile(r"\% (.*?)  \%", re.X)
+    m = regex.findall(inputText)
+    m.append(tool_name)
+    m = list(set(m))
+    
+    res = make_translate_gui_items_html(m)
+    if res:
+      OV.Cursor('busy', "Please wait while uploading your changes")
+      self.upload_items(m)
+      self.downloadTranslation()
+      OV.htmlReload()
+      OV.Cursor()
       
-      res = make_translate_gui_items_html(m)
-      if res:
-        for item in m:
-          value = olx.GetValue('Translate.%s' %item)
-          res = self.uploadSingleTerm(item, language, value)
-        self.downloadTranslation()
-        OV.htmlReload()
-
+  def upload_items(self, m):
+    try:
+      for item in m:
+        value = olx.GetValue('Translate.%s' %item)
+        res = self.uploadSingleTerm(item, self.language, value)
+    except:
+      res = make_translate_gui_items_html
+    
+      
+      
   def downloadSingleTerm(self, OXD, language = "English"):
       
     sql = "SELECT * FROM translation WHERE oxd='%s'" %(OXD)
