@@ -983,13 +983,13 @@ OV.registerMacro(install_plugin, "")
 def runSadabs():    
   olx.User("'%s'" %OV.FilePath())
   olx.Exec("sadabs")
-  #olx.WaitFor('process') # uncomment me!
+  #olx.WaitFor('process') # uncomment me!http://dimas.dur.ac.uk/olex-distro-odac/1.0-alpha/Durham-OLEX2-Demo/AutoChem%20Installer.exe
 OV.registerFunction(runSadabs)
 
 def getKey(key_directory=None, specific_key = None):
   if sys.platform[:3] != 'win':
     return None
-  keyPath = "%s/Olex2u/OD/" %os.environ['ALLUSERSPROFILE']
+  keyPath = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], OV.GetTag())
   if not key_directory:
     key_directory = keyPath
   if specific_key:
@@ -1097,7 +1097,6 @@ def updateACF(force=False):
   institution = keyname.split("-")[0]
   type_of_key = keyname.split("-")[-1]
   
-  url = "http://www.olex2.org/odac/KeyGen/run_update_distro"
   url = "http://www.olex2.org/odac/KeyGen/update_distro"
   values = {'__ac_password':password,
             '__ac_name':username,
@@ -1131,6 +1130,7 @@ def updateACF(force=False):
   
   except Exception, err:
     print "Empty response: %s" %err
+    print repr(response)
 
 OV.registerFunction(updateACF)
     
@@ -1154,7 +1154,7 @@ def GetACF():
     
   
   debug = OV.FindValue('odac_fb', False)
-  debug = [False, True][0]
+  debug = [False, True][1]
   debug_deep1 = [False, True][1]
   debug_deep2 = [False, True][1]
   OV.SetVar("ac_verbose", [False, True][1])
