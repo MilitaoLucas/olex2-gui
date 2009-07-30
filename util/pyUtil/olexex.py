@@ -1005,7 +1005,7 @@ def getKey(key_directory=None, specific_key = None):
     
 
 def getKeys(key_directory=None):
-  keyPath = "%s/Olex2u/OD/" %os.environ['ALLUSERSPROFILE']
+  keyPath = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], OV.GetTag())
   kl = []
   if not key_directory:
     key_directory = keyPath
@@ -1112,7 +1112,7 @@ def updateACF(force=False):
   import pickle
   try:
     l = pickle.load(response)
-    p = "%s/Olex2u/OD/" %os.environ['ALLUSERSPROFILE']
+    p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], olex2_tag)
 
     for f in l:
       f = f.replace(r'/var/distro/www/', 'olex-')
@@ -1154,7 +1154,7 @@ def GetACF():
     
   
   debug = OV.FindValue('odac_fb', False)
-  debug = [False, True][1]
+  debug = [False, True][0]
   debug_deep1 = [False, True][1]
   debug_deep2 = [False, True][1]
   OV.SetVar("ac_verbose", [False, True][1])
@@ -1162,7 +1162,7 @@ def GetACF():
   
 
   if not debug:
-    p = "%s/Olex2u/OD/" %os.environ['ALLUSERSPROFILE']
+    p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], tag)
     if not os.path.exists(p):
       os.makedirs(p)
     name = "entry_ac"
