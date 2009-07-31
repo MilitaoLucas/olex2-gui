@@ -6,7 +6,7 @@ import time
 import olex_core
 import sys
 import programSettings
-
+from subprocess import *
 
 import socket
 import urllib
@@ -1017,14 +1017,17 @@ def getKeys(key_directory=None):
   return kl
   
 
-def GetHttpFile(f, force=False):
+def GetHttpFile(f, force=False, fullURL = False):
   global _is_online
   retVal = None
   go_online = _is_online
   verbose = OV.FindValue("ac_verbose", "False")
   if go_online or force:
     try:
-      url = "%s/%s" %(URL, f.replace(" ",r"%20"))
+      if not fullURL:
+        url = "%s/%s" %(URL, f.replace(" ",r"%20"))
+      else:
+        url = f
       if verbose: print "--> Getting %s" %url,
       path = urllib.URLopener()
       path.addheader('pragma', 'no-cache')
@@ -1109,28 +1112,51 @@ def updateACF(force=False):
   data = urllib.urlencode(values)
   req = urllib2.Request(url)
   response = urllib2.urlopen(req,data)
-  import pickle
-  try:
-    l = pickle.load(response)
-    p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], olex2_tag)
-
-    for f in l:
-      f = f.replace(r'/var/distro/www/', 'olex-')
-      cont = GetHttpFile(f, force=True)
-      name = f.split(r'/')[-1]
-      if cont:
-        wFile = open("%s/%s" %(p, name),'w') 
-        wFile.write(cont)
-        wFile.close()
-        print "Written %s/%s" %(p, name)
-    wFile = open(r"%s/util/pyUtil/PluginLib/odac_update.txt" %OV.BaseDir(),'w')
-    wFile.write("False")
-    rFile.close()
-    print "Updated"
+  #response = response.read()
   
-  except Exception, err:
-    print "Empty response: %s" %err
-    print repr(response)
+  new = True
+  
+  if new:
+    p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], olex2_tag)
+    f = response.read()
+    cont = GetHttpFile(f, force=True, fullURL = True)
+    if cont:
+      name = "AutoChem Updater.exe"
+      wFile = open("%s/%s" %(p, name),'wb') 
+      wFile.write(cont)
+      wFile.close()
+    cmd = r"%s/AutoChem Updater.exe /S" %p
+    print cmd
+    Popen(cmd, shell=False, stdout=PIPE).stdout      
+    print "Updated"
+    
+  else:
+    import pickle
+    try:
+      l = pickle.load(response)
+      p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], olex2_tag)
+  
+      for f in l:
+        f = f.replace(r'/var/distro/www/', 'olex-')
+        cont = GetHttpFile(f, force=True)
+        name = f.split(r'/')[-1]
+        if cont:
+          wFile = open("%s/%s" %(p, name),'wb') 
+          wFile.write(cont)
+          wFile.close()
+          print "Written %s/%s" %(p, name)
+      wFile = open(r"%s/util/pyUtil/PluginLib/odac_update.txt" %OV.BaseDir(),'w')
+      wFile.write("False")
+      rFile.close()
+      
+      cmd = r"%s/AutoChem Installer.exe /S" %p
+      Popen(cmd, shell=False, stdout=PIPE).stdout      
+      
+      print "Updated"
+    
+    except Exception, err:
+      print "Empty response: %s" %err
+      print repr(response)
 
 OV.registerFunction(updateACF)
     
@@ -1156,8 +1182,8 @@ def GetACF():
   debug = OV.FindValue('odac_fb', False)
   debug = [False, True][0]
   debug_deep1 = [False, True][1]
-  debug_deep2 = [False, True][1]
-  OV.SetVar("ac_verbose", [False, True][1])
+  debug_deep2 = [False, True][0]
+  OV.SetVar("ac_verbose", [False, True][0])
   keyname = getKey()
   
 
@@ -1211,7 +1237,7 @@ def GetACF():
       OV.SetVar("ac_debug_deep1", True)
     if debug_deep2:
       OV.SetVar("ac_debug_deep2", True)
-    sys.path.append(r"%s/util/pyUtil/PluginLib/plugin-AutoChemSRC/%s/" %(olx.BaseDir(), tag))
+    sys.path.append(r"%s/util/pyUtil/PluginLib/plugin-AutoChemSRC/%s" %(olx.BaseDir(), tag))
     try:
       print "Debug: Import entry_ac"
       import entry_ac
@@ -1223,7 +1249,7 @@ def GetACF():
 
   if odac_loaded:
     OV.SetVar("HaveODAC", True)
-    #print "ODAC started OK"
+    print "ODAC started OK"
 OV.registerFunction(GetACF)
   
 
