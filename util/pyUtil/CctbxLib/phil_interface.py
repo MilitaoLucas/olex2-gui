@@ -116,9 +116,13 @@ class phil_handler(object):
   def adopt_phil(self, phil_object=None, phil_string=None, phil_file=None):
     assert [phil_object, phil_string, phil_file].count(None) == 2
     if phil_string:
-      phil_object = iotbx.phil.parse(phil_string)
+      phil_object = iotbx.phil.parse(
+        phil_string,
+        converter_registry=converter_registry)
     elif phil_file:
-      phil_object = iotbx.phil.parse(file_name=phil_file)
+      phil_object = iotbx.phil.parse(
+        file_name=phil_file,
+        converter_registry=converter_registry)
     if phil_object:
       for object in phil_object.objects:
         self.master_phil.adopt(object)
