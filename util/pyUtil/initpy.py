@@ -280,7 +280,7 @@ if olx.IsPluginInstalled('MySQL') == "true":
 if olexex.getKey():
   olexex.GetACF()
 
-olexex.check_for_recent_update()
+#olexex.check_for_recent_update()
 
 if sys.platform[:3] == 'win':
   OV.SetVar('defeditor','notepad')
