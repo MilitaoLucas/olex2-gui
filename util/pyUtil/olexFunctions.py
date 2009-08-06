@@ -81,6 +81,24 @@ class OlexFunctions(inheritFunctions):
       print >> sys.stderr, "Program %s could not be set" %(program)
       sys.stderr.formatExceptionInfo()
 
+  def SetMaxCycles(self, max_cycles):
+    try:
+      import programSettings
+      self.SetParam('snum.refinement.max_cycles', max_cycles)
+      programSettings.onMaxCyclesChange(max_cycles)
+    except Exception, ex:
+      print >> sys.stderr, "Could not set max cycles to %s" %(max_cycles)
+      sys.stderr.formatExceptionInfo()
+
+  def SetMaxPeaks(self, max_peaks):
+    try:
+      import programSettings
+      self.SetParam('snum.refinement.max_peaks', max_peaks)
+      programSettings.onMaxPeaksChange(max_peaks)
+    except Exception, ex:
+      print >> sys.stderr, "Could not set max peaks to %s" %(max_peaks)
+      sys.stderr.formatExceptionInfo()
+
   def FindValue(self,variable,default=u''):
     try:
       retVal = olex_core.FindValue(variable, default)
