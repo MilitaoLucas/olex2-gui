@@ -12,6 +12,7 @@ import ExternalPrgParameters
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import variableDefinitions
+import olexex
 
 initialisingVariables = False
 
@@ -293,6 +294,12 @@ snum {
     if structure_phil is None:
       return
   olx.phil_handler.update(phil_string=structure_phil)
+  olexex.onRefinementProgramChange(
+    olx.phil_handler.get_validated_param('snum.refinement.program'),
+    olx.phil_handler.get_validated_param('snum.refinement.method'))
+  olexex.onSolutionProgramChange(
+    olx.phil_handler.get_validated_param('snum.solution.program'),
+    olx.phil_handler.get_validated_param('snum.solution.method'))
 OV.registerFunction(LoadStructureParams)
 
 def SaveStructureParams():
