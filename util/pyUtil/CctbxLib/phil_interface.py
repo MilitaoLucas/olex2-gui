@@ -339,6 +339,17 @@ class phil_handler(object):
         matching_defs.append(phil_name)
     return matching_defs
 
+  def reset(self, scope_name=None, scope_names=None):
+    assert [scope_name, scope_names].count(None) < 2
+    if scope_name is not None:
+      scope_names = [scope_name]
+    if scope_names is None:
+      self = self.copy()
+    else:
+      for scope_name in scope_names:
+        master = self.master_phil.get(scope_name)
+        self.update(phil_object=master)
+
   def _build_index (self, collect_multiple=False) :
     path_index = {}
     multiple_scopes = {}
@@ -390,13 +401,12 @@ class phil_handler(object):
       phil_object = iotbx.phil.parse(phil_string)
     elif phil_file:
       phil_object = iotbx.phil.parse(file_name=phil_file)
-    else:
-      phil_object = iotbx.phil.parse(input_string=phil_string)
     if phil_object:
       try:
         new_phil = self.master_phil.fetch(source=phil_object)
       except Exception, e:
-        pass
+        print >> sys.stderr, "Error updating Phil"
+        sys.stderr.formatExceptionInfo()
       else:
         self.merge_phil(phil_object=phil_object)
 

@@ -259,33 +259,28 @@ def LoadParams():
   master_phil = iotbx.phil.parse(
     file_name="%s/params.phil" %OV.BaseDir(),
     converter_registry=phil_interface.converter_registry)
+  phil_handler = phil_interface.phil_handler(master_phil=master_phil)
+  user_phil = get_user_phil()
+  if user_phil:
+    phil_handler.update(phil_file=user_phil)
+  olx.phil_handler = phil_handler
+OV.registerFunction(LoadParams)
+
+def LoadStructureParams():
+  olx.phil_handler.reset(scope_name='snum')
   solutionPrg, solutionMethod = getDefaultPrgMethod('Solution')
   refinementPrg, refinementMethod = getDefaultPrgMethod('Refinement')
-  programs_phil =iotbx.phil.parse("""
+  snum_phil = """
 snum {
   refinement.program = "%s"
   refinement.method = "%s"
   solution.program = "%s"
   solution.method = "%s"
-}
-""" %(refinementPrg, refinementMethod, solutionPrg, solutionMethod))
-  source = programs_phil
-  working_phil = master_phil.fetch(source=source)
-  phil_handler = phil_interface.phil_handler(master_phil=working_phil)
-  olx.phil_handler = phil_handler
-OV.registerFunction(LoadParams)
-
-def LoadStructureParams():
-  olx.phil_handler = olx.phil_handler.copy()
-  user_phil = get_user_phil()
-  if user_phil:
-    olx.phil_handler.update(phil_file=user_phil)
-  snum_phil = """
-snum {
   report.title = "%s"
   report.image = "%s/screenshot.png"
   }
-""" %(OV.FileName(), OV.FilePath())
+""" %(refinementPrg, refinementMethod, solutionPrg, solutionMethod, 
+      OV.FileName(), OV.FilePath())
   olx.phil_handler.update(phil_string=snum_phil)
   structure_phil_path = "%s/.olex/%s.phil" %(OV.FilePath(), OV.FileName())
   if os.path.isfile(structure_phil_path):
