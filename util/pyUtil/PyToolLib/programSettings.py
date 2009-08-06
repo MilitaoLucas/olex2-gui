@@ -158,10 +158,9 @@ def addInstruction(instruction):
   OV.AddIns(addins)
 OV.registerFunction(addInstruction)
 
-def onMaxCyclesChange():
+def onMaxCyclesChange(max_cycles):
   if not OV.IsFileType('ires'):
     return
-  maxCycles = OV.GetParam('snum.refinement.max_cycles')
   try:
     prg = RPD.programs[OV.GetParam('snum.refinement.program')]
     method = prg.methods[OV.GetParam('snum.refinement.method')]
@@ -171,18 +170,17 @@ def onMaxCyclesChange():
   for arg in method.args:
     for item in ['L.S.', 'CGLS']:
       if arg['name'] == item:
-        OV.SetVar('settings_%s_nls' %item, maxCycles)
+        OV.SetVar('settings_%s_nls' %item, max_cycles)
         ctrl_name = 'SET_SETTINGS_%s_NLS' %item.upper()
         if OV.HasGUI() and OV.IsControl(ctrl_name):
-          olx.SetValue(ctrl_name, maxCycles)
+          olx.SetValue(ctrl_name, max_cycles)
         addInstruction(item)
         return
-OV.registerFunction(onMaxCyclesChange)
+OV.registerFunction(OV.SetMaxCycles)
 
-def onMaxPeaksChange():
+def onMaxPeaksChange(max_peaks):
   if not OV.IsFileType('ires'):
     return
-  maxPeaks = OV.GetParam('snum.refinement.max_peaks')
   try:
     prg = RPD.programs[OV.GetParam('snum.refinement.program')]
     method = prg.methods[OV.GetParam('snum.refinement.method')]
@@ -192,13 +190,13 @@ def onMaxPeaksChange():
   item = 'PLAN'
   for arg in method.args:
     if arg['name'] == item:
-      OV.SetVar('settings_%s_npeaks' %item, maxPeaks)
+      OV.SetVar('settings_%s_npeaks' %item, max_peaks)
       ctrl_name = 'SET_SETTINGS_%s_NPEAKS' %item.upper()
       if OV.HasGUI() and OV.IsControl(ctrl_name):
-        olx.SetValue(ctrl_name, maxPeaks)
+        olx.SetValue(ctrl_name, max_peaks)
       addInstruction(item)
       return
-OV.registerFunction(onMaxPeaksChange)
+OV.registerFunction(OV.SetMaxPeaks)
 
 def stopShelxd():
   try:
