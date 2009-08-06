@@ -462,11 +462,13 @@ olex2
     .type = bool
   last_version = 12
     .type = int
-  in_mode = False
-    .type = bool
-  short_mode = False
-    .type = bool
+  in_mode = None
+    .type = str
+  short_mode = None
+    .type = str
   debug = False
+    .type = bool
+  force_images = False
     .type = bool
 }
 
