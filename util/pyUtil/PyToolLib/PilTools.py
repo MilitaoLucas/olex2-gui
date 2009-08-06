@@ -1022,7 +1022,7 @@ class timage(ImageTools):
   def run_timage(self):
     do_these = []
     if not self.olex2_has_recently_updated:
-      if not OV.FindValue('olex2_force_images'):
+      if not OV.GetParam('olex2.force_images'):
         do_these = [
                 "make_cbtn_items",
                 "info_bitmaps",
@@ -1459,7 +1459,7 @@ class timage(ImageTools):
 
     name = "banner.png"
     
-    if not OV.FindValue('olex2_force_images'):
+    if not OV.GetParam('olex2.force_images'):
       timestamp = olex_fs.Timestamp(name)
       if timestamp:
         if time.time() - timestamp < time.clock():

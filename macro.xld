@@ -914,13 +914,13 @@
 		<cmd 
 			<cmd1 "setVar(gui_htmlpanelwidth,'%1')">
 			<cmd1 "setVar(gui_timage_colour,'%2')">
-			<cmd1 "setVar(olex2_force_images,True)">
+			<cmd1 "SetParam(olex2.force_images,True)">
 			<cmd2 "spy.run_skin timage">
 			<cmd3 "spy.run_skin sNumTitle">
 			<cmd5 "htmlpanelwidth %1">
 			<cmd4 "spy.resize_skin_logo(%1)">
 			<cmd6 "Updatehtml">
-			<cmd1 "setVar(olex2_force_images,False)">
+			<cmd1 "SetParam(olex2.force_images,False)">
 		/>
 	/>
 />
