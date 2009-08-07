@@ -1048,13 +1048,8 @@ def GetHttpFile(f, force=False, fullURL = False):
 
 def check_for_recent_update():
   retVal = False
-  path = "%s/version.txt" %OV.BaseDir()
-  try:
-    rFile = open(path, 'r')
-    line = rFile.read()
-    version = int(line.split("SVN Revision No. ")[1])
-  except:
-    version = 1
+  
+  version = OV.GetSVNVersion()
   last_version = int(OV.FindValue('last_version',0))
 #  print "Last Version: %i"%last_version
   if version > last_version:
