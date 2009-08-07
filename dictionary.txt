@@ -484,7 +484,7 @@ mass & label	Mass & Label	.	.	.	.	Masse & Name	.	.	.
 atom label	Atom Label	.	.	.	.	Atomname	.	.	.
 atomic mass	Atomic Mass	.	.	.	.	Atommasse	.	.	.
 moieties	Moieties	.	.	.	.	Teil	.	.	.
-bad_gui-msg	If the GUI has gone bad	.	.	.	.	Wenn das GUI kaputt gegangen ist	.	bad_gui-msg	.
+bad_gui-msg	If the GUI has Gone Fishing	.	.	.	.	Wenn das GUI kaputt gegangen ist	.	bad_gui-msg	.
 bad_gui	Reload the GUI	.	.	.	.	GUI Neu Laden	.	Reload the GUI	.
 bad_gui-target	bad_gui-target	.	.	.	.	Klicken sie hier, um das GUI neu zu laden	.	bad_gui-target	.
 to 2 parts in order	to 2 parts in order	.	.	.	.	.	.	.	.
@@ -503,4 +503,4 @@ Delete Map	Delete Map	.	.	.	.	Map Löschen	.	.	.
 Calculate	Calculate	.	.	.	.	Berechnen	.	.	.
 Map	.	.	.	.	.	Map	.	.	.
 Source	.	.	.	.	.	Quelle	.	.	.
-Electron Density Peaks	.	.	.	.	.	Elektronendichte Peaks	.	.	.
+Electron Density Peaks	Electron Density Peaks	.	.	.	.	Elektronendichte Peaks	.	.	.
