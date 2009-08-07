@@ -34,17 +34,6 @@
 \>
 
 
-<d
-	<body
-		<args
-			<arg1 name='file' def='DataDir()\samples\ylid\aaexp_1.res'> 
-		\>
-		<cmd 
-			<cmd10 "reap '%1'">
-		\>	
-	\>
-\>
-
 
 <onstartup help="Executes on program start"
 	<body
@@ -54,7 +43,8 @@
 		<cmd 
 			<cmd1 XXX="silent on">
 			<cmd2 "py.Export(datadir()/olx.py)">
-			<cmd3 "py.run 'basedir()/util/pyUtil/initpy.py'">
+			<cmd3 XXX="'py.run 'basedir()/util/pyUtil/initpy.py'">
+			<cmd3 "py.runth 'basedir()/util/pyUtil/initpy.py'">
 			<cmd4 "if IsVar(defeditor) then none else setvar(defeditor,'gedit')">
 			<cmd5 "if IsVar(defexplorer) then none else setvar(defexplorer,'nautilus')">
 			<cmd6 "if IsVar(defbrowser) then none else setvar(defbrowser,'htmlview')">
@@ -83,14 +73,14 @@
 			\>
 		<cmd
 			<cmd1  "if strcmp(%4,'none') then none else 'spy.saveHistory()'">
-			<cmd2  "spy.pickleVVD(structure)">
+			<cmd2  XXX="spy.pickleVVD(structure)">
 			<cmd3  cmd1="clear">
 			<cmd4  "@reap '%1'">
-			<cmd5 "spy.InitialiseVariables(reap)">
-			<cmd6 "spy.UnpickleVVD()">
-			<cmd7 "SetVar(snum_refinement_sg,sg(%n))">
-			<cmd8 "'SetVar(snum_refinement_max_peaks,Ins(QNUM))'">
-			<cmd9 "'SetVar(snum_refinement_max_cycles,Ins(LS))'">
+			<cmd5  "spy.InitialiseVariables(reap)">
+			<cmd6  XXX="spy.UnpickleVVD()">
+			<cmd7  "SetVar(snum_refinement_sg,sg(%n))">
+			<cmd8  "spy.SetParam(snum.refinement_max_peaks,Ins(QNUM))">
+			<cmd9  "spy.SetParam(snum.refinement_max_cycles,Ins(LS))">
 			<cmd10 "if File.Exists(strdir()/filename().vvd) then none else 'SetVar(snum_refinement_original_formula,xf.GetFormula())'">
 			<cmd11 "if and(strcmp(%4,filename()),strcmp(%6,fileext())) then none else 'spy.loadHistory()'">
 			<cmd12 "'if and(IsFileType(ires), not(File.Exists((strdir()/history-filename)))) then 'spy.create_history()'">

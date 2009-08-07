@@ -475,7 +475,7 @@ class ImageTools(FontInstances):
       
       if self.gui_current_language == "Chinese":
         font_peculiarities.setdefault("Arial UTF",{"top_adjust":-0.7,
-                                            "rel_adjust":+0.6})
+                                            "rel_adjust":+0.4})
         
       elif self.gui_current_language == "Greek":
         font_peculiarities.setdefault("Arial UTF",{"top_adjust":-1,
