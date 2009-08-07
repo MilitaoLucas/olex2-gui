@@ -486,6 +486,16 @@ class OlexFunctions(inheritFunctions):
     import os
     return os.getenv('USERNAME'), os.getenv('COMPUTERNAME')  
 
+  def GetSVNVersion(self):
+    path = "%s/version.txt" %self.BaseDir()
+    try:
+      rFile = open(path, 'r')
+      line = rFile.read()
+      version = int(line.split("SVN Revision No. ")[1])
+    except:
+      version = 1
+    return version
+  
   def GetMacAddress(self):
     mac = self.GetParam('olex2.mac_address')
     if mac == "":
