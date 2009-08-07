@@ -6,7 +6,7 @@ import urllib
 import pickle
 import time
 import codecs
-
+import base64
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
@@ -215,11 +215,14 @@ def web_run_sql(sql = None, script = 'run_sql'):
   if not sql:
     return None
   web_authenticate()
-#  sql = u"%s" %sql
-  sql = sql.encode('utf-8')
   
+  sql = base64.b64encode(sql) 
+  
+#  sql = u"%s" %sql
+#  sql = sql.encode('utf-8')
+  script = "Olex2Sql"
   url = "http://www.olex2.org/content/DB/%s" %script
-  url = "http://www.olex2.org/%s" %script
+  #url = "http://www.olex2.org/%s" %script
   values = {'__ac_password':password,
             '__ac_name':username,
             'sqlQ':sql,
@@ -327,7 +330,6 @@ class DownloadOlexLanguageDictionary:
     import re
     regex = re.compile(r"\% (.*?)  \%", re.X)
     m = regex.findall(inputText)
-    m.append(tool_name)
     m = list(set(m))
     
     res = make_translate_gui_items_html(m)
@@ -340,9 +342,18 @@ class DownloadOlexLanguageDictionary:
       
   def upload_items(self, m):
     try:
-      for item in m:
-        value = olx.GetValue('Translate.%s' %item)
-        res = self.uploadSingleTerm(item, self.language, value)
+      total = len(m)
+      i = 0
+      l = []
+      for OXD in m:
+        i += 1
+        value = olx.GetValue('Translate.%s' %OXD)
+        d = {"OXD":OXD, self.language:value}
+        sql = self.create_insert_or_update_sql(d, 'translation')
+        l.append(sql)
+      txt = pickle.dumps(l)
+      text = web_run_sql(txt)        
+        
     except:
       res = make_translate_gui_items_html
     
@@ -382,7 +393,8 @@ class DownloadOlexLanguageDictionary:
   &&
       '''
     return txt
-    
+  
+  
   def uploadSingleTerm(self, OXD, field, value):
     d = {"OXD":OXD, field:value}
     sql = self.create_insert_or_update_sql(d, 'translation')

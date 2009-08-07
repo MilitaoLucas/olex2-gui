@@ -7,7 +7,7 @@ sys.path.append(r"../../../pyUtil")
 #import initpy
 
 #from ArgumentParser import ArgumentParser
-#import SQLFactory
+import SQLFactory
 import string
 import time
 import codecs
@@ -246,7 +246,7 @@ class ImportDataIntoDB:
 class DownloadOlexLanguageDictionary:
   def __init__(self):
     import olx
-    #self.SQL = SQLFactory.SQLFactory(db='OlexGuiDB')  
+    self.SQL = SQLFactory.SQLFactory(db='OlexGuiDB')  
     #self.basedir = r"C:\Documents and Settings\Horst\Desktop\olex"
     self.basedir = olx.BaseDir()
     self.dictionary_l = []
@@ -376,7 +376,7 @@ XX command line text XX
     return text
       
       
-  def downloadTranslation(self):
+  def downloadTranslationMySQL(self):
     self.get_help()
     self.write_dict_file()
     print "Downloaded Dictionary from DB"
@@ -388,8 +388,8 @@ XX command line text XX
     placeholder = "."
     Q = "SELECT * FROM translation"
 
-    #res = self.SQL.run_select_sql(Q)
-    res = olex_logon.web_run_sql(script='run_sql', sql = Q)
+    res = self.SQL.run_select_sql(Q)
+    #res = olex_logon.web_run_sql(script='run_sql', sql = Q)
     if res == "Unauthorised":
       return
     
@@ -467,17 +467,17 @@ XX command line text XX
 
     
 DownloadOlexLanguageDictionary_instance = DownloadOlexLanguageDictionary()
-OV.registerFunction(DownloadOlexLanguageDictionary_instance.EditHelpItem)
-OV.registerFunction(DownloadOlexLanguageDictionary_instance.downloadTranslation)
+#OV.registerFunction(DownloadOlexLanguageDictionary_instance.EditHelpItem)
+OV.registerFunction(DownloadOlexLanguageDictionary_instance.downloadTranslationMySQL)
     
     
     
 class UploadOlexLanguageDictionary:
   def __init__(self):
-    #self.SQL = SQLFactory.SQLFactory(db='OlexGuiDB')  
+    self.SQL = SQLFactory.SQLFactory(db='OlexGuiDB')  
     self.basedir = OV.BaseDir()
     self.dictionary_l = []
-    self.dictF = "%s/dictionary.txt" %self.basedir
+    self.dictF = "%s/dictionary_chinese.txt" %self.basedir
 
   def insertSingleTerm(self, ID, field, value):
     d = {"ID":ID, field:value}
@@ -496,6 +496,8 @@ class UploadOlexLanguageDictionary:
       line = line.replace('\n', "")
       line = line.split("\t")
       self.dictionary_l.append(line)
+      
+      
 
   def post_dictionary(self):
     table = 'translation'

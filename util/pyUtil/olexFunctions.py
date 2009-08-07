@@ -487,18 +487,16 @@ class OlexFunctions(inheritFunctions):
     return os.getenv('USERNAME'), os.getenv('COMPUTERNAME')  
 
   def GetMacAddress(self):
-    mac = ""
-    if sys.platform == 'win32':
-      cmd = "ipconfig /all"
-      for line in Popen(cmd, shell=True, stdout=PIPE).stdout:
-        if line.lstrip().startswith('Physical Address'): 
-          mac = line.split(':')[1].strip()
-          break 
-    else: 
-      for line in os.popen("/sbin/ifconfig"): 
-        if line.find('Ether') > -1: 
-          mac = line.split()[4] 
-          break 
+    mac = self.GetParam('olex2.mac_address')
+    if mac == "":
+      mac = olx.GetMAC()
+      mac = mac.split(";")
+      mac = mac[0]
+      self.SetParam('olex2.mac_address',mac)
     return mac   
-    
+
+  def Refresh(self):
+    olx.Refresh()
+  
+  
 OV = OlexFunctions()
