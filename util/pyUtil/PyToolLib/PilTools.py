@@ -1858,6 +1858,25 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     crop_colouriszed = self.colourize(crop, (0,0,0), self.gui_logo_colour) 
     IM.paste(crop_colouriszed, (width-(175 * factor),0), crop)
 
+    # Add Tag
+    draw = ImageDraw.Draw(IM)
+    txt = "%s" %OV.GetTag()
+    self.write_text_to_draw(draw, 
+                 "%s" %(txt), 
+                 top_left=(10, 125), 
+                 font_name = 'Vera', 
+                 font_size=40, 
+                 font_colour=self.adjust_colour(self.gui_html_font_colour, luminosity = 0.8))
+    # Add version Number
+    draw = ImageDraw.Draw(IM)
+    txt = "%s" %OV.GetSVNVersion()
+    self.write_text_to_draw(draw, 
+                 "SVN: %s" %(txt), 
+                 top_left=(10, 160), 
+                 font_name = 'Vera', 
+                 font_size=40, 
+                 font_colour=self.adjust_colour(self.gui_html_font_colour, luminosity = 0.8))
+
     #finally resize and save the final image
     IM = self.resize_image(IM, (self.width, 55))
     name = r"gui/images/logo.png"
