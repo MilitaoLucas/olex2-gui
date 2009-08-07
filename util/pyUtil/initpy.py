@@ -270,9 +270,9 @@ if olx.IsPluginInstalled('Olex2Portal') == "true":
 if olx.IsPluginInstalled('MySQL') == "true":
   try:
     import OlexToMySQL
-#    from OlexToMySQL import DownloadOlexLanguageDictionary
-#    a = DownloadOlexLanguageDictionary()
-#    olex.registerFunction(a.downloadTranslation)
+    from OlexToMySQL import DownloadOlexLanguageDictionary
+    a = DownloadOlexLanguageDictionary()
+    #olex.registerFunction(a.downloadTranslation)
   except Exception, ex:
     print "MySQL Plugin is installed but a connection to the default server could not be established"
     print ex
