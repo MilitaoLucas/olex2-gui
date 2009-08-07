@@ -9,11 +9,11 @@
 			bgcolor="$getVar(gui_html_input_bg_colour)" 
 			type="combo" 
 			name="SET_SNUM_CALCVOID_VIEW" 
-			items='2D;surface;wire;points' 
+			items='2D;%surface%;%wire%;%points%' 
 			value="$spy.GetParam(snum.calcvoid_view)" 
 			width="70" 
 			height="18" 
-			label="View "
+			label="%View% "
 			onchange="spy.SetParam(snum.calcvoid_view,GetValue(SET_SNUM_CALCVOID_VIEW))>>
 spy.VoidView(0)"
 			>
@@ -76,3 +76,4 @@ xgrid.visible(false)"
 
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
+<!-- %Calculate Voids% -->

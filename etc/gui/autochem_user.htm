@@ -46,7 +46,7 @@
 			width='$eval(htmlpanelwidth()-eval(htmlpanelwidth()/2)-30)' 
 			height="18" 
 			manage
-			value="GetVar(autochem_solution_program)"
+			value="$spy.GetParam(autochem.solution_program)"
 			onchange="spy.SetParam(autochem.solution_program,GetValue(SET_AUTOCHEM_SOLUTION_PROGRAM))"
 			label='Solution Program'
 		>
@@ -59,7 +59,7 @@
 			width='$eval(htmlpanelwidth()-eval(htmlpanelwidth()/2)-30)' 
 			height="18"
 			manage
-			value="GetVar(autochem_solution_method)"
+			value="$spy.GetParam(autochem.solution_method)"
 			onchange="spy.SetParam(autochem.solution_method,GetValue(SET_AUTOCHEM_SOLUTION_METHOD))"
 			label='Solution Method'
 		>
@@ -77,7 +77,7 @@
 			width='$eval(htmlpanelwidth()-eval(htmlpanelwidth()/2)-35)' 
 			height="18" 
 			manage
-			value="GetVar(autochem_refinement_program)"
+			value="$spy.GetParam(autochem.refinement_program)"
 			onchange="spy.SetParam(autochem.refinement_program,GetValue(SET_AUTOCHEM_REFINEMENT_PROGRAM))"
 			label='Refinement Program'
 		>
@@ -90,7 +90,7 @@
 			width='$eval(htmlpanelwidth()-eval(htmlpanelwidth()/2)-30)' 
 			height="18"
 			manage
-			value="GetVar(autochem_refinement_method)"
+			value="$spy.GetParam(autochem.refinement_method)"
 			onchange="spy.SetParam(autochem.refinement_method,GetValue(SET_AUTOCHEM_REFINEMENT_METHOD))"
 			label='Refinement Method '
 		>
