@@ -458,6 +458,8 @@ olex2
     .type = bool
   has_recently_updated = False
     .type = bool
+  mac_address = ""
+    .type = str
   verbose = False
     .type = bool
   last_version = 12
