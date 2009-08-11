@@ -19,7 +19,6 @@
 			<cmd9 "startupPanel GetVar(gui_htmlpanelwidth)">
 			<cmd7 "if isvar(startup) then 'reap getVar(startup)'">
 			<cmd8 "echo filepath()">
-			<cmd10 XXX="schedule 8 'UpdateFile olex2.exe'">
 			<cmd11 "bind wheel 'ShowQ -wheel='">
 			<cmd12 "spy.GetTip(0)">
 		\>
@@ -1556,6 +1555,18 @@
 			<cmd2 "itemstate %1* 2">
 			<cmd2 "itemstate tab-%1 1">
 			<cmd2 "itemstate info-title 1">
+		\>
+	\>
+\>
+
+
+<mspy help="run a spy from the macro"
+	<body
+		<args
+			<arg1 name="command" def="">
+		\>
+		<cmd 
+			<cmd1 "spy.%1()">
 		\>
 	\>
 \>
