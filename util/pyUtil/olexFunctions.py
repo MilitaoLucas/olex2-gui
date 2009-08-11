@@ -22,19 +22,9 @@ class OlexFunctions(inheritFunctions):
       import olex_gui
       self.olex_gui = olex_gui
 
-    pass
-    #self.demo_mode = self.FindValue('autochem_demo_mode',False)
-    #self.no_input_mode = self.FindValue('autochem_no_input_mode',False)
- 
-  
   def SetVar(self,variable,value):
     try:
-      #if value is not None:
-      if value:
-        olex_core.SetVar(variable,value)
-      else:
-        #print "Can't set variable to None"
-        olex_core.SetVar(variable,value) # get rid of this line, just for testing
+      olex_core.SetVar(variable,value)
     except Exception, ex:
       print >> sys.stderr, "Variable %s could not be set with value %s" %(variable,value)
       sys.stderr.formatExceptionInfo()

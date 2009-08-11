@@ -41,7 +41,7 @@
 				value='$spy.GetParam(snum.refinement.method)', 
 				items='$spy.getRefinementMethods($spy.GetParam(snum.refinement.program))'
 				label='', 
-				onchange="spy.SetParam(snum.refinement.method,'GetValue(SET_SNUM_REFINEMENT_METHOD)')>>UpdateHtml" 
+				onchange="spy.SetRefinementProgram(GetValue(SET_SNUM_REFINEMENT_PROGRAM),GetValue(SET_SNUM_REFINEMENT_METHOD))>>UpdateHtml"
 				readonly='readonly'
 			>
 		</font>
