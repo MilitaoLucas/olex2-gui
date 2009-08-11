@@ -18,7 +18,7 @@
 				type="combo" 
 				bgcolor="$getVar(gui_html_input_bg_colour)" 
 				name= "SET_REFLECTION_STATISTICS" 
-				items="Wilson Plot" 
+				items="Wilson Plot<-wp;Cumulative<-mspy CumulativeIntensityDistribution" 
 				width='$eval(htmlpanelwidth()-120)' 
 				value = "Wilson Plot" 
 				height="18" 
@@ -30,7 +30,7 @@
 				name = "DISPLAY_REFLECTION_STATISTICS" 
 				width="70" 
 				value="Make Graph" 
-				onclick="wp>>">
+				onclick="run 'GetValue(SET_REFLECTION_STATISTICS)'">
 		</font>
 	</td>
 </tr>
