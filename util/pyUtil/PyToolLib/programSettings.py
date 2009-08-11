@@ -76,15 +76,18 @@ def makeArgumentsHTML(dictionary):
   help = htmlTools.make_help_href(make_help=(dictionary['name'], 'true'))
   
   argName = dictionary['name']
+  name = argName.replace('.','')
   
-  tick_box_d = {'height':16, 'width':16}
-  tick_box_d.setdefault('ctrl_name', 'SET_SETTINGS_%s' %dictionary['name'].upper())
-  tick_box_d.setdefault('state', '$spy.CheckBoxValue(settings_%s)' %argName)
-  tick_box_d.setdefault('value', '')
-  tick_box_d.setdefault('oncheck', 'SetVar(settings_%s,GetState(SET_SETTINGS_%s))>>spy.addInstruction(%s)' %(argName,argName,argName))
-  tick_box_d.setdefault('onuncheck', 'SetVar(settings_%s,GetState(SET_SETTINGS_%s))>>DelIns %s' %(argName,argName,tick_box_d['ctrl_name']))
-  tick_box_html = htmlTools.make_tick_box_input(tick_box_d)
-  
+  if dictionary['optional']:
+    tick_box_d = {'height':16, 'width':16}
+    tick_box_d.setdefault('ctrl_name', 'SET_SETTINGS_%s' %name.upper())
+    tick_box_d.setdefault('state', '$spy.CheckBoxValue(settings_%s)' %name)
+    tick_box_d.setdefault('value', '')
+    tick_box_d.setdefault('oncheck', 'SetVar(settings_%s,GetState(SET_SETTINGS_%s))>>spy.addInstruction(%s)' %(name,name,name))
+    tick_box_d.setdefault('onuncheck', 'SetVar(settings_%s,GetState(SET_SETTINGS_%s))>>DelIns %s' %(name,name,argName))
+    tick_box_html = htmlTools.make_tick_box_input(tick_box_d)
+  else:
+    tick_box_html = ''
   txt += '''
   <td colspan=5 valign='center' bgcolor='$GetVar(gui_html_table_firstcol_colour)'>
     <b>%s</b> %s
@@ -100,16 +103,15 @@ def makeArgumentsHTML(dictionary):
   for value in dictionary['values']:
     count += 1
     d = {'height':17, 'width':32}
-    name = value[0]
-    varName = 'settings_%s_%s' %(dictionary['name'].lower(), name.lower())
+    varName = 'settings_%s_%s' %(name.lower(), value[0].lower())
     d.setdefault('ctrl_name', 'SET_%s' %varName.upper())
     
-    onchange = 'spy.addInstruction(%s)>>SetVar(%s,GetValue(SET_%s))' %(argName,varName,varName.upper())
+    onchange = 'spy.addInstruction(%s)>>SetVar(%s,GetValue(SET_%s))' %(name,varName,varName.upper())
     if name == 'nls':
-      maxCycles_onchange = '%s>>spy.SetParam(snum.refinement.max_cycles,GetValue(SET_SETTINGS_%s_NLS))>>updatehtml' %(onchange,argName.upper())
+      maxCycles_onchange = '%s>>spy.SetParam(snum.refinement.max_cycles,GetValue(SET_SETTINGS_%s_NLS))>>updatehtml' %(onchange,name.upper())
       d.setdefault('onleave', maxCycles_onchange)
     elif name == 'npeaks':
-      maxPeaks_onchange = '%s>>spy.SetParam(snum.refinement.max_peaks,GetValue(SET_SETTINGS_%s_NPEAKS))>>updatehtml' %(onchange,argName.upper())
+      maxPeaks_onchange = '%s>>spy.SetParam(snum.refinement.max_peaks,GetValue(SET_SETTINGS_%s_NPEAKS))>>updatehtml' %(onchange,name.upper())
       d.setdefault('onleave', maxPeaks_onchange)
     else:
       d.setdefault('onleave', onchange)
@@ -124,7 +126,7 @@ def makeArgumentsHTML(dictionary):
   %s
   <br>
   %s
-</td>''' %(name, inputBox)
+</td>''' %(value[0], inputBox)
   
   txt += '</tr>'
   
@@ -136,23 +138,24 @@ def make_ondown(dictionary):
   return txt
 
 def addInstruction(instruction):
-  if OV.FindValue('settings_%s' %instruction) != 'true':
-    return
   program = RPD.programs[OV.GetParam('snum.refinement.program')]
   method = program.methods[OV.GetParam('snum.refinement.method')]
   
   for arg in method.args:
-    if arg['name'] == instruction:
+    if arg['name'].replace('.','') == instruction:
       break
-    
+
+  if arg['optional'] and OV.FindValue('settings_%s' %instruction) != 'true':
+    return
+
   argName = '%s' %arg['name']
   addins = '%s' %argName
   
   for value in arg['values']:
-    value = OV.FindValue('settings_%s_%s' %(argName, value[0]))
-    if not value:
+    val = OV.FindValue('settings_%s_%s' %(instruction, value[0]))
+    if not val:
       break
-    addins += ' %s' %value
+    addins += ' %s' %val
     
   OV.DelIns(argName)
   OV.AddIns(addins)
@@ -168,8 +171,8 @@ def onMaxCyclesChange(max_cycles):
     return
   
   for arg in method.args:
-    for item in ['L.S.', 'CGLS']:
-      if arg['name'] == item:
+    for item in ['LS', 'CGLS']:
+      if arg['name'].replace('.','') == item:
         OV.SetVar('settings_%s_nls' %item, max_cycles)
         ctrl_name = 'SET_SETTINGS_%s_NLS' %item.upper()
         if OV.HasGUI() and OV.IsControl(ctrl_name):
