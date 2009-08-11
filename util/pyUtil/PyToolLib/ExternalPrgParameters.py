@@ -83,30 +83,34 @@ class Method(object):
       default = arg['default']
       
       global definedControls
-      ctrl_name = 'SET_SETTINGS_%s' %arg['name'].upper()
+      name = arg['name'].replace('.','').lower()
+      varName = "settings_%s" %name
+      ctrl_name = 'SET_%s' %varName.upper()
       if ctrl_name not in definedControls:
-        OV.SetVar('settings_%s' %arg['name'], default) # Define checkbox
+        OV.SetVar(varName, default) # Define checkbox
         definedControls.append(ctrl_name)
         for value in arg['values']:
-          OV.SetVar('settings_%s_%s' %(arg['name'], value[0]), value[1]) # Define text box for each value
+          OV.SetVar('%s_%s' %(varName, value[0]), value[1]) # Define text box for each value
       
   def getValuesFromFile(self):
     """Gets the value of all arguments in self.args that are present in the
     .ins file and sets the value of the GUI input boxes to reflect this.
     """
     for arg in self.args:
-      if arg['name'] == 'TEMP':
+      argName = arg['name']
+      name = arg['name'].replace('.','').lower()
+      if argName == 'TEMP':
         ins = olx.xf_exptl_Temperature()
       else:
-        ins = olx.Ins(arg['name'])
+        ins = olx.Ins(argName)
       if ins != 'n/a':
-        OV.SetVar('settings_%s' %arg['name'], 'true')
+        OV.SetVar('settings_%s' %name, 'true')
         ins = ins.split()
         count = 0
         for value in arg['values']:
           try:
             val = ins[count]
-            OV.SetVar('settings_%s_%s' %(arg['name'], value[0]), val)
+            OV.SetVar('settings_%s_%s' %(name, value[0]), val)
             if value[0] == 'nls':
               OV.SetParam('snum.refinement.max_cycles', val)
             elif value[0] == 'npeaks':
@@ -119,13 +123,13 @@ class Method(object):
           count += 1
       else:
         if arg['default'] != 'true':
-          OV.SetVar('settings_%s' %arg['name'], 'false')
-        if arg['name'] in ('L.S.', 'CGLS'):
+          OV.SetVar('settings_%s' %name, 'false')
+        if argName in ('L.S.', 'CGLS'):
           val = OV.GetParam('snum.refinement.max_cycles')
-          OV.SetVar('settings_%s_nls' %arg['name'], val)
+          OV.SetVar('settings_%s_nls' %name, val)
         elif arg['name'] == 'PLAN':
           val = OV.GetParam('snum.refinement.max_peaks')
-          OV.SetVar('settings_%s_npeaks' %arg['name'], val)
+          OV.SetVar('settings_%s_npeaks' %name, val)
           
   def extraHtml(self):
     """This can be redefined in a subclass to define extra HTML that is to be
@@ -194,12 +198,13 @@ class Method_solution(Method):
     """
     args = ''
     for arg in self.args:
-      if OV.FindValue('settings_%s' %arg['name']) == 'true': # Check if the argument is selected in the GUI
+      argName = arg['name'].replace('.','').lower()
+      if OV.FindValue('settings_%s' %argName) == 'true': # Check if the argument is selected in the GUI
         args += arg['name']
         for item in arg['values']:
           name = item[0]
           try:
-            value = float(OV.FindValue('settings_%s_%s' %(arg['name'], name)))
+            value = float(OV.FindValue('settings_%s_%s' %(argName, name)))
             args += ' %s' %value
           except ValueError:
             break
@@ -225,12 +230,13 @@ class Method_refinement(Method):
     """Adds instructions to the .ins file so that the file reflects what is selected in the GUI.
     """
     for arg in self.args:
-      if OV.FindValue('settings_%s' %arg['name']) == 'true': # Check if the argument is selected in the GUI
+      argName = arg['name'].replace('.','').lower()
+      if OV.FindValue('settings_%s' %argName) == 'true': # Check if the argument is selected in the GUI
         args = arg['name']
         for item in arg['values']:
           name = item[0]
           try:
-            value = float(OV.FindValue('settings_%s_%s' %(arg['name'], name)))
+            value = float(OV.FindValue('settings_%s_%s' %(argName, name)))
             args += ' %s' %value
           except ValueError:
             break
@@ -490,26 +496,32 @@ def defineExternalPrograms():
       dict(name='TREF', 
            values=[['np', 100], ['nE', ''], ['kapscal', ''], ['ntan', ''], ['wn', '']],
            default='true',
+           optional=False,
            ),
       dict(name='INIT',
            values=[['nn', ''], ['nf', ''], ['s+', 0.8], ['s-', 0.2], ['wr', 0.2]],
            default='false',
+           optional=True,
            ),
       dict(name='PHAN',
            values=[['steps', 10], ['cool', 0.9], ['Boltz', ''], ['ns', ''], ['mtpr', 40], ['mngr', 10]],
            default='false',
+           optional=True,
            ),
       dict(name='ESEL',
            values=[['Emin', 1.2], ['Emax', 5], ['dU', .005], ['renorm', .7], ['axis', 0]],
            default='false',
+           optional=True,
            ),
       dict(name='EGEN',
            values=[['d_min', ''], ['d_max', '']],
            default='false',
+           optional=True,
            ),
       dict(name='GRID',
            values=[['sl',''], ['sa', ''], ['sd', ''], ['dl', ''], ['da', ''], ['dd', '']],
            default='false',
+           optional=True,
            ),
       #dict(name='PLAN',
            #values=[['npeaks', ''], ['d1', 0.5], ['d2', 1.5]],
@@ -525,22 +537,27 @@ def defineExternalPrograms():
       dict(name='PATT',
            values=[['nv', ''], ['dmin', ''], ['resl', ''], ['Nsup', ''], ['Zmin', ''], ['maxat', '']],
            default='true',
+           optional=False,
            ),
       dict(name='VECT',
            values=[['X', ''], ['Y', ''], ['Z', '']],
            default='false',
+           optional=True,
            ),
       dict(name='ESEL',
            values=[['Emin', 1.2], ['Emax', 5], ['dU', .005], ['renorm', .7], ['axis', 0]],
            default='false',
+           optional=True,
            ),
       dict(name='EGEN',
            values=[['d_min', ''], ['d_max', '']],
            default='false',
+           optional=True,
            ),
       dict(name='GRID',
            values=[['sl',''], ['sa', ''], ['sd', ''], ['dl', ''], ['da', ''], ['dd', '']],
            default='false',
+           optional=True,
            ),
       #dict(name='PLAN',
            #values=[['npeaks', ''], ['d1', 0.5], ['d2', 1.5]],
@@ -556,18 +573,22 @@ def defineExternalPrograms():
       dict(name='NTRY',
            values=[['ntry', 100]],
            default='true',
+           optional=True,
            ),
       dict(name='FIND',
            values=[['na', 0], ['ncy', '']],
            default='true',
+           optional=True,
            ),
       dict(name='MIND',
            values=[['mdis', 1.0], ['mdeq', 2.2]],
            default='true',
+           optional=True,
            ),
       dict(name='PLOP',
            values=[['1', ''], ['2', ''], ['3', ''], ['4', ''], ['5', ''], ['6', ''], ['7', ''], ['8', ''], ['9', ''], ['10', '']],
            default='true',
+           optional=True,
            ),
     ),
     #{'name':'SHEL', 'values':['dmax:', 'dmin:0']},
@@ -597,6 +618,7 @@ def defineExternalPrograms():
       dict(name='FLIP',
            values=[['interval', 60]],
            default='true',
+           optional=True,
            ),
    ),
     atom_sites_solution='other'
@@ -610,22 +632,27 @@ def defineExternalPrograms():
       {'name':'L.S.',
        'values':[['nls', 4], ['nrf', ''], ['nextra', ''], ['maxvec', 511]],
        'default':'true',
+       'optional':False,
        },
       {'name':'PLAN',
        'values':[['npeaks', 20], ['d1', ''], ['d2', '']],
        'default':'true',
+       'optional':True,
        },
       {'name':'FMAP',
        'values':[['code', 2], ['axis', ''], ['n1', 53]],
        'default':'true',
+       'optional':True,
        },
       {'name':'ACTA',
        'values':[['2thetafull', '']],
        'default':'false',
+       'optional':True,
        },
       {'name':'TEMP',
        'values':[['T','']],
        'default':'false',
+       'optional':True,
        },
    ),
   )
@@ -637,18 +664,22 @@ def defineExternalPrograms():
       {'name':'CGLS',
        'values':[['nls', 4], ['nrf', ''], ['nextra', ''], ['maxvec', 511]],
        'default':'true',
+       'optional':False,
        },
       {'name':'PLAN',
        'values':[['npeaks', 20], ['d1', ''], ['d2', '']],
        'default':'true',
+       'optional':True,
        },
       {'name':'FMAP',
        'values':[['code', 2], ['axis', ''], ['n1', 53]],
        'default':'true',
+       'optional':True,
        },
       {'name':'TEMP',
        'values':[['T','']],
        'default':'false',
+       'optional':True,
        },
    ),
   )
