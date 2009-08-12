@@ -12,7 +12,7 @@ if debug == True:
 datadir = olex.f("DataDir()")
 basedir = olex.f("BaseDir()")
 if sys.platform[:3] == 'win':
-  sys.path = []
+  sys.path = [''] # first should be empty string to avoid problem if cctbx needs cold start
 
 python_dir = "%s/Python26" %basedir
 sys.path.append("%s/DLLs" %python_dir)
