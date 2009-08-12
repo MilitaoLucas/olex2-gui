@@ -46,6 +46,8 @@ def make_translate_gui_items_html(item_l):
   for item in item_l:
     if not item:
       continue
+    if "Close" in item:
+      continue
     boxHeight += 30
     value = OV.TranslatePhrase(item)
     txt += '''
@@ -219,11 +221,11 @@ def web_run_sql(sql = None, script = 'run_sql'):
   if not sql:
     return None
   web_authenticate()
-  try:
-    sql = u"%s" %sql
-    sql = sql.encode('utf-8')
-  except Exception, err:
-    print err
+  #try:
+    #sql = u"%s" %sql
+    #sql = sql.encode('utf-8')
+  #except Exception, err:
+    #print err
   sql = base64.b64encode(sql) 
   script = "Olex2Sql"
   url = "http://www.olex2.org/content/DB/%s" %script
@@ -323,12 +325,12 @@ class DownloadOlexLanguageDictionary:
     
     path = "etc"
     if 'index' in OXD:
-      path = "etc/gui/blocks"
+      path = r"etc/gui/blocks"
       tool_name = OXD
-      gui_file = "%s/%s/%s.htm" % (olx.BaseDir(),path, OXD)
+      gui_file = r"%s/%s/%s.htm" % (olx.BaseDir(),path, OXD)
     else:
-      tool_name = OXD.split("\\")[1].split(".")[0]
-      gui_file = "%s/%s/%s" % (olx.BaseDir(),path, OXD)
+      tool_name = OXD.split("/")[1].split(".")[0]
+      gui_file = r"%s/%s/%s" % (olx.BaseDir(),path, OXD)
       
     #text = olex_logon.web_translation_item(OXD, language)
     language = olx.CurrentLanguage()
@@ -409,6 +411,9 @@ class DownloadOlexLanguageDictionary:
       for OXD in m:
         if not OXD:
           continue
+        if OXD == "Close":
+          continue
+        
         i += 1
         try:
           value = olx.GetValue('Translate.%s' %OXD)
