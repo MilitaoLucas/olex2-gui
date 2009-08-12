@@ -72,11 +72,7 @@ class MetaCif(ArgumentParser):
   def viewCifInfoInOlex(self):
     """Brings up popup text editor in olex containing the text to be added to the cif file."""
 
-    #metacifInfo = variableFunctions.getVVD('metacif')
-    #params = OV.Params()
-    #metacifInfo = params.snum.metacif
     self.sort_crystal_dimensions()
-    #self.metacif_scope = olx.phil_handler.get_scope_by_name('snum.metacif')
     text = self.prepareCifItems()
     inputText = OV.GetUserInput(0,'Items to be entered into cif file',text)
 
@@ -100,8 +96,6 @@ class MetaCif(ArgumentParser):
     metacif = params.snum.metacif
     dimensions = []
     for item in ('exptl_crystal_size_min','exptl_crystal_size_mid','exptl_crystal_size_max'):
-      #if metacifInfo.has_key("snum.metacif.%s" %item):
-        #dimensions.append(metacifInfo[item])
       value = OV.GetParam('snum.metacif.%s' %item)
       if value is not None:
         dimensions.append(value)
@@ -111,9 +105,6 @@ class MetaCif(ArgumentParser):
     if dimensions:
       dimensions.sort()
       try:
-        #metacifInfo['snum_metacif_exptl_crystal_size_min'] = dimensions[0]
-        #metacifInfo['snum_metacif_exptl_crystal_size_mid'] = dimensions[1]
-        #metacifInfo['snum_metacif_exptl_crystal_size_max'] = dimensions[2]
         metacif.exptl_crystal_size_min = dimensions[0]
         metacif.exptl_crystal_size_mid = dimensions[1]
         metacif.exptl_crystal_size_max = dimensions[2]
@@ -336,6 +327,7 @@ class CifTools(ArgumentParser):
     self.ignore = ["?", "'?'", ".", "'.'"]
     self.versions = {"default":[],"smart":{},"saint":{},"shelxtl":{},"xprep":{},"sad":{}}
     self.metacif = {}
+    self.metacifFiles = MetacifFiles()
     self.run()
 
   def run(self):
@@ -368,14 +360,14 @@ class CifTools(ArgumentParser):
 
     if "frames" in tools:
       p = self.sort_out_path(path, "frames")
-      if p != "File Not Found" and metacifFiles.curr_frames != metacifFiles.prev_frames:
+      if p != "File Not Found" and self.metacifFiles.curr_frames != self.metacifFiles.prev_frames:
         from bruker_frames import BrukerFrame
         frames = BrukerFrame(p).cifItems()
         merge.append(frames)
 
     if "smart" in tools:
       p = self.sort_out_path(path, "smart")
-      if p != "File Not Found" and metacifFiles.curr_smart != metacifFiles.prev_smart:
+      if p != "File Not Found" and self.metacifFiles.curr_smart != self.metacifFiles.prev_smart:
         import bruker_smart
         smart = bruker_smart.reader(p).cifItems()
         computing_data_collection = self.prepare_computing(smart, versions, "smart")
@@ -384,7 +376,7 @@ class CifTools(ArgumentParser):
 
     if "p4p" in tools:
       p = self.sort_out_path(path, "p4p")
-      if p != "File Not Found" and metacifFiles.curr_p4p != metacifFiles.prev_p4p:
+      if p != "File Not Found" and self.metacifFiles != self.metacifFiles.prev_p4p:
         try:
           from p4p_reader import p4p_reader
           p4p = p4p_reader(p).read_p4p()
@@ -394,7 +386,7 @@ class CifTools(ArgumentParser):
 
     if "integ" in tools:
       p = self.sort_out_path(path, "integ")
-      if p != "File Not Found" and metacifFiles.curr_integ != metacifFiles.prev_integ:
+      if p != "File Not Found" and self.metacifFiles.curr_integ != self.metacifFiles.prev_integ:
         integ = get_info_from_mls(p)["raw"]
         computing_data_reduction = self.prepare_computing(integ, versions, "saint")
         computing_data_reduction = string.strip((string.split(computing_data_reduction, "="))[0])
@@ -404,7 +396,7 @@ class CifTools(ArgumentParser):
 
     if "saint" in tools:
       p = self.sort_out_path(path, "saint")
-      if p != "File Not Found" and metacifFiles.curr_saint != metacifFiles.prev_saint:
+      if p != "File Not Found" and self.metacifFiles.curr_saint != self.metacifFiles.prev_saint:
         from bruker_saint import bruker_saint
         saint = bruker_saint(p).read_saint()
         computing_cell_refinement = self.prepare_computing(saint, versions, "saint")
@@ -415,7 +407,7 @@ class CifTools(ArgumentParser):
 
     if "sad" in tools:
       p = self.sort_out_path(path, "sad")
-      if p != "File Not Found" and metacifFiles.curr_sad != metacifFiles.prev_sad:
+      if p != "File Not Found" and self.metacifFiles.curr_sad != self.metacifFiles.prev_sad:
         try:
           from sadabs import Sadabs
           sad = Sadabs(p).read_sad()
@@ -429,14 +421,14 @@ class CifTools(ArgumentParser):
 
     if 'pcf' in tools:
       p = self.sort_out_path(path, "pcf")
-      if p != "File Not Found" and metacifFiles.curr_pcf != metacifFiles.prev_pcf:
+      if p != "File Not Found" and self.metacifFiles.curr_pcf != self.metacifFiles.prev_pcf:
         from pcf_reader import pcf_reader
         pcf = pcf_reader(p).read_pcf()
         merge.append(pcf)
 
     if "cad4" in tools:
       p = self.sort_out_path(path, "cad4")
-      if p != "File Not Found" and metacifFiles.curr_cad4 != metacifFiles.prev_cad4:
+      if p != "File Not Found" and self.metacifFiles.curr_cad4 != self.metacifFiles.prev_cad4:
         from cad4_reader import cad4_reader
         cad4 = cad4_reader(p).read_cad4()
         merge.append(cad4)
@@ -444,7 +436,7 @@ class CifTools(ArgumentParser):
     if "cif_od" in tools:
       # Oxford Diffraction data collection CIF
       p = self.sort_out_path(path, "cif_od")
-      if p != "File Not Found" and metacifFiles.curr_cif_od != metacifFiles.prev_cif_od:
+      if p != "File Not Found" and self.metacifFiles.curr_cif_od != self.metacifFiles.prev_cif_od:
         import cif_reader
         cif_od = cif_reader.reader(p).cifItems()
         merge.append(cif_od)
@@ -482,7 +474,9 @@ class CifTools(ArgumentParser):
         except IndexError:
           pass
       for item in d.keys():
-        if item not in dataAdded and item not in userInputVariables:
+        if item not in dataAdded\
+           and userInputVariables is not None\
+           and item not in userInputVariables:
           if item[0] == '_' and item.split('_')[1] in cifLabels:
             value = d[item]
             OV.SetParam("snum.metacif.%s" %(item[1:]), value)
@@ -492,6 +486,7 @@ class CifTools(ArgumentParser):
     colour = OV.GetParam("snum.metacif.exptl_crystal_colour")
     if colour in (
       "colourless","white","black","gray","brown","red","pink","orange","yellow","green","blue","violet")\
+       and userInputVariables is not None\
        and "exptl_crystal_colour_primary" not in userInputVariables:
       OV.SetParam("snum.metacif.exptl_crystal_colour_primary", colour)
 
@@ -755,7 +750,7 @@ class CifTools(ArgumentParser):
     i = 0
     listFiles = []
     returnvalue = ""
-    if self.userInputVariables is not None and "%s_file" %tool not in self.userInputVariables:
+    if self.userInputVariables is None or "%s_file" %tool not in self.userInputVariables:
       for date, file in info:
         a = file.split('/')[-2:]
         shortFilePath = ""
@@ -765,22 +760,23 @@ class CifTools(ArgumentParser):
         i += 1
       files = ';'.join(listFiles)
       try:
-        setattr(metacifFiles, "prev_%s" %tool, getattr(metacifFiles, "curr_%s" %tool))
+        setattr(self.metacifFiles, "prev_%s" %tool, getattr(self.metacifFiles, "curr_%s" %tool))
         OV.SetParam("snum.metacif.list_%s_files" %tool, files)
-        setattr(metacifFiles, "list_%s" %tool, files)
-        OV.SetParam("snum.metacif_%s_file" %tool, listFiles[0])
-        setattr(metacifFiles, "curr_%s" %tool, info[0])
+        setattr(self.metacifFiles, "list_%s" %tool, files)
+        OV.SetParam("snum.metacif.%s_file" %tool, listFiles[0])
+        setattr(self.metacifFiles, "curr_%s" %tool, info[0])
       except:
         pass
       returnvalue = info[0][1]
     else:
       x = OV.GetParam("snum.metacif.%s_file" %tool)
-      for date, file in info:
-        if x in file:
-          setattr(metacifFiles,"curr_%s" %tool, (date,file))
-          returnvalue = file
-        else:
-          pass
+      if x is not None:
+        for date, file in info:
+          if x in file:
+            setattr(self.metacifFiles,"curr_%s" %tool, (date,file))
+            returnvalue = file
+          else:
+            pass
     if not returnvalue:
       returnvalue = info[0][1]
     else:
