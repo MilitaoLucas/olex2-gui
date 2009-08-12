@@ -149,6 +149,7 @@ class RunPrg(ArgumentParser):
     olex.f('GetVar(cctbx_R1)')
 
   def runAfterProcess(self):
+    
     if 'smtbx' not in self.program.name:
       self.doFileResInsMagic()
       reflections = OV.HKLSrc() #BEWARE DRAGONS
@@ -339,6 +340,7 @@ class RunRefinementPrg(RunPrg):
     if self.params.snum.refinement.auto.tidy:
       self.doAutoTidyAfter()
       OV.File()
+    self.isInversionNeeded()
   
   def doHistoryCreation(self):
     R1 = 0
@@ -366,6 +368,20 @@ class RunRefinementPrg(RunPrg):
       print "The refinement has failed, no R value was returned by the refinement."
     self.R1 = R1
     return self.his_file, R1
+  
+  def isInversionNeeded(self):
+    flack = self.method.getFlack()
+    if flack:
+      print "Checking Stereochemistry: Flack Parameter = %s" %flack,
+      fs = flack.split("(")
+      flack_val = float(fs[0])
+      flack_esd = float(fs[1].strip(")"))
+      if flack_val > 0.8:
+        olex.m('Inv -f')
+        OV.File()
+        print "Stucture Inverted"
+      else:
+        print "OK"
 
 OV.registerFunction(RunRefinementPrg)
 OV.registerFunction(RunSolutionPrg)
