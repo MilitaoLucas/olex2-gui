@@ -380,7 +380,7 @@ editatom-target	Edit atoms in a textual representation.&#013;- Selected atoms, i
 dire-target	Open the directory of the current structure.&#013;- or type 'dire'	.	.	.	.	.	.	打开当前结构所在目录。&#013; - 或输入‘dire’	.
 consoletext-target	Displays the contents of the console in a text editor.&#013;- type 'text'	.	.	.	.	.	.	通过文本编辑器显示控制台的内容。&#013; - 输入‘text’	.
 snuminfo-target	Expand the information on this structure.	.	.	.	.	.	.	详述当前结构信息。	.
-tip-1	t^Selecting Multiple Atoms^tMultiple atoms can be selected by clicking on more than one atom in turn. You can also draw a rectangle around atoms by hoding the Shift-key while dragging the mouse with the left mouse button pressed.	.	.	.	.	t^Mehrere Atome gleichzeitig anwählen^tKlicken Sie einfach nacheinander auf alle Atome, die sie in ihrer Auswahl haben wollen. Sie können auch mit gedrückter <<SHIFT>> Taste mit der linken Maus ein Rechteck um die auszuwählenden Atome ziehen.	.	t^选择多个原子^t 您可以通过依次点击多个原子来选择它们。您也可按住Shift键，用鼠标左键画出一个矩形框来选择框内的原子。	.
+tip-1	t^Selecting Multiple Atoms^tMultiple atoms can be selected by clicking on more than one atom in turn. You can also draw a rectangle around atoms by hoding the Shift-key while dragging the mouse with the left mouse button pressed.	.	.	.	.	t^Mehrere Atome gleichzeitig anwählen^tKlicken Sie einfach nacheinander auf alle Atome, die sie in ihrer Auswahl haben wollen. Sie können auch mit gedrückter <<SHIFT>> Taste mit der linken Maus ein Rechteck um die auszuwählenden Atome ziehen.	.	t^选择多个原子^t 您可以通过依次点击多个原子来选择它们。  您也可按住<<SHIFT>>键，用鼠标左键画出一个矩形框来选择框内 的原子。	.
 tip-2	t^Return to Previous Selection^t&nbsp;To select the same atoms that you had selected previously, typeXX selback XXn^Once you save your file, refine, l[FMOL,FMOL,help] or l[FUSE,FUSE,help] your structure, the information about the previous selection will be lost.^n	.	.	.	.	t^Zur vorangegangenen Auswahl zurückkehren^tWenn Sie die Auswahl, die sie eben erst gehabt haben, wieder anwählen wollen, so können Sie dies einfach mit foolgendem Kommando tun:XX selback XXn^Nach einer Verfeinerung, Speicherung, l[FMOL,FMOL,help] oder l[FUSE,FUSE,help]  Ihrer Struktur, steht die vorangegangene Auswahl nicht mehr zur Verfügung.^n	.	t^回到先前的选择^t&nbsp; 如果要选择您先前选择的同一个原子，请输入 XX selback XX	.
 tip-3	t^Tooltips^tClick <a href='html.Tooltips True'>here</a> to switch tooltips on. You can switch them off under 'Settings'.<br>Items that do not have a tooltip (yet) will display the command that will be carried out when clicking on them. For example, the link in the fist line of this tip of the day does not have a tooltip - see what happens when you hover over it!XX html.Tooltips {True/False} XXIf no argument is supplied, tooltips will be toggled.	.	.	.	.	.	.	t^工具提示^t 点击 <a href='html.Tooltips True'>此处</a> 打开工具提示。您可以在‘设置’中关闭工具提示。<br> 没有工具提示的项目将在点击时显示所执行的命令。例如，在每天提示的第一行链接是没有工具提示的。－把鼠标停留在链接上后，请观察变化！ XX html.Tooltips {True/False} XX 如果没有提供参数，工具提示将被关闭。	.
 tip-4	t^Lines of Text^tThe number of lines of text in the main window can be controlledXX lines 5 XXThis will show 5 lines of text in the main window. If you want to see all lines, typeXX lines -1 XXIt is also possible to hide the structure and the text in turn with <<Ctrl+t>>.	.	.	.	.	t^Sichtbare Zeilen^tDie Anzahl der Textzeilen, die in der Konsole angezeigt werden, kann so eingestellt werdenXX lines 5 XXFünf Zeilen werden im Hauptfenster sichtbar sein. Wenn alle Zeilen angezeigt werden sollen, so tippen sie:XX lines -1 XXSie können die Struktur auch ganz verstecken, den Text ganz verstecken oder beide  gleichzeitig anzeigen indem Sie <<Ctrl+t>> wiederholt drücken.	.	t^文本行数^t 在主窗口显示的文本行数是可以调节的。 XX lines 5 XX 这将在主窗口中显示五行文本。如果您想查看所有文本行，请输入 XX lines -1 XX 。通过Ctrl+t来切换结构和文本显示模式。	.
@@ -464,9 +464,9 @@ Change the formula in the files so it reflects what is on the screen	.	.	.	.	.	F
 low-quality-target	.	.	.	.	.	Niedere Grafiksqualität	.	.	.
 Switches the display of the cell on	.	.	.	.	.	Zelle anzeigen	.	.	.
 symmetry-generation	.	.	.	.	.	symmetry-generation	.	.	.
-of selection	.	.	.	.	.	of selection	.	.	.
-Refine and save esd info	.	.	.	.	.	Verfeinern und die e.s.d. Information speichern	.	.	.
-Distance and Angles with esd	.	.	.	.	.	Abstände und Winkel mit e.s.d	.	.	.
+of selection	of selection	.	.	.	.	of selection	.	.	.
+Refine and save esd info	Refine and save esd info	.	.	.	.	Verfeinern und die e.s.d. Information speichern	.	.	.
+Distance and Angles with esd	Distance and Angles with esd	.	.	.	.	Abstände und Winkel mit e.s.d	.	.	.
 quick-drawing-styles	.	.	.	.	.	.	.	quick-drawing-styles	.
 Show Ellipsoids	Ellipsoids	.	.	.	.	Ellipsoide zeigen	.	Show Ellipsoids	.
 Show Ellipsoids and Hydrogen atom Uiso	.	.	.	.	.	Ellipsoide & Wasserstoffatome Uiso zeigen	.	Show Ellipsoids and Hydrogen atom Uiso	.
@@ -489,14 +489,14 @@ bad_gui	Reload the GUI	.	.	.	.	GUI Neu Laden	.	Reload the GUI	.
 bad_gui-target	bad_gui-target	.	.	.	.	Klicken sie hier, um das GUI neu zu laden	.	bad_gui-target	.
 to 2 parts in order	to 2 parts in order	.	.	.	.	.	.	.	.
 recent-files	.	.	.	предыдушие файлы	.	.	.	.	.
-name-target	.	.	.	name-target	.	Bennungsmodus Einschalten	.	.	.
+name-target	Start Naming Mode	.	.	name-target	.	Bennungsmodus Einschalten	.	.	.
 mass & labels	Mass & Labels	.	.	.	.	.	.	.	.
 Pack within Radius of	.	.	.	.	.	.	.	.	.
 wire	.	.	.	.	.	.	.	.	.
 surface	.	.	.	.	.	.	.	.	.
 points	.	.	.	.	.	.	.	.	.
-Equivalent Fragments	.	.	.	.	.	Gleichartige Fragmente	.	.	.
-Automatic Hydrogen Naming	.	.	.	.	.	Automatische Benennung der Wasserstoffatome	.	.	.
+Equivalent Fragments	Equivalent Fragments	.	.	.	.	Gleichartige Fragmente	.	.	.
+Automatic Hydrogen Naming	Automatic Hydrogen Naming	.	.	.	.	Automatische Benennung der Wasserstoffatome	.	.	.
 electron-density	electron-density	.	.	.	.	electron-density	.	.	.
 Mask	Mask	.	.	.	.	Maske	.	.	.
 Delete Map	Delete Map	.	.	.	.	Map Löschen	.	.	.
@@ -504,3 +504,11 @@ Calculate	Calculate	.	.	.	.	Berechnen	.	.	.
 Map	.	.	.	.	.	Map	.	.	.
 Source	.	.	.	.	.	Quelle	.	.	.
 Electron Density Peaks	Electron Density Peaks	.	.	.	.	Elektronendichte Peaks	.	.	.
+rrings_help	Restraints all selected atoms to lie in a plane and have the same distance	.	.	.	.	.	.	.	.
+rrings-htmhelp	Restraints all selected atoms to lie in a plane and have the same distance	.	.	.	.	.	.	.	.
+tria-htmhelp	Restrain three atoms such that the distance between the central atom and two specified bound atoms is the same.	.	.	.	.	.	.	.	.
+eadp-htmhelp	Select any number of atoms - their EADPs will be constrained to be the same.	.	.	.	.	.	.	.	.
+exyz-htmhelp	Select any number of atoms - their XYZ position will be constrained to be the same.	.	.	.	.	.	.	.	.
+Close	Close	.	.	.	.	.	.	Close	.
+.	.	.	.	.	.	.	.	.	.
+Electon Density Peaks	Electon Density Peaks	.	.	.	.	.	.	.	.
