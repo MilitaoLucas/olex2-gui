@@ -44,6 +44,8 @@ def make_translate_gui_items_html(item_l):
   '''
     
   for item in item_l:
+    if not item:
+      continue
     boxHeight += 30
     value = OV.TranslatePhrase(item)
     txt += '''
@@ -102,6 +104,8 @@ def make_translate_gui_items_html(item_l):
     pass
   OV.write_to_olex("Translate.htm", txt)
   boxWidth = 500
+  if boxHeight > 500:
+    boxHeight = 500
   x = 200
   y = 200
   olx.Popup(pop_name, 'Translate.htm', "-s -b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(pop_name, boxWidth, boxHeight, x, y))
@@ -377,7 +381,7 @@ class DownloadOlexLanguageDictionary:
                       inputText += rFile.read()
       
     import re
-    regex = re.compile(r"\% (.*?)  \%", re.X)
+    regex = re.compile(r"\% (.*?) \%", re.X)
     m = regex.findall(inputText)
     m = list(set(m))
     
@@ -403,8 +407,13 @@ class DownloadOlexLanguageDictionary:
       i = 0
       l = []
       for OXD in m:
+        if not OXD:
+          continue
         i += 1
-        value = olx.GetValue('Translate.%s' %OXD)
+        try:
+          value = olx.GetValue('Translate.%s' %OXD)
+        except:
+          continue
         d = {"OXD":OXD, self.language:value}
         sql = self.create_insert_or_update_sql(d, 'translation')
         l.append(sql)
