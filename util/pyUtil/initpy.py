@@ -233,6 +233,7 @@ import variableFunctions
 variableFunctions.InitialiseVariables('startup')
 variableFunctions.LoadParams()
 import olexex
+import CifInfo # import needed to register functions to olex
 
 set_plugins_paths()
 
@@ -280,7 +281,7 @@ if olx.IsPluginInstalled('MySQL') == "true":
 if olexex.getKey():
   olexex.GetACF()
 
-#olexex.check_for_recent_update()
+olexex.check_for_recent_update()
 
 if sys.platform[:3] == 'win':
   OV.SetVar('defeditor','notepad')
