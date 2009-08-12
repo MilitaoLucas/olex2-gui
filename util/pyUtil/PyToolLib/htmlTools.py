@@ -187,7 +187,11 @@ def make_edit_link(name, box_type):
 def make_gui_edit_link(name):
   editLink = ""
   if OV.IsPluginInstalled('Olex2Portal'):
-    editLink = "<a href='spy.EditGuiItem(%s)'>Edit</a>" %(name)
+    if "index" in name:
+      editLink = "<hr><a href='spy.EditGuiItem(%s)'>Edit INDEX File</a>" %(name)
+    else:
+      editLink = "<a href='spy.EditGuiItem(%s)'>Edit</a>" %(name)
+
   return editLink
 OV.registerFunction(make_gui_edit_link)
 

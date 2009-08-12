@@ -426,8 +426,9 @@ class ImageTools(FontInstances):
     if self.gui_language_encoding not in good_encodings:
       self.gui_language_encoding = "unic"
       encoding = 'unic'
-      font_name = 'Arial UTF'
-      #font_name = "Simhei TTF"
+      #txt = txt.encode(encoding)
+      #font_name = 'Arial UTF'
+      font_name = "Simhei TTF"
       #font_name = "Chinese"
       #font_name = "Simsun TTF"
       #font_name = "Simsun TTC"
@@ -437,7 +438,7 @@ class ImageTools(FontInstances):
       #  font_size = 18
       
       try:
-        txt.decode('utf-8')
+        txt.encode('ascii')
         font_name = 'Vera'
         font_size = original_font_size
       except:
