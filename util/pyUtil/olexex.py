@@ -1054,8 +1054,9 @@ def check_for_recent_update():
     V = OV.FindValue('last_version','0')
     last_version = int(V)
   except Exception, err:
-    print "Error with last_version. Value: %s, ErrorL %s" %(V, err)
-    return False
+    print "Alert: Reset parameter 'last_version'"
+    last_version = 0
+    OV.SetVar('last_version','0')
     
 #  print "Last Version: %i"%last_version
   if version > last_version:
@@ -1186,9 +1187,9 @@ def GetACF():
     
   
   debug = OV.FindValue('odac_fb', False)
-  debug = [False, True][0]
+  debug = [False, True][1]
   debug_deep1 = [False, True][0]
-  debug_deep2 = [False, True][0]
+  debug_deep2 = [False, True][1]
   OV.SetVar("ac_verbose", [False, True][0])
   keyname = getKey()
   
