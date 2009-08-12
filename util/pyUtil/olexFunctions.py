@@ -481,7 +481,7 @@ class OlexFunctions(inheritFunctions):
     try:
       rFile = open(path, 'r')
       line = rFile.read()
-      version = int(line.split("SVN Revision No. ")[1])
+      version = int(line.split()[-1])
     except:
       version = 1
     return version
