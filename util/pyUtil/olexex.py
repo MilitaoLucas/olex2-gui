@@ -1051,7 +1051,7 @@ def check_for_recent_update():
   
   version = OV.GetSVNVersion()
   try:
-    V = OV.FindValue('last_version',0)
+    V = OV.FindValue('last_version','0')
     last_version = int(V)
   except Exception, err:
     print "Error with last_version. Value: %s, ErrorL %s" %(V, err)
@@ -1067,6 +1067,7 @@ def check_for_recent_update():
     retVal = False
     #    print "Olex2 has not been updated"
   OV.SetVar('last_version',version)
+  OV.StoreParameter('last_version', version)
   return retVal
 
 def check_for_crypto():
