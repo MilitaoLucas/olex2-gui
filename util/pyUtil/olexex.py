@@ -1066,8 +1066,8 @@ def check_for_recent_update():
     OV.SetParam('olex2.has_recently_updated',False)
     retVal = False
     #    print "Olex2 has not been updated"
-  OV.SetVar('last_version',version)
-  OV.StoreParameter('last_version', version)
+  OV.SetVar('last_version',str(version))
+  OV.StoreParameter('last_version', str(version))
   return retVal
 
 def check_for_crypto():
