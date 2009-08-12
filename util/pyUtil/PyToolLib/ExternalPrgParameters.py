@@ -226,6 +226,9 @@ class Method_refinement(Method):
   def __init__(self, name, cmd, args, atom_sites_solution=None):
     Method.__init__(self, name, cmd, args, atom_sites_solution)
     
+  def getFlack(self):
+    return None
+    
   def addInstructions(self):
     """Adds instructions to the .ins file so that the file reflects what is selected in the GUI.
     """
@@ -327,6 +330,12 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
     import Analysis
     self.observer = Analysis.ShelXL_graph(RunPrgObject.program, RunPrgObject.method)
     OV.registerCallback("procout", self.observer.observe)
+    
+  def getFlack(self):
+    flack = olx.Lst('flack')
+    if flack == "n/a":
+      flack = None
+    return flack
 
 
 class Method_shelx_direct_methods(Method_shelx_solution):
