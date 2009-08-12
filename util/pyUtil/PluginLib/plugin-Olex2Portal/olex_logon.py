@@ -215,11 +215,12 @@ def web_run_sql(sql = None, script = 'run_sql'):
   if not sql:
     return None
   web_authenticate()
-  
+  try:
+    sql = u"%s" %sql
+    sql = sql.encode('utf-8')
+  except Exception, err:
+    print err
   sql = base64.b64encode(sql) 
-  
-#  sql = u"%s" %sql
-#  sql = sql.encode('utf-8')
   script = "Olex2Sql"
   url = "http://www.olex2.org/content/DB/%s" %script
   #url = "http://www.olex2.org/%s" %script
@@ -232,12 +233,16 @@ def web_run_sql(sql = None, script = 'run_sql'):
   response = urllib2.urlopen(req,data)
   
   
+  
   try:
     d = pickle.load(response)
-  except:
-    username =""
-    password = ""
-    return "Unauthorised"
+  except Exception, err:
+    if "Forgot your password" in response.read():
+      username =""
+      password = ""
+      return "Unauthorised"
+    else:
+      d = {}
 
   return d
 
@@ -311,8 +316,16 @@ class DownloadOlexLanguageDictionary:
       return
     language = olx.CurrentLanguage()
     self.language = language
-    gui_file = "%s/etc/%s" % (olx.BaseDir(),OXD)
-    tool_name = OXD.split("\\")[1].split(".")[0]
+    
+    path = "etc"
+    if 'index' in OXD:
+      path = "etc/gui/blocks"
+      tool_name = OXD
+      gui_file = "%s/%s/%s.htm" % (olx.BaseDir(),path, OXD)
+    else:
+      tool_name = OXD.split("\\")[1].split(".")[0]
+      gui_file = "%s/%s/%s" % (olx.BaseDir(),path, OXD)
+      
     #text = olex_logon.web_translation_item(OXD, language)
     language = olx.CurrentLanguage()
     rFile = open(gui_file,'r')
@@ -326,6 +339,42 @@ class DownloadOlexLanguageDictionary:
       wFile.write(inputText)
     else:
       inputText = text
+    
+      
+    if "<!-- #include" in inputText:
+      rFile = open(gui_file,'r')
+      l = rFile.readlines()
+      rFile.close()
+      for line in l:
+        line = line.replace(";", " ;")
+        if line.startswith("<!-- #include"):
+          ll = line.split()
+          for item in ll:
+            if ".htm" in item:
+              includefile = r"%s/etc/%s" %(OV.BaseDir(), item)
+              try:
+                rFile = open(includefile,'r')
+              except:
+                print "Not found: %s" %includefile
+                continue
+              inputText += rFile.read()
+              rFile.close()
+              rFile = open(includefile,'r')
+              m = rFile.readlines()
+              rFile.close()
+              for mline in m:
+                mline = mline.replace(";", " ;")
+                if mline.startswith("<!-- #include"):
+                  mm = mline.split()
+                  for item in mm:
+                    if ".htm" in item:
+                      includefile = r"%s/etc/%s" %(OV.BaseDir(), item)
+                      try:
+                        rFile = open(includefile,'r')
+                      except:
+                        print "Not found: %s" %includefile
+                        continue
+                      inputText += rFile.read()
       
     import re
     regex = re.compile(r"\% (.*?)  \%", re.X)
@@ -335,9 +384,17 @@ class DownloadOlexLanguageDictionary:
     res = make_translate_gui_items_html(m)
     if res:
       OV.Cursor('busy', "Please wait while uploading your changes")
-      self.upload_items(m)
-      self.downloadTranslation()
-      OV.htmlReload()
+      ok = self.upload_items(m)
+      if ok != "OK":
+        for i in xrange(4):
+          OV.Refresh()
+          print "Upload failed, trying %i more times (%s)" %(4 - i, ok)
+          ok = self.upload_items(m)
+      if ok == "OK":
+        self.downloadTranslation()
+        OV.htmlReload()
+      else:
+        print "Upload has failed: %s" %ok
       OV.Cursor()
       
   def upload_items(self, m):
@@ -352,10 +409,11 @@ class DownloadOlexLanguageDictionary:
         sql = self.create_insert_or_update_sql(d, 'translation')
         l.append(sql)
       txt = pickle.dumps(l)
-      text = web_run_sql(txt)        
+      text = web_run_sql(txt)
+      return "OK"
         
-    except:
-      res = make_translate_gui_items_html
+    except Exception, err:
+      return err
     
       
       

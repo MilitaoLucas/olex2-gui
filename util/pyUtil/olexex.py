@@ -1050,7 +1050,13 @@ def check_for_recent_update():
   retVal = False
   
   version = OV.GetSVNVersion()
-  last_version = int(OV.FindValue('last_version',0))
+  try:
+    V = OV.FindValue('last_version',0)
+    last_version = int(V)
+  except Exception, err:
+    print "Error with last_version. Value: %s, ErrorL %s" %(V, err)
+    return False
+    
 #  print "Last Version: %i"%last_version
   if version > last_version:
     OV.SetParam('olex2.has_recently_updated',True)

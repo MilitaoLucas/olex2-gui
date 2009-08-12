@@ -474,11 +474,11 @@ def restraint_builder(cmd):
     "DELU":["name_DELU", "var_s1:0.01", "var_s2:0.01", "help_Select any number of atoms"],
     "SIMU":["name_SIMU", "var_s:0.04", "var_st:0.08", "var_dmax:1.7", "help_Select any number of atoms"],
     "ISOR":["name_ISOR", "var_s:0.1", "var_st:0.2", "help_Select any number of atoms"],
-    "EXYZ":["name_EXYZ", "help_Select any number of atoms - their XYZ position will be constrained to be the same"],
-    "EADP":["name_EADP", "help_Select any number of atoms - their EADPs will be constrained to be the same"],
+    "EXYZ":["name_EXYZ", "help_exyz-htmhelp"],
+    "EADP":["name_EADP", "help_eadp-htmhelp"],
     "AFIX":["name_AFIX", "var_m:6;5;10;11", "var_n:6;9", "help_AFIX-use-help"],
-    "RRINGS":["name_RRINGS", "var_d: ", "var_s1:0.02", "help_Restraints all selected atoms to lie in a plane and have the same distance"],
-    "TRIA":["name_TRIA", "var_distance: ", "var_angle: ", "help_Restrain three atoms such that the distance between the central atom and two specified bound atoms"],
+    "RRINGS":["name_RRINGS", "var_d: ", "var_s1:0.02", "help_rrings-htmhelp"],
+    "TRIA":["name_TRIA", "var_distance: ", "var_angle: ", "help_tria-htmhelp"],
   }
   
   if atom_pairs.has_key(cmd):

@@ -494,6 +494,12 @@ class OlexFunctions(inheritFunctions):
       mac = mac[0]
       self.SetParam('olex2.mac_address',mac)
     return mac   
+  
+  def GetComputername(self):
+    return os.getenv('COMPUTERNAME')
+  
+  def GetUsername(self):
+    return os.getenv('USERNAME')
 
   def Refresh(self):
     olx.Refresh()
