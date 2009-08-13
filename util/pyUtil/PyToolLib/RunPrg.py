@@ -145,7 +145,6 @@ class RunPrg(ArgumentParser):
       cctbx.run()
     except Exception, err:
       print err
-    OV.DeleteBitmap('refine')
     olex.f('GetVar(cctbx_R1)')
 
   def runAfterProcess(self):
@@ -196,19 +195,24 @@ class RunPrg(ArgumentParser):
       return None, None
     return program, prgMethod
 
+  def startRun(self):
+    OV.CreateBitmap('%s' %self.bitmap)
+  
   def endRun(self):
-    #OV.Cursor()
     OV.DeleteBitmap('%s' %self.bitmap)
+    OV.Cursor()
     return self.his_file
 
 class RunSolutionPrg(RunPrg):
   def __init__(self):
     RunPrg.__init__(self)
     #self.getVariables('solution')
+    self.bitmap = 'solve'
     self.program, self.method = self.getProgramMethod('solve')
     self.run()
     
   def run(self):
+    self.startRun()
     if OV.IsFileType('cif'):
       OV.Reap('%s/%s.ins' %(self.filepath,self.filename))
     self.setupSolve()
@@ -237,7 +241,6 @@ class RunSolutionPrg(RunPrg):
     except:
       self.sg = ""
     self.formula = olx.xf_GetFormula()
-    self.bitmap = 'solve'
     if "smtbx" not in self.program.name:
       self.shelx = self.which_shelx(self.program)
     args = self.method.pre_solution(self)
@@ -253,10 +256,12 @@ class RunRefinementPrg(RunPrg):
   def __init__(self):
     RunPrg.__init__(self)
     #self.getVariables('refinement')
+    self.bitmap = 'refine'
     self.program, self.method = self.getProgramMethod('refine')
     self.run()
 
   def run(self):
+    self.startRun()
     olx.File("'%s/%s.ins'" %(OV.FilePath(),self.original_filename))
     self.setupRefine()
     if self.terminate: return
@@ -273,7 +278,6 @@ class RunRefinementPrg(RunPrg):
     sys.stdout.graph = False
 
   def setupRefine(self):
-    self.bitmap = 'refine'
     self.method.pre_refinement(self)
     self.shelx = self.which_shelx(self.program)
     if olx.LSM() == "CGLS": 

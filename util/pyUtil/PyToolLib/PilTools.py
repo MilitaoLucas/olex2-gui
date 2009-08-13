@@ -2506,9 +2506,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     width = int((self.width)/len(self.tabItems)-2)
     if "GB" in self.gui_language_encoding:
       height = 22
+      top = 0
     else:
       height = 20
-
+      top = 3
+      
     base = self.gui_timage_colour
     font_colour = base
     size = (int(width), int(height))
@@ -2550,7 +2552,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     self.write_text_to_draw(draw, 
                             txt, 
                             align = "right",
-                            top_left = (0, 0),
+                            top_left = (0, top),
                             max_width = width-5,
                             font_name=font_name, 
                             font_size=font_size, 
@@ -2887,24 +2889,32 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     return image
 
   def info_bitmaps(self):
+    
+    if olx.CurrentLanguage() == "Chinese":
+      font_size = 24
+      top = 4
+    else:
+      font_size = 24
+      top = -1
+    
     info_bitmap_font = "Verdana"
     info_bitmaps = {
-      'refine':{'label':'Refining...',
+      'refine':{'label':'Refining',
                 'name':'refine',
                 'color':'#ff4444',
-                'size':(64, 16),
+                'size':(128, 32),
                 'font_colour':"#ffffff",
                 },
-      'solve':{'label':'Solving...',
+      'solve':{'label':'Solving',
                'name':'solve',
                'color':'#ff4444',
-               'size':(64, 16),
+               'size':(128, 32),
                 'font_colour':"#ffffff",
                },
-      'working':{'label':'Working...',
+      'working':{'label':'Working',
                 'name':'working',
                 'color':'#ff4444',
-                'size':(64, 16),
+                'size':(128, 32),
                 'font_colour':"#ffffff",
                 },
                 }
@@ -2918,9 +2928,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       draw = ImageDraw.Draw(image)
       self.write_text_to_draw(draw, 
                                  txt, 
-                                 top_left = (1, -1),
+                                 top_left = (5, top),
                                  font_name=info_bitmap_font,
-                                 font_size=13,
+                                 font_size=font_size,
                                  font_colour = map.get('font_colour', '#000000')
                                )
       OlexVFS.save_image_to_olex(image, name, 2)      

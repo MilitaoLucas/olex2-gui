@@ -33,7 +33,7 @@ def print_response(response):
 
 def make_translate_gui_items_html(item_l):
   pop_name = "Translate"
-  boxHeight = 100
+  boxHeight = 150
   if OV.IsControl('%s.WEB_USERNAME'%pop_name):
     olx.html_ShowModal(pop_name)
   else:
@@ -48,8 +48,10 @@ def make_translate_gui_items_html(item_l):
       continue
     if "Close" in item:
       continue
-    boxHeight += 30
+    boxHeight += 20
     value = OV.TranslatePhrase(item)
+    if not value:
+      value = item
     txt += '''
   
   <tr>

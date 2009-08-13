@@ -248,10 +248,10 @@
 			<cmd11 "UpdateHtml">
 		\>
 		<onterminate
-			<cmd0 XXX="cursor()">
+			<cmd0 "cursor()">
 		\>
 		<onabort
-			<cmd0 XXX="cursor()">
+			<cmd0 "cursor()">
 		\>
 	\>
 \>
