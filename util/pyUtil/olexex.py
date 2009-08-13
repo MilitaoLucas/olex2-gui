@@ -259,7 +259,7 @@ def GetAvailableRefinementProgs():
   retStr += "ShelXL CGLS;"
   retStr += "ShelXH L.S.;"
   retStr += "ShelXH CGLS;"
-  if OV.IsPluginInstalled('AutoChem'):
+  if OV.IsPluginInstalled('ODAC'):
     retStr+= "cctbx AutoChem<-cctbx AutoChem"
   return retStr
 OV.registerFunction(GetAvailableRefinementProgs)
@@ -1078,11 +1078,7 @@ def check_for_crypto():
   if olx.IsPluginInstalled(r"ODAC").lower() == 'false':
     import olex
     olex.m(r"InstallPlugin ODAC")
-  if olx.IsPluginInstalled(r"AutoChem").lower() == 'false':
-    import olex
-    olex.m(r"InstallPlugin AutoChem")
 
-    
 def updateACF(force=False):
   rFile = open(r"%s/util/pyUtil/PluginLib/odac_update.txt" %OV.BaseDir())
   txt = rFile.read()
