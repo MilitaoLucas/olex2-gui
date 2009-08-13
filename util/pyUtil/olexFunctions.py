@@ -37,7 +37,7 @@ class OlexFunctions(inheritFunctions):
         phil_string = "%s='%s'" %(variable, value.replace("'", "\\'"))
       else:
         phil_string = "%s='%s'" %(variable, value)
-      olx.phil_handler.update(phil_string=phil_string)
+      olx.phil_handler.update(phil_string=str(phil_string))
     except Exception, ex:
       print >> sys.stderr, "Variable %s could not be set with value %s" %(variable,value)
       sys.stderr.formatExceptionInfo()
