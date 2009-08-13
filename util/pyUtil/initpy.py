@@ -174,11 +174,11 @@ def setup_cctbx():
     cctbx_TAG_file = open("%s/TAG" %cctbxSources,'r')
     cctbx_compile_date = cctbx_TAG_file.readline().strip()
     cctbx_TAG_file.close()
-    cctbx_compatibale_version = "2008_09_13_0905"
-    if int(cctbx_compile_date.replace('_','')) < int(cctbx_compatibale_version.replace('_','')):
+    cctbx_compatible_version = "2008_09_13_0905"
+    if int(cctbx_compile_date.replace('_','')) < int(cctbx_compatible_version.replace('_','')):
       sys.stdout.write("""An incompatible version of the cctbx is installed.
       Please update to cctbx build '%s' or later.
-      """ %cctbx_compatibale_version)
+      """ %cctbx_compatible_version)
 
   if need_cold_start:
     saved_cwd = os.getcwd()

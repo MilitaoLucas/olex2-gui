@@ -118,10 +118,10 @@ def crystalMetadataHtmlMaker():
     {'varName':'snum.metacif.exptl_crystal_colour',
      'itemName':'%Colour%',
      'box1':{'varName':'snum.metacif.exptl_crystal_colour_lustre',
-             'items':'?;n/a;metallic;dull;clear'
+             'items':'?;metallic;dull;clear'
              },
      'box2':{'varName':'snum.metacif.exptl_crystal_colour_modifier',
-             'items':'?;n/a;light;dark;whitish;blackish;grayish;brownish;reddish;pinkish;orangish;yellowish;greenish;bluish'
+             'items':'?;light;dark;whitish;blackish;grayish;brownish;reddish;pinkish;orangish;yellowish;greenish;bluish'
              },
      'box3':{'varName':'snum.metacif.exptl_crystal_colour_primary',
              'items':'?;colourless;white;black;gray;brown;red;pink;orange;yellow;green;blue;violet'

@@ -189,8 +189,7 @@ def AddVariableToUserInputList(variable):
     variable_list = variable
     OV.SetParam("snum.metacif.user_input_variables", variable_list)
   elif variable_list is not None and variable not in variable_list:
-    variable_list.append(variable)
-    variable_list = ' '.join('"%s"' %var for var in variable_list)
+    variable_list += ';%s' %variable
     OV.SetParam("snum.metacif.user_input_variables", variable_list)
 OV.registerFunction(AddVariableToUserInputList)
 
