@@ -31,9 +31,13 @@ class OlexFunctions(inheritFunctions):
 
   def SetParam(self,variable,value):
     try:
-      if type(value) in (str,unicode) and "'" in value:
-        value = value.replace("'", "\\'")
-      olx.phil_handler.update(phil_string=str("%s='%s'" %(variable, value)))
+      if value in ('Auto','auto'):
+        phil_string="%s=%s" %(variable, value)
+      elif type(value) in (str,unicode) and "'" in value:
+        phil_string = "%s='%s'" %(variable, value.replace("'", "\\'"))
+      else:
+        phil_string = "%s='%s'" %(variable, value)
+      olx.phil_handler.update(phil_string=phil_string)
     except Exception, ex:
       print >> sys.stderr, "Variable %s could not be set with value %s" %(variable,value)
       sys.stderr.formatExceptionInfo()
