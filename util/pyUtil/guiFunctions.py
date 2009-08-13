@@ -61,7 +61,7 @@ class GuiFunctions(object):
       olx.Cursor()
     
   def CreateBitmap(self, bitmap):
-    olx.CreateBitmap("%s -r" %bitmap)
+    olx.CreateBitmap("-r %s %s" %(bitmap, bitmap))
     
   def DeleteBitmap(self, bitmap):
     olx.DeleteBitmap('%s' %bitmap)
