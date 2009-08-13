@@ -17,20 +17,16 @@
 <tr>
 	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 	<td  colspan='2' align='left'>
-		<b>		
-			<a href="spy.ac_run solveit -s">Current</a> |
-		</b>
-		<a href="spy.stop_auto">Interrupt</a> | 
-		<a href="spy.ac_run solveit -s -c">Refine Only</a> |
-		<a href="spy.ac_run solveit -s -so">Solve Only</a> |
+		<a href="spy.ac_run solveit -s -c">%Refine Only%</a> |
+		<a href="spy.ac_run solveit -s -so">%Solve Only%</a> |
 	</td>
 </tr>
 
 <tr>
 	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 	<td  colspan='2' align='left'>
-		<a href="vss(true)">Verify Structure Solution</a> | 
-		<a href="ata(1)">Atom Type Assignment</a> |
+		<a href="vss(true)">%vss%</a> | 
+		<a href="ata(1)">%ata%</a> |
 	</td>
 </tr>
 
@@ -48,7 +44,7 @@
 			manage
 			value="$spy.GetParam(autochem.solution_program)"
 			onchange="spy.SetParam(autochem.solution_program,GetValue(SET_AUTOCHEM_SOLUTION_PROGRAM))"
-			label='Solution Program'
+			label='%Solution Program%'
 		>
 	</td>
 	<td colspan='1'>
@@ -61,7 +57,7 @@
 			manage
 			value="$spy.GetParam(autochem.solution_method)"
 			onchange="spy.SetParam(autochem.solution_method,GetValue(SET_AUTOCHEM_SOLUTION_METHOD))"
-			label='Solution Method'
+			label='%Solution Method%'
 		>
 	</td>
 </tr>
@@ -79,7 +75,7 @@
 			manage
 			value="$spy.GetParam(autochem.refinement_program)"
 			onchange="spy.SetParam(autochem.refinement_program,GetValue(SET_AUTOCHEM_REFINEMENT_PROGRAM))"
-			label='Refinement Program'
+			label='%Refinement Program%'
 		>
 	</td>
 	<td colspan='1'>
@@ -92,7 +88,7 @@
 			manage
 			value="$spy.GetParam(autochem.refinement_method)"
 			onchange="spy.SetParam(autochem.refinement_method,GetValue(SET_AUTOCHEM_REFINEMENT_METHOD))"
-			label='Refinement Method '
+			label='%Refinement Method%'
 		>
 	</td>
 </tr>

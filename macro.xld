@@ -1332,7 +1332,7 @@
 <odemo help="Launches OD Demo"
 	<body
 		<args 
-			<arg2 name="single" def="DataDir()/ODemo.zip">
+			<arg1 name="single" def="DataDir()/ODemo.zip">
 		\>
 		<cmd
 			<cmd1 "user BaseDir()">
@@ -1344,15 +1344,15 @@
 			<cmd7 "itemstate info-autochem 0">
 			<cmd8 "itemstate info-refinement-indicators 0">
 			<cmd9 "itemstate info-recent-files 0">
-			<cmd10 "SetVar(autochem_batch_dir,'%1')">
-			<cmd11 "SetVar(autochem_solution_program,Auto)">
-			<cmd12 "SetVar(autochem_solution_method,Auto)">
-			<cmd13 "SetVar(autochem_refinement_program,Auto)">
-			<cmd14 "SetVar(autochem_refinement_method,Auto)">
-			<cmd15 "SetVar(autochem_durham_structures,False)">
-			<cmd16 "SetVar(autochem_demo_mode,True)">
-			<cmd17 "SetVar(autochem_cutoff1_type,--)">
-			<cmd17 "SetVar(autochem_cutoff2_type,--)">
+			<cmd10 "spy.SetParam(autochem.batch_dir,'%1')">
+			<cmd11 "spy.SetParam(autochem.solution_program,Auto)">
+			<cmd12 XXX="spy.SetParam(autochem.solution_method,Auto)">
+			<cmd13 XXX="spy.SetParam(autochem.refinement_program,Auto)">
+			<cmd14 XXX="spy.SetParam(autochem.refinement_method,Auto)">
+			<cmd15 XXX="spy.SetParam(autochem.durham_structures,False)">
+			<cmd16 "spy.SetParam(autochem.demo_mode,True)">
+			<cmd17 XXX="spy.SetParam(autochem.cutoff1_type,--)">
+			<cmd17 XXX="spy.SetParam(autochem.cutoff2_type,--)">
 			<cmd18 "spy.ac_run solveit"> 
 		\>
 	\>
