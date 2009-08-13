@@ -123,6 +123,8 @@ class MetaCif(ArgumentParser):
       if 'file' in name or 'user_input' in name:
         continue
       cifName = '_' + name.split('snum.metacif.')[1]
+      if cifName == '_symmetry_space_group_name_H_M':
+        cifName = '_symmetry_space_group_name_H-M'
       separation = " "*(40-len(cifName))
       if cifName not in ('_list_people'):
         if value is None:
@@ -166,7 +168,7 @@ class MetaCif(ArgumentParser):
           if type(value) == float or type(value) == int:
             s = "%s%s%s\n" %(cifName,separation,value)
           elif value and value[0:2] == '\n;' and value != ';\n ?\n;':
-            s = "%s%s%s" %(cifName,separation,value)
+            s = "%s%s" %(cifName,value)
           elif value and value[0:1] == ';' and value != ';\n ?\n;':
             s = "%s%s\n%s\n" %(cifName,separation,value)
           elif ' ' in value:
@@ -479,7 +481,9 @@ class CifTools(ArgumentParser):
            and item not in userInputVariables:
           if item[0] == '_' and item.split('_')[1] in cifLabels:
             value = d[item]
-            OV.SetParam("snum.metacif.%s" %(item[1:]), value)
+            if item == '_symmetry_cell_setting':
+              value = value.lower()
+            OV.SetParam("snum.metacif.%s" %(item[1:].replace('-','_')), value)
             dataAdded.append(item)
         else: continue
 
