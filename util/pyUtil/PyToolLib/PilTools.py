@@ -298,7 +298,8 @@ class GuiSkinChanger(ImageTools):
     self.setVariables("gui")
     #sNumTitle_instance.run_sNumTitle()
     #timage_instance.run_timage()
-    olx.HtmlPanelWidth(self.gui_htmlpanelwidth)
+    width = OV.FindValue('gui_htmlpanelwidth')
+    olx.HtmlPanelWidth(width)
     self.setGuiProperties()
     OV.HtmlReload()
     

@@ -36,10 +36,12 @@ class ArgumentParser(object):
     return
   
   def setVariables(self,whichVariables):
+    width = OV.FindValue('gui_htmlpanelwidth')
     dictionary = VF.getVVD(whichVariables)
     for item in dictionary.keys():
       varName = item
       value = getattr(self,varName)
       OV.SetVar(varName,value)
+    OV.SetVar('gui_htmlpanelwidth', width)
     return
   
