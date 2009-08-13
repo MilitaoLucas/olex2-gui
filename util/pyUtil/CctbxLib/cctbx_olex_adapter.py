@@ -83,6 +83,8 @@ class OlexRefinementModel(object):
 
 class OlexCctbxAdapter(object):
   def __init__(self):
+    if OV.HasGUI():
+      sys.stdout.refresh = True
     self._xray_structure = None
     self.olx_atoms = OlexRefinementModel()
     try:
@@ -90,6 +92,9 @@ class OlexCctbxAdapter(object):
     except Exception, err:
       print err
       return
+
+  def __del__(self):
+    sys.stdout.refresh = False
 
   def xray_structure(self):
     if self._xray_structure is not None:
@@ -160,6 +165,10 @@ class OlexCctbxRefine(OlexCctbxAdapter):
     self.film = False
     self.max_cycles = max_cycles
     self.do_refinement = True
+    if OV.HasGUI() and OV.GetParam('snum.refinement.graphical_output'):
+      import Analysis
+      self.plot = Analysis.smtbx_refine_graph()
+    else: self.plot = None
 
   def run(self):
     t0 = time.time()
@@ -325,7 +334,6 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     import time
     t1 = time.time()
     from smtbx.ab_initio import charge_flipping
-    from iotbx import reflection_file_reader
     from cctbx import maptbx
     from  libtbx.itertbx import izip
     try:
@@ -338,35 +346,26 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     # Get the reflections from the specified path
     f_obs = self.reflections.f_obs
     data = self.reflections.f_sq_obs
-    #reflections = reflection_file_reader.any_reflection_file(
-      #'hklf+ins/res=' + hkl_path)
-    #data = reflections.as_miller_arrays()[0]
-    #if data.is_xray_intensity_array():
-      #f_obs = data.f_sq_as_f()
-      
+
     # merge them (essential!!)
     merging = f_obs.merge_equivalents()
     f_obs = merging.array()
     f_obs.show_summary()
-    
+
     # charge flipping iterations
-    
     if OV.HasGUI():
       sys.stdout.refresh = True
-      #sys.stdout.graph = self.ChargeFlippingGraph()
     flipping = charge_flipping.basic_iterator(f_obs, delta=None)
     solving = charge_flipping.solving_iterator(
       flipping,
       yield_during_delta_guessing=True,
       yield_solving_interval=solving_interval)
-    #charge_flipping.loop(solving, verbose=verbose)
     charge_flipping_loop(solving, verbose=verbose)
     sys.stdout.refresh = False
-    #sys.stdout.graph = False
-  
+
     # play with the solutions
     expected_peaks =  data.unit_cell().volume()/18.6/len(data.space_group())
-    expected_peaks += expected_peaks * 0.3
+    expected_peaks *= 1.3
     if solving.f_calc_solutions:
       # actually only the supposedly best one
       f_calc, shift, cc_peak_height = solving.f_calc_solutions[0]
@@ -384,8 +383,6 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         ).all()
       for q,h in izip(peaks.sites(), peaks.heights()):
         yield q,h
-        #print "(%.3f, %.3f, %.3f) -> %.3f" % (q+(h,))
-        
     else:
       print "*** No solution found ***"
 
@@ -470,9 +467,10 @@ class OlexCctbxGraphs(OlexCctbxAdapter):
       pass
     OV.DeleteBitmap('%s' %(bitmap))
 
-class OlexSetupCctbxTwinLaws(OlexCctbxAdapter):
+class OlexCctbxTwinLaws(OlexCctbxAdapter):
   def __init__(self):
-    OlexCctbxAdapter.__init__()
+    OlexCctbxAdapter.__init__(self)
+    self.run()
 
   def run(self):
     from PilTools import MatrixMaker
@@ -626,6 +624,7 @@ class OlexSetupCctbxTwinLaws(OlexCctbxAdapter):
     a = MakeGuiTools(tool_fun="single", tool_param=gui)
     a.run()
     OV.UpdateHtml()
+OV.registerFunction(OlexCctbxTwinLaws)
 
 
 def charge_flipping_loop(solving, verbose=True):
