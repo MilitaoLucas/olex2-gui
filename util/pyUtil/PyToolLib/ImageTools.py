@@ -426,9 +426,10 @@ class ImageTools(FontInstances):
     if self.gui_language_encoding not in good_encodings:
       self.gui_language_encoding = "unic"
       encoding = 'unic'
-      #txt = txt.encode(encoding)
-      #font_name = 'Arial UTF'
-      font_name = "Simhei TTF"
+      if self.gui_current_language == "Chinese":
+        font_name = "Simhei TTF"
+      else:
+        font_name = 'Arial UTF'
       #font_name = "Chinese"
       #font_name = "Simsun TTF"
       #font_name = "Simsun TTC"
