@@ -2503,14 +2503,22 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if self.gui_image_font_name:
       font_name = self.gui_image_font_name
       font_name = "%s Bold" %font_name
-
+    language = olx.CurrentLanguage()  
     width = int((self.width)/len(self.tabItems)-2)
-    if "GB" in self.gui_language_encoding:
+    if language == "Chinese":
       height = 22
+      top = 2
+      size_factor = 0.6
+    
+    elif language == "Russian":
+      height = 20
       top = 0
+      size_factor = 0.7
+      
     else:
       height = 20
       top = 3
+      size_factor = 0.7
       
     base = self.gui_timage_colour
     font_colour = base
@@ -2560,7 +2568,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                             font_colour=font_colour,
                             image_size = image.size,
                             lowerCase = True,
-                            valign=(middle,0.7)
+                            valign=(middle,size_factor)
                           )
 
 
