@@ -43,7 +43,7 @@ def makeHtmlTable(list):
     for box in ['box1','box2','box3']:
       if box in input_d.keys():
         box_d = input_d[box]
-        box_d.setdefault('value', '$spy.GetParam(%s)' %box_d['varName'])
+        box_d.setdefault('value', '$spy.GetParam_as_string(%s)' %box_d['varName'])
         box_d.setdefault('ctrl_name', "SET_%s" %str.upper(box_d['varName']).replace('.','_'))
         box_d.setdefault('bgcolor','spy.bgcolor(%s)' %box_d['ctrl_name'])
         box_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
@@ -52,7 +52,7 @@ def makeHtmlTable(list):
     if boxText:
       row_d.setdefault('input',boxText)
     else:
-      input_d.setdefault('value', '$spy.GetParam(%s)' %input_d['varName'])
+      input_d.setdefault('value', '$spy.GetParam_as_string(%s)' %input_d['varName'])
       input_d.setdefault('ctrl_name', "SET_%s" %str.upper(input_d['varName']).replace('.','_'))
       input_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
       input_d.setdefault('onleave',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
@@ -437,7 +437,7 @@ def make_spin_input(d):
   height='%(height)s'
   max='%(max)s'
   bgcolor='GetVar(gui_html_input_bg_colour)'
-  value='$spy.GetParam(%(varName)s)'
+  value='$spy.GetParam_as_string(%(varName)s)'
   onchange='%(onchange)s'
   >""" %d
   return html

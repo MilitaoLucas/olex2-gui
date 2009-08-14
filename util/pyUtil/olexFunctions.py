@@ -67,6 +67,9 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
       retVal = ''
     return retVal
+  
+  def GetParam_as_string(self,variable):
+    return str(self.GetParam(variable))
 
   def Params(self):
     if hasattr(olx, 'phil_handler'):
