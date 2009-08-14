@@ -427,7 +427,8 @@ class ImageTools(FontInstances):
       self.gui_language_encoding = "unic"
       encoding = 'unic'
       if self.gui_current_language == "Chinese":
-        font_name = "Simhei TTF"
+        #font_name = "Simhei TTF"
+        font_name = 'Arial UTF'
       else:
         font_name = 'Arial UTF'
       #font_name = "Chinese"
