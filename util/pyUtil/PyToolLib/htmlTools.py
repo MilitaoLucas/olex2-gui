@@ -117,8 +117,8 @@ def makeHtmlTableRow(dictionary):
   
   if 'chooseFile' in dictionary.keys():
     chooseFile_dict = dictionary['chooseFile']
-    if 'var' in chooseFile_dict.keys():
-      href = "spy.SetParam(%(var)s,FileOpen('%(caption)s','%(filter)s','%(folder)s'))>>updatehtml" %chooseFile_dict
+    if 'file_type' in chooseFile_dict.keys():
+      href = "spy.set_source_file(%(file_type)s,FileOpen('%(caption)s','%(filter)s','%(folder)s'))>>updatehtml" %chooseFile_dict
     else:
       href = "%(function)sFileOpen('%(caption)s','%(filter)s','%(folder)s'))>>updatehtml" %chooseFile_dict
       pass

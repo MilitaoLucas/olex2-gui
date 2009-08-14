@@ -54,9 +54,10 @@ def sourceFilesHtmlMaker():
       if ';' in var:
         d.setdefault('items', 'spy.GetParam(%s)' %listFiles)
       x += 1
+      file_type = d['varName'].split('.')[-1].split('_')[0]
       d.setdefault('onchange',"spy.SetParam(%s,'GetValue(SET_%s)')>>spy.AddVariableToUserInputList(%s)>>spy cif" %(d['varName'],str.upper(d['varName']).replace('.','_'),d['varName']))
       d['chooseFile'].setdefault('folder',OV.FilePath())
-      d['chooseFile'].setdefault('var',d['varName'])
+      d['chooseFile'].setdefault('file_type',file_type)
       d['chooseFile'].setdefault('caption',d['itemName'])
     else:
       del list[list.index(d)]
