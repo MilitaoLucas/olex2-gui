@@ -287,6 +287,8 @@ snum {
     structure_phil_file = open(structure_phil_path, 'r')
     structure_phil = structure_phil_file.read()
     structure_phil_file.close()
+    if """\"[\" \"[',\"""" in structure_phil:
+      return # to get around any problems caused by bug that was fixed in r2585
   else:
     # check if old-style vvd file is present
     structure_phil = VVD_to_phil()
