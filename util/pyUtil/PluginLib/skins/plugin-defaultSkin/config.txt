@@ -47,7 +47,7 @@ L_GUI_TAB_FONT_COLOUR=
 
 #C Other settings defining the Skin.
 #C The FONT NAME is restricted to some select fonts only.
-GUI_HTMLPANELWIDTH= 360
+GUI_HTMLPANELWIDTH=400
 GUI_HTML_FONT_SIZE=2 
 GUI_HTML_FONT_NAME=Arial
 GUI_IMAGE_FONT_NAME= Vera

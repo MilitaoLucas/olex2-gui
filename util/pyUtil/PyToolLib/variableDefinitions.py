@@ -44,7 +44,7 @@ def guiVariables():
     gui_infobox_text='2053;2143326838;2143979345',
     gui_infobox_plane='2053;2136422952;2137144606',
     
-    gui_htmlpanelwidth='320',
+    gui_htmlpanelwidth='400',
     gui_grad_top_left='#05053c',
     gui_grad_top_right='#05053c',
     gui_grad_bottom_left='#ffffff',
