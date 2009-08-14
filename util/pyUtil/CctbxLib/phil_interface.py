@@ -403,12 +403,10 @@ class phil_handler(object):
       phil_object = iotbx.phil.parse(file_name=phil_file)
     if phil_object:
       try:
-        new_phil = self.master_phil.fetch(source=phil_object)
+        self.merge_phil(phil_object=phil_object)
       except Exception, e:
         print >> sys.stderr, "Error updating Phil"
         sys.stderr.formatExceptionInfo()
-      else:
-        self.merge_phil(phil_object=phil_object)
 
   def update_from_python(self, python_object):
     self.working_phil = self.master_phil.format(python_object=python_object)
