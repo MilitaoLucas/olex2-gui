@@ -69,7 +69,17 @@ class OlexFunctions(inheritFunctions):
     return retVal
   
   def GetParam_as_string(self,variable):
-    return str(self.GetParam(variable))
+    try:
+      retVal = olx.phil_handler.get_validated_param(variable)
+    except Exception, ex:
+      print >> sys.stderr, "Variable %s could not be found" %(variable)
+      sys.stderr.formatExceptionInfo()
+      return ''
+    else:
+      if retVal is None:
+        return ''
+      else:
+        return str(retVal)
 
   def Params(self):
     if hasattr(olx, 'phil_handler'):
