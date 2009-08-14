@@ -460,6 +460,7 @@ class CifTools(ArgumentParser):
     dataAdded = []
     userInputVariables = OV.GetParam("snum.metacif.user_input_variables")
 
+    params_to_set = []
     for d in info:
       cifLabels = ['diffrn','cell','symmetry','exptl','computing']
       ## sort crystal dimensions into correct order
@@ -475,18 +476,19 @@ class CifTools(ArgumentParser):
           d['_exptl_crystal_size_max'] = dimensions[2]
         except IndexError:
           pass
-      for item in d.keys():
+      for item, value in d.items():
         if item not in dataAdded\
            and userInputVariables is not None\
            and item not in userInputVariables:
           if item[0] == '_' and item.split('_')[1] in cifLabels:
-            value = d[item]
             if item == '_symmetry_cell_setting':
               value = value.lower()
-            OV.SetParam("snum.metacif.%s" %(item[1:].replace('-','_')), value)
+            params_to_set.append(("snum.metacif.%s" %(item[1:].replace('-','_')), value))
+            #OV.SetParam("snum.metacif.%s" %(item[1:].replace('-','_')), value)
             dataAdded.append(item)
         else: continue
 
+    OV.SetParams(params_to_set)
     colour = OV.GetParam("snum.metacif.exptl_crystal_colour")
     if colour in (
       "colourless","white","black","gray","brown","red","pink","orange","yellow","green","blue","violet")\
@@ -902,3 +904,8 @@ def get_info_from_mls(file):
   mls_key["raw"]["_cell_measurement_reflns_used"] = "%s" %(used)
 
   return mls_key
+
+def set_source_file(file_type, file_path):
+  if file_path != '':
+    OV.SetParam('snum.metacif.%s_file' %file_type, file_path)
+OV.registerFunction(set_source_file)
