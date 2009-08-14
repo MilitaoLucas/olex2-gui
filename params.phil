@@ -398,7 +398,7 @@ snum {
       .type = strings
       .expert_level = 2
     user_input_variables = None
-      .type = strings
+      .type = str
       .expert_level = 2
   }
 
