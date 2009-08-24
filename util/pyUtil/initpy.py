@@ -13,10 +13,28 @@ datadir = olex.f("DataDir()")
 basedir = olex.f("BaseDir()")
 if sys.platform[:3] == 'win':
   sys.path = [''] # first should be empty string to avoid problem if cctbx needs cold start
-
-python_dir = "%s/Python26" %basedir
-sys.path.append("%s/DLLs" %python_dir)
-sys.path.append("%s/Lib" %python_dir)
+  python_dir = "%s/Python26" %basedir
+  sys.path.append(python_dir)
+  sys.path.append("%s/DLLs" %python_dir)
+  sys.path.append("%s/Lib" %python_dir)
+  sys.path.append("%s/Lib/site-packages" %python_dir)
+  sys.path.append("%s/Lib/site-packages/PIL" %python_dir)
+else:
+  sys.prefix = basedir + '/Python26'
+  sys.path = ['',
+    sys.prefix + '/python2.6',
+    sys.prefix + '/python2.6/lib-tk',
+    sys.prefix + '/python2.6/lib-old',
+    sys.prefix + '/python2.6/lib-dynload',
+    sys.prefix + '/python2.6/site-packages',
+    sys.prefix + '/python2.6/site-packages/PIL'
+  ]
+  if sys.platform == 'darwin':
+    sys.path.append(sys.prefix + '/python2.6/plat-darwin')
+    sys.path.append(sys.prefix + '/python2.6/plat-mac')
+  elif sys.platform == 'linux2':
+    sys.path.append(sys.prefix + '/python2.6/plat-linux2')
+    
 sys.path.append(datadir)
 stdout_redirection = True
 
@@ -127,9 +145,6 @@ def print_python_version():
   return version
 
 def set_olex_paths():
-  sys.path.append(python_dir)
-  sys.path.append("%s/Lib/site-packages" %python_dir)
-  sys.path.append("%s/Lib/site-packages/PIL" %python_dir)
   sys.path.append("%s" %basedir)
   sys.path.append("%s/util/pyUtil" %basedir)
   sys.path.append("%s/util/pyUtil/PyToolLib" %basedir)
@@ -161,13 +176,14 @@ def setup_cctbx():
   sys.path.append(str(cctbxSources)) # needed to work with new cctbx directory structure
   try:
     import libtbx.load_env
+    need_cold_start = not os.path.exists(libtbx.env.build_path)
   except IOError, err:
     if err.args[1] == 'No such file or directory' and err.filename.endswith('libtbx_env'):
       need_cold_start = True
     else:
       raise
-  else:
-    need_cold_start = not os.path.exists(libtbx.env.build_path)
+  except Exception, err:
+    raise
   cctbx_TAG_file_path = "%s/TAG" %cctbxSources
   if not os.path.isdir('%s/.svn' %cctbxSources)\
      and os.path.exists(cctbx_TAG_file_path):
