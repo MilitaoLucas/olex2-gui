@@ -5,14 +5,14 @@
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=;1; -->
 
 	<td>
-		<input 
+		<input
+			type="combo"
+			height="$GetVar(gui_html_combo_height)"
 			bgcolor="$getVar(gui_html_input_bg_colour)" 
-			type="combo" 
 			name="SET_SNUM_CALCVOID_VIEW" 
 			items='2D;%surface%;%wire%;%points%' 
 			value="$spy.GetParam(snum.calcvoid_view)" 
 			width="70" 
-			height="18" 
 			label="%View% "
 			onchange="spy.SetParam(snum.calcvoid_view,GetValue(SET_SNUM_CALCVOID_VIEW))>>
 spy.VoidView(0)"

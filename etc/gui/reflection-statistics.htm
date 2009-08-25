@@ -15,13 +15,13 @@
 	<td VALIGN='center'  colspan='2'>
 		<font size='2'>
 			<input 
-				type="combo" 
+				type="combo"
+				height="$GetVar(gui_html_combo_height)"
 				bgcolor="$getVar(gui_html_input_bg_colour)" 
 				name= "SET_REFLECTION_STATISTICS" 
-				items="Wilson Plot<-wp;Cumulative<-mspy CumulativeIntensityDistribution" 
+				items="Wilson Plot<-wp;Cumulative<-mspy CumulativeIntensityDistribution;Systematic Absences<-mspy SystematicAbsencesPlot" 
 				width='$eval(htmlpanelwidth()-120)' 
 				value = "Wilson Plot" 
-				height="18" 
 				readonly
 			>
 		<font size=2 VALIGN='right'>

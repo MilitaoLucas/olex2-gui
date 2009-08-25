@@ -4,15 +4,15 @@
 
 <table border="0" style="border-collapse: collapse" width="100%" id="table11" cellpadding="0" cellspacing="0">
 <tr>
-   <td bgcolor="#808080"><font color="#FFFFFF" size=5><b> Functions in Olex 7</b></font></td>
-	<td align="right" bgcolor="#808080">
-	<font face="Trebuchet MS">
+  <td bgcolor="#808080"><font color="#FFFFFF" size=5><b> Functions in Olex 7</b></font></td>
+<td align="right" bgcolor="#808080">
+<font face="Trebuchet MS">
 
 <a href="itemstate Functions_in_Olex-07 0 >> itemstate Functions_in_Olex-06 1"><zimg border="0" src="gui\images\backward.gif"></a></font>
-	<a href="itemstate Functions_in_Olex-07 0 >> itemstate Functions_in_Olex-01 1"><zimg border="0" src="gui\images\forward.gif"></a>
-	</td>
+  <a href="itemstate Functions_in_Olex-07 0 >> itemstate Functions_in_Olex-01 1"><zimg border="0" src="gui\images\forward.gif"></a>
+  </td>
 
-	
+
 </table>
 
 
@@ -65,8 +65,19 @@ angles.</b></i></p>
   <tr>
     <td width="8" bgcolor="#FFFFFF"></td>
     <td bgcolor="#FFFFFF"><span style="background-color: #FFFFFF"><font color="#669999">
-    <input type="checkbox" name="x" width="30" height="18" value="x" data="0" oncheck="setdata(x, '1')&gt;&gt;rota getdata(x) getdata(y) getdata(z) 10000 getvalue(speed)" onuncheck="setdata(x, '0') &gt;&gt;rota getdata(x) getdata(y) getdata(z) 10000 eval(getvalue(speed)*0.1)">
-    <input type="checkbox" name="y" width="30" height="18" value="y" data="0" oncheck="setdata(y, '1')&gt;&gt;rota getdata(x) getdata(y) getdata(z) 10000 getvalue(speed)" onuncheck="setdata(y, '0') &gt;&gt;rota getdata(x) getdata(y) getdata(z) 10000 eval(getvalue(speed)*0.1)">
+    <input 
+      type="checkbox"
+			height="$getVar(gui_html_checkbox_height)"
+			name="x"
+      width="30"
+      value="x"
+      data="0"
+      oncheck="setdata(x, '1')&gt;&gt;rota getdata(x) getdata(y) getdata(z) 10000 getvalue(speed)"
+      onuncheck="setdata(x, '0') &gt;&gt;rota getdata(x) getdata(y) getdata(z) 10000 eval(getvalue(speed)*0.1)">
+    <input
+			type="checkbox"
+			name="y"
+			width="30" height="18" value="y" data="0" oncheck="setdata(y, '1')&gt;&gt;rota getdata(x) getdata(y) getdata(z) 10000 getvalue(speed)" onuncheck="setdata(y, '0') &gt;&gt;rota getdata(x) getdata(y) getdata(z) 10000 eval(getvalue(speed)*0.1)">
     <input type="checkbox" name="z" width="30" height="18" value="z" data="0" oncheck="setdata(z, '1')&gt;&gt;rota getdata(x) getdata(y) getdata(z) 10000 getvalue(speed)" onuncheck="setdata(z, '0') &gt;&gt;rota getdata(x) getdata(y) getdata(z) 10000 eval(getvalue(speed)*0.1)">
     </font></span><font color="#669999">
     <input type="slider" name="speed" float width="65" height="20" value="1" min="1" max="10" onchange="rota getdata(x) getdata(y) getdata(z) 1000 eval(getvalue(speed)*0.1)" size="20"><span style="background-color: #FFFFFF">

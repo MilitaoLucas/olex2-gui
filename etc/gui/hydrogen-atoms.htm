@@ -101,11 +101,11 @@
 	</td>
 	<td colspan='1'>
 		<input 
-			type="combo" 
+			type="combo"
+			height="$GetVar(gui_html_combo_height)"
 			name = "HIMP_DISTANCE" 
 			float 
 			width="100" 
-			height="20" 
 			value="" 
 			items='B-H (1.19)<-1.19;sp3-C-H (1.083)<-1.083;sp2-C-H (1.077)<-1.083;sp3-N-H (1.033)<-1.033;sp2-N-H (1.009)<-1.009;O-H (0.983)<-0.983;'
 			onchange = "labels -l -h>>mode himp GetValue(HIMP_DISTANCE)">

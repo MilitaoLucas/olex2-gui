@@ -1,105 +1,105 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
 
 <tr VALIGN='center' NAME='Tools'>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
-		<a 
-			href="spy.make_help_box -name='quicktools' -popout='True'" 
-			target="Help me with this">
-			<zimg border="0" src="info.png">
-		</a>
+  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+    <a 
+      href="spy.make_help_box -name='quicktools' -popout='True'" 
+      target="Help me with this">
+      <zimg border="0" src="info.png">
+    </a>
 
-	</td>
-	<td colspan='2'>
-		<a 
-			href="name $Q C"
-			target="%Q To C-target%">
-			<zimg name="qc" border="0" src="gui/images/toolbar-QC.png">
-		</a>
-		&nbsp;
-		<a 
-			href="clean"
-			target="%Tidy Structure-target%">
-			<zimg border="0" src="gui/images/toolbar-tidy.png">
-		</a>
-		&nbsp;			
-		<a 
-			href="fixunit>>updatehtml"
-			target="%Fix Unit-target% ">
-			<zimg border="0" src="gui/images/toolbar-OK.png">
-		</a>
-		
-		&nbsp;
-		&nbsp;
-		
-		<a 
-			href="mode hfix 43"
-			target="%HFIX 43-target%">
-			<zimg border="0" src="gui/images/toolbar-sp2-1H.png">
-		</a>
-		&nbsp;
-		
-		<a href="mode hfix 13"
-			target="%HFIX 13-target%">
-			<zimg border="0" src="gui/images/toolbar-sp3-1H.png">
-		</a>&nbsp;
-		
-		<a 
-			href="mode hfix 23"
-			target="%HFIX 23-target%">
-			<zimg border="0" src="gui/images/toolbar-sp3-2H.png">
-		</a>&nbsp;
-		
-		<a 
-			href="mode hfix 137"
-			target="%HFIX 137-target%">
-			<zimg border="0" src="gui/images/toolbar-sp3-3H.png">
-		</a>
-		&nbsp;
-		
-		<a 
-			href="kill $H"
-			target="%Kill H-target% ">
-			<zimg border="0" src="gui/images/toolbar-killH.png">
-		</a>
+  </td>
+  <td colspan='2'>
+    <a 
+      href="name $Q C"
+      target="%Q To C-target%">
+      <zimg name="qc" border="0" src="gui/images/toolbar-QC.png">
+    </a>
+    &nbsp;
+    <a 
+      href="clean"
+      target="%Tidy Structure-target%">
+      <zimg border="0" src="gui/images/toolbar-tidy.png">
+    </a>
+    &nbsp;			
+    <a 
+      href="fixunit>>updatehtml"
+      target="%Fix Unit-target% ">
+      <zimg border="0" src="gui/images/toolbar-OK.png">
+    </a>
 
-		&nbsp;
-		&nbsp;
-		
-		<a 
-			href="showQ"
-			target="%Toggle Q-target%">
-			<zimg border="0" src="gui/images/toolbar-Q.png">
-		</a>&nbsp;
-		
-		<a 
-			href="showH"
-			target="%Toggle H-target%">
-			<zimg border="0" src="gui/images/toolbar-H.png">
-		</a>
-	</td>
+  &nbsp;
+  &nbsp;
+
+  <a 
+    href="mode hfix 43"
+    target="%HFIX 43-target%">
+    <zimg border="0" src="gui/images/toolbar-sp2-1H.png">
+  </a>
+  &nbsp;
+
+  <a href="mode hfix 13"
+    target="%HFIX 13-target%">
+    <zimg border="0" src="gui/images/toolbar-sp3-1H.png">
+  </a>&nbsp;
+
+  <a 
+    href="mode hfix 23"
+    target="%HFIX 23-target%">
+    <zimg border="0" src="gui/images/toolbar-sp3-2H.png">
+  </a>&nbsp;
+
+  <a 
+    href="mode hfix 137"
+    target="%HFIX 137-target%">
+    <zimg border="0" src="gui/images/toolbar-sp3-3H.png">
+  </a>
+  &nbsp;
+
+  <a 
+    href="kill $H"
+    target="%Kill H-target% ">
+    <zimg border="0" src="gui/images/toolbar-killH.png">
+  </a>
+
+  &nbsp;
+  &nbsp;
+
+  <a 
+    href="showQ"
+    target="%Toggle Q-target%">
+    <zimg border="0" src="gui/images/toolbar-Q.png">
+  </a>&nbsp;
+
+  <a 
+    href="showH"
+    target="%Toggle H-target%">
+    <zimg border="0" src="gui/images/toolbar-H.png">
+  </a>
+</td>
 </tr>	
 
 <tr VALIGN='center' NAME='Labels'>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
-	</td>
-	<td width=20%>
-		<b>%Labels%</b>
-	</td>
-	
-	<td>
-		<input 
-			type='combo' 
-			width='$eval(htmlpanelwidth()-105)' 
-			height="17" 
-			name='set_label_content' 
-			value='' 
-			items='Toggle On/Off<-;Atom Names<-l;Occupancy (None if fully occupied)<-o;Parts<-p;Link-Code<-v;H Atom Labels<-h l;Fixed Parameters<-f;Variables<-v;AFIX Commands<-h a;Q Peak Intensities<-qi' 
-			label='' 
-			bgcolor="$getVar(gui_html_input_bg_colour)" 
-			onchange="spy.ChooseLabelContent(GetValue(set_label_content))"   
-			readonly='readonly'
-		>
-	</td>
+  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+  </td>
+  <td width=20%>
+    <b>%Labels%</b>
+  </td>
+
+  <td>
+    <input 
+      type='combo' 
+      width='$eval(htmlpanelwidth()-105)' 
+			height="$getVar(gui_html_input_height)"
+      name='set_label_content' 
+      value='' 
+      items='%Toggle On/Off%<-;%Atom Names%<-l;%Occupancy% (None if fully occupied)<-o;%Parts%<-p;%Link-Code%<-v;%H Atom Labels%<-h l;%Fixed Parameters%<-f;Variables<-v;AFIX Commands<-h a;Q Peak Intensities<-qi' 
+      label='' 
+      bgcolor="$getVar(gui_html_input_bg_colour)" 
+      onchange="spy.ChooseLabelContent(GetValue(set_label_content))"   
+      readonly='readonly'
+    >
+  </td>
 </tr>
 </table>
 
