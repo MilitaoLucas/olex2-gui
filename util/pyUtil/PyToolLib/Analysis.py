@@ -1574,7 +1574,7 @@ class SystematicAbsencesPlot(Analysis):
       return
     self.have_data = True
     self.data.setdefault('dataset1', Dataset(xy_plot.x, xy_plot.y, metadata))
-    self.data['dataset1'].show_summary()
+    #self.data['dataset1'].show_summary()
     self.draw_origin = True
     self.make_empty_graph(axis_x = True)
     self.graphInfo['marker']['size'] = int(self.im.size[0]/120)
