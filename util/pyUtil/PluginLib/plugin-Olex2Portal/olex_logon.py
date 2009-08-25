@@ -437,24 +437,20 @@ class DownloadOlexLanguageDictionary:
       
     sql = "SELECT * FROM translation WHERE oxd='%s'" %(OXD)
     res = web_run_sql(sql)
-    
+    txt = ""
     if res == "Unauthorised":
       return
-    
-    d = res[0]
-    
-    txt = d.get(language)
-    
-    if not txt:
-      txt = "#######################################################\n"
-      txt += "This is the <b>%s</b> translation of this item in progress.\n" %language
-      txt += "You are the first person to work on a translation of this item\n"
-      txt += "Please insert your translation here.\n"
-      txt += "If you are finished, please delete these lines.\n"
-      txt += "#######################################################\n\n"
-      
-      txt += d.get('English')
-    
+    if res:
+      d = res[0]
+      txt = d.get(language)
+      if not txt:
+        txt = "#######################################################\n"
+        txt += "This is the <b>%s</b> translation of this item in progress.\n" %language
+        txt += "You are the first person to work on a translation of this item\n"
+        txt += "Please insert your translation here.\n"
+        txt += "If you are finished, please delete these lines.\n"
+        txt += "#######################################################\n\n"
+        txt += d.get('English')
     if not txt:
       txt = '''
   Line before a Table.
