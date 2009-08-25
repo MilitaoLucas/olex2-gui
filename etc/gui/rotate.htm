@@ -3,39 +3,42 @@
 <tr>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;1; -->
 		
-	<td width='20%'>
+	<td width='15%'>
 		<b>%Rotate%:</b>
 	</td>
 	<td VALIGN='center'>
 		<font size='2'>
 
 	<input 
-				type="spin" 
-				name = "rx" 
-				width="42" 
-				height="18" 
-				value="90"
-			>
+		type="spin" 
+		name = "rx" 
+		width="42"
+	  height="$getVar(gui_html_spin_height)"
+		value="90"
+	>
+&nbsp;
 $spy.MakeActiveGuiButton(button_tiny-x,'rota 1 getvalue\(rx)')
 &nbsp;
-			<input 
-				type="spin" 
-				name = "ry" 
-				width="42"  
-				height="18" 
-				bgcolor="$getVar(gui_html_input_bg_colour)" 
-				value="90"
-			>
+	<input 
+		type="spin" 
+		name = "ry" 
+		width="42"  
+	  height="$getVar(gui_html_spin_height)"
+		bgcolor="$getVar(gui_html_input_bg_colour)" 
+		value="90"
+	>
+&nbsp;
 $spy.MakeActiveGuiButton(button_tiny-y,'rota 1 getvalue\(ry)')			
 &nbsp;
-			<input 
-				type="spin" 
-				name = "rz" 
-				width="42" 
-				height="18" 
-				bgcolor="$getVar(gui_html_input_bg_colour)" 
-				value="90"
-			>
+	<input 
+		type="spin" 
+		name = "rz" 
+		width="42" 
+	  height="$getVar(gui_html_spin_height)"
+		bgcolor="$getVar(gui_html_input_bg_colour)" 
+		value="90"
+	>
+&nbsp;
 $spy.MakeActiveGuiButton(button_tiny-z,'rota 3 getvalue\(rz)')			
 	</font>
 	</td>
@@ -50,11 +53,11 @@ $spy.MakeActiveGuiButton(button_tiny-z,'rota 3 getvalue\(rz)')
 		<font size='2'>
 			<input 
 				type="checkbox"	
+			  height="$getVar(gui_html_input_height)"
 				name = "x" 
 				bgcolor="$GetVar(gui_html_input_bg_colour)"  
 				fgcolor="$GetVar(gui_html_font_colour)" 
 				width="25" 
-				height="17" 
 				value="x" 
 				data = "0" 
 				oncheck = "setdata(x, '1')>>rota getdata(x) getdata(y) getdata(z) 100000 eval(getvalue(speed)*0.1)" 
@@ -63,11 +66,12 @@ $spy.MakeActiveGuiButton(button_tiny-z,'rota 3 getvalue\(rz)')
 
 			<input 
 				type="checkbox" 
+			  height="$getVar(gui_html_input_height)"
 				name = "y" 
-			bgcolor="$GetVar(gui_html_input_bg_colour)"  
-			fgcolor="$GetVar(gui_html_font_colour)" 
-				width="25" 
-				height="17" 
+				bgcolor="$GetVar(gui_html_input_bg_colour)"  
+				fgcolor="$GetVar(gui_html_font_colour)" 
+				width="25"
+			  height="$getVar(gui_html_input_height)"
 				value="y" 
 				data = "0" 
 				oncheck = "setdata(y, '1')>>rota getdata(x) getdata(y) getdata(z) 100000 eval(getvalue(speed)*0.1)" 
@@ -76,11 +80,12 @@ $spy.MakeActiveGuiButton(button_tiny-z,'rota 3 getvalue\(rz)')
 
 			<input 
 				type="checkbox" 
+			  height="$getVar(gui_html_input_height)"
 				name = "z" 
 				bgcolor="$GetVar(gui_html_input_bg_colour)"  
 				fgcolor="$GetVar(gui_html_input_bg_colour)" 
 				width="25" 
-				height="17" 
+			  height="$getVar(gui_html_input_height)"
 				value="z" 
 				data = "0" 
 				oncheck = "setdata(z, '1')>>rota getdata(x) getdata(y) getdata(z) 100000 eval(getvalue(speed)*0.1)" 

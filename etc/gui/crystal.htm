@@ -11,31 +11,31 @@
 	<td valign='center'>
 		<font size='1'>
 			<input 
-				type="combo" 
+				type="combo"
+				height="$GetVar(gui_html_combo_height)"
 				bgcolor="$getVar(gui_html_input_bg_colour)" 
 				name= "COLOUR_APPEARANCE" 
 				items="metallic;lustrous;translucent;fluorescent;clear" 
 				width="70"  
-				height="17" 
 				onchange="echo getvalue(COLOUR_APPEARANCE)"
 			>
 			<input 
-				type="combo" 
+				type="combo"
+				height="$GetVar(gui_html_combo_height)"
 				bgcolor="$getVar(gui_html_input_bg_colour)" 
 				name= "SET_SNUM_COLOUR_INTENSITY" 
 				items="dark;light;intense;pale" 
 				width="70"  
-				height="17" 
 				value="GetVar(snum_colour_intensity)"
 				onchange="spy.hello(GetValue(SET_SNUM_COLOUR_INTENSITY))>>SetVar(snum_colour_intensity,GetValue(SET_SNUM_COLOUR_INTENSITY))"
 			>
 			<input 
-				type="combo" 
+				type="combo"
+				height="$GetVar(gui_html_combo_height)"
 				bgcolor="$getVar(gui_html_input_bg_colour)" 
 				name= "COLOUR_BASE" 
 				items="black;blue;bronze;brown;colourless;gold;green;grey;orange;pink;purple;red;silver;violet;white;yellow" 
 				width="70"  
-				height="17" 
 				onchange="echo getvalue(COLOUR_BASE)"/>
 		</font>	
 	</td>

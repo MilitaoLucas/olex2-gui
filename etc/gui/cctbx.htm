@@ -18,8 +18,9 @@
 				label="Map ">		
 		</td>		
 		<td>
-			<input 
-				type="combo" 
+			<input
+				type="combo"
+				height="$GetVar(gui_html_combo_height)"
 				name="SET_SNUM_CCTBX_MAP_RESOLUTION" 
 				bgcolor="$GetVar(gui_html_table_bg_colour)" 
 				items="0.3;0.2;0.1" 
@@ -28,7 +29,6 @@
 				width="40" 
 				label="Resolution " 
 				onchange="SetVar(snum_cctbx_map_resolution,GetValue(SET_SNUM_CCTBX_MAP_RESOLUTION))"
-				height="17" 
 				readonly >
 		</td>
 	</tr>

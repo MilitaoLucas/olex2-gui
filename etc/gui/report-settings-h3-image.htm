@@ -21,26 +21,26 @@ cursor(busy, '%Please Wait...%')
 	</td>	
 	<td colspan = '1'>
 		<input
+			type="combo"
+			height="$GetVar(gui_html_combo_height)"
 			bgcolor="GetVar(gui_html_input_bg_colour)" 
-			type="combo" 
 			name="SET_REPORT_IMAGE_SIZE" 
 			items="640;800;1024;1280"
 			onchange="spy.SetParam(snum.report.image_size,GetValue(SET_REPORT_IMAGE_SIZE))"
 			width="20%" 
-			height="18" 
 			value="$spy.GetParam(snum.report.image_size)"
 		>
 	</td>
 	<td colspan='4'>
 		<input 
+			type="combo"
+			height="$GetVar(gui_html_combo_height)"
 			bgcolor="GetVar(gui_html_input_bg_colour)" 
-			type="combo" 
 			name="SET_REPORT_IMAGE"
 			readonly
 			items='file.ListDirForGui(FilePath(),*.png;*.jpg;*.bmp)' 
 			onchange="spy.SetParam(snum.report.image,GetValue(SET_REPORT_IMAGE))"
 			width="50%" 
-			height="18" 
 			value="file.GetName($spy.GetParam(snum.report.image))"
 		>
 	</td>

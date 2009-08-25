@@ -574,7 +574,7 @@ def historyChooserRenamer():
     <input 
       type='combo'
       width='$eval(htmlpanelwidth()/2 -15)',
-      height="17" 
+      height="$getVar(gui_html_input_height)"
       bgcolor='$GetVar(gui_html_input_bg_colour)'
       name='SET_HISTORY_CURRENT_SOLUTION',
       value='$spy.GetParam(snum.history.current_solution)'

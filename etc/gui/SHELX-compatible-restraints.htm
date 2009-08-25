@@ -9,14 +9,14 @@
 	</td>
 	<td width='20%'>
 		<input 
+			type="combo"
+			height="$GetVar(gui_html_combo_height)"
 			bgcolor="$getVar(gui_html_input_bg_colour)" 
-			type="combo" 
 			name="SET_GUI_SHELX_RESTRAINTS" 
 			items='DFIX;DANG;SADI;CHIV;FLAT;DELU;SIMU;ISOR;'
 			value="GetVar(gui_shelx_restraints)" 
 			width="55" 
 			onchange="SetVar(gui_shelx_restraints,GetValue(SET_GUI_SHELX_RESTRAINTS))>>spy.restraint_builder(GetVar(gui_shelx_restraints))"
-			height="17" 
 			label="Restraint"
 			readonly
 		>	

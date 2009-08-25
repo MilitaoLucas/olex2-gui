@@ -15,7 +15,7 @@ Compile Date	Compile Date	Compile Date	تجميع التاريخ	Обобщен�
 Settings	Settings	Réglages	اعدادات	параметры	設定	Einstellungen	Ajustes	设置	Ρυθμισεις
 Tooltips	Tooltips	Infobulles	تلميحات الادوات	Подсказки	ツールのヒント	Werkzeughilfe	Tooltip	工具提示	Εργαλειων
 Help	Help	Aide	مساعدة	Помощь	ヘルプ	Hilfe	Ayuda	帮助	Βοηθεια
-Info	info	Info	معلومات	Инфо	情報	info	Información	信息	info
+info	info	Info	معلومات	Инфо	情報	info	Información	信息	info
 GUI Font Size	GUI Font Size	GUI taille de la police	GUI حجم الخط	GUI размер шрифта	GUIのフォントの大きさ	Schriftgrösse	GUI tamaño de la letra	GUI字体大小	GUI μεγεθος γραμματων
 Swap Backgrounds	Swap Backgrounds	Swap Backgrounds	مقايضه الخلفيات	Поменять обои	スワップ背景	Hintergrund wechseln	Swap Fondos	背景转换	Swap Backgrounds
 Swap Control Panel	Swap Control Panel	Swap Control Panel	مقايضه لوحة التحكم	Съемные панели управления	コントロールパネルのスワップ	Kontrollfeld auf andere Seite	Swap panel de control	控制面板转换	Swap Control Panel
@@ -249,7 +249,7 @@ BCA York Workshop-news	We have held our first ever Olex2 workshop immediately af
 Program Errors-news	.	.	.	.	.	Da Olex2 immer noch in der Entwicklung steckt, kommen häufiger Fehler vor. Wir können aus diesen lernen. Deshalb wird von nun an dieses Zeichen immer dann erscheinen, wenn irgendwo etwas falsch gelaufen ist. Bitte klicken Sie auf dieses Zeichen und senden Sie uns den Inhalt an: <a href=<'shell mailto:horst.puschmann@durham.ac.u'>horst</a>. Vielen Dank!	.	程序错误－新闻	.
 New Workflow-news	We are currently working on a new Olex2 workflow for the solution and refinement stages. Feedback and suggestions in this area are welcome!	.	.	.	.	Wir arbeiten gerade ein einer Neuen 'Workflow'Philosphie für Olex2. Dies ist nicht so einfach, und wir würden uns riesig über Vorschläge und Anregungen freuen.	En la actualidad estamos trabajando en un nuevo Olex2 para la solución de flujo de trabajo y el perfeccionamiento etapas. Comentarios y sugerencias en este ámbito son bienvenidas!	我们正在研究一个用于构解析和精修的OLEX2新工作流程。欢迎提出您宝贵的建议。	Αυτη τη στιγμη εργαζομαστε για ενα νεο Olex2 ροη εργασιας για τη λυση και την ομαλοποιηση σταδια. Feedback και προτασεις στον τομεα αυτο ειναι ευπροσδεκτα!
 work	work	.	.	.	.	Arbeit	work	工作	εργασια
-View	view	.	.	.	.	Ansicht	view	查看	Ενοψει
+view	view	.	.	.	.	Ansicht	view	查看	Ενοψει
 Edit Style	edit style	.	.	.	.	Stileinstellung	.	编辑风格	.
 Electron Density Viewer-news	.	.	.	.	.	.	.	电子云密度查看器－新闻	.
 electron density	Electron Density	.	.	.	.	Elektronendichte	.	电子云密度	.
@@ -312,9 +312,9 @@ news-1	The electron density map viewer tool has been updated. The levels shown i
 news-1-title	Interactive Electron Density Viewer	.	.	.	.	.	.	互交式电子密度查看器	.
 news-2	Olex2 now propagates errors for calculations involving any distances and angles.	.	.	.	.	Olex2 now propagates errors for calculations involving any distances and angles.	.	Olex2现在能计算各个键长和键角的误差。	.
 news-2-title	Errors for Distances and Angles	.	.	.	.	Errors for Distances and Angles	.	键长键角的误差	.
-news-3	When errors occur in Olex2, we would like to know about them. Please use our portal to report any issues you might encounter.	.	.	.	.	When errors occur in Olex2, we would like to know about them. Please use our portal to report any issues you might encounter.	.	欢迎您将在使用Olex2中发现的任何问题告诉我们。请通过我们的网站反馈您所碰到的问题。	.
+news-3	When errors occur in Olex2, we would like to know about them. Please use our portal to report any issues you might encounter.	.	.	.	.	When errors occur in Olex2, we would like to know about them. Please use our portal to report any issues you might encounter.	.	欢迎您将在使用Olex2 中发现的任何问题告诉我们。 请通过我们的网站反馈您所碰到的问题。	.
 news-3-title	Program Errors	.	.	.	.	Program Errors	.	程序错误	.
-news-4	Olex2 will not work with ShelX executables from WinGX. There is not much we can do about this. Please make sure to place non-WinGX versions of ShelX in the installation directory of Olex2.	.	.	.	.	Olex2 will not work with ShelX executables from WinGX. There is not much we can do about this. Please make sure to place non-WinGX versions of ShelX in the installation directory of Olex2.	.	Olex2不能运行WinGX版本的ShelX可执行文件。我们暂时也无法解决这个问题，请将非WinGX版本的ShelX拷贝至Olex2的安装目录。	.
+news-4	Olex2 will not work with ShelX executables from WinGX. There is not much we can do about this. Please make sure to place non-WinGX versions of ShelX in the installation directory of Olex2.	.	.	.	.	Olex2 will not work with ShelX executables from WinGX. There is not much we can do about this. Please make sure to place non-WinGX versions of ShelX in the installation directory of Olex2.	.	Olex2不能运行WinGX 版本的ShelX 可执行文件。 我们暂时也无法解决这个问题，请将非WinGX 版本的ShelX 拷贝至Olex2的安装目录。	.
 news-4-title	WinGX ShelX Executables	.	.	.	.	WinGX ShelX Executables	.	WinGX版本的ShelX可执行文件	.
 setup-title-1	Elements of the GUI	.	.	.	.	.	.	GUI的各个要素	.
 setup-txt-1	&&@Background@The background of the main Olex2 window (The OpenGL window) has three states:~White~ (Toggle with F2)~Solid Colour~ (Toggle with F2)~Gradient~ (Switch on/off with F4) <a href=grad>Change</a>@Swap GUI Panel@The main GUI panel is displayed on the right of the Olex2 window. This panel can be moved to the left:~Swap Panel~<a href='htmlpanelswap'>now</a>@Tooltips@When placing the mouse over any link in the main GUI panel, a 'Tooltip' will appear if this functionality is switched on. Tooltips can be a good idea when learning how to run Olex2, but might be a bit of a distraction later on.~Switch Tooltips~ <a href="html.tooltips true">ON</a>/<a href="html.tooltips false">OFF</a>@Help on Typing@When typing in the command line, a window listing all the commands starting with the typed letters will appear if this functionality is switched on.~Switch Help~ <a href="showwindow help true">ON</a>/<a href="showwindow help false">OFF</a>&&	.	.	.	.	.	.	.	.
@@ -335,9 +335,9 @@ exclude-hkl-help	Conditions for reflections to be excluded can be set here&&@S
 reflection-statistics-help	Currently there is only the Wilson Plot available here.	.	.	.	.	.	.	目前只能提供Wilson Plot统计图。	.
 AFIX-use-help	&&~m = 5~Regular pentagon~m = 6~Regular hexagon~m = 10~Idealized pentamethylcyclopentadienyl (Cp*)~m = 11~Idealized naphthalene group~No atoms selected~Olex2 will automatically search for all occurrences of the selected group in the structure and set the appropriate instructions.~One Atom Selected~The selected atom will be set as the pivot atom of a new rigid group.~More than one atom selected~Select 5, 6, 10 or 10 atoms respectively for m = 5, 6, 10 or 11 and the selected atoms will form a new rigid group.&&	.	.	.	.	.	.	&&~m = 5~正五边形~m = 6~正六边形~m = 10~理想的五甲基环戊二烯基(Cp*)~m = 11~理想的萘环~没有选择原子~Olex2将自动搜索结构中存在的已选择刚性基团，并加上适当的命令。~已选一个原子~已选的原子将作为新刚性基团的中心原子。~已选多个原子~选择5，6，10或11个原子将分别对应m = 5，6，10或11，并且已选的原子将组成新的刚性基团。&&	.
 AFIX-help	english	.	.	.	.	.	.	英语	.
-news-5	Olex2 now has full support for all Shelx AFIX commands.  See <b>Tools > Shelx Constraints</b>	.	.	.	.	Olex2 now has full support for all Shelx AFIX commands.  See <b>Tools > Shelx Constraints</b>	.	Olex2现在能全面支持Shelx所有的AFIX模式。详情请见 <b>工具 > Shelx Constraints</b>	.
+news-5	Olex2 now has full support for all Shelx AFIX commands.  See <b>Tools > Shelx Constraints</b>	.	.	.	.	Olex2 now has full support for all Shelx AFIX commands.  See <b>Tools > Shelx Constraints</b>	.	Olex2现在能全面支持Shelx所有的AFIX 模式。  详情请见  <b>工具 Shelx Constraints</b>	.
 news-5-title	Full AFIX Support	.	.	.	.	Full AFIX Support	.	全面的AFIX支持	.
-news-6	<b><font size=+1 color='$getVar(gui_html_highlight_colour)'>&#187;</font> <a href='shell http://www.olex2.org/content/folder-help/Olex2-Ilia.pdf/view'>Ilia Guzei's Olex2 Manual</a><br></b><font size=+1 color='$getVar(gui_html_highlight_colour)'>&#187;</font> <a href='shell http://www.olex2.org/content/npsFC0C.pdf'>Olex2 paper published in <i>J. Appl. Cryst.</i></a><br><font size=+1 color='$getVar(gui_html_highlight_colour)'>&#187;</font> <a href='shell http://www.olex2.org/content/olex2-bugs'>Bug reports and Frequently Asked Questions</a><br><font size=+1 color='$getVar(gui_html_highlight_colour)'>&#187;</font> <a href='shell http://www.olex2.org/news/ati-graphics-card-problem'>Problems with ATI Radeon graphics cards</a><br></b>	.	.	.	.	<b><font size=+1 color='#ff7800'>»</font> <a href='shell http://www.olex2.org/content/folder-help/Olex2-Ilia.pdf/view'>Ilia Guzei's Olex2 Manual</a><br></b><font size=+1 color='#ff7800'>»</font> <a href='shell http://www.olex2.org/content/npsFC0C.pdf'>Olex2 paper published in <i>J. Appl. Cryst.</i></a><br><font size=+1 color='#ff7800'>»</font> <a href='shell http://www.olex2.org/content/olex2-bugs'>Bug reports and Frequently Asked Questions</a><br><font size=+1 color='#ff7800'>»</font> <a href='shell http://www.olex2.org/news/ati-graphics-card-problem'>Problems with ATI Radeon graphics cards</a><br></b>	.	<b> <font size=+1 color='#ff7800'>»</font>  <a href='shell http://www.olex2.org/content/folder-help/Olex2-Ilia.pdf/view'> Ilia Guzei's Olex2 Manual </a><br> </b><font size=+1 color='#ff7800'>»</font>  <a href='shell http://www.olex2.org/content/npsFC0C.pdf'> Olex2 paper published in <i>J. Appl. Cryst.</i> </a><br> <font size=+1 color='#ff7800'>»</font>  <a href='shell http://www.olex2.org/content/olex2-bugs'> 错误报告和常见问题 </a><br> <font size=+1 color='#ff7800'>»</font>  <a href='shell http://www.olex2.org/news/ati-graphics-card-problem'>ATI Radeon图形卡问题 </a><br> </b>	.
+news-6	<b><font size=+1 color='#ff7800'>»</font> <a href='shell http://www.olex2.org/content/folder-help/Olex2-Ilia.pdf/view'>Ilia Guzei's Olex2 Manual</a><br></b><font size=+1 color='#ff7800'>»</font> <a href='shell http://www.olex2.org/content/npsFC0C.pdf'>Olex2 paper published in <i>J. Appl. Cryst.</i></a><br><font size=+1 color='#ff7800'>»</font> <a href='shell http://www.olex2.org/content/olex2-bugs'>Bug reports and Frequently Asked Questions</a><br><font size=+1 color='#ff7800'>»</font> <a href='shell http://www.olex2.org/news/ati-graphics-card-problem'>Problems with ATI Radeon graphics cards</a><br></b>	.	.	.	.	<b><font size=+1 color='#ff7800'>»</font> <a href='shell http://www.olex2.org/content/folder-help/Olex2-Ilia.pdf/view'>Ilia Guzei's Olex2 Manual</a><br></b><font size=+1 color='#ff7800'>»</font> <a href='shell http://www.olex2.org/content/npsFC0C.pdf'>Olex2 paper published in <i>J. Appl. Cryst.</i></a><br><font size=+1 color='#ff7800'>»</font> <a href='shell http://www.olex2.org/content/olex2-bugs'>Bug reports and Frequently Asked Questions</a><br><font size=+1 color='#ff7800'>»</font> <a href='shell http://www.olex2.org/news/ati-graphics-card-problem'>Problems with ATI Radeon graphics cards</a><br></b>	.	<b> <font size=+1 color='#ff7800'>»</font>  <a href='shell http://www.olex2.org/content/folder-help/Olex2-Ilia.pdf/view'> Ilia Guzei's Olex2 Manual </a><br> </b><font size=+1 color='#ff7800'>»</font>  <a href='shell http://www.olex2.org/content/npsFC0C.pdf'> Olex2 paper published in <i>J. Appl. Cryst.</i> </a><br> <font size=+1 color='#ff7800'>»</font>  <a href='shell http://www.olex2.org/content/olex2-bugs'> 错误报告和常见问题 </a><br> <font size=+1 color='#ff7800'>»</font>  <a href='shell http://www.olex2.org/news/ati-graphics-card-problem'>ATI Radeon图形卡问题 </a><br> </b>	.
 news-6-title	www.olex2.org	.	.	.	.	.	.	www.olex2.org	.
 expand-short-contacts-help	&&Move the slider to adjust the threshold for short contacts to be displayed. Alternatively, you can add the required value in the text box.<br><b>Note:</b> the value has to be between 0.9 and 1.7 Angstrom. Short inter and intramolecular distances will be displayed. If there are intermolecular interactions within the given threshold, clicking on these bonds will expand the missing symmetry equivalent part.&&	.	.	.	.	.	.	&&移动滑条调节短程相互作用显示的阈值。您也可以将所需要的数值填入文本框内。<br><b>注意:</b> 此数值必须在0.9到1.7埃内，这样短程的分子内和分子间距离将显示出来。如果在给定的阈值内有分子间相互作用，请点击那些键以扩展出对称性等同的部分。&&	.
 edit-atom-help	Sometimes you may want to edit your structure using a text-based representation of your current structure model. Olex will generate such a file on request and display it in its own text editor, where you can make changes to the model. The default output format is the ShelX format, because many users are familiar with this representation of a structure model.&&@Edit Atom(s)@If you have no atoms selected, all atoms in your structure will be included, otherwise only those atoms, that are currently selected, will appear in the text. This is particularly useful if you are working on a big structure. <font color='red'>Atoms will be shown with <b>all</a> their dependencies: attached hydrogen atoms, constraints and restraints are all displayed in the top of the window. </font>XX editatom XX@Edit Instructions@Shows only the 'instruction' part of the model - these are the instructions that will be taken into account by the refinement engine on the next refinement cycle.XX editins XX&&	.	.	.	.	.	.	有时您可能想用文本编辑模式修改当前结构。因此Olex2会生成类似文件，并通过自带的文本编辑器您可以对模型进行编辑。 默认的输入格式为Shelx格式，因为毕竟大多数用户对此格式很熟悉。&& @编辑原子@ 如果您没有选择原子，那将显示结构中的所有原子，否则仅显示已选原子。  这对精修尤其是精修大型结构有着很大的帮助。 <font color='red'> 原子的 <b>所有</a> 属性都将显示在窗口的上端，如键联的氢原子，系统规定参数和限制性参数  </font> XX 编辑原子 XX  @编辑命令@ 仅显示模型精修的命令部分－这些命令将应用于下一轮的精修中。  XX 编辑INS XX  &&	.
@@ -461,7 +461,7 @@ Kill all Hydrogen Atoms	Kill all Hydrogen Atoms	.	.	.	.	Alle Wasserstoffatome l�
 Toggle H atoms ON > ON with H-bonds > OFF	Toggle H atoms ON > ON with H-bonds > OFF	.	.	.	.	H an > H mit Wasserstoffbrücken >> H aus	.	.	.
 Atoms clicked after clicking this button &#013;will be asociated with the ShelX command HFIX	.	.	.	.	.	.	.	.	.
 Change the formula in the files so it reflects what is on the screen	.	.	.	.	.	Formel so ändern, dass diese der momentanen Struktur entspricht.	.	.	.
-low-quality-target	Show Structure in Low Quality Display	.	.	.	.	Niedere Grafiksqualität	.	.	.
+low-quality-target	Show Structure in Low Quality Display	.	.	.	.	Niedere Grafiksqualität	.	Show Structure in Low Quality Display	.
 Switches the display of the cell on	.	.	.	.	.	Zelle anzeigen	.	.	.
 symmetry-generation	.	.	.	.	.	symmetry-generation	.	.	.
 of selection	of selection	.	.	.	.	of selection	.	.	.
@@ -491,7 +491,7 @@ to 2 parts in order	to 2 parts in order	.	.	.	.	.	.	to 2 parts in order	.
 recent-files	.	.	.	предыдушие файлы	.	.	.	.	.
 name-target	Start Naming Mode	.	.	name-target	.	Bennungsmodus Einschalten	.	开始命名	.
 mass & labels	Mass & Labels	.	.	.	.	.	.	.	.
-Pack within Radius of	Pack within Radius of <i>n</i> &Aring;	.	.	.	.	Pack within Radius of <i>n</i> Å	.	.	.
+Pack within Radius of	Pack within Radius of <i>n</i> &Aring;	.	.	.	.	Pack within Radius of <i>n</i> Å	.	Pack within Radius of <i>n</i> Å	.
 wire	Wire	.	.	.	.	.	.	.	.
 surface	Surface	.	.	.	.	.	.	.	.
 points	Points	.	.	.	.	.	.	.	.
@@ -514,7 +514,7 @@ Close	Close	.	.	.	.	.	.	关闭	.
 Electon Density Peaks	Electon Density Peaks	.	.	.	.	Electon Density Peaks	.	Electon Density Peaks	.
 Auto	Auto	.	.	.	.	.	.	.	.
 Pack within Radius of <i>n</i> &Aring;	.	.	.	.	.	.	.	.	.
-Pack Radius	Pack within Radius of <i>n</i> &Aring;	.	.	.	.	Pack within Radius of <i>n</i> Å	.	.	.
+Pack Radius	Pack within Radius of <i>n</i> &Aring;	.	.	.	.	Pack within Radius of <i>n</i> Å	.	Pack within Radius of <i>n</i> Å	.
 Starting ...	Starting ...	.	.	.	.	Starting ...	.	Starting ...	.
 Modify Settings for Report Generation	Modify Settings for Report Generation	.	.	.	.	Einstellungen für die Berichterstellung ändern	.	Modify Settings for Report Generation	.
 Tick the box to automatically update	Tick the box to automatically update	.	.	.	.	Tick the box to automatically update	.	Tick the box to automatically update	.
@@ -534,11 +534,11 @@ HFIX 23-target	Atoms clicked after clicking this button will be asociated with t
 Toggle H-target	Toggle H atoms On > With H Bonds > Off	.	.	.	.	Wasserstoffatome: An > An mit Wasserstoffbrückenbindungen > Aus	.	Toggle H atoms On > With H Bonds > Off	.
 HFIX 137-target	%Atoms clicked after clicking this button will be asociated with the ShelX command HFIX 137	.	.	.	.	Atoms clicked after clicking this button will be asociated with the ShelX command HFIX 137	.	%Atoms clicked after clicking this button will be asociated with the ShelX command HFIX 137	.
 HFIX 13-target	Atoms clicked after clicking this button will be asociated with the ShelX command HFIX 13	.	.	.	.	Atome, die nach klicken dieses Knopfes angeklickt werden, werden das ShelX Kommando HFIX 13 erhalten.	.	%Atoms clicked after clicking this button will be asociated with the ShelX command HFIX 13	.
-Show Cell-target	Show Cell-target	.	.	.	.	Zelle anzeigen	.	.	.
+Show Cell-target	Show Cell-target	.	.	.	.	Zelle anzeigen	.	Show Cell-target	.
 Balls and Sticks	Balls & Sticks	.	.	.	.	Kugeln & Stäbe	.	.	.
 Center of cell	Center on Cell	.	.	.	.	Center of cell	.	.	.
-Grow Mode	Grow Mode	.	.	.	.	Grow Mode	.	.	.
-Largest Part	Largest Part	.	.	.	.	Grösste Einheit	.	.	.
+Grow Mode	Grow Mode	.	.	.	.	Grow Mode	.	Grow Mode	.
+Largest Part	Largest Part	.	.	.	.	Grösste Einheit	.	Largest Part	.
 Rename Matched Fragments	Rename Matched Fragments	.	.	.	.	.	.	Rename Matched Fragments	.
 Updating Cif ...	Updating Cif	.	.	.	.	.	.	Updating Cif ...	.
 Creating Image ...	Creating Image...	.	.	.	.	.	.	Creating Image ...	.
@@ -553,14 +553,14 @@ Creating Report ...	Creating Report	.	.	.	.	.	.	Creating Report ...	.
 Switches interactive help in cmd on	Switches interactive help in cmd on	.	.	.	.	.	.	命令行模式互交式帮助开关	.
 Adjust Formula	Adjust Formula	.	.	.	.	.	.	Adjust Formula	.
 Spanish	Spanish	.	.	.	.	Spanisch	.	西班牙语	.
-Create Report	Create Report	.	.	.	.	Create Report	.	.	.
+Create Report	Create Report	.	.	.	.	Create Report	.	Create Report	.
 Add Hydrogen Atoms	Add Hydrogen Atoms	.	.	.	.	<b>Add Hydrogen Atoms	.	.	.
-Solve the Structure	Solve the Structure	.	.	.	.	Solve the Structure	.	.	.
-THPP	THPP	.	.	.	.	THPP	.	.	.
-Assign & Refine	Assign & Refine	.	.	.	.	Assign & Refine	.	.	.
-Open a reflection file (hkl)	Open a reflection file (hkl)	.	.	.	.	Open a reflection file (hkl)	.	.	.
-Co110	Co110	.	.	.	.	Co110	.	.	.
-Make Structure Anisotropic	Make Structure Anisotropic	.	.	.	.	Make Structure Anisotropic	.	.	.
+Solve the Structure	Solve the Structure	.	.	.	.	Solve the Structure	.	Solve the Structure	.
+THPP	THPP	.	.	.	.	THPP	.	THPP	.
+Assign & Refine	Assign & Refine	.	.	.	.	Assign & Refine	.	Assign & Refine	.
+Open a reflection file (hkl)	Open a reflection file (hkl)	.	.	.	.	Open a reflection file (hkl)	.	Open a reflection file (hkl)	.
+Co110	Co110	.	.	.	.	Co110	.	Co110	.
+Make Structure Anisotropic	Make Structure Anisotropic	.	.	.	.	Make Structure Anisotropic	.	Make Structure Anisotropic	.
 vss	Verify Structure Solution	.	.	.	.	Strukturlösung Verifizieren	.	.	.
 ata	Atom Type Assignment	.	.	.	.	Atomtypen Zuweisen	.	.	.
 Solve Only	Solve Only	.	.	.	.	Nur Lösen	.	.	.
@@ -574,6 +574,11 @@ Pyridine	Pyridine	.	.	.	.	Pyridin	.	.	.
 Working	Working	.	.	.	.	.	.	Working	.
 bounding_box-target	Calculate the Bounding Box around your moleule	.	.	.	.	.	.	.	.
 Bounding Box	Bounding Box	.	.	.	.	.	.	.	.
-ZP2	ZP2	.	.	.	.	.	.	.	.
+ZP2	ZP2	.	.	.	.	.	.	ZP2	.
 Batch Match	Batch Match	.	.	.	.	.	.	.	.
 Russian	Russian	.	.	.	.	.	.	.	.
+<b>Add Hydrogen Atoms	.	.	.	.	.	.	.	<b>Add Hydrogen Atoms	.
+Random	Random	.	.	.	.	.	.	Random	.
+List	List	.	.	.	.	.	.	List	.
+Next	Next	.	.	.	.	.	.	Next	.
+Tip Number	Tip Number	.	.	.	.	.	.	Tip Number	.
