@@ -197,8 +197,9 @@ class Graph(ImageTools):
     #txt = txt.replace("Fexp2", "Fexp%s" %(unichr(178)))
     #txt = txt.replace("Fo2", "F%s%s" %(unichr(2092),unichr(178)))
     txt = txt.replace("Fexp", "F%s" %(unichr(2091)))
+    txt = txt.replace("angstrom", unichr(197))
     return txt
-    
+
   def make_x_y_plot(self):
     pass
     #im = self.make_empty_graph()
@@ -626,21 +627,17 @@ class Graph(ImageTools):
         
       wX, wY = self.draw.textsize(txt, font=self.font_small)
       y = self.graph_bottom
-      #if self.draw_origin:
-        #y += (self.min_y * self.scale_y)
-       
       if self.reverse_x:
         x = self.bX \
           -(self.boxXoffset + wX/2
-            + ((val * scale_x) - self.marker_width/2)
+            + ((val * scale_x))
             + ((0 - max_x) * scale_x)
             + (self.delta_x * scale_x))
       else:
         x = (self.boxXoffset - wX/2
-             + ((val * scale_x) - self.marker_width/2)
+             + ((val * scale_x))
              + ((0 - max_x) * scale_x)
              + (self.delta_x * scale_x))
-        
       if (x+wX)  <= (self.graph_right) and x >= self.graph_left - wX/2:
         self.draw.text((x, y), "%s" %txt, font=self.font_small, fill="#444444")
         x = int(x + wX/2)
@@ -657,10 +654,8 @@ class Graph(ImageTools):
     wX, wY = self.draw.textsize(txt, font=self.font_small)
     x = self.boxX - wX - self.bSides - self.imX * 0.002
     y = self.boxY  + self.imY * 0.01
-    #if self.draw_origin:
-      #y += (self.min_y * self.scale_y)
     self.draw.text((x, y), "%s" %txt, font=self.font_small, fill="#444444")
-    
+
   def draw_bars(self):
     import ImageFont
     data = []
@@ -1557,7 +1552,7 @@ class SystematicAbsencesPlot(Analysis):
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.filename
-    self.auto_axes = False
+    self.auto_axes = True
     self.cctbx_systematic_absences_plot()
     if self.have_data:
       self.popout()
