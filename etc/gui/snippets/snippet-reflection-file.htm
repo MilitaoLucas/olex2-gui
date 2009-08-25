@@ -14,10 +14,10 @@
 		<td VALIGN='center' ALIGN='right' colspan=2>
 			<font size='2'>
 				<input 
-					type='combo', 
-					width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)' 
-					height="17" 
+					type='combo' 
+					height="$GetVar(gui_html_combo_height)"
 					bgcolor="GetVar(gui_html_input_bg_colour)"
+					width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)' 
 					name='SET_REFLECTIONS', 
 					items='$spy.GetHklFileList()', 
 					onchange='HKLSrc(GetValue(SET_REFLECTIONS))', 

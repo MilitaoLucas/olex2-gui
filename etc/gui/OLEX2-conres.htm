@@ -10,13 +10,13 @@
 	<td width='20%'>
 		<input 
 			bgcolor="$getVar(gui_html_input_bg_colour)" 
-			type="combo" 
+			type="combo"
+			height="$GetVar(gui_html_combo_height)"
 			name="SET_OLEX_CONRES" 
 			items='RRINGS;TRIA;'
 			value="$spy.GetParam(snum.olex_conres)" 
 			width="55" 
 			onchange="spy.SetParam(snum.olex_conres,GetValue(SET_OLEX_CONRES))>>spy.restraint_builder(GetValue(SET_OLEX_CONRES))"
-			height="17" 
 			label="Name"
 			readonly
 		>	

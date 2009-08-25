@@ -1,44 +1,51 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
 
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
 		<zimg border="0" src="gui/images/toolbar-electron-density.png">
 	</td>
-	<td width='33%'>
+	<td>
+	%Map%
+	</td>
+	</td>
+	<td>
 		<input
-			bgcolor="$getVar(gui_html_input_bg_colour)"
 			type="combo"
+			height="$GetVar(gui_html_combo_height)"
+			bgcolor="$getVar(gui_html_input_bg_colour)"
 			name="SET_SNUM_MAP_TYPE"
 			items='diff;fcalc;2Fo-Fc<-tomc;fobs'
 			value="$spy.GetParam(snum.map.type)"
-			width="60"
+			width="50"
 			onchange="spy.SetParam(snum.map.type,GetValue(SET_SNUM_MAP_TYPE))>>spy.MapView(1)>>html.SetValue(SNUM_EDEN_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)')"
-			height="18"
-			label=" %Map% ">
+			label=" %Map% "
+		>
 	</td>
-	<td width='33%'>
+	<td>
 		<input
-			bgcolor="$getVar(gui_html_input_bg_colour)"
 			type="combo"
+			height="$GetVar(gui_html_combo_height)"
+			bgcolor="$getVar(gui_html_input_bg_colour)"
 			name="SET_SNUM_MAP_SOURCE"
 			items='olex;fcf;'
 			value="$spy.GetParam(snum.map.source)"
 			width="50"
 			onchange="spy.SetParam(snum.map.source,GetValue(SET_SNUM_MAP_SOURCE))>>spy.MapView(1)>>html.SetValue(SNUM_EDEN_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)')"
-			height="18"
-			label=" %Source% ">
+			label=" %Source% "
+		>
 	</td>
-	<td width='33%'>
+	<td>
 		<input
-			bgcolor="$getVar(gui_html_input_bg_colour)"
 			type="combo"
+			height="$GetVar(gui_html_combo_height)"
+			bgcolor="$getVar(gui_html_input_bg_colour)"
 			name="SET_SNUM_MAP_VIEW"
 			items='2D;surface;wire;points'
 			value="$spy.GetParam(snum.map.view)"
-			width="62"
+			width="60"
 			onchange="spy.SetParam(snum.map.view,GetValue(SET_SNUM_MAP_VIEW))>>spy.MapView(0)"
-			height="18"
-			label=" %View% ">
+			label=" %View% "
+		>
 	</td>
 </tr>
 
@@ -89,7 +96,7 @@ xgrid.Scale(eval(GetValue(SNUM_EDEN_SLIDE)/10))
 			type="button"
 			name="SNUM_MAP_BUTTON"
 			value="%Calculate%"
-			width="$eval(htmlpanelwidth()-240)"
+			width="60"
 			manage
 			ondown="setlabel(SNUM_MAP_BUTTON,%Delete Map%)>>
 spy.MapView(1)>>
@@ -103,7 +110,7 @@ SetValue(SNUM_EDEN_VALUE,xgrid.Scale())"
 			<input
 			type="text"
 			name = "SET_SNUM_MAP_RESOLUTION"
-			width="33"
+			width="60"
 			height="18"
 			label="Res/&Aring "
 			bgcolor="$GetVar(gui_html_table_bg_colour)"

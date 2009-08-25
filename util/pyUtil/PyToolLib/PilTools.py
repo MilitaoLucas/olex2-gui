@@ -1203,7 +1203,8 @@ class timage(ImageTools):
     max_width = cut[2] - cut[0]
     crop =  im.crop(cut)
     button_names = self.image_items_d.get("TINY BUTTONS")
-    self.produce_buttons(button_names, crop, cut, max_width,self.sf,"_tiny")
+    scale = self.sf / 1.2
+    self.produce_buttons(button_names, crop, cut, max_width, scale,"_tiny")
     
     ## SMALL buttons
     cut = 90*sf, 178*sf, 138*sf, 193*sf
@@ -2319,7 +2320,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       font_name = self.gui_image_font_name
 
     #self.write_text_to_draw(draw, 
-                 #"x", 
+                 #"TINY BUTTONS", 
                  #top_left=(x_border, -3), 
                  #font_name=font_name, 
                  #font_size=12, 
