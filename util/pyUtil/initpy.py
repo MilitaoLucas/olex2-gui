@@ -20,21 +20,27 @@ if sys.platform[:3] == 'win':
   sys.path.append("%s/Lib/site-packages" %python_dir)
   sys.path.append("%s/Lib/site-packages/PIL" %python_dir)
 else:
-  sys.prefix = basedir + '/Python26'
-  sys.path = ['',
-    sys.prefix + '/python2.6',
-    sys.prefix + '/python2.6/lib-tk',
-    sys.prefix + '/python2.6/lib-old',
-    sys.prefix + '/python2.6/lib-dynload',
-    sys.prefix + '/python2.6/site-packages',
-    sys.prefix + '/python2.6/site-packages/PIL'
-  ]
-  if sys.platform == 'darwin':
-    sys.path.append(sys.prefix + '/python2.6/plat-darwin')
-    sys.path.append(sys.prefix + '/python2.6/plat-mac')
-  elif sys.platform == 'linux2':
-    sys.path.append(sys.prefix + '/python2.6/plat-linux2')
-    
+  set_sys_path = True
+  try:
+    import os
+    set_sys_path = os.path.exists(basedir + '/Python26')
+  except:
+    pass
+  if set_sys_path:
+    sys.prefix = basedir + '/Python26'
+    sys.path = ['',
+      sys.prefix + '/python2.6',
+      sys.prefix + '/python2.6/lib-tk',
+      sys.prefix + '/python2.6/lib-old',
+      sys.prefix + '/python2.6/lib-dynload',
+      sys.prefix + '/python2.6/site-packages',
+      sys.prefix + '/python2.6/site-packages/PIL'
+    ]
+    if sys.platform == 'darwin':
+      sys.path.append(sys.prefix + '/python2.6/plat-darwin')
+      sys.path.append(sys.prefix + '/python2.6/plat-mac')
+    elif sys.platform == 'linux2':
+      sys.path.append(sys.prefix + '/python2.6/plat-linux2')
 sys.path.append(datadir)
 stdout_redirection = True
 
