@@ -1883,8 +1883,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     self.write_text_to_draw(draw, 
                  "%s" %(txt), 
                  top_left=(5, 45), 
-                 font_name = 'Vera', 
-                 font_size=38, 
+                 font_name = 'Vera Bold', 
+                 font_size=43, 
                  font_colour='#ffffff')
 
     new = new.rotate(90)
