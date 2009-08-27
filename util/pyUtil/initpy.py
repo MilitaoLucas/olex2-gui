@@ -46,6 +46,8 @@ stdout_redirection = True
 
 import os
 import locale
+import time
+
 locale.setlocale(locale.LC_ALL, 'C') 
 
 
@@ -62,14 +64,14 @@ sys.exit = our_sys_exit
 
 
 class StreamRedirection:
-
   def __init__(self, stream, is_redirecting=True):
     self.redirected = stream
     self.is_redirecting = is_redirecting
     self.isErrorStream = (stream==sys.stderr)
     self.refresh=False
     self.graph=False
-    
+    self.t0 = time.time()
+
     if self.isErrorStream:
       self.errFile = open("%s/PythonError.log" %olex.f("DataDir()"), 'w')
       self.version = olex.f("GetCompilationInfo()")
@@ -88,7 +90,10 @@ class StreamRedirection:
         self.errFile.flush()
       olex.post( '\'' + Str + '\'')
       if self.refresh:
-        olex.m("refresh")
+        t1 = time.time()
+        if t1 - self.t0 > 1:
+          olex.m("refresh")
+          self.t0 = t1
       if self.graph!=False:
         self.graph(Str)
         
