@@ -638,16 +638,25 @@ def weightGuiDisplay():
   gui_orange = OV.FindValue('gui_orange')
   gui_red = OV.FindValue('gui_red')
   try:
+    longest = 0
     retVal = ""
     current_weight = olx.Ins('weight').split()
     if len(current_weight) == 1:
-      current_weight = current_weight[0]
+      current_weight = [current_weight[0], '0']
     suggested_weight = olx.Ins('weight1').split()
     if suggested_weight:
       for curr, sugg in zip(current_weight, suggested_weight):
-        while len(curr) < 6:
+        c = curr.replace(".", "")
+        if len(c) > longest:
+          longest = len(c)
+        s = sugg.replace(".", "")
+        if len(s) > longest:
+          longest = len(s)
+      
+      for curr, sugg in zip(current_weight, suggested_weight):
+        while len(curr) < longest and curr != "0":
           curr += '0'
-        while len(sugg) < 6:
+        while len(sugg) < longest and sugg != "0":
           sugg += '0'
         if curr == sugg:
           colour = gui_green 
@@ -655,8 +664,8 @@ def weightGuiDisplay():
           colour = gui_orange
         else:
           colour = gui_red
-        retVal += "<font size='1' color='%s'>%s(%s)</font>/" %(colour, curr, sugg)  
-      retVal = retVal.strip("/")
+        retVal += "<font size='2' color='%s'>%s(%s)</font> | " %(colour, curr, sugg)  
+      retVal = retVal.strip("| ")
     else:
       retVal = current_weight
     return retVal
