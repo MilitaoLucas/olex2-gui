@@ -391,13 +391,16 @@ class MatrixMaker(ImageTools):
         j = (i-6)
       txt_size = draw.textsize(str(item), font=font)
       begin = ((j * max_width) + ((max_width - txt_size[0])), k * line_heigth)
-      #print i, j, k, begin
-      draw.text(begin, "%s" %item, font=font, fill=(100, 100, 100))
+      if item == "-1":
+        colour = (255, 0, 0)
+      else:
+        colour = (100, 100, 100)
+      draw.text(begin, "%s" %item, font=font, fill=colour)
       i += 1
 
     font_size = 10
     line_heigth = font_size -2
-    font_nbame = "Arial"
+    font_name = "Arial"
     font = self.registerFontInstance(font_name, font_size)
     for i in xrange(len(text_def)):
       item = text_def[i].get('txt',"")
