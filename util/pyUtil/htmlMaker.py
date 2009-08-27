@@ -643,7 +643,11 @@ def weightGuiDisplay():
     current_weight = olx.Ins('weight').split()
     if len(current_weight) == 1:
       current_weight = [current_weight[0], '0']
+    length_current = len(current_weight)
     suggested_weight = olx.Ins('weight1').split()
+    if len(suggested_weight) < length_current:
+      for i in xrange (length_current - len(suggested_weight)):
+        suggested_weight.append('0')
     if suggested_weight:
       for curr, sugg in zip(current_weight, suggested_weight):
         c = curr.replace(".", "")
