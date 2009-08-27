@@ -482,9 +482,13 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     self.twin_law_gui_txt = ""
     if not twin_laws:
       print "There are no possible twin laws"
-      self.twin_law_gui_txt = "There are no possible twin laws"
-      self.make_gui()
+      
+      html = "<tr><td></td><td>"
+      html += "<b>%There are no possible Twin Laws%</b>"
+      OV.write_to_olex('twinning-result.htm', html, False)
+      OV.htmlReload()
       return
+    
     lawcount = 0
     self.twin_laws_d = {}
     law_txt = ""
