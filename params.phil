@@ -456,6 +456,8 @@ olex2
 {
   is_online = True
     .type = bool
+  is_logged_on = False
+    .type = bool
   has_recently_updated = False
     .type = bool
   mac_address = ""
