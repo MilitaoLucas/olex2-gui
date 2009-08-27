@@ -57,65 +57,66 @@
 </tr>
 
 <tr>
-  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-  <td colspan='1'>
-    <input
-      type="combo"
-      height="$GetVar(gui_html_combo_height)"
-bgcolor="$getVar(gui_html_input_bg_colour)" 
-  name="SET_AUTOCHEM_SOLUTION_PROGRAM" 
-  width='$eval(htmlpanelwidth()-eval(htmlpanelwidth()/2)-30)' 
-  manage
-  value="GetVar(autochem_solution_program)"
-  onchange="SetVar(autochem_solution_program,GetValue(SET_AUTOCHEM_SOLUTION_PROGRAM))"
-  label='Solution Program'
-  >
-  </td>
-  <td colspan='1'>
-<input 
-bgcolor="$getVar(gui_html_input_bg_colour)" 
-type="combo" 
-  name="SET_AUTOCHEM_SOLUTION_METHOD" 
-    width='$eval(htmlpanelwidth()-eval(htmlpanelwidth()/2)-30)' 
-    height="18"
-    manage
-    value="GetVar(autochem_solution_method)"
-    onchange="SetVar(autochem_solution_method,GetValue(SET_AUTOCHEM_SOLUTION_METHOD))"
-    label='Solution Method'
-    >
-    </td>
-    </tr>
-  
-
-<tr>
-<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-<td colspan='1'>
-<input 
-  bgcolor="$getVar(gui_html_input_bg_colour)" 
-  type="combo" 
-    name="SET_AUTOCHEM_REFINEMENT_PROGRAM" 
-      width='$eval(htmlpanelwidth()-eval(htmlpanelwidth()/2)-35)' 
-      height="18" 
-      manage
-      value="GetVar(autochem_refinement_program)"
-      onchange="SetVar(autochem_refinement_program,GetValue(SET_AUTOCHEM_REFINEMENT_PROGRAM))"
-      label='Refinement Program'
-      >
-      </td>
-      <td colspan='1'>
-    <input
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td colspan='1'>
+		<input 
+			bgcolor="$getVar(gui_html_input_bg_colour)" 
+			type="combo" 
+			name="SET_AUTOCHEM_SOLUTION_PROGRAM" 
+			width='$eval(htmlpanelwidth()-eval(htmlpanelwidth()/2)-30)' 
+			height="18" 
+			manage
+			value="$spy.GetParam(autochem.solution_program)"
+			onchange="spy.SetParam(autochem.solution_program,GetValue(SET_AUTOCHEM_SOLUTION_PROGRAM))"
+			label='%Solution Program%'
+		>
+	</td>
+	<td colspan='1'>
+		<input
 			type="combo"
 			height="$GetVar(gui_html_combo_height)"
-		  bgcolor="$getVar(gui_html_input_bg_colour)" 
-	    name="SET_AUTOCHEM_REFINEMENT_METHOD" 
-      width='$eval(htmlpanelwidth()-eval(htmlpanelwidth()/2)-30)' 
-      manage
-      value="GetVar(autochem_refinement_method)"
-      onchange="SetVar(autochem_refinement_method,GetValue(SET_AUTOCHEM_REFINEMENT_METHOD))"
-      label='Refinement Method '
-      >
-      </td>
-      </tr>
+			bgcolor="$getVar(gui_html_input_bg_colour)" 
+			name="SET_AUTOCHEM_SOLUTION_METHOD" 
+			width='$eval(htmlpanelwidth()-eval(htmlpanelwidth()/2)-30)' 
+			manage
+			value="$spy.GetParam(autochem.solution_method)"
+			onchange="spy.SetParam(autochem.solution_method,GetValue(SET_AUTOCHEM_SOLUTION_METHOD))"
+			label='%Solution Method%'
+		>
+	</td>
+</tr>
+
+
+<tr>
+	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td colspan='1'>
+		<input
+			type="combo"
+			height="$GetVar(gui_html_combo_height)"
+			bgcolor="$getVar(gui_html_input_bg_colour)" 
+			name="SET_AUTOCHEM_REFINEMENT_PROGRAM" 
+			width='$eval(htmlpanelwidth()-eval(htmlpanelwidth()/2)-35)' 
+			manage
+			value="$spy.GetParam(autochem.refinement_program)"
+			onchange="spy.SetParam(autochem.refinement_program,GetValue(SET_AUTOCHEM_REFINEMENT_PROGRAM))"
+			label='%Refinement Program%'
+		>
+	</td>
+	<td colspan='1'>
+		<input
+			type="combo"
+			height="$GetVar(gui_html_combo_height)"
+			bgcolor="$getVar(gui_html_input_bg_colour)" 
+			name="SET_AUTOCHEM_REFINEMENT_METHOD" 
+			width='$eval(htmlpanelwidth()-eval(htmlpanelwidth()/2)-30)' 
+			manage
+			value="$spy.GetParam(autochem.refinement_method)"
+			onchange="spy.SetParam(autochem.refinement_method,GetValue(SET_AUTOCHEM_REFINEMENT_METHOD))"
+			label='%Refinement Method%'
+		>
+	</td>
+</tr>
+
     
   
 

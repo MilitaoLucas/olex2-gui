@@ -179,7 +179,7 @@ def makeHtmlTableRow(dictionary):
 def make_edit_link(name, box_type):
   editLink = ""
   if OV.IsPluginInstalled('Olex2Portal'):
-    if OV.GetParam('olex2.is_online'):
+    if OV.GetParam('olex2.is_logged_on'):
       editLink = "<a href='spy.EditHelpItem(%s-%s)'>Edit</a>" %(name, box_type)
   return editLink
 
@@ -187,7 +187,7 @@ def make_edit_link(name, box_type):
 def make_gui_edit_link(name):
   editLink = ""
   name = name.replace("\\", "/")
-  if OV.IsPluginInstalled('Olex2Portal'):
+  if OV.IsPluginInstalled('Olex2Portal') and OV.GetParam('olex2.is_logged_on'):
     if "index" in name:
       editLink = "<hr><a href='spy.EditGuiItem(%s)'>Edit INDEX File</a>" %(name)
     else:
