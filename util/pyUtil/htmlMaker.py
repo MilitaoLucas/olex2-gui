@@ -634,6 +634,10 @@ def checkErrLogFile():
 OV.registerFunction(checkErrLogFile)
 
 def weightGuiDisplay():
+  
+  if "smtbx" in OV.GetParam('snum.refinement.program'):
+    return ""
+  
   gui_green = OV.FindValue('gui_green')
   gui_orange = OV.FindValue('gui_orange')
   gui_red = OV.FindValue('gui_red')
@@ -669,12 +673,38 @@ def weightGuiDisplay():
         else:
           colour = gui_red
         retVal += "<font size='2' color='%s'>%s(%s)</font> | " %(colour, curr, sugg)  
-      retVal = retVal.strip("| ")
+      html_scheme = retVal.strip("| ")
     else:
-      retVal = current_weight
-    return retVal
+      html_scheme = current_weight
+    
+    txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update") 
+    txt_Weight = OV.TranslatePhrase("Weight")
+    html = '''
+<tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_UPDATE_WEIGHT'>
+	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td VALIGN='right' colspan=3>
+		<b><a target="%s" href="weight">%s: %s</a></b>
+	</td>
+	<td VALIGN='center' ALIGN='right'  colspan=1>
+		<font size='2'>
+			<input
+				type='checkbox'  
+				width=12  
+				height=12 
+				name='SET_SNUM_REFINEMENT_UPDATE_WEIGHT' 
+				$spy.CheckBoxValue(snum.refinement.update_weight) 
+				oncheck='spy.SetParam(snum.refinement.update_weight,true)' 
+				onuncheck='spy.SetParam(snum.refinement.update_weight,false)' 
+				value='' 
+			>&nbsp;
+		</font>
+	</td>
+</tr>
+    ''' %(txt_tick_the_box, txt_Weight, html_scheme)
+      
+    return html
   except:
-    return ""
+    return " ERROR !!! "
 OV.registerFunction(weightGuiDisplay)
 
 def getCellHTML():
