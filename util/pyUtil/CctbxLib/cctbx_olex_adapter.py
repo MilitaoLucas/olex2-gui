@@ -468,6 +468,7 @@ class OlexCctbxGraphs(OlexCctbxAdapter):
     OV.DeleteBitmap('%s' %(bitmap))
 
 class OlexCctbxTwinLaws(OlexCctbxAdapter):
+  
   def __init__(self):
     OlexCctbxAdapter.__init__(self)
     self.run()
@@ -496,7 +497,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       lawcount += 1
       self.twin_laws_d.setdefault(lawcount, {})
       self.twin_law_gui_txt = ""
-      r, basf, f_data = self.run_twin_ref_shelx(twin_law)
+      r, basf, f_data, history_refinement, history_solution = self.run_twin_ref_shelx(twin_law)
       try:
         float(r)
       except:
@@ -532,22 +533,37 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
                                     'law_txt':law_txt,
                                     'law_image_name':image_name,
                                     'name':name,
-                                    'ins_file':f_data
+                                    'ins_file':f_data,
+                                    'history_solution':history_solution,
+                                    'history_refinement':history_refinement
                                   }
-      law_txt += "<a href='spy.on_twin_image_click %s'><zimg src=%s></a>&nbsp;" %(lawcount, image_name)
-      self.twin_law_gui_txt += "%s" %(law_txt)
-      self.make_gui()
+#      href = 'spy.on_twin_image_click(%s)'
+#      href = 'spy.revert_history -solution="%s" -refinement="%s"' %(history_solution, history_refinement)
+#      law_txt = "<a href='%s'><zimg src=%s></a>&nbsp;" %(href, image_name)
+#      self.twin_law_gui_txt += "%s" %(law_txt)
+#      self.make_gui()
       l += 1
     r_list.sort()
     law_txt = ""
     self.twin_law_gui_txt = ""
+    i = 0
+    html = "<tr><td></td><td>"
     for r, run, basf in r_list:
+      i += 1
       image_name = self.twin_laws_d[run].get('law_image_name', "XX")
       name = self.twin_laws_d[run].get('name', "XX")
-      law_txt = "<a href='spy.on_twin_image_click %s'><zimg src=%s></a>&nbsp;" %(run, image_name)
+      href = 'spy.on_twin_image_click(%s)'
+      href = 'spy.revert_history -solution="%s" -refinement="%s">>HtmlReload' %(self.twin_laws_d[i].get('history_solution'), self.twin_laws_d[i].get('history_refinement'))
+      law_txt = "<a href='%s'><zimg src=%s></a>&nbsp;" %(href, image_name)
       self.twin_law_gui_txt += "%s" %(law_txt)
-    olx.Wait(500)	
-    self.make_gui()
+      
+      html += '''
+<a href='%s' target='Apply this twin law'><zimg border="0" src="%s"></a>&nbsp;
+    ''' %(href, image_name)
+    html += "</td></tr>"
+    OV.write_to_olex('twinning-result.htm', html, False)
+    OV.htmlReload()
+#    self.make_gui()
 
   def run_backup_shelx(self):
     self.filename = olx.FileName()
@@ -557,7 +573,6 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
   def run_twin_ref_shelx(self, law):
     print "Testing: %s" %str(law)
-
     law_ins = ""
     for i in xrange(9):
       law_ins += " %s" %str(law[i])
@@ -570,16 +585,17 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     olx.File("%s.ins" %self.filename)
     rFile = open(olx.FileFull(), 'r')
     f_data = rFile.readlines()
-    olx.Exec(r"XL '%s'" %(olx.FileName()))
+    prg = OV.GetParam('snum.refinement.program')
+    olx.Exec(r"%s '%s'" %(prg, olx.FileName()))
     olx.WaitFor('process')
     olx.Atreap(r"-b %s/%s.res" %(olx.FilePath(), olx.FileName()))
     r = olx.Lst("R1")
-    basf = olx.Ins("BASF")
+    basf = olx.Lst("BASF")
     if r != 0:
-      hist.create_history()
-      #hist = History('create', r)
-      #hist.run()
-    return r, basf, f_data
+      res = hist.create_history()
+      history_refinement = res.split(";")[1]
+      history_solution = res.split(";")[0]
+    return r, basf, f_data, history_refinement, history_solution
 
   def twinning_gui_def(self):
     if not self.twin_law_gui_txt:
@@ -606,9 +622,9 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
                                     }
 
     tools = {'search_for_twin_laws_t1':{'category':'analysis', 
-                                        'display':"Search for Twin Laws",
+                                        'display':"%Search for Twin Laws%",
                                         'colspan':1,
-                                        'hrefs':['spy cctbx twin_laws']
+                                        'hrefs':['spy.OlexCctbxTwinLaws()']
                                         },
                                         'twin_laws':
                                         {'category':'analysis', 
@@ -630,6 +646,9 @@ OV.registerFunction(OlexCctbxTwinLaws)
 def charge_flipping_loop(solving, verbose=True):
   HasGUI = OV.HasGUI()
   plot = None
+  timing = True
+  if timing:
+    t0 = time.time()
   if HasGUI and OV.GetParam('snum.solution.graphical_output'):
     import Analysis
     plot = Analysis.ChargeFlippingPlot()
@@ -680,14 +699,20 @@ def charge_flipping_loop(solving, verbose=True):
     
     if plot is not None: plot.run_charge_flipping_graph(flipping, solving, previous_state)
     previous_state = solving.state
+  
+  if timing:
+    print "Total Time: %.2f s" %(time.time() - t0)
 
-
-def on_twin_image_click(run_number, options):
+def on_twin_image_click(run_number):
   # arguments is a list
   # options is a dictionary
-  file_data = olx.OlexSetupRefineCctbxInstance.twin_laws_d[int(run_number)].get("ins_file")
+  
+  
+  a = OlexCctbxTwinLaws()
+  file_data = a.twin_laws_d[int(run_number)].get("ins_file")
   wFile = open(olx.FileFull(), 'w')
   wFile.writelines(file_data)
   wFile.close()
   olx.Atreap(olx.FileFull())
   OV.UpdateHtml()
+OV.registerFunction(on_twin_image_click)
