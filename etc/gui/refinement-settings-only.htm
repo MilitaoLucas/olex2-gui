@@ -111,26 +111,9 @@
 	</td>
 </tr>
 
-<tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_UPDATE_WEIGHT'>
-	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-	<td VALIGN='right' colspan=3>
-		<b><a target="%Tick the box to automatically update%" href="weight">Weight: $spy.weightGuiDisplay()</a></b>
-	</td>
-	<td VALIGN='center' ALIGN='right'  colspan=1>
-		<font size='2'>
-			<input
-				type='checkbox'  
-				width=12  
-				height=12 
-				name='SET_SNUM_REFINEMENT_UPDATE_WEIGHT' 
-				$spy.CheckBoxValue(snum.refinement.update_weight) 
-				oncheck='spy.SetParam(snum.refinement.update_weight,true)' 
-				onuncheck='spy.SetParam(snum.refinement.update_weight,false)' 
-				value='' 
-			>&nbsp;
-		</font>
-	</td>
-</tr>
+
+$spy.weightGuiDisplay()
+
 
 <tr VALIGN='center' ALIGN='left' NAME='IGNORE_SETTINGS'>
 	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>

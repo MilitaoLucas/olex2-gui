@@ -163,7 +163,7 @@ class OlexCctbxRefine(OlexCctbxAdapter):
     self.auto = True
     self.debug = False
     self.film = False
-    self.max_cycles = max_cycles
+    self.max_cycles = max_cycles * 10
     self.do_refinement = True
     if OV.HasGUI() and OV.GetParam('snum.refinement.graphical_output'):
       import Analysis
@@ -589,8 +589,14 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     olx.File("%s.ins" %self.filename)
     rFile = open(olx.FileFull(), 'r')
     f_data = rFile.readlines()
-    prg = OV.GetParam('snum.refinement.program')
-    olx.Exec(r"%s '%s'" %(prg, olx.FileName()))
+    #prg = OV.GetParam('snum.refinement.program') ## This currently only works with SHELX
+    prg = "ShelXL"
+    try:
+      olx.Exec(r"%s '%s'" %(prg, olx.FileName()))
+    except:
+      prg = "XL"
+      olx.Exec(r"%s '%s'" %(prg, olx.FileName()))
+      
     olx.WaitFor('process')
     olx.Atreap(r"-b %s/%s.res" %(olx.FilePath(), olx.FileName()))
     r = olx.Lst("R1")

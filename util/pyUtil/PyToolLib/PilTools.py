@@ -391,7 +391,7 @@ class MatrixMaker(ImageTools):
         j = (i-6)
       txt_size = draw.textsize(str(item), font=font)
       begin = ((j * max_width) + ((max_width - txt_size[0])), k * line_heigth)
-      if item == "-1":
+      if item == -1:
         colour = (255, 0, 0)
       else:
         colour = (100, 100, 100)

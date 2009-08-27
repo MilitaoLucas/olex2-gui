@@ -209,8 +209,15 @@ def web_authenticate():
     if res:
       username = olx.GetValue('Logon.WEB_USERNAME')
       password = olx.GetValue('Logon.WEB_PASSWORD')
-      print username
-      return True
+      res = web_run_sql(sql = "SELECT English from translation WHERE OXD = 'English'")
+      if res == "Unauthorised":
+        print "Login failed"
+        return False
+      else:
+        print "%s is now logged on." %username
+        OV.htmlReload()
+        OV.SetParam('olex2.is_logged_on',True)
+        return True
     else:
       return False
 OV.registerFunction(web_authenticate)
