@@ -51,7 +51,7 @@ class Graph(ImageTools):
         },
     }
   
-  def plot_function(self, function, n_points=50):
+  def plot_function(self, function, width=1, n_points=50):
     self.get_division_spacings_and_scale()
     spacing = self.delta_x/n_points
     x_values = []
@@ -113,9 +113,9 @@ class Graph(ImageTools):
           and second_point[0] <= self.graph_right
           and second_point[0] >= self.graph_left): 
         line = (first_point,second_point)
-        self.draw.line(line,fill=fill,)
+        self.draw.line(line, fill=fill, width=width)
     #self.draw_help_lines()
-        
+
   def draw_help_lines(self):
     "Draws guide lines on the image to show box offset, etc."
     
@@ -395,7 +395,7 @@ class Graph(ImageTools):
         slope = float(dataset.metadata().get("fit_slope"))
         y_intercept = float(dataset.metadata().get("fit_y_intercept"))
         self.draw_fit_line(slope, y_intercept)
-      self.draw_data_points(dataset.xy_pairs())
+      self.draw_data_points(dataset.xy_pairs(), dataset.indices)
       
     self.map_txt_list.append("</map>")
     
@@ -461,7 +461,7 @@ class Graph(ImageTools):
       dv_ = round(dv_, -1)
     return dv_/math.pow(10,precision)
   
-  def draw_data_points(self, xy_pairs):
+  def draw_data_points(self, xy_pairs, indices=None):
     min_x = self.min_x
     max_x = self.max_x
     scale_x = self.scale_x
@@ -500,7 +500,7 @@ class Graph(ImageTools):
       scale_y = -self.scale_y
       
     map_txt_list = self.map_txt_list
-    for xr, yr in xy_pairs:
+    for i, (xr, yr) in enumerate(xy_pairs):
       x = x_constant + xr * scale_x
       y = y_constant + yr * scale_y
       
@@ -511,8 +511,12 @@ class Graph(ImageTools):
         map_txt_list.append("""<area shape="rect" coords="%i,%i,%i,%i" href="reap %s"  target="%s">"""
                             % (x, y, x+marker_width, y+marker_width, xr, yr))
       else:
-        map_txt_list.append("""<area shape="rect" coords="%i,%i,%i,%i" href="Html.Update" target="(%.3f,%.3f)">"""
-                            % (x, y, x+marker_width, y+marker_width, xr, yr))
+        if indices is None:
+          target = '(%.3f,%.3f)' %(xr, yr)
+        else:
+          target = '(%.3f,%.3f) %s' %(xr, yr, indices[i])
+        map_txt_list.append("""<area shape="rect" coords="%i,%i,%i,%i" href="Html.Update" target="%s">"""
+                            % (x, y, x+marker_width, y+marker_width, target))
         
       #if self.item == "AutoChem":
         #self.map_txt += '''
@@ -522,7 +526,7 @@ class Graph(ImageTools):
         #self.map_txt += '''
 #<area shape="rect" coords="%s,%s,%s,%s" href="Html.Update" target="(%.3f,%.3f)">
 #''' %(int(x),int(y),int(x+marker_width),int(y+marker_width), item[0], item[1])
-        
+
   def draw_y_axis(self):
     max_y = self.max_y
     min_y = self.min_y
@@ -627,6 +631,7 @@ class Graph(ImageTools):
         
       wX, wY = self.draw.textsize(txt, font=self.font_small)
       y = self.graph_bottom
+
       if self.reverse_x:
         x = self.bX \
           -(self.boxXoffset + wX/2
@@ -655,7 +660,7 @@ class Graph(ImageTools):
     x = self.boxX - wX - self.bSides - self.imX * 0.002
     y = self.boxY  + self.imY * 0.01
     self.draw.text((x, y), "%s" %txt, font=self.font_small, fill="#444444")
-
+    
   def draw_bars(self):
     import ImageFont
     data = []
@@ -817,7 +822,7 @@ class Analysis(Graph):
         x.append(float(xy[0]))
         y.append(float(xy[1]))
         
-    self.data.setdefault('dataset1',Dataset(x,y,metadata))
+    self.data.setdefault('dataset1',Dataset(x,y,metadata=metadata))
     self.metadata = metadata
 
   def popout(self):
@@ -959,7 +964,7 @@ class PrgAnalysis(Analysis):
     self.graphInfo["n_cycles"] = OV.GetParam("snum.refinement.max_cycles")
     self.program = program
     self.method = method
-    self.xl_d = {}
+    #self.xl_d = {}
     self.new_graph_please = False
     self.cycle = 0
     self.new_graph = True
@@ -980,7 +985,7 @@ class PrgAnalysis(Analysis):
     if txt:
       txt = txt %(
         self.program.program_type, self.filename, self.program.name, self.method.name,
-        authors, reference, self.program.program_type.upper(), self.image_location)
+        authors, reference, self.map_txt, self.program.program_type.upper(), self.image_location, self.program.program_type)
     else:
       txt = 'Please provide a template in folder basedir()/etc/gui/blocks/templates/'
     return txt
@@ -991,116 +996,95 @@ class PrgAnalysis(Analysis):
     if OV.IsControl('POP_%s_PRG_ANALYSIS' %self.program.program_type.upper()):
       olx.html_SetImage(
         'POP_%s_PRG_ANALYSIS' %self.program.program_type.upper(), self.image_location)
+    OlexVFS.write_to_olex("%s_image.htm" %self.program.program_type, self.ProgramHtml())
+    #OV.htmlReload()
     if self.new_graph:
       OV.htmlReload()
       self.new_graph = False
 
-class ShelXL_graph(PrgAnalysis):
+class refinement_graph(PrgAnalysis):
   def __init__(self, program, method):
     PrgAnalysis.__init__(self, program, method)
 
-  def observe(self, line):
-    mean_shift = 0
-    max_shift = 0
-    if "before cycle" in line:
-      self.cycle = int(line.split("before cycle")[1].strip().split()[0])
-      self.xl_d.setdefault("cycle_%i" %self.cycle, {})
-    elif "Mean shift/esd =" in line:
-      mean_shift = float(line.split("Mean shift/esd =")[1].strip().split()[0])
-      self.xl_d["cycle_%i" %self.cycle].setdefault('mean_shift',mean_shift)
-    elif "Max. shift = " in line:
-      max_shift = float(line.split("Max. shift =")[1].strip().split()[0])
-      max_shift_atom = line.split("for")[1].strip().split()[0]
-      self.xl_d["cycle_%i" %self.cycle].setdefault('max_shift',max_shift)
-      self.xl_d["cycle_%i" %self.cycle].setdefault('max_shift_atom',max_shift_atom)
-      self.new_graph_please = True
-    if self.new_graph_please:
-      self.make_ShelXL_graph()
+  def get_max_shift_bar_colours(self, shift):
+    rR = int(255*shift*2)
+    rG = int(255*(1.3-shift*2))
+    rB = 0
+    return rR, rG, rB
 
-  def make_ShelXL_graph(self):
-    cycle = self.cycle
-    data = self.xl_d
+  def get_mean_shift_esd_bar_colours(self, shift):
+    rR = int(255*shift*2)
+    rG = int(255*(1.3-shift*2))
+    rB = 0
+    return rR, rG, rB
+
+  def draw_bars(self, dataset, y_scale_factor=1.0, bar_labels=None, colour_function=None):
     top = self.graph_top
     marker_width = 5
     title = self.graphInfo.get('Title', "")
     size = self.graphInfo.get('imSize', "")
     width = size[0]
     height = size[1] - top
+    
     height = self.graph_bottom - self.graph_top
     legend_top = height + 20
-    bar_width = int((width-2*self.bSides)/self.graphInfo["n_cycles"]) -1 
-    
-    mean_shift = data["cycle_%i" %cycle].get("mean_shift","n/a")
-    max_shift = data["cycle_%i" %cycle].get("max_shift","n/a")
-    max_shift_atom = data["cycle_%i" %cycle].get("max_shift_atom","n/a")
-    bar_left = ((cycle - 1) * bar_width) + self.bSides + 1
-    bar_right = bar_left + bar_width
-    bar_bottom = self.graph_bottom -1
-    
-    number = 0
-    if mean_shift != "n/a":
-      number = mean_shift
-      txt = "Mean shift/esd"
-      wX, wY = self.draw.textsize(txt, font=self.font_large)
-      x = width - 2*self.bSides - wX
-      y = wY + 6
-      self.draw.text((x, y), "%s" %txt, font=self.font_large, fill="#888888")
-      
-      if mean_shift >= 1:
+    labels = dataset.metadata().get('labels')
+    y_label = dataset.metadata().get('y_label')
+    wX, wY = self.draw.textsize(y_label, font=self.font_large)
+    n_cycles = len(dataset.x)
+    bar_width = int((width-2*self.bSides)/n_cycles) -1
+    x = width - 2*self.bSides - wX
+    y = wY + 6
+    self.draw.text((x, y), "%s" %y_label, font=self.font_large, fill="#888888")
+
+    for i, xy in enumerate(dataset.xy_pairs()):
+      x_value, y_value = xy
+      bar_left = ((i) * bar_width) + self.bSides + 1
+      bar_right = bar_left + bar_width
+      bar_bottom = self.graph_bottom -1
+      y_value_scale = y_value * y_scale_factor
+
+      if y_value_scale >= 1:
         bar_top = top
       else:
-        bar_top = height + top  - (mean_shift * (height))
-        
-      rR = int(255*mean_shift*2)
-      rG = int(255*(1.3-mean_shift*2))
-      rB = 0
-      
+        bar_top = height + top  - (y_value_scale * (height))
+
+      if colour_function is not None:
+        rR, rG, rB = colour_function(y_value_scale)
+      else:
+        rR, rG, rB = (0,0,0)
+
       box = (bar_left,bar_top,bar_right,bar_bottom)
       self.draw.rectangle(box, fill=(rR, rG, rB), outline=(100, 100, 100))
 
-      txt = str("%.3f" %mean_shift)
+      if bar_labels is not None:
+        map_txt = "%s - %.3f" %(bar_labels[i],y_value)
+      else:
+        map_txt = "%.3f" %y_value
+      self.map_txt_list.append(
+        """<area shape="rect" coords="%i,%i,%i,%i" href="Html.Update" target="%s">"""
+        % (bar_left, top, bar_right, bar_bottom, map_txt))
+      if bar_labels is not None:
+        txt = bar_labels[i]
+      else:
+        txt = "%.3f" %y_value
       wX, wY = self.draw.textsize(txt, font=self.font_large)
       if wX < bar_width:
         x = bar_left + ( bar_width - wX/2 -wX) + self.bSides
         x = bar_left + ( bar_width - wX)/2
         
-        if mean_shift < 0.8:
+        if y_value < 0.8:
           y = bar_top - 14
         else:
           y = bar_top + 6
         self.draw.text((x, y), "%s" %txt, font=self.font_large, fill="#888888")
-        
-      if mean_shift < 0.003:
+
+      if y_value < 0.003:
         txt = "OK"
         wX, wY = self.draw.textsize(txt, font=self.font_large)
         x = width - 2*self.bSides - wX
         y = wY + 30
         self.draw.text((x, y - 10), "%s" %txt, font=self.font_large, fill=self.gui_green)
-      
-    elif max_shift != "n/a":
-      number = max_shift
-      txt = "Max shift in A"
-      wX, wY = self.draw.textsize(txt, font=self.font_large)
-      x = width - 2*self.bSides - wX
-      y = wY + 3
-      self.draw.text((x, y), "%s" %txt, font=self.font_large, fill="#888888")
-      if max_shift >= 1:
-        bar_top = top
-      else:
-        bar_top = height + top - (max_shift *(height - top))
-      
-      rR = int(255*max_shift*2)
-      rG = int(255*(1.3-max_shift*2))
-      rB = 0
-        
-      box = (bar_left,bar_top,bar_right,bar_bottom)
-      self.draw.rectangle(box, fill=(rR, rG, rB), outline=(100, 100, 100))
-      
-      txt = str(max_shift_atom)
-      wX, wY = self.draw.textsize(txt, font=self.font_large)
-      x = bar_left + wX/2 + self.bSides
-      y = bar_top - 13
-      self.draw.text((x, y), "%s" %txt, font=self.font_large, fill="#888888")
 
     legend_top = height + 20
     legend_top = self.graph_bottom + 2
@@ -1109,13 +1093,75 @@ class ShelXL_graph(PrgAnalysis):
     box = (0,legend_top,width,legend_top + 20)
     self.draw.rectangle(box, fill=self.gui_html_bg_colour)
 
-    txt = str(number)
+    txt = '%.3f' %(y_value)
     ## Draw Current Numbers
     wX, wY = self.draw.textsize(txt, font=self.font_large)
     x = width - wX - self.bSides
-    self.draw.text((x, legend_top), "%s" %txt, font=self.font_large, fill="#888888")
+    self.draw.text((x, legend_top), txt, font=self.font_large, fill="#888888")
+
+  def make_graph(self):
+    self.map_txt_list = [ "<map name='map_refinement'>" ]
+    self.make_empty_graph()
+    mean_shifts = self.data.get("mean_shift")
+    max_shifts = self.data.get("max_shift")
+    if max_shifts is not None:
+      max_shift_atom = self.data["max_shift"].metadata()["labels"]
+
+    if mean_shifts is not None:
+      self.draw_bars(dataset=mean_shifts, colour_function=self.get_mean_shift_esd_bar_colours)
+    elif max_shifts is not None:
+      self.draw_bars(dataset=max_shifts, y_scale_factor=3.0, bar_labels=max_shift_atom, colour_function=self.get_max_shift_bar_colours)
+      
+    self.map_txt_list.append("</map>")
     self.update_image()
-    
+    return
+
+class smtbx_refine_graph(refinement_graph):
+  def __init__(self):
+    program = ExternalPrgParameters.defineExternalPrograms()[1].programs["smtbx-refine"]
+    method = program.methods["LBFGS"]
+    self.item = "smtbx-refine"
+    refinement_graph.__init__(self, program, method)
+    y_label = self.get_unicode_characters('Max shift in angstrom')
+    metadata={'labels':[], 'y_label':y_label}
+    self.data.setdefault('max_shift', Dataset(metadata=metadata))
+
+  def observe(self, max_shift, scatterer):
+    return
+    self.cycle += 1
+    self.data['max_shift'].add_pair(self.cycle, max_shift)
+    self.data['max_shift']._metadata['labels'].append(scatterer.label)
+    self.make_graph()
+
+class ShelXL_graph(refinement_graph):
+  def __init__(self, program, method):
+    refinement_graph.__init__(self, program, method)
+
+  def observe(self, line):
+    mean_shift = 0
+    max_shift = 0
+    if "before cycle" in line:
+      self.cycle = int(line.split("before cycle")[1].strip().split()[0])
+      self.data.setdefault("cycle_%i" %self.cycle, {})
+    elif "Mean shift/esd =" in line:
+      if not self.data.has_key('mean_shift'):
+        metadata={'labels':[], 'y_label':'Mean shift/esd'}
+        self.data.setdefault('mean_shift', Dataset(metadata=metadata))
+      mean_shift = float(line.split("Mean shift/esd =")[1].strip().split()[0])
+      self.data['mean_shift'].add_pair(self.cycle, mean_shift)
+    elif "Max. shift = " in line:
+      if not self.data.has_key('max_shift'):
+        y_label = self.get_unicode_characters('Max shift in angstrom')
+        metadata={'labels':[], 'y_label':y_label}
+        self.data.setdefault('max_shift', Dataset(metadata=metadata))
+      max_shift = float(line.split("Max. shift =")[1].strip().split()[0])
+      max_shift_atom = line.split("for")[1].strip().split()[0]
+      self.data['max_shift'].add_pair(self.cycle, max_shift)
+      self.data['max_shift']._metadata['labels'].append(max_shift_atom)
+      self.new_graph_please = True
+    if self.new_graph_please:
+      self.make_graph()
+
 class ShelXS_graph(PrgAnalysis):
   def __init__(self, program, method):
     PrgAnalysis.__init__(self, program, method)
@@ -1126,37 +1172,7 @@ class ShelXS_graph(PrgAnalysis):
       self.make_ShelXS_graph()
 
   def make_ShelXS_graph(self):
-    cycle = self.cycle
-    data = self.xl_d
-    top = self.graph_top
-    marker_width = 5
-    title = self.graphInfo.get('Title', "")
-    size = self.graphInfo.get('imSize', "")
-    width = size[0]
-    height = size[1] - top
-    height = self.graph_bottom - self.graph_top
-    legend_top = height + 20
-    
-    legend_top = height + 20
-    legend_top = self.graph_bottom + 2
-    m_offset = 5
-    ## Wipe the legend area
-    box = (0,legend_top,width,legend_top + 20)
-    self.draw.rectangle(box, fill=self.gui_html_bg_colour)
-
-    x = self.bSides
-    y = legend_top
-    txt = "No Graphical Output available at this time."
-    self.draw.text((x, y), "%s" %txt, font=self.font_large, fill=self.gui_red)
-
-    #txt = str(number)
-    ### Draw Current Numbers
-    #wX, wY = self.draw.textsize(txt, font=self.font_large)
-    #x = width - wX - self.bSides
-    #self.draw.text((x, legend_top), "%s" %txt, font=self.font_large, fill="#888888")
-
-    self.update_image()
-    
+    return
 
 class WilsonPlot(Analysis):
   def __init__(self, n_bins=10, method="olex"):
@@ -1234,7 +1250,7 @@ class WilsonPlot(Analysis):
     metadata.setdefault("<|E^2-1|>", wp.mean_e_sq_minus_1)
     metadata.setdefault("%|E| > 2", wp.percent_e_sq_gt_2)
     self.metadata = metadata
-    self.data.setdefault('dataset1', Dataset(wp.y,wp.x,metadata))
+    self.data.setdefault('dataset1', Dataset(wp.y,wp.x,metadata=metadata))
 
   def make_gradient_box(self, size = (320, 35)):
     boxWidth = size[0]
@@ -1367,7 +1383,7 @@ class ChargeFlippingPlot(PrgAnalysis):
     method = program.methods["Charge Flipping"]
     self.item = "Charge Flipping"
     PrgAnalysis.__init__(self, program, method)
-    
+
   def run_charge_flipping_graph(self, flipping, solving, previous_state):
     top = self.graph_top
     marker_width = 5
@@ -1513,7 +1529,7 @@ class CumulativeIntensityDistribution(Analysis):
     metadata.setdefault("x_label", xy_plot.xLegend)
     self.metadata = metadata
     #self.data.setdefault('dataset1', Dataset(xy_plot.x,[i*100 for i in xy_plot.y],metadata))
-    self.data.setdefault('dataset1', Dataset(xy_plot.x, xy_plot.y,metadata))
+    self.data.setdefault('dataset1', Dataset(xy_plot.x, xy_plot.y,metadata=metadata))
     self.data['dataset1'].show_summary()
 
 class CompletenessPlot(Analysis):
@@ -1542,7 +1558,7 @@ class CompletenessPlot(Analysis):
     metadata.setdefault("y_label", "Shell Completeness")
     metadata.setdefault("x_label", "Resolution")
     self.metadata = metadata
-    self.data.setdefault('dataset1', Dataset(data_object.x,[i*100 for i in data_object.y],metadata))
+    self.data.setdefault('dataset1', Dataset(data_object.x,[i*100 for i in data_object.y],metadata=metadata))
 
 class SystematicAbsencesPlot(Analysis):
   def __init__(self, output_csv_file=False):
@@ -1573,8 +1589,7 @@ class SystematicAbsencesPlot(Analysis):
       print "No systematic absences present"
       return
     self.have_data = True
-    self.data.setdefault('dataset1', Dataset(xy_plot.x, xy_plot.y, metadata))
-    #self.data['dataset1'].show_summary()
+    self.data.setdefault('dataset1', Dataset(xy_plot.x, xy_plot.y, indices=xy_plot.indices, metadata=metadata))
     self.draw_origin = True
     self.make_empty_graph(axis_x = True)
     self.graphInfo['marker']['size'] = int(self.im.size[0]/120)
@@ -1610,9 +1625,12 @@ class Fobs_Fcalc_plot(Analysis):
     self.draw_pairs()
 
 class Dataset(object):
-  def __init__(self, x, y, metadata):
+  def __init__(self, x=None, y=None, indices=None, metadata=None):
+    if x is None: x = []
+    if y is None: y = []
     self.x = x
     self.y = y
+    self.indices = indices
     self._metadata = metadata
 
   def xy_pairs(self):
@@ -1623,6 +1641,10 @@ class Dataset(object):
 
   def show_summary(self):
     print ''.join("%f, %f\n" %(x,y) for x,y in self.xy_pairs())
+
+  def add_pair(self, x, y):
+    self.x.append(x)
+    self.y.append(y)
 
 Analysis_instance = Analysis()
 OV.registerMacro(Analysis_instance.run_Analysis,
