@@ -84,7 +84,6 @@ def completeness_statistics(reflections, n_bins=20):
   verbose = False
   f_obs=reflections.f_obs
   f_sq_obs = reflections.f_sq_obs
-  f_sq_obs.set_observation_type(None)
   f_sq_obs = f_sq_obs.eliminate_sys_absent().average_bijvoet_mates()
   f_obs = f_sq_obs.f_sq_as_f()
   f_obs.setup_binner(
@@ -95,11 +94,10 @@ def completeness_statistics(reflections, n_bins=20):
     f_obs.binner().show_summary()
   return statistics.completeness_plot(f_obs)
 
-def cumulative_intensity_distribution(model, reflections, n_bins=20):
+def cumulative_intensity_distribution(reflections, n_bins=20):
   verbose = False
   f_obs=reflections.f_obs
   f_sq_obs = reflections.f_sq_obs
-  f_sq_obs.set_observation_type(None)
   f_sq_obs = f_sq_obs.eliminate_sys_absent().average_bijvoet_mates()
   f_obs = f_sq_obs.f_sq_as_f()
   f_obs.setup_binner(
@@ -256,7 +254,6 @@ class refinement(object):
   def f_obs_minus_f_calc_map(self, resolution):
     f_obs=self.f_obs
     f_sq_obs = self.f_sq_obs
-    f_sq_obs.set_observation_type(None)
     f_sq_obs = f_sq_obs.eliminate_sys_absent().average_bijvoet_mates()
     f_obs = f_sq_obs.f_sq_as_f()
     sf = xray.structure_factors.from_scatterers(

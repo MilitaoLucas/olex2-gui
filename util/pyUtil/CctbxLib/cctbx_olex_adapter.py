@@ -134,7 +134,7 @@ class OlexCctbxAdapter(object):
 	),
       verify_symmetry=False
       ).all()
-		
+    
     i = 0
     for xyz, height in izip(peaks.sites(), peaks.heights()):
       if i < 3:
@@ -449,7 +449,7 @@ class OlexCctbxGraphs(OlexCctbxAdapter):
       return completeness
 
     elif self.graph == "cumulative":
-      cumulative_distribution = cctbx_controller.cumulative_intensity_distribution(self.xray_structure(), self.reflections, self.n_bins)
+      cumulative_distribution = cctbx_controller.cumulative_intensity_distribution(self.reflections, self.n_bins)
       return cumulative_distribution
 
     elif self.graph == "f_obs_f_calc":
