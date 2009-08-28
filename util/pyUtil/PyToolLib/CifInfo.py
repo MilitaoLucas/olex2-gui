@@ -460,7 +460,6 @@ class CifTools(ArgumentParser):
     dataAdded = []
     userInputVariables = OV.GetParam("snum.metacif.user_input_variables")
 
-    params_to_set = []
     for d in info:
       cifLabels = ['diffrn','cell','symmetry','exptl','computing']
       ## sort crystal dimensions into correct order
@@ -483,12 +482,12 @@ class CifTools(ArgumentParser):
           if item[0] == '_' and item.split('_')[1] in cifLabels:
             if item == '_symmetry_cell_setting':
               value = value.lower()
-            params_to_set.append(("snum.metacif.%s" %(item[1:].replace('-','_')), value))
-            #OV.SetParam("snum.metacif.%s" %(item[1:].replace('-','_')), value)
+            if value == '?':
+              value = None
+            OV.SetParam("snum.metacif.%s" %(item[1:].replace('-','_')), value)
             dataAdded.append(item)
         else: continue
 
-    OV.SetParams(params_to_set)
     colour = OV.GetParam("snum.metacif.exptl_crystal_colour")
     if colour in (
       "colourless","white","black","gray","brown","red","pink","orange","yellow","green","blue","violet")\
@@ -498,11 +497,11 @@ class CifTools(ArgumentParser):
 
   def get_defaults():
     defs = {}
-    defs.setdefault("_exptl_crystal_density_meas","       'not measured'\n") 
-    defs.setdefault("_diffrn_detector_area_resol_mean","  8\n") 
-    defs.setdefault("_diffrn_standards_number","          .\n") 
-    defs.setdefault("_diffrn_standards_interval_count","  .\n") 
-    defs.setdefault("_diffrn_standards_decay_%","         .\n") 
+    defs.setdefault("_exptl_crystal_density_meas","       'not measured'\n")
+    defs.setdefault("_diffrn_detector_area_resol_mean","  8\n")
+    defs.setdefault("_diffrn_standards_number","          .\n")
+    defs.setdefault("_diffrn_standards_interval_count","  .\n")
+    defs.setdefault("_diffrn_standards_decay_%","         .\n")
     return defs
 
   def merge_cifs(self, merge, cif, tmp, basename):

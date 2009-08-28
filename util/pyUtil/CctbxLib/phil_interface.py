@@ -408,6 +408,19 @@ class phil_handler(object):
         print >> sys.stderr, "Error updating Phil"
         sys.stderr.formatExceptionInfo()
 
+  def update_single_param(self, name, value):
+    new_phil_object = iotbx.phil.parse("%s=%s" %(name,value))
+    for definition in self.working_phil.get_without_substitution(name):
+      assert definition.is_definition
+      for new_definition in new_phil_object.get_without_substitution(name):
+        if definition.name == new_definition.name:
+          proxy = definition.validate(value)
+          if proxy.error_message is None:
+            definition.words = definition.fetch_value(new_definition).words
+            self._phil_has_changed = True
+          else:
+            raise libtbx.phil.Sorry(proxy.error_message)
+
   def update_from_python(self, python_object):
     self.working_phil = self.master_phil.format(python_object=python_object)
     self._rebuild_index()

@@ -31,32 +31,16 @@ class OlexFunctions(inheritFunctions):
 
   def SetParam(self,variable,value):
     try:
-      if value in ('Auto','auto'):
-        phil_string="%s=%s" %(variable, value)
+      if value == '': value = None
+      elif value in ('Auto','auto'):
+        value = value
       elif type(value) in (str,unicode) and "'" in value:
-        phil_string = "%s='%s'" %(variable, value.replace("'", "\\'"))
+        value = "'%s'" %value.replace("'", "\\'")
       else:
-        phil_string = "%s='%s'" %(variable, value)
-      olx.phil_handler.update(phil_string=str(phil_string))
+        value = "'%s'" %value
+      olx.phil_handler.update_single_param(str(variable), str(value))
     except Exception, ex:
       print >> sys.stderr, "Variable %s could not be set with value %s" %(variable,value)
-      sys.stderr.formatExceptionInfo()
-
-  def SetParams(self, variable_value_pairs):
-    try:
-      phil_strings = []
-      for variable, value in variable_value_pairs:
-        if value in ('Auto','auto'):
-          phil_strings.append("%s=%s" %(variable, value))
-        elif type(value) in (str,unicode) and "'" in value:
-          phil_strings.append("%s='%s'" %(variable, value.replace("'", "\\'")))
-        else:
-          phil_strings.append("%s='%s'" %(variable, value))
-      #phil_string = '\n'.join(["%s='%s'" %(variable, value) for variable, value in variable_value_pairs])
-      phil_string = '\n'.join(phil_strings)
-      olx.phil_handler.update(phil_string=str(phil_string))
-    except Exception, ex:
-      print >> sys.stderr, "Variables could not be set with value"
       sys.stderr.formatExceptionInfo()
 
   def GetParam(self,variable):
