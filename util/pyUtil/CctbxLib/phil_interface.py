@@ -410,13 +410,15 @@ class phil_handler(object):
 
   def update_single_param(self, name, value):
     new_phil_object = iotbx.phil.parse("%s=%s" %(name,value))
-    for definition in self.working_phil.get_without_substitution(name):
-      assert definition.is_definition
+    for master_defintion, working_definition in zip(
+          self.master_phil.get_without_substitution(name),
+          self.working_phil.get_without_substitution(name)):
+      assert working_definition.is_definition
       for new_definition in new_phil_object.get_without_substitution(name):
-        if definition.name == new_definition.name:
-          proxy = definition.validate(value)
+        if working_definition.name == new_definition.name:
+          proxy = master_defintion.validate(value)
           if proxy.error_message is None:
-            definition.words = definition.fetch_value(new_definition).words
+            working_definition.words = master_defintion.fetch_value(new_definition).words
             self._phil_has_changed = True
           else:
             raise libtbx.phil.Sorry(proxy.error_message)
