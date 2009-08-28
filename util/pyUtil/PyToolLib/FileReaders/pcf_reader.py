@@ -41,7 +41,7 @@ class pcf_reader:
 			"_diffrn_detector_area_resol_mean",
 			"_diffrn_standards_number",
 			"_diffrn_standards_interval_count",
-			"_diffrn_standards_decay_%",
+			#"_diffrn_standards_decay_%",
 			"_cell_measurement_reflns_used",
 			"_cell_measurement_theta_min",
 			"_cell_measurement_theta_max",
