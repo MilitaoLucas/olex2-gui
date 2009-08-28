@@ -1048,6 +1048,8 @@ def GetHttpFile(f, force=False, fullURL = False):
 
 def check_for_recent_update():
   retVal = False
+  if OV.GetParam('olex2.has_recently_updated'):
+    return True
   
   version = OV.GetSVNVersion()
   try:
