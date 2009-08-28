@@ -50,7 +50,7 @@ def makeProgramSettingsGUI(program, method, prgtype):
     <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$getVar(gui_html_table_bg_colour)">
 """
 
-  txt += ''.join([makeArgumentsHTML(arg) for arg in method.args])
+  txt += ''.join([makeArgumentsHTML(program.name, method.name, arg) for arg in method.args])
 
   txt += r'''
 <tr>
@@ -69,7 +69,7 @@ def makeProgramSettingsGUI(program, method, prgtype):
   OlexVFS.write_to_olex(wFilePath, txt)
   return
 
-def makeArgumentsHTML(dictionary):
+def makeArgumentsHTML(program, method, dictionary):
   txt = ''
   first_col = htmlTools.make_table_first_col()
   txt += first_col
@@ -106,7 +106,7 @@ def makeArgumentsHTML(dictionary):
     varName = 'settings_%s_%s' %(name.lower(), value[0].lower())
     d.setdefault('ctrl_name', 'SET_%s' %varName.upper())
     
-    onchange = 'spy.addInstruction(%s)>>SetVar(%s,GetValue(SET_%s))' %(name,varName,varName.upper())
+    onchange = 'spy.addInstruction(%s,%s,%s)>>SetVar(%s,GetValue(SET_%s))' %(program, method, name,varName,varName.upper())
     if name == 'nls':
       maxCycles_onchange = '%s>>spy.SetParam(snum.refinement.max_cycles,GetValue(SET_SETTINGS_%s_NLS))>>updatehtml' %(onchange,name.upper())
       d.setdefault('onleave', maxCycles_onchange)
@@ -137,9 +137,10 @@ def make_ondown(dictionary):
   txt = 'Addins %s%s' %(dictionary['name'], args)
   return txt
 
-def addInstruction(instruction):
-  program = RPD.programs[OV.GetParam('snum.refinement.program')]
-  method = program.methods[OV.GetParam('snum.refinement.method')]
+def addInstruction(program, method, instruction):
+  program = RPD.programs.get(program, SPD.programs.get(program))
+  assert program is not None
+  method = program.methods[method]
   
   for arg in method.args:
     if arg['name'].replace('.','') == instruction:
@@ -177,7 +178,7 @@ def onMaxCyclesChange(max_cycles):
         ctrl_name = 'SET_SETTINGS_%s_NLS' %item.upper()
         if OV.HasGUI() and OV.IsControl(ctrl_name):
           olx.SetValue(ctrl_name, max_cycles)
-        addInstruction(item)
+        addInstruction(prg.name, method.name, item)
         return
 OV.registerFunction(OV.SetMaxCycles)
 
@@ -197,7 +198,7 @@ def onMaxPeaksChange(max_peaks):
       ctrl_name = 'SET_SETTINGS_%s_NPEAKS' %item.upper()
       if OV.HasGUI() and OV.IsControl(ctrl_name):
         olx.SetValue(ctrl_name, max_peaks)
-      addInstruction(item)
+      addInstruction(prg.name, method.name, item)
       return
 OV.registerFunction(OV.SetMaxPeaks)
 
