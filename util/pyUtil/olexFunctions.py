@@ -32,7 +32,7 @@ class OlexFunctions(inheritFunctions):
   def SetParam(self,variable,value):
     try:
       if value == '': value = None
-      elif value in ('Auto','auto'):
+      elif value in ('Auto','auto','None','none',None):
         value = value
       elif type(value) in (str,unicode) and "'" in value:
         value = "'%s'" %value.replace("'", "\\'")
