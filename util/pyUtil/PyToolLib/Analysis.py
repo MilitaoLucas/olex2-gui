@@ -474,10 +474,11 @@ class Graph(ImageTools):
     fill = self.graphInfo['marker']['colour']
     outline = self.graphInfo['marker']['border_colour']
     marker_width = self.marker_width
+    half_marker_width = marker_width/2
     
     if self.reverse_x:
       x_constant = self.bX \
-                 - (marker_width/2 + self.boxXoffset
+                 - (half_marker_width + self.boxXoffset
                     + ((0 - max_x) * self.scale_x) 
                     + (delta_x * self.scale_x))
       scale_x = -self.scale_x
@@ -494,7 +495,7 @@ class Graph(ImageTools):
       scale_y = self.scale_y
     else:
       y_constant = self.bY \
-          - (marker_width/2 + self.boxYoffset 
+          - (half_marker_width + self.boxYoffset 
              + ((0 - max_y) * scale_y) 
              + (delta_y * scale_y))
       scale_y = -self.scale_y
@@ -504,6 +505,8 @@ class Graph(ImageTools):
       x = x_constant + xr * scale_x
       y = y_constant + yr * scale_y
       
+      if self.im.getpixel((x+half_marker_width, y+half_marker_width)) == fill:
+        continue # avoid wasting time drawing points that overlap too much
       box = (x,y,x+marker_width,y+marker_width)
       self.draw.rectangle(box, fill=fill, outline=outline)
       
@@ -1619,7 +1622,13 @@ class Fobs_Fcalc_plot(Analysis):
     from cctbx_olex_adapter import OlexCctbxGraphs
     cctbx = OlexCctbxGraphs('f_obs_f_calc')
     xy_plot = cctbx.run()
-    data = Dataset(xy_plot.f_calc_sq,xy_plot.f_obs_sq,metadata={})
+    self.metadata.setdefault("y_label", xy_plot.yLegend)
+    self.metadata.setdefault("x_label", xy_plot.xLegend)
+    metadata = {}
+    metadata.setdefault("fit_slope", xy_plot.fit_slope)
+    metadata.setdefault("fit_y_intercept", xy_plot.fit_y_intercept)
+    data = Dataset(
+      xy_plot.f_calc, xy_plot.f_obs, indices=xy_plot.indices, metadata=metadata)
     self.data.setdefault('dataset1', data)
     self.make_empty_graph(axis_x = True)
     self.draw_pairs()
