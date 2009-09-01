@@ -244,6 +244,7 @@ class Graph(ImageTools):
     self.draw = draw
     
     txt = self.graphInfo["Title"]
+    txt = OV.TranslatePhrase(txt)
     #txt = self.metadata.get("Title",self.graphInfo["Title"]).title()
     
     if not txt: txt = "Not available"
@@ -875,7 +876,7 @@ class Analysis(Graph):
         
       elif len(li.split("NUMBER OF UNIQUE DATA AS A FUNCTION OF RESOLUTION IN ANGSTROMS")) > 1:
         AnalysisInfo.setdefault("UniqueData", {})
-        AnalysisInfo["UniqueData"].setdefault("Title", "Unique Data")
+        AnalysisInfo["UniqueData"].setdefault("Title", OV.TranslatePhrase("Unique Data"))
         AnalysisInfo["UniqueData"].setdefault("y_label", "Two-theta")
         k_row = (fl[i+6]).split()
         AnalysisInfo["UniqueData"].setdefault("Data", k_row)
@@ -885,8 +886,8 @@ class Analysis(Graph):
         
       elif len(li.split("Most Disagreeable Reflections")) > 1:
         AnalysisInfo.setdefault("DisagreeReflections", {})
-        AnalysisInfo["DisagreeReflections"].setdefault("Title", "Most Disagreeable Reflections")
-        AnalysisInfo["DisagreeReflections"].setdefault("y_label", "Numbers")
+        AnalysisInfo["DisagreeReflections"].setdefault("Title", OV.TranslatePhrase("Most Disagreeable Reflections"))
+        AnalysisInfo["DisagreeReflections"].setdefault("y_label", OV.TranslatePhrase("Numbers"))
         j = i + 4
         fobs=0
         fcalc=0
@@ -1183,7 +1184,7 @@ class WilsonPlot(Analysis):
     self.n_bins = abs(int(n_bins)) #Number of bins for Histograms
     self.method = method      #Method by which graphs are generated
     self.item = "wilson"
-    self.graphInfo["Title"] = "Wilson Plot"
+    self.graphInfo["Title"] = OV.TranslatePhrase("Wilson Plot")
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.filename
@@ -1313,14 +1314,16 @@ class WilsonPlot(Analysis):
     for i in xrange(boxWidth-2):
       i += 1
       if i == margin_left:
-        txt = "non-centrosymmetric"
+        txt = "acentric"
+        txt = OV.TranslatePhrase(txt)
         wX, wY = draw.textsize(txt, font=self.font_tiny)
         draw.text((i-int(wX/2), 0), "%s" %txt, font=self.font_tiny, fill=self.gui_html_highlight_colour)
         txt = "0.736"
         wX, wY = draw.textsize(txt, font=self.font_tiny)
         draw.text((i-int(wX/2), boxTopOffset+boxHeight-1), "%s" %txt, font=self.font_tiny, fill=self.titleColour)
       if i == (margin_right):
-        txt = "centrosymmetric"
+        txt = "centric"
+        txt = OV.TranslatePhrase(txt)
         wX, wY = draw.textsize(txt, font=self.font_tiny)
         draw.text((i-int(wX/2), 0), "%s" %txt, font=self.font_tiny, fill=self.gui_html_highlight_colour)
         txt = "0.968"
@@ -1474,7 +1477,7 @@ class CumulativeIntensityDistribution(Analysis):
     Analysis.__init__(self)
     self.n_bins = abs(int(n_bins)) #Number of bins for Histograms
     self.item = "cumulative"
-    self.graphInfo["Title"] = "Cumulative Intensity Distribution"
+    self.graphInfo["Title"] = OV.TranslatePhrase("Cumulative Intensity Distribution")
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.filename
@@ -1506,13 +1509,13 @@ class CumulativeIntensityDistribution(Analysis):
     colour2 = self.graphInfo['plot_function']['colour2']
     colour3 = self.graphInfo['plot_function']['colour3']
     
-    key = self.draw_key({1:{'label':'Centric',
+    key = self.draw_key({1:{'label':OV.TranslatePhrase('Centric'),
                             'colour':colour1,
                             },
-                         2:{'label':'Acentric',
+                         2:{'label':OV.TranslatePhrase('Acentric'),
                             'colour':colour2,
                             },
-                         3:{'label':'Twinned Acentric',
+                         3:{'label':OV.TranslatePhrase('Twinned Acentric'),
                             'colour':colour3,
                             },
                          })
@@ -1540,7 +1543,7 @@ class CompletenessPlot(Analysis):
     Analysis.__init__(self)
     self.item = "completeness"
     self.n_bins = abs(int(n_bins))
-    self.graphInfo["Title"] = "Completeness Plot"
+    self.graphInfo["Title"] = OV.TranslatePhrase("Completeness Plot")
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.filename
@@ -1558,8 +1561,8 @@ class CompletenessPlot(Analysis):
     data_object = cctbx.run()
     data_object.completeness.show()
     metadata = {}
-    metadata.setdefault("y_label", "Shell Completeness")
-    metadata.setdefault("x_label", "Resolution")
+    metadata.setdefault("y_label", OV.TranslatePhrase("Shell Completeness"))
+    metadata.setdefault("x_label", OV.TranslatePhrase("Resolution"))
     self.metadata = metadata
     self.data.setdefault('dataset1', Dataset(data_object.x,[i*100 for i in data_object.y],metadata=metadata))
 
@@ -1567,7 +1570,7 @@ class SystematicAbsencesPlot(Analysis):
   def __init__(self, output_csv_file=False):
     Analysis.__init__(self)
     self.item = "sys_absences"
-    self.graphInfo["Title"] = "Systematic Absences Intensity Distribution"
+    self.graphInfo["Title"] = OV.TranslatePhrase("Systematic Absences Intensity Distribution")
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.filename
@@ -1608,7 +1611,7 @@ class Fobs_Fcalc_plot(Analysis):
   def __init__(self, output_csv_file=False):
     Analysis.__init__(self)
     self.item = "Fobs_Fcalc"
-    self.graphInfo["Title"] = "Fobs vs Fcalc"
+    self.graphInfo["Title"] = OV.TranslatePhrase("Fobs vs Fcalc")
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.filename
