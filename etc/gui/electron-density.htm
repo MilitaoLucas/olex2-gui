@@ -5,10 +5,6 @@
 		<zimg border="0" src="gui/images/toolbar-electron-density.png">
 	</td>
 	<td>
-	%Map%
-	</td>
-	</td>
-	<td>
 		<input
 			type="combo"
 			height="$GetVar(gui_html_combo_height)"
@@ -16,7 +12,7 @@
 			name="SET_SNUM_MAP_TYPE"
 			items='diff;fcalc;2Fo-Fc<-tomc;fobs'
 			value="$spy.GetParam(snum.map.type)"
-			width="50"
+			width="70"
 			onchange="spy.SetParam(snum.map.type,GetValue(SET_SNUM_MAP_TYPE))>>spy.MapView(1)>>html.SetValue(SNUM_EDEN_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)')"
 			label=" %Map% "
 		>
@@ -29,12 +25,12 @@
 			name="SET_SNUM_MAP_SOURCE"
 			items='olex;fcf;'
 			value="$spy.GetParam(snum.map.source)"
-			width="50"
+			width="70"
 			onchange="spy.SetParam(snum.map.source,GetValue(SET_SNUM_MAP_SOURCE))>>spy.MapView(1)>>html.SetValue(SNUM_EDEN_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)')"
 			label=" %Source% "
 		>
 	</td>
-	<td>
+	<td colspan='2'>
 		<input
 			type="combo"
 			height="$GetVar(gui_html_combo_height)"
@@ -53,11 +49,11 @@
 <tr>
 	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
 	</td>
-	<td colspan = '3' >
+	<td colspan = '2' >
 		<input
 			type="slider"
 			name = "SNUM_EDEN_SLIDE"
-			width="$eval(htmlpanelwidth()-110)"
+			width="$eval(htmlpanelwidth()-160)"
 			height="18"
 			value="eval(xgrid.Scale()*10)"
 			bgcolor="$GetVar(gui_html_table_bg_colour)"
@@ -68,6 +64,8 @@
 SetValue(SNUM_EDEN_VALUE,eval(GetValue(SNUM_EDEN_SLIDE)/10))>>
 xgrid.Scale(eval(GetValue(SNUM_EDEN_SLIDE)/10))
 ">
+	</td>
+	<td colspan = '1'>
 		<b>%Mask%:</b>
      <input
 			type="checkbox"
@@ -96,7 +94,7 @@ xgrid.Scale(eval(GetValue(SNUM_EDEN_SLIDE)/10))
 			type="button"
 			name="SNUM_MAP_BUTTON"
 			value="%Calculate%"
-			width="60"
+			width="90"
 			manage
 			ondown="setlabel(SNUM_MAP_BUTTON,%Delete Map%)>>
 spy.MapView(1)>>
