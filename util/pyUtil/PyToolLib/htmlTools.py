@@ -721,6 +721,7 @@ def OnModeChange(*args):
     'name':'button_small-name',
     'off':None
   }
+  
   name = 'mode'
   mode = ""
   i = 0
@@ -736,8 +737,14 @@ def OnModeChange(*args):
 
 
   active_mode = d.get(mode, None)
+  
+  if last_mode == active_mode:
+    return
+  
   if not active_mode:
     active_mode = d.get(mode_disp, None)
+    
+    
     
   
   
@@ -758,12 +765,16 @@ def OnModeChange(*args):
     makeHtmlBottomPop({'replace':mode_disp, 'name':'pop_mode'}, pb_height=50)
     if active_mode:
       use_image= "%son.png" %active_mode
-      OV.SetImage("IMG_%s" %active_mode.upper(),use_image)
+      control = "IMG_%s" %active_mode.upper()
+      if OV.IsControl(control):
+        OV.SetImage(control,use_image)
       copy_to = "%s.png" %active_mode
       OV.CopyVFSFile(use_image, copy_to,1)
     if last_mode:
       use_image = "%soff.png" %last_mode
-      OV.SetImage("IMG_%s" %last_mode.upper(),use_image)
+      control = "IMG_%s" %last_mode.upper()
+      if OV.IsControl(control):
+        OV.SetImage(control,use_image)
       copy_to = "%s.png" %last_mode
       OV.CopyVFSFile(use_image, copy_to,2)
       
