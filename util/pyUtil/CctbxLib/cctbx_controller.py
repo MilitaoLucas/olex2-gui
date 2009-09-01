@@ -113,17 +113,29 @@ def sys_absent_intensity_distribution(reflections):
   return statistics.sys_absent_intensity_distribution(f_sq_obs).xy_plot_info()
 
 def f_obs_vs_f_calc(model, reflections):
-  f_obs = reflections.f_obs
+  f_obs = reflections.f_obs.merge_equivalents().array()
+  f_obs = f_obs.eliminate_sys_absent().average_bijvoet_mates()
   sf = xray.structure_factors.from_scatterers(miller_set=f_obs,cos_sin_table=True)
   f_calc = sf(model,f_obs).f_calc()
 
-  f_obs_sq = f_obs.f_as_f_sq()
-  f_calc_sq = f_obs.f_as_f_sq()
+  ls_function = xray.unified_least_squares_residual(f_obs)
+  ls = ls_function(f_calc, compute_derivatives=False)
+  k = ls.scale_factor()
+  fc = flex.abs(f_calc.data())
+  fc *= k
+  fo = flex.abs(f_obs.data())
+
+  fit = flex.linear_regression(fc, fo)
+  fit.show_summary()
 
   plot = empty()
-  plot.f_obs_sq = f_obs_sq.data()
-  plot.f_calc_sq = f_calc_sq.data()
-
+  plot.indices = f_obs.indices()
+  plot.f_obs = fo
+  plot.f_calc = fc
+  plot.fit_slope = fit.slope()
+  plot.fit_y_intercept = fit.y_intercept()
+  plot.xLegend = "F calc"
+  plot.yLegend = "F obs"
   return plot
 
 
@@ -148,12 +160,20 @@ def create_cctbx_xray_structure(cell, spacegroup, atom_iter, restraint_iterator=
   builder.make_crystal_symmetry(cell, spacegroup)
   builder.make_structure()
   u_star = shelx_adp_converter(builder.crystal_symmetry)
-  for label, xyz, u, elt in atom_iter:
+  for label, site, occupancy, u, scattering_type in atom_iter:
     if len(u) != 1:
-      a = xray.scatterer(label, xyz, u_star(*u))
+      a = xray.scatterer(label=label,
+                         site=site,
+                         u=u_star(*u),
+                         occupancy=occupancy,
+                         scattering_type=scattering_type)
       behaviour_of_variable = [0,0,0,1,0,0,0,0,0]
     else:
-      a = xray.scatterer(label, xyz,u[0])
+      a = xray.scatterer(label=label,
+                         site=site,
+                         u=u[0],
+                         occupancy=occupancy,
+                         scattering_type=scattering_type)
       behaviour_of_variable = [0,0,0,1,0]
     builder.add_scatterer(a, behaviour_of_variable)
   return builder.structure

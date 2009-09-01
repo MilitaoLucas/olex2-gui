@@ -43,17 +43,18 @@ class OlexRefinementModel(object):
 
   def iterator(self):
     for i, atom in self._atoms.items():
-      name = atom['label']
-      element_type = atom['type']
-      name_to_post = str("%s%i" %(element_type, i))
+      name = str(atom['label'])
+      element_type = str(atom['type'])
+      #name_to_post = str("%s%i" %(element_type, i))
       xyz = atom['crd'][0]
+      occu = atom['occu']
       adp = atom.get('adp',None)
       if adp is None:
         uiso = atom.get('uiso')[0]
         u = (uiso,)
       else: u = adp[0]
       if name[:1] != "Q":
-        yield name_to_post, xyz, u, element_type
+        yield name, xyz, occu, u, element_type
 
   def afix_iterator(self):
     for afix in self._afix:
