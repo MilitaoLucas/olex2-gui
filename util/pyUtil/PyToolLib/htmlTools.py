@@ -753,7 +753,9 @@ def OnModeChange(*args):
     OV.cmd("html.hide pop_%s" %name)
     if not last_mode: return
     use_image = "%soff.png" %last_mode
-    OV.SetImage("IMG_%s" %last_mode.upper(),use_image)
+    control = "IMG_%s" %last_mode.upper()
+    if OV.IsControl(control):
+      OV.SetImage(control,use_image)
     copy_to = "%s.png" %last_mode
     OV.CopyVFSFile(use_image, copy_to,2)
     OV.cmd("html.hide pop_%s" %name)
