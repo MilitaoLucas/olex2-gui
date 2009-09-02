@@ -1248,7 +1248,8 @@ class timage(ImageTools):
                  txt, 
                  top_left=(5, 0), 
                  font_name = 'Vera', 
-                 font_size=14, 
+                 font_size=14,
+                 translate=False,
                  font_colour=self.adjust_colour(self.gui_html_table_firstcol_colour,luminosity=0.7))
     OlexVFS.save_image_to_olex(IM, name, 2)
     
