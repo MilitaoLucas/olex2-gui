@@ -1,8 +1,19 @@
 import olex_hkl
+import olex
+import os
 
 # reads an HKL file and returns a tuple of tuples x7 
 
-hkl_file = olex_hkl.Read("e:/1.hkl")
+input_file_name = olex.f('fileOpen("Choose input HKL file", "HKL files|*.hkl",filepath())')
+output_file_name = olex.f('fileOpen("Choose output HKL file", "HKL files|*.hkl",filepath())')
+if not input_file_name or not os.path.exists(input_file_name) or not output_file_name:
+  exit
+if os.path.exists(output_file_name):
+  res = olex.f('alert("Warning", "Destination file exists.\nOverwrite?", "YCQ")')
+  if not res or res == 'C':
+    exit
+hkl_file = olex_hkl.Read(input_file_name) 
+
 
 # (h,k,l, F, sig(F), batch [default value is 61690 (0xF0FA) - unused], used_flag)
 # used_flag specifies if a given reflection is beyond the (0,0,0) reflection
@@ -19,4 +30,4 @@ for hkl in hkl_file:
   output.append( hkl[:5] + (1,) )
 
 # write the result to a new HKL file
-olex_hkl.Write("e:/1a.hkl", output)
+olex_hkl.Write(output_file_name, output)
