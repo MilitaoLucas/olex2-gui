@@ -33,7 +33,7 @@
 	</td>
 
 	<td>
-		<a href="ExcludeHkl -c=GetVar(exclude_hkl_and) -h=GetValue(exclude_h) -k=GetValue(exclude_k) -l=GetValue(exclude_l)" >Exclude:</a> 
+		<a href="ExcludeHkl -c=GetVar(exclude_hkl_and) -h=GetValue(exclude_h) -k=GetValue(exclude_k) -l=GetValue(exclude_l)" >%Exclude%:</a> 
 	</td>
 	
 	
@@ -82,7 +82,7 @@
 			bgcolor="$getVar(gui_html_table_bg_colour)" 
 			fgcolor="$getVar(gui_html_font_colour)" 
 			name="EXCLUDE_AND" 
-			value="AND"
+			value="%AND%"
 			data=""
 			$spy.CheckBoxValue(exclude_hkl_and) 
 			oncheck="SetVar(exclude_hkl_and,true)>>spy.StoreSingleParameter exclude_hkl_and>>SetData(EXCLUDE_AND,'-c')" 
@@ -91,7 +91,7 @@
 	</td>
 
 	<td>
-		<a href='SetValue(exclude_h,"")>>SetValue(exclude_k,"")>>SetValue(exclude_l,"")>>AppendHkl'>Reset</a> 
+		<a href='SetValue(exclude_h,"")>>SetValue(exclude_k,"")>>SetValue(exclude_l,"")>>AppendHkl'>%Reset%</a> 
 	</td>
 </tr>
 
@@ -111,3 +111,5 @@
 
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
+
+<!-- %Bad Reflections% -->
