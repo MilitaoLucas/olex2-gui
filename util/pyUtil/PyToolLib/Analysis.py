@@ -244,7 +244,7 @@ class Graph(ImageTools):
     self.draw = draw
     
     txt = self.graphInfo["Title"]
-    txt = OV.TranslatePhrase(txt)
+    
     #txt = self.metadata.get("Title",self.graphInfo["Title"]).title()
     
     if not txt: txt = "Not available"

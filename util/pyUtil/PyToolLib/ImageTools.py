@@ -428,8 +428,11 @@ class ImageTools(FontInstances):
                          image_size=None,
                          titleCase=False,
                          lowerCase=False,
-                         valign=None):
-    txt = OV.Translate("%%%s%%" %txt.strip()) ##Language
+                         valign=None,
+                         translate=True):
+    if translate:
+      txt = OV.Translate("%%%s%%" %txt.strip()) ##Language
+      
 
     if titleCase:
       txt = txt.title()
@@ -459,6 +462,11 @@ class ImageTools(FontInstances):
       
       #if font_size < 18:
       #  font_size = 18
+      
+      if not translate:
+        font_name = 'Vera'
+        font_size = original_font_size
+        
       
       try:
         txt.encode('ascii')
