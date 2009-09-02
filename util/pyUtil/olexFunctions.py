@@ -272,6 +272,11 @@ class OlexFunctions(inheritFunctions):
     g = self.func_wrap(function)
     g.__name__ = function.__name__
     olex.registerFunction(g,profiling)
+
+  def unregisterFunction(self,function,profiling=False):
+    g = self.func_wrap(function)
+    g.__name__ = function.__name__
+    olex_core.unregisterFunction(g,profiling)
     
   def registerMacro(self,function,options,profiling=False):
     g = self.func_wrap(function)

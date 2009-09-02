@@ -180,7 +180,7 @@ def make_edit_link(name, box_type):
   editLink = ""
   if OV.IsPluginInstalled('Olex2Portal'):
     if OV.GetParam('olex2.is_logged_on'):
-      editLink = "<a href='spy.EditHelpItem(%s-%s)'>Edit</a>" %(name, box_type)
+      editLink = "<a href='spy.EditHelpItem(%s-%s)'><b>&#187;</b>Edit</a>" %(name, box_type)
   return editLink
 
 
@@ -948,7 +948,7 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
       txt = OV.TranslatePhrase("tip-%i" %i)
       if j > max_i * 2: break
     #txt += "</td></tr><tr><td align='right'>%s</td></tr>" %make_edit_link("tip", "%i" %i)
-    txt += "</td></tr><b>&#187;</b>%s" %make_edit_link("tip", "%i" %i)
+    txt += "</td></tr>%s" %make_edit_link("tip", "%i" %i)
 
   elif number == "+1":
     i = current_tooltip_number + 1
@@ -957,7 +957,7 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
       i = 1
       txt = OV.TranslatePhrase("tip-%i" %i)
     #txt += "</td></tr><tr><td align='right'>%s</td></tr>" %make_edit_link("tip", "%i" %i)
-    txt += "</td></tr><b>&#187;</b>%s" %make_edit_link("tip", "%i" %i)
+    txt += "</td></tr>%s" %make_edit_link("tip", "%i" %i)
   elif number == "list":
     txt = ""
     for i in xrange(max_i):
@@ -976,15 +976,10 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
     txt += "</td></tr><tr><td align='right'>%s</td></tr>" %make_edit_link("tip", "%i" %i)
   current_tooltip_number = i
 
-#  txt = txt.encode('utf-8')
-#  txt = unicode(txt, 'utf-8')
-#  txt = unicode(txt, 'utf-8')
-  
-  #import array
-  #txt = array.array.fromstring(txt).tostring()
-  #txt = txt.encode('raw')
-  
   txt, d = format_help(txt)
+  if number == "list":
+    txt = txt.replace("&nbsp;","")
+
   
   OV.SetVar("current_tooltip_number",i)
   OV.write_to_olex("tip-of-the-day-content.htm", txt.encode('utf-8'))
