@@ -91,7 +91,7 @@ class StreamRedirection:
       olex.post( '\'' + Str + '\'')
       if self.refresh:
         t1 = time.time()
-        if t1 - self.t0 > 1:
+        if t1 - self.t0 > 0.5:
           olex.m("refresh")
           self.t0 = t1
       if self.graph!=False:
@@ -157,6 +157,7 @@ def print_python_version():
 
 def set_olex_paths():
   sys.path.append("%s" %basedir)
+  sys.path.append("%s/etc/scripts" %basedir)
   sys.path.append("%s/util/pyUtil" %basedir)
   sys.path.append("%s/util/pyUtil/PyToolLib" %basedir)
   sys.path.append("%s/util/pyUtil/PyToolLib/FileReaders" %basedir)
@@ -287,7 +288,8 @@ olx.Clear()
 #
 #       for bit in sys.path:
 #               print bit
-    
+  
+
 if olx.IsPluginInstalled('plugin-Batch') == "true":
   import plugin_batch_exex
 
@@ -316,6 +318,9 @@ if sys.platform[:3] == 'win':
 #else:
   #olx.SetVar('defeditor','gedit')
   #olx.SetVar('defexplorer','nautilus')
+
+
+import customScripts
 
 print "Welcome to Olex2"
 
