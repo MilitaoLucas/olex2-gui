@@ -460,25 +460,26 @@ class OlexCctbxGraphs(OlexCctbxAdapter):
 
     bitmap = 'working'
     OV.CreateBitmap(bitmap)
-
-    if graph == "wilson":
-      self.xy_plot = cctbx_controller.wilson_statistics(self.xray_structure(), self.reflections, **kwds)
-
-    elif graph == "completeness":
-      self.xy_plot = cctbx_controller.completeness_statistics(self.reflections, self.wavelength, **kwds)
-
-    elif graph == "cumulative":
-      self.xy_plot = cctbx_controller.cumulative_intensity_distribution(self.reflections, **kwds)
-
-    elif graph == "f_obs_f_calc":
-      self.xy_plot = cctbx_controller.f_obs_vs_f_calc(self.xray_structure(), self.reflections)
-
-    elif graph == "sys_absent":
-      self.xy_plot = cctbx_controller.sys_absent_intensity_distribution(self.reflections)
-
-    else:
-      pass
-    OV.DeleteBitmap(bitmap)
+    
+    try:
+      if graph == "wilson":
+        self.xy_plot = cctbx_controller.wilson_statistics(self.xray_structure(), self.reflections, **kwds)
+  
+      elif graph == "completeness":
+        self.xy_plot = cctbx_controller.completeness_statistics(self.reflections, self.wavelength, **kwds)
+  
+      elif graph == "cumulative":
+        self.xy_plot = cctbx_controller.cumulative_intensity_distribution(self.reflections, **kwds)
+  
+      elif graph == "f_obs_f_calc":
+        self.xy_plot = cctbx_controller.f_obs_vs_f_calc(self.xray_structure(), self.reflections)
+  
+      elif graph == "sys_absent":
+        self.xy_plot = cctbx_controller.sys_absent_intensity_distribution(self.reflections)
+    except Exception, err:
+      raise Exception, err
+    finally:
+      OV.DeleteBitmap(bitmap)
 
 class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
