@@ -129,9 +129,9 @@
     name="SET_AUTOCHEM_CUTOFF1_TYPE" 
       width='$eval(htmlpanelwidth()-eval(htmlpanelwidth()/2)-35)' 
       height="18" 
-      value="GetVar(autochem_cutoff1_type)"
+      value="$spy.GetParam(autochem.cutoff1_type)"
       items="--;solveit_R1;CFOM;Nqual;Ralpa;t;solveit_t;original_R1;volume;VSS;ATA;comment;Max Z;Space Group;Non H Atoms"	
-      onchange="SetVar(autochem_cutoff1_type,GetValue(SET_AUTOCHEM_CUTOFF1_TYPE))"
+      onchange="SetParam(autochem.cutoff1_type,GetValue(SET_AUTOCHEM_CUTOFF1_TYPE))"
       >
       </td>
       <td>
@@ -142,8 +142,8 @@
 	    name="SET_AUTOCHEM_CUTOFF1_OPERATOR" 
       width="50" 
       items="<;=;>;<>;!=;cont"	
-      value="GetVar(autochem_cutoff1_operator)"
-      onchange="SetVar(autochem_cutoff1_operator,GetValue(SET_AUTOCHEM_CUTOFF1_OPERATOR))"
+      value="$spy.GetParam(autochem.cutoff1_operator)"
+      onchange="spy.SetParam(autochem.cutoff1_operator,GetValue(SET_AUTOCHEM_CUTOFF1_OPERATOR))"
       >
       &nbsp;
       <input 
@@ -153,8 +153,8 @@
       width='$eval(htmlpanelwidth()-eval(htmlpanelwidth()/2)-86)' 
       height="18" 
       items="0.05;0.10;0.20;0.5;1.0;5.0;n/a"	
-      value="GetVar(autochem_cutoff1_value)"
-      onchange="SetVar(autochem_cutoff1_value,GetValue(SET_AUTOCHEM_CUTOFF1_VALUE))"
+      value="$spy.GetParam(autochem.cutoff1_value)"
+      onchange="SetParam(autochem.cutoff1_value,GetValue(SET_AUTOCHEM_CUTOFF1_VALUE))"
       >
       </td>
       </tr>
@@ -168,9 +168,9 @@
 		bgcolor="$getVar(gui_html_input_bg_colour)" 
 		name="SET_AUTOCHEM_CUTOFF2_TYPE" 
 		width='$eval(htmlpanelwidth()-eval(htmlpanelwidth()/2)-35)' 
-		value="GetVar(autochem_cutoff2_type)"
+		value="$spy.GetParam(autochem.cutoff2_type)"
 		items="--;solveit_R1;CFOM;Nqual;Ralpa;t;solveit_t;original_R1;volume;VSS;ATA;comment;Max Z;Space Group;Non H Atoms"	
-		onchange="SetVar(autochem_cutoff2_type,GetValue(SET_AUTOCHEM_CUTOFF2_TYPE))"
+		onchange="spy.SetParam(autochem.cutoff2_type,GetValue(SET_AUTOCHEM_CUTOFF2_TYPE))"
 	>
 </td>
 <td>
@@ -181,8 +181,8 @@
 	name="SET_AUTOCHEM_CUTOFF2_OPERATOR" 
 	width="50" 
 	items="--;<;=;>;<>;!=;cont"	
-	value="GetVar(autochem_cutoff2_operator)"
-	onchange="SetVar(autochem_cutoff2_operator,GetValue(SET_AUTOCHEM_CUTOFF2_OPERATOR))"
+	value="$spy.GetParam(autochem.cutoff2_operator)"
+	onchange="spy.SetParam(autochem.cutoff2_operator,GetValue(SET_AUTOCHEM_CUTOFF2_OPERATOR))"
 >
 &nbsp;
 <input
@@ -193,8 +193,8 @@
 	width='$eval(htmlpanelwidth()-eval(htmlpanelwidth()/2)-86)' 
 	height="18" 
 	items="--;0.05;0.10;0.20;0.5;1.0;5.0;n/a"	
-	value="GetVar(autochem_cutoff2_value)"
-	onchange="SetVar(autochem_cutoff2_value,GetValue(SET_AUTOCHEM_CUTOFF2_VALUE))"
+	value="$spy.GetParam(autochem.cutoff2_value)"
+	onchange="spy.SetParam(autochem.cutoff2_value,GetValue(SET_AUTOCHEM_CUTOFF2_VALUE))"
 >
 </td>
 </tr>  
