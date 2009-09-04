@@ -8,6 +8,7 @@ from cctbx import statistics
 from smtbx.refinement import minimization
 from cctbx import uctbx
 from iotbx.shelx import builders
+from smtbx.refinement.manager import manager
 
 class empty: pass
 
@@ -80,22 +81,32 @@ def wilson_statistics(model, reflections, n_bins=10):
     print "wilson_k, wilson_b:", 1/wp.wilson_intensity_scale_factor, wp.wilson_b
   return wp
 
-def completeness_statistics(reflections, n_bins=20):
-  verbose = False
+def completeness_statistics(reflections, wavelength, reflections_per_bin=20, verbose=False):
   f_obs=reflections.f_obs
-  f_sq_obs = reflections.f_sq_obs
+  f_sq_obs = reflections.f_sq_obs_filtered
   f_sq_obs = f_sq_obs.eliminate_sys_absent().average_bijvoet_mates()
   f_obs = f_sq_obs.f_sq_as_f()
   f_obs.setup_binner(
-    #n_bins=n_bins
-    auto_binning=True
-  )
+    reflections_per_bin=reflections_per_bin,
+    auto_binning=True)
   if (0 or verbose):
     f_obs.binner().show_summary()
-  return statistics.completeness_plot(f_obs)
+  missing_set = f_obs.complete_set().lone_set(f_obs).sort()
+  plot = statistics.completeness_plot(f_obs)
+  plot.x = uctbx.d_star_sq_as_two_theta(
+    1./flex.pow2(flex.double(plot.x)), wavelength,deg=True)
+  plot.missing_set = missing_set
+  if missing_set.size() > 0:
+    print "Missing data:"
+    print "  h  k  l  two theta"
+  else:
+    print "No missing data"
+  for indices, two_theta in zip(
+    missing_set.indices(), missing_set.two_theta(wavelength=wavelength, deg=True).data()):
+    print ("(%2i %2i %2i)  ") %indices + ("%8.2f") %two_theta
+  return plot
 
-def cumulative_intensity_distribution(reflections, n_bins=20):
-  verbose = False
+def cumulative_intensity_distribution(reflections, n_bins=20, verbose=False):
   f_obs=reflections.f_obs
   f_sq_obs = reflections.f_sq_obs
   f_sq_obs = f_sq_obs.eliminate_sys_absent().average_bijvoet_mates()
@@ -113,30 +124,47 @@ def sys_absent_intensity_distribution(reflections):
   return statistics.sys_absent_intensity_distribution(f_sq_obs).xy_plot_info()
 
 def f_obs_vs_f_calc(model, reflections):
-  f_obs = reflections.f_obs.merge_equivalents().array()
-  f_obs = f_obs.eliminate_sys_absent().average_bijvoet_mates()
-  sf = xray.structure_factors.from_scatterers(miller_set=f_obs,cos_sin_table=True)
-  f_calc = sf(model,f_obs).f_calc()
+  assert model.scatterers().size() > 0, "model.scatterers().size() > 0"
+  f_obs_merged = reflections.f_sq_obs_merged.f_sq_as_f()
+  sf = xray.structure_factors.from_scatterers(miller_set=f_obs_merged,cos_sin_table=True)
+  f_calc_merged = sf(model,f_obs_merged).f_calc()
 
-  ls_function = xray.unified_least_squares_residual(f_obs)
-  ls = ls_function(f_calc, compute_derivatives=False)
+  f_obs_filtered = f_obs_merged.common_set(reflections.f_sq_obs_filtered)
+  f_calc_filtered = f_calc_merged.common_set(f_obs_filtered)
+  f_obs_omitted = f_obs_merged.lone_set(f_obs_filtered)
+  f_calc_omitted = f_calc_merged.lone_set(f_calc_filtered)
+
+  ls_function = xray.unified_least_squares_residual(f_obs_filtered)
+  ls = ls_function(f_calc_filtered, compute_derivatives=False)
   k = ls.scale_factor()
-  fc = flex.abs(f_calc.data())
+  fc = flex.abs(f_calc_filtered.data())
   fc *= k
-  fo = flex.abs(f_obs.data())
+  fo = flex.abs(f_obs_filtered.data())
 
   fit = flex.linear_regression(fc, fo)
   fit.show_summary()
 
   plot = empty()
-  plot.indices = f_obs.indices()
+  plot.indices = f_obs_filtered.indices()
   plot.f_obs = fo
   plot.f_calc = fc
+  plot.f_obs_omitted = flex.abs(f_obs_omitted.data())
+  plot.f_calc_omitted = flex.abs(f_calc_omitted.data()) * k
+  plot.indices_omitted = f_obs_omitted.indices()
   plot.fit_slope = fit.slope()
   plot.fit_y_intercept = fit.y_intercept()
   plot.xLegend = "F calc"
   plot.yLegend = "F obs"
   return plot
+
+def powder_plot(model, reflection, n_bins=500):
+  f_obs = reflections.f_obs.merge_equivalents().array()
+  f_obs = f_obs.eliminate_sys_absent().average_bijvoet_mates()
+  sf = xray.structure_factors.from_scatterers(miller_set=f_obs,cos_sin_table=True)
+  f_calc = sf(model,f_obs).f_calc()
+  f_obs.setup_binner(
+    n_bins=n_bins)
+
 
 
 class reflections(object):
@@ -152,6 +180,27 @@ class reflections(object):
     self.crystal_symmetry = cs
     self.f_sq_obs = reflections_server.get_miller_arrays(None)[0]
     self.f_obs = self.f_sq_obs.f_sq_as_f()
+    self.omit = None
+    self.merg = None
+    self.f_sq_obs_merged = None
+    self.f_sq_obs_filtered = None
+
+  def merge(self, merg):
+    self.merg = merg
+    self.f_sq_obs_merged = self.f_sq_obs
+    self.f_sq_obs_merged = self.f_sq_obs_merged.eliminate_sys_absent().average_bijvoet_mates()
+
+  def filter(self, omit, wavelength):
+    self.omit = omit
+    two_theta = omit['2theta']
+    s = omit['s']
+    hkl = omit.get('hkl')
+    f_sq_obs_filtered = self.f_sq_obs_merged.resolution_filter(
+      d_min=uctbx.two_theta_as_d(two_theta, wavelength, deg=True))
+    if hkl is not None:
+      f_sq_obs_filtered = f_sq_obs_filtered.indices_filter(
+        indices=flex.miller_index(hkl))
+    self.f_sq_obs_filtered = f_sq_obs_filtered
 
 def create_cctbx_xray_structure(cell, spacegroup, atom_iter, restraint_iterator=None):
   """ cell is a 6-uple, spacegroup a string and atom_iter yields tuples (label, xyz, u, element_type) """
@@ -178,98 +227,26 @@ def create_cctbx_xray_structure(cell, spacegroup, atom_iter, restraint_iterator=
     builder.add_scatterer(a, behaviour_of_variable)
   return builder.structure
 
-class refinement(object):
+class refinement(manager):
   def __init__(self,
                f_obs=None,
                f_sq_obs=None,
                xray_structure=None,
-               lambda_=None,
+               wavelength=None,
                max_sites_pre_cycles=20,
-               max_cycles=40):
-    self.f_sq_obs = f_sq_obs
-    self.max_sites_pre_cycles = max_sites_pre_cycles
-    self.max_cycles = max_cycles
-    self.xs = xray_structure
-    from cctbx.eltbx import wavelengths, sasaki
-    for sc in self.xs.scatterers():
-      if sc.scattering_type in ('H','D'):continue
-      fp_fdp = sasaki.table(sc.scattering_type).at_angstrom(lambda_)
-      sc.fp = fp_fdp.fp()
-      sc.fdp = fp_fdp.fdp()
-
-  def on_cycle_finished(self, xs, minimiser):
-    """ called after each iteration of the given minimiser, xs being
-		the refined structure. It does nothing in this class. """
-
-  def start(self):
-    """ Start the refinement """
-    self.filter_cctbx_reflections()
-    self.xs0 = self.xs
-    #self.set_cctbx_refinement_flags(fix_sites_H=True)
-    self.set_cctbx_refinement_flags()
-    self.setup_cctbx_refinement()
-    self.start_cctbx_refinement()
-
-  def iter_scatterers(self):
-    """ an iterator over tuples (label, xyz, u) """
-    for a in self.xs.scatterers():
-      label = a.label
-      xyz = a.site
-      symbol = a.scattering_type
-      if a.flags.use_u_iso():
-        u = (a.u_iso,)
-        u_eq = u[0]
-      if a.flags.use_u_aniso():
-        u_cif = adptbx.u_star_as_u_cart(self.xs.unit_cell(), a.u_star)
-        u = u_cif
-        u_eq = adptbx.u_star_as_u_iso(self.xs.unit_cell(), a.u_star)
-
-      yield label, xyz, u, u_eq, symbol
-
-  def set_cctbx_refinement_flags(self, fix_sites_H=False):
-    scatterers = self.xs.scatterers()
-    use_u_aniso = scatterers.extract_use_u_aniso()
-    use_u_iso = scatterers.extract_use_u_iso()
-    if fix_sites_H:
-      grad_sites = ~self.xs.element_selection('H')
-    else:
-      grad_sites = flex.bool(self.xs.scatterers().size(), True)
-    scatterers.flags_set_grads(state=False)
-    scatterers.flags_set_grad_u_iso(use_u_iso.iselection())
-    scatterers.flags_set_grad_u_aniso(use_u_aniso.iselection())
-    scatterers.flags_set_grad_site(iselection=grad_sites.iselection())
-
-  def filter_cctbx_reflections(self):
-    f_sq_obs = self.f_sq_obs
-    for i in xrange(f_sq_obs.size()):
-      if f_sq_obs.data()[i] < -f_sq_obs.sigmas()[i]:
-        f_sq_obs.data()[i] = -f_sq_obs.sigmas()[i]
-    f_obs = f_sq_obs\
-          .eliminate_sys_absent()\
-          .as_non_anomalous_array()\
-          .merge_equivalents()\
-          .array().f_sq_as_f()
-
-    self.f_obs = f_obs
-
-  def setup_cctbx_refinement(self):
-    ls = xray.least_squares_residual(self.f_obs)
-    self.ls = ls
-
-  def start_cctbx_refinement(self):
-
-    minimisation = my_lbfgs(
-      delegate=lambda mini: self.on_cycle_finished(self.xs, mini),
-      target_functor=self.ls,
-      xray_structure=self.xs,
-      #structure_factor_algorithm="direct",
-      cos_sin_table=True,
-      lbfgs_sites_pre_minimisation_termination_params=scitbx.lbfgs.termination_parameters(max_iterations=self.max_sites_pre_cycles),
-      lbfgs_termination_params = scitbx.lbfgs.termination_parameters(
-        max_iterations=self.max_cycles),
-      verbose=1
-    )
-    self.minimisation = minimisation
+               max_cycles=40,
+               max_peaks=30,
+               verbose=1,
+               log=None):
+    manager.__init__(self,
+                     f_obs=f_obs,
+                     f_sq_obs=f_sq_obs,
+                     xray_structure=xray_structure,
+                     lambda_=wavelength,
+                     max_cycles=max_cycles,
+                     max_peaks=max_peaks,
+                     verbose=verbose,
+                     log=log)
 
   def f_obs_minus_f_calc_map(self, resolution):
     f_obs=self.f_obs
@@ -280,7 +257,7 @@ class refinement(object):
       miller_set=f_obs,
       cos_sin_table=True
     )
-    f_calc = sf(self.xs, f_obs).f_calc()
+    f_calc = sf(self.xray_structure, f_obs).f_calc()
     fc2 = flex.norm(f_calc.data())
     fo2 = f_sq_obs.data()
     wfo2 = 1./flex.pow2(f_sq_obs.sigmas())
@@ -292,129 +269,24 @@ class refinement(object):
       resolution_factor=resolution,
     )
 
-  def get_difference_map(self, resolution=0.2):
-    return self.f_obs_minus_f_calc_map(resolution).real_map()
-
-  def fourier_map(self):
-    fmap = self.f_obs.structure_factors_from_scatterers(
-      xray_structure=self.xs,
-      algorithm="direct").f_calc()
-    grid = fmap.fft_map().real_map()
-    return grid
-
-  def get_f_obs_map(self, resolution=0.2):
-    f_obs=self.f_obs
-    structure_factors = xray.structure_factors.from_scatterers(
-      miller_set=f_obs,
-      cos_sin_table=True
-    )
-    minimisation = self.minimisation
-    k = minimisation.target_result.scale_factor()
-    f_calc = minimisation.f_calc
-    f_obs = minimisation.target_functor.f_obs()
-    f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1./k, f_calc)
-    fm = f_obs_minus_f_calc.fft_map(
-      symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
-    )
-    fobs_map = f_obs.f_obs.fft_map(
-      symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=True),
-      resolution_factor=resolution,
-    )
-    grid = fobs_map.real_map()
-    return grid
-
-
-  def iter_peaks(self, resolution=0.2):
-    peaks = self.f_obs_minus_f_calc_map(resolution).peak_search(
-      parameters=maptbx.peak_search_parameters(
-        peak_cutoff=1,
-        min_distance_sym_equiv=1.0,
-        max_clusters=30,
-        ),
-      verify_symmetry=False
-      ).all()
-
-    #self.difference_map_grid = m
-    #rFile = open(r"C:\map.txt", 'w')
-    #s = m.last()
-    #rFile.write("%s %s %s " %(s[0], s[1], s[2]))
-    #for i in range (s[0]):
-      #for j in range (s[1]):
-        #for k in range (s[2]):
-          #rFile.write("%.2f " %(m[i,j,k]))
-
-
-    #	peaks = fm.peak_search()
-    for q,h in zip(peaks.sites(), peaks.heights()):
-      yield q,h
-
-  def r1(self):
-    f_sq_obs = self.f_sq_obs
-    merging = f_sq_obs.eliminate_sys_absent().merge_equivalents()
-    #merging.show_summary()
-    f_sq_obs = merging.array()
-    f_obs = f_sq_obs.f_sq_as_f()
-    strong = f_obs.data() > 4*f_obs.sigmas()
-    f_obs = f_obs.select(strong)
-    sf = xray.structure_factors.from_scatterers(
-      miller_set=f_obs,
-      cos_sin_table=True
-    )
-    f_calc = sf(self.xs, f_obs).f_calc()
-    fc = flex.abs(f_calc.data())
-    fo = f_obs.data()
-    k = self.minimisation.target_result.scale_factor()
-    return flex.sum(flex.abs(k*fc - fo)) / flex.sum(fo)
-
-
-if __name__ == '__main__':
-  def gen_atoms():
-    yield (
-      'O1',
-      (-0.137150, 0.839571, 0.535618),
-      (0.03920, 0.02479, 0.02102, -0.00359, 0.00749, -0.01039)
-    )
-    yield (
-      'O2',
-      (0.196475, 0.880847, 0.239105),
-      (0.02834, 0.02192, 0.02851, 0.00028, 0.01033, 0.00035)
-    )
-    yield (
-      'N',
-      (0.044615, 0.885818, 0.395317),
-      (0.01980, 0.01662, 0.01889, -0.00091, 0.00100, -0.00129)
-    )
-    yield (
-      'C1',
-      (-0.067890, 0.803554, 0.453464),
-      (0.02227, 0.01714, 0.01979, 0.00072, -0.00183, -0.00264)
-    )
-    yield (
-      'C2',
-      (0.101242, 0.823488, 0.303320),
-      (0.01814, 0.01616, 0.02174, -0.00007, 0.00138, 0.00220)
-    )
-    yield (
-      'C3',
-      (0.022664, 0.677112, 0.299133),
-      (0.02161, 0.01547, 0.02287, -0.00148, 0.00112, 0.00028)
-    )
-    yield (
-      'C4',
-      (-0.088420, 0.663297, 0.399782),
-      (0.02982, 0.01551, 0.02078, 0.00046, 0.00045, -0.00241)
-    )
-  cell=(7.3500, 9.5410, 12.8420, 90.000, 90.000, 90.000)
-  spacegroup="Pbca"
-  r = refinement(cell, spacegroup,
-                 atom_iter=gen_atoms(),
-                 reflections=reflections(cell, spacegroup, '03srv209.hkl')
-                 )
-  from iotbx import shelx
-  r.xs = shelx.from_ins.from_ins('/Users/luc/Developer/Seattle/TestStructures/03srv209.res')
-  r.start()
-  #r.get_difference_map()
-  #for q,h in r.iter_peaks():
-    #print h, q
-  #print '********************'
-  print r.r1()
+  #def peak_search(self):
+    #sf = xray.structure_factors.from_scatterers(
+      #miller_set=self.f_obs,
+      #cos_sin_table=True
+    #)
+    #f_calc = sf(self.xray_structure, self.f_obs).f_calc()
+    #f_o_minus_f_c = self.f_obs.f_obs_minus_f_calc(
+      #f_obs_factor=1/self.minimisation.target_result.scale_factor(),
+      #f_calc=f_calc)
+    #fft_map = f_o_minus_f_c.fft_map(
+      #symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=True))
+    #if 0: ##display map
+      #from crys3d import wx_map_viewer
+      #wx_map_viewer.display(title=structure_label,
+                            #fft_map=fft_map)
+    #search_parameters = maptbx.peak_search_parameters(
+      #peak_search_level=3,
+      #interpolate=True,
+      #min_distance_sym_equiv=1.,
+      #max_clusters=5)
+    #return fft_map.peak_search(search_parameters).all()
