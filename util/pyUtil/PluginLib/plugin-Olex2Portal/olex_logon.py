@@ -398,7 +398,8 @@ class DownloadOlexLanguageDictionary:
     
     res = make_translate_gui_items_html(m)
     if res:
-      OV.Cursor('busy', "Please wait while uploading your changes")
+      cursor_txt = OV.TranslatePhrase("Please wait while uploading your changes")
+      OV.Cursor('busy',cursor_txt)
       ok = self.upload_items(m)
       if ok != "OK":
         for i in xrange(4):

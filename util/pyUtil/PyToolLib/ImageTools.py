@@ -414,13 +414,23 @@ class ImageTools(FontInstances):
       print "The font %s is required for this option." %font_name
       self.abort = True
     pass
-      
-      
+  
+  def textsize(self,
+                   draw,
+                   txt,
+                   font_size,
+                   font_name='Vera',
+                   titleCase=False,
+                   lowerCase=False,
+                   translate=True):
+    return self.write_text_to_draw(draw=draw, txt=txt, font_name=font_name, font_size=font_size, titleCase=titleCase, lowerCase=lowerCase, translate=translate, getXY_only=True)
+    
+  
   def write_text_to_draw(self,
                          draw,
                          txt, 
                          top_left=(1,0), 
-                         font_name='Verdana', 
+                         font_name='Vera', 
                          font_size=11, 
                          font_colour="#000000", 
                          align="left", 
@@ -429,7 +439,8 @@ class ImageTools(FontInstances):
                          titleCase=False,
                          lowerCase=False,
                          valign=None,
-                         translate=True):
+                         translate=True,
+                         getXY_only=False):
     if translate:
       txt = OV.Translate("%%%s%%" %txt.strip()) ##Language
       
@@ -551,7 +562,10 @@ class ImageTools(FontInstances):
       left = (self.centre_text(draw, txt, font, max_width))
     elif align == "right":
       left = (self.align_text(draw, txt, font, max_width, 'right'))
-    
+      
+    if getXY_only:
+      wX, wY = draw.textsize(txt, font=font)
+      return wX, wY
     
     if not self.abort:
       try:

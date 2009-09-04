@@ -17,6 +17,9 @@ try:
 except:
   pass
 
+from ImageTools import ImageTools
+IT = ImageTools()
+
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
@@ -225,10 +228,22 @@ class Graph(ImageTools):
     fontscale = f * self.imX
     
     font_name = "Vera"
-    self.font_large = self.registerFontInstance(font_name, int(1.4 * fontscale))
-    self.font_normal = self.registerFontInstance(font_name, int(1.0 * fontscale))
-    self.font_small = self.registerFontInstance(font_name, int(0.9 *fontscale))
-    self.font_tiny = self.registerFontInstance(font_name, int(0.7 * fontscale))
+    self.font_size_large = int(1.4 * fontscale)
+    self.font_large = self.registerFontInstance(font_name, self.font_size_large)
+    
+    self.font_size_normal = int(1.0 * fontscale)
+    self.font_normal = self.registerFontInstance(font_name, self.font_size_normal)
+    
+    self.font_size_small = int(0.9 *fontscale)
+    self.font_small = self.registerFontInstance(font_name, self.font_size_small)
+    
+    self.font_size_tiny = int(0.7 * fontscale)
+    self.font_tiny = self.registerFontInstance(font_name, self.font_size_tiny)
+    
+    self.light_grey = "#888888"
+    self.grey = "#444444"
+    self.dark_grey = "#222222"
+    
     font_name = "Vera Bold"
     self.font_bold_large = self.registerFontInstance(font_name, int(1.4 * fontscale))
     self.font_bold_normal = self.registerFontInstance(font_name, int(1.0 * fontscale))
@@ -257,8 +272,8 @@ class Graph(ImageTools):
     if not txt: txt = "Not available"
     x = 0 + self.bSides+self.xSpace
     y = self.bTop
-    
-    self.draw.text((x, y), "%s" %txt, font=self.font_large, fill=self.titleColour)
+    top_left = (x,y)
+    IT.write_text_to_draw(draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.titleColour)
     currX, currY = self.draw.textsize(txt, font=self.font_bold_large)
     
     # Write something in the right-hand top spot on the graph
@@ -321,10 +336,12 @@ class Graph(ImageTools):
     i = 0
     for item in yAxis:
       txt = item
-      wX, wY = self.draw.textsize(txt, font=self.font_small)
+      wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_small)
       x = int(self.bSides + i * barX + (barX - wX)/2)
-      y = self.graph_bottom 
-      self.draw.text((x, y), "%s" %txt, font=self.font_small, fill="#444444")
+      y = self.graph_bottom
+      top_left = (x,y)
+      IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
+#      self.draw.text((x, y), "%s" %txt, font=self.font_small, fill="#444444")
       i += 1
       
   def draw_fit_line(self, slope, y_intercept):
@@ -380,11 +397,13 @@ class Graph(ImageTools):
     if y_intercept >= 0: sign = '+'
     else: sign = '-'
     txt = "y = %.3fx %s %.3f" %(slope,sign,abs(y_intercept))
-    wX, wY = self.draw.textsize(txt, font=self.font_small)
+    
+    wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_small)
     y = (slope * two_thirds + y_intercept) *self.scale_y 
     x = self.bSides + self.boxXoffset + ((two_thirds * self.scale_x)) + ((0 - self.max_x) * self.scale_x) + (self.delta_x * self.scale_x)
-#    x = self.graph_left + abs(two_thirds * self.scale_x)
-    self.draw.text((x, y+wY), "%s" %txt, font=self.font_small, fill="#444444")
+    top_left = (x,y)
+    IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
+    #self.draw.text((x, y+wY), "%s" %txt, font=self.font_small, fill="#444444")
     
   def draw_pairs(self, reverse_y=False, reverse_x=False): 
     self.reverse_y = reverse_y
@@ -575,8 +594,12 @@ class Graph(ImageTools):
              + (delta_y * scale_y))
         
       y = round(y,1)
+      if y < (self.graph_bottom) and y >= self.boxYoffset -wY/2:
+        top_left = (x,y)
       if y + wY/2 <= (self.graph_bottom) and y >= self.boxYoffset -wY/2:
         self.draw.text((x, y), "%s" %txt, font=self.font_small, fill="#444444")
+        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
+        #self.draw.text((x, y), "%s" %txt, font=self.font_small, fill="#444444")
         x = self.graph_left
         y = y + int(wY/2)
         self.draw.line(((x, y),(x+self.ax_marker_length, y)), width=self.line_width, fill=(200, 200, 200))
@@ -661,6 +684,7 @@ class Graph(ImageTools):
     wX, wY = self.draw.textsize(txt, font=self.font_small)
     x = self.boxX - wX - self.bSides - self.imX * 0.002
     y = self.boxY  + self.imY * 0.01
+    #IT.write_text_to_draw(self.draw, txt, top_left=(x,y), font_size=self.font_size_small, font_colour=self.grey)
     self.draw.text((x, y), "%s" %txt, font=self.font_small, fill="#444444")
     
   def draw_bars(self):
@@ -696,9 +720,12 @@ class Graph(ImageTools):
         txt = "%.0f" %item
       else:
         txt = "%.1f" %item
-      wX, wY = self.draw.textsize(txt, font=font)
+      wX, wY = IT.textsize(self.draw, txt, font_size=font_size)
+
       if barHeight > wY * 2:
-        self.draw.text((x + (barX - wX)/2, y + self.graphY * 0.01), "%s" %txt, font=font, fill="#222222")
+        top_left = (x + (barX - wX)/2, y + self.graphY * 0.01)
+        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.dark_grey)
+        #self.draw.text((x + (barX - wX)/2, y + self.graphY * 0.01), "%s" %txt, font=font, fill="#222222")
       i += 1
 
 class Analysis(Graph):
@@ -1024,7 +1051,8 @@ class refinement_graph(PrgAnalysis):
   def draw_bars(self, dataset, y_scale_factor=1.0, bar_labels=None, colour_function=None):
     top = self.graph_top
     marker_width = 5
-    title = self.graphInfo.get('Title', "")
+    txt = self.graphInfo.get('Title', "")
+    
     size = self.graphInfo.get('imSize', "")
     width = size[0]
     height = size[1] - top
@@ -1033,12 +1061,14 @@ class refinement_graph(PrgAnalysis):
     legend_top = height + 20
     labels = dataset.metadata().get('labels')
     y_label = dataset.metadata().get('y_label')
-    wX, wY = self.draw.textsize(y_label, font=self.font_large)
+    wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large)
     n_cycles = len(dataset.x)
     bar_width = int((width-2*self.bSides)/n_cycles) -1
     x = width - 2*self.bSides - wX
     y = wY + 6
-    self.draw.text((x, y), "%s" %y_label, font=self.font_large, fill="#888888")
+    top_left = (x,y)
+    IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
+    #self.draw.text((x, y), "%s" %y_label, font=self.font_large, fill="#888888")
 
     for i, xy in enumerate(dataset.xy_pairs()):
       x_value, y_value = xy
@@ -1071,7 +1101,8 @@ class refinement_graph(PrgAnalysis):
         txt = bar_labels[i]
       else:
         txt = "%.3f" %y_value
-      wX, wY = self.draw.textsize(txt, font=self.font_large)
+      wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large)
+
       if wX < bar_width:
         x = bar_left + ( bar_width - wX/2 -wX) + self.bSides
         x = bar_left + ( bar_width - wX)/2
@@ -1080,14 +1111,19 @@ class refinement_graph(PrgAnalysis):
           y = bar_top - 14
         else:
           y = bar_top + 6
-        self.draw.text((x, y), "%s" %txt, font=self.font_large, fill="#888888")
+        top_left = (x,y)
+        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
+        #self.draw.text((x, y), "%s" %txt, font=self.font_large, fill="#888888")
 
       if y_value < 0.003:
         txt = "OK"
-        wX, wY = self.draw.textsize(txt, font=self.font_large)
+        wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large)
         x = width - 2*self.bSides - wX
         y = wY + 30
-        self.draw.text((x, y - 10), "%s" %txt, font=self.font_large, fill=self.gui_green)
+        top_left = (x, y - 10)
+        top_left = (x,y)
+        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.gui_green)
+        #self.draw.text((x, y - 10), "%s" %txt, font=self.font_large, fill=self.gui_green)
 
     legend_top = height + 20
     legend_top = self.graph_bottom + 2
@@ -1098,9 +1134,11 @@ class refinement_graph(PrgAnalysis):
 
     txt = '%.3f' %(y_value)
     ## Draw Current Numbers
-    wX, wY = self.draw.textsize(txt, font=self.font_large)
+    wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large)
     x = width - wX - self.bSides
-    self.draw.text((x, legend_top), txt, font=self.font_large, fill="#888888")
+    top_left = (x, legend_top)
+    IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
+    #self.draw.text((x, legend_top), txt, font=self.font_large, fill="#888888")
 
   def make_graph(self):
     self.make_empty_graph()
@@ -1220,14 +1258,18 @@ class WilsonPlot(Analysis):
     i = 0
     for txt in text:
       unicode_txt = self.get_unicode_characters(txt)
-      wX, wY = draw.textsize(unicode_txt, font=self.font_tiny)
+      #wX, wY = draw.textsize(unicode_txt, font=self.font_tiny)
+      wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_tiny)
+
       colour = "#444444"
       if "E^2" in txt:
         if float(estats) < float(self.wilson_grad_begin):
           colour = "#ff0000"
         elif float(estats) > float(self.wilson_grad_end):
           colour = "#ff0000"
-      draw.text((left, top), "%s" %unicode_txt, font=self.font_tiny, fill=colour)
+      top_left = (left, top)
+      IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_tiny, font_colour=colour)
+      #draw.text((left, top), "%s" %unicode_txt, font=self.font_tiny, fill=colour)
       top += wY +2
       i += 1
       if i == 2:
@@ -1311,8 +1353,12 @@ class WilsonPlot(Analysis):
       if i == margin_left:
         txt = "acentric"
         txt = OV.TranslatePhrase(txt)
-        wX, wY = draw.textsize(txt, font=self.font_tiny)
-        draw.text((i-int(wX/2), 0), "%s" %txt, font=self.font_tiny, fill=self.gui_html_highlight_colour)
+        #wX, wY = draw.textsize(txt, font=self.font_tiny)
+
+        wX, wY = IT.textsize(draw, txt, font_size=self.font_size_tiny)
+        top_left = (i-int(wX/2), 0)
+        IT.write_text_to_draw(draw, txt, top_left=top_left, font_size=self.font_size_tiny, font_colour=self.gui_html_highlight_colour)
+        #draw.text((i-int(wX/2), 0), "%s" %txt, font=self.font_tiny, fill=self.gui_html_highlight_colour)
         txt = "0.736"
         wX, wY = draw.textsize(txt, font=self.font_tiny)
         draw.text((i-int(wX/2), boxTopOffset+boxHeight-1), "%s" %txt, font=self.font_tiny, fill=self.titleColour)
@@ -1320,7 +1366,9 @@ class WilsonPlot(Analysis):
         txt = "centric"
         txt = OV.TranslatePhrase(txt)
         wX, wY = draw.textsize(txt, font=self.font_tiny)
-        draw.text((i-int(wX/2), 0), "%s" %txt, font=self.font_tiny, fill=self.gui_html_highlight_colour)
+        top_left = (i-int(wX/2), 0)
+        IT.write_text_to_draw(draw, txt, top_left=top_left, font_size=self.font_size_tiny, font_colour=self.gui_html_highlight_colour)
+        #draw.text((i-int(wX/2), 0), "%s" %txt, font=self.font_tiny, fill=self.gui_html_highlight_colour)
         txt = "0.968"
         wX, wY = draw.textsize(txt, font=self.font_small)
         draw.text((i-int(wX/2), boxTopOffset+boxHeight-1), "%s" %txt, font=self.font_tiny, fill=self.titleColour)
@@ -1396,10 +1444,12 @@ class ChargeFlippingPlot(PrgAnalysis):
     
     if solving.state is solving.guessing_delta:
       if previous_state is not solving.guessing_delta:
-        t = "%s" %self.attempt
-        wX, wY = self.draw.textsize(t, font=self.font_bold_large)
+        txt = "%s" %self.attempt
+        wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large, font_name = "Vera Bold")
         x = self.counter + marker_width + 5
-        self.draw.text((x, self.graph_bottom - wY -3), "%s" %t, font=self.font_bold_large, fill="#888888")
+        top_left = (x, self.graph_bottom -wY -3)
+        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_name = "Vera Bold", font_colour=self.light_grey)
+        #self.draw.text((x, self.graph_bottom - wY -3), "%s" %t, font=self.font_bold_large, fill="#888888")
         self.attempt += 1
         if self.counter != 0:
           self.counter += 1
@@ -1414,10 +1464,12 @@ class ChargeFlippingPlot(PrgAnalysis):
         self.make_empty_graph()
         self.draw = ImageDraw.Draw(self.im)
         self.counter = self.bSides
-        t = "...continued"
-        wX, wY = self.draw.textsize(t, font=self.font_normal)
+        txt = "...continued"
+        wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_normal)
         x = width - wX - self.bSides - 3
-        self.draw.text((x, 20), "%s" %t, font=self.font_normal, fill="#888888")
+        top_left = (x, 20)
+        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_normal, font_colour=self.light_grey)
+        #self.draw.text((x, 20), "%s" %t, font=self.font_normal, fill="#888888")
       x = self.counter
       
       ## Draw CC
@@ -1453,7 +1505,10 @@ class ChargeFlippingPlot(PrgAnalysis):
       box = (10,legend_top +m_offset,10+marker_width, legend_top+marker_width + m_offset)
       self.draw.rectangle(box, fill=(ccR, ccG, ccB), outline=(ccR/2, ccG/2, 0))
       tt = "CC"
-      self.draw.text((10+marker_width+3, legend_top), "%s" %tt, font=self.font_large, fill="#888888")
+      #self.draw.text((10+marker_width+3, legend_top), "%s" %tt, font=self.font_large, fill="#888888")
+      top_left = (10+marker_width+3, legend_top)
+      IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_normal, font_colour=self.light_grey)
+
       
       ## Draw R1 Legend
       box = (40,legend_top + m_offset + 1,40+marker_width,legend_top + m_offset + 3)
