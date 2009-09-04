@@ -209,7 +209,7 @@ Basis-target	Switches the display of the basis vectors on	Interrupteurs l'affich
 Grow All-target	Grows all possible fragments in the structure	Pousse tous les fragments possibles dans la structure	ينمو كل ما يمكن من شظايا في الهيكل	Растет всех возможных фрагментов в структуре	すべての可能性は、構造物の破片が生える	German	Crece todos los posibles fragmentos en la estructura	生长结构中所有可能的片段	Μεγαλωνει ολα τα δυνατα κομματια της δομης
 Asymmetric Unit	Asymmetric Unit	Unité asymétrique	غير المتماثله وحده	Асимметричный группы	非対称ユニット	Asymmetrische Einheit	Unidad asimétrica	不对称单元	Ασυμμετρες μοναδας
 Q-Peaks	Q-Peaks	Q-Peaks	س - ذرى	Q-Вершины	問-ピークス	Elektronendichte Peaks	Q-Picos	Q峰	Q-Peaks
-Labels	Labels	Labels	علامات	Ярлыки	ラベル	Name	Etiquetas	标签	Ετικετες
+Labels	Labels	Labels	علامات	Ярлыки	ラベル	Name	Etiquetas	原子标签	Ετικετες
 Expand	Expand	Expand	توسع	Расширять	拡大	Erweitern	Expand	扩展	Αναπτυξτε
 Link	Link	Lien	الوصله	Link	リンク	Verknüpfe	Link	连接	Link
 Assign	Assign	Assigner	اسناد	Назначить	割り当てる	Zuweisen	Asignar	指定	Assign
@@ -459,8 +459,8 @@ Refresh GUI images	Refresh GUI images	.	.	Refresh GUI images	.	Grafik Erneuern	.
 If the GUI has gone bad	If the GUI has gone bad	.	.	If the GUI has gone bad	.	Wenn das GUI kaputt gegangen ist	.	.	.
 Kill all Hydrogen Atoms	Kill all Hydrogen Atoms	.	.	.	.	Alle Wasserstoffatome löschen	.	.	.
 Toggle H atoms ON > ON with H-bonds > OFF	Toggle H atoms ON > ON with H-bonds > OFF	.	.	.	.	H an > H mit Wasserstoffbrücken >> H aus	.	.	.
-Atoms clicked after clicking this button &#013;will be asociated with the ShelX command HFIX	.	.	.	.	.	.	.	.	.
-Change the formula in the files so it reflects what is on the screen	.	.	.	.	.	Formel so ändern, dass diese der momentanen Struktur entspricht.	.	.	.
+Atoms clicked after clicking this button &#013;will be asociated with the ShelX command HFIX	Atoms clicked after clicking this button &#013;will be asociated with the ShelX command HFIX	.	.	.	.	.	.	.	.
+Change the formula in the files so it reflects what is on the screen	Change the formula in the files so it reflects what is on the screen	.	.	.	.	Formel so ändern, dass diese der momentanen Struktur entspricht.	.	.	.
 low-quality-target	Show Structure in Low Quality Display	.	.	.	.	Niedere Grafiksqualität	.	用低质量显示模式	.
 Switches the display of the cell on	.	.	.	.	.	Zelle anzeigen	.	.	.
 symmetry-generation	.	.	.	.	.	symmetry-generation	.	.	.
@@ -475,15 +475,15 @@ Polyhedra	Polyhedra	.	.	.	.	Polyheder	.	多面体模型	.
 Wireframe	Wireframe	.	.	.	.	Drahtmodell	.	线框模型	.
 Tubes	Tubes	.	.	.	.	Röhren	.	管状模型	.
 chemical-tools	Chemical Tools	.	.	.	.	chemical-tools	.	.	.
-Chemical Tools	Chemical Tools	.	.	.	.	Chemische Analysen	.	Chemical Tools	.
-Delete Void Display	Delete Void Display	.	.	.	.	Lerraumdarstellung Löschen	.	Delete Void Display	.
+Chemical Tools	Chemical Tools	.	.	.	.	Chemische Analysen	.	化学工具	.
+Delete Void Display	Delete Void Display	.	.	.	.	Lerraumdarstellung Löschen	.	删除空隙空间显示	.
 calculate-voids	Calculate Voids	.	.	.	.	calculate-voids	.	Calculate Voids	.
-Calculate Voids	Calculate Voids	.	.	.	.	Leerräume Berechnen	.	Calculate Voids	.
-sorting	Sorting	.	.	Сортировка	.	sortieren	.	.	.
+Calculate Voids	Calculate Voids	.	.	.	.	Leerräume Berechnen	.	计算空隙空间	.
+Sorting	Sorting	.	.	Сортировка	.	sortieren	.	原子排序	.
 mass & label	Mass & Label	.	.	.	.	Masse & Name	.	原子量 & 标签	.
 atom label	Atom Label	.	.	.	.	Atomname	.	原子标签	.
 atomic mass	Atomic Mass	.	.	.	.	Atommasse	.	原子量	.
-moieties	Moieties	.	.	.	.	Teil	.	部分	.
+moieties	Moieties	.	.	.	.	Teil	.	分组	.
 bad_gui-msg	If the GUI has Gone Fishing	.	.	.	.	Wenn das GUI kaputt gegangen ist	.	bad_gui-msg	.
 bad_gui	Reload the GUI	.	.	.	.	GUI Neu Laden	.	Reload the GUI	.
 bad_gui-target	Try clicking on this link if the GUI has been corrupted	.	.	.	.	Klicken sie hier, um das GUI neu zu laden	.	bad_gui-target	.
@@ -492,38 +492,38 @@ recent-files	.	.	.	предыдушие файлы	.	.	.	.	.
 name-target	Start Naming Mode	.	.	name-target	.	Bennungsmodus Einschalten	.	开始命名	.
 mass & labels	Mass & Labels	.	.	.	.	.	.	.	.
 Pack within Radius of	Pack within Radius of <i>n</i> Å	.	.	.	.	Pack within Radius of <i>n</i> Å	.	在<i>n</i> Å半径内显示堆积图	.
-wire	Wire	.	.	.	.	Wire	.	.	.
-surface	Surface	.	.	.	.	Surface	.	.	.
-points	Points	.	.	.	.	Points	.	.	.
+wire	Wire	.	.	.	.	Wire	.	线框式	.
+surface	Surface	.	.	.	.	Surface	.	表面式	.
+points	Points	.	.	.	.	Points	.	点式	.
 Equivalent Fragments	Equivalent Fragments	.	.	.	.	Gleichartige Fragmente	.	等价的片段	.
 Automatic Hydrogen Naming	Automatic Hydrogen Naming	.	.	.	.	Automatische Benennung der Wasserstoffatome	.	自动命名氢原子	.
 electron-density	electron-density	.	.	.	.	electron-density	.	.	.
 Mask	Mask	.	.	.	.	Mask	.	Mask	.
-Delete Map	Delete Map	.	.	.	.	Map Löschen	.	Delete Map	.
-Calculate	Calculate	.	.	.	.	Berechnen	.	Calculate	.
-Map	Map	.	.	.	.	Map	.	.	.
-Source	Source	.	.	.	.	Quelle	.	.	.
-Electron Density Peaks	Electron Density Peaks	.	.	.	.	Elektronendichte Peaks	.	电子云密度峰	.
+Delete Map	Delete Map	.	.	.	.	Map Löschen	.	删除电子云密度图	.
+Calculate	Calculate	.	.	.	.	Berechnen	.	计算	.
+Map	Map	.	.	.	.	Map	.	电子云密度图	.
+Source	Source	.	.	.	.	Quelle	.	数据源	.
+Electron Density Peaks	Electron Density Peaks	.	.	.	.	Elektronendichte Peaks	.	残余电子云密度峰	.
 rrings_help	Restraints all selected atoms to lie in a plane and have the same distance	.	.	.	.	.	.	.	.
-rrings-htmhelp	Restraints all selected atoms to lie in a plane and have the same distance	.	.	.	.	Restraints all selected atoms to lie in a plane and have the same distance	.	Restraints all selected atoms to lie in a plane and have the same distance	.
-tria-htmhelp	Restrain three atoms such that the distance between the central atom and two specified bound atoms is the same.	.	.	.	.	Restrain three atoms such that the distance between the central atom and two specified bound atoms is the same.	.	Restrain three atoms such that the distance between the central atom and two specified bound atoms is the same.	.
-eadp-htmhelp	Select any number of atoms - their EADPs will be constrained to be the same.	.	.	.	.	Select any number of atoms - their EADPs will be constrained to be the same.	.	Select any number of atoms - their EADPs will be constrained to be the same.	.
-exyz-htmhelp	Select any number of atoms - their XYZ position will be constrained to be the same.	.	.	.	.	Select any number of atoms - their XYZ position will be constrained to be the same.	.	Select any number of atoms - their XYZ position will be constrained to be the same.	.
+rrings-htmhelp	Restraints all selected atoms to lie in a plane and have the same distance	.	.	.	.	Restraints all selected atoms to lie in a plane and have the same distance	.	限制所有已选原子在同一平面并且间距相等	.
+tria-htmhelp	Restrain three atoms such that the distance between the central atom and two specified bound atoms is the same.	.	.	.	.	Restrain three atoms such that the distance between the central atom and two specified bound atoms is the same.	.	限制中间原子与其它两个原子的间距相等	.
+eadp-htmhelp	Select any number of atoms - their EADPs will be constrained to be the same.	.	.	.	.	Select any number of atoms - their EADPs will be constrained to be the same.	.	选择任意数目原子-这些原子的EADP参数将被限定为相同大小。	.
+exyz-htmhelp	Select any number of atoms - their XYZ position will be constrained to be the same.	.	.	.	.	Select any number of atoms - their XYZ position will be constrained to be the same.	.	选择任意数目原子-这些原子的XYZ坐标将被限定为相同位置。	.
 Close	Close	.	.	.	.	.	.	关闭	.
 .	.	.	.	.	.	.	.	.	.
-Electon Density Peaks	Electon Density Peaks	.	.	.	.	Electon Density Peaks	.	电子云密度峰	.
+Electon Density Peaks	Electon Density Peaks	.	.	.	.	Electon Density Peaks	.	残余电子云密度峰	.
 Auto	Auto	.	.	.	.	.	.	自动模式	.
-Pack within Radius of <i>n</i> &Aring;	.	.	.	.	.	.	.	.	.
-Pack Radius	Pack within Radius of <i>n</i> Å	.	.	.	.	Pack within Radius of <i>n</i> Å	.	在<i>n</i> Å半径内显示堆积图	.
-Starting ...	Starting ...	.	.	.	.	Starting ...	.	Starting ...	.
-Modify Settings for Report Generation	Modify Settings for Report Generation	.	.	.	.	Einstellungen für die Berichterstellung ändern	.	Modify Settings for Report Generation	.
+Pack within Radius of <i>n</i> &Aring;	Pack within Radius of <i>n</i> Å	.	.	.	.	.	.	.	.
+Pack Radius	Pack Radius	.	.	.	.	Pack within Radius of <i>n</i> Å	.	在<i>n</i> Å半径内显示堆积图	.
+Starting ...	Starting ...	.	.	.	.	Starting ...	.	开始 ...	.
+Modify Settings for Report Generation	Modify Settings for Report Generation	.	.	.	.	Einstellungen für die Berichterstellung ändern	.	修改报告创建设置	.
 Tick the box to automatically update	Tick the box to automatically update	.	.	.	.	Tick the box to automatically update	.	Tick the box to automatically update	.
 Checking for CIF file ...	Checking for CIF file ...	.	.	.	.	Nch cif suchen	.	Checking for CIF file ...	.
-Refine the Structure	Refine the Structure	.	.	.	.	Struktur verfeinern	.	Refine the Structure	.
+Refine the Structure	Refine the Structure	.	.	.	.	Struktur verfeinern	.	精修结构	.
 Make selected atoms isotropic. &#013;If no atoms are selected, all atoms will be transformed	.	.	.	.	.	.	.	.	.
-Modify Settings for Structure Solution	Modify Settings for Structure Solution	.	.	.	.	Einstellungen für die Strukturlösung ändern	.	Modify Settings for Structure Solution	.
-Report Title	Report Title	.	.	.	.	Report Title	.	Report Title	.
-Report Style	Report Style	.	.	.	.	Report Style	.	Report Style	.
+Modify Settings for Structure Solution	Modify Settings for Structure Solution	.	.	.	.	Einstellungen für die Strukturlösung ändern	.	更改结构解析设置	.
+Report Title	Report Title	.	.	.	.	Report Title	.	报告标题	.
+Report Style	Report Style	.	.	.	.	Report Style	.	报告格式	.
 Q To C-target	Convert all electron density peaks to C atoms	.	.	.	.	Convert all electron density peaks to C atoms	.	将所有Q峰标为C	.
 Tidy Structure-target	Tidy the structure automatically	.	.	.	.	Struktur automatisch aufräumen	.	自动整理结构	.
 HFIX 43-target	Atoms clicked after clicking this button will be asociated with the ShelX command HFIX% 43	.	.	.	.	Atoms clicked after clicking this button will be asociated with the ShelX command HFIX% 43	.	点击此按钮后选定的原子被加上HFIX 43命令	.
@@ -544,10 +544,9 @@ Updating Cif ...	Updating Cif	.	.	.	.	Updating Cif	.	Updating Cif ...	.
 Creating Image ...	Creating Image...	.	.	.	.	Creating Image...	.	Creating Image ...	.
 Chinese	Chinese	.	.	.	.	Chinesisch	.	中文	.
 HIMP	HIMP	.	.	.	.	HIMP	.	HIMP	.
-Solution XXXXXXXXXXXXXXXX Method	.	.	.	.	.	.	.	Solution XXXXXXXXXXXXXXXX Method	.
 Alerts	Alerts	.	.	.	.	Warnungen	.	警告	.
 Mode Split	Mode Split	.	.	.	.	Mode Split	.	Mode Split	.
-Graduated on/off	Graduated on/off	.	.	.	.	Graduierter Hintergrund An/Aus	.	Graduated on/off	.
+Graduated on/off	Graduated on/off	.	.	.	.	Graduierter Hintergrund An/Aus	.	梯度显示开/关	.
 Tooltips on/off	Tooltips on/off	.	.	.	.	Tooltips An/Aus	.	工具提示开/关	.
 Creating Report ...	Creating Report	.	.	.	.	Creating Report	.	Creating Report ...	.
 Switches interactive help in cmd on	Switches interactive help in cmd on	.	.	.	.	.	.	命令行模式互交式帮助开关	.
@@ -561,44 +560,44 @@ Assign & Refine	Assign & Refine	.	.	.	.	Assign & Refine	.	Assign & Refine	.
 Open a reflection file (hkl)	Open a reflection file (hkl)	.	.	.	.	Open a reflection file (hkl)	.	Open a reflection file (hkl)	.
 Co110	Co110	.	.	.	.	Co110	.	Co110	.
 Make Structure Anisotropic	Make Structure Anisotropic	.	.	.	.	Make Structure Anisotropic	.	Make Structure Anisotropic	.
-vss	Verify Structure Solution	.	.	.	.	Strukturlösung Verifizieren	.	.	.
-ata	Atom Type Assignment	.	.	.	.	Atomtypen Zuweisen	.	.	.
-Solve Only	Solve Only	.	.	.	.	Nur Lösen	.	.	.
-Refine Only	Refine Only	.	.	.	.	Nur Verfeinern	.	.	.
+vss	Verify Structure Solution	.	.	.	.	Strukturlösung Verifizieren	.	核实结构解析	.
+ata	Atom Type Assignment	.	.	.	.	Atomtypen Zuweisen	.	原子种类指认	.
+Solve Only	Solve Only	.	.	.	.	Nur Lösen	.	解析结构	.
+Refine Only	Refine Only	.	.	.	.	Nur Verfeinern	.	精修结构	.
 Current	Current	.	.	.	.	Diese Struktur	.	.	.
-Refinement Method	Refinement Method	.	.	.	.	Verfeinerungsmethode	.	.	.
-Refinement Program	Refinement Program	.	.	.	.	Verfeinerungsprogramm	.	.	.
-isot-target	Make selected atoms isotropic. If no atoms are selected, all atoms will be transformed	.	.	.	.	Make selected atoms isotropic. If no atoms are selected, all atoms will be transformed	.	.	.
+Refinement Method	Refinement Method	.	.	.	.	Verfeinerungsmethode	.	精修方法	.
+Refinement Program	Refinement Program	.	.	.	.	Verfeinerungsprogramm	.	精修程序	.
+isot-target	Make selected atoms isotropic. If no atoms are selected, all atoms will be transformed	.	.	.	.	Make selected atoms isotropic. If no atoms are selected, all atoms will be transformed	.	使已选原子各向同性。如果没有选择原子，则作用于所有原子。	.
 Phenyl	Phenyl	.	.	.	.	Phenyl	.	苯环	.
-Pyridine	Pyridine	.	.	.	.	Pyridin	.	嘧啶环	.
-Working	Working	.	.	.	.	.	.	Working	.
+Pyridine	Pyridine	.	.	.	.	Pyridin	.	吡啶环	.
+Working	Working	.	.	.	.	Working	.	Working	.
 bounding_box-target	Calculate the Bounding Box around your moleule	.	.	.	.	Calculate the Bounding Box around your moleule	.	计算包裹分子的长方体盒子	.
 Bounding Box	Bounding Box	.	.	.	.	Bounding Box	.	包裹分子的长方体	.
-ZP2	ZP2	.	.	.	.	.	.	ZP2	.
+ZP2	ZP2	.	.	.	.	ZP2	.	ZP2	.
 Batch Match	Batch Match	.	.	.	.	Batch Match	.	.	.
-Russian	Russian	.	.	.	.	Russisch	.	.	.
-<b>Add Hydrogen Atoms	.	.	.	.	.	.	.	<b>Add Hydrogen Atoms	.
+Russian	Russian	.	.	.	.	Russisch	.	俄语	.
+<b>Add Hydrogen Atoms	Add Hydrogen Atoms	.	.	.	.	.	.	<b>Add Hydrogen Atoms	.
 Random	Random	.	.	.	.	Zufall	.	Random	.
 List	List	.	.	.	.	Liste	.	List	.
 Next	Next	.	.	.	.	Nächster	.	Next	.
 Tip Number	Tip Number	.	.	.	.	Tip Nummer	.	Tip Number	.
 tip-14	t^Growing^tThere are several commands in olex2 to grow molecules. These are described below. In any case, to get back to the asymmetric unit, you need to type the command:XX fuse XX&&~Grow~ grows all atoms in the asymmetric unit (including Q-peaks even# if they are hidden). Other commands for growing/packing include 'pack' and several modes:XX mode grow XXdisplays the covalent bonds which can be grownXX mode grow -s XXshows hydrogen bonds which can be grownXX mode grow -v XXshows contacts which can be gown within specified distance from shown atoms(default is 2&Aring;, provide -v=D to specify longer distances)  &&	.	.	.	.	.	.	.	.
-center_on_cell-target	Center asymmetric unit contents on the unit cell	.	.	.	.	.	.	.	.
-largest_part-target	Center asymmetric unit contents on the largest fragment	.	.	.	.	.	.	.	.
-Please Select	Please Select	.	.	.	.	Bitte auswählen	.	.	.
-Centric	Centrosymmetric	.	.	.	.	Zentrosymmetrisch	.	.	.
-Twinned Acentric	Twinned Centrosymmetric	.	.	.	.	Verzwillingt nicht-zentrosymmetrisch	.	.	.
-Acentric	Non-Centrosymmetric	.	.	.	.	nicht-zentrosymmetrisch	.	.	.
+center_on_cell-target	Center asymmetric unit contents on the unit cell	.	.	.	.	.	.	将不对称单元中心放在晶胞中	.
+largest_part-target	Center asymmetric unit contents on the largest fragment	.	.	.	.	.	.	将不对称单元中心放在最大片段上	.
+Please Select	Please Select	.	.	.	.	Bitte auswählen	.	请选择	.
+Centric	Centrosymmetric	.	.	.	.	Zentrosymmetrisch	.	中心对称	.
+Twinned Acentric	Twinned Centrosymmetric	.	.	.	.	Verzwillingt nicht-zentrosymmetrisch	.	孪晶非中心对称	.
+Acentric	Non-Centrosymmetric	.	.	.	.	nicht-zentrosymmetrisch	.	非中心对称	.
 Cumulative Intensity Statistics	Cumulative Intensity Statistics	.	.	.	.	.	.	.	.
-Cumulative Intensity Distribution	Cumulative Intensity Distribution	.	.	.	.	Kumulative Intensitätsverteilung	.	.	.
-Wilson Plot	Wilson Plot	.	.	.	.	Wilson Graph	.	.	.
-Systematic Absences Intensity Distribution	Systematic Absences Intensity Distribution	.	.	.	.	Systematic Absences Intensity Distribution	.	.	.
-Most Disagreeable Reflections	Most Disagreeable Reflections	.	.	.	.	Abweichende Reflexe	.	.	.
-Resolution	Resolution	.	.	.	.	Auflösung	.	.	.
-Completeness Plot	Completeness Plot	.	.	.	.	Vollständigkeitsgraph	.	.	.
-Shell Completeness	Shell Completeness	.	.	.	.	Schalenvollständigkeit	.	.	.
-Unique Data	Unique Data	.	.	.	.	Unique Data	.	.	.
-Fobs vs Fcalc	Fobs vs Fcalc	.	.	.	.	Fobs vs Fcalc	.	.	.
+Cumulative Intensity Distribution	Cumulative Intensity Distribution	.	.	.	.	Kumulative Intensitätsverteilung	.	累计强度分布	.
+Wilson Plot	Wilson Plot	.	.	.	.	Wilson Graph	.	Wilson Plot	.
+Systematic Absences Intensity Distribution	Systematic Absences Intensity Distribution	.	.	.	.	Systematic Absences Intensity Distribution	.	系统消光强度分布	.
+Most Disagreeable Reflections	Most Disagreeable Reflections	.	.	.	.	Abweichende Reflexe	.	最不合适的衍射点	.
+Resolution	Resolution	.	.	.	.	Auflösung	.	分辨率	.
+Completeness Plot	Completeness Plot	.	.	.	.	Vollständigkeitsgraph	.	完整度	.
+Shell Completeness	Shell Completeness	.	.	.	.	Schalenvollständigkeit	.	衍射层完整度	.
+Unique Data	Unique Data	.	.	.	.	Unique Data	.	独立衍射点	.
+Fobs vs Fcalc	Fobs vs Fcalc	.	.	.	.	Fobs vs Fcalc	.	Fobs vs Fcalc	.
 Occupancy	Occupancy	.	.	.	.	Occupancy	.	占有率	.
 Parts	Parts	.	.	.	.	Parts	.	Parts	.
 Atom Names	Atom Names	.	.	.	.	Atom Names	.	原子名称	.
@@ -607,11 +606,28 @@ Fixed Parameters	Fixed Parameters	.	.	.	.	Fixed Parameters	.	固定参数	.
 H Atom Labels	H Atom Labels	.	.	.	.	H Atom Labels	.	H原子标签	.
 Link-Code	Link-Code	.	.	.	.	Link-Code	.	链接标记	.
 tip-15	t^Packing^tThere are several commands in olex2 pack molecules. These are described below. In any case, to get back to the asymmetric unit, you need to type the command:XX fuse XX  &&~Pack~XX pack R XXgenerates molecules which centre of mass is within RXX pack cell XXShows the content of the unit cellXX pack &#36;Fe XXpacks only specified atoms, -c option can be added to specify thatcurrent model should not be cleared~Move~XX mode move -c XXonce a fragment atom is selected this mode will copy any other fragment (which is clicked) as close to the selected atom as possible        &&	.	.	.	.	.	.	.	.
-Wilson Plot cctbx	.	.	.	.	.	Wilson Graph (cctbx)	.	.	.
-Systematic Absences	.	.	.	.	.	Systematische Abwesenheit	.	.	.
-Wilson Plot Olex2	.	.	.	.	.	Wilson Graph (Olex2)	.	.	.
-Cumulative	.	.	.	.	.	Kumulativ	.	.	.
-Reflection Statistics	.	.	.	.	.	Reflexstatistik	.	.	.
-AND	.	.	.	.	.	UND	.	.	.
-Exclude	.	.	.	.	.	Auschliessen	.	.	.
-Show Cumulative Intensities	.	.	.	.	.	Show Cumulative Intensities	.	.	.
+Wilson Plot cctbx	Wilson Plot (cctbx)	.	.	.	.	Wilson Graph (cctbx)	.	Wilson Plot cctbx	.
+Systematic Absences	Systematic Absences	.	.	.	.	Systematische Abwesenheit	.	系统消光	.
+Wilson Plot Olex2	Wilson Plot (Olex2)	.	.	.	.	Wilson Graph (Olex2)	.	Wilson Plot Olex2	.
+Cumulative	Cumulative	.	.	.	.	Kumulativ	.	Cumulative	.
+Reflection Statistics	Reflection Statistics	.	.	.	.	Reflexstatistik	.	衍射数据统计	.
+AND	AND	.	.	.	.	UND	.	.	.
+Exclude	Exclude	.	.	.	.	Auschliessen	.	.	.
+Changing Language to	Changing Language to	.	.	.	.	Ändere die Sprache nach	.	.	.
+Please wait while uploading your changes	Please Wait while uploading your changes.	.	.	.	.	Bitte warten sie, bis ihre Änerungen in der Datenbank gespeichert sind.	.	.	.
+Make Graph	Make Graph	.	.	.	.	.	.	作图	.
+Q Peak Intensities	Q Peak Intensities	.	.	.	.	.	.	Q峰强度	.
+AFIX Commands	AFIX Commands	.	.	.	.	.	.	AFIX命令	.
+Variables	Variables	.	.	.	.	.	.	变量	.
+Rename	Rename	.	.	.	.	.	.	重命名	.
+Name	Name	.	.	.	.	.	.	命名	.
+Close sorting	Close sorting	.	.	.	.	.	.	.	.
+Default Style	Default Style	.	.	.	.	.	.	默认风格	.
+Ellipsoids|H	Ellipsoids|H	.	.	.	.	.	.	椭球模型|H	.
+Low Quality	Low Quality	.	.	.	.	.	.	低质量图形	.
+Pack Cell	Pack Cell	.	.	.	.	.	.	晶胞中的堆积图	.
+Pack Limits	Pack Limits	.	.	.	.	.	.	堆积图	.
+Show Basis	Show Basis	.	.	.	.	.	.	显示晶轴矢量	.
+Show Cell	Show Cell	.	.	.	.	.	.	显示晶胞	.
+Shelx Compatible Constraints	Shelx Compatible Constraints	.	.	.	.	.	.	Shelx限制性精修	.
+Constraints	Constraints	.	.	.	.	.	.	限制性精修命令	.
