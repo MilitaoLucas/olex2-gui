@@ -41,10 +41,12 @@ class Graph(ImageTools):
       "TopRightTitle":self.filename,
       "FontScale":0.02,
       "marker":{
-        'colour':(254,150,50),
-        'border_colour':(254/2,150/2,50/2),
+        'colour1':(254,150,50),
+        'colour2':(159,182,205),
+        'border_colour1':(254/2,150/2,50/2),
+        'border_colour2':(159/2,182/2,205/2),
         },
-      "plot_function":{
+      "function":{
         'colour1':(0,0,0),
         'colour2':(0,0,255),
         'colour3':(255,0,0),
@@ -74,7 +76,7 @@ class Graph(ImageTools):
     delta_y = self.delta_y
     xy_pairs = data.xy_pairs()
     self.function_counter += 1
-    fill = self.graphInfo['plot_function']['colour%s' %self.function_counter]
+    fill = self.graphInfo['function']['colour%s' %self.function_counter]
     
     pixel_coordinates = []
     
@@ -154,15 +156,12 @@ class Graph(ImageTools):
     txt = "self.graph_top"
     self.draw.text((250, y + 5), "%s" %txt, font=self.font_tiny, fill=(255, 100, 100))
     
-  def draw_key(self,dictionary):
+  def draw_key(self, keys_to_draw):
     max_length = 0
-    for item in dictionary.values():
-      label = item['label']
-      if len(label) > max_length:
-        max_length = len(label)
+    for key in keys_to_draw:
+      max_length = max(max_length, len(key['label']))
     boxWidth = 60 + 8 * max_length
-    boxHeight = 30 * len(dictionary.keys())
-    #boxTopOffset = self.imY * 0.035
+    boxHeight = 30 * len(keys_to_draw)
     colour = self.gui_html_bg_colour
     im = Image.new('RGB', (boxWidth,boxHeight), colour)
     draw = ImageDraw.Draw(im)
@@ -173,12 +172,20 @@ class Graph(ImageTools):
     
     txt_colour = "#444444"
     top = 10
-    for item in dictionary.values():
-      label = item['label']
-      colour = item['colour']
+    for key in keys_to_draw:
+      key_type = key['type']
+      assert key_type in ("function", "marker")
+      label = key['label']
+      fill = self.graphInfo[key_type]['colour%s' %key['number']]
       left = 15
       wX, wY = draw.textsize(label, font=self.font_tiny)
-      draw.line((left,top+wY/2,left+30,top+wY/2),fill=colour,width=2)
+      if key_type == "function":
+        draw.line((left,top+wY/2,left+30,top+wY/2),fill=fill,width=2)
+      elif key_type == "marker":
+        marker_width = int(self.graphInfo["marker"].get('size', int(self.im.size[0]/80)))
+        outline=self.graphInfo[key_type]['border_colour%s' %key['number']]
+        draw.rectangle((left, top+wY/2-marker_width/2, left+marker_width, top+wY/2 + marker_width/2),
+                       fill=fill, outline=outline)
       left = 60
       draw.text((left,top), "%s" %label, font=self.font_tiny, fill=txt_colour)
       top += wY + 10
@@ -390,7 +397,6 @@ class Graph(ImageTools):
     self.get_division_spacings_and_scale()
     self.draw_x_axis()
     self.draw_y_axis()
-    self.map_txt_list = [ "<map name='map_analysis'>" ]
     for dataset in self.data.values():
       if dataset.metadata().get("fit_slope") and dataset.metadata().get("fit_slope"):
         slope = float(dataset.metadata().get("fit_slope"))
@@ -398,7 +404,6 @@ class Graph(ImageTools):
         self.draw_fit_line(slope, y_intercept)
       self.draw_data_points(dataset.xy_pairs(), dataset.indices)
       
-    self.map_txt_list.append("</map>")
     
   def map_txt(self):
     return '\n'.join(self.map_txt_list)
@@ -472,8 +477,9 @@ class Graph(ImageTools):
     scale_y = self.scale_y
     delta_y = self.delta_y
     
-    fill = self.graphInfo['marker']['colour']
-    outline = self.graphInfo['marker']['border_colour']
+    self.dataset_counter += 1
+    fill = self.graphInfo['marker']['colour%s' %self.dataset_counter]
+    outline = self.graphInfo['marker']['border_colour%s' %self.dataset_counter]
     marker_width = self.marker_width
     half_marker_width = marker_width/2
     
@@ -484,13 +490,13 @@ class Graph(ImageTools):
                     + (delta_x * self.scale_x))
       scale_x = -self.scale_x
     else:
-      x_constant = (self.graph_left - marker_width/2
+      x_constant = (self.graph_left - half_marker_width
                     + ((0 - max_x) * self.scale_x)
                     + (delta_x * self.scale_x))
       scale_x = self.scale_x
       
     if self.reverse_y:
-      y_constant = (self.graph_top - marker_width/2
+      y_constant = (self.graph_top - half_marker_width
                     + ((0 - max_y) * scale_y)
                     + (delta_y * scale_y))
       scale_y = self.scale_y
@@ -512,24 +518,16 @@ class Graph(ImageTools):
       self.draw.rectangle(box, fill=fill, outline=outline)
       
       if self.item == "AutoChem":
-        map_txt_list.append("""<area shape="rect" coords="%i,%i,%i,%i" href="reap %s"  target="%s">"""
-                            % (x, y, x+marker_width, y+marker_width, xr, yr))
+        map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="reap %s"  target="%s">"""
+                            % (box + (xr, yr)))
       else:
+        href="Html.Update"
         if indices is None:
           target = '(%.3f,%.3f)' %(xr, yr)
         else:
           target = '(%.3f,%.3f) %s' %(xr, yr, indices[i])
-        map_txt_list.append("""<area shape="rect" coords="%i,%i,%i,%i" href="Html.Update" target="%s">"""
-                            % (x, y, x+marker_width, y+marker_width, target))
-        
-      #if self.item == "AutoChem":
-        #self.map_txt += '''
-#<area shape="rect" coords="%s,%s,%s,%s" href="reap %s"  target="%s">
-#''' %(int(x),int(y),int(x+marker_width),int(y+marker_width), item[-2:-1][0], item[-1:][0])
-      #else:
-        #self.map_txt += '''
-#<area shape="rect" coords="%s,%s,%s,%s" href="Html.Update" target="(%.3f,%.3f)">
-#''' %(int(x),int(y),int(x+marker_width),int(y+marker_width), item[0], item[1])
+        map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="%s" target="%s">"""
+                            % (box + (href, target)))
 
   def draw_y_axis(self):
     max_y = self.max_y
@@ -538,48 +536,48 @@ class Graph(ImageTools):
     delta_y = self.delta_y
     dv_y = self.get_divisions(delta_y)
     y_axis = []
-    precision = len(str(dv_y).split('.')[-1])
-    
+
+    modulo = dv_y % 1
+    if modulo == 0.0:
+      precision = 0
+    else:
+      precision = len(str(modulo).split('.')[-1])
+
     if min_y < 0 and max_y > 0: # axis are in range to be drawn
       div_val = 0.0
       while div_val > min_y:
         div_val -= dv_y
     else:
       div_val = round(min_y-dv_y, precision-1) # minimum value of div_val
+    if div_val == 0.0: div_val = 0.0 # work-around for if div_val is -0.0
     y_axis.append(div_val)
     while div_val < max_y:
       div_val = div_val + float(dv_y)
       y_axis.append(div_val)
       
+    format_string = "%%.%if" %precision
     for item in y_axis:
       val = float(item)
-      if dv_y < 0.01:
-        txt = "%.3f" %item
-      elif max_y < 10:
-        txt = "%.2f" %item
-      elif max_y <= 100:
-        txt = "%.1f" %item
-      elif max_y > 100:
-        txt = "%.0f" %item
-        
+      txt = format_string %item
+
       wX, wY = self.draw.textsize(txt, font=self.font_small)
-      x = self.imX * 0.01
+      x = self.graph_left - wX - self.imX * 0.01
       if self.reverse_y:
-        y = (self.boxYoffset + wY/2 
-             + ((val * scale_y)) 
-             + ((0 - max_y) * scale_y) 
+        y = (self.boxYoffset + wY/2
+             + ((val * scale_y))
+             + ((0 - max_y) * scale_y)
              + (delta_y * scale_y))
       else:
         y = self.bY \
-          - (self.boxYoffset + wY/2 
-             + ((val * scale_y)) 
-             + ((0 - max_y) * scale_y) 
+          - (self.boxYoffset + wY/2
+             + ((val * scale_y))
+             + ((0 - max_y) * scale_y)
              + (delta_y * scale_y))
         
       y = round(y,1)
-      if y < (self.graph_bottom) and y >= self.boxYoffset -wY/2: 
+      if y + wY/2 <= (self.graph_bottom) and y >= self.boxYoffset -wY/2:
         self.draw.text((x, y), "%s" %txt, font=self.font_small, fill="#444444")
-        x = x + int(self.imX * 0.045)
+        x = self.graph_left
         y = y + int(wY/2)
         self.draw.line(((x, y),(x+self.ax_marker_length, y)), width=self.line_width, fill=(200, 200, 200))
         
@@ -608,33 +606,32 @@ class Graph(ImageTools):
     delta_x = self.delta_x
     dv_x = self.get_divisions(delta_x)
     x_axis = []
-    
-    precision = len(str(dv_x).split('.')[-1])
-    
+
+    modulo = dv_x % 1
+    if modulo == 0.0:
+      precision = 0
+    else:
+      precision = len(str(modulo).split('.')[-1])
+
     if min_x < 0 and max_x > 0: # axis are in range to be drawn
       div_val = 0.0
       while div_val > min_x:
         div_val -= dv_x
     else:
       div_val = round(min_x-dv_x, precision-1) # minimum value of div_val
+    if div_val == 0.0: div_val = 0.0 # work-around for if div_val is -0.0
     x_axis.append(div_val)
     while div_val < max_x:
       div_val = div_val + float(dv_x)
       x_axis.append(div_val)
       
+    format_string = "%%.%if" %precision
     for item in x_axis:
       val = float(item)
-      if dv_x < 0.01:
-        txt = "%.3f" %item
-      elif max_x < 10:
-        txt = "%.2f" %item
-      elif max_x < 100:
-        txt = "%.1f" %item
-      elif max_x >= 10:
-        txt = "%.0f" %item
-        
+      txt = format_string %item
+
       wX, wY = self.draw.textsize(txt, font=self.font_small)
-      y = self.graph_bottom
+      y = self.graph_bottom + self.imX * 0.01
 
       if self.reverse_x:
         x = self.bX \
@@ -651,6 +648,7 @@ class Graph(ImageTools):
         self.draw.text((x, y), "%s" %txt, font=self.font_small, fill="#444444")
         x = int(x + wX/2)
         y = y - self.imY * 0.005
+        y = self.graph_bottom
         self.draw.line(((x, y),(x, y-self.ax_marker_length)), width=self.line_width, fill=(200, 200, 200))
         
     if self.draw_origin:
@@ -842,11 +840,12 @@ class Analysis(Graph):
     str = '''
 <html>
 <body>
+<zimg border="0" src="%s.png">
 %s
-<zimg border="0" src="%s.png" usemap=#map_analysis>
+</zimg>
 </body>
 </html>
-''' %(self.map_txt, self.item)
+''' %(self.item, self.map_txt)
     htm_location = "%s.htm" %pop_html
     OlexVFS.write_to_olex(htm_location, str)
     extraX = 29
@@ -989,7 +988,7 @@ class PrgAnalysis(Analysis):
     if txt:
       txt = txt %(
         self.program.program_type, self.filename, self.program.name, self.method.name,
-        authors, reference, self.map_txt, self.program.program_type.upper(), self.image_location, self.program.program_type)
+        authors, reference, self.program.program_type.upper(), self.image_location,self.map_txt)
     else:
       txt = 'Please provide a template in folder basedir()/etc/gui/blocks/templates/'
     return txt
@@ -1066,7 +1065,7 @@ class refinement_graph(PrgAnalysis):
       else:
         map_txt = "%.3f" %y_value
       self.map_txt_list.append(
-        """<area shape="rect" coords="%i,%i,%i,%i" href="Html.Update" target="%s">"""
+        """<zrect coords="%i,%i,%i,%i" href="Html.Update" target="%s">"""
         % (bar_left, top, bar_right, bar_bottom, map_txt))
       if bar_labels is not None:
         txt = bar_labels[i]
@@ -1104,7 +1103,6 @@ class refinement_graph(PrgAnalysis):
     self.draw.text((x, legend_top), txt, font=self.font_large, fill="#888888")
 
   def make_graph(self):
-    self.map_txt_list = [ "<map name='map_refinement'>" ]
     self.make_empty_graph()
     mean_shifts = self.data.get("mean_shift")
     max_shifts = self.data.get("max_shift")
@@ -1116,7 +1114,6 @@ class refinement_graph(PrgAnalysis):
     elif max_shifts is not None:
       self.draw_bars(dataset=max_shifts, y_scale_factor=3.0, bar_labels=max_shift_atom, colour_function=self.get_max_shift_bar_colours)
       
-    self.map_txt_list.append("</map>")
     self.update_image()
     return
 
@@ -1131,7 +1128,6 @@ class smtbx_refine_graph(refinement_graph):
     self.data.setdefault('max_shift', Dataset(metadata=metadata))
 
   def observe(self, max_shift, scatterer):
-    return
     self.cycle += 1
     self.data['max_shift'].add_pair(self.cycle, max_shift)
     self.data['max_shift']._metadata['labels'].append(scatterer.label)
@@ -1241,8 +1237,7 @@ class WilsonPlot(Analysis):
 
   def cctbx_wilson_statistics(self):  
     from cctbx_olex_adapter import OlexCctbxGraphs
-    cctbx = OlexCctbxGraphs('wilson', n_bins=2*self.n_bins)
-    wp = cctbx.run()
+    wp = OlexCctbxGraphs('wilson', n_bins=2*self.n_bins).xy_plot
     metadata = {}
     metadata.setdefault("K", 1/wp.wilson_intensity_scale_factor)
     metadata.setdefault("B", wp.wilson_b)
@@ -1505,66 +1500,66 @@ class CumulativeIntensityDistribution(Analysis):
     # E. Stanley, J.Appl.Cryst (1972). 5, 191
     self.plot_function(twinned_acentric_distribution)
     
-    colour1 = self.graphInfo['plot_function']['colour1']
-    colour2 = self.graphInfo['plot_function']['colour2']
-    colour3 = self.graphInfo['plot_function']['colour3']
+    colour1 = self.graphInfo['function']['colour1']
+    colour2 = self.graphInfo['function']['colour2']
+    colour3 = self.graphInfo['function']['colour3']
     
-    key = self.draw_key({1:{'label':OV.TranslatePhrase('Centric'),
-                            'colour':colour1,
-                            },
-                         2:{'label':OV.TranslatePhrase('Acentric'),
-                            'colour':colour2,
-                            },
-                         3:{'label':OV.TranslatePhrase('Twinned Acentric'),
-                            'colour':colour3,
-                            },
-                         })
+    key = self.draw_key(({'type': 'function',
+                         'number': 1,
+                         'label': OV.TranslatePhrase('Centric')},
+                        {'type':'function',
+                         'number': 2,
+                         'label': OV.TranslatePhrase('Acentric')},
+                        {'type': 'function',
+                         'number': 3,
+                         'label': OV.TranslatePhrase('Twinned Acentric')}
+                        ))
     self.im.paste(key, 
-                  (int(self.graph_right-(key.size[0]+50)),
-                   int(self.graph_bottom-(key.size[1]+50)))
+                  (int(self.graph_right-(key.size[0]+40)),
+                   int(self.graph_bottom-(key.size[1]+40)))
                   )
     
     self.draw_pairs()
 
-  def cctbx_cumulative_intensity_distribution(self):
+  def cctbx_cumulative_intensity_distribution(self, verbose=False):
     from cctbx_olex_adapter import OlexCctbxGraphs
-    cctbx = OlexCctbxGraphs('cumulative', n_bins=self.n_bins)
-    xy_plot = cctbx.run()
+    xy_plot = OlexCctbxGraphs('cumulative', n_bins=self.n_bins).xy_plot
     metadata = {}
     metadata.setdefault("y_label", xy_plot.yLegend)
     metadata.setdefault("x_label", xy_plot.xLegend)
     self.metadata = metadata
     #self.data.setdefault('dataset1', Dataset(xy_plot.x,[i*100 for i in xy_plot.y],metadata))
     self.data.setdefault('dataset1', Dataset(xy_plot.x, xy_plot.y,metadata=metadata))
-    self.data['dataset1'].show_summary()
+    if verbose:
+      self.data['dataset1'].show_summary()
 
 class CompletenessPlot(Analysis):
-  def __init__(self, n_bins=20, output_csv_file=False):
+  def __init__(self, reflections_per_bin=20, output_csv_file=False):
     Analysis.__init__(self)
     self.item = "completeness"
-    self.n_bins = abs(int(n_bins))
     self.graphInfo["Title"] = OV.TranslatePhrase("Completeness Plot")
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.filename
     self.auto_axes = False
-    self.cctbx_completeness_statistics()
+    self.cctbx_completeness_statistics(int(reflections_per_bin))
     self.make_empty_graph(axis_x = True)
-    self.draw_pairs(reverse_x=True)
+    #self.draw_pairs(reverse_x=True)
+    self.draw_pairs()
     self.popout()
     if output_csv_file in (True, 'true', 'True'):
       self.output_data_as_csv()
 
-  def cctbx_completeness_statistics(self):
+  def cctbx_completeness_statistics(self, reflections_per_bin):
     from cctbx_olex_adapter import OlexCctbxGraphs
-    cctbx = OlexCctbxGraphs('completeness', n_bins=self.n_bins)
-    data_object = cctbx.run()
-    data_object.completeness.show()
+    xy_plot = OlexCctbxGraphs(
+      'completeness', reflections_per_bin=reflections_per_bin).xy_plot
+    #xy_plot.completeness.show()
     metadata = {}
     metadata.setdefault("y_label", OV.TranslatePhrase("Shell Completeness"))
-    metadata.setdefault("x_label", OV.TranslatePhrase("Resolution"))
+    metadata.setdefault("x_label", OV.TranslatePhrase("2theta"))
     self.metadata = metadata
-    self.data.setdefault('dataset1', Dataset(data_object.x,[i*100 for i in data_object.y],metadata=metadata))
+    self.data.setdefault('dataset1', Dataset(xy_plot.x,[i*100 for i in xy_plot.y],metadata=metadata))
 
 class SystematicAbsencesPlot(Analysis):
   def __init__(self, output_csv_file=False):
@@ -1583,9 +1578,7 @@ class SystematicAbsencesPlot(Analysis):
 
   def cctbx_systematic_absences_plot(self):
     from cctbx_olex_adapter import OlexCctbxGraphs
-    cctbx = OlexCctbxGraphs('sys_absent')
-    xy_plot = cctbx.run()
-    
+    xy_plot = OlexCctbxGraphs('sys_absent').xy_plot
     metadata = {}
     metadata.setdefault("y_label", xy_plot.yLegend)
     metadata.setdefault("x_label", xy_plot.xLegend)
@@ -1600,7 +1593,7 @@ class SystematicAbsencesPlot(Analysis):
     self.make_empty_graph(axis_x = True)
     self.graphInfo['marker']['size'] = int(self.im.size[0]/120)
     ratio = 0.75
-    colour = self.graphInfo['marker']['colour']
+    colour = self.graphInfo['marker']['colour%s' %(self.dataset_counter + 1)]
     border_colour = (int(colour[0] * ratio),
                      int(colour[1] * ratio),
                      int(colour[2] * ratio))
@@ -1616,15 +1609,21 @@ class Fobs_Fcalc_plot(Analysis):
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.filename
     self.auto_axes = False
-    self.make_f_obs_f_calc_plot()
+    try:
+      self.make_f_obs_f_calc_plot()
+    except AssertionError, e:
+      if str(e) == "model.scatterers().size() > 0":
+        print "You need some scatterers to do this!"
+        return
+      else:
+        raise AssertionError, e
     self.popout()
     if output_csv_file in (True, 'true', 'True'):
       self.output_data_as_csv()
 
   def make_f_obs_f_calc_plot(self):
     from cctbx_olex_adapter import OlexCctbxGraphs
-    cctbx = OlexCctbxGraphs('f_obs_f_calc')
-    xy_plot = cctbx.run()
+    xy_plot = OlexCctbxGraphs('f_obs_f_calc').xy_plot
     self.metadata.setdefault("y_label", xy_plot.yLegend)
     self.metadata.setdefault("x_label", xy_plot.xLegend)
     metadata = {}
@@ -1633,11 +1632,26 @@ class Fobs_Fcalc_plot(Analysis):
     data = Dataset(
       xy_plot.f_calc, xy_plot.f_obs, indices=xy_plot.indices, metadata=metadata)
     self.data.setdefault('dataset1', data)
+    if xy_plot.f_obs_omitted.size():
+      data_omitted = Dataset(
+        xy_plot.f_calc_omitted, xy_plot.f_obs_omitted, indices=xy_plot.indices_omitted)
+      self.data.setdefault('dataset2', data_omitted)
     self.make_empty_graph(axis_x = True)
     self.draw_pairs()
+    key = self.draw_key(({'type': 'marker',
+                         'number': 1,
+                         'label': OV.TranslatePhrase('Filtered Data')},
+                        {'type':'marker',
+                         'number': 2,
+                         'label': OV.TranslatePhrase('Omitted Data')}
+                        ))
+    self.im.paste(key, 
+                  (int(self.graph_right-(key.size[0]+40)),
+                   int(self.graph_bottom-(key.size[1]+40)))
+                  )
 
 class Dataset(object):
-  def __init__(self, x=None, y=None, indices=None, metadata=None):
+  def __init__(self, x=None, y=None, indices=None, metadata={}):
     if x is None: x = []
     if y is None: y = []
     self.x = x

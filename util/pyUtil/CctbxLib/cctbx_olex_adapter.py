@@ -16,6 +16,7 @@ import olex
 #import olex_core
 import time
 import cctbx_controller as cctbx_controller
+from cctbx import uctbx
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
@@ -32,20 +33,16 @@ class OlexRefinementModel(object):
         i = atom['tag']
         self._atoms.setdefault(i, atom)
         element_type = atom['type']
-        name_to_post = str("%s%i" %(element_type, i))
-        self.id_for_name.setdefault(name_to_post, atom['aunit_id'])
+        self.id_for_name.setdefault(str(atom['label']), atom['aunit_id'])
     self._cell = olex_refinement_model['aunit']['cell']
     self.exptl = olex_refinement_model['exptl']
     self._afix = olex_refinement_model['afix']
     self._model= olex_refinement_model
-    #a = self.afix_iterator()
-    #r = self.restraint_iterator()
 
   def iterator(self):
     for i, atom in self._atoms.items():
       name = str(atom['label'])
       element_type = str(atom['type'])
-      #name_to_post = str("%s%i" %(element_type, i))
       xyz = atom['crd'][0]
       occu = atom['occu']
       adp = atom.get('adp',None)
@@ -88,6 +85,7 @@ class OlexCctbxAdapter(object):
       sys.stdout.refresh = True
     self._xray_structure = None
     self.olx_atoms = OlexRefinementModel()
+    self.wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
     try:
       self.initialise_reflections()
     except Exception, err:
@@ -122,40 +120,19 @@ class OlexCctbxAdapter(object):
       except Exception, err:
         print err
       self.reflections = olx.current_reflections
-
-  def post_peaks(self, fft_map):
-    from cctbx import maptbx
-    from  libtbx.itertbx import izip
-    fft_map.apply_volume_scaling()
-    peaks = fft_map.peak_search(
-      parameters=maptbx.peak_search_parameters(
-	peak_cutoff=0.1,
-	min_distance_sym_equiv=1.0,
-	max_clusters=30,
-	),
-      verify_symmetry=False
-      ).all()
     
-    i = 0
-    for xyz, height in izip(peaks.sites(), peaks.heights()):
-      if i < 3:
-        if self.verbose: print "Position of peak %s = %s, Height = %s" %(i, xyz, height)
-      i += 1
-      id = olx.xf_au_NewAtom("%.2f" %(height), *xyz)
-      #if olx.xf_au_SetAtomCrd(id, *xyz)=="true":
-      if id != '-1':
-        olx.xf_au_SetAtomU(id, "0.06")
-      if i == 100:
-        break
-    olx.xf_EndUpdate()
-    olx.Compaq('-a')
-    olx.Refresh()
-    #olx.Compaq()
+    merg = self.olx_atoms._model.get('merg')
+    if merg is None or merg != self.reflections.merg:
+      self.reflections.merge(merg)
+    omit = self.olx_atoms._model['omit']
+    if omit is None or omit != self.reflections.omit:
+      self.reflections.filter(omit, self.olx_atoms.exptl['radiation'])    
 
 class OlexCctbxRefine(OlexCctbxAdapter):
   def __init__(self, max_cycles=None, verbose=False):
     OlexCctbxAdapter.__init__(self)
     self.verbose = verbose
+    self.log = open('%s/%s.log' %(OV.FilePath(), OV.FileName()),'w')
     PT = PeriodicTable()
     self.pt = PT.PeriodicTable()
     self.olx = olx
@@ -173,70 +150,75 @@ class OlexCctbxRefine(OlexCctbxAdapter):
 
   def run(self):
     t0 = time.time()
-    olx.Kill('$Q')
     print "++++ Refining using the CCTBX with a maximum of %i cycles++++" %self.max_cycles
-    #self.do_refinement = False
     self.refine_with_cctbx()
-    try:
-      self.post_peaks(self.refinement.f_obs_minus_f_calc_map(0.4))
-    except Exception, err:
-      print err
-    try:  
-      self.R1 = self.refinement.r1()
-      OV.SetVar('cctbx_R1',self.R1)
-    except Exception, err:
-      print err
+    asu_mappings = self.xray_structure().asu_mappings(buffer_thickness=3.5)
+    #
+    scatterers = self.xray_structure().scatterers()
+    scattering_types = scatterers.extract_scattering_types()
+    pair_asu_table = crystal.pair_asu_table(asu_mappings=asu_mappings)
+    pair_asu_table.add_covalent_pairs(
+      scattering_types, exclude_scattering_types=flex.std_string(("H","D")))
+    pair_sym_table = pair_asu_table.extract_pair_sym_table()
+    
+    print >> self.log, "\nConnectivity table"
+    pair_sym_table.show(site_labels=scatterers.extract_labels(), f=self.log)
+    print >> self.log, "\nBond lengths"
+    self.xray_structure().show_distances(pair_asu_table=pair_asu_table, out=self.log)
+    print >> self.log, "\nBond angles"
+    self.xray_structure().show_angles(pair_asu_table=pair_asu_table, out=self.log)
+    #
+    self.post_peaks(self.refinement.f_obs_minus_f_calc_map(0.4))
+    self.log.close()
 
-    #cctbxmap_type = 'None'
     #cctbxmap_resolution = 0.4
-    #try:
-      #cctbxmap_type = OV.FindValue('snum_cctbx_map_type')
-      #if cctbxmap_type == "--":
-        #cctbxmap_type = None
-      #else:
-        #cctbxmap_resolution = float(olx.GetValue('snum_cctbxmap_resolution'))
-    #except:
-      #pass
-
-    olx.Compaq()
+    #cctbxmap_type = OV.FindValue('snum_cctbx_map_type', None)
+    #if cctbxmap_type == "--":
+      #cctbxmap_type = None
+    #else:
+      #cctbxmap_resolution = float(OV.FindValue('snum_cctbxmap_resolution'))
     #if cctbxmap_type and cctbxmap_type !='None': 
       #self.write_grid_file(cctbxmap_type, cctbxmap_resolution)
 
-    dt = time.time() - t0
-    print "++++ Finished in %.3f s" %dt
-    #print "++++ Refine in XL with L.S.0"
-    #olex.m('refine 0')
-    filename = olx.FileName()
-    olx.File('%s.res' %filename)
+    print "++++ Finished in %.3f s" %(time.time() - t0)
     print "Done."
 
   def refine_with_cctbx(self):
-    lambda_ = self.olx_atoms.exptl.get('radiation', 0.71073)
+    wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
+    d_min = OV.GetParam('cctbx.refinement.resolution_d_min')
+    d_max = OV.GetParam('cctbx.refinement.resolution_d_max')
+    f_sq_obs = self.reflections.f_sq_obs.resolution_filter(
+      d_min=d_min, d_max=d_max)
     self.refinement = cctbx_controller.refinement(
       f_sq_obs=self.reflections.f_sq_obs,
       xray_structure=self.xray_structure(),
-      lambda_=lambda_,
-      max_cycles=self.max_cycles)
+      wavelength=wavelength,
+      max_cycles=self.max_cycles,
+      log=self.log,
+    )
     self.refinement.on_cycle_finished = self.feed_olex
-    self.cycle += 1
-    try:
-      self.update_refinement_info("Starting...")
-      self.refinement.start()
-      R1 = self.refinement.r1()
-    except Exception,err:
-      print err
-      if self.cycle < self.max_cycles:
-        if self.do_refinement:
-          self.refine_with_cctbx()
+    self.refinement.start()
+    self.R1 = self.refinement.R1()[0]
+    self.wR2, self.GooF = self.refinement.wR2_and_GooF(
+      self.refinement.minimisation.minimizer)
+    self.update_refinement_info("Starting...")
 
-  def feed_olex(self, structure, minimiser):
+  def feed_olex(self, structure, minimisation, minimiser):
     self.auto = False
     self.cycle += 1
-    msg = "Refinement Cycle: %i" %(self.cycle-1)
-    print msg
+    #msg = "Refinement Cycle: %i" %(self.cycle)
+    self.refinement.show_cycle_summary(minimiser)
+    #print msg
     
-    self.update_refinement_info(msg=msg)
-    
+    #self.update_refinement_info(msg=msg)
+    minimisation.show_sorted_shifts(max_items=10, log=self.log)
+    max_shift_site, max_shift_site_scatterer = minimisation.iter_shifts_sites(max_items=1).next()
+    print "Max. shift: %.3f %s" %(max_shift_site, max_shift_site_scatterer.label)
+    if not minimisation.pre_minimisation:
+      max_shift_u, max_shift_u_scatterer = minimisation.iter_shifts_u(max_items=1).next()
+      print "Max. dU: %.3f %s" %(max_shift_u, max_shift_u_scatterer.label)
+    if self.plot is not None:
+      self.plot.observe(max_shift_site, max_shift_site_scatterer)
     if self.film:
       n = str(self.cycle)
       if int(n) < 10:
@@ -258,7 +240,6 @@ class OlexCctbxRefine(OlexCctbxAdapter):
       u_total += u[0]
       if self.tidy:
         if u[0] > 0.09:
-          #reset_refinement = True
           olx.Name("%s Q" %name)
       u_average = u_total/i
 
@@ -305,7 +286,48 @@ class OlexCctbxRefine(OlexCctbxAdapter):
     if reset_refinement:
       raise Exception("Atoms promoted")
 
+  def post_peaks(self, fft_map):
+    from cctbx import maptbx
+    from  libtbx.itertbx import izip
+    fft_map.apply_volume_scaling()
+    peaks = fft_map.peak_search(
+      parameters=maptbx.peak_search_parameters(
+        peak_search_level=3,
+        interpolate=False,
+	#peak_cutoff=0.1,
+	min_distance_sym_equiv=1.0,
+	max_clusters=30,
+	),
+      verify_symmetry=False
+      ).all()
+    #peaks = self.refinement.peak_search()
+    #peaks.show_sorted()
+    i = 0
+    for xyz, height in izip(peaks.sites(), peaks.heights()):
+      if i < 3:
+        if self.verbose: print "Position of peak %s = %s, Height = %s" %(i, xyz, height)
+      i += 1
+      id = olx.xf_au_NewAtom("%.2f" %(height), *xyz)
+      if id != '-1':
+        olx.xf_au_SetAtomU(id, "0.06")
+      if i == 100:
+        break
+    olx.xf_EndUpdate()
+    olx.Compaq('-a')
+    olx.Refresh()
+
   def update_refinement_info(self, msg="Unknown"):
+    import htmlMaker
+    R1, n_reflections = self.refinement.R1()
+    R1_all_data, n_reflections_unique = self.refinement.R1(all_data=True)
+    wR2 = self.wR2
+    GooF = self.GooF
+    #htmlMaker.make_refinement_data_html(R1=R1,
+                                        #n_reflections=n_reflections,
+                                        #R1_all_data=R1_all_data,
+                                        #n_reflections_unique=n_reflections_unique,
+                                        #wR2=wR2,
+                                        #GooF=GooF)
     txt = "Last refinement with <b>smtbx-refine</b>: No refinement info available yet.<br>Status: %s" %msg
     OlexVFS.write_to_olex('refinedata.htm', txt)
 
@@ -352,17 +374,14 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     merging = f_obs.merge_equivalents()
     f_obs = merging.array()
     f_obs.show_summary()
-
+    
     # charge flipping iterations
-    if OV.HasGUI():
-      sys.stdout.refresh = True
     flipping = charge_flipping.basic_iterator(f_obs, delta=None)
     solving = charge_flipping.solving_iterator(
       flipping,
       yield_during_delta_guessing=True,
       yield_solving_interval=solving_interval)
     charge_flipping_loop(solving, verbose=verbose)
-    sys.stdout.refresh = False
 
     # play with the solutions
     expected_peaks =  data.unit_cell().volume()/18.6/len(data.space_group())
@@ -384,6 +403,8 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         ).all()
       for q,h in izip(peaks.sites(), peaks.heights()):
         yield q,h
+        #print "(%.3f, %.3f, %.3f) -> %.3f" % (q+(h,))
+        
     else:
       print "*** No solution found ***"
 
@@ -433,43 +454,34 @@ class OlexCctbxSolve(OlexCctbxAdapter):
 
 
 class OlexCctbxGraphs(OlexCctbxAdapter):
-  def __init__(self, graph, n_bins=None):
+  def __init__(self, graph, *args, **kwds):
     OlexCctbxAdapter.__init__(self)
     self.graph = graph
-    self.n_bins = n_bins
 
-  def run(self):
     bitmap = 'working'
+    OV.CreateBitmap(bitmap)
 
-    if self.graph == "wilson":
-      wilson = cctbx_controller.wilson_statistics(self.xray_structure(), self.reflections, self.n_bins)
-      return wilson
+    if graph == "wilson":
+      self.xy_plot = cctbx_controller.wilson_statistics(self.xray_structure(), self.reflections, **kwds)
 
-    elif self.graph == "completeness":
-      completeness = cctbx_controller.completeness_statistics(self.reflections, self.n_bins)
-      return completeness
+    elif graph == "completeness":
+      self.xy_plot = cctbx_controller.completeness_statistics(self.reflections, self.wavelength, **kwds)
 
-    elif self.graph == "cumulative":
-      cumulative_distribution = cctbx_controller.cumulative_intensity_distribution(self.reflections, self.n_bins)
-      return cumulative_distribution
+    elif graph == "cumulative":
+      self.xy_plot = cctbx_controller.cumulative_intensity_distribution(self.reflections, **kwds)
 
-    elif self.graph == "f_obs_f_calc":
-      f_obs_f_calc = cctbx_controller.f_obs_vs_f_calc(self.xray_structure(), self.reflections)
-      return f_obs_f_calc
+    elif graph == "f_obs_f_calc":
+      self.xy_plot = cctbx_controller.f_obs_vs_f_calc(self.xray_structure(), self.reflections)
 
-    elif self.graph == "sys_absent":
-      return cctbx_controller.sys_absent_intensity_distribution(self.reflections)
+    elif graph == "sys_absent":
+      self.xy_plot = cctbx_controller.sys_absent_intensity_distribution(self.reflections)
 
-    #elif self.fun == "reflection_stats":
-      #cctbx_controller.reflection_statistics(stt(olx.xf_au_GetCell()),
-                                             #olx.xf_au_GetCellSymm(),
-                                             #r"%s/%s" %(olx.FilePath(), olx.FileName()))
     else:
       pass
-    OV.DeleteBitmap('%s' %(bitmap))
+    OV.DeleteBitmap(bitmap)
 
 class OlexCctbxTwinLaws(OlexCctbxAdapter):
-  
+
   def __init__(self):
     OlexCctbxAdapter.__init__(self)
     self.run()
