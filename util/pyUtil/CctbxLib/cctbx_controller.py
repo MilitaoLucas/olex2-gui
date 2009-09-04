@@ -8,14 +8,14 @@ from cctbx import statistics
 from smtbx.refinement import minimization
 from cctbx import uctbx
 from iotbx.shelx import builders
-from smtbx.refinement.manager import manager
+from smtbx.refinement.minimization import lbfgs
+from cctbx.eltbx import sasaki
+from cctbx import adptbx
+from cctbx.array_family import flex
+from cctbx import xray
+#from smtbx.refinement.manager import manager
 
 class empty: pass
-
-class my_lbfgs(minimization.lbfgs):
-  def __init__(self, delegate, **kwds):
-    self.callback_after_step = delegate
-    super(my_lbfgs, self).__init__(**kwds)
 
 
 def reflection_statistics(unit_cell, space_group, hkl):
@@ -226,6 +226,217 @@ def create_cctbx_xray_structure(cell, spacegroup, atom_iter, restraint_iterator=
       behaviour_of_variable = [0,0,0,1,0]
     builder.add_scatterer(a, behaviour_of_variable)
   return builder.structure
+
+
+class manager(object):
+  def __init__(self,
+               f_obs=None,
+               f_sq_obs=None,
+               xray_structure=None,
+               restraints_manager=None,
+               geometry_restraints_flags=None,
+               adp_restraints_flags=None,
+               lambda_=None,
+               max_sites_pre_cycles=20,
+               max_cycles=40,
+               max_peaks=30,
+               verbose=1,
+               log=None):
+    assert [f_obs,f_sq_obs].count(None) == 1
+    assert lambda_ is not None
+    assert xray_structure is not None
+    if f_obs:
+      self.refinement_type = xray.amplitude
+      f_obs.set_observation_type_xray_amplitude()
+      self.f_obs = f_obs
+      self.f_sq_obs = f_obs.f_as_f_sq()
+    else:
+      self.refinement_type = xray.intensity
+      f_sq_obs.set_observation_type_xray_intensity()
+      self.f_sq_obs = f_sq_obs
+      self.f_obs = f_sq_obs.f_sq_as_f()
+    assert self.f_sq_obs.is_real_array()
+    self.xray_structure = xray_structure
+    self.xs_0 = xray_structure
+    self.restraints_manager = restraints_manager
+    self.geometry_restraints_flags = geometry_restraints_flags
+    self.adp_restraints_flags = adp_restraints_flags
+    self.max_sites_pre_cycles = max_sites_pre_cycles
+    self.max_cycles = max_cycles
+    self.max_peaks = max_peaks
+    self.verbose = verbose
+    self.log = log
+    self.minimisation = None
+
+    for sc in self.xray_structure.scatterers():
+      if sc.scattering_type in ('H','D'):continue
+      fp_fdp = sasaki.table(sc.scattering_type).at_angstrom(lambda_)
+      sc.fp = fp_fdp.fp()
+      sc.fdp = fp_fdp.fdp()
+
+  def start(self):
+    """ Start the refinement """
+    self.filter_reflections()
+    #self.xs0 = self.xs
+    self.set_refinement_flags()
+    self.setup_refinement()
+    self.start_refinement()
+
+  def filter_reflections(self):
+    f_sq_obs = self.f_sq_obs
+    for i in xrange(f_sq_obs.size()):
+      if f_sq_obs.data()[i] < -f_sq_obs.sigmas()[i]:
+        f_sq_obs.data()[i] = -f_sq_obs.sigmas()[i]
+    merging = f_sq_obs\
+            .eliminate_sys_absent()\
+            .merge_equivalents()
+    f_sq_obs = merging.array()
+    unique_reflections = f_sq_obs.size()
+    if self.verbose:
+      print >> self.log, "Merging summary:"
+      merging.show_summary(out=self.log)
+      print >> self.log, "R(int) = %.4f   R(sigma) = %.4f" \
+            %(merging.r_int(), merging.r_sigma())
+      print >> self.log, "Total reflection: %i" %self.f_sq_obs.size()
+      print >> self.log, "Unique reflections: %i" %unique_reflections
+    f_obs = f_sq_obs.f_sq_as_f()
+    self.f_sq_obs = f_sq_obs
+    self.f_obs = f_obs
+
+  def set_refinement_flags(self,
+                           state=False,
+                           grad_u_iso_iselection=None,
+                           grad_u_aniso_iselection=None,
+                           grad_sites_iselection=None):
+    scatterers = self.xray_structure.scatterers()
+    scatterers.flags_set_grads(state=state)
+    if not state:
+      if grad_u_iso_iselection is None:
+        grad_u_iso_iselection = scatterers.extract_use_u_iso().iselection()
+      if grad_u_aniso_iselection is None:
+        grad_u_aniso_iselection = scatterers.extract_use_u_aniso().iselection()
+      if grad_sites_iselection is None:
+        grad_sites_iselection = flex.bool(self.xray_structure.scatterers().size(), True).iselection()
+      scatterers.flags_set_grad_u_iso(grad_u_iso_iselection)
+      scatterers.flags_set_grad_u_aniso(grad_u_aniso_iselection)
+      scatterers.flags_set_grad_site(grad_sites_iselection)
+
+  def setup_refinement(self):
+    if self.refinement_type is xray.intensity:
+      weighting = (xray.weighting_schemes.shelx_weighting(),None)[0]
+      ls = xray.unified_least_squares_residual(self.f_sq_obs,
+                                               weighting=weighting)
+    else:
+      ls = xray.unified_least_squares_residual(self.f_obs)
+    self.ls = ls
+
+  def start_refinement(self):
+    minimisation = my_lbfgs(
+      delegate=lambda minimisation, minimiser: self.on_cycle_finished(self.xray_structure, minimisation, minimiser),
+      target_functor=self.ls,
+      xray_structure=self.xray_structure,
+      restraints_manager=self.restraints_manager,
+      geometry_restraints_flags=self.geometry_restraints_flags,
+      adp_restraints_flags=self.adp_restraints_flags,
+      cos_sin_table=True,
+      lbfgs_sites_pre_minimisation_termination_params=scitbx.lbfgs.termination_parameters(
+        max_iterations=self.max_sites_pre_cycles),
+      lbfgs_termination_params = scitbx.lbfgs.termination_parameters(
+        max_iterations=self.max_cycles),
+      verbose=self.verbose,
+      log=self.log,
+    )
+    self.minimisation = minimisation
+
+  def on_cycle_finished(self, xs, minimisation, minimiser):
+    """ called after each iteration of the given minimiser, xs being
+    the refined structure. """
+    self.show_cycle_summary(minimiser)
+
+  def show_cycle_summary(self, minimizer):
+    if self.verbose:
+      print "Refinement Cycle: %i" %(minimizer.iter())
+      print "wR2 = %.4f and GooF = %.4f for" %self.wR2_and_GooF(minimizer),
+      print "%i parameters" %minimizer.n()
+
+  def show_final_summary(self):
+    """ only to be called after minimisation has finished. """
+    assert self.minimisation is not None
+    if self.verbose:
+      print "R1 = %.4f for %i Fo > 4sig(Fo)" %self.R1(),
+      print "and %.4f for all %i data" %(self.R1(all_data=True))
+      print "wR2 = %.4f and " \
+            "GooF = %.4f for" %self.wR2_and_GooF(self.minimisation.minimizer),
+      print "%i parameters" %self.minimisation.minimizer.n()
+
+  def iter_scatterers(self):
+    """ an iterator over tuples (label, xyz, u, u_eq, symbol) """
+    for a in self.xray_structure.scatterers():
+      label = a.label
+      xyz = a.site
+      symbol = a.scattering_type
+      if a.flags.use_u_iso():
+        u = (a.u_iso,)
+        u_eq = u[0]
+      if a.flags.use_u_aniso():
+        u_cif = adptbx.u_star_as_u_cart(self.xray_structure.unit_cell(), a.u_star)
+        u = u_cif
+        u_eq = adptbx.u_star_as_u_iso(self.xray_structure.unit_cell(), a.u_star)
+      yield label, xyz, u, u_eq, symbol
+
+  def calculate_residuals(self, f_obs):
+    sf = xray.structure_factors.from_scatterers(
+      miller_set=f_obs,
+      cos_sin_table=True
+    )
+    f_calc = sf(self.xray_structure, f_obs).f_calc()
+    ls_function = xray.unified_least_squares_residual(f_obs)
+    ls = ls_function(f_calc, compute_derivatives=False)
+    k = ls.scale_factor()
+    fc = flex.abs(f_calc.data())
+    fo = flex.abs(f_obs.data())
+    return flex.abs(k*fc - fo)
+
+  def R1(self, all_data=False):
+    f_obs = self.f_obs
+    if not all_data:
+      strong = f_obs.data() > 4*f_obs.sigmas()
+      f_obs = f_obs.select(strong)
+    R1 = flex.sum(self.calculate_residuals(f_obs)) / flex.sum(f_obs.data())
+    return R1, f_obs.size()
+
+  def wR2_and_GooF(self, minimizer):
+    f_sq_obs = self.f_sq_obs
+    sf = xray.structure_factors.from_scatterers(
+      miller_set=f_sq_obs,
+      cos_sin_table=True
+    )
+    f_calc = sf(self.xray_structure, f_sq_obs).f_calc()
+    ls_function = xray.unified_least_squares_residual(
+      f_sq_obs,
+      weighting=xray.weighting_schemes.shelx_weighting()
+    )
+    ls = ls_function(f_calc, compute_derivatives=False)
+    weights = ls_function.weighting().weights
+    k = ls.scale_factor()
+    f_sq_calc = f_calc.norm()
+    fc_sq = f_sq_calc.data()
+    fo_sq = f_sq_obs.data()
+    wR2 = math.sqrt(flex.sum(weights * flex.pow2(fo_sq - k * fc_sq)) /
+                    flex.sum(weights * flex.pow2(fo_sq)))
+    GooF = math.sqrt(flex.sum(weights * flex.pow2(fo_sq - k * fc_sq)) /
+                     (fo_sq.size() - minimizer.n()))
+    return wR2, GooF
+
+class my_lbfgs(lbfgs):
+  def __init__(self, delegate, **kwds):
+    #self.callback_after_step = delegate
+    self.delegate = delegate
+    super(my_lbfgs, self).__init__(**kwds)
+
+  def callback_after_step(self, minimser):
+    self.delegate(self, minimser)
+
 
 class refinement(manager):
   def __init__(self,
