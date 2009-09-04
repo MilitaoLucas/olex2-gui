@@ -90,27 +90,19 @@
 
 snum {
   solution {
-    #program = ShelXS XS 'smtbx-solve' XM ShelXD
-    #  .type = choice
-    #method = 'Dual Space' 'Charge Flipping' 'Direct Methods' 'Patterson Method'
-    #  .type = choice
-    program = None
-      .type = str
-    method = None
-      .type = str
+    program = ShelXS XS 'smtbx-solve' XM ShelXD
+      .type = choice
+    method = 'Dual Space' 'Charge Flipping' 'Direct Methods' 'Patterson Method'
+      .type = choice
     graphical_output = False
       .type = bool
   }
 
   refinement {
-    #program = ShelXL XL XH ShelXH 'smtbx-refine'
-    #  .type = choice
-    #method = 'Least Squares' CGLS LBFGS
-    #  .type = choice
-    program = None
-      .type = str
-    method = None
-      .type = str
+    program = ShelXL XL XH ShelXH 'smtbx-refine'
+      .type = choice
+    method = 'Least Squares' CGLS LBFGS
+      .type = choice
     sg = None
       .type = space_group
     sg_list = None
@@ -512,5 +504,15 @@ cctbx {
       .type = int(value_min=0)
     verbose = 1
       .type = int(value_min=0)
+    resolution_d_min = 0
+      .type = float(value_min=0)
+    resolution_d_max = 0
+      .type = float(value_min=0)
   }
+  wilson_n_bins = 10
+    .type = int(value_min=1)
+  completeness_n_bins =20
+    .type = int(value_min=1)
+  cumulative_intensity_n_bins = 20
+    .type = int(value_min=1)
 }

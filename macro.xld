@@ -1442,7 +1442,7 @@
 <completeness help="Calculates and displays a completeness plot"
 	<body
 		<args
-			<arg1 name="n_bins" def="20">
+			<arg1 name="reflections_per_bin" def="20">
 			<arg2 name="output_csv_file" def="False">
 		\>
 		<cmd 
