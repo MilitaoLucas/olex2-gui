@@ -107,10 +107,7 @@ def completeness_statistics(reflections, wavelength, reflections_per_bin=20, ver
   return plot
 
 def cumulative_intensity_distribution(reflections, n_bins=20, verbose=False):
-  f_obs=reflections.f_obs
-  f_sq_obs = reflections.f_sq_obs
-  f_sq_obs = f_sq_obs.eliminate_sys_absent().average_bijvoet_mates()
-  f_obs = f_sq_obs.f_sq_as_f()
+  f_obs=reflections.f_sq_obs_merged.f_sq_as_f()
   f_obs.setup_binner(
     n_bins=n_bins
   )
@@ -156,14 +153,6 @@ def f_obs_vs_f_calc(model, reflections):
   plot.xLegend = "F calc"
   plot.yLegend = "F obs"
   return plot
-
-def powder_plot(model, reflection, n_bins=500):
-  f_obs = reflections.f_obs.merge_equivalents().array()
-  f_obs = f_obs.eliminate_sys_absent().average_bijvoet_mates()
-  sf = xray.structure_factors.from_scatterers(miller_set=f_obs,cos_sin_table=True)
-  f_calc = sf(model,f_obs).f_calc()
-  f_obs.setup_binner(
-    n_bins=n_bins)
 
 
 
@@ -335,9 +324,9 @@ class manager(object):
       delegate=lambda minimisation, minimiser: self.on_cycle_finished(self.xray_structure, minimisation, minimiser),
       target_functor=self.ls,
       xray_structure=self.xray_structure,
-      restraints_manager=self.restraints_manager,
-      geometry_restraints_flags=self.geometry_restraints_flags,
-      adp_restraints_flags=self.adp_restraints_flags,
+      #restraints_manager=self.restraints_manager,
+      #geometry_restraints_flags=self.geometry_restraints_flags,
+      #adp_restraints_flags=self.adp_restraints_flags,
       cos_sin_table=True,
       lbfgs_sites_pre_minimisation_termination_params=scitbx.lbfgs.termination_parameters(
         max_iterations=self.max_sites_pre_cycles),
