@@ -477,8 +477,8 @@ class CifTools(ArgumentParser):
           pass
       for item, value in d.items():
         if item not in dataAdded\
-           and userInputVariables is not None\
-           and item not in userInputVariables:
+           and (userInputVariables is None
+                or item not in userInputVariables):
           if item[0] == '_' and item.split('_')[1] in cifLabels:
             if item == '_symmetry_cell_setting':
               value = value.lower()
