@@ -187,8 +187,8 @@ class reflections(object):
     f_sq_obs_filtered = self.f_sq_obs_merged.resolution_filter(
       d_min=uctbx.two_theta_as_d(two_theta, wavelength, deg=True))
     if hkl is not None:
-      f_sq_obs_filtered = f_sq_obs_filtered.indices_filter(
-        indices=flex.miller_index(hkl))
+      f_sq_obs_filtered = f_sq_obs_filtered.select_indices(
+        indices=flex.miller_index(hkl), map_indices_to_asu=True, negate=True)
     self.f_sq_obs_filtered = f_sq_obs_filtered
 
 def create_cctbx_xray_structure(cell, spacegroup, atom_iter, restraint_iterator=None):
