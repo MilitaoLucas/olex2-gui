@@ -656,7 +656,7 @@ class CifTools(ArgumentParser):
     txt = "'" + txt + "'\n"
     yn = OV.Alert("Olex2", "Do you wish to add this to the list of known versions?", "YN")
     if yn == "Y":
-      afile = olexdir + "/Util/Cif/" + "cif_info.def"
+      afile = olexdir + "/util/Cif/" + "cif_info.def"
       afile = open(afile, 'a')
       afile.writelines("\n=%s=     %s=%s =" %(name, version, txt))
       afile.close()                                     
