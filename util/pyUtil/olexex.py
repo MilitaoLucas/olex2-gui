@@ -826,6 +826,8 @@ def onSolutionProgramChange(prg_name, method=None):
   prg = SPD.programs[prg_name]
   if method is None:
     method = sortDefaultMethod(prg)
+    if method == 'Direct Methods' and olx.Ins('PATT') != 'n/a':
+      method = 'Patterson Method' # work-around for bug #48
   OV.SetParam("snum.solution.method", method)
   onSolutionMethodChange(prg_name, method)
 OV.registerFunction(OV.SetSolutionProgram)

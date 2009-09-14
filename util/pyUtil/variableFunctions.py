@@ -269,6 +269,8 @@ OV.registerFunction(LoadParams)
 def LoadStructureParams():
   olx.phil_handler.reset(scope_name='snum')
   solutionPrg, solutionMethod = getDefaultPrgMethod('Solution')
+  if solutionMethod == 'Direct Methods' and olx.Ins('PATT') != 'n/a':
+    solutionMethod = 'Patterson Method' # work-around for bug #48
   refinementPrg, refinementMethod = getDefaultPrgMethod('Refinement')
   if refinementMethod == 'Least Squares' and olx.LSM() == 'CGLS':
     refinementMethod = 'CGLS' # work-around for bug #26
@@ -294,9 +296,8 @@ snum {
   else:
     # check if old-style vvd file is present
     structure_phil = VVD_to_phil()
-    if structure_phil is None:
-      return
-  olx.phil_handler.update(phil_string=structure_phil)
+  if structure_phil is not None:
+    olx.phil_handler.update(phil_string=structure_phil)
   olexex.onRefinementProgramChange(
     olx.phil_handler.get_validated_param('snum.refinement.program'),
     olx.phil_handler.get_validated_param('snum.refinement.method'))
