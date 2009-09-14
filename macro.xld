@@ -849,16 +849,16 @@
 			<arg6 name="bet">
 			<arg7 name="gam">
 			<arg8 name="tol">
-			<arg9 name="basedir" def = "basedir()/Util/LCELLS/fred.txt">
+			<arg9 name="basedir" def = "basedir()/util/LCELLS/fred.txt">
 		\>
 		<cmd
 			<cmd1 "silent on">
-			<cmd2 cmd1="user 'basedir()/Util/LCELLS/'">
+			<cmd2 cmd1="user 'basedir()/util/LCELLS/'">
 			<cmd3 cmd1="echo Hello">
 			<cmd4 "htmlsavedata('%9')">
 			<cmd5 cmd1="echo Hello1">
 			<cmd6 cmd1="echo Hello2">
-			<cmd7 "exec 'basedir()/Util/lcells/lcellsb.exe' '%1' %2 %3 %4 %5 %6 %7 %8">
+			<cmd7 "exec 'basedir()/util/lcells/lcellsb.exe' '%1' %2 %3 %4 %5 %6 %7 %8">
 		\>
 		<onterminate
 			<cmd1 "uPdatehtml">
@@ -952,7 +952,7 @@
 		\>
 		<cmd 
 			<cmd1 "Echo Starting DIMAS INFO with %1">
-			<cmd2 "exec 'basedir()/Util/pyUtil/pyTools.exe' %1 %3 %3 %4">   
+			<cmd2 "exec 'basedir()/util/pyUtil/pyTools.exe' %1 %3 %3 %4">   
 		\>
 	\>
 \>
@@ -974,7 +974,7 @@
 			<cmd1 "Echo Starting pyTools with %1 %2 %3 %4 %5">
 			<cmd1 cmd1="listen %7/%8.res">
 			<cmd5 "cursor(busy, %1)">
-			<cmd4 "exec 'basedir()/Util/pyUtil/pyTools.exe' %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5"> 
+			<cmd4 "exec 'basedir()/util/pyUtil/pyTools.exe' %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5"> 
 			
 			\>
 		<onlisten
@@ -1007,7 +1007,7 @@
 			\>
 		<cmd 
 			<cmd1 "cursor(busy, %1)">
-			<cmd2 "exec 'basedir()/Util/pyUtil/pyTools.exe' %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5"> 
+			<cmd2 "exec 'basedir()/util/pyUtil/pyTools.exe' %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5"> 
 			<cmd3 "cursor()">
 			\>
 
@@ -1057,7 +1057,7 @@
 			\>
 		<cmd 
 			<cmd1 "cursor(busy, %1)">
-			<cmd2 "exec 'basedir()/Util/pyUtil/pyTools.exe' %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5"> 
+			<cmd2 "exec 'basedir()/util/pyUtil/pyTools.exe' %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5"> 
 			<cmd3 "cursor()">
 			\>
 
@@ -1082,7 +1082,7 @@
 			<arg9 name="para" def="filename()">
 			\>
 		<cmd 
-			<cmd4 "exec 'basedir()/Util/pyUtil/pyTools.exe' history_%1:%2 '%6' '%7' '%8' '%9' "> 
+			<cmd4 "exec 'basedir()/util/pyUtil/pyTools.exe' history_%1:%2 '%6' '%7' '%8' '%9' "> 
 			\>
 		<onterminate
 			<cmd2 "wait 200">
@@ -1110,7 +1110,7 @@
 	<body
 		<args
 			<arg0 cif_info="extra_info" def="">
-			<arg1 cif_info_path="extra_info_path" def="basedir()/Util/SiteSpecific/%1.cif">
+			<arg1 cif_info_path="extra_info_path" def="basedir()/util/SiteSpecific/%1.cif">
 			<arg2 cif_original="cif_original" def="filename().cif">
 			
 		\>
@@ -1159,7 +1159,7 @@
 		<args
 		\>
 		<cmd
-			<cmd1 "exec 'basedir()/Util/Bat/mm.bat' mm 'basedir()'">
+			<cmd1 "exec 'basedir()/util/Bat/mm.bat' mm 'basedir()'">
 		\>
 	\>
 \>
