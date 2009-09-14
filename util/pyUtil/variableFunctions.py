@@ -270,6 +270,8 @@ def LoadStructureParams():
   olx.phil_handler.reset(scope_name='snum')
   solutionPrg, solutionMethod = getDefaultPrgMethod('Solution')
   refinementPrg, refinementMethod = getDefaultPrgMethod('Refinement')
+  if refinementMethod == 'Least Squares' and olx.LSM() == 'CGLS':
+    refinementMethod = 'CGLS' # work-around for bug #26
   snum_phil = """
 snum {
   refinement.program = "%s"
