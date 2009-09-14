@@ -1,8 +1,0 @@
-- Hadd needs to restrain Hydrogen atoms on water molecules differently. Since this is one of the nicest features (a real pain to to manually!) I think it's worth while doing. Example structure 02srv036. I think the best way would be to DFIX the two O-H distances to 0.85 and DANG the H-H distance to whatever this distance should be. The same goes for structures with water molecules bound to a metal ion (01aeg011).
-#now adds DFIX o-h1,h2 0.85, dang h1-h2 1.39
-- 02srv169: HADD adds hydrogens atoms to nitrogens where there are none
-#fixed
-- 95srv089: somehow compaq and compaq -a don't seem to compact this structure
-#do not see how the things would compaq
-- 95srv093: that space group problem causes things to go bad
-# olex retuns n/a now instead
