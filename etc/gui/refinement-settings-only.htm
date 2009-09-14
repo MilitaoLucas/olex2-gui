@@ -97,14 +97,14 @@
 	</td>
 	<td VALIGN='right' ALIGN='right' colspan=1>
 		<font size='2'>
-			<input 
-				type="spin" 
-				name="SET_SNUM_REFINEMENT_MAX_PEAKS"  
-				width="50" 
-				height="17" 
-				max='1000' 
+			<input
+				type="spin"
+				name="SET_SNUM_REFINEMENT_MAX_PEAKS"
+				width="50"
+				height="17"
+				max='1000'
 				bgcolor="GetVar(gui_html_input_bg_colour)"
-				value='$spy.GetParam(snum.refinement.max_peaks)'
+				value='$eval(abs\(spy.GetParam(snum.refinement.max_peaks)))'
 				onchange='spy.SetMaxPeaks(GetValue(SET_SNUM_REFINEMENT_MAX_PEAKS))'
 			>
 		</font>

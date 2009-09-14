@@ -83,7 +83,7 @@ def makeArgumentsHTML(program, method, dictionary):
     tick_box_d.setdefault('ctrl_name', 'SET_SETTINGS_%s' %name.upper())
     tick_box_d.setdefault('state', '$spy.CheckBoxValue(settings_%s)' %name)
     tick_box_d.setdefault('value', '')
-    tick_box_d.setdefault('oncheck', 'SetVar(settings_%s,GetState(SET_SETTINGS_%s))>>spy.addInstruction(%s)' %(name,name,name))
+    tick_box_d.setdefault('oncheck', 'SetVar(settings_%s,GetState(SET_SETTINGS_%s))>>spy.addInstruction(%s,%s,%s)' %(name,name,program, method, name))
     tick_box_d.setdefault('onuncheck', 'SetVar(settings_%s,GetState(SET_SETTINGS_%s))>>DelIns %s' %(name,name,argName))
     tick_box_html = htmlTools.make_tick_box_input(tick_box_d)
   else:
@@ -107,10 +107,10 @@ def makeArgumentsHTML(program, method, dictionary):
     d.setdefault('ctrl_name', 'SET_%s' %varName.upper())
     
     onchange = 'spy.addInstruction(%s,%s,%s)>>SetVar(%s,GetValue(SET_%s))' %(program, method, name,varName,varName.upper())
-    if name == 'nls':
+    if value[0] == 'nls':
       maxCycles_onchange = '%s>>spy.SetParam(snum.refinement.max_cycles,GetValue(SET_SETTINGS_%s_NLS))>>updatehtml' %(onchange,name.upper())
       d.setdefault('onleave', maxCycles_onchange)
-    elif name == 'npeaks':
+    elif value[0] == 'npeaks':
       maxPeaks_onchange = '%s>>spy.SetParam(snum.refinement.max_peaks,GetValue(SET_SETTINGS_%s_NPEAKS))>>updatehtml' %(onchange,name.upper())
       d.setdefault('onleave', maxPeaks_onchange)
     else:
@@ -157,7 +157,7 @@ def addInstruction(program, method, instruction):
     if not val:
       break
     addins += ' %s' %val
-    
+
   OV.DelIns(argName)
   OV.AddIns(addins)
 OV.registerFunction(addInstruction)
