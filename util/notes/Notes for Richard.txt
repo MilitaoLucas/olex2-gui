@@ -1,1 +1,0 @@
-- The R1 displayed after smtbx refinement is wrong (both in the history and the GUI display). Equally the refinement program/method.
