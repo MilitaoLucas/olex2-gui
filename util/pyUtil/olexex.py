@@ -809,6 +809,8 @@ def onRefinementProgramChange(prg_name, method=None):
   prg = RPD.programs[prg_name]
   if method is None:
     method = sortDefaultMethod(prg)
+    if method == 'Least Squares' and olx.LSM() == 'CGLS':
+      method = 'CGLS' # work-around for bug #26
   OV.SetParam("snum.refinement.method", method)
   onRefinementMethodChange(prg_name, method)
 OV.registerFunction(OV.SetRefinementProgram)
