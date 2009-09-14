@@ -119,7 +119,7 @@ class Method(object):
               OV.SetParam('snum.metacif.diffrn_ambient_temperature',
                         273.15 + float(val.strip('C')))
           except IndexError:
-            break
+            OV.SetVar('settings_%s_%s' %(name, value[0]), '')
           count += 1
       else:
         if arg['default'] != 'true':
