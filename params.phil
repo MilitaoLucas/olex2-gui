@@ -111,7 +111,7 @@ snum {
       .type = int(value_min=0)
       .help = The maximum number of refinement cycles to be performed
     max_peaks = 20
-      .type = int(value_min=0)
+      .type = int
       .help = The maximum number of electron density peaks to be returned \
               after refinement
     update_weight = False
