@@ -435,7 +435,7 @@ print >> olex2_tag_file, web_directory.split('/')[-1]
 olex2_tag_file.close()
 #end creating the tag file
 
-# create the zip archives
+print 'Creating windows zip file...'
 olex2_zip = zipfile.ZipFile(web_directory + '/olex2.zip',
                             mode='w', compression=zipfile.ZIP_DEFLATED)
 for f in installer_files:
@@ -446,20 +446,21 @@ olex2_zip.write(olex2_tag_file_name, 'olex2.tag')
 #process zip files - just extract - to add to the zip file 
 for zip_name in win_zip_files:
   zip_file = zipfile.ZipFile(bin_directory + '/' + zip_name, 'r')
+  print 'Appending ' + zip_name + '...'
   for zip_info in zip_file.infolist():
     olex2_zip.writestr( zip_info.filename, zip_file.read(zip_info.filename) )
 
 olex2_zip.close()
 
 ####################################################################################################
-# create linux distro
-def create_portable_ditro(port_name, zip_name, port_zips, prefix, extra_files):
+# create portable distro
+def create_portable_distro(port_name, zip_name, port_zips, prefix, extra_files):
   port_files = create_index(zip_index_file_name, only_prop='olex-install', port_name=port_name, portable=True)
   print 'Creating zip :' + zip_name
   dest_zip = zipfile.ZipFile(web_directory + '/' + zip_name,
                               mode='w', compression=zipfile.ZIP_DEFLATED)
   for f in installer_files:
-    if f not in portable_files:
+    if f not in port_files:
       continue
     dest_zip.write(f, zip_destination(f, prefix))
   if prefix is None:  prefix = ''
@@ -478,21 +479,21 @@ def create_portable_ditro(port_name, zip_name, port_zips, prefix, extra_files):
   dest_zip.close()
   return
 ####################################################################################################
-create_portable_ditro(
+create_portable_distro(
   port_name=None, 
   zip_name="portable-gui.zip", 
   port_zips=portable_zip_files, 
   prefix=None,
   extra_files = None
 )
-create_portable_ditro(
+create_portable_distro(
   port_name=suse_port_name, 
   zip_name="suse101x32-py26.zip", 
   port_zips=suse_zip_files, 
   prefix='olex2/',
   extra_files = {bin_directory + '/suse-distro/start' : 'olex2/start'}
 )
-create_portable_ditro(
+create_portable_distro(
   port_name=mac_port_name, 
   zip_name="mac-intel-py26.zip", 
   port_zips=mac_zip_files, 
