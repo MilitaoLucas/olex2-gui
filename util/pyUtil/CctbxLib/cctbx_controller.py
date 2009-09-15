@@ -2,6 +2,7 @@
 
 from my_refine_util import *
 import math
+import sys
 import scitbx.lbfgs
 from cctbx import miller
 from cctbx import statistics
@@ -169,27 +170,58 @@ class reflections(object):
     self.crystal_symmetry = cs
     self.f_sq_obs = reflections_server.get_miller_arrays(None)[0]
     self.f_obs = self.f_sq_obs.f_sq_as_f()
-    self.omit = None
-    self.merg = None
+    self._omit = None
+    self._merge = None
     self.f_sq_obs_merged = None
     self.f_sq_obs_filtered = None
 
-  def merge(self, merg):
-    self.merg = merg
-    self.f_sq_obs_merged = self.f_sq_obs
-    self.f_sq_obs_merged = self.f_sq_obs_merged.eliminate_sys_absent().average_bijvoet_mates()
+  def merge(self, merge, verbose=False, log=None):
+    if log is None:
+      log = sys.stdout
+    if merge is None:
+      merge = 2
+    self._merge = merge
+    f_sq_obs_merged = self.f_sq_obs.eliminate_sys_absent()
+    n_sys_absent = self.f_sq_obs.size() - f_sq_obs_merged.size()
+    merging_in_p1 = f_sq_obs_merged \
+                  .customized_copy(
+                    space_group_info=sgtbx.space_group_info("P1"),
+                    anomalous_flag=True) \
+                  .merge_equivalents()
+    f_sq_obs_merged_in_p1 = merging_in_p1.array().customized_copy(crystal_symmetry=self.f_sq_obs)
+    if merge > 2:
+      f_sq_obs_merged = f_sq_obs_merged.customized_copy(anomalous_flag=False)
+    merging = f_sq_obs_merged.merge_equivalents()
+    f_sq_obs_merged = merging.array()
+    self.f_sq_obs_merged = f_sq_obs_merged
+    if verbose:
+      print >> log, "Merging summary:"
+      print >> log, "Total reflections: %i" %self.f_sq_obs.size()
+      print >> log, "Unique reflections: %i" %f_sq_obs_merged.size()
+      print >> log, "Systematic Absences: %i removed" %n_sys_absent
+      print >> log, "R(int): %f" %merging.r_int()
+      print >> log, "R(sigma): %f" %merging.r_sigma()
+      merging.show_summary(out=log)
 
-  def filter(self, omit, wavelength):
-    self.omit = omit
+  def filter(self, omit, wavelength, verbose=False, log=None):
+    if log is None:
+      log = sys.stdout
+    self._omit = omit
     two_theta = omit['2theta']
+    d_min=uctbx.two_theta_as_d(two_theta, wavelength, deg=True)
     s = omit['s']
     hkl = omit.get('hkl')
-    f_sq_obs_filtered = self.f_sq_obs_merged.resolution_filter(
-      d_min=uctbx.two_theta_as_d(two_theta, wavelength, deg=True))
+    f_sq_obs_filtered = self.f_sq_obs_merged.resolution_filter(d_min=d_min)
+    n_filtered_by_resolution = self.f_sq_obs_merged.size() - f_sq_obs_filtered.size()
     if hkl is not None:
       f_sq_obs_filtered = f_sq_obs_filtered.select_indices(
         indices=flex.miller_index(hkl), map_indices_to_asu=True, negate=True)
     self.f_sq_obs_filtered = f_sq_obs_filtered
+    if verbose:
+      print >> log, "d min: %f" %d_min
+      print >> log, "n reflections filtered by resolution: %i" %(n_filtered_by_resolution)
+      print >> log, "n reflections filtered by hkl: %i" %(
+        self.f_sq_obs_merged.size() - n_filtered_by_resolution - f_sq_obs_filtered.size())
 
 def create_cctbx_xray_structure(cell, spacegroup, atom_iter, restraint_iterator=None):
   """ cell is a 6-uple, spacegroup a string and atom_iter yields tuples (label, xyz, u, element_type) """

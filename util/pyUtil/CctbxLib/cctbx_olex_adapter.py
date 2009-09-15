@@ -105,11 +105,11 @@ class OlexCctbxAdapter(object):
         self.olx_atoms.iterator(),
         restraint_iterator=self.olx_atoms.restraint_iterator())
 
-  def initialise_reflections(self):
+  def initialise_reflections(self, force=False):
     self.cell = self.olx_atoms.getCell()
     self.space_group = str(olx.xf_au_GetCellSymm())
     reflections = olx.HKLSrc()
-    if reflections != olx.current_reflection_filename:
+    if force or reflections != olx.current_reflection_filename:
       olx.current_reflection_filename = reflections
       olx.current_reflections = cctbx_controller.reflections(self.cell, self.space_group, reflections)
     if olx.current_reflections:
@@ -121,12 +121,12 @@ class OlexCctbxAdapter(object):
         print err
       self.reflections = olx.current_reflections
     
-    merg = self.olx_atoms._model.get('merg')
-    if merg is None or merg != self.reflections.merg:
-      self.reflections.merge(merg)
+    merge = self.olx_atoms._model.get('merge')
+    if force or merge is None or merge != self.reflections._merge:
+      self.reflections.merge(merge)
     omit = self.olx_atoms._model['omit']
-    if omit is None or omit != self.reflections.omit:
-      self.reflections.filter(omit, self.olx_atoms.exptl['radiation'])    
+    if force or omit is None or omit != self.reflections._omit:
+      self.reflections.filter(omit, self.olx_atoms.exptl['radiation'])
 
 class OlexCctbxRefine(OlexCctbxAdapter):
   def __init__(self, max_cycles=None, verbose=False):
