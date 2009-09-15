@@ -37,7 +37,7 @@ alterations = {
   'fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
   'acidb.zip': ('olex-update', 'action:extract', 'action:delete'),
   #plugins, no solution for portable plugins yet
-  'olex2c.exe': ('olex-port', win_port_name, 'plugin-Headless')
+  'olex2c.exe': ('olex-port', 'plugin-Headless')
 }
 # special zip files (must have relevent structire), must exist ABOVE as well!!
 #if the associated value is false - the file is non-portable and will not end up in the portable-gui.zip
