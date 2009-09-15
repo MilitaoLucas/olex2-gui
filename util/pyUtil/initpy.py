@@ -204,9 +204,9 @@ def setup_cctbx():
     cctbx_TAG_file.close()
     cctbx_compatible_version = "2009_09_09_0004"
     if int(cctbx_compile_date.replace('_','')) < int(cctbx_compatible_version.replace('_','')):
-      sys.stdout.write("""An incompatible version of the cctbx is installed.
-      Please update to cctbx build '%s' or later.
-      """ %cctbx_compatible_version)
+      sys.stdout.write("""Warning: An incompatible version of the cctbx is installed.
+Please update to cctbx build '%s' or later.
+""" %cctbx_compatible_version)
 
   if need_cold_start:
     saved_cwd = os.getcwd()
@@ -251,6 +251,8 @@ datadir = olx.DataDir()
 
 set_olex_paths()
 
+olx.Clear()
+
 try:
   setup_cctbx()
 except Exception, err:
@@ -277,8 +279,6 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 if OV.HasGUI():
   import htmlMaker
-
-olx.Clear()
 
 #if debug:
 #       keys = os.environ.keys()
