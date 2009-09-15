@@ -8,8 +8,27 @@ web_for_working = {'olex2.exe': 'olex2.dll', 'launch.exe': 'olex2.exe'}
 #available ports
 # alteartions for binary files : name (properties...), olex-port MUST be specified for non-portable files
 mac_port_name = 'port-mac-intel-py26'
+mac_port_zip_name = 'mac-intel-py26.zip'
+mac_port_prefix = 'olex2.app/Contents/MacOS/'
+
 suse_port_name = 'port-suse101x32-py26'
+suse_port_zip_name = 'suse101x32-py26.zip'
+suse_port_prefix = 'olex2/'
+
 win_port_name = 'port-win32'
+win_port_zip_name = 'olex2.zip'
+win_port_prefix = None
+
+portable_zip_name = 'portable-gui.zip'
+portable_prefix = None
+# iteratable list of zips and prefixes
+distro_zips = (
+  (mac_port_zip_name, mac_port_prefix), 
+  (suse_port_zip_name, suse_port_prefix), 
+  (win_port_zip_name, win_port_prefix),
+  (portable_zip_name, portable_prefix)
+)
+
 alterations = {
   #windows installer files
   'launch.exe': ('olex-install', 'olex-port', win_port_name),
@@ -156,7 +175,7 @@ def is_distro_uptodate(src, dest):
     return False
   src_mt = os.path.getmtime(src)
   dest_mt = os.path.getmtime(dest)
-  return abs(dest_mt-src_mt) < 5 # 5 seconds
+  return src_mt - dest_mt < 5 # 5 seconds
   
 def promote_distro(src, dest):
   if not os.path.exists(src):
@@ -170,6 +189,30 @@ def promote_distro(src, dest):
     shutil.copytree(src, dest)
   else:
     shutil.copytree(src, dest)
+  # update the tag files...
+  dest = dest.replace('\\','/')
+  if dest.endswith('/'):  dest = dest[:-1]
+  tag_file_name = dest+'/'+'olex2.tag'
+  tag_file = open(tag_file_name, 'w+b')
+  print >> tag_file, dest.split('/')[-1]
+  tag_file.close()
+  #end creating the tag file
+  for zipfi in distro_zips:
+    print 'Updating ' + zipfi[0] + '...'
+    src_zfile = zipfile.ZipFile(dest + '/' + zipfi[0], mode='r', compression=zipfile.ZIP_DEFLATED)
+    dest_zfile = zipfile.ZipFile(dest + '/' + zipfi[0] + '_', mode='w', compression=zipfile.ZIP_DEFLATED)
+    prefix = zipfi[1]
+    if not prefix:  prefix = ''
+    zip_tag_name = prefix + 'olex2.tag'
+    for zi in src_zfile.infolist():
+      if zi.filename == zip_tag_name:
+        dest_zfile.write(tag_file_name, zip_tag_name) 
+      else:  
+        dest_zfile.writestr(zi, src_zfile.read(zi.filename)) 
+    src_zfile.close()
+    dest_zfile.close()
+    os.remove(dest + '/' + zipfi[0]);
+    os.rename(dest + '/' + zipfi[0] + '_', dest + '/' + zipfi[0])
   sys.exit(0)
 # do the promotion of alpha->beta->release, only alpha can be re-released
 if option.beta: 
@@ -476,7 +519,7 @@ for zip_name in win_zip_files:
   zip_file = zipfile.ZipFile(bin_directory + '/' + zip_name, 'r')
   print 'Appending ' + zip_name + '...'
   for zip_info in zip_file.infolist():
-    olex2_zip.writestr( zip_info.filename, zip_file.read(zip_info.filename) )
+    olex2_zip.writestr(zip_info, zip_file.read(zip_info.filename))
 
 olex2_zip.close()
 
@@ -513,16 +556,16 @@ def create_portable_distro(port_name, zip_name, port_zips, prefix, extra_files):
 ####################################################################################################
 create_portable_distro(
   port_name=None, 
-  zip_name="portable-gui.zip", 
+  zip_name=portable_zip_name, 
   port_zips=portable_zip_files, 
-  prefix=None,
+  prefix=portable_prefix,
   extra_files = None
 )
 create_portable_distro(
   port_name=suse_port_name, 
-  zip_name="suse101x32-py26.zip", 
+  zip_name=suse_port_zip_name, 
   port_zips=suse_zip_files, 
-  prefix='olex2/',
+  prefix=suse_port_prefix,
   extra_files = 
   {
     bin_directory + '/suse-distro/start' : 'olex2/start',
@@ -531,9 +574,9 @@ create_portable_distro(
 )
 create_portable_distro(
   port_name=mac_port_name, 
-  zip_name="mac-intel-py26.zip", 
+  zip_name=mac_port_zip_name, 
   port_zips=mac_zip_files, 
-  prefix='olex2.app/Contents/MacOS/',
+  prefix=mac_port_prefix,
   extra_files = 
   {
     bin_directory + '/mac-distro/start' : 'start',
