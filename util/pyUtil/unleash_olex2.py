@@ -156,7 +156,7 @@ def is_distro_uptodate(src, dest):
     return False
   src_mt = os.path.getmtime(src)
   dest_mt = os.path.getmtime(dest)
-  return dest_mt >= src_mt
+  return abs(dest_mt-src_mt) < 5 # 5 seconds
   
 def promote_distro(src, dest):
   if not os.path.exists(src):
@@ -166,19 +166,23 @@ def promote_distro(src, dest):
     if is_distro_uptodate(src, dest):
       print 'Destination repository is newer than the source one or up-to-date, exiting'
       sys.exit(0)
-    shutil.rmtree(dest_mt)
+    shutil.rmtree(dest)
     shutil.copytree(src, dest)
   else:
     shutil.copytree(src, dest)
   sys.exit(0)
 # do the promotion of alpha->beta->release, only alpha can be re-released
 if option.beta: 
+  print 'Promoting alpha distro to beta'
   promote_distro(web_directory + '-alpha', web_directory + '-beta')
-elif option.alpha: web_directory += '-alpha'
+elif option.alpha: 
+  web_directory += '-alpha'
+  print 'Creating alpha distro...'
 else:
   if not is_distro_uptodate(web_directory + '-alpha', web_directory + '-beta'):
-    print 'Source distro is not up-to-date, aborting'
+    print 'Alpha distro is not up-to-date, aborting'
     sys.exit(0)
+  print 'Promoting beta distro to release'
   promote_distro(web_directory + '-beta', web_directory)
   
 if not os.path.isdir(os.path.dirname(web_directory)):
