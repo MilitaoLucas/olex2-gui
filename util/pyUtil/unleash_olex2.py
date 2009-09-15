@@ -456,7 +456,7 @@ olex2_zip.close()
 # create portable distro
 def create_portable_distro(port_name, zip_name, port_zips, prefix, extra_files):
   port_files = create_index(zip_index_file_name, only_prop='olex-install', port_name=port_name, portable=True)
-  print 'Creating zip :' + zip_name
+  print 'Creating portable zip: ' + zip_name
   dest_zip = zipfile.ZipFile(web_directory + '/' + zip_name,
                               mode='w', compression=zipfile.ZIP_DEFLATED)
   for f in installer_files:
@@ -468,10 +468,14 @@ def create_portable_distro(port_name, zip_name, port_zips, prefix, extra_files):
   dest_zip.write(olex2_tag_file_name, prefix + 'olex2.tag')
   #process zip files - just extract - to add to the zip file 
   for zip_name in port_zips:
-    print 'Processing zip file: ' + zip_name
+    print 'Appending ' + zip_name + '...'
     src_zip = zipfile.ZipFile(bin_directory + '/' + zip_name, 'r')
     for zip_info in src_zip.infolist():
-      dest_zip.writestr( prefix + zip_info.filename, src_zip.read(zip_info.filename) )
+      zi = zipfile.ZipInfo(prefix + zip_info.filename)
+      zi.date_time = zip_info.date_time;
+      zi.compress_type = zipfile.ZIP_DEFLATED
+      zi.external_attr = 0777 << 16L # it is NNEDED on Linux and Mac
+      dest_zip.writestr(zi, src_zip.read(zip_info.filename) )
     src_zip.close()
   if extra_files:
     for k,v in extra_files.iteritems():
@@ -506,7 +510,7 @@ create_portable_distro(
 
 #delete the temporary index file
 os.unlink(zip_index_file_name)
-#create plug zips with indexes
+#create plugin zips with indexes
 plugin_index_file_name = update_directory + 'plugin.ind'
 for plugin, files in files_for_plugin.items():
   plugin_zip = zipfile.ZipFile(web_directory + '/' + plugin + '.zip', 'w', compression=zipfile.ZIP_DEFLATED)
