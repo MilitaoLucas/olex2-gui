@@ -76,6 +76,7 @@ altered_files = set([])
 altered_dirs = set([])
 
 import os.path
+import sys
 from optparse import OptionParser
 import pysvn
 import cStringIO
@@ -128,10 +129,6 @@ parser.add_option('--alpha',
 		  dest='alpha',
 		  action='store_true',
 		  help='whether to use the normal or the tag-alpha web directory')
-parser.add_option('--exp',
-		  dest='exp',
-		  action='store_true',
-		  help='whether to use the normal or the tag-experimental web directory')
 parser.add_option('-f', '--file',
 		  dest='update_file',
                   default='',
@@ -153,10 +150,37 @@ if not os.path.isdir(bin_directory):
   print "ERROR: '%s' is not a directory" % bin_directory
   parser.print_help()
   #os.abort()
+
+def is_distro_uptodate(src, dest):
+  if not os.path.exists(src) or not os.path.exists(dest):
+    return False
+  src_mt = os.path.getmtime(src)
+  dest_mt = os.path.getmtime(dest)
+  return dest_mt >= src_mt
   
-if option.beta: web_directory += '-beta'
+def promote_distro(src, dest):
+  if not os.path.exists(src):
+    print "Source distribution does not exist, exiting..."
+    sys.exit(0)
+  if os.path.exists(dest): 
+    if is_distro_uptodate(src, dest):
+      print 'Destination repository is newer than the source one or up-to-date, exiting'
+      sys.exit(0)
+    shutil.rmtree(dest_mt)
+    shutil.copytree(src, dest)
+  else:
+    shutil.copytree(src, dest)
+  sys.exit(0)
+# do the promotion of alpha->beta->release, only alpha can be re-released
+if option.beta: 
+  promote_distro(web_directory + '-alpha', web_directory + '-beta')
 elif option.alpha: web_directory += '-alpha'
-elif option.exp: web_directory += '-experimental'
+else:
+  if not is_distro_uptodate(web_directory + '-alpha', web_directory + '-beta'):
+    print 'Source distro is not up-to-date, aborting'
+    sys.exit(0)
+  promote_distro(web_directory + '-beta', web_directory)
+  
 if not os.path.isdir(os.path.dirname(web_directory)):
   print "ERROR: '%s' is not a directory" % working_directory
   parser.print_help()
@@ -528,7 +552,7 @@ for plugin, files in files_for_plugin.items():
   plugin_zip.close()
 if os.path.exists(plugin_index_file_name):
   os.remove(plugin_index_file_name)
-#end of th eplugin zips creation
+#end of the plugin zips creation
 
 # update tags file, the web_dir is transformed to correct form when creating olex2.tag file
 up_dir = '/'.join(web_directory.split('/')[:-1])
