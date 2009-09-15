@@ -37,7 +37,7 @@ alterations = {
   'fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
   'acidb.zip': ('olex-update', 'action:extract', 'action:delete'),
   #plugins, no solution for portable plugins yet
-  'olex2c.exe': ('olex-port', win_port_name, 'plugin-Headless', 'olex2-update')
+  'olex2c.exe': ('olex-port', win_port_name, 'plugin-Headless')
 }
 # special zip files (must have relevent structire), must exist ABOVE as well!!
 #if the associated value is false - the file is non-portable and will not end up in the portable-gui.zip
@@ -180,7 +180,7 @@ elif option.alpha:
   print 'Creating alpha distro...'
 else:
   if not is_distro_uptodate(web_directory + '-alpha', web_directory + '-beta'):
-    print 'Alpha distro is not up-to-date, aborting'
+    print 'Beta distro is not up-to-date, aborting'
     sys.exit(0)
   print 'Promoting beta distro to release'
   promote_distro(web_directory + '-beta', web_directory)
@@ -551,7 +551,7 @@ for plugin, files in files_for_plugin.items():
   plugin_zip = zipfile.ZipFile(web_directory + '/' + plugin + '.zip', 'w', compression=zipfile.ZIP_DEFLATED)
   for f in files:
     plugin_zip.write(destination(f,'update'), zip_destination(f))
-  create_index(zip_index_file_name, only_prop=set(['plugin-'+plugin]), enforce_only_prop=True)
+  create_index(zip_index_file_name, only_prop='plugin-'+plugin, enforce_only_prop=True)
   plugin_zip.write(zip_index_file_name, 'index.ind')  
   plugin_zip.close()
 if os.path.exists(plugin_index_file_name):
