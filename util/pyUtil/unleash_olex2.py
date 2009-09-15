@@ -474,7 +474,7 @@ def create_portable_distro(port_name, zip_name, port_zips, prefix, extra_files):
       zi = zipfile.ZipInfo(prefix + zip_info.filename)
       zi.date_time = zip_info.date_time;
       zi.compress_type = zipfile.ZIP_DEFLATED
-      zi.external_attr = 0777 << 16L # it is NNEDED on Linux and Mac
+      zi.external_attr = 0775 << 16L # it is NEEDED on Linux and Mac
       dest_zip.writestr(zi, src_zip.read(zip_info.filename) )
     src_zip.close()
   if extra_files:
