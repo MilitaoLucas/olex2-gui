@@ -170,6 +170,19 @@ if not os.path.isdir(bin_directory):
   parser.print_help()
   #os.abort()
 
+# update tags file, the web_dir is transformed to correct form when creating olex2.tag file
+def update_tags_file(dir):
+  up_dir = '/'.join(dir.split('/')[:-1])
+  tags = os.listdir(up_dir)
+  tags_file = open(up_dir + '/tags.txt', 'w')
+  for dir in tags:
+    if dir != '.' and os.path.isdir(up_dir+'/'+dir):
+      if not os.path.exists(up_dir+'/'+dir+'/olex2.tag'):
+        print 'Skipping invalid TAG folder: ' + dir
+        continue
+      print >> tags_file, dir
+  tags_file.close()
+  
 def is_distro_uptodate(src, dest):
   if not os.path.exists(src) or not os.path.exists(dest):
     return False
@@ -213,6 +226,7 @@ def promote_distro(src, dest):
     dest_zfile.close()
     os.remove(dest + '/' + zipfi[0]);
     os.rename(dest + '/' + zipfi[0] + '_', dest + '/' + zipfi[0])
+  update_tags_file(src)
   sys.exit(0)
 # do the promotion of alpha->beta->release, only alpha can be re-released
 if option.beta: 
@@ -601,19 +615,10 @@ if os.path.exists(plugin_index_file_name):
   os.remove(plugin_index_file_name)
 #end of the plugin zips creation
 
-# update tags file, the web_dir is transformed to correct form when creating olex2.tag file
-up_dir = '/'.join(web_directory.split('/')[:-1])
-tags = os.listdir(up_dir)
-tags_file = open(up_dir + '/tags.txt', 'w')
-for dir in tags:
-  if dir != '.' and os.path.isdir(up_dir+'/'+dir):
-    if not os.path.exists(up_dir+'/'+dir+'/olex2.tag'):
-      print 'Skipping invalid TAG folder: ' + dir
-      continue
-    print >> tags_file, dir
-tags_file.close()
-#end update tags file
-  
+update_tags_file(web_directory)
+
+print 'Done'
+
 if __name__ == '__main__':
   import sys
   sys.argv.append('--beta')
