@@ -5,33 +5,73 @@
 plugins = ('MySQL', 'brukersaint', 'ODSkin', 'BNSkin', 'STOESkin', 'HPSkin', 'Batch', 'Crypto', 'ODAC', 'Headless', 'Olex2Portal') 
 # file name aliases
 web_for_working = {'olex2.exe': 'olex2.dll', 'launch.exe': 'olex2.exe'}
+#available ports
 # alteartions for binary files : name (properties...), olex-port MUST be specified for non-portable files
-alterations = {'launch.exe': ('olex-install', 'olex-port', 'port-win32'),
-               'splash.jpg': ('olex-install', 'olex-update'),
-               'version.txt': ('olex-install', 'olex-update'),
-               'installer.exe': ('olex-top',), #mind the comma!
-               'olex2-mac.zip': ('olex-port', 'port-mac-intel-py26', 'action:extract', 'action:delete'),
-               'olex2-suse101x32.zip': ('olex-port', 'port-suse101x32-py26', 'action:extract', 'action:delete'),
-               'cctbx.zip': ('olex-port', 'port-win32', 'action:extract', 'action:delete'),
-               'python26.zip': ('olex-port', 'port-win32', 'action:extract', 'action:delete'),
-               'vcredist_x86.exe': ('olex-install',),
-               'fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
-               'olex2_fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
-               'acidb.zip': ('olex-update', 'action:extract', 'action:delete'),
-               'olex2_exe.zip': ('olex-port', 'port-win32', 'action:extract', 'action:delete'),
-               'olex2c.exe': ('plugin-Headless', 'olex2-update')
-               }
-# special zip files (must have relevelnt structire), must exist ABOVE as well!!
+mac_port_name = 'port-mac-intel-py26'
+suse_port_name = 'port-suse101x32-py26'
+win_port_name = 'port-win32'
+alterations = {
+  #windows installer files
+  'launch.exe': ('olex-install', 'olex-port', win_port_name),
+  'splash.jpg': ('olex-install', 'olex-update'),
+  'version.txt': ('olex-install', 'olex-update'),
+  'installer.exe': ('olex-top',), #mind the comma!
+  'vcredist_x86.exe': ('olex-install',),
+  #mac
+  'olex2-mac.zip': ('olex-port', mac_port_name, 'action:extract', 'action:delete'),
+  'unirun-mac.zip': ('olex-port', mac_port_name, 'action:extract', 'action:delete'),
+  'cctbx-mac.zip': ('olex-port', mac_port_name, 'action:extract', 'action:delete'),
+  'python26-mac.zip': ('olex-port', mac_port_name, 'action:extract', 'action:delete'),
+  #linux
+  'olex2-suse101x32.zip': ('olex-port', suse_port_name, 'action:extract', 'action:delete'),
+  'unirun-suse101x32.zip': ('olex-port', suse_port_name, 'action:extract', 'action:delete'),
+  'cctbx-suse101x32.zip': ('olex-port', suse_port_name, 'action:extract', 'action:delete'),
+  'python26-suse101x32.zip': ('olex-port', suse_port_name, 'action:extract', 'action:delete'),
+  'lib-suse101x32.zip': ('olex-port', suse_port_name, 'action:extract', 'action:delete'),
+  #windows 
+  'cctbx.zip': ('olex-port', win_port_name, 'action:extract', 'action:delete'),
+  'python26.zip': ('olex-port', win_port_name, 'action:extract', 'action:delete'),
+  'olex2_exe.zip': ('olex-port', win_port_name, 'action:extract', 'action:delete'),
+  #portables
+  'olex2_fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
+  'fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
+  'acidb.zip': ('olex-update', 'action:extract', 'action:delete'),
+  #plugins, no solution for portable plugins yet
+  'olex2c.exe': ('olex-port', win_port_name, 'plugin-Headless', 'olex2-update')
+}
+# special zip files (must have relevent structire), must exist ABOVE as well!!
 #if the associated value is false - the file is non-portable and will not end up in the portable-gui.zip
-zip_files = \
-set(  ['cctbx.zip',       #cctbx/cctb_sources,...
+portable_zip_files = \
+set(  ['olex2_fonts.zip',
+       'fonts.zip',
+       'acidb.zip'
+      ]
+   )
+win_zip_files = \
+set(  ['cctbx.zip',      #cctbx/cctb_sources,...
       'python26.zip',    #Pyhton26/..., ..., + python26.dll!!!
-      'fonts.zip',       #etc/gui/fonts/VeraBd.ttf, ...
-      'olex2_fonts.zip', #etc/Fonts.olex2.fnt, ...
-      'acidb.zip',       #acidb.zip
       'olex2_exe.zip'    #olex2.dll, it will be veryfied first of all
       ]    
-   )
+   ) | portable_zip_files
+mac_zip_files = \
+set(  ['cctbx-mac.zip',  #cctbx/cctb_sources,...
+      'python26-mac.zip',#Pyhton26/..., ..., + python26 dlls
+      'olex2-mac.zip',    #olex2 executable
+      'unirun-mac.zip'
+      ]    
+   ) | portable_zip_files
+
+suse_zip_files = \
+set(  ['cctbx-suse101x32.zip',  #cctbx/cctb_sources,...
+      'python26-suse101x32.zip',#Pyhton26/..., ..., + python26 dlls
+      'lib-suse101x32.zip',     #lib/dlls
+      'olex2-suse101x32.zip',    #olex2 executable
+      'unirun-suse101x32.zip'
+      ]    
+   ) | portable_zip_files
+# a set of all zip files...
+all_zip_files = win_zip_files | mac_zip_files | suse_zip_files
+
 altered_files = set([])
 altered_dirs = set([])
 
@@ -63,9 +103,10 @@ def destination(working_path, sub_web_directory=None):
   return translate_working_to_web(
     working_path.replace(working_directory, dst))
 
-def zip_destination(working_path):
-  return translate_working_to_web(
-    working_path.replace(working_directory + '/', ''))
+def zip_destination(working_path, prefix=None):
+  if prefix:
+    return prefix + translate_working_to_web(working_path.replace(working_directory + '/', ''))
+  return translate_working_to_web(working_path.replace(working_directory + '/', ''))
 
 parser = OptionParser(usage='unleash_olex2.py [options]')
 parser.add_option('--web_directory',
@@ -107,7 +148,7 @@ if not os.path.isdir(working_directory):
 web_directory = os.path.expanduser(option.web_directory
 				   or 'e:/tmp/web')
 bin_directory = os.path.expanduser(option.bin_directory
-                                   or 'e:/tmp/bin-test')
+                                   or 'e:/tmp/bin_dir')
 if not os.path.isdir(bin_directory):
   print "ERROR: '%s' is not a directory" % bin_directory
   parser.print_help()
@@ -326,7 +367,7 @@ class IndexEntry:
     for item in self.items.itervalues():
       item.SaveToFile(idx_file, indent)
   
-def create_index(index_file_name, only_prop=None, portable=False, enforce_only_prop=False):
+def create_index(index_file_name, only_prop=None, port_name = None, portable=False, enforce_only_prop=False):
   portable_files = set([])  
   idx_file = open(index_file_name, 'w')
   root_entry = IndexEntry(None, -1, None, None, True)
@@ -359,9 +400,9 @@ def create_index(index_file_name, only_prop=None, portable=False, enforce_only_p
       #skip non-portable files if required
       #this will tackle translated file names, like 'launch.exe' -> 'olex2.exe'
       if portable and alterations.has_key(working_for_web.get(f,f)):
-        if 'olex-port' in props:
-          continue
-      elif (enforce_only_prop or f not in zip_files) and (only_prop is not None and only_prop not in props): 
+        if 'olex-port' in props and (port_name is None or port_name not in props):
+            continue
+      elif (enforce_only_prop or f not in all_zip_files) and (only_prop is not None and only_prop not in props): 
         continue
       if portable:
         portable_files.add(normalised_root_dir + f)
@@ -378,8 +419,9 @@ def create_index(index_file_name, only_prop=None, portable=False, enforce_only_p
   return portable_files
 #####################################################################################################
 #end of index management procedures
-
+#create a global index file
 create_index(update_directory + '/index.ind')
+#create a file for installation
 zip_index_file_name = update_directory + '/zindex.ind'
 create_index(zip_index_file_name, only_prop='olex-install')
 
@@ -402,34 +444,65 @@ olex2_zip.write(zip_index_file_name, 'index.ind')
 olex2_zip.write(olex2_tag_file_name, 'olex2.tag')
 
 #process zip files - just extract - to add to the zip file 
-for zip_name in zip_files:
+for zip_name in win_zip_files:
   zip_file = zipfile.ZipFile(bin_directory + '/' + zip_name, 'r')
   for zip_info in zip_file.infolist():
     olex2_zip.writestr( zip_info.filename, zip_file.read(zip_info.filename) )
 
 olex2_zip.close()
 
-portable_files = create_index(zip_index_file_name, only_prop='olex-install', portable=True)
+####################################################################################################
+# create linux distro
+def create_portable_ditro(port_name, zip_name, port_zips, prefix, extra_files):
+  port_files = create_index(zip_index_file_name, only_prop='olex-install', port_name=port_name, portable=True)
+  print 'Creating zip :' + zip_name
+  dest_zip = zipfile.ZipFile(web_directory + '/' + zip_name,
+                              mode='w', compression=zipfile.ZIP_DEFLATED)
+  for f in installer_files:
+    if f not in portable_files:
+      continue
+    dest_zip.write(f, zip_destination(f, prefix))
+  if prefix is None:  prefix = ''
+  dest_zip.write(zip_index_file_name, prefix + 'index.ind')
+  dest_zip.write(olex2_tag_file_name, prefix + 'olex2.tag')
+  #process zip files - just extract - to add to the zip file 
+  for zip_name in port_zips:
+    print 'Processing zip file: ' + zip_name
+    src_zip = zipfile.ZipFile(bin_directory + '/' + zip_name, 'r')
+    for zip_info in src_zip.infolist():
+      dest_zip.writestr( prefix + zip_info.filename, src_zip.read(zip_info.filename) )
+    src_zip.close()
+  if extra_files:
+    for k,v in extra_files.iteritems():
+      dest_zip.write(k, v)
+  dest_zip.close()
+  return
+####################################################################################################
+create_portable_ditro(
+  port_name=None, 
+  zip_name="portable-gui.zip", 
+  port_zips=portable_zip_files, 
+  prefix=None,
+  extra_files = None
+)
+create_portable_ditro(
+  port_name=suse_port_name, 
+  zip_name="suse101x32-py26.zip", 
+  port_zips=suse_zip_files, 
+  prefix='olex2/',
+  extra_files = {bin_directory + '/suse-distro/start' : 'olex2/start'}
+)
+create_portable_ditro(
+  port_name=mac_port_name, 
+  zip_name="mac-intel-py26.zip", 
+  port_zips=mac_zip_files, 
+  prefix='olex2.app/Contents/MacOS/',
+  extra_files = {bin_directory + '/mac-distro/start' : 'start',
+                 bin_directory + '/mac-distro/Info.plist' : 'olex2.app/Contents/Info.plist',
+                 bin_directory + '/mac-distro/PkgInfo' : 'olex2.app/Contents/PkgInfo'
+                 }
+)
 
-# create the zip archives for portable GUI
-portable_gui_zip = zipfile.ZipFile(web_directory + '/portable-gui.zip',
-                            mode='w', compression=zipfile.ZIP_DEFLATED)
-for f in installer_files:
-  if f not in portable_files:
-    continue
-  portable_gui_zip.write(f, zip_destination(f))
-portable_gui_zip.write(zip_index_file_name, 'index.ind')
-portable_gui_zip.write(olex2_tag_file_name, 'olex2.tag')
-#process zip files - just extract - to add to the zip file 
-for zip_name in zip_files:
-  if 'olex-port' in alterations[zip_name]:
-    print 'Skipping non-portable zip file: ' + zip_name
-    continue
-  zip_file = zipfile.ZipFile(bin_directory + '/' + zip_name, 'r')
-  for zip_info in zip_file.infolist():
-    portable_gui_zip.writestr( zip_info.filename, zip_file.read(zip_info.filename) )
-
-portable_gui_zip.close()
 #delete the temporary index file
 os.unlink(zip_index_file_name)
 #create plug zips with indexes
@@ -438,7 +511,7 @@ for plugin, files in files_for_plugin.items():
   plugin_zip = zipfile.ZipFile(web_directory + '/' + plugin + '.zip', 'w', compression=zipfile.ZIP_DEFLATED)
   for f in files:
     plugin_zip.write(destination(f,'update'), zip_destination(f))
-  create_index(zip_index_file_name, only_prop='plugin-'+plugin, enforce_only_prop=True)
+  create_index(zip_index_file_name, only_prop=set(['plugin-'+plugin]), enforce_only_prop=True)
   plugin_zip.write(zip_index_file_name, 'index.ind')  
   plugin_zip.close()
 if os.path.exists(plugin_index_file_name):
