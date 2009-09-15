@@ -99,7 +99,7 @@ snum {
   }
 
   refinement {
-    program = ShelXL XL XH ShelXH 'smtbx-refine'
+    program = ShelXL XL XH ShelXH XLMP ShelXL_ifc 'smtbx-refine'
       .type = choice
     method = 'Least Squares' CGLS LBFGS
       .type = choice
