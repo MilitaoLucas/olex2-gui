@@ -495,17 +495,24 @@ create_portable_distro(
   zip_name="suse101x32-py26.zip", 
   port_zips=suse_zip_files, 
   prefix='olex2/',
-  extra_files = {bin_directory + '/suse-distro/start' : 'olex2/start'}
+  extra_files = 
+  {
+    bin_directory + '/suse-distro/start' : 'olex2/start',
+    bin_directory + '/suse-distro/usettings.dat' : 'olex2/usettings.dat'
+  }
 )
 create_portable_distro(
   port_name=mac_port_name, 
   zip_name="mac-intel-py26.zip", 
   port_zips=mac_zip_files, 
   prefix='olex2.app/Contents/MacOS/',
-  extra_files = {bin_directory + '/mac-distro/start' : 'start',
-                 bin_directory + '/mac-distro/Info.plist' : 'olex2.app/Contents/Info.plist',
-                 bin_directory + '/mac-distro/PkgInfo' : 'olex2.app/Contents/PkgInfo'
-                 }
+  extra_files = 
+  {
+    bin_directory + '/mac-distro/start' : 'start',
+    bin_directory + '/mac-distro/Info.plist' : 'olex2.app/Contents/Info.plist',
+    bin_directory + '/mac-distro/PkgInfo' : 'olex2.app/Contents/PkgInfo',
+    bin_directory + '/mac-distro/usettings.dat' : 'olex2.app/Contents/MacOS/usettings.dat'
+  }
 )
 
 #delete the temporary index file
