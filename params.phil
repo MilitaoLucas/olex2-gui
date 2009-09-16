@@ -303,7 +303,7 @@ snum {
     exptl_absorpt_process_details = None
       .type = str
     exptl_crystal_density_meas = None
-      .type = float(value_min=0.00001)
+      .type = float(value_min=0.0)
     exptl_crystal_colour = None
       .type = str
     exptl_crystal_colour_primary= *? colourless white black gray brown red pink orange yellow green blue violet
