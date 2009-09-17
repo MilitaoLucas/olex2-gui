@@ -311,7 +311,6 @@
 			<cmd5 "if strcmp(%1,hkl) then 'exec -o getvar(defeditor) &2E;hklsrc()&2E;' else 'exec -o getvar(defeditor) &2E;filepath()/filename().%1&2E;'">
 		\>
 		<onterminate
-			<cmd0 "silent off">
 			<cmd1 "stop"> 
 		\>
 		<onlisten
