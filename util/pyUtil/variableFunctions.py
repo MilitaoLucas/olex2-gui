@@ -269,11 +269,12 @@ OV.registerFunction(LoadParams)
 def LoadStructureParams():
   olx.phil_handler.reset(scope_name='snum')
   solutionPrg, solutionMethod = getDefaultPrgMethod('Solution')
-  if solutionMethod == 'Direct Methods' and olx.Ins('PATT') != 'n/a':
-    solutionMethod = 'Patterson Method' # work-around for bug #48
   refinementPrg, refinementMethod = getDefaultPrgMethod('Refinement')
-  if refinementMethod == 'Least Squares' and olx.LSM() == 'CGLS':
-    refinementMethod = 'CGLS' # work-around for bug #26
+  if OV.IsFileType('ires'):
+    if solutionMethod == 'Direct Methods' and olx.Ins('PATT') != 'n/a':
+      solutionMethod = 'Patterson Method' # work-around for bug #48
+    if refinementMethod == 'Least Squares' and olx.LSM() == 'CGLS':
+      refinementMethod = 'CGLS' # work-around for bug #26
   snum_phil = """
 snum {
   refinement.program = "%s"
