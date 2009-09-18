@@ -36,7 +36,7 @@ class People:
 	
 	def changePersonInfo(self,person,item,info):
 		if not person:
-			pass
+			return
 		elif not self.isPerson(person):
 			self.addNewPerson(person)
 			
