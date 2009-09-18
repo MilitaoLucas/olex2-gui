@@ -126,11 +126,7 @@ class OlexFunctions(inheritFunctions):
     return retVal
   
   def IsFileType(self, fileType):
-    isFileType = olx.IsFileType(fileType)
-    if isFileType == 'true':
-      return True
-    else:
-      return False
+    return olx.IsFileType(fileType) == 'true'
   
   def FindObject(self,variable):
     try:
