@@ -54,6 +54,10 @@ def makeHtmlTable(list):
     else:
       input_d.setdefault('value', '$spy.GetParam_as_string(%s)' %input_d['varName'])
       input_d.setdefault('ctrl_name', "SET_%s" %str.upper(input_d['varName']).replace('.','_'))
+      if input_d.has_key('onchange'):
+        input_d.setdefault('onleave',input_d['onchange'])
+      elif input_d.has_key('onleave'):
+        input_d.setdefault('onchange',input_d['onleave'])
       input_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
       input_d.setdefault('onleave',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
       input_d.setdefault('bgcolor','spy.bgcolor(%s)' %input_d['ctrl_name'])
