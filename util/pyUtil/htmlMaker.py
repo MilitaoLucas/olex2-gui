@@ -12,36 +12,36 @@ def sourceFilesHtmlMaker():
   list = [
     {'varName':'snum.metacif.sad_file',
      'itemName':'SADABS %File%',
-     'chooseFile':{'filter':'*.abs'}
+     'chooseFile':{'filter':'.abs files|*.abs'}
      },
     {'varName':'snum.metacif.pcf_file',
      'itemName':'pcf %File%',
-     'chooseFile':{'filter':'*.pcf'}
+     'chooseFile':{'filter':'.pcf files|*.pcf'}
      },
     {'varName':'snum.metacif.p4p_file',
      'itemName':'p4p %File%',
-     'chooseFile':{'filter':'*.p4p'}
+     'chooseFile':{'filter':'.p4p files|*.p4p'}
      },
     {'varName':'snum.metacif.smart_file',
      'itemName':'SMART %File%',
-     'chooseFile':{'filter':'*.ini'}
-     },                                      
+     'chooseFile':{'filter':'.ini files|*.ini'}
+     },
     {'varName':'snum.metacif.saint_file',
      'itemName':'SAINT %File%',
-     'chooseFile':{'filter':'*.ini'}
-     },                      
+     'chooseFile':{'filter':'.ini files|*.ini'}
+     },
     {'varName':'snum.metacif.frames_file',
      'itemName':'%Frame% %File%',
-     'chooseFile':{'filter':'*.*'}
-     },                      
+     'chooseFile':{'filter':'All files(*.*)|*.*'}
+     },
     {'varName':'snum.metacif.integ_file',
      'itemName':'%Integration% %File%',
-     'chooseFile':{'filter':'*._ls'}
-     },                      
+     'chooseFile':{'filter':'._ls files|*._ls'}
+     },
     {'varName':'snum.metacif.cad4_file',
      'itemName':'cad4 %File%',
-     'chooseFile':{'filter':'*.dat'}
-     },                      
+     'chooseFile':{'filter':'.dat files|*.dat'}
+     },
   ]
   text = ''
 
@@ -88,7 +88,7 @@ def diffractionMetadataHtmlMaker():
        'value':userDictionaries.localList.getDiffractometerDefinitionFile(OV.GetParam('snum.report.diffractometer')),
        'chooseFile':{
          'caption':'Choose definition file',
-         'filter':'*.cif',
+         'filter':'.cif files|*.cif',
          'folder':'%s/util/SiteSpecific' %OV.BaseDir(),
          'function':'spy.setDiffractometerDefinitionFile(spy.GetParam(snum.report.diffractometer),'
          },
