@@ -231,7 +231,7 @@
 	<body
 		<args
 			<arg0 name="l.s." def='-1'>
-			<arg1 name="plan" def='-1'>
+			<arg1 name="plan" def='-1.1'>
 			<arg2 name="xl" def='xl'>
 		\>
 		<cmd 
@@ -241,7 +241,7 @@
 			<cmd5 "file">
 			<cmd6 XXX="cursor(busy, 'Refining...')">
 			<cmd7 "if strcmp(%1,'-1') then None else spy.SetMaxCycles(%1)">
-			<cmd8 "if strcmp(%2,'-1') then None else spy.SetMaxPeaks(%2)">
+			<cmd8 "if strcmp(%2,'-1.1') then None else spy.SetMaxPeaks(%2)">
 			<cmd10 "spy.RunRefinementPrg()">
 			<cmd11 "UpdateHtml">
 		\>
