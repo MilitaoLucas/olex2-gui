@@ -270,11 +270,6 @@ def LoadStructureParams():
   olx.phil_handler.reset(scope_name='snum')
   solutionPrg, solutionMethod = getDefaultPrgMethod('Solution')
   refinementPrg, refinementMethod = getDefaultPrgMethod('Refinement')
-  if OV.IsFileType('ires'):
-    if solutionMethod == 'Direct Methods' and olx.Ins('PATT') != 'n/a':
-      solutionMethod = 'Patterson Method' # work-around for bug #48
-    if refinementMethod == 'Least Squares' and olx.LSM() == 'CGLS':
-      refinementMethod = 'CGLS' # work-around for bug #26
   snum_phil = """
 snum {
   refinement.program = "%s"
@@ -299,12 +294,17 @@ snum {
     structure_phil = VVD_to_phil()
   if structure_phil is not None:
     olx.phil_handler.update(phil_string=structure_phil)
-  olexex.onRefinementProgramChange(
-    olx.phil_handler.get_validated_param('snum.refinement.program'),
-    olx.phil_handler.get_validated_param('snum.refinement.method'))
-  olexex.onSolutionProgramChange(
-    olx.phil_handler.get_validated_param('snum.solution.program'),
-    olx.phil_handler.get_validated_param('snum.solution.method'))
+  solutionPrg = olx.phil_handler.get_validated_param('snum.solution.program')
+  solutionMethod = olx.phil_handler.get_validated_param('snum.solution.method')
+  refinementPrg = olx.phil_handler.get_validated_param('snum.refinement.program')
+  refinementMethod = olx.phil_handler.get_validated_param('snum.refinement.method')
+  if OV.IsFileType('ires'):
+    if solutionMethod == 'Direct Methods' and olx.Ins('PATT') != 'n/a':
+      solutionMethod = 'Patterson Method' # work-around for bug #48
+    if refinementMethod == 'Least Squares' and olx.LSM() == 'CGLS':
+      refinementMethod = 'CGLS' # work-around for bug #26
+  olexex.onSolutionProgramChange(solutionPrg, solutionMethod)
+  olexex.onRefinementProgramChange(refinementPrg, refinementMethod)
 OV.registerFunction(LoadStructureParams)
 
 def SaveStructureParams():
