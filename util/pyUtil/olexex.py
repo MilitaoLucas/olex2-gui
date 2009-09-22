@@ -1292,10 +1292,7 @@ def AvailablePlugins():
   plugins = {'ODSkin':
              {'display':'Oxford Diffraction Skin',
               'blurb':'A custom-made visual design for Oxford Diffraction'},
-             'cctbx':
-             {'display':'smtbx-cctbx',
-              'blurb':'This will install all of the cctbx as well as the newly developed smtbx. This Small Molecule Tool Box provides totally new solution and refinement functionality.'
-              }}
+            }
   s = "<hr>"
   green = OV.FindValue('gui_green', "#00ff00")
   red = OV.FindValue('gui_red', "#ff0000")

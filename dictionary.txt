@@ -323,11 +323,11 @@ setup-txt-2	The fonts used in the OpenGL window Olex2 (the main window, where th
 setup-title-4	Skins	.	.	.	.	.	.	皮肤	.
 setup-txt-4	The overall look and feel of Olex2 can be set by making use of themes, also called skins.<p>$spy.AvailableSkins()<hr>You can also customise the look of your current installation using the <a href='config>>html.reload setup-box'><b>Configuration Tool</b></a>.  Please note that your customisation will be lost when you reload the skin that you have customised.	.	.	.	.	.	.	皮肤，即整个Olex2的外观风格设置所用的主题。<p>$spy.AvailableSkins()<hr>您也可以修改当前您已安装的皮肤－<a href='config>>html.reload setup-box'><b>设置工具</b></a>. 请注意，在您重新载入皮肤后，已做的修改将被丢失。	.
 setup-title-3	Plugins	.	.	.	.	.	.	插件	.
-setup-txt-3	The functionality of Olex2 can be extended by Olex2 Plugins. Available Plugins are listed below and already installed plugins are highlighted. Maybe.$spy.AvailablePlugins()	.	.	.	.	.	.	Olex2插件将扩展Olex2的已有功能。提供的插件如下所示。已经安装好的将被高亮显示。$spy.AvailablePlugins()	.
+setup-txt-3	The functionality of Olex2 can be extended by Olex2 Plugins. Available Plugins are listed below and already installed plugins are highlighted.$spy.AvailablePlugins()	.	.	.	.	.	.	Olex2插件将扩展Olex2的已有功能。提供的插件如下所示。已经安装好的将被高亮显示。$spy.AvailablePlugins()	.
 setup-title-5	External Programs	.	.	.	.	.	.	外部程序	.
 setup-txt-5	You may wish to use external programs from within Olex2. Olex2 will find any relevant program either because it is on the <b>system path</b> of your computer or because you have put it into the base directory of your <a href='exec -o getvar(defexplorer) $BaseDir()'>Olex2 Program Directory</a>.   The following programs are currently 'known' to exist:&&~SADABS~$file.which(SADABS.exe)~XP~$file.which(shelxp.exe)$file.which(xp.exe)~ShelXS~$file.which(shelxs.exe)~XS (Bruker)~$file.which(xs.exe)~ShelXL~$file.which(shelxl.exe)~XL (Bruker)~$file.which(xl.exe)&&	.	.	.	.	.	.	您也许需要在Olex2中使用外部程序。Olex2将找到任何相关联的程序，如果程序位于您的计算机的<b>系统路径</b> 中，或者您将其放在<a href='exec -o getvar(defexplorer) $BaseDir()'>Olex2程序主目录下</a>.已知的程序如下所示：&& ~SADABS~ $file.which(SADABS.exe)  ~XP~ $file.which(shelxp.exe) $file.which(xp.exe)  ~ShelXS~ $file.which(shelxs.exe)  ~XS (Bruker)~ $file.which(xs.exe)  ~ShelXL~ $file.which(shelxl.exe)  ~XL (Bruker)~ $file.which(xl.exe) &&	.
 setup-title-6	Automatic Updates	.	.	.	.	.	.	自动更新	.
-setup-txt-6	Olex2 is under active development. Many new features are constantly added and the whole GUI and workflow design is under constant flux. We therefore recommend to leave the automatic updates switched on. Every time Olex2 starts, it checks on our server whether there are any updates and will proceed to download and install them automatically. There is no need to restart Olex2 after these updates, and many updates consist of very small files.<br>We actually maintain two versions of the updates. One is at<br><br><b>http://www.dimas.dur.ac.uk/olex-distro</b><br>and the other one at<br><b>http://www.dimas.dur.ac.uk/olex-distro-test</b><br><br>The test server always has the latest updates, while the normal server will be updated once a month or so.<hr>To change the update settings of your installations, please select<br><br><b>Help>Update Options</b><br><br> from the menu bar at the top of the program. You can also set your <b>proxy settings</br> here, if that is required from your location.	.	.	.	.	.	.	Olex2仍在开发中。很多新的特性将被不断的加入进来，但整个GUI和工作流程设计不会有大的变动。因此，我们建议将自动更新打开。这样每次启动Olex2都将检查我们服务器，如果有更新，则将自动下载和安装。更新后并不需要重新启动Olex2，很多更新都是一些很小的文件。<br>目前，我们保持两个版本的更新。一个是<br><br><b>http://www.dimas.dur.ac.uk/olex-distro</b><br>另一个是<br><b>http://www.dimas.dur.ac.uk/olex-distro-test</b><br><br>Test服务器为最新的更新，另一个为大约一个月前的更新。<hr>如果您想改变更新设置，请在程序顶端菜单栏中选择<br><br><b>Help>Update Options</b><br><br>。如果需要的话，您可以在此设置您的<b>proxy settings</br>。	.
+setup-txt-6	Olex2 is under active development. Many new features are constantly added and the whole GUI and workflow design is under constant flux. We therefore recommend to leave the automatic updates switched on. Every time Olex2 starts, it checks on our server whether there are any updates and will proceed to download and install them automatically in the background. Changes will be effective on the next restart.	.	.	.	.	.	.	Olex2仍在开发中。很多新的特性将被不断的加入进来，但整个GUI和工作流程设计不会有大的变动。因此，我们建议将自动更新打开。这样每次启动Olex2都将检查我们服务器，如果有更新，则将自动下载和安装。更新后并不需要重新启动Olex2，很多更新都是一些很小的文件。<br>目前，我们保持两个版本的更新。一个是<br><br><b>http://www.dimas.dur.ac.uk/olex-distro</b><br>另一个是<br><b>http://www.dimas.dur.ac.uk/olex-distro-test</b><br><br>Test服务器为最新的更新，另一个为大约一个月前的更新。<hr>如果您想改变更新设置，请在程序顶端菜单栏中选择<br><br><b>Help>Update Options</b><br><br>。如果需要的话，您可以在此设置您的<b>proxy settings</br>。	.
 setup-title-7	Setup 7	.	.	.	.	.	.	Setup 7	.
 setup-txt-7	Setup 7 Txt	.	.	.	.	.	.	Setup 7 Txt	.
 history-help	Every step along the process of structure solution and refinement is automatically databased within Olex2 - the 'History'.<br>Every time a structure is solved, a new history branch is created. Using the drop-down menu, the latest structure stored in the selected branch will automatically be loaded. It is possible to delete and rename branches.	.	.	.	.	.	.	在Olex2中进行的每一步结构解析和精修都被自动保持在数据库中－'历史'。每当解析结构一次，新的历史组将被创建。使用下拉菜单选择历史组后，此次解析的最新的结构将被自动载入。历史组能被命名和删除	.
@@ -589,7 +589,7 @@ Centric	Centrosymmetric	.	.	.	.	Zentrosymmetrisch	.	中心对称	.
 Twinned Acentric	Twinned Centrosymmetric	.	.	.	.	Verzwillingt nicht-zentrosymmetrisch	.	孪晶非中心对称	.
 Acentric	Non-Centrosymmetric	.	.	.	.	nicht-zentrosymmetrisch	.	非中心对称	.
 Cumulative Intensity Statistics	Cumulative Intensity Statistics	.	.	.	.	.	.	.	.
-Cumulative Intensity Distribution	Cumulative Intensity Distribution	.	.	.	.	Kumulative Intensitätsverteilung	.	累计强度分布	.
+Cumulative Intensity Distribution	Cumulative Intensity Distribution	.	.	.	.	.	.	累计强度分布	.
 Wilson Plot	Wilson Plot	.	.	.	.	Wilson Graph	.	Wilson Plot	.
 Systematic Absences Intensity Distribution	Systematic Absences Intensity Distribution	.	.	.	.	Systematic Absences Intensity Distribution	.	系统消光强度分布	.
 Most Disagreeable Reflections	Most Disagreeable Reflections	.	.	.	.	Abweichende Reflexe	.	最不合适的衍射点	.
@@ -620,7 +620,7 @@ Q Peak Intensities	Q Peak Intensities	.	.	.	.	.	.	Q峰强度	.
 AFIX Commands	AFIX Commands	.	.	.	.	.	.	AFIX命令	.
 Variables	Variables	.	.	.	.	.	.	变量	.
 Rename	Rename	.	.	.	.	.	.	重命名	.
-Name	Name	.	.	.	.	.	.	命名	.
+Name	Name	.	.	.	.	.	.	名称	.
 Close sorting	Close sorting	.	.	.	.	.	.	.	.
 Default Style	Default Style	.	.	.	.	.	.	默认风格	.
 Ellipsoids|H	Ellipsoids|H	.	.	.	.	.	.	椭球模型|H	.
@@ -631,3 +631,4 @@ Show Basis	Show Basis	.	.	.	.	.	.	显示晶轴矢量	.
 Show Cell	Show Cell	.	.	.	.	.	.	显示晶胞	.
 Shelx Compatible Constraints	Shelx Compatible Constraints	.	.	.	.	.	.	Shelx限制性精修	.
 Constraints	Constraints	.	.	.	.	.	.	限制性精修命令	.
+Olex2 Constraints And Restraints	.	.	.	.	.	.	.	Olex2 规定参数和限制性精修	.
