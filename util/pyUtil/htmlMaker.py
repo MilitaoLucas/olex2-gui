@@ -448,8 +448,6 @@ def move(arg,name):
     del listNames[i]
     
   names = ';'.join(listNames)
-  if not names:
-    names = None
   OV.SetParam('snum.metacif.publ_author_names', names)
   
   return ''
