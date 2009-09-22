@@ -240,17 +240,17 @@ def publicationMetadataHtmlMaker():
      'itemName':'%Contact% %Author% %Address%',
      'multiline':'multiline',
      'value':'spy.getPersonInfo(GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME),address)',
-     'onleave':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME),address,GetValue(SET_PUBL_CONTACT_AUTHOR_ADDRESS))>>updatehtml'
+     'onleave':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME),address,GetValue(SET_PUBL_CONTACT_AUTHOR_ADDRESS))>>spy.changeBoxColour(SET_PUBL_CONTACT_AUTHOR_ADDRESS,#FFDCDC)'
      },
     {'varName':'publ_contact_author_email',
      'itemName':'%Contact% %Author% %Email%',
      'value':'spy.getPersonInfo(GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME),email)',
-     'onleave':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME),email,GetValue(SET_PUBL_CONTACT_AUTHOR_EMAIL))>>updatehtml'
+     'onleave':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME),email,GetValue(SET_PUBL_CONTACT_AUTHOR_EMAIL))>>spy.changeBoxColour(SET_PUBL_CONTACT_AUTHOR_EMAIL,#FFDCDC)'
      },
     {'varName':'publ_contact_author_phone',
      'itemName':'%Contact% %Author% %Phone%',
      'value':'spy.getPersonInfo(GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME),phone)',
-     'onleave':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME),phone,GetValue(SET_PUBL_CONTACT_AUTHOR_PHONE))>>updatehtml'
+     'onleave':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME),phone,GetValue(SET_PUBL_CONTACT_AUTHOR_PHONE))>>spy.changeBoxColour(SET_PUBL_CONTACT_AUTHOR_PHONE,#FFDCDC)'
      },
   ]
   listAuthors = OV.GetParam('snum.metacif.publ_author_names')
@@ -294,14 +294,14 @@ def publicationMetadataHtmlMaker():
        'itemName':'%Author% %Address%',
        'multiline':'multiline',
        'value':'spy.getPersonInfo(GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),address)' %s,
-       'onleave':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),address,GetValue(SET_PUBL_AUTHOR_ADDRESS))>>updatehtml' %s
+       'onleave':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),address,GetValue(SET_PUBL_AUTHOR_ADDRESS))>>spy.changeBoxColour(SET_PUBL_AUTHOR_ADDRESS,#FFDCDC)' %s
        }
     )
     list.append(
       {'varName':'publ_author_email',
        'itemName':'%Author% %Email%',
        'value':'spy.getPersonInfo(GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),email)' %s,
-       'onleave':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),email,GetValue(SET_PUBL_AUTHOR_EMAIL))>>updatehtml' %s
+       'onleave':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),email,GetValue(SET_PUBL_AUTHOR_EMAIL))>>spy.changeBoxColour(SET_PUBL_AUTHOR_EMAIL,#FFDCDC)' %s
        }
     )
   list.append(    
@@ -331,7 +331,7 @@ def publicationMetadataHtmlMaker():
      'itemName':'%Requested% %Journal%',
      'items':userDictionaries.localList.getListJournals(),
      'readonly':'',
-     'onchange':'spy.addToLocalList(GetValue(SET_SNUM_METACIF_PUBL_REQUESTED_JOURNAL),requested_journal)>>updatehtml',
+     'onchange':'spy.addToLocalList(GetValue(SET_SNUM_METACIF_PUBL_REQUESTED_JOURNAL),requested_journal)>>spy.changeBoxColour(SET_SNUM_METACIF_PUBL_REQUESTED_JOURNAL,#FFDCDC)',
      }
   ]
 
@@ -428,7 +428,7 @@ def move(arg,name):
   name_i = olx.GetValue(name)
   i = listNames.index(name_i)
   
-  if arg in ('up','UP'):
+  if arg.lower() == 'up':
     if i != 0:
       name_i_minus_1 = listNames[i-1]
       listNames[i] = name_i_minus_1
@@ -436,7 +436,7 @@ def move(arg,name):
     else:
       pass
     
-  elif arg in ('down','DOWN'):
+  elif arg.lower() == 'down':
     try:
       name_i_plus_1 = listNames[i+1]
       listNames[i] = name_i_plus_1
@@ -449,7 +449,7 @@ def move(arg,name):
     
   names = ';'.join(listNames)
   if not names:
-    names = '?'
+    names = None
   OV.SetParam('snum.metacif.publ_author_names', names)
   
   return ''
