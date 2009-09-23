@@ -423,10 +423,6 @@ def MakeElementButtonsFromFormula():
       bgcolour = (210,255,210)
     else:
       bgcolour = (255,210,210)
-    #retStr += '''
-#<a href="if str.cmp(sel(),'') then 'mode name -t=%s' else 'name sel %s'>>sel -u" target="Subsequently clicked atoms will be made into %s">
-#<zimg border="0" src="element-%s.png"></a>
-#''' %(symbol, symbol, symbol, symbol)
     retStr += '''
 <a href="if strcmp(sel(),'') then 'mode name -t=%s' else 'name sel %s'>>sel -u" target="Subsequently clicked atoms will be made into %s">
 <zimg border="0" src="element-%s.png"></a>
@@ -443,8 +439,8 @@ def MakeElementButtonsFromFormula():
                           'grad':False,
                         })
     
-  retStr += ''' 
-<a href="if str.cmp(sel(),'') then 'mode name -t=ChooseElement()' else 'name sel ChooseElement()" target="Chose Element from the periodic table">
+  retStr += '''
+<a href="if strcmp(sel(),'') then 'mode name -t=ChooseElement()' else 'name sel ChooseElement()" target="Chose Element from the periodic table">
 <zimg border="0" src="element-....png"></a>&nbsp;
 '''
   btn_dict.setdefault('Table',
