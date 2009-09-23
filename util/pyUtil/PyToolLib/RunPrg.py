@@ -45,6 +45,7 @@ class RunPrg(ArgumentParser):
     olx.Stop('listen')
 
   def __del__(self):
+    self.method.unregisterCallback()
     olx.phil_handler.update_from_python(self.params)
 
   def which_shelx(self, type="xl"):
@@ -170,7 +171,6 @@ class RunPrg(ArgumentParser):
       else:
         self.params.snum.refinement.auto.pruneQ = 1.5
         self.params.snum.refinement.auto.assignQ = 2.0
-    self.method.unregisterCallback()
 
   def getProgramMethod(self, fun):
     if fun == 'refine':
@@ -201,7 +201,6 @@ class RunPrg(ArgumentParser):
   def endRun(self):
     OV.DeleteBitmap('%s' %self.bitmap)
     OV.Cursor()
-    return self.his_file
 
 class RunSolutionPrg(RunPrg):
   def __init__(self):
@@ -349,9 +348,8 @@ class RunRefinementPrg(RunPrg):
   def doHistoryCreation(self):
     R1 = 0
     self.his_file = ""
-    look = olex.f('IsVar(cctbx_R1)')
-    if look == "true":
-      R1 = float(olex.f('GetVar(cctbx_R1)'))
+    if OV.IsVar('cctbx_R1'):
+      R1 = float(OV.FindValue('cctbx_R1'))
       olex.f('UnsetVar(cctbx_R1)')
     else:
       try:
@@ -361,6 +359,7 @@ class RunRefinementPrg(RunPrg):
         
     if R1:
       self.params.snum.refinement.last_R1 = str(R1)
+      OV.SetParam('snum.refinement.last_R1', str(R1))
       try:
         self.his_file = hist.create_history()
       except Exception, ex:
