@@ -1124,6 +1124,9 @@ def updateACF(force=False):
   if new:
     p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], olex2_tag)
     f = response.read()
+    if not f:
+      print "Updating has failed, previous files will be used"
+      return
     cont = GetHttpFile(f, force=True, fullURL = True)
     if cont:
       name = "AutoChem Updater.exe"
