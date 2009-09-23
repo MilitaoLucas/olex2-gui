@@ -7,7 +7,6 @@ import olx
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
-#import variableFunctions
 
 people = None
 localList = None
@@ -43,7 +42,7 @@ class People:
 		if item in ('email','phone','address'):
 			self.dictionary['people'][person][item] = info
 			
-		print "Changed %s for %s to %s" %(item,person,info)
+		#print "Changed %s for %s to %s" %(item,person,info)
 		saveLocalDictionary(self.dictionary)
 	
 	def isPerson(self,person):
@@ -164,19 +163,11 @@ def createNewLocalDictionary(whichDict):
 	if whichDict == 'people':
 		dictionary = {
 			'people':{
-				#'?':
-				#{'email':'?',
-				 #'phone':'?',
-				 #'address':'?',
-				 #},
 				},
 		}
 	elif whichDict == 'diffractometers':
 		dictionary = {
 			'diffractometers':{
-				#'?':
-				#{'cif_def':'?',
-				 #},
 				},
 		}
 	elif whichDict == 'journals':
