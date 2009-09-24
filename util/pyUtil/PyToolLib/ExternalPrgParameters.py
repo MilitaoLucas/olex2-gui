@@ -117,7 +117,7 @@ class Method(object):
               OV.SetParam('snum.refinement.max_peaks', val)
             elif value[0] == 'T':
               OV.SetParam('snum.metacif.diffrn_ambient_temperature',
-                        273.15 + float(val.strip('C')))
+                        273.0 + float(val.strip('C')))
           except IndexError:
             OV.SetVar('settings_%s_%s' %(name, value[0]), '')
           count += 1
@@ -319,7 +319,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       diffrn_ambient_temperature = diffrn_ambient_temperature.split('K')[0]
     try:
       diffrn_ambient_temperature = float(diffrn_ambient_temperature)
-      diffrn_ambient_temperature = diffrn_ambient_temperature - 273.15
+      diffrn_ambient_temperature = diffrn_ambient_temperature - 273.0
       OV.DelIns('TEMP')
       OV.AddIns('TEMP %s' %diffrn_ambient_temperature)
     except:
