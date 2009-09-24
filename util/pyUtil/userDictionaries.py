@@ -120,13 +120,15 @@ class LocalList:
 		return retStr
 	
 	def setDiffractometerDefinitionFile(self,diffractometer,filepath):
-		if diffractometer not in ('?',''):
-			if os.path.exists(filepath):
-				self.dictionary['diffractometers'][diffractometer]['cif_def'] = filepath
-				saveDict = {'diffractometers':self.dictionary['diffractometers']}
-				saveLocalDictionary(saveDict)
-			else:
-				print "The file specified does not exist"
+		if os.path.exists(filepath):
+			if diffractometer in ('?',''):
+				diffractometer = OV.FileName(filepath)
+				self.addToLocalList(diffractometer,'diffractometers')
+			self.dictionary['diffractometers'][diffractometer]['cif_def'] = filepath
+			saveDict = {'diffractometers':self.dictionary['diffractometers']}
+			saveLocalDictionary(saveDict)
+		else:
+			print "The file specified does not exist"
 		return ''
 	
 	def getDiffractometerDefinitionFile(self,diffractometer):
