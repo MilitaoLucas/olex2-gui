@@ -52,7 +52,7 @@ class p4p_reader:
 					value = "n/a"
 					
 			if value and item == "_diffrn_source_target":
-				p4p_key["cif"].setdefault('_diffrn_radiation_type', r"'%s K\a'" %value)
+				p4p_key["cif"].setdefault('_diffrn_radiation_type', r"%s K\a" %value)
 				have_cif_item = True
 			elif value:
 				p4p_key["cif"].setdefault(item, value)
