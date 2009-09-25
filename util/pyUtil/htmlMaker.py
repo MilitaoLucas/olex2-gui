@@ -660,10 +660,12 @@ def weightGuiDisplay():
           longest = len(s)
       
       for curr, sugg in zip(current_weight, suggested_weight):
-        while len(curr) < longest and curr != "0":
-          curr += '0'
-        while len(sugg) < longest and sugg != "0":
-          sugg += '0'
+        if "." in curr:
+          while len(curr) < longest and curr != "0":
+            curr += '0'
+        if "." in sugg:
+          while len(sugg) < longest and sugg != "0":
+            sugg += '0'
         if curr == sugg:
           colour = gui_green 
         elif float(curr)-float(curr)*0.1 < float(sugg) < float(curr)+float(curr)*0.1:
