@@ -188,9 +188,12 @@ def setup_cctbx():
   sys.path.append(str(cctbxSources)) # needed to work with new cctbx directory structure
   try:
     import libtbx.load_env
-    need_cold_start = not os.path.exists(libtbx.env.build_path)
-    if cctbx_dir != cctbxRoot and libtbx.env.python_exe != sys.executable:
-      need_cold_start = True # needed in case Olex2 BaseDir() is renamed
+    if os.name == "nt":
+      cleaned_build_path = libtbx.env.abs_path_clean(build_path)
+    else:
+      cleaned_build_path = build_path
+    need_cold_start = (not os.path.exists(libtbx.env.build_path)
+                       or libtbx.env.build_path != cleaned_build_path)
   except IOError, err:
     if err.args[1] == 'No such file or directory' and err.filename.endswith('libtbx_env'):
       need_cold_start = True
