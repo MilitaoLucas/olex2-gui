@@ -738,9 +738,13 @@ def OnModeChange(*args):
       mode_disp += " " + item
   mode = mode.strip()
   mode_disp = mode_disp.strip()
-
-
-  active_mode = d.get(mode, None)
+  
+  if 'name' in mode:
+    active_mode = 'button_small-name'
+    #if args[1]:
+    #  mode_disp = "name %s" %args[1]
+  else:
+    active_mode = d.get(mode, None)
   
   if last_mode == active_mode:
     return
@@ -748,9 +752,6 @@ def OnModeChange(*args):
   if not active_mode:
     active_mode = d.get(mode_disp, None)
     
-    
-    
-  
   
   if mode == 'off':
     OV.SetParam('olex2.in_mode',None)
