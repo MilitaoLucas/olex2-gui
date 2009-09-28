@@ -632,7 +632,7 @@ Show Basis	Show Basis	.	.	.	.	Basis zeigen	.	显示晶轴矢量	.
 Show Cell	Show Cell	.	.	.	.	Zelle zeigen	.	显示晶胞	.
 Shelx Compatible Constraints	Shelx Compatible Constraints	.	.	.	.	.	.	Shelx限制性精修	.
 Constraints	Constraints	.	.	.	.	.	.	限制性精修命令	.
-Olex2 Constraints And Restraints	.	.	.	.	.	.	.	Olex2 规定参数和限制性精修	.
+Olex2 Constraints And Restraints	Olex2 Constraints And Restraints	.	.	.	.	.	.	Olex2 规定参数和限制性精修	.
 tip-16	t^Hiding Atoms and Fragments^t  &&~Selected Atoms and Bonds~Any graphical object in Olex2 can be hidden from view. Right-click on the selection then Graphics>Hide will achive this.~Hide a whole Fragment~If your structure has more than one fragments, you can hide a particular fragment with Right-click and then Fragment>Hide. Other options are available there, please play with them for a bit!~Hide the whole Structure~<<Ctrl+T>> will hide the entire structure. In fact, it will toggle between the default view of Structure + Text, Structure Only and Text Only. Any parts that have been previously hidden will be reset.  &&	.	.	.	.	.	.	.	.
 FMOL-help	&&  ~FMOL~Shows all fragments present in the current stucture  XX fmol XX    &&	.	.	.	.	.	.	.	.
 FUSE-help	&&    ~FUSE~Shows the contents of the unit cell  XX fuse XX    &&	.	.	.	.	.	.	.	.
