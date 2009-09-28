@@ -359,11 +359,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     from smtbx.ab_initio import charge_flipping
     from cctbx import maptbx
     from  libtbx.itertbx import izip
-    try:
-      from crys3d import wx_map_viewer
-    except ImportError:
-      wx_map_viewer = None
-      
+
     t2 = time.time()
     print 'imports took %0.3f ms' %((t2-t1)*1000.0)
     # Get the reflections from the specified path
@@ -391,9 +387,6 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       f_calc, shift, cc_peak_height = solving.f_calc_solutions[0]
       fft_map = f_calc.fft_map(
           symmetry_flags=maptbx.use_space_group_symmetry)
-      # 3D display of the electron density iso-contours
-      if wx_map_viewer is not None:
-        wx_map_viewer.display(fft_map)
       # search and print Fourier peaks
       peaks = fft_map.peak_search(
         parameters=maptbx.peak_search_parameters(
