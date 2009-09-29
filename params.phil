@@ -156,6 +156,10 @@ snum {
       .type = bool
   }
 
+  display_quality = 2
+    .type = int(value_min=1, value_max=3)
+
+ 
   shelx_output = True
     .type = bool
 
