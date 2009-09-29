@@ -4,20 +4,24 @@
 
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=;1; -->
 
-<td VALIGN='center' colspan='3' width='100%'>
+<td align='center' VALIGN='center' colspan='1'>
 		<a 
 			href="if strcmp(spy.GetParam(olex2.in_mode),'move sel') then 'mode off' else 'mode move sel'"
 			target="%Move Near-target%">
 			<b>
 			<zimg name=IMG_BUTTON-MOVE_NEAR border="0" src="button-move_near.png"> 
 		</a>
+</td>		
+<td align='center' VALIGN='center' colspan='1'>
 		<a
 			href="if strcmp(spy.GetParam(olex2.in_mode),'move sel -c') then 'mode off' else 'mode move -c sel'" 
 			target="%Copy Near-target%">
 			<b>
 			<zimg name=IMG_BUTTON-COPY_NEAR border="0" src="button-copy_near.png"> 
 		</a>
-		<a 
+</td>		
+<td align='center' VALIGN='center' colspan='1'>
+	<a 
 			href="if strcmp(spy.GetParam(olex2.in_mode),'grow') then 'mode off' else 'mode grow'" 
 			target="%Mode Grow-target%">
 			<b>
@@ -28,11 +32,13 @@
 
 <tr>
 	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-	</td>
-	<td VALIGN='center' colspan='3' width='100%'>
-
+	<td align='center' VALIGN='center' colspan='1'>
 $spy.MakeActiveGuiButton(button-center_on_cell,move>>compaq)		
+</td>		
+<td align='center' VALIGN='center' colspan='1'>
 $spy.MakeActiveGuiButton(button-largest_part,move)		
+</td>		
+<td align='center' VALIGN='center' colspan='1'>
 $spy.MakeActiveGuiButton(button-assemble,'compaq -a')		
 
 
@@ -41,32 +47,34 @@ $spy.MakeActiveGuiButton(button-assemble,'compaq -a')
 
 <tr>
 	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-	<td VALIGN='center' colspan='3' width="100%">
-	
+	<td align='center' VALIGN='center' colspan='1'>
 	<a 
 			href="basis" 
 			target="%Basis-target%">
 			<zimg name=IMG_BUTTON-SHOW_BASIS border="0" src="button-show_basis.png"> 
 		</a> 
+</td>		
+<td align='center' VALIGN='center' colspan='1'>
 		<a 
 			href="cell" 
 			target="%Show Cell-target%">
 			<zimg name=IMG_BUTTON-SHOW_CELL border="0" src="button-show_cell.png"> 
 		</a> 
+</td>		
+<td align='right' VALIGN='center' colspan='1'>
 
-		<a 
-			href="if strcmp(spy.GetParam(olex2.in_mode),'move sel') then 'mode off' else 'mode move sel'"
-			target="%low-quality-target%">
-			<b>
-			<zimg name=IMG_BUTTON-LOW_QUALITY border="0" src="button-low_quality.png"> 
-		</a>
+<!-- #include quality-slider gui\snippets\snippet-quality-slider.htm;1; -->
+
+
 		
 	</td>
 </tr>
 <tr>
 	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-	<td VALIGN='center' colspan='3' width="100%">
+	<td align='center' VALIGN='center' colspan='1'>
 $spy.MakeActiveGuiButton(button-fuse,fuse)		
+</td>		
+<td align='center' VALIGN='center' colspan='1'>
 $spy.MakeActiveGuiButton(button-grow_all,grow)		
 	</td>
 </tr>
@@ -76,10 +84,11 @@ $spy.MakeActiveGuiButton(button-grow_all,grow)
 <tr>
 	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
 	</td>
-	<td colspan=3>
+	<td align='center' colspan=1>
 $spy.MakeActiveGuiButton(button-pack_cell,'pack cell>>cell True')		
+</td>		
+<td align='center' VALIGN='center' colspan='1'>
 $spy.MakeActiveGuiButton(button-pack_limits,'fuse>>pack getvalue\(anpack) getvalue\(appack) getvalue\(bnpack) getvalue\(bppack) getvalue\(cnpack) getvalue\(cppack)>>grow')
-		
 	</td>
 </tr>	
 

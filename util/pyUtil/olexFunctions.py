@@ -458,7 +458,7 @@ class OlexFunctions(inheritFunctions):
 
   def CopyVFSFile(self, copy_from, copy_to, isPersistent=0):
     f = olex.readImage(copy_from)
-    #assert f is not None
+    assert f is not None
     olex.writeImage(copy_to, f, isPersistent)
     return ""
 
@@ -515,8 +515,8 @@ class OlexFunctions(inheritFunctions):
     if mac == "":
       mac = olx.GetMAC()
       mac = mac.split(";")
-      mac = mac[0]
-      self.SetParam('olex2.mac_address',mac)
+      #mac = mac[0]
+      #self.SetParam('olex2.mac_address',mac)
     return mac   
   
   def GetComputername(self):
@@ -528,5 +528,18 @@ class OlexFunctions(inheritFunctions):
   def Refresh(self):
     olx.Refresh()
   
+  def setDisplayQuality(self, q=None):
+    if not q:
+      q = self.GetParam('snum.display_quality')
+      if not q:
+        q = 2
+    try:
+      q = int(q)
+      d = {1:'l', 2:'m', 3:'h'}
+      q = d.get(q,2)
+    except:
+      pass
+    olx.Qual("-%s" %q)
+    
   
 OV = OlexFunctions()

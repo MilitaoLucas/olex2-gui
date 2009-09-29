@@ -1033,7 +1033,9 @@ def makeFormulaForsNumInfo():
     return olx.xf_GetFormula('html',2)
 OV.registerFunction(makeFormulaForsNumInfo)
 
-def reset_file_in_OFS(fileName):
-  OV.reset_file_in_OFS(fileName)
-  return True
-OV.registerFunction(reset_file_in_OFS)
+def setDisplayQuality(q=None):
+  OV.setDisplayQuality(q)
+  
+OV.registerFunction(setDisplayQuality)
+
+
