@@ -1846,7 +1846,7 @@ def makeReflectionGraphGui():
      'onchange':"updatehtml",
      'manage':'manage',
      'readonly':'readonly',
-     'width':"$eval(htmlpanelwidth()-120)",
+     'width':"$eval(htmlpanelwidth()-140)",
     }
   gui_d['graph_chooser']=htmlTools.make_combo_text_box(d)
 
