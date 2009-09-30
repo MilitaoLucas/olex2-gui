@@ -472,6 +472,56 @@ olex2
     .type = bool
 }
 
+
+graphs {
+  reflections {
+    cumulative_intensity
+      .short_caption = "Cumulative Intensity"
+      .caption = "Cumulative Intensity Distribution"
+      .help = "Shows the cumulative intensity distribution of your data"
+    {
+      n_bins = 20
+        .type = int(value_min=1)
+        .help = Number of bins
+        .caption = %Bins%
+      output_csv_file = False
+        .type = bool
+        .caption = "%Output% csv"
+    }
+    wilson_plot
+      .short_caption = "Wilson Plot"
+      .caption = "Wilson Plot"
+    {
+      n_bins = 10
+        .type = int(value_min=1)
+        .help = Number of bins
+        .caption = %Bins%
+      method = 'Olex2' 'cctbx'
+        .type = choice
+        .caption = "%Method%"
+      output_csv_file = False
+        .type = bool
+        .caption = "%Output% csv"
+    }
+    systematic_absences
+      .short_caption = "Systematic Absences"
+      .caption = "Systematic Absences"
+    {
+      output_csv_file = False
+        .type = bool
+        .caption = "%Output% csv"
+    }
+    fobs_fcalc
+      .short_caption = "Fobs-Fcalc"
+      .caption = "Fobs-Fcalc"
+    {
+      output_csv_file = False
+        .type = bool
+        .caption = "%Output% csv"
+    }
+  }
+}
+
 user {
   alert_delete_history = Y
     .type = str
