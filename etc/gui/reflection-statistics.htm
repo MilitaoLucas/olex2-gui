@@ -3,7 +3,7 @@
 <!-- #include tool-table-header gui\blocks\tool-table-header.htm;image=#image;1; -->
 
 
-<tr>
+<tr VALIGN='center'>
 	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
 		<a 
 			href="spy.make_help_box -name='reflection-statistics' -popout='False'" 
@@ -11,32 +11,11 @@
 			<zimg border="0" src="info.png">
 		</a>	
 	</td>
+	
 
-	<td VALIGN='center'  colspan='2'>
-		<font size='2'>
-			<input 
-				type="combo"
-				height="$GetVar(gui_html_combo_height)"
-				bgcolor="$getVar(gui_html_input_bg_colour)" 
-				name= "SET_REFLECTION_STATISTICS" 
-				items="-- %Please Select% --;%Wilson Plot Olex2%<-wp;%Wilson Plot cctbx%<-wp cctbx;%Cumulative%<-cumulative;%Systematic Absences%<-sys_absences;Fobs vs. Fcalc<-FoFc" 
-				width='$eval(htmlpanelwidth()-46)' 
-				value = "-- %Please Select% --" 
-				onchange="run 'GetValue(SET_REFLECTION_STATISTICS)'"
-				readonly
-			>
+$spy.makeReflectionGraphGui()
 
-<!--			
-			<font size=2 VALIGN='right'>
-			<input 
-				type="button" 
-				name = "DISPLAY_REFLECTION_STATISTICS" 
-				width="70" 
-				value="Make Graph" 
-				onclick="run 'GetValue(SET_REFLECTION_STATISTICS)'">
--->				
-				
-		</font>
+
 	</td>
 </tr>
 
@@ -55,3 +34,13 @@
 %Resolution%
 %Reflection Statistics%
 -->
+
+<!--			
+			<font size=2 VALIGN='right'>
+			<input 
+				type="button" 
+				name = "DISPLAY_REFLECTION_STATISTICS" 
+				width="70" 
+				value="Make Graph" 
+				onclick="run 'GetValue(SET_REFLECTION_STATISTICS)'">
+-->				
