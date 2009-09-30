@@ -25,6 +25,10 @@ OV = OlexFunctions()
 
 from scitbx.math import erf
 
+global GuiGraphChooserComboExists
+GuiGraphChooserComboExists = False
+
+
 class Graph(ImageTools):
   def __init__(self):
     ImageTools.__init__(self)
@@ -1739,3 +1743,127 @@ OV.registerFunction(Fobs_Fcalc_plot)
 
 def array_scalar_multiplication(array, multiplier):
   return [i * multiplier for i in array]
+
+
+def makeReflectionGraphOptions(graph, name):
+  value = graph.short_caption
+  options_gui = [""]
+  i = 1
+  for object in graph.active_objects():
+    i += 1
+    data_type = object.type.phil_type
+    caption = object.caption
+    value = object.extract()
+    obj_name = name.upper() + "_" +  object.caption.upper().replace(" ","_").replace("%","").replace("-","_")
+    if data_type == "int":
+      ctrl_name = 'SPIN_%s' %(obj_name)
+      d = {'ctrl_name':ctrl_name,
+           'value':value,
+           'max':'30',
+           'label':'%s ' %caption,
+           }
+      options_gui.append(htmlTools.make_spin_input(d))
+      
+    elif data_type == "str":
+      ctrl_name = 'TEXT_%s' %(obj_name)
+      d = {'ctrl_name':ctrl_name,
+           'value':value,
+           'label':'%s ' %caption,
+           }
+      options_gui.append(htmlTools.make_input_text_box(d))
+
+    elif data_type == "bool":
+      ctrl_name = 'TICK_%s' %(obj_name)
+      d = {'ctrl_name':ctrl_name,
+           'value':'%s ' %caption,
+           'width':80,
+           'bgcolor':"",
+           'fgcolor':"",
+           }
+      options_gui.append(htmlTools.make_tick_box_input(d))
+
+    elif data_type == "choice":
+      items_l = []
+      ctrl_name = 'COMBO_%s' %(obj_name)
+      for thing in object.words:
+        items_l.append(thing.value)
+      items = ";".join(items_l)
+      d = {'ctrl_name':ctrl_name,
+           'label':'%s ' %caption,
+           'items':items,
+           'value':items_l[0],
+           }
+      options_gui.append(htmlTools.make_combo_text_box(d))
+      
+      
+  options_gui = '</td><td align="left" colspan="1">'.join(options_gui)
+  colspan = i
+  return options_gui, colspan
+
+def makeReflectionGraphGui():
+  global GuiGraphChooserComboExists
+  value = False
+  gui_d = {}
+  gui_d.setdefault('colspan', '1')
+  gui_d.setdefault('options_gui', "")
+  gui_d.setdefault('make_graph_button', "")
+  gui_d.setdefault('graph_chooser', "")
+
+  run_d = {'wilson_plot':'run wilson_plot GetValue(COMBO_WILSON_PLOT_METHOD) GetValue(SPIN_WILSON_PLOT_BINS) GetState(TICK_WILSON_PLOT_OUTPUT_CSV)',
+           'cumulative_intensity':'run cumulative_intensity GetValue(SPIN_CUMULATIVE_INTENSITY_BINS) GetState(TICK_CUMULATIVE_INTENSITY_OUTPUT_CSV)',
+           'systematic_absences':'run systematic_absences GetState(TICK_SYSTEMATIC_ABSENCES_OUTPUT_CSV)',
+           'fobs_fcalc':'run fobs_fcalc GetState(TICK_FOBS_FCALC_OUTPUT_CSV)',
+           }
+  
+  
+  if GuiGraphChooserComboExists:
+    value = OV.GetValue('SET_REFLECTION_STATISTICS')
+  if not value:
+    GuiGraphChooserComboExists = True
+    value = "- %Please Select% -"
+  else:
+    name = value.lower().replace(" ", "_").replace("-", "_")
+    graph = olx.phil_handler.get_scope_by_name('graphs.reflections.%s' %name)
+    if not graph:
+      value = "no phil"
+    else:
+      gui_d['options_gui'], gui_d['colspan'] = makeReflectionGraphOptions(graph, name)
+      
+    
+        
+  
+    d = {'name':'BUTTON_MAKE_REFLECTION_GRAPH',
+         'onclick':run_d.get(name),
+         'width':"30",
+         'value':"Go"
+        }
+    gui_d['make_graph_button'] = htmlTools.make_input_button(d)
+  
+    
+  d = {'ctrl_name':'SET_REFLECTION_STATISTICS',
+     'items':"-- %Please Select% --;%Wilson Plot%;%Cumulative Intensity%;%Systematic Absences%;%Fobs-Fcalc%",
+     'value':value,
+     'onchange':"updatehtml",
+     'manage':'manage',
+     'readonly':'readonly',
+     'width':"$eval(htmlpanelwidth()-120)",
+    }
+  gui_d['graph_chooser']=htmlTools.make_combo_text_box(d)
+
+  
+    
+  txt = '''
+<td  ALIGN='left' colspan='%(colspan)s'>
+%(graph_chooser)s &nbsp;
+%(make_graph_button)s
+</td></tr>
+<tr align='left'>
+<td valign='center' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+%(options_gui)s
+''' %gui_d
+  txt = OV.Translate(txt)
+  
+  return txt
+  
+OV.registerFunction(makeReflectionGraphGui)
+  

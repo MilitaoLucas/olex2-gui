@@ -391,11 +391,19 @@ def make_help_href(make_help, image='normal'):
   return help
 
 def make_input_text_box(d):
-  d.setdefault('data', '')
-  d.setdefault('manage', '')
-  d.setdefault('value', '')
-  d.setdefault('label', '')
-  d.setdefault('onleave', '')
+  name = d.get('ctrl_name')
+  dic = {'height':'GetVar(gui_html_input_height)',
+         'bgcolor':'GetVar(gui_html_input_bg_colour)',
+         'value':'$spy.GetParam_as_string(%(varName)s)',
+         'width':'45',
+         'onchange':'',
+         'label':name,
+         'onleave':'',
+         'data':'',
+         'manage':'',
+     }
+  dic.update(d)  
+  
   html = '''
 <input
        bgcolor="$getVar(gui_html_input_bg_colour)"
@@ -408,52 +416,124 @@ def make_input_text_box(d):
        onleave="%(onleave)s"
        %(manage)s
        data="%(data)s"
->''' %d
+>''' %dic
   return html
 
+
+def make_combo_text_box(d):
+  name = d.get('ctrl_name')
+  dic = {'height':"$GetVar(gui_html_combo_height)",
+         'bgcolor':'GetVar(gui_html_input_bg_colour)',
+         'value':'$spy.GetParam_as_string(%(varName)s)',
+         'label':'',
+         'valign':'center',
+         'halign':'left',
+         'width':'70',
+         'onchange':'',
+         'onleave':'',
+         'data':'',
+         'manage':'manage',
+     }
+  dic.update(d)  
+  
+  html = '''
+<input
+       bgcolor="$getVar(gui_html_input_bg_colour)"
+       type="combo"
+       name="%(ctrl_name)s"
+       value="%(value)s"
+       halign="%(halign)s"
+       valign="%(valign)s"
+       items="%(items)s"
+       width="%(width)s"
+       height="%(height)s"
+       label="%(label)s"
+       onleave="%(onleave)s"
+       onchange="%(onchange)s"
+       %(manage)s
+       data="%(data)s"
+>''' %dic
+  return html
+
+
+
 def make_tick_box_input(d):
-  d.setdefault('manage', '')
-  d.setdefault('data', '')
+  name = d.get('ctrl_name')
+  dic = {'height':'GetVar(gui_html_checkbox_height)',
+         'bgcolor':'GetVar(gui_html_input_bg_colour)',
+         'fgcolor':'GetVar(gui_html_input_fg_colour)',
+         'value':'$spy.GetParam_as_string(%(varName)s)',
+         'width':'45',
+         'onchange':'',
+         'value':'%s '%name,
+         'oncheck':'',
+         'onuncheck':'',
+         'data':'',
+         'manage':'manage',
+         'state':'',
+     }
+  dic.update(d)  
+  
   html = """
 <input
   type='checkbox'
-  bgcolor='GetVar(gui_html_input_bg_colour)'
   width='%(width)s'
   height='%(height)s'
   name='%(ctrl_name)s'
   %(state)s
   oncheck='%(oncheck)s'
   onuncheck='%(onuncheck)s'
-  %(value)s
-  value=''
+  value='%(value)s'
   %(manage)s
   data='%(data)s'
   >&nbsp;
-""" %d
+""" %dic
   return html
 
 def make_spin_input(d):
+  name = d.get('ctrl_name')
+  dic = {'width':'12',
+         'height':'GetVar(gui_html_spin_height)',
+         'bgcolor':'GetVar(gui_html_input_bg_colour)',
+         'value':'$spy.GetParam_as_string(%(varName)s)',
+         'max':'99',
+         'width':'45',
+         'onchange':'',
+         'label':"%s: " %name,
+         'valign':'center',
+         'halign':'left',
+         'manage':'manage',
+     }
+  dic.update(d)
   html = """
 <input
+  label='%(label)s'
+  valign='%(valign)s'
+  halign='%(halign)s'
   type='spin'
   name='%(ctrl_name)s'
   width='%(width)s'
   height='%(height)s'
   max='%(max)s'
-  bgcolor='GetVar(gui_html_input_bg_colour)'
-  value='$spy.GetParam_as_string(%(varName)s)'
+  bgcolor='%(bgcolor)s'
+  value='%(value)s'
   onchange='%(onchange)s'
-  >""" %d
+  manage='%(manage)s'
+  >""" %dic
   return html
 
 def make_input_button(d):
-  d.setdefault('ondown', '')
-  d.setdefault('onup', '')
-  d.setdefault('onclick', '')
-  d.setdefault('hint','')
+  dic = {'ondown':'',
+         'onup':'',
+         'onclick':'',
+         'hint':'',
+         'height':"GetVar(gui_html_button_height)",
+         'bgcolor':"getVar(gui_html_input_bg_colour)"
+         }
+  dic.update(d)  
   html = '''
 <input 
-  bgcolor="$getVar(gui_html_input_bg_colour)" 
+  bgcolor="%(bgcolor)s" 
   type="button" 
   name="%(name)s_BUTTON" 
   value="%(value)s" 
@@ -461,18 +541,18 @@ def make_input_button(d):
   height="%(height)s"
   hint="%(hint)s"
   flat
-''' %d
-  if d['onclick']:
+''' %dic
+  if dic['onclick']:
     html += '''
   onclick="%(onclick)s"
 >
-''' %d
-  elif d['ondown'] or d['onup']:
+''' %dic
+  elif dic['ondown'] or dic['onup']:
     html += '''
   ondown="%(ondown)s"
   onup="%(onup)s"
   >
-''' %d
+''' %dic
   else:
     html += '\n>\n'
   return html

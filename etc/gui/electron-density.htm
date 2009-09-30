@@ -15,6 +15,7 @@
 			width="70"
 			onchange="spy.SetParam(snum.map.type,GetValue(SET_SNUM_MAP_TYPE))>>spy.MapView(1)>>html.SetValue(SNUM_EDEN_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)')"
 			label=" %Map% "
+			valign="center"
 		>
 	</td>
 	<td>
@@ -28,6 +29,7 @@
 			width="70"
 			onchange="spy.SetParam(snum.map.source,GetValue(SET_SNUM_MAP_SOURCE))>>spy.MapView(1)>>html.SetValue(SNUM_EDEN_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)')"
 			label=" %Source% "
+			valign="center"
 		>
 	</td>
 	<td colspan='2'>
@@ -41,6 +43,7 @@
 			width="60"
 			onchange="spy.SetParam(snum.map.view,GetValue(SET_SNUM_MAP_VIEW))>>spy.MapView(0)"
 			label=" %View% "
+			valign="center"
 		>
 	</td>
 </tr>
@@ -66,15 +69,16 @@ xgrid.Scale(eval(GetValue(SNUM_EDEN_SLIDE)/10))
 ">
 	</td>
 	<td colspan = '1'>
-		<b>%Mask%:</b>
      <input
 			type="checkbox"
+			value="%Mask%"
+			valign="center"
 			bgcolor="$getVar(gui_html_table_bg_colour)"
 			fgcolor="$GetVar(gui_html_font_colour)"
 			name="SNUM_MAP_MASK"
 			$spy.CheckBoxValue(snum_map_mask)
-			height='12'
-			width='20'
+			height='16'
+			width='45'
 			oncheck="spy.SetParam(snum.map.mask,true)"
 			onuncheck="spy.SetParam(snum.map.mask,false)">
 		</td>
@@ -111,6 +115,7 @@ SetValue(SNUM_EDEN_VALUE,xgrid.Scale())"
 			width="60"
 			height="18"
 			label="Res/&Aring "
+			valign="center"
 			bgcolor="$GetVar(gui_html_table_bg_colour)"
 			fgcolor="$GetVar(gui_html_font_colour)"
 			value="$spy.GetParam(snum.map.resolution)"
@@ -118,7 +123,7 @@ SetValue(SNUM_EDEN_VALUE,xgrid.Scale())"
 			>
 
 	</td>
-	<td colspan ='1'>
+	<td colspan ='2'>
 		<input 
 			type="text" 
 			name = "SNUM_EDEN_VALUE" 
@@ -126,7 +131,10 @@ SetValue(SNUM_EDEN_VALUE,xgrid.Scale())"
 			height="18" 
 			bgcolor="$GetVar(gui_html_table_bg_colour)"  
 			fgcolor="$GetVar(gui_html_font_colour)" 
-			value="$XGrid.Scale()" 
+			value="$XGrid.Scale()"
+			valign="center"
+			label="Current Val "
+
 			onchange="spy.SetParam(snum.eden_value,GetValue(SNUM_EDEN_VALUE))>>
 xgrid.Scale(GetValue(SNUM_EDEN_VALUE))>>
 ">

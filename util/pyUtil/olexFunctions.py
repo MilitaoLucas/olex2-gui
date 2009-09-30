@@ -22,6 +22,11 @@ class OlexFunctions(inheritFunctions):
       import olex_gui
       self.olex_gui = olex_gui
 
+      
+  def GetValue(self, control_name):
+    retVal = olx.GetValue(control_name)
+    return retVal
+      
   def SetVar(self,variable,value):
     try:
       olex_core.SetVar(variable,value)

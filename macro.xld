@@ -1421,10 +1421,10 @@
 	\>
 \>
 
-<wp help="Creates and displays a Wilson Plot"
+<wilson_plot help="Creates and displays a Wilson Plot"
 	<body
 		<args
-			<arg1 name="method" def="olex">
+			<arg1 name="method" def="olex2">
 			<arg2 name="n_bins" def="10">
 			<arg3 name="width" def="1200">
 			<arg4 name="height" def="700">
@@ -1432,7 +1432,7 @@
 			<arg6 name="y" def="80">
 		\>
 		<cmd 
-			<cmd1 "if strcmp(%1,olex) then 'wilson -b=%2 -p' else none">
+			<cmd1 "if strcmp(%1,olex2) then 'wilson -b=%2 -p' else none">
 			<cmd2 "spy.WilsonPlot(%2,%1)">
 		\>
 	\>
@@ -1450,7 +1450,7 @@
 	\>
 \>
 
-<cumulative help="Calculates and displays the cumulative intensity distribution"
+<cumulative_intensity help="Calculates and displays the cumulative intensity distribution"
 	<body
 		<args
 			<arg1 name="n_bins" def="20">
@@ -1462,7 +1462,7 @@
 	\>
 \>
 
-<sys_absences help="Calculates and displays the systematic absences intensity distribution"
+<systematic_absences help="Calculates and displays the systematic absences intensity distribution"
 	<body
 		<args
 			<arg1 name="output_csv_file" def="False">
@@ -1473,7 +1473,7 @@
 	\>
 \>
 
-<FoFc help="Calculates and displays an Fobs vs Fcalc plot"
+<fobs_fcalc help="Calculates and displays an Fobs vs Fcalc plot"
 	<body
 		<args
 			<arg1 name="output_csv_file" def="False">

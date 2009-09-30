@@ -1,11 +1,8 @@
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="0" cellspacing="0" bgcolor="$getVar(gui_html_table_bg_colour)">
-<tr>
-<td align='right'>
-Quality
-</td>
-<td  align='center'>
 <input 
-				type="slider" 
+				type="slider"
+				label="Quality"
+				valign="center"
+				halign="center"
 				name = "SlideDisplayQuality" 
 				width="$eval(htmlpanelwidth()/6)" 
 				height="18" 
@@ -16,6 +13,3 @@ Quality
 				max="3" 
 				onchange="spy.SetParam(snum.display_quality,GetValue(SlideDisplayQuality))>>spy.setDisplayQuality()"
 			>
-</td>
-</tr>
-</table>
