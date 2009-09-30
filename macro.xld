@@ -1424,7 +1424,7 @@
 <wilson_plot help="Creates and displays a Wilson Plot"
 	<body
 		<args
-			<arg1 name="method" def="olex2">
+			<arg1 name="method" def="Olex2">
 			<arg2 name="n_bins" def="10">
 			<arg3 name="width" def="1200">
 			<arg4 name="height" def="700">
@@ -1432,7 +1432,7 @@
 			<arg6 name="y" def="80">
 		\>
 		<cmd 
-			<cmd1 "if strcmp(%1,olex2) then 'wilson -b=%2 -p' else none">
+			<cmd1 "if strcmp(%1,Olex2) then 'wilson -b=%2 -p' else none">
 			<cmd2 "spy.WilsonPlot(%2,%1)">
 		\>
 	\>
