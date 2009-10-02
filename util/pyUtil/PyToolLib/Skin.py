@@ -32,7 +32,7 @@ class Skin():
     if f == 'timage':
       self.timage_instance.run_timage()
     elif f == 'sNumTitle':
-      self.sNumTitle_instance.run_sNumTitle()
+      self.sNumTitle_instance.run_sNumTitle(force=True)
     elif f == 'change':
       self.change()
       #self.GuiSkinChanger_instance.run_GuiSkinChanger()
