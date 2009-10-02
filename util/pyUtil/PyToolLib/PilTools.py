@@ -727,7 +727,7 @@ class sNumTitle(ImageTools):
       width = float(tool_arg)
     self.width = int((width) - 22)
 
-  def run_sNumTitle(self):
+  def run_sNumTitle(self, force=False):
     self.gui_html_base_colour = OV.FindValue('gui_html_base_colour')
     self.width = int(OV.FindValue('gui_htmlpanelwidth')) - 22
     self.basedir = OV.BaseDir()
@@ -740,7 +740,8 @@ class sNumTitle(ImageTools):
     id_string = self.space_group+self.filefull
     curr_id = OV.FindValue("olex2_sNum_id_string","")
     if id_string == curr_id:
-      return
+      if not force:
+        return
     OV.SetVar("olex2_sNum_id_string",id_string)
     
     items = {}
