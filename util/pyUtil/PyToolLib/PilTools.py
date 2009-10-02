@@ -184,7 +184,7 @@ class GuiSkinChanger(ImageTools):
 
   def setOlexColours(self):
     import olex
-    OV.SetGrad()
+    #OV.SetGrad()
 
   def setGuiProperties(self):
     olex.m("SetMaterial InfoBox.Text 2309;1,1,1,1;1,1,1,1")
@@ -270,7 +270,12 @@ class GuiSkinChanger(ImageTools):
         except:
           print "Skin definition file\n%s/config%s.txt\nnot found!" %(skinpath, skin_extension)
       # Then load the actual named skin.
-      rFile = open(r"%s/config.txt" %(skinpath), 'r')
+      path = r"%s/config.txt" %(skinpath)
+      if os.path.exists(path):
+        rFile = open(path, 'r')
+      else:
+        print "The file %s can not be found" %path
+        return
       files.append(rFile)
       for file in files:
         for line in file:
@@ -991,7 +996,7 @@ class timage(ImageTools):
     self.abort = False
     width = self.gui_htmlpanelwidth
     if not width:
-      width = 290
+      width = 350
     else:
       try:
         width = float(width)
@@ -1015,9 +1020,8 @@ class timage(ImageTools):
     self.iconSource = Image.open(icon_source)
     self.imageSource = Image.open(image_source)
     self.olex2_has_recently_updated = OV.GetParam('olex2.has_recently_updated')
-    sf = 4
-    sfs = sf * 360/int(self.gui_htmlpanelwidth)
-    sfs = 3.6
+    sf = 4 #images are four times larger than the nominal width of 350
+    sfs = sf * 350/int(self.gui_htmlpanelwidth)
     self.sf = sf
     self.sfs = sfs
     
