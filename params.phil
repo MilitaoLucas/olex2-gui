@@ -478,7 +478,7 @@ graphs {
     cumulative_intensity
       .short_caption = "Cumulative Intensity"
       .caption = "Cumulative Intensity Distribution"
-      .help = "Shows the cumulative intensity distribution of your data"
+      .help = "cumulative-intensity"
     {
       n_bins = 20
         .type = int(value_min=1)
@@ -491,6 +491,7 @@ graphs {
     wilson_plot
       .short_caption = "Wilson Plot"
       .caption = "Wilson Plot"
+      .help = "wilson-plot"
     {
       n_bins = 10
         .type = int(value_min=1)
@@ -506,6 +507,7 @@ graphs {
     systematic_absences
       .short_caption = "Systematic Absences"
       .caption = "Systematic Absences"
+      .help = "systematic-absences"
     {
       output_csv_file = False
         .type = bool
@@ -514,6 +516,7 @@ graphs {
     fobs_fcalc
       .short_caption = "Fobs-Fcalc"
       .caption = "Fobs-Fcalc"
+      .help = "fobs-fcalc"
     {
       output_csv_file = False
         .type = bool
