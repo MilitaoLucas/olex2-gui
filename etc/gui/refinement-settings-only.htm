@@ -140,14 +140,14 @@ target = "Do automatic tidying once - tick the box to do it after every refineme
 	</td>
 	<td VALIGN='center' ALIGN='right'  colspan=1>
 		<font size='2'>
-		<input 
-			type='checkbox'  
-			width=12  
-			height=12 
-			name='SNUM_REFINEMENT_AUTO_TIDY' 
-			$spy.CheckBoxValue(snum.refinement.auto.tidy) 
-			oncheck='spy.SetParam(snum.refinement.auto.tidy,True)' 
-			onuncheck='spy.SetParam(snum.refinement.auto.tidy,False)' 
+		<input
+			type='checkbox'
+			width=12
+			height=12
+			name='SNUM_REFINEMENT_AUTO_TIDY'
+			checked="$spy.GetParam(snum.refinement.auto.tidy)"
+			oncheck='spy.SetParam(snum.refinement.auto.tidy,True)'
+			onuncheck='spy.SetParam(snum.refinement.auto.tidy,False)'
 			value=''
 		>&nbsp;
 		</font>
@@ -163,13 +163,13 @@ target = "Do automatic tidying once - tick the box to do it after every refineme
 	</td>
 	<td VALIGN='center' ALIGN='right'  colspan=1>
 		<font size='2'>
-			<input 
-				type='checkbox'  
-				width=12  
-				height=12 
-				name='SNUM_REFINEMENT_GRAPHICAL_OUTPUT' 
-				$spy.CheckBoxValue(snum.refinement.graphical_output) 
-				oncheck='spy.SetParam(snum.refinement.graphical_output,true)' 
+			<input
+				type='checkbox'
+				width=12
+				height=12
+				name='SNUM_REFINEMENT_GRAPHICAL_OUTPUT'
+				checked="$spy.GetParam(snum.refinement.graphical_output)"
+				oncheck='spy.SetParam(snum.refinement.graphical_output,true)'
 				onuncheck='spy.SetParam(snum.refinement.graphical_output,false)>>spy.reset_file_in_OFS(refinement_image.htm)>>UpdateHtml' 
 				value=''
 			>&nbsp;
