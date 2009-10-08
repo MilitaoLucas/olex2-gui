@@ -1262,8 +1262,7 @@ class WilsonPlot(Analysis):
     i = 0
     for txt in text:
       unicode_txt = self.get_unicode_characters(txt)
-      #wX, wY = draw.textsize(unicode_txt, font=self.font_tiny)
-      wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_tiny)
+      wX, wY = IT.textsize(draw, txt, font_size=self.font_size_tiny)
 
       colour = "#444444"
       if "E^2" in txt:
@@ -1272,8 +1271,7 @@ class WilsonPlot(Analysis):
         elif float(estats) > float(self.wilson_grad_end):
           colour = "#ff0000"
       top_left = (left, top)
-      IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_tiny, font_colour=colour)
-      #draw.text((left, top), "%s" %unicode_txt, font=self.font_tiny, fill=colour)
+      IT.write_text_to_draw(draw, txt, top_left=top_left, font_size=self.font_size_tiny, font_colour=colour)
       top += wY +2
       i += 1
       if i == 2:
@@ -1357,12 +1355,9 @@ class WilsonPlot(Analysis):
       if i == margin_left:
         txt = "acentric"
         txt = OV.TranslatePhrase(txt)
-        #wX, wY = draw.textsize(txt, font=self.font_tiny)
-
         wX, wY = IT.textsize(draw, txt, font_size=self.font_size_tiny)
         top_left = (i-int(wX/2), 0)
         IT.write_text_to_draw(draw, txt, top_left=top_left, font_size=self.font_size_tiny, font_colour=self.gui_html_highlight_colour)
-        #draw.text((i-int(wX/2), 0), "%s" %txt, font=self.font_tiny, fill=self.gui_html_highlight_colour)
         txt = "0.736"
         wX, wY = draw.textsize(txt, font=self.font_tiny)
         draw.text((i-int(wX/2), boxTopOffset+boxHeight-1), "%s" %txt, font=self.font_tiny, fill=self.titleColour)
@@ -1372,7 +1367,6 @@ class WilsonPlot(Analysis):
         wX, wY = draw.textsize(txt, font=self.font_tiny)
         top_left = (i-int(wX/2), 0)
         IT.write_text_to_draw(draw, txt, top_left=top_left, font_size=self.font_size_tiny, font_colour=self.gui_html_highlight_colour)
-        #draw.text((i-int(wX/2), 0), "%s" %txt, font=self.font_tiny, fill=self.gui_html_highlight_colour)
         txt = "0.968"
         wX, wY = draw.textsize(txt, font=self.font_small)
         draw.text((i-int(wX/2), boxTopOffset+boxHeight-1), "%s" %txt, font=self.font_tiny, fill=self.titleColour)
@@ -1411,11 +1405,9 @@ class WilsonPlot(Analysis):
     val = int((value - begin) / scale)
     txt = unichr(8226)
     wX, wY = draw.textsize(txt, font=self.font_bold_normal)
-#    draw.line(((val, boxTopOffset+1),(val, boxTopOffset+boxHeight-1)), width=wX , fill=(255,235,10))
     draw.ellipse(((val-int(wX/2), boxTopOffset+3),(val+int(wX/2), boxTopOffset+boxHeight-3)), fill=(255,235,10))
     draw.text((val-int(wX/2), boxTopOffset-self.imY*0.001), "%s" %txt, font=self.font_bold_normal, fill="#ff0000")
     image_location = "%s.png" %("grad")
-#    im.save("C:/grad.png", "PNG")
     OlexVFS.save_image_to_olex(im, image_location,  1)
     return im
   
@@ -1453,7 +1445,6 @@ class ChargeFlippingPlot(PrgAnalysis):
         x = self.counter + marker_width + 5
         top_left = (x, self.graph_bottom -wY -3)
         IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_name = "Vera Bold", font_colour=self.light_grey)
-        #self.draw.text((x, self.graph_bottom - wY -3), "%s" %t, font=self.font_bold_large, fill="#888888")
         self.attempt += 1
         if self.counter != 0:
           self.counter += 1
@@ -1473,7 +1464,6 @@ class ChargeFlippingPlot(PrgAnalysis):
         x = width - wX - self.bSides - 3
         top_left = (x, 20)
         IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_normal, font_colour=self.light_grey)
-        #self.draw.text((x, 20), "%s" %t, font=self.font_normal, fill="#888888")
       x = self.counter
       
       ## Draw CC
@@ -1587,7 +1577,6 @@ class CumulativeIntensityDistribution(Analysis):
     metadata.setdefault("y_label", xy_plot.yLegend)
     metadata.setdefault("x_label", xy_plot.xLegend)
     self.metadata = metadata
-    #self.data.setdefault('dataset1', Dataset(xy_plot.x,[i*100 for i in xy_plot.y],metadata))
     self.data.setdefault('dataset1', Dataset(xy_plot.x, xy_plot.y,metadata=metadata))
     if verbose:
       self.data['dataset1'].show_summary()
@@ -1603,7 +1592,6 @@ class CompletenessPlot(Analysis):
     self.auto_axes = False
     self.cctbx_completeness_statistics(int(reflections_per_bin))
     self.make_empty_graph(axis_x = True)
-    #self.draw_pairs(reverse_x=True)
     self.draw_pairs()
     self.popout()
     if output_csv_file in (True, 'true', 'True'):
@@ -1613,7 +1601,6 @@ class CompletenessPlot(Analysis):
     from cctbx_olex_adapter import OlexCctbxGraphs
     xy_plot = OlexCctbxGraphs(
       'completeness', reflections_per_bin=reflections_per_bin).xy_plot
-    #xy_plot.completeness.show()
     metadata = {}
     metadata.setdefault("y_label", OV.TranslatePhrase("Shell Completeness"))
     metadata.setdefault("x_label", OV.TranslatePhrase("2theta"))
@@ -1658,6 +1645,7 @@ class SystematicAbsencesPlot(Analysis):
                      int(colour[2] * ratio))
     self.graphInfo['marker']['border_colour'] = border_colour
     self.draw_pairs()
+
 
 class Fobs_Fcalc_plot(Analysis):
   def __init__(self, output_csv_file=False):
@@ -1814,13 +1802,13 @@ def makeReflectionGraphGui():
            'systematic_absences':'run systematic_absences GetState(TICK_SYSTEMATIC_ABSENCES_OUTPUT_CSV)',
            'fobs_fcalc':'run fobs_fcalc GetState(TICK_FOBS_FCALC_OUTPUT_CSV)',
            }
-  
-  
+
   if GuiGraphChooserComboExists:
     value = OV.GetValue('SET_REFLECTION_STATISTICS')
   if not value:
     GuiGraphChooserComboExists = True
     value = "- %Please Select% -"
+    help_name = None
   else:
     name = value.lower().replace(" ", "_").replace("-", "_")
     graph = olx.phil_handler.get_scope_by_name('graphs.reflections.%s' %name)
@@ -1828,18 +1816,16 @@ def makeReflectionGraphGui():
       value = "no phil"
     else:
       gui_d['options_gui'], gui_d['colspan'] = makeReflectionGraphOptions(graph, name)
-      
-    
-        
-  
+    help_name = graph.help
     d = {'name':'BUTTON_MAKE_REFLECTION_GRAPH',
          'onclick':run_d.get(name),
          'width':"30",
          'value':"Go"
         }
     gui_d['make_graph_button'] = htmlTools.make_input_button(d)
-  
-    
+
+  gui_d['help'] = htmlTools.make_table_first_col(
+    help_name=help_name, popout=False)
   d = {'ctrl_name':'SET_REFLECTION_STATISTICS',
      'items':"-- %Please Select% --;%Wilson Plot%;%Cumulative Intensity%;%Systematic Absences%;%Fobs-Fcalc%",
      'value':value,
@@ -1850,9 +1836,9 @@ def makeReflectionGraphGui():
     }
   gui_d['graph_chooser']=htmlTools.make_combo_text_box(d)
 
-  
-    
   txt = '''
+<tr VALIGN='center'>
+%(help)s
 <td  ALIGN='left' colspan='%(colspan)s'>
 %(graph_chooser)s &nbsp;
 %(make_graph_button)s
@@ -1860,10 +1846,11 @@ def makeReflectionGraphGui():
 <tr align='left'>
 <td valign='center' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
 %(options_gui)s
+</td>
+</tr>
 ''' %gui_d
   txt = OV.Translate(txt)
-  
+
   return txt
-  
+
 OV.registerFunction(makeReflectionGraphGui)
-  
