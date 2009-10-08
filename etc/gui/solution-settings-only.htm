@@ -182,7 +182,7 @@
 				width=12
 				height=12
 				name='SNUM_SOLUTION_GRAPHICAL_OUTPUT'
-				$spy.CheckBoxValue(snum.solution.graphical_output)
+				checked="$spy.GetParam(snum.solution.graphical_output)"
 				oncheck='spy.SetParam(snum.solution.graphical_output,true)'
 				onuncheck='spy.SetParam(snum.solution.graphical_output,false)>>spy.reset_file_in_OFS(solution_image.htm)>>UpdateHtml'
 				value=''

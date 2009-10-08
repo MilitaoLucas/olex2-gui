@@ -435,7 +435,7 @@ class HistoryBranch:
     tree.current_refinement = ref_name
     self.historyBranch[ref_name] = HistoryLeaf(resPath,lstPath)
     return ref_name
-  
+
 class HistoryLeaf:
   def __init__(self,resPath,lstPath):
     self.solution_program = 'n/a'
@@ -505,7 +505,7 @@ class HistoryLeaf:
       self.refinement_method = 'n/a'
       self.refinement_program = 'n/a'
     OV.SetParam('snum.refinement.last_R1', self.R1)
-      
+
   def setLeafInfo(self):
     OV.SetParam('snum.refinement.last_R1',self.R1)
     OV.SetParam('snum.last_wR2',self.wR2)

@@ -65,7 +65,7 @@
       height="$getVar(gui_html_checkbox_height)"
       name = "auto-hydrogen-naming"
       width="17"
-      $spy.CheckBoxValue(snum.auto_hydrogen_naming)
+      checked="$spy.GetParam(snum.auto_hydrogen_naming)"
       oncheck="spy.SetParam(snum.auto_hydrogen_naming,True)"
       onuncheck="spy.SetParam(snum.auto_hydrogen_naming,False)">
   </td>
