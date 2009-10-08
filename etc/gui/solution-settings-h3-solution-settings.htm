@@ -68,14 +68,14 @@
 
 		  <td VALIGN='center' ALIGN='right'  colspan=1>
 				<font size='2'>
-				<input 
-					type='checkbox'  
-					width=12  
-					height=12 
-					name='SNUM_SOLUTION_GRAPHICAL_OUTPUT' 
-					$spy.CheckBoxValue(snum.solution.graphical_output) 
-					oncheck='spy.SetParam(snum.solution.graphical_output,true)' 
-					onuncheck='spy.SetParam(snum.solution.graphical_output,false)' 
+				<input
+					type='checkbox'
+					width=12
+					height=12
+					name='SNUM_SOLUTION_GRAPHICAL_OUTPUT'
+					checked="$spy.GetParam(snum.solution.graphical_output)"
+					oncheck='spy.SetParam(snum.solution.graphical_output,true)'
+					onuncheck='spy.SetParam(snum.solution.graphical_output,false)'
 					value=''
 				>&nbsp;
 			</font>

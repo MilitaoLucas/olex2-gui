@@ -267,7 +267,7 @@ class Method_refinement(Method):
     if RunPrgObject.make_unique_names:
       olx.Sel('-a')
       olx.Name('sel 1 -c')
-    if RunPrgObject.params.snum.auto_hydrogen_naming == 'checked':
+    if RunPrgObject.params.snum.auto_hydrogen_naming:
       olx.FixHL()
 
 

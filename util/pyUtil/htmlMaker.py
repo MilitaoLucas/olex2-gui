@@ -688,14 +688,14 @@ def weightGuiDisplay():
 	<td VALIGN='center' ALIGN='right'  colspan=1>
 		<font size='2'>
 			<input
-				type='checkbox'  
-				width=12  
-				height=12 
-				name='SET_SNUM_REFINEMENT_UPDATE_WEIGHT' 
-				$spy.CheckBoxValue(snum.refinement.update_weight) 
-				oncheck='spy.SetParam(snum.refinement.update_weight,true)' 
-				onuncheck='spy.SetParam(snum.refinement.update_weight,false)' 
-				value='' 
+				type='checkbox'
+				width=12
+				height=12
+				name='SET_SNUM_REFINEMENT_UPDATE_WEIGHT'
+				checked="$spy.GetParam(snum.refinement.update_weight)"
+				oncheck='spy.SetParam(snum.refinement.update_weight,true)'
+				onuncheck='spy.SetParam(snum.refinement.update_weight,false)'
+				value=''
 			>&nbsp;
 		</font>
 	</td>
