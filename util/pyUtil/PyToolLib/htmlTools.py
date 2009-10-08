@@ -366,11 +366,11 @@ def make_warning_html(colspan):
   return html
 OV.registerFunction(make_warning_html)
 
-def make_table_first_col(make_help=False, help_image='large'):
-  if not make_help:
+def make_table_first_col(help_name=None, popout=False, help_image='large'):
+  if help_name is None:
     help = ""
   else:
-    help = make_help_href(make_help, image=help_image)
+    help = make_help_href(help_name, popout, image=help_image)
   html ='''
 <tr>
 <td valign='top' width='2' align='center' bgcolor='$getVar(gui_html_table_firstcol_colour)'>
@@ -379,7 +379,7 @@ def make_table_first_col(make_help=False, help_image='large'):
 ''' %help
   return html
 
-def make_help_href(make_help, image='normal'):
+def make_help_href(name, popout, image='normal'):
   if image == 'small':
     image = 'info_tiny_fc.png'
   else:
@@ -387,7 +387,7 @@ def make_help_href(make_help, image='normal'):
   help='''
 <a href="spy.make_help_box -name='%s' -popout='%s'" target="Help me with this">
 <zimg border="0" src="%s">
-</a>''' %(make_help[0], make_help[1], image)
+</a>''' %(name, popout, image)
   return help
 
 def make_input_text_box(d):
