@@ -57,7 +57,7 @@ class History(ArgumentParser):
     if not tree:
       tree = HistoryTree()
       
-    filefull_lst = OV.file_ChangeExt(self.filefull, 'lst')
+    filefull_lst = os.path.splitext(self.filefull)[0] + '.lst'
     if self.autochem or self.demo_mode:
       branchName = self.params.snum.history.autochem_next_solution
     else:
@@ -237,8 +237,8 @@ class History(ArgumentParser):
       tree = self._convertHistory(historyFolder)
     else:
       tree = HistoryTree()
-      if self.filefull[-4:] in ('.res', '.RES', '.ins', '.INS'):
-        self.current_solution = tree.newBranch(self.filefull, OV.file_ChangeExt(self.filefull,'lst'),solution=False)
+      if os.path.splitext(self.filefull)[-1] in ('.res', '.RES', '.ins', '.INS'):
+        self.current_solution = tree.newBranch(self.filefull, os.path.splitext(self.filefull)[0] + '.lst',solution=False)
       else:
         pass
       
@@ -259,9 +259,9 @@ class History(ArgumentParser):
       solution = r'%s/Solution.res' %folder
       if solution in g:
         g.remove(solution)
-        self.current_solution = tree.newBranch(solution,OV.file_ChangeExt(solution,'lst'))
+        self.current_solution = tree.newBranch(solution, os.path.splitext(solution)[0] + '.lst')
       else:
-        self.current_solution = tree.newBranch(g[0],OV.file_ChangeExt(g[0],'lst'))
+        self.current_solution = tree.newBranch(g[0], os.path.splitext(g[0])[0] + '.lst')
         g.remove(g[0])
       refinements = []
       for item in g:
@@ -279,7 +279,7 @@ class History(ArgumentParser):
       refinements.sort()
       sol_name = tree.current_solution
       for refinement in refinements:
-        tree.historyTree[sol_name].newLeaf(refinement[1],OV.file_ChangeExt(refinement[1],'lst'))
+        tree.historyTree[sol_name].newLeaf(refinement[1], os.path.splitext(refinement[1])[0] + '.lst')
     return tree
   
   def _make_history_bars(self):
@@ -469,7 +469,7 @@ class HistoryLeaf:
       self.getLeafInfo(resPath)
       
   def getLeafInfo(self,filePath):
-    if filePath[-4:] == '.lst':
+    if os.path.splitext(filePath)[-1] == '.lst':
       try:
         lst_file = open(filePath)
         lstValues = lst_reader.reader(lst_file).values()
@@ -492,7 +492,7 @@ class HistoryLeaf:
         
       self.program_version = lstValues.get('version',None)
       
-    elif filePath[-4:] in ('.res', '.ins'):
+    elif os.path.splitext(filePath)[-1] in ('.res', '.ins'):
       try:
         iresValues = ires_reader.reader(open(filePath)).values()
       except:
