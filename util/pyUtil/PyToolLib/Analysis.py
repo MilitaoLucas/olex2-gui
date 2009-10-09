@@ -1814,9 +1814,10 @@ def makeReflectionGraphGui():
     graph = olx.phil_handler.get_scope_by_name('graphs.reflections.%s' %name)
     if not graph:
       value = "no phil"
+      help_name = None
     else:
       gui_d['options_gui'], gui_d['colspan'] = makeReflectionGraphOptions(graph, name)
-    help_name = graph.help
+      help_name = graph.help
     d = {'name':'BUTTON_MAKE_REFLECTION_GRAPH',
          'onclick':run_d.get(name),
          'width':"30",
