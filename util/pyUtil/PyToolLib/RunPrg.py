@@ -111,7 +111,7 @@ class RunPrg(ArgumentParser):
     try:
       self.hkl_src = OV.HKLSrc()
       if not os.path.exists(self.hkl_src):
-        self.hkl_src = OV.file_ChangeExt(OV.FileFull(),'hkl')
+        self.hkl_src = os.path.splitext(OV.FileFull())[0] + '.hkl'
         if os.path.exists(self.hkl_src):
           OV.HKLSrc(self.hkl_src)
         else:
@@ -119,8 +119,8 @@ class RunPrg(ArgumentParser):
           self.terminate = True
           return
     except:
-      self.hkl_src = OV.file_ChangeExt(OV.FileFull(),'hkl')
-    self.hkl_src_name = self.hkl_src.split("/")[-1].split(".")[0]
+      self.hkl_src = os.path.splitext(OV.FileFull())[0] + '.hkl'
+    self.hkl_src_name = os.path.splitext(os.path.basename(self.hkl_src))[0]
     self.curr_file = OV.FileName()
     refinealias = "%s" %self.hkl_src_name
     refinealias = refinealias.replace(' ', '')
