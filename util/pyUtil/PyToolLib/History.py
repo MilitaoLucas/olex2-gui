@@ -364,8 +364,8 @@ class HistoryTree:
       os.mkdir(backupFolder)
     for filePath in (resPath, lstPath):
       if filePath and os.path.exists(filePath):
-        file = filePath.split('/')[-1]
-        backupFileFull = '%s/%s' %(backupFolder,file)
+        filename = os.path.basename(filePath)
+        backupFileFull = '%s/%s' %(backupFolder,filename)
         shutil.copyfile(filePath,backupFileFull)
         
   def newBranch(self, resPath, lstPath, branchName=None, solution=True):
