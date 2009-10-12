@@ -213,7 +213,8 @@ snum {
     cell_measurement_theta_min = None
       .type = float(value_min=0.0, value_max=90.0)
     cell_measurement_temperature = None
-      .type = float(value_min=0.0)
+      #.type = float(value_min=0.0)
+      .type = str
     chemical_name_systematic = None
       .type = str
     computing_cell_refinement = None
@@ -229,7 +230,8 @@ snum {
     computing_structure_solution = None
       .type = str
     diffrn_ambient_temperature = None
-      .type = float(value_min=0.0)
+      #.type = float(value_min=0.0)
+      .type = str
     diffrn_special_details = None
       .type = str
     diffrn_measurement_device = None
@@ -497,7 +499,7 @@ graphs {
         .type = int(value_min=1)
         .help = Number of bins
         .caption = %Bins%
-      method = 'Olex2' 'cctbx'
+      method = Olex2 cctbx
         .type = choice
         .caption = "%Method%"
       output_csv_file = False
