@@ -1568,6 +1568,7 @@
 	\>
 \>
 
-
+<user_onstartup help="dummy definition" <body > >
+<custom_on_report help="dummy definition" <body > >
 
 <#include "custom.xld">
