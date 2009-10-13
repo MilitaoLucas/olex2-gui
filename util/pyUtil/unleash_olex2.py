@@ -500,7 +500,7 @@ def create_index(index_file_name, only_prop=None, port_props = None, portable=Fa
       #skip non-portable files if required
       #this will tackle translated file names, like 'launch.exe' -> 'olex2.exe'
       if portable and alterations.has_key(working_for_web.get(f,f)):
-        if 'olex-port' in props and (port_props is None or port_props.isdisjoint(prop_set)):
+        if 'olex-port' in props and (port_props is None or len(port_props&prop_set) == 0):
             continue
       elif (enforce_only_prop or f not in all_zip_files) and (only_prop is not None and only_prop not in prop_set): 
         continue
