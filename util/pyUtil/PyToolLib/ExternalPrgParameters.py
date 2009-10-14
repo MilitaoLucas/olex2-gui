@@ -312,18 +312,19 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
     Method_shelx.__init__(self, name, cmd, args, atom_sites_solution)
   
   def pre_refinement(self, RunPrgObject):
-    diffrn_ambient_temperature = OV.FindValue('snum.metacif.diffrn_ambient_temperature')
-    if '(' in diffrn_ambient_temperature:
-      diffrn_ambient_temperature = diffrn_ambient_temperature.split('(')[0]
-    if 'K' in diffrn_ambient_temperature:
-      diffrn_ambient_temperature = diffrn_ambient_temperature.split('K')[0]
-    try:
-      diffrn_ambient_temperature = float(diffrn_ambient_temperature)
-      diffrn_ambient_temperature = diffrn_ambient_temperature - 273.0
-      OV.DelIns('TEMP')
-      OV.AddIns('TEMP %s' %diffrn_ambient_temperature)
-    except:
-      pass
+    diffrn_ambient_temperature = OV.GetParam('snum.metacif.diffrn_ambient_temperature')
+    if diffrn_ambient_temperature is not None:
+      if '(' in diffrn_ambient_temperature:
+        diffrn_ambient_temperature = diffrn_ambient_temperature.split('(')[0]
+      if 'K' in diffrn_ambient_temperature:
+        diffrn_ambient_temperature = diffrn_ambient_temperature.split('K')[0]
+      try:
+        diffrn_ambient_temperature = float(diffrn_ambient_temperature)
+        diffrn_ambient_temperature = diffrn_ambient_temperature - 273.0
+        OV.DelIns('TEMP')
+        OV.AddIns('TEMP %s' %diffrn_ambient_temperature)
+      except:
+        pass
     Method_refinement.pre_refinement(self, RunPrgObject)
 
   def observe(self, RunPrgObject):

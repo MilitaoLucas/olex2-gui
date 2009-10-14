@@ -1,16 +1,13 @@
 # bruker_saint.py
 
-class bruker_saint:
-	def __init__(self, path):
-		self.path = path
-		
-	def read_saint(self):		
+class reader:
+	def __init__(self, path):	
 		"""Reads the saint.ini file with the given path.
 		
 		Returns a dictionary of cif items found in the saint.ini file."""
 		
-		saint = {}
-		rfile = open(self.path, 'r')
+		self._cifItems = {}
+		rfile = open(path, 'r')
 		lines = {}
 		
 		i = 0
@@ -22,17 +19,17 @@ class bruker_saint:
 		for line in lines:
 			try:
 				if lines[i][:7] == "VERSION":
-					saint.setdefault("prog_version", lines[i][-6:])
+					self._cifItems.setdefault("prog_version", lines[i][-6:])
 					
 			except:
 				i += 1
 				pass
 			i += 1
-		self.saint_d = saint    
-		return saint   
-	
+
+	def cifItems(self):
+		return self._cifItems
+
 if __name__ == '__main__':
 	a = bruker_saint('C:/datasets/08srv071/work/saint.ini')
-	saint = a.read_saint()
+	saint = a.cifItems()
 	print
-	
