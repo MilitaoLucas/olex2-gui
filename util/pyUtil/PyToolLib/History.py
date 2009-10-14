@@ -57,6 +57,8 @@ class History(ArgumentParser):
     if not tree:
       tree = HistoryTree()
       
+    if os.path.splitext(self.filefull)[-1].lower() == '.cif':
+      return # don't attempt to make a history if a cif is loaded
     filefull_lst = os.path.splitext(self.filefull)[0] + '.lst'
     if self.autochem or self.demo_mode:
       branchName = self.params.snum.history.autochem_next_solution
@@ -72,9 +74,8 @@ class History(ArgumentParser):
     self.setParams()
     return self.his_file
   
-  def delete_history(self, args):
+  def delete_history(self, del_solution):
     self._getItems()
-    del_solution = args.get('solution')
     if not del_solution.strip():
       return
     if self.params.user.alert_delete_history[0] == 'R':
@@ -227,7 +228,10 @@ class History(ArgumentParser):
     self.params.snum.history.next_solution = 'Solution 01'
     self._createNewHistory()
     self.setParams()
-    
+
+  def is_empty(self):
+    return tree.historyTree == {}
+
   def _createNewHistory(self):
     self.filename = olx.FileName()
     historyPicklePath = '/'.join([self.strdir,'%s.history' %self.filename])
@@ -331,17 +335,22 @@ class History(ArgumentParser):
     historyTextList.append("<br>")
     number_of_solutions = len(tree.historyTree.keys())
     if number_of_solutions > 1 and 'Autochem' not in self.params.snum.history.current_solution:
-      historyTextList.append("<a href='spy.delete_history -solution=\"GetValue(SET_HISTORY_CURRENT_SOLUTION)\">>UpdateHtml' target='Delete current history'><zimg border='0' src='delete_small.png'></a>")
+      historyTextList.append("<a href='spy.delete_history(\"GetValue(SET_HISTORY_CURRENT_SOLUTION)\")>>UpdateHtml' target='Delete current history'><zimg border='0' src='delete_small.png'></a>")
     if not self.demo_mode:
-      historyTextList.append(' <b>%s</b> -  %s - %s' %(curr_history_branch.spaceGroup,curr_history_branch.solution_program,curr_history_branch.solution_method))
+      solution = curr_history_branch.historyBranch.get('solution')
+      if solution is not None:
+        historyTextList.append(' <b>%s</b> -  %s - %s' %(
+          curr_history_branch.spaceGroup, solution.solution_program, solution.solution_method))
+      else:
+        historyTextList.append(' <b>%s</b>' %curr_history_branch.spaceGroup)
     
     historyText = '\n'.join(historyTextList)
 #    if self.demo_mode:
 #      historyText = ""
     OV.write_to_olex('history-info.htm',historyText)
-  
+
 hist = History()
-OV.registerMacro(hist.delete_history, 'solution')
+OV.registerFunction(hist.delete_history)
 OV.registerMacro(hist.rename_history, 'old-Old refinement name&;new-New refinement name')
 OV.registerMacro(hist.revert_history, 'solution-&;refinement-')
 OV.registerFunction(hist.create_history)
@@ -408,25 +417,27 @@ class HistoryTree:
     hist._make_history_bars()
     hist.setParams()
     return self.current_solution
-  
+
   def newLeaf(self,resPath,lstPath):
     self.current_refinement = self.historyTree[self.current_solution].newLeaf(resPath,lstPath)
     return self.current_refinement
-  
-  
+
+
 class HistoryBranch:
   def __init__(self,resPath,lstPath,solution=True):
-    self.spaceGroup = OV.olex_function('sg(%n)')
+    self.spaceGroup = OV.GetParam('snum.refinement.sg')
     self.historyBranch = {}
     if solution:
       tree.current_refinement = 'solution'
       self.historyBranch['solution'] = HistoryLeaf(resPath,lstPath)
+      self.solution_program = self.historyBranch['solution'].solution_program
+      self.solution_method = self.historyBranch['solution'].solution_method
     else:
       self.newLeaf(resPath,lstPath)
-    self.solution_program = OV.GetParam('snum.solution.program')
-    self.solution_method = OV.GetParam('snum.solution.method')
+      self.solution_program = None
+      self.solution_method = None
     self.name = None
-    
+
   def newLeaf(self,resPath,lstPath):
     ref_num = str(len(self.historyBranch.keys()) + 1)
     if len(ref_num) == 1:
@@ -436,13 +447,14 @@ class HistoryBranch:
     self.historyBranch[ref_name] = HistoryLeaf(resPath,lstPath)
     return ref_name
 
+
 class HistoryLeaf:
   def __init__(self,resPath,lstPath):
-    self.solution_program = 'n/a'
-    self.solution_method = 'n/a'
-    self.refinement_program = 'n/a'
-    self.refinement_method = 'n/a'
-    self.program_version = 'n/a'
+    self.solution_program = None
+    self.solution_method = None
+    self.refinement_program = None
+    self.refinement_method = None
+    self.program_version = None
     self.R1 = 'n/a'
     self.wR2 = 'n/a'
     self.lst = None
@@ -451,10 +463,10 @@ class HistoryLeaf:
     self.res = compressFile(resPath)
     ref_program = OV.GetParam('snum.refinement.program')
     sol_program = OV.GetParam('snum.solution.program')
-    if tree.current_refinement == 'solution' and 'smtbx' in sol_program:
+    if tree.current_refinement == 'solution' and sol_program == 'smtbx-solve':
       self.solution_program = sol_program
       self.solution_method = OV.GetParam('snum.solution.method')
-    elif tree.current_refinement != 'solution' and 'smtbx' in ref_program:
+    elif tree.current_refinement != 'solution' and sol_program == 'smtbx-solve':
       self.refinement_program = ref_program
       self.refinement_method = OV.GetParam('snum.refinement.method')
       try:
@@ -464,47 +476,56 @@ class HistoryLeaf:
         
     elif os.path.exists(lstPath):
       self.lst = compressFile(lstPath)
-      self.getLeafInfo(lstPath)
+      self.getLeafInfoFromLst(lstPath)
     else:
-      self.getLeafInfo(resPath)
-      
-  def getLeafInfo(self,filePath):
-    if os.path.splitext(filePath)[-1] == '.lst':
-      try:
-        lst_file = open(filePath)
-        lstValues = lst_reader.reader(lst_file).values()
-        lst_file.close()
-      except:
-        lstValues = {'R1':'','wR2':''}
-      try:
-        self.R1 = float(lstValues.get('R1', 'n/a'))
-        self.wR2 = float(lstValues.get('wR2', 'n/a'))
-      except ValueError:
-        self.R1 = 'n/a'
-        self.wR2 = 'n/a'
-        
-      if self.R1 == 'n/a':
-        self.solution_program = OV.GetParam('snum.solution.program')
-        self.solution_method = OV.GetParam('snum.solution.method')
-      else:
-        self.refinement_program = OV.GetParam('snum.refinement.program')
-        self.refinement_method = OV.GetParam('snum.refinement.method')
-        
-      self.program_version = lstValues.get('version',None)
-      
-    elif os.path.splitext(filePath)[-1] in ('.res', '.ins'):
-      try:
-        iresValues = ires_reader.reader(open(filePath)).values()
-      except:
-        iresValues = {'R1':''}
-      try:
-        self.R1 = float(iresValues['R1'])
-      except ValueError:
-        self.R1 = 'n/a'
-      self.wR2 = 'n/a'
-      self.refinement_method = 'n/a'
-      self.refinement_program = 'n/a'
+      self.getLeafInfoFromRes(resPath)
     OV.SetParam('snum.refinement.last_R1', self.R1)
+    if tree.current_refinement == 'solution':
+      if self.solution_program is None:
+        self.solution_program = OV.GetParam('snum.solution.program')
+      if self.solution_method is None:
+        self.solution_method = OV.GetParam('snum.solution.method')
+    else:
+      if self.refinement_program is None:
+        self.refinement_program = OV.GetParam('snum.refinement.program')
+      if self.refinement_method is None:
+        self.refinement_method = OV.GetParam('snum.refinement.method')
+
+  def getLeafInfoFromLst(self, filePath):
+    try:
+      lst_file = open(filePath)
+      lstValues = lst_reader.reader(lst_file).values()
+      lst_file.close()
+    except:
+      lstValues = {'R1':'','wR2':''}
+    try:
+      self.R1 = float(lstValues.get('R1', 'n/a'))
+      self.wR2 = float(lstValues.get('wR2', 'n/a'))
+    except ValueError:
+      self.R1 = 'n/a'
+      self.wR2 = 'n/a'
+      
+    if self.R1 == 'n/a':
+      self.solution_program = OV.GetParam('snum.solution.program')
+      self.solution_method = OV.GetParam('snum.solution.method')
+    else:
+      self.refinement_program = OV.GetParam('snum.refinement.program')
+      self.refinement_method = OV.GetParam('snum.refinement.method')
+      
+    self.program_version = lstValues.get('version',None)
+
+  def getLeafInfoFromRes(self, filePath):
+    try:
+      iresValues = ires_reader.reader(open(filePath)).values()
+    except:
+      iresValues = {'R1':''}
+    try:
+      self.R1 = float(iresValues['R1'])
+    except ValueError:
+      self.R1 = 'n/a'
+    self.wR2 = 'n/a'
+    self.refinement_method = None
+    self.refinement_program = None
 
   def setLeafInfo(self):
     OV.SetParam('snum.refinement.last_R1',self.R1)

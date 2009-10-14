@@ -117,7 +117,6 @@ class MetaCif(ArgumentParser):
     """Returns a string in cif format of all items in a dictionary of cif items."""
 
     listText = []
-
     name_value_pairs = olx.phil_handler.name_value_pairs('snum.metacif')
     for name, value in name_value_pairs:
       if 'file' in name or 'user_input' in name:
@@ -131,7 +130,7 @@ class MetaCif(ArgumentParser):
           continue
         elif value == '?':
           continue
-        elif cifName == '_publ_author_names' and OV.GetParam('snum.metacif.publ_author_names') != '?':
+        elif cifName == '_publ_author_names' and OV.GetParam_as_string('snum.metacif.publ_author_names') != '?':
           loop = [('_publ_author_name','_publ_author_email','_publ_author_address')]
           names = value.split(';')
           for name in names:
@@ -232,7 +231,7 @@ class MetaCif(ArgumentParser):
             i+=1
           value += "\n;"
           try:
-            oldValue = OV.GetParam('snum.metacif.%s' %field)
+            oldValue = OV.GetParam_as_string('snum.metacif.%s' %field)
             if oldValue is not None and value != str(oldValue).rstrip().lstrip():
               OV.SetParam('snum.metacif.%s' %field,value)
               variableFunctions.AddVariableToUserInputList('%s' %field)
@@ -252,7 +251,7 @@ class MetaCif(ArgumentParser):
             value = x[0]
           value = value.replace("'", "").rstrip()
           try:
-            oldValue = OV.GetParam('snum.metacif.%s' %field)
+            oldValue = OV.GetParam_as_string('snum.metacif.%s' %field)
             if oldValue is not None and value != str(oldValue).strip():
               OV.SetParam('snum.metacif.%s' %field, value)
               variableFunctions.AddVariableToUserInputList('%s' %field)
@@ -351,10 +350,11 @@ class CifTools(ArgumentParser):
     try:
       solution_branch = History.tree.historyTree[History.tree.current_solution]
       current_refinement = solution_branch.historyBranch[History.tree.current_refinement]
-      solution_reference = SPD.programs[solution_branch.solution_program].reference
-      OV.SetParam('snum.metacif.computing_structure_solution', solution_reference)
-      atom_sites_solution_primary = SPD.programs[solution_branch.solution_program].methods[solution_branch.solution_method].atom_sites_solution
-      OV.SetParam('snum.metacif.atom_sites_solution_primary', atom_sites_solution_primary)
+      if solution_branch.historyBranch.has_key('solution'):
+        solution_reference = SPD.programs[solution_branch.solution_program].reference
+        OV.SetParam('snum.metacif.computing_structure_solution', solution_reference)
+        atom_sites_solution_primary = SPD.programs[solution_branch.solution_program].methods[solution_branch.solution_method].atom_sites_solution
+        OV.SetParam('snum.metacif.atom_sites_solution_primary', atom_sites_solution_primary)
     except KeyError:
       pass
 
@@ -363,8 +363,8 @@ class CifTools(ArgumentParser):
     if "frames" in tools:
       p = self.sort_out_path(path, "frames")
       if p != "File Not Found" and self.metacifFiles.curr_frames != self.metacifFiles.prev_frames:
-        from bruker_frames import BrukerFrame
-        frames = BrukerFrame(p).cifItems()
+        import bruker_frames
+        frames = bruker_frames.reader(p).cifItems()
         merge.append(frames)
 
     if "smart" in tools:
@@ -399,8 +399,8 @@ class CifTools(ArgumentParser):
     if "saint" in tools:
       p = self.sort_out_path(path, "saint")
       if p != "File Not Found" and self.metacifFiles.curr_saint != self.metacifFiles.prev_saint:
-        from bruker_saint import bruker_saint
-        saint = bruker_saint(p).read_saint()
+        import bruker_saint
+        saint = bruker_saint.reader(p).cifItems()
         computing_cell_refinement = self.prepare_computing(saint, versions, "saint")
         saint.setdefault("_computing_cell_refinement", computing_cell_refinement)
         computing_data_reduction = self.prepare_computing(saint, versions, "saint")
@@ -411,8 +411,8 @@ class CifTools(ArgumentParser):
       p = self.sort_out_path(path, "sad")
       if p != "File Not Found" and self.metacifFiles.curr_sad != self.metacifFiles.prev_sad:
         try:
-          from sadabs import Sadabs
-          sad = Sadabs(p).read_sad()
+          import sadabs
+          sad = sadabs.reader(p).cifItems()
           version = self.prepare_computing(sad, versions, "sad")
           version = string.strip((string.split(version, "="))[0])
           t = self.prepare_exptl_absorpt_process_details(sad, version)
