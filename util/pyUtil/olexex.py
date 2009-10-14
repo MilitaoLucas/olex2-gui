@@ -156,7 +156,6 @@ class SpyVar(object):
 class OlexAtoms(object):
   def __init__(self):
     self.id_for_name = {}
-    #self.atoms = []
     self.atoms = [atom for atom in self.iterator()]
     
   def iterator(self):
@@ -177,26 +176,19 @@ class OlexAtoms(object):
       
       
       if name[:1] != "Q" and olx.xf_au_IsAtomDeleted(i) == "false":
-        #yield name, xyz, u, type, occu
         yield atom
-        #self.id_for_name[name] = str(i)
-        #self.atoms.setdefault(name, atom)
         
   def olexAtoms(self):
-    #return [i for i in self.iterator()]
     return self.atoms
   
   def numberAtoms(self):
-    #return sum(atom['occu'] for atom in self.iterator())
     return sum(atom['occu'] for atom in self.atoms)
   
   def number_non_hydrogen_atoms(self):
-    #return sum(atom['occu'] for atom in self.iterator() if atom['type'] not in ('H','Q'))
     return sum(atom['occu'] for atom in self.atoms if atom['type'] not in ('H','Q'))
   
   def currentFormula(self):
     curr_form = {}
-    #for atom in self.iterator():
     for atom in self.atoms:
       atom_type = atom['type']
       atom_occu = atom['occu']
@@ -205,7 +197,6 @@ class OlexAtoms(object):
     return curr_form
   
   def getExpectedPeaks(self):
-    #olex_atoms = [i for i in OlexAtoms().iterator()]
     cell_volume = float(olx.xf_au_GetVolume())
     expected_atoms = cell_volume/15
     present_atoms = self.numberAtoms()
