@@ -1,0 +1,114 @@
+
+ SADABS-2006/1 - Bruker AXS area detector scaling and absorption correction 
+ --------------------------------------------------------------------------
+
+
+ SADABS-2006/1 - Bruker AXS area detector scaling and absorption correction 
+ --------------------------------------------------------------------------
+
+ Equivalent reflections defined by point group 2/m    for scaling
+
+ Equivalent reflections defined by point group 2/m    for error model
+
+ Reading batch  1 from file s036m.raw
+
+ Mean and maximum errors in direction cosine check function =   0.000   0.000
+ The mean error should not exceed 0.005, and is usually caused by matrix
+ changes during data processing.
+
+ Approximate wavelength, cell and maximum 2-theta (from cosines etc.):
+ 0.71055   11.052    7.503   12.532   89.995   97.886   89.982   63.10
+
+ ==============================================================================
+
+ PART 1 - Refinement of parameters to model systematic errors
+
+ Thresholds should now be specified for excluding reflections from the
+ parameter refinement; these reflections may still be corrected and included
+ in the final output .hkl file
+
+   12497 Reflections of which   3666 unique;   13.98 data per frame
+
+ Redundancy:          1     2     3     4     5     6     7     8     9+
+ Number of groups:   124   665  1278   935   521   137     6     0     0
+
+ Mean(I/sigma):  -inf    0     1     2     3     5    10    15    20   +inf
+ Number of groups:   991   271   241   209   166   607   321   193   667
+
+
+ Settings for parameter refinement:
+
+ Maximum resolution =  0.8000 A
+ (Intensity/sigma) threshold = 5.000
+ Restraint esd for equal adjacent scale factors =  0.0050
+ Maximum odd and even orders for spherical harmonics =   5   6
+
+    5633 Reflections employed for parameter determination
+ Effective data to parameter ratio =    4.47
+
+ R(int) =  0.0728 (selected reflections only, before parameter refinement)
+
+ Cycle  R(incid)  R(diffr)  Mean wt.
+    1    0.0390    0.0232    0.9672
+    2    0.0197    0.0192    0.9730
+    3    0.0184    0.0185    0.9741
+    4    0.0181    0.0183    0.9745
+    5    0.0181    0.0182    0.9747
+    6    0.0180    0.0182    0.9748
+    7    0.0180    0.0181    0.9749
+    8    0.0180    0.0181    0.9749
+    9    0.0180    0.0181    0.9749
+   10    0.0180    0.0181    0.9749
+   11    0.0180    0.0181    0.9750
+   12    0.0180    0.0180    0.9750
+   13    0.0180    0.0180    0.9750
+   14    0.0180    0.0180    0.9750
+   15    0.0180    0.0180    0.9750
+   16    0.0180    0.0180    0.9750
+   17    0.0180    0.0180    0.9750
+   18    0.0180    0.0180    0.9750
+   19    0.0180    0.0180    0.9750
+   20    0.0180    0.0180    0.9750
+   21    0.0180    0.0180    0.9750
+
+ R(int) =  0.0180 (selected reflections only, after parameter refinement)
+
+ ==============================================================================
+
+ PART 2 - Reject outliers and establish error model
+
+ Rejected reflections are ignored in the statistics and Postscript plots
+ (except the detector diagnostics) and in the output .hkl file
+ Before applying rejections there are:
+
+   12497 total and   3666 unique reflections assuming Friedel's law.
+ Reflections rejected for which |I-<I>|/su >   4.00
+ Where:  su^2 = sigma(I)^2 + (  0.04000 <I>)^2  (sigma(I) from SAINT)
+
+   12488 total and   3665 unique reflections left after |I-<I>|/su test
+ g = 0.0318 gave best error model; g set to 0.0318 for statistics and .hkl
+ file output
+
+  Run 2-theta  R(int)  Incid. factors  Diffr. factors    K     Total I>2sig(I)
+    1  -32.0  0.0227   0.895 - 1.288   0.761 - 1.072   0.734    5008    3653
+    2  -32.0  0.0219   0.821 - 1.049   0.901 - 1.069   0.722    5009    3724
+    3  -30.0  0.0208   0.866 - 0.933   0.966 - 1.073   0.692    2471    1854
+
+ su = K * Sqrt[ sigma^2(I) + (g<I>)^2 ]  where sigma(I) is estimated by SAINT
+
+ The above statistics are based on all non-rejected data, ignoring
+ reflections without equivalents when estimating R(int) and K.
+
+
+ ==============================================================================
+
+ PART 3 - Output Postscript diagnostics and corrected data
+
+ Diagnostic plots written to Postscript file sad.eps
+
+   12488 Corrected reflections written to file sad.hkl
+ Estimated minimum and maximum transmission:  0.4884  0.9703
+ The ratio of these values is more reliable than their absolute values!
+ Additional spherical absorption correction applied with mu*r =  0.0200
+ Lambda/2 correction factor = 0.0015
+
