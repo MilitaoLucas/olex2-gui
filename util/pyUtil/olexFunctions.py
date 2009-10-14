@@ -10,23 +10,22 @@ import cProfile
 from subprocess import *
 import guiFunctions
 
-if olx.HasGUI() == 'true':
+HasGUI = olx.HasGUI() == 'true'
+if HasGUI:
   inheritFunctions = guiFunctions.GuiFunctions
 else:
   inheritFunctions = guiFunctions.NoGuiFunctions
-  
+
 class OlexFunctions(inheritFunctions):
   def __init__(self):
-    self._HasGUI = olx.HasGUI()
-    if self._HasGUI != "false":
+    if HasGUI != "false":
       import olex_gui
       self.olex_gui = olex_gui
 
-      
   def GetValue(self, control_name):
     retVal = olx.GetValue(control_name)
     return retVal
-      
+
   def SetVar(self,variable,value):
     try:
       olex_core.SetVar(variable,value)
@@ -56,7 +55,7 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
       retVal = ''
     return retVal
-  
+
   def GetParam_as_string(self,variable):
     try:
       retVal = olx.phil_handler.get_validated_param(variable)
@@ -256,7 +255,7 @@ class OlexFunctions(inheritFunctions):
     except Exception, ex:
       print >> sys.stderr, "An error occured"
       sys.stderr.formatExceptionInfo()
-    return newPath
+    return self.standardizePath(newPath)
   
   def File(self):
     olx.File()
@@ -440,7 +439,7 @@ class OlexFunctions(inheritFunctions):
     olx.DelIns(instruction)
 
   def HasGUI(self):
-    return self._HasGUI == 'true'
+    return HasGUI
   
   def StoreParameter(self, var="", save=False):
     val = self.FindValue(var)
