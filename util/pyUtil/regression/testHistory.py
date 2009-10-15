@@ -12,17 +12,11 @@ from History import hist
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
-class HistoryTestCase(unittest.TestCase):
-
-  def setUp(self):
-    test_utils.copy_to_tmp()
-
-  def tearDown(self):
-    test_utils.clean_up()
+class HistoryTestCase(test_utils.TestCaseBase):
 
   def test_create_history(self):
     # post-solution
-    shutil.copyfile('test_files/Co110_patt.lst', 'tmp/Co110.lst')
+    shutil.copyfile('test_files/Co110_patt.lst', '%s/Co110.lst' %self.tmp)
     OV.SetParam('snum.solution.program', 'ShelXS')
     OV.SetParam('snum.solution.method', 'Patterson Method')
     OV.SetParam('snum.refinement.sg', 'P-1')
@@ -50,11 +44,11 @@ class HistoryTestCase(unittest.TestCase):
     self.assertEqual(leaf.R1, 'n/a')
     self.assertEqual(leaf.wR2, 'n/a')
     self.assertEqual(History.decompressFile(leaf.res),
-                     open('tmp/Co110.res').read())
+                     open('%s/Co110.res' %self.tmp).read())
     self.assertEqual(History.decompressFile(leaf.lst),
-                     open('tmp/Co110.lst').read())
+                     open('%s/Co110.lst' %self.tmp).read())
     # post-refinement
-    shutil.copyfile('test_files/Co110_shelxl.lst', 'tmp/Co110.lst')
+    shutil.copyfile('test_files/Co110_shelxl.lst', '%s/Co110.lst' %self.tmp)
     OV.SetParam('snum.refinement.program', 'ShelXL')
     OV.SetParam('snum.refinement.method', 'Least Squares')
     hist.create_history()
@@ -70,11 +64,11 @@ class HistoryTestCase(unittest.TestCase):
     self.assertEqual(leaf.R1, 0.0312)
     self.assertEqual(leaf.wR2, 0.0819)
     self.assertEqual(History.decompressFile(leaf.res),
-                     open('tmp/Co110.res').read())
+                     open('%s/Co110.res' %self.tmp).read())
     self.assertEqual(History.decompressFile(leaf.lst),
-                     open('tmp/Co110.lst').read())
-    self.assertTrue(os.path.isfile('tmp/VFS/history-info.htm'))
-    history_bars_html = open('tmp/VFS/history-info.htm').read()
+                     open('%s/Co110.lst' %self.tmp).read())
+    self.assertTrue(os.path.isfile('%s/VFS/history-info.htm' %self.tmp))
+    history_bars_html = open('%s/VFS/history-info.htm' %self.tmp).read()
     self.assertFalse(show_diff(history_bars_html, """\
 <zimg border=0 src=vscale.png>
 <a href='spy.revert_history -solution="GetValue(SET_HISTORY_CURRENT_SOLUTION)" -refinement=solution>>UpdateHtml' target=Solution><zimg border=0 width='7' src=vbar-sol.png></a>
@@ -83,7 +77,7 @@ class HistoryTestCase(unittest.TestCase):
  <b>P -1</b> -  ShelXS - Patterson Method"""))
     # test save/load
     hist.saveHistory()
-    self.assertTrue(os.path.isfile('tmp/.olex/Co110.history'))
+    self.assertTrue(os.path.isfile('%s/.olex/Co110.history' %self.tmp))
     History.tree = History.HistoryTree() # reset history
     hist.loadHistory()
     tree = History.tree

@@ -11,7 +11,7 @@ def BaseDir():
   return basedir
 
 def StrDir():
-  return '%s/tmp/.olex' %regression_dir
+  return '%s/.olex' %tmp_dir
 
 def DataDir():
   return ''
@@ -23,10 +23,10 @@ def FileName(FileFull=''):
   return filename
 
 def FilePath(FileFull=''):
-  return '%s/tmp' %regression_dir
+  return tmp_dir
 
 def FileFull():
-  return '%s/tmp/%s.%s' %(regression_dir, filename, fileext)
+  return '%s/%s.%s' %(tmp_dir, filename, fileext)
 
 def file_Copy(copy_from, copy_to):
   assert os.path.isfile(copy_from)
@@ -43,7 +43,7 @@ def HasGUI():
 
 def HKLSrc(filefull=None):
   if filefull is None:
-    return '%s/tmp/%s.hkl' %(regression_dir, filename)
+    return '%s/%s.hkl' %(tmp_dir, filename)
 
 def Lst(item):
   return 'n/a'
@@ -104,6 +104,7 @@ def WaitFor(*args, **kwds):
 
 regression_dir = os.getcwd()
 basedir = os.path.abspath('../../..')
+tmp_dir = None
 filename = 'Co110'
 fileext = 'res'
 has_gui='true'

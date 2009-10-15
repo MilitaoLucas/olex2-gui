@@ -17,8 +17,8 @@ def f(*args, **kwds):
   pass
 
 def writeImage(filename, data, isPersistent=False):
-  if not os.path.isdir('%s/tmp/VFS' %olx.regression_dir):
-    os.mkdir('%s/tmp/VFS' %olx.regression_dir)
-  f = open('%s/tmp/VFS/%s' %(olx.regression_dir,filename), 'w')
+  if not os.path.isdir('%s/VFS' %olx.tmp_dir):
+    os.mkdir('%s/VFS' %olx.tmp_dir)
+  f = open('%s/VFS/%s' %(olx.tmp_dir,filename), 'w')
   f.write(data)
   f.close()
