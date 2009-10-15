@@ -105,7 +105,7 @@ class OlexCctbxAdapter(object):
         self.olx_atoms.iterator(),
         restraint_iterator=self.olx_atoms.restraint_iterator())
 
-  def initialise_reflections(self, force=False):
+  def initialise_reflections(self, force=False, verbose=False):
     self.cell = self.olx_atoms.getCell()
     self.space_group = str(olx.xf_au_GetCellSymm())
     reflections = olx.HKLSrc()
@@ -127,6 +127,8 @@ class OlexCctbxAdapter(object):
     omit = self.olx_atoms.model['omit']
     if force or omit is None or omit != self.reflections._omit:
       self.reflections.filter(omit, self.olx_atoms.exptl['radiation'])
+    if verbose:
+      self.reflections.show_summary()
 
 class OlexCctbxRefine(OlexCctbxAdapter):
   def __init__(self, max_cycles=None, verbose=False):
@@ -190,6 +192,7 @@ class OlexCctbxRefine(OlexCctbxAdapter):
     for param, value in zip(params.keys()[:len(weight)], weight):
       params[param] = value
     weighting = xray.weighting_schemes.shelx_weighting(**params)
+    self.reflections.show_summary(log=self.log)
     self.refinement = cctbx_controller.refinement(
       f_sq_obs=self.reflections.f_sq_obs_merged,
       xray_structure=self.xray_structure(),

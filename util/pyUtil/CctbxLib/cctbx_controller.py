@@ -93,7 +93,7 @@ def completeness_statistics(reflections, wavelength, reflections_per_bin=20, ver
   if (0 or verbose):
     f_obs.binner().show_summary()
   missing_set = f_obs.complete_set().lone_set(f_obs).sort()
-  plot = statistics.completeness_plot(f_obs)
+  plot = completeness_plot(f_obs)
   plot.x = uctbx.d_star_sq_as_two_theta(
     1./flex.pow2(flex.double(plot.x)), wavelength,deg=True)
   plot.missing_set = missing_set
@@ -157,6 +157,37 @@ def f_obs_vs_f_calc(model, reflections):
 
 
 
+class completeness_plot(object):
+  def __init__(self, f_obs):
+    self.info = f_obs.info()
+    self.completeness = f_obs.completeness(use_binning=True)
+    binner = self.completeness.binner
+    data = self.completeness.data
+    i_bins = binner.range_all()
+    d_spacings = f_obs.d_spacings()
+    d_spacings.use_binner_of(f_obs)
+    mean_d_spacings = d_spacings.mean(use_binning=True).data
+    self.x = []
+    self.y = []
+    for i_bin in i_bins:
+      bin_d_range = binner.bin_d_range(i_bin)
+      data_item = data[i_bin]
+      d = mean_d_spacings[i_bin]
+      if (data_item is not None and d is not None):
+        self.x.append(d)
+        self.y.append(data_item)
+
+  def xy_plot_info(self):
+    r = empty()
+    r.title = "Completeness Plot"
+    if (self.info != 0):
+      r.title += ": " + str(self.info)
+    r.x = self.x
+    r.y = self.y
+    r.xLegend = "Resolution"
+    r.yLegend = "Shell Completeness"
+    return r
+
 class reflections(object):
   def __init__(self,  cell, spacegroup, reflection_file):
     """ reflections is the filename holding the reflections """
@@ -172,17 +203,16 @@ class reflections(object):
     self.f_obs = self.f_sq_obs.f_sq_as_f()
     self._omit = None
     self._merge = None
+    self.merging = None
     self.f_sq_obs_merged = None
     self.f_sq_obs_filtered = None
 
-  def merge(self, merge, verbose=False, log=None):
-    if log is None:
-      log = sys.stdout
+  def merge(self, merge=None):
     if merge is None:
       merge = 2
     self._merge = merge
     f_sq_obs_merged = self.f_sq_obs.eliminate_sys_absent()
-    n_sys_absent = self.f_sq_obs.size() - f_sq_obs_merged.size()
+    self.n_sys_absent = self.f_sq_obs.size() - f_sq_obs_merged.size()
     merging_in_p1 = f_sq_obs_merged \
                   .customized_copy(
                     space_group_info=sgtbx.space_group_info("P1"),
@@ -191,37 +221,40 @@ class reflections(object):
     f_sq_obs_merged_in_p1 = merging_in_p1.array().customized_copy(crystal_symmetry=self.f_sq_obs)
     if merge > 2:
       f_sq_obs_merged = f_sq_obs_merged.customized_copy(anomalous_flag=False)
-    merging = f_sq_obs_merged.merge_equivalents()
-    f_sq_obs_merged = merging.array()
+    self.merging = f_sq_obs_merged.merge_equivalents()
+    f_sq_obs_merged = self.merging.array()
     self.f_sq_obs_merged = f_sq_obs_merged
-    if verbose:
-      print >> log, "Merging summary:"
-      print >> log, "Total reflections: %i" %self.f_sq_obs.size()
-      print >> log, "Unique reflections: %i" %f_sq_obs_merged.size()
-      print >> log, "Systematic Absences: %i removed" %n_sys_absent
-      print >> log, "R(int): %f" %merging.r_int()
-      print >> log, "R(sigma): %f" %merging.r_sigma()
-      merging.show_summary(out=log)
 
-  def filter(self, omit, wavelength, verbose=False, log=None):
-    if log is None:
-      log = sys.stdout
+  def filter(self, omit, wavelength):
     self._omit = omit
     two_theta = omit['2theta']
-    d_min=uctbx.two_theta_as_d(two_theta, wavelength, deg=True)
+    self.d_min=uctbx.two_theta_as_d(two_theta, wavelength, deg=True)
     s = omit['s']
     hkl = omit.get('hkl')
-    f_sq_obs_filtered = self.f_sq_obs_merged.resolution_filter(d_min=d_min)
-    n_filtered_by_resolution = self.f_sq_obs_merged.size() - f_sq_obs_filtered.size()
+    f_sq_obs_filtered = self.f_sq_obs_merged.resolution_filter(d_min=self.d_min)
+    self.n_filtered_by_resolution = self.f_sq_obs_merged.size() - f_sq_obs_filtered.size()
     if hkl is not None:
       f_sq_obs_filtered = f_sq_obs_filtered.select_indices(
         indices=flex.miller_index(hkl), map_indices_to_asu=True, negate=True)
     self.f_sq_obs_filtered = f_sq_obs_filtered
-    if verbose:
-      print >> log, "d min: %f" %d_min
-      print >> log, "n reflections filtered by resolution: %i" %(n_filtered_by_resolution)
+
+  def show_summary(self, log=None):
+    if log is None:
+      log = sys.stdout
+    if self._merge is None:
+      self.merge()
+    print >> log, "Merging summary:"
+    print >> log, "Total reflections: %i" %self.f_sq_obs.size()
+    print >> log, "Unique reflections: %i" %self.f_sq_obs_merged.size()
+    print >> log, "Systematic Absences: %i removed" %self.n_sys_absent
+    print >> log, "R(int): %f" %self.merging.r_int()
+    print >> log, "R(sigma): %f" %self.merging.r_sigma()
+    self.merging.show_summary(out=log)
+    if self.f_sq_obs_filtered is not None:
+      print >> log, "d min: %f" %self.d_min
+      print >> log, "n reflections filtered by resolution: %i" %(self.n_filtered_by_resolution)
       print >> log, "n reflections filtered by hkl: %i" %(
-        self.f_sq_obs_merged.size() - n_filtered_by_resolution - f_sq_obs_filtered.size())
+        self.f_sq_obs_merged.size() - self.n_filtered_by_resolution - self.f_sq_obs_filtered.size())
 
 def create_cctbx_xray_structure(cell, spacegroup, atom_iter, restraint_iterator=None):
   """ cell is a 6-uple, spacegroup a string and atom_iter yields tuples (label, xyz, u, element_type) """
@@ -310,18 +343,6 @@ class manager(object):
     for i in xrange(f_sq_obs.size()):
       if f_sq_obs.data()[i] < -f_sq_obs.sigmas()[i]:
         f_sq_obs.data()[i] = -f_sq_obs.sigmas()[i]
-    merging = f_sq_obs\
-            .eliminate_sys_absent()\
-            .merge_equivalents()
-    f_sq_obs = merging.array()
-    unique_reflections = f_sq_obs.size()
-    if self.verbose:
-      print >> self.log, "Merging summary:"
-      merging.show_summary(out=self.log)
-      print >> self.log, "R(int) = %.4f   R(sigma) = %.4f" \
-            %(merging.r_int(), merging.r_sigma())
-      print >> self.log, "Total reflection: %i" %self.f_sq_obs.size()
-      print >> self.log, "Unique reflections: %i" %unique_reflections
     f_obs = f_sq_obs.f_sq_as_f()
     self.f_sq_obs = f_sq_obs
     self.f_obs = f_obs
