@@ -173,8 +173,8 @@ def set_plugins_paths():
       sys.path.append("%s/util/pyUtil/PythonLib/sqlalchemy" %basedir)
 
 def setup_cctbx():
-  import utils
-  utils.setup_cctbx()
+  import path_utils
+  path_utils.setup_cctbx()
 
   # Import these files now to reduce time taken on running cctbx for the first time
   #import my_refine_util
