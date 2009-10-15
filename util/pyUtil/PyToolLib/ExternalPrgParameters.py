@@ -283,6 +283,14 @@ class Method_shelx(Method):
     #olex.m("User '%s'" %RunPrgObject.tempPath)
     olx.User("'%s'" %RunPrgObject.tempPath)
     xl_ins_filename = RunPrgObject.hkl_src_name
+# This is an ugly fix - but good start
+    if 'shelxs86' in prgName:
+        print 'STARTING SHELX86 modifications'
+	import fileinput, string, sys
+	for line in fileinput.input(xl_ins_filename.lower()+'.ins',inplace=1):
+		if 'REM' in line:
+			continue
+		sys.stdout.write(line)
     command = "%s '%s'" % (prgName, xl_ins_filename.lower()) #This is correct!!!!!!
     #sys.stdout.graph = RunPrgObject.Graph()
     if not RunPrgObject.params.snum.shelx_output:
@@ -496,7 +504,35 @@ class Method_cctbx_ChargeFlip(Method_solution):
     file = r"'%s/%s.res'" %(olx.FilePath(), RunPrgObject.fileName)
     olx.xf_SaveSolution(file)
     olx.Atreap(file)
-    
+
+class Method_SIR97(Method_solution):
+  def __init__(self, name, cmd, args, atom_sites_solution=None):
+    Method_solution.__init__(self, name, cmd, args, atom_sites_solution)
+
+  def run(self, RunPrgObject):
+    import OlxSir
+    print 'STARTING SIR97'
+    RunPrgObject.solve = True
+    solving_interval = int(float(self.getArgs().split()[1]))
+
+    formula_l = olx.xf_GetFormula('list')
+    formula_l = formula_l.split(",")
+    formula_d = {}
+    for item in formula_l:
+      item = item.split(":")
+      formula_d.setdefault(item[0], {'count':float(item[1])})
+    olx.xf_EndUpdate()
+    olx.Compaq('-a')
+    olex.m("sel -a")
+    olex.m("fix occu sel")
+    #olx.VSS(True)
+    #olex.m("sel -a")
+    #olex.m("name sel 1")
+    OV.DeleteBitmap('solve')
+    file = r"'%s/%s.res'" %(olx.FilePath(), RunPrgObject.fileName)
+    olx.xf_SaveSolution(file)
+    olx.Atreap(file)
+
 def defineExternalPrograms():
   # define solution methods
   direct_methods = Method_shelx_direct_methods(
@@ -633,7 +669,20 @@ def defineExternalPrograms():
    ),
     atom_sites_solution='other'
   )
-  
+# Testing sir97 easy mode
+  easy = Method_SIR97(
+    name='SIR97 Easy',
+    cmd='easy',
+    args=(
+      dict(name='easy',
+           values=[['interval', 60]],
+           default='true',
+           optional=True,
+           ),
+   ),
+    atom_sites_solution='other'
+  )
+
   # define refinement methods
   least_squares = Method_shelx_refinement(
     name='Least Squares', 
@@ -707,6 +756,12 @@ def defineExternalPrograms():
     author="G.M.Sheldrick",
     reference="SHELXS-97 (Sheldrick, 1990)",
     execs=["shelxs.exe", "shelxs"])
+  ShelXS86 = Program(
+    name='ShelXS86',
+    program_type='solution',
+    author="G.M.Sheldrick",
+    reference="SHELXS-86 (Sheldrick, 1980)",
+    execs=["shelxs86.exe", "shelxs86"])
   XS = Program(
     name='XS',
     program_type='solution',
@@ -730,9 +785,18 @@ def defineExternalPrograms():
     program_type='solution',
     author="Luc Bourhis, Ralf Grosse-Kunstleve",
     reference="smtbx-flip (Bourhis, 2008)")
-  
+  SIR97 = Program(
+    name='SIR97',
+    program_type='solution',
+    author="TBC",
+    reference="TBC (Erm, 1999)",
+    versions = '97')
+
   ShelXS.addMethod(direct_methods)
   ShelXS.addMethod(patterson)
+  ShelXS86.addMethod(direct_methods)
+  ShelXS86.addMethod(patterson)
+  SIR97.addMethod(easy)
   XS.addMethod(direct_methods)
   XS.addMethod(patterson)
   ShelXD.addMethod(dual_space)
@@ -788,7 +852,7 @@ def defineExternalPrograms():
   smtbx_refine.addMethod(lbgfs)
 
   SPD = ExternalProgramDictionary()
-  for prg in (ShelXS, XS, ShelXD, XM, smtbx_solve):
+  for prg in (ShelXS, ShelXS86, XS, ShelXD, XM, smtbx_solve):
     SPD.addProgram(prg)
 
   RPD = ExternalProgramDictionary()
