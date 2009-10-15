@@ -102,15 +102,6 @@ def Stop(*args, **kwds):
 def WaitFor(*args, **kwds):
   pass
 
-def _setup_phil_handler():
-  import phil_interface
-  import iotbx.phil
-  master_phil = iotbx.phil.parse(
-    file_name="../../../params.phil",
-    converter_registry=phil_interface.converter_registry)
-  return phil_interface.phil_handler(master_phil=master_phil)
-
-phil_handler = _setup_phil_handler()
 regression_dir = os.getcwd()
 basedir = os.path.abspath('../../..')
 filename = 'Co110'

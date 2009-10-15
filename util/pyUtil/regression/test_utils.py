@@ -3,7 +3,7 @@ import os
 import shutil
 import sys
 
-def set_up_paths():
+def setup_paths():
   basedir = os.path.abspath('../../../')
   sys.path.append("%s" %basedir)
   sys.path.append("%s/etc/scripts" %basedir)
@@ -14,7 +14,19 @@ def set_up_paths():
   sys.path.append("%s/util/pyUtil/regression" %basedir)
   sys.path.append("%s/util/pyUtil/regression/dummy_olex_files" %basedir)
 
-set_up_paths()
+def setup_phil_handler():
+  import phil_interface
+  import iotbx.phil
+  master_phil = iotbx.phil.parse(
+    file_name="../../../params.phil",
+    converter_registry=phil_interface.converter_registry)
+  return phil_interface.phil_handler(master_phil=master_phil)
+
+setup_paths()
+import path_utils
+path_utils.setup_cctbx()
+import olx
+olx.phil_handler = setup_phil_handler()
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
