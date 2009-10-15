@@ -12,19 +12,18 @@ OV = olexFunctions.OlexFunctions()
 import olx
 import RunPrg
 
-class RunPrgTestCase(unittest.TestCase):
+class RunPrgTestCase(test_utils.TestCaseBase):
 
   def setUp(self):
     self.cwd = os.getcwd()
-    
+    test_utils.TestCaseBase.setUp(self)
     self.stdout = StringIO()
     sys.stdout = self.stdout
-    test_utils.copy_to_tmp()
     olexFunctions.HasGUI = False
 
   def tearDown(self):
     os.chdir(self.cwd)
-    test_utils.clean_up()
+    test_utils.TestCaseBase.tearDown(self)
     olexFunctions.HasGUI = True # reset
     print self.stdout.getvalue()
 
@@ -34,7 +33,7 @@ class RunPrgTestCase(unittest.TestCase):
     run = RunPrg.RunRefinementPrg()
 
   def test_solution_shelxs(self):
-    shutil.copyfile('tmp/Co110_patt.ins', 'tmp/Co110.ins')
+    shutil.copyfile('%s/Co110_patt.ins' %self.tmp, '%s/Co110.ins' %self.tmp)
     OV.SetParam('snum.solution.program', 'ShelXS')
     OV.SetParam('snum.solution.method', 'Patterson Method')
     run = RunPrg.RunSolutionPrg()
