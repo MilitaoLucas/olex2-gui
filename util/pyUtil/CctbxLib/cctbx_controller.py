@@ -261,6 +261,7 @@ class manager(object):
                max_sites_pre_cycles=20,
                max_cycles=40,
                max_peaks=30,
+               weighting=None,
                verbose=1,
                log=None):
     assert [f_obs,f_sq_obs].count(None) == 1
@@ -288,6 +289,7 @@ class manager(object):
     self.verbose = verbose
     self.log = log
     self.minimisation = None
+    self.weighting = weighting
 
     for sc in self.xray_structure.scatterers():
       if sc.scattering_type in ('H','D'):continue
@@ -344,9 +346,8 @@ class manager(object):
 
   def setup_refinement(self):
     if self.refinement_type is xray.intensity:
-      weighting = (xray.weighting_schemes.shelx_weighting(),None)[0]
       ls = xray.unified_least_squares_residual(self.f_sq_obs,
-                                               weighting=weighting)
+                                               weighting=self.weighting)
     else:
       ls = xray.unified_least_squares_residual(self.f_obs)
     self.ls = ls
@@ -435,7 +436,8 @@ class manager(object):
     f_calc = sf(self.xray_structure, f_sq_obs).f_calc()
     ls_function = xray.unified_least_squares_residual(
       f_sq_obs,
-      weighting=xray.weighting_schemes.shelx_weighting()
+      #weighting=xray.weighting_schemes.shelx_weighting()
+      weighting=self.weighting
     )
     ls = ls_function(f_calc, compute_derivatives=False)
     weights = ls_function.weighting().weights
@@ -468,6 +470,7 @@ class refinement(manager):
                max_sites_pre_cycles=20,
                max_cycles=40,
                max_peaks=30,
+               weighting=None,
                verbose=1,
                log=None):
     manager.__init__(self,
@@ -477,6 +480,7 @@ class refinement(manager):
                      lambda_=wavelength,
                      max_cycles=max_cycles,
                      max_peaks=max_peaks,
+                     weighting=weighting,
                      verbose=verbose,
                      log=log)
 
