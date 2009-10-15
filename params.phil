@@ -90,7 +90,7 @@
 
 snum {
   solution {
-    program = ShelXS XS 'smtbx-solve' XM ShelXD
+    program = ShelXS ShelXS86 XS 'smtbx-solve' XM ShelXD
       .type = choice
     method = 'Dual Space' 'Charge Flipping' 'Direct Methods' 'Patterson Method'
       .type = choice
