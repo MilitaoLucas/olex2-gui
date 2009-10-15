@@ -13,24 +13,45 @@ class reader:
     program = None
     method = None
     version = None
-    
+    """    
     while 1:
       line = lines[i].strip()
       if i != 0 and '+++++++' in lines[i-1] and '+' in line:
-        header.append(line.strip('+').strip())
-        program = header[0].split('-')[0].strip()
+  	header.append(line.strip('+').strip())
+	program = header[0].split('-')[0].strip()
         self._values.setdefault('program', program)
-      elif header and '+++++++' not in line:
+      elif header and '+++++++' not in line and len(line.strip('+').strip()) > 0:
+      	print "next", line
         header.append(line.strip('+').strip())
       elif header and '+++++++' in line:
         break
       i += 1
-      
-    if program in ('SHELXL', 'SHELXS', 'SHELXH'):
+      """
+    for i in range(1, 15):
+      line = lines[i].strip()
+#      print "Line = :", i, " ", line
+      if i != 0 and '+++++++' not in lines and '+' in line and len(line.strip('+').strip()) > 0:
+#        print "clasue 1", line
+        header.append(line.strip('+').strip())
+#      elif header and '+++++++' not in line and len(line.strip('+').strip()) > 0:
+#        print "calause 2", line
+#        header.append(line.strip('+').strip())
+      i += 1
+#    print "The header is: ", header
+    program = header[0].split('-')[0].strip()
+    self._values.setdefault('program', program)
+#    print "header = ", header
+#    print "Program = ", program  
+    if program in ('SHELXL', 'SHELXH'):
       version = header[1].split('Release')[-1].strip()
+    elif program == 'SHELXS' and len(header) > 2:
+      version = header[1].split('Release')[-1].strip()
+    elif program == 'SHELXS' and len(header) == 2:
+      version = '86'
     else:
       version = header[0].split(' - ')[-1].strip()
     if version: self._values.setdefault('version', version)
+#    print "Version is: ", version
     
     solution = False
     refinement = False
