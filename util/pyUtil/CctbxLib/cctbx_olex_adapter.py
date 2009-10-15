@@ -37,7 +37,7 @@ class OlexRefinementModel(object):
     self._cell = olex_refinement_model['aunit']['cell']
     self.exptl = olex_refinement_model['exptl']
     self._afix = olex_refinement_model['afix']
-    self._model= olex_refinement_model
+    self.model= olex_refinement_model
 
   def iterator(self):
     for i, atom in self._atoms.items():
@@ -66,7 +66,7 @@ class OlexRefinementModel(object):
 
   def restraint_iterator(self):
     for restraint_type in ('dfix','dang','flat','chiv'):
-      for restraint in self._model[restraint_type]:
+      for restraint in self.model[restraint_type]:
         kwds = dict(
           i_seqs = [i[0] for i in restraint['atoms']],
           sym_ops = [i[1] for i in restraint['atoms']],
@@ -121,10 +121,10 @@ class OlexCctbxAdapter(object):
         print err
       self.reflections = olx.current_reflections
     
-    merge = self.olx_atoms._model.get('merge')
+    merge = self.olx_atoms.model.get('merge')
     if force or merge is None or merge != self.reflections._merge:
       self.reflections.merge(merge)
-    omit = self.olx_atoms._model['omit']
+    omit = self.olx_atoms.model['omit']
     if force or omit is None or omit != self.reflections._omit:
       self.reflections.filter(omit, self.olx_atoms.exptl['radiation'])
 
@@ -185,16 +185,18 @@ class OlexCctbxRefine(OlexCctbxAdapter):
 
   def refine_with_cctbx(self):
     wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
-    d_min = OV.GetParam('cctbx.refinement.resolution_d_min')
-    d_max = OV.GetParam('cctbx.refinement.resolution_d_max')
-    f_sq_obs = self.reflections.f_sq_obs.resolution_filter(
-      d_min=d_min, d_max=d_max)
+    weight = self.olx_atoms.model['weight']
+    params = dict(a=0.1, b=0, c=0, d=0, e=0, f=1./3)
+    for param, value in zip(params.keys()[:len(weight)], weight):
+      params[param] = value
+    weighting = xray.weighting_schemes.shelx_weighting(**params)
     self.refinement = cctbx_controller.refinement(
-      f_sq_obs=self.reflections.f_sq_obs,
+      f_sq_obs=self.reflections.f_sq_obs_merged,
       xray_structure=self.xray_structure(),
       wavelength=wavelength,
       max_cycles=self.max_cycles,
       log=self.log,
+      weighting=weighting,
     )
     self.refinement.on_cycle_finished = self.feed_olex
     self.refinement.start()
@@ -370,7 +372,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     merging = f_obs.merge_equivalents()
     f_obs = merging.array()
     f_obs.show_summary()
-    
+
     # charge flipping iterations
     flipping = charge_flipping.basic_iterator(f_obs, delta=None)
     solving = charge_flipping.solving_iterator(
