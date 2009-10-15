@@ -524,6 +524,18 @@ graphs {
         .type = bool
         .caption = "%Output% csv"
     }
+    completeness
+      .short_caption = "Completeness Plot"
+      .caption = "Completeness Plot"
+      .help = "completeness-plot"
+    {
+      reflections_per_bin=20
+        .type = int(value_min=1)
+        .caption = "Reflections per bin"
+      output_csv_file = False
+        .type = bool
+        .caption = "%Output% csv"
+    }
   }
 }
 
