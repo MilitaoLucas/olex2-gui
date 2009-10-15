@@ -84,7 +84,7 @@ def wilson_statistics(model, reflections, n_bins=10):
 
 def completeness_statistics(reflections, wavelength, reflections_per_bin=20, verbose=False):
   f_obs=reflections.f_obs
-  f_sq_obs = reflections.f_sq_obs_filtered
+  f_sq_obs = reflections.f_sq_obs_merged
   f_sq_obs = f_sq_obs.eliminate_sys_absent().average_bijvoet_mates()
   f_obs = f_sq_obs.f_sq_as_f()
   f_obs.setup_binner(
