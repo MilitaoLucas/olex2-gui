@@ -1801,6 +1801,7 @@ def makeReflectionGraphGui():
            'cumulative_intensity':'run cumulative_intensity GetValue(SPIN_CUMULATIVE_INTENSITY_BINS) GetState(TICK_CUMULATIVE_INTENSITY_OUTPUT_CSV)',
            'systematic_absences':'run systematic_absences GetState(TICK_SYSTEMATIC_ABSENCES_OUTPUT_CSV)',
            'fobs_fcalc':'run fobs_fcalc GetState(TICK_FOBS_FCALC_OUTPUT_CSV)',
+           'completeness':'run completeness GetValue(SPIN_COMPLETENESS_REFLECTIONS_PER_BIN) GetState(TICK_COMPLETENESS_OUTPUT_CSV)',
            }
 
   if GuiGraphChooserComboExists:
@@ -1828,7 +1829,7 @@ def makeReflectionGraphGui():
   gui_d['help'] = htmlTools.make_table_first_col(
     help_name=help_name, popout=False)
   d = {'ctrl_name':'SET_REFLECTION_STATISTICS',
-     'items':"-- %Please Select% --;%Wilson Plot%;%Cumulative Intensity%;%Systematic Absences%;%Fobs-Fcalc%",
+     'items':"-- %Please Select% --;%Wilson Plot%;%Cumulative Intensity%;%Systematic Absences%;%Fobs-Fcalc%;%Completeness%",
      'value':value,
      'onchange':"updatehtml",
      'manage':'manage',
