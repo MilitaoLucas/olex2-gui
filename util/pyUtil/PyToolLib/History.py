@@ -530,8 +530,8 @@ class HistoryLeaf:
   def setLeafInfo(self):
     OV.SetParam('snum.refinement.last_R1',self.R1)
     OV.SetParam('snum.last_wR2',self.wR2)
-    if self.refinement_program != 'n/a':
-      if self.refinement_method != 'n/a':
+    if self.refinement_program is not None:
+      if self.refinement_method is not None:
         OV.SetRefinementProgram(self.refinement_program, self.refinement_method)
       else:
         OV.SetRefinementProgram(self.refinement_program)
