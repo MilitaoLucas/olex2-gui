@@ -575,10 +575,6 @@ def GetHklFileList():
   reflection_file_extensions = ["hkl", "raw"]
   for extension in reflection_file_extensions:
     g = glob.glob(r"%s/*.%s" %(OV.FilePath(),extension))
-    if sys.platform.startswith('linux'):
-      bigG = glob.glob(r"%s/*.%s" %(OV.FilePath(),extension))
-      # Added to make glob look for either case for Linux just incase the HKL isn't lowercase.
-      g += bigG
     reflections_files += g
   g = reflections_files
   g.sort()
