@@ -17,7 +17,7 @@ def DataDir():
   return ''
 
 def Exec(command):
-  subprocess.call('%s/%s' %(basedir, command.replace("'", '')))
+  subprocess.call(command.replace("'", ''))
 
 def FileName(FileFull=''):
   return filename

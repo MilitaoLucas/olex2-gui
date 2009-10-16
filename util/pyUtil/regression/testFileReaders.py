@@ -16,7 +16,10 @@ import sadabs
 class FileReaderTestCase(unittest.TestCase):
   def exercise_FileReader(self, reader, filename, expected):
     FileReader = reader(filename)
-    self.assertEqual(FileReader.cifItems(), expected)
+    if hasattr(FileReader, 'cifItems'):
+      self.assertEqual(FileReader.cifItems(), expected)
+    else:
+      self.assertEqual(FileReader.values(), expected)
     return FileReader
 
   def test_sadabs(self):
@@ -74,6 +77,32 @@ class FileReaderTestCase(unittest.TestCase):
   def test_bruker_saint(self):
     self.exercise_FileReader(
       bruker_saint.reader, 'test_files/saint.ini', {'prog_version': 'V6.02A'})
+
+  def test_lst(self):
+    self.exercise_FileReader(
+      lst_reader.reader, 'test_files/Co110_patt.lst', {
+        'program': 'XS',
+        'wR2': 'n/a',
+        'version': 'SHELXTL Ver. 6.12 W95/98/NT/2000/ME', # bruker XS version
+        'R1': 'n/a',
+        'method': 'Patterson Method'})
+    self.exercise_FileReader(
+      lst_reader.reader, 'test_files/sucrose_direct_methods.lst', {
+        'version': '97-2', # shelxs version
+        'Nqual': -0.81200000000000006,
+        'CFOM': 0.052999999999999999,
+        'program': 'SHELXS',
+        'wR2': 'n/a',
+        'Ralpha': 0.052999999999999999,
+        'method': 'Direct Methods',
+        'R1': 'n/a'})
+    self.exercise_FileReader(
+      lst_reader.reader, 'test_files/Co110_shelxl.lst', {
+        'program': 'XL',
+        'wR2': '0.0819',
+        'version': 'SHELXTL Ver. 6.12 W95/98/NT/2000/ME',
+        'R1': '0.0312',
+        'method': 'Least Squares'})
 
 def TestSuite():
   return unittest.TestLoader().loadTestsFromTestCase(FileReaderTestCase)

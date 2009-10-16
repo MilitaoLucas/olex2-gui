@@ -15,6 +15,7 @@ def setup_paths():
   sys.path.append("%s/util/pyUtil/CctbxLib" %basedir)
   sys.path.append("%s/util/pyUtil/regression" %basedir)
   sys.path.append("%s/util/pyUtil/regression/dummy_olex_files" %basedir)
+  os.environ['PATH'] += ';%s' %basedir
 
 def setup_phil_handler():
   import phil_interface
