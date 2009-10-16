@@ -291,6 +291,51 @@ class Method_shelx(Method):
 		if 'REM' in line:
 			continue
 		sys.stdout.write(line)
+# This is super ugly but what can I do?
+# This really be a function rather than a separate file but I can not get it to work yet?
+    if prgName in ('shelxl', 'xl', 'shelxl_ifc', 'XLMP' ):
+      names = xl_ins_filename.lower()+'.ins'
+      import os, fileinput, string, sys
+      from cctbx.eltbx import henke
+      from cctbx.eltbx import sasaki
+      SFAC_line = []
+      DISP_line = []
+      for line in fileinput.input(names,inplace=1):
+          if 'CELL' in line:
+            wave_length = float(line.split(' ')[1])
+          if 'SFAC' in line:
+            SFAC_line = map(string.strip, line.split(' ')[1:])
+            sys.stdout.write(line)
+            continue
+          if len(SFAC_line) > 0 and 'UNIT' in line and 'DISP' not in line:
+            if round(wave_length, 2) == round(0.71073,2) or round(wave_length, 2)  == round(1.5414, 2) or round(wave_length, 2)  == round(0.56053, 2):
+              print line
+              continue
+            for element in SFAC_line:
+              try:
+                table = henke.table(element)
+              except:
+                try:
+                  table = sasaki.table(element)
+                except:
+                  continue
+              fp_fdp = table.at_angstrom(wave_length)
+              fp = fp_fdp.fp()
+              fdp = fp_fdp.fdp()
+              DISP_line = "DISP %s %.6F %.6F"%(element, fp, fdp)
+              print DISP_line
+            print line
+            SFAC_line = []
+            continue
+          if 'DISP' in line:
+            continue
+          sys.stdout.write(line)
+    if prgName in ('shelxs', 'xs', 'shelxs86'):
+      import fileinput, string, sys
+      for line in fileinput.input(xl_ins_filename.lower()+'.ins',inplace=1):
+        if 'DISP' in line:
+          continue
+        sys.stdout.write(line)
     command = "%s '%s'" % (prgName, xl_ins_filename.lower()) #This is correct!!!!!!
     #sys.stdout.graph = RunPrgObject.Graph()
     if not RunPrgObject.params.snum.shelx_output:
