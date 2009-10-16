@@ -493,9 +493,7 @@ class HistoryLeaf:
 
   def getLeafInfoFromLst(self, filePath):
     try:
-      lst_file = open(filePath)
-      lstValues = lst_reader.reader(lst_file).values()
-      lst_file.close()
+      lstValues = lst_reader.reader(filePath).values()
     except:
       lstValues = {'R1':'','wR2':''}
     try:

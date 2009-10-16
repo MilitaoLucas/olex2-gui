@@ -1,14 +1,20 @@
 # lst_reader.py
 
 class reader:
-  def __init__(self,file_object):
+  def __init__(self, path=None, file_object=None):
     self._values = {}
     found = False
     i = 0
     
-    data = file_object.readlines()
+    assert [path, file_object].count(None) == 1
+    if path is not None:
+      rFile = open(path, 'r')
+      data = rFile.readlines()
+      rFile.close()
+    else:
+      data = file_object.readlines()
     lines = data
-      
+
     header = []
     program = None
     method = None
