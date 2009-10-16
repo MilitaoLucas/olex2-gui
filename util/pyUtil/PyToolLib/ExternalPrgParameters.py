@@ -14,21 +14,21 @@ class ExternalProgramDictionary(object):
   def __init__(self):
     self.programs = {}
     self.counter = 0
-    
+
   def addProgram(self, program):
     program.order = self.counter
     self.programs.setdefault(program.name, program)
     self.counter += 1
-    
+
   def __contains__(self, name):
     if type(name) == str:
       return name in self.programs
     else:
       return name in self.programs.values()
-    
+
   def __iter__(self):
     return self.programs.itervalues()
-  
+
 
 class Program(object):
   def __init__(self, name, program_type, author, reference, execs=None, versions=None):
@@ -40,22 +40,22 @@ class Program(object):
     self.versions = versions
     self.methods = {}
     self.counter = 0
-    
+
   def __contains__(self, name):
     if type(name) == str:
       return name in self.methods
     else:
       return name in self.methods.values()
-  
+
   def __iter__(self):
     return self.methods.itervalues()
-  
+
   def addMethod(self, method):
     method.order = self.counter
     self.methods.setdefault(method.name, method)
     self.counter += 1
-    
-    
+
+
 class Method(object):
   def __init__(self, name, cmd, args, atom_sites_solution=None):
     self.name = name
@@ -65,23 +65,23 @@ class Method(object):
     self.info = '%s-info' %(self.name.lower().replace(' ', '-'))
     self.atom_sites_solution = atom_sites_solution
     self.observer = None
-    
+
   def html_gui(self):
     pass
-  
+
   def run(self, RunPrgObject):
     """Must be redefined in subclass.
-    
+
     It is from within this method that the external program will be run.
     """
     assert 0, 'run must be defined!'
-    
+
   def calculate_defaults(self):
     """Defines controls in Olex2 for each argument in self.args
     """
     for arg in self.args:
       default = arg['default']
-      
+
       global definedControls
       name = arg['name'].replace('.','').lower()
       varName = "settings_%s" %name
@@ -91,7 +91,7 @@ class Method(object):
         definedControls.append(ctrl_name)
         for value in arg['values']:
           OV.SetVar('%s_%s' %(varName, value[0]), value[1]) # Define text box for each value
-      
+
   def getValuesFromFile(self):
     """Gets the value of all arguments in self.args that are present in the
     .ins file and sets the value of the GUI input boxes to reflect this.
@@ -117,7 +117,7 @@ class Method(object):
               OV.SetParam('snum.refinement.max_peaks', val)
             elif value[0] == 'T':
               OV.SetParam('snum.metacif.diffrn_ambient_temperature',
-                        273.0 + float(val.strip('C')))
+                          273.0 + float(val.strip('C')))
           except IndexError:
             OV.SetVar('settings_%s_%s' %(name, value[0]), '')
           count += 1
@@ -130,7 +130,7 @@ class Method(object):
         elif arg['name'] == 'PLAN':
           val = OV.GetParam('snum.refinement.max_peaks')
           OV.SetVar('settings_%s_npeaks' %name, val)
-          
+
   def extraHtml(self):
     """This can be redefined in a subclass to define extra HTML that is to be
     added to the program settings panel.
@@ -158,7 +158,7 @@ class Method_solution(Method):
       args = self.cmd
     if not RunPrgObject.formula or RunPrgObject.formula == "None":
       RunPrgObject.formula = RunPrgObject.params.snum.refinement.original_formula
-      
+
     formula = getFormulaAsDict(RunPrgObject.formula)
     if sum(formula.values()) == 0:
       if OV.HasGUI():
@@ -190,9 +190,9 @@ class Method_solution(Method):
     if RunPrgObject.sg:
       args += "-s=%s " % RunPrgObject.sg
     return args
-  
-  
-  
+
+
+
   def getArgs(self):
     """Gets the value of all the arguments in self.args from Olex2.
     """
@@ -210,7 +210,7 @@ class Method_solution(Method):
             break
         args += '\n'
     return args
-  
+
   def post_solution(self, RunPrgObject):
     """Things to be done after running the solution program.
     """
@@ -225,10 +225,10 @@ class Method_solution(Method):
 class Method_refinement(Method):
   def __init__(self, name, cmd, args, atom_sites_solution=None):
     Method.__init__(self, name, cmd, args, atom_sites_solution)
-    
+
   def getFlack(self):
     return None
-    
+
   def addInstructions(self):
     """Adds instructions to the .ins file so that the file reflects what is selected in the GUI.
     """
@@ -245,7 +245,7 @@ class Method_refinement(Method):
             break
         olx.DelIns(arg['name'])
         OV.AddIns(args)
-  
+
   def pre_refinement(self, RunPrgObject):
     for i in xrange(int(olx.xf_au_GetAtomCount())):
       ret = olx.xf_au_IsPeak(i)
@@ -259,7 +259,7 @@ class Method_refinement(Method):
       RunPrgObject.make_unique_names = True
       #OV.File()
       return
-    
+
     if RunPrgObject.params.snum.refinement.auto.tidy:
       RunPrgObject.doAutoTidyBefore()
     if RunPrgObject.params.snum.refinement.update_weight:
@@ -274,7 +274,7 @@ class Method_refinement(Method):
 class Method_shelx(Method):
   def __init__(self, name, cmd, args, atom_sites_solution=None):
     Method.__init__(self, name, cmd, args, atom_sites_solution)
-  
+
   def run(self, RunPrgObject):
     """Runs any SHELX refinement/solution program
     """
@@ -285,12 +285,12 @@ class Method_shelx(Method):
     xl_ins_filename = RunPrgObject.hkl_src_name
 # This is an ugly fix - but good start
     if 'shelxs86' in prgName:
-        print 'STARTING SHELX86 modifications'
-	import fileinput, string, sys
-	for line in fileinput.input(xl_ins_filename.lower()+'.ins',inplace=1):
-		if 'REM' in line:
-			continue
-		sys.stdout.write(line)
+      print 'STARTING SHELX86 modifications'
+      import fileinput, string, sys
+      for line in fileinput.input(xl_ins_filename.lower()+'.ins',inplace=1):
+        if 'REM' in line:
+          continue
+        sys.stdout.write(line)
 # This is super ugly but what can I do?
 # This really be a function rather than a separate file but I can not get it to work yet?
     if prgName in ('shelxl', 'xl', 'shelxl_ifc', 'XLMP' ):
@@ -301,35 +301,35 @@ class Method_shelx(Method):
       SFAC_line = []
       DISP_line = []
       for line in fileinput.input(names,inplace=1):
-          if 'CELL' in line:
-            wave_length = float(line.split(' ')[1])
-          if 'SFAC' in line:
-            SFAC_line = map(string.strip, line.split(' ')[1:])
-            sys.stdout.write(line)
-            continue
-          if len(SFAC_line) > 0 and 'UNIT' in line and 'DISP' not in line:
-            if round(wave_length, 2) == round(0.71073,2) or round(wave_length, 2)  == round(1.5414, 2) or round(wave_length, 2)  == round(0.56053, 2):
-              print line
-              continue
-            for element in SFAC_line:
-              try:
-                table = henke.table(element)
-              except:
-                try:
-                  table = sasaki.table(element)
-                except:
-                  continue
-              fp_fdp = table.at_angstrom(wave_length)
-              fp = fp_fdp.fp()
-              fdp = fp_fdp.fdp()
-              DISP_line = "DISP %s %.6F %.6F"%(element, fp, fdp)
-              print DISP_line
-            print line
-            SFAC_line = []
-            continue
-          if 'DISP' in line:
-            continue
+        if 'CELL' in line:
+          wave_length = float(line.split(' ')[1])
+        if 'SFAC' in line:
+          SFAC_line = map(string.strip, line.split(' ')[1:])
           sys.stdout.write(line)
+          continue
+        if len(SFAC_line) > 0 and 'UNIT' in line and 'DISP' not in line:
+          if round(wave_length, 2) == round(0.71073,2) or round(wave_length, 2)  == round(1.5414, 2) or round(wave_length, 2)  == round(0.56053, 2):
+            print line
+            continue
+          for element in SFAC_line:
+            try:
+              table = henke.table(element)
+            except:
+              try:
+                table = sasaki.table(element)
+              except:
+                continue
+            fp_fdp = table.at_angstrom(wave_length)
+            fp = fp_fdp.fp()
+            fdp = fp_fdp.fdp()
+            DISP_line = "DISP %s %.6F %.6F"%(element, fp, fdp)
+            print DISP_line
+          print line
+          SFAC_line = []
+          continue
+        if 'DISP' in line:
+          continue
+        sys.stdout.write(line)
     if prgName in ('shelxs', 'xs', 'shelxs86'):
       import fileinput, string, sys
       for line in fileinput.input(xl_ins_filename.lower()+'.ins',inplace=1):
@@ -363,7 +363,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
   """
   def __init__(self, name, cmd, args, atom_sites_solution=None):
     Method_shelx.__init__(self, name, cmd, args, atom_sites_solution)
-  
+
   def pre_refinement(self, RunPrgObject):
     diffrn_ambient_temperature = OV.GetParam('snum.metacif.diffrn_ambient_temperature')
     if diffrn_ambient_temperature is not None:
@@ -384,7 +384,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
     import Analysis
     self.observer = Analysis.ShelXL_graph(RunPrgObject.program, RunPrgObject.method)
     OV.registerCallback("procout", self.observer.observe)
-    
+
   def getFlack(self):
     flack = olx.Lst('flack')
     if flack == "n/a":
@@ -395,22 +395,22 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
 class Method_shelx_direct_methods(Method_shelx_solution):
   def __init__(self, name, cmd, args, atom_sites_solution=None):
     Method_shelx_solution.__init__(self, name, cmd, args, atom_sites_solution)
-    
+
   def post_solution(self, RunPrgObject):
     Method_shelx_solution.post_solution(self, RunPrgObject)
     self.get_XS_TREF_solution_indicators(RunPrgObject)
-    
+
   def get_XS_TREF_solution_indicators(self, RunPrgObject):
     """Gets the TREF solution indicators from the .lst file and prints values in Olex2.
     """
     import lst_reader
     lstPath = "%s/%s.lst" %(OV.FilePath(), OV.FileName())
-    lstValues = lst_reader.reader(open(lstPath)).values()
-    
+    lstValues = lst_reader.reader(path=lstPath).values()
+
     RunPrgObject.Ralpha = lstValues.get('Ralpha','')
     RunPrgObject.Nqual = lstValues.get('Nqual','')
     RunPrgObject.CFOM = lstValues.get('CFOM','')
-    
+
     print RunPrgObject.Ralpha, RunPrgObject.Nqual, RunPrgObject.CFOM
 
 
@@ -615,9 +615,9 @@ def defineExternalPrograms():
            optional=True,
            ),
       #dict(name='PLAN',
-           #values=[['npeaks', ''], ['d1', 0.5], ['d2', 1.5]],
-           #default='false',
-           #),
+      #values=[['npeaks', ''], ['d1', 0.5], ['d2', 1.5]],
+      #default='false',
+      #),
       ),
     atom_sites_solution='direct',
   )
@@ -651,9 +651,9 @@ def defineExternalPrograms():
            optional=True,
            ),
       #dict(name='PLAN',
-           #values=[['npeaks', ''], ['d1', 0.5], ['d2', 1.5]],
-           #default='false',
-           #),
+      #values=[['npeaks', ''], ['d1', 0.5], ['d2', 1.5]],
+      #default='false',
+      #),
       ),
     atom_sites_solution='heavy'
   )
@@ -681,14 +681,14 @@ def defineExternalPrograms():
            default='true',
            optional=True,
            ),
-    ),
+      ),
     #{'name':'SHEL', 'values':['dmax:', 'dmin:0']},
     #{'name':'PATS', 'values':['+np or -dis:100', 'npt:', 'nf:5']},
     #{'name':'GROP', 'values':['nor:99', 'E<sub>g</sub>:1.5', 'd<sub>g</sub>:1.2', 'ntr:99']},
     #{'name':'PSMF', 'values':['pres:3.0', 'psfac:0.34']},
     #{'name':'FRES', 'values':['res:3.0',]},
     #{'name':'ESEL', 'values':['Emin:', 'dlim:1.0']},
-    
+
     #{'name':'DSUL', 'values':['nss:0',]},
     #{'name':'TANG', 'values':['ftan:0.9', 'fex:0.4']},
     #{'name':'NTPR', 'values':['ntpr:100',]},
@@ -711,7 +711,7 @@ def defineExternalPrograms():
            default='true',
            optional=True,
            ),
-   ),
+      ),
     atom_sites_solution='other'
   )
 # Testing sir97 easy mode
@@ -724,7 +724,7 @@ def defineExternalPrograms():
            default='true',
            optional=True,
            ),
-   ),
+      ),
     atom_sites_solution='other'
   )
 
@@ -758,7 +758,7 @@ def defineExternalPrograms():
        'default':'false',
        'optional':True,
        },
-   ),
+      ),
   )
 
   cgls = Method_shelx_refinement(
@@ -785,7 +785,7 @@ def defineExternalPrograms():
        'default':'false',
        'optional':True,
        },
-   ),
+      ),
   )
 
   lbgfs = Method_cctbx_refinement(
@@ -847,7 +847,7 @@ def defineExternalPrograms():
   ShelXD.addMethod(dual_space)
   XM.addMethod(dual_space)
   smtbx_solve.addMethod(charge_flipping)
-  
+
   # define refinement programs
   ShelXL = Program(
     name='ShelXL',
@@ -930,6 +930,6 @@ def getFormulaAsDict(formula):
       print >> sys.stderr, "An error occured in the function getFormulaAsDict.\nFormula: %s, item: %s" %(formula, item)
       sys.stderr.formatExceptionInfo()
   return d
-  
+
 if __name__ == '__main__':
   SPD, RPD = defineExternalPrograms()
