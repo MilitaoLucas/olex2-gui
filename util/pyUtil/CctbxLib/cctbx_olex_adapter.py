@@ -474,6 +474,17 @@ class OlexCctbxGraphs(OlexCctbxAdapter):
   
       elif graph == "sys_absent":
         self.xy_plot = cctbx_controller.sys_absent_intensity_distribution(self.reflections)
+
+      elif graph == "normal_probability":
+        weight = self.olx_atoms.model['weight']
+        params = dict(a=0.1, b=0, c=0, d=0, e=0, f=1./3)
+        for param, value in zip(params.keys()[:len(weight)], weight):
+          params[param] = value
+        weighting = xray.weighting_schemes.shelx_weighting(**params)
+        self.xy_plot = cctbx_controller.normal_probability_plot(
+          self.xray_structure(), self.reflections, weighting,
+        #distribution=cctbx_controller.distributions.students_t_distribution(5),
+        ).xy_plot_info()
     except Exception, err:
       raise Exception, err
     finally:

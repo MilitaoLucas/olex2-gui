@@ -1484,6 +1484,16 @@
 	\>
 \>
 
+<_normal_probability help="Calculates and displays a Normal Probability plot"
+	<body
+		<args
+			<arg1 name="output_csv_file" def="False">
+		\>
+		<cmd 
+			<cmd1 "spy.Normal_probability_plot(%1)">
+		\>
+	\>
+\>
 
 <starter help="Swap between start panels"
 	<body
