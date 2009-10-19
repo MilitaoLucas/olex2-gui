@@ -33,6 +33,8 @@ olx.phil_handler = setup_phil_handler()
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+import variableFunctions
+variableFunctions.InitialiseVariables('startup')
 
 class TestCaseBase(unittest.TestCase):
   def setUp(self):
