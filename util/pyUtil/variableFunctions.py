@@ -1,6 +1,8 @@
 # variableFunctions.py
 
 import os
+import shutil
+import sys
 try:
   import cPickle as pickle # faster C reimplementation of pickle module
 except ImportError:
@@ -74,15 +76,23 @@ def InitialiseVariables(arg):
       OV.SetVar('sample_dir',user_samples_directory)
     else: 
       os.mkdir(user_samples_directory)
-      
+
+    if sys.version_info[0] >= 2 and sys.version_info[1] >=6:
+      ignore_patterns = shutil.ignore_patterns('*.svn')
+    else:
+      ignore_patterns = None # back compatiblity for python < 2.6
+
     samples = os.listdir(svn_samples_directory)
     for sample in samples:
+      if sample == '.svn': continue
       if not os.path.exists('%s/%s' %(user_samples_directory,sample)):
         try:
-          from shutil import copytree
           dirname1 = '%s/%s' %(svn_samples_directory,sample)
           dirname2 = '%s/%s' %(user_samples_directory,sample)
-          copytree(dirname1,dirname2)
+          if ignore_patterns is not None:
+            shutil.copytree(dirname1, dirname2, ignore=ignore_patterns)
+          else:
+            shutil.copytree(dirname1, dirname2)
           OV.SetVar('sample_dir','%s/samples' %OV.DataDir())
         except:
           pass

@@ -14,7 +14,7 @@ def StrDir():
   return '%s/.olex' %tmp_dir
 
 def DataDir():
-  return ''
+  return tmp_dir
 
 def CurrentLanguageEncoding(*args, **kwds):
   return ''
