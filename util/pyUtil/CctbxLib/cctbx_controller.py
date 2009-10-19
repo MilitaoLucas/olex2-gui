@@ -14,6 +14,9 @@ from cctbx.eltbx import sasaki
 from cctbx import adptbx
 from cctbx.array_family import flex
 from cctbx import xray
+from cctbx.xray import weighting_schemes
+from scitbx.math import distributions
+
 #from smtbx.refinement.manager import manager
 
 class empty: pass
@@ -155,7 +158,50 @@ def f_obs_vs_f_calc(model, reflections):
   plot.yLegend = "F obs"
   return plot
 
+class normal_probability_plot(object):
+  def __init__(self, model, reflections, weighting, distribution=None):
+    assert model.scatterers().size() > 0, "model.scatterers().size() > 0"
+    f_sq_obs = reflections.f_sq_obs_filtered
+    f_obs = f_sq_obs.f_sq_as_f()
+    sf = xray.structure_factors.from_scatterers(miller_set=f_obs,cos_sin_table=True)
+    f_calc = sf(model,f_obs).f_calc()
+    f_sq_calc = f_calc.as_intensity_array()
+    if distribution is None:
+      distribution = distributions.normal_distribution()
+    self.info = None
+    ls_function = xray.unified_least_squares_residual(f_sq_obs)
+    ls = ls_function(f_calc, compute_derivatives=False)
+    scale_factor = ls.scale_factor()
+    weighting.observed = f_sq_obs
+    weighting.calculated = f_calc
+    weighting.compute()
+    #
+    observed_deviations = flex.sqrt(weighting.weights) * (
+      f_sq_obs.data() - scale_factor * f_sq_calc.data())
 
+    selection = flex.sort_permutation(observed_deviations)
+    self.x = distribution.quantiles(f_sq_obs.size())
+    self.y = observed_deviations.select(selection)
+    self.indices = f_sq_obs.indices().select(selection)
+    fit = flex.linear_regression(self.x[5:-5], self.y[5:-5])
+    fit.show_summary()
+    assert fit.is_well_defined()
+    self.fit_y_intercept = fit.y_intercept()
+    self.fit_slope = fit.slope()
+
+  def xy_plot_info(self):
+    r = empty()
+    r.title = "Normal probability plot"
+    if (self.info != 0):
+      r.title += ": " + str(self.info)
+    r.x = self.x
+    r.y = self.y
+    r.indices = self.indices
+    r.fit_slope = self.fit_slope
+    r.fit_y_intercept = self.fit_y_intercept
+    r.xLegend = "Expected deviations"
+    r.yLegend = "Observed deviations"
+    return r
 
 class completeness_plot(object):
   def __init__(self, f_obs):

@@ -397,18 +397,21 @@ class Graph(ImageTools):
       
     self.draw.line((x1+2, y1, x2-2, y2), width=5, fill="#eeeeee")
     
-    two_thirds = (self.min_x + (self.max_x - self.min_x) * 0.66)
     if y_intercept >= 0: sign = '+'
     else: sign = '-'
     txt = "y = %.3fx %s %.3f" %(slope,sign,abs(y_intercept))
     
     wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_small)
-    y = (slope * two_thirds + y_intercept) *self.scale_y 
-    x = self.bSides + self.boxXoffset + ((two_thirds * self.scale_x)) + ((0 - self.max_x) * self.scale_x) + (self.delta_x * self.scale_x)
-    top_left = (x,y)
-    IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
-    #self.draw.text((x, y+wY), "%s" %txt, font=self.font_small, fill="#444444")
     
+    if slope > 0 or (self.reverse_x or self.reverse_y):
+      x = self.graph_left + self.imX * 0.1 # write equation top left
+    else:
+      x = self.graph_right - wX - self.imX * 0.1  # write equation top right
+    y = self.graph_top + self.imY * 0.1    
+    top_left = (x,y)
+    IT.write_text_to_draw(
+      self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
+
   def draw_pairs(self, reverse_y=False, reverse_x=False): 
     self.reverse_y = reverse_y
     self.reverse_x = reverse_x
@@ -1646,6 +1649,35 @@ class SystematicAbsencesPlot(Analysis):
     self.graphInfo['marker']['border_colour'] = border_colour
     self.draw_pairs()
 
+class Normal_probability_plot(Analysis):
+  def __init__(self, output_csv_file=False):
+    Analysis.__init__(self)
+    self.item = "Normal_probability_plot"
+    self.graphInfo["Title"] = OV.TranslatePhrase("Normal probability plot")
+    self.graphInfo["pop_html"] = self.item
+    self.graphInfo["pop_name"] = self.item
+    self.graphInfo["TopRightTitle"] = self.filename
+    self.auto_axes = True
+    self.draw_origin = True
+    self.make_normal_probability_plot()
+    self.popout()
+    if output_csv_file in (True, 'true', 'True'):
+      self.output_data_as_csv()
+
+  def make_normal_probability_plot(self):
+    from cctbx_olex_adapter import OlexCctbxGraphs
+    xy_plot = OlexCctbxGraphs('normal_probability').xy_plot
+    self.metadata.setdefault("y_label", xy_plot.yLegend)
+    self.metadata.setdefault("x_label", xy_plot.xLegend)
+    metadata = {}
+    metadata.setdefault("fit_slope", xy_plot.fit_slope)
+    metadata.setdefault("fit_y_intercept", xy_plot.fit_y_intercept)
+    data = Dataset(
+      xy_plot.x, xy_plot.y, indices=xy_plot.indices, metadata=metadata)
+    self.data.setdefault('dataset1', data)
+    self.make_empty_graph(axis_x = True)
+    self.draw_pairs()
+
 
 class Fobs_Fcalc_plot(Analysis):
   def __init__(self, output_csv_file=False):
@@ -1728,6 +1760,7 @@ OV.registerFunction(CumulativeIntensityDistribution)
 OV.registerFunction(CompletenessPlot)
 OV.registerFunction(SystematicAbsencesPlot)
 OV.registerFunction(Fobs_Fcalc_plot)
+OV.registerFunction(Normal_probability_plot)
 
 def array_scalar_multiplication(array, multiplier):
   return [i * multiplier for i in array]
@@ -1802,6 +1835,7 @@ def makeReflectionGraphGui():
            'systematic_absences':'run systematic_absences GetState(TICK_SYSTEMATIC_ABSENCES_OUTPUT_CSV)',
            'fobs_fcalc':'run fobs_fcalc GetState(TICK_FOBS_FCALC_OUTPUT_CSV)',
            'completeness':'run completeness GetValue(SPIN_COMPLETENESS_REFLECTIONS_PER_BIN) GetState(TICK_COMPLETENESS_OUTPUT_CSV)',
+           'normal_probability':'run _normal_probability GetState(TICK_NORMAL_PROBABILITY_OUTPUT_CSV)',
            }
 
   if GuiGraphChooserComboExists:

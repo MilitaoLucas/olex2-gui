@@ -536,6 +536,15 @@ graphs {
         .type = bool
         .caption = "%Output% csv"
     }
+    normal_probability
+      .short_caption = "Normal Probability Plot"
+      .caption = "Normal Probability Plot"
+      .help = "normal-probability"
+    {
+      output_csv_file = False
+        .type = bool
+        .caption = "%Output% csv"
+    }
   }
 }
 
