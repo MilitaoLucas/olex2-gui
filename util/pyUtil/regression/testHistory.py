@@ -2,9 +2,10 @@ import unittest
 import glob
 import os
 import shutil
-from libtbx.test_utils import show_diff
 
 import test_utils
+
+from libtbx.test_utils import show_diff
 
 import History
 from History import hist

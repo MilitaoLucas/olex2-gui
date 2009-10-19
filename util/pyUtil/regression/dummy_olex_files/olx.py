@@ -16,6 +16,9 @@ def StrDir():
 def DataDir():
   return ''
 
+def CurrentLanguageEncoding(*args, **kwds):
+  return ''
+
 def Exec(command):
   subprocess.call(command.replace("'", ''))
 
@@ -44,6 +47,12 @@ def HasGUI():
 def HKLSrc(filefull=None):
   if filefull is None:
     return '%s/%s.hkl' %(tmp_dir, filename)
+
+def HtmlPanelWidth(width='400'):
+  return width
+
+def HtmlReload(*args, **kwds):
+  pass
 
 def Lst(item):
   return 'n/a'
@@ -104,7 +113,7 @@ def WaitFor(*args, **kwds):
 
 regression_dir = os.getcwd()
 basedir = os.path.abspath('../../..')
-tmp_dir = None
+tmp_dir = ''
 filename = 'Co110'
 fileext = 'res'
 has_gui='true'

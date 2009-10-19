@@ -12,19 +12,12 @@ except:
 class ArgumentParser(object):
 
   def __init__(self, args=None, tool_arg=None):
-    try:
-      self.basedir = OV.BaseDir()
-      self.filefull = OV.FileFull()
-      self.filepath = OV.FilePath()
-      self.filename = OV.FileName()
-      self.datadir = OV.DataDir()
-    except:
-      self.basedir = r"C:\Documents and Settings\Horst\Desktop\olex"
-      self.filefull = r"C:\Documents and Settings\Horst\Desktop\olex\sample_data\sucrose\sucrose.lst"
-      self.filepath = r"C:\Documents and Settings\Horst\Desktop\olex\sample_data\sucrose"
-      self.filename = "sucrose"
-      self.datadir = r"C:\Documents and Settings\Horst\Application Data\Olex2"
-      
+    self.basedir = OV.BaseDir()
+    self.filefull = OV.FileFull()
+    self.filepath = OV.FilePath()
+    self.filename = OV.FileName()
+    self.datadir = OV.DataDir()
+
   def getVariables(self,whichVariables):
     dictionary = VF.getVVD(whichVariables)
     for item in dictionary.items():
