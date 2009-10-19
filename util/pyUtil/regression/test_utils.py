@@ -34,7 +34,6 @@ olx.phil_handler = setup_phil_handler()
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import variableFunctions
-variableFunctions.InitialiseVariables('startup')
 
 class TestCaseBase(unittest.TestCase):
   def setUp(self):
@@ -46,6 +45,7 @@ class TestCaseBase(unittest.TestCase):
       if os.path.isfile('test_files/%s' %f):
         shutil.copy('test_files/%s' %f, self.tmp)
     os.mkdir('%s/.olex' %self.tmp)
+    variableFunctions.InitialiseVariables('startup')
 
   def tearDown(self):
     if os.path.isdir(self.tmp):

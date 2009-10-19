@@ -146,6 +146,7 @@ def getLocalDictionary(whichDict):
 		
 	pfile = open(picklePath)
 	dictionary = pickle.load(pfile)
+	pfile.close()
 	if whichDict == 'diffractometers':
 		dictionary = convertDiffractometerDictionary(dictionary)
 		
