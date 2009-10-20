@@ -15,7 +15,6 @@ from cctbx import adptbx
 from cctbx.array_family import flex
 from cctbx import xray
 from cctbx.xray import weighting_schemes
-from scitbx.math import distributions
 
 #from smtbx.refinement.manager import manager
 
@@ -160,6 +159,7 @@ def f_obs_vs_f_calc(model, reflections):
 
 class normal_probability_plot(object):
   def __init__(self, model, reflections, weighting, distribution=None):
+    from scitbx.math import distributions
     assert model.scatterers().size() > 0, "model.scatterers().size() > 0"
     f_sq_obs = reflections.f_sq_obs_filtered
     f_obs = f_sq_obs.f_sq_as_f()
@@ -184,10 +184,13 @@ class normal_probability_plot(object):
     self.y = observed_deviations.select(selection)
     self.indices = f_sq_obs.indices().select(selection)
     fit = flex.linear_regression(self.x[5:-5], self.y[5:-5])
+    corr = flex.linear_correlation(self.x[5:-5], self.y[5:-5])
     fit.show_summary()
     assert fit.is_well_defined()
     self.fit_y_intercept = fit.y_intercept()
     self.fit_slope = fit.slope()
+    self.correlation = corr.coefficient()
+    print "coefficient: %f" %self.correlation
 
   def xy_plot_info(self):
     r = empty()
