@@ -14,7 +14,10 @@ def m(*args, **kwds):
   pass
 
 def f(*args, **kwds):
-  pass
+  if args[0] == 'sg(%h)':
+    return "P1"
+  else:
+    pass
 
 def writeImage(filename, data, isPersistent=False):
   if not os.path.isdir('%s/VFS' %olx.tmp_dir):

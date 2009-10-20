@@ -13,7 +13,7 @@ $spy.MakeElementButtonsFromFormula()
 			width=18
 			height=$GetVar(gui_html_checkbox_height)
 			bgcolor=$GetVar(gui_html_table_firstcol_colour)
-			name='SNUM_REFINEMENT_GRAPHICAL_OUTPUT'
+			name='USER_AUTO_REFINE_AFTER_ANIS'
 			checked="$spy.GetParam(user.auto_refine_after_anis)"
 			oncheck='spy.SetParam(user.auto_refine_after_anis,true)>>echo "Automatically refine after anis/isot or HADD: True'
 			onuncheck='spy.SetParam(user.auto_refine_after_anis,false)>>echo "Do not automatically refine after anis/isot or HADD: True'
