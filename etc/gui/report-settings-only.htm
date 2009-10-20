@@ -1,13 +1,11 @@
 <font color=$getVar(gui_html_font_colour)  size=$getVar(gui_html_font_size)>
 
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$getVar(gui_html_table_bg_colour)">
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$getVar(gui_html_table_firstcol_colour)">
 
 <tr>
 	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-	<td width='50%' align='left' colspan='1'>
-		<a href="spy.CifTools()>>spy.MetaCif()>>updatehtml" target="View cif items to be added"><b>View cif info</b></a>
-	</td>
-	<td width='50%' align='left' colspan='1'>
+	<td colspan=2>
+		<a href="spy.CifTools()>>spy.MetaCif()>>updatehtml" target="View cif items to be added"><b>View cif info</b></a> | 
 		<a href="spy.run_cif_info>>
 if file.Exists('FilePath()\FileName().cif') then None else 'spy.SetParam(snum.refinement.method,Least Squares)'>> 
 if file.Exists('FilePath()\FileName().cif') then None else 'DelIns ACTA'>> 
@@ -15,50 +13,65 @@ if file.Exists('FilePath()\FileName().cif') then None else 'AddIns ACTA'>>
 if file.Exists('FilePath()\FileName().cif') then None else 'refine'>>
 spy.MetaCif(True,True)>>
 "
-       target="Merge with cif file"><b>Merge cif</b></a>
+       target="Merge with cif file"><b>Merge cif</b></a> | 
+		<a href="exec -o getvar(defexplorer) 'file.ospath(basedir()/etc/CIF/styles)'" target="Browse for styles and templates"><b>Change Styles or Templates</b></a> | 
 	</td>
 </tr>
 
-<tr VALIGN='center' ALIGN='left' NAME='SNUM_REPORT_TITLE'>
+<tr VALIGN='center' ALIGN='left' NAME='SNUM_REPORT_TITLE' valign='center'>
 	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-	<td VALIGN='center' width="60%" colspan=1>
-		<b>%Report Title%</b>
-	</td>
-	<td VALIGN='center' colspan=1>
-		<font size='2'>
-			<input
-				type='text',
-				width=120,
-				height="17"
-				bgcolor="GetVar(gui_html_input_bg_colour)"
-				name='SET_SNUM_REPORT_TITLE',
-				value='$spy.GetParam(snum.report.title)'
-				label='',
-				onleave="spy.SetParam(snum.report.title,GetValue(SET_SNUM_REPORT_TITLE))"
-			>
-		</font>
-	</td>
-</tr>
+	<td colspan=2>
+		<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+		  <tr>
+				<td>
+					<b>%Title%</b>
+				</td>
+				<td>
+					<input
+						type='text',
+						width="$eval((htmlpanelwidth()-160)/3),
+						valign='center'
+						height="17"
+						bgcolor="GetVar(gui_html_input_bg_colour)"
+						name='SET_SNUM_REPORT_TITLE',
+						value='$spy.GetParam(snum.report.title)'
+						onleave="spy.SetParam(snum.report.title,GetValue(SET_SNUM_REPORT_TITLE))"
+					>
+				<td>
+					<b>%Style%</b>
+				</td>	
+				<td>
+					<input
+						type='combo',
+						width="$eval((htmlpanelwidth()-160)/3),
+						height="17"
+						bgcolor="GetVar(gui_html_input_bg_colour)"
+						name='SET_USER_REPORT_STYLE',
+						value='$spy.GetParam(user.report_style)'
+						items='spy.getStylesList()'
+						valign='center'
+						onchange="spy.SetParam(user.report_style,GetValue(SET_USER_REPORT_STYLE))"
+					>
+				</td>
+				<td>
+					<b>%Template%</b>
+				</td>	
+				<td>
+					<input
+						type='combo',
+						width="$eval((htmlpanelwidth()-160)/3),
+						height="17"
+						bgcolor="GetVar(gui_html_input_bg_colour)"
+						name='SET_USER_REPORT_TEMPLATE',
+						value='$spy.GetParam(user.report_template)'
+						items='spy.getTemplatesList()'
+						valign='center'
+						onchange="spy.SetParam(user.report_template,GetValue(SET_USER_REPORT_TEMPLATE))"
+					>
+				</td>
 
-<tr VALIGN='center' ALIGN='left' NAME='USER_REPORT_STYLE'>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-	<td VALIGN='center' width="60%" colspan=1>
-		<b>%Report Style%</b>
-	</td>
-	<td VALIGN='center' colspan=1>
-		<font size='2'>
-			<input
-				type='combo',
-				width=120,
-				height="17"
-				bgcolor="GetVar(gui_html_input_bg_colour)"
-				name='SET_USER_REPORT_STYLE',
-				value='$spy.GetParam(user.report_style)'
-				items='spy.getStylesList()'
-				label='',
-				onchange="spy.SetParam(user.report_style,GetValue(SET_USER_REPORT_STYLE))"
-			>
-		</font>
+				</tr>
+		</table>
 	</td>
 </tr>
 
