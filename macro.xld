@@ -56,7 +56,7 @@
 			<cmd10 "SetVar(SlideQPeaksVal,0)">
 			<cmd11 XXX="ceiling on">
 			<cmd12 "storeparam startup filefull() true">
-			<cmd13 "spy.SetParam(snum.refinement.sg,sg(%n))">
+			<cmd13 "if strcmp(%4,filename()) then none else 'spy.SetParam(snum.refinement.sg,sg(%n))'">
 			<cmd1 "spy.setAllMainToolbarTabButtons()">
 			<cmd25 "if strcmp(%4,filename()) then none else 'if html.IsPopup(wilson) then wp'">
 			<cmd15 XXX="if strcmp(%4,filename()) then none else 'spy.run_sNumTitle()'">
@@ -69,8 +69,6 @@
 			<cmd19 "if and(isplugininstalled(plugin-brukersaint),IsFileType('p4p')) then BSINI else none">			
 			<cmd20 cmd1="if strcmp(%4,filename()) then none else 'clear'">
 			<cmd23 "syncbc">
-			<cmd24 "spy.reset_file_in_OFS(solution_image.htm)">
-			<cmd24 "spy.reset_file_in_OFS(refinement_image.htm)">
 			<cmd25 "if strcmp(%4,filename()) then updatehtml else htmlreload">
 			<cmd26 XXX="fade 1 0 -0.1">
 			<cmd27 XXX='waitfor fade'>
@@ -1392,6 +1390,15 @@
 		\>
 	\>
 \>
+
+<autorefine help="Refines only if the user.auto_refine_after_anis parameter is set to True"
+	<body
+		<cmd
+			<cmd1 "if spy.GetParam(user.auto_refine_after_anis) then refine">
+		\>
+	\>
+\>
+
 
 <setup help="Setup Wizard for Olex2"
 	<body

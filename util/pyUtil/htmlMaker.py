@@ -676,31 +676,26 @@ def weightGuiDisplay():
       html_scheme = retVal.strip("| ")
     else:
       html_scheme = current_weight
+      
+    d = {'ctrl_name':'SET_SNUM_REFINEMENT_UPDATE_WEIGHT',
+         'checked':'$spy.GetParam(snum.refinement.update_weight)',
+         'oncheck':'spy.SetParam(snum.refinement.update_weight,true)',
+         'onuncheck':'spy.SetParam(snum.refinement.update_weight,false)',
+         'value':'',
+         }
+    box = htmlTools.make_tick_box_input(d) 
+ 
     
     txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update") 
     txt_Weight = OV.TranslatePhrase("Weight")
     html = '''
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_UPDATE_WEIGHT'>
-	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-	<td VALIGN='right' colspan=3>
-		<b><a target="%s" href="weight">%s: %s</a></b>
-	</td>
-	<td VALIGN='center' ALIGN='right'  colspan=1>
-		<font size='2'>
-			<input
-				type='checkbox'
-				width=12
-				height=12
-				name='SET_SNUM_REFINEMENT_UPDATE_WEIGHT'
-				checked="$spy.GetParam(snum.refinement.update_weight)"
-				oncheck='spy.SetParam(snum.refinement.update_weight,true)'
-				onuncheck='spy.SetParam(snum.refinement.update_weight,false)'
-				value=''
-			>&nbsp;
-		</font>
-	</td>
+  <td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+  <td VALIGN='right' colspan=3>
+    <b><a target="%s" href="weight">%s: %s</a></b></td>
+    <td VALIGN='center' ALIGN='right' colspan=1>%s</td>
 </tr>
-    ''' %(txt_tick_the_box, txt_Weight, html_scheme)
+    ''' %(txt_tick_the_box, txt_Weight, html_scheme, box)
       
     return html
   except:

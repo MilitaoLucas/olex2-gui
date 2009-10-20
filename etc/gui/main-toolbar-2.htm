@@ -1,17 +1,47 @@
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="0" cellspacing="1">
-<tr>
-<td colspan='3' align='left'>
+<table border="0" width="100%" cellpadding="1" cellspacing="1">
+<tr valign='center' bgcolor=red>
+
+
+<td width=65% align='left' bgcolor="$getVar(gui_html_table_firstcol_colour)">
 $spy.MakeElementButtonsFromFormula()
 </td>
-<td align = 'right'>
-		<a href="anis>>echo 'Selected (or all, if none selected) atoms set to anistoropic'>>refine"
-		target="%anis-target% ">
-		<zimg border="0" src="gui/images/toolbar-anis.png"></a> 
+<td align='right' valign='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
 
-		<a href="isot>>echo 'Selected (or all, if none selected) atoms set to isotropic.'>>refine"
+
+		<input
+			type='checkbox'
+			width=18
+			height=$GetVar(gui_html_checkbox_height)
+			bgcolor=$GetVar(gui_html_table_firstcol_colour)
+			name='SNUM_REFINEMENT_GRAPHICAL_OUTPUT'
+			checked="$spy.GetParam(user.auto_refine_after_anis)"
+			oncheck='spy.SetParam(user.auto_refine_after_anis,true)>>echo "Automatically refine after anis/isot or HADD: True'
+			onuncheck='spy.SetParam(user.auto_refine_after_anis,false)>>echo "Do not automatically refine after anis/isot or HADD: True'
+			target="Automatically refine if anis/isot or HADD is changed"
+			value=''
+		>
+</td>
+<td align='right' valign='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+
+		<a href="showH a true>>HADD>>autorefine" target="Add Hydrogen">
+		<zimg border="1" src="element-AddH.png"></a>
+
+		<a href="anis>>echo 'Selected (or all, if none selected) atoms set to anistoropic'>>autorefine"
+		target="%anis-target% ">
+		<zimg border="1" src="gui/images/toolbar-anis.png"></a>
+
+		<a href="isot>>echo 'Selected (or all, if none selected) atoms set to isotropic.'>>autorefine"
 		target="%isot-target% ">
-		<zimg border="0" src="gui/images/toolbar-isot.png"></a>
+		<zimg border="1" src="gui/images/toolbar-isot.png"></a>
 
 </td>
 </tr>
+
+<!--
+<tr>
+	<td bgcolor=#ababab>
+	</td>
+	<td bgcolor=#ababab>
+	</tr>
+-->
 </table>

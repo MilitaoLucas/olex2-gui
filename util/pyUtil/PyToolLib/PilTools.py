@@ -55,9 +55,9 @@ class ButtonMaker(ImageTools):
       font_name = self.gui_image_font_name
     if self.gui_button_font_name:
       font_name = self.gui_button_font_name
-    icon_width = OV.FindValue('gui_icon_width', 20)  
-    width = int(icon_width * 1.1)
-    height = int(icon_width * 0.9)
+    icon_height = int(OV.FindValue('gui_html_icon_size')) * 0.9
+    height = int(icon_height)
+    width = int(icon_height * 1.1)
     
     font_colours = {'H':(220,220,220),'C':(100,100,100),'N':(0,80,180),'O':(230,0,5),'AddH':(50,255,50),'-H':(230,0,5), }
     
@@ -767,7 +767,7 @@ class sNumTitle(ImageTools):
         raise ex
     image = self.sNumTitleStyle1(items)
      
-    name = r"gui/images/sNumTitle.png"
+    name = r"sNumTitle.png"
     OlexVFS.save_image_to_olex(image, name, 1)
 
 
@@ -2088,7 +2088,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       font_name = "%s Bold" %font_name
       
     settings_button_width = 0
-    cbtn_buttons_height = 20
+    cbtn_buttons_height = 22
     
     all_cbtn_buttons = {
         'image_prefix':'cbtn',
