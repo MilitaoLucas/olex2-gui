@@ -432,7 +432,7 @@ def MakeElementButtonsFromFormula():
     
   retStr += '''
 <a href="if strcmp(sel(),'') then 'mode name -t=ChooseElement()' else 'name sel ChooseElement()" target="Chose Element from the periodic table">
-<zimg border="0" src="element-....png"></a>&nbsp;
+<zimg border="0" src="element-....png"></a>
 '''
   btn_dict.setdefault('Table',
                       {
@@ -446,10 +446,10 @@ def MakeElementButtonsFromFormula():
                       })
   
   hname = 'AddH'
-  retStr += ''' 
-<a href="showH a true>>HADD>>refine" target="Add Hydrogen">
-<zimg border="0" src="element-%s.png"></a>
-''' %hname
+#  retStr += ''' 
+#<a href="showH a true>>HADD>>refine" target="Add Hydrogen">
+#<zimg border="0" src="element-%s.png"></a>
+#''' %hname
   
   btn_dict.setdefault('ADDH',
                       {
@@ -1088,28 +1088,33 @@ def updateACF(force=False):
   institution = keyname.split("-")[0]
   type_of_key = keyname.split("-")[-1]
   
-  url = "http://www.olex2.org/odac/KeyGen/update_distro"
-  values = {'__ac_password':password,
-            '__ac_name':username,
-            'institution':institution,
-            'olex2Tag':olex2_tag,
-            'typeOfKey':type_of_key,
-            'computerName':computer_name,
-            'macAddress':mac_address,
-            }
-  data = urllib.urlencode(values)
-  req = urllib2.Request(url)
-  response = urllib2.urlopen(req,data)
-  #response = response.read()
-  
+  for mac_address in OV.GetMacAddress():
+    url = "http://www.olex2.org/odac/update"
+    values = {'__ac_password':password,
+              '__ac_name':username,
+              'context':"None",
+              'institution':institution,
+              'olex2Tag':olex2_tag,
+              'typeOfKey':type_of_key,
+              'computerName':computer_name,
+              'macAddress':mac_address
+              }
+    data = urllib.urlencode(values)
+    print data
+    req = urllib2.Request(url)
+    response = urllib2.urlopen(req,data)
+    f = response.read()
+    if f:
+      break
+
   new = True
+  
+  if not f:
+    print "Updating has failed, previous files will be used"
+    return
   
   if new:
     p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], olex2_tag)
-    f = response.read()
-    if not f:
-      print "Updating has failed, previous files will be used"
-      return
     cont = GetHttpFile(f, force=True, fullURL = True)
     if cont:
       name = "AutoChem Updater.exe"
