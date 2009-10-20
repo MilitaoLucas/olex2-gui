@@ -9,4 +9,7 @@ def FindValue(variable, default=u''):
 def SetVar(variable, value):
   _variables[variable] = value
 
+def Translate(txt):
+  return txt
+  
 _variables = {}

@@ -28,7 +28,7 @@ class Skin():
     self.sNumTitle_instance = PilTools.sNumTitle()
     #self.adjust_font_size_for_ppi()
     
-  def run_skin(self, f, args):
+  def run_skin(self, f, args=None):
     if f == 'timage':
       self.timage_instance.run_timage()
     elif f == 'sNumTitle':
