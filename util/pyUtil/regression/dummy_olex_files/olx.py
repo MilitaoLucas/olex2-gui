@@ -16,6 +16,9 @@ def StrDir():
 def DataDir():
   return tmp_dir
 
+def CurrentLanguage():
+  return "English"
+
 def CurrentLanguageEncoding(*args, **kwds):
   return ''
 
@@ -30,6 +33,9 @@ def FilePath(FileFull=''):
 
 def FileFull():
   return '%s/%s.%s' %(tmp_dir, filename, fileext)
+
+def FileExt():
+  return 'res'
 
 def file_Copy(copy_from, copy_to):
   assert os.path.isfile(copy_from)
