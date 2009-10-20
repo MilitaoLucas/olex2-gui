@@ -560,8 +560,12 @@ user {
     .expert_level = 1
   report_style = default
     .type = str
+  report_template = default
+    .type = str
   report_journal_style = rsc
     .type = str
+  auto_refine_after_anis = True
+    .type = bool 
 }
 
 cctbx {
