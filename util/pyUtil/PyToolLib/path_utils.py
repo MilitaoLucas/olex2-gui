@@ -50,7 +50,9 @@ Current cctbx build: '%s'
     saved_cwd = os.getcwd()
     os.chdir(build_path)
     sys.argv = ['%s/libtbx/configure.py' % cctbxSources, 'smtbx', 'iotbx']
-    execfile(sys.argv[0])
+    #execfile(sys.argv[0])
+    import libtbx.configure
+    libtbx.configure.run()
     os.chdir(saved_cwd)
     import libtbx.load_env
   sys.path.extend(libtbx.env.pythonpath)
