@@ -459,11 +459,11 @@ def make_combo_text_box(d):
 
 def make_tick_box_input(d):
   name = d.get('ctrl_name')
-  dic = {'height':'GetVar(gui_html_checkbox_height)',
-         'bgcolor':'GetVar(gui_html_input_bg_colour)',
-         'fgcolor':'GetVar(gui_html_input_fg_colour)',
+  dic = {'height':'$GetVar(gui_html_checkbox_height)',
+         'bgcolor':'$GetVar(gui_html_table_bg_colour)',
+         'fgcolor':'$GetVar(gui_html_font_colour)',
          'value':'$spy.GetParam_as_string(%(varName)s)',
-         'width':'45',
+         'width':'$GetVar(gui_html_checkbox_height)',
          'onchange':'',
          'value':'%s '%name,
          'oncheck':'',
@@ -480,13 +480,15 @@ def make_tick_box_input(d):
   width='%(width)s'
   height='%(height)s'
   name='%(ctrl_name)s'
+  bgcolor='%(bgcolor)s'
+  fgcolor='%(fgcolor)s'
   %(state)s
   oncheck='%(oncheck)s'
   onuncheck='%(onuncheck)s'
   value='%(value)s'
   %(manage)s
   data='%(data)s'
-  >&nbsp;
+  >
 """ %dic
   return html
 
@@ -741,8 +743,17 @@ def getStylesList():
   exclude = ("rsc.css", "thesis.css", "custom.css")
   stylesList = ";".join(style[:-4] for style in styles
                         if style not in exclude and style.endswith('.css'))
-  return "default;" + stylesList
+  return stylesList
 OV.registerFunction(getStylesList)
+
+def getTemplatesList():
+  templates = os.listdir("%s/etc/CIF/styles" %OV.BaseDir())
+  exclude = ("footer.htm")
+  templatesList = ";".join(template[:-4] for template in templates
+                        if template not in exclude and template.endswith('.htm'))
+  return templatesList
+OV.registerFunction(getTemplatesList)
+
 
 
 def getPopBoxPosition():
