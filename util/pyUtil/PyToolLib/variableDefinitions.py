@@ -33,6 +33,8 @@ def guiVariables():
     gui_html_font_size=2,
     gui_html_code_bg_colour="#ffffdd",
     
+    gui_html_icon_size='20',
+    
     gui_image_font_name='Vera',
     gui_timage_colour='#6464a0',
     gui_timage_font_colour='#ff0000',

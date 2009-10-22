@@ -485,6 +485,10 @@ class OlexFunctions(inheritFunctions):
   def GetRefinementModel(self,calculate_connectivity=False):
     return olex_core.GetRefinementModel(calculate_connectivity)
   
+  def GetCurrentSelection(self,calculate_connectivity=False):
+    res = olx.Info()
+    return res
+  
   def GetTag(self):
     try:
       rFile = open("%s/olex2.tag" %self.BaseDir(),'r')
@@ -519,8 +523,7 @@ class OlexFunctions(inheritFunctions):
     if mac == "":
       mac = olx.GetMAC()
       mac = mac.split(";")
-      #mac = mac[0]
-      #self.SetParam('olex2.mac_address',mac)
+    #mac=['XX-24-E8-00-37-08','00-24-E8-00-37-08']  testing with a bogous mac address
     return mac   
   
   def GetComputername(self):
