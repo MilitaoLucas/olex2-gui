@@ -1353,6 +1353,10 @@ def StoreSingleParameter(var, args):
 OV.registerMacro(StoreSingleParameter, "")
 
 
+def GetCurrentSelection():
+  return OV.GetCurrentSelection()
+OV.registerFunction(GetCurrentSelection)
+
 
 
 if not haveGUI:
