@@ -17,6 +17,7 @@ table.CifTable
 		mso-bidi-language:#0400;}
 	}
 
+	
 table.CifTable td
 	{
 		mso-height-rule:exactly;
@@ -27,6 +28,12 @@ table.CifTable caption
 		margin-left:0em;
 		margin-right:0em;
 	}
+
+table.CifTable td.leftcol
+	{
+		color:green;
+		padding-right:3em;
+
 	
 p.chemComm
  {
