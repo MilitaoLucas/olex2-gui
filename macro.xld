@@ -53,13 +53,13 @@
       <cmd8  XXX='waitfor fade'>
       <cmd9  "@reap '%1' %2">
       <cmd10 "spy.LoadStructureParams()">
-      <cmd10 "SetVar(SlideQPeaksVal,0)">
-      <cmd11 XXX="ceiling on">
-      <cmd12 "storeparam startup filefull() true">
-      <cmd13 "if strcmp(%4,filename()) then none else 'spy.SetParam(snum.refinement.sg,sg(%n))'">
-      <cmd1 "spy.setAllMainToolbarTabButtons()">
-      <cmd25 "if strcmp(%4,filename()) then none else 'if html.IsPopup(wilson) then wp'">
-      <cmd15 XXX="if strcmp(%4,filename()) then none else 'spy.run_sNumTitle()'">
+      <cmd11 "SetVar(SlideQPeaksVal,0)">
+      <cmd12 XXX="ceiling on">
+      <cmd13 "storeparam startup filefull() true">
+      <cmd14 "if strcmp(%4,filename()) then none else 'spy.SetParam(snum.refinement.sg,sg(%n))'">
+      <cmd15 "spy.setAllMainToolbarTabButtons()">
+      <cmd16 "if strcmp(%4,filename()) then none else 'if html.IsPopup(wilson) then wp'">
+      <cmd17 XXX="if strcmp(%4,filename()) then none else 'spy.run_sNumTitle()'">
 
   <cmd15 "spy.run_skin sNumTitle">
 

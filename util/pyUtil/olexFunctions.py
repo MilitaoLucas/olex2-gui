@@ -18,7 +18,7 @@ else:
 
 class OlexFunctions(inheritFunctions):
   def __init__(self):
-    if HasGUI != "false":
+    if HasGUI:
       import olex_gui
       self.olex_gui = olex_gui
 
@@ -532,9 +532,7 @@ class OlexFunctions(inheritFunctions):
   def GetUsername(self):
     return os.getenv('USERNAME')
 
-  def Refresh(self):
-    olx.Refresh()
-  
+ 
   def setDisplayQuality(self, q=None):
     if not q:
       q = self.GetParam('snum.display_quality')
