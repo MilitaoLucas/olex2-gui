@@ -3,8 +3,6 @@
 """ Olex 2 distro management """
 # these to specify to created separate zip files
 plugins = ('MySQL', 'brukersaint', 'ODSkin', 'BNSkin', 'STOESkin', 'HPSkin', 'Batch', 'Crypto', 'ODAC', 'Headless', 'Olex2Portal') 
-# file name aliases
-web_for_working = {'olex2.exe': 'olex2.dll', 'launch.exe': 'olex2.exe'}
 #available ports
 # alteartions for binary files : name (properties...), olex-port MUST be specified for non-portable files
 mac_port_name = 'port-mac-intel-py26'
@@ -19,6 +17,10 @@ win_port_name = 'port-win32-portable'
 win_sse2_port_name = 'port-win32'
 win_sse2_port_zip_name = 'olex2.zip'
 win_sse2_port_prefix = None
+
+win64_port_name = 'port-win64'
+win64_port_zip_name = 'olex2-x64.zip'
+win64_port_prefix = None
 
 win_sse_port_name = 'port-win32-sse'
 win_sse_port_zip_name = 'olex2-sse.zip'
@@ -37,9 +39,8 @@ distro_zips = (
 
 alterations = {
   #windows installer files
-  'launch.exe': ('olex-install', 'olex-port', win_port_name),
   'installer.exe': ('olex-top',), #mind the comma!
-  'vcredist_x86.exe': ('olex-install',),
+  'installer_64.exe': ('olex-top',),
   #mac
   'olex2-mac.zip': ('olex-port', mac_port_name, 'action:extract', 'action:delete'),
   'unirun-mac.zip': ('olex-port', mac_port_name, 'action:extract', 'action:delete'),
@@ -52,6 +53,7 @@ alterations = {
   'python26-suse101x32.zip': ('olex-port', suse_port_name, 'action:extract', 'action:delete'),
   'lib-suse101x32.zip': ('olex-port', suse_port_name, 'action:extract', 'action:delete'),
   #windows 
+  'launch_exe.zip': ('olex-port', win_port_name,  'action:extract', 'action:delete'),
   'python26.zip': ('olex-port', win_port_name, 'action:extract', 'action:delete'),
   #SSE2
   'cctbx.zip': ('olex-port', win_sse2_port_name, 'action:extract', 'action:delete'),
@@ -59,6 +61,11 @@ alterations = {
   #windows SSE vc SSE2
   'cctbx_sse.zip': ('olex-port', win_sse_port_name, 'action:extract', 'action:delete'),
   'olex2_exe_sse.zip': ('olex-port', win_sse_port_name, 'action:extract', 'action:delete'),
+  #windows 64
+  'launch_exe_64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
+  'python26_64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
+  'cctbx_64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
+  'olex2_exe_64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
   #portables
   'olex2_fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
   'fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
@@ -79,13 +86,22 @@ set(  ['olex2_fonts.zip',
 win_sse2_zip_files = \
 set(  ['cctbx.zip',      #cctbx/cctb_sources,...
       'python26.zip',    #Pyhton26/..., ..., + python26.dll!!!
-      'olex2_exe.zip'    #olex2.dll, it will be veryfied first of all
+      'olex2_exe.zip',   #olex2.dll, it will be veryfied first of all
+      'launch_exe.zip'   #olex2.exe
       ]    
    ) | portable_zip_files
 win_sse_zip_files = \
-set(  ['cctbx_sse.zip',      #cctbx/cctb_sources,...
-      'python26.zip',    #Pyhton26/..., ..., + python26.dll!!!
-      'olex2_exe_sse.zip'    #olex2.dll, it will be veryfied first of all
+set(  ['cctbx_sse.zip',     #cctbx/cctb_sources,...
+      'python26.zip',       #Pyhton26/..., ..., + python26.dll!!!
+      'olex2_exe_sse.zip',  #olex2.dll, it will be veryfied first of all
+      'launch_exe.zip'      #olex2.exe
+      ]    
+   ) | portable_zip_files
+win64_zip_files = \
+set(  ['cctbx_64.zip',     #cctbx/cctb_sources,...
+      'python26_64.zip',   #Pyhton26/..., ..., + python26.dll!!!
+      'olex2_exe_64.zip',  #olex2.dll, it will be veryfied first of all
+      'launch_exe_64.zip'  #olex2.exe
       ]    
    ) | portable_zip_files
 mac_zip_files = \
@@ -105,7 +121,7 @@ set(  ['cctbx-suse101x32.zip',  #cctbx/cctb_sources,...
       ]    
    ) | portable_zip_files
 # a set of all zip files...
-all_zip_files = win_sse2_zip_files | win_sse_zip_files | mac_zip_files | suse_zip_files
+all_zip_files = win_sse2_zip_files | win_sse_zip_files | win64_zip_files | mac_zip_files | suse_zip_files
 
 altered_files = set([])
 altered_dirs = set([])
@@ -121,12 +137,8 @@ import itertools
 import re
 import time
 
-working_for_web = dict(zip(web_for_working.values(),
-                           web_for_working.keys()))
-
 def translate_working_to_web(path):
   name = os.path.basename(path)
-  name = web_for_working.get(name, name)
   return os.path.join(os.path.dirname(path), name)
 
 def filter_out_directories(seq):
@@ -493,13 +505,12 @@ def create_index(index_file_name, only_prop=None, port_props = None, portable=Fa
       normalised_root_dir += '/'
     for f in file_names:
       stats, props = info(os.path.join(dir_path, f),
-                          os.path.join(working_dir_path,
-                                       working_for_web.get(f,f)))
+                          os.path.join(working_dir_path, f))
       if props is None: continue
       prop_set = set(props)
       #skip non-portable files if required
       #this will tackle translated file names, like 'launch.exe' -> 'olex2.exe'
-      if portable and alterations.has_key(working_for_web.get(f,f)):
+      if portable and alterations.has_key(f):
         if 'olex-port' in props and (port_props is None or len(port_props&prop_set) == 0):
             continue
       elif (enforce_only_prop or f not in all_zip_files) and (only_prop is not None and only_prop not in prop_set): 
@@ -574,7 +585,6 @@ create_portable_distro(
   prefix=win_sse2_port_prefix,
   extra_files = 
   {
-    bin_directory + '/launch.exe' : 'olex2.exe',
     bin_directory + '/vcredist_x86.exe' : 'vcredist_x86.exe'
   }
 )
@@ -585,8 +595,17 @@ create_portable_distro(
   prefix=win_sse_port_prefix,
   extra_files = 
   {
-    bin_directory + '/launch.exe' : 'olex2.exe',
     bin_directory + '/vcredist_x86.exe' : 'vcredist_x86.exe'
+  }
+)
+create_portable_distro(
+  port_props=set([win64_port_name]), 
+  zip_name=win64_port_zip_name, 
+  port_zips=win64_zip_files, 
+  prefix=win64_port_prefix,
+  extra_files = 
+  {
+    bin_directory + '/vcredist_x64.exe' : 'vcredist_x64.exe'
   }
 )
 create_portable_distro(
