@@ -59,7 +59,10 @@ class GuiFunctions(object):
       olx.Cursor(state, text)
     else:
       olx.Cursor()
-    
+      
+  def Refresh(self):
+    olx.Refresh()
+      
   def CreateBitmap(self, bitmap):
     olx.CreateBitmap("-r %s %s" %(bitmap, bitmap))
     
@@ -136,4 +139,7 @@ class NoGuiFunctions(object):
     return ''
   
   def TranslatePhrase(self,text):
+    return ''
+  
+  def Refresh(self):
     return ''

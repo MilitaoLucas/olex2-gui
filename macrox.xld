@@ -76,15 +76,15 @@
 			<cmd2  XXX="spy.pickleVVD(structure)">
 			<cmd3  cmd1="clear">
 			<cmd4  "@reap '%1'">
-			<cmd5  "spy.InitialiseVariables(reap)">
-			<cmd6  XXX="spy.UnpickleVVD()">
+			<cmd10 "spy.LoadStructureParams()">
+
 			<cmd7  "SetVar(snum_refinement_sg,sg(%n))">
 			<cmd8  "spy.SetParam(snum.refinement_max_peaks,Ins(QNUM))">
 			<cmd9  "spy.SetParam(snum.refinement_max_cycles,Ins(LS))">
 			<cmd10 "if File.Exists(strdir()/filename().vvd) then none else 'SetVar(snum_refinement_original_formula,xf.GetFormula())'">
 			<cmd11 "if and(strcmp(%4,filename()),strcmp(%6,fileext())) then none else 'spy.loadHistory()'">
 			<cmd12 "'if and(IsFileType(ires), not(File.Exists((strdir()/history-filename)))) then 'spy.create_history()'">
-			<cmd13 "if and(isplugininstalled(plugin-brukersaint),IsFileType('p4p')) then BSINI else none">			
+			<cmd13 XXX="if and(isplugininstalled(plugin-brukersaint),IsFileType('p4p')) then BSINI else none">			
 			<cmd14 cmd1="if strcmp(%4,filename()) then none else 'clear'">
 			\>
 		<onabort
