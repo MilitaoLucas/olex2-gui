@@ -78,10 +78,11 @@ if __name__ == '__main__':
     sys.exit(1)
   up_str = putty_location + ' ' + tmp_folder + zip_names['SSE'] +\
                             ' ' + tmp_folder + zip_names['SSE2'] +\
+                            ' ' + tmp_folder + zip_names['None'] +\
                             ' ' + tmp_folder + 'installer' + file_suffix['32bit'] + '.exe' + \
                             ' ' + tmp_folder + 'installer' + file_suffix['64bit'] + '.exe' + \
-                            ' ' + tmp_folder + 'launch' + file_suffix['32bit'] + '.zip' + \
-                            ' ' + tmp_folder + 'launch' + file_suffix['64bit'] + '.zip'
+                            ' ' + tmp_folder + 'launch_exe' + file_suffix['32bit'] + '.zip' + \
+                            ' ' + tmp_folder + 'launch_exe' + file_suffix['64bit'] + '.zip'
   up_str += ' oleg@dimas.dur.ac.uk:/var/distro/bin_dir/'
   if os.system(up_str) != 0:
     print 'Upload has failed...'
