@@ -52,7 +52,7 @@ def win_compile(_platform):
     if not os.path.exists(win_dest_names[_platform] + 'launch.exe'):
       print 'Could not locate the file \'' + win_dest_names[_platform] + 'launch.exe\''
       return False
-    dest_zip = zipfile.ZipFile(tmp_folder + 'launch'+file_suffix[_platform] + '.zip',
+    dest_zip = zipfile.ZipFile(tmp_folder + 'launch_exe'+file_suffix[_platform] + '.zip',
                               mode='w', compression=zipfile.ZIP_DEFLATED)
     dest_zip.write(win_dest_names[_platform] + 'launch.exe', 'olex2.exe')
     dest_zip.close()
