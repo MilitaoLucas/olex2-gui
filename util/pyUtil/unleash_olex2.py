@@ -136,6 +136,7 @@ import shutil
 import itertools
 import re
 import time
+import hashlib
 
 def translate_working_to_web(path):
   name = os.path.basename(path)
@@ -190,7 +191,7 @@ if not os.path.isdir(working_directory):
   parser.print_help()
 
 web_directory = os.path.expanduser(option.web_directory
-				   or 'e:/tmp/web')
+				   or 'e:/tmp/1.0')
 bin_directory = os.path.expanduser(option.bin_directory
                                    or 'e:/tmp/bin_dir')
 if not os.path.isdir(bin_directory):
@@ -415,7 +416,12 @@ for f in itertools.chain(update_files,
 # create the index file
 def info(web_file_name, working_file_name):
   stats = os.stat(web_file_name)
-  stats = (stats.st_mtime, stats.st_size)
+  if os.path.isfile(web_file_name):
+    _file = file(web_file_name, "rb")
+    stats = (stats.st_mtime, stats.st_size, hashlib.md5(_file.read()).hexdigest())
+  else:
+    stats = (stats.st_mtime, stats.st_size, 'dir')
+    
   #override the svn properties with the ones defined above
   normalised_fn = working_file_name.replace('\\', '/')
   if normalised_fn in altered_files:
@@ -440,7 +446,7 @@ def format_info(stats, props):
     props = ';'.join(props)
   else:
     props = ''
-  return "%i,%i,{%s}" % (stats+(props,))
+  return "%i,%i,%s,{%s}" % (stats+(props,))
 
 ###############################################################################################
 #index file management
