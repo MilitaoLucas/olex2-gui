@@ -814,6 +814,9 @@ def OnModeChange(*args):
     'split -r=EADP':'button_full-move_atoms_or_model_disorder',
     'split':'button_full-move_atoms_or_model_disorder',
     'name':'button_small-name',
+    'fixu':'button-fix_u',
+    'fixxyz':'button-fix_xyz',
+    'occu':'button-set_occu',
     'off':None
   }
   
