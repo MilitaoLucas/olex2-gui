@@ -466,7 +466,7 @@ class HistoryLeaf:
     if tree.current_refinement == 'solution' and sol_program == 'smtbx-solve':
       self.solution_program = sol_program
       self.solution_method = OV.GetParam('snum.solution.method')
-    elif tree.current_refinement != 'solution' and sol_program == 'smtbx-solve':
+    elif tree.current_refinement != 'solution' and ref_program == 'smtbx-refine':
       self.refinement_program = ref_program
       self.refinement_method = OV.GetParam('snum.refinement.method')
       try:
