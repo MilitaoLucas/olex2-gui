@@ -39,6 +39,9 @@
   Low Quality
   Pack Cell
   Pack Limits
+  Fix U
+  Fix xyz
+  Set occu
   
   
 [SMALL BUTTONS]
