@@ -1,0 +1,74 @@
+<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=2;1; -->
+<font color=$getVar(gui_html_font_colour)  size=$getVar(gui_html_font_size)>
+<tr><td></td><td colspan='2'>
+
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$getVar(gui_html_table_bg_colour)">
+<tr>
+<td align='left' VALIGN='left' colspan='1'>
+	<a 
+			href="if strcmp(spy.GetParam(olex2.in_mode),'grow') then 'mode off' else 'mode grow GetData(GROW_SHORT) GetData(GROW_SELECTION) GetData(GROW_VDW)'" 
+			target="%Mode Grow-target%">
+			<b>
+			<zimg name=H3_IMG_BUTTON-GROW_MODE border="0" src="button-grow_mode.png"> 
+		</a>
+		&nbsp;
+		
+     <input
+			type="checkbox"
+			value="%Short%"
+			valign="center"
+			bgcolor="$getVar(gui_html_table_bg_colour)"
+			fgcolor="$GetVar(gui_html_font_colour)"
+			name="GROW_SHORT"
+      height="$getVar(gui_html_checkbox_height)"
+			width='55'
+			manage
+			oncheck="setdata(GROW_SHORT,' -s')"
+			onuncheck="setdata(GROW_SHORT,'')">
+
+     <input
+			type="checkbox"
+			value="%Selection%"
+			valign="center"
+			bgcolor="$getVar(gui_html_table_bg_colour)"
+			fgcolor="$GetVar(gui_html_font_colour)"
+			name="GROW_SELECTION"
+      height="$getVar(gui_html_checkbox_height)"
+			width='65'
+			manage
+			oncheck="setdata(GROW_SELECTION,'-r')"
+			onuncheck="setdata(GROW_SELECTION,'')">
+			
+			<input
+			type="checkbox"
+			value="%VdW%"
+			valign="center"
+			bgcolor="$getVar(gui_html_table_bg_colour)"
+			fgcolor="$GetVar(gui_html_font_colour)"
+			name="GROW_VDW"
+      height="$getVar(gui_html_checkbox_height)"
+			width='45'
+			manage
+			oncheck="setdata(GROW_VDW,'-v=GetValue(GROW_VDW_VAL)')"
+			onuncheck="setdata(GROW_VDW,'')">
+			
+     <input
+			type="text"
+			label="&Aring;"
+			value='2.0'
+			valign="center"
+			bgcolor="$getVar(gui_html_table_bg_colour)"
+			fgcolor="$GetVar(gui_html_font_colour)"
+			name="GROW_VDW_VAL"
+      height="$getVar(gui_html_input_height)"
+			width='30'
+			manage
+			onchange="setdata(GROW_VDW,'-v=GetValue(GROW_VDW_VAL)')"
+	</td>
+</tr>
+
+</table>	
+</font>
+
+</td>
+</tr>

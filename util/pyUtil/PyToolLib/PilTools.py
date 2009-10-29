@@ -2030,7 +2030,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           try:
             img_txt = item.split("-h3-")[1]
           except IndexError:
-            img_txt = item
+            img_txt = item.replace('h3','')
           image = self.timage_style_h3(img_txt, state)
           name = "gui/images/h3-%s-%s.png" %(item, state)
         else:
