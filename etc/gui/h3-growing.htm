@@ -3,8 +3,10 @@
 <tr><td></td><td colspan='2'>
 
 <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$getVar(gui_html_table_bg_colour)">
-<tr>
-<td align='left' VALIGN='left' colspan='1'>
+<tr width=100%>
+<td align='left' VALIGN='left' width=100% bgcolor="#ff0000">
+
+<table><tr><td>
 	<a 
 			href="if strcmp(spy.GetParam(olex2.in_mode),'grow') then 'mode off' else 'mode grow GetData(GROW_SHORT) GetData(GROW_SELECTION) GetData(GROW_VDW)'" 
 			target="%Mode Grow-target%">
@@ -64,6 +66,9 @@
 			width='30'
 			manage
 			onchange="setdata(GROW_VDW,'-v=GetValue(GROW_VDW_VAL)')">
+</td></tr></table>
+			
+			
 	</td>
 </tr>
 
