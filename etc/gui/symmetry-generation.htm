@@ -2,8 +2,7 @@
 
 <tr>
 
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=;1; -->
-
+<td bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
 <td align='center' VALIGN='center' colspan='1'>
 		<a 
 			href="if strcmp(spy.GetParam(olex2.in_mode),'move sel') then 'mode off' else 'mode move sel'"
@@ -79,7 +78,7 @@ $spy.MakeActiveGuiButton(button-grow_all,grow)
 	</td>
 </tr>
 
-
+<!--
 
 <tr>
 	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
@@ -92,101 +91,14 @@ $spy.MakeActiveGuiButton(button-pack_limits,'fuse>>pack getvalue\(anpack) getval
 	</td>
 </tr>	
 
-<tr>  
-
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
-	</td>
-	<td colspan=3 VALIGN='center'>
-		<font size=2>
-$spy.MakeActiveGuiButton(button_tiny-a,'matr 1')		
-
-<input 
-   type="text"
-   bgcolor="$getVar(gui_html_input_bg_colour)"
-   name = "anpack"
-   float width="14"
-   float height="$getVar(gui_html_input_height)"
-   value = "-0.5"
->
-
-<input
-  type="text"
-  bgcolor="$getVar(gui_html_input_bg_colour)"
-  name = "appack"
-  float width="12"
-  float height="$getVar(gui_html_input_height)"
-  value = "0.5"
->
-			
-$spy.MakeActiveGuiButton(button_tiny-b,'matr 2')		
-			
-<input type="text"
-  bgcolor="$getVar(gui_html_input_bg_colour)"
-  name = "bnpack"
-  float width="14"
-  float height="$getVar(gui_html_input_height)"
-  value = "-0.5"
->
-
-<input
-  type="text"
-  bgcolor="$getVar(gui_html_input_bg_colour)"
-  name = "bppack"
-  float width="12"
-  float height="$getVar(gui_html_input_height)"
-  value = "0.5"
->
-
-$spy.MakeActiveGuiButton(button_tiny-c,'matr 3')		
-			
-<input
-  type="text"
-  bgcolor="$getVar(gui_html_input_bg_colour)"
-  name = "cnpack"
-  float width="14"
-  float height="$getVar(gui_html_input_height)"
-  value = "-0.5"
->
-
-<input
-  type="text"
-  bgcolor="$getVar(gui_html_input_bg_colour)"
-  name = "cppack"
-  float width="12"
-  float height="$getVar(gui_html_input_height)"
-  value = "0.5"
->
-</font>
-</td>        
-</tr>
-
-<tr>
-</tr>
-
-
-</table>
+-->
 
 
 
-
-<!-- #include close-contacts gui\snippets\snippet-close-contacts.htm;1; -->
-<!-- #include pack-radius gui\snippets\snippet-pack-radius.htm;1; -->
-
-
-<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
-
-
-<!-- 
-%Pack within Radius of%
-%Center on cell%, %center_on_cell-target%
-%Largest Part%, %largest_part-target%
-%Assemble%, %assemble-target%
-"%Grow Mode%,  -->
-
-
-<!-- #include header gui\blocks\tool-table-header.htm;1; -->
 
 <!-- #include h3-growing gui\h3-growing.htm;gui\blocks\tool-h3-off.htm;image=h3-growing;onclick=;colspan=3;2; -->
 <!-- #include h3-packing gui\h3-packing.htm;gui\blocks\tool-h3-off.htm;image=h3-packing;onclick=;colspan=3;2; -->
 
-</table>
+
+<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
+

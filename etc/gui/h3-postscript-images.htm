@@ -1,0 +1,88 @@
+<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
+
+<table><tr><td>
+
+<a href="run 'brad GetValue(IMAGE_PS_BONDWIDTH)'>>run 'pictps GetValue(IMAGE_PS_NAME).ps GetData(COLOR_LINE) GetData(COLOR_FILL) GetData(COLOR_BOND)'>>brad 0.8>>echo 'Image made'">Make</a>
+</td><td>
+Name: 
+</td><td>
+  <input 
+    type="text" 
+    height="$getVar(gui_html_input_height)"
+    bgcolor="$getVar(gui_html_input_bg_colour)" 
+    valign='center' 
+    name="IMAGE_PS_NAME"  
+    width="80"
+    height="$getVar(gui_html_input_height)"
+    value = "$FileName()"
+    manage
+  >
+</td><td>
+Lines
+</td><td>
+  <input
+    type="checkbox"
+    height="$getVar(gui_html_checkbox_height)"
+    name = "COLOR_LINE"
+    width="17"
+    oncheck="SetData(COLOR_LINE,-color_line)"
+    onuncheck="SetData(COLOR_LINE,' ')"
+    manage>
+</td><td>
+Bonds
+</td><td>
+  <input
+    type="checkbox"
+    height="$getVar(gui_html_checkbox_height)"
+    name = "COLOR_BOND"
+    width="17"
+    oncheck="SetData(COLOR_BOND,-color_bond)"
+    onuncheck="SetData(COLOR_BOND,' ')"
+    manage>
+</td><td>
+Fill
+</td><td>
+  <input
+    type="checkbox"
+    height="$getVar(gui_html_checkbox_height)"
+    name = "COLOR_FILL"
+    width="17"
+    oncheck="SetData(COLOR_FILL,-color_fill)"
+    onuncheck="SetData(COLOR_FILL,' ')"
+    manage>
+</td></tr>
+<tr><td colspan=3 bgcolor='#ff0000'>
+
+  <input 
+    type="combo" 
+    height="$GetVar(gui_html_combo_height)"
+    bgcolor="$getVar(gui_html_input_bg_colour)" 
+    items="0.2;0.4;0.6;0.8;1.0;1.2" 
+    height="$getVar(gui_html_input_height)"
+    valign='center' 
+    name="IMAGE_PS_LINEWIDTH"  
+    width="50"
+    value='0.9'
+    label="Line Width "
+    manage
+  >
+</td><td colspan=4>
+  <input 
+    type="combo" 
+    height="$GetVar(gui_html_combo_height)"
+    bgcolor="$getVar(gui_html_input_bg_colour)" 
+    items="0.2;0.4;0.6;0.8;1.0" 
+    height="$getVar(gui_html_input_height)"
+    valign='center' 
+    name="IMAGE_PS_BONDWIDTH"  
+    width="50"
+    value='0.6'
+    label="Bond Width "
+    manage
+  >
+  
+  
+
+</td></tr></table>
+
+<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
