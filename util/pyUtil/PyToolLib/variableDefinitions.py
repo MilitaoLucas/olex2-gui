@@ -19,7 +19,7 @@ def guiVariables():
     gui_html_base_colour='#00ff00',
     gui_html_bg_colour='#ffffff',
     gui_html_input_bg_colour='#F3F3F3',
-    gui_html_input_height=18,
+    gui_html_input_height=16,
     gui_html_combo_height=18,
     gui_html_spin_height=20,
     gui_html_checkbox_height=30,
