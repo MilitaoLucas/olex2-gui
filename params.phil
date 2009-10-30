@@ -156,10 +156,17 @@ snum {
       .type = bool
   }
 
+  
   display_quality = 2
     .type = int(value_min=1, value_max=3)
 
- 
+  image{
+    font_bitmap = #olex2.fnt:frb_18
+      .type = str
+    font_ps = @
+      .type = str
+  }
+    
   shelx_output = True
     .type = bool
 
