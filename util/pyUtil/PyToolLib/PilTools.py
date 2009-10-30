@@ -991,7 +991,9 @@ class timage(ImageTools):
 
   def __init__(self, width=None, tool_arg=None):
     super(timage, self).__init__()
-    self.getVariables('gui')    
+    self.getVariables('gui')
+    self.advertise_new = False
+    self.new_l = ['images']
     
     #from PilTools import ButtonMaker
     self.abort = False
@@ -2030,13 +2032,21 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           try:
             img_txt = item.split("-h3-")[1]
           except IndexError:
-            img_txt = item.replace('h3','')
+            img_txt = item.replace('h3-','')
+          if img_txt in self.new_l:
+            self.advertise_new = True
           image = self.timage_style_h3(img_txt, state)
+          self.advertise_new = False
           name = "gui/images/h3-%s-%s.png" %(item, state)
         else:
           img_txt = item
+          if img_txt in self.new_l:
+            self.advertise_new = True
           image = self.timage_style_1(img_txt, state)
+          self.advertise_new = False
           name = "gui/images/h2-%s-%s.png" %(item, state)
+          name = name.replace(".new.","")
+          
         if name:
           OlexVFS.save_image_to_olex(image, name, 2)
 
@@ -2446,6 +2456,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
             #cTopLeft=False,
             #cTopRight=False
           #)
+          
+    if self.advertise_new:
+      self.draw_advertise_new(draw, image)
 
     if state == "off":
       fill=self.adjust_colour("bg", luminosity=0.8)
@@ -2507,6 +2520,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       cache = {}
       rad = 3
       image = RoundedCorners.round_image(image, cache, rad)
+      
+    if self.advertise_new:
+      self.draw_advertise_new(draw, image)
       
     if state == "off":
       fill=self.adjust_colour("bg", luminosity=0.6)

@@ -651,7 +651,29 @@ class ImageTools(FontInstances):
       
     OlexVFS.save_image_to_olex(im, name, 2)
 
-
+  def draw_advertise_new(self,draw,image):
+    max_width = image.size[0]
+    max_height = image.size[1]
+    font_name = "%s Bold" %self.gui_timage_font_name
+    font_size = max_height
+    colour = self.gui_html_highlight_colour
+    txt="New!"
+    dX, dY = self.getTxtWidthAndHeight(txt, font_name, font_size)
+    
+    draw.rectangle((max_width - dX - 2, 2, max_width - 2, max_height - 2), fill='#ffee00')
+    
+    
+    self.write_text_to_draw(
+      draw,
+      txt = txt,
+      top_left=(60, -1),
+      align='right',
+      max_width=max_width,
+      font_name=font_name, 
+      font_size=font_size, 
+      titleCase=True,
+      font_colour=colour,)
+    
 
   def create_arrows(self, draw, height, direction, colour, type='simple', h_space=4, v_space=4, offset_y = 0, char_pos=(0,0), char_char="+"):
     arrow_height = height - (2*v_space)
