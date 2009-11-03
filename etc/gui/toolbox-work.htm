@@ -98,15 +98,15 @@
 
   <td>
     <input 
-      type='combo' 
-      width='$eval(htmlpanelwidth()-105)' 
+      type='combo'
+      width='$eval(htmlpanelwidth()-105)'
 			height="$getVar(gui_html_input_height)"
-      name='set_label_content' 
-      value='' 
-      items='%Toggle On/Off%<-;%Atom Names%<-l;%Occupancy% (None if fully occupied)<-o;%Parts%<-p;%Link-Code%<-v;%H Atom Labels%<-h l;%Fixed Parameters%<-f;Variables<-v;AFIX Commands<-h a;Q Peak Intensities<-qi' 
-      label='' 
-      bgcolor="$getVar(gui_html_input_bg_colour)" 
-      onchange="spy.ChooseLabelContent(GetValue(set_label_content))"   
+      name='set_label_content'
+      value=''
+      items='%Toggle On/Off%<-;%Atom Names%<-l;%Occupancy% (None if fully occupied)<-o;%Parts%<-p;%Link-Code%<-v;%H Atom Labels%<-h l;%Fixed Parameters%<-f;Variables<-v;AFIX Commands<-h a;Q Peak Intensities<-qi'
+      label=''
+      bgcolor="$getVar(gui_html_input_bg_colour)"
+      onchange="spy.ChooseLabelContent(GetValue(set_label_content))"
       readonly='readonly'
     >
   </td>

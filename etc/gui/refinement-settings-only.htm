@@ -10,14 +10,14 @@
 	<td VALIGN='center' colspan=2 align="right">
 		<font size='2'>
 			<input
-				type='combo',
+				type='combo'
 				width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)'
 				height="GetVar(gui_html_combo_height)"
 				bgcolor="GetVar(gui_html_input_bg_colour)"
-				name='SET_SNUM_REFINEMENT_PROGRAM',
+				name='SET_SNUM_REFINEMENT_PROGRAM'
 				value='$spy.GetParam(snum.refinement.program)'
 				items='$spy.getRefinementPrgs()'
-				label='',
+				label=''
 				onchange="spy.SetRefinementProgram(GetValue(SET_SNUM_REFINEMENT_PROGRAM))>>UpdateHtml"
 				readonly='readonly'
 			>
@@ -33,14 +33,14 @@
 	<td VALIGN='center' colspan=2 align="right">
 		<font size='2'> 
 			<input 
-				type='combo',
+				type='combo'
 				width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)' 
 				height="GetVar(gui_html_combo_height)"
 				bgcolor="GetVar(gui_html_input_bg_colour)"
-				name='SET_SNUM_REFINEMENT_METHOD',
-				value='$spy.GetParam(snum.refinement.method)', 
+				name='SET_SNUM_REFINEMENT_METHOD'
+				value='$spy.GetParam(snum.refinement.method)'
 				items='$spy.getRefinementMethods($spy.GetParam(snum.refinement.program))'
-				label='', 
+				label=''
 				onchange="spy.SetRefinementProgram(GetValue(SET_SNUM_REFINEMENT_PROGRAM),GetValue(SET_SNUM_REFINEMENT_METHOD))>>UpdateHtml"
 				readonly='readonly'
 			>
@@ -56,16 +56,16 @@
 	<td VALIGN='center' colspan=2 align="right">
 		<font size='2'>
 			<input 
-				type='combo', 
-				width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)' 
+				type='combo'
+				width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)'
 				height="GetVar(gui_html_combo_height)"
 				bgcolor="GetVar(gui_html_input_bg_colour)"
-				name='SNUM_SET_REFLECTIONS', 
-				items='$spy.GetHklFileList()', 
-				onchange='HKLSrc(GetValue(SNUM_SET_REFLECTIONS))', 
-				value='FileName(HKLSrc())', 
+				name='SNUM_SET_REFLECTIONS'
+				items='$spy.GetHklFileList()'
+				onchange='HKLSrc(GetValue(SNUM_SET_REFLECTIONS))'
+				value='FileName(HKLSrc())'
 				readonly='readonly'
-			> 
+			>
 		</font>
 	</td>
 </tr>
@@ -78,14 +78,14 @@
 	<td VALIGN='center' ALIGN='right' colspan=1>
 		<font size='2'>
 			<input
-				type='spin',
-				width=50,
+				type='spin'
+				width="50"
 				height="GetVar(gui_html_spin_height)"
 				bgcolor="GetVar(gui_html_input_bg_colour)"
-				name='SET_SNUM_REFINEMENT_MAX_CYCLES',
-				value='$spy.GetParam(snum.refinement.max_cycles)',
+				name='SET_SNUM_REFINEMENT_MAX_CYCLES'
+				value='$spy.GetParam(snum.refinement.max_cycles)'
 				onchange="spy.SetMaxCycles(GetValue(SET_SNUM_REFINEMENT_MAX_CYCLES))"
-			> 
+			>
 		</font>
 	</td>
 </tr>	
@@ -140,8 +140,8 @@ target = "Do automatic tidying once - tick the box to do it after every refineme
 		<font size='2'>
 		<input
 			type='checkbox'
-			width=$GetVar(gui_html_checkbox_height)
-			height=$GetVar(gui_html_checkbox_height)
+			width="$GetVar(gui_html_checkbox_height)"
+			height="$GetVar(gui_html_checkbox_height)"
 			name='SNUM_REFINEMENT_AUTO_TIDY'
 			checked="$spy.GetParam(snum.refinement.auto.tidy)"
 			oncheck='spy.SetParam(snum.refinement.auto.tidy,True)'
@@ -163,10 +163,10 @@ target = "Do automatic tidying once - tick the box to do it after every refineme
 		<font size='2'>
 			<input
 				type='checkbox'
-				width=$GetVar(gui_html_checkbox_height)
-				height=$GetVar(gui_html_checkbox_height)
-				fgcolor=$GetVar(gui_html_font_colour)
-				bgcolor=$GetVar(gui_html_table_bg_colour)
+				width="$GetVar(gui_html_checkbox_height)
+				height="$GetVar(gui_html_checkbox_height)"
+				fgcolor="$GetVar(gui_html_font_colour)"
+				bgcolor="$GetVar(gui_html_table_bg_colour)"
 				name='SNUM_REFINEMENT_GRAPHICAL_OUTPUT'
 				checked="$spy.GetParam(snum.refinement.graphical_output)"
 				oncheck='spy.SetParam(snum.refinement.graphical_output,true)'

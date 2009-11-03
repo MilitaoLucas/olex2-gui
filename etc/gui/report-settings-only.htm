@@ -28,12 +28,12 @@ spy.MetaCif(True,True)>>
 				</td>
 				<td>
 					<input
-						type='text',
-						width="$eval((htmlpanelwidth()-160)/3),
+						type='text'
+						width="$eval((htmlpanelwidth()-160)/3)"
 						valign='center'
 						height="17"
 						bgcolor="GetVar(gui_html_input_bg_colour)"
-						name='SET_SNUM_REPORT_TITLE',
+						name='SET_SNUM_REPORT_TITLE'
 						value='$spy.GetParam(snum.report.title)'
 						onleave="spy.SetParam(snum.report.title,GetValue(SET_SNUM_REPORT_TITLE))"
 					>
@@ -42,11 +42,11 @@ spy.MetaCif(True,True)>>
 				</td>	
 				<td>
 					<input
-						type='combo',
-						width="$eval((htmlpanelwidth()-160)/3),
+						type='combo'
+						width="$eval((htmlpanelwidth()-160)/3)"
 						height="17"
 						bgcolor="GetVar(gui_html_input_bg_colour)"
-						name='SET_USER_REPORT_STYLE',
+						name='SET_USER_REPORT_STYLE'
 						value='$spy.GetParam(user.report_style)'
 						items='spy.getStylesList()'
 						valign='center'
@@ -58,11 +58,11 @@ spy.MetaCif(True,True)>>
 				</td>	
 				<td>
 					<input
-						type='combo',
-						width="$eval((htmlpanelwidth()-160)/3),
+						type='combo'
+						width="$eval((htmlpanelwidth()-160)/3)"
 						height="17"
 						bgcolor="GetVar(gui_html_input_bg_colour)"
-						name='SET_USER_REPORT_TEMPLATE',
+						name='SET_USER_REPORT_TEMPLATE'
 						value='$spy.GetParam(user.report_template)'
 						items='spy.getTemplatesList()'
 						valign='center'

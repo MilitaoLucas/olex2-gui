@@ -592,13 +592,13 @@ def historyChooserRenamer():
     <font size='2'> 
     <input 
       type='combo'
-      width='$eval(htmlpanelwidth()/2 -15)',
+      width='$eval(htmlpanelwidth()/2 -15)'
       height="$getVar(gui_html_input_height)"
       bgcolor='$GetVar(gui_html_input_bg_colour)'
-      name='SET_HISTORY_CURRENT_SOLUTION',
+      name='SET_HISTORY_CURRENT_SOLUTION'
       value='$spy.GetParam(snum.history.current_solution)'
       items='$spy.getAllHistories()'
-      label='', 
+      label=''
       onchange='spy.changeHistory(GetValue(SET_HISTORY_CURRENT_SOLUTION))>>UpdateHtml'
       readonly='readonly'
     >
@@ -632,13 +632,13 @@ def historyChooserRenamer():
     <td VALIGN='center' colspan=1>
     <font size='2'>
     <input
-      type='text',
-      width='$eval(htmlpanelwidth()/2 -15)',
+      type='text'
+      width='$eval(htmlpanelwidth()/2 -15)'
       height="17"
       bgcolor='$GetVar(gui_html_input_bg_colour)'
-      name='SET_SNUM_HISTORY_CURRENT_SOLUTION',
+      name='SET_SNUM_HISTORY_CURRENT_SOLUTION'
       value='$spy.GetParam(snum.history.current_solution)'
-      label='',
+      label=''
     >
     </font>
     </td>
