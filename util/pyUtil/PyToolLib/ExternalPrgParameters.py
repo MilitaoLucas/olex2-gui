@@ -240,10 +240,11 @@ class Method_refinement(Method):
           name = item[0]
           try:
             value = OV.FindValue('settings_%s_%s' %(argName, name))
-            if '.' in value:
-              value = float(value)
-            else:
-              value = int(value)
+            if not isinstance(value, int) and not isinstance(value, float):
+              if '.' in value:
+                value = float(value)
+              else:
+                value = int(value)
             args += ' %s' %value
           except ValueError:
             break
