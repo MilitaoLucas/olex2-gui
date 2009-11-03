@@ -386,25 +386,37 @@ class OlexFunctions(inheritFunctions):
   def DataDir(self):
     path = olx.DataDir()
     return self.standardizePath(path)
-  
-  def FileDrive(self,FileFull=''):
-    path = olx.FileDrive(FileFull)
+
+  def FileDrive(self,FileDrive=None):
+    if FileDrive is not None:
+      path = olx.FileDrive(FileDrive)
+    else:
+      path = olx.FileDrive()
     return self.standardizePath(path)
 
-  def FileExt(self,FileFull=''):
-    path = olx.FileExt(FileFull)
+  def FileExt(self,FileExt=None):
+    if FileExt is not None:
+      path = olx.FileExt(FileExt)
+    else:
+      path = olx.FileExt()
     return self.standardizePath(path)  
-  
+
   def FileFull(self):
     path = olx.FileFull()
     return self.standardizePath(path)
-  
-  def FileName(self,FileFull=''):
-    path = olx.FileName(FileFull)
+
+  def FileName(self,FileName=None):
+    if FileName is not None:
+      path = olx.FileName(FileName)
+    else:
+      path = olx.FileName()
     return self.standardizePath(path)
-  
-  def FilePath(self,FileFull=''):
-    path = olx.FilePath(FileFull)
+
+  def FilePath(self,FilePath=None):
+    if FilePath is not None:
+      path = olx.FilePath(FilePath)
+    else:
+      path = olx.FilePath()
     return self.standardizePath(path)
 
   def olex_function(self, str):
