@@ -10,14 +10,14 @@
 	<td width='50%' VALIGN='center' ALIGN='right' colspan=2>
 		<font size='2'>
 			<input
-				type='combo',
+				type='combo'
 				width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)'
 				height="GetVar(gui_html_combo_height)"
 				bgcolor="GetVar(gui_html_input_bg_colour)"
-				name='SET_SNUM_SOLUTION_PROGRAM',
+				name='SET_SNUM_SOLUTION_PROGRAM'
 				value='$spy.GetParam(snum.solution.program)'
 				items='$spy.getSolutionPrgs()'
-				label='',
+				label=''
 				onchange="spy.SetSolutionProgram(GetValue(SET_SNUM_SOLUTION_PROGRAM))>>UpdateHtml"
 				readonly='readonly'
 			>
@@ -33,14 +33,14 @@
 	<td width='50%' VALIGN='center' ALIGN='right' colspan=2>
 		<font size='2'>
 			<input
-				type='combo',
+				type='combo'
 				width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)'
 				height="GetVar(gui_html_combo_height)"
 				bgcolor="GetVar(gui_html_input_bg_colour)"
-				name='SET_SNUM_SOLUTION_METHOD',
-				value='$spy.GetParam(snum.solution.method)',
+				name='SET_SNUM_SOLUTION_METHOD'
+				value='$spy.GetParam(snum.solution.method)'
 				items='$spy.getSolutionMethods($spy.GetParam(snum.solution.program))'
-				label='',
+				label=''
 				onchange="spy.SetSolutionProgram(GetValue(SET_SNUM_SOLUTION_PROGRAM),GetValue(SET_SNUM_SOLUTION_METHOD))>>UpdateHtml"
 				readonly='readonly'
 			>
@@ -56,14 +56,14 @@
 	<td width='50%' VALIGN='center' ALIGN='right' colspan=2>
 		<font size='2'>
 			<input
-				type='combo',
+				type='combo'
 				width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)'
 				height="GetVar(gui_html_combo_height)"
 				bgcolor="GetVar(gui_html_input_bg_colour)"
-				name='SET_REFLECTIONS',
-				items='$spy.GetHklFileList()',
+				name='SET_REFLECTIONS'
+				items='$spy.GetHklFileList()'
 				onchange='HKLSrc(GetValue(SET_REFLECTIONS))',
-				value='FileName(HKLSrc())',
+				value='FileName(HKLSrc())'
 				readonly='readonly'
 			>
 		</font>
@@ -78,13 +78,13 @@
 	<td width='50%' VALIGN='center' ALIGN='right' colspan=2>
 		<font size='2'>
 			<input
-				type='combo',
+				type='combo'
 				width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)'
 				height="GetVar(gui_html_combo_height)"
 				bgcolor="GetVar(gui_html_input_bg_colour)"
-				name='SET_SNUM_REFINEMENT_FORMULA',
+				name='SET_SNUM_REFINEMENT_FORMULA'
 				items='$spy.GetParam(snum.refinement.original_formula)'
-				value='xf.GetFormula()',
+				value='xf.GetFormula()'
 				onchange='xf.SetFormula(GetValue(SET_SNUM_REFINEMENT_FORMULA))>>spy.SetParam(snum.refinement.formula,"GetValue(SET_SNUM_REFINEMENT_FORMULA)")>>updatehtml'
 			>
 		</font>
@@ -120,13 +120,13 @@
 	<td width='50%' VALIGN='center' ALIGN='right' colspan=1>
 		<font size='2'>
 			<input
-				type='spin',
-				width=50,
+				type='spin'
+				width="50"
 				height="GetVar(gui_html_spin_height)"
 				bgcolor="GetVar(gui_html_input_bg_colour)"
-				name='SET_Z_PRIME',
-				min='1',
-				value='$spy.GetParam(snum.refinement.Z_prime)',
+				name='SET_Z_PRIME'
+				min='1'
+				value='$spy.GetParam(snum.refinement.Z_prime)'
 				onchange="spy.SetParam(snum.refinement.Z_prime,GetValue(SET_Z_PRIME))>>updatehtml"
 			>
 		</font>
@@ -155,13 +155,13 @@
 	<td VALIGN='center' ALIGN='right' colspan=1>
 		<font size='2'>
 			<input
-				type='combo',
-				width=71,
+				type='combo'
+				width="71"
 				height="GetVar(gui_html_combo_height)"
 				bgcolor="GetVar(gui_html_input_bg_colour)"
-				name='SET_SNUM_REFINEMENT_SPACE_GROUP',
-				items='$spy.GetParam(snum.refinement.sg_list)',
-				value='$sg(%n)',
+				name='SET_SNUM_REFINEMENT_SPACE_GROUP'
+				items='$spy.GetParam(snum.refinement.sg_list)'
+				value='$sg(%n)'
 				onchange="reset -s=GetValue(SET_SNUM_REFINEMENT_SPACE_GROUP) -c=GetValue(SET_SNUM_REFINEMENT_FORMULA)>>spy.SetParam(snum.refinement.sg,sg(%n))>>spy.run_skin sNumTitle>>updatehtml"
 			>
 		</font>
@@ -179,8 +179,8 @@
 		<font size='2'>
 			<input
 				type='checkbox'
-				width=$GetVar(gui_html_checkbox_height)
-				height=$GetVar(gui_html_checkbox_height)
+				width="$GetVar(gui_html_checkbox_height)"
+				height="$GetVar(gui_html_checkbox_height)"
 				name='SNUM_SOLUTION_GRAPHICAL_OUTPUT'
 				checked="$spy.GetParam(snum.solution.graphical_output)"
 				oncheck='spy.SetParam(snum.solution.graphical_output,true)'
