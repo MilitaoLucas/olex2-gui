@@ -1,13 +1,10 @@
-
-
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
-
 <tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=model;1; -->
-
-<td colspan=2>
-<!-- #includeif IsFileType(ires) main-toolbar-2 gui\main-toolbar-2.htm;1; -->
-</td></tr>
+	<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=model;1; -->
+	<td colspan='2'>
+		<!-- #includeif IsFileType(ires) main-toolbar-2 gui\main-toolbar-2.htm;1; -->
+	</td>
+</tr>
 
 <tr VALIGN='center' NAME='Tools'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=quicktools;1; -->
@@ -91,16 +88,16 @@
 
 
 <tr VALIGN='center' NAME='Labels'>
-  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+  </td>
   <td width=20%>
     <b>%Labels%</b>
   </td>
-
   <td>
     <input 
       type='combo'
       width='$eval(htmlpanelwidth()-105)'
-			height="$getVar(gui_html_input_height)"
+	  height="$getVar(gui_html_input_height)"
       name='set_label_content'
       value=''
       items='%Toggle On/Off%<-;%Atom Names%<-l;%Occupancy% (None if fully occupied)<-o;%Parts%<-p;%Link-Code%<-v;%H Atom Labels%<-h l;%Fixed Parameters%<-f;Variables<-v;AFIX Commands<-h a;Q Peak Intensities<-qi'
