@@ -159,6 +159,7 @@ def make_logon_html():
          reuse
          width="90"  
          height="20" 
+         onreturn="html.EndModal(Logon,1)"
          value = "">
      </td>
      </tr>
