@@ -128,9 +128,9 @@ def makeHtmlTableRow(dictionary):
       pass
     chooseFileText = '''
     <tr>
-    <a href="%s">
-    <zimg border="0" src="gui/images/toolbar-open.png">
-    </a>
+      <a href="%s">
+        <zimg border="0" src="gui/images/toolbar-open.png">
+      </a>
     </tr>
     ''' %href
     dictionary['chooseFile'] = chooseFileText
@@ -148,35 +148,42 @@ def makeHtmlTableRow(dictionary):
       field_d.setdefault('font','size="2"')
       FieldText += """
                 <td VALIGN="%(fieldVALIGN)s" ALIGN="%(fieldALIGN)s" width="%(fieldWidth)s" colspan=1>
-                <b>%(itemName)s</b>
-                </td>""" %field_d
+                  <b>
+                    %(itemName)s
+                  </b>
+                </td>
+                """ %field_d
   if FieldText:
     dictionary.setdefault('fieldText',FieldText)
     
     htmlTableRowText = '''
-<tr VALIGN="%(trVALIGN)s" ALIGN="%(trALIGN)s" NAME="%(ctrl_name)s">
-                     %(fieldText)s
-                     <td VALIGN="center" colspan=2>
-                     <font %(font)s>
-                     %(input)s
-                     </font>
-                     </td>
-                     %(chooseFile)s
-</tr>''' %dictionary
+  <tr VALIGN="%(trVALIGN)s" ALIGN="%(trALIGN)s" NAME="%(ctrl_name)s">
+    %(fieldText)s
+    <td VALIGN="center" colspan=2>
+      <font %(font)s>
+        %(input)s
+       </font>
+    </td>
+    %(chooseFile)s
+  </tr>
+''' %dictionary
 
   else:	
     htmlTableRowText = '''
-<tr VALIGN="%(trVALIGN)s" ALIGN="%(trALIGN)s" NAME="%(ctrl_name)s">
-                     <td VALIGN="%(fieldVALIGN)s" ALIGN="%(fieldALIGN)s" width="%(fieldWidth)s" colspan=2>
-                     <b>%(itemName)s</b>
-                     </td>
-                     <td VALIGN="center" colspan=2>
-                     <font %(font)s>
-                     %(input)s
-                     </font>
-                     </td>
-                     %(chooseFile)s
-</tr>''' %dictionary
+  <tr VALIGN="%(trVALIGN)s" ALIGN="%(trALIGN)s" NAME="%(ctrl_name)s">
+    <td VALIGN="%(fieldVALIGN)s" ALIGN="%(fieldALIGN)s" width="%(fieldWidth)s" colspan=2>
+      <b>
+        %(itemName)s
+      </b>
+    </td>
+      <td VALIGN="center" colspan=2>
+        <font %(font)s>
+          %(input)s
+        </font>
+    </td>
+    %(chooseFile)s
+  </tr>
+''' %dictionary
 
   return htmlTableRowText
 
@@ -184,7 +191,14 @@ def make_edit_link(name, box_type):
   editLink = ""
   if OV.IsPluginInstalled('Olex2Portal'):
     if OV.GetParam('olex2.is_logged_on'):
-      editLink = "<a href='spy.EditHelpItem(%s-%s)'><b>&#187;</b>Edit</a>" %(name, box_type)
+      editLink = '''
+      <a href='spy.EditHelpItem(%s-%s)'>
+        <b>
+          &#187;
+        </b>
+        Edit
+      </a>
+      ''' %(name, box_type)
   return editLink
 
 
@@ -193,9 +207,18 @@ def make_gui_edit_link(name):
   name = name.replace("\\", "/")
   if OV.IsPluginInstalled('Olex2Portal') and OV.GetParam('olex2.is_logged_on'):
     if "index" in name:
-      editLink = "<hr><a href='spy.EditGuiItem(%s)'>Edit INDEX File</a>" %(name)
+      editLink ='''
+      <hr>
+      <a href='spy.EditGuiItem(%s)'>
+        Edit INDEX File
+      </a>
+      ''' %(name)
     else:
-      editLink = "<a href='spy.EditGuiItem(%s)'>Edit</a>" %(name)
+      editLink = '''
+      <a href='spy.EditGuiItem(%s)'>
+        Edit
+      </a>
+      ''' %(name)
 
   return editLink
 OV.registerFunction(make_gui_edit_link)
@@ -267,8 +290,12 @@ def make_help_box(args):
 ''' %(name, name, name)
     
     return_items = r'''
-<a href="spy.make_help_box -name='%s' -popout=True>>htmlhome"><zimg border='0' src='popout.png'></a>
-<a href=htmlhome><zimg border='0' src='return.png'></a>''' %name
+  <a href="spy.make_help_box -name='%s' -popout=True>>htmlhome">
+    <zimg border='0' src='popout.png'>
+  </a>
+  <a href=htmlhome><zimg border='0' src='return.png'>
+  </a>
+''' %name
     
   else:
     str = ""
@@ -278,28 +305,32 @@ def make_help_box(args):
 %s
 <!-- #include tool-top gui/blocks/help-top.htm;image=blank;1; -->
 <tr VALIGN='center' NAME=%s bgcolor="$getVar(gui_html_table_firstcol_colour)">
-      <td colspan=1 width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+      <td colspan=1 width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+      </td>
       <td>
-      <font size='+2'>
-      <b>	
-      %s
-      </b>
-      </font>
+        <font size='+2'>
+          <b>	
+            %s
+          </b>
+        </font>
       </td>
 </tr>
 <tr>
-      <td valign='top' width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-      <td>	
-      <font size='+1'>
-      %s
-      </font>
+      <td valign='top' width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+      </td>
+      <td>
+        <font size='+1'>
+          %s
+        </font>
       </td>
 </tr>
 <tr>
-<td colspan=1 width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-<td align='right'>
-%s
-</td></tr>
+  <td colspan=1 width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+  </td>
+  <td align='right'>
+    %s
+  </td>
+</tr>
 %s
 <!-- #include tool-footer gui/blocks/tool-footer.htm;1; -->
 ''' %(banner_include, name, titleTxt, helpTxt, return_items, editLink)
@@ -359,10 +390,13 @@ def make_warning_html(colspan):
   first_col = make_table_first_col() 
   html = '''
        %s
-       <td colspan="%s" bgcolor="$getVar(gui_html_highlight_colour)">
-       <b>&nbsp;%s</b>
-       </td>
-       </tr>''' %(first_col, colspan, txt)
+         <td colspan="%s" bgcolor="$getVar(gui_html_highlight_colour)">
+          <b>
+            &nbsp;%s
+          </b>
+         </td>
+       </tr>
+       ''' %(first_col, colspan, txt)
   return html
 OV.registerFunction(make_warning_html)
 
@@ -373,8 +407,8 @@ def make_table_first_col(help_name=None, popout=False, help_image='large'):
     help = make_help_href(help_name, popout, image=help_image)
   html ='''
 <tr>
-<td valign='top' width='2' align='center' bgcolor='$getVar(gui_html_table_firstcol_colour)'>
-%s
+  <td valign='top' width='2' align='center' bgcolor='$getVar(gui_html_table_firstcol_colour)'>
+    %s
 </td>
 ''' %help
   return html
@@ -386,7 +420,7 @@ def make_help_href(name, popout, image='normal'):
     image = 'info.png'
   help='''
 <a href="spy.make_help_box -name='%s' -popout='%s'" target="Help me with this">
-<zimg border="0" src="%s">
+  <zimg border="0" src="%s">
 </a>''' %(name, popout, image)
   return help
 
@@ -589,31 +623,82 @@ def format_help(string):
       
   ## find all occurances of <lb> and replace this with a line-break in a table.
   regex = re.compile(r"<lb>", re.X)
-  string = regex.sub(r"</td></tr><tr><td>", string)
+  string = regex.sub(r'''
+    </td>
+  </tr>
+  <tr>
+    <td>''', string)
 
   ## find all occurances of '->' and replace this with an arrow.
   regex = re.compile(r"->", re.X)
-  string = regex.sub(r"<b>&rarr;</b>", string)
+  string = regex.sub(r'''
+  <b>
+    &rarr;
+  </b>
+  ''', string)
   
   ## find all occurances of strings between t^..^t. These are the headers for tip of the day.
   regex = re.compile(r"t \^ (.*?)  \^ t", re.X)
-  string = regex.sub(r"<font color='$getVar(gui_html_highlight_colour)'><b>\1</b></font>&nbsp;", string)
+  string = regex.sub(r'''
+  <font color='$getVar(gui_html_highlight_colour)'>
+    <b>
+      \1
+    </b>
+  </font>
+  &nbsp;
+  ''', string)
 
   ## find all occurances of strings between <<..>>. These are keys to pressthe headers for tip of the day.
   regex = re.compile(r"<< (.*?)  >>", re.X)
-  string = regex.sub(r"<b><code>\1</code></b>", string)
+  string = regex.sub(r'''
+  <b>
+  <code>
+    \1
+  </code>
+  </b>
+  ''', string)
   
   ## find all occurances of strings between n^..^n. These are the notes.
   regex = re.compile(r"n \^ (.*?)  \^ n", re.X)
-  string = regex.sub(r"<table width='%s' border='0' cellpadding='2' cellspacing='4'><tr bgcolor=#efefef><td><font size=-1><b>Note: </b>\1</font></td></tr></table>", string)
+  string = regex.sub(r'''
+  <table width='%s' border='0' cellpadding='2' cellspacing='4'>
+    <tr bgcolor=#efefef>
+      <td>
+        <font size=-1>
+          <b>Note: 
+          </b>
+            \1
+        </font>
+      </td>
+    </tr>
+  </table>
+  ''', string)
   
   ## find all occurances of strings between l[]. These are links to help or tutorial popup boxes.
   regex = re.compile(r"l\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
-  string = regex.sub(r"<font size=+1 color='$getVar(gui_html_highlight_colour)'>&#187;</font><a target='Go to \g<linktext>' href='spy.make_help_box -name=\g<linkurl> -type=\g<linktype>'><b>\g<linktext></b></a>", string)
+  string = regex.sub(r'''
+  <font size=+1 color='$getVar(gui_html_highlight_colour)'>
+    &#187;
+  </font>
+  <a target='Go to \g<linktext>' href='spy.make_help_box -name=\g<linkurl> -type=\g<linktype>'>
+    <b>
+      \g<linktext>
+    </b>
+  </a>
+  ''', string)
 
   ## find all occurances of strings between gui[]. These are links make something happen on the GUI.
   regex = re.compile(r"gui\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
-  string = regex.sub(r"<font size=+1 color='$getVar(gui_html_highlight_colour)'>&#187;</font><a target='Show Me' href='\g<linkurl>'><b>\g<linktext></b></a>", string)
+  string = regex.sub(r'''
+  <font size=+1 color='$getVar(gui_html_highlight_colour)'>
+    &#187;
+  </font>
+  <a target='Show Me' href='\g<linkurl>'>
+    <b>
+      \g<linktext>
+    </b>
+  </a>
+  ''', string)
   
   
   ## find all occurances of strings between XX. These are command line entities.
@@ -622,7 +707,21 @@ def format_help(string):
   m = regex.findall(string)
   colour = "#888888"
   if m:
-    s = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='4'><tr bgcolor='$getVar(gui_html_code_bg_colour)'><td><a href='\2'><b><font size='2' color='%s'><code>>>\2</code></font></b></a></td></tr></table>" %(width, colour), string)
+    s = regex.sub(r'''
+    <table width='%s' border='0' cellpadding='0' cellspacing='4'>
+      <tr bgcolor='$getVar(gui_html_code_bg_colour)'>
+        <td>
+          <a href='\2'>
+            <b>
+              <font size='2' color='%s'>
+              <code>>>\2</code>
+              </font>
+            </b>
+          </a>
+        </td>
+      </tr>
+    </table>
+    ''' %(width, colour), string)
 
   else:
     s = string
@@ -633,7 +732,17 @@ def format_help(string):
   m = regex.findall(string)
   colour = OV.FindValue('gui_html_highlight_colour')
   if m:
-    s = regex.sub(r"<tr><td><b><font color='%s'>\2</font></b> " %colour, string)
+    s = regex.sub(r'''
+    <tr>
+      <td>
+        <b>
+          <font color='%s'>
+            \2
+          </font>
+        </b>
+      </td>
+    </tr>
+    ''' %colour, string)
   else:
     s = string
     
@@ -643,7 +752,15 @@ def format_help(string):
   m = regex.findall(string)
   colour = "#232323"
   if m:
-    s = regex.sub(r"<tr bgcolor='$getVar(gui_html_table_firstcol_colour)'><td><b>\2</b></td></tr><tr><td>", string)
+    s = regex.sub(r'''
+    <tr bgcolor='$getVar(gui_html_table_firstcol_colour)'>
+      <td>
+        <b>\2</b>
+      </td>
+    </tr>
+    <tr>
+      <td>
+    ''', string)
   else:
     s = string
     
@@ -654,7 +771,11 @@ def format_help(string):
   #regex = re.compile(r"  & (.*?)( [^\&\&]* ) & ", re.X)
   m = regex.findall(string)
   if m:
-    s = regex.sub(r"<table border='0'>\2</table>", string)
+    s = regex.sub(r'''
+    <table border=1>
+      \2
+    </table>
+    ''', string)
   else:
     s = string
     
@@ -666,7 +787,11 @@ def reg_glossary(self, string):
   glossary_to_insert = []
   if m:
     link = r"list_table_items?catID=&entry=&table=category&itemss=glossary#" 
-    s = regex.sub(r"<a href='%s\2'>\1</a>" %link, string)
+    s = regex.sub(r'''
+    <a href='%s\2'>
+      \1
+    </a>
+    ''' %link, string)
   else:
     s = string
   if m:
@@ -676,7 +801,11 @@ def reg_glossary(self, string):
   regex = re.compile(r"  \[ l \s (.*? \w+); ( [^\[\]]* ) \] ", re.X)  
   m = regex.findall(s)
   if m:
-    t = regex.sub(r"<a href='\2'>\1</a>", s)
+    t = regex.sub(r'''
+    <a href='\2'>
+      \1
+    </a>
+    ''', s)
   else:
     t = s
     
@@ -687,7 +816,16 @@ def reg_command(self, string):
   m = regex.findall(string)
   colour = OV.FindValue('gui_html_highlight_colour')
   if m:
-    s = regex.sub(r"<br><br><b><font color=%s>\2</font></b><br>" %colour, string)
+    s = regex.sub(r'''
+    <br>
+    <br>
+    <b>
+    <font color=%s>
+      \2
+    </font>
+    </b>
+    <br>
+    ''' %colour, string)
   else:
     s = string
   return s
@@ -734,7 +872,8 @@ def getStyles(fileName):
 <!--
 %s
 -->
-</style>""" %css
+</style>
+""" %css
   return styleHTML
 OV.registerFunction(getStyles)
 
@@ -963,10 +1102,10 @@ def MakeActiveGuiButton(name,cmds,toolname=""):
   d.setdefault('target', OV.TranslatePhrase("%s-target" %n[1]))
   d.setdefault('toolname', toolname)
   txt = '''
-<a href="spy.InActionButton(%(bt)s-%(bn)s,on,%(toolname)s)>>refresh>>%(cmds)s>>echo '%(target)s: OK'>>spy.InActionButton(%(bt)s-%(bn)s,off,%(toolname)s)" 
-target="%(target)s">
-<zimg name=IMG_%(BT)s-%(BN)s%(toolname)s border="0" src="%(bt)s-%(bn)s.png"> 
-</a> '''%d
+    <a href="spy.InActionButton(%(bt)s-%(bn)s,on,%(toolname)s)>>refresh>>%(cmds)s>>echo '%(target)s: OK'>>spy.InActionButton(%(bt)s-%(bn)s,off,%(toolname)s)" target="%(target)s">
+      zimg name=IMG_%(BT)s-%(BN)s%(toolname)s border="0" src="%(bt)s-%(bn)s.png"> 
+    </a>
+    '''%d
   return txt
 OV.registerFunction(MakeActiveGuiButton)
 
@@ -1047,7 +1186,11 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
       txt = OV.TranslatePhrase("tip-%i" %i)
       if j > max_i * 2: break
     #txt += "</td></tr><tr><td align='right'>%s</td></tr>" %make_edit_link("tip", "%i" %i)
-    txt += "</td></tr>%s" %make_edit_link("tip", "%i" %i)
+    txt += '''
+      </td>
+    </tr>
+    %s
+    ''' %make_edit_link("tip", "%i" %i)
 
   elif number == "+1":
     i = current_tooltip_number + 1
@@ -1056,7 +1199,11 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
       i = 1
       txt = OV.TranslatePhrase("tip-%i" %i)
     #txt += "</td></tr><tr><td align='right'>%s</td></tr>" %make_edit_link("tip", "%i" %i)
-    txt += "</td></tr>%s" %make_edit_link("tip", "%i" %i)
+    txt += '''
+      </td>
+    </tr>
+    %s
+    ''' %make_edit_link("tip", "%i" %i)
   elif number == "list":
     txt = ""
     for i in xrange(max_i):
@@ -1073,7 +1220,11 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
     i = int(number)
     txt = OV.TranslatePhrase("tip-%i" %i)
     #txt += "</td></tr><tr><td align='right'>%s</td></tr>" %make_edit_link("tip", "%i" %i)
-    txt += "</td></tr>%s" %make_edit_link("tip", "%i" %i)
+    txt += '''
+      </td>
+    </tr>
+    %s
+    ''' %make_edit_link("tip", "%i" %i)
   current_tooltip_number = i
 
   txt, d = format_help(txt)
