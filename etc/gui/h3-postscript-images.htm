@@ -3,11 +3,11 @@
 
 <!-- FIRST ROW -->
   <table name=PS_SETTINGS_ROW_1 width=100% cellspacing=0 cellpadding=1 bgcolor='#00ff00' >
-    <tr bgcolor='#cccccc'>
+    <tr bgcolor='#dddddd'>
       <td>
         <input
   type="button"
-  name = "select-uiso"
+  name = "MAKE_PS_IMAGE"
   width="25"
   value="Go"
   onclick="run 'brad
@@ -102,9 +102,9 @@ echo 'Image made and placed in FilePath()'">
 </tr>
 </table>
 
-
+<!-- SECOND ROW -->
   <table name=PS_SETTINGS_ROW_2 width=100% cellspacing=0 cellpadding=1 bgcolor='#00ff00'>
-    <tr bgcolor='#dddddd'>
+    <tr bgcolor='#eeeeee'>
       <td name=IMAGE_PS_BONDWIDTH width=14%>
         <input
           type="combo"
@@ -128,7 +128,6 @@ echo 'Image made and placed in FilePath()'">
           width="$GetVar(gui_html_combo_width_2)"
           bgcolor="$getVar(gui_html_input_bg_colour)"
           items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6"
-          height="$getVar(gui_html_input_height)"
           valign='center'
           name="IMAGE_PS_HBONDS"
           width="50"
@@ -220,4 +219,3 @@ echo 'Image made and placed in FilePath()'">
   </table>
 </table>
 
-<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->

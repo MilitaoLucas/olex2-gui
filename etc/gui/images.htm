@@ -1,22 +1,52 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
-<tr>
-	<td width="8" bgcolor="#E9E9ff">
-	</td>
-	<td>
-	  1) <a href='label'>Add labels to the selected atoms</a> | <a href='sel $H>>sel -i>>label'>Add labels to non H atoms</a>
-	</td>
-</tr>
+<tr name=IMAGE_SETTINGS_ROW_1>
+  <td width="8" bgcolor="#E9E9ff">
+  </td>
+  <td width=100%>
+  
+<!-- FIRST ROW -->
+  <table name=PS_SETTINGS_ROW_1 width=100% cellspacing=0 cellpadding=1>
+    <tr>
+      <td>
+        1) <a href='label -type=GetValue(IMAGE_SETTINGS_LABEL_TYPE)'>Add labels to the selected atoms</a>|
+        <a href='sel $H>>sel -i>>label -type=GetValue(IMAGE_SETTINGS_LABEL_TYPE)'>to non H atoms</a>
+      </td>
+      <td>
+        <input
+          type="combo"
+          height="$GetVar(gui_html_combo_height)"
+          width="80"
+          bgcolor="$getVar(gui_html_input_bg_colour)"
+          items="default;subscript;bracket"
+          height="$getVar(gui_html_input_height)"
+          valign='center'
+          name="IMAGE_SETTINGS_LABEL_TYPE"
+          value='default'
+          label="Style "
+          manage
+        >
+      </td>
+    </tr>
+  </table>
 
-<tr>
-	<td width="8" bgcolor="#E9E9ff"></td>
-	<td>
-	  2) Move the labels with the left mouse while holding down the SHIFT key
-	</td>
+<tr name=IMAGE_SETTINGS_ROW_2>
+  <td width="8" bgcolor="#E9E9ff">
+  </td>
+  <td width=100%>
+
+<!-- SECOND ROW -->
+  <table name=PS_SETTINGS_ROW_2 width=100% cellspacing=0 cellpadding=1>
+    <tr>
+      <td>
+        2) Move the labels with the left mouse while holding down the SHIFT key
+      </td>
+    </tr>
+  </table>
 </tr>
 
 
 <!-- #include h3-bitmap-images gui\h3-bitmap-images.htm;gui\blocks\tool-h3-off.htm;image=h3-bitmap-images;onclick=itemstate h3-postscript-images 2>>setfont Picture_labels spy.GetParam(snum.image.font_bitmap);colspan=1;2; -->
 <!-- #include h3-postscript-images gui\h3-postscript-images.htm;gui\blocks\tool-h3-off.htm;image=h3-postscript-images;onclick=itemstate h3-bitmap-images 2>>setfont Picture_labels spy.GetParam(snum.image.font_ps);colspan=1;2; -->
-	
+
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
