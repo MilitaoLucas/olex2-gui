@@ -68,13 +68,13 @@ SetValue(SNUM_EDEN_VALUE,eval(GetValue(SNUM_EDEN_SLIDE)/10))>>
 xgrid.Scale(eval(GetValue(SNUM_EDEN_SLIDE)/10))
 ">
 	</td>
-	<td colspan = '1'>
+	<td colspan = '1' bgcolor=#ff0000>
      <input
+			bgcolor="$getVar(gui_html_table_bg_colour)"
+			fgcolor="$GetVar(gui_html_font_colour)"
 			type="checkbox"
 			value="%Mask%"
 			valign="center"
-			bgcolor="$getVar(gui_html_table_bg_colour)"
-			fgcolor="$GetVar(gui_html_font_colour)"
 			name="SNUM_MAP_MASK"
 			checked="$spy.GetParam(snum.map.mask)"
 			height='16'

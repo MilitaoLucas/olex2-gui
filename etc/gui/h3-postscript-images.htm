@@ -1,88 +1,223 @@
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
 
-<table><tr><td>
 
-<a href="run 'brad GetValue(IMAGE_PS_BONDWIDTH)'>>run 'pictps GetValue(IMAGE_PS_NAME).ps GetData(COLOR_LINE) GetData(COLOR_FILL) GetData(COLOR_BOND)'>>brad 0.8>>echo 'Image made'">Make</a>
-</td><td>
-Name: 
-</td><td>
-  <input 
-    type="text" 
-    height="$getVar(gui_html_input_height)"
-    bgcolor="$getVar(gui_html_input_bg_colour)" 
-    valign='center' 
-    name="IMAGE_PS_NAME"  
-    width="80"
-    height="$getVar(gui_html_input_height)"
-    value = "$FileName()"
-    manage
-  >
-</td><td>
-Lines
-</td><td>
-  <input
-    type="checkbox"
-    height="$getVar(gui_html_checkbox_height)"
-    name = "COLOR_LINE"
-    width="17"
-    oncheck="SetData(COLOR_LINE,-color_line)"
-    onuncheck="SetData(COLOR_LINE,' ')"
-    manage>
-</td><td>
-Bonds
-</td><td>
-  <input
-    type="checkbox"
-    height="$getVar(gui_html_checkbox_height)"
-    name = "COLOR_BOND"
-    width="17"
-    oncheck="SetData(COLOR_BOND,-color_bond)"
-    onuncheck="SetData(COLOR_BOND,' ')"
-    manage>
-</td><td>
-Fill
-</td><td>
-  <input
-    type="checkbox"
-    height="$getVar(gui_html_checkbox_height)"
-    name = "COLOR_FILL"
-    width="17"
-    oncheck="SetData(COLOR_FILL,-color_fill)"
-    onuncheck="SetData(COLOR_FILL,' ')"
-    manage>
-</td></tr>
-<tr><td colspan=3 bgcolor='#ff0000'>
+<!-- FIRST ROW -->
+  <table name=PS_SETTINGS_ROW_1 width=100% cellspacing=0 cellpadding=1 bgcolor='#00ff00' >
+    <tr bgcolor='#cccccc'>
+      <td>
+        <input
+  type="button"
+  name = "select-uiso"
+  width="25"
+  value="Go"
+  onclick="run 'brad
+GetValue(IMAGE_PS_BONDWIDTH)'>>
+run 'pictps
+  GetValue(IMAGE_PS_NAME).ps
+  GetData(COLOR_LINE)
+  GetData(COLOR_FILL)
+  GetData(COLOR_BOND)
+  GetData(IMAGE_PS_PERSPECTIVE)
+  -lw_ellipse=GetValue(IMAGE_PS_LINEWIDTH)
+  -lw_octant=GetValue(IMAGE_PS_OCTANT_LINEWIDTH)
+  -lw_pie=GetValue(IMAGE_PS_OCTANT_PIEWIDTH)
+  -lw_font=GetValue(IMAGE_PS_FONTWEIGHT)
+  -div_pie=GetValue(IMAGE_PS_OCTANT_COUNT)
+  -scale_hb=GetValue(IMAGE_PS_HBONDS)
+'>>
+brad 0.8>>
+echo 'Image made and placed in FilePath()'">
+  </td>
+  <td>
+    <input 
+      type="text"
+      height="$getVar(gui_html_input_height)"
+      bgcolor="$getVar(gui_html_input_bg_colour)"
+      valign='center'
+      name="IMAGE_PS_NAME"
+      width="80"
+      height="$getVar(gui_html_input_height)"
+      value = "$FileName()"
+      label='Name '
+      manage
+    >
+  </td>
+  <td align='right'>
+    Lines
+  </td>
+  <td>
+    <input
+      type="checkbox"
+      height="$getVar(gui_html_checkbox_height)"
+      width="$getVar(gui_html_checkbox_width)"
+      name = "COLOR_LINE"
+      width="14"
+      oncheck="SetData(COLOR_LINE,-color_line)"
+      onuncheck="SetData(COLOR_LINE,' ')"
+      manage>
+  </td>
+  <td align='right'>
+    Bonds
+  </td>
+  <td>
+    <input
+      type="checkbox"
+      height="$getVar(gui_html_checkbox_height)"
+      width="$getVar(gui_html_checkbox_width)"
+      name = "COLOR_BOND"
+      fgcolor="$GetVar(gui_html_font_colour)"
+      bgcolor="$getVar(gui_html_table_bg_colour)"
+      oncheck="SetData(COLOR_BOND,-color_bond)"
+      onuncheck="SetData(COLOR_BOND,' ')"
+      manage>
+  </td>
+  <td align='right'>
+    Fill
+  </td>
+  <td>
+    <input
+      type="checkbox"
+      height="$getVar(gui_html_checkbox_height)"
+      width="$getVar(gui_html_checkbox_width)"
+      name = "COLOR_FILL"
+      width="17"
+      oncheck="SetData(COLOR_FILL,-color_fill)"
+      onuncheck="SetData(COLOR_FILL,' ')"
+      manage>
+  </td>
+  <td align='right'>
+    Pers
+  </td>
+  <td>
+    <input
+      type="checkbox"
+      height="$getVar(gui_html_checkbox_height)"
+      width="$getVar(gui_html_checkbox_width)"
+      name = "IMAGE_PS_PERSPECTIVE"
+      width="17"
+      oncheck="SetData(IMAGE_PS_PERSPECTIVE,-p)"
+      onuncheck="SetData(IMAGE_PS_PERSPECTIVE,' ')"
+      manage>
+  </td>
+</tr>
+</table>
 
-  <input 
-    type="combo" 
-    height="$GetVar(gui_html_combo_height)"
-    bgcolor="$getVar(gui_html_input_bg_colour)" 
-    items="0.2;0.4;0.6;0.8;1.0;1.2" 
-    height="$getVar(gui_html_input_height)"
-    valign='center' 
-    name="IMAGE_PS_LINEWIDTH"  
-    width="50"
-    value='0.9'
-    label="Line Width "
-    manage
-  >
-</td><td colspan=4>
-  <input 
-    type="combo" 
-    height="$GetVar(gui_html_combo_height)"
-    bgcolor="$getVar(gui_html_input_bg_colour)" 
-    items="0.2;0.4;0.6;0.8;1.0" 
-    height="$getVar(gui_html_input_height)"
-    valign='center' 
-    name="IMAGE_PS_BONDWIDTH"  
-    width="50"
-    value='0.6'
-    label="Bond Width "
-    manage
-  >
-  
-  
 
-</td></tr></table>
+  <table name=PS_SETTINGS_ROW_2 width=100% cellspacing=0 cellpadding=1 bgcolor='#00ff00'>
+    <tr bgcolor='#dddddd'>
+      <td name=IMAGE_PS_BONDWIDTH width=14%>
+        <input
+          type="combo"
+          height="$GetVar(gui_html_combo_height)"
+          width="$GetVar(gui_html_combo_width_2)"
+          bgcolor="$getVar(gui_html_input_bg_colour)"
+          items="0.2;0.4;0.6;0.8;1.0"
+          height="$getVar(gui_html_input_height)"
+          valign='center'
+          name="IMAGE_PS_BONDWIDTH"
+          width="50"
+          value='0.6'
+          label="Bonds "
+          manage
+        >
+      </td>
+      <td name=IMAGE_PS_HBONDS width=14%>
+        <input 
+          type="combo"
+          height="$GetVar(gui_html_combo_height)"
+          width="$GetVar(gui_html_combo_width_2)"
+          bgcolor="$getVar(gui_html_input_bg_colour)"
+          items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6"
+          height="$getVar(gui_html_input_height)"
+          valign='center'
+          name="IMAGE_PS_HBONDS"
+          width="50"
+          value='0.6'
+          label="H Atoms "
+          manage
+        >
+        </td>
+      <td name=IMAGE_PS_FONTWEIGHT width=14%>
+        <input 
+          type="combo"
+          height="$GetVar(gui_html_combo_height)"
+          width="$GetVar(gui_html_combo_width_2)"
+          bgcolor="$getVar(gui_html_input_bg_colour)"
+          items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6;2.0;"
+          height="$getVar(gui_html_input_height)"
+          valign='center'
+          name="IMAGE_PS_FONTWEIGHT"
+          width="50"
+          value='0.6'
+          label="Font "
+          manage
+        >
+        </td>
+      <td name=IMAGE_PS_OCTANT_COUNT width=14%>
+        <input
+          type="combo"
+          height="$GetVar(gui_html_combo_height)"
+          width="$GetVar(gui_html_combo_width_2)"
+          bgcolor="$getVar(gui_html_input_bg_colour)"
+          items="2;3;4;5;6;7;8;9;10;"
+          height="$getVar(gui_html_input_height)"
+          valign='center' 
+          name="IMAGE_PS_OCTANT_COUNT"
+          width="50"
+          value='5'
+          label="Octants "
+          manage
+        >
+        </td>
+      <td name=IMAGE_PS_ELLIPSE_LINEWIDTH width=14%>
+        <input
+          type="combo"
+          height="$GetVar(gui_html_combo_height)"
+          width="$GetVar(gui_html_combo_width_2)"
+          bgcolor="$getVar(gui_html_input_bg_colour)" 
+          items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6" 
+          height="$getVar(gui_html_input_height)"
+          valign='center' 
+          name="IMAGE_PS_LINEWIDTH"
+          value='1.0'
+          label="Outline "
+          manage
+        >
+      </td>
+      <td name=IMAGE_PS_OCTANT_LINEWIDTH width=14%>
+        <input
+          type="combo"
+          height="$GetVar(gui_html_combo_height)"
+          width="$GetVar(gui_html_combo_width_2)"
+          bgcolor="$getVar(gui_html_input_bg_colour)"
+          items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6"
+          height="$getVar(gui_html_input_height)"
+          valign='center'
+          name="IMAGE_PS_OCTANT_LINEWIDTH"
+          width="50"
+          value='1.0'
+          label="Octant "
+          manage
+        >
+      </td>
+      <td name=IMAGE_PS_OCTANT_PIEWIDTH width=14%>
+        <input 
+          type="combo"
+          height="$GetVar(gui_html_combo_height)"
+          width="$GetVar(gui_html_combo_width_2)"
+          bgcolor="$getVar(gui_html_input_bg_colour)"
+          items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6"
+          height="$getVar(gui_html_input_height)"
+          valign='center'
+          name="IMAGE_PS_OCTANT_PIEWIDTH"
+          width="50"
+          value='0.6'
+          label="Pie "
+          manage
+        >
+        </td>
+    </tr>
+  </table>
+</table>
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
