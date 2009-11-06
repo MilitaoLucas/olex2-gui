@@ -1,64 +1,62 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
-<tr name=IMAGE_SETTINGS_ROW_1>
-  <td width="8" bgcolor="#E9E9ff">
-  </td>
-  <td width=100%>
-  
-<!-- FIRST ROW -->
-  <table name=PS_SETTINGS_ROW_1 width=100% cellspacing=0 cellpadding=1>
-    <tr>
-      <td>
-        1) <a href='label -type=GetValue(IMAGE_SETTINGS_LABEL_TYPE)'>Add labels to the selected atoms</a>|
-        <a href='sel $H>>sel -i>>label -type=GetValue(IMAGE_SETTINGS_LABEL_TYPE)'>to non H atoms</a>
-      </td>
-      <td>
-        <input
-          type="combo"
-          height="$GetVar(gui_html_combo_height)"
-          width="80"
-          bgcolor="$getVar(gui_html_input_bg_colour)"
-          items="default;subscript;brackets"
-          height="$getVar(gui_html_input_height)"
-          valign='center'
-          name="IMAGE_SETTINGS_LABEL_TYPE"
-          value='default'
-          label="Style "
-          manage
-        >
-      </td>
-    </tr>
-  </table>
-</tr>
 
-<tr name=IMAGE_SETTINGS_ROW_2>
-  <td width="8" bgcolor="#E9E9ff">
+<!-- FIRST ROW -->
+<tr name=LABEL_SETTINGS>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td name=HREF_MAKE_LABEL>
+    1) <a href='label -type=GetValue(IMAGE_SETTINGS_LABEL_TYPE)'>Add labels to the selected atoms</a>|
+    <a href='sel $H>>sel -i>>label -type=GetValue(IMAGE_SETTINGS_LABEL_TYPE)'>to non H atoms</a>
   </td>
-  <td width=100%>
+  <td name=IMAGE_SETTINGS_LABEL_TYPE>
+    <input
+      type="combo"
+      height="$GetVar(gui_html_combo_height)"
+      width="80"
+      bgcolor="$getVar(gui_html_input_bg_colour)"
+      items="default;subscript;brackets"
+      height="$getVar(gui_html_input_height)"
+      valign='center'
+      name="IMAGE_SETTINGS_LABEL_TYPE"
+      value='default'
+      label="Style "
+      manage
+    >
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
 
 <!-- SECOND ROW -->
-  <table name=PS_SETTINGS_ROW_2 width=100% cellspacing=0 cellpadding=1>
-    <tr>
-      <td>
-        2) Move the labels with the left mouse while holding down the SHIFT key
-      </td>
-    </tr>
-  </table>
+<tr name=IMAGE_SETTINGS_ROW_1>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td name=LABEL_INSTRUCTIONS_2>
+    2) Move the labels with the left mouse while holding down the SHIFT key
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
-
 
 <!-- THIRD ROW -->
-  <table name=PS_SETTINGS_ROW_3 width=100% cellspacing=0 cellpadding=1>
-    <tr>
-      <td>
-        3) <a href='EditMaterial PLabels'>Choose the label colour</a> Change <b>text</b> and <b>background</b> (Plane)!
-      </td>
-    </tr>
-  </table>
+<tr name=IMAGE_SETTINGS_ROW_2>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td name=LABEL_INSTRUCTIONS_3>
+    3) <a href='EditMaterial PLabels'>Choose the label colour</a> Change <b>text</b> and <b>background</b> (Plane)!
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
-
+<!-- FOURTH ROW -->
+<tr name=INCLUDE_H3_BITMAP_IMAGES>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include h3-bitmap-images gui\h3-bitmap-images.htm;gui\blocks\tool-h3-off.htm;image=h3-bitmap-images;onclick=itemstate h3-postscript-images 2>>setfont Picture_labels spy.GetParam(snum.image.font_bitmap);colspan=1;2; -->
+</tr>
+
+<!-- FIFTH ROW -->
+<tr name=INCLUDE_H3_PS_IMAGES>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include h3-postscript-images gui\h3-postscript-images.htm;gui\blocks\tool-h3-off.htm;image=h3-postscript-images;onclick=itemstate h3-bitmap-images 2>>setfont Picture_labels spy.GetParam(snum.image.font_ps);colspan=1;2; -->
+</tr>
 
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->

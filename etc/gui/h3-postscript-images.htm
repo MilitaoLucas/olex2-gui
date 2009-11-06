@@ -1,9 +1,9 @@
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
 
-
 <!-- FIRST ROW -->
-  <table name=PS_SETTINGS_ROW_1 width=100% cellspacing=0 cellpadding=1 bgcolor='#00ff00' >
-    <tr bgcolor='#dddddd'>
+<tr name=IMAGE_PS_ROW_1>
+<!-- #include tool-help-column gui\blocks\tool-first-column.htm;help_ext=mode_name;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
       <td>
         <input
   type="button"
@@ -99,123 +99,122 @@ echo 'Image made and placed in FilePath()'">
       onuncheck="SetData(IMAGE_PS_PERSPECTIVE,' ')"
       manage>
   </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
-</table>
 
 <!-- SECOND ROW -->
-  <table name=PS_SETTINGS_ROW_2 width=100% cellspacing=0 cellpadding=1 bgcolor='#00ff00'>
-    <tr bgcolor='#eeeeee'>
-      <td name=IMAGE_PS_BONDWIDTH width=14%>
-        <input
-          type="combo"
-          height="$GetVar(gui_html_combo_height)"
-          width="$GetVar(gui_html_combo_width_2)"
-          bgcolor="$getVar(gui_html_input_bg_colour)"
-          items="0.2;0.4;0.6;0.8;1.0"
-          height="$getVar(gui_html_input_height)"
-          valign='center'
-          name="IMAGE_PS_BONDWIDTH"
-          width="50"
-          value='0.6'
-          label="Bonds "
-          manage
-        >
-      </td>
-      <td name=IMAGE_PS_HBONDS width=14%>
-        <input 
-          type="combo"
-          height="$GetVar(gui_html_combo_height)"
-          width="$GetVar(gui_html_combo_width_2)"
-          bgcolor="$getVar(gui_html_input_bg_colour)"
-          items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6"
-          valign='center'
-          name="IMAGE_PS_HBONDS"
-          width="50"
-          value='0.6'
-          label="H Atoms "
-          manage
-        >
-        </td>
-      <td name=IMAGE_PS_FONTWEIGHT width=14%>
-        <input 
-          type="combo"
-          height="$GetVar(gui_html_combo_height)"
-          width="$GetVar(gui_html_combo_width_2)"
-          bgcolor="$getVar(gui_html_input_bg_colour)"
-          items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6;2.0;"
-          height="$getVar(gui_html_input_height)"
-          valign='center'
-          name="IMAGE_PS_FONTWEIGHT"
-          width="50"
-          value='0.6'
-          label="Font "
-          manage
-        >
-        </td>
-      <td name=IMAGE_PS_OCTANT_COUNT width=14%>
-        <input
-          type="combo"
-          height="$GetVar(gui_html_combo_height)"
-          width="$GetVar(gui_html_combo_width_2)"
-          bgcolor="$getVar(gui_html_input_bg_colour)"
-          items="2;3;4;5;6;7;8;9;10;"
-          height="$getVar(gui_html_input_height)"
-          valign='center' 
-          name="IMAGE_PS_OCTANT_COUNT"
-          width="50"
-          value='5'
-          label="Octants "
-          manage
-        >
-        </td>
-      <td name=IMAGE_PS_ELLIPSE_LINEWIDTH width=14%>
-        <input
-          type="combo"
-          height="$GetVar(gui_html_combo_height)"
-          width="$GetVar(gui_html_combo_width_2)"
-          bgcolor="$getVar(gui_html_input_bg_colour)" 
-          items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6" 
-          height="$getVar(gui_html_input_height)"
-          valign='center' 
-          name="IMAGE_PS_LINEWIDTH"
-          value='1.0'
-          label="Outline "
-          manage
-        >
-      </td>
-      <td name=IMAGE_PS_OCTANT_LINEWIDTH width=14%>
-        <input
-          type="combo"
-          height="$GetVar(gui_html_combo_height)"
-          width="$GetVar(gui_html_combo_width_2)"
-          bgcolor="$getVar(gui_html_input_bg_colour)"
-          items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6"
-          height="$getVar(gui_html_input_height)"
-          valign='center'
-          name="IMAGE_PS_OCTANT_LINEWIDTH"
-          width="50"
-          value='1.0'
-          label="Octant "
-          manage
-        >
-      </td>
-      <td name=IMAGE_PS_OCTANT_PIEWIDTH width=14%>
-        <input 
-          type="combo"
-          height="$GetVar(gui_html_combo_height)"
-          width="$GetVar(gui_html_combo_width_2)"
-          bgcolor="$getVar(gui_html_input_bg_colour)"
-          items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6"
-          height="$getVar(gui_html_input_height)"
-          valign='center'
-          name="IMAGE_PS_OCTANT_PIEWIDTH"
-          width="50"
-          value='0.6'
-          label="Pie "
-          manage
-        >
-        </td>
-    </tr>
-  </table>
-</table>
-
+<tr name=IMAGE_PS_ROW_2>
+<!-- #include tool-help-column gui\blocks\tool-first-column.htm;help_ext=mode_name;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td name=IMAGE_PS_BONDWIDTH width=14%>
+    <input
+      type="combo"
+      height="$GetVar(gui_html_combo_height)"
+      width="$GetVar(gui_html_combo_width_2)"
+      bgcolor="$getVar(gui_html_input_bg_colour)"
+      items="0.2;0.4;0.6;0.8;1.0"
+      height="$getVar(gui_html_input_height)"
+      valign='center'
+      name="IMAGE_PS_BONDWIDTH"
+      width="50"
+      value='0.6'
+      label="Bonds "
+      manage
+    >
+  </td>
+  <td name=IMAGE_PS_HBONDS width=14%>
+    <input 
+      type="combo"
+      height="$GetVar(gui_html_combo_height)"
+      width="$GetVar(gui_html_combo_width_2)"
+      bgcolor="$getVar(gui_html_input_bg_colour)"
+      items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6"
+      valign='center'
+      name="IMAGE_PS_HBONDS"
+      width="50"
+      value='0.6'
+      label="H Atoms "
+      manage
+    >
+    </td>
+  <td name=IMAGE_PS_FONTWEIGHT width=14%>
+    <input 
+      type="combo"
+      height="$GetVar(gui_html_combo_height)"
+      width="$GetVar(gui_html_combo_width_2)"
+      bgcolor="$getVar(gui_html_input_bg_colour)"
+      items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6;2.0;"
+      height="$getVar(gui_html_input_height)"
+      valign='center'
+      name="IMAGE_PS_FONTWEIGHT"
+      width="50"
+      value='0.6'
+      label="Font "
+      manage
+    >
+    </td>
+  <td name=IMAGE_PS_OCTANT_COUNT width=14%>
+    <input
+      type="combo"
+      height="$GetVar(gui_html_combo_height)"
+      width="$GetVar(gui_html_combo_width_2)"
+      bgcolor="$getVar(gui_html_input_bg_colour)"
+      items="2;3;4;5;6;7;8;9;10;"
+      height="$getVar(gui_html_input_height)"
+      valign='center' 
+      name="IMAGE_PS_OCTANT_COUNT"
+      width="50"
+      value='5'
+      label="Octants "
+      manage
+    >
+    </td>
+  <td name=IMAGE_PS_ELLIPSE_LINEWIDTH width=14%>
+    <input
+      type="combo"
+      height="$GetVar(gui_html_combo_height)"
+      width="$GetVar(gui_html_combo_width_2)"
+      bgcolor="$getVar(gui_html_input_bg_colour)" 
+      items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6" 
+      height="$getVar(gui_html_input_height)"
+      valign='center' 
+      name="IMAGE_PS_LINEWIDTH"
+      value='1.0'
+      label="Outline "
+      manage
+    >
+  </td>
+  <td name=IMAGE_PS_OCTANT_LINEWIDTH width=14%>
+    <input
+      type="combo"
+      height="$GetVar(gui_html_combo_height)"
+      width="$GetVar(gui_html_combo_width_2)"
+      bgcolor="$getVar(gui_html_input_bg_colour)"
+      items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6"
+      height="$getVar(gui_html_input_height)"
+      valign='center'
+      name="IMAGE_PS_OCTANT_LINEWIDTH"
+      width="50"
+      value='1.0'
+      label="Octant "
+      manage
+    >
+  </td>
+  <td name=IMAGE_PS_OCTANT_PIEWIDTH width=14%>
+    <input 
+      type="combo"
+      height="$GetVar(gui_html_combo_height)"
+      width="$GetVar(gui_html_combo_width_2)"
+      bgcolor="$getVar(gui_html_input_bg_colour)"
+      items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6"
+      height="$getVar(gui_html_input_height)"
+      valign='center'
+      name="IMAGE_PS_OCTANT_PIEWIDTH"
+      width="50"
+      value='0.6'
+      label="Pie "
+      manage
+    >
+    </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
