@@ -1,103 +1,103 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
-<tr>
-	<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=model;1; -->
-	<td colspan='2'>
-		<!-- #includeif IsFileType(ires) main-toolbar-2 gui\main-toolbar-2.htm;1; -->
-	</td>
+
+<tr name=MAIN_TOOLBAR_MODEL>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=model;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td name=HREF_MAKE_LABEL>
+<!-- #includeif IsFileType(ires) main-toolbar-2 gui\main-toolbar-2.htm;1; -->
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
-<tr VALIGN='center' NAME='Tools'>
+<tr name=MAIN_TOOLBAR>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=quicktools;1; -->
-  <td colspan='2'>
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td>
     <a 
       href="name $Q C"
       target="%Q To C-target%">
-      <zimg name="qc" border="0" src="gui/images/toolbar-QC.png">
+      <zimg name="qc" border="0" src="gui/images/toolbar-QC.png"/>
     </a>
     &nbsp;
-		
+
     <a 
       href="name $Q H"
       target="%Q To H-target%">
-      <zimg name="qh" border="0" src="gui/images/toolbar-QH.png">
+      <zimg name="qh" border="0" src="gui/images/toolbar-QH.png"/>
     </a>
     &nbsp;
-		
+  
     <a 
       href="clean"
       target="%Tidy Structure-target%">
-      <zimg border="0" src="gui/images/toolbar-tidy.png">
+      <zimg border="0" src="gui/images/toolbar-tidy.png"/>
     </a>
-    &nbsp;			
+    &nbsp;
     <a 
       href="fixunit>>updatehtml"
       target="%Fix Unit-target% ">
-      <zimg border="0" src="gui/images/toolbar-OK.png">
+      <zimg border="0" src="gui/images/toolbar-OK.png"/>
     </a>
-
-  &nbsp;
-  &nbsp;
-
-  <a 
-    href="mode hfix 43"
-    target="%HFIX 43-target%">
-    <zimg border="0" src="gui/images/toolbar-sp2-1H.png">
-  </a>
-  &nbsp;
-
-  <a href="mode hfix 13"
-    target="%HFIX 13-target%">
-    <zimg border="0" src="gui/images/toolbar-sp3-1H.png">
-  </a>&nbsp;
-
-  <a 
-    href="mode hfix 23"
-    target="%HFIX 23-target%">
-    <zimg border="0" src="gui/images/toolbar-sp3-2H.png">
-  </a>&nbsp;
-
-  <a 
-    href="mode hfix 137"
-    target="%HFIX 137-target%">
-    <zimg border="0" src="gui/images/toolbar-sp3-3H.png">
-  </a>
-  &nbsp;
-
-  <a 
-    href="kill $H"
-    target="%Kill H-target% ">
-    <zimg border="0" src="gui/images/toolbar-killH.png">
-  </a>
-
-  &nbsp;
-  &nbsp;
-
-  <a 
-    href="showQ"
-    target="%Toggle Q-target%">
-    <zimg border="0" src="gui/images/toolbar-Q.png">
-  </a>&nbsp;
-
-  <a 
-    href="showH"
-    target="%Toggle H-target%">
-    <zimg border="0" src="gui/images/toolbar-H.png">
-  </a>
-</td>
-</tr>	
-
-
-<tr VALIGN='center' NAME='Labels'>
-  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+  
+    &nbsp;
+    &nbsp;
+  
+    <a 
+      href="mode hfix 43"
+      target="%HFIX 43-target%">
+      <zimg border="0" src="gui/images/toolbar-sp2-1H.png"/>
+    </a>
+    &nbsp;
+  
+    <a href="mode hfix 13"
+      target="%HFIX 13-target%">
+      <zimg border="0" src="gui/images/toolbar-sp3-1H.png"/>
+    </a>&nbsp;
+  
+    <a 
+      href="mode hfix 23"
+      target="%HFIX 23-target%">
+      <zimg border="0" src="gui/images/toolbar-sp3-2H.png"/>
+    </a>&nbsp;
+    <a 
+      href="mode hfix 137"
+      target="%HFIX 137-target%">
+      <zimg border="0" src="gui/images/toolbar-sp3-3H.png"/>
+    </a>
+    &nbsp;
+    <a 
+      href="kill $H"
+      target="%Kill H-target% ">
+      <zimg border="0" src="gui/images/toolbar-killH.png"/>
+    </a>
+    &nbsp;
+    &nbsp;
+    <a 
+      href="showQ"
+      target="%Toggle Q-target%">
+      <zimg border="0" src="gui/images/toolbar-Q.png"/>
+    </a>&nbsp;
+  
+    <a 
+      href="showH"
+      target="%Toggle H-target%">
+      <zimg border="0" src="gui/images/toolbar-H.png"/>
+    </a>
   </td>
-  <td width=20%>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
+
+<tr name=LABEL_COMBO_BOX>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=quicktools;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td name=LABEL_COMBO_BOX_LABEL width=20%>
     <b>%Labels%</b>
   </td>
-  <td>
+  <td name=COMBO_LABEL_COMBO_BOX>
     <input 
       type='combo'
       width='$eval(htmlpanelwidth()-105)'
-	  height="$getVar(gui_html_input_height)"
+      height="$getVar(gui_html_input_height)"
       name='set_label_content'
       value=''
       items='%Toggle On/Off%<-;%Atom Names%<-l;%Occupancy% (None if fully occupied)<-o;%Parts%<-p;%Link-Code%<-v;%H Atom Labels%<-h l;%Fixed Parameters%<-f;Variables<-v;AFIX Commands<-h a;Q Peak Intensities<-qi'
@@ -107,11 +107,16 @@
       readonly='readonly'
     >
   </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
-</table>
 
-<!-- #include tool-table-header gui\blocks\tool-table-header.htm;1; -->
+<tr name=Q_PEAK_SLIDER>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=model;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <!-- #include q-peak-slider gui\snippets\snippet-q-peak-slider.htm;1; -->
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
+
 <!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
 
 <!-- %Electron Density Peaks% -->
