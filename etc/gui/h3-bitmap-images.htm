@@ -1,20 +1,21 @@
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
 
-
 <!-- FIRST ROW -->
-  <table name=BITMAP_SETTINGS_ROW_1 width=100% cellspacing=0 cellpadding=1 bgcolor='#00ff00' >
-    <tr bgcolor='#dddddd'>
-      <td colspan=7>
+<tr name=IMAGE_BITMAP_ROW_1>
+<!-- #include tool-help-column gui\blocks\tool-first-column.htm;help_ext=mode_name;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+      <td>
         <a href="setfont Picture_labels ChooseFont(Olex2)>>spy.SetParam(snum.image.font_bitmap,GetFont(Picture_labels))">Choose Label Font (Olex2)</a> | 
         <a href="setfont Picture_labels ChooseFont()>>spy.SetParam(snum.image.font_bitmap,GetFont(Picture_labels))">Choose Label Font (System)</a>
       </td>
-    </tr>
-  </table>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
 
 
 <!-- SECOND ROW -->
-  <table name=BITMAP_SETTINGS_ROW_2 width=100% cellspacing=0 cellpadding=1 bgcolor='#00ff00'>
-    <tr bgcolor='#eeeeee'>
+<tr name=IMAGE_BITMAP_ROW_2>
+<!-- #include tool-help-column gui\blocks\tool-first-column.htm;help_ext=mode_name;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
       <td>
         <input
           type="button"
@@ -74,6 +75,6 @@ cursor()">
           value='2'
         >
       </td>
-    </tr>
-  </table>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
 
