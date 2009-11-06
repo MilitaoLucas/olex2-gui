@@ -1103,13 +1103,11 @@ def MakeActiveGuiButton(name,cmds,toolname=""):
   d.setdefault('toolname', toolname)
   txt = '''
     <a href="spy.InActionButton(%(bt)s-%(bn)s,on,%(toolname)s)>>refresh>>%(cmds)s>>echo '%(target)s: OK'>>spy.InActionButton(%(bt)s-%(bn)s,off,%(toolname)s)" target="%(target)s">
-      zimg name=IMG_%(BT)s-%(BN)s%(toolname)s border="0" src="%(bt)s-%(bn)s.png"> 
+      <zimg name=IMG_%(BT)s-%(BN)s%(toolname)s border="0" src="%(bt)s-%(bn)s.png"> 
     </a>
     '''%d
   return txt
 OV.registerFunction(MakeActiveGuiButton)
-
-
 
 
 def InActionButton(name,state,toolname=""):
