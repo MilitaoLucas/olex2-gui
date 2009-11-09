@@ -973,6 +973,10 @@ def runSadabs():
   #olx.WaitFor('process') # uncomment me!http://dimas.dur.ac.uk/olex-distro-odac/1.0-alpha/Durham-OLEX2-Demo/AutoChem%20Installer.exe
 OV.registerFunction(runSadabs)
 
+def GetTag():
+  return OV.GetTag()
+OV.registerFunction(GetTag)
+
 def getKey(key_directory=None, specific_key = None):
   if sys.platform[:3] != 'win':
     return None
