@@ -82,7 +82,6 @@
     <item title="Tools;Skin Setttings" macro="config">
 
     <item title="Model;Refine \tCtrl+R" macro="refine" before='Help'>
-    <item title="Model;Refine with Tidy" macro="refineit">
     <item title="Model;#" macro="">
     <item title="Model;Q-->C" macro="name $Q C>>refine">
     <item title="Model;Tidy" macro="tidy">
