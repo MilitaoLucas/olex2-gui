@@ -1,8 +1,9 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
 
-<tr>
-
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=;1; -->
+<!-- FIRST ROW -->
+<tr name=SELECT_EXCLUSIVE_INCLUSIVE>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Select;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
   <td width = "50%">
     %Exclusive%:
@@ -19,10 +20,16 @@
     <a href="sel $N">N</a>&nbsp;
     <a href="sel $O">O</a>&nbsp;
   </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
 </tr>
 
-<tr>
-  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
+
+<!-- SECOND ROW -->
+<tr name=SELECT_OTHERS>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
   <td colspan=3>
     <b>%Selection%:</b>
     <a href="sel -i">%Invert%</a> | 
@@ -30,18 +37,21 @@
     <a href="kill sel">%Delete%</a> | 
     <a href="selback">%Previous%</a>
   </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
-<tr>
-  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
+<!-- THIRD ROW -->
+<tr name=SELECT_WHERE>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td VALIGN='center' >
     %Select atoms where% <b>U<sub>iso</sub></b>
   </td>
   <td VALIGN='center'  colspan='2'>
     <font size='2'>
       <input 
-				type="combo"
-				height="$GetVar(gui_html_combo_height)"
+        type="combo"
+        height="$GetVar(gui_html_combo_height)"
         bgcolor="$getVar(gui_html_input_bg_colour)" 
         name= "compare" 
         items=">;=;<" 
@@ -67,14 +77,17 @@
         onclick="sel atoms where xatom.uiso getvalue(compare) getvalue(uiso)&&xatom.type!='Q'">
     </font>
   </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
-<tr>
-  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
+<!-- FOURTH ROW -->
+<tr name=SELECT_RINGS>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td VALIGN='center' >
     <input 
-			type="combo"
-			height="$GetVar(gui_html_combo_height)"
+      type="combo"
+      height="$GetVar(gui_html_combo_height)"
       bgcolor="$getVar(gui_html_input_bg_colour)" 
       label="%Rings% " 
       name="RINGSELECT" 
@@ -88,7 +101,8 @@
     <a href="sel rings C6"><b>%Phenyl%</b></a>&nbsp;
     <a href="sel rings C5N"><b>%Pyridine%</b></a>
   </td>
-
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
 
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
