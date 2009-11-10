@@ -44,7 +44,7 @@
 			<cmd1 XXX="silent on">
 			<cmd2 "py.Export(datadir()/olx.py)">
 			<cmd3 XXX="'py.run 'basedir()/util/pyUtil/initpy.py'">
-			<cmd3 "py.runth 'basedir()/util/pyUtil/initpy.py'">
+			<cmd3 "py.run 'basedir()/util/pyUtil/initpy.py'">
 			<cmd4 "if IsVar(defeditor) then none else setvar(defeditor,'gedit')">
 			<cmd5 "if IsVar(defexplorer) then none else setvar(defexplorer,'nautilus')">
 			<cmd6 "if IsVar(defbrowser) then none else setvar(defbrowser,'htmlview')">
