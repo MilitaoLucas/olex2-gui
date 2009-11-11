@@ -193,7 +193,7 @@ class GuiSkinChanger(ImageTools):
     olex.m("SetFont Console #olex2.fnt:frb_12")
     olex.m("htmguifontsize %s" %self.gui_html_font_size)
     olex.m("showwindow help false")
-    olex.m("grad true")
+    #olex.m("grad true")
     
   def setGuiAttributesDefault(self):
     #self.gui_html_base_colour = "#ffffff"
