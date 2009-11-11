@@ -34,7 +34,7 @@ class GuiSkinChanger(GuiSkinChanger):
     olex.m("SetMaterial InfoBox.Text %s" %self.gui_infobox_text)
     olex.m("SetMaterial InfoBox.Plane %s" %self.gui_infobox_plane)
     olex.m("htmguifontsize %s" %self.gui_html_font_size)
-    olex.m("grad True")
+    #olex.m("grad True")
   
 class sNumTitle(sNumTitle):
   def __init__(self, width=290, tool_arg=None):

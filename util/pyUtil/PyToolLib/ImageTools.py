@@ -668,13 +668,12 @@ class ImageTools(FontInstances):
     max_width = image.size[0]
     max_height = image.size[1]
     font_name = "%s Bold" %self.gui_timage_font_name
-    font_size = max_height
+    font_size = int(max_height * 0.8)
     colour = self.gui_html_highlight_colour
     txt="New!"
     dX, dY = self.getTxtWidthAndHeight(txt, font_name, font_size)
     
     draw.rectangle((max_width - dX - 2, 2, max_width - 2, max_height - 2), fill='#ffee00')
-    
     
     self.write_text_to_draw(
       draw,
