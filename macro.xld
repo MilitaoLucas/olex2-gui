@@ -65,7 +65,7 @@
 
   <cmd16 "if File.Exists(strdir()/filename().vvd) then none else 'spy.SetParam(snum.refinement.original_formula,xf.GetFormula())'">
   <cmd17 "if and(strcmp(%4,filename()),strcmp(%6,fileext())) then none else 'spy.loadHistory()'">
-  <cmd18 "'if and(IsFileType(ires), not(File.Exists((strdir()/history-filename)))) then 'spy.create_history()'">
+  <cmd18 "if and(IsFileType(ires), not(File.Exists(strdir()/filename().history))) then 'spy.create_history()'">
   <cmd19 "if and(isplugininstalled(plugin-brukersaint),IsFileType('p4p')) then BSINI else none">			
   <cmd20 cmd1="if strcmp(%4,filename()) then none else 'clear'">
   <cmd23 "syncbc">
