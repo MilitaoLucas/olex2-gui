@@ -31,6 +31,8 @@ def setup_cctbx():
       need_cold_start = True
     else:
       raise
+  except AssertionError, err:
+    cold_start = True
   except Exception, err:
     raise
   cctbx_TAG_file_path = "%s/TAG" %cctbxSources
