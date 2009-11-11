@@ -212,14 +212,14 @@ class GuiSkinChanger(ImageTools):
     self.gui_logo_colour = "#6464a0"
     self.gui_skin_logo_name = "basedir()\etc\gui\images\src\default.png"
     self.gui_skin_extension="None"
-    self.gui_html_panelwidth = '350'
+    self.gui_html_panelwidth = '400'
     self.gui_snumtitle_colour='#6464a0'
     self.gui_html_highlight_colour = '#ff7800'
     self.gui_grad_top_left = '#05053c'
     self.gui_grad_top_right = '#05053c'
     self.gui_grad_bottom_left = '#ffffff'
     self.gui_grad_bottom_right = '#ffffff' 
-    self.gui_htmlpanelwidth = '320' 
+    self.gui_htmlpanelwidth = '400' 
 
     
   def run_GuiSkinChanger(self):
@@ -662,8 +662,6 @@ class MakeAllRBars(BarGenerator):
     txt = r"R1"
     hStart = self.centre_text(draw, txt, font, text_width)
     draw.text((hStart, -1), "%s" %txt, font=font, fill='#666666')
-    #txt = "%%"
-    #draw.text((0, 9), "%s" %txt, font=font, fill='#000000')
 
     font_name = "Vera"
     font_size = 10
@@ -682,6 +680,7 @@ class MakeAllRBars(BarGenerator):
 
 #   draw.line(((width-5, int(height/(i+1)*2) ,(width-1, int(height/4)*2)), fill='#000000')
 #   draw.line(((width-5, int(height/(i+1)*3) ,(width-1, int(height/4)*3)), fill='#000000')
+    image = self.makeBackgroundTransparent(image,col=self.gui_html_table_bg_colour)
 
     return image
 

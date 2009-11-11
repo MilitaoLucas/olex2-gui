@@ -149,7 +149,20 @@ class ImageTools(FontInstances):
     else:
         layer.paste(mark, position)
     # composite the watermark with the layer
-    return Image.composite(layer, im, layer)  
+    return Image.composite(layer, im, layer)
+  
+  
+  def makeBackgroundTransparent(self, img, col=(255,255,255)):
+    
+    col = self.HTMLColorToRGB(col)
+    img = img.convert("RGBA")
+    pixdata = img.load()
+
+    for y in xrange(img.size[1]):
+      for x in xrange(img.size[0]):
+        if pixdata[x, y] == (255, 255, 255, 255):
+            pixdata[x, y] = (255, 255, 255, 0)
+    return img
 
   def makeTransparentText(self, im, txt, top_left=(1,0), font_colour="#000000", font_name = "Arial Bold", font_size=14):
     # Make a grayscale image of the font, white on black.
