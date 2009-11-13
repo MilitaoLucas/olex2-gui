@@ -1,46 +1,48 @@
-<!-- #include header gui\blocks\tool-table-header.htm;1; -->
+  <td name=HEADLINE_EXPAND_SHORT_CONTACTS bgcolor="$getVar(gui_html_table_firstcol_colour)">
+    <b>
+      %Expand Short Contacts% (%Hydrogen Bonds%)
+    </b>
+  </td>
+</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-	<tr VALIGN='center' NAME='Expand Short Contacts'>
-		<td valign='top' width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
-			<a 
-				href="spy.make_help_box -name='expand-short-contacts' -popout='True'" 
-				target="Help me with this">
-				<zimg border="0" src="info.png">
-			</a>
-			</td>
-		<td colspan = '2' bgcolor="$getVar(gui_html_table_firstcol_colour)">
-			<b>
-		<b>	
-			%Expand Short Contacts% (%Hydrogen Bonds%)
-		</b>
-		</td>
-	</tr>
-	<tr>
-		<td width="8" VALIGN='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
-		</td>
-		<td colspan='1'>
-			<input 
-				type="slider" 
-				name = "SlideDeltaI" 
-				width="$eval(htmlpanelwidth()-90)" 
-				height="20" 
-				value="60" 
-				bgcolor="$GetVar(gui_html_table_bg_colour)"  
-				fgcolor="$GetVar(gui_html_font_colour)" 
-				min="46" 
-				max="84" 
-				onchange = "SetValue(DeltaIValue,eval(getvalue(SlideDeltaI)/50))>>showH a true>>showH b true>>mode grow -s>>DeltaI eval(getvalue(SlideDeltaI)/50)>>fuse">
-		</td>
-		<td>
-				<input 
-				type="text" 
-				name = "DeltaIValue" 
-				width="32" 
-				height="20" 
-				bgcolor="$GetVar(gui_html_table_bg_colour)"  
-				fgcolor="$GetVar(gui_html_font_colour)" 
-				value="eval(getvalue(SlideDeltaI)/50)" 
-				onchange="SetValue(SlideDeltaI, eval(GetValue(DeltaIValue)*50))>>showH a true>>showH b true>>mode grow -s>>DeltaI GetValue(DeltaIValue)>>fuse">
-			</td>
-	</tr>	
-</table>
+<!-- SECOND ROW -->
+<tr name=EXPAND_SHORT_CONTACTS_2>
+<!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td name=SLIDER_EXPAND_SHORT_CONTACTS>
+    <input 
+      type="slider" 
+      name = "SlideDeltaI" 
+      width="$eval(htmlpanelwidth()-90)" 
+      height="20" 
+      value="60" 
+      bgcolor="$GetVar(gui_html_table_bg_colour)"  
+      fgcolor="$GetVar(gui_html_font_colour)" 
+      min="46" 
+      max="84" 
+      onchange="SetValue(DeltaIValue,eval(getvalue(SlideDeltaI)/50))>>
+showH a true>>
+showH b true>>
+mode grow -s>>
+DeltaI eval(getvalue(SlideDeltaI)/50)>>
+fuse"
+    >
+  </td>
+  <td name=DELATA_I_VALUE>
+    <input 
+    type="text" 
+    name = "DeltaIValue" 
+    width="32" 
+    height="20" 
+    bgcolor="$GetVar(gui_html_table_bg_colour)"  
+    fgcolor="$GetVar(gui_html_font_colour)" 
+    value="eval(getvalue(SlideDeltaI)/50)" 
+    onchange="SetValue(SlideDeltaI, eval(GetValue(DeltaIValue)*50))>>
+showH a true>>
+showH b true>>
+mode grow -s>>
+DeltaI GetValue(DeltaIValue)>>
+fuse"
+    >
+  </td>

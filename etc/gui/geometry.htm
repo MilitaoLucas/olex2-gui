@@ -1,29 +1,63 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
-	<tr>
-		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
-		<td>
-			<a target="%mpln-target%" href="mpln sel">%Mean Plane% (%of active selection%)</a></td>
-	</tr>
-	<tr>
-		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
-		<td>
-			<a target="%line-target%" href="line sel">%Best Line% (%of active selection%)</a></td>
-	</tr>
-	<tr>
-		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
-		<td>
-			<a target="%sel-target%" href="sel">%Distance and Angles% (%of selection%)</a></td>
-	</tr>
-	<tr>
-		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
-		<td>
-			<a target="%esd-refine-target%" href="delins more>>addins more -3>>refine">%Refine and save esd info%</a></td>
-	</tr>
-	<tr>
-		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
-		<td>
-			<a target="%esd-target%" href="esd">%Distance and Angles with esd% (%of selection%)</a></td>
-	</tr>
 
+<!-- FIRST ROW -->
+<tr name=MEAN_PLANE>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td>
+    <a target="%mpln-target%" href="mpln sel">
+      %Mean Plane% (%of active selection%)
+    </a>
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->  
+</tr>
+
+<!-- SECOND ROW -->
+<tr name=BEST_LINE>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td>
+    <a target="%line-target%" href="line sel">
+      %Best Line% (%of active selection%)
+    </a>
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->  
+</tr>
+
+<!-- THIRD ROW -->
+<tr name=DISTANCES_AND_ANGLES>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td>
+    <a target="%sel-target%" href="sel">
+      %Distance and Angles% (%of selection%)
+    </a>
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->  
+</tr>
+
+<!-- FOURTH ROW -->
+<tr name=REFINE_WITH_ESD_INFO>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td>
+    <a target="%esd-refine-target%" href="delins more>>addins more -3>>refine">
+      %Refine and save esd info%
+    </a>
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->  
+</tr>
+
+<!-- FIFTH ROW -->
+<tr name=DISTANCES_AND_ANGLES_WITH_ESD>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td>
+    <a target="%esd-target%" href="esd">
+      %Distance and Angles with esd% (%of selection%)
+    </a>
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->  
+</tr>
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->

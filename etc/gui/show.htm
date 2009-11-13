@@ -1,43 +1,70 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
 
-<tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
-	<a href="cell">
-		<zimg border="0" src="gui/images/toolbar-cell.png"></a>
-	</td>
-	<td width='30%'>
-		<a href="cell">%Cell%</a>
-	</td>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
-		<a href="basis">
-		<zimg border="0" src="gui/images/toolbar-base.png"></a>
-	</td>
-	<td width='70%'>
-		<a href="basis">%Coordinate System%</a>
-	</td>
+<!-- FIRST ROW -->
+<tr name=CEL_BASIS>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td name=IMG_CELL>
+    <a href="cell">
+      <zimg border="0" src="gui/images/toolbar-cell.png"/>
+    </a>
+  </td>
+  <td name=HREF_CELL>
+    <a href="cell">%Cell%</a>
+  </td>
+  <td name=IMG_BASIS bgcolor="$getVar(gui_html_table_firstcol_colour)">
+    <a href="basis">
+      <zimg border="0" src="gui/images/toolbar-base.png"/>
+    </a>
+  </td>
+  <td name=HREF_BASIS>
+    <a href="basis">
+      %Coordinate System%
+    </a>
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
-<tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
-	</td>
-	<td colspan='3'>
-		<a href="ShowQ">%Q-Peaks%</a> | 
-		<a href="ShowH">%Hydrogen Atoms%</a> | 
-		<a href="labels -h -l">H-%Labels%</a>
-	</td>
+<!-- SECOND ROW -->
+<tr name=Q_H_LABELS>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td name=Q_H_LABELS>
+    <a href="ShowQ">%Q-Peaks%</a> | 
+    <a href="ShowH">%Hydrogen Atoms%</a> | 
+    <a href="labels -h -l">H-%Labels%</a>
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
-
-
-<tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
-		<a href="labels">
-		<zimg border="0" src="gui/images/toolbar-labels.png"></a>
-	<td colspan='3'>
-		<a href="labels -l">%Labels%</a>&nbsp|&nbsp<a href="labels -o">%Occupancies%</a>&nbsp|&nbsp<a href="labels -v">FVAR</a>&nbsp|&nbsp<a href="labels -p">PART</a>
-	</td>
+<!-- THIRD ROW-->
+<tr name=Q_H_LABELS>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td name=IMG_LABELS>
+    <a href="labels">
+      <zimg border="0" src="gui/images/toolbar-labels.png"/>
+    </a>
+  </td>  
+  <td name=HREF_LABELS_OCCU_FVAR>
+    <a href="labels -l">
+      %Labels%
+    </a>
+    &nbsp|&nbsp
+    <a href="labels -o">
+      %Occupancies%
+    </a>
+    &nbsp|&nbsp
+    <a href="labels -v">
+      FVAR
+    </a>
+    &nbsp|&nbsp
+    <a href="labels -p">
+      PART
+    </a>
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
-
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
 
