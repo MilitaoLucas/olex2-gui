@@ -1,0 +1,1834 @@
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+<html class="pageview">
+
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<base target="_top">
+<style type="text/css">
+  
+
+/* default css */
+
+table {
+  font-size: 1em;
+  line-height: inherit;
+  border-collapse: collapse;
+}
+
+
+tr {
+  
+  text-align: left;
+  
+}
+
+
+div, address, ol, ul, li, option, select {
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+p {
+  margin: 0px;
+}
+
+
+pre {
+  font-family: Courier New;
+  white-space: pre-wrap;
+  margin:0;
+}
+
+body {
+  margin: 6px;
+  padding: 0px;
+  font-family: Verdana, sans-serif;
+  font-size: 10pt;
+  background-color: #ffffff;
+}
+
+
+img {
+  -moz-force-broken-image-icon: 1;
+}
+
+@media screen {
+  html.pageview {
+    background-color: #f3f3f3 !important;
+    overflow-x: hidden;
+    overflow-y: scroll;
+  }
+
+  
+
+  body {
+    min-height: 1100px;
+    
+    counter-reset: __goog_page__;
+  }
+  * html body {
+    height: 1100px;
+  }
+  .pageview body {
+    border-top: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    border-right: 2px solid #bbb;
+    border-bottom: 2px solid #bbb;
+    width: 648px !important;
+    margin: 15px auto 25px;
+    padding: 40px 50px;
+  }
+  /* IE6 */
+  * html {
+    overflow-y: scroll;
+  }
+  * html.pageview body {
+    overflow-x: auto;
+  }
+  /* Prevent repaint errors when scrolling in Safari. This "Star-7" css hack
+     targets Safari 3.1, but not WebKit nightlies and presumably Safari 4.
+     That's OK because this bug is fixed in WebKit nightlies/Safari 4 :-). */
+  html*#wys_frame::before {
+    content: '\A0';
+    position: fixed;
+    overflow: hidden;
+    width: 0;
+    height: 0;
+    top: 0;
+    left: 0;
+  }
+  
+  
+
+  
+    .writely-callout-data {
+      display: none;
+      *display: inline-block;
+      *width: 0;
+      *height: 0;
+      *overflow: hidden;
+    }
+    .writely-footnote-marker {
+      background-image: url('MISSING');
+      background-color: transparent;
+      background-repeat: no-repeat;
+      width: 7px;
+      overflow: hidden;
+      height: 16px;
+      vertical-align: top;
+
+      
+      -moz-user-select: none;
+    }
+    .editor .writely-footnote-marker {
+      cursor: move;
+    }
+    .writely-footnote-marker-highlight {
+      background-position: -15px 0;
+      -moz-user-select: text;
+    }
+    .writely-footnote-hide-selection ::-moz-selection, .writely-footnote-hide-selection::-moz-selection {
+      background: transparent;
+    }
+    .writely-footnote-hide-selection ::selection, .writely-footnote-hide-selection::selection {
+      background: transparent;
+    }
+    .writely-footnote-hide-selection {
+      cursor: move;
+    }
+
+    
+    .editor .writely-comment-yellow {
+      background-color: #FF9;
+      background-position: -240px 0;
+    }
+    .editor .writely-comment-yellow-hover {
+      background-color: #FF0;
+      background-position: -224px 0;
+    }
+    .editor .writely-comment-blue {
+      background-color: #C0D3FF;
+      background-position: -16px 0;
+    }
+    .editor .writely-comment-blue-hover {
+      background-color: #6292FE;
+      background-position: 0 0;
+    }
+    .editor .writely-comment-orange {
+      background-color: #FFDEAD;
+      background-position: -80px 0;
+    }
+    .editor .writely-comment-orange-hover {
+      background-color: #F90;
+      background-position: -64px 0;
+    }
+    .editor .writely-comment-green {
+      background-color: #99FBB3;
+      background-position: -48px 0;
+    }
+    .editor .writely-comment-green-hover {
+      background-color: #00F442;
+      background-position: -32px 0;
+    }
+    .editor .writely-comment-cyan {
+      background-color: #CFF;
+      background-position: -208px 0;
+    }
+    .editor .writely-comment-cyan-hover {
+      background-color: #0FF;
+      background-position: -192px 0;
+    }
+    .editor .writely-comment-purple {
+      background-color: #EBCCFF;
+      background-position: -144px 0;
+    }
+    .editor .writely-comment-purple-hover {
+      background-color: #90F;
+      background-position: -128px 0;
+    }
+    .editor .writely-comment-magenta {
+      background-color: #FCF;
+      background-position: -112px 0;
+    }
+    .editor .writely-comment-magenta-hover {
+      background-color: #F0F;
+      background-position: -96px 0;
+    }
+    .editor .writely-comment-red {
+      background-color: #FFCACA;
+      background-position: -176px 0;
+    }
+    .editor .writely-comment-red-hover {
+      background-color: #FF7A7A;
+      background-position: -160px 0;
+    }
+
+    .editor .writely-comment-marker {
+      background-image: url('MISSING');
+      background-color: transparent;
+      padding-right: 11px;
+      background-repeat: no-repeat;
+      width: 16px;
+      height: 16px;
+      -moz-user-select: none;
+    }
+
+    .editor .writely-comment-hidden {
+      padding: 0;
+      background: none;
+    }
+    .editor .writely-comment-marker-hidden {
+      background: none;
+      padding: 0;
+      width: 0;
+    }
+    .editor .writely-comment-none {
+      opacity: .2;
+      filter:progid:DXImageTransform.Microsoft.Alpha(opacity=20);
+      -moz-opacity: .2;
+    }
+    .editor .writely-comment-none-hover {
+      opacity: .2;
+      filter:progid:DXImageTransform.Microsoft.Alpha(opacity=20);
+      -moz-opacity: .2;
+    }
+  
+
+
+  
+  .br_fix span+br:not(:-moz-last-node) {
+    
+    position:relative;
+    
+    left: -1ex
+    
+  }
+
+  
+  #cb-p-tgt {
+    font-size: 8pt;
+    padding: .4em;
+    background-color: #ddd;
+    color: #333;
+  }
+  #cb-p-tgt-can {
+    text-decoration: underline;
+    color: #36c;
+    font-weight: bold;
+    margin-left: 2em;
+  }
+  #cb-p-tgt .spin {
+    width: 16px;
+    height: 16px;
+    background: url(//ssl.gstatic.com/docs/clipboard/spin_16o.gif) no-repeat;
+  }
+}
+
+h6 { font-size: 8pt }
+h5 { font-size: 8pt }
+h4 { font-size: 10pt }
+h3 { font-size: 12pt }
+h2 { font-size: 14pt }
+h1 { font-size: 18pt }
+
+blockquote {padding: 10px; border: 1px #DDD dashed }
+
+.webkit-indent-blockquote { border: none; }
+
+a img {border: 0}
+
+.pb {
+  border-width: 0;
+  page-break-after: always;
+  /* We don't want this to be resizeable, so enforce a width and height
+     using !important */
+  height: 1px !important;
+  width: 100% !important;
+}
+
+.editor .pb {
+  border-top: 1px dashed #C0C0C0;
+  border-bottom: 1px dashed #C0C0C0;
+}
+
+div.google_header, div.google_footer {
+  position: relative;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+
+/* Table of contents */
+.editor div.writely-toc {
+  background-color: #f3f3f3;
+  border: 1px solid #ccc;
+}
+.writely-toc > ol {
+  padding-left: 3em;
+  font-weight: bold;
+}
+ol.writely-toc-subheading {
+  padding-left: 1em;
+  font-weight: normal;
+}
+/* IE6 only */
+* html writely-toc ol {
+  list-style-position: inside;
+}
+.writely-toc-none {
+  list-style-type: none;
+}
+.writely-toc-decimal {
+  list-style-type: decimal;
+}
+.writely-toc-upper-alpha {
+  list-style-type: upper-alpha;
+}
+.writely-toc-lower-alpha {
+  list-style-type: lower-alpha;
+}
+.writely-toc-upper-roman {
+  list-style-type: upper-roman;
+}
+.writely-toc-lower-roman {
+  list-style-type: lower-roman;
+}
+.writely-toc-disc {
+  list-style-type: disc;
+}
+
+/* Ordered lists converted to numbered lists can preserve ordered types, and
+   vice versa. This is confusing, so disallow it */
+ul[type="i"], ul[type="I"], ul[type="1"], ul[type="a"], ul[type="A"] {
+  list-style-type: disc;
+}
+
+ol[type="disc"], ol[type="circle"], ol[type="square"] {
+  list-style-type: decimal;
+}
+
+/* end default css */
+
+
+  /* default print css */
+  
+  @media print {
+    body {
+      padding: 0;
+      margin: 0;
+    }
+
+    div.google_header, div.google_footer {
+      display: block;
+      min-height: 0;
+      border: none;
+    }
+
+    div.google_header {
+      flow: static(header);
+    }
+
+    /* used to insert page numbers */
+    div.google_header::before, div.google_footer::before {
+      position: absolute;
+      top: 0;
+    }
+
+    div.google_footer {
+      flow: static(footer);
+    }
+
+    /* always consider this element at the start of the doc */
+    div#google_footer {
+      flow: static(footer, start);
+    }
+
+    span.google_pagenumber {
+      content: counter(page);
+    }
+
+    span.google_pagecount {
+      content: counter(pages);
+    }
+
+    .endnotes {
+      page: endnote;
+    }
+
+    /* MLA specifies that endnotes title should be 1" margin from the top of the page. */
+    @page endnote {
+      margin-top: 1in;
+    }
+
+    callout.google_footnote {
+      
+      display: prince-footnote;
+      footnote-style-position: inside;
+      /* These styles keep the footnote from taking on the style of the text
+         surrounding the footnote marker. They can be overridden in the
+         document CSS. */
+      color: #000;
+      font-family: Verdana;
+      font-size: 10.0pt;
+      font-weight: normal;
+    }
+
+    /* Table of contents */
+    #WritelyTableOfContents a::after {
+      content: leader('.') target-counter(attr(href), page);
+    }
+
+    #WritelyTableOfContents a {
+      text-decoration: none;
+      color: black;
+    }
+  }
+
+  @page {
+    @top {
+      content: flow(header);
+    }
+    @bottom {
+      content: flow(footer);
+    }
+    @footnotes {
+      border-top: solid black thin;
+      padding-top: 8pt;
+    }
+  }
+  /* end default print css */
+
+
+/* custom css */
+
+h3 {
+  margin: 0px;
+  color: #666666;
+}
+h6 {
+  margin: 0px;
+  color: #222222;
+  font-size: x-small;
+  font-weight: normal;
+}
+ul {
+  padding-left: 18px;
+  margin-left: 18px;
+}
+.highlight {
+  color: #448844;
+  background: #eeeeee;
+}
+.console {
+  color: #882222;
+  font-weight: bolder;
+  font-family: "Courier",Georgia,Serif;
+}
+blockquote {
+  border: 3px single #aaaaaa;
+  font-family: Garamond;
+  padding: 10px 10px 10px 100px;
+  margin: 0 0px;
+  background-image: url('ad8wdwbvms_887fk6jk2hh_b.gif');
+  background-repeat: no-repeat;
+}
+
+/* end custom css */
+
+/* ui edited css */
+
+body {
+  font-family: Verdana;
+  
+  font-size: 10.0pt;
+  line-height: 1.5;
+  background-color: #ffffff;
+}
+/* end ui edited css */
+
+
+/* editor CSS */
+.editor a:visited {color: #551A8B}
+.editor table.zeroBorder {border: 1px dotted gray}
+.editor table.zeroBorder td {border: 1px dotted gray}
+.editor table.zeroBorder th {border: 1px dotted gray}
+
+
+.editor div.google_header, .editor div.google_footer {
+  border: 2px #DDDDDD dashed;
+  position: static;
+  width: 100%;
+  min-height: 2em;
+}
+
+.editor .misspell {background-color: yellow}
+
+.editor .writely-comment {
+  font-size: 9pt;
+  line-height: 1.4;
+  padding: 1px;
+  border: 1px dashed #C0C0C0
+}
+
+
+/* end editor CSS */
+
+</style>
+
+  
+  <title>olex2 commands</title>
+
+</head>
+
+<body 
+    
+    >
+    
+    
+    
+<h1>
+  Commands and Modes in Olex2
+</h1>
+<div>
+  There is no special console window in Olex2 - the commands described here can be typed at any time and the text you type as well as the program response will appear in the bottom right hand corner of the main window. The text will then scroll up behind the displayed molecule. The number of lines of text that are visible can be set with the command <span class=console>lines <b><i><span style=FONT-WEIGHT:normal>n</span></i></b></span><b><i>.</i></b>
+</div>
+<div>
+  <br>
+</div>
+<div>
+  Many commands in Olex2 are modelled on the SHELX syntax: four letter commands, where the letters often provide a hint about the function of the command. Many commands that are available in ShelXP, for example, can be used in Olex2. Also, all all commands of the ShelXL and ShelXS syntax are interpreted by Olex2 and used to construct the internal Olex2 structure model. This model is then used directly to carry out a smtbx-refine refinement, whereas a shelx.ins file is generated on the fly if ShelXL/XH is chosen for the refinement.
+</div>
+<div>
+  <br>
+</div>
+<div>
+  All commands in Olex2 will auto-complete when pressing the TAB key. If the completion is not possible, because there are more than one commands starting with the letter that have been typed, a list of these commands will be printed. It is good practice to use the auto-complete feature!&nbsp;
+</div>
+<div>
+  <br>
+</div>
+<div>
+  <b>Selection: </b>If one or more atoms are selected on the screen, then any command that acts on a selection will apply to the selected atoms only. If there is no selection, it will apply to <b>all </b>atoms. Instead of making a selection on the screen, a list of atom names can also be supplied. <i>If a command has been successful, the selection will disappear.</i>
+</div>
+<div>
+  <br>
+</div>
+<div>
+  <b>Mode: </b>If Olex2 is in a<b> Mode</b>, the chosen action will be applied to all subsequently clicked atoms.&nbsp;
+</div>
+<div>
+  <br>
+</div>
+<div>
+  <b>Syntax used below:</b>
+</div>
+<div>
+  <b>{a, b, c}</b>: choice of a, b or c. For example: fix {occu, xyz, Uiso} [atoms] means 'fix occu [atoms]', 'fix xyz [atoms]', 'fix Uiso [atoms]'.
+</div>
+<div>
+  <br>
+</div>
+<div>
+  <b>[val=2]</b>: optional parameter. This parameter is not required for the command to work, and if it is not supplied, the default value will be used.
+</div>
+<div>
+  <br>
+</div>
+<div>
+  -<b>k: </b>This is an option switch.
+</div>
+<div>
+  <br>
+</div>
+<div>
+  <b><i>i: <span style=FONT-WEIGHT:normal><span style=FONT-STYLE:normal>Italic characters are used for variables.</span></span></i></b>
+</div>
+<div>
+  <br>
+</div>
+<div>
+  <b>[atoms]</b> means an optional list of atoms. Any atoms that are selected will automatically be present in this list. If there are no selected atoms, <b>all</b> atoms will be in this list. Alternatively, the atom names of the atoms that should appear in this list can be typed by hand.&nbsp;
+</div>
+<p class=MsoNormal>
+  <br>
+</p>
+<p class=MsoNormal>
+</p>
+<div>
+  <b>atoms</b>&nbsp;means a compulsory list of atoms. Any atoms that are selected will automatically be present in this list. Alternatively, the atom names of the atoms that should appear in this list can be typed by hand.
+</div>
+<div>
+  <br>
+</div>
+<div>
+  <b>Capital Letters</b> are used for commands that will directly affect the structure model in the refinement. These commands will become part of the structure model and will appear in the ShelX input file. Please note that these commands can be typed either in upper or lower case.
+</div>
+<div>
+  <br>
+</div>
+<p>
+</p>
+<p class=MsoNormal>
+  <br>
+</p>
+<p class=MsoNormal>
+</p>
+<div>
+  <table border=1 bordercolor=#999999 cellpadding=2 cellspacing=2 class=MsoTableGrid width=100%>
+    <tbody>
+    <tr style=TEXT-ALIGN:left>
+      <td bgcolor=#ffffff colspan=3 style=WIDTH:426.1pt valign=top width=568>
+        <h3>
+          Fixed/Refined Parameters
+        </h3>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>fix</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>{occu, xyz, Uiso} [<span style=BACKGROUND-COLOR:#eeeeee><span class=highlight>atoms</span>]</span></font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Fixes the specified refinement parameter, ie these parameters will not be refined in subsequent refinement cycles.</font>
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+        </p>
+        <ul>
+          <li>
+            <font size=2><b>occu</b>: will fix the occupancy&nbsp;</font>
+          </li>
+          <li>
+            <font size=2><b>xyz</b>: will fix the xyz coordinates</font>
+          </li>
+          <li>
+            <font size=2><b>Uiso</b>: will fix the whole ADP</font>
+          </li>
+        </ul>
+        <p>
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>free</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>{occu, xyz, Uiso} [<span style=BACKGROUND-COLOR:#eeeeee><span class=highlight>atoms</span>]</span></font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>The opposite of fix - makes the specified parameters for the given atoms refineable. Feeing the occupancy is also available from the context menu.</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>mode</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>fixu</font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Fixes Uiso or ADP for subsequently clicked atoms.</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>mode</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>fixxyz</font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Fixes coordinates for subsequently clicked atoms.</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>mode</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>occu occupancy_to_set</font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Sets atoms occupancy to the povided value for subsequently clicked atoms.</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td bgcolor=#eeeeee colspan=3 style=WIDTH:426.1pt valign=top width=568>
+        <h6>
+          <span class=console>labels -f</span> show currently fixed atomic parameters, <span class=console>labels -f -r</span> show labels for fixed atoms and also the number at which the occupancy of riding atoms is fixed
+        </h6>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+<p>
+</p>
+<p class=MsoNormal>
+  <br>
+</p>
+<p class=MsoNormal>
+  <br>
+</p>
+<p class=MsoNormal>
+</p>
+<div>
+  <table bgcolor=#ffffff border=1 bordercolor=#666666 cellpadding=2 cellspacing=2 class=MsoTableGrid width=100%>
+    <tbody>
+    <tr style=TEXT-ALIGN:left>
+      <td colspan=3 style=WIDTH:426.1pt valign=top width=568>
+        <h3>
+          Atom Connectivity Table Manipulation
+        </h3>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>conn</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><i><b>n</b></i> [<i><b>r</b></i>] <span style=BACKGROUND-COLOR:#eeeeee><span class=highlight>atoms</span></span></font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Sets the maximum number of bonds for the specified &nbsp;atoms to <i><b>n</b></i>&nbsp;and changes the default bond radius for the given atom type to <i><b>r.</b></i></font>
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>Examples:</b></font>
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+        </p>
+        <ul>
+          <li>
+            <font size=2><span class=console>conn 5 $C</span></font><font size=2>&nbsp;sets the maximum number of bonds all C atoms can have to 5,</font>
+          </li>
+          <li>
+            <b><font size=2><span class=console>conn 1.3 $C</span></font></b><font size=2>&nbsp;changes the bonding radius for C atoms to 1.3 (the floating point is used to distinguish between </font><b><i><font size=2>n</font></i></b><font size=2> and </font><b><i><font size=2>r</font></i></b><font size=2> in this case!),</font>
+          </li>
+          <li>
+            <b><font size=2><span class=console>conn 5 1.3 $C</span></font></b><font size=2>&nbsp;combines the two commands above</font>
+          </li>
+        </ul>
+        <p>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td bgcolor=#ffffff style=WIDTH:59.4pt valign=top width=79>
+        <b><span style=BACKGROUND-COLOR:#ffffff>compaq</span></b><span style=BACKGROUND-COLOR:#ffffff><br>
+        </span>
+      </td>
+      <td bgcolor=#ffffff style=WIDTH:126pt valign=top width=168>
+        [<b>-a</b>] [<b>-c</b>]
+      </td>
+      <td bgcolor=#ffffff style=WIDTH:240.7pt valign=top width=321>
+        Moves all atoms or fragments of the asymmetric unit as close to each other as possible. If no options are provided, all fragments are assembled around the largest one.<br>
+        <ul>
+          <li>
+            -<b>a</b><b><font size=2>:</font></b>&nbsp;assembles broken fragments
+          </li>
+          <li>
+            -<b>c</b><b><font size=2>:</font></b>&nbsp;similar as with no options, but considers atom-to-atom distances and will move all atoms to the closest possible position to the largest fragment in the structure.
+          </li>
+        </ul>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>addbond</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>A1</b> <b>A2</b> <i>or </i><span class=highlight>atoms</span></font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Adds a bond to the connectivity list for the specified atoms. This operation will also be successful if symmetry equivalent atoms are specified.</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>delbond</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>A1</b> <b>A2</b>&nbsp;<i>or </i>Selected bond(s)</font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Removes selected bonds from the connectivity list.</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td bgcolor=#eeeeee colspan=3 style=WIDTH:426.1pt valign=top width=568>
+        <h6>
+          Olex2 will display the altered connectivity table in the case if structure is grown or packed
+        </h6>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+<div>
+  <br>
+</div>
+<br>
+<div>
+  <table border=1 bordercolor=#666666 cellpadding=2 cellspacing=2 class=MsoTableGrid width=100%>
+    <tbody>
+    <tr style=TEXT-ALIGN:left>
+      <td colspan=3 style=WIDTH:426.1pt valign=top width=568>
+        <h3>
+          Symmetry Operations
+        </h3>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>lstsymm</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>&nbsp;</font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Prints symmetry operations and their codes for current structure.</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>envi</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b><i>r</i></b> [2.7 Å] <b>A1</b> <i>or</i>&nbsp;<span style=BACKGROUND-COLOR:#eeeeee><span class=highlight>one selected atom</span></span></font> [<b>-h</b>] [<b>-q</b>]
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>Note:</b> if more than one atom is selected the first one is used</font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Prints a list of those atoms within a sphere of radius <b><i>r</i></b>&nbsp;around the specified atom.</font>
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+        </p>
+        <ul>
+          <li>
+            <font size=2><b>-h</b>: adds hydrogen atoms to the list</font>
+          </li>
+          <li>
+            <font size=2><b>-q</b>: option adds Q-peaks to the list</font>
+          </li>
+        </ul>
+        <p>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>mode</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>grow</b> [-<b><i><span style=FONT-STYLE:normal>s</span><span style=FONT-WEIGHT:normal><span style=FONT-STYLE:normal>]</span></span>&nbsp;</i></b>[-<b><i>v<span style="FONT-STYLE:normal; FONT-WEIGHT:normal">] [-<b><i>b</i></b>]</span></i></b></font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Displays the directions in which the molecule can be grown</font>
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+        </p>
+        <ul>
+          <li>
+            <font size=2>-</font><b><i><font size=2>s</font></i></b><font size=2><b><font size=2>:</font></b>&nbsp;also shows the short interaction directions</font>
+          </li>
+          <li>
+            <font size=2>-</font><b><i><font size=2>v<b><font size=2>:</font></b>&nbsp;</font></i></b><font size=2>[2.0&nbsp;</font><font size=2><font size=2>Å</font></font><font size=2>] shows directions to the molecules within </font><b><i><font size=2>v</font></i></b><font size=2>&nbsp;value of the Van der Waals radii of the selected atoms which can be generated by clicking on the direction representations, only unique symmetry operations (producing shortest contacts are displayed)</font>
+          </li>
+          <li>
+            <font size=2>-</font><b><i><font size=2>r</font></i></b><font size=2><b><font size=2>:</font></b>&nbsp;shows directions to all symmetry equivalent atoms atoms of the selected one(s) within 15 Å</font>
+          </li>
+          <li>
+            <font size=2>shortcut <b>Ctrl+G</b>&nbsp;is used to enter the '<b>mode grow</b>'</font>
+          </li>
+        </ul>
+        <p>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>mode</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>pack</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Displays the position of symmetry equivalent asymmetric units as tetrahedra. These asymmetric units can be generated by clicking on the corresponding tetrahedron.</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>sgen</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><span class=highlight>atoms</span></font>
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>The Symmetry operation is represented as 1_555 or -1+X,Y,Z and atoms as a selection or a names list</font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Generates symmetry equivalents of the provided (or all atoms, if there is no selection) using the provided symmetry operation.</font>
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>Note:</b> For symmetry operations starting with '-' and letter, a leading zero must be added, for example, <b>0-x,-y,-z</b>, otherwise Olex2 confuses this with an option.</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>pack</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>-a a -b b -c c</b> [<span style=BACKGROUND-COLOR:#eeeeee><span class=highlight>atoms</span>]</span></font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Packs all or specified atoms within given dimensions</font>
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+        </p>
+        <ul>
+          <li>
+            <b><font size=2>-c</font></b><font size=2><b><font size=2>:</font></b>&nbsp;prevents clearing existing model</font>
+          </li>
+        </ul>
+        <p>
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>Example:</b>&nbsp;&nbsp;<b><span class=console>pack $O</span></b>&nbsp;will pack all O atoms with the default of -1.5 to 1.5 cells range.</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>pack</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>cell</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Shows content of the unit cell.</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>pack</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <b><i><font size=2>r</font></i></b>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Packs fragments within radius&nbsp;<b><i>r</i></b>&nbsp;of the selected atom(s) or the centre of gravity of the asymmetric unit.</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>grow</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>[<span style=BACKGROUND-COLOR:#eeeeee><span class=highlight>atoms</span>] [<b>-w</b>]</span></font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Grows all possible/given atoms; for the polymeric structures or structures requiring several grows Olex2 will continue grow until the comes to already used symmetry element</font>
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+        </p>
+        <ul>
+          <li>
+            <b><font size=2>-w</font></b><font size=2><b><font size=2>:</font></b>&nbsp;allows to apply already used symmetry&nbsp; operations to other fragments of the asymmetric unit</font>
+          </li>
+        </ul>
+        <p>
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>Example:</b> If the main molecule is grown, but only one solvent molecule is shown, using '<b>grow -w</b>' will produce other solvent molecules using symmetry operators used to grow the main molecule</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td bgcolor=#eeeeee colspan=3 style=WIDTH:426.1pt valign=top width=568>
+        <h6>
+          If some atoms are deleted after growing operations, Olex2 will use existing unique atoms as the asymmetric unit atoms; this can be helpful to avoid a sequence of sgen/kill commands
+        </h6>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+<font size=2>
+<div>
+  <br>
+</div>
+<br>
+</font>
+<div>
+  <table border=1 bordercolor=#666666 cellpadding=2 cellspacing=2 class=MsoTableGrid width=100%>
+    <tbody>
+    <tr style=TEXT-ALIGN:left>
+      <td colspan=3 style=WIDTH:426.1pt valign=top width=568>
+        <h3>
+          Disorder Modelling: Constraints and Restraints
+        </h3>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>EXYZ</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><span style=BACKGROUND-COLOR:#eeeeee><span class=highlight>atom types</span></span></font>&nbsp;(to add for the selected atom) [-<b>EADP</b>] [-<b>lo</b>]
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Makes the selected site shared by atoms of several atom types.</font>
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+        </p>
+        <ul>
+          <li>
+            <b><font size=2>-EADP</font></b><font size=2><b><font size=2>:</font></b>&nbsp;adds the equivalent ADPs command for all atoms sharing one site.</font>
+          </li>
+          <li>
+            <b><font size=2>-lo</font></b><font size=2><b><font size=2>:</font></b>&nbsp;links the occupancy of the atoms sharing the site through a free variable.</font>
+          </li>
+        </ul>
+        <p>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>EADP</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><span class=highlight>atoms</span></font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Makes the ADP of the specified atoms equivalent.</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>SADI</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><span style=COLOR:#38761d>atoms <i><font class=Apple-style-span color=#000000>or</font></i> bonds&nbsp;</span>[esd=0.02]</font>
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>For selected bonds or atom pairs <b>SADI</b> makes the distances specified by selecting bonds or atom pairs similar within the esd.</font>
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>If only <b>one</b> atom is selected it is considered to belong to a regular molecule (like PF<sub>6</sub>) and adds similarity restraints for P-F and F-F distances.</font>
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>For <b>three</b> selected atoms (<b>A1</b>,<b>A2</b>,<b>A3</b>) it creates similarity restraint for <b>A1-A2</b> and <b>A2-A3</b> distances.</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>DFIX</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b><i>d&nbsp;<span style=" FONT-STYLE:normal; FONT-WEIGHT:normal"><span class=highlight>atom pairs</span> <i>or</i> <span class=highlight>pairwise selection</span> in order&nbsp;</span></i></b></font><b><i><font size=2><font size=2>[esd=0.02]</font></font></i></b>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>For selected bonds or atom pairs <b>DFIX</b> will generate length fixing restraint with the given esd.</font>
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>If only <b>one</b> atom is selected, all outgoing bonds of that atom will be fixed to the given length with provided esd. For <b>three</b> selected atoms (<b>A1</b>,<b>A2</b>,<b>A3</b>) the A1-A2 and A2-A3 restraints will be generated.</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>DANG</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b><i>d</i></b> <span class=highlight>atom pairs</span> <i>or</i> <span class=highlight>pairwise selection</span> in order&nbsp;</font>&nbsp;[esd=0.04]
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>For selected bonds or atom pairs, distance restraints similar to dfix will be generated.</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>tria</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b><i>d1</i></b> <b><i>d2</i></b> <b><i>angle&nbsp;<span style="FONT-STYLE:normal; FONT-WEIGHT:normal">[esd=0.02]</span></i></b></font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>For given set of bond pairs sharing an atom or atom triplets generates two dfix commands and one dang command.</font>
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>Example:</b> <b><span class=console>tria 1 1 180 C1 C2 C3</span></b>&nbsp;will generate 'DFIX 1 0.02 C1 C2 &nbsp;C2 C3' and 'DANG 2 0.04 C1 C3' it will calculate the distance for dang from d1 d2 and the angle.</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>FLAT</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><font size=2><font size=2>[</font></font><font size=2><span style=BACKGROUND-COLOR:#eeeeee><span class=highlight><font size=2>atoms</font></span></span></font></font><font size=2><font size=2>][esd=0.1]</font></font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Restrains given fragment to be flat (can be used on the grown structure) within given esd.</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>CHIV</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><font size=2><font size=2><font size=2>[</font></font></font><font size=2><span style=BACKGROUND-COLOR:#eeeeee><span class=highlight><font size=2><font size=2>atoms</font></font></span></span></font></font><font size=2><font size=2><font size=2>]</font></font></font>[<b><i>val</i></b>=0] [esd=0.1]
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Restrains the chiral volume of the provided group to be <b><i>val</i></b>&nbsp;within given esd</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>SIMU</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>[<b><i>d</i></b>=1.7] [esd12=0.04] [esd13=0.08]</font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Restrains the ADPs of all 1,2 and 1,3 pairs within the given atoms to be similar with the given esd.</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>DELU&nbsp;&nbsp; &nbsp;</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>[esd12=0.01] [esd13=0.01]</font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>'rigid bond' restraint</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>ISOR</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>[esd=0.1] [esd_terminal=0.2]</font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Restrains the ADP of the given atom(s) to be approximately isotropic</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>SAME</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>N</font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Splits the selected atoms into the N groups and applies the SAME restraint to them. Olex2 will manage the order of atoms within the in file, however mixing rigid group constraints and the 'same' instructions might lead to an erroneous instruction file.</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td bgcolor=#ffffff style=WIDTH:59.4pt valign=top width=79>
+        <b><span style=BACKGROUND-COLOR:#ffffff>showp</span></b><span style=BACKGROUND-COLOR:#ffffff><br>
+        </span>
+      </td>
+      <td bgcolor=#ffffff style=WIDTH:126pt valign=top width=168>
+        <span style=BACKGROUND-COLOR:#ffffff>[any]; space separate</span>d part number(s)<br>
+      </td>
+      <td bgcolor=#ffffff style=WIDTH:240.7pt valign=top width=321>
+        <span style=BACKGROUND-COLOR:#ffffff>Shows only the parts requested: <b>showp 0 1</b> will show parts 0 and 1, <b>showp 0</b> just part 0. <b>showp</b>&nbsp;by itself will display all parts.</span>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>split</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>[-<b>r</b>={eadp, isor, simu}]</font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Splits selected atom(s) along the longest ADP axis into two groups and links their occupancy through a free variable. -<b>r</b>&nbsp;adds specific restraints/constraints for the generated atoms</font>
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+        </p>
+        <ul>
+          <li>
+            <b><font size=2>eadp</font></b><font size=2>, </font><b><font size=2>isor</font></b><font size=2> or </font><b><font size=2>simu</font></b>
+          </li>
+        </ul>
+        <p>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>AFIX</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>shelx afix number{mn} [-n]</font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>-n option considers N-atoms as parts of rings. If no are atoms provided and afix corresponds to a fitted group where n is 6 or 9 (such as 106 or 79), all the rings which satisfy the given afix will be automatically made rigid (this is useful in the case of many PPh3 fragments); alternatively a single ring atom can be selected to make that ring rigid. In other cases, depending on afix either 5,6 or 10 atoms will be expected. Special cases of afix 0, 1 and 2 can be used to remove afix, fix all parameters or leave just the coordinates refinable, all other afix instructions will consider the first atom as a pivot atom and the rest - dependent atom.</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>part</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>[part=new_part] [<span class=highlight>atoms</span></font>] [-p=1]
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Changes part number for given/selected atom; ‑lo options links occupancies of the atoms through a +/-var or linear equation (SUMP) depending on the ‑p[=1] option which specifies how many parts to create. if -p=1, -lo is ignored and the given or new part is assigned to the given atoms.</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>fvar</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>[<b><i>value</i></b>] [<span class=highlight>atoms</span>]</font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>This command links two or more atoms through a free variable.</font>
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+        </p>
+        <ul>
+          <li>
+            <font size=2>If <b>no </b></font><i><font size=2><b>atoms</b></font></i><font size=2> are given the current free variables are printed.</font>
+          </li>
+          <li>
+            <font size=2>If <b>no </b></font><i><font size=2><b>value</b></font></i><font size=2> is given but two atom names are give, the occupancies of those atoms are linked through a new free variable.</font>
+          </li>
+          <li>
+            <font size=2>If a <b>value of 0</b> is given, the occupancy of the specified atoms will be refined freely</font>
+          </li>
+          <li>
+            <font size=2>if the <b>value is not 0</b>, the occupancy value of the specified atoms is set to the given value.</font>
+          </li>
+        </ul>
+        <p>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>sump</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>[<b><i>val</i></b>=1] [esd=0.01]</font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Creates a new linear equation. If any of the selected atoms has refinable or fixed occupancy, a new variable is added with value 1/(number of given atoms), otherwise already used variable is used with weight of 1.0.</font>
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>Example: </b>If 3 atoms (A1, A2, A3) are selected this command will generate three free variables and insert the <b><span class=console>r2 1.0 var 3</span></b>&nbsp;instruction (equivalent to 1.0 = 1.0*occu(A1) + 1.0*occu(A2) + 1.0*occu(A3).</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>mode</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>split [-<b>r</b>={eadp, isor, simu}]</font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Splits subsequently clicked atoms into parts, or in combination with the Shift key can be used to drag an atom to change its position. -r option can be used to generate extra restraints/constraints for original and generated atoms; values are eadp, isor or simu. While in the mode the newly generated atoms can be selected and moved as a group with Shift down or rotated when dragging the selection. The original and generated atoms will be placed into different parts.</font>
+        </p>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+<p>
+</p>
+<p class=MsoNormal>
+  <br>
+</p>
+<p class=MsoNormal>
+  <br>
+</p>
+<p class=MsoNormal>
+</p>
+<div>
+  <table border=1 bordercolor=#666666 cellpadding=2 cellspacing=2 class=MsoTableGrid width=100%>
+    <tbody>
+    <tr style=TEXT-ALIGN:left>
+      <td colspan=3 style=WIDTH:426.1pt valign=top width=568>
+        <h3>
+          HKL file Operations
+        </h3>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>hklstat</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><br>
+          </font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><font size=2>Prints detailed information about reflections used in the refinement.</font></font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <b>omit</b>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        h k l
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Inserts 'OMIT h k l' instruction in the ins file</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>omit</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>val</font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Inserts 'OMIT h k l' for all reflections with <img alt="|F{o}^{2} -F{c}^{2}| > val" class="ee_img tr_noresize" eeimg=1 height=15 src="images/EXTERN_0000.png" style=VERTICAL-ALIGN:middle>&nbsp;.</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>edithkl</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>[h k l]</font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Brings up a dialogue, where 'bad' reflections from the Shelx lst file and all its constituent symmetry equivalents can be inspected and flagged to be excluded from the refinement.</font>
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>In constrast to the OMIT h k l instruction, which &nbsp;excludes the reflection and <i>all it equivalents</i>, this dialogue allows to exclude those equivalents that are actually outliers.</font>
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>If a particular reflection is specified, this particular reflection and all its constituent equivalents can be viewed.</font>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>excludehkl</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>-h=h1;h2;.. -k=k1;k2.. -l=l1;l2.. [-c]</font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>This function provides a mechanism to reversibly exclude some reflections from refinement (these reflections will be moved to the end of the hkl file so they appear after the 0 0 0 reflection).</font>
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+        </p>
+        <ul>
+          <li>
+            <font size=2><b>-c</b><b><font size=2>:</font></b>&nbsp;option controls how the given indices are treated, if not -c option is provided, then any reflection having any of the given h, k or l indices will be excluded, otherwise only reflections with indices within provided h, k and l will be excluded.</font>
+          </li>
+        </ul>
+        <p>
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>appendhkl</b></font>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>-h=h1;h2;.. -k=k1;k2.. -l=l1;l2..</font>
+        </p>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Acts in the opposite way to excludehkl</font>
+        </p>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+  <br>
+</div>
+<p>
+</p>
+<div>
+</div>
+<br>
+<table border=1 bordercolor=#666666 cellpadding=2 cellspacing=2 class=MsoTableGrid width=100%>
+  <tbody>
+  <tr style=TEXT-ALIGN:left>
+    <td colspan=3 style=WIDTH:426.1pt valign=top width=568>
+      <h3>
+        Customising the Olex2 GUI
+      </h3>
+    </td>
+  </tr>
+  <tr style=TEXT-ALIGN:left>
+    <td style=WIDTH:59.4pt valign=top width=79>
+      <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+        <font size=2><b>setfont</b></font>
+      </p>
+    </td>
+    <td style=WIDTH:126pt valign=top width=168>
+      <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+        <font size=2>{console, Picture_labels} choosefont()</font>
+      </p>
+    </td>
+    <td style=WIDTH:240.7pt valign=top width=321>
+      <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+        <font size=2>Will bring up the dialogue to choose the font</font>
+      </p>
+    </td>
+  </tr>
+  <tr style=TEXT-ALIGN:left>
+    <td style=WIDTH:59.4pt valign=top width=79>
+      <b>grad</b>
+    </td>
+    <td style=WIDTH:126pt valign=top width=168>
+      [C1 C2 C3 C4]
+    </td>
+    <td style=WIDTH:240.7pt valign=top width=321>
+      Choose the colour of the four corners of the graduated background.
+    </td>
+  </tr>
+  <tr style=TEXT-ALIGN:left>
+    <td style=WIDTH:59.4pt width=79>
+      <b>brad</b>
+    </td>
+    <td style=WIDTH:126pt width=168>
+      <b>brad <i>r</i></b>
+    </td>
+    <td style=WIDTH:240.7pt width=321>
+      Adjust the bond radius in the display.
+    </td>
+  </tr>
+  </tbody>
+</table>
+<br>
+<div>
+  <br>
+</div>
+<div>
+  <table border=1 bordercolor=#666666 cellpadding=2 cellspacing=2 class=MsoTableGrid width=100%>
+    <tbody>
+    <tr style=TEXT-ALIGN:left>
+      <td colspan=3 style=WIDTH:426.1pt valign=top width=568>
+        <h3 style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px; COLOR:#666666">
+          <font size=3>Output: Tables, Reports and Images</font>
+        </h3>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2><b>pictPS&nbsp;&nbsp; &nbsp;</b></font>
+        </p>
+      </td>
+      <td style=TEXT-ALIGN:auto;WIDTH:126pt valign=top width=168>
+        <b>filename.ps </b>[<b>color_fill</b>] [<b>color_line</b>]
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <font size=2>Generates a post-script file of what is visible in the molecule display.</font>
+        </p>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+        </p>
+        <ul style=MARGIN-LEFT:18px>
+          <li>
+            <font size=3><b><font size=2>-color_fill:</font></b></font><font size=2>&nbsp;Fills the ellipses with colour.</font>
+          </li>
+          <li>
+            <font size=3><b><font size=2><font size=2>-color_bond</font></font></b></font><font size=2><font size=2><b><font size=2>:</font></b>&nbsp;Bonds will be in colour.</font></font>
+          </li>
+          <li>
+            <font size=3><b><font size=2>-color_line</font></b></font><font size=2><b><font size=2>:</font></b>&nbsp;Lines representing the ellipses will be in colour.</font>
+          </li>
+          <li>
+            <b><font size=2>div_pie</font></b><font size=2><b><font size=2>:</font></b>&nbsp;number [4] of stripes in the octant</font>
+          </li>
+          <li>
+            <b><font size=2>lw_ellipse</font></b><font size=2><b><font size=2>:</font></b>&nbsp;line width [0.5] of the ellipse</font>
+          </li>
+          <li>
+            <b><font size=2>lw_font</font></b><font size=2><b><font size=2>:</font></b>&nbsp;line width [1] for the vector font</font>
+          </li>
+          <li>
+            <b><font size=2>lw_octant</font></b><font size=2><b><font size=2>:</font></b>&nbsp;line width [0.5] of the octant arcs</font>
+          </li>
+          <li>
+            <b><font size=2>lw_pie</font></b><font size=2><b><font size=2>:</font></b>&nbsp;line width [0.5] of the octant stripes</font>
+          </li>
+          <li>
+            <b><font size=2>p</font></b><font size=2><b><font size=2>:</font></b>&nbsp;perspective</font>
+          </li>
+          <li>
+            <b><font size=2>scale_hb</font></b><font size=2><b><font size=2>:</font></b>&nbsp;scale for H-bonds [0.5]Label Labels</font>
+          </li>
+        </ul>
+        <font size=2>The bond width is taken from the display. This can be changed with </font><b><font size=2>brad</font></b>
+        <p style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+        </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <b><font size=2>pict</font></b>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <b>filename.</b><b><i>ext</i></b> [<b>-pq</b>] [<b><i>n</i></b>]
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        Generates a bitmap image of what is visible on the molecule display.<br>
+        <ul>
+          <li>
+            ext {png, jpg, bmp}. png is best.&nbsp;
+          </li>
+          <li>
+            <b>-pq:</b> print quality
+          </li>
+          <li>
+            <b><i>n:</i></b>&nbsp;refers to the size of the output image. If <b><i>n</i></b> is smaller than 10, it refers to a multiple of the current display size, if it is larger than 100, it refers to the width of the image in pixels.&nbsp;
+          </li>
+        </ul>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <b><font size=2>picta</font></b>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <b>filename.</b><b><i>ext</i></b>&nbsp;[<b>-pq</b>] [<b><i>n</i></b>]
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        A portable version of <b>pict </b>with limited resolution, which is OS and graphics card dependent. This may not be stable on some graphics cards<br>
+        <ul>
+          <li>
+            <b>-pq:</b> print quality
+          </li>
+        </ul>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
+          <b><font size=2>label</font></b>
+        </p>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <b>label</b> [<span style=COLOR:#448844><font size=2>atoms</font></span>]
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        Adds labels to the selected atoms. These labels can be moved by pressing the SHIFT key while holding down the left mouse button<br>
+        <ul>
+          <li>
+            <b>type:&nbsp;</b>{subscript, brackets, default}
+          </li>
+        </ul>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt valign=top width=79>
+        <br>
+      </td>
+      <td style=WIDTH:126pt valign=top width=168>
+        <br>
+      </td>
+      <td style=WIDTH:240.7pt valign=top width=321>
+        <br>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+  <br>
+</div>
+<br></body>
+</html>
