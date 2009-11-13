@@ -1,104 +1,19 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
 
-<tr>
-
-<td bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-<td align='center' VALIGN='center' colspan='1'>
-		<a 
-			href="if strcmp(spy.GetParam(olex2.in_mode),'move sel') then 'mode off' else 'mode move sel'"
-			target="%Move Near-target%">
-			<b>
-			<zimg name=IMG_BUTTON-MOVE_NEAR border="0" src="button-move_near.png"> 
-		</a>
-</td>		
-<td align='center' VALIGN='center' colspan='1'>
-		<a
-			href="if strcmp(spy.GetParam(olex2.in_mode),'move sel -c') then 'mode off' else 'mode move -c sel'" 
-			target="%Copy Near-target%">
-			<b>
-			<zimg name=IMG_BUTTON-COPY_NEAR border="0" src="button-copy_near.png"> 
-		</a>
-</td>		
-<td align='center' VALIGN='center' colspan='1'>
-	<a 
-			href="if strcmp(spy.GetParam(olex2.in_mode),'grow') then 'mode off' else 'mode grow'" 
-			target="%Mode Grow-target%">
-			<b>
-			<zimg name=IMG_BUTTON-GROW_MODE border="0" src="button-grow_mode.png"> 
-		</a> 
-	</td>
+<!-- FIRST ROW-->
+<tr name=INCLUDE_H3_SYMMETRY_TOOLS>
+<!-- #include h3-symmetry-tools gui\h3-symmetry-tools.htm;gui\blocks\tool-h3-off.htm;image=h3-symmetry-tools;onclick=;colspan=1;2; -->
 </tr>
 
-<tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-	<td align='center' VALIGN='center' colspan='1'>
-$spy.MakeActiveGuiButton(button-center_on_cell,move>>compaq)		
-</td>		
-<td align='center' VALIGN='center' colspan='1'>
-$spy.MakeActiveGuiButton(button-largest_part,move)		
-</td>		
-<td align='center' VALIGN='center' colspan='1'>
-$spy.MakeActiveGuiButton(button-assemble,'compaq -a')		
-
-
-	</td>
+<!-- SECOND ROW -->
+<tr name=INCLUDE_H3_GROWING>
+<!-- #include h3-growing gui\h3-growing.htm;gui\blocks\tool-h3-off.htm;image=h3-growing;onclick=;colspan=1;2; -->
 </tr>
 
-<tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-	<td align='center' VALIGN='center' colspan='1'>
-	<a 
-			href="basis" 
-			target="%Basis-target%">
-			<zimg name=IMG_BUTTON-SHOW_BASIS border="0" src="button-show_basis.png"> 
-		</a> 
-</td>		
-<td align='center' VALIGN='center' colspan='1'>
-		<a 
-			href="cell" 
-			target="%Show Cell-target%">
-			<zimg name=IMG_BUTTON-SHOW_CELL border="0" src="button-show_cell.png"> 
-		</a> 
-</td>		
-<td align='right' VALIGN='center' colspan='1'>
-
-<!-- #include quality-slider gui\snippets\snippet-quality-slider.htm;1; -->
-
-
-		
-	</td>
+<!-- THIRD ROW -->
+<tr name=INCLUDE_H3_PACKING>
+<!-- #include h3-packing gui\h3-packing.htm;gui\blocks\tool-h3-off.htm;image=h3-packing;onclick=;colspan=1;2; -->
 </tr>
-<tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-	<td align='center' VALIGN='center' colspan='1'>
-$spy.MakeActiveGuiButton(button-fuse,fuse)		
-</td>		
-<td align='center' VALIGN='center' colspan='1'>
-$spy.MakeActiveGuiButton(button-grow_all,grow)		
-	</td>
-</tr>
-
-<!--
-
-<tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
-	</td>
-	<td align='center' colspan=1>
-$spy.MakeActiveGuiButton(button-pack_cell,'pack cell>>cell True')		
-</td>		
-<td align='center' VALIGN='center' colspan='1'>
-$spy.MakeActiveGuiButton(button-pack_limits,'fuse>>pack getvalue\(anpack) getvalue\(appack) getvalue\(bnpack) getvalue\(bppack) getvalue\(cnpack) getvalue\(cppack)>>grow')
-	</td>
-</tr>	
-
--->
-
-
-
-
-<!-- #include h3-growing gui\h3-growing.htm;gui\blocks\tool-h3-off.htm;image=h3-growing;onclick=;colspan=3;2; -->
-<!-- #include h3-packing gui\h3-packing.htm;gui\blocks\tool-h3-off.htm;image=h3-packing;onclick=;colspan=3;2; -->
-
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
 
