@@ -1,97 +1,77 @@
-<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=3;1; -->
-<font color=$getVar(gui_html_font_colour)  size=$getVar(gui_html_font_size)>
-<tr>
+<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
 
-<td bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-
-
-<td colspan=3>
-
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$getVar(gui_html_table_bg_colour)">
-<tr>
-<td width=100% align='left' VALIGN='left'>
-
-<table cellpadding=0 cellspacing=0><tr>
-
-<td bgcolor="$getVar(gui_html_table_firstcol_colour)">
-  <a href="spy.make_help_box -name='grow mode' -popout='True'" 
-    target="Help me with this">
-      <zimg border="0" src="info.png">
-  </a>
-</td>
-
-<td>
-
-
-		<a 
-			href="mode off>>run(mode grow GetData(GROW_SHORT) GetData(GROW_SELECTION) GetData(GROW_VDW))" 
-			target="%Mode Grow-target%">
-			<b>
-			<zimg name=H3_IMG_BUTTON-GROW_MODE border="0" src="button-grow_mode.png"> 
-		</a>
-		</td>
-		<td>
-		
-		<td>
-     <input
-			type="checkbox"
-			value="%Short%"
-			valign="center"
-			bgcolor="$getVar(gui_html_table_bg_colour)"
-			fgcolor="$GetVar(gui_html_font_colour)"
-			name="GROW_SHORT"
+<!-- FIRST ROW -->
+<tr name=GROW_ROW_1>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;help_ext=growing;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td name=BTN_GROW_MODE>
+    <a 
+      href="mode off>>run(mode grow GetData(GROW_SHORT) GetData(GROW_SELECTION) GetData(GROW_VDW))" 
+      target="%Mode Grow-target%">
+      <zimg name=H3_IMG_BUTTON-GROW_MODE border="0" src="button-grow_mode.png"/>
+    </a>
+  </td>
+  <td name=GROW_SHORT>
+    <input
+      type="checkbox"
+      value="%Short%"
+      valign="center"
+      bgcolor="$getVar(gui_html_table_bg_colour)"
+      fgcolor="$GetVar(gui_html_font_colour)"
+      name="GROW_SHORT"
       height="$getVar(gui_html_checkbox_height)"
-			width='50'
-			manage
-			oncheck="SetData(GROW_VDW,' ')>>SetData(GROW_SELECTION,' ')>>SetData(GROW_SHORT,-s)"
-			onuncheck=">SetData(GROW_SHORT,' ')"
-	  </td>
-		<td>
-     <input
-			type="checkbox"
-			value="%Selection%"
-			valign="center"
-			bgcolor="$getVar(gui_html_table_bg_colour)"
-			fgcolor="$GetVar(gui_html_font_colour)"
-			name="GROW_SELECTION"
+      width='50'
+      manage
+      oncheck="SetData(GROW_VDW,' ')>>SetData(GROW_SELECTION,' ')>>SetData(GROW_SHORT,-s)"
+      onuncheck=">SetData(GROW_SHORT,' ')"
+    >
+  </td>
+  <td name=GROW_SELECTION>
+    <input
+      type="checkbox"
+      value="%Selection%"
+      valign="center"
+      bgcolor="$getVar(gui_html_table_bg_colour)"
+      fgcolor="$GetVar(gui_html_font_colour)"
+      name="GROW_SELECTION"
       height="$getVar(gui_html_checkbox_height)"
-			width='65'
-			manage
-			oncheck="SetData(GROW_VDW,' ')>>SetData(GROW_SELECTION,-r)>>SetData(GROW_SHORT,' ')"
-			onuncheck="SetData(GROW_SELECTION,' ')">
-		</td>
-		<td>
-			<input
-			type="checkbox"
-			value="%VdW%"
-			valign="center"
-			bgcolor="$getVar(gui_html_table_bg_colour)"
-			fgcolor="$GetVar(gui_html_font_colour)"
-			name="GROW_VDW"
-      height="$getVar(gui_html_checkbox_height)"
-			width='45'
-			manage
-			oncheck="SetData(GROW_VDW,-v=GetValue(GROW_VDW_VAL))>>SetData(GROW_SELECTION,' ')>>SetData(GROW_SHORT,' ')"
-			onuncheck="SetData(GROW_VDW,' ')">
-		</td>
-		<td>
-     <input
-			type="text"
-			value='2.0'
-			valign="center"
-			bgcolor="$getVar(gui_html_table_bg_colour)"
-			fgcolor="$GetVar(gui_html_font_colour)"
-			name="GROW_VDW_VAL"
+      width='65'
+      manage
+      oncheck="SetData(GROW_VDW,' ')>>SetData(GROW_SELECTION,-r)>>SetData(GROW_SHORT,' ')"
+      onuncheck="SetData(GROW_SELECTION,' ')">
+  </td>
+  <td name=GROW_VDW>
+    <input
+    type="checkbox"
+    value="%VdW%"
+    valign="center"
+    bgcolor="$getVar(gui_html_table_bg_colour)"
+    fgcolor="$GetVar(gui_html_font_colour)"
+    name="GROW_VDW"
+    height="$getVar(gui_html_checkbox_height)"
+    width='45'
+    manage
+    oncheck="SetData(GROW_VDW,-v=GetValue(GROW_VDW_VAL))>>SetData(GROW_SELECTION,' ')>>SetData(GROW_SHORT,' ')"
+    onuncheck="SetData(GROW_VDW,' ')">
+  </td>
+  <td name=GROW_VDW_VAL>
+    <input
+      type="text"
+      value='2.0'
+      valign="center"
+      bgcolor="$getVar(gui_html_table_bg_colour)"
+      fgcolor="$GetVar(gui_html_font_colour)"
+      name="GROW_VDW_VAL"
       height="$getVar(gui_html_input_height)"
-			width='30'
-			manage
-			onchange="SetData(GROW_VDW,'-v=GetValue(GROW_VDW_VAL)')">
-		<td>
-		&Aring;
-		</td>
-</td></tr></table>
-			
-			
-</td></tr>
+      width='30'
+      manage
+      onchange="SetData(GROW_VDW,'-v=GetValue(GROW_VDW_VAL)')"
+    >
+  </td>
+  <td name=ARING>
+  &Aring;
+  </td>
+</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
+

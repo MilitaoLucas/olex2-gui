@@ -1,52 +1,43 @@
-<!-- #include header gui\blocks\tool-table-header.htm;1; -->
+  <td name=HEADLINE_PACK_RADIUS bgcolor="$getVar(gui_html_table_firstcol_colour)">
+    <b>
+      %Pack Radius%
+    </b>
+  </td>
+</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-	<tr VALIGN='center' NAME='Pack Radius'>
-		<td valign='top' width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
-			<a 
-				href="spy.make_help_box -name='pack-radius' -popout='True'" 
-				target="Help me with this">
-				<zimg border="0" src="info.png">
-			</a>
-			</td>
-		<td colspan = '2' bgcolor="$getVar(gui_html_table_firstcol_colour)">
-			<b>
-		<b>	
-			%Pack Radius%
-		</b>
-		</td>
-	</tr>
-	<tr>
-		<td width="8" VALIGN='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
-		</td>
-		<td colspan='1'>
-			<input 
-				type="slider" 
-				name = "SlidePackRadius" 
-				width="$eval(htmlpanelwidth()-90)" 
-				height="20" 
-				value="0" 
-				bgcolor="$GetVar(gui_html_table_bg_colour)"  
-				fgcolor="$GetVar(gui_html_font_colour)" 
-				min="2" 
-				max="20" 
-				onchange = "
+<!-- SECOND ROW -->
+<tr name=PACK_RADIUS_2>
+<!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td name=SLIDER_PACK_RADIUS>
+    <input 
+      type="slider" 
+      name = "SlidePackRadius" 
+      width="$eval(htmlpanelwidth()-90)" 
+      height="20" 
+      value="0" 
+      bgcolor="$GetVar(gui_html_table_bg_colour)"  
+      fgcolor="$GetVar(gui_html_font_colour)" 
+      min="2" 
+      max="20" 
+      onchange = "
 SetValue(PackRadius,getvalue(SlidePackRadius))>>
 pack getvalue(PackRadius)>>
 "
-			>
-		</td>
-		<td>
-				<input 
-				type="text" 
-				name = "PackRadius" 
-				width="32" 
-				height="20" 
-				bgcolor="$GetVar(gui_html_table_bg_colour)"  
-				fgcolor="$GetVar(gui_html_font_colour)" 
-				value="getvalue(SlidePackRadius)" 
-				onchange="SetValue(SlidePackRadius,GetValue(PackRadius))>>
+  >
+  </td>
+  <td name=PACK_RADIUS_VALUE>
+    <input 
+      type="text" 
+      name = "PackRadius" 
+      width="32" 
+      height="20" 
+      bgcolor="$GetVar(gui_html_table_bg_colour)"  
+      fgcolor="$GetVar(gui_html_font_colour)" 
+      value="getvalue(SlidePackRadius)" 
+      onchange="SetValue(SlidePackRadius,GetValue(PackRadius))>>
 fuse>>
-pack GetValue(PackRadius)">
-			</td>
-	</tr>	
-</table>
+pack GetValue(PackRadius)"
+    >
+  </td>
