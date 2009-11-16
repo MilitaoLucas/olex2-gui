@@ -334,6 +334,7 @@ OV.registerFunction(SaveUserParams)
 def EditParams(scope_name="", expert_level=0):
   try:
     output_phil = olx.phil_handler.get_scope_by_merged_name(scope_name)
+    original_name = output_phil.name
     output_phil.name = scope_name
   except KeyError:
     print '"%s" is not a valid scope name' %scope_name
@@ -343,6 +344,9 @@ def EditParams(scope_name="", expert_level=0):
     input_phil_string = OV.GetUserInput(0, "Edit parameters", s.getvalue())
     if input_phil_string is not None and not input_phil_string == s.getvalue():
       olx.phil_handler.update(phil_string=str(input_phil_string))
+    else:
+      # need to set scope name back to original since scope isn't rebuilt
+      output_phil.name = original_name
 OV.registerFunction(EditParams)
 
 def ShowParams(expert_level=0, attributes_level=0):
