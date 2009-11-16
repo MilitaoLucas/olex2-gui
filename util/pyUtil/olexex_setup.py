@@ -51,24 +51,14 @@ class SetupWizard(object):
     
     txt += r'''
 <tr VALIGN='center' NAME='Setup Title'>
-  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-    <td width='80%%' colspan='2'>
-      <font size = '4'>
-        <b>	
+  <td width="8" bgcolor="$getVar(gui_html_font_colour)"></td>
+    <td width='80%%' colspan='2' bgcolor="$getVar(gui_html_font_colour)">
+      <font size='4' color="#dedede">
+        <b>
           %%setup-title-%s%%
         </b>
       </font>
     </td> 
- <!--   
-    <td align = 'right' valign='top'>
-      <a href='spy.tbxs -n=%s' target='%%previous%%'>
-        <zimg border="0" src="previous.png">
-      </a>
-      <a href='spy.tbxs -n=%s' target='%%next%%'>
-        <zimg border="0" src="next.png">
-      </a>
-    </td>
-  -->  
   </tr>
 <tr>
   <td valign='top' width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
@@ -87,15 +77,15 @@ class SetupWizard(object):
   </td>
 </tr>
 
-'''%(name, self.previous, self.next, t, htmlTools.make_edit_link("setup-txt", name))
+'''%(name, t, htmlTools.make_edit_link("setup-txt", name))
       
       
     txt += r'''
-<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
+<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=3;1; -->
 '''
     wFilePath = r"setup-%s.htm" %name
     OV.write_to_olex(wFilePath, txt)
-    olex.m("popup setup-box 'setup-%s.htm' -b=tc -t='%s' -w=340 -h=700 -x=50 -y=50 -d=echo''" %(name, 'Olex2 Setup'))
+    olex.m("popup setup-box 'setup-%s.htm' -b=tc -t='%s' -w=340 -h=700 -x=50 -y=50" %(name, 'Olex2 Setup'))
     
     olx.html_SetBorders('setup-box', 2)
     olx.html_Reload('setup-box')
