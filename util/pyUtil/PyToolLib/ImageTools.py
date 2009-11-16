@@ -668,7 +668,7 @@ class ImageTools(FontInstances):
     max_width = image.size[0]
     max_height = image.size[1]
     font_name = "%s Bold" %self.gui_timage_font_name
-    font_size = int(max_height * 0.8)
+    font_size = int(max_height)
     colour = self.gui_html_highlight_colour
     txt="New!"
     dX, dY = self.getTxtWidthAndHeight(txt, font_name, font_size)

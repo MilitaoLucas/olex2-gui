@@ -1,53 +1,53 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
 
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-	<td>
-	<a href="reap">%Open Existing Structure%</a>
-	</td>
+  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+  <td>
+  <a href="reap">%Open Existing Structure%</a>
+  </td>
 </tr>
 
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-	<td valign='center'>
-	<b>%Sample Structures%</b>: 
-	<a href="reap '$GetVar(sample_dir)/sucrose/sucrose'">%Sucrose%</a> | 
-	<a href="reap '$GetVar(sample_dir)/THPP/thpp'">%THPP%</a> | 
-	<a href="reap '$GetVar(sample_dir)/Co110/Co110'">%Co110%</a> | 
-	<a href="reap '$GetVar(sample_dir)/ZP2/ZP2'">%ZP2%</a>
-	</td>
+  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+  <td valign='center'>
+  <b>%Sample Structures%</b>: 
+  <a href="reap '$GetVar(sample_dir)/sucrose/sucrose'">%Sucrose%</a> | 
+  <a href="reap '$GetVar(sample_dir)/THPP/thpp'">%THPP%</a> | 
+  <a href="reap '$GetVar(sample_dir)/Co110/Co110'">%Co110%</a> | 
+  <a href="reap '$GetVar(sample_dir)/ZP2/ZP2'">%ZP2%</a>
+  </td>
 </tr>
 
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-	<td>
-	<b>%Settings%</b>: 
-	<a target="Setup Olex2" href="setup">%Setup Olex2%</a> | 
-	<a target="Configure Olex2" href="config">%Configure%</a> | 
-	<a target="Set atom colours and styles" href="@reap -b 'BaseDir()/sample_data/Periodic Table/Periodic Table.cif' -b>>
+  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+  <td>
+  <b>%Settings%</b>: 
+  <a target="Setup Olex2" href="setup">%Setup Olex2%</a> | 
+  <a target="Configure Olex2" href="config">%Configure%</a> | 
+  <a target="Set atom colours and styles" href="@reap -b 'BaseDir()/sample_data/Periodic Table/Periodic Table.cif' -b>>
 sel -a>>
 conn 0>>
 matr 3>>
 rota 2 90>>
-	">%Atom Styles%</a>
-	</td>
+  ">%Atom Styles%</a>
+  </td>
 </tr>
 
 
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-	<td valign='center'>
-	<b>%Tutorials%</b>(%Incomplete%): 
-	<a target='Start Tutorial' href="spy.make_help_box -name=getting-started_main-window -popout=False -type=tutorial">%Getting Started%</a> | 
-	<a target='Start Tutorial' href="spy.make_help_box -name=sucrose_introduction -popout=False -type=tutorial">%Sucrose%</a>
-	</td>
+  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+  <td valign='center'>
+  <b>%Tutorials%</b>(%Incomplete%): 
+  <a target='Start Tutorial' href="spy.make_help_box -name=getting-started_main-window -popout=False -type=tutorial">%Getting Started%</a> | 
+  <a target='Start Tutorial' href="spy.make_help_box -name=sucrose_introduction -popout=False -type=tutorial">%Sucrose%</a>
+  </td>
 </tr>
 
 
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
-	<td valign='center'><b><font color="$getVar(gui_html_highlight_colour)">%bad_gui-msg%: </font></b>
-	<a target='%bad_gui-target%' href="panel"><b>%bad_gui%</b></a>
-	</td>
+  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+  <td valign='center'><b><font color="$getVar(gui_html_highlight_colour)">%bad_gui-msg%: </font></b>
+  <a target='%bad_gui-target%' href="panel"><b>%bad_gui%</b></a>
+  </td>
 </tr>
-<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
+<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->

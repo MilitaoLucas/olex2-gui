@@ -68,7 +68,7 @@ SetValue(SNUM_EDEN_VALUE,eval(GetValue(SNUM_EDEN_SLIDE)/10))>>
 xgrid.Scale(eval(GetValue(SNUM_EDEN_SLIDE)/10))
 ">
 	</td>
-	<td colspan = '1' bgcolor=#ff0000>
+	<td colspan = '1'>
      <input
 			bgcolor="$getVar(gui_html_table_bg_colour)"
 			fgcolor="$GetVar(gui_html_font_colour)"
@@ -142,108 +142,4 @@ xgrid.Scale(GetValue(SNUM_EDEN_VALUE))>>
 	</td>
 </tr>
 
-<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
-
-
-
-
-<!--
-
-
-<tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
-		<zimg border="0" src="gui/images/toolbar-electron-density.png">
-	</td>
-	<td colspan='2'>
-		<input 
-			type="slider" 
-			name = "SNUM_EDEN_COARSE_SLIDE" 
-			width="$eval(htmlpanelwidth()-80)" 
-			height="18" 
-			value="$GetParam(snum.eden_coarse_value)" 
-			bgcolor="$GetVar(gui_html_table_bg_colour)"  
-			fgcolor="$GetVar(gui_html_font_colour)" 
-			min="0" 
-			max="20" 
-			onchange = "SetParam(snum.eden_coarse_value,GetValue(SNUM_EDEN_COARSE_SLIDE))>>
-SetValue(SNUM_EDEN_COARSE_VALUE,GetVar(snum_eden_coarse_value))>>
-xgrid.Scale(eval(getvalue(snum_eden_coarse_value) + eval(GetValue(snum_eden_fine_value)/1)))>>
-SetValue(XGRID_SCALE,XGrid.Scale())
-">
-	<td colspan='1'>
-		<input 
-			type="text" 
-			name = "SNUM_EDEN_COARSE_VALUE" 
-			width="30" 
-			height="18" 
-			bgcolor="$GetVar(gui_html_table_bg_colour)"  
-			fgcolor="$GetVar(gui_html_font_colour)" 
-			value="$GetParam(snum.eden_coarse_value)" 
-			onchange="SetParam(snum.eden_coarse_value,GetValue(SNUM_EDEN_COARSE_VALUE))>>
-xgrid.Scale(eval(getvalue(snum_eden_coarse_value)) + eval(GetValue(snum_eden_fine_value)/1))>>>>
-SetValue(XGRID_SCALE,XGrid.Scale())
-">
-		</td>
-</tr>		
-
-<tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
-		<zimg border="0" src="gui/images/toolbar-electron-density.png">
-	</td>
-	<td colspan='2'>
-		<input 
-			type="slider" 
-			name = "SNUM_EDEN_FINE_SLIDE" 
-			width="$eval(htmlpanelwidth()-80)" 
-			height="18" 
-			value="eval(GetParam(snum.eden_fine_value)/1)" 
-			bgcolor="$GetVar(gui_html_table_bg_colour)"  
-			fgcolor="$GetVar(gui_html_font_colour)" 
-			min="-10" 
-			max="10" 
-			onchange = "Setparam(snum.eden_fine_value,eval(GetValue(SNUM_EDEN_FINE_SLIDE)/1))>>
-SetValue(SNUM_EDEN_FINE_VALUE,eval(GetVar(snum_eden_fine_value)/10))>>
-xgrid.Scale(eval(GetVar(snum_eden_coarse_value) + eval(GetVar(snum_eden_fine_value)/10)))>>
-SetValue(XGRID_SCALE,XGrid.Scale())
-">
-	</td>
-	<td>
-		<input 
-			type="text" 
-			name = "SNUM_EDEN_FINE_VALUE" 
-			width="30" 
-			height="18" 
-			bgcolor="$GetVar(gui_html_table_bg_colour)"  
-			fgcolor="$GetVar(gui_html_font_colour)" 
-			value="eval(Getparam(snum.eden_fine_value)/10)" 
-			onchange="SetParam(snum.eden_fine_value,eval(GetValue(SNUM_EDEN_FINE_VALUE)*10))>>
-SetValue(SNUM_EDEN_FINE_SLIDE,GetVar(snum_eden_fine_value))>>
-xgrid.Scale(eval(getvalue(snum_eden_coarse_value)) + eval(GetValue(snum_eden_fine_value)/10))>>
-SetValue(XGRID_SCALE,XGrid.Scale())
-">
-		</td>
-</tr>		
-
--->
-
-
-<!--	
-	<td colspan='1'>
-		<input 
-			type="text" 
-			name = "XGRID_SCALE" 
-			width="30" 
-			height="18" 
-			bgcolor="$GetVar(gui_html_table_bg_colour)"  
-			fgcolor="$GetVar(gui_html_font_colour)" 
-			value="xgrid.scale()" 
-			onchange="xgrid.Scale(GetValue(XGRID_SCALE))>>
-SetValue(SNUM_EDEN_COARSE_SLIDE,eval(XGrid.Scale()/1))>>
-SetValue(SNUM_EDEN_COARSE_VALUE,eval(XGrid.Scale()/1))>>
-SetVar(snum_eden_coarse_value,eval(XGrid.Scale()/1))>>
-SetValue(SNUM_EDEN_FINE_SLIDE,0)>>
-SetValue(SNUM_EDEN_FINE_VALUE,0)>>
-SetVar(snum_eden_fine_value,0)>>
-">
-</td>
--->
+<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=5;1; -->

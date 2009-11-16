@@ -714,7 +714,7 @@ def format_help(string):
           <a href='\2'>
             <b>
               <font size='2' color='%s'>
-              <code>>>\2</code>
+                <code>>>\2</code>
               </font>
             </b>
           </a>
@@ -764,15 +764,16 @@ def format_help(string):
   else:
     s = string
     
-  ## find all occurances of strings between &. These are the tables.
+  ## find all occurances of strings between &&. These are the tables.
   string = s
   #regex = re.compile(r"  (&&) (.*?)( [^\&\&]* ) (&&) ", re.X)
-  regex = re.compile(r"  (&&) (.*?) (&&) ", re.X)
+  #regex = re.compile(r"  (&&) (.*?) (&&) ", re.X)
+  regex = re.compile(r"  && (.*?)( [^\&&\&&]* ) && ", re.X)
   #regex = re.compile(r"  & (.*?)( [^\&\&]* ) & ", re.X)
   m = regex.findall(string)
   if m:
     s = regex.sub(r'''
-    <table border=1>
+    <table border=0>
       \2
     </table>
     ''', string)
