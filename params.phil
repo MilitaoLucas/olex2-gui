@@ -107,6 +107,7 @@ snum {
       .type = space_group
     sg_list = None
       .type = str
+      .expert_level = 1
     max_cycles = 4
       .type = int(value_min=0)
       .help = The maximum number of refinement cycles to be performed
@@ -120,7 +121,7 @@ snum {
               refinement
     original_formula = None
       .type = str
-      .expert_level = 2
+      .expert_level = 1
     Z_prime = 1.0
       .type = float(value_min=0.0)
 
@@ -152,11 +153,12 @@ snum {
 
     last_R1 = n/a
       .type = str
+      .expert_level = 1
     graphical_output = False
       .type = bool
   }
 
-  
+
   display_quality = 2
     .type = int(value_min=1, value_max=3)
 
@@ -187,7 +189,9 @@ snum {
   auto_hydrogen_naming = True
     .type = bool
 
-  dimas {
+  dimas
+    .expert_level=2
+  {
     progress_status = None
       .type = str
     progress_comment = None

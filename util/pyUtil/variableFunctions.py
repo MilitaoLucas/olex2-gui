@@ -15,6 +15,7 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import variableDefinitions
 import olexex
+from cStringIO import StringIO
 
 initialisingVariables = False
 
@@ -329,6 +330,20 @@ def SaveUserParams():
   olx.phil_handler.save_param_file(
     file_name=user_phil_file, scope_name='user', diff_only=True)
 OV.registerFunction(SaveUserParams)
+
+def EditParams(scope_name="", expert_level=0):
+  try:
+    output_phil = olx.phil_handler.get_scope_by_merged_name(scope_name)
+    output_phil.name = scope_name
+  except KeyError:
+    print '"%s" is not a valid scope name' %scope_name
+  else:
+    s = StringIO()
+    output_phil.show(out=s, expert_level=expert_level)
+    input_phil_string = OV.GetUserInput(0, "Edit parameters", s.getvalue())
+    if input_phil_string is not None and not input_phil_string == s.getvalue():
+      olx.phil_handler.update(phil_string=str(input_phil_string))
+OV.registerFunction(EditParams)
 
 def ShowParams(expert_level=0, attributes_level=0):
   olx.phil_handler.working_phil.show(
