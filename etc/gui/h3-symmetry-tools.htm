@@ -1,0 +1,85 @@
+<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1; -->
+
+<!-- FIRST ROW -->
+<tr name=SYMM_GEN_ROW_1>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td name=MOVE_NEAR align='center' VALIGN='center'>
+    <a 
+      href="if strcmp(spy.GetParam(olex2.in_mode),'move sel') then 'mode off' else 'mode move sel'"
+      target="%Move Near-target%">
+      <zimg name=IMG_BUTTON-MOVE_NEAR border="0" src="button-move_near.png"/>
+    </a>
+  </td>
+  <td name=COPY_NEAR align='center' VALIGN='center'>
+    <a
+      href="if strcmp(spy.GetParam(olex2.in_mode),'move sel -c') then 'mode off' else 'mode move -c sel'"
+      target="%Copy Near-target%">
+      <zimg name=IMG_BUTTON-COPY_NEAR border="0" src="button-copy_near.png"/>
+    </a>
+  </td>
+  <td name=GROW_MODE align='center' VALIGN='center'>
+    <a 
+      href="if strcmp(spy.GetParam(olex2.in_mode),'grow') then 'mode off' else 'mode grow'"
+      target="%Mode Grow-target%">
+      <zimg name=IMG_BUTTON-GROW_MODE border="0" src="button-grow_mode.png"/>
+    </a>
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
+
+<!-- SECOND ROW -->
+<tr name=SYMM_GEN_2>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td name=CENTER_ON_CELL align='center' VALIGN='center'>
+$spy.MakeActiveGuiButton(button-center_on_cell,move>>compaq)		
+  </td>
+  <td name=CENTER_ON_LARGEST_PART align='center' VALIGN='center'>
+$spy.MakeActiveGuiButton(button-largest_part,move)		
+  </td>
+  <td name=ASSEMBLE align='center' VALIGN='center'>
+$spy.MakeActiveGuiButton(button-assemble,'compaq -a')
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
+
+<!-- THIRD ROW -->
+<tr name=SYMM_GEN_3>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td name=SHOW_BASIS align='center' VALIGN='center'>
+  <a 
+    href="basis" 
+    target="%Basis-target%">
+    <zimg name=IMG_BUTTON-SHOW_BASIS border="0" src="button-show_basis.png"/>
+  </a>
+</td>
+  <td name=SHOW_CELL align='center' VALIGN='center'>
+    <a 
+      href="cell" 
+      target="%Show Cell-target%">
+      <zimg name=IMG_BUTTON-SHOW_CELL border="0" src="button-show_cell.png"/>
+    </a>
+  </td>
+  <td name=QUALITY_SLIDER align='right' VALIGN='center'>
+<!-- #include quality-slider gui\snippets\snippet-quality-slider.htm;1; -->
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
+
+<!-- FOURTH ROW -->
+<tr name=SYMM_GEN_4>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td name=FUSE>
+$spy.MakeActiveGuiButton(button-fuse,fuse)
+  </td>
+  <td name=GROW_ALL>
+$spy.MakeActiveGuiButton(button-grow_all,grow)
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
+
+
+
