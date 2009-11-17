@@ -344,13 +344,11 @@ def make_help_box(args):
   OV.write_to_olex(wFilePath, str)
   
   if box_type == 'help':
-    boxWidth = 450
+    boxWidth = OV.GetParam('gui.help_box.width')
     length = len(helpTxt)
-    #boxHeight = int(length/2.8)
-    boxHeight = int(length/(boxWidth/120)) + 100
-    if boxHeight > 500:
-      boxHeight = 500
-    #boxHeight = 800
+    boxHeight = int(length/(boxWidth/OV.GetParam('gui.help_box.height_factor'))) + OV.GetParam('gui.help_box.height_constant')
+    if boxHeight > OV.GetParam('gui.help_box.height_max'):
+      boxHeight = OV.GetParam('gui.help_box.height_max')
     
     x = 10
     y = 50
