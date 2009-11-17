@@ -192,12 +192,16 @@ def make_edit_link(name, box_type):
   if OV.IsPluginInstalled('Olex2Portal'):
     if OV.GetParam('olex2.is_logged_on'):
       editLink = '''
+      <tr>
+      <td align='right'>
       <a href='spy.EditHelpItem(%s-%s)'>
         <b>
           &#187;
         </b>
         Edit
       </a>
+      </td>
+      </tr>
       ''' %(name, box_type)
   return editLink
 
@@ -309,7 +313,7 @@ def make_help_box(args):
       </td>
       <td>
         <font size='+2'>
-          <b>	
+          <b>
             %s
           </b>
         </font>
@@ -623,82 +627,31 @@ def format_help(string):
       
   ## find all occurances of <lb> and replace this with a line-break in a table.
   regex = re.compile(r"<lb>", re.X)
-  string = regex.sub(r'''
-    </td>
-  </tr>
-  <tr>
-    <td>''', string)
+  string = regex.sub(r"</td></tr><tr><td>", string)
 
   ## find all occurances of '->' and replace this with an arrow.
   regex = re.compile(r"->", re.X)
-  string = regex.sub(r'''
-  <b>
-    &rarr;
-  </b>
-  ''', string)
+  string = regex.sub(r"<b>&rarr;</b>", string)
   
   ## find all occurances of strings between t^..^t. These are the headers for tip of the day.
   regex = re.compile(r"t \^ (.*?)  \^ t", re.X)
-  string = regex.sub(r'''
-  <font color='$getVar(gui_html_highlight_colour)'>
-    <b>
-      \1
-    </b>
-  </font>
-  &nbsp;
-  ''', string)
+  string = regex.sub(r"<font color='$getVar(gui_html_highlight_colour)'><b>\1</b></font>&nbsp;", string)
 
   ## find all occurances of strings between <<..>>. These are keys to pressthe headers for tip of the day.
   regex = re.compile(r"<< (.*?)  >>", re.X)
-  string = regex.sub(r'''
-  <b>
-  <code>
-    \1
-  </code>
-  </b>
-  ''', string)
+  string = regex.sub(r"<b><code>\1</code></b>", string)
   
   ## find all occurances of strings between n^..^n. These are the notes.
   regex = re.compile(r"n \^ (.*?)  \^ n", re.X)
-  string = regex.sub(r'''
-  <table width='%s' border='0' cellpadding='2' cellspacing='4'>
-    <tr bgcolor=#efefef>
-      <td>
-        <font size=-1>
-          <b>Note: 
-          </b>
-            \1
-        </font>
-      </td>
-    </tr>
-  </table>
-  ''', string)
+  string = regex.sub(r"<table width='%s' border='0' cellpadding='2' cellspacing='4'><tr bgcolor=#efefef><td><font size=-1><b>Note: </b>\1</font></td></tr></table>", string)
   
   ## find all occurances of strings between l[]. These are links to help or tutorial popup boxes.
   regex = re.compile(r"l\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
-  string = regex.sub(r'''
-  <font size=+1 color='$getVar(gui_html_highlight_colour)'>
-    &#187;
-  </font>
-  <a target='Go to \g<linktext>' href='spy.make_help_box -name=\g<linkurl> -type=\g<linktype>'>
-    <b>
-      \g<linktext>
-    </b>
-  </a>
-  ''', string)
+  string = regex.sub(r"<font size=+1 color='$getVar(gui_html_highlight_colour)'>&#187;</font><a target='Go to \g<linktext>' href='spy.make_help_box -name=\g<linkurl> -type=\g<linktype>'><b>\g<linktext></b></a>", string)
 
   ## find all occurances of strings between gui[]. These are links make something happen on the GUI.
   regex = re.compile(r"gui\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
-  string = regex.sub(r'''
-  <font size=+1 color='$getVar(gui_html_highlight_colour)'>
-    &#187;
-  </font>
-  <a target='Show Me' href='\g<linkurl>'>
-    <b>
-      \g<linktext>
-    </b>
-  </a>
-  ''', string)
+  string = regex.sub(r"<font size=+1 color='$getVar(gui_html_highlight_colour)'>&#187;</font><a target='Show Me' href='\g<linkurl>'><b>\g<linktext></b></a>", string)
   
   
   ## find all occurances of strings between XX. These are command line entities.
@@ -707,21 +660,7 @@ def format_help(string):
   m = regex.findall(string)
   colour = "#888888"
   if m:
-    s = regex.sub(r'''
-    <table width='%s' border='0' cellpadding='0' cellspacing='4'>
-      <tr bgcolor='$getVar(gui_html_code_bg_colour)'>
-        <td>
-          <a href='\2'>
-            <b>
-              <font size='2' color='%s'>
-                <code>>>\2</code>
-              </font>
-            </b>
-          </a>
-        </td>
-      </tr>
-    </table>
-    ''' %(width, colour), string)
+    s = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='4'><tr bgcolor='$getVar(gui_html_code_bg_colour)'><td><a href='\2'><b><font size='2' color='%s'><code>>>\2</code></font></b></a></td></tr></table>" %(width, colour), string)
 
   else:
     s = string
@@ -732,17 +671,7 @@ def format_help(string):
   m = regex.findall(string)
   colour = OV.FindValue('gui_html_highlight_colour')
   if m:
-    s = regex.sub(r'''
-    <tr>
-      <td>
-        <b>
-          <font color='%s'>
-            \2
-          </font>
-        </b>
-      </td>
-    </tr>
-    ''' %colour, string)
+    s = regex.sub(r"<tr><td><b><font color='%s'>\2</font></b> " %colour, string)
   else:
     s = string
     
@@ -752,65 +681,22 @@ def format_help(string):
   m = regex.findall(string)
   colour = "#232323"
   if m:
-    s = regex.sub(r'''
-    <tr bgcolor='$getVar(gui_html_table_firstcol_colour)'>
-      <td>
-        <b>\2</b>
-      </td>
-    </tr>
-    <tr>
-      <td>
-    ''', string)
+    s = regex.sub(r"<tr bgcolor='$getVar(gui_html_table_firstcol_colour)'><td><b>\2</b></td></tr><tr><td>", string)
   else:
     s = string
     
-  ## find all occurances of strings between &&. These are the tables.
+  ## find all occurances of strings between &. These are the tables.
   string = s
   #regex = re.compile(r"  (&&) (.*?)( [^\&\&]* ) (&&) ", re.X)
-  #regex = re.compile(r"  (&&) (.*?) (&&) ", re.X)
-  regex = re.compile(r"  && (.*?)( [^\&&\&&]* ) && ", re.X)
+  regex = re.compile(r"  (&&) (.*?) (&&) ", re.X)
   #regex = re.compile(r"  & (.*?)( [^\&\&]* ) & ", re.X)
   m = regex.findall(string)
   if m:
-    s = regex.sub(r'''
-    <table border=0>
-      \2
-    </table>
-    ''', string)
+    s = regex.sub(r"<table border='0'>\2</table>", string)
   else:
     s = string
     
   return s, d
-
-def reg_glossary(self, string):
-  regex = re.compile(r"  \[ g \s (.*? \w+); ( [^\[\]]* ) \] ", re.X)  
-  m = regex.findall(string)
-  glossary_to_insert = []
-  if m:
-    link = r"list_table_items?catID=&entry=&table=category&itemss=glossary#" 
-    s = regex.sub(r'''
-    <a href='%s\2'>
-      \1
-    </a>
-    ''' %link, string)
-  else:
-    s = string
-  if m:
-    for item in m:
-      glossary_to_insert.append(item[1].replace(" ", "_"))
-      
-  regex = re.compile(r"  \[ l \s (.*? \w+); ( [^\[\]]* ) \] ", re.X)  
-  m = regex.findall(s)
-  if m:
-    t = regex.sub(r'''
-    <a href='\2'>
-      \1
-    </a>
-    ''', s)
-  else:
-    t = s
-    
-  return t, glossary_to_insert
 
 def reg_command(self, string):
   regex = re.compile(r"  ~ (.*?)( [^\~\~]* ) ~ ", re.X)  
@@ -1184,12 +1070,10 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
       if i == current_tooltip_number: continue
       txt = OV.TranslatePhrase("tip-%i" %i)
       if j > max_i * 2: break
-    #txt += "</td></tr><tr><td align='right'>%s</td></tr>" %make_edit_link("tip", "%i" %i)
     txt += '''
-      </td>
-    </tr>
-    %s
-    ''' %make_edit_link("tip", "%i" %i)
+  </td>
+</tr>
+%s''' %make_edit_link("tip", "%i" %i)
 
   elif number == "+1":
     i = current_tooltip_number + 1
@@ -1197,12 +1081,11 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
     if "tip-" in txt:
       i = 1
       txt = OV.TranslatePhrase("tip-%i" %i)
-    #txt += "</td></tr><tr><td align='right'>%s</td></tr>" %make_edit_link("tip", "%i" %i)
     txt += '''
-      </td>
-    </tr>
-    %s
-    ''' %make_edit_link("tip", "%i" %i)
+  </td>
+</tr>
+%s''' %make_edit_link("tip", "%i" %i)
+
   elif number == "list":
     txt = ""
     for i in xrange(max_i):
@@ -1213,17 +1096,21 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
       t = t.split("^t")[0]
       t += "^t"
       t = t.strip()
-      txt += "<b>%i.</b> <a href='spy.GetTip(%i)>>html.Reload'>%s</a><br>" %(i, i,t)
+      txt += '''
+      <b>
+        %i.
+      </b>
+      <a href='spy.GetTip(%i)>>html.Reload'>%s</a>
+      <br>''' %(i, i,t)
     txt = txt.rstrip("<br>")
+    i = 0
   else:
     i = int(number)
     txt = OV.TranslatePhrase("tip-%i" %i)
-    #txt += "</td></tr><tr><td align='right'>%s</td></tr>" %make_edit_link("tip", "%i" %i)
     txt += '''
-      </td>
-    </tr>
-    %s
-    ''' %make_edit_link("tip", "%i" %i)
+  </td>
+</tr>
+%s''' %make_edit_link("tip", "%i" %i)
   current_tooltip_number = i
 
   txt, d = format_help(txt)
