@@ -70,7 +70,7 @@ def makeProgramSettingsGUI(program, method, prgtype):
   return
 
 def makeArgumentsHTML(program, method, dictionary):
-  txt = ''
+  txt = '<tr>'
   first_col = htmlTools.make_table_first_col()
   txt += first_col
   help = htmlTools.make_help_href(dictionary['name'], 'true')
@@ -96,6 +96,7 @@ def makeArgumentsHTML(program, method, dictionary):
     %s
   </td>
 </tr>
+<tr>
 %s
 ''' %(argName, help, tick_box_html, first_col)
   

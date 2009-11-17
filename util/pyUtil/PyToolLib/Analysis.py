@@ -1768,7 +1768,7 @@ def array_scalar_multiplication(array, multiplier):
 
 def makeReflectionGraphOptions(graph, name):
   value = graph.short_caption
-  options_gui = [""]
+  options_gui = []
   i = 1
   for object in graph.active_objects():
     i += 1
@@ -1817,7 +1817,7 @@ def makeReflectionGraphOptions(graph, name):
       options_gui.append(htmlTools.make_combo_text_box(d))
       
       
-  options_gui = '</td><td align="left" colspan="1">'.join(options_gui)
+  options_gui = '\n<td>%s</td>\n' %'</td>\n<td>'.join(options_gui)
   colspan = i
   return options_gui, colspan
 
@@ -1853,12 +1853,13 @@ def makeReflectionGraphGui():
     else:
       gui_d['options_gui'], gui_d['colspan'] = makeReflectionGraphOptions(graph, name)
       help_name = graph.help
-    d = {'name':'BUTTON_MAKE_REFLECTION_GRAPH',
-         'onclick':run_d.get(name),
-         'width':"30",
-         'value':"Go"
-        }
-    gui_d['make_graph_button'] = htmlTools.make_input_button(d)
+      d = {'name':'BUTTON_MAKE_REFLECTION_GRAPH',
+           'onclick':run_d.get(name),
+           'width':'30',
+           'value':'Go',
+           'valign':'top'
+          }
+      gui_d['make_graph_button'] = htmlTools.make_input_button(d)
 
   gui_d['help'] = htmlTools.make_table_first_col(
     help_name=help_name, popout=False)
@@ -1872,17 +1873,30 @@ def makeReflectionGraphGui():
     }
   gui_d['graph_chooser']=htmlTools.make_combo_text_box(d)
 
+  gui_d['row_table_on'] = htmlTools.include_block('gui/blocks/row_table_on.htm').replace('%','%%')
+  gui_d['row_table_off'] = htmlTools.include_block('gui/blocks/row_table_off.htm')
+
   txt = '''
-<tr VALIGN='center'>
+<tr>
 %(help)s
-<td  ALIGN='left' colspan='%(colspan)s'>
-%(graph_chooser)s &nbsp;
-%(make_graph_button)s
-</td></tr>
-<tr align='left'>
-<td valign='center' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
-%(options_gui)s
+%(row_table_on)s
+<td>
+%(graph_chooser)s
 </td>
+<td>
+%(make_graph_button)s
+</td>
+%(row_table_off)s
+</tr>
+''' %gui_d
+  if gui_d['options_gui'] != '':
+    txt += '''
+<tr>
+<td valign='center' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+</td>
+%(row_table_on)s
+%(options_gui)s
+%(row_table_off)s
 </tr>
 ''' %gui_d
   txt = OV.Translate(txt)
