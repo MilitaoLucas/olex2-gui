@@ -1356,6 +1356,9 @@ def StoreSingleParameter(var, args):
     OV.StoreParameter(var)
 OV.registerMacro(StoreSingleParameter, "")
 
+def reset_file_in_OFS(fileName,txt=" ",copyToDisk = False):
+  OV.reset_file_in_OFS(fileName=fileName, txt=txt, copyToDisk=copyToDisk)
+OV.registerFunction(reset_file_in_OFS)
 
 def GetCurrentSelection():
   return OV.GetCurrentSelection()
