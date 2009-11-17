@@ -1,31 +1,13 @@
-<!-- #include header gui\blocks\tool-table-header.htm;1; -->
-<tr VALIGN='center' ALIGN='left' NAME='SET_REFLECTIONS'>
-	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
-		<a 
-			href="spy.make_help_box -name='reflection-file' -popout='False'" 
-			target="Help me with this">
-			<zimg border="0" src="info.png">
-		</a>	
-	</td>
-		<td VALIGN='center' width="100"  colspan=2>
-				 <b>%Reflection File%</b>
-		</td>
-
-		<td VALIGN='center' ALIGN='right' colspan=2>
-			<font size='2'>
-				<input 
-					type='combo' 
-					height="$GetVar(gui_html_combo_height)"
-					bgcolor="GetVar(gui_html_input_bg_colour)"
-					width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)' 
-					name='SET_REFLECTIONS', 
-					items='$spy.GetHklFileList()', 
-					onchange='HKLSrc(GetValue(SET_REFLECTIONS))', 
-					value='$FileName(HKLSrc()).$FileExt(HKLSrc())', 
-					readonly='readonly'
-				> 
-			</font>
-		</td>
-</tr>
-<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
-
+<font size='2'>
+  <input 
+    type='combo' 
+    height='$GetVar(gui_html_combo_height)'
+    bgcolor='GetVar(gui_html_input_bg_colour)'
+    width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)' 
+    name='SET_REFLECTIONS'
+    items='$spy.GetHklFileList()'
+    onchange='HKLSrc(GetValue(SET_REFLECTIONS))'
+    value='$FileName(HKLSrc()).$FileExt(HKLSrc())'
+    readonly='readonly'
+  >
+</font>

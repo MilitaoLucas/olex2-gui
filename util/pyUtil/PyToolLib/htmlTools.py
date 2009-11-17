@@ -391,7 +391,8 @@ def make_warning_html(colspan):
   txt = OV.TranslatePhrase(txt)
   first_col = make_table_first_col() 
   html = '''
-       %s
+       <tr>
+         %s
          <td colspan="%s" bgcolor="$getVar(gui_html_highlight_colour)">
           <b>
             &nbsp;%s
@@ -408,9 +409,8 @@ def make_table_first_col(help_name=None, popout=False, help_image='large'):
   else:
     help = make_help_href(help_name, popout, image=help_image)
   html ='''
-<tr>
-  <td valign='top' width='2' align='center' bgcolor='$getVar(gui_html_table_firstcol_colour)'>
-    %s
+<td valign='top' width='2' align='center' bgcolor='$getVar(gui_html_table_firstcol_colour)'>
+  %s
 </td>
 ''' %help
   return html
@@ -566,7 +566,9 @@ def make_input_button(d):
          'onclick':'',
          'hint':'',
          'height':"GetVar(gui_html_button_height)",
-         'bgcolor':"getVar(gui_html_input_bg_colour)"
+         'bgcolor':"getVar(gui_html_input_bg_colour)",
+         'valign':'center',
+         'halign':'left'
          }
   dic.update(d)  
   html = '''
@@ -577,6 +579,8 @@ def make_input_button(d):
   value="%(value)s" 
   width="%(width)s" 
   height="%(height)s"
+  valign="%(valign)s"
+  halign="%(halign)s"
   hint="%(hint)s"
   flat
 ''' %dic
@@ -1165,7 +1169,10 @@ OV.registerFunction(makeFormulaForsNumInfo)
 
 def setDisplayQuality(q=None):
   OV.setDisplayQuality(q)
-  
 OV.registerFunction(setDisplayQuality)
 
-
+def include_block(path):
+  f = open('%s/etc/%s' %(OV.BaseDir(),path),'r')
+  txt = f.read()
+  f.close()
+  return txt

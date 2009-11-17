@@ -1,9 +1,27 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
-<!-- #include snippet-reflection-file gui\snippets\snippet-reflection-file.htm;1; -->
-<!-- #include tool-table-header gui\blocks\tool-table-header.htm;image=#image;1; -->
 
+<!-- FIRST ROW -->
+<tr name=INFO_SELECT_REFLECTION_FILE>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=reflection-file;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
+  <td name=REFLECTION_FILE_LABEL>
+    <b>%Reflection File%</b>
+  </td>
+  <td name=REFLECTION_FILE_INPUT>
+<!-- #include reflection-file gui\snippets\snippet-reflection-file.htm;1; -->
+  </td>
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
+
+<!-- SECOND ROW -->
 $spy.makeReflectionGraphGui()
+<!--<tr name=INFO_REFLECTION_GRAPHS>-->
+  <!--<td colspan="4">-->
+<!--$spy.makeReflectionGraphGui()-->
+  <!--</td>-->
+<!--</tr>-->
 
 
-<!-- #include tool-footer gui\blocks\tool-footer.htm;2; -->
+<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=4;1; -->

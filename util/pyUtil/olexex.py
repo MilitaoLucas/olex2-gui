@@ -572,7 +572,7 @@ if haveGUI:
 
 def GetHklFileList():
   reflections_files = []
-  reflection_file_extensions = ["hkl", "raw"]
+  reflection_file_extensions = ["hkl", "hkp", "raw"]
   for extension in reflection_file_extensions:
     g = glob.glob(r"%s/*.%s" %(OV.FilePath(),extension))
     reflections_files += g
@@ -585,7 +585,7 @@ def GetHklFileList():
       a = a[1:-1]
   except:
     a = ""
-    
+
   if os.path.isfile(a):
     most_recent_reflection_file = a.split('//')[-1]
     show_refl_date = time.strftime(r"%d/%b/%Y %H:%M", time.localtime(os.path.getctime(OV.HKLSrc())))

@@ -589,7 +589,7 @@ def restraint_builder(cmd):
   html += "<td width='10%%' align='right'>%s</td>" %htmlTools.make_input_button(button_d)
   
   #Add the help info as the last row in the table
-  html += "</td></tr>"
+  html += "</td></tr><tr>"
   html += htmlTools.make_table_first_col(help_name=name, popout=True, help_image='normal')
   html += "<td colspan=%s bgcolor='%s'>%s</td></tr>" %(colspan, OV.FindValue('gui_html_table_firstcol_colour'), html_help, )
   if name in constraints:
