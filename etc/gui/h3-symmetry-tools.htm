@@ -1,17 +1,17 @@
-<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1; -->
+<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
 
 <!-- FIRST ROW -->
 <tr name=SYMM_GEN_ROW_1>
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td name=MOVE_NEAR align='center' VALIGN='center'>
+  <td name=MOVE_NEAR align='center' VALIGN='center' width='33%'>
     <a 
       href="if strcmp(spy.GetParam(olex2.in_mode),'move sel') then 'mode off' else 'mode move sel'"
       target="%Move Near-target%">
       <zimg name=IMG_BUTTON-MOVE_NEAR border="0" src="button-move_near.png"/>
     </a>
   </td>
-  <td name=COPY_NEAR align='center' VALIGN='center'>
+  <td name=COPY_NEAR align='center' VALIGN='center' width='33%'>
     <a
       href="if strcmp(spy.GetParam(olex2.in_mode),'move sel -c') then 'mode off' else 'mode move -c sel'"
       target="%Copy Near-target%">
@@ -32,10 +32,10 @@
 <tr name=SYMM_GEN_2>
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td name=CENTER_ON_CELL align='center' VALIGN='center'>
+  <td name=CENTER_ON_CELL align='center' VALIGN='center' width='33%'>
 $spy.MakeActiveGuiButton(button-center_on_cell,move>>compaq)		
   </td>
-  <td name=CENTER_ON_LARGEST_PART align='center' VALIGN='center'>
+  <td name=CENTER_ON_LARGEST_PART align='center' VALIGN='center' width='33%'>
 $spy.MakeActiveGuiButton(button-largest_part,move)		
   </td>
   <td name=ASSEMBLE align='center' VALIGN='center'>
@@ -48,14 +48,14 @@ $spy.MakeActiveGuiButton(button-assemble,'compaq -a')
 <tr name=SYMM_GEN_3>
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td name=SHOW_BASIS align='center' VALIGN='center'>
+  <td name=SHOW_BASIS align='center' VALIGN='center' width='33%'>
   <a 
     href="basis" 
     target="%Basis-target%">
     <zimg name=IMG_BUTTON-SHOW_BASIS border="0" src="button-show_basis.png"/>
   </a>
 </td>
-  <td name=SHOW_CELL align='center' VALIGN='center'>
+  <td name=SHOW_CELL align='center' VALIGN='center' width='33%'>
     <a 
       href="cell" 
       target="%Show Cell-target%">
@@ -72,12 +72,15 @@ $spy.MakeActiveGuiButton(button-assemble,'compaq -a')
 <tr name=SYMM_GEN_4>
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td name=FUSE>
+  <td name=FUSE width='33%' align='center'>
 $spy.MakeActiveGuiButton(button-fuse,fuse)
   </td>
-  <td name=GROW_ALL>
+  <td name=GROW_ALL width=33% align='center'>
 $spy.MakeActiveGuiButton(button-grow_all,grow)
   </td>
+  <td name=BLANK>
+  </td>
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
