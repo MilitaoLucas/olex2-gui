@@ -1459,7 +1459,7 @@
       <arg3 name="output_csv_file" def="False">
     \>
     <cmd 
-      <cmd1 "spy.CompletenessPlot(%1,%2)">
+      <cmd1 "spy.CompletenessPlot(%1,%2,%3)">
     \>
   \>
 \>
