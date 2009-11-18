@@ -1360,6 +1360,12 @@ def GetCurrentSelection():
   return OV.GetCurrentSelection()
 OV.registerFunction(GetCurrentSelection)
 
+def test_help_boxes():
+  import htmlTools
+  boxes = ['naming']
+  for box in boxes:
+    htmlTools.make_help_box({'name':box})
+OV.registerFunction(test_help_boxes)
 
 
 if not haveGUI:
