@@ -1455,7 +1455,8 @@
   <body
     <args
       <arg1 name="reflections_per_bin" def="20">
-      <arg2 name="output_csv_file" def="False">
+      <arg2 name="bin_range_as" def="two_theta">
+      <arg3 name="output_csv_file" def="False">
     \>
     <cmd 
       <cmd1 "spy.CompletenessPlot(%1,%2)">

@@ -84,7 +84,8 @@ def wilson_statistics(model, reflections, n_bins=10):
     print "wilson_k, wilson_b:", 1/wp.wilson_intensity_scale_factor, wp.wilson_b
   return wp
 
-def completeness_statistics(reflections, wavelength, reflections_per_bin=20, verbose=False):
+def completeness_statistics(reflections, wavelength=None, reflections_per_bin=20, bin_range_as="two_theta", verbose=False):
+  assert bin_range_as in ["d_spacing", "d_star_sq", "two_theta"]#, "stol", "stol_sq"]
   f_obs=reflections.f_obs
   f_sq_obs = reflections.f_sq_obs_merged
   f_sq_obs = f_sq_obs.eliminate_sys_absent().average_bijvoet_mates()
@@ -96,17 +97,32 @@ def completeness_statistics(reflections, wavelength, reflections_per_bin=20, ver
     f_obs.binner().show_summary()
   missing_set = f_obs.complete_set().lone_set(f_obs).sort()
   plot = completeness_plot(f_obs)
-  plot.x = uctbx.d_star_sq_as_two_theta(
-    1./flex.pow2(flex.double(plot.x)), wavelength,deg=True)
+  if bin_range_as == "two_theta":
+    assert wavelength is not None
+    plot.x = uctbx.d_star_sq_as_two_theta(
+      1./flex.pow2(flex.double(plot.x)), wavelength,deg=True)
+  elif bin_range_as == "d_star_sq":
+    plot.x = 1./flex.pow2(flex.double(plot.x))
+  #elif bin_range_as == "stol":
+    #plot.x = uctbx.d_star_sq_as_stol(
+      #1./flex.pow2(flex.double(plot.x)))
+  #elif bin_range_as == "stol_sq":
+    #plot.x = uctbx.d_star_sq_as_stol_sq(
+      #1./flex.pow2(flex.double(plot.x)))
   plot.missing_set = missing_set
   if missing_set.size() > 0:
     print "Missing data:"
-    print "  h  k  l  two theta"
+    print "  h  k  l  %s" %bin_range_as
   else:
     print "No missing data"
-  for indices, two_theta in zip(
-    missing_set.indices(), missing_set.two_theta(wavelength=wavelength, deg=True).data()):
-    print ("(%2i %2i %2i)  ") %indices + ("%8.2f") %two_theta
+  if bin_range_as == "two_theta":
+    resolutions = missing_set.two_theta(wavelength=wavelength, deg=True)
+  elif bin_range_as == "d_spacing":
+    resolutions = missing_set.d_spacings()
+  elif bin_range_as == "d_star_sq":
+    resolutions = missing_set.d_star_sq()
+  for indices, resolution in zip(missing_set.indices(), resolutions.data()):
+    print ("(%2i %2i %2i)  ") %indices + ("%8.2f") %resolution
   return plot
 
 def cumulative_intensity_distribution(reflections, n_bins=20, verbose=False):

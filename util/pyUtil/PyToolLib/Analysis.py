@@ -200,6 +200,11 @@ class Graph(ImageTools):
     return im
   
   def get_unicode_characters(self, txt):
+    txt = txt.replace("two_theta", "2theta")
+    txt = txt.replace("stol", "(sin(theta)/lambda)")
+    txt = txt.replace("_sq", "^2")
+    txt = txt.replace("_star", "*")
+    txt = txt.replace("_", " ")
     txt = txt.replace("lambda", unichr(61548))
     txt = txt.replace("theta", unichr(61553))
     txt = txt.replace("sigma", unichr(61555))
@@ -1585,7 +1590,7 @@ class CumulativeIntensityDistribution(Analysis):
       self.data['dataset1'].show_summary()
 
 class CompletenessPlot(Analysis):
-  def __init__(self, reflections_per_bin=20, output_csv_file=False):
+  def __init__(self, reflections_per_bin=20, bin_range_as="two_theta", output_csv_file=False):
     Analysis.__init__(self)
     self.item = "completeness"
     self.graphInfo["Title"] = OV.TranslatePhrase("Completeness Plot")
@@ -1593,20 +1598,24 @@ class CompletenessPlot(Analysis):
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.filename
     self.auto_axes = False
-    self.cctbx_completeness_statistics(int(reflections_per_bin))
+    if bin_range_as in ("d_spacing", "d_star_sq"):
+      self.reverse_x = True
+    self.cctbx_completeness_statistics(int(reflections_per_bin), bin_range_as)
     self.make_empty_graph(axis_x = True)
-    self.draw_pairs()
+    self.draw_pairs(reverse_x=self.reverse_x)
     self.popout()
     if output_csv_file in (True, 'true', 'True'):
       self.output_data_as_csv()
 
-  def cctbx_completeness_statistics(self, reflections_per_bin):
+  def cctbx_completeness_statistics(self, reflections_per_bin, bin_range_as):
     from cctbx_olex_adapter import OlexCctbxGraphs
     xy_plot = OlexCctbxGraphs(
-      'completeness', reflections_per_bin=reflections_per_bin).xy_plot
+      'completeness',
+      reflections_per_bin=reflections_per_bin,
+      bin_range_as=bin_range_as).xy_plot
     metadata = {}
     metadata.setdefault("y_label", OV.TranslatePhrase("Shell Completeness"))
-    metadata.setdefault("x_label", OV.TranslatePhrase("2theta"))
+    metadata.setdefault("x_label", bin_range_as)
     self.metadata = metadata
     self.data.setdefault('dataset1', Dataset(xy_plot.x,[i*100 for i in xy_plot.y],metadata=metadata))
 
@@ -1807,12 +1816,13 @@ def makeReflectionGraphOptions(graph, name):
       items_l = []
       ctrl_name = 'COMBO_%s' %(obj_name)
       for thing in object.words:
-        items_l.append(thing.value)
+        items_l.append(thing.value.lstrip('*'))
       items = ";".join(items_l)
       d = {'ctrl_name':ctrl_name,
            'label':'%s ' %caption,
            'items':items,
-           'value':items_l[0],
+           'value':object.extract(),
+           'width':'',
            }
       options_gui.append(htmlTools.make_combo_text_box(d))
       
@@ -1834,7 +1844,7 @@ def makeReflectionGraphGui():
            'cumulative_intensity':'run cumulative_intensity GetValue(SPIN_CUMULATIVE_INTENSITY_BINS) GetState(TICK_CUMULATIVE_INTENSITY_OUTPUT_CSV)',
            'systematic_absences':'run systematic_absences GetState(TICK_SYSTEMATIC_ABSENCES_OUTPUT_CSV)',
            'fobs_fcalc':'run fobs_fcalc GetState(TICK_FOBS_FCALC_OUTPUT_CSV)',
-           'completeness':'run completeness GetValue(SPIN_COMPLETENESS_REFLECTIONS_PER_BIN) GetState(TICK_COMPLETENESS_OUTPUT_CSV)',
+           'completeness':'run completeness GetValue(SPIN_COMPLETENESS_REFLECTIONS_PER_BIN) GetValue(COMBO_COMPLETENESS_BIN_RANGE_AS) GetState(TICK_COMPLETENESS_OUTPUT_CSV)',
            'normal_probability':'run _normal_probability GetState(TICK_NORMAL_PROBABILITY_OUTPUT_CSV)',
            }
 

@@ -458,7 +458,7 @@ class OlexCctbxGraphs(OlexCctbxAdapter):
 
     bitmap = 'working'
     OV.CreateBitmap(bitmap)
-    
+
     try:
       if graph == "wilson":
         self.xy_plot = cctbx_controller.wilson_statistics(self.xray_structure(), self.reflections, **kwds)
@@ -468,10 +468,10 @@ class OlexCctbxGraphs(OlexCctbxAdapter):
   
       elif graph == "cumulative":
         self.xy_plot = cctbx_controller.cumulative_intensity_distribution(self.reflections, **kwds)
-  
+
       elif graph == "f_obs_f_calc":
         self.xy_plot = cctbx_controller.f_obs_vs_f_calc(self.xray_structure(), self.reflections)
-  
+
       elif graph == "sys_absent":
         self.xy_plot = cctbx_controller.sys_absent_intensity_distribution(self.reflections)
 
