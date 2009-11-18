@@ -957,26 +957,22 @@ def OnStateChange(*args):
     'cellvis':'button-show_cell',    
     'htmlttvis':'button-tooltips',    
     'helpvis':'button-help',
-    
   }
-  img_base = d.get(name, None)
+  img_base = d.get(name)
 
   if not img_base:
     return False
-  
+
   state = olx.CheckState(name)
   if state == "true":
     use_image= "%son.png" %img_base
-    OV.SetImage("IMG_%s" %img_base.upper(),use_image)
-    copy_to = "%s.png" %img_base
-    OV.CopyVFSFile(use_image, copy_to,2)
-  if state == "false":
+  else:
     use_image = "%soff.png" %img_base
-    OV.SetImage("IMG_%s" %img_base.upper(),use_image)
-    copy_to = "%s.png" %img_base
-    OV.CopyVFSFile(use_image, copy_to,2)
+  OV.SetImage("IMG_%s" %img_base.upper(),use_image)
+  copy_to = "%s.png" %img_base
+  OV.CopyVFSFile(use_image, copy_to,2)
   return True
-  
+
 OV.registerCallback('statechange',OnStateChange)
 
 
