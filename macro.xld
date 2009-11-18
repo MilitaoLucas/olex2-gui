@@ -1591,6 +1591,24 @@
   \>
 \>
 
+<link_parts_occupancies_with help="link parts and occupancies with chosen restraint"
+  <body
+    <args
+      <arg1 name="command" def="">
+    \>
+    <cmd
+      <cmd1 "SetVar(last_disorder_sel,sel())">
+      <cmd2 "isot">
+      <cmd3 "sel GetVar(last_disorder_sel)">
+      <cmd4 "%1">
+      <cmd5 "selback">
+      <cmd6 "part -p=2 -lo sel">
+      <cmd7 "fuse">
+      <cmd8 "labels -p -v -o">
+    \>
+  \>
+\>
+
 <user_onstartup help="dummy definition" <body > >
 <custom_on_report help="dummy definition" <body > >
 

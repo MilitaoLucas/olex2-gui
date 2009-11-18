@@ -2,7 +2,7 @@
 
 <tr>
 
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=-link-selected;1; -->
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=link-selected;1; -->
 
 <map name="green">
 <area shape="rect" coords="0,0,10,10" href="refine">
@@ -18,32 +18,19 @@
 </tr> 
 
 <tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=-link-constraints;1; -->
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=link-constraints;1; -->
   </td>
   <td VALIGN='center' width='100%' colspan='2'>
     <b>Link Parts & Occupanies + </b> &nbsp;
-      <a href="
-SetVar('last_disorder_sel',sel())>>
-isot>>
-sel GetVar('last_disorder_sel')>>
-EADP>>
-selback>>
-part -p=2 -lo sel>>
-fuse>>
-labels -p -v -o
-">EADP</a>
-
+      <a
+href="if strcmp(sel(),'') then none else 'link_parts_occupancies_with EADP'">
+      EADP
+      </a>
 &nbsp;
-  <a href="
-SetVar('last_disorder_sel',sel())>>
-isot>>
-sel GetVar('last_disorder_sel')>>
-ISOR>>
-selback>>
-part -p=2 -lo sel>>
-fuse>>
-labels -p -v -o
-">ISOR</a>
+      <a
+href="if strcmp(sel(),'') then none else 'link_parts_occupancies_with ISOR'">
+      ISOR
+      </a>
   </td>
 </tr> 
 
@@ -68,15 +55,15 @@ labels -p -v -o
 </tr> 
 
 <tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=-show-parts;1; -->
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=show-parts;1; -->
   <td VALIGN='center' width='100%' colspan='2'>
     <b>%Show% PART </b>
-    <a href="showP 0 1">0 1</a>&nbsp
-    <a href="showP 0 2">0 2</a>&nbsp
-    <a href="showP 1 2">1 2</a>&nbsp
-    <a href="showP 1">1</a>&nbsp
-    <a href="showP 2">2</a>&nbsp
-    <a href="showP">ALL</a>&nbsp
+    <a href="showP 0 1">0 1</a>&nbsp;
+    <a href="showP 0 2">0 2</a>&nbsp;
+    <a href="showP 1 2">1 2</a>&nbsp;
+    <a href="showP 1">1</a>&nbsp;
+    <a href="showP 2">2</a>&nbsp;
+    <a href="showP">ALL</a>&nbsp;
   </td>
 </tr>
 </table>
