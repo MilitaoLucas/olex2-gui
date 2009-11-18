@@ -6,7 +6,7 @@ import olex
 if olx.HasGUI() == 'true': import olex_gui
 
 class GuiFunctions(object):
-  
+
   def GetUserInput(self, arg, title, contentText):
     """If first argument is 1 (number one) brings up one line input box, anything else brings up a multiline input."""
     try:
@@ -100,7 +100,30 @@ class GuiFunctions(object):
       if num == "1": num = ""
       str+="%s<sub>%s</sub>" %(ele, num)
     return str
-  
+
+  def GetHtmlPanelwidth(self):
+    return olx.HtmlPanelWidth()
+
+  def setItemstate(self, txt):
+    olex.m("itemstate %s" %txt)
+
+  def SetImage(self, zimg_name, image_file):
+    if self.olex_gui.IsControl(zimg_name):
+      olx.html_SetImage(zimg_name,image_file)
+
+  def setDisplayQuality(self, q=None):
+    if not q:
+      q = self.GetParam('snum.display_quality')
+      if not q:
+        q = 2
+    try:
+      q = int(q)
+      d = {1:'l', 2:'m', 3:'h'}
+      q = d.get(q,2)
+    except:
+      pass
+    olx.Qual("-%s" %q)
+
 a = GuiFunctions()
 olex.registerMacro(a.SetGrad, 'f')
 olex.registerFunction(a.GetFormulaDisplay)

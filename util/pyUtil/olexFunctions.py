@@ -225,8 +225,7 @@ class OlexFunctions(inheritFunctions):
     path = path.strip('"')
     path = '"%s"' %path
     return olex.m('@reap %s' %path)
-  
-  
+
   def Reset(self):
     olx.Reset()
     
@@ -461,9 +460,6 @@ class OlexFunctions(inheritFunctions):
     
   def GetCompilationInfo(self):
     return olx.GetCompilationInfo()
-  
-  def GetHtmlPanelwidth(self):
-    return olx.HtmlPanelWidth()
 
   def XfAuGetValue(self, var=""):
     try:
@@ -478,22 +474,10 @@ class OlexFunctions(inheritFunctions):
     olex.writeImage(copy_to, f, isPersistent)
     return ""
 
-  def SetImage(self, zimg_name, image_file):
-    if self.olex_gui.IsControl(zimg_name):
-      olx.html_SetImage(zimg_name,image_file)
-    else:
-      try:
-        olx.html_SetImage(zimg_name,image_file)
-      except:
-        print "Failure!"
-
   def cmd(self, command):
     olex.m(command)
     return ""
   
-  def setItemstate(self, txt):
-    olex.m("itemstate %s" %txt)
-
   def GetRefinementModel(self,calculate_connectivity=False):
     return olex_core.GetRefinementModel(calculate_connectivity)
   
@@ -515,7 +499,7 @@ class OlexFunctions(inheritFunctions):
     for item in g:
       keyname = item.split("\\")[-1:][0]
       return keyname.split(".")[0]
-    
+
   def GetUserComputerName(self):
     import os
     return os.getenv('USERNAME'), os.getenv('COMPUTERNAME')  
@@ -544,19 +528,5 @@ class OlexFunctions(inheritFunctions):
   def GetUsername(self):
     return os.getenv('USERNAME')
 
- 
-  def setDisplayQuality(self, q=None):
-    if not q:
-      q = self.GetParam('snum.display_quality')
-      if not q:
-        q = 2
-    try:
-      q = int(q)
-      d = {1:'l', 2:'m', 3:'h'}
-      q = d.get(q,2)
-    except:
-      pass
-    olx.Qual("-%s" %q)
-    
   
 OV = OlexFunctions()
