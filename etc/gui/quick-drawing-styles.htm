@@ -5,38 +5,40 @@
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=quick-drawing-styles;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td name=IMG_BALL_AND_STICK width=10%>
-    <zimg border="0" src="gui/images/toolbar-ball-and-stick.png"/> 
+    <zimg border="0" src="gui/images/toolbar-ball-and-stick.png">
   </td>
   <td name=BTN_BALL_AND_STICK>
 $spy.MakeActiveGuiButton(button-balls_&_sticks,'pers>>sel -u')
   </td>
   <td name=IMG_ANIS width=10%>
-    <zimg border="0" src="gui/images/toolbar-anis.png"/>
+    <zimg border="0" src="gui/images/toolbar-anis.png">
   </td>
   <td name=BTN_BALL_AND_STICK>
 <!-- Button Part ELLIPSOIDS -->
   <map name="map_ellipsoids">
-    <area shape="rect" 
-      coords="0,0,60,25" 
+    <area shape="rect"
+      coords="0,0,60,25"
       href="spy.InActionButton(button-ellipsoids_|_h,on)>>
 refresh>>
 telp>>
 sel -u>>
 spy.InActionButton(button-ellipsoids_|_h,off)"
-  target="%Show Ellipsoids%">
+    target="%Show Ellipsoids%"
+    >
 
 <!-- Button Part H Uiso -->
-  <area shape="rect" 
-    coords="60,0,500,25"
-    href="spy.InActionButton(button-ellipsoids_|_h,on)>>
+    <area shape="rect" 
+      coords="60,0,500,25"
+      href="spy.InActionButton(button-ellipsoids_|_h,on)>>
 refresh>>
 telph>>
 sel -u>>
 spy.InActionButton(button-ellipsoids_|_h,off)"
 
-  target="%Show Ellipsoids and Hydrogen atom Uiso%">
-</map>	
-  <zimg border="0" name=IMG_BUTTON-ELLIPSOIDS_|_H src="button-ellipsoids_|_h.png" usemap=#map_ellipsoids/>
+      target="%Show Ellipsoids and Hydrogen atom Uiso%"
+    >
+  </map>
+  <zimg border="0" name=IMG_BUTTON-ELLIPSOIDS_|_H src="button-ellipsoids_|_h.png" usemap=#map_ellipsoids>
 </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
@@ -46,13 +48,13 @@ spy.InActionButton(button-ellipsoids_|_h,off)"
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=quick-drawing-styles;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td name=IMG_WIREFRAME width=10%>
-    <zimg border="0" src="gui/images/toolbar-wireframe.png"/>
+    <zimg border="0" src="gui/images/toolbar-wireframe.png">
   </td>
   <td name=BTN_WIREFRAME>
 $spy.MakeActiveGuiButton(button-wireframe,'proj')
   </td>
   <td name=IMG_SPHERE_PACKING width=10%>
-    <zimg border="0" src="gui/images/toolbar-sphere-packing.png"/>
+    <zimg border="0" src="gui/images/toolbar-sphere-packing.png">
   </td>
   <td name=BTN_SPHERE_PACKING>
 $spy.MakeActiveGuiButton(button-sphere_packing,'sfil>>sel -u')
@@ -65,13 +67,13 @@ $spy.MakeActiveGuiButton(button-sphere_packing,'sfil>>sel -u')
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=quick-drawing-styles;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td name=IMG_BICOLOURED_BONDS width=10%>
-    <zimg border="0" src="gui/images/toolbar-bicoloured-bonds.png"/>
+    <zimg border="0" src="gui/images/toolbar-bicoloured-bonds.png">
   </td>
   <td name=BTN_BICOLOURED_BONDS>
 $spy.MakeActiveGuiButton(button-tubes,'tubes>>sel -u')
   </td>
   <td name=IMG_DEFAULT width=10%>
-    <zimg border="0" src="gui/images/toolbar-default.png"/>
+    <zimg border="0" src="gui/images/toolbar-default.png">
   </td>
   <td name=BTN_DEFAULT>
 $spy.MakeActiveGuiButton(button-default_style,'default')
@@ -84,7 +86,7 @@ $spy.MakeActiveGuiButton(button-default_style,'default')
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=quick-drawing-styles;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td name=IMG_POLYHEDRA width=10%>
-    <zimg border="0" src="gui/images/toolbar-polyhedra.png"/>
+    <zimg border="0" src="gui/images/toolbar-polyhedra.png">
   </td>
   <td name=BTN_POLYHEDRA>
 $spy.MakeActiveGuiButton(button-polyhedra,'mask atoms 33>>sel -u')
@@ -92,5 +94,6 @@ $spy.MakeActiveGuiButton(button-polyhedra,'mask atoms 33>>sel -u')
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
-
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
+
+<!-- %Wireframe%, %Tubes%, %Polyhedra%, %Ellipsoids%, %Balls and Sticks% -->
