@@ -1592,6 +1592,20 @@
   \>
 \>
 
+<mode_grow help="setting mode grow with parameters"
+  <body
+    <args
+      <arg1 name="command" def=spy.GetParam(snum.grow.short)>
+      <arg1 name="command" def=spy.GetParam(snum.grow.selection)>
+      <arg1 name="command" def=spy.GetParam(snum.grow.vdw)>
+    \>
+    <cmd 
+      <cmd1 'mode grow -%1 -%2 -%3'>
+    \>
+  \>
+\>
+
+
 <link_parts_occupancies_with help="link parts and occupancies with chosen restraint"
   <body
     <args
