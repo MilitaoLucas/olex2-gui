@@ -526,7 +526,7 @@ graphs {
         .type = int(value_min=1)
         .help = Number of bins
         .caption = %Bins%
-      method = Olex2 cctbx
+      method = *Olex2 cctbx
         .type = choice
         .caption = "%Method%"
       output_csv_file = False
@@ -559,6 +559,9 @@ graphs {
       reflections_per_bin=20
         .type = int(value_min=1)
         .caption = "Reflections per bin"
+      bin_range_as = *two_theta d_spacing d_star_sq
+        .type = choice
+        .caption = "Bin range as"
       output_csv_file = False
         .type = bool
         .caption = "%Output% csv"
