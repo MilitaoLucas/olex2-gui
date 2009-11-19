@@ -551,7 +551,7 @@ class Method_cctbx_ChargeFlip(Method_solution):
     #olex.m("sel -a")
     #olex.m("name sel 1")
     OV.DeleteBitmap('solve')
-    file = r"'%s/%s.res'" %(olx.FilePath(), RunPrgObject.fileName)
+    file = r"%s/%s.res" %(olx.FilePath(), RunPrgObject.fileName)
     olx.xf_SaveSolution(file)
     olx.Atreap(file)
 
