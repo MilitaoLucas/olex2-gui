@@ -3,8 +3,80 @@ import cStringIO
 import iotbx.phil
 import libtbx.phil
 from libtbx.phil import scope_extract_attribute_error
+from libtbx.phil import Auto
+from libtbx.phil import tokenizer
 
-converter_registry = iotbx.phil.default_converter_registry
+def rgb2hex(rgb):
+  """return the hexadecimal string representation of an rgb colour"""
+  return '#%02x%02x%02x' % rgb
+
+def hex2rgb(value):
+  """return the rgb tuple representation of a hexadecimal colour"""
+  value = value.lstrip('#')
+  lv = len(value)
+  return tuple(int(value[i:i+lv/3], 16) for i in range(0, lv, lv/3))
+
+html_colours = {
+  'aqua':'#00ffff',
+  'cyan':'#00ffff',
+  'black':'#000000',
+  'blue':'#0000ff',
+  'fuchsia':'#ff00ff',
+  'magenta':'#ff00ff',
+  'grey':'#808080',
+  'green':'#008000',
+  'lime':'#00ff00',
+  'maroon':'#800000',
+  'navy':'#000080',
+  'olive':'#808000',
+  'purple':'#800080',
+  'red':'#ff0000',
+  'silver':'#c0c0c0',
+  'teal':'#008080',
+  'white':'#ffffff',
+  'yellow':'#ffff00'
+}
+
+class colour(object):
+  def __init__(self, colour_str=None, rgb=None, hexadecimal=None):
+    assert [colour_str, rgb, hexadecimal].count(None) == 2
+    if colour_str is not None:
+      try:
+        rgb = tuple(int(i)for i in colour_str.strip('()').split(','))
+      except ValueError:
+        hexadecimal = html_colours.get(colour_str.lower())
+        if hexadecimal is None:
+          hexadecimal = colour_str
+    if rgb is not None:
+      #assert len(rgb) == 3
+      hexadecimal = rgb2hex(rgb)
+    elif hexadecimal is not None:
+      rgb = hex2rgb(hexadecimal)
+    self.rgb = rgb
+    self.hexadecimal=hexadecimal
+
+class colour_converters(object):
+
+  phil_type = "colour"
+
+  def __str__(self): return self.phil_type
+
+  def from_words(self, words, master):
+    s = libtbx.phil.str_from_words(words=words)
+    if (s is None): return None
+    if (s is Auto): return Auto
+    return colour(colour_str=s)
+
+  def as_words(self, python_object, master):
+    if (python_object is None):
+      return [tokenizer.word(value="None")]
+    if (python_object is Auto):
+      return [tokenizer.word(value="Auto")]
+    return [tokenizer.word(value=str(python_object.hexadecimal))]
+
+converter_registry = libtbx.phil.extended_converter_registry(
+  additional_converters=[colour_converters],
+  base_registry=iotbx.phil.default_converter_registry)
 
 #
 # Main interface to Phil
@@ -296,7 +368,7 @@ class phil_handler(object):
         #new_paths = 
       new_phil = self.master_phil.fetch(sources=[old_phil, phil_object])
       if new_phil is not None:
-        self.working_phil = new_phil
+        self.working_phil = new_phil.extract_format()
         if rebuild_index:
           self._rebuild_index()
       else:
