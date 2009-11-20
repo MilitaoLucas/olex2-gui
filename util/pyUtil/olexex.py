@@ -1360,9 +1360,26 @@ def GetCurrentSelection():
   return OV.GetCurrentSelection()
 OV.registerFunction(GetCurrentSelection)
 
+def getAllHelpBoxes():
+  import glob
+  import re
+  boxes = []
+  for htmfile in glob.glob("%s/etc/gui/*.htm" %OV.BaseDir()):
+    rFile = open(htmfile,'r')
+    f = rFile.read()
+    rFile.close()
+    
+    ## find all occurances of strings between help_ext=..; . These should be comma separated things to highlight.
+    regex = re.compile(r"help_ext= (.*?)  ;", re.X)
+    l = regex.findall(f)
+    if l:
+      for item in l:
+        boxes.append(item)
+  return boxes
+
 def test_help_boxes():
   import htmlTools
-  boxes = ['naming']
+  boxes = getAllHelpBoxes()
   for box in boxes:
     htmlTools.make_help_box({'name':box})
 OV.registerFunction(test_help_boxes)

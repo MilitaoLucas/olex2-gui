@@ -1050,7 +1050,7 @@ class timage(ImageTools):
                   "make_images_from_fb_png",
                   "make_popup_banners",
                   "info_bitmaps",
-                  "makeTestBanner",
+                  #"makeTestBanner",
                   "resize_news_image",
                   "create_logo"
                   ]
