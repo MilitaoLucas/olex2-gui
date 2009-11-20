@@ -228,7 +228,7 @@ class ImageTools(FontInstances):
       factor = im.size[0]/width
       height = int(im.size[1] / factor)
       im = self.resize_image(im, (width, height))
-      name = name.split(".")[0]
+      #name = name.split(".")[0]
       OlexVFS.save_image_to_olex(im, name, 2)
     else:
       pass

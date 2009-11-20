@@ -335,8 +335,13 @@ def make_help_box(args):
     %s
   </td>
 </tr>
+</tr>
+</table>
+<table>
 %s
-<!-- #include tool-footer gui/blocks/tool-footer.htm;1; -->
+</table>
+
+</font>
 ''' %(banner_include, name, titleTxt, helpTxt, return_items, editLink)
   wFilePath = r"%s-%s.htm" %(name, box_type)
   #str = unicode(str)#

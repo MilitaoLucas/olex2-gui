@@ -1,6 +1,6 @@
 gui {
   logo_colour = #6464a0
-    .type = str
+    .type = colour
   skin {
     name = default
       .type = str
@@ -10,73 +10,74 @@ gui {
       .type = path
   }
   purple = #a245a2
-    .type = str
+    .type = colour
   red = #ff0000
-    .type = str
+    .type = colour
   orange = #ff8f00
-    .type = str
+    .type = colour
   green = #018F1E
-    .type = str
+    .type = colour
   grey = #555555
-    .type = str
+    .type = colour
   html {
     base_colour = #00ff00
-      .type = str
+      .type = colour
     bg_colour = #ffffff
       .type = str
       .caption = "Background colour"
     code_bg_colour = #ffffdd
-     .type = str
+     .type = colour
     font_colour = #6f6f8b
-      .type = str
+      .type = colour
     font_name = Verdana
       .type = str
     font_size = 2
       .type = int
-    #highlight_colour=OV.FindValue('gui_html_highlight_colour','#ff7800')
+    highlight_colour = #ff7800
+      .type = colour
     input_bg_colour = #F3F3F3
-      .type = str
+      .type = colour
     icon_size = 22
       .type = int
     link_colour = #6f6f8b
-      .type = str
+      .type = colour
     table_bg_colour = #F3F3F3
-      .type = str
+      .type = colour
     table_firstcol_colour='#E9E9E9'
-      .type = str
+      .type = colour
     MainToolbarTabButtonActive = None
       .type = str
   }
   image_font_name = Vera
     .type = str
   timage_colour = #6464a0
-    .type = str
+    .type = colour
   timage_font_colour = #ff0000
-    .type = str
+    .type = colour
   button_colouring = #ff0000
-    .type = str
+    .type = colour
   button_writing = #00ff00
-    .type = str
+    .type = colour
   snumtitle_colour = #6464a0
-    .type = str
+    .type = colour
   snumtitle_font_colour = #ff0000
-    .type = str
+    .type = colour
   tab_colour = #ff0000
-    .type = str
+    .type = colour
   tab_font_colour = #ff0000
-    .type = str
+    .type = colour
   infobox_text = '2053;2143326838;2143979345'
   infobox_plane = '2053;2136422952;2137144606'
   htmlpanelwidth = 320
     .type = int
   grad_top_left = #05053c
-    .type = str
+    .type = colour
   grad_top_right = #05053c
-    .type = str
+    .type = colour
   grad_bottom_left = #ffffff
-    .type = str
+    .type = colour
   grad_bottom_right = #ffffff
-    .type = str
+    .type = colour
   #language_encoding=OV.CurrentLanguageEncoding()
   use_fader=False
     .type = bool
@@ -103,6 +104,8 @@ gui {
       
     }
 }
+
+
 
 snum {
   solution {
