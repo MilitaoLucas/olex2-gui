@@ -224,18 +224,16 @@ class ImageTools(FontInstances):
       im = Image.open(path)
       if colourize:
         im = self.colourize(im, (0,0,0), OV.FindValue('gui_logo_colour')) 
-      width = int(width) - 30
+      width = int(width) - 47
       factor = im.size[0]/width
       height = int(im.size[1] / factor)
       im = self.resize_image(im, (width, height))
-      #name = name.split(".")[0]
+      name = name.split(".")[0]
       OlexVFS.save_image_to_olex(im, name, 2)
     else:
       pass
     return "Done"
 
-  
-    
   def reduce_opacity(self, im, opacity):
     """Returns an image with reduced opacity."""
     import ImageEnhance
