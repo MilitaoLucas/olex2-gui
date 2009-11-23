@@ -1,4 +1,5 @@
 skin default
 html.tooltips true
+panel 400
 clear
 setup
