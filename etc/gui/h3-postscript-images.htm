@@ -4,7 +4,7 @@
 <tr name=IMAGE_PS_ROW_1>
 <!-- #include tool-help-column gui\blocks\tool-first-column.htm;help_ext=mode_name;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-      <td>
+  <td name=IMAGE_PS_BUTTON>
         <input
   type="button"
   name = "MAKE_PS_IMAGE"
@@ -13,22 +13,22 @@
   onclick="run 'brad
 GetValue(IMAGE_PS_BONDWIDTH)'>>
 run 'pictps
-  GetValue(IMAGE_PS_NAME).ps
+  spy.getParam(snum.image.ps.name).ps
   GetData(COLOR_LINE)
   GetData(COLOR_FILL)
   GetData(COLOR_BOND)
   GetData(IMAGE_PS_PERSPECTIVE)
-  -lw_ellipse=GetValue(IMAGE_PS_LINEWIDTH)
-  -lw_octant=GetValue(IMAGE_PS_OCTANT_LINEWIDTH)
-  -lw_pie=GetValue(IMAGE_PS_OCTANT_PIEWIDTH)
-  -lw_font=GetValue(IMAGE_PS_FONTWEIGHT)
-  -div_pie=GetValue(IMAGE_PS_OCTANT_COUNT)
-  -scale_hb=GetValue(IMAGE_PS_HBONDS)
+  -lw_ellipse=spy.GetParam(snum.image.ps.outline_width)
+  -lw_octant=spy.GetParam(snum.image.ps.octant_width)
+  -lw_pie=spy.GetParam(snum.image.ps.pie_width)
+  -lw_font=spy.GetParam(snum.image.ps.font_weight)
+  -div_pie=spy.GetParam(snum.image.ps.octant_count)
+  -scale_hb=spy.GetParam(snum.image.ps.h_bond_width)
 '>>
 brad 0.8>>
-echo 'Image made and placed in FilePath()'">
+echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'">
   </td>
-  <td>
+  <td name=IMAGE_PS_NAME>
     <input 
       type="text"
       height="$getVar(gui_html_input_height)"
@@ -37,15 +37,15 @@ echo 'Image made and placed in FilePath()'">
       name="IMAGE_PS_NAME"
       width="80"
       height="$getVar(gui_html_input_height)"
-      value = "$FileName()"
+      value="$spy.GetParam(snum.image.ps.name)"
+      onleave="spy.SetParam(snum.image.ps.name,GetValue(IMAGE_PS_NAME))"
       label='Name '
-      manage
     >
   </td>
-  <td align='right'>
+  <td name=IMAGE_PS_COLOUR_LINE_LABEL align='right'>
     Lines
   </td>
-  <td>
+  <td name=IMAGE_PS_COLOUR_LINE>
     <input
       type="checkbox"
       height="$getVar(gui_html_checkbox_height)"
@@ -56,10 +56,10 @@ echo 'Image made and placed in FilePath()'">
       onuncheck="SetData(COLOR_LINE,' ')"
       manage>
   </td>
-  <td align='right'>
+  <td name=IMAGE_PS_COLOUR_BOND_LABEL align='right'>
     Bonds
   </td>
-  <td>
+  <td name=IMAGE_PS_COLOUR_BOND>
     <input
       type="checkbox"
       height="$getVar(gui_html_checkbox_height)"
@@ -71,24 +71,24 @@ echo 'Image made and placed in FilePath()'">
       onuncheck="SetData(COLOR_BOND,' ')"
       manage>
   </td>
-  <td align='right'>
+  <td name=IMAGE_PS_COLOUR_FILL_LABEL align='right'>
     Fill
   </td>
-  <td>
+  <td name=IMAGE_PS_COLOUR_FILL>
     <input
       type="checkbox"
       height="$getVar(gui_html_checkbox_height)"
       width="$getVar(gui_html_checkbox_width)"
       name = "COLOR_FILL"
       width="17"
-      oncheck="SetData(COLOR_FILL,-color_fill)"
-      onuncheck="SetData(COLOR_FILL,' ')"
+      oncheck="SetData(COLOR_FILL,-color_fill)>>load style OLTEP.xld"
+      onuncheck="SetData(COLOR_FILL,' ')>>load style default.xld"
       manage>
   </td>
-  <td align='right'>
+  <td name=IMAGE_PS_PERSPECTIVE_LABEL align='right'>
     Pers
   </td>
-  <td>
+  <td name=IMAGE_PS_PERSPECTIVE>
     <input
       type="checkbox"
       height="$getVar(gui_html_checkbox_height)"
@@ -106,54 +106,53 @@ echo 'Image made and placed in FilePath()'">
 <tr name=IMAGE_PS_ROW_2>
 <!-- #include tool-help-column gui\blocks\tool-first-column.htm;help_ext=mode_name;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td name=IMAGE_PS_BONDWIDTH width=14%>
+  <td name=ROW_2_LABEL width=20%>
+    <b>Atoms</b>
+  </td>
+  <td name=IMAGE_PS_ELLIPSE_LINEWIDTH width=40%>
+    <input
+      type="combo"
+      height="$GetVar(gui_html_combo_height)"
+      width="$GetVar(gui_html_combo_width_2)"
+      bgcolor="$getVar(gui_html_input_bg_colour)" 
+      items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6" 
+      height="$getVar(gui_html_input_height)"
+      valign='center'
+      align='right'
+      name="IMAGE_PS_OUTLINE_LINEWIDTH"
+      value='$spy.GetParam_as_string(snum.image.ps.outline_width)'
+      label="Outline Line Width "
+      onleave="spy.SetParam(snum.image.ps.outline_width,GetValue(IMAGE_PS_OUTLINE_WIDTH))"
+    >
+  </td>
+  <td name=IMAGE_PS_OCTANT_LINEWIDTH width=40%>
     <input
       type="combo"
       height="$GetVar(gui_html_combo_height)"
       width="$GetVar(gui_html_combo_width_2)"
       bgcolor="$getVar(gui_html_input_bg_colour)"
-      items="0.2;0.4;0.6;0.8;1.0"
+      items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6"
       height="$getVar(gui_html_input_height)"
       valign='center'
-      name="IMAGE_PS_BONDWIDTH"
+      align='right'
+      name="IMAGE_PS_OCTANT_LINEWIDTH"
       width="50"
-      value='0.6'
-      label="Bonds "
-      manage
+      value='$spy.GetParam_as_string(snum.image.ps.octant_width)'
+      label="Octant Line Width "
+      onleave="spy.SetParam(snum.image.ps.octant_width,GetValue(IMAGE_PS_OCTANT_LINEWIDTH))"
     >
   </td>
-  <td name=IMAGE_PS_HBONDS width=14%>
-    <input 
-      type="combo"
-      height="$GetVar(gui_html_combo_height)"
-      width="$GetVar(gui_html_combo_width_2)"
-      bgcolor="$getVar(gui_html_input_bg_colour)"
-      items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6"
-      valign='center'
-      name="IMAGE_PS_HBONDS"
-      width="50"
-      value='0.6'
-      label="H Atoms "
-      manage
-    >
-    </td>
-  <td name=IMAGE_PS_FONTWEIGHT width=14%>
-    <input 
-      type="combo"
-      height="$GetVar(gui_html_combo_height)"
-      width="$GetVar(gui_html_combo_width_2)"
-      bgcolor="$getVar(gui_html_input_bg_colour)"
-      items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6;2.0;"
-      height="$getVar(gui_html_input_height)"
-      valign='center'
-      name="IMAGE_PS_FONTWEIGHT"
-      width="50"
-      value='0.6'
-      label="Font "
-      manage
-    >
-    </td>
-  <td name=IMAGE_PS_OCTANT_COUNT width=14%>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
+
+<!-- THIRD ROW -->
+<tr name=IMAGE_PS_ROW_3>
+<!-- #include tool-help-column gui\blocks\tool-first-column.htm;help_ext=mode_name;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td name=ROW_3_LABEL width=20%>
+    <b>Octant</b>
+  </td>
+  <td name=IMAGE_PS_OCTANT_COUNT width=40%>
     <input
       type="combo"
       height="$GetVar(gui_html_combo_height)"
@@ -162,45 +161,15 @@ echo 'Image made and placed in FilePath()'">
       items="2;3;4;5;6;7;8;9;10;"
       height="$getVar(gui_html_input_height)"
       valign='center' 
+      align='right'
       name="IMAGE_PS_OCTANT_COUNT"
       width="50"
-      value='5'
-      label="Octants "
-      manage
-    >
-    </td>
-  <td name=IMAGE_PS_ELLIPSE_LINEWIDTH width=14%>
-    <input
-      type="combo"
-      height="$GetVar(gui_html_combo_height)"
-      width="$GetVar(gui_html_combo_width_2)"
-      bgcolor="$getVar(gui_html_input_bg_colour)" 
-      items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6" 
-      height="$getVar(gui_html_input_height)"
-      valign='center' 
-      name="IMAGE_PS_LINEWIDTH"
-      value='1.0'
-      label="Outline "
-      manage
+      value='$spy.GetParam(snum.image.ps.octant_count)'
+      label="No. of Dividers "
+      onleave="spy.SetParam(snum.image.ps.octant_count,GetValue(IMAGE_PS_OCTANT_COUNT))"
     >
   </td>
-  <td name=IMAGE_PS_OCTANT_LINEWIDTH width=14%>
-    <input
-      type="combo"
-      height="$GetVar(gui_html_combo_height)"
-      width="$GetVar(gui_html_combo_width_2)"
-      bgcolor="$getVar(gui_html_input_bg_colour)"
-      items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6"
-      height="$getVar(gui_html_input_height)"
-      valign='center'
-      name="IMAGE_PS_OCTANT_LINEWIDTH"
-      width="50"
-      value='1.0'
-      label="Octant "
-      manage
-    >
-  </td>
-  <td name=IMAGE_PS_OCTANT_PIEWIDTH width=14%>
+  <td name=IMAGE_PS_OCTANT_PIEWIDTH width=40%>
     <input 
       type="combo"
       height="$GetVar(gui_html_combo_height)"
@@ -209,11 +178,100 @@ echo 'Image made and placed in FilePath()'">
       items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6"
       height="$getVar(gui_html_input_height)"
       valign='center'
+      align='right'
       name="IMAGE_PS_OCTANT_PIEWIDTH"
       width="50"
-      value='0.6'
-      label="Pie "
-      manage
+      value='$spy.GetParam_as_string(snum.image.ps.pie_width)'
+      label="Dividing Line Width "
+      onleave="spy.SetParam(snum.image.ps.pie_width,GetValue(IMAGE_PS_OCTANT_PIEWIDTH))"
+    >
+    </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
+
+<!-- FOURTH ROW -->
+<tr name=IMAGE_PS_ROW_4>
+<!-- #include tool-help-column gui\blocks\tool-first-column.htm;help_ext=mode_name;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td name=ROW_4_LABEL width=20%>
+    <b>Bonds</b>
+  </td>
+  <td name=IMAGE_PS_BONDWIDTH width=40%>
+    <input
+      type="combo"
+      height="$GetVar(gui_html_combo_height)"
+      width="$GetVar(gui_html_combo_width_2)"
+      bgcolor="$getVar(gui_html_input_bg_colour)"
+      items="0.2;0.3;0.4;0.5;0.6;0.7;0.8;"
+      height="$getVar(gui_html_input_height)"
+      valign='center'
+      align='right'
+      name="IMAGE_PS_BONDWIDTH"
+      width="50"
+      value='$spy.GetParam_as_string(snum.image.ps.bond_width)'
+      label="Bond Width "
+      onchange="spy.SetParam(snum.image.ps.bond_width,GetValue(IMAGE_PS_BONDWIDTH))"
+    >
+  </td>
+  <td name=IMAGE_PS_HBOND width=40%>
+    <input 
+      type="combo"
+      height="$GetVar(gui_html_combo_height)"
+      width="$GetVar(gui_html_combo_width_2)"
+      bgcolor="$getVar(gui_html_input_bg_colour)"
+      items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6"
+      valign='center'
+      align='right'
+      name="IMAGE_PS_HBOND"
+      width="50"
+      value='$spy.GetParam_as_string(snum.image.ps.h_bond_width)'
+      label="H Atom Bonds "
+      onleave="spy.SetParam(snum.image.ps.h_bond_width,GetValue(IMAGE_PS_HBOND))"
+    >
+    </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
+
+<!-- FIFTH ROW -->
+<tr name=IMAGE_PS_ROW_5>
+<!-- #include tool-help-column gui\blocks\tool-first-column.htm;help_ext=mode_name;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td name=ROW_5_LABEL width=20%>
+    <b>Font</b>
+  </td>
+  <td name=IMAGE_PS_FONTWEIGHT width=40%>
+    <input 
+      type="combo"
+      height="$GetVar(gui_html_combo_height)"
+      width="$GetVar(gui_html_combo_width_2)"
+      bgcolor="$getVar(gui_html_input_bg_colour)"
+      items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6;2.0;"
+      height="$getVar(gui_html_input_height)"
+      valign='center'
+      align='right'
+      name="IMAGE_PS_FONTWEIGHT"
+      width="50"
+      value='$spy.GetParam_as_string(snum.image.ps.font_weight)'
+      label="Weight "
+      onleave="spy.SetParam(snum.image.ps.font_weight,GetValue(IMAGE_PS_FONTWEIGHT))"
+    >
+    </td>
+  <td name=IMAGE_PS_FONTSIZE width=40%>
+    <input 
+      type="combo"
+      height="$GetVar(gui_html_combo_height)"
+      width="$GetVar(gui_html_combo_width_2)"
+      bgcolor="$getVar(gui_html_input_bg_colour)"
+      items="10;12;14;15;16;18;20;22;"
+      height="$getVar(gui_html_input_height)"
+      valign='center'
+      align='right'
+      name="IMAGE_PS_FONTSIZE"
+      width="50"
+      value='$spy.GetParam(snum.image.ps.font_size)'
+      label="Size "
+      onchange="spy.SetParam(snum.image.ps.font_size,GetValue(IMAGE_PS_FONTSIZE))>>
+setfont Picture_labels strcat(spy.GetParam(snum.image.ps.font_name),spy.GetParam(snum.image.ps.font_size))"
     >
     </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
