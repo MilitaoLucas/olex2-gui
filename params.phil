@@ -182,10 +182,34 @@ snum {
     .type = int(value_min=1, value_max=3)
 
   image{
-    font_bitmap = #olex2.fnt:frb_18
-      .type = str
-    font_ps = @
-      .type = str
+    bitmap{
+      name = None
+        .type = str
+      font_name = #olex2.fnt:frb_18
+        .type = str
+    }
+    ps{
+      outline_width = 1.0
+        .type = float
+      octant_width = 1.0
+        .type = float
+      pie_width = 0.6
+        .type = float
+      octant_count = 5
+        .type = int
+      h_bond_width = 0.6
+        .type = float
+      bond_width = 0.7
+        .type = float
+      font_name = @
+        .type = str
+      font_size = 15
+        .type = int
+      font_weight = 1.0
+        .type = float
+      name = None
+        .type = str
+    }
   }
     
   shelx_output = True

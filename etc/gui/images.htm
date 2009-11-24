@@ -48,12 +48,12 @@
 
 <!-- FOURTH ROW -->
 <tr name=INCLUDE_H3_BITMAP_IMAGES>
-<!-- #include h3-bitmap-images gui\h3-bitmap-images.htm;gui\blocks\tool-h3-off.htm;image=h3-bitmap-images;onclick=itemstate h3-postscript-images 2>>setfont Picture_labels spy.GetParam(snum.image.font_bitmap);colspan=1;2; -->
+<!-- #include h3-bitmap-images gui\h3-bitmap-images.htm;gui\blocks\tool-h3-off.htm;image=h3-bitmap-images;onclick=itemstate h3-postscript-images 2>>setfont Picture_labels spy.GetParam(snum.image.bitmap.font_name);colspan=1;2; -->
 </tr>
 
 <!-- FIFTH ROW -->
 <tr name=INCLUDE_H3_PS_IMAGES>
-<!-- #include h3-postscript-images gui\h3-postscript-images.htm;gui\blocks\tool-h3-off.htm;image=h3-postscript-images;onclick=itemstate h3-bitmap-images 2>>setfont Picture_labels spy.GetParam(snum.image.font_ps);colspan=1;2; -->
+<!-- #include h3-postscript-images gui\h3-postscript-images.htm;gui\blocks\tool-h3-off.htm;image=h3-postscript-images;onclick=itemstate h3-bitmap-images 2>>setfont Picture_labels strcat(spy.GetParam(snum.image.ps.font_name),spy.GetParam(snum.image.ps.font_size));colspan=1;2; -->
 </tr>
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->

@@ -4,10 +4,10 @@
 <tr name=IMAGE_BITMAP_ROW_1>
 <!-- #include tool-help-column gui\blocks\tool-first-column.htm;help_ext=mode_name;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-      <td>
-        <a href="setfont Picture_labels ChooseFont(Olex2)>>spy.SetParam(snum.image.font_bitmap,GetFont(Picture_labels))">Choose Label Font (Olex2)</a> | 
-        <a href="setfont Picture_labels ChooseFont()>>spy.SetParam(snum.image.font_bitmap,GetFont(Picture_labels))">Choose Label Font (System)</a>
-      </td>
+  <td name-=IMAGE_BITMAP_CHOOSE_FONTS>
+    <a href="setfont Picture_labels ChooseFont(Olex2)>>spy.SetParam(snum.image.font_bitmap,GetFont(Picture_labels))">Choose Label Font (Olex2)</a> | 
+    <a href="setfont Picture_labels ChooseFont()>>spy.SetParam(snum.image.font_bitmap,GetFont(Picture_labels))">Choose Label Font (System)</a>
+  </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
@@ -16,65 +16,67 @@
 <tr name=IMAGE_BITMAP_ROW_2>
 <!-- #include tool-help-column gui\blocks\tool-first-column.htm;help_ext=mode_name;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-      <td>
-        <input
-          type="button"
-          name = "MAKE_BITMAP_IMAGE"
-          width="25"
-          value="Go"
-          onclick="cursor(busy,'Please Wait. Making image. This may take some time')>>
+  <td>
+    <input
+      type="button"
+      name = "MAKE_BITMAP_IMAGE"
+      width="25"
+      value="Go"
+      onclick="cursor(busy,'Please Wait. Making image. This may take some time')>>
 run 'pict
  -pq
- strcat(GetValue(IMAGE_BITMAP_NAME).,GetValue(IMAGE_BITMAP_TYPE))
+ strcat(spy.Getparam(snum.image.bitmap.name).,GetValue(IMAGE_BITMAP_TYPE))
  GetValue(IMAGE_BITMAP_SIZE)'>>
 cursor()">
-      </td>
-      <td>
-        Name
-      </td>
-      <td>
-        <input 
-          type="text" 
-          height="$getVar(gui_html_input_height)"
-          bgcolor="$getVar(gui_html_input_bg_colour)"
-          valign='center'
-          name="IMAGE_BITMAP_NAME"
-          width="70"
-          height="$getVar(gui_html_input_height)"
-          value = "$FileName()"
-        >
-      </td>
-      <td>
-        Type
-      </td>
-      <td>
-        <input 
-          type="combo" 
-          height="$GetVar(gui_html_combo_height)"
-          width="$GetVar(gui_html_combo_width_2)"
-          bgcolor="$getVar(gui_html_input_bg_colour)"
-          items="png;bmp;jpg"
-          valign='center'
-          name="IMAGE_BITMAP_TYPE"
-          value='png'
-        >
-      </td>
-      <td>
-        Size
-      </td>
-      <td>
-        <input 
-          type="combo" 
-          height="$GetVar(gui_html_combo_height)"
-          bgcolor="$getVar(gui_html_input_bg_colour)"
-          items="1;2;4;800px<-800;1200px<-1200;1800px<-1800;3200px<-3200"
-          height="$getVar(gui_html_input_height)"
-          valign='center'
-          name="IMAGE_BITMAP_SIZE"
-          width="60"
-          value='2'
-        >
-      </td>
+  </td>
+  <td>
+    Name
+  </td>
+  <td name=IMAGE_BITMAP_NAME>
+    <input 
+      type="text" 
+      height="$getVar(gui_html_input_height)"
+      bgcolor="$getVar(gui_html_input_bg_colour)"
+      valign='center'
+      name="IMAGE_BITMAP_NAME"
+      width="70"
+      height="$getVar(gui_html_input_height)"
+      value="$spy.GetParam(snum.image.bitmap.name)"
+      onleave="spy.SetParam(snum.image.bitmap.name,GetValue(IMAGE_BITMAP_NAME))"
+
+    >
+  </td>
+  <td>
+    Type
+  </td>
+  <td name=IMAGE_BITMAP_TYPE>
+    <input 
+      type="combo" 
+      height="$GetVar(gui_html_combo_height)"
+      width="$GetVar(gui_html_combo_width_2)"
+      bgcolor="$getVar(gui_html_input_bg_colour)"
+      items="png;bmp;jpg"
+      valign='center'
+      name="IMAGE_BITMAP_TYPE"
+      value='png'
+    >
+  </td>
+  <td>
+    Size
+  </td>
+  <td name=IMAGE_BITMAP_SIZE>
+    <input 
+      type="combo" 
+      height="$GetVar(gui_html_combo_height)"
+      bgcolor="$getVar(gui_html_input_bg_colour)"
+      items="1;2;4;800px<-800;1200px<-1200;1800px<-1800;3200px<-3200"
+      height="$getVar(gui_html_input_height)"
+      valign='center'
+      name="IMAGE_BITMAP_SIZE"
+      width="60"
+      value='2'
+    >
+  </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
