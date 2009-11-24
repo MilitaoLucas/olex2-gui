@@ -32,26 +32,26 @@ Medium	Medium	Médium	متوسط	Среднесрочной	メディア	Mittel	
 Large	Large	Large	كبير	Крупных	大規模な	Gross	Grande	大	Μεγαλα
 Panel Width	Panel Width	Panel Largeur	الفريق العرض	Группа Ширина	パネルの幅	Kontrollfeldgrösse	Grupo Ancho	面板宽度	Πλατος Panel
 history	History	Histoire	التاريخ	история	歴史	Verlauf	Historia	历史	ιστορια
-solve	solve	Résoudre	حل	решить	解決する	Lösen	Resolver	解析	λυσει
+solve	Solve	Résoudre	حل	решить	解決する	Lösen	Resolver	解析	λυσει
 Solving	Solving	Solving ...	حل...	Решение ...	解決へ...	Lösen	La solución de ...	解析中	Επιλυση ...
-model	model	Modèle	نموذج	модель	モデル	Strukturmodell	modelo	模型	μοντελο
-select	select	Sélectionnez	اختر	выбрать	選択して	Atome Anwählen	Seleccionar	选择	επιλεξτε
-naming	naming	Naming	التسميه	именования	命名	Atome Umbenennen	Nombres	命名	ονοματοδοσια
-quick drawing styles	quick drawing styles	Rapide des styles de dessin	رسم اساليب سريعه	быстрый рисунок стили	クイック描画スタイル	Darstellungsart	Estilos de dibujo rápido	快速绘图模式	γρηγορη επεξεργασια στυλ
-symmetry generation	symmetry generation	Symétrie génération	التناظر جيل	симметрии поколения	対称世代	Symmetie	Simetría generación	对称性操作	συμμετρια γενιας
+model	Model	Modèle	نموذج	модель	モデル	Strukturmodell	modelo	模型	μοντελο
+select	Select	Sélectionnez	اختر	выбрать	選択して	Atome Anwählen	Seleccionar	选择	επιλεξτε
+naming	Naming	Naming	التسميه	именования	命名	Atome Umbenennen	Nombres	命名	ονοματοδοσια
+quick drawing styles	Quick Drawing Styles	Rapide des styles de dessin	رسم اساليب سريعه	быстрый рисунок стили	クイック描画スタイル	Darstellungsart	Estilos de dibujo rápido	快速绘图模式	γρηγορη επεξεργασια στυλ
+symmetry generation	Symmetry Generation	Symétrie génération	التناظر جيل	симметрии поколения	対称世代	Symmetie	Simetría generación	对称性操作	συμμετρια γενιας
 Show	Show	Afficher	عرض	шоу	表示する	Anzeigen	Mostrar	显示	σηος
-geometry	geometry	Géométrie	الهندسه	геометрия	幾何学	Geometrie	Geometría	几何	γεωμετρια
+geometry	Geometry	Géométrie	الهندسه	геометрия	幾何学	Geometrie	Geometría	几何	γεωμετρια
 Rotate	Rotate	Rotation	در	вращаться	回転する	Rotation	rotar	旋转	περιστρεψτε
-tools	tools	Outils	أدوات	инструменты	ツール	extra	Herramientas	工具	εργαλεια
-disorder	disorder	Trouble	الفوضى	беспорядок	障害	Fehlordnung	Desorden	无序	διαταραχη
-images	images	Images	صور	изображения	画像	Bilder	Imágenes	图像	εικονες
-overlay	overlay	Superposition	الغطاء	Наложение	オーバーレイ	überlagerung	Superposición	覆盖	υπερθεση
-crystal	crystal	Crystal	الكريستال	кристалл	水晶	Kristall	Crystal	晶体	crystal
-space groups	space groups	Espace groupes	الفضاء المجموعات	пространства групп	宇宙グループ	Raumgruppen	Grupos Espaciales	空间群	χωρο ομαδες
+tools	Tools	Outils	أدوات	инструменты	ツール	extra	Herramientas	工具	εργαλεια
+disorder	Disorder	Trouble	الفوضى	беспорядок	障害	Fehlordnung	Desorden	无序	διαταραχη
+images	Images	Images	صور	изображения	画像	Bilder	Imágenes	图像	εικονες
+overlay	Overlay	Superposition	الغطاء	Наложение	オーバーレイ	überlagerung	Superposición	覆盖	υπερθεση
+crystal	Crystal	Crystal	الكريستال	кристалл	水晶	Kristall	Crystal	晶体	crystal
+space groups	Space Groups	Espace groupes	الفضاء المجموعات	пространства групп	宇宙グループ	Raumgruppen	Grupos Espaciales	空间群	χωρο ομαδες
 q peaks	q peaks	Q sommets	ف الأعالي	q пиков	問ピークス	Elektronenrestdichte	Q picos	Q峰	q κορυφες
 refinement indicators	refinement indicators	Affinement des indicateurs	صقل المؤشرات	уточнение показателей	洗練指標	Verfeinerung	Perfeccionamiento de los indicadores	精修指标	τελειοποιηση των δεικτων
-Bad Reflections	bad reflections	Mauvaise réflexions	انعكاسات سيئة	плохие размышления	悪い反省	Schlechte Reflexe	Mala reflexiones	不好的衍射点	κακες σκεψεις
-diagnostics	diagnostics	Diagnostic	علم تشخيص الامراض	диагностика	診断	Diagnostik	Diagnósticos	诊断	διαγνωστικης
+Bad Reflections	Bad Reflections	Mauvaise réflexions	انعكاسات سيئة	плохие размышления	悪い反省	Schlechte Reflexe	Mala reflexiones	不好的衍射点	κακες σκεψεις
+diagnostics	Diagnostics	Diagnostic	علم تشخيص الامراض	диагностика	診断	Diagnostik	Diagnósticos	诊断	διαγνωστικης
 Language	Language	Langue	اللغة	Language	言語	Sprache	Idioma	语言	Γλωσσα
 More	More	Plus	أكثر	Более	こちら	Mehr	Más	更多	Περισσοτερα
 Click	Click	Cliquez	انقر	Щелкните	クリック	Klicken	Haga clic en	点击	Καντε κλικ
@@ -462,12 +462,12 @@ Toggle H atoms ON > ON with H-bonds > OFF	Toggle H atoms ON > ON with H-bonds > 
 Atoms clicked after clicking this button &#013;will be asociated with the ShelX command HFIX	Atoms clicked after clicking this button &#013;will be asociated with the ShelX command HFIX	.	.	.	.	.	.	.	.
 Change the formula in the files so it reflects what is on the screen	Change the formula in the files so it reflects what is on the screen	.	.	.	.	Formel so ändern, dass diese der momentanen Struktur entspricht.	.	.	.
 low-quality-target	Show Structure in Low Quality Display	.	.	.	.	Niedere Grafiksqualität	.	用低质量显示模式	.
-Switches the display of the cell on	.	.	.	.	.	Zelle anzeigen	.	.	.
-symmetry-generation	.	.	.	.	.	symmetry-generation	.	.	.
+Switches the display of the cell on	Switches the display of the unit cell on	.	.	.	.	Zelle anzeigen	.	.	.
+symmetry-generation	Symmetry Generation	.	.	.	.	symmetry-generation	.	.	.
 of selection	of selection	.	.	.	.	of selection	.	已选原子之间	.
 Refine and save esd info	Refine and save esd info	.	.	.	.	Verfeinern und die e.s.d. Information speichern	.	精修并保存估计标准偏差信息	.
 Distance and Angles with esd	Distance and Angles with esd	.	.	.	.	Abstände und Winkel mit e.s.d	.	距离和角度及其估计标准偏差	.
-quick-drawing-styles	.	.	.	.	.	.	.	quick-drawing-styles	.
+quick-drawing-styles	Quick Drawing Styles	.	.	.	.	.	.	quick-drawing-styles	.
 Show Ellipsoids	Ellipsoids	.	.	.	.	Ellipsoide zeigen	.	显示椭球模型	.
 Show Ellipsoids and Hydrogen atom Uiso	Show Ellipsoids and Hydrogen atom Uiso	.	.	.	.	Ellipsoide & Wasserstoffatome Uiso zeigen	.	显示椭球模型和氢原子Uiso	.
 Incomplete	Incomplete	.	.	.	.	Unvollständig	.	Incomplete	.
@@ -488,7 +488,7 @@ bad_gui-msg	If the GUI has Gone Fishing	.	.	.	.	Wenn das GUI kaputt gegangen ist
 bad_gui	Reload the GUI	.	.	.	.	GUI Neu Laden	.	Reload the GUI	.
 bad_gui-target	Try clicking on this link if the GUI has been corrupted	.	.	.	.	Klicken sie hier, um das GUI neu zu laden	.	bad_gui-target	.
 to 2 parts in order	to 2 parts in order	.	.	.	.	to 2 parts in order	.	to 2 parts in order	.
-recent-files	.	.	.	предыдушие файлы	.	.	.	.	.
+recent-files	Recent Files	.	.	предыдушие файлы	.	.	.	.	.
 name-target	Start Naming Mode	.	.	name-target	.	Bennungsmodus Einschalten	.	开始命名	.
 mass & labels	Mass & Labels	.	.	.	.	.	.	.	.
 Pack within Radius of	Pack within Radius of <i>n</i> Å	.	.	.	.	Pack within Radius of <i>n</i> Å	.	在<i>n</i> Å半径内显示堆积图	.
@@ -646,3 +646,5 @@ toolbar-model-help	This is a collection of three basic tools needed for model bu
 rename-history-help	You can rename any of the automatically generated histories. Click on the 'Rename' button and then type the new name directly in the drop-down box.	.	.	.	.	.	.	.	.
 labels-help	You can select what you would like to see as labels in the molecule display. If a particular property is not applicable for a particular atom, there will be no label.  &&  ~Atom Names~All atom names of non-hydrogen atoms will be displayed next to the atoms.  XX labels -l XX  ~Occupancy~The occupancies will be displayed for all atoms where the occupancy is not 1.  XX labels -o XX~Parts~If an atom belongs to a particular part, the part number will be shown.  XX labels -p XX~Link Codes~If atoms are linked, the link code will be shown  XX labels -lo XX  &&	.	.	.	.	.	.	.	.
 reflection-file-help	Olex2 will manage the reflection file against which you want to refine your model. Select the file from the drop-down menu and this is the file that will be used.	.	.	.	.	.	.	.	.
+Automatic-Hydrogen-Naming-help	Olex2 will keep track of the naming of hydrogen atoms automatically. This feature can be switched off by unticking the 'Automatic Hydrogen Naming' box.	.	.	.	.	.	.	.	.
+growing-help	By default, Olex2 shows the asymmetric unit only.  Line before a Table.  &&~Mode Grow~will show clickable 'bonds' which will expand symmetry equivalent parts.  XX mode grow XXThere are various modifiers for this command:  ~Short Contacts~will show these growable 'bonds' to those atoms where 'short interactions' exist   XX mode grow -s XX  ~Selection~will show growable 'bonds' to other occurances of the currently selected atoms  XX mode grow -r XX  ~Van der Waals Radii~will show growable 'bonds' to other occurances of the currently selected atoms that are at least the indicated distance away from the selected atom.  XX mode grow -v 2.0 XX  &&	.	.	.	.	.	.	.	.
