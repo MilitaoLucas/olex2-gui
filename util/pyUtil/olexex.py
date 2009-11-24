@@ -1061,12 +1061,13 @@ def check_for_recent_update():
   return retVal
 
 def check_for_crypto():
-  if olx.IsPluginInstalled(r"Crypto").lower() == 'false':
-    import olex
-    olex.m(r"InstallPlugin Crypto")
-  if olx.IsPluginInstalled(r"ODAC").lower() == 'false':
-    import olex
-    olex.m(r"InstallPlugin ODAC")
+  pass
+#  if olx.IsPluginInstalled(r"Crypto").lower() == 'false':
+#    import olex
+#    olex.m(r"InstallPlugin Crypto")
+#  if olx.IsPluginInstalled(r"ODAC").lower() == 'false':
+#    import olex
+#    olex.m(r"InstallPlugin ODAC")
 
 def updateACF(force=False):
   rFile = open(r"%s/util/pyUtil/PluginLib/odac_update.txt" %OV.BaseDir())
