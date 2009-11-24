@@ -288,10 +288,12 @@ snum {
   solution.program = "%s"
   solution.method = "%s"
   report.title = "%s"
+  image.ps.name = "%s"
+  image.bitmap.name = "%s"
   report.image = "%s/screenshot.png"
   }
 """ %(refinementPrg, refinementMethod, solutionPrg, solutionMethod, 
-      OV.FileName(), OV.FilePath())
+      OV.FileName(), OV.FileName(), OV.FileName(), OV.FilePath())
   olx.phil_handler.update(phil_string=snum_phil)
   structure_phil_path = "%s/.olex/%s.phil" %(OV.FilePath(), OV.FileName())
   if os.path.isfile(structure_phil_path):
