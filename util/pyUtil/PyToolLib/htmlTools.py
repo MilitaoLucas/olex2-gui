@@ -309,24 +309,24 @@ def make_help_box(args):
 %s
 <!-- #include tool-top gui/blocks/help-top.htm;image=blank;1; -->
 <tr VALIGN='center' NAME=%s bgcolor="$getVar(gui_html_table_firstcol_colour)">
-      <td colspan=1 width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)">
-      </td>
-      <td>
-        <font size='+2'>
-          <b>
-            %s
-          </b>
-        </font>
-      </td>
+  <td colspan=1 width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+  </td>
+  <td>
+    <font size='+2'>
+      <b>
+        %s
+      </b>
+    </font>
+  </td>
 </tr>
 <tr>
-      <td valign='top' width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)">
-      </td>
-      <td>
-        <font size='+1'>
-          %s
-        </font>
-      </td>
+  <td valign='top' width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+  </td>
+  <td>
+    <font size='+1'>
+      %s
+    </font>
+  </td>
 </tr>
 <tr>
   <td colspan=1 width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)">
@@ -650,7 +650,7 @@ def format_help(string):
   
   ## find all occurances of strings between n^..^n. These are the notes.
   regex = re.compile(r"n \^ (.*?)  \^ n", re.X)
-  string = regex.sub(r"<table width='%s' border='0' cellpadding='2' cellspacing='4'><tr bgcolor=#efefef><td><font size=-1><b>Note: </b>\1</font></td></tr></table>", string)
+  string = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='1'><tr bgcolor=#efefef><td><font size=-1><b>Note: </b>\1</font></td></tr></table>", string)
   
   ## find all occurances of strings between l[]. These are links to help or tutorial popup boxes.
   regex = re.compile(r"l\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
@@ -667,7 +667,7 @@ def format_help(string):
   m = regex.findall(string)
   colour = "#888888"
   if m:
-    s = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='4'><tr bgcolor='$getVar(gui_html_code_bg_colour)'><td><a href='\2'><b><font size='2' color='%s'><code>>>\2</code></font></b></a></td></tr></table>" %(width, colour), string)
+    s = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='1'><tr bgcolor='$getVar(gui_html_code_bg_colour)'><td><a href='\2'><b><font size='2' color='%s'><code>>>\2</code></font></b></a></td></tr></table>" %(width, colour), string)
 
   else:
     s = string
