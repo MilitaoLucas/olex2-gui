@@ -657,3 +657,8 @@ cctbx {
   cumulative_intensity_n_bins = 20
     .type = int(value_min=1)
 }
+
+odac{
+  source_dir = ""
+    .type = str
+}

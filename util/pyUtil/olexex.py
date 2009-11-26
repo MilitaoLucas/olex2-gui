@@ -1062,12 +1062,12 @@ def check_for_recent_update():
 
 def check_for_crypto():
   pass
-#  if olx.IsPluginInstalled(r"Crypto").lower() == 'false':
-#    import olex
-#    olex.m(r"InstallPlugin Crypto")
-#  if olx.IsPluginInstalled(r"ODAC").lower() == 'false':
-#    import olex
-#    olex.m(r"InstallPlugin ODAC")
+  #if olx.IsPluginInstalled(r"Crypto").lower() == 'false':
+    #import olex
+    #olex.m(r"InstallPlugin Crypto")
+  #if olx.IsPluginInstalled(r"ODAC").lower() == 'false':
+    #import olex
+    #olex.m(r"InstallPlugin ODAC")
 
 def updateACF(force=False):
   rFile = open(r"%s/util/pyUtil/PluginLib/odac_update.txt" %OV.BaseDir())
@@ -1190,6 +1190,7 @@ def GetACF():
 
   if not debug:
     p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], tag)
+    OV.SetParam('odac.source_dir',p)
     if not os.path.exists(p):
       os.makedirs(p)
     name = "entry_ac"
