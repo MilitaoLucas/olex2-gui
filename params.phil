@@ -658,9 +658,11 @@ cctbx {
     .type = int(value_min=1)
 }
 
-odac{
-  source_dir = ""
-    .type = str
+odac
+  .expert_level = 2
+{
+  source_dir = None
+    .type = path
   is_active = False
     .type = bool
 }
