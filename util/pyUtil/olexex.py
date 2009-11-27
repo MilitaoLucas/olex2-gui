@@ -1243,15 +1243,15 @@ def GetACF():
     try:
       print "Debug: Import entry_ac"
       import entry_ac
-      print "Debug: entry_ac imported OK"
-      odac_loaded = True
     except Exception, err:
       print "Failed: %s" %err
       odac_loaded = False
 
-  if odac_loaded:
-    OV.SetVar("HaveODAC", True)
-    print "ODAC started OK"
+  if OV.GetParam('odac.is_active'):
+    print "AutoChem loaded OK"
+  else:
+    print "AutoChem could not be started"
+
 OV.registerFunction(GetACF)
   
 
