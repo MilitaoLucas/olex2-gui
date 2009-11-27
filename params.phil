@@ -661,4 +661,6 @@ cctbx {
 odac{
   source_dir = ""
     .type = str
+  is_active = False
+    .type = bool
 }
