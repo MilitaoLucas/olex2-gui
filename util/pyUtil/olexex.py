@@ -1181,10 +1181,10 @@ def GetACF():
     
   
   debug = OV.FindValue('odac_fb', False)
-  debug = [False, True][1]
-  debug_deep1 = [False, True][1]
-  debug_deep2 = [False, True][1]
-  OV.SetVar("ac_verbose", [False, True][1])
+  debug = [False, True][0]
+  debug_deep1 = [False, True][0]
+  debug_deep2 = [False, True][0]
+  OV.SetVar("ac_verbose", [False, True][0])
   keyname = getKey()
   
 
