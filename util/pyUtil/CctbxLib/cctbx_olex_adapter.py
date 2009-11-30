@@ -13,7 +13,6 @@ except:
   olx.current_reflections = None
 
 import olex
-#import olex_core
 import time
 import cctbx_controller as cctbx_controller
 from cctbx import uctbx
