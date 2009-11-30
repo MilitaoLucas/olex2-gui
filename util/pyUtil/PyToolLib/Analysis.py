@@ -1836,6 +1836,7 @@ def makeReflectionGraphOptions(graph, name):
       ctrl_name = 'TICK_%s' %(obj_name)
       d = {'ctrl_name':ctrl_name,
            'value':'%s ' %caption,
+           'checked':'%s' %value,
            'oncheck':'spy.SetParam(graphs.reflections.%s.%s,True)' %(
              graph.name, object.name),
            'onuncheck':'spy.SetParam(graphs.reflections.%s.%s,False)' %(
