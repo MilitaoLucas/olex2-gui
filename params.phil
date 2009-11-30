@@ -530,7 +530,51 @@ olex2
 
 
 graphs {
+  program_analysis {
+    font_scale = 0.03
+      .type = float(value_min=0.0)
+    size_x = None
+      .type = int(value_min=0)
+    size_y = None
+      .type = int(value_min=0)
+  }
   reflections {
+    n_divisions = 5
+      .type = int(value_min=0)
+    size_x = 900
+      .type = int(value_min=0)
+    size_y = 500
+      .type = int(value_min=0)
+    font_scale = 0.02
+      .type = float(value_min=0.0)
+    marker_1 {
+      fill = (254,150,50)
+        .type = colour
+      border = (127,75,25)
+        .type = colour
+      size_factor = 1./80
+        .type = float
+    }
+    marker_2 {
+      fill = (160,182,206)
+        .type = colour
+      border = (80,91,103)
+        .type = colour
+      size_factor = 1./80
+        .type = float
+    }
+    function_1 {
+      colour = (0,0,0)
+        .type = colour
+    }
+    function_2 {
+      colour = (0,0,255)
+        .type = colour
+    }
+    function_3 {
+      colour = (255,0,0)
+        .type = colour
+    }
     cumulative_intensity
       .short_caption = "Cumulative Intensity"
       .caption = "Cumulative Intensity Distribution"
@@ -578,6 +622,25 @@ graphs {
         .type = bool
         .caption = "%Output% csv"
     }
+    fobs_over_fcalc
+      .short_caption = "Fobs/Fcalc"
+      .caption = "Fobs/Fcalc vs resolution"
+      .help = "fobs-over-fcalc"
+    {
+      resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
+        .type = choice
+        .caption = "Resolution as"
+      binning = False
+        .type=bool
+        .caption= "Binning"
+      n_bins = 10
+        .type = int(value_min=1)
+        .help = Number of bins
+        .caption = %Bins%
+      output_csv_file = False
+        .type = bool
+        .caption = "%Output% csv"
+    }
     completeness
       .short_caption = "Completeness Plot"
       .caption = "Completeness Plot"
@@ -586,9 +649,9 @@ graphs {
       reflections_per_bin=20
         .type = int(value_min=1)
         .caption = "Reflections per bin"
-      bin_range_as = *two_theta d_spacing d_star_sq
+      resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
         .type = choice
-        .caption = "Bin range as"
+        .caption = "Resolution as"
       output_csv_file = False
         .type = bool
         .caption = "%Output% csv"
