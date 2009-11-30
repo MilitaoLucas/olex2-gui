@@ -87,10 +87,10 @@ class OlexCctbxAdapter(object):
     self.olx_atoms = OlexRefinementModel()
     self.wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
     try:
+      self.reflections = None
       self.initialise_reflections()
     except Exception, err:
-      print err
-      return
+      sys.stderr.formatExceptionInfo()
 
   def __del__(self):
     sys.stdout.refresh = False
@@ -115,15 +115,11 @@ class OlexCctbxAdapter(object):
     if olx.current_reflections:
       self.reflections = olx.current_reflections
     else:
-      try:
-        olx.current_reflections = cctbx_controller.reflections(self.cell, self.space_group, reflections)
-      except Exception, err:
-        print err
+      olx.current_reflections = cctbx_controller.reflections(self.cell, self.space_group, reflections)
       self.reflections = olx.current_reflections
-    
     merge = self.olx_atoms.model.get('merge')
     if force or merge is None or merge != self.reflections._merge:
-      self.reflections.merge(merge)
+      self.reflections.merge(merge=merge)
     omit = self.olx_atoms.model['omit']
     if force or omit is None or omit != self.reflections._omit:
       self.reflections.filter(omit, self.olx_atoms.exptl['radiation'])
@@ -454,6 +450,8 @@ class OlexCctbxSolve(OlexCctbxAdapter):
 class OlexCctbxGraphs(OlexCctbxAdapter):
   def __init__(self, graph, *args, **kwds):
     OlexCctbxAdapter.__init__(self)
+    if self.reflections is None:
+      raise RuntimeError, "There was an error reading the reflection file."
     self.graph = graph
 
     bitmap = 'working'
@@ -470,7 +468,11 @@ class OlexCctbxGraphs(OlexCctbxAdapter):
         self.xy_plot = cctbx_controller.cumulative_intensity_distribution(self.reflections, **kwds)
 
       elif graph == "f_obs_f_calc":
-        self.xy_plot = cctbx_controller.f_obs_vs_f_calc(self.xray_structure(), self.reflections)
+        twinning = self.olx_atoms.model.get('twin')
+        self.xy_plot = cctbx_controller.f_obs_vs_f_calc(self.xray_structure(), self.reflections, twinning=twinning, **kwds)
+
+      elif graph == "f_obs_over_f_calc":
+        self.xy_plot = cctbx_controller.f_obs_over_f_calc(self.xray_structure(), self.reflections, self.wavelength, **kwds)
 
       elif graph == "sys_absent":
         self.xy_plot = cctbx_controller.sys_absent_intensity_distribution(self.reflections)

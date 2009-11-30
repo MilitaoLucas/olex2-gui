@@ -1435,14 +1435,14 @@
     <args
       <arg1 name="method" def="Olex2">
       <arg2 name="n_bins" def="10">
-      <arg3 name="width" def="1200">
-      <arg4 name="height" def="700">
-      <arg5 name="x" def="5">
-      <arg6 name="y" def="80">
+      <arg3 name="output_csv_file" def="False">
     \>
-    <cmd 
+    <cmd
       <cmd1 "if strcmp(%1,Olex2) then 'wilson -b=%2 -p' else none">
-      <cmd2 "spy.WilsonPlot(%2,%1)">
+      <cmd2 "spy.SetParam(graphs.reflections.wilson_plot.method,%1)">
+      <cmd3 "spy.SetParam(graphs.reflections.wilson_plot.n_bins,%2)">
+      <cmd4 "spy.SetParam(graphs.reflections.wilson_plot.output_csv_file,%3)">
+      <cmd5 "spy.WilsonPlot()">
     \>
   \>
 \>
@@ -1454,8 +1454,11 @@
       <arg2 name="bin_range_as" def="two_theta">
       <arg3 name="output_csv_file" def="False">
     \>
-    <cmd 
-      <cmd1 "spy.CompletenessPlot(%1,%2,%3)">
+    <cmd
+      <cmd1 "spy.SetParam(graphs.reflections.completeness.reflections_per_bin,%1)">
+      <cmd2 "spy.SetParam(graphs.reflections.completeness.resolution_as,%2)">
+      <cmd1 "spy.SetParam(graphs.reflections.completeness.output_csv_file,%3)">
+      <cmd4 "spy.CompletenessPlot()">
     \>
   \>
 \>
@@ -1466,8 +1469,10 @@
       <arg1 name="n_bins" def="20">
       <arg2 name="output_csv_file" def="False">
     \>
-    <cmd 
-      <cmd1 "spy.CumulativeIntensityDistribution(%1,%2)">
+    <cmd
+      <cmd1 "spy.SetParam(graphs.reflections.cumulative_intensity.n_bins,%1)">
+      <cmd1 "spy.SetParam(graphs.reflections.cumulative_intensity.output_csv_file,%2)">
+      <cmd3 "spy.CumulativeIntensityDistribution()">
     \>
   \>
 \>
@@ -1477,8 +1482,9 @@
     <args
       <arg1 name="output_csv_file" def="False">
     \>
-    <cmd 
-      <cmd1 "spy.SystematicAbsencesPlot(%1)">
+    <cmd
+      <cmd1 "spy.SetParam(graphs.reflections.systematic_absences.output_csv_file,%1)">
+      <cmd1 "spy.SystematicAbsencesPlot()">
     \>
   \>
 \>
@@ -1486,21 +1492,42 @@
 <fobs_fcalc help="Calculates and displays an Fobs vs Fcalc plot"
   <body
     <args
-      <arg1 name="output_csv_file" def="False">
+      <arg1 name="batch_number" def="None">
+      <arg2 name="output_csv_file" def="False">
     \>
-    <cmd 
-      <cmd1 "spy.Fobs_Fcalc_plot(%1)">
+    <cmd      
+      <cmd1 "spy.SetParam(graphs.reflections.fobs_fcalc.output_csv_file,%2)">
+      <cmd2 "spy.Fobs_Fcalc_plot(%1)">
     \>
   \>
 \>
 
-<_normal_probability help="Calculates and displays a Normal Probability plot"
+<fobs_over_fcalc help="Calculates and displays a plot of Fobs/Fcalc vs resolution"
+  <body
+    <args
+      <arg1 name="resolution_as" def="two_theta">
+      <arg2 name="binning" def="False">
+      <arg3 name="n_bins" def="10">
+      <arg4 name="output_csv_file" def="False">
+    \>
+    <cmd
+      <cmd1 "spy.SetParam(graphs.reflections.fobs_over_fcalc.resolution_as,%1)">
+      <cmd2 "spy.SetParam(graphs.reflections.fobs_over_fcalc.binning,%2)">
+      <cmd3 "spy.SetParam(graphs.reflections.fobs_over_fcalc.n_bins,%3)">
+      <cmd4 "spy.SetParam(graphs.reflections.fobs_over_fcalc.output_csv_file,%4)">
+      <cmd5 "spy.Fobs_over_Fcalc_plot()">
+    \>
+  \>
+\>
+
+<normal_probability help="Calculates and displays a Normal Probability plot"
   <body
     <args
       <arg1 name="output_csv_file" def="False">
     \>
-    <cmd 
-      <cmd1 "spy.Normal_probability_plot(%1)">
+    <cmd
+      <cmd1 "spy.SetParam(graphs.reflections.normal_probability.output_csv_file,%1)">
+      <cmd2 "spy.Normal_probability_plot()">
     \>
   \>
 \>
