@@ -513,7 +513,12 @@ def make_tick_box_input(d):
          'manage':'manage',
          'state':'',
      }
-  dic.update(d)  
+  dic.update(d)
+  if dic.has_key('checked'):
+    dic['checked'] = "checked='%s'" %dic.get('checked')
+  else:
+    dic.setdefault('checked','')
+  
   
   html = """
 <input
@@ -524,6 +529,7 @@ def make_tick_box_input(d):
   bgcolor='%(bgcolor)s'
   fgcolor='%(fgcolor)s'
   %(state)s
+  %(checked)s
   oncheck='%(oncheck)s'
   onuncheck='%(onuncheck)s'
   value='%(value)s'
