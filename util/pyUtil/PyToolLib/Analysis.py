@@ -343,7 +343,7 @@ class Graph(ImageTools):
       IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
       i += 1
 
-  def draw_fit_line(self, slope, y_intercept):
+  def draw_fit_line(self, slope, y_intercept, write_equation=True):
     if self.min_x is None: self.get_division_spacings_and_scale()
     y1 = (slope * self.min_x + y_intercept)
     y2 = (slope * self.max_x + y_intercept)
@@ -409,14 +409,15 @@ class Graph(ImageTools):
     
     wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_small)
     
-    if slope > 0 or (self.reverse_x or self.reverse_y):
-      x = self.graph_left + self.imX * 0.1 # write equation top left
-    else:
-      x = self.graph_right - wX - self.imX * 0.1  # write equation top right
-    y = self.graph_top + self.imY * 0.1    
-    top_left = (x,y)
-    IT.write_text_to_draw(
-      self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
+    if write_equation:
+      if slope > 0 or (self.reverse_x or self.reverse_y):
+        x = self.graph_left + self.imX * 0.1 # write equation top left
+      else:
+        x = self.graph_right - wX - self.imX * 0.1  # write equation top right
+      y = self.graph_top + self.imY * 0.1    
+      top_left = (x,y)
+      IT.write_text_to_draw(
+        self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
 
   def draw_pairs(self, reverse_y=False, reverse_x=False, marker_size_factor=None): 
     self.reverse_y = reverse_y
@@ -1564,7 +1565,8 @@ class CumulativeIntensityDistribution(Analysis):
   def cctbx_cumulative_intensity_distribution(self, verbose=False):
     from cctbx_olex_adapter import OlexCctbxGraphs
     xy_plot = OlexCctbxGraphs(
-      'cumulative', self.params.cumulative_intensity.n_bins).xy_plot
+      'cumulative',
+      n_bins=self.params.cumulative_intensity.n_bins).xy_plot
     metadata = {}
     metadata.setdefault("y_label", xy_plot.yLegend)
     metadata.setdefault("x_label", xy_plot.xLegend)
@@ -1761,7 +1763,7 @@ class Fobs_over_Fcalc_plot(Analysis):
     self.data.setdefault('dataset1', data)
     self.make_empty_graph(axis_x = True)
     #self.plot_function("1")
-    self.draw_fit_line(slope=0, y_intercept=1)
+    self.draw_fit_line(slope=0, y_intercept=1, write_equation=False)
     self.draw_pairs()
 
 class Dataset(object):
