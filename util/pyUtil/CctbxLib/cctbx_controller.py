@@ -84,46 +84,50 @@ def wilson_statistics(model, reflections, n_bins=10):
     print "wilson_k, wilson_b:", 1/wp.wilson_intensity_scale_factor, wp.wilson_b
   return wp
 
-def completeness_statistics(reflections, wavelength=None, reflections_per_bin=20, bin_range_as="two_theta", verbose=False):
-  assert bin_range_as in ["d_spacing", "d_star_sq", "two_theta"]#, "stol", "stol_sq"]
-  f_obs=reflections.f_obs
-  f_sq_obs = reflections.f_sq_obs_merged
-  f_sq_obs = f_sq_obs.eliminate_sys_absent().average_bijvoet_mates()
-  f_obs = f_sq_obs.f_sq_as_f()
-  f_obs.setup_binner(
-    reflections_per_bin=reflections_per_bin,
-    auto_binning=True)
-  if (0 or verbose):
-    f_obs.binner().show_summary()
-  missing_set = f_obs.complete_set().lone_set(f_obs).sort()
-  plot = completeness_plot(f_obs)
-  if bin_range_as == "two_theta":
-    assert wavelength is not None
-    plot.x = uctbx.d_star_sq_as_two_theta(
-      1./flex.pow2(flex.double(plot.x)), wavelength,deg=True)
-  elif bin_range_as == "d_star_sq":
-    plot.x = 1./flex.pow2(flex.double(plot.x))
-  #elif bin_range_as == "stol":
-    #plot.x = uctbx.d_star_sq_as_stol(
-      #1./flex.pow2(flex.double(plot.x)))
-  #elif bin_range_as == "stol_sq":
-    #plot.x = uctbx.d_star_sq_as_stol_sq(
-      #1./flex.pow2(flex.double(plot.x)))
-  plot.missing_set = missing_set
-  if missing_set.size() > 0:
-    print "Missing data:"
-    print "  h  k  l  %s" %bin_range_as
-  else:
-    print "No missing data"
-  if bin_range_as == "two_theta":
-    resolutions = missing_set.two_theta(wavelength=wavelength, deg=True)
-  elif bin_range_as == "d_spacing":
-    resolutions = missing_set.d_spacings()
-  elif bin_range_as == "d_star_sq":
-    resolutions = missing_set.d_star_sq()
-  for indices, resolution in zip(missing_set.indices(), resolutions.data()):
-    print ("(%2i %2i %2i)  ") %indices + ("%8.2f") %resolution
-  return plot
+class completeness_statistics(object):
+  def __init__(self, reflections, wavelength=None, reflections_per_bin=20,
+               bin_range_as="two_theta", verbose=False):
+    assert bin_range_as in ["d_spacing", "d_star_sq", "two_theta", "stol", "stol_sq"]
+    f_obs=reflections.f_obs
+    f_sq_obs = reflections.f_sq_obs_merged
+    f_sq_obs = f_sq_obs.eliminate_sys_absent().average_bijvoet_mates()
+    f_obs = f_sq_obs.f_sq_as_f()
+    f_obs.setup_binner(
+      reflections_per_bin=reflections_per_bin,
+      auto_binning=True)
+    if (0 or verbose):
+      f_obs.binner().show_summary()
+    missing_set = f_obs.complete_set().lone_set(f_obs).sort()
+    self.info = f_obs.info()
+    self.completeness = f_obs.completeness(use_binning=True)
+    binner = self.completeness.binner
+    data = self.completeness.data
+    self.x = binner.bin_centers(2)
+    self.y = data[1:-1]
+    #
+    if bin_range_as == "two_theta":
+      assert wavelength is not None
+      self.x = uctbx.d_star_sq_as_two_theta(self.x, wavelength,deg=True)
+      resolutions = missing_set.two_theta(wavelength=wavelength, deg=True).data()
+    elif bin_range_as == "d_spacing":
+      self.x = uctbx.d_star_sq_as_d(self.x)
+      resolutions = missing_set.d_spacings().data()
+    elif bin_range_as == "d_star_sq":
+      resolutions = missing_set.d_star_sq().data()
+    elif bin_range_as == "stol":
+      self.x = uctbx.d_star_sq_as_stol(self.x)
+      resolutions = flex.sqrt(missing_set.sin_theta_over_lambda_sq().data())
+    elif bin_range_as == "stol_sq":
+      self.x = uctbx.d_star_sq_as_stol_sq(self.x)
+      resolutions = missing_set.sin_theta_over_lambda_sq().data()
+    self.missing_set = missing_set
+    if missing_set.size() > 0:
+      print "Missing data:"
+      print "  h  k  l  %s" %bin_range_as
+    else:
+      print "No missing data"
+    for indices, resolution in zip(missing_set.indices(), resolutions):
+      print ("(%2i %2i %2i)  ") %indices + ("%8.2f") %resolution
 
 def cumulative_intensity_distribution(reflections, n_bins=20, verbose=False):
   f_obs=reflections.f_sq_obs_merged.f_sq_as_f()
@@ -139,13 +143,44 @@ def sys_absent_intensity_distribution(reflections):
   f_sq_obs = reflections.f_sq_obs
   return statistics.sys_absent_intensity_distribution(f_sq_obs).xy_plot_info()
 
-def f_obs_vs_f_calc(model, reflections):
-  assert model.scatterers().size() > 0, "model.scatterers().size() > 0"
-  f_obs_merged = reflections.f_sq_obs_merged.f_sq_as_f()
+def f_obs_vs_f_calc(model, reflections, twinning=None, batch_number=None):
+  assert model.scatterers().size() > 0, "n_scatterers > 0"
+
+  if twinning is not None:
+    basf = twinning['basf'][0]
+    m = twinning['matrix']
+    matrix = []
+    for i in range(3):
+      for j in range(3):
+        matrix.append(m[i][j])
+    twin_completion = xray.twin_completion(
+      reflections.f_sq_obs_filtered.indices(),
+      model.space_group(),
+      False,
+      matrix)
+    twin_f_obs = miller.set(
+      crystal_symmetry=model.crystal_symmetry(),
+      indices=twin_completion.twin_complete())
+    sf = xray.structure_factors.from_scatterers(
+      miller_set=twin_f_obs,
+      #d_min=reflections.f_sq_obs_filtered.d_min(),
+      cos_sin_table=True)
+    twin_f_calc_filtered = sf(model,twin_f_obs).f_calc()
+
+  if [batch_number, reflections.batch_numbers].count(None) == 0:
+    assert batch_number <= flex.max(reflections.batch_numbers.data()), "batch_number <= max(batch_numbers)"
+    selection = (reflections.batch_numbers.data() == batch_number)
+    f_sq_obs = reflections.f_sq_obs.select(selection)
+    merging = reflections.merge(f_sq_obs)
+    f_obs_merged = merging.array().f_sq_as_f()
+    f_obs_filtered = merging.array().f_sq_as_f()
+  else:
+    f_obs_merged = reflections.f_sq_obs_merged.f_sq_as_f()
+    f_obs_filtered = f_obs_merged.common_set(reflections.f_sq_obs_filtered)
+
   sf = xray.structure_factors.from_scatterers(miller_set=f_obs_merged,cos_sin_table=True)
   f_calc_merged = sf(model,f_obs_merged).f_calc()
 
-  f_obs_filtered = f_obs_merged.common_set(reflections.f_sq_obs_filtered)
   f_calc_filtered = f_calc_merged.common_set(f_obs_filtered)
   f_obs_omitted = f_obs_merged.lone_set(f_obs_filtered)
   f_calc_omitted = f_calc_merged.lone_set(f_calc_filtered)
@@ -171,6 +206,55 @@ def f_obs_vs_f_calc(model, reflections):
   plot.fit_y_intercept = fit.y_intercept()
   plot.xLegend = "F calc"
   plot.yLegend = "F obs"
+  return plot
+
+def f_obs_over_f_calc(model, reflections, wavelength=None, binning=False, n_bins=None, resolution_as="two_theta"):
+  assert model.scatterers().size() > 0, "model.scatterers().size() > 0"
+  f_obs_merged = reflections.f_sq_obs_merged.f_sq_as_f()
+  sf = xray.structure_factors.from_scatterers(miller_set=f_obs_merged,cos_sin_table=True)
+  f_calc_merged = sf(model,f_obs_merged).f_calc()
+
+  f_obs_filtered = f_obs_merged.common_set(reflections.f_sq_obs_filtered)
+  f_calc_filtered = f_calc_merged.common_set(f_obs_filtered)
+  f_obs_omitted = f_obs_merged.lone_set(f_obs_filtered)
+  f_calc_omitted = f_calc_merged.lone_set(f_calc_filtered)
+
+  ls_function = xray.unified_least_squares_residual(f_obs_filtered)
+  ls = ls_function(f_calc_filtered, compute_derivatives=False)
+  k = ls.scale_factor()
+  if binning == True:
+    assert n_bins is not None
+    binner = f_obs_filtered.setup_binner(n_bins=n_bins)
+    f_calc_filtered = f_calc_filtered.as_amplitude_array()
+    f_calc_filtered.use_binning(binner)
+    sum_fo = flex.double(f_obs_filtered.sum(use_binning=True).data[1:-1])
+    sum_fc = flex.double(f_calc_filtered.sum(use_binning=True).data[1:-1])
+    fo_over_fc = sum_fo/(sum_fc*k)
+    d_star_sq = binner.bin_centers(2)
+  else:
+    fc = flex.abs(f_calc_filtered.data())
+    fc *= k
+    fo = flex.abs(f_obs_filtered.data())
+    fo_over_fc = fo/fc
+    d_star_sq = f_calc_filtered.d_star_sq().data()
+  if resolution_as == "two_theta":
+    assert wavelength is not None
+    resolution = uctbx.d_star_sq_as_two_theta(
+      d_star_sq, wavelength, deg=True)
+  elif resolution_as == "d_spacing":
+    resolution = uctbx.d_star_sq_as_d(d_star_sq)
+  elif resolution_as == "d_star_sq":
+    resolution = d_star_sq
+  elif resolution_as == "stol":
+    resolution = uctbx.d_star_sq_as_stol(d_star_sq)
+  elif resolution_as == "stol_sq":
+    resolution = uctbx.d_star_sq_as_stol_sq(d_star_sq)
+  plot = empty()
+  plot.indices = f_obs_filtered.indices()
+  plot.f_obs_over_f_calc = fo_over_fc
+  plot.resolution = resolution
+  plot.xLegend = resolution_as
+  plot.yLegend = "F obs/F calc"
   return plot
 
 class normal_probability_plot(object):
@@ -222,36 +306,7 @@ class normal_probability_plot(object):
     r.yLegend = "Observed deviations"
     return r
 
-class completeness_plot(object):
-  def __init__(self, f_obs):
-    self.info = f_obs.info()
-    self.completeness = f_obs.completeness(use_binning=True)
-    binner = self.completeness.binner
-    data = self.completeness.data
-    i_bins = binner.range_all()
-    d_spacings = f_obs.d_spacings()
-    d_spacings.use_binner_of(f_obs)
-    mean_d_spacings = d_spacings.mean(use_binning=True).data
-    self.x = []
-    self.y = []
-    for i_bin in i_bins:
-      bin_d_range = binner.bin_d_range(i_bin)
-      data_item = data[i_bin]
-      d = mean_d_spacings[i_bin]
-      if (data_item is not None and d is not None):
-        self.x.append(d)
-        self.y.append(data_item)
 
-  def xy_plot_info(self):
-    r = empty()
-    r.title = "Completeness Plot"
-    if (self.info != 0):
-      r.title += ": " + str(self.info)
-    r.x = self.x
-    r.y = self.y
-    r.xLegend = "Resolution"
-    r.yLegend = "Shell Completeness"
-    return r
 
 class reflections(object):
   def __init__(self,  cell, spacegroup, reflection_file):
@@ -264,31 +319,51 @@ class reflections(object):
       ]
     )
     self.crystal_symmetry = cs
-    self.f_sq_obs = reflections_server.get_miller_arrays(None)[0]
+    miller_arrays = reflections_server.get_miller_arrays(None)
+    self.f_sq_obs = miller_arrays[0]
     self.f_obs = self.f_sq_obs.f_sq_as_f()
+    if len(miller_arrays) > 1:
+      self.batch_numbers = miller_arrays[1]
+    else:
+      self.batch_numbers = None
     self._omit = None
     self._merge = None
     self.merging = None
     self.f_sq_obs_merged = None
     self.f_sq_obs_filtered = None
 
-  def merge(self, merge=None):
+  def merge(self, observations=None, merge=None):
     if merge is None:
       merge = 2
     self._merge = merge
-    f_sq_obs_merged = self.f_sq_obs.eliminate_sys_absent()
-    self.n_sys_absent = self.f_sq_obs.size() - f_sq_obs_merged.size()
-    merging_in_p1 = f_sq_obs_merged \
-                  .customized_copy(
-                    space_group_info=sgtbx.space_group_info("P1"),
-                    anomalous_flag=True) \
-                  .merge_equivalents()
-    f_sq_obs_merged_in_p1 = merging_in_p1.array().customized_copy(crystal_symmetry=self.f_sq_obs)
+    if observations is None:
+      obs = self.f_sq_obs
+    else:
+      obs = observations
+    obs_merged = obs.eliminate_sys_absent()
+    n_sys_absent = obs.size() - obs_merged.size()
     if merge > 2:
-      f_sq_obs_merged = f_sq_obs_merged.customized_copy(anomalous_flag=False)
-    self.merging = f_sq_obs_merged.merge_equivalents()
-    f_sq_obs_merged = self.merging.array()
-    self.f_sq_obs_merged = f_sq_obs_merged
+      obs_merged = obs_merged.customized_copy(anomalous_flag=False)
+    merging = obs_merged.merge_equivalents()
+    obs_merged = merging.array()
+    if observations is None:
+      self.merging = merging
+      self.f_sq_obs_merged = obs_merged
+    else:
+      return merging
+    #f_sq_obs_merged = self.f_sq_obs.eliminate_sys_absent()
+    #self.n_sys_absent = self.f_sq_obs.size() - f_sq_obs_merged.size()
+    #merging_in_p1 = f_sq_obs_merged \
+                  #.customized_copy(
+                    #space_group_info=sgtbx.space_group_info("P1"),
+                    #anomalous_flag=True) \
+                  #.merge_equivalents()
+    #f_sq_obs_merged_in_p1 = merging_in_p1.array().customized_copy(crystal_symmetry=self.f_sq_obs)
+    #if merge > 2:
+      #f_sq_obs_merged = f_sq_obs_merged.customized_copy(anomalous_flag=False)
+    #self.merging = f_sq_obs_merged.merge_equivalents()
+    #f_sq_obs_merged = self.merging.array()
+    #self.f_sq_obs_merged = f_sq_obs_merged
 
   def filter(self, omit, wavelength):
     self._omit = omit

@@ -32,6 +32,9 @@ GuiGraphChooserComboExists = False
 class Graph(ImageTools):
   def __init__(self):
     ImageTools.__init__(self)
+    self.params = OV.Params().graphs.reflections
+    self.marker_params = (self.params.marker_1, self.params.marker_2)
+    self.function_params = (self.params.function_1, self.params.function_2, self.params.function_3)
     self.dataset_counter = 0
     self.function_counter = 0
     self.auto_axes = True
@@ -42,25 +45,18 @@ class Graph(ImageTools):
     self.metadata = {}
     self.draw = ""
     self.map_txt_list = []
-    
+    self.min_x = None
+    self.min_y = None
+    self.max_x = None
+    self.max_y = None
+
     self.graphInfo = {
-      "imSize":(900, 500),
       "TopRightTitle":self.filename,
-      "FontScale":0.02,
-      "marker":{
-        'colour1':(254,150,50),
-        'colour2':(159,182,205),
-        'border_colour1':(254/2,150/2,50/2),
-        'border_colour2':(159/2,182/2,205/2),
-        },
-      "function":{
-        'colour1':(0,0,0),
-        'colour2':(0,0,255),
-        'colour3':(255,0,0),
-        },
     }
-  
-  def plot_function(self, function, width=1, n_points=50):
+
+  def plot_function(self, function, locals=None, width=1, n_points=50):
+    if locals is None:
+      locals = {}
     self.get_division_spacings_and_scale()
     spacing = self.delta_x/n_points
     x_values = []
@@ -68,11 +64,12 @@ class Graph(ImageTools):
     x = self.min_x
     for i in xrange(0,n_points+1):
       x_values.append(x)
-      y_values.append(function(x))
+      locals['x'] = x
+      #y_values.append(function(x))
+      y_values.append(eval(function, math.__dict__, locals))
       x += spacing
-      
     data = Dataset(x_values,y_values,metadata=None)
-    
+
     min_x = self.min_x
     max_x = self.max_x
     scale_x = self.scale_x
@@ -83,10 +80,9 @@ class Graph(ImageTools):
     delta_y = self.delta_y
     xy_pairs = data.xy_pairs()
     self.function_counter += 1
-    fill = self.graphInfo['function']['colour%s' %self.function_counter]
-    
+    fill = self.function_params[self.function_counter-1].colour.rgb
     pixel_coordinates = []
-    
+
     for x_value,y_value in xy_pairs:
       
       if self.reverse_x:
@@ -167,8 +163,8 @@ class Graph(ImageTools):
     max_length = 0
     for key in keys_to_draw:
       max_length = max(max_length, len(key['label']))
-    boxWidth = 60 + 8 * max_length
-    boxHeight = 30 * len(keys_to_draw)
+    boxWidth = int(0.6 * self.font_size_tiny * max_length) + 60
+    boxHeight = int((self.font_size_tiny + 10) * (len(keys_to_draw))) + 20
     colour = self.gui_html_bg_colour
     im = Image.new('RGB', (boxWidth,boxHeight), colour)
     draw = ImageDraw.Draw(im)
@@ -183,22 +179,22 @@ class Graph(ImageTools):
       key_type = key['type']
       assert key_type in ("function", "marker")
       label = key['label']
-      fill = self.graphInfo[key_type]['colour%s' %key['number']]
       left = 15
       wX, wY = draw.textsize(label, font=self.font_tiny)
       if key_type == "function":
+        fill = self.function_params[key['number']-1].colour.rgb
         draw.line((left,top+wY/2,left+30,top+wY/2),fill=fill,width=2)
       elif key_type == "marker":
-        marker_width = int(self.graphInfo["marker"].get('size', int(self.im.size[0]/80)))
-        outline=self.graphInfo[key_type]['border_colour%s' %key['number']]
+        marker = self.marker_params[key['number']-1]
+        marker_width = int(self.im.size[0])*marker.size_factor
         draw.rectangle((left, top+wY/2-marker_width/2, left+marker_width, top+wY/2 + marker_width/2),
-                       fill=fill, outline=outline)
+                       fill=marker.fill.rgb, outline=marker.border.rgb)
       left = 60
       draw.text((left,top), "%s" %label, font=self.font_tiny, fill=txt_colour)
       top += wY + 10
       
     return im
-  
+
   def get_unicode_characters(self, txt):
     txt = txt.replace("two_theta", "2theta")
     txt = txt.replace("stol", "(sin(theta)/lambda)")
@@ -228,12 +224,12 @@ class Graph(ImageTools):
     import ImageFont, ImageDraw, ImageChops
     
     #import PngImagePlugin
-    self.imX = self.graphInfo["imSize"][0]
-    self.imY = self.graphInfo["imSize"][1]
+    self.imX = self.params.size_x
+    self.imY = self.params.size_y
     
     fontsize = int(0.08 * self.imX)
     fontscale = 0.02 * self.imX
-    f = self.graphInfo.get("FontScale", 0.02)
+    f = self.params.font_scale
     fontscale = f * self.imX
     
     font_name = "Vera"
@@ -269,7 +265,6 @@ class Graph(ImageTools):
     self.currY = 0
     size = ((int(self.imX), int(self.imY)))
     colour = self.gui_html_bg_colour
-    #colour = "#000000"
     im = Image.new('RGB', size, colour)
     draw = ImageDraw.Draw(im)
     self.draw = draw
@@ -352,8 +347,9 @@ class Graph(ImageTools):
       IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
 #      self.draw.text((x, y), "%s" %txt, font=self.font_small, fill="#444444")
       i += 1
-      
+
   def draw_fit_line(self, slope, y_intercept):
+    if self.min_x is None: self.get_division_spacings_and_scale()
     y1 = (slope * self.min_x + y_intercept)
     y2 = (slope * self.max_x + y_intercept)
     
@@ -362,7 +358,10 @@ class Graph(ImageTools):
     elif y1 < self.min_y:
       y1 = self.min_y
       
-    x1 = (y1-y_intercept)/slope
+    if slope == 0.0:
+      x1 = 0.0
+    else:
+      x1 = (y1-y_intercept)/slope
     x1 = self.graph_left \
        + ((float(x1) * self.scale_x)) \
        + ((0 - self.max_x) * self.scale_x) \
@@ -372,8 +371,11 @@ class Graph(ImageTools):
       y2 = self.max_y
     elif y2 < self.min_y:
       y2 = self.min_y
-      
-    x2 = (y2-y_intercept)/slope    
+    
+    if slope == 0.0:
+      x2 = self.max_x
+    else:
+      x2 = (y2-y_intercept)/slope    
     x2 = self.graph_left \
        + ((float(x2) * self.scale_x)) \
        + ((0 - self.max_x) * self.scale_x) \
@@ -400,7 +402,11 @@ class Graph(ImageTools):
             + ((0 - self.max_y) * self.scale_y) 
             + (self.delta_y * self.scale_y))
       
-    self.draw.line((x1+2, y1, x2-2, y2), width=5, fill="#eeeeee")
+    if slope == 0.0:
+      width = 4
+    else:
+      width = 5
+    self.draw.line((x1+2, y1, x2-2, y2), width=width, fill="#eeeeee")
     
     if y_intercept >= 0: sign = '+'
     else: sign = '-'
@@ -417,14 +423,10 @@ class Graph(ImageTools):
     IT.write_text_to_draw(
       self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
 
-  def draw_pairs(self, reverse_y=False, reverse_x=False): 
+  def draw_pairs(self, reverse_y=False, reverse_x=False, marker_size_factor=None): 
     self.reverse_y = reverse_y
     self.reverse_x = reverse_x
-    self.n_divisions = 5
     self.ax_marker_length = int(self.imX * 0.006)
-    
-    self.marker_width = int(self.graphInfo["marker"].get('size', int(self.im.size[0]/80)))
-    
     self.get_division_spacings_and_scale()
     self.draw_x_axis()
     self.draw_y_axis()
@@ -433,13 +435,13 @@ class Graph(ImageTools):
         slope = float(dataset.metadata().get("fit_slope"))
         y_intercept = float(dataset.metadata().get("fit_y_intercept"))
         self.draw_fit_line(slope, y_intercept)
-      self.draw_data_points(dataset.xy_pairs(), dataset.indices)
-      
-    
+      self.draw_data_points(
+        dataset.xy_pairs(), dataset.indices, marker_size_factor=marker_size_factor)
+
   def map_txt(self):
     return '\n'.join(self.map_txt_list)
   map_txt = property(map_txt)
-    
+
   def get_division_spacings_and_scale(self):  
     min_xs = []
     min_ys = []
@@ -460,16 +462,20 @@ class Graph(ImageTools):
     else:
       min_x = 0.0
       min_y = 0.0
-    max_x = max(max_xs)
-    max_y = max(max_ys)
+    if self.max_x is not None:
+      self.max_x = max(self.max_x, max(max_xs))
+    else:
+      self.max_x = max(max_xs)
+    if self.max_y is not None:
+      self.max_y = max(self.max_y, max(max_ys))
+    else:
+      self.max_y = max(max_ys)
     
-    self.max_x = max_x
     self.min_x = min_x
-    self.max_y = max_y
     self.min_y = min_y
     
-    delta_x = max_x - min_x
-    delta_y = max_y - min_y
+    delta_x = self.max_x - self.min_x
+    delta_y = self.max_y - self.min_y
     self.delta_x = delta_x
     self.delta_y = delta_y
     self.scale_x = ((self.graph_right - self.graph_left)/delta_x)
@@ -480,10 +486,17 @@ class Graph(ImageTools):
     
   def get_divisions(self, delta):
     assert delta != 0
-    dv = delta/self.n_divisions
-    
-    precision = -(int(math.log10(dv))) + 1
-    dv_ = round(dv * math.pow(10,precision))
+    dv = delta/self.params.n_divisions
+    if dv < 10 and dv > 1.0:
+      pow10 = 0
+    else:
+      log10 = math.log10(dv)
+      if log10 < -1.25:
+        pow10 = math.floor(log10)
+      else:
+        pow10 = round(log10)
+    #dv_ = math.ceil(dv / math.pow(10,pow10))
+    dv_ = dv / math.pow(10,pow10)
     if dv_ < 2:
       dv_ = 1.0
     elif dv_ < 2.5:
@@ -492,13 +505,11 @@ class Graph(ImageTools):
       dv_ = 2.5
     elif dv_ < 5:
       dv_ = 4.0
-    elif dv_ < 10:
-      dv_ = 5.0
     else:
-      dv_ = round(dv_, -1)
-    return dv_/math.pow(10,precision)
-  
-  def draw_data_points(self, xy_pairs, indices=None):
+      dv_ = 5.0
+    return dv_ * math.pow(10, round(pow10))
+
+  def draw_data_points(self, xy_pairs, indices=None, marker_size_factor=None):
     min_x = self.min_x
     max_x = self.max_x
     scale_x = self.scale_x
@@ -508,10 +519,13 @@ class Graph(ImageTools):
     scale_y = self.scale_y
     delta_y = self.delta_y
     
+    marker = self.marker_params[self.dataset_counter]
     self.dataset_counter += 1
-    fill = self.graphInfo['marker']['colour%s' %self.dataset_counter]
-    outline = self.graphInfo['marker']['border_colour%s' %self.dataset_counter]
-    marker_width = self.marker_width
+    fill = marker.fill.rgb
+    outline = marker.border.rgb
+    marker_width = int(self.im.size[0])*marker.size_factor
+    if marker_size_factor is not None:
+      marker_width *= marker_size_factor
     half_marker_width = marker_width/2
     
     if self.reverse_x:
@@ -552,7 +566,8 @@ class Graph(ImageTools):
         map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="reap %s"  target="%s">"""
                             % (box + (xr, yr)))
       else:
-        href="Html.Update"
+        href="UpdateHtml"
+        href=""
         if indices is None:
           target = '(%.3f,%.3f)' %(xr, yr)
         else:
@@ -579,7 +594,11 @@ class Graph(ImageTools):
       while div_val > min_y:
         div_val -= dv_y
     else:
-      div_val = round(min_y-dv_y, precision-1) # minimum value of div_val
+      #if dv_y <= 10:
+        #div_val = round(min_y-dv_y, precision-1) # minimum value of div_val
+      #else:
+        #div_val = round(min_y-dv_y, precision)
+      div_val = round(min_y-dv_y, precision)
     if div_val == 0.0: div_val = 0.0 # work-around for if div_val is -0.0
     y_axis.append(div_val)
     while div_val < max_y:
@@ -611,7 +630,6 @@ class Graph(ImageTools):
       if y + wY/2 <= (self.graph_bottom) and y >= self.boxYoffset -wY/2:
         self.draw.text((x, y), "%s" %txt, font=self.font_small, fill="#444444")
         IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
-        #self.draw.text((x, y), "%s" %txt, font=self.font_small, fill="#444444")
         x = self.graph_left
         y = y + int(wY/2)
         self.draw.line(((x, y),(x+self.ax_marker_length, y)), width=self.line_width, fill=(200, 200, 200))
@@ -632,8 +650,9 @@ class Graph(ImageTools):
     y = 0
     draw.text((x, y), "%s" %txt, font=self.font_small, fill="#444444")
     new = new.rotate(90)
-    self.im.paste(new, (int(self.xSpace+self.bSides + wY/2), int(self.bTop + wY + self.bSides *2)))
-    
+    #self.im.paste(new, (int(self.xSpace+self.bSides + wY/2), int(self.bTop + wY + self.bSides *2)))
+    self.im.paste(new, (int(self.xSpace+self.bSides + wY/2), int(self.graph_top +wY/2)))
+
   def draw_x_axis(self):
     min_x = self.min_x
     max_x = self.max_x
@@ -696,7 +715,6 @@ class Graph(ImageTools):
     wX, wY = self.draw.textsize(txt, font=self.font_small)
     x = self.boxX - wX - self.bSides - self.imX * 0.002
     y = self.boxY  + self.imY * 0.01
-    #IT.write_text_to_draw(self.draw, txt, top_left=(x,y), font_size=self.font_size_small, font_colour=self.grey)
     self.draw.text((x, y), "%s" %txt, font=self.font_small, fill="#444444")
     
   def draw_bars(self):
@@ -737,7 +755,6 @@ class Graph(ImageTools):
       if barHeight > wY * 2:
         top_left = (x + (barX - wX)/2, y + self.graphY * 0.01)
         IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.dark_grey)
-        #self.draw.text((x + (barX - wX)/2, y + self.graphY * 0.01), "%s" %txt, font=font, fill="#222222")
       i += 1
 
 class Analysis(Graph):
@@ -755,7 +772,6 @@ class Analysis(Graph):
     self.function = function
     if param:
       self.param = param.split(';')
-    #self.file = ""
     self.fl = []
     self.item = None
     
@@ -890,7 +906,8 @@ class Analysis(Graph):
     extraX = 29
     extraY = 48
     pstr = "popup %s '%s' -b=stcr -t='%s' -w=%s -h=%s -x=1 -y=50" %(
-      pop_name, htm_location, pop_name, width +extraX, height + extraY)
+      pop_name, htm_location, pop_name, int(width*1.033), int(height*1.1))
+      #pop_name, htm_location, pop_name, width +extraX, height + extraY)
     olex.m(pstr)
     olx.html_SetBorders(pop_name,0)
     olx.html_Reload(pop_name)
@@ -995,13 +1012,13 @@ class Analysis(Graph):
 class PrgAnalysis(Analysis):
   def __init__(self, program, method):
     Analysis.__init__(self)
+    self.params = OV.Params().graphs.program_analysis
     self.counter = 0
     self.attempt = 1
     size = (int(OV.FindValue('gui_htmlpanelwidth'))- 30, 150)
     self.item = program.name
     self.graphInfo["Title"] = self.item
-    self.graphInfo["imSize"] = size
-    self.graphInfo["FontScale"] = 0.03
+    self.params.size_x, self.params.size_y = size
     self.graphInfo["TopRightTitle"] = self.filename
     self.graphInfo["n_cycles"] = OV.GetParam("snum.refinement.max_cycles")
     self.program = program
@@ -1034,12 +1051,10 @@ class PrgAnalysis(Analysis):
 
   def update_image(self):
     OlexVFS.save_image_to_olex(self.im, self.image_location, 0)
-    #self.im.save("%s/.olex/Refinement.png" %self.filepath, "PNG")
     if OV.IsControl('POP_%s_PRG_ANALYSIS' %self.program.program_type.upper()):
       olx.html_SetImage(
         'POP_%s_PRG_ANALYSIS' %self.program.program_type.upper(), self.image_location)
     OlexVFS.write_to_olex("%s_image.htm" %self.program.program_type, self.ProgramHtml())
-    #OV.htmlReload()
     if self.new_graph:
       OV.htmlReload()
       self.new_graph = False
@@ -1064,11 +1079,7 @@ class refinement_graph(PrgAnalysis):
     top = self.graph_top
     marker_width = 5
     txt = self.graphInfo.get('Title', "")
-    
-    size = self.graphInfo.get('imSize', "")
-    width = size[0]
-    height = size[1] - top
-    
+    width = self.params.size_x
     height = self.graph_bottom - self.graph_top
     legend_top = height + 20
     labels = dataset.metadata().get('labels')
@@ -1080,8 +1091,7 @@ class refinement_graph(PrgAnalysis):
     y = wY + 6
     top_left = (x,y)
     IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
-    #self.draw.text((x, y), "%s" %y_label, font=self.font_large, fill="#888888")
-
+    
     for i, xy in enumerate(dataset.xy_pairs()):
       x_value, y_value = xy
       bar_left = ((i) * bar_width) + self.bSides + 1
@@ -1125,8 +1135,7 @@ class refinement_graph(PrgAnalysis):
           y = bar_top + 6
         top_left = (x,y)
         IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
-        #self.draw.text((x, y), "%s" %txt, font=self.font_large, fill="#888888")
-
+        
       if y_value < 0.003:
         txt = "OK"
         wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large)
@@ -1135,8 +1144,7 @@ class refinement_graph(PrgAnalysis):
         top_left = (x, y - 10)
         top_left = (x,y)
         IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.gui_green)
-        #self.draw.text((x, y - 10), "%s" %txt, font=self.font_large, fill=self.gui_green)
-
+        
     legend_top = height + 20
     legend_top = self.graph_bottom + 2
     m_offset = 5
@@ -1150,8 +1158,7 @@ class refinement_graph(PrgAnalysis):
     x = width - wX - self.bSides
     top_left = (x, legend_top)
     IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
-    #self.draw.text((x, legend_top), txt, font=self.font_large, fill="#888888")
-
+    
   def make_graph(self):
     self.make_empty_graph()
     mean_shifts = self.data.get("mean_shift")
@@ -1225,10 +1232,8 @@ class ShelXS_graph(PrgAnalysis):
     return
 
 class WilsonPlot(Analysis):
-  def __init__(self, n_bins=10, method="olex"):
+  def __init__(self):
     Analysis.__init__(self)
-    self.n_bins = abs(int(n_bins)) #Number of bins for Histograms
-    self.method = method      #Method by which graphs are generated
     self.item = "wilson"
     self.graphInfo["Title"] = OV.TranslatePhrase("Wilson Plot")
     self.graphInfo["pop_html"] = self.item
@@ -1238,7 +1243,7 @@ class WilsonPlot(Analysis):
     self.popout()
 
   def make_wilson_plot(self):
-    if self.method == 'cctbx':
+    if self.params.wilson_plot.method == 'cctbx':
       self.cctbx_wilson_statistics()
     else:
       filepath = "%s/%s.%s.csv" %(self.filepath,self.filename,"wilson")
@@ -1289,7 +1294,8 @@ class WilsonPlot(Analysis):
 
   def cctbx_wilson_statistics(self):  
     from cctbx_olex_adapter import OlexCctbxGraphs
-    wp = OlexCctbxGraphs('wilson', n_bins=2*self.n_bins).xy_plot
+    n_bins = 2*self.params.wilson_plot.n_bins
+    wp = OlexCctbxGraphs('wilson', n_bins=n_bins).xy_plot
     metadata = {}
     metadata.setdefault("K", 1/wp.wilson_intensity_scale_factor)
     metadata.setdefault("B", wp.wilson_b)
@@ -1441,9 +1447,7 @@ class ChargeFlippingPlot(PrgAnalysis):
     top = self.graph_top
     marker_width = 5
     title = self.graphInfo.get('Title', "")
-    size = self.graphInfo.get('imSize', "")
-    width = size[0]
-    height = size[1] - top
+    width = self.params.size_x
     height = self.graph_bottom - self.graph_top
     
     if solving.state is solving.guessing_delta:
@@ -1525,9 +1529,8 @@ class ChargeFlippingPlot(PrgAnalysis):
       self.update_image()
 
 class CumulativeIntensityDistribution(Analysis):
-  def __init__(self, n_bins=20, output_csv_file=False):
+  def __init__(self):
     Analysis.__init__(self)
-    self.n_bins = abs(int(n_bins)) #Number of bins for Histograms
     self.item = "cumulative"
     self.graphInfo["Title"] = OV.TranslatePhrase("Cumulative Intensity Distribution")
     self.graphInfo["pop_html"] = self.item
@@ -1536,30 +1539,29 @@ class CumulativeIntensityDistribution(Analysis):
     self.auto_axes = False
     self.make_cumulative_intensity_distribution()
     self.popout()
-    if output_csv_file in (True, 'true', 'True'):
+    if self.params.cumulative_intensity.output_csv_file:
       self.output_data_as_csv()
 
   def make_cumulative_intensity_distribution(self):
     # Ideal distributions
-    def acentric_distribution(x):
-      return 1-math.exp(-x)
-    def centric_distribution(x):
-      return math.sqrt(erf(0.5*x))
-    def twinned_acentric_distribution(x):
-      ## twinned acentric distribution
-      ## E. Stanley, J.Appl.Cryst (1972). 5, 191
-      return 1-(1+2*x)*math.exp(-2*x)
+    #def acentric_distribution(x):
+      #return 1-math.exp(-x)
+    #def centric_distribution(x):
+      #return math.sqrt(erf(0.5*x))
+    #def twinned_acentric_distribution(x):
+      ### twinned acentric distribution
+      ### E. Stanley, J.Appl.Cryst (1972). 5, 191
+      #return 1-(1+2*x)*math.exp(-2*x)
 
+    acentric = "1-exp(-x)"
+    centric = "sqrt(erf(0.5*x))"
+    twinned_acentric = "1-(1+2*x)*exp(-2*x)" # E. Stanley, J.Appl.Cryst (1972). 5, 191
+    locals = {'erf':erf}
     self.cctbx_cumulative_intensity_distribution()
     self.make_empty_graph(axis_x = True)
-    self.plot_function(centric_distribution)
-    self.plot_function(acentric_distribution)
-    # E. Stanley, J.Appl.Cryst (1972). 5, 191
-    self.plot_function(twinned_acentric_distribution)
-    
-    colour1 = self.graphInfo['function']['colour1']
-    colour2 = self.graphInfo['function']['colour2']
-    colour3 = self.graphInfo['function']['colour3']
+    self.plot_function(centric, locals=locals)
+    self.plot_function(acentric, locals=locals)
+    self.plot_function(twinned_acentric, locals=locals)
     
     key = self.draw_key(({'type': 'function',
                          'number': 1,
@@ -1580,7 +1582,8 @@ class CumulativeIntensityDistribution(Analysis):
 
   def cctbx_cumulative_intensity_distribution(self, verbose=False):
     from cctbx_olex_adapter import OlexCctbxGraphs
-    xy_plot = OlexCctbxGraphs('cumulative', n_bins=self.n_bins).xy_plot
+    xy_plot = OlexCctbxGraphs(
+      'cumulative', self.params.cumulative_intensity.n_bins).xy_plot
     metadata = {}
     metadata.setdefault("y_label", xy_plot.yLegend)
     metadata.setdefault("x_label", xy_plot.xLegend)
@@ -1590,7 +1593,7 @@ class CumulativeIntensityDistribution(Analysis):
       self.data['dataset1'].show_summary()
 
 class CompletenessPlot(Analysis):
-  def __init__(self, reflections_per_bin=20, bin_range_as="two_theta", output_csv_file=False):
+  def __init__(self):
     Analysis.__init__(self)
     self.item = "completeness"
     self.graphInfo["Title"] = OV.TranslatePhrase("Completeness Plot")
@@ -1598,29 +1601,30 @@ class CompletenessPlot(Analysis):
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.filename
     self.auto_axes = False
-    if bin_range_as in ("d_spacing", "d_star_sq"):
+    if self.params.completeness.resolution_as in ("d_spacing", "d_star_sq"):
       self.reverse_x = True
-    self.cctbx_completeness_statistics(int(reflections_per_bin), bin_range_as)
+    self.cctbx_completeness_statistics()
     self.make_empty_graph(axis_x = True)
     self.draw_pairs(reverse_x=self.reverse_x)
     self.popout()
-    if output_csv_file in (True, 'true', 'True'):
+    if self.params.completeness.output_csv_file:
       self.output_data_as_csv()
 
-  def cctbx_completeness_statistics(self, reflections_per_bin, bin_range_as):
+  def cctbx_completeness_statistics(self):
     from cctbx_olex_adapter import OlexCctbxGraphs
+    params = self.params.completeness
     xy_plot = OlexCctbxGraphs(
       'completeness',
-      reflections_per_bin=reflections_per_bin,
-      bin_range_as=bin_range_as).xy_plot
+      reflections_per_bin=params.reflections_per_bin,
+      bin_range_as=params.resolution_as).xy_plot
     metadata = {}
     metadata.setdefault("y_label", OV.TranslatePhrase("Shell Completeness"))
-    metadata.setdefault("x_label", bin_range_as)
+    metadata.setdefault("x_label", params.resolution_as)
     self.metadata = metadata
     self.data.setdefault('dataset1', Dataset(xy_plot.x,[i*100 for i in xy_plot.y],metadata=metadata))
 
 class SystematicAbsencesPlot(Analysis):
-  def __init__(self, output_csv_file=False):
+  def __init__(self):
     Analysis.__init__(self)
     self.item = "sys_absences"
     self.graphInfo["Title"] = OV.TranslatePhrase("Systematic Absences Intensity Distribution")
@@ -1631,7 +1635,7 @@ class SystematicAbsencesPlot(Analysis):
     self.cctbx_systematic_absences_plot()
     if self.have_data:
       self.popout()
-      if output_csv_file in (True, 'true', 'True'):
+      if self.params.systematic_absences.output_csv_file:
         self.output_data_as_csv()
 
   def cctbx_systematic_absences_plot(self):
@@ -1649,17 +1653,10 @@ class SystematicAbsencesPlot(Analysis):
     self.data.setdefault('dataset1', Dataset(xy_plot.x, xy_plot.y, indices=xy_plot.indices, metadata=metadata))
     self.draw_origin = True
     self.make_empty_graph(axis_x = True)
-    self.graphInfo['marker']['size'] = int(self.im.size[0]/120)
-    ratio = 0.75
-    colour = self.graphInfo['marker']['colour%s' %(self.dataset_counter + 1)]
-    border_colour = (int(colour[0] * ratio),
-                     int(colour[1] * ratio),
-                     int(colour[2] * ratio))
-    self.graphInfo['marker']['border_colour'] = border_colour
-    self.draw_pairs()
+    self.draw_pairs(marker_size_factor = 1/1.5)
 
 class Normal_probability_plot(Analysis):
-  def __init__(self, output_csv_file=False):
+  def __init__(self):
     Analysis.__init__(self)
     self.item = "Normal_probability_plot"
     self.graphInfo["Title"] = OV.TranslatePhrase("Normal probability plot")
@@ -1670,7 +1667,7 @@ class Normal_probability_plot(Analysis):
     self.draw_origin = True
     self.make_normal_probability_plot()
     self.popout()
-    if output_csv_file in (True, 'true', 'True'):
+    if self.params.normal_probability.output_csv_file in (True, 'true', 'True'):
       self.output_data_as_csv()
 
   def make_normal_probability_plot(self):
@@ -1689,7 +1686,7 @@ class Normal_probability_plot(Analysis):
 
 
 class Fobs_Fcalc_plot(Analysis):
-  def __init__(self, output_csv_file=False):
+  def __init__(self, batch_number=None):
     Analysis.__init__(self)
     self.item = "Fobs_Fcalc"
     self.graphInfo["Title"] = OV.TranslatePhrase("Fobs vs Fcalc")
@@ -1697,6 +1694,12 @@ class Fobs_Fcalc_plot(Analysis):
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.filename
     self.auto_axes = False
+    try:
+      batch_number = int(batch_number)
+    except ValueError:
+      self.batch_number = None
+    else:
+      self.batch_number = batch_number
     try:
       self.make_f_obs_f_calc_plot()
     except AssertionError, e:
@@ -1706,12 +1709,12 @@ class Fobs_Fcalc_plot(Analysis):
       else:
         raise AssertionError, e
     self.popout()
-    if output_csv_file in (True, 'true', 'True'):
+    if self.params.fobs_fcalc.output_csv_file:
       self.output_data_as_csv()
 
   def make_f_obs_f_calc_plot(self):
     from cctbx_olex_adapter import OlexCctbxGraphs
-    xy_plot = OlexCctbxGraphs('f_obs_f_calc').xy_plot
+    xy_plot = OlexCctbxGraphs('f_obs_f_calc', batch_number=self.batch_number).xy_plot
     self.metadata.setdefault("y_label", xy_plot.yLegend)
     self.metadata.setdefault("x_label", xy_plot.xLegend)
     metadata = {}
@@ -1737,6 +1740,48 @@ class Fobs_Fcalc_plot(Analysis):
                   (int(self.graph_right-(key.size[0]+40)),
                    int(self.graph_bottom-(key.size[1]+40)))
                   )
+
+class Fobs_over_Fcalc_plot(Analysis):
+  def __init__(self):
+    Analysis.__init__(self)
+    self.item = "Fobs_over_Fcalc"
+    self.graphInfo["Title"] = OV.TranslatePhrase("Fobs/Fcalc vs resolution")
+    self.graphInfo["pop_html"] = self.item
+    self.graphInfo["pop_name"] = self.item
+    self.graphInfo["TopRightTitle"] = self.filename
+    self.auto_axes = False
+    self.max_y = 1.05
+    try:
+      self.make_plot()
+    except AssertionError, e:
+      if str(e) == "model.scatterers().size() > 0":
+        print "You need some scatterers to do this!"
+        return
+      else:
+        raise AssertionError, e
+    self.popout()
+    if self.params.fobs_over_fcalc.output_csv_file:
+      self.output_data_as_csv()
+
+  def make_plot(self):
+    from cctbx_olex_adapter import OlexCctbxGraphs
+    params = self.params.fobs_over_fcalc
+    xy_plot = OlexCctbxGraphs(
+      'f_obs_over_f_calc',
+      binning=params.binning,
+      n_bins=params.n_bins,
+      resolution_as=params.resolution_as).xy_plot
+    self.metadata.setdefault("y_label", xy_plot.yLegend)
+    self.metadata.setdefault("x_label", xy_plot.xLegend)
+    metadata = {}
+    data = Dataset(
+      xy_plot.resolution, xy_plot.f_obs_over_f_calc,
+      indices=xy_plot.indices, metadata=metadata)
+    self.data.setdefault('dataset1', data)
+    self.make_empty_graph(axis_x = True)
+    #self.plot_function("1")
+    self.draw_fit_line(slope=0, y_intercept=1)
+    self.draw_pairs()
 
 class Dataset(object):
   def __init__(self, x=None, y=None, indices=None, metadata={}):
@@ -1769,6 +1814,7 @@ OV.registerFunction(CumulativeIntensityDistribution)
 OV.registerFunction(CompletenessPlot)
 OV.registerFunction(SystematicAbsencesPlot)
 OV.registerFunction(Fobs_Fcalc_plot)
+OV.registerFunction(Fobs_over_Fcalc_plot)
 OV.registerFunction(Normal_probability_plot)
 
 def array_scalar_multiplication(array, multiplier):
@@ -1791,6 +1837,8 @@ def makeReflectionGraphOptions(graph, name):
            'value':value,
            'max':'30',
            'label':'%s ' %caption,
+           'onchange':'spy.SetParam(graphs.reflections.%s.%s,GETVALUE(%s))' %(
+             graph.name, object.name,ctrl_name),
            }
       options_gui.append(htmlTools.make_spin_input(d))
       
@@ -1799,6 +1847,8 @@ def makeReflectionGraphOptions(graph, name):
       d = {'ctrl_name':ctrl_name,
            'value':value,
            'label':'%s ' %caption,
+           'onchange':'spy.SetParam(graphs.reflections.%s.%s,GETVALUE(%s))' %(
+             graph.name, object.name,ctrl_name),
            }
       options_gui.append(htmlTools.make_input_text_box(d))
 
@@ -1806,6 +1856,10 @@ def makeReflectionGraphOptions(graph, name):
       ctrl_name = 'TICK_%s' %(obj_name)
       d = {'ctrl_name':ctrl_name,
            'value':'%s ' %caption,
+           'oncheck':'spy.SetParam(graphs.reflections.%s.%s,True)' %(
+             graph.name, object.name),
+           'onuncheck':'spy.SetParam(graphs.reflections.%s.%s,False)' %(
+             graph.name, object.name),
            'width':80,
            'bgcolor':"",
            'fgcolor':"",
@@ -1822,6 +1876,8 @@ def makeReflectionGraphOptions(graph, name):
            'label':'%s ' %caption,
            'items':items,
            'value':object.extract(),
+           'onchange':'spy.SetParam(graphs.reflections.%s.%s,GETVALUE(%s))' %(
+             graph.name, object.name,ctrl_name),
            'width':'',
            }
       options_gui.append(htmlTools.make_combo_text_box(d))
@@ -1840,12 +1896,13 @@ def makeReflectionGraphGui():
   gui_d.setdefault('make_graph_button', "")
   gui_d.setdefault('graph_chooser', "")
 
-  run_d = {'wilson_plot':'run wilson_plot GetValue(COMBO_WILSON_PLOT_METHOD) GetValue(SPIN_WILSON_PLOT_BINS) GetState(TICK_WILSON_PLOT_OUTPUT_CSV)',
-           'cumulative_intensity':'run cumulative_intensity GetValue(SPIN_CUMULATIVE_INTENSITY_BINS) GetState(TICK_CUMULATIVE_INTENSITY_OUTPUT_CSV)',
-           'systematic_absences':'run systematic_absences GetState(TICK_SYSTEMATIC_ABSENCES_OUTPUT_CSV)',
-           'fobs_fcalc':'run fobs_fcalc GetState(TICK_FOBS_FCALC_OUTPUT_CSV)',
-           'completeness':'run completeness GetValue(SPIN_COMPLETENESS_REFLECTIONS_PER_BIN) GetValue(COMBO_COMPLETENESS_BIN_RANGE_AS) GetState(TICK_COMPLETENESS_OUTPUT_CSV)',
-           'normal_probability':'run _normal_probability GetState(TICK_NORMAL_PROBABILITY_OUTPUT_CSV)',
+  run_d = {'wilson_plot':'spy.WilsonPlot()',
+           'cumulative_intensity':'spy.CumulativeIntensityDistribution()',
+           'systematic_absences':'spy.SystematicAbsencesPlot()',
+           'fobs_fcalc':'spy.Fobs_Fcalc_plot()',
+           'fobs_over_fcalc':'spy.Fobs_over_Fcalc_plot()',
+           'completeness':'spy.CompletenessPlot()',
+           'normal_probability':'spy.Normal_probability_plot()',
            }
 
   if GuiGraphChooserComboExists:
@@ -1874,7 +1931,7 @@ def makeReflectionGraphGui():
   gui_d['help'] = htmlTools.make_table_first_col(
     help_name=help_name, popout=False)
   d = {'ctrl_name':'SET_REFLECTION_STATISTICS',
-     'items':"-- %Please Select% --;%Wilson Plot%;%Cumulative Intensity%;%Systematic Absences%;%Fobs-Fcalc%;%Completeness%",
+     'items':"-- %Please Select% --;%Wilson Plot%;%Cumulative Intensity%;%Systematic Absences%;%Fobs-Fcalc%;%Fobs over Fcalc%;%Completeness%;%Normal Probability%",
      'value':value,
      'onchange':"updatehtml",
      'manage':'manage',
