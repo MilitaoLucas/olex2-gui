@@ -338,7 +338,7 @@ OV.registerFunction(SaveUserParams)
 
 def EditParams(scope_name="", expert_level=0, attributes_level=0):
   try:
-    output_phil = olx.phil_handler.get_scope_by_merged_name(scope_name)
+    output_phil = olx.phil_handler.get_scope_by_name(scope_name)
     original_name = output_phil.name
     output_phil.name = scope_name
   except KeyError:
