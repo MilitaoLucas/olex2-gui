@@ -208,6 +208,7 @@ class Graph(ImageTools):
     txt = txt.replace(">", unichr(61681))
     txt = txt.replace("<", unichr(61665))
     txt = txt.replace("Fo2", "Fo%s" %(unichr(178)))
+    txt = txt.replace("Sum", unichr(8721))
     #txt = txt.replace("Fexp2", "Fexp%s" %(unichr(178)))
     #txt = txt.replace("Fo2", "F%s%s" %(unichr(2092),unichr(178)))
     txt = txt.replace("Fexp", "F%s" %(unichr(2091)))
