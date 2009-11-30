@@ -149,25 +149,6 @@ class phil_handler(libtbx.phil.interface.index):
   def getRootScope (self) :
     return self.working_phil
 
-  def get_scope_by_merged_name(self, merged_name):
-    return self._full_path_index[merged_name]
-
-  def get_validated_param(self, def_name):
-    #if self._phil_has_changed:
-      #self.update_from_python(self.params)
-      #self._phil_has_changed = False
-    phil_objects = self.get_scope_by_name(def_name)
-    if isinstance(phil_objects, list):
-      vals = []
-      for obj in phil_objects:
-        python_value = obj.extract()
-        phil_value = python_value.format()
-        vals.append(phil_value)
-      return vals
-    elif phil_objects is not None:
-      python_value = phil_objects.extract()
-      return python_value
-
   def get_values_by_name(self, def_name):
     if not def_name:
       return None
