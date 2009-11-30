@@ -630,7 +630,7 @@ graphs {
       resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
         .type = choice
         .caption = "Resolution as"
-      binning = False
+      binning = True
         .type=bool
         .caption= "Binning"
       n_bins = 10

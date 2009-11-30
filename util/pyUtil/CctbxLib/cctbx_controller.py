@@ -163,7 +163,6 @@ def f_obs_vs_f_calc(model, reflections, twinning=None, batch_number=None):
       indices=twin_completion.twin_complete())
     sf = xray.structure_factors.from_scatterers(
       miller_set=twin_f_obs,
-      #d_min=reflections.f_sq_obs_filtered.d_min(),
       cos_sin_table=True)
     twin_f_calc_filtered = sf(model,twin_f_obs).f_calc()
 
@@ -274,7 +273,7 @@ class normal_probability_plot(object):
     scale_factor = ls.scale_factor()
     weighting.observed = f_sq_obs
     weighting.calculated = f_calc
-    weighting.compute()
+    weighting.compute(f_calc, scale_factor)
     #
     observed_deviations = flex.sqrt(weighting.weights) * (
       f_sq_obs.data() - scale_factor * f_sq_calc.data())
@@ -351,19 +350,6 @@ class reflections(object):
       self.f_sq_obs_merged = obs_merged
     else:
       return merging
-    #f_sq_obs_merged = self.f_sq_obs.eliminate_sys_absent()
-    #self.n_sys_absent = self.f_sq_obs.size() - f_sq_obs_merged.size()
-    #merging_in_p1 = f_sq_obs_merged \
-                  #.customized_copy(
-                    #space_group_info=sgtbx.space_group_info("P1"),
-                    #anomalous_flag=True) \
-                  #.merge_equivalents()
-    #f_sq_obs_merged_in_p1 = merging_in_p1.array().customized_copy(crystal_symmetry=self.f_sq_obs)
-    #if merge > 2:
-      #f_sq_obs_merged = f_sq_obs_merged.customized_copy(anomalous_flag=False)
-    #self.merging = f_sq_obs_merged.merge_equivalents()
-    #f_sq_obs_merged = self.merging.array()
-    #self.f_sq_obs_merged = f_sq_obs_merged
 
   def filter(self, omit, wavelength):
     self._omit = omit

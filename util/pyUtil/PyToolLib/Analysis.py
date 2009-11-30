@@ -65,7 +65,6 @@ class Graph(ImageTools):
     for i in xrange(0,n_points+1):
       x_values.append(x)
       locals['x'] = x
-      #y_values.append(function(x))
       y_values.append(eval(function, math.__dict__, locals))
       x += spacing
     data = Dataset(x_values,y_values,metadata=None)
@@ -217,13 +216,11 @@ class Graph(ImageTools):
 
   def make_x_y_plot(self):
     pass
-    #im = self.make_empty_graph()
 
   def make_empty_graph(self, axis_x=False):
     import Image
     import ImageFont, ImageDraw, ImageChops
     
-    #import PngImagePlugin
     self.imX = self.params.size_x
     self.imY = self.params.size_y
     
@@ -270,8 +267,6 @@ class Graph(ImageTools):
     self.draw = draw
     
     txt = self.graphInfo["Title"]
-    
-    #txt = self.metadata.get("Title",self.graphInfo["Title"]).title()
     
     if not txt: txt = "Not available"
     x = 0 + self.bSides+self.xSpace
@@ -345,7 +340,6 @@ class Graph(ImageTools):
       y = self.graph_bottom
       top_left = (x,y)
       IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
-#      self.draw.text((x, y), "%s" %txt, font=self.font_small, fill="#444444")
       i += 1
 
   def draw_fit_line(self, slope, y_intercept):
@@ -650,7 +644,6 @@ class Graph(ImageTools):
     y = 0
     draw.text((x, y), "%s" %txt, font=self.font_small, fill="#444444")
     new = new.rotate(90)
-    #self.im.paste(new, (int(self.xSpace+self.bSides + wY/2), int(self.bTop + wY + self.bSides *2)))
     self.im.paste(new, (int(self.xSpace+self.bSides + wY/2), int(self.graph_top +wY/2)))
 
   def draw_x_axis(self):
@@ -875,7 +868,6 @@ class Analysis(Graph):
           data_path = xy[-3:][-2]
         except:
           data_path = 'n/a'
-        #data.append((float(xy[0]), float(xy[1]), data_path, data_name))
         x.append(float(xy[0]))
         y.append(float(xy[1]))
         
@@ -907,7 +899,6 @@ class Analysis(Graph):
     extraY = 48
     pstr = "popup %s '%s' -b=stcr -t='%s' -w=%s -h=%s -x=1 -y=50" %(
       pop_name, htm_location, pop_name, int(width*1.033), int(height*1.1))
-      #pop_name, htm_location, pop_name, width +extraX, height + extraY)
     olex.m(pstr)
     olx.html_SetBorders(pop_name,0)
     olx.html_Reload(pop_name)
@@ -1511,7 +1502,6 @@ class ChargeFlippingPlot(PrgAnalysis):
       box = (10,legend_top +m_offset,10+marker_width, legend_top+marker_width + m_offset)
       self.draw.rectangle(box, fill=(ccR, ccG, ccB), outline=(ccR/2, ccG/2, 0))
       tt = "CC"
-      #self.draw.text((10+marker_width+3, legend_top), "%s" %tt, font=self.font_large, fill="#888888")
       top_left = (10+marker_width+3, legend_top)
       IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_normal, font_colour=self.light_grey)
 
@@ -1543,16 +1533,6 @@ class CumulativeIntensityDistribution(Analysis):
       self.output_data_as_csv()
 
   def make_cumulative_intensity_distribution(self):
-    # Ideal distributions
-    #def acentric_distribution(x):
-      #return 1-math.exp(-x)
-    #def centric_distribution(x):
-      #return math.sqrt(erf(0.5*x))
-    #def twinned_acentric_distribution(x):
-      ### twinned acentric distribution
-      ### E. Stanley, J.Appl.Cryst (1972). 5, 191
-      #return 1-(1+2*x)*math.exp(-2*x)
-
     acentric = "1-exp(-x)"
     centric = "sqrt(erf(0.5*x))"
     twinned_acentric = "1-(1+2*x)*exp(-2*x)" # E. Stanley, J.Appl.Cryst (1972). 5, 191
@@ -1696,7 +1676,7 @@ class Fobs_Fcalc_plot(Analysis):
     self.auto_axes = False
     try:
       batch_number = int(batch_number)
-    except ValueError:
+    except (ValueError, TypeError):
       self.batch_number = None
     else:
       self.batch_number = batch_number
