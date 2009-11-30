@@ -270,7 +270,9 @@ def LoadParams():
   master_phil = iotbx.phil.parse(
     file_name="%s/params.phil" %OV.BaseDir(),
     converter_registry=phil_interface.converter_registry)
-  phil_handler = phil_interface.phil_handler(master_phil=master_phil)
+  phil_handler = phil_interface.phil_handler(
+    master_phil=master_phil,
+    parse=iotbx.phil.parse)
   user_phil = get_user_phil()
   if user_phil:
     phil_handler.update(phil_file=user_phil)
@@ -278,7 +280,8 @@ def LoadParams():
 OV.registerFunction(LoadParams)
 
 def LoadStructureParams():
-  olx.phil_handler.reset(scope_name='snum')
+  #olx.phil_handler.reset(scope_name='snum')
+  olx.phil_handler.reset_scope('snum')
   solutionPrg, solutionMethod = getDefaultPrgMethod('Solution')
   refinementPrg, refinementMethod = getDefaultPrgMethod('Refinement')
   snum_phil = """
