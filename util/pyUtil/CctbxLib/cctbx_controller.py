@@ -253,7 +253,10 @@ def f_obs_over_f_calc(model, reflections, wavelength=None, binning=False, n_bins
   plot.f_obs_over_f_calc = fo_over_fc
   plot.resolution = resolution
   plot.xLegend = resolution_as
-  plot.yLegend = "F obs/F calc"
+  if binning == True:
+    plot.yLegend = "Sum|Fo|/Sum|Fc|"
+  else:
+    plot.yLegend = "F obs/F calc"
   return plot
 
 class normal_probability_plot(object):
