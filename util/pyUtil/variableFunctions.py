@@ -358,7 +358,3 @@ def ShowParams(expert_level=0, attributes_level=0):
   olx.phil_handler.working_phil.show(
     expert_level=int(expert_level), attributes_level=int(attributes_level))
 OV.registerFunction(ShowParams)
-
-OV.registerFunction(OV.GetParam)
-OV.registerFunction(OV.GetParam_as_string)
-OV.registerFunction(OV.SetParam)

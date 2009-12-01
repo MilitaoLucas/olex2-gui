@@ -685,7 +685,6 @@ def weightGuiDisplay():
          }
     box = htmlTools.make_tick_box_input(d) 
  
-    
     txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update") 
     txt_Weight = OV.TranslatePhrase("Weight")
     html = '''

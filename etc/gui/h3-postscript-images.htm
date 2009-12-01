@@ -18,12 +18,12 @@ run 'pictps
   GetData(COLOR_FILL)
   GetData(COLOR_BOND)
   GetData(IMAGE_PS_PERSPECTIVE)
-  -lw_ellipse=spy.GetParam_as_string(snum.image.ps.outline_width)
-  -lw_octant=spy.GetParam_as_string(snum.image.ps.octant_width)
-  -lw_pie=spy.GetParam_as_string(snum.image.ps.pie_width)
-  -lw_font=spy.GetParam_as_string(snum.image.ps.font_weight)
-  -div_pie=spy.GetParam_as_string(snum.image.ps.octant_count)
-  -scale_hb=spy.GetParam_as_string(snum.image.ps.h_bond_width)
+  -lw_ellipse=spy.GetParam(snum.image.ps.outline_width)
+  -lw_octant=spy.GetParam(snum.image.ps.octant_width)
+  -lw_pie=spy.GetParam(snum.image.ps.pie_width)
+  -lw_font=spy.GetParam(snum.image.ps.font_weight)
+  -div_pie=spy.GetParam(snum.image.ps.octant_count)
+  -scale_hb=spy.GetParam(snum.image.ps.h_bond_width)
 '>>
 brad 0.8>>
 echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'">
@@ -120,7 +120,7 @@ echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'">
       valign='center'
       align='right'
       name="IMAGE_PS_OUTLINE_LINEWIDTH"
-      value='$spy.GetParam_as_string(snum.image.ps.outline_width)'
+      value='$spy.GetParam(snum.image.ps.outline_width)'
       label="Outline Line Width "
       onleave="spy.SetParam(snum.image.ps.outline_width,GetValue(IMAGE_PS_OUTLINE_LINEWIDTH))"
     >
@@ -137,7 +137,7 @@ echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'">
       align='right'
       name="IMAGE_PS_OCTANT_LINEWIDTH"
       width="50"
-      value='$spy.GetParam_as_string(snum.image.ps.octant_width)'
+      value='$spy.GetParam(snum.image.ps.octant_width)'
       label="Octant Line Width "
       onleave="spy.SetParam(snum.image.ps.octant_width,GetValue(IMAGE_PS_OCTANT_LINEWIDTH))"
     >
@@ -181,7 +181,7 @@ echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'">
       align='right'
       name="IMAGE_PS_OCTANT_PIEWIDTH"
       width="50"
-      value='$spy.GetParam_as_string(snum.image.ps.pie_width)'
+      value='$spy.GetParam(snum.image.ps.pie_width)'
       label="Dividing Line Width "
       onleave="spy.SetParam(snum.image.ps.pie_width,GetValue(IMAGE_PS_OCTANT_PIEWIDTH))"
     >
@@ -208,7 +208,7 @@ echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'">
       align='right'
       name="IMAGE_PS_BONDWIDTH"
       width="50"
-      value='$spy.GetParam_as_string(snum.image.ps.bond_width)'
+      value='$spy.GetParam(snum.image.ps.bond_width)'
       label="Bond Width "
       onchange="spy.SetParam(snum.image.ps.bond_width,GetValue(IMAGE_PS_BONDWIDTH))"
     >
@@ -224,7 +224,7 @@ echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'">
       align='right'
       name="IMAGE_PS_HBOND"
       width="50"
-      value='$spy.GetParam_as_string(snum.image.ps.h_bond_width)'
+      value='$spy.GetParam(snum.image.ps.h_bond_width)'
       label="H Atom Bonds "
       onleave="spy.SetParam(snum.image.ps.h_bond_width,GetValue(IMAGE_PS_HBOND))"
     >
@@ -251,7 +251,7 @@ echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'">
       align='right'
       name="IMAGE_PS_FONTWEIGHT"
       width="50"
-      value='$spy.GetParam_as_string(snum.image.ps.font_weight)'
+      value='$spy.GetParam(snum.image.ps.font_weight)'
       label="Weight (in file) "
       onleave="spy.SetParam(snum.image.ps.font_weight,GetValue(IMAGE_PS_FONTWEIGHT))"
     >
