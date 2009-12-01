@@ -671,9 +671,11 @@ def format_help(string):
   width = int(OV.GetHtmlPanelwidth()) - 10
   regex = re.compile(r"  XX (.*?)( [^\XX\XX]* ) XX ", re.X)
   m = regex.findall(string)
-  colour = "#888888"
+  code_bg_colour = OV.GetParam('gui.html.code.bg_colour').hexadecimal
+  code_fg_colour = OV.GetParam('gui.html.code.fg_colour').hexadecimal
+  html_tag = OV.GetParam('gui.html.code.html_tag')
   if m:
-    s = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='1'><tr bgcolor='$getVar(gui_html_code_bg_colour)'><td><a href='\2'><b><font size='2' color='%s'><code>>>\2</code></font></b></a></td></tr></table>" %(width, colour), string)
+    s = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='1'><tr bgcolor='%s'><td><a href='\2'><b><font size='2' color='%s'><%s>>>\2</%s></font></a></td></tr></table>" %(width,code_bg_colour, code_fg_colour, html_tag, html_tag), string)
 
   else:
     s = string
@@ -865,6 +867,8 @@ def OnModeChange(*args):
   mode_disp = ""
   args = args[0].split()
   for item in args:
+    if 'name' in item:
+      item = 'name'
     i += 1
     mode = mode + " " + item
     if i < 2:

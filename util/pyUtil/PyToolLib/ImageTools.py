@@ -684,6 +684,23 @@ class ImageTools(FontInstances):
       titleCase=True,
       font_colour=colour,)
     
+    font_size = 8
+    txt = "New!"
+    dX, dY = self.getTxtWidthAndHeight(txt, font_name, font_size)
+    IM = Image.new('RGBA', (dX, dY))
+    IMdraw = ImageDraw.Draw(IM)
+    IMdraw.rectangle((0, 0, dX + 2, dY), fill='#ffee00')
+    self.write_text_to_draw(
+      IMdraw,
+      txt = txt,
+      top_left=(0, -1),
+      max_width=max_width,
+      font_name=font_name, 
+      font_size=font_size, 
+      titleCase=True,
+      font_colour=colour,)
+    OlexVFS.save_image_to_olex(IM, "new", 2)
+
 
   def create_arrows(self, draw, height, direction, colour, type='simple', h_space=4, v_space=4, offset_y = 0, char_pos=(0,0), char_char="+"):
     arrow_height = height - (2*v_space)
