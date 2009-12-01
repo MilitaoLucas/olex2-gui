@@ -1239,6 +1239,7 @@ class WilsonPlot(Analysis):
     if self.params.wilson_plot.method == 'cctbx':
       self.cctbx_wilson_statistics()
     else:
+      olex.m('wilson -b=%i -p' %self.params.wilson_plot.n_bins)
       filepath = "%s/%s.%s.csv" %(self.filepath,self.filename,"wilson")
       self.get_simple_x_y_pair_data_from_file(filepath)
     self.make_empty_graph(axis_x = True)

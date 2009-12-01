@@ -1437,10 +1437,9 @@
       <arg3 name="output_csv_file">
     \>
     <cmd
-      <cmd1 "if strcmp(%1,Olex2) then 'wilson -b=%2 -p' else none">
-      <cmd2 "if strcmp(%1,'') then none else spy.SetParam(graphs.reflections.wilson_plot.method,%1)">
-      <cmd3 "if strcmp(%2,'') then none else spy.SetParam(graphs.reflections.wilson_plot.n_bins,%2)">
-      <cmd4 "if strcmp(%3,'') then none else spy.SetParam(graphs.reflections.wilson_plot.output_csv_file,%3)">
+      <cmd1 "if strcmp(%1,'') then none else spy.SetParam(graphs.reflections.wilson_plot.method,%1)">
+      <cmd2 "if strcmp(%2,'') then none else spy.SetParam(graphs.reflections.wilson_plot.n_bins,%2)">
+      <cmd3 "if strcmp(%3,'') then none else spy.SetParam(graphs.reflections.wilson_plot.output_csv_file,%3)">
       <cmd5 "spy.WilsonPlot()">
     \>
   \>
