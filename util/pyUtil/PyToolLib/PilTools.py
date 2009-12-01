@@ -2016,6 +2016,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         f = (htmfile.replace('\\', '/').split('/')[-1:])
         f = f[0].split(".")[0]
         if f.split("-")[0] != "index" and f[0] != "_":
+          f = f.replace("-and-", "-&-")
           textItems.append(f)
         #elif f[0] != "_":
         #  tabItems.append(f)
