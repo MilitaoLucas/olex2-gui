@@ -2349,7 +2349,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     font_name = "Vera"
     if self.gui_image_font_name:
       font_name = self.gui_image_font_name
-
+      
     #self.write_text_to_draw(draw, 
                  #"TINY BUTTONS", 
                  #top_left=(x_border, -3), 

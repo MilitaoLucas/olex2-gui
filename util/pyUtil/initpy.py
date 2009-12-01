@@ -114,9 +114,11 @@ class StreamRedirection:
       while tb.tb_next is not None: tb = tb.tb_next
       frame = tb.tb_frame
       lineno = frame.f_lineno
-      filename = inspect.getsourcefile(frame) or inspect.getfile(frame)
       def reader():
-        yield open(filename).readlines()[lineno-1]
+        try:
+          yield inspect.getsource(frame)
+        except:
+          print ">>>>> ERROR (formatExceptionInfo)" %filename
       recording_args = False
       args = {}
       try:
