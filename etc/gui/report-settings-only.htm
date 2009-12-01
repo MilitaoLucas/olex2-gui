@@ -14,7 +14,8 @@ if file.Exists('FilePath()\FileName().cif') then None else 'refine'>>
 spy.MetaCif(True,True)>>
 "
        target="Merge with cif file"><b>Merge cif</b></a> | 
-		<a href="exec -o getvar(defexplorer) 'file.ospath(basedir()/etc/CIF/styles)'" target="Browse for styles and templates"><b>Change Styles or Templates</b></a> | 
+		<a href="exec -o getvar(defexplorer) 'file.ospath(basedir()/etc/CIF/styles)'" target="Browse for styles and templates"><b>Change Styles or Templates</b></a> | <zimg border="0" src="new">
+
 	</td>
 </tr>
 
@@ -68,7 +69,7 @@ spy.MetaCif(True,True)>>
 						valign='center'
 						onchange="spy.SetParam(user.report_template,GetValue(SET_USER_REPORT_TEMPLATE))"
 					>
-				</td>
+					</td>
 
 				</tr>
 		</table>
