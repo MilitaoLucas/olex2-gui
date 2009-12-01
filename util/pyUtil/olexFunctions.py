@@ -528,5 +528,10 @@ class OlexFunctions(inheritFunctions):
   def GetUsername(self):
     return os.getenv('USERNAME')
 
-  
+def GetParam(variable):
+  # A wrapper for the function spy.GetParam() as exposed to the GUI.
+  return OV.GetParam_as_string(variable)
+
 OV = OlexFunctions()
+OV.registerFunction(GetParam)
+OV.registerFunction(OV.SetParam)

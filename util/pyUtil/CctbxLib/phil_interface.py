@@ -56,6 +56,9 @@ class colour(object):
     self.rgb = rgb
     self.hexadecimal=hexadecimal
 
+  def __str__(self):
+    return self.hexadecimal
+
 class colour_converters(object):
 
   phil_type = "colour"

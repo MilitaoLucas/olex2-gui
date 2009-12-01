@@ -43,7 +43,7 @@ def makeHtmlTable(list):
     for box in ['box1','box2','box3']:
       if box in input_d.keys():
         box_d = input_d[box]
-        box_d.setdefault('value', '$spy.GetParam_as_string(%s)' %box_d['varName'])
+        box_d.setdefault('value', '$spy.GetParam(%s)' %box_d['varName'])
         box_d.setdefault('ctrl_name', "SET_%s" %str.upper(box_d['varName']).replace('.','_'))
         box_d.setdefault('bgcolor','spy.bgcolor(%s)' %box_d['ctrl_name'])
         box_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
@@ -52,7 +52,7 @@ def makeHtmlTable(list):
     if boxText:
       row_d.setdefault('input',boxText)
     else:
-      input_d.setdefault('value', '$spy.GetParam_as_string(%s)' %input_d['varName'])
+      input_d.setdefault('value', '$spy.GetParam(%s)' %input_d['varName'])
       input_d.setdefault('ctrl_name', "SET_%s" %str.upper(input_d['varName']).replace('.','_'))
       if input_d.has_key('onchange'):
         input_d.setdefault('onleave',input_d['onchange'])
@@ -435,7 +435,7 @@ def make_input_text_box(d):
   name = d.get('ctrl_name')
   dic = {'height':'GetVar(gui_html_input_height)',
          'bgcolor':'GetVar(gui_html_input_bg_colour)',
-         'value':'$spy.GetParam_as_string(%(varName)s)',
+         'value':'$spy.GetParam(%(varName)s)',
          'width':'45',
          'onchange':'',
          'label':name,
@@ -465,7 +465,7 @@ def make_combo_text_box(d):
   name = d.get('ctrl_name')
   dic = {'height':"$GetVar(gui_html_combo_height)",
          'bgcolor':'GetVar(gui_html_input_bg_colour)',
-         'value':'$spy.GetParam_as_string(%(varName)s)',
+         'value':'$spy.GetParam(%(varName)s)',
          'label':'',
          'valign':'center',
          'halign':'left',
@@ -503,7 +503,7 @@ def make_tick_box_input(d):
   dic = {'height':'$GetVar(gui_html_checkbox_height)',
          'bgcolor':'$GetVar(gui_html_table_bg_colour)',
          'fgcolor':'$GetVar(gui_html_font_colour)',
-         'value':'$spy.GetParam_as_string(%(varName)s)',
+         'value':'$spy.GetParam(%(varName)s)',
          'width':'$GetVar(gui_html_checkbox_height)',
          'onchange':'',
          'value':'%s '%name,
@@ -544,7 +544,7 @@ def make_spin_input(d):
   dic = {'width':'12',
          'height':'GetVar(gui_html_spin_height)',
          'bgcolor':'GetVar(gui_html_input_bg_colour)',
-         'value':'$spy.GetParam_as_string(%(varName)s)',
+         'value':'$spy.GetParam(%(varName)s)',
          'max':'99',
          'width':'45',
          'onchange':'',
