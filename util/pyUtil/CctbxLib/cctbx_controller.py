@@ -254,7 +254,7 @@ def f_obs_over_f_calc(model, reflections, wavelength=None, binning=False, n_bins
   plot.resolution = resolution
   plot.xLegend = resolution_as
   if binning == True:
-    plot.yLegend = "Sum|Fo|/Sum|Fc|"
+    plot.yLegend = "Sum|Fo| / Sum|Fc|"
   else:
     plot.yLegend = "F obs/F calc"
   return plot
