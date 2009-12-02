@@ -1,0 +1,29 @@
+﻿2009-12-02 
+----------
+Features 
+
+* ORTEP-style postscript image generation added 
+* Improved handling of labels (including subscripts) for bitmaps/postscript images 
+* CHN analysis fitting is added to allow calculation of amounts of potentially co-crystallised solvents 
+* New reflection graphs added (Fo/Fc vs resolution, Completeness, Normal Probability) 
+* Support for user templates and styles for report generation 
+
+Changes 
+
+* Charge Flipping now uses weak_reflection_improved_iterator 
+* A distribution for 64-bit Windows is added 
+* Support added for older CPUs (Pentium III, older AMD Athlons) (#134) 
+* Structure inversion is no longer done automatically, a warning is printed instead (#168) 
+* Added a splash screen to cover the time gap between launcher and main window becoming visible 
+* Improved matching of H-atoms 
+* Q-peaks and H-atoms no longer included in the connectivity when hidden and therefore do not affect commands involving symmetry generation and connectivity analysis (such as matching) 
+* Improved handling of SHELX instructions (MPLA, EQIV, etc) 
+* Zoom now takes into account whether cell is shown 
+* Standard atom sorting procedure now works with CIFs 
+
+Bug Fixes 
+
+* Problems with UNC paths resolved (#163) 
+* Fixed OpenGL problems with some ATI Radeon graphics cards (#170) 
+* "Black window" resizing bug 
+* Clicking on a bond in mode afix caused a crash (#165)
