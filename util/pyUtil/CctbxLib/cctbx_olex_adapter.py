@@ -372,7 +372,8 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     f_obs.show_summary()
 
     # charge flipping iterations
-    flipping = charge_flipping.basic_iterator(f_obs, delta=None)
+    #flipping = charge_flipping.basic_iterator(f_obs, delta=None)
+    flipping = charge_flipping.weak_reflection_improved_iterator(f_obs, delta=None)
     solving = charge_flipping.solving_iterator(
       flipping,
       yield_during_delta_guessing=True,
@@ -702,18 +703,20 @@ def charge_flipping_loop(solving, verbose=True):
       if verbose == "highly":
         if previous_state is not solving.guessing_delta:
           print "Guessing delta..."
-          print "%10s | %10s | %10s | %10s | %10s"\
-                % ('delta', 'R', 'c_tot', 'c_flip', 'c_tot/c_flip')
-          print "-"*64
+          print ("%10s | %10s | %10s | %10s | %10s | %10s | %10s"
+                 % ('delta', 'delta/sig', 'R', 'F000',
+                    'c_tot', 'c_flip', 'c_tot/c_flip'))
+          print "-"*90
         rho = flipping.rho_map
         c_tot = rho.c_tot()
         c_flip = rho.c_flip(flipping.delta)
         # to compare with superflip output
         c_tot *= flipping.fft_scale; c_flip *= flipping.fft_scale
-        print "%10.4f | %10.3f | %10.1f | %10.1f | %10.2f"\
-              % (flipping.delta, flipping.r1_factor(),
+        print "%10.4f | %10.4f | %10.3f | %10.3f | %10.1f | %10.1f | %10.2f"\
+              % (flipping.delta, flipping.delta/rho.sigma(),
+                 flipping.r1_factor(), flipping.f_000,
                  c_tot, c_flip, c_tot/c_flip)
-        
+
     elif solving.state is solving.solving:
       # main charge flipping loop to solve the structure
       if verbose=="highly":
@@ -722,12 +725,16 @@ def charge_flipping_loop(solving, verbose=True):
           print "Solving..."
           print "with delta=%.4f" % flipping.delta
           print
-          print "%5s | %10s | %10s" % ('#', 'R1', 'c_tot/c_flip')
+          print "%5s | %10s | %10s" % ('#', 'F000', 'skewness')
           print '-'*33
-        r1 = flipping.r1_factor()
-        r = flipping.c_tot_over_c_flip()
-        print "%5i | %10.3f | %10.3f" % (solving.iteration_index, r1, r)
-        
+        print "%5i | %10.1f | %10.3f" % (solving.iteration_index,
+                                         flipping.f_000,
+                                         flipping.rho_map.skewness())
+
+    elif solving.state is solving.polishing:
+      if verbose == 'highly':
+        print
+        print "Polishing with rho_c=%.4f" % flipping.rho_c()
     elif solving.state is solving.finished:
       break
     

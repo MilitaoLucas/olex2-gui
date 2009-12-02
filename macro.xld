@@ -65,7 +65,9 @@
       <cmd19 "if and(isplugininstalled(plugin-brukersaint),IsFileType('p4p')) then BSINI else none">			
       <cmd20 cmd1="if strcmp(%4,filename()) then none else 'clear'">
       <cmd23 "syncbc">
-      <cmd25 "if strcmp(%4,filename()) then updatehtml else htmlreload">
+      <cmd24 "spy.reset_file_in_OFS(solution_image.htm)">
+      <cmd25 "spy.reset_file_in_OFS(refinement_image.htm)">
+      <cmd26 "if strcmp(%4,filename()) then updatehtml else htmlreload">
       <cmd26 XXX="fade 1 0 -0.1">
       <cmd27 XXX='waitfor fade'>
       <cmd28 XXX="ceiling off">
