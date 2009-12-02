@@ -998,7 +998,7 @@ class timage(ImageTools):
     self.abort = False
     width = self.gui_htmlpanelwidth
     if not width:
-      width = 400
+      width = 350
     else:
       try:
         width = float(width)
