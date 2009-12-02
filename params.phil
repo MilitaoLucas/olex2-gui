@@ -74,7 +74,7 @@ gui {
     .type = colour
   infobox_text = '2053;2143326838;2143979345'
   infobox_plane = '2053;2136422952;2137144606'
-  htmlpanelwidth = 320
+  htmlpanelwidth = 400
     .type = int
   grad_top_left = #05053c
     .type = colour

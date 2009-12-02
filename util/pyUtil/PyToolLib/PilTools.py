@@ -43,7 +43,7 @@ class ButtonMaker(ImageTools):
     super(ButtonMaker, self).__init__()
     self.type = type
     self.btn_dict = btn_dict
-    self.max_width = OV.FindValue('gui_htmlpanelwidth', 320)
+    self.max_width = OV.FindValue('gui_htmlpanelwidth', 400)
   def run(self):
     if self.type == "Generic":
       im = self.GenericButtonMaker()
@@ -998,7 +998,7 @@ class timage(ImageTools):
     self.abort = False
     width = self.gui_htmlpanelwidth
     if not width:
-      width = 350
+      width = 400
     else:
       try:
         width = float(width)
