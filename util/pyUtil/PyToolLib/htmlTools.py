@@ -784,7 +784,7 @@ def getStylesList():
   exclude = ("rsc.css", "thesis.css", "custom.css")
   stylesList = ";".join(style[:-4] for style in styles
                         if style not in exclude and style.endswith('.css'))
-  return stylesList
+  return 'default;' + stylesList
 OV.registerFunction(getStylesList)
 
 def getTemplatesList():
