@@ -41,7 +41,7 @@ L_GUI_HTML_HIGHLIGHT_COLOUR=
 
 #Other settings defining the Skin.
 #The FONT NAME is restricted to some select fonts only.
-GUI_HTMLPANELWIDTH= 350
+GUI_HTMLPANELWIDTH= 400
 GUI_IMAGE_FONT_NAME= Vera
 GUI_HTML_ICON_SIZE=22
 GUI_SKIN_LOGO_NAME=basedir()/util/pyUtil/PluginLib/skins/plugin-STOESkin/STOE.png
