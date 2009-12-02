@@ -584,7 +584,7 @@ graphs {
     cumulative_intensity
       .short_caption = "Cumulative Intensity"
       .caption = "Cumulative Intensity Distribution"
-      .help = "cumulative-intensity"
+      .help = "Cumulative-Intensity-Distribution"
     {
       n_bins = 20
         .type = int(value_min=1)
@@ -597,7 +597,7 @@ graphs {
     wilson_plot
       .short_caption = "Wilson Plot"
       .caption = "Wilson Plot"
-      .help = "wilson-plot"
+      .help = "Wilson-Plot"
     {
       n_bins = 10
         .type = int(value_min=1)
@@ -613,7 +613,7 @@ graphs {
     systematic_absences
       .short_caption = "Systematic Absences"
       .caption = "Systematic Absences"
-      .help = "systematic-absences"
+      .help = "Systematic-Absences"
     {
       output_csv_file = False
         .type = bool
@@ -622,7 +622,7 @@ graphs {
     fobs_fcalc
       .short_caption = "Fobs-Fcalc"
       .caption = "Fobs-Fcalc"
-      .help = "fobs-fcalc"
+      .help = "Fobs-vs-Fcalc"
     {
       output_csv_file = False
         .type = bool
@@ -631,7 +631,7 @@ graphs {
     fobs_over_fcalc
       .short_caption = "Fobs/Fcalc"
       .caption = "Fobs/Fcalc vs resolution"
-      .help = "fobs-over-fcalc"
+      .help = "Fobs/Fcalc-vs-resolution"
     {
       resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
         .type = choice
@@ -650,7 +650,7 @@ graphs {
     completeness
       .short_caption = "Completeness Plot"
       .caption = "Completeness Plot"
-      .help = "completeness-plot"
+      .help = "Completeness-Plot"
     {
       reflections_per_bin=20
         .type = int(value_min=1)
@@ -665,7 +665,7 @@ graphs {
     normal_probability
       .short_caption = "Normal Probability Plot"
       .caption = "Normal Probability Plot"
-      .help = "normal-probability"
+      .help = "Normal-Probability-Plot"
     {
       output_csv_file = False
         .type = bool
