@@ -276,7 +276,7 @@ class normal_probability_plot(object):
     scale_factor = ls.scale_factor()
     weighting.observed = f_sq_obs
     weighting.calculated = f_calc
-    weighting.compute(f_calc, scale_factor)
+    weighting.compute()
     #
     observed_deviations = flex.sqrt(weighting.weights) * (
       f_sq_obs.data() - scale_factor * f_sq_calc.data())
