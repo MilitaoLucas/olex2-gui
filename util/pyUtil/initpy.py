@@ -118,7 +118,7 @@ class StreamRedirection:
         try:
           yield inspect.getsource(frame)
         except:
-          print ">>>>> ERROR (formatExceptionInfo)" %filename
+          print ">>>>> ERROR (formatExceptionInfo)"
       recording_args = False
       args = {}
       try:
