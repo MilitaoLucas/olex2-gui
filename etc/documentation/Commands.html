@@ -106,13 +106,17 @@ img {
   
 
   
+    
+    
     .writely-callout-data {
-      display: none;
-      *display: inline-block;
-      *width: 0;
-      *height: 0;
-      *overflow: hidden;
+      display: inline-block;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      margin-left: -1px;
     }
+    
+
     .writely-footnote-marker {
       background-image: url('MISSING');
       background-color: transparent;
@@ -142,101 +146,26 @@ img {
       cursor: move;
     }
 
-    
-    .editor .writely-comment-yellow {
-      background-color: #FF9;
-      background-position: -240px 0;
+    /* Comments */
+    .writely-comment-yellow {
+      background-color: #ffffd7;
     }
-    .editor .writely-comment-yellow-hover {
-      background-color: #FF0;
-      background-position: -224px 0;
+    .writely-comment-orange {
+      background-color: #ffe3c0;
     }
-    .editor .writely-comment-blue {
-      background-color: #C0D3FF;
-      background-position: -16px 0;
+    .writely-comment-pink {
+      background-color: #ffd7ff;
     }
-    .editor .writely-comment-blue-hover {
-      background-color: #6292FE;
-      background-position: 0 0;
+    .writely-comment-green {
+      background-color: #d7ffd7;
     }
-    .editor .writely-comment-orange {
-      background-color: #FFDEAD;
-      background-position: -80px 0;
+    .writely-comment-blue {
+      background-color: #d7ffff;
     }
-    .editor .writely-comment-orange-hover {
-      background-color: #F90;
-      background-position: -64px 0;
-    }
-    .editor .writely-comment-green {
-      background-color: #99FBB3;
-      background-position: -48px 0;
-    }
-    .editor .writely-comment-green-hover {
-      background-color: #00F442;
-      background-position: -32px 0;
-    }
-    .editor .writely-comment-cyan {
-      background-color: #CFF;
-      background-position: -208px 0;
-    }
-    .editor .writely-comment-cyan-hover {
-      background-color: #0FF;
-      background-position: -192px 0;
-    }
-    .editor .writely-comment-purple {
-      background-color: #EBCCFF;
-      background-position: -144px 0;
-    }
-    .editor .writely-comment-purple-hover {
-      background-color: #90F;
-      background-position: -128px 0;
-    }
-    .editor .writely-comment-magenta {
-      background-color: #FCF;
-      background-position: -112px 0;
-    }
-    .editor .writely-comment-magenta-hover {
-      background-color: #F0F;
-      background-position: -96px 0;
-    }
-    .editor .writely-comment-red {
-      background-color: #FFCACA;
-      background-position: -176px 0;
-    }
-    .editor .writely-comment-red-hover {
-      background-color: #FF7A7A;
-      background-position: -160px 0;
+    .writely-comment-purple {
+      background-color: #eed7ff;
     }
 
-    .editor .writely-comment-marker {
-      background-image: url('MISSING');
-      background-color: transparent;
-      padding-right: 11px;
-      background-repeat: no-repeat;
-      width: 16px;
-      height: 16px;
-      -moz-user-select: none;
-    }
-
-    .editor .writely-comment-hidden {
-      padding: 0;
-      background: none;
-    }
-    .editor .writely-comment-marker-hidden {
-      background: none;
-      padding: 0;
-      width: 0;
-    }
-    .editor .writely-comment-none {
-      opacity: .2;
-      filter:progid:DXImageTransform.Microsoft.Alpha(opacity=20);
-      -moz-opacity: .2;
-    }
-    .editor .writely-comment-none-hover {
-      opacity: .2;
-      filter:progid:DXImageTransform.Microsoft.Alpha(opacity=20);
-      -moz-opacity: .2;
-    }
   
 
 
@@ -427,6 +356,26 @@ ol[type="disc"], ol[type="circle"], ol[type="square"] {
       text-decoration: none;
       color: black;
     }
+
+    /* Comments */
+    .writely-comment-yellow {
+      background-color: #ffffd7;
+    }
+    .writely-comment-orange {
+      background-color: #ffe3c0;
+    }
+    .writely-comment-pink {
+      background-color: #ffd7ff;
+    }
+    .writely-comment-green {
+      background-color: #d7ffd7;
+    }
+    .writely-comment-blue {
+      background-color: #d7ffff;
+    }
+    .writely-comment-purple {
+      background-color: #eed7ff;
+    }
   }
 
   @page {
@@ -450,7 +399,7 @@ h3 {
   margin: 0px;
   color: #666666;
 }
-h6 {
+.note {
   margin: 0px;
   color: #222222;
   font-size: x-small;
@@ -528,15 +477,51 @@ body {
 <body 
     
     >
-
-<span align='right'>	
-<h3><font color='red'>Draft: November 2009</font></h3>    
-</span>    
     
+    
+    
+<span align=right>
+<h3>
+  <font color=red>Draft: December 2009</font>
+</h3>
+</span>
 <h1>
-  Commands and Modes in Olex2
+  <a id=Commands_and_Modes_in_Olex2_37 name=Commands_and_Modes_in_Olex2_37></a>Commands and Modes in Olex2
 </h1>
 <div>
+  <div class=writely-toc id=WritelyTableOfContents toctype=none+none>
+    <ol class=writely-toc-none>
+      <li>
+        <a href=#Commands_and_Modes_in_Olex2_37 target=_self>Commands and Modes in Olex2</a>
+        <ol class="writely-toc-subheading writely-toc-none" style=MARGIN-LEFT:0>
+          <li>
+            <a href=#Fixed_Refined_Parameters_31112 target=_self>Fixed/Refined Parameters</a>
+          </li>
+          <li>
+            <a href=#Atom_Connectivity_Table_Manipu target=_self>Atom Connectivity Table Manipulation</a>
+          </li>
+          <li>
+            <a href=#Symmetry_Operations_6316997660_7154068537056446 target=_self>Symmetry Operations</a>
+          </li>
+          <li>
+            <a href=#Disorder_Modelling_Constraints target=_self>Disorder Modelling: Constraints and Restraints</a>
+          </li>
+          <li>
+            <a href=#HKL_file_Operations_2860169773_8668361296877265 target=_self>HKL file Operations</a>
+          </li>
+          <li>
+            <a href=#Customising_the_Olex2_GUI_7237_8985963026061654 target=_self>Customising the Olex2 GUI</a>
+          </li>
+          <li>
+            <a href=#Output_Tables_Reports_and_Imag target=_self>Output: Tables, Reports and Images</a>
+          </li>
+        </ol>
+      </li>
+    </ol>
+  </div>
+  <div>
+    <br>
+  </div>
   There is no special console window in Olex2 - the commands described here can be typed at any time and the text you type as well as the program response will appear in the bottom right hand corner of the main window. The text will then scroll up behind the displayed molecule. The number of lines of text that are visible can be set with the command <span class=console>lines <b><i><span style=FONT-WEIGHT:normal>n</span></i></b></span><b><i>.</i></b>
 </div>
 <div>
@@ -549,8 +534,14 @@ body {
   <br>
 </div>
 <div>
-  All commands in Olex2 will auto-complete when pressing the TAB key. If the completion is not possible, because there are more than one commands starting with the letter that have been typed, a list of these commands will be printed. It is good practice to use the auto-complete feature!&nbsp;
+  All commands in Olex2 will auto-complete when pressing the TAB key. If the completion is not possible, because there are more than one commands starting with the letter that have been typed, a list of these commands will be printed. It is good practice to use the auto-complete feature!
 </div>
+<div>
+  <br>
+</div>
+<h3>
+  Understanding the Syntax
+</h3>
 <div>
   <br>
 </div>
@@ -626,7 +617,7 @@ body {
     <tr style=TEXT-ALIGN:left>
       <td bgcolor=#ffffff colspan=3 style=WIDTH:426.1pt valign=top width=568>
         <h3>
-          Fixed/Refined Parameters
+          <a id=Fixed_Refined_Parameters_31112 name=Fixed_Refined_Parameters_31112></a> Fixed/Refined Parameters
         </h3>
       </td>
     </tr>
@@ -734,9 +725,7 @@ body {
     </tr>
     <tr style=TEXT-ALIGN:left>
       <td bgcolor=#eeeeee colspan=3 style=WIDTH:426.1pt valign=top width=568>
-        <h6>
-          <span class=console>labels -f</span> show currently fixed atomic parameters, <span class=console>labels -f -r</span> show labels for fixed atoms and also the number at which the occupancy of riding atoms is fixed
-        </h6>
+        <span class=note><a id=labels_f_show_currently_fixed_ name=labels_f_show_currently_fixed_></a><span class=console>labels -f</span> show currently fixed atomic parameters, <span class=console>labels -f -r</span> show labels for fixed atoms and also the number at which the occupancy of riding atoms is fixed</span>
       </td>
     </tr>
     </tbody>
@@ -758,7 +747,7 @@ body {
     <tr style=TEXT-ALIGN:left>
       <td colspan=3 style=WIDTH:426.1pt valign=top width=568>
         <h3>
-          Atom Connectivity Table Manipulation
+          <a id=Atom_Connectivity_Table_Manipu name=Atom_Connectivity_Table_Manipu></a> Atom Connectivity Table Manipulation
         </h3>
       </td>
     </tr>
@@ -853,9 +842,7 @@ body {
     </tr>
     <tr style=TEXT-ALIGN:left>
       <td bgcolor=#eeeeee colspan=3 style=WIDTH:426.1pt valign=top width=568>
-        <h6>
-          Olex2 will display the altered connectivity table in the case if structure is grown or packed
-        </h6>
+        <span class=note><a id=Olex2_will_display_the_altered name=Olex2_will_display_the_altered></a>Olex2 will display the altered connectivity table in the case if structure is grown or packed</span>
       </td>
     </tr>
     </tbody>
@@ -871,7 +858,7 @@ body {
     <tr style=TEXT-ALIGN:left>
       <td colspan=3 style=WIDTH:426.1pt valign=top width=568>
         <h3>
-          Symmetry Operations
+          <a id=Symmetry_Operations_6316997660_7154068537056446 name=Symmetry_Operations_6316997660_7154068537056446></a> Symmetry Operations
         </h3>
       </td>
     </tr>
@@ -1093,9 +1080,7 @@ body {
     </tr>
     <tr style=TEXT-ALIGN:left>
       <td bgcolor=#eeeeee colspan=3 style=WIDTH:426.1pt valign=top width=568>
-        <h6>
-          If some atoms are deleted after growing operations, Olex2 will use existing unique atoms as the asymmetric unit atoms; this can be helpful to avoid a sequence of sgen/kill commands
-        </h6>
+        <span class=note><a id=If_some_atoms_are_deleted_afte name=If_some_atoms_are_deleted_afte></a>If some atoms are deleted after growing operations, Olex2 will use existing unique atoms as the asymmetric unit atoms; this can be helpful to avoid a sequence of sgen/kill commands</span>
       </td>
     </tr>
     </tbody>
@@ -1113,7 +1098,7 @@ body {
     <tr style=TEXT-ALIGN:left>
       <td colspan=3 style=WIDTH:426.1pt valign=top width=568>
         <h3>
-          Disorder Modelling: Constraints and Restraints
+          <a id=Disorder_Modelling_Constraints name=Disorder_Modelling_Constraints></a> Disorder Modelling: Constraints and Restraints
         </h3>
       </td>
     </tr>
@@ -1510,7 +1495,7 @@ body {
     <tr style=TEXT-ALIGN:left>
       <td colspan=3 style=WIDTH:426.1pt valign=top width=568>
         <h3>
-          HKL file Operations
+          <a id=HKL_file_Operations_2860169773_8668361296877265 name=HKL_file_Operations_2860169773_8668361296877265></a> HKL file Operations
         </h3>
       </td>
     </tr>
@@ -1564,6 +1549,17 @@ body {
         <p class=MsoNormal style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px">
           <font size=2>Inserts 'OMIT h k l' for all reflections with <img alt="|F{o}^{2} -F{c}^{2}| > val" class="ee_img tr_noresize" eeimg=1 height=15 src="images/EXTERN_0000.png" style=VERTICAL-ALIGN:middle>&nbsp;.</font>
         </p>
+      </td>
+    </tr>
+    <tr style=TEXT-ALIGN:left>
+      <td style=WIDTH:59.4pt width=79>
+        <b>omit</b>
+      </td>
+      <td style=WIDTH:126pt width=168>
+        s 2theta
+      </td>
+      <td style=WIDTH:240.7pt width=321>
+        Inserts 'OMIT s 2theta' instruction in the ins file
       </td>
     </tr>
     <tr style=TEXT-ALIGN:left>
@@ -1646,7 +1642,7 @@ body {
   <tr style=TEXT-ALIGN:left>
     <td colspan=3 style=WIDTH:426.1pt valign=top width=568>
       <h3>
-        Customising the Olex2 GUI
+        <a id=Customising_the_Olex2_GUI_7237_8985963026061654 name=Customising_the_Olex2_GUI_7237_8985963026061654></a> Customising the Olex2 GUI
       </h3>
     </td>
   </tr>
@@ -1701,7 +1697,7 @@ body {
     <tr style=TEXT-ALIGN:left>
       <td colspan=3 style=WIDTH:426.1pt valign=top width=568>
         <h3 style="MARGIN-RIGHT:0px; MARGIN-LEFT:0px; COLOR:#666666">
-          <font size=3>Output: Tables, Reports and Images</font>
+          <a id=Output_Tables_Reports_and_Imag name=Output_Tables_Reports_and_Imag></a><font size=3>Output: Tables, Reports and Images</font>
         </h3>
       </td>
     </tr>
@@ -1815,17 +1811,6 @@ body {
             <b>type:&nbsp;</b>{subscript, brackets, default}
           </li>
         </ul>
-      </td>
-    </tr>
-    <tr style=TEXT-ALIGN:left>
-      <td style=WIDTH:59.4pt valign=top width=79>
-        <br>
-      </td>
-      <td style=WIDTH:126pt valign=top width=168>
-        <br>
-      </td>
-      <td style=WIDTH:240.7pt valign=top width=321>
-        <br>
       </td>
     </tr>
     </tbody>
