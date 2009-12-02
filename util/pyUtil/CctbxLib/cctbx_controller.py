@@ -343,7 +343,7 @@ class reflections(object):
     else:
       obs = observations
     obs_merged = obs.eliminate_sys_absent()
-    n_sys_absent = obs.size() - obs_merged.size()
+    self.n_sys_absent = obs.size() - obs_merged.size()
     if merge > 2:
       obs_merged = obs_merged.customized_copy(anomalous_flag=False)
     merging = obs_merged.merge_equivalents()
