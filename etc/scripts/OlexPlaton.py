@@ -12,10 +12,70 @@ OV = OlexFunctions()
 To run this example script, type spy.example("Hello") in Olex2
 '''
 
-def OlexPlaton(platonflag=" "):
-  print "You are running flag: %s" %platonflag
+def OlexPlaton(platonflag="help"):
+  print "You are running flag: %s"%(platonflag)
 
-  platon_result = os.popen("platon -%s %s.ins "%(platonflag, OV.FileName())).read() # This pipes our new .sir file into sir using sirversion can use 92/97 etc
+  # OS Checking
+  if sys.platform[:3] == 'lin':
+    # Risky but assuming that this is a debroglie version of platon
+    tickornot = '-'
+  elif sys.platform[:3] == 'win':
+    # Windows
+    tickornot = '-o -'
+  elif sys.platform[:3] == 'dar':
+    # Mac assuming like windows
+    tickornot = '-o -'
+    
+  if platonflag == "help": # If no options given then we print all the possible commands out LOL
+    print " 'a' - ORTEP/ADP [PLOT ADP]"
+    print " 'b' - CSD-Search [CALC GEOM CSD]"
+    print " 'c' - Calc Mode [CALC]"
+    print " 'd' - DELABS [CALC DELABS]"
+    print " 'e' - MULABS"
+    print " 'f' - HFIX"
+    print " 'g' - GenRes-filter [CALC GEOM SHELX]"
+    print " 'h' - HKL-CALC [ASYM GENERATE]"
+    print " 'i' - Patterson PLOT"
+    print " 'j' - GenSPF-filter [CALC GEOM EUCLID]"
+    print " 'k' - HELENA"
+    print " 'l' - ASYM VIEW"
+    print " 'm' - ADDSYM (MISSYM) [CALC ADDSYM]"
+    print " 'n' - ADDSYM SHELX"
+    print " 'o' - Menu Off"
+    print " 'p' - PLUTON Mode"
+    print " 'q' - SQUEEZE [CALC SQUEEZE]"
+    print " 'r' - RENAME (RES)"
+    print " 's' - SYSTEM-S"
+    print " 't' - TABLE Mode [TABLE]"
+    print " 'u' - Validation Mode [VALIDATION]"
+    print " 'v' - SOLV Mode [CALC SOLV]"
+    print " 'w' - Difference Map Plot"
+    print " 'x' - Fo-Map PLOT"
+    print " 'y' - SQUEEZE-Map PLOT"
+    print " 'z' - WRITE IDENT"
+    print " 'A' - PLATON/ANIS"
+    print " 'C' - GENERATE CIF for current data set (e.g. .spf or .res)"
+    print " 'F' - SILENT NQA SYSTEM-S PATH (FILTER)"
+    print " 'I' - AUTOFIT 2 MOLECULES"
+    print " 'K' - CALC KPI"
+    print " 'L' - TWINROTMAT (INTERACTIVE)"
+    print " 'M' - TWINROTMAT (FILTER MODE)"
+    print " 'N' - 'ADDSYM EQUAL SHELX' MODE"
+    print " 'O' - PLOT ADP (PostScript)"
+    print " 'P' - Powder Pattern from Iobs"
+    print " 'Q' - Powder Pattern from Icalc"
+    print " 'R' - Auto Renumber and Write SHELX.res"
+    print " 'S' - CIF2RES + FCF2HKL filter"
+    print " 'T' - TwinRotMat"
+    print " 'U' - CIF-VALIDATION (without VALIDATION DOC)"
+    print " 'V' - FCF-VALIDATION (LAUE)"
+    print " 'W' - FCF-VALIDATION (BIJVOET)"
+    print " 'X' - Stripped SHELXS86 (Direct Methods Only) Mode"
+    print " 'Y' - Native Structure Tidy (Parthe & Gelato) Mode"
+    return
+
+    
+  platon_result = os.popen("platon %s%s %s.ins "%(tickornot, platonflag, OV.FileName())).read() # This pipes our new .sir file into sir using sirversion can use 92/97 etc
   print "Platon Said: ", platon_result
   platon_extension = platon_result.split(":")[-1].split(".")[-1].split("\n")[0]
   print "The file extension is: ", platon_extension, " filename is: ", "%s.%s"%(OV.FileName(), platon_extension)
@@ -28,61 +88,5 @@ def OlexPlaton(platonflag=" "):
   except IOError: 
     print "Failed to open file"
   print "You can read this file by typing edit %s"%(platon_extension)
-"""
-Platon functions from CMDLINE
-function HelpPlaton() {
-echo "usage: platon [option] [file]"
-echo "PLATON is a versatile SHELX97 compatible multipurpose crystallographic tool."
-echo ""
-echo "Available options:"
-echo " '--help' - This Help"
-echo " '--documentation' - Documentation of platon (open browser)"
-echo ""
-echo " '-' - No data from file Read (Switch to I/O window)"
-echo " '-a' - ORTEP/ADP [PLOT ADP]"
-echo " '-b' - CSD-Search [CALC GEOM CSD]"
-echo " '-c' - Calc Mode [CALC]"
-echo " '-d' - DELABS [CALC DELABS]"
-echo " '-e' - MULABS"
-echo " '-f' - HFIX"
-echo " '-g' - GenRes-filter [CALC GEOM SHELX]"
-echo " '-h' - HKL-CALC [ASYM GENERATE]"
-echo " '-i' - Patterson PLOT"
-echo " '-j' - GenSPF-filter [CALC GEOM EUCLID]"
-echo " '-k' - HELENA"
-echo " '-l' - ASYM VIEW"
-echo " '-m' - ADDSYM (MISSYM) [CALC ADDSYM]"
-echo " '-n' - ADDSYM SHELX"
-echo " '-o' - Menu Off"
-echo " '-p' - PLUTON Mode"
-echo " '-q' - SQUEEZE [CALC SQUEEZE]"
-echo " '-r' - RENAME (RES)"
-echo " '-s' - SYSTEM-S"
-echo " '-t' - TABLE Mode [TABLE]"
-echo " '-u' - Validation Mode [VALIDATION]"
-echo " '-v' - SOLV Mode [CALC SOLV]"
-echo " '-w' - Difference Map Plot"
-echo " '-x' - Fo-Map PLOT"
-echo " '-y' - SQUEEZE-Map PLOT"
-echo " '-z' - WRITE IDENT"
-echo " '-A' - PLATON/ANIS"
-echo " '-C' - GENERATE CIF for current data set (e.g. .spf or .res)"
-echo " '-F' - SILENT NQA SYSTEM-S PATH (FILTER)"
-echo " '-I' - AUTOFIT 2 MOLECULES"
-echo " '-K' - CALC KPI"
-echo " '-L' - TWINROTMAT (INTERACTIVE)"
-echo " '-M' - TWINROTMAT (FILTER MODE)"
-echo " '-N' - 'ADDSYM EQUAL SHELX' MODE"
-echo " '-O' - PLOT ADP (PostScript)"
-echo " '-P' - Powder Pattern from Iobs"
-echo " '-Q' - Powder Pattern from Icalc"
-echo " '-R' - Auto Renumber and Write SHELX.res"
-echo " '-S' - CIF2RES + FCF2HKL filter"
-echo " '-T' - TwinRotMat"
-echo " '-U' - CIF-VALIDATION (without VALIDATION DOC)"
-echo " '-V' - FCF-VALIDATION (LAUE)"
-echo " '-W' - FCF-VALIDATION (BIJVOET)"
-echo " '-X' - Stripped SHELXS86 (Direct Methods Only) Mode"
-echo " '-Y' - Native Structure Tidy (Parthe & Gelato) Mode"
-"""
+
 OV.registerFunction(OlexPlaton)
