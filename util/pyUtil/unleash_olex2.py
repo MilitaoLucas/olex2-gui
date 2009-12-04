@@ -37,7 +37,7 @@ distro_zips = (
   (portable_zip_name, portable_prefix)
 )
 
-alterations = {
+external_files = {
   #windows installer files
   'installer.exe': ('olex-top',), #mind the comma!
   'installer_64.exe': ('olex-top',),
@@ -86,21 +86,21 @@ set(  ['olex2_fonts.zip',
 win_sse2_zip_files = \
 set(  ['cctbx.zip',      #cctbx/cctb_sources,...
       'python26.zip',    #Pyhton26/..., ..., + python26.dll!!!
-      'olex2_exe.zip',   #olex2.dll, it will be veryfied first of all
-      'launch_exe.zip'   #olex2.exe
+      'launch_exe.zip',  #olex2.exe
+      'olex2_exe.zip'   #olex2.dll, it will be veryfied first of all
       ]    
    ) | portable_zip_files
 win_sse_zip_files = \
-set(  ['cctbx_sse.zip',     #cctbx/cctb_sources,...
-      'python26.zip',       #Pyhton26/..., ..., + python26.dll!!!
-      'olex2_exe_sse.zip',  #olex2.dll, it will be veryfied first of all
-      'launch_exe.zip'      #olex2.exe
+set(  ['cctbx_sse.zip',    #cctbx/cctb_sources,...
+      'python26.zip',      #Pyhton26/..., ..., + python26.dll!!!
+      'launch_exe.zip',    #olex2.exe
+      'olex2_exe_sse.zip'  #olex2.dll
       ]    
    ) | portable_zip_files
 win64_zip_files = \
 set(  ['cctbx_64.zip',     #cctbx/cctb_sources,...
       'python26_64.zip',   #Pyhton26/..., ..., + python26.dll!!!
-      'olex2_exe_64.zip',  #olex2.dll, it will be veryfied first of all
+      'olex2_exe_64.zip',  #olex2.dll
       'launch_exe_64.zip'  #olex2.exe
       ]    
    ) | portable_zip_files
@@ -276,7 +276,7 @@ if not os.path.isdir(os.path.dirname(web_directory)):
   parser.print_help()
 
 # remove the files from the repository: helps to find collisions
-for val, key in alterations.iteritems():
+for val, key in external_files.iteritems():
   fn = working_directory + '/' + val
   if os.path.exists(fn):
     os.unlink(fn) 
@@ -356,7 +356,7 @@ files_for_plugin = dict(
      for plugin in plugins ])
 
 # process binary files, new folders might get created, so the call is before creating dirs
-for val, key in alterations.iteritems():
+for val, key in external_files.iteritems():
   fn = working_directory + '/' + val
   if os.path.exists(fn):
     print "File exist both on the svn and in the binary folder '" + fn + "' skipping..."
@@ -426,7 +426,7 @@ def info(web_file_name, working_file_name):
   normalised_fn = working_file_name.replace('\\', '/')
   if normalised_fn in altered_files:
     normalised_fn = normalised_fn.replace(working_directory + '/', '')    
-    props = alterations.get(normalised_fn)
+    props = external_files.get(normalised_fn)
   else:    
     try:
       props = client.proplist(working_file_name)
@@ -516,7 +516,7 @@ def create_index(index_file_name, only_prop=None, port_props = None, portable=Fa
       prop_set = set(props)
       #skip non-portable files if required
       #this will tackle translated file names, like 'launch.exe' -> 'olex2.exe'
-      if portable and alterations.has_key(f):
+      if portable and external_files.has_key(f):
         if 'olex-port' in props and (port_props is None or len(port_props&prop_set) == 0):
             continue
       elif (enforce_only_prop or f not in all_zip_files) and (only_prop is not None and only_prop not in prop_set): 
