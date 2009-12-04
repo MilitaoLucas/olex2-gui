@@ -183,7 +183,7 @@ parser.add_option('-f', '--file',
 		  action='store',
 		  help='whether to use update any particluare file only')
 option, args = parser.parse_args()
-
+	
 working_directory = os.path.expanduser(option.working_directory
 				       or 'e:/tmp/test-svn')
 if not os.path.isdir(working_directory):
@@ -486,6 +486,21 @@ class IndexEntry:
     for item in self.items.itervalues():
       item.SaveToFile(idx_file, indent)
   
+def fileter_installer_file(only_prop=None, port_props = None, portable=False, enforce_only_prop=False):
+  portable_files = set([])  
+  for f in installer_files:
+    stats, props = info(f, f)
+    if props is None: continue
+    prop_set = set(props)
+    if portable and external_files.has_key(f):
+      if 'olex-port' in props and (port_props is None or len(port_props&prop_set) == 0):
+          continue
+    elif (enforce_only_prop or f not in all_zip_files) and ((only_prop is not None) and (only_prop not in prop_set)): 
+      continue
+    if portable:
+      portable_files.add(f)
+  return portable_files
+  
 def create_index(index_file_name, only_prop=None, port_props = None, portable=False, enforce_only_prop=False):
   portable_files = set([])  
   idx_file = open(index_file_name, 'w')
@@ -495,7 +510,6 @@ def create_index(index_file_name, only_prop=None, port_props = None, portable=Fa
     file_names[:] = [ d for d in file_names if not d.startswith('.') ]
     dir_path = dir_path.replace('\\', '/')    
     d = update_directory_pat.sub('', dir_path)
-    indents = "\t"*d.count('/')
     
     working_dir_path = os.path.join(os.path.normpath(working_directory), d)
     if d:
@@ -505,7 +519,6 @@ def create_index(index_file_name, only_prop=None, port_props = None, portable=Fa
         file_names[:] = []
         continue
       root_entry.FromStrList(d.split('/'), props, stats, True)
-      indents += '\t'
     normalised_root_dir = working_dir_path.replace('\\', '/')
     if normalised_root_dir[-1] != '/':
       normalised_root_dir += '/'
@@ -519,7 +532,7 @@ def create_index(index_file_name, only_prop=None, port_props = None, portable=Fa
       if portable and external_files.has_key(f):
         if 'olex-port' in props and (port_props is None or len(port_props&prop_set) == 0):
             continue
-      elif (enforce_only_prop or f not in all_zip_files) and (only_prop is not None and only_prop not in prop_set): 
+      elif (enforce_only_prop or f not in all_zip_files) and ((only_prop is not None) and (only_prop not in prop_set)): 
         continue
       if portable:
         portable_files.add(normalised_root_dir + f)
@@ -550,12 +563,11 @@ olex2_tag_file.close()
 # create portable distro
 def create_portable_distro(port_props, zip_name, port_zips, prefix, extra_files):
   port_files = create_index(zip_index_file_name, only_prop='olex-install', port_props=port_props, portable=True)
+  inst_files = fileter_installer_file(only_prop='olex-install', port_props=port_props, portable=True)
   print 'Creating portable zip: ' + zip_name
   dest_zip = zipfile.ZipFile(web_directory + '/' + zip_name,
                               mode='w', compression=zipfile.ZIP_DEFLATED)
-  for f in installer_files:
-    if f not in port_files:
-      continue
+  for f in inst_files:
     dest_zip.write(f, zip_destination(f, prefix))
   if prefix is None:  prefix = ''
   dest_zip.write(zip_index_file_name, prefix + 'index.ind')
