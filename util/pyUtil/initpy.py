@@ -262,8 +262,10 @@ if sys.platform[:3] == 'win':
   #olx.SetVar('defeditor','gedit')
   #olx.SetVar('defexplorer','nautilus')
 
-
-import customScripts
+try:
+  import customScripts
+except ImportError, err:
+  print "Could not import customScripts: %s" %err
 
 print "Welcome to Olex2"
 
