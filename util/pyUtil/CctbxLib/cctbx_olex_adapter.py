@@ -134,8 +134,8 @@ class OlexCctbxRefine(OlexCctbxAdapter):
     self.pt = PT.PeriodicTable()
     self.olx = olx
     self.cycle = 0
-    self.tidy = True
-    self.auto = True
+    self.tidy = False
+    self.auto = False
     self.debug = False
     self.film = False
     self.max_cycles = max_cycles * 10
