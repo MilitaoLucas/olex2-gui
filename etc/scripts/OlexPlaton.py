@@ -134,7 +134,9 @@ def OlexPlaton(platonflag="help"):
       print "Or run spy.OlexPlaton(C) and rename the %s.acc to %s.cif?"%(OV.FileName(), OV.FileName())
     inputfilename = OV.FileName() + '.cif'
   try:
-    platon_result = os.popen("platon %s%s %s"%(tickornot, platonflag, inputfilename)).read() # This pipes our new .sir file into sir using sirversion can use 92/97 etc
+    command = "platon %s%s %s"%(tickornot, platonflag, inputfilename)
+    platon_result = olx.Exec(command)
+#    platon_result = os.popen("platon %s%s %s"%(tickornot, platonflag, inputfilename)).read() # This pipes our new .sir file into sir using sirversion can use 92/97 etc
     print "Platon Said: ", platon_result
   except:
     "Platon failed to run"

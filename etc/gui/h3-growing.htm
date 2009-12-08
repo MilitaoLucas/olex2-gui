@@ -8,9 +8,9 @@
 
   <td name=BTN_GROW_MODE>
     <a 
-      href="mode off>>run(mode grow GetData(GROW_SHORT) GetData(GROW_SELECTION) GetData(GROW_VDW))" 
+      href="if strcmp(spy.GetParam(olex2.short_mode),'grow') then 'mode off'  else run(mode grow GetData(GROW_SHORT) GetData(GROW_SELECTION) GetData(GROW_VDW))" 
       target="%Mode Grow-target%">
-      <zimg name=H3_IMG_BUTTON-GROW_MODE border="0" src="button-grow_mode.png"/>
+      <zimg name=IMG_BUTTON-GROW_MODE border="0" src="button-grow_mode.png"/>
     </a>
   </td>
   <td name=GROW_SHORT>

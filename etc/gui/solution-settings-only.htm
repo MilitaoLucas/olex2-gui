@@ -110,12 +110,11 @@
   <td width='50%' VALIGN='center' ALIGN='right' colspan=1>
     <font size='2'>
       <input
-        type='spin'
+        type='text'
         width="50"
         height="GetVar(gui_html_spin_height)"
         bgcolor="GetVar(gui_html_input_bg_colour)"
         name='SET_Z_PRIME'
-        min='1'
         value='$spy.GetParam(snum.refinement.Z_prime)'
         onchange="spy.SetParam(snum.refinement.Z_prime,GetValue(SET_Z_PRIME))>>updatehtml"
       >
