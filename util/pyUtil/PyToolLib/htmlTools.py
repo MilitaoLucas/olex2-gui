@@ -866,9 +866,11 @@ def OnModeChange(*args):
   i = 0
   mode_disp = ""
   args = args[0].split()
+  modes_with_other_stuff_l = ["grow", "name"]
   for item in args:
-    if 'name' in item:
-      item = 'name'
+    for m in modes_with_other_stuff_l:
+      if m in item:
+        item = m
     i += 1
     mode = mode + " " + item
     if i < 2:
@@ -878,11 +880,13 @@ def OnModeChange(*args):
   
   if 'name' in mode:
     active_mode = 'button_small-name'
-    #if args[1]:
-    #  mode_disp = "name %s" %args[1]
+  elif 'grow' in mode:
+    active_mode = 'button-grow_mode'
   else:
     active_mode = d.get(mode, None)
-  
+
+#  mode_disp = "%s" %mode
+    
   if last_mode == active_mode:
     return
   

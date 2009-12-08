@@ -3,7 +3,7 @@
 <node BACKGROUND_COLOR="#ff6633" COLOR="#338800" CREATED="1246481935391" ID="Freemind_Link_1945128606" MODIFIED="1259938538810" STYLE="fork" TEXT="Olex2">
 <edge STYLE="bezier" WIDTH="2"/>
 <font BOLD="true" NAME="SansSerif" SIZE="12"/>
-<node BACKGROUND_COLOR="#ccccff" CREATED="1246482224868" ID="_" MODIFIED="1259939020466" POSITION="right" STYLE="bubble" TEXT="Solving  Structures">
+<node BACKGROUND_COLOR="#ccccff" CREATED="1246482224868" FOLDED="true" ID="_" MODIFIED="1259946815361" POSITION="right" STYLE="bubble" TEXT="Solving  Structures">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node COLOR="#338800" CREATED="1246482232543" ID="Freemind_Link_1780118016" MODIFIED="1259938373515" STYLE="fork" TEXT="With SHELX">
@@ -51,16 +51,16 @@
 </node>
 </node>
 </node>
-<node BACKGROUND_COLOR="#ccccff" CREATED="1256721547419" FOLDED="true" ID="Freemind_Link_1507516291" MODIFIED="1259938539906" POSITION="right" STYLE="bubble" TEXT="Model Building">
+<node BACKGROUND_COLOR="#ccccff" CREATED="1256721547419" FOLDED="true" ID="Freemind_Link_1507516291" MODIFIED="1259947151750" POSITION="right" STYLE="bubble" TEXT="Model Building">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
-<node COLOR="#338800" CREATED="1258039562142" ID="Freemind_Link_191700793" MODIFIED="1259938325570" STYLE="fork" TEXT="Geometric Hydrogen Placement">
+<node COLOR="#338800" CREATED="1258039562142" ID="Freemind_Link_191700793" MODIFIED="1259947110791" STYLE="fork" TEXT="Geometric Hydrogen Placement">
 <font NAME="SansSerif" SIZE="12"/>
 </node>
 <node COLOR="#338800" CREATED="1258039621916" ID="Freemind_Link_1830523761" MODIFIED="1259938325570" STYLE="fork" TEXT="Disorder Modeling Tools">
 <font NAME="SansSerif" SIZE="12"/>
 </node>
-<node COLOR="#338800" CREATED="1256721615513" ID="Freemind_Link_1858296237" MODIFIED="1259938373527" STYLE="fork" TEXT="Fix/Free Parameters">
+<node COLOR="#338800" CREATED="1256721615513" FOLDED="true" ID="Freemind_Link_1858296237" MODIFIED="1259947117619" STYLE="fork" TEXT="Fix/Free Parameters">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node CREATED="1256721622489" ID="Freemind_Link_551440189" MODIFIED="1258031677913" TEXT="occu">
@@ -76,7 +76,7 @@
 <font NAME="SansSerif" SIZE="12"/>
 </node>
 </node>
-<node COLOR="#338800" CREATED="1256721663671" ID="Freemind_Link_255534313" MODIFIED="1259938373530" STYLE="fork" TEXT="Connectivity Table">
+<node COLOR="#338800" CREATED="1256721663671" FOLDED="true" ID="Freemind_Link_255534313" MODIFIED="1259947118451" STYLE="fork" TEXT="Connectivity Table">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node CREATED="1258019891314" ID="Freemind_Link_1054318345" MODIFIED="1258031677912" TEXT="Sort Atom List">
@@ -146,7 +146,7 @@
 </node>
 </node>
 </node>
-<node COLOR="#338800" CREATED="1256723088164" ID="Freemind_Link_1788012562" MODIFIED="1259938373566" STYLE="fork" TEXT="Constraints">
+<node COLOR="#338800" CREATED="1256723088164" FOLDED="true" ID="Freemind_Link_1788012562" MODIFIED="1259946154090" STYLE="fork" TEXT="Constraints">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node CREATED="1256723098756" ID="Freemind_Link_1142527584" MODIFIED="1259938373568" TEXT="Share atom site">
@@ -194,7 +194,7 @@
 </node>
 </node>
 </node>
-<node COLOR="#338800" CREATED="1256723093636" ID="Freemind_Link_95661317" MODIFIED="1259938373584" STYLE="fork" TEXT="Restraints">
+<node COLOR="#338800" CREATED="1256723093636" FOLDED="true" ID="Freemind_Link_95661317" MODIFIED="1259946155138" STYLE="fork" TEXT="Restraints">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node CREATED="1256723298255" ID="Freemind_Link_373542253" MODIFIED="1259938373592" TEXT="Same Distance">
@@ -347,7 +347,7 @@
 </node>
 </node>
 </node>
-<node BACKGROUND_COLOR="#ccccff" CREATED="1246482419739" FOLDED="true" ID="Freemind_Link_1055925113" MODIFIED="1259938549157" POSITION="right" STYLE="bubble" TEXT="Refining  Structures">
+<node BACKGROUND_COLOR="#ccccff" CREATED="1246482419739" FOLDED="true" ID="Freemind_Link_1055925113" MODIFIED="1259946818974" POSITION="right" STYLE="bubble" TEXT="Refining  Structures">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node COLOR="#338800" CREATED="1246482432714" ID="Freemind_Link_1799855020" MODIFIED="1259938373622" STYLE="fork" TEXT="With SHELX">
@@ -379,10 +379,10 @@
 <font NAME="SansSerif" SIZE="12"/>
 </node>
 </node>
-<node BACKGROUND_COLOR="#ccccff" CREATED="1256721756453" FOLDED="true" ID="Freemind_Link_485086975" MODIFIED="1259938972920" POSITION="right" STYLE="bubble" TEXT="Symmetry Operations">
+<node BACKGROUND_COLOR="#ccccff" CREATED="1256721756453" FOLDED="true" ID="Freemind_Link_485086975" MODIFIED="1259946820109" POSITION="right" STYLE="bubble" TEXT="Symmetry Operations">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
-<node COLOR="#338800" CREATED="1256721810724" ID="Freemind_Link_1629025059" MODIFIED="1259938373623" STYLE="fork" TEXT="List Symmetry Operations">
+<node COLOR="#338800" CREATED="1256721810724" FOLDED="true" ID="Freemind_Link_1629025059" MODIFIED="1259946171082" STYLE="fork" TEXT="List Symmetry Operations">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node COLOR="#669900" CREATED="1256722150699" ID="Freemind_Link_72366959" MODIFIED="1259938373625" TEXT="lstsymm">
@@ -394,7 +394,7 @@
 </node>
 </node>
 </node>
-<node COLOR="#338800" CREATED="1256721837507" ID="Freemind_Link_1330907143" MODIFIED="1259938373625" STYLE="fork" TEXT="Environment of an Atom">
+<node COLOR="#338800" CREATED="1256721837507" FOLDED="true" ID="Freemind_Link_1330907143" MODIFIED="1259946172478" STYLE="fork" TEXT="Environment of an Atom">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node COLOR="#669900" CREATED="1256722164347" ID="Freemind_Link_571791170" MODIFIED="1259938373631" TEXT="envi">
@@ -414,10 +414,10 @@
 </node>
 </node>
 </node>
-<node COLOR="#338800" CREATED="1256722396773" ID="Freemind_Link_252245511" MODIFIED="1259938373632" STYLE="fork" TEXT="Missing Atom Generation">
+<node COLOR="#338800" CREATED="1256722396773" FOLDED="true" ID="Freemind_Link_252245511" MODIFIED="1259946173054" STYLE="fork" TEXT="Missing Atom Generation">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
-<node COLOR="#669900" CREATED="1256722422357" ID="Freemind_Link_100072111" MODIFIED="1259938373643" TEXT="mode grow">
+<node COLOR="#669900" CREATED="1256722422357" FOLDED="true" ID="Freemind_Link_100072111" MODIFIED="1259946167139" TEXT="mode grow">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node CREATED="1256722670830" ID="Freemind_Link_101123068" MODIFIED="1258031677901" TEXT="Generates atoms that are not shown because they are symmetry equivalents">
@@ -437,7 +437,7 @@
 <font NAME="SansSerif" SIZE="12"/>
 </node>
 </node>
-<node COLOR="#669900" CREATED="1256722931528" ID="Freemind_Link_1781331906" MODIFIED="1259938373649" TEXT="grow [atoms]">
+<node COLOR="#669900" CREATED="1256722931528" FOLDED="true" ID="Freemind_Link_1781331906" MODIFIED="1259946167737" TEXT="grow [atoms]">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node CREATED="1256722937320" ID="Freemind_Link_1507070235" MODIFIED="1258031677901" TEXT="Grows all possible/given atoms; for the polymeric structures or structures requiring several grows Olex2 will continue grow until the comes to already used symmetry element">
@@ -455,10 +455,10 @@
 </node>
 </node>
 </node>
-<node COLOR="#338800" CREATED="1256722524434" ID="Freemind_Link_1521151110" MODIFIED="1259938373650" STYLE="fork" TEXT="Structure Packing">
+<node COLOR="#338800" CREATED="1256722524434" FOLDED="true" ID="Freemind_Link_1521151110" MODIFIED="1259946173738" STYLE="fork" TEXT="Structure Packing">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
-<node COLOR="#669900" CREATED="1256722535794" ID="Freemind_Link_1657218526" MODIFIED="1259938373652" TEXT="mode pack">
+<node COLOR="#669900" CREATED="1256722535794" FOLDED="true" ID="Freemind_Link_1657218526" MODIFIED="1259946163650" TEXT="mode pack">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node CREATED="1256722541426" ID="Freemind_Link_1753261372" MODIFIED="1258031677900" TEXT="Displays the position of symmetry equivalent asymmetric units as tetrahedra. These asymmetric units can be generated by clicking on the corresponding tetrahedron.">
@@ -466,7 +466,7 @@
 <font BOLD="true" NAME="SansSerif" SIZE="12"/>
 </node>
 </node>
-<node COLOR="#669900" CREATED="1256722564913" ID="Freemind_Link_1624628985" MODIFIED="1259938373656" TEXT="pack -a a -b b -c c">
+<node COLOR="#669900" CREATED="1256722564913" FOLDED="true" ID="Freemind_Link_1624628985" MODIFIED="1259946164275" TEXT="pack -a a -b b -c c">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node CREATED="1256722570353" ID="Freemind_Link_1153615177" MODIFIED="1258031677900" TEXT="Packs all or specified atoms within given dimensions">
@@ -482,7 +482,7 @@
 <font NAME="SansSerif" SIZE="12"/>
 </node>
 </node>
-<node COLOR="#669900" CREATED="1256722868282" ID="Freemind_Link_870557613" MODIFIED="1259938373657" TEXT="pack cell">
+<node COLOR="#669900" CREATED="1256722868282" FOLDED="true" ID="Freemind_Link_870557613" MODIFIED="1259946164781" TEXT="pack cell">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node CREATED="1256722875017" ID="Freemind_Link_1044493897" MODIFIED="1258031677900" TEXT="Shows content of the unit cell.">
@@ -490,7 +490,7 @@
 <font BOLD="true" NAME="SansSerif" SIZE="12"/>
 </node>
 </node>
-<node COLOR="#669900" CREATED="1256722892825" ID="Freemind_Link_209744511" MODIFIED="1259938373659" TEXT="pack r">
+<node COLOR="#669900" CREATED="1256722892825" FOLDED="true" ID="Freemind_Link_209744511" MODIFIED="1259946165300" TEXT="pack r">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node CREATED="1256722898025" ID="Freemind_Link_17946441" MODIFIED="1258031677900" TEXT="Packs fragments within radius r of the selected atom(s) or the centre of gravity of the asymmetric unit.">
@@ -500,10 +500,10 @@
 </node>
 </node>
 </node>
-<node BACKGROUND_COLOR="#ccccff" CREATED="1246482848416" FOLDED="true" ID="Freemind_Link_525766439" MODIFIED="1259938545765" POSITION="left" STYLE="bubble" TEXT="Analyse Raw Data">
+<node BACKGROUND_COLOR="#ccccff" CREATED="1246482848416" FOLDED="true" ID="Freemind_Link_525766439" MODIFIED="1259946212964" POSITION="left" STYLE="bubble" TEXT="Analyse Raw Data">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
-<node COLOR="#338800" CREATED="1246482856032" ID="Freemind_Link_1069405328" MODIFIED="1259938325567" STYLE="fork" TEXT="Space Group Determination">
+<node COLOR="#338800" CREATED="1246482856032" FOLDED="true" ID="Freemind_Link_1069405328" MODIFIED="1259946212380" STYLE="fork" TEXT="Space Group Determination">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node CREATED="1258016952317" ID="Freemind_Link_1094141680" MODIFIED="1259938325567" TEXT="Reflection Statistics">
@@ -515,13 +515,13 @@
 <font NAME="SansSerif" SIZE="12"/>
 </node>
 </node>
-<node COLOR="#338800" CREATED="1246482870927" ID="Freemind_Link_567691244" MODIFIED="1259938325565" STYLE="fork" TEXT="Reflection Statistics">
+<node COLOR="#338800" CREATED="1246482870927" FOLDED="true" ID="Freemind_Link_567691244" MODIFIED="1259946211017" STYLE="fork" TEXT="Reflection Statistics">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
-<node CREATED="1253792121094" ID="Freemind_Link_47207096" MODIFIED="1259938325565" TEXT="Wilson Plot">
+<node CREATED="1253792121094" FOLDED="true" ID="Freemind_Link_47207096" MODIFIED="1259946207185" TEXT="Wilson Plot">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
-<node CREATED="1253792531532" ID="Freemind_Link_1459892916" MODIFIED="1259938325562" STYLE="fork" TEXT="helps with">
+<node CREATED="1253792531532" FOLDED="true" ID="Freemind_Link_1459892916" MODIFIED="1259946203721" STYLE="fork" TEXT="helps with">
 <edge WIDTH="2"/>
 <font ITALIC="true" NAME="SansSerif" SIZE="12"/>
 <node CREATED="1253792536668" ID="Freemind_Link_326917991" MODIFIED="1259938325562" STYLE="bubble" TEXT="centrosymmetric vs non.c">
@@ -534,10 +534,10 @@
 </node>
 </node>
 </node>
-<node CREATED="1253792468605" ID="Freemind_Link_322305670" MODIFIED="1259938325561" TEXT="Cumulative Intensity Distribution">
+<node CREATED="1253792468605" FOLDED="true" ID="Freemind_Link_322305670" MODIFIED="1259946207845" TEXT="Cumulative Intensity Distribution">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
-<node CREATED="1253792531532" ID="Freemind_Link_1791651389" MODIFIED="1259938325561" TEXT="helps with">
+<node CREATED="1253792531532" FOLDED="true" ID="Freemind_Link_1791651389" MODIFIED="1259946204649" TEXT="helps with">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node CREATED="1253792536668" ID="Freemind_Link_531179912" MODIFIED="1259938325560" TEXT="centrosymmetric vs non.c">
@@ -550,10 +550,10 @@
 </node>
 </node>
 </node>
-<node CREATED="1253792483677" ID="Freemind_Link_1051604002" MODIFIED="1259938325560" TEXT="Systematic Absences">
+<node CREATED="1253792483677" FOLDED="true" ID="Freemind_Link_1051604002" MODIFIED="1259946208497" TEXT="Systematic Absences">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
-<node CREATED="1253792637113" ID="Freemind_Link_939270776" MODIFIED="1259938325560" TEXT="helps with">
+<node CREATED="1253792637113" FOLDED="true" ID="Freemind_Link_939270776" MODIFIED="1259946205173" TEXT="helps with">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node CREATED="1253792646633" ID="Freemind_Link_36609314" MODIFIED="1259938325560" TEXT="spce group determination">
@@ -574,10 +574,10 @@
 </node>
 </node>
 </node>
-<node BACKGROUND_COLOR="#ccccff" CREATED="1246482840600" FOLDED="true" ID="Freemind_Link_184600100" MODIFIED="1259938545063" POSITION="left" STYLE="bubble" TEXT="Structure Analysis">
+<node BACKGROUND_COLOR="#ccccff" CREATED="1246482840600" FOLDED="true" ID="Freemind_Link_184600100" MODIFIED="1259946199474" POSITION="left" STYLE="bubble" TEXT="Structure Analysis">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
-<node COLOR="#338800" CREATED="1258026232738" ID="Freemind_Link_1203506055" MODIFIED="1259938373660" STYLE="fork" TEXT="Geometry with s.u.">
+<node COLOR="#338800" CREATED="1258026232738" FOLDED="true" ID="Freemind_Link_1203506055" MODIFIED="1259946198214" STYLE="fork" TEXT="Geometry with s.u.">
 <font NAME="SansSerif" SIZE="12"/>
 <node CREATED="1258026324624" ID="Freemind_Link_1747417134" MODIFIED="1258031677895" TEXT="Distances">
 <font NAME="SansSerif" SIZE="12"/>
@@ -607,12 +607,12 @@
 <font NAME="SansSerif" SIZE="12"/>
 </node>
 </node>
-<node BACKGROUND_COLOR="#ccccff" CREATED="1258039937172" FOLDED="true" ID="Freemind_Link_1143802177" MODIFIED="1259938547221" POSITION="left" STYLE="bubble" TEXT="Structure Completion">
+<node BACKGROUND_COLOR="#ccccff" CREATED="1258039937172" FOLDED="true" ID="Freemind_Link_1143802177" MODIFIED="1259946196909" POSITION="left" STYLE="bubble" TEXT="Structure Completion">
 <font NAME="SansSerif" SIZE="12"/>
-<node COLOR="#338800" CREATED="1246482828152" ID="Freemind_Link_1713214437" MODIFIED="1259938373661" STYLE="fork" TEXT="Images Creation">
+<node COLOR="#338800" CREATED="1246482828152" FOLDED="true" ID="Freemind_Link_1713214437" MODIFIED="1259946195304" STYLE="fork" TEXT="Images Creation">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
-<node COLOR="#338800" CREATED="1253792046056" ID="Freemind_Link_1940584147" MODIFIED="1259938373662" STYLE="fork" TEXT="Rendered Images">
+<node COLOR="#338800" CREATED="1253792046056" FOLDED="true" ID="Freemind_Link_1940584147" MODIFIED="1259946190642" STYLE="fork" TEXT="Rendered Images">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node CREATED="1253792076999" ID="Freemind_Link_1023391697" MODIFIED="1258031677886" TEXT="JPEG">
@@ -628,7 +628,7 @@
 <font NAME="SansSerif" SIZE="12"/>
 </node>
 </node>
-<node COLOR="#338800" CREATED="1253792064280" ID="Freemind_Link_1391908905" MODIFIED="1259938373662" STYLE="fork" TEXT="ADP Plots">
+<node COLOR="#338800" CREATED="1253792064280" FOLDED="true" ID="Freemind_Link_1391908905" MODIFIED="1259946191302" STYLE="fork" TEXT="ADP Plots">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node COLOR="#990000" CREATED="1253792089799" ID="Freemind_Link_1147485245" MODIFIED="1258031677885" TEXT="EPS">
@@ -640,7 +640,7 @@
 <font NAME="SansSerif" SIZE="12"/>
 </node>
 </node>
-<node COLOR="#338800" CREATED="1256724088507" ID="Freemind_Link_548225843" MODIFIED="1259938373663" STYLE="fork" TEXT="Image Series">
+<node COLOR="#338800" CREATED="1256724088507" FOLDED="true" ID="Freemind_Link_548225843" MODIFIED="1259946191870" STYLE="fork" TEXT="Image Series">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node CREATED="1256724096075" ID="Freemind_Link_1127253988" MODIFIED="1258031677885" TEXT="bmp">
@@ -649,7 +649,7 @@
 </node>
 </node>
 </node>
-<node COLOR="#338800" CREATED="1258039967011" ID="Freemind_Link_518564577" MODIFIED="1259938373664" STYLE="fork" TEXT="CIF Tools">
+<node COLOR="#338800" CREATED="1258039967011" FOLDED="true" ID="Freemind_Link_518564577" MODIFIED="1259946193700" STYLE="fork" TEXT="CIF Tools">
 <font NAME="SansSerif" SIZE="12"/>
 <node CREATED="1258039766760" ID="Freemind_Link_1435471115" MODIFIED="1259938522611" STYLE="fork" TEXT="CIF Generation">
 <edge WIDTH="thin"/>
@@ -667,7 +667,7 @@
 <node COLOR="#338800" CREATED="1258040112016" ID="Freemind_Link_398611457" MODIFIED="1259938325558" STYLE="fork" TEXT="Space Group Setting">
 <font NAME="SansSerif" SIZE="12"/>
 </node>
-<node COLOR="#338800" CREATED="1246482911726" ID="Freemind_Link_1987612111" MODIFIED="1259938373664" STYLE="fork" TEXT="Reports Generation">
+<node COLOR="#338800" CREATED="1246482911726" FOLDED="true" ID="Freemind_Link_1987612111" MODIFIED="1259946194586" STYLE="fork" TEXT="Reports Generation">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node CREATED="1256724065564" ID="Freemind_Link_1112196389" MODIFIED="1258040065573" STYLE="fork" TEXT="Custom Templates">
@@ -680,11 +680,11 @@
 </node>
 </node>
 </node>
-<node BACKGROUND_COLOR="#ccccff" CREATED="1246482919326" FOLDED="true" ID="Freemind_Link_1226299369" MODIFIED="1259938542093" POSITION="right" STYLE="bubble" TEXT="Automate Tasks">
+<node BACKGROUND_COLOR="#ccccff" CREATED="1246482919326" FOLDED="true" ID="Freemind_Link_1226299369" MODIFIED="1259946180936" POSITION="right" STYLE="bubble" TEXT="Automate Tasks">
 <edge WIDTH="2"/>
 <arrowlink DESTINATION="Freemind_Link_1226299369" ENDARROW="Default" ENDINCLINATION="0;0;" ID="Freemind_Arrow_Link_1489599013" STARTARROW="None" STARTINCLINATION="0;0;"/>
 <font NAME="SansSerif" SIZE="12"/>
-<node COLOR="#338800" CREATED="1253792323649" ID="Freemind_Link_1852062130" MODIFIED="1259938373665" STYLE="fork" TEXT="Structure Checking">
+<node COLOR="#338800" CREATED="1253792323649" FOLDED="true" ID="Freemind_Link_1852062130" MODIFIED="1259946175359" STYLE="fork" TEXT="Structure Checking">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node CREATED="1253792332305" ID="Freemind_Link_207314099" MODIFIED="1258031677893" TEXT="Chirality (Flack)">
@@ -696,7 +696,7 @@
 <font NAME="SansSerif" SIZE="12"/>
 </node>
 </node>
-<node COLOR="#338800" CREATED="1253792368736" ID="Freemind_Link_852789970" MODIFIED="1259938373667" STYLE="fork" TEXT="Program Setup">
+<node COLOR="#338800" CREATED="1253792368736" FOLDED="true" ID="Freemind_Link_852789970" MODIFIED="1259946178283" STYLE="fork" TEXT="Program Setup">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node CREATED="1253869357116" ID="Freemind_Link_986218465" MODIFIED="1258031677892" TEXT="Initial Setup">
@@ -708,7 +708,7 @@
 <font NAME="SansSerif" SIZE="12"/>
 </node>
 </node>
-<node COLOR="#338800" CREATED="1253875899722" ID="Freemind_Link_193222164" MODIFIED="1259938373669" STYLE="fork" TEXT="Model Building">
+<node COLOR="#338800" CREATED="1253875899722" FOLDED="true" ID="Freemind_Link_193222164" MODIFIED="1259946179160" STYLE="fork" TEXT="Model Building">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node CREATED="1253875915817" ID="Freemind_Link_1183091509" MODIFIED="1258031677892" TEXT="VSS">
@@ -724,7 +724,7 @@
 <font NAME="SansSerif" SIZE="12"/>
 </node>
 </node>
-<node COLOR="#990000" CREATED="1253792378032" ID="Freemind_Link_1055216656" MODIFIED="1259938373669" STYLE="fork" TEXT="Multiple Structures">
+<node COLOR="#990000" CREATED="1253792378032" FOLDED="true" ID="Freemind_Link_1055216656" MODIFIED="1259946179884" STYLE="fork" TEXT="Multiple Structures">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node COLOR="#990000" CREATED="1253792397263" ID="Freemind_Link_1785751306" MODIFIED="1258031677891" TEXT="Creation of Tables">
@@ -737,10 +737,10 @@
 </node>
 </node>
 </node>
-<node BACKGROUND_COLOR="#ccccff" CREATED="1253868057261" FOLDED="true" ID="Freemind_Link_152149540" MODIFIED="1259938542917" POSITION="right" STYLE="bubble" TEXT="Visual Feedback">
+<node BACKGROUND_COLOR="#ccccff" CREATED="1253868057261" FOLDED="true" ID="Freemind_Link_152149540" MODIFIED="1259946184784" POSITION="right" STYLE="bubble" TEXT="Visual Feedback">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
-<node COLOR="#338800" CREATED="1253868068764" ID="Freemind_Link_381464472" MODIFIED="1259938373670" STYLE="fork" TEXT="Refinement Parameters">
+<node COLOR="#338800" CREATED="1253868068764" FOLDED="true" ID="Freemind_Link_381464472" MODIFIED="1259946183366" STYLE="fork" TEXT="Refinement Parameters">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node CREATED="1253868078460" ID="Freemind_Link_328255405" MODIFIED="1258031677890" TEXT="Weighting Scheme">
@@ -752,7 +752,7 @@
 <font NAME="SansSerif" SIZE="12"/>
 </node>
 </node>
-<node COLOR="#338800" CREATED="1253883224148" ID="Freemind_Link_773121223" MODIFIED="1259938373675" STYLE="fork" TEXT="Model">
+<node COLOR="#338800" CREATED="1253883224148" FOLDED="true" ID="Freemind_Link_773121223" MODIFIED="1259946184005" STYLE="fork" TEXT="Model">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node CREATED="1253883228915" ID="Freemind_Link_705457759" MODIFIED="1258031677889" TEXT="Transparent Electron Density Peaks">
@@ -773,7 +773,7 @@
 </node>
 </node>
 </node>
-<node BACKGROUND_COLOR="#ccccff" CREATED="1253869330493" FOLDED="true" ID="Freemind_Link_1843363258" MODIFIED="1259938550201" POSITION="right" STYLE="bubble" TEXT="Workflow">
+<node BACKGROUND_COLOR="#ccccff" CREATED="1253869330493" FOLDED="true" ID="Freemind_Link_1843363258" MODIFIED="1259946186201" POSITION="right" STYLE="bubble" TEXT="Workflow">
 <edge WIDTH="2"/>
 <font NAME="SansSerif" SIZE="12"/>
 <node COLOR="#338800" CREATED="1253869334541" ID="Freemind_Link_1492395886" MODIFIED="1259938325541" STYLE="fork" TEXT="History Generation">
@@ -785,7 +785,7 @@
 <font NAME="SansSerif" SIZE="12"/>
 </node>
 </node>
-<node BACKGROUND_COLOR="#ccccff" COLOR="#990000" CREATED="1258031986531" FOLDED="true" ID="Freemind_Link_447825077" MODIFIED="1259938986043" POSITION="left" STYLE="bubble" TEXT="Databases">
+<node BACKGROUND_COLOR="#ccccff" COLOR="#990000" CREATED="1258031986531" FOLDED="true" ID="Freemind_Link_447825077" MODIFIED="1259946187710" POSITION="left" STYLE="bubble" TEXT="Databases">
 <font NAME="SansSerif" SIZE="12"/>
 <node COLOR="#990000" CREATED="1258032036770" ID="Freemind_Link_1767879980" MODIFIED="1259938325538" STYLE="fork" TEXT="Versioning">
 <font NAME="SansSerif" SIZE="12"/>

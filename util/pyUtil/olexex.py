@@ -404,10 +404,11 @@ def MakeElementButtonsFromFormula():
   for element in f:
     symbol = element.split(':')[0]
     max = float(element.split(':')[1])
-    max = max*Z_prime
     present = round(current_formula.get(symbol,0),2)
     if symbol != "H":
       totalcount += max
+      
+    max = max*Z_prime
     if present < max:
       bgcolour = (250,250,250)
     elif present ==  max:
