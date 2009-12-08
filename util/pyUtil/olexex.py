@@ -1080,6 +1080,7 @@ def updateACF(force=False):
     print "No update required"
     return
   print "Now Updating..."
+  
   mac_address = OV.GetMacAddress()
   username, computer_name = OV.GetUserComputerName()
   keyname = getKey()
@@ -1103,9 +1104,18 @@ def updateACF(force=False):
               }
     data = urllib.urlencode(values)
     print data
-    req = urllib2.Request(url)
-    response = urllib2.urlopen(req,data)
-    f = response.read()
+    try:
+      req = urllib2.Request(url)
+      response = urllib2.urlopen(req,data)
+      f = response.read()
+    except:
+      print "\n++++++++++++++++++++++++++++++++++++++++++++++"
+      print "+ Could not reach update server at www.olex2.org"
+      print "+ --------------------------------------------"
+      print "+ Please make sure your computer is online"
+      print "+ and that you can reach www.olex2.org"
+      print "++++++++++++++++++++++++++++++++++++++++++++++\n"
+      return
     if f:
       break
 
