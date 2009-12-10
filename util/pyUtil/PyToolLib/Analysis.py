@@ -1758,9 +1758,13 @@ class Fobs_over_Fcalc_plot(Analysis):
     self.metadata.setdefault("y_label", xy_plot.yLegend)
     self.metadata.setdefault("x_label", xy_plot.xLegend)
     metadata = {}
+    if not params.binning:
+      indices = xy_plot.indices
+    else:
+      indices = None
     data = Dataset(
       xy_plot.resolution, xy_plot.f_obs_over_f_calc,
-      indices=xy_plot.indices, metadata=metadata)
+      indices=indices, metadata=metadata)
     self.data.setdefault('dataset1', data)
     self.make_empty_graph(axis_x = True)
     #self.plot_function("1")
