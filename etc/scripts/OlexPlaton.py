@@ -8,7 +8,7 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
 '''
-To run this example script, type spy.example("Hello") in Olex2
+To run this script, type spy.OlexPlaton("help") in Olex2
 '''
 
 def OlexPlaton(platonflag="help"):
@@ -74,6 +74,47 @@ def OlexPlaton(platonflag="help"):
     tickornot = '-o -'
     
   if platonflag == "help": # If no options given then we print all the possible commands out LOL
+  # Prefered printing out the raw text but using the dict again is logical but it does not print in order anymore :-(
+    for key in platonflagcodes:
+      print " '%s' - %s"%(key, platonflagcodes[key][0])
+    return
+
+  inputfilename = OV.FileFull().split("/")[-1]
+  print "Input file is: ", inputfilename
+  if platonflag == 'U':
+    print "This option requires a valid CIF file - checking"
+    # Check for CIF
+    try:
+      cifornot = open("%s.%s"%(OV.FileName(), cif), 'r')
+      cifornot.close()
+    except:
+      print "No CIF present - why not make one with ACTA?"
+      print "Or run spy.OlexPlaton(C) and rename the %s.acc to %s.cif?"%(OV.FileName(), OV.FileName())
+    inputfilename = OV.FileName() + '.cif'
+  try:
+    command = "platon %s%s %s"%(tickornot, platonflag, inputfilename)
+    platon_result = olx.Exec(command)
+#    platon_result = os.popen("platon %s%s %s"%(tickornot, platonflag, inputfilename)).read() # This pipes our new .sir file into sir using sirversion can use 92/97 etc
+    "Platon failed to run"
+# Old code works for Linux but not windows thanks to the stupid vritual cmdline built into Platon by LF
+#  platon_extension = platon_result.split(":")[-1].split(".")[-1].split("\n")[0]
+# To compensate now check flag against dictionary and then use that file extension, predominantly this is going to be lis
+  platon_extension = platonflagcodes[platonflag][1]
+  
+  print "The file extension is: ", platon_extension, " filename is: ", "%s.%s"%(OV.FileName(), platon_extension)
+  try:
+    platon_result_file = open("%s.%s"%(OV.FileName(), platon_extension), 'r')
+    print "Successfully opened file", platon_result_file
+    for platon_line in platon_result_file:
+      print platon_line
+    platon_result_file.close()
+  except IOError: 
+    print "Failed to open file"
+  print "You can read this file by typing:"
+  print "edit %s"%(platon_extension)
+
+OV.registerFunction(OlexPlaton)
+"""
     print " 'a' - ORTEP/ADP [PLOT ADP]"
     print " 'b' - CSD-Search [CALC GEOM CSD]"
     print " 'c' - Calc Mode [CALC]"
@@ -119,46 +160,7 @@ def OlexPlaton(platonflag="help"):
     print " 'W' - FCF-VALIDATION (BIJVOET)"
     print " 'X' - Stripped SHELXS86 (Direct Methods Only) Mode"
     print " 'Y' - Native Structure Tidy (Parthe & Gelato) Mode"
-    return
-
-  inputfilename = OV.FileFull().split("/")[-1]
-  print "Input file is: ", inputfilename
-  if platonflag == 'U':
-    print "This option requires a valid CIF file - checking"
-    # Check for CIF
-    try:
-      cifornot = open("%s.%s"%(OV.FileName(), cif), 'r')
-      cifornot.close()
-    except:
-      print "No CIF present - why not make one with ACTA?"
-      print "Or run spy.OlexPlaton(C) and rename the %s.acc to %s.cif?"%(OV.FileName(), OV.FileName())
-    inputfilename = OV.FileName() + '.cif'
-  try:
-    command = "platon %s%s %s"%(tickornot, platonflag, inputfilename)
-    platon_result = olx.Exec(command)
-#    platon_result = os.popen("platon %s%s %s"%(tickornot, platonflag, inputfilename)).read() # This pipes our new .sir file into sir using sirversion can use 92/97 etc
-    print "Platon Said: ", platon_result
-  except:
-    "Platon failed to run"
-# Old code works for Linux but not windows thanks to the stupid vritual cmdline built into Platon by LF
-#  platon_extension = platon_result.split(":")[-1].split(".")[-1].split("\n")[0]
-# To compensate now check flag against dictionary and then use that file extension, predominantly this is going to be lis
-  platon_extension = platonflagcodes[platonflag][1]
-  
-  print "The file extension is: ", platon_extension, " filename is: ", "%s.%s"%(OV.FileName(), platon_extension)
-  try:
-    platon_result_file = open("%s.%s"%(OV.FileName(), platon_extension), 'r')
-    print "Successfully opened file", platon_result_file
-    for platon_line in platon_result_file:
-      print platon_line
-    platon_result_file.close()
-  except IOError: 
-    print "Failed to open file"
-  print "You can read this file by typing:"
-  print "edit %s"%(platon_extension)
-
-OV.registerFunction(OlexPlaton)
-
+"""
 """
 call with print platonflagcodes['letter'][0]
 
