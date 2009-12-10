@@ -94,8 +94,9 @@ def OlexPlaton(platonflag="help"):
   try:
     command = "platon %s%s %s"%(tickornot, platonflag, inputfilename)
     platon_result = olx.Exec(command)
-#    platon_result = os.popen("platon %s%s %s"%(tickornot, platonflag, inputfilename)).read() # This pipes our new .sir file into sir using sirversion can use 92/97 etc
-    "Platon failed to run"
+#    platon_result = os.popen("platon %s%s %s"%(tickornot, platonflag, inputfilename)).read()
+  except:
+    print "Platon failed to run"
 # Old code works for Linux but not windows thanks to the stupid vritual cmdline built into Platon by LF
 #  platon_extension = platon_result.split(":")[-1].split(".")[-1].split("\n")[0]
 # To compensate now check flag against dictionary and then use that file extension, predominantly this is going to be lis
