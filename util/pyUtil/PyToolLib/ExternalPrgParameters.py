@@ -452,7 +452,7 @@ class Method_shelxd(Method_shelx_solution):
       'value':'STOP',
       'width':50,
       'height':28,
-      'onclick':'spy.stopShelxd()',
+      'onclick':'spy.stopShelx()',
     }
     button_html = htmlTools.make_input_button(button_d)
     html = '''
@@ -488,8 +488,6 @@ class Method_shelxd(Method_shelx_solution):
     """Makes Olex listen to the temporary directory before running the executable
     so that intermediate solutions will be displayed onscreen.
     """
-    global stop_path
-    stop_path = '%s/temp/%s.fin' %(olx.StrDir(), OV.FileName())
     listen_file = '%s/%s.res' %(RunPrgObject.tempPath,RunPrgObject.hkl_src_name)
     OV.Listen(listen_file)
     Method_shelx_solution.run(self, RunPrgObject)
