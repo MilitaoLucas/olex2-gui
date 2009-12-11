@@ -203,11 +203,14 @@ def onMaxPeaksChange(max_peaks):
       return
 OV.registerFunction(OV.SetMaxPeaks)
 
-def stopShelxd():
+def stopShelx():
+  """Writes the file name.fin to the directory in which shelx is run.
+     This stops the refinement or solution after the current iteration
+     (for shelxl and shelxd at least)"""
   try:
-    file = open(ExternalPrgParameters.stop_path, 'w')
+    file = open('%s/temp/%s.fin' %(OV.StrDir(), OV.FileName()), 'w')
     file.close()
   except AttributeError:
     pass
   return
-OV.registerFunction(stopShelxd)
+OV.registerFunction(stopShelx)
