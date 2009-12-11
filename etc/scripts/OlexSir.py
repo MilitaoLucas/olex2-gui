@@ -33,10 +33,24 @@ def OlexSir(level="normal", ManAtomContents="C 20 H 20 O 10", rhomax="0.25"):
   rhomax = 0.250 #default for sintheta/lambda 0.5
   Olex2SirIn = OV.FileName()
   SirCompatCell = ''.join(olx.xf_au_GetCell().split(','))
-  SirCompatSymm = ' '.join(re.split("([A-Za-z])", olx.xf_au_GetCellSymm()))
-  AtomContents = ' '.join(re.split("([A-Za-z]*)",olx.xf_GetFormula()))
-  snuff = re.split("([A-Za-z]*)",olx.xf_GetFormula())
+  SirCompatSymm = ' '.join(re.split("([A-Za-z]*)([0-9][0-9])", olx.xf_au_GetCellSymm()))
   OlexZ = int(olx.xf_au_GetZ())
+  AtomPairs = olx.xf_GetFormula().split()
+  print AtomPairs
+  AtomGroups = []
+  CorrectedAtoms = []
+  for atom in AtomPairs:
+    AtomGroups.append(re.split("([A-Za-z]*)",atom)[1:3])
+  print AtomGroups
+  for j in range(0, len(AtomGroups)):
+    print AtomGroups[j][0], AtomGroups[j][1]
+    CorrectedAtoms.append("%s %s"%(AtomGroups[j][0], (AtomGroups[j][1]) * OlexZ))
+  AtomContents = ' '.join(CorrectedAtoms)
+  print AtomContents
+  print "ETF", AtomContents
+  #AtomContents = ' '.join(re.split("([A-Za-z]*)",olx.xf_GetFormula()))
+  snuff = re.split("([A-Za-z]*)",olx.xf_GetFormula())
+
   NumPeaks = int(OlexZ) * int(olx.xf_au_GetAtomCount())
   CellV = float(olx.xf_au_GetCellVolume())
   if ManAtomContents == " " or ManAtomContents != "C 20 H 20 O 10":
@@ -49,7 +63,7 @@ def OlexSir(level="normal", ManAtomContents="C 20 H 20 O 10", rhomax="0.25"):
   print "Olex2 Symmetry:Sir Symmetry", olx.xf_au_GetCellSymm(), ':', SirCompatSymm
   print "Olex2 Formula", olx.xf_GetFormula()
   print "Sir Friendly Formula", AtomContents
-  print "New formula using Z", OlexZ
+  print "New formula using Z", OlexZ, 
   print "Number of atoms to look for", NumPeaks, 'or', float(CellV/18.0)
 # There is an issue with ever decreasing returns from Olex2 and SIR.
 # Basically Olex2 is updating the SFAC from SIR results this then is being posted back to if you try again

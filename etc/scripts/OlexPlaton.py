@@ -93,8 +93,8 @@ def OlexPlaton(platonflag="help"):
     inputfilename = OV.FileName() + '.cif'
   try:
     command = "platon %s%s %s"%(tickornot, platonflag, inputfilename)
-    platon_result = olx.Exec(command)
-#    platon_result = os.popen("platon %s%s %s"%(tickornot, platonflag, inputfilename)).read()
+    #platon_result = olx.Exec(command)
+    platon_result = os.popen("platon %s%s %s"%(tickornot, platonflag, inputfilename)).read()
   except:
     print "Platon failed to run"
 # Old code works for Linux but not windows thanks to the stupid vritual cmdline built into Platon by LF
