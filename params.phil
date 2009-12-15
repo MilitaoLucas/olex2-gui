@@ -73,7 +73,9 @@ gui {
   tab_font_colour = #ff0000
     .type = colour
   infobox_text = '2053;2143326838;2143979345'
+    .type = str
   infobox_plane = '2053;2136422952;2137144606'
+    .type = str
   htmlpanelwidth = 400
     .type = int
   grad_top_left = #05053c
