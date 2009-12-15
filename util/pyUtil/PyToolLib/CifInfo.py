@@ -717,12 +717,12 @@ class CifTools(ArgumentParser):
       name = "*_1"
       extension = ".001"
     elif tool == "cif_od":
-      name = "exp"
+      name = OV.FileName()
       extension = ".cif_od"
     else:
       return "Tool not found"
 
-    files = []      
+    files = []
     for path in glob.glob(os.path.join(directory, name+extension)):
       info = os.stat(path)
       files.append((info.st_mtime, path))
