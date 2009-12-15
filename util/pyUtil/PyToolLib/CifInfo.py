@@ -484,7 +484,7 @@ class CifTools(ArgumentParser):
               value = value.lower()
             if value == '?':
               value = None
-            OV.SetParam("snum.metacif.%s" %(item[1:].replace('-','_')), value)
+            OV.SetParam("snum.metacif.%s" %(item[1:].replace('-','_').replace('/','_over_')), value)
             dataAdded.append(item)
         else: continue
 
