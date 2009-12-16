@@ -2018,6 +2018,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         if f.split("-")[0] != "index" and f[0] != "_":
           f = f.replace("-and-", "-&-")
           textItems.append(f)
+          textItems.append("autochem")
         #elif f[0] != "_":
         #  tabItems.append(f)
     for item in ('solution-settings-h3-solution-settings-extra', 'refinement-settings-h3-refinement-settings-extra',
