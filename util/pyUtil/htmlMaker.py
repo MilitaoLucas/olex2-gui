@@ -697,8 +697,8 @@ def weightGuiDisplay():
     ''' %(txt_tick_the_box, txt_Weight, html_scheme, box)
       
     return html
-  except:
-    return " ERROR !!! "
+  except Exception, err:
+    return " ERROR in weightGuiDisplay: %s" %err
 OV.registerFunction(weightGuiDisplay)
 
 def getCellHTML():
