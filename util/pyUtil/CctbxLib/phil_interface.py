@@ -216,7 +216,7 @@ class phil_handler(libtbx.phil.interface.index):
   def update(self, phil_object=None, phil_string=None, phil_file=None):
     assert [phil_object, phil_string, phil_file].count(None) == 2
     if phil_string:
-      phil_object = self.parse(phil_string)
+      phil_object = self.parse(str(phil_string))
     elif phil_file:
       phil_object = self.parse(file_name=phil_file)
     if phil_object:
