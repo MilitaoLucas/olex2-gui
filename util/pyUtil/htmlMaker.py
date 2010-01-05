@@ -639,55 +639,53 @@ def weightGuiDisplay():
   gui_green = OV.FindValue('gui_green')
   gui_orange = OV.FindValue('gui_orange')
   gui_red = OV.FindValue('gui_red')
-  try:
-    longest = 0
-    retVal = ""
-    current_weight = olx.Ins('weight').split()
-    if len(current_weight) == 1:
-      current_weight = [current_weight[0], '0']
-    length_current = len(current_weight)
-    suggested_weight = olx.Ins('weight1').split()
-    if len(suggested_weight) < length_current:
-      for i in xrange (length_current - len(suggested_weight)):
-        suggested_weight.append('0')
-    if suggested_weight:
-      for curr, sugg in zip(current_weight, suggested_weight):
-        c = curr.replace(".", "")
-        if len(c) > longest:
-          longest = len(c)
-        s = sugg.replace(".", "")
-        if len(s) > longest:
-          longest = len(s)
-      
-      for curr, sugg in zip(current_weight, suggested_weight):
-        if "." in curr:
-          while len(curr) < longest and curr != "0":
-            curr += '0'
-        if "." in sugg:
-          while len(sugg) < longest and sugg != "0":
-            sugg += '0'
-        if curr == sugg:
-          colour = gui_green 
-        elif float(curr)-float(curr)*0.1 < float(sugg) < float(curr)+float(curr)*0.1:
-          colour = gui_orange
-        else:
-          colour = gui_red
-        retVal += "<font size='2' color='%s'>%s(%s)</font> | " %(colour, curr, sugg)  
-      html_scheme = retVal.strip("| ")
-    else:
-      html_scheme = current_weight
-      
-    d = {'ctrl_name':'SET_SNUM_REFINEMENT_UPDATE_WEIGHT',
-         'checked':'$spy.GetParam(snum.refinement.update_weight)',
-         'oncheck':'spy.SetParam(snum.refinement.update_weight,true)',
-         'onuncheck':'spy.SetParam(snum.refinement.update_weight,false)',
-         'value':'',
-         }
-    box = htmlTools.make_tick_box_input(d) 
- 
-    txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update") 
-    txt_Weight = OV.TranslatePhrase("Weight")
-    html = '''
+  longest = 0
+  retVal = ""
+  current_weight = olx.Ins('weight').split()
+  if len(current_weight) == 1:
+    current_weight = [current_weight[0], '0']
+  length_current = len(current_weight)
+  suggested_weight = olx.Ins('weight1').split()
+  if len(suggested_weight) < length_current:
+    for i in xrange (length_current - len(suggested_weight)):
+      suggested_weight.append('0')
+  if suggested_weight:
+    for curr, sugg in zip(current_weight, suggested_weight):
+      c = curr.replace(".", "")
+      if len(c) > longest:
+        longest = len(c)
+      s = sugg.replace(".", "")
+      if len(s) > longest:
+        longest = len(s)
+    for curr, sugg in zip(current_weight, suggested_weight):
+      if "." in curr:
+        while len(curr) < longest and curr != "0":
+          curr += '0'
+      if "." in sugg:
+        while len(sugg) < longest and sugg != "0":
+          sugg += '0'
+      if curr == sugg:
+        colour = gui_green 
+      elif float(curr)-float(curr)*0.1 < float(sugg) < float(curr)+float(curr)*0.1:
+        colour = gui_orange
+      else:
+        colour = gui_red
+      retVal += "<font size='2' color='%s'>%s(%s)</font> | " %(colour, curr, sugg)  
+    html_scheme = retVal.strip("| ")
+  else:
+    html_scheme = current_weight
+    
+  d = {'ctrl_name':'SET_SNUM_REFINEMENT_UPDATE_WEIGHT',
+       'checked':'$spy.GetParam(snum.refinement.update_weight)',
+       'oncheck':'spy.SetParam(snum.refinement.update_weight,true)',
+       'onuncheck':'spy.SetParam(snum.refinement.update_weight,false)',
+       'value':'',
+       }
+  box = htmlTools.make_tick_box_input(d) 
+
+  txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update") 
+  txt_Weight = OV.TranslatePhrase("Weight")
+  html = '''
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_UPDATE_WEIGHT'>
   <td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
   <td VALIGN='right' colspan=3>
@@ -695,10 +693,7 @@ def weightGuiDisplay():
     <td VALIGN='center' ALIGN='right' colspan=1>%s</td>
 </tr>
     ''' %(txt_tick_the_box, txt_Weight, html_scheme, box)
-      
-    return html
-  except Exception, err:
-    return " ERROR in weightGuiDisplay: %s" %err
+  return html
 OV.registerFunction(weightGuiDisplay)
 
 def getCellHTML():
