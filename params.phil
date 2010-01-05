@@ -128,7 +128,7 @@ snum {
   refinement {
     program = ShelXL XL XH ShelXH XLMP ShelXL_ifc 'smtbx-refine'
       .type = choice
-    method = 'Least Squares' CGLS LBFGS
+    method = 'Least Squares' CGLS LBFGS 'Full Matrix'
       .type = choice
     sg = None
       .type = space_group

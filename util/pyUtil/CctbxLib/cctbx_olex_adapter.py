@@ -29,6 +29,8 @@ class OlexRefinementModel(object):
     asu = olex_refinement_model['aunit']
     for residue in asu['residues']:
       for atom in residue['atoms']:
+        if atom['label'].startswith('Q'):
+          continue
         i = atom['tag']
         self._atoms.setdefault(i, atom)
         element_type = atom['type']
@@ -77,7 +79,6 @@ class OlexRefinementModel(object):
   def getCell(self):
     return [self._cell[param][0] for param in ('a','b','c','alpha','beta','gamma')]
 
-
 class OlexCctbxAdapter(object):
   def __init__(self):
     if OV.HasGUI():
@@ -95,14 +96,13 @@ class OlexCctbxAdapter(object):
     sys.stdout.refresh = False
 
   def xray_structure(self):
-    if self._xray_structure is not None:
-      return self._xray_structure
-    else:
-      return cctbx_controller.create_cctbx_xray_structure(
+    if self._xray_structure is None:
+      self._xray_structure = cctbx_controller.create_cctbx_xray_structure(
         self.cell,
         self.space_group,
         self.olx_atoms.iterator(),
         restraint_iterator=self.olx_atoms.restraint_iterator())
+    return self._xray_structure
 
   def initialise_reflections(self, force=False, verbose=False):
     self.cell = self.olx_atoms.getCell()
@@ -138,7 +138,7 @@ class OlexCctbxRefine(OlexCctbxAdapter):
     self.auto = False
     self.debug = False
     self.film = False
-    self.max_cycles = max_cycles * 10
+    self.max_cycles = max_cycles
     self.do_refinement = True
     if OV.HasGUI() and OV.GetParam('snum.refinement.graphical_output'):
       import Analysis
@@ -294,10 +294,9 @@ class OlexCctbxRefine(OlexCctbxAdapter):
       parameters=maptbx.peak_search_parameters(
         peak_search_level=3,
         interpolate=False,
-	#peak_cutoff=0.1,
-	min_distance_sym_equiv=1.0,
-	max_clusters=30,
-	),
+        #peak_cutoff=0.1,
+        min_distance_sym_equiv=1.0,
+        max_clusters=30),
       verify_symmetry=False
       ).all()
     #peaks = self.refinement.peak_search()
@@ -313,7 +312,7 @@ class OlexCctbxRefine(OlexCctbxAdapter):
       if i == 100:
         break
     olx.xf_EndUpdate()
-    olx.Compaq('-a')
+    olx.Compaq('-q')
     olx.Refresh()
 
   def update_refinement_info(self, msg="Unknown"):
@@ -347,6 +346,158 @@ class OlexCctbxRefine(OlexCctbxAdapter):
           olex_xgrid.SetValue( i,j,k,m[i,j,k])
     olex_xgrid.InitSurface(True)
 
+class FullMatrixRefine(OlexCctbxRefine):
+  def __init__(self, max_cycles=None, verbose=False):
+    OlexCctbxAdapter.__init__(self)
+    self.max_cycles = max_cycles
+    self.verbose = verbose
+    sys.stdout.refresh = False
+    self.scale_factor = None
+
+  def run(self):
+    from smtbx.refinement import least_squares
+    wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
+    normal_eqns = least_squares.normal_equations(
+      self.xray_structure(), self.reflections.f_sq_obs_filtered,
+      weighting_scheme="default")
+      #weighting_scheme=least_squares.unit_weighting())
+    objectives = []
+    scales = []
+    for i in range (self.max_cycles):
+      normal_eqns.build_up()
+      objectives.append(normal_eqns.objective)
+      scales.append(normal_eqns.scale_factor)
+      normal_eqns.solve_and_apply_shifts()
+      shifts = normal_eqns.shifts
+      self.feed_olex()
+      self.scale_factor = scales[-1]
+    self.post_peaks(self.f_obs_minus_f_calc_map(0.4))
+    sys.stdout.refresh = True
+
+  def feed_olex(self):
+    ## Feed Model
+    u_total  = 0
+    u_atoms = []
+    i = 1
+    
+    def iter_scatterers():
+      for a in self.xray_structure().scatterers():
+        label = a.label
+        xyz = a.site
+        symbol = a.scattering_type
+        if a.flags.use_u_iso():
+          u = (a.u_iso,)
+          u_eq = u[0]
+        if a.flags.use_u_aniso():
+          u_cif = adptbx.u_star_as_u_cart(self.xray_structure().unit_cell(), a.u_star)
+          u = u_cif
+          u_eq = adptbx.u_star_as_u_iso(self.xray_structure().unit_cell(), a.u_star)
+        yield label, xyz, u, u_eq, symbol
+
+    for name, xyz, u, ueq, symbol in iter_scatterers():
+      if len(u) == 6:
+        u_trans = (u[0], u[1], u[2], u[5], u[4], u[3])
+      else:
+        u_trans = u
+      id = self.olx_atoms.id_for_name[name]
+      olx.xf_au_SetAtomCrd(id, *xyz)
+      olx.xf_au_SetAtomU(id, *u_trans)
+      u_total += u[0]
+      u_average = u_total/i
+    olx.Sel('-u')
+    olx.xf_EndUpdate()
+
+  def f_obs_minus_f_calc_map(self, resolution):
+    import math
+    f_sq_obs = self.reflections.f_sq_obs
+    f_sq_obs = f_sq_obs.eliminate_sys_absent().average_bijvoet_mates()
+    f_obs = f_sq_obs.f_sq_as_f()
+    sf = xray.structure_factors.from_scatterers(
+      miller_set=f_obs,
+      cos_sin_table=True
+    )
+    f_calc = sf(self.xray_structure(), f_obs).f_calc()
+    fc2 = flex.norm(f_calc.data())
+    fo2 = f_sq_obs.data()
+    wfo2 = 1./flex.pow2(f_sq_obs.sigmas())
+    K2 = flex.mean_weighted(fo2*fc2, wfo2)/flex.mean_weighted(fc2*fc2, wfo2)
+    K2 = math.sqrt(K2)
+    f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1./K2, f_calc)
+    return f_obs_minus_f_calc.fft_map(
+      symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
+      resolution_factor=resolution,
+    )
+
+  def post_peaks(self, fft_map):
+    from cctbx import maptbx
+    from  libtbx.itertbx import izip
+    fft_map.apply_volume_scaling()
+    peaks = fft_map.peak_search(
+      parameters=maptbx.peak_search_parameters(
+        peak_search_level=3,
+        interpolate=False,
+        min_distance_sym_equiv=1.0,
+        max_clusters=30),
+      verify_symmetry=False
+      ).all()
+    i = 0
+    for xyz, height in izip(peaks.sites(), peaks.heights()):
+      if i < 3:
+        if self.verbose: print "Position of peak %s = %s, Height = %s" %(i, xyz, height)
+      i += 1
+      id = olx.xf_au_NewAtom("%.2f" %(height), *xyz)
+      if id != '-1':
+        olx.xf_au_SetAtomU(id, "0.06")
+      if i == 100:
+        break
+    olx.xf_EndUpdate()
+    olx.Compaq('-q')
+    olx.Refresh()
+
+  def calculate_residuals(self, f_obs):
+    sf = xray.structure_factors.from_scatterers(
+      miller_set=f_obs,
+      cos_sin_table=True
+    )
+    f_calc = sf(self.xray_structure(), f_obs).f_calc()
+    ls_function = xray.unified_least_squares_residual(f_obs)
+    ls = ls_function(f_calc, compute_derivatives=False)
+    k = ls.scale_factor()
+    fc = flex.abs(f_calc.data())
+    fo = flex.abs(f_obs.data())
+    return flex.abs(k*fc - fo)
+
+  def R1(self, all_data=False):
+    f_obs = self.reflections.f_sq_obs_merged.f_sq_as_f()
+    if not all_data:
+      strong = f_obs.data() > 4*f_obs.sigmas()
+      f_obs = f_obs.select(strong)
+    R1 = flex.sum(self.calculate_residuals(f_obs)) / flex.sum(f_obs.data())
+    return R1, f_obs.size()
+
+  def wR2_and_GooF(self):
+    f_sq_obs = self.reflections.f_sq_obs_merged
+    sf = xray.structure_factors.from_scatterers(
+      miller_set=f_sq_obs,
+      cos_sin_table=True
+    )
+    f_calc = sf(self.xray_structure(), f_sq_obs).f_calc()
+    ls_function = xray.unified_least_squares_residual(
+      f_sq_obs,
+      #weighting=xray.weighting_schemes.shelx_weighting()
+      weighting=self.weighting
+    )
+    ls = ls_function(f_calc, compute_derivatives=False)
+    weights = ls_function.weighting().weights
+    k = ls.scale_factor()
+    f_sq_calc = f_calc.norm()
+    fc_sq = f_sq_calc.data()
+    fo_sq = f_sq_obs.data()
+    wR2 = math.sqrt(flex.sum(weights * flex.pow2(fo_sq - k * fc_sq)) /
+                    flex.sum(weights * flex.pow2(fo_sq)))
+    GooF = math.sqrt(flex.sum(weights * flex.pow2(fo_sq - k * fc_sq)) /
+                     (fo_sq.size() - minimizer.n()))
+    return wR2, GooF
 
 class OlexCctbxSolve(OlexCctbxAdapter):
   def __init__(self):
