@@ -444,7 +444,7 @@ def make_input_text_box(d):
          'manage':'',
      }
   dic.update(d)  
-  
+
   html = '''
 <input
        bgcolor="$getVar(gui_html_input_bg_colour)"
@@ -454,6 +454,7 @@ def make_input_text_box(d):
        width="%(width)s"
        height="%(height)s"
        label="%(label)s"
+       onchange="%(onchange)s"
        onleave="%(onleave)s"
        %(manage)s
        data="%(data)s"
@@ -510,7 +511,7 @@ def make_tick_box_input(d):
          'oncheck':'',
          'onuncheck':'',
          'data':'',
-         'manage':'manage',
+         'manage':'',
          'state':'',
      }
   dic.update(d)
@@ -546,6 +547,7 @@ def make_spin_input(d):
          'bgcolor':'GetVar(gui_html_input_bg_colour)',
          'value':'$spy.GetParam(%(varName)s)',
          'max':'99',
+         'min':'0',
          'width':'45',
          'onchange':'',
          'label':"%s: " %name,
@@ -564,6 +566,7 @@ def make_spin_input(d):
   width='%(width)s'
   height='%(height)s'
   max='%(max)s'
+  min='%(min)s'
   bgcolor='%(bgcolor)s'
   value='%(value)s'
   onchange='%(onchange)s'
