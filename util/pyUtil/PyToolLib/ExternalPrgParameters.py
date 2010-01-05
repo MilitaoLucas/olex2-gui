@@ -7,6 +7,7 @@ import olex
 import olex_core
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+import phil_interface
 
 definedControls = []
 
@@ -57,13 +58,13 @@ class Program(object):
 
 
 class Method(object):
-  def __init__(self, name, cmd, args, atom_sites_solution=None):
-    self.name = name
-    self.cmd = cmd
-    self.args = args
+  def __init__(self, phil_object):
+    self.phil_index = phil_interface.phil_handler(phil_object)
+    params = self.phil_index.params
+    self.name = params.name
+    #self.options = params.options
     self.help = '%s-help' %(self.name.lower().replace(' ', '-'))
     self.info = '%s-info' %(self.name.lower().replace(' ', '-'))
-    self.atom_sites_solution = atom_sites_solution
     self.observer = None
 
   def html_gui(self):
@@ -76,60 +77,106 @@ class Method(object):
     """
     assert 0, 'run must be defined!'
 
+  def instructions(self):
+    scope = self.phil_index.get_scope_by_name('instructions')
+    if scope is None:
+      return []
+    return (object for object in scope.active_objects())
+
+  def options(self, name):
+    return (arg for arg in
+            self.phil_index.get_scope_by_name('instructions.%s.values' %name)
+            .active_objects())
+
   def calculate_defaults(self):
     """Defines controls in Olex2 for each argument in self.args
     """
-    for arg in self.args:
-      default = arg['default']
-
+    for instruction in self.instructions():
+      params = instruction.extract()
+      default = params.default
+      name = instruction.name
       global definedControls
-      name = arg['name'].replace('.','').lower()
       varName = "settings_%s" %name
       ctrl_name = 'SET_%s' %varName.upper()
       if ctrl_name not in definedControls:
         OV.SetVar(varName, default) # Define checkbox
         definedControls.append(ctrl_name)
-        for value in arg['values']:
-          OV.SetVar('%s_%s' %(varName, value[0]), value[1]) # Define text box for each value
+        self.phil_index.get_scope_by_name('instructions.init.values')
+        self.phil_index.get_scope_by_name('instructions.esel')
+        self.phil_index.get_scope_by_name('instructions.esel.values')
+        for option in self.options(name):
+          value = option.extract()
+          if value is None:
+            value = ''
+          OV.SetVar('%s_%s' %(varName, option.name), value) # Define text box for each value
 
   def getValuesFromFile(self):
     """Gets the value of all arguments in self.args that are present in the
     .ins file and sets the value of the GUI input boxes to reflect this.
     """
-    for arg in self.args:
-      argName = arg['name']
-      name = arg['name'].replace('.','').lower()
-      if argName == 'TEMP':
+    for instruction in self.instructions():
+      params = instruction.extract()
+      default = params.default
+      varName = "settings_%s" %instruction.name
+      if instruction.name == 'temp':
         ins = olx.xf_exptl_Temperature()
       else:
-        ins = olx.Ins(argName)
+        if instruction.caption is not None:
+          ins = olx.Ins(instruction.caption)
+        else:
+          ins = olx.Ins(instruction.name)
       if ins != 'n/a':
-        OV.SetVar('settings_%s' %name, 'true')
+        OV.SetVar(varName, True)
         ins = ins.split()
         count = 0
-        for value in arg['values']:
+        for option in self.options(instruction.name):
           try:
             val = ins[count]
-            OV.SetVar('settings_%s_%s' %(name, value[0]), val)
-            if value[0] == 'nls':
+            OV.SetVar('%s_%s' %(varName, option.name), val)
+            if option.name == 'nls':
               OV.SetParam('snum.refinement.max_cycles', val)
-            elif value[0] == 'npeaks':
+            elif option.name == 'npeaks':
               OV.SetParam('snum.refinement.max_peaks', val)
-            elif value[0] == 'T':
+            elif option.name == 'T':
               OV.SetParam('snum.metacif.diffrn_ambient_temperature',
                           273.0 + float(val.strip('C')))
           except IndexError:
-            OV.SetVar('settings_%s_%s' %(name, value[0]), '')
+            OV.SetVar('%s_%s' %(varName, option.name), '')
           count += 1
       else:
-        if arg['default'] != 'true':
-          OV.SetVar('settings_%s' %name, 'false')
-        if argName in ('L.S.', 'CGLS'):
+        if not default:
+          OV.SetVar(varName, False)
+        if instruction.name in ('ls', 'cgls'):
           val = OV.GetParam('snum.refinement.max_cycles')
-          OV.SetVar('settings_%s_nls' %name, val)
-        elif arg['name'] == 'PLAN':
+          OV.SetVar('%s_nls' %varName, val)
+        elif instruction.name == 'plan':
           val = OV.GetParam('snum.refinement.max_peaks')
-          OV.SetVar('settings_%s_npeaks' %name, val)
+          OV.SetVar('%s_npeaks' %varName, val)
+
+  def getArgs(self):
+    """Gets the value of all the arguments in self.args from Olex2.
+    """
+    args = []
+    for instruction in self.instructions():
+      if OV.FindValue('settings_%s' %instruction.name) in (True, 'True', 'true'):
+        # Check if the argument is selected in the GUI
+        if instruction.caption is not None:
+          arg = instruction.caption
+        else:
+          arg = instruction.name
+        for option in self.options(instruction.name):
+          try:
+            value = OV.FindValue('settings_%s_%s' %(instruction.name, option.name))
+            if not isinstance(value, int) and not isinstance(value, float):
+              if '.' in value:
+                value = float(value)
+              else:
+                value = int(value)
+            arg += ' %s' %value
+          except ValueError:
+            break
+        args.append(arg)
+    return args
 
   def extraHtml(self):
     """This can be redefined in a subclass to define extra HTML that is to be
@@ -146,16 +193,17 @@ class Method(object):
 
 
 class Method_solution(Method):
-  def __init__(self, name, cmd, args, atom_sites_solution=None):
-    Method.__init__(self, name, cmd, args, atom_sites_solution)
+  def __init__(self, phil_object):
+    Method.__init__(self, phil_object)
+    self.atom_sites_solution = self.phil_index.params.atom_sites_solution
 
   def pre_solution(self, RunPrgObject):
     """Prepares the arguments required to reset the structure before running the
     structure solution program.
     """
-    args = self.getArgs()
-    if not args:
-      args = self.cmd
+    args = '\n'.join(self.getArgs())
+    #if not args:
+      #args = self.cmd
     if not RunPrgObject.formula or RunPrgObject.formula == "None":
       RunPrgObject.formula = RunPrgObject.params.snum.refinement.original_formula
 
@@ -191,26 +239,6 @@ class Method_solution(Method):
       args += "-s=%s " % RunPrgObject.sg
     return args
 
-
-
-  def getArgs(self):
-    """Gets the value of all the arguments in self.args from Olex2.
-    """
-    args = ''
-    for arg in self.args:
-      argName = arg['name'].replace('.','').lower()
-      if OV.FindValue('settings_%s' %argName) == 'true': # Check if the argument is selected in the GUI
-        args += arg['name']
-        for item in arg['values']:
-          name = item[0]
-          try:
-            value = float(OV.FindValue('settings_%s_%s' %(argName, name)))
-            args += ' %s' %value
-          except ValueError:
-            break
-        args += '\n'
-    return args
-
   def post_solution(self, RunPrgObject):
     """Things to be done after running the solution program.
     """
@@ -223,8 +251,6 @@ class Method_solution(Method):
 
 
 class Method_refinement(Method):
-  def __init__(self, name, cmd, args, atom_sites_solution=None):
-    Method.__init__(self, name, cmd, args, atom_sites_solution)
 
   def getFlack(self):
     return None
@@ -232,24 +258,10 @@ class Method_refinement(Method):
   def addInstructions(self):
     """Adds instructions to the .ins file so that the file reflects what is selected in the GUI.
     """
-    for arg in self.args:
-      argName = arg['name'].replace('.','').lower()
-      if OV.FindValue('settings_%s' %argName) == 'true': # Check if the argument is selected in the GUI
-        args = arg['name']
-        for item in arg['values']:
-          name = item[0]
-          try:
-            value = OV.FindValue('settings_%s_%s' %(argName, name))
-            if not isinstance(value, int) and not isinstance(value, float):
-              if '.' in value:
-                value = float(value)
-              else:
-                value = int(value)
-            args += ' %s' %value
-          except ValueError:
-            break
-        olx.DelIns(arg['name'])
-        OV.AddIns(args)
+    for arg in self.getArgs():
+      argName = arg.split()[0]
+      olx.DelIns(argName)
+      OV.AddIns(arg)
 
   def pre_refinement(self, RunPrgObject):
     for i in xrange(int(olx.xf_au_GetAtomCount())):
@@ -277,8 +289,6 @@ class Method_refinement(Method):
 
 
 class Method_shelx(Method):
-  def __init__(self, name, cmd, args, atom_sites_solution=None):
-    Method.__init__(self, name, cmd, args, atom_sites_solution)
 
   def run(self, RunPrgObject):
     """Runs any SHELX refinement/solution program
@@ -287,7 +297,7 @@ class Method_shelx(Method):
     prgName = olx.file_GetName(RunPrgObject.shelx)
     #olex.m("User '%s'" %RunPrgObject.tempPath)
     olx.User("'%s'" %RunPrgObject.tempPath)
-    xl_ins_filename = RunPrgObject.hkl_src_name
+    xl_ins_filename = RunPrgObject.shelx_alias
 # This is an ugly fix - but good start
     if 'shelxs86' in prgName:
       print 'STARTING SHELX86 modifications'
@@ -354,8 +364,6 @@ class Method_shelx(Method):
 class Method_shelx_solution(Method_shelx, Method_solution):
   """Inherits methods specific to shelx solution programs
   """
-  def __init__(self, name, cmd, args, atom_sites_solution=None):
-    Method_shelx.__init__(self, name, cmd, args, atom_sites_solution)
 
   def observe(self, RunPrgObject):
     import Analysis
@@ -366,8 +374,6 @@ class Method_shelx_solution(Method_shelx, Method_solution):
 class Method_shelx_refinement(Method_shelx, Method_refinement):
   """Inherits methods specific to shelx refinement programs
   """
-  def __init__(self, name, cmd, args, atom_sites_solution=None):
-    Method_shelx.__init__(self, name, cmd, args, atom_sites_solution)
 
   def pre_refinement(self, RunPrgObject):
     diffrn_ambient_temperature = OV.GetParam('snum.metacif.diffrn_ambient_temperature')
@@ -381,7 +387,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
         diffrn_ambient_temperature = diffrn_ambient_temperature - 273.0
         OV.DelIns('TEMP')
         OV.AddIns('TEMP %s' %diffrn_ambient_temperature)
-      except:
+      except ValueError:
         pass
     Method_refinement.pre_refinement(self, RunPrgObject)
 
@@ -398,8 +404,6 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
 
 
 class Method_shelx_direct_methods(Method_shelx_solution):
-  def __init__(self, name, cmd, args, atom_sites_solution=None):
-    Method_shelx_solution.__init__(self, name, cmd, args, atom_sites_solution)
 
   def post_solution(self, RunPrgObject):
     Method_shelx_solution.post_solution(self, RunPrgObject)
@@ -420,8 +424,6 @@ class Method_shelx_direct_methods(Method_shelx_solution):
 
 
 class Method_shelxd(Method_shelx_solution):
-  def __init__(self, name, cmd, args, atom_sites_solution=None):
-    Method_shelx_solution.__init__(self, name, cmd, args, atom_sites_solution)
 
   def calculate_defaults(self):
     """Defines controls in Olex2 for each argument in self.args and then calculates
@@ -437,9 +439,9 @@ class Method_shelxd(Method_shelx_solution):
 
     try:
       OV.SetVar('settings_find_na', nmin)
-      OV.SetVar('settings_plop_1', nmin)
-      OV.SetVar('settings_plop_2', nmid)
-      OV.SetVar('settings_plop_3', nmax)
+      OV.SetVar('settings_plop_a', nmin)
+      OV.SetVar('settings_plop_b', nmid)
+      OV.SetVar('settings_plop_c', nmax)
     except:
       pass
 
@@ -458,9 +460,7 @@ class Method_shelxd(Method_shelx_solution):
     html = '''
   </tr>
   <tr>
-  <td>
     %s
-  </td>
   <td>
     %s
   </td>
@@ -501,8 +501,10 @@ class Method_shelxd(Method_shelx_solution):
       olx.xf_au_SetAtomU(i, "0.06")
 
 class Method_cctbx_refinement(Method_refinement):
-  def __init__(self, name, cmd, args, atom_sites_solution=None):
-    Method_refinement.__init__(self, name, cmd, args, atom_sites_solution)
+
+  def pre_refinement(self, RunPrgObject):
+    RunPrgObject.make_unique_names = True
+    Method_refinement.pre_refinement(self, RunPrgObject)
 
   def run(self, RunPrgObject):
     from cctbx_olex_adapter import OlexCctbxRefine
@@ -517,9 +519,26 @@ class Method_cctbx_refinement(Method_refinement):
     olx.File('%s.res' %OV.FileName())
     OV.DeleteBitmap('refine')
 
+class Method_cctbx_fm_refinement(Method_refinement):
+
+  def pre_refinement(self, RunPrgObject):
+    RunPrgObject.make_unique_names = True
+    Method_refinement.pre_refinement(self, RunPrgObject)
+
+  def run(self, RunPrgObject):
+    from cctbx_olex_adapter import FullMatrixRefine
+    print 'STARTING cctbx refinement'
+    verbose = OV.GetParam('olex2.verbose')
+    cctbx = FullMatrixRefine(
+      max_cycles=RunPrgObject.params.snum.refinement.max_cycles,
+      verbose=verbose)
+    olx.Kill('$Q')
+    cctbx.run()
+    OV.SetVar('cctbx_R1',cctbx.R1()[0])
+    olx.File('%s.res' %OV.FileName())
+    OV.DeleteBitmap('refine')
+
 class Method_cctbx_ChargeFlip(Method_solution):
-  def __init__(self, name, cmd, args, atom_sites_solution=None):
-    Method_solution.__init__(self, name, cmd, args, atom_sites_solution)
 
   def run(self, RunPrgObject):
     from cctbx_olex_adapter import OlexCctbxSolve
@@ -527,7 +546,8 @@ class Method_cctbx_ChargeFlip(Method_solution):
     RunPrgObject.solve = True
     cctbx = OlexCctbxSolve()
 
-    solving_interval = int(float(self.getArgs().split()[1]))
+    #solving_interval = int(float(self.getArgs().split()[1]))
+    solving_interval = self.phil_index.params.flipping_interval
 
     formula_l = olx.xf_GetFormula('list')
     formula_l = formula_l.split(",")
@@ -554,8 +574,6 @@ class Method_cctbx_ChargeFlip(Method_solution):
     olx.Atreap(file)
 
 class Method_SIR97(Method_solution):
-  def __init__(self, name, cmd, args, atom_sites_solution=None):
-    Method_solution.__init__(self, name, cmd, args, atom_sites_solution)
 
   def run(self, RunPrgObject):
     import OlxSir
@@ -583,219 +601,31 @@ class Method_SIR97(Method_solution):
 
 def defineExternalPrograms():
   # define solution methods
-  direct_methods = Method_shelx_direct_methods(
-    name='Direct Methods',
-    cmd='TREF',
-    args=(
-      dict(name='TREF', 
-           values=[['np', 100], ['nE', ''], ['kapscal', ''], ['ntan', ''], ['wn', '']],
-           default='true',
-           optional=False,
-           ),
-      dict(name='INIT',
-           values=[['nn', ''], ['nf', ''], ['s+', 0.8], ['s-', 0.2], ['wr', 0.2]],
-           default='false',
-           optional=True,
-           ),
-      dict(name='PHAN',
-           values=[['steps', 10], ['cool', 0.9], ['Boltz', ''], ['ns', ''], ['mtpr', 40], ['mngr', 10]],
-           default='false',
-           optional=True,
-           ),
-      dict(name='ESEL',
-           values=[['Emin', 1.2], ['Emax', 5], ['dU', .005], ['renorm', .7], ['axis', 0]],
-           default='false',
-           optional=True,
-           ),
-      dict(name='EGEN',
-           values=[['d_min', ''], ['d_max', '']],
-           default='false',
-           optional=True,
-           ),
-      dict(name='GRID',
-           values=[['sl',''], ['sa', ''], ['sd', ''], ['dl', ''], ['da', ''], ['dd', '']],
-           default='false',
-           optional=True,
-           ),
-      #dict(name='PLAN',
-      #values=[['npeaks', ''], ['d1', 0.5], ['d2', 1.5]],
-      #default='false',
-      #),
-      ),
-    atom_sites_solution='direct',
-  )
-  patterson = Method_shelx_solution(
-    name='Patterson Method',
-    cmd='PATT',
-    args=(
-      dict(name='PATT',
-           values=[['nv', ''], ['dmin', ''], ['resl', ''], ['Nsup', ''], ['Zmin', ''], ['maxat', '']],
-           default='true',
-           optional=False,
-           ),
-      dict(name='VECT',
-           values=[['X', ''], ['Y', ''], ['Z', '']],
-           default='false',
-           optional=True,
-           ),
-      dict(name='ESEL',
-           values=[['Emin', 1.2], ['Emax', 5], ['dU', .005], ['renorm', .7], ['axis', 0]],
-           default='false',
-           optional=True,
-           ),
-      dict(name='EGEN',
-           values=[['d_min', ''], ['d_max', '']],
-           default='false',
-           optional=True,
-           ),
-      dict(name='GRID',
-           values=[['sl',''], ['sa', ''], ['sd', ''], ['dl', ''], ['da', ''], ['dd', '']],
-           default='false',
-           optional=True,
-           ),
-      #dict(name='PLAN',
-      #values=[['npeaks', ''], ['d1', 0.5], ['d2', 1.5]],
-      #default='false',
-      #),
-      ),
-    atom_sites_solution='heavy'
-  )
-  dual_space = Method_shelxd(
-    name='Dual Space',
-    cmd='',
-    args = (
-      dict(name='NTRY',
-           values=[['ntry', 100]],
-           default='true',
-           optional=True,
-           ),
-      dict(name='FIND',
-           values=[['na', 0], ['ncy', '']],
-           default='true',
-           optional=True,
-           ),
-      dict(name='MIND',
-           values=[['mdis', 1.0], ['mdeq', 2.2]],
-           default='true',
-           optional=True,
-           ),
-      dict(name='PLOP',
-           values=[['1', ''], ['2', ''], ['3', ''], ['4', ''], ['5', ''], ['6', ''], ['7', ''], ['8', ''], ['9', ''], ['10', '']],
-           default='true',
-           optional=True,
-           ),
-      ),
-    #{'name':'SHEL', 'values':['dmax:', 'dmin:0']},
-    #{'name':'PATS', 'values':['+np or -dis:100', 'npt:', 'nf:5']},
-    #{'name':'GROP', 'values':['nor:99', 'E<sub>g</sub>:1.5', 'd<sub>g</sub>:1.2', 'ntr:99']},
-    #{'name':'PSMF', 'values':['pres:3.0', 'psfac:0.34']},
-    #{'name':'FRES', 'values':['res:3.0',]},
-    #{'name':'ESEL', 'values':['Emin:', 'dlim:1.0']},
 
-    #{'name':'DSUL', 'values':['nss:0',]},
-    #{'name':'TANG', 'values':['ftan:0.9', 'fex:0.4']},
-    #{'name':'NTPR', 'values':['ntpr:100',]},
-    #{'name':'SKIP', 'values':['min2:0.5',]},
-    #{'name':'WEED', 'values':['fr:0.3',]},
-    #{'name':'CCWT', 'values':['g:0.1',]},
-    #{'name':'TEST', 'values':['CCmin:', 'delCC:']},
-    #{'name':'KEEP', 'values':['nh:0',]},
-    #{'name':'PREJ', 'values':['max:3', 'dsp:-0.01', 'mf:1']},
-    #{'name':'SEED', 'values':['nrand:0',]},
-    #{'name':'MOVE', 'values':['dx:0', 'dy:0', 'dz:0', 'sign:1']},
-    atom_sites_solution='dual'
-  )
-  charge_flipping = Method_cctbx_ChargeFlip(
-    name='Charge Flipping', 
-    cmd='FLIP',
-    args=(
-      dict(name='FLIP',
-           values=[['interval', 60]],
-           default='true',
-           optional=True,
-           ),
-      ),
-    atom_sites_solution='other'
-  )
+  direct_methods = Method_shelx_direct_methods(direct_methods_phil)
+  patterson = Method_shelx_solution(patterson_phil)
+  dual_space = Method_shelxd(dual_space_phil)
+  charge_flipping = Method_cctbx_ChargeFlip(charge_flipping_phil)
+
 # Testing sir97 easy mode
-  easy = Method_SIR97(
-    name='SIR97 Easy',
-    cmd='easy',
-    args=(
-      dict(name='easy',
-           values=[['interval', 60]],
-           default='true',
-           optional=True,
-           ),
-      ),
-    atom_sites_solution='other'
-  )
+  #easy = Method_SIR97(
+    #name='SIR97 Easy',
+    #cmd='easy',
+    #args=(
+      #dict(name='easy',
+           #values=[['interval', 60]],
+           #default='true',
+           #optional=True,
+           #),
+      #),
+    #atom_sites_solution='other'
+  #)
 
   # define refinement methods
-  least_squares = Method_shelx_refinement(
-    name='Least Squares', 
-    cmd='L.S.', 
-    args=(
-      {'name':'L.S.',
-       'values':[['nls', 4], ['nrf', ''], ['nextra', ''], ['maxvec', 511]],
-       'default':'true',
-       'optional':False,
-       },
-      {'name':'PLAN',
-       'values':[['npeaks', 20], ['d1', ''], ['d2', '']],
-       'default':'true',
-       'optional':True,
-       },
-      {'name':'FMAP',
-       'values':[['code', 2], ['axis', ''], ['n1', 53]],
-       'default':'true',
-       'optional':True,
-       },
-      {'name':'ACTA',
-       'values':[['2thetafull', '']],
-       'default':'false',
-       'optional':True,
-       },
-      {'name':'TEMP',
-       'values':[['T','']],
-       'default':'false',
-       'optional':True,
-       },
-      ),
-  )
-
-  cgls = Method_shelx_refinement(
-    name='CGLS',
-    cmd='CGLS',
-    args=(
-      {'name':'CGLS',
-       'values':[['nls', 4], ['nrf', ''], ['nextra', ''], ['maxvec', 511]],
-       'default':'true',
-       'optional':False,
-       },
-      {'name':'PLAN',
-       'values':[['npeaks', 20], ['d1', ''], ['d2', '']],
-       'default':'true',
-       'optional':True,
-       },
-      {'name':'FMAP',
-       'values':[['code', 2], ['axis', ''], ['n1', 53]],
-       'default':'true',
-       'optional':True,
-       },
-      {'name':'TEMP',
-       'values':[['T','']],
-       'default':'false',
-       'optional':True,
-       },
-      ),
-  )
-
-  lbgfs = Method_cctbx_refinement(
-    name='LBFGS',
-    cmd='LBFGS',
-    args = {}
-  )
+  least_squares = Method_shelx_refinement(least_squares_phil)
+  cgls = Method_shelx_refinement(cgls_phil)
+  lbfgs = Method_cctbx_refinement(lbfgs_phil)
+  full_matrix = Method_cctbx_fm_refinement(full_matrix_phil)
 
   # define solution programs
   ShelXS = Program(
@@ -844,7 +674,7 @@ def defineExternalPrograms():
   ShelXS.addMethod(patterson)
   ShelXS86.addMethod(direct_methods)
   ShelXS86.addMethod(patterson)
-  SIR97.addMethod(easy)
+  #SIR97.addMethod(easy)
   XS.addMethod(direct_methods)
   XS.addMethod(patterson)
   ShelXD.addMethod(dual_space)
@@ -893,18 +723,24 @@ def defineExternalPrograms():
     program_type='refinement',
     author="L.J. Bourhis, R.J. Gildea, R.W. Grosse-Kunstleve",
     reference="smtbx-refine (Bourhis, 2008)")
+  smtbx_fm_refine = Program(
+    name='smtbx-refine',
+    program_type='refinement',
+    author="L.J. Bourhis, R.J. Gildea, R.W. Grosse-Kunstleve",
+    reference="smtbx-refine (Bourhis, 2008)")
 
   for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc):
     for method in (least_squares, cgls):
       prg.addMethod(method)
-  smtbx_refine.addMethod(lbgfs)
+  smtbx_refine.addMethod(lbfgs)
+  #smtbx_refine.addMethod(full_matrix)
 
   SPD = ExternalProgramDictionary()
   for prg in (ShelXS, ShelXS86, XS, ShelXD, XM, smtbx_solve):
     SPD.addProgram(prg)
 
   RPD = ExternalProgramDictionary()
-  for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc, smtbx_refine):
+  for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc, smtbx_refine, smtbx_fm_refine):
     RPD.addProgram(prg)
 
   return SPD, RPD
@@ -933,6 +769,389 @@ def getFormulaAsDict(formula):
       print >> sys.stderr, "An error occured in the function getFormulaAsDict.\nFormula: %s, item: %s" %(formula, item)
       sys.stderr.formatExceptionInfo()
   return d
+
+shelxs_phil = phil_interface.parse("""
+esel
+  .optional=True
+{
+  values {
+    Emin=1.2
+      .type=float
+    Emax=5
+      .type=float
+    dU=0.05
+      .type=float
+    renorm=.7
+      .type=float
+    axis=0
+      .type=int
+  }
+  default=False
+    .type=bool
+}
+egen
+  .optional=True
+{
+  values {
+    d_min=None
+      .type=float
+    d_max=None
+      .type=float
+  }
+  default=False
+    .type=bool
+}
+grid
+  .optional=True
+{
+  values {
+    sl=None
+      .type=float
+    sa=None
+      .type=float
+    sd=None
+      .type=float
+    dl=None
+      .type=float
+    da=None
+      .type=float
+    dd=None
+      .type=float
+  }
+  default=False
+    .type=bool
+}
+""")
+
+direct_methods_phil = phil_interface.parse("""
+name = 'Direct Methods'
+  .type=str
+atom_sites_solution=direct
+  .type=str
+instructions {
+  tref {
+    values {
+      np = 100
+        .type=int
+      nE = None
+        .type=int
+      kapscal = None
+        .type=float
+      ntan = None
+        .type=int
+      wn = None
+        .type=float
+    }
+    default = True
+      .type=bool
+  }
+  init
+    .optional=True
+  {
+    values {
+      nn=None
+        .type=int
+      nf=None
+        .type=int
+      s_plus=0.8
+        .type=float
+      s_minus=0.2
+        .type=float
+      wr=0.2
+        .type=float
+    }
+    default = False
+      .type=bool
+  }
+  phan
+    .optional=True
+  {
+    values {
+      steps = 10
+        .type=int
+      cool = 0.9
+        .type=float
+      Boltz = None
+        .type=float
+      ns = None
+        .type=int
+      mtpr = 40
+        .type=int
+      mnqr = 10
+        .type=int
+    }
+    default = False
+      .type=bool
+  }
+  include scope ExternalPrgParameters.shelxs_phil
+}
+""", process_includes=True)
+
+patterson_phil = phil_interface.parse("""
+name = 'Patterson Method'
+  .type=str
+atom_sites_solution=heavy
+  .type=str
+instructions {
+  patt {
+    values {
+      nv=None
+        .type=int
+      dmin=None
+        .type=float
+      resl=None
+        .type=float
+      Nsup=None
+        .type=int
+      Zmin=None
+        .type=int
+      maxat=None
+        .type=int
+    }
+    default=True
+      .type=bool
+  }
+  vect
+    .optional=True
+  {
+    values {
+      X=None
+        .type=float
+      Y=None
+        .type=float
+      Z=None
+        .type=float
+    }
+    default=False
+      .type=bool
+  }
+  include scope ExternalPrgParameters.shelxs_phil
+}
+""", process_includes=True)
+
+dual_space_phil = phil_interface.parse("""
+name='Dual Space'
+  .type=str
+atom_sites_solution=dual
+  .type=str
+instructions {
+  ntry
+    .optional=True
+  {
+    values {
+      ntry=100
+        .type=int
+    }
+    default=True
+      .type=bool
+  }
+  find
+    .optional=True
+  {
+    values {
+      na=0
+        .type=int
+      ncy=None
+        .type=int
+    }
+    default=True
+      .type=bool
+  }
+  mind
+    .optional=True
+  {
+    values {
+      mdis=1.0
+        .type=float
+      mdeq=2.2
+        .type=float
+    }
+    default=True
+      .type=bool
+  }
+  plop
+    .optional=True
+  {
+    values {
+      a=None
+        .type=int
+        .caption=1
+      b=None
+        .type=int
+        .caption=2
+      c=None
+        .type=int
+        .caption=3
+      d=None
+        .type=int
+        .caption=4
+      e=None
+        .type=int
+        .caption=5
+      f=None
+        .type=int
+        .caption=6
+      g=None
+        .type=int
+        .caption=7
+      h=None
+        .type=int
+        .caption=8
+      i=None
+        .type=int
+        .caption=9
+      j=None
+        .type=int
+        .caption=10
+    }
+    default=True
+      .type=bool
+  }
+}
+""")
+
+  #{'name':'SHEL', 'values':['dmax:', 'dmin:0']},
+  #{'name':'PATS', 'values':['+np or -dis:100', 'npt:', 'nf:5']},
+  #{'name':'GROP', 'values':['nor:99', 'E<sub>g</sub>:1.5', 'd<sub>g</sub>:1.2', 'ntr:99']},
+  #{'name':'PSMF', 'values':['pres:3.0', 'psfac:0.34']},
+  #{'name':'FRES', 'values':['res:3.0',]},
+  #{'name':'ESEL', 'values':['Emin:', 'dlim:1.0']},
+  #{'name':'SHEL', 'values':['dmax:', 'dmin:0']},
+  #{'name':'PATS', 'values':['+np or -dis:100', 'npt:', 'nf:5']},
+  #{'name':'GROP', 'values':['nor:99', 'E<sub>g</sub>:1.5', 'd<sub>g</sub>:1.2', 'ntr:99']},
+  #{'name':'PSMF', 'values':['pres:3.0', 'psfac:0.34']},
+  #{'name':'FRES', 'values':['res:3.0',]},
+
+  #{'name':'DSUL', 'values':['nss:0',]},
+  #{'name':'TANG', 'values':['ftan:0.9', 'fex:0.4']},
+  #{'name':'NTPR', 'values':['ntpr:100',]},
+  #{'name':'SKIP', 'values':['min2:0.5',]},
+  #{'name':'WEED', 'values':['fr:0.3',]},
+  #{'name':'CCWT', 'values':['g:0.1',]},
+  #{'name':'TEST', 'values':['CCmin:', 'delCC:']},
+  #{'name':'KEEP', 'values':['nh:0',]},
+  #{'name':'PREJ', 'values':['max:3', 'dsp:-0.01', 'mf:1']},
+  #{'name':'SEED', 'values':['nrand:0',]},
+  #{'name':'MOVE', 'values':['dx:0', 'dy:0', 'dz:0', 'sign:1']},
+
+charge_flipping_phil = phil_interface.parse("""
+name = 'Charge Flipping'
+  .type=str
+atom_sites_solution=other
+  .type=str
+flipping_interval=60
+  .type=int
+""")
+
+shelxl_phil = phil_interface.parse("""
+plan
+  .optional=True
+{
+  values {
+    npeaks=20
+      .type=int
+    d1=None
+      .type=float
+    d2=None
+      .type=float
+  }
+  default=True
+    .type=bool
+}
+fmap
+  .optional=True
+{
+  values {
+    code=2
+      .type=int
+    axis=None
+      .type=int(value_min=1, value_max=3)
+    nl=53
+      .type=int
+  }
+  default=True
+    .type=bool
+}
+temp
+  .optional=True
+{
+  values {
+    T=None
+      .type=int
+  }
+  default=False
+    .type=bool
+}
+""")
+
+least_squares_phil = phil_interface.parse("""
+name = 'Least Squares'
+  .type=str
+instructions {
+  ls
+    .caption = 'L.S.'
+  {
+    name='L.S.'
+      .type=str
+    values {
+      nls=4
+        .type=int
+      nrf=0
+        .type=int
+      nextra=0
+        .type=int
+      maxvec=511
+        .type=int
+    }
+    default=True
+      .type=bool
+  }
+  include scope ExternalPrgParameters.shelxl_phil
+  acta
+    .optional=True
+  {
+    values {
+      two_theta_full=None
+        .caption=2thetafull
+        .type=float
+    }
+    default=False
+      .type=bool
+  }
+}
+""", process_includes=True)
+
+cgls_phil = phil_interface.parse("""
+name = CGLS
+  .type=str
+instructions {
+  cgls {
+    values {
+      nls=4
+        .type=int
+      nrf=0
+        .type=int
+      nextra=0
+        .type=int
+      maxvec=511
+        .type=int
+    }
+    default=True
+      .type=bool
+  }
+  include scope ExternalPrgParameters.shelxl_phil
+}
+""", process_includes=True)
+
+lbfgs_phil = phil_interface.parse("""
+name = LBFGS
+  .type=str
+""")
+
+full_matrix_phil = phil_interface.parse("""
+name = 'Full Matrix'
+  .type=str
+""")
 
 if __name__ == '__main__':
   SPD, RPD = defineExternalPrograms()

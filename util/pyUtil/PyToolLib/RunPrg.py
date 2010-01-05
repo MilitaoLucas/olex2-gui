@@ -3,7 +3,8 @@ import olex
 import olx
 import os
 import olexex
-from History import *
+from ArgumentParser import ArgumentParser
+from History import hist
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
@@ -43,6 +44,7 @@ class RunPrg(ArgumentParser):
       return
     self.original_filename = self.filename
     olx.Stop('listen')
+    self.shelx_alias = OV.FileName().replace(' ', '').lower()
 
   def __del__(self):
     self.method.unregisterCallback()
@@ -57,14 +59,11 @@ class RunPrg(ArgumentParser):
     return a
 
   def doBroadcast(self):
-    refinealias = "%s" %self.hkl_src_name
-    refinealias = refinealias.replace(' ', '')
-    refinealias = refinealias.lower()
     if "smtbx" not in self.program.name:
       ext = "res"
     else:
       ext = "res"
-    copy_from = "%s/%s.%s" %(self.tempPath, refinealias, ext)
+    copy_from = "%s/%s.%s" %(self.tempPath, self.shelx_alias, ext)
     copy_to = "%s/listen.res" %(self.datadir)
     if os.path.isfile(copy_from):
       if copy_from.lower() != copy_to.lower():
@@ -75,10 +74,7 @@ class RunPrg(ArgumentParser):
     if self.broadcast_mode:
       self.doBroadcast()
     for ext in extensions:
-      refinealias = "%s" %self.hkl_src_name
-      refinealias = refinealias.replace(' ', '')
-      refinealias = refinealias.lower()
-      copy_from = "%s/%s.%s" %(self.tempPath, refinealias, ext)
+      copy_from = "%s/%s.%s" %(self.tempPath, self.shelx_alias, ext)
       copy_to = "%s/%s.%s" %(self.filePath, self.original_filename, ext)
       if os.path.isfile(copy_from):
         if copy_from.lower() != copy_to.lower():
@@ -122,17 +118,14 @@ class RunPrg(ArgumentParser):
       self.hkl_src = os.path.splitext(OV.FileFull())[0] + '.hkl'
     self.hkl_src_name = os.path.splitext(os.path.basename(self.hkl_src))[0]
     self.curr_file = OV.FileName()
-    refinealias = "%s" %self.hkl_src_name
-    refinealias = refinealias.replace(' ', '')
-    refinealias = refinealias.lower()
     copy_from = "%s" %(self.hkl_src)
     ## All files will be copied to the temp directory in lower case. This is to be compatible with the Linux incarnations of ShelX
-    copy_to = "%s/%s.hkl" %(self.tempPath, refinealias)
+    copy_to = "%s/%s.hkl" %(self.tempPath, self.shelx_alias)
     if not os.path.exists(copy_to):
       olx.file_Copy(copy_from, copy_to)
     copy_from = "%s/%s.ins" %(self.filePath, self.curr_file)
 #    copy_from = copy_from.lower() # This breaks under Linux if the directory is also case sensitive
-    copy_to = "%s/%s.ins" %(self.tempPath, refinealias)
+    copy_to = "%s/%s.ins" %(self.tempPath, self.shelx_alias)
     if not os.path.exists(copy_to):
       olx.file_Copy(copy_from, copy_to)
 
@@ -149,7 +142,6 @@ class RunPrg(ArgumentParser):
     olex.f('GetVar(cctbx_R1)')
 
   def runAfterProcess(self):
-    
     if 'smtbx' not in self.program.name:
       self.doFileResInsMagic()
       reflections = OV.HKLSrc() #BEWARE DRAGONS
@@ -202,6 +194,7 @@ class RunPrg(ArgumentParser):
     OV.DeleteBitmap('%s' %self.bitmap)
     OV.Cursor()
 
+
 class RunSolutionPrg(RunPrg):
   def __init__(self):
     RunPrg.__init__(self)
@@ -209,7 +202,7 @@ class RunSolutionPrg(RunPrg):
     self.bitmap = 'solve'
     self.program, self.method = self.getProgramMethod('solve')
     self.run()
-    
+
   def run(self):
     self.startRun()
     if OV.IsFileType('cif'):
@@ -233,7 +226,7 @@ class RunSolutionPrg(RunPrg):
     RunPrg.runAfterProcess(self)
     self.method.post_solution(self)
     self.doHistoryCreation()
-    
+
   def setupSolve(self):
     try:
       self.sg = olex.f(r'sg(%n)')
@@ -244,7 +237,7 @@ class RunSolutionPrg(RunPrg):
       self.shelx = self.which_shelx(self.program)
     args = self.method.pre_solution(self)
     olx.Reset(args)
-    
+
   def doHistoryCreation(self):
     self.params.snum.refinement.last_R1 = 'Solution'
     self.his_file = hist.create_history(solution=True)
@@ -344,7 +337,7 @@ class RunRefinementPrg(RunPrg):
       self.doAutoTidyAfter()
       OV.File()
     self.isInversionNeeded()
-  
+
   def doHistoryCreation(self):
     R1 = 0
     self.his_file = ""
@@ -371,7 +364,7 @@ class RunRefinementPrg(RunPrg):
       print "The refinement has failed, no R value was returned by the refinement."
     self.R1 = R1
     return self.his_file, R1
-  
+
   def isInversionNeeded(self):
     flack = self.method.getFlack()
     if flack:

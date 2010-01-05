@@ -50,7 +50,8 @@ def makeProgramSettingsGUI(program, method, prgtype):
     <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$getVar(gui_html_table_bg_colour)">
 """
 
-  txt += ''.join([makeArgumentsHTML(program.name, method.name, arg) for arg in method.args])
+  txt += ''.join([makeArgumentsHTML(program, method, instruction)
+                  for instruction in method.instructions()])
 
   txt += r'''
 <tr>
@@ -69,22 +70,27 @@ def makeProgramSettingsGUI(program, method, prgtype):
   OlexVFS.write_to_olex(wFilePath, txt)
   return
 
-def makeArgumentsHTML(program, method, dictionary):
+def makeArgumentsHTML(program, method, instruction):
   txt = '<tr>'
   first_col = htmlTools.make_table_first_col()
   txt += first_col
-  help = htmlTools.make_help_href(dictionary['name'], 'true')
-  
-  argName = dictionary['name']
-  name = argName.replace('.','')
-  
-  if dictionary['optional']:
+  if instruction.caption is not None:
+    argName = instruction.caption
+  else:
+    argName = instruction.name
+  help = htmlTools.make_help_href(argName, 'true')
+
+  name = instruction.name
+
+  if instruction.optional:
     tick_box_d = {'height':16, 'width':16}
     tick_box_d.setdefault('ctrl_name', 'SET_SETTINGS_%s' %name.upper())
-    tick_box_d.setdefault('state', '$spy.CheckBoxValue(settings_%s)' %name)
+    tick_box_d.setdefault('checked', '$GetVar(settings_%s)' %name)
     tick_box_d.setdefault('value', '')
-    tick_box_d.setdefault('oncheck', 'SetVar(settings_%s,GetState(SET_SETTINGS_%s))>>spy.addInstruction(%s,%s,%s)' %(name,name,program, method, name))
-    tick_box_d.setdefault('onuncheck', 'SetVar(settings_%s,GetState(SET_SETTINGS_%s))>>DelIns %s' %(name,name,argName))
+    tick_box_d.setdefault('oncheck', 'SetVar(settings_%s,GetState(SET_SETTINGS_%s))>>spy.addInstruction(%s,%s,%s)' %(
+      name, name, program.name, method.name, name))
+    tick_box_d.setdefault('onuncheck', 'SetVar(settings_%s,GetState(SET_SETTINGS_%s))>>DelIns %s' %(
+      name, name, argName))
     tick_box_html = htmlTools.make_tick_box_input(tick_box_d)
   else:
     tick_box_html = ''
@@ -99,38 +105,99 @@ def makeArgumentsHTML(program, method, dictionary):
 <tr>
 %s
 ''' %(argName, help, tick_box_html, first_col)
-  
+
+  options_gui = []
   count = 0
-  for value in dictionary['values']:
+  for option in method.options(instruction.name):
     count += 1
-    d = {'height':17, 'width':32}
-    varName = 'settings_%s_%s' %(name.lower(), value[0].lower())
-    d.setdefault('ctrl_name', 'SET_%s' %varName.upper())
-    
-    onchange = 'spy.addInstruction(%s,%s,%s)>>SetVar(%s,GetValue(SET_%s))' %(program, method, name,varName,varName.upper())
-    if value[0] == 'nls':
-      maxCycles_onchange = '%s>>spy.SetParam(snum.refinement.max_cycles,GetValue(SET_SETTINGS_%s_NLS))>>updatehtml' %(onchange,name.upper())
-      d.setdefault('onleave', maxCycles_onchange)
-    elif value[0] == 'npeaks':
-      maxPeaks_onchange = '%s>>spy.SetParam(snum.refinement.max_peaks,GetValue(SET_SETTINGS_%s_NPEAKS))>>updatehtml' %(onchange,name.upper())
-      d.setdefault('onleave', maxPeaks_onchange)
-    else:
-      d.setdefault('onleave', onchange)
-    d.setdefault('value', 'GetVar(%s)' %(varName))
-    d.setdefault('label', '')
-    inputBox = htmlTools.make_input_text_box(d)
+
+    varName = 'settings_%s_%s' %(name.lower(), option.name)
+    data_type = option.type.phil_type
+    caption = option.caption
+    if caption is None:
+      caption = option.name
+    value = 'GetVar(%s)' %(varName)
+    if value is None:
+      value = ''
+    ctrl_name = 'SET_%s' %(varName.upper())
+    onchange = 'SetVar(%s,GetValue(%s))>>spy.addInstruction(%s,%s,%s)' %(
+      varName, ctrl_name, program.name, method.name, name)
+    if option.name == 'nls':
+      onchange = '%s>>spy.SetParam(snum.refinement.max_cycles,GetValue(SET_SETTINGS_%s_NLS))>>updatehtml' %(onchange, name.upper())
+    elif option.name == 'npeaks':
+      onchange = '%s>>spy.SetParam(snum.refinement.max_peaks,GetValue(SET_SETTINGS_%s_NPEAKS))>>updatehtml' %(onchange, name.upper())
+    #if data_type == "int":
+      #d = {'ctrl_name':ctrl_name,
+           #'value':value,
+           #'label':'%s ' %caption,
+           #'onchange':onchange,
+           #}
+      #if option.type.value_max is not None:
+        #d.setdefault('max', option.type.value_max)
+      #else:
+        #d.setdefault('max', '')
+      #if option.type.value_min is not None:
+        #d.setdefault('min', option.type.value_min)
+      #else:
+        #d.setdefault('min', '')
+      #options_gui.append(htmlTools.make_spin_input(d))
+
+    #elif data_type == "float":
+    if data_type in ("float", "int"):
+      d = {'ctrl_name':ctrl_name,
+           'value':value,
+           'label':'%s ' %caption,
+           'onchange':onchange,
+           'onleave':onchange,
+           }
+      options_gui.append(htmlTools.make_input_text_box(d))
+
+    elif data_type == "str":
+      d = {'ctrl_name':ctrl_name,
+           'value':value,
+           'label':'%s ' %caption,
+           'onchange':onchange,
+           'onleave':onchange,
+           }
+      options_gui.append(htmlTools.make_input_text_box(d))
+
+    elif data_type == "bool":
+      d = {'ctrl_name':ctrl_name,
+           'value':'%s ' %caption,
+           'checked':'%s' %value,
+           'oncheck':'SetVar(%s,True)' %(varName),
+           'onuncheck':'SetVar(%s,True)' %(varName),
+           'width':80,
+           'bgcolor':"",
+           'fgcolor':"",
+           }
+      options_gui.append(htmlTools.make_tick_box_input(d))
+
+    elif data_type == "choice":
+      items_l = []
+      for thing in option.words:
+        items_l.append(thing.value.lstrip('*'))
+      items = ";".join(items_l)
+      d = {'ctrl_name':ctrl_name,
+           'label':'%s ' %caption,
+           'items':items,
+           'value':option.extract(),
+           'onchange':onchange,
+           'onleave':onchange,
+           'width':'',
+           }
+      options_gui.append(htmlTools.make_combo_text_box(d))
+
     if count == 7:
       txt += '</tr><tr>'
       txt += first_col
     txt += '''
 <td valign='bottom' align='left' width='40' colspan="1">
   %s
-  <br>
-  %s
-</td>''' %(value[0], inputBox)
-  
+</td>''' %(options_gui[-1])
+
   txt += '</tr>'
-  
+
   return txt
 
 def make_ondown(dictionary):
@@ -142,19 +209,22 @@ def addInstruction(program, method, instruction):
   program = RPD.programs.get(program, SPD.programs.get(program))
   assert program is not None
   method = program.methods[method]
-  
-  for arg in method.args:
-    if arg['name'].replace('.','') == instruction:
+
+  for ins in method.instructions():
+    if ins.name == instruction:
       break
 
-  if arg['optional'] and OV.FindValue('settings_%s' %instruction) != 'true':
+  if ins.optional and \
+     OV.FindValue('settings_%s' %instruction) not in (True, 'True', 'true'):
     return
 
-  argName = '%s' %arg['name']
-  addins = '%s' %argName
-  
-  for value in arg['values']:
-    val = OV.FindValue('settings_%s_%s' %(instruction, value[0]))
+  if ins.caption is not None:
+    argName = ins.caption
+  else:
+    argName = ins.name
+  addins = argName
+  for option in method.options(ins.name):
+    val = OV.FindValue('settings_%s_%s' %(ins.name, option.name))
     if not val:
       break
     addins += ' %s' %val
@@ -171,10 +241,10 @@ def onMaxCyclesChange(max_cycles):
     method = prg.methods[OV.GetParam('snum.refinement.method')]
   except KeyError:
     return
-  
-  for arg in method.args:
-    for item in ['LS', 'CGLS']:
-      if arg['name'].replace('.','') == item:
+
+  for instruction in method.instructions():
+    for item in ['ls', 'cgls']:
+      if instruction.name == item:
         OV.SetVar('settings_%s_nls' %item, max_cycles)
         ctrl_name = 'SET_SETTINGS_%s_NLS' %item.upper()
         if OV.HasGUI() and OV.IsControl(ctrl_name):
@@ -191,15 +261,14 @@ def onMaxPeaksChange(max_peaks):
     method = prg.methods[OV.GetParam('snum.refinement.method')]
   except KeyError:
     return
-  
-  item = 'PLAN'
-  for arg in method.args:
-    if arg['name'] == item:
-      OV.SetVar('settings_%s_npeaks' %item, max_peaks)
-      ctrl_name = 'SET_SETTINGS_%s_NPEAKS' %item.upper()
+
+  for instruction in method.instructions():
+    if instruction.name == 'plan':
+      OV.SetVar('settings_plan_npeaks', max_peaks)
+      ctrl_name = 'SET_SETTINGS_PLAN_NPEAKS'
       if OV.HasGUI() and OV.IsControl(ctrl_name):
         olx.SetValue(ctrl_name, max_peaks)
-      addInstruction(prg.name, method.name, item)
+      addInstruction(prg.name, method.name, 'plan')
       return
 OV.registerFunction(OV.SetMaxPeaks)
 
@@ -208,7 +277,8 @@ def stopShelx():
      This stops the refinement or solution after the current iteration
      (for shelxl and shelxd at least)"""
   try:
-    file = open('%s/temp/%s.fin' %(OV.StrDir(), OV.FileName()), 'w')
+    file = open('%s/temp/%s.fin' %(
+      OV.StrDir(), OV.FileName().replace(' ', '').lower()), 'w')
     file.close()
   except AttributeError:
     pass
