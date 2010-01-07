@@ -488,9 +488,14 @@ snum {
   eden_value = None
     .type = float
 
-  map {
+  xgrid {
     view = *wire 2D surface points
       .type = choice
+    extended = False
+      .type = bool
+  }
+
+  map {
     source = *olex fcf
       .type = choice
     type = *diff fcalc '2Fo-Fc' fobs
@@ -503,8 +508,6 @@ snum {
 
   calcvoid_value = -1
     .type = int
-  calcvoid_view = *wire 2D surface points
-    .type = choice
   olex_conres = RRINGS
     .type = str
   refinement_banner_slide = 82

@@ -1,0 +1,40 @@
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=xgrid;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<tr>
+	<td>
+		<input
+			type="combo"
+			height="$GetVar(gui_html_combo_height)"
+			bgcolor="$getVar(gui_html_input_bg_colour)"
+			name="SET_SNUM_XGRID_VIEW_#suffix"
+			items='2D;surface;wire;points'
+			value="$spy.GetParam(snum.xgrid.view)"
+			onchange="spy.SetParam(snum.xgrid.view,GetValue(SET_SNUM_XGRID_VIEW_#suffix))
+>>spy.SetXgridView()
+>>UpdateHtml"
+			label=" %View% "
+			valign="center"
+		>
+	</td>
+	<td>
+		<input
+			type="checkbox"
+			height="$GetVar(gui_html_combo_height)"
+			bgcolor="$getVar(gui_html_input_bg_colour)"
+			name="SET_SNUM_XGRID_EXTENDED_#suffix"
+			checked="$spy.GetParam(snum.xgrid.extended)"
+			oncheck="spy.SetParam(snum.xgrid.extended,True)
+>>spy.SetXgridView()
+>>UpdateHtml"
+			onuncheck="spy.SetParam(snum.xgrid.extended,False)
+>>spy.SetXgridView()
+>>UpdateHtml"
+			value=" %Extended% "
+			valign="center"
+		>
+	</td>
+	<td>
+		<a href="editmaterial XGrid">%Edit% %style%</a>
+	</td>
+</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
