@@ -506,70 +506,61 @@ def VoidView(recalculate='0'):
     # set electron density map button to 'up' state
     olx.SetState('SNUM_MAP_BUTTON','up')
     olx.SetLabel('SNUM_MAP_BUTTON',OV.Translate('Calculate'))
-    
-  map_view =  OV.GetParam("snum.calcvoid_view")
-  
-  if recalculate == "1":
-    olex.m("calcVoid")
-    
-  if map_view == "2D":
-    olex.m("xgrid.3D(false)")
-  elif map_view == "surface":
-    olex.m("xgrid.3D(true)")
-    olex.m("xgrid.fillmode(fill)")
-  elif map_view == "wire":
-    olex.m("xgrid.3D(true)")
-    olex.m("xgrid.fillmode(line)")
-  elif map_view == "points":
-    olex.m("xgrid.3D(true)")
-    olex.m("xgrid.fillmode(point)")
-    
+  olex.m("calcVoid")
+  SetXgridView()
+
 if haveGUI:
   OV.registerFunction(VoidView)
 
-def MapView(recalculate='0'):
+def MapView():
   if OV.IsControl('SNUM_CALCVOID_BUTTON'):
     # set calcvoid button to 'up' state
     olx.SetState('SNUM_CALCVOID_BUTTON','up')
     olx.SetLabel('SNUM_CALCVOID_BUTTON',OV.Translate('Calculate Voids'))
-    
+
   map_type =  OV.GetParam("snum.map.type")
   map_source =  OV.GetParam("snum.map.source")
-  map_view =  OV.GetParam("snum.map.view")
   map_resolution = OV.GetParam("snum.map.resolution")
   mask = OV.GetParam("snum.map.mask")
-  
+
   if map_type == "fcalc":
     map_type = "calc"
   elif map_type == "fobs":
     map_type = "obs"
-    
+
   if mask:
     mask_val = "-m"
   else:
     mask_val = ""
-  
-    
-  if recalculate == "1":
-    if map_source == "olex":
-      olex.m("calcFourier -%s -r=%s %s" %(map_type, map_resolution, mask_val))
-    else:
-      olex.m("calcFourier -%s -%s -r=%s %s" %(map_type, map_source, map_resolution, mask_val))
-      
-  if map_view == "2D":
-    olex.m("xgrid.3D(false)")
-  elif map_view == "surface":
-    olex.m("xgrid.3D(true)")
-    olex.m("xgrid.fillmode(fill)")
-  elif map_view == "wire":
-    olex.m("xgrid.3D(true)")
-    olex.m("xgrid.fillmode(line)")
-  elif map_view == "points":
-    olex.m("xgrid.3D(true)")
-    olex.m("xgrid.fillmode(point)")
-    
+
+  if map_source == "olex":
+    olex.m("calcFourier -%s -r=%s %s" %(map_type, map_resolution, mask_val))
+  else:
+    olex.m("calcFourier -%s -%s -r=%s %s" %(map_type, map_source, map_resolution, mask_val))
+
+  SetXgridView()
+
 if haveGUI:
   OV.registerFunction(MapView)
+
+def SetXgridView():
+  view = OV.GetParam("snum.xgrid.view")
+  extended = OV.GetParam("snum.xgrid.extended")
+  if view == "2D":
+    olex.m("xgrid.3D(false)")
+  elif view == "surface":
+    olex.m("xgrid.3D(true)")
+    olex.m("xgrid.fillmode(fill)")
+  elif view == "wire":
+    olex.m("xgrid.3D(true)")
+    olex.m("xgrid.fillmode(line)")
+  elif view == "points":
+    olex.m("xgrid.3D(true)")
+    olex.m("xgrid.fillmode(point)")
+  olex.m("xgrid.Extended(%s)" %extended)
+
+if haveGUI:
+  OV.registerFunction(SetXgridView)
 
 def GetHklFileList():
   reflections_files = []
