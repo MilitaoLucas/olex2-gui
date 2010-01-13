@@ -5,8 +5,8 @@
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td name=HREF_MAKE_LABEL>
-    1) <a href='label -type=GetValue(IMAGE_SETTINGS_LABEL_TYPE)'>Add labels to the selected atoms</a>|
-    <a href='sel $H>>sel -i>>label -type=GetValue(IMAGE_SETTINGS_LABEL_TYPE)'>to non H atoms</a>
+    1) <a href='label -type=GetValue(IMAGE_SETTINGS_LABEL_TYPE)'>%images_add_labels_to_atoms%</a>|
+    <a href='sel $H>>sel -i>>label -type=GetValue(IMAGE_SETTINGS_LABEL_TYPE)'>%images_add_labels_to_non_H_atoms%</a>
   </td>
   <td name=IMAGE_SETTINGS_LABEL_TYPE>
     <input
@@ -14,12 +14,12 @@
       height="$GetVar(gui_html_combo_height)"
       width="80"
       bgcolor="$getVar(gui_html_input_bg_colour)"
-      items="default;subscript;brackets"
+      items="%default%;%subscript%;%brackets%"
       height="$getVar(gui_html_input_height)"
       valign='center'
       name="IMAGE_SETTINGS_LABEL_TYPE"
       value='default'
-      label="Style "
+      label="%Style% "
       manage
     >
   </td>
@@ -31,7 +31,7 @@
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td name=LABEL_INSTRUCTIONS_2>
-    2) Move the labels with the left mouse while holding down the SHIFT key
+    2) %images_move_labels%
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
@@ -41,9 +41,9 @@
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td name=LABEL_INSTRUCTIONS_3>
-    3) <a href='SetMaterial PLabels.Text ChooseMaterial(GetMaterial(PLabels.Text))'>Choose the label colour</a> | 
-       <a href='SetMaterial PLabels.Plane ChooseMaterial(GetMaterial(PLabels.Plane))'>Label Box</a> |
-       <a href='SetMaterial PLabels.Plane 3077;0.000,0.000,0.000,1.000;986895'>Transparent Box</a>
+    3) <a href='SetMaterial PLabels.Text ChooseMaterial(GetMaterial(PLabels.Text))'>%images_label_colour%</a> | 
+       <a href='SetMaterial PLabels.Plane ChooseMaterial(GetMaterial(PLabels.Plane))'>%images_label_box%</a> |
+       <a href='SetMaterial PLabels.Plane 3077;0.000,0.000,0.000,1.000;986895'>%images_transparent_box%</a>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
@@ -53,7 +53,7 @@
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td name=LABEL_INSTRUCTIONS_2>
-    <b>Tip:</b> When labels are active, CTRL+A will select ALL labels. Selected labels can be <font color='$GetVar(gui_html_highlight_colour)'><b>moved</b></font> while the SHIFT key is pressed and can also be <font color='$GetVar(gui_html_highlight_colour)'><b>deleted</b></font> by pressing the delete key.
+    %images_labels_tip%
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
