@@ -23,7 +23,7 @@ Lines of Text	Lines of Text	Lignes de texte	خطوط النص	Строки те�
 All	All	Tous	كل	Все	すべて	Alle	Todos	所有	Ολα
 Narrow	Narrow	Narrow	ضيق	Узких	狭い	Eng	Narrow	窄型	Στενο
 Wide	Wide	Wide	واسعة	Широкий	ワイド	Weit	Wide	宽型	Wide
-Default	Default	Default	التقصير	По умолчанию	デフォルト	Default	Default	缺省	Προεπιλογη
+default	Default	Default	التقصير	По умолчанию	デフォルト	Default	Default	缺省	Προεπιλογη
 recent files	recent files	Fichiers récents	الاخيرة ملفات	последние файлы	最近のファイル	Aktuelle Strukturen	Archivos recientes	最近使用文件	προσφατα αρχεια
 Off	Off	Off	من	Выкл	オフ	Aus	Off	关	Off
 On	On	Sur	علي	В	上	An	El	开	Στις
@@ -249,7 +249,7 @@ BCA York Workshop-news	We have held our first ever Olex2 workshop immediately af
 Program Errors-news	.	.	.	.	.	Da Olex2 immer noch in der Entwicklung steckt, kommen häufiger Fehler vor. Wir können aus diesen lernen. Deshalb wird von nun an dieses Zeichen immer dann erscheinen, wenn irgendwo etwas falsch gelaufen ist. Bitte klicken Sie auf dieses Zeichen und senden Sie uns den Inhalt an: <a href=<'shell mailto:horst.puschmann@durham.ac.u'>horst</a>. Vielen Dank!	.	程序错误－新闻	.
 New Workflow-news	We are currently working on a new Olex2 workflow for the solution and refinement stages. Feedback and suggestions in this area are welcome!	.	.	.	.	Wir arbeiten gerade ein einer Neuen 'Workflow'Philosphie für Olex2. Dies ist nicht so einfach, und wir würden uns riesig über Vorschläge und Anregungen freuen.	En la actualidad estamos trabajando en un nuevo Olex2 para la solución de flujo de trabajo y el perfeccionamiento etapas. Comentarios y sugerencias en este ámbito son bienvenidas!	我们正在研究一个用于构解析和精修的OLEX2新工作流程。欢迎提出您宝贵的建议。	Αυτη τη στιγμη εργαζομαστε για ενα νεο Olex2 ροη εργασιας για τη λυση και την ομαλοποιηση σταδια. Feedback και προτασεις στον τομεα αυτο ειναι ευπροσδεκτα!
 work	work	.	.	.	.	Arbeit	work	工作	εργασια
-view	view	.	.	.	.	Ansicht	view	查看	Ενοψει
+View	view	.	.	.	.	Ansicht	view	查看	Ενοψει
 Edit Style	edit style	.	.	.	.	Stileinstellung	.	编辑风格	.
 Electron Density Viewer-news	.	.	.	.	.	.	.	电子云密度查看器－新闻	.
 electron density	Electron Density	.	.	.	.	Elektronendichte	.	电子云密度	.
@@ -657,3 +657,30 @@ Calculate-CHN-Analysis-help	Calculates the expected values of a CHN analysis fro
 Link-Selected-help	TWO Selected atoms will be 'linked' in the refinement.&&~Occupancies~The occupancies will be linked such that the individual occupancies add up to unity.XX fvar sel XX~Parts and Occupancies~XX part -p=2 -lo sel XXThe occupancies will be linked such that the individual occupancies add up to unity and the selected atoms will be added to Parts.n^the -p parameter determines the number of parts that should be assigned. -lo stands for '<b>l</b>ink <b>o</b>ccupancy.^n&&	.	.	.	.	.	.	.	.
 normal-probability-plot-help	&&    ~Normal Probability Plot~  The normal probability plot is a graphical technique for assessing whether or not  a data set is approximately normally distributed.  The weighted residuals are sorted by order of magnitude, and plotted against the  values expected for a theoretical normal distribution.  An ideal normal probability plot will be linear, with a gradient of 1 and passing  through the origin.  Large deviations from this can indicate deficiencies with the model, weights  and scaling respectively.    XX normal_probability XX    &&	.	.	.	.	.	.	.	.
 fobs/fcalc-vs-resolution-help	&&    ~Fobs/Fcalc vs resolution~  This graph shows the variation of the Fobs/Fcalc ratio with resolution.  If the model  is a good match for the data, then most of the points should be close to the line  indicating an Fobs/Fcalc ratio of 1.  Deviations from this may indicate systematic  errors in the data with respect to resolution.  XX fobs_over_fcalc XX    &&	.	.	.	.	.	.	.	.
+Fill the Unit Cell	.	.	.	.	.	.	.	Fill the Unit Cell	.
+Short	.	.	.	.	.	.	.	Short	.
+VdW	.	.	.	.	.	.	.	VdW	.
+center_on-target	Centre the structure on the selected atom or the centroid of the selected atoms.	.	.	.	.	.	.	.	.
+images_add_labels_to_atoms	Add labels to the selected atoms	.	.	.	.	.	.	.	.
+images_add_labels_to_non_H_atoms	to non H atoms	.	.	.	.	.	.	.	.
+images_move_labels	Move the labels with the left mouse while holding down the SHIFT key	.	.	.	.	.	.	.	.
+images_labels_tip	<b>Tip:</b> When labels are active, CTRL+A will select ALL labels. Selected labels can be <font color='#ff7800'><b>moved</b></font> while the SHIFT key is pressed and can also be <font color='#ff7800'><b>deleted</b></font> by pressing the delete key.	.	.	.	.	.	.	.	.
+images_label_colour	Choose the label colour	.	.	.	.	.	.	.	.
+images_label_box	Label Box	.	.	.	.	.	.	.	.
+images_transparent_box	Transparent Box	.	.	.	.	.	.	.	.
+images_octant_line_width	Octant Line Width	.	.	.	.	.	.	.	.
+Lines	Lines	.	.	.	.	.	.	.	.
+Bonds	Bonds	.	.	.	.	.	.	.	.
+images_bmp_label_olex_font	Choose Label Font (Olex2)	.	.	.	.	.	.	.	.
+images_bmp_label_system_font	Choose Label Font (System)	.	.	.	.	.	.	.	.
+Atoms	Atoms	.	.	.	.	.	.	.	.
+Font	Font	.	.	.	.	.	.	.	.
+Octant	Octant	.	.	.	.	.	.	.	.
+images_dividing_line_width	Dividing Line Width	.	.	.	.	.	.	.	.
+images_bond_width	Bond Width	.	.	.	.	.	.	.	.
+images_outline_line_width	Outline Line Width	.	.	.	.	.	.	.	.
+images_font_weight	Weight (vis. in file)	.	.	.	.	.	.	.	.
+images_H_atom_bonds	H Atom Bonds	.	.	.	.	.	.	.	.
+images_no_of_dividers	No. of Dividers	.	.	.	.	.	.	.	.
+brackets	brackets	.	.	.	.	.	.	.	.
+subscript	subscript	.	.	.	.	.	.	.	.
