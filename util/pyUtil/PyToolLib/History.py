@@ -261,7 +261,7 @@ class HistoryTree:
     self.active_child_node = node
     self.active_node = node
     self._full_index.setdefault(name, node)
-    if node.hkl not in self.hklFiles:
+    if node.hkl is not None and node.hkl not in self.hklFiles:
       self.hklFiles.setdefault(node.hkl, compressFile(hklPath))
 
     #hist._make_history_bars()
@@ -310,8 +310,10 @@ class Node:
     self.wR2 = None
     self.lst = None
     self.res = None
+    self.hkl = None
 
-    self.hkl = hashlib.md5('%f%s' %(os.path.getmtime(hklPath),hklPath)).hexdigest()
+    if hklPath and os.path.exists(hklPath):
+      self.hkl = hashlib.md5('%f%s' %(os.path.getmtime(hklPath),hklPath)).hexdigest()
 
     if history_leaf is None:
       if resPath is not None and os.path.exists(resPath):
