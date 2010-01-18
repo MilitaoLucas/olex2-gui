@@ -267,12 +267,10 @@ def get_user_phil():
     return None
 
 def LoadParams():
-  master_phil = iotbx.phil.parse(
-    file_name="%s/params.phil" %OV.BaseDir(),
-    converter_registry=phil_interface.converter_registry)
+  master_phil = phil_interface.parse(file_name="%s/params.phil" %OV.BaseDir())
   phil_handler = phil_interface.phil_handler(
     master_phil=master_phil,
-    parse=iotbx.phil.parse)
+    parse=phil_interface.parse)
   user_phil = get_user_phil()
   if user_phil:
     phil_handler.update(phil_file=user_phil)
