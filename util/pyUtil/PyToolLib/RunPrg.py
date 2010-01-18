@@ -35,7 +35,7 @@ class RunPrg(ArgumentParser):
     if self.HasGUI:
       from Analysis import PrgAnalysis
       self.PrgAnalysis = PrgAnalysis
-      
+
     self.params = olx.phil_handler.get_python_object()
     #self.getVariables('auto')
     OV.SetVar('SlideQPeaksVal','0') # reset q peak slider to display all peaks
@@ -48,7 +48,6 @@ class RunPrg(ArgumentParser):
 
   def __del__(self):
     self.method.unregisterCallback()
-    olx.phil_handler.update_from_python(self.params)
 
   def which_shelx(self, type="xl"):
     a = olexex.which_program(type)
@@ -160,9 +159,13 @@ class RunPrg(ArgumentParser):
       if max_peaks <= 5:
         self.params.snum.refinement.auto.pruneQ = 0.5
         self.params.snum.refinement.auto.assignQ = 6.0
+        OV.SetParam('snum.refinement.auto.pruneQ', 0.5)
+        OV.SetParam('snum.refinement.auto.assignQ', 6.0)
       else:
         self.params.snum.refinement.auto.pruneQ = 1.5
         self.params.snum.refinement.auto.assignQ = 2.0
+        OV.SetParam('snum.refinement.auto.pruneQ', 1.5)
+        OV.SetParam('snum.refinement.auto.assignQ', 2.0)
 
   def getProgramMethod(self, fun):
     if fun == 'refine':
@@ -220,7 +223,6 @@ class RunSolutionPrg(RunPrg):
     self.endRun()
     sys.stdout.refresh = False
     sys.stdout.graph = False
-    olx.phil_handler.update_from_python(self.params)
 
   def runAfterProcess(self):
     RunPrg.runAfterProcess(self)
@@ -239,7 +241,7 @@ class RunSolutionPrg(RunPrg):
     olx.Reset(args)
 
   def doHistoryCreation(self):
-    self.params.snum.refinement.last_R1 = 'Solution'
+    OV.SetParam('snum.refinement.last_R1', 'Solution')
     self.his_file = hist.create_history(solution=True)
     return self.his_file
 
@@ -351,7 +353,6 @@ class RunRefinementPrg(RunPrg):
         R1 = False
         
     if R1:
-      self.params.snum.refinement.last_R1 = str(R1)
       OV.SetParam('snum.refinement.last_R1', str(R1))
       try:
         self.his_file = hist.create_history()
