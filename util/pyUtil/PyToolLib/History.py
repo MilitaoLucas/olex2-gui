@@ -1,6 +1,7 @@
 import string
 import sys
 import os
+import hashlib
 import glob
 import os.path
 import shutil
@@ -16,6 +17,7 @@ import variableFunctions
 import olexFunctions
 OV = olexFunctions.OV
 
+import time
 import zlib
 import lst_reader
 import ires_reader
@@ -25,11 +27,11 @@ tree = None
 class History(ArgumentParser):
   def __init__(self):
     super(History, self).__init__()
-    
+
   def _getItems(self):
-    
+
     self.demo_mode = OV.FindValue('autochem_demo_mode',False)
-    
+
     self.autochem = False
     self.solve = False
     self.basedir = OV.BaseDir()
@@ -38,133 +40,64 @@ class History(ArgumentParser):
     self.filename = OV.FileName()
     self.strdir = OV.StrDir()
     self.datadir = OV.DataDir()
-    self.params = olx.phil_handler.get_python_object()
     self.history_filepath = r'%s/%s.history' %(self.strdir,self.filename)
     self.rename = OV.FindValue('rename')
     self.his_file = None
 
-  def setParams(self):
-    olx.phil_handler.update_from_python(self.params)
-
   def create_history(self, solution=False):
     self._getItems()
-    
     self.solve = solution
-    
     got_history = False
     info = ""
     global tree
     if not tree:
       tree = HistoryTree()
-      
+
     if os.path.splitext(self.filefull)[-1].lower() == '.cif':
       return # don't attempt to make a history if a cif is loaded
     filefull_lst = os.path.splitext(self.filefull)[0] + '.lst'
     if self.autochem or self.demo_mode:
-      branchName = self.params.snum.history.autochem_next_solution
+      label = OV.GetParam('snum.history.autochem_next_solution')
     else:
-      branchName = None
+      label = None
     if self.solve:
-      self.current_solution = tree.newBranch(self.filefull, filefull_lst, branchName=branchName)
+      tree.add_top_level_node(
+        OV.HKLSrc(), self.filefull, filefull_lst, is_solution=True, label=label)
     else:
-      self.current_refinement = tree.newLeaf(self.filefull, filefull_lst)
-    self.his_file = "%s;%s" %(tree.current_solution, tree.current_refinement)
-    
+      tree.add_node(OV.HKLSrc(), self.filefull, filefull_lst)
+    self.his_file = tree.active_node.full_path()
+    OV.SetParam('snum.history.current_node', tree.active_node.name)
     self._make_history_bars()
-    self.setParams()
+    assert OV.GetParam('snum.history.current_node') == tree.active_node.name
+    print OV.GetParam('snum.history.current_node')
+    print tree.active_node.name
+    print OV.GetParam('snum.history.current_node')
     return self.his_file
-  
-  def delete_history(self, del_solution):
-    self._getItems()
-    if not del_solution.strip():
-      return
-    if self.params.user.alert_delete_history[0] == 'R':
-      delete = self.params.user.alert_delete_history[-1]
-    elif self.params.user.alert_delete_history == 'Y':
-      delete = OV.Alert('Olex2', "Are you sure you want to delete\nthe solution '%s'?" %del_solution, 'YNIR', "(Don't show this warning again)")
-    else:
-      return
-      
-    if 'Y' in delete:
-      if del_solution in tree.historyTree.keys():
-        del tree.historyTree[del_solution]
-        solutions = tree.historyTree.keys()
-        solutions.sort()
-        tree.current_solution = solutions[0]
-        changeHistory(tree.current_solution)
-      else:
-        print "Could not delete history '%s' " %del_solution
-      
-    if 'R' in delete and 'Y' in delete:
-      self.params.user.alert_delete_history = 'RY'
-      self.setParams()
-      variableFunctions.SaveUserParams()
 
-    self.setParams()
-
-  def rename_history(self, args):
-    self._getItems()
-    old_solution_name = args.get('old','')
-    new_solution_name = args.get('new','')
-    OV.SetVar('rename',False)
-    if not new_solution_name.strip():
-      print "Please provide a valid name"
-    elif new_solution_name == old_solution_name:
-      return
-    self._getItems()
-    if new_solution_name in tree.historyTree.keys():
-      if self.params.user.alert_overwrite_history[0] == 'R':
-        rename = self.params.user.alert_overwrite_history[-1]
-      elif self.params.user.alert_overwrite_history == 'Y':
-        rename = OV.Alert('Olex2', "There is already a solution named '%s'.\nDo you want to overwrite this solution?" %new_solution_name, 'YNIR', "(Don't show this warning again)")
-      else:
-        return
-      
-      if 'Y' in rename:
-        solution_name = new_solution_name
-      else:
-        return
-      if 'R' in rename:
-        self.params.user.alert_overwrite_history = 'RY'
-        self.setParams()
-        variableFunctions.SaveUserParams()
-    else:
-      solution_name = new_solution_name
-      
-    if solution_name:
-      tree.historyTree[solution_name] = tree.historyTree[old_solution_name]
-      del tree.historyTree[old_solution_name]
-      tree.current_solution = solution_name
-      self.params.snum.history.current_solution = solution_name
+  def rename_history(self, name, label=None):
+    if label is None: return
+    node = tree._full_index.get(name)
+    assert node is not None
+    node.label = label
     self._make_history_bars()
-    self.setParams()
-    return
-  
-  def revert_history(self, args):
-    self._getItems()
-    self._revert_history(args)
-    self.setParams()
-    
-  def _revert_history(self, args):
-    solution = args.get('solution','')
-    refinement = args.get('refinement','')
-    if not solution or not refinement:
-      return ''
-    tree.current_solution = solution
-    tree.current_refinement = refinement
+
+  def revert_history(self, node_index):
+    node = tree._full_index.get(node_index)
+    assert node is not None
+    if node.is_root:
+      return
+    tree.set_active_node(node)
+    tree.active_node.set_params()
     filepath = OV.FilePath()
-    filename = self.filename
+    filename = OV.FileName()
     resFile = "%s/%s.res" %(filepath, filename)
     lstFile = "%s/%s.lst" %(filepath, filename)
-    
-    leaf = tree.historyTree[solution].historyBranch[refinement]
-    leaf.setLeafInfo()
-    resFileData = decompressFile(leaf.res)
+    resFileData = decompressFile(node.res)
     wFile = open(resFile, 'w')
     wFile.write(resFileData)
     wFile.close()
-    if leaf.lst:
-      lstFileData = decompressFile(leaf.lst)
+    if node.lst is not None:
+      lstFileData = decompressFile(node.lst)
       wFile = open(lstFile, 'w')
       wFile.write(lstFileData)
       wFile.close()
@@ -176,12 +109,12 @@ class History(ArgumentParser):
     destination = "'%s'" %destination.strip('"').strip("'")
     olx.Atreap("%s" %destination)
     olx.File() ## needed to make new .ins file
-    
+    self._make_history_bars()
+
   def saveHistory(self):
     self._getItems()
     variableFunctions.Pickle(tree,self.history_filepath)
-    self.setParams()
-    
+
   def loadHistory(self):
     self._getItems()
     global tree
@@ -189,21 +122,23 @@ class History(ArgumentParser):
       tree = variableFunctions.unPickle(self.history_filepath)
       try:
         historyName = tree.name
-      except:
+      except AttributeError:
         historyName = OV.FileName()
         tree.name = historyName
         
-      if not tree.historyTree:
+      if tree.version < 2.0:
+        tree = _convert_history(tree)
+
+      if tree.active_node is None:
         self._createNewHistory()
       elif tree.name != OV.FileName():
         self._createNewHistory()
     else:
       self._createNewHistory()
-      
-    if tree.current_solution:
+
+    if tree.active_node is not None:
       self._make_history_bars()
-    self.setParams()
-      
+
   def resetHistory(self):
     self._getItems()
     backupFolder = '%s/originals' %OV.StrDir()
@@ -242,10 +177,10 @@ class History(ArgumentParser):
     else:
       tree = HistoryTree()
       if os.path.splitext(self.filefull)[-1] in ('.res', '.RES', '.ins', '.INS'):
-        self.current_solution = tree.newBranch(self.filefull, os.path.splitext(self.filefull)[0] + '.lst',solution=False)
+        tree.add_top_level_node(OV.HKLSrc(), OV.FileFull(), os.path.splitext(OV.FileFull())[0] + '.lst', is_solution=False)
       else:
         pass
-      
+
   def _convertHistory(self, historyFolder):
     folders = []
     items = os.listdir(historyFolder)
@@ -253,7 +188,7 @@ class History(ArgumentParser):
       itemPath = '/'.join([historyFolder,item])
       if os.path.isdir(itemPath):
         folders.append(OV.standardizePath(itemPath))
-        
+
     global tree
     tree = HistoryTree()
     for folder in folders:
@@ -285,143 +220,294 @@ class History(ArgumentParser):
       for refinement in refinements:
         tree.historyTree[sol_name].newLeaf(refinement[1], os.path.splitext(refinement[1])[0] + '.lst')
     return tree
-  
+
   def _make_history_bars(self):
-    bars = []
-    try:
-      keys = tree.historyTree[tree.current_solution].historyBranch.keys()
-    except KeyError:
-      solution_keys = tree.historyTree.keys()
-      solution_keys.sort()
-      tree.current_solution = solution_keys[-1]
-      keys = tree.historyTree[tree.current_solution].historyBranch.keys()
-      self.params.snum.history.current_solution = tree.current_solution
-    keys.sort()
-    R1 = 1
-    if 'solution' in keys:
-      bars.append(('n/a',"'spy.revert_history -solution=\"GetValue(SET_HISTORY_CURRENT_SOLUTION)\" -refinement=solution>>UpdateHtml'",'Solution'))
-      
-    for item in keys:
-      if 'refinement_' in item:
-        leaf = tree.historyTree[tree.current_solution].historyBranch[item]
-        R1 = leaf.R1
-        href = "'spy.revert_history -solution=\"GetValue(SET_HISTORY_CURRENT_SOLUTION)\" -refinement=\"%s\">>UpdateHtml'" %(item)
-        if R1 == 'n/a':
-          R1 = 0.99
-        target = "'R1: %0.2f%%25, Refinement: %s - %s'" %(R1*100,leaf.refinement_program,leaf.refinement_method)
-        bars.append((R1,href,target))
-        
-    historyTextList = []
-    scale = r"vscale.png"
-    historyTextList.append(r"<zimg border=0 src=%s>" % (scale))
-    
-    for bar in bars:
-      R = bar[0]
-      href = bar[1]
-      target = bar[2]
-      
-      Ri = R
-      if Ri == 'n/a':
-        image = 'vbar-sol.png'
-      else:
-        #if Ri > 0.22:
-          #Ri = 0.22
-        Ri = min(Ri, 0.22)
-        image = 'vbar-%i.png' %int(Ri*1000)
-        
-      historyTextList.append(r"<a href=%s target=%s><zimg border=0 width='7' src=%s></a>" % (href,target,image))
-      
-    curr_history_branch = tree.historyTree[tree.current_solution]
-    historyTextList.append("<br>")
-    number_of_solutions = len(tree.historyTree.keys())
-    if number_of_solutions > 1 and 'Autochem' not in self.params.snum.history.current_solution:
-      historyTextList.append("<a href='spy.delete_history(\"GetValue(SET_HISTORY_CURRENT_SOLUTION)\")>>UpdateHtml' target='Delete current history'><zimg border='0' src='delete_small.png'></a>")
-    if not self.demo_mode:
-      solution = curr_history_branch.historyBranch.get('solution')
-      if solution is not None:
-        historyTextList.append(' <b>%s</b> -  %s - %s' %(
-          curr_history_branch.spaceGroup, solution.solution_program, solution.solution_method))
-      else:
-        historyTextList.append(' <b>%s</b>' %curr_history_branch.spaceGroup)
-    
-    historyText = '\n'.join(historyTextList)
-#    if self.demo_mode:
-#      historyText = ""
-    OV.write_to_olex('history-info.htm',historyText)
+    OV.write_to_olex('history_tree.ind', ''.join(make_html_tree(tree, [], 0)))
+    from Analysis import HistoryGraph
+    HistoryGraph(tree)
+    return
 
 hist = History()
-OV.registerFunction(hist.delete_history)
-OV.registerMacro(hist.rename_history, 'old-Old refinement name&;new-New refinement name')
-OV.registerMacro(hist.revert_history, 'solution-&;refinement-')
+#OV.registerFunction(hist.delete_history)
+OV.registerFunction(hist.rename_history)
+OV.registerFunction(hist.revert_history)
 OV.registerFunction(hist.create_history)
 OV.registerFunction(hist.saveHistory)
 OV.registerFunction(hist.loadHistory)
 OV.registerFunction(hist.resetHistory)
 
 class HistoryTree:
+
+  is_root = True
+
   def __init__(self):
-    self.historyTree = {}
-    self.version = 1.0
-    self.current_solution = None
-    self.current_refinement = None
+    self.primary_parent_node = None
+    self.children = []
+    self.active_child_node = None
+    self.active_node = None
+    self._full_index = {}
+    self.version = 2.0
     self.name = OV.FileName()
     self.hklFiles = {}
-    
-  def saveOriginals(self, resPath, lstPath):
-    backupFolder = '%s/originals' %OV.StrDir()
-    if not os.path.exists(backupFolder):
-      os.mkdir(backupFolder)
-    for filePath in (resPath, lstPath):
-      if filePath and os.path.exists(filePath):
-        filename = os.path.basename(filePath)
-        backupFileFull = '%s/%s' %(backupFolder,filename)
-        shutil.copyfile(filePath,backupFileFull)
-        
-  def newBranch(self, resPath, lstPath, branchName=None, solution=True):
-    if len(self.historyTree.keys()) == 0:
-      self.saveOriginals(resPath, lstPath)
-      
-    if not branchName:
-      branchName = hist.params.snum.history.next_solution
-    self.historyTree[branchName] = HistoryBranch(resPath,lstPath,solution=solution)
-    self.current_solution = branchName
-    hist.params.snum.history.current_solution = branchName
-    
-    if 'Autochem' in branchName:
-      # Sort out next Autochem solution name
-      next_sol_num = int(branchName.split()[-1]) + 1
-      while True:
-        if next_sol_num < 10:
-          next_sol_name = 'Autochem 0%s' %next_sol_num
-        else:
-          next_sol_name = 'Autochem %s' %next_sol_num
-        if self.historyTree.has_key(next_sol_name):
-          next_sol_num += 1
-        else:
-          break
-      hist.params.snum.history.autochem_next_solution = next_sol_name
-    
+    self.next_sol_num = 1
+
+  def add_top_level_node(self, hklPath, resPath, lstPath=None, is_solution=True, label=None):
+    if len(self.children) == 0:
+      saveOriginals(resPath, lstPath)
+
+    if label is None:
+      label = 'Solution %s' %self.next_sol_num
+      self.next_sol_num += 1
+    name = hashlib.md5(time.asctime(time.localtime())).hexdigest()
+    node = Node(name, hklPath, resPath, lstPath, label=label,
+                is_solution=is_solution, primary_parent_node=self)
+    self.children.append(node)
+    self.active_child_node = node
+    self.active_node = node
+    self._full_index.setdefault(name, node)
+    if node.hkl not in self.hklFiles:
+      self.hklFiles.setdefault(node.hkl, compressFile(hklPath))
+
+    #hist._make_history_bars()
+    return self.active_child_node.name
+
+  def add_node(self, hklPath, resPath, lstPath=None):
+    assert self.active_child_node is not None
+    ref_name = hashlib.md5(time.asctime(time.localtime())).hexdigest()
+    node = Node(ref_name, hklPath, resPath, lstPath,
+                primary_parent_node=self.active_node)
+    self.active_node.add_child_node(node)
+    self.active_node = node
+    self._full_index.setdefault(ref_name, node)
+    if node.hkl not in self.hklFiles:
+      self.hklFiles.setdefault(node.hkl, compressFile(hklPath))
+
+  def full_path(self):
+    return full_path(self)
+
+  def set_active_node(self, node):
+    tree.active_node = node
+    OV.SetParam('snum.history.current_node', node.name)
+    while node.primary_parent_node is not None:
+      node.primary_parent_node.active_child_node = node
+      node = node.primary_parent_node
+
+class Node:
+  is_root = False
+
+  def __init__(self,
+               name,
+               hklPath,
+               resPath=None,
+               lstPath=None,
+               label=None,
+               is_solution=False,
+               primary_parent_node=None,
+               history_leaf=None):
+    self.children = []
+    self.active_child_node = None
+    self.name = name
+    self.label = label
+    self.primary_parent_node = primary_parent_node
+    self.is_solution = is_solution
+    self.R1 = None
+    self.wR2 = None
+    self.lst = None
+    self.res = None
+
+    self.hkl = hashlib.md5('%f%s' %(os.path.getmtime(hklPath),hklPath)).hexdigest()
+
+    if history_leaf is None:
+      if resPath is not None and os.path.exists(resPath):
+        self.res = compressFile(resPath)
+        self.read_res(resPath)
+      if lstPath is not None and os.path.exists(lstPath):
+        self.read_lst(lstPath)
+  
+      if self.is_solution and OV.GetParam('snum.solution.program') == 'smtbx-solve':
+        self.program = OV.GetParam('snum.solution.program')
+        self.method = OV.GetParam('snum.solution.method')
+      elif OV.GetParam('snum.refinement.program') == 'smtbx-refine':
+        self.program = OV.GetParam('snum.refinement.program')
+        self.method = OV.GetParam('snum.refinement.method')
+        try:
+          self.R1 = float(OV.GetParam('snum.refinement.last_R1'))
+        except ValueError:
+          pass
+      else:
+        self.program = None
+        self.method = None
+
+      OV.SetParam('snum.refinement.last_R1', self.R1)
+      if self.is_solution:
+        if self.program is None:
+          self.program = OV.GetParam('snum.solution.program')
+        if self.method is None:
+          self.method = OV.GetParam('snum.solution.method')
+      else:
+        if self.program is None:
+          self.program = OV.GetParam('snum.refinement.program')
+        if self.method is None:
+          self.method = OV.GetParam('snum.refinement.method')
     else:
-      next_sol_num = int(branchName.split()[-1]) + 1
-      while True:
-        if next_sol_num < 10:
-          next_sol_name = 'Solution 0%s' %next_sol_num
-        else:
-          next_sol_name = 'Solution %s' %next_sol_num
-        if self.historyTree.has_key(next_sol_name):
-          next_sol_num += 1
-        else:
-          break
-      hist.params.snum.history.next_solution = next_sol_name
-      
-    hist._make_history_bars()
-    hist.setParams()
-    return self.current_solution
+      # XXX backwards compatibility 2010-01-15
+      self.R1 = history_leaf.R1
+      self.wR2 = history_leaf.wR2
+      self.res = history_leaf.res
+      self.lst = history_leaf.lst
+      self.program_version = history_leaf.program_version
+      if self.is_solution:
+        self.program = history_leaf.solution_program
+        self.method = history_leaf.solution_method
+      else:
+        self.program = history_leaf.refinement_program
+        self.method = history_leaf.refinement_method
 
-  def newLeaf(self,resPath,lstPath):
-    self.current_refinement = self.historyTree[self.current_solution].newLeaf(resPath,lstPath)
-    return self.current_refinement
+  def add_child_node(self, node):
+    self.children.append(node)
+    self.active_child_node = node
 
+  def read_lst(self, filePath):
+    try:
+      lstValues = lst_reader.reader(filePath).values()
+    except:
+      lstValues = {'R1':'','wR2':''}
+    if not self.is_solution:
+      try:
+        self.R1 = float(lstValues.get('R1', 'n/a'))
+        self.wR2 = float(lstValues.get('wR2', 'n/a'))
+      except ValueError:
+        pass
+    self.program_version = lstValues.get('version')
+
+  def read_res(self, filePath):
+    try:
+      iresValues = ires_reader.reader(open(filePath)).values()
+    except:
+      iresValues = {'R1':''}
+    try:
+      self.R1 = float(iresValues['R1'])
+    except ValueError:
+      self.R1 = 'n/a'
+    self.wR2 = 'n/a'
+
+  def set_params(self):
+    OV.SetParam('snum.refinement.last_R1',self.R1)
+    OV.SetParam('snum.last_wR2',self.wR2)
+    if self.is_solution:
+      OV.SetSolutionProgram(self.program, self.method)
+    else:
+      OV.SetRefinementProgram(self.program, self.method)
+
+  def full_path(self):
+    return full_path(self)
+
+def full_path(self):
+  result = [self.name]
+  ppn = self.primary_parent_node
+  while (ppn is not None):
+    if (ppn.name == ""): break
+    result.append(ppn.name)
+    ppn = ppn.primary_parent_node
+  result.reverse()
+  return ".".join(result)
+
+def index_node(node, full_index):
+  if node.name not in full_index:
+    full_index.setdefault(node.name, node)
+  for child in node.children:
+    index_node(child, full_index)
+  return full_index
+
+def delete_node(node):
+  for child in node.children:
+    delete_node(child)
+  del(node)
+
+def delete_history(node_name):
+  node = tree._full_index.get(node_name)
+  assert node is not None
+  parent = node.primary_parent_node
+  parent.children.remove(node)
+  if len(parent.children) == 0:
+    active_node = None
+  else:
+    active_node = parent.children[0]
+    while active_node.active_child_node is not None:
+      active_node = active_node.active_child_node
+  delete_node(node)
+  tree.set_active_node(active_node)
+  tree._full_index = index_node(tree, {})
+  hist.revert_history(active_node.name)
+  hist._make_history_bars()
+
+def saveOriginals(resPath, lstPath):
+  backupFolder = '%s/originals' %OV.StrDir()
+  if not os.path.exists(backupFolder):
+    os.mkdir(backupFolder)
+  for filePath in (resPath, lstPath):
+    if filePath and os.path.exists(filePath):
+      filename = os.path.basename(filePath)
+      backupFileFull = '%s/%s' %(backupFolder,filename)
+      shutil.copyfile(filePath,backupFileFull)
+
+def compressFile(filePath):
+  file = open(filePath)
+  fileData = file.read()
+  fileData = zlib.compress(fileData,9)
+  return fileData
+
+def decompressFile(fileData):
+  return zlib.decompress(fileData)
+
+tree = HistoryTree()
+
+def getAllHistories():
+  solutions = ['%s<-%s' %(child.label, child.name) for child in tree.children]
+  solutions.sort()
+  historyList = []
+  for item in solutions:
+    historyList.append("%s;" %item)
+  return ''.join(historyList)
+
+def changeHistory(solution):
+  node = tree._full_index.get(solution)
+  assert node is not None
+  tree.active_child_node = node
+  while node.active_child_node is not None:
+    node = node.active_child_node
+  tree.set_active_node(node)
+  hist.revert_history(node.name)
+  OV.SetParam('snum.history.current_solution', solution)
+  hist._make_history_bars()
+  hist.rename = False
+
+def make_html_tree(node, tree_text, indent_level):
+  indent = indent_level * '\t'
+  if node.is_root:
+    label = node.name
+  elif node.label is not None:
+    label = node.label
+  else:
+    label = '%s (%s)' %(node.program, node.method)
+    try:
+      label += ' - %.2f%%' %(node.R1 * 100)
+    except (ValueError, TypeError):
+      pass
+  tree_text.append(indent + label + '\n' + indent + node.name + '\n')
+  for node in node.children:
+    make_html_tree(node, tree_text, indent_level+1)
+  return tree_text
+
+OV.registerFunction(getAllHistories)
+OV.registerFunction(changeHistory)
+OV.registerFunction(delete_history)
+
+
+
+##############################################
+## START OF BACKWARDS COMPATIBILITY CLASSES ##
+##############################################
 
 class HistoryBranch:
   def __init__(self,resPath,lstPath,solution=True):
@@ -445,7 +531,6 @@ class HistoryBranch:
     ref_name = 'refinement_%s' %ref_num
     tree.current_refinement = ref_name
     self.historyBranch[ref_name] = HistoryLeaf(resPath,lstPath)
-    return ref_name
 
 
 class HistoryLeaf:
@@ -534,127 +619,40 @@ class HistoryLeaf:
       else:
         OV.SetRefinementProgram(self.refinement_program)
 
-def compressFile(filePath):
-  file = open(filePath)
-  fileData = file.read()
-  fileData = zlib.compress(fileData,9)
-  return fileData
+def _convert_history(history_tree):
+  _tree = HistoryTree()
+  hklPath = OV.HKLSrc()
+  branch_names = history_tree.historyTree.keys()
+  branch_names.sort()
+  for branch_name in branch_names:
+    branch = history_tree.historyTree[branch_name]
+    leaf_names = branch.historyBranch.keys()
+    leaf_names.sort()
+    try:
+      leaf_names.remove('solution')
+      leaf_names.insert(0, 'solution') # move solution to front
+    except ValueError:
+      pass
+    for leaf_name in leaf_names:
+      leaf = branch.historyBranch[leaf_name]
+      if leaf_name == 'solution':
+        name = hashlib.md5(branch_name).hexdigest()
+        node = Node(name, hklPath, is_solution=True, primary_parent_node=_tree, history_leaf=leaf)
+        _tree.children.append(node)
+        _tree.active_child_node = node
+      else:
+        name = hashlib.md5(branch_name + leaf_name).hexdigest()
+        if _tree.active_node is None:
+          node = Node(name, hklPath, is_solution=False, primary_parent_node=_tree, history_leaf=leaf)
+          _tree.children.append(node)
+          _tree.active_child_node = node
+        else:
+          node = Node(name, hklPath, is_solution=False, primary_parent_node=_tree.active_node, history_leaf=leaf)
+          _tree.active_node.add_child_node(node)
+      _tree.active_node = node
+      _tree._full_index.setdefault(name, node)
+  return _tree
 
-def decompressFile(fileData):
-  return zlib.decompress(fileData)
-
-tree = HistoryTree()
-
-def getAllHistories():
-  solutions = tree.historyTree.keys()
-  solutions.sort()
-  historyList = []
-  for item in solutions:
-    historyList.append("%s;" %item)
-  return ''.join(historyList)
-
-def changeHistory(solution):
-  tree.current_solution = solution
-  refinements = tree.historyTree[solution].historyBranch.keys()
-  his_file_num = -1
-  his_file = 'solution'
-  for item in refinements:
-    if 'solution' not in item:
-      fileNum = item.split('_')[1]
-      fileNum = int(fileNum)
-      his_file_num = max(his_file_num, fileNum)
-      if his_file_num == fileNum:
-        his_file = item
-      
-  tree.current_refinement = his_file
-  hist.revert_history({'solution':tree.current_solution,'refinement':tree.current_refinement})
-  hist.params.snum.history.current_solution = solution
-  hist._make_history_bars()
-  hist.rename = False
-  hist.setParams()
-  #OV.UpdateHtml() # uncomment me!
-  
-def historyChooserRenamer():
-  if 'Autochem' in OV.GetParam('snum.history.current_solution'):
-    autochem = True
-  else:
-    autochem = False
-    #pass
-
-  rename = OV.FindValue('rename')
-  
-  if not rename:
-    text = """<td VALIGN='center' width="40%%" colspan=1>
-    <b>%History%</b>
-    </td>	
-    
-    <td VALIGN='center' colspan=1>
-    <font size='2'> 
-    <input 
-      type='combo'
-      width='$eval(htmlpanelwidth()/2 -15)'
-      height="$getVar(gui_html_input_height)"
-      bgcolor='$GetVar(gui_html_input_bg_colour)'
-      name='SET_HISTORY_CURRENT_SOLUTION'
-      value='$spy.GetParam(snum.history.current_solution)'
-      items='$spy.getAllHistories()'
-      label=''
-      onchange='spy.changeHistory(GetValue(SET_HISTORY_CURRENT_SOLUTION))>>UpdateHtml'
-      readonly='readonly'
-    >
-    </font>
-    </td>
-    """
-    if not autochem:
-      text += """
-    <td VALIGN='center' colspan=1 width=55>
-    <input 
-      type="button"
-      name="rename"
-      width="50" 
-      height="18" 
-      value="Rename" 
-      onclick="SetVar(rename,True)>>UpdateHtml"
-    >
-    </td>
-    """
-    
-    else: text += """
-    <td colspan=1 width="55">
-    </td>
-    """
-    
-  else:
-    text = """<td VALIGN='center' width="40%%" colspan=1>
-    <b>%Rename Solution%</b>
-    </td>
-    
-    <td VALIGN='center' colspan=1>
-    <font size='2'>
-    <input
-      type='text'
-      width='$eval(htmlpanelwidth()/2 -15)'
-      height="17"
-      bgcolor='$GetVar(gui_html_input_bg_colour)'
-      name='SET_SNUM_HISTORY_CURRENT_SOLUTION'
-      value='$spy.GetParam(snum.history.current_solution)'
-      label=''
-    >
-    </font>
-    </td>
-    <td VALIGN='center' colspan=1>
-    <input 
-      type="button" 
-      name = "select-usio" 
-      width="50" 
-      height="18" 
-      value="OK" 
-      onclick="spy.rename_history -old='spy.GetParam(snum.history.current_solution)' -new='GetValue(SET_SNUM_HISTORY_CURRENT_SOLUTION)'>>SetVar(rename,False)>>UpdateHtml"
-    >
-    </td>
-    """
-  return OV.Translate(text)
-
-OV.registerFunction(historyChooserRenamer)   
-OV.registerFunction(getAllHistories)
-OV.registerFunction(changeHistory)
+############################################
+## END OF BACKWARDS COMPATIBILITY CLASSES ##
+############################################

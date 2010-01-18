@@ -224,13 +224,7 @@ snum {
     .type = bool
 
   history {
-    current_solution = "Solution 01"
-      .type = str
-      .expert_level = 2
-    next_solution = "Solution 01"
-      .type = str
-      .expert_level = 2
-    autochem_next_solution = "Autochem 01"
+    current_node = None
       .type = str
       .expert_level = 2
   }

@@ -1,7 +1,7 @@
 # programSettings.py
 
 import ExternalPrgParameters
-SPD, RPD = ExternalPrgParameters.defineExternalPrograms()
+SPD, RPD = ExternalPrgParameters.SPD, ExternalPrgParameters.RPD
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()

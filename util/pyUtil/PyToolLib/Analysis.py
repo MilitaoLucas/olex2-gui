@@ -218,39 +218,32 @@ class Graph(ImageTools):
   def make_x_y_plot(self):
     pass
 
-  def make_empty_graph(self, axis_x=False):
+  def make_empty_graph(self, axis_x=False, draw_title=True):
     import Image
     import ImageFont, ImageDraw, ImageChops
-    
+
     self.imX = self.params.size_x
     self.imY = self.params.size_y
-    
     fontsize = int(0.08 * self.imX)
     fontscale = 0.02 * self.imX
     f = self.params.font_scale
     fontscale = f * self.imX
-    
     font_name = "Vera"
     self.font_size_large = int(1.4 * fontscale)
     self.font_large = self.registerFontInstance(font_name, self.font_size_large)
-    
     self.font_size_normal = int(1.0 * fontscale)
     self.font_normal = self.registerFontInstance(font_name, self.font_size_normal)
-    
     self.font_size_small = int(0.9 *fontscale)
     self.font_small = self.registerFontInstance(font_name, self.font_size_small)
-    
     self.font_size_tiny = int(0.7 * fontscale)
     self.font_tiny = self.registerFontInstance(font_name, self.font_size_tiny)
-    
     self.light_grey = "#888888"
     self.grey = "#444444"
     self.dark_grey = "#222222"
-    
     font_name = "Vera Bold"
     self.font_bold_large = self.registerFontInstance(font_name, int(1.4 * fontscale))
     self.font_bold_normal = self.registerFontInstance(font_name, int(1.0 * fontscale))
-    
+
     self.filenameColour = "#bbbbbb"
     self.titleColour = "#777777"
     self.bSides = round(0.015 * self.imX)
@@ -266,48 +259,47 @@ class Graph(ImageTools):
     im = Image.new('RGB', size, colour)
     draw = ImageDraw.Draw(im)
     self.draw = draw
-    
-    txt = self.graphInfo["Title"]
-    
-    if not txt: txt = "Not available"
-    x = 0 + self.bSides+self.xSpace
-    y = self.bTop
-    top_left = (x,y)
-    IT.write_text_to_draw(draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.titleColour)
-    currX, currY = self.draw.textsize(txt, font=self.font_bold_large)
-    
-    # Write something in the right-hand top spot on the graph
-    txt = self.graphInfo.get("TopRightTitle", "")
-    font = self.font_bold_large
-    txtX, txtY = self.draw.textsize(txt, font=font)
-    x = (self.imX - self.bSides - txtX) # align text right
-    y = self.bTop
-    draw.text((x, y), "%s" %txt, font=font, fill=self.filenameColour)
-    currX, currY = draw.textsize(txt, font=self.font_bold_large)
-    self.currX += currX
-    self.currY += currY
-    
+
+    if draw_title:
+      txt = self.graphInfo["Title"]
+      if not txt: txt = "Not available"
+      x = 0 + self.bSides+self.xSpace
+      y = self.bTop
+      top_left = (x,y)
+      IT.write_text_to_draw(draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.titleColour)
+      currX, currY = self.draw.textsize(txt, font=self.font_bold_large)
+      # Write something in the right-hand top spot on the graph
+      txt = self.graphInfo.get("TopRightTitle", "")
+      font = self.font_bold_large
+      txtX, txtY = self.draw.textsize(txt, font=font)
+      x = (self.imX - self.bSides - txtX) # align text right
+      y = self.bTop
+      draw.text((x, y), "%s" %txt, font=font, fill=self.filenameColour)
+      currX, currY = draw.textsize(txt, font=self.font_bold_large)
+      self.currX += currX
+      self.currY += currY
+
     self.yAxisSpace = 5
     self.graphX = self.imX - (self.bSides + self.xSpace)
     self.graph_top = int(self.currY + 0.1 * self.imY) + self.yAxisSpace
     self.graphY = self.imY - 2*self.bTop - self.graph_top
-    self.graph_bottom = int(self.graphY + currY + 0.03*self.imY - self.yAxisSpace)
+    self.graph_bottom = int(self.graphY + self.currY + 0.03*self.imY - self.yAxisSpace)
     self.line_width = int(self.imX * 0.002)
-    
+
     dx = self.imX - 1*self.bSides
     dy = self.graph_bottom
-    box = (self.bSides + self.xSpace, currY + 0.03*self.imY, dx, dy)
+    box = (self.bSides + self.xSpace, self.currY + 0.03*self.imY, dx, dy)
     if self.line_width > 0:
       fill = (200, 200, 200)
     else:
       fill = self.gui_html_bg_colour
     draw.rectangle(box,  fill=fill, outline=(200, 200, 200))
     self.boxX = dx - self.bSides*2 + self.xSpace
-    self.boxY = dy - currY
+    self.boxY = dy - self.currY
     self.boxXoffset = self.bSides+self.xSpace
     self.graph_right = self.imX - self.bSides
     self.graph_left = self.boxXoffset
-    self.boxYoffset = currY + 0.03*self.imY
+    self.boxYoffset = self.currY + 0.03*self.imY
     self.graph_top = self.boxYoffset
     if self.line_width > 0:
       box = (box[0] + self.line_width, box[1] + self.line_width, box[2] - self.line_width, box[3] -self.line_width)
@@ -504,6 +496,97 @@ class Graph(ImageTools):
     else:
       dv_ = 5.0
     return dv_ * math.pow(10, round(pow10))
+
+  def draw_bars(self, dataset, y_scale_factor=1.0, bar_labels=None, colour_function=None):
+    top = self.graph_top
+    marker_width = 5
+    width = self.params.size_x
+    height = self.graph_bottom - self.graph_top
+    legend_top = height + 20
+    labels = dataset.metadata().get('labels')
+    y_label = dataset.metadata().get('y_label')
+    title = self.graphInfo.get('Title')
+    n_bars = len(dataset.x)
+    bar_width = int((width-2*self.bSides)/n_bars) -1
+    if title is not None:
+      wX, wY = IT.textsize(self.draw, title, font_size=self.font_size_large)
+      x = width - 2*self.bSides - wX
+      y = wY + 6
+      top_left = (x,y)
+      IT.write_text_to_draw(self.draw, title, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
+
+    for i, xy in enumerate(dataset.xy_pairs()):
+      x_value, y_value = xy
+      bar_left = ((i) * bar_width) + self.bSides + 1
+      bar_right = bar_left + bar_width
+      bar_bottom = self.graph_bottom -1
+      y_value_scale = y_value * y_scale_factor
+
+      if y_value_scale >= 1:
+        bar_top = top
+      else:
+        bar_top = height + top  - (y_value_scale * (height))
+
+      if colour_function is not None:
+        fill = colour_function(y_value_scale)
+      else:
+        fill = (0,0,0)
+
+      box = (bar_left,bar_top,bar_right,bar_bottom)
+      self.draw.rectangle(box, fill=fill, outline=(100, 100, 100))
+
+      if dataset.hrefs is not None:
+        href = dataset.hrefs[i]
+      else:
+        #href = "Html.Update"
+        href = ""
+      if dataset.targets is not None:
+        target = dataset.targets[i]
+      else:
+        target = "%.3f" %y_value
+      self.map_txt_list.append(
+        """<zrect coords="%i,%i,%i,%i" href="%s" target="%s">"""
+        % (bar_left, top, bar_right, bar_bottom, href, target))
+      if bar_labels is not None:
+        txt = bar_labels[i]
+      else:
+        txt = "%.3f" %y_value
+      wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large)
+
+      if wX < bar_width:
+        x = bar_left + ( bar_width - wX/2 -wX) + self.bSides
+        x = bar_left + ( bar_width - wX)/2
+        if y_value < 0.8:
+          y = bar_top - 14
+        else:
+          y = bar_top + 6
+        top_left = (x,y)
+        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
+
+      if y_value < 0.003:
+        txt = "OK"
+        wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large)
+        x = width - 2*self.bSides - wX
+        y = wY + 30
+        top_left = (x, y - 10)
+        top_left = (x,y)
+        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.gui_green)
+
+  def draw_legend(self, txt):
+    height = self.graph_bottom - self.graph_top
+    width = self.params.size_x
+    legend_top = height + 20
+    legend_top = self.graph_bottom + 2
+    m_offset = 5
+    ## Wipe the legend area
+    box = (0,legend_top,width,legend_top + 20)
+    self.draw.rectangle(box, fill=self.gui_html_bg_colour)
+    #txt = '%.3f' %(y_value)
+    ## Draw Current Numbers
+    wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large)
+    x = width - wX - self.bSides
+    top_left = (x, legend_top)
+    IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
 
   def draw_data_points(self, xy_pairs, indices=None, marker_size_factor=None):
     min_x = self.min_x
@@ -712,45 +795,45 @@ class Graph(ImageTools):
     y = self.boxY  + self.imY * 0.01
     self.draw.text((x, y), "%s" %txt, font=self.font_small, fill="#444444")
     
-  def draw_bars(self):
-    import ImageFont
-    data = []
-    for item in self.graphInfo["Data"]:
-      try:
-        data.append(float(item))
-      except:
-        pass
-    barX = self.graphX/len(data)
-    barScale = self.graphY/max(data)
+  #def draw_bars(self):
+    #import ImageFont
+    #data = []
+    #for item in self.graphInfo["Data"]:
+      #try:
+        #data.append(float(item))
+      #except:
+        #pass
+    #barX = self.graphX/len(data)
+    #barScale = self.graphY/max(data)
     
-    i = 0
-    for item in data:
-      barHeight = (item * barScale)
-      fill = (0, 0, 0)
-      fill = self.gui_html_bg_colour
-      for barcol in self.barcolour:
-        if item > barcol[0]:
-          fill = barcol[1]
+    #i = 0
+    #for item in data:
+      #barHeight = (item * barScale)
+      #fill = (0, 0, 0)
+      #fill = self.gui_html_bg_colour
+      #for barcol in self.barcolour:
+        #if item > barcol[0]:
+          #fill = barcol[1]
           
-      x = self.bSides + i * barX
-      y = (self.graph_bottom - barHeight + self.yAxisSpace)
-      dx = ((i + 1) * barX) + self.bSides
-      box = (x, y, dx, self.graph_bottom)
-      self.draw.rectangle(box, fill=fill, outline=(100, 100, 100))
-      font_size = int(barX/2)
-      if font_size > 11: font_size = 11
-      font_name = "Verdana"
-      font = self.registerFontInstance(font_name, font_size)
-      if item >= 10:
-        txt = "%.0f" %item
-      else:
-        txt = "%.1f" %item
-      wX, wY = IT.textsize(self.draw, txt, font_size=font_size)
+      #x = self.bSides + i * barX
+      #y = (self.graph_bottom - barHeight + self.yAxisSpace)
+      #dx = ((i + 1) * barX) + self.bSides
+      #box = (x, y, dx, self.graph_bottom)
+      #self.draw.rectangle(box, fill=fill, outline=(100, 100, 100))
+      #font_size = int(barX/2)
+      #if font_size > 11: font_size = 11
+      #font_name = "Verdana"
+      #font = self.registerFontInstance(font_name, font_size)
+      #if item >= 10:
+        #txt = "%.0f" %item
+      #else:
+        #txt = "%.1f" %item
+      #wX, wY = IT.textsize(self.draw, txt, font_size=font_size)
 
-      if barHeight > wY * 2:
-        top_left = (x + (barX - wX)/2, y + self.graphY * 0.01)
-        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.dark_grey)
-      i += 1
+      #if barHeight > wY * 2:
+        #top_left = (x + (barX - wX)/2, y + self.graphY * 0.01)
+        #IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.dark_grey)
+      #i += 1
 
 class Analysis(Graph):
   def __init__(self, function=None, param=None):
@@ -762,14 +845,14 @@ class Analysis(Graph):
     self.datadir = OV.DataDir()
     self.gui_html_bg_colour = OV.FindValue('gui_html_bg_colour')
     self.gui_html_highlight_colour = OV.FindValue('gui_html_highlight_colour')
-    self.SPD, self.RPD = ExternalPrgParameters.defineExternalPrograms()
+    self.SPD, self.RPD = ExternalPrgParameters.SPD, ExternalPrgParameters.RPD
     self.debug = False
     self.function = function
     if param:
       self.param = param.split(';')
     self.fl = []
     self.item = None
-    
+
   def run_Analysis(self, f, args):
     self.basedir = OV.BaseDir()
     self.filefull = OV.FileFull()
@@ -808,7 +891,6 @@ class Analysis(Graph):
     else:
       raise Exception("Unknown command: expected 'lst'")
 
-    
   def make_simple_x_y_pair_plot(self, imX=512, imY=256):
     self.imX = imX
     self.imY = imY
@@ -955,7 +1037,7 @@ class Analysis(Graph):
       
     #for value in AnalysisInfo["K"]: print value
     self.graphInfo = AnalysisInfo
-    
+  
   def make_analysis_image(self):
     if not self.graphInfo:
       image_location = "%s/%s.png" %(self.filepath, self.item)
@@ -1068,90 +1150,6 @@ class refinement_graph(PrgAnalysis):
     rB = 0
     return rR, rG, rB
 
-  def draw_bars(self, dataset, y_scale_factor=1.0, bar_labels=None, colour_function=None):
-    top = self.graph_top
-    marker_width = 5
-    txt = self.graphInfo.get('Title', "")
-    width = self.params.size_x
-    height = self.graph_bottom - self.graph_top
-    legend_top = height + 20
-    labels = dataset.metadata().get('labels')
-    y_label = dataset.metadata().get('y_label')
-    wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large)
-    n_cycles = len(dataset.x)
-    bar_width = int((width-2*self.bSides)/n_cycles) -1
-    x = width - 2*self.bSides - wX
-    y = wY + 6
-    top_left = (x,y)
-    IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
-    
-    for i, xy in enumerate(dataset.xy_pairs()):
-      x_value, y_value = xy
-      bar_left = ((i) * bar_width) + self.bSides + 1
-      bar_right = bar_left + bar_width
-      bar_bottom = self.graph_bottom -1
-      y_value_scale = y_value * y_scale_factor
-
-      if y_value_scale >= 1:
-        bar_top = top
-      else:
-        bar_top = height + top  - (y_value_scale * (height))
-
-      if colour_function is not None:
-        rR, rG, rB = colour_function(y_value_scale)
-      else:
-        rR, rG, rB = (0,0,0)
-
-      box = (bar_left,bar_top,bar_right,bar_bottom)
-      self.draw.rectangle(box, fill=(rR, rG, rB), outline=(100, 100, 100))
-
-      if bar_labels is not None:
-        map_txt = "%s - %.3f" %(bar_labels[i],y_value)
-      else:
-        map_txt = "%.3f" %y_value
-      self.map_txt_list.append(
-        """<zrect coords="%i,%i,%i,%i" href="Html.Update" target="%s">"""
-        % (bar_left, top, bar_right, bar_bottom, map_txt))
-      if bar_labels is not None:
-        txt = bar_labels[i]
-      else:
-        txt = "%.3f" %y_value
-      wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large)
-
-      if wX < bar_width:
-        x = bar_left + ( bar_width - wX/2 -wX) + self.bSides
-        x = bar_left + ( bar_width - wX)/2
-        
-        if y_value < 0.8:
-          y = bar_top - 14
-        else:
-          y = bar_top + 6
-        top_left = (x,y)
-        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
-        
-      if y_value < 0.003:
-        txt = "OK"
-        wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large)
-        x = width - 2*self.bSides - wX
-        y = wY + 30
-        top_left = (x, y - 10)
-        top_left = (x,y)
-        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.gui_green)
-        
-    legend_top = height + 20
-    legend_top = self.graph_bottom + 2
-    m_offset = 5
-    ## Wipe the legend area
-    box = (0,legend_top,width,legend_top + 20)
-    self.draw.rectangle(box, fill=self.gui_html_bg_colour)
-
-    txt = '%.3f' %(y_value)
-    ## Draw Current Numbers
-    wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large)
-    x = width - wX - self.bSides
-    top_left = (x, legend_top)
-    IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
-    
   def make_graph(self):
     self.make_empty_graph()
     mean_shifts = self.data.get("mean_shift")
@@ -1160,10 +1158,12 @@ class refinement_graph(PrgAnalysis):
       max_shift_atom = self.data["max_shift"].metadata()["labels"]
 
     if mean_shifts is not None:
-      self.draw_bars(dataset=mean_shifts, colour_function=self.get_mean_shift_esd_bar_colours)
+      self.draw_bars(dataset=mean_shifts, y_scale_factor=3.0, colour_function=self.get_mean_shift_esd_bar_colours)
+      self.draw_legend("%.3f" %mean_shifts.y[-1])
     elif max_shifts is not None:
       self.draw_bars(dataset=max_shifts, y_scale_factor=3.0, bar_labels=max_shift_atom, colour_function=self.get_max_shift_bar_colours)
-      
+      self.draw_legend("%.3f" %max_shifts.y[-1])
+
     self.update_image()
     return
 
@@ -1766,17 +1766,111 @@ class Fobs_over_Fcalc_plot(Analysis):
       xy_plot.resolution, xy_plot.f_obs_over_f_calc,
       indices=indices, metadata=metadata)
     self.data.setdefault('dataset1', data)
-    self.make_empty_graph(axis_x = True)
+    self.make_empty_graph(axis_x=True)
     #self.plot_function("1")
     self.draw_fit_line(slope=0, y_intercept=1, write_equation=False)
     self.draw_pairs()
 
+class HistoryGraph(Analysis):
+
+  def __init__(self, history_tree):
+    Analysis.__init__(self)
+    self.params = OV.Params().graphs.program_analysis
+    self.i_bar = 0
+    self.tree = history_tree
+    size = (int(OV.FindValue('gui_htmlpanelwidth'))- 50, 100)
+    self.item = "history"
+    self.params.size_x, self.params.size_y = size
+    self.make_empty_graph(draw_title=False)
+    self.image_location = "history.png"
+    self.make_graph()
+    self.popout()
+
+  def make_graph(self):
+    bars = []
+    node = self.tree.active_node
+    while not node.is_root:
+      R1 = node.R1
+      href = "spy.revert_history(%s)>>UpdateHtml" %(node.name)
+      if node.is_solution:
+        target = "Solution"
+        R1 = 1
+      else:
+        if R1 == 'n/a': R1 = 0.99
+        target = '%s (%s)' %(node.program, node.method)
+        try:
+          target += ' - %.2f%%' %(node.R1 * 100)
+        except (ValueError, TypeError):
+          pass
+      bars.append((R1,href,target))
+      node = node.primary_parent_node
+    bars.reverse()
+    self.i_active_node = len(bars) - 1
+    node = self.tree.active_node.active_child_node
+    while node is not None:
+      if node.is_solution:
+        pass
+      else:
+        R1 = node.R1
+        href = "spy.revert_history(%s)>>UpdateHtml" %(node.name)
+        if R1 == 'n/a': R1 = 0.99
+        if R1 == 'n/a': R1 = 0.99
+        target = '%s (%s)' %(node.program, node.method)
+        try:
+          target += ' - %.2f%%' %(node.R1 * 100)
+        except (ValueError, TypeError):
+          pass
+        bars.append((R1,href,target))
+      node = node.active_child_node
+
+    x = []
+    y = []
+    hrefs = []
+    targets = []
+    for i, bar in enumerate(bars):
+      x.append(i+1)
+      y.append(bar[0]) # R factor
+      hrefs.append(bar[1])
+      targets.append(bar[2])
+    data = Dataset(x, y, hrefs=hrefs, targets=targets)
+    self.draw_bars(dataset=data, y_scale_factor=2, colour_function=self.get_bar_colours)
+    label = '%s (%s)' %(self.tree.active_node.program, self.tree.active_node.method)
+    try:
+      label += ' - %.2f%%' %(self.tree.active_node.R1 * 100)
+    except (ValueError, TypeError):
+      pass
+    self.draw_legend(label)
+    #self.draw_legend("%.3f" %(bars[self.i_active_node][0]))
+    historyText = """\
+<zimg name="HISTORY_IMAGE" border="0" src="%s">
+%s
+</zimg>
+""" %(self.image_location, self.map_txt)
+    OV.write_to_olex('history-info.htm',historyText)
+
+  def get_bar_colours(self, bar_height):
+    if self.i_bar == self.i_active_node:
+      fill =  OV.FindValue('gui_html_highlight_colour')
+      fill = OV.GetParam('gui.grey').rgb
+    elif bar_height == 2:
+      fill = (139, 0, 204)
+    else:
+      fill = (int(255*bar_height*2), int(255*(1.3-bar_height*2)), 0)
+    #if self.i_bar != self.i_active_node:
+      #fill = IT.adjust_colour(fill, luminosity=1.5)
+    self.i_bar += 1
+    return fill
+
+
 class Dataset(object):
-  def __init__(self, x=None, y=None, indices=None, metadata={}):
+  def __init__(self, x=None, y=None, indices=None,
+               hrefs=None, targets=None, metadata={}):
     if x is None: x = []
     if y is None: y = []
     self.x = x
     self.y = y
+    self.hrefs = hrefs
+    self.targets = targets
     self.indices = indices
     self._metadata = metadata
 
@@ -1829,7 +1923,7 @@ def makeReflectionGraphOptions(graph, name):
              graph.name, object.name,ctrl_name),
            }
       options_gui.append(htmlTools.make_spin_input(d))
-      
+
     elif data_type == "str":
       ctrl_name = 'TEXT_%s' %(obj_name)
       d = {'ctrl_name':ctrl_name,
@@ -1870,8 +1964,7 @@ def makeReflectionGraphOptions(graph, name):
            'width':'',
            }
       options_gui.append(htmlTools.make_combo_text_box(d))
-      
-      
+
   options_gui = '\n<td>%s</td>\n' %'</td>\n<td>'.join(options_gui)
   colspan = i
   return options_gui, colspan

@@ -25,7 +25,7 @@ import History
 
 
 import ExternalPrgParameters
-SPD, RPD = ExternalPrgParameters.defineExternalPrograms()
+SPD, RPD = ExternalPrgParameters.SPD, ExternalPrgParameters.RPD
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
@@ -650,21 +650,7 @@ def GetRInfo(txt=""):
       R1 = olx.Cif('_refine_ls_R_factor_gt')
     else:
       tree = History.tree
-      try:
-        if tree.current_refinement == 'solution':
-          R1 = 'Solution'
-        else:
-          R1 = tree.historyTree[tree.current_solution].historyBranch[tree.current_refinement].R1
-      except KeyError:
-        R1 = 'n/a'
-      except AttributeError:
-        tree.current_refinement = OV.GetParam('snum.refinement.current_refinement')
-        tree.current_solution = OV.GetParam('snum.refinement.current_solution')
-        R1 = 'n/a'
-      except:
-        R1 = 'n/a'
-        print 'Someother exception'
-      
+      R1 = tree.active_node.R1
     try:
       R1 = float(R1)
       col = GetRcolour(R1)
@@ -674,7 +660,7 @@ def GetRInfo(txt=""):
       t = "<td colspan='1' rowspan='2' align='center'><font size='4'><b>%s</b></font></td>" %R1
     finally:
       return t
-    
+
   else:
     if txt:
       t = "<td colspan='1' rowspan='2' align='center'><font size='4'><b>%s</b></font></td>" %txt

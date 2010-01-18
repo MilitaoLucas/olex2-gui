@@ -1153,5 +1153,7 @@ name = 'Full Matrix'
   .type=str
 """)
 
+SPD, RPD = defineExternalPrograms()
+
 if __name__ == '__main__':
   SPD, RPD = defineExternalPrograms()
