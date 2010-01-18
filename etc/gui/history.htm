@@ -1,10 +1,24 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
 
 <!-- FIRST ROW -->
-<tr name=HISTORY_REMAMER VALIGN='center' NAME='CURRENT_HISTORY'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Rename-History;1; -->
+<tr>
+<!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  $spy.historyChooserRenamer()
+	<td>
+	  <input
+			noroot
+			editable
+			name="HISTORY_TREE"
+			type="tree"
+			src="history_tree.ind"
+			width="$eval(htmlpanelwidth()-50)"
+			height="200"
+			selected="$spy.GetParam(snum.history.current_node)"
+			onselect="echo 'html.getvalue(HISTORY_TREE) has been selected'"
+			onitem="spy.revert_history(html.getvalue(HISTORY_TREE))>>UpdateHtml"
+			onedit="spy.rename_history(html.getvalue(HISTORY_TREE),~label~)>>UpdateHtml"
+		>
+	</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 

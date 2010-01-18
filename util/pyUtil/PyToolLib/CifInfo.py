@@ -10,7 +10,7 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
 import ExternalPrgParameters
-SPD, RPD = ExternalPrgParameters.defineExternalPrograms()
+SPD, RPD = ExternalPrgParameters.SPD, ExternalPrgParameters.RPD
 
 class MetacifFiles:
   def __init__(self):
@@ -347,16 +347,13 @@ class CifTools(ArgumentParser):
     versions = self.get_def()
 
     import History
-    try:
-      solution_branch = History.tree.historyTree[History.tree.current_solution]
-      current_refinement = solution_branch.historyBranch[History.tree.current_refinement]
-      if solution_branch.historyBranch.has_key('solution'):
-        solution_reference = SPD.programs[solution_branch.solution_program].reference
-        OV.SetParam('snum.metacif.computing_structure_solution', solution_reference)
-        atom_sites_solution_primary = SPD.programs[solution_branch.solution_program].methods[solution_branch.solution_method].atom_sites_solution
-        OV.SetParam('snum.metacif.atom_sites_solution_primary', atom_sites_solution_primary)
-    except KeyError:
-      pass
+    #active_node = History.tree.active_node
+    active_solution = History.tree.active_child_node
+    if active_solution.is_solution:
+      solution_reference = SPD.programs[active_solution.program].reference
+      atom_sites_solution_primary = SPD.programs[active_solution.program].methods[active_solution.method].atom_sites_solution
+      OV.SetParam('snum.metacif.computing_structure_solution', solution_reference)
+      OV.SetParam('snum.metacif.atom_sites_solution_primary', atom_sites_solution_primary)
 
     tools = ['smart', 'saint', 'integ', 'cad4', 'sad', 'pcf','frames', 'p4p', 'cif_od', 'cif_def']
 
