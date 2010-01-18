@@ -1788,39 +1788,22 @@ class HistoryGraph(Analysis):
 
   def make_graph(self):
     bars = []
-    node = self.tree.active_node
-    while not node.is_root:
+    node = self.tree.active_child_node
+    while node is not None:
       R1 = node.R1
       href = "spy.revert_history(%s)>>UpdateHtml" %(node.name)
+      target = '%s (%s)' %(node.program, node.method)
       if node.is_solution:
-        target = "Solution"
         R1 = 1
       else:
         if R1 == 'n/a': R1 = 0.99
-        target = '%s (%s)' %(node.program, node.method)
         try:
           target += ' - %.2f%%' %(node.R1 * 100)
         except (ValueError, TypeError):
           pass
+      if node is self.tree.active_node:
+        self.i_active_node = len(bars)
       bars.append((R1,href,target))
-      node = node.primary_parent_node
-    bars.reverse()
-    self.i_active_node = len(bars) - 1
-    node = self.tree.active_node.active_child_node
-    while node is not None:
-      if node.is_solution:
-        pass
-      else:
-        R1 = node.R1
-        href = "spy.revert_history(%s)>>UpdateHtml" %(node.name)
-        if R1 == 'n/a': R1 = 0.99
-        if R1 == 'n/a': R1 = 0.99
-        target = '%s (%s)' %(node.program, node.method)
-        try:
-          target += ' - %.2f%%' %(node.R1 * 100)
-        except (ValueError, TypeError):
-          pass
-        bars.append((R1,href,target))
       node = node.active_child_node
 
     x = []
