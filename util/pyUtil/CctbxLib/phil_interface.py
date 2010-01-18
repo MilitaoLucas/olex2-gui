@@ -78,7 +78,7 @@ class colour_converters(object):
       return [tokenizer.word(value="Auto")]
     return [tokenizer.word(value=str(python_object.hexadecimal))]
 
-converter_registry = libtbx.phil.extended_converter_registry(
+default_converter_registry = libtbx.phil.extended_converter_registry(
   additional_converters=[colour_converters],
   base_registry=iotbx.phil.default_converter_registry)
 
@@ -89,7 +89,7 @@ def parse(
       converter_registry=None,
       process_includes=False):
   if (converter_registry is None):
-    converter_registry = converter_registry
+    converter_registry = default_converter_registry
   return iotbx.phil.parse(
     input_string=input_string,
     source_info=source_info,
