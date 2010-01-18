@@ -68,10 +68,6 @@ class History(ArgumentParser):
     self.his_file = tree.active_node.full_path()
     OV.SetParam('snum.history.current_node', tree.active_node.name)
     self._make_history_bars()
-    assert OV.GetParam('snum.history.current_node') == tree.active_node.name
-    print OV.GetParam('snum.history.current_node')
-    print tree.active_node.name
-    print OV.GetParam('snum.history.current_node')
     return self.his_file
 
   def rename_history(self, name, label=None):
