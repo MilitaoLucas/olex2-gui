@@ -650,7 +650,10 @@ def GetRInfo(txt=""):
       R1 = olx.Cif('_refine_ls_R_factor_gt')
     else:
       tree = History.tree
-      R1 = tree.active_node.R1
+      if tree.active_node is not None:
+        R1 = tree.active_node.R1
+      else:
+        R1 = 'n/a'
     try:
       R1 = float(R1)
       col = GetRcolour(R1)
