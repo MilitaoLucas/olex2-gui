@@ -386,7 +386,8 @@ class CifTools(ArgumentParser):
     if "integ" in tools:
       p = self.sort_out_path(path, "integ")
       if p != "File Not Found" and self.metacifFiles.curr_integ != self.metacifFiles.prev_integ:
-        integ = get_info_from_mls(p)["raw"]
+        import bruker_saint_listing
+        integ = bruker_saint_listing.reader(p).cifItems()
         computing_data_reduction = self.prepare_computing(integ, versions, "saint")
         computing_data_reduction = string.strip((string.split(computing_data_reduction, "="))[0])
         integ.setdefault("_computing_data_reduction", computing_data_reduction)
@@ -828,78 +829,6 @@ def getOrUpdateDimasVar(getOrUpdate):
         value = OV.GetParam('snum.metacif.%s' %var[-1])
         OV.SetParam(var[0],value)
     else: continue
-
-def get_info_from_p4p(p4p_file):
-  rFile = open(p4p_file, 'r')
-  p4p = []
-  for line in rFile:
-    p4p.append(line)
-  p4p_key = {"raw":{}, "cif":{}}
-  p4p_key["raw"].setdefault("SOURCE", "")
-  i = 0
-  for li in p4p:
-    li = string.strip(li)
-    if not li:
-      continue
-    if li[:2] == "  ":
-      continue
-    l = li.split()
-    field = string.strip(l[0])
-    value = string.strip(li.split(field)[1])
-    if field != "REF05":
-      p4p_key["raw"].setdefault(field, value)
-  ciflist=["_diffrn_radiation_wavelength"]
-  have_cif_item = False
-  value = ""
-  for item in ciflist:
-    if item == "_diffrn_radiation_wavelength":
-      if p4p_key["raw"]["SOURCE"]:
-        value = p4p_key["raw"]["SOURCE"].split()[0]
-      if value:
-        p4p_key["cif"].setdefault(item, r"'%s K\a'" %value)
-        have_cif_item = True
-  if have_cif_item:
-    metacif = MetaCif
-    a = metacif(p4p_key["cif"], None)
-    a.run()
-  return p4p_key
-
-def get_info_from_mls(file):
-  two_theta_min = 0
-  two_theta_max = 0
-  used = 0
-  rFile = open(file, 'r')
-  mls = []
-  for line in rFile:
-    mls.append(line)
-  mls_key = {"raw":{}, "cif":{}}
-  i = 0
-  for li in mls:
-    i += 1
-    l = li.split()
-    if li[:5] == "SAINT":
-      mls_key["raw"].setdefault("prog_version", string.strip(li[6:]))
-    elif li == "Reflection Summary:\n":
-      two_theta_min = float(string.strip(mls[i+2].split()[-2]))
-      two_theta_max = float(string.strip(mls[i+2].split()[-1]))
-      used = string.strip(mls[i+2].split()[-5])
-      best = string.strip(mls[i+2].split()[-3])
-      worst = string.strip(mls[i+2].split()[-2])
-    elif "Range of reflections used:" in li:
-      two_theta_min = float(string.strip(mls[i+1].split()[-2]))
-      two_theta_max = float(string.strip(mls[i+1].split()[-1]))
-      best = string.strip(mls[i+1].split()[1])
-      worst = string.strip(mls[i+1].split()[0])
-    elif "Orientation least squares, component" in li:
-      u = string.strip(li.split("(")[1])
-      used = string.strip(u.split()[0])
-
-  mls_key["raw"].setdefault("_cell_measurement_theta_min", "%.3f" %(two_theta_min/2))
-  mls_key["raw"]["_cell_measurement_theta_min"] = "%.3f" %(two_theta_min/2)
-  mls_key["raw"].setdefault("_cell_measurement_theta_max", "%.3f" %(two_theta_max/2))
-  mls_key["raw"]["_cell_measurement_reflns_used"] = "%s" %(used)
-
-  return mls_key
 
 def set_source_file(file_type, file_path):
   if file_path != '':
