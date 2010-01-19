@@ -240,9 +240,9 @@ class HistoryTree:
     self.children = []
     self.active_child_node = None
     self.active_node = None
-    self._full_index = {}
-    self.version = 2.0
     self.name = OV.FileName()
+    self._full_index = {self.name: self}
+    self.version = 2.0
     self.hklFiles = {}
     self.next_sol_num = 1
 
@@ -457,7 +457,7 @@ def compressFile(filePath):
 def decompressFile(fileData):
   return zlib.decompress(fileData)
 
-tree = HistoryTree()
+#tree = HistoryTree()
 
 def getAllHistories():
   solutions = ['%s<-%s' %(child.label, child.name) for child in tree.children]
@@ -491,6 +491,8 @@ def make_html_tree(node, tree_text, indent_level):
       label += ' - %.2f%%' %(node.R1 * 100)
     except (ValueError, TypeError):
       pass
+  #if node.is_root or len(node.primary_parent_node.children) > 1:
+    #tree_text.append(indent + label + '\n' + indent + node.name + '\n')
   tree_text.append(indent + label + '\n' + indent + node.name + '\n')
   for node in node.children:
     make_html_tree(node, tree_text, indent_level+1)
