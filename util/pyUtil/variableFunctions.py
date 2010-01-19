@@ -279,7 +279,7 @@ OV.registerFunction(LoadParams)
 
 def LoadStructureParams():
   ExternalPrgParameters.definedControls = [] # reset defined controls
-  olx.phil_handler.reset_scope('snum')
+  olx.phil_handler.reset_scope('snum', rebuild_index=False)
   solutionPrg, solutionMethod = getDefaultPrgMethod('Solution')
   refinementPrg, refinementMethod = getDefaultPrgMethod('Refinement')
   snum_phil = """

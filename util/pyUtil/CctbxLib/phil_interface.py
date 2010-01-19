@@ -3,6 +3,7 @@ import cStringIO
 import iotbx.phil
 import libtbx.phil
 import libtbx.phil.interface
+from libtbx.phil.interface import index
 from libtbx.phil import scope_extract_attribute_error
 from libtbx.phil import Auto
 
@@ -100,7 +101,7 @@ def parse(
 #
 # Main interface to Phil
 #
-class phil_handler(libtbx.phil.interface.index):
+class phil_handler(index):
 
   def adopt_phil(self, phil_object=None, phil_string=None, phil_file=None):
     assert [phil_object, phil_string, phil_file].count(None) == 2
@@ -188,6 +189,11 @@ class phil_handler(libtbx.phil.interface.index):
         else:
           parent_scope.__setattr__(scope_name, value)
     self._phil_has_changed = True
+
+  def reset_scope (self, phil_scope_name, rebuild_index=True) :
+    index.reset_scope(self, phil_scope_name)
+    if rebuild_index:
+      self.rebuild_index()
 
   def reset(self, scope_name=None, scope_names=None):
     print "Use reset_scope() instead of this function."
