@@ -132,8 +132,7 @@ class History(ArgumentParser):
     else:
       self._createNewHistory()
 
-    if tree.active_node is not None:
-      self._make_history_bars()
+    self._make_history_bars()
 
   def resetHistory(self):
     self._getItems()
@@ -172,10 +171,10 @@ class History(ArgumentParser):
       tree = self._convertHistory(historyFolder)
     else:
       tree = HistoryTree()
-      if os.path.splitext(self.filefull)[-1] in ('.res', '.RES', '.ins', '.INS'):
+      if olx.xf_au_GetAtomCount() == '0':
+        return
+      elif os.path.splitext(self.filefull)[-1] in ('.res', '.RES', '.ins', '.INS'):
         tree.add_top_level_node(OV.HKLSrc(), OV.FileFull(), os.path.splitext(OV.FileFull())[0] + '.lst', is_solution=False)
-      else:
-        pass
 
   def _convertHistory(self, historyFolder):
     folders = []
@@ -503,9 +502,9 @@ OV.registerFunction(delete_history)
 
 
 
-##############################################
-## START OF BACKWARDS COMPATIBILITY CLASSES ##
-##############################################
+#########################################################
+## START OF BACKWARDS COMPATIBILITY CLASSES 2010-01-19 ##
+#########################################################
 
 class HistoryBranch:
   def __init__(self,resPath,lstPath,solution=True):
