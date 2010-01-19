@@ -15,7 +15,7 @@
       width="$eval(htmlpanelwidth()-50)"
       height="200"
       selected="$spy.GetParam(snum.history.current_node)"
-      onselect="echo 'html.getvalue(HISTORY_TREE) has been selected'"
+      onselect=""
       onitem="spy.revert_history(html.getvalue(HISTORY_TREE))>>UpdateHtml"
       onedit="spy.rename_history(html.getvalue(HISTORY_TREE),~label~)>>UpdateHtml"
     >

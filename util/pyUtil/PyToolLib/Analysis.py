@@ -497,7 +497,7 @@ class Graph(ImageTools):
       dv_ = 5.0
     return dv_ * math.pow(10, round(pow10))
 
-  def draw_bars(self, dataset, y_scale_factor=1.0, bar_labels=None, colour_function=None):
+  def draw_bars(self, dataset, y_scale_factor=1.0, bar_labels=None, colour_function=None, draw_bar_labels=True):
     top = self.graph_top
     marker_width = 5
     width = self.params.size_x
@@ -547,30 +547,31 @@ class Graph(ImageTools):
       self.map_txt_list.append(
         """<zrect coords="%i,%i,%i,%i" href="%s" target="%s">"""
         % (bar_left, top, bar_right, bar_bottom, href, target))
-      if bar_labels is not None:
-        txt = bar_labels[i]
-      else:
-        txt = "%.3f" %y_value
-      wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large)
-
-      if wX < bar_width:
-        x = bar_left + ( bar_width - wX/2 -wX) + self.bSides
-        x = bar_left + ( bar_width - wX)/2
-        if y_value < 0.8:
-          y = bar_top - 14
+      if draw_bar_labels:
+        if bar_labels is not None:
+          txt = bar_labels[i]
         else:
-          y = bar_top + 6
-        top_left = (x,y)
-        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
-
-      if y_value < 0.003:
-        txt = "OK"
+          txt = "%.3f" %y_value
         wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large)
-        x = width - 2*self.bSides - wX
-        y = wY + 30
-        top_left = (x, y - 10)
-        top_left = (x,y)
-        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.gui_green)
+  
+        if wX < bar_width:
+          x = bar_left + ( bar_width - wX/2 -wX) + self.bSides
+          x = bar_left + ( bar_width - wX)/2
+          if y_value < 0.8:
+            y = bar_top - 14
+          else:
+            y = bar_top + 6
+          top_left = (x,y)
+          IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
+  
+        if y_value < 0.003:
+          txt = "OK"
+          wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large)
+          x = width - 2*self.bSides - wX
+          y = wY + 30
+          top_left = (x, y - 10)
+          top_left = (x,y)
+          IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.gui_green)
 
   def draw_legend(self, txt):
     height = self.graph_bottom - self.graph_top
@@ -1806,23 +1807,26 @@ class HistoryGraph(Analysis):
       bars.append((R1,href,target))
       node = node.active_child_node
 
-    x = []
-    y = []
-    hrefs = []
-    targets = []
-    for i, bar in enumerate(bars):
-      x.append(i+1)
-      y.append(bar[0]) # R factor
-      hrefs.append(bar[1])
-      targets.append(bar[2])
-    data = Dataset(x, y, hrefs=hrefs, targets=targets)
-    self.draw_bars(dataset=data, y_scale_factor=2, colour_function=self.get_bar_colours)
-    label = '%s (%s)' %(self.tree.active_node.program, self.tree.active_node.method)
-    try:
-      label += ' - %.2f%%' %(self.tree.active_node.R1 * 100)
-    except (ValueError, TypeError):
-      pass
-    self.draw_legend(label)
+    if len(bars) > 0:
+      x = []
+      y = []
+      hrefs = []
+      targets = []
+      for i, bar in enumerate(bars):
+        x.append(i+1)
+        y.append(bar[0]) # R factor
+        hrefs.append(bar[1])
+        targets.append(bar[2])
+      data = Dataset(x, y, hrefs=hrefs, targets=targets)
+      self.draw_bars(dataset=data, y_scale_factor=2,
+                     colour_function=self.get_bar_colours,
+                     draw_bar_labels=False)
+      label = '%s (%s)' %(self.tree.active_node.program, self.tree.active_node.method)
+      try:
+        label += ' - %.2f%%' %(self.tree.active_node.R1 * 100)
+      except (ValueError, TypeError):
+        pass
+      self.draw_legend(label)
     #self.draw_legend("%.3f" %(bars[self.i_active_node][0]))
     historyText = """\
 <zimg name="HISTORY_IMAGE" border="0" src="%s">
