@@ -34,6 +34,7 @@ distro_zips = (
   (suse_port_zip_name, suse_port_prefix), 
   (win_sse_port_zip_name, win_sse_port_prefix),
   (win_sse2_port_zip_name, win_sse2_port_prefix),
+  (win64_port_zip_name, win64_port_prefix),
   (portable_zip_name, portable_prefix)
 )
 
