@@ -83,12 +83,12 @@ class Graph(ImageTools):
     pixel_coordinates = []
 
     for x_value,y_value in xy_pairs:
-      
+
       if self.reverse_x:
         x = self.bX \
           - (self.boxXoffset
-             + ((float(x_value) * self.scale_x)) 
-             + ((0 - max_x) * self.scale_x) 
+             + ((float(x_value) * self.scale_x))
+             + ((0 - max_x) * self.scale_x)
              + (delta_x * self.scale_x))
       else:
         x = (self.graph_left
@@ -97,67 +97,67 @@ class Graph(ImageTools):
              + (delta_x * self.scale_x))
       if self.reverse_y:
         y = (self.graph_top
-             + ((float(y_value) * scale_y)) 
-             + ((0 - max_y) * scale_y) 
+             + ((float(y_value) * scale_y))
+             + ((0 - max_y) * scale_y)
              + (delta_y * scale_y))
       else:
         y = self.bY \
-          - (self.boxYoffset 
-             + ((float(y_value) * scale_y)) 
-             + ((0 - max_y) * scale_y) 
+          - (self.boxYoffset
+             + ((float(y_value) * scale_y))
+             + ((0 - max_y) * scale_y)
              + (delta_y * scale_y))
-        
+
       pixel_coordinates.append((round(x),round(y)))
-      
+
     for i in range(0,n_points):
       first_point = pixel_coordinates[i]
       second_point = pixel_coordinates[i+1]
-      if (second_point[1] < (self.graph_bottom) 
+      if (second_point[1] < (self.graph_bottom)
           and second_point[1] >= self.boxYoffset
           and second_point[0] <= self.graph_right
-          and second_point[0] >= self.graph_left): 
+          and second_point[0] >= self.graph_left):
         line = (first_point,second_point)
         self.draw.line(line, fill=fill, width=width)
     #self.draw_help_lines()
 
   def draw_help_lines(self):
     "Draws guide lines on the image to show box offset, etc."
-    
+
     x = self.boxXoffset
     self.draw.line(((x, -500),(x, 1500)), width=self.line_width, fill=(255, 200, 200))
     txt = "self.boxXoffset"
     self.draw.text((x+5, 30), "%s" %txt, font=self.font_tiny, fill=(100, 255, 100))
-    
+
     x = self.boxX
     self.draw.line(((x, -500),(x, 1500)), width=self.line_width, fill=(255, 200, 200))
     txt = "self.boxX"
     self.draw.text((x-60, 30), "%s" %txt, font=self.font_tiny, fill=(100, 255, 100))
-    
+
     x = self.graph_right
     self.draw.line(((x, -500),(x, 1500)), width=self.line_width, fill=(255, 200, 200))
     txt = "self.graph_right"
     self.draw.text((x-60, 30), "%s" %txt, font=self.font_tiny, fill=(100, 255, 100))
-    
+
     y = self.boxYoffset
     self.draw.line(((-500, y),(1500, y)), width=self.line_width, fill=(255, 200, 200))
     txt = "self.boxYoffset"
     self.draw.text((100, y + 5), "%s" %txt, font=self.font_tiny, fill=(255, 100, 100))
-    
+
     y = self.boxYoffset + self.boxY
     self.draw.line(((-500, y),(1500, y)), width=self.line_width, fill=(255, 200, 200))
     txt = "self.boxYoffset + self.boxY"
     self.draw.text((150, y + 5), "%s" %txt, font=self.font_tiny, fill=(255, 100, 100))
-    
+
     y = self.graph_bottom
     self.draw.line(((-500, y),(1500, y)), width=self.line_width, fill=(255, 200, 200))
     txt = "self.graph_bottom"
     self.draw.text((200, y + 5), "%s" %txt, font=self.font_tiny, fill=(255, 100, 100))
-    
+
     y = self.graph_top
     self.draw.line(((-500, y),(1500, y)), width=self.line_width, fill=(255, 200, 200))
     txt = "self.graph_top"
     self.draw.text((250, y + 5), "%s" %txt, font=self.font_tiny, fill=(255, 100, 100))
-    
+
   def draw_key(self, keys_to_draw):
     max_length = 0
     for key in keys_to_draw:
@@ -171,7 +171,7 @@ class Graph(ImageTools):
     draw.rectangle(box, fill=self.gui_html_bg_colour, outline=(200, 200, 200))
     margin_left = int((boxWidth/4))
     margin_right = int((boxWidth/4)*3)
-    
+
     txt_colour = "#444444"
     top = 10
     for key in keys_to_draw:
@@ -191,7 +191,7 @@ class Graph(ImageTools):
       left = 60
       draw.text((left,top), "%s" %label, font=self.font_tiny, fill=txt_colour)
       top += wY + 10
-      
+
     return im
 
   def get_unicode_characters(self, txt):
@@ -306,7 +306,7 @@ class Graph(ImageTools):
       draw.rectangle(box, fill=self.gui_html_bg_colour, outline=(200, 200, 200))
     self.im = im
     self.draw = draw
-    
+
   def draw_yAxis(self):
     yAxis = []
     for item in self.graphInfo["y_axis"]:
@@ -318,13 +318,13 @@ class Graph(ImageTools):
           yAxis.append(  "%.1f" %(float(item)))
       except:
         pass
-      
+
     if not yAxis:
       for item in self.graphInfo["y_axis"]:
         yAxis.append(item)
-        
+
     barX = self.graphX/len(yAxis)
-    
+
     i = 0
     for item in yAxis:
       txt = item
@@ -339,12 +339,12 @@ class Graph(ImageTools):
     if self.min_x is None: self.get_division_spacings_and_scale()
     y1 = (slope * self.min_x + y_intercept)
     y2 = (slope * self.max_x + y_intercept)
-    
+
     if y1 > self.max_y:
       y1 = self.max_y
     elif y1 < self.min_y:
       y1 = self.min_y
-      
+
     if slope == 0.0:
       x1 = 0.0
     else:
@@ -353,65 +353,65 @@ class Graph(ImageTools):
        + ((float(x1) * self.scale_x)) \
        + ((0 - self.max_x) * self.scale_x) \
        + (self.delta_x * self.scale_x)
-        
+
     if y2 > self.max_y:
       y2 = self.max_y
     elif y2 < self.min_y:
       y2 = self.min_y
-    
+
     if slope == 0.0:
       x2 = self.max_x
     else:
-      x2 = (y2-y_intercept)/slope    
+      x2 = (y2-y_intercept)/slope
     x2 = self.graph_left \
        + ((float(x2) * self.scale_x)) \
        + ((0 - self.max_x) * self.scale_x) \
        + (self.delta_x * self.scale_x)
-    
+
     if self.reverse_y:
-      y1 = (self.graph_top 
+      y1 = (self.graph_top
             + (float(y1) * self.scale_y)
-            + (0 - self.max_y) * self.scale_y 
+            + (0 - self.max_y) * self.scale_y
             + (self.delta_y * self.scale_y))
-      y2 = (self.graph_top 
-            + (float(y2) * self.scale_y) 
-            + (0 - self.max_y) * self.scale_y 
+      y2 = (self.graph_top
+            + (float(y2) * self.scale_y)
+            + (0 - self.max_y) * self.scale_y
             + (self.delta_y * self.scale_y))
     else:
       y1 = self.bY \
-         - (self.boxYoffset 
-            + ((float(y1) * self.scale_y)) 
-            + ((0 - self.max_y) * self.scale_y) 
+         - (self.boxYoffset
+            + ((float(y1) * self.scale_y))
+            + ((0 - self.max_y) * self.scale_y)
             + (self.delta_y * self.scale_y))
       y2 = self.bY \
-         - (self.boxYoffset 
-            + ((float(y2) * self.scale_y)) 
-            + ((0 - self.max_y) * self.scale_y) 
+         - (self.boxYoffset
+            + ((float(y2) * self.scale_y))
+            + ((0 - self.max_y) * self.scale_y)
             + (self.delta_y * self.scale_y))
-      
+
     if slope == 0.0:
       width = 4
     else:
       width = 5
     self.draw.line((x1+2, y1, x2-2, y2), width=width, fill="#eeeeee")
-    
+
     if y_intercept >= 0: sign = '+'
     else: sign = '-'
     txt = "y = %.3fx %s %.3f" %(slope,sign,abs(y_intercept))
-    
+
     wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_small)
-    
+
     if write_equation:
       if slope > 0 or (self.reverse_x or self.reverse_y):
         x = self.graph_left + self.imX * 0.1 # write equation top left
       else:
         x = self.graph_right - wX - self.imX * 0.1  # write equation top right
-      y = self.graph_top + self.imY * 0.1    
+      y = self.graph_top + self.imY * 0.1
       top_left = (x,y)
       IT.write_text_to_draw(
         self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
 
-  def draw_pairs(self, reverse_y=False, reverse_x=False, marker_size_factor=None): 
+  def draw_pairs(self, reverse_y=False, reverse_x=False, marker_size_factor=None):
     self.reverse_y = reverse_y
     self.reverse_x = reverse_x
     self.ax_marker_length = int(self.imX * 0.006)
@@ -430,12 +430,12 @@ class Graph(ImageTools):
     return '\n'.join(self.map_txt_list)
   map_txt = property(map_txt)
 
-  def get_division_spacings_and_scale(self):  
+  def get_division_spacings_and_scale(self):
     min_xs = []
     min_ys = []
     max_xs = []
     max_ys = []
-    
+
     assert len(self.data) > 0
     for dataset in self.data.values():
       if self.auto_axes:
@@ -443,7 +443,7 @@ class Graph(ImageTools):
         min_ys.append(min(dataset.y))
       max_xs.append(max(dataset.x))
       max_ys.append(max(dataset.y))
-      
+
     if self.auto_axes:
       min_x = min(min_xs)
       min_y = min(min_ys)
@@ -458,20 +458,20 @@ class Graph(ImageTools):
       self.max_y = max(self.max_y, max(max_ys))
     else:
       self.max_y = max(max_ys)
-    
+
     self.min_x = min_x
     self.min_y = min_y
-    
+
     delta_x = self.max_x - self.min_x
     delta_y = self.max_y - self.min_y
     self.delta_x = delta_x
     self.delta_y = delta_y
     self.scale_x = ((self.graph_right - self.graph_left)/delta_x)
     self.scale_y = ((self.graph_bottom - self.graph_top)/delta_y)
-    
+
     self.bY = (self.graph_bottom + self.graph_top)
     self.bX = (self.graph_left + self.graph_right)
-    
+
   def get_divisions(self, delta):
     assert delta != 0
     dv = delta/self.params.n_divisions
@@ -507,7 +507,7 @@ class Graph(ImageTools):
     y_label = dataset.metadata().get('y_label')
     title = self.graphInfo.get('Title')
     n_bars = len(dataset.x)
-    bar_width = int((width-2*self.bSides)/n_bars) -1
+    bar_width = math.floor((width-2*self.bSides)/n_bars)
     if title is not None:
       wX, wY = IT.textsize(self.draw, title, font_size=self.font_size_large)
       x = width - 2*self.bSides - wX
@@ -553,7 +553,7 @@ class Graph(ImageTools):
         else:
           txt = "%.3f" %y_value
         wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large)
-  
+
         if wX < bar_width:
           x = bar_left + ( bar_width - wX/2 -wX) + self.bSides
           x = bar_left + ( bar_width - wX)/2
@@ -563,7 +563,7 @@ class Graph(ImageTools):
             y = bar_top + 6
           top_left = (x,y)
           IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
-  
+
         if y_value < 0.003:
           txt = "OK"
           wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large)
@@ -598,7 +598,7 @@ class Graph(ImageTools):
     min_y = self.min_y
     scale_y = self.scale_y
     delta_y = self.delta_y
-    
+
     marker = self.marker_params[self.dataset_counter]
     self.dataset_counter += 1
     fill = marker.fill.rgb
@@ -607,11 +607,11 @@ class Graph(ImageTools):
     if marker_size_factor is not None:
       marker_width *= marker_size_factor
     half_marker_width = marker_width/2
-    
+
     if self.reverse_x:
       x_constant = self.bX \
                  - (half_marker_width + self.boxXoffset
-                    + ((0 - max_x) * self.scale_x) 
+                    + ((0 - max_x) * self.scale_x)
                     + (delta_x * self.scale_x))
       scale_x = -self.scale_x
     else:
@@ -619,7 +619,7 @@ class Graph(ImageTools):
                     + ((0 - max_x) * self.scale_x)
                     + (delta_x * self.scale_x))
       scale_x = self.scale_x
-      
+
     if self.reverse_y:
       y_constant = (self.graph_top - half_marker_width
                     + ((0 - max_y) * scale_y)
@@ -627,21 +627,21 @@ class Graph(ImageTools):
       scale_y = self.scale_y
     else:
       y_constant = self.bY \
-          - (half_marker_width + self.boxYoffset 
-             + ((0 - max_y) * scale_y) 
+          - (half_marker_width + self.boxYoffset
+             + ((0 - max_y) * scale_y)
              + (delta_y * scale_y))
       scale_y = -self.scale_y
-      
+
     map_txt_list = self.map_txt_list
     for i, (xr, yr) in enumerate(xy_pairs):
       x = x_constant + xr * scale_x
       y = y_constant + yr * scale_y
-      
+
       if self.im.getpixel((x+half_marker_width, y+half_marker_width)) == fill:
         continue # avoid wasting time drawing points that overlap too much
       box = (x,y,x+marker_width,y+marker_width)
       self.draw.rectangle(box, fill=fill, outline=outline)
-      
+
       if self.item == "AutoChem":
         map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="reap %s"  target="%s">"""
                             % (box + (xr, yr)))
@@ -684,7 +684,7 @@ class Graph(ImageTools):
     while div_val < max_y:
       div_val = div_val + float(dv_y)
       y_axis.append(div_val)
-      
+
     format_string = "%%.%if" %precision
     for item in y_axis:
       val = float(item)
@@ -703,7 +703,7 @@ class Graph(ImageTools):
              + ((val * scale_y))
              + ((0 - max_y) * scale_y)
              + (delta_y * scale_y))
-        
+
       y = round(y,1)
       if y < (self.graph_bottom) and y >= self.boxYoffset -wY/2:
         top_left = (x,y)
@@ -713,12 +713,12 @@ class Graph(ImageTools):
         x = self.graph_left
         y = y + int(wY/2)
         self.draw.line(((x, y),(x+self.ax_marker_length, y)), width=self.line_width, fill=(200, 200, 200))
-        
+
     if self.draw_origin:
       line = (self.graph_left - self.min_x * self.scale_x, self.graph_bottom,
               self.graph_left - self.min_x * self.scale_x, self.graph_top)
       self.draw.line(line, fill=(200, 200, 200), width=self.line_width)
-      
+
     txt = self.metadata.get("y_label", "y Axis Label")
     txt = self.get_unicode_characters(txt)
     wX, wY = self.draw.textsize(txt, font=self.font_small)
@@ -757,7 +757,7 @@ class Graph(ImageTools):
     while div_val < max_x:
       div_val = div_val + float(dv_x)
       x_axis.append(div_val)
-      
+
     format_string = "%%.%if" %precision
     for item in x_axis:
       val = float(item)
@@ -783,19 +783,19 @@ class Graph(ImageTools):
         y = y - self.imY * 0.005
         y = self.graph_bottom
         self.draw.line(((x, y),(x, y-self.ax_marker_length)), width=self.line_width, fill=(200, 200, 200))
-        
+
     if self.draw_origin:
       line = (self.bSides + self.xSpace, self.graph_bottom + self.min_y * self.scale_y,
               self.imX - self.bSides, self.graph_bottom + self.min_y * self.scale_y)
       self.draw.line(line, fill=(200, 200, 200), width=self.line_width)
-    
+
     txt = self.metadata.get("x_label", "x Axis Label")
     txt = self.get_unicode_characters(txt)
     wX, wY = self.draw.textsize(txt, font=self.font_small)
     x = self.boxX - wX - self.bSides - self.imX * 0.002
     y = self.boxY  + self.imY * 0.01
     self.draw.text((x, y), "%s" %txt, font=self.font_small, fill="#444444")
-    
+
   #def draw_bars(self):
     #import ImageFont
     #data = []
@@ -806,7 +806,7 @@ class Graph(ImageTools):
         #pass
     #barX = self.graphX/len(data)
     #barScale = self.graphY/max(data)
-    
+
     #i = 0
     #for item in data:
       #barHeight = (item * barScale)
@@ -815,7 +815,7 @@ class Graph(ImageTools):
       #for barcol in self.barcolour:
         #if item > barcol[0]:
           #fill = barcol[1]
-          
+
       #x = self.bSides + i * barX
       #y = (self.graph_bottom - barHeight + self.yAxisSpace)
       #dx = ((i + 1) * barX) + self.bSides
@@ -861,7 +861,7 @@ class Analysis(Graph):
     self.filename = OV.FileName()
     self.datadir = OV.DataDir()
     self.data = {}
-    
+
     fun = f
     self.n_bins = abs(int(args.get('n_bins',0))) #Number of bins for Histograms
     self.method = args.get('method','olex')      #Method by which graphs are generated
@@ -888,7 +888,7 @@ class Analysis(Graph):
 #     for item in items:
         self.item = item
         self.make_analysis_image()
-        
+
     else:
       raise Exception("Unknown command: expected 'lst'")
 
@@ -897,21 +897,21 @@ class Analysis(Graph):
     self.imY = imY
     self.make_empty_graph(axis_x = True)
     self.draw_pairs()
-    
+
   def make_K_graph(self):
     self.barcolour = [(0, (60, 240, 0)), (1.1, (255, 240, 20)), (1.7, (255, 0, 0))]
     self.imY = 128
     self.imX = 256
     self.draw_bars()
     self.draw_yAxis()
-    
+
   def make_UniqeData_graph(self):
     self.barcolour = [(0, (60, 240, 0)), (1.1, (255, 240, 20)), (1.7, (255, 0, 0))]
     self.imY = 128
     self.imX = 256
     self.draw_bars()
     self.draw_yAxis()
-    
+
   def make_DisagreeReflections_graph(self):
     total = (self.graphInfo["Data"][0] + self.graphInfo["Data"][1])
     t = total * 0.85
@@ -955,7 +955,7 @@ class Analysis(Graph):
           data_path = 'n/a'
         x.append(float(xy[0]))
         y.append(float(xy[1]))
-        
+
     self.data.setdefault('dataset1',Dataset(x,y,metadata=metadata))
     self.metadata = metadata
 
@@ -968,7 +968,7 @@ class Analysis(Graph):
     pop_name = self.graphInfo.get("pop_name", None)
     if not pop_html or not pop_name:
       return
-    
+
     str = '''
 <html>
 <body>
@@ -1004,7 +1004,7 @@ class Analysis(Graph):
         k_row = fl[i+9]
         AnalysisInfo["K"].setdefault("Data", k_row.split())
         AnalysisInfo["K"].setdefault("imSize", (256, 128))
-        
+
       elif len(li.split("NUMBER OF UNIQUE DATA AS A FUNCTION OF RESOLUTION IN ANGSTROMS")) > 1:
         AnalysisInfo.setdefault("UniqueData", {})
         AnalysisInfo["UniqueData"].setdefault("Title", OV.TranslatePhrase("Unique Data"))
@@ -1014,7 +1014,7 @@ class Analysis(Graph):
         k_row = fl[i+10]
         AnalysisInfo["UniqueData"].setdefault("y_axis", k_row.split())
         AnalysisInfo["UniqueData"].setdefault("imSize", (256, 128))
-        
+
       elif len(li.split("Most Disagreeable Reflections")) > 1:
         AnalysisInfo.setdefault("DisagreeReflections", {})
         AnalysisInfo["DisagreeReflections"].setdefault("Title", OV.TranslatePhrase("Most Disagreeable Reflections"))
@@ -1035,23 +1035,23 @@ class Analysis(Graph):
         AnalysisInfo["DisagreeReflections"].setdefault("Data", [fobs, fcalc])
         AnalysisInfo["DisagreeReflections"].setdefault("imSize", (256, 128))
       i += 1
-      
+
     #for value in AnalysisInfo["K"]: print value
     self.graphInfo = AnalysisInfo
-  
+
   def make_analysis_image(self):
     if not self.graphInfo:
       image_location = "%s/%s.png" %(self.filepath, self.item)
       self.im.save(image_location, "PNG")
       return
-    
+
     if self.item == "K":
       self.make_K_graph()
     elif self.item == "DisagreeReflections":
       self.make_DisagreeReflections_graph()
     elif self.item == "AutoChem":
       self.make_AutoChem_plot()
-    
+
     ## This whole writing of files to a specific location was only a test, that's been left in by mistake. Sorry John!
     if self.debug:
       if sys.platform.startswith('lin'): # This is to alter path for linux
@@ -1063,7 +1063,7 @@ class Analysis(Graph):
       else: # If all else fails assume evil windows
         testpicturepath = "C:/test.png"
       self.im.save("%s"%testpicturepath, "PNG")
-      
+
     self.popout()
 
   def make_AutoChem_plot(self):
@@ -1252,18 +1252,18 @@ class WilsonPlot(Analysis):
     new.paste(self.im, (0,0))
     new.paste(grad, (int(self.xSpace+self.bSides),int(self.im.size[1]-20)))
     draw = ImageDraw.Draw(new)
-    
+
     imX, imY = new.size
-    
+
     metadata = self.data['dataset1'].metadata()
     estats = metadata.get("<|E^2-1|>", 'n/a')
-    
+
     text = []
     text.append("B = %.3f" %float(metadata.get("B")))
     text.append("K = %.3f" %float(metadata.get("K")))
     text.append("<|E^2-1|> = %.3f" %float(metadata.get("<|E^2-1|>", 0)))
     text.append(r"%%|E| > 2 = %.3f"%float(metadata.get(r"%|E| > 2", 0)))
-    
+
     left = grad.size[0] + self.xSpace + imX * 0.04
     top = self.im.size[1] - imY * 0.02
     top_original = top
@@ -1287,7 +1287,7 @@ class WilsonPlot(Analysis):
         left = int(grad.size[0] + self.xSpace + imX * 0.14)
     self.im = new
 
-  def cctbx_wilson_statistics(self):  
+  def cctbx_wilson_statistics(self):
     from cctbx_olex_adapter import OlexCctbxGraphs
     n_bins = 2*self.params.wilson_plot.n_bins
     wp = OlexCctbxGraphs('wilson', n_bins=n_bins).xy_plot
@@ -1318,16 +1318,16 @@ class WilsonPlot(Analysis):
     draw.rectangle(box, fill=self.gui_html_bg_colour, outline=(200, 200, 200))
     margin_left = int((boxWidth/4))
     margin_right = int((boxWidth/4)*3)
-    
+
     scale = float((0.968-0.736)/(boxWidth - (margin_right - margin_left)))
     metadata = self.data['dataset1'].metadata()
     value = float(metadata.get("<|E^2-1|>", 0))
-    
+
     begin = (0.736 - margin_left * scale)
     end = (0.968 + margin_left * scale)
     self.wilson_grad_begin = begin
     self.wilson_grad_end = end
-    
+
     if value < (0.736 - 0.736*0.2):
       max1 = 128.0
       c1 = (255.0, 0 , 0)
@@ -1358,7 +1358,7 @@ class WilsonPlot(Analysis):
       c1 = (255.0, 0, 0)
       max2 = 128.0
       c2 = (255.0, 0, 0)
-      
+
     for i in xrange(boxWidth-2):
       i += 1
       if i == margin_left:
@@ -1419,7 +1419,7 @@ class WilsonPlot(Analysis):
     image_location = "%s.png" %("grad")
     OlexVFS.save_image_to_olex(im, image_location,  1)
     return im
-  
+
   def grad_fill(self, max, c1, col):
     fill = []
     for c in c1:
@@ -1444,7 +1444,7 @@ class ChargeFlippingPlot(PrgAnalysis):
     title = self.graphInfo.get('Title', "")
     width = self.params.size_x
     height = self.graph_bottom - self.graph_top
-    
+
     if solving.state is solving.guessing_delta:
       if previous_state is not solving.guessing_delta:
         txt = "%s" %self.attempt
@@ -1457,7 +1457,7 @@ class ChargeFlippingPlot(PrgAnalysis):
           self.counter += 1
           self.draw.line(((self.counter + marker_width, self.graph_top),(self.counter + marker_width, self.graphY+self.graph_top - 2)), width=1, fill=(230, 230, 230))
         return
-    
+
     elif solving.state is solving.solving:
       cc = flipping.c_tot_over_c_flip()
       R1 = flipping.r1_factor()
@@ -1472,7 +1472,7 @@ class ChargeFlippingPlot(PrgAnalysis):
         top_left = (x, 20)
         IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_normal, font_colour=self.light_grey)
       x = self.counter
-      
+
       ## Draw CC
       txt = "cc=%.3f" %cc
       if cc > 1: cc = 1
@@ -1482,7 +1482,7 @@ class ChargeFlippingPlot(PrgAnalysis):
       cc = height*(1-cc) + top
       box = (x,cc,x+marker_width,cc+marker_width)
       self.draw.rectangle(box, fill=(ccR, ccG, ccB), outline=(ccR/2, ccG/2, 0))
-      
+
       ## Draw R1
       txt += ", R1=%.3f" %R1
       rR = int(255*R1*2)
@@ -1494,14 +1494,14 @@ class ChargeFlippingPlot(PrgAnalysis):
       font_name = "Vera"
       font_size = 10
       font = self.registerFontInstance(font_name, font_size)
-      
+
       legend_top = height + 20
       legend_top = self.graph_bottom + 1
       m_offset = 5
       ## Wipe the legend area
       box = (0,legend_top,width,legend_top + 20)
       self.draw.rectangle(box, fill=self.gui_html_bg_colour)
-      
+
       ## Draw CC Legend
       box = (10,legend_top +m_offset,10+marker_width, legend_top+marker_width + m_offset)
       self.draw.rectangle(box, fill=(ccR, ccG, ccB), outline=(ccR/2, ccG/2, 0))
@@ -1509,13 +1509,13 @@ class ChargeFlippingPlot(PrgAnalysis):
       top_left = (10+marker_width+3, legend_top)
       IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_normal, font_colour=self.light_grey)
 
-      
+
       ## Draw R1 Legend
       box = (40,legend_top + m_offset + 1,40+marker_width,legend_top + m_offset + 3)
       self.draw.rectangle(box, fill=(rR, rG, rB), outline=(rR/2, rG/2, 0))
       tt = "R1"
       self.draw.text((40+marker_width+3, legend_top), "%s" %tt, font=self.font_large, fill="#888888")
-      
+
       ## Draw Current Numbers
       wX, wY = self.draw.textsize(txt, font=self.font_large)
       x = width - wX - self.bSides
@@ -1546,7 +1546,7 @@ class CumulativeIntensityDistribution(Analysis):
     self.plot_function(centric, locals=locals)
     self.plot_function(acentric, locals=locals)
     self.plot_function(twinned_acentric, locals=locals)
-    
+
     key = self.draw_key(({'type': 'function',
                          'number': 1,
                          'label': OV.TranslatePhrase('Centric')},
@@ -1557,11 +1557,11 @@ class CumulativeIntensityDistribution(Analysis):
                          'number': 3,
                          'label': OV.TranslatePhrase('Twinned Acentric')}
                         ))
-    self.im.paste(key, 
+    self.im.paste(key,
                   (int(self.graph_right-(key.size[0]+40)),
                    int(self.graph_bottom-(key.size[1]+40)))
                   )
-    
+
     self.draw_pairs()
 
   def cctbx_cumulative_intensity_distribution(self, verbose=False):
@@ -1721,7 +1721,7 @@ class Fobs_Fcalc_plot(Analysis):
                          'number': 2,
                          'label': OV.TranslatePhrase('Omitted Data')}
                         ))
-    self.im.paste(key, 
+    self.im.paste(key,
                   (int(self.graph_right-(key.size[0]+40)),
                    int(self.graph_bottom-(key.size[1]+40)))
                   )
