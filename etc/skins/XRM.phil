@@ -1,0 +1,139 @@
+
+gui {
+  logo_colour = #3254ce
+
+  skin {
+    name = OD
+    extension = None
+    logo_name= etc/skins/XRM.png
+  }
+
+  green = #00aa00
+  orange = #d6620d
+  red = #aa0000
+  purple = #a245a2
+
+  sginfo{
+    scale = 1.0
+      .type = float
+  }    
+  
+
+  html {
+  
+    code {
+      bg_colour = #e9e9e9
+      fg_colour = #6f6f8b
+      html_tag = code
+     }
+
+    base_colour = #3c74a0
+    bg_colour = #ffffff
+    font_colour = #6f6f8b
+    font_name = Arial
+    font_size = 2
+    input_bg_colour = #c2e167
+    icon_size = 25
+    link_colour = #585886
+    table_bg_colour = #d6e3ed
+    table_firstcol_colour = #c8dae8
+    MainToolbarTabButtonActive = None
+  }
+  
+  timage{
+    tab{
+      base_colour = None
+      grad_colour = None
+      font_colour = None
+      height = 25
+      corner_rad = 5
+      grad = True
+      grad_step = 0.3
+      bg_colour_L = 1.5
+      grad_colour_L = 1.0
+      font_colour_L = 1.8
+      font_name = Vera Bold
+      font_size = 14
+      top = 7
+      left = 8
+      rounded = 0100
+      arrows = triangle:left
+      off_L = 1.6
+    }  
+  
+  
+    button{
+      base_colour = #c2e167
+      grad = True
+      grad_colour = #c2e167
+      grad_step = 0.4
+      height = 16
+      corner_rad = 3
+      rounded = 1111
+      font_size = 12
+      halign = left
+      top = 1
+      left = 4
+      bg_colour_L = 1.6
+      grad_colour_L = 1.8
+      font_colour_L = 0.8
+      font_colour = None
+      arrows = None
+    }
+    h1{
+      base_colour = None
+      grad_colour = None
+      grad_step = 0.9
+      height = 18
+      corner_rad = 0
+      rounded = 1111
+      font_size = None
+      top = 1
+      left = 16
+      bg_colour_L = 1.7
+      grad_colour_L = 1.8
+      font_colour_L = 0.6
+      font_colour = None
+      arrows = 'arrow'
+      off_L = 1.2
+      shadow = True
+    }  
+
+    h3{
+      base_colour = #ababab
+      grad_colour = #ababab
+      height = 16
+      corner_rad = 0
+      rounded = 1111
+      font_size = None
+      top = 2
+      left = 12
+      bg_colour_L = 1.3
+      grad_colour_L = 1.1 
+      font_colour_L = 0.8
+      font_colour = None
+      arrows = 'arrow'
+      off_L = 1.2
+      shadow = False
+    }
+    
+    grad = True
+    grad_step = 0.2
+    bg_colour_L = 1.6
+    grad_colour_L = 1.8
+    font_colour_L = 0.8
+    font_name = Vera
+  }  
+
+  image_font_name = Vera
+  button_colouring = #dddddd
+  button_writing = #777777
+  button_font_name = Vera
+  tab_colour = #5563a4
+  tab_font_colour = #ff0000
+  htmlpanelwidth = 400
+  gui_grad_top_left=#ffffff
+  gui_grad_top_right=#ffffff
+  gui_grad_bottom_left=#ffffff
+  gui_grad_bottom_right=#ffffff
+}
