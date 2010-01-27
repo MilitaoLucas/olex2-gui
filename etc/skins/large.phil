@@ -1,0 +1,14 @@
+
+gui {
+
+  skin {
+    extension = large
+    size_factor = 1.2
+  }
+
+  htmlpanelwidth = 480
+  
+  html {
+    icon_size = 30
+  }
+}
