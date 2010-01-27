@@ -18,13 +18,10 @@
       <zimg name=IMG_BUTTON-COPY_NEAR border="0" src="button-copy_near.png"/>
     </a>
   </td>
-  <td name=GROW_MODE align='center' VALIGN='center'>
-    <a 
-      href="if strcmp(spy.GetParam(olex2.in_mode),'grow') then 'mode off' else 'mode grow'"
-      target="%Mode Grow-target%">
-      <zimg name=IMG_BUTTON-GROW_MODE border="0" src="button-grow_mode.png"/>
-    </a>
+  <td name=ASSEMBLE align='center' VALIGN='center'>
+$spy.MakeActiveGuiButton(button-assemble,'compaq -a')
   </td>
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
@@ -32,14 +29,13 @@
 <tr name=SYMM_GEN_2>
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td name=CENTER_ON_CELL align='center' VALIGN='center' width='33%'>
-$spy.MakeActiveGuiButton(button-center_on_cell,move>>compaq)		
+  <td name=CENTRE_ON_CELL align='center' VALIGN='center' width='33%'>
+$spy.MakeActiveGuiButton(button-centre_on_cell,move>>compaq)		
   </td>
   <td name=CENTER_ON_LARGEST_PART align='center' VALIGN='center' width='33%'>
 $spy.MakeActiveGuiButton(button-largest_part,move)		
   </td>
-  <td name=ASSEMBLE align='center' VALIGN='center'>
-$spy.MakeActiveGuiButton(button-assemble,'compaq -a')
+  <td name=BLANK>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>

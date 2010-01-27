@@ -14,8 +14,8 @@
 			width="$eval(htmlpanelwidth()-120)"
 			height="18"
 			value="$spy.GetParam(snum.calcvoid_value)"
-			bgcolor="$GetVar(gui_html_table_bg_colour)"
-			fgcolor="$GetVar(gui_html_font_colour)"
+			bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+			fgcolor="$spy.GetParam(gui.html.font_colour)"
 			min="-3"
 			max="10"
 			onchange="spy.SetParam(snum.calcvoid_value,GetValue(SNUM_CALCVOID_SLIDE))>>
@@ -28,8 +28,8 @@ xgrid.Scale(GetValue(SNUM_CALCVOID_SLIDE))>>
 			name = "SNUM_CALCVOID_VALUE"
 			width="30"
 			height="18"
-			bgcolor="$GetVar(gui_html_table_bg_colour)"
-			fgcolor="$GetVar(gui_html_font_colour)"
+			bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+			fgcolor="$spy.GetParam(gui.html.font_colour)"
 			value="$spy.GetParam(snum.calcvoid_value)"
 			onchange="spy.SetParam(snum.calcvoid_value,GetValue(SNUM_CALCVOID_VALUE))>>
 xgrid.Scale(GetValue(SNUM_CALCVOID_VALUE))

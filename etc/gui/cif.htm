@@ -1,7 +1,7 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
 
   <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
+	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td></td>
 			<a href="spy cif info"><zimg border="0" src="gui/images/toolbar-cif.png"></td></a>
       <td width="20%">
 		<a href="cursor(busy, '%Creating Image ...%')>>
@@ -20,7 +20,7 @@ cursor()"
 target="%Create Structure Report%">
 <b>%Report%</b></a></td>
 <td>
-	<input bgcolor="$getVar(gui_html_input_bg_colour)" type="combo" name="snum_report_image" items='file.ListDirForGui(FilePath(),*.png;*.jpg;*.bmp)' value="" width="150" height="18" label="%Image% ">
+	<input bgcolor="$spy.GetParam(gui.html.input_bg_colour)" type="combo" name="snum_report_image" items='file.ListDirForGui(FilePath(),*.png;*.jpg;*.bmp)' value="" width="150" height="18" label="%Image% ">
 </td>
 	</tr>
 	<tr>
@@ -58,13 +58,13 @@ cursor()"
 
   <tr>
 		 <td><zimg border="0" src="gui/images/toolbar-cif.png"></td>
-  <td colspan="2" bgcolor="$getVar(gui_html_table_bg_colour)">
+  <td colspan="2" bgcolor="$spy.GetParam(gui.html.table_bg_colour)">
 	
-     <input type="checkbox" bgcolor="$getVar(gui_html_table_bg_colour)" fgcolor="$GetVar(gui_html_font_colour)" name="sym" checked height='12' width='53' data="sym" value="Symm" oncheck="setdata(sym, 'sym')" onuncheck="setdata(sym, )">
-     <input type="checkbox" bgcolor="$getVar(gui_html_table_bg_colour)" fgcolor="$GetVar(gui_html_font_colour)" name="acrd" checked height='12' width='48' data="acrd" value="Acrd" oncheck="setdata(acrd, 'acrd')" onuncheck="setdata(acrd, ' ')">
-     <input type="checkbox" bgcolor="$getVar(gui_html_table_bg_colour)" fgcolor="$GetVar(gui_html_font_colour)" name="anis" checked height='12' width='48' data="anis" value="Anis" oncheck="setdata(anis, 'anis')" onuncheck="setdata(anis, ' ')">
-     <input type="checkbox" bgcolor="$getVar(gui_html_table_bg_colour)" fgcolor="$GetVar(gui_html_font_colour)" name="bnd" checked height='12' width='46' data="bnd" value="Bond" oncheck="setdata(bnd, 'bnd')" onuncheck="setdata(bnd, ' ')">
-     <input type="checkbox" bgcolor="$getVar(gui_html_table_bg_colour)" fgcolor="$GetVar(gui_html_font_colour)" name="ang" checked height='12' width='46' data="ang" value="Ang" oncheck="setdata(ang, 'ang')" onuncheck="setdata(ang, ' ')">
+     <input type="checkbox" bgcolor="$spy.GetParam(gui.html.table_bg_colour)" fgcolor="$spy.GetParam(gui.html.font_colour)" name="sym" checked height='12' width='53' data="sym" value="Symm" oncheck="setdata(sym, 'sym')" onuncheck="setdata(sym, )">
+     <input type="checkbox" bgcolor="$spy.GetParam(gui.html.table_bg_colour)" fgcolor="$spy.GetParam(gui.html.font_colour)" name="acrd" checked height='12' width='48' data="acrd" value="Acrd" oncheck="setdata(acrd, 'acrd')" onuncheck="setdata(acrd, ' ')">
+     <input type="checkbox" bgcolor="$spy.GetParam(gui.html.table_bg_colour)" fgcolor="$spy.GetParam(gui.html.font_colour)" name="anis" checked height='12' width='48' data="anis" value="Anis" oncheck="setdata(anis, 'anis')" onuncheck="setdata(anis, ' ')">
+     <input type="checkbox" bgcolor="$spy.GetParam(gui.html.table_bg_colour)" fgcolor="$spy.GetParam(gui.html.font_colour)" name="bnd" checked height='12' width='46' data="bnd" value="Bond" oncheck="setdata(bnd, 'bnd')" onuncheck="setdata(bnd, ' ')">
+     <input type="checkbox" bgcolor="$spy.GetParam(gui.html.table_bg_colour)" fgcolor="$spy.GetParam(gui.html.font_colour)" name="ang" checked height='12' width='46' data="ang" value="Ang" oncheck="setdata(ang, 'ang')" onuncheck="setdata(ang, ' ')">
 	</td>
 	</font>
 	</tr>

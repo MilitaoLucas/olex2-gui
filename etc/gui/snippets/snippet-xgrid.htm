@@ -4,8 +4,8 @@
 	<td>
 		<input
 			type="combo"
-			height="$GetVar(gui_html_combo_height)"
-			bgcolor="$getVar(gui_html_input_bg_colour)"
+			height="$spy.GetParam(gui.html.combo_height)"
+			bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
 			name="SET_SNUM_XGRID_VIEW_#suffix"
 			items='2D;surface;wire;points'
 			value="$spy.GetParam(snum.xgrid.view)"
@@ -19,8 +19,8 @@
 	<td>
 		<input
 			type="checkbox"
-			height="$GetVar(gui_html_combo_height)"
-			bgcolor="$getVar(gui_html_input_bg_colour)"
+			height="$spy.GetParam(gui.html.combo_height)"
+			bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
 			name="SET_SNUM_XGRID_EXTENDED_#suffix"
 			checked="$spy.GetParam(snum.xgrid.extended)"
 			oncheck="spy.SetParam(snum.xgrid.extended,True)
