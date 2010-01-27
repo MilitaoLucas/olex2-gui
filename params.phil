@@ -9,6 +9,8 @@ gui {
       .type = str
     logo_name= etc/skins/default.png
       .type = path
+    size_factor = 1.0
+      .type = float
   }
 
   purple = #a245a2
