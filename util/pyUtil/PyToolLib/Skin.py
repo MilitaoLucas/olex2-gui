@@ -180,7 +180,7 @@ def adjust_skin_colours():
 def adjust_skin_luminosity():
   base_colour = OV.GetParam('gui.html.base_colour')
   
-  scope_l= ['gui', 'gui.tab', 'gui.timage', 'gui.snumtitle', 'gui.timage.button', 'gui.timage.h1', 'gui.timage.h3', 'gui.timage.tab']
+  scope_l= ['gui', 'gui.timage', 'gui.snumtitle', 'gui.timage.button', 'gui.timage.h1', 'gui.timage.h3', 'gui.timage.tab']
   for scope in scope_l:
     gui = olx.phil_handler.get_scope_by_name(scope)
     for object in gui.active_objects():
