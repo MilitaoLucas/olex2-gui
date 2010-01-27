@@ -16,6 +16,7 @@
       <cmd4 "if isos(mac) then setvar(defeditor,'open')">
       <cmd5 "if isos(mac) then setvar(defexplorer,'open')">
       <cmd6 "if isos(mac) then setvar(defbrowser,'open')">
+      <cmd9 "spy.load_user_gui_phil()">
       <cmd9 "spy.change_skin()">
       <cmd7 "if isvar(startup) then 'reap getVar(startup)'">
       <cmd8 "echo filepath()">
