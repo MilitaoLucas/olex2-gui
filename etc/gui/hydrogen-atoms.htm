@@ -2,7 +2,7 @@
 
 
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td> 
+	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td> 
 	</td>
 	<td colspan='3'>
 		<zimg border="0" src="gui/images/toolbar-sp2.png">
@@ -33,11 +33,11 @@
 
 
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
 	</td>
 	<td VALIGN='center' width='15%'>
 		<font size="2">
-			<input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name = "HFIX"  width="30"  height="17" value = "137">
+			<input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name = "HFIX"  width="30"  height="17" value = "137">
 		</font>
 	</td>
 	<td VALIGN='center' width='20%'>
@@ -59,7 +59,7 @@
 	
 
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
+	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td></td>
 	<td colspan='3'>
 		<a href="labels -h -l">H %Labels%</a>
 		<a href="labels -l">No H %Labels%</a>
@@ -68,14 +68,14 @@
 	</tr>
 
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
+	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td></td>
 	<td colspan='3'>
 		<a href="hadd">%Add Hydrogen%</a> | <b>%EXPERIMENTAL%</b>
 	</td> 
 </tr>
 
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
 	<td colspan='2'>
 		<a href="mode grow -s"><b>%Expand%</b></a>
 	</td>
@@ -95,14 +95,14 @@
 
 
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
 	<td colspan='2'>
 	<b>%HIMP%</b>
 	</td>
 	<td colspan='1'>
 		<input 
 			type="combo"
-			height="$GetVar(gui_html_combo_height)"
+			height="$spy.GetParam(gui.html.combo_height)"
 			name = "HIMP_DISTANCE" 
 			float 
 			width="100" 

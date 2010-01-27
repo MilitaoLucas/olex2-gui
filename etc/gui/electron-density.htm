@@ -13,8 +13,8 @@
 			width="$eval(htmlpanelwidth()-120)"
 			height="18"
 			value="eval(xgrid.Scale()*10)"
-			bgcolor="$GetVar(gui_html_table_bg_colour)"
-			fgcolor="$GetVar(gui_html_font_colour)"
+			bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+			fgcolor="$spy.GetParam(gui.html.font_colour)"
 			min="-10"
 			max="+20"
 			onchange="spy.SetParam(snum.eden_value,GetValue(SNUM_EDEN_SLIDE))>>
@@ -24,8 +24,8 @@ xgrid.Scale(eval(GetValue(SNUM_EDEN_SLIDE)/10))
 	</td>
 	<td colspan = '1'>
      <input
-			bgcolor="$getVar(gui_html_table_bg_colour)"
-			fgcolor="$GetVar(gui_html_font_colour)"
+			bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+			fgcolor="$spy.GetParam(gui.html.font_colour)"
 			type="checkbox"
 			value="%Mask%"
 			valign="center"
@@ -40,15 +40,15 @@ xgrid.Scale(eval(GetValue(SNUM_EDEN_SLIDE)/10))
 </tr>
 
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
 		<zimg border="0" src="gui/images/toolbar-electron-density.png">
 	</td>
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 	<td>
 		<input
 			type="combo"
-			height="$GetVar(gui_html_combo_height)"
-			bgcolor="$getVar(gui_html_input_bg_colour)"
+			height="$spy.GetParam(gui.html.combo_height)"
+			bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
 			name="SET_SNUM_MAP_TYPE"
 			items='diff;fcalc;2Fo-Fc<-tomc;fobs'
 			value="$spy.GetParam(snum.map.type)"
@@ -61,8 +61,8 @@ xgrid.Scale(eval(GetValue(SNUM_EDEN_SLIDE)/10))
 	<td>
 		<input
 			type="combo"
-			height="$GetVar(gui_html_combo_height)"
-			bgcolor="$getVar(gui_html_input_bg_colour)"
+			height="$spy.GetParam(gui.html.combo_height)"
+			bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
 			name="SET_SNUM_MAP_SOURCE"
 			items='olex;fcf;'
 			value="$spy.GetParam(snum.map.source)"
@@ -80,8 +80,8 @@ xgrid.Scale(eval(GetValue(SNUM_EDEN_SLIDE)/10))
 			height="18"
 			label="%Res%/&Aring "
 			valign="center"
-			bgcolor="$GetVar(gui_html_table_bg_colour)"
-			fgcolor="$GetVar(gui_html_font_colour)"
+			bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+			fgcolor="$spy.GetParam(gui.html.font_colour)"
 			value="$spy.GetParam(snum.map.resolution)"
 			onchange="spy.SetParam(snum.map.resolution,GetValue(SET_SNUM_MAP_RESOLUTION))"
 			>
@@ -92,8 +92,8 @@ xgrid.Scale(eval(GetValue(SNUM_EDEN_SLIDE)/10))
 			name = "SNUM_EDEN_VALUE"
 			width="20%"
 			height="18"
-			bgcolor="$GetVar(gui_html_table_bg_colour)"
-			fgcolor="$GetVar(gui_html_font_colour)"
+			bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+			fgcolor="$spy.GetParam(gui.html.font_colour)"
 			value="$XGrid.Scale()"
 			valign="center"
 			label="%Current Val% "

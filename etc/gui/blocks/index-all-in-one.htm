@@ -23,8 +23,8 @@
 <!-- #include aio-refine-autochemu gui\autochem_user.htm;gui\blocks\tool-off.htm;image=autochem;0; -->
 
 <!-- #includeif IsFileType('ires') aio-disorder-disorder gui\disorder.htm;gui\blocks\tool-off.htm;image=disorder;onclick=;0; -->
-<!-- #includeif IsFileType('ires') aio-disorder-constraints gui\SHELX-compatible-constraints.htm;gui\blocks\tool-off.htm;image=SHELX-constraints;onclick='spy.restraint_builder(GetVar(gui_shelx_constraints))';0; -->
-<!-- #includeif IsFileType('ires') aio-disorder-restraints gui\SHELX-compatible-restraints.htm;gui\blocks\tool-off.htm;image=SHELX-restraints;onclick='spy.restraint_builder(GetVar(gui_shelx_restraints))';0; -->
+<!-- #includeif IsFileType('ires') aio-disorder-constraints gui\SHELX-compatible-constraints.htm;gui\blocks\tool-off.htm;image=SHELX-constraints;onclick='spy.restraint_builder(spy.GetParam(gui.shelx_constraints))';0; -->
+<!-- #includeif IsFileType('ires') aio-disorder-restraints gui\SHELX-compatible-restraints.htm;gui\blocks\tool-off.htm;image=SHELX-restraints;onclick='spy.restraint_builder(spy.GetParam(gui.shelx_restraints))';0; -->
 
 <!-- #include aio-analyze-calculate-voids gui\calculate-voids-analyze.htm;gui\blocks\tool-off.htm;image=calculate-voids;onclick=;0; -->
 <!-- #includeif file.Exists('HKLSrc()') aio-analyze-electron-density gui\electron-density.htm;gui\blocks\tool-off.htm;image=electron-density;onclick=;0; -->

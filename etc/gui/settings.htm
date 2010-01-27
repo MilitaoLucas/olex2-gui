@@ -1,7 +1,7 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
 
 <tr>
-  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+  <td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
     <a href="swapbg">
     <zimg border="0" src="gui/images/toolbar-swapbg.png"></a>
   </td>
@@ -27,7 +27,7 @@
 
 
 <tr>
-  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+  <td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
     <zimg border="0" src="gui/images/toolbar-olex.png"></td>
   <td colspan='1'>
     <b>%Compile Date%:</b>
@@ -38,7 +38,7 @@ $GetCompilationInfo()
 </tr>
 
 <tr>
-  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+  <td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
     <zimg border="0" src="gui/images/toolbar-olex.png"></td>
   <td colspan='1'>
 		<b>%Tooltips%:</b>
@@ -56,7 +56,7 @@ $GetCompilationInfo()
 </tr>
 
 <tr>
-  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+  <td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
     <zimg border="0" src="gui/images/toolbar-olex.png"></td>
   <td colspan='1'>
     <b>%Info%:</b>
@@ -74,7 +74,7 @@ $GetCompilationInfo()
 </tr>
 
 <tr>
-  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+  <td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
     <zimg border="0" src="gui/images/toolbar-olex.png"></td>
   <td colspan='1'>
     <b>%GUI Font Size%:</b>
@@ -85,7 +85,7 @@ $GetCompilationInfo()
 </tr>
 
 <tr>
-  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+  <td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
     <a href="lines -1">
     <zimg border="0" src="gui/images/toolbar-lines.png"></a>
   </td>
@@ -103,7 +103,7 @@ $GetCompilationInfo()
 </tr>
 
 <tr>
-  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
+  <td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td></td>
     <a href="htmlpanelwidth 23">
     </a>
   </td>
@@ -119,7 +119,7 @@ $GetCompilationInfo()
 </tr>
 
 <tr>
-  <td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
+  <td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td></td>
   </td>
 
   <td colspan='1'>
@@ -132,7 +132,7 @@ $GetCompilationInfo()
 </tr>
 
 <tr>
-<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
+<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td></td>
   </td>
   
 <td  valign='center' colspan = '1'>
@@ -149,7 +149,7 @@ $GetCompilationInfo()
 
 
 <tr>
-<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
+<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td></td>
   </td>
   
 <td  valign='center' colspan='1'>
@@ -158,14 +158,14 @@ $GetCompilationInfo()
   <td colspan='2'>
   <input 
     type="checkbox"
-      float height="$getVar(gui_html_checkbox_height)"
-      bgcolor="$getVar(gui_html_table_bg_colour)"
-      fgcolor="$GetVar(gui_html_font_colour)"
+      float height="$spy.GetParam(gui.html.checkbox_height)"
+      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+      fgcolor="$spy.GetParam(gui.html.font_colour)"
       name="USE_FADER"
-      checked="$GetVar(gui_use_fader, false)"
+      checked="$spy.GetParam(gui.use_fader)"
       width='53' 
-      oncheck="SetVar(gui_use_fader,true)" 
-      onuncheck="SetVar(gui_use_fader,false)">
+      oncheck="spy.SetParam(gui.use_fader,true)" 
+      onuncheck="spy.SetParam(gui.use_fader,false)">
       </td>
   </tr>
 
@@ -175,7 +175,7 @@ $GetCompilationInfo()
 <!--
 
 <tr>
-<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
+<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td></td>
   </td>
   
 <td  valign='center' colspan = '3'>
@@ -186,8 +186,8 @@ $GetCompilationInfo()
       width="$eval(htmlpanelwidth()-80)" 
       height="18" 
       value="0" 
-      bgcolor="$GetVar(gui_html_table_bg_colour)"  
-      fgcolor="$GetVar(gui_html_font_colour)" 
+      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"  
+      fgcolor="$spy.GetParam(gui.html.font_colour)" 
       min="0" 
       max="10" 
       onchange = "gl.Perspective>>
@@ -199,7 +199,7 @@ $GetCompilationInfo()
 
 
 <tr>
-<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
+<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td></td>
   </td>
   
 <td  valign='center' >

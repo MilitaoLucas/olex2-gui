@@ -3,7 +3,7 @@
 <font color='red'>
 	%This feature is not available yet%
 </font>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
 	</td>
 	<td valign='center'>
 		&nbsp;<b>%Colour%</b>
@@ -12,8 +12,8 @@
 		<font size='1'>
 			<input 
 				type="combo"
-				height="$GetVar(gui_html_combo_height)"
-				bgcolor="$getVar(gui_html_input_bg_colour)" 
+				height="$spy.GetParam(gui.html.combo_height)"
+				bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
 				name= "COLOUR_APPEARANCE" 
 				items="metallic;lustrous;translucent;fluorescent;clear" 
 				width="70"  
@@ -21,8 +21,8 @@
 			>
 			<input 
 				type="combo"
-				height="$GetVar(gui_html_combo_height)"
-				bgcolor="$getVar(gui_html_input_bg_colour)" 
+				height="$spy.GetParam(gui.html.combo_height)"
+				bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
 				name= "SET_SNUM_COLOUR_INTENSITY" 
 				items="dark;light;intense;pale" 
 				width="70"  
@@ -31,8 +31,8 @@
 			>
 			<input 
 				type="combo"
-				height="$GetVar(gui_html_combo_height)"
-				bgcolor="$getVar(gui_html_input_bg_colour)" 
+				height="$spy.GetParam(gui.html.combo_height)"
+				bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
 				name= "COLOUR_BASE" 
 				items="black;blue;bronze;brown;colourless;gold;green;grey;orange;pink;purple;red;silver;violet;white;yellow" 
 				width="70"  
@@ -42,28 +42,28 @@
 
 </tr>
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
 	</td>
 	<td valign='center'>
 		&nbsp;<b>%Size%</b>
 	</td>
 	<td valign='center'>
 		<font size='2'>
-			<input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name = "size_min"  width="40"  height="17" value = "">
-			<input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name = "size_med"  width="40"  height="17" value = "">
-			<input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name = "size_max"  width="40"  height="17" value = "">
+			<input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name = "size_min"  width="40"  height="17" value = "">
+			<input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name = "size_med"  width="40"  height="17" value = "">
+			<input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name = "size_max"  width="40"  height="17" value = "">
 		</font>
 	</td>
 </tr>
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
 	</td>
 	<td valign='center'>
 		&nbsp;<b>%Shape%</b>
 	</td>
 	<td valign='center'>
 		<font color='#ffeeee' size='2'>
-			<input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name = "shape"  width="60"  height="17" value = "">
+			<input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name = "shape"  width="60"  height="17" value = "">
 		</font>
 	</td>
 </tr>

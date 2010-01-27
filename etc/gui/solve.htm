@@ -1,7 +1,7 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
 
 <tr>
-	<td valign='top' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+	<td valign='top' width="8" align='center' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
 		<a 
 			href="spy.make_help_box -name='solve' -popout='False'" 
 			target="Help me with this">
@@ -10,7 +10,7 @@
 	</td>
 	<td VALIGN='center'  colspan='2'>
     <input
-			bgcolor="$GetVar(gui_html_table_bg_colour)"  
+			bgcolor="$spy.GetParam(gui.html.table_bg_colour)"  
 			type="button" 
 			name="RUN_SOLVE" 
 			image="button-solve.png"

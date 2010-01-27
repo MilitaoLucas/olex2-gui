@@ -1,12 +1,12 @@
 <tr>
-	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+	<td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
 	</td>
 	<td width='70' align='left' colspan='4'>
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan='4';1; -->
 	</td>
 </tr>
 <tr>
-	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
 	<td VALIGN='center' width="100" colspan=2>
 			<b>Solution Program</b>
 	</td>	
@@ -16,9 +16,9 @@
 		<font size='2'> 
 			<input 
 				type='combo',
-				width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)' 
+				width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 -20)' 
 				height="17" 
-				bgcolor="GetVar(gui_html_input_bg_colour)"
+				bgcolor="spy.GetParam(gui.html.input_bg_colour)"
 				name='SET_SNUM_SOLUTION_PROGRAM',
 				value='$spy.GetParam(snum.solution.program)'
 				items='$spy.getSolutionPrgs()'
@@ -31,7 +31,7 @@
 </tr>
 
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_SOLUTION_METHOD'>
-	<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
 
 	<td VALIGN='center' width="100" colspan=2>
 			<b>%Solution XXXXXXXXXXXXXXXX Method%</b>
@@ -41,9 +41,9 @@
 		<font size='2'> 
 			<input 
 				type='combo',
-				width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)' 
+				width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 -20)' 
 				height="17" 
-				bgcolor="GetVar(gui_html_input_bg_colour)"
+				bgcolor="spy.GetParam(gui.html.input_bg_colour)"
 				name='SET_SNUM_SOLUTION_METHOD',
 				value='$spy.GetParam(snum.solution.method)', 
 				items='$spy.getSolutionMethods($spy.GetParam(snum.solution.program))'
@@ -59,7 +59,7 @@
 
 
 	<tr VALIGN='center' ALIGN='left' NAME='IGNORE_SETTINGS'>
-		<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+		<td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
 		  <td VALIGN='center'  colspan=3>
 				<b>
 					Graphical Output

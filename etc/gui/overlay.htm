@@ -1,7 +1,7 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
 
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
 	</td>
 	<td colspan='1'>
 		<a 
@@ -16,7 +16,7 @@
 </tr>
 
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
 	</td>
 	<td colspan='2'>
 <!-- #includeif File.Exists(match.htm) match match.htm;1; -->
@@ -24,7 +24,7 @@
 </tr>
 
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
 	</td>
 	<td colspan='2'>
 		<a 
@@ -35,7 +35,7 @@
 </tr>
 <!--
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
 	</td>
 	<td>
 		<a href="match sel -s='GetValue(SET_FRAG_SUFFIX)'">%Rename Matched Fragments%</a>
@@ -57,7 +57,7 @@
 
 
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
 	</td>
 	<td colspan='2'>
 		<a href="fuse>> @reap -*>>mode match">%Overlay Structure%</a>&nbsp;|
@@ -67,7 +67,7 @@
 </td>
 </tr>
 <tr>
-	<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
 	</td>
 	<td colspan='2'>
 		%Mode Match-help%

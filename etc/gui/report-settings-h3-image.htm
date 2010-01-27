@@ -1,8 +1,8 @@
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=2;1; -->
-<font color=$getVar(gui_html_font_colour)  size=$getVar(gui_html_font_size)>
+<font color=$spy.GetParam(gui.html.font_colour)  size=$spy.GetParam(gui.html.font_size)>
 <tr><td></td><td colspan='2'>
 
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$getVar(gui_html_table_bg_colour)">
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_bg_colour)">
 <tr>
   <td colspan = '1'>
     <a href="
@@ -22,8 +22,8 @@ cursor(busy, '%Please Wait...%')
 	<td colspan = '1'>
 		<input
 			type="combo"
-			height="$GetVar(gui_html_combo_height)"
-			bgcolor="GetVar(gui_html_input_bg_colour)" 
+			height="$spy.GetParam(gui.html.combo_height)"
+			bgcolor="spy.GetParam(gui.html.input_bg_colour)" 
 			name="SET_REPORT_IMAGE_SIZE" 
 			items="640;800;1024;1280"
 			onchange="spy.SetParam(snum.report.image_size,GetValue(SET_REPORT_IMAGE_SIZE))"
@@ -34,8 +34,8 @@ cursor(busy, '%Please Wait...%')
 	<td colspan='4'>
 		<input 
 			type="combo"
-			height="$GetVar(gui_html_combo_height)"
-			bgcolor="GetVar(gui_html_input_bg_colour)" 
+			height="$spy.GetParam(gui.html.combo_height)"
+			bgcolor="spy.GetParam(gui.html.input_bg_colour)" 
 			name="SET_REPORT_IMAGE"
 			readonly
 			items='file.ListDirForGui(FilePath(),*.png;*.jpg;*.bmp)' 
@@ -61,13 +61,13 @@ cursor(busy, '%Please Wait...%')
 		%Rotation around Axis%:
 	</td>
 	<td valign='center' >
-		<font size='2' align='center'><input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name="axis"  width="30"  height="17" value = "2"></font>
+		<font size='2' align='center'><input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name="axis"  width="30"  height="17" value = "2"></font>
 	</td>
 	<td valign='center' >
 		%Degree%:
 	</td>
 	<td valign='center' >
-		<font size='2'><input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name="steps"  width="30"  height="17" value = "1"></font>
+		<font size='2'><input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name="steps"  width="30"  height="17" value = "1"></font>
 	</td>
 	
 </tr>	
@@ -76,13 +76,13 @@ cursor(busy, '%Please Wait...%')
 		%Number of frames%:
 	</td>
 	<td valign='center' >
-		<font size='2'><input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name="frames" width="30"  height="17" value = "30"></font>
+		<font size='2'><input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name="frames" width="30"  height="17" value = "30"></font>
 	</td>
 	<td valign='center' >
 		%Size%:
 	</td>
 	<td>
-			<font size='2'><input type="text" bgcolor="$getVar(gui_html_input_bg_colour)" name="size" width="30" height="17" value = "0.5"></font>
+			<font size='2'><input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name="size" width="30" height="17" value = "0.5"></font>
 	</td>
 </tr>
 

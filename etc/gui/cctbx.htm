@@ -1,13 +1,13 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
 	<tr>
-		<td width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td></td>
+		<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td></td>
 			<a href="spy cctbx refine"><zimg border="0" src="gui/images/toolbar-cctbx.png"></a>
 		<td>
 			<a href="spy cctbx refine">%Refine%</a>&nbsp;
 		</td>
 		<td>
 			<input 
-				bgcolor="$getVar(gui_html_input_bg_colour)" 
+				bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
 				type="combo" 
 				name="SET_SNUM_CCTBX_MAP_TYPE" 
 				items='--;DIFF' 
@@ -20,12 +20,12 @@
 		<td>
 			<input
 				type="combo"
-				height="$GetVar(gui_html_combo_height)"
+				height="$spy.GetParam(gui.html.combo_height)"
 				name="SET_SNUM_CCTBX_MAP_RESOLUTION" 
-				bgcolor="$GetVar(gui_html_table_bg_colour)" 
+				bgcolor="$spy.GetParam(gui.html.table_bg_colour)" 
 				items="0.3;0.2;0.1" 
 				value="GetVar(snum_cctbx_map_resolution)" 
-				fgcolor="$GetVar(gui_html_font_colour)" 
+				fgcolor="$spy.GetParam(gui.html.font_colour)" 
 				width="40" 
 				label="%Resolution% " 
 				onchange="SetVar(snum_cctbx_map_resolution,GetValue(SET_SNUM_CCTBX_MAP_RESOLUTION))"
