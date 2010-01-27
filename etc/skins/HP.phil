@@ -1,0 +1,150 @@
+
+gui {
+  logo_colour = #6464a0
+
+  skin {
+    name = HP
+    extension = None
+    logo_name= etc/skins/default.png
+  }
+
+  green = #00aa00
+  orange = #ff740e
+  red = #aa0000
+  purple = #a245a2
+
+  sginfo{
+    scale = 1.0
+      .type = float
+  }    
+  
+  snumtitle{
+    base_colour = None
+    height = 30
+    font_name = Verdana
+    grad = True
+    grad_step = 0.2
+    bg_colour_L = 0.7
+    grad_colour_L = 0.7
+    font_colour_L = 0.2
+    filefullinfo_size = 9
+  }
+
+  html {
+  
+    code {
+      bg_colour = #e9e9e9 #
+      fg_colour = #6f6f8b
+      html_tag = code
+     }
+    base_colour = #aaaaaa
+    font_colour = #222244
+    font_name = Arial
+    font_size = 2
+    highlight_colour = #ff8800
+    input_bg_colour = #eeeeee
+    table_bg_colour = #eaeaea
+    table_firstcol_colour = #e1e1e1
+
+
+    
+    icon_size = 25
+    link_colour = #585886
+    MainToolbarTabButtonActive = None
+  }
+  image_font_name = Vera
+
+  timage{
+    button{
+      base_colour = #ababab
+      grad = True
+      grad_colour = #e1e1e1
+      grad_step = 0.3
+      height = 18
+      corner_rad = 3
+      font_size = 12
+      halign = left
+      top = 2
+      left = 4
+      bg_colour_L = 1.8
+      grad_colour_L = 1.9
+      font_colour_L = 0.7
+      font_colour = None
+    }
+  
+  
+    h1{
+      height = 18
+      corner_rad = 3
+      top = 1
+      left = 4
+      bg_colour_L = 1.2
+      font_colour_L = 0.6
+      arrows = bar:left:5,char:on~:off+
+      off_L = 1.0
+      rounded = 1111
+    }
+
+    h3{
+      height = 16
+      corner_rad = 3
+      top = 2
+      left = 4
+      bg_colour_L = 1.3
+      font_colour_L = 0.6
+      arrows = bar:left:4,char:on~:off+
+      off_L = 1.0
+    }
+    
+    tab{
+      height = 30
+      corner_rad = 3
+      shadow = False
+      arrows = plus
+      grad = True
+      grad_step = 0.2
+      bg_colour_L = 0.7
+      grad_colour_L = 0.7
+      font_colour_L = 1.4
+      font_name = Vera Bold
+      font_size = 16
+      top = 6
+      rounded = 1100
+      arrows = bar:top:3
+      off_L = 0.8
+      on_L = 0.9
+    }  
+    
+    grad = True
+    grad_step = 0.2
+    bg_colour_L = 0.8
+    grad_colour_L = 0.7
+    font_colour_L = 1.4
+    font_name = Vera
+    }  
+
+  tab{
+    height = 40
+    corner_rad = 0
+    grad = True
+    grad_step = 0.2
+    bg_colour_L = 0.7
+    grad_colour_L = 0.7
+    font_colour_L = 1.4
+    font_name = Verdana Bold
+    font_size = 18
+    top = 18
+    rounded = 0000
+  }  
+
+  button_colouring = #dddddd
+  button_writing = #777777
+  button_font_name = Vera
+  tab_colour = #5563a4
+  tab_font_colour = #ff0000
+  htmlpanelwidth = 400
+  grad_top_left = #1f3257
+  grad_top_right = #1f3257
+  grad_bottom_left = #ffffff
+  grad_bottom_right = #ffffff
+}
