@@ -1,9 +1,9 @@
-<font color=$getVar(gui_html_font_colour) size=$getVar(gui_html_font_size) face=$getVar(gui_html_font_name)>
+<font color=$spy.GetParam(gui.html.font_colour) size=$spy.GetParam(gui.html.font_size) face=$spy.GetParam(gui.html.font_name)>
 
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
 
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_PROGRAM'>
-  <td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
   <td width='50%' VALIGN='center' colspan=2>
     <b>Refinement Program</b>
   </td>
@@ -11,9 +11,9 @@
     <font size='2'>
       <input
         type='combo'
-        width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)'
-        height="GetVar(gui_html_combo_height)"
-        bgcolor="GetVar(gui_html_input_bg_colour)"
+        width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 -20)'
+        height="$spy.GetParam(gui.html.combo_height)"
+        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name='SET_SNUM_REFINEMENT_PROGRAM'
         value='$spy.GetParam(snum.refinement.program)'
         items='$spy.getRefinementPrgs()'
@@ -26,7 +26,7 @@
 </tr>
 
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_METHOD'>
-  <td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
   <td width='50%' align='left' colspan=2>
     <b>Refinement Method</b>
   </td>	
@@ -34,9 +34,9 @@
     <font size='2'> 
       <input 
         type='combo'
-        width='$eval(GetVar(gui_htmlpanelwidth)/2 -20)' 
-        height="GetVar(gui_html_combo_height)"
-        bgcolor="GetVar(gui_html_input_bg_colour)"
+        width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 -20)' 
+        height="$spy.GetParam(gui.html.combo_height)"
+        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name='SET_SNUM_REFINEMENT_METHOD'
         value='$spy.GetParam(snum.refinement.method)'
         items='$spy.getRefinementMethods($spy.GetParam(snum.refinement.program))'
@@ -49,7 +49,7 @@
 </tr>
 
 <tr VALIGN='center' ALIGN='left' NAME='SET_REFLECTIONS'>
-  <td width='2' bgcolor='$getVar(gui_html_table_firstcol_colour)'></td>
+  <td width='2' bgcolor='$spy.GetParam(gui.html.table_firstcol_colour)'></td>
   <td width='50%' VALIGN='center' colspan='2'>
     <b>%Reflection File%</b>
   </td>
@@ -61,7 +61,7 @@
 </tr>
 
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_MAX_CYCLES'>
-<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+<td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
   <td VALIGN='center' colspan=3>
     <b>Maximum Refinement Iterations</b>
   </td>
@@ -70,8 +70,8 @@
       <input
         type='spin'
         width="50"
-        height="GetVar(gui_html_spin_height)"
-        bgcolor="GetVar(gui_html_input_bg_colour)"
+        height="$spy.GetParam(gui.html.spin_height)"
+        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name='SET_SNUM_REFINEMENT_MAX_CYCLES'
         value='$spy.GetParam(snum.refinement.max_cycles)'
         onchange="spy.SetMaxCycles(GetValue(SET_SNUM_REFINEMENT_MAX_CYCLES))"
@@ -81,7 +81,7 @@
 </tr>	
 
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_MAX_PEAKS'>
-  <td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
   <td VALIGN='center' colspan=3>
     <b>Number of Residual Peaks</b>
   </td>
@@ -91,9 +91,9 @@
         type="spin"
         name="SET_SNUM_REFINEMENT_MAX_PEAKS"
         width="50"
-        height="GetVar(gui_html_spin_height)"
+        height="$spy.GetParam(gui.html.spin_height)"
         max='1000'
-        bgcolor="GetVar(gui_html_input_bg_colour)"
+        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         value='$eval(abs\(spy.GetParam(snum.refinement.max_peaks)))'
         onchange='spy.SetMaxPeaks(GetValue(SET_SNUM_REFINEMENT_MAX_PEAKS))'
       >
@@ -104,7 +104,7 @@
 $spy.weightGuiDisplay()
 
 <tr VALIGN='center' ALIGN='left' NAME='IGNORE_SETTINGS'>
-  <td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
   <td VALIGN='center'  colspan=3>
     <b>
     <a href="
@@ -130,8 +130,8 @@ target = "Do automatic tidying once - tick the box to do it after every refineme
   <font size='2'>
   <input
     type='checkbox'
-    width="$GetVar(gui_html_checkbox_height)"
-    height="$GetVar(gui_html_checkbox_height)"
+    width="$spy.GetParam(gui.html.checkbox_height)"
+    height="$spy.GetParam(gui.html.checkbox_height)"
     name='SNUM_REFINEMENT_AUTO_TIDY'
     checked="$spy.GetParam(snum.refinement.auto.tidy)"
     oncheck='spy.SetParam(snum.refinement.auto.tidy,True)'
@@ -143,7 +143,7 @@ target = "Do automatic tidying once - tick the box to do it after every refineme
 </tr>
 
 <tr VALIGN='center' ALIGN='left' NAME='IGNORE_SETTINGS'>
-  <td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
   <td VALIGN='center'  colspan=3>
     <b>
       Graphical Output
@@ -153,10 +153,10 @@ target = "Do automatic tidying once - tick the box to do it after every refineme
     <font size='2'>
       <input
         type='checkbox'
-        width="$GetVar(gui_html_checkbox_height)"
-        height="$GetVar(gui_html_checkbox_height)"
-        fgcolor="$GetVar(gui_html_font_colour)"
-        bgcolor="$GetVar(gui_html_table_bg_colour)"
+        width="$spy.GetParam(gui.html.checkbox_height)"
+        height="$spy.GetParam(gui.html.checkbox_height)"
+        fgcolor="$spy.GetParam(gui.html.font_colour)"
+        bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
         name='SNUM_REFINEMENT_GRAPHICAL_OUTPUT'
         checked="$spy.GetParam(snum.refinement.graphical_output)"
         oncheck='spy.SetParam(snum.refinement.graphical_output,true)'
@@ -168,7 +168,7 @@ target = "Do automatic tidying once - tick the box to do it after every refineme
 </tr>
 
 <!--<tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_UPDATE_WEIGHT'>-->
-  <!--<td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>-->
+  <!--<td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>-->
     <!--<td VALIGN='center'  colspan=4>-->
       <!--<a href="spy.save_user_parameters(refinement)">-->
         <!--<b>Save these settings as user default</b>-->

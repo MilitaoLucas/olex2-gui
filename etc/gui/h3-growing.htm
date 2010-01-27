@@ -18,10 +18,10 @@
       type="checkbox"
       value="%Short%"
       valign="center"
-      bgcolor="$getVar(gui_html_table_bg_colour)"
-      fgcolor="$GetVar(gui_html_font_colour)"
+      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+      fgcolor="$spy.GetParam(gui.html.font_colour)"
       name="GROW_SHORT"
-      height="$getVar(gui_html_checkbox_height)"
+      height="$spy.GetParam(gui.html.checkbox_height)"
       width='50'
       manage
       oncheck="SetData(GROW_VDW,' ')>>SetData(GROW_SELECTION,' ')>>SetData(GROW_SHORT,-s)"
@@ -33,10 +33,10 @@
       type="checkbox"
       value="%Selection%"
       valign="center"
-      bgcolor="$getVar(gui_html_table_bg_colour)"
-      fgcolor="$GetVar(gui_html_font_colour)"
+      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+      fgcolor="$spy.GetParam(gui.html.font_colour)"
       name="GROW_SELECTION"
-      height="$getVar(gui_html_checkbox_height)"
+      height="$spy.GetParam(gui.html.checkbox_height)"
       width='65'
       manage
       oncheck="SetData(GROW_VDW,' ')>>SetData(GROW_SELECTION,-r)>>SetData(GROW_SHORT,' ')"
@@ -47,10 +47,10 @@
     type="checkbox"
     value="%VdW%"
     valign="center"
-    bgcolor="$getVar(gui_html_table_bg_colour)"
-    fgcolor="$GetVar(gui_html_font_colour)"
+    bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+    fgcolor="$spy.GetParam(gui.html.font_colour)"
     name="GROW_VDW"
-    height="$getVar(gui_html_checkbox_height)"
+    height="$spy.GetParam(gui.html.checkbox_height)"
     width='45'
     manage
     oncheck="SetData(GROW_VDW,-v=GetValue(GROW_VDW_VAL))>>SetData(GROW_SELECTION,' ')>>SetData(GROW_SHORT,' ')"
@@ -61,10 +61,10 @@
       type="text"
       value='2.0'
       valign="center"
-      bgcolor="$getVar(gui_html_table_bg_colour)"
-      fgcolor="$GetVar(gui_html_font_colour)"
+      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+      fgcolor="$spy.GetParam(gui.html.font_colour)"
       name="GROW_VDW_VAL"
-      height="$getVar(gui_html_input_height)"
+      height="$spy.GetParam(gui.html.input_height)"
       width='30'
       manage
       onchange="SetData(GROW_VDW,'-v=GetValue(GROW_VDW_VAL)')"

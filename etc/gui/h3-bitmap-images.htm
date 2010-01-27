@@ -35,12 +35,12 @@ cursor()">
   <td name=IMAGE_BITMAP_NAME>
     <input 
       type="text" 
-      height="$getVar(gui_html_input_height)"
-      bgcolor="$getVar(gui_html_input_bg_colour)"
+      height="$spy.GetParam(gui.html.input_height)"
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
       valign='center'
       name="IMAGE_BITMAP_NAME"
       width="70"
-      height="$getVar(gui_html_input_height)"
+      height="$spy.GetParam(gui.html.input_height)"
       value="$spy.GetParam(snum.image.bitmap.name)"
       onleave="spy.SetParam(snum.image.bitmap.name,GetValue(IMAGE_BITMAP_NAME))"
 
@@ -52,9 +52,9 @@ cursor()">
   <td name=IMAGE_BITMAP_TYPE>
     <input 
       type="combo" 
-      height="$GetVar(gui_html_combo_height)"
-      width="$GetVar(gui_html_combo_width_2)"
-      bgcolor="$getVar(gui_html_input_bg_colour)"
+      height="$spy.GetParam(gui.html.combo_height)"
+      width="$spy.GetParam(gui.html.combo_width_2)"
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
       items="png;bmp;jpg"
       valign='center'
       name="IMAGE_BITMAP_TYPE"
@@ -67,10 +67,10 @@ cursor()">
   <td name=IMAGE_BITMAP_SIZE>
     <input 
       type="combo" 
-      height="$GetVar(gui_html_combo_height)"
-      bgcolor="$getVar(gui_html_input_bg_colour)"
+      height="$spy.GetParam(gui.html.combo_height)"
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
       items="1;2;4;800px<-800;1200px<-1200;1800px<-1800;3200px<-3200"
-      height="$getVar(gui_html_input_height)"
+      height="$spy.GetParam(gui.html.input_height)"
       valign='center'
       name="IMAGE_BITMAP_SIZE"
       width="60"

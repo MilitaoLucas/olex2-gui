@@ -4,14 +4,14 @@
 <tr name=IMAGE_PS_ROW_1>
 <!-- #include tool-help-column gui\blocks\tool-first-column.htm;help_ext=mode_name;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
   <td name=IMAGE_PS_BUTTON>
-        <input
+    <input
   type="button"
   name = "MAKE_PS_IMAGE"
   width="25"
   value="Go"
-  onclick="run 'brad
-GetValue(IMAGE_PS_BONDWIDTH)'>>
+  onclick="run 'brad GetValue(IMAGE_PS_BONDWIDTH)'>>
 run 'pictps
   spy.getParam(snum.image.ps.name).ps
   GetData(COLOR_LINE)
@@ -26,17 +26,17 @@ run 'pictps
   -scale_hb=spy.GetParam(snum.image.ps.h_bond_width)
 '>>
 brad 0.8>>
-echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'">
+echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'"
+    >
   </td>
   <td name=IMAGE_PS_NAME>
     <input 
       type="text"
-      height="$getVar(gui_html_input_height)"
-      bgcolor="$getVar(gui_html_input_bg_colour)"
+      height="$spy.GetParam(gui.html.input_height)"
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
       valign='center'
       name="IMAGE_PS_NAME"
-      width="80"
-      height="$getVar(gui_html_input_height)"
+      width="20"
       value="$spy.GetParam(snum.image.ps.name)"
       onleave="spy.SetParam(snum.image.ps.name,GetValue(IMAGE_PS_NAME))"
       label='%Name% '
@@ -48,13 +48,14 @@ echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'">
   <td name=IMAGE_PS_COLOUR_LINE>
     <input
       type="checkbox"
-      height="$getVar(gui_html_checkbox_height)"
-      width="$getVar(gui_html_checkbox_width)"
+      height="$spy.GetParam(gui.html.checkbox_height)"
+      width="$spy.GetParam(gui.html.checkbox_width)"
       name = "COLOR_LINE"
       width="14"
       oncheck="SetData(COLOR_LINE,-color_line)"
       onuncheck="SetData(COLOR_LINE,' ')"
-      manage>
+      manage
+    >
   </td>
   <td name=IMAGE_PS_COLOUR_BOND_LABEL align='right'>
     %Bonds%
@@ -62,14 +63,15 @@ echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'">
   <td name=IMAGE_PS_COLOUR_BOND>
     <input
       type="checkbox"
-      height="$getVar(gui_html_checkbox_height)"
-      width="$getVar(gui_html_checkbox_width)"
+      height="$spy.GetParam(gui.html.checkbox_height)"
+      width="$spy.GetParam(gui.html.checkbox_width)"
       name = "COLOR_BOND"
-      fgcolor="$GetVar(gui_html_font_colour)"
-      bgcolor="$getVar(gui_html_table_bg_colour)"
+      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
       oncheck="SetData(COLOR_BOND,-color_bond)"
       onuncheck="SetData(COLOR_BOND,' ')"
-      manage>
+      manage
+    >
   </td>
   <td name=IMAGE_PS_COLOUR_FILL_LABEL align='right'>
     Fill
@@ -77,13 +79,14 @@ echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'">
   <td name=IMAGE_PS_COLOUR_FILL>
     <input
       type="checkbox"
-      height="$getVar(gui_html_checkbox_height)"
-      width="$getVar(gui_html_checkbox_width)"
+      height="$spy.GetParam(gui.html.checkbox_height)"
+      width="$spy.GetParam(gui.html.checkbox_width)"
       name = "COLOR_FILL"
       width="17"
       oncheck="SetData(COLOR_FILL,-color_fill)>>load style OLTEP.xld"
       onuncheck="SetData(COLOR_FILL,' ')>>load style default.xld"
-      manage>
+      manage
+    >
   </td>
   <td name=IMAGE_PS_PERSPECTIVE_LABEL align='right'>
     Pers
@@ -91,13 +94,14 @@ echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'">
   <td name=IMAGE_PS_PERSPECTIVE>
     <input
       type="checkbox"
-      height="$getVar(gui_html_checkbox_height)"
-      width="$getVar(gui_html_checkbox_width)"
+      height="$spy.GetParam(gui.html.checkbox_height)"
+      width="$spy.GetParam(gui.html.checkbox_width)"
       name = "IMAGE_PS_PERSPECTIVE"
       width="17"
       oncheck="SetData(IMAGE_PS_PERSPECTIVE,-p)"
       onuncheck="SetData(IMAGE_PS_PERSPECTIVE,' ')"
-      manage>
+      manage
+    >
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
@@ -112,11 +116,11 @@ echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'">
   <td name=IMAGE_PS_ELLIPSE_LINEWIDTH width=42%>
     <input
       type="combo"
-      height="$GetVar(gui_html_combo_height)"
-      width="$GetVar(gui_html_combo_width_2)"
-      bgcolor="$getVar(gui_html_input_bg_colour)" 
+      height="$spy.GetParam(gui.html.combo_height)"
+      width="$spy.GetParam(gui.html.combo_width_2)"
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
       items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6" 
-      height="$getVar(gui_html_input_height)"
+      height="$spy.GetParam(gui.html.input_height)"
       valign='center'
       align='right'
       name="IMAGE_PS_OUTLINE_LINEWIDTH"
@@ -128,11 +132,11 @@ echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'">
   <td name=IMAGE_PS_OCTANT_LINEWIDTH width=42%>
     <input
       type="combo"
-      height="$GetVar(gui_html_combo_height)"
-      width="$GetVar(gui_html_combo_width_2)"
-      bgcolor="$getVar(gui_html_input_bg_colour)"
+      height="$spy.GetParam(gui.html.combo_height)"
+      width="$spy.GetParam(gui.html.combo_width_2)"
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
       items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6"
-      height="$getVar(gui_html_input_height)"
+      height="$spy.GetParam(gui.html.input_height)"
       valign='center'
       align='right'
       name="IMAGE_PS_OCTANT_LINEWIDTH"
@@ -155,11 +159,11 @@ echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'">
   <td name=IMAGE_PS_OCTANT_COUNT width=42%>
     <input
       type="combo"
-      height="$GetVar(gui_html_combo_height)"
-      width="$GetVar(gui_html_combo_width_2)"
-      bgcolor="$getVar(gui_html_input_bg_colour)"
+      height="$spy.GetParam(gui.html.combo_height)"
+      width="$spy.GetParam(gui.html.combo_width_2)"
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
       items="2;3;4;5;6;7;8;9;10;"
-      height="$getVar(gui_html_input_height)"
+      height="$spy.GetParam(gui.html.input_height)"
       valign='center' 
       align='right'
       name="IMAGE_PS_OCTANT_COUNT"
@@ -172,11 +176,11 @@ echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'">
   <td name=IMAGE_PS_OCTANT_PIEWIDTH width=42%>
     <input 
       type="combo"
-      height="$GetVar(gui_html_combo_height)"
-      width="$GetVar(gui_html_combo_width_2)"
-      bgcolor="$getVar(gui_html_input_bg_colour)"
+      height="$spy.GetParam(gui.html.combo_height)"
+      width="$spy.GetParam(gui.html.combo_width_2)"
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
       items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6"
-      height="$getVar(gui_html_input_height)"
+      height="$spy.GetParam(gui.html.input_height)"
       valign='center'
       align='right'
       name="IMAGE_PS_OCTANT_PIEWIDTH"
@@ -199,11 +203,11 @@ echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'">
   <td name=IMAGE_PS_BONDWIDTH width=42%>
     <input
       type="combo"
-      height="$GetVar(gui_html_combo_height)"
-      width="$GetVar(gui_html_combo_width_2)"
-      bgcolor="$getVar(gui_html_input_bg_colour)"
+      height="$spy.GetParam(gui.html.combo_height)"
+      width="$spy.GetParam(gui.html.combo_width_2)"
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
       items="0.2;0.3;0.4;0.5;0.6;0.7;0.8;"
-      height="$getVar(gui_html_input_height)"
+      height="$spy.GetParam(gui.html.input_height)"
       valign='center'
       align='right'
       name="IMAGE_PS_BONDWIDTH"
@@ -216,9 +220,9 @@ echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'">
   <td name=IMAGE_PS_HBOND width=42%>
     <input 
       type="combo"
-      height="$GetVar(gui_html_combo_height)"
-      width="$GetVar(gui_html_combo_width_2)"
-      bgcolor="$getVar(gui_html_input_bg_colour)"
+      height="$spy.GetParam(gui.html.combo_height)"
+      width="$spy.GetParam(gui.html.combo_width_2)"
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
       items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6"
       valign='center'
       align='right'
@@ -242,11 +246,11 @@ echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'">
   <td name=IMAGE_PS_FONTWEIGHT width=42%>
     <input 
       type="combo"
-      height="$GetVar(gui_html_combo_height)"
-      width="$GetVar(gui_html_combo_width_2)"
-      bgcolor="$getVar(gui_html_input_bg_colour)"
+      height="$spy.GetParam(gui.html.combo_height)"
+      width="$spy.GetParam(gui.html.combo_width_2)"
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
       items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6;2.0;"
-      height="$getVar(gui_html_input_height)"
+      height="$spy.GetParam(gui.html.input_height)"
       valign='center'
       align='right'
       name="IMAGE_PS_FONTWEIGHT"
@@ -259,11 +263,11 @@ echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'">
   <td name=IMAGE_PS_FONTSIZE width=42%>
     <input 
       type="combo"
-      height="$GetVar(gui_html_combo_height)"
-      width="$GetVar(gui_html_combo_width_2)"
-      bgcolor="$getVar(gui_html_input_bg_colour)"
+      height="$spy.GetParam(gui.html.combo_height)"
+      width="$spy.GetParam(gui.html.combo_width_2)"
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
       items="10;12;14;15;16;18;20;22;"
-      height="$getVar(gui_html_input_height)"
+      height="$spy.GetParam(gui.html.input_height)"
       valign='center'
       align='right'
       name="IMAGE_PS_FONTSIZE"

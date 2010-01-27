@@ -15,7 +15,7 @@
 <!-- Button SOLVE -->
 <map name="map_solve">
 		  <area shape="rect" 
-						coords="0,0,$GetVar(olex2_main_toolbar_vline_position),25" 
+						coords="0,0,$spy.GetParam(olex2.main_toolbar_vline_position),25" 
 						href="
 itemstate refinement-settings 0 report-settings 0 -u>>
 spy.setMainToolbarTabButtons(solve)>>
@@ -26,7 +26,7 @@ updatehtml>>
 
 <!-- Button SOLVE SETTINGS-->
 		  <area shape="rect" 
-						coords="$GetVar(olex2_main_toolbar_vline_position),0,500,25"
+						coords="$spy.GetParam(olex2.main_toolbar_vline_position),0,500,25"
 						href="
 itemstate refinement-settings 0 report-settings 0 solution-settings 0 1 -u>>
 spy.setMainToolbarTabButtons(solve)>>
@@ -37,7 +37,7 @@ updatehtml>>"
 <map name="map_refine">
 <!-- Button REFINE -->
 		  <area shape="rect" 
-						coords="0,0,$GetVar(olex2_main_toolbar_vline_position),25" 
+						coords="0,0,$spy.GetParam(olex2.main_toolbar_vline_position),25" 
 						href="
 itemstate solution-settings 0 report-settings 0>>
 spy.setMainToolbarTabButtons(refine)>>
@@ -46,7 +46,7 @@ refine>>
 						target="%Refine the Structure%">
 <!-- Button REFINE SETTINGS-->
 		  <area shape="rect" 
-						coords="$GetVar(olex2_main_toolbar_vline_position),0,500,25"
+						coords="$spy.GetParam(olex2.main_toolbar_vline_position),0,500,25"
 						href="
 itemstate solution-settings 0 report-settings 0 refinement-settings 0 1 -u>>
 spy.setMainToolbarTabButtons(refine)>>
@@ -57,7 +57,7 @@ updatehtml>>"
 <map name="map_report">
 <!-- Button REPORT -->
 				<area shape="rect"
-						coords="0,0,$GetVar(olex2_main_toolbar_vline_position),25" 
+						coords="0,0,$spy.GetParam(olex2.main_toolbar_vline_position),25" 
 						href="
 cursor(busy, '%Starting ...%')>>
 itemstate solution-settings 0 refinement-settings 0 -u>>
@@ -72,7 +72,7 @@ updatehtml>>
 				>
 <!-- Button REPORT SETTINGS-->
 		  <area shape="rect" 
-						coords="$GetVar(olex2_main_toolbar_vline_position),0,500,25"
+						coords="$spy.GetParam(olex2.main_toolbar_vline_position),0,500,25"
 						href="
 spy.CifTools()>>
 itemstate refinement-settings 0 solution-settings 0 report-settings 0 1 -u>>
