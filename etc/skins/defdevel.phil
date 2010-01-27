@@ -260,42 +260,6 @@ gui {
       .type = str
   }  
 
-  tab{
-    base_colour = None
-      .type = colour
-
-    height = 30
-      .type = int
-
-    corner_rad = 5
-      .type = int
-      
-    grad = True
-      .type = bool
-    grad_step = 0.3
-      .type = float
-      
-    bg_colour_L = 1.6
-      .type = float
-    grad_colour_L = 1.1
-      .type = float
-      
-    font_colour_L = 0.8
-      .type = float
-    font_name = Vera Bold
-      .type = str
-    font_size = 14
-      .type = int
-    top = 10
-      .type = int
-    left = 8
-      .type = int
-    rounded = 0100
-      .type = str
-    decorated = top_left_triangle
-      .type = str
-  }  
-  
   button_colouring = #ababab
     .type = colour
   button_writing = #00ff00

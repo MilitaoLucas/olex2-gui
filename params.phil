@@ -9,8 +9,6 @@ gui {
       .type = str
     logo_name= etc/skins/default.png
       .type = path
-    size_factor = 1.0
-      .type = float
   }
 
   purple = #a245a2
@@ -127,7 +125,7 @@ gui {
       grad_colour_L = 1.0
         .type = float
         
-      font_colour_L = 1.6
+      font_colour_L = 1.8
         .type = float
       font_name = Vera Bold
         .type = str
@@ -155,7 +153,7 @@ gui {
         .type = colour
       grad_step = 0.4
         .type = float
-      height = 17
+      height = 16
         .type = int
       corner_rad = 3
         .type = int
@@ -216,9 +214,9 @@ gui {
     }  
 
     h3{
-      base_colour = None
+      base_colour = #ababab
         .type = colour
-      grad_colour = None
+      grad_colour = #ababab
         .type = colour
       height = 16
         .type = int
@@ -232,7 +230,7 @@ gui {
         .type = int
       left = 12
         .type = int
-      bg_colour_L = 1.7
+      bg_colour_L = 1.3
         .type = float
       grad_colour_L = 1.1 
         .type = float
@@ -262,42 +260,6 @@ gui {
       .type = str
   }  
 
-  tab{
-    base_colour = None
-      .type = colour
-
-    height = 30
-      .type = int
-
-    corner_rad = 5
-      .type = int
-      
-    grad = True
-      .type = bool
-    grad_step = 0.3
-      .type = float
-      
-    bg_colour_L = 1.6
-      .type = float
-    grad_colour_L = 1.1
-      .type = float
-      
-    font_colour_L = 0.8
-      .type = float
-    font_name = Vera Bold
-      .type = str
-    font_size = 14
-      .type = int
-    top = 10
-      .type = int
-    left = 8
-      .type = int
-    rounded = 0100
-      .type = str
-    decorated = top_left_triangle
-      .type = str
-  }  
-  
   button_colouring = #ababab
     .type = colour
   button_writing = #00ff00
@@ -350,7 +312,6 @@ gui {
       
     }
 }
-
 
 
 snum {
