@@ -68,30 +68,26 @@ OV.registerMacro(Skin_instance.run_skin, 'function-The function to call')
 
 
 def change_skin(skin_name=None, force=False):
+  gui_phil_path = "%s/gui.phil" %(OV.DataDir())
 
   timing = False
   if timing:
     t1 = time.time()
     t2 = 0
   
-  gui_phil_path = "%s/gui.phil" %(OV.DataDir())
 
   size_list = ['large', 'standard', 'small']
+  if not skin_name:
+    pass
   
-  if not skin_name or skin_name in size_list:
-    if os.path.exists(gui_phil_path):
-      gui_phil_file = open(gui_phil_path, 'r')
-      gui_phil = gui_phil_file.read()
-      gui_phil_file.close()
-      olx.phil_handler.update(phil_string=gui_phil)
-    if skin_name in size_list:
-      force = True
-      gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_name)
-      if os.path.isfile(gui_skin_phil_path):
-        gui_skin_phil_file = open(gui_skin_phil_path, 'r')
-        gui_skin_phil = gui_skin_phil_file.read()
-        gui_skin_phil_file.close()
-        olx.phil_handler.update(phil_string=gui_skin_phil)
+  elif skin_name in size_list:
+    force = True
+    gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_name)
+    if os.path.isfile(gui_skin_phil_path):
+      gui_skin_phil_file = open(gui_skin_phil_path, 'r')
+      gui_skin_phil = gui_skin_phil_file.read()
+      gui_skin_phil_file.close()
+      olx.phil_handler.update(phil_string=gui_skin_phil)
 
   else:
     force = True
@@ -211,3 +207,14 @@ def SetGrad():
     val = IT.hex2dec(val)
     v.append(val)
   olx.Grad("%i %i %i %i" %(v[0], v[1], v[2], v[3]))
+  
+def load_user_gui_phil():
+  gui_phil_path = "%s/gui.phil" %(OV.DataDir())
+  if os.path.exists(gui_phil_path):
+    gui_phil_file = open(gui_phil_path, 'r')
+    gui_phil = gui_phil_file.read()
+    gui_phil_file.close()
+    olx.phil_handler.update(phil_string=gui_phil)
+  
+OV.registerFunction(load_user_gui_phil)
+  
