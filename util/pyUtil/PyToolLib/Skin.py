@@ -78,7 +78,7 @@ def change_skin(skin_name=None, force=False):
 
   size_list = ['large', 'standard', 'small']
   
-  if skin_name is None or skin_name in size_list:
+  if not skin_name or skin_name in size_list:
     if os.path.exists(gui_phil_path):
       gui_phil_file = open(gui_phil_path, 'r')
       gui_phil = gui_phil_file.read()
