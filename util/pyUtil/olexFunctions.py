@@ -41,7 +41,7 @@ class OlexFunctions(inheritFunctions):
       elif type(value) in (str,unicode) and "'" in value:
         value = "'%s'" %value.replace("'", "\\'")
       else:
-        value = "'%s'" %value
+        value = "'%s'" %str(value)
       olx.phil_handler.update_single_param(str(variable), str(value))
     except Exception, ex:
       print >> sys.stderr, "Variable %s could not be set with value %s" %(variable,value)

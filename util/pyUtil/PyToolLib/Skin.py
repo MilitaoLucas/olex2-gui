@@ -2,13 +2,24 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import sys
 import olex_gui
+import olx
+import os
+import PilTools
+from ImageTools import ImageTools
+IT = ImageTools()
+
+from olexFunctions import OlexFunctions
+OV = OlexFunctions()
+
+import time
 
 class Skin():
   def __init__(self):
-    self.change()
+    return
+    #self.change()
     
   def change(self):
-    skin = OV.FindValue('gui_skin_name',None)
+    skin = OV.GetParam('gui.skin.name')
     skin_extension = OV.FindValue('gui_skin_extension',"None")
     try:
       skin_path = "%s/util/pyUtil/PluginLib/skins/plugin-%sSkin" %(OV.BaseDir(), skin)
@@ -30,9 +41,13 @@ class Skin():
     
   def run_skin(self, f, args=None):
     if f == 'timage':
-      self.timage_instance.run_timage()
+      a = PilTools.timage()
+      a.run_timage(force_images=True)
+      
     elif f == 'sNumTitle':
-      self.sNumTitle_instance.run_sNumTitle(force=True)
+      a = PilTools.sNumTitle()
+      a.run_sNumTitle(force=True)
+
     elif f == 'change':
       self.change()
       #self.GuiSkinChanger_instance.run_GuiSkinChanger()
@@ -50,3 +65,149 @@ class Skin():
 
 Skin_instance = Skin()
 OV.registerMacro(Skin_instance.run_skin, 'function-The function to call')
+
+
+def change_skin(skin_name=None, force=False):
+
+  timing = False
+  if timing:
+    t1 = time.time()
+    t2 = 0
+  
+  gui_phil_path = "%s/gui.phil" %(OV.DataDir())
+
+  size_list = ['large', 'standard', 'small']
+  
+  if skin_name is None or skin_name in size_list:
+    if os.path.exists(gui_phil_path):
+      gui_phil_file = open(gui_phil_path, 'r')
+      gui_phil = gui_phil_file.read()
+      gui_phil_file.close()
+      olx.phil_handler.update(phil_string=gui_phil)
+    if skin_name in size_list:
+      force = True
+      gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_name)
+      if os.path.isfile(gui_skin_phil_path):
+        gui_skin_phil_file = open(gui_skin_phil_path, 'r')
+        gui_skin_phil = gui_skin_phil_file.read()
+        gui_skin_phil_file.close()
+        olx.phil_handler.update(phil_string=gui_skin_phil)
+
+  else:
+    force = True
+    olx.phil_handler.reset_scope('gui')
+    gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_name)
+    if os.path.isfile(gui_skin_phil_path):
+      gui_skin_phil_file = open(gui_skin_phil_path, 'r')
+      gui_skin_phil = gui_skin_phil_file.read()
+      gui_skin_phil_file.close()
+      olx.phil_handler.update(phil_string=gui_skin_phil)
+
+  if timing:
+    t = time.time()
+    print "After 'Reading PHIL Stuff': %.2f s (%.2f s)" % ((t - t1), (t - t1))
+    t2 = t
+    
+  try:
+    adjust_skin_luminosity()
+  except:
+    pass
+
+  if timing:
+    t = time.time()
+    print "After 'adjust_skin_luminosity': %.2f s (%.5f s)" % ((t - t1), (t - t2))
+    t2 = t
+  
+  IT.resize_skin_logo(OV.GetParam('gui.htmlpanelwidth'))
+
+  if timing:
+    t = time.time()
+    print "After 'resize_skin_logo': %.2f s (%.5f s)" % ((t - t1), (t - t2))
+    t2 = t
+  
+  a = PilTools.timage()
+  a.run_timage(force_images=force)
+
+  if timing:
+    t = time.time()
+    print "After 'run_timage': %.2f s (%.5f s)" % ((t - t1), (t - t2))
+    t2 = t
+  
+  if OV.FileName() != 'none':
+    a = PilTools.sNumTitle()
+    a.run_sNumTitle(force=force)
+
+  if timing:
+    t = time.time()
+    print "After 'sNumTitle': %.2f s (%.5f s)" % ((t - t1), (t - t2))
+    t2 = t
+  
+  SetGrad()
+
+  olx.SetMaterial("InfoBox.Text %s" %OV.GetParam('gui.infobox_text'))
+  olx.SetMaterial("InfoBox.Plane %s" %OV.GetParam('gui.infobox_plane'))
+
+  olx.HtmlPanelWidth(OV.GetParam('gui.htmlpanelwidth'))
+  olx.html_Reload()
+  
+  if timing:
+    t = time.time()
+    print "After 'Reload': %.2f s (%.5f s)" % ((t - t1), (t - t2))
+    t2 = t
+  
+  
+  olx.phil_handler.save_param_file(
+    file_name=gui_phil_path, scope_name='gui', diff_only=True)
+
+  if timing:
+    t = time.time()
+    print "After 'Save PHIL': %.2f s (%.5f s)" % ((t - t1), (t - t2))
+    t2 = t
+  
+OV.registerFunction(change_skin)
+
+
+def adjust_skin_colours():
+  base_colour = OV.GetParam('gui.html.base_colour')
+  item = ['tab', 'timage', 'snumtitle']
+  for tem in item:
+    if not OV.GetParam('gui.%s.base_colour' %tem) :
+      OV.SetParam('gui.%s.base_colour' %tem, base_colour)
+
+  if OV.GetParam('gui.snumtitle.filefullinfo_colour') is None:
+    OV.SetParam('gui.snumtitle.filefullinfo_colour', IT.adjust_colour(base_colour.rgb, luminosity = OV.GetParam('gui.snumtitle.filefullinfo_colour_L')))
+
+def adjust_skin_luminosity():
+  base_colour = OV.GetParam('gui.html.base_colour')
+  
+  scope_l= ['gui', 'gui.tab', 'gui.timage', 'gui.snumtitle', 'gui.timage.button', 'gui.timage.h1', 'gui.timage.h3', 'gui.timage.tab']
+  for scope in scope_l:
+    gui = olx.phil_handler.get_scope_by_name(scope)
+    for object in gui.active_objects():
+      try:
+        data_type = object.type.phil_type
+        if data_type == 'colour':
+          name = object.name
+          if object.extract() is None:
+            name = object.name
+            if "base_colour" in name:
+              OV.SetParam('%s.%s' %(scope,name), base_colour)
+            else:
+              OV.SetParam('%s.%s' %(scope,name), IT.adjust_colour(base_colour.rgb, luminosity = OV.GetParam('%s.%s_L' %(scope,name))))
+          #print "%s.%s: %s" %(scope, name, OV.GetParam('%s.%s' %(scope,name)))
+      except Exception, ex:
+        pass
+        #print "Something has gone wrong with SKIN adjust_skin_luminosity: %s" %ex
+
+def SetGrad():
+  from ImageTools import ImageTools
+  IT = ImageTools()
+  l = ['top_right', 'top_left', 'bottom_right', 'bottom_left']
+  v = []
+  for i in xrange(4):
+    val = OV.GetParam('gui.grad_%s' %(l[i])).hexadecimal
+    if not val:
+      val = "#ffffff"
+    val = IT.hex2dec(val)
+    v.append(val)
+  olx.Grad("%i %i %i %i" %(v[0], v[1], v[2], v[3]))
