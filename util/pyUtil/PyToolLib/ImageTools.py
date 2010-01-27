@@ -219,16 +219,19 @@ class ImageTools(FontInstances):
 
   def resize_skin_logo(self, width):
     logopath = "%s/%s" %(self.basedir, OV.GetParam('gui.skin.logo_name'))
+    name = r"skin_logo.png"
     if os.path.exists(logopath):
       im = Image.open(logopath)
       width = int(width) - 20
       factor = im.size[0]/width
       height = int(im.size[1] / factor)
       im = self.resize_image(im, (width, height))
-      name = r"skin_logo.png"
       OlexVFS.save_image_to_olex(im, name, 2)
+      txt = '<zimg border="0" src="skin_logo.png">'
     else:
-      pass
+      txt = " "
+      
+    OlexVFS.write_to_olex('logo1_txt.htm',txt)
     return "Done"
   
 

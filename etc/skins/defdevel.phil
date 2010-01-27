@@ -7,7 +7,7 @@ gui {
       .type = str
     extension = None
       .type = str
-    logo_name= etc/skins/default.png
+    logo_name= None
       .type = path
   }
 
