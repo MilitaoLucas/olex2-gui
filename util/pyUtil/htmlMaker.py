@@ -264,7 +264,7 @@ def publicationMetadataHtmlMaker():
       'ctrl_name':'SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s' %i,
       'readonly':'readonly',
       'value':"%s" %listAuthors.split(';')[i-1],
-      'bgcolor':"%s" %OV.FindValue('gui_html_table_bg_colour'),
+      'bgcolor':"%s" %OV.GetParam('gui.html.table_bg_colour'),
       'onchange':""
     }
     if numberAuthors == 1:
@@ -281,7 +281,7 @@ def publicationMetadataHtmlMaker():
     elif i == numberAuthors:
       authorRow.setdefault('itemName','<a href="spy.move(up,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Move author up list"><zimg border="0" src="gui/images/toolbar-up.png"></a><zimg border="0" src="gui/images/toolbar-down-off.png"><a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Remove author from list"><zimg border="0" src="gui/images/toolbar-delete.png"></a>' %(str(i),str(i)))
       authorRow.setdefault('fieldALIGN','right')
-      authorRow['bgcolor'] = OV.FindValue('gui_html_input_bg_colour')
+      authorRow['bgcolor'] = OV.GetParam('gui.html.input_bg_colour')
     else:
       authorRow.setdefault('itemName','<a href="spy.move(up,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Move author up list"><zimg border="0" src="gui/images/toolbar-up.png"></a> <a href="spy.move(down,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Move author down list"><zimg border="0" src="gui/images/toolbar-down.png"></a> <a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Remove author from list"><zimg border="0" src="gui/images/toolbar-delete.png"></a>' %(str(i),str(i),str(i)))
       authorRow.setdefault('fieldALIGN','right')
@@ -530,7 +530,7 @@ def restraint_builder(cmd):
            "value":val,
            "width":width,
            "height":17,
-           "bgcolor":"$getVar(gui_html_input_bg_colour)"
+           "bgcolor":"$spy.GetParam(gui.html.input_bg_colour)"
            }
       if items:
         d.setdefault("items",items)
@@ -591,7 +591,7 @@ def restraint_builder(cmd):
   #Add the help info as the last row in the table
   html += "</td></tr><tr>"
   html += htmlTools.make_table_first_col(help_name=name, popout=True, help_image='normal')
-  html += "<td colspan=%s bgcolor='%s'>%s</td></tr>" %(colspan, OV.FindValue('gui_html_table_firstcol_colour'), html_help, )
+  html += "<td colspan=%s bgcolor='%s'>%s</td></tr>" %(colspan, OV.GetParam('gui.html.table_firstcol_colour'), html_help, )
   if name in constraints:
     wFilePath = r"constraint-vars.htm"
   elif name in olex_conres:
@@ -687,7 +687,7 @@ def weightGuiDisplay():
   txt_Weight = OV.TranslatePhrase("Weight")
   html = '''
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_UPDATE_WEIGHT'>
-  <td width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
   <td VALIGN='right' colspan=3>
     <b><a target="%s" href="weight">%s: %s</a></b></td>
     <td VALIGN='center' ALIGN='right' colspan=1>%s</td>

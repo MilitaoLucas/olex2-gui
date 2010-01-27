@@ -37,10 +37,25 @@ except:
   pass
 
 
+#self.params.html.highlight_colour.rgb = self.params.html.highlight_colour.rgb
+#self.params.html.bg_colour.rgb = self.params.html.bg_colour.rgb
+#self.params.html.table_bg_colour.rgb = self.params.html.table_bg_colour.rgb
+#self.params.html.font_colour.rgb = self.params.html.font_colour.rgb
+#self.params.logo_colour.rgb = self.params.logo_colour.rgb
+#self.params.html.link_colour.rgb = self.params.html.link_colour.rgb
+#self.params.html.input_bg_colour.rgb = self.params.html.input_bg_colour.rgb
+#self.params.html.base_colour.rgb = self.params.html.base_colour.rgb
+#self.params.html.table_firstcol_colour.rgb = self.params.html.table_firstcol_colour.rgb
+#self.params.button_colouring.rgb = self.params.button_colouring.rgb
+#self.params.grey.rgb = self.params.grey.rgb
+#self.params.green.rgb = self.params.green.rgb
+#self.params.red.rgb = self.params.red.rgb
+#self.params.html.base_colour.rgb = self.params.html.base_colour.rgb
 
 class ButtonMaker(ImageTools):
   def __init__(self, btn_dict, type="Generic"):
     super(ButtonMaker, self).__init__()
+    self.params = OV.Params().gui
     self.type = type
     self.btn_dict = btn_dict
     self.max_width = OV.FindValue('gui_htmlpanelwidth', 400)
@@ -51,11 +66,11 @@ class ButtonMaker(ImageTools):
       im = self.cbtn()
 
   def GenericButtonMaker(self,  font_name = "Vera", font_size = 14):
-    if self.gui_image_font_name:
-      font_name = self.gui_image_font_name
-    if self.gui_button_font_name:
-      font_name = self.gui_button_font_name
-    icon_height = int(OV.FindValue('gui_html_icon_size')) * 0.9
+    if self.params.image_font_name:
+      font_name = self.params.image_font_name
+    if self.params.button_font_name:
+      font_name = self.params.button_font_name
+    icon_height = int(OV.GetParam('gui.html.icon_size')) * 0.9
     height = int(icon_height)
     width = int(icon_height * 1.1)
     
@@ -67,14 +82,14 @@ class ButtonMaker(ImageTools):
       d = self.btn_dict[btn]
       image_prefix = d.get("image_prefix", "")
       height = d.get("height", height)
-      bgcolour = d.get("bgcolour", self.gui_html_bg_colour)
+      bgcolour = d.get("bgcolour", self.params.html.bg_colour.rgb)
       txt = d['txt']
       name = d.get('name', txt)
       fontcolouroff = d.get("fontcolouroff", None)
       fontcolouron = d.get("fontcolouron", None)
       grad = d.get('grad', False)
-      grad_colour = self.adjust_colour(self.gui_timage_colour, luminosity = 2.1)
-      outline_colour = d.get("outline_colour", self.gui_html_table_bg_colour)
+      grad_colour = self.adjust_colour(self.params.html.base_colour.rgb, luminosity = 2.1)
+      outline_colour = d.get("outline_colour", self.params.html.table_bg_colour.rgb)
       continue_mark = d.get('continue_mark', False)
       states = d.get('states', [""])
       vline = d.get('vline', False)
@@ -93,17 +108,17 @@ class ButtonMaker(ImageTools):
         number = number_minus[0]
         minus = number_minus[1]
         if width == "auto":
-          width = int(self.gui_htmlpanelwidth)-(number * minus)
+          width = int(self.params.htmlpanelwidth)-(number * minus)
           width = (width/number-9)
           if vline:
             vline.setdefault('position', width - 20)
-            olx.SetVar('olex2_main_toolbar_vline_position', int(width - 20))
+            OV.SetParam('olex2.main_toolbar_vline_position', int(width - 20))
       except:
         width = int(width)
       size = (int(width), int(height))
 
       for state in states:
-        font_colour = self.gui_html_font_colour
+        font_colour = self.params.html.font_colour.rgb
         bgcolour = d.get('bgcolour%s' %state, bgcolour)
         if txt in ["report", "solve", "refine"]:
           font_colour = d.get("fontcolour%s" %state, font_colour)
@@ -158,12 +173,12 @@ class ButtonMaker(ImageTools):
                                       ) 
         if txt not in ["report", "solve", "refine"]:        
           if state == "on":
-            outline_colour = self.gui_html_highlight_colour
+            outline_colour = self.params.html.highlight_colour.rgb
         draw.rectangle((0, 0, image.size[0]-1, image.size[1]-1), outline=outline_colour)
-        dup = ImageChops.duplicate(image)
-        dup = ImageChops.invert(dup)
-        dup = ImageChops.offset(dup, 1, 1)
-        image = ImageChops.blend(image, dup, 0.05)
+        #dup = ImageChops.duplicate(image)
+        #dup = ImageChops.invert(dup)
+        #dup = ImageChops.offset(dup, 1, 1)
+        #image = ImageChops.blend(image, dup, 0.05)
         if whitespace_right:
           image = self.add_whitespace(image=image, side='right',
                                       weight=whitespace_right.get('weight',0), 
@@ -179,6 +194,8 @@ class ButtonMaker(ImageTools):
 class GuiSkinChanger(ImageTools):
   def __init__(self, tool_fun=None, tool_arg=None):
     super(GuiSkinChanger, self).__init__()
+    self.params = OV.Params().gui
+
     self.fun = tool_fun
     self.param = tool_fun
 
@@ -191,42 +208,19 @@ class GuiSkinChanger(ImageTools):
     olex.m("SetMaterial InfoBox.Plane 3077;0,0,0,1;1,1,1,0.5")
     olex.m("SetFont Notes #olex2.fnt:frb_10")
     olex.m("SetFont Console #olex2.fnt:frb_12")
-    olex.m("htmguifontsize %s" %self.gui_html_font_size)
+    olex.m("htmguifontsize %s" %self.params.html.font_size)
     olex.m("showwindow help false")
     #olex.m("grad true")
     
   def setGuiAttributesDefault(self):
-    #self.gui_html_base_colour = "#ffffff"
-    self.gui_html_bg_colour = "#ffffff"
-    self.gui_html_font_colour = "#6f6f8b"
-    self.gui_html_font_name = 'Arial'
-    self.gui_html_font_size = '2' 
-    self.gui_html_icon_size = '20'
-    self.gui_html_link_colour = "#6f6f8b"
-    self.gui_html_table_bg_colour = "#F3F3F3"
-    self.gui_html_table_firstcol_colour = "#E9E9E9"
-    self.gui_table_rows = "#F3F3F3"
-    self.gui_html_input_bg_colour="#efefef"
-    self.gui_timage_colour = "#6464a0"
-    self.gui_html_base_colour = "#6464a0"
-    self.gui_logo_colour = "#6464a0"
-    self.gui_skin_logo_name = "basedir()\etc\gui\images\src\default.png"
-    self.gui_skin_extension="None"
-    self.gui_html_panelwidth = '400'
-    self.gui_snumtitle_colour='#6464a0'
-    self.gui_html_highlight_colour = '#ff7800'
-    self.gui_grad_top_left = '#05053c'
-    self.gui_grad_top_right = '#05053c'
-    self.gui_grad_bottom_left = '#ffffff'
-    self.gui_grad_bottom_right = '#ffffff' 
-    self.gui_htmlpanelwidth = '400' 
+    return
 
     
   def run_GuiSkinChanger(self):
     verbose = OV.GetParam('olex2.verbose')
     path = r"gui/images/src/default.png"
-    skin = self.gui_skin_name
-    skin_extension = self.gui_skin_extension
+    skin = self.params.skin.name
+    skin_extension = self.params.skin.extension
     if skin_extension == "None": skin_extension = None
     config = {}
     if "#" in skin:
@@ -295,11 +289,11 @@ class GuiSkinChanger(ImageTools):
         import PilTools
       except Exception, err:
         raise
-      self.gui_html_base_colour = config.get('GUI_HTML_BASE_COLOUR', '#0000ff')  
+      #self.params.html.base_colour.rgb = config.get('GUI_HTMLself.params.html.base_colour.rgb', '#0000ff')  
       self.setGuiAttributes(config)
       self.setVariables('gui')
       self.setOlexColours()
-    self.resize_skin_logo(self.gui_htmlpanelwidth)
+    self.resize_skin_logo(self.params.htmlpanelwidth)
     self.setVariables("gui")
     #sNumTitle_instance.run_sNumTitle()
     #timage_instance.run_timage()
@@ -327,18 +321,20 @@ class GuiSkinChanger(ImageTools):
        
       if type(colour) != str:
         colour = self.RGBToHTMLColor(colour)
-    self.gui_html_bg_colour = "#ffffff"
-    self.gui_html_font_colour = self.RGBToHTMLColor(self.adjust_colour(colour, hue = 180, luminosity = 0.8))
-    self.gui_html_link_colour = "#6f6f8b"
-    self.gui_html_table_bg_colour = self.RGBToHTMLColor(self.adjust_colour(colour, luminosity = 2))
-    self.gui_html_table_firstcol_colour = self.RGBToHTMLColor(self.adjust_colour(colour, luminosity = 1.8))
-    self.gui_html_input_bg_colour = self.RGBToHTMLColor(self.adjust_colour(colour, luminosity = 1.9))
-    self.gui_timage_colour = self.RGBToHTMLColor(self.adjust_colour(colour, luminosity = 0.9))
+    #self.params.html.bg_colour.rgb = "#ffffff"
+    #self.params.html.font_colour.rgb = self.RGBToHTMLColor(self.adjust_colour(colour, hue = 180, luminosity = 0.8))
+    #self.params.html.link_colour.rgb = "#6f6f8b"
+    #self.params.html.table_bg_colour.rgb = self.RGBToHTMLColor(self.adjust_colour(colour, luminosity = 2))
+    #self.params.html.table_firstcol_colour.rgb = self.RGBToHTMLColor(self.adjust_colour(colour, luminosity = 1.8))
+    #inputself.params.html.bg_colour.rgb = self.RGBToHTMLColor(self.adjust_colour(colour, luminosity = 1.9))
+    #self.params.html.base_colour.rgb = self.RGBToHTMLColor(self.adjust_colour(colour, luminosity = 0.9))
 
 
 class MatrixMaker(ImageTools):
   def __init__(self):
     super(MatrixMaker, self).__init__()
+    self.params = OV.Params().gui
+
     #import PngImagePlugin
     #import Image
     #import ImageDraw, ImageChops
@@ -438,6 +434,8 @@ def fade_image(image, frames=5, overlay_colour=(255, 255, 255), filename="out.gi
 
 class BarMaker(object):
   def __init__(self, dx, dy, colour):
+    self.params = OV.Params().gui
+
     self.dx = int(dx)
     self.dy = int(dy)
     self.colour = colour
@@ -490,6 +488,8 @@ class BarMaker(object):
 class BarGenerator(ImageTools):
   def __init__(self, type='vbar', colour='grey', size=100, basedir=""):
     super(BarGenerator, self).__init__()
+    self.params = OV.Params().gui
+
     self.thickness = 5
     self.type = type
     self.colour = colour
@@ -557,7 +557,7 @@ class BarGenerator(ImageTools):
       colour_a = self.adjust_colour(OV.FindValue('gui_orange'), luminosity=1.2)
     elif R < 0.11: #'green':
       colour = [(22, 240, 69), (3, 240, 53), (0, 225, 47), (0, 200, 43), (0, 180, 38)]
-      colour_a = self.adjust_colour(OV.FindValue('gui_green'), luminosity=1.2)
+      colour_a = self.adjust_colour(self.params.green.rgb, luminosity=1.2)
     
       
     size = R * factor
@@ -607,9 +607,11 @@ class BarGenerator(ImageTools):
 class MakeAllRBars(BarGenerator):
   def __init__(self, tool_fun=None, tool_arg=None):
     super(MakeAllRBars, self).__init__()
+    self.params = OV.Params().gui
+
     self.thickness = 5
     self.factor = 300
-    #self.gui_html_bg_colour = OV.FindValue('gui_html_bg_colour')
+    #self.params.html.bg_colour.rgb = OV.FindValue('gui_htmlself.params.html.bg_colour.rgb')
 
   def run_MakeAllRBars(self):
     name = "vscale.png"
@@ -651,7 +653,7 @@ class MakeAllRBars(BarGenerator):
     text_width = 14
     height = (top * scale) + 10
     size = (int(width), int(height))
-    image = Image.new('RGBA', size, self.gui_html_table_bg_colour)
+    image = Image.new('RGBA', size, self.params.html.table_bg_colour.rgb)
     draw = ImageDraw.Draw(image)
     draw.line(((width-2, 0) ,(width-2, height)), fill='#666666')
 
@@ -680,7 +682,7 @@ class MakeAllRBars(BarGenerator):
 
 #   draw.line(((width-5, int(height/(i+1)*2) ,(width-1, int(height/4)*2)), fill='#000000')
 #   draw.line(((width-5, int(height/(i+1)*3) ,(width-1, int(height/4)*3)), fill='#000000')
-    image = self.makeBackgroundTransparent(image,col=self.gui_html_table_bg_colour)
+    image = self.makeBackgroundTransparent(image,col=self.params.html.table_bg_colour.rgb)
 
     return image
 
@@ -691,25 +693,15 @@ OV.registerMacro(MakeAllRBars_instance.run_MakeAllRBars, '')
 class sNumTitle(ImageTools):
   def __init__(self, width=None, tool_arg=None):
     super(sNumTitle, self).__init__()
+    self.params = OV.Params().gui
     self.have_connection = False
-    width = self.gui_htmlpanelwidth
+    width = self.params.htmlpanelwidth
     if not width:
       width = 290
     try:
       width = float(width)
     except:
       width = float(tool_arg)
-    if tool_arg:
-      args = tool_arg.split(";")
-      if args[0] == "None":
-        self.gui_html_base_colour = OV.FindValue('gui_html_base_colour')
-      elif args[0][:1] == "#":
-        self.gui_html_base_colour = self.HTMLColorToRGB(args[0])
-      else:
-        self.gui_html_base_colour = args[0]
-    else:
-        self.gui_html_base_colour = OV.FindValue('gui_html_base_colour')
-      
 
     if self.have_connection:
       try:
@@ -720,15 +712,11 @@ class sNumTitle(ImageTools):
         pass
 
     self.sNum = self.filename
-    try:
-      width = float(width)
-    except:
-      width = float(tool_arg)
     self.width = int((width) - 22)
 
   def run_sNumTitle(self, force=False):
-    self.gui_html_base_colour = OV.FindValue('gui_html_base_colour')
-    self.width = int(OV.FindValue('gui_htmlpanelwidth')) - 22
+    #self.params.html.base_colour.rgb = OV.FindValue('gui_htmlself.params.html.base_colour.rgb')
+    self.width = OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
     self.basedir = OV.BaseDir()
     self.filefull = OV.FileFull()
     self.filepath = OV.FilePath()
@@ -737,11 +725,12 @@ class sNumTitle(ImageTools):
     self.sNum = self.filename
     self.space_group = OV.olex_function('sg(%h)')
     id_string = self.space_group+self.filefull
-    curr_id = OV.FindValue("olex2_sNum_id_string","")
+    curr_id = OV.GetParam("olex2.sNum_id_string")
+    
     if id_string == curr_id:
       if not force:
         return
-    OV.SetVar("olex2_sNum_id_string",id_string)
+    OV.SetParam("olex2.sNum_id_string",id_string)
     
     items = {}
     if self.filename != 'none':
@@ -768,6 +757,8 @@ class sNumTitle(ImageTools):
      
     name = r"sNumTitle.png"
     OlexVFS.save_image_to_olex(image, name, 1)
+    OV.CopyVFSFile(name, 'SNUMTITLE',2)
+
 
 
   def own_sql(self): #not currently used
@@ -793,10 +784,19 @@ WHERE (((submission.ID)="%s"));""" %sNum
 
 
   def sNumTitleStyle1(self, items, font_name="Arial Bold", font_size=17):
-    if self.gui_sNumTitle_font_name:
-      font_name = self.gui_sNumTitle_font_name
+
+    base_colour = self.params.snumtitle.base_colour.rgb
+    height = self.params.snumtitle.height
+    font_name = self.params.snumtitle.font_name
+    grad = self.params.snumtitle.grad
+    grad_step = self.params.snumtitle.grad_step
+    
+    bg_colour = self.adjust_colour(base_colour, luminosity = self.params.snumtitle.bg_colour_L)
+    grad_colour = self.adjust_colour(base_colour, luminosity = self.params.snumtitle.grad_colour_L)
+    font_colour = self.adjust_colour(base_colour, luminosity = self.params.snumtitle.font_colour_L)
+
+
     width = self.width
-    height = 24
     self.height = height
     gap = 0
     bgap = height - gap
@@ -804,15 +804,14 @@ WHERE (((submission.ID)="%s"));""" %sNum
     #cs = copy.deepcopy(cS1)
 
     if olx.IsFileType("cif") == 'true':
-      base = (255, 0, 0)
+      base_colour = (255, 0, 0)
 
-    base = self.gui_timage_colour
-    image = Image.new('RGBA', size, base)
+    image = Image.new('RGBA', size, base_colour)
 
     draw = ImageDraw.Draw(image)
     
-    grad_colour = self.adjust_colour("base", luminosity = 1.1)
-    self.gradient_bgr(draw, width, height, colour = grad_colour, fraction=1, step=0.7)
+    if grad:
+      self.gradient_bgr(draw, width, height, colour = grad_colour, fraction=1, step=grad_step)
     cache = {}
     pos = (('Rounded'),('Rounded'),('Square'),('Square'))
     #pos = (('Rounded'),('Rounded'),('Rounded'),('Rounded'))
@@ -824,8 +823,8 @@ WHERE (((submission.ID)="%s"));""" %sNum
             #draw=draw,
             #width=width,
             #height=height,
-            #bg_colour=base,
-            #border_colour=base,
+            #bg_colour=base_colour,
+            #border_colour=base_colour,
             #cBottomLeft=False,
             #cBottomRight=False,
             #border_hls = (0, 1.2, 1)
@@ -833,16 +832,19 @@ WHERE (((submission.ID)="%s"));""" %sNum
 
     sNum = items["sNum"]
     if sNum == "none": sNum = "No Structure"
-    self.write_text_to_draw(draw, 
+    wX, wY = self.write_text_to_draw(draw, 
                        sNum, 
                        top_left=(6, 1), 
                        font_name=font_name, 
                        font_size=17, 
                        image_size = image.size,
                        valign=("middle", 0.8),
-                       font_colour=self.adjust_colour("base", luminosity = 2.0))
-    
-    self.drawFileFullInfo(draw, luminosity=1.8, right_margin=3, bottom_margin=0)
+                       font_colour=self.adjust_colour(base_colour, luminosity = 2.0)
+                      )
+    info_size = OV.GetParam('gui.snumtitle.filefullinfo_size')
+
+    colour = OV.GetParam('gui.snumtitle.filefullinfo_colour').rgb
+    self.drawFileFullInfo(draw, colour, right_margin=5, height=height, font_size=info_size, left_start=wX + 15)
     self.drawSpaceGroupInfo(draw, luminosity=1.8, right_margin=3)
 
 
@@ -850,37 +852,46 @@ WHERE (((submission.ID)="%s"));""" %sNum
     #if self.have_connection:
       #self.drawDBInfo()
       
-    dup = ImageChops.duplicate(image)
-    dup = ImageChops.invert(dup)
-    dup = ImageChops.offset(dup, 1, 1)
-    image = ImageChops.blend(image, dup, 0.05)
+    #dup = ImageChops.duplicate(image)
+    #dup = ImageChops.invert(dup)
+    #dup = ImageChops.offset(dup, 1, 1)
+    #image = ImageChops.blend(image, dup, 0.05)
       
     return image
 
-  def drawFileFullInfo(self, draw, luminosity=1.8, right_margin=0, bottom_margin=0, font_name="Verdana", font_size=8):
-    left_start = 120
-    txt = self.filefull
-    if len(txt) > 26:
-      txtbeg = txt[:5]
-      txtend = txt [-25:]
-      txt = "%s...%s" %(txtbeg, txtend)
-      
+  def drawFileFullInfo(self, draw, colour='#ff0000', right_margin=0, height=10, font_name="Verdana", font_size=8, left_start = 40):
+    base_colour = self.params.html.base_colour.rgb
+    txt = OV.FileFull()
+    if txt == "none":
+      return
     font = self.registerFontInstance(font_name, font_size)
     tw = (draw.textsize(txt, font)[0])
-    left_start =  (self.width-tw) - right_margin
-    bottom = self.height - bottom_margin - 9
+    n = int(len(txt)/2)
+    txtbeg = txt[:n]
+    txtend = txt [-n:]
+    while tw > self.width - left_start:
+      txtbeg = txt[:n]
+      txtend = txt [-n:]
+      tw = (draw.textsize("%s...%s" %(txtbeg, txtend), font)[0])
+      n -= 1
+    txt = "%s...%s" %(txtbeg, txtend)
+      
+    wX, wY  = draw.textsize(txt, font)
+    left_start =  (self.width-wX) - right_margin
+    top = height - wY - 2
     self.write_text_to_draw(draw, 
                        txt, 
-                       top_left=(left_start, 12), 
+                       top_left=(left_start, top), 
                        font_name=font_name, 
                        font_size=font_size, 
-                       font_colour=self.adjust_colour("base", luminosity=luminosity))
+                       font_colour=colour)
 
 
   def drawSpaceGroupInfo(self, draw, luminosity=1.9, right_margin=12, font_name="Times Bold"):
+    base_colour = self.params.html.base_colour.rgb
     left_start = 120
-    font_colour = self.adjust_colour("base", luminosity=luminosity)
-
+    font_colour = self.adjust_colour(base_colour, luminosity=luminosity)
+    scale = OV.GetParam('gui.sginfo.scale')
     try:
       txt_l = []
       txt_sub = []
@@ -902,11 +913,11 @@ WHERE (((submission.ID)="%s"));""" %sNum
         #font_number = self.registerFontInstance("Times Bold", 14)
         #font_letter = self.registerFontInstance("Times Bold Italic", 15.5)
         #font_sub = self.registerFontInstance("Times Bold", 10)
-        font_bar = self.registerFontInstance("%s Bold" %font_base, 11)
-        font_slash = self.registerFontInstance("%s Bold" %font_base, 18)
-        font_number = self.registerFontInstance("%s Bold" %font_base, 14)
-        font_letter = self.registerFontInstance("%s Bold Italic" %font_base, 15)
-        font_sub = self.registerFontInstance("%s Bold" %font_base, 10)
+        font_bar = self.registerFontInstance("%s Bold" %font_base, int(11 * scale))
+        font_slash = self.registerFontInstance("%s Bold" %font_base, int(18 * scale))
+        font_number = self.registerFontInstance("%s Bold" %font_base, int(14 * scale))
+        font_letter = self.registerFontInstance("%s Bold Italic" %font_base, int(15 * scale))
+        font_sub = self.registerFontInstance("%s Bold" %font_base, int(10 * scale))
         norm_kern = 2
         sub_kern = 0
       except:
@@ -990,13 +1001,18 @@ class timage(ImageTools):
 
   def __init__(self, width=None, tool_arg=None):
     super(timage, self).__init__()
+    self.params = OV.Params().gui
+
     self.getVariables('gui')
     self.advertise_new = False
     self.new_l = ['images']
     
+    self.available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
+    self.size_factor = OV.GetParam('gui.skin.size_factor')
+    
     #from PilTools import ButtonMaker
     self.abort = False
-    width = self.gui_htmlpanelwidth
+    width = self.params.htmlpanelwidth
     if not width:
       width = 350
     else:
@@ -1009,12 +1025,12 @@ class timage(ImageTools):
     if self.timer:
       import time
       self.time = time
-    if tool_arg:
-      args = tool_arg.split(";")
-      if args[0] == "None":
-        self.gui_html_base_colour = OV.FindValue('gui_html_base_colour')
-      else:
-        self.gui_html_base_colour = self.HTMLColorToRGB(args[0])
+    #if tool_arg:
+      #args = tool_arg.split(";")
+      #if args[0] == "None":
+        #self.params.html.base_colour.rgb = OV.FindValue('gui_htmlself.params.html.base_colour.rgb')
+      #else:
+        #self.params.html.base_colour.rgb = self.HTMLColorToRGB(args[0])
     self.width = int((width) - 22)
     if self.width <= 0: self.width = 10
     icon_source = "%s/etc/gui/images/src/icons.png" %self.basedir
@@ -1023,17 +1039,23 @@ class timage(ImageTools):
     self.imageSource = Image.open(image_source)
     self.olex2_has_recently_updated = OV.GetParam('olex2.has_recently_updated')
     sf = 4 #images are four times larger than the nominal width of 350
-    sfs = sf * 350/int(self.gui_htmlpanelwidth)
+    sfs = sf * 350/int(self.params.htmlpanelwidth)
     self.sf = sf
     self.sfs = sfs
     
   def resize_news_image(self):
     IT.resize_to_panelwidth({'i':'news/news.png'})
     
-  def run_timage(self):
+  def run_timage(self,force_images=False):
+
+    self.highlight_colour = OV.GetParam('gui.html.highlight_colour').rgb
+    self.width = OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+
+    
+    
     do_these = []
     if not self.olex2_has_recently_updated:
-      if not OV.GetParam('olex2.force_images'):
+      if not OV.GetParam('olex2.force_images') and not force_images:
         do_these = [
                 "make_cbtn_items",
                 "info_bitmaps",
@@ -1056,8 +1078,8 @@ class timage(ImageTools):
                   ]
       
     self.getVariables('gui')
-    self.gui_html_base_colour = OV.FindValue('gui_html_base_colour')
-    self.width = int(OV.FindValue('gui_htmlpanelwidth')) - 22
+    #self.params.html.base_colour.rgb = OV.FindValue('gui_htmlself.params.html.base_colour.rgb')
+    self.width = int(OV.GetParam('gui.htmlpanelwidth')) - int(OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
     self.basedir = OV.BaseDir()
     self.filefull = OV.FileFull()
     self.filepath = OV.FilePath()
@@ -1065,7 +1087,7 @@ class timage(ImageTools):
     self.datadir = OV.DataDir()
     self.sNum = self.filename
     
-    MakeAllRBars_instance.run_MakeAllRBars()
+    #MakeAllRBars_instance.run_MakeAllRBars()
     
     
     for item in do_these:
@@ -1106,7 +1128,7 @@ class timage(ImageTools):
     im = image_source
     cut = 0, 52*sf, 27*sf, 76*sf
     crop =  im.crop(cut)
-    self.warning =  Image.new('RGBA', crop.size, self.gui_html_bg_colour)
+    self.warning =  Image.new('RGBA', crop.size, self.params.html.bg_colour.rgb)
     self.warning.paste(crop, (0,0), crop)
     name = "warning.png"
     self.warning = self.resize_image(self.warning, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
@@ -1114,7 +1136,7 @@ class timage(ImageTools):
     
     cut = 140*sf, 58*sf, 170*sf, 81*sf
     crop =  im.crop(cut)
-    IM =  Image.new('RGBA', crop.size, self.gui_html_table_firstcol_colour)
+    IM =  Image.new('RGBA', crop.size, self.params.html.table_firstcol_colour.rgb)
     IM.paste(crop, (0,0), crop)
     #draw = ImageDraw.Draw(IM)
     #draw.rectangle((0, 0, IM.size[0]-1, IM.size[1]-1), outline='#bcbcbc')
@@ -1124,8 +1146,8 @@ class timage(ImageTools):
 
     cut = 201*sf, 58*sf, 227*sf, 81*sf
     crop =  im.crop(cut)
-    IM =  Image.new('RGBA', crop.size, self.gui_html_bg_colour)
-    IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
+    IM =  Image.new('RGBA', crop.size, self.params.html.bg_colour.rgb)
+    IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
     IM.paste(crop, (0,0), crop)
     #draw = ImageDraw.Draw(IM)
     #draw.rectangle((0, 0, IM.size[0]-1, IM.size[1]-1), outline='#bcbcbc')
@@ -1135,8 +1157,8 @@ class timage(ImageTools):
     
     cut = 227*sf, 58*sf, 300*sf, 81*sf
     crop =  im.crop(cut)
-    IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
-    IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
+    IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
+    IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
     IM.paste(crop, (0,0), crop)
     #draw = ImageDraw.Draw(IM)
     #draw.rectangle((0, 0, IM.size[0]-1, IM.size[1]-1), outline='#bcbcbc')
@@ -1146,11 +1168,11 @@ class timage(ImageTools):
     
     cut = 0*sf, 0*sf, 275*sf, 55*sf
     crop =  im.crop(cut)
-    IM =  Image.new('RGBA', crop.size, self.gui_html_bg_colour)
+    IM =  Image.new('RGBA', crop.size, self.params.html.bg_colour.rgb)
     IM.paste(crop, (0,0), crop)
     cut = 0*sf, 95*sf, 100*sf, 150*sf
     crop =  im.crop(cut)
-    crop_colouriszed = self.colourize(crop, (0,0,0), self.gui_html_highlight_colour) 
+    crop_colouriszed = self.colourize(crop, (0,0,0), self.params.html.highlight_colour.rgb) 
     IM.paste(crop_colouriszed, (190,10), crop)
     IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
     name = "olex_help_logo.png"
@@ -1167,17 +1189,17 @@ class timage(ImageTools):
     states = ["on", "off", ""]
     for state in states:
       if state == "on":
-        colour = self.adjust_colour(self.gui_html_highlight_colour,luminosity=1.3)
+        colour = self.adjust_colour(self.params.html.highlight_colour.rgb,luminosity=1.3)
       elif state == "off":
-        colour = self.adjust_colour(self.gui_html_base_colour,luminosity=1.9)
+        colour = self.adjust_colour(self.params.html.base_colour.rgb,luminosity=1.9)
       elif state == "":
-        colour = self.adjust_colour(self.gui_html_base_colour,luminosity=1.9)
+        colour = self.adjust_colour(self.params.html.base_colour.rgb,luminosity=1.9)
       for txt in txt_l:
-        #IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
+        #IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
         #crop_colouriszed = self.colourize(crop, (0,0,0), colour) 
         crop_colouriszed = crop
         IM =  Image.new('RGBA', crop.size)
-        circle = self.makeCharcterCircles(str('1'), im, self.gui_html_table_firstcol_colour, resize = False)
+        circle = self.makeCharcterCircles(str('1'), im, self.params.html.table_firstcol_colour.rgb, resize = False)
         IM.paste(crop_colouriszed, (0,0), crop)
         IM.paste(circle,(0,0), circle)
         draw = ImageDraw.Draw(IM)
@@ -1208,62 +1230,65 @@ class timage(ImageTools):
     name = "test.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
     
+    
+    available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
     ## TINY buttons
     cut = 138*sf, 178*sf, 158*sf, 195*sf
     max_width = cut[2] - cut[0]
     crop =  im.crop(cut)
     button_names = self.image_items_d.get("TINY BUTTONS")
     scale = self.sf / 1.2
-    self.produce_buttons(button_names, crop, cut, max_width, scale,"_tiny")
+    self.produce_buttons(button_names, crop, cut, max_width, scale,"_tiny",width=15)
     
     ## SMALL buttons
     cut = 90*sf, 178*sf, 138*sf, 193*sf
     max_width = cut[2] - cut[0]
     crop =  im.crop(cut)
     button_names = self.image_items_d.get("SMALL BUTTONS")
-    self.produce_buttons(button_names, crop, cut, max_width,self.sf,"_small")
+    width = int(round(50 * self.size_factor,0))
+    self.produce_buttons(button_names, crop, cut, max_width,self.sf,"_small",width=40)
     
     ## THREEE buttons in the HTMLpanelWIDTH
     cut = 0*sf, 178*sf, 91*sf, 195*sf
     max_width = cut[2] - cut[0]
     crop =  im.crop(cut)
     button_names = self.image_items_d.get("THREE BUTTONS PER ROW", button_names)
-    self.produce_buttons(button_names, crop, cut, max_width,self.sfs,"")
+    width = int(available_width/3) - 15
+    self.produce_buttons(button_names, crop, cut, max_width,self.sfs,"",width=width)
 
     ## FULL ROW buttons in the HTMLpanelWIDTH
     cut = 0*sf, 193*sf, 275*sf, 211*sf
     max_width = cut[2] - cut[0]
     crop =  im.crop(cut)
     button_names = self.image_items_d.get("FULL ROW", button_names)
-    self.produce_buttons(button_names, crop, cut, max_width,self.sfs,"_full")
+    width = available_width
+    self.produce_buttons(button_names, crop, cut, max_width,self.sfs,"_full",width=width)
   
     
-    cut = 0*sf, 152*sf, 15*sf, 167*sf
+    cut = 0*sf, 152*sf, 15*sf, 169*sf
     crop =  im.crop(cut)
-    crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_table_firstcol_colour,luminosity=1.98)) 
-    #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_green,luminosity=1.3,saturation=0.7))
-    #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_base_colour,luminosity=1.7)) 
-    #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_base_colour,luminosity=1.5)) 
-    IM =  Image.new('RGBA', crop.size, self.gui_html_table_firstcol_colour)
+    #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=1.98)) 
+    crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.green.rgb,luminosity=1.3,saturation=0.7))
+    IM =  Image.new('RGBA', crop.size, self.params.html.table_firstcol_colour.rgb)
     IM.paste(crop_colouriszed, (0,0), crop)
     name = "info.png"
     IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
     draw = ImageDraw.Draw(IM)
-    txt = IT.get_unicode_characters('info')
+    #txt = IT.get_unicode_characters('info')
     #txt = "i"
-    self.write_text_to_draw(draw, 
-                 txt, 
-                 top_left=(5, 0), 
-                 font_name = 'Vera', 
-                 font_size=14,
-                 translate=False,
-                 font_colour=self.adjust_colour(self.gui_html_table_firstcol_colour,luminosity=0.7))
+    #self.write_text_to_draw(draw, 
+    #             txt, 
+    #             top_left=(6, 0), 
+    #             font_name = 'Vera', 
+    #             font_size=14,
+    #             translate=False,
+    #             font_colour=self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=0.7))
     OlexVFS.save_image_to_olex(IM, name, 2)
     
     cut = 16*sf, 156*sf, 26*sf, 166*sf
     crop =  im.crop(cut)
-    crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_table_firstcol_colour,luminosity=1.7)) 
-    IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
+    crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=1.7)) 
+    IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
     IM.paste(crop_colouriszed, (0,0), crop)
     IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
     name = "info_tiny.png"
@@ -1274,14 +1299,14 @@ class timage(ImageTools):
                  top_left=(1, 1), 
                  font_name = 'Vera', 
                  font_size=6, 
-                 font_colour=self.gui_html_font_colour)
+                 font_colour=self.params.html.font_colour.rgb)
     OlexVFS.save_image_to_olex(IM, name, 2)
 
     
     cut = 16*sf, 156*sf, 26*sf, 166*sf
     crop =  im.crop(cut)
-    crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.gui_html_table_firstcol_colour,luminosity=0.7)) 
-    IM =  Image.new('RGBA', crop.size, self.gui_html_table_firstcol_colour)
+    crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=0.7)) 
+    IM =  Image.new('RGBA', crop.size, self.params.html.table_firstcol_colour.rgb)
     IM.paste(crop_colouriszed, (0,0), crop)
     draw = ImageDraw.Draw(IM)
     IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
@@ -1296,8 +1321,8 @@ class timage(ImageTools):
     
     cut = 16*sf, 156*sf, 26*sf, 166*sf
     crop =  im.crop(cut)
-    crop_colouriszed = self.colourize(crop, (0,0,0), self.gui_html_highlight_colour) 
-    IM =  Image.new('RGBA', crop.size, self.gui_html_table_firstcol_colour)
+    crop_colouriszed = self.colourize(crop, (0,0,0), self.params.html.highlight_colour.rgb) 
+    IM =  Image.new('RGBA', crop.size, self.params.html.table_firstcol_colour.rgb)
     IM.paste(crop_colouriszed, (0,0), crop)
     IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
     draw = ImageDraw.Draw(IM)
@@ -1313,18 +1338,18 @@ class timage(ImageTools):
     ## Create big circles with Writing In
     #cut = 30*sf, 150*sf, 55*sf, 175*sf
     #crop =  im.crop(cut)
-    #crop_colouriszed = self.colourize(crop, (0,0,0), self.gui_html_table_firstcol_colour) 
+    #crop_colouriszed = self.colourize(crop, (0,0,0), self.params.html.table_firstcol_colour.rgb) 
     for i in xrange(12):
-      self.makeCharcterCircles(str(i), im, self.gui_html_table_firstcol_colour)
+      self.makeCharcterCircles(str(i), im, self.params.html.table_firstcol_colour.rgb)
 
-    colo =  self.adjust_colour(self.gui_green,saturation=0.7,luminosity=2.1)
+    colo =  self.adjust_colour(self.params.green.rgb,saturation=0.7,luminosity=2.1)
     l = ["a", "b", "c", "d", "e", "f"]
     for letter in l:
       self.makeCharcterCircles(letter, im, colo)
       
     cut = 55*sf, 150*sf, 80*sf, 175*sf
     crop =  im.crop(cut)
-    IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
+    IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
     IM.paste(crop, (0,0), crop)
     IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
     name = "settings_small.png"
@@ -1332,7 +1357,7 @@ class timage(ImageTools):
 
     cut = 80*sf, 154*sf, 100*sf, 171*sf
     crop =  im.crop(cut)
-    IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
+    IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
     IM.paste(crop, (0,0), crop)
     IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
     name = "delete.png"
@@ -1340,7 +1365,7 @@ class timage(ImageTools):
 
     cut = 101*sf, 154*sf, 117*sf, 165*sf
     crop =  im.crop(cut)
-    IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
+    IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
     IM.paste(crop, (0,0), crop)
     IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
     name = "delete_small.png"
@@ -1348,7 +1373,7 @@ class timage(ImageTools):
 
     cut = 136*sf, 154*sf, 185*sf, 170*sf
     crop =  im.crop(cut)
-    crop_colouriszed = self.colourize(crop, (0,0,0), self.gui_html_base_colour) 
+    crop_colouriszed = self.colourize(crop, (0,0,0), self.params.html.base_colour.rgb) 
     IM =  Image.new('RGBA', crop.size)
     IM.paste(crop_colouriszed, (0,0), crop)
     IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
@@ -1357,7 +1382,7 @@ class timage(ImageTools):
     
     cut = 185*sf, 154*sf, 205*sf, 170*sf
     crop =  im.crop(cut)
-    crop_colouriszed = self.colourize(crop, (0,0,0), self.gui_html_highlight_colour) 
+    crop_colouriszed = self.colourize(crop, (0,0,0), self.params.html.highlight_colour.rgb) 
     IM =  Image.new('RGBA', crop.size)
     IM.paste(crop_colouriszed, (0,0), crop)
     IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
@@ -1366,7 +1391,7 @@ class timage(ImageTools):
 
     cut = 205*sf, 154*sf, 220*sf, 170*sf
     crop =  im.crop(cut)
-    crop_colouriszed = self.colourize(crop, (0,0,0), self.gui_html_highlight_colour) 
+    crop_colouriszed = self.colourize(crop, (0,0,0), self.params.html.highlight_colour.rgb) 
     IM =  Image.new('RGBA', crop.size)
     IM.paste(crop_colouriszed, (0,0), crop)
     IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
@@ -1384,8 +1409,8 @@ class timage(ImageTools):
     cut = 140*sf, 98*sf, 400*sf, 140*sf
     max_width = cut[2] - cut[0]
     crop =  im.crop(cut)
-    crop_colouriszed = self.colourize(crop, (0,0,0), self.gui_html_highlight_colour) 
-    IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
+    crop_colouriszed = self.colourize(crop, (0,0,0), self.params.html.highlight_colour.rgb) 
+    IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
     IM.paste(crop_colouriszed, (0,0), crop)
     draw = ImageDraw.Draw(IM)
     self.write_text_to_draw(draw, 
@@ -1393,7 +1418,7 @@ class timage(ImageTools):
                  top_left=(5, 1), 
                  font_name = 'Vera Bold', 
                  font_size=90, 
-                 font_colour=self.gui_html_font_colour,
+                 font_colour=self.params.html.font_colour.rgb,
                  align='centre',
                  max_width=max_width
                  )
@@ -1405,8 +1430,8 @@ class timage(ImageTools):
     cut = 140*sf, 98*sf, 400*sf, 140*sf
     max_width = cut[2] - cut[0]
     crop =  im.crop(cut)
-    crop_colouriszed = self.colourize(crop, (0,0,0), self.gui_html_highlight_colour) 
-    IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
+    crop_colouriszed = self.colourize(crop, (0,0,0), self.params.html.highlight_colour.rgb) 
+    IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
     IM.paste(crop_colouriszed, (0,0), crop)
     draw = ImageDraw.Draw(IM)
     self.write_text_to_draw(draw, 
@@ -1414,7 +1439,7 @@ class timage(ImageTools):
                  top_left=(5, 1), 
                  font_name = 'Vera Bold', 
                  font_size=90, 
-                 font_colour=self.gui_html_font_colour,
+                 font_colour=self.params.html.font_colour.rgb,
                  align='centre',
                  max_width=max_width
                  )
@@ -1426,45 +1451,56 @@ class timage(ImageTools):
     
     cut = 90*sf, 95*sf, 140*sf, 140*sf
     crop =  im.crop(cut)
-#    IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
+#    IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
     IM =  Image.new('RGBA', crop.size)
     IM.paste(crop, (0,0), crop)
     IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
     name = "warning_big.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
     
-  def produce_buttons(self, button_names, crop, cut, max_width,scale,btn_type):
+  def produce_buttons(self, button_names, crop, cut, max_width,scale,btn_type,width=None):
     states = ["on", "off", ""]
     for state in states:
       if state == "on":
-        colour = self.adjust_colour(self.gui_html_highlight_colour,luminosity=1.3)
+        colour = self.adjust_colour(self.params.html.highlight_colour.rgb,luminosity=1.3)
       elif state == "off":
-        #colour = self.adjust_colour(self.gui_html_base_colour,luminosity=1.9)
-        colour = self.gui_button_colouring
+        #colour = self.adjust_colour(self.params.html.base_colour.rgb,luminosity=1.9)
+        colour = self.params.button_colouring.rgb
       elif state == "":
-        #colour = self.adjust_colour(self.gui_html_base_colour,luminosity=1.9)
-        colour = self.gui_button_colouring
+        #colour = self.adjust_colour(self.params.html.base_colour.rgb,luminosity=1.9)
+        colour = self.params.button_colouring.rgb
       for txt in button_names:
-        #IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
-        crop_colouriszed = self.colourize(crop, (0,0,0), colour) 
-        IM =  Image.new('RGBA', crop.size)
-        IM.paste(crop_colouriszed, (0,0), crop)
-        draw = ImageDraw.Draw(IM)
-        t = txt.replace("blank"," _ ") 
-        self.write_text_to_draw(draw, 
-                     "%s" %t,
-                     top_left=(4, 7), 
-                     font_name = 'Vera', 
-                     font_size=40, 
-                     titleCase=False,                  
-                     font_colour=self.gui_button_writing,
-                     max_width = max_width,
-                     align='centre'
-                     )
-        IM = self.resize_image(IM, (int((cut[2]-cut[0])/scale), int((cut[3]-cut[1])/scale)))
-        name = "button%s-%s%s.png" %(btn_type, txt.replace(" ", "_"), state)
-        name = name.lower()
-        OlexVFS.save_image_to_olex(IM, name, 2)
+        if width is None: width = max_width
+        use_new = True
+        if use_new:
+          IM = self.make_timage(item_type='button', item=txt, state=state, width=width)
+          name = "button%s-%s%s.png" %(btn_type, txt.replace(" ", "_"), state)
+          name = name.lower()
+          OlexVFS.save_image_to_olex(IM, name, 2)
+        else:
+          
+          
+          #IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
+          crop = self.make_timage(item_type='button', item="", state=state, width=width)
+          crop_colouriszed = self.colourize(crop, (0,0,0), colour) 
+          IM =  Image.new('RGBA', crop.size)
+          IM.paste(crop_colouriszed, (0,0), crop)
+          draw = ImageDraw.Draw(IM)
+          t = txt.replace("blank"," _ ") 
+          self.write_text_to_draw(draw, 
+                       "%s" %t,
+                       top_left=(4, 7), 
+                       font_name = 'Vera', 
+                       font_size=40, 
+                       titleCase=False,                  
+                       font_colour=self.params.button_writing,
+                       max_width = max_width,
+                       align='centre'
+                       )
+          IM = self.resize_image(IM, (int((cut[2]-cut[0])/scale), int((cut[3]-cut[1])/scale)))
+          name = "button%s-%s%s.png" %(btn_type, txt.replace(" ", "_"), state)
+          name = name.lower()
+          OlexVFS.save_image_to_olex(IM, name, 2)
         
   def makeTestBanner(self):
     if not OV.FindValue('user_refinement_gui2'):
@@ -1479,7 +1515,7 @@ class timage(ImageTools):
           return
     
     bannerbg = "#fdff72"
-    bannerbg = self.gui_html_base_colour
+    bannerbg = self.params.html.base_colour.rgb
     col_0 = self.adjust_colour(bannerbg,luminosity=0.85)
     col_1 = self.adjust_colour(bannerbg,luminosity=1.7)
     cmd_col = "#fff600"
@@ -1560,14 +1596,14 @@ class timage(ImageTools):
       txt_items[item].setdefault('txt_dimensions',txt_dimensions)          
     
 
-#    bannerbg = self.gui_html_font_colour
+#    bannerbg = self.params.html.font_colour.rgb
     offset = 180
     height = 44
     width = 1700
     size = (width,height)
     
     
-    IM =  Image.new('RGBA', size, self.gui_html_table_bg_colour)
+    IM =  Image.new('RGBA', size, self.params.html.table_bg_colour.rgb)
     IM =  Image.new('RGBA', size, bannerbg)
     #IM =  Image.new('RGBA', size, "#aaaa00")
     draw = ImageDraw.Draw(IM)
@@ -1596,7 +1632,7 @@ class timage(ImageTools):
         lower_case = lower_l[row]
         wX = txt_items[item].get('txt_dimensions')[0]
         wY = txt_items[item].get('txt_dimensions')[1]
-        olex_pos = x_pos + wX/2 - (int(self.gui_htmlpanelwidth) - 24)/2
+        olex_pos = x_pos + wX/2 - (int(self.params.htmlpanelwidth) - 24)/2
         olex_pos = "%.0f" %(olex_pos/10.0)
         if row != 0:
           olx.banner_slide.setdefault(int(olex_pos),txt_items[item])
@@ -1609,7 +1645,7 @@ class timage(ImageTools):
                      titleCase=titleCase,
                      lowerCase=lower_case,
                      font_colour=font_colour)
-    width = int(self.gui_htmlpanelwidth) - 24
+    width = int(self.params.htmlpanelwidth) - 24
 
     size = (width, height)
     self.banner_make_decoration_image(size)    
@@ -1676,8 +1712,8 @@ class timage(ImageTools):
     width="$eval(htmlpanelwidth()-24)" 
     height="20" 
     value="GetVar(snum_refinement_banner_slide)" 
-    bgcolor="$GetVar(gui_html_table_bg_colour)"  
-    fgcolor="$GetVar(gui_html_font_colour)" 
+    bgcolor="$GetVar(gui_htmlself.params.html.tableself.params.html.bg_colour.rgb.rgb)"  
+    fgcolor="$GetVar(gui_htmlself.params.html.font_colour.rgb)" 
     min="0" 
     max="119" 
     onchange = "SetImage(BANNER_IMAGE,strcat(banner_,GetValue(BANNER_SLIDE).png))"	
@@ -1736,7 +1772,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     draw.polygon((begin, middle, end), marker_colour)
     
     draw.line(((width/2,0),(width/2,height)), fill=marker_colour)
-    division_col = IT.HTMLColorToRGB(self.gui_html_base_colour) + (255,)
+    division_col = IT.HTMLColorToRGB(self.params.html.base_colour.rgb) + (255,)
     left = width/2
     right = width/2
     for j in xrange(40):
@@ -1790,7 +1826,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     draw.line(((width/2,0),(width/2,height)), fill=marker_colour)
     
     #division_col = "#ababab"
-    division_col = self.gui_html_base_colour
+    division_col = self.params.html.base_colour.rgb
     left = width/2
     right = width/2
     for j in xrange(40):
@@ -1807,7 +1843,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
   def makeCharcterCircles(self, character, im, colour, resize = True):
     cut = 30*self.sf, 150*self.sf, 55*self.sf, 175*self.sf
     crop =  im.crop(cut)
-    IM =  Image.new('RGBA', crop.size, self.gui_html_table_bg_colour)
+    IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
     #IM =  Image.new('RGBA', crop.size)
     crop_colouriszed = self.colourize(crop, (0,0,0,0), colour) 
     IM.paste(crop_colouriszed, (0,0), crop)
@@ -1817,7 +1853,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                  top_left=(24, 6), 
                  font_name = 'Vera Bold', 
                  font_size=70, 
-                 font_colour=self.gui_html_font_colour)
+                 font_colour=self.params.html.font_colour.rgb)
     if resize:
       IM = self.resize_image(IM, (int((cut[2]-cut[0])/self.sf), int((cut[3]-cut[1])/self.sf)))
     name = "circle_%s.png" %character
@@ -1850,31 +1886,31 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     #create a new image
     width = self.width * factor
     size = (width, 55 * factor)
-    IM =  Image.new('RGBA', size, self.gui_html_bg_colour)
+    IM =  Image.new('RGBA', size, self.params.html.bg_colour.rgb)
     
     #this is the source of the images required for the logo
     image_source = "%s/etc/gui/images/src/images.png" %self.basedir
     im = Image.open(image_source)
 
     #first cut the small logo picture from the source 
-    cut_left = 200 * factor - (int(self.gui_htmlpanelwidth) - 200) * factor
+    cut_left = 200 * factor - (int(self.params.htmlpanelwidth) - 200) * factor
     if cut_left <= 0:
       cut_left = 0
     cut = cut_left, 0, 200 * factor, 55 * factor #the area of the small image
     crop = im.crop(cut)
-    #crop_colourised = self.colourize(crop, (0,0,0), self.gui_logo_colour) 
+    #crop_colourised = self.colourize(crop, (0,0,0), self.params.logo_colour.rgb) 
     IM.paste(crop, (0,0), crop)
 
     #then cut the actual logo 
     cut = 200 * factor, 0, 372 * factor, 55 * factor #the area of the olex writing
     crop =  im.crop(cut)
-    crop_colouriszed = self.colourize(crop, (0,0,0), self.gui_logo_colour) 
+    crop_colouriszed = self.colourize(crop, (0,0,0), self.params.logo_colour.rgb) 
     IM.paste(crop_colouriszed, (width-(175 * factor),0), crop)
 
     
     # Add Version and Tag info
     size = (203,95)
-    new = Image.new('RGB', size, self.gui_html_highlight_colour)
+    new = Image.new('RGB', size, self.params.html.highlight_colour.rgb)
     draw = ImageDraw.Draw(new)
     x = 0
     y = 0
@@ -1886,7 +1922,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                  top_left=(5, 5), 
                  font_name = 'Vera', 
                  font_size=38, 
-                 font_colour=self.adjust_colour(self.gui_html_font_colour, luminosity = 0.8))
+                 font_colour=self.adjust_colour(self.params.html.font_colour.rgb, luminosity = 0.8))
 #                 font_colour='#ffffff')
 
     # Add version Number
@@ -1930,7 +1966,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
   def make_generated_assorted_images(self):
     size = (6,15)
-    colour = self.gui_html_table_firstcol_colour
+    colour = self.params.html.table_firstcol_colour.rgb
     #colour = "#00ff00"
     image = Image.new('RGBA', size, colour)
     draw = ImageDraw.Draw(image)
@@ -1940,7 +1976,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                        top_left=(1, -1), 
                        font_name=font_name, 
                        font_size=14, 
-                       font_colour=self.gui_html_font_colour)
+                       font_colour=self.params.html.font_colour.rgb)
     name = "infos.png"
     OlexVFS.save_image_to_olex(image, name, 2)
     
@@ -1948,11 +1984,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     
     ## Make the wedges for the Q-Peak slider
     scale = 4
-    width = (int(self.gui_htmlpanelwidth) - 81)
+    width = (int(self.params.htmlpanelwidth) - 81)
     height = 8
     
     size = (width*scale, height*scale)
-    colour = self.gui_html_table_bg_colour
+    colour = self.params.html.table_bg_colour.rgb
     image = Image.new('RGBA', size, colour)
     draw = ImageDraw.Draw(image)
 
@@ -1964,12 +2000,12 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     begin = (left, bottom)
     middle = (right, top)
     end = (right, bottom)
-    draw.polygon((begin, middle, end), self.adjust_colour(self.gui_html_table_firstcol_colour, luminosity = 0.9))
+    draw.polygon((begin, middle, end), self.adjust_colour(self.params.html.table_firstcol_colour.rgb, luminosity = 0.9))
 
     begin = (left, top)
     middle = (right, top)
     end = (left, bottom)
-    draw.polygon((begin, middle, end), self.adjust_colour(self.gui_html_table_firstcol_colour, luminosity = 1.1))
+    draw.polygon((begin, middle, end), self.adjust_colour(self.params.html.table_firstcol_colour.rgb, luminosity = 1.1))
 
     left = (int(width/2)+ 10)*scale
     right = width*scale
@@ -1977,18 +2013,18 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     begin = (left,  top)
     middle = (right, top)
     end = (left, bottom)
-    draw.polygon((begin, middle, end), self.adjust_colour(self.gui_html_table_firstcol_colour, luminosity = 0.9))
+    draw.polygon((begin, middle, end), self.adjust_colour(self.params.html.table_firstcol_colour.rgb, luminosity = 0.9))
 
     begin = (left, bottom)
     middle = (right, top)
     end = (right, bottom)
-    draw.polygon((begin, middle, end), self.adjust_colour(self.gui_html_table_firstcol_colour, luminosity = 1.1))
+    draw.polygon((begin, middle, end), self.adjust_colour(self.params.html.table_firstcol_colour.rgb, luminosity = 1.1))
     
     begin = ((int(width/2)+ 2)*scale, (1*scale) + 1)
     m1 = ((int(width/2)+ 5)*scale, (1*scale) +1)
     m2 = ((int(width/2)+ 5)*scale, (height*scale) -1)
     end = ((int(width/2)+ 2)*scale, (height*scale) -1)
-    draw.polygon((begin, m1, m2, end), self.adjust_colour(self.gui_html_table_firstcol_colour, luminosity = 0.8))
+    draw.polygon((begin, m1, m2, end), self.adjust_colour(self.params.html.table_firstcol_colour.rgb, luminosity = 0.8))
 
     
     image = image.resize((width, height),Image.ANTIALIAS) 
@@ -2036,14 +2072,14 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
             img_txt = item.replace('h3-','')
           if img_txt in self.new_l:
             self.advertise_new = True
-          image = self.timage_style_h3(img_txt, state)
+          image = self.make_timage('h3', img_txt, state)
           self.advertise_new = False
           name = "gui/images/h3-%s-%s.png" %(item, state)
         else:
           img_txt = item
           if img_txt in self.new_l:
             self.advertise_new = True
-          image = self.timage_style_1(img_txt, state)
+          image = self.make_timage('h1', img_txt, state)
           self.advertise_new = False
           name = "gui/images/h2-%s-%s.png" %(item, state)
           name = name.replace(".new.","")
@@ -2054,7 +2090,13 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     for item in tabItems:
       states = ["on", "off"]
       for state in states:
-        image = self.tab_items(item, state)
+        use_new = True
+        if use_new:
+          width = int(self.available_width/len(tabItems))
+          image = self.make_timage(item_type='tab', item=item, state=state, width=width)
+        else:
+          image = self.tab_items(item, state)
+          
         name = r"gui/images/tab-%s-%s.png" %(item, state)
         OlexVFS.save_image_to_olex(image, name, 2)
         #image.save(r"%s\etc\gui\images\tab-%s-%s.png" %(datadir, item.split("index-")[1], state), "PNG")
@@ -2094,8 +2136,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       #image.save(r"%s\etc\gui\images\label-%s.png" %(datadir, item[0]), "PNG")
 
   def make_cbtn_items(self, font_name = 'Vera'):
-    if self.gui_image_font_name:
-      font_name = self.gui_image_font_name
+    if self.params.image_font_name:
+      font_name = self.params.image_font_name
       font_name = "%s Bold" %font_name
       
     settings_button_width = 0
@@ -2105,21 +2147,21 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         'image_prefix':'cbtn',
         'height':cbtn_buttons_height,
         'font_name':font_name,
-        #'bgcolouroff':self.adjust_colour(self.gui_timage_colour, luminosity = 1.0),
-        #'bgcolouron':self.gui_timage_colour,
-        #'fontcolouroff':self.adjust_colour(self.gui_timage_colour, luminosity = 1.6),
-        #'fontcolouron':self.gui_html_highlight_colour,
-        'bgcolouroff':self.gui_html_bg_colour,
-        'bgcolouron':self.gui_html_bg_colour,
-        'fontcolouroff':self.gui_timage_colour,
-        'fontcolouron':self.gui_html_highlight_colour,
-        'fontcolourinactive':self.adjust_colour(self.gui_grey, luminosity = 2.0),
-        'bgcolourinactive':self.adjust_colour(self.gui_grey, luminosity = 2.0),
+        #'bgcolouroff':self.adjust_colour(self.params.html.base_colour.rgb, luminosity = 1.0),
+        #'bgcolouron':self.params.html.base_colour.rgb,
+        #'fontcolouroff':self.adjust_colour(self.params.html.base_colour.rgb, luminosity = 1.6),
+        #'fontcolouron':self.params.html.highlight_colour.rgb,
+        'bgcolouroff':self.params.html.bg_colour.rgb,
+        'bgcolouron':self.params.html.bg_colour.rgb,
+        'fontcolouroff':self.params.html.base_colour.rgb,
+        'fontcolouron':self.params.html.highlight_colour.rgb,
+        'fontcolourinactive':self.adjust_colour(self.params.grey.rgb, luminosity = 2.0),
+        'bgcolourinactive':self.adjust_colour(self.params.grey.rgb, luminosity = 2.0),
         'states':['','on', 'off', 'inactive'],
-        'outline_colour':self.adjust_colour(self.gui_html_table_bg_colour, luminosity = 0.8),
+        'outline_colour':self.adjust_colour(self.params.html.table_bg_colour.rgb, luminosity = 0.8),
         'grad_colour':(237,237,245),
         'vline':{'v_pos':0, 'height':18},
-        #'grad':{'grad_colour':self.adjust_colour(self.gui_timage_colour, luminosity = 1.8), 
+        #'grad':{'grad_colour':self.adjust_colour(self.params.timage_colour, luminosity = 1.8), 
                 #'fraction':1,
                 #'increment':0.5,
                 #'step':1,
@@ -2130,7 +2172,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         'titleCase':False,
         'lowerCase':True,
         'continue_mark':True,
-        'whitespace_bottom':{'weight':1, 'colour':self.adjust_colour(self.gui_html_bg_colour, luminosity = 0.98)},
+        'whitespace_bottom':{'weight':1, 'colour':self.adjust_colour(self.params.html.bg_colour.rgb, luminosity = 0.98)},
 
       }
     
@@ -2140,14 +2182,14 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         'txt':'refine',
         'name':'refine',
         'width':('auto', (3,settings_button_width), 0),
-        'whitespace_right':{'weight':1, 'colour':self.gui_html_bg_colour},
+        'whitespace_right':{'weight':1, 'colour':self.params.html.bg_colour.rgb},
         },
       "cbtn-solve":
       {
         'txt':'solve',
         'name':'solve',
         'width':('auto', (3,settings_button_width), 0),
-        'whitespace_right':{'weight':1, 'colour':self.gui_html_bg_colour},
+        'whitespace_right':{'weight':1, 'colour':self.params.html.bg_colour.rgb},
         }, 
       "cbtn-report":
       {
@@ -2160,7 +2202,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     
     for d in buttonItems:
       buttonItems[d].update(all_cbtn_buttons)
-
+      
     BM = ButtonMaker(buttonItems)
     im = BM.run()
     
@@ -2181,9 +2223,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     #imageIndex = {}
     #imageIndex.setdefault("logo", (0, 0, 275, 55))
     #for imag in imageIndex:
-      #bgcolour = self.gui_html_bg_colour
+      #bgcolour = self.params.html.bg_colour.rgb
       #image = self.image_items(imageIndex[imag])
-      #if self.gui_skin_name == "OD":
+      #if self.params.skin.name == "OD":
         #logo_bild = self.removeTransparancy(image.crop((0,0,100,55)), bgcolour)
         #image = self.removeTransparancy(image, (255,255,255))
         #image = image.convert("L")
@@ -2194,6 +2236,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       ##image.save(r"%s\etc\gui\images\%s.png" %(datadir, imag), "PNG")
 
   def make_icon_items(self):
+    base_colour = self.params.html.base_colour.rgb
+    
     iconIndex = {}
     iconIndex.setdefault("anis", (0, 0))
     iconIndex.setdefault("isot", (0, 1))
@@ -2223,7 +2267,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     iconIndex.setdefault("N", (2, 5))
     iconIndex.setdefault("O", (2, 6))
     iconIndex.setdefault("F", (2, 7))
-    iconIndex.setdefault("center", (2, 8, {'colourise':'gui_html_highlight_colour'}))
+    iconIndex.setdefault("center", (2, 8, {'colourise':self.params.html.highlight_colour.rgb}))
     iconIndex.setdefault("Cl", (2, 9))
     iconIndex.setdefault("auto", (3, 0))
     iconIndex.setdefault("edit", (3, 1))
@@ -2261,10 +2305,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     iconIndex.setdefault("killH", (6, 6))
     iconIndex.setdefault("home", (6, 7))
     iconIndex.setdefault("settings", (6, 8))
-    iconIndex.setdefault("dot-arrow-right", (7, 0, {'colourise':'gui_green'}))
-    iconIndex.setdefault("dot-arrow-left", (7, 1, {'colourise':'gui_green'}))
-    iconIndex.setdefault("dot-arrow-down", (7, 2, {'colourise':'gui_green'}))
-    iconIndex.setdefault("dot-arrow-up", (7, 3, {'colourise':'gui_green'}))
+    iconIndex.setdefault("dot-arrow-right", (7, 0, {'colourise':self.params.green.rgb}))
+    iconIndex.setdefault("dot-arrow-left", (7, 1, {'colourise':self.params.green.rgb}))
+    iconIndex.setdefault("dot-arrow-down", (7, 2, {'colourise':self.params.green.rgb}))
+    iconIndex.setdefault("dot-arrow-up", (7, 3, {'colourise':self.params.green.rgb}))
     iconIndex.setdefault("polyhedra", (6, 9))
 
     for icon in iconIndex:
@@ -2275,9 +2319,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     height = 10
     width = 10
-    bg_colour = self.adjust_colour("base", luminosity = 1.6)
+    bg_colour = self.adjust_colour(base_colour, luminosity = 1.6)
     size = (height,width)
-    colour = self.gui_html_bg_colour
+    colour = self.params.html.bg_colour.rgb
     image = Image.new('RGBA', size, colour)
     draw = ImageDraw.Draw(image)
     begin = (1,1)
@@ -2287,7 +2331,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     name = r"gui/images/toolbar-expand.png"
     OlexVFS.save_image_to_olex(image, name, 2)
 
-    colour = self.gui_html_bg_colour
+    colour = self.params.html.bg_colour.rgb
     image = Image.new('RGBA', size, colour)
     draw = ImageDraw.Draw(image)
     begin = (width/2,1)
@@ -2303,7 +2347,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     
     height = 15
     width = 2
-    colour = self.gui_html_bg_colour
+    colour = self.params.html.bg_colour.rgb
     image = Image.new('RGBA', size, colour)
     draw = ImageDraw.Draw(image)
     begin = (1,1)
@@ -2317,17 +2361,17 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     width = 8
     y_offset = 1
     x_border = 2
-    bg_colour = self.gui_html_bg_colour
+    bg_colour = self.params.html.bg_colour.rgb
     size = (width,height)
     image = Image.new('RGBA', size, bg_colour)
     draw = ImageDraw.Draw(image)
     begin = (x_border,height-y_offset)
     middle = (width/2,0)
     end = (width-x_border,height-y_offset)
-    draw.polygon((begin, middle, end), self.gui_html_font_colour)
+    draw.polygon((begin, middle, end), self.params.html.font_colour.rgb)
     name = r"gui/images/toolbar-up.png"
     OlexVFS.save_image_to_olex(image, name, 2)
-    draw.polygon((begin, middle, end), self.adjust_colour(self.gui_html_table_bg_colour, luminosity = 0.9 ))
+    draw.polygon((begin, middle, end), self.adjust_colour(self.params.html.table_bg_colour.rgb, luminosity = 0.9 ))
     name = r"gui/images/toolbar-up-off.png"
     OlexVFS.save_image_to_olex(image, name, 2)
 
@@ -2336,10 +2380,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     begin = (x_border,y_offset)
     middle = (width/2,height)
     end = (width-x_border,y_offset)
-    draw.polygon((begin, middle, end), self.gui_html_font_colour)
+    draw.polygon((begin, middle, end), self.params.html.font_colour.rgb)
     name = r"gui/images/toolbar-down.png"
     OlexVFS.save_image_to_olex(image, name, 2)
-    draw.polygon((begin, middle, end), self.adjust_colour(self.gui_html_table_bg_colour, luminosity = 0.9 ))
+    draw.polygon((begin, middle, end), self.adjust_colour(self.params.html.table_bg_colour.rgb, luminosity = 0.9 ))
     name = r"gui/images/toolbar-down-off.png"
     OlexVFS.save_image_to_olex(image, name, 2)
 
@@ -2349,8 +2393,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     image = Image.new('RGBA', size, bg_colour)
     draw = ImageDraw.Draw(image)
     font_name = "Vera"
-    if self.gui_image_font_name:
-      font_name = self.gui_image_font_name
+    if self.params.image_font_name:
+      font_name = self.params.image_font_name
       
     #self.write_text_to_draw(draw, 
                  #"TINY BUTTONS", 
@@ -2377,7 +2421,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                        top_left=(10,0), 
                        font_name=self.font_name, 
                        font_size=12, 
-                       font_colour=self.adjust_colour("base", luminosity = 0.8))
+                       font_colour=self.adjust_colour(base_colour, luminosity = 0.8))
 
     #border top
     begin = (0, 1)
@@ -2405,21 +2449,20 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     return image
 
   def timage_style_h3(self, item, state, bg_luminosity=1.85, bg_saturation=0.9, luminosity_font=1.0, font_name = "Vera"):
-    if self.gui_image_font_name:
-      font_name = self.gui_image_font_name
+    if self.params.image_font_name:
+      font_name = self.params.image_font_name
     width = self.width - 8
     
-    if "GB" in self.gui_language_encoding:
+    if "GB" in self.gui_language_encoding: #--!--
       height = 18
     else:
       height = 16
-    base = self.gui_timage_colour
-    base = self.gui_timage_colour
-    bg_colour = self.adjust_colour("base", luminosity=bg_luminosity, saturation=bg_saturation)
+    base_colour = self.params.html.base_colour.rgb
+    bg_colour = self.adjust_colour(base_colour, luminosity=bg_luminosity, saturation=bg_saturation)
     size = (int(width), int(height))
     image = Image.new('RGBA', size, bg_colour)
     draw = ImageDraw.Draw(image)
-    grad_colour = self.adjust_colour(base, luminosity = 1.9)
+    grad_colour = self.adjust_colour(base_colour, luminosity = 1.9)
     self.gradient_bgr(draw, width, height, colour = grad_colour, fraction=1, step=0.3)
 
     t = item.split("-")
@@ -2432,7 +2475,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                        top_left=(13,0), 
                        font_name=font_name, 
                        font_size=10, 
-                       font_colour=self.adjust_colour("base", luminosity=luminosity_font, hue=0),
+                       font_colour=self.adjust_colour(base_colour, luminosity=luminosity_font, hue=0),
                        image_size = image.size,
                        titleCase=True,
                        valign = ("middle", 0.7)
@@ -2474,25 +2517,40 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
 
   def timage_style_1(self, item, state, font_name="Vera"):
-    if self.gui_image_font_name:
-      font_name = self.gui_image_font_name
+
+    base_colour = self.params.html.base_colour.rgb
+    
+    bg_colour_L = self.params.timage.bg_colour_L
+    grad = self.params.timage.grad
+    grad_colour_L = self.params.timage.grad_colour_L
+    grad_step = self.params.timage.grad_step
+    font_colour_L = self.params.timage.font_colour_L
+    
+    bg_colour = self.adjust_colour(base_colour, luminosity = bg_colour_L)
+    grad_colour = self.adjust_colour(base_colour, luminosity = grad_colour_L)
+    font_colour = self.adjust_colour(base_colour, luminosity = font_colour_L)
+    
+    height = self.params.timage.height
+    font_name = self.params.timage.font_name
+    font_size = self.params.timage.font_size
+    corner_rad = self.params.timage.corner_rad
+    
+    top = self.params.timage.top
+    left = self.params.timage.left
     
     width = self.width + 1
     
-    if "GB" in self.gui_language_encoding:
-      height = 18
+    if "GB" in self.gui_language_encoding: #--!--
+      height = height + 2
     else:
-      height = 16
+      height = height
 
-    
-    base = self.gui_timage_colour
-    bg_colour = self.adjust_colour("base", luminosity = 1.6)
-    #bg_colour = self.gui_timage_colour
     size = (int(width), int(height))
     image = Image.new('RGBA', size, bg_colour)
     draw = ImageDraw.Draw(image)
-    grad_colour = self.adjust_colour("base", luminosity = 1.8)
-    self.gradient_bgr(draw, width, height, colour = grad_colour, fraction=1, step=0.2)
+    
+    if grad:
+      self.gradient_bgr(draw, width, height, colour = grad_colour, fraction=1, step=grad_step)
     t = item.split("-")
     txt = ""
     for bit in t:
@@ -2502,25 +2560,25 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if transtest:
       image = self.makeTransparentText(image, 
                                           txt, 
-                                          font_colour=self.adjust_colour("base", luminosity = 0.7),
-                                          top_left=(14,1), 
-                                          font_size=11, 
+                                          font_colour=font_colour,
+                                          top_left=(left,top), 
+                                          font_size=font_size, 
                                           font_name=font_name, 
                                         )
       draw = ImageDraw.Draw(image)
     else:
       self.write_text_to_draw(draw, 
                               txt, 
-                              top_left=(14,1), 
+                              top_left=(left,top), 
                               font_name=font_name, 
-                              font_size=11, 
+                              font_size=font_size, 
                               image_size = image.size,
                               valign=("middle",0.7),
                               titleCase=True,
-                              font_colour=self.adjust_colour("base", luminosity = 0.8))
+                              font_colour=font_colour)
       cache = {}
       rad = 3
-      image = RoundedCorners.round_image(image, cache, rad)
+      image = RoundedCorners.round_image(image, cache, corner_rad)
       
     if self.advertise_new:
       self.draw_advertise_new(draw, image)
@@ -2539,83 +2597,275 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     return image
 
 
+  def make_timage(self, item_type, item, state, font_name="Vera", width=None):
+    if not width:
+      width = self.width
+    base_colour = OV.GetParam('gui.timage.%s.base_colour' %item_type).rgb
+    grad = OV.GetParam('gui.timage.%s.grad' %item_type)
+    grad_step = OV.GetParam('gui.timage.%s.grad_step' %item_type)
+    grad_colour = OV.GetParam('gui.timage.%s.grad_colour' %item_type).rgb
+    font_colour = OV.GetParam('gui.timage.%s.font_colour' %item_type).rgb
+    
+    bg_colour = self.adjust_colour(base_colour, luminosity = OV.GetParam('gui.timage.%s.bg_colour_L' %item_type))
+    if not grad_colour:
+      grad_colour = self.adjust_colour(base_colour, luminosity = OV.GetParam('gui.timage.%s.grad_colour_L' %item_type))
+    if not font_colour:
+      font_colour = self.adjust_colour(base_colour, luminosity = OV.GetParam('gui.timage.%s.font_colour_L' %item_type))
+    font_name = OV.GetParam('gui.timage.%s.font_name' %item_type)
+    if not font_name:
+      font_name = OV.GetParam('gui.timage.font_name')
+    font_size = OV.GetParam('gui.timage.%s.font_size' %item_type)
+    if font_size is None:
+      valign = ('middle',0.7,)
+    else:
+      valign = False
+      font_size = int(round(font_size * self.size_factor,0))
+    arrows = OV.GetParam('gui.timage.%s.arrows' %item_type)
+
+    height = int(round(OV.GetParam('gui.timage.%s.height' %item_type) * self.size_factor, 0))
+    top = int(round(OV.GetParam('gui.timage.%s.top' %item_type) * self.size_factor,0))
+    left = int(round(OV.GetParam('gui.timage.%s.left' %item_type) * self.size_factor,0))
+    corner_rad = int(round(OV.GetParam('gui.timage.%s.corner_rad' %item_type) * self.size_factor,0))
+    halign = OV.GetParam('gui.timage.%s.halign' %item_type)
+
+    shadow = OV.GetParam('gui.timage.%s.shadow' %item_type)
+    if shadow is None: shadow = True
+    
+    if item_type == "h1":
+      width += 1
+      underground = OV.GetParam('gui.html.bg_colour').rgb
+      
+    elif item_type == "h3":
+      width -= OV.GetParam('gui.html.table_firstcol_width')
+      underground = OV.GetParam('gui.html.table_bg_colour').rgb
+
+    elif item_type == "tab":
+      underground = OV.GetParam('gui.html.bg_colour').rgb
+      if state == 'on':
+        font_colour = self.highlight_colour
+        
+    elif item_type == 'button':
+      underground = OV.GetParam('gui.html.table_bg_colour').rgb
+      shadow = False
+      arrows = False
+      if state == "on":
+        grad_colour = self.highlight_colour
+      
+    if "GB" in self.gui_language_encoding: #--!--
+      height = height + 2
+    else:
+      height = height
+
+    size = (int(width), int(height))
+    image = Image.new('RGBA', size, bg_colour)
+    draw = ImageDraw.Draw(image)
+    
+    if grad:
+      self.gradient_bgr(draw, width, height, colour = grad_colour, fraction=1, step=grad_step)
+    t = item.split("-")
+    txt = ""
+    for bit in t:
+      txt += bit.title() + " "
+
+    self.write_text_to_draw(draw, 
+                            txt, 
+                            top_left=(left,top), 
+                            font_name=font_name, 
+                            font_size=font_size, 
+                            image_size = image.size,
+                            valign=valign,
+                            align=halign, 
+                            titleCase=True,
+                            font_colour=font_colour)
+    cache = {}
+    
+    if item_type == "sNumTitle":
+      drawSpaceGroupInfo(draw)
+    
+      
+    if self.advertise_new:
+      self.draw_advertise_new(draw, image)
+
+    if arrows:
+      off_L = OV.GetParam('gui.timage.%s.off_L' %item_type)
+      if off_L is None:
+        off_L = 1.0
+      on_L = OV.GetParam('gui.timage.%s.on_L' %item_type)
+      if on_L is None:
+        on_L = 1.0
+      image = self.make_arrows(state, width, arrows, image, height, base_colour, off_L, on_L)
+
+    if corner_rad:
+      rounded = OV.GetParam('gui.timage.%s.rounded' %item_type)
+      if rounded is None: rounded = '1111'
+      image = self.make_corners(rounded, image, corner_rad, underground)
+      
+    if shadow:
+      image = self.make_shadow(image, underground, corner_rad)
+      
+    filename = item
+    return image
+
+  def make_corners(self, rounded, image, corner_rad, underground):
+    cache = {}
+    rounded_pos = []
+    for ritem in rounded:
+      if ritem == '0':
+        r = 'Square'
+      elif ritem == '1':
+        r = 'Rounded'
+      rounded_pos.append(r)
+    pos = tuple(rounded_pos)
+    image = RoundedCorners.round_image(image, cache, radius=corner_rad, pos=pos, back_colour=underground)
+    return image
+  
+  def make_shadow(self, image, underground, corner_rad):
+    image = self.add_whitespace(image=image, side='bottom', margin_left=corner_rad, weight=1, colour = self.adjust_colour(underground, luminosity = 0.90))
+    image = self.add_whitespace(image=image, side='bottom', margin_left=corner_rad, weight=1, colour = self.adjust_colour(underground, luminosity = 0.95))
+    return image
+  
+  def make_arrows(self, state, width, arrows, image, height, base_colour, off_L, on_L):
+    draw = ImageDraw.Draw(image)
+    if state == "off":
+      fill = self.adjust_colour(base_colour, luminosity=off_L)
+    elif state == "on":
+      fill = self.adjust_colour(self.highlight_colour, luminosity=on_L)
+    if 'arrow' in arrows:
+      if state == 'off':
+        direction = 'right'
+      elif state == 'on':
+        direction = 'up'
+      self.create_arrows(draw, height, direction=direction, colour=fill, type='simple')
+      
+    if 'char' in arrows:
+      try:
+        char = arrows.split(state)[1].split(':')[0]
+      except:
+        side = '0'
+      self.create_arrows(draw, height, direction='down',
+                         colour=fill,
+                         type='char',
+                         char_pos=(width-20,0), char_char=char, h_space=4, v_space=4)
+
+    if 'bar' in arrows:
+      try:
+        side = arrows.split('bar:')[1].split(':')[0]
+      except:
+        side = 'left'
+      try:
+        weight = int(arrows.split('bar:')[1].split(',')[0].split(':')[1])
+      except:
+        weight = 2
+      weight = int(round(weight * self.size_factor,0))
+      image = self.add_whitespace(image=image, side=side, weight=weight, colour = fill, overwrite=True)
+     
+    if 'triangle' in arrows:
+      try:
+        side = arrows.split('triangle:')[1].split(',')[0]
+      except:
+        side = 'left'
+        
+      begin = (2, 7)
+      middle = (2, 2)
+      end = (7, 2)
+  
+      draw.polygon((begin, middle, end), fill)
+
+    return image
+    
   def tab_items(self, item, state, font_name = "Vera", font_size=13):
-    if self.gui_image_font_name:
-      font_name = self.gui_image_font_name
+    if self.params.image_font_name:
+      font_name = self.params.image_font_name
       font_name = "%s Bold" %font_name
-    language = olx.CurrentLanguage()  
-    width = int((self.width)/len(self.tabItems)-2)
+    language = olx.CurrentLanguage()
+    
+    base_colour = self.params.tab.base_colour.rgb
+    rounded =  self.params.tab.rounded
+    decorated = self.params.tab.decorated
+    
+    bg_colour_L = self.params.tab.bg_colour_L
+    grad = self.params.tab.grad
+    grad_colour_L = self.params.tab.grad_colour_L
+    grad_step = self.params.tab.grad_step
+    font_colour_L = self.params.tab.font_colour_L
+    
+    bg_colour = self.adjust_colour(base_colour, luminosity = bg_colour_L)
+    grad_colour = self.adjust_colour(base_colour, luminosity = grad_colour_L)
+    font_colour = self.adjust_colour(base_colour, luminosity = font_colour_L)
+    
+    height = self.params.tab.height
+    font_name = self.params.tab.font_name
+    font_size = self.params.tab.font_size
+    
+    top = self.params.tab.top
+    left = self.params.tab.left
+
+    width = self.width/len(self.tabItems)-2
     if language == "Chinese":
-      height = 22
-      top = 2
+      height = height + 2
+      top += 2
       size_factor = 0.6
     
     elif language == "Russian":
-      height = 20
-      top = 0
+      height = height
       size_factor = 0.7
       
     else:
-      height = 20
-      top = 3
-      size_factor = 0.7
+      height = height
+      top += 3
+      size_factor = 1
       
-    base = self.gui_timage_colour
-    font_colour = base
     size = (int(width), int(height))
-    image = Image.new('RGBA', size, base)
+    image = Image.new('RGBA', size, base_colour)
     draw = ImageDraw.Draw(image)
-    grad_colour = self.adjust_colour(self.gui_timage_colour, luminosity = 1.1)
-    self.gradient_bgr(draw, width, height, colour = grad_colour, fraction=1, step=0.4)
+    if grad:
+      self.gradient_bgr(draw, width, height, colour = grad_colour, fraction=1, step=grad_step)
 
     begin = (2, 7)
     middle = (2, 2)
     end = (7, 2)
 
-
     if state == "off":
       #triangle left-off
-      font_colour = self.adjust_colour("base", luminosity = 1.9, saturation = 1.2)
-      draw.polygon((begin, middle, end), self.adjust_colour("base", luminosity = 1.2))
+      font_colour = self.adjust_colour(base_colour, luminosity = 1.9, saturation = 1.2)
+      if decorated == 'top_left_triangle':
+        draw.polygon((begin, middle, end), self.adjust_colour(base_colour, luminosity = 1.3))
     if state != "off":
       #triangle left-on
-      draw.polygon((begin, middle, end), fill=self.gui_html_highlight_colour)
-      font_colour = self.gui_html_highlight_colour
+      if decorated == 'top_left_triangle':
+        draw.polygon((begin, middle, end), fill=self.highlight_colour)
+      font_colour = self.highlight_colour
 
+
+    ## ROUNDEDNESS OR OTHERWISE
     cache = {}
-    pos = (('Square'),('Rounded'),('Square'),('Square'))
+    rounded_pos = []
+    for ritem in rounded:
+      if ritem == '0':
+        r = 'Square'
+      elif ritem == '1':
+        r = 'Rounded'
+      rounded_pos.append(r)
+    pos = tuple(rounded_pos)
     image = RoundedCorners.round_image(image, cache, 7, pos=pos)
   
-    #self.make_border(rad=11,
-            #draw=draw,
-            #width=width,
-            #height=height,
-            #bg_colour=base,
-            #border_colour=base,
-            #border_hls=(0, 1.3, 1),
-            #cBottomLeft=False,
-            #cBottomRight=False,
-            #cTopLeft=False)
     txt = item.replace("index-", "")
 
     self.write_text_to_draw(draw, 
                             txt, 
-                            align = "right",
-                            top_left = (0, top),
+                            #align = "right",
+                            top_left = (left, top),
                             max_width = width-5,
                             font_name=font_name, 
                             font_size=font_size, 
                             font_colour=font_colour,
                             image_size = image.size,
                             lowerCase = True,
-                            valign=(middle,size_factor)
+                            #valign=(middle,size_factor)
                           )
 
 
-    #dup = ImageChops.invert(dup)
-    #dup = ImageChops.offset(dup, 1, 1)
-    #image = ImageChops.blend(image, dup, 0.05)
-    image = self.add_whitespace(image=image, side='top', weight=2, colour=self.gui_html_bg_colour)
+    image = self.add_whitespace(image=image, side='top', weight=2, colour=self.params.html.bg_colour.rgb)
     image = self.add_whitespace(image=image, side='bottom', weight=1, colour = self.adjust_colour("bg", luminosity = 0.90))
     image = self.add_whitespace(image=image, side='bottom', weight=1, colour = self.adjust_colour("bg", luminosity = 0.95))
     image = self.add_whitespace(image=image, side='right', margin_top=4, weight=1, colour = self.adjust_colour("bg", luminosity = 0.95))
@@ -2626,7 +2876,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
   def note_items(self, item):
     #cs = self.cs
-    base = self.gui_timage_colour
+    base_colour = self.params.html.base_colour.rgb
     needs_warning=item[3]
     font_size = 9
     line = int(font_size + font_size * 0.18)
@@ -2644,8 +2894,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       font_name = "Arial UTF"
     else:
       font_name = "Vera"
-      if self.gui_image_font_name:
-        font_name = self.gui_image_font_name
+      if self.params.image_font_name:
+        font_name = self.params.image_font_name
 
     font = self.registerFontInstance(font_name, font_size)
       
@@ -2712,19 +2962,19 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       #draw.text((((width - text_width)/2), (line * i) + 1), "%s" %txt, font=font, fill=font_colour)
       i += 1
     #if needs_warning:
-    #  image = self.add_whitespace(image=image, side='left', weight=w, colour=self.gui_html_bg_colour)
+    #  image = self.add_whitespace(image=image, side='left', weight=w, colour=self.params.html.bg_colour.rgb)
     #  image.paste(self.warning, (2,2), self.warning)
 
-    image = self.add_whitespace(image=image, side='top', weight=2, colour=self.gui_html_bg_colour)
+    image = self.add_whitespace(image=image, side='top', weight=2, colour=self.params.html.bg_colour.rgb)
 
     return image
 
   def label_items(self, item, font_name = 'Vera'):
     text = item[0]
     width = item[1]
-    base = self.gui_timage_colour
-    if self.gui_image_font_name:
-      font_name = self.gui_image_font_name
+    base_colour = self.params.html.base_colour.rgb
+    if self.params.image_font_name:
+      font_name = self.params.image_font_name
 
     if width == 0:
       width = len(text) * 7
@@ -2734,7 +2984,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     bg_colour = 250, 250, 250
     font_colour="#4e5086"
     size = (int(width), int(height))
-    image = Image.new('RGBA', size, base)
+    image = Image.new('RGBA', size, base_colour)
     draw = ImageDraw.Draw(image)
 
 #               border_colour=("#f2f2f2","#f2f2f2","#f2f2f2","#f2f2f2")
@@ -2742,8 +2992,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
             draw=draw,
             width=width,
             height=height,
-            bg_colour=base,
-            border_colour=base,
+            bg_colour=base_colour,
+            border_colour=base_colour,
             border_hls = (50, 0.4, 0.4)
           )
 
@@ -2752,7 +3002,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                        txt, 
                        font_name=font_name, 
                        font_size=10, 
-                       font_colour=self.adjust_colour(base, luminosity = 1.2)
+                       font_colour=self.adjust_colour(base_colour, luminosity = 1.2)
                      )
     
 #    draw.text((((width-txt_size[0])/2), 0), "%s" %text, font=font, fill=font_colour)
@@ -2765,7 +3015,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
   def label_items_control(self, item, font_name="Verdana"):
     #cs = self.cs
-    base = self.gui_timage_colour
+    base_colour = self.params.html.base_colour.rgb
     text = item[0]
     width = item[1]
     if width == 0:
@@ -2782,16 +3032,16 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                    text.replace("-", " "), 
                    font_name=font_name, 
                    font_size=11, 
-                   font_colour=self.adjust_colour(base, luminosity = 1.2)
+                   font_colour=self.adjust_colour(base_colour, luminosity = 1.2)
                  )
 
     begin = (0,height-2)
     end = (width, height-2)
-    draw.line((begin ,end), fill=base)
+    draw.line((begin ,end), fill=base_colour)
 
     begin = (0,0)
     end = (width, 0)
-    draw.line((begin ,end), fill=base)
+    draw.line((begin ,end), fill=base_colour)
 
     begin = (0,height-1)
     end = (width, height-1)
@@ -2804,20 +3054,20 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     return image
 
   def cbtn_items(self, item, state, font_name = "Vera"):
-    if self.gui_image_font_name:
-      font_name = self.gui_image_font_name
+    if self.params.image_font_name:
+      font_name = self.params.image_font_name
 
     width = 75
     height = 30
     size = (int(width), int(height))
     if state == "off":
       colour = 100, 100, 160
-      colour = self.gui_timage_colour
+      colour = self.params.html.base_colour.rgb
     else:
       colour = 220, 220, 220
-      colour = self.gui_html_highlight_colour
+      colour = self.highlight_colour
     try:  
-      font_colour = OV.FindValue('gui_html_font_colour')
+      font_colour = OV.FindValue('gui_htmlself.params.html.font_colour.rgb')
     except:
       font_colour = "#777777"
     image = Image.new('RGBA', size, colour)
@@ -2850,8 +3100,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
 
   def button_items(self, item, state, font_name = 'Vera'):
-    if self.gui_image_font_name:
-      font_name = self.gui_image_font_name
+    if self.params.image_font_name:
+      font_name = self.params.image_font_name
     width = 50
     height = 17
     size = (int(width), int(height))
@@ -2860,7 +3110,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     else:
       colour = 255, 0, 0
     try:  
-      font_colour = OV.FindValue('gui_html_font_colour')
+      font_colour = self.params.html.font_colour.rgb
     except:
       font_colour = "#aaaaaa"
     image = Image.new('RGBA', size, colour)
@@ -2914,7 +3164,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     
     crop = self.iconSource.crop(cut)
     if colourise:
-      crop_colourised = self.colourize(crop, (0,0,0), getattr(self,colourise)) 
+      crop_colourised = self.colourize(crop, (0,0,0), colourise) 
       image.paste(crop_colourised, (0,0), crop)
     else:
       image.paste(crop)
@@ -2925,7 +3175,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     cut = (0, strip, width, width - strip)
     image = image.crop(cut)
    
-    image = image.resize(  ( int(self.gui_html_icon_size) , int(int(self.gui_html_icon_size)*(width-2*strip)/width)  ), Image.ANTIALIAS)
+    image = image.resize(  ( int(self.params.html.icon_size) , int(int(self.params.html.icon_size)*(width-2*strip)/width)  ), Image.ANTIALIAS)
     draw = ImageDraw.Draw(image)
       
     if border:
@@ -3005,7 +3255,111 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       ##print i, R,G,B
       #draw.line((begin ,end), fill=(R, G, B))
 
-      
+
+def drawSpaceGroupInfo(draw, luminosity=1.9, right_margin=12, font_name="Times Bold"):
+  base_colour = OV.GetParam('gui.html.base_colour').rgb
+  left_start = 120
+  font_colour = OV.GetParam('gui.html.font_colour').rgb
+
+  try:
+    txt_l = []
+    txt_sub = []
+    txt_norm = []
+    try:
+      txt = OV.olex_function('sg(%h)')
+    except:
+      pass
+    if not txt:
+      txt="ERROR"
+    txt = txt.replace(" 1", "")
+    txt = txt.replace(" ", "")
+    txt_l = txt.split("</sub>") 
+    if len(txt_l) == 1:
+      txt_norm = [(txt,0)]
+    try:
+      font_base = "Times"
+      font_bar = self.registerFontInstance("%s Bold" %font_base, 11)
+      font_slash = self.registerFontInstance("%s Bold" %font_base, 18)
+      font_number = self.registerFontInstance("%s Bold" %font_base, 14)
+      font_letter = self.registerFontInstance("%s Bold Italic" %font_base, 15)
+      font_sub = self.registerFontInstance("%s Bold" %font_base, 10)
+      norm_kern = 2
+      sub_kern = 0
+    except:
+      font_name = "Arial"
+      font_bar = self.registerFontInstance("%s Bold" %font_base, 12)
+      font_slash = self.registerFontInstance("%s Bold" %font_base, 18)
+      font_number = self.registerFontInstance("%s Bold" %font_base, 14)
+      font_letter = self.registerFontInstance("%s Bold Italic" %font_base, 15)
+      font_norm = self.registerFontInstance(font_name, 13)
+      font_sub = self.registerFontInstance(font_name, 10)
+      norm_kern = 0
+      sub_kern = 0
+    textwidth = 0
+    for item in txt_l:
+      if item:
+        try:
+          sub = item.split("<sub>")[1]
+        except:
+          sub = ""
+        norm = item.split("<sub>")[0]
+        tw_s = (draw.textsize(sub, font=font_sub)[0]) + sub_kern
+        tw_n = (draw.textsize(norm, font=font_number)[0]) + norm_kern
+        txt_sub.append((sub, tw_s))
+        txt_norm.append((norm, tw_n))
+        textwidth += (tw_s + tw_n)
+  except:
+    txt_l = []
+  if txt_l:
+    i = 0
+    left_start =  (self.width-textwidth) - right_margin -5
+    cur_pos = left_start
+    advance = 0
+    after_kern = 0
+    for item in txt_l:
+      if item:
+        text_normal = txt_norm[i][0]
+        for character in text_normal:
+          if character == "":
+            continue
+          cur_pos += advance
+          cur_pos += after_kern
+          after_kern = 2
+          advance = 0
+          try:
+            int(character)
+            font = font_number
+            top = 0
+            after_kern = 2
+          except:
+            font = font_letter
+            top = -1
+            if character == "P" or character == "I" or character == "C":
+              norm_kern = -2
+              after_kern = 0
+              character = " %s" %character
+          if character == "-":
+            draw.text((cur_pos + 1, -10), "_", font=font_bar, fill=font_colour)
+            draw.text((cur_pos + 1, -9), "_", font=font_bar, fill=font_colour)
+            advance = -1
+            norm_kern = 0
+          elif character == "/":
+            norm_kern = 0
+            after_kern = 0
+            draw.text((cur_pos -2, -3), "/", font=font_slash, fill=font_colour)
+            advance = ((draw.textsize("/", font=font_slash)[0]) + norm_kern) - 1
+          else:
+            draw.text((cur_pos + norm_kern, top), "%s" %character, font=font, fill=font_colour)
+            advance = (draw.textsize(character, font=font)[0]) + norm_kern
+          
+        text_in_superscript = txt_sub[i][0]
+        if text_in_superscript:
+          cur_pos += advance
+          draw.text((cur_pos + sub_kern, 5), "%s" %text_in_superscript, font=font_sub, fill=font_colour)
+          advance = (draw.textsize(text_in_superscript, font=font_sub)[0]) + sub_kern
+          after_kern = -2
+          cur_pos += advance
+      i+= 1
       
       
       
@@ -3027,9 +3381,9 @@ class Boxplot(ImageTools):
     #bgcolour = (255,255,255)
     colour = (255,255,255)
     #outline = (60,60,60)
-    bgcolour = self.gui_html_bg_colour
-    outline = self.gui_timage_colour
-    outline = self.adjust_colour(self.gui_timage_colour,hue=180)
+    bgcolour = self.params.html.bg_colour.rgb
+    outline = self.params.html.base_colour.rgb
+    outline = self.adjust_colour(self.params.html.base_colour.rgb,hue=180)
     size = (self.width, self.height)
     plotWidth = int(self.width * 0.8)
     plotHeight = int(self.height * 0.8)
@@ -3057,7 +3411,7 @@ class Boxplot(ImageTools):
     
     draw.rectangle((0,0,self.width-1,self.height-1), fill=bgcolour, outline=outline)
     draw.rectangle((xlowerQ,ybottom,xupperQ,ytop), fill=colour, outline=outline)
-    draw.line((xmedian,ybottom,xmedian,ytop), fill=self.gui_red) # draw median line
+    draw.line((xmedian,ybottom,xmedian,ytop), fill=self.params.red.rgb) # draw median line
     draw.line((xlower,ymid - plotHeight/4,xlower,ymid + plotHeight/4), fill=outline)
     draw.line((xupper,ymid - plotHeight/4,xupper,ymid + plotHeight/4), fill=outline)
     draw.line((xlower,ymid,xlowerQ,ymid), fill=outline)
@@ -3069,18 +3423,8 @@ class Boxplot(ImageTools):
 timage_instance_TestBanner = timage()
 OV.registerFunction(timage_instance_TestBanner.makeTestBanner)    
 
-#GuiSkinChanger_instance = GuiSkinChanger()
-#OV.registerMacro(GuiSkinChanger_instance.run_GuiSkinChanger, 'skin_extension')    
-
-#sNumTitle_instance = sNumTitle()
-#OV.registerFunction(sNumTitle_instance.run_sNumTitle)    
-#OV.registerMacro(GuiSkinChanger_instance.run_GuiSkinChanger, 'skin_extension')    
 
 
-
-
-    
-    
 if __name__ == "__main__":
   colour = "green"
   size = 90

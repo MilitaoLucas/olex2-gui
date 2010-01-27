@@ -79,7 +79,7 @@ class GuiFunctions(object):
     l = ['top_right', 'top_left', 'bottom_right', 'bottom_left']
     v = []
     for i in xrange(4):
-      val = olx.GetVar('gui_grad_%s' %(l[i]))
+      val = OV.GetParam('gui.grad_%s' %(l[i]))
       if not val:
         val = "#ffffff"
       val = IT.hex2dec(val)

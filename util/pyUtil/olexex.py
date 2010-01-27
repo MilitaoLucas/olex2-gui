@@ -458,7 +458,7 @@ def MakeElementButtonsFromFormula():
                         'bgcolour':'#efefef',
                         'image_prefix':'element',
                         'width':int(icon_size * 2),
-                        'font_size':12,
+                        'font_size':11,
                         'top_left':(2,0),
                         #'grad':{'fraction':1,'increment':10,'steps':0.2},
                         'grad':False,
@@ -983,7 +983,37 @@ def getKeys(key_directory=None):
     keyname = item.split("\\")[-1:][0]
     kl.append(keyname.split(".")[0])
   return kl
+
+
+def GetCheckcifReport():
   
+  import urllib2
+  import urllib2_file
+
+  file_name = '%s/%s.cif' %(OV.FilePath(), OV.FileName())
+  rFile = open(file_name)
+  #file_stat = os.stat(file_name)
+  #cif = rFile.read()
+  cif = rFile
+  
+  params = {
+    "runtype": "symmonly",
+    "referer": "checkcif_server",
+    "outputtype": "html",
+    "file": cif
+  }
+  
+  f = urllib2.urlopen("http://vm02.iucr.org/cgi-bin/checkcif.pl", params)
+  print f.read()
+  
+  #url = "http://vm02.iucr.org/cgi-bin/checkcif.pl"
+  #data = urllib.urlencode(params)
+  #print data
+  #req = urllib2.Request(url, data)
+  #response = urllib2.urlopen(req,data)
+  #print response.read()
+  rFile.close()
+OV.registerFunction(GetCheckcifReport)
 
 def GetHttpFile(f, force=False, fullURL = False):
   global _is_online
@@ -1175,7 +1205,7 @@ def GetACF():
   debug = [False, True][0]
   debug_deep1 = [False, True][0]
   debug_deep2 = [False, True][0]
-  OV.SetVar("ac_verbose", [False, True][1])
+  OV.SetVar("ac_verbose", [False, True][0])
   keyname = getKey()
   
 
@@ -1230,7 +1260,9 @@ def GetACF():
       OV.SetVar("ac_debug_deep1", True)
     if debug_deep2:
       OV.SetVar("ac_debug_deep2", True)
-    sys.path.append(r"%s/util/pyUtil/PluginLib/plugin-AutoChemSRC/%s" %(olx.BaseDir(), tag))
+    p = r"%s/util/pyUtil/PluginLib/plugin-AutoChemSRC/%s" %(olx.BaseDir(), tag)
+    sys.path.append(p)
+    OV.SetParam('odac.source_dir',p)
     try:
       print "Debug: Import entry_ac"
       import entry_ac

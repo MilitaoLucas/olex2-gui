@@ -733,7 +733,7 @@ def defineExternalPrograms():
     for method in (least_squares, cgls):
       prg.addMethod(method)
   smtbx_refine.addMethod(lbfgs)
-  #smtbx_refine.addMethod(full_matrix)
+  smtbx_refine.addMethod(full_matrix)
 
   SPD = ExternalProgramDictionary()
   for prg in (ShelXS, ShelXS86, XS, ShelXD, XM, smtbx_solve):

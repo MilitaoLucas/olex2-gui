@@ -844,8 +844,8 @@ class Analysis(Graph):
     self.filepath = OV.FilePath()
     self.filename = OV.FileName()
     self.datadir = OV.DataDir()
-    self.gui_html_bg_colour = OV.FindValue('gui_html_bg_colour')
-    self.gui_html_highlight_colour = OV.FindValue('gui_html_highlight_colour')
+    self.gui_html_bg_colour = OV.GetParam('gui.html.bg_colour').rgb
+    self.gui_html_highlight_colour = OV.GetParam('gui.html.highlight_colour').rgb
     self.SPD, self.RPD = ExternalPrgParameters.SPD, ExternalPrgParameters.RPD
     self.debug = False
     self.function = function
@@ -1091,7 +1091,7 @@ class PrgAnalysis(Analysis):
     self.params = OV.Params().graphs.program_analysis
     self.counter = 0
     self.attempt = 1
-    size = (int(OV.FindValue('gui_htmlpanelwidth'))- 30, 150)
+    size = (int(OV.GetParam('gui.htmlpanelwidth'))- 30, 150)
     self.item = program.name
     self.graphInfo["Title"] = self.item
     self.params.size_x, self.params.size_y = size
@@ -1779,7 +1779,7 @@ class HistoryGraph(Analysis):
     self.params = OV.Params().graphs.program_analysis
     self.i_bar = 0
     self.tree = history_tree
-    size = (int(OV.FindValue('gui_htmlpanelwidth'))- 50, 100)
+    size = (int(OV.GetParam('gui.htmlpanelwidth'))- 50, 100)
     self.item = "history"
     self.params.size_x, self.params.size_y = size
     self.make_empty_graph(draw_title=False)

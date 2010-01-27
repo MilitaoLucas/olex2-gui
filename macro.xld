@@ -16,7 +16,7 @@
       <cmd4 "if isos(mac) then setvar(defeditor,'open')">
       <cmd5 "if isos(mac) then setvar(defexplorer,'open')">
       <cmd6 "if isos(mac) then setvar(defbrowser,'open')">
-      <cmd9 "startupPanel GetVar(gui_htmlpanelwidth)">
+      <cmd9 "spy.change_skin()">
       <cmd7 "if isvar(startup) then 'reap getVar(startup)'">
       <cmd8 "echo filepath()">
       <cmd11 "bind wheel 'ShowQ -wheel='">
@@ -53,15 +53,15 @@
       <cmd8  XXX='waitfor fade'>
       <cmd9  "@reap '%1' %2">
       <cmd10 "spy.LoadStructureParams()">
+      <cmd15 "spy.run_skin sNumTitle">
       <cmd11 "SetVar(SlideQPeaksVal,0)">
       <cmd12 XXX="ceiling on">
       <cmd13 "storeparam startup filefull() true">
       <cmd14 "if strcmp(%4,filename()) then none else 'spy.SetParam(snum.refinement.sg,sg(%n))'">
       <cmd15 "spy.setAllMainToolbarTabButtons()">
-      <cmd15 "spy.run_skin sNumTitle">
       <cmd16 "if File.Exists(strdir()/filename().vvd) then none else 'spy.SetParam(snum.refinement.original_formula,xf.GetFormula())'">
       <cmd17 "if and(strcmp(%4,filename()),strcmp(%6,fileext())) then none else 'spy.loadHistory()'">
-      <cmd19 "if and(isplugininstalled(plugin-brukersaint),IsFileType('p4p')) then BSINI else none">			
+      <cmd19 "if and(isplugininstalled(plugin-brukersaint),IsFileType('p4p')) then BSINI else none">
       <cmd20 cmd1="if strcmp(%4,filename()) then none else 'clear'">
       <cmd23 "syncbc">
       <cmd24 "spy.reset_file_in_OFS(solution_image.htm)">
@@ -870,18 +870,14 @@
 <skin help="Changes the Olex2 Gui Skin"
   <body
     <args
-      <arg1 name="name" def="default"> 
-      <arg2 name="skin_extension" def="None"> 
+      <arg1 name="name" def=""> 
+      <arg2 name="forece" def="false"> 
     />
     <cmd 
-      <cmd1 "SetVar(gui_skin_name,%1)">
-      <cmd1 "SetVar(gui_skin_extension,%2)">
-      <cmd1 "spy.SetParam(olex2.force_images,True)">
-      <cmd2 "spy.run_skin change">
+      <cmd1 XXX"spy.SetParam(olex2.force_images,True)">
+      <cmd2 "spy.change_skin(%1,%2)">
       <cmd3 "spy.setAllMainToolbarTabButtons()">
-      <cmd4 "spy.resize_to_panelwidth -i='news/news.png'">
-      <cmd5 "updatehtml">
-      <cmd1 "spy.SetParam(olex2.force_images,False)">
+      <cmd1 XXX"spy.SetParam(olex2.force_images,False)">
     />
   />
 />
