@@ -819,10 +819,12 @@ def get_template(name):
   else:
     return None
 
-def makeHtmlBottomPop(args, pb_height = 50, y = 0, panel_diff = 22):
+def makeHtmlBottomPop(args, pb_height = 50, y = 0):
+  panel_diff = OV.GetParam('gui.htmlpanelwidth_margin_adjust')
   txt = args.get('txt',None)
   name = args.get('name',"test")
   replace_str = args.get('replace',None)
+  modequalifiers = args.get('modequalifiers',None)
   
   import OlexVFS
   from ImageTools import ImageTools
@@ -831,6 +833,7 @@ def makeHtmlBottomPop(args, pb_height = 50, y = 0, panel_diff = 22):
   if not txt:
     txt = get_template(name)
     txt = txt.replace(r"<MODENAME>",replace_str.upper())
+    txt = txt.replace(r"<MODEQUALIFIERS>",modequalifiers.upper())
   pop_html = name
   pop_name = name
   htm_location = "%s.htm" %pop_html
@@ -871,6 +874,7 @@ def OnModeChange(*args):
   mode_disp = ""
   args = args[0].split()
   modes_with_other_stuff_l = ["grow", "name"]
+  modequalifiers = ""
   for item in args:
     for m in modes_with_other_stuff_l:
       if m in item:
@@ -879,6 +883,9 @@ def OnModeChange(*args):
     mode = mode + " " + item
     if i < 2:
       mode_disp += " " + item
+    if i >= 2:
+      modequalifiers += item
+  modequalifiers = modequalifiers.strip("=")
   mode = mode.strip()
   mode_disp = mode_disp.strip()
   
@@ -914,7 +921,7 @@ def OnModeChange(*args):
     OV.SetParam('olex2.short_mode',None)
   else:
     OV.SetParam('olex2.in_mode',mode.split("=")[0])
-    makeHtmlBottomPop({'replace':mode_disp, 'name':'pop_mode'}, pb_height=50)
+    makeHtmlBottomPop({'replace':mode_disp, 'name':'pop_mode', 'modequalifiers':modequalifiers}, pb_height=50)
     if active_mode:
       use_image= "%son.png" %active_mode
       control = "IMG_%s" %active_mode.upper()
