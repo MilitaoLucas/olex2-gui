@@ -3,7 +3,6 @@
   Copy Near 
   Add H 
   Grow Mode 
-  Center on Cell 
   Assemble 
   Centre on Cell 
   Largest Part

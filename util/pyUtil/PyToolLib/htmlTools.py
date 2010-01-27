@@ -115,7 +115,7 @@ def makeHtmlTableRow(dictionary):
   dictionary.setdefault('font', 'size="2"')
   dictionary.setdefault('trVALIGN','center')
   dictionary.setdefault('trALIGN','left')
-  dictionary.setdefault('fieldWidth','40%%')
+  dictionary.setdefault('fieldWidth','30%%')
   dictionary.setdefault('fieldVALIGN','center')
   dictionary.setdefault('fieldALIGN','left')
   
@@ -127,11 +127,11 @@ def makeHtmlTableRow(dictionary):
       href = "%(function)sFileOpen('%(caption)s','%(filter)s','%(folder)s'))>>updatehtml" %chooseFile_dict
       pass
     chooseFileText = '''
-    <tr>
+    <td>
       <a href="%s">
         <zimg border="0" src="gui/images/toolbar-open.png">
       </a>
-    </tr>
+    </td>
     ''' %href
     dictionary['chooseFile'] = chooseFileText
   else:
@@ -852,8 +852,8 @@ def OnModeChange(*args):
   global last_mode
   debug = OV.GetParam("olex2.debug")
   d = {
-    'move sel':'button-move_near',
-    'move sel -c=':'button-copy_near',    
+    'movesel':'button-move_near',
+    'movesel -c=':'button-copy_near',
     'grow':'button-grow_mode',
     'split -r=EADP':'button_full-move_atoms_or_model_disorder',
     'split':'button_full-move_atoms_or_model_disorder',
@@ -863,6 +863,7 @@ def OnModeChange(*args):
     'occu':'button-set_occu',
     'off':None
   }
+  
   
   name = 'mode'
   mode = ""

@@ -16,6 +16,21 @@ global sizedraw
 sizedraw_dummy_draw  = ImageDraw.Draw(Image.new('RGBA',(300, 300)))
 import olx
 
+#self.params.html.highlight_colour.rgb = self.params.html.highlight_colour.rgb
+#self.params.timage.colour.rgb = self.params.timage.colour.rgb
+#self.params.html.bg_colour.rgb = self.params.html.bg_colour.rgb
+#self.params.html.table_bg_colour.rgb = self.params.html.table_bg_colour.rgb
+#self.params.html.font_colour.rgb = self.params.html.font_colour.rgb
+#self.params.logo_colour.rgb = self.params.logo_colour.rgb
+#self.params.html.link_colour.rgb = self.params.html.link_colour.rgb
+#self.params.html.input_bg_colour.rgb = self.params.html.input_bg_colour.rgb
+#self.params.html.base_colour.rgb = self.params.html.base_colour.rgb
+#self.params.html.table_firstcol_colour.rgb = self.params.html.table_firstcol_colour.rgb
+#self.params.button_colouring.rgb = self.params.button_colouring.rgb
+#self.params.grey.rgb = self.params.grey.rgb
+#self.params.green.rgb = self.params.green.rgb
+#self.params.red.rgb = self.params.red.rgb
+
 
 class ImageTools(FontInstances):
   def __init__(self):
@@ -117,7 +132,10 @@ class ImageTools(FontInstances):
 
   def HTMLColorToRGB(self, colorstring):
       """ convert #RRGGBB to an (R, G, B) tuple """
-      colorstring = colorstring.strip()
+      try:
+        colorstring = colorstring.strip()
+      except:
+        return colorstring
       if colorstring[0] == '#': colorstring = colorstring[1:]
       if len(colorstring) != 6:
           raise ValueError, "input #%s is not in #RRGGBB format" % colorstring
@@ -200,9 +218,7 @@ class ImageTools(FontInstances):
     return image
 
   def resize_skin_logo(self, width):
-    #self.getVariables('gui')
-    logopath = r"%s" %(self.gui_skin_logo_name)
-    logopath = logopath.replace("basedir()", self.basedir)
+    logopath = "%s/%s" %(self.basedir, OV.GetParam('gui.skin.logo_name'))
     if os.path.exists(logopath):
       im = Image.open(logopath)
       width = int(width) - 20
@@ -214,16 +230,17 @@ class ImageTools(FontInstances):
     else:
       pass
     return "Done"
+  
 
   def resize_to_panelwidth(self, args):
     name = args['i']
     colourize = args.get('c',False)
     path = ("%s/etc/%s" %(self.basedir, name))
-    width = OV.FindValue('gui_htmlpanelwidth')
+    width = OV.GetParam('gui.htmlpanelwidth')
     if os.path.exists(path):
       im = Image.open(path)
       if colourize:
-        im = self.colourize(im, (0,0,0), OV.FindValue('gui_logo_colour')) 
+        im = self.colourize(im, (0,0,0), OV.GetParam('gui.logo_colour')) 
       width = int(width) - 47
       factor = im.size[0]/width
       height = int(im.size[1] / factor)
@@ -262,30 +279,34 @@ class ImageTools(FontInstances):
     draw.line((begin ,end), fill=self.adjust_colour(colour, luminosity = 1))
     pass
 
-  def add_whitespace(self, image, side, weight, colour, margin_left=0, margin_right=0, margin_top=0, margin_bottom=0):
+  def add_whitespace(self, image, side, weight, colour, margin_left=0, margin_right=0, margin_top=0, margin_bottom=0, overwrite=False):
     width, height = image.size
     top = 0 + margin_top
     left = 0 + margin_left
     bottom = height - margin_bottom
     right = width - margin_right
+    if overwrite:
+      weight_add = 0
+    else:
+      weight_add = weight
     if side == "top":
       whitespace = Image.new('RGBA', (width - margin_left - margin_right, weight), colour)
-      canvas = Image.new('RGBA', (width,height + weight),(0,0,0,0))
+      canvas = Image.new('RGBA', (width,height + weight_add),(0,0,0,0))
       canvas.paste(whitespace, (margin_left, 0))
       canvas.paste(image, (0, weight))
     elif side == "bottom":
       whitespace = Image.new('RGBA', (width - margin_left - margin_right, weight), colour)
-      canvas = Image.new('RGBA', (width,height + weight),(0,0,0,0))
+      canvas = Image.new('RGBA', (width,height + weight_add),(0,0,0,0))
       canvas.paste(whitespace, (margin_left, height))
       canvas.paste(image, (0, 0))
     elif side == "right":
       whitespace = Image.new('RGBA', (weight, height - margin_top - margin_bottom), colour)
-      canvas = Image.new('RGBA', (width + weight,height),(0,0,0,0))
+      canvas = Image.new('RGBA', (width + weight_add, height),(0,0,0,0))
       canvas.paste(whitespace, (width, margin_top))
       canvas.paste(image, (0, 0))
     elif side == "left":
       whitespace = Image.new('RGBA', (weight, height - margin_top - margin_bottom), colour)
-      canvas = Image.new('RGBA', (width + weight,height),(0,0,0,0))
+      canvas = Image.new('RGBA', (width + weight_add, height),(0,0,0,0))
       canvas.paste(whitespace, (0, margin_top))
       canvas.paste(image, (weight, 0))
     return canvas
@@ -294,7 +315,13 @@ class ImageTools(FontInstances):
     import ImageOps
     #IM = self.removeTransparancy(IM, (255,255,255))
     IM= IM.convert("L")
-    IM = ImageOps.colorize(IM, col_1, col_2) 
+    if type(col_1) == str:
+      col_1 = self.RGBToHTMLColor(col_1)
+      col_2 = self.RGBToHTMLColor(col_2)
+    try:
+      IM = ImageOps.colorize(IM, col_1, col_2) 
+    except:
+      pass
     return IM
 
   
@@ -356,22 +383,28 @@ class ImageTools(FontInstances):
 
   def adjust_colour(self, colour, hue=0, luminosity=1, saturation=1):
     hue = float(hue)
-    luminosity = float(luminosity)
-    saturation = float(saturation)
+    try:
+      luminosity = float(luminosity)
+      saturation = float(saturation)
+    except:
+      pass
     if colour == 'base':
-      colour = self.gui_timage_colour
+      colour = self.params.timage.base_colour.rgb
     if colour == "bg":
-      colour = self.gui_html_bg_colour
+      colour = self.params.html.bg_colour.rgb
     if colour == "highlight":
-      colour = self.gui_html_highlight_colour
+      colour = self.params.html.highlight_colour.rgb
     if colour == "gui_html_table_bg_colour":
-      colour = self.gui_html_table_bg_colour
+      colour = self.params.html.table_bg_colour.rgb
     else:
       colour = colour
 
     if "#" in colour:
       colour = ImageColor.getrgb(colour)
-    c = self.colorsys.rgb_to_hls(*[x/255.0 for x in colour])
+    try:
+      c = self.colorsys.rgb_to_hls(*[x/255.0 for x in colour])
+    except:
+      pass
     l = list(c)
     l[0] = l[0] + hue/360.
     if l[0] > 1:
@@ -506,7 +539,10 @@ class ImageTools(FontInstances):
       rel_size = valign[1]
       position = valign[0]
       font_size = int(rel_size * image_size[1])
-      font = self.fonts[font_name]["fontInstance"].get(font_size,None)
+      try:
+        font = self.fonts[font_name]["fontInstance"].get(font_size,None)
+      except:
+        pass
       if not font:
         font = self.registerFontInstance(font_name, font_size)
 
@@ -574,19 +610,23 @@ class ImageTools(FontInstances):
     elif align == "right":
       left = (self.align_text(draw, txt, font, max_width, 'right'))
       
+    wX, wY = draw.textsize(txt, font=font)
     if getXY_only:
-      wX, wY = draw.textsize(txt, font=font)
       return wX, wY
     
     if not self.abort:
+      if type(font_colour) != str and type(font_colour) != tuple and type(font_colour) != unicode:
+        try:
+          font_colour = font_colour.hexadecimal
+        except Exception, ex:
+          print("font_colour is ill defined: %s" %ex)
       try:
-        if "(" in font_colour:
-          font_colour = eval(font_colour)
         draw.text((left,int(top)), txt, font=font, fill=font_colour)
-      except:
-        print "Text %s could not be drawn" %txt
+      except Exception, ex:
+        print "Text %s could not be drawn: %s" %(txt, ex)
     else:
-      pass    
+      pass
+    return wX, wY
     
   def addTransparancy(self, im, target_colour = (255,255,255)):
     mask = im.point(lambda i : i == 0 and 0) # create RGB mask
@@ -665,9 +705,9 @@ class ImageTools(FontInstances):
   def draw_advertise_new(self,draw,image):
     max_width = image.size[0]
     max_height = image.size[1]
-    font_name = "%s Bold" %self.gui_timage_font_name
+    font_name = "%s Bold" %OV.GetParam('gui.html.font_name')
     font_size = int(max_height)
-    colour = self.gui_html_highlight_colour
+    colour = OV.GetParam('gui.html.highlight_colour')
     txt="New!"
     dX, dY = self.getTxtWidthAndHeight(txt, font_name, font_size)
     
