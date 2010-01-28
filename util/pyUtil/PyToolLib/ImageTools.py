@@ -300,13 +300,13 @@ class ImageTools(FontInstances):
     elif side == "bottom":
       whitespace = Image.new('RGBA', (width - margin_left - margin_right, weight), colour)
       canvas = Image.new('RGBA', (width,height + weight_add),(0,0,0,0))
-      canvas.paste(whitespace, (margin_left, height))
+      canvas.paste(whitespace, (margin_left, height - weight + margin_top))
       canvas.paste(image, (0, 0))
     elif side == "right":
       whitespace = Image.new('RGBA', (weight, height - margin_top - margin_bottom), colour)
       canvas = Image.new('RGBA', (width + weight_add, height),(0,0,0,0))
-      canvas.paste(whitespace, (width, margin_top))
       canvas.paste(image, (0, 0))
+      canvas.paste(whitespace, (width - weight + weight_add, margin_top))
     elif side == "left":
       whitespace = Image.new('RGBA', (weight, height - margin_top - margin_bottom), colour)
       canvas = Image.new('RGBA', (width + weight_add, height),(0,0,0,0))
@@ -745,7 +745,8 @@ class ImageTools(FontInstances):
     OlexVFS.save_image_to_olex(IM, "new", 2)
 
 
-  def create_arrows(self, draw, height, direction, colour, type='simple', h_space=4, v_space=4, offset_y = 0, char_pos=(0,0), char_char="+"):
+  def create_arrows(self, draw, height, direction, colour, type='simple', h_space=4, v_space=4, offset_y = 0, char_pos=(0,0), char_char="+", width=10):
+    
     arrow_height = height - (2*v_space)
     arrow_width = arrow_height 
     if arrow_width%2 != 0:
@@ -791,12 +792,12 @@ class ImageTools(FontInstances):
         middle = (12, 5)
         draw.polygon((begin, middle, end), fill=self.adjust_colour(colour, luminosity = 0.6))
     elif type == "char":
-      if direction == 'up':
-        font_size = 13
-      else:
-        font_size = 13
-      
+      font_size = 13
       font_name = "%s Bold" %self.gui_timage_font_name
+      if char_pos == "Auto":
+        wX, wY = self.getTxtWidthAndHeight(char_char,font_name,font_size)
+        char_pos = (width - wX -5, 1)
+
       self.write_text_to_draw(
         draw, 
         char_char, 

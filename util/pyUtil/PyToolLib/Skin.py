@@ -69,6 +69,7 @@ OV.registerMacro(Skin_instance.run_skin, 'function-The function to call')
 
 def change_skin(skin_name=None, force=False):
   gui_phil_path = "%s/gui.phil" %(OV.DataDir())
+  gui_phil_template_path = "%s/gui_template.phil" %(OV.DataDir())
 
   timing = False
   if timing:
@@ -103,6 +104,9 @@ def change_skin(skin_name=None, force=False):
     t = time.time()
     print "After 'Reading PHIL Stuff': %.2f s (%.2f s)" % ((t - t1), (t - t1))
     t2 = t
+
+  olx.phil_handler.save_param_file(
+    file_name=gui_phil_template_path, scope_name='gui', diff_only=True)
     
   try:
     adjust_skin_luminosity()
@@ -176,7 +180,14 @@ def adjust_skin_colours():
 def adjust_skin_luminosity():
   base_colour = OV.GetParam('gui.html.base_colour')
   
-  scope_l= ['gui', 'gui.timage', 'gui.snumtitle', 'gui.timage.button', 'gui.timage.h1', 'gui.timage.h3', 'gui.timage.tab']
+  scope_l= ['gui',
+            'gui.timage',
+            'gui.timage.button',
+            'gui.timage.h1',
+            'gui.timage.h3',
+            'gui.timage.tab',
+            'gui.timage.ctab',
+            'gui.timage.snumtitle',]
   for scope in scope_l:
     gui = olx.phil_handler.get_scope_by_name(scope)
     for object in gui.active_objects():
