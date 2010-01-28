@@ -2092,7 +2092,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       for state in states:
         use_new = True
         if use_new:
-          width = int(self.available_width/len(tabItems))
+          width = int(self.available_width/len(tabItems)) - 1
           image = self.make_timage(item_type='tab', item=item, state=state, width=width)
         else:
           image = self.tab_items(item, state)
@@ -2136,14 +2136,15 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       #image.save(r"%s\etc\gui\images\label-%s.png" %(datadir, item[0]), "PNG")
 
   def make_cbtn_items(self, font_name = 'Vera'):
+
     new_style = True
     if new_style:
       buttons = ['Solve', 'Refine', 'Report']
-      states = ['on', 'off']
+      states = ['on', 'off', 'inactive']
       for state in states:  
         for item in buttons:
-          width = int(self.available_width/3) - 1
-          image = self.make_timage(item_type='button', item=item, state=state, width=width)
+          width = int(round(self.available_width/3,0)) - 5 
+          image = self.make_timage(item_type='cbtn', item=item, state=state, width=width)
           OlexVFS.save_image_to_olex(image,'%s-%s%s.png' %('cbtn', item.lower(), state), 2)
 
     else:
@@ -2612,10 +2613,16 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if not width:
       width = self.width
       
-    base_colour = OV.GetParam('gui.timage.%s.base_colour' %item_type).rgb
+    base_colour = OV.GetParam('gui.timage.%s.base_colour' %item_type)
     if not base_colour:
-      base_colour = OV.GetParam('gui.timage.base_colour').rgb
-    
+      base_colour = OV.GetParam('gui.timage.base_colour')
+      if not base_colour:
+        base_colour = OV.GetParam('gui.base_colour').rgb
+      else:
+        base_colour = base_colour.rgb
+    else:
+      base_colour = base_colour.rgb
+
     grad_step = OV.GetParam('gui.timage.%s.grad_step' %item_type)
     grad_colour = OV.GetParam('gui.timage.%s.grad_colour' %item_type).rgb
     font_colour = OV.GetParam('gui.timage.%s.font_colour' %item_type).rgb
@@ -2645,6 +2652,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     shadow = OV.GetParam('gui.timage.%s.shadow' %item_type)
     if shadow is None: shadow = True
     title_case = True
+    border = False
     
     if item_type == "h1":
       width += 1
@@ -2669,10 +2677,20 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       arrows = False
       if state == "on":
         grad_colour = self.highlight_colour
-      cbtn = ['solve', 'refine', 'report']  
-      if item.lower() in cbtn:
-        arrows = 'bar:right:25,char:on...:off...'
-        corner_rad = 0
+        
+    elif item_type =='cbtn':
+      underground = OV.GetParam('gui.html.bg_colour').rgb
+
+      OV.SetParam('olex2.main_toolbar_vline_position', width - 25 - 10)
+      if state == 'on':
+        font_colour = self.highlight_colour 
+      else:
+        font_colour = IT.adjust_colour(grad_colour, luminosity = 0.5)
+        
+      border = True
+      border_weight = 1
+      border_fill = IT.adjust_colour(grad_colour, luminosity = 0.8)
+
       
     if "GB" in self.gui_language_encoding: #--!--
       height = height + 2
@@ -2728,6 +2746,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         on_L = 1.0
       image = self.make_arrows(state, width, arrows, image, height, base_colour, off_L, on_L)
 
+    if border:
+      image = self.make_timage_border(image, fill = border_fill)
+      
     if corner_rad:
       rounded = OV.GetParam('gui.timage.%s.rounded' %item_type)
       if rounded is None: rounded = '1111'
@@ -2737,6 +2758,15 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       image = self.make_shadow(image, underground, corner_rad)
       
     filename = item
+    return image
+
+  def make_timage_border (self, image, weight=1, fill='#ff0000'):
+    width, height = image.size
+    draw = ImageDraw.Draw(image)
+    draw.line((0,0,width-1,0), fill = fill)
+    draw.line((0,height -1,width-1,height -1), fill = fill)
+    draw.line((0,0,0,height - 1), fill = fill)
+    draw.line((width -1,0,width-1,height -1), fill = fill)
     return image
 
   def make_corners(self, rounded, image, corner_rad, underground):
