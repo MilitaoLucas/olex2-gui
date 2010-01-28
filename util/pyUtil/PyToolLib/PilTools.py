@@ -784,217 +784,217 @@ WHERE (((submission.ID)="%s"));""" %sNum
 
 
   def sNumTitleStyle1(self, items, font_name="Arial Bold", font_size=17):
-
-    base_colour = self.params.snumtitle.base_colour.rgb
-    height = self.params.snumtitle.height
-    font_name = self.params.snumtitle.font_name
-    grad = self.params.snumtitle.grad
-    grad_step = self.params.snumtitle.grad_step
-    
-    bg_colour = self.adjust_colour(base_colour, luminosity = self.params.snumtitle.bg_colour_L)
-    grad_colour = self.adjust_colour(base_colour, luminosity = self.params.snumtitle.grad_colour_L)
-    font_colour = self.adjust_colour(base_colour, luminosity = self.params.snumtitle.font_colour_L)
-
-
-    width = self.width
-    self.height = height
-    gap = 0
-    bgap = height - gap
-    size = (int(width), int(height))
-    #cs = copy.deepcopy(cS1)
-
-    if olx.IsFileType("cif") == 'true':
-      base_colour = (255, 0, 0)
-
-    image = Image.new('RGBA', size, base_colour)
-
-    draw = ImageDraw.Draw(image)
-    
-    if grad:
-      self.gradient_bgr(draw, width, height, colour = grad_colour, fraction=1, step=grad_step)
-    cache = {}
-    pos = (('Rounded'),('Rounded'),('Square'),('Square'))
-    #pos = (('Rounded'),('Rounded'),('Rounded'),('Rounded'))
-    #pos = (('Square'),('Square'),('Square'),('Square'))
-    image = RoundedCorners.round_image(image, cache, 2, pos=pos) #used to be 10
-
-    #border_rad=20
-    #self.make_border(rad=border_rad,
-            #draw=draw,
-            #width=width,
-            #height=height,
-            #bg_colour=base_colour,
-            #border_colour=base_colour,
-            #cBottomLeft=False,
-            #cBottomRight=False,
-            #border_hls = (0, 1.2, 1)
-          #)
-
     sNum = items["sNum"]
-    if sNum == "none": sNum = "No Structure"
-    wX, wY = self.write_text_to_draw(draw, 
-                       sNum, 
-                       top_left=(6, 1), 
-                       font_name=font_name, 
-                       font_size=17, 
-                       image_size = image.size,
-                       valign=("middle", 0.8),
-                       font_colour=self.adjust_colour(base_colour, luminosity = 2.0)
-                      )
-    info_size = OV.GetParam('gui.snumtitle.filefullinfo_size')
-
-    colour = OV.GetParam('gui.snumtitle.filefullinfo_colour').rgb
-    self.drawFileFullInfo(draw, colour, right_margin=5, height=height, font_size=info_size, left_start=wX + 15)
-    self.drawSpaceGroupInfo(draw, luminosity=1.8, right_margin=3)
+    a = timage()
+    return a.make_timage('snumtitle', sNum, 'on')
+    #base_colour = self.params.snumtitle.base_colour.rgb
+    #height = self.params.snumtitle.height
+    #font_name = self.params.snumtitle.font_name
+    #grad_step = self.params.snumtitle.grad_step
+    
+    #bg_colour = self.adjust_colour(base_colour, luminosity = self.params.snumtitle.bg_colour_L)
+    #grad_colour = self.adjust_colour(base_colour, luminosity = self.params.snumtitle.grad_colour_L)
+    #font_colour = self.adjust_colour(base_colour, luminosity = self.params.snumtitle.font_colour_L)
 
 
-    ### Draw this info ONLY if there is a connection to the MySQL database
-    #if self.have_connection:
-      #self.drawDBInfo()
+    #width = self.width
+    #self.height = height
+    #gap = 0
+    #bgap = height - gap
+    #size = (int(width), int(height))
+    ##cs = copy.deepcopy(cS1)
+
+    #if olx.IsFileType("cif") == 'true':
+      #base_colour = (255, 0, 0)
+
+    #image = Image.new('RGBA', size, base_colour)
+
+    #draw = ImageDraw.Draw(image)
+    
+    #if grad_step:
+      #self.gradient_bgr(draw, width, height, colour = grad_colour, fraction=1, step=grad_step)
+    #cache = {}
+    #pos = (('Rounded'),('Rounded'),('Square'),('Square'))
+    ##pos = (('Rounded'),('Rounded'),('Rounded'),('Rounded'))
+    ##pos = (('Square'),('Square'),('Square'),('Square'))
+    #image = RoundedCorners.round_image(image, cache, 2, pos=pos) #used to be 10
+
+    ##border_rad=20
+    ##self.make_border(rad=border_rad,
+            ##draw=draw,
+            ##width=width,
+            ##height=height,
+            ##bg_colour=base_colour,
+            ##border_colour=base_colour,
+            ##cBottomLeft=False,
+            ##cBottomRight=False,
+            ##border_hls = (0, 1.2, 1)
+          ##)
+
+    #sNum = items["sNum"]
+    #if sNum == "none": sNum = "No Structure"
+    #wX, wY = self.write_text_to_draw(draw, 
+                       #sNum, 
+                       #top_left=(6, 1), 
+                       #font_name=font_name, 
+                       #font_size=17, 
+                       #image_size = image.size,
+                       #valign=("middle", 0.8),
+                       #font_colour=self.adjust_colour(base_colour, luminosity = 2.0)
+                      #)
+    #info_size = OV.GetParam('gui.timage.snumtitle.filefullinfo_size')
+    #colour = OV.GetParam('gui.timage.snumtitle.filefullinfo_colour').rgb
+    #self.drawFileFullInfo(draw, colour, right_margin=5, height=height, font_size=info_size, left_start=wX + 15)
+    #self.drawSpaceGroupInfo(draw, luminosity=1.8, right_margin=3)
+
+
+    #### Draw this info ONLY if there is a connection to the MySQL database
+    ##if self.have_connection:
+      ##self.drawDBInfo()
       
-    #dup = ImageChops.duplicate(image)
-    #dup = ImageChops.invert(dup)
-    #dup = ImageChops.offset(dup, 1, 1)
-    #image = ImageChops.blend(image, dup, 0.05)
+    ##dup = ImageChops.duplicate(image)
+    ##dup = ImageChops.invert(dup)
+    ##dup = ImageChops.offset(dup, 1, 1)
+    ##image = ImageChops.blend(image, dup, 0.05)
       
-    return image
+    #return image
 
-  def drawFileFullInfo(self, draw, colour='#ff0000', right_margin=0, height=10, font_name="Verdana", font_size=8, left_start = 40):
-    base_colour = self.params.html.base_colour.rgb
-    txt = OV.FileFull()
-    if txt == "none":
-      return
-    font = self.registerFontInstance(font_name, font_size)
-    tw = (draw.textsize(txt, font)[0])
-    n = int(len(txt)/2)
-    txtbeg = txt[:n]
-    txtend = txt [-n:]
-    while tw > self.width - left_start:
-      txtbeg = txt[:n]
-      txtend = txt [-n:]
-      tw = (draw.textsize("%s...%s" %(txtbeg, txtend), font)[0])
-      n -= 1
-    txt = "%s...%s" %(txtbeg, txtend)
+  #def drawFileFullInfo(self, draw, colour='#ff0000', right_margin=0, height=10, font_name="Verdana", font_size=8, left_start = 40):
+    #base_colour = self.params.html.base_colour.rgb
+    #txt = OV.FileFull()
+    #if txt == "none":
+      #return
+    #font = self.registerFontInstance(font_name, font_size)
+    #tw = (draw.textsize(txt, font)[0])
+    #n = int(len(txt)/2)
+    #txtbeg = txt[:n]
+    #txtend = txt [-n:]
+    #while tw > self.width - left_start:
+      #txtbeg = txt[:n]
+      #txtend = txt [-n:]
+      #tw = (draw.textsize("%s...%s" %(txtbeg, txtend), font)[0])
+      #n -= 1
+    #txt = "%s...%s" %(txtbeg, txtend)
       
-    wX, wY  = draw.textsize(txt, font)
-    left_start =  (self.width-wX) - right_margin
-    top = height - wY - 2
-    self.write_text_to_draw(draw, 
-                       txt, 
-                       top_left=(left_start, top), 
-                       font_name=font_name, 
-                       font_size=font_size, 
-                       font_colour=colour)
+    #wX, wY  = draw.textsize(txt, font)
+    #left_start =  (self.width-wX) - right_margin
+    #top = height - wY - 2
+    #self.write_text_to_draw(draw, 
+                       #txt, 
+                       #top_left=(left_start, top), 
+                       #font_name=font_name, 
+                       #font_size=font_size, 
+                       #font_colour=colour)
 
 
-  def drawSpaceGroupInfo(self, draw, luminosity=1.9, right_margin=12, font_name="Times Bold"):
-    base_colour = self.params.html.base_colour.rgb
-    left_start = 120
-    font_colour = self.adjust_colour(base_colour, luminosity=luminosity)
-    scale = OV.GetParam('gui.sginfo.scale')
-    try:
-      txt_l = []
-      txt_sub = []
-      txt_norm = []
-      try:
-        txt = OV.olex_function('sg(%h)')
-      except:
-        pass
-      if not txt:
-        txt="ERROR"
-      txt = txt.replace(" 1", "")
-      txt = txt.replace(" ", "")
-      txt_l = txt.split("</sub>") 
-      if len(txt_l) == 1:
-        txt_norm = [(txt,0)]
-      try:
-        font_base = "Times"
-        #font_slash = self.registerFontInstance("Times Bold", 18)
-        #font_number = self.registerFontInstance("Times Bold", 14)
-        #font_letter = self.registerFontInstance("Times Bold Italic", 15.5)
-        #font_sub = self.registerFontInstance("Times Bold", 10)
-        font_bar = self.registerFontInstance("%s Bold" %font_base, int(11 * scale))
-        font_slash = self.registerFontInstance("%s Bold" %font_base, int(18 * scale))
-        font_number = self.registerFontInstance("%s Bold" %font_base, int(14 * scale))
-        font_letter = self.registerFontInstance("%s Bold Italic" %font_base, int(15 * scale))
-        font_sub = self.registerFontInstance("%s Bold" %font_base, int(10 * scale))
-        norm_kern = 2
-        sub_kern = 0
-      except:
-        font_name = "Arial"
-        font_bar = self.registerFontInstance("%s Bold" %font_base, 12)
-        font_slash = self.registerFontInstance("%s Bold" %font_base, 18)
-        font_number = self.registerFontInstance("%s Bold" %font_base, 14)
-        font_letter = self.registerFontInstance("%s Bold Italic" %font_base, 15)
-        font_norm = self.registerFontInstance(font_name, 13)
-        font_sub = self.registerFontInstance(font_name, 10)
-        norm_kern = 0
-        sub_kern = 0
-      textwidth = 0
-      for item in txt_l:
-        if item:
-          try:
-            sub = item.split("<sub>")[1]
-          except:
-            sub = ""
-          norm = item.split("<sub>")[0]
-          tw_s = (draw.textsize(sub, font=font_sub)[0]) + sub_kern
-          tw_n = (draw.textsize(norm, font=font_number)[0]) + norm_kern
-          txt_sub.append((sub, tw_s))
-          txt_norm.append((norm, tw_n))
-          textwidth += (tw_s + tw_n)
-    except:
-      txt_l = []
-    if txt_l:
-      i = 0
-      left_start =  (self.width-textwidth) - right_margin -5
-      cur_pos = left_start
-      advance = 0
-      after_kern = 0
-      for item in txt_l:
-        if item:
-          text_normal = txt_norm[i][0]
-          for character in text_normal:
-            if character == "":
-              continue
-            cur_pos += advance
-            cur_pos += after_kern
-            after_kern = 2
-            advance = 0
-            try:
-              int(character)
-              font = font_number
-              top = 0
-              after_kern = 2
-            except:
-              font = font_letter
-              top = -1
-              if character == "P" or character == "I" or character == "C":
-                norm_kern = -2
-                after_kern = 0
-                character = " %s" %character
-            if character == "-":
-              draw.text((cur_pos + 1, -10), "_", font=font_bar, fill=font_colour)
-              draw.text((cur_pos + 1, -9), "_", font=font_bar, fill=font_colour)
-              advance = -1
-              norm_kern = 0
-            elif character == "/":
-              norm_kern = 0
-              after_kern = 0
-              draw.text((cur_pos -2, -3), "/", font=font_slash, fill=font_colour)
-              advance = ((draw.textsize("/", font=font_slash)[0]) + norm_kern) - 1
-            else:
-              draw.text((cur_pos + norm_kern, top), "%s" %character, font=font, fill=font_colour)
-              advance = (draw.textsize(character, font=font)[0]) + norm_kern
+  #def drawSpaceGroupInfo(self, draw, luminosity=1.9, right_margin=12, font_name="Times Bold"):
+    #base_colour = self.params.html.base_colour.rgb
+    #left_start = 120
+    #font_colour = self.adjust_colour(base_colour, luminosity=luminosity)
+    #scale = OV.GetParam('gui.sginfo.scale')
+    #try:
+      #txt_l = []
+      #txt_sub = []
+      #txt_norm = []
+      #try:
+        #txt = OV.olex_function('sg(%h)')
+      #except:
+        #pass
+      #if not txt:
+        #txt="ERROR"
+      #txt = txt.replace(" 1", "")
+      #txt = txt.replace(" ", "")
+      #txt_l = txt.split("</sub>") 
+      #if len(txt_l) == 1:
+        #txt_norm = [(txt,0)]
+      #try:
+        #font_base = "Times"
+        ##font_slash = self.registerFontInstance("Times Bold", 18)
+        ##font_number = self.registerFontInstance("Times Bold", 14)
+        ##font_letter = self.registerFontInstance("Times Bold Italic", 15.5)
+        ##font_sub = self.registerFontInstance("Times Bold", 10)
+        #font_bar = self.registerFontInstance("%s Bold" %font_base, int(11 * scale))
+        #font_slash = self.registerFontInstance("%s Bold" %font_base, int(18 * scale))
+        #font_number = self.registerFontInstance("%s Bold" %font_base, int(14 * scale))
+        #font_letter = self.registerFontInstance("%s Bold Italic" %font_base, int(15 * scale))
+        #font_sub = self.registerFontInstance("%s Bold" %font_base, int(10 * scale))
+        #norm_kern = 2
+        #sub_kern = 0
+      #except:
+        #font_name = "Arial"
+        #font_bar = self.registerFontInstance("%s Bold" %font_base, 12)
+        #font_slash = self.registerFontInstance("%s Bold" %font_base, 18)
+        #font_number = self.registerFontInstance("%s Bold" %font_base, 14)
+        #font_letter = self.registerFontInstance("%s Bold Italic" %font_base, 15)
+        #font_norm = self.registerFontInstance(font_name, 13)
+        #font_sub = self.registerFontInstance(font_name, 10)
+        #norm_kern = 0
+        #sub_kern = 0
+      #textwidth = 0
+      #for item in txt_l:
+        #if item:
+          #try:
+            #sub = item.split("<sub>")[1]
+          #except:
+            #sub = ""
+          #norm = item.split("<sub>")[0]
+          #tw_s = (draw.textsize(sub, font=font_sub)[0]) + sub_kern
+          #tw_n = (draw.textsize(norm, font=font_number)[0]) + norm_kern
+          #txt_sub.append((sub, tw_s))
+          #txt_norm.append((norm, tw_n))
+          #textwidth += (tw_s + tw_n)
+    #except:
+      #txt_l = []
+    #if txt_l:
+      #i = 0
+      #left_start =  (self.width-textwidth) - right_margin -5
+      #cur_pos = left_start
+      #advance = 0
+      #after_kern = 0
+      #for item in txt_l:
+        #if item:
+          #text_normal = txt_norm[i][0]
+          #for character in text_normal:
+            #if character == "":
+              #continue
+            #cur_pos += advance
+            #cur_pos += after_kern
+            #after_kern = 2
+            #advance = 0
+            #try:
+              #int(character)
+              #font = font_number
+              #top = 0
+              #after_kern = 2
+            #except:
+              #font = font_letter
+              #top = -1
+              #if character == "P" or character == "I" or character == "C":
+                #norm_kern = -2
+                #after_kern = 0
+                #character = " %s" %character
+            #if character == "-":
+              #draw.text((cur_pos + 1, -10), "_", font=font_bar, fill=font_colour)
+              #draw.text((cur_pos + 1, -9), "_", font=font_bar, fill=font_colour)
+              #advance = -1
+              #norm_kern = 0
+            #elif character == "/":
+              #norm_kern = 0
+              #after_kern = 0
+              #draw.text((cur_pos -2, -3), "/", font=font_slash, fill=font_colour)
+              #advance = ((draw.textsize("/", font=font_slash)[0]) + norm_kern) - 1
+            #else:
+              #draw.text((cur_pos + norm_kern, top), "%s" %character, font=font, fill=font_colour)
+              #advance = (draw.textsize(character, font=font)[0]) + norm_kern
             
-          text_in_superscript = txt_sub[i][0]
-          if text_in_superscript:
-            cur_pos += advance
-            draw.text((cur_pos + sub_kern, 5), "%s" %text_in_superscript, font=font_sub, fill=font_colour)
-            advance = (draw.textsize(text_in_superscript, font=font_sub)[0]) + sub_kern
-            after_kern = -2
-            cur_pos += advance
-        i+= 1
+          #text_in_superscript = txt_sub[i][0]
+          #if text_in_superscript:
+            #cur_pos += advance
+            #draw.text((cur_pos + sub_kern, 5), "%s" %text_in_superscript, font=font_sub, fill=font_colour)
+            #advance = (draw.textsize(text_in_superscript, font=font_sub)[0]) + sub_kern
+            #after_kern = -2
+            #cur_pos += advance
+        #i+= 1
 
 
 class timage(ImageTools):
@@ -2136,75 +2136,86 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       #image.save(r"%s\etc\gui\images\label-%s.png" %(datadir, item[0]), "PNG")
 
   def make_cbtn_items(self, font_name = 'Vera'):
-    if self.params.image_font_name:
-      font_name = self.params.image_font_name
-      font_name = "%s Bold" %font_name
-      
-    settings_button_width = 0
-    cbtn_buttons_height = 22
-    
-    all_cbtn_buttons = {
-        'image_prefix':'cbtn',
-        'height':cbtn_buttons_height,
-        'font_name':font_name,
-        #'bgcolouroff':self.adjust_colour(self.params.html.base_colour.rgb, luminosity = 1.0),
-        #'bgcolouron':self.params.html.base_colour.rgb,
-        #'fontcolouroff':self.adjust_colour(self.params.html.base_colour.rgb, luminosity = 1.6),
-        #'fontcolouron':self.params.html.highlight_colour.rgb,
-        'bgcolouroff':self.params.html.bg_colour.rgb,
-        'bgcolouron':self.params.html.bg_colour.rgb,
-        'fontcolouroff':self.params.html.base_colour.rgb,
-        'fontcolouron':self.params.html.highlight_colour.rgb,
-        'fontcolourinactive':self.adjust_colour(self.params.grey.rgb, luminosity = 2.0),
-        'bgcolourinactive':self.adjust_colour(self.params.grey.rgb, luminosity = 2.0),
-        'states':['','on', 'off', 'inactive'],
-        'outline_colour':self.adjust_colour(self.params.html.table_bg_colour.rgb, luminosity = 0.8),
-        'grad_colour':(237,237,245),
-        'vline':{'v_pos':0, 'height':18},
-        #'grad':{'grad_colour':self.adjust_colour(self.params.timage_colour, luminosity = 1.8), 
-                #'fraction':1,
-                #'increment':0.5,
-                #'step':1,
-                #},
-        'valign':("middle", 0.7),
-        'top_left':(3,1),
-        'align':'center',
-        'titleCase':False,
-        'lowerCase':True,
-        'continue_mark':True,
-        'whitespace_bottom':{'weight':1, 'colour':self.adjust_colour(self.params.html.bg_colour.rgb, luminosity = 0.98)},
+    new_style = True
+    if new_style:
+      buttons = ['Solve', 'Refine', 'Report']
+      states = ['on', 'off']
+      for state in states:  
+        for item in buttons:
+          width = int(self.available_width/3) - 1
+          image = self.make_timage(item_type='button', item=item, state=state, width=width)
+          OlexVFS.save_image_to_olex(image,'%s-%s%s.png' %('cbtn', item.lower(), state), 2)
 
-      }
-    
-    buttonItems = {
-      "cbtn-refine":
-      {
-        'txt':'refine',
-        'name':'refine',
-        'width':('auto', (3,settings_button_width), 0),
-        'whitespace_right':{'weight':1, 'colour':self.params.html.bg_colour.rgb},
-        },
-      "cbtn-solve":
-      {
-        'txt':'solve',
-        'name':'solve',
-        'width':('auto', (3,settings_button_width), 0),
-        'whitespace_right':{'weight':1, 'colour':self.params.html.bg_colour.rgb},
-        }, 
-      "cbtn-report":
-      {
-        'txt':'report',
-        'name':'report',
-        'width':('auto', (3,settings_button_width), 0),
-        'whitespace_right':False,
-      },
-    }
-    
-    for d in buttonItems:
-      buttonItems[d].update(all_cbtn_buttons)
+    else:
+      if self.params.image_font_name:
+        font_name = self.params.image_font_name
+        font_name = "%s Bold" %font_name
+        
+      settings_button_width = 0
+      cbtn_buttons_height = 22
       
-    BM = ButtonMaker(buttonItems)
-    im = BM.run()
+      all_cbtn_buttons = {
+          'image_prefix':'cbtn',
+          'height':cbtn_buttons_height,
+          'font_name':font_name,
+          #'bgcolouroff':self.adjust_colour(self.params.html.base_colour.rgb, luminosity = 1.0),
+          #'bgcolouron':self.params.html.base_colour.rgb,
+          #'fontcolouroff':self.adjust_colour(self.params.html.base_colour.rgb, luminosity = 1.6),
+          #'fontcolouron':self.params.html.highlight_colour.rgb,
+          'bgcolouroff':self.params.html.bg_colour.rgb,
+          'bgcolouron':self.params.html.bg_colour.rgb,
+          'fontcolouroff':self.params.html.base_colour.rgb,
+          'fontcolouron':self.params.html.highlight_colour.rgb,
+          'fontcolourinactive':self.adjust_colour(self.params.grey.rgb, luminosity = 2.0),
+          'bgcolourinactive':self.adjust_colour(self.params.grey.rgb, luminosity = 2.0),
+          'states':['','on', 'off', 'inactive'],
+          'outline_colour':self.adjust_colour(self.params.html.table_bg_colour.rgb, luminosity = 0.8),
+          'grad_colour':(237,237,245),
+          'vline':{'v_pos':0, 'height':18},
+          #'grad':{'grad_colour':self.adjust_colour(self.params.timage_colour, luminosity = 1.8), 
+                  #'fraction':1,
+                  #'increment':0.5,
+                  #'step':1,
+                  #},
+          'valign':("middle", 0.7),
+          'top_left':(3,1),
+          'align':'center',
+          'titleCase':False,
+          'lowerCase':True,
+          'continue_mark':True,
+          'whitespace_bottom':{'weight':1, 'colour':self.adjust_colour(self.params.html.bg_colour.rgb, luminosity = 0.98)},
+  
+        }
+      
+      buttonItems = {
+        "cbtn-refine":
+        {
+          'txt':'refine',
+          'name':'refine',
+          'width':('auto', (3,settings_button_width), 0),
+          'whitespace_right':{'weight':1, 'colour':self.params.html.bg_colour.rgb},
+          },
+        "cbtn-solve":
+        {
+          'txt':'solve',
+          'name':'solve',
+          'width':('auto', (3,settings_button_width), 0),
+          'whitespace_right':{'weight':1, 'colour':self.params.html.bg_colour.rgb},
+          }, 
+        "cbtn-report":
+        {
+          'txt':'report',
+          'name':'report',
+          'width':('auto', (3,settings_button_width), 0),
+          'whitespace_right':False,
+        },
+      }
+      
+      
+      for d in buttonItems:
+        buttonItems[d].update(all_cbtn_buttons)
+      BM = ButtonMaker(buttonItems)
+      im = BM.run()
     
 
   def make_button_items(self):
@@ -2600,8 +2611,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
   def make_timage(self, item_type, item, state, font_name="Vera", width=None):
     if not width:
       width = self.width
+      
     base_colour = OV.GetParam('gui.timage.%s.base_colour' %item_type).rgb
-    grad = OV.GetParam('gui.timage.%s.grad' %item_type)
+    if not base_colour:
+      base_colour = OV.GetParam('gui.timage.base_colour').rgb
+    
     grad_step = OV.GetParam('gui.timage.%s.grad_step' %item_type)
     grad_colour = OV.GetParam('gui.timage.%s.grad_colour' %item_type).rgb
     font_colour = OV.GetParam('gui.timage.%s.font_colour' %item_type).rgb
@@ -2630,6 +2644,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     shadow = OV.GetParam('gui.timage.%s.shadow' %item_type)
     if shadow is None: shadow = True
+    title_case = True
     
     if item_type == "h1":
       width += 1
@@ -2639,10 +2654,14 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       width -= OV.GetParam('gui.html.table_firstcol_width')
       underground = OV.GetParam('gui.html.table_bg_colour').rgb
 
-    elif item_type == "tab":
+    elif "tab" in item_type:
       underground = OV.GetParam('gui.html.bg_colour').rgb
       if state == 'on':
         font_colour = self.highlight_colour
+
+    elif item_type == "snumtitle":
+      underground = OV.GetParam('gui.html.bg_colour').rgb
+      title_case = False
         
     elif item_type == 'button':
       underground = OV.GetParam('gui.html.table_bg_colour').rgb
@@ -2650,6 +2669,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       arrows = False
       if state == "on":
         grad_colour = self.highlight_colour
+      cbtn = ['solve', 'refine', 'report']  
+      if item.lower() in cbtn:
+        arrows = 'bar:right:25,char:on...:off...'
+        corner_rad = 0
       
     if "GB" in self.gui_language_encoding: #--!--
       height = height + 2
@@ -2660,14 +2683,22 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     image = Image.new('RGBA', size, bg_colour)
     draw = ImageDraw.Draw(image)
     
-    if grad:
+    if grad_step:
       self.gradient_bgr(draw, width, height, colour = grad_colour, fraction=1, step=grad_step)
+
+
+    ## Prepare text for printing on the new image. If '-' is present in the string, this will
+    ## be replaced with a space and the parts will be made into title case.
     t = item.split("-")
     txt = ""
-    for bit in t:
-      txt += bit.title() + " "
+    if len(t) > 1:
+      for bit in t:
+        txt += bit.title() + " "
+    else:
+      txt = item
 
-    self.write_text_to_draw(draw, 
+    ## Actually print the text on the new image item.
+    wX, wY = self.write_text_to_draw(draw, 
                             txt, 
                             top_left=(left,top), 
                             font_name=font_name, 
@@ -2675,13 +2706,15 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                             image_size = image.size,
                             valign=valign,
                             align=halign, 
-                            titleCase=True,
+                            titleCase=title_case,
                             font_colour=font_colour)
     cache = {}
     
-    if item_type == "sNumTitle":
-      drawSpaceGroupInfo(draw)
-    
+    if item_type == "snumtitle":
+      info_size = OV.GetParam('gui.timage.snumtitle.filefullinfo_size')
+      colour = OV.GetParam('gui.timage.snumtitle.filefullinfo_colour').rgb
+      self.drawFileFullInfo(draw, colour, right_margin=5, height=height, font_size=info_size, left_start=wX + 15)
+      self.drawSpaceGroupInfo(draw, luminosity=1.8, right_margin=3)
       
     if self.advertise_new:
       self.draw_advertise_new(draw, image)
@@ -2725,29 +2758,16 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     return image
   
   def make_arrows(self, state, width, arrows, image, height, base_colour, off_L, on_L):
-    draw = ImageDraw.Draw(image)
+    
     if state == "off":
       fill = self.adjust_colour(base_colour, luminosity=off_L)
     elif state == "on":
       fill = self.adjust_colour(self.highlight_colour, luminosity=on_L)
-    if 'arrow' in arrows:
-      if state == 'off':
-        direction = 'right'
-      elif state == 'on':
-        direction = 'up'
-      self.create_arrows(draw, height, direction=direction, colour=fill, type='simple')
-      
-    if 'char' in arrows:
-      try:
-        char = arrows.split(state)[1].split(':')[0]
-      except:
-        side = '0'
-      self.create_arrows(draw, height, direction='down',
-                         colour=fill,
-                         type='char',
-                         char_pos=(width-20,0), char_char=char, h_space=4, v_space=4)
+    else:
+      fill = '#ff0000'
 
     if 'bar' in arrows:
+      draw = ImageDraw.Draw(image)
       try:
         side = arrows.split('bar:')[1].split(':')[0]
       except:
@@ -2758,8 +2778,40 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         weight = 2
       weight = int(round(weight * self.size_factor,0))
       image = self.add_whitespace(image=image, side=side, weight=weight, colour = fill, overwrite=True)
+      
+    if 'arrow' in arrows:
+      draw = ImageDraw.Draw(image)
+      if state == 'off':
+        direction = 'right'
+      elif state == 'on':
+        direction = 'up'
+      self.create_arrows(draw, height, direction=direction, colour=fill, type='simple')
+      
+    if 'char' in arrows:
+      draw = ImageDraw.Draw(image)
+      if 'right' in arrows:
+        fill = IT.adjust_colour(fill, luminosity=0.5)
+      draw = ImageDraw.Draw(image)
+      try:
+        char = arrows.split(state)[1].split(':')[0]
+      except:
+        side = '0'
+        char = "#"
+        
+      self.create_arrows(draw,
+                         height,
+                         direction='down',
+                         colour=fill,
+                         type='char',
+                         char_pos='Auto',
+                         char_char = char,
+                         h_space=4,
+                         v_space=4,
+                         width = width)
+
      
     if 'triangle' in arrows:
+      draw = ImageDraw.Draw(image)
       try:
         side = arrows.split('triangle:')[1].split(',')[0]
       except:
@@ -2772,6 +2824,142 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       draw.polygon((begin, middle, end), fill)
 
     return image
+  def drawFileFullInfo(self, draw, colour='#ff0000', right_margin=0, height=10, font_name="Verdana", font_size=8, left_start = 40):
+    base_colour = self.params.html.base_colour.rgb
+    txt = OV.FileFull()
+    if txt == "none":
+      return
+    font = self.registerFontInstance(font_name, font_size)
+    tw = (draw.textsize(txt, font)[0])
+    n = int(len(txt)/2)
+    txtbeg = txt[:n]
+    txtend = txt [-n:]
+    while tw > self.width - left_start:
+      txtbeg = txt[:n]
+      txtend = txt [-n:]
+      tw = (draw.textsize("%s...%s" %(txtbeg, txtend), font)[0])
+      n -= 1
+    txt = "%s...%s" %(txtbeg, txtend)
+      
+    wX, wY  = draw.textsize(txt, font)
+    left_start =  (self.width-wX) - right_margin
+    top = height - wY - 2
+    self.write_text_to_draw(draw, 
+                       txt, 
+                       top_left=(left_start, top), 
+                       font_name=font_name, 
+                       font_size=font_size, 
+                       font_colour=colour)
+
+
+  def drawSpaceGroupInfo(self, draw, luminosity=1.9, right_margin=8, font_name="Times Bold"):
+    base_colour = self.params.html.base_colour.rgb
+    left_start = 150
+    font_colour = self.adjust_colour(base_colour, luminosity=luminosity)
+    scale = OV.GetParam('gui.timge.snumtitle.sginfo_scale')
+    try:
+      txt_l = []
+      txt_sub = []
+      txt_norm = []
+      try:
+        txt = OV.olex_function('sg(%h)')
+      except:
+        pass
+      if not txt:
+        txt="ERROR"
+      txt = txt.replace(" 1", "")
+      txt = txt.replace(" ", "")
+      txt_l = txt.split("</sub>") 
+      if len(txt_l) == 1:
+        txt_norm = [(txt,0)]
+      try:
+        font_base = "Times"
+        #font_slash = self.registerFontInstance("Times Bold", 18)
+        #font_number = self.registerFontInstance("Times Bold", 14)
+        #font_letter = self.registerFontInstance("Times Bold Italic", 15.5)
+        #font_sub = self.registerFontInstance("Times Bold", 10)
+        font_bar = self.registerFontInstance("%s Bold" %font_base, int(11 * scale))
+        font_slash = self.registerFontInstance("%s Bold" %font_base, int(18 * scale))
+        font_number = self.registerFontInstance("%s Bold" %font_base, int(14 * scale))
+        font_letter = self.registerFontInstance("%s Bold Italic" %font_base, int(15 * scale))
+        font_sub = self.registerFontInstance("%s Bold" %font_base, int(10 * scale))
+        norm_kern = 2
+        sub_kern = 0
+      except:
+        font_name = "Arial"
+        font_bar = self.registerFontInstance("%s Bold" %font_base, 12)
+        font_slash = self.registerFontInstance("%s Bold" %font_base, 18)
+        font_number = self.registerFontInstance("%s Bold" %font_base, 14)
+        font_letter = self.registerFontInstance("%s Bold Italic" %font_base, 15)
+        font_norm = self.registerFontInstance(font_name, 13)
+        font_sub = self.registerFontInstance(font_name, 10)
+        norm_kern = 0
+        sub_kern = 0
+      textwidth = 0
+      for item in txt_l:
+        if item:
+          try:
+            sub = item.split("<sub>")[1]
+          except:
+            sub = ""
+          norm = item.split("<sub>")[0]
+          tw_s = (draw.textsize(sub, font=font_sub)[0]) + sub_kern
+          tw_n = (draw.textsize(norm, font=font_number)[0]) + norm_kern
+          txt_sub.append((sub, tw_s))
+          txt_norm.append((norm, tw_n))
+          textwidth += (tw_s + tw_n)
+    except:
+      txt_l = []
+    if txt_l:
+      i = 0
+      left_start =  (self.width-textwidth) - right_margin -5
+      cur_pos = left_start
+      advance = 0
+      after_kern = 0
+      for item in txt_l:
+        if item:
+          text_normal = txt_norm[i][0]
+          for character in text_normal:
+            if character == "":
+              continue
+            cur_pos += advance
+            cur_pos += after_kern
+            after_kern = 2
+            advance = 0
+            try:
+              int(character)
+              font = font_number
+              top = 0
+              after_kern = 2
+            except:
+              font = font_letter
+              top = -1
+              if character == "P" or character == "I" or character == "C":
+                norm_kern = -2
+                after_kern = 0
+                character = " %s" %character
+            if character == "-":
+              draw.text((cur_pos + 1, -10), "_", font=font_bar, fill=font_colour)
+              draw.text((cur_pos + 1, -9), "_", font=font_bar, fill=font_colour)
+              advance = -1
+              norm_kern = 0
+            elif character == "/":
+              norm_kern = 0
+              after_kern = 0
+              draw.text((cur_pos -2, -3), "/", font=font_slash, fill=font_colour)
+              advance = ((draw.textsize("/", font=font_slash)[0]) + norm_kern) - 1
+            else:
+              draw.text((cur_pos + norm_kern, top), "%s" %character, font=font, fill=font_colour)
+              advance = (draw.textsize(character, font=font)[0]) + norm_kern
+            
+          text_in_superscript = txt_sub[i][0]
+          if text_in_superscript:
+            cur_pos += advance
+            draw.text((cur_pos + sub_kern, 5), "%s" %text_in_superscript, font=font_sub, fill=font_colour)
+            advance = (draw.textsize(text_in_superscript, font=font_sub)[0]) + sub_kern
+            after_kern = -2
+            cur_pos += advance
+        i+= 1
     
   def tab_items(self, item, state, font_name = "Vera", font_size=13):
     if self.params.image_font_name:
