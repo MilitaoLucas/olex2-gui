@@ -4,6 +4,8 @@
 
 
 gui {
+  base_colour = #6464a0
+    .type = colour
   logo_colour = #6464a0
     .type = colour
   image_font_name = Vera
@@ -73,6 +75,23 @@ gui {
   }
 
   timage{
+    base_colour = None
+      .type = colour
+    grad_colour = None
+      .type = colour
+    font_colour = None
+      .type = colour
+    grad_step = 0.2
+      .type = float
+    bg_colour_L = 1.6
+      .type = float
+    grad_colour_L = 1.8
+      .type = float
+    font_colour_L = 0.8
+      .type = float
+    font_name = Vera
+      .type = str
+      
     snumtitle{
       base_colour = None
         .type = colour
@@ -149,7 +168,42 @@ gui {
       off_L = 1.6
         .type = float
     }  
-  
+
+    cbtn{
+      base_colour = None
+        .type = colour
+      grad_colour = None
+        .type = colour
+      font_colour = None
+        .type = colour
+      height = 20
+        .type = int
+      corner_rad = 1
+        .type = int
+      grad_step = 0.1
+        .type = float
+      bg_colour_L = 1.6
+        .type = float
+      grad_colour_L = 1.8
+        .type = float
+      font_colour_L = 0.8
+        .type = float
+      font_name = Vera Bold
+        .type = str
+      font_size = 14
+        .type = int
+      top = 2
+        .type = int
+      left = 3
+        .type = int
+      rounded = 0101
+        .type = str
+      arrows = 'bar:right:25,char:on .:off...'
+        .type = str
+      off_L = 1.6
+        .type = float
+    }
+    
     button{
       base_colour = #ababab
         .type = colour
@@ -219,14 +273,25 @@ gui {
     }  
 
     h3{
+      height = 16
+        .type = int
+
       base_colour = None
         .type = colour
       grad_colour = None
         .type = colour
-      grad_step = 0.2
+      font_colour = None
+        .type = colour
+        
+      bg_colour_L = 1.3
         .type = float
-      height = 16
-        .type = int
+      grad_colour_L = 1.75
+        .type = float
+      font_colour_L = 0.8
+        .type = float
+        
+      grad_step = 0.1
+        .type = float
       corner_rad = 2
         .type = int
       rounded = 1111
@@ -237,14 +302,6 @@ gui {
         .type = int
       left = 12
         .type = int
-      bg_colour_L = 1.3
-        .type = float
-      grad_colour_L = 1.1 
-        .type = float
-      font_colour_L = 0.8
-        .type = float
-      font_colour = None
-        .type = colour
       arrows = 'arrow'
         .type = str
       off_L = 1.2
@@ -252,17 +309,6 @@ gui {
       shadow = False
         .type = bool
     }
-    
-    grad_step = 0.2
-      .type = float
-    bg_colour_L = 1.6
-      .type = float
-    grad_colour_L = 1.8
-      .type = float
-    font_colour_L = 0.8
-      .type = float
-    font_name = Vera
-      .type = str
   }  
 
   button_colouring = #ababab
@@ -737,10 +783,10 @@ olex2
     .type = bool
   force_images = False
     .type = bool
-  main_toolbar_vline_position = 100
-    .type = int
   sNum_id_string = None
     .type = str
+  main_toolbar_vline_position = 100
+    .type = int
 }
 
 
