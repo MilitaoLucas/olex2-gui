@@ -178,7 +178,7 @@ def adjust_skin_colours():
     OV.SetParam('gui.snumtitle.filefullinfo_colour', IT.adjust_colour(base_colour.rgb, luminosity = OV.GetParam('gui.snumtitle.filefullinfo_colour_L')))
 
 def adjust_skin_luminosity():
-  base_colour = OV.GetParam('gui.html.base_colour')
+  base_colour = OV.GetParam('gui.base_colour')
   
   scope_l= ['gui',
             'gui.timage',
@@ -186,8 +186,9 @@ def adjust_skin_luminosity():
             'gui.timage.h1',
             'gui.timage.h3',
             'gui.timage.tab',
-            'gui.timage.ctab',
-            'gui.timage.snumtitle',]
+            'gui.timage.cbtn',
+            'gui.timage.snumtitle']
+
   for scope in scope_l:
     gui = olx.phil_handler.get_scope_by_name(scope)
     for object in gui.active_objects():
@@ -205,7 +206,7 @@ def adjust_skin_luminosity():
       except Exception, ex:
         pass
         #print "Something has gone wrong with SKIN adjust_skin_luminosity: %s" %ex
-
+        
 def SetGrad():
   from ImageTools import ImageTools
   IT = ImageTools()
