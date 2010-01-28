@@ -1,6 +1,12 @@
+##############################################################################
+# The GUI section. This part is currently under development; expect frequent changes!.
+##############################################################################
+
 gui {
   logo_colour = #6464a0
     .type = colour
+  image_font_name = Vera
+    .type = str
 
   skin {
     name = default
@@ -9,63 +15,11 @@ gui {
       .type = str
     logo_name= None
       .type = path
-  }
-
-  purple = #a245a2
-    .type = colour
-  red = #ff0000
-    .type = colour
-  orange = #ff8f00
-    .type = colour
-  green = #018F1E
-    .type = colour
-  grey = #555555
-    .type = colour
-
-  sginfo{
-    scale = 1.0
+    size_factor = 1.0
       .type = float
-  }    
-    
-  snumtitle{
-    base_colour = None
-      .type = colour
-    height = 28
-      .type = int
-    colour = #6464a0
-      .type = colour
-    font_colour = #ff0000
-      .type = colour
-    font_name = Vera Bold
-      .type = str
-    grad = True
-      .type = bool
-    grad_step = 0.2
-      .type = float
-    bg_colour_L = 1.6
-      .type = float
-    grad_colour_L = 1.0
-      .type = float
-    font_colour_L = 0.8
-      .type = float
-    filefullinfo_size = 10
-      .type = int
-    filefullinfo_colour = None
-      .type = colour
-    filefullinfo_colour_L = 1.5
-      .type = float
-      
   }
 
   html {
-    code {
-      bg_colour = #e9e9e9
-        .type = colour
-      fg_colour = #6f6f8b
-        .type = colour
-      html_tag = code
-        .type = str
-      }
     base_colour = #6464a0
       .type = colour
     bg_colour = #efefef
@@ -97,11 +51,71 @@ gui {
       .type = int
     MainToolbarTabButtonActive = None
       .type = str
+    code {
+      bg_colour = #e9e9e9
+        .type = colour
+      fg_colour = #6f6f8b
+        .type = colour
+      html_tag = code
+        .type = str
+      }
   }
-  image_font_name = Vera
-    .type = str
+  
+  purple = #a245a2
+    .type = colour
+  red = #ff0000
+    .type = colour
+  orange = #ff8f00
+    .type = colour
+  green = #018F1E
+    .type = colour
+  grey = #555555
+    .type = colour
+
+  sginfo{
+    scale = 1.0
+      .type = float
+  }    
+    
 
   timage{
+    snumtitle{
+      base_colour = None
+        .type = colour
+      grad_colour = None
+        .type = colour
+      height = 28
+        .type = int
+
+      font_colour = None
+        .type = colour
+      font_name = Vera Bold
+        .type = str
+      font_colour_L = 1.6
+        .type = float
+      font_size = 22
+        .type = int
+      top = 1
+        .type = int
+      left = 5
+        .type = int
+      bg_colour_L = 1.6
+        .type = float
+      grad_step = 0.2
+        .type = float
+      grad_colour_L = 1.0
+        .type = float
+      filefullinfo_size = 10
+        .type = int
+      filefullinfo_colour = None
+        .type = colour
+      filefullinfo_colour_L = 1.5
+        .type = float
+      corner_rad = 3
+        .type = int
+      rounded = 1100
+        .type = str
+    }
     tab{
       base_colour = None
         .type = colour
@@ -109,20 +123,17 @@ gui {
         .type = colour
       font_colour = None
         .type = colour
-  
       height = 25
         .type = int
       corner_rad = 5
         .type = int
         
-      grad = True
-        .type = bool
       grad_step = 0.3
         .type = float
         
       bg_colour_L = 1.5
         .type = float
-      grad_colour_L = 1.0
+      grad_colour_L = 1.1
         .type = float
         
       font_colour_L = 1.8
@@ -147,8 +158,6 @@ gui {
     button{
       base_colour = #ababab
         .type = colour
-      grad = True
-        .type = bool
       grad_colour = #dedede
         .type = colour
       grad_step = 0.4
@@ -183,7 +192,7 @@ gui {
         .type = colour
       grad_colour = None
         .type = colour
-      grad_step = 0.9
+      grad_step = 0.2
         .type = float
       height = 16
         .type = int
@@ -199,7 +208,7 @@ gui {
         .type = int
       bg_colour_L = 1.7
         .type = float
-      grad_colour_L = 1.8
+      grad_colour_L = 1.7
         .type = float
       font_colour_L = 0.6
         .type = float
@@ -214,10 +223,12 @@ gui {
     }  
 
     h3{
-      base_colour = #ababab
+      base_colour = None
         .type = colour
-      grad_colour = #ababab
+      grad_colour = None
         .type = colour
+      grad_step = 0.2
+        .type = float
       height = 16
         .type = int
       corner_rad = 2
@@ -246,8 +257,6 @@ gui {
         .type = bool
     }
     
-    grad = True
-      .type = bool
     grad_step = 0.2
       .type = float
     bg_colour_L = 1.6
