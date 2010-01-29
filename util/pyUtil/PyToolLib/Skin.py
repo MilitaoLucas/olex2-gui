@@ -148,6 +148,7 @@ def change_skin(skin_name=None, force=False):
   olx.SetMaterial("InfoBox.Plane %s" %OV.GetParam('gui.infobox_plane'))
 
   olx.HtmlPanelWidth(OV.GetParam('gui.htmlpanelwidth'))
+  OV.setAllMainToolbarTabButtons()
   olx.html_Reload()
   
   if timing:

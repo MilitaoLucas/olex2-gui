@@ -2653,6 +2653,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if shadow is None: shadow = True
     title_case = True
     border = False
+    arrow_scale = 1.0
     
     if item_type == "h1":
       width += 1
@@ -2690,7 +2691,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       border = True
       border_weight = 1
       border_fill = IT.adjust_colour(grad_colour, luminosity = 0.8)
-
+      arrow_scale = 0.7
       
     if "GB" in self.gui_language_encoding: #--!--
       height = height + 2
@@ -2744,7 +2745,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       on_L = OV.GetParam('gui.timage.%s.on_L' %item_type)
       if on_L is None:
         on_L = 1.0
-      image = self.make_arrows(state, width, arrows, image, height, base_colour, off_L, on_L)
+      image = self.make_arrows(state, width, arrows, image, height, base_colour, off_L, on_L, arrow_scale)
 
     if border:
       image = self.make_timage_border(image, fill = border_fill)
@@ -2787,7 +2788,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     image = self.add_whitespace(image=image, side='bottom', margin_left=corner_rad, weight=1, colour = self.adjust_colour(underground, luminosity = 0.95))
     return image
   
-  def make_arrows(self, state, width, arrows, image, height, base_colour, off_L, on_L):
+  def make_arrows(self, state, width, arrows, image, height, base_colour, off_L, on_L, scale=1.0):
     
     if state == "off":
       fill = self.adjust_colour(base_colour, luminosity=off_L)
@@ -2831,7 +2832,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         else:
           fill = IT.adjust_colour(fill,luminosity = 0.8)
           
-      self.create_arrows(draw, height, direction=direction, colour=fill, type='simple', align = align, width=width)
+      self.create_arrows(draw, height, direction=direction, colour=fill, type='simple', align = align, width=width, scale = scale)
       
     if 'char' in arrows:
       draw = ImageDraw.Draw(image)
