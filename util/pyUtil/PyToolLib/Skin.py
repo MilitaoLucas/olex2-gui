@@ -119,7 +119,7 @@ def change_skin(skin_name=None, force=False):
     t2 = t
   
   IT.resize_skin_logo(OV.GetParam('gui.htmlpanelwidth'))
-
+  IT.resize_news_image()
   if timing:
     t = time.time()
     print "After 'resize_skin_logo': %.2f s (%.5f s)" % ((t - t1), (t - t2))

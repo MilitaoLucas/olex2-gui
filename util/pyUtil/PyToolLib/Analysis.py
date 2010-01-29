@@ -1990,10 +1990,11 @@ def makeReflectionGraphGui():
       gui_d['options_gui'], gui_d['colspan'] = makeReflectionGraphOptions(graph, name)
       help_name = graph.help
       d = {'name':'BUTTON_MAKE_REFLECTION_GRAPH',
+           'bgcolor':'spy.GetParam(gui.html.input_bg_colour)',
            'onclick':run_d.get(name),
            'width':'30',
            'value':'Go',
-           'valign':'top'
+           'valign':'top',
           }
       gui_d['make_graph_button'] = htmlTools.make_input_button(d)
 
@@ -2001,6 +2002,8 @@ def makeReflectionGraphGui():
     help_name=help_name, popout=False)
   d = {'ctrl_name':'SET_REFLECTION_STATISTICS',
      'items':"-- %Please Select% --;%Wilson Plot%;%Cumulative Intensity%;%Systematic Absences%;%Fobs-Fcalc%;%Fobs over Fcalc%;%Completeness%;%Normal Probability%",
+     'height':'$spy.GetParam(gui.html.combo_height)',
+     'bgcolor':'$spy.GetParam(gui.html.input_bg_colour)',
      'value':value,
      'onchange':"updatehtml",
      'manage':'manage',
@@ -2028,7 +2031,7 @@ def makeReflectionGraphGui():
   if gui_d['options_gui'] != '':
     txt += '''
 <tr>
-<td valign='center' width="8" align='center' bgcolor="$getVar(gui_html_table_firstcol_colour)">
+<td valign='center' width="8" align='center' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
 </td>
 %(row_table_on)s
 %(options_gui)s
