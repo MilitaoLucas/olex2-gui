@@ -2811,11 +2811,27 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       
     if 'arrow' in arrows:
       draw = ImageDraw.Draw(image)
-      if state == 'off':
-        direction = 'right'
-      elif state == 'on':
-        direction = 'up'
-      self.create_arrows(draw, height, direction=direction, colour=fill, type='simple')
+      direction = "up"
+      align = 'left'
+      if "arrow_right" in arrows:
+        align = 'right'
+      elif "arrow_left" in arrows:
+        align = 'left'
+        
+      try:
+        direction = arrows.split(state)[1].split(':')[0]
+      except:
+        if state == 'off':
+          direction = 'right'
+        elif state == 'on':
+          direction = 'up'
+      if 'bar' in arrows:
+        if state == 'on':
+          fill = IT.adjust_colour(fill,luminosity = 1.6)
+        else:
+          fill = IT.adjust_colour(fill,luminosity = 0.8)
+          
+      self.create_arrows(draw, height, direction=direction, colour=fill, type='simple', align = align, width=width)
       
     if 'char' in arrows:
       draw = ImageDraw.Draw(image)
