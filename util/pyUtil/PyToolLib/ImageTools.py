@@ -745,8 +745,10 @@ class ImageTools(FontInstances):
     OlexVFS.save_image_to_olex(IM, "new", 2)
 
 
-  def create_arrows(self, draw, height, direction, colour, type='simple', h_space=4, v_space=4, offset_y = 0, char_pos=(0,0), char_char="+", width=10):
-    
+  def create_arrows(self, draw, height, direction, colour, type='simple', h_space=4, v_space=4, offset_y = 0, char_pos=(0,0), char_char="+", width=10, align='left'):
+    if align == 'right':
+      char_pos = (width - 20, char_pos[1])
+      h_space = width - h_space - 11
     arrow_height = height - (2*v_space)
     arrow_width = arrow_height 
     if arrow_width%2 != 0:
@@ -809,6 +811,9 @@ class ImageTools(FontInstances):
     elif type == "circle":
       xy = (4,4,8,8)
       draw.ellipse(xy, fill = colour)
+
+  def resize_news_image(self):
+    self.resize_to_panelwidth({'i':'news/news.png'})
 
   def make_border(self, rad,
               draw,
