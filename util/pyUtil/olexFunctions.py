@@ -528,6 +528,11 @@ class OlexFunctions(inheritFunctions):
   def GetUsername(self):
     return os.getenv('USERNAME')
 
+  def setAllMainToolbarTabButtons(self):
+    import olexex
+    olexex.setAllMainToolbarTabButtons()
+  
+  
 def GetParam(variable):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
   return OV.GetParam_as_string(variable)

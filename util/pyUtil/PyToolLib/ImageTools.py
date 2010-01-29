@@ -745,16 +745,23 @@ class ImageTools(FontInstances):
     OlexVFS.save_image_to_olex(IM, "new", 2)
 
 
-  def create_arrows(self, draw, height, direction, colour, type='simple', h_space=4, v_space=4, offset_y = 0, char_pos=(0,0), char_char="+", width=10, align='left'):
+  def create_arrows(self, draw, height, direction, colour, type='simple', h_space=4, v_space=4, offset_y = 0, char_pos=(0,0), char_char="+", width=10, align='left', scale = 1.0):
     if align == 'right':
-      char_pos = (width - 20, char_pos[1])
-      h_space = width - h_space - 11
+      adval = int(round(13 * scale,0))
+      char_pos = (width - adval, char_pos[1])
+      h_space = width - h_space - adval
     arrow_height = height - (2*v_space)
-    arrow_width = arrow_height 
+    arrow_width = arrow_height
+    
+    arrow_height = int(round(arrow_height*scale,0))
+    arrow_width = int(round(arrow_width*scale,0))
+    #h_space = int(round(h_space*scale/1,0))
+    v_space = int(round(v_space*(1/scale),0))
+    
     if arrow_width%2 != 0:
       arrow_width -= 1
       arrow_height -= 1
-    arrow_half = arrow_width/2
+    arrow_half = int(round(arrow_width/2,0))
     if type == 'simple':
       if direction == 'up':
         h_space -= 2
