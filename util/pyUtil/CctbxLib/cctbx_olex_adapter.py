@@ -157,7 +157,7 @@ class OlexCctbxRefine(OlexCctbxAdapter):
     pair_asu_table.add_covalent_pairs(
       scattering_types, exclude_scattering_types=flex.std_string(("H","D")))
     pair_sym_table = pair_asu_table.extract_pair_sym_table()
-    
+
     print >> self.log, "\nConnectivity table"
     pair_sym_table.show(site_labels=scatterers.extract_labels(), f=self.log)
     print >> self.log, "\nBond lengths"
@@ -174,7 +174,7 @@ class OlexCctbxRefine(OlexCctbxAdapter):
       #cctbxmap_type = None
     #else:
       #cctbxmap_resolution = float(OV.FindValue('snum_cctbxmap_resolution'))
-    #if cctbxmap_type and cctbxmap_type !='None': 
+    #if cctbxmap_type and cctbxmap_type !='None':
       #self.write_grid_file(cctbxmap_type, cctbxmap_resolution)
 
     print "++++ Finished in %.3f s" %(time.time() - t0)
@@ -209,7 +209,7 @@ class OlexCctbxRefine(OlexCctbxAdapter):
     #msg = "Refinement Cycle: %i" %(self.cycle)
     self.refinement.show_cycle_summary(minimiser)
     #print msg
-    
+
     #self.update_refinement_info(msg=msg)
     minimisation.show_sorted_shifts(max_items=10, log=self.log)
     max_shift_site, max_shift_site_scatterer = minimisation.iter_shifts_sites(max_items=1).next()
@@ -379,7 +379,7 @@ class FullMatrixRefine(OlexCctbxRefine):
     u_total  = 0
     u_atoms = []
     i = 1
-    
+
     def iter_scatterers():
       for a in self.xray_structure().scatterers():
         label = a.label
@@ -417,12 +417,15 @@ class FullMatrixRefine(OlexCctbxRefine):
       cos_sin_table=True
     )
     f_calc = sf(self.xray_structure(), f_obs).f_calc()
-    fc2 = flex.norm(f_calc.data())
-    fo2 = f_sq_obs.data()
-    wfo2 = 1./flex.pow2(f_sq_obs.sigmas())
-    K2 = flex.mean_weighted(fo2*fc2, wfo2)/flex.mean_weighted(fc2*fc2, wfo2)
-    K2 = math.sqrt(K2)
-    f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1./K2, f_calc)
+    #fc2 = flex.norm(f_calc.data())
+    #fo2 = f_sq_obs.data()
+    #wfo2 = 1./flex.pow2(f_sq_obs.sigmas())
+    #K2 = f_sq_obs.quick_scale_factor_approximation(f_calc, cutoff_factor=0.0)
+    #K2 = flex.mean_weighted(fo2*fc2, wfo2)/flex.mean_weighted(fc2*fc2, wfo2)
+    #K2 = math.sqrt(K2)
+    #f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1./K2, f_calc)
+    k = f_obs.quick_scale_factor_approximation(f_calc, cutoff_factor=0)
+    f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1./k, f_calc)
     return f_obs_minus_f_calc.fft_map(
       symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
       resolution_factor=resolution,
@@ -549,7 +552,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       for q,h in izip(peaks.sites(), peaks.heights()):
         yield q,h
         #print "(%.3f, %.3f, %.3f) -> %.3f" % (q+(h,))
-        
+
     else:
       print "*** No solution found ***"
 
@@ -557,7 +560,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     if height/self.peak_normaliser < cutoff:
       return
     sp = (height/self.peak_normaliser)
-     
+
     if not auto_assign:
       id = olx.xf_au_NewAtom("%.2f" %(sp), *xyz)
       #if olx.xf_au_SetAtomCrd(id, *xyz)=="true":
@@ -611,10 +614,10 @@ class OlexCctbxGraphs(OlexCctbxAdapter):
     try:
       if graph == "wilson":
         self.xy_plot = cctbx_controller.wilson_statistics(self.xray_structure(), self.reflections, **kwds)
-  
+
       elif graph == "completeness":
         self.xy_plot = cctbx_controller.completeness_statistics(self.reflections, self.wavelength, **kwds)
-  
+
       elif graph == "cumulative":
         self.xy_plot = cctbx_controller.cumulative_intensity_distribution(self.reflections, **kwds)
 
@@ -658,13 +661,13 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     self.twin_law_gui_txt = ""
     if not twin_laws:
       print "There are no possible twin laws"
-      
+
       html = "<tr><td></td><td>"
       html += "<b>%There are no possible Twin Laws%</b>"
       OV.write_to_olex('twinning-result.htm', html, False)
       OV.htmlReload()
       return
-    
+
     lawcount = 0
     self.twin_laws_d = {}
     law_txt = ""
@@ -694,8 +697,8 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         font_color_basf = "green"
         basf = "%.2f" %float(basf)
       txt = [{'txt':"R=%.2f%%" %(float(r)*100),
-              'font_colour':font_color}, 
-              {'txt':"basf=%s" %str(basf), 
+              'font_colour':font_color},
+              {'txt':"basf=%s" %str(basf),
                'font_colour':font_color_basf}]
       image_name, img  = a.make_3x3_matrix_image(name, twin_law, txt)
       #law_txt += "<zimg src=%s>" %image_name
@@ -703,11 +706,11 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       for x in xrange(9):
         law_straight += " %s" %(law_double)[x]
 
-      self.twin_laws_d[lawcount] = {'number':lawcount, 
-                                    'law':twin_law, 
-                                    'law_double':law_double, 
-                                    'law_straight':law_straight, 
-                                    'R1':r, 
+      self.twin_laws_d[lawcount] = {'number':lawcount,
+                                    'law':twin_law,
+                                    'law_double':law_double,
+                                    'law_straight':law_straight,
+                                    'R1':r,
                                     'BASF':basf,
                                     'law_image':img,
                                     'law_txt':law_txt,
@@ -736,7 +739,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       href = 'spy.revert_history -solution="%s" -refinement="%s">>HtmlReload' %(self.twin_laws_d[i].get('history_solution'), self.twin_laws_d[i].get('history_refinement'))
       law_txt = "<a href='%s'><zimg src=%s></a>&nbsp;" %(href, image_name)
       self.twin_law_gui_txt += "%s" %(law_txt)
-      
+
       html += '''
 <a href='%s' target='Apply this twin law'><zimg border="0" src="%s"></a>&nbsp;
     ''' %(href, image_name)
@@ -759,7 +762,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     olx.Atreap("-b notwin.ins")
     olx.User("'%s'" %olx.FilePath())
     if law != (1, 0, 0, 0, 1, 0, 0, 0, 1):
-      OV.AddIns("TWIN %s" %law_ins) 
+      OV.AddIns("TWIN %s" %law_ins)
       OV.AddIns("BASF %s" %"0.5")
     olx.LS('CGLS 1')
     olx.File("%s.ins" %self.filename)
@@ -772,7 +775,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     except:
       prg = "XL"
       olx.Exec(r"%s '%s'" %(prg, olx.FileName()))
-      
+
     olx.WaitFor('process')
     olx.Atreap(r"-b %s/%s.res" %(olx.FilePath(), olx.FileName()))
     r = olx.Lst("R1")
@@ -797,32 +800,32 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
           }
          }
 
-    tbx_li = {'search_for_twin_laws':{"category":'analysis', 
-                                      'image':'cctbx', 
+    tbx_li = {'search_for_twin_laws':{"category":'analysis',
+                                      'image':'cctbx',
                                       'tools':['search_for_twin_laws_t1']
                                       },
-                                      'twin_laws':{"category":'analysis', 
-                                                   'image':'cctbx', 
+                                      'twin_laws':{"category":'analysis',
+                                                   'image':'cctbx',
                                                    'tools':['twin_laws']
-                                                 }																			
+                                                 }
                                     }
 
-    tools = {'search_for_twin_laws_t1':{'category':'analysis', 
+    tools = {'search_for_twin_laws_t1':{'category':'analysis',
                                         'display':"%Search for Twin Laws%",
                                         'colspan':1,
                                         'hrefs':['spy.OlexCctbxTwinLaws()']
                                         },
                                         'twin_laws':
-                                        {'category':'analysis', 
+                                        {'category':'analysis',
                                          'colspan':1,
-                                         'before':self.twin_law_gui_txt, 
+                                         'before':self.twin_law_gui_txt,
                                        }
                                       }
     return {"tbx":tbx,"tbx_li":tbx_li,"tools":tools}
 
   def make_gui(self):
     gui = self.twinning_gui_def()
-    from GuiTools import MakeGuiTools 
+    from GuiTools import MakeGuiTools
     a = MakeGuiTools(tool_fun="single", tool_param=gui)
     a.run()
     OV.UpdateHtml()
@@ -888,18 +891,18 @@ def charge_flipping_loop(solving, verbose=True):
         print "Polishing with rho_c=%.4f" % flipping.rho_c()
     elif solving.state is solving.finished:
       break
-    
+
     if plot is not None: plot.run_charge_flipping_graph(flipping, solving, previous_state)
     previous_state = solving.state
-  
+
   if timing:
     print "Total Time: %.2f s" %(time.time() - t0)
 
 def on_twin_image_click(run_number):
   # arguments is a list
   # options is a dictionary
-  
-  
+
+
   a = OlexCctbxTwinLaws()
   file_data = a.twin_laws_d[int(run_number)].get("ins_file")
   wFile = open(olx.FileFull(), 'w')
