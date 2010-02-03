@@ -317,7 +317,8 @@ class reflections(object):
     reflections_server = reflection_file_utils.reflection_file_server(
       crystal_symmetry = cs,
       reflection_files = [
-        reflection_file_reader.any_reflection_file('hklf4=%s' %reflection_file)
+        reflection_file_reader.any_reflection_file(
+          'hklf4=%s' %reflection_file, strict=False)
       ]
     )
     self.crystal_symmetry = cs
@@ -644,12 +645,14 @@ class refinement(manager):
       cos_sin_table=True
     )
     f_calc = sf(self.xray_structure, f_obs).f_calc()
-    fc2 = flex.norm(f_calc.data())
-    fo2 = f_sq_obs.data()
-    wfo2 = 1./flex.pow2(f_sq_obs.sigmas())
-    K2 = flex.mean_weighted(fo2*fc2, wfo2)/flex.mean_weighted(fc2*fc2, wfo2)
-    K2 = math.sqrt(K2)
-    f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1./K2, f_calc)
+    #fc2 = flex.norm(f_calc.data())
+    #fo2 = f_sq_obs.data()
+    #wfo2 = 1./flex.pow2(f_sq_obs.sigmas())
+    #K2 = flex.mean_weighted(fo2*fc2, wfo2)/flex.mean_weighted(fc2*fc2, wfo2)
+    #K2 = math.sqrt(K2)
+    #f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1./K2, f_calc)
+    k = f_obs.quick_scale_factor_approximation(f_calc, cutoff_factor=0)
+    f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1./k, f_calc)
     return f_obs_minus_f_calc.fft_map(
       symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
       resolution_factor=resolution,
