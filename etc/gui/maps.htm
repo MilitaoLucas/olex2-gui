@@ -1,0 +1,55 @@
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
+
+<tr>
+<!-- #include xgrid gui\snippets\snippet-xgrid.htm;suffix=maps;1;colspan=3 -->
+</tr>
+<tr>
+
+<tr>
+<!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td colspan='1'>
+    <input
+      type="slider"
+      name="SNUM_XGRID_SLIDE"
+      width="$eval(htmlpanelwidth()-80)"
+      height="18"
+      value="$spy.GetParam(snum.xgrid.value)"
+      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      min="-3"
+      max="10"
+      onchange="spy.SetParam(snum.xgrid.value,GetValue(SNUM_XGRID_SLIDE))>>
+SetValue(SNUM_XGRID_VALUE,GetValue(SNUM_XGRID_SLIDE))>>
+xgrid.Scale(GetValue(SNUM_XGRID_SLIDE))>>
+">
+  <td colspan='1'>
+    <input
+      type="text"
+      name = "SNUM_XGRID_VALUE"
+      width="30"
+      height="18"
+      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      value="$spy.GetParam(snum.xgrid.value)"
+      onchange="spy.SetParam(snum.xgrid.value,GetValue(SNUM_XGRID_SLIDE))>>
+xgrid.Scale(GetValue(SNUM_XGRID_SLIDE))
+SetValue(XGRID_SCALE,XGrid.Scale())
+">
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
+
+<tr name=INCLUDE_H3_MASKS>
+<!-- #include h3-masks gui\h3-masks.htm;gui\blocks\tool-h3-off.htm;image=h3-masks;onclick="itemstate h3-calculate-voids 2>>itemstate h3-electron-density 2";colspan=1;2; -->
+</tr>
+
+<tr name=INCLUDE_H3_CALCULATE_VOIDS>
+<!-- #include h3-calculate-voids gui\h3-calculate-voids.htm;gui\blocks\tool-h3-off.htm;image=h3-calculate-voids;onclick="itemstate h3-masks 2>>itemstate h3-electron-density 2";colspan=1;2; -->
+</tr>
+
+<tr name=INCLUDE_H3_ELECTRON_DENSITY>
+<!-- #includeif file.Exists('HKLSrc()') h3-electron-density gui\h3-electron-density.htm;gui\blocks\tool-h3-off.htm;image=h3-electron-density;onclick="itemstate h3-calculate-voids 2>>itemstate h3-masks 2";colspan=1;2; -->
+</tr>
+
+<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=4;1; -->
