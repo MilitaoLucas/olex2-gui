@@ -91,7 +91,7 @@ gui {
       .type = float
     font_name = Vera
       .type = str
-      
+
     snumtitle{
       base_colour = None
         .type = colour
@@ -142,15 +142,15 @@ gui {
         .type = int
       corner_rad = 5
         .type = int
-        
+
       grad_step = 0.3
         .type = float
-        
+
       bg_colour_L = 1.5
         .type = float
       grad_colour_L = 1.1
         .type = float
-        
+
       font_colour_L = 1.8
         .type = float
       font_name = Vera Bold
@@ -167,7 +167,7 @@ gui {
         .type = str
       off_L = 1.6
         .type = float
-    }  
+    }
 
     cbtn{
       base_colour = None
@@ -203,7 +203,7 @@ gui {
       off_L = 1.6
         .type = float
     }
-    
+
     button{
       base_colour = #ababab
         .type = colour
@@ -236,7 +236,7 @@ gui {
       arrows = None
         .type = str
     }
-    
+
     h1{
       base_colour = None
         .type = colour
@@ -270,7 +270,7 @@ gui {
         .type = float
       shadow = True
         .type = bool
-    }  
+    }
 
     h3{
       height = 16
@@ -282,14 +282,14 @@ gui {
         .type = colour
       font_colour = None
         .type = colour
-        
+
       bg_colour_L = 1.3
         .type = float
       grad_colour_L = 1.75
         .type = float
       font_colour_L = 0.8
         .type = float
-        
+
       grad_step = 0.1
         .type = float
       corner_rad = 2
@@ -309,7 +309,7 @@ gui {
       shadow = False
         .type = bool
     }
-  }  
+  }
 
   button_colouring = #ababab
     .type = colour
@@ -359,7 +359,7 @@ gui {
     height_max = 500
       .type = int
       .help = Maximum height of the help popup boxes
-      
+
     }
 }
 
@@ -471,7 +471,7 @@ snum {
         .type = str
     }
   }
-    
+
   shelx_output = True
     .type = bool
 
@@ -739,12 +739,14 @@ snum {
       .type = choice
     extended = False
       .type = bool
+    value = 0.0
+      .type = float
   }
 
   map {
     source = *olex fcf
       .type = choice
-    type = *diff fcalc '2Fo-Fc' fobs
+    type = *diff fcalc tomc fobs
       .type = choice
     mask = True
       .type = bool
@@ -752,8 +754,26 @@ snum {
       .type = float
   }
 
-  calcvoid_value = -1
-    .type = int
+  calcvoid {
+    resolution = 0.2
+      .type = float
+    precise = False
+      .type = bool
+    distance = 0.0
+      .type = float
+  }
+
+  masks {
+    type = *mask f_mask f_model
+      .type = choice
+    solvent_radius = 1.2
+      .type = float
+    shrink_truncation_radius = 1.2
+      .type = float
+    resolution_factor = 1./3
+      .type = float
+  }
+
   olex_conres = RRINGS
     .type = str
   refinement_banner_slide = 82
@@ -788,7 +808,6 @@ olex2
   main_toolbar_vline_position = 100
     .type = int
 }
-
 
 graphs {
   program_analysis {
@@ -946,7 +965,7 @@ user {
   report_journal_style = rsc
     .type = str
   auto_refine_after_anis = True
-    .type = bool 
+    .type = bool
 }
 
 odac

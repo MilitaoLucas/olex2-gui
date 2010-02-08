@@ -1,3 +1,5 @@
+from __future__ import division
+
 import sys
 import olx
 import OlexVFS
@@ -11,8 +13,10 @@ try:
 except:
   olx.current_reflection_filename = None
   olx.current_reflections = None
+  olx.current_mask = None
 
 import olex
+import olex_xgrid
 import time
 import cctbx_controller as cctbx_controller
 from cctbx import uctbx
@@ -541,7 +545,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       # actually only the supposedly best one
       f_calc, shift, cc_peak_height = solving.f_calc_solutions[0]
       fft_map = f_calc.fft_map(
-          symmetry_flags=maptbx.use_space_group_symmetry)
+        symmetry_flags=maptbx.use_space_group_symmetry)
       # search and print Fourier peaks
       peaks = fft_map.peak_search(
         parameters=maptbx.peak_search_parameters(
@@ -600,6 +604,69 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       if id != '-1':
         olx.xf_au_SetAtomU(id, "0.06")
 
+class OlexCctbxMasks(OlexCctbxAdapter):
+  def __init__(self, recompute=True):
+    OlexCctbxAdapter.__init__(self)
+    from cctbx import miller
+    from smtbx import masks
+    from cctbx.masks import flood_fill
+
+    self.params = OV.Params().snum.masks
+
+    if recompute in ('false', 'False'): recompute = False
+
+    if recompute or olx.current_mask is None:
+      xs = self.xray_structure()
+      fo_sq = self.reflections.f_sq_obs_merged
+      mask = masks.mask(xs, fo_sq)
+      mask.compute(solvent_radius=self.params.solvent_radius,
+                   shrink_truncation_radius=self.params.shrink_truncation_radius,
+                   resolution_factor=self.params.resolution_factor,
+                   atom_radii_table={'C':1.70, 'B':1.63, 'N':1.55, 'O':1.52})
+      flood_fill(mask.mask.data)
+      f_mask = mask.structure_factors()
+      olx.current_mask = mask
+    else:
+      mask = olx.current_mask
+      f_mask = mask.f_mask()
+    f_model = mask.f_model()
+    if self.params.type == "mask":
+      output_data = mask.mask.data
+    elif self.params.type == "f_mask":
+      model_map = miller.fft_map(mask.crystal_gridding, f_mask)
+      output_data = model_map.apply_volume_scaling().real_map()
+    elif self.params.type == "f_model":
+      model_map = miller.fft_map(mask.crystal_gridding, f_model)
+      output_data = model_map.apply_volume_scaling().real_map()
+    write_grid_to_olex(output_data)
+    self.mask = mask
+    self.show()
+
+  def show(self, log=None):
+    if log is None:
+      log = sys.stdout
+    params = self.params
+    mask = self.mask
+    unit_cell = self.xray_structure().unit_cell()
+    print >> log, "Mask parameters: "
+    print >> log, "Solvent radius: %.2f" %params.solvent_radius
+    print >> log, "Shrink truncation radius: %.2f" %params.shrink_truncation_radius
+    print >> log, "Resolution factor: %.2f" %params.resolution_factor
+    print >> log, "d min: %.2f" %mask.observations.d_min()
+    print >> log, "Gridding: (%i,%i,%i)" %mask.crystal_gridding.n_real()
+    print >> log, "n grid points: %i" %mask.crystal_gridding.n_grid_points()
+    print
+
+    print >> log, "Solvent accessible volume = %.1f [%.1f%%]" %(
+      mask.solvent_accessible_volume, 100*
+      mask.solvent_accessible_volume/unit_cell.volume())
+    n_voids = flex.max(mask.mask.data) - 1
+    for i in range(2, n_voids + 2):
+      void_vol = (unit_cell.volume() * mask.mask.data.count(i)) \
+               / mask.crystal_gridding.n_grid_points()
+      print >> log, "void %i: %.1f" %(i-1, void_vol)
+    print >> log, "F000 void: %.1f" %mask.f_000_s
+OV.registerFunction(OlexCctbxMasks)
 
 class OlexCctbxGraphs(OlexCctbxAdapter):
   def __init__(self, graph, *args, **kwds):
@@ -639,8 +706,8 @@ class OlexCctbxGraphs(OlexCctbxAdapter):
         weighting = xray.weighting_schemes.shelx_weighting(**params)
         self.xy_plot = cctbx_controller.normal_probability_plot(
           self.xray_structure(), self.reflections, weighting,
-        #distribution=cctbx_controller.distributions.students_t_distribution(5),
-        ).xy_plot_info()
+          #distribution=cctbx_controller.distributions.students_t_distribution(5),
+          ).xy_plot_info()
     except Exception, err:
       raise Exception, err
     finally:
@@ -698,8 +765,8 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         basf = "%.2f" %float(basf)
       txt = [{'txt':"R=%.2f%%" %(float(r)*100),
               'font_colour':font_color},
-              {'txt':"basf=%s" %str(basf),
-               'font_colour':font_color_basf}]
+             {'txt':"basf=%s" %str(basf),
+              'font_colour':font_color_basf}]
       image_name, img  = a.make_3x3_matrix_image(name, twin_law, txt)
       #law_txt += "<zimg src=%s>" %image_name
       law_straight = ""
@@ -719,7 +786,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
                                     'ins_file':f_data,
                                     'history_solution':history_solution,
                                     'history_refinement':history_refinement
-                                  }
+                                    }
 #      href = 'spy.on_twin_image_click(%s)'
 #      href = 'spy.revert_history -solution="%s" -refinement="%s"' %(history_solution, history_refinement)
 #      law_txt = "<a href='%s'><zimg src=%s></a>&nbsp;" %(href, image_name)
@@ -797,30 +864,30 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     tbx = {"twinning":
            {"category":'tools',
             'tbx_li':lines
-          }
-         }
+            }
+           }
 
     tbx_li = {'search_for_twin_laws':{"category":'analysis',
                                       'image':'cctbx',
                                       'tools':['search_for_twin_laws_t1']
                                       },
-                                      'twin_laws':{"category":'analysis',
-                                                   'image':'cctbx',
-                                                   'tools':['twin_laws']
-                                                 }
-                                    }
+              'twin_laws':{"category":'analysis',
+                           'image':'cctbx',
+                           'tools':['twin_laws']
+                           }
+              }
 
     tools = {'search_for_twin_laws_t1':{'category':'analysis',
                                         'display':"%Search for Twin Laws%",
                                         'colspan':1,
                                         'hrefs':['spy.OlexCctbxTwinLaws()']
                                         },
-                                        'twin_laws':
-                                        {'category':'analysis',
-                                         'colspan':1,
-                                         'before':self.twin_law_gui_txt,
-                                       }
-                                      }
+             'twin_laws':
+             {'category':'analysis',
+              'colspan':1,
+              'before':self.twin_law_gui_txt,
+              }
+             }
     return {"tbx":tbx,"tbx_li":tbx_li,"tools":tools}
 
   def make_gui(self):
@@ -901,8 +968,6 @@ def charge_flipping_loop(solving, verbose=True):
 def on_twin_image_click(run_number):
   # arguments is a list
   # options is a dictionary
-
-
   a = OlexCctbxTwinLaws()
   file_data = a.twin_laws_d[int(run_number)].get("ins_file")
   wFile = open(olx.FileFull(), 'w')
@@ -911,3 +976,13 @@ def on_twin_image_click(run_number):
   olx.Atreap(olx.FileFull())
   OV.UpdateHtml()
 OV.registerFunction(on_twin_image_click)
+
+def write_grid_to_olex(grid):
+  gridding = grid.accessor()
+  n_real = gridding.focus()
+  olex_xgrid.Init(*n_real)
+  for i in range(n_real[0]):
+    for j in range(n_real[1]):
+      for k in range(n_real[2]):
+        olex_xgrid.SetValue(i,j,k, grid[i,j,k])
+  olex_xgrid.SetVisible(True)

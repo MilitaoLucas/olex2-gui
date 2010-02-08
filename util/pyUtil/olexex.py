@@ -37,14 +37,14 @@ if __debug__:
   #gc.set_debug(gc.DEBUG_LEAK | gc.DEBUG_STATS)
   #gc.set_debug(gc.DEBUG_STATS)
   #gc.set_debug(gc.DEBUG_SAVEALL | gc.DEBUG_STATS)
-  
+
   def dump():
     #a = gc.get_threshold()
     dump_garbage()
     #a = gc.garbage
     #b = gc.collect()
   OV.registerFunction(dump)
-  
+
   def collect(generation=None):
     print gc.get_count()
     if generation != None:
@@ -53,7 +53,7 @@ if __debug__:
       a = gc.collect()
     print "%s garbage items collected" %a
   OV.registerFunction(collect)
-  
+
   def getObjectCount():
     #a = gc.get_objects()
     a = get_all_objects()
@@ -67,17 +67,17 @@ if __debug__:
     gc.collect()
     return ''
   OV.registerFunction(getObjectCount)
-  
+
   def dump_garbage():
     """
     show us what's the garbage about
     """
-    
+
     # force collection
     print "\nGARBAGE:"
     a = gc.collect()
     print "%s objects collected" %a
-    
+
     print "\nGARBAGE OBJECTS:"
     for x in gc.garbage:
         s = str(x)
@@ -86,9 +86,9 @@ if __debug__:
         if type(x).__name__ == 'function':
           print x.func_code
           #print x.func_name
-          
+
     print 'Size of garbage is: ',len(gc.garbage)
-    
+
   # Recursively expand slist's objects
   # into olist, using seen to track
   # already processed objects.
@@ -116,11 +116,11 @@ if __debug__:
     # _getr does the real work.
     _getr(gcl, olist, seen)
     return olist
-  
+
   # -*- Mode: Python; tab-width: 4 -*-
-  
+
   import types
-  
+
   def get_refcounts():
     d = {}
     sys.modules
@@ -135,11 +135,11 @@ if __debug__:
     pairs.sort()
     pairs.reverse()
     return pairs
-  
+
   def print_top_100():
     for n, c in get_refcounts()[:100]:
       print '%10d %s' % (n, c.__name__)
-      
+
   OV.registerFunction(print_top_100)
 
 #if headless:
@@ -157,7 +157,7 @@ class OlexAtoms(object):
   def __init__(self):
     self.id_for_name = {}
     self.atoms = [atom for atom in self.iterator()]
-    
+
   def iterator(self):
     for i in xrange(int(olx.xf_au_GetAtomCount())):
       #name = olx.xf_au_GetAtomName(i)
@@ -173,20 +173,20 @@ class OlexAtoms(object):
       atom.setdefault('type', olx.xf_au_GetAtomType(i))
       atom.setdefault('occu', float(olx.xf_au_GetAtomOccu(i)))
       atom.setdefault('afix', olx.xf_au_GetAtomAfix(i))
-      
-      
+
+
       if name[:1] != "Q" and olx.xf_au_IsAtomDeleted(i) == "false":
         yield atom
-        
+
   def olexAtoms(self):
     return self.atoms
-  
+
   def numberAtoms(self):
     return sum(atom['occu'] for atom in self.atoms)
-  
+
   def number_non_hydrogen_atoms(self):
     return sum(atom['occu'] for atom in self.atoms if atom['type'] not in ('H','Q'))
-  
+
   def currentFormula(self):
     curr_form = {}
     for atom in self.atoms:
@@ -195,16 +195,16 @@ class OlexAtoms(object):
       curr_form.setdefault(atom_type, 0)
       curr_form[atom_type] += atom_occu
     return curr_form
-  
+
   def getExpectedPeaks(self):
     cell_volume = float(olx.xf_au_GetVolume())
     expected_atoms = cell_volume/15
     present_atoms = self.numberAtoms()
     present_atoms = self.number_non_hydrogen_atoms()
-    expected_peaks = expected_atoms - present_atoms 
+    expected_peaks = expected_atoms - present_atoms
     if expected_peaks < 5: expected_peaks = 5
     return int(expected_peaks)
-  
+
 def stt(str):
   l = []
   s = str.split(",")
@@ -241,7 +241,7 @@ def get_refine_ls_hydrogen_treatment():
     return afixes_present[0]
   else:
     return 'mixed'
-      
+
 OV.registerFunction(get_refine_ls_hydrogen_treatment)
 
 def GetAvailableRefinementProgs():
@@ -290,7 +290,7 @@ def OnMatchFound(rms, fragA, fragB):
     SpyVar.MatchedFragments.setdefault(fragB, {'fragID':idB})
   else:
     idB = SpyVar.MatchedFragments[fragB].get('fragID')
-    
+
   rms = float(rms)
   SpyVar.MatchedRms.append(rms)
   outStr = ""
@@ -298,7 +298,7 @@ def OnMatchFound(rms, fragA, fragB):
     outStr += olex.readImage('match.htm')
   except:
     pass
-  
+
   outStr+='<font size="3"><b>'
   if rms < 0.2:
     outStr += '<font color="#10c237">%.4f</font>&nbsp;' %(rms)
@@ -311,7 +311,7 @@ def OnMatchFound(rms, fragA, fragB):
   outStr+='</b>&nbsp;<a href="Sel %s"><b>%s</b></a>&nbsp;' %(fragA, idA)
   outStr+='<a href="Sel %s"><b>%s </b></a>' %(fragB, idB)
   outStr+="<br></font>"
-  
+
   OV.write_to_olex('match.htm',outStr)
 if haveGUI:
   OV.registerCallback('onmatch',OnMatchFound)
@@ -338,12 +338,12 @@ def SetFormulaFromInput():
   for element in f:
     try:
       n = int(element[1:])*Z
-      el = element[:1] 
+      el = element[:1]
     except:
       n = int(element[2:])*Z
       el = element[:2]
     argStr += "%s:%i," %(el, n)
-  argStr = argStr.strip(',')  
+  argStr = argStr.strip(',')
   argStr = "'%s'" %argStr
   olx.xf_SetFormula(argStr)
   return ""
@@ -407,7 +407,7 @@ def MakeElementButtonsFromFormula():
     present = round(current_formula.get(symbol,0),2)
     if symbol != "H":
       totalcount += max
-      
+
     max = max*Z_prime
     if present < max:
       bgcolour = (250,250,250)
@@ -419,7 +419,7 @@ def MakeElementButtonsFromFormula():
 <a href="if strcmp(sel(),'') then 'mode name -t=%s' else 'name sel %s'>>sel -u" target="Subsequently clicked atoms will be made into %s">
 <zimg border="0" src="element-%s.png"></a>
 ''' %(symbol, symbol, symbol, symbol)
-    
+
     btn_dict.setdefault(symbol,
                         {
                           'txt':symbol,
@@ -430,14 +430,14 @@ def MakeElementButtonsFromFormula():
                           #'grad':{'grad_colour':bgcolour,'fraction':1,'increment':10,'steps':0.2},
                           'grad':False,
                         })
-    
+
   retStr += '''
 <a href="if strcmp(sel(),'') then 'mode name -t=ChooseElement()' else 'name sel ChooseElement()" target="Chose Element from the periodic table">
 <zimg border="0" src="element-....png"></a>
 '''
   btn_dict.setdefault('Table',
                       {
-                        'txt':'...', 
+                        'txt':'...',
                         'bgcolour':'#efefef',
                         'width':int(icon_size*1.2),
                         'image_prefix':'element',
@@ -445,16 +445,16 @@ def MakeElementButtonsFromFormula():
                         #'grad':{'fraction':1,'increment':10,'steps':0.2},
                         'grad':False,
                       })
-  
+
   hname = 'AddH'
-#  retStr += ''' 
+#  retStr += '''
 #<a href="showH a true>>HADD>>refine" target="Add Hydrogen">
 #<zimg border="0" src="element-%s.png"></a>
 #''' %hname
-  
+
   btn_dict.setdefault('ADDH',
                       {
-                        'txt':'%s' %hname, 
+                        'txt':'%s' %hname,
                         'bgcolour':'#efefef',
                         'image_prefix':'element',
                         'width':int(icon_size * 2),
@@ -463,7 +463,7 @@ def MakeElementButtonsFromFormula():
                         #'grad':{'fraction':1,'increment':10,'steps':0.2},
                         'grad':False,
                       })
-  
+
   bm = ButtonMaker(btn_dict)
   bm.run()
   cell_volume = 0
@@ -477,7 +477,7 @@ def MakeElementButtonsFromFormula():
     Z = float(olx.xf_au_GetZ())
   except:
     pass
-  
+
   if cell_volume and totalcount:
     atomic_volume = (cell_volume)/(totalcount * Z)
     OV.SetVar('current_atomic_volume','%.1f' %atomic_volume)
@@ -506,7 +506,14 @@ def VoidView(recalculate='0'):
     # set electron density map button to 'up' state
     olx.SetState('SNUM_MAP_BUTTON','up')
     olx.SetLabel('SNUM_MAP_BUTTON',OV.Translate('Calculate'))
-  olex.m("calcVoid")
+
+  resolution = OV.GetParam("snum.calcvoid.resolution")
+  distance = OV.GetParam("snum.calcvoid.distance")
+  precise = OV.GetParam("snum.calcvoid.precise")
+  cmd = "calcVoid -r=%s -d=%s" %(resolution, distance)
+  if precise:
+    cmd += " -p"
+  olex.m(cmd)
   SetXgridView()
 
 if haveGUI:
@@ -572,7 +579,7 @@ def GetHklFileList():
   g.sort()
   reflection_files = ""
   try:
-    a = OV.HKLSrc() 
+    a = OV.HKLSrc()
     if a[:1] == "'":
       a = a[1:-1]
   except:
@@ -588,7 +595,7 @@ def GetHklFileList():
     else:
       print "There is no reflection file or the reflection file is not accessible"
       return
-  most_recent_reflection_file = ""      
+  most_recent_reflection_file = ""
   for item in g:
     reflection_files+="%s.%s<-%s;" %(OV.FileName(item), OV.FileExt(item), item)
   return str(reflection_files)
@@ -608,13 +615,13 @@ def tbxs_(name):
 </table>
 <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$getVar(gui_html_table_bg_colour)">
 '''
-  
+
   txt += r'''
 <tr VALIGN='center' NAME='Expand Short Contacts'>
   <td colspan=1 width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
     <td>
       <font size = '4'>
-        <b>	
+        <b>
           %%setup-title-%s%%
         </b>
       </font>
@@ -622,7 +629,7 @@ def tbxs_(name):
   </tr>
 <tr>
   <td valign='top' width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"><zimg border="0" src="info.png"></td>
-  <td>	
+  <td>
     %%setup-txt-%s%%
     <br>
     <a href=htmlpanelswap>Swap the position of the GUI panel</a>
@@ -633,7 +640,7 @@ def tbxs_(name):
   </td>
 </tr>
 '''%(name, name)
-  
+
   txt += r'''
 <!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
 '''
@@ -731,7 +738,7 @@ def setAllMainToolbarTabButtons():
   btns = [("solve", "solution-settings"), ("refine", "refinement-settings"), ("report","report-settings")]
   for item in btns:
     btn = item[0]
-    if isCif and btn != 'report': 
+    if isCif and btn != 'report':
       state = 'inactive'
       if olx.html_IsItem(item[1]) == 'true':
         olx.html_ItemState(item[1],'-1')
@@ -739,7 +746,7 @@ def setAllMainToolbarTabButtons():
       state = ''
       #state = 'off'
     if not state:
-      #if OV.IsControl(item[1]): 
+      #if OV.IsControl(item[1]):
       if olx.html_IsItem(item[1]) == 'true':
         try:
           state = olx.html_GetItemState(item[1])
@@ -872,7 +879,7 @@ def getRefinementPrgs():
     if not a:
       continue
     p.append(prg.name)
-    
+
   p.sort()
   for item in p:
     retval += "%s;" %item
@@ -930,25 +937,25 @@ def install_plugin(plugin, args):
     except:
       print "The plugin %s does not exist"
     return
-  
+
   if user_alert_uninstall_plugin[0] == 'R':
     delete = user_alert_uninstall_plugin[-1]
   elif user_alert_uninstall_plugin == 'Y':
     delete = OV.Alert('Olex2', "This will delete all files and folders of plugin '%s'. Are you sure you want to continue?" %plugin, 'YNIR', "(Don't show this warning again)")
   else:
     returnspy.install_plugin
-    
+
   if 'Y' in delete:
     olex.m("installplugin %s" %plugin)
     pass
-    
+
   if 'R' in delete:
     user_alert_uninstall_plugin = 'RY'
     self.setVariables('alert')
     variableFunctions.save_user_parameters('alert')
 OV.registerMacro(install_plugin, "")
 
-def runSadabs():    
+def runSadabs():
   olx.User("'%s'" %OV.FilePath())
   olx.Exec("sadabs")
   #olx.WaitFor('process') # uncomment me!http://dimas.dur.ac.uk/olex-distro-odac/1.0-alpha/Durham-OLEX2-Demo/AutoChem%20Installer.exe
@@ -970,7 +977,7 @@ def getKey(key_directory=None, specific_key = None):
   for item in g:
     keyname = item.split("\\")[-1:][0]
     return keyname.split(".")[0]
-    
+
 
 def getKeys(key_directory=None):
   keyPath = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], OV.GetTag())
@@ -986,7 +993,7 @@ def getKeys(key_directory=None):
 
 
 def GetCheckcifReport():
-  
+
   import urllib2
   import urllib2_file
 
@@ -995,17 +1002,17 @@ def GetCheckcifReport():
   #file_stat = os.stat(file_name)
   #cif = rFile.read()
   cif = rFile
-  
+
   params = {
     "runtype": "symmonly",
     "referer": "checkcif_server",
     "outputtype": "html",
     "file": cif
   }
-  
+
   f = urllib2.urlopen("http://vm02.iucr.org/cgi-bin/checkcif.pl", params)
   print f.read()
-  
+
   #url = "http://vm02.iucr.org/cgi-bin/checkcif.pl"
   #data = urllib.urlencode(params)
   #print data
@@ -1048,7 +1055,7 @@ def check_for_recent_update():
   retVal = False
   if OV.GetParam('olex2.has_recently_updated'):
     return True
-  
+
   version = OV.GetSVNVersion()
   try:
     V = OV.FindValue('last_version','0')
@@ -1057,7 +1064,7 @@ def check_for_recent_update():
     print "Alert: Reset parameter 'last_version'"
     last_version = 0
     OV.SetVar('last_version','0')
-    
+
 #  print "Last Version: %i"%last_version
   if version > last_version:
     OV.SetParam('olex2.has_recently_updated',True)
@@ -1090,17 +1097,17 @@ def updateACF(force=False):
     print "No update required"
     return
   print "Now Updating..."
-  
+
   mac_address = OV.GetMacAddress()
   username, computer_name = OV.GetUserComputerName()
   keyname = getKey()
   olex2_tag = OV.GetTag()
-  
+
   username = "updater"
   password = "update456R"
   institution = keyname.split("-")[0]
   type_of_key = keyname.split("-")[-1]
-  
+
   for mac_address in OV.GetMacAddress():
     url = "http://www.olex2.org/odac/update"
     values = {'__ac_password':password,
@@ -1130,59 +1137,59 @@ def updateACF(force=False):
       break
 
   new = True
-  
+
   if not f:
     print "Updating has failed, previous files will be used"
     return
-  
+
   if new:
     p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], olex2_tag)
     cont = GetHttpFile(f, force=True, fullURL = True)
     if cont:
       name = "AutoChem Updater.exe"
-      wFile = open("%s/%s" %(p, name),'wb') 
+      wFile = open("%s/%s" %(p, name),'wb')
       wFile.write(cont)
       wFile.close()
     cmd = r"%s/AutoChem Updater.exe /S" %p
     print cmd
-    Popen(cmd, shell=False, stdout=PIPE).stdout      
+    Popen(cmd, shell=False, stdout=PIPE).stdout
     print "Updated"
     wFile = open(r"%s/util/pyUtil/PluginLib/odac_update.txt" %OV.BaseDir(),'w')
     wFile.write("False")
     rFile.close()
 
-    
+
   else:
     import pickle
     try:
       l = pickle.load(response)
       p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], olex2_tag)
-  
+
       for f in l:
         f = f.replace(r'/var/distro/www/', 'olex-')
         cont = GetHttpFile(f, force=True)
         name = f.split(r'/')[-1]
         if cont:
-          wFile = open("%s/%s" %(p, name),'wb') 
+          wFile = open("%s/%s" %(p, name),'wb')
           wFile.write(cont)
           wFile.close()
           print "Written %s/%s" %(p, name)
       wFile = open(r"%s/util/pyUtil/PluginLib/odac_update.txt" %OV.BaseDir(),'w')
       wFile.write("False")
       rFile.close()
-      
+
       cmd = r"%s/AutoChem Installer.exe /S" %p
-      Popen(cmd, shell=False, stdout=PIPE).stdout      
-      
+      Popen(cmd, shell=False, stdout=PIPE).stdout
+
       print "Updated"
-    
+
     except Exception, err:
       print "Empty response: %s" %err
       print repr(response)
 
 OV.registerFunction(updateACF)
-    
-    
+
+
 def GetACF():
   global _is_online
   no_update = False
@@ -1190,8 +1197,8 @@ def GetACF():
   if no_update:
     _is_online = False
     print "Will not update ODAC Files"
-  check_for_crypto()  
-  
+  check_for_crypto()
+
   cont = None
   tag = OV.GetTag()
   if not tag:
@@ -1199,15 +1206,15 @@ def GetACF():
     return
 
   updateACF()
-    
-  
+
+
   debug = OV.FindValue('odac_fb', False)
   debug = [False, True][0]
   debug_deep1 = [False, True][0]
   debug_deep2 = [False, True][0]
   OV.SetVar("ac_verbose", [False, True][0])
   keyname = getKey()
-  
+
 
   if not debug:
     p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], tag)
@@ -1219,7 +1226,7 @@ def GetACF():
     if not os.path.exists("%s/entry_ac.py" %p):
       cont = GetHttpFile(f, force=True)
       if cont:
-        wFile = open("%s/%s.py" %(p, name),'w') 
+        wFile = open("%s/%s.py" %(p, name),'w')
         wFile.write(cont)
         wFile.close()
       if not cont:
@@ -1231,7 +1238,7 @@ def GetACF():
         if check_for_recent_update() and not no_update:
           cont = GetHttpFile(f)
         if cont:
-          wFile = open("%s/%s.py" %(p, name),'w') 
+          wFile = open("%s/%s.py" %(p, name),'w')
           wFile.write(cont)
           wFile.close()
       except Exception, err:
@@ -1244,7 +1251,7 @@ def GetACF():
           print "Olex2 can not access a necessary file."
           print "Please make sure that your computer is online and try again."
           return
-    try:    
+    try:
       sys.modules[name] = types.ModuleType(name)
       exec cont in sys.modules[name].__dict__
       odac_loaded = True
@@ -1276,7 +1283,7 @@ def GetACF():
     print "AutoChem could not be started"
 
 OV.registerFunction(GetACF)
-  
+
 
 def runODAC(cmd):
   if OV.GetParam('odac.is_active'):
@@ -1284,27 +1291,27 @@ def runODAC(cmd):
     cmd += " -s"
     OV.Cursor('Starting ODAC')
     res = olex.m(cmd)
-      
-    
+
+
   else:
     print "ODAC has failed to initialize or is not installed"
-  
+
 OV.registerFunction(runODAC)
-  
+
 
 
 def HklStatsAnalysis():
   import olex_core
   stats = olex_core.GetHklStat()
 OV.registerFunction(HklStatsAnalysis)
-  
+
 
 def InstalledPlugins():
   import olex_core
   l = olex_core.GetPluginList()
   return l
 
-def AvailablePlugins():    
+def AvailablePlugins():
   plugins = {'ODSkin':
              {'display':'Oxford Diffraction Skin',
               'blurb':'A custom-made visual design for Oxford Diffraction'},
@@ -1322,11 +1329,11 @@ def AvailablePlugins():
   return s
 OV.registerFunction(AvailablePlugins)
 
-def AvailableSkins():    
+def AvailableSkins():
   skins = {'OD':{'display':'Oxford Diffraction Skin'}, 'HP':{'display':'Grey'}, 'default':{'display':'Default'}}
   s = "<hr>"
   for skin in skins:
-    
+
     if OV.FindValue('gui_skin_name') == skin:
       s += "<a href='skin %s>>html.reload setup-box'><b>%s</b></a><br>" %(skin, skins[skin].get('display', skin))
     else:
@@ -1340,21 +1347,21 @@ def AvailableExternalPrograms(prgType):
     dict = RPD
   elif prgType == 'solution':
     dict = SPD
-    
+
   p = {}
   for prg in dict:
     a = which_program(prg)
     if not a:
       continue
     p.setdefault(prg.name,a)
-    
+
   return p
 
 def AvailableExternalProgramsHtml():
   d = {}
   d.setdefault('refinement', AvailableExternalPrograms('refinement'))
   d.setdefault('solution', AvailableExternalPrograms('solution'))
-  
+
 def getReportImageSrc():
   imagePath = OV.GetParam('snum.report.image')
   if OV.FilePath(imagePath) == OV.FilePath():
@@ -1362,7 +1369,7 @@ def getReportImageSrc():
   else:
     return 'file:///%s' %imagePath
 OV.registerFunction(getReportImageSrc)
-  
+
 def stopDebugging():
   try:
     import wingdbstub
@@ -1371,7 +1378,7 @@ def stopDebugging():
     pass
   return
 OV.registerFunction(stopDebugging)
-  
+
 def StoreSingleParameter(var, args):
   if var:
     OV.StoreParameter(var)
@@ -1393,7 +1400,7 @@ def getAllHelpBoxes():
     rFile = open(htmfile,'r')
     f = rFile.read()
     rFile.close()
-    
+
     ## find all occurances of strings between help_ext=..; . These should be comma separated things to highlight.
     regex = re.compile(r"help_ext= (.*?)  ;", re.X)
     l = regex.findall(f)
