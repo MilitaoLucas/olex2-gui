@@ -16,7 +16,7 @@
 spy.SetParam(snum.masks.type,GetValue(SET_SNUM_MASKS_TYPE))>>
 spy.OlexCctbxMasks()>>
 spy.SetXGridView()>>
-html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()), eval(xgrid.GetMax())')"
+html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)')"
       label="%Map% "
       valign="center"
     >
@@ -79,7 +79,7 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()), eval(xgrid.GetMax())')"
       ondown="setlabel(SNUM_MASKS_BUTTON,%Delete Mask Display%)>>
 spy.OlexCctbxMasks()>>
 spy.SetXgridView()>>
-html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()), eval(xgrid.GetMax())')>>
+html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)')>>
 SetValue(SNUM_XGRID_SLIDE,eval(xgrid.Scale()))>>
 SetValue(SNUM_XGRID_SLIDE,xgrid.Scale())"
       onup="

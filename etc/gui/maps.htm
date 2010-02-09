@@ -14,14 +14,14 @@
       name="SNUM_XGRID_SLIDE"
       width="$eval(htmlpanelwidth()-80)"
       height="18"
-      value="$spy.GetParam(snum.xgrid.value)"
+      value="$eval(spy.GetParam(snum.xgrid.value)*10)"
       bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
       fgcolor="$spy.GetParam(gui.html.font_colour)"
-      min="-3"
-      max="10"
-      onchange="spy.SetParam(snum.xgrid.value,GetValue(SNUM_XGRID_SLIDE))>>
-SetValue(SNUM_XGRID_VALUE,GetValue(SNUM_XGRID_SLIDE))>>
-xgrid.Scale(GetValue(SNUM_XGRID_SLIDE))>>
+      min="$eval(xgrid.GetMin()*10)"
+      max="$eval(xgrid.GetMax()*10)"
+      onchange="spy.SetParam(snum.xgrid.value,eval(GetValue(SNUM_XGRID_SLIDE)/10))>>
+SetValue(SNUM_XGRID_VALUE,spy.GetParam(snum.xgrid.value))>>
+xgrid.Scale(GetValue(SNUM_XGRID_VALUE))>>
 ">
   <td colspan='1'>
     <input
@@ -32,8 +32,8 @@ xgrid.Scale(GetValue(SNUM_XGRID_SLIDE))>>
       bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
       fgcolor="$spy.GetParam(gui.html.font_colour)"
       value="$spy.GetParam(snum.xgrid.value)"
-      onchange="spy.SetParam(snum.xgrid.value,GetValue(SNUM_XGRID_SLIDE))>>
-xgrid.Scale(GetValue(SNUM_XGRID_SLIDE))
+      onchange="spy.SetParam(snum.xgrid.value,eval(GetValue(SNUM_XGRID_SLIDE))*10)>>
+xgrid.Scale(GetValue(SNUM_XGRID_VALUE))
 SetValue(XGRID_SCALE,XGrid.Scale())
 ">
   </td>
