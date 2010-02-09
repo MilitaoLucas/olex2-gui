@@ -661,11 +661,18 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       mask.solvent_accessible_volume, 100*
       mask.solvent_accessible_volume/unit_cell.volume())
     n_voids = flex.max(mask.mask.data) - 1
+    #diff_map = miller.fft_map(mask.crystal_gridding, f_obs_minus_f_calc)
+    #diff_map.apply_volume_scaling()
     for i in range(2, n_voids + 2):
-      void_vol = (unit_cell.volume() * mask.mask.data.count(i)) \
+      n_void_grid_points = mask.mask.data.count(i)
+      #f_000 = flex.sum(
+        #diff_map.deep_copy().set_selected(mask.mask.data.as_double() != i, 0)) * mask.fft_scale
+      #f_000_s = f_000 * (mask.mask.data.size() /
+        #(mask.mask.data.size() - n_void_grid_points))
+      void_vol = (unit_cell.volume() * n_void_grid_points) \
                / mask.crystal_gridding.n_grid_points()
       print >> log, "void %i: %.1f" %(i-1, void_vol)
-    print >> log, "F000 void: %.1f" %mask.f_000_s
+      #print >> log, "F000 void: %.1f" %f_000_s
 OV.registerFunction(OlexCctbxMasks)
 
 class OlexCctbxGraphs(OlexCctbxAdapter):
@@ -985,4 +992,5 @@ def write_grid_to_olex(grid):
     for j in range(n_real[1]):
       for k in range(n_real[2]):
         olex_xgrid.SetValue(i,j,k, grid[i,j,k])
+  olex_xgrid.SetMinMax(flex.min(grid), flex.max(grid))
   olex_xgrid.SetVisible(True)
