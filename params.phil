@@ -735,7 +735,7 @@ snum {
     .type = float
 
   xgrid {
-    view = *wire 2D surface points contour
+    view = *wire 2D surface points contour 'contour+plane'
       .type = choice
     extended = False
       .type = bool

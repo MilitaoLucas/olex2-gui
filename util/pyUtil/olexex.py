@@ -557,6 +557,8 @@ def SetXgridView():
     olex.m("xgrid.RenderMode(plane)")
   if view == "contour":
     olex.m("xgrid.RenderMode(contour)")
+  if view == "contour+plane":
+    olex.m("xgrid.RenderMode(contour+plane)")
   elif view == "surface":
     olex.m("xgrid.RenderMode(fill)")
   elif view == "wire":
