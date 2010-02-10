@@ -143,11 +143,8 @@ def change_skin(skin_name=None, force=False):
     t2 = t
   
   SetGrad()
-
-  olx.SetMaterial("InfoBox.Text %s" %OV.GetParam('gui.infobox_text'))
-  olx.SetMaterial("InfoBox.Plane %s" %OV.GetParam('gui.infobox_plane'))
-
-  olx.HtmlPanelWidth(OV.GetParam('gui.htmlpanelwidth'))
+  SetMaterials()
+  
   OV.setAllMainToolbarTabButtons()
   olx.html_Reload()
   
@@ -220,6 +217,14 @@ def SetGrad():
     val = IT.hex2dec(val)
     v.append(val)
   olx.Grad("%i %i %i %i" %(v[0], v[1], v[2], v[3]))
+
+def SetMaterials():
+  olx.SetMaterial("InfoBox.Text %s" %OV.GetParam('gui.infobox_text'))
+  olx.SetMaterial("InfoBox.Plane %s" %OV.GetParam('gui.infobox_plane'))
+  olx.SetMaterial("XGrid.+Surface %s" %OV.GetParam('gui.xgrid.positive_surface_material'))
+  olx.SetMaterial("XGrid.-Surface %s" %OV.GetParam('gui.xgrid.negative_surface_material'))
+  olx.HtmlPanelWidth(OV.GetParam('gui.htmlpanelwidth'))
+
   
 def load_user_gui_phil():
   gui_phil_path = "%s/gui.phil" %(OV.DataDir())
