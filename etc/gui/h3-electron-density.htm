@@ -3,88 +3,88 @@
 <tr>
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-	<td>
-		<input
-			type="combo"
-			height="$spy.GetParam(gui.html.combo_height)"
-			bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-			name="SET_SNUM_MAP_TYPE"
-			items='diff;fcalc;2Fo-Fc<-tomc;fobs'
-			value="$spy.GetParam(snum.map.type)"
-			width="20%"
-			onchange="
+  <td>
+    <input
+      type="combo"
+      height="$spy.GetParam(gui.html.combo_height)"
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      name="SET_SNUM_MAP_TYPE"
+      items='diff;fcalc;2Fo-Fc<-tomc;fobs'
+      value="$spy.GetParam(snum.map.type)"
+      width="20%"
+      onchange="
 spy.SetParam(snum.map.type,GetValue(SET_SNUM_MAP_TYPE))>>
 spy.MapView()>>
 html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)')"
-			label="%Map% "
-			valign="center"
-		>
-	</td>
-	<td>
-		<input
-			type="combo"
-			height="$spy.GetParam(gui.html.combo_height)"
-			bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-			name="SET_SNUM_MAP_SOURCE"
-			items='olex;fcf;'
-			value="$spy.GetParam(snum.map.source)"
-			width="20%"
-			onchange="
+  label="%Map% "
+  valign="center"
+>
+</td>
+<td>
+  <input
+    type="combo"
+    height="$spy.GetParam(gui.html.combo_height)"
+    bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+    name="SET_SNUM_MAP_SOURCE"
+    items='olex;fcf;'
+    value="$spy.GetParam(snum.map.source)"
+    width="20%"
+    onchange="
 spy.SetParam(snum.map.source,GetValue(SET_SNUM_MAP_SOURCE))>>
 spy.MapView()>>
 html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)')"
-			label="%Source% "
-			valign="center"
-		>
-	</td>
-	<td>
-			<input
-			type="text"
-			name = "SET_SNUM_MAP_RESOLUTION"
-			width="20%"
-			height="18"
-			label="%Res%/&Aring "
-			valign="center"
-			bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-			fgcolor="$spy.GetParam(gui.html.font_colour)"
-			value="$spy.GetParam(snum.map.resolution)"
-			onchange="spy.SetParam(snum.map.resolution,GetValue(SET_SNUM_MAP_RESOLUTION))"
-			>
-	</td>
-	<td colspan = '1'>
-	 <input
-		bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-		fgcolor="$spy.GetParam(gui.html.font_colour)"
-		type="checkbox"
-		value="%Mask%"
-		valign="center"
-		name="SNUM_MAP_MASK"
-		checked="$spy.GetParam(snum.map.mask)"
-		height='16'
-		width='20%'
-		oncheck="spy.SetParam(snum.map.mask,True)"
-		onuncheck="spy.SetParam(snum.map.mask,False)">
-	</td>
+  label="%Source% "
+  valign="center"
+>
+</td>
+<td>
+  <input
+  type="text"
+  name = "SET_SNUM_MAP_RESOLUTION"
+  width="20%"
+  height="18"
+  label="%Res%/&Aring "
+  valign="center"
+  bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+  fgcolor="$spy.GetParam(gui.html.font_colour)"
+  value="$spy.GetParam(snum.map.resolution)"
+  onchange="spy.SetParam(snum.map.resolution,GetValue(SET_SNUM_MAP_RESOLUTION))"
+  >
+</td>
+<td colspan = '1'>
+  <input
+    bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+    fgcolor="$spy.GetParam(gui.html.font_colour)"
+    type="checkbox"
+    value="%Mask%"
+    valign="center"
+    name="SNUM_MAP_MASK"
+    checked="$spy.GetParam(snum.map.mask)"
+    height='16'
+    width='20%'
+    oncheck="spy.SetParam(snum.map.mask,True)"
+    onuncheck="spy.SetParam(snum.map.mask,False)">
+</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
 <tr>
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-	<td colspan='1' align="center">
-		<input
-			type="button"
-			name="SNUM_MAP_BUTTON"
-			value="%Calculate%"
-			width="180"
-			manage
-			ondown="setlabel(SNUM_MAP_BUTTON,%Delete Map%)>>
+  <td colspan='1' align="center">
+    <input
+      type="button"
+      name="SNUM_MAP_BUTTON"
+      value="%Calculate%"
+      width='$eval(htmlpanelwidth()-35)'
+      manage
+      ondown="setlabel(SNUM_MAP_BUTTON,%Delete Map%)>>
 spy.MapView()>>
 html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)')>>
 SetValue(SNUM_XGRID_SLIDE,eval(xgrid.Scale()*10))>>
 SetValue(SNUM_XGRID_SLIDE,xgrid.Scale())"
-			onup="setlabel(SNUM_MAP_BUTTON,%Calculate%)>>xgrid.visible(false)"
-	>
-	</td>
+  onup="setlabel(SNUM_MAP_BUTTON,%Calculate%)>>xgrid.visible(false)"
+>
+</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>

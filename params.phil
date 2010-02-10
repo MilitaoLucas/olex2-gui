@@ -20,6 +20,13 @@ gui {
     .type = colour
   grey = #555555
     .type = colour
+    
+  xgrid {
+    positive_surface_material = '245;3623911424;3632300160;1.000,1.000,1.000,0.500;1.000,1.000,1.000,1.000;36;36'
+      .type = str
+    negative_surface_material = '245;3628089472;3632300160;1.000,1.000,1.000,0.500;1.000,1.000,1.000,1.000;36;366'
+      .type = str
+  }  
 
   skin {
     name = default
@@ -46,12 +53,19 @@ gui {
       .type = int
     highlight_colour = #ff7800
       .type = colour
+      
     input_bg_colour = #F3F3F3
       .type = colour
+      
+    input_height = 18
+      .type = int
     checkbox_height = 18
       .type = int
     checkbox_width = 18
       .type = int
+    combo_width_2 = 50
+      .type = int
+      .help = Width of a combobox that is to take 2 digits and a decimal point.
     icon_size = 25
       .type = int
     link_colour = #6f6f8b
@@ -364,7 +378,7 @@ gui {
 }
 
 ##############################################################################
-# The sNum section. Information belonging to the currenlty loaded structure
+# The sNum section. Information belonging to the currently loaded structure
 ##############################################################################
 
 snum {
@@ -947,6 +961,22 @@ graphs {
     }
   }
 }
+
+
+programs {
+  solution {
+    smtbx {
+      cf {
+        max_attempts_to_get_phase_transition = 2
+          .type = int
+        max_attempts_to_get_sharp_correlation_map = 2
+          .type = int
+        max_solving_iterations = 500
+          .type = int
+        } 
+      }
+    }
+  }
 
 user {
   alert_delete_history = Y
