@@ -1,0 +1,70 @@
+<!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<tr name=XGRID_DEPTH_SLIDER>
+  <td colspan='1'>
+    <input
+      align="right"
+      label="depth"
+      type="slider"
+      name="SNUM_XGRID_DEPTH_SLIDE"
+      width="$eval(htmlpanelwidth()-110)"
+      height="18"
+      value="eval(xgrid.Depth()*5)"
+      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      min="$eval(-gl.CalcZoom()*5/2)"
+      max="$eval(gl.CalcZoom()*5/2)"
+      onchange="
+xgrid.Depth(eval(GetValue(SNUM_XGRID_DEPTH_SLIDE)/5))>>
+SetValue(SNUM_XGRID_DEPTH_VALUE,eval(GetValue(SNUM_XGRID_DEPTH_SLIDE)/5))"
+  >
+  <td colspan='1'>
+    <input
+      type="text"
+      name="SNUM_XGRID_DEPTH_VALUE"
+      width="30"
+      height="18"
+      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      value="xgrid.Depth()"
+      onchange="
+xgrid.Depth(GetValue(SNUM_XGRID_DEPTH_VALUE))>>
+SetValue(SNUM_XGRID_DEPTH_SLIDE,eval(GetValue(SNUM_XGRID_DEPTH_VALUE)*5))"
+    >
+  </td>
+</tr>
+
+<tr name=XGRID_SIZE_SLIDER>
+  <td colspan='1'>
+    <input
+      align="right"
+      label="size"
+      type="slider"
+      name="SNUM_XGRID_SIZE_SLIDE"
+      width="$eval(htmlpanelwidth()-110)"
+      height="18"
+      value="xgrid.Size()"
+      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      min="1"
+      max="10"
+      onchange="
+xgrid.Size(GetValue(SNUM_XGRID_SIZE_SLIDE))>>
+SetValue(SNUM_XGRID_SIZE_VALUE,GetValue(SNUM_XGRID_SIZE_SLIDE))"
+  >
+  <td colspan='1'>
+    <input
+      type="text"
+      name="SNUM_XGRID_SIZE_VALUE"
+      width="30"
+      height="18"
+      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      value="GetValue(SNUM_XGRID_SIZE_SLIDE)"
+      onchange="
+xgrid.Size(GetValue(SNUM_XGRID_SIZE_SLIDE))>>
+SetValue(SNUM_XGRID_SIZE_SLIDE,GetValue(SNUM_XGRID_SIZE_VALUE))"
+    >
+  </td>
+</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
