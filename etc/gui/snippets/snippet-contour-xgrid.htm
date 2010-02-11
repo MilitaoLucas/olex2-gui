@@ -1,0 +1,36 @@
+<!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<tr name=XGRID_CONTOUR_SLIDE>
+  <td colspan='1'>
+    <input
+      align="right"
+      label="contours"
+      type="slider"
+      name="SNUM_XGRID_CONTOUR_SLIDE"
+      width="$eval(htmlpanelwidth()-110)"
+      height="18"
+      value="$xgrid.Contours()"
+      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      min="3"
+      max="30"
+      onchange="
+xgrid.Contours(GetValue(SNUM_XGRID_CONTOUR_SLIDE))>>
+SetValue(SNUM_XGRID_CONTOUR_VALUE,xGrid.Contours())"
+  >
+  <td colspan='1'>
+    <input
+      type="text"
+      name = "SNUM_XGRID_CONTOUR_VALUE"
+      width="30"
+      height="18"
+      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      value="$xgrid.Contours()"
+      onchange="
+xgrid.Contours(GetValue(SNUM_XGRID_CONTOUR_VALUE))
+SetValue(SNUM_XGRID_CONTOUR_SLIDE,xGrid.Contours())"
+    >
+  </td>
+</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
