@@ -777,15 +777,18 @@ def onCrystalColourChange():
     OV.SetVar('snum_metacif_exptl_crystal_colour', colour)
 OV.registerFunction(onCrystalColourChange)
 
-def onRefinementProgramChange(prg_name, method=None):
+def onRefinementProgramChange(prg_name, method=None, scope='snum'):
+  if prg_name == 'Auto':
+    OV.SetParam('autochem.refinement.method','Auto')
+    return
   prg = RPD.programs[prg_name]
-  if method is None:
+  if method is None or not method:
     method = sortDefaultMethod(prg)
     if method == 'Least Squares' and olx.LSM() == 'CGLS':
       method = 'CGLS' # work-around for bug #26
-  OV.SetParam("snum.refinement.method", method)
+  OV.SetParam("%s.refinement.method" %scope, method)
   onRefinementMethodChange(prg_name, method)
-OV.registerFunction(OV.SetRefinementProgram)
+OV.registerFunction(OV.set_refinement_program)
 
 def onRefinementMethodChange(prg_name, method):
   if method in RPD.programs[prg_name].methods:
@@ -794,15 +797,20 @@ def onRefinementMethodChange(prg_name, method):
     print "Please choose a valid method for the refinement program %s" %prg_name
 OV.registerFunction(onRefinementMethodChange)
 
-def onSolutionProgramChange(prg_name, method=None):
+def onSolutionProgramChange(prg_name, method=None, scope='snum'):
+  if prg_name == "Auto":
+    OV.SetParam('autochem.solution.method','Auto')
+    #olx.SetValue('SET_autochem_solution_METHOD', 'Auto')
+    return
+
   prg = SPD.programs[prg_name]
-  if method is None:
+  if method is None or not method:
     method = sortDefaultMethod(prg)
     if method == 'Direct Methods' and olx.Ins('PATT') != 'n/a':
       method = 'Patterson Method' # work-around for bug #48
-  OV.SetParam("snum.solution.method", method)
+  OV.SetParam("%s.solution.method" %scope, method)
   onSolutionMethodChange(prg_name, method)
-OV.registerFunction(OV.SetSolutionProgram)
+OV.registerFunction(OV.set_solution_program)
 
 def onSolutionMethodChange(prg_name, method):
   if method in SPD.programs[prg_name].methods:
@@ -821,7 +829,7 @@ def sortDefaultMethod(prg):
   default = methods[0][1].name
   return default
 
-def getSolutionPrgs():
+def get_solution_programs(scope='snum'):
   retval = ""
   p = []
   for prg in SPD:
@@ -832,20 +840,25 @@ def getSolutionPrgs():
   p.sort()
   for item in p:
     retval += "%s;" %item
+  if scope != 'snum':
+    retval = 'Auto;' + retval
   return retval
-OV.registerFunction(getSolutionPrgs)
+OV.registerFunction(get_solution_programs)
 
-def getSolutionMethods(prg):
+def get_solution_methods(prg, scope='snum'):
   retval = ""
   if prg == '?': return retval
+  if prg == 'Auto': return 'Auto'
   p = []
   for method in SPD.programs[prg]:
     p.append(method.name)
   p.sort()
   for item in p:
     retval += "%s;" %item
+  if scope != 'snum':
+    retval = 'Auto;' + retval
   return retval
-OV.registerFunction(getSolutionMethods)
+OV.registerFunction(get_solution_methods)
 
 def which_program(prg):
   if "smtbx" in prg.name:
@@ -872,7 +885,7 @@ def getmap(mapName):
 if haveGUI:
   OV.registerFunction(getmap)
 
-def getRefinementPrgs():
+def get_refinement_programs(scope='snum'):
   retval = ""
   p = []
   for prg in RPD:
@@ -884,20 +897,26 @@ def getRefinementPrgs():
   p.sort()
   for item in p:
     retval += "%s;" %item
+  if scope != 'snum':
+    retval = 'Auto;' + retval
+  
   return retval
-OV.registerFunction(getRefinementPrgs)
+OV.registerFunction(get_refinement_programs)
 
-def getRefinementMethods(prg):
+def get_refinement_methods(prg, scope='snum'):
   retval = ""
   if prg == '?': return retval
+  if prg == 'Auto': return 'Auto'
   p = []
   for method in RPD.programs[prg]:
     p.append(method.name)
   p.sort()
   for item in p:
     retval += "%s;" %item
+  if scope != 'snum':
+    retval = 'Auto;' + retval
   return retval
-OV.registerFunction(getRefinementMethods)
+OV.registerFunction(get_refinement_methods)
 
 def QPeaksSlide(value):
   val = int(value) * 5
@@ -1207,13 +1226,22 @@ def GetACF():
     return
 
   updateACF()
+  use_new = True
+  if use_new:
+    debug = OV.FindValue('odac_fb', False)
+    debug =  OV.GetParam('odac.debug.debug')
+    OV.SetVar('odac_fb', debug)
+    debug_deep1 = OV.GetParam('odac.debug.debug_deep1')
+    debug_deep2 = OV.GetParam('odac.debug.debug_deep2')
+    OV.SetVar("ac_verbose",  OV.GetParam('odac.debug.verbose'))
 
-
-  debug = OV.FindValue('odac_fb', False)
-  debug = [False, True][0]
-  debug_deep1 = [False, True][0]
-  debug_deep2 = [False, True][0]
-  OV.SetVar("ac_verbose", [False, True][0])
+  else:
+    debug = OV.FindValue('odac_fb', False)
+    debug = [False, True][1]
+    debug_deep1 = [False, True][1]
+    debug_deep2 = [False, True][1]
+    OV.SetVar("ac_verbose", [False, True][1])
+    
   keyname = getKey()
 
 
@@ -1425,3 +1453,4 @@ if not haveGUI:
   #OV.registerFunction(tbxs)
 OV.registerFunction(OV.IsPluginInstalled)
 OV.registerFunction(OV.GetTag)
+
