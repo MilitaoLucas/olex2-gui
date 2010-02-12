@@ -1,0 +1,14 @@
+<font size='2'>
+      <input 
+        type='combo'
+        width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 - spy.GetParam(gui.htmlpanelwidth_margin_adjust))' 
+        height="$spy.GetParam(gui.html.combo_height)"
+        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+        name='SET_#scope_#prg_type_METHOD'
+        value='$spy.GetParam(#scope.#prg_type.method)'
+        items='$spy.get_#prg_type_methods($spy.GetParam(#scope.#prg_type.program),#scope)'
+        label=''
+        onchange="spy.set_#prg_type_program(GetValue(SET_#scope_#prg_type_PROGRAM),GetValue(SET_#scope_#prg_type_METHOD),#scope)>>UpdateHtml"
+        readonly='readonly'
+      >
+</font>
