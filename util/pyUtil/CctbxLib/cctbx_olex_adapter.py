@@ -285,7 +285,7 @@ class OlexCctbxRefine(OlexCctbxAdapter):
             if self.debug: print "OK"
           else:
             if self.debug: print " X"
-    olx.Sel('-u')
+    #olx.Sel('-u')
     olx.xf_EndUpdate()
     if reset_refinement:
       raise Exception("Atoms promoted")
@@ -351,9 +351,10 @@ class OlexCctbxRefine(OlexCctbxAdapter):
     olex_xgrid.InitSurface(True)
 
 class FullMatrixRefine(OlexCctbxRefine):
-  def __init__(self, max_cycles=None, verbose=False):
+  def __init__(self, max_cycles=None, max_peaks=5, verbose=False):
     OlexCctbxAdapter.__init__(self)
     self.max_cycles = max_cycles
+    self.max_peaks = max_peaks
     self.verbose = verbose
     sys.stdout.refresh = False
     self.scale_factor = None
@@ -367,16 +368,44 @@ class FullMatrixRefine(OlexCctbxRefine):
       #weighting_scheme=least_squares.unit_weighting())
     objectives = []
     scales = []
-    for i in range (self.max_cycles):
-      normal_eqns.build_up()
-      objectives.append(normal_eqns.objective)
-      scales.append(normal_eqns.scale_factor)
-      normal_eqns.solve_and_apply_shifts()
-      shifts = normal_eqns.shifts
-      self.feed_olex()
-      self.scale_factor = scales[-1]
-    self.post_peaks(self.f_obs_minus_f_calc_map(0.4))
-    sys.stdout.refresh = True
+    
+    use_old = False
+    if use_old:
+      for i in range (self.max_cycles):
+        normal_eqns.build_up()
+        objectives.append(normal_eqns.objective)
+        scales.append(normal_eqns.scale_factor)
+        normal_eqns.solve_and_apply_shifts()
+        shifts = normal_eqns.shifts
+        self.feed_olex()
+        self.scale_factor = scales[-1]
+      self.post_peaks(self.f_obs_minus_f_calc_map(0.4), max_peaks=self.max_peaks)
+      sys.stdout.refresh = True
+    
+    else:
+      for i in range (self.max_cycles):
+        try:
+          normal_eqns.build_up()
+        except RuntimeError, e:
+          if str(e).startswith("cctbx::adptbx::debye_waller_factor_exp: max_arg exceeded"):
+            print "Refinement failed!"
+        objectives.append(normal_eqns.objective)
+        scales.append(normal_eqns.scale_factor)
+        try:
+          normal_eqns.solve_and_apply_shifts()
+        except RuntimeError, e:
+          if "SCITBX_ASSERT(!chol.failure) failure" in str(e):
+            print "Cholesky failure"
+          print e
+          break
+        finally:
+          shifts = normal_eqns.shifts
+          self.feed_olex()
+          self.scale_factor = scales[-1]
+        
+        self.post_peaks(self.f_obs_minus_f_calc_map(0.4), max_peaks=self.max_peaks)
+        sys.stdout.refresh = True
+
 
   def feed_olex(self):
     ## Feed Model
@@ -403,12 +432,13 @@ class FullMatrixRefine(OlexCctbxRefine):
         u_trans = (u[0], u[1], u[2], u[5], u[4], u[3])
       else:
         u_trans = u
+
       id = self.olx_atoms.id_for_name[name]
       olx.xf_au_SetAtomCrd(id, *xyz)
       olx.xf_au_SetAtomU(id, *u_trans)
       u_total += u[0]
       u_average = u_total/i
-    olx.Sel('-u')
+    #olx.Sel('-u')
     olx.xf_EndUpdate()
 
   def f_obs_minus_f_calc_map(self, resolution):
@@ -435,7 +465,7 @@ class FullMatrixRefine(OlexCctbxRefine):
       resolution_factor=resolution,
     )
 
-  def post_peaks(self, fft_map):
+  def post_peaks(self, fft_map, max_peaks=5):
     from cctbx import maptbx
     from  libtbx.itertbx import izip
     fft_map.apply_volume_scaling()
@@ -444,7 +474,7 @@ class FullMatrixRefine(OlexCctbxRefine):
         peak_search_level=3,
         interpolate=False,
         min_distance_sym_equiv=1.0,
-        max_clusters=30),
+        max_clusters=max_peaks),
       verify_symmetry=False
       ).all()
     i = 0
@@ -535,7 +565,11 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     solving = charge_flipping.solving_iterator(
       flipping,
       yield_during_delta_guessing=True,
-      yield_solving_interval=solving_interval)
+      yield_solving_interval=solving_interval,
+      max_attempts_to_get_phase_transition=OV.GetParam('programs.solution.smtbx.cf.max_attempts_to_get_phase_transition'),
+      max_attempts_to_get_sharp_correlation_map=OV.GetParam('programs.solution.smtbx.cf.max_attempts_to_get_sharp_correlation_map'),
+      max_solving_iterations=OV.GetParam('programs.solution.smtbx.cf.max_solving_iterations'),
+    )
     charge_flipping_loop(solving, verbose=verbose)
 
     # play with the solutions
@@ -559,6 +593,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
 
     else:
       print "*** No solution found ***"
+      yield (None, None)
 
   def post_single_peak(self, xyz, height, cutoff=1.0, auto_assign=False):
     if height/self.peak_normaliser < cutoff:

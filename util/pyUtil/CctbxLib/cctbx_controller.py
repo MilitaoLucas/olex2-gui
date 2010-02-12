@@ -448,7 +448,7 @@ class manager(object):
     self.adp_restraints_flags = adp_restraints_flags
     self.max_sites_pre_cycles = max_sites_pre_cycles
     self.max_cycles = max_cycles
-    self.max_peaks = max_peaks
+    self.max_peaks = OV.GetParam
     self.verbose = verbose
     self.log = log
     self.minimisation = None
