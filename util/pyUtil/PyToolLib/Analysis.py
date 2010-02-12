@@ -953,8 +953,11 @@ class Analysis(Graph):
           data_path = xy[-3:][-2]
         except:
           data_path = 'n/a'
-        x.append(float(xy[0]))
-        y.append(float(xy[1]))
+        try:
+          x.append(float(xy[0]))
+          y.append(float(xy[1]))
+        except:
+          pass
 
     self.data.setdefault('dataset1',Dataset(x,y,metadata=metadata))
     self.metadata = metadata
@@ -1772,6 +1775,26 @@ class Fobs_over_Fcalc_plot(Analysis):
     self.draw_fit_line(slope=0, y_intercept=1, write_equation=False)
     self.draw_pairs()
 
+class X_Y_plot(Analysis):
+  def __init__(self):
+    Analysis.__init__(self)
+    self.item = "X_Y_plot"
+    print("Good things will come to those who wait")
+    self.run()
+    
+  def run(self):
+#    filepath = self.file_reader("%s/%s.csv" %(self.datadir,"ac_stats"))
+    filepath = ("%s/%s.csv" %(self.datadir,"ac_stats"))
+    self.get_simple_x_y_pair_data_from_file(filepath)
+    self.graphInfo.update(self.metadata)
+    self.make_empty_graph(axis_x = True)
+    self.draw_pairs()
+    self.graphInfo.setdefault("pop_html", 'acgraph.htm')
+    self.graphInfo.setdefault("pop_name", 'acgraph')
+
+    self.popout()
+
+    
 class HistoryGraph(Analysis):
 
   def __init__(self, history_tree):
@@ -1885,6 +1908,7 @@ OV.registerFunction(SystematicAbsencesPlot)
 OV.registerFunction(Fobs_Fcalc_plot)
 OV.registerFunction(Fobs_over_Fcalc_plot)
 OV.registerFunction(Normal_probability_plot)
+OV.registerFunction(X_Y_plot)
 
 def array_scalar_multiplication(array, multiplier):
   return [i * multiplier for i in array]

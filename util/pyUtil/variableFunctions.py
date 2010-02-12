@@ -123,11 +123,11 @@ def getDefaultPrgMethod(prgType):
   defaultPrg = '?'
   defaultMethod = '?'
   if prgType == 'Refinement':
-    availablePrgs = olexex.getRefinementPrgs().split(';')
+    availablePrgs = olexex.get_refinement_programs().split(';')
     prgList = ('XL', 'ShelXL', 'XH', 'ShelXH', 'smtbx-refine')
     prgDict = olexex.RPD
   elif prgType == 'Solution':
-    availablePrgs = olexex.getSolutionPrgs().split(';')
+    availablePrgs = olexex.get_solution_programs().split(';')
     prgList = ('XS', 'ShelXS', 'smtbx-solve', 'XM', 'ShelXD')
     prgDict = olexex.SPD
   for prg in prgList:

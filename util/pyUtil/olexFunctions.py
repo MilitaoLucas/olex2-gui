@@ -75,20 +75,20 @@ class OlexFunctions(inheritFunctions):
     else:
       return None
 
-  def SetSolutionProgram(self, program, method=None):
+  def set_solution_program(self, program, method=None, scope='snum'):
     try:
       import olexex
-      self.SetParam('snum.solution.program', program)
-      olexex.onSolutionProgramChange(program, method)
+      self.SetParam('%s.solution.program' %scope, program)
+      olexex.onSolutionProgramChange(program, method,scope)
     except Exception, ex:
       print >> sys.stderr, "Program %s could not be set" %(program)
       sys.stderr.formatExceptionInfo()
 
-  def SetRefinementProgram(self, program, method=None):
+  def set_refinement_program(self, program, method=None, scope='snum'):
     try:
       import olexex
-      self.SetParam('snum.refinement.program', program)
-      olexex.onRefinementProgramChange(program, method)
+      self.SetParam('%s.refinement.program' %scope, program)
+      olexex.onRefinementProgramChange(program, method, scope)
     except Exception, ex:
       print >> sys.stderr, "Program %s could not be set" %(program)
       sys.stderr.formatExceptionInfo()
