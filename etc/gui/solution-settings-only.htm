@@ -9,18 +9,7 @@
   </td>
   <td width='50%' VALIGN='center' ALIGN='right' colspan=2>
     <font size='2'>
-      <input
-        type='combo'
-        width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 -20)'
-        height="$spy.GetParam(gui.html.combo_height)"
-        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-        name='SET_SNUM_SOLUTION_PROGRAM'
-        value='$spy.GetParam(snum.solution.program)'
-        items='$spy.getSolutionPrgs()'
-        label=''
-        onchange="spy.SetSolutionProgram(GetValue(SET_SNUM_SOLUTION_PROGRAM))>>UpdateHtml"
-        readonly='readonly'
-      >
+<!-- #include program gui\snippets\snippet-program.htm;scope=snum;prg_type=solution;1; -->
     </font>
   </td>
 </tr>
@@ -32,18 +21,7 @@
   </td>
   <td width='50%' VALIGN='center' ALIGN='right' colspan=2>
     <font size='2'>
-      <input
-        type='combo'
-        width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 -20)'
-        height="$spy.GetParam(gui.html.combo_height)"
-        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-        name='SET_SNUM_SOLUTION_METHOD'
-        value='$spy.GetParam(snum.solution.method)'
-        items='$spy.getSolutionMethods($spy.GetParam(snum.solution.program))'
-        label=''
-        onchange="spy.SetSolutionProgram(GetValue(SET_SNUM_SOLUTION_PROGRAM),GetValue(SET_SNUM_SOLUTION_METHOD))>>UpdateHtml"
-        readonly='readonly'
-      >
+<!-- #include program gui\snippets\snippet-method.htm;scope=snum;prg_type=solution;1; -->
     </font>
   </td>
 </tr>
@@ -69,7 +47,7 @@
     <font size='2'>
       <input
         type='combo'
-        width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 -20)'
+        width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 - spy.GetParam(gui.htmlpanelwidth_margin_adjust))' 
         height="$spy.GetParam(gui.html.combo_height)"
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name='SET_SNUM_REFINEMENT_FORMULA'
