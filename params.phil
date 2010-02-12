@@ -1005,4 +1005,14 @@ odac
     .type = path
   is_active = False
     .type = bool
+  debug{
+    debug = True
+      .type = bool
+    debug_deep1 = True
+      .type = bool
+    debug_deep2 = True
+      .type = bool
+    verbose = True
+      .type = bool
+  }
 }
