@@ -1,4 +1,5 @@
 #!/usr/bin/python2
+version = "120210"
 """
 =====================================================================
            Submit charge flipping phasing procedure
@@ -134,18 +135,28 @@ def process_insfile(flip_keywords,files,derived_info):
     c=map(float,c)
     if ( abs(c[3] - 90.00)/90.00 < delta ) and ( abs(c[4]-90.00) / 90.00 < delta ) and ( abs(c[5]-90.00) / 90.00 < delta ) \
     and ( abs((c[0]-c[1]) / c[0]) < delta ) and ( abs((c[0]-c[2]) / c[0]) < delta ) \
-    and ( abs((c[1]-c[2]) / c[0]) < delta ): derived_info['crsyst']='cubi'
+    and ( abs((c[1]-c[2]) / c[0]) < delta ): 
+        derived_info['crsyst']='cubi'
+	derived_info['flipcell'] = str(c[0])+" "+str(c[0])+" "+str(c[0])+" 90.00 90.00 90.00"
     if ( abs(c[3] - 90.00)/90.00 < delta ) and ( abs(c[4]-90.00) / 90.00 < delta ) and ( abs(c[5]-90.00) / 90.00 < delta ) \
     and ( abs((c[0]-c[1]) / c[0]) < delta ) and ( abs((c[0]-c[2]) / c[0]) > delta ) \
-    and ( abs((c[1]-c[2]) / c[0]) > delta ): derived_info['crsyst']='tetr'
+    and ( abs((c[1]-c[2]) / c[0]) > delta ): 
+        derived_info['crsyst']='tetr'
+	derived_info['flipcell'] = str(c[0])+" "+str(c[0])+" "+str(c[2])+" 90.00 90.00 90.00"	
     if ( abs(c[3] - 90.00)/90.00 < delta ) and ( abs(c[4]-90.00) / 90.00 < delta ) and ( abs(c[5]-90.00) / 90.00 < delta ) \
     and ( abs((c[0]-c[1]) / c[0]) > delta ) and ( abs((c[0]-c[2]) / c[0]) > delta ) \
-    and ( abs((c[1]-c[2]) / c[0]) > delta ): derived_info['crsyst']='orth'
+    and ( abs((c[1]-c[2]) / c[0]) > delta ): 
+        derived_info['crsyst']='orth'
+	derived_info['flipcell'] = str(c[0])+" "+str(c[1])+" "+str(c[2])+" 90.00 90.00 90.00"		
     if ( abs(c[3] - 90.00)/90.00 < delta ) and ( abs(c[4]-90.00) / 90.00 < delta ) and ( abs(c[5]-120.00) / 120.00 < delta ) \
-    and ( abs((c[0]-c[1]) / c[0]) < delta ): derived_info['crsyst']='trig'
-    if ( abs(c[3] - 90.00)/90.00 < delta ) and ( abs(c[4]-90.00) / 90.00 > delta ) and ( abs(c[5]-90.00) / 90.00 < delta ): \
-    derived_info['crsyst']='mono'
-
+    and ( abs((c[0]-c[1]) / c[0]) < delta ): 
+        derived_info['crsyst']='trig'
+	derived_info['flipcell'] = str(c[0])+" "+str(c[0])+" "+str(c[2])+" 90.00 90.00 120.00"	
+    if ( abs(c[3] - 90.00)/90.00 < delta ) and ( abs(c[4]-90.00) / 90.00 > delta ) and ( abs(c[5]-90.00) / 90.00 < delta ): 
+        derived_info['crsyst']='mono'
+	derived_info['flipcell'] = str(c[0])+" "+str(c[1])+" "+str(c[2])+" 90.00 "+str(c[4])+" 90.00"
+    if ( derived_info["crsyst"] == "tric"):
+	derived_info['flipcell'] = str(c[0])+" "+str(c[1])+" "+str(c[2])+" "+str(c[3])+" "+str(c[4])+" "+str(c[5])   
 
 #Process symmetry information from .ins-file if this is to be used and put this is temporary symcards.tmp file
     if ( flip_keywords['forcesymmetry'] == "yes" ):
@@ -258,7 +269,7 @@ def process_insfile(flip_keywords,files,derived_info):
 def check_executables(exe):
    for k, v in exe.items():
        if ( find_executable(v) == None ):
-         print "%s executable not found" % v
+         print "%s executable not found, check whether it is installed and in the path." % v
          return False
    return True
 
@@ -276,9 +287,9 @@ def generate_superflip_file(flip_keywords,files,derived_info):
 !       Palatinus, L. & Chapuis, G.(2007): J. Appl. Cryst. 40, 786-790     !
 !              http://superspace.epfl.ch/superflip                         !
 !                                                                          !
-!                          python-script-version 080210                    !
+!                          python-script-version %s                    !
 ============================================================================
-    """
+    """ % version
 
     print """
 -------------------  Crystal data --------------------
@@ -297,7 +308,7 @@ number of trials          ......  %s
 superposition             ......  %s
 ----------------------------------------------------
 
-    """ % (files['insin'], files['hklin'], derived_info['cell'], derived_info['crsyst'], flip_keywords['SG'], flip_keywords['weak'], flip_keywords['biso'], 
+    """ % (files['insin'], files['hklin'], derived_info['flipcell'], derived_info['crsyst'], flip_keywords['SG'], flip_keywords['weak'], flip_keywords['biso'], 
        flip_keywords['maxcycl'], flip_keywords['normalize'], flip_keywords['trial'], flip_keywords['superposition']) 
 
     if ( flip_keywords['comments'] == 'yes' ): raw_input("\n Press <RETURN> to continue\n")       
@@ -312,13 +323,13 @@ superposition             ......  %s
 #   Ab initio phasing by Charge Flipping
 #                                             
 #                   SUPERFLIP
-#                                             
+#
 #=============================================
 title    ab initio Phasing by Charge Flipping 
 
 # Basic crystallographic information          
 cell             %s
-""" % derived_info['cell'])
+""" % derived_info['flipcell'])
 
     f.writelines(g.readlines())
 
@@ -375,6 +386,13 @@ def analyze_superflip_logfile(flip_keywords,files,derived_info):
         if "Last run from" in line: cev=fileinput.filelineno()-2 
         if "Number of successes" in line: nsuccess=int(string.split(line)[4])
         if "# Iteration #" in line: derived_info['itlino'].append(fileinput.filelineno()-1)
+    try: 
+        cev
+        nsuccess   
+    except NameError:
+# x doesn't exist, do something
+      	print "\n Note from Flipsmall:\n Not all required information could be found in Superflip's logfile.\n Did Superflip report a problem?"
+	return False 
     derived_info['itlino'].append(fileinput.filelineno()-1)
     bestresults = open(files['fliplog'],'r').readlines()[cev].strip()
     if ( bestresults[0:3] == "" ): bestresults = open(files['fliplog'],'r').readlines()[cev-2].strip()
@@ -392,7 +410,7 @@ def analyze_superflip_logfile(flip_keywords,files,derived_info):
 
             =====================================================
                          ANALYSIS OF THE RESULTS          
-           =====================================================
+            =====================================================
 
 
     """
@@ -467,7 +485,7 @@ title    CF solution in %s
 # Basic crystallographic information
 cell             %s
 
-""" % (derived_info['spgr'],derived_info['cell']))
+""" % (derived_info['spgr'],derived_info['flipcell']))
 
 #Process symmetry information, either the input info or that from the best run in the log-file
     if ( flip_keywords['forcesymmetry'] == "yes" ):
@@ -600,7 +618,6 @@ def find_executable(executable, path=None):
         (base, ext) = os.path.splitext(executable)
         if ext.lower() not in pathext:
             extlist = pathext
-        print extlist
     for ext in extlist:
         execname = executable + ext
         if os.path.isfile(execname):
@@ -659,14 +676,19 @@ def flipsmall (*args):
 
     cleanup(files)
     print 'Finishing flipsmall procedure'
-    sys.exit(0)
+    print """\n
+ ========================
+ Flipsmall version %s""" % version
+
+    return
 
 # the main keywords
 flip_keywords=dict(weak=0.20, biso=2.5, maxcycl=10000, comments="yes", edmacontinue="no",
                    normalize="yes", merge="yes", forcesymmetry="no", trial="1", SG="1", missing="zero",
 		   derivesymmetry="use",dataformat="shelx",cleanup="yes",terminal='yes', logging='no', superposition='no')
 # calculated and extracted info, from ins-file and logfile
-derived_info=dict(crsyst='tric', cell="9.0 9.0 9.0 90.0 90.0 90.0", cellesd = "0.0 0.0 0.0 0.0 0.0 0.0", wavelength ="0.71073", sfac="C H O N",
+derived_info=dict(crsyst='tric', cell="9.0 9.0 9.0 90.0 90.0 90.0", flipcell="9.0 9.0 9.0 90.0 90.0 90.0",  
+                  cellesd = "0.0 0.0 0.0 0.0 0.0 0.0", wavelength ="0.71073", sfac="C H O N",
                   latt=1, spgr='P1', zerr = '1', itlino=[], bestrun=1)
 # file names in use
 files=dict(base='name',insin='name.ins',hklin='name.hkl',m81='name.m81',inflip='name.inflip',
@@ -686,6 +708,5 @@ try:
 except:
   comlineargs = tuple(sys.argv)
   flipsmall(*comlineargs)
-
-
+sys.exit(0)
 
