@@ -218,7 +218,13 @@ class RunSolutionPrg(RunPrg):
       return
     if self.params.snum.solution.graphical_output and self.HasGUI:
       self.method.observe(self)
-    self.method.run(self)
+    try:
+      res = self.method.run(self)
+    except Exception, err:
+      print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+      print(" The structure Solution Program failed: %s" %err)
+      print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    
     self.runAfterProcess()
     self.endRun()
     sys.stdout.refresh = False

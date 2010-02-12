@@ -65,7 +65,7 @@ class History(ArgumentParser):
         OV.HKLSrc(), self.filefull, filefull_lst, is_solution=True, label=label)
     else:
       tree.add_node(OV.HKLSrc(), self.filefull, filefull_lst)
-    self.his_file = tree.active_node.full_path()
+    self.his_file = tree.active_node.name
     OV.SetParam('snum.history.current_node', tree.active_node.name)
     self._make_history_bars()
     return self.his_file
@@ -392,9 +392,9 @@ class Node:
     OV.SetParam('snum.refinement.last_R1',self.R1)
     OV.SetParam('snum.last_wR2',self.wR2)
     if self.is_solution:
-      OV.SetSolutionProgram(self.program, self.method)
+      OV.set_solution_program(self.program, self.method)
     else:
-      OV.SetRefinementProgram(self.program, self.method)
+      OV.set_refinement_program(self.program, self.method)
 
   def full_path(self):
     return full_path(self)
@@ -614,9 +614,9 @@ class HistoryLeaf:
     OV.SetParam('snum.last_wR2',self.wR2)
     if self.refinement_program is not None:
       if self.refinement_method is not None:
-        OV.SetRefinementProgram(self.refinement_program, self.refinement_method)
+        OV.set_refinement_program(self.refinement_program, self.refinement_method)
       else:
-        OV.SetRefinementProgram(self.refinement_program)
+        OV.set_refinement_program(self.refinement_program)
 
 def _convert_history(history_tree):
   _tree = HistoryTree()

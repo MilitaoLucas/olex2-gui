@@ -243,9 +243,9 @@ class Method_solution(Method):
     """Things to be done after running the solution program.
     """
     if RunPrgObject.HasGUI:
-      olx.ShowQ('a true')
-      olx.ShowQ('b true')
-      olx.Compaq('-a')
+      #olx.ShowQ('a true')
+      #olx.ShowQ('b true')
+      #olx.Compaq('-a')
       olx.ShowStr("true")
     self.auto = True
 
@@ -282,8 +282,9 @@ class Method_refinement(Method):
     if RunPrgObject.params.snum.refinement.update_weight:
       olx.UpdateWght()
     if RunPrgObject.make_unique_names:
-      olx.Sel('-a')
-      olx.Name('sel 1 -c')
+      pass
+      #olx.Sel('-a')
+      #olx.Name('sel 1 -c')
     if RunPrgObject.params.snum.auto_hydrogen_naming:
       olx.FixHL()
 
@@ -513,7 +514,7 @@ class Method_cctbx_refinement(Method_refinement):
     cctbx = OlexCctbxRefine(
       max_cycles=RunPrgObject.params.snum.refinement.max_cycles,
       verbose=verbose)
-    olx.Kill('$Q')
+    #olx.Kill('$Q')
     cctbx.run()
     OV.SetVar('cctbx_R1',cctbx.R1)
     olx.File('%s.res' %OV.FileName())
@@ -531,8 +532,9 @@ class Method_cctbx_fm_refinement(Method_refinement):
     verbose = OV.GetParam('olex2.verbose')
     cctbx = FullMatrixRefine(
       max_cycles=RunPrgObject.params.snum.refinement.max_cycles,
+      max_peaks=RunPrgObject.params.snum.refinement.max_peaks,
       verbose=verbose)
-    olx.Kill('$Q')
+    #olx.Kill('$Q')
     cctbx.run()
     OV.SetVar('cctbx_R1',cctbx.R1()[0])
     olx.File('%s.res' %OV.FileName())
@@ -556,8 +558,15 @@ class Method_cctbx_ChargeFlip(Method_solution):
       item = item.split(":")
       formula_d.setdefault(item[0], {'count':float(item[1])})
     try:
-      for xyz, height in cctbx.runChargeFlippingSolution('%s/%s.hkl' %(RunPrgObject.tempPath,RunPrgObject.hkl_src_name.lower()), solving_interval=solving_interval):
-        cctbx.post_single_peak(xyz, height, auto_assign=False)
+      solution = cctbx.runChargeFlippingSolution('%s/%s.hkl' %(RunPrgObject.tempPath,RunPrgObject.hkl_src_name.lower()), solving_interval=solving_interval)
+      if not solution:
+        print "Sorry Mate!"
+      else:
+        for xyz, height in solution:
+          if not xyz:
+            return "No Solution"
+          else:
+            cctbx.post_single_peak(xyz, height, auto_assign=False)
     except Exception, err:
       print err
       #cctbx.post_single_peak(xyz, height)
@@ -632,31 +641,31 @@ def defineExternalPrograms():
     name='ShelXS',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference="SHELXS-97 (Sheldrick, 1990)",
+    reference="A short history of SHELX (Sheldrick, 2007)",
     execs=["shelxs.exe", "shelxs"])
   ShelXS86 = Program(
     name='ShelXS86',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference="SHELXS-86 (Sheldrick, 1980)",
+    reference="A short history of SHELX (Sheldrick, 2007)",
     execs=["shelxs86.exe", "shelxs86"])
   XS = Program(
     name='XS',
     program_type='solution',
     author="G.M.Sheldrick/Bruker",
-    reference="SHELXS-97 (Sheldrick, 1990)/Bruker",
+        reference="A short history of SHELX (Sheldrick, 2007)/Bruker",
     execs=["xs.exe", "xs"])
   ShelXD = Program(
     name='ShelXD',
     program_type='solution',
-    author="G.M.Sheldrick", 
-    reference="University of G&#246;ttingen", 
+    author="G.M.Sheldrick",
+    reference="A short history of SHELX (Sheldrick, 2007)",
     execs=["shelxd.exe", "shelxd"])
   XM = Program(
     name='XM',
     program_type='solution',
     author="G.M.Sheldrick/Bruker",
-    reference="University of G&#246;ttingen/Bruker",
+    reference="A short history of SHELX (Sheldrick, 2007)/Bruker",
     execs=["xm.exe", "xm"])
   smtbx_solve = Program(
     name='smtbx-solve',
@@ -686,37 +695,37 @@ def defineExternalPrograms():
     name='ShelXL',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="University of G&#246;ttingen",
+    reference="A short history of SHELX (Sheldrick, 2007)",
     execs=["shelxl.exe", "shelxl"])
   XL = Program(
     name='XL',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="University of G&#246;ttingen/Bruker",
+    reference="A short history of SHELX (Sheldrick, 2007)/Bruker",
     execs=["xl.exe", "xl"])
   XLMP = Program(
     name='XLMP',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="University of G&#246;ttingen/Bruker",
+    reference="A short history of SHELX (Sheldrick, 2007)/Bruker",
     execs=["xlmp.exe", "xlmp"])
   ShelXH = Program(
     name='ShelXH',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="University of G&#246;ttingen",
+    reference="A short history of SHELX (Sheldrick, 2007)",
     execs=["shelxh.exe", "shelxh"])
   XH = Program(
     name='XH',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="University of G&#246;ttingen/Bruker",
+    reference="A short history of SHELX (Sheldrick, 2007)/Bruker",
     execs=["xh.exe", "xh"])
   ShelXL_ifc = Program(
     name='ShelXL_ifc',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="University of G&#246;ttingen",
+    reference="A short history of SHELX (Sheldrick, 2007)",
     execs=["shelxl_ifc"])
   smtbx_refine = Program(
     name='smtbx-refine',
@@ -732,8 +741,8 @@ def defineExternalPrograms():
   for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc):
     for method in (least_squares, cgls):
       prg.addMethod(method)
-  smtbx_refine.addMethod(lbfgs)
   smtbx_refine.addMethod(full_matrix)
+  smtbx_refine.addMethod(lbfgs)
 
   SPD = ExternalProgramDictionary()
   for prg in (ShelXS, ShelXS86, XS, ShelXD, XM, smtbx_solve):
