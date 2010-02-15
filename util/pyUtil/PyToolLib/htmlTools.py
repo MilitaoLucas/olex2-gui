@@ -25,7 +25,7 @@ current_tooltip_number = 0
 
 def makeHtmlTable(list):
   """ Pass a list of dictionaries, with one dictionary for each table row.
-  
+
   In each dictionary set at least the 'varName':(the name of the variable) and 'itemName':(the text to go in the first column).
   If you require a combo box set 'items':(a semi-colon separated list of items).
   If you want a multiline box set 'multiline':'multiline'.
@@ -38,7 +38,7 @@ def makeHtmlTable(list):
     row_d = {}
     row_d.setdefault('itemName',input_d['itemName'])
     row_d.setdefault('ctrl_name', "SET_%s" %str.upper(input_d['varName']).replace('.','_'))
-    
+
     boxText = ''
     for box in ['box1','box2','box3']:
       if box in input_d.keys():
@@ -63,7 +63,7 @@ def makeHtmlTable(list):
       input_d.setdefault('bgcolor','spy.bgcolor(%s)' %input_d['ctrl_name'])
       row_d.setdefault('input',makeHtmlInputBox(input_d))
       row_d.update(input_d)
-      
+
     text += makeHtmlTableRow(row_d)
 
   return OV.Translate(text)
@@ -72,10 +72,10 @@ def makeHtmlInputBox(inputDictionary):
   if inputDictionary.has_key('items'):
     inputDictionary.setdefault('type','combo')
     inputDictionary.setdefault('readonly','readonly')
-    
+
   if inputDictionary.has_key('multiline'):
     inputDictionary.setdefault('height','35')
-    
+
   dictionary = {
     'width':'55%%',
     'height':'18',
@@ -91,16 +91,16 @@ def makeHtmlInputBox(inputDictionary):
     'bgcolor':'',
   }
   dictionary.update(inputDictionary)
-  
+
   htmlInputBoxText = '''
-<input 
+<input
 type="%(type)s"
 %(multiline)s
-width="%(width)s"  
-height="%(height)s" 
+width="%(width)s"
+height="%(height)s"
 name="%(ctrl_name)s"
-value="%(value)s" 
-items="%(items)s" 
+value="%(value)s"
+items="%(items)s"
 label="%(label)s"
 onchange="%(onchange)s"
 onleave="%(onleave)s"
@@ -108,7 +108,7 @@ onleave="%(onleave)s"
 bgcolor="%(bgcolor)s"
 >
 '''%dictionary
-  
+
   return htmlInputBoxText
 
 def makeHtmlTableRow(dictionary):
@@ -118,7 +118,7 @@ def makeHtmlTableRow(dictionary):
   dictionary.setdefault('fieldWidth','30%%')
   dictionary.setdefault('fieldVALIGN','center')
   dictionary.setdefault('fieldALIGN','left')
-  
+
   if 'chooseFile' in dictionary.keys():
     chooseFile_dict = dictionary['chooseFile']
     if 'file_type' in chooseFile_dict.keys():
@@ -136,7 +136,7 @@ def makeHtmlTableRow(dictionary):
     dictionary['chooseFile'] = chooseFileText
   else:
     dictionary.setdefault('chooseFile','')
-    
+
   FieldText = ''
   for field in ['field1','field2']:
     if field in dictionary.keys():
@@ -155,7 +155,7 @@ def makeHtmlTableRow(dictionary):
                 """ %field_d
   if FieldText:
     dictionary.setdefault('fieldText',FieldText)
-    
+
     htmlTableRowText = '''
   <tr VALIGN="%(trVALIGN)s" ALIGN="%(trALIGN)s" NAME="%(ctrl_name)s">
     %(fieldText)s
@@ -168,7 +168,7 @@ def makeHtmlTableRow(dictionary):
   </tr>
 ''' %dictionary
 
-  else:	
+  else:
     htmlTableRowText = '''
   <tr VALIGN="%(trVALIGN)s" ALIGN="%(trALIGN)s" NAME="%(ctrl_name)s">
     <td VALIGN="%(fieldVALIGN)s" ALIGN="%(fieldALIGN)s" width="%(fieldWidth)s" colspan=2>
@@ -238,14 +238,14 @@ def make_help_box(args):
     popout = False
   else:
     popout = True
-    
+
   if not name:
     return
   if "-h3-" in name:
     t = name.split("-h3-")
     help_src = t[1]
     title = help_src.replace("-", " ")
-    
+
   elif "-" in name:
     title = name.replace("-", " ")
     help_src = name
@@ -258,41 +258,41 @@ def make_help_box(args):
     t = titleTxt.split("_")
     if len(t) > 1:
       titleTxt = "%s: %s" %(t[0], t[1])
-    
+
   helpTxt = OV.TranslatePhrase("%s-%s" %(help_src, box_type))
   helpTxt = helpTxt.replace("\r", "")
   helpTxt, d = format_help(helpTxt)
   d.setdefault('next',name)
   d.setdefault('previous',name)
-  
+
   editLink = make_edit_link(name, box_type)
-  
+
   if box_type != "help":
     banner_include = "<zimg border='0' src='banner_%s.png' usemap='map_tutorial'>" %box_type
     banner_include += """
-    
+
 <map name="map_tutorial">
 <!-- Button PREVIOUS -->
     <area shape="rect" usemap="#map_setup"
-      coords="290,0,340,60" 
+      coords="290,0,340,60"
       href='spy.make_help_box -name=%(previous)s -type=tutorial' target='%%previous%%: %(previous)s'>
 
 <!-- Button NEXT-->
-    <area shape="rect" 
-      coords="340,0,400,60" 
+    <area shape="rect"
+      coords="340,0,400,60"
       href='spy.make_help_box -name=%(next)s -type=tutorial' target='%%next%%: %(next)s'>
-</map>    
+</map>
     """ %d
-    
+
   else:
     banner_include = ""
 
-  
+
   if not popout:
     str = r'''
 <!-- #include help-%s gui\%s.htm;gui\blocks\tool-off.htm;image=%s;onclick=;1; -->
 ''' %(name, name, name)
-    
+
     return_items = r'''
   <a href="spy.make_help_box -name='%s' -popout=True>>htmlhome">
     <zimg border='0' src='popout.png'>
@@ -300,11 +300,11 @@ def make_help_box(args):
   <a href=htmlhome><zimg border='0' src='return.png'>
   </a>
 ''' %name
-    
+
   else:
     str = ""
     return_items = ""
-    
+
   str += r'''
 %s
 <!-- #include tool-top gui/blocks/help-top.htm;image=blank;1; -->
@@ -347,14 +347,14 @@ def make_help_box(args):
   #str = unicode(str)#
   str = str.replace(u'\xc5', 'angstrom')
   OV.write_to_olex(wFilePath, str)
-  
+
   if box_type == 'help':
     boxWidth = OV.GetParam('gui.help_box.width')
     length = len(helpTxt)
     boxHeight = int(length/(boxWidth/OV.GetParam('gui.help_box.height_factor'))) + OV.GetParam('gui.help_box.height_constant')
     if boxHeight > OV.GetParam('gui.help_box.height_max'):
       boxHeight = OV.GetParam('gui.help_box.height_max')
-    
+
     x = 10
     y = 50
     mouse = True
@@ -366,7 +366,7 @@ def make_help_box(args):
         x = mouseX + 10 - boxWidth
       else:
         x = mouseX - 10
-        
+
   else:
     ws = olx.GetWindowSize('gl')
     ws = ws.split(',')
@@ -374,7 +374,7 @@ def make_help_box(args):
     y = int(ws[1]) + 50
     boxWidth = int(400)
     boxHeight = int(ws[3]) - 80
-    
+
   if popout:
     if box_type == 'tutorial':
       pop_name = "Tutorial"
@@ -386,15 +386,15 @@ def make_help_box(args):
 #    olx.Popup(pop_name, wFilePath, "-b=tc -t='%s' -w=%i -d='echo' -h=%i -x=%i -y=%i" %(name, boxWidth, boxHeight, x, y))
 #    olx.html_SetBorders(pop_name,5)
   else:
-    olx.html_Load(wFilePath) 
-#  popup '%1-tbxh' 'basedir()/etc/gui/help/%1.htm' -b=tc -t='%1' -w=%3 -h=%2 -x=%4 -y=%5"> 
+    olx.html_Load(wFilePath)
+#  popup '%1-tbxh' 'basedir()/etc/gui/help/%1.htm' -b=tc -t='%1' -w=%3 -h=%2 -x=%4 -y=%5">
 OV.registerMacro(make_help_box, 'name-Name of the Box&;popout-True/False&;type-Type of Box (help or tutorial)')
 
 
 def make_warning_html(colspan):
   txt = "htmltool-warning"
   txt = OV.TranslatePhrase(txt)
-  first_col = make_table_first_col() 
+  first_col = make_table_first_col()
   html = '''
        <tr>
          %s
@@ -443,7 +443,7 @@ def make_input_text_box(d):
          'data':'',
          'manage':'',
      }
-  dic.update(d)  
+  dic.update(d)
 
   html = '''
 <input
@@ -476,8 +476,8 @@ def make_combo_text_box(d):
          'data':'',
          'manage':'manage',
      }
-  dic.update(d)  
-  
+  dic.update(d)
+
   html = '''
 <input
        bgcolor="$getVar(gui_html_input_bg_colour)"
@@ -519,8 +519,8 @@ def make_tick_box_input(d):
     dic['checked'] = "checked='%s'" %dic.get('checked')
   else:
     dic.setdefault('checked','')
-  
-  
+
+
   html = """
 <input
   type='checkbox'
@@ -584,14 +584,14 @@ def make_input_button(d):
          'valign':'center',
          'halign':'left'
          }
-  dic.update(d)  
+  dic.update(d)
   html = '''
-<input 
-  bgcolor="%(bgcolor)s" 
-  type="button" 
-  name="%(name)s_BUTTON" 
-  value="%(value)s" 
-  width="%(width)s" 
+<input
+  bgcolor="%(bgcolor)s"
+  type="button"
+  name="%(name)s_BUTTON"
+  value="%(value)s"
+  width="%(width)s"
   height="%(height)s"
   valign="%(valign)s"
   halign="%(halign)s"
@@ -616,14 +616,14 @@ def make_input_button(d):
 def format_help(string):
   import re
   d = {}  # initialise a dictionary, which will be used to store metadata.
-  
+
   ## find all occurances of strings between **..**. These should be comma separated things to highlight.
   regex = re.compile(r"\*\* (.*?)  \*\*", re.X)
   l = regex.findall(string)
   if l:
     l = l[0].split(",")
     string = regex.sub(r"", string)
-  
+
     for item in l:
       regex = re.compile(r"((?P<left>\W) (?P<txt>%s) (?P<right>\W))" %item, re.X)
 #      string = regex.sub(r"\g<left><font color='$getVar(gui_html_highlight_colour)'><b>\g<txt></b></font>\g<right>", string)
@@ -639,8 +639,8 @@ def format_help(string):
     dt = dt.replace(":", "':'")
     dt = "{'%s'}" %dt
     d = eval(dt)
-      
-      
+
+
   ## find all occurances of <lb> and replace this with a line-break in a table.
   regex = re.compile(r"<lb>", re.X)
   string = regex.sub(r"</td></tr><tr><td>", string)
@@ -648,7 +648,7 @@ def format_help(string):
   ## find all occurances of '->' and replace this with an arrow.
   regex = re.compile(r"->", re.X)
   string = regex.sub(r"<b>&rarr;</b>", string)
-  
+
   ## find all occurances of strings between t^..^t. These are the headers for tip of the day.
   regex = re.compile(r"t \^ (.*?)  \^ t", re.X)
   string = regex.sub(r"<font color='$getVar(gui_html_highlight_colour)'><b>\1</b></font>&nbsp;", string)
@@ -656,11 +656,11 @@ def format_help(string):
   ## find all occurances of strings between <<..>>. These are keys to pressthe headers for tip of the day.
   regex = re.compile(r"<< (.*?)  >>", re.X)
   string = regex.sub(r"<b><code>\1</code></b>", string)
-  
+
   ## find all occurances of strings between n^..^n. These are the notes.
   regex = re.compile(r"n \^ (.*?)  \^ n", re.X)
   string = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='1'><tr bgcolor=#efefef><td><font size=-1><b>Note: </b>\1</font></td></tr></table>", string)
-  
+
   ## find all occurances of strings between l[]. These are links to help or tutorial popup boxes.
   regex = re.compile(r"l\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
   string = regex.sub(r"<font size=+1 color='$getVar(gui_html_highlight_colour)'>&#187;</font><a target='Go to \g<linktext>' href='spy.make_help_box -name=\g<linkurl> -type=\g<linktype>'><b>\g<linktext></b></a>", string)
@@ -668,8 +668,8 @@ def format_help(string):
   ## find all occurances of strings between gui[]. These are links make something happen on the GUI.
   regex = re.compile(r"gui\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
   string = regex.sub(r"<font size=+1 color='$getVar(gui_html_highlight_colour)'>&#187;</font><a target='Show Me' href='\g<linkurl>'><b>\g<linktext></b></a>", string)
-  
-  
+
+
   ## find all occurances of strings between XX. These are command line entities.
   width = int(OV.GetHtmlPanelwidth()) - 10
   regex = re.compile(r"  XX (.*?)( [^\XX\XX]* ) XX ", re.X)
@@ -683,7 +683,7 @@ def format_help(string):
   else:
     s = string
   string = s
-  
+
   ## find all occurances of strings between ~. These are the entries for the table.
   regex = re.compile(r"  ~ (.*?)( [^\~\~]* ) ~ ", re.X)
   m = regex.findall(string)
@@ -692,7 +692,7 @@ def format_help(string):
     s = regex.sub(r"<tr><td><b><font color='%s'>\2</font></b> " %colour, string)
   else:
     s = string
-    
+
   ## find all occurances of strings between@. These are the table headers.
   string = s
   regex = re.compile(r"  @ (.*?)( [^\@\@]* ) @ ", re.X)
@@ -702,7 +702,7 @@ def format_help(string):
     s = regex.sub(r"<tr bgcolor='$getVar(gui_html_table_firstcol_colour)'><td><b>\2</b></td></tr><tr><td>", string)
   else:
     s = string
-    
+
   ## find all occurances of strings between &. These are the tables.
   string = s
   #regex = re.compile(r"  (&&) (.*?)( [^\&\&]* ) (&&) ", re.X)
@@ -713,11 +713,11 @@ def format_help(string):
     s = regex.sub(r"<table border='0'>\2</table>", string)
   else:
     s = string
-    
+
   return s, d
 
 def reg_command(self, string):
-  regex = re.compile(r"  ~ (.*?)( [^\~\~]* ) ~ ", re.X)  
+  regex = re.compile(r"  ~ (.*?)( [^\~\~]* ) ~ ", re.X)
   m = regex.findall(string)
   colour = OV.FindValue('gui_html_highlight_colour')
   if m:
@@ -825,7 +825,7 @@ def makeHtmlBottomPop(args, pb_height = 50, y = 0):
   name = args.get('name',"test")
   replace_str = args.get('replace',None)
   modequalifiers = args.get('modequalifiers',None)
-  
+
   import OlexVFS
   from ImageTools import ImageTools
   IM = ImageTools()
@@ -838,7 +838,7 @@ def makeHtmlBottomPop(args, pb_height = 50, y = 0):
   pop_name = name
   htm_location = "%s.htm" %pop_html
   OlexVFS.write_to_olex(htm_location,txt)
-  width = int(IM.gui_htmlpanelwidth) - panel_diff
+  width = OV.GetParam('gui.htmlpanelwidth') - panel_diff
   x = metric[0] + 10
   if not y:
     y = metric[1] - pb_height - 8
@@ -866,8 +866,8 @@ def OnModeChange(*args):
     'occu':'button-set_occu',
     'off':None
   }
-  
-  
+
+
   name = 'mode'
   mode = ""
   i = 0
@@ -888,7 +888,7 @@ def OnModeChange(*args):
   modequalifiers = modequalifiers.strip("=")
   mode = mode.strip()
   mode_disp = mode_disp.strip()
-  
+
   if 'name' in mode:
     active_mode = 'button_small-name'
   elif 'grow' in mode:
@@ -897,14 +897,14 @@ def OnModeChange(*args):
     active_mode = d.get(mode, None)
 
 #  mode_disp = "%s" %mode
-    
+
   if last_mode == active_mode:
     return
-  
+
   if not active_mode:
     active_mode = d.get(mode_disp, None)
-    
-  
+
+
   if mode == 'off':
     OV.SetParam('olex2.in_mode',None)
     OV.cmd("html.hide pop_%s" %name)
@@ -936,7 +936,7 @@ def OnModeChange(*args):
         OV.SetImage(control,use_image)
       copy_to = "%s.png" %last_mode
       OV.CopyVFSFile(use_image, copy_to,2)
-      
+
     last_mode = active_mode
     OV.SetParam('olex2.in_mode',mode.split("=")[0])
     OV.SetParam('olex2.short_mode',mode_disp)
@@ -946,9 +946,9 @@ def OnModeChange(*args):
 
 ##  if active_mode == last_mode:
 ##    active_mode = None
-  
+
   ## Deal with button images
-  #if not active_mode: 
+  #if not active_mode:
     #if not last_mode: return
     #use_image = "%soff.png" %last_mode
     #OV.SetImage("IMG_%s" %last_mode.upper(),use_image)
@@ -975,7 +975,7 @@ def OnModeChange(*args):
       #OV.CopyVFSFile(use_image, copy_to,1)
       #last_mode = active_mode
       #OV.SetVar('olex2_in_mode',mode.split("=")[0])
-    
+
 OV.registerCallback('modechange',OnModeChange)
 
 
@@ -984,8 +984,8 @@ def OnStateChange(*args):
   state = args[1]
   d = {
     'basisvis':'button-show_basis',
-    'cellvis':'button-show_cell',    
-    'htmlttvis':'button-tooltips',    
+    'cellvis':'button-show_cell',
+    'htmlttvis':'button-tooltips',
     'helpvis':'button-help',
   }
   img_base = d.get(name)
@@ -1018,7 +1018,7 @@ def MakeActiveGuiButton(name,cmds,toolname=""):
   d.setdefault('toolname', toolname)
   txt = '''
     <a href="spy.InActionButton(%(bt)s-%(bn)s,on,%(toolname)s)>>refresh>>%(cmds)s>>echo '%(target)s: OK'>>spy.InActionButton(%(bt)s-%(bn)s,off,%(toolname)s)" target="%(target)s">
-      <zimg name=IMG_%(BT)s-%(BN)s%(toolname)s border="0" src="%(bt)s-%(bn)s.png"> 
+      <zimg name=IMG_%(BT)s-%(BN)s%(toolname)s border="0" src="%(bt)s-%(bn)s.png">
     </a>
     '''%d
   return txt
@@ -1026,29 +1026,29 @@ OV.registerFunction(MakeActiveGuiButton)
 
 
 def InActionButton(name,state,toolname=""):
-  
+
   if state == "on":
     use_image= "%son.png" %name
     OV.SetImage("IMG_%s%s" %(name.upper().lstrip(".PNG"),toolname),use_image)
-    
+
   if state == "off":
     use_image= "%soff.png" %name
     OV.SetImage("IMG_%s%s" %(name.upper().lstrip(".PNG"),toolname), use_image)
   return True
 
 OV.registerFunction(InActionButton)
-  
-  
+
+
 def PopProgram(txt="Fred"):
   name = "pop_prg_analysis"
   makeHtmlBottomPop({'txt':txt, 'name':name}, pb_height=225)
-  
+
 def PopBanner(txt='<zimg src="banner.png">'):
   name = "pop_banner"
   makeHtmlBottomPop({'txt':txt, 'name':name}, pb_height=65, y = 130,panel_diff=22)
 OV.registerFunction(PopBanner)
-  
-  
+
+
 def doBanner(i):
   i = int(i)
   #olx.html_SetImage("BANNER_IMAGE","banner_%i.png" %i)
@@ -1059,7 +1059,7 @@ def doBanner(i):
   ist = ""
   cmds = []
   ist += "aio-* 0 "
-  
+
   d = olx.banner_slide.get(i,0)
   if not d:
     i = i + 1
@@ -1073,15 +1073,15 @@ def doBanner(i):
 
 #  print i, d.get('name')
   OV.SetParam('snum.refinement.banner_slide', i)
-  
+
   ist += d.get('itemstate',0)
   cmds += d.get('cmd',"").split(">>")
-  
+
   OV.setItemstate(ist)
 
   for cmd in cmds:
     OV.cmd(cmd)
-  
+
 OV.registerFunction(doBanner)
 
 
@@ -1145,7 +1145,7 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
   if number == "list":
     txt = txt.replace("&nbsp;","")
 
-  
+
   OV.SetVar("current_tooltip_number",i)
   OV.write_to_olex("tip-of-the-day-content.htm", txt.encode('utf-8'))
   return True
@@ -1160,7 +1160,7 @@ OV.registerFunction(getTip)
     #i = 1
     #txt = OV.TranslatePhrase("tip-%i" %i)
     #txt += " | <font size=1>This is Tip %i</font>" %i
-  #current_tooltip_number = i  
+  #current_tooltip_number = i
   #OV.write_to_olex("tip-of-the-day.htm", txt)
   #return True
 

@@ -154,7 +154,7 @@ class RunPrg(ArgumentParser):
       olx.DelIns("TREF")
 
     if self.params.snum.refinement.auto.max_peaks:
-      max_peaks = olexex.OlexAtoms().getExpectedPeaks()
+      max_peaks = olexex.OlexRefinementModel().getExpectedPeaks()
       if max_peaks <= 5:
         self.params.snum.refinement.auto.pruneQ = 0.5
         self.params.snum.refinement.auto.assignQ = 6.0
