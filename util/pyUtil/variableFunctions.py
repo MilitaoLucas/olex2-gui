@@ -13,7 +13,6 @@ import userDictionaries
 import ExternalPrgParameters
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
-import variableDefinitions
 import olexex
 from cStringIO import StringIO
 
