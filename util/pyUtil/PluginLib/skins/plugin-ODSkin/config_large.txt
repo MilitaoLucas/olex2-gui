@@ -1,6 +1,0 @@
-# Extension file for the skin. Values in this file will overwrite those of the parent skin.
-
-GUI_HTMLPANELWIDTH=420
-GUI_HTML_FONT_SIZE=3
-GUI_IMAGE_FONT_NAME=Vera
-gui_html_icon_size=28
