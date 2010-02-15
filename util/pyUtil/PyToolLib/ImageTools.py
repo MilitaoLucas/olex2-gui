@@ -52,7 +52,7 @@ class ImageTools(FontInstances):
     self.gui_sNumTitle_font_name = "%s Bold" %font
     self.gui_button_font_name = "%s Bold" %font
 
-    
+
   def show_image(self, IM):
     import sys
     sys.path.append("C:\Users\Horst\Documents\olex-trunk\Python26\Lib\site-packages\wx-2.8-msw-unicode")
@@ -64,15 +64,15 @@ class ImageTools(FontInstances):
     f.SetSize( wxbmp.GetSize() )
     wx.StaticBitmap(f,-1,wxbmp,(0,0))
     f.Show(True)
-    
+
     def callback(evt,a=a,f=f):
       # Closes the window upon any keypress
       f.Close()
       a.ExitMainLoop()
       wx.EVT_CHAR(f,callback)
       a.MainLoop()
-    
-    
+
+
   def get_unicode_characters(self, txt):
     txt = txt.replace("lambda", unichr(61548))
     txt = txt.replace("theta", unichr(61553))
@@ -86,13 +86,13 @@ class ImageTools(FontInstances):
     #txt  = txt.replace("info", unichr(65353))
     txt  = txt.replace("info", unichr(61600))
     return txt
-    
-    
+
+
   def centre_text(self, draw, txt, font, maxWidth):
     txt_size = draw.textsize(txt, font=font)
     hStart = int((maxWidth - txt_size[0])/2)
     return hStart
-  
+
   def align_text(self, draw, txt, font, maxWidth, align):
     if align == "centre":
       txt_size = draw.textsize(txt, font=font)
@@ -103,27 +103,26 @@ class ImageTools(FontInstances):
       hStart = int((maxWidth - txt_size[0]))
       retVal = hStart
     return retVal
-    
-    
+
+
   def getOlexVariables(self):
-    self.getVariables('gui')
     #self.encoding = self.test_encoding(self.gui_language_encoding) ##Language
     #self.language = "English" ##Language
     #if olx.IsCurrentLanguage('Chinese') == "true":
     #  self.language = 'Chinese'
     self.fonts = self.defineFonts()
- 
+
   def dec2hex(self, n):
     """return the hexadecimal string representation of integer n"""
     return "%X" % n
-     
+
   def hex2dec(self, s):
     """return the integer value of a hexadecimal string s"""
     l = list(s)
     c = "%s%s%s%s%s%s" %(l[5], l[6], l[3], l[4], l[1], l[2])
-    return int(c, 16)    
-        
-    
+    return int(c, 16)
+
+
   def RGBToHTMLColor(self, rgb_tuple):
       """ convert an (R, G, B) tuple to #RRGGBB """
       hexcolor = '#%02x%02x%02x' % rgb_tuple
@@ -142,7 +141,7 @@ class ImageTools(FontInstances):
       r, g, b = colorstring[:2], colorstring[2:4], colorstring[4:]
       r, g, b = [int(n, 16) for n in (r, g, b)]
       return (r, g, b)
-      
+
   def watermark(self, im, mark, position, opacity=1):
     """Adds a watermark to an image."""
     if opacity < 1:
@@ -168,10 +167,10 @@ class ImageTools(FontInstances):
         layer.paste(mark, position)
     # composite the watermark with the layer
     return Image.composite(layer, im, layer)
-  
-  
+
+
   def makeBackgroundTransparent(self, img, col=(255,255,255)):
-    
+
     col = self.HTMLColorToRGB(col)
     img = img.convert("RGBA")
     pixdata = img.load()
@@ -198,10 +197,10 @@ class ImageTools(FontInstances):
     # that has even a little bit of alpha showing.
     solidcolor = Image.new("RGBA", im.size, font_colour)
     immask = Image.eval(imtext, lambda p: 255 * (int(p != 0)))
-    im = Image.composite(solidcolor, im, immask) 
+    im = Image.composite(solidcolor, im, immask)
     im.putalpha(alpha)
     return im
-  
+
   def make_colour_sample(self, colour, size=(20,12)):
     if not colour:
       return
@@ -212,7 +211,7 @@ class ImageTools(FontInstances):
     name = r"colour_%s.png" %colour[1:]
     OlexVFS.save_image_to_olex(IM, name, 2)
     return name
-  
+
   def resize_image(self, image, size):
     image = image.resize(size, Image.ANTIALIAS)
     return image
@@ -230,10 +229,10 @@ class ImageTools(FontInstances):
       txt = '<zimg border="0" src="skin_logo.png">'
     else:
       txt = " "
-      
+
     OlexVFS.write_to_olex('logo1_txt.htm',txt)
     return "Done"
-  
+
 
   def resize_to_panelwidth(self, args):
     name = args['i']
@@ -243,7 +242,7 @@ class ImageTools(FontInstances):
     if os.path.exists(path):
       im = Image.open(path)
       if colourize:
-        im = self.colourize(im, (0,0,0), OV.GetParam('gui.logo_colour')) 
+        im = self.colourize(im, (0,0,0), OV.GetParam('gui.logo_colour'))
       width = int(width) - 47
       factor = im.size[0]/width
       height = int(im.size[1] / factor)
@@ -265,17 +264,17 @@ class ImageTools(FontInstances):
     alpha = im.split()[3]
     alpha = ImageEnhance.Brightness(alpha).enhance(opacity)
     im.putalpha(alpha)
-    return im  
-  
-  
-  def doDup(self, image, offset_x=1, offset_y=1, blend=0.1):    
+    return im
+
+
+  def doDup(self, image, offset_x=1, offset_y=1, blend=0.1):
     dup = ImageChops.duplicate(image)
     dup = ImageChops.invert(dup)
     dup = ImageChops.offset(dup, offset_x, offset_y)
     image = ImageChops.blend(image, dup, blend)
     return image
 
-  
+
   def add_vline(self, draw, height, h_pos, v_pos, weight=1, colour=(237,237,235)):
     begin = (h_pos, v_pos)
     end = (h_pos, height)
@@ -322,12 +321,12 @@ class ImageTools(FontInstances):
       col_1 = self.RGBToHTMLColor(col_1)
       col_2 = self.RGBToHTMLColor(col_2)
     try:
-      IM = ImageOps.colorize(IM, col_1, col_2) 
+      IM = ImageOps.colorize(IM, col_1, col_2)
     except:
       pass
     return IM
 
-  
+
   def add_continue_triangles(self, draw, width, height, shift_up = 4, shift_left = 5, style=('multiple')):
     arrow_top = 8 + shift_up
     arrow_middle = 5 + shift_up
@@ -427,8 +426,8 @@ class ImageTools(FontInstances):
     nc = tuple(l)
     return nc
 
-    
-    
+
+
   def gradient_bgr(self, draw, width, height, colour=(237,237,235), fraction=0.85, increment=10, step=1):
     inc = increment
     if "#" in colour: colour = self.HTMLColorToRGB(colour)
@@ -450,18 +449,18 @@ class ImageTools(FontInstances):
       #print i, R,G,B
       draw.line((begin ,end), fill=(R, G, B))
 
-      
+
   def sort_out_encoding():
     font = ImageFont.truetype("%s" %font_file, font_size, encoding=self.test_encoding("unic")) ##Leave in for Debug!
-    try:  
+    try:
       font_file = self.fonts.get(font_name, "arialuni.ttf")
       font = ImageFont.truetype("%s" %font_file, font_size, encoding=self.test_encoding("unic"))
-     
+
     except:
       print "The font %s is required for this option." %font_name
       self.abort = True
     pass
-  
+
   def textsize(self,
                    draw,
                    txt,
@@ -471,17 +470,17 @@ class ImageTools(FontInstances):
                    lowerCase=False,
                    translate=True):
     return self.write_text_to_draw(draw=draw, txt=txt, font_name=font_name, font_size=font_size, titleCase=titleCase, lowerCase=lowerCase, translate=translate, getXY_only=True)
-    
-  
+
+
   def write_text_to_draw(self,
                          draw,
-                         txt, 
-                         top_left=(1,0), 
-                         font_name='Vera', 
-                         font_size=11, 
-                         font_colour="#000000", 
-                         align="left", 
-                         max_width=0, 
+                         txt,
+                         top_left=(1,0),
+                         font_name='Vera',
+                         font_size=11,
+                         font_colour="#000000",
+                         align="left",
+                         max_width=0,
                          image_size=None,
                          titleCase=False,
                          lowerCase=False,
@@ -490,7 +489,7 @@ class ImageTools(FontInstances):
                          getXY_only=False):
     if translate:
       txt = OV.Translate("%%%s%%" %txt.strip()) ##Language
-      
+
 
     if titleCase:
       txt = txt.title()
@@ -499,7 +498,7 @@ class ImageTools(FontInstances):
     top = top_left[1]
     left = top_left[0]
 
-    
+
     good_encodings = ["ISO8859-1", "ISO8859-2", "ISO8859-7"]
     good_encodings = ["ISO8859-1", "ISO8859-2"]
     self.gui_language_encoding = olx.CurrentLanguageEncoding()
@@ -517,15 +516,15 @@ class ImageTools(FontInstances):
       #font_name = "Simsun TTF"
       #font_name = "Simsun TTC"
       original_font_size = font_size
-      
+
       #if font_size < 18:
       #  font_size = 18
-      
+
       if not translate:
         font_name = 'Vera'
         font_size = original_font_size
-        
-      
+
+
       try:
         txt.encode('ascii')
         font_name = 'Vera'
@@ -533,11 +532,11 @@ class ImageTools(FontInstances):
       except:
         top -= 1
         pass
-    
-    
+
+
 
     if valign:
-      
+
       top = top
       rel_size = valign[1]
       position = valign[0]
@@ -565,11 +564,11 @@ class ImageTools(FontInstances):
         "Simhei TTF":{"top_adjust":-0.2,
                       "rel_adjust":+0.3},
         }
-      
+
       if self.gui_current_language == "Chinese":
         font_peculiarities.setdefault("Arial UTF",{"top_adjust":-0.7,
                                             "rel_adjust":+0.4})
-        
+
       elif self.gui_current_language == "Greek":
         font_peculiarities.setdefault("Arial UTF",{"top_adjust":-1,
                                             "rel_adjust":+0.4})
@@ -577,16 +576,16 @@ class ImageTools(FontInstances):
       elif self.gui_current_language == "Russian":
         font_peculiarities.setdefault("Arial UTF",{"top_adjust":-1,
                                             "rel_adjust":+0.4})
-        
-        
+
+
       top_adjust = 0
       rel_adjust = 0
       for f in font_peculiarities:
         if f in font_name:
           top_adjust = font_peculiarities[f]["top_adjust"]
           rel_adjust = font_peculiarities[f]["rel_adjust"]
-        
-        
+
+
       letting_width, lettering_height = draw.textsize(txt, font=font)
       increase = True
       while increase:
@@ -597,8 +596,8 @@ class ImageTools(FontInstances):
           letting_width, lettering_height = draw.textsize(txt, font=font)
         else:
           increase = False
-    
-    
+
+
 
     try:
       font = self.fonts[font_name]["fontInstance"].get(font_size,None)
@@ -606,17 +605,17 @@ class ImageTools(FontInstances):
       font = self.registerFontInstance(font_name, font_size)
     if not font:
       font = self.registerFontInstance(font_name, font_size, encoding=encoding)
-    
-      
+
+
     if align == "centre":
       left = (self.centre_text(draw, txt, font, max_width))
     elif align == "right":
       left = (self.align_text(draw, txt, font, max_width, 'right'))
-      
+
     wX, wY = draw.textsize(txt, font=font)
     if getXY_only:
       return wX, wY
-    
+
     if not self.abort:
       if type(font_colour) != str and type(font_colour) != tuple and type(font_colour) != unicode:
         try:
@@ -630,7 +629,7 @@ class ImageTools(FontInstances):
     else:
       pass
     return wX, wY
-    
+
   def addTransparancy(self, im, target_colour = (255,255,255)):
     mask = im.point(lambda i : i == 0 and 0) # create RGB mask
     mask = mask.convert('L') # mask to grayscale
@@ -640,7 +639,7 @@ class ImageTools(FontInstances):
     R, G, B = im.split()
     n_img = Image.merge('RGBA', (R, G, B, mask))
     return n_img
-  
+
   def removeTransparancy(self,im, target_colour = (255,255,255)):
     # Remove transparency
     white = Image.new("RGB",im.size,target_colour) # Create new white image
@@ -655,7 +654,7 @@ class ImageTools(FontInstances):
       font = self.registerFontInstance(font_name, font_size)
     wX, wY = sizedraw_dummy_draw.textsize(txt, font=font)
     return wX, wY
-  
+
   def make_pop_image(self, d):
     size = d.get('size')
     bgcolour = d.get('bgcolour')
@@ -663,9 +662,9 @@ class ImageTools(FontInstances):
     name = d.get('name')
     im = Image.new("RGB",size,bgcolour)
     draw = ImageDraw.Draw(im)
-    
+
     margin = 4
-    
+
     line_count = 0
     curr_pos_x = margin
     curr_pos_y = margin
@@ -677,20 +676,20 @@ class ImageTools(FontInstances):
       font_name = "%s %s" %(self.gui_timage_font_name, font_weight)
       font_name = font_name.strip()
       after = t.get('after')
-      
+
       font = self.fonts[font_name]["fontInstance"].get(font_size,None)
       if not font:
         font = self.registerFontInstance(font_name, font_size)
       wX, wY = draw.textsize(txt, font=font)
-      
+
       self.write_text_to_draw(
-        draw, 
-        txt, 
-        top_left=(curr_pos_x,curr_pos_y), 
-        font_name=font_name, 
-        font_size=font_size, 
+        draw,
+        txt,
+        top_left=(curr_pos_x,curr_pos_y),
+        font_name=font_name,
+        font_size=font_size,
         font_colour=colour,)
-      
+
       if '<br>' in after:
         s = after.split('<br>')
         if len(s) > 1:
@@ -699,10 +698,10 @@ class ImageTools(FontInstances):
           mul = int(wY * float(mul))
           curr_pos_y += (wY + mul)
         line_count += 1
-        curr_pos_x = margin 
+        curr_pos_x = margin
       else:
         curr_pos_x += wX
-      
+
     OlexVFS.save_image_to_olex(im, name, 2)
 
   def draw_advertise_new(self,draw,image):
@@ -713,20 +712,20 @@ class ImageTools(FontInstances):
     colour = OV.GetParam('gui.html.highlight_colour')
     txt="New!"
     dX, dY = self.getTxtWidthAndHeight(txt, font_name, font_size)
-    
+
     draw.rectangle((max_width - dX - 2, 2, max_width - 2, max_height - 2), fill='#ffee00')
-    
+
     self.write_text_to_draw(
       draw,
       txt = txt,
       top_left=(60, -1),
       align='right',
       max_width=max_width,
-      font_name=font_name, 
-      font_size=font_size, 
+      font_name=font_name,
+      font_size=font_size,
       titleCase=True,
       font_colour=colour,)
-    
+
     font_size = 8
     txt = "New!"
     dX, dY = self.getTxtWidthAndHeight(txt, font_name, font_size)
@@ -738,8 +737,8 @@ class ImageTools(FontInstances):
       txt = txt,
       top_left=(0, -1),
       max_width=max_width,
-      font_name=font_name, 
-      font_size=font_size, 
+      font_name=font_name,
+      font_size=font_size,
       titleCase=True,
       font_colour=colour,)
     OlexVFS.save_image_to_olex(IM, "new", 2)
@@ -752,12 +751,12 @@ class ImageTools(FontInstances):
       h_space = width - h_space - adval
     arrow_height = height - (2*v_space)
     arrow_width = arrow_height
-    
+
     arrow_height = int(round(arrow_height*scale,0))
     arrow_width = int(round(arrow_width*scale,0))
     #h_space = int(round(h_space*scale/1,0))
     v_space = int(round(v_space*(1/scale),0))
-    
+
     if arrow_width%2 != 0:
       arrow_width -= 1
       arrow_height -= 1
@@ -787,7 +786,7 @@ class ImageTools(FontInstances):
       draw.polygon((begin, middle, end), colour)
     elif type == "composite":
       if direction == "up":
-        begin = (8, 5) 
+        begin = (8, 5)
         middle = (4, height-5)
         end = (8, height-7)
         draw.polygon((begin, middle, end), self.adjust_colour(colour, luminosity = 0.8))
@@ -808,11 +807,11 @@ class ImageTools(FontInstances):
         char_pos = (width - wX -5, 1)
 
       self.write_text_to_draw(
-        draw, 
-        char_char, 
-        top_left=char_pos, 
-        font_name=font_name, 
-        font_size=font_size, 
+        draw,
+        char_char,
+        top_left=char_pos,
+        font_name=font_name,
+        font_size=font_size,
         titleCase=True,
         font_colour=colour,)
     elif type == "circle":
@@ -840,7 +839,7 @@ class ImageTools(FontInstances):
     hrad_TR = 0
     hrad_BL = 0
     hrad_BR = 0
-  
+
     #border_colour = bg_colour
     border_colour = self.adjust_colour(border_colour, hue=border_hls[0], luminosity=border_hls[1], saturation=border_hls[2])
     #border top
@@ -848,28 +847,28 @@ class ImageTools(FontInstances):
     end = (width, 0)
   #       draw.line((begin ,end), fill=border_colour['top'])
     draw.line((begin ,end), fill=border_colour)
-  
+
     #border bottom
     begin = (0, height-1)
     end = (width-1, height-1)
   #       draw.line((begin ,end), fill=border_colour['bottom'])
     draw.line((begin ,end), fill=border_colour)
-  
+
     #border left
     begin = (0, 0)
     end = (0, height-1)
   #       draw.line((begin ,end), fill=border_colour['left'])
     draw.line((begin ,end), fill=border_colour)
-  
+
     #border right
     begin = (width-1 ,0)
     end = (width-1, 0)
   #       draw.line((begin ,end), fill=border_colour['right'])
     draw.line((begin ,end), fill=border_colour)
-  
+
     rect_colour = OV.FindValue('gui_html_bg_colour')
     pie_colour = bg_colour
-    
+
     pie_colour = (0,0,0,255)
     rect_colour = (0,0,0,255)
     #top-left corner
@@ -896,22 +895,22 @@ class ImageTools(FontInstances):
 #      draw.pieslice((width-rad-shift, 0, width-shift, rad), 270, 360, fill=pie_colour)
       draw.arc((width-rad-shift, 0, width-shift, rad), 270, 360, fill=border_colour)
       hrad_TR = hrad
-  
+
     #border top
     begin = (hrad_TL, 0)
     end = (width-hrad_TR, 0)
     draw.line((begin ,end), fill=border_colour)
-  
+
     #border bottom
     begin = (hrad_BL-1, height-1)
     end = (width-hrad_BR-1, height-1)
     draw.line((begin ,end), fill=border_colour)
-  
+
     #border left
     begin = (0, hrad_TL)
     end = (0, height-hrad_BL-1)
     draw.line((begin ,end), fill=border_colour)
-  
+
     #border right
     begin = (width-1 ,hrad_TR)
     end = (width-1, height-hrad_TL)

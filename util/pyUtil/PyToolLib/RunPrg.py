@@ -26,7 +26,7 @@ class RunPrg(ArgumentParser):
     self.shelx_files = r"%s/util/SHELX/" %self.basedir
     self.isAllQ = False #If all atoms are q-peaks, this will be assigned to True
     self.his_file = None
-    
+
     self.demo_mode = OV.FindValue('autochem_demo_mode',False)
     self.broadcast_mode = OV.FindValue('broadcast_mode',False)
     if self.demo_mode:
@@ -37,7 +37,6 @@ class RunPrg(ArgumentParser):
       self.PrgAnalysis = PrgAnalysis
 
     self.params = olx.phil_handler.get_python_object()
-    #self.getVariables('auto')
     OV.SetVar('SlideQPeaksVal','0') # reset q peak slider to display all peaks
     if not self.filename:
       print "No structure loaded"
@@ -52,7 +51,7 @@ class RunPrg(ArgumentParser):
   def which_shelx(self, type="xl"):
     a = olexex.which_program(type)
     if a == "":
-      OV.Alert("Error", "ShelX %s is not found on this system.\nPlease make sure that the ShelX executable files are either on the path or in the Olex2 installation directory." %type, "O") 
+      OV.Alert("Error", "ShelX %s is not found on this system.\nPlease make sure that the ShelX executable files are either on the path or in the Olex2 installation directory." %type, "O")
       OV.Cursor()
       self.terminate = True
     return a
@@ -94,15 +93,15 @@ class RunPrg(ArgumentParser):
     self.tempPath = "%s/.olex/temp" %OV.FilePath()
     if not os.path.exists(self.tempPath):
       os.mkdir(self.tempPath)
-    
+
     ## clear temp folder to avoid problems
-    old_temp_files = os.listdir(self.tempPath) 
+    old_temp_files = os.listdir(self.tempPath)
     for file in old_temp_files:
       try:
         os.remove(r'%s/%s' %(self.tempPath,file))
       except OSError:
         continue
-      
+
     try:
       self.hkl_src = OV.HKLSrc()
       if not os.path.exists(self.hkl_src):
@@ -153,7 +152,7 @@ class RunPrg(ArgumentParser):
       if os.path.exists(lstFile):
         os.remove(lstFile)
       olx.DelIns("TREF")
-      
+
     if self.params.snum.refinement.auto.max_peaks:
       max_peaks = olexex.OlexAtoms().getExpectedPeaks()
       if max_peaks <= 5:
@@ -192,7 +191,7 @@ class RunPrg(ArgumentParser):
 
   def startRun(self):
     OV.CreateBitmap('%s' %self.bitmap)
-  
+
   def endRun(self):
     OV.DeleteBitmap('%s' %self.bitmap)
     OV.Cursor()
@@ -201,7 +200,6 @@ class RunPrg(ArgumentParser):
 class RunSolutionPrg(RunPrg):
   def __init__(self):
     RunPrg.__init__(self)
-    #self.getVariables('solution')
     self.bitmap = 'solve'
     self.program, self.method = self.getProgramMethod('solve')
     self.run()
@@ -224,7 +222,7 @@ class RunSolutionPrg(RunPrg):
       print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
       print(" The structure Solution Program failed: %s" %err)
       print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-    
+
     self.runAfterProcess()
     self.endRun()
     sys.stdout.refresh = False
@@ -255,7 +253,6 @@ class RunSolutionPrg(RunPrg):
 class RunRefinementPrg(RunPrg):
   def __init__(self):
     RunPrg.__init__(self)
-    #self.getVariables('refinement')
     self.bitmap = 'refine'
     self.program, self.method = self.getProgramMethod('refine')
     self.run()
@@ -280,7 +277,7 @@ class RunRefinementPrg(RunPrg):
   def setupRefine(self):
     self.method.pre_refinement(self)
     self.shelx = self.which_shelx(self.program)
-    if olx.LSM() == "CGLS": 
+    if olx.LSM() == "CGLS":
       olx.DelIns('ACTA')
     OV.File()
 
@@ -357,7 +354,7 @@ class RunRefinementPrg(RunPrg):
         R1 = float(olx.Lst('R1'))
       except:
         R1 = False
-        
+
     if R1:
       OV.SetParam('snum.refinement.last_R1', str(R1))
       try:
