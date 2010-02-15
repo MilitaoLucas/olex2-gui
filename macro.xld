@@ -4,9 +4,9 @@
 <onstartup help="Executes on program start"
   <body
     <args
-      <arg1 name="width" def='htmlpanelwidth()'> 
+      <arg1 name="width" def='htmlpanelwidth()'>
     \>
-    <cmd 
+    <cmd
       <cmd1 "silent on">
       <cmd2 "py.Export(datadir()/olx.py)">
       <cmd3 "py.run 'basedir()/util/pyUtil/initpy.py'">
@@ -25,7 +25,7 @@
     \>
 
   <onterminate
-    <cmd1 cmd1="clear"> 
+    <cmd1 cmd1="clear">
     <cmd2 "echo filepath()">
   \>
 \>
@@ -75,7 +75,7 @@
 <onabort
   <cmd "ceiling off">
   <cmd "echo lasterror()">
->	
+>
 >
 >
 
@@ -109,7 +109,7 @@
     <args
     \>
 
-  <cmd 
+  <cmd
     <cmd1  "echo Good Bye">
     <cmd2  "spy.saveHistory()">
     <cmd3  "spy.SaveStructureParams()">
@@ -131,12 +131,12 @@
 <xprep help="Starts XPREP if it installed on your machine"
   <body
     <args
-      <arg1 name="file" def='filename()'> 
+      <arg1 name="file" def='filename()'>
     \>
-    <cmd 
+    <cmd
       <cmd1 "if File.Exists(%s.p4p) then none else 'file %1.p4p'">
       <cmd2 "exec -o xprep %1">
-    \>	
+    \>
 
   <onterminate
   \>
@@ -175,14 +175,14 @@
 <spy help="run internal python"
   <body
     <args
-      <arg1 name="tool" def=" "> 
-      <arg2 name="fun" def=" "> 
-      <arg3 name="param1" def="None"> 
-      <arg4 name="param2" def="None"> 
-      <arg5 name="param3" def="None"> 
-      <arg6 name="param4" def="None"> 
-      <arg7 name="param5" def="None"> 
-      <arg8 name="param6" def="None"> 
+      <arg1 name="tool" def=" ">
+      <arg2 name="fun" def=" ">
+      <arg3 name="param1" def="None">
+      <arg4 name="param2" def="None">
+      <arg5 name="param3" def="None">
+      <arg6 name="param4" def="None">
+      <arg7 name="param5" def="None">
+      <arg8 name="param6" def="None">
     \>
 
   <cmd
@@ -232,7 +232,7 @@
       <arg1 name="plan" def='-1.1'>
       <arg2 name="xl" def='xl'>
     \>
-    <cmd 
+    <cmd
       <cmd0 "xgrid.Visible(false)">
       <cmd1 "mode off">
       <cmd4 "user 'filepath()'">
@@ -256,10 +256,10 @@
 
 <solve help="Launches solution program XS"
   <body
-    <args 
-      <arg1 name="SOLVE" def='SOLVE'\> 
+    <args
+      <arg1 name="SOLVE" def='SOLVE'\>
     \>
-    <cmd 
+    <cmd
       <cmd10 "spy.RunSolutionPrg()">
       <cmd2 cmd="spy.doProgramSettings(spy.GetParam(snum.refinement.program),spy.GetParam(snum.refinement.method),true)">
       \>
@@ -273,10 +273,10 @@
 
 <tidy help = "Automatically select things"
   <body
-    <args 
-      <arg1 name="cutoff" def='0.07'> 
+    <args
+      <arg1 name="cutoff" def='0.07'>
     />
-    <cmd 
+    <cmd
       <cmd1 "sel atoms where xatom.uiso > %1">
       <cmd2 "sel atoms where xatom.peak<2&&xatom.peak>0">
       <cmd3 "updatehtml">
@@ -310,13 +310,13 @@
       <cmd5 "if strcmp(%1,hkl) then 'exec -o getvar(defeditor) &2E;hklsrc()&2E;' else 'exec -o getvar(defeditor) &2E;filepath()/filename().%1&2E;'">
     \>
     <onterminate
-      <cmd1 "stop"> 
+      <cmd1 "stop">
     \>
     <onlisten
       <cmd1 "'spy.SetParam(snum.refinement.max_peaks,Ins(QNUM))'">
       <cmd1 "'spy.SetParam(snum.refinement.max_cycles,Ins(LS))'">
       <cmd1 "spy.doProgramSettings(spy.GetParam(snum.refinement.program),spy.GetParam(snum.refinement.method))">
-      <cmd0 "updatehtml"> 
+      <cmd0 "updatehtml">
     \>
   \>
 \>
@@ -336,7 +336,7 @@
     \>
     <onterminate
       <cmd0 "sel -u">
-    \> 
+    \>
   \>
 \>
 
@@ -353,7 +353,7 @@
       \>
     <onterminate
       <cmd0 "sel -u">
-    \> 
+    \>
   \>
 \>
 
@@ -488,7 +488,7 @@
       <cmd17 "windowcmd XRAYFWClass nl">
     \>
     <onlisten
-      <cmd0 "grow"> 
+      <cmd0 "grow">
     \>
   \>
 \>
@@ -503,11 +503,11 @@
     \>
     <cmd
       <cmd1 "tools hadd">
-      <cmd2 "listen %1"> 
+      <cmd2 "listen %1">
     \>
     <onterminate
-      <cmd1 "echo %1"> 
-      <cmd2 "reap %1"> 
+      <cmd1 "echo %1">
+      <cmd2 "reap %1">
     \>
   \>
 \>
@@ -532,7 +532,7 @@
       <cmd12 cmdXX="windowcmd XRAYFWClass proj/n nl">
     \>
     <onlisten
-      <cmd0 XXX"grow"> 
+      <cmd0 XXX"grow">
     \>
   \>
 \>
@@ -622,7 +622,7 @@
       <cmd8  "cursor(busy, 'Creating Report ...')">
       <cmd9  "cif2tab header sym acrd anis bnd ang footer">
       <cmd10 "exec -o getvar(defexplorer) tables.html">
-      <cmd11 "cursor()">		
+      <cmd11 "cursor()">
     \>
   \>
 \>
@@ -711,9 +711,9 @@
   <body
     <args
       <arg1 name="name" def="">
-      <arg2 name="bat" def='basedir()/uti/bat/skins.bat'> 
-      <arg3 name="sourceroot" def='basedir()/etc/images/%1'> 
-      <arg4 name="destination" def='basedir()/etc/images/Skin'> 
+      <arg2 name="bat" def='basedir()/uti/bat/skins.bat'>
+      <arg3 name="sourceroot" def='basedir()/etc/images/%1'>
+      <arg4 name="destination" def='basedir()/etc/images/Skin'>
     \>
     <cmd
       <cmd1 cmd1="silent on">
@@ -721,7 +721,7 @@
     \>
     <onterminate
       <cmd1 "updatehtml">
-    \> 
+    \>
   \>
 \>
 
@@ -777,7 +777,7 @@
   <body
     <args
       <arg1 name="name" def="">
-      <arg2 name="type" def="">  
+      <arg2 name="type" def="">
     \>
     <cmd
       <cmd1 "updatewght">
@@ -804,7 +804,7 @@
 
 <_report help="Create Reports"
   <body
-    <args 
+    <args
       <arg1 name="name" def="thesis">
       <arg2 name="type" def="rtf">
       <arg3 name="ori_file" def="filefull()">
@@ -871,10 +871,10 @@
 <skin help="Changes the Olex2 Gui Skin"
   <body
     <args
-      <arg1 name="name" def=""> 
-      <arg2 name="forece" def="false"> 
+      <arg1 name="name" def="">
+      <arg2 name="forece" def="false">
     />
-    <cmd 
+    <cmd
       <cmd1 XXX"spy.SetParam(olex2.force_images,True)">
       <cmd2 "spy.change_skin(%1,%2)">
       <cmd3 "spy.setAllMainToolbarTabButtons()">
@@ -887,10 +887,10 @@
 <startupPanel help="Set the width of the Control Panel"
   <body
     <args
-      <arg1 name="width" def="GetVar(gui_htmlpanelwidth)"> 
-      <arg2 name="colour" def="GetVar(gui_timage_colour)">			
+      <arg1 name="width" def="GetVar(gui_htmlpanelwidth)">
+      <arg2 name="colour" def="GetVar(gui_timage_colour)">
     >
-    <cmd 
+    <cmd
       <cmd1 "setVar(gui_htmlpanelwidth,'%1')">
       <cmd2 "spy.run_skin timage">
       <cmd5 "htmlpanelwidth %1">
@@ -903,10 +903,10 @@
 <panel help="Set the width of the Control Panel"
   <body
     <args
-      <arg1 name="width" def="GetVar(gui_htmlpanelwidth)"> 
-      <arg2 name="colour" def="GetVar(gui_timage_colour)">			
+      <arg1 name="width" def="GetVar(gui_htmlpanelwidth)">
+      <arg2 name="colour" def="GetVar(gui_timage_colour)">
     >
-    <cmd 
+    <cmd
       <cmd1 "setVar(gui_htmlpanelwidth,'%1')">
       <cmd1 "setVar(gui_timage_colour,'%2')">
       <cmd1 "spy.SetParam(olex2.force_images,True)">
@@ -941,22 +941,22 @@
 
 <dimas help="Gets information from DIMAS"
   <body
-    <args 
+    <args
       <arg1 name="tool" def="dimas_info">
       <arg2 name="para" def="filepath()">
       <arg3 name="para" def="filename()">
       <arg4 name="para" def="basedir()">
     \>
-    <cmd 
+    <cmd
       <cmd1 "Echo Starting DIMAS INFO with %1">
-      <cmd2 "exec 'basedir()/util/pyUtil/pyTools.exe' %1 %3 %3 %4">   
+      <cmd2 "exec 'basedir()/util/pyUtil/pyTools.exe' %1 %3 %3 %4">
     \>
   \>
 \>
 
 <_tools help="Launches pyTools"
   <body
-    <args 
+    <args
       <arg1 name="tool1" def="">
       <arg2 name="tool2" def="">
       <arg3 name="tool3" def="">
@@ -967,11 +967,11 @@
       <arg8 name="para" def="filepath()">
       <arg9 name="para" def="filename()">
       \>
-    <cmd 
+    <cmd
       <cmd1 "Echo Starting pyTools with %1 %2 %3 %4 %5">
       <cmd1 cmd1="listen %7/%8.res">
       <cmd5 "cursor(busy, %1)">
-      <cmd4 "exec 'basedir()/util/pyUtil/pyTools.exe' %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5"> 
+      <cmd4 "exec 'basedir()/util/pyUtil/pyTools.exe' %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5">
 
   \>
 <onlisten
@@ -991,7 +991,7 @@
 
 <_tool help="Launches pyTools"
   <body
-    <args 
+    <args
       <arg1 name="tool1" def="">
       <arg2 name="tool2" def="">
       <arg3 name="tool3" def="">
@@ -1002,9 +1002,9 @@
       <arg8 name="para" def="filepath()">
       <arg9 name="para" def="filename()">
       \>
-    <cmd 
+    <cmd
       <cmd1 "cursor(busy, %1)">
-      <cmd2 "exec 'basedir()/util/pyUtil/pyTools.exe' %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5"> 
+      <cmd2 "exec 'basedir()/util/pyUtil/pyTools.exe' %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5">
       <cmd3 "cursor()">
       \>
 
@@ -1016,7 +1016,7 @@
 
 <py help="Launches pyTools"
   <body
-    <args 
+    <args
       <arg1 name="tool1" def="">
       <arg2 name="tool2" def="">
       <arg3 name="tool3" def="">
@@ -1027,9 +1027,9 @@
       <arg8 name="para" def="filepath()">
       <arg9 name="para" def="filename()">
       \>
-    <cmd 
+    <cmd
       <cmd1 "cursor(busy, %1)">
-      <cmd2 "exec python C:/DS/durham_autosolve/horst/Olex_pyTools/pyTools.py %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5"> 
+      <cmd2 "exec python C:/DS/durham_autosolve/horst/Olex_pyTools/pyTools.py %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5">
       <cmd3 "cursor()">
       \>
 
@@ -1041,7 +1041,7 @@
 
 <_pyt help="Launches pyTools"
   <body
-    <args 
+    <args
       <arg1 name="tool1" def="">
       <arg2 name="tool2" def="">
       <arg3 name="tool3" def="">
@@ -1052,9 +1052,9 @@
       <arg8 name="para" def="filepath()">
       <arg9 name="para" def="filename()">
       \>
-    <cmd 
+    <cmd
       <cmd1 "cursor(busy, %1)">
-      <cmd2 "exec 'basedir()/util/pyUtil/pyTools.exe' %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5"> 
+      <cmd2 "exec 'basedir()/util/pyUtil/pyTools.exe' %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5">
       <cmd3 "cursor()">
       \>
 
@@ -1067,7 +1067,7 @@
 
 <history help="Creates Refinement History"
   <body
-    <args 
+    <args
       <arg1 name="tool1" def="create">
       <arg2 name="tool2" def="Lst(R1)">
       <arg3 name="tool3" def="">
@@ -1078,8 +1078,8 @@
       <arg8 name="para" def="filepath()">
       <arg9 name="para" def="filename()">
       \>
-    <cmd 
-      <cmd4 "exec 'basedir()/util/pyUtil/pyTools.exe' history_%1:%2 '%6' '%7' '%8' '%9' "> 
+    <cmd
+      <cmd4 "exec 'basedir()/util/pyUtil/pyTools.exe' history_%1:%2 '%6' '%7' '%8' '%9' ">
       \>
     <onterminate
       <cmd2 "wait 200">
@@ -1091,12 +1091,12 @@
 
 <guinames_m
   <body
-    <args 
+    <args
       <arg1 name="number" def="getvalue(MODE_NAME_NUMBER)">
       <arg2 name="suffix" def="getvalue(MODE_NAME_SUFFIX)">
       <arg3 name="type" def="getvalue(MODE_NAME_TYPE)">
     \>
-    <cmd 
+    <cmd
       <cmd1 "mode name %1 -s=%2 -t=%3">
     \>
   \>
@@ -1111,13 +1111,13 @@
       <arg2 cif_original="cif_original" def="filename().cif">
 
   \>
-  <cmd 
+  <cmd
     <cmd1 "echo Inserting info from file %2 into %3.">
     <cmd2 "echo cifmerge '%3' '%2'">
     <cmd3 "cifmerge '%3' '%2'">
   \>
   <onterminate
-    <cmd1 "echo Done!"> 
+    <cmd1 "echo Done!">
   \>
 \>
 \>
@@ -1127,12 +1127,12 @@
   <body
     <args
     \>
-    <cmd 
+    <cmd
       <cmd1 "user 'basedir()/sample_data'">
       <cmd2 "htmlLoad tutorials/tutorials.htm">
     \>
     <onterminate
-      <cmd1 "clear"> 
+      <cmd1 "clear">
     \>
   \>
 \>
@@ -1211,13 +1211,13 @@
 
 <_get help='Get a structure from the dimas database'
   <body
-    <args 
+    <args
       <arg1 name="para" def="">
       <arg2 name="para" def="basedir()">
       <arg2 name="para" def="htmlpanelwidth()">
     \>
-    <cmd 
-      <cmd1 "spy dimas_load:%1">  
+    <cmd
+      <cmd1 "spy dimas_load:%1">
     \>
     <onterminate
       <cmd1 "cursor()">
@@ -1228,16 +1228,16 @@
 
 <tbx help='toolbox'
   <body
-    <args 
+    <args
       <arg1 name="name" def="general">
       <arg2 name="width" def="300">
       <arg3 name="height" def="120">
       <arg4 name="x" def="5">
       <arg5 name="y" def="80">
     \>
-    <cmd 
-      <cmd0 cmd1="popup %1-box 'basedir()/etc/gui/%1.htm' -b=rtc -t=%1 -w=%2 -h=%3 -x=%4 -y=%5"> 
-      <cmd0 "popup %1-box 'basedir()/etc/gui/%1.htm' -b=tc -t='%1' -w=%2 -h=%3 -x=%4 -y=%5"> 
+    <cmd
+      <cmd0 cmd1="popup %1-box 'basedir()/etc/gui/%1.htm' -b=rtc -t=%1 -w=%2 -h=%3 -x=%4 -y=%5">
+      <cmd0 "popup %1-box 'basedir()/etc/gui/%1.htm' -b=tc -t='%1' -w=%2 -h=%3 -x=%4 -y=%5">
     \>
     <onterminate
       <cmd1 "cursor()">
@@ -1248,15 +1248,15 @@
 
 <tbxs help='toolbox'
   <body
-    <args 
+    <args
       <arg1 name="name" def="1">
       <arg2 name="width" def="400">
       <arg3 name="height" def="300">
       <arg4 name="x" def="200">
       <arg5 name="y" def="200">
     \>
-    <cmd 
-      <cmd0 "popup %1-box 'basedir()/etc/gui/customise.htm' -b=tc -t='%1' -w=%2 -h=%3 -x=%4 -y=%5"> 
+    <cmd
+      <cmd0 "popup %1-box 'basedir()/etc/gui/customise.htm' -b=tc -t='%1' -w=%2 -h=%3 -x=%4 -y=%5">
     \>
     <onterminate
       <cmd1 "cursor()">
@@ -1267,15 +1267,15 @@
 
 <tbxh help='toolbox help'
   <body
-    <args 
+    <args
       <arg1 name="name" def="general">
       <arg2 name="height" def="300">
       <arg3 name="width" def="200">
       <arg4 name="x" def="eval(GetMouseX()-212)">
       <arg5 name="y" def="GetMouseY()">
     \>
-    <cmd 
-      <cmd1 "popup '%1-tbxh' 'basedir()/etc/gui/help/%1.htm' -b=tc -t='%1' -w=%3 -h=%2 -x=%4 -y=%5"> 
+    <cmd
+      <cmd1 "popup '%1-tbxh' 'basedir()/etc/gui/help/%1.htm' -b=tc -t='%1' -w=%3 -h=%2 -x=%4 -y=%5">
     \>
     <onterminate
       <cmd0 "cursor()">
@@ -1286,11 +1286,11 @@
 
 <oda help="Launches ac_run"
   <body
-    <args 
+    <args
       <arg1 name="single" def="">
     \>
     <cmd
-      <cmd6 "spy.runODAC('spy.ac_run solveit -%1')"> 
+      <cmd6 "spy.runODAC('spy.ac_run solveit -%1')">
     \>
   \>
 \>
@@ -1298,13 +1298,13 @@
 
 <odac help="Launches ac_run"
   <body
-    <args 
+    <args
       <arg2 name="single" def="-s">
       <arg2 name="single" def="-fc">
     \>
     <cmd
       <cmd5 "cursor(busy,'Starting ODAC with File Config')">
-      <cmd6 "spy.runODAC('spy.ac_run solveit %1 %2)'"> 
+      <cmd6 "spy.runODAC('spy.ac_run solveit %1 %2)'">
     \>
   \>
 \>
@@ -1325,7 +1325,7 @@
 
 <odemo help="Launches OD Demo"
   <body
-    <args 
+    <args
       <arg1 name="single" def="DataDir()/ODemo.zip">
     \>
     <cmd
@@ -1347,7 +1347,7 @@
       <cmd16 "spy.SetParam(autochem.demo_mode,True)">
       <cmd17 XXX="spy.SetParam(autochem.cutoff1_type,--)">
       <cmd17 XXX="spy.SetParam(autochem.cutoff2_type,--)">
-      <cmd18 "spy.ac_run solveit"> 
+      <cmd18 "spy.ac_run solveit">
     \>
   \>
 \>
@@ -1355,7 +1355,7 @@
 
 <auto help="Launches AutoStructure. Only available in Durham"
   <body
-    <args 
+    <args
       <arg1 name="solved" def="Default">
       <arg2 name="xm_CC" def="Formula,enforce">
       <arg3 name="tool3" def="">
@@ -1369,14 +1369,14 @@
     <cmd
       <cmd1 "Echo Starting pyTools with %1 %2 %3 %4 %5">
       <cmd5 "cursor(busy, %1)">
-      <cmd6 "exec '\\crystal-02\dcd\olex\pyTools.exe' auto '%6' '%7' '%8' '%9' %2 %3 %4 %5"> 
+      <cmd6 "exec '\\crystal-02\dcd\olex\pyTools.exe' auto '%6' '%7' '%8' '%9' %2 %3 %4 %5">
     \>
     <onlisten
       <cmd2 "updatEhtml">
     \>
     <onterminate
       <cmd0 "cursor()">
-      <cmd2 "delins rem"> 
+      <cmd2 "delins rem">
     \>
   \>
 \>
@@ -1384,7 +1384,7 @@
 
 <dire help="Opens the current directory in Explorer"
   <body
-    <cmd 
+    <cmd
       <cmd0 "exec -o getvar(defexplorer) 'filepath()'">
     \>
   \>
@@ -1411,21 +1411,6 @@
 />
 />
 
-
-<config help="Edits the specified configuration file"
-  <body
-    <args
-      <arg1 name="file name" def="'basedir()/util/pyUtil/PluginLib/skins/plugin-GetVar(gui_skin_name)Skin/config.txt'">
-    \>
-
-  <cmd 
-    <cmd1  "spy.config_box -name='Configuration' -popout='False' -config=%1">
-  \>
-
-  <onterminate
-  \>
-\>
-\>
 
 <wilson_plot help="Creates and displays a Wilson Plot"
   <body
@@ -1491,7 +1476,7 @@
       <arg1 name="batch_number" def="None">
       <arg2 name="output_csv_file">
     \>
-    <cmd      
+    <cmd
       <cmd1 "if strcmp(%2,'') then none else spy.SetParam(graphs.reflections.fobs_fcalc.output_csv_file,%2)">
       <cmd2 "spy.Fobs_Fcalc_plot(%1)">
     \>
@@ -1530,7 +1515,7 @@
 
 <starter help="Swap between start panels"
   <body
-    <cmd 
+    <cmd
       <cmd1 "itemstate home-start 0 1">
       <cmd2 "itemstate home-starter 0 1">
       <cmd2 "itemstate work-itneractive 1">
@@ -1540,7 +1525,7 @@
 
 <gui2 help="Switch to Gui2"
   <body
-    <cmd 
+    <cmd
       <cmd2 "SetVar('user_refinement_gui2',True)">
       <cmd2 "spy.makeTestbanner()">
       <cmd2 "itemstate * 0">
@@ -1560,7 +1545,7 @@
     <args
       <arg1 name="tools" def="">
     \>
-    <cmd 
+    <cmd
       <cmd1 "gui2">
       <cmd1 "itemstate aio* 0">
       <cmd2 "itemstate aio-%1* 1">
@@ -1575,7 +1560,7 @@
     <args
       <arg1 name="atom" def="">
     \>
-    <cmd 
+    <cmd
       <cmd1 "editatom %1">
     \>
   \>
@@ -1587,7 +1572,7 @@
     <args
       <arg1 name="tab" def="work">
     \>
-    <cmd 
+    <cmd
       <cmd1 "itemstate * 0">
       <cmd1 "itemstate tab* 2">
       <cmd2 "itemstate logo1 1">
@@ -1605,7 +1590,7 @@
     <args
       <arg1 name="command" def="">
     \>
-    <cmd 
+    <cmd
       <cmd1 "spy.%1()">
     \>
   \>
@@ -1618,7 +1603,7 @@
       <arg1 name="command" def=spy.GetParam(snum.grow.selection)>
       <arg1 name="command" def=spy.GetParam(snum.grow.vdw)>
     \>
-    <cmd 
+    <cmd
       <cmd1 'mode grow -%1 -%2 -%3'>
     \>
   \>

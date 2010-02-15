@@ -1781,7 +1781,7 @@ class X_Y_plot(Analysis):
     self.item = "X_Y_plot"
     print("Good things will come to those who wait")
     self.run()
-    
+
   def run(self):
 #    filepath = self.file_reader("%s/%s.csv" %(self.datadir,"ac_stats"))
     filepath = ("%s/%s.csv" %(self.datadir,"ac_stats"))
@@ -1794,7 +1794,7 @@ class X_Y_plot(Analysis):
 
     self.popout()
 
-    
+
 class HistoryGraph(Analysis):
 
   def __init__(self, history_tree):
@@ -1802,7 +1802,7 @@ class HistoryGraph(Analysis):
     self.params = OV.Params().graphs.program_analysis
     self.i_bar = 0
     self.tree = history_tree
-    size = (int(OV.GetParam('gui.htmlpanelwidth'))- 50, 100)
+    size = (OV.GetParam('gui.htmlpanelwidth')- 50, 100)
     self.item = "history"
     self.params.size_x, self.params.size_y = size
     self.make_empty_graph(draw_title=False)

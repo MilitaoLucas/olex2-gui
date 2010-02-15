@@ -153,43 +153,76 @@ class SpyVar(object):
   MatchedFragments = {}
   MatchedRms = []
 
-class OlexAtoms(object):
+class OlexRefinementModel(object):
   def __init__(self):
+    olex_refinement_model = OV.GetRefinementModel(True)
+    self._atoms = {}
     self.id_for_name = {}
-    self.atoms = [atom for atom in self.iterator()]
+    asu = olex_refinement_model['aunit']
+    for residue in asu['residues']:
+      for atom in residue['atoms']:
+        if atom['label'].startswith('Q'):
+          continue
+        i = atom['tag']
+        self._atoms.setdefault(i, atom)
+        element_type = atom['type']
+        self.id_for_name.setdefault(str(atom['label']), atom['aunit_id'])
+    self._cell = olex_refinement_model['aunit']['cell']
+    self.exptl = olex_refinement_model['exptl']
+    self._afix = olex_refinement_model['afix']
+    self.model= olex_refinement_model
+
+  def atoms(self):
+    return self._atoms.values()
 
   def iterator(self):
-    for i in xrange(int(olx.xf_au_GetAtomCount())):
-      #name = olx.xf_au_GetAtomName(i)
-      #xyz = stt(olx.xf_au_GetAtomCrd(i))
-      #u = stt(olx.xf_au_GetAtomU(i))
-      #type = olx.xf_au_GetAtomType(i)
-      #occu = float(olx.xf_au_GetAtomOccu(i))
-      atom = {}
-      name = olx.xf_au_GetAtomName(i)
-      atom.setdefault('name', name)
-      atom.setdefault('xyz', stt(olx.xf_au_GetAtomCrd(i)))
-      atom.setdefault('u', stt(olx.xf_au_GetAtomU(i)))
-      atom.setdefault('type', olx.xf_au_GetAtomType(i))
-      atom.setdefault('occu', float(olx.xf_au_GetAtomOccu(i)))
-      atom.setdefault('afix', olx.xf_au_GetAtomAfix(i))
+    for i, atom in self._atoms.items():
+      name = str(atom['label'])
+      element_type = str(atom['type'])
+      xyz = atom['crd'][0]
+      occu = atom['occu']
+      adp = atom.get('adp',None)
+      if adp is None:
+        uiso = atom.get('uiso')[0]
+        u = (uiso,)
+      else: u = adp[0]
+      if name[:1] != "Q":
+        yield name, xyz, occu, u, element_type
 
+  def afix_iterator(self):
+    for afix in self._afix:
+      mn = afix['afix']
+      m, n = divmod(mn, 10)
+      pivot = afix['pivot']
+      dependent = afix['dependent']
+      pivot_neighbours = [i for i in self._atoms[pivot]['neighbours'] if not i in dependent]
+      bond_length = afix['d']
+      uiso = afix['u']
+      yield m, n, pivot, dependent, pivot_neighbours, bond_length
 
-      if name[:1] != "Q" and olx.xf_au_IsAtomDeleted(i) == "false":
-        yield atom
+  def restraint_iterator(self):
+    for restraint_type in ('dfix','dang','flat','chiv'):
+      for restraint in self.model[restraint_type]:
+        kwds = dict(
+          i_seqs = [i[0] for i in restraint['atoms']],
+          sym_ops = [i[1] for i in restraint['atoms']],
+          value = restraint['value'],
+          weight = 1/math.pow(restraint['esd1'],2),
+        )
+        yield restraint_type, kwds
 
-  def olexAtoms(self):
-    return self.atoms
+  def getCell(self):
+    return [self._cell[param][0] for param in ('a','b','c','alpha','beta','gamma')]
 
   def numberAtoms(self):
-    return sum(atom['occu'] for atom in self.atoms)
+    return sum(atom['occu'] for atom in self.atoms())
 
   def number_non_hydrogen_atoms(self):
-    return sum(atom['occu'] for atom in self.atoms if atom['type'] not in ('H','Q'))
+    return sum(atom['occu'] for atom in self.atoms() if atom['type'] not in ('H','Q'))
 
   def currentFormula(self):
     curr_form = {}
-    for atom in self.atoms:
+    for atom in self.atoms():
       atom_type = atom['type']
       atom_occu = atom['occu']
       curr_form.setdefault(atom_type, 0)
@@ -199,19 +232,12 @@ class OlexAtoms(object):
   def getExpectedPeaks(self):
     cell_volume = float(olx.xf_au_GetVolume())
     expected_atoms = cell_volume/15
-    present_atoms = self.numberAtoms()
+    #present_atoms = self.numberAtoms()
     present_atoms = self.number_non_hydrogen_atoms()
     expected_peaks = expected_atoms - present_atoms
     if expected_peaks < 5: expected_peaks = 5
     return int(expected_peaks)
-
-def stt(str):
-  l = []
-  s = str.split(",")
-  for item in s:
-    l.append(float(item))
-  retval = tuple(l)
-  return retval
+##
 
 def get_refine_ls_hydrogen_treatment():
   afixes_present = []
@@ -224,8 +250,7 @@ def get_refine_ls_hydrogen_treatment():
             7:'refxyz',
             8:'refxyz',
             }
-  a = OlexAtoms()
-  for atom in a.olexAtoms():
+  for atom  in OlexRefinementModel().atoms():
     if atom['type'] == 'H':
       afix = atom['afix']
       n = int(afix[-1])
@@ -389,18 +414,21 @@ def FindZOfHeaviestAtomInFormua():
 
 OV.registerFunction(FindZOfHeaviestAtomInFormua)
 
+last_formula = None
+
 def MakeElementButtonsFromFormula():
+  global last_formula
   from PilTools import ButtonMaker
-  icon_size = int(OV.FindValue('gui_html_icon_size'))
-  retStr = ""
+  icon_size = OV.GetParam('gui.html.icon_size')
   totalcount = 0
   btn_dict = {}
   f = olx.xf_GetFormula('list')
   if not f:
     return
   f = f.split(',')
-  current_formula = OlexAtoms().currentFormula()
+  current_formula = OlexRefinementModel().currentFormula()
   Z_prime = OV.GetParam('snum.refinement.Z_prime')
+  html_elements = []
   for element in f:
     symbol = element.split(':')[0]
     max = float(element.split(':')[1])
@@ -415,43 +443,36 @@ def MakeElementButtonsFromFormula():
       bgcolour = (210,255,210)
     else:
       bgcolour = (255,210,210)
-    retStr += '''
+    html_elements.append('''
 <a href="if strcmp(sel(),'') then 'mode name -t=%s' else 'name sel %s'>>sel -u" target="Subsequently clicked atoms will be made into %s">
 <zimg border="0" src="element-%s.png"></a>
-''' %(symbol, symbol, symbol, symbol)
+''' %(symbol, symbol, symbol, symbol))
 
-    btn_dict.setdefault(symbol,
-                        {
-                          'txt':symbol,
-                          'bgcolour':bgcolour,
-                          'image_prefix':'element',
-                          'width':icon_size ,
-                          'top_left':(0,-1),
-                          #'grad':{'grad_colour':bgcolour,'fraction':1,'increment':10,'steps':0.2},
-                          'grad':False,
-                        })
+    btn_dict.setdefault(
+      symbol, {
+        'txt':symbol,
+        'bgcolour':bgcolour,
+        'image_prefix':'element',
+        'width':icon_size ,
+        'top_left':(0,-1),
+        'grad':False,
+      })
 
-  retStr += '''
+  html_elements.append('''
 <a href="if strcmp(sel(),'') then 'mode name -t=ChooseElement()' else 'name sel ChooseElement()" target="Chose Element from the periodic table">
 <zimg border="0" src="element-....png"></a>
-'''
-  btn_dict.setdefault('Table',
-                      {
-                        'txt':'...',
-                        'bgcolour':'#efefef',
-                        'width':int(icon_size*1.2),
-                        'image_prefix':'element',
-                        'top_left':(0,-1),
-                        #'grad':{'fraction':1,'increment':10,'steps':0.2},
-                        'grad':False,
-                      })
+''')
+  btn_dict.setdefault(
+    'Table', {
+      'txt':'...',
+      'bgcolour':'#efefef',
+      'width':int(icon_size*1.2),
+      'image_prefix':'element',
+      'top_left':(0,-1),
+      'grad':False,
+    })
 
   hname = 'AddH'
-#  retStr += '''
-#<a href="showH a true>>HADD>>refine" target="Add Hydrogen">
-#<zimg border="0" src="element-%s.png"></a>
-#''' %hname
-
   btn_dict.setdefault('ADDH',
                       {
                         'txt':'%s' %hname,
@@ -460,17 +481,18 @@ def MakeElementButtonsFromFormula():
                         'width':int(icon_size * 2),
                         'font_size':11,
                         'top_left':(2,0),
-                        #'grad':{'fraction':1,'increment':10,'steps':0.2},
                         'grad':False,
                       })
 
-  bm = ButtonMaker(btn_dict)
-  bm.run()
+  if current_formula != last_formula:
+    last_formula = current_formula
+    bm = ButtonMaker(btn_dict)
+    bm.run()
   cell_volume = 0
   Z = 1
   Z_prime = OV.GetParam('snum.refinement.Z_prime')
   try:
-    cell_volume = float(olex.f('Cell(volume)'))
+    cell_volume = float(olx.xf_au_GetCellVolume())
   except:
     pass
   try:
@@ -478,6 +500,7 @@ def MakeElementButtonsFromFormula():
   except:
     pass
 
+  retStr = '\n'.join(html_elements)
   if cell_volume and totalcount:
     atomic_volume = (cell_volume)/(totalcount * Z)
     OV.SetVar('current_atomic_volume','%.1f' %atomic_volume)
@@ -830,16 +853,19 @@ def sortDefaultMethod(prg):
   return default
 
 def get_solution_programs(scope='snum'):
-  retval = ""
-  p = []
-  for prg in SPD:
-    a = which_program(prg)
-    if not a:
-      continue
-    p.append(prg.name)
-  p.sort()
-  for item in p:
-    retval += "%s;" %item
+  global available_solution_programs
+  if available_solution_programs is None:
+    p = []
+    for prg in SPD:
+      a = which_program(prg)
+      if not a:
+        continue
+      p.append(prg.name)
+    p.sort()
+    available_solution_programs = p
+  else:
+    p = available_solution_programs
+  retval = ';'.join(p)
   if scope != 'snum':
     retval = 'Auto;' + retval
   return retval
@@ -885,21 +911,25 @@ def getmap(mapName):
 if haveGUI:
   OV.registerFunction(getmap)
 
-def get_refinement_programs(scope='snum'):
-  retval = ""
-  p = []
-  for prg in RPD:
-    a = which_program(prg)
-    if not a:
-      continue
-    p.append(prg.name)
+available_refinement_programs = None
+available_solution_programs = None
 
-  p.sort()
-  for item in p:
-    retval += "%s;" %item
+def get_refinement_programs(scope='snum'):
+  global available_refinement_programs
+  if available_refinement_programs is None:
+    p = []
+    for prg in RPD:
+      a = which_program(prg)
+      if not a:
+        continue
+      p.append(prg.name)
+    p.sort()
+    available_refinement_programs = p
+  else:
+    p = available_refinement_programs
+  retval = ';'.join(p)
   if scope != 'snum':
     retval = 'Auto;' + retval
-  
   return retval
 OV.registerFunction(get_refinement_programs)
 
@@ -1241,7 +1271,7 @@ def GetACF():
     debug_deep1 = [False, True][1]
     debug_deep2 = [False, True][1]
     OV.SetVar("ac_verbose", [False, True][1])
-    
+
   keyname = getKey()
 
 

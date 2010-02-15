@@ -24,71 +24,12 @@ from cctbx import uctbx
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
-
-class OlexRefinementModel(object):
-  def __init__(self):
-    olex_refinement_model = OV.GetRefinementModel(True)
-    self._atoms = {}
-    self.id_for_name = {}
-    asu = olex_refinement_model['aunit']
-    for residue in asu['residues']:
-      for atom in residue['atoms']:
-        if atom['label'].startswith('Q'):
-          continue
-        i = atom['tag']
-        self._atoms.setdefault(i, atom)
-        element_type = atom['type']
-        self.id_for_name.setdefault(str(atom['label']), atom['aunit_id'])
-    self._cell = olex_refinement_model['aunit']['cell']
-    self.exptl = olex_refinement_model['exptl']
-    self._afix = olex_refinement_model['afix']
-    self.model= olex_refinement_model
-
-  def iterator(self):
-    for i, atom in self._atoms.items():
-      name = str(atom['label'])
-      element_type = str(atom['type'])
-      xyz = atom['crd'][0]
-      occu = atom['occu']
-      adp = atom.get('adp',None)
-      if adp is None:
-        uiso = atom.get('uiso')[0]
-        u = (uiso,)
-      else: u = adp[0]
-      if name[:1] != "Q":
-        yield name, xyz, occu, u, element_type
-
-  def afix_iterator(self):
-    for afix in self._afix:
-      mn = afix['afix']
-      m, n = divmod(mn, 10)
-      pivot = afix['pivot']
-      dependent = afix['dependent']
-      pivot_neighbours = [i for i in self._atoms[pivot]['neighbours'] if not i in dependent]
-      bond_length = afix['d']
-      uiso = afix['u']
-      yield m, n, pivot, dependent, pivot_neighbours, bond_length
-
-  def restraint_iterator(self):
-    for restraint_type in ('dfix','dang','flat','chiv'):
-      for restraint in self.model[restraint_type]:
-        kwds = dict(
-          i_seqs = [i[0] for i in restraint['atoms']],
-          sym_ops = [i[1] for i in restraint['atoms']],
-          value = restraint['value'],
-          weight = 1/math.pow(restraint['esd1'],2),
-        )
-        yield restraint_type, kwds
-
-  def getCell(self):
-    return [self._cell[param][0] for param in ('a','b','c','alpha','beta','gamma')]
-
 class OlexCctbxAdapter(object):
   def __init__(self):
     if OV.HasGUI():
       sys.stdout.refresh = True
     self._xray_structure = None
-    self.olx_atoms = OlexRefinementModel()
+    self.olx_atoms = olexex.OlexRefinementModel()
     self.wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
     try:
       self.reflections = None
@@ -365,10 +306,9 @@ class FullMatrixRefine(OlexCctbxRefine):
     normal_eqns = least_squares.normal_equations(
       self.xray_structure(), self.reflections.f_sq_obs_filtered,
       weighting_scheme="default")
-      #weighting_scheme=least_squares.unit_weighting())
     objectives = []
     scales = []
-    
+
     use_old = False
     if use_old:
       for i in range (self.max_cycles):
@@ -381,7 +321,7 @@ class FullMatrixRefine(OlexCctbxRefine):
         self.scale_factor = scales[-1]
       self.post_peaks(self.f_obs_minus_f_calc_map(0.4), max_peaks=self.max_peaks)
       sys.stdout.refresh = True
-    
+
     else:
       for i in range (self.max_cycles):
         try:
@@ -402,9 +342,9 @@ class FullMatrixRefine(OlexCctbxRefine):
           shifts = normal_eqns.shifts
           self.feed_olex()
           self.scale_factor = scales[-1]
-        
-        self.post_peaks(self.f_obs_minus_f_calc_map(0.4), max_peaks=self.max_peaks)
-        sys.stdout.refresh = True
+
+      self.post_peaks(self.f_obs_minus_f_calc_map(0.4), max_peaks=self.max_peaks)
+      sys.stdout.refresh = True
 
 
   def feed_olex(self):
@@ -451,14 +391,10 @@ class FullMatrixRefine(OlexCctbxRefine):
       cos_sin_table=True
     )
     f_calc = sf(self.xray_structure(), f_obs).f_calc()
-    #fc2 = flex.norm(f_calc.data())
-    #fo2 = f_sq_obs.data()
-    #wfo2 = 1./flex.pow2(f_sq_obs.sigmas())
-    #K2 = f_sq_obs.quick_scale_factor_approximation(f_calc, cutoff_factor=0.0)
-    #K2 = flex.mean_weighted(fo2*fc2, wfo2)/flex.mean_weighted(fc2*fc2, wfo2)
-    #K2 = math.sqrt(K2)
-    #f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1./K2, f_calc)
-    k = f_obs.quick_scale_factor_approximation(f_calc, cutoff_factor=0)
+    if self.scale_factor is None:
+      k = f_obs.quick_scale_factor_approximation(f_calc, cutoff_factor=0)
+    else:
+      k = math.sqrt(self.scale_factor)
     f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1./k, f_calc)
     return f_obs_minus_f_calc.fft_map(
       symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
@@ -640,11 +576,17 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         olx.xf_au_SetAtomU(id, "0.06")
 
 class OlexCctbxMasks(OlexCctbxAdapter):
+
   def __init__(self, recompute=True):
     OlexCctbxAdapter.__init__(self)
     from cctbx import miller
     from smtbx import masks
     from cctbx.masks import flood_fill
+    from libtbx.utils import time_log
+
+    OV.CreateBitmap("working")
+
+    self.time_total = time_log("total time").start()
 
     self.params = OV.Params().snum.masks
 
@@ -654,12 +596,15 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       xs = self.xray_structure()
       fo_sq = self.reflections.f_sq_obs_merged
       mask = masks.mask(xs, fo_sq)
+      self.time_compute = time_log("computation of mask").start()
       mask.compute(solvent_radius=self.params.solvent_radius,
                    shrink_truncation_radius=self.params.shrink_truncation_radius,
                    resolution_factor=self.params.resolution_factor,
                    atom_radii_table={'C':1.70, 'B':1.63, 'N':1.55, 'O':1.52})
-      flood_fill(mask.mask.data)
+      self.time_compute.stop()
+      self.time_f_mask = time_log("f_mask calculation").start()
       f_mask = mask.structure_factors()
+      self.time_f_mask.stop()
       olx.current_mask = mask
     else:
       mask = olx.current_mask
@@ -673,7 +618,10 @@ class OlexCctbxMasks(OlexCctbxAdapter):
     elif self.params.type == "f_model":
       model_map = miller.fft_map(mask.crystal_gridding, f_model)
       output_data = model_map.apply_volume_scaling().real_map()
-    write_grid_to_olex(output_data)
+    self.time_write_grid = time_log("write grid").start()
+    if mask.flood_fill.n_voids() > 0:
+      write_grid_to_olex(output_data)
+    self.time_write_grid.stop()
     self.mask = mask
     self.show()
 
@@ -690,6 +638,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
     print >> log, "d min: %.2f" %mask.observations.d_min()
     print >> log, "Gridding: (%i,%i,%i)" %mask.crystal_gridding.n_real()
     print >> log, "n grid points: %i" %mask.crystal_gridding.n_grid_points()
+    print >> log, self.time_total.log()
     print
 
     print >> log, "Solvent accessible volume = %.1f [%.1f%%]" %(
@@ -708,6 +657,10 @@ class OlexCctbxMasks(OlexCctbxAdapter):
                / mask.crystal_gridding.n_grid_points()
       print >> log, "void %i: %.1f" %(i-1, void_vol)
       #print >> log, "F000 void: %.1f" %f_000_s
+
+  def __del__(self):
+    OV.DeleteBitmap("working")
+
 OV.registerFunction(OlexCctbxMasks)
 
 class OlexCctbxGraphs(OlexCctbxAdapter):
