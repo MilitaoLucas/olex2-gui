@@ -49,7 +49,11 @@ class OlexFunctions(inheritFunctions):
 
   def GetParam(self,variable):
     try:
-      retVal = olx.phil_handler.get_validated_param(variable)
+      if variable.startswith('gui'):
+        handler = olx.gui_phil_handler
+      else:
+        handler = olx.phil_handler
+      retVal = handler.get_validated_param(variable)
     except Exception, ex:
       print >> sys.stderr, "Variable %s could not be found" %(variable)
       sys.stderr.formatExceptionInfo()
@@ -57,21 +61,21 @@ class OlexFunctions(inheritFunctions):
     return retVal
 
   def GetParam_as_string(self,variable):
-    try:
-      retVal = olx.phil_handler.get_validated_param(variable)
-    except Exception, ex:
-      print >> sys.stderr, "Variable %s could not be found" %(variable)
-      sys.stderr.formatExceptionInfo()
+    retVal = self.GetParam(variable)
+    if retVal is None:
       return ''
     else:
-      if retVal is None:
-        return ''
-      else:
-        return str(retVal)
+      return str(retVal)
 
   def Params(self):
     if hasattr(olx, 'phil_handler'):
       return olx.phil_handler.get_python_object()
+    else:
+      return None
+
+  def GuiParams(self):
+    if hasattr(olx, 'gui_phil_handler'):
+      return olx.gui_phil_handler.get_python_object().gui
     else:
       return None
 
@@ -128,10 +132,10 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
       retVal = ''
     return retVal
-  
+
   def IsFileType(self, fileType):
     return olx.IsFileType(fileType) == 'true'
-  
+
   def FindObject(self,variable):
     try:
       retVal = olex_core.FindObject(variable)
@@ -140,7 +144,7 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
       retVal = None
     return retVal
-  
+
   def IsVar(self,variable):
     try:
       retVal = olex_core.IsVar(variable)
@@ -149,7 +153,7 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
       retVal = False
     return retVal
-  
+
   def Translate(self,text):
     try:
       retStr = olex_core.Translate(text)
@@ -158,7 +162,7 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
       retStr = None
     return retStr
-  
+
   def TranslatePhrase(self,text):
     try:
       retStr = olx.TranslatePhrase(text)
@@ -168,7 +172,7 @@ class OlexFunctions(inheritFunctions):
       retStr = None
     return retStr
 
-  
+
   def CurrentLanguageEncoding(self):
     try:
       retStr = olx.CurrentLanguageEncoding()
@@ -177,14 +181,14 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
       retStr = None
     return retStr
-  
+
   def CifMerge(self,file):
     try:
       olx.CifMerge(file)
     except Exception, ex:
       print >> sys.stderr, "An error occured whilst trying to find merge cif files"
       sys.stderr.formatExceptionInfo()
-      
+
   def reset_file_in_OFS(self,fileName,txt=" ",copyToDisk = False):
     try:
       OlexVFS.write_to_olex(fileName, txt)
@@ -195,7 +199,7 @@ class OlexFunctions(inheritFunctions):
     except Exception, ex:
       print >> sys.stderr, "An error occured whilst trying to write to the VFS"
       sys.stderr.formatExceptionInfo()
-      
+
   def write_to_olex(self,fileName,text,copyToDisk = False):
     try:
       OlexVFS.write_to_olex(fileName, text)
@@ -228,13 +232,13 @@ class OlexFunctions(inheritFunctions):
 
   def Reset(self):
     olx.Reset()
-    
+
   def htmlUpdate(self):
     olex.m("UpdateHtml")
-    
+
   def htmlReload(self):
     olex.m("html.Reload")
-    
+
   def reloadStructureAtreap(self, path, file, fader=True):
     fader = self.FindValue('gui_use_fader')
     #print "AtReap %s/%s" %(path, file)
@@ -243,11 +247,11 @@ class OlexFunctions(inheritFunctions):
         olex.m(r"atreap_fader -b '%s'" %(r"%s/%s.res" %(path, file)))
       else:
         olex.m(r"atreap_no_fader -b '%s'" %(r"%s/%s.res" %(path, file)))
-        
+
     except Exception, ex:
       print >> sys.stderr, "An error occured whilst trying to reload %s/%s" %(path, file)
       sys.stderr.formatExceptionInfo()
-      
+
   def file_ChangeExt(self, path, newExt):
     try:
       newPath = olx.file_ChangeExt(path, newExt)
@@ -255,10 +259,10 @@ class OlexFunctions(inheritFunctions):
       print >> sys.stderr, "An error occured"
       sys.stderr.formatExceptionInfo()
     return self.standardizePath(newPath)
-  
+
   def File(self):
     olx.File()
-    
+
   def timer_wrap(self,f,*args, **kwds):
     try:
       import time
@@ -271,7 +275,7 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
       retVal = ''
     return retVal
-  
+
   def registerFunction(self,function,profiling=False):
     g = self.func_wrap(function)
     g.__name__ = function.__name__
@@ -281,7 +285,7 @@ class OlexFunctions(inheritFunctions):
     g = self.func_wrap(function)
     g.__name__ = function.__name__
     olex_core.unregisterFunction(g,profiling)
-    
+
   def registerMacro(self,function,options,profiling=False):
     g = self.func_wrap(function)
     g.__name__ = function.__name__
@@ -291,13 +295,13 @@ class OlexFunctions(inheritFunctions):
     g = self.func_wrap(function)
     g.__name__ = function.__name__
     olex_core.unregisterMacro(g,options,profiling)
-    
+
   def registerCallback(self,event,function,profiling=False):
     g = self.func_wrap(function)
     g.__name__ = function.__name__
     olex.registerCallback(event,function,profiling)
     #olex.registerCallback(event,function)
-    
+
   def unregisterCallback(self,event,function,profiling=False):
     g = self.func_wrap(function)
     g.__name__ = function.__name__
@@ -314,7 +318,7 @@ class OlexFunctions(inheritFunctions):
         retVal = ''
       return retVal
     return func
-    
+
   if False:  ## Change this to True to print out information about all the function calls
     def func_wrap(self,f):
       def func(*args, **kwds):
@@ -331,7 +335,7 @@ class OlexFunctions(inheritFunctions):
         #retVal = a.runcall(f, *args, **kwds)
         return retVal
       return func
-    
+
   def IsPluginInstalled(self,plugin):
     return olx.IsPluginInstalled(plugin) == 'true'
 
@@ -339,7 +343,7 @@ class OlexFunctions(inheritFunctions):
     #import cProfile
     outFile = open('%s/profile.txt' %olx.DataDir(), 'w')
     outFile.close()
-    
+
     def cprofile_wrap(self,f):
       import pstats
       def func(*args, **kwds):
@@ -363,25 +367,25 @@ class OlexFunctions(inheritFunctions):
         sys.stdout = olex_output
         return retVal
       return func
-    
+
     func_wrap = cprofile_wrap
-    
+
   def Lst(self,string):
     return olx.Lst(string)
-  
+
   def standardizePath(self, path):
     return path.replace('\\','/')
-  
+
   def standardizeListOfPaths(self, list_of_paths):
     retList = []
     for path in list_of_paths:
       retList.append(self.standardizePath(path))
     return retList
-  
+
   def BaseDir(self):
     path = olx.BaseDir()
     return self.standardizePath(path)
-  
+
   def DataDir(self):
     path = olx.DataDir()
     return self.standardizePath(path)
@@ -398,7 +402,7 @@ class OlexFunctions(inheritFunctions):
       path = olx.FileExt(FileExt)
     else:
       path = olx.FileExt()
-    return self.standardizePath(path)  
+    return self.standardizePath(path)
 
   def FileFull(self):
     path = olx.FileFull()
@@ -425,39 +429,39 @@ class OlexFunctions(inheritFunctions):
     except Exception, err:
       print "Printing error %s" %err
       return "Error"
-  
+
   def HKLSrc(self, new_HKLSrc=None):
     if new_HKLSrc:
       return olx.HKLSrc(new_HKLSrc)
     else:
       path = olx.HKLSrc()
       return self.standardizePath(path)
-  
+
   def StrDir(self):
     path = olx.StrDir()
     return self.standardizePath(path)
-  
+
   def GetFormula(self):
     return olx.xf_GetFormula()
-  
+
   def GetCellVolume(self):
     return olx.xf_au_GetCell()
-  
+
   def AddIns(self, instruction):
     olx.AddIns(instruction)
-    
+
   def DelIns(self, instruction):
     olx.DelIns(instruction)
 
   def HasGUI(self):
     return HasGUI
-  
+
   def StoreParameter(self, var="", save=False):
     val = self.FindValue(var)
     if val:
       val = "'%s'" %val
       olex.m('storeparam %s %s %s' %(var, val, save))
-    
+
   def GetCompilationInfo(self):
     return olx.GetCompilationInfo()
 
@@ -477,14 +481,14 @@ class OlexFunctions(inheritFunctions):
   def cmd(self, command):
     olex.m(command)
     return ""
-  
+
   def GetRefinementModel(self,calculate_connectivity=False):
     return olex_core.GetRefinementModel(calculate_connectivity)
-  
+
   def GetCurrentSelection(self,calculate_connectivity=False):
     res = olx.Info()
     return res
-  
+
   def GetTag(self):
     try:
       rFile = open("%s/olex2.tag" %self.BaseDir(),'r')
@@ -502,7 +506,7 @@ class OlexFunctions(inheritFunctions):
 
   def GetUserComputerName(self):
     import os
-    return os.getenv('USERNAME'), os.getenv('COMPUTERNAME')  
+    return os.getenv('USERNAME'), os.getenv('COMPUTERNAME')
 
   def GetSVNVersion(self):
     path = "%s/version.txt" %self.BaseDir()
@@ -513,26 +517,26 @@ class OlexFunctions(inheritFunctions):
     except:
       version = 1
     return version
-  
+
   def GetMacAddress(self):
     mac = self.GetParam('olex2.mac_address')
     if mac == "":
       mac = olx.GetMAC()
       mac = mac.split(";")
     #mac=['XX-24-E8-00-37-08','00-24-E8-00-37-08']  testing with a bogous mac address
-    return mac   
-  
+    return mac
+
   def GetComputername(self):
     return os.getenv('COMPUTERNAME')
-  
+
   def GetUsername(self):
     return os.getenv('USERNAME')
 
   def setAllMainToolbarTabButtons(self):
     import olexex
     olexex.setAllMainToolbarTabButtons()
-  
-  
+
+
 def GetParam(variable):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
   return OV.GetParam_as_string(variable)
