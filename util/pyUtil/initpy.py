@@ -48,7 +48,7 @@ import os
 import locale
 import time
 
-locale.setlocale(locale.LC_ALL, 'C') 
+locale.setlocale(locale.LC_ALL, 'C')
 
 
 if os.environ.get('OLEX_DBG_NO_STDERR_REDIRECTION') is not None:
@@ -82,7 +82,7 @@ class StreamRedirection:
       except:
         self.GUIversion = "unknown"
       self.errFile.write("================= PYTHON ERROR ================= Olex Version %s -- %s\n\n" %(self.version, self.GUIversion))
-      
+
   def write(self, Str):
     if self.is_redirecting:
       if self.isErrorStream:
@@ -96,13 +96,13 @@ class StreamRedirection:
           self.t0 = t1
       if self.graph!=False:
         self.graph(Str)
-        
+
     else:
       self.redirected.write(Str)
-      
+
   def flush(self):
     pass
-  
+
   def formatExceptionInfo(maxTBlevel=5):
     import traceback
     import inspect
@@ -163,13 +163,13 @@ def set_olex_paths():
   sys.path.append("%s/util/pyUtil" %basedir)
   sys.path.append("%s/util/pyUtil/PyToolLib" %basedir)
   sys.path.append("%s/util/pyUtil/PyToolLib/FileReaders" %basedir)
-  sys.path.append("%s/util/pyUtil/CctbxLib" %basedir)  
+  sys.path.append("%s/util/pyUtil/CctbxLib" %basedir)
 
-def set_plugins_paths():  
+def set_plugins_paths():
   plugins = olexex.InstalledPlugins()
   for plugin in plugins:
     sys.path.append("%s/util/pyUtil/PluginLib/plugin-%s" %(basedir,plugin))
-    
+
     ##Dependencies
     if plugin == "plugin-SQLAlchemy":
       sys.path.append("%s/util/pyUtil/PythonLib/sqlalchemy" %basedir)
@@ -203,7 +203,6 @@ except Exception, err:
   print err
 
 import variableFunctions
-variableFunctions.InitialiseVariables('startup')
 variableFunctions.LoadParams()
 import olexex
 import CifInfo # import needed to register functions to olex
@@ -223,6 +222,51 @@ OV = OlexFunctions()
 if OV.HasGUI():
   import htmlMaker
 
+def onstartup():
+  OV.SetVar('cbtn_solve_on','false')
+  OV.SetVar('cbtn_refine_on','false')
+  OV.SetVar('cbtn_report_on','false')
+
+  ## copy sample directory to datadir
+  import shutil
+  svn_samples_directory = '%s/sample_data' %OV.BaseDir()
+  user_samples_directory = '%s/samples' %OV.DataDir()
+  if os.path.exists(user_samples_directory):
+    OV.SetVar('sample_dir',user_samples_directory)
+  else:
+    os.mkdir(user_samples_directory)
+
+  if sys.version_info[0] >= 2 and sys.version_info[1] >=6:
+    ignore_patterns = shutil.ignore_patterns('*.svn')
+  else:
+    ignore_patterns = None # back compatiblity for python < 2.6
+
+  samples = os.listdir(svn_samples_directory)
+  for sample in samples:
+    if sample == '.svn': continue
+    if not os.path.exists('%s/%s' %(user_samples_directory,sample)):
+      try:
+        dirname1 = '%s/%s' %(svn_samples_directory,sample)
+        dirname2 = '%s/%s' %(user_samples_directory,sample)
+        if ignore_patterns is not None:
+          shutil.copytree(dirname1, dirname2, ignore=ignore_patterns)
+        else:
+          shutil.copytree(dirname1, dirname2)
+        OV.SetVar('sample_dir','%s/samples' %OV.DataDir())
+      except:
+        pass
+    else:
+      continue
+
+  ## initialise userDictionaries objects
+  import userDictionaries
+  if not userDictionaries.people:
+    userDictionaries.People()
+  if not userDictionaries.localList:
+    userDictionaries.LocalList()
+
+onstartup()
+
 #if debug:
 #       keys = os.environ.keys()
 #       keys.sort()
@@ -231,15 +275,15 @@ if OV.HasGUI():
 #
 #       for bit in sys.path:
 #               print bit
-  
+
 
 if olx.IsPluginInstalled('plugin-Batch') == "true":
   import plugin_batch_exex
 
 if olx.IsPluginInstalled('Olex2Portal') == "true":
     import olex_logon
-  
-  
+
+
 if olx.IsPluginInstalled('MySQL') == "true":
   try:
     import OlexToMySQL
@@ -270,7 +314,7 @@ except ImportError, err:
 print "Welcome to Olex2"
 
 
-## These imports will register macros and functions for spy.  
+## These imports will register macros and functions for spy.
 if OV.HasGUI():
   from Skin import Skin
   from Analysis import Analysis

@@ -17,102 +17,11 @@ import variableDefinitions
 import olexex
 from cStringIO import StringIO
 
-initialisingVariables = False
-
 import phil_interface
 
 import iotbx.phil
 import libtbx.phil.command_line
 
-class VVD:
-  def __init__(self):
-    self.user = {}
-    self.gui = {}
-    self.history = {}
-    self.refinement = {}
-    self.metacif = {}
-    self.dimas = {}
-    self.report = {}
-    self.solution = {}
-    self.auto = {}
-    self.workflow = {}
-    self.olex2 = {}
-
-def InitialiseVariables(arg):
-  """Called on startup by macro.
-  
-  Initialises all the variables and objects needed in olex.
-  Should only be called once, on startup.
-  """
-  
-  global initialisingVariables
-  initialisingVariables = True
-  
-  if arg == 'startup':
-    global vvdItems
-    vvdItems = VVD()
-    
-    variables = {
-      'FileName':'none',
-      'FilePath':'none',
-    }
-    if OV.HasGUI():
-      variables.update(variableDefinitions.guiVariables())
-    for varName, value in variables.items():
-      if not OV.IsVar(varName):
-        OV.SetVar(varName,value)
-      if 'gui' in varName:
-        vvdItems.gui.setdefault(varName)
-      if 'olex2' in varName:
-        vvdItems.olex2.setdefault(varName)
-        
-    OV.SetVar('cbtn_solve_on','false')
-    OV.SetVar('cbtn_refine_on','false')
-    OV.SetVar('cbtn_report_on','false')
-    
-    ## copy sample directory to datadir
-    svn_samples_directory = '%s/sample_data' %OV.BaseDir()
-    user_samples_directory = '%s/samples' %OV.DataDir()
-    if os.path.exists(user_samples_directory):
-      OV.SetVar('sample_dir',user_samples_directory)
-    else: 
-      os.mkdir(user_samples_directory)
-
-    if sys.version_info[0] >= 2 and sys.version_info[1] >=6:
-      ignore_patterns = shutil.ignore_patterns('*.svn')
-    else:
-      ignore_patterns = None # back compatiblity for python < 2.6
-
-    samples = os.listdir(svn_samples_directory)
-    for sample in samples:
-      if sample == '.svn': continue
-      if not os.path.exists('%s/%s' %(user_samples_directory,sample)):
-        try:
-          dirname1 = '%s/%s' %(svn_samples_directory,sample)
-          dirname2 = '%s/%s' %(user_samples_directory,sample)
-          if ignore_patterns is not None:
-            shutil.copytree(dirname1, dirname2, ignore=ignore_patterns)
-          else:
-            shutil.copytree(dirname1, dirname2)
-          OV.SetVar('sample_dir','%s/samples' %OV.DataDir())
-        except:
-          pass
-      else:
-        continue
-       
-    ## initialise userDictionaries objects
-    if not userDictionaries.people:
-      userDictionaries.People()
-    if not userDictionaries.localList:
-      userDictionaries.LocalList()
-      
-  elif arg == 'reap':
-    """List of variables (usually structure-specific variables) to be initialised on reap."""
-    
-    ExternalPrgParameters.definedControls = [] # reset defined controls
-    
-  return ""
-OV.registerFunction(InitialiseVariables)
 
 def getOlex2VersionInfo():
   txt = 'Olex2, Durham University (compiled %s)' %OV.GetCompilationInfo()
@@ -137,44 +46,6 @@ def getDefaultPrgMethod(prgType):
       defaultMethod = olexex.sortDefaultMethod(program)
       break
   return defaultPrg, defaultMethod
-
-def getVVD(what_do_i_want='structure'):
-  """ if what_do_i_want is blank, will return the whole vvd """
-  vvd = {}
-  dictionary = {}
-  if what_do_i_want == 'structure':
-    listItems = ['refinement','dimas','metacif','history','report','solution','auto']
-  elif what_do_i_want == 'user':
-    listItems = ['refinement','solution']
-  #elif what_do_i_want == 'auto' or what_do_i_want == 'snum_auto':
-    #listItems = [what_do_i_want]
-  elif what_do_i_want == 'alert':
-    listItems = ['alert']
-  else:
-    listItems = [what_do_i_want]
-    
-  if listItems:
-    for item in listItems:
-      #if what_do_i_want in ('user','auto','alert'):
-      if 'user' in what_do_i_want:
-        dictionary = getattr(user_vvdItems,item.split('_')[-1])
-      else:
-        dictionary = getattr(vvdItems,item)
-      for item in dictionary.keys():
-        try:
-          value = OV.FindValue(item)
-          vvd[item] = value
-        except:
-          continue
-  else:
-    dictionary = getattr(vvdItems,what_do_i_want)
-    for item in dictionary.keys():
-      try:
-        value = OV.FindValue(item)
-        vvd[item] = value
-      except:
-        continue
-  return vvd
 
 def Pickle(item,path):
   if "none/.olex" in path:
@@ -211,15 +82,6 @@ def SwitchAllAlertsOn():
     OV.SetParam(item,'Y')
   SaveUserParams()
 OV.registerFunction(SwitchAllAlertsOn)
-
-def StoreParameters(type=""):
-  if type:
-    d = getVVD(type)
-    for var, value in d.items():
-      olex.m('storeparam %s %s' %(var, value))
-  else:
-    print "Please provide the type of variable you want to save (e.g. gui, snum)"
-OV.registerFunction(StoreParameters)
 
 def VVD_to_phil():
   phil_strings = []
@@ -267,6 +129,7 @@ def get_user_phil():
     return None
 
 def LoadParams():
+  # snum params
   master_phil = phil_interface.parse(file_name="%s/params.phil" %OV.BaseDir())
   phil_handler = phil_interface.phil_handler(
     master_phil=master_phil,
@@ -275,6 +138,12 @@ def LoadParams():
   if user_phil:
     phil_handler.update(phil_file=user_phil)
   olx.phil_handler = phil_handler
+  # gui params
+  master_gui_phil = phil_interface.parse(file_name="%s/gui.params" %OV.BaseDir())
+  gui_phil_handler = phil_interface.phil_handler(
+    master_phil=master_gui_phil,
+    parse=phil_interface.parse)
+  olx.gui_phil_handler = gui_phil_handler
 OV.registerFunction(LoadParams)
 
 def LoadStructureParams():
@@ -293,7 +162,7 @@ snum {
   image.bitmap.name = "%s"
   report.image = "%s/screenshot.png"
   }
-""" %(refinementPrg, refinementMethod, solutionPrg, solutionMethod, 
+""" %(refinementPrg, refinementMethod, solutionPrg, solutionMethod,
       OV.FileName(), OV.FileName(), OV.FileName(), OV.FilePath())
   olx.phil_handler.update(phil_string=snum_phil)
   structure_phil_path = "%s/.olex/%s.phil" %(OV.FilePath(), OV.FileName())

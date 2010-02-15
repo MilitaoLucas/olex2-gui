@@ -12,7 +12,6 @@ class pyTools(ArgumentParser):
     self.function = function
     self.param = param
     self.debug = False
-    self.getVariables('gui')
     #self.debug = True
     self.dispatching = {}
     self.timing = False
@@ -51,7 +50,7 @@ class pyTools(ArgumentParser):
     fun = self.function
     param = self.param
     dispatching = self.dispatching
-    
+
     if tool in ["GuiSkinChanger", "sNumTitle", "timage", "MakeAllRBars", "BarGenerator"]:
       skin = self.gui_skin_name
       try:
@@ -61,7 +60,7 @@ class pyTools(ArgumentParser):
         PilTools = __import__("PilTools_%s" %skin)
         #print "pyTools -- Using %s skin." %"PilTools_%s: %s" %(skin, tool)
       except ImportError:
-        #print "pyTools -- Using Default PilTools for Tool: %s" %tool 
+        #print "pyTools -- Using Default PilTools for Tool: %s" %tool
         import PilTools
       except Exception, err:
         raise
@@ -76,25 +75,25 @@ class pyTools(ArgumentParser):
           dispatching.setdefault('sNumTitle', PilTools.sNumTitle)
         except Exception, err:
           raise
-  
+
       elif tool == "GuiSkinChanger":
         try:
           dispatching.setdefault('GuiSkinChanger', PilTools.GuiSkinChanger)
         except Exception, err:
           raise
-        
+
       elif tool == "BarGenerator":
         try:
           dispatching.setdefault('BarGenerator', PilTools.BarGenerator)
         except Exception, err:
           raise
-  
+
       elif tool == "MakeAllRBars":
         try:
           dispatching.setdefault('MakeAllRBars', PilTools.MakeAllRBars)
         except Exception, err:
           raise
-      
+
 
     elif tool == "auto" or tool == "hadd":
     ## THESE SHOULD ALL BE COMMENTED UNLESS A DURHAM EXECUTABLE IS SUPPOSED TO BE MADE!
@@ -115,14 +114,14 @@ class pyTools(ArgumentParser):
     elif tool == "cif":
       from CifInfo import CifTools
       dispatching.setdefault('cif', CifTools)
-      
+
     elif tool == "metacif":
       from CifInfo import MetaCif
-      dispatching.setdefault('metacif', MetaCif)   
+      dispatching.setdefault('metacif', MetaCif)
 
     elif tool == "meta":
       from CifInfo import MetaCif
-      dispatching.setdefault('meta', MetaCif) 
+      dispatching.setdefault('meta', MetaCif)
 
     elif tool == "archive":
       from ArchiveStructure import archive
@@ -195,7 +194,7 @@ class pyTools(ArgumentParser):
     elif tool == "sqlhelp":
       from OlexHelpToMySQL import ExportHelp
       dispatching.setdefault('sqlhelp', ExportHelp)
-      
+
     #elif tool == "settings":
       #from htmlMaker import settingsPage
       #dispatching.setdefault('settings', settingsPage)

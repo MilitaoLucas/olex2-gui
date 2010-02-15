@@ -13,21 +13,20 @@ class ImageTools(ArgumentParser):
     self.colorsys = colorsys
     self.abort = False
     self.getOlexVariables()
-    
+
   def getOlexVariables(self):
-    self.getVariables('gui')
     self.encoding = test_encoding(olx.CurrentLanguageEncoding()) ##Language
     self.language = "English" ##Language
     if olx.IsCurrentLanguage('Chinese') == "true":
       self.language = 'Chinese'
     self.fonts = self.defineFonts()
- 
+
   def RGBToHTMLColor(self, rgb_tuple):
       """ convert an (R, G, B) tuple to #RRGGBB """
       hexcolor = '#%02x%02x%02x' % rgb_tuple
       # that's it! '%02x' means zero-padded, 2-digit hex values
       return hexcolor
-  
+
   def HTMLColorToRGB(self, colorstring):
       """ convert #RRGGBB to an (R, G, B) tuple """
       colorstring = colorstring.strip()
@@ -37,7 +36,7 @@ class ImageTools(ArgumentParser):
       r, g, b = colorstring[:2], colorstring[2:4], colorstring[4:]
       r, g, b = [int(n, 16) for n in (r, g, b)]
       return (r, g, b)
-      
+
   def defineFonts(self):
     fonts = {
       "Verdana":"verdana.ttf",
@@ -76,7 +75,7 @@ class ImageTools(ArgumentParser):
     else:
         layer.paste(mark, position)
     # composite the watermark with the layer
-    return Image.composite(layer, im, layer)  
+    return Image.composite(layer, im, layer)
 
   def makeTransparentText(self, im, txt, top_left=(1,0), font_colour="#000000", font_name = "Arial Bold", font_size=14):
     # Make a grayscale image of the font, white on black.
@@ -94,11 +93,11 @@ class ImageTools(ArgumentParser):
     # that has even a little bit of alpha showing.
     solidcolor = Image.new("RGBA", im.size, font_colour)
     immask = Image.eval(imtext, lambda p: 255 * (int(p != 0)))
-    im = Image.composite(solidcolor, im, immask) 
+    im = Image.composite(solidcolor, im, immask)
     im.putalpha(alpha)
     return im
-  
-  
+
+
   def reduce_opacity(self, im, opacity):
     """Returns an image with reduced opacity."""
     import ImageEnhance
@@ -110,17 +109,17 @@ class ImageTools(ArgumentParser):
     alpha = im.split()[3]
     alpha = ImageEnhance.Brightness(alpha).enhance(opacity)
     im.putalpha(alpha)
-    return im  
-  
-  
-  def doDup(self, image, offset_x=1, offset_y=1, blend=0.1):    
+    return im
+
+
+  def doDup(self, image, offset_x=1, offset_y=1, blend=0.1):
     dup = ImageChops.duplicate(image)
     dup = ImageChops.invert(dup)
     dup = ImageChops.offset(dup, offset_x, offset_y)
     image = ImageChops.blend(image, dup, blend)
     return image
 
-  
+
   def add_vline(self, draw, height, h_pos, weight=1, colour=(237,237,235)):
     begin = (h_pos, 4)
     end = (h_pos, height - 8)
@@ -154,7 +153,7 @@ class ImageTools(ArgumentParser):
       canvas.paste(whitespace, (width, margin_top))
       canvas.paste(image, (weight, 0))
     return canvas
-  
+
   def add_continue_triangles(self, draw, width, height, shift_up = 4):
     arrow_top = 8 + shift_up
     arrow_middle = 5 + shift_up
@@ -165,7 +164,7 @@ class ImageTools(ArgumentParser):
     mid_2 = 9
     beg_3 = 7
     mid_3 = 3
-    
+
     colour = (150, 190, 230)
     colour = self.gui_timage_colour
     begin = (width-beg_1,height-arrow_top)
@@ -217,8 +216,8 @@ class ImageTools(ArgumentParser):
     nc = tuple(l)
     return nc
 
-    
-    
+
+
   def gradient_bgr(self, draw, width, height, colour=(237,237,235), fraction=0.85, increment=10, step=1):
     inc = increment
     if "#" in colour: colour = self.HTMLColorToRGB(colour)
@@ -241,38 +240,38 @@ class ImageTools(ArgumentParser):
       #print i, R,G,B
       draw.line((begin ,end), fill=(R, G, B))
 
-      
+
   def write_text_to_draw(self, draw, txt, top_left=(1,0), font_name='Verdana', font_size=11, font_colour="#000000", align="left", max_width=0):
     #txt = olx.TranslatePhrase(str.strip(txt))
     txt = OV.Translate("%%%s%%" %str.strip(txt)) ##Language
-    
+
     if self.language == 'Chinese':
       font_name = 'Arial UTF'
       font_size=13
       top_left=(top_left[0], top_left[1] -1)
     font_file = self.fonts[font_name]
     font = ImageFont.truetype("%s" %font_file, font_size, encoding=test_encoding("unic")) ##Leave in for Debug!
-    try:  
+    try:
       font_file = self.fonts.get(font_name, "aarialuni.ttf")
       font = ImageFont.truetype("%s" %font_file, font_size, encoding=test_encoding("unic"))
-     
+
     except:
       print "The font %s is required for this option." %font_name
       self.abort = True
-      
+
     if align == "centre":
       top_left = (centre_text(draw, txt, font, max_width), top_left[1])
     if align == "right":
       top_left = (align_text(draw, txt, font, max_width, 'right'), top_left[1])
-      
+
     if not self.abort:
       try:
         draw.text(top_left, "%s" %txt.decode(self.encoding), font=font, fill=font_colour)
       except:
         draw.text(top_left, "%s" %txt.decode("ISO8859-1"), font=font, fill=font_colour)
     else:
-      pass      
-      
+      pass
+
   def removeTransparancy(self,im, target_colour = (255,255,255)):
     # Remove transparency
     white = Image.new("RGB",im.size,target_colour) # Create new white image
@@ -284,7 +283,7 @@ class ImageTools(ArgumentParser):
 
   def create_arrows(self, draw, height, direction, colour, type='simple', h_space=4, v_space=4):
     arrow_height = height - (2*v_space)
-    arrow_width = arrow_height 
+    arrow_width = arrow_height
     if arrow_width%2 != 0:
       arrow_width -= 1
       arrow_height -= 1
@@ -314,7 +313,7 @@ class ImageTools(ArgumentParser):
       draw.polygon((begin, middle, end), colour)
     elif type == "composite":
       if direction == "up":
-        begin = (8, 5) 
+        begin = (8, 5)
         middle = (4, height-5)
         end = (8, height-7)
         draw.polygon((begin, middle, end), self.adjust_colour(colour, luminosity = 0.8))
@@ -328,7 +327,7 @@ class ImageTools(ArgumentParser):
         middle = (12, 5)
         draw.polygon((begin, middle, end), fill=self.adjust_colour(colour, luminosity = 0.6))
     elif type == "circle":
-      
+
       xy = (4,4,8,8)
       draw.ellipse(xy, fill = colour)
 
@@ -350,7 +349,7 @@ class ImageTools(ArgumentParser):
     hrad_TR = 0
     hrad_BL = 0
     hrad_BR = 0
-  
+
     #border_colour = bg_colour
     border_colour = self.adjust_colour(border_colour, hue=border_hls[0], luminosity=border_hls[1], saturation=border_hls[2])
     #border top
@@ -358,28 +357,28 @@ class ImageTools(ArgumentParser):
     end = (width, 0)
   #       draw.line((begin ,end), fill=border_colour['top'])
     draw.line((begin ,end), fill=border_colour)
-  
+
     #border bottom
     begin = (0, height-1)
     end = (width-1, height-1)
   #       draw.line((begin ,end), fill=border_colour['bottom'])
     draw.line((begin ,end), fill=border_colour)
-  
+
     #border left
     begin = (0, 0)
     end = (0, height-1)
   #       draw.line((begin ,end), fill=border_colour['left'])
     draw.line((begin ,end), fill=border_colour)
-  
+
     #border right
     begin = (width-1 ,0)
     end = (width-1, 0)
   #       draw.line((begin ,end), fill=border_colour['right'])
     draw.line((begin ,end), fill=border_colour)
-  
+
     rect_colour = OV.FindValue('gui_bgcolor')
     pie_colour = bg_colour
-    
+
     pie_colour = (0,0,0,255)
     rect_colour = (0,0,0,255)
     #top-left corner
@@ -406,22 +405,22 @@ class ImageTools(ArgumentParser):
 #      draw.pieslice((width-rad-shift, 0, width-shift, rad), 270, 360, fill=pie_colour)
       draw.arc((width-rad-shift, 0, width-shift, rad), 270, 360, fill=border_colour)
       hrad_TR = hrad
-  
+
     #border top
     begin = (hrad_TL, 0)
     end = (width-hrad_TR, 0)
     draw.line((begin ,end), fill=border_colour)
-  
+
     #border bottom
     begin = (hrad_BL-1, height-1)
     end = (width-hrad_BR-1, height-1)
     draw.line((begin ,end), fill=border_colour)
-  
+
     #border left
     begin = (0, hrad_TL)
     end = (0, height-hrad_BL-1)
     draw.line((begin ,end), fill=border_colour)
-  
+
     #border right
     begin = (width-1 ,hrad_TR)
     end = (width-1, height-hrad_TL)

@@ -17,7 +17,7 @@ class Skin():
   def __init__(self):
     return
     #self.change()
-    
+
   def change(self):
     skin = OV.GetParam('gui.skin.name')
     skin_extension = OV.FindValue('gui_skin_extension',"None")
@@ -28,7 +28,7 @@ class Skin():
       PilTools = __import__("PilTools_%s" %skin)
       #print "pyTools -- Using %s skin." %"PilTools_%s: %s" %(skin, tool)
     except ImportError:
-      #print "pyTools -- Using Default PilTools for Tool: %s" %tool 
+      #print "pyTools -- Using Default PilTools for Tool: %s" %tool
       import PilTools
     except Exception, err:
       raise
@@ -38,12 +38,12 @@ class Skin():
     OV.SetVar('olex2_sNum_id_string',"")
     self.sNumTitle_instance = PilTools.sNumTitle()
     #self.adjust_font_size_for_ppi()
-    
+
   def run_skin(self, f, args=None):
     if f == 'timage':
       a = PilTools.timage()
       a.run_timage(force_images=True)
-      
+
     elif f == 'sNumTitle':
       a = PilTools.sNumTitle()
       a.run_sNumTitle(force=True)
@@ -54,7 +54,7 @@ class Skin():
       self.timage_instance.run_timage()
       self.sNumTitle_instance.run_sNumTitle()
     #self.adjust_font_size_for_ppi()
-    
+
   def adjust_font_size_for_ppi(self):
     ppi = olex_gui.GetPPI()[0]
     html_font_size = int(OV.FindValue('gui_html_font_size').strip())
@@ -75,12 +75,12 @@ def change_skin(skin_name=None, force=False):
   if timing:
     t1 = time.time()
     t2 = 0
-  
+
 
   size_list = ['large', 'standard', 'small']
   if not skin_name:
     pass
-  
+
   elif skin_name in size_list:
     force = True
     gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_name)
@@ -88,26 +88,26 @@ def change_skin(skin_name=None, force=False):
       gui_skin_phil_file = open(gui_skin_phil_path, 'r')
       gui_skin_phil = gui_skin_phil_file.read()
       gui_skin_phil_file.close()
-      olx.phil_handler.update(phil_string=gui_skin_phil)
+      olx.gui_phil_handler.update(phil_string=gui_skin_phil)
 
   else:
     force = True
-    olx.phil_handler.reset_scope('gui')
+    olx.gui_phil_handler.reset_scope('gui')
     gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_name)
     if os.path.isfile(gui_skin_phil_path):
       gui_skin_phil_file = open(gui_skin_phil_path, 'r')
       gui_skin_phil = gui_skin_phil_file.read()
       gui_skin_phil_file.close()
-      olx.phil_handler.update(phil_string=gui_skin_phil)
+      olx.gui_phil_handler.update(phil_string=gui_skin_phil)
 
   if timing:
     t = time.time()
     print "After 'Reading PHIL Stuff': %.2f s (%.2f s)" % ((t - t1), (t - t1))
     t2 = t
 
-  olx.phil_handler.save_param_file(
+  olx.gui_phil_handler.save_param_file(
     file_name=gui_phil_template_path, scope_name='gui', diff_only=True)
-    
+
   try:
     adjust_skin_luminosity()
   except:
@@ -117,14 +117,14 @@ def change_skin(skin_name=None, force=False):
     t = time.time()
     print "After 'adjust_skin_luminosity': %.2f s (%.5f s)" % ((t - t1), (t - t2))
     t2 = t
-  
+
   IT.resize_skin_logo(OV.GetParam('gui.htmlpanelwidth'))
   IT.resize_news_image()
   if timing:
     t = time.time()
     print "After 'resize_skin_logo': %.2f s (%.5f s)" % ((t - t1), (t - t2))
     t2 = t
-  
+
   a = PilTools.timage()
   a.run_timage(force_images=force)
 
@@ -132,7 +132,7 @@ def change_skin(skin_name=None, force=False):
     t = time.time()
     print "After 'run_timage': %.2f s (%.5f s)" % ((t - t1), (t - t2))
     t2 = t
-  
+
   if OV.FileName() != 'none':
     a = PilTools.sNumTitle()
     a.run_sNumTitle(force=force)
@@ -141,27 +141,27 @@ def change_skin(skin_name=None, force=False):
     t = time.time()
     print "After 'sNumTitle': %.2f s (%.5f s)" % ((t - t1), (t - t2))
     t2 = t
-  
+
   SetGrad()
   SetMaterials()
-  
+
   OV.setAllMainToolbarTabButtons()
   olx.html_Reload()
-  
+
   if timing:
     t = time.time()
     print "After 'Reload': %.2f s (%.5f s)" % ((t - t1), (t - t2))
     t2 = t
-  
-  
-  olx.phil_handler.save_param_file(
+
+
+  olx.gui_phil_handler.save_param_file(
     file_name=gui_phil_path, scope_name='gui', diff_only=True)
 
   if timing:
     t = time.time()
     print "After 'Save PHIL': %.2f s (%.5f s)" % ((t - t1), (t - t2))
     t2 = t
-  
+
 OV.registerFunction(change_skin)
 
 
@@ -177,7 +177,7 @@ def adjust_skin_colours():
 
 def adjust_skin_luminosity():
   base_colour = OV.GetParam('gui.base_colour')
-  
+
   scope_l= ['gui',
             'gui.timage',
             'gui.timage.button',
@@ -188,7 +188,7 @@ def adjust_skin_luminosity():
             'gui.timage.snumtitle']
 
   for scope in scope_l:
-    gui = olx.phil_handler.get_scope_by_name(scope)
+    gui = olx.gui_phil_handler.get_scope_by_name(scope)
     for object in gui.active_objects():
       try:
         data_type = object.type.phil_type
@@ -204,7 +204,7 @@ def adjust_skin_luminosity():
       except Exception, ex:
         pass
         #print "Something has gone wrong with SKIN adjust_skin_luminosity: %s" %ex
-        
+
 def SetGrad():
   from ImageTools import ImageTools
   IT = ImageTools()
@@ -225,14 +225,14 @@ def SetMaterials():
   olx.SetMaterial("XGrid.-Surface %s" %OV.GetParam('gui.xgrid.negative_surface_material'))
   olx.HtmlPanelWidth(OV.GetParam('gui.htmlpanelwidth'))
 
-  
+
 def load_user_gui_phil():
   gui_phil_path = "%s/gui.phil" %(OV.DataDir())
   if os.path.exists(gui_phil_path):
     gui_phil_file = open(gui_phil_path, 'r')
     gui_phil = gui_phil_file.read()
     gui_phil_file.close()
-    olx.phil_handler.update(phil_string=gui_phil)
-  
+    olx.gui_phil_handler.update(phil_string=gui_phil)
+
 OV.registerFunction(load_user_gui_phil)
-  
+

@@ -86,7 +86,6 @@ class MetaCif(ArgumentParser):
   def writeMetacifFile(self):
     """Writes the file 'meta.cif' to the Olex virtual FS."""
 
-    metacifInfo = variableFunctions.getVVD('metacif')
     text = self.prepareCifItems()
     ## write file to virtual FS
     OV.write_to_olex('meta.cif', text)
@@ -180,7 +179,7 @@ class MetaCif(ArgumentParser):
             s = None
           if s:
             listText.append(s)
-    listText.sort() 
+    listText.sort()
     if listText != []:
       text = ''.join(listText)
     else:
@@ -246,7 +245,7 @@ class MetaCif(ArgumentParser):
           value = ""
           if len(x) > 1:
             for thing in x:
-              value += "%s " %thing					
+              value += "%s " %thing
           else:
             value = x[0]
           value = value.replace("'", "").rstrip()
@@ -303,7 +302,7 @@ class MetaCif(ArgumentParser):
           continue
       if field in self.toInsert:
         continue
-      if apd not in meta:     
+      if apd not in meta:
         meta.append(apd)
     rFile.close()
     return meta
@@ -311,7 +310,7 @@ class MetaCif(ArgumentParser):
   def insert_item(self):
     metacifInfo = variableFunctions.getVVD('metacif')
     listText = self.prepareCifItems(metacifInfo)
-    listText.sort() 
+    listText.sort()
     text = ""
     if listText != []:
       for item in listText:
@@ -518,7 +517,7 @@ class CifTools(ArgumentParser):
       if line == "": line = "BLANK"
       lines.append(string.strip(line))
 
-    skip = 0        
+    skip = 0
     i = 0
     for line in lines:
       free_txt = ""
@@ -546,7 +545,7 @@ class CifTools(ArgumentParser):
           merge_content.setdefault(txt[0], free_txt)
       i += 1
 
-    lines = []      
+    lines = []
     for line in rfile_cif:
       lines.append(string.strip(line))
     i = 0
@@ -569,7 +568,7 @@ class CifTools(ArgumentParser):
           cif_content.setdefault(txt[0], free_txt)
       i += 1
 
-      ## Write the combined file      
+      ## Write the combined file
     skip = 0
     i = 0
     for line in lines:
@@ -598,7 +597,7 @@ class CifTools(ArgumentParser):
           if descriptor == "_exptl_special_details":
             value = "\n" + value
             spacer = ""
-          line = "%s%s%s" %(descriptor, spacer, value)    
+          line = "%s%s%s" %(descriptor, spacer, value)
       except IndexError:
         i += 1
         continue
@@ -657,7 +656,7 @@ class CifTools(ArgumentParser):
       afile = olexdir + "/util/Cif/" + "cif_info.def"
       afile = open(afile, 'a')
       afile.writelines("\n=%s=     %s=%s =" %(name, version, txt))
-      afile.close()                                     
+      afile.close()
     return txt
 
   def prepare_diffractometer_data(self, smart):
@@ -696,7 +695,7 @@ class CifTools(ArgumentParser):
     elif tool == "saint":
       name = "saint"
       extension = ".ini"
-    elif tool == "sad":     
+    elif tool == "sad":
       name = "*"
       extension = ".abs"
     elif tool == "integ":
@@ -731,7 +730,7 @@ class CifTools(ArgumentParser):
       p[-1:] = ""
       for bit in p:
         parent = parent + bit + "/"
-      files = []      
+      files = []
       for path in glob.glob(os.path.join(parent, name + extension)):
         info = os.stat(path)
         files.append((info.st_mtime, path))
@@ -739,7 +738,7 @@ class CifTools(ArgumentParser):
         returnvalue = self.file_choice(files,tool)
       else:
 
-        returnvalue = "File Not Found"        
+        returnvalue = "File Not Found"
     return OV.standardizePath(returnvalue)
 
   def file_choice(self, info, tool):
@@ -758,7 +757,7 @@ class CifTools(ArgumentParser):
         a = file.split('/')[-2:]
         shortFilePath = ""
         for bit in a:
-          shortFilePath += "/" + bit 
+          shortFilePath += "/" + bit
         listFiles.append("%s" %shortFilePath)
         i += 1
       files = ';'.join(listFiles)
@@ -800,7 +799,7 @@ class CifTools(ArgumentParser):
         versionnumber = line[2]
         versiontext = line[3]
         versions[prgname].setdefault(versionnumber, versiontext)
-    return versions            
+    return versions
 
   ############################################################
 
@@ -823,7 +822,7 @@ def getOrUpdateDimasVar(getOrUpdate):
               ]:
     if OV.GetParam(var[0]) != OV.GetParam('snum.metacif.%s' %var[-1]):
       if getOrUpdate == 'get':
-        value = OV.GetParam(var[0]) 
+        value = OV.GetParam(var[0])
         OV.SetParam('snum.metacif%s' %var[-1],value)
       elif getOrUpdate == 'update':
         value = OV.GetParam('snum.metacif.%s' %var[-1])

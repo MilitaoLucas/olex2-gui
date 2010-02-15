@@ -12,11 +12,11 @@ class GuiSkinChanger(GuiSkinChanger):
   def __init__(self, tool_fun=None, tool_arg=None):
     super(GuiSkinChanger, self).__init__()
     self.param = tool_fun
-    
+
   def setGuiAttributes(self, config):
     import olex
     colour = self.gui_html_base_colour
-    
+
     for item in config:
       if item.startswith("L_"): continue
       val = config.get(item, "")
@@ -36,13 +36,12 @@ class GuiSkinChanger(GuiSkinChanger):
     olex.m("SetMaterial InfoBox.Plane %s" %self.gui_infobox_plane)
     olex.m("htmguifontsize %s" %self.gui_html_font_size)
     #olex.m("grad True")
-  
+
 class sNumTitle(sNumTitle):
   def __init__(self, width=290, tool_arg=None):
     super(sNumTitle, self).__init__(width=290, tool_arg=None)
     #setGuiColours(self)
     #setGuiAttributes(self)
-    #self.setVariables('gui')
 
   def sNumTitleStyle1(self, items, font_name="Arial Bold", font_size=20):
     width = self.width
@@ -67,11 +66,11 @@ class sNumTitle(sNumTitle):
 
     sNum = items["sNum"]
     if sNum == "none": sNum = "No Structure"
-    self.write_text_to_draw(draw, 
-                            sNum, 
-                            top_left=(6, 1), 
-                            font_name=font_name, 
-                            font_size=font_size, 
+    self.write_text_to_draw(draw,
+                            sNum,
+                            top_left=(6, 1),
+                            font_name=font_name,
+                            font_size=font_size,
                             font_colour=self.gui_snumtitle_font_colour)
     self.drawFileFullInfo(draw, luminosity=0.6, right_margin=3, bottom_margin=0)
     self.drawSpaceGroupInfo(draw, luminosity=0.4, right_margin=3)
@@ -119,11 +118,11 @@ class timage(timage):
       image = self.makeTransparentText(image, txt, font_colour=self.adjust_colour("base", luminosity = 0.7))
     else:
       self.write_text_to_draw(
-        draw, 
-        txt, 
-        top_left=(16,1), 
-        font_name=font_name, 
-        font_size=13, 
+        draw,
+        txt,
+        top_left=(16,1),
+        font_name=font_name,
+        font_size=13,
         titleCase=True,
         font_colour=self.gui_timage_font_colour)
       cache = {}
@@ -149,7 +148,7 @@ class timage(timage):
     image = self.add_whitespace(image=image, side='bottom', weight=1, colour = self.adjust_colour("bg", luminosity = 0.98),)
     image = self.add_whitespace(image=image, side='right', weight=1, colour = self.adjust_colour("bg", luminosity = 0.95), )
     return image
-  
+
   def timage_style_h3(self, item, state, bg_luminosity=0.8, bg_saturation=0.9, luminosity_font=1.7, font_name = "Vera"):
     if self.gui_image_font_name:
       font_name = self.gui_image_font_name
@@ -168,11 +167,11 @@ class timage(timage):
     for bit in t:
       txt += bit.title() + " "
 
-    self.write_text_to_draw(draw, 
-                       txt, 
-                       top_left=(13,0), 
-                       font_name=font_name, 
-                       font_size=10, 
+    self.write_text_to_draw(draw,
+                       txt,
+                       top_left=(13,0),
+                       font_name=font_name,
+                       font_size=10,
                        font_colour=self.gui_timage_font_colour,
                        image_size = image.size,
                        titleCase=True,
@@ -189,7 +188,7 @@ class timage(timage):
     else:
       fill = self.gui_html_highlight_colour
       self.create_arrows(draw, height, direction="up", colour=fill, type='simple')
-      
+
     image = self.add_whitespace(image=image, side='bottom', weight=1, colour = self.adjust_colour("bg", luminosity = 0.9))
     filename = item
     return image
@@ -207,11 +206,11 @@ class timage(timage):
     #for bit in t:
       #txt += "%s " %bit
 
-    #self.write_text_to_draw(draw, 
-                            #txt, 
-                            #top_left=(12,1), 
-                            #font_name=font_name, 
-                            #font_size=10, 
+    #self.write_text_to_draw(draw,
+                            #txt,
+                            #top_left=(12,1),
+                            #font_name=font_name,
+                            #font_size=10,
                             #font_colour=self.adjust_colour("base", luminosity=luminosity_font, hue=0))
 
     #self.make_border(rad=11,
@@ -287,13 +286,13 @@ class timage(timage):
 
     #right_align_position = (width - int(width * 0.05) - draw.textsize(txt, font=font)[0])
 
-    self.write_text_to_draw(draw, 
-                            txt, 
+    self.write_text_to_draw(draw,
+                            txt,
                             align = "right",
                             max_width = width-5,
-                            top_left=(6,1), 
-                            font_name=font_name, 
-                            font_size=font_size, 
+                            top_left=(6,1),
+                            font_name=font_name,
+                            font_size=font_size,
                             font_colour=font_colour)
 
     #dup = ImageChops.duplicate(image)
