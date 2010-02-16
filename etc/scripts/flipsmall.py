@@ -1,5 +1,5 @@
 #!/usr/bin/python2
-version = "120210"
+version = "160210"
 """
 =====================================================================
            Submit charge flipping phasing procedure
@@ -102,8 +102,10 @@ cleanup=yes      ...... remove all intermediate files, keep only .res (default=y
        flip_keywords['derivesymmetry'] = "yes"
 
     if olexrun: 
-       flip_keywords['logging'] == "no"
+       flip_keywords['logging'] = "no"
        flip_keywords['comments'] = "no"
+     
+    exe['SF'] = flip_keywords['sflipversion']
               
     if  ( flip_keywords['logging'] == "yes" ): log=open('/home/vdlee/unix/python/log.txt', "a")
 
@@ -685,7 +687,8 @@ def flipsmall (*args):
 # the main keywords
 flip_keywords=dict(weak=0.20, biso=2.5, maxcycl=10000, comments="yes", edmacontinue="no",
                    normalize="yes", merge="yes", forcesymmetry="no", trial="1", SG="1", missing="zero",
-		   derivesymmetry="use",dataformat="shelx",cleanup="yes",terminal='yes', logging='no', superposition='no')
+		   derivesymmetry="use",dataformat="shelx",cleanup="yes",terminal='yes', logging='no', superposition='no', 
+		   sflipversion='superflip')
 # calculated and extracted info, from ins-file and logfile
 derived_info=dict(crsyst='tric', cell="9.0 9.0 9.0 90.0 90.0 90.0", flipcell="9.0 9.0 9.0 90.0 90.0 90.0",  
                   cellesd = "0.0 0.0 0.0 0.0 0.0 0.0", wavelength ="0.71073", sfac="C H O N",
