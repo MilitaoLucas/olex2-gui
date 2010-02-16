@@ -578,16 +578,14 @@ def SetXgridView():
   extended = OV.GetParam("snum.xgrid.extended")
   if view == "2D":
     olex.m("xgrid.RenderMode(plane)")
-  if view == "contour":
-    olex.m("xgrid.RenderMode(contour)")
-  if view == "contour+plane":
-    olex.m("xgrid.RenderMode(contour+plane)")
   elif view == "surface":
     olex.m("xgrid.RenderMode(fill)")
   elif view == "wire":
     olex.m("xgrid.RenderMode(line)")
   elif view == "points":
     olex.m("xgrid.RenderMode(point)")
+  else:
+    olex.m("xgrid.RenderMode(%s)" %view)
   olex.m("xgrid.Extended(%s)" %extended)
 
 if haveGUI:
