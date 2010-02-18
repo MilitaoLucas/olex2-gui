@@ -31,11 +31,8 @@ class OlexCctbxAdapter(object):
     self._xray_structure = None
     self.olx_atoms = olexex.OlexRefinementModel()
     self.wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
-    try:
-      self.reflections = None
-      self.initialise_reflections()
-    except Exception, err:
-      sys.stderr.formatExceptionInfo()
+    self.reflections = None
+    self.initialise_reflections()
 
   def __del__(self):
     sys.stdout.refresh = False
@@ -594,7 +591,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
 
     if recompute or olx.current_mask is None:
       xs = self.xray_structure()
-      fo_sq = self.reflections.f_sq_obs_merged
+      fo_sq = self.reflections.f_sq_obs_filtered.average_bijvoet_mates()
       mask = masks.mask(xs, fo_sq)
       self.time_compute = time_log("computation of mask").start()
       mask.compute(solvent_radius=self.params.solvent_radius,
@@ -623,40 +620,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       write_grid_to_olex(output_data)
     self.time_write_grid.stop()
     self.mask = mask
-    self.show()
-
-  def show(self, log=None):
-    if log is None:
-      log = sys.stdout
-    params = self.params
-    mask = self.mask
-    unit_cell = self.xray_structure().unit_cell()
-    print >> log, "Mask parameters: "
-    print >> log, "Solvent radius: %.2f" %params.solvent_radius
-    print >> log, "Shrink truncation radius: %.2f" %params.shrink_truncation_radius
-    print >> log, "Resolution factor: %.2f" %params.resolution_factor
-    print >> log, "d min: %.2f" %mask.observations.d_min()
-    print >> log, "Gridding: (%i,%i,%i)" %mask.crystal_gridding.n_real()
-    print >> log, "n grid points: %i" %mask.crystal_gridding.n_grid_points()
-    print >> log, self.time_total.log()
-    print
-
-    print >> log, "Solvent accessible volume = %.1f [%.1f%%]" %(
-      mask.solvent_accessible_volume, 100*
-      mask.solvent_accessible_volume/unit_cell.volume())
-    n_voids = flex.max(mask.mask.data) - 1
-    #diff_map = miller.fft_map(mask.crystal_gridding, f_obs_minus_f_calc)
-    #diff_map.apply_volume_scaling()
-    for i in range(2, n_voids + 2):
-      n_void_grid_points = mask.mask.data.count(i)
-      #f_000 = flex.sum(
-        #diff_map.deep_copy().set_selected(mask.mask.data.as_double() != i, 0)) * mask.fft_scale
-      #f_000_s = f_000 * (mask.mask.data.size() /
-        #(mask.mask.data.size() - n_void_grid_points))
-      void_vol = (unit_cell.volume() * n_void_grid_points) \
-               / mask.crystal_gridding.n_grid_points()
-      print >> log, "void %i: %.1f" %(i-1, void_vol)
-      #print >> log, "F000 void: %.1f" %f_000_s
+    mask.show_summary()
 
   def __del__(self):
     OV.DeleteBitmap("working")
