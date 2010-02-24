@@ -17,6 +17,7 @@
   <shortcut key="F6" macro="itemstate * 0 tab* 2 tab-view 1 logo1 1 index-view* 1 info-title 1">
   <shortcut key="F7" macro="itemstate * 0 tab* 2 tab-tools 1 logo1 1 index-tools* 1 info-title 1">
   <shortcut key="F8" macro="itemstate * 0 tab* 2 tab-info 1 logo1 1 index-info* 1 info-title 1">
+  <shortcut key="F11" macro="if strcmp(Fullscreen(),false) then Fullscreen(true) else Fullscreen(false)">
   <shortcut key="F12" macro="spy.stop_auto">
   <shortcut key="Ctrl+0" macro="showP 0">
   <shortcut key="Ctrl+1" macro="showP 1">
@@ -67,8 +68,8 @@
     <check title="Mode;Naming;Number Sequentially from 1" macro="mode name">
     <item  title="Mode;#" macro="">
     <item title="Mode;Clear" macro="mode -1">
-    
-    
+
+
     <item title="Tools;Options" macro="setup" before="Help">
     <item title="Tools;Settings;Toggle Background \tF2" macro="swapbg">
     <item title="Tools;Settings;Show Labels \tF3" macro="labels">
@@ -113,7 +114,7 @@
     <item title="View;Quick Drawing Styles;Wire Frame" macro="proj">
     <item title="View;Quick Drawing Styles;Sphere Packing" macro="sfil>>sel -u">
     <item title="View;Quick Drawing Styles;Tubes" macro="tubes>>sel -u">
-    
+
     <check title="View;Structure;Cell" macro="cell" statedependent="cellvis">
     <check title="View;Structure;Basis" macro="basis" statedependent="basisvis">
     <check title="View;Structure;Hide Structure" macro="showStr" statedependent="strvis">
