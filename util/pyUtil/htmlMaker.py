@@ -61,13 +61,13 @@ def sourceFilesHtmlMaker():
       d['chooseFile'].setdefault('caption',d['itemName'])
     else:
       del list[list.index(d)]
-      
+
   text = htmlTools.makeHtmlTable(list)
   if text == '':
     retstr = 'No relevant files found'
   else:
     retstr = text
-    
+
   return retstr
 OV.registerFunction(sourceFilesHtmlMaker)
 
@@ -94,11 +94,11 @@ def diffractionMetadataHtmlMaker():
          },
        },
     )
-    
+
   list += (
     {'varName':'snum.metacif.diffrn_ambient_temperature',
      'itemName':'%Diffraction Temperature% (K)'
-     },					
+     },
     {'varName':'snum.metacif.cell_measurement_temperature',
      'itemName':'%Cell Measurement Temperature% (K)'
      },
@@ -153,7 +153,7 @@ def crystalMetadataHtmlMaker():
      'multiline':'multiline',
      },
   )
-  
+
   return htmlTools.makeHtmlTable(list)
 OV.registerFunction(crystalMetadataHtmlMaker)
 
@@ -178,7 +178,7 @@ def collectionMetadataHtmlMaker():
      'itemName':'%Date Collected%',
      },
   )
-  
+
   return htmlTools.makeHtmlTable(list)
 OV.registerFunction(collectionMetadataHtmlMaker)
 
@@ -285,11 +285,11 @@ def publicationMetadataHtmlMaker():
     else:
       authorRow.setdefault('itemName','<a href="spy.move(up,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Move author up list"><zimg border="0" src="gui/images/toolbar-up.png"></a> <a href="spy.move(down,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Move author down list"><zimg border="0" src="gui/images/toolbar-down.png"></a> <a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Remove author from list"><zimg border="0" src="gui/images/toolbar-delete.png"></a>' %(str(i),str(i),str(i)))
       authorRow.setdefault('fieldALIGN','right')
-      
+
     list.append(authorRow)
   if numberAuthors > 0:
     s = '_' + str(numberAuthors)
-    list.append(                            
+    list.append(
       {'varName':'publ_author_address',
        'itemName':'%Author% %Address%',
        'multiline':'multiline',
@@ -304,7 +304,7 @@ def publicationMetadataHtmlMaker():
        'onleave':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),email,GetValue(SET_PUBL_AUTHOR_EMAIL))>>spy.changeBoxColour(SET_PUBL_AUTHOR_EMAIL,#FFDCDC)' %s
        }
     )
-  list.append(    
+  list.append(
     {'varName':'snum.metacif.publ_author_names',
      'ctrl_name':'ADD_PUBL_AUTHOR_NAME',
      'readonly':'',
@@ -342,7 +342,7 @@ def publicationMetadataHtmlMaker():
          <td VALIGN="center" width="40%%" colspan=2>
 
          <a href="spy.contactLetter()>>updatehtml" target="Edit Contact Letter"><b>Contact Letter</b></a>
-         </td>   
+         </td>
 </tr>
 """
   return retstr
@@ -377,7 +377,7 @@ def contactLetter():
         initials = ''
         for forename in a[:-1]:
           initials += '%s.' %forename[0].upper()
-          
+
       if i < numberAuthors - 2:
         authorAbbrev = initials + surname + ', '
       elif i == numberAuthors - 2:
@@ -388,14 +388,14 @@ def contactLetter():
     letterText = """Date of submission %s
 
 The CIF file contains data for the structure %s from
-the paper 'ENTER PAPER TITLE' by 
+the paper 'ENTER PAPER TITLE' by
 %s.
 The paper will be submitted to %s.
 """ %(date,fileName,authors,journal)
 
   else:
     letterText = OV.GetParam('snum.metacif.publ_contact_letter')
-    
+
   inputText = OV.GetUserInput(0,'_publ_contact_letter',letterText)
   if inputText == '':
     OV.SetParam('snum.metacif.publ_contact_letter', letterText)
@@ -427,7 +427,7 @@ def move(arg,name):
   listNames = OV.GetParam('snum.metacif.publ_author_names').split(';')
   name_i = olx.GetValue(name)
   i = listNames.index(name_i)
-  
+
   if arg.lower() == 'up':
     if i != 0:
       name_i_minus_1 = listNames[i-1]
@@ -435,7 +435,7 @@ def move(arg,name):
       listNames[i-1] = name_i
     else:
       pass
-    
+
   elif arg.lower() == 'down':
     try:
       name_i_plus_1 = listNames[i+1]
@@ -443,29 +443,29 @@ def move(arg,name):
       listNames[i+1] = name_i
     except:
       pass
-    
+
   elif arg in ('del','DEL'):
     del listNames[i]
-    
+
   names = ';'.join(listNames)
   OV.SetParam('snum.metacif.publ_author_names', names)
-  
+
   return ''
 OV.registerFunction(move)
 
 def restraint_builder(cmd):
   colspan = 6
-  
+
   constraints = ["EXYZ", "EADP", "AFIX"]
   olex_conres = ["RRINGS", "TRIA"]
-  
+
   html = ""
   atom_pairs =  {
     "DFIX":["name_DFIX", "var_d: ", "var_s:0.02", "help_DFIX-use-help"],
-    "DANG":["name_DANG", "var_d: ", "var_s:0.04", "help_Select atom pairs"], 
-    "SADI":["name_SADI", "var_s:0.02", "help_SADI-use-help"], 
+    "DANG":["name_DANG", "var_d: ", "var_s:0.04", "help_Select atom pairs"],
+    "SADI":["name_SADI", "var_s:0.02", "help_SADI-use-help"],
   }
-  
+
   atom_names =  {
     "SAME":["name_SAME", "var_s1:0.02", "var_s2:0.02", "help_Select any number of atoms"],
     "CHIV":["name_CHIV", "var_V:0", "var_s:0.1", "help_Select any number of atoms"],
@@ -479,7 +479,7 @@ def restraint_builder(cmd):
     "RRINGS":["name_RRINGS", "var_d: ", "var_s1:0.02", "help_rrings-htmhelp"],
     "TRIA":["name_TRIA", "var_distance: ", "var_angle: ", "help_tria-htmhelp"],
   }
-  
+
   if atom_pairs.has_key(cmd):
     l = atom_pairs[cmd]
   elif atom_names.has_key(cmd):
@@ -537,7 +537,7 @@ def restraint_builder(cmd):
       #html += "<td width='20%%'>%s</td>" %make_input_text_box(d)
       if var:
         html += "<td width='15%%'>%s</td>" %htmlTools.makeHtmlInputBox(d)
-      
+
   if name == "AFIX":
     itemcount += 2
     onclick_list = onclick.strip().split(' ')
@@ -561,7 +561,7 @@ def restraint_builder(cmd):
       "width":40, "height":28,
       "hint":"Removes the current AFIX command from the structure",
     }
-    
+
   has_modes = []
   if name in has_modes:
     if haveSelection():
@@ -570,9 +570,9 @@ def restraint_builder(cmd):
       onclick = "mode %s" %onclick
   else:
     onclick += " sel"
-    
+
   onclick = "%s%s%s" %(pre_onclick, onclick, post_onclick)
-  
+
   button_d = {
     "name":'%s_GO' %name,
     "value":"GO",
@@ -587,7 +587,7 @@ def restraint_builder(cmd):
     html += "<td width='25%%' align='right'>%s</td>" %htmlTools.make_input_button(clear_button_d)
     html += "<td width='25%%' align='right'>%s</td>" %htmlTools.make_input_button(mode_button_d)
   html += "<td width='10%%' align='right'>%s</td>" %htmlTools.make_input_button(button_d)
-  
+
   #Add the help info as the last row in the table
   html += "</td></tr><tr>"
   html += htmlTools.make_table_first_col(help_name=name, popout=True, help_image='normal')
@@ -598,44 +598,36 @@ def restraint_builder(cmd):
     wFilePath = r"olex-conres-vars.htm"
   else:
     wFilePath = r"restraint-vars.htm"
-    
+
   OV.write_to_olex(wFilePath, html)
   OV.UpdateHtml()
   return "Done"
 OV.registerFunction(restraint_builder)
 
+have_found_python_error = False
+
 def checkErrLogFile():
-  retVal = ""
   logfile = "%s/PythonError.log" %OV.DataDir()
   logfile = logfile.replace("\\\\", "\\")
-  try:
-    rFile = open(logfile, 'r')
-  except:
-    return retVal
-  f = rFile.readlines()
-  if len(f) != 0:
-    txt = "This is a transcript of the error encountered by Olex2\n"
-    for line in f:
-      txt += line
-    txt = "'%s'" %txt
-    txt = txt.replace("\n", "--")
-    txt = txt.replace("\\", "/")
-    #retVal = '''
-#<a href='external_edit %s>>shell "mailto:horst.puschmann@gmail.com?subject=Olex Python Error&body=%s"'>
-#<zimg border='0' src='gui\\images\\toolbar-stop.png'></a>
-#'''%(logfile, txt)
-    retVal = '''
-<a href='external_edit "%s"'>
-<zimg border='0' src='gui\\images\\toolbar-stop.png'></a>
-'''%(logfile)
-  return retVal
+  global have_found_python_error
+  if not have_found_python_error:
+    f = open(logfile, 'r')
+    if len(f.readlines()) > 0:
+      have_found_python_error = True
+    f.close()
+  if have_found_python_error:
+    return '''
+    <a href='external_edit "%s"'>
+    <zimg border='0' src='gui\\images\\toolbar-stop.png'></a>
+    '''%(logfile)
+  else: return ""
 OV.registerFunction(checkErrLogFile)
 
 def weightGuiDisplay():
-  
+
   if "smtbx" in OV.GetParam('snum.refinement.program'):
     return ""
-  
+
   gui_green = OV.FindValue('gui_green')
   gui_orange = OV.FindValue('gui_orange')
   gui_red = OV.FindValue('gui_red')
@@ -665,25 +657,25 @@ def weightGuiDisplay():
         while len(sugg) < longest and sugg != "0":
           sugg += '0'
       if curr == sugg:
-        colour = gui_green 
+        colour = gui_green
       elif float(curr)-float(curr)*0.1 < float(sugg) < float(curr)+float(curr)*0.1:
         colour = gui_orange
       else:
         colour = gui_red
-      retVal += "<font size='2' color='%s'>%s(%s)</font> | " %(colour, curr, sugg)  
+      retVal += "<font size='2' color='%s'>%s(%s)</font> | " %(colour, curr, sugg)
     html_scheme = retVal.strip("| ")
   else:
     html_scheme = current_weight
-    
+
   d = {'ctrl_name':'SET_SNUM_REFINEMENT_UPDATE_WEIGHT',
        'checked':'$spy.GetParam(snum.refinement.update_weight)',
        'oncheck':'spy.SetParam(snum.refinement.update_weight,true)',
        'onuncheck':'spy.SetParam(snum.refinement.update_weight,false)',
        'value':'',
        }
-  box = htmlTools.make_tick_box_input(d) 
+  box = htmlTools.make_tick_box_input(d)
 
-  txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update") 
+  txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update")
   txt_Weight = OV.TranslatePhrase("Weight")
   html = '''
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_UPDATE_WEIGHT'>
@@ -706,7 +698,7 @@ def getCellHTML():
     'Hexagonal':('a', 'c'),
     'Trigonal':('a', 'c'),
   }
-  
+
   cell_param_value_pairs = dict(zip(
     ('a', 'b', 'c', '&alpha;', '&beta;', '&gamma;'),
     ('_cell_length_a','_cell_length_b','_cell_length_c','_cell_angle_alpha','_cell_angle_beta','_cell_angle_gamma')))
@@ -722,12 +714,12 @@ def getCellHTML():
         value = '%%%s%%' %value,
         unit = '&deg;'
       )
-      
+
   cell_html = dict((param, '<i>%s</i>&nbsp;= %s%s, ' %(param,cell[param]['value'],cell[param]['unit'])) for param in cell.keys())
-  
+
   crystal_system = OV.olex_function('sg(%s)')
 
   html = ''.join(cell_html[param] for param in crystal_systems[crystal_system])
-  
+
   return html
 OV.registerFunction(getCellHTML)
