@@ -558,18 +558,11 @@ class Method_cctbx_ChargeFlip(Method_solution):
       item = item.split(":")
       formula_d.setdefault(item[0], {'count':float(item[1])})
     try:
-      solution = cctbx.runChargeFlippingSolution(solving_interval=solving_interval)
-      if not solution:
-        print "Sorry Mate!"
-      else:
-        for xyz, height in solution:
-          if not xyz:
-            return "No Solution"
-          else:
-            cctbx.post_single_peak(xyz, height)
+      have_solution = cctbx.runChargeFlippingSolution(solving_interval=solving_interval)
+      if not have_solution:
+        print "*** No solution found ***"
     except Exception, err:
       print err
-      #cctbx.post_single_peak(xyz, height)
     olx.xf_EndUpdate()
     olx.Compaq('-a')
     olex.m("sel -a")
