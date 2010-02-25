@@ -506,9 +506,8 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         'programs.solution.smtbx.cf.max_solving_iterations'),
     )
     charge_flipping_loop(solving, verbose=verbose)
-
     # play with the solutions
-    expected_peaks =  data.unit_cell().volume()/18.6/len(data.space_group())
+    expected_peaks = f_obs.unit_cell().volume()/18.6/len(f_obs.space_group())
     expected_peaks *= 1.3
     if solving.f_calc_solutions:
       # actually only the supposedly best one
@@ -522,12 +521,15 @@ class OlexCctbxSolve(OlexCctbxAdapter):
           max_clusters=expected_peaks,),
         verify_symmetry=False
         ).all()
-      for q,h in izip(peaks.sites(), peaks.heights()):
-        yield q,h
-
-    else:
-      print "*** No solution found ***"
-      yield (None, None)
+      for xyz, height in izip(peaks.sites(), peaks.heights()):
+        if not xyz:
+          have_solution = False
+          break
+        else:
+          self.post_single_peak(xyz, height)
+      have_solution = True
+    else: have_solution = False
+    return have_solution
 
   def post_single_peak(self, xyz, height, cutoff=1.0):
     if height/self.peak_normaliser < cutoff:
