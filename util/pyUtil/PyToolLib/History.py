@@ -68,6 +68,7 @@ class History(ArgumentParser):
     self.his_file = tree.active_node.name
     OV.SetParam('snum.history.current_node', tree.active_node.name)
     self._make_history_bars()
+    self.saveHistory()
     return self.his_file
 
   def rename_history(self, name, label=None):
@@ -121,7 +122,7 @@ class History(ArgumentParser):
       except AttributeError:
         historyName = OV.FileName()
         tree.name = historyName
-        
+
       if tree.version < 2.0:
         tree = _convert_history(tree)
 
@@ -143,7 +144,7 @@ class History(ArgumentParser):
         path = '%s/%s.%s' %(OV.FilePath(),OV.FileName(),ext)
         if os.path.exists(path):
           os.remove(path)
-          
+
       for fileName in os.listdir(backupFolder):
         if fileName == '%s.res' %OV.FileName():
           resetFile = '%s.res' %(OV.FileName())
@@ -151,7 +152,7 @@ class History(ArgumentParser):
         if os.path.exists(backupFilePath):
           restorePath = '%s/%s' %(OV.FilePath(), fileName)
           shutil.copyfile(backupFilePath,restorePath)
-          
+
     self.filefull = '%s/%s' %(OV.FilePath(), resetFile)
     olx.Atreap(self.filefull)
     self.params.snum.history.current_solution = 'Solution 01'
@@ -320,7 +321,7 @@ class Node:
         self.read_res(resPath)
       if lstPath is not None and os.path.exists(lstPath):
         self.read_lst(lstPath)
-  
+
       if self.is_solution and OV.GetParam('snum.solution.program') == 'smtbx-solve':
         self.program = OV.GetParam('snum.solution.program')
         self.method = OV.GetParam('snum.solution.method')
@@ -543,7 +544,7 @@ class HistoryLeaf:
     self.wR2 = 'n/a'
     self.lst = None
     self.res = None
-    
+
     self.res = compressFile(resPath)
     ref_program = OV.GetParam('snum.refinement.program')
     sol_program = OV.GetParam('snum.solution.program')
@@ -557,7 +558,7 @@ class HistoryLeaf:
         self.R1 = float(OV.GetParam('snum.refinement.last_R1'))
       except ValueError:
         pass
-        
+
     elif os.path.exists(lstPath):
       self.lst = compressFile(lstPath)
       self.getLeafInfoFromLst(lstPath)
@@ -586,14 +587,14 @@ class HistoryLeaf:
     except ValueError:
       self.R1 = 'n/a'
       self.wR2 = 'n/a'
-      
+
     if self.R1 == 'n/a':
       self.solution_program = OV.GetParam('snum.solution.program')
       self.solution_method = OV.GetParam('snum.solution.method')
     else:
       self.refinement_program = OV.GetParam('snum.refinement.program')
       self.refinement_method = OV.GetParam('snum.refinement.method')
-      
+
     self.program_version = lstValues.get('version',None)
 
   def getLeafInfoFromRes(self, filePath):
