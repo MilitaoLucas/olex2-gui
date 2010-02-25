@@ -558,7 +558,7 @@ class Method_cctbx_ChargeFlip(Method_solution):
       item = item.split(":")
       formula_d.setdefault(item[0], {'count':float(item[1])})
     try:
-      solution = cctbx.runChargeFlippingSolution('%s/%s.hkl' %(RunPrgObject.tempPath,RunPrgObject.hkl_src_name.lower()), solving_interval=solving_interval)
+      solution = cctbx.runChargeFlippingSolution(solving_interval=solving_interval)
       if not solution:
         print "Sorry Mate!"
       else:
@@ -566,7 +566,7 @@ class Method_cctbx_ChargeFlip(Method_solution):
           if not xyz:
             return "No Solution"
           else:
-            cctbx.post_single_peak(xyz, height, auto_assign=False)
+            cctbx.post_single_peak(xyz, height)
     except Exception, err:
       print err
       #cctbx.post_single_peak(xyz, height)

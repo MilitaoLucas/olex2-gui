@@ -474,7 +474,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     OlexCctbxAdapter.__init__(self)
     self.peak_normaliser = 1200 #fudge factor to get cctbx peaks on the same scale as shelx peaks
 
-  def runChargeFlippingSolution(self, hkl_path, verbose='highly', solving_interval=60):
+  def runChargeFlippingSolution(self, verbose="highly", solving_interval=60):
     import time
     t1 = time.time()
     from smtbx.ab_initio import charge_flipping
@@ -493,15 +493,17 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     f_obs.show_summary()
 
     # charge flipping iterations
-    #flipping = charge_flipping.basic_iterator(f_obs, delta=None)
     flipping = charge_flipping.weak_reflection_improved_iterator(f_obs, delta=None)
     solving = charge_flipping.solving_iterator(
       flipping,
       yield_during_delta_guessing=True,
       yield_solving_interval=solving_interval,
-      max_attempts_to_get_phase_transition=OV.GetParam('programs.solution.smtbx.cf.max_attempts_to_get_phase_transition'),
-      max_attempts_to_get_sharp_correlation_map=OV.GetParam('programs.solution.smtbx.cf.max_attempts_to_get_sharp_correlation_map'),
-      max_solving_iterations=OV.GetParam('programs.solution.smtbx.cf.max_solving_iterations'),
+      max_attempts_to_get_phase_transition=OV.GetParam(
+        'programs.solution.smtbx.cf.max_attempts_to_get_phase_transition'),
+      max_attempts_to_get_sharp_correlation_map=OV.GetParam(
+        'programs.solution.smtbx.cf.max_attempts_to_get_sharp_correlation_map'),
+      max_solving_iterations=OV.GetParam(
+        'programs.solution.smtbx.cf.max_solving_iterations'),
     )
     charge_flipping_loop(solving, verbose=verbose)
 
@@ -522,55 +524,19 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         ).all()
       for q,h in izip(peaks.sites(), peaks.heights()):
         yield q,h
-        #print "(%.3f, %.3f, %.3f) -> %.3f" % (q+(h,))
 
     else:
       print "*** No solution found ***"
       yield (None, None)
 
-  def post_single_peak(self, xyz, height, cutoff=1.0, auto_assign=False):
+  def post_single_peak(self, xyz, height, cutoff=1.0):
     if height/self.peak_normaliser < cutoff:
       return
     sp = (height/self.peak_normaliser)
 
-    if not auto_assign:
-      id = olx.xf_au_NewAtom("%.2f" %(sp), *xyz)
-      #if olx.xf_au_SetAtomCrd(id, *xyz)=="true":
-      if id != '-1':
-        olx.xf_au_SetAtomU(id, "0.06")
-    else:
-      max_Z = 0
-      for element in auto_assign:
-        Z = self.pt[element].get('Z', 0)
-        if self.pt[element].get('Z', 0) > max_Z: max_Z = Z
-      please_assign = False
-      for element in auto_assign:
-        if element == "H":
-          continue
-        Z = self.pt[element].get('Z', 0)
-        if (sp-sp*0.1) < Z < (sp + sp*0.1):
-          please_assign = True
-          break
-        elif sp > Z and Z == max_Z:
-          please_assign = True
-          break
-      if please_assign:
-        id = olx.xf_au_NewAtom(element, *xyz)
-        #olx.xf_au_SetAtomCrd(id, *xyz)
-        #olx.xf_au_SetAtomOccu(id, 1)
-        auto_assign[element]['count'] -= 1
-        if auto_assign[element]['count'] == 0:
-          del auto_assign[element]
-          return
-      else:
-        if sp > 2:
-          id = olx.xf_au_NewAtom("C", *xyz)
-          #olx.xf_au_SetAtomCrd(id, *xyz)
-          return
-      id = olx.xf_au_NewAtom("%.2f" %(sp), *xyz)
-      #if olx.xf_au_SetAtomCrd(id, *xyz)=="true":
-      if id != '-1':
-        olx.xf_au_SetAtomU(id, "0.06")
+    id = olx.xf_au_NewAtom("%.2f" %(sp), *xyz)
+    if id != '-1':
+      olx.xf_au_SetAtomU(id, "0.06")
 
 class OlexCctbxMasks(OlexCctbxAdapter):
 
@@ -914,7 +880,7 @@ def charge_flipping_loop(solving, verbose=True):
     elif solving.state is solving.polishing:
       if verbose == 'highly':
         print
-        print "Polishing with rho_c=%.4f" % flipping.rho_c()
+        print "Polishing"
     elif solving.state is solving.finished:
       break
 
