@@ -29,7 +29,7 @@ gui {
 
     base_colour = #095aa5
     bg_colour = #FFFFFF
-    font_colour = #6f6f8b
+    font_colour = #095aa5
     font_name = Arial
     font_size = 2
     input_bg_colour = #095aa5
