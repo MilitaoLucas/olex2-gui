@@ -29,7 +29,7 @@ gui {
 
     base_colour = #095aa5
     bg_colour = #FFFFFF
-    font_colour = #FFFFFF
+    font_colour = #6f6f8b
     font_name = Arial
     font_size = 2
     input_bg_colour = #095aa5
@@ -41,6 +41,17 @@ gui {
   }
   
   timage{
+    snumtitle {
+      base_colour = None
+      grad_colour = #0b5aa4
+      font_colour = #FFFFFF
+      font_colour_L = 1.4
+      bg_colour_L = 1.4
+      grad_step = 0.4
+      grad_colour_L = 0.75
+      filefullinfo_colour = '(221, 221, 221)'
+      filefullinfo_colour_L = 1.3
+    }
     tab{
       base_colour = None
       grad_colour = #095aa5
@@ -101,7 +112,7 @@ gui {
 
     h3{
       base_colour = None
-      grad_colour = None
+      grad_colour = #095aa5
       height = 16
       corner_rad = 0
       rounded = 1111
@@ -111,7 +122,7 @@ gui {
       bg_colour_L = 1.3
       grad_colour_L = 1.1 
       font_colour_L = 0.8
-      font_colour = None
+      font_colour = #FFFFFF
       arrows = 'arrow'
       off_L = 1.2
       shadow = False
@@ -130,8 +141,8 @@ gui {
   button_writing = #095aa5
   button_font_name = Vera
   tab_colour = #095aa5
-  tab_font_colour = #ffFFFF
-  htmlpanelwidth = 480
+  tab_font_colour = #095aa5
+  htmlpanelwidth = 400
   gui_grad_top_left=#000000
   gui_grad_top_right=#095aa5
   gui_grad_bottom_left=#095aa5
