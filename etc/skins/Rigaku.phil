@@ -1,0 +1,139 @@
+
+gui {
+  logo_colour = #095aa5
+
+  skin {
+    name = Rigaku
+    extension = None
+    logo_name= etc/skins/Rigaku.png
+  }
+
+  green = #00aa00
+  orange = #d6620d
+  red = #aa0000
+  purple = #a245a2
+
+  sginfo{
+    scale = 1.0
+      .type = float
+  }    
+  
+
+  html {
+  
+    code {
+      bg_colour = #181621
+      fg_colour = #095aa5
+      html_tag = code
+     }
+
+    base_colour = #095aa5
+    bg_colour = #FFFFFF
+    font_colour = #FFFFFF
+    font_name = Arial
+    font_size = 2
+    input_bg_colour = #095aa5
+    icon_size = 25
+    link_colour = #095000
+    table_bg_colour = #a7a7a7
+    table_firstcol_colour = #a7a7a7
+    MainToolbarTabButtonActive = None
+  }
+  
+  timage{
+    tab{
+      base_colour = None
+      grad_colour = #095aa5
+      font_colour = #FFFFFF
+      height = 25
+      corner_rad = 5
+      grad = True
+      grad_step = 0.3
+      bg_colour_L = 1.5
+      grad_colour_L = 1.0
+      font_colour_L = 1.8
+      font_name = Vera Bold
+      font_size = 14
+      top = 7
+      left = 8
+      rounded = 0100
+      arrows = triangle:left
+      off_L = 1.6
+    }  
+  
+  
+    button{
+      base_colour = #095aa5
+      grad = True
+      grad_colour = #095aa5
+      grad_step = 0.4
+      height = 16
+      corner_rad = 3
+      rounded = 1111
+      font_size = 12
+      halign = left
+      top = 1
+      left = 4
+      bg_colour_L = 1.6
+      grad_colour_L = 1.8
+      font_colour_L = 0.8
+      font_colour = #FFFFFF
+      arrows = None
+    }
+    h1{
+      base_colour = None
+      grad_colour = #095aa5
+      grad_step = 0.9
+      height = 18
+      corner_rad = 0
+      rounded = 1111
+      font_size = None
+      top = 1
+      left = 16
+      bg_colour_L = 1.7
+      grad_colour_L = 1.8
+      font_colour_L = 0.6
+      font_colour = #FFFFFF
+      arrows = 'arrow'
+      off_L = 1.2
+      shadow = True
+    }  
+
+    h3{
+      base_colour = None
+      grad_colour = None
+      height = 16
+      corner_rad = 0
+      rounded = 1111
+      font_size = None
+      top = 2
+      left = 12
+      bg_colour_L = 1.3
+      grad_colour_L = 1.1 
+      font_colour_L = 0.8
+      font_colour = None
+      arrows = 'arrow'
+      off_L = 1.2
+      shadow = False
+    }
+    
+    grad = True
+    grad_step = 0.2
+    bg_colour_L = 1.6
+    grad_colour_L = 1.8
+    font_colour_L = 0.8
+    font_name = Vera
+  }  
+
+  image_font_name = Vera
+  button_colouring = #191820
+  button_writing = #095aa5
+  button_font_name = Vera
+  tab_colour = #095aa5
+  tab_font_colour = #ffFFFF
+  htmlpanelwidth = 480
+  gui_grad_top_left=#000000
+  gui_grad_top_right=#095aa5
+  gui_grad_bottom_left=#095aa5
+  gui_grad_bottom_right=#095aa5
+}
