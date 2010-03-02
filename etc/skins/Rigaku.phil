@@ -32,7 +32,7 @@ gui {
     font_colour = #095aa5
     font_name = Arial
     font_size = 2
-    input_bg_colour = #095aa5
+    input_bg_colour = #c2e167
     icon_size = 25
     link_colour = #095000
     table_bg_colour = #a7a7a7
