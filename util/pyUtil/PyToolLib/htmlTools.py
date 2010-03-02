@@ -433,8 +433,8 @@ def make_help_href(name, popout, image='normal'):
 
 def make_input_text_box(d):
   name = d.get('ctrl_name')
-  dic = {'height':'GetVar(gui_html_input_height)',
-         'bgcolor':'GetVar(gui_html_input_bg_colour)',
+  dic = {'height':'$spy.GetParam(gui.html.input_height)',
+         'bgcolor':'$spy.GetParam(gui.html.input_bg_colour)',
          'value':'$spy.GetParam(%(varName)s)',
          'width':'45',
          'onchange':'',
