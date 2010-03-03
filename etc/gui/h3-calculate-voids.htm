@@ -5,30 +5,30 @@
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td>
     <input
-    type="text"
-    name = "SET_SNUM_CALCVOID_RESOLUTION"
-    width="20%"
-    height="18"
-    label="%Res%/&Aring "
-    valign="center"
-    bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-    fgcolor="$spy.GetParam(gui.html.font_colour)"
-    value="$spy.GetParam(snum.calcvoid.resolution)"
-    onchange="spy.SetParam(snum.calcvoid.resolution,GetValue(SET_SNUM_CALCVOID_RESOLUTION))"
+      type="text"
+      name = "SET_SNUM_CALCVOID_RESOLUTION"
+      width="20%"
+      height="18"
+      label="%Res%/&Aring "
+      valign="center"
+      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      value="$spy.GetParam(snum.calcvoid.resolution)"
+      onleave="spy.SetParam(snum.calcvoid.resolution,GetValue(SET_SNUM_CALCVOID_RESOLUTION))"
     >
   </td>
   <td>
     <input
-    type="text"
-    name = "SET_SNUM_CALCVOID_DISTANCE"
-    width="20%"
-    height="18"
-    label="%Distance%/&Aring "
-    valign="center"
-    bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-    fgcolor="$spy.GetParam(gui.html.font_colour)"
-    value="$spy.GetParam(snum.calcvoid.distance)"
-    onchange="spy.SetParam(snum.calcvoid.distance,GetValue(SET_SNUM_CALCVOID_RESOLUTION))"
+      type="text"
+      name = "SET_SNUM_CALCVOID_DISTANCE"
+      width="20%"
+      height="18"
+      label="%Distance%/&Aring "
+      valign="center"
+      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      value="$spy.GetParam(snum.calcvoid.distance)"
+      onleave="spy.SetParam(snum.calcvoid.distance,GetValue(SET_SNUM_CALCVOID_RESOLUTION))"
     >
   </td>
   <td colspan = '1'>
