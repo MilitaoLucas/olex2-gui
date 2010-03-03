@@ -15,6 +15,7 @@ import os
 global sizedraw
 sizedraw_dummy_draw  = ImageDraw.Draw(Image.new('RGBA',(300, 300)))
 import olx
+import math
 
 #self.params.html.highlight_colour.rgb = self.params.html.highlight_colour.rgb
 #self.params.timage.colour.rgb = self.params.timage.colour.rgb
@@ -111,6 +112,10 @@ class ImageTools(FontInstances):
     #if olx.IsCurrentLanguage('Chinese') == "true":
     #  self.language = 'Chinese'
     self.fonts = self.defineFonts()
+    self.gui_red = OV.GetParam('gui.red').rgb
+    self.gui_green = OV.GetParam('gui.green').rgb
+    self.gui_blue = OV.GetParam('gui.blue').rgb
+    self.gui_grey = OV.GetParam('gui.grey').rgb
 
   def dec2hex(self, n):
     """return the hexadecimal string representation of integer n"""
@@ -655,6 +660,12 @@ class ImageTools(FontInstances):
     wX, wY = sizedraw_dummy_draw.textsize(txt, font=font)
     return wX, wY
 
+  def get_font(self, font_name='Vera', font_size=12):
+    font = self.fonts[font_name]["fontInstance"].get(font_size,None)
+    if not font:
+      font = self.registerFontInstance(font_name, font_size)
+    return font
+
   def make_pop_image(self, d):
     size = d.get('size')
     bgcolour = d.get('bgcolour')
@@ -917,5 +928,163 @@ class ImageTools(FontInstances):
     draw.line((begin ,end), fill=border_colour)
 
 
+  def make_pie_graph(self, number=2, segments=[('R',0.5,'#ee0000'),('G',0.5,'#00ee00')], rotation=-90, name='fred'):
+    rotation = int(rotation)
+    number = int(number)
+    red = self.gui_red
+    green = self.gui_green
+    blue = self.gui_blue
+    grey = self.gui_grey
+    colours = [red, green, blue, grey]
+    
+    map_l = []
+    
+    if not number:
+      number = len(segments)
+    if number == 2:
+      rotation = 90
+      segments=[('Solve',0.5,red),('Refine',0.5,green)]
+      rad_factor = 4
+    if number == 3:
+      segments=[('R',0.333,red),('G',0.333,green), ('B',0.333,blue)]
+      rad_factor = 4
+    if number == 4:
+      rotation = -135
+      segments=[('R',0.25,red),('G',0.25,green), ('B',0.25,blue), ('Grey',0.25,'#888888')]
+      rad_factor = 3.4
+    
+    colour = (0,0,0,0)
+    colour = OV.GetParam('gui.html.bg_colour').rgb
+    size = (600,300)
+    im_size = (size[0] + 1,size[1] + 1)
+    IM = Image.new('RGBA', im_size, colour)
+    draw = ImageDraw.Draw(IM)
+    font_size = int(size[0]/8)
+    font_name = 'Vera Bold'
+    font = self.get_font(font_size=font_size, font_name=font_name)
+    font_colour = '#ababab'
+    border_colour = "#ffffff"
+    border_width = 0
+    rad_width = size[0] - 2 - border_width * 2
+    rad_height = size[1] - 2 - border_width * 2
+    margin = 0
+    center = (int(size[0]/2), int(size[1]/2))
+    draw.ellipse((margin, margin, rad_width, rad_height), fill=border_colour)
+    
+    curr_end = rotation
+    i = 0
+    for segment in segments:
+      var = segment[0]
+      map_l.append({'var':var, 'href':var, 'target':var})
+      value = 1/len(segments)
+      pie_colour = colours[i]
+      begin = int(curr_end)
+      end = begin + int(round(360*value,0))
+      draw.pieslice((margin+border_width, margin+border_width, rad_width, rad_height), begin, end, fill=pie_colour)
+      curr_end = end
+      i += 1
+      
+    curr_end = 0
+    if number == 2:
+      curr_end = 180
+    elif number == 4:
+      curr_end = -45
+      
+    i = 0
+    for segment in segments:
+      var = segment[0]
+      pie_colour = colours[i]
+      font_colour = self.adjust_colour(pie_colour, luminosity = 1.6)
+      font_colour = '#ffffff'
+      begin = int(curr_end)
+      end = begin + int(round(360*value,0))
+      angle = (end - begin)/2 + begin
+      angle = math.radians(angle)
+      
+      wX, wY = self.textsize(draw, var, font_size, font_name)
+      left = (center[0] + math.sin(angle) * rad_width/rad_factor) - wX/2
+      top = ((center[1] + (math.cos(angle) * -1) * rad_height/3.2)) - wY/2
+      
+      draw.text((int(left), int(top)), var, font=font, fill=font_colour)
+      curr_end = end
+      i += 1
+      
+    map_width = 200
+    map_height = 100
+    pie_map = self.make_pie_map(map_l, (map_width, map_height))
+      
+    html = '''
+<table align='center' width='100%%'>
+<tr align='center'>
+<td align='center'>
+<zimg border="0" width="200" height="100" src="fred.png" usemap="pie">
+%s
+</td>
+</tr>
+</table>''' %(pie_map)
+    
+    IM.save("%s/%s.png" %(OV.DataDir(),name))
+    OlexVFS.save_image_to_olex(IM, name, 1)
+    OlexVFS.write_to_olex('pie.htm',html, True)
+    OV.HtmlReload()
+  
+  def make_pie_map(self, map_l, size):
+    
+    width = size[0]
+    height = size[1]
+    map = "<map name='pie'>"
+
+    if len(map_l) == 2:
+      i = 0
+      for item in map_l:
+        href = item.get('href','n/a')
+        target = item.get('target','n/a')
+        left = i * int(width/2)
+        if i == 0:
+          right = width/2
+        else:
+          right = width
+        if len(map_l) == 4:
+          top = i * height/2
+          bottom = height
+        elif len(map_l) == 2:
+          top = 0
+          bottom = height
+        map += '''
+<area shape='rect' coords='%s,%s,%s,%s' href='%s' target='%s'>''' %(int(left), int(top), int(right), int(bottom), href, target)
+        i += 1
+  
+#      <area shape='rect'
+#        coords='100,0,200,100'
+#        href='refine'
+#        target='refine'>
+#      </map>'''
+    #elif len(map_l) == 3:
+      #map = '''
+      #<map name='pie'>
+      #<area shape='rect'
+        #coords='0,0,100,100'
+        #href='solve'
+        #target='solve'>
+      #<area shape='rect'
+        #coords='100,0,200,100'
+        #href='refine'
+        #target='refine'>'''
+#    elif len(map_l) == 4:
+      ##map = '''
+      ##<map name='pie'>
+      ##<area shape='rect'
+        ##coords='0,0,100,100'
+        ##href='solve'
+        ##target='solve'>
+      ##<area shape='rect'
+        ##coords='100,0,200,100'
+        ##href='refine'
+        ##target='refine'>
+      ##</map>'''
+    map += "</map>"
+    return map
+
 a = ImageTools()
 OV.registerMacro(a.resize_to_panelwidth, 'i-Image&;c-Colourize')
+OV.registerFunction(a.make_pie_graph)

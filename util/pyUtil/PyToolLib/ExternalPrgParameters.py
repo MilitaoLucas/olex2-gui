@@ -534,6 +534,8 @@ class Method_cctbx_fm_refinement(Method_refinement):
       max_cycles=RunPrgObject.params.snum.refinement.max_cycles,
       max_peaks=RunPrgObject.params.snum.refinement.max_peaks,
       verbose=verbose)
+#      max_peaks=OV.SetMaxPeaks(),
+#      verbose=verbose)
     #olx.Kill('$Q')
     cctbx.run()
     OV.SetVar('cctbx_R1',cctbx.R1()[0])
