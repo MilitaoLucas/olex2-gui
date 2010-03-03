@@ -630,17 +630,17 @@ def tbxs_(name):
 <!-- #include header gui\blocks\tool-header.htm;1; -->
 <table border="0" style="border-collapse: collapse" width="100%" id="#tool" cellpadding="0" cellspacing="1">
         <tr>
-                <td width="100%" bgcolor="$getVar(gui_html_font_colour)">
+                <td width="100%" bgcolor="$spy.GetParam(gui.html.font_colour)">
                         <-zimg border="0" src="#image.png">
                 </td>
         </tr>
 </table>
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$getVar(gui_html_table_bg_colour)">
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_bg_colour)">
 '''
 
   txt += r'''
 <tr VALIGN='center' NAME='Expand Short Contacts'>
-  <td colspan=1 width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"></td>
+  <td colspan=1 width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
     <td>
       <font size = '4'>
         <b>
@@ -650,7 +650,7 @@ def tbxs_(name):
     </td>
   </tr>
 <tr>
-  <td valign='top' width="8" bgcolor="$getVar(gui_html_table_firstcol_colour)"><zimg border="0" src="info.png"></td>
+  <td valign='top' width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"><zimg border="0" src="info.png"></td>
   <td>
     %%setup-txt-%s%%
     <br>

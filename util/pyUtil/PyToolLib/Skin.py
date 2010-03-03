@@ -190,6 +190,8 @@ def adjust_skin_luminosity():
   for scope in scope_l:
     gui = olx.gui_phil_handler.get_scope_by_name(scope)
     for object in gui.active_objects():
+      if object.is_scope:
+        continue
       try:
         data_type = object.type.phil_type
         if data_type == 'colour':
@@ -202,6 +204,7 @@ def adjust_skin_luminosity():
               OV.SetParam('%s.%s' %(scope,name), IT.adjust_colour(base_colour.rgb, luminosity = OV.GetParam('%s.%s_L' %(scope,name))))
           #print "%s.%s: %s" %(scope, name, OV.GetParam('%s.%s' %(scope,name)))
       except Exception, ex:
+        print ex
         pass
         #print "Something has gone wrong with SKIN adjust_skin_luminosity: %s" %ex
 

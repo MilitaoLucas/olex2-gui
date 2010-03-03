@@ -61,6 +61,29 @@ class FontInstances(ArgumentParser):
         "fontInstance":{}
           },
 
+      ##################################################### Verdana
+      "Gill":{
+        "font_src":(
+          r"GIL____.ttf",
+          r"%s/etc/gui/fonts/Vera.ttf" %self.basedir,
+          ),
+        "fontInstance":{}
+          },
+      "Gill Bold":{
+        "font_src":(
+          r"GILB____.ttf",
+          r"%s/etc/gui/fonts/VeraBd.ttf" %self.basedir,
+          ),
+        "fontInstance":{}
+          },
+      
+      "Verdana Italic":{
+        "font_src":(
+          r"GILI____.ttf",
+          r"%s/etc/gui/fonts/VeraBd.ttf" %self.basedir,
+          ),
+        "fontInstance":{}
+          },
       
       
       ##################################################### Vera

@@ -308,8 +308,8 @@ def make_help_box(args):
   str += r'''
 %s
 <!-- #include tool-top gui/blocks/help-top.htm;image=blank;1; -->
-<tr VALIGN='center' NAME=%s bgcolor="$getVar(gui_html_table_firstcol_colour)">
-  <td colspan=1 width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+<tr VALIGN='center' NAME=%s bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+  <td colspan=1 width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
   </td>
   <td>
     <font size='+2'>
@@ -320,7 +320,7 @@ def make_help_box(args):
   </td>
 </tr>
 <tr>
-  <td valign='top' width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+  <td valign='top' width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
   </td>
   <td>
     <font size='+1'>
@@ -329,7 +329,7 @@ def make_help_box(args):
   </td>
 </tr>
 <tr>
-  <td colspan=1 width="2" bgcolor="$getVar(gui_html_table_firstcol_colour)">
+  <td colspan=1 width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
   </td>
   <td align='right'>
     %s
@@ -398,7 +398,7 @@ def make_warning_html(colspan):
   html = '''
        <tr>
          %s
-         <td colspan="%s" bgcolor="$getVar(gui_html_highlight_colour)">
+         <td colspan="%s" bgcolor="$spy.GetParam(gui.html.highlight_colour)">
           <b>
             &nbsp;%s
           </b>
@@ -414,7 +414,7 @@ def make_table_first_col(help_name=None, popout=False, help_image='large'):
   else:
     help = make_help_href(help_name, popout, image=help_image)
   html ='''
-<td valign='top' width='2' align='center' bgcolor='$getVar(gui_html_table_firstcol_colour)'>
+<td valign='top' width='2' align='center' bgcolor='$spy.GetParam(gui.html.table_firstcol_colour)'>
   %s
 </td>
 ''' %help
@@ -447,7 +447,7 @@ def make_input_text_box(d):
 
   html = '''
 <input
-       bgcolor="$getVar(gui_html_input_bg_colour)"
+       bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
        type="text"
        name="%(ctrl_name)s"
        value="%(value)s"
@@ -464,8 +464,8 @@ def make_input_text_box(d):
 
 def make_combo_text_box(d):
   name = d.get('ctrl_name')
-  dic = {'height':"$GetVar(gui_html_combo_height)",
-         'bgcolor':'GetVar(gui_html_input_bg_colour)',
+  dic = {'height':"$spy.GetParam(gui.html.combo_height)",
+         'bgcolor':'$spy.GetParam(gui.html.input_bg_colour)',
          'value':'$spy.GetParam(%(varName)s)',
          'label':'',
          'valign':'center',
@@ -480,7 +480,7 @@ def make_combo_text_box(d):
 
   html = '''
 <input
-       bgcolor="$getVar(gui_html_input_bg_colour)"
+       bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
        type="combo"
        name="%(ctrl_name)s"
        value="%(value)s"
@@ -501,11 +501,11 @@ def make_combo_text_box(d):
 
 def make_tick_box_input(d):
   name = d.get('ctrl_name')
-  dic = {'height':'$GetVar(gui_html_checkbox_height)',
-         'bgcolor':'$GetVar(gui_html_table_bg_colour)',
-         'fgcolor':'$GetVar(gui_html_font_colour)',
+  dic = {'height':'$spy.GetParam(gui.html.checkbox_height)',
+         'bgcolor':'$spy.GetParam(gui.html.table_bg_colour)',
+         'fgcolor':'$spy.GetParam(gui.html.font_colour)',
          'value':'$spy.GetParam(%(varName)s)',
-         'width':'$GetVar(gui_html_checkbox_height)',
+         'width':'$spy.GetParam(gui.html.checkbox_height)',
          'onchange':'',
          'value':'%s '%name,
          'oncheck':'',
@@ -543,8 +543,8 @@ def make_tick_box_input(d):
 def make_spin_input(d):
   name = d.get('ctrl_name')
   dic = {'width':'12',
-         'height':'GetVar(gui_html_spin_height)',
-         'bgcolor':'GetVar(gui_html_input_bg_colour)',
+         'height':'$spy.GetParam(gui.html.spin_height)',
+         'bgcolor':'$spy.GetParam(gui.html.input_bg_colour)',
          'value':'$spy.GetParam(%(varName)s)',
          'max':'99',
          'min':'0',
@@ -579,8 +579,8 @@ def make_input_button(d):
          'onup':'',
          'onclick':'',
          'hint':'',
-         'height':"GetVar(gui_html_button_height)",
-         'bgcolor':"getVar(gui_html_input_bg_colour)",
+         'height':"$spy.GetParam(gui.html.button_height)",
+         'bgcolor':"$spy.GetParam(gui.html.input_bg_colour)",
          'valign':'center',
          'halign':'left'
          }
@@ -626,7 +626,7 @@ def format_help(string):
 
     for item in l:
       regex = re.compile(r"((?P<left>\W) (?P<txt>%s) (?P<right>\W))" %item, re.X)
-#      string = regex.sub(r"\g<left><font color='$getVar(gui_html_highlight_colour)'><b>\g<txt></b></font>\g<right>", string)
+#      string = regex.sub(r"\g<left><font color='$spy.GetParam(gui.html.highlight_colour)'><b>\g<txt></b></font>\g<right>", string)
       string = regex.sub(r"\g<left><b>\g<txt></b>\g<right>", string)
 
   ## find all occurances of strings between {{..}}. This will be translated into a dictionary and returned with the string.
@@ -651,7 +651,7 @@ def format_help(string):
 
   ## find all occurances of strings between t^..^t. These are the headers for tip of the day.
   regex = re.compile(r"t \^ (.*?)  \^ t", re.X)
-  string = regex.sub(r"<font color='$getVar(gui_html_highlight_colour)'><b>\1</b></font>&nbsp;", string)
+  string = regex.sub(r"<font color='$spy.GetParam(gui.html.highlight_colour)'><b>\1</b></font>&nbsp;", string)
 
   ## find all occurances of strings between <<..>>. These are keys to pressthe headers for tip of the day.
   regex = re.compile(r"<< (.*?)  >>", re.X)
@@ -663,11 +663,11 @@ def format_help(string):
 
   ## find all occurances of strings between l[]. These are links to help or tutorial popup boxes.
   regex = re.compile(r"l\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
-  string = regex.sub(r"<font size=+1 color='$getVar(gui_html_highlight_colour)'>&#187;</font><a target='Go to \g<linktext>' href='spy.make_help_box -name=\g<linkurl> -type=\g<linktype>'><b>\g<linktext></b></a>", string)
+  string = regex.sub(r"<font size=+1 color='$spy.GetParam(gui.html.highlight_colour)'>&#187;</font><a target='Go to \g<linktext>' href='spy.make_help_box -name=\g<linkurl> -type=\g<linktype>'><b>\g<linktext></b></a>", string)
 
   ## find all occurances of strings between gui[]. These are links make something happen on the GUI.
   regex = re.compile(r"gui\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
-  string = regex.sub(r"<font size=+1 color='$getVar(gui_html_highlight_colour)'>&#187;</font><a target='Show Me' href='\g<linkurl>'><b>\g<linktext></b></a>", string)
+  string = regex.sub(r"<font size=+1 color='$spy.GetParam(gui.html.highlight_colour)'>&#187;</font><a target='Show Me' href='\g<linkurl>'><b>\g<linktext></b></a>", string)
 
 
   ## find all occurances of strings between XX. These are command line entities.
@@ -699,7 +699,7 @@ def format_help(string):
   m = regex.findall(string)
   colour = "#232323"
   if m:
-    s = regex.sub(r"<tr bgcolor='$getVar(gui_html_table_firstcol_colour)'><td><b>\2</b></td></tr><tr><td>", string)
+    s = regex.sub(r"<tr bgcolor='$spy.GetParam(gui.html.table_firstcol_colour)'><td><b>\2</b></td></tr><tr><td>", string)
   else:
     s = string
 

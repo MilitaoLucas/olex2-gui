@@ -1,6 +1,6 @@
 gui {
   base_colour = #aaaaaa
-  logo_colour = #aaaaaa
+  logo_colour = #887777
   red = #aa0000
   orange = #ff740e
   green = #00aa00
@@ -17,7 +17,7 @@ gui {
     table_firstcol_colour = #e1e1e1
   }
   timage {
-    base_colour = #6464a0
+    base_colour = #888888
     grad_colour = #454570
     font_colour = #a4a4c7
     bg_colour_L = 0.8
@@ -38,14 +38,14 @@ gui {
       base_colour = #aaaaaa
       grad_colour = #767676
       font_colour = #ededed
-      height = 30
+      height = 26
       corner_rad = 3
-      grad_step = 0.2
+      grad_step = 0.3
       bg_colour_L = 0.7
       grad_colour_L = 0.7
       font_colour_L = 1.4
       font_size = 16
-      top = 6
+      top = 3
       rounded = "1100"
       arrows = "bar:top:3"
       off_L = 0.9
@@ -62,9 +62,14 @@ gui {
     }
     
     cbtn{
-      off_L = 1.35
+      height = 22
+      font_size = 14
+      top = 3
+      rounded = 0101
+      corner_rad = 2
+      arrows = "bar:right:18,arrow_right:onup:offdown"
     }
-
+    
     h1 {
       base_colour = #aaaaaa
       grad_colour = #dddddd

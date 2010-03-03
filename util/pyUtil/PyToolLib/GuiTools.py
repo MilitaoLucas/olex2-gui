@@ -298,7 +298,7 @@ class MakeGuiTools(object):
     name = r"blocks/tool-header"
     self.txt = []
     self.txt.append("<font color='#6f6f8b' size=")
-    self.txt.append("<!-- #cmd getVar(gui_html_font_size) -->")
+    self.txt.append("<!-- #cmd $spy.GetParam(gui.html.font_size) -->")
     self.txt.append(">\n<p>")
     self.write_tool(name)
 
@@ -545,7 +545,7 @@ oncheck="%(oncheck)s"
 onuncheck="%(onuncheck)s" 
 onup="%(onup)s" 
 ondown="%(ondown)s"
-bgcolor="$getVar(gui_html_input_bg_colour)" 
+bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
 image="%(image)s"
 %(readonly)s
 %(checked)s

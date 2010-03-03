@@ -14,11 +14,13 @@ gui {
     .type = colour
   red = #ff0000
     .type = colour
-  orange = #ff8f00
-    .type = colour
   green = #018F1E
     .type = colour
+  blue = #0033ff
+    .type = colour
   grey = #555555
+    .type = colour
+  orange = #ff8f00
     .type = colour
 
   xgrid {
@@ -133,7 +135,7 @@ gui {
         .type = float
       filefullinfo_size = 10
         .type = int
-      filefullinfo_colour = None
+      filefullinfo_colour = #ffffff
         .type = colour
       filefullinfo_colour_L = 1.5
         .type = float

@@ -95,17 +95,17 @@ gui {
       base_colour = None
       grad_colour = #095aa5
       grad_step = 0.9
-      height = 18
+      height = 20
       corner_rad = 0
       rounded = 1111
       font_size = None
       top = 1
-      left = 16
+      left = 26
       bg_colour_L = 1.7
       grad_colour_L = 1.8
       font_colour_L = 0.6
       font_colour = #FFFFFF
-      arrows = 'arrow'
+      arrows = "img:left:ragu_timage_img,char:on~:off+"
       off_L = 1.2
       shadow = True
     }  
