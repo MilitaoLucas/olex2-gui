@@ -36,43 +36,43 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
   </td>
   <td>
     <input
-    type="text"
-    name = "SET_SNUM_MASKS_RESOLUTION_FACTOR"
-    width="20%"
-    height="18"
-    label="%Res. factor%"
-    valign="center"
-    bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-    fgcolor="$spy.GetParam(gui.html.font_colour)"
-    value="$spy.GetParam(snum.masks.resolution_factor)"
-    onchange="spy.SetParam(snum.masks.resolution_factor,GetValue(SET_SNUM_MASKS_RESOLUTION_FACTOR))"
+      type="text"
+      name = "SET_SNUM_MASKS_RESOLUTION_FACTOR"
+      width="20%"
+      height="18"
+      label="%Res. factor%"
+      valign="center"
+      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      value="$spy.GetParam(snum.masks.resolution_factor)"
+      onleave="spy.SetParam(snum.masks.resolution_factor,GetValue(SET_SNUM_MASKS_RESOLUTION_FACTOR))"
     >
   </td>
   <td>
     <input
-    type="text"
-    name = "SET_SNUM_MASKS_SOLVENT_RADIUS"
-    width="20%"
-    height="18"
-    label="%Solvent rad.%/&Aring "
-    valign="center"
-    bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-    fgcolor="$spy.GetParam(gui.html.font_colour)"
-    value="$spy.GetParam(snum.masks.solvent_radius)"
-    onchange="spy.SetParam(snum.masks.solvent_radius,GetValue(SET_SNUM_MASKS_SOLVENT_RADIUS))"
+      type="text"
+      name = "SET_SNUM_MASKS_SOLVENT_RADIUS"
+      width="20%"
+      height="18"
+      label="%Solvent rad.%/&Aring "
+      valign="center"
+      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      value="$spy.GetParam(snum.masks.solvent_radius)"
+      onleave="spy.SetParam(snum.masks.solvent_radius,GetValue(SET_SNUM_MASKS_SOLVENT_RADIUS))"
     >
   </td>  <td>
     <input
-    type="text"
-    name = "SET_SNUM_MASKS_SHRINK_TRUNCATION_RADIUS"
-    width="20%"
-    height="18"
-    label="%Shrink trunc. rad.%/&Aring "
-    valign="center"
-    bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-    fgcolor="$spy.GetParam(gui.html.font_colour)"
-    value="$spy.GetParam(snum.masks.shrink_truncation_radius)"
-    onchange="spy.SetParam(snum.masks.shrink_truncation_radius,GetValue(SET_SNUM_MASKS_SHRINK_TRUNCATION_RADIUS))"
+      type="text"
+      name = "SET_SNUM_MASKS_SHRINK_TRUNCATION_RADIUS"
+      width="20%"
+      height="18"
+      label="%Shrink trunc. rad.%/&Aring "
+      valign="center"
+      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      value="$spy.GetParam(snum.masks.shrink_truncation_radius)"
+      onleave="spy.SetParam(snum.masks.shrink_truncation_radius,GetValue(SET_SNUM_MASKS_SHRINK_TRUNCATION_RADIUS))"
     >
   </td>
 
