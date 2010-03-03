@@ -1,0 +1,23 @@
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
+
+<!-- FIRST ROW -->
+<tr name=CURRENT_HISTORY_TREE VALIGN='center' ALIGN='left' >
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=History;1; -->
+  <td>
+    <input
+      noroot
+      editable
+      name="HISTORY_TREE"
+      type="tree"
+      src="history_tree.ind"
+      bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+      width="$eval(htmlpanelwidth()-50)"
+      height="200"
+      selected="$spy.GetParam(snum.history.current_node)"
+      onselect=""
+      onitem="spy.revert_history(html.getvalue(HISTORY_TREE))>>UpdateHtml"
+      onedit="spy.rename_history(html.getvalue(HISTORY_TREE),~label~)>>UpdateHtml"
+    >
+</td>
+</tr>
+<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
