@@ -2789,6 +2789,18 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     else:
       fill = '#ff0000'
 
+    if 'img' in arrows:
+      side = arrows.split('img:')[1].split(':')[0]
+      image_name = (arrows.split('img:')[1].split(',')[0].split(':')[1])
+      p = "%s/etc/skins/%s_%s.png" %(OV.BaseDir(), image_name, state)
+      if os.path.exists(p):
+        img = Image.open(p)
+        oSize = img.size
+        s = oSize[1]/image.size[1]
+        nSize = (int(oSize[0]/s), int(oSize[1]/s))
+        img = img.resize(nSize)
+        image.paste(img,(0,0))
+      
     if 'bar' in arrows:
       draw = ImageDraw.Draw(image)
       try:
