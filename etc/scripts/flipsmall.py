@@ -162,7 +162,7 @@ def process_insfile(flip_keywords,files,derived_info):
 
 #Process symmetry information from .ins-file if this is to be used and put this is temporary symcards.tmp file
     if ( flip_keywords['forcesymmetry'] == "yes" ):
-        if ( nsymm == 0 ):
+        if ( nsymm == 0 ) and not (derived_info["crsyst"]=="tric"):
            print " No symmetry information available "
            print " Calculation continues, but forcesymmetry is set to no"
 	   flip_keywords['forcesymmetry'] = "no"
