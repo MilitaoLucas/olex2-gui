@@ -25,8 +25,9 @@ def OlexMail(SendorNot=0):
   # I need to replace these with inbuilt olex2 functions such as usettings.dat path
   # and ErrorLog path
   recipients_address = "olex2pythonerrorlog@googlemail.com"
-  Olex2Path = "/home/xray/olex/" # these need to be inbuilt
-  ErrorLogPath = "/home/xray/.olexdata/0cde599287bbeeba7921594da41abef8/" # these need to be inbuilt
+  Olex2Path = "/home/xray/olexsvn/" # these need to be inbuilt
+  ErrorLogPath = "%s/" %OV.DataDir() # these need to be inbuilt
+  ErrorLogPath = ErrorLogPath.replace("\\\\", "\\")
   usettings = open("%s/usettings.dat"%(Olex2Path), 'r')
   email_address = ""
   mailserver = ""
