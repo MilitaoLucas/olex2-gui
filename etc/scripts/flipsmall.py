@@ -1,5 +1,5 @@
 #!/usr/bin/python2
-version = "160210"
+version = "040310"
 """
 =====================================================================
            Submit charge flipping phasing procedure
@@ -165,6 +165,7 @@ def process_insfile(flip_keywords,files,derived_info):
         if ( nsymm == 0 ):
            print " No symmetry information available "
            print " Calculation continues, but forcesymmetry is set to no"
+	   flip_keywords['forcesymmetry'] = "no"
            if ( flip_keywords['comments'] == 'yes' ): raw_input(" Press <RETURN> to continue")
         else:
            symcards = open("symcards.tmp", "w")
@@ -287,7 +288,7 @@ def generate_superflip_file(flip_keywords,files,derived_info):
 !          script written by: A. van der Lee, C. Dumas & L. Palatinus      !
 !  CF and map interpretation calculations by : L. Palatinus & G. Chapuis   ! 
 !       Palatinus, L. & Chapuis, G.(2007): J. Appl. Cryst. 40, 786-790     !
-!              http://superspace.epfl.ch/superflip                         !
+!              http://superspace.fzu.cz/superflip                         !
 !                                                                          !
 !                          python-script-version %s                    !
 ============================================================================
