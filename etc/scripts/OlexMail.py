@@ -22,11 +22,10 @@ def OlexMail(SendorNot=0):
     print "mailserver information as mailserver="
     print "In the usettings.dat file"
     return
-  # I need to replace these with inbuilt olex2 functions such as usettings.dat path
-  # and ErrorLog path
+  # These are just some variables for emailing
   recipients_address = "olex2pythonerrorlog@googlemail.com"
-  Olex2Path = "/home/xray/olexsvn/" # these need to be inbuilt
-  ErrorLogPath = "%s/" %OV.DataDir() # these need to be inbuilt
+  Olex2Path = olex.f("BaseDir()")
+  ErrorLogPath = "%s/" %OV.DataDir()
   ErrorLogPath = ErrorLogPath.replace("\\\\", "\\")
   usettings = open("%s/usettings.dat"%(Olex2Path), 'r')
   email_address = ""
@@ -74,5 +73,6 @@ def OlexMail(SendorNot=0):
   server = smtplib.SMTP(mailserver)
   server.sendmail(From, To, msg.as_string()) #Send away
   server.quit()
+  print "Your log file has been emailed to the Olex2 Team, thank you for your support"
   
 OV.registerFunction(OlexMail)
