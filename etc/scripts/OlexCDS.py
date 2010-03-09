@@ -169,7 +169,7 @@ def OlexCDS():
         if "hits for your search" in line_response:
           results_line = line_response
           #print "BinGO", results_line
-          # Example string name="hitfile" value="/cweb/1268049669.9312.cwje"
+          # Example string name="hitfile" value="/cweb/1268049669.9312.
           cds_hits_string = re.search(r'(?<=name\=\"hitfile\")*value\=\"/cweb/.*?\"', results_line)
           #print cds_hits_string
           #print cds_hits_string.group()
