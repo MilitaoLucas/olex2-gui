@@ -480,6 +480,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     from smtbx.ab_initio import charge_flipping
     from cctbx import maptbx
     from  libtbx.itertbx import izip
+    from libtbx import group_args
 
     t2 = time.time()
     print 'imports took %0.3f ms' %((t2-t1)*1000.0)
@@ -493,17 +494,28 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     f_obs.show_summary()
 
     # charge flipping iterations
-    flipping = charge_flipping.weak_reflection_improved_iterator(f_obs, delta=None)
+    flipping = charge_flipping.weak_reflection_improved_iterator(delta=None)
+
+    params = OV.Params().programs.solution.smtbx.cf
+    extra = group_args(
+      max_attempts_to_get_phase_transition\
+        = params.max_attempts_to_get_phase_transition,
+      max_attempts_to_get_sharp_correlation_map \
+        = params.max_attempts_to_get_sharp_correlation_map,
+      max_solving_iterations=params.max_solving_iterations)
+    if params.amplitude_type == 'E':
+      formula = {}
+      for element in str(olx.xf_GetFormula('list')).split(','):
+        element_type, n = element.split(':')
+        formula.setdefault(element_type, float(n))
+      extra.normalisations_for = lambda f: f.amplitude_normalisations(formula)
+
     solving = charge_flipping.solving_iterator(
       flipping,
+      f_obs,
       yield_during_delta_guessing=True,
       yield_solving_interval=solving_interval,
-      max_attempts_to_get_phase_transition=OV.GetParam(
-        'programs.solution.smtbx.cf.max_attempts_to_get_phase_transition'),
-      max_attempts_to_get_sharp_correlation_map=OV.GetParam(
-        'programs.solution.smtbx.cf.max_attempts_to_get_sharp_correlation_map'),
-      max_solving_iterations=OV.GetParam(
-        'programs.solution.smtbx.cf.max_solving_iterations'),
+      **extra.__dict__
     )
     charge_flipping_loop(solving, verbose=verbose)
     # play with the solutions
