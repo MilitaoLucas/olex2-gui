@@ -66,7 +66,6 @@ class History(ArgumentParser):
     else:
       tree.add_node(OV.HKLSrc(), self.filefull, filefull_lst)
     self.his_file = tree.active_node.name
-    print "His_file = %s" %self.his_file
     OV.SetParam('snum.history.current_node', tree.active_node.name)
     self._make_history_bars()
     self.saveHistory()

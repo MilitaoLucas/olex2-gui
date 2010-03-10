@@ -1,6 +1,6 @@
 gui {
   base_colour = #aaaaaa
-  logo_colour = #887777
+  logo_colour = #777777
   red = #aa0000
   orange = #ff740e
   green = #00aa00
@@ -102,6 +102,6 @@ gui {
   button_colouring = #dddddd
   button_writing = #777777
   tab_colour = #5563a4
-  grad_top_left = #1f3257
-  grad_top_right = #1f3257
+  grad_top_left = #000000
+  grad_top_right = #000000
 }
