@@ -1,5 +1,5 @@
 #!/usr/bin/python2
-version = "040310"
+version = "110310"
 """
 =====================================================================
            Submit charge flipping phasing procedure
@@ -53,6 +53,7 @@ normalize=no     ...... locally normalize the data (default yes)
 maxcycl=30000    ...... maximum number of cycles per trial (default 10000)
 forcesymmetry=yes...... use symmetry from Shelx-file, that should obviously be present (default no)
 weak=0.1         ...... fraction of reflections considered to be weak (default 0.2)
+ked=1.3          ...... user-defined flip-threshold delta=ked*sigma(map) (default: delta=auto)
 superposition=yes...... start with minimal superposition map (default no)
 edmacontinue=no  ...... continue if convergence is not detected (default no)
 comments=yes     ...... have intermediate stops to check results (default=yes)
@@ -303,15 +304,16 @@ crystal system           .......  %s
 merging space group      .......  %s
 
 ----------------  CF parameters used  -----------------
-weak threshold	         .......  %s
+flip threshold            ......  %s
+weak threshold	          ......  %s
 Biso                      ......  %s
 maximum cycles / trial    ......  %s
 normalize                 ......  %s
 number of trials          ......  %s
 superposition             ......  %s
 ----------------------------------------------------
-
-    """ % (files['insin'], files['hklin'], derived_info['flipcell'], derived_info['crsyst'], flip_keywords['SG'], flip_keywords['weak'], flip_keywords['biso'], 
+       
+    """ % (files['insin'], files['hklin'], derived_info['flipcell'], derived_info['crsyst'], flip_keywords['SG'], flip_keywords['ked'], flip_keywords['weak'], flip_keywords['biso'], 
        flip_keywords['maxcycl'], flip_keywords['normalize'], flip_keywords['trial'], flip_keywords['superposition']) 
 
     if ( flip_keywords['comments'] == 'yes' ): raw_input("\n Press <RETURN> to continue\n")       
@@ -360,6 +362,13 @@ dataformat       %s
 """ % ( flip_keywords['terminal'], flip_keywords['weak'], flip_keywords['biso'], flip_keywords['normalize'],
        flip_keywords['missing'], flip_keywords['maxcycl'], flip_keywords['trial'], 
        flip_keywords['derivesymmetry'], files['m81'], flip_keywords['dataformat']  ))
+
+    if ( flip_keywords['ked'] != "auto" ):
+       f.write("""
+
+delta %s sigma
+               
+	       """ % flip_keywords['ked'])
 
     if ( flip_keywords['superposition'] == "yes" ):
        f.write("""
@@ -689,7 +698,7 @@ def flipsmall (*args):
 flip_keywords=dict(weak=0.20, biso=2.5, maxcycl=10000, comments="yes", edmacontinue="no",
                    normalize="yes", merge="yes", forcesymmetry="no", trial="1", SG="1", missing="zero",
 		   derivesymmetry="use",dataformat="shelx",cleanup="yes",terminal='yes', logging='no', superposition='no', 
-		   sflipversion='superflip')
+		   sflipversion='superflip',ked='auto')
 # calculated and extracted info, from ins-file and logfile
 derived_info=dict(crsyst='tric', cell="9.0 9.0 9.0 90.0 90.0 90.0", flipcell="9.0 9.0 9.0 90.0 90.0 90.0",  
                   cellesd = "0.0 0.0 0.0 0.0 0.0 0.0", wavelength ="0.71073", sfac="C H O N",
