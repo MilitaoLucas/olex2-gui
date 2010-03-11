@@ -1,0 +1,40 @@
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
+
+<!-- FIRST ROW -->
+<tr name=MEAN_PLANE>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td>
+    <a target="%mpln-target%" href="gl.stereo(color)">
+      %Stereo% (%colour%)
+    </a>
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->  
+</tr>
+
+<!-- SECOND ROW -->
+<tr name=BEST_LINE>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td>
+    <a target="%line-target%" href="gl.stereo(anaglyph)">
+      %Stereo% (%anaglyph%)
+    </a>
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->  
+</tr>
+
+
+<!-- FIFTH ROW -->
+<tr name=DISTANCES_AND_ANGLES_WITH_ESD>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td>
+    <a target="%esd-target%" href="gl.stereo(false)">
+      %Normal View%
+    </a>
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->  
+</tr>
+
+<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
