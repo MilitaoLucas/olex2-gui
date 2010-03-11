@@ -590,7 +590,7 @@ programs {
       cf {
         amplitude_type = F *E quasi-E
           .type = choice
-        max_attempts_to_get_phase_transition = 2
+        max_attempts_to_get_phase_transition = 3
           .type = int
         max_attempts_to_get_sharp_correlation_map = 2
           .type = int
