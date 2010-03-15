@@ -3,6 +3,7 @@ OV = OlexFunctions()
 import sys
 import olex_gui
 import olx
+import olex
 import os
 import PilTools
 from ImageTools import ImageTools
@@ -227,6 +228,8 @@ def SetMaterials():
   olx.SetMaterial("XGrid.+Surface %s" %OV.GetParam('gui.xgrid.positive_surface_material'))
   olx.SetMaterial("XGrid.-Surface %s" %OV.GetParam('gui.xgrid.negative_surface_material'))
   olx.HtmlPanelWidth(OV.GetParam('gui.htmlpanelwidth'))
+  #olex.m("lines %s" %OV.GetParam('gui.lines_of_cmd_text'))
+
 
 
 def load_user_gui_phil():

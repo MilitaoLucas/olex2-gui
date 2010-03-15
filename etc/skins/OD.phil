@@ -9,6 +9,7 @@ gui {
     name = "OD"
     logo_name = etc/skins/OD.png
   }
+
   html {
     base_colour = #b6b6b6
     font_colour = #222244
