@@ -326,7 +326,8 @@ gui {
         .type = bool
     }
   }
-
+  lines_of_cmd_text = 10
+    .type = str
   button_colouring = #ababab
     .type = colour
   button_writing = #00ff00
