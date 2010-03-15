@@ -178,6 +178,10 @@ parser.add_option('--alpha',
 		  dest='alpha',
 		  action='store_true',
 		  help='whether to use the normal or the tag-alpha web directory')
+parser.add_option('--revert',
+		  dest='revert',
+		  action='store_true',
+		  help='whether to revert vs promoting a distribution')
 parser.add_option('-f', '--file',
 		  dest='update_file',
                   default='',
@@ -220,14 +224,19 @@ def is_distro_uptodate(src, dest):
   dest_mt = os.path.getmtime(dest)
   return src_mt - dest_mt < 5 # 5 seconds
   
-def promote_distro(src, dest):
+def promote_distro(src, dest, forward=True):
   if not os.path.exists(src):
     print "Source distribution does not exist, exiting..."
     sys.exit(0)
   if os.path.exists(dest): 
-    if is_distro_uptodate(src, dest):
-      print 'Destination repository is newer than the source one or up-to-date, exiting'
-      sys.exit(0)
+    if forward:
+      if is_distro_uptodate(src, dest):
+        print 'Destination repository is newer than the source one or up-to-date, exiting'
+        sys.exit(0)
+    else:
+      if is_distro_uptodate(dest, src):
+        print 'Destination repository is older than the source one or up-to-date, exiting'
+        sys.exit(0)
     shutil.rmtree(dest)
     shutil.copytree(src, dest)
   else:
@@ -259,12 +268,20 @@ def promote_distro(src, dest):
   update_tags_file(src)
   sys.exit(0)
 # do the promotion of alpha->beta->release, only alpha can be re-released
-if option.beta: 
-  print 'Promoting alpha distro to beta'
-  promote_distro(web_directory + '-alpha', web_directory + '-beta')
+if option.beta:
+  if option.revert:
+    print 'Reverting release distro to beta'
+    promote_distro(web_directory, web_directory + '-beta')
+  else:
+    print 'Promoting alpha distro to beta'
+    promote_distro(web_directory + '-alpha', web_directory + '-beta')
 elif option.alpha: 
-  web_directory += '-alpha'
-  print 'Creating alpha distro...'
+  if option.revert:
+    print 'Reverting beta distro to alpha'
+    promote_distro(web_directory+ '-beta', web_directory + '-alpha', forward=False)
+  else:
+    web_directory += '-alpha'
+    print 'Creating alpha distro...'
 else:
   if not is_distro_uptodate(web_directory + '-alpha', web_directory + '-beta'):
     print 'Beta distro is not up-to-date, aborting'
