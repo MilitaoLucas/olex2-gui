@@ -588,7 +588,7 @@ programs {
   solution {
     smtbx {
       cf {
-        amplitude_type = F *E quasi-E
+        amplitude_type = F E *quasi-E
           .type = choice
         max_attempts_to_get_phase_transition = 3
           .type = int
