@@ -1253,6 +1253,9 @@ def GetACF():
     print "You need to update Olex2 to at least version 1.0"
     return
 
+  if not OV.IsPluginInstalled('Headless'):
+    olex.m("installplugin Headless")
+  
   updateACF()
   use_new = True
   if use_new:
