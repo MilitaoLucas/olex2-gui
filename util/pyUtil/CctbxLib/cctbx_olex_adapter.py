@@ -509,6 +509,8 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         element_type, n = element.split(':')
         formula.setdefault(element_type, float(n))
       extra.normalisations_for = lambda f: f.amplitude_normalisations(formula)
+    elif params.amplitude_type == 'quasi-E':
+      extra.normalisations_for = charge_flipping.amplitude_quasi_normalisations
 
     solving = charge_flipping.solving_iterator(
       flipping,
