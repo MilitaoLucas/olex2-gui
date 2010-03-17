@@ -2,7 +2,7 @@
 
 """ Olex 2 distro management """
 # these to specify to created separate zip files
-plugins = ('MySQL', 'ODSkin', 'BNSkin', 'STOESkin', 'HPSkin', 'XRMSkin', 'Batch', 'Crypto', 'ODAC', 'Headless', 'Olex2Portal') 
+plugins = ('MySQL', 'Batch', 'Crypto', 'ODAC', 'Headless', 'Olex2Portal') 
 #available ports
 # alteartions for binary files : name (properties...), olex-port MUST be specified for non-portable files
 mac_port_name = 'port-mac-intel-py26'
