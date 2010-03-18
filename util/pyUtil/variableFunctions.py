@@ -127,6 +127,13 @@ def get_user_phil():
   else:
     return None
 
+def get_custom_phil():
+  custom_phil_file = "%s/custom.phil" %OV.DataDir()
+  if os.path.isfile(custom_phil_file):
+    return custom_phil_file
+  else:
+    return None
+  
 def LoadParams():
   # snum params
   master_phil = phil_interface.parse(file_name="%s/params.phil" %OV.BaseDir())
@@ -136,6 +143,9 @@ def LoadParams():
   user_phil = get_user_phil()
   if user_phil:
     phil_handler.update(phil_file=user_phil)
+  custom_phil = get_custom_phil()
+  if custom_phil:
+    phil_handler.update(phil_file=custom_phil)
   olx.phil_handler = phil_handler
   # gui params
   master_gui_phil = phil_interface.parse(file_name="%s/gui.params" %OV.BaseDir())
