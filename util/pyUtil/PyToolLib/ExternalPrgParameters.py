@@ -1,7 +1,7 @@
 # ExternalPrgParameters.py
 # -*- coding: latin-1 -*-
 
-import sys
+import os, sys
 import olx
 import olex
 import olex_core
@@ -288,6 +288,9 @@ class Method_refinement(Method):
     if RunPrgObject.params.snum.auto_hydrogen_naming:
       olx.FixHL()
 
+  def post_refinement(self, RunPrgObject):
+    pass
+
 
 class Method_shelx(Method):
 
@@ -376,7 +379,39 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
   """Inherits methods specific to shelx refinement programs
   """
 
+  def __init__(self, phil_object):
+    Method.__init__(self, phil_object)
+    self.original_hklsrc = None
+
   def pre_refinement(self, RunPrgObject):
+    if OV.GetParam("snum.refinement.use_solvent_mask"):
+      import cctbx_olex_adapter
+      from smtbx import masks
+      from libtbx import easy_pickle
+      #from iotbx.shelx import hklf
+      filepath = OV.StrDir()
+      self.original_hklsrc = OV.HKLSrc()
+      modified_intensities = None
+      if OV.GetParam("snum.refinement.recompute_mask_before_refinement"):
+        cctbx_olex_adapter.OlexCctbxMasks()
+        if olx.current_mask.flood_fill.n_voids() > 0:
+          f_mask = olx.current_mask.f_mask()
+          f_model = olx.current_mask.f_model()
+          modified_intensities = olx.current_mask.modified_intensities()
+      elif os.path.exists("%s/f_mask.pickle" %filepath):
+        f_mask = easy_pickle.load("%s/f_mask.pickle" %filepath)
+        f_model = easy_pickle.load("%s/f_model.pickle" %filepath)
+        cctbx_adapter = cctbx_olex_adapter.OlexCctbxAdapter()
+        fo2 = cctbx_adapter.reflections.f_sq_obs_filtered
+        modified_intensities = masks.modified_intensities(fo2, f_model, f_mask)
+      if modified_intensities is not None:
+        modified_hkl_path = "%s/%s_modified.hkl" %(OV.FilePath(), OV.FileName())
+        file_out = open(modified_hkl_path, 'w')
+        modified_intensities.export_as_shelx_hklf(file_out)
+        file_out.close()
+        OV.HKLSrc(modified_hkl_path)
+      else:
+        print "No mask present"
     diffrn_ambient_temperature = OV.GetParam('snum.metacif.diffrn_ambient_temperature')
     if diffrn_ambient_temperature is not None:
       if '(' in diffrn_ambient_temperature:
@@ -391,6 +426,10 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       except ValueError:
         pass
     Method_refinement.pre_refinement(self, RunPrgObject)
+
+  def post_refinement(self, RunPrgObject):
+    if self.original_hklsrc is not None:
+      OV.HKLSrc(self.original_hklsrc)
 
   def observe(self, RunPrgObject):
     import Analysis
