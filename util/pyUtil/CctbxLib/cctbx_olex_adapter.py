@@ -1,6 +1,6 @@
 from __future__ import division
 
-import sys
+import os, sys
 import olx
 import OlexVFS
 import time
@@ -19,7 +19,8 @@ import olex
 import olex_xgrid
 import time
 import cctbx_controller as cctbx_controller
-from cctbx import uctbx
+from cctbx import maptbx, miller, uctbx
+from libtbx import easy_pickle
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
@@ -300,45 +301,44 @@ class FullMatrixRefine(OlexCctbxRefine):
   def run(self):
     from smtbx.refinement import least_squares
     wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
+
+    filepath = OV.StrDir()
+    self.f_mask = None
+    if OV.GetParam("snum.refinement.use_solvent_mask"):
+      if OV.GetParam("snum.refinement.recompute_mask_before_refinement"):
+        OlexCctbxMasks()
+        if olx.current_mask.flood_fill.n_voids() > 0:
+          self.f_mask = olx.current_mask.f_mask()
+      elif os.path.exists("%s/f_mask.pickle" %filepath):
+        self.f_mask = easy_pickle.load("%s/f_mask.pickle" %filepath)
+      if self.f_mask is None:
+        print "No mask present"
     normal_eqns = least_squares.normal_equations(
       self.xray_structure(), self.reflections.f_sq_obs_filtered,
+      f_mask=self.f_mask,
       weighting_scheme="default")
     objectives = []
     scales = []
-
-    use_old = False
-    if use_old:
-      for i in range (self.max_cycles):
+    for i in range (self.max_cycles):
+      try:
         normal_eqns.build_up()
-        objectives.append(normal_eqns.objective)
-        scales.append(normal_eqns.scale_factor)
+      except RuntimeError, e:
+        if str(e).startswith("cctbx::adptbx::debye_waller_factor_exp: max_arg exceeded"):
+          print "Refinement failed!"
+        break
+      objectives.append(normal_eqns.objective)
+      scales.append(normal_eqns.scale_factor)
+      try:
         normal_eqns.solve_and_apply_shifts()
+      except RuntimeError, e:
+        if "SCITBX_ASSERT(!chol.failure) failure" in str(e):
+          print "Cholesky failure"
+        print e
+        break
+      finally:
         shifts = normal_eqns.shifts
         self.feed_olex()
         self.scale_factor = scales[-1]
-      self.post_peaks(self.f_obs_minus_f_calc_map(0.4), max_peaks=self.max_peaks)
-      sys.stdout.refresh = True
-
-    else:
-      for i in range (self.max_cycles):
-        try:
-          normal_eqns.build_up()
-        except RuntimeError, e:
-          if str(e).startswith("cctbx::adptbx::debye_waller_factor_exp: max_arg exceeded"):
-            print "Refinement failed!"
-        objectives.append(normal_eqns.objective)
-        scales.append(normal_eqns.scale_factor)
-        try:
-          normal_eqns.solve_and_apply_shifts()
-        except RuntimeError, e:
-          if "SCITBX_ASSERT(!chol.failure) failure" in str(e):
-            print "Cholesky failure"
-          print e
-          break
-        finally:
-          shifts = normal_eqns.shifts
-          self.feed_olex()
-          self.scale_factor = scales[-1]
 
       self.post_peaks(self.f_obs_minus_f_calc_map(0.4), max_peaks=self.max_peaks)
       sys.stdout.refresh = True
@@ -378,18 +378,25 @@ class FullMatrixRefine(OlexCctbxRefine):
     #olx.Sel('-u')
     olx.xf_EndUpdate()
 
+  def f_model(self, miller_set):
+    f_model = miller_set.structure_factors_from_scatterers(
+      self.xray_structure(),
+      algorithm="direct",
+      cos_sin_table=True).f_calc()
+    if self.f_mask is not None:
+      f_model, f_mask = f_model.common_sets(self.f_mask)
+      f_model = miller.array(miller_set=miller_set,
+                            data=(f_model.data() + f_mask.data()))
+    return f_model
+
   def f_obs_minus_f_calc_map(self, resolution):
     import math
-    f_sq_obs = self.reflections.f_sq_obs
+    f_sq_obs = self.reflections.f_sq_obs_filtered
     f_sq_obs = f_sq_obs.eliminate_sys_absent().average_bijvoet_mates()
     f_obs = f_sq_obs.f_sq_as_f()
-    sf = xray.structure_factors.from_scatterers(
-      miller_set=f_obs,
-      cos_sin_table=True
-    )
-    f_calc = sf(self.xray_structure(), f_obs).f_calc()
+    f_calc = self.f_model(f_obs)
     if self.scale_factor is None:
-      k = f_obs.quick_scale_factor_approximation(f_calc, cutoff_factor=0)
+      k = f_obs.scale_factor(f_calc)
     else:
       k = math.sqrt(self.scale_factor)
     f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1./k, f_calc)
@@ -425,11 +432,7 @@ class FullMatrixRefine(OlexCctbxRefine):
     olx.Refresh()
 
   def calculate_residuals(self, f_obs):
-    sf = xray.structure_factors.from_scatterers(
-      miller_set=f_obs,
-      cos_sin_table=True
-    )
-    f_calc = sf(self.xray_structure(), f_obs).f_calc()
+    f_calc = self.f_model(f_obs)
     ls_function = xray.unified_least_squares_residual(f_obs)
     ls = ls_function(f_calc, compute_derivatives=False)
     k = ls.scale_factor()
@@ -438,7 +441,7 @@ class FullMatrixRefine(OlexCctbxRefine):
     return flex.abs(k*fc - fo)
 
   def R1(self, all_data=False):
-    f_obs = self.reflections.f_sq_obs_merged.f_sq_as_f()
+    f_obs = self.reflections.f_sq_obs_filtered.f_sq_as_f()
     if not all_data:
       strong = f_obs.data() > 4*f_obs.sigmas()
       f_obs = f_obs.select(strong)
@@ -447,11 +450,7 @@ class FullMatrixRefine(OlexCctbxRefine):
 
   def wR2_and_GooF(self):
     f_sq_obs = self.reflections.f_sq_obs_merged
-    sf = xray.structure_factors.from_scatterers(
-      miller_set=f_sq_obs,
-      cos_sin_table=True
-    )
-    f_calc = sf(self.xray_structure(), f_sq_obs).f_calc()
+    f_calc = self.f_model(f_sq_obs)
     ls_function = xray.unified_least_squares_residual(
       f_sq_obs,
       #weighting=xray.weighting_schemes.shelx_weighting()
@@ -571,7 +570,21 @@ class OlexCctbxMasks(OlexCctbxAdapter):
 
     if recompute in ('false', 'False'): recompute = False
 
-    if recompute or olx.current_mask is None:
+    map_type = self.params.type
+    filepath = OV.StrDir()
+    pickle_path = '%s/%s.pickle' %(filepath, map_type)
+    if os.path.exists(pickle_path):
+      data = easy_pickle.load(pickle_path)
+      crystal_gridding = maptbx.crystal_gridding(
+        unit_cell=self.xray_structure().unit_cell(),
+        space_group_info=self.xray_structure().space_group_info(),
+        d_min=self.reflections.f_sq_obs_filtered.d_min(),
+        resolution_factor=self.params.resolution_factor,
+        symmetry_flags=sgtbx.search_symmetry_flags(
+          use_space_group_symmetry=True))
+    else: data = None
+
+    if recompute or data is None:
       xs = self.xray_structure()
       fo_sq = self.reflections.f_sq_obs_filtered.average_bijvoet_mates()
       mask = masks.mask(xs, fo_sq)
@@ -585,24 +598,29 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       f_mask = mask.structure_factors()
       self.time_f_mask.stop()
       olx.current_mask = mask
+      if mask.flood_fill.n_voids() > 0:
+        easy_pickle.dump('%s/mask.pickle' %filepath, mask.mask.data)
+        easy_pickle.dump('%s/f_mask.pickle' %filepath, mask.f_mask())
+        easy_pickle.dump('%s/f_model.pickle' %filepath, mask.f_model())
+      mask.show_summary()
     else:
       mask = olx.current_mask
-      f_mask = mask.f_mask()
-    f_model = mask.f_model()
     if self.params.type == "mask":
-      output_data = mask.mask.data
-    elif self.params.type == "f_mask":
-      model_map = miller.fft_map(mask.crystal_gridding, f_mask)
-      output_data = model_map.apply_volume_scaling().real_map()
-    elif self.params.type == "f_model":
-      model_map = miller.fft_map(mask.crystal_gridding, f_model)
+      if data: output_data = data
+      else: output_data = mask.mask.data
+    else:
+      if not data:
+        crystal_gridding = mask.crystal_gridding
+        if self.params.type == "f_mask":
+          data = mask.f_mask()
+        elif self.params.type == "f_model":
+          data = mask.f_model()
+      model_map = miller.fft_map(crystal_gridding, data)
       output_data = model_map.apply_volume_scaling().real_map()
     self.time_write_grid = time_log("write grid").start()
     if mask.flood_fill.n_voids() > 0:
       write_grid_to_olex(output_data)
     self.time_write_grid.stop()
-    self.mask = mask
-    mask.show_summary()
 
   def __del__(self):
     OV.DeleteBitmap("working")

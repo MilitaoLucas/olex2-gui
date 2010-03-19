@@ -122,7 +122,6 @@ class RunPrg(ArgumentParser):
     if not os.path.exists(copy_to):
       olx.file_Copy(copy_from, copy_to)
     copy_from = "%s/%s.ins" %(self.filePath, self.curr_file)
-#    copy_from = copy_from.lower() # This breaks under Linux if the directory is also case sensitive
     copy_to = "%s/%s.ins" %(self.tempPath, self.shelx_alias)
     if not os.path.exists(copy_to):
       olx.file_Copy(copy_from, copy_to)
@@ -342,6 +341,7 @@ class RunRefinementPrg(RunPrg):
       self.doAutoTidyAfter()
       OV.File()
     self.isInversionNeeded()
+    self.method.post_refinement(self)
 
   def doHistoryCreation(self):
     R1 = 0

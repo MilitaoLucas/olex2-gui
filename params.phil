@@ -38,6 +38,10 @@ snum {
       .expert_level = 1
     Z_prime = 1.0
       .type = float(value_min=0.0)
+    use_solvent_mask = False
+      .type = bool
+    recompute_mask_before_refinement = False
+      .type = bool
 
     auto {
       max_peaks = False
@@ -405,7 +409,7 @@ snum {
       .type = float
     shrink_truncation_radius = 1.2
       .type = float
-    resolution_factor = 1./3
+    resolution_factor = 1/4
       .type = float
   }
 
