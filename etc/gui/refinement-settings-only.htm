@@ -16,9 +16,9 @@
   <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
   <td width='50%' align='left' colspan=2>
     <b>Refinement Method</b>
-  </td>	
+  </td>
   <td VALIGN='center' colspan='2' align="right">
-    <font size='2'> 
+    <font size='2'>
 
 <!-- #include method gui\snippets\snippet-method.htm;scope=snum;prg_type=refinement;1; -->
 
@@ -56,7 +56,7 @@
       >
     </font>
   </td>
-</tr>	
+</tr>
 
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_MAX_PEAKS'>
   <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
@@ -98,8 +98,8 @@ target = "Do automatic tidying once - tick the box to do it after every refineme
 >Autotidy
   </a>
   </b>
-  <a 
-    href="spy.make_help_box -name='refinement-settings-h3-autotidy-settings' -popout='True'" 
+  <a
+    href="spy.make_help_box -name='refinement-settings-h3-autotidy-settings' -popout='True'"
     target="Help me with this">
     <zimg border="0" src="info.png">
   </a>
@@ -138,8 +138,61 @@ target = "Do automatic tidying once - tick the box to do it after every refineme
         name='SNUM_REFINEMENT_GRAPHICAL_OUTPUT'
         checked="$spy.GetParam(snum.refinement.graphical_output)"
         oncheck='spy.SetParam(snum.refinement.graphical_output,true)'
-        onuncheck='spy.SetParam(snum.refinement.graphical_output,false)>>spy.reset_file_in_OFS(refinement_image.htm)>>UpdateHtml' 
+        onuncheck='spy.SetParam(snum.refinement.graphical_output,false)>>spy.reset_file_in_OFS(refinement_image.htm)>>UpdateHtml'
         value=''
+      >
+    </font>
+  </td>
+</tr>
+
+<tr VALIGN="center" ALIGN="left" NAME="USE_SOLVENT_MASK">
+  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td VALIGN="center"  colspan=3>
+    <b>
+      Use solvent mask
+    </b>
+  </td>
+  <td VALIGN="center" ALIGN="right"  colspan=1>
+    <font size="2">
+      <input
+        type="checkbox"
+        width="$spy.GetParam(gui.html.checkbox_width)"
+        height="$spy.GetParam(gui.html.checkbox_height)"
+        fgcolor="$spy.GetParam(gui.html.font_colour)"
+        bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+        name="SNUM_REFINEMENT_USE_SOLVENT_MASK"
+        checked="$spy.GetParam(snum.refinement.use_solvent_mask)"
+        oncheck="spy.SetParam(snum.refinement.use_solvent_mask,true)"
+        onuncheck="spy.SetParam(snum.refinement.use_solvent_mask,false)"
+        value=""
+      >
+    </font>
+  </td>
+</tr>
+
+<tr VALIGN="center" ALIGN="left" NAME="RECOMPUTE_MASK_BEFORE_REFINEMENT">
+  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td VALIGN="center"  colspan=3>
+    <b>
+      Recompute mask before refinement
+    </b>
+  </td>
+  <td VALIGN="center" ALIGN="right"  colspan=1>
+    <font size="2">
+      <input
+        type="checkbox"
+        width="$spy.GetParam(gui.html.checkbox_width)"
+        height="$spy.GetParam(gui.html.checkbox_height)"
+        fgcolor="$spy.GetParam(gui.html.font_colour)"
+        bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+        name="SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT"
+        checked="$spy.GetParam(snum.refinement.recompute_mask_before_refinement)"
+        oncheck="
+spy.SetParam(snum.refinement.use_solvent_mask,true)>>
+spy.SetParam(snum.refinement.recompute_mask_before_refinement,true)>>
+UpdateHtml"
+        onuncheck="spy.SetParam(snum.refinement.recompute_mask_before_refinement,false)"
+        value=""
       >
     </font>
   </td>
