@@ -200,8 +200,8 @@ def OlexCDS():
                                         r' action="https://cds.dl.ac.uk/cgi-bin/cweb/\g<action>"',
                                         search_results_fix_grpahic)
             # Here we need to change the path information for action="" for all actions to include the cds URL
-            #CDS_res = open('%s/%s_CDS.html' %(OV.FilePath(), OV.FileName()), 'w')
-            CDS_res = open('test_CDS.html', 'w')
+            CDS_res = open('%s/%s_CDS.html' %(OV.FilePath(), OV.FileName()), 'w')
+            #CDS_res = open('test_CDS.html', 'w')
             CDS_res.write("%s"%search_results_out)
             CDS_res.close()
             olx.Shell('%s/%s_CDS.html' %(OV.FilePath(), OV.FileName()))
