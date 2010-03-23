@@ -1135,6 +1135,75 @@ def check_for_crypto():
     #import olex
     #olex.m(r"InstallPlugin ODAC")
 
+def make_url_call(url, values):
+  #url = "http://www.olex2.org/odac/update"
+  data = urllib.urlencode(values)
+  print data
+  try:
+    req = urllib2.Request(url)
+    response = urllib2.urlopen(req,data)
+    f = response.read()
+  except:
+    print "\n++++++++++++++++++++++++++++++++++++++++++++++"
+    print "+ Could not reach update server at www.olex2.org"
+    print "+ --------------------------------------------"
+    print "+ Please make sure your computer is online"
+    print "+ and that you can reach www.olex2.org"
+    print "++++++++++++++++++++++++++++++++++++++++++++++\n"
+    return False
+  return f
+    
+def register_new_odac(username=None, pwd=None):
+  OV.Cursor("Please wait while AutoChem will be installed")
+  mac_address = OV.GetMacAddress()[0]
+  computer_name = os.getenv('COMPUTERNAME')
+  url = "http://www.olex2.org/odac/register_new"
+  olex2_tag = OV.GetTag()
+  if not username:
+    print("Please provide a username and password")
+    OV.Cursor()
+    return
+  if not pwd:
+    print("Please provide a username and password")
+    OV.Cursor()
+    return
+  values = {'__ac_password':pwd,
+            '__ac_name':username,
+            'olex2Tag':olex2_tag,
+            'computerName':computer_name,
+            'username':username,
+            'macAddress':mac_address
+            }
+  f = make_url_call(url, values)
+  
+  if not f:
+    print "Please provide a valid username and password, and make sure your computer is online."
+    return
+  p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], olex2_tag)
+  if not os.path.exists(p):
+    os.mkdir(p)
+  cont = GetHttpFile(f, force=True, fullURL = True)
+  if cont:
+    name = "AutoChem Installer.exe"
+    wFile = open("%s/%s" %(p, name),'wb')
+    wFile.write(cont)
+    wFile.close()
+  ins = "%s/AutoChem Installer.exe" %p
+  cmd = r"%s /S" %ins
+#  print cmd
+  Popen(cmd, shell=False, stdout=PIPE).stdout
+  for i in xrange(10):
+    try:
+      os.remove(ins)
+      break
+    except:
+      time.sleep(5)
+  print "AutoChem is now installed on your machine."
+  print "Please restart Olex2 now."
+  OV.Cursor()
+  
+OV.registerFunction(register_new_odac)
+
 def updateACF(force=False):
   rFile = open(r"%s/util/pyUtil/PluginLib/odac_update.txt" %OV.BaseDir())
   txt = rFile.read()
@@ -1145,7 +1214,7 @@ def updateACF(force=False):
     print "No update required"
     return
   print "Now Updating..."
-
+  
   mac_address = OV.GetMacAddress()
   username, computer_name = OV.GetUserComputerName()
   keyname = getKey()

@@ -1609,6 +1609,19 @@
   \>
 \>
 
+<getAutoChem help="Get AutoChem"
+  <body
+    <args
+      <arg1 name="username" def="">
+      <arg1 name="password" def="">
+    \>
+    <cmd
+      <cmd1 'spy.register_new_odac(%1,%2)'>
+    \>
+  \>
+\>
+
+
 
 <link_parts_occupancies_with help="link parts and occupancies with chosen restraint"
   <body
