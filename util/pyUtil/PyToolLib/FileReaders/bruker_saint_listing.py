@@ -4,11 +4,12 @@ class reader:
   def __init__(self, path):
     """Reads the *m._ls merging listing file with the given path.
 
-    Returns a dictionary of cif items found in the *.cif file."""
+    Returns a dictionary of cif items found in the *m._ls file."""
 
     self._cifItems = {}
     rFile = open(path, 'r')
     lines = [line.strip() for line in rFile]
+    rFile.close()
     two_theta_min = 0
     two_theta_max = 0
     used = 0
@@ -25,7 +26,7 @@ class reader:
       elif "Range of reflections used:" in li:
         info = lines[i+2].split()
         two_theta_min = float(info[-2].strip())
-        two_theta_max = float(info[-1].strip)
+        two_theta_max = float(info[-1].strip())
         best = info[1].strip()
         worst = info[0].strip()
       elif "Orientation least squares, component" in li:
