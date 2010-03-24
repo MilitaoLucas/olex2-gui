@@ -1178,10 +1178,12 @@ def register_new_odac(username=None, pwd=None):
   
   if not f:
     print "Please provide a valid username and password, and make sure your computer is online."
+    print "You may also have used up the numbr of allowable installs."
     return
   p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], olex2_tag)
   if not os.path.exists(p):
-    os.mkdir(p)
+    os.makedirs(p)
+    
   cont = GetHttpFile(f, force=True, fullURL = True)
   if cont:
     name = "AutoChem Installer.exe"
@@ -1198,7 +1200,7 @@ def register_new_odac(username=None, pwd=None):
       break
     except:
       time.sleep(5)
-  print "AutoChem is now installed on your machine."
+  print "AutoChem is now installed on your computer."
   print "Please restart Olex2 now."
   OV.Cursor()
   
