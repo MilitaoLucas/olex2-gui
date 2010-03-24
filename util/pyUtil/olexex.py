@@ -180,7 +180,7 @@ class OlexRefinementModel(object):
       name = str(atom['label'])
       element_type = str(atom['type'])
       xyz = atom['crd'][0]
-      occu = atom['occu']
+      occu = atom['occu'][0]
       adp = atom.get('adp',None)
       if adp is None:
         uiso = atom.get('uiso')[0]
@@ -215,16 +215,16 @@ class OlexRefinementModel(object):
     return [self._cell[param][0] for param in ('a','b','c','alpha','beta','gamma')]
 
   def numberAtoms(self):
-    return sum(atom['occu'] for atom in self.atoms())
+    return sum(atom['occu'][0] for atom in self.atoms())
 
   def number_non_hydrogen_atoms(self):
-    return sum(atom['occu'] for atom in self.atoms() if atom['type'] not in ('H','Q'))
+    return sum(atom['occu'][0] for atom in self.atoms() if atom['type'] not in ('H','Q'))
 
   def currentFormula(self):
     curr_form = {}
     for atom in self.atoms():
       atom_type = atom['type']
-      atom_occu = atom['occu']
+      atom_occu = atom['occu'][0]
       curr_form.setdefault(atom_type, 0)
       curr_form[atom_type] += atom_occu
     return curr_form
