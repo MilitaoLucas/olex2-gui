@@ -1296,31 +1296,6 @@
 \>
 
 
-<odac help="Launches ac_run"
-  <body
-    <args
-      <arg2 name="single" def="-s">
-      <arg2 name="single" def="-fc">
-    \>
-    <cmd
-      <cmd5 "cursor(busy,'Starting ODAC with File Config')">
-      <cmd6 "spy.runODAC('spy.ac_run solveit %1 %2)'">
-    \>
-  \>
-\>
-
-<odac_config help='Opens the config file'
-  <body
-    <args
-      <arg1 name="filname" def="custom">
-    \>
-    <cmd
-      <cmd1 "exec -o getvar(defeditor) 'BaseDir()/util/pyUtil/PluginLib/plugin-AutoChem/autochem_config.txt'">
-    \>
-  \>
-\>
-
-
 
 
 <odemo help="Launches OD Demo"
