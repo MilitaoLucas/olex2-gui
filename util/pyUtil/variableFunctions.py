@@ -133,7 +133,7 @@ def get_custom_phil():
     return custom_phil_file
   else:
     return None
-  
+
 def LoadParams():
   # snum params
   master_phil = phil_interface.parse(file_name="%s/params.phil" %OV.BaseDir())
@@ -213,8 +213,12 @@ def SaveUserParams():
 OV.registerFunction(SaveUserParams)
 
 def EditParams(scope_name="", expert_level=0, attributes_level=0):
+  if scope_name.startswith("gui"):
+    handler = olx.gui_phil_handler
+  else:
+    handler = olx.phil_handler
   try:
-    output_phil = olx.phil_handler.get_scope_by_name(scope_name)
+    output_phil = handler.get_scope_by_name(scope_name)
     original_name = output_phil.name
     output_phil.name = scope_name
   except KeyError:
@@ -224,7 +228,7 @@ def EditParams(scope_name="", expert_level=0, attributes_level=0):
     output_phil.show(out=s, expert_level=expert_level, attributes_level=attributes_level)
     input_phil_string = OV.GetUserInput(0, "Edit parameters", s.getvalue())
     if input_phil_string is not None and not input_phil_string == s.getvalue():
-      olx.phil_handler.update(phil_string=str(input_phil_string))
+      handler.update(phil_string=str(input_phil_string))
     else:
       # need to set scope name back to original since scope isn't rebuilt
       output_phil.name = original_name
