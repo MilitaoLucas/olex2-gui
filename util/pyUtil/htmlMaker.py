@@ -89,7 +89,7 @@ def diffractionMetadataHtmlMaker():
        'chooseFile':{
          'caption':'Choose definition file',
          'filter':'.cif files|*.cif',
-         'folder':'%s/util/SiteSpecific' %OV.BaseDir(),
+         'folder':'%s/etc/site' %OV.BaseDir(),
          'function':'spy.setDiffractometerDefinitionFile(spy.GetParam(snum.report.diffractometer),'
          },
        },

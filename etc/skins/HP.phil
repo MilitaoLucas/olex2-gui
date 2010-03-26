@@ -1,3 +1,8 @@
+#############################################################
+# Definitions for the HP skin                               #
+# Expect frequent changes!                                  #
+#############################################################
+
 gui {
   base_colour = #aaaaaa
   logo_colour = #777777
@@ -40,7 +45,6 @@ gui {
       font_colour = #ededed
       height = 26
       corner_rad = 3
-      grad_step = 0.3
       bg_colour_L = 0.7
       grad_colour_L = 0.7
       font_colour_L = 1.4
@@ -63,9 +67,7 @@ gui {
     
     cbtn{
       height = 22
-      font_size = 14
       top = 3
-      rounded = 0101
       corner_rad = 2
       arrows = "bar:right:18,arrow_right:onup:offdown"
     }

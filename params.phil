@@ -587,7 +587,6 @@ graphs {
   }
 }
 
-
 programs {
   solution {
     smtbx {

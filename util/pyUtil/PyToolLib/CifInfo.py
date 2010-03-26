@@ -788,7 +788,7 @@ class CifTools(ArgumentParser):
   def get_def(self):
     olexdir = self.basedir
     versions = self.versions
-    file = "%s/util/SiteSpecific/cif_info.def" %self.basedir
+    file = "%s/etc/site/cif_info.def" %self.basedir
     rfile = open(file, 'r')
     for line in rfile:
       if line[:1] == "_":
