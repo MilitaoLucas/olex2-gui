@@ -1,0 +1,18 @@
+_diffrn_detector                      'CCD area detector'
+_diffrn_detector_area_resol_mean      5.6
+_diffrn_detector_type                 'Bruker SMART CCD 6000 area detector'
+
+_diffrn_measurement_device            'three-circle diffractometer'
+_diffrn_measurement_device_type       'Bruker SMART CCD 6000 area detector'
+_diffrn_measurement_method            '\w scans'
+
+_diffrn_radiation_collimation         ?
+_diffrn_radiation_monochromator       graphite
+_diffrn_radiation_probe               x-ray
+_diffrn_radiation_type                MoK\a
+_diffrn_radiation_xray_symbol         K-L~3~
+_diffrn_radiation_wavelength          0.71073
+
+_diffrn_source                        'sealed X-ray tube'
+_diffrn_source_target                 Mo
+_diffrn_source_type                   ?
