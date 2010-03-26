@@ -348,7 +348,7 @@ class CifTools(ArgumentParser):
     import History
     #active_node = History.tree.active_node
     active_solution = History.tree.active_child_node
-    if active_solution.is_solution:
+    if active_solution is not None and active_solution.is_solution:
       solution_reference = SPD.programs[active_solution.program].reference
       atom_sites_solution_primary = SPD.programs[active_solution.program].methods[active_solution.method].atom_sites_solution
       OV.SetParam('snum.metacif.computing_structure_solution', solution_reference)
