@@ -643,7 +643,7 @@ WHERE (((submission.ID)="%s"));
     elif  files == '*.*':
       arguments = '*'
     sNum = filename
-    def_file = basedir + r"\util\SiteSpecific\archive.def"
+    def_file = basedir + r"\etc\site\archive.def"
 
     if sNum[:1] == "9":
       prefix = "19"
