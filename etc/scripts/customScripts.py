@@ -7,3 +7,4 @@ import OlexSir
 import OlexPlaton
 import OlexMail
 import OlexCheckCIF
+import hptools

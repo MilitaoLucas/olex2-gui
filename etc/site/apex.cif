@@ -1,0 +1,9 @@
+_diffrn_radiation_type            'MoK\a'
+_diffrn_source                    'sealed tube'
+_diffrn_radiation_monochromator   'graphite'
+_diffrn_measurement_device_type   'Bruker SMART APEX CCD area detector'
+_diffrn_measurement_method        '\w and \f scans'
+_diffrn_detector_area_resol_mean  8
+_diffrn_standards_number          .
+_diffrn_standards_interval_count  .
+_diffrn_standards_interval_time   .
