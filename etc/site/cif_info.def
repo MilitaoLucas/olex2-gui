@@ -1,0 +1,50 @@
+[Default Values]
+_exptl_crystal_density_meas        'not measured'
+_exptl_crystal_density_method      'not measured' 
+_diffrn_detector_area_resol_mean      8 
+_diffrn_standards_number           . 
+_diffrn_standards_interval_count   . 
+_diffrn_standards_decay_%          .
+
+
+[Software Version Data]
+
+=smart=V5.049=       'SMART v5.049 (Bruker, 1999)'
+=smart=V5.054=       'SMART v5.054 (Bruker, 2001)'
+=smart=V5.060=       'SMART v5.060 (Bruker, 2001)' 
+=smart=V5.625=       'SMART v5.625 (Bruker, 2001)'
+=smart=V5.630=       'SMART v5.630 (Bruker, 2003)'
+
+=smart=V6.28A=       'SMART v6.28A (Bruker, 2002)'
+
+
+=saint=V6.02A=       'SAINT v6.02A (Bruker, 2001)'
+=saint=V6.22=        'SAINT v6.22  (Bruker, 2001)'
+=saint=V6.28A=       'SAINT v6.28A (Bruker, 2002)'
+=saint=V6.45=        'SAINT v6.45  (Bruker, 2003)'
+=saint=V6.45A=       'SAINT v6.45A (Bruker, 2003)'
+=saint=V7.06A=       'SAINT v7.06A (Bruker, 2003)'
+=saint=V7.12A=       'SAINT v7.12A (Bruker, 2003)'
+=saint=V7.23A=       'SAINT v7.23A (Bruker, 2003)'
+=saint=V7.34A=       'SAINT v7.34A (Bruker, 200?)'
+=saint=V7.46A=       'SAINT v7.46A (Bruker, 2008)'
+=saint=V7.53A=       'SAINT v7.53A (Bruker, 2008)'
+=saint=V7.56A=       'SAINT v7.56A (Bruker, 2009)'
+
+=shelxtl=V5.10=      'SHELXTL v6.12 (Bruker, 1998)'
+=shelxtl=V6.12=      'SHELXTL v6.12 (Bruker, 2001)'
+=shelxtl=V6.14=      'SHELXTL v6.12 (Bruker, 2003)'
+
+=xprep=V6.12=        'XPREP ver.6.12 (Bruker,2001)'
+=xprep=v6.14=        'XPREP ver.6.14 (Bruker,2003)'
+=xprep=2008/2=        'XPREP 008/2 (Bruker,2009)'
+
+
+=sad=V2.03=          'SADABS v.2.03 (Bruker,200?)'
+=sad=V2.10=          'SADABS v.2.10 (Bruker,2003)'
+=sad=V2.1X=          'SADABS v.2.11 (Bruker,200?)'
+=sad=2004/1=         'SADABS-2004/1 (Bruker,2004)'
+=sad=2006/1=         'SADABS-2006/1 (Bruker,2006)'
+=sad=2007/1=         'SADABS-2007/1 (Bruker,2007)'
+=sad=2007/2=         'SADABS-2007/2 (Bruker,2007)'
+=sad=2008/1=         'SADABS-2008/1 (Bruker,2008)'

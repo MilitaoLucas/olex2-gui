@@ -1,0 +1,18 @@
+_diffrn_detector                      'CCD area detector'
+_diffrn_detector_area_resol_mean      ?
+_diffrn_detector_type                 'Bruker-Nonius APEXII CCD area detector'
+
+_diffrn_measurement_device            'Bruker-Nonius APEXII CCD area detector and D8 diffractometer'
+_diffrn_measurement_device_type       'Bruker D8 diffractometer'
+_diffrn_measurement_method            'omega rotation'
+
+_diffrn_radiation_collimation         '0.2 mm double-pinhole'
+_diffrn_radiation_monochromator       'Silicon 111'
+_diffrn_radiation_probe               x-ray
+_diffrn_radiation_type                'Super conducting Wiggler'
+_diffrn_radiation_xray_symbol         ?
+_diffrn_radiation_wavelength          ?
+
+_diffrn_source                        synchrotron
+_diffrn_source_target                 ?
+_diffrn_source_type                   'Station 9.8, SRS, Daresbury'
