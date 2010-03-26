@@ -4,17 +4,17 @@
 #############################################################
 
 gui {
-  base_colour = #6464a0
+  base_colour = #aaaaaa
     .type = colour
-  logo_colour = #6464a0
+  logo_colour = #777777
     .type = colour
   image_font_name = Vera
     .type = str
   purple = #a245a2
     .type = colour
-  red = #ff0000
+  red = #aa0000
     .type = colour
-  green = #018F1E
+  green = #00aa00
     .type = colour
   blue = #0033ff
     .type = colour
@@ -42,21 +42,21 @@ gui {
   }
 
   html {
-    base_colour = #6464a0
+    base_colour = #aaaaaa
       .type = colour
     bg_colour = #efefef
       .type = colour
       .caption = "Background colour"
-    font_colour = #6f6f8b
+    font_colour = #222244
       .type = colour
     font_name = Arial
       .type = str
     font_size = 2
       .type = int
-    highlight_colour = #ff7800
+    highlight_colour = #ff8800
       .type = colour
 
-    input_bg_colour = #F3F3F3
+    input_bg_colour = #eeeeee
       .type = colour
 
     input_height = 18
@@ -70,11 +70,11 @@ gui {
       .help = Width of a combobox that is to take 2 digits and a decimal point.
     icon_size = 25
       .type = int
-    link_colour = #6f6f8b
+    link_colour = #585886
       .type = colour
-    table_bg_colour = #F3F3F3
+    table_bg_colour = #eaeaea
       .type = colour
-    table_firstcol_colour = #e9e9e9
+    table_firstcol_colour = #e1e1e1
       .type = colour
     table_firstcol_width = 8
       .type = int
@@ -91,19 +91,19 @@ gui {
   }
 
   timage{
-    base_colour = None
+    base_colour = #888888
       .type = colour
-    grad_colour = None
+    grad_colour = #454570
       .type = colour
-    font_colour = None
+    font_colour = #a4a4c7
       .type = colour
     grad_step = 0.2
       .type = float
-    bg_colour_L = 1.6
+    bg_colour_L = 0.8
       .type = float
-    grad_colour_L = 1.8
+    grad_colour_L = 0.7
       .type = float
-    font_colour_L = 0.8
+    font_colour_L = 1.4
       .type = float
     font_name = Vera
       .type = str
@@ -111,15 +111,15 @@ gui {
     snumtitle{
       base_colour = None
         .type = colour
-      grad_colour = None
+      grad_colour = '(127, 127, 127)'
         .type = colour
       height = 28
         .type = int
-      font_colour = None
+      font_colour = '(237, 237, 237)'
         .type = colour
       font_name = Vera Bold
         .type = str
-      font_colour_L = 1.6
+      font_colour_L = 1.4
         .type = float
       font_size = 22
         .type = int
@@ -127,17 +127,17 @@ gui {
         .type = int
       left = 5
         .type = int
-      bg_colour_L = 1.6
+      bg_colour_L = 1.4
         .type = float
-      grad_step = 0.2
+      grad_step = 0.4
         .type = float
-      grad_colour_L = 1.0
+      grad_colour_L = 0.75
         .type = float
       filefullinfo_size = 10
         .type = int
-      filefullinfo_colour = #ffffff
+      filefullinfo_colour = '(221, 221, 221)'
         .type = colour
-      filefullinfo_colour_L = 1.5
+      filefullinfo_colour_L = 1.3
         .type = float
       sginfo_scale = 1.0
         .type = float
@@ -148,40 +148,39 @@ gui {
     }
 
     tab{
-      base_colour = None
+      base_colour = #aaaaaa
         .type = colour
-      grad_colour = None
+      grad_colour = #767676
         .type = colour
-      font_colour = None
+      font_colour = #ededed
         .type = colour
-      height = 25
+      height = 26
         .type = int
-      corner_rad = 5
+      corner_rad = 3
         .type = int
-
       grad_step = 0.3
         .type = float
 
-      bg_colour_L = 1.5
+      bg_colour_L = 0.7
         .type = float
-      grad_colour_L = 1.1
+      grad_colour_L = 0.7
         .type = float
 
-      font_colour_L = 1.8
+      font_colour_L = 1.4
         .type = float
       font_name = Vera Bold
         .type = str
-      font_size = 14
+      font_size = 16
         .type = int
-      top = 7
+      top = 3
         .type = int
       left = 8
         .type = int
-      rounded = 0100
+      rounded = 1100
         .type = str
-      arrows = triangle:left
+      arrows = "bar:top:3"
         .type = str
-      off_L = 1.6
+      off_L = 0.9
         .type = float
     }
 
@@ -192,9 +191,9 @@ gui {
         .type = colour
       font_colour = None
         .type = colour
-      height = 20
+      height = 22
         .type = int
-      corner_rad = 1
+      corner_rad = 2
         .type = int
       grad_step = 0.1
         .type = float
@@ -208,26 +207,26 @@ gui {
         .type = str
       font_size = 14
         .type = int
-      top = 2
+      top = 3
         .type = int
       left = 3
         .type = int
       rounded = 0101
         .type = str
-      arrows = "bar:right:20,arrow_right:onup:offdown"
+      arrows = "bar:right:18,arrow_right:onup:offdown"
         .type = str
       off_L = 1.6
         .type = float
     }
 
     button{
-      base_colour = #ababab
+      base_colour = #e1e1e1
         .type = colour
       grad_colour = #dedede
         .type = colour
-      grad_step = 0.4
+      grad_step = 0.3
         .type = float
-      height = 16
+      height = 18
         .type = int
       corner_rad = 3
         .type = int
@@ -237,50 +236,50 @@ gui {
         .type = int
       halign = left
         .type = str
-      top = 1
+      top = 2
         .type = int
       left = 4
         .type = int
-      bg_colour_L = 1.6
+      bg_colour_L = 1.8
         .type = float
-      grad_colour_L = 1.8
+      grad_colour_L = 1.9
         .type = float
-      font_colour_L = 0.8
+      font_colour_L = 0.7
         .type = float
-      font_colour = None
+      font_colour = #767676
         .type = colour
       arrows = None
         .type = str
     }
 
     h1{
-      base_colour = None
+      base_colour = #aaaaaa
         .type = colour
-      grad_colour = None
+      grad_colour = #dddddd
         .type = colour
       grad_step = 0.2
         .type = float
-      height = 16
+      height = 19
         .type = int
       corner_rad = 3
         .type = int
       rounded = 1111
         .type = str
-      font_size = None
+      font_size = 14
         .type = int
-      top = 1
+      top = 2
         .type = int
-      left = 16
+      left = 4
         .type = int
-      bg_colour_L = 1.7
+      bg_colour_L = 1.3
         .type = float
-      grad_colour_L = 1.7
+      grad_colour_L = 1.3
         .type = float
-      font_colour_L = 0.6
+      font_colour_L = 0.5
         .type = float
-      font_colour = None
+      font_colour = #555555
         .type = colour
-      arrows = 'arrow'
+      arrows = "bar:left:5,char:on~:off+"
         .type = str
       off_L = 1.2
         .type = float
@@ -289,38 +288,38 @@ gui {
     }
 
     h3{
-      height = 16
+      height = 17
         .type = int
 
-      base_colour = None
+      base_colour = #aaaaaa
         .type = colour
-      grad_colour = None
+      grad_colour = #cbcbcb
         .type = colour
-      font_colour = None
+      font_colour = #555555
         .type = colour
 
-      bg_colour_L = 1.3
+      bg_colour_L = 1.2
         .type = float
-      grad_colour_L = 1.75
+      grad_colour_L = 1.2
         .type = float
-      font_colour_L = 0.8
+      font_colour_L = 0.5
         .type = float
 
       grad_step = 0.1
         .type = float
-      corner_rad = 2
+      corner_rad = 3
         .type = int
       rounded = 1111
         .type = str
       font_size = None
         .type = int
-      top = 2
+      top = 1
         .type = int
-      left = 12
+      left = 4
         .type = int
-      arrows = 'arrow'
+      arrows = "bar:left:4,char:on~:off+"
         .type = str
-      off_L = 1.2
+      off_L = 1.0
         .type = float
       shadow = False
         .type = bool
@@ -346,9 +345,9 @@ gui {
     .type = int
   htmlpanelwidth_margin_adjust = 22
     .type = int
-  grad_top_left = #05053c
+  grad_top_left = #1f3257
     .type = colour
-  grad_top_right = #05053c
+  grad_top_right = #1f3257
     .type = colour
   grad_bottom_left = #ffffff
     .type = colour

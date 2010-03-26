@@ -1,0 +1,95 @@
+#############################################################
+# The GUI section. For the CLASSIC skin.#
+#############################################################
+
+
+gui {
+  base_colour = #6464a0
+  logo_colour = #6464a0
+  red = #aa0000
+  orange = #ff8f00
+  green = #018F1E
+  skin {
+    name = "classic"
+  }
+  html {
+    input_bg_colour = #F3F3F3
+    link_colour = #6f6f8b
+    table_bg_colour = #F3F3F3
+    table_firstcol_colour = #e9e9e9
+  }
+  timage {
+    font_colour = #a4a4c7
+    bg_colour_L = 0.8
+    grad_colour_L = 1.8
+    font_colour_L = 0.8
+    snumtitle {
+      font_colour_L = 1.6
+      bg_colour_L = 1.6
+      grad_step = 0.2
+      grad_colour_L = 1.0
+      filefullinfo_colour = #ffffff
+      filefullinfo_colour_L = 1.5
+    }
+    tab {
+      height = 25
+      corner_rad = 5
+      grad_step = 0.3
+      bg_colour_L = 1.5
+      grad_colour_L = 1.1
+      font_colour_L = 1.8
+      font_size = 14
+      top = 7
+      rounded = "0100"
+      arrows = triangle:left
+      off_L = 1.6
+    }
+    button {
+      grad_colour = #dedede
+      grad_step = 0.4
+      height = 16
+      top = 1
+      bg_colour_L = 1.6
+      grad_colour_L = 1.8
+      font_colour_L = 0.8
+    }
+    
+    cbtn{
+      height = 20
+      font_size = 14
+      top = 2
+      rounded = 0101
+      corner_rad = 1
+      arrows = "bar:right:20,arrow_right:onup:offdown"
+    }
+    
+    h1 {
+      height = 16
+      top = 1
+      left = 16
+      bg_colour_L = 1.7
+      grad_colour_L = 1.7
+      font_colour_L = 0.6
+      arrows = 'arrow'
+      off_L = 1.2
+    }
+    
+    h3 {
+      height = 16
+      bg_colour_L = 1.3
+      grad_colour_L = 1.75
+      font_colour_L = 0.8
+      corner_rad = 2
+      top = 2
+      left = 12
+      arrows = "arrow"
+      off_L = 1.2
+    }
+  }
+  button_colouring = #ff0000
+  button_writing = #ff0000
+  tab_colour = #ff0000
+  grad_top_left = #05053c
+  grad_top_right = #05053c
+  lines_of_cmd_text = 10
+}

@@ -756,8 +756,8 @@
 <default help="Change the output to default"
   <body
     <cmd
-      <cmd1 "load style 'basedir()/util/StylesAndScenes/default.glds'">
-      <cmd2 "load scene 'basedir()/util/StylesAndScenes/default.glps'">
+      <cmd1 "load style 'basedir()/etc/styles/default.glds'">
+      <cmd2 "load scene 'basedir()/etc/styles/default.glps'">
       <cmd3 "telp 50">
     \>
   \>
@@ -1107,7 +1107,7 @@
   <body
     <args
       <arg0 cif_info="extra_info" def="">
-      <arg1 cif_info_path="extra_info_path" def="basedir()/util/SiteSpecific/%1.cif">
+      <arg1 cif_info_path="extra_info_path" def="basedir()/etc/site/%1.cif">
       <arg2 cif_original="cif_original" def="filename().cif">
 
   \>
