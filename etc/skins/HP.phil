@@ -101,6 +101,7 @@ gui {
       off_L = 1
     }
   }
+  htmlpanelwidth = 400
   button_colouring = #dddddd
   button_writing = #777777
   tab_colour = #5563a4
