@@ -27,7 +27,7 @@ class MakeMovie(ArgumentParser):
         pass
       for i in xrange(self.frames):
         olx.Rota("%s %s" %(self.axis, self.steps))
-        olx.Refresh()
+        OV.Refresh()
         if i < 100: number = "0%i" %i
         if i < 10: number = "00%i" %i
         if i > 99: number = i

@@ -14,8 +14,8 @@ except:
   pass
 import variableFunctions
 
-import olexFunctions
-OV = olexFunctions.OV
+from olexFunctions import OlexFunctions
+OV = OlexFunctions()
 
 import time
 import zlib
@@ -219,6 +219,8 @@ class History(ArgumentParser):
     return tree
 
   def _make_history_bars(self):
+    if not OV.HasGUI():
+      return
     OV.write_to_olex('history_tree.ind', ''.join(make_html_tree(tree, [], 0)))
     from Analysis import HistoryGraph
     HistoryGraph(tree)
@@ -439,6 +441,7 @@ def delete_history(node_name):
   tree._full_index = index_node(tree, {})
   hist.revert_history(active_node.name)
   hist._make_history_bars()
+
 
 def saveOriginals(resPath, lstPath):
   backupFolder = '%s/originals' %OV.StrDir()
