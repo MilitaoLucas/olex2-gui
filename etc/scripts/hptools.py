@@ -73,7 +73,7 @@ def bulk_copy_files (mask="hklres", path_from=r"Z:", path_to=r"C:\DS\Data",overw
 OV.registerFunction(bulk_copy_files)
 
 
-def autodemo(name='default_auto_tutorial', reading_speed=0.04):
+def autodemo(name='default_auto_tutorial', reading_speed=0.06):
   
   rFile = open("%s/etc/tutorials/%s.txt" %(OV.BaseDir(),name),'r')
   items = rFile.readlines()
@@ -114,7 +114,7 @@ def autodemo(name='default_auto_tutorial', reading_speed=0.04):
           #break
         #else:
           #control_img = "h2-%s" %control
-      for i in xrange(5):
+      for i in xrange(3):
         use_image = r"%s-highlight.png" %control
         OV.SetImage(control,use_image)
         OV.Refresh()
