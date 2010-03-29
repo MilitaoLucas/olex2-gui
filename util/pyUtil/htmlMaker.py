@@ -270,20 +270,20 @@ def publicationMetadataHtmlMaker():
     if numberAuthors == 1:
       authorRow.setdefault('itemName','')
       authorRow.setdefault('field1',{'itemName':'%Author%'})
-      authorRow.setdefault('field2',{'itemName':'<a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Remove author from list"><zimg border="0" src="gui/images/toolbar-delete.png"></a>' %str(i),
+      authorRow.setdefault('field2',{'itemName':'<a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Remove author from list"><zimg border="0" src="toolbar-delete.png"></a>' %str(i),
                                      'fieldALIGN':'right'})
 
     elif i == 1:
       authorRow.setdefault('itemName','')
       authorRow.setdefault('field1',{'itemName':'%Authors%'})
-      authorRow.setdefault('field2',{'itemName':'<zimg border="0" src="gui/images/toolbar-up-off.png"><a href="spy.move(down,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Move author down list"><zimg border="0" src="gui/images/toolbar-down.png"></a> <a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Remove author from list"><zimg border="0" src="gui/images/toolbar-delete.png"></a>' %(str(i),str(i)),
+      authorRow.setdefault('field2',{'itemName':'<zimg border="0" src="toolbar-up-off.png"><a href="spy.move(down,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Move author down list"><zimg border="0" src="toolbar-down.png"></a> <a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Remove author from list"><zimg border="0" src="toolbar-delete.png"></a>' %(str(i),str(i)),
                                      'fieldALIGN':'right'})
     elif i == numberAuthors:
-      authorRow.setdefault('itemName','<a href="spy.move(up,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Move author up list"><zimg border="0" src="gui/images/toolbar-up.png"></a><zimg border="0" src="gui/images/toolbar-down-off.png"><a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Remove author from list"><zimg border="0" src="gui/images/toolbar-delete.png"></a>' %(str(i),str(i)))
+      authorRow.setdefault('itemName','<a href="spy.move(up,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Move author up list"><zimg border="0" src="toolbar-up.png"></a><zimg border="0" src="toolbar-down-off.png"><a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Remove author from list"><zimg border="0" src="toolbar-delete.png"></a>' %(str(i),str(i)))
       authorRow.setdefault('fieldALIGN','right')
       authorRow['bgcolor'] = OV.GetParam('gui.html.input_bg_colour')
     else:
-      authorRow.setdefault('itemName','<a href="spy.move(up,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Move author up list"><zimg border="0" src="gui/images/toolbar-up.png"></a> <a href="spy.move(down,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Move author down list"><zimg border="0" src="gui/images/toolbar-down.png"></a> <a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Remove author from list"><zimg border="0" src="gui/images/toolbar-delete.png"></a>' %(str(i),str(i),str(i)))
+      authorRow.setdefault('itemName','<a href="spy.move(up,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Move author up list"><zimg border="0" src="toolbar-up.png"></a> <a href="spy.move(down,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Move author down list"><zimg border="0" src="toolbar-down.png"></a> <a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Remove author from list"><zimg border="0" src="toolbar-delete.png"></a>' %(str(i),str(i),str(i)))
       authorRow.setdefault('fieldALIGN','right')
 
     list.append(authorRow)

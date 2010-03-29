@@ -835,7 +835,7 @@ INTEGRATE /TITLE="%(title)s" &
     morename = "more-%s.htm" %self.frame_base
     morefile = r"%s/etc/gui/%s" %(self.basedir, morename)
     txt = []
-    txt.append(r'<tr><td width="8" bgcolor="#E9E9E9"><a href="itemstate %s 1 0" target="Expand"><zimg src="gui\images\toolbar-expand.png"></a></td>' %("'%s'" %morename))
+    txt.append(r'<tr><td width="8" bgcolor="#E9E9E9"><a href="itemstate %s 1 0" target="Expand"><zimg src="$toolbar-expand.png"></a></td>' %("'%s'" %morename))
     nFrames = ""
     txt.append('<td colspan="4">Series <b>%s</b>: (%s)</td></tr>' %(self.frame_base, string.strip(nFrames)))
     framedata_d = {}
@@ -856,14 +856,14 @@ INTEGRATE /TITLE="%(title)s" &
         current=False
 
       if i == 0:
-        mtxt.append(r'<tr><td width="8" bgcolor="#E9E9E9"><a href="itemstate %s 0" target="Collapse"><zimg src="gui\images\toolbar-collapse.png"></a></td>' %("'%s'" %morename))
+        mtxt.append(r'<tr><td width="8" bgcolor="#E9E9E9"><a href="itemstate %s 0" target="Collapse"><zimg src="$toolbar-collapse.png"></a></td>' %("'%s'" %morename))
       else:
         mtxt.append(r'<tr><td width="8" bgcolor="#E9E9E9"></td>')
       if current:
         mtxt.append("<font color='#ff0000'>")
-        mtxt.append(r'<td colspan="4"><zimg src="gui\images\toolbar-line.png"> Run <b>%s</b> (%i frames) %s</td></tr>' %(run[0], run[1]['nFrames'], framedata_d[run[0]]))
+        mtxt.append(r'<td colspan="4"><zimg src="$toolbar-line.png"> Run <b>%s</b> (%i frames) %s</td></tr>' %(run[0], run[1]['nFrames'], framedata_d[run[0]]))
       else:
-        mtxt.append(r'<td colspan="4"><zimg src="gui\images\toolbar-line.png"> Run <b>%s</b> (%i frames) %s</td></tr>' %(run[0], run[1]['nFrames'], framedata_d[run[0]]))
+        mtxt.append(r'<td colspan="4"><zimg src="$toolbar-line.png"> Run <b>%s</b> (%i frames) %s</td></tr>' %(run[0], run[1]['nFrames'], framedata_d[run[0]]))
       if current:
         mtxt.append("</font>")
 
@@ -888,7 +888,7 @@ INTEGRATE /TITLE="%(title)s" &
 </td><tr>"""%(items, self.most_recent_p4p_name)
     txt.append(t)
     t = r"""<tr><td width="8" bgcolor="#E9E9E9"></td>
-<td><a href='setvalue(outdir,choosedir())'>Output<zimg src="gui\images\toolbar-open.png"></a>
+<td><a href='setvalue(outdir,choosedir())'>Output<zimg src="$toolbar-open.png"></a>
 <td colspan='3'><input type="text" name="outdir" width="180"  height="17" value="%s" onchange="echo getvalue(outdir)"/></td>
 </td><tr>"""%(self.outdir)
     txt.append(t)
