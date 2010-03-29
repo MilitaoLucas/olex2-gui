@@ -210,9 +210,9 @@ class MakeGuiTools(object):
   def tool_tool(self):
     self.tool_name = "fools"
     self.category = "tools"
-    #self.tool_lines = {'tools':[calculate_chn, calculate_isotopePattern], 'images':["gui/images/toolbar-chn.png", "gui/images/toolbar-chn.png"]}
-    self.tool_lines = [{'tools':[calculate_chn], 'image':["gui/images/toolbar-chn.png"]},
-                       {'tools':[calculate_isotopePattern], 'image':["gui/images/toolbar-ms.png"]}
+    #self.tool_lines = {'tools':[calculate_chn, calculate_isotopePattern], 'images':["toolbar-chn.png", "toolbar-chn.png"]}
+    self.tool_lines = [{'tools':[calculate_chn], 'image':["toolbar-chn.png"]},
+                       {'tools':[calculate_isotopePattern], 'image':["toolbar-ms.png"]}
                        ]
 
   def fun(self):
@@ -312,7 +312,7 @@ class MakeGuiTools(object):
   def make_logo(self):
     name = r"blocks/logo"
     self.txt = []
-    self.txt.append('<zimg border="0" src="gui\images\logo.png">')
+    self.txt.append('<zimg border="0" src="logo.png">')
     self.write_tool(name)
 
   def make_tool_item(self):
@@ -344,7 +344,7 @@ class MakeGuiTools(object):
       toolwidth = "width='%s'" %toolwidth
 
     if tool_tem['image']:
-      tool_tem['image_txt'] = '\t\t<zimg border="0" src="gui/images/toolbar-%(image)s.png"</td><td>' %tool_tem
+      tool_tem['image_txt'] = '\t\t<zimg border="0" src="toolbar-%(image)s.png"</td><td>' %tool_tem
       self.col_count += 1
 
     if tool_tem.get('box1', ""):
@@ -415,7 +415,7 @@ class MakeGuiTools(object):
     tool_line.setdefault('header_line', '<table border="0" VALIGN="center" style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="#F3F3F3">') 
     tool_line.setdefault('footer_line', '</table>')
     if tool_line['image']:
-      tool_line['image_txt'] = '\t\t<zimg border="0" src="gui/images/toolbar-%(image)s.png">' %tool_line
+      tool_line['image_txt'] = '\t\t<zimg border="0" src="toolbar-%(image)s.png">' %tool_line
     if self.IsFirstLine:
       tool_line['header_line'] = ""
       tool_line['footer_line'] = ""
@@ -453,7 +453,7 @@ class MakeGuiTools(object):
     image_txt = ""
     if image:
       self.colspan += 1
-      image_txt = '<zimg border="0" src="gui/images/toolbar-%s.png">' %image
+      image_txt = '<zimg border="0" src="toolbar-%s.png">' %image
       self.txt_tool.append('\t\t<a href="%s" target="%%%s%%">%s</a></td><td>' %(href, target, image_txt))
     self.colspan += 1
     self.txt_tool.append('\t\t<a href="%s" target="%%%s%%">%%%s%%</a>' %(href, target, display))
@@ -465,7 +465,7 @@ class MakeGuiTools(object):
 
     if image:
       self.colspan += 1
-      image_txt = '<zimg border="0" src="gui/images/toolbar-%s.png">' %image
+      image_txt = '<zimg border="0" src="toolbar-%s.png">' %image
       self.txt_tool.append('\t\t<a href="%s" target="%%%s%%">%s</a></td><td>' %(href, target, image_txt))
     self.colspan += 1
     self.txt_tool.append('\t\t<a href="%s" target="%%%s%%">%%%s%%</a>' %(href, target, display))
@@ -473,7 +473,7 @@ class MakeGuiTools(object):
   def _make_tool_line(self):
     self.txt.append('<tr>')
     self.txt.append('\t<td width="8" bgcolor="#E9E9E9">')
-    self.txt.append('\t\t<zimg border="0" src="gui/images/toolbar-%s.png">' %image)
+    self.txt.append('\t\t<zimg border="0" src="toolbar-%s.png">' %image)
     self.txt.append('\t</td>')
     self.txt.append('\t<td width="12" colspan="%i">' %self.colspan)
     for item in self.txt_tool:
@@ -637,7 +637,7 @@ image="%(image)s"
               'before':self.box({'type':'button',
                                  'width':50, 
                                  'name':'cmd_refine',
-                                 'image':'gui/images/btn-refine-on.png',
+                                 'image':'btn-refine-on.png',
                                  'value':'%Refine%', 
                                  'onclick':'ls GetValue(set_method) GetValue(set_iterations)>>refine -1 GetValue(set_PLAN)', 
                                  }),
@@ -830,7 +830,7 @@ image="%(image)s"
               'colwidth':'25%', 
               'before':self.box({'type':'button',
                                  'width':50, 
-                                 'image':'gui/images/btn-solve-on.png',
+                                 'image':'btn-solve-on.png',
                                  'name':'cmd_solve',
                                  'value':'%Solve%', 
                                  'onclick':'reset GetValue(set_solve_method) -c=\'GetValue(set_formula)\' -s=GetValue(set_space_group)>>solve', 

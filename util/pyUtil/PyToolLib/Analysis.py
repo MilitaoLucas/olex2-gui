@@ -1861,7 +1861,7 @@ class HistoryGraph(Analysis):
   def get_bar_colours(self, bar_height):
     if self.i_bar == self.i_active_node:
       fill =  OV.FindValue('gui_html_highlight_colour')
-      fill = OV.GetParam('gui.grey').rgb
+      #fill = OV.GetParam('gui.grey').rgb
     elif bar_height == 2:
       fill = (139, 0, 204)
     else:

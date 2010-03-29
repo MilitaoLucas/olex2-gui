@@ -832,6 +832,21 @@ class ImageTools(FontInstances):
   def resize_news_image(self):
     self.resize_to_panelwidth({'i':'news/news.png'})
 
+  def make_simple_text_to_image(self, width, height, txt, font_name='Vera', font_size=16, bg_colour='#fff6bf', font_colour='#222222'):
+    IM = Image.new('RGB', (width, height), bg_colour)
+    draw = ImageDraw.Draw(IM)
+    txt = txt.strip()
+    self.write_text_to_draw(
+      draw,
+      top_left = (3,3),
+      max_width = width-20,
+      txt = txt,
+      font_name=font_name,
+      font_size=font_size,
+      titleCase=False,
+      font_colour=font_colour,)
+    return IM
+  
   def make_border(self, rad,
               draw,
               width,

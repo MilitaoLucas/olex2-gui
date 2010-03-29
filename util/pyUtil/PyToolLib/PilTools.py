@@ -30,7 +30,7 @@ try:
   import olex
   datadir = olx.DataDir()
   basedir = olx.BaseDir()
-#       newdir = r"%s\etc\gui\images\tools" %datadir
+#       newdir = r"%s\etc\$tools" %datadir
 #       if not os.path.isdir(newdir):
 #       _mkdir(newdir)
 except:
@@ -218,7 +218,7 @@ class GuiSkinChanger(ImageTools):
 
   def run_GuiSkinChanger(self):
     verbose = OV.GetParam('olex2.verbose')
-    path = r"gui/images/src/default.png"
+    path = r"src/default.png"
     skin = self.params.skin.name
     skin_extension = self.params.skin.extension
     if skin_extension == "None": skin_extension = None
@@ -228,19 +228,19 @@ class GuiSkinChanger(ImageTools):
       #self.setGuiAttributes()
       self.setGuiAttributesDefault()
       self.setOlexColours()
-      path = r"gui/images/src/default.png"
+      path = r"src/default.png"
       import PilTools
     elif "(" in skin:
       self.set_custom(skin)
       self.setGuiAttributesDefault()
       self.setOlexColours()
-      path = r"gui/images/src/default.png"
+      path = r"src/default.png"
       import PilTools
     #elif skin == "default":
       #self.setGuiAttributesDefault()
       #self.setGuiAttributes()
       #self.setOlexColours()
-      #path = r"gui/images/src/default.png"
+      #path = r"src/default.png"
       #import PilTools
 ##    this is a 'named' skin - ie should have a plugin-folder associated with it
     else:
@@ -493,7 +493,7 @@ class BarGenerator(ImageTools):
       else:
         name = r"vBar-%i.png" %(int(self.size))
       OlexVFS.save_image_to_olex(image, name, 2)
-      #image.save(r"%s\etc\gui\images\tools\vBar-%s.png" %(datadir, int(self.size)), "PNG")
+      #image.save(r"%s\etc\$tools\vBar-%s.png" %(datadir, int(self.size)), "PNG")
     return name
 
   def make_vBar(self, size, colour):
@@ -604,6 +604,7 @@ class MakeAllRBars(BarGenerator):
     #self.params.html.bg_colour.rgb = OV.FindValue('gui_htmlself.params.html.bg_colour.rgb')
 
   def run_MakeAllRBars(self):
+    return
     name = "vscale.png"
     OlexVFS.save_image_to_olex(self.makeRBarScale(), name, 2)
     name = "vbar-sol.png"
@@ -1174,7 +1175,7 @@ class timage(ImageTools):
               "Solve",
               "Refine",
               "Analyze", )
-    states = ["on", "off", ""]
+    states = ["on", "off", "", "highlight"]
     for state in states:
       if state == "on":
         colour = self.adjust_colour(self.params.html.highlight_colour.rgb,luminosity=1.3)
@@ -1447,7 +1448,7 @@ class timage(ImageTools):
     OlexVFS.save_image_to_olex(IM, name, 2)
 
   def produce_buttons(self, button_names, crop, cut, max_width,scale,btn_type,width=None):
-    states = ["on", "off", ""]
+    states = ["on", "off", "", "highlight"]
     for state in states:
       if state == "on":
         colour = self.adjust_colour(self.params.html.highlight_colour.rgb,luminosity=1.3)
@@ -1928,7 +1929,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     #finally resize and save the final image
     IM = self.resize_image(IM, (self.width, 55))
-    name = r"gui/images/logo.png"
+    name = r"logo.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
 
 
@@ -2050,7 +2051,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       textItems.append(item)
 
     for item in textItems:
-      states = ["on", "off"]
+      states = ["on", "off", "highlight"]
       name = ""
       for state in states:
         if "h3" in item:
@@ -2062,21 +2063,23 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
             self.advertise_new = True
           image = self.make_timage('h3', img_txt, state)
           self.advertise_new = False
-          name = "gui/images/h3-%s-%s.png" %(item, state)
+          name = "h3-%s-%s.png" %(item, state)
         else:
           img_txt = item
           if img_txt in self.new_l:
             self.advertise_new = True
           image = self.make_timage('h1', img_txt, state)
           self.advertise_new = False
-          name = "gui/images/h2-%s-%s.png" %(item, state)
+          name = "h2-%s-%s.png" %(item, state)
           name = name.replace(".new.","")
 
         if name:
           OlexVFS.save_image_to_olex(image, name, 2)
+          #name = "h2-%s-%s.png" %(item, state)
+          #image.save("C:/tmp/%s" %name)
 
     for item in tabItems:
-      states = ["on", "off"]
+      states = ["on", "off", "highlight"]
       for state in states:
         use_new = True
         if use_new:
@@ -2085,9 +2088,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         else:
           image = self.tab_items(item, state)
 
-        name = r"gui/images/tab-%s-%s.png" %(item, state)
+        name = r"tab-%s-%s.png" %(item, state)
         OlexVFS.save_image_to_olex(image, name, 2)
-        #image.save(r"%s\etc\gui\images\tab-%s-%s.png" %(datadir, item.split("index-")[1], state), "PNG")
+        #name = r"tab-%s-%s.png" %(item, state)
+        #image.save("C:/tmp/%s" %name)
+        #image.save(r"%s\etc\$tab-%s-%s.png" %(datadir, item.split("index-")[1], state), "PNG")
 
     OV.DeleteBitmap('%s' %bitmap)
 
@@ -2103,37 +2108,39 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
             ]
     for item in noteItems:
       image = self.note_items(item)
-      name = r"gui/images/note-%s.png" %(item[2])
+      name = r"note-%s.png" %(item[2])
       OlexVFS.save_image_to_olex(image, name, 2)
-      #image.save(r"%s\etc\gui\images\note-%s.png" %(datadir, item[2]), "PNG")
+      #image.save(r"%s\etc\note-%s.png" %(datadir, item[2]), "PNG")
 
   def make_label_items(self):
     labelItemsControl = [("Start",0), ("Suffix",0), ("Type",0), ("Cycles",0), ("Q-peaks",0),("Axis",0),("Deg",0),("Step",0),("No.",0), ("More",0) ]
     for item in labelItemsControl:
       #image = self.label_items_control(item)
       image = self.label_items(item)
-      name = r"gui/images/label-%s.png" %(item[0])
+      name = r"label-%s.png" %(item[0])
       OlexVFS.save_image_to_olex(image, name, 2)
-      #image.save(r"%s\etc\gui\images\label-%s.png" %(datadir, item[0]), "PNG")
+      #image.save(r"%s\etc\$label-%s.png" %(datadir, item[0]), "PNG")
 
     labelItems = [("Display", 50), ("A-Type", 50), ("Model", 50)]
     for item in labelItems:
       image = self.label_items(item)
-      name = r"gui/images/label-%s.png" %(item[0])
+      name = r"label-%s.png" %(item[0])
       OlexVFS.save_image_to_olex(image, name, 2)
-      #image.save(r"%s\etc\gui\images\label-%s.png" %(datadir, item[0]), "PNG")
+      #image.save(r"%s\etc\$label-%s.png" %(datadir, item[0]), "PNG")
 
   def make_cbtn_items(self, font_name = 'Vera'):
 
     new_style = True
     if new_style:
       buttons = ['Solve', 'Refine', 'Report']
-      states = ['on', 'off', 'inactive']
+      states = ['on', 'off', 'inactive', 'highlight']
       for state in states:
         for item in buttons:
           width = int(round(self.available_width/3,0)) - 5
           image = self.make_timage(item_type='cbtn', item=item, state=state, width=width)
-          OlexVFS.save_image_to_olex(image,'%s-%s%s.png' %('cbtn', item.lower(), state), 2)
+          OlexVFS.save_image_to_olex(image,'%s-%s-%s.png' %('cbtn', item.lower(), state), 2)
+          #image.save("C:/tmp/%s-%s-%s.png" %('cbtn', item.lower(), state))
+
 
     else:
       if self.params.image_font_name:
@@ -2157,7 +2164,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           'fontcolouron':self.params.html.highlight_colour.rgb,
           'fontcolourinactive':self.adjust_colour(self.params.grey.rgb, luminosity = 2.0),
           'bgcolourinactive':self.adjust_colour(self.params.grey.rgb, luminosity = 2.0),
-          'states':['','on', 'off', 'inactive'],
+          'states':['','on', 'off', 'inactive', 'highlight'],
           'outline_colour':self.adjust_colour(self.params.html.table_bg_colour.rgb, luminosity = 0.8),
           'grad_colour':(237,237,245),
           'vline':{'v_pos':0, 'height':18},
@@ -2210,12 +2217,12 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
   def make_button_items(self):
     buttonItems = ["btn", "btn-QC", "btn-refine", "btn-solve"]
     for item in buttonItems:
-      states = ["on", "off"]
+      states = ["on", "off", "highlight"]
       for state in states:
         image = self.button_items(item, state)
-        name =r"gui/images/%s-%s.png" %(item, state)
+        name =r"%s-%s.png" %(item, state)
         OlexVFS.save_image_to_olex(image, name, 2)
-        #image.save(r"%s\etc\gui\images\%s-%s.png" %(datadir, item, state), "PNG")
+        #image.save(r"%s\etc\$%s-%s.png" %(datadir, item, state), "PNG")
 
   def make_image_items(self):
     pass
@@ -2231,9 +2238,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         #image = image.convert("L")
         #image = ImageOps.colorize(image, (0,10,40), bgcolour)
         #image.paste(logo_bild, (0,0))
-      #name = r"gui/images/%s.png" %(imag)
+      #name = r"%s.png" %(imag)
       #OlexVFS.save_image_to_olex(image, name, 2)
-      ##image.save(r"%s\etc\gui\images\%s.png" %(datadir, imag), "PNG")
+      ##image.save(r"%s\etc\$%s.png" %(datadir, imag), "PNG")
 
   def make_icon_items(self):
     base_colour = self.params.html.base_colour.rgb
@@ -2313,9 +2320,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     for icon in iconIndex:
       image = self.icon_items(iconIndex[icon])
-      name = r"gui/images/toolbar-%s.png" %(icon)
+      name = r"toolbar-%s.png" %(icon)
       OlexVFS.save_image_to_olex(image, name, 2)
-      #image.save(r"%s\etc\gui\images\toolbar-%s.png" %(datadir, icon), "PNG")
+      #image.save(r"%s\etc\$toolbar-%s.png" %(datadir, icon), "PNG")
 
     height = 10
     width = 10
@@ -2328,7 +2335,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     middle = (width-1,1)
     end = (width/2,height-1)
     draw.polygon((begin, middle, end), self.adjust_colour("bg",  luminosity = 0.7,))
-    name = r"gui/images/toolbar-expand.png"
+    name = r"toolbar-expand.png"
     OlexVFS.save_image_to_olex(image, name, 2)
 
     colour = self.params.html.bg_colour.rgb
@@ -2338,7 +2345,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     middle = (width-1, height-1)
     end = (1,height-1)
     draw.polygon((begin, middle, end), "#ff0000")
-    name = r"gui/images/toolbar-collapse.png"
+    name = r"toolbar-collapse.png"
     OlexVFS.save_image_to_olex(image, name, 2)
 
 
@@ -2353,7 +2360,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     begin = (1,1)
     end = (1,height)
     draw.line((begin, end), "#ff0000")
-    name = r"gui/images/toolbar-line.png"
+    name = r"toolbar-line.png"
     OlexVFS.save_image_to_olex(image, name, 2)
 
     ## Little Icons for up, down, delete
@@ -2369,10 +2376,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     middle = (width/2,0)
     end = (width-x_border,height-y_offset)
     draw.polygon((begin, middle, end), self.params.html.font_colour.rgb)
-    name = r"gui/images/toolbar-up.png"
+    name = r"toolbar-up.png"
     OlexVFS.save_image_to_olex(image, name, 2)
     draw.polygon((begin, middle, end), self.adjust_colour(self.params.html.table_bg_colour.rgb, luminosity = 0.9 ))
-    name = r"gui/images/toolbar-up-off.png"
+    name = r"toolbar-up-off.png"
     OlexVFS.save_image_to_olex(image, name, 2)
 
     image = Image.new('RGBA', size, bg_colour)
@@ -2381,10 +2388,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     middle = (width/2,height)
     end = (width-x_border,y_offset)
     draw.polygon((begin, middle, end), self.params.html.font_colour.rgb)
-    name = r"gui/images/toolbar-down.png"
+    name = r"toolbar-down.png"
     OlexVFS.save_image_to_olex(image, name, 2)
     draw.polygon((begin, middle, end), self.adjust_colour(self.params.html.table_bg_colour.rgb, luminosity = 0.9 ))
-    name = r"gui/images/toolbar-down-off.png"
+    name = r"toolbar-down-off.png"
     OlexVFS.save_image_to_olex(image, name, 2)
 
     height = 10
@@ -2402,7 +2409,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                  #font_name=font_name,
                  #font_size=12,
                  #font_colour="#ff0000")
-    #name = r"gui\images\toolbar-delete.png"
+    #name = r"$toolbar-delete.png"
     #OlexVFS.save_image_to_olex(image, name, 2)
 
 
@@ -2615,7 +2622,13 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     grad_colour = OV.GetParam('gui.timage.%s.grad_colour' %item_type)
     font_colour = OV.GetParam('gui.timage.%s.font_colour' %item_type)
 
+    #if state == "highlight":
+    #  font_colour = OV.GetParam('gui.html.highlight_colour')
+      
     bg_colour = self.adjust_colour(base_colour, luminosity = OV.GetParam('gui.timage.%s.bg_colour_L' %item_type))
+    if state == "highlight":
+      bg_colour = OV.GetParam('gui.html.highlight_colour').rgb
+
     if grad_colour is None:
       grad_colour = self.adjust_colour(base_colour, luminosity = OV.GetParam('gui.timage.%s.grad_colour_L' %item_type))
     else:
@@ -2634,6 +2647,12 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       valign = False
       font_size = int(round(font_size * self.size_factor,0))
     arrows = OV.GetParam('gui.timage.%s.arrows' %item_type)
+
+    if state == "highlight":
+      grad_colour = OV.GetParam('gui.html.highlight_colour').rgb
+    if state == "inactive":
+      grad_colour = '#ababab'
+      bg_colour = '#ababab'
 
     height = int(round(OV.GetParam('gui.timage.%s.height' %item_type) * self.size_factor, 0))
     top = int(round(OV.GetParam('gui.timage.%s.top' %item_type) * self.size_factor,0))
@@ -2753,7 +2772,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     filename = item
     return image
 
-  def make_timage_border (self, image, weight=1, fill='#ff0000'):
+  def make_timage_border (self, image, weight=1, fill='#ababab'):
     width, height = image.size
     draw = ImageDraw.Draw(image)
     draw.line((0,0,width-1,0), fill = fill)
@@ -2787,7 +2806,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     elif state == "on":
       fill = self.adjust_colour(self.highlight_colour, luminosity=on_L)
     else:
-      fill = '#ff0000'
+      fill = '#888888'
 
     if 'img' in arrows:
       side = arrows.split('img:')[1].split(':')[0]

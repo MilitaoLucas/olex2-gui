@@ -129,7 +129,7 @@ def makeHtmlTableRow(dictionary):
     chooseFileText = '''
     <td>
       <a href="%s">
-        <zimg border="0" src="gui/images/toolbar-open.png">
+        <zimg border="0" src="toolbar-open.png">
       </a>
     </td>
     ''' %href
