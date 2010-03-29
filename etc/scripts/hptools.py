@@ -73,13 +73,13 @@ def bulk_copy_files (mask="hklres", path_from=r"Z:", path_to=r"C:\DS\Data",overw
 OV.registerFunction(bulk_copy_files)
 
 
-def autodemo(name='test', reading_speed=0.04):
+def autodemo(name='default_auto_tutorial', reading_speed=0.04):
   
   rFile = open("%s/etc/tutorials/%s.txt" %(OV.BaseDir(),name),'r')
   items = rFile.readlines()
   rFile.close()
   olx.Clear()
-  bitmap = make_tutbox_image("Welcome")
+  bitmap = make_tutbox_image("Welcome", font_colour='#44aa44')
   olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
   olx.SetMaterial("%s.Plane 2053;2131693327;2131693327"%bitmap)
   olx.DeleteBitmap(bitmap)
@@ -123,13 +123,13 @@ def autodemo(name='test', reading_speed=0.04):
         OV.SetImage(control,use_image)
         OV.Refresh()
         time.sleep(0.2)
-      
-    time.sleep(sleep)  
+    #time.sleep(sleep)
+    olx.Wait(int(sleep * 1000))
       
     if cmd_type == 'c':
       olex.m(cmd_content)
 
-  bitmap = make_tutbox_image("Done")
+  bitmap = make_tutbox_image("Done", font_colour="#44aa44")
   olx.DeleteBitmap(bitmap)
   olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
   time.sleep(1)
@@ -137,8 +137,8 @@ def autodemo(name='test', reading_speed=0.04):
       
 OV.registerFunction(autodemo)
 
-def make_tutbox_image(txt='txt', font_size=20):
-  IM = IT.make_simple_text_to_image(512, 64, txt, font_size=font_size, bg_colour='#fff6bf', font_colour='#aa4444')
+def make_tutbox_image(txt='txt', font_size=20, font_colour='#aa4444', bg_colour='#fff6bf'):
+  IM = IT.make_simple_text_to_image(512, 64, txt, font_size=font_size, bg_colour=bg_colour, font_colour=font_colour)
   IM.save("autotut.png")
   OlexVFS.save_image_to_olex(IM, "autotut", 0)
   return "autotut"
