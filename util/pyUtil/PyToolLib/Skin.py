@@ -225,6 +225,7 @@ def SetGrad():
 def SetMaterials():
   olx.SetMaterial("InfoBox.Text %s" %OV.GetParam('gui.infobox_text'))
   olx.SetMaterial("InfoBox.Plane %s" %OV.GetParam('gui.infobox_plane'))
+  olx.SetMaterial("Console.Text %s" %OV.GetParam('gui.infobox_text'))
   olx.SetMaterial("XGrid.+Surface %s" %OV.GetParam('gui.xgrid.positive_surface_material'))
   olx.SetMaterial("XGrid.-Surface %s" %OV.GetParam('gui.xgrid.negative_surface_material'))
   olx.HtmlPanelWidth(OV.GetParam('gui.htmlpanelwidth'))

@@ -7,6 +7,11 @@ import time
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
+from ImageTools import ImageTools
+IT = ImageTools()
+
+import OlexVFS
+
 
 def bulk_copy_files (mask="hklres", path_from=r"Z:", path_to=r"C:\DS\Data",overwrite=True,lowercase=True):
   import FileSystem as FS
@@ -68,12 +73,18 @@ def bulk_copy_files (mask="hklres", path_from=r"Z:", path_to=r"C:\DS\Data",overw
 OV.registerFunction(bulk_copy_files)
 
 
-def autodemo(name='test', reading_speed=0.02):
+def autodemo(name='test', reading_speed=0.04):
   
   rFile = open("%s/etc/tutorials/%s.txt" %(OV.BaseDir(),name),'r')
   items = rFile.readlines()
   rFile.close()
   olx.Clear()
+  bitmap = make_tutbox_image("Welcome")
+  olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
+  olx.SetMaterial("%s.Plane 2053;2131693327;2131693327"%bitmap)
+  olx.DeleteBitmap(bitmap)
+  olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
+  time.sleep(2)
   for item in items:
     item = item.strip()
     cmd_type = item.split(":")[0]
@@ -82,13 +93,73 @@ def autodemo(name='test', reading_speed=0.02):
     if cmd_type == "s":
       sleep = cmd_content
     
-    if cmd_type == 'p' or cmd_type == 'c':
-      print "%s: %s" %(cmd_type, cmd_content)
-      olx.Refresh()
+    if cmd_type == 'p':
+      txt = "%s" %(cmd_content)
+      print(txt)
+      olx.DeleteBitmap(bitmap)
+      bitmap = make_tutbox_image(txt)
+      olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
       sleep = len(cmd_content) * reading_speed
-    
+      
+    if cmd_type == 'c':
+      txt = "%s: %s" %(cmd_type, cmd_content)
+      print(txt)
+
+    if cmd_type == 'h':
+      control = cmd_content
+      #types = ['cbtn', 'tab']
+      #for t in types:
+        #if t in control:
+          #control_img = control
+          #break
+        #else:
+          #control_img = "h2-%s" %control
+      for i in xrange(5):
+        use_image = r"%s-highlight.png" %control
+        OV.SetImage(control,use_image)
+        olx.Refresh()
+        time.sleep(0.2)
+        use_image = r"%s-on.png" %control
+        OV.SetImage(control,use_image)
+        olx.Refresh()
+        time.sleep(0.2)
+      
     time.sleep(sleep)  
       
     if cmd_type == 'c':
       olex.m(cmd_content)
+
+  bitmap = make_tutbox_image("Done")
+  olx.DeleteBitmap(bitmap)
+  olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
+  time.sleep(1)
+  olx.DeleteBitmap(bitmap)
+      
 OV.registerFunction(autodemo)
+
+def make_tutbox_image(txt='txt', font_size=20):
+  IM = IT.make_simple_text_to_image(512, 64, txt, font_size=font_size, bg_colour='#fff6bf', font_colour='#aa4444')
+  IM.save("autotut.png")
+  OlexVFS.save_image_to_olex(IM, "autotut", 0)
+  return "autotut"
+
+#  control = 'IMG_TUTBOX'
+#  use_image = 'autotut.png'
+#  if OV.IsControl(control):
+#    olx.html_SetImage('POP_%s_PRG_ANALYSIS' %self.program.program_type.upper(), self.image_location)
+#  OV.SetImage(control,use_image)
+  
+
+def tutbox(txt):
+  make_tutbox_image(txt)
+  name = 'Auto_Tutorial'
+  txt = '<zimg border="0" name="IMG_TUTBOX" src="autotut.png">'
+  wFilePath = r"%s.htm" %(name)
+  txt = txt.replace(u'\xc5', 'angstrom')
+  OV.write_to_olex(wFilePath, txt)
+
+  boxWidth = 300
+  boxHeight = 200
+  x = 200
+  y = 200
+  olx.Popup(name, wFilePath, "-b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(name, boxWidth, boxHeight, x, y))
