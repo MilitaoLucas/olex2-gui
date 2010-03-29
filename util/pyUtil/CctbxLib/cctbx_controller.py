@@ -448,7 +448,7 @@ class manager(object):
     self.adp_restraints_flags = adp_restraints_flags
     self.max_sites_pre_cycles = max_sites_pre_cycles
     self.max_cycles = max_cycles
-    self.max_peaks = OV.GetParam
+    self.max_peaks = max_peaks
     self.verbose = verbose
     self.log = log
     self.minimisation = None
@@ -651,7 +651,7 @@ class refinement(manager):
     #K2 = flex.mean_weighted(fo2*fc2, wfo2)/flex.mean_weighted(fc2*fc2, wfo2)
     #K2 = math.sqrt(K2)
     #f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1./K2, f_calc)
-    k = f_obs.quick_scale_factor_approximation(f_calc, cutoff_factor=0)
+    k = f_obs.scale_factor(f_calc)
     f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1./k, f_calc)
     return f_obs_minus_f_calc.fft_map(
       symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
