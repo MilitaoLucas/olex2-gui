@@ -36,7 +36,7 @@ echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'"
       bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
       valign='center'
       name="IMAGE_PS_NAME"
-      width="20"
+      width="60"
       value="$spy.GetParam(snum.image.ps.name)"
       onleave="spy.SetParam(snum.image.ps.name,GetValue(IMAGE_PS_NAME))"
       label='%Name% '
@@ -83,8 +83,8 @@ echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'"
       width="$spy.GetParam(gui.html.checkbox_width)"
       name = "COLOR_FILL"
       width="17"
-      oncheck="SetData(COLOR_FILL,-color_fill)>>load style OLTEP.xld"
-      onuncheck="SetData(COLOR_FILL,' ')>>load style default.xld"
+      oncheck="SetData(COLOR_FILL,-color_fill)"
+      onuncheck="SetData(COLOR_FILL,' ')"
       manage
     >
   </td>
