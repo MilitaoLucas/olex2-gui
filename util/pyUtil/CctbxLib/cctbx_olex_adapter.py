@@ -69,7 +69,7 @@ class OlexCctbxAdapter(object):
       self.reflections.show_summary()
 
 class OlexCctbxRefine(OlexCctbxAdapter):
-  def __init__(self, max_cycles=None, verbose=False):
+  def __init__(self, max_cycles=None, max_peaks=None, verbose=False):
     OlexCctbxAdapter.__init__(self)
     self.verbose = verbose
     self.log = open('%s/%s.log' %(OV.FilePath(), OV.FileName()),'w')
@@ -82,6 +82,7 @@ class OlexCctbxRefine(OlexCctbxAdapter):
     self.debug = False
     self.film = False
     self.max_cycles = max_cycles
+    self.max_peaks = max_peaks
     self.do_refinement = True
     if OV.HasGUI() and OV.GetParam('snum.refinement.graphical_output'):
       import Analysis
@@ -136,6 +137,7 @@ class OlexCctbxRefine(OlexCctbxAdapter):
       xray_structure=self.xray_structure(),
       wavelength=wavelength,
       max_cycles=self.max_cycles,
+      max_peaks=self.max_peaks,
       log=self.log,
       weighting=weighting,
     )
