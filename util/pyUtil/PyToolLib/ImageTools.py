@@ -485,7 +485,7 @@ class ImageTools(FontInstances):
                          font_size=11,
                          font_colour="#000000",
                          align="left",
-                         max_width=0,
+                         max_width=1000,
                          image_size=None,
                          titleCase=False,
                          lowerCase=False,
@@ -621,6 +621,25 @@ class ImageTools(FontInstances):
     if getXY_only:
       return wX, wY
 
+    txt_l = []
+    t = ""
+    wXT = 0
+    if wX > max_width:
+      txt_in = txt.split()
+      
+      for word in txt_in:
+        wX, wY = draw.textsize(word, font=font)
+        wXT += wX
+        if wXT < max_width:
+          t += " %s" %word
+        else:
+          txt_l.append(t.strip())
+          wXT = 0
+          t = "%s" %word
+      txt_l.append(t.strip())
+    else:
+      txt_l.append(txt)
+
     if not self.abort:
       if type(font_colour) != str and type(font_colour) != tuple and type(font_colour) != unicode:
         try:
@@ -628,7 +647,11 @@ class ImageTools(FontInstances):
         except Exception, ex:
           print("font_colour is ill defined: %s" %ex)
       try:
-        draw.text((left,int(top)), txt, font=font, fill=font_colour)
+        i = 0
+        for txt in txt_l:
+          top_n = top + wY * i
+          draw.text((left,int(top_n)), txt, font=font, fill=font_colour)
+          i += 1
       except Exception, ex:
         print "Text %s could not be drawn: %s" %(txt, ex)
     else:
@@ -839,7 +862,7 @@ class ImageTools(FontInstances):
     self.write_text_to_draw(
       draw,
       top_left = (3,3),
-      max_width = width-20,
+      max_width = width-40,
       txt = txt,
       font_name=font_name,
       font_size=font_size,

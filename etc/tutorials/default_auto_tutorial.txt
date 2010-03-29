@@ -1,0 +1,17 @@
+p:Olex2 will now go back to the original start screen.
+c:itemstate index* 0
+c:itemstate index-home 1
+c:itemstate tab* 2
+p:The sample structure 'sucrose' will now be loaded from the 'Start' tool.
+h:h2-start
+c:reap 'DataDir()/samples/sucrose/sucrose.res'
+p:The structure will then be reset by typing 'reset'
+c:reset
+p:By clicking on the 'Work' tab, we get access to the tools we need
+h:tab-work
+c:itemstate index* 0
+c:itemstate index-work 1
+c:itemstate tab* 2
+p:And then solved by clicking on the 'solve' button
+h:cbtn-solve
+c:solve
