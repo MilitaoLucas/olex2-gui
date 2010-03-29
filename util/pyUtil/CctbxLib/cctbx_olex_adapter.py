@@ -16,7 +16,7 @@ except:
   olx.current_mask = None
 
 import olex
-import olex_xgrid
+
 import time
 import cctbx_controller as cctbx_controller
 from cctbx import maptbx, miller, uctbx
@@ -258,7 +258,7 @@ class OlexCctbxRefine(OlexCctbxAdapter):
         break
     olx.xf_EndUpdate()
     olx.Compaq('-q')
-    olx.Refresh()
+    OV.Refresh()
 
   def update_refinement_info(self, msg="Unknown"):
     import htmlMaker
@@ -431,7 +431,7 @@ class FullMatrixRefine(OlexCctbxRefine):
         break
     olx.xf_EndUpdate()
     olx.Compaq('-q')
-    olx.Refresh()
+    OV.Refresh()
 
   def calculate_residuals(self, f_obs):
     f_calc = self.f_model(f_obs)
@@ -620,7 +620,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       model_map = miller.fft_map(crystal_gridding, data)
       output_data = model_map.apply_volume_scaling().real_map()
     self.time_write_grid = time_log("write grid").start()
-    if mask.flood_fill.n_voids() > 0:
+    if mask.flood_fill.n_voids() > 0 and OV.HasGui():
       write_grid_to_olex(output_data)
     self.time_write_grid.stop()
 
@@ -939,6 +939,7 @@ def on_twin_image_click(run_number):
 OV.registerFunction(on_twin_image_click)
 
 def write_grid_to_olex(grid):
+  import olex_xgrid
   gridding = grid.accessor()
   n_real = gridding.focus()
   olex_xgrid.Init(*n_real)

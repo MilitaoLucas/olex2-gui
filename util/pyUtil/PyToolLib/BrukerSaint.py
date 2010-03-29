@@ -374,7 +374,7 @@ class BrukerSaint(ImageTools):
       self.make_gui_content_evaluate_frames()
       #self.saint_pid.stdout.flush()
       olx.UpdateHtml()
-      olx.Refresh()
+      OV.Refresh()
       
       #global terminated
       #if terminated == True:
