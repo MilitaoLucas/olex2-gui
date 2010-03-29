@@ -117,11 +117,11 @@ def autodemo(name='test', reading_speed=0.04):
       for i in xrange(5):
         use_image = r"%s-highlight.png" %control
         OV.SetImage(control,use_image)
-        olx.Refresh()
+        OV.Refresh()
         time.sleep(0.2)
         use_image = r"%s-on.png" %control
         OV.SetImage(control,use_image)
-        olx.Refresh()
+        OV.Refresh()
         time.sleep(0.2)
       
     time.sleep(sleep)  
