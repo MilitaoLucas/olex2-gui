@@ -618,7 +618,7 @@ def checkErrLogFile():
   if have_found_python_error:
     return '''
     <a href='external_edit "%s"'>
-    <zimg border='0' src='gui\\images\\toolbar-stop.png'></a>
+    <zimg border='0' src='toolbar-stop.png'></a>
     '''%(logfile)
   else: return ""
 OV.registerFunction(checkErrLogFile)
