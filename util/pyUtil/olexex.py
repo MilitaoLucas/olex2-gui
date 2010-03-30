@@ -747,10 +747,10 @@ def setMainToolbarTabButtons(btn, state=""):
         state = "off"
       elif state == '0':
         state = "on"
-      OV.CopyVFSFile("cbtn-%s%s.png" %(item[0],state),"cbtn-%s.png" %item[0])
+      OV.CopyVFSFile("cbtn-%s-%s.png" %(item[0],state),"cbtn-%s.png" %item[0])
       OV.SetVar('gui_MainToolbarTabButtonActive',btn)
     elif state != 'inactive' and not isCif:
-      OV.CopyVFSFile("cbtn-%soff.png" %item[0],"cbtn-%s.png" %item[0])
+      OV.CopyVFSFile("cbtn-%s-off.png" %item[0],"cbtn-%s.png" %item[0])
   return "Done"
 if haveGUI:
   OV.registerFunction(setMainToolbarTabButtons)
@@ -780,7 +780,7 @@ def setAllMainToolbarTabButtons():
           state = "on"
       else:
         state = 'off'
-    OV.CopyVFSFile("cbtn-%s%s.png" %(btn,state),"cbtn-%s.png" %btn)
+    OV.CopyVFSFile("cbtn-%s-%s.png" %(btn,state),"cbtn-%s.png" %btn)
     if state == 'on':
       OV.SetVar('gui_MainToolbarTabButtonActive',btn)
   return "Done"
@@ -1152,7 +1152,7 @@ def make_url_call(url, values):
     print "++++++++++++++++++++++++++++++++++++++++++++++\n"
     return False
   return f
-    
+
 def register_new_odac(username=None, pwd=None):
   OV.Cursor("Please wait while AutoChem will be installed")
   mac_address = OV.GetMacAddress()[0]
@@ -1175,7 +1175,7 @@ def register_new_odac(username=None, pwd=None):
             'macAddress':mac_address
             }
   f = make_url_call(url, values)
-  
+
   if not f:
     print "Please provide a valid username and password, and make sure your computer is online."
     print "You may also have used up the numbr of allowable installs."
@@ -1183,7 +1183,7 @@ def register_new_odac(username=None, pwd=None):
   p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], olex2_tag)
   if not os.path.exists(p):
     os.makedirs(p)
-    
+
   cont = GetHttpFile(f, force=True, fullURL = True)
   if cont:
     name = "AutoChem Installer.exe"
@@ -1203,7 +1203,7 @@ def register_new_odac(username=None, pwd=None):
   print "AutoChem is now installed on your computer."
   print "Please restart Olex2 now."
   OV.Cursor()
-  
+
 OV.registerFunction(register_new_odac)
 
 def updateACF(force=False):
@@ -1216,7 +1216,7 @@ def updateACF(force=False):
     print "No update required"
     return
   print "Now Updating..."
-  
+
   mac_address = OV.GetMacAddress()
   username, computer_name = OV.GetUserComputerName()
   keyname = getKey()
@@ -1326,7 +1326,7 @@ def GetACF():
 
   if not OV.IsPluginInstalled('Headless'):
     olex.m("installplugin Headless")
-  
+
   updateACF()
   use_new = True
   if use_new:
