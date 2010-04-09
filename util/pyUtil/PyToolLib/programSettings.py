@@ -122,6 +122,11 @@ def makeArgumentsHTML(program, method, instruction):
     ctrl_name = 'SET_%s' %(varName.upper())
     onchange = 'SetVar(%s,GetValue(%s))>>spy.addInstruction(%s,%s,%s)' %(
       varName, ctrl_name, program.name, method.name, name)
+    
+    if "settings_cf" in varName:
+      value = "$spy.GetParam('programs.solution.smtbx.cf.%s')" %(varName.lstrip('settings_cf'))
+      onchange = "spy.SetParam('programs.solution.smtbx.cf.%s',GetValue(%s))" %(varName.lstrip('settings_cf'), ctrl_name)
+    
     if option.name == 'nls':
       onchange = '%s>>spy.SetParam(snum.refinement.max_cycles,GetValue(SET_SETTINGS_%s_NLS))>>updatehtml' %(onchange, name.upper())
     elif option.name == 'npeaks':

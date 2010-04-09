@@ -5,8 +5,8 @@
 <font BOLD="true" NAME="Gill Sans MT" SIZE="28"/>
 <node COLOR="#4e6c9a" CREATED="1246482224868" ID="_" MODIFIED="1270821345570" POSITION="right" STYLE="bubble" TEXT="Solving  Structures">
 <font BOLD="true" NAME="Gill Sans MT" SIZE="18"/>
-<node CREATED="1246482232543" ID="Freemind_Link_1780118016" MODIFIED="1270821345571" TEXT="With SHELX">
-<font NAME="Gill Sans MT" SIZE="12"/>
+<node COLOR="#338800" CREATED="1246482232543" ID="Freemind_Link_1780118016" MODIFIED="1270824204030" TEXT="With SHELX">
+<font BOLD="true" NAME="Gill Sans MT" SIZE="12"/>
 <node CREATED="1246482365468" ID="Freemind_Link_420495388" MODIFIED="1270821142280" TEXT="ShelXS">
 <font NAME="Gill Sans MT" SIZE="12"/>
 <node CREATED="1246482388347" ID="Freemind_Link_372544166" MODIFIED="1270821142280" TEXT="Direct Methods">
@@ -20,14 +20,14 @@
 <font NAME="Gill Sans MT" SIZE="12"/>
 </node>
 </node>
-<node CREATED="1253792161685" ID="Freemind_Link_1342539768" MODIFIED="1270821345571" TEXT="With Superflip">
-<font NAME="Gill Sans MT" SIZE="12"/>
+<node COLOR="#338800" CREATED="1253792161685" ID="Freemind_Link_1342539768" MODIFIED="1270824204843" TEXT="With Superflip">
+<font BOLD="true" NAME="Gill Sans MT" SIZE="12"/>
 </node>
-<node CREATED="1253792172213" ID="Freemind_Link_1030614921" MODIFIED="1270821345572" TEXT="With SIR">
-<font NAME="Gill Sans MT" SIZE="12"/>
+<node COLOR="#338800" CREATED="1253792172213" ID="Freemind_Link_1030614921" MODIFIED="1270824205467" TEXT="With SIR">
+<font BOLD="true" NAME="Gill Sans MT" SIZE="12"/>
 </node>
-<node CREATED="1246482235479" ID="Freemind_Link_779597585" MODIFIED="1270821345572" TEXT="With smtbx">
-<font NAME="Gill Sans MT" SIZE="12"/>
+<node COLOR="#338800" CREATED="1246482235479" ID="Freemind_Link_779597585" MODIFIED="1270824206315" TEXT="With smtbx">
+<font BOLD="true" NAME="Gill Sans MT" SIZE="12"/>
 <node CREATED="1246482406451" ID="Freemind_Link_1594921558" MODIFIED="1270821142280" TEXT="Charge Flipping">
 <font NAME="Gill Sans MT" SIZE="12"/>
 <node CREATED="1270732859582" ID="ID_437488237" MODIFIED="1270821142280" TEXT="On F"/>
@@ -46,14 +46,11 @@
 <node COLOR="#4e6c9a" CREATED="1256721547419" ID="Freemind_Link_1507516291" MODIFIED="1270821895969" POSITION="right" STYLE="bubble" TEXT="Model Building">
 <edge WIDTH="2"/>
 <font BOLD="true" NAME="Gill Sans MT" SIZE="18"/>
-<node CREATED="1258039562142" ID="Freemind_Link_191700793" MODIFIED="1270821344564" TEXT="Geometric Hydrogen Placement">
-<font NAME="Gill Sans MT" SIZE="12"/>
+<node COLOR="#338800" CREATED="1258039562142" ID="Freemind_Link_191700793" MODIFIED="1270824207371" TEXT="Geometric Hydrogen Placement">
+<font BOLD="true" NAME="Gill Sans MT" SIZE="12"/>
 </node>
-<node CREATED="1258039621916" ID="Freemind_Link_1830523761" MODIFIED="1270821344564" TEXT="Disorder Modeling Tools">
-<font NAME="Gill Sans MT" SIZE="12"/>
-</node>
-<node CREATED="1256721615513" ID="Freemind_Link_1858296237" MODIFIED="1270821344565" TEXT="Fix/Free Parameters">
-<font NAME="Gill Sans MT" SIZE="12"/>
+<node COLOR="#338800" CREATED="1256721615513" ID="Freemind_Link_1858296237" MODIFIED="1270824208139" TEXT="Fix/Free Parameters">
+<font BOLD="true" NAME="Gill Sans MT" SIZE="12"/>
 <node CREATED="1256721622489" ID="Freemind_Link_551440189" MODIFIED="1270821151252" TEXT="occu">
 <edge WIDTH="2"/>
 <font NAME="Gill Sans MT" SIZE="12"/>
@@ -67,8 +64,8 @@
 <font NAME="Gill Sans MT" SIZE="12"/>
 </node>
 </node>
-<node CREATED="1256721663671" ID="Freemind_Link_255534313" MODIFIED="1270821344565" TEXT="Connectivity Table">
-<font NAME="Gill Sans MT" SIZE="12"/>
+<node COLOR="#338800" CREATED="1256721663671" ID="Freemind_Link_255534313" MODIFIED="1270824209003" TEXT="Connectivity Table">
+<font BOLD="true" NAME="Gill Sans MT" SIZE="12"/>
 <node CREATED="1258019891314" ID="Freemind_Link_1054318345" MODIFIED="1270821151253" TEXT="Sort Atom List">
 <edge WIDTH="2"/>
 <font NAME="Gill Sans MT" SIZE="12"/>
@@ -136,8 +133,8 @@
 </node>
 </node>
 </node>
-<node CREATED="1256723088164" ID="Freemind_Link_1788012562" MODIFIED="1270821344566" TEXT="Constraints">
-<font NAME="Gill Sans MT" SIZE="12"/>
+<node COLOR="#338800" CREATED="1256723088164" ID="Freemind_Link_1788012562" MODIFIED="1270824209947" TEXT="Constraints">
+<font BOLD="true" NAME="Gill Sans MT" SIZE="12"/>
 <node CREATED="1256723098756" FOLDED="true" ID="Freemind_Link_1142527584" MODIFIED="1270821151253" TEXT="Share atom site">
 <edge WIDTH="2"/>
 <font NAME="Gill Sans MT" SIZE="12"/>
@@ -183,8 +180,8 @@
 </node>
 </node>
 </node>
-<node CREATED="1256723093636" ID="Freemind_Link_95661317" MODIFIED="1270821344566" TEXT="Restraints">
-<font NAME="Gill Sans MT" SIZE="12"/>
+<node COLOR="#338800" CREATED="1256723093636" ID="Freemind_Link_95661317" MODIFIED="1270824210811" TEXT="Restraints">
+<font BOLD="true" NAME="Gill Sans MT" SIZE="12"/>
 <node CREATED="1256723298255" FOLDED="true" ID="Freemind_Link_373542253" MODIFIED="1270821151254" TEXT="Same Distance">
 <edge WIDTH="2"/>
 <font NAME="Gill Sans MT" SIZE="12"/>
@@ -337,8 +334,8 @@
 </node>
 <node COLOR="#4e6c9a" CREATED="1246482419739" ID="Freemind_Link_1055925113" MODIFIED="1270821346626" POSITION="right" STYLE="bubble" TEXT="Refining  Structures">
 <font BOLD="true" NAME="Gill Sans MT" SIZE="18"/>
-<node CREATED="1246482432714" ID="Freemind_Link_1799855020" MODIFIED="1270821346626" TEXT="With SHELX">
-<font NAME="Gill Sans MT" SIZE="12"/>
+<node COLOR="#338800" CREATED="1246482432714" ID="Freemind_Link_1799855020" MODIFIED="1270824213675" TEXT="With SHELX">
+<font BOLD="true" NAME="Gill Sans MT" SIZE="12"/>
 <node CREATED="1253792294098" ID="Freemind_Link_837232422" MODIFIED="1270821157369" TEXT="Full Matrix LS">
 <edge WIDTH="2"/>
 <font NAME="Gill Sans MT" SIZE="12"/>
@@ -348,8 +345,8 @@
 <font NAME="Gill Sans MT" SIZE="12"/>
 </node>
 </node>
-<node CREATED="1246482437722" ID="Freemind_Link_1100535887" MODIFIED="1270821346627" TEXT="With smtbx">
-<font NAME="Gill Sans MT" SIZE="12"/>
+<node COLOR="#338800" CREATED="1246482437722" ID="Freemind_Link_1100535887" MODIFIED="1270824214427" TEXT="With smtbx">
+<font BOLD="true" NAME="Gill Sans MT" SIZE="12"/>
 <node CREATED="1246482445050" ID="Freemind_Link_942852928" MODIFIED="1270821157369" TEXT="LBFGS minimizer">
 <edge WIDTH="2"/>
 <font NAME="Gill Sans MT" SIZE="12"/>
@@ -359,13 +356,33 @@
 <font NAME="Gill Sans MT" SIZE="12"/>
 </node>
 </node>
-<node CREATED="1253792191748" ID="Freemind_Link_707304456" MODIFIED="1270821346627" TEXT="With CRYSTALS">
+<node COLOR="#990000" CREATED="1253792191748" ID="Freemind_Link_707304456" MODIFIED="1270822872343" TEXT="With CRYSTALS">
 <font NAME="Gill Sans MT" SIZE="12"/>
+</node>
+</node>
+<node COLOR="#4e6c9a" CREATED="1270826794523" ID="ID_1187212273" MODIFIED="1270826828621" POSITION="right" STYLE="bubble" TEXT="Structure Visualisation">
+<font BOLD="true" NAME="Gill Sans MT" SIZE="18"/>
+<node COLOR="#338800" CREATED="1270826879177" ID="ID_1417300597" MODIFIED="1270826905112" TEXT="Display Styles">
+<font BOLD="true" NAME="Gill Sans MT" SIZE="12"/>
+<node CREATED="1270826831450" ID="ID_1108875244" MODIFIED="1270826840326" TEXT="Ball and Stick"/>
+<node CREATED="1270826840954" ID="ID_1885669032" MODIFIED="1270826850357" TEXT="Thermal Ellipsoid Plots"/>
+<node CREATED="1270826851193" ID="ID_1106269118" MODIFIED="1270826858069" TEXT="Polyhedral Display"/>
+<node CREATED="1270826858505" ID="ID_134524085" MODIFIED="1270826860549" TEXT="Tubes"/>
+<node CREATED="1270826861129" ID="ID_971615780" MODIFIED="1270826863253" TEXT="Wire"/>
+</node>
+<node COLOR="#338800" CREATED="1270826909656" ID="ID_732353054" MODIFIED="1270826918024" TEXT="Packing Diagrams">
+<font BOLD="true" NAME="Gill Sans MT" SIZE="12"/>
+</node>
+<node COLOR="#338800" CREATED="1270826925655" ID="ID_546485762" MODIFIED="1270826934135" TEXT="Stereo Display">
+<font BOLD="true" NAME="Gill Sans MT" SIZE="12"/>
+<node CREATED="1270826939255" ID="ID_171532227" MODIFIED="1270826945635" TEXT="Red/Blue"/>
+<node CREATED="1270826946135" ID="ID_1047054441" MODIFIED="1270826949155" TEXT="Hardware"/>
+<node CREATED="1270826959975" ID="ID_1182653422" MODIFIED="1270826966482" TEXT="Side-by-Side"/>
 </node>
 </node>
 <node COLOR="#4e6c9a" CREATED="1256721756453" ID="Freemind_Link_485086975" MODIFIED="1270821347714" POSITION="right" STYLE="bubble" TEXT="Symmetry Operations">
 <font BOLD="true" NAME="Gill Sans MT" SIZE="18"/>
-<node CREATED="1256721810724" FOLDED="true" ID="Freemind_Link_1629025059" MODIFIED="1270821347715" TEXT="List Symmetry Operations">
+<node CREATED="1256721810724" FOLDED="true" ID="Freemind_Link_1629025059" MODIFIED="1270824229082" TEXT="List Symmetry Operations">
 <font NAME="Gill Sans MT" SIZE="12"/>
 <node COLOR="#669900" CREATED="1256722150699" FOLDED="true" ID="Freemind_Link_72366959" MODIFIED="1270730990534" TEXT="lstsymm">
 <edge WIDTH="2"/>
@@ -376,7 +393,7 @@
 </node>
 </node>
 </node>
-<node CREATED="1256721837507" FOLDED="true" ID="Freemind_Link_1330907143" MODIFIED="1270821347716" TEXT="Environment of an Atom">
+<node CREATED="1256721837507" FOLDED="true" ID="Freemind_Link_1330907143" MODIFIED="1270824229674" TEXT="Environment of an Atom">
 <font NAME="Gill Sans MT" SIZE="12"/>
 <node COLOR="#669900" CREATED="1256722164347" FOLDED="true" ID="Freemind_Link_571791170" MODIFIED="1270726478258" TEXT="envi">
 <edge WIDTH="2"/>
@@ -395,7 +412,7 @@
 </node>
 </node>
 </node>
-<node CREATED="1256722396773" FOLDED="true" ID="Freemind_Link_252245511" MODIFIED="1270821347716" TEXT="Missing Atom Generation">
+<node CREATED="1256722396773" FOLDED="true" ID="Freemind_Link_252245511" MODIFIED="1270824230186" TEXT="Missing Atom Generation">
 <font NAME="Gill Sans MT" SIZE="12"/>
 <node COLOR="#669900" CREATED="1256722422357" FOLDED="true" ID="Freemind_Link_100072111" MODIFIED="1270726478258" TEXT="mode grow">
 <edge WIDTH="2"/>
@@ -435,7 +452,7 @@
 </node>
 </node>
 </node>
-<node CREATED="1256722524434" FOLDED="true" ID="Freemind_Link_1521151110" MODIFIED="1270821347717" TEXT="Structure Packing">
+<node CREATED="1256722524434" FOLDED="true" ID="Freemind_Link_1521151110" MODIFIED="1270824230618" TEXT="Structure Packing">
 <font NAME="Gill Sans MT" SIZE="12"/>
 <node COLOR="#669900" CREATED="1256722535794" FOLDED="true" ID="Freemind_Link_1657218526" MODIFIED="1270726478257" TEXT="mode pack">
 <edge WIDTH="2"/>
@@ -478,17 +495,18 @@
 </node>
 </node>
 </node>
+<node CREATED="1270826765339" ID="ID_903628898" MODIFIED="1270826771383" TEXT="Space Group Settings"/>
 </node>
-<node COLOR="#4e6c9a" CREATED="1246482848416" ID="Freemind_Link_525766439" MODIFIED="1270821841658" POSITION="left" STYLE="bubble" TEXT="Analyse Raw Data">
+<node COLOR="#4e6c9a" CREATED="1246482848416" ID="Freemind_Link_525766439" MODIFIED="1270826645918" POSITION="left" STYLE="bubble" TEXT="Analyse Raw Data">
 <edge STYLE="bezier" WIDTH="2"/>
-<font BOLD="true" NAME="Gill Sans MT" SIZE="18"/>
+<font BOLD="true" NAME="Gill Sans MT" SIZE="16"/>
 <node COLOR="#338800" CREATED="1246482856032" ID="Freemind_Link_1069405328" MODIFIED="1270821105198" TEXT="Space Group Determination">
 <edge WIDTH="2"/>
 <font BOLD="true" NAME="Gill Sans MT" SIZE="12"/>
 <node CREATED="1258016952317" ID="Freemind_Link_1094141680" MODIFIED="1270821105198" TEXT="Reflection Statistics">
 <font NAME="Gill Sans MT" SIZE="12"/>
 </node>
-<node CREATED="1258016958522" ID="Freemind_Link_1737977173" MODIFIED="1270821105198" TEXT="From Charge Flipping Solution">
+<node COLOR="#990000" CREATED="1258016958522" ID="Freemind_Link_1737977173" MODIFIED="1270826610654" TEXT="From Charge Flipping Solution">
 <font NAME="Gill Sans MT" SIZE="12"/>
 </node>
 </node>
@@ -574,7 +592,7 @@
 <node CREATED="1270726245558" ID="ID_164865892" MODIFIED="1270821117645" TEXT="Mass Centre"/>
 <node CREATED="1270818655078" ID="ID_395778951" MODIFIED="1270821117645" TEXT="Consistent Naming"/>
 </node>
-<node COLOR="#338800" CREATED="1270818680885" ID="ID_166583553" MODIFIED="1270821117646" TEXT="Maps">
+<node COLOR="#338800" CREATED="1270818680885" ID="ID_166583553" MODIFIED="1270823667084" TEXT="Maps">
 <font BOLD="true" NAME="Gill Sans MT" SIZE="12"/>
 <node CREATED="1246482931542" ID="Freemind_Link_222100363" MODIFIED="1270821117646" TEXT="Electron Density Maps">
 <font NAME="Gill Sans MT" SIZE="12"/>
@@ -585,8 +603,28 @@
 </node>
 <node CREATED="1270818733092" ID="ID_867570594" MODIFIED="1270821117646" TEXT="Channel Analysis"/>
 </node>
+<node COLOR="#338800" CREATED="1270823668521" ID="ID_1545891744" MODIFIED="1270823858711" TEXT="Intermolecular Interactions">
+<font BOLD="true" NAME="Gill Sans MT" SIZE="12"/>
+<node CREATED="1270823721367" ID="ID_1144580918" MODIFIED="1270823831908" TEXT="pi-pi interactions">
+<font NAME="Gill Sans MT" SIZE="12"/>
 </node>
-<node COLOR="#4e6c9a" CREATED="1246482919326" ID="Freemind_Link_1226299369" MODIFIED="1270821299171" POSITION="left" STYLE="bubble" TEXT="Automate Tasks">
+<node CREATED="1270823860404" ID="ID_532855441" MODIFIED="1270823866655" TEXT="H-bond analysis"/>
+</node>
+<node COLOR="#338800" CREATED="1253875899722" ID="Freemind_Link_193222164" MODIFIED="1270823998268" TEXT="Connectivity Analysis">
+<edge WIDTH="2"/>
+<font BOLD="true" NAME="Gill Sans MT" SIZE="12"/>
+<node CREATED="1253875915817" ID="Freemind_Link_1183091509" MODIFIED="1270821178643" TEXT="Veryfiy Structuer Solution (VSS)">
+<font NAME="Gill Sans MT" SIZE="12"/>
+</node>
+<node CREATED="1253875918473" ID="Freemind_Link_1633604094" MODIFIED="1270826529171" TEXT="Atom Type Analysis (ATA)">
+<font NAME="Gill Sans MT" SIZE="12"/>
+</node>
+<node CREATED="1253883452590" ID="Freemind_Link_417410101" MODIFIED="1270826533765" TEXT="Fourier Atom Type Analysis (FATA)">
+<font NAME="Gill Sans MT" SIZE="12"/>
+</node>
+</node>
+</node>
+<node COLOR="#4e6c9a" CREATED="1246482919326" ID="Freemind_Link_1226299369" MODIFIED="1270824028521" POSITION="left" STYLE="bubble" TEXT="Automate Tasks">
 <arrowlink DESTINATION="Freemind_Link_1226299369" ENDARROW="Default" ENDINCLINATION="0;0;" ID="Arrow_ID_1825979605" STARTARROW="None" STARTINCLINATION="0;0;"/>
 <font BOLD="true" NAME="Gill Sans MT" SIZE="18"/>
 <node COLOR="#338800" CREATED="1253792323649" ID="Freemind_Link_1852062130" MODIFIED="1270821178642" TEXT="Structure Checking">
@@ -610,19 +648,6 @@
 <font NAME="Gill Sans MT" SIZE="12"/>
 </node>
 </node>
-<node COLOR="#338800" CREATED="1253875899722" ID="Freemind_Link_193222164" MODIFIED="1270821178643" TEXT="Model Building">
-<edge WIDTH="2"/>
-<font BOLD="true" NAME="Gill Sans MT" SIZE="12"/>
-<node CREATED="1253875915817" ID="Freemind_Link_1183091509" MODIFIED="1270821178643" TEXT="Veryfiy Structuer Solution (VSS)">
-<font NAME="Gill Sans MT" SIZE="12"/>
-</node>
-<node CREATED="1253875918473" ID="Freemind_Link_1633604094" MODIFIED="1270821178643" TEXT="Atom Type Assignment (ATA)">
-<font NAME="Gill Sans MT" SIZE="12"/>
-</node>
-<node CREATED="1253883452590" ID="Freemind_Link_417410101" MODIFIED="1270821178643" TEXT="Fourier Atom Type Assignment (FATA)">
-<font NAME="Gill Sans MT" SIZE="12"/>
-</node>
-</node>
 <node COLOR="#990000" CREATED="1253792378032" ID="Freemind_Link_1055216656" MODIFIED="1270821178643" TEXT="Multiple Structures">
 <edge WIDTH="2"/>
 <font NAME="Gill Sans MT" SIZE="12"/>
@@ -636,8 +661,14 @@
 </node>
 <node COLOR="#990000" CREATED="1270726346163" ID="ID_1941256177" MODIFIED="1270821178643" TEXT="Consistent Naming"/>
 </node>
+<node COLOR="#338800" CREATED="1258039621916" ID="Freemind_Link_1830523761" MODIFIED="1270824960120" TEXT="Disorder Modeling Tools">
+<font BOLD="true" NAME="Gill Sans MT" SIZE="12"/>
 </node>
-<node COLOR="#4e6c9a" CREATED="1253869330493" ID="Freemind_Link_1843363258" MODIFIED="1270821343298" POSITION="left" STYLE="bubble" TEXT="Workflow">
+<node COLOR="#338800" CREATED="1270824044719" ID="ID_865809117" MODIFIED="1270824969390" TEXT="Automatic Constraint Generation">
+<font BOLD="true" NAME="Gill Sans MT" SIZE="12"/>
+</node>
+</node>
+<node COLOR="#4e6c9a" CREATED="1253869330493" ID="Freemind_Link_1843363258" MODIFIED="1270823934989" POSITION="left" STYLE="bubble" TEXT="Workflow">
 <font BOLD="true" NAME="Gill Sans MT" SIZE="18"/>
 <node CREATED="1253869334541" ID="Freemind_Link_1492395886" MODIFIED="1270821343300" TEXT="History Generation">
 <font NAME="Gill Sans MT" SIZE="12"/>
@@ -645,9 +676,11 @@
 <node CREATED="1253875365639" ID="Freemind_Link_238635034" MODIFIED="1270821343300" TEXT="Choose Reflection File">
 <font NAME="Gill Sans MT" SIZE="12"/>
 </node>
+<node CREATED="1270823902659" ID="ID_633037527" MODIFIED="1270823910702" TEXT="Model Pesistence"/>
+<node COLOR="#990000" CREATED="1270823936002" ID="ID_422570576" MODIFIED="1270823957169" TEXT="Context Sensitive Menus"/>
 </node>
-<node COLOR="#4e6c9a" CREATED="1258039937172" ID="Freemind_Link_1143802177" MODIFIED="1270821744461" POSITION="left" STYLE="bubble" TEXT="Structure Completion">
-<edge WIDTH="1"/>
+<node COLOR="#4e6c9a" CREATED="1258039937172" ID="Freemind_Link_1143802177" MODIFIED="1270824952220" POSITION="left" STYLE="bubble" TEXT="Structure Completion">
+<edge WIDTH="2"/>
 <font BOLD="true" NAME="Gill Sans MT" SIZE="18"/>
 <node CREATED="1246482828152" ID="Freemind_Link_1713214437" MODIFIED="1270821348819" TEXT="Images Creation">
 <font NAME="Gill Sans MT" SIZE="12"/>
@@ -713,8 +746,8 @@
 <node COLOR="#4e6c9a" CREATED="1253868057261" ID="Freemind_Link_152149540" MODIFIED="1270821883963" POSITION="right" STYLE="bubble" TEXT="Visual Feedback">
 <edge WIDTH="2"/>
 <font BOLD="true" NAME="Gill Sans MT" SIZE="18"/>
-<node CREATED="1253868068764" ID="Freemind_Link_381464472" MODIFIED="1270821824982" TEXT="Refinement Parameters">
-<font NAME="Gill Sans MT" SIZE="12"/>
+<node COLOR="#338800" CREATED="1253868068764" ID="Freemind_Link_381464472" MODIFIED="1270824217803" TEXT="Refinement Parameters">
+<font BOLD="true" NAME="Gill Sans MT" SIZE="12"/>
 <node CREATED="1253868078460" ID="Freemind_Link_328255405" MODIFIED="1270821188176" TEXT="Weighting Scheme">
 <edge WIDTH="2"/>
 <font NAME="Gill Sans MT" SIZE="12"/>
@@ -724,8 +757,8 @@
 <font NAME="Gill Sans MT" SIZE="12"/>
 </node>
 </node>
-<node CREATED="1253883224148" ID="Freemind_Link_773121223" MODIFIED="1270821352356" TEXT="Model">
-<font NAME="Gill Sans MT" SIZE="12"/>
+<node COLOR="#338800" CREATED="1253883224148" ID="Freemind_Link_773121223" MODIFIED="1270824218651" TEXT="Model">
+<font BOLD="true" NAME="Gill Sans MT" SIZE="12"/>
 <node CREATED="1253883228915" ID="Freemind_Link_705457759" MODIFIED="1270821188176" TEXT="Transparent Electron Density Peaks">
 <edge WIDTH="2"/>
 <font NAME="Gill Sans MT" SIZE="12"/>
@@ -746,16 +779,16 @@
 </node>
 <node COLOR="#4e6c9a" CREATED="1258031986531" ID="Freemind_Link_447825077" MODIFIED="1270821353234" POSITION="left" STYLE="bubble" TEXT="Databases">
 <font BOLD="true" NAME="Gill Sans MT" SIZE="18"/>
-<node CREATED="1258032036770" ID="Freemind_Link_1767879980" MODIFIED="1270821353234" TEXT="Versioning">
+<node COLOR="#990000" CREATED="1258032036770" ID="Freemind_Link_1767879980" MODIFIED="1270822909605" TEXT="Versioning">
 <font NAME="Gill Sans MT" SIZE="12"/>
 </node>
-<node CREATED="1258034426710" ID="Freemind_Link_1736691546" MODIFIED="1270821353234" TEXT="Local">
+<node COLOR="#990000" CREATED="1258034426710" ID="Freemind_Link_1736691546" MODIFIED="1270822911819" TEXT="Local">
 <font NAME="Gill Sans MT" SIZE="12"/>
 </node>
-<node CREATED="1258034438038" ID="Freemind_Link_166165100" MODIFIED="1270821353234" TEXT="Remote">
+<node COLOR="#990000" CREATED="1258034438038" ID="Freemind_Link_166165100" MODIFIED="1270822912619" TEXT="Remote">
 <font NAME="Gill Sans MT" SIZE="12"/>
 </node>
-<node CREATED="1258034462549" ID="Freemind_Link_1574586250" MODIFIED="1270821353235" TEXT="CFR11 Compliance">
+<node COLOR="#990000" CREATED="1258034462549" ID="Freemind_Link_1574586250" MODIFIED="1270822913355" TEXT="CFR11 Compliance">
 <font NAME="Gill Sans MT" SIZE="12"/>
 </node>
 </node>
