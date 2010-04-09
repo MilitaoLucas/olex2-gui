@@ -1084,6 +1084,26 @@ atom_sites_solution=other
   .type=str
 flipping_interval=60
   .type=int
+instructions {
+  cf {
+    values {
+      amplitude_type = F E *quasi-E
+        .type = choice
+        .caption = AMPT
+      max_attempts_to_get_phase_transition = 5
+        .type = int
+        .caption = MAPT
+      max_attempts_to_get_sharp_correlation_map = 5
+        .type = int
+        .caption = MACM
+      max_solving_iterations = 500
+        .type = int
+        .caption = MASI
+        }
+    default=True
+      .type=bool
+    }
+  }
 """)
 
 shelxl_phil = phil_interface.parse("""
