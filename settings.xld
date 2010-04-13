@@ -17,7 +17,8 @@
   <shortcut key="F6" macro="itemstate * 0 tab* 2 tab-view 1 logo1 1 index-view* 1 info-title 1">
   <shortcut key="F7" macro="itemstate * 0 tab* 2 tab-tools 1 logo1 1 index-tools* 1 info-title 1">
   <shortcut key="F8" macro="itemstate * 0 tab* 2 tab-info 1 logo1 1 index-info* 1 info-title 1">
-  <shortcut key="F11" macro="if strcmp(Fullscreen(),false) then Fullscreen(true) else Fullscreen(false)">
+  <shortcut key="Shift+F11" macro="HtmlPanelVisible">
+  <shortcut key="F11" macro="Fullscreen(not(Fullscreen()))">
   <shortcut key="F12" macro="spy.stop_auto">
   <shortcut key="Ctrl+0" macro="showP 0">
   <shortcut key="Ctrl+1" macro="showP 1">
