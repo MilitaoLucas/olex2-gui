@@ -620,7 +620,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       model_map = miller.fft_map(crystal_gridding, data)
       output_data = model_map.apply_volume_scaling().real_map()
     self.time_write_grid = time_log("write grid").start()
-    if mask.flood_fill.n_voids() > 0 and OV.HasGui():
+    if mask.flood_fill.n_voids() > 0 and OV.HasGUI():
       write_grid_to_olex(output_data)
     self.time_write_grid.stop()
 
