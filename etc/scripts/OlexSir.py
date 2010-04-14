@@ -33,7 +33,36 @@ def OlexSir(level="normal", ManAtomContents="C 20 H 20 O 10", rhomax="0.25"):
   rhomax = 0.250 #default for sintheta/lambda 0.5
   Olex2SirIn = OV.FileName()
   SirCompatCell = ''.join(olx.xf_au_GetCell().split(','))
-  SirCompatSymm = ' '.join(re.split("([A-Za-z]*)([0-9][0-9])", olx.xf_au_GetCellSymm()))
+  brokensym = list(olx.xf_au_GetCellSymm())
+  SirCompatSymmSetting = brokensym.pop(0)
+  SirCompatSymmOpps = []
+  while len(brokensym) > 0:
+    print brokensym
+    print SirCompatSymmOpps
+    if brokensym[0] == '-':
+      print "true for -"
+      SirCompatSymmOpps.append(" "+brokensym.pop(0))
+      SirCompatSymmOpps.append(brokensym.pop(0))
+      continue
+    elif brokensym[0] in "a b c d n m":
+      print "true for letter"
+      SirCompatSymmOpps.append(" "+brokensym.pop(0))
+      continue
+    elif brokensym[0] in "1":
+      print "true for number"
+      SirCompatSymmOpps.append(brokensym.pop(0))
+      continue
+    elif brokensym[0] in "2 3 4 6 8 9":
+      print "true for number"
+      SirCompatSymmOpps.append(" "+brokensym.pop(0))
+      continue
+    elif brokensym[0] in "/":
+      print "true for number"
+      SirCompatSymmOpps.append(" "+brokensym.pop(0))
+      continue
+    print brokensym
+    print SirCompatSymmOpps
+  print ''.join(SirCompatSymmOpps)
   OlexZ = int(olx.xf_au_GetZ())
   AtomPairs = olx.xf_GetFormula().split()
   print AtomPairs
@@ -44,7 +73,7 @@ def OlexSir(level="normal", ManAtomContents="C 20 H 20 O 10", rhomax="0.25"):
   print AtomGroups
   for j in range(0, len(AtomGroups)):
     print AtomGroups[j][0], AtomGroups[j][1]
-    CorrectedAtoms.append("%s %s"%(AtomGroups[j][0], (AtomGroups[j][1]) * OlexZ))
+    CorrectedAtoms.append("%s %s"%(AtomGroups[j][0], (AtomGroups[j][1])))
   AtomContents = ' '.join(CorrectedAtoms)
   print AtomContents
   print "ETF", AtomContents
@@ -60,7 +89,7 @@ def OlexSir(level="normal", ManAtomContents="C 20 H 20 O 10", rhomax="0.25"):
   
   print "Job name", Olex2SirIn
   print "Unit Cell", SirCompatCell
-  print "Olex2 Symmetry:Sir Symmetry", olx.xf_au_GetCellSymm(), ':', SirCompatSymm
+  print "Olex2 Symmetry:Sir Symmetry", olx.xf_au_GetCellSymm(), ':',   SirCompatSymmSetting, ' '.join(SirCompatSymmOpps)
   print "Olex2 Formula", olx.xf_GetFormula()
   print "Sir Friendly Formula", AtomContents
   print "New formula using Z", OlexZ, 
@@ -79,7 +108,7 @@ def OlexSir(level="normal", ManAtomContents="C 20 H 20 O 10", rhomax="0.25"):
   SIRINS.write("%Init\n")
   SIRINS.write("%Data\n")
   SIRINS.write("\tCell %s\n"%(SirCompatCell))
-  SIRINS.write("\tSpaceGroup %s\n"%(SirCompatSymm))
+  SIRINS.write("\tSpaceGroup %s %s\n"%(SirCompatSymmSetting, "".join(SirCompatSymmOpps)))
   SIRINS.write("\tContent %s\n"%(AtomContents))
   SIRINS.write("\tRhomax %s\n"%(rhomax))    
   SIRINS.write("\tReflections %s.hkl\n"%(Olex2SirIn))
