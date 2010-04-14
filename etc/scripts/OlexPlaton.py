@@ -84,46 +84,50 @@ def OlexPlaton(platonflag="0"):
     # Mac assuming like windows
     tickornot = '-o -'
     
-  if platonflag == "help": # If no options given then we print all the possible commands out LOL
-  # Prefered printing out the raw text but using the dict again is logical but it does not print in order anymore :-(
+  # Checking for help string
+  if len(platonflag) > 1 or platonflag == "help":
+    print "Unknown option, please check options and try again"
+    #if platonflag == help: # If no options given then we print all the possible commands out LOL
+    # Prefered printing out the raw text but using the dict again is logical but it does not print in order anymore :-(
     for key in platonflagcodes:
       print " '%s' - %s"%(key, platonflagcodes[key][0])
-      return
-  elif platonflag == "0":
-    # Start just platon with the INS file
-    print "Calling Platon Directly"
-    command = "platon %s.ins"%(inputfilename)
-    platon(command)
     return
   else:
-    if platonflag == 'U':
-      print "This option requires a valid CIF file - checking"
-      # Check for CIF
+    if platonflag == "0":
+      # Start just platon with the INS file
+      print "Calling Platon Directly"
+      command = "platon %s.ins"%(inputfilename)
+      platon(command)
+      return
+    else:
+      if platonflag == 'U':
+        print "This option requires a valid CIF file - checking"
+        # Check for CIF
+        try:
+          cifornot = open("%s.%s"%(OV.FileName(), cif), 'r')
+          cifornot.close()
+        except:
+          print "No CIF present - why not make one with ACTA?"
+          print "Or run spy.OlexPlaton(C) and rename the %s.acc to %s.cif?"%(OV.FileName(), OV.FileName())
+        inputfilename = OV.FileName() + '.cif'
+      command = "platon %s%s %s"%(tickornot, platonflag, inputfilename)
+      platon(command)
+    # Old code works for Linux but not windows thanks to the stupid vritual cmdline built into Platon by LF
+    #  platon_extension = platon_result.split(":")[-1].split(".")[-1].split("\n")[0]
+    # To compensate now check flag against dictionary and then use that file extension, predominantly this is going to be lis
+      platon_extension = platonflagcodes[platonflag][1]
+      print "The file extension is: ", platon_extension, " filename is: ", "%s.%s"%(OV.FileName(), platon_extension)
       try:
-        cifornot = open("%s.%s"%(OV.FileName(), cif), 'r')
-        cifornot.close()
-      except:
-        print "No CIF present - why not make one with ACTA?"
-        print "Or run spy.OlexPlaton(C) and rename the %s.acc to %s.cif?"%(OV.FileName(), OV.FileName())
-      inputfilename = OV.FileName() + '.cif'
-    command = "platon %s%s %s"%(tickornot, platonflag, inputfilename)
-    platon(command)
-  # Old code works for Linux but not windows thanks to the stupid vritual cmdline built into Platon by LF
-  #  platon_extension = platon_result.split(":")[-1].split(".")[-1].split("\n")[0]
-  # To compensate now check flag against dictionary and then use that file extension, predominantly this is going to be lis
-    platon_extension = platonflagcodes[platonflag][1]
-    print "The file extension is: ", platon_extension, " filename is: ", "%s.%s"%(OV.FileName(), platon_extension)
-    try:
-      platon_result_file = open("%s.%s"%(OV.FileName(), platon_extension), 'r')
-      print "Successfully opened file", platon_result_file
-      for platon_line in platon_result_file:
-        print platon_line
-      platon_result_file.close()
-    except IOError: 
-      print "Failed to open file"
-    print "You can read this file by typing:"
-    print "edit %s"%(platon_extension)
-    return
+        platon_result_file = open("%s.%s"%(OV.FileName(), platon_extension), 'r')
+        print "Successfully opened file", platon_result_file
+        for platon_line in platon_result_file:
+          print platon_line
+        platon_result_file.close()
+      except IOError: 
+        print "Failed to open file"
+      print "You can read this file by typing:"
+      print "edit %s"%(platon_extension)
+      return
 
 OV.registerFunction(OlexPlaton)
 """
