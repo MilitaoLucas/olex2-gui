@@ -2,7 +2,7 @@
 <HTML Minimized="false" OnLeft="false" Width="320" Tooltips="false" Borders="10" NormalFont="" FixedFont="" >
 <Window Maximized="true" Width="1288" Height="968" X="-4" Y="-4" >
 <Windows Help="false" Info="false" CmdLine="false" >
-<Defaults Style="" Scene="" BgColor="4194304" WhiteOn="true" Gradient="true" GradientPicture="" language="English" ExtraZoom="1.25" GlTooltip="false" console.blend="true" >
+<Defaults Style="" Scene="" BgColor="4194304" WhiteOn="true" Gradient="true" GradientPicture="" language="English" ExtraZoom="1.25" console.blend="true" >
 <Stored_params 
  <gui_archive_last value="--" >
  <gui_grad_bottom_left value="#ffffff" >
