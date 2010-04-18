@@ -114,7 +114,7 @@
     <cmd2  "spy.saveHistory()">
     <cmd3  "spy.SaveStructureParams()">
     <cmd2  "mode off">
-    <cmd4  "storeparam startup filefull()">
+    <cmd4  "storeparam startup file.relativePath(filefull())">
     <cmd5  "storeparam last_version GetVar(last_version)">
     <cmd5  "spy.StoreParameters(gui)">
     <cmd5  XXX="spy.StoreParameters(olex2)">
