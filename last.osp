@@ -1,8 +1,8 @@
-﻿<Folders Styles="basedir()/util/stylesandscenes/" SceneP="basedir()/util/StylesAndScenes/" CifTemplates="basedir()/etc/CIF/" >
+﻿<Folders Styles="basedir()/util/stylesandscenes/" Scenes="basedir()/util/StylesAndScenes/" >
 <HTML Minimized="false" OnLeft="false" Width="320" Tooltips="false" Borders="10" NormalFont="" FixedFont="" >
 <Window Maximized="true" Width="1288" Height="968" X="-4" Y="-4" >
 <Windows Help="false" Info="false" CmdLine="false" >
-<Defaults Style="" SceneP="" BgColor="4194304" WhiteOn="true" Gradient="true" GradientPicture="C:\Users\Horst\Documents\olex-trunk\p.bmp" language="English" ExtraZoom="1.25" GlTooltip="false" console.blend="true" >
+<Defaults Style="" Scene="" BgColor="4194304" WhiteOn="true" Gradient="true" GradientPicture="" language="English" ExtraZoom="1.25" GlTooltip="false" console.blend="true" >
 <Stored_params 
  <gui_archive_last value="--" >
  <gui_grad_bottom_left value="#ffffff" >
@@ -35,7 +35,6 @@
  <gui_shelx_constraints value="--" >
  <gui_shelx_restraints value="--" >
  <gui_skin_extension value="None" >
- <gui_skin_logo_name value="basedir()/util/pyUtil/PluginLib/skins/plugin-defaultSkin/default.png" >
  <gui_skin_name value="default" >
  <gui_snumtitle_colour value="#6464a0" >
  <gui_snumtitle_font_colour value="#ff0000" >
