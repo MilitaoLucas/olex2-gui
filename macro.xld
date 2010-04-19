@@ -763,6 +763,16 @@
   \>
 \>
 
+<defaultu help="Change current style to default (for some broken graphics drivers on Ubuntu)"
+  <body
+    <cmd
+      <cmd1 "load style 'basedir()/etc/styles/default.glds'">
+      <cmd2 "load scene 'basedir()/etc/styles/defaultu.glps'">
+      <cmd3 "telp 50">
+    \>
+  \>
+\>
+
 <_defaultw help="Change the output to white default"
   <body
     <cmd

@@ -1,0 +1,27 @@
+﻿<Scene_Properties Flags="6" Ambient="11645361" ClearColor="4194304" 
+ <Light0 Ambient="0" Diffuse="7960953" Specular="8092539" Position="-56.000,46.000,100.000,1.000" Attenuation="1.000,0.000,0.000,1.000" SpotDirection="0.000,0.000,0.000,1.000" SpotCutoff="180" Enabled="true" >
+ <Light1 Ambient="0.000,0.000,0.000,1.000" Diffuse="0.000,0.000,0.000,1.000" Specular="201326656" Position="0.000,26.000,1.000,1.000" Attenuation="1.000,0.000,0.000,1.000" SpotDirection="1.000,0.000,0.000,1.000" SpotCutoff="180" Enabled="false" >
+ <Light2 Ambient="0.000,0.000,0.000,1.000" Diffuse="0.000,0.000,0.000,1.000" Specular="205520896" Position="60.000,33.000,1.000,1.000" Attenuation="1.000,0.000,0.000,1.000" SpotDirection="0.000,0.000,0.000,1.000" SpotCutoff="180" Enabled="false" >
+ <Light3 Ambient="0.000,0.000,0.000,1.000" Diffuse="0.000,0.000,0.000,1.000" Specular="201343104" Position="-98.000,-100.000,-100.000,1.000" Attenuation="1.000,0.000,0.000,1.000" SpotDirection="0.000,0.000,0.000,1.000" SpotCutoff="180" Enabled="false" >
+ <Light4 Ambient="0.000,0.000,0.000,1.000" Diffuse="0.000,0.000,0.000,1.000" Specular="252645135" Position="0.000,0.000,1.000,1.000" Attenuation="1.000,0.000,0.000,1.000" SpotDirection="0.000,0.000,0.000,1.000" SpotCutoff="180" Enabled="false" >
+ <Light5 Ambient="0.000,0.000,0.000,1.000" Diffuse="0.000,0.000,0.000,1.000" Specular="252645135" Position="0.000,0.000,1.000,1.000" Attenuation="1.000,0.000,0.000,1.000" SpotDirection="0.000,0.000,0.000,1.000" SpotCutoff="180" Enabled="false" >
+ <Light6 Ambient="0.000,0.000,0.000,1.000" Diffuse="0.000,0.000,0.000,1.000" Specular="252645135" Position="0.000,0.000,1.000,1.000" Attenuation="1.000,0.000,0.000,1.000" SpotDirection="0.000,0.000,0.000,1.000" SpotCutoff="180" Enabled="false" >
+ <Light7 Ambient="0.000,0.000,0.000,1.000" Diffuse="0.000,0.000,0.000,1.000" Specular="252645135" Position="0.000,0.000,1.000,1.000" Attenuation="1.000,0.000,0.000,1.000" SpotDirection="0.000,0.000,0.000,1.000" SpotCutoff="180" Enabled="false" >
+>
+<Fonts 
+  <Console id="#olex2.fnt:frb_12" >
+  <Help id="#olex2.fnt:frb_12" >
+  <Notes id="#olex2.fnt:frb_12" >
+  <Labels id="#olex2.fnt:frb_12" >
+  <Picture_labels id="#olex2.fnt:frb_20" >
+  <Tooltip id="#olex2.fnt:frb_12" >
+>
+<Materials 
+ <Help_txt "1;0.000,1.000,1.000,0.000" >
+ <Help_cmd "1;1.000,1.000,0.000,0.000" >
+ <Exec "2305;0.000,0.000,0.502,1.000" >
+ <Info "1;0.000,0.498,1.000,0.000" >
+ <Warning "1;1.000,0.498,0.000,0.000" >
+ <Error "1;1.000,0.498,0.000,0.000" >
+ <Exception "1;1.000,0.498,0.000,0.000" >
+>
