@@ -118,6 +118,9 @@ class History(ArgumentParser):
     global tree
     if os.path.exists(self.history_filepath):
       tree = variableFunctions.unPickle(self.history_filepath)
+      if tree is None:
+        # Not sure why this ever happens though...
+        self._createNewHistory()
       try:
         historyName = tree.name
       except AttributeError:
