@@ -594,7 +594,8 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       mask.compute(solvent_radius=self.params.solvent_radius,
                    shrink_truncation_radius=self.params.shrink_truncation_radius,
                    resolution_factor=self.params.resolution_factor,
-                   atom_radii_table={'C':1.70, 'B':1.63, 'N':1.55, 'O':1.52})
+                   atom_radii_table={'C':1.70, 'B':1.63, 'N':1.55, 'O':1.52},
+                   use_space_group_symmetry=True)
       self.time_compute.stop()
       self.time_f_mask = time_log("f_mask calculation").start()
       f_mask = mask.structure_factors()
