@@ -49,17 +49,27 @@ def getDefaultPrgMethod(prgType):
 def Pickle(item,path):
   if "none/.olex" in path:
     return
-  pFile = open(path, 'w')
+  pFile = open(path, 'wb')
   pickle.dump(item, pFile)
   pFile.close()
 
 def unPickle(path):
+  pFile = None
   try:
+    pFile = open(path, 'rb')
+    data = pickle.load(pFile)
+  except:
+    # compatibility for files that were not saved in mode 'wb'
+    if pFile is not None:
+      pFile.close()
+      pFile = None
     pFile = open(path, 'r')
     data = pickle.load(pFile)
-    pFile.close()
-  except IOError:
-    data = None
+  finally:
+    if pFile is not None:
+      pFile.close()
+  #except IOError:
+    #data = None
   return data
 
 def AddVariableToUserInputList(variable):
