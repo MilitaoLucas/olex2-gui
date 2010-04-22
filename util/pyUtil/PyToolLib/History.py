@@ -40,7 +40,7 @@ class History(ArgumentParser):
     self.filename = OV.FileName()
     self.strdir = OV.StrDir()
     self.datadir = OV.DataDir()
-    self.history_filepath = r'%s/%s.history' %(self.strdir,self.filename)
+    self.history_filepath = r'%s/%s.hist' %(self.strdir,self.filename)
     self.rename = OV.FindValue('rename')
     self.his_file = None
 
@@ -117,7 +117,13 @@ class History(ArgumentParser):
     self._getItems()
     global tree
     if os.path.exists(self.history_filepath):
-      tree = variableFunctions.unPickle(self.history_filepath)
+      # new version
+      history_path = self.history_filepath
+    else:
+      # old version
+      history_path = r'%s/%s.history' %(self.strdir,self.filename)
+    if os.path.exists(history_path):
+      tree = variableFunctions.unPickle(history_path)
       if tree is None:
         # Not sure why this ever happens though...
         self._createNewHistory()
