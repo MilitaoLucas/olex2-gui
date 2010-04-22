@@ -1499,6 +1499,11 @@ def AvailableExternalProgramsHtml():
   d.setdefault('refinement', AvailableExternalPrograms('refinement'))
   d.setdefault('solution', AvailableExternalPrograms('solution'))
 
+def makeGreek(txt):
+  txt = txt.replace(r"\a", r"&#945;")
+  return txt
+OV.registerFunction(makeGreek)
+  
 def getReportImageSrc(size=400):
   import PIL
   import Image
