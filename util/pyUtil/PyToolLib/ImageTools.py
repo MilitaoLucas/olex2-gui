@@ -238,7 +238,6 @@ class ImageTools(FontInstances):
     OlexVFS.write_to_olex('logo1_txt.htm',txt)
     return "Done"
 
-
   def resize_to_panelwidth(self, args):
     name = args['i']
     colourize = args.get('c',False)
