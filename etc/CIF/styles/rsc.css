@@ -1,30 +1,40 @@
-p.journal
-	{
-		font-family:"Times New Roman";
-		text-align:justify;
-		font-size:10.0pt;
-		line-height:11.0pt;
-		margin-top:0pt;
-		margin-bottom:0pt;
-		text-indent:1cm;
-	}
+p.journal{
+  font-family:"Times New Roman";
+  text-align:justify;
+  font-size:10.0pt;
+  line-height:11.0pt;
+  margin-top:0pt;
+  margin-bottom:0pt;
+  text-indent:1cm;
+}
 
-p.journal_h1
-	{
-		font-size:13.0pt;
-		font-weight:bold;
-		margin-top:18pt;
-		margin-bottom:6pt;
-	} 
+p.journal_h1{
+  font-size:13.0pt;
+  font-weight:bold;
+  margin-top:18pt;
+  margin-bottom:6pt;
+} 
 
-p.journal_h2
-	{
-		font-size:10.0pt;
-		font-weight:bold;
-		margin-top:6pt;
-		margin-bottom:3pt;
-	}
-ul.journal_reference li
-	{
-		list-style-type:none;
-	}
+p.journal_h2{
+  font-size:10.0pt;
+  font-weight:bold;
+  margin-top:6pt;
+  margin-bottom:3pt;
+}
+ul.journal_reference li{
+  list-style-type:none;
+}
+
+.container {
+  margin: 0 auto;
+  padding-top: 0px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 50px;
+  position: relative;
+  width: 800px;
+  background-color: #ffffff !important;
+}
+.outside {
+  background-color: #efefef;
+}
