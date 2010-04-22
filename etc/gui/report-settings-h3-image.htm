@@ -12,78 +12,78 @@ cursor(busy, '%Please Wait...%')
 >>dire
 >>UpdateHtml
 >>Cursor()"
-			 target="Save screenshot as image">
-			 <zimg border="0" src="toolbar-image.png">
-    </a>
-	</td>	
-	<td width='15%' align='right' colspan='1'>
-		Width
-	</td>	
-	<td colspan = '1'>
-		<input
-			type="combo"
-			height="$spy.GetParam(gui.html.combo_height)"
-			bgcolor="spy.GetParam(gui.html.input_bg_colour)" 
-			name="SET_REPORT_IMAGE_SIZE" 
-			items="640;800;1024;1280"
-			onchange="spy.SetParam(snum.report.image_size,GetValue(SET_REPORT_IMAGE_SIZE))"
-			width="20%" 
-			value="$spy.GetParam(snum.report.image_size)"
-		>
-	</td>
-	<td colspan='4'>
-		<input 
-			type="combo"
-			height="$spy.GetParam(gui.html.combo_height)"
-			bgcolor="spy.GetParam(gui.html.input_bg_colour)" 
-			name="SET_REPORT_IMAGE"
-			readonly
-			items='file.ListDirForGui(FilePath(),*.png;*.jpg;*.bmp)' 
-			onchange="spy.SetParam(snum.report.image,GetValue(SET_REPORT_IMAGE))"
-			width="50%" 
-			value="file.GetName($spy.GetParam(snum.report.image))"
-		>
-	</td>
+  target="Save screenshot as image">
+  <zimg border="0" src="toolbar-image.png">
+</a>
+</td>	
+<td width='15%' align='right' colspan='1'>
+  Width
+</td>	
+<td colspan = '1'>
+  <input
+    type="combo"
+    height="$spy.GetParam(gui.html.combo_height)"
+    bgcolor="spy.GetParam(gui.html.input_bg_colour)" 
+    name="SET_REPORT_IMAGE_SIZE" 
+    items="640;800;1024;1280"
+    onchange="spy.SetParam(snum.report.image_size,GetValue(SET_REPORT_IMAGE_SIZE))"
+    width="20%" 
+    value="$spy.GetParam(snum.report.image_size)"
+  >
+</td>
+<td colspan='4'>
+  <input 
+    type="combo"
+    height="$spy.GetParam(gui.html.combo_height)"
+    bgcolor="spy.GetParam(gui.html.input_bg_colour)" 
+    name="SET_REPORT_IMAGE"
+    readonly
+    items='file.ListDirForGui(FilePath(),*.png;*.jpg;*.bmp;*.ps;*.eps)' 
+    onchange="spy.SetParam(snum.report.image,GetValue(SET_REPORT_IMAGE))"
+    width="50%" 
+    value="file.GetName($spy.GetParam(snum.report.image))"
+  >
+</td>
 </tr>
 <tr>
-	<td colspan = '1'>
+  <td colspan = '1'>
     <a href="spy MakeMovie movie getvalue(axis);getvalue(steps);getvalue(frames);getvalue(size)"
-			 target="Make Movie">
-			 <zimg border="0" src="toolbar-movie.png">
+      target="Make Movie">
+      <zimg border="0" src="toolbar-movie.png">
     </a>
-	</td>
-	<td colspan='5'>
-		<font size=2 color=grey>%This will produce a series of .bmp files in the sub-folder 'movie'%</font>
-	</td>
+  </td>
+  <td colspan='5'>
+    <font size=2 color=grey>%This will produce a series of .bmp files in the sub-folder 'movie'%</font>
+  </td>
 </tr>
 <tr>
   <td valign='center' colspan='2'>
-		%Rotation around Axis%:
-	</td>
-	<td valign='center' >
-		<font size='2' align='center'><input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name="axis"  width="30"  height="17" value = "2"></font>
-	</td>
-	<td valign='center' >
-		%Degree%:
-	</td>
-	<td valign='center' >
-		<font size='2'><input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name="steps"  width="30"  height="17" value = "1"></font>
-	</td>
-	
+    %Rotation around Axis%:
+  </td>
+  <td valign='center' >
+    <font size='2' align='center'><input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name="axis"  width="30"  height="17" value = "2"></font>
+  </td>
+  <td valign='center' >
+    %Degree%:
+  </td>
+  <td valign='center' >
+    <font size='2'><input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name="steps"  width="30"  height="17" value = "1"></font>
+  </td>
+
 </tr>	
 <tr>
-	<td valign='center' colspan='2'>
-		%Number of frames%:
-	</td>
-	<td valign='center' >
-		<font size='2'><input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name="frames" width="30"  height="17" value = "30"></font>
-	</td>
-	<td valign='center' >
-		%Size%:
-	</td>
-	<td>
-			<font size='2'><input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name="size" width="30" height="17" value = "0.5"></font>
-	</td>
+  <td valign='center' colspan='2'>
+    %Number of frames%:
+  </td>
+  <td valign='center' >
+    <font size='2'><input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name="frames" width="30"  height="17" value = "30"></font>
+  </td>
+  <td valign='center' >
+    %Size%:
+  </td>
+  <td>
+    <font size='2'><input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name="size" width="30" height="17" value = "0.5"></font>
+  </td>
 </tr>
 
 </table>	

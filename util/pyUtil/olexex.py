@@ -1,3 +1,5 @@
+from __future__ import division
+
 import olex
 import glob
 import olx
@@ -1269,13 +1271,17 @@ def updateACF(force=False):
       wFile = open("%s/%s" %(p, name),'wb')
       wFile.write(cont)
       wFile.close()
-    cmd = r"%s/AutoChem Updater.exe /S" %p
-    print cmd
-    Popen(cmd, shell=False, stdout=PIPE).stdout
-    print "Updated"
-    wFile = open(r"%s/util/pyUtil/PluginLib/odac_update.txt" %OV.BaseDir(),'w')
-    wFile.write("False")
-    rFile.close()
+    try:
+      cmd = r"%s/AutoChem Updater.exe /S" %p
+      print cmd
+      Popen(cmd, shell=False, stdout=PIPE).stdout
+      print "Updated"
+      wFile = open(r"%s/util/pyUtil/PluginLib/odac_update.txt" %OV.BaseDir(),'w')
+      wFile.write("False")
+      rFile.close()
+    except Exception, err:
+      print "Error with updating %s" %err
+      print "Please check your file permissions"
 
 
   else:
@@ -1493,12 +1499,33 @@ def AvailableExternalProgramsHtml():
   d.setdefault('refinement', AvailableExternalPrograms('refinement'))
   d.setdefault('solution', AvailableExternalPrograms('solution'))
 
-def getReportImageSrc():
+def getReportImageSrc(size=400):
+  import PIL
+  import Image
+  import PngImagePlugin
+  import StringIO
+  import base64
+  import EpsImagePlugin
+  
+  size = int(size)
+
   imagePath = OV.GetParam('snum.report.image')
   if OV.FilePath(imagePath) == OV.FilePath():
-    return olx.file_GetName(imagePath)
+    retVal = olx.file_GetName(imagePath)
   else:
-    return 'file:///%s' %imagePath
+    retVal = 'file:///%s' %imagePath
+   
+  IM = Image.open(imagePath)
+  oSize = IM.size
+  nHeight = int(oSize[1]*(size/oSize[0]))
+  IM = IM.resize((size, nHeight), Image.BICUBIC)
+  p = "%s/report_tmp.png" %OV.DataDir()
+  IM.save(p, "PNG")
+  
+  rFile = open(p, 'rb').read()
+  data = base64.b64encode(rFile)
+  retVal ='data:image/png;base64,' + data
+  return retVal
 OV.registerFunction(getReportImageSrc)
 
 def stopDebugging():
