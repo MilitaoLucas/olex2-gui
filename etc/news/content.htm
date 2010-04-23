@@ -1,97 +1,78 @@
-<!--
-<tr align='center'>
-	<td VALIGN='center' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
-	</td>
-	<td colspan='2'>
-	<a href='shell http://www.olex2.org'>
-		<zimg border="0" src="news/news">
-	</a>	
-	</td>
-</tr>
--->
-
-<!-- #include tip-of-the-day \news\tip-of-the-day.htm;onclick='spy.getTip()';1; -->
-
-
-<tr>
-	<td bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
-	</td>
-	<td colspan='2'>
-		%news-6%
-	</td>
-</tr>
-
-
-<tr bgcolor="$spy.GetParam(gui.timage_colour)">
-	<td bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
-	</td>
-	<td colspan = "2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
-		<font size="+0" color=$spy.GetParam(gui.html.highlight_colour)>
-			&nbsp;<b>%news-5-title%</b>
-		</font>
-	</td>
-</tr>
-<tr>
-	<td bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
-	</td>
-	<td colspan='2'>
-		%news-5%
-	</td>
-</tr>
-
-
-<tr bgcolor="$spy.GetParam(gui.timage_colour)">
-	<td bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
-	</td>
-	<td colspan = "2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
-		<font size="+0" color=$spy.GetParam(gui.html.highlight_colour)>
-			&nbsp;<b>%news-2-title%</b>
-		</font>
-	</td>
-</tr>
-<tr>
-	<td bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
-	</td>
-	<td colspan='2'>
-		%news-2%
-	</td>
-</tr>
-
-
-<tr bgcolor="$spy.GetParam(gui.timage_colour)">
-	<td bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
-	</td>
-	<td colspan = "2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
-		<font size="+0" color=$spy.GetParam(gui.html.highlight_colour)>
-			&nbsp;<b>%news-3-title%</b>
-		</font>
-	</td>
+<tr bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+  <td bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+  </td>
+  <td colspan = "2">
+    <font size="+0" color=$spy.GetParam(gui.html.highlight_colour)>
+      &nbsp;<b>%news-tag-$spy.GetTag()-title%</b>
+    </font>
+  </td>
 </tr>
 
 <tr>
-	<td bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
-	</td>
-	<td colspan='2'>
-		%news-3%
-	</td>
+  <td bgcolor=$spy.GetParam(gui.html.table_firstcol_colour)>
+  </td>
+  <td colspan='2'>
+    %news-tag-$spy.GetTag()%
+  </td>
 </tr>
-
 
 
 <tr bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
-	<td bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
-	</td>
-	<td colspan = "2">
-		<font size="+0" color=$spy.GetParam(gui.html.highlight_colour)>
-			&nbsp;<b>%news-4-title%</b>
-		</font>
-	</td>
+  <td bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+  </td>
+  <td colspan='2'>
+    <font size="+0" color=$spy.GetParam(gui.html.highlight_colour)>
+      <b>ORTEP-style drawings can now be created straight from within Olex2. This new tool can be found under Tools>Images.</b>
+    </font>
+  </td>
+</tr>
+
+<tr align='center'>
+  <td VALIGN='center' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+  </td>
+  <td colspan='2'>
+  <a href='shell http://www.olex2.org'>
+    <zimg border="0" src="news/news">
+  </a>
+  <br>
+  </td>
+</tr>
+
+
+<tr bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+  <td bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+  </td>
+  <td colspan = "2">
+    <font size="+0" color=$spy.GetParam(gui.html.highlight_colour)>
+      &nbsp;<b>%news-4-title%</b>
+    </font>
+  </td>
 </tr>
 
 <tr>
-	<td bgcolor=$spy.GetParam(gui.html.table_firstcol_colour)>
-	</td>
-	<td colspan='2'>
-		%news-4%
-	</td>
+  <td bgcolor=$spy.GetParam(gui.html.table_firstcol_colour)>
+  </td>
+  <td colspan='2'>
+    %news-4%
+  </td>
 </tr>
+
+<tr bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+  <td bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+  </td>
+  <td colspan = "2">
+    <font size="+0" color=$spy.GetParam(gui.html.highlight_colour)>
+      &nbsp;<b>%news-6-title%</b>
+    </font>
+  </td>
+</tr>
+
+
+<tr>
+  <td bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+  </td>
+  <td colspan='2'>
+    %news-6%
+  </td>
+</tr>
+

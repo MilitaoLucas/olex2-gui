@@ -37,6 +37,39 @@ class FontInstances(ArgumentParser):
     
   def defineFonts(self):
     self.fonts = {
+      ##################################################### Gerogia
+      "Georgia":{
+        "font_src":(
+          r"georgia.ttf",
+          r"%s/etc/gui/fonts/Vera.ttf" %self.basedir,
+          ),
+        "fontInstance":{}
+          },
+      
+      "Georgia Bold":{
+        "font_src":(
+          r"georgiab.ttf",
+          r"%s/etc/gui/fonts/VeraBd.ttf" %self.basedir,
+          ),
+        "fontInstance":{}
+          },
+      
+      "Georgia Italic":{
+        "font_src":(
+          r"georgiai.ttf",
+          r"%s/etc/gui/fonts/VeraBd.ttf" %self.basedir,
+          ),
+        "fontInstance":{}
+          },
+
+      "Georgia Bold Italic":{
+        "font_src":(
+          r"georgiaz.ttf",
+          r"%s/etc/gui/fonts/VeraBd.ttf" %self.basedir,
+          ),
+        "fontInstance":{}
+          },
+      
       ##################################################### Verdana
       "Verdana":{
         "font_src":(
@@ -61,7 +94,7 @@ class FontInstances(ArgumentParser):
         "fontInstance":{}
           },
 
-      ##################################################### Verdana
+      ##################################################### Gill
       "Gill":{
         "font_src":(
           r"GIL____.ttf",
