@@ -5,6 +5,7 @@
   %$spy.getStyles(default)%
   %$spy.getStyles(spy.GetParam(user.report_journal_style))%
   %$spy.getStyles(spy.GetParam(user.report_style))%
+  %$spy.getPrintStyles(print)%
 </head>
 
 
@@ -15,6 +16,16 @@
 
 <div class=Content>
 <div class=Section1>
+<!--
+<div class=ImageLogo>
+  <img src="%$spy.getReportImageSrc(h200,'site_logo')%">
+</div>
+
+<div class=Image>
+  <img width="%$spy.GetParam(gui.report.width)%" src="%$spy.getReportTitleSrc()%">
+</div>
+-->
+
 <div class=Title>
 <h1>%$spy.GetParam(snum.report.title)% </h1>
 </div>
@@ -47,7 +58,7 @@
 </table>
 </div>
 <div class=Image>
-  <img width=500 id="_x0000_i1025" src="%$spy.getReportImageSrc(500)%">
+  <img width=500 src="%$spy.getReportImageSrc(w500)%">
 </div>
 
 </div>

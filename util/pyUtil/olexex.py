@@ -1503,27 +1503,92 @@ def makeGreek(txt):
   txt = txt.replace(r"\a", r"&#945;")
   return txt
 OV.registerFunction(makeGreek)
+
+
+def getReportTitleSrc():
+  import PIL
+  import Image
+  import ImageDraw
+  import PngImagePlugin
+  import StringIO
+  import base64
+  import EpsImagePlugin
+  from ImageTools import ImageTools
+  IT = ImageTools()
   
-def getReportImageSrc(size=400):
+  width = OV.GetParam('gui.report.width')
+  height = OV.GetParam('gui.report.title.height')
+  colour = OV.GetParam('gui.report.title.colour').rgb
+  font_name = OV.GetParam('gui.report.title.font_name')
+  font_size = OV.GetParam('gui.report.title.font_size')
+  font_colour = OV.GetParam('gui.report.title.font_colour')
+  
+  sNum = OV.GetParam('snum.report.title')
+  
+  IM = Image.new('RGBA', (width, height), colour)
+  draw = ImageDraw.Draw(IM)
+  IT.write_text_to_draw(draw,
+                 sNum,
+                 align='right',
+                 max_width=width,
+                 font_name=font_name,
+                 font_size=font_size,
+                 font_colour=font_colour)
+  
+  ## This bits would insert a logo into the header, but it doesn't look good.
+  #imagePath = OV.GetParam('snum.report.image')
+  #imagePath = "%s/etc/CIF/styles/logo.png" %OV.BaseDir()
+  #im = Image.open(imagePath)
+  #imHeight = height
+  #oSize = im.size
+  #nWidth = int(oSize[0]*(imHeight/oSize[1]))
+  #im = im.resize((nWidth, imHeight), Image.BICUBIC)
+  
+  #IM.paste(im, (0,0), im)
+  
+
+  p = "%s/report_tmp.png" %OV.DataDir()
+  IM.save(p, "PNG")
+  
+  rFile = open(p, 'rb').read()
+  data = base64.b64encode(rFile)
+  retVal ='data:image/png;base64,' + data
+  return retVal
+OV.registerFunction(getReportTitleSrc)
+
+
+def getReportImageSrc(size='w400', imageName=None):
   import PIL
   import Image
   import PngImagePlugin
   import StringIO
   import base64
   import EpsImagePlugin
-  
-  size = int(size)
 
-  imagePath = OV.GetParam('snum.report.image')
-  if OV.FilePath(imagePath) == OV.FilePath():
-    retVal = olx.file_GetName(imagePath)
+  size_type = size[:1]
+  size = int(size[1:])
+  if imageName is None:
+    imagePath = OV.GetParam('snum.report.image')
   else:
-    retVal = 'file:///%s' %imagePath
+    imagePath = r"%s/etc/CIF/styles/%s.png" %(OV.BaseDir(),imageName)
+    
+#  if OV.FilePath(imagePath) == OV.FilePath():
+#    retVal = olx.file_GetName(imagePath)
+#  else:
+#    retVal = 'file:///%s' %imagePath
    
   IM = Image.open(imagePath)
   oSize = IM.size
-  nHeight = int(oSize[1]*(size/oSize[0]))
-  IM = IM.resize((size, nHeight), Image.BICUBIC)
+  if size_type == "w":
+    if oSize[1] != size:
+      nHeight = int(oSize[1]*(size/oSize[0]))
+      nWidth = size
+      IM = IM.resize((nWidth, nHeight), Image.BICUBIC)
+  elif size_type == "h":
+    if oSize[0] != size:
+      nHeight = size
+      nWidth = int(oSize[0]*(size/oSize[1]))
+      IM = IM.resize((nWidth, nHeight), Image.BICUBIC)
   p = "%s/report_tmp.png" %OV.DataDir()
   IM.save(p, "PNG")
   
