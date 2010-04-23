@@ -182,15 +182,26 @@ table.CifTable{
   margin-bottom:2em;
   border-collapse:collapse;
   width:45em;
+  color:#666;
 }
 
-table.CifTable td.leftcol{
+table.CifTable1{
   color:#666;
+  font-family: Georgia,"Times New Roman",Times,serif !important;
+  margin-left:2em;
+  margin-top:1em;
+  margin-bottom:2em;
+  border-collapse:collapse;
+  width:45em;
+  line-height: 180% !important;
+}
+
+
+table.CifTable td.leftcol{
   padding-right:3em;
 }
 
 table.CifTable td.data{
-  color:#666;
   width:3em;
   white-space:nowrap;
 }
@@ -225,7 +236,6 @@ table.CifTable th{
   font-weight:bold;
   color:#326496;
   height:30px
-
 }
 
 table.CifTable caption{
@@ -237,6 +247,17 @@ table.CifTable caption{
   margin-right:0em;
   margin-top:1em;
 }
+
+table.CifTable1 caption{
+  color:#326496;
+  margin-before:3em;
+  text-align:left;
+  caption-side:top;
+  margin-left:0em;
+  margin-right:0em;
+  margin-top:1em;
+}
+
 /*
 table.CifTable caption:before{
  content: "Table " counter(level1) ": ";
