@@ -782,6 +782,20 @@ def getStyles(fileName):
   return styleHTML
 OV.registerFunction(getStyles)
 
+def getPrintStyles(fileName):
+  cssPath = '%s/etc/CIF/styles/%s.css' %(OV.BaseDir(),fileName)
+  if not os.path.exists(cssPath): return ''
+  css = open(cssPath,'r').read()
+  styleHTML = """
+<style type="text/css" media="print">
+<!--
+%s
+-->
+</style>
+""" %css
+  return styleHTML
+OV.registerFunction(getPrintStyles)
+
 def getStylesList():
   styles = os.listdir("%s/etc/CIF/styles" %OV.BaseDir())
   exclude = ("rsc.css", "thesis.css", "custom.css")

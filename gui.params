@@ -377,4 +377,21 @@ gui {
       .help = Maximum height of the help popup boxes
 
     }
+
+  report{
+    width = 800
+      .type = int
+    title{
+      height = 50
+        .type = int
+      colour = #326496
+        .type = colour
+      font_name = Georgia Bold
+        .type = str
+      font_size = 35
+        .type = int
+      font_colour = #ffffff
+        .type = colour
+    }
+  }
 }

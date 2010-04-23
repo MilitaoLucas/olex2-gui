@@ -1,13 +1,12 @@
-﻿#header, #nav, .noprint {display: none;}
-
+﻿
 body{
   tab-interval:36.0pt;
   text-justify-trim:punctuation;
-  counter-reset: level1;
   text-align: justify !important;
   font-family: Georgia,"Times New Roman",Times,serif !important;
   color: #666 !important;
   line-height: 180% !important;
+  
 }
 
 sub, sup {
@@ -101,6 +100,7 @@ table.Submission td.val
   {
     color:#326496;
     text-indent:30px;
+    font-size:1.3em;
   }
   
   
@@ -112,6 +112,31 @@ div.Image
     left:0px;
   }
 
+div.ImageLogo{
+
+  @media screen {
+    {
+      float:left;
+      position:relative;
+      top:0px;
+      left:0px;
+      height:80px;
+      background-color: #ff0000 !important;
+      
+    }
+  }
+
+  @media print {
+    {
+      float:right;
+      position:relative;
+      top:0px;
+      left:0px;
+      height:80px;
+    }
+  }  
+}  
+  
 h1{
   font-family: Georgia,"Times New Roman",Times,serif;
   margin-top:6.0pt;
@@ -120,6 +145,7 @@ h1{
   margin-left:0cm;
   text-autospace:none;
   font-weight:bold;
+
 }
 
 p.normal, li.normal, div.normal{
@@ -199,6 +225,7 @@ table.CifTable th{
   font-weight:bold;
   color:#326496;
   height:30px
+
 }
 
 table.CifTable caption{
@@ -210,7 +237,13 @@ table.CifTable caption{
   margin-right:0em;
   margin-top:1em;
 }
-
+/*
+table.CifTable caption:before{
+ content: "Table " counter(level1) ": ";
+ counter-increment: level1;
+ font-weight: bold;
+}
+*/
 .cifTableFirst{
   font-weight:bold;
   color:#326496;
