@@ -1,0 +1,263 @@
+﻿#header, #nav, .noprint {display: none;}
+
+body{
+  tab-interval:36.0pt;
+  text-justify-trim:punctuation;
+  counter-reset: level1;
+  text-align: justify !important;
+  font-family: Georgia,"Times New Roman",Times,serif !important;
+  color: #666 !important;
+  line-height: 180% !important;
+}
+
+sub, sup {
+  line-height: 0.1em;
+}
+
+.container {
+  margin: 0 auto;
+  padding-top: 0px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 50px;
+  position: relative;
+  width: 800px;
+  background-color: #ffffff !important;
+}
+.outside {
+  background-color: #efefef;
+}
+
+.highlight{
+  colour=red
+}
+
+div.Content{
+  color: #666 !important;
+  width:900px;
+  position:relative;
+  left:0px;
+  top:0px;
+  font-family: Georgia,"Times New Roman",Times,serif !important;
+  color: #666 !important;
+  line-height: 160% !important;
+}
+
+div.Section1
+  {	
+    width:100%;
+    float:left;
+    page:Section1;
+  }
+
+div.Section2
+  {
+    width:100%;
+    float:left;
+    page:Section2;
+  }
+
+div.Section3
+  {
+    width:100%;
+    float:left;
+    page:Section3;
+    colour:blue;
+  }
+
+div.Title{
+  font-family: Georgia,"Times New Roman",Times,serif;
+  position:relative;
+  float:left;
+  width:800px;
+  height:50px;
+  text-align:right;
+  vertical-align:bottom;
+  background:#326496;
+  color: #ffffff;
+}
+
+div.Submission{
+  float:left;
+  width:300px;
+  font-family: Georgia,"Times New Roman",Times,serif !important;
+  color: #666 !important;
+  line-height: 160% !important;
+}
+
+table.Submission{
+  margin-left:2em;
+  margin-top:1em;
+  margin-bottom:2em;
+  border-collapse:collapse;
+}
+
+table.Submission td.id
+  {
+    color:#ababab;
+  }
+
+table.Submission td.val
+  {
+    color:#326496;
+    text-indent:30px;
+  }
+  
+  
+div.Image
+  {
+    float:left;
+    position:relative;
+    top:0px;
+    left:0px;
+  }
+
+h1{
+  font-family: Georgia,"Times New Roman",Times,serif;
+  margin-top:6.0pt;
+  margin-right:6.0pt;
+  margin-bottom:6.0pt;
+  margin-left:0cm;
+  text-autospace:none;
+  font-weight:bold;
+}
+
+p.normal, li.normal, div.normal{
+    margin:0cm;
+    margin-bottom:.0001pt;
+    text-autospace:none;
+    font-size:11.0pt;
+    font-family:Tahoma;
+    color:#ababab
+    font-family: Georgia,"Times New Roman",Times,serif !important;
+    color: #666 !important;
+    line-height: 160% !important;
+}
+
+p.faint{
+  color:gray;
+}
+
+p.cifTableHeadline{
+  margin-top:21.0pt;
+  margin-bottom:6.0pt;
+  font-weight:bold;
+}
+
+span.replaceThisChar{
+  color:green;
+  font-weight:bold;
+}
+
+table.CifTable{
+  font-family: Georgia,"Times New Roman",Times,serif !important;
+  margin-left:2em;
+  margin-top:1em;
+  margin-bottom:2em;
+  border-collapse:collapse;
+  width:45em;
+}
+
+table.CifTable td.leftcol{
+  color:#666;
+  padding-right:3em;
+}
+
+table.CifTable td.data{
+  color:#666;
+  width:3em;
+  white-space:nowrap;
+}
+
+table.CifTable td.decimal{
+  tab-stops:decimal 6pt;
+  text-align:".";
+  text-align:right;
+  font-size:11.0pt;
+  font-family:"Courier";
+  width:6em;
+  color:blue;
+  padding-right:2em;
+  color:#666;
+}
+
+table.CifTable td.decimalWide{
+  tab-stops:decimal 10pt;
+  text-align:".";
+  text-align:right;
+  font-size:11.0pt;
+  font-family:"Courier";
+  width:8em;
+  color:#666;
+}
+
+table.CifTable th{
+  tab-stops:decimal 6pt;
+  text-align:".";
+  text-align:right;
+  padding-right:2em;
+  font-weight:bold;
+  color:#326496;
+  height:30px
+}
+
+table.CifTable caption{
+  color:#326496;
+  margin-before:3em;
+  text-align:left;
+  caption-side:top;
+  margin-left:0em;
+  margin-right:0em;
+  margin-top:1em;
+}
+
+.cifTableFirst{
+  font-weight:bold;
+  color:#326496;
+  }
+
+.cifTableFooter{
+  boder-top:solid;
+  font-size:8.0pt;
+  margin-top:1.0pt;
+  margin-left:45.0pt;
+  margin-bottom:1.0pt;
+}
+
+/* Page Definitions */
+@page Section1
+  {
+    size:21cm 29.7cm;
+    margin-top:1.5cm;
+    margin-bottom:1.5cm;
+    margin-left:3.00cm;
+    margin-right:2.5cm;
+  }
+div.Section1
+  {
+    page:Section1;
+  }
+@page Section2
+  {
+    size:21cm 29.7cm;
+    margin-top:1.5cm;
+    margin-bottom:1.5cm;
+    margin-left:3.00cm;
+    margin-right:2.5cm;
+  }
+div.Section2
+  {
+    page:Section2;
+  }
+@page Section3
+  {
+    size:21cm 29.7cm;
+    margin-top:1.5cm;
+    margin-bottom:1.5cm;
+    margin-left:3.00cm;
+    margin-right:2.5cm;
+  }
+div.Section3
+  {
+    page:Section3;
+  }
