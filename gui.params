@@ -377,6 +377,13 @@ gui {
       .help = Maximum height of the help popup boxes
 
     }
+    
+  buttons{
+    small_buttons{
+      width = 50
+        .type = int
+    }
+  }  
 
   report{
     width = 800
