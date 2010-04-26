@@ -5,7 +5,8 @@
 
 <ang caption=" Bond Angles for $spy.GetParam(snum.report.title)." 
 tita="class=cifTableHeadline"  
-coln='2' 
+coln='2'
+colsa='width="50px"'
 tha="class=cifTableFirst" 
 taba="class=CifTable"
 rowa="class=cifTableRow" 
@@ -19,6 +20,7 @@ foota="class=cifTableFooter"
 
 <angst caption=" Angles for $spy.GetParam(snum.report.title)." 
  coln='2' 
+ colsa='width="50px"'
  tita="class=angst"
  tha="class=cifTableFirst"
  taba="" 
@@ -33,6 +35,7 @@ foota="class=cifTableFooter"
 <sang caption=" Selected Angles for $spy.GetParam(snum.report.title)." 
 tita="class=cifTableHeadline" 
 coln='2' 
+colsa='width="50px"'
 tha="class=cifTableFirst" 
 taba="class=CifTable"
 rowa="class=cifTableRow"
@@ -62,6 +65,7 @@ foota="class=cifTableFooter"
 <bnd caption="Bond Lengths for $spy.GetParam(snum.report.title)." 
  tita="class=cifTableHeadline" 
  coln='2' 
+ colsa='width="100px"'
  tha="class=cifTableFirst" 
  taba="class=CifTable"
  rowa="class=cifTableRow"
