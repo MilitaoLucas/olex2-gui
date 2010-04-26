@@ -1234,8 +1234,9 @@ class timage(ImageTools):
     max_width = cut[2] - cut[0]
     crop =  im.crop(cut)
     button_names = self.image_items_d.get("SMALL BUTTONS")
-    width = int(round(50 * self.size_factor,0))
-    self.produce_buttons(button_names, crop, cut, max_width,self.sf,"_small",width=40)
+    width = OV.GetParam('gui.buttons.small_buttons.width')
+    width = int(round(width * self.size_factor,0))
+    self.produce_buttons(button_names, crop, cut, max_width,self.sf,"_small",width=width)
 
     ## THREEE buttons in the HTMLpanelWIDTH
     cut = 0*sf, 178*sf, 91*sf, 195*sf
