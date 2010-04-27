@@ -1501,10 +1501,11 @@ def AvailableExternalProgramsHtml():
   d.setdefault('refinement', AvailableExternalPrograms('refinement'))
   d.setdefault('solution', AvailableExternalPrograms('solution'))
 
-def makeGreek(txt):
+def makeGreekRadiation():
+  txt = OV.GetParam('snum.metacif.diffrn_radiation_xray_symbol')
   txt = txt.replace(r"\a", r"&#945;")
   return txt
-OV.registerFunction(makeGreek)
+OV.registerFunction(makeGreekRadiation)
 
 
 def getReportTitleSrc():
