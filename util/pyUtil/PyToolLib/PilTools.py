@@ -1079,6 +1079,7 @@ class timage(ImageTools):
     #MakeAllRBars_instance.run_MakeAllRBars()
 
 
+    self.params = OV.GuiParams()
     for item in do_these:
       if self.timer:
         t1 = self.time.time()
@@ -1259,7 +1260,7 @@ class timage(ImageTools):
     crop =  im.crop(cut)
     #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=1.98))
     crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.green.rgb,luminosity=1.3,saturation=0.7))
-    IM =  Image.new('RGBA', crop.size, self.params.html.table_firstcol_colour.rgb)
+    IM =  Image.new('RGBA', crop.size, OV.GetParam('gui.html.table_firstcol_colour').rgb)
     IM.paste(crop_colouriszed, (0,0), crop)
     name = "info.png"
     IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
@@ -1876,17 +1877,17 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     #create a new image
     width = self.width * factor
     size = (width, 55 * factor)
-    IM =  Image.new('RGBA', size, self.params.html.bg_colour.rgb)
+    IM =  Image.new('RGBA', size, OV.GetParam('gui.html.bg_colour').rgb)
 
     #this is the source of the images required for the logo
     image_source = "%s/etc/gui/images/src/images.png" %self.basedir
     im = Image.open(image_source)
 
     #first cut the small logo picture from the source
-    cut_left = 200 * factor - (int(self.params.htmlpanelwidth) - 200) * factor
-    if cut_left <= 0:
-      cut_left = 0
-    cut = cut_left, 0, 200 * factor, 55 * factor #the area of the small image
+    cut_right = (int(OV.GetParam('gui.htmlpanelwidth')) - 210) * factor
+    if cut_right > 1400:
+      cut_right = 1400
+    cut = 0, 230, cut_right, 430 * factor #the area of the small image
     crop = im.crop(cut)
     #crop_colourised = self.colourize(crop, (0,0,0), self.params.logo_colour.rgb)
     IM.paste(crop, (0,0), crop)
@@ -1894,7 +1895,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     #then cut the actual logo
     cut = 200 * factor, 0, 372 * factor, 55 * factor #the area of the olex writing
     crop =  im.crop(cut)
-    crop_colouriszed = self.colourize(crop, (0,0,0), self.params.logo_colour.rgb)
+    crop_colouriszed = self.colourize(crop, (0,0,0), OV.GetParam('gui.logo_colour').rgb)
     IM.paste(crop_colouriszed, (width-(175 * factor),0), crop)
 
 
