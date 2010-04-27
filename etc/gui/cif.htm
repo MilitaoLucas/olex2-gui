@@ -4,20 +4,20 @@
 	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td></td>
 			<a href="spy cif info"><zimg border="0" src="toolbar-cif.png"></td></a>
       <td width="20%">
-		<a href="cursor(busy, '%Creating Image ...%')>>
+		<a href="cursor(busy, 'Creating Image ...')>>
 ShowWindow info false>>
 if file.Exists('FilePath()/FileName().cif'
 if file.Exists(GetValue(snum_report_image)) then 'SetVar(snum_report_image,GetValue(snum_report_image))' else 'SetVar(snum_report_image,olex_report_o.png)'>>
 if file.Exists(GetValue(snum_report_image)) then 'echo Using Image GetValue(snum_report_image)' else 'pict -pq olex_report_o.png 1'>>
 ShowWindow info true>>
-cursor(busy, '%Updating% Cif ...')>>
+cursor(busy, 'Updating Cif ...')>>
 spy cif info>>
 cifmerge 'filename()_meta.cif'>>
-cursor(busy, '%Creating% Report ... if images are also created, this might take some time.')>>
+cursor(busy, 'Creating Report ... if images are also created, this might take some time.')>>
 cif2tab header acrd anis bnd ang htab tang footer>>
 exec -o explorer tables.html>>
 cursor()"
-target="%Create Structure Report%">
+target="Create Structure Report">
 <b>%Report%</b></a></td>
 <td>
 	<input bgcolor="$spy.GetParam(gui.html.input_bg_colour)" type="combo" name="snum_report_image" items='file.ListDirForGui(FilePath(),*.png;*.jpg;*.bmp)' value="" width="150" height="18" label="%Image% ">
@@ -40,18 +40,18 @@ exec -o explorer tables.html"
     target="%Create Tables%">
     %Tables% (htm)</a>
 
-		<a href="cursor(busy, '%Creating Image ...%')>>
+		<a href="cursor(busy, 'Creating Image ...')>>
 ShowWindow info false>>
 pict -pq olex_report_o.png 1>>
 ShowWindow info true>>
-cursor(busy, '%Updating Cif ...%')>>
+cursor(busy, 'Updating Cif ...')>>
 spy cif info>>
 cifmerge 'filename()_meta.cif'>>
-cursor(busy, '%Creating Report ...%')>>
+cursor(busy, 'Creating Report ...')>>
 cif2tab header acrd anis bnd ang htab footer>>
 exec -o explorer tables.html>>
 cursor()"
-		target="%Create Structure Report%">
+		target="Create Structure Report">
 		%Report%</a>
   </td>   
   </tr>

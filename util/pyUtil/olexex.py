@@ -10,6 +10,8 @@ import sys
 import programSettings
 from subprocess import *
 
+import MakeMovie
+
 import socket
 import urllib
 import urllib2
@@ -1556,8 +1558,15 @@ def getReportTitleSrc():
   return retVal
 OV.registerFunction(getReportTitleSrc)
 
+def getReportImageSrc():
+  imagePath = OV.GetParam('snum.report.image')
+  if OV.FilePath(imagePath) == OV.FilePath():
+    return olx.file_GetName(imagePath)
+  else:
+    return 'file:///%s' %imagePath
+OV.registerFunction(getReportImageSrc)
 
-def getReportImageSrc(size='w400', imageName=None):
+def getReportImageData(size='w400', imageName=None):
   import PIL
   import Image
   import PngImagePlugin
@@ -1594,9 +1603,15 @@ def getReportImageSrc(size='w400', imageName=None):
   
   rFile = open(p, 'rb').read()
   data = base64.b64encode(rFile)
-  retVal ='data:image/png;base64,' + data
-  return retVal
-OV.registerFunction(getReportImageSrc)
+  d ='data:image/png;base64,' + data
+  
+  html = '''
+<!--[if IE]><img width=500 src='file:///%s'><![endif]-->
+<![if !IE]><img width=500 src='data:image/png;base64,%s'><![endif]>
+  '''%(imagePath, data)
+  
+  return html
+OV.registerFunction(getReportImageData)
 
 def stopDebugging():
   try:
