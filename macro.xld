@@ -116,8 +116,6 @@
     <cmd2  "mode off">
     <cmd4  "storeparam startup file.relativePath(filefull())">
     <cmd5  "storeparam last_version GetVar(last_version)">
-    <cmd5  "spy.StoreParameters(gui)">
-    <cmd5  XXX="spy.StoreParameters(olex2)">
     <cmd99 "stop logging">
 
   \>

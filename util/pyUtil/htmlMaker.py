@@ -693,10 +693,10 @@ def getCellHTML():
     'Triclinic':('a', 'b', 'c', '&alpha;', '&beta;', '&gamma;'),
     'Monoclinic':('a', 'b', 'c', '&beta;'),
     'Orthorhombic':('a', 'b', 'c'),
-    'Tetragonal':('c',),
-    'Cubic':('a',),
+    'Tetragonal':('a', 'c',),
     'Hexagonal':('a', 'c'),
     'Trigonal':('a', 'c'),
+    'Cubic':('a',),
   }
 
   cell_param_value_pairs = dict(zip(
