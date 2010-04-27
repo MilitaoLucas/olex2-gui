@@ -3,77 +3,77 @@
 <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
 
 <tr>
-	<td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
-	<td colspan=2>
-		<a href="spy.CifTools()>>spy.MetaCif()>>updatehtml" target="View cif items to be added"><b>View cif info</b></a> | 
-		<a href="
+  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td colspan=2>
+    <a href="spy.CifTools()>>spy.MetaCif()>>updatehtml" target="View cif items to be added"><b>View cif info</b></a> | 
+    <a href="
 if file.Exists('FilePath()\FileName().cif') then None else 'spy.SetParam(snum.refinement.method,Least Squares)'>> 
 if file.Exists('FilePath()\FileName().cif') then None else 'DelIns ACTA'>> 
 if file.Exists('FilePath()\FileName().cif') then None else 'AddIns ACTA'>> 
 if file.Exists('FilePath()\FileName().cif') then None else 'refine'>>
 spy.MetaCif(True,True)>>
 "
-       target="Merge with cif file"><b>Merge cif</b></a> | 
-		<a href="exec -o getvar(defexplorer) 'file.ospath(basedir()/etc/CIF/styles)'" target="Browse for styles and templates"><b>Change Styles or Templates</b></a> | <zimg border="0" src="new">
+  target="Merge with cif file"><b>Merge cif</b></a> | 
+<a href="exec -o getvar(defexplorer) 'file.ospath(basedir()/etc/CIF/styles)'" target="Browse for styles and templates"><b>Change Styles or Templates</b></a> | <zimg border="0" src="new">
 
-	</td>
+  </td>
 </tr>
 
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_REPORT_TITLE' valign='center'>
-	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
-	<td colspan=2>
-		<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
-		  <tr>
-				<td>
-					<b>%Title%</b>
-				</td>
-				<td>
-					<input
-						type='text'
-						width="$eval((htmlpanelwidth()-160)/3)"
-						valign='center'
-						height="17"
-						bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-						name='SET_SNUM_REPORT_TITLE'
-						value='$spy.GetParam(snum.report.title)'
-						onleave="spy.SetParam(snum.report.title,GetValue(SET_SNUM_REPORT_TITLE))"
-					>
-				<td>
-					<b>%Style%</b>
-				</td>	
-				<td>
-					<input
-						type='combo'
-						width="$eval((htmlpanelwidth()-160)/3)"
-						height="17"
-						bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-						name='SET_USER_REPORT_STYLE'
-						value='$spy.GetParam(user.report_style)'
-						items='spy.getStylesList()'
-						valign='center'
-						onchange="spy.SetParam(user.report_style,GetValue(SET_USER_REPORT_STYLE))"
-					>
-				</td>
-				<td>
-					<b>%Template%</b>
-				</td>	
-				<td>
-					<input
-						type='combo'
-						width="$eval((htmlpanelwidth()-160)/3)"
-						height="17"
-						bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-						name='SET_USER_REPORT_TEMPLATE'
-						value='$spy.GetParam(user.report_template)'
-						items='spy.getTemplatesList()'
-						valign='center'
-						onchange="spy.SetParam(user.report_template,GetValue(SET_USER_REPORT_TEMPLATE))"
-					>
-					</td>
+  <td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td colspan=2>
+    <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+      <tr>
+        <td>
+          <b>%Title%</b>
+        </td>
+        <td>
+          <input
+            type='text'
+            width="$eval((htmlpanelwidth()-160)/3)"
+            valign='center'
+            height="17"
+            bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+            name='SET_SNUM_REPORT_TITLE'
+            value='$spy.GetParam(snum.report.title)'
+            onleave="spy.SetParam(snum.report.title,GetValue(SET_SNUM_REPORT_TITLE))"
+          >
+        <td>
+          <b>%Style%</b>
+        </td>	
+        <td>
+          <input
+            type='combo'
+            width="$eval((htmlpanelwidth()-160)/3)"
+            height="17"
+            bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+            name='SET_USER_REPORT_STYLE'
+            value='$spy.GetParam(user.report_style)'
+            items='spy.getStylesList()'
+            valign='center'
+            onchange="spy.SetParam(user.report_style,GetValue(SET_USER_REPORT_STYLE))"
+          >
+        </td>
+        <td>
+          <b>%Template%</b>
+        </td>	
+        <td>
+          <input
+            type='combo'
+            width="$eval((htmlpanelwidth()-160)/3)"
+            height="17"
+            bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+            name='SET_USER_REPORT_TEMPLATE'
+            value='$spy.GetParam(user.report_template)'
+            items='spy.getTemplatesList()'
+            valign='center'
+            onchange="spy.SetParam(user.report_template,GetValue(SET_USER_REPORT_TEMPLATE))"
+          >
+          </td>
 
-				</tr>
-		</table>
-	</td>
+  </tr>
+</table>
+</td>
 </tr>
 
 <!-- #include report-settings-h3-image gui\report-settings-h3-image.htm;gui\blocks\tool-h3-off.htm;image=report-settings-h3-image;onclick=;colspan=2;2; -->
