@@ -59,15 +59,15 @@ gui {
       base_colour = None
       grad_colour = None
       font_colour = None
-      height = 22
-      corner_rad = 1
+      height = 24
+      corner_rad = 2
       grad_step = 0.1
       bg_colour_L = 1.4
       grad_colour_L = 1.3
       font_colour_L = 0.8
       font_name = Vera Bold
-      font_size = 15
-      top = 2
+      font_size = 16
+      top = 3
       left = 3
       off_L = 1.2
     }
@@ -85,23 +85,24 @@ gui {
     h1 {
       base_colour = None
       grad_colour = #527bde
-      height = 19
+      height = 21
       font_size = 14
       top = 2
       left = 4
       bg_colour_L = 1.2
       grad_colour_L = 0.9
       font_colour_L = 1.5
+      font_colour = #ffffff
       arrows = "bar:left:5,char:on~:off+"
       off_L = 0.8
     }
     h3 {
-      height = 17
+      height = 18
       base_colour = None
       grad_colour = None
       font_colour = None
       bg_colour_L = 1.2
-      grad_colour_L = 1.1
+      grad_colour_L = 0.95
       font_colour_L = 0.5
       corner_rad = 3
       top = 1
