@@ -134,10 +134,6 @@ def change_skin(skin_name=None, force=False):
     print "After 'run_timage': %.2f s (%.5f s)" % ((t - t1), (t - t2))
     t2 = t
 
-  if OV.FileName() != 'none':
-    a = PilTools.sNumTitle()
-    a.run_sNumTitle(force=force)
-
   if timing:
     t = time.time()
     print "After 'sNumTitle': %.2f s (%.5f s)" % ((t - t1), (t - t2))
@@ -147,6 +143,14 @@ def change_skin(skin_name=None, force=False):
   SetMaterials()
 
   OV.setAllMainToolbarTabButtons()
+  
+  if OV.FileFull() != "none":
+    import History
+    from History import hist
+    hist._make_history_bars()
+    a = PilTools.sNumTitle()
+    a.run_sNumTitle(force=True)
+  
   olx.html_Reload()
 
   if timing:
@@ -228,6 +232,7 @@ def SetMaterials():
   olx.SetMaterial("Console.Text %s" %OV.GetParam('gui.infobox_text'))
   olx.SetMaterial("XGrid.+Surface %s" %OV.GetParam('gui.xgrid.positive_surface_material'))
   olx.SetMaterial("XGrid.-Surface %s" %OV.GetParam('gui.xgrid.negative_surface_material'))
+  
   olx.HtmlPanelWidth(OV.GetParam('gui.htmlpanelwidth'))
   #olex.m("lines %s" %OV.GetParam('gui.lines_of_cmd_text'))
 
