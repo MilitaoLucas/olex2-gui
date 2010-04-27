@@ -2,38 +2,34 @@
 from ArgumentParser import ArgumentParser
 import os
 import olx
+from olexFunctions import OlexFunctions
+OV = OlexFunctions()
 
-class MakeMovie(ArgumentParser):
-  def __init__(self, function, param):
-    super(MakeMovie, self).__init__(function, param)
+class MakeMovie():
+  def __init__(self):
     self.i = 0
-    #self.wfile = open("c:\movie.txt", 'w')
-    #self.wfile = open(r"%s/movie.xld" %self.basedir, 'a')
-    #self.maxdegree = 0
-    self.function = function
-    parameters = param.split(';')
-    self.axis = int(parameters[0])
-    self.steps = float(parameters[1])
-    self.frames = int(parameters[2])
-    self.size = float(parameters[3])
 
 
-  def run(self):
-    if self.function == 'movie':
-      print "Making %i frames by rotating around axis %i in %.2f degree steps in size %.2f" %(self.frames, self.axis, self.steps, self.size)
-      try:
-        os.mkdir(r"%s/movie" %(self.filepath))
-      except:
-        pass
-      for i in xrange(self.frames):
-        olx.Rota("%s %s" %(self.axis, self.steps))
-        OV.Refresh()
-        if i < 100: number = "0%i" %i
-        if i < 10: number = "00%i" %i
-        if i > 99: number = i
-        olx.Pict(r"'%s/movie/%s.bmp' %.3f" %(self.filepath, number, self.size))
-
-
+  def run_MakeMovie(self):
+    
+    self.axis = OV.GetParam('snum.image.image_series.rotation_around_axis')
+    self.frames = OV.GetParam('snum.image.image_series.number_of_frames')
+    self.steps = OV.GetParam('snum.image.image_series.degrees_of_rotation')
+    self.size = OV.GetParam('snum.image.image_series.size_of_frames')
+    self.filepath = OV.FilePath()
+    
+    print "Making %i frames by rotating around axis %i in %.2f degree steps in size %.2f" %(self.frames, self.axis, self.steps, self.size)
+    try:
+      os.mkdir(r"%s/movie" %(self.filepath))
+    except:
+      pass
+    for i in xrange(self.frames):
+      olx.Rota("%s %s" %(self.axis, self.steps))
+      OV.Refresh()
+      if i < 100: number = "0%i" %i
+      if i < 10: number = "00%i" %i
+      if i > 99: number = i
+      olx.Pict(r"'%s/movie/%s.bmp' %.3f" %(self.filepath, number, self.size))
 
   def run_complex(self):
     movie = self
@@ -159,3 +155,9 @@ class MakeMovie(ArgumentParser):
     #movie.motion(format='bmp', frames=10, rotation=3, type='start', hdirect='left', speedmin = 10)
     #movie.motion(format='bmp', frames=0, rotation=3, type='middle', hdirect='left')
     #movie.motion(format='bmp', frames=10, rotation=3, type='end', hdirect='left')
+
+    
+MakeMovie_instance = MakeMovie()
+OV.registerFunction(MakeMovie_instance.run_MakeMovie)
+
+    

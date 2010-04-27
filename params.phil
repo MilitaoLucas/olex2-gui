@@ -109,6 +109,16 @@ snum {
       name = None
         .type = str
     }
+  image_series{
+    rotation_around_axis=2
+      .type = int
+    degrees_of_rotation=1.0
+      .type = float
+    number_of_frames=30
+      .type=int
+    size_of_frames=0.2
+      .type=float
+    }
   }
 
   shelx_output = True
