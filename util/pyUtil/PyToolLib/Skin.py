@@ -53,7 +53,7 @@ class Skin():
       self.change()
       #self.GuiSkinChanger_instance.run_GuiSkinChanger()
       self.timage_instance.run_timage()
-      self.sNumTitle_instance.run_sNumTitle()
+      self.sNumTitle_instance.run_sNumTitle(force=True)
     #self.adjust_font_size_for_ppi()
 
   def adjust_font_size_for_ppi(self):
@@ -227,16 +227,20 @@ def SetGrad():
   olx.Grad("%i %i %i %i" %(v[0], v[1], v[2], v[3]))
 
 def SetMaterials():
+  if OV.GetParam('gui.skin.materials_have_been_set'):
+    return
   olx.SetMaterial("InfoBox.Text %s" %OV.GetParam('gui.infobox_text'))
   olx.SetMaterial("InfoBox.Plane %s" %OV.GetParam('gui.infobox_plane'))
   olx.SetMaterial("Console.Text %s" %OV.GetParam('gui.infobox_text'))
   olx.SetMaterial("XGrid.+Surface %s" %OV.GetParam('gui.xgrid.positive_surface_material'))
   olx.SetMaterial("XGrid.-Surface %s" %OV.GetParam('gui.xgrid.negative_surface_material'))
+  olex.m("gl.lm.ClearColor(%s)" %OV.GetParam('gui.skin.clearcolor'))
   
   olx.HtmlPanelWidth(OV.GetParam('gui.htmlpanelwidth'))
+  
   #olex.m("lines %s" %OV.GetParam('gui.lines_of_cmd_text'))
 
-
+  OV.SetParam('gui.skin.materials_have_been_set', True)
 
 def load_user_gui_phil():
   gui_phil_path = "%s/gui.phil" %(OV.DataDir())

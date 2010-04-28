@@ -55,6 +55,7 @@
   Ellipsoids
   
 [FULL ROW]
+  Run AutoChem
   Move Atoms or Model Disorder
   Separate Moieties
   

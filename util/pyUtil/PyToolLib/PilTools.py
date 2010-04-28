@@ -1252,7 +1252,7 @@ class timage(ImageTools):
     max_width = cut[2] - cut[0]
     crop =  im.crop(cut)
     button_names = self.image_items_d.get("FULL ROW", button_names)
-    width = available_width
+    width = available_width - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
     self.produce_buttons(button_names, crop, cut, max_width,self.sfs,"_full",width=width)
 
 
@@ -2688,7 +2688,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     elif item_type == 'button':
       underground = OV.GetParam('gui.html.table_bg_colour').rgb
       shadow = False
-      arrows = False
+      buttonmark = True
       if state == "on":
         grad_colour = self.highlight_colour
 
@@ -2770,6 +2770,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     if shadow:
       image = self.make_shadow(image, underground, corner_rad)
+      
 
     filename = item
     return image
@@ -2800,9 +2801,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     image = self.add_whitespace(image=image, side='bottom', margin_left=corner_rad, weight=1, colour = self.adjust_colour(underground, luminosity = 0.90))
     image = self.add_whitespace(image=image, side='bottom', margin_left=corner_rad, weight=1, colour = self.adjust_colour(underground, luminosity = 0.95))
     return image
+  
 
   def make_arrows(self, state, width, arrows, image, height, base_colour, off_L, on_L, scale=1.0):
-
+    draw = None
     if state == "off":
       fill = self.adjust_colour(base_colour, luminosity=off_L)
     elif state == "on":
@@ -2888,14 +2890,25 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         side = arrows.split('triangle:')[1].split(',')[0]
       except:
         side = 'left'
-
       begin = (2, 7)
       middle = (2, 2)
       end = (7, 2)
-
       draw.polygon((begin, middle, end), fill)
-
+      
+    if 'buttonmark' in arrows:
+      margin = int(arrows.split('buttonmark:')[1])
+      if not draw:
+        draw = ImageDraw.Draw(image)
+      w,h = image.size
+      for i in xrange(int(h/2) - 2):
+        fill = "#ffffff"
+        y = 3 + i * 2
+        for j in xrange(4):
+          x = (w - margin) + j * 2
+          draw.point((x, y), fill)
+          
     return image
+  
   def drawFileFullInfo(self, draw, colour='#ff0000', right_margin=0, height=10, font_name="Verdana", font_size=8, left_start = 40):
     base_colour = self.params.html.base_colour.rgb
     txt = OV.FileFull()

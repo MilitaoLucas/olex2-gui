@@ -64,7 +64,7 @@
   </td>
   <td>
     <a 
-      href="fixunit spy.GetParam('snum.refinement.Z_prime')>>updatehtml"
+      href="fixunit xf.au.GetZprime()>>updatehtml"
       target="%Fix Unit-target% ">
       <zimg border="0" src="toolbar-OK.png"/>
     </a>
@@ -72,14 +72,14 @@
   <td>
     <input
         type='text'
-        width="28"
+        width="40"
         height="$spy.GetParam(gui.html.spin_height)"
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-        name='SET_Z_PRIME'
+        name='SET_Z_PRIME_FIXUNIT'
         label="Z'&nbsp;"
         valign='center' 
-        value='$spy.GetParam(snum.refinement.Z_prime)'
-        onchange="spy.SetParam(snum.refinement.Z_prime,GetValue(SET_Z_PRIME))>>updatehtml"
+        value='xf.au.GetZprime()'
+        onleave="xf.au.SetZprime(GetValue(SET_Z_PRIME_FIXUNIT))>>spy.SetParam(snum.refinement.Z_prime,GetValue(SET_Z_PRIME_FIXUNIT))>>updatehtml"
       >
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

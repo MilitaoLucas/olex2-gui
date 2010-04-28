@@ -74,7 +74,7 @@
         name='SET_Z'
         min='1'
         value='xf.au.GetZ()'
-        onchange="xf.au.SetZ(GetValue(SET_Z))>>updatehtml" 
+        onchange="xf.au.SetZ(GetValue(SET_Z))>>updatehtml"
       >
     </font>
   </td>
@@ -89,12 +89,12 @@
     <font size='2'>
       <input
         type='text'
-        width="30"
+        width="40"
         height="$spy.GetParam(gui.html.spin_height)"
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-        name='SET_Z_PRIME_FIXUNIT'
-        value='$spy.GetParam(snum.refinement.Z_prime)'
-        onchange="spy.SetParam(snum.refinement.Z_prime,GetValue(SET_Z_PRIME_FIXUNIT))>>updatehtml"
+        name='SET_Z_PRIME'
+        value='xf.au.GetZprime()'
+        onleave="xf.au.SetZprime(GetValue(SET_Z_PRIME))>>spy.SetParam(snum.refinement.Z_prime,GetValue(SET_Z_PRIME))>>updatehtml"
       >
     </font>
   </td>
