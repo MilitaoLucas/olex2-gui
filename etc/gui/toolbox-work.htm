@@ -18,82 +18,69 @@
       target="%Q To C-target%">
       <zimg name="qc" border="0" src="toolbar-QC.png"/>
     </a>
-    &nbsp;
-
+  </td>
+  <td>
     <a 
       href="name $Q H"
       target="%Q To H-target%">
       <zimg name="qh" border="0" src="toolbar-QH.png"/>
     </a>
-    &nbsp;
-  
+  </td>
+  <td>
     <a 
       href="clean"
       target="%Tidy Structure-target%">
       <zimg border="0" src="toolbar-tidy.png"/>
     </a>
-    &nbsp;
-    <a 
-      href="fixunit spy.GetParam('snum.refinement.Z_prime')>>updatehtml"
-      target="%Fix Unit-target% ">
-      <zimg border="0" src="toolbar-OK.png"/>
-    </a>
-<!--  
-    &nbsp;
-    &nbsp;
-  
-    <a 
-      href="mode hfix 43"
-      target="%HFIX 43-target%">
-      <zimg border="0" src="toolbar-sp2-1H.png"/>
-    </a>
-    &nbsp;
-  
-    <a href="mode hfix 13"
-      target="%HFIX 13-target%">
-      <zimg border="0" src="toolbar-sp3-1H.png"/>
-    </a>&nbsp;
-  
-    <a 
-      href="mode hfix 23"
-      target="%HFIX 23-target%">
-      <zimg border="0" src="toolbar-sp3-2H.png"/>
-    </a>&nbsp;
-    <a 
-      href="mode hfix 137"
-      target="%HFIX 137-target%">
-      <zimg border="0" src="toolbar-sp3-3H.png"/>
-    </a>
--->
-    &nbsp;
+  </td>
+  <td>
     <a 
       href="kill $H"
       target="%Kill H-target% ">
       <zimg border="0" src="toolbar-killH.png"/>
     </a>
-    &nbsp;
-    &nbsp;
+  </td>
+  <td>
     <a 
       href="showQ"
       target="%Toggle Q-target%">
       <zimg border="0" src="toolbar-Q.png"/>
-    </a>&nbsp;
-  
+    </a>
+  </td>
+  <td>
     <a 
       href="showH"
       target="%Toggle H-target%">
       <zimg border="0" src="toolbar-H.png"/>
     </a>
-    
-    &nbsp;
-    &nbsp;
-    
+  </td>
+  <td>
     <a 
       target="%center_on-target%" href="center">
       <zimg  border="0" src="toolbar-center.png">
     </a>
-    
-    
+  </td>
+  <td>
+  </td>
+  <td>
+    <a 
+      href="fixunit spy.GetParam('snum.refinement.Z_prime')>>updatehtml"
+      target="%Fix Unit-target% ">
+      <zimg border="0" src="toolbar-OK.png"/>
+    </a>
+  </td>
+  <td>
+    <input
+        type='text'
+        width="28"
+        height="$spy.GetParam(gui.html.spin_height)"
+        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+        name='SET_Z_PRIME'
+        label="Z'&nbsp;"
+        valign='center' 
+        value='$spy.GetParam(snum.refinement.Z_prime)'
+        onchange="spy.SetParam(snum.refinement.Z_prime,GetValue(SET_Z_PRIME))>>updatehtml"
+      >
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
