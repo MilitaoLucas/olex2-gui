@@ -1,0 +1,117 @@
+<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
+
+<!-- FIRST ROW -->
+<tr name=IMAGE_PS_ROW_1>
+<!-- #include tool-help-column gui\blocks\tool-first-column.htm;help_ext=mode_name;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
+  <td name=IMAGE_PS_BUTTON>
+    <input
+      type="button"
+      name = "MAKE_IMAGE_SERIES"
+      width="25"
+      value="Go"
+      onclick="spy.run_MakeMovie()"
+      target="Make Movie"
+    >
+  </td>
+  <td>
+    %This will produce a series of .bmp files in the sub-folder 'movie'%
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
+
+
+
+<!-- SECOND ROW -->
+<tr name=IMAGE_SERIES_ROW_1>
+<!-- #include tool-column gui\blocks\tool-first-column.htm;help_ext=mode_name;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
+  <td name=ROTATION_AROUND_AXIS_LABEL width=40%>
+    <b>%Rotation around Axis%:</b>
+  </td>
+  
+  <td name=ROTATION_AROUND_AXIS width=20%>
+    <font size='2' align='center'>
+      <input 
+        name="ROTATION_AROUND_AXIS"
+        type="text" 
+        height="$spy.GetParam(gui.html.input_height)"
+        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+        name="axis"
+        width="30"
+        value="$spy.GetParam(snum.image.image_series.rotation_around_axis)"
+        onleave="spy.SetParam(snum.image.image_series.rotation_around_axis,GetValue(ROTATION_AROUND_AXIS))"
+
+      >
+    </font>
+  </td>
+  
+  <td name=DEGREES_OF_ROTATION_LABEL width=20%>
+    <b>%Degree%</b>:
+  </td>
+  
+  <td name=DEGREES_OF_ROTATION width=20%>
+    <font size='2'>
+      <input
+        name="DEGREES_OF_ROTATION"
+        type="text"
+        height="$spy.GetParam(gui.html.input_height)"
+        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+        name="steps"
+        width="30"
+        value = "$spy.GetParam('snum.image.image_series.degrees_of_rotation')"
+        onleave="spy.SetParam('snum.image.image_series.degrees_of_rotation',GetValue(DEGREES_OF_ROTATION))"
+      >
+    </font>
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
+
+
+<!-- THIRD ROW -->
+<tr name=IMAGE_SERIES_ROW_2>
+<!-- #include tool-help-column gui\blocks\tool-first-column.htm;help_ext=mode_name;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
+
+  <td name=NUMBER_OF_FRAMES_LABEL width=40%>
+    <b>%Number of frames%:</b>
+  </td>
+  <td name=NUMBER_OF_FRAMES width=20%>
+    <font size='2'>
+      <input
+        name="NUMBER_OF_FRAMES"
+        type="text"
+        height="$spy.GetParam(gui.html.input_height)"
+        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+        name="frames"
+        width="30"
+        value="$spy.GetParam('snum.image.image_series.number_of_frames')"
+        onleave="spy.SetParam('snum.image.image_series.number_of_frames',GetValue(NUMBER_OF_FRAMES))"
+        
+      >
+    </font>
+  </td>
+  
+  <td name=SIZE_LABEL width=20%>
+    <b>%Size%</b>:
+  </td>
+
+  <td name=SIZE_OF_FRAMES width=20%>
+    <font size='2'>
+      <input
+        name='SIZE_OF_FRAMES'
+        type="text"
+        height="$spy.GetParam(gui.html.input_height)"
+        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+        name="size"
+        width="30"
+        value="$spy.GetParam(snum.image.image_series.size_of_frames)"
+        onleave="spy.SetParam(snum.image.image_series.size_of_frames,GetValue(SIZE_OF_FRAMES))"
+        >
+      </font>
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
