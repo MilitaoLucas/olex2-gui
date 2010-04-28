@@ -41,7 +41,7 @@ def setup_cctbx():
     cctbx_TAG_file = open("%s/TAG" %cctbxSources,'r')
     cctbx_compile_date = cctbx_TAG_file.readline().strip()
     cctbx_TAG_file.close()
-    cctbx_compatible_version = "2009_11_30_2204"
+    cctbx_compatible_version = "2010_04_22_0000"
     if int(cctbx_compile_date.replace('_','')) < int(cctbx_compatible_version.replace('_','')):
       sys.stdout.write("""Warning: An incompatible version of the cctbx is installed.
 Please update to cctbx build '%s' or later.
