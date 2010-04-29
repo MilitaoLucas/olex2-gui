@@ -895,11 +895,11 @@
 <startupPanel help="Set the width of the Control Panel"
   <body
     <args
-      <arg1 name="width" def="GetVar(gui_htmlpanelwidth)">
-      <arg2 name="colour" def="GetVar(gui_timage_colour)">
+      <arg1 name="width" def="$spy.GetParam(gui.htmlpanelwidth)">
+      <arg2 name="colour" def="$spy.GetParam(gui.timage.base_colour)">
     >
     <cmd
-      <cmd1 "setVar(gui_htmlpanelwidth,'%1')">
+      <cmd1 "spy.SetParam(gui.htmlpanelwidth,'%1')">
       <cmd2 "spy.run_skin timage">
       <cmd5 "htmlpanelwidth %1">
       <cmd4 "spy.resize_skin_logo(%1)">
@@ -911,17 +911,17 @@
 <panel help="Set the width of the Control Panel"
   <body
     <args
-      <arg1 name="width" def="GetVar(gui_htmlpanelwidth)">
-      <arg2 name="colour" def="GetVar(gui_timage_colour)">
+      <arg1 name="width" def="$spy.GetParam(gui.htmlpanelwidth)">
+      <arg2 name="colour" def="$spy.GetParam(gui.timage.base_colour)">
     >
     <cmd
-      <cmd1 "setVar(gui_htmlpanelwidth,'%1')">
-      <cmd1 "setVar(gui_timage_colour,'%2')">
+      <cmd1 "spy.setParam(gui.htmlpanelwidth,'%1')">
+      <cmd1 "spy.SetParam(gui.timage.base_colour,'%2')">
       <cmd1 "spy.SetParam(olex2.force_images,True)">
       <cmd2 "spy.run_skin timage">
       <cmd3 "spy.run_skin sNumTitle">
       <cmd5 "htmlpanelwidth %1">
-      <cmd4 "spy.resize_skin_logo(%1)">
+      <cmd4 XXX="spy.resize_skin_logo(%1)">
       <cmd6 "Updatehtml">
       <cmd1 "spy.SetParam(olex2.force_images,False)">
     />
