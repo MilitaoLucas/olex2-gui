@@ -238,7 +238,7 @@ def SetMaterials():
   
   olx.HtmlPanelWidth(OV.GetParam('gui.htmlpanelwidth'))
   
-  #olex.m("lines %s" %OV.GetParam('gui.lines_of_cmd_text'))
+  olex.m("lines %s" %OV.GetParam('gui.lines_of_cmd_text'))
 
   OV.SetParam('gui.skin.materials_have_been_set', True)
 

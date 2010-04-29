@@ -1884,10 +1884,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     im = Image.open(image_source)
 
     #first cut the small logo picture from the source
-    cut_right = (int(OV.GetParam('gui.htmlpanelwidth')) - 210) * factor
+    cut_right = (int(OV.GetParam('gui.htmlpanelwidth')) - 213) * factor
     if cut_right > 1400:
       cut_right = 1400
-    cut = 0, 230, cut_right, 430 * factor #the area of the small image
+    cut = 0, 228, cut_right, 430 * factor #the area of the small image
     crop = im.crop(cut)
     #crop_colourised = self.colourize(crop, (0,0,0), self.params.logo_colour.rgb)
     IM.paste(crop, (0,0), crop)
@@ -2813,8 +2813,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       fill = '#888888'
 
     if 'img' in arrows:
-      side = arrows.split('img:')[1].split(':')[0]
-      image_name = (arrows.split('img:')[1].split(',')[0].split(':')[1])
+      side = arrows.split('img:')[1].split(':')[0].split(',')[0]
+      image_name = (arrows.split('img:')[1].split(',')[0].split(':')[1]).split(',')[0]
       p = "%s/etc/skins/%s_%s.png" %(OV.BaseDir(), image_name, state)
       if os.path.exists(p):
         img = Image.open(p)
@@ -2827,7 +2827,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if 'bar' in arrows:
       draw = ImageDraw.Draw(image)
       try:
-        side = arrows.split('bar:')[1].split(':')[0]
+        side = arrows.split('bar:')[1].split(':')[0].split(',')[0]
       except:
         side = 'left'
       try:
@@ -2847,7 +2847,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         align = 'left'
 
       try:
-        direction = arrows.split(state)[1].split(':')[0]
+        direction = arrows.split(state)[1].split(':')[0].split(',')[0]
       except:
         if state == 'off':
           direction = 'right'
@@ -2867,7 +2867,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         fill = IT.adjust_colour(fill, luminosity=0.5)
       draw = ImageDraw.Draw(image)
       try:
-        char = arrows.split(state)[1].split(':')[0]
+        char = arrows.split(state)[1].split(':')[0].split(',')[0]
       except:
         side = '0'
         char = "#"
@@ -2896,13 +2896,13 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       draw.polygon((begin, middle, end), fill)
       
     if 'buttonmark' in arrows:
-      margin = int(arrows.split('buttonmark:')[1])
+      margin = int(arrows.split('buttonmark:')[1].split(',')[0])
       if not draw:
         draw = ImageDraw.Draw(image)
       w,h = image.size
       for i in xrange(int(h/2) - 2):
         fill = "#ffffff"
-        y = 3 + i * 2
+        y = 2 + i * 2
         for j in xrange(4):
           x = (w - margin) + j * 2
           draw.point((x, y), fill)
