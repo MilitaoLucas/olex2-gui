@@ -622,7 +622,7 @@ AFIX Commands	AFIX Commands	.	.	.	.	AFIX Befehle	.	AFIX命令	.
 Variables	Variables	.	.	.	.	Variablen	.	变量	.
 Rename	Rename	.	.	.	.	Umbenennen	.	重命名	.
 Name	Name	Name	.	.	.	Benennen	.	名称	.
-Close sorting	Close sorting	.	.	.	.	.	.	.	.
+Close sorting	Close sorting	.	.	.	.	Sortierung schliessen	.	.	.
 Default Style	Default Style	.	.	.	.	Default Stil	.	默认风格	.
 Ellipsoids|H	Ellipsoids|H	.	.	.	.	Ellipsoide|H	.	椭球模型|H	.
 Low Quality	Low Quality	.	.	.	.	Niedrige Qual	.	低质量图形	.
@@ -657,36 +657,36 @@ Calculate-CHN-Analysis-help	Calculates the expected values of a CHN analysis fro
 Link-Selected-help	TWO Selected atoms will be 'linked' in the refinement.&&~Occupancies~The occupancies will be linked such that the individual occupancies add up to unity.XX fvar sel XX~Parts and Occupancies~XX part -p=2 -lo sel XXThe occupancies will be linked such that the individual occupancies add up to unity and the selected atoms will be added to Parts.n^the -p parameter determines the number of parts that should be assigned. -lo stands for '<b>l</b>ink <b>o</b>ccupancy.^n&&	.	.	.	.	.	.	.	.
 normal-probability-plot-help	&&    ~Normal Probability Plot~  The normal probability plot is a graphical technique for assessing whether or not  a data set is approximately normally distributed.  The weighted residuals are sorted by order of magnitude, and plotted against the  values expected for a theoretical normal distribution.  An ideal normal probability plot will be linear, with a gradient of 1 and passing  through the origin.  Large deviations from this can indicate deficiencies with the model, weights  and scaling respectively.    XX normal_probability XX    &&	.	.	.	.	.	.	.	.
 fobs/fcalc-vs-resolution-help	&&    ~Fobs/Fcalc vs resolution~  This graph shows the variation of the Fobs/Fcalc ratio with resolution.  If the model  is a good match for the data, then most of the points should be close to the line  indicating an Fobs/Fcalc ratio of 1.  Deviations from this may indicate systematic  errors in the data with respect to resolution.  XX fobs_over_fcalc XX    &&	.	.	.	.	.	.	.	.
-Fill the Unit Cell	None	.	.	.	.	.	.	Fill the Unit Cell	.
-Short	None	.	.	.	.	.	.	Short	.
-VdW	None	.	.	.	.	.	.	VdW	.
+Fill the Unit Cell	Fill the Unit Cell	.	.	.	.	.	.	Fill the Unit Cell	.
+Short	Short	.	.	.	.	Kurz	.	Short	.
+VdW	VdW	.	.	.	.	VdW	.	VdW	.
 center_on-target	Centre the structure on the selected atom or the centroid of the selected atoms.	.	.	.	.	.	.	.	.
 images_add_labels_to_atoms	Add labels to the selected atoms	Add labels to the selected atoms	.	.	.	.	.	.	.
-images_add_labels_to_non_H_atoms	to non H atoms	to non H atoms	.	.	.	.	.	.	.
+images_add_labels_to_non_H_atoms	to non H atoms	to non H atoms	.	.	.	Nicht H Atome beschriften	.	.	.
 images_move_labels	Move the labels with the left mouse while holding down the SHIFT key	Move the labels with the left mouse while holding down the SHIFT key	.	.	.	.	.	.	.
 images_labels_tip	<b>Tip:</b> When labels are active, CTRL+A will select ALL labels. Selected labels can be <font color='#ff7800'><b>moved</b></font> while the SHIFT key is pressed and can also be <font color='#ff7800'><b>deleted</b></font> by pressing the delete key.	<b>Tip:</b> When labels are active, CTRL+A will select ALL labels. Selected labels can be <font color='#ff7800'><b>moved</b></font> while the SHIFT key is pressed and can also be <font color='#ff7800'><b>deleted</b></font> by pressing the delete key.	.	.	.	.	.	.	.
 images_label_colour	Choose the label colour	Choose the label colour	.	.	.	.	.	.	.
-images_label_box	Label Box	Label Box	.	.	.	.	.	.	.
-images_transparent_box	Transparent Box	Transparent Box	.	.	.	.	.	.	.
+images_label_box	Label Box	Label Box	.	.	.	Beschriftungsbox	.	.	.
+images_transparent_box	Transparent Box	Transparent Box	.	.	.	Durchsichtige Box	.	.	.
 images_octant_line_width	Octant Line Width	Octant Line Width	.	.	.	.	.	.	.
-Lines	Lines	Lines	.	.	.	.	.	.	.
-Bonds	Bonds	Bonds	.	.	.	.	.	.	.
-images_bmp_label_olex_font	Choose Label Font (Olex2)	Choose Label Font (Olex2)	.	.	.	.	.	.	.
-images_bmp_label_system_font	Choose Label Font (System)	Choose Label Font (System)	.	.	.	.	.	.	.
-Atoms	Atoms	Atoms	.	.	.	.	.	.	.
-Font	Font	Font	.	.	.	.	.	.	.
-Octant	Octant	Octant	.	.	.	.	.	.	.
-images_dividing_line_width	Dividing Line Width	Dividing Line Width	.	.	.	.	.	.	.
-images_bond_width	Bond Width	Bond Width	.	.	.	.	.	.	.
+Lines	Lines	Lines	.	.	.	Linien	.	.	.
+Bonds	Bonds	Bonds	.	.	.	Bindungen	.	.	.
+images_bmp_label_olex_font	Choose Label Font (Olex2)	Choose Label Font (Olex2)	.	.	.	Beschriftungsfong(Olex2)	.	.	.
+images_bmp_label_system_font	Choose Label Font (System)	Choose Label Font (System)	.	.	.	Beschriftungsfont (System)	.	.	.
+Atoms	Atoms	Atoms	.	.	.	Atome	.	.	.
+Font	Font	Font	.	.	.	Font	.	.	.
+Octant	Octant	Octant	.	.	.	Oktant	.	.	.
+images_dividing_line_width	Dividing Line Width	Dividing Line Width	.	.	.	Teilstrichdicke	.	.	.
+images_bond_width	Bond Width	Bond Width	.	.	.	Binungsdicke	.	.	.
 images_outline_line_width	Outline Line Width	Outline Line Width	.	.	.	.	.	.	.
 images_font_weight	Weight (vis. in file)	Weight (vis. in file)	.	.	.	.	.	.	.
-images_H_atom_bonds	H Atom Bonds	H Atom Bonds	.	.	.	.	.	.	.
-images_no_of_dividers	No. of Dividers	No. of Dividers	.	.	.	.	.	.	.
-brackets	brackets	brackets	.	.	.	.	.	.	.
-subscript	subscript	subscript	.	.	.	.	.	.	.
-news-tag-1.1-alpha-title	+++ This is Olex2 Version 1.1-alpha +++	.	.	.	.	.	.	.	.
+images_H_atom_bonds	H Atom Bonds	H Atom Bonds	.	.	.	H Bindungen	.	.	.
+images_no_of_dividers	No. of Dividers	No. of Dividers	.	.	.	Teilstriche	.	.	.
+brackets	brackets	brackets	.	.	.	Klammern	.	.	.
+subscript	subscript	subscript	.	.	.	tiefgestellt	.	.	.
+news-tag-1.1-alpha-title	+++ This is Olex2 Version 1.1-alpha +++	.	.	.	.	+++ Dies ist Olex2 Version 1.1-alpha +++	.	.	.
 news-tag-1.1-alpha	This is the alpha version of the current 1.1 release of Olex2. This version will be updated very frequently, and you can expect things to go wrong from time to time. You are welcome to use this version - and if you come across anything that isn't quite right, please let us know so that we can fix it.	.	.	.	.	.	.	.	.
-news-tag-1.1-beta-title	+++ This is Olex2 Version 1.1-beta +++	.	.	.	.	.	.	.	.
+news-tag-1.1-beta-title	+++ This is Olex2 Version 1.1-beta +++	.	.	.	.	+++ Dies ist Olex2 Version 1.1-beta +++	.	.	.
 news-tag-1.1-beta	This beta version of the current 1.1 release of Olex2 has seen some testing in alpha, but isn't quite ready to be updated to the full release version yet. This version should not have any serious bugs - so, if one of them comes crawling your way, please let us know as soon as you can that things aren't quite right.	.	.	.	.	.	.	.	.
 news-tag-1.1-title	Welcome to  Olex2 Version 1.1	.	.	.	.	.	.	.	.
 news-tag-1.1	This is our current release version of Olex2. This release version will be updated only after we have gone through subsential testing using the alpha and beta versions of our software. If you would like more frequent updates, please also install these other testing versions. Multiple installations of Olex2 do not interfere with each other.	.	.	.	.	.	.	.	.
