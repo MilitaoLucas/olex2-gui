@@ -400,6 +400,10 @@ class DownloadOlexLanguageDictionary:
     res = make_translate_gui_items_html(m)
     if res:
       cursor_txt = OV.TranslatePhrase("Please wait while uploading your changes")
+      try:
+        cursor_txt = cursor_txt.encode('ascii')
+      except:
+        cursor_txt = repr(cursor_txt)
       OV.Cursor('busy',cursor_txt)
       ok = self.upload_items(m)
       if ok != "OK":
