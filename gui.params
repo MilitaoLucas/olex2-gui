@@ -217,7 +217,7 @@ gui {
         .type = int
       rounded = 0101
         .type = str
-      arrows = "bar:right:18,arrow_right:onup:offdown"
+      arrows = "bar:right:18,arrow_right:onup:offdown,buttonmark:28"
         .type = str
       off_L = 1.6
         .type = float

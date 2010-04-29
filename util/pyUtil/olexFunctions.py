@@ -35,6 +35,10 @@ class OlexFunctions(inheritFunctions):
 
   def SetParam(self,variable,value):
     try:
+      if variable.startswith('gui'):
+        handler = olx.gui_phil_handler
+      else:
+        handler = olx.phil_handler
       if value == '': value = None
       elif value in ('Auto','auto','None','none',None):
         value = value
@@ -42,7 +46,7 @@ class OlexFunctions(inheritFunctions):
         value = "'%s'" %value.replace("'", "\\'")
       else:
         value = "'%s'" %str(value)
-      olx.phil_handler.update_single_param(str(variable), str(value))
+      handler.update_single_param(str(variable), str(value))
     except Exception, ex:
       print >> sys.stderr, "Variable %s could not be set with value %s" %(variable,value)
       sys.stderr.formatExceptionInfo()
