@@ -741,19 +741,19 @@ class ImageTools(FontInstances):
     max_width = image.size[0]
     max_height = image.size[1]
     font_name = "%s Bold" %OV.GetParam('gui.html.font_name')
-    font_size = int(max_height)
+    font_size = int(max_height) - 1
     colour = OV.GetParam('gui.html.highlight_colour')
     txt="New!"
     dX, dY = self.getTxtWidthAndHeight(txt, font_name, font_size)
 
-    draw.rectangle((max_width - dX - 2, 2, max_width - 2, max_height - 2), fill='#ffee00')
+    draw.rectangle((max_width - dX - 3, 2, max_width - 3, max_height - 3), fill='#ffee00')
 
     self.write_text_to_draw(
       draw,
       txt = txt,
-      top_left=(60, -1),
+      top_left=(59, -1),
       align='right',
-      max_width=max_width,
+      max_width=max_width -1,
       font_name=font_name,
       font_size=font_size,
       titleCase=True,
