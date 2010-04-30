@@ -995,7 +995,7 @@ class timage(ImageTools):
     self.params = OV.GuiParams()
 
     self.advertise_new = False
-    self.new_l = ['images']
+    self.new_l = ['maps']
 
     self.available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
     self.size_factor = OV.GetParam('gui.skin.size_factor')
@@ -1044,6 +1044,9 @@ class timage(ImageTools):
 
 
     do_these = []
+    if olx.fs_Exists("logo.png") == 'false':
+      force_images = True
+
     if not self.olex2_has_recently_updated:
       if not OV.GetParam('olex2.force_images') and not force_images:
         do_these = [
@@ -2022,12 +2025,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     name = "qwedges.png"
     OlexVFS.save_image_to_olex(image, name, 2)
 
-
-
-
   def make_text_and_tab_items(self):
     bitmap = "working"
-    olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
+    if olx.fs_Exists(bitmap) == 'true':
+      olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
     textItems = []
     tabItems = []
     directories = ["etc/gui", "etc/news", "etc/gui/blocks", "etc/gui/snippets"]
@@ -2589,9 +2590,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       rad = 3
       image = RoundedCorners.round_image(image, cache, corner_rad)
 
-    if self.advertise_new:
-      self.draw_advertise_new(draw, image)
-
     if state == "off":
       fill=self.adjust_colour("bg", luminosity=0.6)
       self.create_arrows(draw, height, direction="right", colour=fill, type='simple')
@@ -2600,6 +2598,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       fill = self.adjust_colour("highlight",  luminosity = 1.0)
       self.create_arrows(draw, height, direction="up", colour=fill, type='simple')
 
+    if self.advertise_new:
+      self.draw_advertise_new(draw, image)
+      
     image = self.add_whitespace(image=image, side='bottom', margin_left=rad, weight=1, colour = self.adjust_colour("bg", luminosity = 0.90))
     image = self.add_whitespace(image=image, side='bottom', margin_left=rad, weight=1, colour = self.adjust_colour("bg", luminosity = 0.95))
     filename = item
@@ -2748,9 +2749,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       self.drawFileFullInfo(draw, colour, right_margin=5, height=height, font_size=info_size, left_start=wX + 15)
       self.drawSpaceGroupInfo(draw, luminosity=1.8, right_margin=3)
 
-    if self.advertise_new:
-      self.draw_advertise_new(draw, image)
-
     if arrows:
       off_L = OV.GetParam('gui.timage.%s.off_L' %item_type)
       if off_L is None:
@@ -2767,6 +2765,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       rounded = OV.GetParam('gui.timage.%s.rounded' %item_type)
       if rounded is None: rounded = '1111'
       image = self.make_corners(rounded, image, corner_rad, underground)
+
+    if self.advertise_new:
+      draw = ImageDraw.Draw(image)
+      self.draw_advertise_new(draw, image)
 
     if shadow:
       image = self.make_shadow(image, underground, corner_rad)
