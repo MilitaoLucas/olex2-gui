@@ -1,4 +1,4 @@
-<td width=65% align='left' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+<td align='left' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
 $spy.MakeElementButtonsFromFormula()
 </td>
 
@@ -19,12 +19,14 @@ $spy.MakeElementButtonsFromFormula()
 
 <td align='right' valign='center' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
   <a href="showH a true>>HADD>>autorefine" target="Add Hydrogen">
-  <zimg border="1" src="element-AddH.png"/></a>
-
+  <zimg name=IMG_BUTTON_SMALL-NAME border="0" src="button_small-add_h.png"/></a>
+</td>
+<td>
   <a href="anis>>echo 'Selected (or all, if none selected) atoms set to anistoropic'>>autorefine"
   target="%anis-target% ">
   <zimg border="1" src="toolbar-anis.png"/></a>
-
+</td>
+<td>
   <a href="isot>>echo 'Selected (or all, if none selected) atoms set to isotropic.'>>autorefine"
   target="%isot-target% ">
   <zimg border="1" src="toolbar-isot.png"/></a>
