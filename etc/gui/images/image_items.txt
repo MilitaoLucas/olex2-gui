@@ -53,6 +53,7 @@
   Go
   Name
   Ellipsoids
+  Add H
   
 [FULL ROW]
   Run AutoChem
