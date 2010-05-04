@@ -72,7 +72,6 @@ class MetaCif(ArgumentParser):
   def viewCifInfoInOlex(self):
     """Brings up popup text editor in olex containing the text to be added to the cif file."""
 
-    self.sort_crystal_dimensions()
     text = self.prepareCifItems()
     inputText = OV.GetUserInput(0,'Items to be entered into cif file',text)
 
@@ -115,6 +114,7 @@ class MetaCif(ArgumentParser):
   def prepareCifItems(self):
     """Returns a string in cif format of all items in a dictionary of cif items."""
 
+    self.sort_crystal_dimensions()
     listText = []
     name_value_pairs = olx.phil_handler.name_value_pairs('snum.metacif')
     for name, value in name_value_pairs:
