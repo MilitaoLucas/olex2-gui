@@ -484,7 +484,7 @@ def MakeElementButtonsFromFormula():
                         'bgcolour':'#efefef',
                         'image_prefix':'element',
                         'width':int(icon_size * 2),
-                        'font_size':11,
+                        'font_size':10,
                         'top_left':(2,0),
                         'grad':False,
                       })
