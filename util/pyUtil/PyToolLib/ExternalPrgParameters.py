@@ -874,7 +874,7 @@ atom_sites_solution=direct
 instructions {
   tref {
     values {
-      np = 100
+      np = 500
         .type=int
       nE = None
         .type=int
