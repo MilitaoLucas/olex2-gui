@@ -1231,7 +1231,8 @@ class timage(ImageTools):
     crop =  im.crop(cut)
     button_names = self.image_items_d.get("TINY BUTTONS")
     scale = self.sf / 1.2
-    self.produce_buttons(button_names, crop, cut, max_width, scale,"_tiny",width=15)
+    tiny_width= OV.GetParam('gui.timage.tinybutton.width')
+    self.produce_buttons(button_names, crop, cut, max_width, scale,"_tiny",width=tiny_width)
 
     ## SMALL buttons
     cut = 90*sf, 178*sf, 138*sf, 193*sf
@@ -1467,7 +1468,11 @@ class timage(ImageTools):
         if width is None: width = max_width
         use_new = True
         if use_new:
-          IM = self.make_timage(item_type='button', item=txt, state=state, width=width)
+          if btn_type =="_tiny":
+            button_type = 'tinybutton'
+          else:
+            button_type = 'button'
+          IM = self.make_timage(item_type=button_type, item=txt, state=state, width=width)
           name = "button%s-%s%s.png" %(btn_type, txt.replace(" ", "_"), state)
           name = name.lower()
           OlexVFS.save_image_to_olex(IM, name, 2)
@@ -2607,7 +2612,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     return image
 
 
-  def make_timage(self, item_type, item, state, font_name="Vera", width=None):
+  def make_timage(self, item_type, item, state, font_name="Vera", width=None, colour=None):
     if not width:
       width = self.width
 
@@ -2691,8 +2696,16 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       shadow = False
       buttonmark = True
       if state == "on":
-        grad_colour = self.highlight_colour
+        grad_colour = OV.GetParam('gui.html.highlight_colour').rgb
 
+    elif item_type == 'tinybutton':
+      underground = OV.GetParam('gui.html.table_bg_colour').rgb
+      shadow = False
+      if colour:
+        grad_colour = colour
+      if state == "on":
+        grad_colour = OV.GetParam('gui.html.highlight_colour').rgb
+        
     elif item_type =='cbtn':
       underground = OV.GetParam('gui.html.bg_colour').rgb
 
@@ -2739,6 +2752,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                             image_size = image.size,
                             valign=valign,
                             align=halign,
+                            max_width=width,
                             titleCase=title_case,
                             font_colour=font_colour)
     cache = {}
@@ -2810,7 +2824,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if state == "off":
       fill = self.adjust_colour(base_colour, luminosity=off_L)
     elif state == "on":
-      fill = self.adjust_colour(self.highlight_colour, luminosity=on_L)
+      fill = self.adjust_colour(OV.GetParam('gui.html.highlight_colour').rgb, luminosity=on_L)
     else:
       fill = '#888888'
 

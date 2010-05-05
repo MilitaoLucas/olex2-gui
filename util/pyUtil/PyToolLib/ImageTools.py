@@ -611,7 +611,7 @@ class ImageTools(FontInstances):
       font = self.registerFontInstance(font_name, font_size, encoding=encoding)
 
 
-    if align == "centre":
+    if align == "centre" or align == 'middle':
       left = (self.centre_text(draw, txt, font, max_width))
     elif align == "right":
       left = (self.align_text(draw, txt, font, max_width, 'right'))

@@ -256,6 +256,42 @@ gui {
         .type = str
     }
 
+    tinybutton{
+      base_colour = #e1e1e1
+        .type = colour
+      grad_colour = #dedede
+        .type = colour
+      grad_step = 0.3
+        .type = float
+      height = 20
+        .type = int
+      width = 20
+        .type = int
+      corner_rad = 3
+        .type = int
+      rounded = 1111
+        .type = str
+      font_size = 14
+        .type = int
+      halign = middle
+        .type = str
+      top = 2
+        .type = int
+      left = 3
+        .type = int
+      bg_colour_L = 1.8
+        .type = float
+      grad_colour_L = 1.9
+        .type = float
+      font_colour_L = 0.7
+        .type = float
+      font_colour = #767676
+        .type = colour
+      arrows = None
+        .type = str
+    }
+    
+    
     h1{
       base_colour = #aaaaaa
         .type = colour
