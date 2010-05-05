@@ -516,6 +516,7 @@ class Graph(ImageTools):
       IT.write_text_to_draw(self.draw, title, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
 
     for i, xy in enumerate(dataset.xy_pairs()):
+      last = len(dataset.x)
       x_value, y_value = xy
       bar_left = ((i) * bar_width) + self.bSides + 1
       bar_right = bar_left + bar_width
@@ -532,7 +533,10 @@ class Graph(ImageTools):
       else:
         fill = (0,0,0)
 
+      if i == last -1:
+        bar_right = width - self.bSides - 1
       box = (bar_left,bar_top,bar_right,bar_bottom)
+        
       self.draw.rectangle(box, fill=fill, outline=(100, 100, 100))
 
       if dataset.hrefs is not None:
