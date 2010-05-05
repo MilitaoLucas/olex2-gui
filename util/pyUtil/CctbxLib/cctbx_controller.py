@@ -271,16 +271,12 @@ class normal_probability_plot(object):
     if distribution is None:
       distribution = distributions.normal_distribution()
     self.info = None
-    ls_function = xray.unified_least_squares_residual(f_sq_obs)
-    ls = ls_function(f_calc, compute_derivatives=False)
-    scale_factor = ls.scale_factor()
+    scale_factor = math.pow(f_obs.scale_factor(f_calc), 2)
     weighting.observed = f_sq_obs
-    weighting.calculated = f_calc
-    weighting.compute()
+    weighting.compute(f_calc, scale_factor)
     #
     observed_deviations = flex.sqrt(weighting.weights) * (
       f_sq_obs.data() - scale_factor * f_sq_calc.data())
-
     selection = flex.sort_permutation(observed_deviations)
     self.x = distribution.quantiles(f_sq_obs.size())
     self.y = observed_deviations.select(selection)
