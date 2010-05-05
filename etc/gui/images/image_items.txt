@@ -64,7 +64,11 @@
   a
   b
   c
-  x
-  y
-  z
+  x:
+  :x
+  y:
+  :y
+  z:
+  :z
   H
+  Go

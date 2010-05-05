@@ -35,6 +35,8 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import variableFunctions
 
+import OlexVFS
+
 haveGUI = OV.HasGUI()
 
 if __debug__:
@@ -433,6 +435,7 @@ def MakeElementButtonsFromFormula():
   current_formula = OlexRefinementModel().currentFormula()
 #  Z_prime = OV.GetParam('snum.refinement.Z_prime')
   Z_prime = float(olx.xf_au_GetZprime())
+  Z = float(olx.xf_au_GetZ())
   html_elements = []
   for element in f:
     symbol = element.split(':')[0]
@@ -442,16 +445,26 @@ def MakeElementButtonsFromFormula():
       totalcount += max
 
     max = max*Z_prime
+    bgcolour = '#ff0000'
     if present < max:
       bgcolour = (250,250,250)
     elif present ==  max:
       bgcolour = (210,255,210)
     else:
       bgcolour = (255,210,210)
-    html_elements.append('''
-<a href="if strcmp(sel(),'') then 'mode name -t=%s' else 'name sel %s'>>sel -u" target="Subsequently clicked atoms will be made into %s">
-<zimg border="0" src="element-%s.png"></a>
-''' %(symbol, symbol, symbol, symbol))
+    command = "if strcmp(sel(),'') then 'mode name -t=%s' else 'name sel %s'>>sel -u" %(symbol, symbol)
+    target = OV.TranslatePhrase('change_element-target')
+    #command = "if strcmp(spy.GetParam(olex2.in_mode),'mode name -t=%s') then 'mode off' else \"if strcmp(sel(),'') then 'mode name -t=%s' else 'name sel %s'>>sel -u\"" %(symbol, symbol, symbol)
+    
+    html = '''
+    <a href="%s" target="%s %s">
+      <zimg name=IMG_BTN-ELEMENT%s border="0" src="btn-element%s.png"/>
+    </a>&thinsp; '''%(command, target, symbol, symbol.upper(), symbol)
+    
+    html_elements.append(html)
+
+#$spy.MakeActiveGuiButton(btn-element%s,%s)&thinsp;
+#''' %(symbol, command))
 
     btn_dict.setdefault(
       symbol, {
@@ -464,33 +477,55 @@ def MakeElementButtonsFromFormula():
       })
 
   html_elements.append('''
-<a href="if strcmp(sel(),'') then 'mode name -t=ChooseElement()' else 'name sel ChooseElement()" target="Chose Element from the periodic table">
-<zimg border="0" src="element-....png"></a>
+<a href="if strcmp(sel(),'') then 'mode name -t=ChooseElement()' else 'name sel ChooseElement()"
+   target="Chose Element from the periodic table">
+<zimg border="0" src="btn-element....png"></a>
 ''')
-  btn_dict.setdefault(
-    'Table', {
-      'txt':'...',
-      'bgcolour':'#efefef',
-      'width':int(icon_size*1.2),
-      'image_prefix':'element',
-      'top_left':(0,-1),
-      'grad':False,
-    })
+  #btn_dict.setdefault(
+    #'Table', {
+      #'txt':'...',
+      #'bgcolour':'#efefef',
+      #'width':int(icon_size*1.2),
+      #'image_prefix':'element',
+      #'top_left':(0,-1),
+      #'grad':False,
+    #})
 
-  hname = 'AddH'
-  btn_dict.setdefault('ADDH',
-                      {
-                        'txt':'%s' %hname,
-                        'bgcolour':'#efefef',
-                        'image_prefix':'element',
-                        'width':int(icon_size * 2),
-                        'font_size':10,
-                        'top_left':(2,0),
-                        'grad':False,
-                      })
+  #hname = 'AddH'
+  #btn_dict.setdefault('ADDH',
+                      #{
+                        #'txt':'%s' %hname,
+                        #'bgcolour':'#efefef',
+                        #'image_prefix':'element',
+                        #'width':int(icon_size * 2),
+                        #'font_size':10,
+                        #'top_left':(2,0),
+                        #'grad':False,
+                      #})
 
   if current_formula != last_formula:
     last_formula = current_formula
+    use_new = True
+  else:
+    use_new = True
+    
+  if use_new:
+    from PilTools import timage
+    TI = timage()
+    for b in btn_dict:
+      for state in ['on', 'off']:
+        txt = btn_dict[b].get('txt')
+        bgcolour = btn_dict[b].get('bgcolour')
+        width = 21
+        btn_type = 'tiny'
+        IM = TI.make_timage(item_type='tinybutton', item=txt, state=state, width=width, colour=bgcolour)
+        name = "btn-element%s%s.png" %(txt, state)
+        OlexVFS.save_image_to_olex(IM, name, 1)
+        if state == 'off':
+          name = "btn-element%s.png" %(txt)
+          OlexVFS.save_image_to_olex(IM, name, 1)
+            
+  else:
     bm = ButtonMaker(btn_dict)
     bm.run()
   cell_volume = 0

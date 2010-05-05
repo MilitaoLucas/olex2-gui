@@ -903,7 +903,14 @@ def OnModeChange(*args):
   mode = mode.strip()
   mode_disp = mode_disp.strip()
 
-  if 'name' in mode:
+  if 'name -t=' in mode:
+    element = mode.split('=')[1]
+    if element:
+      active_mode = 'btn-element%s' %element
+    else:
+      return
+  
+  elif 'name' in mode:
     active_mode = 'button_small-name'
   elif 'grow' in mode:
     active_mode = 'button-grow_mode'
@@ -1023,12 +1030,16 @@ OV.registerCallback('statechange',OnStateChange)
 def MakeActiveGuiButton(name,cmds,toolname=""):
   n = name.split("-")
   d = {}
+  if toolname:
+    target=toolname.lower()
+  else:
+    target=n[1]
   d.setdefault('bt', n[0])
   d.setdefault('bn', n[1])
   d.setdefault('BT', n[0].upper())
   d.setdefault('BN', n[1].upper())
   d.setdefault('cmds', cmds.replace("\(","("))
-  d.setdefault('target', OV.TranslatePhrase("%s-target" %n[1]))
+  d.setdefault('target', OV.TranslatePhrase("%s-target" %target))
   d.setdefault('toolname', toolname)
   txt = '''
     <a href="spy.InActionButton(%(bt)s-%(bn)s,on,%(toolname)s)>>refresh>>%(cmds)s>>echo '%(target)s: OK'>>spy.InActionButton(%(bt)s-%(bn)s,off,%(toolname)s)" target="%(target)s">

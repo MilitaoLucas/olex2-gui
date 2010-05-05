@@ -68,14 +68,8 @@
         value = "0.06"
       >
     </font>
-    <font size=2>
-      <input 
-        type="button" 
-        name = "select-uiso"
-        width="25" 
-        value="Go" 
-        onclick="sel atoms where xatom.uiso getvalue(compare) getvalue(uiso)&&xatom.type!='Q'">
-    </font>
+      $spy.MakeActiveGuiButton(button_tiny-go,'sel atoms where xatom.uiso getvalue\(compare) getvalue\(uiso)&&xatom.type!='Q'',GO_SELECT)
+
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>

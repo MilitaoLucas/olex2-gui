@@ -2,47 +2,51 @@
 
 <!-- FIRST ROW -->
 <tr name=ROTATE>
-<!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Rotate;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td name=LABEL_ROTATE width='15%'>
     <b>%Rotate%:</b>
   </td>
   <td name=SPIN_ROTATION_X>
+    $spy.MakeActiveGuiButton(button_tiny-:x,'rota 1 eval\(GetValue\(rx)*-1)')
+    &thinsp;
     <input 
       type="spin" 
       name = "rx" 
-      width="42"
+      width="45"
       height="$spy.GetParam(gui.html.spin_height)"
-      value="90"
+      value="10"
     >
-    &nbsp;
-    $spy.MakeActiveGuiButton(button_tiny-x,'rota 1 getvalue\(rx)')
-    &nbsp;
+    &thinsp;
+    $spy.MakeActiveGuiButton(button_tiny-x:,'rota 1 getvalue\(rx)')
   </td>
   <td name=SPIN_ROTATION_Y>
+    $spy.MakeActiveGuiButton(button_tiny-:y,'rota 2 eval\(GetValue\(ry)*-1)')
+    &thinsp;
     <input 
       type="spin" 
       name = "ry" 
-      width="42"  
+      width="45"  
       height="$spy.GetParam(gui.html.spin_height)"
       bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
-      value="90"
+      value="10"
     >
-    &nbsp;
-    $spy.MakeActiveGuiButton(button_tiny-y,'rota 1 getvalue\(ry)')
-    &nbsp;
+    &thinsp;
+    $spy.MakeActiveGuiButton(button_tiny-y:,'rota 2 getvalue\(ry)')
   </td>
   <td name=SPIN_ROTATION_Z>
+    $spy.MakeActiveGuiButton(button_tiny-:z,'rota 3 eval\(GetValue\(rx)*-1)')
+    &thinsp;
     <input 
       type="spin" 
       name = "rz" 
-      width="42" 
+      width="45" 
       height="$spy.GetParam(gui.html.spin_height)"
       bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
-      value="90"
+      value="10"
     >
-    &nbsp;
-    $spy.MakeActiveGuiButton(button_tiny-z,'rota 3 getvalue\(rz)')
+    &thinsp;
+    $spy.MakeActiveGuiButton(button_tiny-z:,'rota 3 getvalue\(rz)')
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
