@@ -481,15 +481,15 @@ def MakeElementButtonsFromFormula():
    target="Chose Element from the periodic table">
 <zimg border="0" src="btn-element....png"></a>
 ''')
-  #btn_dict.setdefault(
-    #'Table', {
-      #'txt':'...',
-      #'bgcolour':'#efefef',
-      #'width':int(icon_size*1.2),
-      #'image_prefix':'element',
-      #'top_left':(0,-1),
-      #'grad':False,
-    #})
+  btn_dict.setdefault(
+    'Table', {
+      'txt':'...',
+      'bgcolour':'#efefef',
+      'width':int(icon_size*1.2),
+      'image_prefix':'element',
+      'top_left':(0,-1),
+      'grad':False,
+    })
 
   #hname = 'AddH'
   #btn_dict.setdefault('ADDH',
