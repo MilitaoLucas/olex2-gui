@@ -994,6 +994,20 @@ def QPeaksSlide(value):
   return val
 OV.registerFunction(QPeaksSlide)
 
+def UisoSelectSlide(value):
+  val = int(value) * 5
+  if val >= 0:
+    val = 100 - val
+    val = val * 0.001
+    val = "> %.3f" %val
+  else:
+    val = val * 0.001 * -1
+    val = "< %.3f" %val
+#  print val
+  return val
+OV.registerFunction(UisoSelectSlide)
+
+
 def createRMSDisplay(outStr):
   for rms in SpyVar.MatchedRms:
     if rms < 0.2:
