@@ -1664,11 +1664,9 @@ def getReportImageData(size='w400', imageName=None):
     imagePath = OV.GetParam('snum.report.image')
   else:
     imagePath = r"%s/etc/CIF/styles/%s.png" %(OV.BaseDir(),imageName)
+  imageLocalSrc = imagePath.split("/")[-1:][0]
+  imageLocalSrc = imageLocalSrc.split("\\")[-1:][0]
     
-#  if OV.FilePath(imagePath) == OV.FilePath():
-#    retVal = olx.file_GetName(imagePath)
-#  else:
-#    retVal = 'file:///%s' %imagePath
    
   IM = Image.open(imagePath)
   oSize = IM.size
@@ -1690,9 +1688,9 @@ def getReportImageData(size='w400', imageName=None):
   d ='data:image/png;base64,' + data
   
   html = '''
-<!--[if IE]><img width=500 src='file:///%s'><![endif]-->
+<!--[if IE]><img width=500 src='%s'><![endif]-->
 <![if !IE]><img width=500 src='data:image/png;base64,%s'><![endif]>
-  '''%(imagePath, data)
+  '''%(imageLocalSrc, data)
   
   return html
 OV.registerFunction(getReportImageData)
