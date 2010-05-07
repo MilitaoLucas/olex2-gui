@@ -459,11 +459,11 @@ def MakeElementButtonsFromFormula():
     html = '''
     <a href="%s" target="%s %s">
       <zimg name=IMG_BTN-ELEMENT%s border="0" src="btn-element%s.png"/>
-    </a>&thinsp; '''%(command, target, symbol, symbol.upper(), symbol)
+    </a>&nbsp; '''%(command, target, symbol, symbol.upper(), symbol)
     
     html_elements.append(html)
 
-#$spy.MakeActiveGuiButton(btn-element%s,%s)&thinsp;
+#$spy.MakeActiveGuiButton(btn-element%s,%s)&nbsp;
 #''' %(symbol, command))
 
     btn_dict.setdefault(
