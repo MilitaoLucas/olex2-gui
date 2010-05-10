@@ -413,6 +413,8 @@ snum {
   }
 
   masks {
+    original_hklsrc = None
+      .type = path
     type = *mask f_mask f_model
       .type = choice
     solvent_radius = 1.2
