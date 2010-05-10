@@ -168,7 +168,11 @@ target = "Do automatic tidying once - tick the box to do it after every refineme
         name="SNUM_REFINEMENT_USE_SOLVENT_MASK"
         checked="$spy.GetParam(snum.refinement.use_solvent_mask)"
         oncheck="spy.SetParam(snum.refinement.use_solvent_mask,true)"
-        onuncheck="spy.SetParam(snum.refinement.use_solvent_mask,false)"
+        onuncheck="
+spy.SetParam(snum.refinement.use_solvent_mask,false)>>
+if strcmp(spy.GetParam(snum.masks.original_hklsrc),'') then none else HKLSrc(spy.GetParam(snum.masks.original_hklsrc))>>
+spy.SetParam(snum.masks.original_hklsrc,None)>>
+UpdateHtml"
         value=""
       >
     </font>

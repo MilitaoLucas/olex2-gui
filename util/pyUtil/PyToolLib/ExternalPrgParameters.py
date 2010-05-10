@@ -390,28 +390,39 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       from libtbx import easy_pickle
       #from iotbx.shelx import hklf
       filepath = OV.StrDir()
-      self.original_hklsrc = OV.HKLSrc()
+      #self.original_hklsrc = OV.HKLSrc()
       modified_intensities = None
+      modified_hkl_path = "%s/%s_modified.hkl" %(OV.FilePath(), OV.FileName())
+      if not OV.HKLSrc() == modified_hkl_path:
+        OV.SetParam('snum.masks.original_hklsrc', OV.HKLSrc())
       if OV.GetParam("snum.refinement.recompute_mask_before_refinement"):
         cctbx_olex_adapter.OlexCctbxMasks()
         if olx.current_mask.flood_fill.n_voids() > 0:
           f_mask = olx.current_mask.f_mask()
           f_model = olx.current_mask.f_model()
           modified_intensities = olx.current_mask.modified_intensities()
+      elif os.path.exists(modified_hkl_path):
+        OV.HKLSrc(modified_hkl_path)
       elif os.path.exists("%s/f_mask.pickle" %filepath):
         f_mask = easy_pickle.load("%s/f_mask.pickle" %filepath)
         f_model = easy_pickle.load("%s/f_model.pickle" %filepath)
         cctbx_adapter = cctbx_olex_adapter.OlexCctbxAdapter()
         fo2 = cctbx_adapter.reflections.f_sq_obs_filtered
+        if f_mask.size() < fo2.size():
+          f_model = f_model.generate_bijvoet_mates().customized_copy(
+            anomalous_flag=fo2.anomalous_flag()).common_set(fo2)
+          f_mask = f_mask.generate_bijvoet_mates().customized_copy(
+            anomalous_flag=fo2.anomalous_flag()).common_set(fo2)
+        elif f_mask.size() > fo2.size():
+          raise RuntimeError("f_mask array doesn't match hkl file")
         modified_intensities = masks.modified_intensities(fo2, f_model, f_mask)
       if modified_intensities is not None:
-        modified_hkl_path = "%s/%s_modified.hkl" %(OV.FilePath(), OV.FileName())
         file_out = open(modified_hkl_path, 'w')
         modified_intensities.export_as_shelx_hklf(file_out)
         file_out.close()
         OV.HKLSrc(modified_hkl_path)
-      else:
-        print "No mask present"
+      #else:
+        #print "No mask present"
     diffrn_ambient_temperature = OV.GetParam('snum.metacif.diffrn_ambient_temperature')
     if diffrn_ambient_temperature is not None:
       if '(' in diffrn_ambient_temperature:

@@ -587,6 +587,17 @@ class OlexCctbxMasks(OlexCctbxAdapter):
     else: data = None
 
     if recompute or data is None:
+      # remove modified hkl (for shelxl) if we are recomputing the mask
+      # and change back to original hklsrc
+      modified_hkl_path = "%s/%s_modified.hkl" %(OV.FilePath(), OV.FileName())
+      if os.path.exists(modified_hkl_path):
+        os.remove(modified_hkl_path)
+        original_hklsrc = OV.GetParam('snum.masks.original_hklsrc')
+        if OV.HKLSrc() == modified_hkl_path and original_hklsrc is not None:
+          OV.HKLSrc(original_hklsrc)
+          OV.UpdateHtml()
+          # we need to reinitialise reflections
+          self.initialise_reflections()
       xs = self.xray_structure()
       fo_sq = self.reflections.f_sq_obs_filtered.average_bijvoet_mates()
       mask = masks.mask(xs, fo_sq)
@@ -950,3 +961,4 @@ def write_grid_to_olex(grid):
         olex_xgrid.SetValue(i,j,k, grid[i,j,k])
   olex_xgrid.SetMinMax(flex.min(grid), flex.max(grid))
   olex_xgrid.SetVisible(True)
+  olex_xgrid.InitSurface(True)
