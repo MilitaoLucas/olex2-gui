@@ -299,6 +299,7 @@ class FullMatrixRefine(OlexCctbxRefine):
     self.verbose = verbose
     sys.stdout.refresh = False
     self.scale_factor = None
+    self.failure = False
 
   def run(self):
     from smtbx.refinement import least_squares
@@ -307,6 +308,13 @@ class FullMatrixRefine(OlexCctbxRefine):
     filepath = OV.StrDir()
     self.f_mask = None
     if OV.GetParam("snum.refinement.use_solvent_mask"):
+      modified_hkl_path = "%s/%s_modified.hkl" %(OV.FilePath(), OV.FileName())
+      original_hklsrc = OV.GetParam('snum.masks.original_hklsrc')
+      if OV.HKLSrc() == modified_hkl_path and original_hklsrc is not None:
+        # change back to original hklsrc
+        OV.HKLSrc(original_hklsrc)
+        # we need to reinitialise reflections
+        self.initialise_reflections()
       if OV.GetParam("snum.refinement.recompute_mask_before_refinement"):
         OlexCctbxMasks()
         if olx.current_mask.flood_fill.n_voids() > 0:
@@ -321,30 +329,28 @@ class FullMatrixRefine(OlexCctbxRefine):
       weighting_scheme="default")
     objectives = []
     scales = []
-    for i in range (self.max_cycles):
-      try:
+    try:
+      for i in range (self.max_cycles):
         normal_eqns.build_up()
-      except RuntimeError, e:
-        if str(e).startswith("cctbx::adptbx::debye_waller_factor_exp: max_arg exceeded"):
-          print "Refinement failed!"
-        break
-      objectives.append(normal_eqns.objective)
-      scales.append(normal_eqns.scale_factor)
-      try:
+        objectives.append(normal_eqns.objective)
+        scales.append(normal_eqns.scale_factor)
         normal_eqns.solve_and_apply_shifts()
-      except RuntimeError, e:
-        if "SCITBX_ASSERT(!chol.failure) failure" in str(e):
-          print "Cholesky failure"
-        print e
-        break
-      finally:
         shifts = normal_eqns.shifts
         self.feed_olex()
         self.scale_factor = scales[-1]
-
+    except RuntimeError, e:
+      if str(e).startswith("cctbx::adptbx::debye_waller_factor_exp: max_arg exceeded"):
+        print "Refinement failed to converge"
+      elif "SCITBX_ASSERT(!chol.failure) failure" in str(e):
+        print "Cholesky failure"
+      else:
+        print "Refinement failed"
+        print e
+      self.failure = True
+    else:
       self.post_peaks(self.f_obs_minus_f_calc_map(0.4), max_peaks=self.max_peaks)
+    finally:
       sys.stdout.refresh = True
-
 
   def feed_olex(self):
     ## Feed Model
