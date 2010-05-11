@@ -1329,7 +1329,7 @@ def updateACF(force=False):
       print cmd
       Popen(cmd, shell=False, stdout=PIPE).stdout
       print "Updated"
-      wFile = open(r"%s/util/pyUtil/PluginLib/odac_update.txt" %OV.BaseDir(),'w')
+      wFile = open(r"%s/odac_update.txt" %OV.BaseDir(),'w')
       wFile.write("False")
       rFile.close()
     except Exception, err:
