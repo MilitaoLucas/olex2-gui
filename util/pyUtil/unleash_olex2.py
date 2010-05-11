@@ -73,10 +73,12 @@ external_files = {
   'acidb.zip': ('olex-update', 'action:extract', 'action:delete'),
   'splash.jpg': ('olex-install', 'olex-update'),
   'version.txt': ('olex-install', 'olex-update'),
+  'dictionary.txt': ('olex-install', 'olex-update'),
+  'odac_update.txt': ('olex-install', 'olex-update'),
   #plugins, no solution for portable plugins yet
   'olex2c.exe': ('olex-port', 'plugin-Headless')
 }
-# special zip files (must have relevent structire), must exist ABOVE as well!!
+# special zip files (must have relevant structure), must exist ABOVE as well!!
 #if the associated value is false - the file is non-portable and will not end up in the portable-gui.zip
 portable_zip_files = \
 set(  ['olex2_fonts.zip',
