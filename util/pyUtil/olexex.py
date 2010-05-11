@@ -1262,7 +1262,7 @@ def register_new_odac(username=None, pwd=None):
 OV.registerFunction(register_new_odac)
 
 def updateACF(force=False):
-  rFile = open(r"%s/util/pyUtil/PluginLib/odac_update.txt" %OV.BaseDir())
+  rFile = open(r"%s/odac_update.txt" %OV.BaseDir())
   txt = rFile.read()
   rFile.close()
   if force:
