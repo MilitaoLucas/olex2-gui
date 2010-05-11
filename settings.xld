@@ -120,6 +120,7 @@
     <check title="View;Structure;Basis" macro="basis" statedependent="basisvis">
     <check title="View;Structure;Hide Structure" macro="showStr" statedependent="strvis">
 
+    <item title="Help;About" macro="spy.make_help_box -name='About' -popout='False'">
     <item title="Help;Update options" macro="updateoptions">
     <item title="Help;Documentation (HTML)" macro="shell 'BaseDir()/etc/documentation/Commands.html'">
     <item title="Help;Documentation (PDF)" macro="shell 'BaseDir()/etc/documentation/Commands.pdf'">

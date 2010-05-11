@@ -381,6 +381,8 @@ gui {
     .type = str
   infobox_plane = '2053;2136422952;2137144606'
     .type = str
+  console_font = #olex2.fnt:frb_12
+    .type = str
   htmlpanelwidth = 400
     .type = int
   htmlpanelwidth_margin_adjust = 22

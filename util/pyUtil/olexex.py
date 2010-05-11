@@ -1319,12 +1319,12 @@ def updateACF(force=False):
   if new:
     p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], olex2_tag)
     cont = GetHttpFile(f, force=True, fullURL = True)
-    if cont:
-      name = "AutoChem Updater.exe"
-      wFile = open("%s/%s" %(p, name),'wb')
-      wFile.write(cont)
-      wFile.close()
     try:
+      if cont:
+        name = "AutoChem Updater.exe"
+        wFile = open("%s/%s" %(p, name),'wb')
+        wFile.write(cont)
+        wFile.close()
       cmd = r"%s/AutoChem Updater.exe /S" %p
       print cmd
       Popen(cmd, shell=False, stdout=PIPE).stdout
