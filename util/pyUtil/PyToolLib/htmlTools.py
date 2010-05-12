@@ -253,6 +253,7 @@ def make_help_box(args):
     title = name
     help_src = name
   titleTxt = OV.TranslatePhrase("%s" %title)
+#  titleTxt = title
   if box_type == "tutorial":
     titleTxt = titleTxt.title()
     t = titleTxt.split("_")
