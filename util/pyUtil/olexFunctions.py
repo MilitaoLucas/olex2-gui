@@ -205,6 +205,7 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
 
   def write_to_olex(self,fileName,text,copyToDisk = False):
+    text = text.encode('utf-8')
     try:
       OlexVFS.write_to_olex(fileName, text)
       if copyToDisk:
