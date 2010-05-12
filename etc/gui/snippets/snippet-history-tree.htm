@@ -1,0 +1,14 @@
+<input
+  noroot
+  editable
+  name="HISTORY_TREE"
+  type="tree"
+  src="history_tree.ind"
+  bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+  width="#width"
+  height="#height"
+  selected="$spy.GetParam(snum.history.current_node)"
+  onselect=""
+  onitem="spy.revert_history(html.getvalue(HISTORY_TREE))>>UpdateHtml"
+  onedit="spy.rename_history(html.getvalue(HISTORY_TREE),~label~)>>UpdateHtml"
+>
