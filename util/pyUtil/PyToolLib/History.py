@@ -230,7 +230,9 @@ class History(ArgumentParser):
   def _make_history_bars(self):
     if not OV.HasGUI():
       return
-    OV.write_to_olex('history_tree.ind', ''.join(make_html_tree(tree, [], 0)))
+    full_tree = not OV.GetParam('snum.history.condensed_tree')
+    OV.write_to_olex(
+      'history_tree.ind', ''.join(make_html_tree(tree, [], 0, full_tree)))
     from Analysis import HistoryGraph
     HistoryGraph(tree)
     return
@@ -493,7 +495,13 @@ def changeHistory(solution):
   hist._make_history_bars()
   hist.rename = False
 
-def make_html_tree(node, tree_text, indent_level):
+def make_history_bars():
+  hist._make_history_bars()
+OV.registerFunction(make_history_bars)
+
+
+def make_html_tree(node, tree_text, indent_level, full_tree=False,
+                   start_count=0, end_count=0):
   indent = indent_level * '\t'
   if node.is_root:
     label = node.name
@@ -505,11 +513,33 @@ def make_html_tree(node, tree_text, indent_level):
       label += ' - %.2f%%' %(node.R1 * 100)
     except (ValueError, TypeError):
       pass
-  #if node.is_root or len(node.primary_parent_node.children) > 1:
-    #tree_text.append(indent + label + '\n' + indent + node.name + '\n')
-  tree_text.append(indent + label + '\n' + indent + node.name + '\n')
+  if full_tree:
+    tree_text.append(indent + label + '\n' + indent + node.name + '\n')
+    indent_level += 1
+  elif (node.active_child_node is not None and
+        len(node.active_child_node.children) > 1 or
+        len(node.children) == 0):
+    if start_count != end_count:
+      label = "refinements %i - %i" %(start_count, end_count)
+    child = node
+    while (child.active_child_node is not None and
+           len(child.active_child_node.children) <=1):
+      child = child.active_child_node
+    tree_text.append(indent + label + '\n' + indent + child.name + '\n')
+    indent_level += 1
+  elif (node.is_root or
+        node.primary_parent_node.is_root or
+        len(node.children) > 1# or
+        #len(node.primary_parent_node.children) > 1
+        ):
+    start_count = end_count + 1
+    tree_text.append(indent + label + '\n' + indent + node.name + '\n')
+    indent_level += 1
+  end_count +=1
+  #tree_text.append(indent + label + '\n' + indent + node.name + '\n')
   for node in node.children:
-    make_html_tree(node, tree_text, indent_level+1)
+    make_html_tree(
+      node, tree_text, indent_level, full_tree, start_count, end_count)
   return tree_text
 
 OV.registerFunction(getAllHistories)
