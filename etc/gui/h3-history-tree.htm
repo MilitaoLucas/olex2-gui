@@ -1,18 +1,31 @@
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
-
-    <input
-      noroot
-      editable
-      name="HISTORY_TREE"
-      type="tree"
-      src="history_tree.ind"
-      bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-      width="$eval(htmlpanelwidth()-50)"
-      height="200"
-      selected="$spy.GetParam(snum.history.current_node)"
-      onselect=""
-      onitem="spy.revert_history(html.getvalue(HISTORY_TREE))>>UpdateHtml"
-      onedit="spy.rename_history(html.getvalue(HISTORY_TREE),~label~)>>UpdateHtml"
-    >
-
+<table>
+  <tr>
+    <td>
+<!-- #include history-tree gui\snippets\snippet-history-tree.htm;width=$eval(htmlpanelwidth()-50);height=200;1; -->
+    </td>
+  </tr>
+  <tr>
+    <td colspan = '1'>
+      <input
+        bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+        fgcolor="$spy.GetParam(gui.html.font_colour)"
+        type="checkbox"
+        value="%Condensed%"
+        valign="center"
+        name="SNUM_HISTORY_CONDENSED_TREE"
+        checked="$spy.GetParam(snum.history.condensed_tree)"
+        height='16'
+        width='20%'
+        oncheck="
+spy.SetParam(snum.history.condensed_tree,True)>>
+spy.make_history_bars()>>
+UpdateHtml"
+        onuncheck="
+spy.SetParam(snum.history.condensed_tree,False)>>
+spy.make_history_bars()>>
+UpdateHtml"
+    </td>
+  </tr>
+</table>
 </tr>
