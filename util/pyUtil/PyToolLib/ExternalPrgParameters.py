@@ -138,8 +138,14 @@ class Method(object):
             elif option.name == 'npeaks':
               OV.SetParam('snum.refinement.max_peaks', val)
             elif option.name == 'T':
-              OV.SetParam('snum.metacif.diffrn_ambient_temperature',
-                          273.0 + float(val.strip('C')))
+              diffrn_ambient_temperature = OV.GetParam(
+                'snum.metacif.diffrn_ambient_temperature')
+              from_ins = 273.0 + float(val.strip('C'))
+              if diffrn_ambient_temperature is None:
+                OV.SetParam('snum.metacif.diffrn_ambient_temperature', from_ins)
+              elif (from_ins != float(
+                diffrn_ambient_temperature.split('(')[0].strip())):
+                print "Warning: Temp instruction from ins does not match that from cif"
           except IndexError:
             OV.SetVar('%s_%s' %(varName, option.name), '')
           count += 1
