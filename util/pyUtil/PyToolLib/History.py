@@ -499,6 +499,32 @@ def make_history_bars():
   hist._make_history_bars()
 OV.registerFunction(make_history_bars)
 
+def popout_history_tree(width=800, height=500):
+  width = int(width)
+  height = int(height)
+  font_colour = OV.GetParam('gui.html.font_colour')
+  font_size = OV.GetParam('gui.html.font_size')
+  html = """
+<html>
+  <body>
+  <font color=%s size=%s face="Arial">
+<!-- #include history-tree gui\snippets\snippet-history-tree.htm;width=%i;height=%i;prefix=POPUP;popup=history-tree.;1; -->
+  </body>
+  </font>
+</html>
+""" %(font_colour, font_size, width, height)
+  htm_location = "popout-history-tree.htm"
+  pop_name = 'history-tree'
+  pop_str = "popup %s %s -b=stci -t='History Tree' -w=%s -h=%s -x=1 -y=50" %(
+    #pop_name, htm_location, int(width), int(height))
+    pop_name, htm_location, int(width*1.033), int(height*1.1))
+  OV.write_to_olex(htm_location, html)
+  olex.m(pop_str)
+  olx.html_SetBorders(pop_name,0)
+  olex.m(pop_str)
+  #olx.html_Reload(pop_name)
+OV.registerFunction(popout_history_tree)
+
 
 def make_html_tree(node, tree_text, indent_level, full_tree=False,
                    start_count=0, end_count=0):

@@ -1,8 +1,8 @@
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
 <table>
   <tr>
-    <td>
-<!-- #include history-tree gui\snippets\snippet-history-tree.htm;width=$eval(htmlpanelwidth()-50);height=200;1; -->
+    <td colspan='2'>
+<!-- #include history-tree gui\snippets\snippet-history-tree.htm;width=$eval(htmlpanelwidth()-50);height=200;prefix=H3;popup=;1; -->
     </td>
   </tr>
   <tr>
@@ -20,12 +20,19 @@
         oncheck="
 spy.SetParam(snum.history.condensed_tree,True)>>
 spy.make_history_bars()>>
+if html.IsPopup(history-tree) then spy.popout_history_tree()>>
 UpdateHtml"
         onuncheck="
 spy.SetParam(snum.history.condensed_tree,False)>>
 spy.make_history_bars()>>
+if html.IsPopup(history-tree) then spy.popout_history_tree()>>
 UpdateHtml"
     </td>
+    <td colspan = '1' align="right">
+      <a href="spy.popout_history_tree()" target="popout tree">
+      <b>Popout</b>
+      </a>
+    </td
   </tr>
 </table>
 </tr>
