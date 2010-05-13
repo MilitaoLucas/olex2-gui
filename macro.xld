@@ -68,6 +68,7 @@
       <cmd24 "spy.reset_file_in_OFS(solution_image.htm)">
       <cmd25 "spy.reset_file_in_OFS(refinement_image.htm)">
       <cmd26 "if strcmp(%4,filename()) then updatehtml else htmlreload">
+      <cnd27 "if html.IsPopup(history-tree) then spy.popout_history_tree()">
       <cmd26 XXX="fade 1 0 -0.1">
       <cmd27 XXX='waitfor fade'>
       <cmd28 XXX="ceiling off">
