@@ -9,6 +9,8 @@
   height="#height"
   selected="$spy.GetParam(snum.history.current_node)"
   onselect=""
-  onitem="spy.revert_history(html.getvalue(HISTORY_TREE))>>UpdateHtml"
-  onedit="spy.rename_history(html.getvalue(HISTORY_TREE),~label~)>>UpdateHtml"
+  onitem="
+spy.revert_history(html.getvalue(#popupHISTORY_TREE))>>UpdateHtml>>
+if html.IsPopup(history-tree) then spy.popout_history_tree()"
+  onedit="spy.rename_history(html.getvalue(#popupHISTORY_TREE),~label~)>>UpdateHtml"
 >
