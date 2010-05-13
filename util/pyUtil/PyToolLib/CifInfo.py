@@ -252,7 +252,10 @@ class MetaCif(ArgumentParser):
           try:
             oldValue = OV.GetParam_as_string('snum.metacif.%s' %field)
             if oldValue is not None and value != str(oldValue).strip():
-              OV.SetParam('snum.metacif.%s' %field, value)
+              if value in ('?', '.'):
+                OV.SetParam('snum.metacif.%s' %field, None)
+              else:
+                OV.SetParam('snum.metacif.%s' %field, value)
               variableFunctions.AddVariableToUserInputList('%s' %field)
             else:
               continue
@@ -475,7 +478,7 @@ class CifTools(ArgumentParser):
       for item, value in d.items():
         if item not in dataAdded\
            and (userInputVariables is None
-                or item not in userInputVariables):
+                or item.lstrip('_') not in userInputVariables):
           if item[0] == '_' and item.split('_')[1] in cifLabels:
             if item == '_symmetry_cell_setting':
               value = value.lower()
