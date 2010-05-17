@@ -4,7 +4,7 @@ import os, sys
 import olx
 import OlexVFS
 import time
-#from History import *
+
 from my_refine_util import *
 from PeriodicTable import PeriodicTable
 import olexex
@@ -24,6 +24,9 @@ from libtbx import easy_pickle
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+
+from History import hist
+
 
 class OlexCctbxAdapter(object):
   def __init__(self):
@@ -718,15 +721,16 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     self.twin_laws_d = {}
     law_txt = ""
     self.run_backup_shelx()
-    twin_double_laws = [(1, 0, 0, 0, 1, 0, 0, 0, 1)]
+    twin_double_laws = []
     for twin_law in twin_laws:
       law_double = twin_law.as_double_array()
       twin_double_laws.append(law_double)
+    twin_double_laws.append((1, 0, 0, 0, 1, 0, 0, 0, 1))
     for twin_law in twin_double_laws:
       lawcount += 1
       self.twin_laws_d.setdefault(lawcount, {})
       self.twin_law_gui_txt = ""
-      r, basf, f_data, history_refinement, history_solution = self.run_twin_ref_shelx(twin_law)
+      r, basf, f_data, history = self.run_twin_ref_shelx(twin_law)
       try:
         float(r)
       except:
@@ -742,6 +746,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       else:
         font_color_basf = "green"
         basf = "%.2f" %float(basf)
+        
       txt = [{'txt':"R=%.2f%%" %(float(r)*100),
               'font_colour':font_color},
              {'txt':"basf=%s" %str(basf),
@@ -763,8 +768,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
                                     'law_image_name':image_name,
                                     'name':name,
                                     'ins_file':f_data,
-                                    'history_solution':history_solution,
-                                    'history_refinement':history_refinement
+                                    'history':history,
                                     }
 #      href = 'spy.on_twin_image_click(%s)'
 #      href = 'spy.revert_history -solution="%s" -refinement="%s"' %(history_solution, history_refinement)
@@ -772,7 +776,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
 #      self.twin_law_gui_txt += "%s" %(law_txt)
 #      self.make_gui()
       l += 1
-    r_list.sort()
+    #r_list.sort()
     law_txt = ""
     self.twin_law_gui_txt = ""
     i = 0
@@ -782,7 +786,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       image_name = self.twin_laws_d[run].get('law_image_name', "XX")
       name = self.twin_laws_d[run].get('name', "XX")
       href = 'spy.on_twin_image_click(%s)'
-      href = 'spy.revert_history -solution="%s" -refinement="%s">>HtmlReload' %(self.twin_laws_d[i].get('history_solution'), self.twin_laws_d[i].get('history_refinement'))
+      href = 'spy.revert_history(%s)>>HtmlReload' %(self.twin_laws_d[i].get('history'))
       law_txt = "<a href='%s'><zimg src=%s></a>&nbsp;" %(href, image_name)
       self.twin_law_gui_txt += "%s" %(law_txt)
 
@@ -828,9 +832,9 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     basf = olx.Lst("BASF")
     if r != 0:
       res = hist.create_history()
-      history_refinement = res.split(";")[1]
-      history_solution = res.split(";")[0]
-    return r, basf, f_data, history_refinement, history_solution
+#      history_refinement = res.split(";")[1]
+#      history_solution = res.split(";")[0]
+    return r, basf, f_data, res
 
   def twinning_gui_def(self):
     if not self.twin_law_gui_txt:
