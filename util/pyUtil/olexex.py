@@ -10,8 +10,6 @@ import sys
 import programSettings
 from subprocess import *
 
-import MakeMovie
-
 import socket
 import urllib
 import urllib2
@@ -34,6 +32,8 @@ SPD, RPD = ExternalPrgParameters.SPD, ExternalPrgParameters.RPD
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import variableFunctions
+
+import MakeMovie
 
 import OlexVFS
 
