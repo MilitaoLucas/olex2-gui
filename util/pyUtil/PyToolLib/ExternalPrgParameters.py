@@ -207,7 +207,7 @@ class Method_solution(Method):
     """Prepares the arguments required to reset the structure before running the
     structure solution program.
     """
-    args = '\n'.join(self.getArgs())
+    args = '\n'.join(self.getArgs()).upper()
     #if not args:
       #args = self.cmd
     if not RunPrgObject.formula or RunPrgObject.formula == "None":
