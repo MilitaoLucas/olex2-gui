@@ -16,12 +16,11 @@
       <cmd4 "if isos(mac) then setvar(defeditor,'open')">
       <cmd5 "if isos(mac) then setvar(defexplorer,'open')">
       <cmd6 "if isos(mac) then setvar(defbrowser,'open')">
-      <cmd9 "spy.load_user_gui_phil()">
-      <cmd9 "spy.change_skin()">
-      <cmd7 "if isvar(startup) then 'reap getVar(startup)'">
-      <cmd8 "echo filepath()">
-      <cmd11 "bind wheel 'ShowQ -wheel='">
-      <cmd12 "spy.GetTip(0)">
+      <cmd7 "spy.load_user_gui_phil()">
+      <cmd8 "spy.change_skin()">
+      <cmd9 "if and(isvar(startup),file.exists(app.getarg(1))) then none else 'reap getVar(startup)>>echo filepath()'">
+      <cmd10 "bind wheel 'ShowQ -wheel='">
+      <cmd11 "spy.GetTip(0)">
     \>
 
   <onterminate
