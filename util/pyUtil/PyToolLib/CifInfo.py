@@ -268,60 +268,6 @@ class MetaCif(ArgumentParser):
         else:
           continue
 
-  def read_meta_file(self, metacif):
-    rFile=open(metacif, 'r')
-    mcif = []
-    meta = []
-    for line in rFile:
-      mcif.append(line)
-    for line in mcif:
-      field = ""
-      apd=""
-      l = line.split()
-      if len(l) <= 1:
-        i = 0
-        value = ""
-        if line == "\n":
-          continue
-        if line == ';\n':
-          continue
-        if line[:1] == "_":
-          field = line[:-1]
-          value += "%s" %(mcif[i+1])
-          i+= 1
-          while mcif[i+1][:1] != ";":
-            value += (mcif[i+2])
-            i+=1
-          apd = "%s\n%s" %(field, value)
-      else:
-        if line[:1] == "_":
-          apd = line
-          field = line.split()[0]
-        elif line == "\n":
-          continue
-        elif line[:1] == "#":
-          apd = line
-        else:
-          continue
-      if field in self.toInsert:
-        continue
-      if apd not in meta:
-        meta.append(apd)
-    rFile.close()
-    return meta
-
-  def insert_item(self):
-    metacifInfo = variableFunctions.getVVD('metacif')
-    listText = self.prepareCifItems(metacifInfo)
-    listText.sort()
-    text = ""
-    if listText != []:
-      for item in listText:
-        text += item
-    joinstr =  "/"
-    dir_up = joinstr.join(self.filepath.split(joinstr)[:-1])
-    meta = []
-
 OV.registerFunction(MetaCif)
 
 class CifTools(ArgumentParser):
@@ -495,121 +441,6 @@ class CifTools(ArgumentParser):
        and "exptl_crystal_colour_primary" not in userInputVariables:
       OV.SetParam("snum.metacif.exptl_crystal_colour_primary", colour)
 
-  def get_defaults():
-    defs = {}
-    defs.setdefault("_exptl_crystal_density_meas","       'not measured'\n")
-    defs.setdefault("_diffrn_detector_area_resol_mean","  8\n")
-    defs.setdefault("_diffrn_standards_number","          .\n")
-    defs.setdefault("_diffrn_standards_interval_count","  .\n")
-    defs.setdefault("_diffrn_standards_decay_%","         .\n")
-    return defs
-
-  def merge_cifs(self, merge, cif, tmp, basename):
-    try:
-      rfile_cif = open(cif, 'r')
-    except IOError:
-      "The file can't be written at this time"
-      return "End"
-    rfile_merge = open(merge, 'r')
-    wfile = open(tmp, 'w')
-    cif_content = {}
-    merge_content = {}
-    lines = []
-
-    for line in rfile_merge:
-      if line == "": line = "BLANK"
-      lines.append(string.strip(line))
-
-    skip = 0
-    i = 0
-    for line in lines:
-      free_txt = ""
-      if skip > 0:
-        skip -= 1
-        continue
-      if line == "": line = "BLANK"
-      txt = string.split(line, " ", 1)
-      try:
-        merge_content.setdefault(txt[0], txt[1])
-      except IndexError:
-        if (txt[0])[:1] != "_":
-          continue
-        else:
-          while (lines[i+1])[:1] != "_":
-            skip += 1
-            t = lines[i+1]
-            if t != ";":
-              t = " %s" %t
-            elif t == ";":
-              if skip == 1: t = "\n;"
-
-            free_txt = "%s%s\n" %(free_txt,  t)
-            i += 1
-          merge_content.setdefault(txt[0], free_txt)
-      i += 1
-
-    lines = []
-    for line in rfile_cif:
-      lines.append(string.strip(line))
-    i = 0
-    for line in lines:
-      if line == "": line = "BLANK"
-      txt = string.split(line)
-      try:
-        cif_content.setdefault(txt[0], txt[1])
-      except IndexError:
-        if (txt[0])[:1] != "_":
-          continue
-        else:
-          free_txt = ""
-          while (lines[i+1])[:1] != "_":
-            t = lines[i+1]
-            if t != ";":
-              t = " %s" %t
-            free_txt = "%s%s\n" %(free_txt,  t)
-            i += 1
-          cif_content.setdefault(txt[0], free_txt)
-      i += 1
-
-      ## Write the combined file
-    skip = 0
-    i = 0
-    for line in lines:
-      if line == "":
-        line = "BLANK"
-      if line == ";" and lines[i+1] == "?" and lines[i+2] == ";":
-        topic = "_exptl_special_details"
-        try:
-          if lines[i-1] == topic and merge_content[topic]:
-            skip = 3
-        except KeyError:
-          pass
-
-      if skip != 0:
-        skip -= 1
-        i += 1
-        continue
-
-      txt = string.split(line)
-      try:
-        if txt[0] in merge_content:
-          descriptor = txt[0]
-          value = string.strip(merge_content[txt[0]])
-          spaces = 34 - len(descriptor)
-          spacer = " " * spaces
-          if descriptor == "_exptl_special_details":
-            value = "\n" + value
-            spacer = ""
-          line = "%s%s%s" %(descriptor, spacer, value)
-      except IndexError:
-        i += 1
-        continue
-      if line == "BLANK":
-        line = ""
-      txt = "%s\n" %line
-      wfile.writelines(txt)
-      i += 1
-
   def prepare_exptl_absorpt_process_details(self, abs, version):
     parameter_ratio = abs["parameter_ratio"]
     R_int_after = abs["Rint_after"]
@@ -625,18 +456,6 @@ class CifTools(ArgumentParser):
     txt = " %s\n %s\n %s\n %s" %(t[0], t[1], t[2], t[3])
     exptl_absorpt_process_details = "\n;\n%s\n;\n" %txt
     return exptl_absorpt_process_details
-
-  def prepare_exptl_special_details(self, smart):
-    """Prepares the text for the _exptl_special_details cif item using details obtained from the smart.ini file."""
-
-    txt = """
-        The data collection nominally covered a full sphere of reciprocal space by
-        a combination of %(scans)i sets of \\w scans each set at different \\f and/or
-        2\\q angles and each scan (%(scantime)s s exposure) covering %(scanwidth)s\ degrees in \\w.
-        The crystal to detector distance was %(distance)s cm.
-"""%smart
-    exptl_special_details = "\n;%s;\n" %txt
-    return exptl_special_details
 
   def prepare_computing(self, dict, versions, name):
     version = dict.get("prog_version","None")
@@ -661,26 +480,6 @@ class CifTools(ArgumentParser):
       afile.writelines("\n=%s=     %s=%s =" %(name, version, txt))
       afile.close()
     return txt
-
-  def prepare_diffractometer_data(self, smart):
-    diffractometers = {}
-    diffractometers["1k"] = {}
-    diffractometers["6k"] = {}
-    diffractometers["apex"] = {}
-    diffractometers["1k"]["_diffrn_detector_area_resol_mean"] = "8"
-    diffractometers["6k"]["_diffrn_detector_area_resol_mean"] = "8"
-    diffractometers["apex"]["_diffrn_detector_area_resol_mean"] = "8"
-    version = smart["version"]
-
-  def write_merge_file(self, path, merge):
-    file = path
-    afile = open(file, 'w')
-    for section in merge:
-      for item in section:
-        if item[:1] == "_":
-          spacers = 35 - len(item)
-          txt = "%s%s%s\n" %(item, " "*spacers, section[item])
-          afile.write(txt)
 
   def sort_out_path(self, directory, tool):
     """Returns the path of the most recent file in the given directory of the given type.
