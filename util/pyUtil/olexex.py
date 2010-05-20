@@ -1236,8 +1236,19 @@ def register_new_odac(username=None, pwd=None):
     print "You may also have used up the numbr of allowable installs."
     return
   p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], olex2_tag)
+  p = os.path.abspath(p)
   if not os.path.exists(p):
     os.makedirs(p)
+  else:
+    try:
+      os.removedir(p)
+      os.makedir(p)
+    except:
+      print "The installer could not delete this folder: %s" %p
+      print "Please remove all files in this folder manually and run the installer again."
+      olex.m('exec -o explorer "%s"' %p)
+      return
+      
 
   cont = GetHttpFile(f, force=True, fullURL = True)
   if cont:
