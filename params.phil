@@ -450,6 +450,8 @@ olex2
     .type = int
   in_mode = None
     .type = str
+  full_mode = None
+    .type = str
   short_mode = None
     .type = str
   debug = False

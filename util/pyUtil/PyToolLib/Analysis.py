@@ -49,6 +49,7 @@ class Graph(ImageTools):
     self.min_y = None
     self.max_x = None
     self.max_y = None
+    self.decorated = False
 
     self.graphInfo = {
       "TopRightTitle":self.filename,
@@ -508,6 +509,11 @@ class Graph(ImageTools):
     title = self.graphInfo.get('Title')
     n_bars = len(dataset.x)
     bar_width = math.floor((width-2*self.bSides)/n_bars)
+
+    ## Fixed width bar_width if fewer than 10 Bars
+    if n_bars < 10:
+      bar_width = int(width/10)
+      
     if title is not None:
       wX, wY = IT.textsize(self.draw, title, font_size=self.font_size_large)
       x = width - 2*self.bSides - wX
@@ -533,11 +539,25 @@ class Graph(ImageTools):
       else:
         fill = (0,0,0)
 
-      if i == last -1:
+      if i == last -1 and n_bars > 10:
         bar_right = width - self.bSides - 1
       box = (bar_left,bar_top,bar_right,bar_bottom)
+      
+#      if self.decorated:
+#        outline_colour = fill
+#      else:
+#        outline_colour = (100, 100, 100)
+      outline_colour = (100,100,100)
+      
+      if self.decorated:
+        decorated_fill = OV.FindValue('gui_html_highlight_colour')
+        self.draw.rectangle(box, fill=decorated_fill, outline=outline_colour)
+        self.draw.rectangle((bar_left+3,bar_top+3,bar_right-3,bar_bottom-3), fill=fill)
         
-      self.draw.rectangle(box, fill=fill, outline=(100, 100, 100))
+        self.decorated = False
+      else:
+        self.draw.rectangle(box, fill=fill, outline=outline_colour)
+
 
       if dataset.hrefs is not None:
         href = dataset.hrefs[i]
@@ -1806,13 +1826,15 @@ class HistoryGraph(Analysis):
     self.params = OV.Params().graphs.program_analysis
     self.i_bar = 0
     self.tree = history_tree
-    size = (OV.GetParam('gui.htmlpanelwidth')- 50, 100)
+    size = (OV.GetParam('gui.htmlpanelwidth')- 32, 100)
     self.item = "history"
     self.params.size_x, self.params.size_y = size
     self.make_empty_graph(draw_title=False)
     self.image_location = "history.png"
     self.make_graph()
     self.popout()
+    self.decorated = False
+
 
   def make_graph(self):
     bars = []
@@ -1864,7 +1886,8 @@ class HistoryGraph(Analysis):
 
   def get_bar_colours(self, bar_height):
     if self.i_bar == self.i_active_node:
-      fill =  OV.FindValue('gui_html_highlight_colour')
+      fill = (int(255*bar_height*2), int(255*(1.3-bar_height*2)), 0)
+      self.decorated = True
       #fill = OV.GetParam('gui.grey').rgb
     elif bar_height == 2:
       fill = (139, 0, 204)

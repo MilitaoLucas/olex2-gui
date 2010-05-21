@@ -422,6 +422,19 @@ OV.registerFunction(FindZOfHeaviestAtomInFormua)
 
 last_formula = None
 
+def ElementButtonStates(symbol):
+  if OV.GetParam('olex2.full_mode') == 'name -t=%s' %symbol:
+    olex.m('mode off')
+  else: 
+    if olex.f('Sel()') == '':
+      olex.m('mode name -t=%s' %symbol)
+    else:
+      olex.m('name sel %s' %symbol)
+      olex.m('sel -u')
+if haveGUI:
+  OV.registerFunction(ElementButtonStates)
+
+
 def MakeElementButtonsFromFormula():
   global last_formula
   from PilTools import ButtonMaker
@@ -454,8 +467,8 @@ def MakeElementButtonsFromFormula():
       bgcolour = (255,210,210)
     command = "if strcmp(sel(),'') then 'mode name -t=%s' else 'name sel %s'>>sel -u" %(symbol, symbol)
     target = OV.TranslatePhrase('change_element-target')
-    #command = "if strcmp(spy.GetParam(olex2.in_mode),'mode name -t=%s') then 'mode off' else \"if strcmp(sel(),'') then 'mode name -t=%s' else 'name sel %s'>>sel -u\"" %(symbol, symbol, symbol)
-    
+    #command = "if strcmp(spy.GetParam(olex2.in_mode),'mode name -t=%s') then 'mode off' else %%22 if strcmp(sel(),'') then 'mode name -t=%s' else 'name sel %s'>>sel -u%%22" %(symbol, symbol, symbol)
+    command = 'spy.ElementButtonStates(%s)' %symbol
     html = '''
     <a href="%s" target="%s %s">
       <zimg name=IMG_BTN-ELEMENT%s border="0" src="btn-element%s.png"/>
