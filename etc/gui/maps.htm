@@ -17,11 +17,11 @@
 </tr>
 
 <tr name=INCLUDE_H3_MASKS>
-<!-- #include h3-masks gui\h3-masks.htm;gui\blocks\tool-h3-off.htm;image=h3-masks;onclick="itemstate h3-calculate-voids 2>>itemstate h3-electron-density 2";colspan=1;2; -->
+<!-- #includeif file.Exists('HKLSrc()') h3-masks gui\h3-masks.htm;gui\blocks\tool-h3-off.htm;image=h3-masks;onclick="itemstate h3-calculate-voids 2>>if file.Exists('HKLSrc()') then itemstate h3-electron-density 2 else none";colspan=1;2; -->
 </tr>
 
 <tr name=INCLUDE_H3_CALCULATE_VOIDS>
-<!-- #include h3-calculate-voids gui\h3-calculate-voids.htm;gui\blocks\tool-h3-off.htm;image=h3-calculate-voids;onclick="itemstate h3-masks 2>>itemstate h3-electron-density 2";colspan=1;2; -->
+<!-- #include h3-calculate-voids gui\h3-calculate-voids.htm;gui\blocks\tool-h3-off.htm;image=h3-calculate-voids;onclick="if file.Exists('HKLSrc()') then itemstate h3-masks 2 else none>>if file.Exists('HKLSrc()') then itemstate h3-electron-density 2 else none";colspan=1;2; -->
 </tr>
 
 <tr name=INCLUDE_H3_ELECTRON_DENSITY>
