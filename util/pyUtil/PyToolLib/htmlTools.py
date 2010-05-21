@@ -941,8 +941,10 @@ def OnModeChange(*args):
     last_mode = None
     OV.SetParam('olex2.in_mode',None)
     OV.SetParam('olex2.short_mode',None)
+    OV.SetParam('olex2.full_mode',None)
   else:
     OV.SetParam('olex2.in_mode',mode.split("=")[0])
+    OV.SetParam('olex2.full_mode',mode)
     makeHtmlBottomPop({'replace':mode_disp, 'name':'pop_mode', 'modequalifiers':modequalifiers}, pb_height=50)
     if active_mode:
       use_image= "%son.png" %active_mode
