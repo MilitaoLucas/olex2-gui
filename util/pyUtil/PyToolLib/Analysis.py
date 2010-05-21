@@ -508,6 +508,11 @@ class Graph(ImageTools):
     title = self.graphInfo.get('Title')
     n_bars = len(dataset.x)
     bar_width = math.floor((width-2*self.bSides)/n_bars)
+
+    ## Fixed width bar_width if fewer than 10 Bars
+    if n_bars < 10:
+      bar_width = int(width/10)
+      
     if title is not None:
       wX, wY = IT.textsize(self.draw, title, font_size=self.font_size_large)
       x = width - 2*self.bSides - wX
@@ -533,7 +538,7 @@ class Graph(ImageTools):
       else:
         fill = (0,0,0)
 
-      if i == last -1:
+      if i == last -1 and n_bars > 10:
         bar_right = width - self.bSides - 1
       box = (bar_left,bar_top,bar_right,bar_bottom)
         
