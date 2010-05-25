@@ -1,5 +1,5 @@
 
-<td name=Q_PAEAK_SLIDER_LABEL colspan = '1' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+<td width='40%' name=Q_PAEAK_SLIDER_LABEL colspan = '1' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
   <b>
     %Electron Density Peaks%
   </b>
@@ -17,7 +17,7 @@
   <input
     type="slider"
     name = "SlideQPeaks"
-    width="$eval(htmlpanelwidth()-90)"
+    width="$eval($spy.getParam(gui.htmlpanelwidth)-100)"
     height="18"
     value="GetVar(SlideQPeaksVal,0)"
     bgcolor="$spy.GetParam(gui.html.table_bg_colour)"

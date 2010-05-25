@@ -92,10 +92,10 @@
   <td name=LABEL_COMBO_BOX_LABEL width=20%>
     <b>%Labels%</b>
   </td>
-  <td name=COMBO_LABEL_COMBO_BOX>
+  <td align='right' name=COMBO_LABEL_COMBO_BOX>
     <input 
       type='combo'
-      width='$eval(htmlpanelwidth()-105)'
+      width='$eval($spy.getParam(gui.htmlpanelwidth)-140)'
       height="$spy.GetParam(gui.html.input_height)"
       name='set_label_content'
       value=''
@@ -117,14 +117,16 @@
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
+<!-- FIFTH ROW -->
 <tr name=UISO_SELECT_SLIDER>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Uiso-Select-Slider;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<!-- #include q-peak-slider gui\snippets\snippet-uiso-select-slider.htm;1; -->
+<!-- #include uiso-slider gui\snippets\snippet-uiso-select-slider.htm;1; -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
-
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
+
+</table>
 
 <!-- %Electron Density Peaks% -->
