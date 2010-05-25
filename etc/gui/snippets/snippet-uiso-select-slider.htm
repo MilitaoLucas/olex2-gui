@@ -1,5 +1,5 @@
 
-<td name=Q_PAEAK_SLIDER_LABEL colspan = '1' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+<td width='40%' name=Q_PAEAK_SLIDER_LABEL colspan = '1' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
   <b>
     %Uiso Select Atoms%
   </b>
@@ -18,7 +18,7 @@
   <input
     type="slider"
     name = "UISO_SELECT_SLIDER"
-    width="$eval(htmlpanelwidth()-90)"
+    width="$eval($spy.getParam(gui.htmlpanelwidth)-100)"
     height="18"
     value="0"
     bgcolor="$spy.GetParam(gui.html.table_bg_colour)"

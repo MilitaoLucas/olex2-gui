@@ -921,7 +921,7 @@ def OnModeChange(*args):
 #  mode_disp = "%s" %mode
 
   if last_mode == active_mode:
-    return
+    mode = 'off'
 
   if not active_mode:
     active_mode = d.get(mode_disp, None)
