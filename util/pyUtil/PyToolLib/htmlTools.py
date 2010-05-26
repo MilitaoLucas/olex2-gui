@@ -23,6 +23,9 @@ last_mode = None
 global current_tooltip_number
 current_tooltip_number = 0
 
+global HaveModeBox
+HaveModeBox = False
+
 def makeHtmlTable(list):
   """ Pass a list of dictionaries, with one dictionary for each table row.
 
@@ -835,6 +838,7 @@ def get_template(name):
     return None
 
 def makeHtmlBottomPop(args, pb_height = 50, y = 0):
+  global HaveModeBox
   panel_diff = OV.GetParam('gui.htmlpanelwidth_margin_adjust')
   txt = args.get('txt',None)
   name = args.get('name',"test")
@@ -858,11 +862,17 @@ def makeHtmlBottomPop(args, pb_height = 50, y = 0):
   if not y:
     y = metric[1] - pb_height - 8
   pstr = "popup %s '%s' -t='%s' -w=%s -h=%s -x=%s  -y=%s" %(pop_name, htm_location, pop_name, width, pb_height, x, y)
-  OV.cmd(pstr)
-  olx.html_SetBorders(pop_name,0)
-  OV.cmd(pstr)
-  olx.html_SetBorders(pop_name,0)
-  olx.html_Reload(pop_name)
+  
+  if HaveModeBox:
+    OV.cmd(pstr)
+  else:
+    OV.cmd(pstr)
+    olx.html_SetBorders(pop_name,0)
+    OV.cmd(pstr)
+    olx.html_SetBorders(pop_name,0)
+    olx.html_Reload(pop_name)
+    HaveModeBox = True
+    
 OV.registerMacro(makeHtmlBottomPop, 'txt-Text to display&;name-Name of the Bottom html popupbox')
 
 def OnModeChange(*args):
