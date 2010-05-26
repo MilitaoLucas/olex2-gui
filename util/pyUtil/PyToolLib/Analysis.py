@@ -22,6 +22,8 @@ IT = ImageTools()
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+guiParams = OV.GuiParams()
+
 
 from scitbx.math import erf
 
@@ -2009,6 +2011,7 @@ def makeReflectionGraphOptions(graph, name):
 
 def makeReflectionGraphGui():
   global GuiGraphChooserComboExists
+
   value = False
   gui_d = {}
   gui_d.setdefault('colspan', '1')
@@ -2041,7 +2044,7 @@ def makeReflectionGraphGui():
       gui_d['options_gui'], gui_d['colspan'] = makeReflectionGraphOptions(graph, name)
       help_name = graph.help
       d = {'name':'BUTTON_MAKE_REFLECTION_GRAPH',
-           'bgcolor':'spy.GetParam(gui.html.input_bg_colour)',
+           'bgcolor':guiParams.html.input_bg_colour,
            'onclick':run_d.get(name),
            'width':'30',
            'value':'Go',
@@ -2053,8 +2056,8 @@ def makeReflectionGraphGui():
     help_name=help_name, popout=False)
   d = {'ctrl_name':'SET_REFLECTION_STATISTICS',
      'items':"-- %Please Select% --;%Wilson Plot%;%Cumulative Intensity%;%Systematic Absences%;%Fobs-Fcalc%;%Fobs over Fcalc%;%Completeness%;%Normal Probability%",
-     'height':'$spy.GetParam(gui.html.combo_height)',
-     'bgcolor':'$spy.GetParam(gui.html.input_bg_colour)',
+     'height':guiParams.html.combo_height,
+     'bgcolor':guiParams.html.input_bg_colour,
      'value':value,
      'onchange':"updatehtml",
      'manage':'manage',
@@ -2065,6 +2068,8 @@ def makeReflectionGraphGui():
 
   gui_d['row_table_on'] = htmlTools.include_block('gui/blocks/row_table_on.htm').replace('%','%%')
   gui_d['row_table_off'] = htmlTools.include_block('gui/blocks/row_table_off.htm')
+  gui_d['bgcolor'] = guiParams.html.table_firstcol_colour
+
 
   txt = '''
 <tr>
@@ -2082,7 +2087,7 @@ def makeReflectionGraphGui():
   if gui_d['options_gui'] != '':
     txt += '''
 <tr>
-<td valign='center' width="8" align='center' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+<td valign='center' width="8" align='center' bgcolor=%(bgcolor)s>
 </td>
 %(row_table_on)s
 %(options_gui)s
