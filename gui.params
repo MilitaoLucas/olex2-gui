@@ -72,7 +72,9 @@ gui {
     combo_width_2 = 50
       .type = int
       .help = Width of a combobox that is to take 2 digits and a decimal point.
-    icon_size = 25
+    combo_height = 18
+      .type = int
+      icon_size = 25
       .type = int
     link_colour = #585886
       .type = colour
