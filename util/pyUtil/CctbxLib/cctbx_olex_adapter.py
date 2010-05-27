@@ -552,6 +552,10 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         else:
           self.post_single_peak(xyz, height)
       have_solution = True
+      
+      olex.m('Compaq -a')
+      olex.m('move')
+      
     else: have_solution = False
     return have_solution
 
