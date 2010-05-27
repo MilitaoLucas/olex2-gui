@@ -1,6 +1,7 @@
 from __future__ import division
 
 import olex
+import olex_fs
 import glob
 import olx
 import os
@@ -431,6 +432,7 @@ def ElementButtonStates(symbol):
     else:
       olex.m('name sel %s' %symbol)
       olex.m('sel -u')
+      OV.htmlReload()
 if haveGUI:
   OV.registerFunction(ElementButtonStates)
 
@@ -1780,6 +1782,12 @@ def test_help_boxes():
 OV.registerFunction(test_help_boxes)
 
 
+def olex_fs_copy(src_file, dst_file):
+  txt = olex_fs.ReadFile(src_file)
+  olex_fs.NewFile(dst_file,txt)
+OV.registerFunction(olex_fs_copy)
+
+
 if not haveGUI:
   def tbxs(name):
     print "This is not available in Headless Olex"
@@ -1787,4 +1795,7 @@ if not haveGUI:
   #OV.registerFunction(tbxs)
 OV.registerFunction(OV.IsPluginInstalled)
 OV.registerFunction(OV.GetTag)
+
+
+
 

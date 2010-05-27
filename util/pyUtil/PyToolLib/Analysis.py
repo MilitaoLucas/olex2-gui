@@ -30,6 +30,9 @@ from scitbx.math import erf
 global GuiGraphChooserComboExists
 GuiGraphChooserComboExists = False
 
+global PreviousHistoryNode
+PreviousHistoryNode = None
+
 
 class Graph(ImageTools):
   def __init__(self):
@@ -249,7 +252,7 @@ class Graph(ImageTools):
 
     self.filenameColour = "#bbbbbb"
     self.titleColour = "#777777"
-    self.bSides = round(0.015 * self.imX)
+    self.bSides = round(0.012 * self.imX)
     self.xSpace = 0
     self.axis_x = axis_x
     if self.axis_x:
@@ -510,11 +513,18 @@ class Graph(ImageTools):
     y_label = dataset.metadata().get('y_label')
     title = self.graphInfo.get('Title')
     n_bars = len(dataset.x)
-    bar_width = math.floor((width-2*self.bSides)/n_bars)
-
-    ## Fixed width bar_width if fewer than 10 Bars
-    if n_bars < 10:
-      bar_width = int(width/10)
+    max_bars = self.params.max_bars
+    all_in_one_history = self.params.all_in_one_history
+    
+    if all_in_one_history:
+      bar_width = math.floor(width/n_bars)
+      #bar_width += 1
+      if n_bars <= max_bars:
+        bar_width = int(width/max_bars)
+      max_bars = n_bars
+      
+    else:
+      bar_width = int(width/max_bars)
       
     if title is not None:
       wX, wY = IT.textsize(self.draw, title, font_size=self.font_size_large)
@@ -523,48 +533,53 @@ class Graph(ImageTools):
       top_left = (x,y)
       IT.write_text_to_draw(self.draw, title, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
 
+    j = 0
+    img_no = 0
+    colour = self.gui_html_bg_colour
     for i, xy in enumerate(dataset.xy_pairs()):
+      if j == 0:
+        barImage = Image.new('RGB', (int(width-2*self.bSides-1), int(height-1)), color=colour)
+        barDraw = ImageDraw.Draw(barImage)
       last = len(dataset.x)
       x_value, y_value = xy
-      bar_left = ((i) * bar_width) + self.bSides + 1
+#      bar_left = ((i) * bar_width) + self.bSides + 1
+      bar_left = ((j) * bar_width)
       bar_right = bar_left + bar_width
-      bar_bottom = self.graph_bottom -1
+      bar_bottom = self.graph_bottom - 4
       y_value_scale = y_value * y_scale_factor
-
       if y_value_scale >= 1:
-        bar_top = top
+        bar_top = top - self.bTop
+        bar_top = 0
       else:
-        bar_top = height + top  - (y_value_scale * (height))
+        bar_top = height - self.bTop + top  - (y_value_scale * (height))
+        bar_top = height - (y_value_scale * (height))
 
       if colour_function is not None:
         fill = colour_function(y_value_scale)
       else:
         fill = (0,0,0)
 
-      if i == last -1 and n_bars > 10:
+      if i == last - 1 and n_bars > max_bars and all_in_one_history:
         bar_right = width - self.bSides - 1
+
       box = (bar_left,bar_top,bar_right,bar_bottom)
       
-#      if self.decorated:
-#        outline_colour = fill
-#      else:
-#        outline_colour = (100, 100, 100)
-      outline_colour = (100,100,100)
+      outline_colour = (200,200,200)
       
       if self.decorated:
         decorated_fill = OV.FindValue('gui_html_highlight_colour')
-        self.draw.rectangle(box, fill=decorated_fill, outline=outline_colour)
-        self.draw.rectangle((bar_left+3,bar_top+3,bar_right-3,bar_bottom-3), fill=fill)
+        barDraw.rectangle(box, fill=decorated_fill, outline=outline_colour)
+        barDraw.rectangle((bar_left+3,bar_top+3,bar_right-3,bar_bottom-3), fill=fill)
         
         self.decorated = False
       else:
-        self.draw.rectangle(box, fill=fill, outline=outline_colour)
+        barDraw.rectangle(box, fill=fill, outline=outline_colour)
+        barDraw.rectangle(box, fill=fill, outline=outline_colour)
 
 
       if dataset.hrefs is not None:
         href = dataset.hrefs[i]
       else:
-        #href = "Html.Update"
         href = ""
       if dataset.targets is not None:
         target = dataset.targets[i]
@@ -582,7 +597,7 @@ class Graph(ImageTools):
 
         if wX < bar_width:
           x = bar_left + ( bar_width - wX/2 -wX) + self.bSides
-          x = bar_left + ( bar_width - wX)/2
+          #x = bar_left + ( bar_width - wX)/2
           if y_value < 0.8:
             y = bar_top - 14
           else:
@@ -598,6 +613,80 @@ class Graph(ImageTools):
           top_left = (x, y - 10)
           top_left = (x,y)
           IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.gui_green)
+          
+      j += 1
+      if j == max_bars or i == last - 1:
+        img_no += 1
+        j = 0
+        self.image_location = "history_%s.png" %img_no
+        
+        historyText = """\
+        <zimg name="HISTORY_IMAGE" border="0" src="%s">
+        %s
+        </zimg>
+        """ %(self.image_location, self.map_txt)
+        
+        
+        previous_img = img_no -1
+        next_img = img_no + 1
+        if all_in_one_history:
+          all_in_oneText = "<a href='spy.SetParam(graphs.program_analysis.all_in_one_history,False)>>spy._make_history_bars()>>html.reload'>Split Display</a>"
+          previous_img = ""
+          next_img = ""
+        else:
+          all_in_oneText = "<a href='spy.SetParam(graphs.program_analysis.all_in_one_history,True)>>spy._make_history_bars()>>html.reload'>Show All Bars</a>"
+          previous_img = "<a href='spy.olex_fs_copy(history-info_%s.htm,history-info.htm)>>updatehtml'><zimg src=previous.png></a>" %(img_no -1)
+          next_img = "<a href='spy.olex_fs_copy(history-info_%s.htm,history-info.htm)>>updatehtml'><zimg src=next.png></a>" %(img_no + 1)
+
+        historyTextNext = '''
+<table width='100%%' border='0' cellpadding='0'>
+<tr>
+  <td align='left' width='33%%'></td>
+  <td align='center' width='33%%'>%s</td>
+  <td align='right' width='33%%'>%s</td>
+</tr>
+</table>''' %(all_in_oneText, next_img)
+        historyTextPrevious = '''
+<table width='100%%' border='0' cellpadding='0'>
+<tr>
+  <td align='left' width='33%%' >%s</td>
+  <td align='center' width='33%%'>%s</td>
+  <td align='right' width='33%%'></td>
+</tr>
+</table>''' %(previous_img, all_in_oneText)
+        historyTextBoth = '''
+<table width='100%%' border='0' cellpadding='0'>
+<tr>
+  <td align='left' width='33%%'>%s</td>
+  <td align='center' width='33%%'>%s</td>
+  <td align='right' width='33%%'>%s</td>
+</tr>
+</table>''' %(previous_img, all_in_oneText, next_img)
+        if img_no == 1 and i != last - 1:
+#          IT.write_text_to_draw(barDraw, 'previous', align='left', max_width=width)
+          historyText += historyTextNext
+        elif img_no == 1 and i == last - 1 and not all_in_one_history:
+          pass
+#          IT.write_text_to_draw(barDraw, 'previous', align='left', max_width=width)
+        elif i == last - 1:
+#          IT.write_text_to_draw(barDraw, 'previous', align='left', max_width=width)
+          historyText += historyTextPrevious
+#          IT.write_text_to_draw(barDraw, 'next', align='right', max_width=width)#
+        else:
+#          IT.write_text_to_draw(barDraw, 'previous', align='left', max_width=width)
+          historyText += historyTextBoth
+
+        self.im.paste(barImage, (int(self.bSides+1),int(top+1)), None)
+        label = '%s (%s)' %(self.tree.active_node.program, self.tree.active_node.method)
+        try:
+          label += ' - %.2f%%' %(self.tree.active_node.R1 * 100)
+        except (ValueError, TypeError):
+          pass
+        self.draw_legend(label)
+        OlexVFS.save_image_to_olex(self.im, self.image_location, 0)
+        #self.draw_legend("%.3f" %(bars[self.i_active_node][0]))
+        OV.write_to_olex('history-info_%s.htm' %img_no, historyText)
+        OV.write_to_olex('history-info.htm', historyText)
 
   def draw_legend(self, txt):
     height = self.graph_bottom - self.graph_top
@@ -1828,19 +1917,26 @@ class HistoryGraph(Analysis):
     self.params = OV.Params().graphs.program_analysis
     self.i_bar = 0
     self.tree = history_tree
-    size = (OV.GetParam('gui.htmlpanelwidth')- 32, 100)
+    #size = (OV.GetParam('gui.htmlpanelwidth')- 32, 100)
     self.item = "history"
-    self.params.size_x, self.params.size_y = size
-    self.make_empty_graph(draw_title=False)
-    self.image_location = "history.png"
+    #self.params.size_x, self.params.size_y = size
+    #self.make_empty_graph(draw_title=False)
+    #self.image_location = "history.png"
     self.make_graph()
     self.popout()
     self.decorated = False
 
 
   def make_graph(self):
+    global PreviousHistoryNode
     bars = []
+    
     node = self.tree.active_child_node
+    #if node == PreviousHistoryNode:
+    #  return
+    #else:
+    #  PreviousHistoryNode = node
+      
     while node is not None:
       R1 = node.R1
       href = "spy.revert_history(%s)>>UpdateHtml" %(node.name)
@@ -1857,6 +1953,10 @@ class HistoryGraph(Analysis):
         self.i_active_node = len(bars)
       bars.append((R1,href,target))
       node = node.active_child_node
+    n_bars = len(bars)
+    size = (OV.GetParam('gui.htmlpanelwidth')- 32, 100)
+    self.params.size_x, self.params.size_y = size
+    self.make_empty_graph(draw_title=False)
 
     if len(bars) > 0:
       x = []
@@ -1872,19 +1972,19 @@ class HistoryGraph(Analysis):
       self.draw_bars(dataset=data, y_scale_factor=2,
                      colour_function=self.get_bar_colours,
                      draw_bar_labels=False)
-      label = '%s (%s)' %(self.tree.active_node.program, self.tree.active_node.method)
-      try:
-        label += ' - %.2f%%' %(self.tree.active_node.R1 * 100)
-      except (ValueError, TypeError):
-        pass
-      self.draw_legend(label)
-    #self.draw_legend("%.3f" %(bars[self.i_active_node][0]))
-    historyText = """\
-<zimg name="HISTORY_IMAGE" border="0" src="%s">
-%s
-</zimg>
-""" %(self.image_location, self.map_txt)
-    OV.write_to_olex('history-info.htm',historyText)
+      #label = '%s (%s)' %(self.tree.active_node.program, self.tree.active_node.method)
+      #try:
+        #label += ' - %.2f%%' %(self.tree.active_node.R1 * 100)
+      #except (ValueError, TypeError):
+        #pass
+      #self.draw_legend(label)
+    ##self.draw_legend("%.3f" %(bars[self.i_active_node][0]))
+    #historyText = """\
+#<zimg name="HISTORY_IMAGE" border="0" src="%s">
+#%s
+#</zimg>
+#""" %(self.image_location, self.map_txt)
+    #OV.write_to_olex('history-info.htm',historyText)
 
   def get_bar_colours(self, bar_height):
     if self.i_bar == self.i_active_node:
