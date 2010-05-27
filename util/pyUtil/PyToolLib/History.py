@@ -246,6 +246,7 @@ OV.registerFunction(hist.create_history)
 OV.registerFunction(hist.saveHistory)
 OV.registerFunction(hist.loadHistory)
 OV.registerFunction(hist.resetHistory)
+OV.registerFunction(hist._make_history_bars)
 
 class HistoryTree:
 
