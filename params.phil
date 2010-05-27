@@ -472,6 +472,10 @@ graphs {
       .type = int(value_min=0)
     size_y = None
       .type = int(value_min=0)
+    max_bars = 12
+      .type = int
+    all_in_one_history = False
+      .type = bool
   }
   reflections {
     n_divisions = 5
