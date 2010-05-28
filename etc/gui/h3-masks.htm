@@ -94,7 +94,7 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
       type="button"
       name="SNUM_MASKS_BUTTON"
       value="Calculate Mask"
-      width='$eval(htmlpanelwidth()-35)'
+      width='$eval(html.clientwidth(self)-35)'
       manage
       ondown="setlabel(SNUM_MASKS_BUTTON,%Delete Mask Display%)>>
 spy.OlexCctbxMasks()>>
