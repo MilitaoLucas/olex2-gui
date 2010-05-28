@@ -209,7 +209,8 @@ if not os.path.isdir(bin_directory):
 # update tags file, the web_dir is transformed to correct form when creating olex2.tag file
 def update_tags_file(dir):
   up_dir = '/'.join(dir.split('/')[:-1])
-  tags = os.listdir(up_dir)
+  #tags = os.listdir(up_dir)
+  tags = ['1.1', '1.1-beta', '1.1-alpha', '1.0']
   tags_file = open(up_dir + '/tags.txt', 'w')
   for dir in tags:
     if dir != '.' and os.path.isdir(up_dir+'/'+dir):
