@@ -476,6 +476,8 @@ graphs {
       .type = int
     all_in_one_history = False
       .type = bool
+    y_scale_factor = 2
+      .type = int
   }
   reflections {
     n_divisions = 5

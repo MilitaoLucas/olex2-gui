@@ -30,7 +30,7 @@ spy.MetaCif(True,True)>>
         <td>
           <input
             type='text'
-            width="$eval((htmlpanelwidth()-160)/3)"
+            width="$eval((html.clientwidth(self)-160)/3)"
             valign='center'
             height="17"
             bgcolor="spy.GetParam(gui.html.input_bg_colour)"
@@ -44,7 +44,7 @@ spy.MetaCif(True,True)>>
         <td>
           <input
             type='combo'
-            width="$eval((htmlpanelwidth()-160)/3)"
+            width="$eval((html.clientwidth(self)-160)/3)"
             height="17"
             bgcolor="spy.GetParam(gui.html.input_bg_colour)"
             name='SET_USER_REPORT_STYLE'
@@ -60,7 +60,7 @@ spy.MetaCif(True,True)>>
         <td>
           <input
             type='combo'
-            width="$eval((htmlpanelwidth()-160)/3)"
+            width="$eval((html.clientwidth(self)-160)/3)"
             height="17"
             bgcolor="spy.GetParam(gui.html.input_bg_colour)"
             name='SET_USER_REPORT_TEMPLATE'

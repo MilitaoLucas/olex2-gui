@@ -1708,7 +1708,7 @@ class timage(ImageTools):
   <input
     type="slider"
     name = "BANNER_SLIDE"
-    width="$eval(htmlpanelwidth()-24)"
+    width="$eval(html.clientwidth(self)-24)"
     height="20"
     value="GetVar(snum_refinement_banner_slide)"
     bgcolor="$GetVar(gui_htmlself.params.html.tableself.params.html.bg_colour.rgb.rgb)"
