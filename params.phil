@@ -476,7 +476,7 @@ graphs {
       .type = int
     all_in_one_history = False
       .type = bool
-    y_scale_factor = 2
+    y_scale_factor = 3
       .type = int
   }
   reflections {
