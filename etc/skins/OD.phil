@@ -19,6 +19,13 @@ gui {
     link_colour = #585886
     table_bg_colour = #bcbcbc
     table_firstcol_colour = #bbbbbb
+    input_height = 20
+    checkbox_height = 20
+    checkbox_width = 20
+    combo_width_2 = 55
+    combo_height = 20
+
+
   }
   timage {
     base_colour = None
