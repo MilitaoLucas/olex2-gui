@@ -4,7 +4,7 @@
 <onstartup help="Executes on program start"
   <body
     <args
-      <arg1 name="width" def='htmlpanelwidth()'>
+      <arg1 name="width" def='html.clientwidth(self)'>
     \>
     <cmd
       <cmd1 "silent on">
@@ -36,7 +36,7 @@
     <args
       <arg1 name="file name" def="">
       <arg2 name="options" def="">
-      <arg3 name="width" def="htmlpanelwidth()">
+      <arg3 name="width" def="html.clientwidth(self)">
       <arg4 name="filename" def="filename()">
       <arg5 name="base" def="basedir()">
       <arg6 name="ext" def="fileext()">
@@ -74,7 +74,10 @@
   \>
 <onabort
   <cmd "ceiling off">
-  <cmd "echo lasterror()">
+  <cmd "echo lasterror() -m=error">
+  <cmd "echo 'There is something wrong with the input file you were trying to load. Please fix this error manually'">
+  <cmd "echo 'Have a look in the lines above - the error and the line number where it occurs are printed there'">
+  <cmd "echo 'You are still in the same structure that you were in before you attempted to load this file'">
 >
 >
 >
@@ -1222,7 +1225,7 @@
     <args
       <arg1 name="para" def="">
       <arg2 name="para" def="basedir()">
-      <arg2 name="para" def="htmlpanelwidth()">
+      <arg2 name="para" def="html.clientwidth(self)">
     \>
     <cmd
       <cmd1 "spy dimas_load:%1">

@@ -50,7 +50,7 @@
       <cmd6 "if IsVar(defbrowser) then none else setvar(defbrowser,'htmlview')">
       <cmd7 cmd1="spy.InitialiseVariables(startup)">
       <cmd8 XXX="echo filepath()">
-      <cmd9 XXX="panel htmlpanelwidth()">
+      <cmd9 XXX="panel html.clientwidth(self)">
       <cmd10 XXX="schedule 8 'UpdateFile olex2.exe'">
     \>	
 
