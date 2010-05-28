@@ -83,7 +83,7 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
       type="button"
       name="SNUM_MAP_BUTTON"
       value="%Calculate%"
-      width='$eval(htmlpanelwidth()-35)'
+      width='$eval(html.clientwidth(self)-35)'
       manage
       ondown="setlabel(SNUM_MAP_BUTTON,%Delete Map%)>>spy.MapView()"
       onup="setlabel(SNUM_MAP_BUTTON,%Calculate%)>>xgrid.visible(false)"

@@ -486,7 +486,7 @@ WHERE (((submission.ID)='%s'));""" %(id)
         import PilTools
         olx.Clear()
         olx.Atreap(r"%s" %inspath)
-#        width = olx.HtmlPanelWidth()
+#        width = olx.html.clientwidth(self)
 #        width = 290
 #        tool_arg = '100;100;160;None;None;None'
 #        makeImage = PilTools.sNumTitle(width, tool_arg)
