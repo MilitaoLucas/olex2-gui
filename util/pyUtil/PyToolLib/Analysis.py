@@ -233,7 +233,7 @@ class Graph(ImageTools):
     fontsize = int(0.08 * self.imX)
     fontscale = 0.02 * self.imX
     f = self.params.font_scale
-    fontscale = f * self.imY
+    fontscale = f * self.imX
     font_name = "Vera"
     self.font_size_large = int(1.4 * fontscale)
     self.font_large = self.registerFontInstance(font_name, self.font_size_large)
@@ -702,13 +702,15 @@ class Graph(ImageTools):
           label += ' - %.2f%%' %(self.tree.active_node.R1 * 100)
         except (ValueError, TypeError):
           pass
-        self.draw_legend(label)
+        self.draw_legend(label, font_size=self.font_size_normal)
         OlexVFS.save_image_to_olex(self.im, self.image_location, 0)
         #self.draw_legend("%.3f" %(bars[self.i_active_node][0]))
         OV.write_to_olex('history-info_%s.htm' %img_no, historyText)
         OV.write_to_olex('history-info.htm', historyText)
 
-  def draw_legend(self, txt):
+  def draw_legend(self, txt, font_size=None):
+    if not font_size:
+      self.font_size_large
     height = self.graph_bottom - self.graph_top
     width = self.params.size_x
     legend_top = height + 20
@@ -719,10 +721,10 @@ class Graph(ImageTools):
     self.draw.rectangle(box, fill=self.gui_html_bg_colour)
     #txt = '%.3f' %(y_value)
     ## Draw Current Numbers
-    wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large)
+    wX, wY = IT.textsize(self.draw, txt, font_size=font_size)
     x = width - wX - self.bSides
     top_left = (x, legend_top)
-    IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
+    IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=font_size, font_colour=self.light_grey)
 
   def draw_data_points(self, xy_pairs, indices=None, marker_size_factor=None):
     min_x = self.min_x
@@ -1942,9 +1944,11 @@ class HistoryGraph(Analysis):
     #self.params.size_x, self.params.size_y = size
     #self.make_empty_graph(draw_title=False)
     #self.image_location = "history.png"
+    self.green = OV.GetParam('gui.green').rgb[1]
+    self.red = OV.GetParam('gui.red').rgb[0]
+    self.blue = 0
     self.make_graph()
-    self.popout()
-    self.decorated = False
+    #self.popout()
 
 
   def make_graph(self):
@@ -2018,8 +2022,7 @@ class HistoryGraph(Analysis):
     if bar_height == factor:
       fill = (139, 0, 204)
     else:
-      
-      fill = (int(255*bar_height), int(255*(1.3-bar_height)), 0)
+      fill = (int(self.red*bar_height), int(self.green*(1.3-bar_height)), self.blue)
     #if self.i_bar != self.i_active_node:
       #fill = IT.adjust_colour(fill, luminosity=1.5)
     self.i_bar += 1
