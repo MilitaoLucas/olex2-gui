@@ -75,9 +75,9 @@
 <onabort
   <cmd "ceiling off">
   <cmd "echo lasterror() -m=error">
-  <cmd "echo 'There is something wrong with the input file you were trying to load. Please fix this error manually'">
-  <cmd "echo 'Have a look in the lines above - the error and the line number where it occurs are printed there'">
-  <cmd "echo 'You are still in the same structure that you were in before you attempted to load this file'">
+  <cmd "echo 'There is something wrong with the input file you were trying to load. Please fix this error manually.'">
+  <cmd "echo 'Have a look in the lines above - the error and the line number where it occurs are printed there.'">
+  <cmd "echo 'You are still in the same structure that you were in before you attempted to load this file.'">
 >
 >
 >

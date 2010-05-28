@@ -517,8 +517,7 @@ class Graph(ImageTools):
     all_in_one_history = self.params.all_in_one_history
     
     if all_in_one_history:
-      bar_width = math.floor(width/n_bars)
-      #bar_width += 1
+      bar_width = math.floor((width-10)/n_bars)
       if n_bars <= max_bars:
         bar_width = int(width/max_bars)
       max_bars = n_bars
@@ -633,12 +632,13 @@ class Graph(ImageTools):
         scaleTxt = '''
 <input 
   type="spin" 
-  name = "HistoryScale" 
+  name="HistoryScale" 
   width="45"
-  label = "Scale "
+  label="Scale "
   bgcolor="$spy.GetParam(gui.html.table_bg_colour)"  
   fgcolor="$spy.GetParam(gui.html.font_colour)" 
   valign='center'
+  min="2"
   height="$spy.GetParam(gui.html.spin_height)"
   value="$spy.GetParam(graphs.program_analysis.y_scale_factor)"
   onchange="spy.SetParam(graphs.program_analysis.y_scale_factor,GetValue(HistoryScale))>>spy._make_history_bars()>>html.Reload"
