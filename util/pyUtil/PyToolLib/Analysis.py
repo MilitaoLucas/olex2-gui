@@ -233,7 +233,7 @@ class Graph(ImageTools):
     fontsize = int(0.08 * self.imX)
     fontscale = 0.02 * self.imX
     f = self.params.font_scale
-    fontscale = f * self.imX
+    fontscale = f * self.imY
     font_name = "Vera"
     self.font_size_large = int(1.4 * fontscale)
     self.font_large = self.registerFontInstance(font_name, self.font_size_large)
@@ -2011,13 +2011,14 @@ class HistoryGraph(Analysis):
 
   def get_bar_colours(self, bar_height):
     factor = self.params.y_scale_factor
-    if self.i_bar == self.i_active_node:
-      fill = (int(255*bar_height), int(255*(1.3-bar_height)), 0)
-      self.decorated = True
-      #fill = OV.GetParam('gui.grey').rgb
-    elif bar_height == factor:
+    #if self.i_bar == self.i_active_node:
+      #fill = (int(255*bar_height), int(255*(1.3-bar_height)), 0)
+      #self.decorated = True
+      ##fill = OV.GetParam('gui.grey').rgb
+    if bar_height == factor:
       fill = (139, 0, 204)
     else:
+      
       fill = (int(255*bar_height), int(255*(1.3-bar_height)), 0)
     #if self.i_bar != self.i_active_node:
       #fill = IT.adjust_colour(fill, luminosity=1.5)

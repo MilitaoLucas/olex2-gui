@@ -466,7 +466,7 @@ olex2
 
 graphs {
   program_analysis {
-    font_scale = 0.03
+    font_scale = 0.1
       .type = float(value_min=0.0)
     size_x = None
       .type = int(value_min=0)
