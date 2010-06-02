@@ -98,7 +98,8 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
       manage
       ondown="setlabel(SNUM_MASKS_BUTTON,%Delete Mask Display%)>>
 spy.OlexCctbxMasks()>>
-spy.SetXgridView()>>"
+spy.SetXgridView()>>
+UpdateHtml"
       onup="
 setlabel(SNUM_MASKS_BUTTON,%Calculate Mask%)>>
 xgrid.visible(false)"
