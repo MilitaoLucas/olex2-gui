@@ -7,7 +7,7 @@ gui {
   green = #00aa00
   skin {
     name = "OD"
-    logo_name = etc/skins/OD.png
+    logo_name = None
   }
 
   html {
