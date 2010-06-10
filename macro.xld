@@ -82,6 +82,15 @@
 >
 >
 
+<Close
+  <body
+    <args>
+  <cmd
+    <cmd "if IsFileLoaded() then '@close>>html.reload>>echo File is closed'">
+  \>
+>
+>
+
 <GetParam
   <body
     <args
