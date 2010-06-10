@@ -36,6 +36,7 @@
     <check title="File;#" macro="">
     <item title="File;Save" macro="file">
     <item title="File;Save With Sorting" macro="file -s">
+    <item title="File;Close" macro="Close">
     <item title="File;Exit" macro="quit">
 
     <check title="Mode;HFIX;13 (1 Hydrogen sp3)" macro="mode hfix 13" modedependent="HFIX;13" before='Help'>
