@@ -9,9 +9,10 @@ from my_refine_util import *
 from PeriodicTable import PeriodicTable
 import olexex
 try:
-  olx.current_reflection_filename
+  olx.current_hklsrc
 except:
-  olx.current_reflection_filename = None
+  olx.current_hklsrc = None
+  olx.current_hklsrc_mtime = None
   olx.current_reflections = None
   olx.current_mask = None
 
@@ -54,8 +55,12 @@ class OlexCctbxAdapter(object):
     self.cell = self.olx_atoms.getCell()
     self.space_group = str(olx.xf_au_GetCellSymm())
     reflections = olx.HKLSrc()
-    if force or reflections != olx.current_reflection_filename:
-      olx.current_reflection_filename = reflections
+    mtime = os.path.getmtime(reflections)
+    if (force or
+        reflections != olx.current_hklsrc or
+        mtime != olx.current_hklsrc_mtime):
+      olx.current_hklsrc = reflections
+      olx.current_hklsrc_mtime = mtime
       olx.current_reflections = cctbx_controller.reflections(self.cell, self.space_group, reflections)
     if olx.current_reflections:
       self.reflections = olx.current_reflections
@@ -552,10 +557,10 @@ class OlexCctbxSolve(OlexCctbxAdapter):
         else:
           self.post_single_peak(xyz, height)
       have_solution = True
-      
+
       olex.m('Compaq -a')
       olex.m('move')
-      
+
     else: have_solution = False
     return have_solution
 
@@ -750,7 +755,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       else:
         font_color_basf = "green"
         basf = "%.2f" %float(basf)
-        
+
       txt = [{'txt':"R=%.2f%%" %(float(r)*100),
               'font_colour':font_color},
              {'txt':"basf=%s" %str(basf),
