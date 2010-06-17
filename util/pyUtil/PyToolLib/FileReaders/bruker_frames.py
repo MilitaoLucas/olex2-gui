@@ -47,7 +47,7 @@ class reader:
 		
 		self._cifItems['_diffrn_source_voltage'] = "%.0f" %float(header_d['SOURCEK'])
 		self._cifItems['_diffrn_source_current'] = "%.0f" %float(header_d['SOURCEM'])
-		self._cifItems['_diffrn_refln_scan_width'] = "%.2f" %float(header_d['RANGE'])
+		#self._cifItems['_diffrn_refln_scan_width'] = "%.2f" %float(header_d['RANGE'])
 		self._cifItems['time'] = "%.2f" %float(header_d['CUMULAT'])
 		self._cifItems['formula'] = "%s" %(header_d['CHEM'])
 		self._cifItems['_diffrn_radiation_monochromator'] = header_d['FILTER']
