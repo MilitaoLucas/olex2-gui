@@ -16,6 +16,7 @@
       <cmd4 "if isos(mac) then setvar(defeditor,'open')">
       <cmd5 "if isos(mac) then setvar(defexplorer,'open')">
       <cmd6 "if isos(mac) then setvar(defbrowser,'open')">
+      <cmd6 "loglevel(mf)>>py.loglevel(mf)">
       <cmd7 "spy.load_user_gui_phil()">
       <cmd8 "spy.change_skin()">
       <cmd9 "if and(isvar(startup),file.exists(app.getarg(1))) then none else 'reap getVar(startup)>>echo filepath()'">
@@ -1612,6 +1613,18 @@
     \>
     <cmd
       <cmd1 'spy.register_new_odac(%1,%2)'>
+    \>
+  \>
+\>
+
+
+<dires help="open the directory using explorer (Windows only)"
+  <body
+    <args
+      <arg1 name="datadir" def="%DataDir()">
+    \>
+    <cmd
+      <cmd1 'exec -o explorer %1'>
     \>
   \>
 \>

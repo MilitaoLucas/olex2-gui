@@ -474,7 +474,7 @@ def MakeElementButtonsFromFormula():
     html = '''
     <a href="%s" target="%s %s">
       <zimg name=IMG_BTN-ELEMENT%s border="0" src="btn-element%s.png"/>
-    </a>&nbsp;'''%(command, target, symbol, symbol.upper(), symbol)
+    </a>'''%(command, target, symbol, symbol.upper(), symbol)
     
     html_elements.append(html)
 
@@ -531,9 +531,10 @@ def MakeElementButtonsFromFormula():
       for state in ['on', 'off']:
         txt = btn_dict[b].get('txt')
         bgcolour = btn_dict[b].get('bgcolour')
-        width = 21
+        width = 22
         btn_type = 'tiny'
-        IM = TI.make_timage(item_type='tinybutton', item=txt, state=state, width=width, colour=bgcolour)
+        bg = OV.GetParam('gui.html.table_firstcol_colour')
+        IM = TI.make_timage(item_type='tinybutton', item=txt, state=state, width=width, colour=bgcolour, whitespace='right:1:%s' %bg)
         name = "btn-element%s%s.png" %(txt, state)
         OlexVFS.save_image_to_olex(IM, name, 1)
         if state == 'off':
