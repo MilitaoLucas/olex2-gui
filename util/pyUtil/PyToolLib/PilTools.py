@@ -2612,7 +2612,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     return image
 
 
-  def make_timage(self, item_type, item, state, font_name="Vera", width=None, colour=None):
+  def make_timage(self, item_type, item, state, font_name="Vera", width=None, colour=None, whitespace=None):
     if not width:
       width = self.width
 
@@ -2786,6 +2786,13 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     if shadow:
       image = self.make_shadow(image, underground, corner_rad)
+      
+    if whitespace:
+      w = whitespace.split(':')
+      side = w[0]
+      weight = int(w[1])
+      bg = w[2]
+      image = self.add_whitespace(image, side, weight, bg)
       
 
     filename = item
