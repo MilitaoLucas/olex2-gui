@@ -329,7 +329,7 @@ class Node:
     self.hkl = None
 
     if hklPath and os.path.exists(hklPath):
-      self.hkl = hashlib.md5('%f%s' %(os.path.getmtime(hklPath),hklPath)).hexdigest()
+      self.hkl = hashlib.md5('%f%s' %(os.path.getmtime(hklPath),hklPath.encode('utf-8'))).hexdigest()
 
     if history_leaf is None:
       if resPath is not None and os.path.exists(resPath):

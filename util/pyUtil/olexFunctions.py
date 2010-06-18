@@ -39,6 +39,8 @@ class OlexFunctions(inheritFunctions):
         handler = olx.gui_phil_handler
       else:
         handler = olx.phil_handler
+      value = unicode(value)
+      value = value.encode('utf-8')
       if value == '': value = None
       elif value in ('Auto','auto','None','none',None):
         value = value
@@ -544,7 +546,12 @@ class OlexFunctions(inheritFunctions):
 
 def GetParam(variable):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
-  return OV.GetParam_as_string(variable)
+  p = OV.GetParam_as_string(variable)
+  try:
+    p = p.decode('utf-8')
+  except:
+    pass
+  return p
 
 OV = OlexFunctions()
 OV.registerFunction(GetParam)

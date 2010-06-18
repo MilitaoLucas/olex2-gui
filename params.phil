@@ -233,8 +233,8 @@ snum {
       .type = str
     diffrn_source_type = None
       .type = str
-    diffrn_refln_scan_width = None
-      .type = float(value_min=0.0)
+#    diffrn_refln_scan_width = None
+#      .type = float(value_min=0.0)
     diffrn_detector = None
       .type = str
     diffrn_detector_type = None
