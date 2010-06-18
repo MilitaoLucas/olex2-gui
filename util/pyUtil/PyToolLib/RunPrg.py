@@ -258,7 +258,7 @@ class RunRefinementPrg(RunPrg):
 
   def run(self):
     self.startRun()
-    olx.File("'%s/%s.ins'" %(OV.FilePath(),self.original_filename))
+    olx.File(u"'%s/%s.ins'" %(OV.FilePath(),self.original_filename))
     self.setupRefine()
     if self.terminate: return
     self.setupFiles()

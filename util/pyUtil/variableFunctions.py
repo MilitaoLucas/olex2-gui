@@ -183,8 +183,8 @@ snum {
   }
 """ %(refinementPrg, refinementMethod, solutionPrg, solutionMethod,
       OV.FileName(), OV.FileName(), OV.FileName(), OV.FilePath())
-  olx.phil_handler.update(phil_string=snum_phil)
-  structure_phil_path = "%s/.olex/%s.phil" %(OV.FilePath(), OV.FileName())
+  olx.phil_handler.update(phil_string=snum_phil.encode('utf-8'))
+  structure_phil_path = u"%s/.olex/%s.phil" %(OV.FilePath(), OV.FileName())
   if os.path.isfile(structure_phil_path):
     structure_phil_file = open(structure_phil_path, 'r')
     structure_phil = structure_phil_file.read()
