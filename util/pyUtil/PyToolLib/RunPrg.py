@@ -369,7 +369,7 @@ class RunRefinementPrg(RunPrg):
     self.R1 = R1
     return self.his_file, R1
 
-  def isInversionNeeded(self):
+  def isInversionNeeded(self, force=False):
     flack = self.method.getFlack()
     if flack:
       print "Checking Stereochemistry: Flack Parameter = %s" %flack
@@ -377,7 +377,8 @@ class RunRefinementPrg(RunPrg):
       flack_val = float(fs[0])
       flack_esd = float(fs[1].strip(")"))
       if flack_val > 0.8:
-        #olex.m('Inv -f')
+        if force:
+          olex.m('Inv -f')
         OV.File()
         print "WARNING: Stucture should be inverted (inv -f), unless there is a good reason not to do so."
       else:
