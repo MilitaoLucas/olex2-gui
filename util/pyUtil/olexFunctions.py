@@ -115,6 +115,10 @@ class OlexFunctions(inheritFunctions):
 
   def SetMaxPeaks(self, max_peaks):
     try:
+      int(max_peaks)
+    except:
+      return
+    try:
       import programSettings
       old_value = self.GetParam('snum.refinement.max_peaks')
       if old_value is not None:
