@@ -1431,6 +1431,7 @@ class ShelXL_graph(refinement_graph):
       self.data['max_shift'].add_pair(self.cycle, max_shift)
       self.data['max_shift']._metadata['labels'].append(max_shift_atom)
       self.new_graph_please = True
+    #self.new_graph_please = True
     if self.new_graph_please:
       self.make_graph()
 
