@@ -329,7 +329,11 @@ class MatrixMaker(ImageTools):
     #import Image
     #import ImageDraw, ImageChops
 
-  def make_3x3_matrix_image(self, name, matrix, text_def=""):
+  def make_3x3_matrix_image(self, name, matrix, text_def="", state=''):
+    if state == "on":
+      bgcolor = OV.GetParam('gui.html.highlight_colour').rgb
+    if state == "off":
+      bgcolor = '#dedede'
     width = 52
     height = 55
     size = (width, height)
@@ -337,7 +341,7 @@ class MatrixMaker(ImageTools):
     font_size = 13
     font = self.registerFontInstance(font_name, font_size)
     line_heigth = font_size -2
-    im = Image.new('RGBA', size, '#dedede')
+    im = Image.new('RGBA', size, bgcolor)
     draw = ImageDraw.Draw(im)
     m = []
     i = 0
@@ -398,8 +402,11 @@ class MatrixMaker(ImageTools):
       colour = text_def[i].get('font_colour',"")
       w = draw.textsize(str(item), font=font)[0]
       draw.text(((width-w)/2, 35 + line_heigth * i), "%s" %item, font=font, fill=(colour))
-    name = r"%s.png" %(name)
-    OlexVFS.save_image_to_olex(im, name, 2)
+    namestate = r"%s%s.png" %(name, state)
+    name = r"%s" %(name)
+    OlexVFS.save_image_to_olex(im, namestate)
+    if state == "off":
+      OlexVFS.save_image_to_olex(im, "%s.png" %name)
     return name, im
 
 

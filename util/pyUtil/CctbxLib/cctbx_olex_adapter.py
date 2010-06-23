@@ -28,6 +28,11 @@ OV = OlexFunctions()
 
 from History import hist
 
+from RunPrg import RunRefinementPrg
+
+global twin_laws_d
+twin_laws_d = {}
+
 
 class OlexCctbxAdapter(object):
   def __init__(self):
@@ -712,6 +717,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
   def run(self):
     from PilTools import MatrixMaker
+    global twin_laws_d
     a = MatrixMaker()
     twin_laws = cctbx_controller.twin_laws(self.reflections)
     r_list = []
@@ -760,7 +766,10 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
               'font_colour':font_color},
              {'txt':"basf=%s" %str(basf),
               'font_colour':font_color_basf}]
-      image_name, img  = a.make_3x3_matrix_image(name, twin_law, txt)
+      states = ['on', 'off']
+      for state in states:
+        image_name, img  = a.make_3x3_matrix_image(name, twin_law, txt, state)
+        
       #law_txt += "<zimg src=%s>" %image_name
       law_straight = ""
       for x in xrange(9):
@@ -793,18 +802,26 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     for r, run, basf in r_list:
       i += 1
       image_name = self.twin_laws_d[run].get('law_image_name', "XX")
+      use_image = "%son.png" %image_name
+      img_src = "%s.png" %image_name
       name = self.twin_laws_d[run].get('name', "XX")
-      href = 'spy.on_twin_image_click(%s)'
-      href = 'spy.revert_history(%s)>>HtmlReload' %(self.twin_laws_d[i].get('history'))
+      #href = 'spy.on_twin_image_click(%s)'
+      href = 'spy.revert_history(%s)>>spy.reset_twin_law_img()>>HtmlReload' %(self.twin_laws_d[i].get('history'))
       law_txt = "<a href='%s'><zimg src=%s></a>&nbsp;" %(href, image_name)
       self.twin_law_gui_txt += "%s" %(law_txt)
+      control = "IMG_%s" %image_name.upper()
 
       html += '''
-<a href='%s' target='Apply this twin law'><zimg border="0" src="%s"></a>&nbsp;
-    ''' %(href, image_name)
+<a href='%s' target='Apply this twin law'><zimg name='%s' border="0" src="%s"></a>&nbsp;
+    ''' %(href, control, img_src)
     html += "</td></tr>"
     OV.write_to_olex('twinning-result.htm', html, False)
-    OV.htmlReload()
+    OV.CopyVFSFile(use_image, "%s.png" %image_name,2)
+    #OV.Refresh()
+    #if OV.IsControl(control):
+    #  OV.SetImage(control,use_image)
+    OV.HtmlReload()
+    twin_laws_d = self.twin_laws_d
 #    self.make_gui()
 
   def run_backup_shelx(self):
@@ -823,27 +840,33 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     if law != (1, 0, 0, 0, 1, 0, 0, 0, 1):
       OV.AddIns("TWIN %s" %law_ins)
       OV.AddIns("BASF %s" %"0.5")
+    else:
+      OV.DelIns("TWIN")
+      OV.DelIns("BASF")
+      
     olx.LS('CGLS 1')
     olx.File("%s.ins" %self.filename)
     rFile = open(olx.FileFull(), 'r')
     f_data = rFile.readlines()
-    #prg = OV.GetParam('snum.refinement.program') ## This currently only works with SHELX
-    prg = "ShelXL"
-    try:
-      olx.Exec(r"%s '%s'" %(prg, olx.FileName()))
-    except:
-      prg = "XL"
-      olx.Exec(r"%s '%s'" %(prg, olx.FileName()))
-
-    olx.WaitFor('process')
-    olx.Atreap(r"-b %s/%s.res" %(olx.FilePath(), olx.FileName()))
+    
+    curr_refprg = OV.GetParam('snum.refinement.program')
+    OV.SetParam('snum.refinement.program','ShelXL')
+    OV.SetParam('snum.skip_history','True')
+    
+    a = RunRefinementPrg()
+    self.R1 = a.R1
+    his_file = a.his_file    
+    
+    OV.SetParam('snum.skip_history','False')
+    OV.SetParam('snum.refinement.program',curr_refprg)
     r = olx.Lst("R1")
-    basf = olx.Lst("BASF")
-    if r != 0:
-      res = hist.create_history()
-#      history_refinement = res.split(";")[1]
-#      history_solution = res.split(";")[0]
-    return r, basf, f_data, res
+    olex_refinement_model = OV.GetRefinementModel(False)
+    if olex_refinement_model.has_key('twin'):
+      basf = olex_refinement_model['twin']['basf'][0]
+    else:
+      basf = "n/a"
+    
+    return self.R1, basf, f_data, his_file
 
   def twinning_gui_def(self):
     if not self.twin_law_gui_txt:
@@ -968,6 +991,32 @@ def on_twin_image_click(run_number):
   olx.Atreap(olx.FileFull())
   OV.UpdateHtml()
 OV.registerFunction(on_twin_image_click)
+
+def reset_twin_law_img():
+  global twin_laws_d
+  olex_refinement_model = OV.GetRefinementModel(False)
+  if olex_refinement_model.has_key('twin'):
+    c = olex_refinement_model['twin']['matrix']
+    curr_law = []
+    for row in c:
+      for el in row:
+        curr_law.append(el)
+    for i in xrange(3):
+      curr_law.append(0.0)
+    curr_law = tuple(curr_law)
+      
+  else:
+    curr_law = (1, 0, 0, 0, 1, 0, 0, 0, 1)
+  for law in twin_laws_d:
+    name = twin_laws_d[law]['name']
+    matrix = twin_laws_d[law]['law']
+    if curr_law == matrix:
+      OV.CopyVFSFile("%son.png" %name, "%s.png" %name,2)
+    else:
+      OV.CopyVFSFile("%soff.png" %name, "%s.png" %name,2)
+  OV.HtmlReload()
+OV.registerFunction(reset_twin_law_img)
+
 
 def write_grid_to_olex(grid):
   import olex_xgrid
