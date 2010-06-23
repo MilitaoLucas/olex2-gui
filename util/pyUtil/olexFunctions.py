@@ -561,3 +561,4 @@ def GetParam(variable):
 OV = OlexFunctions()
 OV.registerFunction(GetParam)
 OV.registerFunction(OV.SetParam)
+OV.registerFunction(OV.CopyVFSFile)

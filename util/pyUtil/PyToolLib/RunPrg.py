@@ -344,6 +344,8 @@ class RunRefinementPrg(RunPrg):
     self.method.post_refinement(self)
 
   def doHistoryCreation(self):
+    if self.params.snum.skip_history:
+      print ("Skipping History")
     R1 = 0
     self.his_file = ""
     if OV.IsVar('cctbx_R1'):

@@ -3,6 +3,9 @@
 ##############################################################################
 
 snum {
+  skip_history = False
+    .type = bool
+    .expert_level = 1
   solution {
     program = ShelXS ShelXS86 XS 'smtbx-solve' XM ShelXD
       .type = choice
