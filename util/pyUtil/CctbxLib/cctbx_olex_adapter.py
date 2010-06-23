@@ -351,6 +351,7 @@ class FullMatrixRefine(OlexCctbxRefine):
         shifts = normal_eqns.shifts
         self.feed_olex()
         self.scale_factor = scales[-1]
+      self.export_var_covar(normal_eqns.covariance_matrix_and_annotations())  
     except RuntimeError, e:
       if str(e).startswith("cctbx::adptbx::debye_waller_factor_exp: max_arg exceeded"):
         print "Refinement failed to converge"
@@ -364,7 +365,15 @@ class FullMatrixRefine(OlexCctbxRefine):
       self.post_peaks(self.f_obs_minus_f_calc_map(0.4), max_peaks=self.max_peaks)
     finally:
       sys.stdout.refresh = True
-
+    
+  def export_var_covar(self, matrix):
+    wFile = open("%s/matrix.vcov" %OV.FilePath(),'wb')
+    wFile.write("VCOV\n")
+    wFile.write(" ".join(matrix[1]) + "\n")
+    for item in matrix[0]:
+      wFile.write(str(item) + " ")
+    wFile.close()
+    
   def feed_olex(self):
     ## Feed Model
     u_total  = 0

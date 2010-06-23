@@ -1531,8 +1531,6 @@ def GetTwinLaw(html=False):
     for row in c:
       for el in row:
         curr_law.append(el)
-    for i in xrange(3):
-      curr_law.append(0.0)
     curr_law = tuple(curr_law)
   else:
     return
