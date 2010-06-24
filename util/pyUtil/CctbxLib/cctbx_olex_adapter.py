@@ -367,7 +367,7 @@ class FullMatrixRefine(OlexCctbxRefine):
       sys.stdout.refresh = True
     
   def export_var_covar(self, matrix):
-    wFile = open("%s/matrix.vcov" %OV.FilePath(),'wb')
+    wFile = open("%s/%s.vcov" %(OV.FilePath(),OV.FileName()),'wb')
     wFile.write("VCOV\n")
     wFile.write(" ".join(matrix[1]) + "\n")
     for item in matrix[0]:
