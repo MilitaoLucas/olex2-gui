@@ -1,5 +1,6 @@
 # olexFunctions.py
 
+import math
 import os
 import sys
 import olx
@@ -114,12 +115,16 @@ class OlexFunctions(inheritFunctions):
 
   def SetMaxPeaks(self, max_peaks):
     try:
+      int(max_peaks)
+    except:
+      return
+    try:
       import programSettings
       old_value = self.GetParam('snum.refinement.max_peaks')
       if old_value is not None:
         max_peaks = int(max_peaks)
         if max_peaks > 0:
-          max_peaks *= cmp(old_value, 0) # keep sign of old value
+          max_peaks = int(math.copysign(max_peaks, old_value)) # keep sign of old value
       self.SetParam('snum.refinement.max_peaks', max_peaks)
       programSettings.onMaxPeaksChange(max_peaks)
     except Exception, ex:
@@ -556,3 +561,4 @@ def GetParam(variable):
 OV = OlexFunctions()
 OV.registerFunction(GetParam)
 OV.registerFunction(OV.SetParam)
+OV.registerFunction(OV.CopyVFSFile)
