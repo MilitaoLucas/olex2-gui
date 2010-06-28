@@ -455,6 +455,7 @@ def MakeElementButtonsFromFormula():
   for element in f:
     symbol = element.split(':')[0]
     max = float(element.split(':')[1])
+    max = round(max, 2)
     present = round(current_formula.get(symbol,0),2)
     if symbol != "H":
       totalcount += max
@@ -1515,6 +1516,30 @@ def runODAC(cmd):
 
 OV.registerFunction(runODAC)
 
+def GetOptionalHyphenString(txt):
+  txt = txt.replace ("/", "/" + u"\u200B")
+  txt = txt.replace ("\\", "\\" + u"\u200B")
+  txt = txt.replace ("\\", "\\" + " ")
+  return txt
+OV.registerFunction(GetOptionalHyphenString)
+
+def GetTwinLaw(html=False):
+  olex_refinement_model = OV.GetRefinementModel(False)
+  if olex_refinement_model.has_key('twin'):
+    c = olex_refinement_model['twin']['matrix']
+    curr_law = []
+    for row in c:
+      for el in row:
+        curr_law.append(el)
+    curr_law = tuple(curr_law)
+  else:
+    return
+
+  txt = repr(curr_law)
+  if html:
+    txt = "<tr><td colspan='4'><b><font color='%s'>TWIN LAW %s</font></b></td></tr>" %(OV.GetParam('gui.red').hexadecimal, repr(curr_law))
+  return txt
+OV.registerFunction(GetTwinLaw)
 
 
 def HklStatsAnalysis():

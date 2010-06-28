@@ -513,6 +513,87 @@ class Graph(ImageTools):
     y_label = dataset.metadata().get('y_label')
     title = self.graphInfo.get('Title')
     n_bars = len(dataset.x)
+    bar_width = math.floor((width-2*self.bSides)/n_bars)
+    if title is not None:
+      wX, wY = IT.textsize(self.draw, title, font_size=self.font_size_large)
+      x = width - 2*self.bSides - wX
+      y = wY + 6
+      top_left = (x,y)
+      IT.write_text_to_draw(self.draw, title, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
+
+    for i, xy in enumerate(dataset.xy_pairs()):
+      last = len(dataset.x)
+      x_value, y_value = xy
+      bar_left = ((i) * bar_width) + self.bSides + 1
+      bar_right = bar_left + bar_width
+      bar_bottom = self.graph_bottom -1
+      y_value_scale = y_value * y_scale_factor
+
+      if y_value_scale >= 1:
+        bar_top = top
+      else:
+        bar_top = height + top  - (y_value_scale * (height))
+
+      if colour_function is not None:
+        fill = colour_function(y_value_scale)
+      else:
+        fill = (0,0,0)
+
+      if i == last -1:
+        bar_right = width - self.bSides - 1
+      box = (bar_left,bar_top,bar_right,bar_bottom)
+        
+      self.draw.rectangle(box, fill=fill, outline=(100, 100, 100))
+
+      if dataset.hrefs is not None:
+        href = dataset.hrefs[i]
+      else:
+        #href = "Html.Update"
+        href = ""
+      if dataset.targets is not None:
+        target = dataset.targets[i]
+      else:
+        target = "%.3f" %y_value
+      self.map_txt_list.append(
+        """<zrect coords="%i,%i,%i,%i" href="%s" target="%s">"""
+        % (bar_left, top, bar_right, bar_bottom, href, target))
+      if draw_bar_labels:
+        if bar_labels is not None:
+          txt = bar_labels[i]
+        else:
+          txt = "%.3f" %y_value
+        wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large)
+
+        if wX < bar_width:
+          x = bar_left + ( bar_width - wX/2 -wX) + self.bSides
+          x = bar_left + ( bar_width - wX)/2
+          if y_value < 0.8:
+            y = bar_top - 14
+          else:
+            y = bar_top + 6
+          top_left = (x,y)
+          IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.light_grey)
+
+        if y_value < 0.003:
+          txt = "OK"
+          wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_large)
+          x = width - 2*self.bSides - wX
+          y = wY + 30
+          top_left = (x, y - 10)
+          top_left = (x,y)
+          IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.gui_green)
+  
+  
+  def draw_history_bars(self, dataset, y_scale_factor=1.0, bar_labels=None, colour_function=None, draw_bar_labels=True):
+    top = self.graph_top
+    marker_width = 5
+    width = self.params.size_x
+    height = self.graph_bottom - self.graph_top
+    legend_top = height + 20
+    labels = dataset.metadata().get('labels')
+    y_label = dataset.metadata().get('y_label')
+    title = self.graphInfo.get('Title')
+    n_bars = len(dataset.x)
     max_bars = self.params.max_bars
     all_in_one_history = self.params.all_in_one_history
     
@@ -1350,6 +1431,7 @@ class ShelXL_graph(refinement_graph):
       self.data['max_shift'].add_pair(self.cycle, max_shift)
       self.data['max_shift']._metadata['labels'].append(max_shift_atom)
       self.new_graph_please = True
+    #self.new_graph_please = True
     if self.new_graph_please:
       self.make_graph()
 
@@ -1996,7 +2078,7 @@ class HistoryGraph(Analysis):
         hrefs.append(bar[1])
         targets.append(bar[2])
       data = Dataset(x, y, hrefs=hrefs, targets=targets)
-      self.draw_bars(dataset=data, y_scale_factor=y_scale_factor,
+      self.draw_history_bars(dataset=data, y_scale_factor=y_scale_factor,
                      colour_function=self.get_bar_colours,
                      draw_bar_labels=False)
       #label = '%s (%s)' %(self.tree.active_node.program, self.tree.active_node.method)
