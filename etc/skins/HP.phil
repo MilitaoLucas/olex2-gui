@@ -4,8 +4,8 @@
 #############################################################
 
 gui {
-  base_colour = #aaaaaa
-  logo_colour = #777777
+  base_colour = #222222
+  logo_colour = #222222
   red = #aa0000
   orange = #ff740e
   green = #00aa00
@@ -13,99 +13,51 @@ gui {
     name = "HP"
   }
   html {
-    base_colour = #aaaaaa
-    font_colour = #222244
+    base_colour = #444444
+    bg_colour = #444444
+    font_colour = #dedede
     highlight_colour = #ff8800
-    input_bg_colour = #eeeeee
-    link_colour = #585886
-    table_bg_colour = #eaeaea
-    table_firstcol_colour = #e1e1e1
+    input_bg_colour = #555555
+    link_colour = #ababde
+    table_bg_colour = #555555
+    table_firstcol_colour = #666666
   }
-  timage {
-    base_colour = #888888
-    grad_colour = #454570
-    font_colour = #a4a4c7
-    bg_colour_L = 0.8
-    grad_colour_L = 0.7
-    font_colour_L = 1.4
-    snumtitle {
-      base_colour = '#aaaaaa'
-      grad_colour = '(127, 127, 127)'
-      font_colour = '(237, 237, 237)'
-      font_colour_L = 1.4
-      bg_colour_L = 1.4
-      grad_step = 0.4
-      grad_colour_L = 0.75
-      filefullinfo_colour = '(221, 221, 221)'
-      filefullinfo_colour_L = 1.3
-    }
-    tab {
-      base_colour = #aaaaaa
-      grad_colour = #767676
-      font_colour = #ededed
-      height = 26
-      corner_rad = 3
-      bg_colour_L = 0.7
-      grad_colour_L = 0.7
-      font_colour_L = 1.4
-      font_size = 16
-      top = 3
-      rounded = "1100"
-      arrows = "bar:top:3"
-      off_L = 0.9
-    }
-    button {
-      grad_colour = #e1e1e1
-      grad_step = 0.3
-      height = 18
-      top = 2
-      bg_colour_L = 1.8
-      grad_colour_L = 1.9
-      font_colour_L = 0.7
-      font_colour = #767676
-    }
-    
+  skin {
+  materials_have_been_set = False
+    .type = bool
+  name = default
+    .type = str
+  extension = None
+    .type = str
+  logo_name= None
+    .type = path
+  size_factor = 1.0
+    .type = float
+  clearcolor = 8404992
+    .type = int
+  }
+  timage{
+  
     cbtn{
-      height = 22
-      top = 3
-      corner_rad = 2
-      arrows = "bar:right:18,arrow_right:onup:offdown"
+      base_colour = #555555
+      grad_colour = #777777
+      }  
+  
+    h1{
+      font_colour = #dedede
+      font_colour_L = 1.4
+      base_colour = #666666
+      grad_colour = #666666
+      grad_colour_L = 0.3
     }
+    h3{
+      font_colour = #dedede
+      font_colour_L = 1.4
+      base_colour = #555555
+      grad_colour = #555555
+      grad_colour_L = 0.3
+    }
+
     
-    h1 {
-      base_colour = #aaaaaa
-      grad_colour = #dddddd
-      height = 19
-      font_size = 14
-      top = 2
-      left = 4
-      bg_colour_L = 1.2
-      grad_colour_L = 1.3
-      font_colour_L = 0.5
-      font_colour = #555555
-      arrows = "bar:left:5,char:on~:off+"
-      off_L = 1
     }
-    h3 {
-      height = 17
-      base_colour = #aaaaaa
-      grad_colour = #cbcbcb
-      font_colour = #555555
-      bg_colour_L = 1.2
-      grad_colour_L = 1.2
-      font_colour_L = 0.5
-      corner_rad = 3
-      top = 1
-      left = 4
-      arrows = "bar:left:4,char:on~:off+"
-      off_L = 1
-    }
-  }
-  htmlpanelwidth = 400
-  button_colouring = #dddddd
-  button_writing = #777777
-  tab_colour = #5563a4
-  grad_top_left = #1f3257
-  grad_top_right = #1f3257
-  lines_of_cmd_text = 10
 }
