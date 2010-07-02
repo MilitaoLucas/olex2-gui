@@ -301,7 +301,7 @@ gui {
         .type = colour
       grad_step = 0.2
         .type = float
-      height = 19
+      height = 20
         .type = int
       corner_rad = 3
         .type = int
@@ -384,6 +384,8 @@ gui {
   infobox_plane = '2053;2136422952;2137144606'
     .type = str
   console_font = #olex2.fnt:frb_12
+    .type = str
+  labels_font = #olex2.fnt:frb_20
     .type = str
   htmlpanelwidth = 400
     .type = int
