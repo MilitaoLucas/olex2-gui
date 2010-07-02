@@ -239,9 +239,9 @@
 <refine help="Launches refine program. Syntax: refine [l.s.=-1] [plan=-1]"
   <body
     <args
-      <arg0 name="l.s." def='-1'>
-      <arg1 name="plan" def='-1.1'>
-      <arg2 name="xl" def='xl'>
+      <arg1 name="l.s." def='-1'>
+      <arg2 name="plan" def='-1.1'>
+      
     \>
     <cmd
       <cmd0 "xgrid.Visible(false)">
