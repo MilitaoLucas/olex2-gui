@@ -164,6 +164,7 @@ class OlexRefinementModel(object):
   def __init__(self):
     olex_refinement_model = OV.GetRefinementModel(True)
     self._atoms = {}
+    self._fixed_variables = {}
     self.id_for_name = {}
     asu = olex_refinement_model['aunit']
     for residue in asu['residues']:
@@ -174,6 +175,9 @@ class OlexRefinementModel(object):
         self._atoms.setdefault(i, atom)
         element_type = atom['type']
         self.id_for_name.setdefault(str(atom['label']), atom['aunit_id'])
+    for var in olex_refinement_model['variables']['variables'][0]['references']:
+      self._fixed_variables.setdefault(var['id'], [])
+      self._fixed_variables[var['id']].append(var)
     self._cell = olex_refinement_model['aunit']['cell']
     self.exptl = olex_refinement_model['exptl']
     self._afix = olex_refinement_model['afix']
@@ -194,7 +198,7 @@ class OlexRefinementModel(object):
         u = (uiso,)
       else: u = adp[0]
       if name[:1] != "Q":
-        yield name, xyz, occu, u, element_type
+        yield name, xyz, occu, u, element_type, self._fixed_variables.get(i)
 
   def afix_iterator(self):
     for afix in self._afix:
@@ -252,10 +256,10 @@ def get_refine_ls_hydrogen_treatment():
             1:'noref',
             2:'refxyz',
             3:'constr',
-            4:'refxyz',
+            4:'constr',
             5:'constr',
-            7:'refxyz',
-            8:'refxyz',
+            7:'constr',
+            8:'constr',
             }
   for atom  in OlexRefinementModel().atoms():
     if atom['type'] == 'H':
@@ -426,7 +430,7 @@ last_formula = None
 def ElementButtonStates(symbol):
   if OV.GetParam('olex2.full_mode') == 'name -t=%s' %symbol:
     olex.m('mode off')
-  else: 
+  else:
     if olex.f('Sel()') == '':
       olex.m('mode name -t=%s' %symbol)
     else:
@@ -476,7 +480,7 @@ def MakeElementButtonsFromFormula():
     <a href="%s" target="%s %s">
       <zimg name=IMG_BTN-ELEMENT%s border="0" src="btn-element%s.png"/>
     </a>'''%(command, target, symbol, symbol.upper(), symbol)
-    
+
     html_elements.append(html)
 
 #$spy.MakeActiveGuiButton(btn-element%s,%s)&nbsp;
@@ -524,7 +528,7 @@ def MakeElementButtonsFromFormula():
     use_new = True
   else:
     use_new = True
-    
+
   if use_new:
     from PilTools import timage
     TI = timage()
@@ -541,7 +545,7 @@ def MakeElementButtonsFromFormula():
         if state == 'off':
           name = "btn-element%s.png" %(txt)
           OlexVFS.save_image_to_olex(IM, name, 1)
-            
+
   else:
     bm = ButtonMaker(btn_dict)
     bm.run()
@@ -622,6 +626,9 @@ def MapView():
     mask_val = ""
 
   if map_source == "olex":
+    if OV.GetParam("snum.refinement.use_solvent_mask"):
+      modified_hkl = "%s/%s_modified.hkl"
+
     olex.m("calcFourier -%s -r=%s %s" %(map_type, map_resolution, mask_val))
   else:
     olex.m("calcFourier -%s -%s -r=%s %s" %(map_type, map_source, map_resolution, mask_val))
@@ -1265,7 +1272,7 @@ def register_new_odac(username=None, pwd=None):
       print "Please remove all files in this folder manually and run the installer again."
       olex.m('exec -o explorer "%s"' %p)
       return
-      
+
 
   cont = GetHttpFile(f, force=True, fullURL = True)
   if cont:
@@ -1652,7 +1659,7 @@ def makeSpecialCifCharacter(txt):
   txt = txt.replace(r"\Y", r"&Psi;")
   txt = txt.replace(r"\z", r"&zeta;")
   txt = txt.replace(r"\Z", r"&Zeta;")
-  
+
   return txt
 OV.registerFunction(makeSpecialCifCharacter)
 
@@ -1667,16 +1674,16 @@ def getReportTitleSrc():
   import EpsImagePlugin
   from ImageTools import ImageTools
   IT = ImageTools()
-  
+
   width = OV.GetParam('gui.report.width')
   height = OV.GetParam('gui.report.title.height')
   colour = OV.GetParam('gui.report.title.colour').rgb
   font_name = OV.GetParam('gui.report.title.font_name')
   font_size = OV.GetParam('gui.report.title.font_size')
   font_colour = OV.GetParam('gui.report.title.font_colour')
-  
+
   sNum = OV.GetParam('snum.report.title')
-  
+
   IM = Image.new('RGBA', (width, height), colour)
   draw = ImageDraw.Draw(IM)
   IT.write_text_to_draw(draw,
@@ -1686,7 +1693,7 @@ def getReportTitleSrc():
                  font_name=font_name,
                  font_size=font_size,
                  font_colour=font_colour)
-  
+
   ## This bits would insert a logo into the header, but it doesn't look good.
   #imagePath = OV.GetParam('snum.report.image')
   #imagePath = "%s/etc/CIF/styles/logo.png" %OV.BaseDir()
@@ -1695,13 +1702,13 @@ def getReportTitleSrc():
   #oSize = im.size
   #nWidth = int(oSize[0]*(imHeight/oSize[1]))
   #im = im.resize((nWidth, imHeight), Image.BICUBIC)
-  
+
   #IM.paste(im, (0,0), im)
-  
+
 
   p = "%s/report_tmp.png" %OV.DataDir()
   IM.save(p, "PNG")
-  
+
   rFile = open(p, 'rb').read()
   data = base64.b64encode(rFile)
   retVal ='data:image/png;base64,' + data
@@ -1732,8 +1739,8 @@ def getReportImageData(size='w400', imageName=None):
     imagePath = r"%s/etc/CIF/styles/%s.png" %(OV.BaseDir(),imageName)
   imageLocalSrc = imagePath.split("/")[-1:][0]
   imageLocalSrc = imageLocalSrc.split("\\")[-1:][0]
-    
-   
+
+
   IM = Image.open(imagePath)
   oSize = IM.size
   if size_type == "w":
@@ -1748,16 +1755,16 @@ def getReportImageData(size='w400', imageName=None):
       IM = IM.resize((nWidth, nHeight), Image.BICUBIC)
   p = "%s/report_tmp.png" %OV.DataDir()
   IM.save(p, "PNG")
-  
+
   rFile = open(p, 'rb').read()
   data = base64.b64encode(rFile)
   d ='data:image/png;base64,' + data
-  
+
   html = '''
 <!--[if IE]><img width=500 src='%s'><![endif]-->
 <![if !IE]><img width=500 src='data:image/png;base64,%s'><![endif]>
   '''%(imageLocalSrc, data)
-  
+
   return html
 OV.registerFunction(getReportImageData)
 
