@@ -16,7 +16,7 @@
       <cmd4 "if isos(mac) then setvar(defeditor,'open')">
       <cmd5 "if isos(mac) then setvar(defexplorer,'open')">
       <cmd6 "if isos(mac) then setvar(defbrowser,'open')">
-      <cmd6 "loglevel(mf)>>py.loglevel(mf)">
+      <cmd6 rem="loglevel(mf)>>py.loglevel(mf)">
       <cmd7 "spy.load_user_gui_phil()">
       <cmd8 "spy.change_skin()">
       <cmd9 "if and(isvar(startup),file.exists(app.getarg(1))) then none else 'reap getVar(startup)>>echo filepath()'">
@@ -593,7 +593,7 @@
     <cmd
       <cmd1 cmd1="silent on">
       <cmd2 cmd1="htmlLoad snippets/work.htm">
-      <cmd3 "@reap %1 %2">
+      <cmd3 "@reap '%1' %2">
       <cmd4 "itemstate title 1">
       <cmd5 "itemstate tabs-01 1">
       <cmd6 "syncbc">
@@ -648,7 +648,7 @@
     \>
     <cmd
       <cmd1 cmd1="silent on">
-      <cmd2 "@reap %1 %2">
+      <cmd2 "@reap '%1' %2">
       <cmd3 "itemstate title 1">
       <cmd4 "itemstate tabs-01 1">
       <cmd5 "syncbc">
@@ -691,7 +691,7 @@
       <cmd3 "fader.position(0)">
       <cmd4 "fader.step(0.05)">
       <cmd5 "fader.visible(true)">
-      <cmd6 "@reap %1 %2">
+      <cmd6 "@reap '%1' %2">
     \>
     <onabort
       <cmd "echo lasterror()">
@@ -707,7 +707,7 @@
       <arg1 name="options" def="">
     \>
     <cmd
-      <cmd1 "@reap %1 %2">
+      <cmd1 "@reap '%1' %2">
     \>
     <onabort
       <cmd "echo lasterror()">
