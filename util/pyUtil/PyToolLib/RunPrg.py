@@ -51,7 +51,7 @@ class RunPrg(ArgumentParser):
   def which_shelx(self, type="xl"):
     a = olexex.which_program(type)
     if a == "":
-      OV.Alert("Error", "ShelX %s is not found on this system.\nPlease make sure that the ShelX executable files are either on the path or in the Olex2 installation directory." %type, "O")
+      OV.Alert("Error", "ShelX %s is not found on this system.\nPlease make sure that the ShelX executable files can be found on system PATH." %type, "O")
       OV.Cursor()
       self.terminate = True
     return a
