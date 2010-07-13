@@ -1297,12 +1297,16 @@ def register_new_odac(username=None, pwd=None):
 OV.registerFunction(register_new_odac)
 
 def updateACF(force=False):
+  remote_version = OV.GetParam('odac.version.remote')
+  local_version = OV.GetParam('odac.version.local')
+  
+  
   rFile = open(r"%s/odac_update.txt" %OV.BaseDir())
   txt = rFile.read()
   rFile.close()
   if force:
     print "Update is forced"
-  elif txt == "False":
+  elif remote_version == local_version:
     print "No update required"
     return
   print "Now Updating..."
