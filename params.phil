@@ -667,8 +667,6 @@ odac
       .type = bool
   }
   version{
-    local = None
-      .type = str
     remote = "r38"
       .type = str
   }  
