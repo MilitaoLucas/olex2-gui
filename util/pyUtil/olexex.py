@@ -1300,10 +1300,9 @@ def updateACF(force=False):
   remote_version = OV.GetParam('odac.version.remote')
   local_version = OV.GetParam('odac.version.local')
   
-  
-  rFile = open(r"%s/odac_update.txt" %OV.BaseDir())
-  txt = rFile.read()
-  rFile.close()
+  #rFile = open(r"%s/odac_update.txt" %OV.BaseDir())
+  #txt = rFile.read()
+  #rFile.close()
   if force:
     print "Update is forced"
   elif remote_version == local_version:
@@ -1368,9 +1367,10 @@ def updateACF(force=False):
       print cmd
       Popen(cmd, shell=False, stdout=PIPE).stdout
       print "Updated"
-      wFile = open(r"%s/odac_update.txt" %OV.BaseDir(),'w')
-      wFile.write("False")
-      rFile.close()
+      OV.SetParam('odac.version.local',remote_version)
+#      wFile = open(r"%s/odac_update.txt" %OV.BaseDir(),'w')
+#      wFile.write("False")
+#      rFile.close()
     except Exception, err:
       print "Error with updating %s" %err
       print "Please check your file permissions"
