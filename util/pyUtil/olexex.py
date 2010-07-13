@@ -1311,6 +1311,7 @@ def updateACF(force=False):
     return
   print "Now Updating..."
 
+  
   mac_address = OV.GetMacAddress()
   username, computer_name = OV.GetUserComputerName()
   keyname = getKey()
@@ -1368,10 +1369,9 @@ def updateACF(force=False):
       print cmd
       Popen(cmd, shell=False, stdout=PIPE).stdout
       print "Updated"
-      OV.SetParam('odac.version.local',remote_version)
       wFile = open(version_p,'w')
       wFile.write(remote_version)
-      rFile.close()
+      wFile.close()
     except Exception, err:
       print "Error with updating %s" %err
       print "Please check your file permissions"
