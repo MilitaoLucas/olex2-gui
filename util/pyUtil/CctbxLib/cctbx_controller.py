@@ -389,21 +389,28 @@ def create_cctbx_xray_structure(cell, spacegroup, atom_iter, restraint_iterator=
   builder.make_crystal_symmetry(cell, spacegroup)
   builder.make_structure()
   u_star = shelx_adp_converter(builder.crystal_symmetry)
-  for label, site, occupancy, u, scattering_type in atom_iter:
+  for label, site, occupancy, u, scattering_type, fixed_vars in atom_iter:
+    behaviour_of_variable = [0]*12
+    if fixed_vars is not None:
+      for var in fixed_vars:
+        behaviour_of_variable[var['index']] = 1
     if len(u) != 1:
       a = xray.scatterer(label=label,
                          site=site,
                          u=u_star(*u),
                          occupancy=occupancy,
                          scattering_type=scattering_type)
-      behaviour_of_variable = [0,0,0,1,0,0,0,0,0]
+      behaviour_of_variable.pop(5)
+      #behaviour_of_variable = [0,0,0,1,0,0,0,0,0]
     else:
       a = xray.scatterer(label=label,
                          site=site,
                          u=u[0],
                          occupancy=occupancy,
                          scattering_type=scattering_type)
-      behaviour_of_variable = [0,0,0,1,0]
+      #behaviour_of_variable = [0,0,0,1,0]
+      behaviour_of_variable = behaviour_of_variable[:6]
+    behaviour_of_variable.pop(0)
     builder.add_scatterer(a, behaviour_of_variable)
   return builder.structure
 

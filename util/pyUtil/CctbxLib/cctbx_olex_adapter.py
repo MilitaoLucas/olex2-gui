@@ -17,6 +17,7 @@ except:
   olx.current_mask = None
 
 import olex
+import olex_core
 
 import time
 import cctbx_controller as cctbx_controller
@@ -351,7 +352,7 @@ class FullMatrixRefine(OlexCctbxRefine):
         shifts = normal_eqns.shifts
         self.feed_olex()
         self.scale_factor = scales[-1]
-      self.export_var_covar(normal_eqns.covariance_matrix_and_annotations())  
+      self.export_var_covar(normal_eqns.covariance_matrix_and_annotations())
     except RuntimeError, e:
       if str(e).startswith("cctbx::adptbx::debye_waller_factor_exp: max_arg exceeded"):
         print "Refinement failed to converge"
@@ -365,7 +366,7 @@ class FullMatrixRefine(OlexCctbxRefine):
       self.post_peaks(self.f_obs_minus_f_calc_map(0.4), max_peaks=self.max_peaks)
     finally:
       sys.stdout.refresh = True
-    
+
   def export_var_covar(self, matrix):
     wFile = open("%s/%s.vcov" %(OV.FilePath(),OV.FileName()),'wb')
     wFile.write("VCOV\n")
@@ -373,7 +374,7 @@ class FullMatrixRefine(OlexCctbxRefine):
     for item in matrix[0]:
       wFile.write(str(item) + " ")
     wFile.close()
-    
+
   def feed_olex(self):
     ## Feed Model
     u_total  = 0
@@ -392,9 +393,9 @@ class FullMatrixRefine(OlexCctbxRefine):
           u_cif = adptbx.u_star_as_u_cart(self.xray_structure().unit_cell(), a.u_star)
           u = u_cif
           u_eq = adptbx.u_star_as_u_iso(self.xray_structure().unit_cell(), a.u_star)
-        yield label, xyz, u, u_eq, symbol
+        yield label, xyz, u, u_eq, symbol, a.flags
 
-    for name, xyz, u, ueq, symbol in iter_scatterers():
+    for name, xyz, u, ueq, symbol, flags in iter_scatterers():
       if len(u) == 6:
         u_trans = (u[0], u[1], u[2], u[5], u[4], u[3])
       else:
@@ -403,6 +404,12 @@ class FullMatrixRefine(OlexCctbxRefine):
       id = self.olx_atoms.id_for_name[name]
       olx.xf_au_SetAtomCrd(id, *xyz)
       olx.xf_au_SetAtomU(id, *u_trans)
+      if not flags.grad_site():
+        olx.Fix('xyz', name)
+      if not (flags.grad_u_iso() or flags.grad_u_aniso()):
+        olx.Fix('Uiso', name)
+      if not flags.grad_occupancy():
+        olx.Fix('occu', name)
       u_total += u[0]
       u_average = u_total/i
     #olx.Sel('-u')
@@ -637,7 +644,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       mask.compute(solvent_radius=self.params.solvent_radius,
                    shrink_truncation_radius=self.params.shrink_truncation_radius,
                    resolution_factor=self.params.resolution_factor,
-                   atom_radii_table={'C':1.70, 'B':1.63, 'N':1.55, 'O':1.52},
+                   atom_radii_table=olex_core.GetVdWRadii(),
                    use_space_group_symmetry=True)
       self.time_compute.stop()
       self.time_f_mask = time_log("f_mask calculation").start()
@@ -778,7 +785,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       states = ['on', 'off']
       for state in states:
         image_name, img  = a.make_3x3_matrix_image(name, twin_law, txt, state)
-        
+
       #law_txt += "<zimg src=%s>" %image_name
       law_straight = ""
       for x in xrange(9):
@@ -852,20 +859,20 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     else:
       OV.DelIns("TWIN")
       OV.DelIns("BASF")
-      
+
     olx.LS('CGLS 1')
     olx.File("%s.ins" %self.filename)
     rFile = open(olx.FileFull(), 'r')
     f_data = rFile.readlines()
-    
+
     curr_refprg = OV.GetParam('snum.refinement.program')
     OV.SetParam('snum.refinement.program','ShelXL')
     OV.SetParam('snum.skip_history','True')
-    
+
     a = RunRefinementPrg()
     self.R1 = a.R1
-    his_file = a.his_file    
-    
+    his_file = a.his_file
+
     OV.SetParam('snum.skip_history','False')
     OV.SetParam('snum.refinement.program',curr_refprg)
     r = olx.Lst("R1")
@@ -874,7 +881,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       basf = olex_refinement_model['twin']['basf'][0]
     else:
       basf = "n/a"
-    
+
     return self.R1, basf, f_data, his_file
 
   def twinning_gui_def(self):
@@ -1013,7 +1020,7 @@ def reset_twin_law_img():
     for i in xrange(3):
       curr_law.append(0.0)
     curr_law = tuple(curr_law)
-      
+
   else:
     curr_law = (1, 0, 0, 0, 1, 0, 0, 0, 1)
   for law in twin_laws_d:
@@ -1039,3 +1046,20 @@ def write_grid_to_olex(grid):
   olex_xgrid.SetMinMax(flex.min(grid), flex.max(grid))
   olex_xgrid.SetVisible(True)
   olex_xgrid.InitSurface(True)
+
+
+class as_pdb_file(OlexCctbxAdapter):
+  def __init__(self, args):
+    OlexCctbxAdapter.__init__(self)
+    filepath = args.get('filepath', OV.file_ChangeExt(OV.FileFull(), 'pdb'))
+    f = open(filepath, 'wb')
+    fractional_coordinates = \
+      args.get('fractional_coordinates')in (True, 'True', 'true')
+    print >> f, self.xray_structure().as_pdb_file(
+      remark=args.get('remark'),
+      remarks=args.get('remarks', []),
+      fractional_coordinates=fractional_coordinates,
+      resname=args.get('resname'))
+
+OV.registerMacro(as_pdb_file, """\
+filepath&;remark&;remarks&;fractional_coordinates-(False)&;resname""")
