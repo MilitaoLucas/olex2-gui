@@ -5,8 +5,8 @@
 <!-- #include tool-help-column gui\blocks\tool-first-column.htm;help_ext=mode_name;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td name-=IMAGE_BITMAP_CHOOSE_FONTS>
-    <a href="setfont Picture_labels ChooseFont(Olex2)>>spy.SetParam(snum.image.font_bitmap,GetFont(Picture_labels))">%images_bmp_label_olex_font%</a> | 
-    <a href="setfont Picture_labels ChooseFont()>>spy.SetParam(snum.image.font_bitmap,GetFont(Picture_labels))">%images_bmp_label_system_font%</a>
+    <a href="setfont AtomLabels ChooseFont(Olex2,spy.GetParam(snum.image.bitmap.font_name))>>spy.SetParam(snum.image.bitmap.font_name,GetFont(AtomLabels))">%images_bmp_label_olex_font%</a> | 
+    <a href="setfont AtomLabels ChooseFont(System,spy.GetParam(snum.image.bitmap.font_name))>>spy.SetParam(snum.image.bitmap.font_name,GetFont(AtomLabels))">%images_bmp_label_system_font%</a>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
