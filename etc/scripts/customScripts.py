@@ -7,4 +7,4 @@ import example
 #import OlexPlaton
 #import OlexMail
 #import OlexCheckCIF
-#import hptools
+import hptools

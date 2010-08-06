@@ -1535,6 +1535,21 @@
   \>
 \>
 
+<gui3 help="Switch to Gui3"
+  <body
+    <cmd
+      <cmd2 "SetVar('user_refinement_gui2',True)">
+      <cmd2 "itemstate * 0">
+      <cmd2 "itemstate logo1 1">
+      <cmd2 "itemstate info-title 1">
+      <cmd2 "itemstate index-all-in-one 1">
+      <cmd2 "itemstate aio-* 0">
+      <cmd2 "itemstate aio-choice 1">
+    \>
+  \>
+\>
+
+
 
 <tool help="Show grouped gui tools"
   <body
