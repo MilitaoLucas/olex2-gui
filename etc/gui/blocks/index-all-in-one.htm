@@ -1,6 +1,5 @@
-<!-- #include element-buttons gui\snippets\snippet-element-buttons.htm;gui\blocks\tool-off.htm;1; -->
 
-<!-- #include snippet-banner banner.htm;gui\blocks\tool-off.htm;1; -->
+<!-- #include aio-choice gui\choice.htm;gui\blocks\tool-off.htm;image=choice;1; -->
 
 <!-- #include aio-olex2-settings gui\settings.htm;gui\blocks\tool-off.htm;image=settings;onclick=;0; -->
 
@@ -18,32 +17,28 @@
 
 <!-- #includeif or(IsFileType('ires'),IsFileType('cif')) aio-refine-refine gui\refine.htm;gui\blocks\tool-off.htm;image=refinement;onclick=;0; -->
 <!-- #includeif IsFileType('ires') aio-refine-refinement-indicators gui\refinement-indicators.htm;gui\blocks\tool-off.htm;image=refinement-indicators;onclick=;0; -->
-<!-- #includeif IsFileType('ires') aio-refine-q-peaks gui\q-peaks.htm;gui\blocks\tool-off.htm;image=q-peaks;onclick=;0; -->
+<!-- #includeif IsFileType('ires') aio-electron-density-peaks gui\electron-density-peaks.htm;gui\blocks\tool-off.htm;image=electron-density-peaks;onclick=;0; -->
 
-<!-- #include aio-refine-autochemu gui\autochem_user.htm;gui\blocks\tool-off.htm;image=autochem;0; -->
+<!-- #include aio-images gui\images.htm;gui\blocks\tool-off.htm;image=images;onclick=;1; -->
 
 <!-- #includeif IsFileType('ires') aio-disorder-disorder gui\disorder.htm;gui\blocks\tool-off.htm;image=disorder;onclick=;0; -->
-<!-- #includeif IsFileType('ires') aio-disorder-constraints gui\SHELX-compatible-constraints.htm;gui\blocks\tool-off.htm;image=SHELX-constraints;onclick='spy.restraint_builder(spy.GetParam(gui.shelx_constraints))';0; -->
-<!-- #includeif IsFileType('ires') aio-disorder-restraints gui\SHELX-compatible-restraints.htm;gui\blocks\tool-off.htm;image=SHELX-restraints;onclick='spy.restraint_builder(spy.GetParam(gui.shelx_restraints))';0; -->
+<!-- #includeif IsFileType('ires') aio-disorder-constraints gui\SHELX-compatible-constraints.htm;gui\blocks\tool-off.htm;image=SHELX-compatible-constraints;onclick='spy.restraint_builder(spy.GetParam(gui.shelx_constraints))';0; -->
+<!-- #includeif IsFileType('ires') aio-disorder-restraints gui\SHELX-compatible-restraints.htm;gui\blocks\tool-off.htm;image=SHELX-compatible-restraints;onclick='spy.restraint_builder(spy.GetParam(gui.shelx_restraints))';0; -->
 
-<!-- #include aio-analyze-calculate-voids gui\calculate-voids-analyze.htm;gui\blocks\tool-off.htm;image=calculate-voids;onclick=;0; -->
-<!-- #includeif file.Exists('HKLSrc()') aio-analyze-electron-density gui\electron-density.htm;gui\blocks\tool-off.htm;image=electron-density;onclick=;0; -->
 <!-- #includeif or(IsFileType('ires'),IsFileType('cif')) aio-analyze-geometry gui\geometry.htm;gui\blocks\tool-off.htm;image=geometry;onclick=;0; -->
-
-<!-- #includeif or(IsFileType('ires'),IsFileType('cif')) aio-analyze-overlay gui\overlay.htm;gui\blocks\tool-off.htm;image=overlay;onclick=;onclick=;0; -->
-<!-- #includeif IsFileType('ires') aio-analyze-tools gui\tools.htm;gui\blocks\tool-off.htm;image=tools;onclick=;0; -->
+<!-- #includeif or(IsFileType('ires'),IsFileType('cif')) aio-analyze-overlay gui\overlay.htm;gui\blocks\tool-off.htm;image=overlay;onclick=;0; -->
 
 <!-- #includeif or(IsFileType('ires'),IsFileType('cif')) aio-publish-naming gui\naming.htm;gui\blocks\tool-off.htm;image=naming;onclick=;0; -->
 <!-- #includeif IsFileType('ires') aio-publish-hydrogen-atoms gui\hydrogen-atoms.htm;gui\blocks\tool-off.htm;image=hydrogen-atoms;onclick=;0; -->
 <!-- #includeif or(IsFileType('ires'),IsFileType('cif')) aio-publish-sorting gui\sorting.htm;gui\blocks\tool-off.htm;image=sorting;onclick=;0; -->
 
-
+<!-- #include aio-masks gui\maps.htm;gui\blocks\tool-off.htm;image=maps;onclick=;0; -->
 
 <!-- #includeif or(IsFileType('ires'),IsFileType('cif')) aio-select gui\select.htm;gui\blocks\tool-off.htm;image=select;onclick=;0; -->
 <!-- #includeif file.Exists('FilePath()\FileName().cif') aio-cif gui\cif.htm;gui\blocks\tool-off.htm;image=cif;onclick=;0; -->
 <!-- #includeif IsFileType('ires') aio-twinning gui\twinning.htm;gui\blocks\tool-off.htm;image=twinning;onclick=;0; -->
-<!-- #includeif IsFileType('ires') aio-cctbx gui\cctbx.htm;gui\blocks\tool-off.htm;image=cctbx;onclick=;onclick=;0; -->
-<!-- #includeif isplugininstalled(plugin-Batch) aio-batch gui\batch.htm;gui\blocks\tool-off.htm;image=batch;onclick=;onclick=;0; -->
+<!-- #includeif IsFileType('ires') aio-cctbx gui\cctbx.htm;gui\blocks\tool-off.htm;image=cctbx;onclick=;0; -->
+<!-- #includeif isplugininstalled(plugin-Batch) aio-batch gui\batch.htm;gui\blocks\tool-off.htm;image=batch;onclick=;0; -->
 
 <!-- #includeif or(IsFileType('ires'),IsFileType('cif')) aio-quick-drawing-styles gui\quick-drawing-styles.htm;gui\blocks\tool-off.htm;image=quick-drawing-styles;onclick=;0; -->
 <!-- #includeif or(IsFileType('ires'),IsFileType('cif')) aio-symmetry-generation-analyze gui\symmetry-generation.htm;gui\blocks\tool-off.htm;image=symmetry-generation;onclick=;0; -->

@@ -9,12 +9,13 @@
  <Light7 Ambient="0.000,0.000,0.000,1.000" Diffuse="0.000,0.000,0.000,1.000" Specular="252645135" Position="0.000,0.000,1.000,1.000" Attenuation="1.000,0.000,0.000,1.000" SpotDirection="0.000,0.000,0.000,1.000" SpotCutoff="180" Enabled="false" >
 >
 <Fonts 
- <Console id="#olex2.fnt:frb_12" >
- <Help id="0;-13;0;0;0;400;0;0;0;1;0;0;2;48;Courier New" >
- <Notes id="0;-16;0;0;0;400;0;0;0;1;0;0;2;48;Courier New" >
- <Labels id="0;-24;0;0;0;700;0;0;0;0;3;2;1;49;Courier New" >
- <Picture_labels id="#olex2.fnt:frb_18" >
- <Tooltip id="0;-13;0;0;0;400;0;0;0;1;0;0;2;48;Courier New" >
+ <Default id="#olex2.fnt:frb_12" >
+ <Help id="#olex2.fnt:frb_12" >
+ <Notes id="#olex2.fnt:frb_12" >
+ <Labels id="#olex2.fnt:frb_12" >
+ <AtomLabels id="#olex2.fnt:frb_20" >
+ <BondLabels id="#olex2.fnt:frb_20" >
+ <Tooltip id="#olex2.fnt:frb_12" >
 >
 <Materials 
  <Help_txt "1;0.000,1.000,1.000,0.000" >
