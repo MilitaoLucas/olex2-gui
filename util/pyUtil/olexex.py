@@ -497,7 +497,7 @@ def MakeElementButtonsFromFormula():
       })
 
   html_elements.append('''
-<a href="if strcmp(sel(),'') then 'mode name -t=ChooseElement()' else 'name sel ChooseElement()"
+<a href="if strcmp(sel(),'') then 'mode name -t=ChooseElement()' else 'name sel ChooseElement()'"
    target="Chose Element from the periodic table">
 <zimg border="0" src="btn-element....png"></a>
 ''')

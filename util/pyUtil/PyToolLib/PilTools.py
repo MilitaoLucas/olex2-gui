@@ -207,7 +207,7 @@ class GuiSkinChanger(ImageTools):
     olex.m("SetMaterial InfoBox.Text 2309;1,1,1,1;1,1,1,1")
     olex.m("SetMaterial InfoBox.Plane 3077;0,0,0,1;1,1,1,0.5")
     olex.m("SetFont Notes #olex2.fnt:frb_10")
-    olex.m("SetFont Console #olex2.fnt:frb_12")
+    olex.m("SetFont Default #olex2.fnt:frb_12")
     olex.m("htmguifontsize %s" %self.params.html.font_size)
     olex.m("showwindow help false")
     #olex.m("grad true")

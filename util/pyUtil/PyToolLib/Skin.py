@@ -235,7 +235,7 @@ def SetMaterials():
   olx.SetMaterial("XGrid.+Surface %s" %OV.GetParam('gui.xgrid.positive_surface_material'))
   olx.SetMaterial("XGrid.-Surface %s" %OV.GetParam('gui.xgrid.negative_surface_material'))
   olex.m("gl.lm.ClearColor(%s)" %OV.GetParam('gui.skin.clearcolor'))
-  olex.m("SetFont Console %s" %OV.GetParam('gui.console_font'))
+  olex.m("SetFont Default %s" %OV.GetParam('gui.console_font'))
   olex.m("SetFont Labels %s" %OV.GetParam('gui.labels_font'))
   olx.HtmlPanelWidth(OV.GetParam('gui.htmlpanelwidth'))
   

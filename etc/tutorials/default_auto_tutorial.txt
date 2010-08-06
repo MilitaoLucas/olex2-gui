@@ -15,3 +15,4 @@ c:itemstate tab* 2
 p:And then solved by clicking on the 'solve' button
 h:cbtn-solve
 c:solve
+p:Of course, we can change the settings of the solution program.
