@@ -376,7 +376,7 @@ class CifTools(ArgumentParser):
             merge.append(sad)
           except KeyError:
             print "There was an error reading the SADABS output file\n'%s'.\nThe file may be incomplete." %p
-          print "sad", sad
+          #print "sad", sad
       elif abs_reader.abs_type(p) == "TWINABS":
         if p != "File Not Found" and self.metacifFiles.curr_abs != self.metacifFiles.prev_abs:
           try:
