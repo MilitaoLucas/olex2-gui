@@ -24,6 +24,8 @@ class MetacifFiles:
     self.curr_p4p = None
     self.curr_cif_od = None
     self.curr_cif_def = None
+    self.curr_twin = None
+    self.curr_abs = None
 
     self.prev_smart = None
     self.prev_saint = None
@@ -35,6 +37,8 @@ class MetacifFiles:
     self.prev_p4p = None
     self.prev_cif_od = None
     self.prev_cif_def = None
+    self.prev_twin = None
+    self.prev_abs = None
 
     self.list_smart = None
     self.list_saint = None
@@ -45,6 +49,8 @@ class MetacifFiles:
     self.list_frames = None
     self.list_p4p = None
     self.list_cif_od = None
+    self.list_twin = None
+    self.list_abs = None
 
 
 class MetaCif(ArgumentParser):
@@ -274,7 +280,7 @@ class CifTools(ArgumentParser):
   def __init__(self):
     super(CifTools, self).__init__()
     self.ignore = ["?", "'?'", ".", "'.'"]
-    self.versions = {"default":[],"smart":{},"saint":{},"shelxtl":{},"xprep":{},"sad":{}}
+    self.versions = {"default":[],"smart":{},"saint":{},"shelxtl":{},"xprep":{},"sad":{}, "twin":{}, "abs":{}}
     self.metacif = {}
     self.metacifFiles = MetacifFiles()
     self.run()
@@ -303,7 +309,7 @@ class CifTools(ArgumentParser):
       OV.SetParam('snum.metacif.computing_structure_solution', solution_reference)
       OV.SetParam('snum.metacif.atom_sites_solution_primary', atom_sites_solution_primary)
 
-    tools = ['smart', 'saint', 'integ', 'cad4', 'sad', 'pcf','frames', 'p4p', 'cif_od', 'cif_def']
+    tools = ['smart', 'saint', 'integ', 'cad4', 'sad', 'pcf','frames', 'p4p', 'cif_od', 'cif_def', 'twin', 'abs']
 
     if "frames" in tools:
       p = self.sort_out_path(path, "frames")
@@ -353,19 +359,36 @@ class CifTools(ArgumentParser):
         saint.setdefault("_computing_data_reduction", computing_data_reduction)
         merge.append(saint)
 
-    if "sad" in tools:
-      p = self.sort_out_path(path, "sad")
-      if p != "File Not Found" and self.metacifFiles.curr_sad != self.metacifFiles.prev_sad:
-        try:
-          import sadabs
-          sad = sadabs.reader(p).cifItems()
-          version = self.prepare_computing(sad, versions, "sad")
-          version = string.strip((string.split(version, "="))[0])
-          t = self.prepare_exptl_absorpt_process_details(sad, version)
-          sad.setdefault("_exptl_absorpt_process_details", t)
-          merge.append(sad)
-        except KeyError:
-          print "There was an error reading the SADABS output file\n'%s'.\nThe file may be incomplete." %p
+    if "abs" in tools:
+      import abs_reader
+      p = self.sort_out_path(path, "abs")
+      if p != "File Not Found" and self.metacifFiles.curr_abs != self.metacifFiles.prev_abs:
+        print "ABS File type = ", abs_reader.abs_type(p)
+      if abs_reader.abs_type(p) == "SADABS":
+        if p != "File Not Found" and self.metacifFiles.curr_abs != self.metacifFiles.prev_abs:
+          try:
+            import abs_reader
+            sad = abs_reader.reader(p).cifItems()
+            version = self.prepare_computing(sad, versions, "sad")
+            version = string.strip((string.split(version, "="))[0])
+            t = self.prepare_exptl_absorpt_process_details(sad, version)
+            sad.setdefault("_exptl_absorpt_process_details", t)
+            merge.append(sad)
+          except KeyError:
+            print "There was an error reading the SADABS output file\n'%s'.\nThe file may be incomplete." %p
+          print "sad", sad
+      elif abs_reader.abs_type(p) == "TWINABS":
+        if p != "File Not Found" and self.metacifFiles.curr_abs != self.metacifFiles.prev_abs:
+          try:
+            import abs_reader
+            twin = abs_reader.reader(p).twin_cifItems()
+            version = self.prepare_computing(twin, versions, "twin")
+            version = string.strip((string.split(version, "="))[0])
+            t = self.prepare_exptl_absorpt_process_details(twin, version)
+            twin.setdefault("_exptl_absorpt_process_details", t)
+            merge.append(twin)
+          except KeyError:
+            print "There was an error reading the TWINABS output file\n'%s'.\nThe file may be incomplete." %p 
 
     if 'pcf' in tools:
       p = self.sort_out_path(path, "pcf")
@@ -442,19 +465,38 @@ class CifTools(ArgumentParser):
       OV.SetParam("snum.metacif.exptl_crystal_colour_primary", colour)
 
   def prepare_exptl_absorpt_process_details(self, abs, version):
-    parameter_ratio = abs["parameter_ratio"]
-    R_int_after = abs["Rint_after"]
-    R_int_before = abs["Rint_before"]
-    ratiominmax = abs["ratiominmax"]
-    lambda_correction = abs["lambda_correction"]
-
-    t = ["%s was used for absorption correction." %(version),
-         "R(int) was %s before and %s after correction." %(R_int_before, R_int_after),
-         "The Ratio of minimum to maximum transmission is %s." %(ratiominmax),
-         "The \l/2 correction factor is %s" %(lambda_correction)]
-
-    txt = " %s\n %s\n %s\n %s" %(t[0], t[1], t[2], t[3])
-    exptl_absorpt_process_details = "\n;\n%s\n;\n" %txt
+    if abs["abs_type"] == "TWINABS":
+      t = ["%s was used for absorption correction.\n" %(version)]
+      txt = "\n;\n"
+      for component in range(1, int(abs["number_twin_components"])+1):
+        #print "component", component
+        parameter_ratio = abs["%s"%component]["parameter_ratio"]
+        R_int_after = abs["%s"%component]["Rint_after"]
+        R_int_before = abs["%s"%component]["Rint_before"]
+        ratiominmax = abs["%s"%component]["ratiominmax"]
+        lambda_correction = abs["lambda_correction"]     
+        t.append("For component %s:\n" %(component))
+        t.append("R(int) was %s before and %s after correction.\n" %(R_int_before, R_int_after))
+        t.append("The Ratio of minimum to maximum transmission is %.2f.\n" %(float(ratiominmax)))      
+      t.append("The \l/2 correction factor is %s\n;\n" %(lambda_correction))
+      for me in t:
+        txt = txt + " %s"%me
+      exptl_absorpt_process_details = "%s"%txt
+      
+    elif abs["abs_type"] == "SADABS":
+      parameter_ratio = abs["parameter_ratio"]
+      R_int_after = abs["Rint_after"]
+      R_int_before = abs["Rint_before"]
+      ratiominmax = abs["ratiominmax"]
+      lambda_correction = abs["lambda_correction"]
+      
+      t = ["%s was used for absorption correction." %(version),
+           "R(int) was %s before and %s after correction." %(R_int_before, R_int_after),
+           "The Ratio of minimum to maximum transmission is %s." %(ratiominmax),
+           "The \l/2 correction factor is %s" %(lambda_correction)]
+  
+      txt = " %s\n %s\n %s\n %s" %(t[0], t[1], t[2], t[3])
+      exptl_absorpt_process_details = "\n;\n%s\n;\n" %txt
     return exptl_absorpt_process_details
 
   def prepare_computing(self, dict, versions, name):
@@ -497,7 +539,13 @@ class CifTools(ArgumentParser):
     elif tool == "saint":
       name = "saint"
       extension = ".ini"
+    elif tool == "abs":
+      name = "*"
+      extension = ".abs"
     elif tool == "sad":
+      name = "*"
+      extension = ".abs"
+    elif tool == "twin":
       name = "*"
       extension = ".abs"
     elif tool == "integ":
