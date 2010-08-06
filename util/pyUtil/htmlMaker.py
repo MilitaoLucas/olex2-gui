@@ -10,8 +10,8 @@ import variableFunctions
 
 def sourceFilesHtmlMaker():
   list = [
-    {'varName':'snum.metacif.sad_file',
-     'itemName':'SADABS %File%',
+    {'varName':'snum.metacif.abs_file',
+     'itemName':'abs %File%',
      'chooseFile':{'filter':'.abs files|*.abs'}
      },
     {'varName':'snum.metacif.pcf_file',
