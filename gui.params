@@ -447,4 +447,37 @@ gui {
         .type = colour
     }
   }
+  g3{
+    top{
+      start_new_structure{
+        label = start_new_structure
+          .type = str
+      }
+      work_on_existing_structure{
+        label = work_on_existing_structure
+          .type = str
+      }
+      analyse_finished_structure{
+        label = analyse_finished_structure
+          .type = str
+      }
+    }
+  
+    start_new_structure{
+      analyse_diffraction_data{
+        label = analyse_diffraction_data
+          .type = str
+      }
+      determine_space_group{
+        label = determine_space_group
+          .type = str
+      }
+      solve_structure{
+        label = solve_structure
+          .type = str
+      }
+    }
+  }  
+  
 }
+
