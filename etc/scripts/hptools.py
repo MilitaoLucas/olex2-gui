@@ -73,7 +73,7 @@ def bulk_copy_files (mask="hklres", path_from=r"Z:", path_to=r"C:\DS\Data",overw
 OV.registerFunction(bulk_copy_files)
 
 
-def autodemo(name='default_auto_tutorial', reading_speed=0.06):
+def autodemo(name='default_auto_tutorial', reading_speed=0.08):
   
   rFile = open("%s/etc/tutorials/%s.txt" %(OV.BaseDir(),name),'r')
   items = rFile.readlines()

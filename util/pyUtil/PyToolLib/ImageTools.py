@@ -965,7 +965,7 @@ class ImageTools(FontInstances):
     draw.line((begin ,end), fill=border_colour)
 
 
-  def make_pie_graph(self, number=2, segments=[('R',0.5,'#ee0000'),('G',0.5,'#00ee00')], rotation=-90, name='fred'):
+  def make_pie_graph(self, number=3, segments=[('R',0.5,'#ee0000'),('G',0.5,'#00ee00')], rotation=-90, name='fred'):
     rotation = int(rotation)
     number = int(number)
     red = self.gui_red
@@ -992,7 +992,7 @@ class ImageTools(FontInstances):
     
     colour = (0,0,0,0)
     colour = OV.GetParam('gui.html.bg_colour').rgb
-    size = (600,300)
+    size = (300,300)
     im_size = (size[0] + 1,size[1] + 1)
     IM = Image.new('RGBA', im_size, colour)
     draw = ImageDraw.Draw(IM)
