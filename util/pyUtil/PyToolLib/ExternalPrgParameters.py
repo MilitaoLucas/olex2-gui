@@ -101,9 +101,6 @@ class Method(object):
       if ctrl_name not in definedControls:
         OV.SetVar(varName, default) # Define checkbox
         definedControls.append(ctrl_name)
-        self.phil_index.get_scope_by_name('instructions.init.values')
-        self.phil_index.get_scope_by_name('instructions.esel')
-        self.phil_index.get_scope_by_name('instructions.esel.values')
         for option in self.options(name):
           value = option.extract()
           if value is None:
@@ -303,7 +300,8 @@ class Method_shelx(Method):
   def run(self, RunPrgObject):
     """Runs any SHELX refinement/solution program
     """
-    print 'STARTING SHELX refinement/solution with %s' %self.name
+    print 'STARTING SHELX %s with %s' %(
+      RunPrgObject.program.program_type, self.name)
     prgName = olx.file_GetName(RunPrgObject.shelx)
     #olex.m("User '%s'" %RunPrgObject.tempPath)
     olx.User("'%s'" %RunPrgObject.tempPath)
@@ -365,7 +363,10 @@ class Method_shelx(Method):
     #sys.stdout.graph = RunPrgObject.Graph()
     if not RunPrgObject.params.snum.shelx_output:
       command = "-q " + command
-    olx.Exec(command)
+    success = olx.Exec(command)
+    if not success:
+      raise RuntimeError(
+        'you may be using an outdated version of %s' %(prgName))
     olx.WaitFor('process') # uncomment me!
     #olex.m("User '%s'" %RunPrgObject.filePath)
     olx.User("'%s'" %RunPrgObject.filePath)
