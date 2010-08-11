@@ -727,6 +727,7 @@ class OlexCctbxGraphs(OlexCctbxAdapter):
         weighting = xray.weighting_schemes.shelx_weighting(**params)
         self.xy_plot = cctbx_controller.normal_probability_plot(
           self.xray_structure(), self.reflections, weighting,
+          twinning=twinning,
           #distribution=cctbx_controller.distributions.students_t_distribution(5),
           ).xy_plot_info()
     except Exception, err:
