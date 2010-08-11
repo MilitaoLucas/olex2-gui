@@ -686,6 +686,7 @@ class OlexCctbxGraphs(OlexCctbxAdapter):
     if self.reflections is None:
       raise RuntimeError, "There was an error reading the reflection file."
     self.graph = graph
+    twinning=self.olx_atoms.model.get('twin')
 
     bitmap = 'working'
     OV.CreateBitmap(bitmap)
@@ -701,11 +702,19 @@ class OlexCctbxGraphs(OlexCctbxAdapter):
         self.xy_plot = cctbx_controller.cumulative_intensity_distribution(self.reflections, **kwds)
 
       elif graph == "f_obs_f_calc":
-        twinning = self.olx_atoms.model.get('twin')
-        self.xy_plot = cctbx_controller.f_obs_vs_f_calc(self.xray_structure(), self.reflections, twinning=twinning, **kwds)
+        self.xy_plot = cctbx_controller.f_obs_vs_f_calc(
+          self.xray_structure(),
+          self.reflections,
+          twinning=twinning,
+          **kwds)
 
       elif graph == "f_obs_over_f_calc":
-        self.xy_plot = cctbx_controller.f_obs_over_f_calc(self.xray_structure(), self.reflections, self.wavelength, **kwds)
+        self.xy_plot = cctbx_controller.f_obs_over_f_calc(
+          self.xray_structure(),
+          self.reflections,
+          twinning=twinning,
+          wavelength=self.wavelength,
+          **kwds)
 
       elif graph == "sys_absent":
         self.xy_plot = cctbx_controller.sys_absent_intensity_distribution(self.reflections)
