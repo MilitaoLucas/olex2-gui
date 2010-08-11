@@ -262,7 +262,6 @@ def f_obs_over_f_calc(model,
       f_calc_filtered.as_intensity_array(),
       twin_fraction)
     f_calc_filtered = twinned_f_sq.f_sq_as_f().phase_transfer(f_calc_filtered)
-    #fc = flex.sqrt(twinned_f_sq.data())
 
   k = f_obs_filtered.scale_factor(f_calc_filtered)
   if binning == True:
@@ -304,18 +303,37 @@ def f_obs_over_f_calc(model,
   return plot
 
 class normal_probability_plot(object):
-  def __init__(self, model, reflections, weighting, distribution=None):
+  def __init__(self,
+               model,
+               reflections,
+               weighting,
+               twinning=None,
+               distribution=None):
     from scitbx.math import distributions
     assert model.scatterers().size() > 0, "model.scatterers().size() > 0"
     f_sq_obs = reflections.f_sq_obs_filtered
     f_obs = f_sq_obs.f_sq_as_f()
-    sf = xray.structure_factors.from_scatterers(miller_set=f_obs,cos_sin_table=True)
-    f_calc = sf(model,f_obs).f_calc()
-    f_sq_calc = f_calc.as_intensity_array()
+    if twinning is not None:
+      twin_fraction = twinning['basf'][0]
+      twin_law = [twinning['matrix'][i][j]
+                  for i in range(3) for j in range(3)]
+      twinning = hemihedral_twinning(twin_law, f_obs)
+      twin_set = twinning.twin_complete_set
+      f_calc = twin_set.structure_factors_from_scatterers(
+        model, algorithm="direct").f_calc()
+      f_sq_calc = twinning.twin_with_twin_fraction(
+        f_calc.as_intensity_array(),
+        twin_fraction).common_set(f_obs)
+      f_calc = f_sq_calc.as_amplitude_array().phase_transfer(
+        f_calc.common_set(f_obs))
+    else:
+      f_calc = f_obs.structure_factors_from_scatterers(
+        model, algorithm="direct").f_calc()
+      f_sq_calc = f_calc.as_intensity_array()
     if distribution is None:
       distribution = distributions.normal_distribution()
     self.info = None
-    scale_factor = math.pow(f_obs.scale_factor(f_calc), 2)
+    scale_factor = f_sq_obs.scale_factor(f_calc)
     weighting.observed = f_sq_obs
     weighting.compute(f_calc, scale_factor)
     #
