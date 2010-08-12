@@ -48,7 +48,7 @@ class access_log_stats:
 
     for log in logFiles:
       logName = os.path.basename(log)
-      if search_cache.has_key(logName):
+      if search_cache.has_key(logName) and 0:
         users = search_cache[logName]
       else:
         a = reader(open(log, 'r'), filterString=self.filterString, write_directory=self.write_directory)
@@ -63,7 +63,7 @@ class access_log_stats:
     search_caches[self.filterString] = search_cache
     self.save_search_cache(search_caches)
 
-    #print self.html_hit_stats()
+    print self.html_hit_stats()
 
     #print self.user_stats()
 
@@ -97,13 +97,16 @@ class access_log_stats:
       return data_dict
     elif 1:
       url = "http://freegeoip.appspot.com/csv/%s" % (addr)
+#      url = "http://www.ip2location.com/%s" % (addr)
       proxies = {'http': 'http://wwwcache.dur.ac.uk:8080'}
       data = urlopen(url, proxies=proxies).read()
+      if "Over Quota" in data:
+        return {}
       data = data.split(',')
       data_dict = {}
       fields = ['status','ip','countrycode','countryname','regioncode',
                 'regionname','city','zipcode','latitude','longitude']
-      for i in range(max(len(data),len(fields))):
+      for i in range(min(len(data),len(fields))):
         data_dict.setdefault(fields[i],data[i])
       self.geocodeIP_cache.setdefault(addr, data_dict)
       self.save_geocodeIP_cache()
@@ -138,6 +141,15 @@ class access_log_stats:
     markers = []
     for user, access_log in users.items():
       geocode = self.geocodeIP(user)
+      if not geocode:
+        continue
+      if "Over Quota" in repr(geocode):
+        try:
+          del self.geocodeIP_cache[user]
+          self.save_geocodeIP_cache()
+        except:
+          pass
+        continue
       latitude = geocode['latitude']
       longitude = geocode['longitude']
       num_hits, first_access, last_access = self.get_num_hits(user)
@@ -146,10 +158,10 @@ class access_log_stats:
         last_access = strftime(self.time_string_format, last_access)
         if num_hits == 1:
           icon = 'greyIcon'
-          zindex = '1'
+          zindex = '3'
         elif num_hits >= 10:
           icon = 'redIcon'
-          zindex = '3'
+          zindex = '1'
         else:
           icon = 'orangeIcon'
           zindex = '2'
@@ -172,6 +184,12 @@ class access_log_stats:
     <head>
       <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
       <title>Olex2 User Map</title>
+      
+      <STYLE type="text/css">
+      H1 {text-align: center; color: #ff8f00; font-family: Courier}
+      </STYLE>
+      
+      
       <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAWYsMNksHxyZ1nTR9cMAj-hQQSsONx3yoT9qajHkD6DdltYiy9BTKqloAGrfU9_zugGdfQzA1N91GhA"
         type="text/javascript"></script>
       <script type="text/javascript">
@@ -191,7 +209,7 @@ class access_log_stats:
         var orangeIcon = new GIcon(G_DEFAULT_ICON);
         orangeIcon.image = "http://gmaps-samples.googlecode.com/svn/trunk/markers/orange/blank.png";
         var greyIcon = new GIcon(G_DEFAULT_ICON);
-        greyIcon.image = "grey.png";
+        greyIcon.image = "http://gmaps-samples.googlecode.com/svn/trunk/markers/blue/blank.png";
         var greenIcon = new GIcon(G_DEFAULT_ICON);
         greenIcon.image = "green.png";
 
@@ -215,14 +233,18 @@ class access_log_stats:
       //]]>
       </script>
     </head>
-    <body onload="load()" onunload="GUnload()">
-      <div id="map_canvas" style="width: 1020px; height: 650px"></div>
+    <center>
+    <body onload="load()" onunload="GUnload()" bgcolor='#000000'>
+    
+      <h1>Olex2 Access Statistics</h1>
+      <div class='body' id="map_canvas" style="width: 850px; height: 550px"></div>
       filterString=%s
       filterNumber=%s
       <div id="stats">
         %s
       </div>
     </body>
+    </center>
   </html>""" %(markers_html,self.filterString,self.filterNumber,self.html_hit_stats())
     return html
 
@@ -237,25 +259,41 @@ class access_log_stats:
       last_access = max(last_access, access_date)
     return num_hits, first_access, last_access
 
-  def html_hit_stats(self, number_results=10):
+  def html_hit_stats(self, number_results=200):
     hit_stats_dict = {}
 
     stats_list = []
+    total_num_hits = 0
+    total_num_users = 0
+    exclude_list = ['129.234.13.99', '81.157.18.58', '129.234.13.105', '86.136.54.118']
     for user in self.olex_users.keys():
+      if user in exclude_list:
+        continue
       num_hits, first_access, last_access = self.get_num_hits(user)
+      if num_hits > 0:
+        total_num_users += 1
+      else:
+        continue
+      
       stats_list.append((num_hits, user, first_access, last_access))
-
+      total_num_hits += num_hits
     stats_list.sort()
     stats_list.reverse()
 
     table_rows = []
     for n_hits, ip, first, last in stats_list[:number_results]:
       geo = self.geocodeIP(ip)
+      if not geo:
+        try:
+          del self.geocodeIP_cache[ip]
+        except:
+          pass
+        continue
       country = geo.get('country', geo.get('countryname'))
       table_rows.append("""
       <tr>
         <td>%s</td>
-        <td>%s</td>
+        <td align='center'><font color='#ababab'><b>%s</b></font></td>
         <td>%s, %s</td>
         <td>%s</td>
         <td>%s</td>
@@ -264,10 +302,14 @@ class access_log_stats:
                 n_hits,
                 geo['city'],
                 country,
-                strftime(self.time_string_format, first),
-                strftime(self.time_string_format, last),
+                strftime('%Y-%m-%d', first) + "&nbsp;-&nbsp;",
+                strftime('%Y-%m-%d', last),
               ))
     table_html = """
+    <font face='Courier' color='#ff8f00' size='4'><b>
+    Total number of hits:%s, Total number of users: %s
+    </b></font><br><br>
+    <font face='Courier' color='#888888' size='2'>
     <table>
       <th>IP</th>
       <th>No. hits</th>
@@ -276,7 +318,8 @@ class access_log_stats:
       <th>Last access</th>
       %s
     </table>
-    """ %(''.join(table_rows))
+    </font>
+    """ %(total_num_hits, total_num_users, ''.join(table_rows))
     return table_html
 
   def user_stats(self):
@@ -316,10 +359,15 @@ class reader(object):
   def __init__(self, file_object, filterString='index.ind', write_directory=''):
     users = {}
     self.write_directory = write_directory
-
+    heads = ['.zip']
+    
     for line in file_object:
-      #if searchString(line, filterString):
-      if filterString in line:
+      for head in heads:
+        if head in filterString:
+          head_get = "HEAD"
+        else:
+          head_get = 'GET'
+      if filterString in line and head_get not in line:
         ip = self.get_IP_address(line)
         url = self.get_url(line)
         if url:
@@ -419,10 +467,10 @@ def parse_timeStr(timeStr):
 
 
 if __name__ == '__main__':
-  html = run(directory='C:/httpd',
+  html = run(directory='C:/tmp',
              filterNumber=1,
              #filterString="installer.exe"
              )
-  html_file = open('C:/httpd/access_log.html', 'w')
+  html_file = open('C:/tmp/access_log.html', 'w')
   html_file.write(html)
   html_file.close()

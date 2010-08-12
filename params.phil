@@ -89,6 +89,8 @@ snum {
         .type = str
       font_name = #olex2.fnt:frb_18
         .type = str
+      type = png jpg bmp
+        .type = choice
     }
     ps{
       outline_width = 1.0
@@ -661,7 +663,15 @@ user {
     .type = str
   auto_refine_after_anis = True
     .type = bool
+    
+  image{
+    bitmap{
+      type = png
+        .type = str
+    }
+  }
 }
+
 
 odac
   .expert_level = 2
