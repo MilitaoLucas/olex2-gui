@@ -43,6 +43,37 @@ def test_statistics(reflections):
   a = iotbx.command_line.reflection_statistics.array_cache(reflections.f_obs, 10, 3)
   a.show_completeness()
 
+
+class hemihedral_twinning(object):
+  def __init__(self, twin_law, miller_set):
+    self.twin_law=twin_law
+    twin_completion = xray.twin_completion(
+      miller_set.indices(),
+      miller_set.space_group(),
+      miller_set.anomalous_flag(),
+      self.twin_law)
+    self.twin_complete_set = miller.set(
+      crystal_symmetry=miller_set.crystal_symmetry(),
+      indices=twin_completion.twin_complete(),
+      anomalous_flag=miller_set.anomalous_flag()).map_to_asu()
+
+  def twin_with_twin_fraction(self, f_sq, twin_fraction):
+    detwinner = xray.hemihedral_detwinner(
+      hkl_obs=f_sq.indices(),
+      hkl_calc=self.twin_complete_set.indices(),
+      space_group=f_sq.space_group(),
+      anomalous_flag=f_sq.anomalous_flag(),
+      twin_law=self.twin_law)
+    sigmas = f_sq.sigmas()
+    if sigmas is None: sigmas = flex.double()
+    twinned_i, twinned_s = detwinner.twin_with_twin_fraction(
+      f_sq.data(),
+      sigmas,
+      twin_fraction=twin_fraction)
+    if sigmas is not None: sigmas = twinned_s
+    return f_sq.customized_copy(data=twinned_i, sigmas=sigmas)
+
+
 def wilson_statistics(model, reflections, n_bins=10):
   from cctbx import sgtbx
 
@@ -146,26 +177,6 @@ def sys_absent_intensity_distribution(reflections):
 def f_obs_vs_f_calc(model, reflections, twinning=None, batch_number=None):
   assert model.scatterers().size() > 0, "n_scatterers > 0"
 
-  if twinning is not None:
-    basf = twinning['basf'][0]
-    m = twinning['matrix']
-    matrix = []
-    for i in range(3):
-      for j in range(3):
-        matrix.append(m[i][j])
-    twin_completion = xray.twin_completion(
-      reflections.f_sq_obs_filtered.indices(),
-      model.space_group(),
-      False,
-      matrix)
-    twin_f_obs = miller.set(
-      crystal_symmetry=model.crystal_symmetry(),
-      indices=twin_completion.twin_complete())
-    sf = xray.structure_factors.from_scatterers(
-      miller_set=twin_f_obs,
-      cos_sin_table=True)
-    twin_f_calc_filtered = sf(model,twin_f_obs).f_calc()
-
   if [batch_number, reflections.batch_numbers].count(None) == 0:
     assert batch_number <= flex.max(reflections.batch_numbers.data()), "batch_number <= max(batch_numbers)"
     selection = (reflections.batch_numbers.data() == batch_number)
@@ -177,20 +188,32 @@ def f_obs_vs_f_calc(model, reflections, twinning=None, batch_number=None):
     f_obs_merged = reflections.f_sq_obs_merged.f_sq_as_f()
     f_obs_filtered = f_obs_merged.common_set(reflections.f_sq_obs_filtered)
 
-  sf = xray.structure_factors.from_scatterers(miller_set=f_obs_merged,cos_sin_table=True)
-  f_calc_merged = sf(model,f_obs_merged).f_calc()
+  if twinning is not None:
+    twin_fraction = twinning['basf'][0]
+    twin_law = [twinning['matrix'][i][j]
+                for i in range(3) for j in range(3)]
+    twinning = hemihedral_twinning(twin_law, f_obs_merged)
+    twin_set = twinning.twin_complete_set
+    f_calc_merged = twin_set.structure_factors_from_scatterers(
+      model, algorithm="direct").f_calc()
+  else:
+    f_calc_merged = f_obs_merged.structure_factors_from_scatterers(
+      model, algorithm="direct").f_calc()
 
   f_calc_filtered = f_calc_merged.common_set(f_obs_filtered)
   f_obs_omitted = f_obs_merged.lone_set(f_obs_filtered)
   f_calc_omitted = f_calc_merged.lone_set(f_calc_filtered)
 
-  ls_function = xray.unified_least_squares_residual(f_obs_filtered)
-  ls = ls_function(f_calc_filtered, compute_derivatives=False)
-  k = ls.scale_factor()
+  if twinning is not None:
+    twinned_f_sq = twinning.twin_with_twin_fraction(
+      f_calc_filtered.as_intensity_array(),
+      twin_fraction)
+    f_calc_filtered = twinned_f_sq.f_sq_as_f().phase_transfer(f_calc_filtered)
+
+  k = f_obs_filtered.scale_factor(f_calc_filtered)
+  fo = flex.abs(f_obs_filtered.data())
   fc = flex.abs(f_calc_filtered.data())
   fc *= k
-  fo = flex.abs(f_obs_filtered.data())
-
   fit = flex.linear_regression(fc, fo)
   fit.show_summary()
 
@@ -207,20 +230,40 @@ def f_obs_vs_f_calc(model, reflections, twinning=None, batch_number=None):
   plot.yLegend = "F obs"
   return plot
 
-def f_obs_over_f_calc(model, reflections, wavelength=None, binning=False, n_bins=None, resolution_as="two_theta"):
+def f_obs_over_f_calc(model,
+                      reflections,
+                      twinning=None,
+                      wavelength=None,
+                      binning=False,
+                      n_bins=None,
+                      resolution_as="two_theta"):
   assert model.scatterers().size() > 0, "model.scatterers().size() > 0"
   f_obs_merged = reflections.f_sq_obs_merged.f_sq_as_f()
-  sf = xray.structure_factors.from_scatterers(miller_set=f_obs_merged,cos_sin_table=True)
-  f_calc_merged = sf(model,f_obs_merged).f_calc()
+
+  if twinning is not None:
+    twin_fraction = twinning['basf'][0]
+    twin_law = [twinning['matrix'][i][j]
+                for i in range(3) for j in range(3)]
+    twinning = hemihedral_twinning(twin_law, f_obs_merged)
+    twin_set = twinning.twin_complete_set
+    f_calc_merged = twin_set.structure_factors_from_scatterers(
+      model, algorithm="direct").f_calc()
+  else:
+    f_calc_merged = f_obs_merged.structure_factors_from_scatterers(
+      model, algorithm="direct").f_calc()
 
   f_obs_filtered = f_obs_merged.common_set(reflections.f_sq_obs_filtered)
   f_calc_filtered = f_calc_merged.common_set(f_obs_filtered)
   f_obs_omitted = f_obs_merged.lone_set(f_obs_filtered)
   f_calc_omitted = f_calc_merged.lone_set(f_calc_filtered)
 
-  ls_function = xray.unified_least_squares_residual(f_obs_filtered)
-  ls = ls_function(f_calc_filtered, compute_derivatives=False)
-  k = ls.scale_factor()
+  if twinning is not None:
+    twinned_f_sq = twinning.twin_with_twin_fraction(
+      f_calc_filtered.as_intensity_array(),
+      twin_fraction)
+    f_calc_filtered = twinned_f_sq.f_sq_as_f().phase_transfer(f_calc_filtered)
+
+  k = f_obs_filtered.scale_factor(f_calc_filtered)
   if binning == True:
     assert n_bins is not None
     binner = f_obs_filtered.setup_binner(n_bins=n_bins)
@@ -260,18 +303,37 @@ def f_obs_over_f_calc(model, reflections, wavelength=None, binning=False, n_bins
   return plot
 
 class normal_probability_plot(object):
-  def __init__(self, model, reflections, weighting, distribution=None):
+  def __init__(self,
+               model,
+               reflections,
+               weighting,
+               twinning=None,
+               distribution=None):
     from scitbx.math import distributions
     assert model.scatterers().size() > 0, "model.scatterers().size() > 0"
     f_sq_obs = reflections.f_sq_obs_filtered
     f_obs = f_sq_obs.f_sq_as_f()
-    sf = xray.structure_factors.from_scatterers(miller_set=f_obs,cos_sin_table=True)
-    f_calc = sf(model,f_obs).f_calc()
-    f_sq_calc = f_calc.as_intensity_array()
+    if twinning is not None:
+      twin_fraction = twinning['basf'][0]
+      twin_law = [twinning['matrix'][i][j]
+                  for i in range(3) for j in range(3)]
+      twinning = hemihedral_twinning(twin_law, f_obs)
+      twin_set = twinning.twin_complete_set
+      f_calc = twin_set.structure_factors_from_scatterers(
+        model, algorithm="direct").f_calc()
+      f_sq_calc = twinning.twin_with_twin_fraction(
+        f_calc.as_intensity_array(),
+        twin_fraction).common_set(f_obs)
+      f_calc = f_sq_calc.as_amplitude_array().phase_transfer(
+        f_calc.common_set(f_obs))
+    else:
+      f_calc = f_obs.structure_factors_from_scatterers(
+        model, algorithm="direct").f_calc()
+      f_sq_calc = f_calc.as_intensity_array()
     if distribution is None:
       distribution = distributions.normal_distribution()
     self.info = None
-    scale_factor = math.pow(f_obs.scale_factor(f_calc), 2)
+    scale_factor = f_sq_obs.scale_factor(f_calc)
     weighting.observed = f_sq_obs
     weighting.compute(f_calc, scale_factor)
     #

@@ -1216,9 +1216,11 @@ def check_for_crypto():
 
 def make_url_call(url, values):
   #url = "http://www.olex2.org/odac/update"
+  proxy = get_proxy_from_usettings()
+  proxies = {'http': proxy}
   data = urllib.urlencode(values)
-  print data
   try:
+    proxy_support = urllib2.ProxyHandler(proxies)
     req = urllib2.Request(url)
     response = urllib2.urlopen(req,data)
     f = response.read()
@@ -1231,6 +1233,20 @@ def make_url_call(url, values):
     print "++++++++++++++++++++++++++++++++++++++++++++++\n"
     return False
   return f
+
+def get_proxy_from_usettings():
+  rFile = open("%s/usettings.dat" %OV.BaseDir(),'r')
+  lines = rFile.readlines()
+  rFile.close()
+  proxy = None
+  for line in lines:
+    if line.startswith('proxy='):
+      proxy =  line.split('proxy=')[1]
+  if proxy:
+    print "Using Proxy server %s" %proxy
+  else:
+    print "No Proxy server is set"
+  return proxy
 
 def register_new_odac(username=None, pwd=None):
   OV.Cursor("Please wait while AutoChem will be installed")
@@ -1251,13 +1267,13 @@ def register_new_odac(username=None, pwd=None):
             'olex2Tag':olex2_tag,
             'computerName':computer_name,
             'username':username,
-            'macAddress':mac_address
+            'macAddress':mac_address,
             }
   f = make_url_call(url, values)
 
   if not f:
     print "Please provide a valid username and password, and make sure your computer is online."
-    print "You may also have used up the numbr of allowable installs."
+    print "You may also have used up the number of allowable installs."
     return
   p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], olex2_tag)
   p = os.path.abspath(p)
@@ -1321,6 +1337,8 @@ def updateACF(force=False):
   password = "update456R"
   institution = keyname.split("-")[0]
   type_of_key = keyname.split("-")[-1]
+  proxy = get_proxy_from_usettings()
+  proxies = {'http': proxy}
 
   for mac_address in OV.GetMacAddress():
     url = "http://www.olex2.org/odac/update"
@@ -1331,17 +1349,18 @@ def updateACF(force=False):
               'olex2Tag':olex2_tag,
               'typeOfKey':type_of_key,
               'computerName':computer_name,
-              'macAddress':mac_address
+              'macAddress':mac_address,
               }
     data = urllib.urlencode(values)
-    print data
+    #print data
     try:
+      proxy_support = urllib2.ProxyHandler(proxies)
       req = urllib2.Request(url)
       response = urllib2.urlopen(req,data)
       f = response.read()
     except:
       print "\n++++++++++++++++++++++++++++++++++++++++++++++"
-      print "+ Could not reach update server at www.olex2.org"
+      print "+ Could not reach server at www.olex2.org"
       print "+ --------------------------------------------"
       print "+ Please make sure your computer is online"
       print "+ and that you can reach www.olex2.org"

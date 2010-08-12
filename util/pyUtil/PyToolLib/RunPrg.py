@@ -48,6 +48,21 @@ class RunPrg(ArgumentParser):
   def __del__(self):
     self.method.unregisterCallback()
 
+  def run(self):
+    try:
+      res = self.method.run(self)
+    except Exception, err:
+      print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+      print " The structure %s program failed:" %self.program.program_type
+      print "  %s" %err
+      print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+    else:
+      self.runAfterProcess()
+    finally:
+      self.endRun()
+      sys.stdout.refresh = False
+      sys.stdout.graph = False
+
   def which_shelx(self, type="xl"):
     a = olexex.which_program(type)
     if a == "":
@@ -215,17 +230,7 @@ class RunSolutionPrg(RunPrg):
       return
     if self.params.snum.solution.graphical_output and self.HasGUI:
       self.method.observe(self)
-    try:
-      res = self.method.run(self)
-    except Exception, err:
-      print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-      print(" The structure Solution Program failed: %s" %err)
-      print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-
-    self.runAfterProcess()
-    self.endRun()
-    sys.stdout.refresh = False
-    sys.stdout.graph = False
+    RunPrg.run(self)
 
   def runAfterProcess(self):
     RunPrg.runAfterProcess(self)
@@ -267,11 +272,7 @@ class RunRefinementPrg(RunPrg):
       return
     if self.params.snum.refinement.graphical_output and self.HasGUI:
       self.method.observe(self)
-    self.method.run(self)
-    self.runAfterProcess()
-    self.endRun()
-    sys.stdout.refresh = False
-    sys.stdout.graph = False
+    RunPrg.run(self)
 
   def setupRefine(self):
     self.method.pre_refinement(self)
