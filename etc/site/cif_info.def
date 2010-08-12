@@ -30,6 +30,8 @@ _diffrn_standards_decay_%          .
 =saint=V7.46A=       'SAINT v7.46A (Bruker, 2008)'
 =saint=V7.53A=       'SAINT v7.53A (Bruker, 2008)'
 =saint=V7.56A=       'SAINT v7.56A (Bruker, 2009)'
+=saint=V7.58A=       'SAINT v7.58A (Bruker, 2009)'
+=saint=V7.68A=       'SAINT v7.68A (Bruker, 2009)'
 
 =shelxtl=V5.10=      'SHELXTL v6.12 (Bruker, 1998)'
 =shelxtl=V6.12=      'SHELXTL v6.12 (Bruker, 2001)'
@@ -48,3 +50,6 @@ _diffrn_standards_decay_%          .
 =sad=2007/1=         'SADABS-2007/1 (Bruker,2007)'
 =sad=2007/2=         'SADABS-2007/2 (Bruker,2007)'
 =sad=2008/1=         'SADABS-2008/1 (Bruker,2008)'
+=sad=2008/4=         'SADABS-2008/4 (Bruker,2010)'
+
+=twin=2008/4=         'TWINABS-2008/4 (Bruker,2010)'

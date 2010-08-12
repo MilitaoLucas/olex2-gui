@@ -89,6 +89,8 @@ snum {
         .type = str
       font_name = #olex2.fnt:frb_18
         .type = str
+      type = png jpg bmp
+        .type = choice
     }
     ps{
       outline_width = 1.0
@@ -298,6 +300,9 @@ snum {
       .type = choice
     symmetry_space_group_name_H_M = None
       .type = str
+    abs_file = None
+      .type = path
+      .expert_level = 1
     sad_file = None
       .type = path
       .expert_level = 1
@@ -322,6 +327,11 @@ snum {
     cad4_file = None
       .type = path
       .expert_level = 1
+    twin_file = None
+      .type = path
+      .expert_level = 1
+    abs_type = twinabs sadabs
+      .type = choice
     #'snum_report_diffractometer_definition_file':Variable('?'),
     publ_contact_author_name = None
       .type = str
@@ -334,6 +344,9 @@ snum {
     publ_requested_journal = None
       .type = str
     list_sad_files = None
+      .type = strings
+      .expert_level = 2
+    list_abs_files = None
       .type = strings
       .expert_level = 2
     list_pcf_files = None
@@ -359,6 +372,9 @@ snum {
       .expert_level = 2
     user_input_variables = None
       .type = str
+      .expert_level = 2
+    list_twin_files = None
+      .type = strings
       .expert_level = 2
   }
 
@@ -647,7 +663,15 @@ user {
     .type = str
   auto_refine_after_anis = True
     .type = bool
+    
+  image{
+    bitmap{
+      type = png
+        .type = str
+    }
+  }
 }
+
 
 odac
   .expert_level = 2
