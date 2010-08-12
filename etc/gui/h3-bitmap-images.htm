@@ -55,10 +55,11 @@ cursor()">
       height="$spy.GetParam(gui.html.combo_height)"
       width="$spy.GetParam(gui.html.combo_width_2)"
       bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-      items="png;bmp;jpg"
+      items='png;jpg;bmp'
       valign='center'
       name="IMAGE_BITMAP_TYPE"
-      value='png'
+      value='$spy.GetParam(user.image.bitmap.type)'
+      onchange='spy.SetParam(user.image.bitmap.type,GetValue(IMAGE_BITMAP_TYPE))'
     >
   </td>
   <td>
