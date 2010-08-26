@@ -123,9 +123,10 @@ class completeness_statistics(object):
     f_sq_obs = reflections.f_sq_obs_merged
     f_sq_obs = f_sq_obs.eliminate_sys_absent().average_bijvoet_mates()
     f_obs = f_sq_obs.f_sq_as_f()
-    f_obs.setup_binner(
+    binner = f_obs.complete_set().setup_binner(
       reflections_per_bin=reflections_per_bin,
       auto_binning=True)
+    f_obs.use_binning(binner)
     if (0 or verbose):
       f_obs.binner().show_summary()
     missing_set = f_obs.complete_set().lone_set(f_obs).sort()
