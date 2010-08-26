@@ -202,7 +202,7 @@ class access_log_stats:
         map.enableScrollWheelZoom();
         map.addControl(new GLargeMapControl());
         map.addControl(new GMapTypeControl());
-        map.setCenter(new GLatLng(0.0, 0.0), 2);
+        map.setCenter(new GLatLng(15.0, 0.0), 1);
 
         var redIcon = new GIcon(G_DEFAULT_ICON);
         redIcon.image = "http://gmaps-samples.googlecode.com/svn/trunk/markers/red/blank.png";
@@ -237,7 +237,7 @@ class access_log_stats:
     <body onload="load()" onunload="GUnload()" bgcolor='#000000'>
     
       <h1>Olex2 Access Statistics</h1>
-      <div class='body' id="map_canvas" style="width: 850px; height: 550px"></div>
+      <div class='body' id="map_canvas" style="width: 650px; height: 450px"></div>
       filterString=%s
       filterNumber=%s
       <div id="stats">
@@ -265,7 +265,7 @@ class access_log_stats:
     stats_list = []
     total_num_hits = 0
     total_num_users = 0
-    exclude_list = ['129.234.13.99', '81.157.18.58', '129.234.13.105', '86.136.54.118']
+    exclude_list = ['129.234.13.99', '81.157.18.58', '129.234.13.105', '86.136.54.118', '129.234.13.129', '86.151.228.39']
     for user in self.olex_users.keys():
       if user in exclude_list:
         continue
@@ -359,12 +359,13 @@ class reader(object):
   def __init__(self, file_object, filterString='index.ind', write_directory=''):
     users = {}
     self.write_directory = write_directory
-    heads = ['.zip']
+    gets = ['.zip', '1.0', 'installer']
     
     for line in file_object:
-      for head in heads:
-        if head in filterString:
+      for get in gets:
+        if get in filterString:
           head_get = "HEAD"
+          break
         else:
           head_get = 'GET'
       if filterString in line and head_get not in line:
