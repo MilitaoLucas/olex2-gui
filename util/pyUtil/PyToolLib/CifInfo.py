@@ -362,6 +362,8 @@ class CifTools(ArgumentParser):
     if "abs" in tools:
       import abs_reader
       p = self.sort_out_path(path, "abs")
+      if p == "File Not Found":
+        return
       if p != "File Not Found" and self.metacifFiles.curr_abs != self.metacifFiles.prev_abs:
         print "ABS File type = ", abs_reader.abs_type(p)
       if abs_reader.abs_type(p) == "SADABS":
