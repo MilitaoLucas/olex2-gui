@@ -5,15 +5,15 @@
 <tr>
   <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
   <td colspan=2>
-    <a href="spy.CifTools()>>spy.MetaCif()>>updatehtml" target="View cif items to be added"><b>View cif info</b></a> | 
+    <a href="spy.ExtractCifInfo()>>spy.ViewCifInfo()>>updatehtml" target="View cif items to be added"><b>View cif info</b></a> |
     <a href="
-if file.Exists('FilePath()\FileName().cif') then None else 'spy.SetParam(snum.refinement.method,Least Squares)'>> 
-if file.Exists('FilePath()\FileName().cif') then None else 'DelIns ACTA'>> 
-if file.Exists('FilePath()\FileName().cif') then None else 'AddIns ACTA'>> 
+if file.Exists('FilePath()\FileName().cif') then None else 'spy.SetParam(snum.refinement.method,Least Squares)'>>
+if file.Exists('FilePath()\FileName().cif') then None else 'DelIns ACTA'>>
+if file.Exists('FilePath()\FileName().cif') then None else 'AddIns ACTA'>>
 if file.Exists('FilePath()\FileName().cif') then None else 'refine'>>
-spy.MetaCif(True,True)>>
+spy.MergeCif(True)>>
 "
-  target="Merge with cif file"><b>Merge cif</b></a> | 
+  target="Merge with cif file"><b>Merge cif</b></a> |
 <a href="exec -o getvar(defexplorer) 'file.ospath(basedir()/etc/CIF/styles)'" target="Browse for styles and templates"><b>Change Styles or Templates</b></a> | <zimg border="0" src="new">
 
   </td>
@@ -40,7 +40,7 @@ spy.MetaCif(True,True)>>
           >
         <td>
           <b>%Style%</b>
-        </td>	
+        </td>
         <td>
           <input
             type='combo'
@@ -56,7 +56,7 @@ spy.MetaCif(True,True)>>
         </td>
         <td>
           <b>%Template%</b>
-        </td>	
+        </td>
         <td>
           <input
             type='combo'
@@ -86,5 +86,5 @@ spy.MetaCif(True,True)>>
 <!-- #include metadata-h3-source-files gui\metadata-h3-source-files.htm;gui\blocks\tool-h3-off.htm;image=metadata-h3-source-files;onclick=;onclick=;colspan=2;2; -->
 <!-- #includeif isplugininstalled(plugin-mysql) report-settings-h3-archive gui\report-settings-h3-archive.htm;gui\blocks\tool-h3-off.htm;image=report-settings-h3-archive;onclick=;onclick=;colspan=2;2; -->
 
-</table>	
+</table>
 </font>

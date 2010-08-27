@@ -112,8 +112,8 @@ class pyTools(ArgumentParser):
         sys.stderr.formatExceptionInfo()
 
     elif tool == "cif":
-      from CifInfo import CifTools
-      dispatching.setdefault('cif', CifTools)
+      from CifInfo import ExtractCifInfo
+      dispatching.setdefault('cif', ExtractCifInfo)
 
     elif tool == "metacif":
       from CifInfo import MetaCif
