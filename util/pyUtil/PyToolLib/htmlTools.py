@@ -46,23 +46,33 @@ def makeHtmlTable(list):
     for box in ['box1','box2','box3']:
       if box in input_d.keys():
         box_d = input_d[box]
-        box_d.setdefault('value', '$spy.GetParam(%s)' %box_d['varName'])
         box_d.setdefault('ctrl_name', "SET_%s" %str.upper(box_d['varName']).replace('.','_'))
         box_d.setdefault('bgcolor','spy.bgcolor(%s)' %box_d['ctrl_name'])
-        box_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
-        box_d.setdefault('onleave',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
+        if box_d['varName'].startswith('_'): # treat cif items differently
+          box_d.setdefault('value', '$spy.get_cif_item(%(varName)s,?)' %box_d)
+          box_d.setdefault('onchange',"spy.set_cif_item(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
+          box_d.setdefault('onleave',"spy.set_cif_item(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
+        else:
+          box_d.setdefault('value', '$spy.GetParam(%(varName)s)' %box_d)
+          box_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
+          box_d.setdefault('onleave',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
         boxText += makeHtmlInputBox(box_d)
     if boxText:
       row_d.setdefault('input',boxText)
     else:
-      input_d.setdefault('value', '$spy.GetParam(%s)' %input_d['varName'])
       input_d.setdefault('ctrl_name', "SET_%s" %str.upper(input_d['varName']).replace('.','_'))
       if input_d.has_key('onchange'):
         input_d.setdefault('onleave',input_d['onchange'])
       elif input_d.has_key('onleave'):
         input_d.setdefault('onchange',input_d['onleave'])
-      input_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
-      input_d.setdefault('onleave',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
+      if input_d['varName'].startswith('_'):
+        input_d.setdefault('value', '$spy.get_cif_item(%(varName)s,?)' %input_d)
+        input_d.setdefault('onchange',"spy.set_cif_item(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
+        input_d.setdefault('onleave',"spy.set_cif_item(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
+      else:
+        input_d.setdefault('value', '$spy.GetParam(%(varName)s)' %input_d)
+        input_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
+        input_d.setdefault('onleave',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
       input_d.setdefault('bgcolor','spy.bgcolor(%s)' %input_d['ctrl_name'])
       row_d.setdefault('input',makeHtmlInputBox(input_d))
       row_d.update(input_d)
@@ -862,7 +872,7 @@ def makeHtmlBottomPop(args, pb_height = 50, y = 0):
   if not y:
     y = metric[1] - pb_height - 8
   pstr = "popup %s '%s' -t='%s' -w=%s -h=%s -x=%s  -y=%s" %(pop_name, htm_location, pop_name, width, pb_height, x, y)
-  
+
   if HaveModeBox:
     OV.cmd(pstr)
   else:
@@ -872,7 +882,7 @@ def makeHtmlBottomPop(args, pb_height = 50, y = 0):
     olx.html_SetBorders(pop_name,0)
     olx.html_Reload(pop_name)
     HaveModeBox = True
-    
+
 OV.registerMacro(makeHtmlBottomPop, 'txt-Text to display&;name-Name of the Bottom html popupbox')
 
 def OnModeChange(*args):
@@ -920,7 +930,7 @@ def OnModeChange(*args):
       active_mode = 'btn-element%s' %element
     else:
       return
-  
+
   elif 'name' in mode:
     active_mode = 'button_small-name'
   elif 'grow' in mode:

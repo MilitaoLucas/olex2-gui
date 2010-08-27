@@ -5,9 +5,9 @@ class reader(object):
   def __init__(self, path):
     """Reads the .abs file with the given path. Able to read
     both sadabs and twinabs file formats.
-    
+
     Returns a dictionary of cif items found in the .abs file."""
-    
+
     self._cifItems = {}
     self._twin_cifItems = {}
     rfile = open(path, 'r')
@@ -23,12 +23,12 @@ class reader(object):
     for line in lines:
       try:
         if "SADABS" in lines[i]:
-          print "SADABS File Type"
+          #print "SADABS File Type"
           abs_type = "SADABS"
           self._cifItems.setdefault("abs_type", "SADABS")
           break
         if "TWINABS" in lines[i]:
-          print "TWINABS File Type"
+          #print "TWINABS File Type"
           abs_type = "TWINABS"
           self._twin_cifItems.setdefault("abs_type", "TWINABS")
           break
@@ -38,8 +38,8 @@ class reader(object):
       i+= 1
     i = 0
     if abs_type == "SADABS":
-      print "Running SADABS parser"
-      print "PATH", path
+      #print "Running SADABS parser"
+      #print "PATH", path
       for line in lines:
         try:
   #	print lines[i]
@@ -97,8 +97,8 @@ class reader(object):
           pass
         i += 1
     elif abs_type == "TWINABS":
-      print "Running TWINABS parser"
-      print "PATH", path
+      #print "Running TWINABS parser"
+      #print "PATH", path
       for line in lines:
         #print "line = ", line, lines[line]
         try:
@@ -161,7 +161,7 @@ class reader(object):
             txt = lines[line].split(':')
             #txt = string.split(lines[line], ":")
             self._twin_cifItems["%s"%twin_component].setdefault("ratiominmax", "%s" %txt[1].strip())
-            self._twin_cifItems["%s"%twin_component].setdefault("_exptl_absorpt_correction_T_min", "%s" %txt[1].strip())            
+            self._twin_cifItems["%s"%twin_component].setdefault("_exptl_absorpt_correction_T_min", "%s" %txt[1].strip())
             #print "check ratiominmax, exptl Tmin", twin_component, self._twin_cifItems
             continue
           if "involving domain" in lines[line] :
@@ -185,11 +185,11 @@ class reader(object):
           print "there was an error"
           pass
       #print "twin info ", self._twin_cifItems
-      
+
     self._twin_cifItems.setdefault("_exptl_absorpt_correction_T_max", "%s" %("1"))
     self._twin_cifItems.setdefault("_exptl_absorpt_correction_type", "multi-scan")
 
-    
+
   def cifItems(self):
     return self._cifItems
   def twin_cifItems(self):
@@ -220,7 +220,7 @@ def abs_type(path):
     i+= 1
   i = 0
   return abs_type
-  
+
 if __name__ == '__main__':
   a = reader('/home/xray/olexsvn/abs-test/cycle2.abs')
   #b = reader('/home/xray/olexsvn/abs-test/MJR0602.abs')
