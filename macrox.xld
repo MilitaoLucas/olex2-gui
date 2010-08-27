@@ -159,8 +159,8 @@
       <cmd5 "if file.Exists(GetVar(report_image)) then 'SetVar(report_image,GetVar(report_image))' else 'SetVar(report_image,screenshot.png)'">
       <cmd6 XXX="if not(strcmp(GetVar(report_image),screenshot.png)) then None else 'cursor(busy, %Creating Image ...%)>>pict -pq screenshot.png 1'">
       <cmd7 XXX="cursor(busy, '%Updating% Cif ...')">
-      <cmd8 "spy.CifTools()">
-      <cmd9 "spy.MetaCif(True)">
+      <cmd8 "spy.ExtractCifInfo()">
+      <cmd9 "spy.MergeCif()">
       <cmd10 XXX="cursor(busy, '%Creating% Report')">
       <cmd11 "cif2tab header acrd anis bnd ang htab tang hcrd footer">
       <cmd12 XXX="shell tables.html">
