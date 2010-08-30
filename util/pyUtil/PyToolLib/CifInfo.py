@@ -160,7 +160,7 @@ class ValidateCif(object):
     filepath = args.get('filepath', OV.file_ChangeExt(OV.FileFull(), 'cif'))
     cif_dic = args.get('cif_dic', 'cif_core.dic')
     show_warnings=(args.get('show_warnings', True) in (True, 'True', 'true'))
-    if os.path.exists(filepath):
+    if os.path.isfile(filepath):
       f = open(filepath, 'rUb')
       cif_model = iotbx.cif.fast_reader(input_string=f.read()).model()
       f.close()
@@ -262,7 +262,6 @@ class ExtractCifInfo(CifTools):
     versions = self.get_def()
 
     import History
-    #active_node = History.tree.active_node
     active_solution = History.tree.active_child_node
     if active_solution is not None and active_solution.is_solution:
       solution_reference = SPD.programs[active_solution.program].reference
@@ -325,30 +324,27 @@ class ExtractCifInfo(CifTools):
       p = self.sort_out_path(path, "abs")
       if p and self.metacifFiles.curr_abs != self.metacifFiles.prev_abs:
         if abs_reader.abs_type(p) == "SADABS":
-          if self.metacifFiles.curr_abs != self.metacifFiles.prev_abs:
-            try:
-              import abs_reader
-              sad = abs_reader.reader(p).cifItems()
-              version = self.prepare_computing(sad, versions, "sad")
-              version = string.strip((string.split(version, "="))[0])
-              t = self.prepare_exptl_absorpt_process_details(sad, version)
-              sad.setdefault("_exptl_absorpt_process_details", t)
-              merge.append(sad)
-            except KeyError:
-              print "There was an error reading the SADABS output file\n'%s'.\nThe file may be incomplete." %p
-            #print "sad", sad
+          try:
+            import abs_reader
+            sad = abs_reader.reader(p).cifItems()
+            version = self.prepare_computing(sad, versions, "sad")
+            version = string.strip((string.split(version, "="))[0])
+            t = self.prepare_exptl_absorpt_process_details(sad, version)
+            sad.setdefault("_exptl_absorpt_process_details", t)
+            merge.append(sad)
+          except KeyError:
+            print "There was an error reading the SADABS output file\n'%s'.\nThe file may be incomplete." %p
         elif abs_reader.abs_type(p) == "TWINABS":
-          if self.metacifFiles.curr_abs != self.metacifFiles.prev_abs:
-            try:
-              import abs_reader
-              twin = abs_reader.reader(p).twin_cifItems()
-              version = self.prepare_computing(twin, versions, "twin")
-              version = string.strip((string.split(version, "="))[0])
-              t = self.prepare_exptl_absorpt_process_details(twin, version)
-              twin.setdefault("_exptl_absorpt_process_details", t)
-              merge.append(twin)
-            except KeyError:
-              print "There was an error reading the TWINABS output file\n'%s'.\nThe file may be incomplete." %p
+          try:
+            import abs_reader
+            twin = abs_reader.reader(p).twin_cifItems()
+            version = self.prepare_computing(twin, versions, "twin")
+            version = string.strip((string.split(version, "="))[0])
+            t = self.prepare_exptl_absorpt_process_details(twin, version)
+            twin.setdefault("_exptl_absorpt_process_details", t)
+            merge.append(twin)
+          except KeyError:
+            print "There was an error reading the TWINABS output file\n'%s'.\nThe file may be incomplete." %p
 
     if 'pcf' in tools:
       p = self.sort_out_path(path, "pcf")
@@ -372,7 +368,6 @@ class ExtractCifInfo(CifTools):
         f = open(p, 'rUb')
         cif_od = iotbx.cif.fast_reader(input_string=f.read()).model().values()[0]
         f.close()
-        #self.cif_block.update(cif_od)
         self.update_cif_block(cif_od)
 
     if "cif_def" in tools:
