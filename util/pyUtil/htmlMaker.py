@@ -234,7 +234,7 @@ def publicationMetadataHtmlMaker():
      'itemName':'%Contact% %Author%',
      'items':userDictionaries.people.getListPeople(),
      'readonly':'',
-     'onchange':'spy.set_cif_item(_publ_contact_author_name,GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME))>>spy.AddVariableToUserInputList(_publ_contact_author_name)>>UpdateHtml'
+     'onchange':'spy.set_cif_item(_publ_contact_author_name,GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME))>>UpdateHtml'
      },
     {'varName':'_publ_contact_author_address',
      'itemName':'%Contact% %Author% %Address%',

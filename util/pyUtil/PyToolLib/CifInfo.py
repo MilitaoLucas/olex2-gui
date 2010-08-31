@@ -78,6 +78,20 @@ class MetacifFiles:
     self.list_twin = None
     self.list_abs = None
 
+class ValidateCif(object):
+  def __init__(self, args):
+    filepath = args.get('filepath', OV.file_ChangeExt(OV.FileFull(), 'cif'))
+    cif_dic = args.get('cif_dic', 'cif_core.dic')
+    show_warnings=(args.get('show_warnings', True) in (True, 'True', 'true'))
+    if os.path.isfile(filepath):
+      f = open(filepath, 'rUb')
+      cif_model = iotbx.cif.fast_reader(input_string=f.read()).model()
+      f.close()
+      cif_dic = validation.smart_load_dictionary(cif_dic)
+      cif_model.validate(cif_dic, show_warnings)
+
+OV.registerMacro(ValidateCif, """filepath&;cif_dic&;show_warnings""")
+
 class CifTools(ArgumentParser):
   def __init__(self):
     super(CifTools, self).__init__()
@@ -155,19 +169,12 @@ class CifTools(ArgumentParser):
                 user_removed is not None and key in user_removed):
           self.cif_block[key] = value
 
-class ValidateCif(object):
-  def __init__(self, args):
-    filepath = args.get('filepath', OV.file_ChangeExt(OV.FileFull(), 'cif'))
-    cif_dic = args.get('cif_dic', 'cif_core.dic')
-    show_warnings=(args.get('show_warnings', True) in (True, 'True', 'true'))
-    if os.path.isfile(filepath):
-      f = open(filepath, 'rUb')
-      cif_model = iotbx.cif.fast_reader(input_string=f.read()).model()
-      f.close()
-      cif_dic = validation.smart_load_dictionary(cif_dic)
-      cif_model.validate(cif_dic, show_warnings)
+class SaveCifInfo(CifTools):
+  def __init__(self):
+    super(SaveCifInfo, self).__init__()
+    self.write_metacif_file()
 
-OV.registerMacro(ValidateCif, """filepath&;cif_dic&;show_warnings""")
+OV.registerFunction(SaveCifInfo)
 
 class ViewCifInfo(CifTools):
   def __init__(self):
