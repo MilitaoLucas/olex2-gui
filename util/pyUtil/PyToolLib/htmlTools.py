@@ -50,8 +50,8 @@ def makeHtmlTable(list):
         box_d.setdefault('bgcolor','spy.bgcolor(%s)' %box_d['ctrl_name'])
         if box_d['varName'].startswith('_'): # treat cif items differently
           box_d.setdefault('value', '$spy.get_cif_item(%(varName)s,?)' %box_d)
-          box_d.setdefault('onchange',"spy.set_cif_item(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
-          box_d.setdefault('onleave',"spy.set_cif_item(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
+          box_d.setdefault('onchange',"spy.set_cif_item(%(varName)s,GetValue(%(ctrl_name)s))>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
+          box_d.setdefault('onleave',"spy.set_cif_item(%(varName)s,GetValue(%(ctrl_name)s))>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
         else:
           box_d.setdefault('value', '$spy.GetParam(%(varName)s)' %box_d)
           box_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
@@ -65,10 +65,10 @@ def makeHtmlTable(list):
         input_d.setdefault('onleave',input_d['onchange'])
       elif input_d.has_key('onleave'):
         input_d.setdefault('onchange',input_d['onleave'])
-      if input_d['varName'].startswith('_'):
+      if input_d['varName'].startswith('_'): # treat cif items differently
         input_d.setdefault('value', '$spy.get_cif_item(%(varName)s,?)' %input_d)
-        input_d.setdefault('onchange',"spy.set_cif_item(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
-        input_d.setdefault('onleave',"spy.set_cif_item(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
+        input_d.setdefault('onchange',"spy.set_cif_item(%(varName)s,GetValue(%(ctrl_name)s))>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
+        input_d.setdefault('onleave',"spy.set_cif_item(%(varName)s,GetValue(%(ctrl_name)s))>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
       else:
         input_d.setdefault('value', '$spy.GetParam(%(varName)s)' %input_d)
         input_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
