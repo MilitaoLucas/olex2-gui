@@ -374,6 +374,7 @@ class ExtractCifInfo(CifTools):
         import iotbx.cif
         f = open(p, 'rUb')
         cif_od = iotbx.cif.fast_reader(input_string=f.read()).model().values()[0]
+        self.exclude_cif_items(cif_od)
         f.close()
         self.update_cif_block(cif_od)
 
@@ -390,6 +391,15 @@ class ExtractCifInfo(CifTools):
         self.update_cif_block(cif_def)
 
     self.write_metacif_file()
+
+  def exclude_cif_items(self, cif_block):
+    # ignore cif items that should be provided by the refinement engine
+    exclude_list = ('_cell_length', '_cell_angle', '_cell_volume', '_cell_formula',
+                    '_cell_oxdiff', '_symmetry')
+    for item in cif_block:
+      for exclude in exclude_list:
+        if item.startswith(exclude):
+          del cif_block[item]
 
   def prepare_exptl_absorpt_process_details(self, dictionary, version):
     parameter_ratio = dictionary["parameter_ratio"]
