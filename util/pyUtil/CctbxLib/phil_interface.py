@@ -240,7 +240,7 @@ class phil_handler(index):
       assert working_definition.is_definition
       for new_definition in new_phil_object.get_without_substitution(name):
         if working_definition.name == new_definition.name:
-          proxy = master_defintion.validate(value)
+          proxy = master_defintion.validate(str(value))
           if proxy.error_message is None:
             working_definition.words = master_defintion.fetch_value(new_definition).words
             self._phil_has_changed = True

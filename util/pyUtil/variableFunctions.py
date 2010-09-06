@@ -207,6 +207,37 @@ snum {
       refinementMethod = 'CGLS' # work-around for bug #26
   olexex.onSolutionProgramChange(solutionPrg, solutionMethod)
   olexex.onRefinementProgramChange(refinementPrg, refinementMethod)
+  #
+  # Start backwards compatibility  2010-06-18
+  #
+  metacif_path = '%s/%s.metacif' %(OV.StrDir(), OV.FileName())
+  if not os.path.isfile(metacif_path) and structure_phil is not None:
+    from iotbx.cif import model
+    master_phil = phil_interface.parse(
+      file_name=os.path.join(OV.BaseDir(), "metacif.phil"))
+    user_phil = phil_interface.parse(structure_phil)
+    diff = master_phil.fetch_diff(source=user_phil)
+    active_objects = diff.active_objects()
+    def name_value_pairs(active_objects):
+      result = []
+      for object in active_objects:
+        if object.is_scope:
+          result += name_value_pairs(object.master_active_objects())
+        elif object.is_definition:
+          result.append(("_%s" %(object.name), object.extract()))
+      return result
+    cif_items = name_value_pairs(diff.get('snum.metacif').master_active_objects())
+    if cif_items:
+      cif_block = model.block()
+      for key, value in cif_items:
+        cif_block[key] = value
+      cif_model = model.cif({OV.FileName(): cif_block})
+      f = open(metacif_path, 'wb')
+      print >> f, cif_model
+      f.close()
+  #
+  # End backwards compatibility
+  #
 OV.registerFunction(LoadStructureParams)
 
 def SaveStructureParams():

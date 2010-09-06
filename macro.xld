@@ -46,6 +46,7 @@
       <cmd0  "xgrid.Visible(false)">
       <cmd1  "if strcmp(%4,'none') then none else 'spy.saveHistory()'">
       <cmd2  "spy.SaveStructureParams()">
+      <cmd1  "if strcmp(%4,'none') then none else 'spy.SaveCifInfo()'">
       <cmd3  cmd1="silent on">
       <cmd4  cmd1="clear">
       <cmd5  XXXcmd1="fader.InitFG()">
@@ -126,6 +127,7 @@
     <cmd1  "echo Good Bye">
     <cmd2  "spy.saveHistory()">
     <cmd3  "spy.SaveStructureParams()">
+    <cmd2  "spy.SaveCifInfo()">
     <cmd2  "mode off">
     <cmd4  "storeparam startup file.relativePath(filefull())">
     <cmd5  "storeparam last_version GetVar(last_version)">
@@ -218,8 +220,8 @@
       <cmd5 "if file.Exists(spy.GetParam(snum.report.image)) then None else 'spy.SetParam(snum.report.image,FilePath()/screenshot.png)'">
       <cmd6 "if not(strcmp(file.GetName(spy.GetParam(snum.report.image)),screenshot.png)) then None else 'cursor(busy, Creating Image ...)>>pict -pq screenshot.png 1'">
       <cmd7 "cursor(busy, '%Updating% Cif ...')">
-      <cmd8 "spy.CifTools()">
-      <cmd9 "spy.MetaCif(True)">
+      <cmd8 "spy.ExtractCifInfo()">
+      <cmd9 "spy.MergeCif()">
       <cmd9a "custom_on_report">
       <cmd10 "cursor(busy, 'Creating Report')">
       <cmd11 "cif2tab header acrd anis bnd ang htab tang hcrd footer -n=spy.GetParam(snum.report.title)_tables">
@@ -241,7 +243,7 @@
     <args
       <arg1 name="l.s." def='-1'>
       <arg2 name="plan" def='-1.1'>
-      
+
     \>
     <cmd
       <cmd0 "xgrid.Visible(false)">
