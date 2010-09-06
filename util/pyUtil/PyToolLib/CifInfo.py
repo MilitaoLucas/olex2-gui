@@ -117,7 +117,9 @@ class CifTools(ArgumentParser):
 
   def read_metacif_file(self):
     if os.path.isfile(self.metacif_path):
-      reader = iotbx.cif.reader(file_path=self.metacif_path)
+      file_object = open(self.metacif_path, 'rb')
+      reader = iotbx.cif.reader(file_object=file_object)
+      file_object.close()
       return reader.model()
 
   def write_metacif_file(self):
@@ -192,7 +194,7 @@ class ViewCifInfo(CifTools):
     text = s.getvalue()
     inputText = OV.GetUserInput(0,'Items to be entered into cif file', text)
     if inputText and inputText != text:
-      reader = iotbx.cif.fast_reader(input_string=str(inputText))
+      reader = iotbx.cif.reader(input_string=str(inputText))
       if reader.error_count():
         return
       updated_cif_model = reader.model()
