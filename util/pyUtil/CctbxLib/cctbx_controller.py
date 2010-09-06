@@ -197,19 +197,19 @@ def f_obs_vs_f_calc(model, reflections, twinning=None, batch_number=None):
     twin_set = twinning.twin_complete_set
     f_calc_merged = twin_set.structure_factors_from_scatterers(
       model, algorithm="direct").f_calc()
+    twinned_f_sq = twinning.twin_with_twin_fraction(
+      f_calc_merged.as_intensity_array(),
+      twin_fraction)
+    f_calc_merged = twinned_f_sq.f_sq_as_f().phase_transfer(f_calc_merged)
+
   else:
     f_calc_merged = f_obs_merged.structure_factors_from_scatterers(
       model, algorithm="direct").f_calc()
 
   f_calc_filtered = f_calc_merged.common_set(f_obs_filtered)
   f_obs_omitted = f_obs_merged.lone_set(f_obs_filtered)
-  f_calc_omitted = f_calc_merged.lone_set(f_calc_filtered)
-
-  if twinning is not None:
-    twinned_f_sq = twinning.twin_with_twin_fraction(
-      f_calc_filtered.as_intensity_array(),
-      twin_fraction)
-    f_calc_filtered = twinned_f_sq.f_sq_as_f().phase_transfer(f_calc_filtered)
+  f_calc_omitted = f_calc_merged.common_set(
+    f_obs_merged).lone_set(f_calc_filtered)
 
   k = f_obs_filtered.scale_factor(f_calc_filtered)
   fo = flex.abs(f_obs_filtered.data())

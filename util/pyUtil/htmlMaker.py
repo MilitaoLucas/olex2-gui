@@ -96,13 +96,13 @@ def diffractionMetadataHtmlMaker():
     )
 
   list += (
-    {'varName':'snum.metacif.diffrn_ambient_temperature',
+    {'varName':'_diffrn_ambient_temperature',
      'itemName':'%Diffraction Temperature% (K)'
      },
-    {'varName':'snum.metacif.cell_measurement_temperature',
-     'itemName':'%Cell Measurement Temperature% (K)'
-     },
-    {'varName':'snum.metacif.diffrn_special_details',
+    #{'varName':'_cell_measurement_temperature',
+     #'itemName':'%Cell Measurement Temperature% (K)'
+     #},
+    {'varName':'_diffrn_special_details',
      'itemName':'%Special Details%',
      'multiline':'multiline'
      }
@@ -113,42 +113,42 @@ OV.registerFunction(diffractionMetadataHtmlMaker)
 
 def crystalMetadataHtmlMaker():
   list = (
-    {'varName':'snum.metacif.chemical_name_systematic',
+    {'varName':'_chemical_name_systematic',
      'itemName':'%Systematic Name%',
      },
-    {'varName':'snum.metacif.exptl_crystal_colour',
+    {'varName':'_exptl_crystal_colour',
      'itemName':'%Colour%',
-     'box1':{'varName':'snum.metacif.exptl_crystal_colour_lustre',
+     'box1':{'varName':'_exptl_crystal_colour_lustre',
              'items':'?;metallic;dull;clear'
              },
-     'box2':{'varName':'snum.metacif.exptl_crystal_colour_modifier',
+     'box2':{'varName':'_exptl_crystal_colour_modifier',
              'items':'?;light;dark;whitish;blackish;grayish;brownish;reddish;pinkish;orangish;yellowish;greenish;bluish'
              },
-     'box3':{'varName':'snum.metacif.exptl_crystal_colour_primary',
+     'box3':{'varName':'_exptl_crystal_colour_primary',
              'items':'?;colourless;white;black;gray;brown;red;pink;orange;yellow;green;blue;violet'
              },
      },
-    {'varName':'snum.metacif.exptl_crystal_size',
+    {'varName':'_exptl_crystal_size',
      'itemName':'%Size%',
-     'box1':{'varName':'snum.metacif.exptl_crystal_size_min',
+     'box1':{'varName':'_exptl_crystal_size_min',
              'width':'50'
              },
-     'box2':{'varName':'snum.metacif.exptl_crystal_size_mid',
+     'box2':{'varName':'_exptl_crystal_size_mid',
              'width':'50'
              },
-     'box3':{'varName':'snum.metacif.exptl_crystal_size_max',
+     'box3':{'varName':'_exptl_crystal_size_max',
              'width':'50'
              },
      },
-    {'varName':'snum.metacif.exptl_crystal_description',
+    {'varName':'_exptl_crystal_description',
      'itemName':'%Shape%',
      'items':'?;block;plate;needle;prism;irregular;cube;trapezoid;rect. Prism;rhombohedral;hexagonal;octahedral',
      },
-    {'varName':'snum.metacif.exptl_crystal_preparation',
+    {'varName':'_exptl_crystal_preparation',
      'itemName':'%Preparation Details%',
      'multiline':'multiline',
      },
-    {'varName':'snum.metacif.exptl_crystal_recrystallization_method',
+    {'varName':'_exptl_crystal_recrystallization_method',
      'itemName':'%Crystallisation Details%',
      'multiline':'multiline',
      },
@@ -230,24 +230,24 @@ def publicationMetadataHtmlMaker():
     {'varName':'snum.dimas.reference_ccdc_number',
      'itemName':'CCDC %Number%',
      },
-    {'varName':'snum.metacif.publ_contact_author_name',
+    {'varName':'_publ_contact_author_name',
      'itemName':'%Contact% %Author%',
      'items':userDictionaries.people.getListPeople(),
      'readonly':'',
-     'onchange':'spy.SetParam(snum.metacif.publ_contact_author_name,GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME))>>spy.AddVariableToUserInputList(publ_contact_author_name)>>UpdateHtml'
+     'onchange':'spy.set_cif_item(_publ_contact_author_name,GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME))>>UpdateHtml'
      },
-    {'varName':'publ_contact_author_address',
+    {'varName':'_publ_contact_author_address',
      'itemName':'%Contact% %Author% %Address%',
      'multiline':'multiline',
      'value':'spy.getPersonInfo(GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME),address)',
      'onleave':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME),address,GetValue(SET_PUBL_CONTACT_AUTHOR_ADDRESS))>>spy.changeBoxColour(SET_PUBL_CONTACT_AUTHOR_ADDRESS,#FFDCDC)'
      },
-    {'varName':'publ_contact_author_email',
+    {'varName':'_publ_contact_author_email',
      'itemName':'%Contact% %Author% %Email%',
      'value':'spy.getPersonInfo(GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME),email)',
      'onleave':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME),email,GetValue(SET_PUBL_CONTACT_AUTHOR_EMAIL))>>spy.changeBoxColour(SET_PUBL_CONTACT_AUTHOR_EMAIL,#FFDCDC)'
      },
-    {'varName':'publ_contact_author_phone',
+    {'varName':'_publ_contact_author_phone',
      'itemName':'%Contact% %Author% %Phone%',
      'value':'spy.getPersonInfo(GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME),phone)',
      'onleave':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME),phone,GetValue(SET_PUBL_CONTACT_AUTHOR_PHONE))>>spy.changeBoxColour(SET_PUBL_CONTACT_AUTHOR_PHONE,#FFDCDC)'
@@ -327,7 +327,7 @@ def publicationMetadataHtmlMaker():
   retstr = htmlTools.makeHtmlTable(list)
 
   list = [
-    {'varName':'snum.metacif.publ_requested_journal',
+    {'varName':'_publ_requested_journal',
      'itemName':'%Requested% %Journal%',
      'items':userDictionaries.localList.getListJournals(),
      'readonly':'',

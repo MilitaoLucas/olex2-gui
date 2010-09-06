@@ -6,7 +6,6 @@ import sys
 import olx
 import olex
 import olex_core
-import OlexVFS
 import cProfile
 from subprocess import *
 import guiFunctions
@@ -47,9 +46,13 @@ class OlexFunctions(inheritFunctions):
         value = value
       elif type(value) in (str,unicode) and "'" in value:
         value = "'%s'" %value.replace("'", "\\'")
+      elif type(value) in (list, set):
+        value = ' '.join("'%s'" %v.replace("'", "\\'") for v in value)
       else:
+        value = unicode(value)
+        value = value.encode('utf-8')
         value = "'%s'" %str(value)
-      handler.update_single_param(str(variable), str(value))
+      handler.update_single_param(str(variable), value)
     except Exception, ex:
       print >> sys.stderr, "Variable %s could not be set with value %s" %(variable,value)
       sys.stderr.formatExceptionInfo()
@@ -79,6 +82,24 @@ class OlexFunctions(inheritFunctions):
       return olx.phil_handler.get_python_object()
     else:
       return None
+
+  def get_cif_item(self, key, default=None):
+    if olx.cif_model is not None:
+      if self.FileName() not in olx.cif_model:
+        import CifInfo
+        CifInfo.ExtractCifInfo()
+      return olx.cif_model[self.FileName()].get(key, default)
+    else:
+      return default
+
+  def set_cif_item(self, key, value):
+    if olx.cif_model is not None:
+      olx.cif_model[self.FileName()][key] = value
+    user_modified = OV.GetParam('snum.metacif.user_modified')
+    if user_modified is None: user_modified = []
+    if key not in user_modified:
+      user_modified.append(key)
+    OV.SetParam('snum.metacif.user_modified', user_modified)
 
   def GuiParams(self):
     if hasattr(olx, 'gui_phil_handler'):
@@ -202,6 +223,7 @@ class OlexFunctions(inheritFunctions):
 
   def reset_file_in_OFS(self,fileName,txt=" ",copyToDisk = False):
     try:
+      import OlexVFS
       OlexVFS.write_to_olex(fileName, txt)
       if copyToDisk:
         wFile = open("%s/%s" %(self.DataDir(),fileName),'w')
@@ -214,6 +236,7 @@ class OlexFunctions(inheritFunctions):
   def write_to_olex(self,fileName,text,copyToDisk = False):
     text = text.encode('utf-8')
     try:
+      import OlexVFS
       OlexVFS.write_to_olex(fileName, text)
       if copyToDisk:
         wFile = open("%s/%s" %(self.DataDir(),fileName),'w')
@@ -561,4 +584,6 @@ def GetParam(variable):
 OV = OlexFunctions()
 OV.registerFunction(GetParam)
 OV.registerFunction(OV.SetParam)
+OV.registerFunction(OV.set_cif_item)
+OV.registerFunction(OV.get_cif_item)
 OV.registerFunction(OV.CopyVFSFile)

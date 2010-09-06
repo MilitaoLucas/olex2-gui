@@ -1,6 +1,8 @@
 import os
 import string
 import glob
+from cStringIO import StringIO
+import datetime
 
 import olx
 from ArgumentParser import ArgumentParser
@@ -11,6 +13,30 @@ OV = OlexFunctions()
 
 import ExternalPrgParameters
 SPD, RPD = ExternalPrgParameters.SPD, ExternalPrgParameters.RPD
+
+import iotbx.cif
+from iotbx.cif import model
+from iotbx.cif import validation
+olx.cif_model = None
+
+class cif_manager(object):
+
+  def __init__(self):
+    self.metacif_path = '%s/%s.metacif' %(OV.StrDir(), OV.FileName())
+    if os.path.exists(self.metacif_path):
+      f = open(self.metacif_path, 'rUb')
+      self.cif_model = iotbx.cif.fast_reader(input_string=f.read()).model()
+      f.close()
+    else:
+      self.cif_model = iotbx.cif.model.cif()
+    self.master_cif_block = self.cif_model.get(OV.FileName())
+
+  def set_data_item(self, key, value):
+    self.master_cif_block[key] = value
+
+  def get_data_item(self, key):
+    return self.master_cif_block.get(key)
+
 
 class MetacifFiles:
   def __init__(self):
@@ -52,238 +78,180 @@ class MetacifFiles:
     self.list_twin = None
     self.list_abs = None
 
+class ValidateCif(object):
+  def __init__(self, args):
+    filepath = args.get('filepath', OV.file_ChangeExt(OV.FileFull(), 'cif'))
+    cif_dic = args.get('cif_dic', 'cif_core.dic')
+    show_warnings=(args.get('show_warnings', True) in (True, 'True', 'true'))
+    if os.path.isfile(filepath):
+      f = open(filepath, 'rUb')
+      cif_model = iotbx.cif.fast_reader(input_string=f.read()).model()
+      f.close()
+      cif_dic = validation.smart_load_dictionary(cif_dic)
+      cif_model.validate(cif_dic, show_warnings)
 
-class MetaCif(ArgumentParser):
-  def __init__(self, merge=False, edit=False):
+OV.registerMacro(ValidateCif, """filepath&;cif_dic&;show_warnings""")
+
+class CifTools(ArgumentParser):
+  def __init__(self):
+    super(CifTools, self).__init__()
+    self.metacif_path = '%s/%s.metacif' %(OV.StrDir(), OV.FileName())
+    if olx.cif_model is None or OV.FileName() not in olx.cif_model.keys():
+      if os.path.isfile(self.metacif_path):
+        olx.cif_model = self.read_metacif_file()
+      else:
+        olx.cif_model = model.cif()
+        olx.cif_model[OV.FileName()] = model.block()
+    self.cif_model = olx.cif_model
+    self.cif_block = olx.cif_model[OV.FileName()]
+    today = datetime.date.today()
+    self.update_cif_block(
+      {'_audit_creation_date': today.strftime('%Y-%m-%d'),
+       '_audit_creation_method': """
+;
+  Olex2 %s
+  (compiled %s, GUI svn.r%i)
+;
+""" %(OV.GetTag(), OV.GetCompilationInfo(), OV.GetSVNVersion())
+    })
+
+  def read_metacif_file(self):
+    if os.path.isfile(self.metacif_path):
+      reader = iotbx.cif.reader(file_path=self.metacif_path)
+      return reader.model()
+
+  def write_metacif_file(self):
+    f = open(self.metacif_path, 'wb')
+    print >> f, self.cif_model
+    f.close()
+
+  def sort_crystal_dimensions(self):
+    dimensions = []
+    exptl_crystal_sizes = ('_exptl_crystal_size_min',
+                           '_exptl_crystal_size_mid',
+                           '_exptl_crystal_size_max')
+    for size in exptl_crystal_sizes:
+      value = self.cif_model[OV.FileName()].get(size)
+      if value is not None:
+        dimensions.append(float(value))
+    if dimensions:
+      dimensions.sort()
+      for i in range(len(dimensions)):
+        self.cif_model[OV.FileName()][exptl_crystal_sizes[i]] = str(dimensions[i])
+
+  def sort_crystal_colour(self):
+    cif_block = self.cif_model[OV.FileName()]
+    colour = cif_block.get('_exptl_crystal_colour')
+    if colour is None:
+      colours = []
+      cif_items = ('_exptl_crystal_colour_lustre',
+                   '_exptl_crystal_colour_modifier',
+                   '_exptl_crystal_colour_primary')
+      for item in cif_items:
+        value = cif_block.get(item)
+        if value is not None:
+          colours.append(value)
+      if colours:
+        cif_block['_exptl_crystal_colour'] = ' '.join(colours)
+    elif (colour in (
+      "colourless","white","black","gray","brown","red","pink","orange",
+      "yellow","green","blue","violet")):
+      cif_block.setdefault('_exptl_crystal_colour_primary', colour)
+
+  def update_cif_block(self, dictionary):
+    user_modified = OV.GetParam('snum.metacif.user_modified')
+    user_removed = OV.GetParam('snum.metacif.user_removed')
+    user_added = OV.GetParam('snum.metacif.user_added')
+    for key, value in dictionary.iteritems():
+      if key.startswith('_') and value not in ('?', '.'):
+        if not (user_added is not None and key in user_added or
+                user_modified is not None and key in user_modified or
+                user_removed is not None and key in user_removed):
+          self.cif_block[key] = value
+
+class SaveCifInfo(CifTools):
+  def __init__(self):
+    super(SaveCifInfo, self).__init__()
+    self.write_metacif_file()
+
+OV.registerFunction(SaveCifInfo)
+
+class ViewCifInfo(CifTools):
+  def __init__(self):
     """First argument should be 'view' or 'merge'.
 
 		'view' brings up an internal text editor with the metacif information in cif format.
 		'merge' merges the metacif data with cif file from refinement, and brings up and external text editor with the merged cif file.
 		"""
-    super(MetaCif, self).__init__()
-    merge = (merge not in ('False','false',False))
-    edit = (edit not in ('False','false',False))
-
-    if not merge:
-      ## view metacif information in internal text editor
-      self.viewCifInfoInOlex()
-    else:
-      self.writeMetacifFile()
-      ## merge metacif file with cif file from refinement
-      OV.CifMerge('meta.cif')
-      ## open merged cif file in external text editor
-      if edit:
-        OV.external_edit('filepath()/filename().cif')
-
-  def viewCifInfoInOlex(self):
-    """Brings up popup text editor in olex containing the text to be added to the cif file."""
-
-    text = self.prepareCifItems()
-    inputText = OV.GetUserInput(0,'Items to be entered into cif file',text)
-
-    if inputText and inputText != text:
-      self.read_input_text(inputText)
-    else:
-      inputText = text
-
-    return inputText
-
-  def writeMetacifFile(self):
-    """Writes the file 'meta.cif' to the Olex virtual FS."""
-
-    text = self.prepareCifItems()
-    ## write file to virtual FS
-    OV.write_to_olex('meta.cif', text)
-
-  def sort_crystal_dimensions(self):
-    params = OV.Params()
-    metacif = params.snum.metacif
-    dimensions = []
-    for item in ('exptl_crystal_size_min','exptl_crystal_size_mid','exptl_crystal_size_max'):
-      value = OV.GetParam('snum.metacif.%s' %item)
-      if value is not None:
-        dimensions.append(value)
-    dimensions = [item for item in (metacif.exptl_crystal_size_min,
-                                    metacif.exptl_crystal_size_mid,
-                                    metacif.exptl_crystal_size_max) if item is not None]
-    if dimensions:
-      dimensions.sort()
-      try:
-        metacif.exptl_crystal_size_min = dimensions[0]
-        metacif.exptl_crystal_size_mid = dimensions[1]
-        metacif.exptl_crystal_size_max = dimensions[2]
-      except IndexError:
-        pass
-    params.snum.metacif = metacif
-    olx.phil_handler.update_from_python(params)
-
-  def prepareCifItems(self):
-    """Returns a string in cif format of all items in a dictionary of cif items."""
-
+    super(ViewCifInfo, self).__init__()
     self.sort_crystal_dimensions()
-    listText = []
-    name_value_pairs = olx.phil_handler.name_value_pairs('snum.metacif')
-    for name, value in name_value_pairs:
-      if 'file' in name or 'user_input' in name:
-        continue
-      cifName = '_' + name.split('snum.metacif.')[1]
-      if cifName == '_symmetry_space_group_name_H_M':
-        cifName = '_symmetry_space_group_name_H-M'
-      separation = " "*(40-len(cifName))
-      if cifName not in ('_list_people'):
-        if value is None:
-          continue
-        elif value == '?':
-          continue
-        elif cifName == '_publ_author_names' and OV.GetParam_as_string('snum.metacif.publ_author_names') != '?':
-          loop = [('_publ_author_name','_publ_author_email','_publ_author_address')]
-          names = value.split(';')
-          for name in names:
-            if name != '?':
-              email = userDictionaries.people.getPersonInfo(name,'email')
-              add = userDictionaries.people.getPersonInfo(name,'address')
-              address = ''
-              for line in add.split('\n'):
-                address += ' %s\n' %line
-              loop.append((name,email,address))
-          loopText = self.prepareLoop(loop)
-          listText.append(loopText)
-        elif cifName == '_publ_contact_author_name':
-          name = value
-          if name != '?':
-            email = userDictionaries.people.getPersonInfo(name,'email')
-            phone = userDictionaries.people.getPersonInfo(name,'phone')
-            add = userDictionaries.people.getPersonInfo(name,'add')
-            address = ''
-            for line in add.split('\n'):
-              address += ' %s\n' %line
-            publ_contact_author_text = ''
-            for item in [('_publ_contact_author_name',name),('_publ_contact_author_email',email),('_publ_contact_author_phone',phone)]:
-              separation = " "*(40-len(item[0]))
-              publ_contact_author_text += "%s%s'%s'\n" %(item[0],separation,item[1])
-            listText.append(publ_contact_author_text)
-        elif cifName == '_publ_contact_letter' and value != '?':
-          letterText = '_publ_contact_letter\n;\n'
-          for line in value.split('\n'):
-            letterText += ' %s\n' %line
-          letterText += ';\n'
-          listText.append(letterText)
-        else:
-          if type(value) == float or type(value) == int:
-            s = "%s%s%s\n" %(cifName,separation,value)
-          elif value and value[0:2] == '\n;' and value != ';\n ?\n;':
-            s = "%s%s" %(cifName,value)
-          elif value and value[0:1] == ';' and value != ';\n ?\n;':
-            s = "%s%s\n%s\n" %(cifName,separation,value)
-          elif ' ' in value:
-            s = "%s%s'%s'\n" %(cifName,separation,value)
-          elif ',' in value:
-            s = "%s%s'%s'\n" %(cifName,separation,value)
-          elif value:
-            s = "%s%s%s\n" %(cifName,separation,value)
-          else:
-            s = None
-          if s:
-            listText.append(s)
-    listText.sort()
-    if listText != []:
-      text = ''.join(listText)
-    else:
-      text = "No cif information has been found"
-    return text
+    self.sort_crystal_colour()
+    ## view metacif information in internal text editor
+    s = StringIO()
+    print >> s, self.cif_model
+    text = s.getvalue()
+    inputText = OV.GetUserInput(0,'Items to be entered into cif file', text)
+    if inputText and inputText != text:
+      reader = iotbx.cif.fast_reader(input_string=str(inputText))
+      if reader.error_count():
+        return
+      updated_cif_model = reader.model()
+      diff_1 = self.cif_model.values()[0].difference(updated_cif_model.values()[0])
+      modified_items = diff_1._set
+      removed_items = self.cif_model.values()[0]._set\
+                    - updated_cif_model.values()[0]._set
+      added_items = updated_cif_model.values()[0]._set\
+                  - self.cif_model.values()[0]._set
+      user_modified = OV.GetParam('snum.metacif.user_modified')
+      user_removed = OV.GetParam('snum.metacif.user_removed')
+      user_added = OV.GetParam('snum.metacif.user_added')
+      for item in added_items:
+        if user_added is None:
+          user_added = [item]
+        elif item not in user_added:
+          user_added.append(item)
+      for item in removed_items:
+        if user_removed is None:
+          user_removed = [item]
+        elif item not in user_removed:
+          user_removed.append(item)
+      for item in modified_items:
+        if user_modified is None:
+          user_modified = [item]
+        elif item not in user_modified:
+          user_modified.append(item)
+      olx.cif_model = updated_cif_model
+      self.cif_model = olx.cif_model
+      self.write_metacif_file()
+      if user_modified is not None:
+        OV.SetParam('snum.metacif.user_modified', user_modified)
+      if user_removed is not None:
+        OV.SetParam('snum.metacif.user_removed', user_removed)
+      if user_added is not None:
+        OV.SetParam('snum.metacif.user_added', user_added)
 
-  def prepareLoop(self,loop):
-    strList = ['loop_\n']
-    for item in loop:
-      for line in item:
-        if '\n' in line:
-          strList.append(';\n%s;\n' %line)
-        elif ' ' in line:
-          strList.append("'%s'\n" %line)
-        else:
-          strList.append("%s\n" %line)
-    return ''.join(strList)
+OV.registerFunction(ViewCifInfo)
 
-  def read_input_text(self, inputText):
-    """Reads input text from internal text editor and saves as variables in Olex those that have changed.
+class MergeCif(CifTools):
+  def __init__(self, edit=False):
+    super(MergeCif, self).__init__()
+    edit = (edit not in ('False','false',False))
+    ## merge metacif file with cif file from refinement
+    OV.CifMerge(self.metacif_path)
+    ## open merged cif file in external text editor
+    if edit:
+      OV.external_edit('filepath()/filename().cif')
+OV.registerFunction(MergeCif)
 
-		For each cif item, if the value of the cif item has changed, the new value of the variable will be saved in Olex
-		and the variable added to the list of variables that have been modified by the user.
-		The Olex variables are then saved as a pickle file.
-		"""
-
-    mcif = inputText.split('\n')
-    meta = []
-    a = -1
-    for line in mcif:
-      a+= 1
-      field = ""
-      apd=""
-      l = line.split()
-      if len(l) <= 1:
-        i = 1
-        value = ""
-        if line == "\n":
-          continue
-        if line[:1] == ';':
-          continue
-        if line[:1] == "_":
-          field = line[1:].strip()
-          value += "%s" %(mcif[a+i])
-          i+= 1
-          while mcif[a+i][:1] != ";":
-            value += "\n%s" %(mcif[a+i])
-            i+=1
-          value += "\n;"
-          try:
-            oldValue = OV.GetParam_as_string('snum.metacif.%s' %field)
-            if oldValue is not None and value != str(oldValue).rstrip().lstrip():
-              OV.SetParam('snum.metacif.%s' %field,value)
-              variableFunctions.AddVariableToUserInputList('%s' %field)
-            else:
-              continue
-          except:
-            OV.SetParam('snum.metacif.%s' %field,value[1:])
-      else:
-        if line[:1] == "_":
-          field = line.split()[0][1:]
-          x = line.split()[1:]
-          value = ""
-          if len(x) > 1:
-            for thing in x:
-              value += "%s " %thing
-          else:
-            value = x[0]
-          value = value.replace("'", "").rstrip()
-          try:
-            oldValue = OV.GetParam_as_string('snum.metacif.%s' %field)
-            if oldValue is not None and value != str(oldValue).strip():
-              if value in ('?', '.'):
-                OV.SetParam('snum.metacif.%s' %field, None)
-              else:
-                OV.SetParam('snum.metacif.%s' %field, value)
-              variableFunctions.AddVariableToUserInputList('%s' %field)
-            else:
-              continue
-          except:
-            OV.SetParam('snum.metacif.%s' %field, value)
-        elif line == "\n":
-          continue
-        elif line[:1] == "#":
-          continue
-        else:
-          continue
-
-OV.registerFunction(MetaCif)
-
-class CifTools(ArgumentParser):
+class ExtractCifInfo(CifTools):
   def __init__(self):
-    super(CifTools, self).__init__()
+    super(ExtractCifInfo, self).__init__()
     self.ignore = ["?", "'?'", ".", "'.'"]
     self.versions = {"default":[],"smart":{},"saint":{},"shelxtl":{},"xprep":{},"sad":{}, "twin":{}, "abs":{}}
     self.metacif = {}
     self.metacifFiles = MetacifFiles()
     self.run()
+    olx.cif_model = self.cif_model
 
   def run(self):
     merge = []
@@ -301,7 +269,6 @@ class CifTools(ArgumentParser):
     versions = self.get_def()
 
     import History
-    #active_node = History.tree.active_node
     active_solution = History.tree.active_child_node
     if active_solution is not None and active_solution.is_solution:
       solution_reference = SPD.programs[active_solution.program].reference
@@ -313,61 +280,57 @@ class CifTools(ArgumentParser):
 
     if "frames" in tools:
       p = self.sort_out_path(path, "frames")
-      if p != "File Not Found" and self.metacifFiles.curr_frames != self.metacifFiles.prev_frames:
+      if p and self.metacifFiles.curr_frames != self.metacifFiles.prev_frames:
         import bruker_frames
         frames = bruker_frames.reader(p).cifItems()
-        merge.append(frames)
+        self.update_cif_block(frames)
 
     if "smart" in tools:
       p = self.sort_out_path(path, "smart")
-      if p != "File Not Found" and self.metacifFiles.curr_smart != self.metacifFiles.prev_smart:
+      if p and self.metacifFiles.curr_smart != self.metacifFiles.prev_smart:
         import bruker_smart
         smart = bruker_smart.reader(p).cifItems()
         computing_data_collection = self.prepare_computing(smart, versions, "smart")
         smart.setdefault("_computing_data_collection", computing_data_collection)
-        merge.append(smart)
+        self.update_cif_block(smart)
 
     if "p4p" in tools:
       p = self.sort_out_path(path, "p4p")
-      if p != "File Not Found" and self.metacifFiles != self.metacifFiles.prev_p4p:
+      if p and self.metacifFiles != self.metacifFiles.prev_p4p:
         try:
           from p4p_reader import p4p_reader
           p4p = p4p_reader(p).read_p4p()
-          merge.append(p4p)
+          self.update_cif_block(p4p)
         except:
           pass
 
     if "integ" in tools:
       p = self.sort_out_path(path, "integ")
-      if p != "File Not Found" and self.metacifFiles.curr_integ != self.metacifFiles.prev_integ:
+      if p and self.metacifFiles.curr_integ != self.metacifFiles.prev_integ:
         import bruker_saint_listing
         integ = bruker_saint_listing.reader(p).cifItems()
         computing_data_reduction = self.prepare_computing(integ, versions, "saint")
         computing_data_reduction = string.strip((string.split(computing_data_reduction, "="))[0])
         integ.setdefault("_computing_data_reduction", computing_data_reduction)
         integ["computing_data_reduction"] = computing_data_reduction
-        merge.append(integ)
+        self.update_cif_block(integ)
 
     if "saint" in tools:
       p = self.sort_out_path(path, "saint")
-      if p != "File Not Found" and self.metacifFiles.curr_saint != self.metacifFiles.prev_saint:
+      if p and self.metacifFiles.curr_saint != self.metacifFiles.prev_saint:
         import bruker_saint
         saint = bruker_saint.reader(p).cifItems()
         computing_cell_refinement = self.prepare_computing(saint, versions, "saint")
         saint.setdefault("_computing_cell_refinement", computing_cell_refinement)
         computing_data_reduction = self.prepare_computing(saint, versions, "saint")
         saint.setdefault("_computing_data_reduction", computing_data_reduction)
-        merge.append(saint)
+        self.update_cif_block(saint)
 
     if "abs" in tools:
       import abs_reader
       p = self.sort_out_path(path, "abs")
-      if p == "File Not Found":
-        return
-      if p != "File Not Found" and self.metacifFiles.curr_abs != self.metacifFiles.prev_abs:
-        print "ABS File type = ", abs_reader.abs_type(p)
-      if abs_reader.abs_type(p) == "SADABS":
-        if p != "File Not Found" and self.metacifFiles.curr_abs != self.metacifFiles.prev_abs:
+      if p and self.metacifFiles.curr_abs != self.metacifFiles.prev_abs:
+        if abs_reader.abs_type(p) == "SADABS":
           try:
             import abs_reader
             sad = abs_reader.reader(p).cifItems()
@@ -378,9 +341,7 @@ class CifTools(ArgumentParser):
             merge.append(sad)
           except KeyError:
             print "There was an error reading the SADABS output file\n'%s'.\nThe file may be incomplete." %p
-          #print "sad", sad
-      elif abs_reader.abs_type(p) == "TWINABS":
-        if p != "File Not Found" and self.metacifFiles.curr_abs != self.metacifFiles.prev_abs:
+        elif abs_reader.abs_type(p) == "TWINABS":
           try:
             import abs_reader
             twin = abs_reader.reader(p).twin_cifItems()
@@ -390,29 +351,32 @@ class CifTools(ArgumentParser):
             twin.setdefault("_exptl_absorpt_process_details", t)
             merge.append(twin)
           except KeyError:
-            print "There was an error reading the TWINABS output file\n'%s'.\nThe file may be incomplete." %p 
+            print "There was an error reading the TWINABS output file\n'%s'.\nThe file may be incomplete." %p
 
     if 'pcf' in tools:
       p = self.sort_out_path(path, "pcf")
-      if p != "File Not Found" and self.metacifFiles.curr_pcf != self.metacifFiles.prev_pcf:
+      if p and self.metacifFiles.curr_pcf != self.metacifFiles.prev_pcf:
         from pcf_reader import pcf_reader
         pcf = pcf_reader(p).read_pcf()
-        merge.append(pcf)
+        self.update_cif_block(pcf)
 
     if "cad4" in tools:
       p = self.sort_out_path(path, "cad4")
-      if p != "File Not Found" and self.metacifFiles.curr_cad4 != self.metacifFiles.prev_cad4:
+      if p and self.metacifFiles.curr_cad4 != self.metacifFiles.prev_cad4:
         from cad4_reader import cad4_reader
         cad4 = cad4_reader(p).read_cad4()
-        merge.append(cad4)
+        self.update_cif_block(cad4)
 
     if "cif_od" in tools:
       # Oxford Diffraction data collection CIF
       p = self.sort_out_path(path, "cif_od")
-      if p != "File Not Found" and self.metacifFiles.curr_cif_od != self.metacifFiles.prev_cif_od:
-        import cif_reader
-        cif_od = cif_reader.reader(p).cifItems()
-        merge.append(cif_od)
+      if p and self.metacifFiles.curr_cif_od != self.metacifFiles.prev_cif_od:
+        import iotbx.cif
+        f = open(p, 'rUb')
+        cif_od = iotbx.cif.fast_reader(input_string=f.read()).model().values()[0]
+        self.exclude_cif_items(cif_od)
+        f.close()
+        self.update_cif_block(cif_od)
 
     if "cif_def" in tools:
       # Diffractometer definition file
@@ -424,47 +388,25 @@ class CifTools(ArgumentParser):
       if diffractometer not in ('','?') and p != '?' and os.path.exists(p):
         import cif_reader
         cif_def = cif_reader.reader(p).cifItems()
-        merge.append(cif_def)
-    self.setVariables(merge)
+        self.update_cif_block(cif_def)
 
-  def setVariables(self,info):
-    dataAdded = []
-    userInputVariables = OV.GetParam("snum.metacif.user_input_variables")
+    self.write_metacif_file()
 
-    for d in info:
-      cifLabels = ['diffrn','cell','symmetry','exptl','computing']
-      ## sort crystal dimensions into correct order
-      dimensions = []
-      for item in ('_exptl_crystal_size_min','_exptl_crystal_size_mid','_exptl_crystal_size_max'):
-        if item not in dataAdded and d.has_key(item):
-          dimensions.append(d[item])
-      if dimensions:
-        dimensions.sort()
-        try:
-          d['_exptl_crystal_size_min'] = dimensions[0]
-          d['_exptl_crystal_size_mid'] = dimensions[1]
-          d['_exptl_crystal_size_max'] = dimensions[2]
-        except IndexError:
-          pass
-      for item, value in d.items():
-        if item not in dataAdded\
-           and (userInputVariables is None
-                or item.lstrip('_') not in userInputVariables):
-          if item[0] == '_' and item.split('_')[1] in cifLabels:
-            if item == '_symmetry_cell_setting':
-              value = value.lower()
-            if value == '?':
-              value = None
-            OV.SetParam("snum.metacif.%s" %(item[1:].replace('-','_').replace('/','_over_')), value)
-            dataAdded.append(item)
-        else: continue
+  def exclude_cif_items(self, cif_block):
+    # ignore cif items that should be provided by the refinement engine
+    exclude_list = ('_cell_length', '_cell_angle', '_cell_volume', '_cell_formula',
+                    '_cell_oxdiff', '_symmetry')
+    for item in cif_block:
+      for exclude in exclude_list:
+        if item.startswith(exclude):
+          del cif_block[item]
 
-    colour = OV.GetParam("snum.metacif.exptl_crystal_colour")
-    if colour in (
-      "colourless","white","black","gray","brown","red","pink","orange","yellow","green","blue","violet")\
-       and userInputVariables is not None\
-       and "exptl_crystal_colour_primary" not in userInputVariables:
-      OV.SetParam("snum.metacif.exptl_crystal_colour_primary", colour)
+  def prepare_exptl_absorpt_process_details(self, dictionary, version):
+    parameter_ratio = dictionary["parameter_ratio"]
+    R_int_after = dictionary["Rint_after"]
+    R_int_before = dictionary["Rint_before"]
+    ratiominmax = dictionary["ratiominmax"]
+    lambda_correction = dictionary["lambda_correction"]
 
   def prepare_exptl_absorpt_process_details(self, abs, version):
     if abs["abs_type"] == "TWINABS":
@@ -476,27 +418,27 @@ class CifTools(ArgumentParser):
         R_int_after = abs["%s"%component]["Rint_after"]
         R_int_before = abs["%s"%component]["Rint_before"]
         ratiominmax = abs["%s"%component]["ratiominmax"]
-        lambda_correction = abs["lambda_correction"]     
+        lambda_correction = abs["lambda_correction"]
         t.append("For component %s:\n" %(component))
         t.append("R(int) was %s before and %s after correction.\n" %(R_int_before, R_int_after))
-        t.append("The Ratio of minimum to maximum transmission is %.2f.\n" %(float(ratiominmax)))      
+        t.append("The Ratio of minimum to maximum transmission is %.2f.\n" %(float(ratiominmax)))
       t.append("The \l/2 correction factor is %s\n;\n" %(lambda_correction))
       for me in t:
         txt = txt + " %s"%me
       exptl_absorpt_process_details = "%s"%txt
-      
+
     elif abs["abs_type"] == "SADABS":
       parameter_ratio = abs["parameter_ratio"]
       R_int_after = abs["Rint_after"]
       R_int_before = abs["Rint_before"]
       ratiominmax = abs["ratiominmax"]
       lambda_correction = abs["lambda_correction"]
-      
+
       t = ["%s was used for absorption correction." %(version),
            "R(int) was %s before and %s after correction." %(R_int_before, R_int_after),
            "The Ratio of minimum to maximum transmission is %s." %(ratiominmax),
            "The \l/2 correction factor is %s" %(lambda_correction)]
-  
+
       txt = " %s\n %s\n %s\n %s" %(t[0], t[1], t[2], t[3])
       exptl_absorpt_process_details = "\n;\n%s\n;\n" %txt
     return exptl_absorpt_process_details
@@ -533,7 +475,6 @@ class CifTools(ArgumentParser):
 		If more than one file is present, the path of the most recent file is returned by default.
 		"""
 
-    parent = ""
     info = ""
     if tool == "smart":
       name = "smart"
@@ -575,23 +516,16 @@ class CifTools(ArgumentParser):
     for path in glob.glob(os.path.join(directory, name+extension)):
       info = os.stat(path)
       files.append((info.st_mtime, path))
-    if info:
-      returnvalue = self.file_choice(files,tool)
+    if files:
+      return OV.standardizePath(self.file_choice(files,tool))
     else:
-      p = string.split(directory, "/")
-      p[-1:] = ""
-      for bit in p:
-        parent = parent + bit + "/"
+      parent = os.path.dirname(directory)
       files = []
       for path in glob.glob(os.path.join(parent, name + extension)):
         info = os.stat(path)
         files.append((info.st_mtime, path))
-      if info:
-        returnvalue = self.file_choice(files,tool)
-      else:
-
-        returnvalue = "File Not Found"
-    return OV.standardizePath(returnvalue)
+      if files:
+        return OV.standardizePath(self.file_choice(files,tool))
 
   def file_choice(self, info, tool):
     """Given a list of files, it will return the most recent file.
@@ -655,7 +589,7 @@ class CifTools(ArgumentParser):
 
   ############################################################
 
-OV.registerFunction(CifTools)
+OV.registerFunction(ExtractCifInfo)
 
 def getOrUpdateDimasVar(getOrUpdate):
   for var in [('snum_dimas_crystal_colour_base','exptl_crystal_colour_primary'),

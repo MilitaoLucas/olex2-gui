@@ -168,138 +168,9 @@ snum {
   }
 
   metacif {
-    atom_sites_solution_primary = *? difmap vecmap heavy direct geom disper isormor notdet dual other
-      .type = choice
-    cell_measurement_reflns_used = None
-      .type = int(value_min=0)
-    cell_measurement_theta_max = None
-      .type = float(value_min=0.0, value_max=90.0)
-    cell_measurement_theta_min = None
-      .type = float(value_min=0.0, value_max=90.0)
-    cell_measurement_temperature = None
-      #.type = float(value_min=0.0)
-      .type = str
-    chemical_name_systematic = None
-      .type = str
-    computing_cell_refinement = None
-      .type = str
-    computing_data_collection = None
-      .type = str
-    computing_data_reduction = None
-      .type = str
-    computing_molecular_graphics = 'OLEX2: a complete structure solution, refinement and analysis program. Dolomanov et al., J. Appl. Cryst. (2009). 42, 339-341'
-      .type = str
-    computing_publication_material = 'OLEX2: a complete structure solution, refinement and analysis program. Dolomanov et al., J. Appl. Cryst. (2009). 42, 339-341'
-      .type = str
-    computing_structure_solution = None
-      .type = str
-    diffrn_ambient_temperature = None
-      #.type = float(value_min=0.0)
-      .type = str
-    diffrn_special_details = None
-      .type = str
-    diffrn_measurement_device = None
-      .type = str
-    diffrn_measurement_device_type = None
-      .type = str
-    diffrn_measurement_method = None
-      .type = str
-    diffrn_measurement_details = None
-      .type = str
-    diffrn_radiation_collimation = None
-      .type = str
-    diffrn_radiation_filter_edge = None
-      .type = float(value_min=0.0)
-    diffrn_radiation_inhomogeneity = None
-      .type = float(value_min=0.0)
-    diffrn_radiation_monochromator = None
-      .type = str
-    diffrn_radiation_polarisn_norm = None
-      .type = float(value_min=-180.0, value_max=180.0)
-    diffrn_radiation_polarisn_ratio = None
-      .type = float(value_min=0.0)
-    diffrn_radiation_probe = *? x-ray neutron electron gamma
-      .type = choice
-    diffrn_radiation_type = None
-      .type = str
-    diffrn_radiation_xray_symbol = *? 'K-L~3~' 'K-L~2~' 'K-M~3~' 'K-L~2,3~'
-      .type = choice
-    diffrn_radiation_wavelength = None
-      .type = float(value_min=0.0)
-    diffrn_source = None
-      .type = str
-    diffrn_source_current = None
-      .type = float(value_min=0.0)
-    diffrn_source_power = None
-      .type = float(value_min=0.0)
-    diffrn_source_voltage = None
-      .type = float(value_min=0.0)
-    diffrn_source_target = None
-      .type = str
-    diffrn_source_type = None
-      .type = str
-#    diffrn_refln_scan_width = None
-#      .type = float(value_min=0.0)
-    diffrn_detector = None
-      .type = str
-    diffrn_detector_type = None
-      .type = str
-    diffrn_detector_area_resol_mean = None
-      .type = float(value_min=0.0)
-    diffrn_orient_matrix_UB_11 = None
-      .type = float
-    diffrn_orient_matrix_UB_12 = None
-      .type = float
-    diffrn_orient_matrix_UB_13 = None
-      .type = float
-    diffrn_orient_matrix_UB_21 = None
-      .type = float
-    diffrn_orient_matrix_UB_22 = None
-      .type = float
-    diffrn_orient_matrix_UB_23 = None
-      .type = float
-    diffrn_orient_matrix_UB_31 = None
-      .type = float
-    diffrn_orient_matrix_UB_32 = None
-      .type = float
-    diffrn_orient_matrix_UB_33 = None
-      .type = float
-    exptl_absorpt_correction_type = *? analytical cylinder empirical gaussian integration multi-scan none numerical psi-scan refdelf sphere
-      .type = choice
-    exptl_absorpt_correction_T_max = None
-      .type = float(value_min=0.0, value_max=1.0)
-    exptl_absorpt_correction_T_min = None
-      .type = float(value_min=0.0, value_max=1.0)
-    exptl_absorpt_process_details = None
-      .type = str
-    exptl_crystal_density_meas = None
-      .type = float(value_min=0.0)
-    exptl_crystal_colour = None
-      .type = str
-    exptl_crystal_colour_primary= *? colourless white black gray brown red pink orange yellow green blue violet
-      .type = choice
-    exptl_crystal_colour_lustre = *? metallic dull clear
-      .type = choice
-    exptl_crystal_colour_modifier = *? light dark whitish blackish grayish brownish reddish pinkish orangish yellowish greenish bluish
-      .type = choice
-    exptl_crystal_size_min = None
-      .type = float(value_min=0.0)
-    exptl_crystal_size_mid = None
-      .type = float(value_min=0.0)
-    exptl_crystal_size_max = None
-      .type = float(value_min=0.0)
-    exptl_crystal_description = None
-      .type = str
-    exptl_crystal_recrystallization_method = None
-      .type = str
-    exptl_crystal_preparation = None
-      .type = str
-    exptl_special_details = None
-      .type = str
-    symmetry_cell_setting = *? triclinic monoclinic orthorhombic tetragonal rhombohedral trigonal hexagonal cubic
-      .type = choice
-    symmetry_space_group_name_H_M = None
-      .type = str
+    abs_file = None
+      .type = path
+      .expert_level = 1
     abs_file = None
       .type = path
       .expert_level = 1
@@ -332,17 +203,6 @@ snum {
       .expert_level = 1
     abs_type = twinabs sadabs
       .type = choice
-    #'snum_report_diffractometer_definition_file':Variable('?'),
-    publ_contact_author_name = None
-      .type = str
-    publ_author_names = None
-      .type = str
-    publ_contact_letter = None
-      .type = str
-    publ_author_name_list = None
-      .type = str
-    publ_requested_journal = None
-      .type = str
     list_sad_files = None
       .type = strings
       .expert_level = 2
@@ -374,6 +234,15 @@ snum {
       .type = str
       .expert_level = 2
     list_twin_files = None
+      .type = strings
+      .expert_level = 2
+    user_modified = None
+      .type = strings
+      .expert_level = 2
+    user_added = None
+      .type = strings
+      .expert_level = 2
+    user_removed = None
       .type = strings
       .expert_level = 2
   }
@@ -544,6 +413,9 @@ graphs {
         .type = int(value_min=1)
         .help = Number of bins
         .caption = %Bins%
+      d_min=None
+        .type = float(value_min=0.0)
+        .caption = "d min"
       output_csv_file = False
         .type = bool
         .caption = "%Output% csv"
@@ -590,6 +462,9 @@ graphs {
       resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
         .type = choice
         .caption = "Resolution as"
+      as_intensities = False
+        .type=bool
+        .caption="Intensities"
       binning = True
         .type=bool
         .caption= "Binning"
@@ -663,7 +538,7 @@ user {
     .type = str
   auto_refine_after_anis = True
     .type = bool
-    
+
   image{
     bitmap{
       type = png
@@ -693,5 +568,5 @@ odac
   version{
     remote = "r38"
       .type = str
-  }  
+  }
 }
