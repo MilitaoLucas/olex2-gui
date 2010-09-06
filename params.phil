@@ -171,9 +171,6 @@ snum {
     abs_file = None
       .type = path
       .expert_level = 1
-    abs_file = None
-      .type = path
-      .expert_level = 1
     sad_file = None
       .type = path
       .expert_level = 1
