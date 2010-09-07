@@ -3,33 +3,33 @@
 <a
   <body
     <args
-      <arg1 name='file' def='DataDir()/samples/sucrose/sucrose.res'> 
+      <arg1 name='file' def='DataDir()/samples/sucrose/sucrose.res'>
     \>
-    <cmd 
+    <cmd
       <cmd10 "reap '%1'">
-    \>	
+    \>
   \>
 \>
 
 <b
   <body
     <args
-      <arg1 name='file' def='DataDir()/samples/THPP/thpp.res'> 
+      <arg1 name='file' def='DataDir()/samples/THPP/thpp.res'>
     \>
-    <cmd 
+    <cmd
       <cmd10 "reap '%1'">
-    \>	
+    \>
   \>
 \>
 
 <c
   <body
     <args
-      <arg1 name='file' def='DataDir()/samples/Co110/Co110.res'> 
+      <arg1 name='file' def='DataDir()/samples/Co110/Co110.res'>
     \>
-    <cmd 
+    <cmd
       <cmd10 "reap '%1'">
-    \>	
+    \>
   \>
 \>
 
@@ -38,9 +38,9 @@
 <onstartup help="Executes on program start"
   <body
     <args
-      <arg1 name="width" def='100'> 
+      <arg1 name="width" def='100'>
     \>
-    <cmd 
+    <cmd
       <cmd1 XXX="silent on">
       <cmd2 "py.Export(datadir()/olx.py)">
       <cmd3 XXX="'py.run 'basedir()/util/pyUtil/initpy.py'">
@@ -52,10 +52,10 @@
       <cmd8 XXX="echo filepath()">
       <cmd9 XXX="panel html.clientwidth(self)">
       <cmd10 XXX="schedule 8 'UpdateFile olex2.exe'">
-    \>	
+    \>
 
   <onterminate
-    <cmd1 cmd1="clear"> 
+    <cmd1 cmd1="clear">
     <cmd2 "echo filepath()">
   \>
 \>
@@ -76,7 +76,7 @@
       <cmd2  XXX="spy.pickleVVD(structure)">
       <cmd3  cmd1="clear">
       <cmd4  "@reap '%1'">
-      <cmd10 "spy.LoadStructureParams()">
+      <cmd10 "if strcmp(filename(),'none') then none else spy.LoadStructureParams()">
 
   <cmd7  "SetVar(snum_refinement_sg,sg(%n))">
   <cmd8  "spy.SetParam(snum.refinement_max_peaks,Ins(QNUM))">
@@ -86,7 +86,7 @@
   <cmd14 cmd1="if strcmp(%4,filename()) then none else 'clear'">
   \>
 <onabort
->	
+>
 >
 >
 
@@ -96,7 +96,7 @@
     <args
     \>
 
-  <cmd 
+  <cmd
     <cmd1  "echo Good Bye">
     <cmd2  "spy.saveHistory()">
     <cmd3  "spy.pickleVVD(structure)">
@@ -127,14 +127,14 @@
 <spy help="run internal python"
   <body
     <args
-      <arg1 name="tool" def=" "> 
-      <arg2 name="fun" def=" "> 
-      <arg3 name="param1" def="None"> 
-      <arg4 name="param2" def="None"> 
-      <arg5 name="param3" def="None"> 
-      <arg6 name="param4" def="None"> 
-      <arg7 name="param5" def="None"> 
-      <arg8 name="param6" def="None"> 
+      <arg1 name="tool" def=" ">
+      <arg2 name="fun" def=" ">
+      <arg3 name="param1" def="None">
+      <arg4 name="param2" def="None">
+      <arg5 name="param3" def="None">
+      <arg6 name="param4" def="None">
+      <arg7 name="param5" def="None">
+      <arg8 name="param6" def="None">
     \>
 
   <cmd
@@ -150,7 +150,7 @@
   <body
     <args
     \>
-    <cmd 
+    <cmd
       <cmd0 "if file.Exists('FilePath()/FileName().cif') then None else 'SetVar(snum_refinement_method,Least Squares)'">
       <cmd1 "if file.Exists('FilePath()/FileName().cif') then None else 'DelIns ACTA'">
       <cmd2 "if file.Exists('FilePath()/FileName().cif') then None else 'AddIns ACTA'">
@@ -177,11 +177,11 @@
 <refine help="Launches refine program. Syntax: refine [l.s.=-1] [plan=-1]"
   <body
     <args
-      <arg0 name="l.s." def='-1'> 
-      <arg1 name="plan" def='-1'> 
+      <arg0 name="l.s." def='-1'>
+      <arg1 name="plan" def='-1'>
       <arg2 name="xl" def='xl'>
     \>
-    <cmd 
+    <cmd
       <cmd4 "user('filepath')">
       <cmd5 "file">
       <cmd7 "SetVar(snum_refinement_max_cycles,%1)">
@@ -200,10 +200,10 @@
 
 <solve help="Launches solution program XS"
   <body
-    <args 
-      <arg1 name="SOLVE" def='SOLVE'\> 
+    <args
+      <arg1 name="SOLVE" def='SOLVE'\>
     \>
-    <cmd 
+    <cmd
       <cmd10 "spy.RunSolutionPrg()">
       <cmd2 cmd="spy.doProgramSettings(GetVar(snum_refinement_program),GetVar(snum_refinement_method),true)">
       \>
@@ -216,10 +216,10 @@
 
 <tidy help = "Automatically select things"
   <body
-    <args 
-      <arg1 name="cutoff" def='0.07'> 
+    <args
+      <arg1 name="cutoff" def='0.07'>
     />
-    <cmd 
+    <cmd
       <cmd1 "sel atoms where xatom.uiso > %1">
       <cmd2 "sel atoms where xatom.peak<2&&xatom.peak>0">
       <cmd3 "updatehtml">
@@ -244,13 +244,13 @@
     \>
     <onterminate
       <cmd0 "silent off">
-      <cmd1 "stop"> 
+      <cmd1 "stop">
     \>
     <onlisten
       <cmd1 cmdXXX="'SetVar(snum_refinement_max_peaks,Ins(QNUM))'">
       <cmd1 cmdXXX="'SetVar(snum_refinement_max_cycles,Ins(LS))'">
       <cmd1 cmdXXX="spy.doProgramSettings(GetVar(snum_refinement_program),GetVar(snum_refinement_method))">
-      <cmd0 cmdXXX="updatehtml"> 
+      <cmd0 cmdXXX="updatehtml">
     \>
   \>
 \>
@@ -298,7 +298,7 @@
   <body
     <args
       <arg1 name="name" def="">
-      <arg2 name="type" def="">  
+      <arg2 name="type" def="">
     \>
     <cmd
       <cmd1 "updatewght">
@@ -372,7 +372,7 @@
 
 <dire help="Opens the current directory in Explorer"
   <body
-    <cmd 
+    <cmd
       <cmd0 "exec -o getvar(defexplorer) 'filepath()'">
     \>
   \>
@@ -383,7 +383,7 @@
     <args
       <arg1 name="atom" def="">
     \>
-    <cmd 
+    <cmd
       <cmd1 "editatom %1">
     \>
   \>
@@ -391,11 +391,11 @@
 
 <oda help="Launches ac_run"
   <body
-    <args 
+    <args
       <arg1 name="single" def="">
     \>
     <cmd
-      <cmd6 "spy.runODAC('spy.ac_run solveit -%1')"> 
+      <cmd6 "spy.runODAC('spy.ac_run solveit -%1')">
     \>
   \>
 \>
@@ -403,11 +403,11 @@
 
 <start_autochem help="Launches ac_run"
   <body
-    <args 
+    <args
       <arg1 name="filefull" def="'FileFull()'">
     \>
     <cmd
-      <cmd6 "spy.ac_run solveit -filefull='%1'"> 
+      <cmd6 "spy.ac_run solveit -filefull='%1'">
     \>
   \>
 \>
