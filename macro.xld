@@ -54,7 +54,7 @@
       <cmd7  XXX="fade 0 1 0.05">
       <cmd8  XXX='waitfor fade'>
       <cmd9  "@reap '%1' %2">
-      <cmd10 "spy.LoadStructureParams()">
+      <cmd10 "if strcmp(filename(),'none') then none else spy.LoadStructureParams()">
       <cmd15 "spy.run_skin sNumTitle">
       <cmd11 "SetVar(SlideQPeaksVal,0)">
       <cmd12 XXX="ceiling on">
