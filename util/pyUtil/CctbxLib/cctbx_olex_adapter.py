@@ -610,7 +610,6 @@ class OlexCctbxMasks(OlexCctbxAdapter):
     self.params = OV.Params().snum.masks
 
     if recompute in ('false', 'False'): recompute = False
-
     map_type = self.params.type
     filepath = OV.StrDir()
     pickle_path = '%s/%s.pickle' %(filepath, map_type)
@@ -638,7 +637,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
           # we need to reinitialise reflections
           self.initialise_reflections()
       xs = self.xray_structure()
-      fo_sq = self.reflections.f_sq_obs_filtered.average_bijvoet_mates()
+      fo_sq = self.reflections.f_sq_obs_merged.average_bijvoet_mates()
       mask = masks.mask(xs, fo_sq)
       self.time_compute = time_log("computation of mask").start()
       mask.compute(solvent_radius=self.params.solvent_radius,
@@ -656,6 +655,13 @@ class OlexCctbxMasks(OlexCctbxAdapter):
         easy_pickle.dump('%s/f_mask.pickle' %filepath, mask.f_mask())
         easy_pickle.dump('%s/f_model.pickle' %filepath, mask.f_model())
       mask.show_summary()
+      from iotbx.cif import model
+      cif = model.cif()
+      cif[OV.FileName()] = mask.as_cif_block()
+      f = open('%s/%s-mask.cif' %(filepath, OV.FileName()),'wb')
+      print >> f, cif
+      f.close()
+      OV.SetParam('snum.masks.update_cif', True)
     else:
       mask = olx.current_mask
     if self.params.type == "mask":
@@ -671,7 +677,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       model_map = miller.fft_map(crystal_gridding, data)
       output_data = model_map.apply_volume_scaling().real_map()
     self.time_write_grid = time_log("write grid").start()
-    if mask.flood_fill.n_voids() > 0 and OV.HasGUI():
+    if OV.HasGUI():
       write_grid_to_olex(output_data)
     self.time_write_grid.stop()
 
