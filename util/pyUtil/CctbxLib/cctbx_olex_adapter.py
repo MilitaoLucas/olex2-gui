@@ -126,15 +126,6 @@ class OlexCctbxRefine(OlexCctbxAdapter):
     self.post_peaks(self.refinement.f_obs_minus_f_calc_map(0.4))
     self.log.close()
 
-    #cctbxmap_resolution = 0.4
-    #cctbxmap_type = OV.FindValue('snum_cctbx_map_type', None)
-    #if cctbxmap_type == "--":
-      #cctbxmap_type = None
-    #else:
-      #cctbxmap_resolution = float(OV.FindValue('snum_cctbxmap_resolution'))
-    #if cctbxmap_type and cctbxmap_type !='None':
-      #self.write_grid_file(cctbxmap_type, cctbxmap_resolution)
-
     print "++++ Finished in %.3f s" %(time.time() - t0)
     print "Done."
 
@@ -322,7 +313,7 @@ class FullMatrixRefine(OlexCctbxRefine):
     filepath = OV.StrDir()
     self.f_mask = None
     if OV.GetParam("snum.refinement.use_solvent_mask"):
-      modified_hkl_path = "%s/%s_modified.hkl" %(OV.FilePath(), OV.FileName())
+      modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
       original_hklsrc = OV.GetParam('snum.masks.original_hklsrc')
       if OV.HKLSrc() == modified_hkl_path and original_hklsrc is not None:
         # change back to original hklsrc
@@ -333,8 +324,8 @@ class FullMatrixRefine(OlexCctbxRefine):
         OlexCctbxMasks()
         if olx.current_mask.flood_fill.n_voids() > 0:
           self.f_mask = olx.current_mask.f_mask()
-      elif os.path.exists("%s/f_mask.pickle" %filepath):
-        self.f_mask = easy_pickle.load("%s/f_mask.pickle" %filepath)
+      elif os.path.exists("%s/%s-f_mask.pickle" %(filepath, OV.FileName())):
+        self.f_mask = easy_pickle.load("%s/%s-f_mask.pickle" %(filepath, OV.FileName()))
       if self.f_mask is None:
         print "No mask present"
     normal_eqns = least_squares.normal_equations(
@@ -612,7 +603,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
     if recompute in ('false', 'False'): recompute = False
     map_type = self.params.type
     filepath = OV.StrDir()
-    pickle_path = '%s/%s.pickle' %(filepath, map_type)
+    pickle_path = '%s/%s-%s.pickle' %(filepath, OV.FileName(), map_type)
     if os.path.exists(pickle_path):
       data = easy_pickle.load(pickle_path)
       crystal_gridding = maptbx.crystal_gridding(
@@ -627,7 +618,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
     if recompute or data is None:
       # remove modified hkl (for shelxl) if we are recomputing the mask
       # and change back to original hklsrc
-      modified_hkl_path = "%s/%s_modified.hkl" %(OV.FilePath(), OV.FileName())
+      modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
       if os.path.exists(modified_hkl_path):
         os.remove(modified_hkl_path)
         original_hklsrc = OV.GetParam('snum.masks.original_hklsrc')
@@ -651,9 +642,12 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       self.time_f_mask.stop()
       olx.current_mask = mask
       if mask.flood_fill.n_voids() > 0:
-        easy_pickle.dump('%s/mask.pickle' %filepath, mask.mask.data)
-        easy_pickle.dump('%s/f_mask.pickle' %filepath, mask.f_mask())
-        easy_pickle.dump('%s/f_model.pickle' %filepath, mask.f_model())
+        easy_pickle.dump(
+          '%s/%s-mask.pickle' %(filepath, OV.FileName()), mask.mask.data)
+        easy_pickle.dump(
+          '%s/%s-f_mask.pickle' %(filepath, OV.FileName()), mask.f_mask())
+        easy_pickle.dump(
+          '%s/%s-f_model.pickle' %(filepath, OV.FileName()), mask.f_model())
       mask.show_summary()
       from iotbx.cif import model
       cif = model.cif()
