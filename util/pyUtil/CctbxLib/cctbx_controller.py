@@ -370,7 +370,7 @@ class normal_probability_plot(object):
 
 
 class reflections(object):
-  def __init__(self,  cell, spacegroup, reflection_file):
+  def __init__(self,  cell, spacegroup, reflection_file, hklf_matrix=None):
     """ reflections is the filename holding the reflections """
     cs = crystal.symmetry(cell, spacegroup)
     reflections_server = reflection_file_utils.reflection_file_server(
@@ -383,6 +383,10 @@ class reflections(object):
     self.crystal_symmetry = cs
     miller_arrays = reflections_server.get_miller_arrays(None)
     self.f_sq_obs = miller_arrays[0]
+    if hklf_matrix is not None and not hklf_matrix.is_unit_mx():
+      cb_op = sgtbx.change_of_basis_op(hklf_matrix).inverse()
+      self.f_sq_obs = self.f_sq_obs.change_basis(cb_op).customized_copy(
+        crystal_symmetry=cs)
     self.f_obs = self.f_sq_obs.f_sq_as_f()
     if len(miller_arrays) > 1:
       self.batch_numbers = miller_arrays[1]
@@ -391,6 +395,7 @@ class reflections(object):
     self._omit = None
     self._merge = None
     self.merging = None
+    self.hklf_matrix = hklf_matrix
     self.f_sq_obs_merged = None
     self.f_sq_obs_filtered = None
 

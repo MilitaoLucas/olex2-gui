@@ -22,7 +22,7 @@ import olex_core
 import time
 import cctbx_controller as cctbx_controller
 from cctbx import maptbx, miller, uctbx
-from libtbx import easy_pickle
+from libtbx import easy_pickle, utils
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
@@ -60,18 +60,24 @@ class OlexCctbxAdapter(object):
   def initialise_reflections(self, force=False, verbose=False):
     self.cell = self.olx_atoms.getCell()
     self.space_group = str(olx.xf_au_GetCellSymm())
+    hklf_matrix = utils.flat_list(self.olx_atoms.model['hklf']['matrix'])
+    hklf_matrix = sgtbx.rt_mx(
+      sgtbx.rot_mx([int(i) for i in hklf_matrix]).transpose())
     reflections = olx.HKLSrc()
     mtime = os.path.getmtime(reflections)
     if (force or
         reflections != olx.current_hklsrc or
-        mtime != olx.current_hklsrc_mtime):
+        mtime != olx.current_hklsrc_mtime or
+        hklf_matrix != olx.current_reflections.hklf_matrix):
       olx.current_hklsrc = reflections
       olx.current_hklsrc_mtime = mtime
-      olx.current_reflections = cctbx_controller.reflections(self.cell, self.space_group, reflections)
+      olx.current_reflections = cctbx_controller.reflections(
+        self.cell, self.space_group, reflections, hklf_matrix)
     if olx.current_reflections:
       self.reflections = olx.current_reflections
     else:
-      olx.current_reflections = cctbx_controller.reflections(self.cell, self.space_group, reflections)
+      olx.current_reflections = cctbx_controller.reflections(
+        self.cell, self.space_group, reflections, hklf_matrix)
       self.reflections = olx.current_reflections
     merge = self.olx_atoms.model.get('merge')
     if force or merge is None or merge != self.reflections._merge:
@@ -125,15 +131,6 @@ class OlexCctbxRefine(OlexCctbxAdapter):
     #
     self.post_peaks(self.refinement.f_obs_minus_f_calc_map(0.4))
     self.log.close()
-
-    #cctbxmap_resolution = 0.4
-    #cctbxmap_type = OV.FindValue('snum_cctbx_map_type', None)
-    #if cctbxmap_type == "--":
-      #cctbxmap_type = None
-    #else:
-      #cctbxmap_resolution = float(OV.FindValue('snum_cctbxmap_resolution'))
-    #if cctbxmap_type and cctbxmap_type !='None':
-      #self.write_grid_file(cctbxmap_type, cctbxmap_resolution)
 
     print "++++ Finished in %.3f s" %(time.time() - t0)
     print "Done."
@@ -322,7 +319,7 @@ class FullMatrixRefine(OlexCctbxRefine):
     filepath = OV.StrDir()
     self.f_mask = None
     if OV.GetParam("snum.refinement.use_solvent_mask"):
-      modified_hkl_path = "%s/%s_modified.hkl" %(OV.FilePath(), OV.FileName())
+      modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
       original_hklsrc = OV.GetParam('snum.masks.original_hklsrc')
       if OV.HKLSrc() == modified_hkl_path and original_hklsrc is not None:
         # change back to original hklsrc
@@ -333,8 +330,8 @@ class FullMatrixRefine(OlexCctbxRefine):
         OlexCctbxMasks()
         if olx.current_mask.flood_fill.n_voids() > 0:
           self.f_mask = olx.current_mask.f_mask()
-      elif os.path.exists("%s/f_mask.pickle" %filepath):
-        self.f_mask = easy_pickle.load("%s/f_mask.pickle" %filepath)
+      elif os.path.exists("%s/%s-f_mask.pickle" %(filepath, OV.FileName())):
+        self.f_mask = easy_pickle.load("%s/%s-f_mask.pickle" %(filepath, OV.FileName()))
       if self.f_mask is None:
         print "No mask present"
     normal_eqns = least_squares.normal_equations(
@@ -610,10 +607,9 @@ class OlexCctbxMasks(OlexCctbxAdapter):
     self.params = OV.Params().snum.masks
 
     if recompute in ('false', 'False'): recompute = False
-
     map_type = self.params.type
     filepath = OV.StrDir()
-    pickle_path = '%s/%s.pickle' %(filepath, map_type)
+    pickle_path = '%s/%s-%s.pickle' %(filepath, OV.FileName(), map_type)
     if os.path.exists(pickle_path):
       data = easy_pickle.load(pickle_path)
       crystal_gridding = maptbx.crystal_gridding(
@@ -628,7 +624,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
     if recompute or data is None:
       # remove modified hkl (for shelxl) if we are recomputing the mask
       # and change back to original hklsrc
-      modified_hkl_path = "%s/%s_modified.hkl" %(OV.FilePath(), OV.FileName())
+      modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
       if os.path.exists(modified_hkl_path):
         os.remove(modified_hkl_path)
         original_hklsrc = OV.GetParam('snum.masks.original_hklsrc')
@@ -638,7 +634,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
           # we need to reinitialise reflections
           self.initialise_reflections()
       xs = self.xray_structure()
-      fo_sq = self.reflections.f_sq_obs_filtered.average_bijvoet_mates()
+      fo_sq = self.reflections.f_sq_obs_merged.average_bijvoet_mates()
       mask = masks.mask(xs, fo_sq)
       self.time_compute = time_log("computation of mask").start()
       mask.compute(solvent_radius=self.params.solvent_radius,
@@ -652,10 +648,20 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       self.time_f_mask.stop()
       olx.current_mask = mask
       if mask.flood_fill.n_voids() > 0:
-        easy_pickle.dump('%s/mask.pickle' %filepath, mask.mask.data)
-        easy_pickle.dump('%s/f_mask.pickle' %filepath, mask.f_mask())
-        easy_pickle.dump('%s/f_model.pickle' %filepath, mask.f_model())
+        easy_pickle.dump(
+          '%s/%s-mask.pickle' %(filepath, OV.FileName()), mask.mask.data)
+        easy_pickle.dump(
+          '%s/%s-f_mask.pickle' %(filepath, OV.FileName()), mask.f_mask())
+        easy_pickle.dump(
+          '%s/%s-f_model.pickle' %(filepath, OV.FileName()), mask.f_model())
       mask.show_summary()
+      from iotbx.cif import model
+      cif = model.cif()
+      cif[OV.FileName()] = mask.as_cif_block()
+      f = open('%s/%s-mask.cif' %(filepath, OV.FileName()),'wb')
+      print >> f, cif
+      f.close()
+      OV.SetParam('snum.masks.update_cif', True)
     else:
       mask = olx.current_mask
     if self.params.type == "mask":
@@ -671,7 +677,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       model_map = miller.fft_map(crystal_gridding, data)
       output_data = model_map.apply_volume_scaling().real_map()
     self.time_write_grid = time_log("write grid").start()
-    if mask.flood_fill.n_voids() > 0 and OV.HasGUI():
+    if OV.HasGUI():
       write_grid_to_olex(output_data)
     self.time_write_grid.stop()
 
