@@ -397,9 +397,9 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       from libtbx import easy_pickle
       #from iotbx.shelx import hklf
       filepath = OV.StrDir()
-      #self.original_hklsrc = OV.HKLSrc()
+      self.original_hklsrc = OV.HKLSrc()
       modified_intensities = None
-      modified_hkl_path = "%s/%s_modified.hkl" %(OV.FilePath(), OV.FileName())
+      modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
       if not OV.HKLSrc() == modified_hkl_path:
         OV.SetParam('snum.masks.original_hklsrc', OV.HKLSrc())
       if OV.GetParam("snum.refinement.recompute_mask_before_refinement"):
@@ -410,9 +410,9 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
           modified_intensities = olx.current_mask.modified_intensities()
       elif os.path.exists(modified_hkl_path):
         OV.HKLSrc(modified_hkl_path)
-      elif os.path.exists("%s/f_mask.pickle" %filepath):
-        f_mask = easy_pickle.load("%s/f_mask.pickle" %filepath)
-        f_model = easy_pickle.load("%s/f_model.pickle" %filepath)
+      elif os.path.exists("%s/%s-f_mask.pickle" %(filepath, OV.FileName())):
+        f_mask = easy_pickle.load("%s/%s-f_mask.pickle" %(filepath, OV.FileName()))
+        f_model = easy_pickle.load("%s/%s-f_model.pickle" %(filepath, OV.FileName()))
         cctbx_adapter = cctbx_olex_adapter.OlexCctbxAdapter()
         fo2 = cctbx_adapter.reflections.f_sq_obs_filtered
         if f_mask.size() < fo2.size():
@@ -448,6 +448,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
   def post_refinement(self, RunPrgObject):
     if self.original_hklsrc is not None:
       OV.HKLSrc(self.original_hklsrc)
+      OV.File()
 
   def observe(self, RunPrgObject):
     import Analysis
