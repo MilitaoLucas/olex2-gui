@@ -244,7 +244,7 @@ class MergeCif(CifTools):
     super(MergeCif, self).__init__()
     edit = (edit not in ('False','false',False))
     ## merge metacif file with cif file from refinement
-    OV.CifMerge('"%s"' %self.metacif_path) # needs to be double quoted
+    OV.CifMerge(self.metacif_path)
     ## open merged cif file in external text editor
     if edit:
       OV.external_edit('filepath()/filename().cif')
