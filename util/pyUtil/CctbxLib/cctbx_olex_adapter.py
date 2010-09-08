@@ -22,7 +22,7 @@ import olex_core
 import time
 import cctbx_controller as cctbx_controller
 from cctbx import maptbx, miller, uctbx
-from libtbx import easy_pickle
+from libtbx import easy_pickle, utils
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
@@ -60,18 +60,24 @@ class OlexCctbxAdapter(object):
   def initialise_reflections(self, force=False, verbose=False):
     self.cell = self.olx_atoms.getCell()
     self.space_group = str(olx.xf_au_GetCellSymm())
+    hklf_matrix = utils.flat_list(self.olx_atoms.model['hklf']['matrix'])
+    hklf_matrix = sgtbx.rt_mx(
+      sgtbx.rot_mx([int(i) for i in hklf_matrix]).transpose())
     reflections = olx.HKLSrc()
     mtime = os.path.getmtime(reflections)
     if (force or
         reflections != olx.current_hklsrc or
-        mtime != olx.current_hklsrc_mtime):
+        mtime != olx.current_hklsrc_mtime or
+        hklf_matrix != olx.current_reflections.hklf_matrix):
       olx.current_hklsrc = reflections
       olx.current_hklsrc_mtime = mtime
-      olx.current_reflections = cctbx_controller.reflections(self.cell, self.space_group, reflections)
+      olx.current_reflections = cctbx_controller.reflections(
+        self.cell, self.space_group, reflections, hklf_matrix)
     if olx.current_reflections:
       self.reflections = olx.current_reflections
     else:
-      olx.current_reflections = cctbx_controller.reflections(self.cell, self.space_group, reflections)
+      olx.current_reflections = cctbx_controller.reflections(
+        self.cell, self.space_group, reflections, hklf_matrix)
       self.reflections = olx.current_reflections
     merge = self.olx_atoms.model.get('merge')
     if force or merge is None or merge != self.reflections._merge:
