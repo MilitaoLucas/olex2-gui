@@ -170,6 +170,11 @@ class CifTools(ArgumentParser):
                 user_modified is not None and key in user_modified or
                 user_removed is not None and key in user_removed):
           self.cif_block[key] = value
+    import iotbx.cif
+    if isinstance(dictionary, iotbx.cif.model.block):
+      for key, value in dictionary.loops.iteritems():
+        self.cif_block[key] = value # overwrite these for now
+
 
 class SaveCifInfo(CifTools):
   def __init__(self):
@@ -278,119 +283,125 @@ class ExtractCifInfo(CifTools):
       OV.SetParam('snum.metacif.computing_structure_solution', solution_reference)
       OV.SetParam('snum.metacif.atom_sites_solution_primary', atom_sites_solution_primary)
 
-    tools = ['smart', 'saint', 'integ', 'cad4', 'sad', 'pcf','frames', 'p4p', 'cif_od', 'cif_def', 'twin', 'abs']
+    p = self.sort_out_path(path, "frames")
+    if p and self.metacifFiles.curr_frames != self.metacifFiles.prev_frames:
+      import bruker_frames
+      frames = bruker_frames.reader(p).cifItems()
+      self.update_cif_block(frames)
 
-    if "frames" in tools:
-      p = self.sort_out_path(path, "frames")
-      if p and self.metacifFiles.curr_frames != self.metacifFiles.prev_frames:
-        import bruker_frames
-        frames = bruker_frames.reader(p).cifItems()
-        self.update_cif_block(frames)
+    p = self.sort_out_path(path, "smart")
+    if p and self.metacifFiles.curr_smart != self.metacifFiles.prev_smart:
+      import bruker_smart
+      smart = bruker_smart.reader(p).cifItems()
+      computing_data_collection = self.prepare_computing(smart, versions, "smart")
+      smart.setdefault("_computing_data_collection", computing_data_collection)
+      self.update_cif_block(smart)
 
-    if "smart" in tools:
-      p = self.sort_out_path(path, "smart")
-      if p and self.metacifFiles.curr_smart != self.metacifFiles.prev_smart:
-        import bruker_smart
-        smart = bruker_smart.reader(p).cifItems()
-        computing_data_collection = self.prepare_computing(smart, versions, "smart")
-        smart.setdefault("_computing_data_collection", computing_data_collection)
-        self.update_cif_block(smart)
-
-    if "p4p" in tools:
-      p = self.sort_out_path(path, "p4p")
-      if p and self.metacifFiles != self.metacifFiles.prev_p4p:
-        try:
-          from p4p_reader import p4p_reader
-          p4p = p4p_reader(p).read_p4p()
-          self.update_cif_block(p4p)
-        except:
-          pass
-
-    if "integ" in tools:
-      p = self.sort_out_path(path, "integ")
-      if p and self.metacifFiles.curr_integ != self.metacifFiles.prev_integ:
-        import bruker_saint_listing
-        integ = bruker_saint_listing.reader(p).cifItems()
-        computing_data_reduction = self.prepare_computing(integ, versions, "saint")
-        computing_data_reduction = string.strip((string.split(computing_data_reduction, "="))[0])
-        integ.setdefault("_computing_data_reduction", computing_data_reduction)
-        integ["computing_data_reduction"] = computing_data_reduction
-        self.update_cif_block(integ)
-
-    if "saint" in tools:
-      p = self.sort_out_path(path, "saint")
-      if p and self.metacifFiles.curr_saint != self.metacifFiles.prev_saint:
-        import bruker_saint
-        saint = bruker_saint.reader(p).cifItems()
-        computing_cell_refinement = self.prepare_computing(saint, versions, "saint")
-        saint.setdefault("_computing_cell_refinement", computing_cell_refinement)
-        computing_data_reduction = self.prepare_computing(saint, versions, "saint")
-        saint.setdefault("_computing_data_reduction", computing_data_reduction)
-        self.update_cif_block(saint)
-
-    if "abs" in tools:
-      import abs_reader
-      p = self.sort_out_path(path, "abs")
-      if p and self.metacifFiles.curr_abs != self.metacifFiles.prev_abs:
-        if abs_reader.abs_type(p) == "SADABS":
-          try:
-            import abs_reader
-            sad = abs_reader.reader(p).cifItems()
-            version = self.prepare_computing(sad, versions, "sad")
-            version = string.strip((string.split(version, "="))[0])
-            t = self.prepare_exptl_absorpt_process_details(sad, version)
-            sad.setdefault("_exptl_absorpt_process_details", t)
-            merge.append(sad)
-          except KeyError:
-            print "There was an error reading the SADABS output file\n'%s'.\nThe file may be incomplete." %p
-        elif abs_reader.abs_type(p) == "TWINABS":
-          try:
-            import abs_reader
-            twin = abs_reader.reader(p).twin_cifItems()
-            version = self.prepare_computing(twin, versions, "twin")
-            version = string.strip((string.split(version, "="))[0])
-            t = self.prepare_exptl_absorpt_process_details(twin, version)
-            twin.setdefault("_exptl_absorpt_process_details", t)
-            merge.append(twin)
-          except KeyError:
-            print "There was an error reading the TWINABS output file\n'%s'.\nThe file may be incomplete." %p
-
-    if 'pcf' in tools:
-      p = self.sort_out_path(path, "pcf")
-      if p and self.metacifFiles.curr_pcf != self.metacifFiles.prev_pcf:
-        from pcf_reader import pcf_reader
-        pcf = pcf_reader(p).read_pcf()
-        self.update_cif_block(pcf)
-
-    if "cad4" in tools:
-      p = self.sort_out_path(path, "cad4")
-      if p and self.metacifFiles.curr_cad4 != self.metacifFiles.prev_cad4:
-        from cad4_reader import cad4_reader
-        cad4 = cad4_reader(p).read_cad4()
-        self.update_cif_block(cad4)
-
-    if "cif_od" in tools:
-      # Oxford Diffraction data collection CIF
-      p = self.sort_out_path(path, "cif_od")
-      if p and self.metacifFiles.curr_cif_od != self.metacifFiles.prev_cif_od:
-        import iotbx.cif
-        f = open(p, 'rUb')
-        cif_od = iotbx.cif.fast_reader(input_string=f.read()).model().values()[0]
-        self.exclude_cif_items(cif_od)
-        f.close()
-        self.update_cif_block(cif_od)
-
-    if "cif_def" in tools:
-      # Diffractometer definition file
-      diffractometer = OV.GetParam('snum.report.diffractometer')
+    p = self.sort_out_path(path, "p4p")
+    if p and self.metacifFiles != self.metacifFiles.prev_p4p:
       try:
-        p = userDictionaries.localList.dictionary['diffractometers'][diffractometer]['cif_def']
-      except KeyError:
-        p = '?'
-      if diffractometer not in ('','?') and p != '?' and os.path.exists(p):
-        import cif_reader
-        cif_def = cif_reader.reader(p).cifItems()
-        self.update_cif_block(cif_def)
+        from p4p_reader import p4p_reader
+        p4p = p4p_reader(p).read_p4p()
+        self.update_cif_block(p4p)
+      except:
+        pass
+
+    p = self.sort_out_path(path, "integ")
+    if p and self.metacifFiles.curr_integ != self.metacifFiles.prev_integ:
+      import bruker_saint_listing
+      integ = bruker_saint_listing.reader(p).cifItems()
+      computing_data_reduction = self.prepare_computing(integ, versions, "saint")
+      computing_data_reduction = string.strip((string.split(computing_data_reduction, "="))[0])
+      integ.setdefault("_computing_data_reduction", computing_data_reduction)
+      integ["computing_data_reduction"] = computing_data_reduction
+      self.update_cif_block(integ)
+
+    p = self.sort_out_path(path, "saint")
+    if p and self.metacifFiles.curr_saint != self.metacifFiles.prev_saint:
+      import bruker_saint
+      saint = bruker_saint.reader(p).cifItems()
+      computing_cell_refinement = self.prepare_computing(saint, versions, "saint")
+      saint.setdefault("_computing_cell_refinement", computing_cell_refinement)
+      computing_data_reduction = self.prepare_computing(saint, versions, "saint")
+      saint.setdefault("_computing_data_reduction", computing_data_reduction)
+      self.update_cif_block(saint)
+
+    p = self.sort_out_path(path, "abs")
+    if p and self.metacifFiles.curr_abs != self.metacifFiles.prev_abs:
+      import abs_reader
+      abs_type = abs_reader.abs_type(p)
+      if abs_type == "SADABS":
+        try:
+          sad = abs_reader.reader(p).cifItems()
+          version = self.prepare_computing(sad, versions, "sad")
+          version = string.strip((string.split(version, "="))[0])
+          t = self.prepare_exptl_absorpt_process_details(sad, version)
+          sad.setdefault("_exptl_absorpt_process_details", t)
+          merge.append(sad)
+        except KeyError:
+          print "There was an error reading the SADABS output file\n'%s'.\nThe file may be incomplete." %p
+      elif abs_type == "TWINABS":
+        try:
+          twin = abs_reader.reader(p).twin_cifItems()
+          version = self.prepare_computing(twin, versions, "twin")
+          version = string.strip((string.split(version, "="))[0])
+          t = self.prepare_exptl_absorpt_process_details(twin, version)
+          twin.setdefault("_exptl_absorpt_process_details", t)
+          merge.append(twin)
+        except KeyError:
+          print "There was an error reading the TWINABS output file\n'%s'.\nThe file may be incomplete." %p
+
+    p = self.sort_out_path(path, "pcf")
+    if p and self.metacifFiles.curr_pcf != self.metacifFiles.prev_pcf:
+      from pcf_reader import pcf_reader
+      pcf = pcf_reader(p).read_pcf()
+      self.update_cif_block(pcf)
+
+    p = self.sort_out_path(path, "cad4")
+    if p and self.metacifFiles.curr_cad4 != self.metacifFiles.prev_cad4:
+      from cad4_reader import cad4_reader
+      cad4 = cad4_reader(p).read_cad4()
+      self.update_cif_block(cad4)
+
+    # Oxford Diffraction data collection CIF
+    p = self.sort_out_path(path, "cif_od")
+    if p and self.metacifFiles.curr_cif_od != self.metacifFiles.prev_cif_od:
+      import iotbx.cif
+      f = open(p, 'rUb')
+      cif_od = iotbx.cif.reader(input_string=f.read()).model().values()[0]
+      self.exclude_cif_items(cif_od)
+      f.close()
+      self.update_cif_block(cif_od)
+
+    # Diffractometer definition file
+    diffractometer = OV.GetParam('snum.report.diffractometer')
+    try:
+      p = userDictionaries.localList.dictionary['diffractometers'][diffractometer]['cif_def']
+    except KeyError:
+      p = '?'
+    if diffractometer not in ('','?') and p != '?' and os.path.exists(p):
+      import cif_reader
+      cif_def = cif_reader.reader(p).cifItems()
+      self.update_cif_block(cif_def)
+
+    # smtbx solvent masks output file
+    mask_cif_path = '%s/%s-mask.cif' %(OV.StrDir(), OV.FileName())
+    if (os.path.isfile(mask_cif_path)
+        and OV.GetParam('snum.refinement.use_solvent_mask')
+        and (OV.GetParam('snum.masks.update_cif')
+             or '_smtbx_masks_void' not in self.cif_block)):
+      import iotbx.cif
+      f = open(mask_cif_path, 'rUb')
+      cif_block = iotbx.cif.reader(file_object=f).model().get(OV.FileName())
+      f.close()
+      if cif_block is not None:
+        self.cif_block.update(cif_block)
+        OV.SetParam('snum.masks.update_cif', False)
+    elif (not OV.GetParam('snum.refinement.use_solvent_mask')
+          and '_smtbx_masks_void' in self.cif_block):
+      del self.cif_block['_smtbx_masks_void']
+      if '_smtbx_masks_special_details' in self.cif_block:
+        del self.cif_block['_smtbx_masks_special_details']
 
     self.write_metacif_file()
 
