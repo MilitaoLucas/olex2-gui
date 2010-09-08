@@ -214,9 +214,9 @@ class OlexFunctions(inheritFunctions):
       retStr = None
     return retStr
 
-  def CifMerge(self,file):
+  def CifMerge(self, filepath):
     try:
-      olx.CifMerge(file)
+      olx.CifMerge('"%s"' %filepath)
     except Exception, ex:
       print >> sys.stderr, "An error occured whilst trying to find merge cif files"
       sys.stderr.formatExceptionInfo()
