@@ -625,7 +625,8 @@ OV.registerFunction(checkErrLogFile)
 
 def weightGuiDisplay():
 
-  if "smtbx" in OV.GetParam('snum.refinement.program'):
+  if ("smtbx" in OV.GetParam('snum.refinement.program')
+      or not OV.IsFileType('ires')):
     return ""
 
   gui_green = OV.FindValue('gui_green')
