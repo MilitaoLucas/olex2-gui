@@ -80,9 +80,10 @@ class OlexCctbxAdapter(object):
         self.cell, self.space_group, reflections, hklf_matrix)
       self.reflections = olx.current_reflections
     merge = self.olx_atoms.model.get('merge')
+    omit = self.olx_atoms.model['omit']
     if force or merge is None or merge != self.reflections._merge:
       self.reflections.merge(merge=merge)
-    omit = self.olx_atoms.model['omit']
+      self.reflections.filter(omit, self.olx_atoms.exptl['radiation'])
     if force or omit is None or omit != self.reflections._omit:
       self.reflections.filter(omit, self.olx_atoms.exptl['radiation'])
     if verbose:
