@@ -191,7 +191,7 @@ def f_obs_vs_f_calc(model, reflections, twinning=None, batch_number=None):
 
   if twinning is not None:
     twin_fraction = twinning['basf'][0]
-    twin_law = [twinning['matrix'][i][j]
+    twin_law = [twinning['matrix'][j][i]
                 for i in range(3) for j in range(3)]
     twinning = hemihedral_twinning(twin_law, f_obs_merged)
     twin_set = twinning.twin_complete_set
@@ -243,7 +243,7 @@ def f_obs_over_f_calc(model,
 
   if twinning is not None:
     twin_fraction = twinning['basf'][0]
-    twin_law = [twinning['matrix'][i][j]
+    twin_law = [twinning['matrix'][j][i]
                 for i in range(3) for j in range(3)]
     twinning = hemihedral_twinning(twin_law, f_obs_merged)
     twin_set = twinning.twin_complete_set
@@ -316,7 +316,7 @@ class normal_probability_plot(object):
     f_obs = f_sq_obs.f_sq_as_f()
     if twinning is not None:
       twin_fraction = twinning['basf'][0]
-      twin_law = [twinning['matrix'][i][j]
+      twin_law = [twinning['matrix'][j][i]
                   for i in range(3) for j in range(3)]
       twinning = hemihedral_twinning(twin_law, f_obs)
       twin_set = twinning.twin_complete_set
