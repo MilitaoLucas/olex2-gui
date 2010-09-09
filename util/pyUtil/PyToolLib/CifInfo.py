@@ -18,6 +18,12 @@ import iotbx.cif
 from iotbx.cif import model
 from iotbx.cif import validation
 olx.cif_model = None
+olex2_reference = """\
+;
+O. V. Dolomanov, L. J. Bourhis, R. J. Gildea, J. A. K. Howard and H. Puschmann,
+OLEX2: a complete structure solution, refinement and analysis program.
+J. Appl. Cryst. (2009). 42, 339-341.
+;"""
 
 class cif_manager(object):
 
@@ -114,6 +120,10 @@ class CifTools(ArgumentParser):
 ;
 """ %(OV.GetTag(), OV.GetCompilationInfo(), OV.GetSVNVersion())
     })
+    self.update_cif_block(
+      {'_computing_molecular_graphics': olex2_reference,
+       '_computing_publication_material': olex2_reference
+       })
 
   def read_metacif_file(self):
     if os.path.isfile(self.metacif_path):
