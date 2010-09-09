@@ -32,7 +32,7 @@ def setup_cctbx():
     else:
       raise
   except AssertionError, err:
-    cold_start = True
+    need_cold_start = True
   except Exception, err:
     raise
   cctbx_TAG_file_path = "%s/TAG" %cctbxSources
@@ -49,13 +49,7 @@ Current cctbx build: '%s'
 """ %(cctbx_compatible_version, cctbx_compile_date))
 
   if need_cold_start:
-    saved_cwd = os.getcwd()
-    os.chdir(build_path)
-    sys.argv = ['%s/libtbx/configure.py' % cctbxSources, 'smtbx', 'iotbx']
-    #execfile(sys.argv[0])
-    import libtbx.configure
-    libtbx.configure.run()
-    os.chdir(saved_cwd)
+    cold_start(cctbxSources, build_path)
     import libtbx.load_env
   sys.path.extend(libtbx.env.pythonpath)
   if sys.platform.startswith('win'):
@@ -76,3 +70,17 @@ Current cctbx build: '%s'
       os.environ[lib_path] += lib_sep + libtbx.env.lib_path
   else:
     os.environ[lib_path] = libtbx.env.lib_path
+  try:
+    import antlr3 # check antlr3 paths are setup correctly
+  except ImportError, err:
+    cold_start(cctbxSources, build_path)
+
+def cold_start(cctbx_sources, build_path):
+  saved_cwd = os.getcwd()
+  os.chdir(build_path)
+  sys.argv = ['%s/libtbx/configure.py' % cctbx_sources, 'smtbx', 'iotbx']
+  #execfile(sys.argv[0])
+  import libtbx.configure
+  libtbx.configure.run()
+  os.chdir(saved_cwd)
+  import libtbx.load_env
