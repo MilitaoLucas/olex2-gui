@@ -461,12 +461,41 @@ graphs {
       resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
         .type = choice
         .caption = "Resolution as"
-      as_intensities = False
-        .type=bool
-        .caption="Intensities"
       binning = True
         .type=bool
         .caption= "Binning"
+      n_bins = 10
+        .type = int(value_min=1)
+        .help = Number of bins
+        .caption = %Bins%
+      output_csv_file = False
+        .type = bool
+        .caption = "%Output% csv"
+    }
+    scale_factor_vs_resolution
+      .short_caption = "scale vs res."
+      .caption = "Scale factor vs resolution"
+      .help = "Scale factor vs resolution"
+    {
+#      resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
+#        .type = choice
+#        .caption = "Resolution as"
+      n_bins = 10
+        .type = int(value_min=1)
+        .help = Number of bins
+        .caption = %Bins%
+      output_csv_file = False
+        .type = bool
+        .caption = "%Output% csv"
+    }
+    r1_factor_vs_resolution
+      .short_caption = "R1 vs res."
+      .caption = "R1 factor vs resolution"
+      .help = "R1 factor vs resolution"
+    {
+#      resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
+#        .type = choice
+#        .caption = "Resolution as"
       n_bins = 10
         .type = int(value_min=1)
         .help = Number of bins

@@ -21,7 +21,7 @@ import olex_core
 
 import time
 import cctbx_controller as cctbx_controller
-from cctbx import maptbx, miller, uctbx
+from cctbx import maptbx, miller
 from libtbx import easy_pickle, utils
 
 from olexFunctions import OlexFunctions
@@ -43,6 +43,20 @@ class OlexCctbxAdapter(object):
     self.olx_atoms = olexex.OlexRefinementModel()
     self.wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
     self.reflections = None
+    twinning=self.olx_atoms.model.get('twin')
+    if twinning is not None:
+      self.twin_fraction = twinning['basf'][0]
+      self.twin_law = [twinning['matrix'][j][i]
+                  for i in range(3) for j in range(3)]
+      twin_multiplicity = twinning.get('n', 2)
+      if twin_multiplicity != 2:
+        print "warning: only hemihedral twinning is currently supported"
+    else:
+      self.twin_law, self.twin_fraction = None, None
+    try:
+      self.exti = float(olx.Ins('exti'))
+    except:
+      self.exti = None
     self.initialise_reflections()
 
   def __del__(self):
@@ -55,6 +69,9 @@ class OlexCctbxAdapter(object):
         self.space_group,
         self.olx_atoms.iterator(),
         restraint_iterator=self.olx_atoms.restraint_iterator())
+    if self.reflections._merge < 4:
+      from cctbx.eltbx import wavelengths
+      self._xray_structure.set_inelastic_form_factors(self.wavelength, "sasaki")
     return self._xray_structure
 
   def initialise_reflections(self, force=False, verbose=False):
@@ -88,6 +105,40 @@ class OlexCctbxAdapter(object):
       self.reflections.filter(omit, self.olx_atoms.exptl['radiation'])
     if verbose:
       self.reflections.show_summary()
+
+  def f_calc(self, miller_set,
+             apply_extinction_correction=True,
+             apply_twin_law=True,
+             algorithm="direct"):
+    assert self.xray_structure().scatterers().size() > 0, "n_scatterers > 0"
+    if apply_twin_law and self.twin_law is not None:
+      twinning = cctbx_controller.hemihedral_twinning(self.twin_law, miller_set)
+      twin_set = twinning.twin_complete_set
+      fc = twin_set.structure_factors_from_scatterers(
+        self.xray_structure(), algorithm=algorithm).f_calc()
+      twinned_fc2 = twinning.twin_with_twin_fraction(
+        fc.as_intensity_array(),
+        self.twin_fraction)
+      fc = twinned_fc2.f_sq_as_f().phase_transfer(fc).common_set(miller_set)
+    else:
+      fc = miller_set.structure_factors_from_scatterers(
+        self.xray_structure(), algorithm=algorithm).f_calc()
+    if apply_extinction_correction and self.exti is not None:
+      fc = fc.apply_shelxl_extinction_correction(self.exti, self.wavelength)
+    return fc
+
+  def compute_weights(self, fo2, fc):
+    weight = self.olx_atoms.model['weight']
+    params = dict(a=0.1, b=0, c=0, d=0, e=0, f=1./3)
+    for param, value in zip(params.keys()[:len(weight)], weight):
+      params[param] = value
+    weighting = xray.weighting_schemes.shelx_weighting(**params)
+    scale_factor = fo2.scale_factor(fc)
+    weighting.observed = fo2
+    weighting.compute(fc, scale_factor)
+    return weighting.weights
+
+
 
 class OlexCctbxRefine(OlexCctbxAdapter):
   def __init__(self, max_cycles=None, max_peaks=None, verbose=False):
@@ -686,61 +737,6 @@ class OlexCctbxMasks(OlexCctbxAdapter):
     OV.DeleteBitmap("working")
 
 OV.registerFunction(OlexCctbxMasks)
-
-class OlexCctbxGraphs(OlexCctbxAdapter):
-  def __init__(self, graph, *args, **kwds):
-    OlexCctbxAdapter.__init__(self)
-    if self.reflections is None:
-      raise RuntimeError, "There was an error reading the reflection file."
-    self.graph = graph
-    twinning=self.olx_atoms.model.get('twin')
-
-    bitmap = 'working'
-    OV.CreateBitmap(bitmap)
-
-    try:
-      if graph == "wilson":
-        self.xy_plot = cctbx_controller.wilson_statistics(self.xray_structure(), self.reflections, **kwds)
-
-      elif graph == "completeness":
-        self.xy_plot = cctbx_controller.completeness_statistics(self.reflections, self.wavelength, **kwds)
-
-      elif graph == "cumulative":
-        self.xy_plot = cctbx_controller.cumulative_intensity_distribution(self.reflections, **kwds)
-
-      elif graph == "f_obs_f_calc":
-        self.xy_plot = cctbx_controller.f_obs_vs_f_calc(
-          self.xray_structure(),
-          self.reflections,
-          twinning=twinning,
-          **kwds)
-
-      elif graph == "f_obs_over_f_calc":
-        self.xy_plot = cctbx_controller.f_obs_over_f_calc(
-          self.xray_structure(),
-          self.reflections,
-          twinning=twinning,
-          wavelength=self.wavelength,
-          **kwds)
-
-      elif graph == "sys_absent":
-        self.xy_plot = cctbx_controller.sys_absent_intensity_distribution(self.reflections)
-
-      elif graph == "normal_probability":
-        weight = self.olx_atoms.model['weight']
-        params = dict(a=0.1, b=0, c=0, d=0, e=0, f=1./3)
-        for param, value in zip(params.keys()[:len(weight)], weight):
-          params[param] = value
-        weighting = xray.weighting_schemes.shelx_weighting(**params)
-        self.xy_plot = cctbx_controller.normal_probability_plot(
-          self.xray_structure(), self.reflections, weighting,
-          twinning=twinning,
-          #distribution=cctbx_controller.distributions.students_t_distribution(5),
-          ).xy_plot_info()
-    except Exception, err:
-      raise Exception, err
-    finally:
-      OV.DeleteBitmap(bitmap)
 
 class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
