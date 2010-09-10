@@ -461,9 +461,6 @@ graphs {
       resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
         .type = choice
         .caption = "Resolution as"
-      as_intensities = False
-        .type=bool
-        .caption="Intensities"
       binning = True
         .type=bool
         .caption= "Binning"
