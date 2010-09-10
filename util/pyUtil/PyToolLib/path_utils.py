@@ -47,10 +47,11 @@ def setup_cctbx():
 Please update to cctbx build '%s' or later.
 Current cctbx build: '%s'
 """ %(cctbx_compatible_version, cctbx_compile_date))
-
+  if not need_cold_start:
+    need_cold_start = not libtbx.env.has_module('antlr3')
   if need_cold_start:
     cold_start(cctbxSources, build_path)
-    import libtbx.load_env
+    reload(libtbx.load_env)
   sys.path.extend(libtbx.env.pythonpath)
   if sys.platform.startswith('win'):
     lib_path, lib_sep = 'PATH', ';'
@@ -70,10 +71,6 @@ Current cctbx build: '%s'
       os.environ[lib_path] += lib_sep + libtbx.env.lib_path
   else:
     os.environ[lib_path] = libtbx.env.lib_path
-  try:
-    import antlr3 # check antlr3 paths are setup correctly
-  except ImportError, err:
-    cold_start(cctbxSources, build_path)
 
 def cold_start(cctbx_sources, build_path):
   saved_cwd = os.getcwd()
