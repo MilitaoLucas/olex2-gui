@@ -1,9 +1,8 @@
-<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=2;1; -->
-<font color=$spy.GetParam(gui.html.font_colour)  size=$spy.GetParam(gui.html.font_size)>
-<tr><td></td><td colspan='2'>
+<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
 
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_bg_colour)">
 <tr>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td colspan = '1'>
     <a href="
 cursor(busy, '%Please Wait...%')
@@ -16,38 +15,18 @@ cursor(busy, '%Please Wait...%')
   <zimg border="0" src="toolbar-image.png">
 </a>
 </td>
-<td width='15%' align='right' colspan='1'>
-  Width
-</td>	
-<td colspan = '1'>
+<td colspan='4'>
   <input
     type="combo"
     height="$spy.GetParam(gui.html.combo_height)"
-    bgcolor="spy.GetParam(gui.html.input_bg_colour)" 
-    name="SET_REPORT_IMAGE_SIZE" 
-    items="640;800;1024;1280"
-    onchange="spy.SetParam(snum.report.image_size,GetValue(SET_REPORT_IMAGE_SIZE))"
-    width="20%" 
-    value="$spy.GetParam(snum.report.image_size)"
-  >
-</td>
-<td colspan='4'>
-  <input 
-    type="combo"
-    height="$spy.GetParam(gui.html.combo_height)"
-    bgcolor="spy.GetParam(gui.html.input_bg_colour)" 
+    bgcolor="spy.GetParam(gui.html.input_bg_colour)"
     name="SET_REPORT_IMAGE"
     readonly
-    items='file.ListDirForGui(FilePath(),*.png;*.jpg;*.bmp;*.ps;*.eps)' 
+    items='file.ListDirForGui(FilePath(),*.png;*.jpg;*.bmp;*.ps;*.eps)'
     onchange="spy.SetParam(snum.report.image,GetValue(SET_REPORT_IMAGE))"
-    width="50%" 
+    width="50%"
     value="file.GetName($spy.GetParam(snum.report.image))"
   >
 </td>
-</tr>
-
-</table>
-</font>
-
-</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>

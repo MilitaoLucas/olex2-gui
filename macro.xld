@@ -212,10 +212,6 @@
     <args
     \>
     <cmd
-      <cmd0 "if file.Exists('FilePath()/FileName().cif') then None else 'spy.SetParam(snum.refinement.method,Least Squares)'">
-      <cmd1 "if file.Exists('FilePath()/FileName().cif') then None else 'DelIns ACTA'">
-      <cmd2 "if file.Exists('FilePath()/FileName().cif') then None else 'AddIns ACTA'">
-      <cmd3 "if file.Exists('FilePath()/FileName().cif') then None else 'refine'">
       <cmd4 "cursor(busy, '%Checking for IMAGE file ...%')">
       <cmd5 "if file.Exists(spy.GetParam(snum.report.image)) then None else 'spy.SetParam(snum.report.image,FilePath()/screenshot.png)'">
       <cmd6 "if not(strcmp(file.GetName(spy.GetParam(snum.report.image)),screenshot.png)) then None else 'cursor(busy, Creating Image ...)>>pict -pq screenshot.png 1'">

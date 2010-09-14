@@ -259,6 +259,8 @@ class RunRefinementPrg(RunPrg):
     RunPrg.__init__(self)
     self.bitmap = 'refine'
     self.program, self.method = self.getProgramMethod('refine')
+    if self.program is None or self.method is None:
+      return
     self.run()
 
   def run(self):
