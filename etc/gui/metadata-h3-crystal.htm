@@ -1,12 +1,10 @@
-<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=2;1; -->
-<font color=$spy.GetParam(gui.html.font_colour)  size=$spy.GetParam(gui.html.font_size)>
+<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
 
 <tr>
-  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
-  <td colspan='2'>
-    <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_bg_colour)">
-      $spy.crystalMetadataHtmlMaker()
-    </table>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td>
+    $spy.crystalMetadataHtmlMaker()
   </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
-</font>

@@ -1,10 +1,10 @@
 [THREE BUTTONS PER ROW]
-  Move Near 
-  Copy Near 
-  Add H 
-  Grow Mode 
-  Assemble 
-  Centre on Cell 
+  Move Near
+  Copy Near
+  Add H
+  Grow Mode
+  Assemble
+  Centre on Cell
   Largest Part
   Show Basis
   Show Cell
@@ -12,12 +12,12 @@
   Grow All
   Edit Atom(s)
   Edit Instructions
-  Balls & Sticks 
-  Wireframe 
-  Tubes 
-  Default Style 
-  Sphere Packing 
-  Ellipsoids | H 
+  Balls & Sticks
+  Wireframe
+  Tubes
+  Default Style
+  Sphere Packing
+  Ellipsoids | H
   Atomic Mass
   Atom Number
   Atom Label
@@ -41,25 +41,27 @@
   Fix U
   Fix xyz
   Set occu
-  
-  
+  Edit Cif Info
+  Merge Cif
+  Validate Cif
+
 [SMALL BUTTONS]
-  Delete 
+  Delete
   Select
-  Balls & Sticks 
-  blank 
-  Naming 
+  Balls & Sticks
+  blank
+  Naming
   Edit
   Go
   Name
   Ellipsoids
   Add H
-  
+
 [FULL ROW]
   Run AutoChem
   Move Atoms or Model Disorder
   Separate Moieties
-  
+
 [TINY BUTTONS]
   a
   b
