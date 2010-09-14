@@ -259,8 +259,6 @@ snum {
       .type = path
     image = None
       .type = path
-    image_size = 800
-      .type = int(value_min = 0)
   }
 
   eden_fine_value = 0
