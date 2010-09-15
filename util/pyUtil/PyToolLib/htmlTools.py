@@ -1039,7 +1039,7 @@ def OnStateChange(*args):
 
   state = olx.CheckState(name)
   if state == "true":
-    use_image= "%shover.png" %img_base
+    use_image= "%son.png" %img_base
   else:
     use_image = "%soff.png" %img_base
   OV.SetImage("IMG_%s" %img_base.upper(),use_image)
