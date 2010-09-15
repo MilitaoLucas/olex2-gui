@@ -5,21 +5,18 @@
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td name=MOVE_NEAR align='center' VALIGN='center' width='33%'>
-    <a 
-      href="if strcmp(spy.GetParam(olex2.in_mode),'move sel') then 'mode off' else 'mode move sel'"
-      target="%Move Near-target%">
-      <zimg name=IMG_BUTTON-MOVE_NEAR border="0" src="button-move_near.png"/>
-    </a>
+$spy.MakeHoverButton(button-move_near,"if strcmp(spy.GetParam(olex2.in_mode),'move sel') then 'mode off' else 'mode move sel'")
   </td>
   <td name=COPY_NEAR align='center' VALIGN='center' width='33%'>
-    <a
-      href="if strcmp(spy.GetParam(olex2.in_mode),'move sel -c') then 'mode off' else 'mode move -c sel'"
-      target="%Copy Near-target%">
-      <zimg name=IMG_BUTTON-COPY_NEAR border="0" src="button-copy_near.png"/>
-    </a>
+$spy.MakeHoverButton(button-copy_near,"if strcmp(spy.GetParam(olex2.in_mode),'move sel -c') then 'mode off' else 'mode move -c sel'")
+<!--<a-->
+      <!--href="if strcmp(spy.GetParam(olex2.in_mode),'move sel -c') then 'mode off' else 'mode move -c sel'"-->
+      <!--target="%Copy Near-target%">-->
+      <!--<zimg name=IMG_BUTTON-COPY_NEAR border="0" src="button-copy_near.png"/>-->
+    <!--</a>-->
   </td>
   <td name=ASSEMBLE align='center' VALIGN='center'>
-$spy.MakeActiveGuiButton(button-assemble,'compaq -a')
+$spy.MakeHoverButton(button-assemble,'compaq -a')
   </td>
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -30,10 +27,10 @@ $spy.MakeActiveGuiButton(button-assemble,'compaq -a')
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td name=CENTRE_ON_CELL align='center' VALIGN='center' width='33%'>
-$spy.MakeActiveGuiButton(button-centre_on_cell,move>>compaq)
+$spy.MakeHoverButton(button-centre_on_cell,move>>compaq)
   </td>
   <td name=CENTER_ON_LARGEST_PART align='center' VALIGN='center' width='33%'>
-$spy.MakeActiveGuiButton(button-largest_part,move)
+$spy.MakeHoverButton(button-largest_part,move)
   </td>
   <td name=BLANK>
   </td>
@@ -45,18 +42,20 @@ $spy.MakeActiveGuiButton(button-largest_part,move)
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td name=SHOW_BASIS align='center' VALIGN='center' width='33%'>
-  <a 
-    href="basis" 
-    target="%Basis-target%">
-    <zimg name=IMG_BUTTON-SHOW_BASIS border="0" src="button-show_basis.png"/>
-  </a>
+$spy.MakeHoverButton(button-show_basis,basis)
+  <!--<a-->
+    <!--href="basis"-->
+    <!--target="%Basis-target%">-->
+    <!--<zimg name=IMG_BUTTON-SHOW_BASIS border="0" src="button-show_basis.png"/>-->
+  <!--</a>-->
 </td>
   <td name=SHOW_CELL align='center' VALIGN='center' width='33%'>
-    <a 
-      href="cell" 
-      target="%Show Cell-target%">
-      <zimg name=IMG_BUTTON-SHOW_CELL border="0" src="button-show_cell.png"/>
-    </a>
+$spy.MakeHoverButton(button-show_cell,cell)
+    <!--<a-->
+      <!--href="cell"-->
+      <!--target="%Show Cell-target%">-->
+      <!--<zimg name=IMG_BUTTON-SHOW_CELL border="0" src="button-show_cell.png"/>-->
+    <!--</a>-->
   </td>
   <td name=QUALITY_SLIDER align='right' VALIGN='center'>
 <!-- #include quality-slider gui\snippets\snippet-quality-slider.htm;1; -->
@@ -69,10 +68,10 @@ $spy.MakeActiveGuiButton(button-largest_part,move)
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td name=FUSE width='33%' align='center'>
-$spy.MakeActiveGuiButton(button-fuse,fuse)
+$spy.MakeHoverButton(button-fuse,fuse)
   </td>
   <td name=GROW_ALL width=33% align='center'>
-$spy.MakeActiveGuiButton(button-grow_all,grow)
+$spy.MakeHoverButton(button-grow_all,grow)
   </td>
   <td name=BLANK>
   </td>
