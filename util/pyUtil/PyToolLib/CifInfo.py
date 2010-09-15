@@ -94,8 +94,11 @@ class ValidateCif(object):
       f = open(filepath, 'rUb')
       cif_model = iotbx.cif.fast_reader(input_string=f.read()).model()
       f.close()
+      print "Validating %s" %filepath
       cif_dic = validation.smart_load_dictionary(cif_dic)
-      cif_model.validate(cif_dic, show_warnings)
+      error_handler = cif_model.validate(cif_dic, show_warnings)
+      if error_handler.error_count == 0:
+        print "No errors found"
 
 OV.registerMacro(ValidateCif, """filepath&;cif_dic&;show_warnings""")
 
@@ -268,14 +271,14 @@ class MergeCif(CifTools):
           olex.m('refine')
         print "Creating cif:"
         olex.m('CifCreate')
-        ## pre-merge (info about refinement)
-        #from cctbx_olex_adapter import OlexCctbxAdapter
-        #xs = OlexCctbxAdapter().xray_structure()
-        #cif_block = xs.as_cif_block()
-        #s = StringIO()
-        #print >> s, cif_block
-        #OV.write_to_olex('xs.cif', s.getvalue())
-        #OV.CifMerge('xs.cif')
+        # pre-merge (info about refinement)
+        from cctbx_olex_adapter import OlexCctbxAdapter
+        xs = OlexCctbxAdapter().xray_structure()
+        cif_block = xs.as_cif_block()
+        s = StringIO()
+        print >> s, cif_block
+        OV.write_to_olex('xs.cif', s.getvalue())
+        OV.CifMerge('xs.cif')
       else:
         if method == 'CGLS':
           OV.set_refinement_program(prg, 'Least Squares')

@@ -69,9 +69,12 @@ class OlexCctbxAdapter(object):
         self.space_group,
         self.olx_atoms.iterator(),
         restraint_iterator=self.olx_atoms.restraint_iterator())
-    if self.reflections._merge < 4:
-      from cctbx.eltbx import wavelengths
-      self._xray_structure.set_inelastic_form_factors(self.wavelength, "sasaki")
+      table = ("n_gaussian", "it1992", "wk1995")[0]
+      self._xray_structure.scattering_type_registry(
+        table=table, d_min=self.reflections.f_sq_obs.d_min())
+      if self.reflections._merge < 4:
+        from cctbx.eltbx import wavelengths
+        self._xray_structure.set_inelastic_form_factors(self.wavelength, "sasaki")
     return self._xray_structure
 
   def initialise_reflections(self, force=False, verbose=False):
