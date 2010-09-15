@@ -1461,7 +1461,7 @@ class timage(ImageTools):
     OlexVFS.save_image_to_olex(IM, name, 2)
 
   def produce_buttons(self, button_names, crop, cut, max_width,scale,btn_type,width=None):
-    states = ["on", "off", "", "highlight"]
+    states = ["on", "off", "", "highlight", "hover"]
     for state in states:
       if state == "on":
         colour = self.adjust_colour(self.params.html.highlight_colour.rgb,luminosity=1.3)
@@ -1471,6 +1471,8 @@ class timage(ImageTools):
       elif state == "":
         #colour = self.adjust_colour(self.params.html.base_colour.rgb,luminosity=1.9)
         colour = self.params.button_colouring.rgb
+      elif state == "hover":
+        color = (20,100,20)
       for txt in button_names:
         if width is None: width = max_width
         use_new = True
@@ -2232,7 +2234,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
   def make_button_items(self):
     buttonItems = ["btn", "btn-QC", "btn-refine", "btn-solve"]
     for item in buttonItems:
-      states = ["on", "off", "highlight"]
+      states = ["on", "off", "highlight", "hover"]
       for state in states:
         image = self.button_items(item, state)
         name =r"%s-%s.png" %(item, state)
@@ -2668,7 +2670,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if state == "inactive":
       grad_colour = '#ababab'
       bg_colour = '#ababab'
-
+    if state == "hover":
+      grad_colour = IT.adjust_colour(grad_colour, luminosity = 0.95)
     height = int(round(OV.GetParam('gui.timage.%s.height' %item_type) * self.size_factor, 0))
     top = int(round(OV.GetParam('gui.timage.%s.top' %item_type) * self.size_factor,0))
     left = int(round(OV.GetParam('gui.timage.%s.left' %item_type) * self.size_factor,0))
