@@ -7,11 +7,19 @@
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Growing;1; -->
 
   <td name=BTN_GROW_MODE>
-    <a 
-      href="if strcmp(spy.GetParam(olex2.short_mode),'grow') then 'mode off'  else run(mode grow GetData(GROW_SHORT) GetData(GROW_SELECTION) GetData(GROW_VDW))" 
-      target="%Mode Grow-target%">
-      <zimg name=IMG_BUTTON-GROW_MODE border="0" src="button-grow_mode.png"/>
-    </a>
+    <input
+      name=IMG_BUTTON-GROW_MODE
+      type="button"
+      image="up=button-grow_modeoff.png,down=button-grow_modeon.png,hover=button-grow_modehover.png",disable=button-grow_modedisable.png"
+      hint="%Mode Grow-target%"
+      onclick="if strcmp(spy.GetParam(olex2.short_mode),'grow') then 'mode off'  else run(mode grow GetData(GROW_SHORT) GetData(GROW_SELECTION) GetData(GROW_VDW))"
+      bgcolor=$spy.GetParam(gui.html.table_bg_colour)
+    >
+    <!--<a-->
+      <!--href="if strcmp(spy.GetParam(olex2.short_mode),'grow') then 'mode off'  else run(mode grow GetData(GROW_SHORT) GetData(GROW_SELECTION) GetData(GROW_VDW))"-->
+      <!--target="%Mode Grow-target%">-->
+      <!--<zimg name=IMG_BUTTON-GROW_MODE border="0" src="button-grow_mode.png"/>-->
+    <!--</a>-->
   </td>
   <td name=GROW_SHORT>
     <input
