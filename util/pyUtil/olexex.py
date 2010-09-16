@@ -476,15 +476,27 @@ def MakeElementButtonsFromFormula():
     target = OV.TranslatePhrase('change_element-target')
     #command = "if strcmp(spy.GetParam(olex2.in_mode),'mode name -t=%s') then 'mode off' else %%22 if strcmp(sel(),'') then 'mode name -t=%s' else 'name sel %s'>>sel -u%%22" %(symbol, symbol, symbol)
     command = 'spy.ElementButtonStates(%s)' %symbol
+    namelower = 'btn-element%s' %symbol
+    d = {}
+    d.setdefault('namelower', namelower)
+    d.setdefault('symbol', symbol)
+    d.setdefault('cmds', command)
+    d.setdefault('target', target + symbol)
+    d.setdefault('bgcolor', OV.GetParam('gui.html.table_firstcol_colour'))
     html = '''
-    <a href="%s" target="%s %s">
-      <zimg name=IMG_BTN-ELEMENT%s border="0" src="btn-element%s.png"/>
-    </a>'''%(command, target, symbol, symbol.upper(), symbol)
+<input
+  name=IMG_BTN-ELEMENT%(symbol)s
+  type="button"
+  image="up=%(namelower)soff.png,down=%(namelower)son.png,hover=%(namelower)shover.png",disable=%(namelower)sdisable.png"
+  hint="%(target)s"
+  onclick="%(cmds)s>>echo '%(target)s: OK'"
+  bgcolor=%(bgcolor)s
+>''' %d
+#    <a href="%s" target="%s %s">
+#      <zimg name=IMG_BTN-ELEMENT%s border="0" src="btn-element%s.png"/>
+#    </a>'''%(command, target, symbol, symbol.upper(), symbol)
 
     html_elements.append(html)
-
-#$spy.MakeActiveGuiButton(btn-element%s,%s)&nbsp;
-#''' %(symbol, command))
 
     btn_dict.setdefault(
       symbol, {
@@ -495,12 +507,23 @@ def MakeElementButtonsFromFormula():
         'top_left':(0,-1),
         'grad':False,
       })
-
+  
+  d['namelower'] = 'btn-element...'
   html_elements.append('''
-<a href="if strcmp(sel(),'') then 'mode name -t=ChooseElement()' else 'name sel ChooseElement()'"
-   target="Chose Element from the periodic table">
-<zimg border="0" src="btn-element....png"></a>
-''')
+<input
+  name=IMG_BTN-ELEMENT...
+  type="button"
+  image="up=%(namelower)soff.png,down=%(namelower)son.png,hover=%(namelower)shover.png",disable=%(namelower)sdisable.png"
+  hint="Chose Element from the periodic table"
+  onclick="if strcmp(sel(),'') then 'mode name -t=ChooseElement()' else 'name sel ChooseElement()'"
+  bgcolor=%(bgcolor)s
+>''' %d)
+
+#<a href="if strcmp(sel(),'') then 'mode name -t=ChooseElement()' else 'name sel ChooseElement()'"
+#   target="Chose Element from the periodic table">
+#<zimg border="0" src="btn-element....png"></a>
+#''')
+
   btn_dict.setdefault(
     'Table', {
       'txt':'...',
@@ -533,7 +556,7 @@ def MakeElementButtonsFromFormula():
     from PilTools import timage
     TI = timage()
     for b in btn_dict:
-      for state in ['on', 'off']:
+      for state in ['on', 'off', 'hover', '']:
         txt = btn_dict[b].get('txt')
         bgcolour = btn_dict[b].get('bgcolour')
         width = 22

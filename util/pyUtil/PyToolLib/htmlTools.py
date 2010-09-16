@@ -1077,6 +1077,36 @@ def MakeHoverButton(name,cmds,toolname=""):
 OV.registerFunction(MakeHoverButton)
 
 
+def MakeHoverButtonOn(name,cmds,toolname=""):
+  n = name.split("-")
+  d = {'bgcolor': OV.GetParam('gui.html.table_bg_colour')}
+  if toolname:
+    target=toolname.lower()
+  else:
+    target=n[1]
+  d.setdefault('namelower', name.lower())
+  d.setdefault('nameupper', name.upper())
+  #d.setdefault('bt', n[0])
+  #d.setdefault('bn', n[1])
+  #d.setdefault('BT', n[0].upper())
+  #d.setdefault('BN', n[1].upper())
+  d.setdefault('cmds', cmds.replace("\(","("))
+  d.setdefault('target', OV.TranslatePhrase("%s-target" %target))
+  d.setdefault('toolname', toolname)
+  txt = '''
+<input
+  name=IMG_%(nameupper)s%(toolname)s
+  type="button"
+  image="up=%(namelower)son.png,down=%(namelower)son.png,hover=%(namelower)son.png",disable=%(namelower)sdisable.png"
+  hint="%(target)s"
+  onclick="%(cmds)s>>echo '%(target)s: OK'"
+  bgcolor=%(bgcolor)s
+>
+'''%d
+  return txt
+OV.registerFunction(MakeHoverButtonOn)
+
+
 def MakeActiveGuiButton(name,cmds,toolname=""):
   n = name.split("-")
   d = {}
