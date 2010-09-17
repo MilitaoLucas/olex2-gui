@@ -2068,7 +2068,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       textItems.append(item)
 
     for item in textItems:
-      states = ["on", "off", "highlight"]
+      states = ["on", "off", "highlight", "", "hover"]
       name = ""
       for state in states:
         if "h3" in item:
@@ -2087,7 +2087,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
             self.advertise_new = True
           image = self.make_timage('h1', img_txt, state)
           self.advertise_new = False
-          name = "h2-%s-%s.png" %(item, state)
+          name = "h2-%s%s.png" %(item, state)
           name = name.replace(".new.","")
 
         if name:
@@ -3506,6 +3506,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       dup = ImageChops.invert(dup)
       dup = ImageChops.offset(dup, 1, 1)
       image = ImageChops.blend(image, dup, 0.05)
+      
     return image
 
   def info_bitmaps(self):
