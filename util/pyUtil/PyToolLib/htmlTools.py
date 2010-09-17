@@ -1047,9 +1047,9 @@ def OnStateChange(*args):
 OV.registerCallback('statechange',OnStateChange)
 
 
-def MakeHoverButton(name,cmds,toolname=""):
+def MakeHoverButton(name, cmds, btn_bg='table_bg_colour', toolname=""):
   n = name.split("-")
-  d = {'bgcolor': OV.GetParam('gui.html.table_bg_colour')}
+  d = {'bgcolor': OV.GetParam('gui.html.%s' %btn_bg)}
   if toolname:
     target=toolname.lower()
   else:
