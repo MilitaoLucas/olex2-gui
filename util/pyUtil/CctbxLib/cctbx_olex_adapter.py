@@ -21,7 +21,7 @@ import olex_core
 
 import time
 import cctbx_controller as cctbx_controller
-from cctbx import maptbx, miller
+from cctbx import maptbx, miller, uctbx
 from libtbx import easy_pickle, utils
 
 from olexFunctions import OlexFunctions
@@ -711,8 +711,31 @@ class OlexCctbxMasks(OlexCctbxAdapter):
           '%s/%s-f_model.pickle' %(filepath, OV.FileName()), mask.f_model())
       mask.show_summary()
       from iotbx.cif import model
+      cif_block = model.block()
+      fo2 = self.reflections.f_sq_obs
+      hklstat = olex_core.GetHklStat()
+      merging = self.reflections.merging
+      min_d_star_sq, max_d_star_sq = fo2.min_max_d_star_sq()
+      fo2 = self.reflections.f_sq_obs
+      fo2.show_comprehensive_summary()
+      h_min, k_min, l_min = hklstat['MinIndexes']
+      h_max, k_max, l_max = hklstat['MaxIndexes']
+      cif_block['_diffrn_reflns_number'] = fo2.size()
+      cif_block['_diffrn_reflns_av_R_equivalents'] = "%.4f" %merging.r_int()
+      cif_block['_diffrn_reflns_av_sigmaI/netI'] = "%.4f" %merging.r_sigma()
+      cif_block['_diffrn_reflns_limit_h_min'] = h_min
+      cif_block['_diffrn_reflns_limit_h_max'] = h_max
+      cif_block['_diffrn_reflns_limit_k_min'] = k_min
+      cif_block['_diffrn_reflns_limit_k_max'] = k_max
+      cif_block['_diffrn_reflns_limit_l_min'] = l_min
+      cif_block['_diffrn_reflns_limit_l_max'] = l_max
+      cif_block['_diffrn_reflns_theta_min'] = "%.2f" %(
+        0.5 * uctbx.d_star_sq_as_two_theta(min_d_star_sq, self.wavelength, deg=True))
+      cif_block['_diffrn_reflns_theta_max'] = "%.2f" %(
+        0.5 * uctbx.d_star_sq_as_two_theta(max_d_star_sq, self.wavelength, deg=True))
+      cif_block.update(mask.as_cif_block())
       cif = model.cif()
-      cif[OV.FileName()] = mask.as_cif_block()
+      cif[OV.FileName()] = cif_block
       f = open('%s/%s-mask.cif' %(filepath, OV.FileName()),'wb')
       print >> f, cif
       f.close()

@@ -97,7 +97,7 @@ class ValidateCif(object):
       print "Validating %s" %filepath
       cif_dic = validation.smart_load_dictionary(cif_dic)
       error_handler = cif_model.validate(cif_dic, show_warnings)
-      if error_handler.error_count == 0:
+      if error_handler.error_count == 0 and error_handler.warning_count == 0:
         print "No errors found"
 
 OV.registerMacro(ValidateCif, """filepath&;cif_dic&;show_warnings""")
