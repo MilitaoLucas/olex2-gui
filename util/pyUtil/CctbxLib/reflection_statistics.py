@@ -45,8 +45,9 @@ class OlexCctbxGraphs(OlexCctbxAdapter):
 
 
 class r1_factor_vs_resolution(OlexCctbxAdapter):
-  def __init__(self, n_bins=10):
+  def __init__(self, n_bins=10, resolution_as="two_theta"):
     OlexCctbxAdapter.__init__(self)
+    self.resolution_as = resolution_as
     fo2 = self.reflections.f_sq_obs_filtered
     fo = fo2.f_sq_as_f()
     fc = self.f_calc(miller_set=fo)
@@ -62,16 +63,29 @@ class r1_factor_vs_resolution(OlexCctbxAdapter):
     r.title = "R1 factor vs resolution"
     if (self.info is not None):
       r.title += ": " + str(self.info)
-    r.x = self.binned_data.binner.bin_centers(2)
+    d_star_sq = self.binned_data.binner.bin_centers(2)
+    if self.resolution_as == "two_theta":
+      resolution = uctbx.d_star_sq_as_two_theta(
+        d_star_sq, self.wavelength, deg=True)
+    elif self.resolution_as == "d_spacing":
+      resolution = uctbx.d_star_sq_as_d(d_star_sq)
+    elif self.resolution_as == "d_star_sq":
+      resolution = d_star_sq
+    elif self.resolution_as == "stol":
+      resolution = uctbx.d_star_sq_as_stol(d_star_sq)
+    elif self.resolution_as == "stol_sq":
+      resolution = uctbx.d_star_sq_as_stol_sq(d_star_sq)
+    r.x = resolution
     r.y = self.binned_data.data[1:-1]
-    r.xLegend = "Resolution"
+    r.xLegend = self.resolution_as
     r.yLegend = "R1 factor"
     return r
 
 
 class scale_factor_vs_resolution(OlexCctbxAdapter):
-  def __init__(self, n_bins=10, normalize=True):
+  def __init__(self, n_bins=10, resolution_as="two_theta", normalize=True):
     OlexCctbxAdapter.__init__(self)
+    self.resolution_as = resolution_as
     fo2 = self.reflections.f_sq_obs_filtered
     fo2.setup_binner(n_bins=n_bins)
     self.info = fo2.info()
@@ -90,9 +104,21 @@ class scale_factor_vs_resolution(OlexCctbxAdapter):
     r.title = "Scale factor vs resolution"
     if (self.info is not None):
       r.title += ": " + str(self.info)
-    r.x = self.binned_data.binner.bin_centers(2)
+    d_star_sq = self.binned_data.binner.bin_centers(2)
+    if self.resolution_as == "two_theta":
+      resolution = uctbx.d_star_sq_as_two_theta(
+        d_star_sq, self.wavelength, deg=True)
+    elif self.resolution_as == "d_spacing":
+      resolution = uctbx.d_star_sq_as_d(d_star_sq)
+    elif self.resolution_as == "d_star_sq":
+      resolution = d_star_sq
+    elif self.resolution_as == "stol":
+      resolution = uctbx.d_star_sq_as_stol(d_star_sq)
+    elif self.resolution_as == "stol_sq":
+      resolution = uctbx.d_star_sq_as_stol_sq(d_star_sq)
+    r.x = resolution
     r.y = self.binned_data.data[1:-1]
-    r.xLegend = "Resolution"
+    r.xLegend = self.resolution_as
     r.yLegend = "Scale factor"
     return r
 

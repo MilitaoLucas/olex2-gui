@@ -1809,8 +1809,7 @@ class CompletenessPlot(Analysis):
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.filename
     self.auto_axes = False
-    if self.params.completeness.resolution_as in ("d_spacing", "d_star_sq"):
-      self.reverse_x = True
+    self.reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
     self.cctbx_completeness_statistics()
     self.make_empty_graph(axis_x = True)
     self.draw_pairs(reverse_x=self.reverse_x)
@@ -1988,9 +1987,7 @@ class Fobs_over_Fcalc_plot(Analysis):
     data = Dataset(
       xy_plot.resolution, xy_plot.f_obs_over_f_calc,
       indices=indices, metadata=metadata)
-    if xy_plot.xLegend in ('d_spacing', 'd_star_sq'):
-      reverse_x = True
-    else: reverse_x = False
+    reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
     self.data.setdefault('dataset1', data)
     self.make_empty_graph(axis_x=True)
     #self.plot_function("1")
@@ -2022,7 +2019,8 @@ class scale_factor_vs_resolution_plot(Analysis):
   def make_plot(self):
     from reflection_statistics import scale_factor_vs_resolution
     params = self.params.scale_factor_vs_resolution
-    xy_plot = scale_factor_vs_resolution(params.n_bins).xy_plot_info()
+    xy_plot = scale_factor_vs_resolution(
+      params.n_bins, params.resolution_as).xy_plot_info()
     self.metadata.setdefault("y_label", xy_plot.yLegend)
     self.metadata.setdefault("x_label", xy_plot.xLegend)
     metadata = {}
@@ -2031,7 +2029,8 @@ class scale_factor_vs_resolution_plot(Analysis):
     self.data.setdefault('dataset1', data)
     self.make_empty_graph(axis_x=True)
     self.draw_fit_line(slope=0, y_intercept=1, write_equation=False)
-    self.draw_pairs(reverse_x=True)
+    reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
+    self.draw_pairs(reverse_x=reverse_x)
 
 class r1_factor_vs_resolution_plot(Analysis):
   def __init__(self):
@@ -2058,7 +2057,8 @@ class r1_factor_vs_resolution_plot(Analysis):
   def make_plot(self):
     from reflection_statistics import r1_factor_vs_resolution
     params = self.params.r1_factor_vs_resolution
-    xy_plot = r1_factor_vs_resolution(params.n_bins).xy_plot_info()
+    xy_plot = r1_factor_vs_resolution(
+      params.n_bins, params.resolution_as).xy_plot_info()
     self.metadata.setdefault("y_label", xy_plot.yLegend)
     self.metadata.setdefault("x_label", xy_plot.xLegend)
     metadata = {}
@@ -2066,7 +2066,8 @@ class r1_factor_vs_resolution_plot(Analysis):
       xy_plot.x, [y*100 for y in xy_plot.y], metadata=metadata)
     self.data.setdefault('dataset1', data)
     self.make_empty_graph(axis_x=True)
-    self.draw_pairs(reverse_x=True)
+    reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
+    self.draw_pairs(reverse_x=reverse_x)
 
 
 class X_Y_plot(Analysis):
@@ -2306,23 +2307,13 @@ def makeReflectionGraphGui():
   gui_d.setdefault('make_graph_button', "")
   gui_d.setdefault('graph_chooser', "")
 
-  run_d = {'wilson_plot':'spy.WilsonPlot()',
-           'cumulative_intensity':'spy.CumulativeIntensityDistribution()',
-           'systematic_absences':'spy.SystematicAbsencesPlot()',
-           'fobs_fcalc':'spy.Fobs_Fcalc_plot()',
-           'fobs_over_fcalc':'spy.Fobs_over_Fcalc_plot()',
-           'completeness':'spy.CompletenessPlot()',
-           'normal_probability':'spy.Normal_probability_plot()',
-           'r1_factor_vs_resolution':'spy.r1_factor_vs_resolution_plot()',
-           'scale_factor_vs_resolution':'spy.scale_factor_vs_resolution_plot()',
-           }
-
   if GuiGraphChooserComboExists:
     value = OV.GetValue('SET_REFLECTION_STATISTICS')
   if not value:
     GuiGraphChooserComboExists = True
     value = "- %Please Select% -"
     help_name = None
+    name = None
   else:
     name = value.lower().replace(" ", "_").replace("-", "_")
     graph = olx.phil_handler.get_scope_by_name('graphs.reflections.%s' %name)
@@ -2334,7 +2325,7 @@ def makeReflectionGraphGui():
       help_name = graph.help
       d = {'name':'BUTTON_MAKE_REFLECTION_GRAPH',
            'bgcolor':guiParams.html.input_bg_colour,
-           'onclick':run_d.get(name),
+           'onclick': 'spy.make_reflection_graph(%s)' %name,
            'width':'30',
            'value':'Go',
            'valign':'top',
@@ -2351,10 +2342,10 @@ def makeReflectionGraphGui():
      'height':guiParams.html.combo_height,
      'bgcolor':guiParams.html.input_bg_colour,
      'value':value,
-     'onchange':"updatehtml",
+     'onchange':'spy.make_reflection_graph(GetValue(SET_REFLECTION_STATISTICS))>>updatehtml',
      'manage':'manage',
      'readonly':'readonly',
-     'width':"$eval(html.clientwidth(self)-140)",
+     'width':'$eval(html.clientwidth(self)-140)',
     }
   gui_d['graph_chooser']=htmlTools.make_combo_text_box(d)
 
@@ -2391,3 +2382,22 @@ def makeReflectionGraphGui():
   return txt
 
 OV.registerFunction(makeReflectionGraphGui)
+
+def make_reflection_graph(name):
+  name = name.lower().replace(" ", "_").replace("-", "_")
+  run_d = {'wilson_plot': WilsonPlot,
+           'cumulative_intensity': CumulativeIntensityDistribution,
+           'systematic_absences': SystematicAbsencesPlot,
+           'fobs_fcalc': Fobs_Fcalc_plot,
+           'fobs_over_fcalc': Fobs_over_Fcalc_plot,
+           'completeness': CompletenessPlot,
+           'normal_probability': Normal_probability_plot,
+           'r1_factor_vs_resolution': r1_factor_vs_resolution_plot,
+           'scale_factor_vs_resolution': scale_factor_vs_resolution_plot,
+           }
+  func = run_d.get(name)
+  if func is not None:
+    func()
+
+OV.registerFunction(make_reflection_graph)
+
