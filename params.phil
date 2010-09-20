@@ -475,9 +475,9 @@ graphs {
       .caption = "Scale factor vs resolution"
       .help = "Scale factor vs resolution"
     {
-#      resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
-#        .type = choice
-#        .caption = "Resolution as"
+      resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
+        .type = choice
+        .caption = "Resolution as"
       n_bins = 10
         .type = int(value_min=1)
         .help = Number of bins
@@ -491,9 +491,9 @@ graphs {
       .caption = "R1 factor vs resolution"
       .help = "R1 factor vs resolution"
     {
-#      resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
-#        .type = choice
-#        .caption = "Resolution as"
+      resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
+        .type = choice
+        .caption = "Resolution as"
       n_bins = 10
         .type = int(value_min=1)
         .help = Number of bins
