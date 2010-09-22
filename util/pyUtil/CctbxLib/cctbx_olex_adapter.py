@@ -768,9 +768,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
   def __init__(self):
     OlexCctbxAdapter.__init__(self)
-    self.run()
 
-  def run(self):
     from PilTools import MatrixMaker
     global twin_laws_d
     a = MatrixMaker()
@@ -780,7 +778,6 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     self.twin_law_gui_txt = ""
     if not twin_laws:
       print "There are no possible twin laws"
-
       html = "<tr><td></td><td>"
       html += "<b>%There are no possible Twin Laws%</b>"
       OV.write_to_olex('twinning-result.htm', html, False)
@@ -886,10 +883,8 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     olx.File("notwin.ins")
 
   def run_twin_ref_shelx(self, law):
-    print "Testing: %s" %str(law)
-    law_ins = ""
-    for i in xrange(9):
-      law_ins += " %s" %str(law[i])
+    law_ins = ' '.join(str(int(i)) for i in law[:9])
+    print "Testing: %s" %law_ins
     olx.Atreap("-b notwin.ins")
     olx.User("'%s'" %olx.FilePath())
     if law != (1, 0, 0, 0, 1, 0, 0, 0, 1):
@@ -899,21 +894,26 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       OV.DelIns("TWIN")
       OV.DelIns("BASF")
 
-    olx.LS('CGLS 1')
+    curr_prg = OV.GetParam('snum.refinement.program')
+    curr_method = OV.GetParam('snum.refinement.method')
+    curr_cycles = OV.GetParam('snum.refinement.max_cycles')
+    OV.SetMaxCycles(1)
+    if curr_prg != 'smtbx-refine':
+      OV.set_refinement_program(curr_prg, 'CGLS')
     olx.File("%s.ins" %self.filename)
     rFile = open(olx.FileFull(), 'r')
     f_data = rFile.readlines()
 
-    curr_refprg = OV.GetParam('snum.refinement.program')
-    OV.SetParam('snum.refinement.program','ShelXL')
     OV.SetParam('snum.skip_history','True')
 
     a = RunRefinementPrg()
     self.R1 = a.R1
     his_file = a.his_file
 
+    OV.SetMaxCycles(curr_cycles)
+    OV.set_refinement_program(curr_prg, curr_method)
+
     OV.SetParam('snum.skip_history','False')
-    OV.SetParam('snum.refinement.program',curr_refprg)
     r = olx.Lst("R1")
     olex_refinement_model = OV.GetRefinementModel(False)
     if olex_refinement_model.has_key('twin'):
