@@ -197,14 +197,14 @@ class SaveCifInfo(CifTools):
 
 OV.registerFunction(SaveCifInfo)
 
-class ViewCifInfo(CifTools):
+class EditCifInfo(CifTools):
   def __init__(self):
     """First argument should be 'view' or 'merge'.
 
     'view' brings up an internal text editor with the metacif information in cif format.
     'merge' merges the metacif data with cif file from refinement, and brings up and external text editor with the merged cif file.
     """
-    super(ViewCifInfo, self).__init__()
+    super(EditCifInfo, self).__init__()
     self.sort_crystal_dimensions()
     self.sort_crystal_colour()
     ## view metacif information in internal text editor
@@ -251,13 +251,42 @@ class ViewCifInfo(CifTools):
       if user_added is not None:
         OV.SetParam('snum.metacif.user_added', user_added)
 
-OV.registerFunction(ViewCifInfo)
+OV.registerFunction(EditCifInfo)
 
 
 class MergeCif(CifTools):
   def __init__(self, edit=False):
     super(MergeCif, self).__init__()
     edit = (edit not in ('False','false',False))
+    # check if cif exists and is up-to-date
+    cif_path = '%s/%s.cif' %(OV.FilePath(), OV.FileName())
+    file_full = OV.FileFull()
+    if (not os.path.isfile('%s/%s.cif' %(OV.FilePath(), OV.FileName())) or
+        os.path.getmtime(file_full) > os.path.getmtime(cif_path)):
+      prg = OV.GetParam('snum.refinement.program')
+      method = OV.GetParam('snum.refinement.method')
+      if prg == 'smtbx-refine':
+        OV.set_refinement_program(prg, 'Full Matrix')
+        if not os.path.isfile("%s/%s.vcov" %(OV.FilePath(),OV.FileName())):
+          olex.m('refine')
+        print "Creating cif:"
+        olex.m('CifCreate')
+        # pre-merge (info about refinement)
+        from cctbx_olex_adapter import OlexCctbxAdapter
+        xs = OlexCctbxAdapter().xray_structure()
+        cif_block = xs.as_cif_block()
+        s = StringIO()
+        print >> s, cif_block
+        OV.write_to_olex('xs.cif', s.getvalue())
+        OV.CifMerge('xs.cif')
+      else:
+        if method == 'CGLS':
+          OV.set_refinement_program(prg, 'Least Squares')
+        acta = olx.Ins('ACTA')
+        if acta == 'n/a':
+          olx.AddIns('ACTA')
+        olex.m('refine')
+
     ## merge metacif file with cif file from refinement
     OV.CifMerge(self.metacif_path)
     ## open merged cif file in external text editor
