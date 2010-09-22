@@ -1791,8 +1791,7 @@ class CumulativeIntensityDistribution(Analysis):
     from reflection_statistics import OlexCctbxGraphs
     xy_plot = OlexCctbxGraphs(
       'cumulative',
-      n_bins=self.params.cumulative_intensity.n_bins,
-      d_min=self.params.cumulative_intensity.d_min).xy_plot
+      n_bins=self.params.cumulative_intensity.n_bins).xy_plot
     metadata = {}
     metadata.setdefault("y_label", xy_plot.yLegend)
     metadata.setdefault("x_label", xy_plot.xLegend)
