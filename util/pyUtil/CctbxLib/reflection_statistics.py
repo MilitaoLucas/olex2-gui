@@ -352,11 +352,8 @@ class completeness_statistics(object):
 
 def cumulative_intensity_distribution(reflections,
                                       n_bins=20,
-                                      d_min=None,
                                       verbose=False):
   f_obs=reflections.f_sq_obs_merged.f_sq_as_f()
-  if d_min is not None:
-    f_obs = f_obs.resolution_filter(d_min=d_min)
   f_obs.setup_binner(
     n_bins=n_bins
   )
