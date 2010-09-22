@@ -5,6 +5,7 @@ from cStringIO import StringIO
 import datetime
 
 import olx
+import olex
 from ArgumentParser import ArgumentParser
 import userDictionaries
 import variableFunctions
@@ -93,8 +94,11 @@ class ValidateCif(object):
       f = open(filepath, 'rUb')
       cif_model = iotbx.cif.fast_reader(input_string=f.read()).model()
       f.close()
+      print "Validating %s" %filepath
       cif_dic = validation.smart_load_dictionary(cif_dic)
-      cif_model.validate(cif_dic, show_warnings)
+      error_handler = cif_model.validate(cif_dic, show_warnings)
+      if error_handler.error_count == 0 and error_handler.warning_count == 0:
+        print "No errors found"
 
 OV.registerMacro(ValidateCif, """filepath&;cif_dic&;show_warnings""")
 
@@ -197,9 +201,9 @@ class ViewCifInfo(CifTools):
   def __init__(self):
     """First argument should be 'view' or 'merge'.
 
-		'view' brings up an internal text editor with the metacif information in cif format.
-		'merge' merges the metacif data with cif file from refinement, and brings up and external text editor with the merged cif file.
-		"""
+    'view' brings up an internal text editor with the metacif information in cif format.
+    'merge' merges the metacif data with cif file from refinement, and brings up and external text editor with the merged cif file.
+    """
     super(ViewCifInfo, self).__init__()
     self.sort_crystal_dimensions()
     self.sort_crystal_colour()
@@ -249,6 +253,7 @@ class ViewCifInfo(CifTools):
 
 OV.registerFunction(ViewCifInfo)
 
+
 class MergeCif(CifTools):
   def __init__(self, edit=False):
     super(MergeCif, self).__init__()
@@ -259,6 +264,7 @@ class MergeCif(CifTools):
     if edit:
       OV.external_edit('filepath()/filename().cif')
 OV.registerFunction(MergeCif)
+
 
 class ExtractCifInfo(CifTools):
   def __init__(self):
@@ -610,9 +616,11 @@ class ExtractCifInfo(CifTools):
         versions[prgname].setdefault(versionnumber, versiontext)
     return versions
 
-  ############################################################
-
 OV.registerFunction(ExtractCifInfo)
+
+
+############################################################
+
 
 def getOrUpdateDimasVar(getOrUpdate):
   for var in [('snum_dimas_crystal_colour_base','exptl_crystal_colour_primary'),
