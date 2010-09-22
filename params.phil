@@ -410,9 +410,6 @@ graphs {
         .type = int(value_min=1)
         .help = Number of bins
         .caption = %Bins%
-      d_min=None
-        .type = float(value_min=0.0)
-        .caption = "d min"
       output_csv_file = False
         .type = bool
         .caption = "%Output% csv"
