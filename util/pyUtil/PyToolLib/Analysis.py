@@ -214,6 +214,7 @@ class Graph(ImageTools):
     txt = txt.replace(">", unichr(61681))
     txt = txt.replace("<", unichr(61665))
     txt = txt.replace("Fo2", "Fo%s" %(unichr(178)))
+    txt = txt.replace("Fc2", "Fc%s" %(unichr(178)))
     txt = txt.replace("Sum", unichr(8721))
     #txt = txt.replace("Fexp2", "Fexp%s" %(unichr(178)))
     #txt = txt.replace("Fo2", "F%s%s" %(unichr(2092),unichr(178)))
@@ -1809,7 +1810,7 @@ class CompletenessPlot(Analysis):
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.filename
     self.auto_axes = False
-    self.reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
+    self.reverse_x = self.params.completeness.resolution_as in ('d_spacing', 'd_star_sq')
     self.cctbx_completeness_statistics()
     self.make_empty_graph(axis_x = True)
     self.draw_pairs(reverse_x=self.reverse_x)
@@ -2259,6 +2260,7 @@ def makeReflectionGraphOptions(graph, name):
            'label':'%s ' %caption,
            'onchange':'spy.SetParam(graphs.reflections.%s.%s,GETVALUE(%s))' %(
              graph.name, object.name,ctrl_name),
+           'readonly':'readonly',
            }
       options_gui.append(htmlTools.make_input_text_box(d))
 
@@ -2287,7 +2289,7 @@ def makeReflectionGraphOptions(graph, name):
            'label':'%s ' %caption,
            'items':items,
            'value':object.extract(),
-           'onchange':'spy.SetParam(graphs.reflections.%s.%s,GETVALUE(%s))' %(
+           'onchange':'spy.SetParam(graphs.reflections.%s.%s,GETVALUE(%s))>>spy.make_reflection_graph(GetValue(SET_REFLECTION_STATISTICS))' %(
              graph.name, object.name,ctrl_name),
            'width':'',
            }
@@ -2346,6 +2348,7 @@ def makeReflectionGraphGui():
      'manage':'manage',
      'readonly':'readonly',
      'width':'$eval(html.clientwidth(self)-140)',
+     'readonly':'readonly',
     }
   gui_d['graph_chooser']=htmlTools.make_combo_text_box(d)
 
