@@ -172,7 +172,7 @@ gui {
       grad_colour_L = 0.7
         .type = float
 
-      font_colour_L = 1.4
+      font_colour_L = 1.2
         .type = float
       font_name = Vera Bold
         .type = str
@@ -242,7 +242,7 @@ gui {
         .type = int
       halign = left
         .type = str
-      top = 2
+      top = 1
         .type = int
       left = 4
         .type = int
@@ -321,7 +321,7 @@ gui {
         .type = float
       font_colour = #555555
         .type = colour
-      arrows = "bar:left:5,char:on~:off+"
+      arrows = "bar:left:5,char:on~:off+:hoverGo!:hoveronClose"
         .type = str
       off_L = 1.2
         .type = float
