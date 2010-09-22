@@ -542,7 +542,7 @@ class Graph(ImageTools):
       if i == last -1:
         bar_right = width - self.bSides - 1
       box = (bar_left,bar_top,bar_right,bar_bottom)
-        
+
       self.draw.rectangle(box, fill=fill, outline=(100, 100, 100))
 
       if dataset.hrefs is not None:
@@ -582,8 +582,8 @@ class Graph(ImageTools):
           top_left = (x, y - 10)
           top_left = (x,y)
           IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.gui_green)
-  
-  
+
+
   def draw_history_bars(self, dataset, y_scale_factor=1.0, bar_labels=None, colour_function=None, draw_bar_labels=True):
     top = self.graph_top
     marker_width = 5
@@ -596,16 +596,16 @@ class Graph(ImageTools):
     n_bars = len(dataset.x)
     max_bars = self.params.max_bars
     all_in_one_history = self.params.all_in_one_history
-    
+
     if all_in_one_history:
       bar_width = math.floor((width-10)/n_bars)
       if n_bars <= max_bars:
         bar_width = int(width/max_bars)
       max_bars = n_bars
-      
+
     else:
       bar_width = int(width/max_bars)
-      
+
     if title is not None:
       wX, wY = IT.textsize(self.draw, title, font_size=self.font_size_large)
       x = width - 2*self.bSides - wX
@@ -643,14 +643,14 @@ class Graph(ImageTools):
         bar_right = width - self.bSides - 1
 
       box = (bar_left,bar_top,bar_right,bar_bottom)
-      
+
       outline_colour = (200,200,200)
-      
+
       if self.decorated:
         decorated_fill = OV.FindValue('gui_html_highlight_colour')
         barDraw.rectangle(box, fill=decorated_fill, outline=outline_colour)
         barDraw.rectangle((bar_left+3,bar_top+3,bar_right-3,bar_bottom-3), fill=fill)
-        
+
         self.decorated = False
       else:
         barDraw.rectangle(box, fill=fill, outline=outline_colour)
@@ -693,31 +693,31 @@ class Graph(ImageTools):
           top_left = (x, y - 10)
           top_left = (x,y)
           IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_large, font_colour=self.gui_green)
-          
+
       j += 1
       if j == max_bars or i == last - 1:
         img_no += 1
         j = 0
         self.image_location = "history_%s.png" %img_no
-        
+
         historyText = """\
         <zimg name="HISTORY_IMAGE" border="0" src="%s">
         %s
         </zimg>
         """ %(self.image_location, self.map_txt)
-        
-        
+
+
         previous_img = img_no -1
         next_img = img_no + 1
-        
+
         scaleTxt = '''
-<input 
-  type="spin" 
-  name="HistoryScale" 
+<input
+  type="spin"
+  name="HistoryScale"
   width="45"
   label="Scale "
-  bgcolor="$spy.GetParam(gui.html.table_bg_colour)"  
-  fgcolor="$spy.GetParam(gui.html.font_colour)" 
+  bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+  fgcolor="$spy.GetParam(gui.html.font_colour)"
   valign='center'
   min="2"
   height="$spy.GetParam(gui.html.spin_height)"
@@ -1510,7 +1510,7 @@ class WilsonPlot(Analysis):
     self.im = new
 
   def cctbx_wilson_statistics(self):
-    from cctbx_olex_adapter import OlexCctbxGraphs
+    from reflection_statistics import OlexCctbxGraphs
     n_bins = 2*self.params.wilson_plot.n_bins
     wp = OlexCctbxGraphs('wilson', n_bins=n_bins).xy_plot
     metadata = {}
@@ -1787,10 +1787,11 @@ class CumulativeIntensityDistribution(Analysis):
     self.draw_pairs()
 
   def cctbx_cumulative_intensity_distribution(self, verbose=False):
-    from cctbx_olex_adapter import OlexCctbxGraphs
+    from reflection_statistics import OlexCctbxGraphs
     xy_plot = OlexCctbxGraphs(
       'cumulative',
-      n_bins=self.params.cumulative_intensity.n_bins).xy_plot
+      n_bins=self.params.cumulative_intensity.n_bins,
+      d_min=self.params.cumulative_intensity.d_min).xy_plot
     metadata = {}
     metadata.setdefault("y_label", xy_plot.yLegend)
     metadata.setdefault("x_label", xy_plot.xLegend)
@@ -1808,8 +1809,7 @@ class CompletenessPlot(Analysis):
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.filename
     self.auto_axes = False
-    if self.params.completeness.resolution_as in ("d_spacing", "d_star_sq"):
-      self.reverse_x = True
+    self.reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
     self.cctbx_completeness_statistics()
     self.make_empty_graph(axis_x = True)
     self.draw_pairs(reverse_x=self.reverse_x)
@@ -1818,7 +1818,7 @@ class CompletenessPlot(Analysis):
       self.output_data_as_csv()
 
   def cctbx_completeness_statistics(self):
-    from cctbx_olex_adapter import OlexCctbxGraphs
+    from reflection_statistics import OlexCctbxGraphs
     params = self.params.completeness
     xy_plot = OlexCctbxGraphs(
       'completeness',
@@ -1846,7 +1846,7 @@ class SystematicAbsencesPlot(Analysis):
         self.output_data_as_csv()
 
   def cctbx_systematic_absences_plot(self):
-    from cctbx_olex_adapter import OlexCctbxGraphs
+    from reflection_statistics import OlexCctbxGraphs
     xy_plot = OlexCctbxGraphs('sys_absent').xy_plot
     metadata = {}
     metadata.setdefault("y_label", xy_plot.yLegend)
@@ -1878,8 +1878,8 @@ class Normal_probability_plot(Analysis):
       self.output_data_as_csv()
 
   def make_normal_probability_plot(self):
-    from cctbx_olex_adapter import OlexCctbxGraphs
-    xy_plot = OlexCctbxGraphs('normal_probability').xy_plot
+    from reflection_statistics import normal_probability_plot
+    xy_plot = normal_probability_plot().xy_plot_info()
     self.metadata.setdefault("y_label", xy_plot.yLegend)
     self.metadata.setdefault("x_label", xy_plot.xLegend)
     metadata = {}
@@ -1920,8 +1920,8 @@ class Fobs_Fcalc_plot(Analysis):
       self.output_data_as_csv()
 
   def make_f_obs_f_calc_plot(self):
-    from cctbx_olex_adapter import OlexCctbxGraphs
-    xy_plot = OlexCctbxGraphs('f_obs_f_calc', batch_number=self.batch_number).xy_plot
+    from reflection_statistics import f_obs_vs_f_calc
+    xy_plot = f_obs_vs_f_calc(batch_number=self.batch_number).xy_plot
     self.metadata.setdefault("y_label", xy_plot.yLegend)
     self.metadata.setdefault("x_label", xy_plot.xLegend)
     metadata = {}
@@ -1971,10 +1971,9 @@ class Fobs_over_Fcalc_plot(Analysis):
       self.output_data_as_csv()
 
   def make_plot(self):
-    from cctbx_olex_adapter import OlexCctbxGraphs
+    from reflection_statistics import f_obs_over_f_calc
     params = self.params.fobs_over_fcalc
-    xy_plot = OlexCctbxGraphs(
-      'f_obs_over_f_calc',
+    xy_plot = f_obs_over_f_calc(
       binning=params.binning,
       n_bins=params.n_bins,
       resolution_as=params.resolution_as).xy_plot
@@ -1988,11 +1987,88 @@ class Fobs_over_Fcalc_plot(Analysis):
     data = Dataset(
       xy_plot.resolution, xy_plot.f_obs_over_f_calc,
       indices=indices, metadata=metadata)
+    reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
     self.data.setdefault('dataset1', data)
     self.make_empty_graph(axis_x=True)
     #self.plot_function("1")
     self.draw_fit_line(slope=0, y_intercept=1, write_equation=False)
-    self.draw_pairs()
+    self.draw_pairs(reverse_x=reverse_x)
+
+class scale_factor_vs_resolution_plot(Analysis):
+  def __init__(self):
+    Analysis.__init__(self)
+    self.item = "scale_factor_vs_resolution"
+    self.graphInfo["Title"] = OV.TranslatePhrase("Scale factor vs resolution")
+    self.graphInfo["pop_html"] = self.item
+    self.graphInfo["pop_name"] = self.item
+    self.graphInfo["TopRightTitle"] = self.filename
+    self.auto_axes = False
+    self.max_y = 1.05
+    try:
+      self.make_plot()
+    except AssertionError, e:
+      if str(e) == "model.scatterers().size() > 0":
+        print "You need some scatterers to do this!"
+        return
+      else:
+        raise AssertionError, e
+    self.popout()
+    if self.params.scale_factor_vs_resolution.output_csv_file:
+      self.output_data_as_csv()
+
+  def make_plot(self):
+    from reflection_statistics import scale_factor_vs_resolution
+    params = self.params.scale_factor_vs_resolution
+    xy_plot = scale_factor_vs_resolution(
+      params.n_bins, params.resolution_as).xy_plot_info()
+    self.metadata.setdefault("y_label", xy_plot.yLegend)
+    self.metadata.setdefault("x_label", xy_plot.xLegend)
+    metadata = {}
+    data = Dataset(
+      xy_plot.x, xy_plot.y, metadata=metadata)
+    self.data.setdefault('dataset1', data)
+    self.make_empty_graph(axis_x=True)
+    self.draw_fit_line(slope=0, y_intercept=1, write_equation=False)
+    reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
+    self.draw_pairs(reverse_x=reverse_x)
+
+class r1_factor_vs_resolution_plot(Analysis):
+  def __init__(self):
+    Analysis.__init__(self)
+    self.item = "r1_factor_vs_resolution"
+    self.graphInfo["Title"] = OV.TranslatePhrase("R1 factor vs resolution")
+    self.graphInfo["pop_html"] = self.item
+    self.graphInfo["pop_name"] = self.item
+    self.graphInfo["TopRightTitle"] = self.filename
+    self.auto_axes = False
+    #self.max_y = 1.05
+    try:
+      self.make_plot()
+    except AssertionError, e:
+      if str(e) == "model.scatterers().size() > 0":
+        print "You need some scatterers to do this!"
+        return
+      else:
+        raise AssertionError, e
+    self.popout()
+    if self.params.r1_factor_vs_resolution.output_csv_file:
+      self.output_data_as_csv()
+
+  def make_plot(self):
+    from reflection_statistics import r1_factor_vs_resolution
+    params = self.params.r1_factor_vs_resolution
+    xy_plot = r1_factor_vs_resolution(
+      params.n_bins, params.resolution_as).xy_plot_info()
+    self.metadata.setdefault("y_label", xy_plot.yLegend)
+    self.metadata.setdefault("x_label", xy_plot.xLegend)
+    metadata = {}
+    data = Dataset(
+      xy_plot.x, [y*100 for y in xy_plot.y], metadata=metadata)
+    self.data.setdefault('dataset1', data)
+    self.make_empty_graph(axis_x=True)
+    reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
+    self.draw_pairs(reverse_x=reverse_x)
+
 
 class X_Y_plot(Analysis):
   def __init__(self):
@@ -2036,16 +2112,16 @@ class HistoryGraph(Analysis):
   def make_graph(self):
     global PreviousHistoryNode
     bars = []
-    
+
     node = self.tree.active_child_node
     #if node == PreviousHistoryNode:
     #  return
     #else:
     #  PreviousHistoryNode = node
-      
+
     while node is not None:
       R1 = node.R1
-      href = "spy.revert_history(%s)>>UpdateHtml" %(node.name)
+      href = "spy.revert_history(%s)>>UpdateHtml>>if html.IsPopup(history-tree) then spy.popout_history_tree()" %(node.name)
       target = '%s (%s)' %(node.program, node.method)
       if node.is_solution:
         R1 = 1
@@ -2063,10 +2139,10 @@ class HistoryGraph(Analysis):
     size = (OV.GetParam('gui.htmlpanelwidth')- 32, 100)
     self.params.size_x, self.params.size_y = size
     self.make_empty_graph(draw_title=False)
-    
+
     y_scale_factor = self.params.y_scale_factor
-    
-    
+
+
     if len(bars) > 0:
       x = []
       y = []
@@ -2147,6 +2223,8 @@ OV.registerFunction(SystematicAbsencesPlot)
 OV.registerFunction(Fobs_Fcalc_plot)
 OV.registerFunction(Fobs_over_Fcalc_plot)
 OV.registerFunction(Normal_probability_plot)
+OV.registerFunction(r1_factor_vs_resolution_plot)
+OV.registerFunction(scale_factor_vs_resolution_plot)
 OV.registerFunction(X_Y_plot)
 
 def array_scalar_multiplication(array, multiplier):
@@ -2174,7 +2252,7 @@ def makeReflectionGraphOptions(graph, name):
            }
       options_gui.append(htmlTools.make_spin_input(d))
 
-    elif data_type == "str":
+    elif data_type in ("str", "float"):
       ctrl_name = 'TEXT_%s' %(obj_name)
       d = {'ctrl_name':ctrl_name,
            'value':value,
@@ -2229,21 +2307,13 @@ def makeReflectionGraphGui():
   gui_d.setdefault('make_graph_button', "")
   gui_d.setdefault('graph_chooser', "")
 
-  run_d = {'wilson_plot':'spy.WilsonPlot()',
-           'cumulative_intensity':'spy.CumulativeIntensityDistribution()',
-           'systematic_absences':'spy.SystematicAbsencesPlot()',
-           'fobs_fcalc':'spy.Fobs_Fcalc_plot()',
-           'fobs_over_fcalc':'spy.Fobs_over_Fcalc_plot()',
-           'completeness':'spy.CompletenessPlot()',
-           'normal_probability':'spy.Normal_probability_plot()',
-           }
-
   if GuiGraphChooserComboExists:
     value = OV.GetValue('SET_REFLECTION_STATISTICS')
   if not value:
     GuiGraphChooserComboExists = True
     value = "- %Please Select% -"
     help_name = None
+    name = None
   else:
     name = value.lower().replace(" ", "_").replace("-", "_")
     graph = olx.phil_handler.get_scope_by_name('graphs.reflections.%s' %name)
@@ -2255,7 +2325,7 @@ def makeReflectionGraphGui():
       help_name = graph.help
       d = {'name':'BUTTON_MAKE_REFLECTION_GRAPH',
            'bgcolor':guiParams.html.input_bg_colour,
-           'onclick':run_d.get(name),
+           'onclick': 'spy.make_reflection_graph(%s)' %name,
            'width':'30',
            'value':'Go',
            'valign':'top',
@@ -2265,14 +2335,17 @@ def makeReflectionGraphGui():
   gui_d['help'] = htmlTools.make_table_first_col(
     help_name=help_name, popout=False)
   d = {'ctrl_name':'SET_REFLECTION_STATISTICS',
-     'items':"-- %Please Select% --;%Wilson Plot%;%Cumulative Intensity%;%Systematic Absences%;%Fobs-Fcalc%;%Fobs over Fcalc%;%Completeness%;%Normal Probability%",
+     'items':"-- %Please Select% --;%Wilson Plot%;%Cumulative Intensity%;" +\
+             "%Systematic Absences%;%Fobs-Fcalc%;%Fobs over Fcalc%;" +\
+             "%Completeness%;%Normal Probability%;" +\
+             "%Scale factor vs resolution%;%R1 factor vs resolution%",
      'height':guiParams.html.combo_height,
      'bgcolor':guiParams.html.input_bg_colour,
      'value':value,
-     'onchange':"updatehtml",
+     'onchange':'spy.make_reflection_graph(GetValue(SET_REFLECTION_STATISTICS))>>updatehtml',
      'manage':'manage',
      'readonly':'readonly',
-     'width':"$eval(html.clientwidth(self)-140)",
+     'width':'$eval(html.clientwidth(self)-140)',
     }
   gui_d['graph_chooser']=htmlTools.make_combo_text_box(d)
 
@@ -2309,3 +2382,22 @@ def makeReflectionGraphGui():
   return txt
 
 OV.registerFunction(makeReflectionGraphGui)
+
+def make_reflection_graph(name):
+  name = name.lower().replace(" ", "_").replace("-", "_")
+  run_d = {'wilson_plot': WilsonPlot,
+           'cumulative_intensity': CumulativeIntensityDistribution,
+           'systematic_absences': SystematicAbsencesPlot,
+           'fobs_fcalc': Fobs_Fcalc_plot,
+           'fobs_over_fcalc': Fobs_over_Fcalc_plot,
+           'completeness': CompletenessPlot,
+           'normal_probability': Normal_probability_plot,
+           'r1_factor_vs_resolution': r1_factor_vs_resolution_plot,
+           'scale_factor_vs_resolution': scale_factor_vs_resolution_plot,
+           }
+  func = run_d.get(name)
+  if func is not None:
+    func()
+
+OV.registerFunction(make_reflection_graph)
+

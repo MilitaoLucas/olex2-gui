@@ -135,11 +135,11 @@ class Method(object):
             elif option.name == 'npeaks':
               OV.SetParam('snum.refinement.max_peaks', val)
             elif option.name == 'T':
-              diffrn_ambient_temperature = OV.GetParam(
-                'snum.metacif.diffrn_ambient_temperature')
-              from_ins = 273.0 + float(val.strip('C'))
+              diffrn_ambient_temperature = OV.get_cif_item(
+                '_diffrn_ambient_temperature')
+              from_ins = 273.0 + float(val.split('(')[0].strip('C'))
               if diffrn_ambient_temperature is None:
-                OV.SetParam('snum.metacif.diffrn_ambient_temperature', from_ins)
+                OV.set_cif_item('_diffrn_ambient_temperature', from_ins)
               elif (from_ins != float(
                 diffrn_ambient_temperature.split('(')[0].strip())):
                 print "Warning: Temp instruction from ins does not match that from cif"
@@ -430,7 +430,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
         OV.HKLSrc(modified_hkl_path)
       #else:
         #print "No mask present"
-    diffrn_ambient_temperature = OV.GetParam('snum.metacif.diffrn_ambient_temperature')
+    diffrn_ambient_temperature = OV.get_cif_item('_diffrn_ambient_temperature')
     if diffrn_ambient_temperature is not None:
       if '(' in diffrn_ambient_temperature:
         diffrn_ambient_temperature = diffrn_ambient_temperature.split('(')[0]
