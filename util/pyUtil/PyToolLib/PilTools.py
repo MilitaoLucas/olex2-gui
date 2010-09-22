@@ -1461,7 +1461,7 @@ class timage(ImageTools):
     OlexVFS.save_image_to_olex(IM, name, 2)
 
   def produce_buttons(self, button_names, crop, cut, max_width,scale,btn_type,width=None):
-    states = ["on", "off", "", "highlight", "hover"]
+    states = ["on", "off", "", "highlight", "hover", "hoveron"]
     for state in states:
       if state == "on":
         colour = self.adjust_colour(self.params.html.highlight_colour.rgb,luminosity=1.3)
@@ -1472,7 +1472,10 @@ class timage(ImageTools):
         #colour = self.adjust_colour(self.params.html.base_colour.rgb,luminosity=1.9)
         colour = self.params.button_colouring.rgb
       elif state == "hover":
-        color = (20,100,20)
+        colour = self.adjust_colour(self.params.button_colouring.rgb,luminosity=1.1)
+      elif state == "hoveron":
+        colour = self.adjust_colour(self.params.button_colouring.rgb,luminosity=0.9)
+
       for txt in button_names:
         if width is None: width = max_width
         use_new = True
@@ -2068,7 +2071,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       textItems.append(item)
 
     for item in textItems:
-      states = ["on", "off", "highlight", "", "hover"]
+      states = ["on", "off", "highlight", "", "hover", "hoveron"]
       name = ""
       for state in states:
         if "h3" in item:
@@ -2091,12 +2094,12 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           name = name.replace(".new.","")
 
         if name:
-          OlexVFS.save_image_to_olex(image, name, 2)
+          OlexVFS.save_image_to_olex(image, name.lower(), 2)
           #name = "h2-%s-%s.png" %(item, state)
           #image.save("C:/tmp/%s" %name)
 
     for item in tabItems:
-      states = ["on", "off", "highlight", "", "hover"]
+      states = ["on", "off", "highlight", "", "hover", "hoveron"]
       for state in states:
         use_new = True
         if use_new:
@@ -2234,7 +2237,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
   def make_button_items(self):
     buttonItems = ["btn", "btn-QC", "btn-refine", "btn-solve"]
     for item in buttonItems:
-      states = ["on", "off", "highlight", "hover"]
+      states = ["on", "off", "highlight", "hover", "hoveron"]
       for state in states:
         image = self.button_items(item, state)
         name =r"%s-%s.png" %(item, state)
@@ -2336,7 +2339,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     iconIndex.setdefault("polyhedra", (6, 9))
 
     for icon in iconIndex:
-      states = ["on", "off", "hover", ""]
+      states = ["on", "off", "hover", "", "hoveron"]
       for state in states:
         image = self.icon_items(iconIndex[icon], state)
         name = r"toolbar-%s%s.png" %(icon,state)
@@ -2629,6 +2632,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       width = self.width
 
     base_colour = OV.GetParam('gui.timage.%s.base_colour' %item_type)
+    highlight_colour = OV.GetParam('gui.html.highlight_colour').rgb
+    self.highlight_colour = highlight_colour
+    
     if not base_colour:
       base_colour = OV.GetParam('gui.timage.base_colour')
       if not base_colour:
@@ -2670,12 +2676,17 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     if state == "highlight":
       grad_colour = OV.GetParam('gui.html.highlight_colour').rgb
-    if state == "inactive":
+    elif state == "inactive":
       grad_colour = '#ababab'
       bg_colour = '#ababab'
-    if state == "hover":
-      grad_colour = IT.adjust_colour(grad_colour, luminosity = 0.95)
-      font_colour = IT.adjust_colour(font_colour, luminosity = 1.2)
+    elif state == "hover":
+#      grad_colour = IT.adjust_colour(grad_colour, luminosity = 1.02)
+      grad_colour = IT.adjust_colour(grad_colour, luminosity = 0.98)
+#      font_colour = IT.adjust_colour(highlight_colour, luminosity = 0.9)
+    elif state == "hoveron":
+      grad_colour = IT.adjust_colour(grad_colour, luminosity = 0.98)
+#      font_colour = IT.adjust_colour(font_colour, luminosity = 0.9)
+  
     height = int(round(OV.GetParam('gui.timage.%s.height' %item_type) * self.size_factor, 0))
     top = int(round(OV.GetParam('gui.timage.%s.top' %item_type) * self.size_factor,0))
     left = int(round(OV.GetParam('gui.timage.%s.left' %item_type) * self.size_factor,0))
@@ -2849,6 +2860,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if state == "off":
       fill = self.adjust_colour(base_colour, luminosity=off_L)
     elif state == "on":
+      fill = self.adjust_colour(OV.GetParam('gui.html.highlight_colour').rgb, luminosity=on_L)
+    elif state == "hover":
+      fill = self.adjust_colour(OV.GetParam('gui.html.highlight_colour').rgb, luminosity=on_L)
+    elif state == "hoveron":
       fill = self.adjust_colour(OV.GetParam('gui.html.highlight_colour').rgb, luminosity=on_L)
     else:
       fill = '#888888'

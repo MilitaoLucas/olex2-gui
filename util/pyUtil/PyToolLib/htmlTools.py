@@ -1056,6 +1056,11 @@ def MakeHoverButton(name, cmds, btn_bg='table_bg_colour', toolname=""):
     target=toolname.lower()
   else:
     target=n[1]
+  if '@' in name:
+    tool_img = name.split('@')[0]
+  else:
+    tool_img = name.lower()
+  d.setdefault('tool_img', tool_img)
   d.setdefault('namelower', name.lower())
   d.setdefault('nameupper', name.upper())
   #d.setdefault('bt', n[0])
@@ -1069,7 +1074,7 @@ def MakeHoverButton(name, cmds, btn_bg='table_bg_colour', toolname=""):
 <input
   name=IMG_%(nameupper)s%(toolname)s
   type="button"
-  image="up=%(namelower)soff.png,down=%(namelower)son.png,hover=%(namelower)shover.png",disable=%(namelower)sdisable.png"
+  image="up=%(tool_img)soff.png,down=%(tool_img)son.png,hover=%(tool_img)shover.png",disable=%(tool_img)sdisable.png"
   hint="%(target)s"
   onclick="%(cmds)s>>echo '%(target)s: OK'"
   bgcolor=%(bgcolor)s
@@ -1086,6 +1091,11 @@ def MakeHoverButtonOn(name,cmds,toolname=""):
     target=toolname.lower()
   else:
     target=n[1]
+  if '@' in name:
+    tool_img = name.split('@')[0]
+  else:
+    tool_img = name.lower()
+  d.setdefault('tool_img', tool_img)
   d.setdefault('namelower', name.lower())
   d.setdefault('nameupper', name.upper())
   #d.setdefault('bt', n[0])
@@ -1099,7 +1109,7 @@ def MakeHoverButtonOn(name,cmds,toolname=""):
 <input
   name=IMG_%(nameupper)s%(toolname)s
   type="button"
-  image="up=%(namelower)son.png,down=%(namelower)son.png,hover=%(namelower)son.png",disable=%(namelower)sdisable.png"
+  image="up=%(tool_img)son.png,down=%(tool_img)son.png,hover=%(tool_img)shoveron.png",disable=%(tool_img)sdisable.png"
   hint="%(target)s"
   onclick="%(cmds)s>>echo '%(target)s: OK'"
   bgcolor=%(bgcolor)s
