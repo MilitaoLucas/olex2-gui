@@ -489,6 +489,7 @@ def make_combo_text_box(d):
          'onleave':'',
          'data':'',
          'manage':'manage',
+         'readonly':'',
      }
   dic.update(d)
 
@@ -508,6 +509,7 @@ def make_combo_text_box(d):
        onchange="%(onchange)s"
        %(manage)s
        data="%(data)s"
+       readonly="%(readonly)s"
 >''' %dic
   return html
 
