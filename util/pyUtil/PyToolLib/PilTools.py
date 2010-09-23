@@ -2165,7 +2165,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
             prefixes = ['btn', 'cbtn']
             name = '%s-%s%s.png' %(prefixes[i], item.lower(), state)
             OlexVFS.save_image_to_olex(image,name, 2)
-            image.save("C:/tmp/%s" %name)
+            #image.save("C:/tmp/%s" %name)
             i += 1
 
 
