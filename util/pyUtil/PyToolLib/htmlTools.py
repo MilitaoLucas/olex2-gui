@@ -1049,13 +1049,11 @@ def OnStateChange(*args):
 OV.registerCallback('statechange',OnStateChange)
 
 
-def MakeHoverButton(name, cmds, btn_bg='table_bg_colour', toolname=""):
+def MakeHoverButton(name, cmds, btn_bg='table_firstcol_colour'):
+  click_console_feedback = False
   n = name.split("-")
   d = {'bgcolor': OV.GetParam('gui.html.%s' %btn_bg)}
-  if toolname:
-    target=toolname.lower()
-  else:
-    target=n[1]
+  target=n[1]
   if '@' in name:
     tool_img = name.split('@')[0]
   else:
@@ -1069,14 +1067,17 @@ def MakeHoverButton(name, cmds, btn_bg='table_bg_colour', toolname=""):
   #d.setdefault('BN', n[1].upper())
   d.setdefault('cmds', cmds.replace("\(","("))
   d.setdefault('target', OV.TranslatePhrase("%s-target" %target))
-  d.setdefault('toolname', toolname)
+  if click_console_feedback:
+    d.setdefault('feedback',">>echo '%(target)s: OK'" %target)
+  else:
+    d.setdefault('feedback',"")
   txt = '''
 <input
-  name=IMG_%(nameupper)s%(toolname)s
+  name=IMG_%(nameupper)s
   type="button"
   image="up=%(tool_img)soff.png,down=%(tool_img)son.png,hover=%(tool_img)shover.png",disable=%(tool_img)sdisable.png"
   hint="%(target)s"
-  onclick="%(cmds)s>>echo '%(target)s: OK'"
+  onclick="%(cmds)s%(feedback)s"
   bgcolor=%(bgcolor)s
 >
 '''%d
@@ -1084,13 +1085,11 @@ def MakeHoverButton(name, cmds, btn_bg='table_bg_colour', toolname=""):
 OV.registerFunction(MakeHoverButton)
 
 
-def MakeHoverButtonOn(name,cmds,toolname=""):
+def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
+  click_console_feedback = False
   n = name.split("-")
-  d = {'bgcolor': OV.GetParam('gui.html.table_bg_colour')}
-  if toolname:
-    target=toolname.lower()
-  else:
-    target=n[1]
+  d = {'bgcolor': OV.GetParam('gui.html.%s' %btn_bg)}
+  target=n[1]
   if '@' in name:
     tool_img = name.split('@')[0]
   else:
@@ -1098,20 +1097,19 @@ def MakeHoverButtonOn(name,cmds,toolname=""):
   d.setdefault('tool_img', tool_img)
   d.setdefault('namelower', name.lower())
   d.setdefault('nameupper', name.upper())
-  #d.setdefault('bt', n[0])
-  #d.setdefault('bn', n[1])
-  #d.setdefault('BT', n[0].upper())
-  #d.setdefault('BN', n[1].upper())
   d.setdefault('cmds', cmds.replace("\(","("))
   d.setdefault('target', OV.TranslatePhrase("%s-target" %target))
-  d.setdefault('toolname', toolname)
+  if click_console_feedback:
+    d.setdefault('feedback',">>echo '%(target)s: OK'" %target)
+  else:
+    d.setdefault('feedback',"")
   txt = '''
 <input
-  name=IMG_%(nameupper)s%(toolname)s
+  name=IMG_%(nameupper)s
   type="button"
   image="up=%(tool_img)son.png,down=%(tool_img)son.png,hover=%(tool_img)shoveron.png",disable=%(tool_img)sdisable.png"
   hint="%(target)s"
-  onclick="%(cmds)s>>echo '%(target)s: OK'"
+  onclick="%(cmds)s%(feedback)s"
   bgcolor=%(bgcolor)s
 >
 '''%d
