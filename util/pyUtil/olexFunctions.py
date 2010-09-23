@@ -554,11 +554,17 @@ class OlexFunctions(inheritFunctions):
   def GetMacAddress(self):
     mac = self.GetParam('olex2.mac_address')
     if mac == "":
-      mac = olx.GetMAC()
-      mac = mac.split(";")
+      retVal = []
+      macs = olx.GetMAC('full')
+      macs = macs.split(";")
+      for mac in macs:
+        if "virtual" in mac.lower():
+          continue
+        else:
+          retVal.append(mac.split("=")[1])
     #mac=['XX-24-E8-00-37-08','00-24-E8-00-37-08']  testing with a bogous mac address
-    return mac
-
+    return retVal
+  
   def GetComputername(self):
     return os.getenv('COMPUTERNAME')
 

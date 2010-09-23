@@ -297,25 +297,39 @@ class ImageTools(FontInstances):
       weight_add = weight
     if side == "top":
       whitespace = Image.new('RGBA', (width - margin_left - margin_right, weight), colour)
-      canvas = Image.new('RGBA', (width,height + weight_add),(0,0,0,0))
+      canvas = Image.new('RGBA', (width,height + weight_add),colour)
       canvas.paste(whitespace, (margin_left, 0))
       canvas.paste(image, (0, weight))
     elif side == "bottom":
       whitespace = Image.new('RGBA', (width - margin_left - margin_right, weight), colour)
-      canvas = Image.new('RGBA', (width,height + weight_add),(0,0,0,0))
+      canvas = Image.new('RGBA', (width,height + weight_add),colour)
       canvas.paste(whitespace, (margin_left, height - weight + margin_top))
       canvas.paste(image, (0, 0))
     elif side == "right":
       whitespace = Image.new('RGBA', (weight, height - margin_top - margin_bottom), colour)
-      canvas = Image.new('RGBA', (width + weight_add, height),(0,0,0,0))
+      canvas = Image.new('RGBA', (width + weight_add, height),colour)
       canvas.paste(image, (0, 0))
       canvas.paste(whitespace, (width - weight + weight_add, margin_top))
     elif side == "left":
       whitespace = Image.new('RGBA', (weight, height - margin_top - margin_bottom), colour)
-      canvas = Image.new('RGBA', (width + weight_add, height),(0,0,0,0))
+      canvas = Image.new('RGBA', (width + weight_add, height),colour)
       canvas.paste(whitespace, (0, margin_top))
       canvas.paste(image, (weight, 0))
     return canvas
+  
+  def cut_image(self, image, cuts=(10,20)):
+    ''' Returns a list of images, cut left to right at the cuts positions '''
+    retVal = []
+    size = image.size
+    current = 0
+    for cut in cuts:
+      left = 0
+      right = cut
+      current += right
+      retVal.append(image.crop((left, 0, right, size[1])))
+    retVal.append(image.crop((current, 0, size[0], size[1])))
+    return retVal
+    
 
   def colourize(self, IM, col_1, col_2):
     import ImageOps
