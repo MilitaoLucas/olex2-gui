@@ -2083,7 +2083,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
             self.advertise_new = True
           image = self.make_timage('h3', img_txt, state)
           self.advertise_new = False
-          name = "h3-%s-%s.png" %(item, state)
+          name = "h3-%s%s.png" %(item, state)
         else:
           img_txt = item
           if img_txt in self.new_l:
@@ -2151,15 +2151,22 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
   def make_cbtn_items(self, font_name = 'Vera'):
 
     new_style = True
+    cut = OV.GetParam('olex2.main_toolbar_vline_position') + 3
     if new_style:
       buttons = ['Solve', 'Refine', 'Report']
-      states = ['on', 'off', 'inactive', 'highlight']
+      states = ['on', 'off', 'inactive', 'highlight', 'hover', 'hoveron']
       for state in states:
         for item in buttons:
           width = int(round(self.available_width/3,0)) - 5
           image = self.make_timage(item_type='cbtn', item=item, state=state, width=width)
-          OlexVFS.save_image_to_olex(image,'%s-%s-%s.png' %('cbtn', item.lower(), state), 2)
-          #image.save("C:/tmp/%s-%s-%s.png" %('cbtn', item.lower(), state))
+          images = IT.cut_image(image,(cut,))
+          i = 0
+          for image in images:
+            prefixes = ['btn', 'cbtn']
+            name = '%s-%s%s.png' %(prefixes[i], item.lower(), state)
+            OlexVFS.save_image_to_olex(image,name, 2)
+            image.save("C:/tmp/%s" %name)
+            i += 1
 
 
     else:
@@ -2822,7 +2829,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       weight = int(w[1])
       bg = w[2]
       image = self.add_whitespace(image, side, weight, bg)
-      
 
     filename = item
     return image
@@ -2850,8 +2856,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     return image
 
   def make_shadow(self, image, underground, corner_rad):
-    image = self.add_whitespace(image=image, side='bottom', margin_left=corner_rad, weight=1, colour = self.adjust_colour(underground, luminosity = 0.90))
-    image = self.add_whitespace(image=image, side='bottom', margin_left=corner_rad, weight=1, colour = self.adjust_colour(underground, luminosity = 0.95))
+    image = self.add_whitespace(image=image, side='bottom', margin_left=corner_rad, weight=1, colour = self.adjust_colour(underground, luminosity = 0.97))
+    image = self.add_whitespace(image=image, side='bottom', margin_left=corner_rad, weight=1, colour = self.adjust_colour(underground, luminosity = 0.99))
     return image
   
 
@@ -2952,12 +2958,16 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       draw.polygon((begin, middle, end), fill)
       
     if 'buttonmark' in arrows:
+      if state == "hover":
+        fill = self.highlight_colour
+      else:
+        fill = "#ffffff"
+      
       margin = int(arrows.split('buttonmark:')[1].split(',')[0])
       if not draw:
         draw = ImageDraw.Draw(image)
       w,h = image.size
       for i in xrange(int(h/2) - 2):
-        fill = "#ffffff"
         y = 2 + i * 2
         for j in xrange(4):
           x = (w - margin) + j * 2

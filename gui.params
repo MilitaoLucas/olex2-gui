@@ -188,6 +188,8 @@ gui {
         .type = str
       off_L = 0.9
         .type = float
+      shadow = False
+        .type = bool
     }
 
     cbtn{
@@ -321,7 +323,7 @@ gui {
         .type = float
       font_colour = #555555
         .type = colour
-      arrows = "bar:left:5,char:on~:off+:hoverGo!:hoveronClose"
+      arrows = "bar:left:5,char:on~:off+:hover+:hoveron~"
         .type = str
       off_L = 1.2
         .type = float

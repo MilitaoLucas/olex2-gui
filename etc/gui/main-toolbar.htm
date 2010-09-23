@@ -3,14 +3,16 @@
 <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="0" cellspacing="1">
 <tr VALIGN='center'>
 <td align='left'>
-  <zimg name="cbtn-solve" border="0" src="cbtn-solve.png" usemap=$spy.getmap(solve)>
-</td>
+  $spy.MakeHoverButton(btn-solve,itemstate refine-settings 0 report-settings 0 -u>>solve>>compaq -a>>updatehtml)
+<!-- #include cbtn-solve gui\blocks\cbtn-on.htm;gui\blocks\cbtn-off.htm;image=solve;1; -->
 </td>
 <td align='center'>
-  <zimg name="cbtn-refine" border="0" src="cbtn-refine.png" usemap=$spy.getmap(refine)>
+  $spy.MakeHoverButton(btn-refine,itemstate solve-settings 0 report-settings 0>>refine>>compaq -a)
+<!-- #include cbtn-refine gui\blocks\cbtn-on.htm;gui\blocks\cbtn-off.htm;image=refine;1; -->
 </td>
 <td align='right'>
-  <zimg name="cbtn-report" border="0" src="cbtn-report.png" usemap=#map_report>
+  $spy.MakeHoverButton(btn-report,cursor(busy, '%Starting ...%')>>itemstate solve-settings 0 refine-settings 0 -u>>updatehtml>>cursor(busy, '%Checking for CIF file ...%')>>report>>cursor()>>updatehtml)
+<!-- #include cbtn-report gui\blocks\cbtn-on.htm;gui\blocks\cbtn-off.htm;image=report;1; -->
 </td>
 
 <!-- Button SOLVE -->
@@ -84,8 +86,6 @@ updatehtml"
 </tr>
 </table>
 
-
-
-<!-- #include refinement-settings gui\refinement-settings-only.htm;0; -->
-<!-- #include solution-settings gui\solution-settings-only.htm;0; -->
+<!-- #include refine-settings gui\refinement-settings-only.htm;0; -->
+<!-- #include solve-settings gui\solution-settings-only.htm;0; -->
 <!-- #include report-settings gui\report-settings-only.htm;0; -->
