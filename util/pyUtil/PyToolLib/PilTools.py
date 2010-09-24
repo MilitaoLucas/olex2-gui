@@ -1270,22 +1270,28 @@ class timage(ImageTools):
     cut = 0*sf, 152*sf, 15*sf, 169*sf
     crop =  im.crop(cut)
     #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=1.98))
-    crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.green.rgb,luminosity=1.3,saturation=0.7))
-    IM =  Image.new('RGBA', crop.size, OV.GetParam('gui.html.table_firstcol_colour').rgb)
-    IM.paste(crop_colouriszed, (0,0), crop)
-    name = "info.png"
-    IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
-    draw = ImageDraw.Draw(IM)
-    #txt = IT.get_unicode_characters('info')
-    #txt = "i"
-    #self.write_text_to_draw(draw,
-    #             txt,
-    #             top_left=(6, 0),
-    #             font_name = 'Vera',
-    #             font_size=14,
-    #             translate=False,
-    #             font_colour=self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=0.7))
-    OlexVFS.save_image_to_olex(IM, name, 2)
+    states = ['', 'on', 'hover', 'hoveron']
+    for state in states:
+      if state == "on":
+        crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.green.rgb,luminosity=1.3,saturation=0.7))
+      else:
+        crop_colouriszed = self.colourize(crop, (0,0,0), self.highlight_colour)
+       
+      IM =  Image.new('RGBA', crop.size, OV.GetParam('gui.html.table_firstcol_colour').rgb)
+      IM.paste(crop_colouriszed, (0,0), crop)
+      name = "info.png"
+      IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
+      draw = ImageDraw.Draw(IM)
+      #txt = IT.get_unicode_characters('info')
+      #txt = "i"
+      #self.write_text_to_draw(draw,
+      #             txt,
+      #             top_left=(6, 0),
+      #             font_name = 'Vera',
+      #             font_size=14,
+      #             translate=False,
+      #             font_colour=self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=0.7))
+      OlexVFS.save_image_to_olex(IM, "btn-info%s.png" %(state), 2)
 
     cut = 16*sf, 156*sf, 26*sf, 166*sf
     crop =  im.crop(cut)
@@ -1313,7 +1319,7 @@ class timage(ImageTools):
     draw = ImageDraw.Draw(IM)
     IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
     self.write_text_to_draw(draw,
-                 "i",
+                 "iX",
                  top_left=(2, 1),
                  font_name = 'Vera',
                  font_size=10,
@@ -1329,7 +1335,7 @@ class timage(ImageTools):
     IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
     draw = ImageDraw.Draw(IM)
     self.write_text_to_draw(draw,
-                 "i",
+                 "iY",
                  top_left=(3, -1),
                  font_name = 'Vera Bold Italic',
                  font_size=11,
@@ -1983,7 +1989,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     draw = ImageDraw.Draw(image)
     font_name = "Times Bold Italic"
     self.write_text_to_draw(draw,
-                       "i",
+                       "iZ",
                        top_left=(1, -1),
                        font_name=font_name,
                        font_size=14,
@@ -2909,12 +2915,19 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         align = 'left'
 
       try:
-        direction = arrows.split(state)[1].split(':')[0].split(',')[0]
+        direction = arrows.split(":"+state)[1].split(':')[0].split(',')[0]
       except:
         if state == 'off':
           direction = 'right'
         elif state == 'on':
           direction = 'up'
+        #elif state == 'hover':
+          #direction = 'down'
+        #elif state == 'hoveron':
+          #direction = 'up'
+        elif state == 'inactive':
+          direction = 'up'
+          
       if 'bar' in arrows:
         if state == 'on':
           fill = IT.adjust_colour(fill,luminosity = 1.6)

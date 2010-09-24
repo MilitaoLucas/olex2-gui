@@ -44,7 +44,7 @@
 <tr name=SELECT_WHERE>
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;help_ext=;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td VALIGN='center' >
+  <td width='40%' VALIGN='center' >
     %Select atoms where% <b>U<sub>iso</sub></b>
   </td>
   <td VALIGN='center'  colspan='2'>
@@ -63,13 +63,14 @@
         type="text"
         bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
         name = "uiso"
-        width="40"
+        width="30"
         float height="$spy.GetParam(gui.html.input_height)"
         value = "0.06"
       >
-    </font>
-      $spy.MakeHoverButton(button_small-select@uiso,sel atoms where xatom.uiso getvalue\(compare) getvalue\(uiso)&&xatom.type!='Q')
-
+    </font>&nbsp;
+</td>
+<td width='20%' align='right'>
+$spy.MakeHoverButton(button_small-select@uiso,sel atoms where xatom.uiso getvalue\(compare) getvalue\(uiso)&&xatom.type!='Q')
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>

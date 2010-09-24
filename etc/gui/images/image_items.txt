@@ -56,6 +56,8 @@
   Name
   Ellipsoids
   Add H
+  Clear
+  Mode
 
 [FULL ROW]
   Run AutoChem
