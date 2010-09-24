@@ -5,20 +5,14 @@
 <!-- #include tool-help-column gui\blocks\tool-first-column.htm;help_ext=mode_name;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
-  <td name=IMAGE_PS_BUTTON>
-    <input
-      type="button"
-      name = "MAKE_IMAGE_SERIES"
-      width="25"
-      value="Go"
-      onclick="spy.run_MakeMovie()"
-      target="Make Movie"
-    >
-  </td>
   <td>
     %This will produce a series of .bmp files in the sub-folder 'movie'%
   </td>
+  <td name=IMAGE_PS_BUTTON>
+$spy.MakeHoverButton(button_small-go@bitmap,spy.run_MakeMovie\())
+  </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
 </tr>
 
 
