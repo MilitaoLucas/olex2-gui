@@ -509,7 +509,7 @@ def restraint_builder(cmd):
       html_help, d = htmlTools.format_help(html_help)
     elif id == "var":
       ctrl_name = "%s_%s_TEXT_BOX" %(name, var)
-      pre_onclick += "SetVar(%s_value,GetValue(%s))>>" %(ctrl_name,ctrl_name)
+      pre_onclick += "SetVar\(%s_value,GetValue(%s))>>" %(ctrl_name,ctrl_name)
       onclick += "GetValue(%s) " %ctrl_name
       if val == " ":
         val = "$GetVar(%s_value,'')" %ctrl_name
@@ -553,7 +553,7 @@ def restraint_builder(cmd):
       "width":40, "height":28,
       "hint":"Atoms subsequently clicked will become the pivot atom of a new rigid group",
     }
-    clear_onclick = "sel atoms where xatom.afix ==  strcat(%s,%s)>>Afix 0>>labels -a" %(onclick_list[1],onclick_list[2])
+    clear_onclick = "sel atoms where xatom.afix==strcat\(%s,%s)>>Afix 0>>labels -a" %(onclick_list[1],onclick_list[2])
     clear_button_d = {
       "name":'AFIX_CLEAR',
       "value":"Clear",
@@ -584,9 +584,13 @@ def restraint_builder(cmd):
   if itemcount < colspan:
     html+= "<td></td>"*(colspan-itemcount) # Space-filler
   if name == 'AFIX':
-    html += "<td width='25%%' align='right'>%s</td>" %htmlTools.make_input_button(clear_button_d)
-    html += "<td width='25%%' align='right'>%s</td>" %htmlTools.make_input_button(mode_button_d)
-  html += "<td width='10%%' align='right'>%s</td>" %htmlTools.make_input_button(button_d)
+#    html += "<td width='25%%' align='right'>%s</td>" %htmlTools.make_input_button(clear_button_d)
+    html += "<td width='25%%' align='right'>$spy.MakeHoverButton(button_small-clear@Afix,%s)</td>" %clear_onclick
+#    html += "<td width='25%%' align='right'>%s</td>" %htmlTools.make_input_button(mode_button_d)
+    html += "<td width='25%%' align='right'>$spy.MakeHoverButton(button_small-mode@Afix,%s)</td>" %mode_ondown
+#  html += "<td width='10%%' align='right'>%s</td>" %htmlTools.make_input_button(button_d)
+
+  html += "<td width='25%%' align='right'>$spy.MakeHoverButton(button_small-go@%s,%s)</td>" %(name, onclick)
 
   #Add the help info as the last row in the table
   html += "</td></tr><tr>"
