@@ -1270,9 +1270,9 @@ class timage(ImageTools):
     cut = 0*sf, 152*sf, 15*sf, 169*sf
     crop =  im.crop(cut)
     #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=1.98))
-    states = ['', 'on', 'hover', 'hoveron']
+    states = ['', 'on', 'off', 'hover', 'hoveron']
     for state in states:
-      if state == "on":
+      if state == "off":
         crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.green.rgb,luminosity=1.3,saturation=0.7))
       else:
         crop_colouriszed = self.colourize(crop, (0,0,0), self.highlight_colour)
