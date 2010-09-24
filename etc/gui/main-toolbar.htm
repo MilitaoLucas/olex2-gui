@@ -3,86 +3,18 @@
 <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="0" cellspacing="1">
 <tr VALIGN='center'>
 <td align='left'>
-  $spy.MakeHoverButton(btn-solve,itemstate refine-settings 0 report-settings 0 -u>>solve>>compaq -a>>updatehtml)
+  $spy.MakeHoverButton(btn-solve,itemstate cbtn-refine 1 cbtn-report 1 refine-settings 0 report-settings 0>>updatehtml>>solve>>compaq -a)
 <!-- #include cbtn-solve gui\blocks\cbtn-on.htm;gui\blocks\cbtn-off.htm;image=solve;1; -->
 </td>
 <td align='center'>
-  $spy.MakeHoverButton(btn-refine,itemstate solve-settings 0 report-settings 0>>refine>>compaq -a)
+  $spy.MakeHoverButton(btn-refine,itemstate cbtn-solve 1 cbtn-report solve-settings 0 report-settings 0>>updatehtml>>refine>>compaq -a)
 <!-- #include cbtn-refine gui\blocks\cbtn-on.htm;gui\blocks\cbtn-off.htm;image=refine;1; -->
 </td>
 <td align='right'>
-  $spy.MakeHoverButton(btn-report,cursor(busy, '%Starting ...%')>>itemstate solve-settings 0 refine-settings 0 -u>>updatehtml>>cursor(busy, '%Checking for CIF file ...%')>>report>>cursor()>>updatehtml)
+  $spy.MakeHoverButton(btn-report,itemstate cbtn-solve 1 cbtn-refine solve-settings 0 refine-settings 0>>updatehtml>>cursor(busy, '%Checking for CIF file ...%')>>report>>cursor()>>updatehtml)
 <!-- #include cbtn-report gui\blocks\cbtn-on.htm;gui\blocks\cbtn-off.htm;image=report;1; -->
 </td>
 
-<!-- Button SOLVE -->
-<map name="map_solve">
-  <area shape="rect" 
-    coords="0,0,$spy.GetParam(olex2.main_toolbar_vline_position),25" 
-    href="
-itemstate refinement-settings 0 report-settings 0 -u>>
-spy.setMainToolbarTabButtons(solve)>>
-solve>>
-updatehtml>>
-"
-  target="%Reset and Solve the Structure%">
-
-<!-- Button SOLVE SETTINGS-->
-  <area shape="rect" 
-    coords="$spy.GetParam(olex2.main_toolbar_vline_position),0,500,25"
-    href="
-itemstate refinement-settings 0 report-settings 0 solution-settings 0 1 -u>>
-spy.setMainToolbarTabButtons(solve)>>
-updatehtml>>"
-  target="%Modify Settings for Structure Solution%">
-</map>	
-
-<map name="map_refine">
-<!-- Button REFINE -->
-  <area shape="rect" 
-    coords="0,0,$spy.GetParam(olex2.main_toolbar_vline_position),25" 
-    href="
-itemstate solution-settings 0 report-settings 0>>
-spy.setMainToolbarTabButtons(refine)>>
-refine>>
-"
-  target="%Refine the Structure%">
-<!-- Button REFINE SETTINGS-->
-  <area shape="rect" 
-    coords="$spy.GetParam(olex2.main_toolbar_vline_position),0,500,25"
-    href="
-itemstate solution-settings 0 report-settings 0 refinement-settings 0 1 -u>>
-spy.setMainToolbarTabButtons(refine)>>
-updatehtml>>"
-  target="%Modify Settings for Structure Solution%">
-</map>
-
-<map name="map_report">
-<!-- Button REPORT -->
-  <area shape="rect"
-    coords="0,0,$spy.GetParam(olex2.main_toolbar_vline_position),25" 
-    href="
-cursor(busy, '%Starting ...%')>>
-itemstate solution-settings 0 refinement-settings 0 -u>>
-spy.setMainToolbarTabButtons(report)>>
-updatehtml>>
-cursor(busy, '%Checking for CIF file ...%')>> 
-report>>
-cursor()
-updatehtml>>
-"
-  target="%Create Structure Report%"
->
-<!-- Button REPORT SETTINGS-->
-  <area shape="rect" 
-    coords="$spy.GetParam(olex2.main_toolbar_vline_position),0,500,25"
-    href="
-spy.ExtractCifInfo()>>
-itemstate refinement-settings 0 solution-settings 0 report-settings 0 1 -u>>
-spy.setMainToolbarTabButtons(report)>>
-updatehtml"
-  target="%Modify Settings for Report Generation%">
-</map>	
 </tr>
 </table>
 
