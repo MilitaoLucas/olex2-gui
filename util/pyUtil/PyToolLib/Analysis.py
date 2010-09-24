@@ -2324,14 +2324,16 @@ def makeReflectionGraphGui():
     else:
       gui_d['options_gui'], gui_d['colspan'] = makeReflectionGraphOptions(graph, name)
       help_name = graph.help
+      onclick = 'spy.make_reflection_graph\(%s)' %name
       d = {'name':'BUTTON_MAKE_REFLECTION_GRAPH',
            'bgcolor':guiParams.html.input_bg_colour,
-           'onclick': 'spy.make_reflection_graph(%s)' %name,
+           'onclick': onclick,
            'width':'30',
            'value':'Go',
            'valign':'top',
           }
-      gui_d['make_graph_button'] = htmlTools.make_input_button(d)
+      #gui_d['make_graph_button'] = htmlTools.make_input_button(d)
+      gui_d['make_graph_button'] = '$spy.MakeHoverButton(button_small-go@MakeGraphs,%s)' %onclick
 
   gui_d['help'] = htmlTools.make_table_first_col(
     help_name=help_name, popout=False)
@@ -2363,7 +2365,7 @@ def makeReflectionGraphGui():
 <td>
 %(graph_chooser)s
 </td>
-<td>
+<td align='right'>
 %(make_graph_button)s
 </td>
 %(row_table_off)s

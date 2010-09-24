@@ -5,30 +5,6 @@
 <!-- #include tool-help-column gui\blocks\tool-first-column.htm;help_ext=mode_name;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
-  <td name=IMAGE_PS_BUTTON>
-    <input
-  type="button"
-  name = "MAKE_PS_IMAGE"
-  width="25"
-  value="Go"
-  onclick="run 'brad GetValue(IMAGE_PS_BONDWIDTH)'>>
-run 'pictps
-  spy.getParam(snum.image.ps.name).ps
-  GetData(COLOR_LINE)
-  GetData(COLOR_FILL)
-  GetData(COLOR_BOND)
-  GetData(IMAGE_PS_PERSPECTIVE)
-  -lw_ellipse=spy.GetParam(snum.image.ps.outline_width)
-  -lw_octant=spy.GetParam(snum.image.ps.octant_width)
-  -lw_pie=spy.GetParam(snum.image.ps.pie_width)
-  -lw_font=spy.GetParam(snum.image.ps.font_weight)
-  -div_pie=spy.GetParam(snum.image.ps.octant_count)
-  -scale_hb=spy.GetParam(snum.image.ps.h_bond_width)
-'>>
-brad 0.8>>
-echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'"
-    >
-  </td>
   <td name=IMAGE_PS_NAME>
     <input 
       type="text"
@@ -102,6 +78,9 @@ echo 'Image spy.GetParam(snum.image.ps.name).ps made and placed in FilePath()'"
       onuncheck="SetData(IMAGE_PS_PERSPECTIVE,' ')"
       manage
     >
+  </td>
+  <td name=IMAGE_PS_BUTTON>
+$spy.MakeHoverButton(button_small-go@postscript,run 'brad GetValue\(IMAGE_PS_BONDWIDTH)'>>run 'pictps spy.getParam\(snum.image.ps.name).ps GetData\(COLOR_LINE) GetData\(COLOR_FILL) GetData\(COLOR_BOND) GetData\(IMAGE_PS_PERSPECTIVE) -lw_ellipse=spy.GetParam\(snum.image.ps.outline_width) -lw_octant=spy.GetParam\(snum.image.ps.octant_width) -lw_pie=spy.GetParam\(snum.image.ps.pie_width) -lw_font=spy.GetParam\(snum.image.ps.font_weight) -div_pie=spy.GetParam\(snum.image.ps.octant_count) -scale_hb=spy.GetParam\(snum.image.ps.h_bond_width)'>>brad 0.8>>echo 'Image spy.GetParam\(snum.image.ps.name).ps made and placed in FilePath\()')
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
