@@ -1,0 +1,38 @@
+<cif_customisation
+  <translation
+    <item from="_symmetry_cell_setting" to="_space_group_crystal_system">
+    <item from="_symmetry_space_group_name_Hall" to="_space_group_name_Hall">
+    <item from="_symmetry_space_group_name_H-M" to="_space_group_name_H-M_alt">
+    <item from="_symmetry_Int_Tables_number-M" to="_space_group_IT_number">
+    <item from="_diffrn_reflns_av_sigmaI/netI" to="_diffrn_reflns_av_unetI/netI">
+  >
+  <sorting
+    <pivots
+      <pivot "_audit_creation">
+      <pivot "_publ">
+      <pivot "_chemical_name">  <pivot "_chemical_formula">  <pivot "_chemical">
+      <pivot "_atom_type">
+      <pivot "_space_group">  <pivot "_space_group_symop">
+      <pivot "_symmetry">
+      <pivot "_cell_length">  <pivot "_cell_angle">  <pivot "_cell_volume">  <pivot "_cell_formula">  <pivot "_cell">
+      <pivot "_exptl_">
+      <pivot "_diffrn_reflns">  <pivot "_diffrn">
+      <pivot "_reflns">
+      <pivot "_computing">
+      <pivot "_refine">
+      <pivot "_atom_sites">  <pivot "_atom_site">  <pivot "_atom_site_aniso">
+      <pivot "_geom_special">  <pivot "_geom_bond">  <pivot "_geom_angle">  <pivot "_geom">
+      <pivot "_smtbx">
+    >
+    <endings
+      <ending "_h_min">
+      <ending "_h_max">
+      <ending "_k_min">
+      <ending "_k_max">
+      <ending "_l_min">
+      <ending "_l_max">
+      <ending "_min">
+      <ending "_max">
+    >
+  >
+>

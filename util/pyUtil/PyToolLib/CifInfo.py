@@ -306,7 +306,6 @@ class ExtractCifInfo(CifTools):
     olx.cif_model = self.cif_model
 
   def run(self):
-    merge = []
     self.userInputVariables = OV.GetParam("snum.metacif.user_input_variables")
     basename = self.filename
     path = self.filepath
@@ -330,17 +329,23 @@ class ExtractCifInfo(CifTools):
 
     p = self.sort_out_path(path, "frames")
     if p and self.metacifFiles.curr_frames != self.metacifFiles.prev_frames:
-      import bruker_frames
-      frames = bruker_frames.reader(p).cifItems()
-      self.update_cif_block(frames)
+      try:
+        import bruker_frames
+        frames = bruker_frames.reader(p).cifItems()
+        self.update_cif_block(frames)
+      except:
+        print "Error reading Bruker frame file %s" %p
 
     p = self.sort_out_path(path, "smart")
     if p and self.metacifFiles.curr_smart != self.metacifFiles.prev_smart:
-      import bruker_smart
-      smart = bruker_smart.reader(p).cifItems()
-      computing_data_collection = self.prepare_computing(smart, versions, "smart")
-      smart.setdefault("_computing_data_collection", computing_data_collection)
-      self.update_cif_block(smart)
+      try:
+        import bruker_smart
+        smart = bruker_smart.reader(p).cifItems()
+        computing_data_collection = self.prepare_computing(smart, versions, "smart")
+        smart.setdefault("_computing_data_collection", computing_data_collection)
+        self.update_cif_block(smart)
+      except:
+        print "Error reading Bruker SMART file %s" %p
 
     p = self.sort_out_path(path, "p4p")
     if p and self.metacifFiles != self.metacifFiles.prev_p4p:
@@ -349,74 +354,86 @@ class ExtractCifInfo(CifTools):
         p4p = p4p_reader(p).read_p4p()
         self.update_cif_block(p4p)
       except:
-        pass
+        print "Error reading p4p file %s" %p
 
     p = self.sort_out_path(path, "integ")
     if p and self.metacifFiles.curr_integ != self.metacifFiles.prev_integ:
-      import bruker_saint_listing
-      integ = bruker_saint_listing.reader(p).cifItems()
-      computing_data_reduction = self.prepare_computing(integ, versions, "saint")
-      computing_data_reduction = string.strip((string.split(computing_data_reduction, "="))[0])
-      integ.setdefault("_computing_data_reduction", computing_data_reduction)
-      integ["computing_data_reduction"] = computing_data_reduction
-      self.update_cif_block(integ)
+      try:
+        import bruker_saint_listing
+        integ = bruker_saint_listing.reader(p).cifItems()
+        computing_data_reduction = self.prepare_computing(integ, versions, "saint")
+        computing_data_reduction = string.strip((string.split(computing_data_reduction, "="))[0])
+        integ.setdefault("_computing_data_reduction", computing_data_reduction)
+        integ["computing_data_reduction"] = computing_data_reduction
+        self.update_cif_block(integ)
+      except:
+        print "Error reading Bruker Saint integration file %s" %p
 
     p = self.sort_out_path(path, "saint")
     if p and self.metacifFiles.curr_saint != self.metacifFiles.prev_saint:
-      import bruker_saint
-      saint = bruker_saint.reader(p).cifItems()
-      computing_cell_refinement = self.prepare_computing(saint, versions, "saint")
-      saint.setdefault("_computing_cell_refinement", computing_cell_refinement)
-      computing_data_reduction = self.prepare_computing(saint, versions, "saint")
-      saint.setdefault("_computing_data_reduction", computing_data_reduction)
-      self.update_cif_block(saint)
+      try:
+        import bruker_saint
+        saint = bruker_saint.reader(p).cifItems()
+        computing_cell_refinement = self.prepare_computing(saint, versions, "saint")
+        saint.setdefault("_computing_cell_refinement", computing_cell_refinement)
+        computing_data_reduction = self.prepare_computing(saint, versions, "saint")
+        saint.setdefault("_computing_data_reduction", computing_data_reduction)
+        self.update_cif_block(saint)
+      except:
+        print "Error reading Bruker saint.ini"
 
     p = self.sort_out_path(path, "abs")
     if p and self.metacifFiles.curr_abs != self.metacifFiles.prev_abs:
-      import abs_reader
-      abs_type = abs_reader.abs_type(p)
-      if abs_type == "SADABS":
-        try:
+      try:
+        import abs_reader
+        abs_type = abs_reader.abs_type(p)
+        if abs_type == "SADABS":
           sad = abs_reader.reader(p).cifItems()
           version = self.prepare_computing(sad, versions, "sad")
           version = string.strip((string.split(version, "="))[0])
           t = self.prepare_exptl_absorpt_process_details(sad, version)
           sad.setdefault("_exptl_absorpt_process_details", t)
-          merge.append(sad)
-        except KeyError:
-          print "There was an error reading the SADABS output file\n'%s'.\nThe file may be incomplete." %p
-      elif abs_type == "TWINABS":
-        try:
+          self.update_cif_block(sad)
+        elif abs_type == "TWINABS":
           twin = abs_reader.reader(p).twin_cifItems()
           version = self.prepare_computing(twin, versions, "twin")
           version = string.strip((string.split(version, "="))[0])
           t = self.prepare_exptl_absorpt_process_details(twin, version)
           twin.setdefault("_exptl_absorpt_process_details", t)
-          merge.append(twin)
-        except KeyError:
-          print "There was an error reading the TWINABS output file\n'%s'.\nThe file may be incomplete." %p
+          self.update_cif_block(twin)
+      except:
+        print "There was an error reading the SADABS/TWINABS output file\n'%s'.\nThe file may be incomplete." %(p)
 
     p = self.sort_out_path(path, "pcf")
     if p and self.metacifFiles.curr_pcf != self.metacifFiles.prev_pcf:
-      from pcf_reader import pcf_reader
-      pcf = pcf_reader(p).read_pcf()
-      self.update_cif_block(pcf)
+      try:
+        from pcf_reader import pcf_reader
+        pcf = pcf_reader(p).read_pcf()
+        self.update_cif_block(pcf)
+      except:
+        print "Error reading pcf file %s" %p
 
     p = self.sort_out_path(path, "cad4")
     if p and self.metacifFiles.curr_cad4 != self.metacifFiles.prev_cad4:
-      from cad4_reader import cad4_reader
-      cad4 = cad4_reader(p).read_cad4()
-      self.update_cif_block(cad4)
+      try:
+        from cad4_reader import cad4_reader
+        cad4 = cad4_reader(p).read_cad4()
+        self.update_cif_block(cad4)
+      except:
+        print "Error reading cad4 file %s" %p
 
     # Oxford Diffraction data collection CIF
     p = self.sort_out_path(path, "cif_od")
     if p and self.metacifFiles.curr_cif_od != self.metacifFiles.prev_cif_od:
-      import iotbx.cif
-      f = open(p, 'rUb')
-      cif_od = iotbx.cif.reader(input_string=f.read()).model().values()[0]
-      self.exclude_cif_items(cif_od)
-      f.close()
-      self.update_cif_block(cif_od)
+      try:
+        import iotbx.cif
+        f = open(p, 'rUb')
+        cif_od = iotbx.cif.reader(input_string=f.read()).model().values()[0]
+        self.exclude_cif_items(cif_od)
+        f.close()
+        self.update_cif_block(cif_od)
+      except:
+        print "Error reading Oxford Diffraction CIF %s" %p
 
     # Diffractometer definition file
     diffractometer = OV.GetParam('snum.report.diffractometer')
@@ -425,9 +442,12 @@ class ExtractCifInfo(CifTools):
     except KeyError:
       p = '?'
     if diffractometer not in ('','?') and p != '?' and os.path.exists(p):
-      import cif_reader
-      cif_def = cif_reader.reader(p).cifItems()
-      self.update_cif_block(cif_def)
+      try:
+        import cif_reader
+        cif_def = cif_reader.reader(p).cifItems()
+        self.update_cif_block(cif_def)
+      except:
+        print "Error reading local diffractometer definition file %s" %p
 
     # smtbx solvent masks output file
     mask_cif_path = '%s/%s-mask.cif' %(OV.StrDir(), OV.FileName())
@@ -508,7 +528,7 @@ class ExtractCifInfo(CifTools):
     except KeyError:
       if version != "None":
         print "Version %s of the programme %s is not in the list of known versions" %(version, name)
-      versiontext = "Unknown"
+      versiontext = "?"
     return versiontext
 
   def enter_new_version(self, dict, version, name):
