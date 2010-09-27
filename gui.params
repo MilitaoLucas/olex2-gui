@@ -43,6 +43,8 @@ gui {
       .type = float
     clearcolor = 8404992
       .type = int
+    icon_size = 25
+      .type = int
   }
 
   html {
@@ -74,7 +76,7 @@ gui {
       .help = Width of a combobox that is to take 2 digits and a decimal point.
     combo_height = 18
       .type = int
-      icon_size = 25
+    icon_size = 25
       .type = int
     link_colour = #585886
       .type = colour

@@ -559,7 +559,7 @@ def MakeElementButtonsFromFormula():
       for state in ['on', 'off', 'hover', '']:
         txt = btn_dict[b].get('txt')
         bgcolour = btn_dict[b].get('bgcolour')
-        width = 22
+        width = OV.GetParam('gui.skin.icon_size')
         btn_type = 'tiny'
         bg = OV.GetParam('gui.html.table_firstcol_colour')
         IM = TI.make_timage(item_type='tinybutton', item=txt, state=state, width=width, colour=bgcolour, whitespace='right:1:%s' %bg)

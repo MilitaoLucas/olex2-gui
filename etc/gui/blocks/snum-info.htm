@@ -12,40 +12,35 @@
     </td>	
     <td align='right' colspan = '2'>
       $spy.checkErrLogFile()
-      <a target="%olex2-home-target%" href="itemstate index* 0>>itemstate index-home 1>>itemstate tab* 2">
-      <zimg  border="0" src="toolbar-home.png"></a>			
-      <a target="%editins-target%" href="editins>>spy.doProgramSettings(spy.GetParam(snum.refinement.program),spy.GetParam(snum.refinement.method))>>UpdateHtml" target='editins'>
-      <zimg  border="0" src="toolbar-edit.png"></a>			
-      <a target="%editatom-target%" href="editatom">
-      <zimg border="0" src="toolbar-editatom.png"></a>			
-      <a target="%dire-target%" href="exec -o getvar(defexplorer) 'filepath()'">
-      <zimg  border="0" src="toolbar-open.png"></a>			
-      <a target="%consoletext-target%" href="text">
-      <zimg  border="0" src="toolbar-text.png"></a>			
-      <a target="%snuminfo-target%" href="itemstate more-snum-info 1 2">
-      <zimg  border="0" src="toolbar-info.png"></a>			
-    </td>
+&nbsp;$spy.MakeHoverButton(toolbar-home, 'itemstate index* 0>>itemstate index-home 1>>itemstate tab* 2')
+&nbsp;$spy.MakeHoverButton(toolbar-edit, 'editins>>spy.doProgramSettings\(spy.GetParam\(snum.refinement.program),spy.GetParam\(snum.refinement.method))>>UpdateHtml')
+&nbsp;$spy.MakeHoverButton(toolbar-editatom, 'editatom')
+&nbsp;$spy.MakeHoverButton(toolbar-open, 'exec -o getvar\(defexplorer) 'filepath\()'')
+&nbsp;$spy.MakeHoverButton(toolbar-text, 'text')
+&nbsp;$spy.MakeHoverButton(toolbar-info, 'itemstate more-snum-info 1 2')
+
+  </td>
   </tr>
 
 
 <tr align='left'>
-  <td colspan = '3'>
-  &nbsp;<b>a=</b>$xf.uc.CellEx(a)<b>; b=</b>$xf.uc.CellEx(b)<b>; c=</b>$xf.uc.CellEx(c)&Aring;
+<td colspan = '3'>
+&nbsp;<b>a=</b>$xf.uc.CellEx(a)<b>; b=</b>$xf.uc.CellEx(b)<b>; c=</b>$xf.uc.CellEx(c)&Aring;
   </td>
-<!--<!-- #includeif file.Exists('StrDir()\displayR.htm') displayR StrDir()/displayR.htm;1 -->
+  <!--<!-- #includeif file.Exists('StrDir()\displayR.htm') displayR StrDir()/displayR.htm;1 -->
   $spy.GetRInfo()
-  </tr>
-
-  <tr align='left'>
-    <td colspan = '3'>
-    &nbsp;<b>&alpha;</b>=$xf.uc.CellEx(alpha)&deg;
-      <b>&beta;</b>=$xf.uc.CellEx(beta)&deg;
-      <b>&gamma;</b>=$xf.uc.CellEx(gamma)&deg;
-    </td>
-  </tr>
-
-$spy.GetTwinLaw(html)
+</tr>
   
+  <tr align='left'>
+<td colspan = '3'>
+  &nbsp;<b>&alpha;</b>=$xf.uc.CellEx(alpha)&deg;
+    <b>&beta;</b>=$xf.uc.CellEx(beta)&deg;
+    <b>&gamma;</b>=$xf.uc.CellEx(gamma)&deg;
+      </td>
+      </tr>
+    
+  $spy.GetTwinLaw(html)
+
 <!-- #include more-snum-info gui\blocks\more-snum-info.htm;2 -->
 
 </table>
