@@ -99,6 +99,11 @@ class OlexFunctions(inheritFunctions):
     if key not in user_modified:
       user_modified.append(key)
     OV.SetParam('snum.metacif.user_modified', user_modified)
+    if key == '_diffrn_ambient_temperature':
+      value = str(value)
+      if value not in ('?', '.'):
+        if 'K' not in value: value += ' K'
+        olx.xf_exptl_Temperature(value)
 
   def GuiParams(self):
     if hasattr(olx, 'gui_phil_handler'):
