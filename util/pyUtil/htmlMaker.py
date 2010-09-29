@@ -518,7 +518,7 @@ def restraint_builder(cmd):
       html_help, d = htmlTools.format_help(html_help)
     elif id == "var":
       ctrl_name = "%s_%s_TEXT_BOX" %(name, var)
-      pre_onclick += "SetVar\(%s_value,GetValue(%s))>>" %(ctrl_name,ctrl_name)
+      pre_onclick += "SetVar(%s_value,GetValue(%s))>>" %(ctrl_name,ctrl_name)
       onclick += "GetValue(%s) " %ctrl_name
       if val == " ":
         val = "$GetVar(%s_value,'')" %ctrl_name
