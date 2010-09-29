@@ -161,7 +161,7 @@ class CifTools(ArgumentParser):
   def sort_crystal_colour(self):
     cif_block = self.cif_model[OV.FileName()]
     colour = cif_block.get('_exptl_crystal_colour')
-    if colour is None:
+    if colour is None or colour == '?':
       colours = []
       cif_items = ('_exptl_crystal_colour_lustre',
                    '_exptl_crystal_colour_modifier',
@@ -492,7 +492,7 @@ class ExtractCifInfo(CifTools):
   def exclude_cif_items(self, cif_block):
     # ignore cif items that should be provided by the refinement engine
     exclude_list = ('_cell_length', '_cell_angle', '_cell_volume', '_cell_formula',
-                    '_cell_oxdiff', '_symmetry')
+                    '_cell_oxdiff', '_symmetry', '_exptl_absorpt_coefficient_mu')
     for item in cif_block:
       for exclude in exclude_list:
         if item.startswith(exclude):
