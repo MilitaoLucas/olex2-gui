@@ -94,6 +94,7 @@ class OlexFunctions(inheritFunctions):
 
   def set_cif_item(self, key, value):
     if olx.cif_model is not None:
+      if isinstance(value, basestring) and value.strip() == '': value = '?'
       olx.cif_model[self.FileName()][key] = value
     user_modified = OV.GetParam('snum.metacif.user_modified')
     if user_modified is None: user_modified = []
@@ -559,7 +560,7 @@ class OlexFunctions(inheritFunctions):
       mac = olx.GetMAC()
       mac = mac.split(";")
     #mac=['XX-24-E8-00-37-08','00-24-E8-00-37-08']  testing with a bogous mac address
-    return mac
+    return retVal
 
   def GetComputername(self):
     return os.getenv('COMPUTERNAME')

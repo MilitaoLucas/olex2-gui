@@ -195,6 +195,12 @@ snum {
     cad4_file = None
       .type = path
       .expert_level = 1
+    cif_od_file = None
+      .type = path
+      .expert_level = 1
+    crystal_clear_file = None
+      .type = path
+      .expert_level = 1
     twin_file = None
       .type = path
       .expert_level = 1
@@ -225,6 +231,12 @@ snum {
       .type = strings
       .expert_level = 2
     list_cad4_files = None
+      .type = strings
+      .expert_level = 2
+    list_crystal_clear_files = None
+      .type = strings
+      .expert_level = 2
+    list_cif_od_files = None
       .type = strings
       .expert_level = 2
     user_input_variables = None
