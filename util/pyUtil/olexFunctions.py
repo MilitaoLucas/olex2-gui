@@ -92,7 +92,7 @@ class OlexFunctions(inheritFunctions):
 
   def set_cif_item(self, key, value):
     if olx.cif_model is not None:
-      if value.strip() == '': value = '?'
+      if isinstance(value, basestring) and value.strip() == '': value = '?'
       olx.cif_model[self.FileName()][key] = value
     user_modified = OV.GetParam('snum.metacif.user_modified')
     if user_modified is None: user_modified = []
