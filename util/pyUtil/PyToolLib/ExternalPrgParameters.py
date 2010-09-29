@@ -432,17 +432,9 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
         #print "No mask present"
     diffrn_ambient_temperature = OV.get_cif_item('_diffrn_ambient_temperature')
     if diffrn_ambient_temperature is not None:
-      if '(' in diffrn_ambient_temperature:
-        diffrn_ambient_temperature = diffrn_ambient_temperature.split('(')[0]
-      if 'K' in diffrn_ambient_temperature:
-        diffrn_ambient_temperature = diffrn_ambient_temperature.split('K')[0]
-      try:
-        diffrn_ambient_temperature = float(diffrn_ambient_temperature)
-        diffrn_ambient_temperature = diffrn_ambient_temperature - 273.0
-        OV.DelIns('TEMP')
-        OV.AddIns('TEMP %s' %diffrn_ambient_temperature)
-      except ValueError:
-        pass
+      if 'K' not in diffrn_ambient_temperature.upper():
+        diffrn_ambient_temperature += ' K'
+      olx.xf_exptl_Temperature(diffrn_ambient_temperature)
     Method_refinement.pre_refinement(self, RunPrgObject)
 
   def post_refinement(self, RunPrgObject):
