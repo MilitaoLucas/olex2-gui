@@ -42,20 +42,29 @@ def sourceFilesHtmlMaker():
      'itemName':'cad4 %File%',
      'chooseFile':{'filter':'.dat files|*.dat'}
      },
+    {'varName':'snum.metacif.cif_od_file',
+     'itemName':'Agilent %File%',
+     'chooseFile':{'filter':'.cif_od files|*.cif_od'}
+     },
+    {'varName':'snum.metacif.crystal_clear_file',
+     'itemName':'CrystalClear %File%',
+     'chooseFile':{'filter':'CrystalClear.cif files|CrystalClear.cif'}
+     },
   ]
   text = ''
 
   x = 0
   for i in range(len(list)):
     d = list[x]
-    listFiles = 'snum.metacif.list_%s_files'  %d['varName'].split('.')[-1].split('_')[-2]
+    listFiles = 'snum.metacif.list_%s_files'  %'_'.join(
+      d['varName'].split('.')[-1].split('_')[:-1])
     var = OV.GetParam(listFiles)
     if var is not None:
       if ';' in var:
         d.setdefault('items', 'spy.GetParam(%s)' %listFiles)
       x += 1
       file_type = d['varName'].split('.')[-1].split('_')[0]
-      d.setdefault('onchange',"spy.SetParam(%s,'GetValue(SET_%s)')>>spy.AddVariableToUserInputList(%s)>>spy cif" %(d['varName'],str.upper(d['varName']).replace('.','_'),d['varName']))
+      d.setdefault('onchange',"spy.SetParam(%s,'GetValue(SET_%s)')>>spy.AddVariableToUserInputList(%s)" %(d['varName'],str.upper(d['varName']).replace('.','_'),d['varName']))
       d['chooseFile'].setdefault('folder',OV.FilePath())
       d['chooseFile'].setdefault('file_type',file_type)
       d['chooseFile'].setdefault('caption',d['itemName'])

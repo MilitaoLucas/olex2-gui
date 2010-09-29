@@ -56,6 +56,7 @@ class MetacifFiles:
     self.curr_frames = None
     self.curr_p4p = None
     self.curr_cif_od = None
+    self.curr_crystal_clear = None
     self.curr_cif_def = None
     self.curr_twin = None
     self.curr_abs = None
@@ -69,6 +70,7 @@ class MetacifFiles:
     self.prev_frames = None
     self.prev_p4p = None
     self.prev_cif_od = None
+    self.prev_crystal_clear = None
     self.prev_cif_def = None
     self.prev_twin = None
     self.prev_abs = None
@@ -82,6 +84,7 @@ class MetacifFiles:
     self.list_frames = None
     self.list_p4p = None
     self.list_cif_od = None
+    self.list_crystal_clear = None
     self.list_twin = None
     self.list_abs = None
 
@@ -435,6 +438,22 @@ class ExtractCifInfo(CifTools):
       except:
         print "Error reading Oxford Diffraction CIF %s" %p
 
+    # Rigaku data collection CIF
+    p = self.sort_out_path(path, "crystal_clear")
+    if p and self.metacifFiles.curr_crystal_clear != self.metacifFiles.prev_crystal_clear:
+      try:
+        import iotbx.cif
+        f = open(p, 'rUb')
+        cif = iotbx.cif.reader(input_string=f.read()).model()
+        for key, cif_block in cif.iteritems():
+          if key.lower() not in ('global', 'general'):
+            break
+        self.exclude_cif_items(cif_block)
+        f.close()
+        self.update_cif_block(cif_block)
+      except:
+        print "Error reading Rigaku CIF %s" %p
+
     # Diffractometer definition file
     diffractometer = OV.GetParam('snum.report.diffractometer')
     try:
@@ -587,6 +606,9 @@ class ExtractCifInfo(CifTools):
     elif tool == "cif_od":
       name = OV.FileName()
       extension = ".cif_od"
+    elif tool == "crystal_clear":
+      name = "CrystalClear"
+      extension = ".cif"
     else:
       return "Tool not found"
 
