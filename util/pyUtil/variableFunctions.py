@@ -200,13 +200,6 @@ snum {
   solutionMethod = olx.phil_handler.get_validated_param('snum.solution.method')
   refinementPrg = olx.phil_handler.get_validated_param('snum.refinement.program')
   refinementMethod = olx.phil_handler.get_validated_param('snum.refinement.method')
-  if OV.IsFileType('ires'):
-    if solutionMethod == 'Direct Methods' and olx.Ins('PATT') != 'n/a':
-      solutionMethod = 'Patterson Method' # work-around for bug #48
-    if refinementMethod == 'Least Squares' and olx.LSM() == 'CGLS':
-      refinementMethod = 'CGLS' # work-around for bug #26
-  olexex.onSolutionProgramChange(solutionPrg, solutionMethod)
-  olexex.onRefinementProgramChange(refinementPrg, refinementMethod)
   #
   # Start backwards compatibility  2010-06-18
   #
@@ -238,6 +231,16 @@ snum {
   #
   # End backwards compatibility
   #
+  import CifInfo
+  CifInfo.CifTools() # needed to load metacif items
+  if OV.IsFileType('ires'):
+    if solutionMethod == 'Direct Methods' and olx.Ins('PATT') != 'n/a':
+      solutionMethod = 'Patterson Method' # work-around for bug #48
+    if refinementMethod == 'Least Squares' and olx.LSM() == 'CGLS':
+      refinementMethod = 'CGLS' # work-around for bug #26
+  olexex.onSolutionProgramChange(solutionPrg, solutionMethod)
+  olexex.onRefinementProgramChange(refinementPrg, refinementMethod)
+
 OV.registerFunction(LoadStructureParams)
 
 def SaveStructureParams():
