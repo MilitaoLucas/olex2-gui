@@ -85,22 +85,24 @@ class OlexFunctions(inheritFunctions):
 
   def get_cif_item(self, key, default=None):
     if olx.cif_model is not None:
-      if self.FileName() not in olx.cif_model:
+      data_name = self.FileName().replace(' ', '')
+      if data_name not in olx.cif_model:
         import CifInfo
         CifInfo.ExtractCifInfo()
-      return olx.cif_model[self.FileName()].get(key, default)
+      return olx.cif_model[data_name].get(key, default)
     else:
       return default
 
   def set_cif_item(self, key, value):
+    data_name = self.FileName().replace(' ', '')
     if olx.cif_model is not None:
       if isinstance(value, basestring) and value.strip() == '': value = '?'
-      olx.cif_model[self.FileName()][key] = value
-    user_modified = OV.GetParam('snum.metacif.user_modified')
+      olx.cif_model[data_name][key] = value
+    user_modified = self.GetParam('snum.metacif.user_modified')
     if user_modified is None: user_modified = []
     if key not in user_modified:
       user_modified.append(key)
-    OV.SetParam('snum.metacif.user_modified', user_modified)
+    self.SetParam('snum.metacif.user_modified', user_modified)
     if key == '_diffrn_ambient_temperature':
       value = str(value)
       if value not in ('?', '.'):
