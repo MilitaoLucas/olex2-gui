@@ -735,7 +735,8 @@ class OlexCctbxMasks(OlexCctbxAdapter):
         0.5 * uctbx.d_star_sq_as_two_theta(max_d_star_sq, self.wavelength, deg=True))
       cif_block.update(mask.as_cif_block())
       cif = model.cif()
-      cif[OV.FileName()] = cif_block
+      data_name = OV.FileName().replace(' ', '')
+      cif[data_name] = cif_block
       f = open('%s/%s-mask.cif' %(filepath, OV.FileName()),'wb')
       print >> f, cif
       f.close()
