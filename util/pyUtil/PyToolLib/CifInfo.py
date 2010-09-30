@@ -26,24 +26,6 @@ OLEX2: a complete structure solution, refinement and analysis program.
 J. Appl. Cryst. (2009). 42, 339-341.
 ;"""
 
-class cif_manager(object):
-
-  def __init__(self):
-    self.metacif_path = '%s/%s.metacif' %(OV.StrDir(), OV.FileName())
-    if os.path.exists(self.metacif_path):
-      f = open(self.metacif_path, 'rUb')
-      self.cif_model = iotbx.cif.fast_reader(input_string=f.read()).model()
-      f.close()
-    else:
-      self.cif_model = iotbx.cif.model.cif()
-    self.master_cif_block = self.cif_model.get(OV.FileName())
-
-  def set_data_item(self, key, value):
-    self.master_cif_block[key] = value
-
-  def get_data_item(self, key):
-    return self.master_cif_block.get(key)
-
 
 class MetacifFiles:
   def __init__(self):
@@ -109,14 +91,15 @@ class CifTools(ArgumentParser):
   def __init__(self):
     super(CifTools, self).__init__()
     self.metacif_path = '%s/%s.metacif' %(OV.StrDir(), OV.FileName())
-    if olx.cif_model is None or OV.FileName() not in olx.cif_model.keys():
+    self.data_name = OV.FileName().replace(' ', '')
+    if olx.cif_model is None or self.data_name not in olx.cif_model.keys():
       if os.path.isfile(self.metacif_path):
         olx.cif_model = self.read_metacif_file()
       else:
         olx.cif_model = model.cif()
-        olx.cif_model[OV.FileName()] = model.block()
+        olx.cif_model[self.data_name] = model.block()
     self.cif_model = olx.cif_model
-    self.cif_block = olx.cif_model[OV.FileName()]
+    self.cif_block = olx.cif_model[self.data_name]
     today = datetime.date.today()
     self.update_cif_block(
       {'_audit_creation_date': today.strftime('%Y-%m-%d'),
@@ -150,32 +133,31 @@ class CifTools(ArgumentParser):
                            '_exptl_crystal_size_mid',
                            '_exptl_crystal_size_max')
     for size in exptl_crystal_sizes:
-      value = self.cif_model[OV.FileName()].get(size)
+      value = self.cif_block.get(size)
       if value is not None:
         dimensions.append(float(value))
     if dimensions:
       dimensions.sort()
       for i in range(len(dimensions)):
-        self.cif_model[OV.FileName()][exptl_crystal_sizes[i]] = str(dimensions[i])
+        self.cif_block[exptl_crystal_sizes[i]] = str(dimensions[i])
 
   def sort_crystal_colour(self):
-    cif_block = self.cif_model[OV.FileName()]
-    colour = cif_block.get('_exptl_crystal_colour')
+    colour = self.cif_block.get('_exptl_crystal_colour')
     if colour is None or colour == '?':
       colours = []
       cif_items = ('_exptl_crystal_colour_lustre',
                    '_exptl_crystal_colour_modifier',
                    '_exptl_crystal_colour_primary')
       for item in cif_items:
-        value = cif_block.get(item)
+        value = self.cif_block.get(item)
         if value is not None:
           colours.append(value)
       if colours:
-        cif_block['_exptl_crystal_colour'] = ' '.join(colours)
+        self.cif_block['_exptl_crystal_colour'] = ' '.join(colours)
     elif (colour in (
       "colourless","white","black","gray","brown","red","pink","orange",
       "yellow","green","blue","violet")):
-      cif_block.setdefault('_exptl_crystal_colour_primary', colour)
+      self.cif_block.setdefault('_exptl_crystal_colour_primary', colour)
 
   def update_cif_block(self, dictionary):
     user_modified = OV.GetParam('snum.metacif.user_modified')
@@ -476,7 +458,7 @@ class ExtractCifInfo(CifTools):
              or '_smtbx_masks_void' not in self.cif_block)):
       import iotbx.cif
       f = open(mask_cif_path, 'rUb')
-      cif_block = iotbx.cif.reader(file_object=f).model().get(OV.FileName())
+      cif_block = iotbx.cif.reader(file_object=f).model().get(self.data_name)
       f.close()
       if cif_block is not None:
         self.cif_block.update(cif_block)
