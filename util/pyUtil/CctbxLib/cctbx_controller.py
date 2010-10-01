@@ -4,7 +4,6 @@ from my_refine_util import *
 import math
 import sys
 from cctbx import miller
-from smtbx.refinement import minimization
 from cctbx import uctbx
 from iotbx import builders
 
