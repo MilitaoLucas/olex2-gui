@@ -263,6 +263,52 @@ class normal_probability_plot(OlexCctbxAdapter):
     return r
 
 
+class bijvoet_differences_NPP:
+  def __init__(self, hooft_analysis=None, use_students_t=False, scale=None):
+    from smtbx import absolute_structure
+    if hooft_analysis is None:
+      import cctbx_olex_adapter
+      hooft_analysis = cctbx_olex_adapter.hooft_analysis()
+    self.plot = absolute_structure.bijvoet_differences_probability_plot(
+      hooft_analysis, use_students_t=use_students_t)
+    self.plot.show()
+
+  def xy_plot_info(self):
+    r = empty()
+    r.title = "Bijvoet difference normal probability plot"
+    r.x = self.plot.x
+    r.y = self.plot.y
+    r.indices = self.plot.delta_fc2.indices()
+    r.fit_slope = self.plot.fit.slope()
+    r.fit_y_intercept = self.plot.fit.y_intercept()
+    r.xLegend = "Expected deviations"
+    r.yLegend = "Observed deviations"
+    return r
+
+
+class bijvoet_differences_scatter_plot(OlexCctbxAdapter):
+  def __init__(self, hooft_analysis=None):
+    OlexCctbxAdapter.__init__(self)
+    self.info = None
+    if hooft_analysis is None:
+      import cctbx_olex_adapter
+      hooft_analysis = cctbx_olex_adapter.hooft_analysis()
+    self.delta_fo2 = hooft_analysis.delta_fo2
+    self.delta_fc2 = hooft_analysis.delta_fc2
+    self.indices = self.delta_fo2.indices()
+
+  def xy_plot_info(self):
+    r = empty()
+    r.title = "Bijvoet differences scatter plot"
+    if (self.info != 0):
+      r.title += ": " + str(self.info)
+    r.x = self.delta_fc2.data()
+    r.y = self.delta_fo2.data()
+    r.indices = self.indices
+    r.xLegend = "delta Fc2"
+    r.yLegend = "delta Fo2"
+    return r
+
 def wilson_statistics(model, reflections, n_bins=10):
   from cctbx import sgtbx
 
