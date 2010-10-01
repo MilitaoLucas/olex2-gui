@@ -1862,6 +1862,65 @@ class SystematicAbsencesPlot(Analysis):
     self.make_empty_graph(axis_x = True)
     self.draw_pairs(marker_size_factor = 1/1.5)
 
+class bijvoet_differences_scatter_plot(Analysis):
+  def __init__(self):
+    Analysis.__init__(self)
+    self.item = "bijvoet_differences_scatter"
+    self.graphInfo["pop_html"] = self.item
+    self.graphInfo["pop_name"] = self.item
+    self.graphInfo["TopRightTitle"] = self.filename
+    self.auto_axes = True
+    import reflection_statistics
+    xy_plot = reflection_statistics.bijvoet_differences_scatter_plot().xy_plot_info()
+    self.graphInfo["Title"] = OV.TranslatePhrase(xy_plot.title)
+    metadata = {}
+    metadata.setdefault("y_label", xy_plot.yLegend)
+    metadata.setdefault("x_label", xy_plot.xLegend)
+    self.metadata = metadata
+    if xy_plot.x is None:
+      self.have_data = False
+      print "No Bijvoet pairs present"
+      return
+    self.have_data = True
+    self.data.setdefault('dataset1', Dataset(xy_plot.x, xy_plot.y, indices=xy_plot.indices, metadata=metadata))
+    self.draw_origin = True
+    self.make_empty_graph(axis_x = True)
+    self.draw_pairs(marker_size_factor = 1/1.5)
+    if self.have_data:
+      self.popout()
+      if self.params.systematic_absences.output_csv_file:
+        self.output_data_as_csv()
+
+class bijvoet_differences_NPP(Analysis):
+  def __init__(self, use_students_t=False):
+    Analysis.__init__(self)
+    self.item = "bijvoet_differences_NPP"
+    self.graphInfo["pop_html"] = self.item
+    self.graphInfo["pop_name"] = self.item
+    self.graphInfo["TopRightTitle"] = self.filename
+    self.auto_axes = True
+    import reflection_statistics
+    xy_plot = reflection_statistics.bijvoet_differences_NPP(
+      use_students_t=use_students_t).xy_plot_info()
+    self.graphInfo["Title"] = OV.TranslatePhrase(xy_plot.title)
+    metadata = {}
+    metadata.setdefault("y_label", xy_plot.yLegend)
+    metadata.setdefault("x_label", xy_plot.xLegend)
+    self.metadata = metadata
+    if xy_plot.x is None:
+      self.have_data = False
+      print "No Bijvoet pairs present"
+      return
+    self.have_data = True
+    self.data.setdefault('dataset1', Dataset(xy_plot.x, xy_plot.y, indices=xy_plot.indices, metadata=metadata))
+    self.draw_origin = True
+    self.make_empty_graph(axis_x = True)
+    self.draw_pairs(marker_size_factor = 1/1.5)
+    if self.have_data:
+      self.popout()
+      if self.params.systematic_absences.output_csv_file:
+        self.output_data_as_csv()
+
 class Normal_probability_plot(Analysis):
   def __init__(self):
     Analysis.__init__(self)
@@ -2226,6 +2285,8 @@ OV.registerFunction(Normal_probability_plot)
 OV.registerFunction(r1_factor_vs_resolution_plot)
 OV.registerFunction(scale_factor_vs_resolution_plot)
 OV.registerFunction(X_Y_plot)
+OV.registerFunction(bijvoet_differences_scatter_plot)
+OV.registerFunction(bijvoet_differences_NPP)
 
 def array_scalar_multiplication(array, multiplier):
   return [i * multiplier for i in array]

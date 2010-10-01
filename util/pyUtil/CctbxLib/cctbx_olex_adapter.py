@@ -4,6 +4,7 @@ import os, sys
 import olx
 import OlexVFS
 import time
+import math
 
 from my_refine_util import *
 from PeriodicTable import PeriodicTable
@@ -34,6 +35,8 @@ from RunPrg import RunRefinementPrg
 global twin_laws_d
 twin_laws_d = {}
 
+from cctbx import adptbx, sgtbx, xray
+from cctbx.array_family import flex
 
 class OlexCctbxAdapter(object):
   def __init__(self):
@@ -141,7 +144,25 @@ class OlexCctbxAdapter(object):
     weighting.compute(fc, scale_factor)
     return weighting.weights
 
+from smtbx import absolute_structure
 
+class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):
+  def __init__(self, scale=None):
+    OlexCctbxAdapter.__init__(self)
+    if scale is not None:
+      self.scale = float(scale)
+    else: self.scale=None
+    fo2 = self.reflections.f_sq_obs_filtered
+    if not fo2.anomalous_flag():
+      print "No Bijvoet pairs"
+      return
+    fc = self.f_calc(miller_set=fo2)
+    weights = self.compute_weights(fo2, fc)
+    scale = fo2.scale_factor(fc, weights=weights)
+    absolute_structure.hooft_analysis.__init__(self, fo2, fc, scale)
+    self.show()
+
+OV.registerFunction(hooft_analysis)
 
 class OlexCctbxRefine(OlexCctbxAdapter):
   def __init__(self, max_cycles=None, max_peaks=None, verbose=False):
