@@ -6,7 +6,6 @@ import OlexVFS
 import time
 import math
 
-from my_refine_util import *
 from PeriodicTable import PeriodicTable
 import olexex
 try:
@@ -38,11 +37,14 @@ twin_laws_d = {}
 from cctbx import adptbx, sgtbx, xray
 from cctbx.array_family import flex
 
+from smtbx.refinement import restraints
+
 class OlexCctbxAdapter(object):
   def __init__(self):
     if OV.HasGUI():
       sys.stdout.refresh = True
     self._xray_structure = None
+    self._restraints_manager = None
     self.olx_atoms = olexex.OlexRefinementModel()
     self.wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
     self.reflections = None
@@ -65,13 +67,21 @@ class OlexCctbxAdapter(object):
   def __del__(self):
     sys.stdout.refresh = False
 
-  def xray_structure(self):
-    if self._xray_structure is None:
-      self._xray_structure = cctbx_controller.create_cctbx_xray_structure(
+  def xray_structure(self, construct_restraints=False):
+    if self._xray_structure is None or construct_restraints:
+      if construct_restraints: restraints_iter=self.olx_atoms.restraints_iterator()
+      else: restraints_iter = None
+      create_cctbx_xray_structure = cctbx_controller.create_cctbx_xray_structure(
         self.cell,
         self.space_group,
         self.olx_atoms.iterator(),
-        restraint_iterator=self.olx_atoms.restraint_iterator())
+        restraints_iter=restraints_iter)
+      if construct_restraints:
+        proxies = create_cctbx_xray_structure.restraint_proxies()
+        kwds = dict([(key+"_proxies", value) for key, value in proxies.iteritems()])
+        self._restraints_manager = restraints.manager(**kwds)
+      self._xray_structure = create_cctbx_xray_structure.structure()
+
       table = ("n_gaussian", "it1992", "wk1995")[0]
       self._xray_structure.scattering_type_registry(
         table=table, d_min=self.reflections.f_sq_obs.d_min())
@@ -79,6 +89,11 @@ class OlexCctbxAdapter(object):
         from cctbx.eltbx import wavelengths
         self._xray_structure.set_inelastic_form_factors(self.wavelength, "sasaki")
     return self._xray_structure
+
+  def restraints_manager(self):
+    if self._restraints_manager is None:
+      self.xray_structure(construct_restraints=True)
+    return self._restraints_manager
 
   def initialise_reflections(self, force=False, verbose=False):
     self.cell = self.olx_atoms.getCell()
@@ -164,221 +179,8 @@ class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):
 
 OV.registerFunction(hooft_analysis)
 
-class OlexCctbxRefine(OlexCctbxAdapter):
-  def __init__(self, max_cycles=None, max_peaks=None, verbose=False):
-    OlexCctbxAdapter.__init__(self)
-    self.verbose = verbose
-    self.log = open('%s/%s.log' %(OV.FilePath(), OV.FileName()),'w')
-    PT = PeriodicTable()
-    self.pt = PT.PeriodicTable()
-    self.olx = olx
-    self.cycle = 0
-    self.tidy = False
-    self.auto = False
-    self.debug = False
-    self.film = False
-    self.max_cycles = max_cycles
-    self.max_peaks = max_peaks
-    self.do_refinement = True
-    if OV.HasGUI() and OV.GetParam('snum.refinement.graphical_output'):
-      import Analysis
-      self.plot = Analysis.smtbx_refine_graph()
-    else: self.plot = None
 
-  def run(self):
-    t0 = time.time()
-    print "++++ Refining using the CCTBX with a maximum of %i cycles++++" %self.max_cycles
-    self.refine_with_cctbx()
-    asu_mappings = self.xray_structure().asu_mappings(buffer_thickness=3.5)
-    #
-    scatterers = self.xray_structure().scatterers()
-    scattering_types = scatterers.extract_scattering_types()
-    pair_asu_table = crystal.pair_asu_table(asu_mappings=asu_mappings)
-    pair_asu_table.add_covalent_pairs(
-      scattering_types, exclude_scattering_types=flex.std_string(("H","D")))
-    pair_sym_table = pair_asu_table.extract_pair_sym_table()
-
-    print >> self.log, "\nConnectivity table"
-    pair_sym_table.show(site_labels=scatterers.extract_labels(), f=self.log)
-    print >> self.log, "\nBond lengths"
-    self.xray_structure().show_distances(pair_asu_table=pair_asu_table, out=self.log)
-    print >> self.log, "\nBond angles"
-    self.xray_structure().show_angles(pair_asu_table=pair_asu_table, out=self.log)
-    #
-    self.post_peaks(self.refinement.f_obs_minus_f_calc_map(0.4))
-    self.log.close()
-
-    print "++++ Finished in %.3f s" %(time.time() - t0)
-    print "Done."
-
-  def refine_with_cctbx(self):
-    wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
-    weight = self.olx_atoms.model['weight']
-    params = dict(a=0.1, b=0, c=0, d=0, e=0, f=1./3)
-    for param, value in zip(params.keys()[:len(weight)], weight):
-      params[param] = value
-    weighting = xray.weighting_schemes.shelx_weighting(**params)
-    self.reflections.show_summary(log=self.log)
-    self.refinement = cctbx_controller.refinement(
-      f_sq_obs=self.reflections.f_sq_obs_merged,
-      xray_structure=self.xray_structure(),
-      wavelength=wavelength,
-      max_cycles=self.max_cycles,
-      max_peaks=self.max_peaks,
-      log=self.log,
-      weighting=weighting,
-    )
-    self.refinement.on_cycle_finished = self.feed_olex
-    self.refinement.start()
-    self.R1 = self.refinement.R1()[0]
-    self.wR2, self.GooF = self.refinement.wR2_and_GooF(
-      self.refinement.minimisation.minimizer)
-    self.update_refinement_info("Starting...")
-
-  def feed_olex(self, structure, minimisation, minimiser):
-    self.auto = False
-    self.cycle += 1
-    #msg = "Refinement Cycle: %i" %(self.cycle)
-    self.refinement.show_cycle_summary(minimiser)
-    #print msg
-
-    #self.update_refinement_info(msg=msg)
-    minimisation.show_sorted_shifts(max_items=10, log=self.log)
-    max_shift_site, max_shift_site_scatterer = minimisation.iter_shifts_sites(max_items=1).next()
-    print "Max. shift: %.3f %s" %(max_shift_site, max_shift_site_scatterer.label)
-    if not minimisation.pre_minimisation:
-      max_shift_u, max_shift_u_scatterer = minimisation.iter_shifts_u(max_items=1).next()
-      print "Max. dU: %.3f %s" %(max_shift_u, max_shift_u_scatterer.label)
-    if self.plot is not None:
-      self.plot.observe(max_shift_site, max_shift_site_scatterer)
-    if self.film:
-      n = str(self.cycle)
-      if int(n) < 10:
-        n = "0%s" %n
-      olx.Picta(r"%s0%s.bmp 1" %(self.film, n))
-    reset_refinement = False
-    ## Feed Model
-    u_total  = 0
-    u_atoms = []
-    i = 1
-    for name, xyz, u, ueq, symbol in self.refinement.iter_scatterers():
-      if len(u) == 6:
-        u_trans = (u[0], u[1], u[2], u[5], u[4], u[3])
-      else:
-        u_trans = u
-      id = self.olx_atoms.id_for_name[name]
-      olx.xf_au_SetAtomCrd(id, *xyz)
-      olx.xf_au_SetAtomU(id, *u_trans)
-      u_total += u[0]
-      if self.tidy:
-        if u[0] > 0.09:
-          olx.Name("%s Q" %name)
-      u_average = u_total/i
-
-    if reset_refinement:
-      raise Exception("Atoms with SillyU Deleted")
-
-    if self.auto:
-      for name, xyz, u, symbol in self.refinement.iter_scatterers():
-        if symbol == 'H': continue
-        id = self.olx_atoms.id_for_name[name]
-        selbst_currently_present = curr_formula.get(symbol, 0)
-        #print name, u[0]
-        if u[0] < u_average * 0.8:
-#          print "  ------> PROMOTE?"
-          promote_to = element_d[symbol].get('+1', symbol)
-          currently_present = curr_formula.get(promote_to, 0)
-          max_possible = element_d[promote_to].get('max_number')
-          if self.debug: olx.Sel(name)
-          if self.debug: print "Promote %s to a %s. There are %.2f present, and  %.2f are allowed" %(name, promote_to, currently_present, max_possible),
-          if currently_present < max_possible:
-            olx.xf_au_SetAtomlabel(id, promote_to)
-            curr_formula[promote_to] = currently_present + 1
-            curr_formula[symbol] = selbst_currently_present - 1
-            if self.debug: print " OK"
-          else:
-            if self.debug: print " X"
-        if u[0] > u_average * 1.5:
-#          print "  DEMOTE? <-------"
-          #reset_refinement = True
-          demote_to = element_d[symbol].get('-1', symbol)
-          currently_present = curr_formula.get(demote_to, 0)
-          max_possible = element_d[demote_to].get('max_number')
-          if self.debug: olx.Sel(name)
-          if self.debug: print "Demote %s to a %s. There are %.2f present, and %.2f are allowed" %(name, demote_to, currently_present, max_possible),
-          if curr_formula.get(demote_to, 0) < element_d[demote_to].get('max_number'):
-            olx.xf_au_SetAtomlabel(id, demote_to)
-            curr_formula[demote_to] = currently_present + 1
-            curr_formula[symbol] = selbst_currently_present - 1
-            if self.debug: print "OK"
-          else:
-            if self.debug: print " X"
-    #olx.Sel('-u')
-    olx.xf_EndUpdate()
-    if reset_refinement:
-      raise Exception("Atoms promoted")
-
-  def post_peaks(self, fft_map):
-    from cctbx import maptbx
-    from  libtbx.itertbx import izip
-    fft_map.apply_volume_scaling()
-    peaks = fft_map.peak_search(
-      parameters=maptbx.peak_search_parameters(
-        peak_search_level=3,
-        interpolate=False,
-        #peak_cutoff=0.1,
-        min_distance_sym_equiv=1.0,
-        max_clusters=30),
-      verify_symmetry=False
-      ).all()
-    #peaks = self.refinement.peak_search()
-    #peaks.show_sorted()
-    i = 0
-    for xyz, height in izip(peaks.sites(), peaks.heights()):
-      if i < 3:
-        if self.verbose: print "Position of peak %s = %s, Height = %s" %(i, xyz, height)
-      i += 1
-      id = olx.xf_au_NewAtom("%.2f" %(height), *xyz)
-      if id != '-1':
-        olx.xf_au_SetAtomU(id, "0.06")
-      if i == 100:
-        break
-    olx.xf_EndUpdate()
-    olx.Compaq('-q')
-    OV.Refresh()
-
-  def update_refinement_info(self, msg="Unknown"):
-    import htmlMaker
-    R1, n_reflections = self.refinement.R1()
-    R1_all_data, n_reflections_unique = self.refinement.R1(all_data=True)
-    wR2 = self.wR2
-    GooF = self.GooF
-    #htmlMaker.make_refinement_data_html(R1=R1,
-                                        #n_reflections=n_reflections,
-                                        #R1_all_data=R1_all_data,
-                                        #n_reflections_unique=n_reflections_unique,
-                                        #wR2=wR2,
-                                        #GooF=GooF)
-    txt = "Last refinement with <b>smtbx-refine</b>: No refinement info available yet.<br>Status: %s" %msg
-    OlexVFS.write_to_olex('refinedata.htm', txt)
-
-  def write_grid_file(self, type, resolution):
-    import olex_xgrid
-    if type == "DIFF":
-      m = self.refinement.get_difference_map(resolution)
-    elif type == "FOBS":
-      m = self.refinement.get_f_obs_map(resolution)
-    else:
-      return
-    s = m.last()
-    olex_xgrid.Init(s[0], s[1], s[2])
-    for i in range (s[0]-1):
-      for j in range (s[1]-1):
-        for k in range (s[2]-1):
-          olex_xgrid.SetValue( i,j,k,m[i,j,k])
-    olex_xgrid.InitSurface(True)
-
-class FullMatrixRefine(OlexCctbxRefine):
+class FullMatrixRefine(OlexCctbxAdapter):
   def __init__(self, max_cycles=None, max_peaks=5, verbose=False):
     OlexCctbxAdapter.__init__(self)
     self.max_cycles = max_cycles
@@ -390,6 +192,7 @@ class FullMatrixRefine(OlexCctbxRefine):
 
   def run(self):
     from smtbx.refinement import least_squares
+    from smtbx.refinement import constraints
     wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
 
     filepath = OV.StrDir()
@@ -410,9 +213,19 @@ class FullMatrixRefine(OlexCctbxRefine):
         self.f_mask = easy_pickle.load("%s/%s-f_mask.pickle" %(filepath, OV.FileName()))
       if self.f_mask is None:
         print "No mask present"
+    restraints_manager = self.restraints_manager()
+    geometrical_constraints = self.setup_geometrical_constraints(
+      self.olx_atoms.afix_iterator())
+    import smtbx.refinement.restraints
+    linearised_eqns_of_restraint = restraints_manager.build_linearised_eqns(self.xray_structure())
+    reparametrisation = constraints.reparametrisation(
+      structure=self.xray_structure(),
+      geometrical_constraints=geometrical_constraints)
     normal_eqns = least_squares.normal_equations(
       self.xray_structure(), self.reflections.f_sq_obs_filtered,
       f_mask=self.f_mask,
+      reparametrisation=reparametrisation,
+      #linearised_eqns_of_restraint=linearised_eqns_of_restraint,
       weighting_scheme="default")
     objectives = []
     scales = []
@@ -439,6 +252,50 @@ class FullMatrixRefine(OlexCctbxRefine):
       self.post_peaks(self.f_obs_minus_f_calc_map(0.4), max_peaks=self.max_peaks)
     finally:
       sys.stdout.refresh = True
+
+  def setup_geometrical_constraints(self, afix_iter=None):
+    geometrical_constraints = []
+    #import smtbx.refinement.constraints
+    from iotbx.constraints import geometrical
+    from smtbx.refinement.constraints import geometrical_hydrogens
+    constraints = {
+      # AFIX mn : some of them use a pivot whose position is given wrt
+      #           the first constrained scatterer site
+      # m:    type                                    , pivot position
+        1:  ("tertiary_ch_site"                        , -1),
+        2:  ("secondary_ch2_sites"                     , -1),
+        3:  ("staggered_terminal_tetrahedral_xh3_sites", -1),
+        4:  ("secondary_planar_xh_site"                , -1),
+        8:  ("staggered_terminal_tetrahedral_xh_site"  , -1),
+        9:  ("terminal_planar_xh2_sites"               , -1),
+        13: ("terminal_tetrahedral_xh3_sites"          , -1),
+        14: ("terminal_tetrahedral_xh_site"            , -1),
+        15: ("polyhedral_bh_site"                      , -1),
+        16: ("terminal_linear_ch_site"                 , -1),
+    }
+
+    xs = self.xray_structure()
+    for m, n, pivot, dependent, pivot_neighbours, bond_length in afix_iter:
+      if len(dependent) == 0: continue
+      info = constraints.get(m)
+      if info is not None:
+        constraint_name = info[0]
+        constraint_type = getattr(
+          geometrical_hydrogens, constraint_name)
+          #iotbx.constraints.geometrical, constraint_name)
+        rotating = n in (7, 8)
+        stretching = n in (4, 8)
+        if bond_length == 0:
+          bond_length = None
+        current = constraint_type(
+          rotating=rotating,
+          stretching=stretching,
+          bond_length=bond_length,
+          pivot=pivot,
+          constrained_site_indices=dependent)
+        #current.finalise(pivot_neighbours[0], pivot_neighbours[-1])
+        geometrical_constraints.append(current)
+    return geometrical_constraints
 
   def export_var_covar(self, matrix):
     wFile = open("%s/%s.vcov" %(OV.FilePath(),OV.FileName()),'wb')
