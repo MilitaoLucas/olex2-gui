@@ -809,9 +809,9 @@ def GetRInfo(txt=""):
       R1 = float(R1)
       col = GetRcolour(R1)
       R1 = "%.2f" %(R1*100)
-      t = r"<td colspan='1' align='center' rowspan='2'><font size='4' color='%s'><b>%s%%</b></font></td>" %(col, R1)
+      t = r"<td colspan='1' align='right' rowspan='2'><font size='4' color='%s'><b>%s%%</b></font></td>" %(col, R1)
     except:
-      t = "<td colspan='1' rowspan='2' align='center'><font size='4'><b>%s</b></font></td>" %R1
+      t = "<td colspan='1' rowspan='2' align='right'><font size='4'><b>%s</b></font></td>" %R1
     finally:
       return t
 

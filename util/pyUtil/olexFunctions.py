@@ -561,8 +561,8 @@ class OlexFunctions(inheritFunctions):
 
   def GetMacAddress(self):
     mac = self.GetParam('olex2.mac_address')
+    retVal = []
     if mac == "":
-      retVal = []
       macs = olx.GetMAC('full')
       macs = macs.split(";")
       for mac in macs:
@@ -571,6 +571,8 @@ class OlexFunctions(inheritFunctions):
         else:
           retVal.append(mac.split("=")[1])
     #mac=['XX-24-E8-00-37-08','00-24-E8-00-37-08']  testing with a bogous mac address
+    else:
+      retVal.append(mac)
     return retVal
 
   def GetComputername(self):
