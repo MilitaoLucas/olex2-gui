@@ -2694,10 +2694,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       bg_colour = '#ababab'
     elif state == "hover":
 #      grad_colour = IT.adjust_colour(grad_colour, luminosity = 1.02)
-      grad_colour = IT.adjust_colour(grad_colour, luminosity = 0.98)
+      grad_colour = IT.adjust_colour(grad_colour, luminosity = 0.95)
 #      font_colour = IT.adjust_colour(highlight_colour, luminosity = 0.9)
     elif state == "hoveron":
-      grad_colour = IT.adjust_colour(grad_colour, luminosity = 0.98)
+      grad_colour = IT.adjust_colour(grad_colour, luminosity = 0.95)
 #      font_colour = IT.adjust_colour(font_colour, luminosity = 0.9)
   
     height = int(round(OV.GetParam('gui.timage.%s.height' %item_type) * self.size_factor, 0))

@@ -30,15 +30,18 @@ $spy.MakeHoverButton(toolbar-Q,showQ)
   <td width='5%'>
 $spy.MakeHoverButton(toolbar-H,showH)
   </td>
-  <td width='40%'>
+  <td width='5%'>
 $spy.MakeHoverButton(toolbar-center,center)
   </td>
   <td>
   </td>
-  <td align='right'>
+  <td width = '30%'>
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+  <tr>
+  <td width='30%' align='center'>
 $spy.MakeHoverButton(toolbar-OK,fixunit xf.au.GetZprime()>>updatehtml)
   </td>
-  <td align='right'>
+  <td width='70%' align='center'>
     <input
         type='text'
         width="40"
@@ -46,11 +49,13 @@ $spy.MakeHoverButton(toolbar-OK,fixunit xf.au.GetZprime()>>updatehtml)
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name='SET_Z_PRIME_FIXUNIT'
         label="Z'&nbsp;"
-        valign='center' 
+        valign='center'
+        align='right'
         value='xf.au.GetZprime()'
         onleave="xf.au.SetZprime(GetValue(SET_Z_PRIME_FIXUNIT))>>spy.SetParam(snum.refinement.Z_prime,GetValue(SET_Z_PRIME_FIXUNIT))>>updatehtml"
       >
   </td>
+  </tr></table>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 

@@ -522,6 +522,7 @@ class ImageTools(FontInstances):
     self.gui_language_encoding = olx.CurrentLanguageEncoding()
     self.gui_current_language = olx.CurrentLanguage()
     encoding = 'unic'
+    original_font_size = font_size
     if self.gui_language_encoding not in good_encodings:
       self.gui_language_encoding = "unic"
       encoding = 'unic'
@@ -533,7 +534,6 @@ class ImageTools(FontInstances):
       #font_name = "Chinese"
       #font_name = "Simsun TTF"
       #font_name = "Simsun TTC"
-      original_font_size = font_size
 
       #if font_size < 18:
       #  font_size = 18
@@ -543,13 +543,12 @@ class ImageTools(FontInstances):
         font_size = original_font_size
 
 
-      try:
-        txt.encode('ascii')
-        font_name = 'Vera'
-        font_size = original_font_size
-      except:
-        top -= 1
-        pass
+    try:
+      txt.encode('ascii')
+    except:
+      font_name = 'Arial UTF'
+      top -= 3
+      pass
 
 
 
