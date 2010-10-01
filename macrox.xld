@@ -183,6 +183,7 @@
     \>
     <cmd
       <cmd4 "user('filepath')">
+      <cmd3 "kill $q">
       <cmd5 "file">
       <cmd7 "SetVar(snum_refinement_max_cycles,%1)">
       <cmd8 "SetVar(snum_refinement_max_peaks,%2)">

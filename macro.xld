@@ -234,6 +234,19 @@
   \>
 \>
 
+<ValidateCif help="Validates a CIF file against the given CIF dictionary"
+  <body
+    <args
+      <arg1 name="filepath" def=''>
+      <arg2 name="cif_dic" def="cif_core.dic">
+      <arg3 name="show_warnings" def="True">
+    \>
+    <cmd
+      <cmd1 "if strcmp(%1,'') then spy.ValidateCif else 'spy.ValidateCif -filepath=%1 -cif_dic=%2 -show_warnings=%3'">
+    \>
+  \>
+\>
+
 <refine help="Launches refine program. Syntax: refine [l.s.=-1] [plan=-1]"
   <body
     <args
@@ -244,7 +257,8 @@
     <cmd
       <cmd0 "xgrid.Visible(false)">
       <cmd1 "mode off">
-      <cmd4 "user 'filepath()'">
+      <cmd2 "user 'filepath()'">
+      <cmd3 "kill $q">
       <cmd5 "file">
       <cmd6 XXX="cursor(busy, 'Refining...')">
       <cmd7 "if strcmp(%1,'-1') then None else spy.SetMaxCycles(%1)">

@@ -679,7 +679,6 @@ def defineExternalPrograms():
   # define refinement methods
   least_squares = Method_shelx_refinement(least_squares_phil)
   cgls = Method_shelx_refinement(cgls_phil)
-  lbfgs = Method_cctbx_refinement(lbfgs_phil)
   full_matrix = Method_cctbx_fm_refinement(full_matrix_phil)
 
   # define solution programs
@@ -788,7 +787,6 @@ def defineExternalPrograms():
     for method in (least_squares, cgls):
       prg.addMethod(method)
   smtbx_refine.addMethod(full_matrix)
-  smtbx_refine.addMethod(lbfgs)
 
   SPD = ExternalProgramDictionary()
   for prg in (ShelXS, ShelXS86, XS, ShelXD, XM, smtbx_solve):
@@ -1217,11 +1215,6 @@ instructions {
   include scope ExternalPrgParameters.shelxl_phil
 }
 """, process_includes=True)
-
-lbfgs_phil = phil_interface.parse("""
-name = LBFGS
-  .type=str
-""")
 
 full_matrix_phil = phil_interface.parse("""
 name = 'Full Matrix'

@@ -6,6 +6,7 @@ import glob
 import olx
 import os
 import time
+import math
 import olex_core
 import sys
 import programSettings
@@ -161,6 +162,17 @@ class SpyVar(object):
   MatchedRms = []
 
 class OlexRefinementModel(object):
+  restraint_types = {
+    'dfix':'bond',
+    'dang':'bond',
+    'flat':'planarity',
+    'chiv':'chirality',
+    'sadi':'bond_similarity',
+    'simu':'adp_similarity',
+    'delu':'rigid_bond',
+    'isor':'isotropic_adp',
+  }
+
   def __init__(self):
     olex_refinement_model = OV.GetRefinementModel(True)
     self._atoms = {}
@@ -211,15 +223,37 @@ class OlexRefinementModel(object):
       uiso = afix['u']
       yield m, n, pivot, dependent, pivot_neighbours, bond_length
 
-  def restraint_iterator(self):
-    for restraint_type in ('dfix','dang','flat','chiv'):
-      for restraint in self.model[restraint_type]:
-        kwds = dict(
-          i_seqs = [i[0] for i in restraint['atoms']],
-          sym_ops = [i[1] for i in restraint['atoms']],
-          value = restraint['value'],
-          weight = 1/math.pow(restraint['esd1'],2),
-        )
+  def restraints_iterator(self):
+    for shelxl_restraint in (self.restraint_types):
+      for restraint in self.model[shelxl_restraint]:
+        restraint_type = self.restraint_types.get(shelxl_restraint)
+        if restraint_type is None: continue
+        i_seqs = [i[0] for i in restraint['atoms']]
+        kwds = dict(i_seqs=i_seqs)
+        if restraint_type not in (
+          'adp_similarity', 'rigid_bond', 'isotropic_adp'):
+          kwds['sym_ops'] = [i[1] for i in restraint['atoms']]
+          kwds['weight'] = 1/math.pow(restraint['esd1'],2)
+        value = restraint['value']
+        if restraint_type in ('adp_similarity', 'isotropic_adp'):
+          kwds['sigma'] = restraint['esd1']
+          kwds['sigma_terminal'] = restraint['esd2'] if restraint['esd2'] != 0 else None
+        elif restraint_type == 'rigid_bond':
+          kwds['sigma_12'] = restraint['esd1']
+          kwds['sigma_13'] = restraint['esd2'] if restraint['esd2'] != 0 else None
+        if restraint_type == 'bond':
+          kwds['distance_ideal'] = value
+        elif restraint_type in ('bond_similarity', 'planarity'):
+          kwds['weights'] = [kwds['weight']]*len(i_seqs)
+          if restraint_type == 'bond_similarity':
+            sym_ops = kwds['sym_ops']
+            kwds['i_seqs'] = [[i_seq for i_seq in i_seqs[i*2:(i+1)*2]]
+                                     for i in range(int(len(i_seqs)/2))]
+            kwds['sym_ops'] = [[sym_op for sym_op in sym_ops[i*2:(i+1)*2]]
+                                       for i in range(int(len(sym_ops)/2))]
+            #sym_ops.append([self.symmetry_operations.get(atom[2]) for atom in atom_pair])
+        if 'weights' in kwds:
+          del kwds['weight']
         yield restraint_type, kwds
 
   def getCell(self):
@@ -507,7 +541,7 @@ def MakeElementButtonsFromFormula():
         'top_left':(0,-1),
         'grad':False,
       })
-  
+
   d['namelower'] = 'btn-element...'
   html_elements.append('''
 <input
@@ -1351,7 +1385,7 @@ def updateACF(force=False):
     return
   print "Now Updating..."
 
-  
+
   mac_address = OV.GetMacAddress()
   username, computer_name = OV.GetUserComputerName()
   keyname = getKey()
