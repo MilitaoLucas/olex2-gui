@@ -39,8 +39,6 @@ class OlexFunctions(inheritFunctions):
         handler = olx.gui_phil_handler
       else:
         handler = olx.phil_handler
-      value = unicode(value)
-      value = value.encode('utf-8')
       if value == '': value = None
       elif value in ('Auto','auto','None','none',None):
         value = value
@@ -563,10 +561,18 @@ class OlexFunctions(inheritFunctions):
 
   def GetMacAddress(self):
     mac = self.GetParam('olex2.mac_address')
+    retVal = []
     if mac == "":
-      mac = olx.GetMAC()
-      mac = mac.split(";")
+      macs = olx.GetMAC('full')
+      macs = macs.split(";")
+      for mac in macs:
+        if "virtual" in mac.lower():
+          continue
+        else:
+          retVal.append(mac.split("=")[1])
     #mac=['XX-24-E8-00-37-08','00-24-E8-00-37-08']  testing with a bogous mac address
+    else:
+      retVal.append(mac)
     return retVal
 
   def GetComputername(self):
