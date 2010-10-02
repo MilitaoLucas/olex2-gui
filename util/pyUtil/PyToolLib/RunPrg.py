@@ -1,6 +1,7 @@
 import sys
 import olex
 import olx
+import olex_core
 import os
 import olexex
 from ArgumentParser import ArgumentParser
@@ -375,7 +376,21 @@ class RunRefinementPrg(RunPrg):
     return self.his_file, R1
 
   def isInversionNeeded(self, force=False):
+    from cctbx_olex_adapter import hooft_analysis
+    from cctbx import sgtbx
+    print
+    print "Checking absolute structure..."
+    if olex_core.SGInfo()['Centrosymmetric'] == 1: return
+    inversion_warning = "WARNING: Stucture should be inverted (inv -f), unless there is a good reason not to do so."
+    racemic_twin_warning = "WARNING: Structure may be an inversion twin"
     flack = self.method.getFlack()
+    hooft = hooft_analysis()
+    if hooft.reflections.f_sq_obs_filtered.anomalous_flag():
+      if hooft.p2 is not None and round(hooft.p2, 3) == 0:
+        print inversion_warning
+      elif (hooft.p3_racemic_twin is not None and
+            round(hooft.p3_racemic_twin, 3) == 0):
+        print racemic_twin_warning
     if flack:
       print "Checking Stereochemistry: Flack Parameter = %s" %flack
       fs = flack.split("(")
@@ -385,7 +400,7 @@ class RunRefinementPrg(RunPrg):
         if force:
           olex.m('Inv -f')
         OV.File()
-        print "WARNING: Stucture should be inverted (inv -f), unless there is a good reason not to do so."
+        print inversion_warning
       else:
         print "OK"
 
