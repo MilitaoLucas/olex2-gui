@@ -47,7 +47,7 @@ class OlexCctbxAdapter(object):
     if twinning is not None:
       self.twin_fraction = twinning['basf'][0]
       self.twin_law = [twinning['matrix'][j][i]
-                  for i in range(3) for j in range(3)]
+                       for i in range(3) for j in range(3)]
       twin_multiplicity = twinning.get('n', 2)
       if twin_multiplicity != 2:
         print "warning: only hemihedral twinning is currently supported"
@@ -88,7 +88,8 @@ class OlexCctbxAdapter(object):
     if (force or
         reflections != olx.current_hklsrc or
         mtime != olx.current_hklsrc_mtime or
-        hklf_matrix != olx.current_reflections.hklf_matrix):
+        (olx.current_reflections is not None
+         and hklf_matrix != olx.current_reflections.hklf_matrix)):
       olx.current_hklsrc = reflections
       olx.current_hklsrc_mtime = mtime
       olx.current_reflections = cctbx_controller.reflections(
