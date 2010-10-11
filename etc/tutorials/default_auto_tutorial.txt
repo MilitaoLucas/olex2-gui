@@ -1,18 +1,67 @@
-p:Olex2 will now go back to the original start screen.
 c:itemstate index* 0
 c:itemstate index-home 1
 c:itemstate tab* 2
-p:The sample structure 'sucrose' will now be loaded from the 'Start' tool.
+c:lines 10
+
+p:The sample structure 'sucrose' will now be loaded from the 'Start' tool. Go!
 h:h2-start
 c:reap 'DataDir()/samples/sucrose/sucrose.res'
-p:The structure will then be reset by typing 'reset'
-c:reset
+
 p:By clicking on the 'Work' tab, we get access to the tools we need
 h:tab-work
 c:itemstate index* 0
 c:itemstate index-work 1
+c:itemstate info-title 1
+c:itemstate solve-settings 2
+c:itemstate refine-settings 2
+c:itemstate report-settings 2
 c:itemstate tab* 2
-p:And then solved by clicking on the 'solve' button
-h:cbtn-solve
+
+p:Structure solution...
+h:btn-solve;1
+
+p:Structure refinement...
+h:btn-refine;1
+
+p:... and report generation.
+h:btn-report;1
+
+p:For example, we can <i>solve</i> the structure by clicking the <b>Solve</b> button
+h:btn-solve;1
+
+p:Solve this structure now. Go!
 c:solve
+
 p:Of course, we can change the settings of the solution program.
+
+p:We do this, by clicking the <b>Solution Settings</b> Button. Go!
+h:cbtn-solve
+c:itemstate solve-settings 1
+
+p:Here we can choose solution programs and settings ...
+
+p:... set the <b>Formula</b> and can determine the <b>space group</b>.
+
+p:When you click on <b>Suggest SG</b> link, watch what happens!
+c:sg
+
+p:In order to see all the console output, you can type <b><i>lines -1</b></i>.
+c:lines -1
+
+p:If you type <b>text</b> or press the little text icon, you will get a 'transcript' of the console in your text editor
+h:toolbar-text
+c:text
+
+p:To show only 10 lines, type <b><i>lines 10</b></i>
+c:lines 10
+c:itemstate solve-settings 2
+
+p:We can clean this structure by typing <b>clean</b> or by pressing the <b>Clean</b> button.
+h:toolbar-clean
+c:clean
+
+p:Let's refine what we've got so far.
+c:refine
+
+p:The End
+
