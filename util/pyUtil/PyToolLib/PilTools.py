@@ -2352,7 +2352,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     iconIndex.setdefault("polyhedra", (6, 9))
 
     for icon in iconIndex:
-      states = ["on", "off", "hover", "", "hoveron"]
+      states = ["on", "off", "hover", "", "hoveron", "highlight"]
       for state in states:
         image = self.icon_items(iconIndex[icon], state)
         name = r"toolbar-%s%s.png" %(icon,state)
@@ -3524,6 +3524,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     cut = idxY * width, idxX * height, idxY * width + width, idxX * height + height
 
     crop = self.iconSource.crop(cut)
+
+    if state == "highlight":
+      colourise = '#ff0000'
+    
     if colourise:
       crop_colourised = self.colourize(crop, (0,0,0), colourise)
       image.paste(crop_colourised, (0,0), crop)
@@ -3543,6 +3547,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if state == "hover":
       outline_colour = self.params.html.highlight_colour.rgb
     elif state == "on":
+      outline_colour = self.params.html.highlight_colour.rgb
+    elif state == "highlight":
       outline_colour = self.params.html.highlight_colour.rgb
     else:
       outline_colour = '#bcbcbc'

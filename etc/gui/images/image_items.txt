@@ -58,6 +58,7 @@
   Add H
   Clear
   Mode
+  Next
 
 [FULL ROW]
   Run AutoChem

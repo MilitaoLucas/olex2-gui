@@ -1071,11 +1071,18 @@ def MakeHoverButton(name, cmds, btn_bg='table_firstcol_colour'):
     d.setdefault('feedback',">>echo '%(target)s: OK'" %target)
   else:
     d.setdefault('feedback',"")
+  on = "on"
+  off = "off"
+  if OV.GetParam('gui.image_highlight') == name:
+    on = "highlight"
+    off = "highlight"
+  d.setdefault('on', on)
+  d.setdefault('off', off)
   txt = '''
 <input
   name=IMG_%(nameupper)s
   type="button"
-  image="up=%(tool_img)soff.png,down=%(tool_img)son.png,hover=%(tool_img)shover.png",disable=%(tool_img)sdisable.png"
+  image="up=%(tool_img)s%(off)s.png,down=%(tool_img)s%(on)s.png,hover=%(tool_img)shover.png",disable=%(tool_img)sdisable.png"
   hint="%(target)s"
   onclick="%(cmds)s%(feedback)s"
   bgcolor=%(bgcolor)s
@@ -1103,11 +1110,19 @@ def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
     d.setdefault('feedback',">>echo '%(target)s: OK'" %target)
   else:
     d.setdefault('feedback',"")
+  on = "on"
+  off = "off"
+  if OV.GetParam('gui.image_highlight') == name:
+    on = "highlight"
+    off = "highlight"
+  d.setdefault('on', on)
+  d.setdefault('off', off)
+  
   txt = '''
 <input
   name=IMG_%(nameupper)s
   type="button"
-  image="up=%(tool_img)son.png,down=%(tool_img)son.png,hover=%(tool_img)shoveron.png",disable=%(tool_img)sdisable.png"
+  image="up=%(tool_img)s%(on)s.png,down=%(tool_img)s%(on)s.png,hover=%(tool_img)shoveron.png",disable=%(tool_img)sdisable.png"
   hint="%(target)s"
   onclick="%(cmds)s%(feedback)s"
   bgcolor=%(bgcolor)s

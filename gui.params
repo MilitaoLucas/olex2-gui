@@ -22,6 +22,8 @@ gui {
     .type = colour
   orange = #ff8f00
     .type = colour
+  image_highlight = None
+    .type = str
 
   xgrid {
     positive_surface_material = '245;3623911424;3632300160;1.000,1.000,1.000,0.500;1.000,1.000,1.000,1.000;36;36'
