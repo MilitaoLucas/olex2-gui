@@ -386,6 +386,8 @@ def OnMatchFound(rms, fragA, fragB):
 if haveGUI:
   OV.registerCallback('onmatch',OnMatchFound)
 
+  
+  
 #def getScreenSize():
   #retval = ()
   #from win32api import GetSystemMetrics
@@ -590,7 +592,7 @@ def MakeElementButtonsFromFormula():
     from PilTools import timage
     TI = timage()
     for b in btn_dict:
-      for state in ['on', 'off', 'hover', '']:
+      for state in ['on', 'off', 'hover', '', 'highlight']:
         txt = btn_dict[b].get('txt')
         bgcolour = btn_dict[b].get('bgcolour')
         width = OV.GetParam('gui.skin.icon_size')

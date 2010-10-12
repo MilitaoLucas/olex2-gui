@@ -1,15 +1,29 @@
+﻿#set:bg_colour="$spy.GetParam(gui.html.bg_colour)"
+#set:font_colour="$spy.GetParam(gui.html.font_colour)"
+
+set:bg_colour=#004080
+set:font_colour=#ffffff
+
 c:itemstate index* 0
 c:itemstate index-home 1
 c:itemstate tab* 2
 c:lines 10
 
-p:The sample structure 'sucrose' will now be loaded from the 'Start' tool. Go!
+
+p:欢迎 Welcome to this introductory tutorial. To get the most out of it, please read this text carefully and whey you are done press the 'Next' button - or simply hit the Return key!<br>
+
+p:We suggest that you go through the whole tutorial first, then run it again and exit at a suitable point from which you can try and do for yourself what you have learned from previous times you have gone through the tutorial.
+
+p:In this tutorial, we will be solving and refining one of the sample structures that come with Olex2 - Sucrose.
+
+p:We load the structure from the <b>Start</b> tool. The tool will be highlighted after you hit return.
 h:h2-start
 c:reap 'DataDir()/samples/sucrose/sucrose.res'
 
-p:By clicking on the 'Work' tab, we get access to the tools we need
+p:By clicking on the <b>Work</b> tab, we get access to the main tools:
 h:tab-work
 c:itemstate index* 0
+c:itemstate logo 0
 c:itemstate index-work 1
 c:itemstate info-title 1
 c:itemstate solve-settings 2
@@ -17,20 +31,57 @@ c:itemstate refine-settings 2
 c:itemstate report-settings 2
 c:itemstate tab* 2
 
-p:Structure solution...
+p:Structure <b>Solution</b>...
 h:btn-solve;1
 
-p:Structure refinement...
+p:Structure <b>Refinement</b>...
 h:btn-refine;1
 
-p:... and report generation.
+p:... and make <b>Reports</b>.
 h:btn-report;1
 
-p:For example, we can <i>solve</i> the structure by clicking the <b>Solve</b> button
+p:For example, we can <i>solve</i> the structure by clicking the <b>Solve</b> button. We will do this now.
 h:btn-solve;1
-
-p:Solve this structure now. Go!
 c:solve
+
+p:We can tidy this solution by typing <i>clean</i> or by pressing the <b>Clean</b> button.
+h:toolbar-tidy
+c:clean
+
+p:Let's press the <b>Refine</b> button and refine what we've got so far.
+h:btn-refine;1
+c:refine
+
+p:With the <b>Uiso Slider</b> in the <b>Toolbox Work</b> we can select all those atoms that look 'too small'
+c:itemstate work-main-toolbar 1
+c:html.setBG(UISO_SELECT_SLIDER,#ff0000)
+c:html.setvalue(UISO_SELECT_SLIDER,-7)
+c:sel atoms where xatom.uiso < 0.035&&xatom.type!='Q'
+c:refresh
+
+p:... and make them into Oxygen by pressing the <b>O</b> button.
+h:btn-elementO
+c:name sel O
+c:refresh
+
+p:Refine this again...
+c:refine
+
+p:Now it's time to make everything <b>anistropic</b>. Type <i>anis</i> or click on the <b>ANIS</b> button.
+h:toolbar-anis
+c:anis
+c:refine
+
+p:... clean it ...
+c:clean
+
+p:Let's add some hydrogen atoms to this. Type <i>hadd</i> or click on the <b>ADD H</b> button:
+h:button_small-add_h
+c:hadd
+c:refine
+
+
+##
 
 p:Of course, we can change the settings of the solution program.
 
@@ -38,30 +89,29 @@ p:We do this, by clicking the <b>Solution Settings</b> Button. Go!
 h:cbtn-solve
 c:itemstate solve-settings 1
 
+
 p:Here we can choose solution programs and settings ...
 
 p:... set the <b>Formula</b> and can determine the <b>space group</b>.
 
 p:When you click on <b>Suggest SG</b> link, watch what happens!
 c:sg
+c:refresh
 
 p:In order to see all the console output, you can type <b><i>lines -1</b></i>.
 c:lines -1
+c:refresh
 
 p:If you type <b>text</b> or press the little text icon, you will get a 'transcript' of the console in your text editor
 h:toolbar-text
 c:text
+c:refresh
 
 p:To show only 10 lines, type <b><i>lines 10</b></i>
 c:lines 10
+c:refresh
 c:itemstate solve-settings 2
 
-p:We can clean this structure by typing <b>clean</b> or by pressing the <b>Clean</b> button.
-h:toolbar-clean
-c:clean
-
-p:Let's refine what we've got so far.
-c:refine
 
 p:The End
 
