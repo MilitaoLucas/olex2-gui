@@ -2746,7 +2746,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       if state == "hover":
         if colour:
           grad_colour = IT.adjust_colour(colour, luminosity=0.9)
-        
+      if state == "highlight":
+        font_colour = OV.GetParam('gui.html.highlight_colour').rgb
         
     elif item_type =='cbtn':
       underground = OV.GetParam('gui.html.bg_colour').rgb

@@ -79,6 +79,7 @@ def autodemo(name='default_auto_tutorial', reading_speed=0.06):
   items = rFile.readlines()
   rFile.close()
   olx.Clear()
+  please_exit = False
   if not interactive:
     bitmap = make_tutbox_image("Press Return to advance this tutorial!", font_colour='#44aa44')
     olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
@@ -87,8 +88,12 @@ def autodemo(name='default_auto_tutorial', reading_speed=0.06):
     olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
     time.sleep(2)
   for item in items:
+    if please_exit:
+      break
     item = item.strip()
     if not item:
+      continue
+    if item.startswith('#'):
       continue
     cmd_type = item.split(":")[0]
     cmd_content = item.split(":")[1]
@@ -102,7 +107,9 @@ def autodemo(name='default_auto_tutorial', reading_speed=0.06):
       if interactive:
         OV.UpdateHtml()
         OV.Refresh()
-        make_tutbox_popup(txt)
+        res = make_tutbox_popup(txt)
+        if res == 0:
+          please_exit = True
       else:
         olx.DeleteBitmap(bitmap)
         bitmap = make_tutbox_image(txt)
@@ -172,18 +179,26 @@ def make_tutbox_popup(txt):
 
   <tr align='right'>
     <td>
-      <input 
+       <input 
          type="button" 
          bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
-         valign='center'
-         aligh='center'
+         valign='center' 
          width="60"  
          height="22"
          onclick="html.EndModal(%s,1)"
-         value = "Next">
+         value = "OK">
+       <input 
+         type="button" 
+         bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+         valign='center' 
+         width="60"  
+         height="22"
+         onclick="html.EndModal(%s,0)"
+         value = "Cancel">
     </td>
   </tr>
 
+  
   <tr bgcolor='#888888'>
     <td></td>
   </tr>
@@ -196,15 +211,17 @@ def make_tutbox_popup(txt):
      </table>
      </font>
      </body>
-     '''%(pop_name,txt)
+     '''%(pop_name,pop_name,txt)
   
     OV.write_to_olex("%s.htm" %pop_name.lower(), txt)
     boxWidth = 300
-    boxHeight = 350
-    x = 900
-    y = 200
-    olx.Popup(pop_name, '%s.htm' %pop_name.lower(), "-s -b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(pop_name, boxWidth, boxHeight, x, y))
-    olx.Echo('html.ShowModal(%s)' %pop_name)
+    boxHeight = 500
+    x = OV.GetHtmlPanelX() - boxWidth - 20
+    y = 100
+    olx.Popup(pop_name, '%s.htm' %pop_name.lower(), "-s -t='%s' -w=%i -h=%i -x=%i -y=%i" %(pop_name, boxWidth, boxHeight, x, y))
+    res = olx.html_ShowModal(pop_name)
+    res = int(res)
+    return res
 
 
 def tutbox(txt):
