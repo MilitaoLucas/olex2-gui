@@ -344,7 +344,7 @@ class RunRefinementPrg(RunPrg):
     if self.params.snum.refinement.auto.tidy:
       self.doAutoTidyAfter()
       OV.File()
-    self.isInversionNeeded()
+    #self.isInversionNeeded() RICHARD!
     self.method.post_refinement(self)
 
   def doHistoryCreation(self):

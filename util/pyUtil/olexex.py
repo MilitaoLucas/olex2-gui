@@ -905,7 +905,7 @@ def setAllMainToolbarTabButtons():
           state = "on"
       else:
         state = 'off'
-    OV.CopyVFSFile("cbtn-%s-%s.png" %(btn,state),"cbtn-%s.png" %btn)
+    OV.CopyVFSFile("cbtn-%s%s.png" %(btn,state),"cbtn-%s.png" %btn)
     if state == 'on':
       OV.SetVar('gui_MainToolbarTabButtonActive',btn)
   return "Done"
