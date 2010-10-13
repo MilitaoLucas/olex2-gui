@@ -15,12 +15,17 @@ import OlexVFS
 class AutoDemo():
   def __init__(self, name='default_auto_tutorial', reading_speed=0.06):
     self.interactive = True
-    self.bg_colour = '#002040'
+    self.bg_colour = IT.decimalColorToHTMLcolor(OV.GetParam('gui.skin.clearcolor'))
     self.font_colour = '#ffffff'
+    self.font_colour_code = '#aaaaff'
+    self.font_colour_bold = '#aaaaff'
+    self.highlight_colour = OV.GetParam('gui.html.highlight_colour').hexadecimal
+    
     self.name = name
     self.reading_speed = reading_speed
 
   def run_autodemo(self):
+    self.bg_colour = IT.decimalColorToHTMLcolor(int(olx.gl_lm_ClearColor()))
     rFile = open("%s/etc/tutorials/%s.txt" %(OV.BaseDir(),self.name),'r')
     items = rFile.readlines()
     rFile.close()
@@ -36,6 +41,7 @@ class AutoDemo():
       time.sleep(2)
     for item in items:
       if please_exit:
+        olex.m('rota 1 2 3 0 0')
         break
       item = item.strip()
       if not item:
@@ -45,6 +51,11 @@ class AutoDemo():
       if item.startswith('set:'):
         var = item.split('set:')[1].split('=')[0]
         val = item.split('=')[1]
+        if "." in val:
+          if 'colour' in val:
+            val = OV.GetParam(val).hexadecimal
+          else:
+            val = OV.GetParam(val)
         setattr(self, var, val)
     
       cmd_type = item.split(":")[0]
@@ -75,24 +86,33 @@ class AutoDemo():
   
       if cmd_type == 'h':
         control = cmd_content
+
         if ';' in control:
           n = int(control.split(';')[1])
           control = control.split(';')[0]
         else:
           n = 2
+
         for i in xrange(n):
           control_name = "IMG_%s" %control.upper()
           if "element" in control:
             new_image = "up=%son.png" %control
             olx.html_SetImage(control_name,new_image)
+          elif control.endswith('_bg'):
+            cmd = 'html.setBG(%s,%s)' %(control.rstrip('_bg'), self.highlight_colour)
+            olex.m(cmd)
           else:
             OV.SetParam('gui.image_highlight',control)
             OV.UpdateHtml()
           OV.Refresh()
           time.sleep(0.1)
+
           if "element" in control:
             new_image = "up=%soff.png" %control
             olx.html_SetImage(control_name,new_image)
+          elif control.endswith('_bg'):
+            cmd = 'html.setBG(%s,%s)' %(control.rstrip('_bg'), '#ffffff')
+            olex.m(cmd)
           else:
             OV.SetParam('gui.image_highlight',None)
             OV.UpdateHtml()
@@ -129,12 +149,14 @@ class AutoDemo():
     d = {}
     d.setdefault('pop_name',pop_name)
     d.setdefault('bg_colour',self.bg_colour)
+    d['bg_colour'] = self.bg_colour
     d.setdefault('font_colour',self.font_colour)
     d.setdefault('txt', self.txt)
     
     if OV.IsControl('%s'%pop_name):
       olx.html_ShowModal(pop_name)
     else:
+##$spy.MakeHoverButtonOn(button_small-next@tutorial,'html.EndModal\(%(pop_name)s,1)',%(bg_colour)s)
       txt='''
     <body link="$spy.GetParam(gui.html.link_colour)" bgcolor='%(bg_colour)s'>
     <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1">
@@ -152,13 +174,13 @@ class AutoDemo():
            value = "Cancel">
          <input 
            type="button"
-           name=TUTORIAL_OK
+           name=TUTORIAL_NEXT
            bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
            valign='center' 
            width="60"  
            height="22"
            onclick="html.EndModal(%(pop_name)s,1)"
-           value = "OK">
+           value = "Next">
         <br>
       </td>
     </tr>
@@ -186,7 +208,7 @@ class AutoDemo():
       x = OV.GetHtmlPanelX() - boxWidth - 40
       y = 70
       olx.Popup(pop_name, '%s.htm' %pop_name.lower(), "-s -t='%s' -w=%i -h=%i -x=%i -y=%i" %(pop_name, boxWidth, boxHeight, x, y))
-      olx.html_SetFocus(pop_name + '.TUTORIAL_OK')
+      olx.html_SetFocus(pop_name + '.TUTORIAL_NEXT')
       res = olx.html_ShowModal(pop_name)
       res = int(res)
       return res
@@ -212,8 +234,10 @@ class AutoDemo():
 
   def format_txt(self):
     txt = self.txt
-    txt = txt.replace('<b>','<b><font color=$spy.GetParam(gui.html.highlight_colour)>')
+    txt = txt.replace('<b>','<b><font color=%s>' %self.font_colour_bold)
     txt = txt.replace('</b>','</font></b>')
+    txt = txt.replace('<c>','<b><code><font color=%s>' %self.font_colour_code)
+    txt = txt.replace('</c>','</font></code></b>')
     self.txt = txt
     
     
