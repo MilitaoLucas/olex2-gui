@@ -183,10 +183,7 @@ class History(ArgumentParser):
       tree = self._convertHistory(historyFolder)
     else:
       tree = HistoryTree()
-      if olx.xf_au_GetAtomCount() == '0':
-        return
-      elif os.path.splitext(self.filefull)[-1] in ('.res', '.RES', '.ins', '.INS'):
-        tree.add_top_level_node(OV.HKLSrc(), OV.FileFull(), os.path.splitext(OV.FileFull())[0] + '.lst', is_solution=False)
+      tree.add_top_level_node(OV.HKLSrc(), OV.FileFull(), os.path.splitext(OV.FileFull())[0] + '.lst', is_solution=False)
 
   def _convertHistory(self, historyFolder):
     folders = []
@@ -582,7 +579,6 @@ OV.registerFunction(delete_history)
 
 class HistoryBranch:
   def __init__(self,resPath,lstPath,solution=True):
-    self.spaceGroup = OV.GetParam('snum.refinement.sg')
     self.historyBranch = {}
     if solution:
       tree.current_refinement = 'solution'
