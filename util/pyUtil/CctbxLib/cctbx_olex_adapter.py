@@ -194,6 +194,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
   def run(self):
     from smtbx.refinement import least_squares
     from smtbx.refinement import constraints
+    from smtbx.utils import connectivity_table
     wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
 
     filepath = OV.StrDir()
@@ -217,29 +218,39 @@ class FullMatrixRefine(OlexCctbxAdapter):
     restraints_manager = self.restraints_manager()
     geometrical_constraints = self.setup_geometrical_constraints(
       self.olx_atoms.afix_iterator())
+    shelx_parts = flex.int(self.olx_atoms.disorder_parts())
+    conformer_indices = shelx_parts.deep_copy().set_selected(shelx_parts < 0, 0)
+    sym_excl_indices = flex.abs(
+      shelx_parts.deep_copy().set_selected(shelx_parts > 0, 0))
+    connectivity_table = connectivity_table(
+      self.xray_structure(),
+      conformer_indices=flex.size_t(list(conformer_indices)),
+      sym_excl_indices=flex.size_t(list(sym_excl_indices)))
     import smtbx.refinement.restraints
-    linearised_eqns_of_restraint = restraints_manager.build_linearised_eqns(self.xray_structure())
     reparametrisation = constraints.reparametrisation(
       structure=self.xray_structure(),
-      geometrical_constraints=geometrical_constraints)
-    normal_eqns = least_squares.normal_equations(
+      geometrical_constraints=geometrical_constraints,
+      connectivity_table=connectivity_table)
+    self.normal_eqns = least_squares.normal_equations(
       self.xray_structure(), self.reflections.f_sq_obs_filtered,
       f_mask=self.f_mask,
       reparametrisation=reparametrisation,
-      #linearised_eqns_of_restraint=linearised_eqns_of_restraint,
+      restraints_manager=restraints_manager,
       weighting_scheme="default")
     objectives = []
     scales = []
     try:
       for i in range (self.max_cycles):
-        normal_eqns.build_up()
-        objectives.append(normal_eqns.objective)
-        scales.append(normal_eqns.scale_factor)
-        normal_eqns.solve_and_apply_shifts()
-        shifts = normal_eqns.shifts
+        self.xray_structure_pre_cycle = self.xray_structure().deep_copy_scatterers()
+        self.normal_eqns.build_up()
+        objectives.append(self.normal_eqns.objective)
+        scales.append(self.normal_eqns.scale_factor)
+        self.normal_eqns.solve_and_apply_shifts()
+        self.shifts = self.normal_eqns.shifts
+        self.show_sorted_shifts(max_items=2)
         self.feed_olex()
         self.scale_factor = scales[-1]
-      self.export_var_covar(normal_eqns.covariance_matrix_and_annotations())
+      self.export_var_covar(self.normal_eqns.covariance_matrix_and_annotations())
     except RuntimeError, e:
       if str(e).startswith("cctbx::adptbx::debye_waller_factor_exp: max_arg exceeded"):
         print "Refinement failed to converge"
@@ -251,28 +262,28 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.failure = True
     else:
       self.post_peaks(self.f_obs_minus_f_calc_map(0.4), max_peaks=self.max_peaks)
+      self.restraints_manager().show_sorted(self.xray_structure())
+      self.show_summary()
     finally:
       sys.stdout.refresh = True
 
   def setup_geometrical_constraints(self, afix_iter=None):
     geometrical_constraints = []
-    #import smtbx.refinement.constraints
-    from iotbx.constraints import geometrical
     from smtbx.refinement.constraints import geometrical_hydrogens
     constraints = {
       # AFIX mn : some of them use a pivot whose position is given wrt
       #           the first constrained scatterer site
       # m:    type                                    , pivot position
-        1:  ("tertiary_ch_site"                        , -1),
-        2:  ("secondary_ch2_sites"                     , -1),
-        3:  ("staggered_terminal_tetrahedral_xh3_sites", -1),
-        4:  ("secondary_planar_xh_site"                , -1),
-        8:  ("staggered_terminal_tetrahedral_xh_site"  , -1),
-        9:  ("terminal_planar_xh2_sites"               , -1),
-        13: ("terminal_tetrahedral_xh3_sites"          , -1),
-        14: ("terminal_tetrahedral_xh_site"            , -1),
-        15: ("polyhedral_bh_site"                      , -1),
-        16: ("terminal_linear_ch_site"                 , -1),
+      1:  ("tertiary_ch_site"                        , -1),
+      2:  ("secondary_ch2_sites"                     , -1),
+      3:  ("staggered_terminal_tetrahedral_xh3_sites", -1),
+      4:  ("secondary_planar_xh_site"                , -1),
+      8:  ("staggered_terminal_tetrahedral_xh_site"  , -1),
+      9:  ("terminal_planar_xh2_sites"               , -1),
+      13: ("terminal_tetrahedral_xh3_sites"          , -1),
+      14: ("terminal_tetrahedral_xh_site"            , -1),
+      15: ("polyhedral_bh_site"                      , -1),
+      16: ("terminal_linear_ch_site"                 , -1),
     }
 
     xs = self.xray_structure()
@@ -283,7 +294,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
         constraint_name = info[0]
         constraint_type = getattr(
           geometrical_hydrogens, constraint_name)
-          #iotbx.constraints.geometrical, constraint_name)
         rotating = n in (7, 8)
         stretching = n in (4, 8)
         if bond_length == 0:
@@ -294,7 +304,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
           bond_length=bond_length,
           pivot=pivot,
           constrained_site_indices=dependent)
-        #current.finalise(pivot_neighbours[0], pivot_neighbours[-1])
         geometrical_constraints.append(current)
     return geometrical_constraints
 
@@ -324,9 +333,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
           u_cif = adptbx.u_star_as_u_cart(self.xray_structure().unit_cell(), a.u_star)
           u = u_cif
           u_eq = adptbx.u_star_as_u_iso(self.xray_structure().unit_cell(), a.u_star)
-        yield label, xyz, u, u_eq, symbol, a.flags
+        yield label, xyz, u, u_eq, a.occupancy, symbol, a.flags
 
-    for name, xyz, u, ueq, symbol, flags in iter_scatterers():
+    for name, xyz, u, ueq, occu, symbol, flags in iter_scatterers():
       if len(u) == 6:
         u_trans = (u[0], u[1], u[2], u[5], u[4], u[3])
       else:
@@ -335,12 +344,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
       id = self.olx_atoms.id_for_name[name]
       olx.xf_au_SetAtomCrd(id, *xyz)
       olx.xf_au_SetAtomU(id, *u_trans)
+      olx.xf_au_SetAtomOccu(id, occu)
       if not flags.grad_site():
         olx.Fix('xyz', name)
       if not (flags.grad_u_iso() or flags.grad_u_aniso()):
         olx.Fix('Uiso', name)
       if not flags.grad_occupancy():
-        olx.Fix('occu', name)
+        olx.Fix('occu', occu, name)
       u_total += u[0]
       u_average = u_total/i
     #olx.Sel('-u')
@@ -354,7 +364,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if self.f_mask is not None:
       f_model, f_mask = f_model.common_sets(self.f_mask)
       f_model = miller.array(miller_set=miller_set,
-                            data=(f_model.data() + f_mask.data()))
+                             data=(f_model.data() + f_mask.data()))
     return f_model
 
   def f_obs_minus_f_calc_map(self, resolution):
@@ -399,42 +409,106 @@ class FullMatrixRefine(OlexCctbxAdapter):
     olx.Compaq('-q')
     OV.Refresh()
 
-  def calculate_residuals(self, f_obs):
-    f_calc = self.f_model(f_obs)
-    ls_function = xray.unified_least_squares_residual(f_obs)
-    ls = ls_function(f_calc, compute_derivatives=False)
-    k = ls.scale_factor()
-    fc = flex.abs(f_calc.data())
-    fo = flex.abs(f_obs.data())
-    return flex.abs(k*fc - fo)
-
   def R1(self, all_data=False):
     f_obs = self.reflections.f_sq_obs_filtered.f_sq_as_f()
     if not all_data:
       strong = f_obs.data() > 4*f_obs.sigmas()
       f_obs = f_obs.select(strong)
-    R1 = flex.sum(self.calculate_residuals(f_obs)) / flex.sum(f_obs.data())
+    R1 = f_obs.r1_factor(
+      self.f_model(f_obs), scale_factor=math.sqrt(self.scale_factor))
     return R1, f_obs.size()
 
-  def wR2_and_GooF(self):
-    f_sq_obs = self.reflections.f_sq_obs_merged
-    f_calc = self.f_model(f_sq_obs)
-    ls_function = xray.unified_least_squares_residual(
-      f_sq_obs,
-      #weighting=xray.weighting_schemes.shelx_weighting()
-      weighting=self.weighting
-    )
-    ls = ls_function(f_calc, compute_derivatives=False)
-    weights = ls_function.weighting().weights
-    k = ls.scale_factor()
-    f_sq_calc = f_calc.norm()
-    fc_sq = f_sq_calc.data()
-    fo_sq = f_sq_obs.data()
-    wR2 = math.sqrt(flex.sum(weights * flex.pow2(fo_sq - k * fc_sq)) /
-                    flex.sum(weights * flex.pow2(fo_sq)))
-    GooF = math.sqrt(flex.sum(weights * flex.pow2(fo_sq - k * fc_sq)) /
-                     (fo_sq.size() - minimizer.n()))
-    return wR2, GooF
+
+  def show_summary(self):
+    print "R1 (all data): %.3f for %i unique reflections" % self.R1(all_data=True)
+    print "R1: %.3f for %i reflections" % self.R1()
+    print "wR2, GooF: ", self.normal_eqns.wR2(), self.normal_eqns.goof()
+
+  def iter_shifts_sites(self, max_items=None):
+    scatterers = self.xray_structure().scatterers()
+    sites_shifts = self.xray_structure().sites_cart() - self.xray_structure_pre_cycle.sites_cart()
+    distances = sites_shifts.norms()
+    i_distances_sorted = flex.sort_permutation(data=distances, reverse=True)
+    mean = flex.mean(distances)
+    if max_items is not None:
+      i_distances_sorted = i_distances_sorted[:max_items]
+    for i_seq in iter(i_distances_sorted):
+      yield distances[i_seq], scatterers[i_seq]
+
+  def iter_shifts_u(self, max_items=None):
+    scatterers = self.xray_structure().scatterers()
+    adp_shifts = self.xray_structure().extract_u_cart_plus_u_iso() \
+               - self.xray_structure_pre_cycle.extract_u_cart_plus_u_iso()
+    norms = adp_shifts.norms()
+    mean = flex.mean(norms)
+    i_adp_shifts_sorted = flex.sort_permutation(data=norms, reverse=True)
+    if max_items is not None:
+      i_adp_shifts_sorted = i_adp_shifts_sorted[:max_items]
+    for i_seq in iter(i_adp_shifts_sorted):
+      yield norms[i_seq], scatterers[i_seq]
+
+  def show_log(self, f=None):
+    import sys
+    if self.log is sys.stdout: return
+    if f is None: f = sys.stdout
+    print >> f, self.log.getvalue()
+
+  def show_sorted_shifts(self, max_items=None, log=None):
+    import sys
+    if log is None: log = sys.stdout
+    print >> log, "Sorted site shifts in Angstrom:"
+    print >> log, "shift scatterer"
+    n_not_shown = self.xray_structure().scatterers().size()
+    for distance, scatterer in self.iter_shifts_sites(max_items=max_items):
+      n_not_shown -= 1
+      print >> log, "%5.3f %s" %(distance, scatterer.label)
+      if round(distance, 3) == 0: break
+    if n_not_shown != 0:
+      print >> log, "... (remaining %d not shown)" % n_not_shown
+    #
+    print >> log, "Sorted adp shift norms:"
+    print >> log, "dU scatterer"
+    n_not_shown = self.xray_structure().scatterers().size()
+    for norm, scatterer in self.iter_shifts_u(max_items=max_items):
+      n_not_shown -= 1
+      print >> log, "%5.3f %s" %(norm, scatterer.label)
+      if round(norm, 3) == 0: break
+    if n_not_shown != 0:
+      print >> log, "... (remaining %d not shown)" % n_not_shown
+
+  def show_shifts(self, log=None):
+    import sys
+    if log is None: log = sys.stdout
+    site_symmetry_table = self.xray_structure().site_symmetry_table()
+    i=0
+    for i_sc, sc in enumerate(self.xray_structure().scatterers()):
+      op = site_symmetry_table.get(i_sc)
+      print >> log, "%-4s" % sc.label
+      if sc.flags.grad_site():
+        n = op.site_constraints().n_independent_params()
+        if n != 0:
+          print >> log, ("site:" + "%7.4f, "*(n-1) + "%7.4f")\
+                % tuple(self.shifts[i:i+n])
+        i += n
+      if sc.flags.grad_u_iso() and sc.flags.use_u_iso():
+        if not(sc.flags.tan_u_iso() and sc.flags.param > 0):
+          print >> log, "u_iso: %6.4f" % self.shifts[i]
+          i += 1
+      if sc.flags.grad_u_aniso() and sc.flags.use_u_aniso():
+        n = op.adp_constraints().n_independent_params()
+        print >> log, (("u_aniso:" + "%6.3f, "*(n-1) + "%6.3f")
+                       % tuple(self.shifts[i:i+n]))
+        i += n
+      if sc.flags.grad_occupancy():
+        print >> log, "occ: %4.2f" % self.shifts[i]
+        i += 1
+      if sc.flags.grad_fp():
+        print >> log, "f': %6.4f" % self.shifts[i]
+        i += 1
+      if sc.flags.grad_fdp():
+        print >> log, "f'': %6.4f" % self.shifts[i]
+        i += 1
+      print >> log
 
 class OlexCctbxSolve(OlexCctbxAdapter):
   def __init__(self):
@@ -973,7 +1047,7 @@ class as_pdb_file(OlexCctbxAdapter):
     filepath = args.get('filepath', OV.file_ChangeExt(OV.FileFull(), 'pdb'))
     f = open(filepath, 'wb')
     fractional_coordinates = \
-      args.get('fractional_coordinates')in (True, 'True', 'true')
+                           args.get('fractional_coordinates')in (True, 'True', 'true')
     print >> f, self.xray_structure().as_pdb_file(
       remark=args.get('remark'),
       remarks=args.get('remarks', []),
