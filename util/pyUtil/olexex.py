@@ -198,6 +198,9 @@ class OlexRefinementModel(object):
   def atoms(self):
     return self._atoms.values()
 
+  def disorder_parts(self):
+    return [atom['part'] for atom in self._atoms.values()]
+
   def iterator(self):
     for i, atom in self._atoms.items():
       name = str(atom['label'])
@@ -219,11 +222,16 @@ class OlexRefinementModel(object):
       pivot = afix['pivot']
       dependent = afix['dependent']
       pivot_neighbours = [i for i in self._atoms[pivot]['neighbours'] if not i in dependent]
+      if len(dependent) == 0: continue
+      dependent_part = self._atoms[dependent[0]]['part']
+      pivot_neighbours = None
       bond_length = afix['d']
       uiso = afix['u']
       yield m, n, pivot, dependent, pivot_neighbours, bond_length
 
   def restraints_iterator(self):
+    from libtbx.utils import flat_list
+    from cctbx import sgtbx
     for shelxl_restraint in (self.restraint_types):
       for restraint in self.model[shelxl_restraint]:
         restraint_type = self.restraint_types.get(shelxl_restraint)
@@ -232,7 +240,9 @@ class OlexRefinementModel(object):
         kwds = dict(i_seqs=i_seqs)
         if restraint_type not in (
           'adp_similarity', 'rigid_bond', 'isotropic_adp'):
-          kwds['sym_ops'] = [i[1] for i in restraint['atoms']]
+          kwds['sym_ops'] = [
+            (sgtbx.rt_mx(flat_list(i[1][:-1]), i[1][-1]) if i[1] is not None else None)
+            for i in restraint['atoms']]
           kwds['weight'] = 1/math.pow(restraint['esd1'],2)
         value = restraint['value']
         if restraint_type in ('adp_similarity', 'isotropic_adp'):
@@ -254,7 +264,15 @@ class OlexRefinementModel(object):
             #sym_ops.append([self.symmetry_operations.get(atom[2]) for atom in atom_pair])
         if 'weights' in kwds:
           del kwds['weight']
-        yield restraint_type, kwds
+        if restraint_type in ('bond', ):
+          for i in range(int(len(i_seqs)/2)):
+            yield restraint_type, dict(
+              weight=kwds['weight'],
+              distance_ideal=kwds['distance_ideal'],
+              i_seqs=kwds['i_seqs'][i*2:(i+1)*2],
+              sym_ops=kwds['sym_ops'][i*2:(i+1)*2])
+        else:
+          yield restraint_type, kwds
 
   def getCell(self):
     return [self._cell[param][0] for param in ('a','b','c','alpha','beta','gamma')]
@@ -386,8 +404,8 @@ def OnMatchFound(rms, fragA, fragB):
 if haveGUI:
   OV.registerCallback('onmatch',OnMatchFound)
 
-  
-  
+
+
 #def getScreenSize():
   #retval = ()
   #from win32api import GetSystemMetrics
