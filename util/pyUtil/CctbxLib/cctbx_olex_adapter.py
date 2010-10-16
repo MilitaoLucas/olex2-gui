@@ -227,14 +227,14 @@ class FullMatrixRefine(OlexCctbxAdapter):
       conformer_indices=flex.size_t(list(conformer_indices)),
       sym_excl_indices=flex.size_t(list(sym_excl_indices)))
     import smtbx.refinement.restraints
-    reparametrisation = constraints.reparametrisation(
+    self.reparametrisation = constraints.reparametrisation(
       structure=self.xray_structure(),
       geometrical_constraints=geometrical_constraints,
       connectivity_table=connectivity_table)
     self.normal_eqns = least_squares.normal_equations(
       self.xray_structure(), self.reflections.f_sq_obs_filtered,
       f_mask=self.f_mask,
-      reparametrisation=reparametrisation,
+      reparametrisation=self.reparametrisation,
       restraints_manager=restraints_manager,
       weighting_scheme="default")
     objectives = []
@@ -261,11 +261,43 @@ class FullMatrixRefine(OlexCctbxAdapter):
         print e
       self.failure = True
     else:
-      self.post_peaks(self.f_obs_minus_f_calc_map(0.4), max_peaks=self.max_peaks)
+      fo_minus_fc = self.f_obs_minus_f_calc_map(0.4)
+      fo_minus_fc.apply_volume_scaling()
+      self.diff_stats = fo_minus_fc.statistics()
+      self.post_peaks(fo_minus_fc, max_peaks=self.max_peaks)
       self.restraints_manager().show_sorted(self.xray_structure())
       self.show_summary()
     finally:
       sys.stdout.refresh = True
+
+  def as_cif_block(self):
+    cif_block = self.xray_structure().as_cif_block()
+    fmt = "%.6f"
+    d_max, d_min = self.reflections.f_sq_obs_filtered.d_max_min()
+    cif_block['_refine_diff_density_max'] = fmt % self.diff_stats.max()
+    cif_block['_refine_diff_density_min'] = fmt % self.diff_stats.min()
+    cif_block['_refine_diff_density_rms'] = fmt % math.sqrt(self.diff_stats.mean_sq())
+    cif_block['_refine_ls_d_res_high'] = fmt % d_min
+    cif_block['_refine_ls_d_res_low'] = fmt % d_max
+    cif_block['_reflns_threshold_expression'] = 'I>4u(I)' # XXX is this correct?
+    #wR2, GooF = self.wR2_and_GooF()
+    #cif_block['_refine_ls_goodness_of_fit_all'] = GooF
+    #cif_block['_refine_ls_hydrogen_treatment'] =
+    cif_block['_refine_ls_matrix_type'] = 'full'
+    #cif_block['_refine_ls_number_constraints'] =
+    cif_block['_refine_ls_number_parameters'] = self.reparametrisation.n_independent_params
+    cif_block['_refine_ls_number_reflns'] = self.reflections.f_sq_obs_filtered.size()
+    #cif['_refine_ls_number_restraints' =
+    cif_block['_refine_ls_R_factor_all'] = fmt % self.R1(all_data=True)[0]
+    cif_block['_refine_ls_R_factor_gt'] = fmt % self.R1()[0]
+    #cif_block['_refine_ls_restrained_S_all'] = # check whether GooF is correct (restraints)
+    #cif_block['_refine_ls_shift/su_max'] =
+    #cif_block['_refine_ls_shift/su_mean'] =
+    cif_block['_refine_ls_structure_factor_coef'] = 'Fsqd'
+    #cif_block['_refine_ls_weighting_details'] =
+    cif_block['_refine_ls_weighting_scheme'] = 'calc'
+    #cif_block['_refine_ls_wR_factor_all'] = wR2
+    return cif_block
 
   def setup_geometrical_constraints(self, afix_iter=None):
     geometrical_constraints = []
@@ -386,7 +418,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
   def post_peaks(self, fft_map, max_peaks=5):
     from cctbx import maptbx
     from  libtbx.itertbx import izip
-    fft_map.apply_volume_scaling()
     peaks = fft_map.peak_search(
       parameters=maptbx.peak_search_parameters(
         peak_search_level=3,
