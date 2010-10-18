@@ -5,6 +5,7 @@ import olx
 import OlexVFS
 import time
 import math
+from cStringIO import StringIO
 
 from PeriodicTable import PeriodicTable
 import olexex
@@ -36,6 +37,8 @@ twin_laws_d = {}
 
 from cctbx import adptbx, sgtbx, xray
 from cctbx.array_family import flex
+
+import iotbx.cif.model
 
 from smtbx.refinement import restraints
 
@@ -190,13 +193,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
     sys.stdout.refresh = False
     self.scale_factor = None
     self.failure = False
+    self.log = open(OV.file_ChangeExt(OV.FileFull(), 'log'), 'wb')
 
   def run(self):
     from smtbx.refinement import least_squares
     from smtbx.refinement import constraints
     from smtbx.utils import connectivity_table
-    wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
 
+    self.reflections.show_summary(log=self.log)
+
+    wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
     filepath = OV.StrDir()
     self.f_mask = None
     if OV.GetParam("snum.refinement.use_solvent_mask"):
@@ -218,6 +224,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     restraints_manager = self.restraints_manager()
     geometrical_constraints = self.setup_geometrical_constraints(
       self.olx_atoms.afix_iterator())
+    self.n_constraints = len(geometrical_constraints)
     shelx_parts = flex.int(self.olx_atoms.disorder_parts())
     conformer_indices = shelx_parts.deep_copy().set_selected(shelx_parts < 0, 0)
     sym_excl_indices = flex.abs(
@@ -247,10 +254,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
         scales.append(self.normal_eqns.scale_factor)
         self.normal_eqns.solve_and_apply_shifts()
         self.shifts = self.normal_eqns.shifts
-        self.show_sorted_shifts(max_items=2)
+        self.show_cycle_summary(log=self.log)
+        self.show_sorted_shifts(max_items=10, log=self.log)
+        self.restraints_manager().show_sorted(self.xray_structure(), f=self.log)
+        self.show_cycle_summary()
         self.feed_olex()
         self.scale_factor = scales[-1]
       self.export_var_covar(self.normal_eqns.covariance_matrix_and_annotations())
+      self.r1 = self.normal_eqns.r1_factor(cutoff_factor=4)
+      self.r1_all_data = self.normal_eqns.r1_factor()
     except RuntimeError, e:
       if str(e).startswith("cctbx::adptbx::debye_waller_factor_exp: max_arg exceeded"):
         print "Refinement failed to converge"
@@ -267,36 +279,67 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.post_peaks(fo_minus_fc, max_peaks=self.max_peaks)
       self.restraints_manager().show_sorted(self.xray_structure())
       self.show_summary()
+      f = open(OV.file_ChangeExt(OV.FileFull(), 'cif'), 'wb')
+      cif = iotbx.cif.model.cif()
+      cif[OV.FileName().replace(' ', '')] = self.as_cif_block()
+      print >> f, cif
+      f.close()
     finally:
       sys.stdout.refresh = True
+      self.log.close()
 
   def as_cif_block(self):
-    cif_block = self.xray_structure().as_cif_block()
+    def format_type_count(type, count):
+      if round(count, 1) == round(count):
+        return "%s%.0f" %(type, count)
+      elif abs(round(count, 2) - round(count)) in (0.25, 0.33):
+        return "%s%.2f" %(type, count)
+      else:
+        return "%s%.1f" %(type, count)
+    unit_cell_content = self.xray_structure().unit_cell_content()
+    formatted_type_count_pairs = []
+    count = unit_cell_content.pop('C', None)
+    if count is not None:
+      formatted_type_count_pairs.append(format_type_count('C', count))
+      count = unit_cell_content.pop('H', None)
+      if count is not None:
+        formatted_type_count_pairs.append(format_type_count('H', count))
+    types = unit_cell_content.keys()
+    types.sort()
+    for type in types:
+      formatted_type_count_pairs.append(
+        format_type_count(type, unit_cell_content[type]))
+
+    xs = self.xray_structure()
+    cif_block = xs.as_cif_block()
     fmt = "%.6f"
+    cif_block['_chemical_formula_sum'] = ' '.join(formatted_type_count_pairs)
+    cif_block['_chemical_formula_weight'] = '%.3f' % flex.sum(
+      xs.atomic_weights() * xs.scatterers().extract_occupancies())
+    cif_block['_diffrn_radiation_wavelength'] = self.wavelength
     d_max, d_min = self.reflections.f_sq_obs_filtered.d_max_min()
     cif_block['_refine_diff_density_max'] = fmt % self.diff_stats.max()
     cif_block['_refine_diff_density_min'] = fmt % self.diff_stats.min()
     cif_block['_refine_diff_density_rms'] = fmt % math.sqrt(self.diff_stats.mean_sq())
     cif_block['_refine_ls_d_res_high'] = fmt % d_min
     cif_block['_refine_ls_d_res_low'] = fmt % d_max
-    cif_block['_reflns_threshold_expression'] = 'I>4u(I)' # XXX is this correct?
-    #wR2, GooF = self.wR2_and_GooF()
-    #cif_block['_refine_ls_goodness_of_fit_all'] = GooF
+    cif_block['_reflns_threshold_expression'] = 'I>2u(I)' # XXX is this correct?
+    cif_block['_refine_ls_goodness_of_fit_all'] = fmt % self.normal_eqns.goof()
     #cif_block['_refine_ls_hydrogen_treatment'] =
     cif_block['_refine_ls_matrix_type'] = 'full'
-    #cif_block['_refine_ls_number_constraints'] =
+    cif_block['_refine_ls_number_constraints'] = self.n_constraints
     cif_block['_refine_ls_number_parameters'] = self.reparametrisation.n_independent_params
     cif_block['_refine_ls_number_reflns'] = self.reflections.f_sq_obs_filtered.size()
-    #cif['_refine_ls_number_restraints' =
-    cif_block['_refine_ls_R_factor_all'] = fmt % self.R1(all_data=True)[0]
-    cif_block['_refine_ls_R_factor_gt'] = fmt % self.R1()[0]
-    #cif_block['_refine_ls_restrained_S_all'] = # check whether GooF is correct (restraints)
+    cif_block['_refine_ls_number_restraints'] = self.normal_eqns.n_restraints
+    cif_block['_refine_ls_R_factor_all'] = fmt % self.r1_all_data[0]
+    cif_block['_refine_ls_R_factor_gt'] = fmt % self.r1[0]
+    cif_block['_refine_ls_restrained_S_all'] = fmt % self.normal_eqns.restrained_goof()
     #cif_block['_refine_ls_shift/su_max'] =
     #cif_block['_refine_ls_shift/su_mean'] =
     cif_block['_refine_ls_structure_factor_coef'] = 'Fsqd'
     #cif_block['_refine_ls_weighting_details'] =
     cif_block['_refine_ls_weighting_scheme'] = 'calc'
-    #cif_block['_refine_ls_wR_factor_all'] = wR2
+    cif_block['_refine_ls_wR_factor_all'] = fmt % self.normal_eqns.wR2()
     return cif_block
 
   def setup_geometrical_constraints(self, afix_iter=None):
@@ -440,20 +483,31 @@ class FullMatrixRefine(OlexCctbxAdapter):
     olx.Compaq('-q')
     OV.Refresh()
 
-  def R1(self, all_data=False):
-    f_obs = self.reflections.f_sq_obs_filtered.f_sq_as_f()
-    if not all_data:
-      strong = f_obs.data() > 4*f_obs.sigmas()
-      f_obs = f_obs.select(strong)
-    R1 = f_obs.r1_factor(
-      self.f_model(f_obs), scale_factor=math.sqrt(self.scale_factor))
-    return R1, f_obs.size()
-
+  def show_cycle_summary(self, log=None):
+    if log is None: log = sys.stdout
+    print >> log, "wR2 = %.4f for %i data and %i parameters" %(
+      self.normal_eqns.wR2(), self.normal_eqns.fo_sq.size(),
+      self.normal_eqns.reparametrisation.n_independent_params)
+    print >> log, "GooF = %.4f" %(
+      self.normal_eqns.goof(),)
+    max_shift_site = self.max_shift_site()
+    max_shift_u = self.max_shift_u()
+    print >> log, "Max shift site: %.4f A for %s" %(
+      max_shift_site[0], max_shift_site[1].label)
+    print >> log, "Max dU: %.4f for %s" %(
+      max_shift_u[0], max_shift_u[1].label)
 
   def show_summary(self):
-    print "R1 (all data): %.3f for %i unique reflections" % self.R1(all_data=True)
-    print "R1: %.3f for %i reflections" % self.R1()
-    print "wR2, GooF: ", self.normal_eqns.wR2(), self.normal_eqns.goof()
+    print "R1 (all data): %.4f for %i unique reflections" % self.r1_all_data
+    print "R1: %.4f for %i reflections" % self.r1
+    print "wR2 = %.4f, GooF: %.4f" % (
+      self.normal_eqns.wR2(), self.normal_eqns.goof())
+
+  def max_shift_site(self):
+    return self.iter_shifts_sites(max_items=1).next()
+
+  def max_shift_u(self):
+    return self.iter_shifts_u(max_items=1).next()
 
   def iter_shifts_sites(self, max_items=None):
     scatterers = self.xray_structure().scatterers()
