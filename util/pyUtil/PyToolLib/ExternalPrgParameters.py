@@ -577,7 +577,7 @@ class Method_cctbx_fm_refinement(Method_refinement):
     Method_refinement.pre_refinement(self, RunPrgObject)
 
   def run(self, RunPrgObject):
-    from cctbx_olex_adapter import FullMatrixRefine
+    from refinement import FullMatrixRefine
     print 'STARTING cctbx refinement'
     verbose = OV.GetParam('olex2.verbose')
     cctbx = FullMatrixRefine(
