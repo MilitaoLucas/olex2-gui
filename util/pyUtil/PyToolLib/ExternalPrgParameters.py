@@ -589,7 +589,7 @@ class Method_cctbx_fm_refinement(Method_refinement):
     #olx.Kill('$Q')
     cctbx.run()
     if not cctbx.failure:
-      OV.SetVar('cctbx_R1',cctbx.R1()[0])
+      OV.SetVar('cctbx_R1',cctbx.r1[0])
       olx.File('%s.res' %OV.FileName())
     OV.DeleteBitmap('refine')
 

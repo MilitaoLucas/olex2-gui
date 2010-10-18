@@ -121,9 +121,15 @@ class reflections(object):
     self._omit = omit
     two_theta = omit['2theta']
     self.d_min=uctbx.two_theta_as_d(two_theta, wavelength, deg=True)
-    s = omit['s']
     hkl = omit.get('hkl')
     f_sq_obs_filtered = self.f_sq_obs_merged.resolution_filter(d_min=self.d_min)
+    s = omit['s']
+    if s < 0:
+      weak_cutoff = 0.5 * s * f_sq_obs_filtered.sigmas()
+      weak = f_sq_obs_filtered.data() < weak_cutoff
+      f_sq_obs_filtered.data().set_selected(weak, weak_cutoff)
+    elif s > 0:
+      pass
     self.n_filtered_by_resolution = self.f_sq_obs_merged.size() - f_sq_obs_filtered.size()
     if hkl is not None:
       f_sq_obs_filtered = f_sq_obs_filtered.select_indices(

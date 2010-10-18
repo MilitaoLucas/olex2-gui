@@ -254,16 +254,21 @@ class MergeCif(CifTools):
         OV.set_refinement_program(prg, 'Full Matrix')
         if not os.path.isfile("%s/%s.vcov" %(OV.FilePath(),OV.FileName())):
           olex.m('refine')
+        if os.path.isfile(OV.file_ChangeExt(OV.FileFull(), 'cif')):
+          refinement_cif = iotbx.cif.reader(
+            file_path=OV.file_ChangeExt(OV.FileFull(), 'cif')).model()
+          OV.write_to_olex('refinement.cif', str(refinement_cif))
+        else: refinement_cif = None
         print "Creating cif:"
         olex.m('CifCreate')
         # pre-merge (info about refinement)
-        from cctbx_olex_adapter import OlexCctbxAdapter
-        xs = OlexCctbxAdapter().xray_structure()
-        cif_block = xs.as_cif_block()
-        s = StringIO()
-        print >> s, cif_block
-        OV.write_to_olex('xs.cif', s.getvalue())
-        OV.CifMerge('xs.cif')
+        #from cctbx_olex_adapter import OlexCctbxAdapter
+        #xs = OlexCctbxAdapter().xray_structure()
+        #cif_block = xs.as_cif_block()
+        #s = StringIO()
+        #print >> s, cif_block
+        #OV.write_to_olex('xs.cif', s.getvalue())
+        OV.CifMerge('refinement.cif')
       else:
         if method == 'CGLS':
           OV.set_refinement_program(prg, 'Least Squares')
