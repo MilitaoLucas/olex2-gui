@@ -237,7 +237,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.reparametrisation = constraints.reparametrisation(
       structure=self.xray_structure(),
       geometrical_constraints=geometrical_constraints,
-      connectivity_table=connectivity_table)
+      connectivity_table=connectivity_table,
+      temperature=self.olx_atoms.exptl['temperature'])
     self.normal_eqns = least_squares.normal_equations(
       self.xray_structure(), self.reflections.f_sq_obs_filtered,
       f_mask=self.f_mask,
