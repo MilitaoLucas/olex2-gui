@@ -56,6 +56,7 @@
       <cmd9  "@reap '%1' %2">
       <cmd10 "if strcmp(filename(),'none') then none else spy.LoadStructureParams()">
       <cmd15 "spy.run_skin sNumTitle">
+      <cmd29 "spy.run_HealthOfStructure()">
       <cmd11 "SetVar(SlideQPeaksVal,0)">
       <cmd12 XXX="ceiling on">
       <cmd13 "storeparam startup file.relativePath(filefull()) true">
