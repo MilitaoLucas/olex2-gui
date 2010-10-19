@@ -47,7 +47,17 @@ gui {
       .type = int
     icon_size = 25
       .type = int
-  }
+    diagnostics {
+      colour_grade1 = #307125
+        .type = colour
+      colour_grade2 = #b4be10
+        .type = colour
+      colour_grade3 = #d6a113
+        .type = colour
+      colour_grade4 = #d62613
+        .type = colour
+      }
+    }
 
   html {
     base_colour = #aaaaaa
