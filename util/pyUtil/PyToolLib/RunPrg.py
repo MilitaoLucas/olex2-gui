@@ -344,7 +344,7 @@ class RunRefinementPrg(RunPrg):
     if self.params.snum.refinement.auto.tidy:
       self.doAutoTidyAfter()
       OV.File()
-    #self.isInversionNeeded() RICHARD!
+    self.isInversionNeeded()
     self.method.post_refinement(self)
 
   def doHistoryCreation(self):
@@ -378,6 +378,7 @@ class RunRefinementPrg(RunPrg):
   def isInversionNeeded(self, force=False):
     from cctbx_olex_adapter import hooft_analysis
     from cctbx import sgtbx
+    from libtbx.utils import Sorry
     print
     if olex_core.SGInfo()['Centrosymmetric'] == 1: return
     print "Checking absolute structure..."
@@ -386,13 +387,19 @@ class RunRefinementPrg(RunPrg):
     inversion_warning = "WARNING: Stucture should be inverted (inv -f), unless there is a good reason not to do so."
     racemic_twin_warning = "WARNING: Structure may be an inversion twin"
     flack = self.method.getFlack()
-    hooft = hooft_analysis()
-    if hooft.reflections.f_sq_obs_filtered.anomalous_flag():
-      if hooft.p2 is not None and round(hooft.p2, 3) == 0:
-        inversion_needed = True
-      elif (hooft.p3_racemic_twin is not None and
-            round(hooft.p3_racemic_twin, 3) == 1):
-        possible_racemic_twin = True
+
+    try:
+      hooft = hooft_analysis()
+    except Sorry, e:
+      print e
+    else:
+      if hooft.reflections.f_sq_obs_filtered.anomalous_flag():
+        if hooft.p2 is not None and round(hooft.p2, 3) == 0:
+          inversion_needed = True
+        elif (hooft.p3_racemic_twin is not None and
+              round(hooft.p3_racemic_twin, 3) == 1):
+          possible_racemic_twin = True
+
     if flack:
       print "Flack Parameter = %s" %flack
       fs = flack.split("(")
