@@ -2,15 +2,16 @@ from __future__ import division
 
 import math, os, sys
 
-from cctbx_olex_adapter import OlexCctbxAdapter
+from cctbx_olex_adapter import OlexCctbxAdapter, OlexCctbxMasks
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
 import olx
+import olex_core
 
 from cctbx.array_family import flex
-from cctbx import adptbx, maptbx, miller, sgtbx
+from cctbx import adptbx, maptbx, miller, sgtbx, uctbx
 
 import iotbx.cif.model
 
@@ -73,12 +74,19 @@ class FullMatrixRefine(OlexCctbxAdapter):
       geometrical_constraints=geometrical_constraints,
       connectivity_table=connectivity_table,
       temperature=self.olx_atoms.exptl['temperature'])
+    weight = self.olx_atoms.model['weight']
+    params = dict(a=0.1, b=0,
+                  #c=0, d=0, e=0, f=1./3,
+                  )
+    for param, value in zip(params.keys()[:min(2,len(weight))], weight):
+      params[param] = value
+    weighting = least_squares.mainstream_shelx_weighting(**params)
     self.normal_eqns = least_squares.normal_equations(
       self.xray_structure(), self.reflections.f_sq_obs_filtered,
       f_mask=self.f_mask,
       reparametrisation=self.reparametrisation,
       restraints_manager=restraints_manager,
-      weighting_scheme="default")
+      weighting_scheme=weighting)
     objectives = []
     scales = []
     try:
@@ -145,20 +153,51 @@ class FullMatrixRefine(OlexCctbxAdapter):
       formatted_type_count_pairs.append(
         format_type_count(type, unit_cell_content[type]))
 
+    two_theta_full = olx.Ins('acta')
+    try: two_theta_full = float(two_theta_full)
+    except ValueError: two_theta_full = uctbx.d_star_sq_as_two_theta(
+      uctbx.d_as_d_star_sq(
+        self.normal_eqns.fo_sq.d_max_min()[0]), self.wavelength, deg=True)
+    completeness_full = self.normal_eqns.fo_sq.resolution_filter(
+      d_min=uctbx.two_theta_as_d(two_theta_full, self.wavelength, deg=True)).completeness()
+
     xs = self.xray_structure()
     cif_block = xs.as_cif_block()
     fmt = "%.6f"
     cif_block['_chemical_formula_sum'] = ' '.join(formatted_type_count_pairs)
     cif_block['_chemical_formula_weight'] = '%.3f' % flex.sum(
       xs.atomic_weights() * xs.scatterers().extract_occupancies())
+    #
+    fo2 = self.reflections.f_sq_obs
+    hklstat = olex_core.GetHklStat()
+    merging = self.reflections.merging
+    min_d_star_sq, max_d_star_sq = fo2.min_max_d_star_sq()
+    fo2 = self.reflections.f_sq_obs
+    h_min, k_min, l_min = hklstat['MinIndexes']
+    h_max, k_max, l_max = hklstat['MaxIndexes']
+    cif_block['_diffrn_measured_fraction_theta_full'] = fmt % completeness_full
     cif_block['_diffrn_radiation_wavelength'] = self.wavelength
-    d_max, d_min = self.reflections.f_sq_obs_filtered.d_max_min()
+    cif_block['_diffrn_reflns_number'] = fo2.size()
+    cif_block['_diffrn_reflns_av_R_equivalents'] = "%.4f" %merging.r_int()
+    cif_block['_diffrn_reflns_av_sigmaI/netI'] = "%.4f" %merging.r_sigma()
+    cif_block['_diffrn_reflns_limit_h_min'] = h_min
+    cif_block['_diffrn_reflns_limit_h_max'] = h_max
+    cif_block['_diffrn_reflns_limit_k_min'] = k_min
+    cif_block['_diffrn_reflns_limit_k_max'] = k_max
+    cif_block['_diffrn_reflns_limit_l_min'] = l_min
+    cif_block['_diffrn_reflns_limit_l_max'] = l_max
+    cif_block['_diffrn_reflns_theta_min'] = "%.2f" %(
+      0.5 * uctbx.d_star_sq_as_two_theta(min_d_star_sq, self.wavelength, deg=True))
+    cif_block['_diffrn_reflns_theta_max'] = "%.2f" %(
+      0.5 * uctbx.d_star_sq_as_two_theta(max_d_star_sq, self.wavelength, deg=True))
+    cif_block['_diffrn_reflns_theta_full'] = two_theta_full/2
+    #
     cif_block['_refine_diff_density_max'] = fmt % self.diff_stats.max()
     cif_block['_refine_diff_density_min'] = fmt % self.diff_stats.min()
     cif_block['_refine_diff_density_rms'] = fmt % math.sqrt(self.diff_stats.mean_sq())
+    d_max, d_min = self.reflections.f_sq_obs_filtered.d_max_min()
     cif_block['_refine_ls_d_res_high'] = fmt % d_min
     cif_block['_refine_ls_d_res_low'] = fmt % d_max
-    cif_block['_reflns_threshold_expression'] = 'I>2u(I)' # XXX is this correct?
     cif_block['_refine_ls_goodness_of_fit_all'] = fmt % self.normal_eqns.goof()
     #cif_block['_refine_ls_hydrogen_treatment'] =
     cif_block['_refine_ls_matrix_type'] = 'full'
@@ -175,6 +214,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     #cif_block['_refine_ls_weighting_details'] =
     cif_block['_refine_ls_weighting_scheme'] = 'calc'
     cif_block['_refine_ls_wR_factor_all'] = fmt % self.normal_eqns.wR2()
+    cif_block['_reflns_threshold_expression'] = 'I>2u(I)' # XXX is this correct?
     return cif_block
 
   def setup_geometrical_constraints(self, afix_iter=None):
@@ -265,23 +305,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
     #olx.Sel('-u')
     olx.xf_EndUpdate()
 
-  def f_model(self, miller_set):
-    f_model = miller_set.structure_factors_from_scatterers(
-      self.xray_structure(),
-      algorithm="direct",
-      cos_sin_table=True).f_calc()
-    if self.f_mask is not None:
-      f_model, f_mask = f_model.common_sets(self.f_mask)
-      f_model = miller.array(miller_set=miller_set,
-                             data=(f_model.data() + f_mask.data()))
-    return f_model
-
   def f_obs_minus_f_calc_map(self, resolution):
-    import math
-    f_sq_obs = self.reflections.f_sq_obs_filtered
-    f_sq_obs = f_sq_obs.eliminate_sys_absent().average_bijvoet_mates()
-    f_obs = f_sq_obs.f_sq_as_f()
-    f_calc = self.f_model(f_obs)
+    fo2 = self.normal_eqns.fo_sq.average_bijvoet_mates()
+    f_obs = fo2.f_sq_as_f()
+    f_calc = self.normal_eqns.f_calc.average_bijvoet_mates()
     if self.scale_factor is None:
       k = f_obs.scale_factor(f_calc)
     else:
