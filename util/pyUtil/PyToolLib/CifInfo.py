@@ -257,6 +257,13 @@ class MergeCif(CifTools):
         if os.path.isfile(OV.file_ChangeExt(OV.FileFull(), 'cif')):
           refinement_cif = iotbx.cif.reader(
             file_path=OV.file_ChangeExt(OV.FileFull(), 'cif')).model()
+          del refinement_cif[self.data_name]['_atom_site']
+          if '_atom_site_aniso' in refinement_cif[self.data_name]:
+            del refinement_cif[self.data_name]['_atom_site_aniso']
+          for cell_param in ('a','b','c'):
+            del refinement_cif[self.data_name]['_cell_length_%s' %cell_param]
+          for cell_param in ('alpha','beta','gamma'):
+            del refinement_cif[self.data_name]['_cell_angle_%s' %cell_param]
           OV.write_to_olex('refinement.cif', str(refinement_cif))
         else: refinement_cif = None
         print "Creating cif:"
