@@ -701,12 +701,9 @@ OV.registerFunction(reset_twin_law_img)
 def write_grid_to_olex(grid):
   import olex_xgrid
   gridding = grid.accessor()
-  n_real = gridding.focus()
-  olex_xgrid.Init(*n_real)
-  for i in range(n_real[0]):
-    for j in range(n_real[1]):
-      for k in range(n_real[2]):
-        olex_xgrid.SetValue(i,j,k, grid[i,j,k])
+  type = isinstance(grid, flex.int)
+  olex_xgrid.Import(
+    gridding.all(), gridding.focus(), grid.copy_to_byte_str(), type)
   olex_xgrid.SetMinMax(flex.min(grid), flex.max(grid))
   olex_xgrid.SetVisible(True)
   olex_xgrid.InitSurface(True)
