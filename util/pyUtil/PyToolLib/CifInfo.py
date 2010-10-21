@@ -321,8 +321,10 @@ class ExtractCifInfo(CifTools):
     if active_solution is not None and active_solution.is_solution:
       solution_reference = SPD.programs[active_solution.program].reference
       atom_sites_solution_primary = SPD.programs[active_solution.program].methods[active_solution.method].atom_sites_solution
-      OV.SetParam('snum.metacif.computing_structure_solution', solution_reference)
-      OV.SetParam('snum.metacif.atom_sites_solution_primary', atom_sites_solution_primary)
+      self.update_cif_block({
+        '_computing_structure_solution': solution_reference,
+        '_atom_sites_solution_primary': atom_sites_solution_primary
+      })
 
     p = self.sort_out_path(path, "frames")
     if p and self.metacifFiles.curr_frames != self.metacifFiles.prev_frames:
@@ -486,7 +488,8 @@ class ExtractCifInfo(CifTools):
   def exclude_cif_items(self, cif_block):
     # ignore cif items that should be provided by the refinement engine
     exclude_list = ('_cell_length', '_cell_angle', '_cell_volume', '_cell_formula',
-                    '_cell_oxdiff', '_symmetry', '_exptl_absorpt_coefficient_mu')
+                    '_cell_oxdiff', '_symmetry', '_exptl_absorpt_coefficient_mu',
+                    '_audit_creation')
     for item in cif_block:
       for exclude in exclude_list:
         if item.startswith(exclude):
