@@ -104,7 +104,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         self.feed_olex()
         self.scale_factor = scales[-1]
       self.export_var_covar(self.normal_eqns.covariance_matrix_and_annotations())
-      self.r1 = self.normal_eqns.r1_factor(cutoff_factor=4)
+      self.r1 = self.normal_eqns.r1_factor(fo_sq_cutoff_factor=2)
       self.r1_all_data = self.normal_eqns.r1_factor()
     except RuntimeError, e:
       if str(e).startswith("cctbx::adptbx::debye_waller_factor_exp: max_arg exceeded"):
@@ -295,9 +295,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
       olx.xf_au_SetAtomU(id, *u_trans)
       olx.xf_au_SetAtomOccu(id, occu)
       if not flags.grad_site():
-        olx.Fix('xyz', name)
+        olx.Fix('xyz', xyz, name)
       if not (flags.grad_u_iso() or flags.grad_u_aniso()):
-        olx.Fix('Uiso', name)
+        olx.Fix('Uiso', u, name)
       if not flags.grad_occupancy():
         olx.Fix('occu', occu, name)
       u_total += u[0]
@@ -348,18 +348,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
     print >> log, "wR2 = %.4f for %i data and %i parameters" %(
       self.normal_eqns.wR2(), self.normal_eqns.fo_sq.size(),
       self.normal_eqns.reparametrisation.n_independent_params)
-    print >> log, "GooF = %.4f" %(
-      self.normal_eqns.goof(),)
+    print >> log, "GooF = %.4f" %(self.normal_eqns.goof(),)
     max_shift_site = self.max_shift_site()
     max_shift_u = self.max_shift_u()
     print >> log, "Max shift site: %.4f A for %s" %(
       max_shift_site[0], max_shift_site[1].label)
-    print >> log, "Max dU: %.4f for %s" %(
-      max_shift_u[0], max_shift_u[1].label)
+    print >> log, "Max dU: %.4f for %s" %(max_shift_u[0], max_shift_u[1].label)
 
   def show_summary(self):
-    print "R1 (all data): %.4f for %i unique reflections" % self.r1_all_data
-    print "R1: %.4f for %i reflections" % self.r1
+    print "R1 (all data): %.4f for %i reflections" % self.r1_all_data
+    print "R1: %.4f for %i reflections I > 2u(I)" % self.r1
     print "wR2 = %.4f, GooF: %.4f" % (
       self.normal_eqns.wR2(), self.normal_eqns.goof())
 
