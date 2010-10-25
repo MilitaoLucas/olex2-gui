@@ -9,6 +9,7 @@ import Image
 import ImageFont, ImageDraw, ImageChops
 from ImageTools import ImageTools
 import ImageFilter
+import os
 try:
   import olx
   import olex
@@ -2479,6 +2480,15 @@ class HealthOfStructure():
     self.grade_4_colour = OV.GetParam('gui.skin.diagnostics.colour_grade4')
 
   def run_HealthOfStructure(self):
+    hkl = OV.HKLSrc()
+    if not os.path.exists(hkl):
+      print "There is no reflection file associated with this structure"
+      txt = "<tr><table width='100%%'><tr bgcolor=%s align='center'>" %self.grade_4_colour
+      txt += "<td colspan='2'><font color=#ffffff>There is no reflection file</font><td>"
+      txt += "</tr></table></tr>"
+      txt = txt.decode('utf-8')
+      OV.write_to_olex("hos.htm" , txt)
+      return
     self.hkl_stats = olex_core.GetHklStat()
     self.make_HOS_html()
     
