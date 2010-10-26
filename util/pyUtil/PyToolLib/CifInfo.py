@@ -477,7 +477,7 @@ class ExtractCifInfo(CifTools):
     # ignore cif items that should be provided by the refinement engine
     exclude_list = ('_cell_length', '_cell_angle', '_cell_volume', '_cell_formula',
                     '_cell_oxdiff', '_symmetry', '_exptl_absorpt_coefficient_mu',
-                    '_audit_creation')
+                    '_audit_creation', '_diffrn_reflns_')
     for item in cif_block:
       for exclude in exclude_list:
         if item.startswith(exclude):
