@@ -352,6 +352,8 @@ def OnMatchFound(rms, fragA, fragB):
 if haveGUI:
   OV.registerCallback('onmatch',OnMatchFound)
 
+  
+  
 #def getScreenSize():
   #retval = ()
   #from win32api import GetSystemMetrics
@@ -452,7 +454,6 @@ def MakeElementButtonsFromFormula():
     return
   f = f.split(',')
   current_formula = OlexRefinementModel().currentFormula()
-#  Z_prime = OV.GetParam('snum.refinement.Z_prime')
   Z_prime = float(olx.xf_au_GetZprime())
   Z = float(olx.xf_au_GetZ())
   html_elements = []
@@ -533,7 +534,7 @@ def MakeElementButtonsFromFormula():
     from PilTools import timage
     TI = timage()
     for b in btn_dict:
-      for state in ['on', 'off']:
+      for state in ['on', 'off', 'hover', '', 'highlight']:
         txt = btn_dict[b].get('txt')
         bgcolour = btn_dict[b].get('bgcolour')
         width = 22
@@ -551,7 +552,6 @@ def MakeElementButtonsFromFormula():
     bm.run()
   cell_volume = 0
   Z = 1
-#  Z_prime = OV.GetParam('snum.refinement.Z_prime')
   Z_prime = float(olx.xf_au_GetZprime())
   try:
     cell_volume = float(olx.xf_au_GetCellVolume())
@@ -845,7 +845,7 @@ def setAllMainToolbarTabButtons():
           state = "on"
       else:
         state = 'off'
-    OV.CopyVFSFile("cbtn-%s-%s.png" %(btn,state),"cbtn-%s.png" %btn)
+    OV.CopyVFSFile("cbtn-%s%s.png" %(btn,state),"cbtn-%s.png" %btn)
     if state == 'on':
       OV.SetVar('gui_MainToolbarTabButtonActive',btn)
   return "Done"
