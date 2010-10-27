@@ -39,8 +39,8 @@ $spy.MakeHoverButton(toolbar-center,center)
 <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
   <tr>
   <td width='30%' align='center'>
-$spy.MakeHoverButton(toolbar-OK,fixunit xf.au.GetZprime()>>updatehtml)
-  </td>
+$spy.MakeHoverButton(toolbar-OK,fixunit GetValue\(SET_Z_PRIME_FIXUNIT)>>xf.au.SetZprime\(GetValue\(SET_Z_PRIME_FIXUNIT))>>updatehtml>>echo DONE)
+</td>
   <td width='70%' align='center'>
     <input
         type='text'
