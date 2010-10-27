@@ -507,7 +507,6 @@ def MakeElementButtonsFromFormula():
     return
   f = f.split(',')
   current_formula = OlexRefinementModel().currentFormula()
-#  Z_prime = OV.GetParam('snum.refinement.Z_prime')
   Z_prime = float(olx.xf_au_GetZprime())
   Z = float(olx.xf_au_GetZ())
   html_elements = []
@@ -629,7 +628,6 @@ def MakeElementButtonsFromFormula():
     bm.run()
   cell_volume = 0
   Z = 1
-#  Z_prime = OV.GetParam('snum.refinement.Z_prime')
   Z_prime = float(olx.xf_au_GetZprime())
   try:
     cell_volume = float(olx.xf_au_GetCellVolume())
