@@ -52,7 +52,8 @@ $spy.MakeHoverButton(toolbar-OK,fixunit xf.au.GetZprime()>>updatehtml)
         valign='center'
         align='right'
         value='xf.au.GetZprime()'
-        onleave="xf.au.SetZprime(GetValue(SET_Z_PRIME_FIXUNIT))>>spy.SetParam(snum.refinement.Z_prime,GetValue(SET_Z_PRIME_FIXUNIT))>>updatehtml"
+        onleave="xf.au.SetZprime(GetValue(SET_Z_PRIME_FIXUNIT))>>updatehtml"
+        onchange="xf.au.SetZprime(GetValue(SET_Z_PRIME_FIXUNIT))>>updatehtml"
       >
   </td>
   </tr></table>
