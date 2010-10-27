@@ -105,7 +105,20 @@ class ImageTools(FontInstances):
       retVal = hStart
     return retVal
 
-
+  def decimalColorToHTMLcolor(self, dec_colour):
+    val = hex(dec_colour)
+    val = val.lstrip('0x')
+    if len(val) > 6:
+      return dec_colour
+    while len(val) != 6:
+      val = "0" + val
+    retVal = "#"
+    retVal += val[-2:]
+    retVal += val[-4:-2]
+    retVal += val[-6:-4]
+    return retVal
+  
+  
   def getOlexVariables(self):
     #self.encoding = self.test_encoding(self.gui_language_encoding) ##Language
     #self.language = "English" ##Language

@@ -79,14 +79,20 @@ def autodemo(name='default_auto_tutorial', reading_speed=0.08):
   items = rFile.readlines()
   rFile.close()
   olx.Clear()
-  bitmap = make_tutbox_image("Welcome", font_colour='#44aa44')
-  olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
-  olx.SetMaterial("%s.Plane 2053;2131693327;2131693327"%bitmap)
-  olx.DeleteBitmap(bitmap)
-  olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
-  time.sleep(2)
+  please_exit = False
+  if not interactive:
+    bitmap = make_tutbox_image("Press Return to advance this tutorial!", font_colour='#44aa44')
+    olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
+    olx.SetMaterial("%s.Plane 2053;2131693327;2131693327"%bitmap)
+    olx.DeleteBitmap(bitmap)
+    olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
+    time.sleep(2)
   for item in items:
+    if please_exit:
+      break
     item = item.strip()
+    if item.startswith('#'):
+      continue
     cmd_type = item.split(":")[0]
     cmd_content = item.split(":")[1]
     sleep = 0
@@ -95,11 +101,19 @@ def autodemo(name='default_auto_tutorial', reading_speed=0.08):
     
     if cmd_type == 'p':
       txt = "%s" %(cmd_content)
-      print(txt)
-      olx.DeleteBitmap(bitmap)
-      bitmap = make_tutbox_image(txt)
-      olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
-      sleep = len(cmd_content) * reading_speed
+      #print(txt)
+      if interactive:
+        OV.UpdateHtml()
+        OV.Refresh()
+        res = make_tutbox_popup(txt)
+        if res == 0:
+          please_exit = True
+      else:
+        olx.DeleteBitmap(bitmap)
+        bitmap = make_tutbox_image(txt)
+        olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
+        sleep = len(cmd_content) * reading_speed
+        
       
     if cmd_type == 'c':
       txt = "%s: %s" %(cmd_type, cmd_content)
@@ -149,6 +163,64 @@ def make_tutbox_image(txt='txt', font_size=20, font_colour='#aa4444', bg_colour=
 #    olx.html_SetImage('POP_%s_PRG_ANALYSIS' %self.program.program_type.upper(), self.image_location)
 #  OV.SetImage(control,use_image)
   
+
+def make_tutbox_popup(txt):
+  have_image = make_tutbox_image(txt)
+  pop_name = "Tutorial"
+  if OV.IsControl('%s'%pop_name):
+    olx.html_ShowModal(pop_name)
+  else:
+    txt='''
+  <body link="$spy.GetParam(gui.html.link_colour)" bgcolor="$spy.GetParam(gui.html.bg_colour)">
+  <font color=$spy.GetParam(gui.html.font_colour)  size=4 face="$spy.GetParam(gui.html.font_name)">
+  <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_bg_colour)">
+
+  <tr align='right'>
+    <td>
+       <input 
+         type="button" 
+         bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+         valign='center' 
+         width="60"  
+         height="22"
+         onclick="html.EndModal(%s,1)"
+         value = "OK">
+       <input 
+         type="button" 
+         bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+         valign='center' 
+         width="60"  
+         height="22"
+         onclick="html.EndModal(%s,0)"
+         value = "Cancel">
+    </td>
+  </tr>
+
+  
+  <tr bgcolor='#888888'>
+    <td></td>
+  </tr>
+  
+  <tr>
+    <td><br><br>
+    %s
+    </td>
+  </tr>
+     </table>
+     </font>
+     </body>
+     '''%(pop_name,pop_name,txt)
+  
+    OV.write_to_olex("%s.htm" %pop_name.lower(), txt)
+    boxWidth = 300
+    boxHeight = 500
+    x = OV.GetHtmlPanelX() - boxWidth - 20
+    y = 100
+    olx.Popup(pop_name, '%s.htm' %pop_name.lower(), "-s -t='%s' -w=%i -h=%i -x=%i -y=%i" %(pop_name, boxWidth, boxHeight, x, y))
+    res = olx.html_ShowModal(pop_name)
+    res = int(res)
+    return res
+
 
 def tutbox(txt):
   make_tutbox_image(txt)
