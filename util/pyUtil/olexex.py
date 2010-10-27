@@ -262,7 +262,6 @@ class OlexRefinementModel(object):
                                      for i in range(int(len(i_seqs)/2))]
             kwds['sym_ops'] = [[sym_op for sym_op in sym_ops[i*2:(i+1)*2]]
                                        for i in range(int(len(sym_ops)/2))]
-            #sym_ops.append([self.symmetry_operations.get(atom[2]) for atom in atom_pair])
         if 'weights' in kwds:
           del kwds['weight']
         if restraint_type in ('bond', ):

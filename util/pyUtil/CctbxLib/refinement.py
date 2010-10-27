@@ -82,7 +82,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       params[param] = value
     weighting = least_squares.mainstream_shelx_weighting(**params)
     self.normal_eqns = least_squares.normal_equations(
-      self.xray_structure(), self.reflections.f_sq_obs_filtered,
+      self.reflections.f_sq_obs_filtered,
       f_mask=self.f_mask,
       reparametrisation=self.reparametrisation,
       restraints_manager=restraints_manager,
@@ -198,7 +198,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     d_max, d_min = self.reflections.f_sq_obs_filtered.d_max_min()
     cif_block['_refine_ls_d_res_high'] = fmt % d_min
     cif_block['_refine_ls_d_res_low'] = fmt % d_max
-    cif_block['_refine_ls_goodness_of_fit_all'] = fmt % self.normal_eqns.goof()
+    cif_block['_refine_ls_goodness_of_fit_ref'] = fmt % self.normal_eqns.goof()
     #cif_block['_refine_ls_hydrogen_treatment'] =
     cif_block['_refine_ls_matrix_type'] = 'full'
     cif_block['_refine_ls_number_constraints'] = self.n_constraints
@@ -271,6 +271,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     i = 1
 
     def iter_scatterers():
+      n_equiv_positions = self.xray_structure().space_group().n_equivalent_positions()
       for a in self.xray_structure().scatterers():
         label = a.label
         xyz = a.site
@@ -282,7 +283,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
           u_cif = adptbx.u_star_as_u_cart(self.xray_structure().unit_cell(), a.u_star)
           u = u_cif
           u_eq = adptbx.u_star_as_u_iso(self.xray_structure().unit_cell(), a.u_star)
-        yield label, xyz, u, u_eq, a.occupancy, symbol, a.flags
+        yield (label, xyz, u, u_eq,
+               a.occupancy*(a.multiplicity()/n_equiv_positions),
+               symbol, a.flags)
 
     for name, xyz, u, ueq, occu, symbol, flags in iter_scatterers():
       if len(u) == 6:
