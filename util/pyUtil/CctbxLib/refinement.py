@@ -157,16 +157,20 @@ class FullMatrixRefine(OlexCctbxAdapter):
     try: two_theta_full = float(two_theta_full)
     except ValueError: two_theta_full = uctbx.d_star_sq_as_two_theta(
       uctbx.d_as_d_star_sq(
-        self.normal_eqns.fo_sq.d_max_min()[0]), self.wavelength, deg=True)
+        self.normal_eqns.fo_sq.d_max_min()[1]), self.wavelength, deg=True)
     completeness_full = self.normal_eqns.fo_sq.resolution_filter(
       d_min=uctbx.two_theta_as_d(two_theta_full, self.wavelength, deg=True)).completeness()
 
+    shifts_over_su = flex.abs(
+      self.normal_eqns.shifts /
+      flex.sqrt(self.normal_eqns.covariance_matrix(independent_params=True)\
+                .matrix_packed_u_diagonal()))
     xs = self.xray_structure()
     cif_block = xs.as_cif_block()
     fmt = "%.6f"
-    cif_block['_chemical_formula_sum'] = ' '.join(formatted_type_count_pairs)
-    cif_block['_chemical_formula_weight'] = '%.3f' % flex.sum(
-      xs.atomic_weights() * xs.scatterers().extract_occupancies())
+    #cif_block['_chemical_formula_sum'] = ' '.join(formatted_type_count_pairs)
+    #cif_block['_chemical_formula_weight'] = '%.3f' % flex.sum(
+      #xs.atomic_weights() * xs.scatterers().extract_occupancies())
     #
     fo2 = self.reflections.f_sq_obs
     hklstat = olex_core.GetHklStat()
@@ -208,12 +212,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_refine_ls_R_factor_all'] = fmt % self.r1_all_data[0]
     cif_block['_refine_ls_R_factor_gt'] = fmt % self.r1[0]
     cif_block['_refine_ls_restrained_S_all'] = fmt % self.normal_eqns.restrained_goof()
-    #cif_block['_refine_ls_shift/su_max'] =
-    #cif_block['_refine_ls_shift/su_mean'] =
+    cif_block['_refine_ls_shift/su_max'] = "%.4f" % flex.max(shifts_over_su)
+    cif_block['_refine_ls_shift/su_mean'] = "%.4f" % flex.mean(shifts_over_su)
     cif_block['_refine_ls_structure_factor_coef'] = 'Fsqd'
     #cif_block['_refine_ls_weighting_details'] =
     cif_block['_refine_ls_weighting_scheme'] = 'calc'
     cif_block['_refine_ls_wR_factor_all'] = fmt % self.normal_eqns.wR2()
+    cif_block['_reflns_number_gt'] = (
+      self.normal_eqns.fo_sq.data() > 2 * self.normal_eqns.fo_sq.sigmas()).count(True)
+    cif_block['_reflns_number_total'] = self.normal_eqns.fo_sq.size()
     cif_block['_reflns_threshold_expression'] = 'I>2u(I)' # XXX is this correct?
     return cif_block
 
