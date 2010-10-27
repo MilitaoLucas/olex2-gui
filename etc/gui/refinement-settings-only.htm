@@ -98,16 +98,14 @@ target = "Do automatic tidying once - tick the box to do it after every refineme
 >Autotidy
   </a>
   </b>
-  <a
-    href="spy.make_help_box -name='refinement-settings-h3-autotidy-settings' -popout='True'"
-    target="Help me with this">
-    <zimg border="0" src="info.png">
-  </a>
+$spy.MakeHoverButton(btn-info@#autotidy,spy.make_help_box -name='autotidy' -popout='False')
 </td>
 <td VALIGN='center' ALIGN='right'  colspan=1>
   <font size='2'>
   <input
     type='checkbox'
+    fgcolor="$spy.GetParam(gui.html.font_colour)"
+    bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"
     width="$spy.GetParam(gui.html.checkbox_height)"
     height="$spy.GetParam(gui.html.checkbox_height)"
     name='SNUM_REFINEMENT_AUTO_TIDY'
@@ -154,11 +152,8 @@ target = "Do automatic tidying once - tick the box to do it after every refineme
     <b>
       Use solvent mask
     </b>
-    <a
-      href="spy.make_help_box -name='refinement-masks' -popout='True'"
-      target="Help me with this">
-      <zimg border="0" src="info.png">
-    </a>
+$spy.MakeHoverButton(btn-info@#refinement-masks,spy.make_help_box -name='refinement-masks' -popout='False')
+    
   </td>
   <td VALIGN="center" ALIGN="right"  colspan=1>
     <font size="2">
@@ -167,7 +162,7 @@ target = "Do automatic tidying once - tick the box to do it after every refineme
         width="$spy.GetParam(gui.html.checkbox_width)"
         height="$spy.GetParam(gui.html.checkbox_height)"
         fgcolor="$spy.GetParam(gui.html.font_colour)"
-        bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+        bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"
         name="SNUM_REFINEMENT_USE_SOLVENT_MASK"
         checked="$spy.GetParam(snum.refinement.use_solvent_mask)"
         oncheck="spy.SetParam(snum.refinement.use_solvent_mask,true)"
@@ -182,7 +177,7 @@ UpdateHtml"
   </td>
 </tr>
 
-<tr VALIGN="center" ALIGN="left" NAME="RECOMPUTE_MASK_BEFORE_REFINEMENT">
+<tr VALIGN="center" ALIGN="left" NAME="RECOMPUTE_MASK_BEFORE_REFINEMENT" >
   <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
   <td VALIGN="center"  colspan=3>
     <b>
@@ -196,7 +191,7 @@ UpdateHtml"
         width="$spy.GetParam(gui.html.checkbox_width)"
         height="$spy.GetParam(gui.html.checkbox_height)"
         fgcolor="$spy.GetParam(gui.html.font_colour)"
-        bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+        bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"
         name="SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT"
         checked="$spy.GetParam(snum.refinement.recompute_mask_before_refinement)"
         oncheck="
