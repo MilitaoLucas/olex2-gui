@@ -2153,7 +2153,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         for item in buttons:
           width = int(round(self.available_width/3,0)) - 5
           image = self.make_timage(item_type='cbtn', item=item, state=state, width=width)
-          OlexVFS.save_image_to_olex(image,'%s-%s-%s.png' %('cbtn', item.lower(), state), 2)
+          OlexVFS.save_image_to_olex(image,'%s-%s%s.png' %('cbtn', item.lower(), state), 2)
           #image.save("C:/tmp/%s-%s-%s.png" %('cbtn', item.lower(), state))
 
 
