@@ -166,6 +166,8 @@ snum {
   }
 
   metacif {
+    publ_author_names = None
+      .type = str
     abs_file = None
       .type = path
       .expert_level = 1
