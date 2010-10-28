@@ -243,23 +243,23 @@ def publicationMetadataHtmlMaker():
      'itemName':'%Contact% %Author%',
      'items':userDictionaries.people.getListPeople(),
      'readonly':'',
-     'onchange':'spy.set_cif_item(_publ_contact_author_name,GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME))>>UpdateHtml'
+     'onchange':'spy.set_cif_item(_publ_contact_author_name,GetValue(SET__PUBL_CONTACT_AUTHOR_NAME))>>UpdateHtml'
      },
     {'varName':'_publ_contact_author_address',
      'itemName':'%Contact% %Author% %Address%',
      'multiline':'multiline',
-     'value':'spy.getPersonInfo(GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME),address)',
-     'onleave':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME),address,GetValue(SET_PUBL_CONTACT_AUTHOR_ADDRESS))>>spy.changeBoxColour(SET_PUBL_CONTACT_AUTHOR_ADDRESS,#FFDCDC)'
+     'value':'spy.getPersonInfo(GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),address)',
+     'onleave':'spy.changePersonInfo(GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),address,GetValue(SET__PUBL_CONTACT_AUTHOR_ADDRESS))>>spy.changeBoxColour(SET__PUBL_CONTACT_AUTHOR_ADDRESS,#FFDCDC)'
      },
     {'varName':'_publ_contact_author_email',
      'itemName':'%Contact% %Author% %Email%',
-     'value':'spy.getPersonInfo(GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME),email)',
-     'onleave':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME),email,GetValue(SET_PUBL_CONTACT_AUTHOR_EMAIL))>>spy.changeBoxColour(SET_PUBL_CONTACT_AUTHOR_EMAIL,#FFDCDC)'
+     'value':'spy.getPersonInfo(GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),email)',
+     'onleave':'spy.changePersonInfo(GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),email,GetValue(SET__PUBL_CONTACT_AUTHOR_EMAIL))>>spy.changeBoxColour(SET__PUBL_CONTACT_AUTHOR_EMAIL,#FFDCDC)'
      },
     {'varName':'_publ_contact_author_phone',
      'itemName':'%Contact% %Author% %Phone%',
-     'value':'spy.getPersonInfo(GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME),phone)',
-     'onleave':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_CONTACT_AUTHOR_NAME),phone,GetValue(SET_PUBL_CONTACT_AUTHOR_PHONE))>>spy.changeBoxColour(SET_PUBL_CONTACT_AUTHOR_PHONE,#FFDCDC)'
+     'value':'spy.getPersonInfo(GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),phone)',
+     'onleave':'spy.changePersonInfo(GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),phone,GetValue(SET__PUBL_CONTACT_AUTHOR_PHONE))>>spy.changeBoxColour(SET__PUBL_CONTACT_AUTHOR_PHONE,#FFDCDC)'
      },
   ]
   listAuthors = OV.GetParam('snum.metacif.publ_author_names')
@@ -340,7 +340,7 @@ def publicationMetadataHtmlMaker():
      'itemName':'%Requested% %Journal%',
      'items':userDictionaries.localList.getListJournals(),
      'readonly':'',
-     'onchange':'spy.addToLocalList(GetValue(SET_SNUM_METACIF_PUBL_REQUESTED_JOURNAL),requested_journal)>>spy.changeBoxColour(SET_SNUM_METACIF_PUBL_REQUESTED_JOURNAL,#FFDCDC)',
+     'onchange':'spy.addToLocalList(GetValue(SET__PUBL_REQUESTED_JOURNAL),requested_journal)>>spy.changeBoxColour(SET__PUBL_REQUESTED_JOURNAL,#FFDCDC)',
      }
   ]
 
