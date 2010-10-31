@@ -158,8 +158,12 @@ class create_cctbx_xray_structure(object):
 
   def __init__(self, cell, spacegroup, atom_iter, restraints_iter=None):
     """ cell is a 6-uple, spacegroup a string and atom_iter yields tuples (label, xyz, u, element_type) """
+    import iotbx.constraints
+    _ = iotbx.constraints.commonplace
     if restraints_iter is not None:
-      builder = builders.restrained_crystal_structure_builder()
+      import smtbx.refinement.constraints.factory
+      builder = builders.constrained_restrained_crystal_structure_builder(
+        constraint_factory=smtbx.refinement.constraints.factory)
     else:
       builder = builders.crystal_structure_builder()
     unit_cell = uctbx.unit_cell(cell)
@@ -178,17 +182,17 @@ class create_cctbx_xray_structure(object):
                            occupancy=occupancy,
                            scattering_type=scattering_type)
         behaviour_of_variable.pop(5)
-        #behaviour_of_variable = [0,0,0,1,0,0,0,0,0]
       else:
         a = xray.scatterer(label=label,
                            site=site,
                            u=u[0],
                            occupancy=occupancy,
                            scattering_type=scattering_type)
-        #behaviour_of_variable = [0,0,0,1,0]
         behaviour_of_variable = behaviour_of_variable[:6]
         if uiso_owner is not None:
-          behaviour_of_variable[5] = 1 # XXX temporary fix for riding u_iso's
+          behaviour_of_variable[5] = (
+            _.constant_times_u_eq, uiso_owner['k'], uiso_owner['id'])
+          #behaviour_of_variable[5] = 1 # XXX temporary fix for riding u_iso's
       behaviour_of_variable.pop(0)
       builder.add_scatterer(a, behaviour_of_variable,
                             occupancy_includes_symmetry_factor=True)

@@ -58,9 +58,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if self.f_mask is None:
         print "No mask present"
     restraints_manager = self.restraints_manager()
-    geometrical_constraints = self.setup_geometrical_constraints(
+    self.constraints += self.setup_geometrical_constraints(
       self.olx_atoms.afix_iterator())
-    self.n_constraints = len(geometrical_constraints)
+    self.n_constraints = len(self.constraints)
     shelx_parts = flex.int(self.olx_atoms.disorder_parts())
     conformer_indices = shelx_parts.deep_copy().set_selected(shelx_parts < 0, 0)
     sym_excl_indices = flex.abs(
@@ -71,7 +71,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       sym_excl_indices=flex.size_t(list(sym_excl_indices)))
     self.reparametrisation = constraints.reparametrisation(
       structure=self.xray_structure(),
-      geometrical_constraints=geometrical_constraints,
+      constraints=self.constraints,
       connectivity_table=connectivity_table,
       temperature=self.olx_atoms.exptl['temperature'])
     weight = self.olx_atoms.model['weight']
