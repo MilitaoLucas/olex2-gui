@@ -178,8 +178,8 @@ class CifTools(ArgumentParser):
         self.cif_block[key] = value # overwrite these for now
 
   def sort_publication_info(self):
-    publ_author_names = OV.GetParam_as_string('snum.metacif.publ_author_names')
-    if publ_author_names is not None and publ_author_names != '?':
+    publ_author_names = OV.GetParam('snum.metacif.publ_author_names')
+    if publ_author_names is not None and publ_author_names not in ('?', ''):
       names = publ_author_names.split(';')
       if len(names):
         cif_loop = model.loop(
@@ -188,10 +188,6 @@ class CifTools(ArgumentParser):
           if name != '?':
             email = userDictionaries.people.getPersonInfo(name,'email')
             address = userDictionaries.people.getPersonInfo(name,'address')
-            #address = ''
-            #for line in add.split('\n'):
-              #address += ' %s\n' %line
-            #loop.append((name,email,address))
             cif_loop.add_row((name, email, address))
           if '_publ_author' in self.cif_block.loops:
             del self.cif_block.loops['_publ_author']
