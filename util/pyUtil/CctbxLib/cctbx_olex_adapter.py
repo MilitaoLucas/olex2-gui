@@ -81,6 +81,7 @@ class OlexCctbxAdapter(object):
         proxies = create_cctbx_xray_structure.restraint_proxies()
         kwds = dict([(key+"_proxies", value) for key, value in proxies.iteritems()])
         self._restraints_manager = restraints.manager(**kwds)
+        self.constraints = create_cctbx_xray_structure.builder.constraints
       self._xray_structure = create_cctbx_xray_structure.structure()
 
       table = ("n_gaussian", "it1992", "wk1995")[0]
