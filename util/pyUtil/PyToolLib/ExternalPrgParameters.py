@@ -421,7 +421,11 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
           f_mask = f_mask.generate_bijvoet_mates().customized_copy(
             anomalous_flag=fo2.anomalous_flag()).common_set(fo2)
         elif f_mask.size() > fo2.size():
-          raise RuntimeError("f_mask array doesn't match hkl file")
+          # this could happen with omit instruction
+          f_mask = f_mask.common_set(fo2)
+          f_model = f_model.common_set(fo2)
+          if f_mask.size() != fo2.size():
+            raise RuntimeError("f_mask array doesn't match hkl file")
         modified_intensities = masks.modified_intensities(fo2, f_model, f_mask)
       if modified_intensities is not None:
         file_out = open(modified_hkl_path, 'w')
