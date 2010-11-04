@@ -60,7 +60,6 @@
       <cmd11 "SetVar(SlideQPeaksVal,0)">
       <cmd12 XXX="ceiling on">
       <cmd13 "storeparam startup file.relativePath(filefull()) true">
-      <cmd14 "if strcmp(%4,filename()) then none else 'spy.SetParam(snum.refinement.sg,sg(%n))'">
       <cmd15 "spy.setAllMainToolbarTabButtons()">
       <cmd16 "if File.Exists(strdir()/filename().vvd) then none else 'spy.SetParam(snum.refinement.original_formula,xf.GetFormula())'">
       <cmd17 "if and(strcmp(%4,filename()),strcmp(%6,fileext())) then none else 'spy.loadHistory()'">
