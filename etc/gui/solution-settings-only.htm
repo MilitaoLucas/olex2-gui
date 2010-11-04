@@ -51,7 +51,7 @@
     <font size='2'>
       <input
         type='combo'
-        width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 - spy.GetParam(gui.htmlpanelwidth_margin_adjust))' 
+        width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 - spy.GetParam(gui.htmlpanelwidth_margin_adjust))'
         height="$spy.GetParam(gui.html.combo_height)"
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name='SET_SNUM_REFINEMENT_FORMULA'
@@ -133,7 +133,7 @@
         name='SET_SNUM_REFINEMENT_SPACE_GROUP'
         items='$spy.GetParam(snum.refinement.sg_list)'
         value='$sg(%n)'
-        onchange="reset -s=GetValue(SET_SNUM_REFINEMENT_SPACE_GROUP) -c=GetValue(SET_SNUM_REFINEMENT_FORMULA)>>spy.SetParam(snum.refinement.sg,sg(%n))>>spy.run_skin sNumTitle>>updatehtml"
+        onchange="reset -s=GetValue(SET_SNUM_REFINEMENT_SPACE_GROUP) -c=GetValue(SET_SNUM_REFINEMENT_FORMULA)>>spy.run_skin sNumTitle>>updatehtml"
       >
     </font>
   </td>

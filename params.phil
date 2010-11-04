@@ -20,8 +20,6 @@ snum {
       .type = choice
     method = 'Least Squares' CGLS 'Full Matrix'
       .type = choice
-    sg = None
-      .type = space_group
     sg_list = None
       .type = str
       .expert_level = 1
