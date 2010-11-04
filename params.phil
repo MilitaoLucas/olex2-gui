@@ -34,6 +34,10 @@ snum {
       .type = bool
       .help = Automatically update the weight instruction before the next \
               refinement
+    suggested_weight = None
+      .type = floats(size=2)
+      .help = The weighting scheme parameters suggested by the refinement \
+              program in a previous cycle
     original_formula = None
       .type = str
       .expert_level = 1
