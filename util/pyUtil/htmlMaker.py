@@ -637,46 +637,32 @@ def checkErrLogFile():
 OV.registerFunction(checkErrLogFile)
 
 def weightGuiDisplay():
-
-  if ("smtbx" in OV.GetParam('snum.refinement.program')
-      or not OV.IsFileType('ires')):
-    return ""
-
   gui_green = OV.FindValue('gui_green')
   gui_orange = OV.FindValue('gui_orange')
   gui_red = OV.FindValue('gui_red')
   longest = 0
   retVal = ""
-  current_weight = olx.Ins('weight').split()
+  current_weight = olx.Ins('weight')
+  if current_weight == "n/a": return ""
+  current_weight = current_weight.split()
   if len(current_weight) == 1:
     current_weight = [current_weight[0], '0']
   length_current = len(current_weight)
-  suggested_weight = olx.Ins('weight1').split()
+  suggested_weight = OV.GetParam('snum.refinement.suggested_weight')
+  if suggested_weight is None: suggested_weight = []
   if len(suggested_weight) < length_current:
     for i in xrange (length_current - len(suggested_weight)):
-      suggested_weight.append('0')
+      suggested_weight.append(0)
   if suggested_weight:
     for curr, sugg in zip(current_weight, suggested_weight):
-      c = curr.replace(".", "")
-      if len(c) > longest:
-        longest = len(c)
-      s = sugg.replace(".", "")
-      if len(s) > longest:
-        longest = len(s)
-    for curr, sugg in zip(current_weight, suggested_weight):
-      if "." in curr:
-        while len(curr) < longest and curr != "0":
-          curr += '0'
-      if "." in sugg:
-        while len(sugg) < longest and sugg != "0":
-          sugg += '0'
-      if curr == sugg:
+      curr = float(curr)
+      if round(curr, 4) == round(sugg, 4):
         colour = gui_green
-      elif float(curr)-float(curr)*0.1 < float(sugg) < float(curr)+float(curr)*0.1:
+      elif curr-curr*0.1 < sugg < curr+curr*0.1:
         colour = gui_orange
       else:
         colour = gui_red
-      retVal += "<font size='2' color='%s'>%s(%s)</font> | " %(colour, curr, sugg)
+      retVal += "<font size='2' color='%s'>%.4f(%.4f)</font> | " %(colour, curr, sugg)
     html_scheme = retVal.strip("| ")
   else:
     html_scheme = current_weight
@@ -689,16 +675,17 @@ def weightGuiDisplay():
        }
   box = htmlTools.make_tick_box_input(d)
 
+  a, b = suggested_weight
   txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update")
   txt_Weight = OV.TranslatePhrase("Weight")
   html = '''
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_UPDATE_WEIGHT'>
   <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
   <td VALIGN='right' colspan=3>
-    <b><a target="%s" href="weight">%s: %s</a></b></td>
+    <b><a target="%s" href="UpdateWght %.4f %.4f>>UpdateHtml">%s: %s</a></b></td>
     <td VALIGN='center' ALIGN='right' colspan=1>%s</td>
 </tr>
-    ''' %(txt_tick_the_box, txt_Weight, html_scheme, box)
+    ''' %(txt_tick_the_box, a, b, txt_Weight, html_scheme, box)
   return html
 OV.registerFunction(weightGuiDisplay)
 

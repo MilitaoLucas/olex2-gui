@@ -283,7 +283,9 @@ class Method_refinement(Method):
     if RunPrgObject.params.snum.refinement.auto.tidy:
       RunPrgObject.doAutoTidyBefore()
     if RunPrgObject.params.snum.refinement.update_weight:
-      olx.UpdateWght()
+      suggested_weight = OV.GetParam('snum.refinement.suggested_weight')
+      if suggested_weight is not None:
+        olx.UpdateWght(*suggested_weight)
     if RunPrgObject.make_unique_names:
       pass
       #olx.Sel('-a')
@@ -445,6 +447,9 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
     if self.original_hklsrc is not None:
       OV.HKLSrc(self.original_hklsrc)
       OV.File()
+    suggested_weight = olx.Ins('weight1')
+    if suggested_weight != 'n/a':
+      OV.SetParam('snum.refinement.suggested_weight', suggested_weight)
 
   def observe(self, RunPrgObject):
     import Analysis

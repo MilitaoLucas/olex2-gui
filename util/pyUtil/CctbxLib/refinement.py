@@ -251,7 +251,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
         self.normal_eqns.f_calc,
         self.normal_eqns.scale_factor,
         self.reparametrisation.n_independent_params)
-      print new_weighting.a, new_weighting.b
+      OV.SetParam(
+        'snum.refinement.suggested_weight', "%s %s" %(new_weighting.a, new_weighting.b))
     finally:
       sys.stdout.refresh = True
       self.log.close()
