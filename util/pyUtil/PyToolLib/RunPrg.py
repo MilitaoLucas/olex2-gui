@@ -234,6 +234,9 @@ class RunSolutionPrg(RunPrg):
     RunPrg.run(self)
 
   def runAfterProcess(self):
+    olx.UpdateWght(0.1)
+    OV.SetParam('snum.refinement.suggested_weight','0.1 0')
+    OV.SetParam('snum.refinement.update_weight', False)
     RunPrg.runAfterProcess(self)
     self.method.post_solution(self)
     self.doHistoryCreation()
