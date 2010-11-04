@@ -88,7 +88,7 @@
   <body
     <args>
   <cmd
-    <cmd "if IsFileLoaded() then '@close>>html.reload>>itemstate index* 0 index-home 1 info-title 0 logo 1>>echo File is closed'">
+    <cmd "if IsFileLoaded() then '@close>>itemstate index* 0 index-home 1 info-title 0 logo 1>>html.reload>>echo File is closed'">
   \>
 >
 >
