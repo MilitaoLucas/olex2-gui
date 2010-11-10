@@ -627,10 +627,12 @@ class Method_cctbx_ChargeFlip(Method_solution):
         print "*** No solution found ***"
     except Exception, err:
       print err
+    olx.ShowQ('a false')
     olx.xf_EndUpdate()
     olx.Compaq('-a')
-    olex.m("sel -a")
-    olex.m("fix occu sel")
+    olx.Move()
+    olx.Fix("occu $Q")
+    olx.ShowQ('a true')
     #olx.VSS(True)
     #olex.m("sel -a")
     #olex.m("name sel 1")
