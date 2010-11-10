@@ -4,15 +4,15 @@
 <tr VALIGN='center'>
 <td align='left'>
   $spy.MakeHoverButton(btn-solve,itemstate cbtn-refine 1 cbtn-report 1 refine-settings 0 report-settings 0>>updatehtml>>solve)
-<!-- #include cbtn-solve gui\blocks\cbtn-on.htm;gui\blocks\cbtn-off.htm;image=solve;1; -->
+<!-- #include cbtn-solve gui\blocks\cbtn-on.htm;gui\blocks\cbtn-off.htm;image=solve;ondown=;1; -->
 </td>
 <td align='center'>
   $spy.MakeHoverButton(btn-refine,itemstate cbtn-solve 1 cbtn-report solve-settings 0 report-settings 0>>updatehtml>>refine>>compaq -a)
-<!-- #include cbtn-refine gui\blocks\cbtn-on.htm;gui\blocks\cbtn-off.htm;image=refine;1; -->
+<!-- #include cbtn-refine gui\blocks\cbtn-on.htm;gui\blocks\cbtn-off.htm;image=refine;ondown=;1; -->
 </td>
 <td align='right'>
   $spy.MakeHoverButton(btn-report,itemstate cbtn-solve 1 cbtn-refine solve-settings 0 refine-settings 0>>updatehtml>>cursor(busy, '%Checking for CIF file ...%')>>report>>cursor()>>updatehtml)
-<!-- #include cbtn-report gui\blocks\cbtn-on.htm;gui\blocks\cbtn-off.htm;image=report;1; -->
+<!-- #include cbtn-report gui\blocks\cbtn-on.htm;gui\blocks\cbtn-off.htm;image=report;ondown=spy.ExtractCifInfo\();1; -->
 </td>
 
 </tr>

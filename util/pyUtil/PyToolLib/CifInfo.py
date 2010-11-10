@@ -311,6 +311,7 @@ class MergeCif(CifTools):
           olx.AddIns('ACTA')
         olex.m('refine')
 
+    self.write_metacif_file()
     ## merge metacif file with cif file from refinement
     OV.CifMerge(self.metacif_path)
     ## open merged cif file in external text editor
