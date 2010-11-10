@@ -171,7 +171,9 @@ class Method(object):
           try:
             value = OV.FindValue('settings_%s_%s' %(instruction.name, option.name))
             if not isinstance(value, int) and not isinstance(value, float):
-              if '.' in value:
+              if ('(' in value and ')' in value):
+                value = value
+              elif '.' in value:
                 value = float(value)
               else:
                 value = int(value)
