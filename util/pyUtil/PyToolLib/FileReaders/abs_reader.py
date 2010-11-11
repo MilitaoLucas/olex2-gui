@@ -96,6 +96,9 @@ class reader(object):
           #i += 1
           pass
         i += 1
+      self._cifItems.setdefault("_exptl_absorpt_correction_T_max", "%s" %(1))
+      self._cifItems.setdefault("_exptl_absorpt_correction_type", "multi-scan")
+
     elif abs_type == "TWINABS":
       print "Running TWINABS parser"
       print "PATH", path
@@ -186,8 +189,8 @@ class reader(object):
           pass
       #print "twin info ", self._twin_cifItems
       
-    self._twin_cifItems.setdefault("_exptl_absorpt_correction_T_max", "%s" %("1"))
-    self._twin_cifItems.setdefault("_exptl_absorpt_correction_type", "multi-scan")
+      self._twin_cifItems.setdefault("_exptl_absorpt_correction_T_max", "%s" %(1))
+      self._twin_cifItems.setdefault("_exptl_absorpt_correction_type", "multi-scan")
 
     
   def cifItems(self):
