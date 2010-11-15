@@ -222,8 +222,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
     try:
       self.cycles.do(gradient_threshold=1e-5, shift_threshold=1e-5)
       self.scale_factor = self.cycles.scale_factors[-1]
-      self.export_var_covar(self.normal_eqns.covariance_matrix_and_annotations())
-      self.r1 = self.normal_eqns.r1_factor(cutoff_factor=2)
+      self.covariance_matrix_and_annotations=self.normal_eqns.covariance_matrix_and_annotations()
+      self.export_var_covar(self.covariance_matrix_and_annotations)
+      self.r1 = self.normal_eqns.r1_factor(cutoff_factor=4)
       self.r1_all_data = self.normal_eqns.r1_factor()
     except RuntimeError, e:
       if str(e).startswith("cctbx::adptbx::debye_waller_factor_exp: max_arg exceeded"):

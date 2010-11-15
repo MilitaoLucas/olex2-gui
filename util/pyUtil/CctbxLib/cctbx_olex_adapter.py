@@ -84,12 +84,13 @@ class OlexCctbxAdapter(object):
         self.constraints = create_cctbx_xray_structure.builder.constraints
       self._xray_structure = create_cctbx_xray_structure.structure()
 
-      table = ("n_gaussian", "it1992", "wk1995")[0]
+      table = ("n_gaussian", "it1992", "wk1995")[1]
       self._xray_structure.scattering_type_registry(
         table=table, d_min=self.reflections.f_sq_obs.d_min())
       if self.reflections._merge < 4:
         from cctbx.eltbx import wavelengths
-        self._xray_structure.set_inelastic_form_factors(self.wavelength, "sasaki")
+        self._xray_structure.set_inelastic_form_factors(
+          self.wavelength, ("sasaki", "henke")[0])
     return self._xray_structure
 
   def restraints_manager(self):
