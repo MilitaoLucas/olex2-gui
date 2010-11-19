@@ -120,6 +120,7 @@
     <check title="View;Structure;Cell" macro="cell" statedependent="cellvis">
     <check title="View;Structure;Basis" macro="basis" statedependent="basisvis">
     <check title="View;Structure;Hide Structure" macro="showStr" statedependent="strvis">
+    <check title="View;Structure;Show Map" macro="xgrid.visible(true)" statedependent="mapvis">
 
     <item title="Help;About" macro="spy.make_help_box -name='About' -popout='False'">
     <item title="Help;Update options" macro="updateoptions">

@@ -41,6 +41,8 @@
       <arg4 name="filename" def="filename()">
       <arg5 name="base" def="basedir()">
       <arg6 name="ext" def="fileext()">
+      <arg7 name="filefull" def="filefull()">
+      
       \>
     <cmd
       <cmd0  "xgrid.Visible(false)">
@@ -62,9 +64,9 @@
       <cmd13 "storeparam startup file.relativePath(filefull()) true">
       <cmd15 "spy.setAllMainToolbarTabButtons()">
       <cmd16 "if File.Exists(strdir()/filename().vvd) then none else 'spy.SetParam(snum.refinement.original_formula,xf.GetFormula())'">
-      <cmd17 "if and(strcmp(%4,filename()),strcmp(%6,fileext())) then none else 'spy.loadHistory()'">
+      <cmd17 "if and(strcmp(%7,filefull()),strcmp(%6,fileext())) then none else 'spy.loadHistory()'">
       <cmd19 "if and(isplugininstalled(plugin-brukersaint),IsFileType('p4p')) then BSINI else none">
-      <cmd20 cmd1="if strcmp(%4,filename()) then none else 'clear'">
+      <cmd20 cmd1="if strcmp(%7,filefull()) then none else 'clear'">
       <cmd23 "syncbc">
       <cmd24 "spy.reset_file_in_OFS(solution_image.htm)">
       <cmd25 "spy.reset_file_in_OFS(refinement_image.htm)">
