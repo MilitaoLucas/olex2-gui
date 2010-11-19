@@ -293,23 +293,21 @@ class FullMatrixRefine(OlexCctbxAdapter):
       flex.sqrt(self.normal_eqns.covariance_matrix(independent_params=True)\
                 .matrix_packed_u_diagonal()))
     xs = self.xray_structure()
-    non_h_sel = ~(xs.scatterers().extract_scattering_types() == 'H' or
-                  xs.scatterers().extract_scattering_types() == 'D')
-    xs_no_h = xs.select(non_h_sel)
     connectivity_full = self.reparametrisation.connectivity_table
-    connectivity = smtbx.utils.connectivity_table(
-      xs_no_h,
-      conformer_indices=connectivity_full.conformer_indices.select(non_h_sel),
-      sym_excl_indices=connectivity_full.sym_excl_indices.select(non_h_sel))
-    cif_block = xs.as_cif_block()
+    cif_block = xs.as_cif_block(
+      covariance_matrix=self.covariance_matrix_and_annotations.matrix)
     cif_block.add_loop(iotbx.cif.distances_as_cif_loop(
-      connectivity.pair_asu_table,
-      site_labels=xs_no_h.scatterers().extract_labels(),
-      sites_frac=xs_no_h.sites_frac()).loop)
+      connectivity_full.pair_asu_table,
+      site_labels=xs.scatterers().extract_labels(),
+      sites_frac=xs.sites_frac(),
+      covariance_matrix=self.covariance_matrix_and_annotations.matrix,
+      parameter_map=xs.parameter_map()).loop)
     cif_block.add_loop(iotbx.cif.angles_as_cif_loop(
-      connectivity.pair_asu_table,
-      site_labels=xs_no_h.scatterers().extract_labels(),
-      sites_frac=xs_no_h.sites_frac()).loop)
+      connectivity_full.pair_asu_table,
+      site_labels=xs.scatterers().extract_labels(),
+      sites_frac=xs.sites_frac(),
+      covariance_matrix=self.covariance_matrix_and_annotations.matrix,
+      parameter_map=xs.parameter_map()).loop)
     fmt = "%.6f"
     #cif_block['_chemical_formula_sum'] = ' '.join(formatted_type_count_pairs)
     #cif_block['_chemical_formula_weight'] = '%.3f' % flex.sum(
