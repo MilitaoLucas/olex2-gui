@@ -12,6 +12,8 @@ import sys
 import programSettings
 from subprocess import *
 
+import htmlTools
+
 import socket
 import urllib
 import urllib2
@@ -679,7 +681,24 @@ def VoidView(recalculate='0'):
 if haveGUI:
   OV.registerFunction(VoidView)
 
-def MapView():
+def MapView(onoff='on'):
+  if OV.FindValue('map_vis') == False:
+    onoff = 'off'
+  elif OV.FindValue('map_vis') == True:
+    onoff = 'on'
+  
+  img_base = 'button_full-electron_density_map'
+  if onoff == 'off':
+    OV.SetVar('map_vis',False)
+    olex.m('xgrid.visible(false)')
+    use_image= "up=%soff.png" %img_base
+    OV.SetImage("IMG_%s" %img_base.upper(),use_image)
+    return
+  if onoff == 'on':
+    OV.SetVar('map_vis',True)
+    use_image= "up=%son.png" %img_base
+    OV.SetImage("IMG_%s" %img_base.upper(),use_image)
+    
   if OV.IsControl('SNUM_CALCVOID_BUTTON'):
     # set calcvoid button to 'up' state
     olx.SetState('SNUM_CALCVOID_BUTTON','up')
@@ -707,8 +726,9 @@ def MapView():
     olex.m("calcFourier -%s -r=%s %s" %(map_type, map_resolution, mask_val))
   else:
     olex.m("calcFourier -%s -%s -r=%s %s" %(map_type, map_source, map_resolution, mask_val))
-
+  
   SetXgridView()
+  OV.SetVar('map_vis',True)
 
 if haveGUI:
   OV.registerFunction(MapView)

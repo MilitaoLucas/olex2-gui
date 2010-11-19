@@ -6,6 +6,7 @@ Various generic tools for creating and using HTML.
 import os
 import sys
 import olx
+import olex
 
 import time
 #import sys
@@ -435,14 +436,10 @@ def make_table_first_col(help_name=None, popout=False, help_image='large'):
   return html
 
 def make_help_href(name, popout, image='normal'):
-  if image == 'small':
-    image = 'info_tiny_fc.png'
-  else:
-    image = 'info.png'
-  help='''
-<a href="spy.make_help_box -name='%s' -popout='%s'" target="Help me with this">
-  <zimg border="0" src="%s">
-</a>''' %(name, popout, image)
+  help = '''
+  $spy.MakeHoverButton(btn-info@%s,spy.make_help_box -name='%s' -popout='%s')
+  ''' %(name, name, popout)
+  
   return help
 
 def make_input_text_box(d):
@@ -1049,7 +1046,28 @@ def OnStateChange(*args):
 OV.registerCallback('statechange',OnStateChange)
 
 
-def MakeHoverButton(name, cmds, btn_bg='table_firstcol_colour'):
+def MakeHoverButton(name, cmds, onoff = "off", btn_bg='table_firstcol_colour'):
+
+  if name == 'button_full-move_atoms_or_model_disorder':
+    if OV.GetParam('olex2.in_mode') == 'split -r':
+      onoff = 'on'
+      olex.m('cursor(hand)')
+
+  if name == 'button_full-electron_density_map':
+    if OV.FindValue('map_vis') == True:
+      onoff = 'on'
+      
+      
+  if onoff == "on":
+    txt = MakeHoverButtonOn(name, cmds, btn_bg)
+  else:
+    txt = MakeHoverButtonOff(name, cmds, btn_bg)
+  return txt
+  
+OV.registerFunction(MakeHoverButton)
+
+def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
+    
   click_console_feedback = False
   n = name.split("-")
   d = {'bgcolor': OV.GetParam('gui.html.%s' %btn_bg)}
@@ -1089,7 +1107,7 @@ def MakeHoverButton(name, cmds, btn_bg='table_firstcol_colour'):
 >
 '''%d
   return txt
-OV.registerFunction(MakeHoverButton)
+OV.registerFunction(MakeHoverButtonOff)
 
 
 def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):

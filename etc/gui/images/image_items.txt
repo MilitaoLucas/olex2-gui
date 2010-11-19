@@ -63,6 +63,7 @@
 [FULL ROW]
   Run AutoChem
   Move Atoms or Model Disorder
+  Electron Density Map
   Separate Moieties
 
 [TINY BUTTONS]
