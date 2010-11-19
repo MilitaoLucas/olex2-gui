@@ -474,7 +474,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     )
 
   def post_peaks(self, fft_map, max_peaks=5):
-    from  libtbx.itertbx import izip
+    from itertools import izip
     peaks = fft_map.peak_search(
       parameters=maptbx.peak_search_parameters(
         peak_search_level=3,
