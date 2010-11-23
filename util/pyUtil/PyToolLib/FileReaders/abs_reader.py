@@ -85,17 +85,18 @@ class reader(object):
             self._cifItems.setdefault("_exptl_absorpt_correction_T_min", "%s" %min)
             self._cifItems.setdefault("_exptl_absorpt_correction_T_max", "%s" %max)
             self._cifItems.setdefault("ratiominmax", "%s" %ratio)
-          if self._cifItems.get("prog_version") == '2008/1':
-            self._cifItems.setdefault("lambda_correction", "Not present")
-          else:
-            if lines[i][:6] == "Lambda":
-              txt = lines[i].split('=')
-              #txt = string.split(lines[i], "=")
-              self._cifItems.setdefault("lambda_correction", "%s" %txt[1].strip())
+## Not sure why this was in here. The lambda correction value is present in this version!
+#          if self._cifItems.get("prog_version") == '2008/1':
+#            self._cifItems.setdefault("lambda_correction", "Not present")
+          if lines[i][:6] == "Lambda":
+            txt = lines[i].split('=')
+            #txt = string.split(lines[i], "=")
+            self._cifItems.setdefault("lambda_correction", "%s" %txt[1].strip())
         except:
           #i += 1
           pass
         i += 1
+      self._cifItems.setdefault("lambda_correction", "Not present")
       self._cifItems.setdefault("_exptl_absorpt_correction_T_max", "%s" %(1))
       self._cifItems.setdefault("_exptl_absorpt_correction_type", "multi-scan")
 
