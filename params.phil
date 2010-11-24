@@ -300,6 +300,7 @@ snum {
       .type = bool
     resolution = 0.1
       .type = float
+      
   }
 
   calcvoid {
@@ -325,6 +326,7 @@ snum {
     update_cif = False
       .type = bool
   }
+  
 
   olex_conres = RRINGS
     .type = str
@@ -361,6 +363,12 @@ olex2
     .type = str
   main_toolbar_vline_position = 100
     .type = int
+  eden_vis = False
+    .type = bool
+  void_vis = False
+    .type = bool
+  mask_vis = False
+    .type = bool
 }
 
 graphs {

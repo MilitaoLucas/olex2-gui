@@ -4,11 +4,7 @@
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td>
-    <a
-      href="spy.make_help_box -name='electron-density' -popout='True'"
-      target="Help me with this">
-      <zimg border="0" src="info.png">
-    </a>
+<!-- #include tool-help-button gui\blocks\tool-help-button.htm;help_ext=electron-density;1; -->
   </td>
   <td>
     <input
@@ -18,7 +14,7 @@
       name="SET_SNUM_MAP_TYPE"
       items='diff;fcalc;2Fo-Fc<-tomc;fobs'
       value="$spy.GetParam(snum.map.type)"
-      width="20%"
+      width="15%"
       onchange="
 spy.SetParam(snum.map.type,GetValue(SET_SNUM_MAP_TYPE))>>
 spy.MapView()>>
@@ -35,21 +31,22 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
       name="SET_SNUM_MAP_SOURCE"
       items='olex;fcf;'
       value="$spy.GetParam(snum.map.source)"
-      width="20%"
+      width="15%"
       onchange="
 spy.SetParam(snum.map.source,GetValue(SET_SNUM_MAP_SOURCE))>>
 spy.MapView()>>
 html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)')"
       label="%Source% "
       valign="center"
+      height="$spy.GetParam(gui.html.combo_height)"
   >
   </td>
   <td>
     <input
       type="text"
       name = "SET_SNUM_MAP_RESOLUTION"
-      width="20%"
-      height="18"
+      width="15%"
+      height="$spy.GetParam(gui.html.input_height)"
       label="%Res%/&Aring "
       valign="center"
       bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
@@ -58,36 +55,29 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
       onleave="spy.SetParam(snum.map.resolution,GetValue(SET_SNUM_MAP_RESOLUTION))"
     >
   </td>
-  <td colspan = '1'>
+  <td colspan = '1' valign='bottom'>
     <input
       bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
       fgcolor="$spy.GetParam(gui.html.font_colour)"
       type="checkbox"
       value="%Mask%"
-      valign="center"
+      valign="bottom"
       name="SNUM_MAP_MASK"
       checked="$spy.GetParam(snum.map.mask)"
-      height='16'
-      width='20%'
+      height="$spy.GetParam(gui.html.input_height)"
+      width='20%' 
       oncheck="spy.SetParam(snum.map.mask,True)"
       onuncheck="spy.SetParam(snum.map.mask,False)">
   </td>
+  <td colspan='1' valign='bottom' align="center">
+$spy.MakeHoverButton(button_small-map,spy.MapView\())
+  </td>
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
 <tr>
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td colspan='1' align="center">
-    <input
-      type="button"
-      name="SNUM_MAP_BUTTON"
-      value="%Calculate%"
-      width='$eval(html.clientwidth(self)-35)'
-      manage
-      ondown="setlabel(SNUM_MAP_BUTTON,%Delete Map%)>>spy.MapView()>>UpdateHtml"
-      onup="setlabel(SNUM_MAP_BUTTON,%Calculate%)>>xgrid.visible(false)"
-    >
-  </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
