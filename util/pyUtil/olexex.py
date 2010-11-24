@@ -663,7 +663,10 @@ def CheckBoxValue(var, def_val='false'):
 if haveGUI:
   OV.registerFunction(CheckBoxValue)
 
-def VoidView(recalculate='0'):
+def VoidView(recalculate='0', onoff=None):
+  img_bases = ['button_small-void']
+  if deal_with_map_buttons(onoff, img_bases, 'void'):
+    return
   if OV.IsControl('SNUM_MAP_BUTTON'):
     # set electron density map button to 'up' state
     olx.SetState('SNUM_MAP_BUTTON','up')
@@ -677,28 +680,30 @@ def VoidView(recalculate='0'):
     cmd += " -p"
   olex.m(cmd)
   SetXgridView()
+  OV.SetParam('olex2.void_vis',True)
+
 
 if haveGUI:
   OV.registerFunction(VoidView)
 
-def MapView(onoff='on'):
-  if OV.FindValue('map_vis') == False:
-    onoff = 'off'
-  elif OV.FindValue('map_vis') == True:
-    onoff = 'on'
-  
-  img_base = 'button_full-electron_density_map'
-  if onoff == 'off':
-    OV.SetVar('map_vis',False)
-    olex.m('xgrid.visible(false)')
-    use_image= "up=%soff.png" %img_base
-    OV.SetImage("IMG_%s" %img_base.upper(),use_image)
+def MaskView(onoff=None):
+  img_bases = ['button_small-mask']
+  if deal_with_map_buttons(onoff, img_bases, 'mask'):
     return
-  if onoff == 'on':
-    OV.SetVar('map_vis',True)
-    use_image= "up=%son.png" %img_base
-    OV.SetImage("IMG_%s" %img_base.upper(),use_image)
-    
+  olex.m('spy.OlexCctbxMasks()')
+  SetXgridView()
+  OV.SetVar('olex2.mask_vis',True)
+  OV.UpdateHtml()
+if haveGUI:
+  OV.registerFunction(MaskView)
+
+  
+  
+def MapView(onoff=None):
+  img_bases = ['button_full-electron_density_map', 'button_small-map']
+  if deal_with_map_buttons(onoff, img_bases, 'eden'):
+    return
+  
   if OV.IsControl('SNUM_CALCVOID_BUTTON'):
     # set calcvoid button to 'up' state
     olx.SetState('SNUM_CALCVOID_BUTTON','up')
@@ -728,11 +733,38 @@ def MapView(onoff='on'):
     olex.m("calcFourier -%s -%s -r=%s %s" %(map_type, map_source, map_resolution, mask_val))
   
   SetXgridView()
-  OV.SetVar('map_vis',True)
+  OV.SetVar('olex2.eden_vis',True)
 
 if haveGUI:
   OV.registerFunction(MapView)
 
+def deal_with_map_buttons(onoff, img_bases, map_type):
+  tl = ['eden', 'void', 'mask']
+  for item in tl:
+    if item != map_type:
+      OV.SetParam('olex2.%s_vis' %item, False)
+  
+  if not onoff:
+    if OV.GetParam('olex2.%s_vis' %map_type) == False:
+      onoff = 'on'
+    elif OV.GetParam('olex2.%s_vis' %map_type) == True:
+      onoff = 'off'
+  
+  if onoff == 'off':
+    OV.SetParam('olex2.%s_vis' %map_type,False)
+    olex.m('xgrid.visible(false)')
+    for img_base in img_bases:
+      use_image= "up=%soff.png" %img_base
+      OV.SetImage("IMG_%s" %img_base.upper(),use_image)
+    retVal = True
+  if onoff == 'on':
+    OV.SetParam('olex2.%s_vis' %map_type,True)
+    for img_base in img_bases:
+      use_image= "up=%son.png" %img_base
+      OV.SetImage("IMG_%s" %img_base.upper(),use_image)
+    retVal = False
+  return retVal
+  
 def SetXgridView():
   view = OV.GetParam("snum.xgrid.view")
   extended = OV.GetParam("snum.xgrid.extended")

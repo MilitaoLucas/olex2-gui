@@ -59,6 +59,9 @@
   Clear
   Mode
   Next
+  Map
+  Mask
+  Void
 
 [FULL ROW]
   Run AutoChem
