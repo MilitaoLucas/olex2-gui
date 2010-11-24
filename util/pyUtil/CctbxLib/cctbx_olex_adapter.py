@@ -387,7 +387,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
 
 OV.registerFunction(OlexCctbxMasks)
 
-class TwinAnalysis:
+class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
   def __init__(self):
     OlexCctbxAdapter.__init__(self)
