@@ -2694,7 +2694,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       bg_colour = '#ababab'
     elif state == "hover":
 #      grad_colour = IT.adjust_colour(grad_colour, luminosity = 1.02)
-      grad_colour = IT.adjust_colour(grad_colour, luminosity = 0.95)
+      grad_colour = IT.adjust_colour(grad_colour, luminosity = 0.98)
 #      font_colour = IT.adjust_colour(highlight_colour, luminosity = 0.9)
     elif state == "hoveron":
       grad_colour = IT.adjust_colour(grad_colour, luminosity = 0.95)
@@ -2734,7 +2734,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       shadow = False
       buttonmark = True
       if state == "on":
-        grad_colour = OV.GetParam('gui.html.highlight_colour').rgb
+        grad_colour = highlight_colour
+      elif state == "hover":
+        grad_colour = IT.adjust_colour(highlight_colour, luminosity = 0.95)
 
     elif item_type == 'tinybutton':
       underground = OV.GetParam('gui.html.table_bg_colour').rgb

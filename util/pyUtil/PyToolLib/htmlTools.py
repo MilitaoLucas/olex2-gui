@@ -1045,20 +1045,61 @@ def OnStateChange(*args):
 
 OV.registerCallback('statechange',OnStateChange)
 
+def _check_modes_and_states(name):
+  ## Modes
+  d = {
+    'button-move_near':'movesel',
+    'button-copy_near':'movesel -c=',
+    'button-grow_mode':'grow',
+    'button_full-move_atoms_or_model_disorder':'split -r=EADP',
+    'button_full-move_atoms_or_model_disorder':'split',
+    'button_small-name':'name',
+    'button-fix_u':'fixu',
+    'button-fix_xyz':'fixxyz',
+    'button-set_occu':'occu',
+  }
+  if name in d:
+    if 'near' in name:
+      mode = OV.GetParam('olex2.full_mode')
+    else:
+      mode = OV.GetParam('olex2.short_mode')
+    if mode == d.get(name):
+      return True
+  ##States
+  d = {
+    'button-show_basis':'basisvis',
+    'button-show_cell':'cellvis',
+    'button-tooltips':'htmlttvis',
+    'button-help':'helpvis',
+  }
+  if name in d:
+    state = olx.CheckState(d.get(name))
+    if state == 'true':
+      return True
 
-def MakeHoverButton(name, cmds, onoff = "off", btn_bg='table_firstcol_colour'):
-
+  ## Hand-grafted buttons
   if name == 'button_full-move_atoms_or_model_disorder':
     if OV.GetParam('olex2.in_mode') == 'split -r':
-      onoff = 'on'
-      olex.m('cursor(hand)')
+      return True
+  buttons = ['button_full-electron_density_map', 'button_small-map']
+  if name in buttons:
+    if OV.GetParam('olex2.eden_vis') == True:
+      return True
+  buttons = ['button_small-void']
+  if name in buttons:
+    if OV.GetParam('olex2.void_vis') == True:
+      return True
+  buttons = ['button_small-mask']
+  if name in buttons:
+    if OV.GetParam('olex2.mask_vis') == True:
+      return True
+  return False
 
-  if name == 'button_full-electron_density_map':
-    if OV.FindValue('map_vis') == True:
-      onoff = 'on'
+
+def MakeHoverButton(name, cmds, onoff = "off", btn_bg='table_firstcol_colour'):
+  on = _check_modes_and_states(name)
       
-      
-  if onoff == "on":
+  if on:
     txt = MakeHoverButtonOn(name, cmds, btn_bg)
   else:
     txt = MakeHoverButtonOff(name, cmds, btn_bg)
