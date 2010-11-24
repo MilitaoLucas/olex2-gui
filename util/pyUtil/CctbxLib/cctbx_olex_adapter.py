@@ -193,7 +193,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     import time
     t1 = time.time()
     from smtbx.ab_initio import charge_flipping
-    from libtbx.itertbx import izip
+    from itertools import izip
     from libtbx import group_args
 
     t2 = time.time()
@@ -387,7 +387,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
 
 OV.registerFunction(OlexCctbxMasks)
 
-class OlexCctbxTwinLaws(OlexCctbxAdapter):
+class TwinAnalysis:
 
   def __init__(self):
     OlexCctbxAdapter.__init__(self)
