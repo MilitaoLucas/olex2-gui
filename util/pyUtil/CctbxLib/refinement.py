@@ -491,8 +491,12 @@ class FullMatrixRefine(OlexCctbxAdapter):
         olx.xf_au_SetAtomU(id, "0.06")
       if i == 100:
         break
+    basis = olx.gl_Basis()
+    frozen = olx.Freeze(True)
     olx.xf_EndUpdate()
     olx.Compaq('-q')
+    olx.gl_Basis(basis)
+    olx.Freeze(frozen)
     OV.Refresh()
 
   def show_summary(self):
