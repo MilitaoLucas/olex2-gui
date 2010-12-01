@@ -279,6 +279,9 @@ class OlexRefinementModel(object):
   def getCell(self):
     return [self._cell[param][0] for param in ('a','b','c','alpha','beta','gamma')]
 
+  def getCellErrors(self):
+    return [self._cell[param][1] for param in ('a','b','c','alpha','beta','gamma')]
+
   def numberAtoms(self):
     return sum(atom['occu'][0] for atom in self.atoms())
 
@@ -697,13 +700,13 @@ def MaskView(onoff=None):
 if haveGUI:
   OV.registerFunction(MaskView)
 
-  
-  
+
+
 def MapView(onoff=None):
   img_bases = ['button_full-electron_density_map', 'button_small-map']
   if deal_with_map_buttons(onoff, img_bases, 'eden'):
     return
-  
+
   if OV.IsControl('SNUM_CALCVOID_BUTTON'):
     # set calcvoid button to 'up' state
     olx.SetState('SNUM_CALCVOID_BUTTON','up')
@@ -731,7 +734,7 @@ def MapView(onoff=None):
     olex.m("calcFourier -%s -r=%s %s" %(map_type, map_resolution, mask_val))
   else:
     olex.m("calcFourier -%s -%s -r=%s %s" %(map_type, map_source, map_resolution, mask_val))
-  
+
   SetXgridView()
   OV.SetVar('olex2.eden_vis',True)
 
@@ -743,13 +746,13 @@ def deal_with_map_buttons(onoff, img_bases, map_type):
   for item in tl:
     if item != map_type:
       OV.SetParam('olex2.%s_vis' %item, False)
-  
+
   if not onoff:
     if OV.GetParam('olex2.%s_vis' %map_type) == False:
       onoff = 'on'
     elif OV.GetParam('olex2.%s_vis' %map_type) == True:
       onoff = 'off'
-  
+
   if onoff == 'off':
     OV.SetParam('olex2.%s_vis' %map_type,False)
     olex.m('xgrid.visible(false)')
@@ -764,7 +767,7 @@ def deal_with_map_buttons(onoff, img_bases, map_type):
       OV.SetImage("IMG_%s" %img_base.upper(),use_image)
     retVal = False
   return retVal
-  
+
 def SetXgridView():
   view = OV.GetParam("snum.xgrid.view")
   extended = OV.GetParam("snum.xgrid.extended")
