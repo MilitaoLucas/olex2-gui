@@ -312,7 +312,8 @@ class OlexCctbxMasks(OlexCctbxAdapter):
           self.initialise_reflections()
       xs = self.xray_structure()
       fo_sq = self.reflections.f_sq_obs_merged.average_bijvoet_mates()
-      mask = masks.mask(xs, fo_sq)
+      use_complete_set = OV.GetParam('snum.masks.use_complete_set')
+      mask = masks.mask(xs, fo_sq, use_complete_set=use_complete_set)
       self.time_compute = time_log("computation of mask").start()
       mask.compute(solvent_radius=self.params.solvent_radius,
                    shrink_truncation_radius=self.params.shrink_truncation_radius,
