@@ -62,6 +62,7 @@
   Map
   Mask
   Void
+  HFIX
 
 [FULL ROW]
   Run AutoChem
