@@ -1,18 +1,132 @@
-p:Olex2 will now go back to the original start screen.
+﻿#set:bg_colour=gui.html.bg_colour
+#set:font_colour=gui.html.font_colour
+
+set:font_colour=#ffffff
+set:font_colour_code=#aaaaff
+set:font_colour_bold=gui.html.highlight_colour
+
 c:itemstate index* 0
 c:itemstate index-home 1
 c:itemstate tab* 2
-p:The sample structure 'sucrose' will now be loaded from the 'Start' tool.
+c:lines 10
+c:showQ True
+
+
+p:欢迎 Welcome to this introductory tutorial. To get the most out of it, please read this text carefully and whey you are done press the <b>Next</b> button - or simply hit the Return key!<br>
+
+p:We suggest that you go through the whole tutorial first, then run it again and exit at a suitable point from which you can try and do for yourself what you have learned from previous times you have gone through the tutorial.
+
+p:In this tutorial, we will be solving and refining one of the sample structures that come with Olex2 - Sucrose.
+
+p:We load the structure from the <b>Start</b> tool. The tool will be highlighted after you hit return.
 h:h2-start
 c:reap 'DataDir()/samples/sucrose/sucrose.res'
-p:The structure will then be reset by typing 'reset'
-c:reset
-p:By clicking on the 'Work' tab, we get access to the tools we need
+c:mpln -n
+c:refresh
+
+p:By clicking on the <b>Work</b> tab, we get access to the main tools:
 h:tab-work
 c:itemstate index* 0
+c:itemstate logo 0
 c:itemstate index-work 1
+c:itemstate info-title 1
+c:itemstate solve-settings 2
+c:itemstate refine-settings 2
+c:itemstate report-settings 2
 c:itemstate tab* 2
-p:And then solved by clicking on the 'solve' button
-h:cbtn-solve
+
+p:Structure <b>Solution</b>...
+h:btn-solve;1
+
+p:Structure <b>Refinement</b>...
+h:btn-refine;1
+
+p:... and make <b>Reports</b>.
+h:btn-report;1
+
+p:For example, we can solve the structure by typing <c>solve</c> or by clicking the <b>Solve</b> button. We will do this now.
+h:btn-solve;1
 c:solve
+c:rota 1 2 3 100 0.01
+c:refresh
+
+p:We can tidy this solution by typing <c>clean</c> or by pressing the <b>Clean</b> button.
+h:toolbar-tidy
+c:clean
+c:compaq -a
+
+p:Let's press the <b>Refine</b> button (or type <c>refine</c> and refine what we've got so far.
+h:btn-refine;1
+c:refine
+
+p:With the <b>Uiso Slider</b> in the <b>Toolbox Work</b> we can select all those atoms that look 'too small'
+c:itemstate work-main-toolbar 1
+c:html.setBG(UISO_SELECT_SLIDER,#ff0000)
+c:html.setvalue(UISO_SELECT_SLIDER,-7)
+c:html.setvalue(UisoSelectVal,<0.035)
+c:sel atoms where xatom.uiso < 0.035&&xatom.type!='Q'
+c:refresh
+
+p:... and make them into Oxygen by pressing the <b>O</b> button.
+h:btn-elementO
+c:name sel O
+c:refresh
+
+p:Refine this again...
+c:refine
+
+p:Now it's time to make everything <b>anistropic</b>. Type <c>anis</c> or click on the <b>ANIS</b> button.
+h:toolbar-anis
+c:anis
+c:refine
+
+p:... clean it ...
+c:clean
+
+p:Let's add some hydrogen atoms to this. Type <c>hadd</c> or click on the <b>ADD H</b> button:
+h:button_small-add_h
+c:hadd
+c:refine
+
+p:You can toggle the display of electron density peaks (Q-peaks) by repeatedly pressing the <b>Q</b> button or by <c>CTRL+Q</c>
+h:toolbar-Q
+c:showQ False
+
+##
+
 p:Of course, we can change the settings of the solution program.
+
+p:We do this, by clicking the <b>Solution Settings</b> Button.
+h:cbtn-solve
+c:itemstate solve-settings 1
+
+
+p:Here we can choose solution programs and settings ...
+h:SET_snum_solution_PROGRAM_bg
+h:SET_snum_solution_METHOD_bg
+
+p:... set the <b>Formula</b> and can determine the <b>space group</b>.
+h:SET_SNUM_REFINEMENT_FORMULA_bg
+h:SET_SNUM_REFINEMENT_SPACE_GROUP_bg
+
+p:When you click on <b>Suggest SG</b> link (or type <c>sg</c>, watch what happens!
+c:sg
+c:refresh
+
+p:In order to see all the console output, you can type <c>lines -1</c>.
+c:lines -1
+c:refresh
+
+p:If you type <c>text</c> or press the little text icon, you will get a 'transcript' of the console in your text editor
+h:toolbar-text
+c:text
+c:refresh
+
+p:To show only 10 lines, type <c>lines 10</c>
+c:lines 10
+c:refresh
+c:itemstate solve-settings 2
+c:rota 1 2 3 0 0
+
+p:The End
+

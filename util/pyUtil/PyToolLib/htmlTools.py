@@ -6,6 +6,7 @@ Various generic tools for creating and using HTML.
 import os
 import sys
 import olx
+import olex
 
 import time
 #import sys
@@ -25,6 +26,8 @@ current_tooltip_number = 0
 
 global HaveModeBox
 HaveModeBox = False
+
+global hover_buttons
 
 def makeHtmlTable(list):
   """ Pass a list of dictionaries, with one dictionary for each table row.
@@ -435,14 +438,10 @@ def make_table_first_col(help_name=None, popout=False, help_image='large'):
   return html
 
 def make_help_href(name, popout, image='normal'):
-  if image == 'small':
-    image = 'info_tiny_fc.png'
-  else:
-    image = 'info.png'
-  help='''
-<a href="spy.make_help_box -name='%s' -popout='%s'" target="Help me with this">
-  <zimg border="0" src="%s">
-</a>''' %(name, popout, image)
+  help = '''
+  $spy.MakeHoverButton(btn-info@%s,spy.make_help_box -name='%s' -popout='%s')
+  ''' %(name, name, popout)
+  
   return help
 
 def make_input_text_box(d):
@@ -900,6 +899,7 @@ def OnModeChange(*args):
     'name':'button_small-name',
     'fixu':'button-fix_u',
     'fixxyz':'button-fix_xyz',
+    'hfix':'button_small-hfix',
     'occu':'button-set_occu',
     'off':None
   }
@@ -925,6 +925,7 @@ def OnModeChange(*args):
   modequalifiers = modequalifiers.strip("=")
   mode = mode.strip()
   mode_disp = mode_disp.strip()
+  mode_short = mode_disp
 
   if 'name -t=' in mode:
     element = mode.split('=')[1]
@@ -937,6 +938,9 @@ def OnModeChange(*args):
     active_mode = 'button_small-name'
   elif 'grow' in mode:
     active_mode = 'button-grow_mode'
+  elif 'hfix' in mode:
+    active_mode = 'button_small-hfix'
+    mode_short = 'hfix'
   else:
     active_mode = d.get(mode, None)
 
@@ -953,12 +957,10 @@ def OnModeChange(*args):
     OV.SetParam('olex2.in_mode',None)
     OV.cmd("html.hide pop_%s" %name)
     if not last_mode: return
-    use_image = "%soff.png" %last_mode
     control = "IMG_%s" %last_mode.upper()
     if OV.IsControl(control):
-      OV.SetImage(control,use_image)
-    copy_to = "%s.png" %last_mode
-    OV.CopyVFSFile(use_image, copy_to,2)
+      OV.SetImage(control,"up=%soff.png" %last_mode)
+      OV.SetImage(control,"hover=%shover.png" %last_mode)
     OV.cmd("html.hide pop_%s" %name)
     last_mode = None
     OV.SetParam('olex2.in_mode',None)
@@ -969,25 +971,22 @@ def OnModeChange(*args):
     OV.SetParam('olex2.full_mode',mode)
     makeHtmlBottomPop({'replace':mode_disp, 'name':'pop_mode', 'modequalifiers':modequalifiers}, pb_height=50)
     if active_mode:
-      use_image= "%son.png" %active_mode
       control = "IMG_%s" %active_mode.upper()
       if OV.IsControl(control):
-        OV.SetImage(control,use_image)
-      copy_to = "%s.png" %active_mode
-      OV.CopyVFSFile(use_image, copy_to,1)
+        OV.SetImage(control,"up=%son.png" %active_mode)
+        OV.SetImage(control,"hover=%son.png" %active_mode)
     if last_mode:
       use_image = "%soff.png" %last_mode
       control = "IMG_%s" %last_mode.upper()
       if OV.IsControl(control):
-        OV.SetImage(control,use_image)
-      copy_to = "%s.png" %last_mode
-      OV.CopyVFSFile(use_image, copy_to,2)
+        OV.SetImage(control,"up=%son.png" %active_mode)
+        OV.SetImage(control,"hover=%son.png" %active_mode)
 
     last_mode = active_mode
     OV.SetParam('olex2.in_mode',mode.split("=")[0])
-    OV.SetParam('olex2.short_mode',mode_disp)
+    OV.SetParam('olex2.short_mode',mode_short)
     last_mode = active_mode
-
+  OV.Refresh()
 
 
 ##  if active_mode == last_mode:
@@ -1041,15 +1040,186 @@ def OnStateChange(*args):
 
   state = olx.CheckState(name)
   if state == "true":
-    use_image= "%son.png" %img_base
+    use_image= "up=%son.png" %img_base
+    hover_image = "hover=%son.png" %img_base
   else:
-    use_image = "%soff.png" %img_base
+    use_image = "up=%soff.png" %img_base
+    hover_image = "hover=%shover.png" %img_base
   OV.SetImage("IMG_%s" %img_base.upper(),use_image)
-  copy_to = "%s.png" %img_base
-  OV.CopyVFSFile(use_image, copy_to,2)
+  OV.SetImage("IMG_%s" %img_base.upper(),hover_image)
+  OV.Refresh()
   return True
 
 OV.registerCallback('statechange',OnStateChange)
+
+def _check_modes_and_states(name):
+  ## Modes
+  d = {
+    'button-move_near':'movesel',
+    'button-copy_near':'movesel -c=',
+    'button-grow_mode':'grow',
+    'button_full-move_atoms_or_model_disorder':'split -r=EADP',
+    'button_full-move_atoms_or_model_disorder':'split',
+    'button_small-name':'name',
+    'button-fix_u':'fixu',
+    'button-fix_xyz':'fixxyz',
+    'button-set_occu':'occu',
+    'button_small-hfix':'hfix',
+  }
+  if name in d:
+    if 'near' in name:
+      mode = OV.GetParam('olex2.full_mode')
+    else:
+      mode = OV.GetParam('olex2.short_mode')
+      if mode:
+        if 'hfix' in mode: mode = "hfix"
+    if mode == d.get(name):
+      return True
+  ##States
+  d = {
+    'button-show_basis':'basisvis',
+    'button-show_cell':'cellvis',
+    'button-tooltips':'htmlttvis',
+    'button-help':'helpvis',
+  }
+  if name in d:
+    state = olx.CheckState(d.get(name))
+    if state == 'true':
+      return True
+
+  ## Hand-crafted buttons
+  if name == 'button_full-move_atoms_or_model_disorder':
+    if OV.GetParam('olex2.in_mode') == 'split -r':
+      return True
+  buttons = ['button_full-electron_density_map', 'button_small-map']
+  if name in buttons:
+    if OV.GetParam('olex2.eden_vis') == True:
+      return True
+  buttons = ['button_small-void']
+  if name in buttons:
+    if OV.GetParam('olex2.void_vis') == True:
+      return True
+  buttons = ['button_small-mask']
+  if name in buttons:
+    if OV.GetParam('olex2.mask_vis') == True:
+      return True
+  return False
+
+
+def MakeHoverButton(name, cmds, onoff = "off", btn_bg='table_firstcol_colour'):
+  global hover_buttons
+  hover_buttons = OV.GetParam('olex2.hover_buttons')
+  on = _check_modes_and_states(name)
+      
+  if on:
+    txt = MakeHoverButtonOn(name, cmds, btn_bg)
+  else:
+    txt = MakeHoverButtonOff(name, cmds, btn_bg)
+  return txt
+  
+OV.registerFunction(MakeHoverButton)
+
+def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
+  global hover_buttons
+  click_console_feedback = False
+  n = name.split("-")
+  d = {'bgcolor': OV.GetParam('gui.html.%s' %btn_bg)}
+  target=n[1]
+  if '@' in name:
+    tool_img = name.split('@')[0]
+  else:
+    tool_img = name.lower()
+  d.setdefault('tool_img', tool_img)
+  d.setdefault('namelower', name.lower())
+  d.setdefault('nameupper', name.upper())
+  #d.setdefault('bt', n[0])
+  #d.setdefault('bn', n[1])
+  #d.setdefault('BT', n[0].upper())
+  #d.setdefault('BN', n[1].upper())
+  d.setdefault('cmds', cmds.replace("\(","("))
+  d.setdefault('target', OV.TranslatePhrase("%s-target" %target))
+  if click_console_feedback:
+    d.setdefault('feedback',">>echo '%(target)s: OK'" %target)
+  else:
+    d.setdefault('feedback',"")
+  on = "on"
+  off = "off"
+  hover = "hover"
+  down = "off"
+  
+  if OV.GetParam('gui.image_highlight') == name:
+    on = "highlight"
+    off = "highlight"
+  if not hover_buttons:
+    on = "on"
+    off = "off"
+    hover = "off"
+  d.setdefault('on', on)
+  d.setdefault('off', off)
+  d.setdefault('down', down)
+  d.setdefault('hover', hover)
+  txt = '''
+<input
+  name=IMG_%(nameupper)s
+  type="button"
+  image="up=%(tool_img)s%(off)s.png,down=%(tool_img)s%(down)s.png,hover=%(tool_img)s%(hover)s.png",disable=%(tool_img)sdisable.png"
+  hint="%(target)s"
+  onclick="%(cmds)s%(feedback)s"
+  bgcolor=%(bgcolor)s
+>
+'''%d
+  return txt
+OV.registerFunction(MakeHoverButtonOff)
+
+
+def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
+  global hover_buttons
+  click_console_feedback = False
+  n = name.split("-")
+  d = {'bgcolor': OV.GetParam('gui.html.%s' %btn_bg)}
+  target=n[1]
+  if '@' in name:
+    tool_img = name.split('@')[0]
+  else:
+    tool_img = name.lower()
+  d.setdefault('tool_img', tool_img)
+  d.setdefault('namelower', name.lower())
+  d.setdefault('nameupper', name.upper())
+  d.setdefault('cmds', cmds.replace("\(","("))
+  d.setdefault('target', OV.TranslatePhrase("%s-target" %target))
+  if click_console_feedback:
+    d.setdefault('feedback',">>echo '%(target)s: OK'" %target)
+  else:
+    d.setdefault('feedback',"")
+  on = "on"
+  off = "off"
+  hover = "hoveron"
+  down = "on"
+  
+  if OV.GetParam('gui.image_highlight') == name:
+    on = "highlight"
+    off = "highlight"
+  if not hover_buttons:
+    on = "on"
+    off = "off"
+    hover = "on"
+  d.setdefault('on', on)
+  d.setdefault('off', off)
+  d.setdefault('down', down)
+  d.setdefault('hover', hover)
+  
+  txt = '''
+<input
+  name=IMG_%(nameupper)s
+  type="button"
+  image="up=%(tool_img)s%(on)s.png,down=%(tool_img)s%(down)s.png,hover=%(tool_img)s%(hover)s.png",disable=%(tool_img)sdisable.png"
+  hint="%(target)s"
+  onclick="%(cmds)s%(feedback)s"
+  bgcolor=%(bgcolor)s
+>
+'''%d
+  return txt
+OV.registerFunction(MakeHoverButtonOn)
 
 
 def MakeActiveGuiButton(name,cmds,toolname=""):

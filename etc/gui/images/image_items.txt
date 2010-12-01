@@ -56,10 +56,18 @@
   Name
   Ellipsoids
   Add H
+  Clear
+  Mode
+  Next
+  Map
+  Mask
+  Void
+  HFIX
 
 [FULL ROW]
   Run AutoChem
   Move Atoms or Model Disorder
+  Electron Density Map
   Separate Moieties
 
 [TINY BUTTONS]

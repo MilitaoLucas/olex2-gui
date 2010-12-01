@@ -4,18 +4,14 @@
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td>
-    <a
-      href="spy.make_help_box -name='calculate-voids' -popout='True'"
-      target="Help me with this">
-      <zimg border="0" src="info.png">
-    </a>
+<!-- #include tool-help-button gui\blocks\tool-help-button.htm;help_ext=calculate-voids;1; -->
   </td>
   <td>
     <input
       type="text"
       name = "SET_SNUM_CALCVOID_RESOLUTION"
-      width="20%"
-      height="18"
+      width="15%"
+      height="$spy.GetParam(gui.html.input_height)"
       label="%Res%/&Aring "
       valign="center"
       bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
@@ -28,8 +24,8 @@
     <input
       type="text"
       name = "SET_SNUM_CALCVOID_DISTANCE"
-      width="20%"
-      height="18"
+      width="15%"
+      height="$spy.GetParam(gui.html.input_height)"
       label="%Distance%/&Aring "
       valign="center"
       bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
@@ -44,13 +40,16 @@
       fgcolor="$spy.GetParam(gui.html.font_colour)"
       type="checkbox"
       value="%Precise%"
-      valign="center"
+      valign="bottom"
       name="SNUM_CALCVOID_PRECISE"
       checked="$spy.GetParam(snum.calcvoid.precise)"
-      height='16'
-      width='20%'
+      height="$spy.GetParam(gui.html.input_height)"
+      width='15%'
       oncheck="spy.SetParam(snum.calcvoid.precise,True)"
       onuncheck="spy.SetParam(snum.calcvoid.precise,False)">
+  </td>
+  <td>
+$spy.MakeHoverButton(button_small-void,spy.VoidView\())
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
@@ -58,19 +57,5 @@
 <tr>
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td colspan = '2' align="center">
-    <input
-      type="button"
-      name="SNUM_CALCVOID_BUTTON"
-      value="Calculate Voids"
-      width='$eval(html.clientwidth(self)-35)'
-      manage
-      ondown="setlabel(SNUM_CALCVOID_BUTTON,%Delete Void Display%)>>
-spy.VoidView()>>
-UpdateHtml"
-      onup="setlabel(SNUM_CALCVOID_BUTTON,%Calculate Voids%)>>
-xgrid.visible(false)"
-  >
-  </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>

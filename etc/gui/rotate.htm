@@ -8,45 +8,45 @@
     <b>%Rotate%:</b>
   </td>
   <td name=SPIN_ROTATION_X align='left'>
-    $spy.MakeActiveGuiButton(button_tiny-:x,'rota 1 eval\(GetValue\(rx)*-1)')
+    $spy.MakeHoverButton(button_tiny-:x,rota 1 eval\(GetValue\(rx)*-1))
     &thinsp;
-    <input 
-      type="spin" 
-      name = "rx" 
+    <input
+      type="spin"
+      name = "rx"
       width="45"
       height="$spy.GetParam(gui.html.spin_height)"
       value="10"
     >
     &thinsp;
-    $spy.MakeActiveGuiButton(button_tiny-x:,'rota 1 getvalue\(rx)')
+    $spy.MakeHoverButton(button_tiny-x:,rota 1 getvalue\(rx))
   </td>
   <td name=SPIN_ROTATION_Y align='center'>
-    $spy.MakeActiveGuiButton(button_tiny-:y,'rota 2 eval\(GetValue\(ry)*-1)')
+    $spy.MakeHoverButton(button_tiny-:y,rota 2 eval\(GetValue\(ry)*-1))
     &thinsp;
-    <input 
-      type="spin" 
-      name = "ry" 
-      width="45"  
+    <input
+      type="spin"
+      name = "ry"
+      width="45"
       height="$spy.GetParam(gui.html.spin_height)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
       value="10"
     >
     &thinsp;
-    $spy.MakeActiveGuiButton(button_tiny-y:,'rota 2 getvalue\(ry)')
+    $spy.MakeHoverButton(button_tiny-y:,rota 2 getvalue\(ry))
   </td>
   <td name=SPIN_ROTATION_Z align='right'>
-    $spy.MakeActiveGuiButton(button_tiny-:z,'rota 3 eval\(GetValue\(rz)*-1)')
+    $spy.MakeHoverButton(button_tiny-:z,rota 3 eval\(GetValue\(rz)*-1))
     &thinsp;
-    <input 
-      type="spin" 
-      name = "rz" 
-      width="45" 
+    <input
+      type="spin"
+      name = "rz"
+      width="45"
       height="$spy.GetParam(gui.html.spin_height)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
       value="10"
     >
     &thinsp;
-    $spy.MakeActiveGuiButton(button_tiny-z:,'rota 3 getvalue\(rz)')
+    $spy.MakeHoverButton(button_tiny-z:,rota 3 getvalue\(rz))
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
@@ -59,69 +59,69 @@
     <b>%Auto%:</b>
   </td>
   <td name=CHECK_X>
-    <input 
-      type="checkbox"	
+    <input
+      type="checkbox"
       height="$spy.GetParam(gui.html.input_height)"
-      name = "x" 
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"  
-      fgcolor="$spy.GetParam(gui.html.font_colour)" 
-      width="28" 
-      value="x" 
-      data = "0" 
-      oncheck = "setdata(x, '1')>>rota getdata(x) getdata(y) getdata(z) 100000 eval(getvalue(speed)*0.1)" 
+      name = "x"
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      width="28"
+      value="x"
+      data = "0"
+      oncheck = "setdata(x, '1')>>rota getdata(x) getdata(y) getdata(z) 100000 eval(getvalue(speed)*0.1)"
       onuncheck="setdata(x, '0') >>rota getdata(x) getdata(y) getdata(z) 100000 eval(getvalue(speed)*0.1)"
     >
   </td>
   <td name=CHECK_Y>
-    <input 
-      type="checkbox" 
+    <input
+      type="checkbox"
       height="$spy.GetParam(gui.html.input_height)"
-      name = "y" 
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"  
-      fgcolor="$spy.GetParam(gui.html.font_colour)" 
+      name = "y"
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      fgcolor="$spy.GetParam(gui.html.font_colour)"
       width="28"
       height="$spy.GetParam(gui.html.input_height)"
-      value="y" 
-      data = "0" 
-      oncheck = "setdata(y, '1')>>rota getdata(x) getdata(y) getdata(z) 100000 eval(getvalue(speed)*0.1)" 
+      value="y"
+      data = "0"
+      oncheck = "setdata(y, '1')>>rota getdata(x) getdata(y) getdata(z) 100000 eval(getvalue(speed)*0.1)"
       onuncheck="setdata(y, '0') >>rota getdata(x) getdata(y) getdata(z) 100000 eval(getvalue(speed)*0.1)"
     >
   </td>
   <td name=CHECK_Z>
-    <input 
-      type="checkbox" 
+    <input
+      type="checkbox"
       height="$spy.GetParam(gui.html.input_height)"
-      name = "z" 
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"  
-      fgcolor="$spy.GetParam(gui.html.font_colour)" 
-      width="28" 
+      name = "z"
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      width="28"
       height="$spy.GetParam(gui.html.input_height)"
-      value="z" 
-      data = "0" 
-      oncheck = "setdata(z, '1')>>rota getdata(x) getdata(y) getdata(z) 100000 eval(getvalue(speed)*0.1)" 
+      value="z"
+      data = "0"
+      oncheck = "setdata(z, '1')>>rota getdata(x) getdata(y) getdata(z) 100000 eval(getvalue(speed)*0.1)"
       onuncheck="setdata(z, '0') >>rota getdata(x) getdata(y) getdata(z) 100000 eval(getvalue(speed)*0.1)"
     >
   </td>
   <td name=SLIDER_SPEED align='center'>
-    <input 
-      type="slider" 
-      name="speed" 
+    <input
+      type="slider"
+      name="speed"
       width="70"
-      height="20" 
-      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"  
-      fgcolor="$spy.GetParam(gui.html.font_colour)" 
-      value="1" 
-      min="1" 
-      max="10" 
+      height="20"
+      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      value="1"
+      min="1"
+      max="10"
       onchange = "rota getdata(x) getdata(y) getdata(z) 100000 eval(getvalue(speed)*0.1)"
     >
   </td>
   <td name=XYZ align='right'>
-    $spy.MakeActiveGuiButton(button_tiny-a,'matr 1',#switch_name)
+    $spy.MakeHoverButton(button_tiny-a,matr 1)
     &nbsp
-    $spy.MakeActiveGuiButton(button_tiny-b,'matr 2',#switch_name)
+    $spy.MakeHoverButton(button_tiny-b,matr 2)
     &nbsp
-    $spy.MakeActiveGuiButton(button_tiny-c,'matr 3',#switch_name)
+    $spy.MakeHoverButton(button_tiny-c,matr 3)
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>

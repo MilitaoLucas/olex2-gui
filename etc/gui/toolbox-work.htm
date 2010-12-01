@@ -2,7 +2,9 @@
 
 <!-- FIRST ROW -->
 <tr name=MAIN_TOOLBAR_MODEL>
+
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Toolbar-Model;1; -->
+
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <!-- #includeif IsFileType(ires) main-toolbar-2 gui\main-toolbar-2.htm;1; -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -13,63 +15,35 @@
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Quicktools;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td>
-    <a 
-      href="name $Q C"
-      target="%Q To C-target%">
-      <zimg name="qc" border="0" src="toolbar-QC.png"/>
-    </a>
+$spy.MakeHoverButton(toolbar-QC,name \$Q C)
   </td>
   <td>
-    <a 
-      href="name $Q H"
-      target="%Q To H-target%">
-      <zimg name="qh" border="0" src="toolbar-QH.png"/>
-    </a>
+$spy.MakeHoverButton(toolbar-QH,name \$Q H)
   </td>
   <td>
-    <a 
-      href="clean"
-      target="%Tidy Structure-target%">
-      <zimg border="0" src="toolbar-tidy.png"/>
-    </a>
+$spy.MakeHoverButton(toolbar-tidy,clean)
   </td>
   <td>
-    <a 
-      href="kill $H"
-      target="%Kill H-target% ">
-      <zimg border="0" src="toolbar-killH.png"/>
-    </a>
+$spy.MakeHoverButton(toolbar-killH,kill \$H)
   </td>
   <td>
-    <a 
-      href="showQ"
-      target="%Toggle Q-target%">
-      <zimg border="0" src="toolbar-Q.png"/>
-    </a>
+$spy.MakeHoverButton(toolbar-Q,showQ)
   </td>
   <td>
-    <a 
-      href="showH"
-      target="%Toggle H-target%">
-      <zimg border="0" src="toolbar-H.png"/>
-    </a>
+$spy.MakeHoverButton(toolbar-H,showH)
   </td>
-  <td>
-    <a 
-      target="%center_on-target%" href="center">
-      <zimg  border="0" src="toolbar-center.png">
-    </a>
+  <td width='5%'>
+$spy.MakeHoverButton(toolbar-center,compaq>>compaq -a>>center)
   </td>
   <td>
   </td>
-  <td>
-    <a 
-      href="fixunit GetValue(SET_Z_PRIME_FIXUNIT)>>xf.au.SetZprime(GetValue(SET_Z_PRIME_FIXUNIT))>>updatehtml"
-      target="%Fix Unit-target% ">
-      <zimg border="0" src="toolbar-OK.png"/>
-    </a>
-  </td>
-  <td>
+  <td width = '30%'>
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+  <tr>
+  <td width='30%' align='center'>
+$spy.MakeHoverButton(toolbar-OK,fixunit GetValue\(SET_Z_PRIME_FIXUNIT)>>xf.au.SetZprime\(GetValue\(SET_Z_PRIME_FIXUNIT))>>updatehtml>>echo DONE)
+</td>
+  <td width='70%' align='center'>
     <input
         type='text'
         width="40"
@@ -77,11 +51,14 @@
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name='SET_Z_PRIME_FIXUNIT'
         label="Z'&nbsp;"
-        valign='center' 
+        valign='center'
+        align='right'
         value='xf.au.GetZprime()'
-        onleave="xf.au.SetZprime(GetValue(SET_Z_PRIME_FIXUNIT))>>spy.SetParam(snum.refinement.Z_prime,GetValue(SET_Z_PRIME_FIXUNIT))>>updatehtml"
+        onleave="xf.au.SetZprime(GetValue(SET_Z_PRIME_FIXUNIT))>>updatehtml"
+        onchange="xf.au.SetZprime(GetValue(SET_Z_PRIME_FIXUNIT))>>updatehtml"
       >
   </td>
+  </tr></table>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
@@ -120,12 +97,19 @@
 <!-- FIFTH ROW -->
 <tr name=UISO_SELECT_SLIDER>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Uiso-Select-Slider;1; -->
+
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <!-- #include uiso-slider gui\snippets\snippet-uiso-select-slider.htm;1; -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
+
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
+
+<!-- #include model-disorder gui\snippets\snippet-model-disorder.htm;1; -->
+<!-- #include calculate-electron-density gui\snippets\snippet-electron-density-map.htm;1; -->
+
+
 
 </table>
 

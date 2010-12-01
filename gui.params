@@ -22,6 +22,8 @@ gui {
     .type = colour
   orange = #ff8f00
     .type = colour
+  image_highlight = None
+    .type = str
 
   xgrid {
     positive_surface_material = '245;3623911424;3632300160;1.000,1.000,1.000,0.500;1.000,1.000,1.000,1.000;36;36'
@@ -43,7 +45,17 @@ gui {
       .type = float
     clearcolor = 8404992
       .type = int
-  }
+    diagnostics {
+      colour_grade1 = #307125
+        .type = colour
+      colour_grade2 = #b4be10
+        .type = colour
+      colour_grade3 = #d6a113
+        .type = colour
+      colour_grade4 = #d62613
+        .type = colour
+      }
+    }
 
   html {
     base_colour = #aaaaaa
@@ -172,7 +184,7 @@ gui {
       grad_colour_L = 0.7
         .type = float
 
-      font_colour_L = 1.4
+      font_colour_L = 1.2
         .type = float
       font_name = Vera Bold
         .type = str
@@ -188,6 +200,8 @@ gui {
         .type = str
       off_L = 0.9
         .type = float
+      shadow = False
+        .type = bool
     }
 
     cbtn{
@@ -219,7 +233,7 @@ gui {
         .type = int
       rounded = 0101
         .type = str
-      arrows = "bar:right:18,arrow_right:onup:offdown,buttonmark:28"
+      arrows = "bar:right:18,arrow_right:onup:offdown:hoverdown:hoveronup,buttonmark:28"
         .type = str
       off_L = 1.6
         .type = float
@@ -242,7 +256,7 @@ gui {
         .type = int
       halign = left
         .type = str
-      top = 2
+      top = 1
         .type = int
       left = 4
         .type = int
@@ -321,7 +335,7 @@ gui {
         .type = float
       font_colour = #555555
         .type = colour
-      arrows = "bar:left:5,char:on~:off+"
+      arrows = "bar:left:5,char:on~:off+:hover+:hoveron~"
         .type = str
       off_L = 1.2
         .type = float
