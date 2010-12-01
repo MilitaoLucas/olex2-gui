@@ -287,26 +287,45 @@ class FullMatrixRefine(OlexCctbxAdapter):
         self.normal_eqns.fo_sq.d_max_min()[1]), self.wavelength, deg=True)
     completeness_full = self.normal_eqns.fo_sq.resolution_filter(
       d_min=uctbx.two_theta_as_d(two_theta_full, self.wavelength, deg=True)).completeness()
-
     shifts_over_su = flex.abs(
       self.normal_eqns.shifts /
       flex.sqrt(self.normal_eqns.covariance_matrix(independent_params=True)\
                 .matrix_packed_u_diagonal()))
+    # cell parameters and errors
+    cell_params = self.olx_atoms.getCell()
+    cell_errors = self.olx_atoms.getCellErrors()
+    from scitbx import matrix
+    cell_vcv = flex.pow2(matrix.diag(cell_errors).as_flex_double_matrix())
     xs = self.xray_structure()
-    connectivity_full = self.reparametrisation.connectivity_table
     cif_block = xs.as_cif_block(
-      covariance_matrix=self.covariance_matrix_and_annotations.matrix)
+      covariance_matrix=self.covariance_matrix_and_annotations.matrix,
+      cell_covariance_matrix=cell_vcv.matrix_symmetric_as_packed_u())
+    for i in range(3):
+      for j in range(i+1,3):
+        if (cell_params[i] == cell_params[j] and
+            cell_errors[i] == cell_errors[j] and
+            cell_params[i+3] == 90 and
+            cell_errors[i+3] == 0 and
+            cell_params[j+3] == 90 and
+            cell_errors[j+3] == 0):
+          cell_vcv[i,j] = math.pow(cell_errors[i],2)
+          cell_vcv[j,i] = math.pow(cell_errors[i],2)
+    # geometry loops
+    cell_vcv = cell_vcv.matrix_symmetric_as_packed_u()
+    connectivity_full = self.reparametrisation.connectivity_table
     cif_block.add_loop(iotbx.cif.distances_as_cif_loop(
       connectivity_full.pair_asu_table,
       site_labels=xs.scatterers().extract_labels(),
       sites_frac=xs.sites_frac(),
       covariance_matrix=self.covariance_matrix_and_annotations.matrix,
+      cell_covariance_matrix=cell_vcv,
       parameter_map=xs.parameter_map()).loop)
     cif_block.add_loop(iotbx.cif.angles_as_cif_loop(
       connectivity_full.pair_asu_table,
       site_labels=xs.scatterers().extract_labels(),
       sites_frac=xs.sites_frac(),
       covariance_matrix=self.covariance_matrix_and_annotations.matrix,
+      cell_covariance_matrix=cell_vcv,
       parameter_map=xs.parameter_map()).loop)
     fmt = "%.6f"
     #cif_block['_chemical_formula_sum'] = ' '.join(formatted_type_count_pairs)
@@ -364,6 +383,18 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.normal_eqns.fo_sq.data() > 2 * self.normal_eqns.fo_sq.sigmas()).count(True)
     cif_block['_reflns_number_total'] = self.normal_eqns.fo_sq.size()
     cif_block['_reflns_threshold_expression'] = 'I>2u(I)' # XXX is this correct?
+    def sort_key(key, *args):
+      if key.startswith('_space_group_symop') or key.startswith('_symmetry_equiv'):
+        return -1
+      elif key.startswith('_atom_type'):
+        return 0
+      elif key.startswith('_geom_bond'):
+        return '_geom_0'
+      elif key.startswith('_geom_angle'):
+        return '_geom_1'
+      else:
+        return key
+    cif_block.sort(key=sort_key)
     return cif_block
 
   def setup_geometrical_constraints(self, afix_iter=None):
