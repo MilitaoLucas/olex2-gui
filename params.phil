@@ -45,6 +45,8 @@ snum {
       .type = bool
     recompute_mask_before_refinement = False
       .type = bool
+    check_absolute_structure_after_refinement = True
+      .type = bool
 
     auto {
       max_peaks = False
