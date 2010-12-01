@@ -22,6 +22,7 @@ OV = OlexFunctions()
 import olex_fs
 import olx
 import time
+global isPro
 
 olx.banner_slide = {}
 

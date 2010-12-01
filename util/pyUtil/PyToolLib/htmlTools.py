@@ -27,6 +27,8 @@ current_tooltip_number = 0
 global HaveModeBox
 HaveModeBox = False
 
+global hover_buttons
+
 def makeHtmlTable(list):
   """ Pass a list of dictionaries, with one dictionary for each table row.
 
@@ -1097,6 +1099,8 @@ def _check_modes_and_states(name):
 
 
 def MakeHoverButton(name, cmds, onoff = "off", btn_bg='table_firstcol_colour'):
+  global hover_buttons
+  hover_buttons = OV.GetParam('olex2.hover_buttons')
   on = _check_modes_and_states(name)
       
   if on:
@@ -1108,7 +1112,7 @@ def MakeHoverButton(name, cmds, onoff = "off", btn_bg='table_firstcol_colour'):
 OV.registerFunction(MakeHoverButton)
 
 def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
-    
+  global hover_buttons
   click_console_feedback = False
   n = name.split("-")
   d = {'bgcolor': OV.GetParam('gui.html.%s' %btn_bg)}
@@ -1132,16 +1136,22 @@ def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
     d.setdefault('feedback',"")
   on = "on"
   off = "off"
+  hover = "hover"
   if OV.GetParam('gui.image_highlight') == name:
     on = "highlight"
     off = "highlight"
+  if not hover_buttons:
+    on = "on"
+    off = "off"
+    hover = "off"
   d.setdefault('on', on)
   d.setdefault('off', off)
+  d.setdefault('hover', hover)
   txt = '''
 <input
   name=IMG_%(nameupper)s
   type="button"
-  image="up=%(tool_img)s%(off)s.png,down=%(tool_img)s%(on)s.png,hover=%(tool_img)shover.png",disable=%(tool_img)sdisable.png"
+  image="up=%(tool_img)s%(off)s.png,down=%(tool_img)s%(on)s.png,hover=%(tool_img)s%(hover)s.png",disable=%(tool_img)sdisable.png"
   hint="%(target)s"
   onclick="%(cmds)s%(feedback)s"
   bgcolor=%(bgcolor)s
@@ -1152,6 +1162,7 @@ OV.registerFunction(MakeHoverButtonOff)
 
 
 def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
+  global hover_buttons
   click_console_feedback = False
   n = name.split("-")
   d = {'bgcolor': OV.GetParam('gui.html.%s' %btn_bg)}
@@ -1171,17 +1182,23 @@ def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
     d.setdefault('feedback',"")
   on = "on"
   off = "off"
+  hover = "hoveron"
   if OV.GetParam('gui.image_highlight') == name:
     on = "highlight"
     off = "highlight"
+  if not hover_buttons:
+    on = "on"
+    off = "off"
+    hover = "on"
   d.setdefault('on', on)
   d.setdefault('off', off)
+  d.setdefault('hover', hover)
   
   txt = '''
 <input
   name=IMG_%(nameupper)s
   type="button"
-  image="up=%(tool_img)s%(on)s.png,down=%(tool_img)s%(on)s.png,hover=%(tool_img)shoveron.png",disable=%(tool_img)sdisable.png"
+  image="up=%(tool_img)s%(on)s.png,down=%(tool_img)s%(on)s.png,hover=%(tool_img)s%(hover)s.png",disable=%(tool_img)sdisable.png"
   hint="%(target)s"
   onclick="%(cmds)s%(feedback)s"
   bgcolor=%(bgcolor)s
