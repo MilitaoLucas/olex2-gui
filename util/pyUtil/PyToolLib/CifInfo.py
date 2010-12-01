@@ -279,30 +279,6 @@ class MergeCif(CifTools):
       method = OV.GetParam('snum.refinement.method')
       if prg == 'smtbx-refine':
         OV.set_refinement_program(prg, 'Full Matrix')
-        if not os.path.isfile("%s/%s.vcov" %(OV.FilePath(),OV.FileName())):
-          olex.m('refine')
-        if os.path.isfile(OV.file_ChangeExt(OV.FileFull(), 'cif')):
-          refinement_cif = iotbx.cif.reader(
-            file_path=OV.file_ChangeExt(OV.FileFull(), 'cif')).model()
-          del refinement_cif[self.data_name]['_atom_site']
-          if '_atom_site_aniso' in refinement_cif[self.data_name]:
-            del refinement_cif[self.data_name]['_atom_site_aniso']
-          for cell_param in ('a','b','c'):
-            del refinement_cif[self.data_name]['_cell_length_%s' %cell_param]
-          for cell_param in ('alpha','beta','gamma'):
-            del refinement_cif[self.data_name]['_cell_angle_%s' %cell_param]
-          OV.write_to_olex('refinement.cif', str(refinement_cif))
-        else: refinement_cif = None
-        print "Creating cif:"
-        olex.m('CifCreate')
-        # pre-merge (info about refinement)
-        #from cctbx_olex_adapter import OlexCctbxAdapter
-        #xs = OlexCctbxAdapter().xray_structure()
-        #cif_block = xs.as_cif_block()
-        #s = StringIO()
-        #print >> s, cif_block
-        #OV.write_to_olex('xs.cif', s.getvalue())
-        OV.CifMerge('refinement.cif')
       else:
         if method == 'CGLS':
           OV.set_refinement_program(prg, 'Least Squares')
