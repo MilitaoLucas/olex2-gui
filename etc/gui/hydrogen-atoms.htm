@@ -43,16 +43,7 @@
           value = "137">
       </td>
       <td VALIGN='center' width='20%'>
-        <input
-          type="button" 
-          name = "hydrogen-atoms-mode" 
-          width="40" 
-          value="AFIX" 
-          modedependent="hfix"
-          onclick="mode hfix getvalue(HFIX)" 
-          ondown="echo setlabel(hydrogen-atoms-mode,Done)>>mode hfix getvalue(HFIX)" 
-          onup="echo setlabel(hydrogen-atoms-mode,AFIX)>>mode off"
-        >
+$spy.MakeHoverButton(button_small-hfix,if strcmp\(spy.GetParam\(olex2.short_mode),'hfix') then 'mode off'  else 'mode hfix getvalue\(HFIX)')
       </td>
     <td>
       <b>%HIMP%</b>
