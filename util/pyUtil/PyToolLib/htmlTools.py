@@ -899,6 +899,7 @@ def OnModeChange(*args):
     'name':'button_small-name',
     'fixu':'button-fix_u',
     'fixxyz':'button-fix_xyz',
+    'hfix':'button_small-hfix',
     'occu':'button-set_occu',
     'off':None
   }
@@ -924,6 +925,7 @@ def OnModeChange(*args):
   modequalifiers = modequalifiers.strip("=")
   mode = mode.strip()
   mode_disp = mode_disp.strip()
+  mode_short = mode_disp
 
   if 'name -t=' in mode:
     element = mode.split('=')[1]
@@ -937,7 +939,8 @@ def OnModeChange(*args):
   elif 'grow' in mode:
     active_mode = 'button-grow_mode'
   elif 'hfix' in mode:
-    active_mode = 'button-hfix_mode'
+    active_mode = 'button_small-hfix'
+    mode_short = 'hfix'
   else:
     active_mode = d.get(mode, None)
 
@@ -981,7 +984,7 @@ def OnModeChange(*args):
 
     last_mode = active_mode
     OV.SetParam('olex2.in_mode',mode.split("=")[0])
-    OV.SetParam('olex2.short_mode',mode_disp)
+    OV.SetParam('olex2.short_mode',mode_short)
     last_mode = active_mode
   OV.Refresh()
 
@@ -1061,12 +1064,15 @@ def _check_modes_and_states(name):
     'button-fix_u':'fixu',
     'button-fix_xyz':'fixxyz',
     'button-set_occu':'occu',
+    'button_small-hfix':'hfix',
   }
   if name in d:
     if 'near' in name:
       mode = OV.GetParam('olex2.full_mode')
     else:
       mode = OV.GetParam('olex2.short_mode')
+      if mode:
+        if 'hfix' in mode: mode = "hfix"
     if mode == d.get(name):
       return True
   ##States
@@ -1081,7 +1087,7 @@ def _check_modes_and_states(name):
     if state == 'true':
       return True
 
-  ## Hand-grafted buttons
+  ## Hand-crafted buttons
   if name == 'button_full-move_atoms_or_model_disorder':
     if OV.GetParam('olex2.in_mode') == 'split -r':
       return True
