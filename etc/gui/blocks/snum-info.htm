@@ -32,19 +32,27 @@
   <td colspan = '3'>
   &nbsp;<b>a=</b>$xf.uc.CellEx(a)<b>; b=</b>$xf.uc.CellEx(b)<b>; c=</b>$xf.uc.CellEx(c)&Aring;
   </td>
-<!--<!-- #includeif file.Exists('StrDir()\displayR.htm') displayR StrDir()/displayR.htm;1 -->
   $spy.GetRInfo()
   </tr>
 
-  <tr align='left'>
-    <td colspan = '3'>
+<tr align='left'>
+  <td colspan = '3'>
     &nbsp;<b>&alpha;</b>=$xf.uc.CellEx(alpha)&deg;
       <b>&beta;</b>=$xf.uc.CellEx(beta)&deg;
       <b>&gamma;</b>=$xf.uc.CellEx(gamma)&deg;
     </td>
-  </tr>
+</tr>
 
-$spy.GetTwinLaw(html)
+<tr>
+  <td colspan='4'>
+  </td>
+</tr>
+
+<!-- #includeif fs.Exists(hos.htm) hos hos.htm;1 -->
+
+  $spy.GetTwinLaw(html)
+
+  
   
 <!-- #include more-snum-info gui\blocks\more-snum-info.htm;2 -->
 

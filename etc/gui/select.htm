@@ -32,9 +32,9 @@
 
   <td colspan=3>
     <b>%Selection%:</b>
-    <a href="sel -i">%Invert%</a> | 
-    <a href="sel -u">%Deselect%</a> | 
-    <a href="kill sel">%Delete%</a> | 
+    <a href="sel -i">%Invert%</a> |
+    <a href="sel -u">%Deselect%</a> |
+    <a href="kill sel">%Delete%</a> |
     <a href="selback">%Previous%</a>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -44,32 +44,33 @@
 <tr name=SELECT_WHERE>
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;help_ext=;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td VALIGN='center' >
+  <td width='40%' VALIGN='center' >
     %Select atoms where% <b>U<sub>iso</sub></b>
   </td>
   <td VALIGN='center'  colspan='2'>
     <font size='2'>
-      <input 
+      <input
         type="combo"
         height="$spy.GetParam(gui.html.combo_height)"
-        bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
-        name= "compare" 
-        items=">;=;<" 
-        width="35"  
+        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+        name= "compare"
+        items=">;=;<"
+        width="35"
         value = ">"
         readonly
       >
-      <input 
-        type="text" 
-        bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
-        name = "uiso"  
-        width="40"  
+      <input
+        type="text"
+        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+        name = "uiso"
+        width="30"
         float height="$spy.GetParam(gui.html.input_height)"
         value = "0.06"
       >
-    </font>
-      $spy.MakeActiveGuiButton(button_tiny-go,'sel atoms where xatom.uiso getvalue\(compare) getvalue\(uiso)&&xatom.type!='Q'',GO_SELECT)
-
+    </font>&nbsp;
+</td>
+<td width='20%' align='right'>
+$spy.MakeHoverButton(button_small-select@uiso,sel atoms where xatom.uiso getvalue\(compare) getvalue\(uiso)&&xatom.type!='Q')
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
@@ -79,16 +80,16 @@
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;help_ext=;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td VALIGN='center' >
-    <input 
+    <input
       type="combo"
       height="$spy.GetParam(gui.html.combo_height)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
-      label="%Rings% " 
-      name="RINGSELECT" 
-      items="--;C6;C5N;C5;C5O;" 
-      width="80" 
-      onchange="if strcmp(GetValue(RINGSELECT),--) then html.SetFocus(RINGSELECT) else 'sel -u'>>sel rings GetValue(RINGSELECT)" 
-      value="" 
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      label="%Rings% "
+      name="RINGSELECT"
+      items="--;C6;C5N;C5;C5O;"
+      width="80"
+      onchange="if strcmp(GetValue(RINGSELECT),--) then html.SetFocus(RINGSELECT) else 'sel -u'>>sel rings GetValue(RINGSELECT)"
+      value=""
     >
   </td>
   <td VALIGN='center' colspan='2'>

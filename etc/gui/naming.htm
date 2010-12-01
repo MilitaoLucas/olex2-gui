@@ -6,45 +6,43 @@
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Naming;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td name=MODE_NAME_NUMBER>
-    <input 
-      type="text" 
+    <input
+      type="text"
       height="$spy.GetParam(gui.html.input_height)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
-      label='%Start%&nbsp;' 
-      valign='center' 
-      name="MODE_NAME_NUMBER"  
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      label='%Start%&nbsp;'
+      valign='center'
+      name="MODE_NAME_NUMBER"
       width="35"
       height="$spy.GetParam(gui.html.input_height)"
       value = "1">
   </td>
   <td name=MODE_NAME_SUFFIX>
-    <input 
+    <input
       type="text"
       height="$spy.GetParam(gui.html.input_height)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
-      label='%Suffix%&nbsp;' 
-      valign='center' 
-      name = "MODE_NAME_SUFFIX"  
-      width="25" 
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      label='%Suffix%&nbsp;'
+      valign='center'
+      name = "MODE_NAME_SUFFIX"
+      width="25"
       value = ""
     >
   </td>
   <td name=MODE_NAME_TYPE>
-    <input 
-      type="text" 
+    <input
+      type="text"
       height="$spy.GetParam(gui.html.input_height)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
-      label='%Type%&nbsp;' 
-      valign='center' 
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      label='%Type%&nbsp;'
+      valign='center'
       name = "MODE_NAME_TYPE"
-      width="25"  
+      width="25"
       value = ""
     >
   </td>
   <td name=IMG_BUTTON_SMALL-NAME align='right'>
-    <a href="if strcmp(spy.GetParam(olex2.short_mode),'name') then 'mode off'  else 'guinames_m'" target="%name-target%">
-    <zimg name=IMG_BUTTON_SMALL-NAME border="0" src="button_small-name.png"/>
-    </a>
+$spy.MakeHoverButton(button_small-name,if strcmp(spy.GetParam(olex2.short_mode),'name') then 'mode off'  else 'guinames_m')
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
@@ -82,7 +80,7 @@
       type="text"
       height="$spy.GetParam(gui.html.input_height)"
       width="30"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
       label='%Suffix%&nbsp;'
       valign='center'
       name = "MATCH_NAME_SUFFIX"

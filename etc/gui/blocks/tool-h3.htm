@@ -1,8 +1,6 @@
 <tr bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
   <td align='left' colspan=#colspan>
-    <a target="%Collapse%" href="itemstate #parent_name 1 2">
-      <zimg border="0" src="h3-#image-on.png"/>
-    </a>
+    $spy.MakeHoverButtonOn(h3-#image,itemstate #parent_name 1 2)
   </td>
 </tr>

@@ -589,6 +589,12 @@ class OlexFunctions(inheritFunctions):
     htmlPanelX = screen_width - html_panelwidth
     return htmlPanelX
 
+  def GetHtmlPanelX(self):
+    screen_width = int(olx.GetWindowSize().split(',')[2])
+    html_panelwidth = int(olx.html_ClientWidth('self'))
+    htmlPanelX = screen_width - html_panelwidth
+    return htmlPanelX
+
   def setAllMainToolbarTabButtons(self):
     import olexex
     olexex.setAllMainToolbarTabButtons()

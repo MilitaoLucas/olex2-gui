@@ -1,25 +1,25 @@
 <!-- #include header gui\blocks\tool-table-header.htm;1; -->
 	<tr VALIGN='center' NAME='Expand Short Contacts'>
 		<td valign='top' width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
-			<a 
-				href="spy.make_help_box -name='edit-atom' -popout='True'" 
+			<a
+				href="spy.make_help_box -name='edit-atom' -popout='True'"
 				target="Help me with this">
 				<zimg border="0" src="info.png">
 			</a>
 		</td>
 		<td colspan = '2'>
-$spy.MakeActiveGuiButton(button-edit_atom(s),'editatom')
-$spy.MakeActiveGuiButton(button-edit_instructions,'editins')
+$spy.MakeHoverButton(button-edit_atom(s),editatom)
+$spy.MakeHoverButton(button-edit_instructions,editins)
 		</td>
 	</tr>
 </table>
 
 <!--
-<input type="button" 
-		name="mc" 
-		width="80" 
-		value="c" 
-		image="button_small-blank.png" 
-		height="17" 
+<input type="button"
+		name="mc"
+		width="80"
+		value="c"
+		image="button_small-blank.png"
+		height="17"
 		onclick = "matr 3">
 		-->

@@ -4,6 +4,9 @@
 <tr name=INFO_SELECT_REFLECTION_FILE>
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;colspan=2;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td>
+<!-- #include tool-help-button gui\blocks\tool-help-button.htm;help_ext=masks;1; -->
+  </td>
   <td name=REFLECTION_FILE_LABEL>
     <b>%Reflection File%</b>
   </td>
@@ -17,13 +20,6 @@
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td>
-    <a
-      href="spy.make_help_box -name='masks' -popout='True'"
-      target="Help me with this">
-      <zimg border="0" src="info.png">
-    </a>
-  </td>
-  <td>
     <input
       type="combo"
       height="$spy.GetParam(gui.html.combo_height)"
@@ -31,7 +27,8 @@
       name="SET_SNUM_MASKS_TYPE"
       items='mask;f_mask;f_model'
       value="$spy.GetParam(snum.masks.type)"
-      width="20%"
+      width="15%"
+      height="$spy.GetParam(gui.html.input_height)"
       onchange="
 spy.SetParam(snum.masks.type,GetValue(SET_SNUM_MASKS_TYPE))>>
 spy.OlexCctbxMasks(False)>>
@@ -45,8 +42,8 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
     <input
       type="text"
       name = "SET_SNUM_MASKS_RESOLUTION_FACTOR"
-      width="20%"
-      height="18"
+      width="15%"
+      height="$spy.GetParam(gui.html.input_height)"
       label="%Res. factor%"
       valign="center"
       bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
@@ -59,8 +56,8 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
     <input
       type="text"
       name = "SET_SNUM_MASKS_SOLVENT_RADIUS"
-      width="20%"
-      height="18"
+      width="15%"
+      height="$spy.GetParam(gui.html.input_height)"
       label="%Solvent rad.%/&Aring "
       valign="center"
       bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
@@ -72,8 +69,8 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
     <input
       type="text"
       name = "SET_SNUM_MASKS_SHRINK_TRUNCATION_RADIUS"
-      width="20%"
-      height="18"
+      width="15%"
+      height="$spy.GetParam(gui.html.input_height)"
       label="%Shrink trunc. rad.%/&Aring "
       valign="center"
       bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
@@ -83,27 +80,15 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
     >
   </td>
 
+<td valign='bottom'>
+$spy.MakeHoverButton(button_small-mask,spy.MaskView\())
+</td>
+  
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
 <tr>
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td colspan = '2' align="center">
-    <input
-      type="button"
-      name="SNUM_MASKS_BUTTON"
-      value="Calculate Mask"
-      width='$eval(html.clientwidth(self)-35)'
-      manage
-      ondown="setlabel(SNUM_MASKS_BUTTON,%Delete Mask Display%)>>
-spy.OlexCctbxMasks()>>
-spy.SetXgridView()>>
-UpdateHtml"
-      onup="
-setlabel(SNUM_MASKS_BUTTON,%Calculate Mask%)>>
-xgrid.visible(false)"
-  >
-  </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>

@@ -534,15 +534,27 @@ def MakeElementButtonsFromFormula():
     target = OV.TranslatePhrase('change_element-target')
     #command = "if strcmp(spy.GetParam(olex2.in_mode),'mode name -t=%s') then 'mode off' else %%22 if strcmp(sel(),'') then 'mode name -t=%s' else 'name sel %s'>>sel -u%%22" %(symbol, symbol, symbol)
     command = 'spy.ElementButtonStates(%s)' %symbol
+    namelower = 'btn-element%s' %symbol
+    d = {}
+    d.setdefault('namelower', namelower)
+    d.setdefault('symbol', symbol)
+    d.setdefault('cmds', command)
+    d.setdefault('target', target + symbol)
+    d.setdefault('bgcolor', OV.GetParam('gui.html.table_firstcol_colour'))
     html = '''
-    <a href="%s" target="%s %s">
-      <zimg name=IMG_BTN-ELEMENT%s border="0" src="btn-element%s.png"/>
-    </a>'''%(command, target, symbol, symbol.upper(), symbol)
+<input
+  name=IMG_BTN-ELEMENT%(symbol)s
+  type="button"
+  image="up=%(namelower)soff.png,down=%(namelower)son.png,hover=%(namelower)shover.png",disable=%(namelower)sdisable.png"
+  hint="%(target)s"
+  onclick="%(cmds)s>>echo '%(target)s: OK'"
+  bgcolor=%(bgcolor)s
+>''' %d
+#    <a href="%s" target="%s %s">
+#      <zimg name=IMG_BTN-ELEMENT%s border="0" src="btn-element%s.png"/>
+#    </a>'''%(command, target, symbol, symbol.upper(), symbol)
 
     html_elements.append(html)
-
-#$spy.MakeActiveGuiButton(btn-element%s,%s)&nbsp;
-#''' %(symbol, command))
 
     btn_dict.setdefault(
       symbol, {
@@ -554,11 +566,22 @@ def MakeElementButtonsFromFormula():
         'grad':False,
       })
 
+  d['namelower'] = 'btn-element...'
   html_elements.append('''
-<a href="if strcmp(sel(),'') then 'mode name -t=ChooseElement()' else 'name sel ChooseElement()'"
-   target="Chose Element from the periodic table">
-<zimg border="0" src="btn-element....png"></a>
-''')
+<input
+  name=IMG_BTN-ELEMENT...
+  type="button"
+  image="up=%(namelower)soff.png,down=%(namelower)son.png,hover=%(namelower)shover.png",disable=%(namelower)sdisable.png"
+  hint="Chose Element from the periodic table"
+  onclick="if strcmp(sel(),'') then 'mode name -t=ChooseElement()' else 'name sel ChooseElement()'"
+  bgcolor=%(bgcolor)s
+>''' %d)
+
+#<a href="if strcmp(sel(),'') then 'mode name -t=ChooseElement()' else 'name sel ChooseElement()'"
+#   target="Chose Element from the periodic table">
+#<zimg border="0" src="btn-element....png"></a>
+#''')
+
   btn_dict.setdefault(
     'Table', {
       'txt':'...',
@@ -643,7 +666,10 @@ def CheckBoxValue(var, def_val='false'):
 if haveGUI:
   OV.registerFunction(CheckBoxValue)
 
-def VoidView(recalculate='0'):
+def VoidView(recalculate='0', onoff=None):
+  img_bases = ['button_small-void']
+  if deal_with_map_buttons(onoff, img_bases, 'void'):
+    return
   if OV.IsControl('SNUM_MAP_BUTTON'):
     # set electron density map button to 'up' state
     olx.SetState('SNUM_MAP_BUTTON','up')
@@ -657,11 +683,30 @@ def VoidView(recalculate='0'):
     cmd += " -p"
   olex.m(cmd)
   SetXgridView()
+  OV.SetParam('olex2.void_vis',True)
+
 
 if haveGUI:
   OV.registerFunction(VoidView)
 
-def MapView():
+def MaskView(onoff=None):
+  img_bases = ['button_small-mask']
+  if deal_with_map_buttons(onoff, img_bases, 'mask'):
+    return
+  olex.m('spy.OlexCctbxMasks()')
+  SetXgridView()
+  OV.SetVar('olex2.mask_vis',True)
+  OV.UpdateHtml()
+if haveGUI:
+  OV.registerFunction(MaskView)
+
+
+
+def MapView(onoff=None):
+  img_bases = ['button_full-electron_density_map', 'button_small-map']
+  if deal_with_map_buttons(onoff, img_bases, 'eden'):
+    return
+
   if OV.IsControl('SNUM_CALCVOID_BUTTON'):
     # set calcvoid button to 'up' state
     olx.SetState('SNUM_CALCVOID_BUTTON','up')
@@ -691,9 +736,37 @@ def MapView():
     olex.m("calcFourier -%s -%s -r=%s %s" %(map_type, map_source, map_resolution, mask_val))
 
   SetXgridView()
+  OV.SetVar('olex2.eden_vis',True)
 
 if haveGUI:
   OV.registerFunction(MapView)
+
+def deal_with_map_buttons(onoff, img_bases, map_type):
+  tl = ['eden', 'void', 'mask']
+  for item in tl:
+    if item != map_type:
+      OV.SetParam('olex2.%s_vis' %item, False)
+
+  if not onoff:
+    if OV.GetParam('olex2.%s_vis' %map_type) == False:
+      onoff = 'on'
+    elif OV.GetParam('olex2.%s_vis' %map_type) == True:
+      onoff = 'off'
+
+  if onoff == 'off':
+    OV.SetParam('olex2.%s_vis' %map_type,False)
+    olex.m('xgrid.visible(false)')
+    for img_base in img_bases:
+      use_image= "up=%soff.png" %img_base
+      OV.SetImage("IMG_%s" %img_base.upper(),use_image)
+    retVal = True
+  if onoff == 'on':
+    OV.SetParam('olex2.%s_vis' %map_type,True)
+    for img_base in img_bases:
+      use_image= "up=%son.png" %img_base
+      OV.SetImage("IMG_%s" %img_base.upper(),use_image)
+    retVal = False
+  return retVal
 
 def SetXgridView():
   view = OV.GetParam("snum.xgrid.view")
@@ -869,10 +942,11 @@ def setMainToolbarTabButtons(btn, state=""):
         state = "off"
       elif state == '0':
         state = "on"
-      OV.CopyVFSFile("cbtn-%s-%s.png" %(item[0],state),"cbtn-%s.png" %item[0])
+      #OV.CopyVFSFile("cbtn-%s2%s.png" %(item[0],state),"cbtn-%s2.png" %item[0])
+      OV.SetImage("IMG_CBTN-%s2" %btn.upper(),"cbtn-%s2%s.png" %(item[0], state))
       OV.SetVar('gui_MainToolbarTabButtonActive',btn)
     elif state != 'inactive' and not isCif:
-      OV.CopyVFSFile("cbtn-%s-off.png" %item[0],"cbtn-%s.png" %item[0])
+      OV.CopyVFSFile("cbtn-%s2off.png" %item[0],"cbtn-%s2.png" %item[0])
   return "Done"
 if haveGUI:
   OV.registerFunction(setMainToolbarTabButtons)
@@ -1901,6 +1975,9 @@ def olex_fs_copy(src_file, dst_file):
   olex_fs.NewFile(dst_file,txt)
 OV.registerFunction(olex_fs_copy)
 
+def isPro():
+  return True
+OV.registerFunction(isPro)
 
 if not haveGUI:
   def tbxs(name):
