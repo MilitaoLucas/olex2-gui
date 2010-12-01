@@ -936,6 +936,8 @@ def OnModeChange(*args):
     active_mode = 'button_small-name'
   elif 'grow' in mode:
     active_mode = 'button-grow_mode'
+  elif 'hfix' in mode:
+    active_mode = 'button-hfix_mode'
   else:
     active_mode = d.get(mode, None)
 
@@ -1137,6 +1139,8 @@ def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
   on = "on"
   off = "off"
   hover = "hover"
+  down = "off"
+  
   if OV.GetParam('gui.image_highlight') == name:
     on = "highlight"
     off = "highlight"
@@ -1146,12 +1150,13 @@ def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
     hover = "off"
   d.setdefault('on', on)
   d.setdefault('off', off)
+  d.setdefault('down', down)
   d.setdefault('hover', hover)
   txt = '''
 <input
   name=IMG_%(nameupper)s
   type="button"
-  image="up=%(tool_img)s%(off)s.png,down=%(tool_img)s%(on)s.png,hover=%(tool_img)s%(hover)s.png",disable=%(tool_img)sdisable.png"
+  image="up=%(tool_img)s%(off)s.png,down=%(tool_img)s%(down)s.png,hover=%(tool_img)s%(hover)s.png",disable=%(tool_img)sdisable.png"
   hint="%(target)s"
   onclick="%(cmds)s%(feedback)s"
   bgcolor=%(bgcolor)s
@@ -1183,6 +1188,8 @@ def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
   on = "on"
   off = "off"
   hover = "hoveron"
+  down = "on"
+  
   if OV.GetParam('gui.image_highlight') == name:
     on = "highlight"
     off = "highlight"
@@ -1192,13 +1199,14 @@ def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
     hover = "on"
   d.setdefault('on', on)
   d.setdefault('off', off)
+  d.setdefault('down', down)
   d.setdefault('hover', hover)
   
   txt = '''
 <input
   name=IMG_%(nameupper)s
   type="button"
-  image="up=%(tool_img)s%(on)s.png,down=%(tool_img)s%(on)s.png,hover=%(tool_img)s%(hover)s.png",disable=%(tool_img)sdisable.png"
+  image="up=%(tool_img)s%(on)s.png,down=%(tool_img)s%(down)s.png,hover=%(tool_img)s%(hover)s.png",disable=%(tool_img)sdisable.png"
   hint="%(target)s"
   onclick="%(cmds)s%(feedback)s"
   bgcolor=%(bgcolor)s

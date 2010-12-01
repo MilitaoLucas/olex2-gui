@@ -1,116 +1,92 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
 
-
-<tr>
-	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td> 
-	</td>
-	<td colspan='3'>
-		<zimg border="0" src="toolbar-sp2.png">
-		<a href="mode hfix 43">
-		<zimg border="0" src="toolbar-sp2-1H.png"></a>
-		<a href="mode hfix 93">
-		<zimg border="0" src="toolbar-sp2-2H.png"></a>
-&nbsp;
-		<zimg border="0" src="toolbar-sp3.png"></a>
-		<a href="mode hfix 13">
-		<zimg border="0" src="toolbar-sp3-1H.png"></a>
-		<a href="mode hfix 23">
-		<zimg border="0" src="toolbar-sp3-2H.png"></a>
-		<a href="mode hfix 137">
-		<zimg border="0" src="toolbar-sp3-3H.png"></a>
-&nbsp;
-		<zimg border="0" src="toolbar-OH.png"></a>
-		<a href="mode hfix 134">
-		<zimg border="0" src="toolbar-O-H.png"></a>
-		<a href="mode hfix 83">
-		<zimg border="0" src="toolbar-O-H.png"></a>
-
-		<a href="mode off">
-		<zimg border="0" src="toolbar-OK.png"></a>
-
-	</td>        
+<!-- FIRST ROW -->
+<tr name=MAIN_TOOLBAR_HYDROGEN_1>
+<!-- #include tool-help-column gui\blocks\tool-help-first-column.htm;help_ext=toolbar-hydrogen_1;1; -->
+  <td>
+    <table><tr>
+      <td width='35%'>
+        $spy.MakeHoverButton(toolbar-sp2,mode hfix 43)
+        $spy.MakeHoverButton(toolbar-sp2-1H,mode hfix 93)
+        $spy.MakeHoverButton(toolbar-sp2-2H,mode hfix 93)
+      </td>
+      <td width='35%'>
+        $spy.MakeHoverButton(toolbar-sp3,mode hfix 13)
+        $spy.MakeHoverButton(toolbar-sp3-1H,mode hfix 23)
+        $spy.MakeHoverButton(toolbar-sp3-2H,mode hfix 137)
+        $spy.MakeHoverButton(toolbar-sp3-3H,mode hfix 137)
+      </td>
+      <td width='20%'>
+        $spy.MakeHoverButton(toolbar-OH,mode hfix 134)
+        $spy.MakeHoverButton(toolbar-O-H,mode hfix 83)
+      </td>
+      <td width=10%>
+        $spy.MakeHoverButton(toolbar-OK,mode off)
+      </td>
+    </tr></table>
+  </td>
 </tr>
 
 
-<tr>
-	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
-	</td>
-	<td VALIGN='center' width='15%'>
-		<font size="2">
-			<input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name = "HFIX"  width="30"  height="17" value = "137">
-		</font>
-	</td>
-	<td VALIGN='center' width='20%'>
-		<font size="2">
-			<input type="button" 
-				name = "hydrogen-atoms-mode" 
-				width="40" 
-				value="AFIX" 
-				amodedependent="hfix"
-				aonclick="mode hfix getvalue(HFIX)" 
-				ondown="echo setlabel(hydrogen-atoms-mode,Done)>>mode hfix getvalue(HFIX)" 
-				onup="echo setlabel(hydrogen-atoms-mode,AFIX)>>mode off"
-			>
-		</font>
-	</td>
-	<td VALIGN='center' width='65%'>
-			<font size="-1">Click and then select atoms</font>
-	</td>	
-	
-
-<tr>
-	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td></td>
-	<td colspan='3'>
-		<a href="labels -h -l">H %Labels%</a>
-		<a href="labels -l">No H %Labels%</a>
-		<a href="labels -h -a">%Show% AFIX</a>
-	</td> 
-	</tr>
-
-<tr>
-	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td></td>
-	<td colspan='3'>
-		<a href="hadd">%Add Hydrogen%</a> | <b>%EXPERIMENTAL%</b>
-	</td> 
+<!-- SECOND ROW -->
+<tr name=MAIN_TOOLBAR_HYDROGEN_2>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=toolbar-hydrogen_2;1; -->
+  <td>
+    <table><tr>
+      <td VALIGN='center' width='15%'>
+        <input
+          type="text"
+          bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+          name = "HFIX"
+          width="30"
+          height="17"
+          value = "137">
+      </td>
+      <td VALIGN='center' width='20%'>
+        <input
+          type="button" 
+          name = "hydrogen-atoms-mode" 
+          width="40" 
+          value="AFIX" 
+          modedependent="hfix"
+          onclick="mode hfix getvalue(HFIX)" 
+          ondown="echo setlabel(hydrogen-atoms-mode,Done)>>mode hfix getvalue(HFIX)" 
+          onup="echo setlabel(hydrogen-atoms-mode,AFIX)>>mode off"
+        >
+      </td>
+    <td>
+      <b>%HIMP%</b>
+    </td>
+    <td>
+      <input 
+        type="combo"
+        height="$spy.GetParam(gui.html.combo_height)"
+        name = "HIMP_DISTANCE"
+        width="100" 
+        value="" 
+        items='B-H (1.19)<-1.19;sp3-C-H (1.083)<-1.083;sp2-C-H (1.077)<-1.083;sp3-N-H (1.033)<-1.033;sp2-N-H (1.009)<-1.009;O-H (0.983)<-0.983;'
+        onchange = "labels -l -h>>mode himp GetValue(HIMP_DISTANCE)"
+      >
+    </td>
+</tr></table>
 </tr>
 
-<tr>
-	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
-	<td colspan='2'>
-		<a href="mode grow -s"><b>%Expand%</b></a>
-	</td>
-	<td colspan='1'>
-		<input 
-			type="slider" 
-			name = "SlideDeltaI" 
-			float 
-			width="100" 
-			height="20" 
-			value="120" 
-			min="91" 
-			max="169" 
-			onchange = "showH a true>>showH b true>>mode grow -s>>DeltaI eval(getvalue(SlideDeltaI)/100)>>fuse>>DeltaI">
-		</td>
-</tr>	
-
-
-<tr>
-	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
-	<td colspan='2'>
-	<b>%HIMP%</b>
-	</td>
-	<td colspan='1'>
-		<input 
-			type="combo"
-			height="$spy.GetParam(gui.html.combo_height)"
-			name = "HIMP_DISTANCE" 
-			float 
-			width="100" 
-			value="" 
-			items='B-H (1.19)<-1.19;sp3-C-H (1.083)<-1.083;sp2-C-H (1.077)<-1.083;sp3-N-H (1.033)<-1.033;sp2-N-H (1.009)<-1.009;O-H (0.983)<-0.983;'
-			onchange = "labels -l -h>>mode himp GetValue(HIMP_DISTANCE)">
-		</td>
-</tr>	
+<!-- THIRD ROW-->
+<tr name=MAIN_TOOLBAR_HYDROGEN_3>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=toolbar-hydrogen_3;1; -->
+  <td>
+    <table><tr>
+      <td>
+        <a href="hadd">%Add Hydrogen%</a>
+      </td>
+      <td>
+        <a href="labels -h -l">H %Labels%</a>
+        <a href="labels -l">No H %Labels%</a>
+        <a href="labels -h -a">%Show% AFIX</a>
+      </td> 
+    </tr>
+  </table>
+</tr>
 
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
