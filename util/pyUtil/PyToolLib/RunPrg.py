@@ -1,6 +1,7 @@
 import sys
 import olex
 import olx
+import olex_core
 import os
 import olexex
 from ArgumentParser import ArgumentParser
@@ -233,6 +234,9 @@ class RunSolutionPrg(RunPrg):
     RunPrg.run(self)
 
   def runAfterProcess(self):
+    olx.UpdateWght(0.1)
+    OV.SetParam('snum.refinement.suggested_weight','0.1 0')
+    OV.SetParam('snum.refinement.update_weight', False)
     RunPrg.runAfterProcess(self)
     self.method.post_solution(self)
     self.doHistoryCreation()
@@ -343,7 +347,8 @@ class RunRefinementPrg(RunPrg):
     if self.params.snum.refinement.auto.tidy:
       self.doAutoTidyAfter()
       OV.File()
-    #self.isInversionNeeded() RICHARD!
+    if OV.GetParam('snum.refinement.check_absolute_structure_after_refinement'):
+      self.isInversionNeeded()
     self.method.post_refinement(self)
 
   def doHistoryCreation(self):
@@ -375,19 +380,44 @@ class RunRefinementPrg(RunPrg):
     return self.his_file, R1
 
   def isInversionNeeded(self, force=False):
+    from cctbx_olex_adapter import hooft_analysis
+    from cctbx import sgtbx
+    from libtbx.utils import Sorry
+    print
+    if olex_core.SGInfo()['Centrosymmetric'] == 1: return
+    print "Checking absolute structure..."
+    inversion_needed = False
+    possible_racemic_twin = False
+    inversion_warning = "WARNING: Stucture should be inverted (inv -f), unless there is a good reason not to do so."
+    racemic_twin_warning = "WARNING: Structure may be an inversion twin"
     flack = self.method.getFlack()
+
+    try:
+      hooft = hooft_analysis()
+    except Sorry, e:
+      print e
+    else:
+      if hooft.reflections.f_sq_obs_filtered.anomalous_flag():
+        if hooft.p2 is not None and round(hooft.p2, 3) == 0:
+          inversion_needed = True
+        elif (hooft.p3_racemic_twin is not None and
+              round(hooft.p3_racemic_twin, 3) == 1):
+          possible_racemic_twin = True
+
     if flack:
-      print "Checking Stereochemistry: Flack Parameter = %s" %flack
+      print "Flack Parameter = %s" %flack
       fs = flack.split("(")
       flack_val = float(fs[0])
       flack_esd = float(fs[1].strip(")"))
       if flack_val > 0.8:
-        if force:
-          olex.m('Inv -f')
         OV.File()
-        print "WARNING: Stucture should be inverted (inv -f), unless there is a good reason not to do so."
-      else:
-        print "OK"
+        inversion_needed = True
+    if force and inversion_needed:
+      olex.m('Inv -f')
+    if inversion_needed: print inversion_warning
+    if possible_racemic_twin: print racemic_twin_warning
+    if not inversion_needed and not possible_racemic_twin:
+      print "OK"
 
 OV.registerFunction(RunRefinementPrg)
 OV.registerFunction(RunSolutionPrg)

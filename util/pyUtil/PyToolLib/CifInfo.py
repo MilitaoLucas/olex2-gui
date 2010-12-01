@@ -114,6 +114,9 @@ class CifTools(ArgumentParser):
       {'_computing_molecular_graphics': olex2_reference,
        '_computing_publication_material': olex2_reference
        })
+    self.sort_crystal_dimensions()
+    self.sort_crystal_colour()
+    self.sort_publication_info()
 
   def read_metacif_file(self):
     if os.path.isfile(self.metacif_path):
@@ -174,6 +177,32 @@ class CifTools(ArgumentParser):
       for key, value in dictionary.loops.iteritems():
         self.cif_block[key] = value # overwrite these for now
 
+  def sort_publication_info(self):
+    publ_author_names = OV.GetParam('snum.metacif.publ_author_names')
+    if publ_author_names is not None and publ_author_names not in ('?', ''):
+      names = publ_author_names.split(';')
+      if len(names):
+        cif_loop = model.loop(
+          header=('_publ_author_name','_publ_author_email','_publ_author_address'))
+        for name in names:
+          if name != '?':
+            email = userDictionaries.people.getPersonInfo(name,'email')
+            address = userDictionaries.people.getPersonInfo(name,'address')
+            cif_loop.add_row((name, email, address))
+          if '_publ_author' in self.cif_block.loops:
+            del self.cif_block.loops['_publ_author']
+          self.cif_block.add_loop(cif_loop)
+    publ_contact_author_name = OV.get_cif_item('_publ_contact_author_name')
+    if publ_contact_author_name is not None and publ_contact_author_name != '?':
+      if '_publ_contact_author_name' in self.cif_block:
+        del self.cif_block['_publ_contact_author_name'] # hack to make things in the right order
+      self.cif_block['_publ_contact_author_name'] = publ_contact_author_name
+      self.cif_block['_publ_contact_author_email'] \
+        = userDictionaries.people.getPersonInfo(publ_contact_author_name,'email')
+      self.cif_block['_publ_contact_author_phone'] \
+        = userDictionaries.people.getPersonInfo(publ_contact_author_name,'phone')
+      self.cif_block['_publ_contact_author_address'] \
+        = userDictionaries.people.getPersonInfo(publ_contact_author_name,'address')
 
 class SaveCifInfo(CifTools):
   def __init__(self):
@@ -190,8 +219,6 @@ class EditCifInfo(CifTools):
     'merge' merges the metacif data with cif file from refinement, and brings up and external text editor with the merged cif file.
     """
     super(EditCifInfo, self).__init__()
-    self.sort_crystal_dimensions()
-    self.sort_crystal_colour()
     ## view metacif information in internal text editor
     s = StringIO()
     print >> s, self.cif_model
@@ -252,18 +279,6 @@ class MergeCif(CifTools):
       method = OV.GetParam('snum.refinement.method')
       if prg == 'smtbx-refine':
         OV.set_refinement_program(prg, 'Full Matrix')
-        if not os.path.isfile("%s/%s.vcov" %(OV.FilePath(),OV.FileName())):
-          olex.m('refine')
-        print "Creating cif:"
-        olex.m('CifCreate')
-        # pre-merge (info about refinement)
-        from cctbx_olex_adapter import OlexCctbxAdapter
-        xs = OlexCctbxAdapter().xray_structure()
-        cif_block = xs.as_cif_block()
-        s = StringIO()
-        print >> s, cif_block
-        OV.write_to_olex('xs.cif', s.getvalue())
-        OV.CifMerge('xs.cif')
       else:
         if method == 'CGLS':
           OV.set_refinement_program(prg, 'Least Squares')
@@ -471,6 +486,11 @@ class ExtractCifInfo(CifTools):
       del self.cif_block['_smtbx_masks_void']
       if '_smtbx_masks_special_details' in self.cif_block:
         del self.cif_block['_smtbx_masks_special_details']
+
+    if '_diffrn_ambient_temperature' in self.cif_block:
+      self.update_cif_block({
+        '_cell_measurement_temperature': self.cif_block['_diffrn_ambient_temperature']
+      })
 
     self.write_metacif_file()
 

@@ -9,11 +9,13 @@ import Image
 import ImageFont, ImageDraw, ImageChops
 from ImageTools import ImageTools
 import ImageFilter
+import os
 try:
   import olx
   import olex
   import olexex
   import htmlTools
+  import olex_core
 except:
   pass
 
@@ -1791,7 +1793,8 @@ class CumulativeIntensityDistribution(Analysis):
     from reflection_statistics import OlexCctbxGraphs
     xy_plot = OlexCctbxGraphs(
       'cumulative',
-      n_bins=self.params.cumulative_intensity.n_bins).xy_plot
+      n_bins=self.params.cumulative_intensity.n_bins,
+      d_min=self.params.cumulative_intensity.d_min).xy_plot
     metadata = {}
     metadata.setdefault("y_label", xy_plot.yLegend)
     metadata.setdefault("x_label", xy_plot.xLegend)
@@ -1809,7 +1812,7 @@ class CompletenessPlot(Analysis):
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.filename
     self.auto_axes = False
-    self.reverse_x = self.params.completeness.resolution_as in ('d_spacing', 'd_star_sq')
+    self.reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
     self.cctbx_completeness_statistics()
     self.make_empty_graph(axis_x = True)
     self.draw_pairs(reverse_x=self.reverse_x)
@@ -1861,6 +1864,64 @@ class SystematicAbsencesPlot(Analysis):
     self.draw_origin = True
     self.make_empty_graph(axis_x = True)
     self.draw_pairs(marker_size_factor = 1/1.5)
+
+class bijvoet_differences_scatter_plot(Analysis):
+  def __init__(self):
+    Analysis.__init__(self)
+    self.item = "bijvoet_differences_scatter"
+    self.graphInfo["pop_html"] = self.item
+    self.graphInfo["pop_name"] = self.item
+    self.graphInfo["TopRightTitle"] = self.filename
+    self.auto_axes = True
+    import reflection_statistics
+    xy_plot = reflection_statistics.bijvoet_differences_scatter_plot().xy_plot_info()
+    if xy_plot is None:
+      self.have_data = False
+      return
+    self.graphInfo["Title"] = OV.TranslatePhrase(xy_plot.title)
+    metadata = {}
+    metadata.setdefault("y_label", xy_plot.yLegend)
+    metadata.setdefault("x_label", xy_plot.xLegend)
+    self.metadata = metadata
+
+    self.have_data = True
+    self.data.setdefault('dataset1', Dataset(xy_plot.x, xy_plot.y, indices=xy_plot.indices, metadata=metadata))
+    self.draw_origin = True
+    self.make_empty_graph(axis_x = True)
+    self.draw_pairs(marker_size_factor = 1/1.5)
+    if self.have_data:
+      self.popout()
+      if self.params.systematic_absences.output_csv_file:
+        self.output_data_as_csv()
+
+class bijvoet_differences_NPP(Analysis):
+  def __init__(self, use_students_t=False):
+    Analysis.__init__(self)
+    self.item = "bijvoet_differences_NPP"
+    self.graphInfo["pop_html"] = self.item
+    self.graphInfo["pop_name"] = self.item
+    self.graphInfo["TopRightTitle"] = self.filename
+    self.auto_axes = True
+    import reflection_statistics
+    xy_plot = reflection_statistics.bijvoet_differences_NPP(
+      use_students_t=use_students_t).xy_plot_info()
+    if xy_plot is None:
+      self.have_data = False
+      return
+    self.graphInfo["Title"] = OV.TranslatePhrase(xy_plot.title)
+    metadata = {}
+    metadata.setdefault("y_label", xy_plot.yLegend)
+    metadata.setdefault("x_label", xy_plot.xLegend)
+    self.metadata = metadata
+    self.have_data = True
+    self.data.setdefault('dataset1', Dataset(xy_plot.x, xy_plot.y, indices=xy_plot.indices, metadata=metadata))
+    self.draw_origin = True
+    self.make_empty_graph(axis_x = True)
+    self.draw_pairs(marker_size_factor = 1/1.5)
+    if self.have_data:
+      self.popout()
+      if self.params.systematic_absences.output_csv_file:
+        self.output_data_as_csv()
 
 class Normal_probability_plot(Analysis):
   def __init__(self):
@@ -2226,6 +2287,8 @@ OV.registerFunction(Normal_probability_plot)
 OV.registerFunction(r1_factor_vs_resolution_plot)
 OV.registerFunction(scale_factor_vs_resolution_plot)
 OV.registerFunction(X_Y_plot)
+OV.registerFunction(bijvoet_differences_scatter_plot)
+OV.registerFunction(bijvoet_differences_NPP)
 
 def array_scalar_multiplication(array, multiplier):
   return [i * multiplier for i in array]
@@ -2324,14 +2387,16 @@ def makeReflectionGraphGui():
     else:
       gui_d['options_gui'], gui_d['colspan'] = makeReflectionGraphOptions(graph, name)
       help_name = graph.help
+      onclick = 'spy.make_reflection_graph\(%s)' %name
       d = {'name':'BUTTON_MAKE_REFLECTION_GRAPH',
            'bgcolor':guiParams.html.input_bg_colour,
-           'onclick': 'spy.make_reflection_graph(%s)' %name,
+           'onclick': onclick,
            'width':'30',
            'value':'Go',
            'valign':'top',
           }
-      gui_d['make_graph_button'] = htmlTools.make_input_button(d)
+      #gui_d['make_graph_button'] = htmlTools.make_input_button(d)
+      gui_d['make_graph_button'] = '$spy.MakeHoverButton(button_small-go@MakeGraphs,%s)' %onclick
 
   gui_d['help'] = htmlTools.make_table_first_col(
     help_name=help_name, popout=False)
@@ -2339,7 +2404,9 @@ def makeReflectionGraphGui():
      'items':"-- %Please Select% --;%Wilson Plot%;%Cumulative Intensity%;" +\
              "%Systematic Absences%;%Fobs-Fcalc%;%Fobs over Fcalc%;" +\
              "%Completeness%;%Normal Probability%;" +\
-             "%Scale factor vs resolution%;%R1 factor vs resolution%",
+             "%Scale factor vs resolution%;%R1 factor vs resolution%;" +\
+             "%Bijvoet Differences% %Normal Probability%;" +\
+             "%Bijvoet Differences% %Scatter Plot%",
      'height':guiParams.html.combo_height,
      'bgcolor':guiParams.html.input_bg_colour,
      'value':value,
@@ -2347,7 +2414,6 @@ def makeReflectionGraphGui():
      'manage':'manage',
      'readonly':'readonly',
      'width':'$eval(html.clientwidth(self)-140)',
-     'readonly':'readonly',
     }
   gui_d['graph_chooser']=htmlTools.make_combo_text_box(d)
 
@@ -2363,7 +2429,7 @@ def makeReflectionGraphGui():
 <td>
 %(graph_chooser)s
 </td>
-<td>
+<td align='right'>
 %(make_graph_button)s
 </td>
 %(row_table_off)s
@@ -2396,6 +2462,8 @@ def make_reflection_graph(name):
            'normal_probability': Normal_probability_plot,
            'r1_factor_vs_resolution': r1_factor_vs_resolution_plot,
            'scale_factor_vs_resolution': scale_factor_vs_resolution_plot,
+           'bijvoet_differences_normal_probability': bijvoet_differences_NPP,
+           'bijvoet_differences_scatter_plot': bijvoet_differences_scatter_plot,
            }
   func = run_d.get(name)
   if func is not None:

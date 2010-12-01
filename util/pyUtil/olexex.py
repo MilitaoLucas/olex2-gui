@@ -6,10 +6,13 @@ import glob
 import olx
 import os
 import time
+import math
 import olex_core
 import sys
 import programSettings
 from subprocess import *
+
+import htmlTools
 
 import socket
 import urllib
@@ -161,6 +164,17 @@ class SpyVar(object):
   MatchedRms = []
 
 class OlexRefinementModel(object):
+  restraint_types = {
+    'dfix':'bond',
+    'dang':'bond',
+    'flat':'planarity',
+    'chiv':'chirality',
+    'sadi':'bond_similarity',
+    'simu':'adp_similarity',
+    'delu':'rigid_bond',
+    'isor':'isotropic_adp',
+  }
+
   def __init__(self):
     olex_refinement_model = OV.GetRefinementModel(True)
     self._atoms = {}
@@ -186,19 +200,23 @@ class OlexRefinementModel(object):
   def atoms(self):
     return self._atoms.values()
 
+  def disorder_parts(self):
+    return [atom['part'] for atom in self._atoms.values()]
+
   def iterator(self):
     for i, atom in self._atoms.items():
       name = str(atom['label'])
       element_type = str(atom['type'])
       xyz = atom['crd'][0]
       occu = atom['occu'][0]
-      adp = atom.get('adp',None)
+      adp = atom.get('adp')
       if adp is None:
         uiso = atom.get('uiso')[0]
         u = (uiso,)
       else: u = adp[0]
+      uiso_owner = atom.get('uisoOwner')
       if name[:1] != "Q":
-        yield name, xyz, occu, u, element_type, self._fixed_variables.get(i)
+        yield name, xyz, occu, u, uiso_owner, element_type, self._fixed_variables.get(i)
 
   def afix_iterator(self):
     for afix in self._afix:
@@ -207,23 +225,62 @@ class OlexRefinementModel(object):
       pivot = afix['pivot']
       dependent = afix['dependent']
       pivot_neighbours = [i for i in self._atoms[pivot]['neighbours'] if not i in dependent]
+      if len(dependent) == 0: continue
+      dependent_part = self._atoms[dependent[0]]['part']
+      pivot_neighbours = None
       bond_length = afix['d']
       uiso = afix['u']
       yield m, n, pivot, dependent, pivot_neighbours, bond_length
 
-  def restraint_iterator(self):
-    for restraint_type in ('dfix','dang','flat','chiv'):
-      for restraint in self.model[restraint_type]:
-        kwds = dict(
-          i_seqs = [i[0] for i in restraint['atoms']],
-          sym_ops = [i[1] for i in restraint['atoms']],
-          value = restraint['value'],
-          weight = 1/math.pow(restraint['esd1'],2),
-        )
-        yield restraint_type, kwds
+  def restraints_iterator(self):
+    from libtbx.utils import flat_list
+    from cctbx import sgtbx
+    for shelxl_restraint in (self.restraint_types):
+      for restraint in self.model[shelxl_restraint]:
+        restraint_type = self.restraint_types.get(shelxl_restraint)
+        if restraint_type is None: continue
+        i_seqs = [i[0] for i in restraint['atoms']]
+        kwds = dict(i_seqs=i_seqs)
+        if restraint_type not in (
+          'adp_similarity', 'rigid_bond', 'isotropic_adp'):
+          kwds['sym_ops'] = [
+            (sgtbx.rt_mx(flat_list(i[1][:-1]), i[1][-1]) if i[1] is not None else None)
+            for i in restraint['atoms']]
+          kwds['weight'] = 1/math.pow(restraint['esd1'],2)
+        value = restraint['value']
+        if restraint_type in ('adp_similarity', 'isotropic_adp'):
+          kwds['sigma'] = restraint['esd1']
+          kwds['sigma_terminal'] = restraint['esd2'] if restraint['esd2'] != 0 else None
+        elif restraint_type == 'rigid_bond':
+          kwds['sigma_12'] = restraint['esd1']
+          kwds['sigma_13'] = restraint['esd2'] if restraint['esd2'] != 0 else None
+        if restraint_type == 'bond':
+          kwds['distance_ideal'] = value
+        elif restraint_type in ('bond_similarity', 'planarity'):
+          kwds['weights'] = [kwds['weight']]*len(i_seqs)
+          if restraint_type == 'bond_similarity':
+            sym_ops = kwds['sym_ops']
+            kwds['i_seqs'] = [[i_seq for i_seq in i_seqs[i*2:(i+1)*2]]
+                                     for i in range(int(len(i_seqs)/2))]
+            kwds['sym_ops'] = [[sym_op for sym_op in sym_ops[i*2:(i+1)*2]]
+                                       for i in range(int(len(sym_ops)/2))]
+        if 'weights' in kwds:
+          del kwds['weight']
+        if restraint_type in ('bond', ):
+          for i in range(int(len(i_seqs)/2)):
+            yield restraint_type, dict(
+              weight=kwds['weight'],
+              distance_ideal=kwds['distance_ideal'],
+              i_seqs=kwds['i_seqs'][i*2:(i+1)*2],
+              sym_ops=kwds['sym_ops'][i*2:(i+1)*2])
+        else:
+          yield restraint_type, kwds
 
   def getCell(self):
     return [self._cell[param][0] for param in ('a','b','c','alpha','beta','gamma')]
+
+  def getCellErrors(self):
+    return [self._cell[param][1] for param in ('a','b','c','alpha','beta','gamma')]
 
   def numberAtoms(self):
     return sum(atom['occu'][0] for atom in self.atoms())
@@ -352,8 +409,8 @@ def OnMatchFound(rms, fragA, fragB):
 if haveGUI:
   OV.registerCallback('onmatch',OnMatchFound)
 
-  
-  
+
+
 #def getScreenSize():
   #retval = ()
   #from win32api import GetSystemMetrics
@@ -685,7 +742,7 @@ def GetHklFileList():
   most_recent_reflection_file = ""
   for item in g:
     reflection_files+="%s.%s<-%s;" %(OV.FileName(item), OV.FileExt(item), item)
-  return str(reflection_files)
+  return reflection_files
 if haveGUI:
   OV.registerFunction(GetHklFileList)
 
@@ -752,9 +809,9 @@ def GetRInfo(txt=""):
       R1 = float(R1)
       col = GetRcolour(R1)
       R1 = "%.2f" %(R1*100)
-      t = r"<td colspan='1' align='center' rowspan='2'><font size='4' color='%s'><b>%s%%</b></font></td>" %(col, R1)
+      t = r"<td colspan='1' align='right' rowspan='2'><font size='4' color='%s'><b>%s%%</b></font></td>" %(col, R1)
     except:
-      t = "<td colspan='1' rowspan='2' align='center'><font size='4'><b>%s</b></font></td>" %R1
+      t = "<td colspan='1' rowspan='2' align='right'><font size='4'><b>%s</b></font></td>" %R1
     finally:
       return t
 
@@ -1327,7 +1384,7 @@ def updateACF(force=False):
     return
   print "Now Updating..."
 
-  
+
   mac_address = OV.GetMacAddress()
   username, computer_name = OV.GetUserComputerName()
   keyname = getKey()
