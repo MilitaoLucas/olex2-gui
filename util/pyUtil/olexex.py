@@ -1975,6 +1975,9 @@ def olex_fs_copy(src_file, dst_file):
   olex_fs.NewFile(dst_file,txt)
 OV.registerFunction(olex_fs_copy)
 
+def isPro():
+  return True
+OV.registerFunction(isPro)
 
 if not haveGUI:
   def tbxs(name):
