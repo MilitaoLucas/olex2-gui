@@ -347,7 +347,8 @@ class RunRefinementPrg(RunPrg):
     if self.params.snum.refinement.auto.tidy:
       self.doAutoTidyAfter()
       OV.File()
-    self.isInversionNeeded()
+    if OV.GetParam('snum.refinement.check_absolute_structure_after_refinement'):
+      self.isInversionNeeded()
     self.method.post_refinement(self)
 
   def doHistoryCreation(self):
