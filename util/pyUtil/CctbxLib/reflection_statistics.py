@@ -266,14 +266,19 @@ class normal_probability_plot(OlexCctbxAdapter):
 class bijvoet_differences_NPP:
   def __init__(self, hooft_analysis=None, use_students_t=False, scale=None):
     from smtbx import absolute_structure
+    self.have_bijvoet_pairs = False
     if hooft_analysis is None:
       import cctbx_olex_adapter
       hooft_analysis = cctbx_olex_adapter.hooft_analysis()
+      if not hasattr(hooft_analysis, 'delta_fo2'):
+        return
+    self.have_bijvoet_pairs = True
     self.plot = absolute_structure.bijvoet_differences_probability_plot(
-      hooft_analysis, use_students_t=use_students_t)
+      hooft_analysis, use_students_t_distribution=use_students_t)
     self.plot.show()
 
   def xy_plot_info(self):
+    if not self.have_bijvoet_pairs: return None
     r = empty()
     r.title = "Bijvoet difference normal probability plot"
     r.x = self.plot.x
@@ -290,14 +295,19 @@ class bijvoet_differences_scatter_plot(OlexCctbxAdapter):
   def __init__(self, hooft_analysis=None):
     OlexCctbxAdapter.__init__(self)
     self.info = None
+    self.have_bijvoet_pairs = False
     if hooft_analysis is None:
       import cctbx_olex_adapter
       hooft_analysis = cctbx_olex_adapter.hooft_analysis()
+      if not hasattr(hooft_analysis, 'delta_fo2'):
+        return
+    self.have_bijvoet_pairs = True
     self.delta_fo2 = hooft_analysis.delta_fo2
     self.delta_fc2 = hooft_analysis.delta_fc2
     self.indices = self.delta_fo2.indices()
 
   def xy_plot_info(self):
+    if not self.have_bijvoet_pairs: return None
     r = empty()
     r.title = "Bijvoet differences scatter plot"
     if (self.info != 0):
