@@ -1874,15 +1874,15 @@ class bijvoet_differences_scatter_plot(Analysis):
     self.auto_axes = True
     import reflection_statistics
     xy_plot = reflection_statistics.bijvoet_differences_scatter_plot().xy_plot_info()
+    if xy_plot is None:
+      self.have_data = False
+      return
     self.graphInfo["Title"] = OV.TranslatePhrase(xy_plot.title)
     metadata = {}
     metadata.setdefault("y_label", xy_plot.yLegend)
     metadata.setdefault("x_label", xy_plot.xLegend)
     self.metadata = metadata
-    if xy_plot.x is None:
-      self.have_data = False
-      print "No Bijvoet pairs present"
-      return
+
     self.have_data = True
     self.data.setdefault('dataset1', Dataset(xy_plot.x, xy_plot.y, indices=xy_plot.indices, metadata=metadata))
     self.draw_origin = True
@@ -1904,15 +1904,14 @@ class bijvoet_differences_NPP(Analysis):
     import reflection_statistics
     xy_plot = reflection_statistics.bijvoet_differences_NPP(
       use_students_t=use_students_t).xy_plot_info()
+    if xy_plot is None:
+      self.have_data = False
+      return
     self.graphInfo["Title"] = OV.TranslatePhrase(xy_plot.title)
     metadata = {}
     metadata.setdefault("y_label", xy_plot.yLegend)
     metadata.setdefault("x_label", xy_plot.xLegend)
     self.metadata = metadata
-    if xy_plot.x is None:
-      self.have_data = False
-      print "No Bijvoet pairs present"
-      return
     self.have_data = True
     self.data.setdefault('dataset1', Dataset(xy_plot.x, xy_plot.y, indices=xy_plot.indices, metadata=metadata))
     self.draw_origin = True
@@ -2404,7 +2403,9 @@ def makeReflectionGraphGui():
      'items':"-- %Please Select% --;%Wilson Plot%;%Cumulative Intensity%;" +\
              "%Systematic Absences%;%Fobs-Fcalc%;%Fobs over Fcalc%;" +\
              "%Completeness%;%Normal Probability%;" +\
-             "%Scale factor vs resolution%;%R1 factor vs resolution%",
+             "%Scale factor vs resolution%;%R1 factor vs resolution%;" +\
+             "%Bijvoet Differences% %Normal Probability%;" +\
+             "%Bijvoet Differences% %Scatter Plot%",
      'height':guiParams.html.combo_height,
      'bgcolor':guiParams.html.input_bg_colour,
      'value':value,
@@ -2461,6 +2462,8 @@ def make_reflection_graph(name):
            'normal_probability': Normal_probability_plot,
            'r1_factor_vs_resolution': r1_factor_vs_resolution_plot,
            'scale_factor_vs_resolution': scale_factor_vs_resolution_plot,
+           'bijvoet_differences_normal_probability': bijvoet_differences_NPP,
+           'bijvoet_differences_scatter_plot': bijvoet_differences_scatter_plot,
            }
   func = run_d.get(name)
   if func is not None:
@@ -2491,7 +2494,7 @@ class HealthOfStructure():
       return
     self.hkl_stats = olex_core.GetHklStat()
     self.make_HOS_html()
-    
+
   def make_HOS_html(self):
     txt = "<tr><table width='100%%'><tr>"
     l = ['MeanIOverSigma','Rint']
@@ -2510,11 +2513,11 @@ class HealthOfStructure():
     %s: <b>%s</b>
   </font></td>
 '''%(bg_colour, 100/len(l), display, value)
-      
+
     txt += "</tr></table></tr>"
     txt = txt.decode('utf-8')
     OV.write_to_olex("hos.htm" , txt)
-    
+
   def get_bg_colour(self, item):
     op = OV.GetParam('diagnostics.hkl.%s.op' %item)
     val = self.hkl_stats[item]
@@ -2526,7 +2529,7 @@ class HealthOfStructure():
       elif op == 'smaller':
         if val <= OV.GetParam('diagnostics.hkl.%s.grade%s' %(item, i)):
           break
-      
+
     if i == 1:
       retVal = self.grade_1_colour
     elif i == 2:
@@ -2535,8 +2538,8 @@ class HealthOfStructure():
       retVal = self.grade_3_colour
     elif i == 4:
       retVal = self.grade_4_colour
-      
+
     return retVal
-    
+
 HealthOfStructure_instance = HealthOfStructure()
 OV.registerFunction(HealthOfStructure_instance.run_HealthOfStructure)

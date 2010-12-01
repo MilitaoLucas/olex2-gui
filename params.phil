@@ -300,7 +300,7 @@ snum {
       .type = bool
     resolution = 0.1
       .type = float
-      
+
   }
 
   calcvoid {
@@ -326,7 +326,7 @@ snum {
     update_cif = False
       .type = bool
   }
-  
+
 
   olex_conres = RRINGS
     .type = str
@@ -540,6 +540,24 @@ graphs {
       .short_caption = "Normal Probability Plot"
       .caption = "Normal Probability Plot"
       .help = "Normal-Probability-Plot"
+    {
+      output_csv_file = False
+        .type = bool
+        .caption = "%Output% csv"
+    }
+    bijvoet_differences_normal_probability
+      .short_caption = "Bijvoet Differences Normal Probability Plot"
+      .caption = "Bijvoet Differences Normal Probability Plot"
+      .help = "Bijvoet-differences-NPP"
+    {
+      output_csv_file = False
+        .type = bool
+        .caption = "%Output% csv"
+    }
+    bijvoet_differences_scatter_plot
+      .short_caption = "Bijvoet Differences Scatter Plot"
+      .caption = "Bijvoet Differences Scatter Plot"
+      .help = "Bijvoet-differences-scatter-plot"
     {
       output_csv_file = False
         .type = bool
