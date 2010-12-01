@@ -31,6 +31,7 @@ _diffrn_standards_decay_%          .
 =saint=V7.53A=       'SAINT v7.53A (Bruker, 2008)'
 =saint=V7.56A=       'SAINT v7.56A (Bruker, 2009)'
 =saint=V7.58A=       'SAINT v7.58A (Bruker, 2009)'
+=saint=V7.60A=       'SAINT v7.60A (Bruker, 2009)'
 =saint=V7.68A=       'SAINT v7.68A (Bruker, 2009)'
 
 =shelxtl=V5.10=      'SHELXTL v6.12 (Bruker, 1998)'
@@ -39,7 +40,7 @@ _diffrn_standards_decay_%          .
 
 =xprep=V6.12=        'XPREP ver.6.12 (Bruker,2001)'
 =xprep=v6.14=        'XPREP ver.6.14 (Bruker,2003)'
-=xprep=2008/2=        'XPREP 008/2 (Bruker,2009)'
+=xprep=2008/2=       'XPREP 008/2 (Bruker,2009)'
 
 
 =sad=V2.03=          'SADABS v.2.03 (Bruker,200?)'

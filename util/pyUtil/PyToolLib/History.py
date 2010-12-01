@@ -248,9 +248,11 @@ OV.registerFunction(hist._make_history_bars)
 class HistoryTree:
 
   is_root = True
+  link_table = []
 
   def __init__(self):
     self.primary_parent_node = None
+    self.link_table = []
     self.children = []
     self.active_child_node = None
     self.active_node = None
@@ -260,7 +262,8 @@ class HistoryTree:
     self.hklFiles = {}
     self.next_sol_num = 1
 
-  def add_top_level_node(self, hklPath, resPath, lstPath=None, is_solution=True, label=None):
+  def add_top_level_node(
+    self, hklPath, resPath, lstPath=None, is_solution=True, label=None):
     if len(self.children) == 0:
       saveOriginals(resPath, lstPath)
 
@@ -268,7 +271,7 @@ class HistoryTree:
       label = 'Solution %s' %self.next_sol_num
       self.next_sol_num += 1
     name = hashlib.md5(time.asctime(time.localtime())).hexdigest()
-    node = Node(name, hklPath, resPath, lstPath, label=label,
+    node = Node(self.link_table, name, hklPath, resPath, lstPath, label=label,
                 is_solution=is_solution, primary_parent_node=self)
     self.children.append(node)
     self.active_child_node = node
@@ -283,7 +286,7 @@ class HistoryTree:
   def add_node(self, hklPath, resPath, lstPath=None):
     assert self.active_child_node is not None
     ref_name = hashlib.md5(time.asctime(time.localtime())).hexdigest()
-    node = Node(ref_name, hklPath, resPath, lstPath,
+    node = Node(self.link_table, ref_name, hklPath, resPath, lstPath,
                 primary_parent_node=self.active_node)
     self.active_node.add_child_node(node)
     self.active_node = node
@@ -303,8 +306,12 @@ class HistoryTree:
 
 class Node:
   is_root = False
+  link_table = []
+  _children = []
+  _active_child_node = None
 
   def __init__(self,
+               link_table,
                name,
                hklPath,
                resPath=None,
@@ -313,8 +320,9 @@ class Node:
                is_solution=False,
                primary_parent_node=None,
                history_leaf=None):
-    self.children = []
-    self.active_child_node = None
+    self.link_table = link_table
+    self._children = []
+    self._active_child_node = None
     self.name = name
     self.label = label
     self.primary_parent_node = primary_parent_node
@@ -326,7 +334,8 @@ class Node:
     self.hkl = None
 
     if hklPath and os.path.exists(hklPath):
-      self.hkl = hashlib.md5('%f%s' %(os.path.getmtime(hklPath),hklPath.encode('utf-8'))).hexdigest()
+      self.hkl = hashlib.md5(
+        '%f%s' %(os.path.getmtime(hklPath),hklPath.encode('utf-8'))).hexdigest()
 
     if history_leaf is None:
       if resPath is not None and os.path.exists(resPath):
@@ -374,9 +383,39 @@ class Node:
         self.program = history_leaf.refinement_program
         self.method = history_leaf.refinement_method
 
+  @property
+  def active_child_node(self):
+    try:
+      if self._active_child_node is None: return None
+      return self.link_table[self._active_child_node]
+    except TypeError:
+      # XXX backwards compatibility 2010-11-22
+      node = self._active_child_node
+      if node not in self.link_table:
+        self.link_table.append(node)
+      self._active_child_node = self.link_table.index(node)
+      return node
+  @active_child_node.setter
+  def active_child_node(self, node):
+    if node not in self.link_table:
+      self.link_table.append(node)
+    self._active_child_node = self.link_table.index(node)
+
+  @property
+  def children(self):
+    return [self.link_table[i] for i in self._children]
+  @children.setter
+  def children(self, children):
+    for i, child in enumerate(children):
+      children[i] = self.link_table.index(node)
+    self._children = children
+
   def add_child_node(self, node):
-    self.children.append(node)
-    self.active_child_node = node
+    if node not in self.link_table:
+      self.link_table.append(node)
+    i_node = self.link_table.index(node)
+    self._children.append(i_node)
+    self._active_child_node = i_node
 
   def read_lst(self, filePath):
     try:
@@ -704,17 +743,20 @@ def _convert_history(history_tree):
       leaf = branch.historyBranch[leaf_name]
       if leaf_name == 'solution':
         name = hashlib.md5(branch_name).hexdigest()
-        node = Node(name, hklPath, is_solution=True, primary_parent_node=_tree, history_leaf=leaf)
+        node = Node(_tree.link_table, name, hklPath, is_solution=True,
+                    primary_parent_node=_tree, history_leaf=leaf)
         _tree.children.append(node)
         _tree.active_child_node = node
       else:
         name = hashlib.md5(branch_name + leaf_name).hexdigest()
         if _tree.active_node is None:
-          node = Node(name, hklPath, is_solution=False, primary_parent_node=_tree, history_leaf=leaf)
+          node = Node(_tree.link_table, name, hklPath, is_solution=False,
+                      primary_parent_node=_tree, history_leaf=leaf)
           _tree.children.append(node)
           _tree.active_child_node = node
         else:
-          node = Node(name, hklPath, is_solution=False, primary_parent_node=_tree.active_node, history_leaf=leaf)
+          node = Node(_tree.link_table, name, hklPath, is_solution=False,
+                      primary_parent_node=_tree.active_node, history_leaf=leaf)
           _tree.active_node.add_child_node(node)
       _tree.active_node = node
       _tree._full_index.setdefault(name, node)

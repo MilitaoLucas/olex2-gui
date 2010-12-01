@@ -49,7 +49,7 @@ class OlexFunctions(inheritFunctions):
       else:
         value = unicode(value)
         value = value.encode('utf-8')
-        value = "'%s'" %str(value)
+        value = "'%s'" %value
       handler.update_single_param(str(variable), value)
     except Exception, ex:
       print >> sys.stderr, "Variable %s could not be set with value %s" %(variable,value)
@@ -62,6 +62,8 @@ class OlexFunctions(inheritFunctions):
       else:
         handler = olx.phil_handler
       retVal = handler.get_validated_param(variable)
+      if isinstance(retVal, str):
+        retVal = retVal.decode('utf-8')
     except Exception, ex:
       print >> sys.stderr, "Variable %s could not be found" %(variable)
       sys.stderr.formatExceptionInfo()
@@ -73,7 +75,7 @@ class OlexFunctions(inheritFunctions):
     if retVal is None:
       return ''
     else:
-      return str(retVal)
+      return "%s" %retVal
 
   def Params(self):
     if hasattr(olx, 'phil_handler'):
@@ -574,19 +576,19 @@ class OlexFunctions(inheritFunctions):
     else:
       retVal.append(mac)
     return retVal
-
+  
   def GetComputername(self):
     return os.getenv('COMPUTERNAME')
 
   def GetUsername(self):
     return os.getenv('USERNAME')
-  
+
   def GetHtmlPanelX(self):
     screen_width = int(olx.GetWindowSize().split(',')[2])
     html_panelwidth = int(olx.html_ClientWidth('self'))
     htmlPanelX = screen_width - html_panelwidth
     return htmlPanelX
-    
+
   def setAllMainToolbarTabButtons(self):
     import olexex
     olexex.setAllMainToolbarTabButtons()

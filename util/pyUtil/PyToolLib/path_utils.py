@@ -51,6 +51,7 @@ Current cctbx build: '%s'
     need_cold_start = not libtbx.env.has_module('antlr3')
   if need_cold_start:
     cold_start(cctbxSources, build_path)
+    import libtbx.load_env
     reload(libtbx.load_env)
   sys.path.extend(libtbx.env.pythonpath)
   if sys.platform.startswith('win'):

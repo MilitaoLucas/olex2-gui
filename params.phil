@@ -18,10 +18,8 @@ snum {
   refinement {
     program = ShelXL XL XH ShelXH XLMP ShelXL_ifc 'smtbx-refine'
       .type = choice
-    method = 'Least Squares' CGLS LBFGS 'Full Matrix'
+    method = 'Least Squares' CGLS 'Full Matrix'
       .type = choice
-    sg = None
-      .type = space_group
     sg_list = None
       .type = str
       .expert_level = 1
@@ -36,12 +34,18 @@ snum {
       .type = bool
       .help = Automatically update the weight instruction before the next \
               refinement
+    suggested_weight = None
+      .type = floats(size=2)
+      .help = The weighting scheme parameters suggested by the refinement \
+              program in a previous cycle
     original_formula = None
       .type = str
       .expert_level = 1
     use_solvent_mask = False
       .type = bool
     recompute_mask_before_refinement = False
+      .type = bool
+    check_absolute_structure_after_refinement = True
       .type = bool
 
     auto {
@@ -166,6 +170,8 @@ snum {
   }
 
   metacif {
+    publ_author_names = None
+      .type = str
     abs_file = None
       .type = path
       .expert_level = 1
@@ -528,6 +534,24 @@ graphs {
       .short_caption = "Normal Probability Plot"
       .caption = "Normal Probability Plot"
       .help = "Normal-Probability-Plot"
+    {
+      output_csv_file = False
+        .type = bool
+        .caption = "%Output% csv"
+    }
+    bijvoet_differences_normal_probability
+      .short_caption = "Bijvoet Differences Normal Probability Plot"
+      .caption = "Bijvoet Differences Normal Probability Plot"
+      .help = "Bijvoet-differences-NPP"
+    {
+      output_csv_file = False
+        .type = bool
+        .caption = "%Output% csv"
+    }
+    bijvoet_differences_scatter_plot
+      .short_caption = "Bijvoet Differences Scatter Plot"
+      .caption = "Bijvoet Differences Scatter Plot"
+      .help = "Bijvoet-differences-scatter-plot"
     {
       output_csv_file = False
         .type = bool

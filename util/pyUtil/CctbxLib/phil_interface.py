@@ -1,6 +1,5 @@
 import os, sys, string
 import cStringIO
-import iotbx.phil
 import libtbx.phil
 import libtbx.phil.interface
 from libtbx.phil.interface import index
@@ -81,7 +80,7 @@ class colour_converters(object):
 
 default_converter_registry = libtbx.phil.extended_converter_registry(
   additional_converters=[colour_converters],
-  base_registry=iotbx.phil.default_converter_registry)
+  base_registry=libtbx.phil.default_converter_registry)
 
 def parse(
       input_string=None,
@@ -91,7 +90,7 @@ def parse(
       process_includes=False):
   if (converter_registry is None):
     converter_registry = default_converter_registry
-  return iotbx.phil.parse(
+  return libtbx.phil.parse(
     input_string=input_string,
     source_info=source_info,
     file_name=file_name,
@@ -108,7 +107,7 @@ class phil_handler(index):
     if phil_string:
       phil_object = self.parse(phil_string)
     elif phil_file:
-      phil_object = iotbx.phil.parse(file_name=phil_file)
+      phil_object = libtbx.phil.parse(file_name=phil_file)
     if phil_object:
       for object in phil_object.objects:
         self.master_phil.adopt(object)
@@ -208,8 +207,6 @@ class phil_handler(index):
       phil_object = self.parse(file_name=phil_file)
     if phil_object:
       old_phil = self.working_phil
-      #if overwrite_params:
-        #new_paths = 
       new_phil = self.master_phil.fetch(sources=[old_phil, phil_object])
       if new_phil is not None:
         self.working_phil = new_phil.extract_format()
@@ -222,7 +219,7 @@ class phil_handler(index):
   def update(self, phil_object=None, phil_string=None, phil_file=None):
     assert [phil_object, phil_string, phil_file].count(None) == 2
     if phil_string:
-      phil_object = self.parse(str(phil_string))
+      phil_object = self.parse(phil_string)
     elif phil_file:
       phil_object = self.parse(file_name=phil_file)
     if phil_object:

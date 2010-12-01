@@ -41,6 +41,8 @@
       <arg4 name="filename" def="filename()">
       <arg5 name="base" def="basedir()">
       <arg6 name="ext" def="fileext()">
+      <arg7 name="filefull" def="filefull()">
+      
       \>
     <cmd
       <cmd0  "xgrid.Visible(false)">
@@ -59,12 +61,11 @@
       <cmd11 "SetVar(SlideQPeaksVal,0)">
       <cmd12 XXX="ceiling on">
       <cmd13 "storeparam startup file.relativePath(filefull()) true">
-      <cmd14 "if strcmp(%4,filename()) then none else 'spy.SetParam(snum.refinement.sg,sg(%n))'">
       <cmd15 "spy.setAllMainToolbarTabButtons()">
       <cmd16 "if File.Exists(strdir()/filename().vvd) then none else 'spy.SetParam(snum.refinement.original_formula,xf.GetFormula())'">
-      <cmd17 "if and(strcmp(%4,filename()),strcmp(%6,fileext())) then none else 'spy.loadHistory()'">
+      <cmd17 "if and(strcmp(%7,filefull()),strcmp(%6,fileext())) then none else 'spy.loadHistory()'">
       <cmd19 "if and(isplugininstalled(plugin-brukersaint),IsFileType('p4p')) then BSINI else none">
-      <cmd20 cmd1="if strcmp(%4,filename()) then none else 'clear'">
+      <cmd20 cmd1="if strcmp(%7,filefull()) then none else 'clear'">
       <cmd23 "syncbc">
       <cmd24 "spy.reset_file_in_OFS(solution_image.htm)">
       <cmd25 "spy.reset_file_in_OFS(refinement_image.htm)">
@@ -88,7 +89,7 @@
   <body
     <args>
   <cmd
-    <cmd "if IsFileLoaded() then '@close>>html.reload>>itemstate index* 0 index-home 1 info-title 0 logo 1>>echo File is closed'">
+    <cmd "if IsFileLoaded() then '@close>>itemstate index* 0 index-home 1 info-title 0 logo 1>>html.reload>>echo File is closed'">
   \>
 >
 >
@@ -234,6 +235,19 @@
   \>
 \>
 
+<ValidateCif help="Validates a CIF file against the given CIF dictionary"
+  <body
+    <args
+      <arg1 name="filepath" def=''>
+      <arg2 name="cif_dic" def="cif_core.dic">
+      <arg3 name="show_warnings" def="True">
+    \>
+    <cmd
+      <cmd1 "if strcmp(%1,'') then spy.ValidateCif else 'spy.ValidateCif -filepath=%1 -cif_dic=%2 -show_warnings=%3'">
+    \>
+  \>
+\>
+
 <refine help="Launches refine program. Syntax: refine [l.s.=-1] [plan=-1]"
   <body
     <args
@@ -244,7 +258,8 @@
     <cmd
       <cmd0 "xgrid.Visible(false)">
       <cmd1 "mode off">
-      <cmd4 "user 'filepath()'">
+      <cmd2 "user 'filepath()'">
+      <cmd3 "kill $q">
       <cmd5 "file">
       <cmd6 XXX="cursor(busy, 'Refining...')">
       <cmd7 "if strcmp(%1,'-1') then None else spy.SetMaxCycles(%1)">

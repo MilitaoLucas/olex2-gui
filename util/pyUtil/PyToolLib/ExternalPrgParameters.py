@@ -171,7 +171,9 @@ class Method(object):
           try:
             value = OV.FindValue('settings_%s_%s' %(instruction.name, option.name))
             if not isinstance(value, int) and not isinstance(value, float):
-              if '.' in value:
+              if ('(' in value and ')' in value):
+                value = value
+              elif '.' in value:
                 value = float(value)
               else:
                 value = int(value)
@@ -283,7 +285,9 @@ class Method_refinement(Method):
     if RunPrgObject.params.snum.refinement.auto.tidy:
       RunPrgObject.doAutoTidyBefore()
     if RunPrgObject.params.snum.refinement.update_weight:
-      olx.UpdateWght()
+      suggested_weight = OV.GetParam('snum.refinement.suggested_weight')
+      if suggested_weight is not None:
+        olx.UpdateWght(*suggested_weight)
     if RunPrgObject.make_unique_names:
       pass
       #olx.Sel('-a')
@@ -445,6 +449,9 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
     if self.original_hklsrc is not None:
       OV.HKLSrc(self.original_hklsrc)
       OV.File()
+    suggested_weight = olx.Ins('weight1')
+    if suggested_weight != 'n/a':
+      OV.SetParam('snum.refinement.suggested_weight', suggested_weight)
 
   def observe(self, RunPrgObject):
     import Analysis
@@ -581,7 +588,7 @@ class Method_cctbx_fm_refinement(Method_refinement):
     Method_refinement.pre_refinement(self, RunPrgObject)
 
   def run(self, RunPrgObject):
-    from cctbx_olex_adapter import FullMatrixRefine
+    from refinement import FullMatrixRefine
     print 'STARTING cctbx refinement'
     verbose = OV.GetParam('olex2.verbose')
     cctbx = FullMatrixRefine(
@@ -593,7 +600,7 @@ class Method_cctbx_fm_refinement(Method_refinement):
     #olx.Kill('$Q')
     cctbx.run()
     if not cctbx.failure:
-      OV.SetVar('cctbx_R1',cctbx.R1()[0])
+      OV.SetVar('cctbx_R1',cctbx.r1[0])
       olx.File('%s.res' %OV.FileName())
     OV.DeleteBitmap('refine')
 
@@ -620,10 +627,14 @@ class Method_cctbx_ChargeFlip(Method_solution):
         print "*** No solution found ***"
     except Exception, err:
       print err
-    olx.xf_EndUpdate()
-    olx.Compaq('-a')
-    olex.m("sel -a")
-    olex.m("fix occu sel")
+    try:
+      olx.Freeze(True)
+      olx.xf_EndUpdate()
+      olx.Compaq('-a')
+      olx.Move()
+      olx.Fix("occu $Q")
+    finally:
+      olx.Freeze(False)
     #olx.VSS(True)
     #olex.m("sel -a")
     #olex.m("name sel 1")
@@ -683,7 +694,6 @@ def defineExternalPrograms():
   # define refinement methods
   least_squares = Method_shelx_refinement(least_squares_phil)
   cgls = Method_shelx_refinement(cgls_phil)
-  lbfgs = Method_cctbx_refinement(lbfgs_phil)
   full_matrix = Method_cctbx_fm_refinement(full_matrix_phil)
 
   # define solution programs
@@ -792,7 +802,6 @@ def defineExternalPrograms():
     for method in (least_squares, cgls):
       prg.addMethod(method)
   smtbx_refine.addMethod(full_matrix)
-  smtbx_refine.addMethod(lbfgs)
 
   SPD = ExternalProgramDictionary()
   for prg in (ShelXS, ShelXS86, XS, ShelXD, XM, smtbx_solve):
@@ -1221,11 +1230,6 @@ instructions {
   include scope ExternalPrgParameters.shelxl_phil
 }
 """, process_includes=True)
-
-lbfgs_phil = phil_interface.parse("""
-name = LBFGS
-  .type=str
-""")
 
 full_matrix_phil = phil_interface.parse("""
 name = 'Full Matrix'
