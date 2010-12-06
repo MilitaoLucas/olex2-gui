@@ -2475,6 +2475,8 @@ OV.registerFunction(make_reflection_graph)
 class HealthOfStructure():
   def __init__(self):
     self.hkl_stats = {}
+    if not olexex.isPro():
+      return
     phil_file = r"%s/etc/CIF/diagnostics.phil" %(OV.BaseDir())
     olx.phil_handler.adopt_phil(phil_file=phil_file)
     self.grade_1_colour = OV.GetParam('gui.skin.diagnostics.colour_grade1')
