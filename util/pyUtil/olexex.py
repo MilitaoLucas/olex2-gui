@@ -1976,7 +1976,11 @@ def olex_fs_copy(src_file, dst_file):
 OV.registerFunction(olex_fs_copy)
 
 def isPro():
-  return True
+  p = "%s/pro.txt" %OV.BaseDir()
+  if os.path.exists(p):
+    return True
+  else:
+    return False
 OV.registerFunction(isPro)
 
 if not haveGUI:
