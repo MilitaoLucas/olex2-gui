@@ -325,6 +325,8 @@ snum {
       .type = float
     resolution_factor = 1/4
       .type = float
+    use_complete_set = False
+      .type = bool
     update_cif = False
       .type = bool
   }
