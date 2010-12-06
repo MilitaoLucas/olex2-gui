@@ -183,6 +183,33 @@ class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):
 
 OV.registerFunction(hooft_analysis)
 
+class students_t_hooft_analysis(OlexCctbxAdapter, absolute_structure.students_t_hooft_analysis):
+  def __init__(self, nu=None):
+    OlexCctbxAdapter.__init__(self)
+    #if scale is not None:
+      #self.scale = float(scale)
+    #else: self.scale=None
+    fo2 = self.reflections.f_sq_obs_filtered
+    if not fo2.anomalous_flag():
+      print "No Bijvoet pairs"
+      return
+    fc = self.f_calc(miller_set=fo2)
+    weights = self.compute_weights(fo2, fc)
+    scale = fo2.scale_factor(fc, weights=weights)
+    analysis = absolute_structure.hooft_analysis(fo2, fc, scale)
+    bijvoet_diff_plot = absolute_structure.bijvoet_differences_probability_plot(analysis)
+    if nu is not None:
+      nu = float(nu)
+    else:
+      nu = absolute_structure.maximise_students_t_correlation_coefficient(
+        bijvoet_diff_plot.y, 1, 101)
+    print "nu: %.1f" %nu
+    bijvoet_diff_plot.show()
+    absolute_structure.students_t_hooft_analysis.__init__(self, fo2, fc, nu, scale)
+    self.show()
+
+OV.registerFunction(students_t_hooft_analysis)
+
 
 class OlexCctbxSolve(OlexCctbxAdapter):
   def __init__(self):
