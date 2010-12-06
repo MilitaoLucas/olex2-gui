@@ -100,7 +100,7 @@ class OlexCctbxAdapter(object):
 
   def initialise_reflections(self, force=False, verbose=False):
     self.cell = self.olx_atoms.getCell()
-    self.space_group = str(olx.xf_au_GetCellSymm())
+    self.space_group = "hall: "+str(olx.xf_au_GetCellSymm("hall"))
     hklf_matrix = utils.flat_list(self.olx_atoms.model['hklf']['matrix'])
     hklf_matrix = sgtbx.rt_mx(
       sgtbx.rot_mx([int(i) for i in hklf_matrix]).transpose())
