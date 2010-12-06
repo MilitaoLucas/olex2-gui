@@ -15,19 +15,11 @@ import time
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
-global active_mode
 active_mode = None
-
-global last_mode
 last_mode = None
-
-global current_tooltip_number
 current_tooltip_number = 0
-
-global HaveModeBox
 HaveModeBox = False
 
-global hover_buttons
 
 def makeHtmlTable(list):
   """ Pass a list of dictionaries, with one dictionary for each table row.
@@ -1107,7 +1099,6 @@ def _check_modes_and_states(name):
 
 
 def MakeHoverButton(name, cmds, onoff = "off", btn_bg='table_firstcol_colour'):
-  global hover_buttons
   hover_buttons = OV.GetParam('olex2.hover_buttons')
   on = _check_modes_and_states(name)
       
@@ -1120,7 +1111,7 @@ def MakeHoverButton(name, cmds, onoff = "off", btn_bg='table_firstcol_colour'):
 OV.registerFunction(MakeHoverButton)
 
 def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
-  global hover_buttons
+  hover_buttons = OV.GetParam('olex2.hover_buttons')
   click_console_feedback = False
   n = name.split("-")
   d = {'bgcolor': OV.GetParam('gui.html.%s' %btn_bg)}
@@ -1173,7 +1164,7 @@ OV.registerFunction(MakeHoverButtonOff)
 
 
 def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
-  global hover_buttons
+  hover_buttons = OV.GetParam('olex2.hover_buttons')
   click_console_feedback = False
   n = name.split("-")
   d = {'bgcolor': OV.GetParam('gui.html.%s' %btn_bg)}
