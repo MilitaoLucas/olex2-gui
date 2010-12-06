@@ -25,6 +25,8 @@ class AutoDemo():
     self.reading_speed = reading_speed
 
   def run_autodemo(self):
+    have_hover = OV.GetParam('olex2.hover_buttons')
+    OV.SetParam('olex2.hover_buttons', True)
     self.bg_colour = IT.decimalColorToHTMLcolor(int(olx.gl_lm_ClearColor()))
     rFile = open("%s/etc/tutorials/%s.txt" %(OV.BaseDir(),self.name),'r')
     items = rFile.readlines()
@@ -130,6 +132,7 @@ class AutoDemo():
       olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
       time.sleep(1)
       olx.DeleteBitmap(bitmap)
+    OV.SetParam('olex2.hover_buttons', have_hover)
         
   
   def make_tutbox_image(self, font_size=20, font_colour='#aa4444', bg_colour='#fff6bf'):
