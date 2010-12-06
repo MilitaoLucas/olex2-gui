@@ -120,9 +120,10 @@ def web_run_sql(sql = None, script = 'run_sql'):
   
 #  sql = u"%s" %sql
   sql = sql.encode('utf-8')
-  
-  url = "http://www.olex2.org/content/DB/%s" %script
-  url = "http://www.olex2.org/%s" %script
+#  url_phil = OV.GetParam('olex2.portal_url')
+#  url = "http://www.olex2.org/content/DB/%s" %script
+#  url = "http://www.olex2.org/%s" %script
+  url = "%s/%s" %(url_phil, script)
   values = {'__ac_password':password,
             '__ac_name':username,
             'sqlQ':sql,
