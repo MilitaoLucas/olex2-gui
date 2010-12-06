@@ -375,6 +375,8 @@ olex2
     .type = bool
   hover_buttons = False
     .type = bool
+  portal_url = http://www.olex2.org
+    .type = str
 }
 
 graphs {
