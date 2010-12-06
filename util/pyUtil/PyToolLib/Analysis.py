@@ -2482,7 +2482,6 @@ class HealthOfStructure():
     self.grade_3_colour = OV.GetParam('gui.skin.diagnostics.colour_grade3')
     self.grade_4_colour = OV.GetParam('gui.skin.diagnostics.colour_grade4')
 
-  def run_HealthOfStructure(self):
     hkl = OV.HKLSrc()
     if not os.path.exists(hkl):
       print "There is no reflection file associated with this structure"
@@ -2541,5 +2540,4 @@ class HealthOfStructure():
 
     return retVal
 
-HealthOfStructure_instance = HealthOfStructure()
-OV.registerFunction(HealthOfStructure_instance.run_HealthOfStructure)
+OV.registerFunction(HealthOfStructure)
