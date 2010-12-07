@@ -269,7 +269,10 @@ class bijvoet_differences_NPP:
     self.have_bijvoet_pairs = False
     if hooft_analysis is None:
       import cctbx_olex_adapter
-      hooft_analysis = cctbx_olex_adapter.hooft_analysis()
+      if use_students_t:
+        hooft_analysis = cctbx_olex_adapter.students_t_hooft_analysis()
+      else:
+        hooft_analysis = cctbx_olex_adapter.hooft_analysis()
       if not hasattr(hooft_analysis, 'delta_fo2'):
         return
     self.have_bijvoet_pairs = True
