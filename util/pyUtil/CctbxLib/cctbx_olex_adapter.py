@@ -359,15 +359,20 @@ class OlexCctbxMasks(OlexCctbxAdapter):
           '%s/%s-f_mask.pickle' %(filepath, OV.FileName()), mask.f_mask())
         easy_pickle.dump(
           '%s/%s-f_model.pickle' %(filepath, OV.FileName()), mask.f_model())
-      mask.show_summary()
+      out = StringIO()
+      fo2 = self.reflections.f_sq_obs
+      fo2.show_comprehensive_summary(f=out)
+      print >> out
+      mask.show_summary(log=out)
       from iotbx.cif import model
       cif_block = model.block()
-      fo2 = self.reflections.f_sq_obs
       hklstat = olex_core.GetHklStat()
       merging = self.reflections.merging
       min_d_star_sq, max_d_star_sq = fo2.min_max_d_star_sq()
-      fo2 = self.reflections.f_sq_obs
-      fo2.show_comprehensive_summary()
+      f = open('%s/%s-mask.log' %(OV.FilePath(), OV.FileName()),'wb')
+      print >> f, out.getvalue()
+      f.close()
+      print out.getvalue()
       h_min, k_min, l_min = hklstat['MinIndexes']
       h_max, k_max, l_max = hklstat['MaxIndexes']
       cif_block['_diffrn_reflns_number'] = fo2.size()
