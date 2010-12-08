@@ -166,11 +166,10 @@ class OlexCctbxAdapter(object):
 from smtbx import absolute_structure
 
 class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):
-  def __init__(self, scale=None):
+  def __init__(self, probability_plot_slope=None):
     OlexCctbxAdapter.__init__(self)
-    if scale is not None:
-      self.scale = float(scale)
-    else: self.scale=None
+    if probability_plot_slope is not None:
+      probability_plot_slope = float(probability_plot_slope)
     fo2 = self.reflections.f_sq_obs_filtered
     if not fo2.anomalous_flag():
       print "No Bijvoet pairs"
@@ -178,7 +177,8 @@ class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):
     fc = self.f_calc(miller_set=fo2)
     weights = self.compute_weights(fo2, fc)
     scale = fo2.scale_factor(fc, weights=weights)
-    absolute_structure.hooft_analysis.__init__(self, fo2, fc, scale)
+    absolute_structure.hooft_analysis.__init__(
+      self, fo2, fc, probability_plot_slope=probability_plot_slope)
     self.show()
 
 OV.registerFunction(hooft_analysis)
