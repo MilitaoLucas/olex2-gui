@@ -18,7 +18,8 @@ snum {
   refinement {
     program = ShelXL XL XH ShelXH XLMP ShelXL_ifc 'smtbx-refine'
       .type = choice
-    method = 'Least Squares' CGLS 'Full Matrix'
+    method = 'Least Squares' CGLS 'Gauss-Newton' 'Levenberg-Marquardt' \
+             'Full Matrix'
       .type = choice
     sg_list = None
       .type = str

@@ -569,25 +569,6 @@ class Method_cctbx_refinement(Method_refinement):
     Method_refinement.pre_refinement(self, RunPrgObject)
 
   def run(self, RunPrgObject):
-    from cctbx_olex_adapter import OlexCctbxRefine
-    print 'STARTING cctbx refinement'
-    verbose = OV.GetParam('olex2.verbose')
-    cctbx = OlexCctbxRefine(
-      max_cycles=RunPrgObject.params.snum.refinement.max_cycles,
-      verbose=verbose)
-    #olx.Kill('$Q')
-    cctbx.run()
-    OV.SetVar('cctbx_R1',cctbx.R1)
-    olx.File('%s.res' %OV.FileName())
-    OV.DeleteBitmap('refine')
-
-class Method_cctbx_fm_refinement(Method_refinement):
-
-  def pre_refinement(self, RunPrgObject):
-    RunPrgObject.make_unique_names = True
-    Method_refinement.pre_refinement(self, RunPrgObject)
-
-  def run(self, RunPrgObject):
     from refinement import FullMatrixRefine
     print 'STARTING cctbx refinement'
     verbose = OV.GetParam('olex2.verbose')
@@ -601,7 +582,7 @@ class Method_cctbx_fm_refinement(Method_refinement):
     cctbx.run()
     if not cctbx.failure:
       OV.SetVar('cctbx_R1',cctbx.r1[0])
-      olx.File('%s.res' %OV.FileName())
+      OV.File('%s.res' %OV.FileName())
     OV.DeleteBitmap('refine')
 
 class Method_cctbx_ChargeFlip(Method_solution):
@@ -694,7 +675,8 @@ def defineExternalPrograms():
   # define refinement methods
   least_squares = Method_shelx_refinement(least_squares_phil)
   cgls = Method_shelx_refinement(cgls_phil)
-  full_matrix = Method_cctbx_fm_refinement(full_matrix_phil)
+  gauss_newton = Method_cctbx_refinement(gauss_newton_phil)
+  levenberg_marquardt = Method_cctbx_refinement(levenberg_marquardt_phil)
 
   # define solution programs
   ShelXS = Program(
@@ -792,23 +774,19 @@ def defineExternalPrograms():
     program_type='refinement',
     author="L.J. Bourhis, R.J. Gildea, R.W. Grosse-Kunstleve",
     reference="smtbx-refine (Bourhis, 2008)")
-  smtbx_fm_refine = Program(
-    name='smtbx-refine',
-    program_type='refinement',
-    author="L.J. Bourhis, R.J. Gildea, R.W. Grosse-Kunstleve",
-    reference="smtbx-refine (Bourhis, 2008)")
 
   for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc):
     for method in (least_squares, cgls):
       prg.addMethod(method)
-  smtbx_refine.addMethod(full_matrix)
+  smtbx_refine.addMethod(gauss_newton)
+  smtbx_refine.addMethod(levenberg_marquardt)
 
   SPD = ExternalProgramDictionary()
   for prg in (ShelXS, ShelXS86, XS, ShelXD, XM, smtbx_solve):
     SPD.addProgram(prg)
 
   RPD = ExternalProgramDictionary()
-  for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc, smtbx_refine, smtbx_fm_refine):
+  for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc, smtbx_refine):
     RPD.addProgram(prg)
 
   return SPD, RPD
@@ -1231,8 +1209,13 @@ instructions {
 }
 """, process_includes=True)
 
-full_matrix_phil = phil_interface.parse("""
-name = 'Full Matrix'
+gauss_newton_phil = phil_interface.parse("""
+name = 'Gauss-Newton'
+  .type=str
+""")
+
+levenberg_marquardt_phil = phil_interface.parse("""
+name = 'Levenberg-Marquardt'
   .type=str
 """)
 
