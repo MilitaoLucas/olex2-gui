@@ -100,7 +100,7 @@ class OlexCctbxAdapter(object):
 
   def initialise_reflections(self, force=False, verbose=False):
     self.cell = self.olx_atoms.getCell()
-    self.space_group = str(olx.xf_au_GetCellSymm())
+    self.space_group = "hall: "+str(olx.xf_au_GetCellSymm("hall"))
     hklf_matrix = utils.flat_list(self.olx_atoms.model['hklf']['matrix'])
     hklf_matrix = sgtbx.rt_mx(
       sgtbx.rot_mx([int(i) for i in hklf_matrix]).transpose())
@@ -182,6 +182,33 @@ class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):
     self.show()
 
 OV.registerFunction(hooft_analysis)
+
+class students_t_hooft_analysis(OlexCctbxAdapter, absolute_structure.students_t_hooft_analysis):
+  def __init__(self, nu=None):
+    OlexCctbxAdapter.__init__(self)
+    #if scale is not None:
+      #self.scale = float(scale)
+    #else: self.scale=None
+    fo2 = self.reflections.f_sq_obs_filtered
+    if not fo2.anomalous_flag():
+      print "No Bijvoet pairs"
+      return
+    fc = self.f_calc(miller_set=fo2)
+    weights = self.compute_weights(fo2, fc)
+    scale = fo2.scale_factor(fc, weights=weights)
+    analysis = absolute_structure.hooft_analysis(fo2, fc, scale)
+    bijvoet_diff_plot = absolute_structure.bijvoet_differences_probability_plot(analysis)
+    if nu is not None:
+      nu = float(nu)
+    else:
+      nu = absolute_structure.maximise_students_t_correlation_coefficient(
+        bijvoet_diff_plot.y, 1, 101)
+    print "nu: %.1f" %nu
+    bijvoet_diff_plot.show()
+    absolute_structure.students_t_hooft_analysis.__init__(self, fo2, fc, nu, scale)
+    self.show()
+
+OV.registerFunction(students_t_hooft_analysis)
 
 
 class OlexCctbxSolve(OlexCctbxAdapter):
@@ -332,15 +359,20 @@ class OlexCctbxMasks(OlexCctbxAdapter):
           '%s/%s-f_mask.pickle' %(filepath, OV.FileName()), mask.f_mask())
         easy_pickle.dump(
           '%s/%s-f_model.pickle' %(filepath, OV.FileName()), mask.f_model())
-      mask.show_summary()
+      out = StringIO()
+      fo2 = self.reflections.f_sq_obs
+      fo2.show_comprehensive_summary(f=out)
+      print >> out
+      mask.show_summary(log=out)
       from iotbx.cif import model
       cif_block = model.block()
-      fo2 = self.reflections.f_sq_obs
       hklstat = olex_core.GetHklStat()
       merging = self.reflections.merging
       min_d_star_sq, max_d_star_sq = fo2.min_max_d_star_sq()
-      fo2 = self.reflections.f_sq_obs
-      fo2.show_comprehensive_summary()
+      f = open('%s/%s-mask.log' %(OV.FilePath(), OV.FileName()),'wb')
+      print >> f, out.getvalue()
+      f.close()
+      print out.getvalue()
       h_min, k_min, l_min = hklstat['MinIndexes']
       h_max, k_max, l_max = hklstat['MaxIndexes']
       cif_block['_diffrn_reflns_number'] = fo2.size()
