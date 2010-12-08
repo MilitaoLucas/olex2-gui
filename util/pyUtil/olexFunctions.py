@@ -303,8 +303,11 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
     return self.standardizePath(newPath)
 
-  def File(self):
-    olx.File()
+  def File(self, filename=None):
+    if filename is not None:
+      olx.File("'%s'" %filename)
+    else:
+      olx.File()
 
   def timer_wrap(self,f,*args, **kwds):
     try:
