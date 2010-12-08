@@ -1879,6 +1879,8 @@ class bijvoet_differences_scatter_plot(Analysis):
       return
     self.graphInfo["Title"] = OV.TranslatePhrase(xy_plot.title)
     metadata = {}
+    metadata.setdefault("fit_slope", xy_plot.fit_slope)
+    metadata.setdefault("fit_y_intercept", xy_plot.fit_y_intercept)
     metadata.setdefault("y_label", xy_plot.yLegend)
     metadata.setdefault("x_label", xy_plot.xLegend)
     self.metadata = metadata
@@ -1909,6 +1911,8 @@ class bijvoet_differences_NPP(Analysis):
       return
     self.graphInfo["Title"] = OV.TranslatePhrase(xy_plot.title)
     metadata = {}
+    metadata.setdefault("fit_slope", xy_plot.fit_slope)
+    metadata.setdefault("fit_y_intercept", xy_plot.fit_y_intercept)
     metadata.setdefault("y_label", xy_plot.yLegend)
     metadata.setdefault("x_label", xy_plot.xLegend)
     self.metadata = metadata
