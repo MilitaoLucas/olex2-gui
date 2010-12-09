@@ -249,6 +249,18 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.xray_structure(),
       conformer_indices=flex.size_t(list(conformer_indices)),
       sym_excl_indices=flex.size_t(list(sym_excl_indices)))
+    olx_conn = self.olx_atoms.model['conn']
+    def rt_mx(olx_input):
+      from libtbx.utils import flat_list
+      return sgtbx.rt_mx(flat_list(olx_input[:-1]), olx_input[-1])
+    equivs = self.olx_atoms.model['equivalents']
+    for i_seq, v in olx_conn['atom'].items():
+      for bond_to_delete in v.get('delete', []):
+        connectivity_table.remove_bond(
+          i_seq, bond_to_delete['to'], rt_mx(equivs[bond_to_delete['eqiv']]))
+      for bond_to_add in v.get('create', []):
+        connectivity_table.add_bond(
+          i_seq, bond_to_add['to'], rt_mx(equivs[bond_to_add['eqiv']]))
     self.reparametrisation = constraints.reparametrisation(
       structure=self.xray_structure(),
       constraints=self.constraints,
@@ -467,17 +479,12 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.normal_eqns.f_calc.as_intensity_array(), array_type='calc')
     cif[OV.FileName().replace(' ', '')] = mas_as_cif_block.cif_block
     from libtbx.utils import time_log
-    time_fast = time_log("fast").start()
-    fmt_str="%-4i"*4 + "%-12.2f"*2 + "%-10.2f"
-    mas_as_cif_block.cif_block.loops['_refln'].show_fast(fmt_str=fmt_str)
-    time_fast.stop()
-    time_slow = time_log("slow").start()
-    mas_as_cif_block.cif_block.loops['_refln'].show()
-    time_slow.stop()
-    print time_fast.legend
-    print time_fast.report()
-    print time_slow.report()
-    print >> f, cif
+    time_fcf = time_log("fast").start()
+    fmt_str="%-4i"*3 + "%-12.2f"*2 + "%-10.2f"
+    cif.show(out=f, loop_format_strings={'_refln':fmt_str})
+    time_fcf.stop()
+    print time_fcf.legend
+    print time_fcf.report()
     f.close()
 
   def setup_geometrical_constraints(self, afix_iter=None):
