@@ -134,15 +134,6 @@ class Method(object):
               OV.SetParam('snum.refinement.max_cycles', val)
             elif option.name == 'npeaks':
               OV.SetParam('snum.refinement.max_peaks', val)
-            elif option.name == 'T':
-              diffrn_ambient_temperature = OV.get_cif_item(
-                '_diffrn_ambient_temperature')
-              from_ins = 273.0 + float(val.split('(')[0].strip('C'))
-              if diffrn_ambient_temperature is None:
-                OV.set_cif_item('_diffrn_ambient_temperature', from_ins)
-              elif (from_ins != float(
-                diffrn_ambient_temperature.split('(')[0].strip())):
-                print "Warning: Temp instruction from ins does not match that from cif"
           except IndexError:
             OV.SetVar('%s_%s' %(varName, option.name), '')
           count += 1
@@ -438,11 +429,6 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
         OV.HKLSrc(modified_hkl_path)
       #else:
         #print "No mask present"
-    diffrn_ambient_temperature = OV.get_cif_item('_diffrn_ambient_temperature')
-    if diffrn_ambient_temperature is not None:
-      if 'K' not in diffrn_ambient_temperature.upper():
-        diffrn_ambient_temperature += ' K'
-      olx.xf_exptl_Temperature(diffrn_ambient_temperature)
     Method_refinement.pre_refinement(self, RunPrgObject)
 
   def post_refinement(self, RunPrgObject):
