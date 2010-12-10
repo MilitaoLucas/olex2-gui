@@ -174,6 +174,10 @@ class CifTools(ArgumentParser):
                 user_modified is not None and key in user_modified or
                 user_removed is not None and key in user_removed):
           self.cif_block[key] = value
+    # this requires special treatment
+    if '_diffrn_ambient_temperature' in dictionary:
+      OV.set_cif_item(
+        '_diffrn_ambient_temperature', dictionary['_diffrn_ambient_temperature'])
     import iotbx.cif
     if isinstance(dictionary, iotbx.cif.model.block):
       for key, value in dictionary.loops.iteritems():
