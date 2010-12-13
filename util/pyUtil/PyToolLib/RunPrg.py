@@ -47,22 +47,15 @@ class RunPrg(ArgumentParser):
     self.shelx_alias = OV.FileName().replace(' ', '').lower()
 
   def __del__(self):
-    self.method.unregisterCallback()
+    if self.method is not None:
+      self.method.unregisterCallback()
 
   def run(self):
-    try:
-      res = self.method.run(self)
-    except Exception, err:
-      print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-      print " The structure %s program failed:" %self.program.program_type
-      print "  %s" %err
-      print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-    else:
-      self.runAfterProcess()
-    finally:
-      self.endRun()
-      sys.stdout.refresh = False
-      sys.stdout.graph = False
+    res = self.method.run(self)
+    self.runAfterProcess()
+    self.endRun()
+    sys.stdout.refresh = False
+    sys.stdout.graph = False
 
   def which_shelx(self, type="xl"):
     a = olexex.which_program(type)
