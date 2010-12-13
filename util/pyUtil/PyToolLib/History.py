@@ -171,9 +171,6 @@ class History(ArgumentParser):
     self._createNewHistory()
     self.setParams()
 
-  def is_empty(self):
-    return tree.historyTree == {}
-
   def _createNewHistory(self):
     self.filename = olx.FileName()
     historyPicklePath = '/'.join([self.strdir,'%s.history' %self.filename])
@@ -245,7 +242,7 @@ OV.registerFunction(hist.loadHistory)
 OV.registerFunction(hist.resetHistory)
 OV.registerFunction(hist._make_history_bars)
 
-class HistoryTree:
+class HistoryTree(object):
 
   is_root = True
   link_table = []
@@ -258,7 +255,7 @@ class HistoryTree:
     self.active_node = None
     self.name = OV.FileName()
     self._full_index = {self.name: self}
-    self.version = 2.0
+    self.version = 2.1
     self.hklFiles = {}
     self.next_sol_num = 1
 
@@ -288,7 +285,7 @@ class HistoryTree:
     ref_name = hashlib.md5(time.asctime(time.localtime())).hexdigest()
     node = Node(self.link_table, ref_name, hklPath, resPath, lstPath,
                 primary_parent_node=self.active_node)
-    self.active_node.add_child_node(node)
+    self.active_node.active_child_node = node
     self.active_node = node
     self._full_index.setdefault(ref_name, node)
     if node.hkl not in self.hklFiles:
@@ -304,22 +301,26 @@ class HistoryTree:
       node.primary_parent_node.active_child_node = node
       node = node.primary_parent_node
 
-class Node:
+class Node(object):
   is_root = False
   link_table = []
   _children = []
   _active_child_node = None
 
   def __init__(self,
-               link_table,
-               name,
-               hklPath,
+               link_table=None,
+               name=None,
+               hklPath=None,
                resPath=None,
                lstPath=None,
                label=None,
                is_solution=False,
                primary_parent_node=None,
                history_leaf=None):
+    if link_table is None:
+      # XXX backwards compatibility 2010-12-12 
+      # this should only happen if we are unpickling an old-style object of Node
+      return
     self.link_table = link_table
     self._children = []
     self._active_child_node = None
@@ -400,6 +401,8 @@ class Node:
     if node not in self.link_table:
       self.link_table.append(node)
     self._active_child_node = self.link_table.index(node)
+    if self._active_child_node not in self._children:
+      self._children.append(self._active_child_node)
 
   @property
   def children(self):
@@ -407,15 +410,10 @@ class Node:
   @children.setter
   def children(self, children):
     for i, child in enumerate(children):
-      children[i] = self.link_table.index(node)
+      if child not in self.link_table:
+        self.link_table.append(child)
+      children[i] = self.link_table.index(child)
     self._children = children
-
-  def add_child_node(self, node):
-    if node not in self.link_table:
-      self.link_table.append(node)
-    i_node = self.link_table.index(node)
-    self._children.append(i_node)
-    self._active_child_node = i_node
 
   def read_lst(self, filePath):
     try:
@@ -451,6 +449,22 @@ class Node:
 
   def full_path(self):
     return full_path(self)
+
+  def __setstate__(self, state):
+    # XXX backwards compatibility 2010-12-12
+    # This is to deal correctly with an older version of Node where
+    # active_child_node and children were not properties of Node.
+    if 'active_child_node' in state:
+      parent = state['primary_parent_node']
+      while not parent.is_root:
+        parent = parent.primary_parent_node
+      self.link_table = parent.link_table
+      self.active_child_node = state['active_child_node']
+      del state['active_child_node']
+    if 'children' in state:
+      self.children = state['children']
+      del state['children']
+    self.__dict__.update(state)
 
 def full_path(self):
   result = [self.name]
@@ -757,7 +771,7 @@ def _convert_history(history_tree):
         else:
           node = Node(_tree.link_table, name, hklPath, is_solution=False,
                       primary_parent_node=_tree.active_node, history_leaf=leaf)
-          _tree.active_node.add_child_node(node)
+          _tree.active_node.active_child_node = node
       _tree.active_node = node
       _tree._full_index.setdefault(name, node)
   return _tree
