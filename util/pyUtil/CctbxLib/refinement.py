@@ -22,7 +22,7 @@ from scitbx.lstbx import normal_eqns_solving
 from smtbx.refinement import restraints
 from smtbx.refinement import least_squares
 from smtbx.refinement import constraints
-from smtbx.refinement.constraints import geometrical_hydrogens
+from smtbx.refinement.constraints import geometrical
 import smtbx.utils
 
 solvers = {
@@ -512,7 +512,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if info is not None:
         constraint_name = info[0]
         constraint_type = getattr(
-          geometrical_hydrogens, constraint_name)
+          geometrical.hydrogens, constraint_name)
         rotating = n in (7, 8)
         stretching = n in (4, 8)
         if bond_length == 0:
