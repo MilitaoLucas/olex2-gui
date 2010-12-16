@@ -3,6 +3,7 @@ import string
 import glob
 from cStringIO import StringIO
 import datetime
+import math
 
 import olx
 import olex
@@ -18,6 +19,7 @@ SPD, RPD = ExternalPrgParameters.SPD, ExternalPrgParameters.RPD
 import iotbx.cif
 from iotbx.cif import model
 from iotbx.cif import validation
+from libtbx.utils import format_float_with_standard_uncertainty
 olx.cif_model = None
 olex2_reference = """\
 ;
@@ -172,6 +174,10 @@ class CifTools(ArgumentParser):
                 user_modified is not None and key in user_modified or
                 user_removed is not None and key in user_removed):
           self.cif_block[key] = value
+    # this requires special treatment
+    if '_diffrn_ambient_temperature' in dictionary:
+      OV.set_cif_item(
+        '_diffrn_ambient_temperature', dictionary['_diffrn_ambient_temperature'])
     import iotbx.cif
     if isinstance(dictionary, iotbx.cif.model.block):
       for key, value in dictionary.loops.iteritems():
@@ -229,6 +235,10 @@ class EditCifInfo(CifTools):
       if reader.error_count():
         return
       updated_cif_model = reader.model()
+      if '_diffrn_ambient_temperature' in updated_cif_model.values()[0]:
+        OV.set_cif_item(
+          '_diffrn_ambient_temperature',
+          updated_cif_model.values()[0]['_diffrn_ambient_temperature'])
       diff_1 = self.cif_model.values()[0].difference(updated_cif_model.values()[0])
       modified_items = diff_1._set
       removed_items = self.cif_model.values()[0]._set\
@@ -278,7 +288,7 @@ class MergeCif(CifTools):
       prg = OV.GetParam('snum.refinement.program')
       method = OV.GetParam('snum.refinement.method')
       if prg == 'smtbx-refine':
-        OV.set_refinement_program(prg, 'Full Matrix')
+        OV.set_refinement_program(prg, 'Gauss-Newton')
       else:
         if method == 'CGLS':
           OV.set_refinement_program(prg, 'Least Squares')
@@ -487,6 +497,19 @@ class ExtractCifInfo(CifTools):
       if '_smtbx_masks_special_details' in self.cif_block:
         del self.cif_block['_smtbx_masks_special_details']
 
+    temp = olx.xf_exptl_Temperature()
+    if temp != 'n/a':
+      temp = temp.split('(')
+      t = 273.15 + float(temp[0].strip('C'))
+      if len(temp) > 1:
+        if '.' in temp[0]:
+          precision = len(temp[0].split('.')[1].strip('C').strip())
+        else:
+          precision = 0
+        su = float(temp[1].split(')')[0]) / math.pow(10, precision)
+        t = format_float_with_standard_uncertainty(t, su)
+        self.cif_block['_diffrn_ambient_temperature'] = t
+      self.cif_block['_diffrn_ambient_temperature'] = t
     if '_diffrn_ambient_temperature' in self.cif_block:
       self.update_cif_block({
         '_cell_measurement_temperature': self.cif_block['_diffrn_ambient_temperature']

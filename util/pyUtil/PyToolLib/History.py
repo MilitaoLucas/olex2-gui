@@ -70,7 +70,6 @@ class History(ArgumentParser):
     OV.SetParam('snum.history.current_node', tree.active_node.name)
     self._make_history_bars()
     self.saveHistory()
-    #return self.his_file
     return tree.active_node.name
 
   def rename_history(self, name, label=None):
@@ -85,8 +84,8 @@ class History(ArgumentParser):
     assert node is not None
     if node.is_root:
       return
-    tree.set_active_node(node)
-    tree.active_node.set_params()
+    tree.active_node = node
+    node.set_params()
     filepath = OV.FilePath()
     filename = OV.FileName()
     resFile = "%s/%s.res" %(filepath, filename)
@@ -171,9 +170,6 @@ class History(ArgumentParser):
     self._createNewHistory()
     self.setParams()
 
-  def is_empty(self):
-    return tree.historyTree == {}
-
   def _createNewHistory(self):
     self.filename = olx.FileName()
     historyPicklePath = '/'.join([self.strdir,'%s.history' %self.filename])
@@ -245,81 +241,28 @@ OV.registerFunction(hist.loadHistory)
 OV.registerFunction(hist.resetHistory)
 OV.registerFunction(hist._make_history_bars)
 
-class HistoryTree:
 
-  is_root = True
-  link_table = []
-
-  def __init__(self):
-    self.primary_parent_node = None
-    self.link_table = []
-    self.children = []
-    self.active_child_node = None
-    self.active_node = None
-    self.name = OV.FileName()
-    self._full_index = {self.name: self}
-    self.version = 2.0
-    self.hklFiles = {}
-    self.next_sol_num = 1
-
-  def add_top_level_node(
-    self, hklPath, resPath, lstPath=None, is_solution=True, label=None):
-    if len(self.children) == 0:
-      saveOriginals(resPath, lstPath)
-
-    if label is None:
-      label = 'Solution %s' %self.next_sol_num
-      self.next_sol_num += 1
-    name = hashlib.md5(time.asctime(time.localtime())).hexdigest()
-    node = Node(self.link_table, name, hklPath, resPath, lstPath, label=label,
-                is_solution=is_solution, primary_parent_node=self)
-    self.children.append(node)
-    self.active_child_node = node
-    self.active_node = node
-    self._full_index.setdefault(name, node)
-    if node.hkl is not None and node.hkl not in self.hklFiles:
-      self.hklFiles.setdefault(node.hkl, compressFile(hklPath))
-
-    #hist._make_history_bars()
-    return self.active_child_node.name
-
-  def add_node(self, hklPath, resPath, lstPath=None):
-    assert self.active_child_node is not None
-    ref_name = hashlib.md5(time.asctime(time.localtime())).hexdigest()
-    node = Node(self.link_table, ref_name, hklPath, resPath, lstPath,
-                primary_parent_node=self.active_node)
-    self.active_node.add_child_node(node)
-    self.active_node = node
-    self._full_index.setdefault(ref_name, node)
-    if node.hkl not in self.hklFiles:
-      self.hklFiles.setdefault(node.hkl, compressFile(hklPath))
-
-  def full_path(self):
-    return full_path(self)
-
-  def set_active_node(self, node):
-    tree.active_node = node
-    OV.SetParam('snum.history.current_node', node.name)
-    while node.primary_parent_node is not None:
-      node.primary_parent_node.active_child_node = node
-      node = node.primary_parent_node
-
-class Node:
+class Node(object):
   is_root = False
   link_table = []
   _children = []
   _active_child_node = None
+  _primary_parent_node = None
 
   def __init__(self,
-               link_table,
-               name,
-               hklPath,
+               link_table=None,
+               name=None,
+               hklPath=None,
                resPath=None,
                lstPath=None,
                label=None,
                is_solution=False,
                primary_parent_node=None,
                history_leaf=None):
+    if link_table is None:
+      # XXX backwards compatibility 2010-12-12
+      # this should only happen if we are unpickling an old-style object of Node
+      return
     self.link_table = link_table
     self._children = []
     self._active_child_node = None
@@ -400,6 +343,8 @@ class Node:
     if node not in self.link_table:
       self.link_table.append(node)
     self._active_child_node = self.link_table.index(node)
+    if self._active_child_node not in self._children:
+      self._children.append(self._active_child_node)
 
   @property
   def children(self):
@@ -407,15 +352,20 @@ class Node:
   @children.setter
   def children(self, children):
     for i, child in enumerate(children):
-      children[i] = self.link_table.index(node)
+      if child not in self.link_table:
+        self.link_table.append(child)
+      children[i] = self.link_table.index(child)
     self._children = children
 
-  def add_child_node(self, node):
+  @property
+  def primary_parent_node(self):
+    if self._primary_parent_node is None: return None
+    return self.link_table[self._primary_parent_node]
+  @primary_parent_node.setter
+  def primary_parent_node(self, node):
     if node not in self.link_table:
       self.link_table.append(node)
-    i_node = self.link_table.index(node)
-    self._children.append(i_node)
-    self._active_child_node = i_node
+    self._primary_parent_node = self.link_table.index(node)
 
   def read_lst(self, filePath):
     try:
@@ -449,18 +399,97 @@ class Node:
     else:
       OV.set_refinement_program(self.program, self.method)
 
-  def full_path(self):
-    return full_path(self)
+  def __setstate__(self, state):
+    # XXX backwards compatibility 2010-12-12
+    # This is to deal correctly with an older version of Node where
+    # active_child_node and children were not properties of Node.
+    if 'active_child_node' in state:
+      if not self.is_root:
+        parent = state['primary_parent_node']
+        while not parent.is_root:
+          if parent.primary_parent_node is None:
+            break
+          parent = parent.primary_parent_node
+        self.link_table = parent.link_table
+      self.active_child_node = state['active_child_node']
+      if 'link_table' in state: del state['link_table']
+      del state['active_child_node']
+    if 'children' in state:
+      self.children = state['children']
+      del state['children']
+    if 'primary_parent_node' in state:
+      if state['primary_parent_node'] is not None:
+        self.primary_parent_node = state['primary_parent_node']
+      del state['primary_parent_node']
+    self.__dict__.update(state)
 
-def full_path(self):
-  result = [self.name]
-  ppn = self.primary_parent_node
-  while (ppn is not None):
-    if (ppn.name == ""): break
-    result.append(ppn.name)
-    ppn = ppn.primary_parent_node
-  result.reverse()
-  return ".".join(result)
+class HistoryTree(Node):
+
+  is_root = True
+
+  def __init__(self):
+    self._primary_parent_node = None
+    self.link_table = []
+    self._children = []
+    self._active_child_node = None
+    self._active_node = None
+    self.name = OV.FileName()
+    self._full_index = {self.name: self}
+    self.version = 2.1
+    self.hklFiles = {}
+    self.next_sol_num = 1
+
+  def add_top_level_node(
+    self, hklPath, resPath, lstPath=None, is_solution=True, label=None):
+    if len(self.children) == 0:
+      saveOriginals(resPath, lstPath)
+
+    if label is None:
+      label = 'Solution %s' %self.next_sol_num
+      self.next_sol_num += 1
+    name = hashlib.md5(time.asctime(time.localtime())).hexdigest()
+    node = Node(self.link_table, name, hklPath, resPath, lstPath, label=label,
+                is_solution=is_solution, primary_parent_node=self)
+    self.children.append(node)
+    self.active_child_node = node
+    self.active_node = node
+    self._full_index.setdefault(name, node)
+    if node.hkl is not None and node.hkl not in self.hklFiles:
+      self.hklFiles.setdefault(node.hkl, compressFile(hklPath))
+
+    return self.active_child_node.name
+
+  def add_node(self, hklPath, resPath, lstPath=None):
+    assert self.active_child_node is not None
+    ref_name = hashlib.md5(time.asctime(time.localtime())).hexdigest()
+    node = Node(self.link_table, ref_name, hklPath, resPath, lstPath,
+                primary_parent_node=self.active_node)
+    self.active_node.active_child_node = node
+    self.active_node = node
+    self._full_index.setdefault(ref_name, node)
+    if node.hkl not in self.hklFiles:
+      self.hklFiles.setdefault(node.hkl, compressFile(hklPath))
+
+  @property
+  def active_node(self):
+    return self.link_table[self._active_node]
+  @active_node.setter
+  def active_node(self, node):
+    if node not in self.link_table:
+      self.link_table.append(node)
+    self._active_node = self.link_table.index(node)
+    OV.SetParam('snum.history.current_node', node.name)
+    while node.primary_parent_node is not None:
+      node.primary_parent_node.active_child_node = node
+      node = node.primary_parent_node
+
+  def __setstate__(self, state):
+    if 'active_node' in state:
+      if 'link_table' in state:
+        del state['link_table']
+      self.active_node = state['active_node']
+      del state['active_node']
+    Node.__setstate__(self, state)
 
 def index_node(node, full_index):
   if node.name not in full_index:
@@ -486,7 +515,7 @@ def delete_history(node_name):
     while active_node.active_child_node is not None:
       active_node = active_node.active_child_node
   delete_node(node)
-  tree.set_active_node(active_node)
+  tree.active_node = active_node
   tree._full_index = index_node(tree, {})
   hist.revert_history(active_node.name)
   hist._make_history_bars()
@@ -510,28 +539,6 @@ def compressFile(filePath):
 
 def decompressFile(fileData):
   return zlib.decompress(fileData)
-
-#tree = HistoryTree()
-
-def getAllHistories():
-  solutions = ['%s<-%s' %(child.label, child.name) for child in tree.children]
-  solutions.sort()
-  historyList = []
-  for item in solutions:
-    historyList.append("%s;" %item)
-  return ''.join(historyList)
-
-def changeHistory(solution):
-  node = tree._full_index.get(solution)
-  assert node is not None
-  tree.active_child_node = node
-  while node.active_child_node is not None:
-    node = node.active_child_node
-  tree.set_active_node(node)
-  hist.revert_history(node.name)
-  OV.SetParam('snum.history.current_solution', solution)
-  hist._make_history_bars()
-  hist.rename = False
 
 def make_history_bars():
   hist._make_history_bars()
@@ -606,8 +613,6 @@ def make_html_tree(node, tree_text, indent_level, full_tree=False,
       node, tree_text, indent_level, full_tree, start_count, end_count)
   return tree_text
 
-OV.registerFunction(getAllHistories)
-OV.registerFunction(changeHistory)
 OV.registerFunction(delete_history)
 
 
@@ -757,7 +762,7 @@ def _convert_history(history_tree):
         else:
           node = Node(_tree.link_table, name, hklPath, is_solution=False,
                       primary_parent_node=_tree.active_node, history_leaf=leaf)
-          _tree.active_node.add_child_node(node)
+          _tree.active_node.active_child_node = node
       _tree.active_node = node
       _tree._full_index.setdefault(name, node)
   return _tree

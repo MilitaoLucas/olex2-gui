@@ -52,7 +52,7 @@ class OlexCctbxAdapter(object):
     if twinning is not None:
       self.twin_fraction = twinning['basf'][0]
       self.twin_law = [twinning['matrix'][j][i]
-                  for i in range(3) for j in range(3)]
+                       for i in range(3) for j in range(3)]
       twin_multiplicity = twinning.get('n', 2)
       if twin_multiplicity != 2:
         print "warning: only hemihedral twinning is currently supported"
@@ -134,8 +134,11 @@ class OlexCctbxAdapter(object):
   def f_calc(self, miller_set,
              apply_extinction_correction=True,
              apply_twin_law=True,
+             ignore_inversion_twin=False,
              algorithm="direct"):
     assert self.xray_structure().scatterers().size() > 0, "n_scatterers > 0"
+    if ignore_inversion_twin and self.twin_law == [-1,0,0,0,-1,0,0,0,-1]:
+      apply_twin_law = False
     if apply_twin_law and self.twin_law is not None:
       twinning = cctbx_controller.hemihedral_twinning(self.twin_law, miller_set)
       twin_set = twinning.twin_complete_set
@@ -166,19 +169,19 @@ class OlexCctbxAdapter(object):
 from smtbx import absolute_structure
 
 class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):
-  def __init__(self, scale=None):
+  def __init__(self, probability_plot_slope=None):
     OlexCctbxAdapter.__init__(self)
-    if scale is not None:
-      self.scale = float(scale)
-    else: self.scale=None
+    if probability_plot_slope is not None:
+      probability_plot_slope = float(probability_plot_slope)
     fo2 = self.reflections.f_sq_obs_filtered
     if not fo2.anomalous_flag():
       print "No Bijvoet pairs"
       return
-    fc = self.f_calc(miller_set=fo2)
+    fc = self.f_calc(miller_set=fo2, ignore_inversion_twin=True)
     weights = self.compute_weights(fo2, fc)
     scale = fo2.scale_factor(fc, weights=weights)
-    absolute_structure.hooft_analysis.__init__(self, fo2, fc, scale)
+    absolute_structure.hooft_analysis.__init__(
+      self, fo2, fc, probability_plot_slope=probability_plot_slope)
     self.show()
 
 OV.registerFunction(hooft_analysis)
@@ -203,8 +206,7 @@ class students_t_hooft_analysis(OlexCctbxAdapter, absolute_structure.students_t_
     else:
       nu = absolute_structure.maximise_students_t_correlation_coefficient(
         bijvoet_diff_plot.y, 1, 101)
-    print "nu: %.1f" %nu
-    bijvoet_diff_plot.show()
+    print "Student's t nu: %.1f" %nu
     absolute_structure.students_t_hooft_analysis.__init__(self, fo2, fc, nu, scale)
     self.show()
 
@@ -339,8 +341,8 @@ class OlexCctbxMasks(OlexCctbxAdapter):
           self.initialise_reflections()
       xs = self.xray_structure()
       fo_sq = self.reflections.f_sq_obs_merged.average_bijvoet_mates()
-      use_complete_set = OV.GetParam('snum.masks.use_complete_set')
-      mask = masks.mask(xs, fo_sq, use_complete_set=use_complete_set)
+      use_set_completion = OV.GetParam('snum.masks.use_set_completion')
+      mask = masks.mask(xs, fo_sq, use_set_completion=use_set_completion)
       self.time_compute = time_log("computation of mask").start()
       mask.compute(solvent_radius=self.params.solvent_radius,
                    shrink_truncation_radius=self.params.shrink_truncation_radius,
@@ -390,7 +392,8 @@ class OlexCctbxMasks(OlexCctbxAdapter):
         0.5 * uctbx.d_star_sq_as_two_theta(max_d_star_sq, self.wavelength, deg=True))
       cif_block.update(mask.as_cif_block())
       cif = model.cif()
-      cif[OV.FileName()] = cif_block
+      data_name = OV.FileName().replace(' ', '')
+      cif[data_name] = cif_block
       f = open('%s/%s-mask.cif' %(filepath, OV.FileName()),'wb')
       print >> f, cif
       f.close()

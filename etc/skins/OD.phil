@@ -8,6 +8,7 @@ gui {
   skin {
     name = "OD"
     logo_name = None
+    icon_size = 28
   }
 
   html {
@@ -82,7 +83,7 @@ gui {
     button {
       grad_colour = #e1e1e1
       grad_step = 0.3
-      height = 18
+      height = 20
       top = 2
       bg_colour_L = 1.8
       grad_colour_L = 1.9
@@ -92,8 +93,8 @@ gui {
     h1 {
       base_colour = None
       grad_colour = #527bde
-      height = 21
-      font_size = 14
+      height = 23
+      font_size = 15
       top = 2
       left = 4
       bg_colour_L = 1.2
@@ -117,6 +118,10 @@ gui {
       arrows = "bar:left:4,char:on~:off+"
       off_L = 0.6
     }
+    tinybutton{
+      height = 26
+      font_size = 18
+      }
   }
   button_colouring = #dddddd
   button_writing = #777777

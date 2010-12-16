@@ -22,36 +22,40 @@ from scitbx.lstbx import normal_eqns_solving
 from smtbx.refinement import restraints
 from smtbx.refinement import least_squares
 from smtbx.refinement import constraints
-from smtbx.refinement.constraints import geometrical_hydrogens
+from smtbx.refinement.constraints import geometrical
 import smtbx.utils
 
+solvers = {
+  'Gauss-Newton': normal_eqns_solving.naive_iterations,
+  'Levenberg-Marquardt': normal_eqns_solving.levenberg_marquardt_iterations
+}
 
-class iterations(normal_eqns_solving.naive_iterations):
+
+class olex2_normal_eqns(least_squares.normal_equations):
   log = None
 
-  def __init__(self, full_matrix_refine, **kwds):
-    normal_eqns_solving.naive_iterations.__init__(
-      self, full_matrix_refine.normal_eqns, **kwds)
-    self.full_matrix_refine = full_matrix_refine
-    self.xray_structure = full_matrix_refine.normal_eqns.xray_structure
+  def __init__(self, fo_sq, reparametrisation, olx_atoms, **kwds):
+    self.olx_atoms = olx_atoms
+    least_squares.normal_equations.__init__(
+      self, fo_sq, reparametrisation, **kwds)
 
-  def next(self):
+  def step_forward(self):
     self.xray_structure_pre_cycle = self.xray_structure.deep_copy_scatterers()
-    normal_eqns_solving.naive_iterations.next(self)
-    #self.show_cycle_summary(log=self.log)
-    #self.show_sorted_shifts(max_items=10, log=self.log)
-    #self.normal_eqns.restraints_manager.show_sorted(
-      #self.xray_structure, f=self.log) # XXX
-    #self.show_cycle_summary()
-    self.full_matrix_refine.feed_olex()
+    least_squares.normal_equations.step_forward(self)
+    self.show_cycle_summary(log=self.log)
+    self.show_sorted_shifts(max_items=10, log=self.log)
+    self.restraints_manager.show_sorted(
+      self.xray_structure, f=self.log)
+    self.show_cycle_summary()
+    self.feed_olex()
     return self
 
   def show_cycle_summary(self, log=None):
     if log is None: log = sys.stdout
     print >> log, "wR2 = %.4f for %i data and %i parameters" %(
-      self.normal_eqns.wR2(), self.normal_eqns.fo_sq.size(),
-      self.normal_eqns.reparametrisation.n_independent_params)
-    print >> log, "GooF = %.4f" %(self.normal_eqns.goof(),)
+      self.wR2(), self.fo_sq.size(),
+      self.reparametrisation.n_independent_params)
+    print >> log, "GooF = %.4f" %(self.goof(),)
     max_shift_site = self.max_shift_site()
     max_shift_u = self.max_shift_u()
     print >> log, "Max shift site: %.4f A for %s" %(
@@ -151,6 +155,50 @@ class iterations(normal_eqns_solving.naive_iterations):
         i += 1
       print >> log
 
+  def feed_olex(self):
+    ## Feed Model
+    u_total  = 0
+    u_atoms = []
+    i = 1
+
+    def iter_scatterers():
+      n_equiv_positions = self.xray_structure.space_group().n_equivalent_positions()
+      for a in self.xray_structure.scatterers():
+        label = a.label
+        xyz = a.site
+        symbol = a.scattering_type
+        if a.flags.use_u_iso():
+          u = (a.u_iso,)
+          u_eq = u[0]
+        if a.flags.use_u_aniso():
+          u_cif = adptbx.u_star_as_u_cart(self.xray_structure.unit_cell(), a.u_star)
+          u = u_cif
+          u_eq = adptbx.u_star_as_u_iso(self.xray_structure.unit_cell(), a.u_star)
+        yield (label, xyz, u, u_eq,
+               a.occupancy*(a.multiplicity()/n_equiv_positions),
+               symbol, a.flags)
+
+    for name, xyz, u, ueq, occu, symbol, flags in iter_scatterers():
+      if len(u) == 6:
+        u_trans = (u[0], u[1], u[2], u[5], u[4], u[3])
+      else:
+        u_trans = u
+
+      id = self.olx_atoms.id_for_name[name]
+      olx.xf_au_SetAtomCrd(id, *xyz)
+      olx.xf_au_SetAtomU(id, *u_trans)
+      olx.xf_au_SetAtomOccu(id, occu)
+      if not flags.grad_site():
+        olx.Fix('xyz', xyz, name)
+      if not (flags.grad_u_iso() or flags.grad_u_aniso()):
+        olx.Fix('Uiso', u, name)
+      if not flags.grad_occupancy():
+        olx.Fix('occu', occu, name)
+      u_total += u[0]
+      u_average = u_total/i
+    #olx.Sel('-u')
+    olx.xf_EndUpdate()
+
 
 class FullMatrixRefine(OlexCctbxAdapter):
   def __init__(self, max_cycles=None, max_peaks=5, verbose=False):
@@ -185,11 +233,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
         self.f_mask = easy_pickle.load("%s/%s-f_mask.pickle" %(filepath, OV.FileName()))
       if self.f_mask is None:
         print "No mask present"
-    #restraints_manager = self.restraints_manager()
-    #self.constraints += self.setup_geometrical_constraints(
-      #self.olx_atoms.afix_iterator())
-    restraints_manager = None # XXX
-    self.constraints = [] # XXX
+      else:
+        fo_sq = self.reflections.f_sq_obs_filtered
+        if not fo_sq.space_group().is_centric():
+          self.f_mask = self.f_mask.generate_bijvoet_mates().common_set(fo_sq)
+    restraints_manager = self.restraints_manager()
+    self.constraints += self.setup_geometrical_constraints(
+      self.olx_atoms.afix_iterator())
     self.n_constraints = len(self.constraints)
     shelx_parts = flex.int(self.olx_atoms.disorder_parts())
     conformer_indices = shelx_parts.deep_copy().set_selected(shelx_parts < 0, 0)
@@ -199,11 +249,25 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.xray_structure(),
       conformer_indices=flex.size_t(list(conformer_indices)),
       sym_excl_indices=flex.size_t(list(sym_excl_indices)))
+    olx_conn = self.olx_atoms.model['conn']
+    def rt_mx(olx_input):
+      from libtbx.utils import flat_list
+      return sgtbx.rt_mx(flat_list(olx_input[:-1]), olx_input[-1])
+    equivs = self.olx_atoms.model['equivalents']
+    for i_seq, v in olx_conn['atom'].items():
+      for bond_to_delete in v.get('delete', []):
+        connectivity_table.remove_bond(
+          i_seq, bond_to_delete['to'], rt_mx(equivs[bond_to_delete['eqiv']]))
+      for bond_to_add in v.get('create', []):
+        connectivity_table.add_bond(
+          i_seq, bond_to_add['to'], rt_mx(equivs[bond_to_add['eqiv']]))
+    temp = self.olx_atoms.exptl['temperature']
+    if temp < -274: temp = 20
     self.reparametrisation = constraints.reparametrisation(
       structure=self.xray_structure(),
       constraints=self.constraints,
       connectivity_table=connectivity_table,
-      temperature=self.olx_atoms.exptl['temperature'])
+      temperature=temp)
     weight = self.olx_atoms.model['weight']
     params = dict(a=0.1, b=0,
                   #c=0, d=0, e=0, f=1./3,
@@ -211,19 +275,27 @@ class FullMatrixRefine(OlexCctbxAdapter):
     for param, value in zip(params.keys()[:min(2,len(weight))], weight):
       params[param] = value
     weighting = least_squares.mainstream_shelx_weighting(**params)
-    self.normal_eqns = least_squares.normal_equations(
+    self.normal_eqns = olex2_normal_eqns(
       self.reflections.f_sq_obs_filtered,
+      self.reparametrisation,
+      self.olx_atoms,
       f_mask=self.f_mask,
-      reparametrisation=self.reparametrisation,
       restraints_manager=restraints_manager,
-      weighting_scheme=weighting)
-    self.cycles = iterations(self,
-                             n_max_iterations=self.max_cycles,
-                             log=self.log,
-                             track_all=True)
+      weighting_scheme=weighting,
+      log=self.log)
+    method = OV.GetParam('snum.refinement.method')
+    iterations = solvers.get(method)
+    iterations = normal_eqns_solving.naive_iterations
+    assert iterations is not None
     try:
-      self.cycles.do(gradient_threshold=1e-5, shift_threshold=1e-5)
-      self.scale_factor = self.cycles.scale_factors[-1]
+      self.cycles = iterations(self.normal_eqns,
+                               n_max_iterations=self.max_cycles,
+                               track_all=True,
+                               gradient_threshold=1e-8,
+                               step_threshold=1e-8)
+                               #gradient_threshold=1e-5,
+                               #step_threshold=1e-5)
+      self.scale_factor = self.cycles.scale_factor_history[-1]
       self.covariance_matrix_and_annotations=self.normal_eqns.covariance_matrix_and_annotations()
       self.export_var_covar(self.covariance_matrix_and_annotations)
       self.r1 = self.normal_eqns.r1_factor(cutoff_factor=4)
@@ -242,17 +314,18 @@ class FullMatrixRefine(OlexCctbxAdapter):
       fo_minus_fc.apply_volume_scaling()
       self.diff_stats = fo_minus_fc.statistics()
       self.post_peaks(fo_minus_fc, max_peaks=self.max_peaks)
-      #self.restraints_manager().show_sorted(self.xray_structure()) # XXX
-      #self.show_summary()
+      self.restraints_manager().show_sorted(self.xray_structure())
+      self.show_summary()
       f = open(OV.file_ChangeExt(OV.FileFull(), 'cif'), 'wb')
       cif = iotbx.cif.model.cif()
       cif[OV.FileName().replace(' ', '')] = self.as_cif_block()
       print >> f, cif
       f.close()
+      #self.output_fcf()
       new_weighting = weighting.optimise_parameters(
         self.normal_eqns.fo_sq,
         self.normal_eqns.f_calc,
-        self.normal_eqns.scale_factor,
+        self.normal_eqns.scale_factor(),
         self.reparametrisation.n_independent_params)
       OV.SetParam(
         'snum.refinement.suggested_weight', "%s %s" %(new_weighting.a, new_weighting.b))
@@ -290,7 +363,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     completeness_full = self.normal_eqns.fo_sq.resolution_filter(
       d_min=uctbx.two_theta_as_d(two_theta_full, self.wavelength, deg=True)).completeness()
     shifts_over_su = flex.abs(
-      self.normal_eqns.shifts /
+      self.normal_eqns.step() /
       flex.sqrt(self.normal_eqns.covariance_matrix(independent_params=True)\
                 .matrix_packed_u_diagonal()))
     # cell parameters and errors
@@ -399,14 +472,31 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block.sort(key=sort_key)
     return cif_block
 
+  def output_fcf(self):
+    f = open(OV.file_ChangeExt(OV.FileFull(), 'fcf'), 'wb')
+    cif = iotbx.cif.model.cif()
+    mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
+      self.normal_eqns.fo_sq, array_type='meas')
+    mas_as_cif_block.add_miller_array(
+      self.normal_eqns.f_calc.as_intensity_array(), array_type='calc')
+    cif[OV.FileName().replace(' ', '')] = mas_as_cif_block.cif_block
+    from libtbx.utils import time_log
+    time_fcf = time_log("fast").start()
+    fmt_str="%-4i"*3 + "%-12.2f"*2 + "%-10.2f"
+    cif.show(out=f, loop_format_strings={'_refln':fmt_str})
+    time_fcf.stop()
+    print time_fcf.legend
+    print time_fcf.report()
+    f.close()
+
   def setup_geometrical_constraints(self, afix_iter=None):
     geometrical_constraints = []
     constraints = {
       # AFIX mn : some of them use a pivot whose position is given wrt
       #           the first constrained scatterer site
       # m:    type                                    , pivot position
-      1:  ("tertiary_ch_site"                        , -1),
-      2:  ("secondary_ch2_sites"                     , -1),
+      1:  ("tertiary_xh_site"                        , -1),
+      2:  ("secondary_xh2_sites"                     , -1),
       3:  ("staggered_terminal_tetrahedral_xh3_sites", -1),
       4:  ("secondary_planar_xh_site"                , -1),
       8:  ("staggered_terminal_tetrahedral_xh_site"  , -1),
@@ -424,7 +514,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if info is not None:
         constraint_name = info[0]
         constraint_type = getattr(
-          geometrical_hydrogens, constraint_name)
+          geometrical.hydrogens, constraint_name)
         rotating = n in (7, 8)
         stretching = n in (4, 8)
         if bond_length == 0:
@@ -445,50 +535,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
     for item in matrix.matrix:
       wFile.write(str(item) + " ")
     wFile.close()
-
-  def feed_olex(self):
-    ## Feed Model
-    u_total  = 0
-    u_atoms = []
-    i = 1
-
-    def iter_scatterers():
-      n_equiv_positions = self.xray_structure().space_group().n_equivalent_positions()
-      for a in self.xray_structure().scatterers():
-        label = a.label
-        xyz = a.site
-        symbol = a.scattering_type
-        if a.flags.use_u_iso():
-          u = (a.u_iso,)
-          u_eq = u[0]
-        if a.flags.use_u_aniso():
-          u_cif = adptbx.u_star_as_u_cart(self.xray_structure().unit_cell(), a.u_star)
-          u = u_cif
-          u_eq = adptbx.u_star_as_u_iso(self.xray_structure().unit_cell(), a.u_star)
-        yield (label, xyz, u, u_eq,
-               a.occupancy*(a.multiplicity()/n_equiv_positions),
-               symbol, a.flags)
-
-    for name, xyz, u, ueq, occu, symbol, flags in iter_scatterers():
-      if len(u) == 6:
-        u_trans = (u[0], u[1], u[2], u[5], u[4], u[3])
-      else:
-        u_trans = u
-
-      id = self.olx_atoms.id_for_name[name]
-      olx.xf_au_SetAtomCrd(id, *xyz)
-      olx.xf_au_SetAtomU(id, *u_trans)
-      olx.xf_au_SetAtomOccu(id, occu)
-      if not flags.grad_site():
-        olx.Fix('xyz', xyz, name)
-      if not (flags.grad_u_iso() or flags.grad_u_aniso()):
-        olx.Fix('Uiso', u, name)
-      if not flags.grad_occupancy():
-        olx.Fix('occu', occu, name)
-      u_total += u[0]
-      u_average = u_total/i
-    #olx.Sel('-u')
-    olx.xf_EndUpdate()
 
   def f_obs_minus_f_calc_map(self, resolution):
     fo2 = self.normal_eqns.fo_sq.average_bijvoet_mates()
@@ -533,6 +579,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     OV.Refresh()
 
   def show_summary(self):
+    print str(self.cycles)
     print "Summary after %i cycles:" %self.cycles.n_iterations
     print "R1 (all data): %.4f for %i reflections" % self.r1_all_data
     print "R1: %.4f for %i reflections I > 2u(I)" % self.r1
