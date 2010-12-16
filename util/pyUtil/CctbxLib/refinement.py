@@ -261,11 +261,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
       for bond_to_add in v.get('create', []):
         connectivity_table.add_bond(
           i_seq, bond_to_add['to'], rt_mx(equivs[bond_to_add['eqiv']]))
+    temp = self.olx_atoms.exptl['temperature']
+    if temp < -274: temp = 20
     self.reparametrisation = constraints.reparametrisation(
       structure=self.xray_structure(),
       constraints=self.constraints,
       connectivity_table=connectivity_table,
-      temperature=self.olx_atoms.exptl['temperature'])
+      temperature=temp)
     weight = self.olx_atoms.model['weight']
     params = dict(a=0.1, b=0,
                   #c=0, d=0, e=0, f=1./3,
@@ -493,8 +495,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       # AFIX mn : some of them use a pivot whose position is given wrt
       #           the first constrained scatterer site
       # m:    type                                    , pivot position
-      1:  ("tertiary_ch_site"                        , -1),
-      2:  ("secondary_ch2_sites"                     , -1),
+      1:  ("tertiary_xh_site"                        , -1),
+      2:  ("secondary_xh2_sites"                     , -1),
       3:  ("staggered_terminal_tetrahedral_xh3_sites", -1),
       4:  ("secondary_planar_xh_site"                , -1),
       8:  ("staggered_terminal_tetrahedral_xh_site"  , -1),
