@@ -472,6 +472,7 @@ class HistoryTree(Node):
 
   @property
   def active_node(self):
+    if self._active_child_node is None: return None
     return self.link_table[self._active_node]
   @active_node.setter
   def active_node(self, node):
