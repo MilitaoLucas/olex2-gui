@@ -8,6 +8,7 @@ import olex_core
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import phil_interface
+import libtbx.utils
 
 definedControls = []
 
@@ -134,15 +135,6 @@ class Method(object):
               OV.SetParam('snum.refinement.max_cycles', val)
             elif option.name == 'npeaks':
               OV.SetParam('snum.refinement.max_peaks', val)
-            elif option.name == 'T':
-              diffrn_ambient_temperature = OV.get_cif_item(
-                '_diffrn_ambient_temperature')
-              from_ins = 273.0 + float(val.split('(')[0].strip('C'))
-              if diffrn_ambient_temperature is None:
-                OV.set_cif_item('_diffrn_ambient_temperature', from_ins)
-              elif (from_ins != float(
-                diffrn_ambient_temperature.split('(')[0].strip())):
-                print "Warning: Temp instruction from ins does not match that from cif"
           except IndexError:
             OV.SetVar('%s_%s' %(varName, option.name), '')
           count += 1
@@ -438,11 +430,6 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
         OV.HKLSrc(modified_hkl_path)
       #else:
         #print "No mask present"
-    diffrn_ambient_temperature = OV.get_cif_item('_diffrn_ambient_temperature')
-    if diffrn_ambient_temperature is not None:
-      if 'K' not in diffrn_ambient_temperature.upper():
-        diffrn_ambient_temperature += ' K'
-      olx.xf_exptl_Temperature(diffrn_ambient_temperature)
     Method_refinement.pre_refinement(self, RunPrgObject)
 
   def post_refinement(self, RunPrgObject):
@@ -451,6 +438,8 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       OV.File()
     suggested_weight = olx.Ins('weight1')
     if suggested_weight != 'n/a':
+      if len(suggested_weight.split()) == 1:
+        suggested_weight.append(' 0')
       OV.SetParam('snum.refinement.suggested_weight', suggested_weight)
 
   def observe(self, RunPrgObject):
@@ -569,26 +558,9 @@ class Method_cctbx_refinement(Method_refinement):
     Method_refinement.pre_refinement(self, RunPrgObject)
 
   def run(self, RunPrgObject):
-    from cctbx_olex_adapter import OlexCctbxRefine
-    print 'STARTING cctbx refinement'
-    verbose = OV.GetParam('olex2.verbose')
-    cctbx = OlexCctbxRefine(
-      max_cycles=RunPrgObject.params.snum.refinement.max_cycles,
-      verbose=verbose)
-    #olx.Kill('$Q')
-    cctbx.run()
-    OV.SetVar('cctbx_R1',cctbx.R1)
-    olx.File('%s.res' %OV.FileName())
-    OV.DeleteBitmap('refine')
-
-class Method_cctbx_fm_refinement(Method_refinement):
-
-  def pre_refinement(self, RunPrgObject):
-    RunPrgObject.make_unique_names = True
-    Method_refinement.pre_refinement(self, RunPrgObject)
-
-  def run(self, RunPrgObject):
     from refinement import FullMatrixRefine
+    from smtbx.refinement.constraints import InvalidConstraint
+    self.failure = True
     print 'STARTING cctbx refinement'
     verbose = OV.GetParam('olex2.verbose')
     cctbx = FullMatrixRefine(
@@ -598,11 +570,17 @@ class Method_cctbx_fm_refinement(Method_refinement):
 #      max_peaks=OV.SetMaxPeaks(),
 #      verbose=verbose)
     #olx.Kill('$Q')
-    cctbx.run()
-    if not cctbx.failure:
-      OV.SetVar('cctbx_R1',cctbx.r1[0])
-      olx.File('%s.res' %OV.FileName())
-    OV.DeleteBitmap('refine')
+    try:
+      cctbx.run()
+    except InvalidConstraint, e:
+      print e
+    else:
+      self.failure = cctbx.failure
+      if not self.failure:
+        OV.SetVar('cctbx_R1',cctbx.r1[0])
+        OV.File('%s.res' %OV.FileName())
+    finally:
+      OV.DeleteBitmap('refine')
 
 class Method_cctbx_ChargeFlip(Method_solution):
 
@@ -694,7 +672,8 @@ def defineExternalPrograms():
   # define refinement methods
   least_squares = Method_shelx_refinement(least_squares_phil)
   cgls = Method_shelx_refinement(cgls_phil)
-  full_matrix = Method_cctbx_fm_refinement(full_matrix_phil)
+  gauss_newton = Method_cctbx_refinement(gauss_newton_phil)
+  levenberg_marquardt = Method_cctbx_refinement(levenberg_marquardt_phil)
 
   # define solution programs
   ShelXS = Program(
@@ -792,23 +771,19 @@ def defineExternalPrograms():
     program_type='refinement',
     author="L.J. Bourhis, R.J. Gildea, R.W. Grosse-Kunstleve",
     reference="smtbx-refine (Bourhis, 2008)")
-  smtbx_fm_refine = Program(
-    name='smtbx-refine',
-    program_type='refinement',
-    author="L.J. Bourhis, R.J. Gildea, R.W. Grosse-Kunstleve",
-    reference="smtbx-refine (Bourhis, 2008)")
 
   for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc):
     for method in (least_squares, cgls):
       prg.addMethod(method)
-  smtbx_refine.addMethod(full_matrix)
+  smtbx_refine.addMethod(gauss_newton)
+  smtbx_refine.addMethod(levenberg_marquardt)
 
   SPD = ExternalProgramDictionary()
   for prg in (ShelXS, ShelXS86, XS, ShelXD, XM, smtbx_solve):
     SPD.addProgram(prg)
 
   RPD = ExternalProgramDictionary()
-  for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc, smtbx_refine, smtbx_fm_refine):
+  for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc, smtbx_refine):
     RPD.addProgram(prg)
 
   return SPD, RPD
@@ -1231,8 +1206,13 @@ instructions {
 }
 """, process_includes=True)
 
-full_matrix_phil = phil_interface.parse("""
-name = 'Full Matrix'
+gauss_newton_phil = phil_interface.parse("""
+name = 'Gauss-Newton'
+  .type=str
+""")
+
+levenberg_marquardt_phil = phil_interface.parse("""
+name = 'Levenberg-Marquardt'
   .type=str
 """)
 

@@ -295,18 +295,29 @@ class bijvoet_differences_NPP:
 
 
 class bijvoet_differences_scatter_plot(OlexCctbxAdapter):
-  def __init__(self, hooft_analysis=None):
+  def __init__(self, hooft_analysis=None, use_students_t=False):
     OlexCctbxAdapter.__init__(self)
     self.info = None
     self.have_bijvoet_pairs = False
     if hooft_analysis is None:
       import cctbx_olex_adapter
-      hooft_analysis = cctbx_olex_adapter.hooft_analysis()
+      if use_students_t:
+        hooft_analysis = cctbx_olex_adapter.students_t_hooft_analysis()
+      else:
+        hooft_analysis = cctbx_olex_adapter.hooft_analysis()
       if not hasattr(hooft_analysis, 'delta_fo2'):
         return
     self.have_bijvoet_pairs = True
-    self.delta_fo2 = hooft_analysis.delta_fo2
-    self.delta_fc2 = hooft_analysis.delta_fc2
+    self.delta_fo2, minus_fo2 =\
+        hooft_analysis.delta_fo2.generate_bijvoet_mates().hemispheres_acentrics()
+    self.delta_fc2, minus_fc2 =\
+        hooft_analysis.delta_fc2.generate_bijvoet_mates().hemispheres_acentrics()
+    # we want to plot both hemispheres
+    self.delta_fo2.indices().extend(minus_fo2.indices())
+    self.delta_fo2.data().extend(minus_fo2.data() * -1)
+    self.delta_fo2.sigmas().extend(minus_fo2.sigmas())
+    self.delta_fc2.indices().extend(minus_fc2.indices())
+    self.delta_fc2.data().extend(minus_fc2.data() * -1)
     self.indices = self.delta_fo2.indices()
 
   def xy_plot_info(self):
@@ -317,6 +328,9 @@ class bijvoet_differences_scatter_plot(OlexCctbxAdapter):
       r.title += ": " + str(self.info)
     r.x = self.delta_fc2.data()
     r.y = self.delta_fo2.data()
+    fit = flex.linear_regression(r.x, r.y)
+    r.fit_slope = fit.slope()
+    r.fit_y_intercept = fit.y_intercept()
     r.indices = self.indices
     r.xLegend = "delta Fc2"
     r.yLegend = "delta Fo2"

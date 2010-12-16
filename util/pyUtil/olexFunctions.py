@@ -303,8 +303,11 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
     return self.standardizePath(newPath)
 
-  def File(self):
-    olx.File()
+  def File(self, filename=None):
+    if filename is not None:
+      olx.File("'%s'" %filename)
+    else:
+      olx.File()
 
   def timer_wrap(self,f,*args, **kwds):
     try:
@@ -576,18 +579,12 @@ class OlexFunctions(inheritFunctions):
     else:
       retVal.append(mac)
     return retVal
-  
+
   def GetComputername(self):
     return os.getenv('COMPUTERNAME')
 
   def GetUsername(self):
     return os.getenv('USERNAME')
-
-  def GetHtmlPanelX(self):
-    screen_width = int(olx.GetWindowSize().split(',')[2])
-    html_panelwidth = int(olx.html_ClientWidth('self'))
-    htmlPanelX = screen_width - html_panelwidth
-    return htmlPanelX
 
   def GetHtmlPanelX(self):
     screen_width = int(olx.GetWindowSize().split(',')[2])

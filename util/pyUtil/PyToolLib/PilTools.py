@@ -71,7 +71,7 @@ class ButtonMaker(ImageTools):
       font_name = self.params.image_font_name
     if self.params.button_font_name:
       font_name = self.params.button_font_name
-    icon_height = int(OV.GetParam('gui.html.icon_size')) * 0.9
+    icon_height = int(OV.GetParam('gui.skin.icon_size')) * 0.9
     height = int(icon_height)
     width = int(icon_height * 1.1)
 
@@ -2754,18 +2754,22 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         
     elif item_type =='cbtn':
       underground = OV.GetParam('gui.html.bg_colour').rgb
-
       OV.SetParam('olex2.main_toolbar_vline_position', width - 25 - 10)
       if state == 'on':
         font_colour = self.highlight_colour
       else:
         font_colour = IT.adjust_colour(grad_colour, luminosity = 0.5)
-
       border = True
       border_weight = 1
       border_fill = IT.adjust_colour(grad_colour, luminosity = 0.8)
       arrow_scale = 0.7
+      
+      bg_colour = '#229922'
+    
 
+    self.font_colour = font_colour
+      
+      
     if "GB" in self.gui_language_encoding: #--!--
       height = height + 2
     else:
@@ -2878,7 +2882,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     elif state == "on":
       fill = self.adjust_colour(OV.GetParam('gui.html.highlight_colour').rgb, luminosity=on_L)
     elif state == "hover":
-      fill = self.adjust_colour(OV.GetParam('gui.html.highlight_colour').rgb, luminosity=on_L)
+#      fill = self.adjust_colour(OV.GetParam('gui.html.highlight_colour').rgb, luminosity=on_L)
+      fill = self.adjust_colour(OV.GetParam('gui.html.base_colour').rgb, luminosity=1.0)
     elif state == "hoveron":
       fill = self.adjust_colour(OV.GetParam('gui.html.highlight_colour').rgb, luminosity=on_L)
     else:
@@ -2907,7 +2912,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       except:
         weight = 2
       weight = int(round(weight * self.size_factor,0))
-      image = self.add_whitespace(image=image, side=side, weight=weight, colour = fill, overwrite=True)
+      if side == 'right':
+        sidefill = '#ffffff'
+      else:
+        sidefill = fill
+      image = self.add_whitespace(image=image, side=side, weight=weight, colour = sidefill, overwrite=True)
 
     if 'arrow' in arrows:
       draw = ImageDraw.Draw(image)
@@ -2976,7 +2985,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       
     if 'buttonmark' in arrows:
       if state == "hover":
-        fill = self.highlight_colour
+        fill = IT.adjust_colour(self.font_colour, luminosity=1.2)
       else:
         fill = "#ffffff"
       
@@ -3534,8 +3543,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     strip = int(width * 0.05)
     cut = (0, strip, width, width - strip)
     image = image.crop(cut)
-
-    image = image.resize(  ( int(self.params.html.icon_size) , int(int(self.params.html.icon_size)*(width-2*strip)/width)  ), Image.ANTIALIAS)
+    icon_size = self.params.skin.icon_size
+    icon_size = OV.GetParam('gui.skin.icon_size')
+    image = image.resize(  (icon_size , int(icon_size*(width-2*strip)/width)  ), Image.ANTIALIAS)
     draw = ImageDraw.Draw(image)
 
     if state == "hover":

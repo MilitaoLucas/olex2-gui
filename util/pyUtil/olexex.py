@@ -204,6 +204,7 @@ class OlexRefinementModel(object):
     return [atom['part'] for atom in self._atoms.values()]
 
   def iterator(self):
+    atom_ids = self._atoms.keys()
     for i, atom in self._atoms.items():
       name = str(atom['label'])
       element_type = str(atom['type'])
@@ -215,16 +216,21 @@ class OlexRefinementModel(object):
         u = (uiso,)
       else: u = adp[0]
       uiso_owner = atom.get('uisoOwner')
+      if uiso_owner is not None:
+        uiso_owner['id'] = atom_ids.index(uiso_owner['id'])
       if name[:1] != "Q":
         yield name, xyz, occu, u, uiso_owner, element_type, self._fixed_variables.get(i)
 
   def afix_iterator(self):
+    atoms_ids = self._atoms.keys()
     for afix in self._afix:
       mn = afix['afix']
       m, n = divmod(mn, 10)
-      pivot = afix['pivot']
-      dependent = afix['dependent']
-      pivot_neighbours = [i for i in self._atoms[pivot]['neighbours'] if not i in dependent]
+      pivot = atoms_ids.index(afix['pivot'])
+      dependent = [atoms_ids.index(i) for i in afix['dependent']]
+      pivot_neighbours = [
+        atoms_ids.index(i) for i in self._atoms[pivot]['neighbours']
+        if not i in dependent]
       if len(dependent) == 0: continue
       dependent_part = self._atoms[dependent[0]]['part']
       pivot_neighbours = None
@@ -617,7 +623,7 @@ def MakeElementButtonsFromFormula():
       for state in ['on', 'off', 'hover', '', 'highlight']:
         txt = btn_dict[b].get('txt')
         bgcolour = btn_dict[b].get('bgcolour')
-        width = 22
+        width = OV.GetParam('gui.skin.icon_size')
         btn_type = 'tiny'
         bg = OV.GetParam('gui.html.table_firstcol_colour')
         IM = TI.make_timage(item_type='tinybutton', item=txt, state=state, width=width, colour=bgcolour, whitespace='right:1:%s' %bg)

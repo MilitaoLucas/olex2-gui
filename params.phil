@@ -18,7 +18,8 @@ snum {
   refinement {
     program = ShelXL XL XH ShelXH XLMP ShelXL_ifc 'smtbx-refine'
       .type = choice
-    method = 'Least Squares' CGLS 'Full Matrix'
+    method = 'Least Squares' CGLS 'Gauss-Newton' 'Levenberg-Marquardt' \
+             'Full Matrix'
       .type = choice
     sg_list = None
       .type = str
@@ -325,7 +326,7 @@ snum {
       .type = float
     resolution_factor = 1/4
       .type = float
-    use_complete_set = False
+    use_set_completion = False
       .type = bool
     update_cif = False
       .type = bool
@@ -553,14 +554,17 @@ graphs {
         .type = bool
         .caption = "%Output% csv"
     }
-    bijvoet_differences_normal_probability
-      .short_caption = "Bijvoet Differences Normal Probability Plot"
-      .caption = "Bijvoet Differences Normal Probability Plot"
+    bijvoet_differences_probability_plot
+      .short_caption = "Bijvoet Differences Probability Plot"
+      .caption = "Bijvoet Differences Probability Plot"
       .help = "Bijvoet-differences-NPP"
     {
       output_csv_file = False
         .type = bool
         .caption = "%Output% csv"
+      use_students_t = False
+        .type = bool
+        .caption = "%Use Student's t Distribution%"
     }
     bijvoet_differences_scatter_plot
       .short_caption = "Bijvoet Differences Scatter Plot"
@@ -570,6 +574,9 @@ graphs {
       output_csv_file = False
         .type = bool
         .caption = "%Output% csv"
+      use_students_t = False
+        .type = bool
+        .caption = "%Student's t Distribution%"
     }
   }
 }
