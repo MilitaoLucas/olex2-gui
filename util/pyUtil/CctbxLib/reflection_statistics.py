@@ -295,13 +295,16 @@ class bijvoet_differences_NPP:
 
 
 class bijvoet_differences_scatter_plot(OlexCctbxAdapter):
-  def __init__(self, hooft_analysis=None):
+  def __init__(self, hooft_analysis=None, use_students_t=False):
     OlexCctbxAdapter.__init__(self)
     self.info = None
     self.have_bijvoet_pairs = False
     if hooft_analysis is None:
       import cctbx_olex_adapter
-      hooft_analysis = cctbx_olex_adapter.hooft_analysis()
+      if use_students_t:
+        hooft_analysis = cctbx_olex_adapter.students_t_hooft_analysis()
+      else:
+        hooft_analysis = cctbx_olex_adapter.hooft_analysis()
       if not hasattr(hooft_analysis, 'delta_fo2'):
         return
     self.have_bijvoet_pairs = True

@@ -65,7 +65,8 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
       value="$spy.GetParam(snum.masks.solvent_radius)"
       onleave="spy.SetParam(snum.masks.solvent_radius,GetValue(SET_SNUM_MASKS_SOLVENT_RADIUS))"
     >
-  </td>  <td>
+  </td>
+  <td>
     <input
       type="text"
       name = "SET_SNUM_MASKS_SHRINK_TRUNCATION_RADIUS"
@@ -80,10 +81,31 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
     >
   </td>
 
-<td valign='bottom'>
-$spy.MakeHoverButton(button_small-mask,spy.MaskView\())
-</td>
-  
+  <td valign='bottom'>
+  $spy.MakeHoverButton(button_small-mask,spy.MaskView\())
+  </td>
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
+<tr>
+<!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td colspan = '1' valign='bottom'>
+    <input
+      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      type="checkbox"
+      value="%Use set completion%"
+      valign="bottom"
+      name="SET_SNUM_MASKS_USE_COMPLETE_SET"
+      checked="$spy.GetParam(snum.masks.use_set_completion)"
+      height="$spy.GetParam(gui.html.input_height)"
+      width='50%'
+      oncheck="spy.SetParam(snum.masks.use_set_completion,True)"
+      onuncheck="spy.SetParam(snum.masks.use_set_completion,False)">
+  </td>
+
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
