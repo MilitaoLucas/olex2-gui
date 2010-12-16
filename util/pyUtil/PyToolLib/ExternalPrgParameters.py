@@ -8,6 +8,7 @@ import olex_core
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import phil_interface
+import libtbx.utils
 
 definedControls = []
 
@@ -437,6 +438,8 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       OV.File()
     suggested_weight = olx.Ins('weight1')
     if suggested_weight != 'n/a':
+      if len(suggested_weight.split()) == 1:
+        suggested_weight.append(' 0')
       OV.SetParam('snum.refinement.suggested_weight', suggested_weight)
 
   def observe(self, RunPrgObject):
@@ -556,6 +559,8 @@ class Method_cctbx_refinement(Method_refinement):
 
   def run(self, RunPrgObject):
     from refinement import FullMatrixRefine
+    from smtbx.refinement.constraints import InvalidConstraint
+    self.failure = True
     print 'STARTING cctbx refinement'
     verbose = OV.GetParam('olex2.verbose')
     cctbx = FullMatrixRefine(
@@ -565,11 +570,17 @@ class Method_cctbx_refinement(Method_refinement):
 #      max_peaks=OV.SetMaxPeaks(),
 #      verbose=verbose)
     #olx.Kill('$Q')
-    cctbx.run()
-    if not cctbx.failure:
-      OV.SetVar('cctbx_R1',cctbx.r1[0])
-      OV.File('%s.res' %OV.FileName())
-    OV.DeleteBitmap('refine')
+    try:
+      cctbx.run()
+    except InvalidConstraint, e:
+      print e
+    else:
+      self.failure = cctbx.failure
+      if not self.failure:
+        OV.SetVar('cctbx_R1',cctbx.r1[0])
+        OV.File('%s.res' %OV.FileName())
+    finally:
+      OV.DeleteBitmap('refine')
 
 class Method_cctbx_ChargeFlip(Method_solution):
 
