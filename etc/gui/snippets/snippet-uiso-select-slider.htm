@@ -26,10 +26,12 @@ $spy.MakeHoverButton(button_small-delete,kill sel)
     min="-20"
     max="20"
     onchange="
-sel -u
+Freeze(True)
+>>sel -u
 >>SetVar(UisoSelectVal,spy.UisoSelectSlide(GetValue(UISO_SELECT_SLIDER)))
 >>SetLabel(UisoSelectVal,GetVar(UisoSelectVal))
 >>sel atoms where xatom.uiso GetVar(UisoSelectVal)&&xatom.type!='Q''
+>>Freeze(False)
   ">
 </td>
 
