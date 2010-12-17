@@ -468,7 +468,7 @@ def restraint_builder(cmd):
   constraints = ["EXYZ", "EADP", "AFIX"]
   olex_conres = ["RRINGS", "TRIA"]
 
-  html = ""
+  html = []
   atom_pairs =  {
     "DFIX":["name_DFIX", "var_d: ", "var_s:0.02", "help_DFIX-use-help"],
     "DANG":["name_DANG", "var_d: ", "var_s:0.04", "help_Select atom pairs"],
@@ -512,14 +512,13 @@ def restraint_builder(cmd):
     if id == "name":
       name = tem
       onclick += "%s " %name
-      #html += "<td><b>%s</b></td>" %tem
     elif id == "help":
       html_help = OV.TranslatePhrase(tem)
       html_help, d = htmlTools.format_help(html_help)
     elif id == "var":
       ctrl_name = "%s_%s_TEXT_BOX" %(name, var)
-      pre_onclick += "SetVar(%s_value,GetValue(%s))>>" %(ctrl_name,ctrl_name)
-      onclick += "GetValue(%s) " %ctrl_name
+      pre_onclick += "SetVar\(%s_value,GetValue\(%s))>>" %(ctrl_name,ctrl_name)
+      onclick += "GetValue\(%s) " %ctrl_name
       if val == " ":
         val = "$GetVar(%s_value,'')" %ctrl_name
       elif ';' in val:
@@ -539,18 +538,17 @@ def restraint_builder(cmd):
            "value":val,
            "width":width,
            "height":17,
-           "bgcolor":"$spy.GetParam(gui.html.input_bg_colour)"
+           "bgcolor":"$spy.GetParam\(gui.html.input_bg_colour)"
            }
       if items:
         d.setdefault("items",items)
-      #html += "<td width='20%%'>%s</td>" %make_input_text_box(d)
       if var:
-        html += "<td width='15%%'>%s</td>" %htmlTools.makeHtmlInputBox(d)
+        html.append("<td width='15%%'>%s</td>" %htmlTools.makeHtmlInputBox(d))
 
   if name == "AFIX":
     itemcount += 2
     onclick_list = onclick.strip().split(' ')
-    onclick = 'AFIX strcat(%s,%s)' %(onclick_list[1],onclick_list[2])
+    onclick = 'AFIX strcat\(%s,%s)' %(onclick_list[1],onclick_list[2])
     post_onclick = '>>labels -a'
     mode_ondown = "mode %s" %(onclick.replace('AFIX ','HFIX '))
     mode_onup = "mode off>>sel -u"
@@ -591,20 +589,17 @@ def restraint_builder(cmd):
     "hint":"The %s command will be applied to all currently selected atoms" %name
   }
   if itemcount < colspan:
-    html+= "<td></td>"*(colspan-itemcount) # Space-filler
+    html.append("<td></td>"*(colspan-itemcount)) # Space-filler
   if name == 'AFIX':
-#    html += "<td width='25%%' align='right'>%s</td>" %htmlTools.make_input_button(clear_button_d)
-    html += "<td width='25%%' align='right'>$spy.MakeHoverButton(button_small-clear@Afix,%s)</td>" %clear_onclick
-#    html += "<td width='25%%' align='right'>%s</td>" %htmlTools.make_input_button(mode_button_d)
-    html += "<td width='25%%' align='right'>$spy.MakeHoverButton(button_small-mode@Afix,%s)</td>" %mode_ondown
-#  html += "<td width='10%%' align='right'>%s</td>" %htmlTools.make_input_button(button_d)
+    html.append("<td width='25%%' align='right'>$spy.MakeHoverButton(button_small-clear@Afix,%s)</td>" %clear_onclick)
+    html.append("<td width='25%%' align='right'>$spy.MakeHoverButton(button_small-mode@Afix,%s)</td>" %mode_ondown)
 
-  html += "<td width='25%%' align='right'>$spy.MakeHoverButton(button_small-go@%s,%s)</td>" %(name, onclick)
+  html.append("<td width='25%%' align='right'>$spy.MakeHoverButton(button_small-go@%s,%s)</td>" %(name, onclick))
 
   #Add the help info as the last row in the table
-  html += "</td></tr><tr>"
-  html += htmlTools.make_table_first_col(help_name=name, popout=True, help_image='normal')
-  html += "<td colspan=%s bgcolor='%s'>%s</td></tr>" %(colspan, OV.GetParam('gui.html.table_firstcol_colour'), html_help, )
+  html.append("</td></tr><tr>")
+  html.append(htmlTools.make_table_first_col(help_name=name, popout=True, help_image='normal'))
+  html.append("<td colspan=%s bgcolor='%s'>%s</td></tr>" %(colspan, OV.GetParam('gui.html.table_firstcol_colour'), html_help, ))
   if name in constraints:
     wFilePath = r"constraint-vars.htm"
   elif name in olex_conres:
@@ -612,7 +607,7 @@ def restraint_builder(cmd):
   else:
     wFilePath = r"restraint-vars.htm"
 
-  OV.write_to_olex(wFilePath, html)
+  OV.write_to_olex(wFilePath, '\n'.join(html))
   OV.UpdateHtml()
   return "Done"
 OV.registerFunction(restraint_builder)
