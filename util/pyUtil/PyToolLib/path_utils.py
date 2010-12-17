@@ -10,7 +10,8 @@ def setup_cctbx():
     cctbxRoot = cctbx_dir
   else:
     cctbxRoot = str("%s/cctbx" %basedir)
-  build_path = os.environ['LIBTBX_BUILD'] = os.path.normpath(str("%s/cctbx_build" % cctbxRoot))
+  build_path = os.environ['LIBTBX_BUILD'] = os.path.normpath(
+    str("%s/cctbx_build" % cctbxRoot))
   if os.path.isdir("%s/cctbx_project" %cctbxRoot):
     cctbxSources = "%s/cctbx_project" %cctbxRoot
   else:
@@ -41,7 +42,7 @@ def setup_cctbx():
     cctbx_TAG_file = open("%s/TAG" %cctbxSources,'r')
     cctbx_compile_date = cctbx_TAG_file.readline().strip()
     cctbx_TAG_file.close()
-    cctbx_compatible_version = "2010_09_22_0000"
+    cctbx_compatible_version = "2010_12_16_0000"
     if int(cctbx_compile_date.replace('_','')) < int(cctbx_compatible_version.replace('_','')):
       sys.stdout.write("""Warning: An incompatible version of the cctbx is installed.
 Please update to cctbx build '%s' or later.
