@@ -10,11 +10,11 @@
 <tr>
   <td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
   <td valign='center'>
-  <b>%Sample Structures%</b>: 
-  <a href="reap '$GetVar(sample_dir)/sucrose/sucrose'">%Sucrose%</a> | 
-  <a href="reap '$GetVar(sample_dir)/THPP/thpp'">THPP</a> | 
-  <a href="reap '$GetVar(sample_dir)/Co110/Co110'">Co110</a> | 
-  <a href="reap '$GetVar(sample_dir)/ZP2/ZP2'">ZP2</a> | 
+  <b>%Sample Structures%</b>:
+  <a href="reap '$GetVar(sample_dir)/sucrose/sucrose'">%Sucrose%</a> |
+  <a href="reap '$GetVar(sample_dir)/THPP/thpp'">THPP</a> |
+  <a href="reap '$GetVar(sample_dir)/Co110/Co110'">Co110</a> |
+  <a href="reap '$GetVar(sample_dir)/ZP2/ZP2'">ZP2</a> |
   <a href="reap '$GetVar(sample_dir)/ZZULI2/ZZULI2'">ZZULI2</a>
   </td>
 </tr>
@@ -22,14 +22,17 @@
 <tr>
   <td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
   <td>
-  <b>%Settings%</b>: 
-  <a target="Setup Olex2" href="setup">%Setup Olex2%</a> | 
-  <a target="Set atom colours and styles" href="@reap -b 'BaseDir()/sample_data/Periodic Table/Periodic Table.cif' -b>>
+  <b>%Settings%</b>:
+  <a target="Setup Olex2" href="setup">%Setup Olex2%</a> |
+  <a target="Set atom colours and styles" href="
+Freeze(true)>>
+@reap -b 'BaseDir()/sample_data/Periodic Table/Periodic Table.cif' -b>>
 sel -a>>
-conn 0>>
+conn 0 0>>
 matr 3>>
 rota 2 90>>
-  ">%Atom Styles%</a>
+Freeze(false)>>
+">%Atom Styles%</a>
   </td>
 </tr>
 
@@ -37,9 +40,9 @@ rota 2 90>>
 <tr>
   <td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
   <td valign='center'>
-  <b>%Tutorials%</b>: 
-  <a target='Start Tutorial' href="spy.make_help_box -name=getting-started_main-window -popout=False -type=tutorial">%Getting Started%</a> | 
-  <a target='Start Tutorial' href="spy.make_help_box -name=sucrose_introduction -popout=False -type=tutorial">%Sucrose%</a> | 
+  <b>%Tutorials%</b>:
+  <a target='Start Tutorial' href="spy.make_help_box -name=getting-started_main-window -popout=False -type=tutorial">%Getting Started%</a> |
+  <a target='Start Tutorial' href="spy.make_help_box -name=sucrose_introduction -popout=False -type=tutorial">%Sucrose%</a> |
   <a target='Quick Demo' href="@py>>@py from Tutorials import AutoDemo>>spy.run_autodemo()"><b>%QuickDemo%</b></a>
   <zimg src='new'>
   </td>
@@ -51,7 +54,7 @@ rota 2 90>>
   <td valign='center'>
     <b>%Documentation%</b>:
 
-  <a target='Documentation' href="shell 'http://docs.google.com/View?id=dwxkst2_159fgj29dg4'"><b>Online</b></a> | 
+  <a target='Documentation' href="shell 'http://docs.google.com/View?id=dwxkst2_159fgj29dg4'"><b>Online</b></a> |
   <a target='Documentation' href="shell 'BaseDir()/etc/documentation/Commands.pdf'">Static %PDF% October 2010</a>
   </td>
 </tr>
