@@ -51,7 +51,7 @@ class OlexCctbxAdapter(object):
     twinning=self.olx_atoms.model.get('twin')
     if twinning is not None:
       self.twin_fraction = twinning['basf'][0]
-      self.twin_law = [twinning['matrix'][j][i]
+      self.twin_law = [int(twinning['matrix'][j][i])
                        for i in range(3) for j in range(3)]
       twin_multiplicity = twinning.get('n', 2)
       if twin_multiplicity != 2:
