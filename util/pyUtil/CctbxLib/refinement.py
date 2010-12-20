@@ -236,7 +236,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       else:
         fo_sq = self.reflections.f_sq_obs_filtered
         if not fo_sq.space_group().is_centric():
-          self.f_mask = self.f_mask.generate_bijvoet_mates().common_set(fo_sq)
+          self.f_mask = self.f_mask.generate_bijvoet_mates()
+        self.f_mask = self.f_mask.common_set(fo_sq)
     restraints_manager = self.restraints_manager()
     self.constraints += self.setup_geometrical_constraints(
       self.olx_atoms.afix_iterator())
