@@ -439,7 +439,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
     suggested_weight = olx.Ins('weight1')
     if suggested_weight != 'n/a':
       if len(suggested_weight.split()) == 1:
-        suggested_weight.append(' 0')
+        suggested_weight += ' 0'
       OV.SetParam('snum.refinement.suggested_weight', suggested_weight)
 
   def observe(self, RunPrgObject):
