@@ -530,19 +530,19 @@ def make_tick_box_input(d):
 
   html = """
 <input
-  type='checkbox'
-  width='%(width)s'
-  height='%(height)s'
-  name='%(ctrl_name)s'
-  bgcolor='%(bgcolor)s'
-  fgcolor='%(fgcolor)s'
+  type="checkbox"
+  width="%(width)s"
+  height="%(height)s"
+  name="%(ctrl_name)s"
+  bgcolor="%(bgcolor)s"
+  fgcolor="%(fgcolor)s"
   %(state)s
   %(checked)s
-  oncheck='%(oncheck)s'
-  onuncheck='%(onuncheck)s'
-  value='%(value)s'
+  oncheck="%(oncheck)s"
+  onuncheck="%(onuncheck)s"
+  value="%(value)s"
   %(manage)s
-  data='%(data)s'
+  data="%(data)s"
   >
 """ %dic
   return html
@@ -565,19 +565,19 @@ def make_spin_input(d):
   dic.update(d)
   html = """
 <input
-  label='%(label)s'
-  valign='%(valign)s'
-  halign='%(halign)s'
-  type='spin'
-  name='%(ctrl_name)s'
-  width='%(width)s'
-  height='%(height)s'
-  max='%(max)s'
-  min='%(min)s'
-  bgcolor='%(bgcolor)s'
-  value='%(value)s'
-  onchange='%(onchange)s'
-  manage='%(manage)s'
+  label="%(label)s"
+  valign="%(valign)s"
+  halign="%(halign)s"
+  type="spin"
+  name="%(ctrl_name)s"
+  width="%(width)s"
+  height="%(height)s"
+  max="%(max)s"
+  min="%(min)s"
+  bgcolor="%(bgcolor)s"
+  value="%(value)s"
+  onchange="%(onchange)s"
+  manage="%(manage)s"
   >""" %dic
   return html
 
