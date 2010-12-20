@@ -1726,6 +1726,8 @@ def AvailablePlugins():
              {'display':'Oxford Diffraction Skin',
               'blurb':'A custom-made visual design for Oxford Diffraction'},
             }
+  plugins = {
+            }
   s = "<hr>"
   green = OV.FindValue('gui_green', "#00ff00")
   red = OV.FindValue('gui_red', "#ff0000")
