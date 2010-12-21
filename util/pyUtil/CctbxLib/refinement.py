@@ -510,6 +510,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     return constraints
     
   def setup_occupancy_constraints(self):
+    atoms_ids = self.olx_atoms._atoms.keys()
     constraints = []
     vars = self.olx_atoms.model['variables']['variables']
     for var in vars:
@@ -518,9 +519,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
       as_var_minus_one = []
       for ref in refs:
         if ref['index'] == 4 and ref['relation'] == "var":
-          as_var.append((ref['id'], ref['k']))
+          as_var.append((atoms_ids.index(ref['id']), ref['k']))
         if ref['index'] == 4 and ref['relation'] == "one_minus_var":
-          as_var_minus_one.append((ref['id'], ref['k']))
+          as_var_minus_one.append((atoms_ids.index(ref['id']), ref['k']))
       if (len(as_var) + len(as_var_minus_one)) != 0:
         current = occupancy.dependent_occupancy(as_var, as_var_minus_one)
         constraints.append(current)
