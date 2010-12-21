@@ -2005,6 +2005,7 @@ OV.registerFunction(olex_fs_copy)
 def isPro():
   p = "%s/pro.txt" %OV.BaseDir()
   if os.path.exists(p):
+    OV.SetParam('olex2.hover_buttons',True)
     return True
   else:
     return False
