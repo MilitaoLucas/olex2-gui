@@ -290,15 +290,16 @@ class OlexRefinementModel(object):
   def constraints_iterator(self):
     from libtbx.utils import flat_list
     from cctbx import sgtbx
+    atoms_ids = self._atoms.keys()
     for shelxl_constraint in (self.constraint_types):
       for constraint in self.model[shelxl_constraint]:
         constraint_type = self.constraint_types.get(shelxl_constraint)
         if constraint_type is None: continue
         if constraint_type == "adp":
-          i_seqs = [i[0] for i in constraint['atoms']]
+          i_seqs = [atoms_ids.index(i[0]) for i in constraint['atoms']]
           kwds = dict(i_seqs=i_seqs)
         else:
-          kwds = {"i_seqs": constraint}
+          kwds = {"i_seqs": [atoms_ids.index(i) for u in constraint]}
         yield constraint_type, kwds
 
   def getCell(self):
