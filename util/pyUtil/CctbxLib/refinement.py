@@ -23,6 +23,8 @@ from smtbx.refinement import restraints
 from smtbx.refinement import least_squares
 from smtbx.refinement import constraints
 from smtbx.refinement.constraints import geometrical
+from smtbx.refinement.constraints import adp
+from smtbx.refinement.constraints import site
 import smtbx.utils
 
 solvers = {
@@ -241,6 +243,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     restraints_manager = self.restraints_manager()
     self.constraints += self.setup_geometrical_constraints(
       self.olx_atoms.afix_iterator())
+    self.constraints += self.setup_shared_parameters_constraints()
     self.n_constraints = len(self.constraints)
     shelx_parts = flex.int(self.olx_atoms.disorder_parts())
     conformer_indices = shelx_parts.deep_copy().set_selected(shelx_parts < 0, 0)
@@ -490,6 +493,18 @@ class FullMatrixRefine(OlexCctbxAdapter):
     print time_fcf.report()
     f.close()
 
+  def setup_shared_parameters_constraints(self):
+    constraints = []
+    constraints_itr = self.olx_atoms.constraints_iterator()
+    for constraint_type, kwds in constraints_itr:
+      if constraint_type == "adp":
+        current = adp.shared_u(kwds["i_seqs"])
+        constraints.append(current)
+      elif constraint_type == "site":
+        current = site.shared_site(kwds["i_seqs"])
+        constraints.append(current)
+    return constraints
+    
   def setup_geometrical_constraints(self, afix_iter=None):
     geometrical_constraints = []
     constraints = {
@@ -527,6 +542,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           pivot=pivot,
           constrained_site_indices=dependent)
         geometrical_constraints.append(current)
+        
     return geometrical_constraints
 
   def export_var_covar(self, matrix):
