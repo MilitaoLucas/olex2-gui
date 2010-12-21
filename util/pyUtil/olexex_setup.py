@@ -27,7 +27,6 @@ class SetupWizard(object):
       self.next = str(current + 1)
       
     txt = '''
-
 <zimg border="0" src="banner_setup.png" usemap="#map_setup">
 
 <map name="map_setup">
@@ -51,9 +50,9 @@ class SetupWizard(object):
     
     txt += r'''
 <tr VALIGN='center' NAME='Setup Title'>
-  <td width="8" bgcolor="$spy.GetParam(gui.html.font_colour)"></td>
-    <td width='80%%' colspan='2' bgcolor="$spy.GetParam(gui.html.font_colour)">
-      <font size='4' color="#dedede">
+  <td width="8" bgcolor="$spy.GetParam(gui.html.highlight_colour)"></td>
+    <td width='80%%' colspan='2' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+      <font size='4' color="$spy.GetParam(gui.html.font_colour)">
         <b>
           %%setup-title-%s%%
         </b>
@@ -65,7 +64,7 @@ class SetupWizard(object):
   <td colspan = 2>
   <font size = '3'>
     %s
-  </font>  
+  </font>
   </td>
 </tr>
 

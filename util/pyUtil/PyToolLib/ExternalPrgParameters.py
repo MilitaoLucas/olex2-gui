@@ -261,17 +261,15 @@ class Method_refinement(Method):
       OV.AddIns(arg)
 
   def pre_refinement(self, RunPrgObject):
+    RunPrgObject.isAllQ = True
     for i in xrange(int(olx.xf_au_GetAtomCount())):
       ret = olx.xf_au_IsPeak(i)
       if ret == "false":
         RunPrgObject.isAllQ = False
         break
-      else:
-        RunPrgObject.isAllQ = True
     if RunPrgObject.isAllQ:
-      olx.Name('$Q C')
-      RunPrgObject.make_unique_names = True
-      #OV.File()
+      print "Please provide some atoms to refine"
+      RunPrgObject.terminate = True
       return
 
     if RunPrgObject.params.snum.refinement.auto.tidy:
@@ -439,7 +437,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
     suggested_weight = olx.Ins('weight1')
     if suggested_weight != 'n/a':
       if len(suggested_weight.split()) == 1:
-        suggested_weight.append(' 0')
+        suggested_weight += ' 0'
       OV.SetParam('snum.refinement.suggested_weight', suggested_weight)
 
   def observe(self, RunPrgObject):
@@ -573,6 +571,8 @@ class Method_cctbx_refinement(Method_refinement):
     try:
       cctbx.run()
     except InvalidConstraint, e:
+      print e
+    except NotImplementedError, e:
       print e
     else:
       self.failure = cctbx.failure

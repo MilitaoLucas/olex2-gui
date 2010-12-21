@@ -564,7 +564,7 @@ graphs {
         .caption = "%Output% csv"
       use_students_t = False
         .type = bool
-        .caption = "%Use Student's t Distribution%"
+        .caption = "%Student's t%"
     }
     bijvoet_differences_scatter_plot
       .short_caption = "Bijvoet Differences Scatter Plot"
@@ -576,7 +576,7 @@ graphs {
         .caption = "%Output% csv"
       use_students_t = False
         .type = bool
-        .caption = "%Student's t Distribution%"
+        .caption = "%Student's t%"
     }
   }
 }

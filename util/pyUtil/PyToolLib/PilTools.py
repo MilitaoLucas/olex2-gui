@@ -1006,6 +1006,8 @@ class timage(ImageTools):
     self.new_l = ['maps']
 
     self.available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
+    
+#    self.available_width = OV.htmlPanelWidth() - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
     self.size_factor = OV.GetParam('gui.skin.size_factor')
 
     #from PilTools import ButtonMaker
@@ -1048,6 +1050,7 @@ class timage(ImageTools):
 
     self.highlight_colour = OV.GetParam('gui.html.highlight_colour').rgb
     self.width = OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+    self.available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
 
 
 
@@ -2156,7 +2159,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       #image.save(r"%s\etc\$label-%s.png" %(datadir, item[0]), "PNG")
 
   def make_cbtn_items(self, font_name = 'Vera'):
-
     new_style = True
     cut = OV.GetParam('olex2.main_toolbar_vline_position') + 3
     if new_style:
@@ -2165,6 +2167,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       for state in states:
         for item in buttons:
           width = int(round(self.available_width/3,0)) - 5
+          if cut > width:
+            cut = width - 1
+            print ("WARNING: HtmlPanelWidth is smaller than intended. Some GUI images may not display correctly")
           image = self.make_timage(item_type='cbtn', item=item, state=state, width=width)
           images = IT.cut_image(image,(cut,))
           i = 0

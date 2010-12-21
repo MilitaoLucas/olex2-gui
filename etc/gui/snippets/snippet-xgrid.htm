@@ -2,40 +2,41 @@
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <tr>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=xgrid;1; -->
-	<td>
-		<input
-			type="combo"
-			height="$spy.GetParam(gui.html.combo_height)"
-			bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-			name="SET_SNUM_XGRID_VIEW_#suffix"
-			items='plane;contour;contour+plane;surface;wire;points'
-			value="$spy.GetParam(snum.xgrid.view)"
-			onchange="spy.SetParam(snum.xgrid.view,GetValue(SET_SNUM_XGRID_VIEW_#suffix))
+  <td>
+    <input
+      type="combo"
+      height="$spy.GetParam(gui.html.combo_height)"
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      name="SET_SNUM_XGRID_VIEW_#suffix"
+      items='plane;contour;contour+plane;surface;wire;points'
+      value="$spy.GetParam(snum.xgrid.view)"
+      onchange="spy.SetParam(snum.xgrid.view,GetValue(SET_SNUM_XGRID_VIEW_#suffix))
 >>spy.SetXgridView()
 >>UpdateHtml"
-			label="%View% "
-			valign="center"
-		>
-	</td>
-	<td>
-		<input
-			type="checkbox"
-			height="$spy.GetParam(gui.html.combo_height)"
-			bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-			name="SET_SNUM_XGRID_EXTENDED_#suffix"
-			checked="$spy.GetParam(snum.xgrid.extended)"
-			oncheck="spy.SetParam(snum.xgrid.extended,True)
+  label="%View% "
+  valign="center"
+>
+</td>
+<td>
+  <input
+    type="checkbox"
+    height="$spy.GetParam(gui.html.combo_height)"
+    bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+    name="SET_SNUM_XGRID_EXTENDED_#suffix"
+    checked="$spy.GetParam(snum.xgrid.extended)"
+    oncheck="spy.SetParam(snum.xgrid.extended,True)
 >>spy.SetXgridView()
 >>UpdateHtml"
-			onuncheck="spy.SetParam(snum.xgrid.extended,False)
+  onuncheck="spy.SetParam(snum.xgrid.extended,False)
 >>spy.SetXgridView()
 >>UpdateHtml"
-			value=" %Extended% "
-			valign="center"
-		>
-	</td>
-	<td>
-		<a href="editmaterial XGrid">%Edit% %style%</a>
-	</td>
+  value=" %Extended% "
+  valign="center"
+>
+</td>
+<td>
+  <a href="editmaterial XGrid">%Edit% %style%</a>
+  <!--<a href="sel WBox">%Select% %Volume%</a>-->
+</td>
 </tr>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
