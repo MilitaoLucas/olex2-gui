@@ -175,6 +175,11 @@ class OlexRefinementModel(object):
     'isor':'isotropic_adp',
   }
 
+  constraint_types = {
+    'eadp':'adp',
+    'exyz':'site',
+  }
+
   def __init__(self):
     olex_refinement_model = OV.GetRefinementModel(True)
     self._atoms = {}
@@ -281,6 +286,20 @@ class OlexRefinementModel(object):
               sym_ops=kwds['sym_ops'][i*2:(i+1)*2])
         else:
           yield restraint_type, kwds
+
+  def constraints_iterator(self):
+    from libtbx.utils import flat_list
+    from cctbx import sgtbx
+    for shelxl_constraint in (self.constraint_types):
+      for constraint in self.model[shelxl_constraint]:
+        constraint_type = self.constraint_types.get(shelxl_constraint)
+        if constraint_type is None: continue
+        if constraint_type == "adp":
+          i_seqs = [i[0] for i in constraint['atoms']]
+          kwds = dict(i_seqs=i_seqs)
+        else:
+          kwds = {"i_seqs": constraint}
+        yield constraint_type, kwds
 
   def getCell(self):
     return [self._cell[param][0] for param in ('a','b','c','alpha','beta','gamma')]
