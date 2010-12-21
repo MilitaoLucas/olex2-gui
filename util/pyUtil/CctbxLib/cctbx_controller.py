@@ -156,7 +156,7 @@ class reflections(object):
 
 class create_cctbx_xray_structure(object):
 
-  def __init__(self, cell, spacegroup, atom_iter, restraints_iter=None):
+  def __init__(self, cell, spacegroup, atom_iter, restraints_iter=None, constraints_iter=None):
     """ cell is a 6-uple, spacegroup a string and atom_iter yields tuples (label, xyz, u, element_type) """
     import iotbx.constrained_parameters as _
     if restraints_iter is not None:
@@ -196,6 +196,9 @@ class create_cctbx_xray_structure(object):
     if restraints_iter is not None:
       for restraint_type, kwds in restraints_iter:
         builder.process_restraint(restraint_type, **kwds)
+    if constraints_iter is not None:
+      for constraint_type, kwds in constraints_iter:
+        builder.process_constraint(constraint_type, **kwds)
     self.builder = builder
 
   def structure(self):
