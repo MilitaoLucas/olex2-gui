@@ -25,6 +25,7 @@ from smtbx.refinement import constraints
 from smtbx.refinement.constraints import geometrical
 from smtbx.refinement.constraints import adp
 from smtbx.refinement.constraints import site
+from smtbx.refinement.constraints import occupancy
 import smtbx.utils
 
 solvers = {
@@ -241,9 +242,12 @@ class FullMatrixRefine(OlexCctbxAdapter):
           self.f_mask = self.f_mask.generate_bijvoet_mates()
         self.f_mask = self.f_mask.common_set(fo_sq)
     restraints_manager = self.restraints_manager()
+    #put shared parameter constraints first - to allow proper bookeeping of
+    #overrided parameters (U, sites)
+    self.constraints = self.setup_shared_parameters_constraints() + self.constraints
+    self.constraints += self.setup_occupancy_constraints()
     self.constraints += self.setup_geometrical_constraints(
       self.olx_atoms.afix_iterator())
-    self.constraints += self.setup_shared_parameters_constraints()
     self.n_constraints = len(self.constraints)
     shelx_parts = flex.int(self.olx_atoms.disorder_parts())
     conformer_indices = shelx_parts.deep_copy().set_selected(shelx_parts < 0, 0)
@@ -505,6 +509,23 @@ class FullMatrixRefine(OlexCctbxAdapter):
         constraints.append(current)
     return constraints
     
+  def setup_occupancy_constraints(self):
+    constraints = []
+    vars = self.olx_atoms.model['variables']['variables']
+    for var in vars:
+      refs = var['references']
+      as_var = []
+      as_var_minus_one = []
+      for ref in refs:
+        if ref['index'] == 4 and ref['relation'] == "var":
+          as_var.append((ref['id'], ref['k']))
+        if ref['index'] == 4 and ref['relation'] == "one_minus_var":
+          as_var_minus_one.append((ref['id'], ref['k']))
+      if (len(as_var) + len(as_var_minus_one)) != 0:
+        current = occupancy.dependent_occupancy(as_var, as_var_minus_one)
+        constraints.append(current)
+    return constraints
+  
   def setup_geometrical_constraints(self, afix_iter=None):
     geometrical_constraints = []
     constraints = {
