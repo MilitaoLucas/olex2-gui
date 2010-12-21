@@ -282,6 +282,9 @@ class OlexFunctions(inheritFunctions):
   def htmlReload(self):
     olex.m("html.Reload")
 
+  def htmlPanelWidth(self):
+    olex.m("HtmlPanelWidth")
+    
   def reloadStructureAtreap(self, path, file, fader=True):
     fader = self.FindValue('gui_use_fader')
     #print "AtReap %s/%s" %(path, file)
