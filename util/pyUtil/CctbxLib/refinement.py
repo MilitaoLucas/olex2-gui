@@ -180,14 +180,15 @@ class olex2_normal_eqns(least_squares.normal_equations):
         yield (label, xyz, u, u_eq,
                a.occupancy*(a.multiplicity()/n_equiv_positions),
                symbol, a.flags)
-
+    this_atom_id = 0
     for name, xyz, u, ueq, occu, symbol, flags in iter_scatterers():
       if len(u) == 6:
         u_trans = (u[0], u[1], u[2], u[5], u[4], u[3])
       else:
         u_trans = u
 
-      id = self.olx_atoms.id_for_name[name]
+      id = self.olx_atoms.atom_ids[this_atom_id]
+      this_atom_id += 1
       olx.xf_au_SetAtomCrd(id, *xyz)
       olx.xf_au_SetAtomU(id, *u_trans)
       olx.xf_au_SetAtomOccu(id, occu)
@@ -510,7 +511,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
     return constraints
     
   def setup_occupancy_constraints(self):
-    atoms_ids = self.olx_atoms._atoms.keys()
     constraints = []
     vars = self.olx_atoms.model['variables']['variables']
     for var in vars:
@@ -519,9 +519,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
       as_var_minus_one = []
       for ref in refs:
         if ref['index'] == 4 and ref['relation'] == "var":
-          as_var.append((atoms_ids.index(ref['id']), ref['k']))
+          as_var.append((ref['id'], ref['k']))
         if ref['index'] == 4 and ref['relation'] == "one_minus_var":
-          as_var_minus_one.append((atoms_ids.index(ref['id']), ref['k']))
+          as_var_minus_one.append((ref['id'], ref['k']))
       if (len(as_var) + len(as_var_minus_one)) != 0:
         current = occupancy.dependent_occupancy(as_var, as_var_minus_one)
         constraints.append(current)
