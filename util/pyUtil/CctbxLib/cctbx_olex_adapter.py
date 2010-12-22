@@ -75,7 +75,9 @@ class OlexCctbxAdapter(object):
         self.cell,
         self.space_group,
         self.olx_atoms.iterator(),
-        restraints_iter=restraints_iter)
+        restraints_iter=restraints_iter,
+        constraints_iter=None #self.olx_atoms.constraints_iterator()
+      )
       if construct_restraints:
         from smtbx.refinement import restraints
         proxies = create_cctbx_xray_structure.restraint_proxies()
