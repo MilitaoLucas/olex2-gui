@@ -81,7 +81,7 @@ class StreamRedirection:
         rFile.close()
       except:
         self.GUIversion = "unknown"
-      self.errFile.write("================= PYTHON ERROR ================= Olex Version %s -- %s\n\n" %(self.version, self.GUIversion))
+      self.errFile.write("================= PYTHON ERROR ================= Olex2 Version %s -- %s\n\n" %(self.version, self.GUIversion))
 
   def write(self, Str):
     if self.is_redirecting:

@@ -196,8 +196,6 @@ class olex2_normal_eqns(least_squares.normal_equations):
         olx.Fix('xyz', xyz, name)
       if not (flags.grad_u_iso() or flags.grad_u_aniso()):
         olx.Fix('Uiso', u, name)
-      if not flags.grad_occupancy():
-        olx.Fix('occu', occu, name)
       u_total += u[0]
       u_average = u_total/i
     #olx.Sel('-u')
