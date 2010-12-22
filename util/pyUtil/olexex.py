@@ -206,9 +206,7 @@ class OlexRefinementModel(object):
     return [atom['part'] for atom in self._atoms]
 
   def iterator(self):
-    i = -1
-    for atom in self._atoms:
-      i += 1
+    for i, atom in enumerate(self._atoms):
       name = str(atom['label'])
       element_type = str(atom['type'])
       xyz = atom['crd'][0]
