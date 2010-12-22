@@ -23,6 +23,9 @@ from smtbx.refinement import restraints
 from smtbx.refinement import least_squares
 from smtbx.refinement import constraints
 from smtbx.refinement.constraints import geometrical
+from smtbx.refinement.constraints import adp
+from smtbx.refinement.constraints import site
+from smtbx.refinement.constraints import occupancy
 import smtbx.utils
 
 solvers = {
@@ -177,14 +180,15 @@ class olex2_normal_eqns(least_squares.normal_equations):
         yield (label, xyz, u, u_eq,
                a.occupancy*(a.multiplicity()/n_equiv_positions),
                symbol, a.flags)
-
+    this_atom_id = 0
     for name, xyz, u, ueq, occu, symbol, flags in iter_scatterers():
       if len(u) == 6:
         u_trans = (u[0], u[1], u[2], u[5], u[4], u[3])
       else:
         u_trans = u
 
-      id = self.olx_atoms.id_for_name[name]
+      id = self.olx_atoms.atom_ids[this_atom_id]
+      this_atom_id += 1
       olx.xf_au_SetAtomCrd(id, *xyz)
       olx.xf_au_SetAtomU(id, *u_trans)
       olx.xf_au_SetAtomOccu(id, occu)
@@ -192,8 +196,6 @@ class olex2_normal_eqns(least_squares.normal_equations):
         olx.Fix('xyz', xyz, name)
       if not (flags.grad_u_iso() or flags.grad_u_aniso()):
         olx.Fix('Uiso', u, name)
-      if not flags.grad_occupancy():
-        olx.Fix('occu', occu, name)
       u_total += u[0]
       u_average = u_total/i
     #olx.Sel('-u')
@@ -239,6 +241,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
           self.f_mask = self.f_mask.generate_bijvoet_mates()
         self.f_mask = self.f_mask.common_set(fo_sq)
     restraints_manager = self.restraints_manager()
+    #put shared parameter constraints first - to allow proper bookeeping of
+    #overrided parameters (U, sites)
+    self.constraints = self.setup_shared_parameters_constraints() + self.constraints
+    self.constraints += self.setup_occupancy_constraints()
     self.constraints += self.setup_geometrical_constraints(
       self.olx_atoms.afix_iterator())
     self.n_constraints = len(self.constraints)
@@ -490,6 +496,35 @@ class FullMatrixRefine(OlexCctbxAdapter):
     print time_fcf.report()
     f.close()
 
+  def setup_shared_parameters_constraints(self):
+    constraints = []
+    constraints_itr = self.olx_atoms.constraints_iterator()
+    for constraint_type, kwds in constraints_itr:
+      if constraint_type == "adp":
+        current = adp.shared_u(kwds["i_seqs"])
+        constraints.append(current)
+      elif constraint_type == "site":
+        current = site.shared_site(kwds["i_seqs"])
+        constraints.append(current)
+    return constraints
+    
+  def setup_occupancy_constraints(self):
+    constraints = []
+    vars = self.olx_atoms.model['variables']['variables']
+    for var in vars:
+      refs = var['references']
+      as_var = []
+      as_var_minus_one = []
+      for ref in refs:
+        if ref['index'] == 4 and ref['relation'] == "var":
+          as_var.append((ref['id'], ref['k']))
+        if ref['index'] == 4 and ref['relation'] == "one_minus_var":
+          as_var_minus_one.append((ref['id'], ref['k']))
+      if (len(as_var) + len(as_var_minus_one)) != 0:
+        current = occupancy.dependent_occupancy(as_var, as_var_minus_one)
+        constraints.append(current)
+    return constraints
+  
   def setup_geometrical_constraints(self, afix_iter=None):
     geometrical_constraints = []
     constraints = {
@@ -527,6 +562,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           pivot=pivot,
           constrained_site_indices=dependent)
         geometrical_constraints.append(current)
+        
     return geometrical_constraints
 
   def export_var_covar(self, matrix):
