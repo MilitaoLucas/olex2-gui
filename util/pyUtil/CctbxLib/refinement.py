@@ -26,6 +26,7 @@ from smtbx.refinement.constraints import geometrical
 from smtbx.refinement.constraints import adp
 from smtbx.refinement.constraints import site
 from smtbx.refinement.constraints import occupancy
+from smtbx.refinement.constraints import rigid
 import smtbx.utils
 
 solvers = {
@@ -245,6 +246,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     #overrided parameters (U, sites)
     self.constraints = self.setup_shared_parameters_constraints() + self.constraints
     self.constraints += self.setup_occupancy_constraints()
+    self.constraints += self.setup_rigid_body_constraints(
+      self.olx_atoms.afix_iterator())
     self.constraints += self.setup_geometrical_constraints(
       self.olx_atoms.afix_iterator())
     self.n_constraints = len(self.constraints)
@@ -525,6 +528,28 @@ class FullMatrixRefine(OlexCctbxAdapter):
         constraints.append(current)
     return constraints
   
+  def setup_rigid_body_constraints(self, afix_iter):
+    rigid_body_constraints = []
+    rigid_body = {
+      # m:    type       , pivot position
+      5:  ("Cp"          , -1),
+      6:  ("Ph"          , -1),
+      7:  ("Ph"          , -1),
+      10: ("Cp*"         , -1),
+      11: ("naphthalene" , -1),
+    }
+    # have to process rigid body constraints first - H may be riding on 
+    # overrident sites...
+    for m, n, pivot, dependent, pivot_neighbours, bond_length in afix_iter:
+      if len(dependent) == 0: continue
+      info = rigid_body.get(m)
+      if not info or len(pivot_neighbours) != 1:  continue
+      current = rigid.rigid_pivoted_rotable_group(
+        pivot, pivot_neighbours[0], dependent)
+      rigid_body_constraints.append(current)
+        
+    return rigid_body_constraints
+
   def setup_geometrical_constraints(self, afix_iter=None):
     geometrical_constraints = []
     constraints = {
@@ -543,7 +568,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
       16: ("terminal_linear_ch_site"                 , -1),
     }
 
-    xs = self.xray_structure()
     for m, n, pivot, dependent, pivot_neighbours, bond_length in afix_iter:
       if len(dependent) == 0: continue
       info = constraints.get(m)
