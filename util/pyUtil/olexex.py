@@ -225,13 +225,13 @@ class OlexRefinementModel(object):
       mn = afix['afix']
       m, n = divmod(mn, 10)
       pivot = afix['pivot']
-      dependent = [i for i in afix['dependent']]
+      dependent = afix['dependent']
       pivot_neighbours = [
         i for i in self._atoms[pivot]['neighbours']
         if not i in dependent]
       if len(dependent) == 0: continue
       dependent_part = self._atoms[dependent[0]]['part']
-      pivot_neighbours = None
+      #pivot_neighbours = None
       bond_length = afix['d']
       uiso = afix['u']
       yield m, n, pivot, dependent, pivot_neighbours, bond_length
