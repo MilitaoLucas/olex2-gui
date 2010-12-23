@@ -37,6 +37,39 @@ class FontInstances(ArgumentParser):
     
   def defineFonts(self):
     self.fonts = {
+      ##################################################### Cambria
+      "Cambria":{
+        "font_src":(
+          r"cambria.ttc",
+          r"%s/etc/gui/fonts/Vera.ttf" %self.basedir,
+          ),
+        "fontInstance":{}
+          },
+      
+      "Cambria Bold":{
+        "font_src":(
+          r"cambriab.ttc",
+          r"%s/etc/gui/fonts/VeraBd.ttf" %self.basedir,
+          ),
+        "fontInstance":{}
+          },
+      
+      "Cambria Italic":{
+        "font_src":(
+          r"cambriai.ttc",
+          r"%s/etc/gui/fonts/VeraBd.ttf" %self.basedir,
+          ),
+        "fontInstance":{}
+          },
+
+      "Cambria Bold Italic":{
+        "font_src":(
+          r"cambriaz.ttc",
+          r"%s/etc/gui/fonts/VeraBd.ttf" %self.basedir,
+          ),
+        "fontInstance":{}
+          },
+      
       ##################################################### Gerogia
       "Georgia":{
         "font_src":(
