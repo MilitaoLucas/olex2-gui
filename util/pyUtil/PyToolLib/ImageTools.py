@@ -75,6 +75,11 @@ class ImageTools(FontInstances):
 
 
   def get_unicode_characters(self, txt):
+    txt = txt.replace("two_theta", "2theta")
+    txt = txt.replace("stol", "(sin(theta)/lambda)")
+    txt = txt.replace("_sq", "^2")
+    txt = txt.replace("_star", "*")
+    txt = txt.replace("_", " ")
     txt = txt.replace("lambda", unichr(61548))
     txt = txt.replace("theta", unichr(61553))
     txt = txt.replace("sigma", unichr(61555))
@@ -83,9 +88,12 @@ class ImageTools(FontInstances):
     txt = txt.replace(">", unichr(61681))
     txt = txt.replace("<", unichr(61665))
     txt = txt.replace("Fo2", "Fo%s" %(unichr(178)))
+    txt = txt.replace("Fc2", "Fc%s" %(unichr(178)))
+    txt = txt.replace("Sum", unichr(8721))
+    #txt = txt.replace("Fexp2", "Fexp%s" %(unichr(178)))
+    #txt = txt.replace("Fo2", "F%s%s" %(unichr(2092),unichr(178)))
     txt = txt.replace("Fexp", "F%s" %(unichr(2091)))
-    #txt  = txt.replace("info", unichr(65353))
-    txt  = txt.replace("info", unichr(61600))
+    txt = txt.replace("angstrom", unichr(197))
     return txt
 
 
