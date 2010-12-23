@@ -20,6 +20,8 @@ diagnostics {
         .type = float
       grade4 = 5
         .type = float
+      top = 25
+        .type = float
     }
     Rint{
       op = "smaller"
@@ -36,10 +38,8 @@ diagnostics {
         .type = float
       grade4 = 0.15
         .type = float
+      top = 0.15
+        .type = float
     }
   }
 }
-
-
-
-

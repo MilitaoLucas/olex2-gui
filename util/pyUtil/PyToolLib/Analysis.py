@@ -2490,6 +2490,7 @@ class HealthOfStructure():
     self.grade_2_colour = OV.GetParam('gui.skin.diagnostics.colour_grade2')
     self.grade_3_colour = OV.GetParam('gui.skin.diagnostics.colour_grade3')
     self.grade_4_colour = OV.GetParam('gui.skin.diagnostics.colour_grade4')
+    self.available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
 
     hkl = OV.HKLSrc()
     if not os.path.exists(hkl):
@@ -2504,19 +2505,25 @@ class HealthOfStructure():
     self.make_HOS_html()
 
   def make_HOS_html(self):
-    txt = "<tr><table width='100%%'><tr>"
+    txt = "<tr><table width='100%%' cellpadding=0 cellspacing=0><tr>"
     l = ['MeanIOverSigma','Rint']
     for item in l:
       bg_colour = self.get_bg_colour(item)
       display = OV.GetParam('diagnostics.hkl.%s.display' %item)
       value_format = OV.GetParam('diagnostics.hkl.%s.value_format' %item)
       value = self.hkl_stats[item]
+      raw_val = value
       if "%" in value_format:
         value_format = value_format.replace('%','f%%')
         value = value * 100
+        #raw_val = value
       value_format = "%." + value_format
       value = value_format %value
-      txt += '''
+      use_image = False
+      if use_image:
+        txt += self.make_hos_images(item=item, colour=bg_colour, display=display, value_raw=raw_val, value_display=value, n=len(l))
+      else:
+        txt += '''
   <td bgcolor=%s align='center' width='%s%%'><font color='#ffffff'>
     %s: <b>%s</b>
   </font></td>
@@ -2525,6 +2532,55 @@ class HealthOfStructure():
     txt += "</tr></table></tr>"
     txt = txt.decode('utf-8')
     OV.write_to_olex("hos.htm" , txt)
+
+  def make_hos_images(self, item='test', colour='#ff0000', display='Display', value_display='10%', value_raw='0.1', n=1):
+    boxWidth = self.available_width/n - 10
+    boxHeight = 20
+    boxHalf = 8
+    im = Image.new('RGB', (boxWidth,boxHeight), colour.hexadecimal)
+    im = Image.new('RGB', (boxWidth,boxHeight), OV.GetParam('gui.html.table_firstcol_colour').hexadecimal)
+    draw = ImageDraw.Draw(im)
+    value_raw = float(value_raw)
+    op = OV.GetParam('diagnostics.hkl.%s.op' %item)
+    curr_x = 0
+    for i in xrange(4):
+      i += 1
+      top = OV.GetParam('diagnostics.hkl.%s.top' %item)
+      limit = OV.GetParam('diagnostics.hkl.%s.grade%s' %(item, i))
+      print item, limit
+#      if limit > value_raw:
+#        continue
+      limit_width = int((limit/top) * boxWidth)
+      if op == "greater":
+        box = (0,boxHalf,limit_width,boxHeight)
+      elif op == 'smaller':
+        box = (curr_x,boxHalf,limit_width,boxHeight)
+        curr_x += limit_width
+      fill = OV.GetParam('gui.skin.diagnostics.colour_grade%i' %i).hexadecimal
+      draw.rectangle(box, fill=fill)
+    
+    if item == "MeanIOverSigma":
+      display = IT.get_unicode_characters("I/sigma")
+    if item == "Rint":
+      display = "Rint"
+    font = IT.registerFontInstance("Vera", 11)
+    x = 2
+    y = boxHalf
+    draw.text((x, y), "%s" %display, font=font, fill="#ffffff")
+#    IT.write_text_to_draw(draw, display, font_colour='#ffffff', font_size=12)
+#    IT.write_text_to_draw(draw, value_display, align='right', max_width=boxWidth - 2, font_colour='#ffffff', font_size=17)
+    IT.write_text_to_draw(draw, str(top), align='right', max_width=boxWidth - 2, font_colour='#ffffff', font_size=11)
+    y = 0
+    r = 18
+    x = int((value_raw/top) * boxWidth - r/2) 
+    draw.ellipse(((x, y),(x+r, y+r)), fill="#ff0000")
+    draw.text((x, y), "%s" %value_display, font=font, fill="#ffffff")
+    
+    
+    OlexVFS.save_image_to_olex(im, item, 0)
+    txt = '''
+<td align='center'><zimg src=%s></td>''' %item
+    return txt
 
   def get_bg_colour(self, item):
     op = OV.GetParam('diagnostics.hkl.%s.op' %item)

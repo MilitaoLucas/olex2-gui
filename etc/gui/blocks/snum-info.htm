@@ -4,23 +4,26 @@
 <table border="0" style="border-collapse: collapse" width="100%" id="info-cell" cellpadding="0" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
 
 
-  <tr align='center'>
-    <td colspan = '2' align='left'>
-      <font size='3'>
-      &nbsp;<b>$spy.makeFormulaForsNumInfo()</b>
-      </font>
-    </td>	
-    <td align='right' colspan = '2'>
-      $spy.checkErrLogFile()
-&nbsp;$spy.MakeHoverButton(toolbar-home, 'itemstate index* 0>>itemstate index-home 1>>itemstate tab* 2')
-&nbsp;$spy.MakeHoverButton(toolbar-edit, 'editins>>spy.doProgramSettings\(spy.GetParam\(snum.refinement.program),spy.GetParam\(snum.refinement.method))>>UpdateHtml')
-&nbsp;$spy.MakeHoverButton(toolbar-editatom, 'editatom')
-&nbsp;$spy.MakeHoverButton(toolbar-open, 'exec -o getvar\(defexplorer) 'filepath\()'')
-&nbsp;$spy.MakeHoverButton(toolbar-text, 'text')
-&nbsp;$spy.MakeHoverButton(toolbar-info, 'itemstate more-snum-info 1 2')
-
+<tr>
+  <td colspan = '4'>
+  <table width='100%' cellspacing='1' cellpadding='0'>
+    <tr>
+      <td align=left>
+        &nbsp;$spy.makeFormulaForsNumInfo()
+      </td>
+      <td align=right>
+        $spy.checkErrLogFile()
+  &nbsp;$spy.MakeHoverButton(toolbar-home, 'itemstate index* 0>>itemstate index-home 1>>itemstate tab* 2')
+  &nbsp;$spy.MakeHoverButton(toolbar-edit, 'editins>>spy.doProgramSettings\(spy.GetParam\(snum.refinement.program),spy.GetParam\(snum.refinement.method))>>UpdateHtml')
+  &nbsp;$spy.MakeHoverButton(toolbar-editatom, 'editatom')
+  &nbsp;$spy.MakeHoverButton(toolbar-open, 'exec -o getvar\(defexplorer) 'filepath\()'')
+  &nbsp;$spy.MakeHoverButton(toolbar-text, 'text')
+  &nbsp;$spy.MakeHoverButton(toolbar-info, 'itemstate more-snum-info 1 2')
+     </td>
+   </tr>
+   </table>
   </td>
-  </tr>
+</tr>
 
 
 <tr align='left'>
