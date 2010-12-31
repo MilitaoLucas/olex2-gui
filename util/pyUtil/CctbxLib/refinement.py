@@ -35,17 +35,17 @@ solvers = {
 }
 
 
-class olex2_normal_eqns(least_squares.normal_equations):
+class olex2_normal_eqns(least_squares.crystallographic_ls):
   log = None
 
   def __init__(self, fo_sq, reparametrisation, olx_atoms, **kwds):
     self.olx_atoms = olx_atoms
-    least_squares.normal_equations.__init__(
+    least_squares.crystallographic_ls.__init__(
       self, fo_sq, reparametrisation, **kwds)
 
   def step_forward(self):
     self.xray_structure_pre_cycle = self.xray_structure.deep_copy_scatterers()
-    least_squares.normal_equations.step_forward(self)
+    least_squares.crystallographic_ls.step_forward(self)
     self.show_cycle_summary(log=self.log)
     self.show_sorted_shifts(max_items=10, log=self.log)
     self.restraints_manager.show_sorted(
@@ -542,11 +542,17 @@ class FullMatrixRefine(OlexCctbxAdapter):
     # overrident sites...
     for m, n, pivot, dependent, pivot_neighbours, bond_length in afix_iter:
       if len(dependent) == 0: continue
-      info = rigid_body.get(m)
-      if not info or len(pivot_neighbours) != 1:  continue
-      current = rigid.rigid_pivoted_rotable_group(
-        pivot, pivot_neighbours[0], dependent)
-      rigid_body_constraints.append(current)
+      #info = rigid_body.get(m)  # this is needed for idealisation of the geometry
+      #if len(pivot_neighbours) == 0:  continue
+      current = None
+      if n == 6 and len(pivot_neighbours) == 1:
+        current = rigid.rigid_pivoted_rotable_group(
+          pivot, pivot_neighbours[0], dependent)
+      elif n == 9:
+        current = rigid.rigid_rotable_expandable_group(
+          pivot, dependent)
+      if current:
+        rigid_body_constraints.append(current)
         
     return rigid_body_constraints
 
