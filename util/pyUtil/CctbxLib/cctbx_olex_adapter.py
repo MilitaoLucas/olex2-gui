@@ -76,7 +76,8 @@ class OlexCctbxAdapter(object):
         self.space_group,
         self.olx_atoms.iterator(),
         restraints_iter=restraints_iter,
-        constraints_iter=None #self.olx_atoms.constraints_iterator()
+        constraints_iter=None, #self.olx_atoms.constraints_iterator()
+        afix_iter = self.olx_atoms.afix_iterator()
       )
       if construct_restraints:
         from smtbx.refinement import restraints

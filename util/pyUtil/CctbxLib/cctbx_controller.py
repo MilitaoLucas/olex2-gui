@@ -13,6 +13,7 @@ from cctbx.eltbx import sasaki
 from cctbx import adptbx, crystal, miller, sgtbx, xray
 from cctbx.array_family import flex
 from cctbx import xray
+from smtbx.refinement.constraints import rigid
 
 
 def reflection_statistics(unit_cell, space_group, hkl):
@@ -156,7 +157,8 @@ class reflections(object):
 
 class create_cctbx_xray_structure(object):
 
-  def __init__(self, cell, spacegroup, atom_iter, restraints_iter=None, constraints_iter=None):
+  def __init__(self, cell, spacegroup, atom_iter, restraints_iter=None, constraints_iter=None,
+               afix_iter=None):
     """ cell is a 6-uple, spacegroup a string and atom_iter yields tuples (label, xyz, u, element_type) """
     import iotbx.constrained_parameters as _
     if restraints_iter is not None:
@@ -200,6 +202,29 @@ class create_cctbx_xray_structure(object):
       for constraint_type, kwds in constraints_iter:
         builder.process_constraint(constraint_type, **kwds)
     self.builder = builder
+    if afix_iter != None:
+      rigid_body = {
+        # m:    type       , number of dependent
+        5:  ("Cp"          , 4),
+        6:  ("Ph"          , 5),
+        7:  ("Ph"          , 5),
+        10: ("Cp*"         , 9),
+        11: ("Naphthalene" , 9),
+      }
+      scatterers = self.builder.structure.scatterers()
+      uc = self.builder.structure.unit_cell()
+      for m, n, pivot, dependent, pivot_neighbours, bond_length in afix_iter:
+        if len(dependent) == 0: continue
+        info = rigid_body.get(m)  # this is needed for idealisation of the geometry
+        if info != None and info[1] == len(dependent):
+          i_f = rigid.idealised_fragment()
+          frag = i_f.generate_fragment(info[0])
+          frag_sc = [pivot,]
+          for i in dependent: frag_sc.append(i)
+          sites = [ uc.orthogonalize(scatterers[i].site) for i in frag_sc]
+          new_crd = i_f.fit(frag, sites)
+          for i, crd in enumerate(new_crd):
+            scatterers[frag_sc[i]].site = uc.fractionalize(crd)
 
   def structure(self):
     return self.builder.structure
