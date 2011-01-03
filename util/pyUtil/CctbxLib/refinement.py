@@ -530,19 +530,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
   
   def setup_rigid_body_constraints(self, afix_iter):
     rigid_body_constraints = []
-    rigid_body = {
-      # m:    type       , pivot position
-      5:  ("Cp"          , -1),
-      6:  ("Ph"          , -1),
-      7:  ("Ph"          , -1),
-      10: ("Cp*"         , -1),
-      11: ("naphthalene" , -1),
-    }
     # have to process rigid body constraints first - H may be riding on 
     # overrident sites...
+    scatterers = self.xray_structure().scatterers()
     for m, n, pivot, dependent, pivot_neighbours, bond_length in afix_iter:
       if len(dependent) == 0: continue
-      #info = rigid_body.get(m)  # this is needed for idealisation of the geometry
       #if len(pivot_neighbours) == 0:  continue
       current = None
       if n == 6 and len(pivot_neighbours) == 1:
