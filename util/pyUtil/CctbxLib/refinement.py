@@ -627,23 +627,24 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
   def post_peaks(self, fft_map, max_peaks=5):
     from itertools import izip
+    #have to get more peaks than max_peaks - cctbx often returns peaks on the atoms
     peaks = fft_map.peak_search(
       parameters=maptbx.peak_search_parameters(
         peak_search_level=3,
         interpolate=False,
         min_distance_sym_equiv=1.0,
-        max_clusters=max_peaks),
-      verify_symmetry=True
+        max_clusters=max_peaks+len(self.xray_structure().scatterers())),
+      verify_symmetry=False
       ).all()
     i = 0
     for xyz, height in izip(peaks.sites(), peaks.heights()):
       if i < 3:
         if self.verbose: print "Position of peak %s = %s, Height = %s" %(i, xyz, height)
-      i += 1
       id = olx.xf_au_NewAtom("%.2f" %(height), *xyz)
       if id != '-1':
         olx.xf_au_SetAtomU(id, "0.06")
-      if i == 100:
+        i = i+1
+      if i == 100 or i >= max_peaks:
         break
     basis = olx.gl_Basis()
     frozen = olx.Freeze(True)
