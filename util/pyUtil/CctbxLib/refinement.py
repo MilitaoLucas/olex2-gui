@@ -530,12 +530,28 @@ class FullMatrixRefine(OlexCctbxAdapter):
   
   def setup_rigid_body_constraints(self, afix_iter):
     rigid_body_constraints = []
-    # have to process rigid body constraints first - H may be riding on 
-    # overrident sites...
+    rigid_body = {
+      # m:    type       , number of dependent
+      5:  ("Cp"          , 4),
+      6:  ("Ph"          , 5),
+      7:  ("Ph"          , 5),
+      10: ("Cp*"         , 9),
+      11: ("Naphthalene" , 9),
+    }
     scatterers = self.xray_structure().scatterers()
+    uc = self.xray_structure().unit_cell()
     for m, n, pivot, dependent, pivot_neighbours, bond_length in afix_iter:
       if len(dependent) == 0: continue
-      #if len(pivot_neighbours) == 0:  continue
+      info = rigid_body.get(m)  # this is needed for idealisation of the geometry
+      if info != None and info[1] == len(dependent):
+        i_f = rigid.idealised_fragment()
+        frag = i_f.generate_fragment(info[0])
+        frag_sc = [pivot,]
+        for i in dependent: frag_sc.append(i)
+        sites = [ uc.orthogonalize(scatterers[i].site) for i in frag_sc]
+        new_crd = i_f.fit(frag, sites)
+        for i, crd in enumerate(new_crd):
+          scatterers[frag_sc[i]].site = uc.fractionalize(crd)
       current = None
       if n == 6 and len(pivot_neighbours) == 1:
         current = rigid.rigid_pivoted_rotable_group(
@@ -617,7 +633,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         interpolate=False,
         min_distance_sym_equiv=1.0,
         max_clusters=max_peaks),
-      verify_symmetry=False
+      verify_symmetry=True
       ).all()
     i = 0
     for xyz, height in izip(peaks.sites(), peaks.heights()):
