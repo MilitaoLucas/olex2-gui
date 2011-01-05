@@ -290,7 +290,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
     weighting = least_squares.mainstream_shelx_weighting(**params)
     self.reflections.f_sq_obs_filtered = self.reflections.f_sq_obs_filtered.sort(
       by_value="resolution")
-    twin_law = (sgtbx.rot_mx(self.twin_law),) if self.twin_law is not None else None
     self.normal_eqns = olex2_normal_eqns(
       self.reflections.f_sq_obs_filtered,
       self.reparametrisation,
@@ -298,7 +297,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       f_mask=self.f_mask,
       restraints_manager=restraints_manager,
       weighting_scheme=weighting,
-      twin_laws=twin_law,
+      twin_laws=self.twin_laws,
       log=self.log)
     method = OV.GetParam('snum.refinement.method')
     iterations = solvers.get(method)
