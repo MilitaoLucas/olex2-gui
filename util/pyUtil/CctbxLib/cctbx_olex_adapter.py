@@ -50,14 +50,14 @@ class OlexCctbxAdapter(object):
     self.reflections = None
     twinning=self.olx_atoms.model.get('twin')
     if twinning is not None:
-      self.twin_fraction = twinning['basf'][0]
+      self.twin_fractions = flex.double(twinning['basf'])
       self.twin_law = [int(twinning['matrix'][j][i])
                        for i in range(3) for j in range(3)]
       twin_multiplicity = twinning.get('n', 2)
       if twin_multiplicity != 2:
         print "warning: only hemihedral twinning is currently supported"
     else:
-      self.twin_law, self.twin_fraction = None, None
+      self.twin_law, self.twin_fractions = None, None
     try:
       self.exti = float(olx.Ins('exti'))
     except:
@@ -148,7 +148,7 @@ class OlexCctbxAdapter(object):
         self.xray_structure(), algorithm=algorithm).f_calc()
       twinned_fc2 = twinning.twin_with_twin_fraction(
         fc.as_intensity_array(),
-        self.twin_fraction)
+        self.twin_fractions[0])
       fc = twinned_fc2.f_sq_as_f().phase_transfer(fc).common_set(miller_set)
     else:
       fc = miller_set.structure_factors_from_scatterers(

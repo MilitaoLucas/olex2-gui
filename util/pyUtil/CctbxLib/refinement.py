@@ -200,6 +200,8 @@ class olex2_normal_eqns(least_squares.crystallographic_ls):
       u_total += u[0]
       u_average = u_total/i
     OV.SetOSF(self.osf)
+    if self.twin_fractions is not None:
+      olx.AddIns('BASF ' + ' '.join(self.twin_fractions.as_string()))
     olx.xf_EndUpdate()
 
 
@@ -277,6 +279,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       structure=self.xray_structure(),
       constraints=self.constraints,
       connectivity_table=connectivity_table,
+      twin_fractions=self.twin_fractions,
       temperature=temp)
     weight = self.olx_atoms.model['weight']
     params = dict(a=0.1, b=0,
@@ -285,6 +288,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
     for param, value in zip(params.keys()[:min(2,len(weight))], weight):
       params[param] = value
     weighting = least_squares.mainstream_shelx_weighting(**params)
+    self.reflections.f_sq_obs_filtered = self.reflections.f_sq_obs_filtered.sort(
+      by_value="resolution")
+    twin_law = (sgtbx.rot_mx(self.twin_law),) if self.twin_law is not None else None
     self.normal_eqns = olex2_normal_eqns(
       self.reflections.f_sq_obs_filtered,
       self.reparametrisation,
@@ -292,6 +298,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       f_mask=self.f_mask,
       restraints_manager=restraints_manager,
       weighting_scheme=weighting,
+      twin_laws=twin_law,
       log=self.log)
     method = OV.GetParam('snum.refinement.method')
     iterations = solvers.get(method)
@@ -320,6 +327,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
         print e
       self.failure = True
     else:
+      cov = self.normal_eqns.covariance_matrix(
+        jacobian_transpose=self.reparametrisation.jacobian_transpose_matching(
+          self.reparametrisation.mapping_to_grad_fc_independent_scalars))
       fo_minus_fc = self.f_obs_minus_f_calc_map(0.4)
       fo_minus_fc.apply_volume_scaling()
       self.diff_stats = fo_minus_fc.statistics()
@@ -334,7 +344,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       #self.output_fcf()
       new_weighting = weighting.optimise_parameters(
         self.normal_eqns.fo_sq,
-        self.normal_eqns.f_calc,
+        self.normal_eqns.fc_sq,
         self.normal_eqns.scale_factor(),
         self.reparametrisation.n_independent_params)
       OV.SetParam(
@@ -374,8 +384,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       d_min=uctbx.two_theta_as_d(two_theta_full, self.wavelength, deg=True)).completeness()
     shifts_over_su = flex.abs(
       self.normal_eqns.step() /
-      flex.sqrt(self.normal_eqns.covariance_matrix(independent_params=True)\
-                .matrix_packed_u_diagonal()))
+      flex.sqrt(self.normal_eqns.covariance_matrix().matrix_packed_u_diagonal()))
     # cell parameters and errors
     cell_params = self.olx_atoms.getCell()
     cell_errors = self.olx_atoms.getCellErrors()
@@ -510,7 +519,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         current = site.shared_site(kwds["i_seqs"])
         constraints.append(current)
     return constraints
-    
+
   def setup_occupancy_constraints(self):
     constraints = []
     vars = self.olx_atoms.model['variables']['variables']
@@ -527,7 +536,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         current = occupancy.dependent_occupancy(as_var, as_var_minus_one)
         constraints.append(current)
     return constraints
-  
+
   def setup_rigid_body_constraints(self, afix_iter):
     rigid_body_constraints = []
     rigid_body = {
@@ -561,7 +570,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           pivot, dependent)
       if current:
         rigid_body_constraints.append(current)
-        
+
     return rigid_body_constraints
 
   def setup_geometrical_constraints(self, afix_iter=None):
@@ -600,7 +609,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           pivot=pivot,
           constrained_site_indices=dependent)
         geometrical_constraints.append(current)
-        
+
     return geometrical_constraints
 
   def export_var_covar(self, matrix):
