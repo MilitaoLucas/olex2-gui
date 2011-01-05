@@ -159,6 +159,22 @@ class OlexFunctions(inheritFunctions):
     except Exception, ex:
       print >> sys.stderr, "Could not set max peaks to %s" %(max_peaks)
       sys.stderr.formatExceptionInfo()
+  
+  def GetOSF(self):
+    try:
+      a = float(olx.xf_rm_OSF())
+      if a == 0: #value previously unset
+        return None
+      return a*a
+    except:
+      return None
+    
+  def SetOSF(self, v):
+    try:
+      olx.xf_rm_OSF(math.sqrt(v))
+      return True
+    except:
+      return False
 
   def FindValue(self,variable,default=u''):
     try:

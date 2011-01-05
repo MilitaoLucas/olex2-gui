@@ -41,7 +41,7 @@ class olex2_normal_eqns(least_squares.crystallographic_ls):
   def __init__(self, fo_sq, reparametrisation, olx_atoms, **kwds):
     self.olx_atoms = olx_atoms
     least_squares.crystallographic_ls.__init__(
-      self, fo_sq, reparametrisation, **kwds)
+      self, fo_sq, reparametrisation, osf=OV.GetOSF(), **kwds)
 
   def step_forward(self):
     self.xray_structure_pre_cycle = self.xray_structure.deep_copy_scatterers()
@@ -199,7 +199,7 @@ class olex2_normal_eqns(least_squares.crystallographic_ls):
         olx.Fix('Uiso', u, name)
       u_total += u[0]
       u_average = u_total/i
-    #olx.Sel('-u')
+    OV.SetOSF(self.osf)
     olx.xf_EndUpdate()
 
 
