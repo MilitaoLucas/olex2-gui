@@ -200,8 +200,9 @@ class olex2_normal_eqns(least_squares.crystallographic_ls):
       u_total += u[0]
       u_average = u_total/i
     OV.SetOSF(self.scale_factor())
-    if self.twin_fractions is not None:
-      olx.AddIns('BASF ' + ' '.join(self.twin_fractions.as_string()))
+    if self.twin_components is not None:
+      olx.AddIns('BASF ' + ' '.join(
+        '%f' %component.twin_fraction for component in self.twin_components))
     olx.xf_EndUpdate()
 
 
@@ -279,7 +280,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       structure=self.xray_structure(),
       constraints=self.constraints,
       connectivity_table=connectivity_table,
-      twin_fractions=self.twin_fractions,
+      twin_components=self.twin_components,
       temperature=temp)
     weight = self.olx_atoms.model['weight']
     params = dict(a=0.1, b=0,
@@ -297,7 +298,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
       f_mask=self.f_mask,
       restraints_manager=restraints_manager,
       weighting_scheme=weighting,
-      twin_laws=self.twin_laws,
       log=self.log)
     method = OV.GetParam('snum.refinement.method')
     iterations = solvers.get(method)
@@ -560,6 +560,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         new_crd = i_f.fit(frag, sites)
         for i, crd in enumerate(new_crd):
           scatterers[frag_sc[i]].site = uc.fractionalize(crd)
+      if m != 0: continue
       current = None
       if n == 6:
         current = rigid.rigid_rotable_expandable_group(
@@ -672,3 +673,5 @@ class FullMatrixRefine(OlexCctbxAdapter):
     print "R1: %.4f for %i reflections I > 2u(I)" % self.r1
     print "wR2 = %.4f, GooF: %.4f" % (
       self.normal_eqns.wR2(), self.normal_eqns.goof())
+    print "Difference map: max=%.2f, min=%.2f" %(
+      self.diff_stats.max(), self.diff_stats.min())
