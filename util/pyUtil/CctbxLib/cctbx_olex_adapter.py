@@ -50,25 +50,29 @@ class OlexCctbxAdapter(object):
     self.reflections = None
     twinning=self.olx_atoms.model.get('twin')
     if twinning is not None:
-      self.twin_fractions = flex.double(twinning['basf'])
+      twin_fractions = flex.double(twinning['basf'])
       twin_law = sgtbx.rot_mx([int(twinning['matrix'][j][i])
                   for i in range(3) for j in range(3)])
       twin_multiplicity = twinning.get('n', 2)
-      self.twin_laws = [twin_law]
+      twin_laws = [twin_law]
       if twin_multiplicity > 2 or abs(twin_multiplicity) > 4:
         n = twin_multiplicity
         if twin_multiplicity < 0: n /= 2
         for i in range(n):
-          self.twin_laws.append(self.twin_laws[-1].multiply(twin_law))
+          twin_laws.append(twin_laws[-1].multiply(twin_law))
       if twin_multiplicity < 0:
         inv = sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))
-        self.twin_laws.append(inv)
-        for law in self.twin_laws[:-1]:
-          self.twin_laws.append(law.multiply(inv))
-      assert len(self.twin_fractions) == abs(twin_multiplicity) - 1
-      assert len(self.twin_fractions) == len(self.twin_laws)
+        twin_laws.append(inv)
+        for law in twin_laws[:-1]:
+          twin_laws.append(law.multiply(inv))
+      assert len(twin_fractions) == abs(twin_multiplicity) - 1
+      assert len(twin_fractions) == len(twin_laws)
+      self.twin_components = tuple(
+        [xray.twin_component(law, fraction, True)
+         for law, fraction in zip(twin_laws, twin_fractions)])
     else:
-      self.twin_laws, self.twin_fractions = None, None
+      self.twin_components = None
+
     try:
       self.exti = float(olx.Ins('exti'))
     except:
@@ -151,18 +155,18 @@ class OlexCctbxAdapter(object):
              algorithm="direct"):
     assert self.xray_structure().scatterers().size() > 0, "n_scatterers > 0"
     if (    ignore_inversion_twin
-        and self.twin_laws is not None
-        and self.twin_laws[0] == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
+        and self.twin_components is not None
+        and self.twin_components[0].twin_law == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
       apply_twin_law = False
-    if apply_twin_law and self.twin_laws is not None:
+    if apply_twin_law and self.twin_components is not None:
+      twin_component = self.twin_components[0]
       twinning = cctbx_controller.hemihedral_twinning(
-        self.twin_laws[0].as_double(), miller_set)
+        twin_component.twin_law.as_double(), miller_set)
       twin_set = twinning.twin_complete_set
       fc = twin_set.structure_factors_from_scatterers(
         self.xray_structure(), algorithm=algorithm).f_calc()
       twinned_fc2 = twinning.twin_with_twin_fraction(
-        fc.as_intensity_array(),
-        self.twin_fractions[0])
+        fc.as_intensity_array(), twin_component.twin_fraction)
       fc = twinned_fc2.f_sq_as_f().phase_transfer(fc).common_set(miller_set)
     else:
       fc = miller_set.structure_factors_from_scatterers(
