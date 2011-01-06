@@ -561,12 +561,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
         for i, crd in enumerate(new_crd):
           scatterers[frag_sc[i]].site = uc.fractionalize(crd)
       current = None
-      if n == 6 and len(pivot_neighbours) == 1:
+      if n == 6:
+        current = rigid.rigid_rotable_expandable_group(
+          pivot, dependent, False)
+      elif n == 7 and len(pivot_neighbours) == 1:
         current = rigid.rigid_pivoted_rotable_group(
           pivot, pivot_neighbours[0], dependent)
       elif n == 9:
         current = rigid.rigid_rotable_expandable_group(
-          pivot, dependent)
+          pivot, dependent, True)
       if current:
         rigid_body_constraints.append(current)
 
