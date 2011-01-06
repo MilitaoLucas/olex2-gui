@@ -20,6 +20,11 @@ last_mode = None
 current_tooltip_number = 0
 HaveModeBox = False
 
+global formula
+global formula_string
+formula = ""
+formula_string = ""
+
 
 def makeHtmlTable(list):
   """ Pass a list of dictionaries, with one dictionary for each table row.
@@ -1398,10 +1403,26 @@ def getGenericSwitchNameTranslation(name):
 OV.registerFunction(getGenericSwitchNameTranslation)
 
 def makeFormulaForsNumInfo():
+  global formula
+  global formula_string
+  
   if olx.FileName() == "Periodic Table":
     return "Periodic Table"
   else:
-    return olx.xf_GetFormula('html',2)
+    colour = ""
+    txt_formula = olx.xf_GetFormula()
+    if txt_formula == formula:
+      return formula_string
+    formula = txt_formula
+    l = ['3333', '6667']
+    for item in l:
+      if item in txt_formula:
+        colour = OV.GetParam('gui.red').hexadecimal
+    if not colour:
+      colour = OV.GetParam('gui.html.font_colour')
+    html_formula = olx.xf_GetFormula('html',1)
+    formula_string = "<font size='4' color=%s>%s</font>" %(colour, html_formula)
+    return formula_string
 OV.registerFunction(makeFormulaForsNumInfo)
 
 def setDisplayQuality(q=None):
