@@ -68,6 +68,41 @@ class hemihedral_twinning(object):
     if sigmas is not None: sigmas = twinned_s
     return f_sq.customized_copy(data=twinned_i, sigmas=sigmas)
 
+  def detwin_with_twin_fraction(self, f_sq, twin_fraction):
+    detwinner = xray.hemihedral_detwinner(
+      hkl_obs=f_sq.indices(),
+      hkl_calc=self.twin_complete_set.indices(),
+      space_group=f_sq.space_group(),
+      anomalous_flag=f_sq.anomalous_flag(),
+      twin_law=self.twin_law)
+    sigmas = f_sq.sigmas()
+    if sigmas is None: sigmas = flex.double()
+    detwinned_i, detwinned_s = detwinner.detwin_with_twin_fraction(
+      f_sq.data(),
+      sigmas,
+      twin_fraction=twin_fraction)
+    if sigmas is not None: sigmas = detwinned_s
+    return f_sq.customized_copy(data=detwinned_i, sigmas=sigmas)
+
+  def detwin_with_model_data(self, f_sq, f_model, twin_fraction):
+    assert f_model.is_complex_array()
+    detwinner = xray.hemihedral_detwinner(
+      hkl_obs=f_sq.indices(),
+      hkl_calc=self.twin_complete_set.indices(),
+      space_group=f_sq.space_group(),
+      anomalous_flag=f_sq.anomalous_flag(),
+      twin_law=self.twin_law)
+    sigmas = f_sq.sigmas()
+    if sigmas is None: sigmas = flex.double()
+    detwinned_i, detwinned_s = detwinner.detwin_with_model_data(
+      f_sq.data(),
+      sigmas,
+      f_model.data(),
+      twin_fraction=twin_fraction)
+    if sigmas is not None: sigmas = detwinned_s
+    return f_sq.customized_copy(data=detwinned_i, sigmas=sigmas)
+
+
 class reflections(object):
   def __init__(self,  cell, spacegroup, reflection_file, hklf_matrix=None):
     """ reflections is the filename holding the reflections """

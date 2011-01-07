@@ -319,6 +319,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
                                #step_threshold=1e-5)
       self.scale_factor = self.cycles.scale_factor_history[-1]
       self.covariance_matrix_and_annotations=self.normal_eqns.covariance_matrix_and_annotations()
+      self.twin_covariance_matrix = self.normal_eqns.covariance_matrix(
+        jacobian_transpose=self.reparametrisation.jacobian_transpose_matching(
+          self.reparametrisation.mapping_to_grad_fc_independent_scalars))
       self.export_var_covar(self.covariance_matrix_and_annotations)
       self.r1 = self.normal_eqns.r1_factor(cutoff_factor=4)
       self.r1_all_data = self.normal_eqns.r1_factor()
@@ -332,15 +335,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
         print e
       self.failure = True
     else:
-      cov = self.normal_eqns.covariance_matrix(
-        jacobian_transpose=self.reparametrisation.jacobian_transpose_matching(
-          self.reparametrisation.mapping_to_grad_fc_independent_scalars))
       fo_minus_fc = self.f_obs_minus_f_calc_map(0.4)
       fo_minus_fc.apply_volume_scaling()
       self.diff_stats = fo_minus_fc.statistics()
       self.post_peaks(fo_minus_fc, max_peaks=self.max_peaks)
       self.restraints_manager().show_sorted(self.xray_structure())
       self.show_summary()
+      self.show_comprehensive_summary(log=self.log)
       f = open(OV.file_ChangeExt(OV.FileFull(), 'cif'), 'wb')
       cif = iotbx.cif.model.cif()
       cif[OV.FileName().replace(' ', '')] = self.as_cif_block()
@@ -459,6 +460,14 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_refine_diff_density_min'] = fmt % self.diff_stats.min()
     cif_block['_refine_diff_density_rms'] = fmt % math.sqrt(self.diff_stats.mean_sq())
     d_max, d_min = self.reflections.f_sq_obs_filtered.d_max_min()
+    if self.twin_components is not None and len(self.twin_components):
+      if self.twin_components[0].twin_law == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1)):
+        flack = self.twin_components[0].twin_fraction
+        su = math.sqrt(self.twin_covariance_matrix.matrix_packed_u_diagonal()[0])
+        cif_block['_refine_ls_abs_structure_details'] = \
+                 'Flack, H. D. (1983). Acta Cryst. A39, 876-881.'
+        cif_block['_refine_ls_abs_structure_Flack'] = \
+                 utils.format_float_with_standard_uncertainty(flack, su)
     cif_block['_refine_ls_d_res_high'] = fmt % d_min
     cif_block['_refine_ls_d_res_low'] = fmt % d_max
     cif_block['_refine_ls_goodness_of_fit_ref'] = fmt % self.normal_eqns.goof()
@@ -633,12 +642,25 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
   def f_obs_minus_f_calc_map(self, resolution):
     fo2 = self.normal_eqns.fo_sq.average_bijvoet_mates()
-    f_obs = fo2.f_sq_as_f()
     f_calc = self.normal_eqns.f_calc.average_bijvoet_mates()
-    if self.scale_factor is None:
+    scale_factor = self.scale_factor
+    if (    self.twin_components is not None
+        and self.twin_components[0].twin_law != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
+      import cctbx_controller
+      hemihedral_twinning = cctbx_controller.hemihedral_twinning(
+        self.twin_components[0].twin_law.as_double(), miller_set=fo2)
+      #fo2 = hemihedral_twinning.detwin_with_twin_fraction(
+        #fo2, self.twin_components[0].twin_fraction)
+      f_calc = hemihedral_twinning.twin_complete_set.structure_factors_from_scatterers(
+        self.xray_structure()).f_calc()
+      fo2 = hemihedral_twinning.detwin_with_model_data(
+        fo2, f_calc, self.twin_components[0].twin_fraction)
+      f_calc = f_calc.common_set(fo2)
+    f_obs = fo2.f_sq_as_f()
+    if scale_factor is None:
       k = f_obs.scale_factor(f_calc)
     else:
-      k = math.sqrt(self.scale_factor)
+      k = math.sqrt(scale_factor)
     f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(1./k, f_calc)
     return f_obs_minus_f_calc.fft_map(
       symmetry_flags=sgtbx.search_symmetry_flags(use_space_group_symmetry=False),
@@ -674,12 +696,28 @@ class FullMatrixRefine(OlexCctbxAdapter):
     olx.Freeze(frozen)
     OV.Refresh()
 
-  def show_summary(self):
-    print str(self.cycles)
-    print "Summary after %i cycles:" %self.cycles.n_iterations
-    print "R1 (all data): %.4f for %i reflections" % self.r1_all_data
-    print "R1: %.4f for %i reflections I > 2u(I)" % self.r1
-    print "wR2 = %.4f, GooF: %.4f" % (
+  def show_summary(self, log=None):
+    import sys
+    if log is None: log = sys.stdout
+    print >> log, str(self.cycles)
+    print >> log, "Summary after %i cycles:" %self.cycles.n_iterations
+    print >> log, "R1 (all data): %.4f for %i reflections" % self.r1_all_data
+    print >> log, "R1: %.4f for %i reflections I > 2u(I)" % self.r1
+    print >> log, "wR2 = %.4f, GooF: %.4f" % (
       self.normal_eqns.wR2(), self.normal_eqns.goof())
-    print "Difference map: max=%.2f, min=%.2f" %(
+    print >> log, "Difference map: max=%.2f, min=%.2f" %(
       self.diff_stats.max(), self.diff_stats.min())
+
+  def show_comprehensive_summary(self, log=None):
+    import sys
+    if log is None: log = sys.stdout
+    self.show_summary(log)
+    standard_uncertainties = self.twin_covariance_matrix.matrix_packed_u_diagonal()
+    if self.twin_components is not None and len(self.twin_components):
+      print >> log
+      print >> log, "Twin summary:"
+      print >> log, "twin_law  fraction  standard_uncertainty"
+      for i, twin in enumerate(self.twin_components):
+        print >> log, "%-9s %-9.4f %.4f" %(
+          twin.twin_law.as_hkl(), twin.twin_fraction, math.sqrt(standard_uncertainties[i]))
+
