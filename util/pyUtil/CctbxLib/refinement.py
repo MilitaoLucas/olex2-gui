@@ -560,18 +560,20 @@ class FullMatrixRefine(OlexCctbxAdapter):
         new_crd = i_f.fit(frag, sites)
         for i, crd in enumerate(new_crd):
           scatterers[frag_sc[i]].site = uc.fractionalize(crd)
-      if m != 0: continue
+      if m != 0:  continue
       current = None
-      if n == 6:
+      if n in(6, 9):
         current = rigid.rigid_rotable_expandable_group(
-          pivot, dependent, False)
-      elif n == 7 and len(pivot_neighbours) == 1:
+          pivot, dependent, n == 9, True)
+      elif n in (3,4,7,8):
+        if len(pivot_neighbours) != 1:
+          print "Invalid rigid group for " + scatterers[pivot].label
+          continue
         current = rigid.rigid_pivoted_rotable_group(
-          pivot, pivot_neighbours[0], dependent)
-      elif n == 9:
-        current = rigid.rigid_rotable_expandable_group(
-          pivot, dependent, True)
-      if current:
+          pivot, pivot_neighbours[0], dependent,
+          n in (4,8), n in (7,8))
+
+      if current and current not in rigid_body_constraints:
         rigid_body_constraints.append(current)
 
     return rigid_body_constraints
