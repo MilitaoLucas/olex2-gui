@@ -269,11 +269,17 @@ class FullMatrixRefine(OlexCctbxAdapter):
     equivs = self.olx_atoms.model['equivalents']
     for i_seq, v in olx_conn['atom'].items():
       for bond_to_delete in v.get('delete', []):
-        connectivity_table.remove_bond(
-          i_seq, bond_to_delete['to'], rt_mx(equivs[bond_to_delete['eqiv']]))
+        if bond_to_delete['eqiv'] == -1:
+          connectivity_table.remove_bond(i_seq, bond_to_delete['to'])
+        else:
+          connectivity_table.remove_bond(
+            i_seq, bond_to_delete['to'], rt_mx(equivs[bond_to_delete['eqiv']]))
       for bond_to_add in v.get('create', []):
-        connectivity_table.add_bond(
-          i_seq, bond_to_add['to'], rt_mx(equivs[bond_to_add['eqiv']]))
+        if bond_to_add['eqiv'] == -1:
+          connectivity_table.add_bond(i_seq, bond_to_add['to'])
+        else:
+          connectivity_table.add_bond(
+            i_seq, bond_to_add['to'], rt_mx(equivs[bond_to_add['eqiv']]))
     temp = self.olx_atoms.exptl['temperature']
     if temp < -274: temp = 20
     self.reparametrisation = constraints.reparametrisation(
