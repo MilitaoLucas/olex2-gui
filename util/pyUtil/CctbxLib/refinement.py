@@ -199,7 +199,12 @@ class olex2_normal_eqns(least_squares.crystallographic_ls):
         olx.Fix('Uiso', u, name)
       u_total += u[0]
       u_average = u_total/i
+    #update OSF
     OV.SetOSF(self.scale_factor())
+    #update FVars
+    for var in self.occupancy_constraints:
+      OV.SetFVar(var[0], var[1].occupancy.value)
+    #update BASF
     if self.twin_components is not None:
       olx.AddIns('BASF ' + ' '.join(
         '%f' %component.twin_fraction for component in self.twin_components))
@@ -305,6 +310,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       restraints_manager=restraints_manager,
       weighting_scheme=weighting,
       log=self.log)
+    self.normal_eqns.occupancy_constraints = self.occupancy_constraints
     method = OV.GetParam('snum.refinement.method')
     iterations = solvers.get(method)
     iterations = normal_eqns_solving.naive_iterations
@@ -535,9 +541,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
     return constraints
 
   def setup_occupancy_constraints(self):
+    self.occupancy_constraints = []
     constraints = []
     vars = self.olx_atoms.model['variables']['variables']
-    for var in vars:
+    for i, var in enumerate(vars):
       refs = var['references']
       as_var = []
       as_var_minus_one = []
@@ -549,6 +556,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if (len(as_var) + len(as_var_minus_one)) != 0:
         current = occupancy.dependent_occupancy(as_var, as_var_minus_one)
         constraints.append(current)
+        self.occupancy_constraints.append((i, current))
     return constraints
 
   def setup_rigid_body_constraints(self, afix_iter):
