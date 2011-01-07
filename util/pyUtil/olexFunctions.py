@@ -176,6 +176,19 @@ class OlexFunctions(inheritFunctions):
     except:
       return False
 
+  def GetFVar(self, i):
+    try:
+      return float(olx.xf_rm_FVar(i))
+    except:
+      return None
+    
+  def SetFVar(self, i, v):
+    try:
+      olx.xf_rm_FVar(i, v)
+      return True
+    except:
+      return False
+
   def FindValue(self,variable,default=u''):
     try:
       retVal = olex_core.FindValue(variable, default)
