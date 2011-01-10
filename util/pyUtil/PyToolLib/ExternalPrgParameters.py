@@ -570,6 +570,7 @@ class Method_cctbx_refinement(Method_refinement):
     #olx.Kill('$Q')
     try:
       cctbx.run()
+      self.flack = cctbx.flack
     except InvalidConstraint, e:
       print e
     except NotImplementedError, e:
@@ -581,6 +582,9 @@ class Method_cctbx_refinement(Method_refinement):
         OV.File('%s.res' %OV.FileName())
     finally:
       OV.DeleteBitmap('refine')
+
+  def getFlack(self):
+    return self.flack
 
 class Method_cctbx_ChargeFlip(Method_solution):
 
