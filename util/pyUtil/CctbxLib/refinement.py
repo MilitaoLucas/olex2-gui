@@ -221,6 +221,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.scale_factor = None
     self.failure = False
     self.log = open(OV.file_ChangeExt(OV.FileFull(), 'log'), 'wb')
+    self.flack = None
 
   def run(self):
     self.reflections.show_summary(log=self.log)
@@ -474,6 +475,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
                  'Flack, H. D. (1983). Acta Cryst. A39, 876-881.'
         cif_block['_refine_ls_abs_structure_Flack'] = \
                  utils.format_float_with_standard_uncertainty(flack, su)
+        self.flack = cif_block['_refine_ls_abs_structure_Flack']
     cif_block['_refine_ls_d_res_high'] = fmt % d_min
     cif_block['_refine_ls_d_res_low'] = fmt % d_max
     cif_block['_refine_ls_goodness_of_fit_ref'] = fmt % self.normal_eqns.goof()
