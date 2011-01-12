@@ -332,6 +332,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.export_var_covar(self.covariance_matrix_and_annotations)
       self.r1 = self.normal_eqns.r1_factor(cutoff_factor=4)
       self.r1_all_data = self.normal_eqns.r1_factor()
+      self.check_flack()
     except RuntimeError, e:
       if str(e).startswith("cctbx::adptbx::debye_waller_factor_exp: max_arg exceeded"):
         print "Refinement failed to converge"
@@ -365,6 +366,21 @@ class FullMatrixRefine(OlexCctbxAdapter):
     finally:
       sys.stdout.refresh = True
       self.log.close()
+
+  def check_flack(self):
+    if (not self.xray_structure().space_group().is_centric()
+        and self.normal_eqns.fo_sq.anomalous_flag()):
+      if (self.twin_components is not None and len(self.twin_components)
+          and self.twin_components[0].twin_law == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
+        flack = self.twin_components[0].twin_fraction
+        su = math.sqrt(self.twin_covariance_matrix.matrix_packed_u_diagonal()[0])
+        self.flack = utils.format_float_with_standard_uncertainty(flack, su)
+      else:
+        from smtbx import absolute_structure
+        flack = absolute_structure.flack_analysis(
+          self.normal_eqns.xray_structure, self.normal_eqns.fo_sq)
+        self.flack = utils.format_float_with_standard_uncertainty(
+          flack.flack_x, flack.sigma_x)
 
   def as_cif_block(self):
     def format_type_count(type, count):
@@ -467,15 +483,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_refine_diff_density_min'] = fmt % self.diff_stats.min()
     cif_block['_refine_diff_density_rms'] = fmt % math.sqrt(self.diff_stats.mean_sq())
     d_max, d_min = self.reflections.f_sq_obs_filtered.d_max_min()
-    if self.twin_components is not None and len(self.twin_components):
-      if self.twin_components[0].twin_law == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1)):
-        flack = self.twin_components[0].twin_fraction
-        su = math.sqrt(self.twin_covariance_matrix.matrix_packed_u_diagonal()[0])
+    if self.flack is not None:
         cif_block['_refine_ls_abs_structure_details'] = \
                  'Flack, H. D. (1983). Acta Cryst. A39, 876-881.'
-        cif_block['_refine_ls_abs_structure_Flack'] = \
-                 utils.format_float_with_standard_uncertainty(flack, su)
-        self.flack = cif_block['_refine_ls_abs_structure_Flack']
+        cif_block['_refine_ls_abs_structure_Flack'] = self.flack
     cif_block['_refine_ls_d_res_high'] = fmt % d_min
     cif_block['_refine_ls_d_res_low'] = fmt % d_max
     cif_block['_refine_ls_goodness_of_fit_ref'] = fmt % self.normal_eqns.goof()
