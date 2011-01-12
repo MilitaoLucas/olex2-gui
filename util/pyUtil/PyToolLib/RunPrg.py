@@ -396,9 +396,8 @@ class RunRefinementPrg(RunPrg):
         elif (hooft.p3_racemic_twin is not None and
               round(hooft.p3_racemic_twin, 3) == 1):
           possible_racemic_twin = True
-
     if flack:
-      print "Flack Parameter = %s" %flack
+      print "Flack x: %s" %flack
       fs = flack.split("(")
       flack_val = float(fs[0])
       flack_esd = float(fs[1].strip(")"))
