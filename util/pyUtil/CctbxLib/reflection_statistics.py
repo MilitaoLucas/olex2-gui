@@ -308,10 +308,15 @@ class bijvoet_differences_scatter_plot(OlexCctbxAdapter):
       if not hasattr(hooft_analysis, 'delta_fo2'):
         return
     self.have_bijvoet_pairs = True
+    cutoff_factor = 0.12
+    selection = (flex.abs(hooft_analysis.delta_fo2.data()) > cutoff_factor
+                 * hooft_analysis.delta_fo2.sigmas())
+    self.delta_fo2 = hooft_analysis.delta_fo2.select(selection)
+    self.delta_fc2 = hooft_analysis.delta_fc2.select(selection)
     self.delta_fo2, minus_fo2 =\
-        hooft_analysis.delta_fo2.generate_bijvoet_mates().hemispheres_acentrics()
+        self.delta_fo2.generate_bijvoet_mates().hemispheres_acentrics()
     self.delta_fc2, minus_fc2 =\
-        hooft_analysis.delta_fc2.generate_bijvoet_mates().hemispheres_acentrics()
+        self.delta_fc2.generate_bijvoet_mates().hemispheres_acentrics()
     # we want to plot both hemispheres
     self.delta_fo2.indices().extend(minus_fo2.indices())
     self.delta_fo2.data().extend(minus_fo2.data() * -1)
@@ -334,6 +339,7 @@ class bijvoet_differences_scatter_plot(OlexCctbxAdapter):
     r.indices = self.indices
     r.xLegend = "delta Fc2"
     r.yLegend = "delta Fo2"
+    r.sigmas = self.delta_fo2.sigmas()
     return r
 
 def wilson_statistics(model, reflections, n_bins=10):
