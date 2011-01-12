@@ -181,7 +181,7 @@ class OlexCctbxAdapter(object):
     for param, value in zip(params.keys()[:len(weight)], weight):
       params[param] = value
     weighting = xray.weighting_schemes.shelx_weighting(**params)
-    scale_factor = fo2.scale_factor(fc)
+    scale_factor = OV.GetOSF()
     weighting.observed = fo2
     weighting.compute(fc, scale_factor)
     return weighting.weights
@@ -201,7 +201,7 @@ class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):
     weights = self.compute_weights(fo2, fc)
     scale = fo2.scale_factor(fc, weights=weights)
     absolute_structure.hooft_analysis.__init__(
-      self, fo2, fc, probability_plot_slope=probability_plot_slope)
+      self, fo2, fc, probability_plot_slope=probability_plot_slope, scale_factor=scale)
     self.show()
 
 OV.registerFunction(hooft_analysis)
@@ -209,9 +209,6 @@ OV.registerFunction(hooft_analysis)
 class students_t_hooft_analysis(OlexCctbxAdapter, absolute_structure.students_t_hooft_analysis):
   def __init__(self, nu=None):
     OlexCctbxAdapter.__init__(self)
-    #if scale is not None:
-      #self.scale = float(scale)
-    #else: self.scale=None
     fo2 = self.reflections.f_sq_obs_filtered
     if not fo2.anomalous_flag():
       print "No Bijvoet pairs"
