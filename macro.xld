@@ -64,14 +64,14 @@
       <cmd13 "storeparam startup file.relativePath(filefull()) true">
       <cmd15 "spy.setAllMainToolbarTabButtons()">
       <cmd16 "if File.Exists(strdir()/filename().vvd) then none else 'spy.SetParam(snum.refinement.original_formula,xf.GetFormula())'">
-      <cmd17 "if and(strcmp(%7,filefull()),strcmp(%6,fileext())) then none else 'spy.loadHistory()'">
+      <cmd17 "if strcmp(%7,filefull()) then none else 'spy.loadHistory()'">
       <cmd19 "if and(isplugininstalled(plugin-brukersaint),IsFileType('p4p')) then BSINI else none">
       <cmd20 cmd1="if strcmp(%7,filefull()) then none else 'clear'">
-      <cmd23 "syncbc">
       <cmd24 "spy.reset_file_in_OFS(solution_image.htm)">
       <cmd25 "spy.reset_file_in_OFS(refinement_image.htm)">
-      <cmd26 "if strcmp(%4,filename()) then updatehtml else htmlreload">
+      <cmd26 "if strcmp(%7,filefull()) then updatehtml else htmlreload">
       <cnd27 "if html.IsPopup(history-tree) then spy.popout_history_tree()">
+      <cmd23 "syncbc">
       <cmd26 XXX="fade 1 0 -0.1">
       <cmd27 XXX='waitfor fade'>
       <cmd28 XXX="ceiling off">
@@ -817,7 +817,7 @@
       <arg2 name="type" def="">
     \>
     <cmd
-      <cmd1 "updatewght">
+      <cmd1 "updatewght ">
       <cmd2 "updatehtml">
       <cmd3 "echo DONE">
     \>
