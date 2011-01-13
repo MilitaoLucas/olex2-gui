@@ -264,15 +264,17 @@ class normal_probability_plot(OlexCctbxAdapter):
 
 
 class bijvoet_differences_NPP:
-  def __init__(self, hooft_analysis=None, use_students_t=False, scale=None):
+  def __init__(self, hooft_analysis=None, use_students_t=False,
+               scale=None, use_fcf=False):
     from smtbx import absolute_structure
     self.have_bijvoet_pairs = False
     if hooft_analysis is None:
       import cctbx_olex_adapter
       if use_students_t:
-        hooft_analysis = cctbx_olex_adapter.students_t_hooft_analysis()
+        hooft_analysis = cctbx_olex_adapter.students_t_hooft_analysis(
+          use_fcf=use_fcf)
       else:
-        hooft_analysis = cctbx_olex_adapter.hooft_analysis()
+        hooft_analysis = cctbx_olex_adapter.hooft_analysis(use_fcf=use_fcf)
       if not hasattr(hooft_analysis, 'delta_fo2'):
         return
     self.have_bijvoet_pairs = True
