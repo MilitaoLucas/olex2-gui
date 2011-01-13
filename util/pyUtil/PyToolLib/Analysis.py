@@ -433,7 +433,8 @@ class Graph(ImageTools):
         y_intercept = float(dataset.metadata().get("fit_y_intercept"))
         self.draw_fit_line(slope, y_intercept)
       self.draw_data_points(
-        dataset.xy_pairs(), dataset.indices, marker_size_factor=marker_size_factor)
+        dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
+        marker_size_factor=marker_size_factor)
 
   def map_txt(self):
     return '\n'.join(self.map_txt_list)
@@ -449,9 +450,15 @@ class Graph(ImageTools):
     for dataset in self.data.values():
       if self.auto_axes:
         min_xs.append(min(dataset.x))
-        min_ys.append(min(dataset.y))
+        if dataset.sigmas is not None:
+          min_ys.append(min(dataset.y-dataset.sigmas))
+        else:
+          min_ys.append(min(dataset.y))
       max_xs.append(max(dataset.x))
-      max_ys.append(max(dataset.y))
+      if dataset.sigmas is not None:
+        max_ys.append(max(dataset.y+dataset.sigmas))
+      else:
+        max_ys.append(max(dataset.y))
 
     if self.auto_axes:
       min_x = min(min_xs)
@@ -459,17 +466,16 @@ class Graph(ImageTools):
     else:
       min_x = 0.0
       min_y = 0.0
-    if self.max_x is not None:
-      self.max_x = max(self.max_x, max(max_xs))
-    else:
-      self.max_x = max(max_xs)
-    if self.max_y is not None:
-      self.max_y = max(self.max_y, max(max_ys))
-    else:
-      self.max_y = max(max_ys)
-
-    self.min_x = min_x
-    self.min_y = min_y
+    max_x = max(max_xs)
+    max_y = max(max_ys)
+    self.max_y = max_y + .05*abs(max_y - min_y)
+    self.max_x = max_x + .05*abs(max_x - min_x)
+    if min_x != 0.0:
+      self.min_x = min_x - .05*abs(max_x - min_x)
+    else: self.min_x = 0.0
+    if min_y != 0.0:
+      self.min_y = min_y - .05*abs(max_y - min_y)
+    else: self.min_y = 0.0
 
     delta_x = self.max_x - self.min_x
     delta_y = self.max_y - self.min_y
@@ -810,7 +816,7 @@ class Graph(ImageTools):
     top_left = (x, legend_top)
     IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=font_size, font_colour=self.light_grey)
 
-  def draw_data_points(self, xy_pairs, indices=None, marker_size_factor=None):
+  def draw_data_points(self, xy_pairs, indices=None, sigmas=None, marker_size_factor=None):
     min_x = self.min_x
     max_x = self.max_x
     scale_x = self.scale_x
@@ -854,6 +860,23 @@ class Graph(ImageTools):
       scale_y = -self.scale_y
 
     map_txt_list = self.map_txt_list
+    if sigmas is not None:
+      for i, (xr, yr) in enumerate(xy_pairs):
+        x = x_constant + xr * scale_x
+        y = y_constant + yr * scale_y
+        dy = sigmas[i]*scale_y
+        x_centre = x+half_marker_width
+        y_centre = y+half_marker_width
+        y_plus_dy = y+half_marker_width+dy
+        y_minus_dy = y+half_marker_width-dy
+        line = ((x+half_marker_width, y_plus_dy),
+                (x+half_marker_width, y_minus_dy))
+        self.draw.line(line, width=self.line_width, fill=(200,200,200))
+        self.draw.line(((x, y_plus_dy), (x+marker_width, y_plus_dy)),
+                       width=1, fill=(200,200,200))
+        self.draw.line(((x, y_minus_dy), (x+marker_width, y_minus_dy)),
+                       width=1, fill=(200,200,200))
+
     for i, (xr, yr) in enumerate(xy_pairs):
       x = x_constant + xr * scale_x
       y = y_constant + yr * scale_y
@@ -1888,7 +1911,9 @@ class bijvoet_differences_scatter_plot(Analysis):
     self.metadata = metadata
 
     self.have_data = True
-    self.data.setdefault('dataset1', Dataset(xy_plot.x, xy_plot.y, indices=xy_plot.indices, metadata=metadata))
+    self.data.setdefault(
+      'dataset1', Dataset(xy_plot.x, xy_plot.y, sigmas=xy_plot.sigmas,
+                          indices=xy_plot.indices, metadata=metadata))
     self.draw_origin = True
     self.make_empty_graph(axis_x = True)
     self.draw_pairs(marker_size_factor = 1/1.5)
@@ -1906,9 +1931,11 @@ class bijvoet_differences_NPP(Analysis):
     self.graphInfo["TopRightTitle"] = self.filename
     self.auto_axes = True
     import reflection_statistics
-    use_students_t = self.params.bijvoet_differences_probability_plot.use_students_t
+    params = self.params.bijvoet_differences_probability_plot
+    use_students_t = params.use_students_t
+    use_fcf = params.source == "fcf"
     xy_plot = reflection_statistics.bijvoet_differences_NPP(
-      use_students_t=use_students_t).xy_plot_info()
+      use_students_t=use_students_t, use_fcf=use_fcf).xy_plot_info()
     if xy_plot is None:
       self.have_data = False
       return
@@ -2255,19 +2282,20 @@ class HistoryGraph(Analysis):
 
 
 class Dataset(object):
-  def __init__(self, x=None, y=None, indices=None,
+  def __init__(self, x=None, y=None, indices=None, sigmas=None,
                hrefs=None, targets=None, metadata={}):
     if x is None: x = []
     if y is None: y = []
     self.x = x
     self.y = y
+    self.sigmas = sigmas
     self.hrefs = hrefs
     self.targets = targets
     self.indices = indices
     self._metadata = metadata
 
   def xy_pairs(self):
-    return izip(self.x,self.y)
+    return zip(self.x,self.y)
 
   def metadata(self):
     return self._metadata
@@ -2558,7 +2586,7 @@ class HealthOfStructure():
         curr_x += limit_width
       fill = OV.GetParam('gui.skin.diagnostics.colour_grade%i' %i).hexadecimal
       draw.rectangle(box, fill=fill)
-    
+
     if item == "MeanIOverSigma":
       display = IT.get_unicode_characters("I/sigma")
     if item == "Rint":
@@ -2572,11 +2600,11 @@ class HealthOfStructure():
     IT.write_text_to_draw(draw, str(top), align='right', max_width=boxWidth - 2, font_colour='#ffffff', font_size=11)
     y = 0
     r = 18
-    x = int((value_raw/top) * boxWidth - r/2) 
+    x = int((value_raw/top) * boxWidth - r/2)
     draw.ellipse(((x, y),(x+r, y+r)), fill="#ff0000")
     draw.text((x, y), "%s" %value_display, font=font, fill="#ffffff")
-    
-    
+
+
     OlexVFS.save_image_to_olex(im, item, 0)
     txt = '''
 <td align='center'><zimg src=%s></td>''' %item
