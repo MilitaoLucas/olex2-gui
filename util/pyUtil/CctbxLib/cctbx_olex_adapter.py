@@ -181,7 +181,7 @@ class OlexCctbxAdapter(object):
     for param, value in zip(params.keys()[:len(weight)], weight):
       params[param] = value
     weighting = xray.weighting_schemes.shelx_weighting(**params)
-    scale_factor = OV.GetOSF()
+    scale_factor = fo2.scale_factor(fc)
     weighting.observed = fo2
     weighting.compute(fc, scale_factor)
     return weighting.weights
