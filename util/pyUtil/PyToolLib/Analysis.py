@@ -475,10 +475,10 @@ class Graph(ImageTools):
     else:
       self.max_y = max(max_ys)
 
-    self.max_y *= 1.05
-    self.max_x *= 1.05
-    self.min_x = 1.05*min_x
-    self.min_y = 1.05*min_y
+    self.max_y += .05*abs(self.max_y)
+    self.max_x += .05*abs(self.max_x)
+    self.min_x = min_x - .05*abs(min_x)
+    self.min_y = min_y - .05*abs(min_y)
 
     delta_x = self.max_x - self.min_x
     delta_y = self.max_y - self.min_y
