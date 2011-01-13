@@ -2326,7 +2326,6 @@ OV.registerFunction(scale_factor_vs_resolution_plot)
 OV.registerFunction(X_Y_plot)
 OV.registerFunction(bijvoet_differences_scatter_plot)
 OV.registerFunction(bijvoet_differences_NPP)
-OV.registerFunction(bijvoet_differences_quotient_plot)
 
 def array_scalar_multiplication(array, multiplier):
   return [i * multiplier for i in array]
