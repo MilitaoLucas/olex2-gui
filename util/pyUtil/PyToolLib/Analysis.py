@@ -466,19 +466,16 @@ class Graph(ImageTools):
     else:
       min_x = 0.0
       min_y = 0.0
-    if self.max_x is not None:
-      self.max_x = max(self.max_x, max(max_xs))
-    else:
-      self.max_x = max(max_xs)
-    if self.max_y is not None:
-      self.max_y = max(self.max_y, max(max_ys))
-    else:
-      self.max_y = max(max_ys)
-
-    self.max_y += .05*abs(self.max_y)
-    self.max_x += .05*abs(self.max_x)
-    self.min_x = min_x - .05*abs(min_x)
-    self.min_y = min_y - .05*abs(min_y)
+    max_x = max(max_xs)
+    max_y = max(max_ys)
+    self.max_y = max_y + .05*abs(max_y - min_y)
+    self.max_x = max_x + .05*abs(max_x - min_x)
+    if min_x != 0.0:
+      self.min_x = min_x - .05*abs(max_x - min_x)
+    else: self.min_x = 0.0
+    if min_y != 0.0:
+      self.min_y = min_y - .05*abs(max_y - min_y)
+    else: self.min_y = 0.0
 
     delta_x = self.max_x - self.min_x
     delta_y = self.max_y - self.min_y
