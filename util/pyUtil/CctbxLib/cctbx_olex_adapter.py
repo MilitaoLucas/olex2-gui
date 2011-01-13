@@ -189,17 +189,28 @@ class OlexCctbxAdapter(object):
 from smtbx import absolute_structure
 
 class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):
-  def __init__(self, probability_plot_slope=None):
+  def __init__(self, probability_plot_slope=None, use_fcf=False):
     OlexCctbxAdapter.__init__(self)
     if probability_plot_slope is not None:
       probability_plot_slope = float(probability_plot_slope)
-    fo2 = self.reflections.f_sq_obs_filtered
+    if use_fcf:
+      fcf_path = OV.file_ChangeExt(OV.FileFull(), "fcf")
+      if not os.path.exists(fcf_path):
+        print "No fcf file is present"
+        return
+      reflections = miller.array.from_cif(file_path=fcf_path)
+      fo2 = reflections['_refln_F_squared_meas']
+      fc2 = reflections['_refln_F_squared_calc']
+      fc = fc2.f_sq_as_f().phase_transfer(flex.double(fc2.size(), 0))
+      scale = 1
+    else:
+      fo2 = self.reflections.f_sq_obs_filtered
+      fc = self.f_calc(miller_set=fo2, ignore_inversion_twin=True)
+      weights = self.compute_weights(fo2, fc)
+      scale = fo2.scale_factor(fc, weights=weights)
     if not fo2.anomalous_flag():
       print "No Bijvoet pairs"
       return
-    fc = self.f_calc(miller_set=fo2, ignore_inversion_twin=True)
-    weights = self.compute_weights(fo2, fc)
-    scale = fo2.scale_factor(fc, weights=weights)
     absolute_structure.hooft_analysis.__init__(
       self, fo2, fc, probability_plot_slope=probability_plot_slope, scale_factor=scale)
     self.show()
@@ -207,16 +218,27 @@ class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):
 OV.registerFunction(hooft_analysis)
 
 class students_t_hooft_analysis(OlexCctbxAdapter, absolute_structure.students_t_hooft_analysis):
-  def __init__(self, nu=None):
+  def __init__(self, nu=None, use_fcf=False):
     OlexCctbxAdapter.__init__(self)
-    fo2 = self.reflections.f_sq_obs_filtered
+    if use_fcf:
+      fcf_path = OV.file_ChangeExt(OV.FileFull(), "fcf")
+      if not os.path.exists(fcf_path):
+        print "No fcf file is present"
+        return
+      reflections = miller.array.from_cif(file_path=fcf_path)
+      fo2 = reflections['_refln_F_squared_meas']
+      fc2 = reflections['_refln_F_squared_calc']
+      fc = fc2.f_sq_as_f().phase_transfer(flex.double(fc2.size(), 0))
+      scale = 1
+    else:
+      fo2 = self.reflections.f_sq_obs_filtered
+      fc = self.f_calc(miller_set=fo2, ignore_inversion_twin=True)
+      weights = self.compute_weights(fo2, fc)
+      scale = fo2.scale_factor(fc, weights=weights)
     if not fo2.anomalous_flag():
       print "No Bijvoet pairs"
       return
-    fc = self.f_calc(miller_set=fo2)
-    weights = self.compute_weights(fo2, fc)
-    scale = fo2.scale_factor(fc, weights=weights)
-    analysis = absolute_structure.hooft_analysis(fo2, fc, scale)
+    analysis = absolute_structure.hooft_analysis(fo2, fc, scale_factor=scale)
     bijvoet_diff_plot = absolute_structure.bijvoet_differences_probability_plot(analysis)
     if nu is not None:
       nu = float(nu)
@@ -224,7 +246,8 @@ class students_t_hooft_analysis(OlexCctbxAdapter, absolute_structure.students_t_
       nu = absolute_structure.maximise_students_t_correlation_coefficient(
         bijvoet_diff_plot.y, 1, 101)
     print "Student's t nu: %.1f" %nu
-    absolute_structure.students_t_hooft_analysis.__init__(self, fo2, fc, nu, scale)
+    absolute_structure.students_t_hooft_analysis.__init__(
+      self, fo2, fc, nu, scale_factor=scale)
     self.show()
 
 OV.registerFunction(students_t_hooft_analysis)

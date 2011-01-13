@@ -1934,9 +1934,11 @@ class bijvoet_differences_NPP(Analysis):
     self.graphInfo["TopRightTitle"] = self.filename
     self.auto_axes = True
     import reflection_statistics
-    use_students_t = self.params.bijvoet_differences_probability_plot.use_students_t
+    params = self.params.bijvoet_differences_probability_plot
+    use_students_t = params.use_students_t
+    use_fcf = params.source == "fcf"
     xy_plot = reflection_statistics.bijvoet_differences_NPP(
-      use_students_t=use_students_t).xy_plot_info()
+      use_students_t=use_students_t, use_fcf=use_fcf).xy_plot_info()
     if xy_plot is None:
       self.have_data = False
       return
@@ -2324,6 +2326,7 @@ OV.registerFunction(scale_factor_vs_resolution_plot)
 OV.registerFunction(X_Y_plot)
 OV.registerFunction(bijvoet_differences_scatter_plot)
 OV.registerFunction(bijvoet_differences_NPP)
+OV.registerFunction(bijvoet_differences_quotient_plot)
 
 def array_scalar_multiplication(array, multiplier):
   return [i * multiplier for i in array]
