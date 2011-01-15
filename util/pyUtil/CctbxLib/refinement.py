@@ -607,10 +607,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
             pivot, dependent, n == 4)
         elif len(pivot_neighbours) != 1:
           print "Invalid rigid group for " + scatterers[pivot].label
-          continue
-        current = rigid.rigid_pivoted_rotable_group(
-          pivot, pivot_neighbours[0], dependent,
-          n in (4,8), n in (7,8))  #nm 4 never coming here from the above
+        else:
+          current = rigid.rigid_pivoted_rotable_group(
+            pivot, pivot_neighbours[0], dependent,
+            n in (4,8), n in (7,8))  #nm 4 never coming here from the above
 
       if current and current not in rigid_body_constraints:
         rigid_body_constraints.append(current)
