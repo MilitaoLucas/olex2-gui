@@ -209,8 +209,6 @@ class create_cctbx_xray_structure(object):
       if fixed_vars is not None:
         for var in fixed_vars:
           behaviour_of_variable[var['index']] = 1
-      if scattering_type == "H":
-        scattering_type = "Hsds"
       if len(u) != 1:
         a = xray.scatterer(label=label,
                            site=site,
