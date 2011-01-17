@@ -451,9 +451,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
       cell_covariance_matrix=cell_vcv,
       parameter_map=xs.parameter_map()).loop)
     fmt = "%.6f"
-    #cif_block['_chemical_formula_sum'] = ' '.join(formatted_type_count_pairs)
-    #cif_block['_chemical_formula_weight'] = '%.3f' % flex.sum(
-      #xs.atomic_weights() * xs.scatterers().extract_occupancies())
+    cif_block['_chemical_formula_moiety'] = olx.xf_latt_GetMoiety()
+    cif_block['_chemical_formula_sum'] = olx.xf_au_GetFormula()
+    cif_block['_chemical_formula_weight'] = olx.xf_au_GetWeight()
     #
     fo2 = self.reflections.f_sq_obs
     hklstat = olex_core.GetHklStat()
