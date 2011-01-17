@@ -145,7 +145,7 @@ class reflections(object):
     self.n_sys_absent = obs.size() - obs_merged.size()
     if merge > 2:
       obs_merged = obs_merged.customized_copy(anomalous_flag=False)
-    merging = obs_merged.merge_equivalents()
+    merging = obs_merged.merge_equivalents(merger="shelx")#merger="standard")
     obs_merged = merging.array()
     if observations is None:
       self.merging = merging
@@ -180,6 +180,7 @@ class reflections(object):
     print >> log, "Merging summary:"
     print >> log, "Total reflections: %i" %self.f_sq_obs.size()
     print >> log, "Unique reflections: %i" %self.f_sq_obs_merged.size()
+    print >> log, "Inconsistent equivalents: %i" %self.merging.inconsistent_equivalents()
     print >> log, "Systematic Absences: %i removed" %self.n_sys_absent
     print >> log, "R(int): %f" %self.merging.r_int()
     print >> log, "R(sigma): %f" %self.merging.r_sigma()
@@ -208,6 +209,8 @@ class create_cctbx_xray_structure(object):
       if fixed_vars is not None:
         for var in fixed_vars:
           behaviour_of_variable[var['index']] = 1
+      if scattering_type == "H":
+        scattering_type = "Hsds"
       if len(u) != 1:
         a = xray.scatterer(label=label,
                            site=site,
