@@ -330,7 +330,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         jacobian_transpose=self.reparametrisation.jacobian_transpose_matching(
           self.reparametrisation.mapping_to_grad_fc_independent_scalars))
       self.export_var_covar(self.covariance_matrix_and_annotations)
-      self.r1 = self.normal_eqns.r1_factor(cutoff_factor=4)
+      self.r1 = self.normal_eqns.r1_factor(cutoff_factor=2)
       self.r1_all_data = self.normal_eqns.r1_factor()
       self.check_flack()
     except RuntimeError, e:
