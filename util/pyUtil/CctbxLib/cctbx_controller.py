@@ -145,7 +145,7 @@ class reflections(object):
     self.n_sys_absent = obs.size() - obs_merged.size()
     if merge > 2:
       obs_merged = obs_merged.customized_copy(anomalous_flag=False)
-    merging = obs_merged.merge_equivalents(merger="shelx")#merger="standard")
+    merging = obs_merged.merge_equivalents(algorithm="shelx")#algorithm="default")
     obs_merged = merging.array()
     if observations is None:
       self.merging = merging
