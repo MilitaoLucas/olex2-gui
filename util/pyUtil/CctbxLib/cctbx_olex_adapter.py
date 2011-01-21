@@ -65,6 +65,11 @@ class OlexCctbxAdapter(object):
         twin_laws.append(inv)
         for law in twin_laws[:-1]:
           twin_laws.append(law.multiply(inv))
+      if len(twin_fractions) == 0:
+        # perfect twinning
+        # SHELX manual pages 7-6/7
+        n = abs(twin_multiplicity)
+        twin_fractions = flex.double([1/n]*(n-1))
       assert len(twin_fractions) == abs(twin_multiplicity) - 1
       assert len(twin_fractions) == len(twin_laws)
       self.twin_components = tuple(
@@ -158,7 +163,9 @@ class OlexCctbxAdapter(object):
         and self.twin_components is not None
         and self.twin_components[0].twin_law == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
       apply_twin_law = False
-    if apply_twin_law and self.twin_components is not None:
+    if (    apply_twin_law
+        and self.twin_components is not None
+        and self.twin_components[0].twin_fraction > 0):
       twin_component = self.twin_components[0]
       twinning = cctbx_controller.hemihedral_twinning(
         twin_component.twin_law.as_double(), miller_set)
