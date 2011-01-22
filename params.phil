@@ -6,6 +6,12 @@ snum {
   skip_history = False
     .type = bool
     .expert_level = 1
+  smtbx {
+    inelastic_form_factor_table = *henke sasaki
+      .type = choice
+    atomic_form_factor_table = *it1992 wk1995 n_gaussian
+      .type = choice
+  }
   solution {
     program = ShelXS ShelXS86 XS 'smtbx-solve' XM ShelXD
       .type = choice
