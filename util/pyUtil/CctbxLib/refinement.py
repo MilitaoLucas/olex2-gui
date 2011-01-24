@@ -161,7 +161,6 @@ class olex2_normal_eqns(least_squares.crystallographic_ls):
 
   def feed_olex(self):
     ## Feed Model
-    u_total  = 0
     u_atoms = []
     i = 1
 
@@ -197,8 +196,6 @@ class olex2_normal_eqns(least_squares.crystallographic_ls):
         olx.Fix('xyz', xyz, name)
       if not (flags.grad_u_iso() or flags.grad_u_aniso()):
         olx.Fix('Uiso', u, name)
-      u_total += u[0]
-      u_average = u_total/i
     #update OSF
     OV.SetOSF(self.scale_factor())
     #update FVars
@@ -454,6 +451,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_chemical_formula_moiety'] = olx.xf_latt_GetMoiety()
     cif_block['_chemical_formula_sum'] = olx.xf_au_GetFormula()
     cif_block['_chemical_formula_weight'] = olx.xf_au_GetWeight()
+    cif_block['_exptl_crystal_density_diffrn'] = "%.4f" %xs.crystal_density()
     #
     fo2 = self.reflections.f_sq_obs
     hklstat = olex_core.GetHklStat()
@@ -464,7 +462,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     h_max, k_max, l_max = hklstat['MaxIndexes']
     cif_block['_diffrn_measured_fraction_theta_full'] = fmt % completeness_full
     cif_block['_diffrn_radiation_wavelength'] = self.wavelength
-    cif_block['_diffrn_reflns_number'] = fo2.size()
+    cif_block['_diffrn_reflns_number'] = fo2.eliminate_sys_absent().size()
     cif_block['_diffrn_reflns_av_R_equivalents'] = "%.4f" %merging.r_int()
     cif_block['_diffrn_reflns_av_unetI/netI'] = "%.4f" %merging.r_sigma()
     cif_block['_diffrn_reflns_limit_h_min'] = h_min
