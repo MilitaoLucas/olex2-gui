@@ -35,6 +35,8 @@ from RunPrg import RunRefinementPrg
 global twin_laws_d
 twin_laws_d = {}
 
+from scitbx.math import continued_fraction
+from boost import rational
 from cctbx import sgtbx, xray
 from cctbx.array_family import flex
 
@@ -124,7 +126,11 @@ class OlexCctbxAdapter(object):
     self.cell = self.olx_atoms.getCell()
     self.space_group = "hall: "+str(olx.xf_au_GetCellSymm("hall"))
     hklf_matrix = utils.flat_list(self.olx_atoms.model['hklf']['matrix'])
-    hklf_matrix = sgtbx.rot_mx([int(i) for i in hklf_matrix])
+    mx = [ continued_fraction.from_real(e, eps=1e-3).as_rational()
+           for e in hklf_matrix ]
+    den = reduce(rational.lcm, [ r.denominator() for r in mx ])
+    nums = [ r.numerator()*(den//r.denominator()) for r in mx ]
+    hklf_matrix = sgtbx.rot_mx(nums, den)
     reflections = olx.HKLSrc()
     mtime = os.path.getmtime(reflections)
     if (force or
