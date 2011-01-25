@@ -452,6 +452,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_chemical_formula_sum'] = olx.xf_au_GetFormula()
     cif_block['_chemical_formula_weight'] = olx.xf_au_GetWeight()
     cif_block['_exptl_crystal_density_diffrn'] = "%.4f" %xs.crystal_density()
+    cif_block['_exptl_crystal_F_000'] = "%.4f" %xs.f_000()
     #
     fo2 = self.reflections.f_sq_obs
     hklstat = olex_core.GetHklStat()
