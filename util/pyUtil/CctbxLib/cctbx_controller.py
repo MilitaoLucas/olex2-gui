@@ -118,7 +118,8 @@ class reflections(object):
     miller_arrays = reflections_server.get_miller_arrays(None)
     self.f_sq_obs = miller_arrays[0]
     if hklf_matrix is not None and not hklf_matrix.is_unit_mx():
-      cb_op = sgtbx.change_of_basis_op(hklf_matrix).inverse()
+      r = sgtbx.rt_mx(hklf_matrix.new_denominator(24).transpose())
+      cb_op = sgtbx.change_of_basis_op(r).inverse()
       self.f_sq_obs = self.f_sq_obs.change_basis(cb_op).customized_copy(
         crystal_symmetry=cs)
     self.f_obs = self.f_sq_obs.f_sq_as_f()

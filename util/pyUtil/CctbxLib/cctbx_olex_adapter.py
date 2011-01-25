@@ -124,8 +124,7 @@ class OlexCctbxAdapter(object):
     self.cell = self.olx_atoms.getCell()
     self.space_group = "hall: "+str(olx.xf_au_GetCellSymm("hall"))
     hklf_matrix = utils.flat_list(self.olx_atoms.model['hklf']['matrix'])
-    hklf_matrix = sgtbx.rt_mx(
-      sgtbx.rot_mx([int(i) for i in hklf_matrix]).transpose())
+    hklf_matrix = sgtbx.rot_mx([int(i) for i in hklf_matrix])
     reflections = olx.HKLSrc()
     mtime = os.path.getmtime(reflections)
     if (force or
