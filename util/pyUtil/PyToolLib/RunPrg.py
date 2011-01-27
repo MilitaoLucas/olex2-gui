@@ -52,7 +52,8 @@ class RunPrg(ArgumentParser):
 
   def run(self):
     res = self.method.run(self)
-    self.runAfterProcess()
+    if not self.method.failure:
+      self.runAfterProcess()
     self.endRun()
     sys.stdout.refresh = False
     sys.stdout.graph = False
