@@ -596,24 +596,25 @@ class FullMatrixRefine(OlexCctbxAdapter):
         new_crd = i_f.fit(frag, sites)
         for i, crd in enumerate(new_crd):
           scatterers[frag_sc[i]].site = uc.fractionalize(crd)
-      if m != 0:  continue
-      current = None
-      if n in(6, 9):
-        current = rigid.rigid_rotable_expandable_group(
-          pivot, dependent, n == 9, True)
-      elif n in (3,4,7,8):
-        if n in (3,4):
-          current = rigid.rigid_riding_expandable_group(
-            pivot, dependent, n == 4)
-        elif len(pivot_neighbours) != 1:
-          print "Invalid rigid group for " + scatterers[pivot].label
-        else:
-          current = rigid.rigid_pivoted_rotable_group(
-            pivot, pivot_neighbours[0], dependent,
-            n in (4,8), n in (7,8))  #nm 4 never coming here from the above
+      if m == 0 or m in rigid_body:
+        current = None
+        if n in(6, 9):
+          current = rigid.rigid_rotable_expandable_group(
+            pivot, dependent, n == 9, True)
+        elif n in (3,4,7,8):
+          if n in (3,4):
+            current = rigid.rigid_riding_expandable_group(
+              pivot, dependent, n == 4)
+          elif len(pivot_neighbours) != 1:
+            print "Invalid rigid group for " + scatterers[pivot].label
+          else:
+            current = rigid.rigid_pivoted_rotable_group(
+              pivot, pivot_neighbours[0], dependent,
+              sizeable=n in (4,8),  #nm 4 never coming here from the above
+              rotatable=n in (7,8))
 
-      if current and current not in rigid_body_constraints:
-        rigid_body_constraints.append(current)
+        if current and current not in rigid_body_constraints:
+          rigid_body_constraints.append(current)
 
     return rigid_body_constraints
 
