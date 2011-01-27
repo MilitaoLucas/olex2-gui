@@ -588,8 +588,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if len(dependent) == 0: continue
       info = rigid_body.get(m)  # this is needed for idealisation of the geometry
       if info != None and info[1] == len(dependent):
+        lengths = None
+        if bond_length != 0: lengths = (bond_length,)
         i_f = rigid.idealised_fragment()
-        frag = i_f.generate_fragment(info[0])
+        frag = i_f.generate_fragment(info[0], lengths=lengths)
         frag_sc = [pivot,]
         for i in dependent: frag_sc.append(i)
         sites = [ uc.orthogonalize(scatterers[i].site) for i in frag_sc]
