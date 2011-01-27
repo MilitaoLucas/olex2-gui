@@ -59,6 +59,8 @@ class Program(object):
 
 
 class Method(object):
+  failure = False
+
   def __init__(self, phil_object):
     self.phil_index = phil_interface.phil_handler(phil_object)
     params = self.phil_index.params
@@ -581,6 +583,7 @@ class Method_cctbx_refinement(Method_refinement):
         OV.SetVar('cctbx_R1',cctbx.r1[0])
         OV.File('%s.res' %OV.FileName())
     finally:
+      self.flack = None
       OV.DeleteBitmap('refine')
 
   def getFlack(self):
