@@ -4,6 +4,7 @@ import shutil
 import re
 import olex
 import olx
+import olex_core
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 """
@@ -70,6 +71,7 @@ def OlexBET(probe="n2", trials="5000"):
   print "New formula using Z", OlexZ
   print "Cell voume", CellV
   print "Calculated density", CalDen
+  print "RAddiiii?", olex_core.GetVdWRadii()
 
 # Write the BET input file
 # This is primative will need to add features such as patterson on and off
