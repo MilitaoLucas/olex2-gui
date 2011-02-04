@@ -755,6 +755,7 @@ def MapView(onoff=None):
 
   SetXgridView()
   OV.SetVar('olex2.eden_vis',True)
+  OV.UpdateHtml()
 
 if haveGUI:
   OV.registerFunction(MapView)
