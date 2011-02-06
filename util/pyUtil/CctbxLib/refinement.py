@@ -601,7 +601,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       if m == 0 or m in rigid_body:
         current = None
         if n in(6, 9):
-          current = rigid.rigid_rotable_expandable_group(
+          current = rigid.rigid_rotatable_expandable_group(
             pivot, dependent, n == 9, True)
         elif n in (3,4,7,8):
           if n in (3,4):
@@ -610,7 +610,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           elif len(pivot_neighbours) != 1:
             print "Invalid rigid group for " + scatterers[pivot].label
           else:
-            current = rigid.rigid_pivoted_rotable_group(
+            current = rigid.rigid_pivoted_rotatable_group(
               pivot, pivot_neighbours[0], dependent,
               sizeable=n in (4,8),  #nm 4 never coming here from the above
               rotatable=n in (7,8))
