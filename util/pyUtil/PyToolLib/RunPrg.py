@@ -392,11 +392,11 @@ class RunRefinementPrg(RunPrg):
       print e
     else:
       if hooft.reflections.f_sq_obs_filtered.anomalous_flag():
-        if hooft.p2 is not None and round(hooft.p2, 3) == 0:
-          inversion_needed = True
-        elif (hooft.p3_racemic_twin is not None and
-              round(hooft.p3_racemic_twin, 3) == 1):
+        if (hooft.p3_racemic_twin is not None and
+            round(hooft.p3_racemic_twin, 3) == 1):
           possible_racemic_twin = True
+        elif hooft.p2 is not None and round(hooft.p2, 3) == 0:
+          inversion_needed = True
     if flack:
       print "Flack x: %s" %flack
       fs = flack.split("(")
@@ -408,7 +408,10 @@ class RunRefinementPrg(RunPrg):
     if force and inversion_needed:
       olex.m('Inv -f')
     if inversion_needed: print inversion_warning
-    if possible_racemic_twin: print racemic_twin_warning
+    if possible_racemic_twin:
+      if (hooft.twin_components is not None and
+          hooft.twin_components[0].twin_law != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
+        print racemic_twin_warning
     if not inversion_needed and not possible_racemic_twin:
       print "OK"
 
