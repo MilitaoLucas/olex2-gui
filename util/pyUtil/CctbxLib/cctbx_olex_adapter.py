@@ -72,11 +72,15 @@ class OlexCctbxAdapter(object):
         # SHELX manual pages 7-6/7
         n = abs(twin_multiplicity)
         twin_fractions = flex.double([1/n]*(n-1))
+        grad_twin_fractions = [False] * (n-1)
+      else:
+        grad_twin_fractions = [True] * len(twin_fractions)
       assert len(twin_fractions) == abs(twin_multiplicity) - 1
       assert len(twin_fractions) == len(twin_laws)
       self.twin_components = tuple(
-        [xray.twin_component(law, fraction, True)
-         for law, fraction in zip(twin_laws, twin_fractions)])
+        [xray.twin_component(law, fraction, grad)
+         for law, fraction, grad in zip(
+           twin_laws, twin_fractions, grad_twin_fractions)])
     else:
       self.twin_components = None
 

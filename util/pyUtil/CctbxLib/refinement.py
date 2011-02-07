@@ -203,8 +203,10 @@ class olex2_normal_eqns(least_squares.crystallographic_ls):
       OV.SetFVar(var[0], var[1].occupancy.value)
     #update BASF
     if self.twin_components is not None:
-      olx.AddIns('BASF ' + ' '.join(
-        '%f' %component.twin_fraction for component in self.twin_components))
+      basf = ' '.join('%f' %component.twin_fraction
+                      for component in self.twin_components
+                      if component.grad_twin_fraction)
+      if basf: olx.AddIns('BASF ' + basf)
     olx.xf_EndUpdate()
 
 
@@ -369,9 +371,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
         and self.normal_eqns.fo_sq.anomalous_flag()):
       if (self.twin_components is not None and len(self.twin_components)
           and self.twin_components[0].twin_law == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
-        flack = self.twin_components[0].twin_fraction
-        su = math.sqrt(self.twin_covariance_matrix.matrix_packed_u_diagonal()[0])
-        self.flack = utils.format_float_with_standard_uncertainty(flack, su)
+        if self.twin_components[0].grad_twin_fraction:
+          flack = self.twin_components[0].twin_fraction
+          su = math.sqrt(self.twin_covariance_matrix.matrix_packed_u_diagonal()[0])
+          self.flack = utils.format_float_with_standard_uncertainty(flack, su)
       else:
         from smtbx import absolute_structure
         flack = absolute_structure.flack_analysis(
@@ -745,6 +748,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       print >> log, "Twin summary:"
       print >> log, "twin_law  fraction  standard_uncertainty"
       for i, twin in enumerate(self.twin_components):
-        print >> log, "%-9s %-9.4f %.4f" %(
-          twin.twin_law.as_hkl(), twin.twin_fraction, math.sqrt(standard_uncertainties[i]))
+        if twin.grad_twin_fraction:
+          print >> log, "%-9s %-9.4f %.4f" %(
+            twin.twin_law.as_hkl(), twin.twin_fraction, math.sqrt(standard_uncertainties[i]))
 
