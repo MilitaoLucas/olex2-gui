@@ -395,7 +395,7 @@ class RunRefinementPrg(RunPrg):
         if (hooft.p3_racemic_twin is not None and
             round(hooft.p3_racemic_twin, 3) == 1):
           possible_racemic_twin = True
-        elif hooft.p2 is not None and round(hooft.p2, 3) == 0:
+        elif hooft.p2_false is not None and round(hooft.p2_false, 3) == 1:
           inversion_needed = True
     if flack:
       print "Flack x: %s" %flack
