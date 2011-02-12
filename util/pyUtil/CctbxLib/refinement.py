@@ -346,7 +346,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
       fo_minus_fc.apply_volume_scaling()
       self.diff_stats = fo_minus_fc.statistics()
       self.post_peaks(fo_minus_fc, max_peaks=self.max_peaks)
-      self.restraints_manager().show_sorted(self.xray_structure())
       self.show_summary()
       self.show_comprehensive_summary(log=self.log)
       f = open(OV.file_ChangeExt(OV.FileFull(), 'cif'), 'wb')
@@ -454,6 +453,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_chemical_formula_moiety'] = olx.xf_latt_GetMoiety()
     cif_block['_chemical_formula_sum'] = olx.xf_au_GetFormula()
     cif_block['_chemical_formula_weight'] = olx.xf_au_GetWeight()
+    cif_block['_exptl_absorpt_coefficient_mu'] = olx.xf_GetMu()
     cif_block['_exptl_crystal_density_diffrn'] = "%.4f" %xs.crystal_density()
     cif_block['_exptl_crystal_F_000'] \
              = "%.4f" %xs.f_000(include_inelastic_part=True)
