@@ -3,657 +3,660 @@
 ##############################################################################
 
 snum {
-  skip_history = False
-    .type = bool
-    .expert_level = 1
-  smtbx {
-    inelastic_form_factor_table = *henke sasaki
-      .type = choice
-    atomic_form_factor_table = *it1992 wk1995 n_gaussian
-      .type = choice
-  }
-  solution {
-    program = ShelXS ShelXS86 XS 'smtbx-solve' XM ShelXD
-      .type = choice
-    method = 'Dual Space' 'Charge Flipping' 'Direct Methods' 'Patterson Method'
-      .type = choice
-    graphical_output = False
-      .type = bool
-  }
+	skip_history = False
+		.type = bool
+		.expert_level = 1
+	smtbx {
+		inelastic_form_factor_table = *henke sasaki
+			.type = choice
+		atomic_form_factor_table = *it1992 wk1995 n_gaussian
+			.type = choice
+	}
+	solution {
+		program = ShelXS ShelXS86 XS 'smtbx-solve' XM ShelXD
+			.type = choice
+		method = 'Dual Space' 'Charge Flipping' 'Direct Methods' 'Patterson Method'
+			.type = choice
+		graphical_output = False
+			.type = bool
+	}
 
-  refinement {
-    program = ShelXL XL XH ShelXH XLMP ShelXL_ifc 'smtbx-refine'
-      .type = choice
-    method = 'Least Squares' CGLS 'Gauss-Newton' 'Levenberg-Marquardt' \
-             'Full Matrix'
-      .type = choice
-    sg_list = None
-      .type = str
-      .expert_level = 1
-    max_cycles = 4
-      .type = int(value_min=0)
-      .help = The maximum number of refinement cycles to be performed
-    max_peaks = 20
-      .type = int
-      .help = The maximum number of electron density peaks to be returned \
-              after refinement
-    update_weight = False
-      .type = bool
-      .help = Automatically update the weight instruction before the next \
-              refinement
-    suggested_weight = None
-      .type = floats(size=2)
-      .help = The weighting scheme parameters suggested by the refinement \
-              program in a previous cycle
-    original_formula = None
-      .type = str
-      .expert_level = 1
-    use_solvent_mask = False
-      .type = bool
-    recompute_mask_before_refinement = False
-      .type = bool
-    check_absolute_structure_after_refinement = True
-      .type = bool
+	refinement {
+		program = ShelXL XL XH ShelXH XLMP ShelXL_ifc 'smtbx-refine'
+			.type = choice
+		method = 'Least Squares' CGLS 'Gauss-Newton' 'Levenberg-Marquardt' \
+			'Full Matrix'
+		.type = choice
+		sg_list = None
+			.type = str
+			.expert_level = 1
+		max_cycles = 4
+			.type = int(value_min=0)
+			.help = The maximum number of refinement cycles to be performed
+		max_peaks = 20
+			.type = int
+			.help = The maximum number of electron density peaks to be returned \
+				after refinement
+		update_weight = False
+			.type = bool
+			.help = Automatically update the weight instruction before the next \
+				refinement
+		suggested_weight = None
+			.type = floats(size=2)
+			.help = The weighting scheme parameters suggested by the refinement \
+				program in a previous cycle
+		original_formula = None
+			.type = str
+			.expert_level = 1
+		use_solvent_mask = False
+			.type = bool
+		recompute_mask_before_refinement = False
+			.type = bool
+		check_absolute_structure_after_refinement = True
+			.type = bool
 
-    auto {
-      max_peaks = False
-        .type = bool
-      assignQ = 2.0
-        .type = float(value_min=0.0)
-        .help = Assign all residual electron density peaks greater than the \
-                given cutoff value as a Carbon atom
-      pruneU = 0.1
-        .type = float(value_min=0.0)
-        .help = Delete all atoms where the Ueq is greater than the given cutoff
-      pruneQ = 1.5
-        .type = float(value_min=0.0)
-        .help = Delete all residual electron density peaks smaller than \
-                the given cutoff value
-      promote = 0.1
-        .type = float
-      assemble = False
-        .type = bool
-        .help = Move all atoms or fragments of the asymmetric unit as \
-                close together as possible
-      tidy = False
-        .type = bool
-        .help = Automatically tidy the structure after refinement according \
-                to the settings
-    }
+	auto {
+		max_peaks = False
+			.type = bool
+		assignQ = 2.0
+			.type = float(value_min=0.0)
+			.help = Assign all residual electron density peaks greater than the \
+				given cutoff value as a Carbon atom
+		pruneU = 0.1
+			.type = float(value_min=0.0)
+			.help = Delete all atoms where the Ueq is greater than the given cutoff
+		pruneQ = 1.5
+			.type = float(value_min=0.0)
+			.help = Delete all residual electron density peaks smaller than \
+				the given cutoff value
+		promote = 0.1
+			.type = float
+		assemble = False
+			.type = bool
+			.help = Move all atoms or fragments of the asymmetric unit as \
+				close together as possible
+		tidy = False
+			.type = bool
+			.help = Automatically tidy the structure after refinement according \
+				to the settings
+		invert = False
+			.type = bool
+			.help = If set to TRUE, the structure will be automatically inverted if the inversion seems necessary
+	}
 
-    last_R1 = n/a
-      .type = str
-      .expert_level = 1
-    graphical_output = False
-      .type = bool
-  }
-
-
-  display_quality = 2
-    .type = int(value_min=1, value_max=3)
-
-  image{
-    bitmap{
-      name = None
-        .type = str
-      font_name = #olex2.fnt:frb_18
-        .type = str
-      type = png jpg bmp
-        .type = choice
-    }
-    ps{
-      outline_width = 1.0
-        .type = float
-      octant_width = 1.0
-        .type = float
-      pie_width = 0.6
-        .type = float
-      octant_count = 5
-        .type = int
-      h_bond_width = 0.6
-        .type = float
-      bond_width = 0.7
-        .type = float
-      font_name = @
-        .type = str
-      font_size = 15
-        .type = int
-      font_weight = 1.0
-        .type = float
-      name = None
-        .type = str
-    }
-  image_series{
-    rotation_around_axis=2
-      .type = int
-    degrees_of_rotation=1.0
-      .type = float
-    number_of_frames=30
-      .type=int
-    size_of_frames=0.2
-      .type=float
-    }
-  }
-
-  shelx_output = True
-    .type = bool
-
-  history {
-    current_node = None
-      .type = str
-      .expert_level = 2
-    condensed_tree = True
-      .type = bool
-  }
-
-  autochem_current_solution = "Autochem 01"
-    .type = str
-  auto_hydrogen_naming = True
-    .type = bool
-
-  dimas
-    .expert_level=2
-  {
-    progress_status = None
-      .type = str
-    progress_comment = None
-      .type = str
-    reference_ccdc_number = None
-      .type = str
-    reference_csd_refcode = None
-      .type = str
-    reference_publ_authors = None
-      .type = str
-    reference_journal_name = None
-      .type = str
-    reference_journal_volume = None
-      .type = str
-    reference_journal_pages = None
-      .type = int(value_min=1)
-    reference_journal_year = None
-      .type = int(value_min=1800, value_max=2100)
-    reference_comment = None
-      .type = str
-  }
-
-  metacif {
-    publ_author_names = None
-      .type = str
-    abs_file = None
-      .type = path
-      .expert_level = 1
-    sad_file = None
-      .type = path
-      .expert_level = 1
-    pcf_file = None
-      .type = path
-      .expert_level = 1
-    p4p_file = None
-      .type = path
-      .expert_level = 1
-    smart_file = None
-      .type = path
-      .expert_level = 1
-    saint_file = None
-      .type = path
-      .expert_level = 1
-    frames_file = None
-      .type = path
-      .expert_level = 1
-    integ_file = None
-      .type = path
-      .expert_level = 1
-    cad4_file = None
-      .type = path
-      .expert_level = 1
-    cif_od_file = None
-      .type = path
-      .expert_level = 1
-    crystal_clear_file = None
-      .type = path
-      .expert_level = 1
-    twin_file = None
-      .type = path
-      .expert_level = 1
-    abs_type = twinabs sadabs
-      .type = choice
-    list_sad_files = None
-      .type = strings
-      .expert_level = 2
-    list_abs_files = None
-      .type = strings
-      .expert_level = 2
-    list_pcf_files = None
-      .type = strings
-      .expert_level = 2
-    list_p4p_files = None
-      .type = strings
-      .expert_level = 2
-    list_smart_files = None
-      .type = strings
-      .expert_level = 2
-    list_saint_files = None
-      .type = strings
-      .expert_level = 2
-    list_frames_files = None
-      .type = strings
-      .expert_level = 2
-    list_integ_files = None
-      .type = strings
-      .expert_level = 2
-    list_cad4_files = None
-      .type = strings
-      .expert_level = 2
-    list_crystal_clear_files = None
-      .type = strings
-      .expert_level = 2
-    list_cif_od_files = None
-      .type = strings
-      .expert_level = 2
-    user_input_variables = None
-      .type = str
-      .expert_level = 2
-    list_twin_files = None
-      .type = strings
-      .expert_level = 2
-    user_modified = None
-      .type = strings
-      .expert_level = 2
-    user_added = None
-      .type = strings
-      .expert_level = 2
-    user_removed = None
-      .type = strings
-      .expert_level = 2
-  }
-
-  report {
-    date_collected = None
-      .type = str
-    date_submitted = None
-      .type = str
-    operator = None
-      .type = str
-    submitter = None
-      .type = str
-    diffractometer = None
-      .type = str
-    title = None
-      .type = path
-    image = None
-      .type = path
-  }
-
-  eden_fine_value = 0
-    .type = int
-  eden_coarse_value = 1
-    .type = int
-  eden_value = None
-    .type = float
-
-  xgrid {
-    view = *wire 2D plane surface points contour 'contour+plane'
-      .type = choice
-    extended = False
-      .type = bool
-    value = 0.0
-      .type = float
-  }
-
-  map {
-    source = *olex fcf
-      .type = choice
-    type = *diff fcalc tomc fobs
-      .type = choice
-    mask = True
-      .type = bool
-    resolution = 0.1
-      .type = float
-
-  }
-
-  calcvoid {
-    resolution = 0.2
-      .type = float
-    precise = False
-      .type = bool
-    distance = 0.0
-      .type = float
-  }
-
-  masks {
-    original_hklsrc = None
-      .type = path
-    type = *mask f_mask f_model
-      .type = choice
-    solvent_radius = 1.2
-      .type = float
-    shrink_truncation_radius = 1.2
-      .type = float
-    resolution_factor = 1/4
-      .type = float
-    use_set_completion = False
-      .type = bool
-    update_cif = False
-      .type = bool
-  }
+	last_R1 = n/a
+		.type = str
+		.expert_level = 1
+	graphical_output = False
+		.type = bool
+}
 
 
-  olex_conres = RRINGS
-    .type = str
-  refinement_banner_slide = 82
-    .type = int
+	display_quality = 2
+		.type = int(value_min=1, value_max=3)
+
+	image{
+		bitmap{
+			name = None
+				.type = str
+			font_name = #olex2.fnt:frb_18
+				.type = str
+			type = png jpg bmp
+				.type = choice
+		}
+		ps{
+			outline_width = 1.0
+				.type = float
+			octant_width = 1.0
+				.type = float
+			pie_width = 0.6
+				.type = float
+			octant_count = 5
+				.type = int
+			h_bond_width = 0.6
+				.type = float
+			bond_width = 0.7
+				.type = float
+			font_name = @
+				.type = str
+			font_size = 15
+				.type = int
+			font_weight = 1.0
+				.type = float
+			name = None
+				.type = str
+		}
+	image_series{
+		rotation_around_axis=2
+			.type = int
+		degrees_of_rotation=1.0
+			.type = float
+		number_of_frames=30
+			.type=int
+		size_of_frames=0.2
+			.type=float
+		}
+	}
+
+	shelx_output = True
+		.type = bool
+
+	history {
+		current_node = None
+			.type = str
+			.expert_level = 2
+		condensed_tree = True
+			.type = bool
+	}
+
+	autochem_current_solution = "Autochem 01"
+		.type = str
+	auto_hydrogen_naming = True
+		.type = bool
+
+	dimas
+		.expert_level=2
+	{
+		progress_status = None
+			.type = str
+		progress_comment = None
+			.type = str
+		reference_ccdc_number = None
+			.type = str
+		reference_csd_refcode = None
+			.type = str
+		reference_publ_authors = None
+			.type = str
+		reference_journal_name = None
+			.type = str
+		reference_journal_volume = None
+			.type = str
+		reference_journal_pages = None
+			.type = int(value_min=1)
+		reference_journal_year = None
+			.type = int(value_min=1800, value_max=2100)
+		reference_comment = None
+			.type = str
+	}
+
+	metacif {
+		publ_author_names = None
+			.type = str
+		abs_file = None
+			.type = path
+			.expert_level = 1
+		sad_file = None
+			.type = path
+			.expert_level = 1
+		pcf_file = None
+			.type = path
+			.expert_level = 1
+		p4p_file = None
+			.type = path
+			.expert_level = 1
+		smart_file = None
+			.type = path
+			.expert_level = 1
+		saint_file = None
+			.type = path
+			.expert_level = 1
+		frames_file = None
+			.type = path
+			.expert_level = 1
+		integ_file = None
+			.type = path
+			.expert_level = 1
+		cad4_file = None
+			.type = path
+			.expert_level = 1
+		cif_od_file = None
+			.type = path
+			.expert_level = 1
+		crystal_clear_file = None
+			.type = path
+			.expert_level = 1
+		twin_file = None
+			.type = path
+			.expert_level = 1
+		abs_type = twinabs sadabs
+			.type = choice
+		list_sad_files = None
+			.type = strings
+			.expert_level = 2
+		list_abs_files = None
+			.type = strings
+			.expert_level = 2
+		list_pcf_files = None
+			.type = strings
+			.expert_level = 2
+		list_p4p_files = None
+			.type = strings
+			.expert_level = 2
+		list_smart_files = None
+			.type = strings
+			.expert_level = 2
+		list_saint_files = None
+			.type = strings
+			.expert_level = 2
+		list_frames_files = None
+			.type = strings
+			.expert_level = 2
+		list_integ_files = None
+			.type = strings
+			.expert_level = 2
+		list_cad4_files = None
+			.type = strings
+			.expert_level = 2
+		list_crystal_clear_files = None
+			.type = strings
+			.expert_level = 2
+		list_cif_od_files = None
+			.type = strings
+			.expert_level = 2
+		user_input_variables = None
+			.type = str
+			.expert_level = 2
+		list_twin_files = None
+			.type = strings
+			.expert_level = 2
+		user_modified = None
+			.type = strings
+			.expert_level = 2
+		user_added = None
+			.type = strings
+			.expert_level = 2
+		user_removed = None
+			.type = strings
+			.expert_level = 2
+	}
+
+	report {
+		date_collected = None
+			.type = str
+		date_submitted = None
+			.type = str
+		operator = None
+			.type = str
+		submitter = None
+			.type = str
+		diffractometer = None
+			.type = str
+		title = None
+			.type = path
+		image = None
+			.type = path
+	}
+
+	eden_fine_value = 0
+		.type = int
+	eden_coarse_value = 1
+		.type = int
+	eden_value = None
+		.type = float
+
+	xgrid {
+		view = *wire 2D plane surface points contour 'contour+plane'
+			.type = choice
+		extended = False
+			.type = bool
+		value = 0.0
+			.type = float
+	}
+
+	map {
+		source = *olex fcf
+			.type = choice
+		type = *diff fcalc tomc fobs
+			.type = choice
+		mask = True
+			.type = bool
+		resolution = 0.1
+			.type = float
+
+	}
+
+	calcvoid {
+		resolution = 0.2
+			.type = float
+		precise = False
+			.type = bool
+		distance = 0.0
+			.type = float
+	}
+
+	masks {
+		original_hklsrc = None
+			.type = path
+		type = *mask f_mask f_model
+			.type = choice
+		solvent_radius = 1.2
+			.type = float
+		shrink_truncation_radius = 1.2
+			.type = float
+		resolution_factor = 1/4
+			.type = float
+		use_set_completion = False
+			.type = bool
+		update_cif = False
+			.type = bool
+	}
+
+
+	olex_conres = RRINGS
+		.type = str
+	refinement_banner_slide = 82
+		.type = int
 }
 
 olex2
-  .expert_level = 2
+	.expert_level = 2
 {
-  is_online = True
-    .type = bool
-  is_logged_on = False
-    .type = bool
-  has_recently_updated = False
-    .type = bool
-  mac_address = ""
-    .type = str
-  verbose = False
-    .type = bool
-  last_version = 12
-    .type = int
-  in_mode = None
-    .type = str
-  full_mode = None
-    .type = str
-  short_mode = None
-    .type = str
-  debug = False
-    .type = bool
-  force_images = False
-    .type = bool
-  sNum_id_string = None
-    .type = str
-  main_toolbar_vline_position = 100
-    .type = int
-  eden_vis = False
-    .type = bool
-  void_vis = False
-    .type = bool
-  mask_vis = False
-    .type = bool
-  hover_buttons = False
-    .type = bool
-  portal_url = http://www.olex2.org
-    .type = str
+	is_online = True
+		.type = bool
+	is_logged_on = False
+		.type = bool
+	has_recently_updated = False
+		.type = bool
+	mac_address = ""
+		.type = str
+	verbose = False
+		.type = bool
+	last_version = 12
+		.type = int
+	in_mode = None
+		.type = str
+	full_mode = None
+		.type = str
+	short_mode = None
+		.type = str
+	debug = False
+		.type = bool
+	force_images = False
+		.type = bool
+	sNum_id_string = None
+		.type = str
+	main_toolbar_vline_position = 100
+		.type = int
+	eden_vis = False
+		.type = bool
+	void_vis = False
+		.type = bool
+	mask_vis = False
+		.type = bool
+	hover_buttons = False
+		.type = bool
+	portal_url = http://www.olex2.org
+		.type = str
 }
 
 graphs {
-  program_analysis {
-    font_scale = 0.03
-      .type = float(value_min=0.0)
-    size_x = None
-      .type = int(value_min=0)
-    size_y = None
-      .type = int(value_min=0)
-    max_bars = 12
-      .type = int
-    all_in_one_history = False
-      .type = bool
-    y_scale_factor = 3
-      .type = int
-  }
-  reflections {
-    n_divisions = 5
-      .type = int(value_min=0)
-    size_x = 900
-      .type = int(value_min=0)
-    size_y = 500
-      .type = int(value_min=0)
-    font_scale = 0.02
-      .type = float(value_min=0.0)
-    marker_1 {
-      fill = (254,150,50)
-        .type = colour
-      border = (127,75,25)
-        .type = colour
-      size_factor = 1./80
-        .type = float
-    }
-    marker_2 {
-      fill = (160,182,206)
-        .type = colour
-      border = (80,91,103)
-        .type = colour
-      size_factor = 1./80
-        .type = float
-    }
-    function_1 {
-      colour = (0,0,0)
-        .type = colour
-    }
-    function_2 {
-      colour = (0,0,255)
-        .type = colour
-    }
-    function_3 {
-      colour = (255,0,0)
-        .type = colour
-    }
-    cumulative_intensity
-      .short_caption = "Cumulative Intensity"
-      .caption = "Cumulative Intensity Distribution"
-      .help = "Cumulative-Intensity-Distribution"
-    {
-      n_bins = 20
-        .type = int(value_min=1)
-        .help = Number of bins
-        .caption = %Bins%
-      output_csv_file = False
-        .type = bool
-        .caption = "%Output% csv"
-    }
-    wilson_plot
-      .short_caption = "Wilson Plot"
-      .caption = "Wilson Plot"
-      .help = "Wilson-Plot"
-    {
-      n_bins = 10
-        .type = int(value_min=1)
-        .help = Number of bins
-        .caption = %Bins%
-      method = *Olex2 cctbx
-        .type = choice
-        .caption = "%Method%"
-      output_csv_file = False
-        .type = bool
-        .caption = "%Output% csv"
-    }
-    systematic_absences
-      .short_caption = "Systematic Absences"
-      .caption = "Systematic Absences"
-      .help = "Systematic-Absences"
-    {
-      output_csv_file = False
-        .type = bool
-        .caption = "%Output% csv"
-    }
-    fobs_fcalc
-      .short_caption = "Fobs-Fcalc"
-      .caption = "Fobs-Fcalc"
-      .help = "Fobs-vs-Fcalc"
-    {
-      output_csv_file = False
-        .type = bool
-        .caption = "%Output% csv"
-    }
-    fobs_over_fcalc
-      .short_caption = "Fobs/Fcalc"
-      .caption = "Fobs/Fcalc vs resolution"
-      .help = "Fobs/Fcalc-vs-resolution"
-    {
-      resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
-        .type = choice
-        .caption = "Resolution as"
-      binning = True
-        .type=bool
-        .caption= "Binning"
-      n_bins = 10
-        .type = int(value_min=1)
-        .help = Number of bins
-        .caption = %Bins%
-      output_csv_file = False
-        .type = bool
-        .caption = "%Output% csv"
-    }
-    scale_factor_vs_resolution
-      .short_caption = "scale vs res."
-      .caption = "Scale factor vs resolution"
-      .help = "Scale-factor-vs-resolution"
-    {
-      resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
-        .type = choice
-        .caption = "Resolution as"
-      n_bins = 10
-        .type = int(value_min=1)
-        .help = Number of bins
-        .caption = %Bins%
-      output_csv_file = False
-        .type = bool
-        .caption = "%Output% csv"
-    }
-    r1_factor_vs_resolution
-      .short_caption = "R1 vs res."
-      .caption = "R1 factor vs resolution"
-      .help = "R1-factor-vs-resolution"
-    {
-      resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
-        .type = choice
-        .caption = "Resolution as"
-      n_bins = 10
-        .type = int(value_min=1)
-        .help = Number of bins
-        .caption = %Bins%
-      output_csv_file = False
-        .type = bool
-        .caption = "%Output% csv"
-    }
-    completeness
-      .short_caption = "Completeness Plot"
-      .caption = "Completeness Plot"
-      .help = "Completeness-Plot"
-    {
-      reflections_per_bin=20
-        .type = int(value_min=1)
-        .caption = "Reflections per bin"
-      resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
-        .type = choice
-        .caption = "Resolution as"
-      output_csv_file = False
-        .type = bool
-        .caption = "%Output% csv"
-    }
-    normal_probability
-      .short_caption = "Normal Probability Plot"
-      .caption = "Normal Probability Plot"
-      .help = "Normal-Probability-Plot"
-    {
-      output_csv_file = False
-        .type = bool
-        .caption = "%Output% csv"
-    }
-    bijvoet_differences_probability_plot
-      .short_caption = "Bijvoet Differences Probability Plot"
-      .caption = "Bijvoet Differences Probability Plot"
-      .help = "Bijvoet-differences-NPP"
-    {
-      output_csv_file = False
-        .type = bool
-        .caption = "%Output% csv"
-      use_students_t = False
-        .type = bool
-        .caption = "%Student's t%"
-      source = *Olex2 fcf
-        .type = choice
-        .caption = "%Source%"
-    }
-    bijvoet_differences_scatter_plot
-      .short_caption = "Bijvoet Differences Scatter Plot"
-      .caption = "Bijvoet Differences Scatter Plot"
-      .help = "Bijvoet-differences-scatter-plot"
-    {
-      output_csv_file = False
-        .type = bool
-        .caption = "%Output% csv"
-      use_students_t = False
-        .type = bool
-        .caption = "%Student's t%"
-    }
-  }
+	program_analysis {
+		font_scale = 0.03
+			.type = float(value_min=0.0)
+		size_x = None
+			.type = int(value_min=0)
+		size_y = None
+			.type = int(value_min=0)
+		max_bars = 12
+			.type = int
+		all_in_one_history = False
+			.type = bool
+		y_scale_factor = 3
+			.type = int
+	}
+	reflections {
+		n_divisions = 5
+			.type = int(value_min=0)
+		size_x = 900
+			.type = int(value_min=0)
+		size_y = 500
+			.type = int(value_min=0)
+		font_scale = 0.02
+			.type = float(value_min=0.0)
+		marker_1 {
+			fill = (254,150,50)
+				.type = colour
+			border = (127,75,25)
+				.type = colour
+			size_factor = 1./80
+				.type = float
+		}
+		marker_2 {
+			fill = (160,182,206)
+				.type = colour
+			border = (80,91,103)
+				.type = colour
+			size_factor = 1./80
+				.type = float
+		}
+		function_1 {
+			colour = (0,0,0)
+				.type = colour
+		}
+		function_2 {
+			colour = (0,0,255)
+				.type = colour
+		}
+		function_3 {
+			colour = (255,0,0)
+				.type = colour
+		}
+		cumulative_intensity
+			.short_caption = "Cumulative Intensity"
+			.caption = "Cumulative Intensity Distribution"
+			.help = "Cumulative-Intensity-Distribution"
+		{
+			n_bins = 20
+				.type = int(value_min=1)
+				.help = Number of bins
+				.caption = %Bins%
+			output_csv_file = False
+				.type = bool
+				.caption = "%Output% csv"
+		}
+		wilson_plot
+			.short_caption = "Wilson Plot"
+			.caption = "Wilson Plot"
+			.help = "Wilson-Plot"
+		{
+			n_bins = 10
+				.type = int(value_min=1)
+				.help = Number of bins
+				.caption = %Bins%
+			method = *Olex2 cctbx
+				.type = choice
+				.caption = "%Method%"
+			output_csv_file = False
+				.type = bool
+				.caption = "%Output% csv"
+		}
+		systematic_absences
+			.short_caption = "Systematic Absences"
+			.caption = "Systematic Absences"
+			.help = "Systematic-Absences"
+		{
+			output_csv_file = False
+				.type = bool
+				.caption = "%Output% csv"
+		}
+		fobs_fcalc
+			.short_caption = "Fobs-Fcalc"
+			.caption = "Fobs-Fcalc"
+			.help = "Fobs-vs-Fcalc"
+		{
+			output_csv_file = False
+				.type = bool
+				.caption = "%Output% csv"
+		}
+		fobs_over_fcalc
+			.short_caption = "Fobs/Fcalc"
+			.caption = "Fobs/Fcalc vs resolution"
+			.help = "Fobs/Fcalc-vs-resolution"
+		{
+			resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
+				.type = choice
+				.caption = "Resolution as"
+			binning = True
+				.type=bool
+				.caption= "Binning"
+			n_bins = 10
+				.type = int(value_min=1)
+				.help = Number of bins
+				.caption = %Bins%
+			output_csv_file = False
+				.type = bool
+				.caption = "%Output% csv"
+		}
+		scale_factor_vs_resolution
+			.short_caption = "scale vs res."
+			.caption = "Scale factor vs resolution"
+			.help = "Scale-factor-vs-resolution"
+		{
+			resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
+				.type = choice
+				.caption = "Resolution as"
+			n_bins = 10
+				.type = int(value_min=1)
+				.help = Number of bins
+				.caption = %Bins%
+			output_csv_file = False
+				.type = bool
+				.caption = "%Output% csv"
+		}
+		r1_factor_vs_resolution
+			.short_caption = "R1 vs res."
+			.caption = "R1 factor vs resolution"
+			.help = "R1-factor-vs-resolution"
+		{
+			resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
+				.type = choice
+				.caption = "Resolution as"
+			n_bins = 10
+				.type = int(value_min=1)
+				.help = Number of bins
+				.caption = %Bins%
+			output_csv_file = False
+				.type = bool
+				.caption = "%Output% csv"
+		}
+		completeness
+			.short_caption = "Completeness Plot"
+			.caption = "Completeness Plot"
+			.help = "Completeness-Plot"
+		{
+			reflections_per_bin=20
+				.type = int(value_min=1)
+				.caption = "Reflections per bin"
+			resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
+				.type = choice
+				.caption = "Resolution as"
+			output_csv_file = False
+				.type = bool
+				.caption = "%Output% csv"
+		}
+		normal_probability
+			.short_caption = "Normal Probability Plot"
+			.caption = "Normal Probability Plot"
+			.help = "Normal-Probability-Plot"
+		{
+			output_csv_file = False
+				.type = bool
+				.caption = "%Output% csv"
+		}
+		bijvoet_differences_probability_plot
+			.short_caption = "Bijvoet Differences Probability Plot"
+			.caption = "Bijvoet Differences Probability Plot"
+			.help = "Bijvoet-differences-NPP"
+		{
+			output_csv_file = False
+				.type = bool
+				.caption = "%Output% csv"
+			use_students_t = False
+				.type = bool
+				.caption = "%Student's t%"
+			source = *Olex2 fcf
+				.type = choice
+				.caption = "%Source%"
+		}
+		bijvoet_differences_scatter_plot
+			.short_caption = "Bijvoet Differences Scatter Plot"
+			.caption = "Bijvoet Differences Scatter Plot"
+			.help = "Bijvoet-differences-scatter-plot"
+		{
+			output_csv_file = False
+				.type = bool
+				.caption = "%Output% csv"
+			use_students_t = False
+				.type = bool
+				.caption = "%Student's t%"
+		}
+	}
 }
 
 programs {
-  solution {
-    smtbx {
-      cf {
-        amplitude_type = F E *quasi-E
-          .type = choice
-        max_attempts_to_get_phase_transition = 5
-          .type = int
-        max_attempts_to_get_sharp_correlation_map = 5
-          .type = int
-        max_solving_iterations = 500
-          .type = int
-        }
-      }
-    }
-  }
+	solution {
+		smtbx {
+			cf {
+				amplitude_type = F E *quasi-E
+					.type = choice
+				max_attempts_to_get_phase_transition = 5
+					.type = int
+				max_attempts_to_get_sharp_correlation_map = 5
+					.type = int
+				max_solving_iterations = 500
+					.type = int
+				}
+			}
+		}
+	}
 
 user {
-  alert_delete_history = Y
-    .type = str
-    .expert_level = 1
-  alert_overwrite_history = Y
-    .type = str
-    .expert_level = 1
-  alert_uninstall_plugin = Y
-    .type = str
-    .expert_level = 1
-  report_style = default
-    .type = str
-  report_template = default
-    .type = str
-  report_journal_style = rsc
-    .type = str
-  auto_refine_after_anis = True
-    .type = bool
+	alert_delete_history = Y
+		.type = str
+		.expert_level = 1
+	alert_overwrite_history = Y
+		.type = str
+		.expert_level = 1
+	alert_uninstall_plugin = Y
+		.type = str
+		.expert_level = 1
+	report_style = default
+		.type = str
+	report_template = default
+		.type = str
+	report_journal_style = rsc
+		.type = str
+	auto_refine_after_anis = True
+		.type = bool
 
-  image{
-    bitmap{
-      type = png
-        .type = str
-    }
-  }
+	image{
+		bitmap{
+			type = png
+				.type = str
+		}
+	}
 }
 
 
 odac
-  .expert_level = 2
+	.expert_level = 2
 {
-  source_dir = None
-    .type = path
-  is_active = False
-    .type = bool
-  debug{
-    debug = False
-      .type = bool
-    debug_deep1 = False
-      .type = bool
-    debug_deep2 = False
-      .type = bool
-    verbose = False
-      .type = bool
-  }
-  version{
-    remote = "r39"
-      .type = str
-  }
+	source_dir = None
+		.type = path
+	is_active = False
+		.type = bool
+	debug{
+		debug = True
+			.type = bool
+		debug_deep1 = True
+			.type = bool
+		debug_deep2 = True
+			.type = bool
+		verbose = True
+			.type = bool
+	}
+	version{
+		remote = "r39"
+			.type = str
+	}
 }
