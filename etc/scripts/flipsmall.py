@@ -1,5 +1,5 @@
 #!/usr/bin/python2
-version = "110310"
+version = "200111"
 """
 =====================================================================
            Submit charge flipping phasing procedure
@@ -8,7 +8,7 @@ version = "110310"
  Charge Flipping for ab initio small-molecule structure determination
           A van der Lee, C.Dumas & L. Palatinus   (python version february 08th,  2010)
 	  corrected bug in "forcesymmetry=yes" processing ins symcards.
-
+          20-01-11: corrected bug for Olex2 processing
  prepares input file for SUPERFLIP and EDMA program  (L. Palatinus)
 
 
@@ -41,9 +41,20 @@ def process_command_line_arg(s,flip_keywords,files):
 Some guidelines
 ###############
 
+""")
+    if olexrun:
+       sys.stdout.write("""
+use: spy.flipsmall(data.ins)
+ or: spy.flipsmall()  -- ins-file loaded by Olex2 is taken
+ or: spy.flipsmall(data.ins maxcycles=30000)
+ or: spy.flipsmall(data.ins,ked=1.1)
+""" )
+    else:
+       sys.stdout.write("""
 use: %s data.ins
  or: %s data.ins  maxcycles=30000
-
+""" % (s[0],s[0]))
+       sys.stdout.write("""
 where:
 data.ins is input shelx-file with only cell info and scattering type info, optionally space group info
 
@@ -59,7 +70,7 @@ edmacontinue=no  ...... continue if convergence is not detected (default no)
 comments=yes     ...... have intermediate stops to check results (default=yes)
 cleanup=yes      ...... remove all intermediate files, keep only .res (default=yes)
 
-""" % (s[0],s[0]))
+""")
        print 'Start again'
        return False
 
@@ -102,12 +113,12 @@ cleanup=yes      ...... remove all intermediate files, keep only .res (default=y
     else:
        flip_keywords['derivesymmetry'] = "yes"
 
-    if olexrun: 
+    if olexrun:
        flip_keywords['logging'] = "no"
        flip_keywords['comments'] = "no"
-     
+
     exe['SF'] = flip_keywords['sflipversion']
-              
+
     if  ( flip_keywords['logging'] == "yes" ): log=open('/home/vdlee/unix/python/log.txt', "a")
 
     return True
@@ -145,21 +156,21 @@ def process_insfile(flip_keywords,files,derived_info):
     and ( abs((c[0]-c[1]) / c[0]) < delta ) and ( abs((c[0]-c[2]) / c[0]) > delta ) \
     and ( abs((c[1]-c[2]) / c[0]) > delta ): 
         derived_info['crsyst']='tetr'
-	derived_info['flipcell'] = str(c[0])+" "+str(c[0])+" "+str(c[2])+" 90.00 90.00 90.00"	
+	derived_info['flipcell'] = str(c[0])+" "+str(c[0])+" "+str(c[2])+" 90.00 90.00 90.00"
     if ( abs(c[3] - 90.00)/90.00 < delta ) and ( abs(c[4]-90.00) / 90.00 < delta ) and ( abs(c[5]-90.00) / 90.00 < delta ) \
     and ( abs((c[0]-c[1]) / c[0]) > delta ) and ( abs((c[0]-c[2]) / c[0]) > delta ) \
     and ( abs((c[1]-c[2]) / c[0]) > delta ): 
         derived_info['crsyst']='orth'
-	derived_info['flipcell'] = str(c[0])+" "+str(c[1])+" "+str(c[2])+" 90.00 90.00 90.00"		
+	derived_info['flipcell'] = str(c[0])+" "+str(c[1])+" "+str(c[2])+" 90.00 90.00 90.00"
     if ( abs(c[3] - 90.00)/90.00 < delta ) and ( abs(c[4]-90.00) / 90.00 < delta ) and ( abs(c[5]-120.00) / 120.00 < delta ) \
-    and ( abs((c[0]-c[1]) / c[0]) < delta ): 
+    and ( abs((c[0]-c[1]) / c[0]) < delta ):
         derived_info['crsyst']='trig'
-	derived_info['flipcell'] = str(c[0])+" "+str(c[0])+" "+str(c[2])+" 90.00 90.00 120.00"	
-    if ( abs(c[3] - 90.00)/90.00 < delta ) and ( abs(c[4]-90.00) / 90.00 > delta ) and ( abs(c[5]-90.00) / 90.00 < delta ): 
+	derived_info['flipcell'] = str(c[0])+" "+str(c[0])+" "+str(c[2])+" 90.00 90.00 120.00"
+    if ( abs(c[3] - 90.00)/90.00 < delta ) and ( abs(c[4]-90.00) / 90.00 > delta ) and ( abs(c[5]-90.00) / 90.00 < delta ):
         derived_info['crsyst']='mono'
 	derived_info['flipcell'] = str(c[0])+" "+str(c[1])+" "+str(c[2])+" 90.00 "+str(c[4])+" 90.00"
     if ( derived_info["crsyst"] == "tric"):
-	derived_info['flipcell'] = str(c[0])+" "+str(c[1])+" "+str(c[2])+" "+str(c[3])+" "+str(c[4])+" "+str(c[5])   
+	derived_info['flipcell'] = str(c[0])+" "+str(c[1])+" "+str(c[2])+" "+str(c[3])+" "+str(c[4])+" "+str(c[5])
 
 #Process symmetry information from .ins-file if this is to be used and put this is temporary symcards.tmp file
     if ( flip_keywords['forcesymmetry'] == "yes" ):
@@ -204,16 +215,16 @@ def process_insfile(flip_keywords,files,derived_info):
         if ( derived_info['crsyst'] == 'tric' ):
            symcards.write("-x -y -z\n")
            flip_keywords['SG'] = '2'
-        if ( derived_info['crsyst'] == 'mono' ):       
+        if ( derived_info['crsyst'] == 'mono' ):
            symcards.write("-x y -z\n")
            flip_keywords['SG'] = '3'
         if ( derived_info['crsyst'] == 'orth' ):       
            symcards.write("-x -y z\n-x y -z\nx -y -z\n")
            flip_keywords['SG'] = '16'
-        if ( derived_info['crsyst'] == 'tetr' ):       
+        if ( derived_info['crsyst'] == 'tetr' ):
            symcards.write("-x -y z\n-y x z\ny -x z\n")
            flip_keywords['SG'] = '75'
-        if ( derived_info['crsyst'] == 'trig' ):       
+        if ( derived_info['crsyst'] == 'trig' ):
            symcards.write("-y x-y z\n-x+y -x z\n")
            flip_keywords['SG'] = '143'
         if ( derived_info['crsyst'] == 'cubi' ):
@@ -250,7 +261,7 @@ def process_insfile(flip_keywords,files,derived_info):
 #Process SFAC info (is a bit complicated, since there are two styles in Shelx-files
 # there can be two types of SFAC cards in .ins file; second character of element need to be lower-case
     if ( nsfac == 1 ):
-       for line in fileinput.input(files['insin']): 
+       for line in fileinput.input(files['insin']):
           if "SFAC" in line:
              multi=re.search('=$',line)
              sfacline=string.split(line)[1:]
@@ -282,12 +293,12 @@ def check_executables(exe):
 def generate_superflip_file(flip_keywords,files,derived_info):
 #Generate Superflip .inflip file and write some info to the screen
     print """
-============================================================================    
+============================================================================
 !                  Ab initio Charge Flipping procedure                     !
 !                      for small-molecule structures                       ! 
 !                                                                          !
 !          script written by: A. van der Lee, C. Dumas & L. Palatinus      !
-!  CF and map interpretation calculations by : L. Palatinus & G. Chapuis   ! 
+!  CF and map interpretation calculations by : L. Palatinus & G. Chapuis   !
 !       Palatinus, L. & Chapuis, G.(2007): J. Appl. Cryst. 40, 786-790     !
 !              http://superspace.fzu.cz/superflip                         !
 !                                                                          !
@@ -313,7 +324,7 @@ number of trials          ......  %s
 superposition             ......  %s
 ----------------------------------------------------
        
-    """ % (files['insin'], files['hklin'], derived_info['flipcell'], derived_info['crsyst'], flip_keywords['SG'], flip_keywords['ked'], flip_keywords['weak'], flip_keywords['biso'], 
+    """ % (files['insin'], files['hklin'], derived_info['flipcell'], derived_info['crsyst'], flip_keywords['SG'], flip_keywords['ked'], flip_keywords['weak'], flip_keywords['biso'],
        flip_keywords['maxcycl'], flip_keywords['normalize'], flip_keywords['trial'], flip_keywords['superposition']) 
 
     if ( flip_keywords['comments'] == 'yes' ): raw_input("\n Press <RETURN> to continue\n")       
@@ -326,13 +337,13 @@ superposition             ......  %s
     f.write("""
 #=============================================
 #   Ab initio phasing by Charge Flipping
-#                                             
+#
 #                   SUPERFLIP
 #
 #=============================================
-title    ab initio Phasing by Charge Flipping 
+title    ab initio Phasing by Charge Flipping
 
-# Basic crystallographic information          
+# Basic crystallographic information
 cell             %s
 """ % derived_info['flipcell'])
 
@@ -360,21 +371,21 @@ outputfile       %s
 
 dataformat       %s
 """ % ( flip_keywords['terminal'], flip_keywords['weak'], flip_keywords['biso'], flip_keywords['normalize'],
-       flip_keywords['missing'], flip_keywords['maxcycl'], flip_keywords['trial'], 
+       flip_keywords['missing'], flip_keywords['maxcycl'], flip_keywords['trial'],
        flip_keywords['derivesymmetry'], files['m81'], flip_keywords['dataformat']  ))
 
     if ( flip_keywords['ked'] != "auto" ):
        f.write("""
 
 delta %s sigma
-               
+
 	       """ % flip_keywords['ked'])
 
     if ( flip_keywords['superposition'] == "yes" ):
        f.write("""
 
 modelfile superposition 0.05
-               
+
 	       """)
 
     if ( flip_keywords['dataformat'] == "shelx" ):
@@ -395,16 +406,16 @@ def analyze_superflip_logfile(flip_keywords,files,derived_info):
 # Analyse the log-file
     derived_info['itlino']=[]
     for line in fileinput.input(files['fliplog']):
-        if "Last run from" in line: cev=fileinput.filelineno()-2 
+        if "Last run from" in line: cev=fileinput.filelineno()-2
         if "Number of successes" in line: nsuccess=int(string.split(line)[4])
         if "# Iteration #" in line: derived_info['itlino'].append(fileinput.filelineno()-1)
-    try: 
+    try:
         cev
-        nsuccess   
+        nsuccess
     except NameError:
 # x doesn't exist, do something
       	print "\n Note from Flipsmall:\n Not all required information could be found in Superflip's logfile.\n Did Superflip report a problem?"
-	return False 
+	return False
     derived_info['itlino'].append(fileinput.filelineno()-1)
     bestresults = open(files['fliplog'],'r').readlines()[cev].strip()
     if ( bestresults[0:3] == "" ): bestresults = open(files['fliplog'],'r').readlines()[cev-2].strip()
@@ -415,13 +426,13 @@ def analyze_superflip_logfile(flip_keywords,files,derived_info):
     if  ( flip_keywords['logging'] == "yes" ):
         log.write("\
 %12s: %12s %12s\n" % (files['base'], derived_info['spgr'], phisym))
-    
+
 
     print """
 
 
             =====================================================
-                         ANALYSIS OF THE RESULTS          
+                         ANALYSIS OF THE RESULTS
             =====================================================
 
 
@@ -647,15 +658,33 @@ def find_executable(executable, path=None):
 
 def flipsmall (*args):
 
-    if ((len(args) == 1) and (not olexrun)) or ((len(args) == 0) and (olexrun)):
-       if olexrun:
-          print "There should be at least the name of an existing ins-file as command line argument.\nTry again or do 'spy.flipsmall(--help)' to get help."
-       else:
-          print "There should be at least the name of an existing ins-file as command line argument.\nTry again or do 'flipsmall.py --help' to get help."
+    if (len(args) == 1) and (not olexrun):
+       print "There should be at least the name of an existing ins-file as command line argument.\nTry again or do 'flipsmall.py --help' to get help."
        return False
     args=list(args)
-    if olexrun: args.insert(0,'flipsmall')
-    print 'Starting flipsmall procedure for ' + args[1] + '.'
+    helpasked = False
+    for i in range(0,len(args)):
+       if  "-h" in args[i] or "--help" in args[i] : helpasked = True
+    if olexrun:
+#check whether commas or spaces are used as separators, for olexrun it should be commas; replace simply all spaces by commas
+       for i in range(0,len(args)):
+         args[i]=args[i].replace(' ',',')
+       args=''.join(args)
+       args=string.split(args,',')
+       insertins = True
+       for i in range(0,len(args)):
+         if  ".ins" in args[i]: insertins = False
+       if not helpasked:
+          if OV.FileName() == 'none' and insertins:
+             print "There should be at least the name of an existing ins-file as command line argument.\nOr the .ins file should be preloaded in Olex2.\nCheck whether you have loaded a file in Olex2, probably not.\nTry again or do 'spy.flipsmall(--help)' to get help."
+             return False
+          else:
+             insin = OV.FileName() + '.ins'
+             args.insert(0,'flipsmall')
+#take ins file which is loaded already in Olex, but if specified on the command line take that one
+             if insertins: args.insert(1,insin)
+    if not helpasked:
+       print 'Starting flipsmall procedure for ' + args[1] + '.'
     q=process_command_line_arg(args,flip_keywords,files)
     if not q: return False
     q=check_executables(exe)
@@ -672,6 +701,9 @@ def flipsmall (*args):
        olex.m('waitfor process')
     ##########################################################################
 
+    if not os.path.isfile(files['m81']):
+       print "Superflip has not created an .m81 electron density file. Quitting..."
+       return False
     q=analyze_superflip_logfile(flip_keywords,files,derived_info)
     if not q: return False
     generate_edma_file(flip_keywords,files,derived_info)
@@ -682,11 +714,14 @@ def flipsmall (*args):
     else:
        olex.m('exec -q ' + exe['EDMA']+' '+ files['edmain'])
        olex.m('waitfor process')
-       olex.m('reap ' + args[1].split('.')[0] + '.res')
+    cleanup(files)
+    if olexrun:
+       olx.Atreap(files['base']+'.res')
+#       olex.m('reap ' + args[1].split('.')[0] + '.res')
+#       print "assemble"
        olex.m('compaq -a')
     #######################################################################
 
-    cleanup(files)
     print 'Finishing flipsmall procedure'
     print """\n
  ========================
@@ -697,10 +732,10 @@ def flipsmall (*args):
 # the main keywords
 flip_keywords=dict(weak=0.20, biso=2.5, maxcycl=10000, comments="yes", edmacontinue="no",
                    normalize="yes", merge="yes", forcesymmetry="no", trial="1", SG="1", missing="zero",
-		   derivesymmetry="use",dataformat="shelx",cleanup="yes",terminal='yes', logging='no', superposition='no', 
+		   derivesymmetry="use",dataformat="shelx",cleanup="yes",terminal='yes', logging='no', superposition='no',
 		   sflipversion='superflip',ked='auto')
 # calculated and extracted info, from ins-file and logfile
-derived_info=dict(crsyst='tric', cell="9.0 9.0 9.0 90.0 90.0 90.0", flipcell="9.0 9.0 9.0 90.0 90.0 90.0",  
+derived_info=dict(crsyst='tric', cell="9.0 9.0 9.0 90.0 90.0 90.0", flipcell="9.0 9.0 9.0 90.0 90.0 90.0",
                   cellesd = "0.0 0.0 0.0 0.0 0.0 0.0", wavelength ="0.71073", sfac="C H O N",
                   latt=1, spgr='P1', zerr = '1', itlino=[], bestrun=1)
 # file names in use
