@@ -71,7 +71,6 @@
       <cmd25 "spy.reset_file_in_OFS(refinement_image.htm)">
       <cmd26 "if strcmp(%7,filefull()) then updatehtml else htmlreload">
       <cnd27 "if html.IsPopup(history-tree) then spy.popout_history_tree()">
-      <cmd23 "syncbc">
       <cmd26 XXX="fade 1 0 -0.1">
       <cmd27 XXX='waitfor fade'>
       <cmd28 XXX="ceiling off">
@@ -612,7 +611,6 @@
       <cmd3 "@reap '%1' %2">
       <cmd4 "itemstate title 1">
       <cmd5 "itemstate tabs-01 1">
-      <cmd6 "syncbc">
       <cmd7 "history">
       <cmd8 cmd1="lines 12">
       <cmd9 "updatehtml">
@@ -667,7 +665,6 @@
       <cmd2 "@reap '%1' %2">
       <cmd3 "itemstate title 1">
       <cmd4 "itemstate tabs-01 1">
-      <cmd5 "syncbc">
       <cmd6 cmd1="lines 12">
     \>
   \>
@@ -757,7 +754,6 @@
     <cmd
       <cmd1 "load scene bw">
       <cmd2 "load style bw">
-      <cmd3 "syncbc">
     \>
   \>
 \>
@@ -767,7 +763,6 @@
     <cmd
       <cmd1 "scene bw">
       <cmd2 "style bw">
-      <cmd3 "syncbc">
     \>
   \>
 \>
@@ -805,7 +800,6 @@
     <cmd
       <cmd1 "load scene white">
       <cmd2 "load style white">
-      <cmd3 "syncbc">
     \>
   \>
 \>
@@ -1015,7 +1009,6 @@
   <cmd1 cmd1="silent on">
   <cmd2 "updAtehtml">
   <cmd3 cmd1="load style default">
-  <cmd4 cmd1="syncbc">
   \>
 
   <onterminate
