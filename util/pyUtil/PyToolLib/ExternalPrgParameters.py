@@ -553,6 +553,8 @@ class Method_shelxd(Method_shelx_solution):
 
 class Method_cctbx_refinement(Method_refinement):
 
+  flack = None
+
   def pre_refinement(self, RunPrgObject):
     RunPrgObject.make_unique_names = True
     Method_refinement.pre_refinement(self, RunPrgObject)
@@ -583,7 +585,6 @@ class Method_cctbx_refinement(Method_refinement):
         OV.SetVar('cctbx_R1',cctbx.r1[0])
         OV.File('%s.res' %OV.FileName())
     finally:
-      self.flack = None
       OV.DeleteBitmap('refine')
 
   def getFlack(self):

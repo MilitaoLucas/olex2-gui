@@ -375,6 +375,7 @@ class RunRefinementPrg(RunPrg):
 
   def isInversionNeeded(self, force=False):
     from cctbx_olex_adapter import hooft_analysis
+    from libtbx.utils import format_float_with_standard_uncertainty
     from cctbx import sgtbx
     from libtbx.utils import Sorry
     print
@@ -392,6 +393,8 @@ class RunRefinementPrg(RunPrg):
       print e
     else:
       if hooft.reflections.f_sq_obs_filtered.anomalous_flag():
+        print "Hooft y: %s" %format_float_with_standard_uncertainty(
+          hooft.hooft_y, hooft.sigma_y)
         if (hooft.p3_racemic_twin is not None and
             round(hooft.p3_racemic_twin, 3) == 1):
           possible_racemic_twin = True
