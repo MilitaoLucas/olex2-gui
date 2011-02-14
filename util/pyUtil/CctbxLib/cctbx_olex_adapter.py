@@ -27,6 +27,7 @@ from libtbx import easy_pickle, utils
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+from scitbx.math import distributions
 
 from History import hist
 
@@ -229,7 +230,6 @@ class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):
       return
     absolute_structure.hooft_analysis.__init__(
       self, fo2, fc, probability_plot_slope=probability_plot_slope, scale_factor=scale)
-    self.show()
 
 OV.registerFunction(hooft_analysis)
 
@@ -255,16 +255,22 @@ class students_t_hooft_analysis(OlexCctbxAdapter, absolute_structure.students_t_
       print "No Bijvoet pairs"
       return
     analysis = absolute_structure.hooft_analysis(fo2, fc, scale_factor=scale)
-    bijvoet_diff_plot = absolute_structure.bijvoet_differences_probability_plot(analysis)
+    bijvoet_diff_plot = absolute_structure.bijvoet_differences_probability_plot(
+      analysis)
     if nu is not None:
       nu = float(nu)
     else:
       nu = absolute_structure.maximise_students_t_correlation_coefficient(
-        bijvoet_diff_plot.y, 1, 101)
+        bijvoet_diff_plot.y, 1, 300)
+    distribution = distributions.students_t_distribution(nu)
+    observed_deviations = bijvoet_diff_plot.y
+    expected_deviations = distribution.quantiles(observed_deviations.size())
+    fit = flex.linear_regression(
+      expected_deviations[5:-5], observed_deviations[5:-5])
+    self.slope = fit.slope()
     print "Student's t nu: %.1f" %nu
     absolute_structure.students_t_hooft_analysis.__init__(
-      self, fo2, fc, nu, scale_factor=scale)
-    self.show()
+      self, fo2, fc, nu, scale_factor=scale, probability_plot_slope=self.slope)
 
 OV.registerFunction(students_t_hooft_analysis)
 
