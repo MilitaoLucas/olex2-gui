@@ -49,7 +49,7 @@ def OlexBET(probe="n2", trials="5000"):
   OV.cmd("pack cell")
   OV.File("atoms_%s.xyz"%(Olex2BETIn))
   OV.AtReap("atoms_%s.xyz"%(Olex2BETIn))
-  CalDen = ((float(olx.xf_au_GetWeight())*OlexZ)/(CellV*0.60225))
+  CalDen = ((float(olx.xf_au_GetWeight()))/(CellV*0.60225))
   print AtomPairs
   AtomGroups = []
   CorrectedAtoms = []
