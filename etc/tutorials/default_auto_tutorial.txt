@@ -1,7 +1,6 @@
 ﻿#set:bg_colour=gui.html.bg_colour
 #set:font_colour=gui.html.font_colour
 
-set:font_colour=#ffffff
 set:font_colour_code=#aaaaff
 set:font_colour_bold=gui.html.highlight_colour
 
@@ -47,7 +46,6 @@ h:btn-report;1
 p:For example, we can solve the structure by typing <c>solve</c> or by clicking the <b>Solve</b> button. We will do this now.
 h:btn-solve;1
 c:solve
-c:rota 1 2 3 100 0.01
 c:refresh
 
 p:We can tidy this solution by typing <c>clean</c> or by pressing the <b>Clean</b> button.
@@ -126,7 +124,6 @@ p:To show only 10 lines, type <c>lines 10</c>
 c:lines 10
 c:refresh
 c:itemstate solve-settings 2
-c:rota 1 2 3 0 0
 
 p:The End
 
