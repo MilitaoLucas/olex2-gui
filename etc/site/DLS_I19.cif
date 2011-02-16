@@ -1,0 +1,18 @@
+_diffrn_detector                      'CCD area detector'
+_diffrn_detector_area_resol_mean       0.0350
+_diffrn_detector_type                 'Rigaku Saturn724+'
+
+_diffrn_measurement_device      			'CrystalLogic Kappa (4 circle)'
+_diffrn_measurement_device_type       'Kappa Rigaku Saturn724+'
+_diffrn_measurement_method            'omega rotation'
+
+_diffrn_radiation_collimation         '0.3 x 1.5 Double Pinhole'
+_diffrn_radiation_monochromator       'Synchrotron '
+_diffrn_radiation_probe               'x-ray'
+_diffrn_radiation_type                'Synchrotron'
+_diffrn_radiation_xray_symbol         ?
+_diffrn_radiation_wavelength          0.688900
+
+_diffrn_source                        'Synchrotron'
+_diffrn_source_target                 ?
+_diffrn_source_type                   'Undulator, I19, DLS, RAL'
