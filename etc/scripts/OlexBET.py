@@ -32,7 +32,7 @@ IRMOF1.xyz
 To run type spy.OlexBET() in Olex2
 '''
 
-def OlexBET(probe="n2", trials="5000"):
+def OlexBET(probe="N2", trials="5000"):
   print "This script converts the current model and creates a non_ortho_surface_area input dat, runs non_ortho_surface_area and reports the result"
   # We can assume that the INS name and information can come from Olex2
   # These probe values are from the AIC group standards KS uses 3.4 and 3.2 for N2 and CO2
@@ -107,31 +107,35 @@ def OlexBET(probe="n2", trials="5000"):
     'Me' : '3.822'
   }
   
+  run_inc = 0
+  base_path = OV.FilePath()
+  Olex2BETIn_start = OV.FileFull()
+  print OV.FilePath()
+  while True:
+    if(os.path.exists('%s/BET_run_%2.2d'%(base_path, run_inc))):
+      print "Failed to make BET_run_%2.2d directory, as already present - incrementing"%run_inc
+      run_inc = run_inc+1
+    else:
+      os.mkdir('%s/BET_run_%2.2d'%(base_path, run_inc))
+      BET_path = "%s/BET_run_%2.2d"%(base_path, run_inc)
+      break
+  
   Olex2BETIn = OV.FileName()
   BETCompatCell = (olx.xf_au_GetCell().split(','))
   brokensym = list(olx.xf_au_GetCellSymm())
   OlexZ = int(olx.xf_au_GetZ())
   AtomPairs = olx.xf_GetFormula().split()
   CellV = float(olx.xf_au_GetCellVolume())
+  
+  # Olex2 internal commands here
   OV.cmd("pack cell")
-  OV.File("atoms_%s.xyz"%(Olex2BETIn))
-  OV.AtReap("atoms_%s.xyz"%(Olex2BETIn))
+  OV.File("%s/atoms_%s.xyz"%(BET_path, Olex2BETIn))
+  OV.AtReap("%s/atoms_%s.xyz"%(BET_path, Olex2BETIn))
   CalDen = ((float(olx.xf_au_GetWeight()))/(CellV*0.60225))
-  print AtomPairs
-  AtomGroups = []
-  CorrectedAtoms = []
-  for atom in AtomPairs:
-    AtomGroups.append(re.split("([A-Za-z]*)",atom)[1:3])
-  print AtomGroups
-  for j in range(0, len(AtomGroups)):
-    print AtomGroups[j][0], AtomGroups[j][1]
-    CorrectedAtoms.append("%s %s"%(AtomGroups[j][0], (AtomGroups[j][1])))
-  AtomContents = ' '.join(CorrectedAtoms)
-  print AtomContents
-  print "ETF", AtomContents
-  #AtomContents = ' '.join(re.split("([A-Za-z]*)",olx.xf_GetFormula()))
-  snuff = re.split("([A-Za-z]*)",olx.xf_GetFormula())
-
+  
+  # Back to starting model
+  OV.AtReap(Olex2BETIn_start)
+  
   # General stuff for the user to see in Olex2
   print "Job name", Olex2BETIn
   print "Unit Cell", BETCompatCell
@@ -142,15 +146,15 @@ def OlexBET(probe="n2", trials="5000"):
   print "Cell voume", CellV
   print "Calculated density", CalDen
   print "RAddiiii?", olex_core.GetVdWRadii()
-  print "Probes", probetypes
+  print "Probe Used", probe, " : ", probetypes[probe]
   for element in olex_core.GetVdWRadii():
-    print "Element: ",element, "Radii: ", olex_core.GetVdWRadii()[element], "Diameter: ", 2*olex_core.GetVdWRadii()[element]
+    print "Element: %2.2s Radii: %2.2f Diameter: %2.2f"%(element, olex_core.GetVdWRadii()[element], 2*olex_core.GetVdWRadii()[element])
 
 # Write the BET input file
 # This is primative will need to add features such as patterson on and off
-  BETINS= open("%s.dat"%(Olex2BETIn), 'w')
-  BETINS.write("atoms_%s.atoms\n"%(Olex2BETIn)) #! file containing the atom types and diameters
-  BETINS.write("atoms_%s.xyz\n"%(Olex2BETIn)) #! file containing the framework coordinates
+  BETINS= open("%s/%s.dat"%(BET_path, Olex2BETIn), 'w')
+  BETINS.write("%s/atoms_%s.atoms\n"%(BET_path, Olex2BETIn)) #! file containing the atom types and diameters
+  BETINS.write("%s/atoms_%s.xyz\n"%(BET_path, Olex2BETIn)) #! file containing the framework coordinates
   BETINS.write("%s\n"%(probetypes[probe])) #! probe size in A
   BETINS.write("%s\n"%(trials)) #! number of trial insertion
   BETINS.write("%s %s %s\n"%(BETCompatCell[0], BETCompatCell[1], BETCompatCell[2])) #! length of unit cell a, b, c in A
@@ -158,9 +162,9 @@ def OlexBET(probe="n2", trials="5000"):
   BETINS.write("%s\n"%(CalDen)) #! crystal density in g / cm3
   BETINS.close()
 
-  ATOMSINS= open("atoms_%s.atoms"%(Olex2BETIn), 'w')
+  ATOMSINS= open("%s/atoms_%s.atoms"%(BET_path, Olex2BETIn), 'w')
   for element in olex_core.GetVdWRadii():
-    ATOMSINS.write("%s %s\n"%(element, 2*olex_core.GetVdWRadii()[element])) #! file containing the atom types and diameters
+    ATOMSINS.write("%2.2s %2.2f\n"%(element, 2*olex_core.GetVdWRadii()[element])) #! file containing the atom types and diameters
   ATOMSINS.write("EOF")
   ATOMSINS.close()
 
@@ -168,14 +172,14 @@ def OlexBET(probe="n2", trials="5000"):
 # All this need error control
   try:
     print "Running BET calculation now"
-    content = os.popen("nonorthoSA.exe < %s.dat > %s_BET.log"%(Olex2BETIn, Olex2BETIn)).read() # This pipes our new .dat file into nonortho
+    content = os.popen("nonorthoSA.exe < %s/%s.dat > %s/%s_BET.log"%(BET_path, Olex2BETIn, BET_path, Olex2BETIn)).read() # This pipes our new .dat file into nonortho
     #BET_result = olx.Exec("nonorthoSA.exe < %s.dat > %s_BET.log"%(Olex2BETIn, Olex2BETIn))
     print "Finished calculation"
   except:
     print "BET calculation failed to run"
     return
   try:
-    BET_result_file = open("%s_BET.log"%(Olex2BETIn), 'r')
+    BET_result_file = open("%s/%s_BET.log"%(BET_path, Olex2BETIn), 'r')
     print "Reviewing Log File to Window:"
     for BET_line in BET_result_file:
       print BET_line.rstrip("\n")
@@ -183,7 +187,7 @@ def OlexBET(probe="n2", trials="5000"):
   except IOError: 
     print "Failed to open file"
     print "You can read this file by typing:"
-    print "edit %s_BET.log"%(Olex2BETIn)
+    print "edit %s/%s_BET.log"%(BET_path, Olex2BETIn)
     return
   #print content # Output from pipe need proper error control here
 
