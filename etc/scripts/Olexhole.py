@@ -7,6 +7,7 @@ import olx
 import olex_core
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+import subprocess
 """
 ! first cards which must be quoted
 ! (note that HOLE is case insensitive (except file names)
@@ -26,66 +27,35 @@ To run type spy.Olexhole() in Olex2
 '''
 
 def Olexhole(endrad="3"):
-  print "This script converts the current model and creates a non_ortho_surface_area input dat, runs non_ortho_surface_area and reports the result"
+  print "This script converts the current model and creates a hole2 input file, runs hole2 and reports the result"
   # We can assume that the INS name and information can come from Olex2
-  probetypes = {
-    'n2' : '3.4',
-    'he' : '1',
-    'co2' : '3.2'
-  }
+  # Need to allow for all possible options, at the moment this is very basic implementation.
+  
   run_inc = 0
-  base_path = os.getcwd()
+  base_path = OV.FilePath()
+  print OV.FilePath()
   while True:
-    if(os.path.exists('%s//hole2_run%s'%(base_path, run_inc))):
-      print "Failed to make hole2_run%s directory, as already present - incrementing"%run_inc
+    if(os.path.exists('%s/hole2_run_%2.2d'%(base_path, run_inc))):
+      print "Failed to make hole2_run_%2.2d directory, as already present - incrementing"%run_inc
       run_inc = run_inc+1
     else:
-      os.mkdir('%s//hole2_run%s'%(base_path, run_inc))
-      hole2_path = "%s//hole2_run%s"%(base_path, run_inc)
+      os.mkdir('%s/hole2_run_%2.2d'%(base_path, run_inc))
+      hole2_path = "%s/hole2_run_%2.2d"%(base_path, run_inc)
       break
     
   Olex2holeIn = OV.FileName()
-  holeCompatCell = (olx.xf_au_GetCell().split(','))
-  brokensym = list(olx.xf_au_GetCellSymm())
-  OlexZ = int(olx.xf_au_GetZ())
-  AtomPairs = olx.xf_GetFormula().split()
-  CellV = float(olx.xf_au_GetCellVolume())
-  
   #Olex2 commands here!
   OV.cmd("isot")
   OV.cmd("pack -1 1 -1 1 -1 1")
   #OV.cmd("grow")
   OV.cmd("grow -w")
   OV.File("%s/olex_%s.pdb"%(hole2_path, Olex2holeIn))
-  print AtomPairs
-  AtomGroups = []
-  CorrectedAtoms = []
-  for atom in AtomPairs:
-    AtomGroups.append(re.split("([A-Za-z]*)",atom)[1:3])
-  print AtomGroups
-  for j in range(0, len(AtomGroups)):
-    print AtomGroups[j][0], AtomGroups[j][1]
-    CorrectedAtoms.append("%s %s"%(AtomGroups[j][0], (AtomGroups[j][1])))
-  AtomContents = ' '.join(CorrectedAtoms)
-  print AtomContents
-  print "ETF", AtomContents
-  #AtomContents = ' '.join(re.split("([A-Za-z]*)",olx.xf_GetFormula()))
-  snuff = re.split("([A-Za-z]*)",olx.xf_GetFormula())
+  OV.cmd("fuse")
 
+  qptcmd = "%s/qpt_conv"%hole2_path
+  
   # General stuff for the user to see in Olex2
   print "Job name", Olex2holeIn
-  print "Unit Cell", holeCompatCell
-  print "Olex2 Formula", olx.xf_GetFormula()
-  print "Atom Count", olx.xf_au_GetAtomCount()
-  print "Mw", olx.xf_au_GetWeight()
-  print "New formula using Z", OlexZ
-  print "Cell voume", CellV
-#  print "Calculated density", CalDen
-  print "RAddiiii?", olex_core.GetVdWRadii()
-  print "Probes", probetypes
-  for element in olex_core.GetVdWRadii():
-    print "Element: ",element, "Radii: ", olex_core.GetVdWRadii()[element], "Diameter: ", 2*olex_core.GetVdWRadii()[element]
-
 # Write the hole input file
 # This is primative will need to add features such as patterson on and off
   holeINS= open("%s/%s.inp"%(hole2_path, Olex2holeIn), 'w')
@@ -134,11 +104,12 @@ def Olexhole(endrad="3"):
   
 # All this need error control
   try:
-    print "Running hole calculation now"
+    print "**** Running hole calculation now"
     command = "hole < %s/%s.inp > %s/%s_hole.log "%(hole2_path, Olex2holeIn, hole2_path, Olex2holeIn)
+    print command
     os.system(command)
     #hole_result = olx.Exec(command)
-    print "Finished calculation"
+    print "Finished calculation ****"
   except:
     print "hole calculation failed to run"
     return
@@ -200,6 +171,7 @@ def Olexhole(endrad="3"):
   except:
     print "hole conversion 2 failed to run"
     return
+
   """
     try:
       hole_result_file = open("%s_sph_process_2_.log"%(Olex2holeIn), 'r')
