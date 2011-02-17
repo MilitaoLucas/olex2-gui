@@ -121,7 +121,7 @@ def OlexPlaton(platonflag="0"):
         platon_result_file = open("%s.%s"%(OV.FileName(), platon_extension), 'r')
         print "Successfully opened file", platon_result_file
         for platon_line in platon_result_file:
-          print platon_line
+          print platon_line.rstrip('\n')
         platon_result_file.close()
       except IOError: 
         print "Failed to open file"

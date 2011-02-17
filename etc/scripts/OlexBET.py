@@ -25,6 +25,7 @@ IRMOF1.xyz
 ! length of unit cell a, b, c in A
 ! unit cell angles alpha, beta, gamma
 ! crystal density in g / cm3
+    'n2' : '3.681',
 """
 
 '''
@@ -35,9 +36,9 @@ def OlexBET(probe="n2", trials="5000"):
   print "This script converts the current model and creates a non_ortho_surface_area input dat, runs non_ortho_surface_area and reports the result"
   # We can assume that the INS name and information can come from Olex2
   probetypes = {
-    'n2' : '3.681',
+    'n2' : '3.4',
     'he' : '1',
-    'co2' : '1'
+    'co2' : '3.2'
   }
 
   Olex2BETIn = OV.FileName()
@@ -106,6 +107,17 @@ def OlexBET(probe="n2", trials="5000"):
     print "Finished calculation"
   except:
     print "BET calculation failed to run"
+    return
+  try:
+    BET_result_file = open("%s_BET.log"%(Olex2BETIn), 'r')
+    print "Reviewing Log File to Window:"
+    for BET_line in BET_result_file:
+      print BET_line.rstrip("\n")
+    BET_result_file.close()
+  except IOError: 
+    print "Failed to open file"
+    print "You can read this file by typing:"
+    print "edit %s_BET.log"%(Olex2BETIn)
     return
   #print content # Output from pipe need proper error control here
 
