@@ -335,7 +335,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     except RuntimeError, e:
       if str(e).startswith("cctbx::adptbx::debye_waller_factor_exp: max_arg exceeded"):
         print "Refinement failed to converge"
-      elif "SCITBX_ASSERT(!chol.failure) failure" in str(e):
+      elif "SCITBX_ASSERT(!cholesky.failure) failure" in str(e):
         print "Cholesky failure"
       else:
         print "Refinement failed"
