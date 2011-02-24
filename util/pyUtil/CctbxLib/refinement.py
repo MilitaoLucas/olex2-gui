@@ -199,8 +199,8 @@ class olex2_normal_eqns(least_squares.crystallographic_ls):
     #update OSF
     OV.SetOSF(self.scale_factor())
     #update FVars
-    for var in self.occupancy_constraints:
-      OV.SetFVar(var[0], var[1].occupancy.value)
+    for var in self.shared_param_constraints:
+      OV.SetFVar(var[0], var[1].value.value)
     #update BASF
     if self.twin_components is not None:
       basf = ' '.join('%f' %component.twin_fraction
@@ -253,7 +253,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
     #put shared parameter constraints first - to allow proper bookeeping of
     #overrided parameters (U, sites)
     self.constraints = self.setup_shared_parameters_constraints() + self.constraints
-    self.constraints += self.setup_occupancy_constraints()
     self.constraints += self.setup_rigid_body_constraints(
       self.olx_atoms.afix_iterator())
     self.constraints += self.setup_geometrical_constraints(
@@ -310,7 +309,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       restraints_manager=restraints_manager,
       weighting_scheme=weighting,
       log=self.log)
-    self.normal_eqns.occupancy_constraints = self.occupancy_constraints
+    self.normal_eqns.shared_param_constraints = self.shared_param_constraints
     method = OV.GetParam('snum.refinement.method')
     iterations = solvers.get(method)
     iterations = normal_eqns_solving.naive_iterations
@@ -554,25 +553,32 @@ class FullMatrixRefine(OlexCctbxAdapter):
       elif constraint_type == "site":
         current = site.shared_site(kwds["i_seqs"])
         constraints.append(current)
-    return constraints
 
-  def setup_occupancy_constraints(self):
-    self.occupancy_constraints = []
-    constraints = []
+    self.shared_param_constraints = []
     vars = self.olx_atoms.model['variables']['variables']
     for i, var in enumerate(vars):
       refs = var['references']
       as_var = []
       as_var_minus_one = []
+      eadp = []
       for ref in refs:
         if ref['index'] == 4 and ref['relation'] == "var":
           as_var.append((ref['id'], ref['k']))
         if ref['index'] == 4 and ref['relation'] == "one_minus_var":
           as_var_minus_one.append((ref['id'], ref['k']))
+        if ref['index'] == 5 and ref['relation'] == "var":
+          eadp.append(ref['id'])
       if (len(as_var) + len(as_var_minus_one)) != 0:
+        if len(eadp) != 0:
+          print "Invalid varaible use - mixes occupancy and U" 
+          continue
         current = occupancy.dependent_occupancy(as_var, as_var_minus_one)
         constraints.append(current)
-        self.occupancy_constraints.append((i, current))
+        self.shared_param_constraints.append((i, current))
+      elif len(eadp) > 1:
+        current = adp.shared_u(eadp)
+        constraints.append(current)
+        self.shared_param_constraints.append((i, current))
     return constraints
 
   def setup_rigid_body_constraints(self, afix_iter):
