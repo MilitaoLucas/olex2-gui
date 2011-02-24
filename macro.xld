@@ -261,7 +261,7 @@
       <cmd0 "xgrid.Visible(false)">
       <cmd1 "mode off">
       <cmd2 "user 'filepath()'">
-      <cmd3 "kill $q">
+      <cmd3 x="kill $q">
       <cmd5 "file">
       <cmd6 XXX="cursor(busy, 'Refining...')">
       <cmd7 "if strcmp(%1,'-1') then None else spy.SetMaxCycles(%1)">
@@ -721,6 +721,7 @@
     \>
     <cmd
       <cmd1 "@reap '%1' %2">
+      <cmd1 x="@update '%1'">
     \>
     <onabort
       <cmd "echo lasterror()">
