@@ -37,12 +37,12 @@ gui {
     .type = int
   }
   timage{
-  
+
     cbtn{
       base_colour = #555555
       grad_colour = #777777
-      }  
-  
+      }
+
     h1{
       font_colour = #dedede
       font_colour_L = 1.4
@@ -50,6 +50,7 @@ gui {
       grad_colour = #666666
       grad_colour_L = 0.3
     }
+
     h3{
       font_colour = #dedede
       font_colour_L = 1.4
@@ -57,7 +58,5 @@ gui {
       grad_colour = #555555
       grad_colour_L = 0.3
     }
-
-    
-    }
+  }
 }
