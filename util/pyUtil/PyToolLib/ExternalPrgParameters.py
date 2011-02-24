@@ -569,9 +569,6 @@ class Method_cctbx_refinement(Method_refinement):
       max_cycles=RunPrgObject.params.snum.refinement.max_cycles,
       max_peaks=RunPrgObject.params.snum.refinement.max_peaks,
       verbose=verbose)
-#      max_peaks=OV.SetMaxPeaks(),
-#      verbose=verbose)
-    #olx.Kill('$Q')
     try:
       cctbx.run()
       self.flack = cctbx.flack
@@ -618,7 +615,6 @@ class Method_cctbx_ChargeFlip(Method_solution):
       olx.xf_EndUpdate()
       olx.Compaq('-a')
       olx.Move()
-      olx.Fix("occu $Q")
     finally:
       olx.Freeze(False)
     #olx.VSS(True)
