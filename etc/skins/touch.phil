@@ -1,262 +1,157 @@
 #############################################################
-# The GUI section. This part is currently under development #
-# Expect frequent changes!                                  #
+# GUI extension for Full HD Touch Screens                   #
 #############################################################
 
 gui {
 
   skin {
     materials_have_been_set = False
-      .type = bool
     name = default
-      .type = str
     extension = None
-      .type = str
     logo_name= None
-      .type = path
     size_factor = 1.5
-      .type = float
     clearcolor = 8404992
-      .type = int
     icon_size = 45
-      .type = int
     }
 
   html {
     font_size = 5
-    font_colour = #ff0000
-    input_height = 30 
+    font_size_large = 6
+    input_height = 30
     checkbox_height = 30
     checkbox_width = 30
     combo_width_2 = 60
-    combo_height = 40
+    combo_height = 30
+    spin_height = 30
     icon_size = 40
   }
 
   timage{
     snumtitle{
       height = 28
-        .type = int
       font_size = 22
-        .type = int
       top = 1
-        .type = int
       left = 5
-        .type = int
       filefullinfo_size = 10
-        .type = int
       sginfo_scale = 1.0
-        .type = float
       corner_rad = 3
-        .type = int
       rounded = 1100
-        .type = str
     }
 
     tab{
       height = 30
-        .type = int
       corner_rad = 3
-        .type = int
       grad_step = 0.3
-        .type = float
       font_size = 16
-        .type = int
       top = 3
-        .type = int
       left = 8
-        .type = int
       rounded = 1100
-        .type = str
       arrows = "bar:top:3"
-        .type = str
       off_L = 0.9
-        .type = float
       shadow = False
-        .type = bool
     }
 
     cbtn{
       height = 30
-        .type = int
       corner_rad = 2
-        .type = int
       font_size = 14
-        .type = int
       top = 3
-        .type = int
       left = 3
-        .type = int
       rounded = 0101
-        .type = str
-      arrows = "bar:right:40,arrow_right:onup:offdown:hoverdown:hoveronup,buttonmark:60"
-        .type = str
+      arrows = "bar:right:20,arrow_right:onup:offdown:hoverdown:hoveronup,buttonmark:40"
       off_L = 1.6
-        .type = float
     }
 
     button{
       height = 25
-        .type = int
       corner_rad = 3
-        .type = int
       rounded = 1111
-        .type = str
       font_size = 12
-        .type = int
       halign = left
-        .type = str
       top = 1
-        .type = int
       left = 4
-        .type = int
       arrows = buttonmark:11
-        .type = str
     }
 
     tinybutton{
-      height = 25
-        .type = int
-      width = 25
-        .type = int
+      height = 20
+      width = 60
       corner_rad = 3
-        .type = int
       rounded = 1111
-        .type = str
       font_size = 14
-        .type = int
       halign = middle
-        .type = str
       top = 2
-        .type = int
       left = 3
-        .type = int
       arrows = None
-        .type = str
     }
-    
-    
+
     h1{
       height = 30
-        .type = int
       corner_rad = 3
-        .type = int
       rounded = 1111
-        .type = str
       font_size = 14
-        .type = int
       top = 2
-        .type = int
       left = 4
-        .type = int
       arrows = "bar:left:5,char:on~:off+:hover+:hoveron~"
-        .type = str
       off_L = 1.2
-        .type = float
       shadow = True
-        .type = bool
     }
 
     h3{
       height = 25
-        .type = int
-
       corner_rad = 3
-        .type = int
       rounded = 1111
-        .type = str
-      font_size = None
-        .type = int
+      font_size = 13
       top = 1
-        .type = int
       left = 4
-        .type = int
       arrows = "bar:left:4,char:on~:off+"
-        .type = str
       off_L = 1.0
-        .type = float
       shadow = False
-        .type = bool
     }
   }
   lines_of_cmd_text = 10
-    .type = str
   button_colouring = #ababab
-    .type = colour
   button_writing = #00ff00
-    .type = colour
   button_font_name = Vera
-    .type = str
   tab_colour = #ff0000
-    .type = colour
   tab_font_colour = #ff0000
-    .type = colour
   infobox_text = '2053;2143326838;2143979345'
-    .type = str
   infobox_plane = '2053;2136422952;2137144606'
-    .type = str
   console_font = #olex2.fnt:frb_16
-    .type = str
   labels_font = #olex2.fnt:frb_20
-    .type = str
   htmlpanelwidth = 600
-    .type = int
   htmlpanelwidth_margin_adjust = 22
-    .type = int
   grad_top_left = #1f3257
-    .type = colour
   grad_top_right = #1f3257
-    .type = colour
   grad_bottom_left = #ffffff
-    .type = colour
   grad_bottom_right = #ffffff
-    .type = colour
   use_fader=False
-    .type = bool
   shelx_restraints = None
-    .type = strings
   shelx_constraints = None
-    .type = strings
   archive_last = None
-    .type = strings
 
   help_box{
     width = 450
-      .type = int
-      .help = Width of the help popup boxes
     height_factor = 120
-      .type = int
-      .help = A factor that helps estimating the height of the help box by the total number of characters in the help text
     height_constant = 100
-      .type = int
-      .help = Number of pixels to add to the height of a help box
     height_max = 500
-      .type = int
-      .help = Maximum height of the help popup boxes
 
     }
-    
+
   buttons{
     small_buttons{
-      width = 56
-        .type = int
+      width = 50
     }
-  }  
+  }
 
   report{
     width = 800
-      .type = int
     title{
       height = 50
-        .type = int
       colour = #326496
-        .type = colour
       font_name = Georgia Bold
-        .type = str
       font_size = 35
-        .type = int
       font_colour = #ffffff
-        .type = colour
     }
   }
 

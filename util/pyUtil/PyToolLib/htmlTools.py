@@ -438,7 +438,7 @@ def make_help_href(name, popout, image='normal'):
   help = '''
   $spy.MakeHoverButton(btn-info@%s,spy.make_help_box -name='%s' -popout='%s')
   ''' %(name, name, popout)
-  
+
   return help
 
 def make_input_text_box(d):
@@ -1106,13 +1106,13 @@ def _check_modes_and_states(name):
 def MakeHoverButton(name, cmds, onoff = "off", btn_bg='table_firstcol_colour'):
   hover_buttons = OV.GetParam('olex2.hover_buttons')
   on = _check_modes_and_states(name)
-      
+
   if on:
     txt = MakeHoverButtonOn(name, cmds, btn_bg)
   else:
     txt = MakeHoverButtonOff(name, cmds, btn_bg)
   return txt
-  
+
 OV.registerFunction(MakeHoverButton)
 
 def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
@@ -1142,7 +1142,7 @@ def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
   off = "off"
   hover = "hover"
   down = "off"
-  
+
   if OV.GetParam('gui.image_highlight') == name:
     on = "highlight"
     off = "highlight"
@@ -1191,7 +1191,7 @@ def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
   off = "off"
   hover = "hoveron"
   down = "on"
-  
+
   if OV.GetParam('gui.image_highlight') == name:
     on = "highlight"
     off = "highlight"
@@ -1203,7 +1203,7 @@ def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
   d.setdefault('off', off)
   d.setdefault('down', down)
   d.setdefault('hover', hover)
-  
+
   txt = '''
 <input
   name=IMG_%(nameupper)s
@@ -1405,7 +1405,7 @@ OV.registerFunction(getGenericSwitchNameTranslation)
 def makeFormulaForsNumInfo():
   global formula
   global formula_string
-  
+
   if olx.FileName() == "Periodic Table":
     return "Periodic Table"
   else:
@@ -1420,8 +1420,9 @@ def makeFormulaForsNumInfo():
         colour = OV.GetParam('gui.red').hexadecimal
     if not colour:
       colour = OV.GetParam('gui.html.font_colour')
+    font_size = OV.GetParam('gui.html.font_size_large')
     html_formula = olx.xf_GetFormula('html',1)
-    formula_string = "<font size='4' color=%s>%s</font>" %(colour, html_formula)
+    formula_string = "<font size=%s color=%s>%s</font>" %(font_size, colour, html_formula)
     return formula_string
 OV.registerFunction(makeFormulaForsNumInfo)
 
