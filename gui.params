@@ -71,6 +71,8 @@ gui {
       .type = str
     font_size = 2
       .type = int
+    font_size_large = 3
+      .type = int
     highlight_colour = #ff8800
       .type = colour
 
@@ -87,6 +89,8 @@ gui {
       .type = int
       .help = Width of a combobox that is to take 2 digits and a decimal point.
     combo_height = 18
+      .type = int
+    spin_height = 18
       .type = int
     icon_size = 25
       .type = int
@@ -308,8 +312,8 @@ gui {
       arrows = None
         .type = str
     }
-    
-    
+
+
     h1{
       base_colour = #aaaaaa
         .type = colour
@@ -439,13 +443,13 @@ gui {
       .help = Maximum height of the help popup boxes
 
     }
-    
+
   buttons{
     small_buttons{
       width = 56
         .type = int
     }
-  }  
+  }
 
   report{
     width = 800
@@ -478,7 +482,7 @@ gui {
           .type = str
       }
     }
-  
+
     start_new_structure{
       analyse_diffraction_data{
         label = analyse_diffraction_data
@@ -493,7 +497,7 @@ gui {
           .type = str
       }
     }
-  }  
-  
+  }
+
 }
 
