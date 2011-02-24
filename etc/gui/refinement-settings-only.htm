@@ -1,5 +1,3 @@
-<font color=$spy.GetParam(gui.html.font_colour) size=$spy.GetParam(gui.html.font_size) face=$spy.GetParam(gui.html.font_name)>
-
 <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
 
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_PROGRAM'>
@@ -18,11 +16,9 @@
     <b>Refinement Method</b>
   </td>
   <td VALIGN='center' colspan='2' align="right">
-    <font size='2'>
 
 <!-- #include method gui\snippets\snippet-method.htm;scope=snum;prg_type=refinement;1; -->
 
-    </font>
   </td>
 </tr>
 
@@ -32,9 +28,7 @@
     <b>%Reflection File%</b>
   </td>
   <td width='50%' VALIGN='center' ALIGN='right' colspan='2'>
-    <font size='2'>
 <!-- #include tool-footer gui\snippets\snippet-reflection-file.htm;1; -->
-  </font>
 </td>
 </tr>
 
@@ -44,7 +38,6 @@
     <b>Maximum Refinement Iterations</b>
   </td>
   <td VALIGN='center' ALIGN='right' colspan=1>
-    <font size='2'>
       <input
         type='spin'
         width="50"
@@ -54,7 +47,6 @@
         value='$spy.GetParam(snum.refinement.max_cycles)'
         onchange="spy.SetMaxCycles(GetValue(SET_SNUM_REFINEMENT_MAX_CYCLES))"
       >
-    </font>
   </td>
 </tr>
 
@@ -64,7 +56,6 @@
     <b>Number of Residual Peaks</b>
   </td>
   <td VALIGN='right' ALIGN='right' colspan=1>
-    <font size='2'>
       <input
         type="spin"
         name="SET_SNUM_REFINEMENT_MAX_PEAKS"
@@ -75,7 +66,6 @@
         value='$eval(abs\(spy.GetParam(snum.refinement.max_peaks)))'
         onchange='spy.SetMaxPeaks(GetValue(SET_SNUM_REFINEMENT_MAX_PEAKS))'
       >
-    </font>
   </td>
 </tr>
 
@@ -101,7 +91,6 @@ target = "Do automatic tidying once - tick the box to do it after every refineme
 $spy.MakeHoverButton(btn-info@#autotidy,spy.make_help_box -name='autotidy' -popout='False')
 </td>
 <td VALIGN='center' ALIGN='right'  colspan=1>
-  <font size='2'>
   <input
     type='checkbox'
     fgcolor="$spy.GetParam(gui.html.font_colour)"
@@ -114,7 +103,6 @@ $spy.MakeHoverButton(btn-info@#autotidy,spy.make_help_box -name='autotidy' -popo
     onuncheck='spy.SetParam(snum.refinement.auto.tidy,False)'
     value=''
   >
-  </font>
 </td>
 </tr>
 
@@ -156,7 +144,6 @@ $spy.MakeHoverButton(btn-info@#refinement-masks,spy.make_help_box -name='refinem
     
   </td>
   <td VALIGN="center" ALIGN="right"  colspan=1>
-    <font size="2">
       <input
         type="checkbox"
         width="$spy.GetParam(gui.html.checkbox_width)"
@@ -173,7 +160,6 @@ spy.SetParam(snum.masks.original_hklsrc,None)>>
 UpdateHtml"
         value=""
       >
-    </font>
   </td>
 </tr>
 
@@ -185,7 +171,6 @@ UpdateHtml"
     </b>
   </td>
   <td VALIGN="center" ALIGN="right"  colspan=1>
-    <font size="2">
       <input
         type="checkbox"
         width="$spy.GetParam(gui.html.checkbox_width)"
@@ -201,7 +186,6 @@ UpdateHtml"
         onuncheck="spy.SetParam(snum.refinement.recompute_mask_before_refinement,false)"
         value=""
       >
-    </font>
   </td>
 </tr>
 
