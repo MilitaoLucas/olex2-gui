@@ -27,6 +27,7 @@ def round_image(image,cache={},radius=100,fill=255,pos=ROUNDED_POS,
   image.paste(Image.new('RGB',image.size,back_colour),(0,0),
               ImageChops.invert(mask))
   image.putalpha(mask)
+  image = image.convert('RGB')
   return image
 
 def create_corner(radius=100,fill=255,factor=2):

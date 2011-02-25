@@ -113,7 +113,7 @@ class ButtonMaker(ImageTools):
           width = (width/number-9)
           if vline:
             vline.setdefault('position', width - 20)
-            OV.SetParam('olex2.main_toolbar_vline_position', int(width - 20))
+            OV.SetParam('olex2.main_toolbar_vline_position', int(width - OV.GetParam('gui.timage.cbtn.vline')))
       except:
         width = int(width)
       size = (int(width), int(height))
@@ -2161,13 +2161,13 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
   def make_cbtn_items(self, font_name = 'Vera'):
     new_style = True
-    cut = OV.GetParam('olex2.main_toolbar_vline_position') + 3
     if new_style:
       buttons = ['Solve', 'Refine', 'Report']
       states = ['on', 'off', 'inactive', 'highlight', 'hover', 'hoveron']
       for state in states:
         for item in buttons:
           width = int(round(self.available_width/3,0)) - 5
+          cut = width - OV.GetParam('gui.timage.cbtn.vline')
           if cut > width:
             cut = width - 1
             print ("WARNING: HtmlPanelWidth is smaller than intended. Some GUI images may not display correctly")
@@ -2760,7 +2760,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     elif item_type =='cbtn':
       underground = OV.GetParam('gui.html.bg_colour').rgb
-      OV.SetParam('olex2.main_toolbar_vline_position', width - 25 - 10)
       if state == 'on':
         font_colour = self.highlight_colour
       else:
@@ -2769,9 +2768,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       border_weight = 1
       border_fill = IT.adjust_colour(grad_colour, luminosity = 0.8)
       arrow_scale = 0.7
-
       bg_colour = '#229922'
-
 
     self.font_colour = font_colour
 
@@ -2782,6 +2779,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       height = height
 
     size = (int(width), int(height))
+    bg_colour = underground #hp
     image = Image.new('RGBA', size, bg_colour)
     draw = ImageDraw.Draw(image)
 
@@ -2849,7 +2847,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       weight = int(w[1])
       bg = w[2]
       image = self.add_whitespace(image, side, weight, bg)
-
     filename = item
     return image
 
@@ -2889,7 +2886,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       fill = self.adjust_colour(OV.GetParam('gui.html.highlight_colour').rgb, luminosity=on_L)
     elif state == "hover":
 #      fill = self.adjust_colour(OV.GetParam('gui.html.highlight_colour').rgb, luminosity=on_L)
-      fill = self.adjust_colour(OV.GetParam('gui.html.base_colour').rgb, luminosity=1.0)
+      fill = self.adjust_colour(OV.GetParam('gui.html.base_colour').rgb, luminosity=1.5)
     elif state == "hoveron":
       fill = self.adjust_colour(OV.GetParam('gui.html.highlight_colour').rgb, luminosity=on_L)
     else:
@@ -2917,9 +2914,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         weight = int(arrows.split('bar:')[1].split(',')[0].split(':')[1])
       except:
         weight = 2
-      weight = int(round(weight * self.size_factor,0))
+      #weight = int(round(weight * self.size_factor,0))
       if side == 'right':
         sidefill = '#ffffff'
+        sidefill = fill
       else:
         sidefill = fill
       image = self.add_whitespace(image=image, side=side, weight=weight, colour = sidefill, overwrite=True)
@@ -3004,7 +3002,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         for j in xrange(4):
           x = (w - margin) + j * 2
           draw.point((x, y), fill)
-
     return image
 
   def drawFileFullInfo(self, draw, colour='#ff0000', right_margin=0, height=10, font_name="Verdana", font_size=8, left_start = 40):
