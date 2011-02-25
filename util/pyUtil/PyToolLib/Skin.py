@@ -69,6 +69,7 @@ OV.registerMacro(Skin_instance.run_skin, 'function-The function to call')
 
 
 def change_skin(skin_name=None, force=False):
+
 	gui_phil_path = "%s/gui.phil" %(OV.DataDir())
 	gui_phil_template_path = "%s/gui_template.phil" %(OV.DataDir())
 
@@ -80,13 +81,13 @@ def change_skin(skin_name=None, force=False):
 	if not skin_name:
 		skin_extension = None
 	else:
+		force = True
 		olx.gui_phil_handler.reset_scope('gui')
 		if len(skin_name.split("_")) > 1:
 			skin_extension = skin_name.split("_")[1]
 			skin_name = skin_name.split("_")[0]
 		else: skin_extension = skin_name
 
-	force = True
 	gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_name)
 	if os.path.isfile(gui_skin_phil_path):
 		gui_skin_phil_file = open(gui_skin_phil_path, 'r')

@@ -6,9 +6,9 @@
     <b>Auto-<a href='sel atoms where xatom.peak<$spy.GetParam(snum.refinement.auto.pruneQ)&&xatom.peak>0>>kill sel'>Prune Peaks</a> smaller than</b>
   </td>
   <td ALIGN='right' colspan=1>
-    <font size='2'>
       <input
         type='combo'
+        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         width="$spy.GetParam(gui.html.combo_width_2)"
         height="17"
         name='SET_SNUM_REFINEMENT_AUTO_PRUNEQ',
@@ -16,7 +16,6 @@
         value='$spy.GetParam(snum.refinement.auto.pruneQ)'
         onchange='spy.SetParam(snum.refinement.auto.pruneQ,GetValue(SET_SNUM_REFINEMENT_AUTO_PRUNEQ))'
       >
-    </font>
   </td>
 </tr>
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_ASSIGN_Q'>
@@ -25,9 +24,9 @@
     <b>Auto-<a href='sel atoms where xatom.peak>$spy.GetParam(snum.refinement.auto.assignQ)>>name sel C>>sel -a>>name sel 1 -c'>Assign as C</a> Peaks > </b>
   </td>
   <td ALIGN='right'  colspan=1>
-    <font size='2'>
       <input
         type='combo'
+        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         width="$spy.GetParam(gui.html.combo_width_2)"
         height="17"
         name='SET_SNUM_REFINEMENT_AUTO_ASSIGNQ'
@@ -35,7 +34,6 @@
         value='$spy.GetParam(snum.refinement.auto.assignQ)'
         onchange='spy.SetParam(snum.refinement.auto.assignQ,GetValue(SET_SNUM_REFINEMENT_AUTO_ASSIGNQ))'
       >
-    </font>
   </td>
 </tr>
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_PRUNE_U'>
@@ -44,9 +42,9 @@
     <b>Auto-<a href='sel atoms where xatom.uiso>$spy.GetParam(snum.refinement.auto.pruneU)>>kill sel'>Prune Atoms</a> where U<sub>eq</sub> > </b>
   </td>
   <td ALIGN='right'  colspan=1>
-    <font size='2'>
       <input
         type='combo',
+        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         width="$spy.GetParam(gui.html.combo_width_2)"
         height="17"
         name='SET_SNUM_REFINEMENT_AUTO_PRUNEU',
@@ -54,7 +52,6 @@
         value='$spy.GetParam(snum.refinement.auto.pruneU)',
         onchange='spy.SetParam(snum.refinement.auto.pruneU,GetValue(SET_SNUM_REFINEMENT_AUTO_PRUNEU))'
       >
-    </font>
   </td>
 </tr>
 <tr VALIGN='center' ALIGN='left' NAME='ASSEMBLE_STRUCTURE'>
@@ -63,7 +60,6 @@
     <b>Auto <a href="compaq -a">Assemble</a> Structure</b>
   </td>
   <td ALIGN='right' colspan=1>
-    <font size='2'>
       <input
         type='checkbox'
         width="$spy.GetParam(gui.html.checkbox_width)"
@@ -76,7 +72,6 @@
         onuncheck='spy.SetParam(snum.refinement.auto.assemble,false)'
         value=''
       >&nbsp;
-    </font>
   </td>
 </tr>
 
@@ -86,7 +81,6 @@
     <b>Auto <a href="inv -f">Invert</a> Structure</b>
   </td>
   <td ALIGN='right' colspan=1>
-    <font size='2'>
       <input
         type='checkbox'
         width="$spy.GetParam(gui.html.checkbox_width)"
@@ -99,7 +93,6 @@
         onuncheck='spy.SetParam(snum.refinement.auto.invert,false)'
         value=''
       >&nbsp;
-    </font>
   </td>
 </tr>
 
