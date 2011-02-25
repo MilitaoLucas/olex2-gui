@@ -144,11 +144,11 @@ class ButtonMaker(ImageTools):
             self.add_continue_triangles(draw, width, height, style=('single', 'down', font_colour))
         if arrow:
           if state == "off":
-            self.create_arrows(draw, height, direction="down", h_space=8, v_space=8, colour=font_colour, type='simple')
+            self.create_arrows(image, draw, height, direction="down", h_space=8, v_space=8, colour=font_colour, type='simple')
           elif state == "on":
-            self.create_arrows(draw, height, direction="up", h_space=8, v_space=8, colour=font_colour, type='simple')
+            self.create_arrows(image, draw, height, direction="up", h_space=8, v_space=8, colour=font_colour, type='simple')
           elif state == "inactive":
-            self.create_arrows(draw, height, direction="down", h_space=8, v_space=8, colour=font_colour, type='simple')
+            self.create_arrows(image, draw, height, direction="down", h_space=8, v_space=8, colour=font_colour, type='simple')
         if vline:
           if state == "on" or state == "off":
             if grad:
@@ -1254,7 +1254,16 @@ class timage(ImageTools):
     width = int(round(width * self.size_factor,0))
     self.produce_buttons(button_names, crop, cut, max_width,self.sf,"_small",width=width)
 
-    ## THREEE buttons in the HTMLpanelWIDTH
+    ## TWO buttons in the HTMLpanelWIDTH
+    cut = 0*sf, 178*sf, 91*sf, 195*sf
+    max_width = cut[2] - cut[0]
+    crop =  im.crop(cut)
+    button_names = self.image_items_d.get("TWO BUTTONS PER ROW", button_names)
+    width = int(available_width/2) - 15
+    self.produce_buttons(button_names, crop, cut, max_width,self.sfs,"",width=width)
+
+
+    ## THREE buttons in the HTMLpanelWIDTH
     cut = 0*sf, 178*sf, 91*sf, 195*sf
     max_width = cut[2] - cut[0]
     crop =  im.crop(cut)
@@ -1284,7 +1293,8 @@ class timage(ImageTools):
       IM =  Image.new('RGBA', crop.size, OV.GetParam('gui.html.table_firstcol_colour').rgb)
       IM.paste(crop_colouriszed, (0,0), crop)
       name = "info.png"
-      IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
+      info_size_scale = OV.GetParam('gui.timage.info_size_scale')
+      IM = self.resize_image(IM, (int((cut[2]-cut[0])/info_size_scale), int((cut[3]-cut[1])/info_size_scale)))
       draw = ImageDraw.Draw(IM)
       #txt = IT.get_unicode_characters('info')
       #txt = "i"
@@ -1475,7 +1485,6 @@ class timage(ImageTools):
     for state in states:
       if state == "on":
         colour = self.adjust_colour(self.params.html.highlight_colour.rgb,luminosity=1.3)
-        colour = '#ff0000'
       elif state == "off":
         #colour = self.adjust_colour(self.params.html.base_colour.rgb,luminosity=1.9)
         colour = self.params.button_colouring.rgb
@@ -2556,10 +2565,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     if state == "off":
       fill=self.adjust_colour("bg", luminosity=0.8)
-      self.create_arrows(draw, height, direction="right", colour=fill, type='simple')
+      self.create_arrows(image, draw, height, direction="right", colour=fill, type='simple')
     else:
       fill = self.adjust_colour("highlight",  luminosity = 1.1)
-      self.create_arrows(draw, height, direction="up", colour=fill, type='simple')
+      self.create_arrows(image, draw, height, direction="up", colour=fill, type='simple')
 
     image = self.add_whitespace(image=image, side='bottom', weight=1, colour = self.adjust_colour("bg", luminosity = 0.9))
     filename = item
@@ -2632,11 +2641,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     if state == "off":
       fill=self.adjust_colour("bg", luminosity=0.6)
-      self.create_arrows(draw, height, direction="right", colour=fill, type='simple')
+      self.create_arrows(image, draw, height, direction="right", colour=fill, type='simple')
 
     else:
       fill = self.adjust_colour("highlight",  luminosity = 1.0)
-      self.create_arrows(draw, height, direction="up", colour=fill, type='simple')
+      self.create_arrows(image, draw, height, direction="up", colour=fill, type='simple')
 
     if self.advertise_new:
       self.draw_advertise_new(draw, image)
@@ -2824,7 +2833,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       on_L = OV.GetParam('gui.timage.%s.on_L' %item_type)
       if on_L is None:
         on_L = 1.0
-      image = self.make_arrows(state, width, arrows, image, height, base_colour, off_L, on_L, arrow_scale)
+      hover_L = OV.GetParam('gui.timage.%s.hover_L' %item_type)
+      if hover_L is None:
+        hover_L = 1.0
+      image = self.make_arrows(state, width, arrows, image, height, base_colour, off_L, on_L, hover_L, arrow_scale)
 
     if border:
       image = self.make_timage_border(image, fill = border_fill)
@@ -2878,7 +2890,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     return image
 
 
-  def make_arrows(self, state, width, arrows, image, height, base_colour, off_L, on_L, scale=1.0):
+  def make_arrows(self, state, width, arrows, image, height, base_colour, off_L, on_L, hover_L, scale=1.0):
     draw = None
     if state == "off":
       fill = self.adjust_colour(base_colour, luminosity=off_L)
@@ -2886,7 +2898,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       fill = self.adjust_colour(OV.GetParam('gui.html.highlight_colour').rgb, luminosity=on_L)
     elif state == "hover":
 #      fill = self.adjust_colour(OV.GetParam('gui.html.highlight_colour').rgb, luminosity=on_L)
-      fill = self.adjust_colour(OV.GetParam('gui.html.base_colour').rgb, luminosity=1.5)
+      fill = self.adjust_colour(OV.GetParam('gui.html.base_colour').rgb, luminosity=hover_L)
     elif state == "hoveron":
       fill = self.adjust_colour(OV.GetParam('gui.html.highlight_colour').rgb, luminosity=on_L)
     else:
@@ -2951,7 +2963,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         else:
           fill = IT.adjust_colour(fill,luminosity = 0.8)
 
-      self.create_arrows(draw, height, direction=direction, colour=fill, type='simple', align = align, width=width, scale = scale)
+      self.create_arrows(image, draw, height, direction=direction, colour=fill, type='dots', align = align, width=width, scale = scale)
 
     if 'char' in arrows:
       draw = ImageDraw.Draw(image)
@@ -2964,7 +2976,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         side = '0'
         char = "#"
 
-      self.create_arrows(draw,
+      self.create_arrows(image,
+                         draw,
                          height,
                          direction='down',
                          colour=fill,

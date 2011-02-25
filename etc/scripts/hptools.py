@@ -13,12 +13,13 @@ IT = ImageTools()
 import olex_core
 
 import OlexVFS
+print "Hello"
 
 
 def bulk_copy_files (mask="hklres", path_from=r"Z:", path_to=r"C:\DS\Data",overwrite=True,lowercase=True):
   import FileSystem as FS
-  
-  
+  print "Hello"
+
   path_from = OV.standardizePath(path_from)
   path_to = OV.standardizePath(path_to)
   folders = []
@@ -31,20 +32,20 @@ def bulk_copy_files (mask="hklres", path_from=r"Z:", path_to=r"C:\DS\Data",overw
         folders.append(OV.standardizePath("%s/%s/%s" %(path_from, item, tem)))
     except:
       continue
-      
-  
-    
-  
+
+
+
+
   #for item in items:
     ##folders.append(OV.standardizePath(item.path._str))
     #path = item.path._str
     #if os.path.isdir(path):
       #folders.append(item.path._str)
-   
+
     ##itemPath = '/'.join([path_from,item])
     ##if os.path.isdir(itemPath):
     ##folders.append(OV.standardizePath(itemPath))
-      
+
   masks = []
   if "*" in mask:
     masks.append(mask)
@@ -57,7 +58,7 @@ def bulk_copy_files (mask="hklres", path_from=r"Z:", path_to=r"C:\DS\Data",overw
       masks.append("*.res")
     if "lst" in mask:
       masks.append("*.lst")
-      
+
   for folder in folders:
     print repr(folder)
     for mask in masks:
@@ -70,8 +71,8 @@ def bulk_copy_files (mask="hklres", path_from=r"Z:", path_to=r"C:\DS\Data",overw
           FS.Node("%s" %file.lower()).copy_file((file.replace(path_from,path_to)),overwrite=overwrite)
         except:
           pass
-    
-  
+
+
 OV.registerFunction(bulk_copy_files)
 
 class HealthOfStructure():
@@ -83,7 +84,7 @@ class HealthOfStructure():
   def run_HealthOfStructure(self):
     self.hkl_stats = olex_core.GetHklStat()
     self.make_HOS_html()
-    
+
   def make_HOS_html(self):
     txt = "<tr><table width='100%%'><tr>"
     l = ['MeanIOverSigma','Rint']
@@ -102,11 +103,11 @@ class HealthOfStructure():
     %s: <b>%s</b>
   </font></td>
 '''%(bg_colour, 100/len(l), display, value)
-      
+
     txt += "</tr></table></tr>"
     txt = txt.decode('utf-8')
     OV.write_to_olex("hos.htm" , txt)
-    
+
   def get_bg_colour(self, item):
     op = OV.GetParam('diagnostics.hkl.%s.op' %item)
     val = self.hkl_stats[item]
@@ -118,7 +119,7 @@ class HealthOfStructure():
       elif op == 'smaller':
         if val <= OV.GetParam('diagnostics.hkl.%s.grade%s' %(item, i)):
           break
-      
+
     if i == 1:
       retVal = '#3dbe10'
     elif i == 2:
@@ -127,9 +128,8 @@ class HealthOfStructure():
       retVal = '#d6a113'
     elif i == 4:
       retVal = '#d62613'
-      
+
     return retVal
-    
+
 HealthOfStructure_instance = HealthOfStructure()
 OV.registerFunction(HealthOfStructure_instance.run_HealthOfStructure)
-  
