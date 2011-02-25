@@ -131,6 +131,8 @@ gui {
       .type = float
     font_name = Vera
       .type = str
+    adval = 13
+      .type = int
 
     snumtitle{
       base_colour = None
@@ -243,6 +245,9 @@ gui {
         .type = str
       off_L = 1.6
         .type = float
+      vline = 18
+        .type = int
+  
     }
 
     button{
