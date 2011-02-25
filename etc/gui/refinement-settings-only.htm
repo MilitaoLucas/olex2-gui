@@ -58,11 +58,11 @@
   <td VALIGN='right' ALIGN='right' colspan=1>
       <input
         type="spin"
+        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name="SET_SNUM_REFINEMENT_MAX_PEAKS"
         width="50"
         height="$spy.GetParam(gui.html.spin_height)"
         max='1000'
-        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         value='$eval(abs\(spy.GetParam(snum.refinement.max_peaks)))'
         onchange='spy.SetMaxPeaks(GetValue(SET_SNUM_REFINEMENT_MAX_PEAKS))'
       >
@@ -141,7 +141,7 @@ $spy.MakeHoverButton(btn-info@#autotidy,spy.make_help_box -name='autotidy' -popo
       Use solvent mask
     </b>
 $spy.MakeHoverButton(btn-info@#refinement-masks,spy.make_help_box -name='refinement-masks' -popout='False')
-    
+
   </td>
   <td VALIGN="center" ALIGN="right"  colspan=1>
       <input

@@ -28,6 +28,7 @@ gui {
 
   timage{
     adval = 42
+    info_size_scale = 2
     snumtitle{
       height = 28
       font_size = 22
@@ -59,8 +60,10 @@ gui {
       top = 3
       left = 3
       rounded = 0101
-      arrows = "bar:right:42,arrow_right:onup:offdown:hoverdown:hoveronup,buttonmark:52"
-      vline = 42
+      arrows = "bar:right:44,arrow_right:onup:offdown:hoverdown:hoveronup,buttonmark:54"
+      vline = 44
+      dot_size = 8
+      dot_pad = 8
       off_L = 1.6
     }
 
@@ -94,7 +97,7 @@ gui {
       font_size = 14
       top = 2
       left = 4
-      arrows = "bar:left:5,char:on~:off+:hover+:hoveron~"
+      arrows = "bar:left:10,char:on~:off+:hover+:hoveron~"
       shadow = True
     }
 
@@ -119,7 +122,7 @@ gui {
   infobox_plane = '2053;2136422952;2137144606'
   console_font = #olex2.fnt:frb_16
   labels_font = #olex2.fnt:frb_20
-  htmlpanelwidth = 600
+  htmlpanelwidth = 620
   htmlpanelwidth_margin_adjust = 22
   grad_top_left = #1f3257
   grad_top_right = #1f3257
