@@ -813,9 +813,11 @@ class ImageTools(FontInstances):
 
   def create_arrows(self, draw, height, direction, colour, type='simple', h_space=4, v_space=4, offset_y = 0, char_pos=(0,0), char_char="+", width=10, align='left', scale = 1.0):
     if align == 'right':
-      adval = int(round(13 * scale,0))
+      adval_parameter = OV.GetParam('gui.timage.adval')
+      adval = int(round(adval_parameter * scale,0))
       char_pos = (width - adval, char_pos[1])
       h_space = width - h_space - adval
+      #h_space = width - height
     arrow_height = height - (2*v_space)
     arrow_width = arrow_height
 
