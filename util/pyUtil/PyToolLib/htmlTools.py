@@ -1419,7 +1419,7 @@ def makeFormulaForsNumInfo():
       if item in txt_formula:
         colour = OV.GetParam('gui.red').hexadecimal
     if not colour:
-      colour = OV.GetParam('gui.html.font_colour')
+      colour = OV.GetParam('gui.html.font_colour').hexadecimal
     font_size = OV.GetParam('gui.html.font_size_large')
     html_formula = olx.xf_GetFormula('html',1)
     formula_string = "<font size=%s color=%s>%s</font>" %(font_size, colour, html_formula)

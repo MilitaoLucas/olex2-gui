@@ -604,7 +604,7 @@ def MakeElementButtonsFromFormula():
     'Table', {
       'txt':'...',
       'bgcolour':'#efefef',
-      'width':int(icon_size*1.2),
+      'width':int(icon_size*1.0),
       'image_prefix':'element',
       'top_left':(0,-1),
       'grad':False,
