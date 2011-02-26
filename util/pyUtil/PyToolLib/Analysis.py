@@ -1036,7 +1036,7 @@ class Graph(ImageTools):
     txt = self.metadata.get("x_label", "x Axis Label")
     txt = self.get_unicode_characters(txt)
     wX, wY = self.draw.textsize(txt, font=self.font_small)
-    x = self.boxX - wX - self.bSides - self.imX * 0.002
+    x = self.graph_right - wX - self.bSides
     y = self.boxY  + self.imY * 0.01
     self.draw.text((x, y), "%s" %txt, font=self.font_small, fill="#444444")
 
@@ -1324,7 +1324,7 @@ class Analysis(Graph):
     if filename is None:
       filename = '%s-%s.csv' %(self.filename,self.item)
     filefull = '%s/%s' %(self.filepath,filename)
-    f = open(filefull, 'w')
+    f = open(filefull, 'wb')
     for dataset in self.data.values():
       fieldnames = (dataset.metadata().get('x_label', 'x'),
                     dataset.metadata().get('y_label', 'y'))
@@ -1797,13 +1797,16 @@ class CumulativeIntensityDistribution(Analysis):
 
     key = self.draw_key(({'type': 'function',
                          'number': 1,
-                         'label': OV.TranslatePhrase('Centric')},
+                         #'label': OV.TranslatePhrase('Centric')},
+                         'label': 'Centric'},
                         {'type':'function',
                          'number': 2,
-                         'label': OV.TranslatePhrase('Acentric')},
+                         #'label': OV.TranslatePhrase('Acentric')},
+                         'label': 'Acentric'},
                         {'type': 'function',
                          'number': 3,
-                         'label': OV.TranslatePhrase('Twinned Acentric')}
+                         #'label': OV.TranslatePhrase('Twinned Acentric')}
+                         'label': 'Twinned Acentric'}
                         ))
     self.im.paste(key,
                   (int(self.graph_right-(key.size[0]+40)),
