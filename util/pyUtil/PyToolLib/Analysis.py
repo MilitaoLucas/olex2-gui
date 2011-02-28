@@ -2526,7 +2526,7 @@ class HealthOfStructure():
     hkl = OV.HKLSrc()
     if not os.path.exists(hkl):
       print "There is no reflection file associated with this structure"
-      txt = "<tr><table width='100%%'><tr bgcolor=%s align='center'>" %self.grade_4_colour
+      txt = "<tr><table width='100%%' cellspacing='2'><tr bgcolor=%s align='center'>" %self.grade_4_colour
       txt += "<td colspan='2'><font color=#ffffff>There is no reflection file</font><td>"
       txt += "</tr></table></tr>"
       txt = txt.decode('utf-8')

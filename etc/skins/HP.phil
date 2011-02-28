@@ -38,10 +38,19 @@ gui {
   }
   timage{
 
+    tab{
+      off_L = 1.6
+      on_L = 1.0
+      hover_L = 1.5
+    }  
+  
     cbtn{
       base_colour = #555555
       grad_colour = #777777
-      on_L = 0.5
+      font_colour_L = 1.4
+      off_L = 1.2
+      on_L = 1.1
+      hover_L = 1.1
       }
 
     h1{
@@ -50,6 +59,10 @@ gui {
       base_colour = #666666
       grad_colour = #666666
       grad_colour_L = 0.3
+      off_L = 1.3
+      on_L = 1.0
+      hover_L = 1.7
+
     }
 
     h3{
@@ -58,6 +71,9 @@ gui {
       base_colour = #555555
       grad_colour = #555555
       grad_colour_L = 0.3
+      off_L = 1.1
+      on_L = 1.0
+      hover_L = 1.7
     }
 
     button{

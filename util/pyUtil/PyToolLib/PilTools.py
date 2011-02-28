@@ -2366,6 +2366,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     iconIndex.setdefault("dot-arrow-down", (7, 2, {'colourise':self.params.green.rgb}))
     iconIndex.setdefault("dot-arrow-up", (7, 3, {'colourise':self.params.green.rgb}))
     iconIndex.setdefault("polyhedra", (6, 9))
+    
+    also_make_small_icons_l = ['open']
 
     for icon in iconIndex:
       states = ["on", "off", "hover", "", "hoveron", "highlight"]
@@ -2375,7 +2377,15 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         name = name.lower()
         OlexVFS.save_image_to_olex(image, name, 2)
       #image.save(r"%s\etc\$toolbar-%s.png" %(datadir, icon), "PNG")
-
+    
+      if icon in also_make_small_icons_l:
+        states = ["on", "off", "hover", "", "hoveron", "highlight"]
+        for state in states:
+          image = self.icon_items(iconIndex[icon], state, icon_size=OV.GetParam('gui.html.combo_height'))
+          name = r"toolbar_small-%s%s.png" %(icon,state)
+          name = name.lower()
+          OlexVFS.save_image_to_olex(image, name, 2)
+      
     height = 10
     width = 10
     bg_colour = self.adjust_colour(base_colour, luminosity = 1.6)
@@ -2734,7 +2744,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     elif item_type == "h3":
       width -= OV.GetParam('gui.html.table_firstcol_width')
-      underground = OV.GetParam('gui.html.table_bg_colour').rgb
+      underground = OV.GetParam('gui.html.table_firstcol_colour').rgb
 
     elif "tab" in item_type:
       underground = OV.GetParam('gui.html.bg_colour').rgb
@@ -2772,7 +2782,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       if state == 'on':
         font_colour = self.highlight_colour
       else:
-        font_colour = IT.adjust_colour(grad_colour, luminosity = 0.5)
+        font_colour = IT.adjust_colour(grad_colour, luminosity = OV.GetParam('gui.timage.font_colour_L'))
       border = True
       border_weight = 1
       border_fill = IT.adjust_colour(grad_colour, luminosity = 0.8)
@@ -2828,14 +2838,18 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     if arrows:
       off_L = OV.GetParam('gui.timage.%s.off_L' %item_type)
+
       if off_L is None:
         off_L = 1.0
       on_L = OV.GetParam('gui.timage.%s.on_L' %item_type)
+
       if on_L is None:
         on_L = 1.0
       hover_L = OV.GetParam('gui.timage.%s.hover_L' %item_type)
+
       if hover_L is None:
         hover_L = 1.0
+
       image = self.make_arrows(state, width, arrows, image, height, base_colour, off_L, on_L, hover_L, arrow_scale)
 
     if border:
@@ -3520,7 +3534,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     image.paste(content)
     return image
 
-  def icon_items(self, idx, state):
+  def icon_items(self, idx, state, icon_size=None):
     d = {}
     border = True
     colourise = False
@@ -3558,8 +3572,12 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     strip = int(width * 0.05)
     cut = (0, strip, width, width - strip)
     image = image.crop(cut)
-    icon_size = self.params.skin.icon_size
-    icon_size = OV.GetParam('gui.skin.icon_size')
+    if not icon_size:
+      icon_size = self.params.skin.icon_size
+      icon_size = OV.GetParam('gui.skin.icon_size')
+    else:
+      icon_size = icon_size + 2
+    
     image = image.resize(  (icon_size , int(icon_size*(width-2*strip)/width)  ), Image.ANTIALIAS)
     draw = ImageDraw.Draw(image)
 

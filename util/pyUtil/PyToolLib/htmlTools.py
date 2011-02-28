@@ -91,7 +91,7 @@ def makeHtmlInputBox(inputDictionary):
 
   dictionary = {
     'width':'55%%',
-    'height':'18',
+    'height':'$spy.GetParam(gui.html.input_height)',
     'onchange':'',
     'onleave':'',
     'items':'',
@@ -1100,6 +1100,20 @@ def _check_modes_and_states(name):
   if name in buttons:
     if OV.GetParam('olex2.mask_vis') == True:
       return True
+
+  buttons = ['btn-solve']
+  if name in buttons:
+    if OV.GetParam('olex2.solving') == True:
+      return True
+  buttons = ['btn-refine']
+  if name in buttons:
+    if OV.GetParam('olex2.refining') == True:
+      return True
+  buttons = ['btn-report']
+  if name in buttons:
+    if OV.GetParam('olex2.reporting') == True:
+      return True
+    
   return False
 
 

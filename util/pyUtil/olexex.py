@@ -897,13 +897,14 @@ def GetRInfo(txt=""):
         R1 = tree.active_node.R1
       else:
         R1 = 'n/a'
+    font_size = OV.GetParam('gui.html.font_size_large')
     try:
       R1 = float(R1)
       col = GetRcolour(R1)
       R1 = "%.2f" %(R1*100)
-      t = r"<td colspan='1' align='right' rowspan='2'><font size='4' color='%s'><b>%s%%</b></font></td>" %(col, R1)
+      t = r"<td colspan='1' align='right' rowspan='2'><font size='%s' color='%s'><b>%s%%</b></font></td>" %(font_size, col, R1)
     except:
-      t = "<td colspan='1' rowspan='2' align='right'><font size='4'><b>%s</b></font></td>" %R1
+      t = "<td colspan='1' rowspan='2' align='right'><font size='%s'><b>%s</b></font></td>" %(font_size, R1)
     finally:
       return t
 
@@ -963,6 +964,7 @@ def setMainToolbarTabButtons(btn, state=""):
         state = "on"
       #OV.CopyVFSFile("cbtn-%s2%s.png" %(item[0],state),"cbtn-%s2.png" %item[0])
       OV.SetImage("IMG_CBTN-%s2" %btn.upper(),"cbtn-%s2%s.png" %(item[0], state))
+      OV.SetImage("IMG_BTN-%s2" %btn.upper(),"btn-%s2%s.png" %(item[0], state))
       OV.SetVar('gui_MainToolbarTabButtonActive',btn)
     elif state != 'inactive' and not isCif:
       OV.CopyVFSFile("cbtn-%s2off.png" %item[0],"cbtn-%s2.png" %item[0])
