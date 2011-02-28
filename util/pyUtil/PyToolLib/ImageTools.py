@@ -900,6 +900,7 @@ class ImageTools(FontInstances):
       r = width - pad
 
       if direction == 'up':
+        fill = OV.GetParam('gui.html.highlight_colour').rgb
         i = 0
         top = b - pad
         left = l
@@ -907,18 +908,19 @@ class ImageTools(FontInstances):
           left = l + i * dot_size/2
           top = b - i * dot_size - dot_size
           xy = (int(left), int(top), left + dot_size, top + dot_size)
-          draw.ellipse(xy, fill = colour)
+          draw.ellipse(xy, fill = fill)
           i += 1
         j = i
         while top < height - pad - dot_size:
           left = l + j * dot_size/2
           top = b - i * dot_size - dot_size
           xy = (int(left), int(top), left + dot_size, top + dot_size)
-          draw.ellipse(xy, fill = colour)
+          draw.ellipse(xy, fill = fill)
           i -= 1
           j += 1
       elif direction == 'down':
-        fill = OV.GetParam('gui.html.highlight_colour').rgb
+        fill = colour
+
         i = 0
         top = t
         left = l
