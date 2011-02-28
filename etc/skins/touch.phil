@@ -11,11 +11,11 @@ gui {
     logo_name= None
     size_factor = 1.5
     clearcolor = 8404992
-    icon_size = 45
+    icon_size = 40
     }
 
   html {
-    font_size = 5
+    font_size = 4
     font_size_large = 6
     input_height = 30
     checkbox_height = 30
@@ -62,9 +62,8 @@ gui {
       rounded = 0101
       arrows = "bar:right:44,arrow_right:onup:offdown:hoverdown:hoveronup,buttonmark:54"
       vline = 44
-      dot_size = 8
+      dot_size = 6
       dot_pad = 8
-      off_L = 1.6
     }
 
     button{
@@ -108,7 +107,7 @@ gui {
       font_size = 13
       top = 1
       left = 4
-      arrows = "bar:left:4,char:on~:off+"
+      arrows = "bar:left:10,char:on~:off+"
       shadow = False
     }
   }

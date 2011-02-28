@@ -364,8 +364,8 @@ class Method_shelx(Method):
       raise RuntimeError(
         'you may be using an outdated version of %s' %(prgName))
     olx.WaitFor('process') # uncomment me!
-    #olex.m("User '%s'" %RunPrgObject.filePath)
-    olx.User("'%s'" %RunPrgObject.filePath)
+    olex.m("User '%s'" %RunPrgObject.filePath)
+    #olx.User("'%s'" %RunPrgObject.filePath)
 
 
 class Method_shelx_solution(Method_shelx, Method_solution):
