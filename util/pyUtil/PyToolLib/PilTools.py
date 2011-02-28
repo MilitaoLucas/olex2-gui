@@ -2928,7 +2928,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         weight = 2
       #weight = int(round(weight * self.size_factor,0))
       if side == 'right':
-        sidefill = '#ffffff'
         sidefill = fill
       else:
         sidefill = fill

@@ -1596,7 +1596,7 @@ def GetACF():
     olex.m("installplugin Headless")
 
   updateACF()
-  use_new = True
+  use_new = False
   if use_new:
     debug = OV.FindValue('odac_fb', False)
     debug =  OV.GetParam('odac.debug.debug')
