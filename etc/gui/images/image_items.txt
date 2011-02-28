@@ -70,6 +70,7 @@
   Mask
   Void
   HFIX
+  Set
 
 [FULL ROW]
   Run AutoChem
@@ -89,3 +90,4 @@
   :z
   H
   Go
+  Set

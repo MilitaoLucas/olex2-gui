@@ -894,13 +894,14 @@ class ImageTools(FontInstances):
     elif type == "dots":
       dot_size = OV.GetParam('gui.timage.cbtn.dot_size')
       pad = OV.GetParam('gui.timage.cbtn.dot_pad')
-      l = width - height + pad/2
+      l = width - height + pad
       t = pad
       b = height - pad
       r = width - pad
 
       if direction == 'up':
         fill = OV.GetParam('gui.html.highlight_colour').rgb
+        fill = colour
         i = 0
         top = b - pad
         left = l
