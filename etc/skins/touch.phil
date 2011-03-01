@@ -48,7 +48,7 @@ gui {
       top = 3
       left = 8
       rounded = 1100
-      arrows = "bar:top:3"
+      arrows = "bar:top:5"
       off_L = 0.9
       shadow = False
     }
@@ -62,8 +62,10 @@ gui {
       rounded = 0101
       arrows = "bar:right:44,arrow_right:onup:offdown:hoverdown:hoveronup,buttonmark:54"
       vline = 44
+
       dot_size = 6
       dot_pad = 8
+      dot_left = 6
     }
 
     button{

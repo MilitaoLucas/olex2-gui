@@ -221,9 +221,9 @@ gui {
     }
 
     cbtn{
-      base_colour = #e1e1e1
+      base_colour = #444444
         .type = colour
-      grad_colour = #eeeeee
+      grad_colour = #999999
         .type = colour
       grad_step = 0.2
         .type = float
@@ -249,14 +249,14 @@ gui {
         .type = int
       rounded = 0101
         .type = str
-      arrows = "bar:right:22,arrow_right:onup:offdown:hoverdown:hoveronup,buttonmark:32"
+      arrows = "bar:right:23,arrow_right:onup:offdown:hoverdown:hoveronup,buttonmark:33"
         .type = str
 
       off_L = 1.6
         .type = float
-      on_L = 1.0
+      on_L = 1.2
         .type = float
-      hover_L = 0.8
+      hover_L = 1.0
         .type = float
 
       vline = 22
@@ -265,6 +265,12 @@ gui {
         .type = int
       dot_pad = 4
         .type = int
+      dot_left = 2
+        .type = int
+      dot_colour_off = #dedede
+        .type = colour
+      dot_colour_on = #444444
+        .type = colour
 
     }
 
@@ -504,6 +510,30 @@ gui {
         .type = colour
     }
   }
+  
+  graph{
+    light_grey = #888888
+      .type = colour
+    grey = #444444
+      .type = colour
+    dark_grey = #222222
+      .type = colour
+    filename_colour = #bbbbbb
+      .type = colour
+    title_colour = #777777
+      .type = colour
+    fill_colour = #ffffff
+      .type = colour
+    outline_colour = #666666
+      .type = colour
+    fitline_colour = #eeeeee
+      .type = colour
+    page_colour = #ffffff
+      .type = colour
+    axislabel_colour = #666666
+      .type = colour
+  }
+  
   g3{
     top{
       start_new_structure{

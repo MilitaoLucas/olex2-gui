@@ -101,6 +101,7 @@ def makeHtmlInputBox(inputDictionary):
     'manage':'',
     'data':'',
     'label':'',
+    'valign':'center',
     'bgcolor':'',
   }
   dictionary.update(inputDictionary)
@@ -114,7 +115,8 @@ height="%(height)s"
 name="%(ctrl_name)s"
 value="%(value)s"
 items="%(items)s"
-label="%(label)s"
+label="%(label)s "
+valign="%(valign)s"
 onchange="%(onchange)s"
 onleave="%(onleave)s"
 %(readonly)s
@@ -125,7 +127,7 @@ bgcolor="%(bgcolor)s"
   return htmlInputBoxText
 
 def makeHtmlTableRow(dictionary):
-  dictionary.setdefault('font', 'size="2"')
+  dictionary.setdefault('font', 'size=%s' %OV.GetParam('gui.html.font_size'))
   dictionary.setdefault('trVALIGN','center')
   dictionary.setdefault('trALIGN','left')
   dictionary.setdefault('fieldWidth','30%%')
@@ -158,7 +160,7 @@ def makeHtmlTableRow(dictionary):
       field_d.setdefault('fieldVALIGN','center')
       field_d.setdefault('fieldALIGN','left')
       field_d.setdefault('fieldWidth','20%%')
-      field_d.setdefault('font','size="2"')
+      field_d.setdefault('font','size=%s' %OV.GetParam('gui.html.font_size'))
       FieldText += """
                 <td VALIGN="%(fieldVALIGN)s" ALIGN="%(fieldALIGN)s" width="%(fieldWidth)s" colspan=1>
                   <b>
@@ -449,6 +451,7 @@ def make_input_text_box(d):
          'width':'45',
          'onchange':'',
          'label':name,
+         'valign':'center',
          'onleave':'',
          'data':'',
          'manage':'',
@@ -464,6 +467,7 @@ def make_input_text_box(d):
        width="%(width)s"
        height="%(height)s"
        label="%(label)s"
+       valign="%(valign)s"
        onchange="%(onchange)s"
        onleave="%(onleave)s"
        %(manage)s
