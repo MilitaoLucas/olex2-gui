@@ -91,12 +91,12 @@ class History(ArgumentParser):
     resFile = "%s/%s.res" %(filepath, filename)
     lstFile = "%s/%s.lst" %(filepath, filename)
     resFileData = decompressFile(node.res)
-    wFile = open(resFile, 'w')
+    wFile = open(resFile, 'wb')
     wFile.write(resFileData)
     wFile.close()
     if node.lst is not None:
       lstFileData = decompressFile(node.lst)
-      wFile = open(lstFile, 'w')
+      wFile = open(lstFile, 'wb')
       wFile.write(lstFileData)
       wFile.close()
     else:
@@ -533,7 +533,7 @@ def saveOriginals(resPath, lstPath):
       shutil.copyfile(filePath,backupFileFull)
 
 def compressFile(filePath):
-  file = open(filePath)
+  file = open(filePath, "rb")
   fileData = file.read()
   fileData = zlib.compress(fileData,9)
   return fileData
