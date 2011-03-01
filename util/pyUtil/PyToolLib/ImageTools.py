@@ -894,17 +894,18 @@ class ImageTools(FontInstances):
     elif type == "dots":
       dot_size = OV.GetParam('gui.timage.cbtn.dot_size')
       pad = OV.GetParam('gui.timage.cbtn.dot_pad')
-      l = width - height + pad
+      left_start = OV.GetParam('gui.timage.cbtn.dot_left')
+      colour_off = OV.GetParam('gui.timage.cbtn.dot_colour_off').hexadecimal
+      colour_on = OV.GetParam('gui.timage.cbtn.dot_colour_on').hexadecimal
+      l = width - height + left_start
       t = pad
       b = height - pad
       r = width - pad
 
       if direction == 'up':
-        fill = OV.GetParam('gui.html.highlight_colour').rgb
-        fill = colour
+        fill = colour_on
         i = 0
         top = b - pad
-        left = l
         while top > pad + dot_size:
           left = l + i * dot_size/2
           top = b - i * dot_size - dot_size
@@ -920,11 +921,9 @@ class ImageTools(FontInstances):
           i -= 1
           j += 1
       elif direction == 'down':
-        fill = colour
-
+        fill = colour_off
         i = 0
         top = t
-        left = l
         while top < height - pad - dot_size * 2:
           left = l + i * dot_size/2
           top = t + i * dot_size

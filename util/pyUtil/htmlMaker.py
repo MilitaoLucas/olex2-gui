@@ -463,6 +463,7 @@ def move(arg,name):
 OV.registerFunction(move)
 
 def restraint_builder(cmd):
+  height = OV.GetParam('gui.html.combo_height')
   colspan = 6
 
   constraints = ["EXYZ", "EADP", "AFIX"]
@@ -528,16 +529,17 @@ def restraint_builder(cmd):
         items = None
         val = val.strip()
       if items:
-        width = 40
+        width = 50
       else:
         width=50
       if var == "d":
         width=50
       d = {"ctrl_name":ctrl_name,
            "label":var,
+           "valign":'center',
            "value":val,
            "width":width,
-           "height":17,
+           "height":height,
            "bgcolor":"$spy.GetParam\(gui.html.input_bg_colour)"
            }
       if items:
@@ -557,7 +559,7 @@ def restraint_builder(cmd):
       "value":"Mode",
       "ondown":"%s"%mode_ondown,
       "onup":"%s"%mode_onup,
-      "width":40, "height":28,
+      "width":50, "height":height,
       "hint":"Atoms subsequently clicked will become the pivot atom of a new rigid group",
     }
     clear_onclick = "sel atoms where xatom.afix==strcat\(%s,%s)>>Afix 0>>labels -a" %(onclick_list[1],onclick_list[2])
@@ -565,7 +567,7 @@ def restraint_builder(cmd):
       "name":'AFIX_CLEAR',
       "value":"Clear",
       "onclick":"%s"%clear_onclick,
-      "width":40, "height":28,
+      "width":50, "height":height,
       "hint":"Removes the current AFIX command from the structure",
     }
 
