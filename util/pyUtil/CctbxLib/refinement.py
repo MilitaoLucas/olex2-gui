@@ -30,10 +30,10 @@ from smtbx.refinement.constraints import rigid
 import smtbx.utils
 
 solvers = {
-  'Gauss-Newton': normal_eqns_solving.naive_iterations,
+  'Gauss-Newton': normal_eqns_solving.naive_iterations_with_damping,
   'Levenberg-Marquardt': normal_eqns_solving.levenberg_marquardt_iterations
 }
-
+solvers_default_method = 'Gauss-Newton'
 
 class olex2_normal_eqns(least_squares.crystallographic_ls):
   log = None
@@ -312,12 +312,17 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.normal_eqns.shared_param_constraints = self.shared_param_constraints
     method = OV.GetParam('snum.refinement.method')
     iterations = solvers.get(method)
-    iterations = normal_eqns_solving.naive_iterations
+    if iterations == None:
+      method = solvers_default_method
+      iterations = solvers.get(method)
+      print "WARNING: unsupported method: '" + method + "' is replaced by '" +\
+        solvers_default_method + "'"
     assert iterations is not None
     try:
       self.cycles = iterations(self.normal_eqns,
                                n_max_iterations=self.max_cycles,
                                track_all=True,
+                               damping_value = 0.007,
                                gradient_threshold=1e-8,
                                step_threshold=1e-8)
                                #gradient_threshold=1e-5,
