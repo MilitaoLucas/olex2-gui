@@ -48,8 +48,9 @@ gui {
       base_colour = #555555
       grad_colour = #777777
       font_colour_L = 1.4
+
       off_L = 1.2
-      on_L = 1.1
+      on_L = 1.0
       hover_L = 1.1
       }
 
@@ -89,7 +90,19 @@ gui {
       height = 18
       width = 18
     }
-
-
   }
+
+  graph{
+    light_grey = #888888
+    grey = #444444
+    dark_grey = #222222
+    filename_colour = #bbbbbb
+    title_colour = #777777
+    fill_colour = #444444
+    outline_colour = #888888
+    fitline_colour = #888888
+    page_colour = #444444
+    axislabel_colour = #ababab
+  }  
+
 }
