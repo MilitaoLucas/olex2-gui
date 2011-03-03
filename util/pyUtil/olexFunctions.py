@@ -189,6 +189,16 @@ class OlexFunctions(inheritFunctions):
     except:
       return False
 
+  def GetDampingParams(self):
+    default = (0.7/1000, 15)
+    try:
+      v = olx.Ins('DAMP').split()
+      if len(v) != 2:
+        return default
+      return (float(v[0])/1000, float(v[1]))
+    except:
+      return default
+
   def FindValue(self,variable,default=u''):
     try:
       retVal = olex_core.FindValue(variable, default)

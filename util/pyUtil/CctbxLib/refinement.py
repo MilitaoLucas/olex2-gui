@@ -30,7 +30,7 @@ from smtbx.refinement.constraints import rigid
 import smtbx.utils
 
 solvers = {
-  'Gauss-Newton': normal_eqns_solving.naive_iterations_with_damping,
+  'Gauss-Newton': normal_eqns_solving.naive_iterations_with_damping_and_shift_limit,
   'Levenberg-Marquardt': normal_eqns_solving.levenberg_marquardt_iterations
 }
 solvers_default_method = 'Gauss-Newton'
@@ -192,15 +192,11 @@ class olex2_normal_eqns(least_squares.crystallographic_ls):
       olx.xf_au_SetAtomCrd(id, *xyz)
       olx.xf_au_SetAtomU(id, *u_trans)
       olx.xf_au_SetAtomOccu(id, occu)
-      if not flags.grad_site():
-        olx.Fix('xyz', xyz, name)
-      if not (flags.grad_u_iso() or flags.grad_u_aniso()):
-        olx.Fix('Uiso', u, name)
     #update OSF
     OV.SetOSF(self.scale_factor())
     #update FVars
     for var in self.shared_param_constraints:
-      OV.SetFVar(var[0], var[1].value.value)
+      OV.SetFVar(var[0], var[1].value.value*var[2])
     #update BASF
     if self.twin_components is not None:
       basf = ' '.join('%f' %component.twin_fraction
@@ -319,10 +315,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
         solvers_default_method + "'"
     assert iterations is not None
     try:
+      damping = OV.GetDampingParams()
       self.cycles = iterations(self.normal_eqns,
                                n_max_iterations=self.max_cycles,
                                track_all=True,
-                               damping_value = 0.007,
+                               damping_value=damping[0],
+                               max_shift_over_esd=damping[1],
+                               convergence_as_shift_over_esd=1e-3,
                                gradient_threshold=1e-8,
                                step_threshold=1e-8)
                                #gradient_threshold=1e-5,
@@ -589,11 +588,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
           continue
         current = occupancy.dependent_occupancy(as_var, as_var_minus_one)
         constraints.append(current)
-        self.shared_param_constraints.append((i, current))
+        if len(as_var) > 0:
+          scale = as_var[0][1]
+        else:
+          scale = as_var_minus_one[0][1]
+        self.shared_param_constraints.append((i, current, 1./scale))
       elif len(eadp) > 1:
         current = adp.shared_u(eadp)
         constraints.append(current)
-        self.shared_param_constraints.append((i, current))
+        self.shared_param_constraints.append((i, current, 1))
     return constraints
 
   def setup_rigid_body_constraints(self, afix_iter):
