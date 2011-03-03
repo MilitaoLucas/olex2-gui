@@ -35,11 +35,11 @@ gui {
       top = 1
       left = 5
       filefullinfo_size = 10
-      sginfo_scale = 1.0
+      sginfo_scale = 1.5
       corner_rad = 3
       rounded = 1100
     }
-
+    
     tab{
       height = 30
       corner_rad = 3

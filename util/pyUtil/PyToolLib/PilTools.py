@@ -2834,7 +2834,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       info_size = OV.GetParam('gui.timage.snumtitle.filefullinfo_size')
       colour = OV.GetParam('gui.timage.snumtitle.filefullinfo_colour').rgb
       self.drawFileFullInfo(draw, colour, right_margin=5, height=height, font_size=info_size, left_start=wX + 15)
-      self.drawSpaceGroupInfo(draw, luminosity=1.8, right_margin=3)
+      self.drawSpaceGroupInfo(draw, luminosity=OV.GetParam('gui.timage.snumtitle.sg_L'), right_margin=3)
 
     if arrows:
       off_L = OV.GetParam('gui.timage.%s.off_L' %item_type)
@@ -3040,11 +3040,21 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     n = int(len(txt)/2)
     txtbeg = txt[:n]
     txtend = txt [-n:]
+    
+    if left_start > self.width:
+      left_start = 50
+    else:
+      left_start = left_start
+    
+    xx = 0
     while tw > self.width - left_start:
       txtbeg = txt[:n]
       txtend = txt [-n:]
       tw = (draw.textsize("%s...%s" %(txtbeg, txtend), font)[0])
       n -= 1
+      xx += 1
+      if xx > 100:
+        break
     txt = "%s...%s" %(txtbeg, txtend)
 
     wX, wY  = draw.textsize(txt, font)
@@ -3062,7 +3072,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     base_colour = self.params.html.base_colour.rgb
     left_start = 150
     font_colour = self.adjust_colour(base_colour, luminosity=luminosity)
-    scale = OV.GetParam('gui.timge.snumtitle.sginfo_scale')
+    scale = OV.GetParam('gui.timage.snumtitle.sginfo_scale')
     try:
       txt_l = []
       txt_sub = []
