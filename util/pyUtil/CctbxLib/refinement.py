@@ -439,20 +439,30 @@ class FullMatrixRefine(OlexCctbxAdapter):
     # geometry loops
     cell_vcv = cell_vcv.matrix_symmetric_as_packed_u()
     connectivity_full = self.reparametrisation.connectivity_table
-    cif_block.add_loop(iotbx.cif.distances_as_cif_loop(
+    distances = iotbx.cif.distances_as_cif_loop(
       connectivity_full.pair_asu_table,
       site_labels=xs.scatterers().extract_labels(),
       sites_frac=xs.sites_frac(),
       covariance_matrix=self.covariance_matrix_and_annotations.matrix,
       cell_covariance_matrix=cell_vcv,
-      parameter_map=xs.parameter_map()).loop)
-    cif_block.add_loop(iotbx.cif.angles_as_cif_loop(
+      parameter_map=xs.parameter_map())
+    angles = iotbx.cif.angles_as_cif_loop(
       connectivity_full.pair_asu_table,
       site_labels=xs.scatterers().extract_labels(),
       sites_frac=xs.sites_frac(),
       covariance_matrix=self.covariance_matrix_and_annotations.matrix,
       cell_covariance_matrix=cell_vcv,
-      parameter_map=xs.parameter_map()).loop)
+      parameter_map=xs.parameter_map())
+    cif_block.add_loop(distances.loop)
+    cif_block.add_loop(angles.loop)
+    # cctbx could make e.g. 1.001(1) become 1.0010(10), so use Olex2 values for cell
+    cif_block['_cell_length_a'] = olx.xf_uc_CellEx('a')
+    cif_block['_cell_length_b'] = olx.xf_uc_CellEx('b')
+    cif_block['_cell_length_c'] = olx.xf_uc_CellEx('c')
+    cif_block['_cell_angle_alpha'] = olx.xf_uc_CellEx('alpha')
+    cif_block['_cell_angle_beta'] = olx.xf_uc_CellEx('beta')
+    cif_block['_cell_angle_gamma'] = olx.xf_uc_CellEx('gamma')
+    cif_block['_cell_volume'] = olx.xf_uc_VolumeEx()
     fmt = "%.6f"
     cif_block['_chemical_formula_moiety'] = olx.xf_latt_GetMoiety()
     cif_block['_chemical_formula_sum'] = olx.xf_au_GetFormula()
@@ -575,7 +585,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           eadp.append(ref['id'])
       if (len(as_var) + len(as_var_minus_one)) != 0:
         if len(eadp) != 0:
-          print "Invalid varaible use - mixes occupancy and U" 
+          print "Invalid varaible use - mixes occupancy and U"
           continue
         current = occupancy.dependent_occupancy(as_var, as_var_minus_one)
         constraints.append(current)
@@ -599,6 +609,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     scatterers = self.xray_structure().scatterers()
     uc = self.xray_structure().unit_cell()
     for m, n, pivot, dependent, pivot_neighbours, bond_length in afix_iter:
+      # pivot_neighbours excludes dependent atoms
       if len(dependent) == 0: continue
       info = rigid_body.get(m)  # this is needed for idealisation of the geometry
       if info != None and info[1] == len(dependent):
@@ -621,7 +632,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           if n in (3,4):
             current = rigid.rigid_riding_expandable_group(
               pivot, dependent, n == 4)
-          elif len(pivot_neighbours) != 1:
+          elif len(pivot_neighbours) < 1:
             print "Invalid rigid group for " + scatterers[pivot].label
           else:
             current = rigid.rigid_pivoted_rotatable_group(
