@@ -37,6 +37,9 @@ gui {
     .type = int
   }
   timage{
+    snumtitle{
+      sg_L = 0.8
+    }
 
     tab{
       off_L = 1.6
