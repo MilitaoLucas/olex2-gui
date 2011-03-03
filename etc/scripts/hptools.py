@@ -16,6 +16,36 @@ import OlexVFS
 print "Hello"
 
 
+def db_test():
+  pass
+#  from sqlalchemy import create_engine
+#  engine = create_engine('sqlite:///:memory:', echo=True)#
+
+
+def t(cmd):
+  
+  d = {}
+  d.setdefault('make_bitmap_image',"$spy.MakeHoverButton(button_small-go@bitmapp,cursor\(busy,'Please Wait. Making image. This may take some time')>>run 'pict -pq strcat\(GetValue\(IMAGE_BITMAP_NAME).,GetValue\(IMAGE_BITMAP_TYPE)) GetValue\(IMAGE_BITMAP_SIZE)'>>cursor\()")
+  
+  
+  html = '<html>%s>>html.hide test)</html>' %d[cmd]
+  
+  x = int(olx.GetMouseX())
+  y = int(olx.GetMouseY())
+  name = 'test'
+  boxWidth = 200
+  boxHeight = 200
+  pop_name = "Test"
+  wFilePath = r"%s.htm" %(name)
+  OV.write_to_olex(wFilePath, html)
+
+  olx.Popup(pop_name, wFilePath, "-b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(name, boxWidth, boxHeight, x, y))
+
+  print 'Hello'
+OV.registerFunction(t)
+  
+
+
 def bulk_copy_files (mask="hklres", path_from=r"Z:", path_to=r"C:\DS\Data",overwrite=True,lowercase=True):
   import FileSystem as FS
   print "Hello"
@@ -133,3 +163,11 @@ class HealthOfStructure():
 
 HealthOfStructure_instance = HealthOfStructure()
 OV.registerFunction(HealthOfStructure_instance.run_HealthOfStructure)
+
+
+#if __name__ == '__main__':
+  #t('make_bitmap_image')
+
+  
+if __name__ == '__main__':
+  db_test()

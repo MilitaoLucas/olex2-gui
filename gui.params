@@ -169,6 +169,8 @@ gui {
         .type = float
       sginfo_scale = 1.0
         .type = float
+      sg_L = 1.8
+        .type = float
       corner_rad = 3
         .type = int
       rounded = 1100
