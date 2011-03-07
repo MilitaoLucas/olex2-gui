@@ -2,8 +2,8 @@ import olex_core
 from elixir import *
 import sqlalchemy.types as types
 
-#metadata.bind = "sqlite:///:memory:"
-metadata.bind = "sqlite:///t.sqlite"
+metadata.bind = "sqlite:///:memory:"
+#metadata.bind = "sqlite:///t.sqlite"
 
 #metadata.bind = "mysql://DIMAS:fddd-anode@dimas.dur.ac.uk:3306/Olex2Docu"
 metadata.bind.echo = True
@@ -119,10 +119,6 @@ class XInserts():
 
 
   def export_help(self, which_type):
-    arguments = ''
-    state = ''
-    parameters = ''
-    scope = ''
 
     if which_type == "fun":
       l = olex_core.ExportFunctionList()
@@ -136,10 +132,17 @@ class XInserts():
     total = len(l)
     i = 0
     for item in l:
+      o_type = type
+      arguments = ''
+      state = ''
+      parameters = ''
+      scope = ''
+      
       i += 1
       command = "%s" %item[0]
 
       if 'spy' in command:
+        o_type = type
         type = 'spy'
 
       if 'html.' in command:
@@ -184,30 +187,36 @@ class XInserts():
       d[command].setdefault("type", type)
       d[command].setdefault("state", state)
       d[command].setdefault("scope", scope)
+      
+      type = o_type
 
     return d
-
+  
+  def get_scope(self, scope='html'):
+    cmds = session.query(Command).\
+         filter(Command.scope_name==scope).\
+         all()
+    cmd_l = []
+    for cmd in cmds:
+      cmd_l.append((cmd.name, cmd))
+      
+    cmd_l.sort()
+    for cmd[1] in cmd_l:
+      print cmd.name, cmd.state_name, cmd.builtin_doc
+    
 
 
 if __name__ == "__main__":
   print "Setup All"
   setup_all(True)
 
-#  rscott = Director(name=u"Ridley Scott")
-#  glucas = Director(name=u"George Lucas")
-#  alien = Movie(title=u"Alien", year=1979)
-#  swars = Movie(title=u"Star Wars", year=1977)
-#  brunner = Movie(title=u"Blade Runner", year=1982)
-
-#  rscott.movies.append(brunner)
-#  rscott.movies.append(alien)
-#  swars.director = glucas
-
-
   print "Create All"
   create_all()
   insert = XInserts()
   print "Running Inserts"
   insert.run()
-  session.commit()
+  #session.commit()
+  insert.get_scope('gl')
+  
+         
   print "Done."
