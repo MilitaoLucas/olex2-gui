@@ -199,6 +199,22 @@ class OlexFunctions(inheritFunctions):
     except:
       return default
 
+  def GetExtinction(self):
+    try:
+      v = olx.Ins('EXTI')
+      a = float(olx.xf_rm_OSF())
+      return a
+    except:
+      return None
+    
+  def SetExtinction(self, v):
+    try:
+      olx.DelIns('EXTI')
+      olx.AddIns('EXTI ' + str(v))
+      return True
+    except:
+      return False
+
   def FindValue(self,variable,default=u''):
     try:
       retVal = olex_core.FindValue(variable, default)
