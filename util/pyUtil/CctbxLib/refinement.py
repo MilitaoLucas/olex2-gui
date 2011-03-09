@@ -293,7 +293,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.extinction.grad = True
     else:
       self.extinction = xray.dummy_extinction_correction()
-      
+
     self.reparametrisation = constraints.reparametrisation(
       structure=self.xray_structure(),
       constraints=self.constraints,
@@ -469,6 +469,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       parameter_map=xs.parameter_map())
     cif_block.add_loop(distances.loop)
     cif_block.add_loop(angles.loop)
+    self.restraints_manager().add_to_cif_block(cif_block, xs)
     # cctbx could make e.g. 1.001(1) become 1.0010(10), so use Olex2 values for cell
     cif_block['_cell_length_a'] = olx.xf_uc_CellEx('a')
     cif_block['_cell_length_b'] = olx.xf_uc_CellEx('b')
