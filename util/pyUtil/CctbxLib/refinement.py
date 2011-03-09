@@ -11,7 +11,7 @@ import olx
 import olex_core
 
 from cctbx.array_family import flex
-from cctbx import adptbx, maptbx, miller, sgtbx, uctbx
+from cctbx import adptbx, maptbx, miller, sgtbx, uctbx, xray
 
 import iotbx.cif.model
 
@@ -203,6 +203,9 @@ class olex2_normal_eqns(least_squares.crystallographic_ls):
                       for component in self.twin_components
                       if component.grad_twin_fraction)
       if basf: olx.AddIns('BASF ' + basf)
+    #update EXTI
+    if self.reparametrisation.extinction.grad:
+      OV.SetExtinction(self.reparametrisation.extinction.value)
     olx.xf_EndUpdate()
 
 
@@ -282,12 +285,23 @@ class FullMatrixRefine(OlexCctbxAdapter):
             i_seq, bond_to_add['to'], rt_mx(equivs[bond_to_add['eqiv']]))
     temp = self.olx_atoms.exptl['temperature']
     if temp < -274: temp = 20
+    #set up extinction correction if defined
+    exti = OV.GetExtinction()
+    if exti is not None:
+      self.extinction = xray.shelx_extinction_correction(
+        self.xray_structure().unit_cell(), self.wavelength, exti)
+      self.extinction.grad = True
+    else:
+      self.extinction = xray.dummy_extinction_correction()
+      
     self.reparametrisation = constraints.reparametrisation(
       structure=self.xray_structure(),
       constraints=self.constraints,
       connectivity_table=connectivity_table,
       twin_components=self.twin_components,
-      temperature=temp)
+      temperature=temp,
+      extinction = self.extinction
+    )
     weight = self.olx_atoms.model['weight']
     params = dict(a=0.1, b=0,
                   #c=0, d=0, e=0, f=1./3,
@@ -304,7 +318,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       f_mask=self.f_mask,
       restraints_manager=restraints_manager,
       weighting_scheme=weighting,
-      log=self.log)
+      log=self.log
+    )
     self.normal_eqns.shared_param_constraints = self.shared_param_constraints
     method = OV.GetParam('snum.refinement.method')
     iterations = solvers.get(method)
@@ -380,7 +395,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       else:
         from smtbx import absolute_structure
         flack = absolute_structure.flack_analysis(
-          self.normal_eqns.xray_structure, self.normal_eqns.fo_sq)
+          self.normal_eqns.xray_structure, self.normal_eqns.fo_sq, self.extinction)
         self.flack = utils.format_float_with_standard_uncertainty(
           flack.flack_x, flack.sigma_x)
 
