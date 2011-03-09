@@ -202,7 +202,7 @@ class OlexFunctions(inheritFunctions):
   def GetExtinction(self):
     try:
       v = olx.Ins('EXTI')
-      a = float(olx.xf_rm_OSF())
+      a = float(v)
       return a
     except:
       return None
@@ -210,7 +210,7 @@ class OlexFunctions(inheritFunctions):
   def SetExtinction(self, v):
     try:
       olx.DelIns('EXTI')
-      olx.AddIns('EXTI ' + str(v))
+      olx.AddIns('EXTI %.6f' %(v))
       return True
     except:
       return False
