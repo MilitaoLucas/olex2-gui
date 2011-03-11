@@ -73,7 +73,7 @@ class reader(object):
           if lines[i][:16] == "Ratio of minimum":
             txt = lines[i].split(':')
             #txt = string.split(lines[i], ":")
-            self._cifItems.setdefault("ratiominmax", "%s" %txt[1].strip())
+            self._cifItems.setdefault("ratiominmax", "%.4f" %txt[1].strip())
             self._cifItems.setdefault("_exptl_absorpt_correction_T_min", "%s" %txt[1].strip())
           if "Estimated minimum" in lines[i] :
             txt = lines[i].split(':')
@@ -84,14 +84,14 @@ class reader(object):
             ratio = float(min)/float(max)
             self._cifItems.setdefault("_exptl_absorpt_correction_T_min", "%s" %min)
             self._cifItems.setdefault("_exptl_absorpt_correction_T_max", "%s" %max)
-            self._cifItems.setdefault("ratiominmax", "%s" %ratio)
+            self._cifItems.setdefault("ratiominmax", "%.4f" %ratio)
 ## Not sure why this was in here. The lambda correction value is present in this version!
 #          if self._cifItems.get("prog_version") == '2008/1':
 #            self._cifItems.setdefault("lambda_correction", "Not present")
           if lines[i][:6] == "Lambda":
             txt = lines[i].split('=')
             #txt = string.split(lines[i], "=")
-            self._cifItems.setdefault("lambda_correction", "%s" %txt[1].strip())
+            self._cifItems.setdefault("lambda_correction", "%.4s" %txt[1].strip())
         except:
           #i += 1
           pass
@@ -181,7 +181,7 @@ class reader(object):
             ratio = float(min)/float(max)
             self._twin_cifItems["%s"%twin_component].setdefault("_exptl_absorpt_correction_T_min", "%s" %min)
             self._twin_cifItems["%s"%twin_component].setdefault("_exptl_absorpt_correction_T_max", "%s" %max)
-            self._twin_cifItems["%s"%twin_component].setdefault("ratiominmax", "%s" %ratio)
+            self._twin_cifItems["%s"%twin_component].setdefault("ratiominmax", "%.4f" %ratio)
             #print "check ratiominmax, exptl Tmin", twin_component, self._twin_cifItems
           if "HKLF 5" in lines[line]:
             break
@@ -226,7 +226,8 @@ def abs_type(path):
   return abs_type
 
 if __name__ == '__main__':
-  a = reader('/home/xray/olexsvn/abs-test/cycle2.abs')
+  a = reader('/media/data2/DLS/MJR0747/refinement/mjr0747abs.abs')
+  #a = reader('/home/xray/olexsvn/abs-test/cycle2.abs')
   #b = reader('/home/xray/olexsvn/abs-test/MJR0602.abs')
   info_cif = a.cifItems()
   info_twin = a.twin_cifItems()
