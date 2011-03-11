@@ -104,7 +104,9 @@ def OlexBET(probe="N2", trials="5000"):
     'CS2' : '4.438',
     # Common Names
     'DCM' : '4.759',
-    'Me' : '3.822'
+    'Me' : '3.822',
+    'ksn' : '3.2',
+    'ksc' : '3.4'
   }
   
   run_inc = 0

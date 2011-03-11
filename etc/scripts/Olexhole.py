@@ -26,11 +26,12 @@ endrad 5.                       ! This is the pore radius that is taken
 To run type spy.Olexhole() in Olex2
 '''
 
-def Olexhole(endrad="3"):
+def Olexhole(endrad="3", cm="1"):
   print "This script converts the current model and creates a hole2 input file, runs hole2 and reports the result"
   # We can assume that the INS name and information can come from Olex2
   # Need to allow for all possible options, at the moment this is very basic implementation.
   
+  cm = int(cm)
   run_inc = 0
   base_path = OV.FilePath()
   print OV.FilePath()
@@ -46,7 +47,7 @@ def Olexhole(endrad="3"):
   Olex2holeIn = OV.FileName()
   #Olex2 commands here!
   OV.cmd("isot")
-  OV.cmd("pack -1 1 -1 1 -1 1")
+  OV.cmd("pack -%d %d -%d %d -%d %d"%(cm*1, cm*1, cm*1, cm*1, cm*1, cm*1))
   #OV.cmd("grow")
   OV.cmd("grow -w")
   OV.File("%s/olex_%s.pdb"%(hole2_path, Olex2holeIn))
