@@ -85,10 +85,7 @@ class OlexCctbxAdapter(object):
     else:
       self.twin_components = None
 
-    try:
-      self.exti = float(olx.Ins('exti'))
-    except:
-      self.exti = None
+    self.exti = self.olx_atoms.model.get('exti', None)
     self.initialise_reflections()
 
   def __del__(self):
