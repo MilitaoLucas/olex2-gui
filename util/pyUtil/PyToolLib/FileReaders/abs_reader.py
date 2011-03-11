@@ -60,7 +60,7 @@ class reader(object):
           # txt = lines[i+2].split()
             #txt = string.split(lines[i+2])
           if "(selected reflections only, before parameter refinement)" in lines[i]: ############################
-  #	print "wR2(int) Before =", lines[i]
+            #print "wR2(int) Before =", lines[i]
             txt = lines[i].split('=')
             txt = txt[1].strip()
             txt = txt.split('(')
@@ -106,7 +106,7 @@ class reader(object):
       for line in lines:
         #print "line = ", line, lines[line]
         try:
-  #	print lines[line]
+          #print lines[line]
           if "TWINABS" in lines[line]:
             txt = lines[line].split('-')
             if 'Bruker' in txt[1] and len(txt) == 3:
@@ -206,9 +206,9 @@ def abs_type(path):
   abs_type = None
 
   for line in rfile:
-      lines[i] = line.strip()
-      #lines[i] = string.strip(line)
-      i+=1
+    lines[i] = line.strip()
+    #lines[i] = string.strip(line)
+    i+=1
   i=0
   for line in lines:
     try:
