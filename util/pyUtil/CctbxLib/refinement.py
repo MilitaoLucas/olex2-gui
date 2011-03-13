@@ -559,14 +559,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
   def output_fcf(self):
     f = open(OV.file_ChangeExt(OV.FileFull(), 'fcf'), 'wb')
     cif = iotbx.cif.model.cif()
+    fc_sq = self.normal_eqns.f_calc.as_intensity_array()
+    fc_sq = fc_sq.customized_copy(data=fc_sq.data()*self.scale_factor)
     mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
-      self.normal_eqns.fo_sq, array_type='meas')
+      fc_sq, array_type='calc')
     mas_as_cif_block.add_miller_array(
-      self.normal_eqns.f_calc.as_intensity_array(), array_type='calc')
+      self.normal_eqns.fo_sq, array_type='meas')
     cif[OV.FileName().replace(' ', '')] = mas_as_cif_block.cif_block
     from libtbx.utils import time_log
     time_fcf = time_log("fast").start()
-    fmt_str="%-4i"*3 + "%-12.2f"*2 + "%-10.2f"
+    fmt_str="%4i"*3 + "%12.2f"*2 + "%10.2f"
     cif.show(out=f, loop_format_strings={'_refln':fmt_str})
     time_fcf.stop()
     print time_fcf.legend
