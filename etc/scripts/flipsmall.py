@@ -1,5 +1,5 @@
 #!/usr/bin/python2
-version = "200111"
+version = "160311"
 """
 =====================================================================
            Submit charge flipping phasing procedure
@@ -9,6 +9,7 @@ version = "200111"
           A van der Lee, C.Dumas & L. Palatinus   (python version february 08th,  2010)
 	  corrected bug in "forcesymmetry=yes" processing ins symcards.
           20-01-11: corrected bug for Olex2 processing
+          16-03-11: added keyword 'p1' for triclinic structure solution for metrically non-triclinic lattices
  prepares input file for SUPERFLIP and EDMA program  (L. Palatinus)
 
 
@@ -42,15 +43,15 @@ Some guidelines
 ###############
 
 """)
-    if olexrun:
-       sys.stdout.write("""
+       if olexrun:
+          sys.stdout.write("""
 use: spy.flipsmall(data.ins)
  or: spy.flipsmall()  -- ins-file loaded by Olex2 is taken
  or: spy.flipsmall(data.ins maxcycles=30000)
  or: spy.flipsmall(data.ins,ked=1.1)
 """ )
-    else:
-       sys.stdout.write("""
+       else:
+          sys.stdout.write("""
 use: %s data.ins
  or: %s data.ins  maxcycles=30000
 """ % (s[0],s[0]))
@@ -62,7 +63,10 @@ optional:
 trial=5          ...... number of repeated trials (default 1)
 normalize=no     ...... locally normalize the data (default yes)
 maxcycl=30000    ...... maximum number of cycles per trial (default 10000)
-forcesymmetry=yes...... use symmetry from Shelx-file, that should obviously be present (default no)
+forcesymmetry=yes...... use symmetry from shelx-file, that should obviously be present (default no)
+p1=no            ...... the combination p1=yes and forcesymmetry=yes gives the possibility to do
+                 ...... a structure solution in p1 for metrically non-triclinic lattices
+                 ...... note: all symmetry information in the shelx file is ignored (default no)
 weak=0.1         ...... fraction of reflections considered to be weak (default 0.2)
 ked=1.3          ...... user-defined flip-threshold delta=ked*sigma(map) (default: delta=auto)
 superposition=yes...... start with minimal superposition map (default no)
@@ -149,17 +153,17 @@ def process_insfile(flip_keywords,files,derived_info):
     c=map(float,c)
     if ( abs(c[3] - 90.00)/90.00 < delta ) and ( abs(c[4]-90.00) / 90.00 < delta ) and ( abs(c[5]-90.00) / 90.00 < delta ) \
     and ( abs((c[0]-c[1]) / c[0]) < delta ) and ( abs((c[0]-c[2]) / c[0]) < delta ) \
-    and ( abs((c[1]-c[2]) / c[0]) < delta ): 
+    and ( abs((c[1]-c[2]) / c[0]) < delta ):
         derived_info['crsyst']='cubi'
 	derived_info['flipcell'] = str(c[0])+" "+str(c[0])+" "+str(c[0])+" 90.00 90.00 90.00"
     if ( abs(c[3] - 90.00)/90.00 < delta ) and ( abs(c[4]-90.00) / 90.00 < delta ) and ( abs(c[5]-90.00) / 90.00 < delta ) \
     and ( abs((c[0]-c[1]) / c[0]) < delta ) and ( abs((c[0]-c[2]) / c[0]) > delta ) \
-    and ( abs((c[1]-c[2]) / c[0]) > delta ): 
+    and ( abs((c[1]-c[2]) / c[0]) > delta ):
         derived_info['crsyst']='tetr'
 	derived_info['flipcell'] = str(c[0])+" "+str(c[0])+" "+str(c[2])+" 90.00 90.00 90.00"
     if ( abs(c[3] - 90.00)/90.00 < delta ) and ( abs(c[4]-90.00) / 90.00 < delta ) and ( abs(c[5]-90.00) / 90.00 < delta ) \
     and ( abs((c[0]-c[1]) / c[0]) > delta ) and ( abs((c[0]-c[2]) / c[0]) > delta ) \
-    and ( abs((c[1]-c[2]) / c[0]) > delta ): 
+    and ( abs((c[1]-c[2]) / c[0]) > delta ):
         derived_info['crsyst']='orth'
 	derived_info['flipcell'] = str(c[0])+" "+str(c[1])+" "+str(c[2])+" 90.00 90.00 90.00"
     if ( abs(c[3] - 90.00)/90.00 < delta ) and ( abs(c[4]-90.00) / 90.00 < delta ) and ( abs(c[5]-120.00) / 120.00 < delta ) \
@@ -174,7 +178,7 @@ def process_insfile(flip_keywords,files,derived_info):
 
 #Process symmetry information from .ins-file if this is to be used and put this is temporary symcards.tmp file
     if ( flip_keywords['forcesymmetry'] == "yes" ):
-        if ( nsymm == 0 ) and not (derived_info["crsyst"]=="tric"):
+        if ( nsymm == 0 ) and not (derived_info["crsyst"]=="tric") and flip_keywords['p1'] == "no":
            print " No symmetry information available "
            print " Calculation continues, but forcesymmetry is set to no"
 	   flip_keywords['forcesymmetry'] = "no"
@@ -183,8 +187,9 @@ def process_insfile(flip_keywords,files,derived_info):
            symcards = open("symcards.tmp", "w")
            print >> symcards, "symmetry"
            print >> symcards, "X Y Z"
-           if ( derived_info['latt'] > 0 ): print >> symcards, " -X -Y -Z"
-           for line in fileinput.input(files['insin']):
+           if flip_keywords['p1'] == "no":
+             if ( derived_info['latt'] > 0 ): print >> symcards, " -X -Y -Z"
+             for line in fileinput.input(files['insin']):
                if "SYMM" in line:
 	          line = string.upper(string.join(string.split(line)[1:]))
 	          for k in ['X', 'Y', 'Z']:
@@ -195,7 +200,7 @@ def process_insfile(flip_keywords,files,derived_info):
      	          line = string.replace(line,","," , ")
                   print >> symcards, line
                   if ( derived_info['latt'] > 0 ):
-		     splitline=string.split(line)
+	             splitline=string.split(line)
                      invline = ""
 		     for k in splitline:
                          if ( k[0] == "+" ): l = string.replace(k,'+','-')
@@ -206,6 +211,7 @@ def process_insfile(flip_keywords,files,derived_info):
                      print >> symcards, "%s" % invline
            print  >> symcards, "endsymmetry"
            symcards.close()
+
 
 # Build symcards.tmp from crystal system info
     if ( flip_keywords['forcesymmetry'] == "no" ):
@@ -218,7 +224,7 @@ def process_insfile(flip_keywords,files,derived_info):
         if ( derived_info['crsyst'] == 'mono' ):
            symcards.write("-x y -z\n")
            flip_keywords['SG'] = '3'
-        if ( derived_info['crsyst'] == 'orth' ):       
+        if ( derived_info['crsyst'] == 'orth' ):
            symcards.write("-x -y z\n-x y -z\nx -y -z\n")
            flip_keywords['SG'] = '16'
         if ( derived_info['crsyst'] == 'tetr' ):
@@ -236,7 +242,7 @@ def process_insfile(flip_keywords,files,derived_info):
       symcards.write("endsymmetry\n")
       symcards.close()
     else:
-      SG="as in import file"
+      flip_keywords['SG']="as in import file"
 
 #Write lattice cards
     symcards = open("symcards.tmp", "a")
@@ -327,7 +333,7 @@ superposition             ......  %s
     """ % (files['insin'], files['hklin'], derived_info['flipcell'], derived_info['crsyst'], flip_keywords['SG'], flip_keywords['ked'], flip_keywords['weak'], flip_keywords['biso'],
        flip_keywords['maxcycl'], flip_keywords['normalize'], flip_keywords['trial'], flip_keywords['superposition']) 
 
-    if ( flip_keywords['comments'] == 'yes' ): raw_input("\n Press <RETURN> to continue\n")       
+    if ( flip_keywords['comments'] == 'yes' ): raw_input("\n Press <RETURN> to continue\n")
 
 #Now generate inflip file
     f = open(files['inflip'], "w")
@@ -733,7 +739,7 @@ def flipsmall (*args):
 flip_keywords=dict(weak=0.20, biso=2.5, maxcycl=10000, comments="yes", edmacontinue="no",
                    normalize="yes", merge="yes", forcesymmetry="no", trial="1", SG="1", missing="zero",
 		   derivesymmetry="use",dataformat="shelx",cleanup="yes",terminal='yes', logging='no', superposition='no',
-		   sflipversion='superflip',ked='auto')
+		   sflipversion='superflip',ked='auto',p1='no')
 # calculated and extracted info, from ins-file and logfile
 derived_info=dict(crsyst='tric', cell="9.0 9.0 9.0 90.0 90.0 90.0", flipcell="9.0 9.0 9.0 90.0 90.0 90.0",
                   cellesd = "0.0 0.0 0.0 0.0 0.0 0.0", wavelength ="0.71073", sfac="C H O N",
@@ -742,7 +748,7 @@ derived_info=dict(crsyst='tric', cell="9.0 9.0 9.0 90.0 90.0 90.0", flipcell="9.
 files=dict(base='name',insin='name.ins',hklin='name.hkl',m81='name.m81',inflip='name.inflip',
            fliplog='name.sflog',edmain='name_edma.inflip',edmaout='name_structure.ins')
 # the external executables
-exe=dict(SF="superflip",EDMA="EDMA")
+exe=dict(SF="~/unix/bin/superflip",EDMA="EDMA")
 
 
 olexrun = False
