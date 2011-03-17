@@ -436,6 +436,20 @@ def make_table_first_col(help_name=None, popout=False, help_image='large'):
 ''' %help
   return html
 
+def make_html_opening():
+  html = '''
+  <html>
+  <body link=$spy.GetParam(gui.html.link_colour) bgcolor=$spy.GetParam(gui.html.bg_colour)>
+  <font color=$spy.GetParam(gui.html.font_colour) size=$spy.GetParam(gui.html.font_size) face="$spy.GetParam(gui.html.font_name)">
+<p> '''
+  return html
+
+def make_html_closing():
+  html = '''
+  </font></body></html>
+  '''
+  return html
+
 def make_help_href(name, popout, image='normal'):
   help = '''
   $spy.MakeHoverButton(btn-info@%s,spy.make_help_box -name='%s' -popout='%s')
@@ -1117,7 +1131,7 @@ def _check_modes_and_states(name):
   if name in buttons:
     if OV.GetParam('olex2.reporting') == True:
       return True
-    
+
   return False
 
 
