@@ -13,7 +13,7 @@ snum {
       .type = choice
   }
   solution {
-    program = ShelXS ShelXS86 XS 'smtbx-solve' XM ShelXD
+    program = ShelXS ShelXS86 XS 'smtbx-solve' XM ShelXD SIR2008
       .type = choice
     method = 'Dual Space' 'Charge Flipping' 'Direct Methods' 'Patterson Method'
       .type = choice
