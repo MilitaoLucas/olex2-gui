@@ -591,6 +591,7 @@ class Method_cctbx_ChargeFlip(Method_solution):
 
   def run(self, RunPrgObject):
     from cctbx_olex_adapter import OlexCctbxSolve
+    import traceback
     print 'STARTING cctbx Charge Flip'
     RunPrgObject.solve = True
     cctbx = OlexCctbxSolve()
@@ -610,6 +611,7 @@ class Method_cctbx_ChargeFlip(Method_solution):
         print "*** No solution found ***"
     except Exception, err:
       print err
+      traceback.print_exc()
     try:
       olx.Freeze(True)
       olx.xf_EndUpdate()
