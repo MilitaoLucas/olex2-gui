@@ -807,7 +807,7 @@ if haveGUI:
 
 def GetHklFileList():
   reflections_files = []
-  reflection_file_extensions = ["hkl", "hkp", "raw"]
+  reflection_file_extensions = ["hkl", "hkp", "raw", 'hklf5', 'hkc']
   for extension in reflection_file_extensions:
     g = glob.glob(r"%s/*.%s" %(OV.FilePath(),extension))
     reflections_files += g
