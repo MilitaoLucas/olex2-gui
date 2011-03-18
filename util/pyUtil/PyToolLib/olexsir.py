@@ -158,7 +158,8 @@ class Sir(object):#{{{
                 print invalid_val
                 del self._data[item[0]]
 
-            elif item[0] in ('REFLECTIONS') and not isFileHasExt(item[1],'hkl'):
+            elif item[0] in ('REFLECTIONS') and not isFileHasExt(item[1], 
+                    ('hkl', 'hkc', 'hkp', 'raw', 'hklf5')):
                     print invalid_val
                     del self._data[item[0]]
 
@@ -224,11 +225,13 @@ class Sir(object):#{{{
     def getGui(self):#{{{
         return self._sirgui
     #}}}
-    def setGui(self, sirgui=True):#{{{
+    def setGui(self, sirgui):#{{{
         if sirgui == True:
             self._sirgui = True
         elif sirgui == False:
             self._sirgui = False
+        else:
+            print 'Invalid value for GUI: True or False'
 #}}}
     def setDirectives(self, **kwargs):#{{{
         '''
