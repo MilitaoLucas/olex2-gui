@@ -158,13 +158,8 @@ class Sir(object):#{{{
                 print invalid_val
                 del self._data[item[0]]
 
-            elif item[0] in ('REFLECTIONS') and not isFileHasExt(item[1], 
-                    ('hkl', 'hkc', 'hkp', 'raw', 'hklf5')):
-                    print invalid_val
-                    del self._data[item[0]]
-
             elif item[0] in ('CELL', 'ERRORS', 'CONTENTS', 'SFACTORS', 'ANOMALOUS',
-                    'FORMAT') and type(item[1]) not in (str,unicode):
+                    'FORMAT', 'REFLECTIONS') and type(item[1]) not in (str,unicode):
                     print invalid_val
                     del self._data[item[0]]
 
