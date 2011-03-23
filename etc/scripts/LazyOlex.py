@@ -26,14 +26,81 @@ from operator import itemgetter, attrgetter
 def degrees_to_radians(d):
   return d * math.pi / 180
 
-def LazyOlex(wavelength=0.710174):
+def hklgen(cella, cellb, cellc, alpha, beta, gamma, wavelength, filename, max2theta):
+  """
+  Uses A. Labail hklgen code, tweaked, to generate a powder pattern
+  """
+
+  brokensym = list(olx.xf_au_GetCellSymm())
+  SirCompatSymmSetting = brokensym.pop(0)
+  SirCompatSymmOpps = []
+  while len(brokensym) > 0:
+    print brokensym
+    print SirCompatSymmOpps
+    if brokensym[0] == '-':
+      print "true for -"
+      SirCompatSymmOpps.append(" "+brokensym.pop(0))
+      SirCompatSymmOpps.append(brokensym.pop(0))
+      continue
+    elif brokensym[0] in "a b c d n m":
+      print "true for letter"
+      SirCompatSymmOpps.append(" "+brokensym.pop(0))
+      continue
+    elif brokensym[0] in "1":
+      print "true for number"
+      SirCompatSymmOpps.append(brokensym.pop(0))
+      continue
+    elif brokensym[0] in "2 3 4 6 8 9":
+      print "true for number"
+      SirCompatSymmOpps.append(" "+brokensym.pop(0))
+      continue
+    elif brokensym[0] in "/":
+      print "true for number"
+      SirCompatSymmOpps.append(" "+brokensym.pop(0))
+      continue
+    print brokensym
+    print SirCompatSymmOpps
+  print ''.join(SirCompatSymmOpps)
+
+  # Write HKL dat input
+  # format is:
+  # Line 1 : Title (Format 80A4)
+  # Line 2 : Wavelength (Free Format)
+  # Line 3 : Space group (put some blanks time to time :-)
+  # Line 4 : a, b, c, alpha, beta, gamma  (Free Format)
+  # Line 5 : 2-theta max (Free Format)  
+  whklgen= open("%s.dat"%(filename), 'w')
+  whklgen.write("Olex2 HKLGEN Input for Sample %s\r\n"%filename)
+  whklgen.write("%s\r\n"%(wavelength))
+  whklgen.write("%s%s\r\n"%(SirCompatSymmSetting, "".join(SirCompatSymmOpps)))
+  whklgen.write("%4.4f %4.4f %4.4f %4.4f %4.4f %4.4f\r\n"%(cella, cellb, cellc, alpha, beta, gamma)) 
+  whklgen.write("%s\r\n"%(max2theta))
+  whklgen.close()
+  
+  # All this need error control
+  try:
+    print "Running hklgen calculation now"
+    olx.Exec("hklgen %s"%filename)
+    print "Finished calculation"
+  except:
+    print "hklgen calculation failed to run"
+    return
+
+def LazyOlex(ops='0', wavelength=0.710174, max2theta=60):
+  min2theta = 1 
+  max2theta = 60
+  steps = 0.01
+  points = int((max2theta - min2theta) / steps)
   if inOlex > 0:
     cella = float(olx.xf_au_GetCell().split(',')[0])
     cellb = float(olx.xf_au_GetCell().split(',')[1])
     cellc = float(olx.xf_au_GetCell().split(',')[2])
-    alpha = degrees_to_radians(float(olx.xf_au_GetCell().split(',')[3]))
-    beta = degrees_to_radians(float(olx.xf_au_GetCell().split(',')[4]))
-    gamma = degrees_to_radians(float(olx.xf_au_GetCell().split(',')[5]))
+    alpha = float(olx.xf_au_GetCell().split(',')[3])
+    beta = float(olx.xf_au_GetCell().split(',')[4])
+    gamma = float(olx.xf_au_GetCell().split(',')[5])
+    ralpha = degrees_to_radians(float(olx.xf_au_GetCell().split(',')[3]))
+    rbeta = degrees_to_radians(float(olx.xf_au_GetCell().split(',')[4]))
+    rgamma = degrees_to_radians(float(olx.xf_au_GetCell().split(',')[5]))
     wavelength = float(olx.xf_exptl_Radiation())
     filename = OV.FileName() #"/home/xray/olextrunk/etc/scripts/sucrose" #OV.FileName()
   else:
@@ -46,10 +113,24 @@ def LazyOlex(wavelength=0.710174):
     gamma = degrees_to_radians(90.00)
     #wavelength = radiation
     filename = "/home/xray/olextrunk/etc/scripts/sucrose"
+  if (ops == '0'):
+    print "You can: "
+    print "1) Run hklgen"
+    print "2) Run hkl2powder"
+    return
+  elif (ops == '1'):
+    hklgen(cella, cellb, cellc, alpha, beta, gamma, wavelength, filename, max2theta)
+    return
+  elif (ops == '2'):
+    print "Converting HKL to powder"
+  else:
+    print "That option %s is not available at the moment"%ops
+    return
 
   print "Calculating Powder Pattern This Is Slow - Sorry"
   print "Using Wavelength: ", wavelength
 
+  
   # Set up some variables
   iHKL = []
   i = 0
@@ -76,13 +157,13 @@ def LazyOlex(wavelength=0.710174):
   #print "last: ", iHKL[-1]
   
   # From here we are doing the maths
-  dsqTop = (1 - math.cos(alpha)**2 - math.cos(beta)**2 - math.cos(gamma)**2) + (2 * math.cos(alpha) * math.cos(beta) * math.cos(gamma))
-  Ast2 =((math.sin(alpha)/cella)**2) * (1/dsqTop)
-  Bst2 =((math.sin(beta)/cellb)**2) * (1/dsqTop)
-  Cst2 =((math.sin(gamma)/cellc)**2) * (1/dsqTop)
-  twoBstCst = (2/(cellb*cellc))*((math.cos(beta)*math.cos(gamma)-math.cos(alpha))/dsqTop)
-  twoAstCst = (2/(cella*cellc))*((math.cos(gamma) * math.cos(alpha) - math.cos(beta))/dsqTop)
-  twoAstBst = (2/(cella*cellb))*((math.cos(beta)*math.cos(alpha)-math.cos(gamma))/dsqTop)
+  dsqTop = (1 - math.cos(ralpha)**2 - math.cos(rbeta)**2 - math.cos(rgamma)**2) + (2 * math.cos(ralpha) * math.cos(rbeta) * math.cos(rgamma))
+  Ast2 =((math.sin(ralpha)/cella)**2) * (1/dsqTop)
+  Bst2 =((math.sin(rbeta)/cellb)**2) * (1/dsqTop)
+  Cst2 =((math.sin(rgamma)/cellc)**2) * (1/dsqTop)
+  twoBstCst = (2/(cellb*cellc))*((math.cos(rbeta)*math.cos(rgamma)-math.cos(ralpha))/dsqTop)
+  twoAstCst = (2/(cella*cellc))*((math.cos(rgamma) * math.cos(ralpha) - math.cos(rbeta))/dsqTop)
+  twoAstBst = (2/(cella*cellb))*((math.cos(rbeta)*math.cos(ralpha)-math.cos(rgamma))/dsqTop)
   i = 0
   print len(iHKL)
   for i in range(len(iHKL)):
@@ -97,12 +178,8 @@ def LazyOlex(wavelength=0.710174):
   print "Starting Writing Out Powder File"
   ordered_list = []
   ordered_list = sorted(iHKL, key=itemgetter('2Theta'), reverse=False)
-  wFileC = open("%s.xy"%filename, 'w')
+  wFileC = open("%s.csv"%filename, 'w')
   j = 0
-  min2theta = 1 
-  max2theta = 60
-  steps = 0.01
-  points = int((max2theta - min2theta) / steps)
   popped = []
   for j in range(min2theta, points):
     jus = j * steps
