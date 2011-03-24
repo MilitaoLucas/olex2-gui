@@ -2,6 +2,8 @@ import os
 import sys
 import shutil
 import re
+import sets
+from numpy import *
 
 # For Olex2
 try:
@@ -18,10 +20,26 @@ except:
 import subprocess
 import math
 from operator import itemgetter, attrgetter
+import collections
+from itertools import izip
+
 
 
 """ 1 Calculate powder pattern from HKL file
 """
+
+def merge(i2Theta):
+  k = itemgetter('start', 'end')
+  for i, grp in itertools.groupby(i2Theta, key=k):
+    lst = list(grp)
+    if len(lst) > 2:
+      print lst
+      #item = mergepings(lst)
+    else:
+      item = lst[0]
+    emitping(i, item)
+  return
+
 
 def degrees_to_radians(d):
   return d * math.pi / 180
@@ -86,7 +104,34 @@ def hklgen(cella, cellb, cellc, alpha, beta, gamma, wavelength, filename, max2th
     print "hklgen calculation failed to run"
     return
 
-def LazyOlex(ops='0', wavelength=0.710174, max2theta=60):
+def graph_it(filename):
+  from pyx import *
+  g = graph.graphxy(width=8,
+                    x=graph.axis.linear(min=0, max=60),
+                    y=graph.axis.linear(min=0, max=2000))
+  g.plot(graph.data.file("%s.csv"%filename, x=1, y=2), [graph.style.line()])
+  #g.writeEPSfile("%s"%filename)
+  g.writePDFfile("%s"%filename)
+  
+  """
+  from pyx import *
+  
+  g = graph.graphxy(width=8,
+                    x=graph.axis.linear(min=0, max=2),
+                    y=graph.axis.linear(min=0, max=2),
+                    key=graph.key.key(pos="br", dist=0.1))
+  g.plot([graph.data.function("x(y)=y**4", title=r"$x = y^4$"),
+          graph.data.function("x(y)=y**2", title=r"$x = y^2$"),
+          graph.data.function("x(y)=y", title=r"$x = y$"),
+          graph.data.function("y(x)=x**2", title=r"$y = x^2$"),
+          graph.data.function("y(x)=x**4", title=r"$y = x^4$")],
+         [graph.style.line([color.gradient.Rainbow])])
+  g.writeEPSfile("change")
+  g.writePDFfile("change")
+  """
+  return
+
+def LazyOlex(ops='2', pdf='n', wavelength=0.710174, max2theta=60):
   min2theta = 1 
   max2theta = 60
   steps = 0.01
@@ -108,11 +153,11 @@ def LazyOlex(ops='0', wavelength=0.710174, max2theta=60):
     cella = 7.783 
     cellb = 8.7364 
     cellc = 10.9002
-    alpha = degrees_to_radians(90.00)
-    beta = degrees_to_radians(102.984)
-    gamma = degrees_to_radians(90.00)
+    ralpha = degrees_to_radians(90.00)
+    rbeta = degrees_to_radians(102.984)
+    rgamma = degrees_to_radians(90.00)
     #wavelength = radiation
-    filename = "/home/xray/olextrunk/etc/scripts/sucrose"
+    filename = "./sucrose"
   if (ops == '0'):
     print "You can: "
     print "1) Run hklgen"
@@ -165,7 +210,7 @@ def LazyOlex(ops='0', wavelength=0.710174, max2theta=60):
   twoAstCst = (2/(cella*cellc))*((math.cos(rgamma) * math.cos(ralpha) - math.cos(rbeta))/dsqTop)
   twoAstBst = (2/(cella*cellb))*((math.cos(rbeta)*math.cos(ralpha)-math.cos(rgamma))/dsqTop)
   i = 0
-  print len(iHKL)
+  i2Theta = []
   for i in range(len(iHKL)):
     h = iHKL[i]['H']
     k = iHKL[i]['K']
@@ -174,39 +219,71 @@ def LazyOlex(ops='0', wavelength=0.710174, max2theta=60):
     twotheta = 2 *(math.degrees(math.asin((wavelength / (2 * d)))))
     iHKL[i]['D'] = d
     iHKL[i]['2Theta'] = twotheta
+    #i2Theta = {twotheta : abs(iHKL[i]['Fsqd'])}
+    i2Theta.append([round(twotheta, 2),abs(iHKL[i]['Fsqd'])])
     i+=1
   print "Starting Writing Out Powder File"
   ordered_list = []
-  ordered_list = sorted(iHKL, key=itemgetter('2Theta'), reverse=False)
+  i2ThetaS = []
+  i2ThetaSj = []
+  i2ThetaSf = []
+  sorted(iHKL, key=itemgetter('2Theta'), reverse=False)
   wFileC = open("%s.csv"%filename, 'w')
-  j = 0
-  popped = []
+  i2ThetaS = sorted(i2Theta, key=itemgetter(0), reverse=False)
+  n = 0
+
+  for j,t in i2ThetaS:
+    i2ThetaSj.append(j)
+    i2ThetaSf.append(t)
+
+  mergeDict = {}
+  count = 0
+  merid = []
+  for Sj, Sf in izip(i2ThetaSj, i2ThetaSf):
+      key = (Sj)
+      try:
+        # if this (row, col) location already has data, merge var1's
+        mergeDict[key][0] = Sf
+        #print "Current: ", mergeDict[key][0], "New", Sf, "Count: ", count
+        count += 1
+        merid.append(mergeDict[key][0])
+        #print merid
+      except KeyError:
+        #print "unique"
+        if count == 0:
+          oldkey = key
+        if count+1 == len(merid) and count > 0:
+          #print "No fucking clue", key, oldkey, mean(merid), min(merid), max(merid), mergeDict[oldkey][0]
+          mergeDict[oldkey][0] = mean(merid)
+          oldkey = key
+        count = 0
+        merid = []
+        mergeDict[key] = [Sf]
+        merid.append(mergeDict[key][0])
+
+  print "**************"
+  #print mergeDict
+
   for j in range(min2theta, points):
-    jus = j * steps
-    n = 0
-    for n in range(len(ordered_list)):
-      popped = []
-      if jus == round(float(ordered_list[n]['2Theta']), 2):
-        popped = ordered_list[n]
-        new2Theta = popped['2Theta']
-        newFsqd = popped['Fsqd']
-        wFileC.write("%4.4f,%4.4f\n"%
-               (float(new2Theta),
-                float(newFsqd)
-                )
-               )
-        n = 0
-        continue
-      else:
-        new2Theta = jus
-        newFsqd = 0.0000
-    wFileC.write("%4.4f,%4.4f\n"%
-                   (float(new2Theta),
-                    float(newFsqd)
-                    )
-                   )
+    twotheta = j * steps
+    if twotheta in mergeDict:
+      newFsqd = mergeDict[twotheta][0]
+      #print "match ", twotheta, newFsqd
+    else:
+      newFsqd = 0.0
+    wFileC.write("%.2f,%4.4f\n"%
+       (twotheta,
+        abs(float(newFsqd))
+        )
+       )
+    #print twotheta, newFsqd
   wFileC.close()
   print "Finished Writing Out Powder File"
+  
+  if (pdf == 'y') or (pdf == 'Y'):
+    print "creating pdf graph"
+    graph_it(filename)
+    
     # Stage 1 create Lazy P input file basically an INS with ATOM instead of LABEL SFAC
     # Note allow for wavelength in the input
     # Stage 2 run lazyc
