@@ -2,8 +2,13 @@ import os
 import sys
 import shutil
 import re
-import sets
 from numpy import *
+from pyx import *
+import subprocess
+import math
+from operator import itemgetter, attrgetter
+import collections
+from itertools import izip
 
 # For Olex2
 try:
@@ -16,14 +21,6 @@ try:
 except:
   inOlex = -1
   pass
-
-import subprocess
-import math
-from operator import itemgetter, attrgetter
-import collections
-from itertools import izip
-
-
 
 """ 1 Calculate powder pattern from HKL file
 """
@@ -105,7 +102,7 @@ def hklgen(cella, cellb, cellc, alpha, beta, gamma, wavelength, filename, max2th
     return
 
 def graph_it(filename):
-  from pyx import *
+
   g = graph.graphxy(width=8,
                     x=graph.axis.linear(min=0, max=60),
                     y=graph.axis.linear(min=0, max=2000))
