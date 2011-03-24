@@ -128,7 +128,7 @@ def graph_it(filename):
   """
   return
 
-def LazyOlex(ops='2', pdf='n', wavelength=0.710174, max2theta=60):
+def LazyOlex(ops='0', pdf='n', wavelength=0.710174, max2theta=60):
   min2theta = 1 
   max2theta = 60
   steps = 0.01
