@@ -42,7 +42,7 @@
       <arg5 name="base" def="basedir()">
       <arg6 name="ext" def="fileext()">
       <arg7 name="filefull" def="filefull()">
-      
+
       \>
     <cmd
       <cmd0  "xgrid.Visible(false)">
@@ -208,14 +208,13 @@
 />
 />
 
-<report help="Creates structure report"
+<report help="Creates structure report (macro.xld)"
   <body
     <args
     \>
     <cmd
       <cmd4 "cursor(busy, '%Checking for IMAGE file ...%')">
-      <cmd5 "if file.Exists(spy.GetParam(snum.report.image)) then None else 'spy.SetParam(snum.report.image,FilePath()/screenshot.png)'">
-      <cmd6 "if not(strcmp(file.GetName(spy.GetParam(snum.report.image)),screenshot.png)) then None else 'cursor(busy, Creating Image ...)>>pict -pq screenshot.png 1'>>cursor()">
+      <cmd2 "spy.dealWithReportImage()">
       <cmd13 "cursor()">
       <cmd7 "cursor(busy, '%Updating% Cif ...')">
       <cmd8 "spy.ExtractCifInfo()">
@@ -1391,7 +1390,7 @@
 <dire help="Opens the current directory in Explorer"
   <body
     <cmd
-      <cmd0 "exec -o getvar(defexplorer) 'filepath()'">
+      <cmd0 "shell getvar(defexplorer) 'filepath()'">
     \>
   \>
 \>
@@ -1649,7 +1648,7 @@
       <arg1 name="datadir" def="%DataDir()">
     \>
     <cmd
-      <cmd1 'exec -o explorer %1'>
+      <cmd1 'shell explorer %1'>
     \>
   \>
 \>

@@ -1893,6 +1893,17 @@ def getReportTitleSrc():
   return retVal
 OV.registerFunction(getReportTitleSrc)
 
+def dealWithReportImage():
+  image_name = OV.GetValue('SET_REPORT_IMAGE')
+  if image_name == "No Image":
+    OV.SetParam('snum.report.image',None)
+    return
+  elif image_name == "screenshot":
+    olex.m('pict -pq screenshot.png 1')
+    OV.SetParam('snum.report.image',"%s\screenshot.png" %OV.FilePath())
+OV.registerFunction(dealWithReportImage)
+
+
 def getReportImageSrc():
   imagePath = OV.GetParam('snum.report.image')
   if OV.FilePath(imagePath) == OV.FilePath():
