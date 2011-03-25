@@ -29,7 +29,7 @@ $spy.MakeHoverButton(button-validate_cif,spy.ValidateCif)
       type='text'
       valign='center'
       height="$spy.GetParam(gui.html.input_height)"
-      width="$eval((html.clientwidth(self)-200)/2 )"
+      width="$eval((html.clientwidth(self)-180)/2 )"
       bgcolor="spy.GetParam(gui.html.input_bg_colour)"
       name='SET_SNUM_REPORT_TITLE'
       value='$spy.GetParam(snum.report.title)'
@@ -42,15 +42,15 @@ $spy.MakeHoverButton(button-validate_cif,spy.ValidateCif)
   <td>
     <input
       type="combo"
-      width="$eval((html.clientwidth(self)-200)/2)"
+      width="$eval((html.clientwidth(self)-180)/2)"
       height="$spy.GetParam(gui.html.combo_height)"
       bgcolor="spy.GetParam(gui.html.input_bg_colour)"
       name="SET_REPORT_IMAGE"
       readonly
-      items='file.ListDirForGui(FilePath(),*.png;*.jpg;*.bmp;*.ps;*.eps)'
+      items='strcat(screenshot; ,file.ListDirForGui(FilePath(),*.png;*.jpg;*.bmp;*.ps;*.eps))'
       onchange="spy.SetParam(snum.report.image,GetValue(SET_REPORT_IMAGE))"
       width="50%"
-      value="file.GetName($spy.GetParam(snum.report.image))"
+      value="No Image"
     >
   </td>
 </tr>
@@ -61,7 +61,7 @@ $spy.MakeHoverButton(button-validate_cif,spy.ValidateCif)
   <td>
     <input
       type='combo'
-      width="$eval((html.clientwidth(self)-200)/2)"
+      width="$eval((html.clientwidth(self)-180)/2)"
       height="$spy.GetParam(gui.html.combo_height)"
       bgcolor="spy.GetParam(gui.html.input_bg_colour)"
       name='SET_USER_REPORT_STYLE'
@@ -77,7 +77,7 @@ $spy.MakeHoverButton(button-validate_cif,spy.ValidateCif)
   <td>
     <input
       type='combo'
-      width="$eval(((html.clientwidth(self)-250)/2) - $spy.GetParam('gui.html.combo_height') - 15)"
+      width="$eval(((html.clientwidth(self)-21 0)/2) - $spy.GetParam('gui.html.combo_height') - 15)"
       height="$spy.GetParam(gui.html.combo_height)"
       bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
       name='SET_USER_REPORT_TEMPLATE'
