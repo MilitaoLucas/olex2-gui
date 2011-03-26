@@ -339,6 +339,11 @@ class ExtractCifInfo(CifTools):
         '_computing_structure_solution': solution_reference,
         '_atom_sites_solution_primary': atom_sites_solution_primary
       })
+    active_node = History.tree.active_node
+    if active_node is not None and not active_node.is_solution:
+      refinement_reference = RPD.programs[active_node.program].reference
+      self.update_cif_block({
+        '_computing_structure_refinement': refinement_reference})
 
     p = self.sort_out_path(path, "frames")
     if p and self.metacifFiles.curr_frames != self.metacifFiles.prev_frames:
