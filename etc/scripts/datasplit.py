@@ -61,6 +61,21 @@ def family_tree(path, file_seeker, sfrm):
         print "error", OSError
   return
 
+
+try:
+  os.mkdir('%s/datasplit'%(path))
+  sfrm_copy_files = file_finder(path, '*', '*')
+  for sfrm_copy in sfrm_copy_files:
+    try:
+      shutil.copy("%s"%(sfrm_copy), "%s/datasplit/%s"%(path, os.path.split(sfrm_copy)[-1]))
+    except shutil.Error():
+      print "Copy Failed", shutil.Error()
+      sys.exit(-2)
+except OSError:
+  print "ARRRRRRRrrgh I already exist", OSError
+  sys.exit(-1)
+  
+path = path + '/datasplit'
 sfrm_files = (glob.glob('%s/*.ins'%path))
 #print sfrm_files
 sfrm_files.sort()
@@ -88,10 +103,10 @@ for sfrm in unq_filename:
         sfrm_copy_files = file_finder(path, sfrm, '*')
         for sfrm_copy in sfrm_copy_files:
           try:
-            print "copy with inc"
-            shutil.copy("%s"%(sfrm_copy), "%s/%s_%2.2d/%s"%(path, sfrm, run_inc, os.path.split(sfrm_copy)[-1]))
+            print "Move with inc"
+            shutil.move("%s"%(sfrm_copy), "%s/%s_%2.2d/%s"%(path, sfrm, run_inc, os.path.split(sfrm_copy)[-1]))
           except shutil.Error():
-            print "Copy Failed", shutil.Error()
+            print "Moe with inc Failed", shutil.Error()
 
         break
   else :
@@ -99,30 +114,30 @@ for sfrm in unq_filename:
     sfrm_copy_files = file_finder(path, sfrm, '*')
     for sfrm_copy in sfrm_copy_files:
       try:
-        print "Copying"
-        shutil.copy("%s"%(sfrm_copy), "%s/%s/%s"%(path, sfrm, os.path.split(sfrm_copy)[-1]))
+        #print "Moving"
+        shutil.move("%s"%(sfrm_copy), "%s/%s/%s"%(path, sfrm, os.path.split(sfrm_copy)[-1]))
       except shutil.Error():
-        print "Copy Failed", shutil.Error()
+        print "Move Failed", shutil.Error()
     file_seek = []
     file_seek = file_finder(path, '*', 'prp')
     hkl_filename = family_tree(path, file_seek, sfrm)
     sfrm_copy_files = file_finder(path, hkl_filename, '*')
     for sfrm_copy in sfrm_copy_files:
       try:
-        print "Copying"
-        shutil.copy("%s"%(sfrm_copy), "%s/%s/%s"%(path, sfrm, os.path.split(sfrm_copy)[-1]))
+        #print "Moving"
+        shutil.move("%s"%(sfrm_copy), "%s/%s/%s"%(path, sfrm, os.path.split(sfrm_copy)[-1]))
       except shutil.Error():
-        print "Copy Failed", shutil.Error()
+        print "Move failed", shutil.Error()
     file_seek = []
     file_seek = file_finder(path, '*', 'abs')
     abs_filename = family_tree(path, file_seek, hkl_filename)
     sfrm_copy_files = file_finder(path, abs_filename, '*')
     for sfrm_copy in sfrm_copy_files:
       try:
-        print "Copying"
-        shutil.copy("%s"%(sfrm_copy), "%s/%s/%s"%(path, sfrm, os.path.split(sfrm_copy)[-1]))
+        #print "Moving"
+        shutil.move("%s"%(sfrm_copy), "%s/%s/%s"%(path, sfrm, os.path.split(sfrm_copy)[-1]))
       except shutil.Error():
-        print "Copy Failed", shutil.Error()
+        print "Move Failed", shutil.Error()
     
     
 
