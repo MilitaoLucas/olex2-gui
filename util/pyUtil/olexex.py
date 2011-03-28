@@ -648,6 +648,7 @@ def MakeElementButtonsFromFormula():
   else:
     bm = ButtonMaker(btn_dict)
     bm.run()
+    
   cell_volume = 0
   Z = 1
   Z_prime = float(olx.xf_au_GetZprime())
@@ -663,10 +664,10 @@ def MakeElementButtonsFromFormula():
   retStr = '\n'.join(html_elements)
   if cell_volume and totalcount:
     atomic_volume = (cell_volume)/(totalcount * Z)
-    OV.SetVar('current_atomic_volume','%.1f' %atomic_volume)
+    OV.SetParam('snum.solution.current_atomic_volume','%.1f' %atomic_volume)
     retStr = retStr.replace("\n","")
   else:
-    OV.SetVar('current_atomic_volume','n/a')
+    OV.SetParam('snum.solution.current_atomic_volume',None)
   return str(retStr)
 if haveGUI:
   OV.registerFunction(MakeElementButtonsFromFormula)
@@ -807,7 +808,7 @@ if haveGUI:
 
 def GetHklFileList():
   reflections_files = []
-  reflection_file_extensions = ["hkl", "hkp", "raw"]
+  reflection_file_extensions = ["hkl", "hkp", "raw", 'hklf5', 'hkc']
   for extension in reflection_file_extensions:
     g = glob.glob(r"%s/*.%s" %(OV.FilePath(),extension))
     reflections_files += g
@@ -1894,7 +1895,8 @@ def getReportTitleSrc():
 OV.registerFunction(getReportTitleSrc)
 
 def dealWithReportImage():
-  image_name = OV.GetValue('SET_REPORT_IMAGE')
+  #OV.GetParam('snum.re
+  image_name = OV.Getparam('snum.report.image')
   if image_name == "No Image":
     OV.SetParam('snum.report.image',None)
     return
@@ -1924,8 +1926,10 @@ def getReportImageData(size='w400', imageName=None):
   size = int(size[1:])
   if imageName is None:
     imagePath = OV.GetParam('snum.report.image')
-  else:
-    imagePath = r"%s/etc/CIF/styles/%s.png" %(OV.BaseDir(),imageName)
+  if imagePath == "No Image" or imagePath is None:
+    return ""
+#  else:
+#    imagePath = r"%s/etc/CIF/styles/%s.png" %(OV.BaseDir(),imageName)
   imageLocalSrc = imagePath.split("/")[-1:][0]
   imageLocalSrc = imageLocalSrc.split("\\")[-1:][0]
 
