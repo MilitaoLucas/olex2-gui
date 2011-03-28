@@ -816,3 +816,31 @@ class as_pdb_file(OlexCctbxAdapter):
 
 OV.registerMacro(as_pdb_file, """\
 filepath&;remark&;remarks&;fractional_coordinates-(False)&;resname""")
+
+
+class symmetry_search(OlexCctbxAdapter):
+  def __init__(self):
+    OlexCctbxAdapter.__init__(self)
+    from cctbx import symmetry_search
+    xs = self.xray_structure()
+    xs_p1 = xs.expand_to_p1()
+    fo_sq = self.reflections.f_sq_obs.customized_copy(
+      anomalous_flag=False).expand_to_p1().merge_equivalents().array()
+    fo_in_p1 = fo_sq.as_amplitude_array()
+    fc_in_p1 = fo_in_p1.structure_factors_from_scatterers(
+      xray_structure=xs_p1,
+      algorithm="direct").f_calc()
+    fo_complex_in_p1 = fo_in_p1.phase_transfer(fc_in_p1).customized_copy(
+      sigmas=None)
+    #sf_symm = symmetry_search.structure_factor_symmetry(fo_complex_in_p1)
+    fc_in_p1 = miller.build_set(
+      crystal_symmetry=xs_p1,
+      anomalous_flag=False,d_min=fo_sq.d_min()
+      ).structure_factors_from_scatterers(
+        xray_structure=xs_p1,
+        algorithm="direct").f_calc()
+    sf_symm = symmetry_search.structure_factor_symmetry(fc_in_p1)
+    print sf_symm
+    sf_symm.space_group_info.show_summary()
+
+OV.registerFunction(symmetry_search)
