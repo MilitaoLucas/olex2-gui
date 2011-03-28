@@ -371,7 +371,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       cif[OV.FileName().replace(' ', '')] = self.as_cif_block()
       print >> f, cif
       f.close()
-      #self.output_fcf()
+      self.output_fcf()
       new_weighting = weighting.optimise_parameters(
         self.normal_eqns.fo_sq,
         self.normal_eqns.fc_sq,
@@ -557,22 +557,37 @@ class FullMatrixRefine(OlexCctbxAdapter):
     return cif_block
 
   def output_fcf(self):
-    f = open(OV.file_ChangeExt(OV.FileFull(), 'fcf'), 'wb')
+    try: list_code = int(olx.Ins('list'))
+    except: list_code = None
+    if list_code is None: return
     cif = iotbx.cif.model.cif()
-    fc_sq = self.normal_eqns.f_calc.as_intensity_array()
-    fc_sq = fc_sq.customized_copy(data=fc_sq.data()*self.scale_factor)
-    mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
-      fc_sq, array_type='calc')
-    mas_as_cif_block.add_miller_array(
-      self.normal_eqns.fo_sq, array_type='meas')
+    if list_code == 4:
+      fc_sq = self.normal_eqns.f_calc.as_intensity_array()
+      fc_sq = fc_sq.customized_copy(data=fc_sq.data()*self.scale_factor)
+      mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
+        fc_sq, array_type='calc')
+      mas_as_cif_block.add_miller_array(
+        self.normal_eqns.fo_sq, array_type='meas')
+      fmt_str="%4i"*3 + "%12.2f"*2 + "%10.2f"
+    elif list_code == 3:
+      fc = self.normal_eqns.f_calc.customized_copy(anomalous_flag=False)
+      fo_sq = self.normal_eqns.fo_sq.customized_copy(
+        data=self.normal_eqns.fo_sq.data()*(1/self.scale_factor),
+        anomalous_flag=False)
+      fo_sq = fo_sq.eliminate_sys_absent().merge_equivalents(algorithm="shelx").array()
+      fo = fo_sq.as_amplitude_array()
+      fc = fc.common_set(fo)
+      mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
+        fo, array_type='meas')
+      mas_as_cif_block.add_miller_array(
+        fc, column_names=['_refln_A_calc', '_refln_B_calc'])
+      fmt_str="%4i"*3 + "%12.4f"*4
+    else:
+      print "list code %i not supported" %i
+      return
     cif[OV.FileName().replace(' ', '')] = mas_as_cif_block.cif_block
-    from libtbx.utils import time_log
-    time_fcf = time_log("fast").start()
-    fmt_str="%4i"*3 + "%12.2f"*2 + "%10.2f"
+    f = open(OV.file_ChangeExt(OV.FileFull(), 'fcf'), 'wb')
     cif.show(out=f, loop_format_strings={'_refln':fmt_str})
-    time_fcf.stop()
-    print time_fcf.legend
-    print time_fcf.report()
     f.close()
 
   def setup_shared_parameters_constraints(self):
