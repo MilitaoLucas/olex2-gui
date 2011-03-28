@@ -1390,7 +1390,7 @@
 <dire help="Opens the current directory in Explorer"
   <body
     <cmd
-      <cmd0 "run getvar(defexplorer) 'filepath()'">
+      <cmd0 "run &2E;getvar(defexplorer) 'filepath()'&2E;">
     \>
   \>
 \>
@@ -1648,7 +1648,7 @@
       <arg1 name="datadir" def="DataDir()">
     \>
     <cmd
-      <cmd0 "run getvar(defexplorer) %1">
+      <cmd0 "run &2E;getvar(defexplorer) '%1'&2E;">
     \>
   \>
 \>
