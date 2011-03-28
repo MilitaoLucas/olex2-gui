@@ -562,20 +562,24 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if list_code is None: return
     cif = iotbx.cif.model.cif()
     if list_code == 4:
-      fc_sq = self.normal_eqns.f_calc.as_intensity_array()
-      fc_sq = fc_sq.customized_copy(data=fc_sq.data()*self.scale_factor)
+      fc_sq = self.normal_eqns.fc_sq.sort(by_value="packed_indices")
+      fo_sq = self.normal_eqns.fo_sq.sort(by_value="packed_indices")
+      fo_sq = fo_sq.customized_copy(data=fo_sq.data()*(1/self.scale_factor))
       mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
         fc_sq, array_type='calc')
+      mas_as_cif_block.add_miller_array(fo_sq, array_type='meas')
+      _refln_include_status = fc_sq.array(data=flex.std_string(fc_sq.size(), 'o'))
       mas_as_cif_block.add_miller_array(
-        self.normal_eqns.fo_sq, array_type='meas')
-      fmt_str="%4i"*3 + "%12.2f"*2 + "%10.2f"
+        #_refln_include_status, column_name='_refln_include_status')
+        _refln_include_status, column_name='_refln_observed_status') # checkCIF only accepts this one
+      fmt_str="%4i"*3 + "%12.2f"*2 + "%10.2f" + " %s"
     elif list_code == 3:
       fc = self.normal_eqns.f_calc.customized_copy(anomalous_flag=False)
       fo_sq = self.normal_eqns.fo_sq.customized_copy(
         data=self.normal_eqns.fo_sq.data()*(1/self.scale_factor),
         anomalous_flag=False)
       fo_sq = fo_sq.eliminate_sys_absent().merge_equivalents(algorithm="shelx").array()
-      fo = fo_sq.as_amplitude_array()
+      fo = fo_sq.as_amplitude_array().sort(by_value="packed_indices")
       fc = fc.common_set(fo)
       mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
         fo, array_type='meas')
@@ -585,7 +589,19 @@ class FullMatrixRefine(OlexCctbxAdapter):
     else:
       print "list code %i not supported" %i
       return
-    cif[OV.FileName().replace(' ', '')] = mas_as_cif_block.cif_block
+    # cctbx could make e.g. 1.001(1) become 1.0010(10), so use Olex2 values for cell
+    cif_block = iotbx.cif.model.block()
+    cif_block['_shelx_refln_list_code'] = list_code
+    cif_block.update(mas_as_cif_block.cif_block)
+
+    cif_block['_cell_length_a'] = olx.xf_uc_CellEx('a')
+    cif_block['_cell_length_b'] = olx.xf_uc_CellEx('b')
+    cif_block['_cell_length_c'] = olx.xf_uc_CellEx('c')
+    cif_block['_cell_angle_alpha'] = olx.xf_uc_CellEx('alpha')
+    cif_block['_cell_angle_beta'] = olx.xf_uc_CellEx('beta')
+    cif_block['_cell_angle_gamma'] = olx.xf_uc_CellEx('gamma')
+    cif_block['_cell_volume'] = olx.xf_uc_VolumeEx()
+    cif[OV.FileName().replace(' ', '')] = cif_block
     f = open(OV.file_ChangeExt(OV.FileFull(), 'fcf'), 'wb')
     cif.show(out=f, loop_format_strings={'_refln':fmt_str})
     f.close()
