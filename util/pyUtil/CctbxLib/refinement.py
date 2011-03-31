@@ -469,6 +469,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       cell_covariance_matrix=cell_vcv,
       parameter_map=xs.parameter_map(),
       include_bonds_to_hydrogen=True)
+    cif_block.add_loop(distances.loop)
+    cif_block.add_loop(angles.loop)
     htabs = [i for i in self.olx_atoms.model['info_tables'] if i['type'] == 'HTAB']
     equivs = self.olx_atoms.model['equivalents']
     hbonds = []
@@ -479,17 +481,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
         rt_mx = rt_mx_from_olx(equivs[atoms[1][1]])
       hbonds.append(
         iotbx.cif.geometry.hbond(atoms[0][0], atoms[1][0], rt_mx=rt_mx))
-    hbonds_loop = iotbx.cif.geometry.hbonds_as_cif_loop(
-      hbonds,
-      connectivity_full.pair_asu_table,
-      site_labels=xs.scatterers().extract_labels(),
-      sites_frac=xs.sites_frac(),
-      covariance_matrix=self.covariance_matrix_and_annotations.matrix,
-      cell_covariance_matrix=cell_vcv,
-      parameter_map=xs.parameter_map())
-    cif_block.add_loop(distances.loop)
-    cif_block.add_loop(angles.loop)
-    cif_block.add_loop(hbonds_loop.loop)
+    if len(hbonds):
+      hbonds_loop = iotbx.cif.geometry.hbonds_as_cif_loop(
+        hbonds,
+        connectivity_full.pair_asu_table,
+        site_labels=xs.scatterers().extract_labels(),
+        sites_frac=xs.sites_frac(),
+        covariance_matrix=self.covariance_matrix_and_annotations.matrix,
+        cell_covariance_matrix=cell_vcv,
+        parameter_map=xs.parameter_map())
+      cif_block.add_loop(hbonds_loop.loop)
     self.restraints_manager().add_to_cif_block(cif_block, xs)
     # cctbx could make e.g. 1.001(1) become 1.0010(10), so use Olex2 values for cell
     cif_block['_cell_length_a'] = olx.xf_uc_CellEx('a')
