@@ -266,9 +266,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
       conformer_indices=flex.size_t(list(conformer_indices)),
       sym_excl_indices=flex.size_t(list(sym_excl_indices)))
     olx_conn = self.olx_atoms.model['conn']
-    def rt_mx(olx_input):
-      from libtbx.utils import flat_list
-      return sgtbx.rt_mx(flat_list(olx_input[:-1]), olx_input[-1])
     equivs = self.olx_atoms.model['equivalents']
     for i_seq, v in olx_conn['atom'].items():
       for bond_to_delete in v.get('delete', []):
@@ -276,13 +273,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
           connectivity_table.remove_bond(i_seq, bond_to_delete['to'])
         else:
           connectivity_table.remove_bond(
-            i_seq, bond_to_delete['to'], rt_mx(equivs[bond_to_delete['eqiv']]))
+            i_seq, bond_to_delete['to'],
+            rt_mx_from_olx(equivs[bond_to_delete['eqiv']]))
       for bond_to_add in v.get('create', []):
         if bond_to_add['eqiv'] == -1:
           connectivity_table.add_bond(i_seq, bond_to_add['to'])
         else:
           connectivity_table.add_bond(
-            i_seq, bond_to_add['to'], rt_mx(equivs[bond_to_add['eqiv']]))
+            i_seq, bond_to_add['to'],
+            rt_mx_from_olx(equivs[bond_to_add['eqiv']]))
     temp = self.olx_atoms.exptl['temperature']
     if temp < -274: temp = 20
     #set up extinction correction if defined
@@ -452,15 +451,36 @@ class FullMatrixRefine(OlexCctbxAdapter):
           cell_vcv[j,i] = math.pow(cell_errors[i],2)
     # geometry loops
     cell_vcv = cell_vcv.matrix_symmetric_as_packed_u()
+    cell_vcv = None
     connectivity_full = self.reparametrisation.connectivity_table
-    distances = iotbx.cif.distances_as_cif_loop(
+    distances = iotbx.cif.geometry.distances_as_cif_loop(
       connectivity_full.pair_asu_table,
       site_labels=xs.scatterers().extract_labels(),
       sites_frac=xs.sites_frac(),
       covariance_matrix=self.covariance_matrix_and_annotations.matrix,
       cell_covariance_matrix=cell_vcv,
-      parameter_map=xs.parameter_map())
-    angles = iotbx.cif.angles_as_cif_loop(
+      parameter_map=xs.parameter_map(),
+      include_bonds_to_hydrogen=True)
+    angles = iotbx.cif.geometry.angles_as_cif_loop(
+      connectivity_full.pair_asu_table,
+      site_labels=xs.scatterers().extract_labels(),
+      sites_frac=xs.sites_frac(),
+      covariance_matrix=self.covariance_matrix_and_annotations.matrix,
+      cell_covariance_matrix=cell_vcv,
+      parameter_map=xs.parameter_map(),
+      include_bonds_to_hydrogen=True)
+    htabs = [i for i in self.olx_atoms.model['info_tables'] if i['type'] == 'HTAB']
+    equivs = self.olx_atoms.model['equivalents']
+    hbonds = []
+    for htab in htabs:
+      atoms = htab['atoms']
+      rt_mx = None
+      if atoms[1][1] > -1:
+        rt_mx = rt_mx_from_olx(equivs[atoms[1][1]])
+      hbonds.append(
+        iotbx.cif.geometry.hbond(atoms[0][0], atoms[1][0], rt_mx=rt_mx))
+    hbonds_loop = iotbx.cif.geometry.hbonds_as_cif_loop(
+      hbonds,
       connectivity_full.pair_asu_table,
       site_labels=xs.scatterers().extract_labels(),
       sites_frac=xs.sites_frac(),
@@ -469,6 +489,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       parameter_map=xs.parameter_map())
     cif_block.add_loop(distances.loop)
     cif_block.add_loop(angles.loop)
+    cif_block.add_loop(hbonds_loop.loop)
     self.restraints_manager().add_to_cif_block(cif_block, xs)
     # cctbx could make e.g. 1.001(1) become 1.0010(10), so use Olex2 values for cell
     cif_block['_cell_length_a'] = olx.xf_uc_CellEx('a')
@@ -827,3 +848,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           print >> log, "%-9s %-9.4f %.4f" %(
             twin.twin_law.as_hkl(), twin.twin_fraction, math.sqrt(standard_uncertainties[i]))
 
+
+def rt_mx_from_olx(olx_input):
+  from libtbx.utils import flat_list
+  return sgtbx.rt_mx(flat_list(olx_input[:-1]), olx_input[-1])
