@@ -648,6 +648,23 @@ class Method_SIR(Method_solution):
 
     oxs = Sir()
     (data, inv, phase) = oxs.getDirectives()
+
+    filein = open(olx.FileFull(),'r')
+    filedata = filein.readlines()
+    filein.close()
+    esd = []
+    for line in filedata:
+      if 'zerr ' in line.lower():
+        esd = line.split()
+    
+    if len(esd) > 2:
+        del esd[1]
+        del esd[0]
+        try:
+            oxs.setDirectives(errors = ' '.join(esd))
+        except TypeError:
+            pass
+
     oxs.setDirectives(cell=cell, SPACEGROUP=olx.xf_au_GetCellSymm(),
             Format='(3i4,2f8.0)', contents=contents, Reflections=hklfile)
 
