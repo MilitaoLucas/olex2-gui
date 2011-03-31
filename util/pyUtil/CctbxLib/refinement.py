@@ -514,8 +514,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     merging = self.reflections.merging
     min_d_star_sq, max_d_star_sq = fo2.min_max_d_star_sq()
     fo2 = self.reflections.f_sq_obs
-    h_min, k_min, l_min = hklstat['MinIndexes']
-    h_max, k_max, l_max = hklstat['MaxIndexes']
+    h_min, k_min, l_min = hklstat['FileMinIndexes']
+    h_max, k_max, l_max = hklstat['FileMaxIndexes']
     cif_block['_diffrn_measured_fraction_theta_full'] = fmt % completeness_full
     cif_block['_diffrn_radiation_wavelength'] = self.wavelength
     cif_block['_diffrn_reflns_number'] = fo2.eliminate_sys_absent().size()

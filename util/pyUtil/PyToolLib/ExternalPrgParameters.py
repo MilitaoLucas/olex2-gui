@@ -396,6 +396,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       self.original_hklsrc = OV.HKLSrc()
       modified_intensities = None
       modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
+      f_mask, f_model = None, None
       if not OV.HKLSrc() == modified_hkl_path:
         OV.SetParam('snum.masks.original_hklsrc', OV.HKLSrc())
       if OV.GetParam("snum.refinement.recompute_mask_before_refinement"):
@@ -403,12 +404,12 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
         if olx.current_mask.flood_fill.n_voids() > 0:
           f_mask = olx.current_mask.f_mask()
           f_model = olx.current_mask.f_model()
-          modified_intensities = olx.current_mask.modified_intensities()
       elif os.path.exists(modified_hkl_path):
         OV.HKLSrc(modified_hkl_path)
       elif os.path.exists("%s/%s-f_mask.pickle" %(filepath, OV.FileName())):
         f_mask = easy_pickle.load("%s/%s-f_mask.pickle" %(filepath, OV.FileName()))
         f_model = easy_pickle.load("%s/%s-f_model.pickle" %(filepath, OV.FileName()))
+      if f_mask is not None:
         cctbx_adapter = cctbx_olex_adapter.OlexCctbxAdapter()
         fo2 = cctbx_adapter.reflections.f_sq_obs_filtered
         if f_mask.size() < fo2.size():

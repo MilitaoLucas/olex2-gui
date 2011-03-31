@@ -434,8 +434,8 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       print >> f, out.getvalue()
       f.close()
       print out.getvalue()
-      h_min, k_min, l_min = hklstat['MinIndexes']
-      h_max, k_max, l_max = hklstat['MaxIndexes']
+      h_min, k_min, l_min = hklstat['FileMinIndexes']
+      h_max, k_max, l_max = hklstat['FileMaxIndexes']
       cif_block['_diffrn_reflns_number'] = fo2.size()
       cif_block['_diffrn_reflns_av_R_equivalents'] = "%.4f" %merging.r_int()
       cif_block['_diffrn_reflns_av_sigmaI/netI'] = "%.4f" %merging.r_sigma()
