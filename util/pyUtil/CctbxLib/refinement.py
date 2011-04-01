@@ -451,7 +451,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
           cell_vcv[j,i] = math.pow(cell_errors[i],2)
     # geometry loops
     cell_vcv = cell_vcv.matrix_symmetric_as_packed_u()
-    cell_vcv = None
     connectivity_full = self.reparametrisation.connectivity_table
     distances = iotbx.cif.geometry.distances_as_cif_loop(
       connectivity_full.pair_asu_table,
