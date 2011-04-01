@@ -10,9 +10,7 @@
     <b>Solution Program</b>
   </td>
   <td width='50%' VALIGN='center' ALIGN='right' colspan=2>
-    <font size='2'>
 <!-- #include program gui\snippets\snippet-program.htm;scope=snum;prg_type=solution;1; -->
-    </font>
   </td>
 </tr>
 
@@ -23,9 +21,7 @@
     <b>%Solution Method%</b>
   </td>
   <td width='50%' VALIGN='center' ALIGN='right' colspan=2>
-    <font size='2'>
 <!-- #include program gui\snippets\snippet-method.htm;scope=snum;prg_type=solution;1; -->
-    </font>
   </td>
 </tr>
 
@@ -36,9 +32,7 @@
     <b>%Reflection File%</b>
   </td>
   <td width='50%' VALIGN='center' ALIGN='right' colspan='2'>
-    <font size='2'>
 <!-- #include tool-footer gui\snippets\snippet-reflection-file.htm;1; -->
-  </font>
 </td>
 </tr>
 
@@ -48,7 +42,6 @@
     <b>%Chemical Composition%</b>
   </td>
   <td width='50%' VALIGN='center' ALIGN='right' colspan=2>
-    <font size='2'>
       <input
         type='combo'
         width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 - spy.GetParam(gui.htmlpanelwidth_margin_adjust))'
@@ -59,7 +52,6 @@
         value='xf.GetFormula()'
         onchange='xf.SetFormula(GetValue(SET_SNUM_REFINEMENT_FORMULA))>>spy.SetParam(snum.refinement.formula,"GetValue(SET_SNUM_REFINEMENT_FORMULA)")>>updatehtml'
       >
-    </font>
   </td>
 </tr>
 
@@ -69,10 +61,9 @@
     <b>%Number of Formula Units%</b>
   </td>
   <td width='50%' VALIGN='center' ALIGN='right' colspan=1>
-    <font size='2'>
       <input
         type='spin'
-        width=50
+        width='100'
         height="$spy.GetParam(gui.html.spin_height)"
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name='SET_Z'
@@ -80,7 +71,6 @@
         value='xf.au.GetZ()'
         onchange="xf.au.SetZ(GetValue(SET_Z))>>updatehtml"
       >
-    </font>
   </td>
 </tr>
 
@@ -90,17 +80,15 @@
     <b>%Number in Asymmetric Unit%</b>
   </td>
   <td width='50%' VALIGN='center' ALIGN='right' colspan=1>
-    <font size='2'>
       <input
         type='text'
-        width="40"
+        width="100"
         height="$spy.GetParam(gui.html.spin_height)"
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name='SET_Z_PRIME'
         value='xf.au.GetZprime()'
         onleave="xf.au.SetZprime(GetValue(SET_Z_PRIME))>>updatehtml"
       >
-    </font>
   </td>
 </tr>
 
@@ -111,7 +99,7 @@
   </td>
   <td VALIGN='center' ALIGN='right' colspan=1>
     <b>
-      $GetVar(current_atomic_volume)
+      $spy.GetParam('snum.solution.current_atomic_volume')
     </b>
     &Aring;
   </td>
@@ -124,10 +112,9 @@
     <a href='sg>>spy.SetParam(snum.refinement.sg_list,SGList())>>html.Reload'><b>%Suggest SG%</b></a>
   </td>
   <td VALIGN='center' ALIGN='right' colspan=1>
-    <font size='2'>
       <input
         type='combo'
-        width="71"
+        width="100"
         height="$spy.GetParam(gui.html.combo_height)"
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name='SET_SNUM_REFINEMENT_SPACE_GROUP'
@@ -135,7 +122,6 @@
         value='$sg(%n)'
         onchange="reset -s=GetValue(SET_SNUM_REFINEMENT_SPACE_GROUP) -c=GetValue(SET_SNUM_REFINEMENT_FORMULA)>>spy.run_skin sNumTitle>>updatehtml"
       >
-    </font>
   </td>
 </tr>
 

@@ -27,6 +27,7 @@ from libtbx import easy_pickle, utils
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+from scitbx.math import distributions
 
 from History import hist
 
@@ -35,6 +36,8 @@ from RunPrg import RunRefinementPrg
 global twin_laws_d
 twin_laws_d = {}
 
+from scitbx.math import continued_fraction
+from boost import rational
 from cctbx import sgtbx, xray
 from cctbx.array_family import flex
 
@@ -50,18 +53,39 @@ class OlexCctbxAdapter(object):
     self.reflections = None
     twinning=self.olx_atoms.model.get('twin')
     if twinning is not None:
-      self.twin_fraction = twinning['basf'][0]
-      self.twin_law = [int(twinning['matrix'][j][i])
-                       for i in range(3) for j in range(3)]
+      twin_fractions = flex.double(twinning['basf'])
+      twin_law = sgtbx.rot_mx([int(twinning['matrix'][j][i])
+                  for i in range(3) for j in range(3)])
       twin_multiplicity = twinning.get('n', 2)
-      if twin_multiplicity != 2:
-        print "warning: only hemihedral twinning is currently supported"
+      twin_laws = [twin_law]
+      if twin_multiplicity > 2 or abs(twin_multiplicity) > 4:
+        n = twin_multiplicity
+        if twin_multiplicity < 0: n /= 2
+        for i in range(n):
+          twin_laws.append(twin_laws[-1].multiply(twin_law))
+      if twin_multiplicity < 0:
+        inv = sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))
+        twin_laws.append(inv)
+        for law in twin_laws[:-1]:
+          twin_laws.append(law.multiply(inv))
+      if len(twin_fractions) == 0:
+        # perfect twinning
+        # SHELX manual pages 7-6/7
+        n = abs(twin_multiplicity)
+        twin_fractions = flex.double([1/n]*(n-1))
+        grad_twin_fractions = [False] * (n-1)
+      else:
+        grad_twin_fractions = [True] * len(twin_fractions)
+      assert len(twin_fractions) == abs(twin_multiplicity) - 1
+      assert len(twin_fractions) == len(twin_laws)
+      self.twin_components = tuple(
+        [xray.twin_component(law, fraction, grad)
+         for law, fraction, grad in zip(
+           twin_laws, twin_fractions, grad_twin_fractions)])
     else:
-      self.twin_law, self.twin_fraction = None, None
-    try:
-      self.exti = float(olx.Ins('exti'))
-    except:
-      self.exti = None
+      self.twin_components = None
+
+    self.exti = self.olx_atoms.model.get('exti', None)
     self.initialise_reflections()
 
   def __del__(self):
@@ -85,14 +109,14 @@ class OlexCctbxAdapter(object):
         self._restraints_manager = restraints.manager(**kwds)
         self.constraints = create_cctbx_xray_structure.builder.constraints
       self._xray_structure = create_cctbx_xray_structure.structure()
-
-      table = ("n_gaussian", "it1992", "wk1995")[1]
+      table = OV.GetParam("snum.smtbx.atomic_form_factor_table")
       self._xray_structure.scattering_type_registry(
         table=table, d_min=self.reflections.f_sq_obs.d_min())
       if self.reflections._merge < 4:
         from cctbx.eltbx import wavelengths
+        inelastic_table = OV.GetParam("snum.smtbx.inelastic_form_factor_table")
         self._xray_structure.set_inelastic_form_factors(
-          self.wavelength, ("sasaki", "henke")[0])
+          self.wavelength, inelastic_table)
     return self._xray_structure
 
   def restraints_manager(self):
@@ -104,8 +128,11 @@ class OlexCctbxAdapter(object):
     self.cell = self.olx_atoms.getCell()
     self.space_group = "hall: "+str(olx.xf_au_GetCellSymm("hall"))
     hklf_matrix = utils.flat_list(self.olx_atoms.model['hklf']['matrix'])
-    hklf_matrix = sgtbx.rt_mx(
-      sgtbx.rot_mx([int(i) for i in hklf_matrix]).transpose())
+    mx = [ continued_fraction.from_real(e, eps=1e-3).as_rational()
+           for e in hklf_matrix ]
+    den = reduce(rational.lcm, [ r.denominator() for r in mx ])
+    nums = [ r.numerator()*(den//r.denominator()) for r in mx ]
+    hklf_matrix = sgtbx.rot_mx(nums, den)
     reflections = olx.HKLSrc()
     mtime = os.path.getmtime(reflections)
     if (force or
@@ -139,16 +166,21 @@ class OlexCctbxAdapter(object):
              ignore_inversion_twin=False,
              algorithm="direct"):
     assert self.xray_structure().scatterers().size() > 0, "n_scatterers > 0"
-    if ignore_inversion_twin and self.twin_law == [-1,0,0,0,-1,0,0,0,-1]:
+    if (    ignore_inversion_twin
+        and self.twin_components is not None
+        and self.twin_components[0].twin_law == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
       apply_twin_law = False
-    if apply_twin_law and self.twin_law is not None:
-      twinning = cctbx_controller.hemihedral_twinning(self.twin_law, miller_set)
+    if (    apply_twin_law
+        and self.twin_components is not None
+        and self.twin_components[0].twin_fraction > 0):
+      twin_component = self.twin_components[0]
+      twinning = cctbx_controller.hemihedral_twinning(
+        twin_component.twin_law.as_double(), miller_set)
       twin_set = twinning.twin_complete_set
       fc = twin_set.structure_factors_from_scatterers(
         self.xray_structure(), algorithm=algorithm).f_calc()
       twinned_fc2 = twinning.twin_with_twin_fraction(
-        fc.as_intensity_array(),
-        self.twin_fraction)
+        fc.as_intensity_array(), twin_component.twin_fraction)
       fc = twinned_fc2.f_sq_as_f().phase_transfer(fc).common_set(miller_set)
     else:
       fc = miller_set.structure_factors_from_scatterers(
@@ -195,7 +227,6 @@ class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):
       return
     absolute_structure.hooft_analysis.__init__(
       self, fo2, fc, probability_plot_slope=probability_plot_slope, scale_factor=scale)
-    self.show()
 
 OV.registerFunction(hooft_analysis)
 
@@ -221,16 +252,22 @@ class students_t_hooft_analysis(OlexCctbxAdapter, absolute_structure.students_t_
       print "No Bijvoet pairs"
       return
     analysis = absolute_structure.hooft_analysis(fo2, fc, scale_factor=scale)
-    bijvoet_diff_plot = absolute_structure.bijvoet_differences_probability_plot(analysis)
+    bijvoet_diff_plot = absolute_structure.bijvoet_differences_probability_plot(
+      analysis)
     if nu is not None:
       nu = float(nu)
     else:
       nu = absolute_structure.maximise_students_t_correlation_coefficient(
-        bijvoet_diff_plot.y, 1, 101)
+        bijvoet_diff_plot.y, 1, 300)
+    distribution = distributions.students_t_distribution(nu)
+    observed_deviations = bijvoet_diff_plot.y
+    expected_deviations = distribution.quantiles(observed_deviations.size())
+    fit = flex.linear_regression(
+      expected_deviations[5:-5], observed_deviations[5:-5])
+    self.slope = fit.slope()
     print "Student's t nu: %.1f" %nu
     absolute_structure.students_t_hooft_analysis.__init__(
-      self, fo2, fc, nu, scale_factor=scale)
-    self.show()
+      self, fo2, fc, nu, scale_factor=scale, probability_plot_slope=self.slope)
 
 OV.registerFunction(students_t_hooft_analysis)
 
@@ -397,8 +434,8 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       print >> f, out.getvalue()
       f.close()
       print out.getvalue()
-      h_min, k_min, l_min = hklstat['MinIndexes']
-      h_max, k_max, l_max = hklstat['MaxIndexes']
+      h_min, k_min, l_min = hklstat['FileMinIndexes']
+      h_max, k_max, l_max = hklstat['FileMaxIndexes']
       cif_block['_diffrn_reflns_number'] = fo2.size()
       cif_block['_diffrn_reflns_av_R_equivalents'] = "%.4f" %merging.r_int()
       cif_block['_diffrn_reflns_av_sigmaI/netI'] = "%.4f" %merging.r_sigma()
@@ -779,3 +816,31 @@ class as_pdb_file(OlexCctbxAdapter):
 
 OV.registerMacro(as_pdb_file, """\
 filepath&;remark&;remarks&;fractional_coordinates-(False)&;resname""")
+
+
+class symmetry_search(OlexCctbxAdapter):
+  def __init__(self):
+    OlexCctbxAdapter.__init__(self)
+    from cctbx import symmetry_search
+    xs = self.xray_structure()
+    xs_p1 = xs.expand_to_p1()
+    fo_sq = self.reflections.f_sq_obs.customized_copy(
+      anomalous_flag=False).expand_to_p1().merge_equivalents().array()
+    fo_in_p1 = fo_sq.as_amplitude_array()
+    fc_in_p1 = fo_in_p1.structure_factors_from_scatterers(
+      xray_structure=xs_p1,
+      algorithm="direct").f_calc()
+    fo_complex_in_p1 = fo_in_p1.phase_transfer(fc_in_p1).customized_copy(
+      sigmas=None)
+    #sf_symm = symmetry_search.structure_factor_symmetry(fo_complex_in_p1)
+    fc_in_p1 = miller.build_set(
+      crystal_symmetry=xs_p1,
+      anomalous_flag=False,d_min=fo_sq.d_min()
+      ).structure_factors_from_scatterers(
+        xray_structure=xs_p1,
+        algorithm="direct").f_calc()
+    sf_symm = symmetry_search.structure_factor_symmetry(fc_in_p1)
+    print sf_symm
+    sf_symm.space_group_info.show_summary()
+
+OV.registerFunction(symmetry_search)

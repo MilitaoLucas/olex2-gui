@@ -374,7 +374,7 @@
 <dire help="Opens the current directory in Explorer"
   <body
     <cmd
-      <cmd0 "exec -o getvar(defexplorer) 'filepath()'">
+      <cmd0 "run getvar(defexplorer) 'filepath()'">
     \>
   \>
 \>

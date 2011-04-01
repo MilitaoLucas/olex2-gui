@@ -71,6 +71,8 @@ gui {
       .type = str
     font_size = 2
       .type = int
+    font_size_large = 5
+      .type = int
     highlight_colour = #ff8800
       .type = colour
 
@@ -87,6 +89,8 @@ gui {
       .type = int
       .help = Width of a combobox that is to take 2 digits and a decimal point.
     combo_height = 18
+      .type = int
+    spin_height = 18
       .type = int
     icon_size = 25
       .type = int
@@ -127,6 +131,10 @@ gui {
       .type = float
     font_name = Vera
       .type = str
+    adval = 13
+      .type = int
+    info_size_scale = 4
+      .type = int
 
     snumtitle{
       base_colour = None
@@ -160,6 +168,8 @@ gui {
       filefullinfo_colour_L = 1.3
         .type = float
       sginfo_scale = 1.0
+        .type = float
+      sg_L = 1.8
         .type = float
       corner_rad = 3
         .type = int
@@ -200,16 +210,22 @@ gui {
         .type = str
       arrows = "bar:top:3"
         .type = str
+
       off_L = 0.9
         .type = float
+      hover_L = 0.8
+        .type = float
+      on_L = 1.2
+        .type = float
+
       shadow = False
         .type = bool
     }
 
     cbtn{
-      base_colour = #e1e1e1
+      base_colour = #444444
         .type = colour
-      grad_colour = #eeeeee
+      grad_colour = #999999
         .type = colour
       grad_step = 0.2
         .type = float
@@ -235,10 +251,29 @@ gui {
         .type = int
       rounded = 0101
         .type = str
-      arrows = "bar:right:18,arrow_right:onup:offdown:hoverdown:hoveronup,buttonmark:28"
+      arrows = "bar:right:23,arrow_right:onup:offdown:hoverdown:hoveronup,buttonmark:33"
         .type = str
+
       off_L = 1.6
         .type = float
+      on_L = 1.2
+        .type = float
+      hover_L = 1.0
+        .type = float
+
+      vline = 22
+        .type = int
+      dot_size = 4
+        .type = int
+      dot_pad = 4
+        .type = int
+      dot_left = 2
+        .type = int
+      dot_colour_off = #dedede
+        .type = colour
+      dot_colour_on = #444444
+        .type = colour
+
     }
 
     button{
@@ -272,6 +307,12 @@ gui {
         .type = colour
       arrows = buttonmark:11
         .type = str
+      off_L = 0.9
+        .type = float
+      hover_L = 0.8
+        .type = float
+      on_L = 1.2
+        .type = float
     }
 
     tinybutton{
@@ -281,7 +322,7 @@ gui {
         .type = colour
       grad_step = 0.3
         .type = float
-      height = 20
+      height = 18
         .type = int
       width = 18
         .type = int
@@ -308,8 +349,8 @@ gui {
       arrows = None
         .type = str
     }
-    
-    
+
+
     h1{
       base_colour = #aaaaaa
         .type = colour
@@ -340,6 +381,10 @@ gui {
       arrows = "bar:left:5,char:on~:off+:hover+:hoveron~"
         .type = str
       off_L = 1.2
+        .type = float
+      on_L = 1.2
+        .type = float
+      hover_L = 0.8
         .type = float
       shadow = True
         .type = bool
@@ -378,6 +423,10 @@ gui {
       arrows = "bar:left:4,char:on~:off+"
         .type = str
       off_L = 1.0
+        .type = float
+      on_L = 1.0
+        .type = float
+      hover_L = 0.8
         .type = float
       shadow = False
         .type = bool
@@ -439,13 +488,13 @@ gui {
       .help = Maximum height of the help popup boxes
 
     }
-    
+
   buttons{
     small_buttons{
       width = 56
         .type = int
     }
-  }  
+  }
 
   report{
     width = 800
@@ -463,6 +512,30 @@ gui {
         .type = colour
     }
   }
+  
+  graph{
+    light_grey = #888888
+      .type = colour
+    grey = #444444
+      .type = colour
+    dark_grey = #222222
+      .type = colour
+    filename_colour = #bbbbbb
+      .type = colour
+    title_colour = #777777
+      .type = colour
+    fill_colour = #ffffff
+      .type = colour
+    outline_colour = #666666
+      .type = colour
+    fitline_colour = #eeeeee
+      .type = colour
+    page_colour = #ffffff
+      .type = colour
+    axislabel_colour = #666666
+      .type = colour
+  }
+  
   g3{
     top{
       start_new_structure{
@@ -478,7 +551,7 @@ gui {
           .type = str
       }
     }
-  
+
     start_new_structure{
       analyse_diffraction_data{
         label = analyse_diffraction_data
@@ -493,7 +566,7 @@ gui {
           .type = str
       }
     }
-  }  
-  
+  }
+
 }
 

@@ -16,18 +16,26 @@ class AutoDemo():
   def __init__(self, name='default_auto_tutorial', reading_speed=0.06):
     self.interactive = True
     self.bg_colour = IT.decimalColorToHTMLcolor(OV.GetParam('gui.skin.clearcolor'))
-    self.font_colour = '#ffffff'
-    self.font_colour_code = '#aaaaff'
-    self.font_colour_bold = '#aaaaff'
+    self.font_size = 20
     self.highlight_colour = OV.GetParam('gui.html.highlight_colour').hexadecimal
-    
+
+    try:
+      self.bg_colour = IT.decimalColorToHTMLcolor(int(olx.gl_lm_ClearColor()))
+      self.font_colour = '#ffffff'
+      self.font_colour_code = '#aaaaff'
+      self.font_colour_bold = '#aaaaff'
+    except:
+      self.bg_colour = '#ffffff'
+      self.font_colour = '#000000'
+      self.font_colour_code = '#000088'
+      self.font_colour_bold = '#444444'
+
     self.name = name
     self.reading_speed = reading_speed
 
   def run_autodemo(self):
     have_hover = OV.GetParam('olex2.hover_buttons')
     OV.SetParam('olex2.hover_buttons', True)
-    self.bg_colour = IT.decimalColorToHTMLcolor(int(olx.gl_lm_ClearColor()))
     rFile = open("%s/etc/tutorials/%s.txt" %(OV.BaseDir(),self.name),'r')
     items = rFile.readlines()
     rFile.close()
@@ -59,13 +67,13 @@ class AutoDemo():
           else:
             val = OV.GetParam(val)
         setattr(self, var, val)
-    
+
       cmd_type = item.split(":")[0]
       cmd_content = item.split(":")[1]
       sleep = 0
       if cmd_type == "s":
         sleep = cmd_content
-      
+
       if cmd_type == 'p':
         self.txt = "%s" %(cmd_content)
         if self.interactive:
@@ -79,13 +87,13 @@ class AutoDemo():
           bitmap = self.make_tutbox_image()
           olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
           sleep = len(cmd_content) * reading_speed
-          
-        
+
+
       if cmd_type == 'c':
         txt = "%s: %s" %(cmd_type, cmd_content)
         txt = "%s" %(cmd_content)
         print(txt)
-  
+
       if cmd_type == 'h':
         control = cmd_content
 
@@ -113,7 +121,7 @@ class AutoDemo():
             new_image = "up=%soff.png" %control
             olx.html_SetImage(control_name,new_image)
           elif control.endswith('_bg'):
-            cmd = 'html.setBG(%s,%s)' %(control.rstrip('_bg'), '#ffffff')
+            cmd = 'html.setBG(%s,%s)' %(control.rstrip('_bg'), '#fffffe')
             olex.m(cmd)
           else:
             OV.SetParam('gui.image_highlight',None)
@@ -123,39 +131,39 @@ class AutoDemo():
             time.sleep(0.1)
       #time.sleep(sleep)
       #olx.Wait(int(sleep * 1000))
-        
+
       if cmd_type == 'c':
         olex.m(cmd_content)
     if not self.interactive:
-      bitmap = self.make_tutbox_image("Done", font_colour="#44aa44")
+      bitmap = self.make_tutbox_image("Done", font_colour=self.font_colour)
       olx.DeleteBitmap(bitmap)
       olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
       time.sleep(1)
       olx.DeleteBitmap(bitmap)
     OV.SetParam('olex2.hover_buttons', have_hover)
-        
-  
-  def make_tutbox_image(self, font_size=20, font_colour='#aa4444', bg_colour='#fff6bf'):
+
+
+  def make_tutbox_image(self):
     txt = self.txt
-    IM = IT.make_simple_text_to_image(512, 64, txt, font_size=font_size, bg_colour=bg_colour, font_colour=font_colour)
+    IM = IT.make_simple_text_to_image(512, 64, txt, font_size=self.font_size, bg_colour=self.bg_colour, font_colour=self.font_colour)
     IM.save("autotut.png")
     OlexVFS.save_image_to_olex(IM, "autotut.png", 0)
     return "autotut.png"
-  
+
   def make_tutbox_popup(self):
     txt = self.txt
     have_image = self.make_tutbox_image()
     pop_name = "AutoTutorial"
-  
+
     self.format_txt()
-    
+
     d = {}
     d.setdefault('pop_name',pop_name)
     d.setdefault('bg_colour',self.bg_colour)
     d['bg_colour'] = self.bg_colour
     d.setdefault('font_colour',self.font_colour)
     d.setdefault('txt', self.txt)
-    
+
     if OV.IsControl('%s'%pop_name):
       olx.html_ShowModal(pop_name)
     else:
@@ -163,37 +171,37 @@ class AutoDemo():
       txt='''
     <body link="$spy.GetParam(gui.html.link_colour)" bgcolor='%(bg_colour)s'>
     <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1">
-  
+
     <tr align='center'>
       <td>
-         <input 
-           type="button" 
+         <input
+           type="button"
            name=TUTORIAL_CANCEL
-           bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
-           valign='center' 
-           width="60"  
+           bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+           valign='center'
+           width="60"
            height="22"
            onclick="html.EndModal(%(pop_name)s,0)"
            value = "Cancel">
-         <input 
+         <input
            type="button"
            name=TUTORIAL_NEXT
            bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-           valign='center' 
-           width="60"  
+           valign='center'
+           width="60"
            height="22"
            onclick="html.EndModal(%(pop_name)s,1)"
            value = "Next">
         <br>
       </td>
     </tr>
-  
+
     <tr bgcolor='#006090'>
       <td></td>
     </tr>
 
     <font color='%(font_colour)s' size=4 face="$spy.GetParam(gui.html.font_name)">
-    
+
     <tr align = 'center'>
       <td><br><br>
       %(txt)s
@@ -203,7 +211,7 @@ class AutoDemo():
        </font>
        </body>
        '''%d
-      
+
       txt = txt.decode('utf-8')
       OV.write_to_olex("%s.htm" %pop_name.lower(), txt)
       boxWidth = 200
@@ -215,8 +223,8 @@ class AutoDemo():
       res = olx.html_ShowModal(pop_name)
       res = int(res)
       return res
-  
-  
+
+
   def tutbox(self):
     txt = self.txt
     have_image = self.make_tutbox_image()
@@ -228,7 +236,7 @@ class AutoDemo():
     wFilePath = r"%s.htm" %(name)
     txt = txt.replace(u'\xc5', 'angstrom')
     OV.write_to_olex(wFilePath, txt)
-  
+
     boxWidth = 300
     boxHeight = 200
     x = 200
@@ -242,7 +250,7 @@ class AutoDemo():
     txt = txt.replace('<c>','<b><code><font color=%s>' %self.font_colour_code)
     txt = txt.replace('</c>','</font></code></b>')
     self.txt = txt
-    
-    
+
+
 AutoDemo_istance = AutoDemo()
 OV.registerFunction(AutoDemo_istance.run_autodemo)

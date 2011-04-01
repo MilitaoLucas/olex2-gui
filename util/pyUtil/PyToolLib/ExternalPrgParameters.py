@@ -59,6 +59,8 @@ class Program(object):
 
 
 class Method(object):
+  failure = False
+
   def __init__(self, phil_object):
     self.phil_index = phil_interface.phil_handler(phil_object)
     params = self.phil_index.params
@@ -362,8 +364,8 @@ class Method_shelx(Method):
       raise RuntimeError(
         'you may be using an outdated version of %s' %(prgName))
     olx.WaitFor('process') # uncomment me!
-    #olex.m("User '%s'" %RunPrgObject.filePath)
-    olx.User("'%s'" %RunPrgObject.filePath)
+    olex.m("User '%s'" %RunPrgObject.filePath)
+    #olx.User("'%s'" %RunPrgObject.filePath)
 
 
 class Method_shelx_solution(Method_shelx, Method_solution):
@@ -394,6 +396,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       self.original_hklsrc = OV.HKLSrc()
       modified_intensities = None
       modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
+      f_mask, f_model = None, None
       if not OV.HKLSrc() == modified_hkl_path:
         OV.SetParam('snum.masks.original_hklsrc', OV.HKLSrc())
       if OV.GetParam("snum.refinement.recompute_mask_before_refinement"):
@@ -401,12 +404,12 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
         if olx.current_mask.flood_fill.n_voids() > 0:
           f_mask = olx.current_mask.f_mask()
           f_model = olx.current_mask.f_model()
-          modified_intensities = olx.current_mask.modified_intensities()
       elif os.path.exists(modified_hkl_path):
         OV.HKLSrc(modified_hkl_path)
       elif os.path.exists("%s/%s-f_mask.pickle" %(filepath, OV.FileName())):
         f_mask = easy_pickle.load("%s/%s-f_mask.pickle" %(filepath, OV.FileName()))
         f_model = easy_pickle.load("%s/%s-f_model.pickle" %(filepath, OV.FileName()))
+      if f_mask is not None:
         cctbx_adapter = cctbx_olex_adapter.OlexCctbxAdapter()
         fo2 = cctbx_adapter.reflections.f_sq_obs_filtered
         if f_mask.size() < fo2.size():
@@ -551,6 +554,8 @@ class Method_shelxd(Method_shelx_solution):
 
 class Method_cctbx_refinement(Method_refinement):
 
+  flack = None
+
   def pre_refinement(self, RunPrgObject):
     RunPrgObject.make_unique_names = True
     Method_refinement.pre_refinement(self, RunPrgObject)
@@ -565,11 +570,9 @@ class Method_cctbx_refinement(Method_refinement):
       max_cycles=RunPrgObject.params.snum.refinement.max_cycles,
       max_peaks=RunPrgObject.params.snum.refinement.max_peaks,
       verbose=verbose)
-#      max_peaks=OV.SetMaxPeaks(),
-#      verbose=verbose)
-    #olx.Kill('$Q')
     try:
       cctbx.run()
+      self.flack = cctbx.flack
     except InvalidConstraint, e:
       print e
     except NotImplementedError, e:
@@ -582,10 +585,14 @@ class Method_cctbx_refinement(Method_refinement):
     finally:
       OV.DeleteBitmap('refine')
 
+  def getFlack(self):
+    return self.flack
+
 class Method_cctbx_ChargeFlip(Method_solution):
 
   def run(self, RunPrgObject):
     from cctbx_olex_adapter import OlexCctbxSolve
+    import traceback
     print 'STARTING cctbx Charge Flip'
     RunPrgObject.solve = True
     cctbx = OlexCctbxSolve()
@@ -605,12 +612,12 @@ class Method_cctbx_ChargeFlip(Method_solution):
         print "*** No solution found ***"
     except Exception, err:
       print err
+      traceback.print_exc()
     try:
       olx.Freeze(True)
       olx.xf_EndUpdate()
       olx.Compaq('-a')
       olx.Move()
-      olx.Fix("occu $Q")
     finally:
       olx.Freeze(False)
     #olx.VSS(True)
@@ -680,36 +687,36 @@ def defineExternalPrograms():
     name='ShelXS',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference="A short history of SHELX (Sheldrick, 2007)",
+    reference="SHELXS, G.M. Sheldrick, Acta Cryst. (2008). A64, 112-122",
     execs=["shelxs.exe", "shelxs"])
   ShelXS86 = Program(
     name='ShelXS86',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference="A short history of SHELX (Sheldrick, 2007)",
+    reference="ShelXS86, G.M. Sheldrick, Acta Cryst. (2008). A64, 112-122",
     execs=["shelxs86.exe", "shelxs86"])
   XS = Program(
     name='XS',
     program_type='solution',
     author="G.M.Sheldrick/Bruker",
-        reference="A short history of SHELX (Sheldrick, 2007)/Bruker",
+    reference="XS, G.M. Sheldrick, Acta Cryst. (2008). A64, 112-122",
     execs=["xs.exe", "xs"])
   ShelXD = Program(
     name='ShelXD',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference="A short history of SHELX (Sheldrick, 2007)",
+    reference="SHELXD, G.M. Sheldrick, Acta Cryst. (2008). A64, 112-122",
     execs=["shelxd.exe", "shelxd"])
   XM = Program(
     name='XM',
     program_type='solution',
     author="G.M.Sheldrick/Bruker",
-    reference="A short history of SHELX (Sheldrick, 2007)/Bruker",
+    reference="XM, G.M. Sheldrick, Acta Cryst. (2008). A64, 112-122",
     execs=["xm.exe", "xm"])
   smtbx_solve = Program(
     name='smtbx-solve',
     program_type='solution',
-    author="Luc Bourhis, Ralf Grosse-Kunstleve",
+    author="Luc Bourhis",
     reference="smtbx-flip (Bourhis, 2008)")
   SIR97 = Program(
     name='SIR97',
@@ -734,43 +741,43 @@ def defineExternalPrograms():
     name='ShelXL',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="A short history of SHELX (Sheldrick, 2007)",
+    reference="SHELXL, G.M. Sheldrick, Acta Cryst. (2008). A64, 112-122",
     execs=["shelxl.exe", "shelxl"])
   XL = Program(
     name='XL',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="A short history of SHELX (Sheldrick, 2007)/Bruker",
+    reference="XL, G.M. Sheldrick, Acta Cryst. (2008). A64, 112-122",
     execs=["xl.exe", "xl"])
   XLMP = Program(
     name='XLMP',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="A short history of SHELX (Sheldrick, 2007)/Bruker",
+    reference="XLMP, G.M. Sheldrick, Acta Cryst. (2008). A64, 112-122",
     execs=["xlmp.exe", "xlmp"])
   ShelXH = Program(
     name='ShelXH',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="A short history of SHELX (Sheldrick, 2007)",
+    reference="SHELXH, G.M. Sheldrick, Acta Cryst. (2008). A64, 112-122",
     execs=["shelxh.exe", "shelxh"])
   XH = Program(
     name='XH',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="A short history of SHELX (Sheldrick, 2007)/Bruker",
+    reference="XH, G.M. Sheldrick, Acta Cryst. (2008). A64, 112-122",
     execs=["xh.exe", "xh"])
   ShelXL_ifc = Program(
     name='ShelXL_ifc',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="A short history of SHELX (Sheldrick, 2007)",
+    reference="SHELXL, G.M. Sheldrick, Acta Cryst. (2008). A64, 112-122",
     execs=["shelxl_ifc"])
   smtbx_refine = Program(
     name='smtbx-refine',
     program_type='refinement',
-    author="L.J. Bourhis, R.J. Gildea, R.W. Grosse-Kunstleve",
-    reference="smtbx-refine (Bourhis, 2008)")
+    author="L.J. Bourhis, O.V. Dolomanov, R.J. Gildea",
+    reference="smtbx-refine (L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, 2011)")
 
   for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc):
     for method in (least_squares, cgls):

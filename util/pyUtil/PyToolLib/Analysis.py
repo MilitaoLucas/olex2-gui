@@ -58,6 +58,8 @@ class Graph(ImageTools):
     self.max_y = None
     self.decorated = False
 
+    self.guiParams = OV.GuiParams()
+    
     self.graphInfo = {
       "TopRightTitle":self.filename,
     }
@@ -172,11 +174,11 @@ class Graph(ImageTools):
       max_length = max(max_length, len(key['label']))
     boxWidth = int(0.6 * self.font_size_tiny * max_length) + 60
     boxHeight = int((self.font_size_tiny + 10) * (len(keys_to_draw))) + 20
-    colour = self.gui_html_bg_colour
+    colour = self.fillColour
     im = Image.new('RGB', (boxWidth,boxHeight), colour)
     draw = ImageDraw.Draw(im)
     box = (2,2,boxWidth-2,boxHeight-2)
-    draw.rectangle(box, fill=self.gui_html_bg_colour, outline=(200, 200, 200))
+    draw.rectangle(box, fill=self.fillColour, outline=self.outlineColour)
     margin_left = int((boxWidth/4))
     margin_right = int((boxWidth/4)*3)
 
@@ -230,6 +232,7 @@ class Graph(ImageTools):
   def make_empty_graph(self, axis_x=False, draw_title=True):
     import Image
     import ImageFont, ImageDraw, ImageChops
+    guiParams = OV.GuiParams()
 
     self.imX = self.params.size_x
     self.imY = self.params.size_y
@@ -246,15 +249,21 @@ class Graph(ImageTools):
     self.font_small = self.registerFontInstance(font_name, self.font_size_small)
     self.font_size_tiny = int(0.7 * fontscale)
     self.font_tiny = self.registerFontInstance(font_name, self.font_size_tiny)
-    self.light_grey = "#888888"
-    self.grey = "#444444"
-    self.dark_grey = "#222222"
     font_name = "Vera Bold"
     self.font_bold_large = self.registerFontInstance(font_name, int(1.4 * fontscale))
     self.font_bold_normal = self.registerFontInstance(font_name, int(1.0 * fontscale))
 
-    self.filenameColour = "#bbbbbb"
-    self.titleColour = "#777777"
+    self.light_grey = guiParams.graph.light_grey.hexadecimal
+    self.grey = guiParams.graph.grey.hexadecimal
+    self.dark_grey = guiParams.graph.grey.hexadecimal
+    self.filenameColour = guiParams.graph.filename_colour.hexadecimal
+    self.titleColour = guiParams.graph.title_colour.hexadecimal
+    self.fillColour = guiParams.graph.fill_colour.hexadecimal
+    self.outlineColour = guiParams.graph.outline_colour.hexadecimal
+    self.fitlineColour = guiParams.graph.fitline_colour.hexadecimal
+    self.pageColour = guiParams.graph.page_colour.hexadecimal
+    self.axislabelColour = guiParams.graph.axislabel_colour.hexadecimal
+    
     self.bSides = round(0.012 * self.imX)
     self.xSpace = 0
     self.axis_x = axis_x
@@ -264,8 +273,8 @@ class Graph(ImageTools):
     self.currX = 0
     self.currY = 0
     size = ((int(self.imX), int(self.imY)))
-    colour = self.gui_html_bg_colour
-    im = Image.new('RGB', size, colour)
+    
+    im = Image.new('RGB', size, self.pageColour)
     draw = ImageDraw.Draw(im)
     self.draw = draw
 
@@ -298,11 +307,11 @@ class Graph(ImageTools):
     dx = self.imX - 1*self.bSides
     dy = self.graph_bottom
     box = (self.bSides + self.xSpace, self.currY + 0.03*self.imY, dx, dy)
-    if self.line_width > 0:
-      fill = (200, 200, 200)
-    else:
-      fill = self.gui_html_bg_colour
-    draw.rectangle(box,  fill=fill, outline=(200, 200, 200))
+    #if self.line_width > 0:
+      #fillColour = (200, 200, 200)
+    #else:
+      #fillColour = self.fillColour
+    draw.rectangle(box,  fill=self.fillColour, outline=self.outlineColour)
     self.boxX = dx - self.bSides*2 + self.xSpace
     self.boxY = dy - self.currY
     self.boxXoffset = self.bSides+self.xSpace
@@ -310,9 +319,10 @@ class Graph(ImageTools):
     self.graph_left = self.boxXoffset
     self.boxYoffset = self.currY + 0.03*self.imY
     self.graph_top = self.boxYoffset
+
     if self.line_width > 0:
       box = (box[0] + self.line_width, box[1] + self.line_width, box[2] - self.line_width, box[3] -self.line_width)
-      draw.rectangle(box, fill=self.gui_html_bg_colour, outline=(200, 200, 200))
+      draw.rectangle(box, fill=self.fillColour, outline=self.outlineColour)
     self.im = im
     self.draw = draw
 
@@ -341,7 +351,7 @@ class Graph(ImageTools):
       x = int(self.bSides + i * barX + (barX - wX)/2)
       y = self.graph_bottom
       top_left = (x,y)
-      IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
+      IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.axislabelColour)
       i += 1
 
   def draw_fit_line(self, slope, y_intercept, write_equation=True):
@@ -402,7 +412,7 @@ class Graph(ImageTools):
       width = 4
     else:
       width = 5
-    self.draw.line((x1+2, y1, x2-2, y2), width=width, fill="#eeeeee")
+    self.draw.line((x1+2, y1, x2-2, y2), width=width, fill=self.fitlineColour)
 
     if y_intercept >= 0: sign = '+'
     else: sign = '-'
@@ -624,7 +634,7 @@ class Graph(ImageTools):
 
     j = 0
     img_no = 0
-    colour = self.gui_html_bg_colour
+    colour = self.fillColour
     for i, xy in enumerate(dataset.xy_pairs()):
       if j == 0:
         barImage = Image.new('RGB', (int(width-2*self.bSides-1), int(height-1)), color=colour)
@@ -653,7 +663,7 @@ class Graph(ImageTools):
 
       box = (bar_left,bar_top,bar_right,bar_bottom)
 
-      outline_colour = (200,200,200)
+      outline_colour = self.outlineColour
 
       if self.decorated:
         decorated_fill = OV.FindValue('gui_html_highlight_colour')
@@ -808,13 +818,13 @@ class Graph(ImageTools):
     m_offset = 5
     ## Wipe the legend area
     box = (0,legend_top,width,legend_top + 20)
-    self.draw.rectangle(box, fill=self.gui_html_bg_colour)
+    self.draw.rectangle(box, fill=self.fillColour)
     #txt = '%.3f' %(y_value)
     ## Draw Current Numbers
     wX, wY = IT.textsize(self.draw, txt, font_size=font_size)
     x = width - wX - self.bSides
     top_left = (x, legend_top)
-    IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=font_size, font_colour=self.light_grey)
+    IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=font_size, font_colour=self.axislabelColour)
 
   def draw_data_points(self, xy_pairs, indices=None, sigmas=None, marker_size_factor=None):
     min_x = self.min_x
@@ -871,11 +881,11 @@ class Graph(ImageTools):
         y_minus_dy = y+half_marker_width-dy
         line = ((x+half_marker_width, y_plus_dy),
                 (x+half_marker_width, y_minus_dy))
-        self.draw.line(line, width=self.line_width, fill=(200,200,200))
+        self.draw.line(line, width=self.line_width, fill=self.outlineColour)
         self.draw.line(((x, y_plus_dy), (x+marker_width, y_plus_dy)),
-                       width=1, fill=(200,200,200))
+                       width=1, fill=self.outlineColour)
         self.draw.line(((x, y_minus_dy), (x+marker_width, y_minus_dy)),
-                       width=1, fill=(200,200,200))
+                       width=1, fill=self.outlineColour)
 
     for i, (xr, yr) in enumerate(xy_pairs):
       x = x_constant + xr * scale_x
@@ -952,27 +962,26 @@ class Graph(ImageTools):
       if y < (self.graph_bottom) and y >= self.boxYoffset -wY/2:
         top_left = (x,y)
       if y + wY/2 <= (self.graph_bottom) and y >= self.boxYoffset -wY/2:
-        self.draw.text((x, y), "%s" %txt, font=self.font_small, fill="#444444")
-        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
+        self.draw.text((x, y), "%s" %txt, font=self.font_small, fill=self.axislabelColour)
+        IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.axislabelColour)
         x = self.graph_left
         y = y + int(wY/2)
-        self.draw.line(((x, y),(x+self.ax_marker_length, y)), width=self.line_width, fill=(200, 200, 200))
+        self.draw.line(((x, y),(x+self.ax_marker_length, y)), width=self.line_width, fill=self.outlineColour)
 
     if self.draw_origin:
       line = (self.graph_left - self.min_x * self.scale_x, self.graph_bottom,
               self.graph_left - self.min_x * self.scale_x, self.graph_top)
-      self.draw.line(line, fill=(200, 200, 200), width=self.line_width)
+      self.draw.line(line, fill=self.outlineColour, width=self.line_width)
 
     txt = self.metadata.get("y_label", "y Axis Label")
     txt = self.get_unicode_characters(txt)
     wX, wY = self.draw.textsize(txt, font=self.font_small)
     size = (wX, wY)
-    colour = self.gui_html_bg_colour
-    new = Image.new('RGB', size, colour)
+    new = Image.new('RGB', size, self.fillColour)
     draw = ImageDraw.Draw(new)
     x = 0
     y = 0
-    draw.text((x, y), "%s" %txt, font=self.font_small, fill="#444444")
+    draw.text((x, y), "%s" %txt, font=self.font_small, fill=self.axislabelColour)
     new = new.rotate(90)
     self.im.paste(new, (int(self.xSpace+self.bSides + wY/2), int(self.graph_top +wY/2)))
 
@@ -1022,23 +1031,23 @@ class Graph(ImageTools):
              + ((0 - max_x) * scale_x)
              + (self.delta_x * scale_x))
       if (x+wX)  <= (self.graph_right) and x >= self.graph_left - wX/2:
-        self.draw.text((x, y), "%s" %txt, font=self.font_small, fill="#444444")
+        self.draw.text((x, y), "%s" %txt, font=self.font_small, fill=self.axislabelColour)
         x = int(x + wX/2)
         y = y - self.imY * 0.005
         y = self.graph_bottom
-        self.draw.line(((x, y),(x, y-self.ax_marker_length)), width=self.line_width, fill=(200, 200, 200))
+        self.draw.line(((x, y),(x, y-self.ax_marker_length)), width=self.line_width, fill=self.outlineColour)
 
     if self.draw_origin:
       line = (self.bSides + self.xSpace, self.graph_bottom + self.min_y * self.scale_y,
               self.imX - self.bSides, self.graph_bottom + self.min_y * self.scale_y)
-      self.draw.line(line, fill=(200, 200, 200), width=self.line_width)
+      self.draw.line(line, fill=self.outlineColour, width=self.line_width)
 
     txt = self.metadata.get("x_label", "x Axis Label")
     txt = self.get_unicode_characters(txt)
     wX, wY = self.draw.textsize(txt, font=self.font_small)
-    x = self.boxX - wX - self.bSides - self.imX * 0.002
+    x = self.graph_right - wX - self.bSides
     y = self.boxY  + self.imY * 0.01
-    self.draw.text((x, y), "%s" %txt, font=self.font_small, fill="#444444")
+    self.draw.text((x, y), "%s" %txt, font=self.font_small, fill=self.axislabelColour)
 
   #def draw_bars(self):
     #import ImageFont
@@ -1097,6 +1106,7 @@ class Analysis(Graph):
       self.param = param.split(';')
     self.fl = []
     self.item = None
+    guiParams = OV.GuiParams()
 
   def run_Analysis(self, f, args):
     self.basedir = OV.BaseDir()
@@ -1324,7 +1334,7 @@ class Analysis(Graph):
     if filename is None:
       filename = '%s-%s.csv' %(self.filename,self.item)
     filefull = '%s/%s' %(self.filepath,filename)
-    f = open(filefull, 'w')
+    f = open(filefull, 'wb')
     for dataset in self.data.values():
       fieldnames = (dataset.metadata().get('x_label', 'x'),
                     dataset.metadata().get('y_label', 'y'))
@@ -1495,7 +1505,7 @@ class WilsonPlot(Analysis):
     self.draw_pairs(reverse_y = True)
     grad = self.make_gradient_box(size = ((int(self.imX * 0.64), int(self.imY * 0.1))))
     size = ((self.im.size[0]), (self.im.size[1] + grad.size[1]))
-    colour = self.gui_html_bg_colour
+    colour = self.fillColour
     new = Image.new('RGB', size, colour)
     new.paste(self.im, (0,0))
     new.paste(grad, (int(self.xSpace+self.bSides),int(self.im.size[1]-20)))
@@ -1556,14 +1566,14 @@ class WilsonPlot(Analysis):
     boxWidth = size[0]
     boxHeight = size[1]*0.4
     boxTopOffset = self.imY * 0.035
-    colour = self.gui_html_bg_colour
+    colour = self.fillColour
     im = Image.new('RGB', size, colour)
     draw = ImageDraw.Draw(im)
     #target_left = (0,0,255)
     #target_right = (0,255,0)
     middle = boxWidth/2
     box = (0,boxTopOffset,boxWidth-1,boxTopOffset+boxHeight-1)
-    draw.rectangle(box, fill=self.gui_html_bg_colour, outline=(200, 200, 200))
+    draw.rectangle(box, fill=self.fillColour, outline=self.outlineColour)
     margin_left = int((boxWidth/4))
     margin_right = int((boxWidth/4)*3)
 
@@ -1636,7 +1646,7 @@ class WilsonPlot(Analysis):
         fill = self.grad_fill(max1, c1, col)
         draw.line(((i, top),(i, bottom)), fill=fill)
       elif i == margin_left:
-        draw.line(((i, top),(i, bottom)), fill=(200, 200, 200))
+        draw.line(((i, top),(i, bottom)), fill=self.outlineColour)
       elif i < middle:
         step = (max1)/(middle-margin_left)
         col = max1+step*(i - margin_left)
@@ -1644,7 +1654,7 @@ class WilsonPlot(Analysis):
         fill = self.grad_fill(max1, c1, col)
         draw.line(((i, top),(i, bottom)), fill=fill)
       elif i == middle:
-        draw.line(((i, top),(i, bottom)), fill=(200, 200, 200))
+        draw.line(((i, top),(i, bottom)), fill=self.outlineColour)
       elif i > middle and i < (margin_right):
         step = (max2)/(margin_right-middle)
         col = max2+step*(margin_right - i)
@@ -1652,7 +1662,7 @@ class WilsonPlot(Analysis):
         fill = self.grad_fill(max2, c2, col)
         draw.line(((i, top),(i, bottom)), fill=fill)
       elif i == (margin_right):
-        draw.line(((i, top),(i, bottom)), fill=(200, 200, 200))
+        draw.line(((i, top),(i, bottom)), fill=self.outlineColour)
       else:
         step = ((max2)/(boxWidth-margin_right))
         col = max2+step*(i - margin_right)
@@ -1748,7 +1758,7 @@ class ChargeFlippingPlot(PrgAnalysis):
       m_offset = 5
       ## Wipe the legend area
       box = (0,legend_top,width,legend_top + 20)
-      self.draw.rectangle(box, fill=self.gui_html_bg_colour)
+      self.draw.rectangle(box, fill=self.fillColour)
 
       ## Draw CC Legend
       box = (10,legend_top +m_offset,10+marker_width, legend_top+marker_width + m_offset)
@@ -1797,13 +1807,16 @@ class CumulativeIntensityDistribution(Analysis):
 
     key = self.draw_key(({'type': 'function',
                          'number': 1,
-                         'label': OV.TranslatePhrase('Centric')},
+                         #'label': OV.TranslatePhrase('Centric')},
+                         'label': 'Centric'},
                         {'type':'function',
                          'number': 2,
-                         'label': OV.TranslatePhrase('Acentric')},
+                         #'label': OV.TranslatePhrase('Acentric')},
+                         'label': 'Acentric'},
                         {'type': 'function',
                          'number': 3,
-                         'label': OV.TranslatePhrase('Twinned Acentric')}
+                         #'label': OV.TranslatePhrase('Twinned Acentric')}
+                         'label': 'Twinned Acentric'}
                         ))
     self.im.paste(key,
                   (int(self.graph_right-(key.size[0]+40)),
@@ -2329,6 +2342,9 @@ def array_scalar_multiplication(array, multiplier):
 
 
 def makeReflectionGraphOptions(graph, name):
+  guiParams = OV.GuiParams()
+  ### This is assuming that there are no more than FOUR option controls:
+  width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))/4
   value = graph.short_caption
   options_gui = []
   i = 1
@@ -2343,6 +2359,7 @@ def makeReflectionGraphOptions(graph, name):
       d = {'ctrl_name':ctrl_name,
            'value':value,
            'max':'30',
+           'width':'%s' %width,
            'label':'%s ' %caption,
            'onchange':'spy.SetParam(graphs.reflections.%s.%s,GETVALUE(%s))' %(
              graph.name, object.name,ctrl_name),
@@ -2353,6 +2370,7 @@ def makeReflectionGraphOptions(graph, name):
       ctrl_name = 'TEXT_%s' %(obj_name)
       d = {'ctrl_name':ctrl_name,
            'value':value,
+           'width':'%s' %width,
            'label':'%s ' %caption,
            'onchange':'spy.SetParam(graphs.reflections.%s.%s,GETVALUE(%s))' %(
              graph.name, object.name,ctrl_name),
@@ -2369,9 +2387,8 @@ def makeReflectionGraphOptions(graph, name):
              graph.name, object.name),
            'onuncheck':'spy.SetParam(graphs.reflections.%s.%s,False)' %(
              graph.name, object.name),
-           'width':80,
-           'bgcolor':"",
-           'fgcolor':"",
+           'width':'%s' %width,
+           'bgcolor':'%s' %guiParams.html.table_bg_colour,
            }
       options_gui.append(htmlTools.make_tick_box_input(d))
 
@@ -2387,7 +2404,7 @@ def makeReflectionGraphOptions(graph, name):
            'value':object.extract(),
            'onchange':'spy.SetParam(graphs.reflections.%s.%s,GETVALUE(%s))>>spy.make_reflection_graph(GetValue(SET_REFLECTION_STATISTICS))' %(
              graph.name, object.name,ctrl_name),
-           'width':'',
+           'width':'%s' %width,
            }
       options_gui.append(htmlTools.make_combo_text_box(d))
 
@@ -2397,6 +2414,7 @@ def makeReflectionGraphOptions(graph, name):
 
 def makeReflectionGraphGui():
   global GuiGraphChooserComboExists
+  guiParams = OV.GuiParams()
 
   value = False
   gui_d = {}
@@ -2523,7 +2541,7 @@ class HealthOfStructure():
     hkl = OV.HKLSrc()
     if not os.path.exists(hkl):
       print "There is no reflection file associated with this structure"
-      txt = "<tr><table width='100%%'><tr bgcolor=%s align='center'>" %self.grade_4_colour
+      txt = "<tr><table width='100%%' cellspacing='2'><tr bgcolor=%s align='center'>" %self.grade_4_colour
       txt += "<td colspan='2'><font color=#ffffff>There is no reflection file</font><td>"
       txt += "</tr></table></tr>"
       txt = txt.decode('utf-8')

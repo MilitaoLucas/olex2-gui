@@ -13,6 +13,7 @@ from cctbx.eltbx import sasaki
 from cctbx import adptbx, crystal, miller, sgtbx, xray
 from cctbx.array_family import flex
 from cctbx import xray
+from smtbx.refinement.constraints import rigid
 
 
 def reflection_statistics(unit_cell, space_group, hkl):
@@ -67,6 +68,41 @@ class hemihedral_twinning(object):
     if sigmas is not None: sigmas = twinned_s
     return f_sq.customized_copy(data=twinned_i, sigmas=sigmas)
 
+  def detwin_with_twin_fraction(self, f_sq, twin_fraction):
+    detwinner = xray.hemihedral_detwinner(
+      hkl_obs=f_sq.indices(),
+      hkl_calc=self.twin_complete_set.indices(),
+      space_group=f_sq.space_group(),
+      anomalous_flag=f_sq.anomalous_flag(),
+      twin_law=self.twin_law)
+    sigmas = f_sq.sigmas()
+    if sigmas is None: sigmas = flex.double()
+    detwinned_i, detwinned_s = detwinner.detwin_with_twin_fraction(
+      f_sq.data(),
+      sigmas,
+      twin_fraction=twin_fraction)
+    if sigmas is not None: sigmas = detwinned_s
+    return f_sq.customized_copy(data=detwinned_i, sigmas=sigmas)
+
+  def detwin_with_model_data(self, f_sq, f_model, twin_fraction):
+    assert f_model.is_complex_array()
+    detwinner = xray.hemihedral_detwinner(
+      hkl_obs=f_sq.indices(),
+      hkl_calc=self.twin_complete_set.indices(),
+      space_group=f_sq.space_group(),
+      anomalous_flag=f_sq.anomalous_flag(),
+      twin_law=self.twin_law)
+    sigmas = f_sq.sigmas()
+    if sigmas is None: sigmas = flex.double()
+    detwinned_i, detwinned_s = detwinner.detwin_with_model_data(
+      f_sq.data(),
+      sigmas,
+      f_model.data(),
+      twin_fraction=twin_fraction)
+    if sigmas is not None: sigmas = detwinned_s
+    return f_sq.customized_copy(data=detwinned_i, sigmas=sigmas)
+
+
 class reflections(object):
   def __init__(self,  cell, spacegroup, reflection_file, hklf_matrix=None):
     """ reflections is the filename holding the reflections """
@@ -82,7 +118,8 @@ class reflections(object):
     miller_arrays = reflections_server.get_miller_arrays(None)
     self.f_sq_obs = miller_arrays[0]
     if hklf_matrix is not None and not hklf_matrix.is_unit_mx():
-      cb_op = sgtbx.change_of_basis_op(hklf_matrix).inverse()
+      r = sgtbx.rt_mx(hklf_matrix.new_denominator(24).transpose())
+      cb_op = sgtbx.change_of_basis_op(r).inverse()
       self.f_sq_obs = self.f_sq_obs.change_basis(cb_op).customized_copy(
         crystal_symmetry=cs)
     self.f_obs = self.f_sq_obs.f_sq_as_f()
@@ -109,7 +146,7 @@ class reflections(object):
     self.n_sys_absent = obs.size() - obs_merged.size()
     if merge > 2:
       obs_merged = obs_merged.customized_copy(anomalous_flag=False)
-    merging = obs_merged.merge_equivalents()
+    merging = obs_merged.merge_equivalents(algorithm="shelx")#algorithm="default")
     obs_merged = merging.array()
     if observations is None:
       self.merging = merging
@@ -144,6 +181,7 @@ class reflections(object):
     print >> log, "Merging summary:"
     print >> log, "Total reflections: %i" %self.f_sq_obs.size()
     print >> log, "Unique reflections: %i" %self.f_sq_obs_merged.size()
+    print >> log, "Inconsistent equivalents: %i" %self.merging.inconsistent_equivalents()
     print >> log, "Systematic Absences: %i removed" %self.n_sys_absent
     print >> log, "R(int): %f" %self.merging.r_int()
     print >> log, "R(sigma): %f" %self.merging.r_sigma()

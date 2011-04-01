@@ -2,7 +2,7 @@
 
 <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_bg_colour)">
 
-<tr name=EDIT_CIF>
+<tr align = 'center' name=EDIT_CIF>
 <!-- #include tool-column gui\blocks\tool-first-column.htm;help_ext=cif-info;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <!-- #include tool-column gui\blocks\tool-help-first-column.htm;help_ext=cif-info;1; -->
@@ -18,7 +18,7 @@ $spy.MakeHoverButton(button-validate_cif,spy.ValidateCif)
 </tr>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<tr VALIGN='center' ALIGN='left' NAME='SNUM_REPORT_TITLE' valign='center'>
+<tr VALIGN='center' ALIGN='center' NAME='SNUM_REPORT_TITLE' valign='center'>
 <!-- #include tool-column gui\blocks\tool-first-column.htm;help_ext=;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td>
@@ -27,9 +27,9 @@ $spy.MakeHoverButton(button-validate_cif,spy.ValidateCif)
   <td>
     <input
       type='text'
-      width="$eval((html.clientwidth(self)-160)/2 )"
       valign='center'
-      height="17"
+      height="$spy.GetParam(gui.html.input_height)"
+      width="$eval((html.clientwidth(self)-180)/2 )"
       bgcolor="spy.GetParam(gui.html.input_bg_colour)"
       name='SET_SNUM_REPORT_TITLE'
       value='$spy.GetParam(snum.report.title)'
@@ -42,15 +42,15 @@ $spy.MakeHoverButton(button-validate_cif,spy.ValidateCif)
   <td>
     <input
       type="combo"
-      width="$eval((html.clientwidth(self)-160)/2)"
+      width="$eval((html.clientwidth(self)-180)/2)"
       height="$spy.GetParam(gui.html.combo_height)"
       bgcolor="spy.GetParam(gui.html.input_bg_colour)"
       name="SET_REPORT_IMAGE"
       readonly
-      items='file.ListDirForGui(FilePath(),*.png;*.jpg;*.bmp;*.ps;*.eps)'
+      items='strcat(screenshot; ,file.ListDirForGui(FilePath(),*.png;*.jpg;*.bmp;*.ps;*.eps))'
       onchange="spy.SetParam(snum.report.image,GetValue(SET_REPORT_IMAGE))"
       width="50%"
-      value="file.GetName($spy.GetParam(snum.report.image))"
+      value="$spy.GetParam(snum.report.image)"
     >
   </td>
 </tr>
@@ -61,8 +61,8 @@ $spy.MakeHoverButton(button-validate_cif,spy.ValidateCif)
   <td>
     <input
       type='combo'
-      width="$eval((html.clientwidth(self)-160)/2)"
-      height="17"
+      width="$eval((html.clientwidth(self)-180)/2)"
+      height="$spy.GetParam(gui.html.combo_height)"
       bgcolor="spy.GetParam(gui.html.input_bg_colour)"
       name='SET_USER_REPORT_STYLE'
       value='$spy.GetParam(user.report_style)'
@@ -77,20 +77,18 @@ $spy.MakeHoverButton(button-validate_cif,spy.ValidateCif)
   <td>
     <input
       type='combo'
-      width="$eval((html.clientwidth(self)-160)/2)"
-      height="17"
-      bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+      width="$eval(((html.clientwidth(self)-21 0)/2) - $spy.GetParam('gui.html.combo_height') - 15)"
+      height="$spy.GetParam(gui.html.combo_height)"
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
       name='SET_USER_REPORT_TEMPLATE'
       value='$spy.GetParam(user.report_template)'
       items='spy.getTemplatesList()'
       valign='center'
       onchange="spy.SetParam(user.report_template,GetValue(SET_USER_REPORT_TEMPLATE))"
-    >
-  </td>
-  <td>
-    <a target="Browse for styles and templates" href="exec -o getvar(defexplorer) 'file.ospath(basedir()/etc/CIF/styles)'">
-    <zimg  border="0" src="toolbar-open.png"></a>
-  </td>
+    > &nbsp;
+$spy.MakeHoverButton(toolbar_small-open,exec -o getvar\(defexplorer) 'file.ospath\(basedir\()/etc/CIF/styles)')
+
+    </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 

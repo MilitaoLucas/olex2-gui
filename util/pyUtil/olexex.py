@@ -225,13 +225,13 @@ class OlexRefinementModel(object):
       mn = afix['afix']
       m, n = divmod(mn, 10)
       pivot = afix['pivot']
-      dependent = [i for i in afix['dependent']]
+      dependent = afix['dependent']
       pivot_neighbours = [
         i for i in self._atoms[pivot]['neighbours']
         if not i in dependent]
       if len(dependent) == 0: continue
       dependent_part = self._atoms[dependent[0]]['part']
-      pivot_neighbours = None
+      #pivot_neighbours = None
       bond_length = afix['d']
       uiso = afix['u']
       yield m, n, pivot, dependent, pivot_neighbours, bond_length
@@ -604,7 +604,7 @@ def MakeElementButtonsFromFormula():
     'Table', {
       'txt':'...',
       'bgcolour':'#efefef',
-      'width':int(icon_size*1.2),
+      'width':int(icon_size*1.0),
       'image_prefix':'element',
       'top_left':(0,-1),
       'grad':False,
@@ -648,6 +648,7 @@ def MakeElementButtonsFromFormula():
   else:
     bm = ButtonMaker(btn_dict)
     bm.run()
+    
   cell_volume = 0
   Z = 1
   Z_prime = float(olx.xf_au_GetZprime())
@@ -663,10 +664,10 @@ def MakeElementButtonsFromFormula():
   retStr = '\n'.join(html_elements)
   if cell_volume and totalcount:
     atomic_volume = (cell_volume)/(totalcount * Z)
-    OV.SetVar('current_atomic_volume','%.1f' %atomic_volume)
+    OV.SetParam('snum.solution.current_atomic_volume','%.1f' %atomic_volume)
     retStr = retStr.replace("\n","")
   else:
-    OV.SetVar('current_atomic_volume','n/a')
+    OV.SetParam('snum.solution.current_atomic_volume',None)
   return str(retStr)
 if haveGUI:
   OV.registerFunction(MakeElementButtonsFromFormula)
@@ -807,7 +808,7 @@ if haveGUI:
 
 def GetHklFileList():
   reflections_files = []
-  reflection_file_extensions = ["hkl", "hkp", "raw"]
+  reflection_file_extensions = ["hkl", "hkp", "raw", 'hklf5', 'hkc']
   for extension in reflection_file_extensions:
     g = glob.glob(r"%s/*.%s" %(OV.FilePath(),extension))
     reflections_files += g
@@ -897,13 +898,14 @@ def GetRInfo(txt=""):
         R1 = tree.active_node.R1
       else:
         R1 = 'n/a'
+    font_size = OV.GetParam('gui.html.font_size_large')
     try:
       R1 = float(R1)
       col = GetRcolour(R1)
       R1 = "%.2f" %(R1*100)
-      t = r"<td colspan='1' align='right' rowspan='2'><font size='4' color='%s'><b>%s%%</b></font></td>" %(col, R1)
+      t = r"<td colspan='1' align='right' rowspan='2'><font size='%s' color='%s'><b>%s%%</b></font></td>" %(font_size, col, R1)
     except:
-      t = "<td colspan='1' rowspan='2' align='right'><font size='4'><b>%s</b></font></td>" %R1
+      t = "<td colspan='1' rowspan='2' align='right'><font size='%s'><b>%s</b></font></td>" %(font_size, R1)
     finally:
       return t
 
@@ -963,6 +965,7 @@ def setMainToolbarTabButtons(btn, state=""):
         state = "on"
       #OV.CopyVFSFile("cbtn-%s2%s.png" %(item[0],state),"cbtn-%s2.png" %item[0])
       OV.SetImage("IMG_CBTN-%s2" %btn.upper(),"cbtn-%s2%s.png" %(item[0], state))
+      OV.SetImage("IMG_BTN-%s2" %btn.upper(),"btn-%s2%s.png" %(item[0], state))
       OV.SetVar('gui_MainToolbarTabButtonActive',btn)
     elif state != 'inactive' and not isCif:
       OV.CopyVFSFile("cbtn-%s2off.png" %item[0],"cbtn-%s2.png" %item[0])
@@ -1596,7 +1599,7 @@ def GetACF():
     olex.m("installplugin Headless")
 
   updateACF()
-  use_new = True
+  use_new = False
   if use_new:
     debug = OV.FindValue('odac_fb', False)
     debug =  OV.GetParam('odac.debug.debug')
@@ -1891,6 +1894,18 @@ def getReportTitleSrc():
   return retVal
 OV.registerFunction(getReportTitleSrc)
 
+def dealWithReportImage():
+  #OV.GetParam('snum.re
+  image_name = OV.Getparam('snum.report.image')
+  if image_name == "No Image":
+    OV.SetParam('snum.report.image',None)
+    return
+  elif image_name == "screenshot":
+    olex.m('pict -pq screenshot.png 1')
+    OV.SetParam('snum.report.image',"%s\screenshot.png" %OV.FilePath())
+OV.registerFunction(dealWithReportImage)
+
+
 def getReportImageSrc():
   imagePath = OV.GetParam('snum.report.image')
   if OV.FilePath(imagePath) == OV.FilePath():
@@ -1911,8 +1926,10 @@ def getReportImageData(size='w400', imageName=None):
   size = int(size[1:])
   if imageName is None:
     imagePath = OV.GetParam('snum.report.image')
-  else:
-    imagePath = r"%s/etc/CIF/styles/%s.png" %(OV.BaseDir(),imageName)
+  if imagePath == "No Image" or imagePath is None:
+    return ""
+#  else:
+#    imagePath = r"%s/etc/CIF/styles/%s.png" %(OV.BaseDir(),imageName)
   imageLocalSrc = imagePath.split("/")[-1:][0]
   imageLocalSrc = imageLocalSrc.split("\\")[-1:][0]
 

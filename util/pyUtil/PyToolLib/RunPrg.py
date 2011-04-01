@@ -52,7 +52,8 @@ class RunPrg(ArgumentParser):
 
   def run(self):
     res = self.method.run(self)
-    self.runAfterProcess()
+    if not self.method.failure:
+      self.runAfterProcess()
     self.endRun()
     sys.stdout.refresh = False
     sys.stdout.graph = False
@@ -341,7 +342,7 @@ class RunRefinementPrg(RunPrg):
       self.doAutoTidyAfter()
       OV.File()
     if OV.GetParam('snum.refinement.check_absolute_structure_after_refinement'):
-      self.isInversionNeeded()
+      self.isInversionNeeded(force=self.params.snum.refinement.auto.invert)
     self.method.post_refinement(self)
 
   def doHistoryCreation(self):
@@ -374,6 +375,7 @@ class RunRefinementPrg(RunPrg):
 
   def isInversionNeeded(self, force=False):
     from cctbx_olex_adapter import hooft_analysis
+    from libtbx.utils import format_float_with_standard_uncertainty
     from cctbx import sgtbx
     from libtbx.utils import Sorry
     print
@@ -391,11 +393,13 @@ class RunRefinementPrg(RunPrg):
       print e
     else:
       if hooft.reflections.f_sq_obs_filtered.anomalous_flag():
-        if hooft.p2 is not None and round(hooft.p2, 3) == 0:
-          inversion_needed = True
-        elif (hooft.p3_racemic_twin is not None and
-              round(hooft.p3_racemic_twin, 3) == 1):
+        print "Hooft y: %s" %format_float_with_standard_uncertainty(
+          hooft.hooft_y, hooft.sigma_y)
+        if (hooft.p3_racemic_twin is not None and
+            round(hooft.p3_racemic_twin, 3) == 1):
           possible_racemic_twin = True
+        elif hooft.p2_false is not None and round(hooft.p2_false, 3) == 1:
+          inversion_needed = True
     if flack:
       print "Flack x: %s" %flack
       fs = flack.split("(")
@@ -407,7 +411,10 @@ class RunRefinementPrg(RunPrg):
     if force and inversion_needed:
       olex.m('Inv -f')
     if inversion_needed: print inversion_warning
-    if possible_racemic_twin: print racemic_twin_warning
+    if possible_racemic_twin:
+      if (hooft.twin_components is not None and
+          hooft.twin_components[0].twin_law != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
+        print racemic_twin_warning
     if not inversion_needed and not possible_racemic_twin:
       print "OK"
 

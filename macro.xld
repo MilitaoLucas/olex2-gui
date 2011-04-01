@@ -42,7 +42,7 @@
       <arg5 name="base" def="basedir()">
       <arg6 name="ext" def="fileext()">
       <arg7 name="filefull" def="filefull()">
-      
+
       \>
     <cmd
       <cmd0  "xgrid.Visible(false)">
@@ -71,7 +71,6 @@
       <cmd25 "spy.reset_file_in_OFS(refinement_image.htm)">
       <cmd26 "if strcmp(%7,filefull()) then updatehtml else htmlreload">
       <cnd27 "if html.IsPopup(history-tree) then spy.popout_history_tree()">
-      <cmd23 "syncbc">
       <cmd26 XXX="fade 1 0 -0.1">
       <cmd27 XXX='waitfor fade'>
       <cmd28 XXX="ceiling off">
@@ -209,14 +208,13 @@
 />
 />
 
-<report help="Creates structure report"
+<report help="Creates structure report (macro.xld)"
   <body
     <args
     \>
     <cmd
       <cmd4 "cursor(busy, '%Checking for IMAGE file ...%')">
-      <cmd5 "if file.Exists(spy.GetParam(snum.report.image)) then None else 'spy.SetParam(snum.report.image,FilePath()/screenshot.png)'">
-      <cmd6 "if not(strcmp(file.GetName(spy.GetParam(snum.report.image)),screenshot.png)) then None else 'cursor(busy, Creating Image ...)>>pict -pq screenshot.png 1'>>cursor()">
+      <cmd2 "spy.dealWithReportImage()">
       <cmd13 "cursor()">
       <cmd7 "cursor(busy, '%Updating% Cif ...')">
       <cmd8 "spy.ExtractCifInfo()">
@@ -262,7 +260,7 @@
       <cmd0 "xgrid.Visible(false)">
       <cmd1 "mode off">
       <cmd2 "user 'filepath()'">
-      <cmd3 "kill $q">
+      <cmd3 x="kill $q">
       <cmd5 "file">
       <cmd6 XXX="cursor(busy, 'Refining...')">
       <cmd7 "if strcmp(%1,'-1') then None else spy.SetMaxCycles(%1)">
@@ -612,7 +610,6 @@
       <cmd3 "@reap '%1' %2">
       <cmd4 "itemstate title 1">
       <cmd5 "itemstate tabs-01 1">
-      <cmd6 "syncbc">
       <cmd7 "history">
       <cmd8 cmd1="lines 12">
       <cmd9 "updatehtml">
@@ -667,7 +664,6 @@
       <cmd2 "@reap '%1' %2">
       <cmd3 "itemstate title 1">
       <cmd4 "itemstate tabs-01 1">
-      <cmd5 "syncbc">
       <cmd6 cmd1="lines 12">
     \>
   \>
@@ -724,6 +720,7 @@
     \>
     <cmd
       <cmd1 "@reap '%1' %2">
+      <cmd1 x="@update '%1'">
     \>
     <onabort
       <cmd "echo lasterror()">
@@ -757,7 +754,6 @@
     <cmd
       <cmd1 "load scene bw">
       <cmd2 "load style bw">
-      <cmd3 "syncbc">
     \>
   \>
 \>
@@ -767,7 +763,6 @@
     <cmd
       <cmd1 "scene bw">
       <cmd2 "style bw">
-      <cmd3 "syncbc">
     \>
   \>
 \>
@@ -805,7 +800,6 @@
     <cmd
       <cmd1 "load scene white">
       <cmd2 "load style white">
-      <cmd3 "syncbc">
     \>
   \>
 \>
@@ -1015,7 +1009,6 @@
   <cmd1 cmd1="silent on">
   <cmd2 "updAtehtml">
   <cmd3 cmd1="load style default">
-  <cmd4 cmd1="syncbc">
   \>
 
   <onterminate
@@ -1397,7 +1390,7 @@
 <dire help="Opens the current directory in Explorer"
   <body
     <cmd
-      <cmd0 "exec -o getvar(defexplorer) 'filepath()'">
+      <cmd0 "run &2E;getvar(defexplorer) 'filepath()'&2E;">
     \>
   \>
 \>
@@ -1649,13 +1642,13 @@
 \>
 
 
-<dires help="open the directory using explorer (Windows only)"
+<dires help="open the directory using explorer"
   <body
     <args
-      <arg1 name="datadir" def="%DataDir()">
+      <arg1 name="datadir" def="DataDir()">
     \>
     <cmd
-      <cmd1 'exec -o explorer %1'>
+      <cmd0 "run &2E;getvar(defexplorer) '%1'&2E;">
     \>
   \>
 \>

@@ -4,6 +4,9 @@ from __future__ import division
 #import PngImagePlugin
 import Image
 import ImageDraw, ImageChops, ImageColor
+
+from StringIO import StringIO
+
 import OlexVFS
 import RoundedCorners
 from ArgumentParser import ArgumentParser
@@ -125,8 +128,8 @@ class ImageTools(FontInstances):
     retVal += val[-4:-2]
     retVal += val[-6:-4]
     return retVal
-  
-  
+
+
   def getOlexVariables(self):
     #self.encoding = self.test_encoding(self.gui_language_encoding) ##Language
     #self.language = "English" ##Language
@@ -337,7 +340,7 @@ class ImageTools(FontInstances):
       canvas.paste(whitespace, (0, margin_top))
       canvas.paste(image, (weight, 0))
     return canvas
-  
+
   def cut_image(self, image, cuts=(10,20)):
     ''' Returns a list of images, cut left to right at the cuts positions '''
     retVal = []
@@ -350,7 +353,7 @@ class ImageTools(FontInstances):
       retVal.append(image.crop((left, 0, right, size[1])))
     retVal.append(image.crop((current, 0, size[0], size[1])))
     return retVal
-    
+
 
   def colourize(self, IM, col_1, col_2):
     import ImageOps
@@ -659,7 +662,7 @@ class ImageTools(FontInstances):
     wXT = 0
     if wX > max_width:
       txt_in = txt.split()
-      
+
       for word in txt_in:
         wX, wY = draw.textsize(word, font=font)
         wXT += wX
@@ -811,11 +814,13 @@ class ImageTools(FontInstances):
     OlexVFS.save_image_to_olex(IM, "new", 2)
 
 
-  def create_arrows(self, draw, height, direction, colour, type='simple', h_space=4, v_space=4, offset_y = 0, char_pos=(0,0), char_char="+", width=10, align='left', scale = 1.0):
+  def create_arrows(self, image, draw, height, direction, colour, type='simple', h_space=4, v_space=4, offset_y = 0, char_pos=(0,0), char_char="+", width=10, align='left', scale = 1.0):
     if align == 'right':
-      adval = int(round(13 * scale,0))
+      adval_parameter = OV.GetParam('gui.timage.adval')
+      adval = int(round(adval_parameter * scale,0))
       char_pos = (width - adval, char_pos[1])
       h_space = width - h_space - adval
+      #h_space = width - height
     arrow_height = height - (2*v_space)
     arrow_width = arrow_height
 
@@ -881,9 +886,70 @@ class ImageTools(FontInstances):
         font_size=font_size,
         titleCase=True,
         font_colour=colour,)
+
     elif type == "circle":
       xy = (4,4,8,8)
       draw.ellipse(xy, fill = colour)
+
+    elif type == "dots":
+      dot_size = OV.GetParam('gui.timage.cbtn.dot_size')
+      pad = OV.GetParam('gui.timage.cbtn.dot_pad')
+      left_start = OV.GetParam('gui.timage.cbtn.dot_left')
+      colour_off = OV.GetParam('gui.timage.cbtn.dot_colour_off').hexadecimal
+      colour_on = OV.GetParam('gui.timage.cbtn.dot_colour_on').hexadecimal
+      l = width - height + left_start
+      t = pad
+      b = height - pad
+      r = width - pad
+
+      if direction == 'up':
+        fill = colour_on
+        i = 0
+        top = b - pad
+        while top > pad + dot_size:
+          left = l + i * dot_size/2
+          top = b - i * dot_size - dot_size
+          xy = (int(left), int(top), left + dot_size, top + dot_size)
+          draw.ellipse(xy, fill = fill)
+          i += 1
+        j = i
+        while top < height - pad - dot_size:
+          left = l + j * dot_size/2
+          top = b - i * dot_size - dot_size
+          xy = (int(left), int(top), left + dot_size, top + dot_size)
+          draw.ellipse(xy, fill = fill)
+          i -= 1
+          j += 1
+      elif direction == 'down':
+        fill = colour_off
+        i = 0
+        top = t
+        while top < height - pad - dot_size * 2:
+          left = l + i * dot_size/2
+          top = t + i * dot_size
+          xy = (int(left), int(top), left + dot_size, top + dot_size)
+          draw.ellipse(xy, fill = fill)
+          i += 1
+        j = i
+        while top > pad:
+          left = l + j * dot_size/2
+          top = t + i * dot_size
+          xy = (int(left), int(top), left + dot_size, top + dot_size)
+          draw.ellipse(xy, fill = fill)
+          i -= 1
+          j += 1
+
+
+      elif direction == "right":
+        im_data = OlexVFS.read_from_olex('toolbar-dot-arrow-right.png')
+      elif direction == "left":
+        im_data = OlexVFS.read_from_olex('toolbar-dot-arrow-left.png')
+
+#      IM = Image.open(StringIO(im_data))
+#      IM = IM.resize((height, height))
+#      box = (width - height, 0)
+#      image.paste(IM, box)
+
 
   def resize_news_image(self):
     self.resize_to_panelwidth({'i':'news/news.png'})
@@ -902,7 +968,7 @@ class ImageTools(FontInstances):
       titleCase=False,
       font_colour=font_colour,)
     return IM
-  
+
   def make_border(self, rad,
               draw,
               width,
@@ -1007,9 +1073,9 @@ class ImageTools(FontInstances):
     blue = self.gui_blue
     grey = self.gui_grey
     colours = [red, green, blue, grey]
-    
+
     map_l = []
-    
+
     if not number:
       number = len(segments)
     if number == 2:
@@ -1023,7 +1089,7 @@ class ImageTools(FontInstances):
       rotation = -135
       segments=[('R',0.25,red),('G',0.25,green), ('B',0.25,blue), ('Grey',0.25,'#888888')]
       rad_factor = 3.4
-    
+
     colour = (0,0,0,0)
     colour = OV.GetParam('gui.html.bg_colour').rgb
     size = (300,300)
@@ -1041,7 +1107,7 @@ class ImageTools(FontInstances):
     margin = 0
     center = (int(size[0]/2), int(size[1]/2))
     draw.ellipse((margin, margin, rad_width, rad_height), fill=border_colour)
-    
+
     curr_end = rotation
     i = 0
     for segment in segments:
@@ -1054,13 +1120,13 @@ class ImageTools(FontInstances):
       draw.pieslice((margin+border_width, margin+border_width, rad_width, rad_height), begin, end, fill=pie_colour)
       curr_end = end
       i += 1
-      
+
     curr_end = 0
     if number == 2:
       curr_end = 180
     elif number == 4:
       curr_end = -45
-      
+
     i = 0
     for segment in segments:
       var = segment[0]
@@ -1071,19 +1137,19 @@ class ImageTools(FontInstances):
       end = begin + int(round(360*value,0))
       angle = (end - begin)/2 + begin
       angle = math.radians(angle)
-      
+
       wX, wY = self.textsize(draw, var, font_size, font_name)
       left = (center[0] + math.sin(angle) * rad_width/rad_factor) - wX/2
       top = ((center[1] + (math.cos(angle) * -1) * rad_height/3.2)) - wY/2
-      
+
       draw.text((int(left), int(top)), var, font=font, fill=font_colour)
       curr_end = end
       i += 1
-      
+
     map_width = 200
     map_height = 100
     pie_map = self.make_pie_map(map_l, (map_width, map_height))
-      
+
     html = '''
 <table align='center' width='100%%'>
 <tr align='center'>
@@ -1093,14 +1159,14 @@ class ImageTools(FontInstances):
 </td>
 </tr>
 </table>''' %(pie_map)
-    
+
     IM.save("%s/%s.png" %(OV.DataDir(),name))
     OlexVFS.save_image_to_olex(IM, name, 1)
     OlexVFS.write_to_olex('pie.htm',html, True)
     OV.HtmlReload()
-  
+
   def make_pie_map(self, map_l, size):
-    
+
     width = size[0]
     height = size[1]
     map = "<map name='pie'>"
@@ -1124,7 +1190,7 @@ class ImageTools(FontInstances):
         map += '''
 <area shape='rect' coords='%s,%s,%s,%s' href='%s' target='%s'>''' %(int(left), int(top), int(right), int(bottom), href, target)
         i += 1
-  
+
 #      <area shape='rect'
 #        coords='100,0,200,100'
 #        href='refine'

@@ -159,6 +159,58 @@ class OlexFunctions(inheritFunctions):
     except Exception, ex:
       print >> sys.stderr, "Could not set max peaks to %s" %(max_peaks)
       sys.stderr.formatExceptionInfo()
+  
+  def GetOSF(self):
+    try:
+      a = float(olx.xf_rm_OSF())
+      if a == 0: #value previously unset
+        return None
+      return a*a
+    except:
+      return None
+    
+  def SetOSF(self, v):
+    try:
+      olx.xf_rm_OSF(math.sqrt(v))
+      return True
+    except:
+      return False
+
+  def GetFVar(self, i):
+    try:
+      return float(olx.xf_rm_FVar(i))
+    except:
+      return None
+    
+  def SetFVar(self, i, v):
+    try:
+      olx.xf_rm_FVar(i, v)
+      return True
+    except:
+      return False
+
+  def GetDampingParams(self):
+    default = (0.7/1000, 15)
+    try:
+      v = olx.Ins('DAMP').split()
+      if len(v) != 2:
+        return default
+      return (float(v[0])/1000, float(v[1]))
+    except:
+      return default
+
+  def GetExtinction(self):
+    try:
+      return float(olx.xf_rm_Exti())
+    except:
+      return None
+    
+  def SetExtinction(self, v):
+    try:
+      olx.xf_rm_Exti(v)
+      return True
+    except:
+      return False
 
   def FindValue(self,variable,default=u''):
     try:
