@@ -91,7 +91,7 @@ def makeHtmlInputBox(inputDictionary):
 
   dictionary = {
     'width':'55%%',
-    'height':'18',
+    'height':'$spy.GetParam(gui.html.input_height)',
     'onchange':'',
     'onleave':'',
     'items':'',
@@ -101,6 +101,7 @@ def makeHtmlInputBox(inputDictionary):
     'manage':'',
     'data':'',
     'label':'',
+    'valign':'center',
     'bgcolor':'',
   }
   dictionary.update(inputDictionary)
@@ -114,7 +115,8 @@ height="%(height)s"
 name="%(ctrl_name)s"
 value="%(value)s"
 items="%(items)s"
-label="%(label)s"
+label="%(label)s "
+valign="%(valign)s"
 onchange="%(onchange)s"
 onleave="%(onleave)s"
 %(readonly)s
@@ -125,7 +127,7 @@ bgcolor="%(bgcolor)s"
   return htmlInputBoxText
 
 def makeHtmlTableRow(dictionary):
-  dictionary.setdefault('font', 'size="2"')
+  dictionary.setdefault('font', 'size=%s' %OV.GetParam('gui.html.font_size'))
   dictionary.setdefault('trVALIGN','center')
   dictionary.setdefault('trALIGN','left')
   dictionary.setdefault('fieldWidth','30%%')
@@ -158,7 +160,7 @@ def makeHtmlTableRow(dictionary):
       field_d.setdefault('fieldVALIGN','center')
       field_d.setdefault('fieldALIGN','left')
       field_d.setdefault('fieldWidth','20%%')
-      field_d.setdefault('font','size="2"')
+      field_d.setdefault('font','size=%s' %OV.GetParam('gui.html.font_size'))
       FieldText += """
                 <td VALIGN="%(fieldVALIGN)s" ALIGN="%(fieldALIGN)s" width="%(fieldWidth)s" colspan=1>
                   <b>
@@ -434,11 +436,25 @@ def make_table_first_col(help_name=None, popout=False, help_image='large'):
 ''' %help
   return html
 
+def make_html_opening():
+  html = '''
+  <html>
+  <body link=$spy.GetParam(gui.html.link_colour) bgcolor=$spy.GetParam(gui.html.bg_colour)>
+  <font color=$spy.GetParam(gui.html.font_colour) size=$spy.GetParam(gui.html.font_size) face="$spy.GetParam(gui.html.font_name)">
+<p> '''
+  return html
+
+def make_html_closing():
+  html = '''
+  </font></body></html>
+  '''
+  return html
+
 def make_help_href(name, popout, image='normal'):
   help = '''
   $spy.MakeHoverButton(btn-info@%s,spy.make_help_box -name='%s' -popout='%s')
   ''' %(name, name, popout)
-  
+
   return help
 
 def make_input_text_box(d):
@@ -449,6 +465,7 @@ def make_input_text_box(d):
          'width':'45',
          'onchange':'',
          'label':name,
+         'valign':'center',
          'onleave':'',
          'data':'',
          'manage':'',
@@ -464,6 +481,7 @@ def make_input_text_box(d):
        width="%(width)s"
        height="%(height)s"
        label="%(label)s"
+       valign="%(valign)s"
        onchange="%(onchange)s"
        onleave="%(onleave)s"
        %(manage)s
@@ -820,7 +838,7 @@ def getTemplatesList():
   templates = os.listdir("%s/etc/CIF/styles" %OV.BaseDir())
   exclude = ("footer.htm")
   templatesList = ";".join(template[:-4] for template in templates
-                        if template not in exclude and template.endswith('.htm'))
+                        if template not in exclude and template.endswith('.htm') or template.endswith('.rtf'))
   return templatesList
 OV.registerFunction(getTemplatesList)
 
@@ -1100,19 +1118,33 @@ def _check_modes_and_states(name):
   if name in buttons:
     if OV.GetParam('olex2.mask_vis') == True:
       return True
+
+  buttons = ['btn-solve']
+  if name in buttons:
+    if OV.GetParam('olex2.solving') == True:
+      return True
+  buttons = ['btn-refine']
+  if name in buttons:
+    if OV.GetParam('olex2.refining') == True:
+      return True
+  buttons = ['btn-report']
+  if name in buttons:
+    if OV.GetParam('olex2.reporting') == True:
+      return True
+
   return False
 
 
 def MakeHoverButton(name, cmds, onoff = "off", btn_bg='table_firstcol_colour'):
   hover_buttons = OV.GetParam('olex2.hover_buttons')
   on = _check_modes_and_states(name)
-      
+
   if on:
     txt = MakeHoverButtonOn(name, cmds, btn_bg)
   else:
     txt = MakeHoverButtonOff(name, cmds, btn_bg)
   return txt
-  
+
 OV.registerFunction(MakeHoverButton)
 
 def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
@@ -1142,7 +1174,7 @@ def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
   off = "off"
   hover = "hover"
   down = "off"
-  
+
   if OV.GetParam('gui.image_highlight') == name:
     on = "highlight"
     off = "highlight"
@@ -1191,7 +1223,7 @@ def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
   off = "off"
   hover = "hoveron"
   down = "on"
-  
+
   if OV.GetParam('gui.image_highlight') == name:
     on = "highlight"
     off = "highlight"
@@ -1203,7 +1235,7 @@ def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
   d.setdefault('off', off)
   d.setdefault('down', down)
   d.setdefault('hover', hover)
-  
+
   txt = '''
 <input
   name=IMG_%(nameupper)s
@@ -1405,7 +1437,7 @@ OV.registerFunction(getGenericSwitchNameTranslation)
 def makeFormulaForsNumInfo():
   global formula
   global formula_string
-  
+
   if olx.FileName() == "Periodic Table":
     return "Periodic Table"
   else:
@@ -1419,9 +1451,10 @@ def makeFormulaForsNumInfo():
       if item in txt_formula:
         colour = OV.GetParam('gui.red').hexadecimal
     if not colour:
-      colour = OV.GetParam('gui.html.font_colour')
+      colour = OV.GetParam('gui.html.font_colour').hexadecimal
+    font_size = OV.GetParam('gui.html.font_size_large')
     html_formula = olx.xf_GetFormula('html',1)
-    formula_string = "<font size='4' color=%s>%s</font>" %(colour, html_formula)
+    formula_string = "<font size=%s color=%s>%s</font>" %(font_size, colour, html_formula)
     return formula_string
 OV.registerFunction(makeFormulaForsNumInfo)
 

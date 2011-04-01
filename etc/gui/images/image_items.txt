@@ -45,6 +45,13 @@
   Merge Cif
   Validate Cif
 
+[TWO BUTTONS PER ROW]
+  Stereo (Colour)
+  Stereo (Anaglyph)
+  Stereo (Hardware)
+  Normal View
+
+
 [SMALL BUTTONS]
   Delete
   Select
@@ -63,6 +70,7 @@
   Mask
   Void
   HFIX
+  Set
 
 [FULL ROW]
   Run AutoChem
@@ -82,3 +90,4 @@
   :z
   H
   Go
+  Set

@@ -6,21 +6,31 @@ snum {
   skip_history = False
     .type = bool
     .expert_level = 1
+    
+  smtbx {
+    inelastic_form_factor_table = *henke sasaki
+      .type = choice
+    atomic_form_factor_table = *it1992 wk1995 n_gaussian
+      .type = choice
+    }
+    
   solution {
-    program = ShelXS ShelXS86 XS 'smtbx-solve' XM ShelXD
+    program = ShelXS ShelXS86 XS 'smtbx-solve' XM ShelXD SIR2008
       .type = choice
     method = 'Dual Space' 'Charge Flipping' 'Direct Methods' 'Patterson Method'
       .type = choice
     graphical_output = False
       .type = bool
+    current_atomic_volume = None
+      .type = float
   }
 
   refinement {
     program = ShelXL XL XH ShelXH XLMP ShelXL_ifc 'smtbx-refine'
       .type = choice
     method = 'Least Squares' CGLS 'Gauss-Newton' 'Levenberg-Marquardt' \
-             'Full Matrix'
-      .type = choice
+      'Full Matrix'
+    .type = choice
     sg_list = None
       .type = str
       .expert_level = 1
@@ -30,15 +40,15 @@ snum {
     max_peaks = 20
       .type = int
       .help = The maximum number of electron density peaks to be returned \
-              after refinement
+        after refinement
     update_weight = False
       .type = bool
       .help = Automatically update the weight instruction before the next \
-              refinement
+        refinement
     suggested_weight = None
       .type = floats(size=2)
       .help = The weighting scheme parameters suggested by the refinement \
-              program in a previous cycle
+        program in a previous cycle
     original_formula = None
       .type = str
       .expert_level = 1
@@ -49,38 +59,41 @@ snum {
     check_absolute_structure_after_refinement = True
       .type = bool
 
-    auto {
-      max_peaks = False
-        .type = bool
-      assignQ = 2.0
-        .type = float(value_min=0.0)
-        .help = Assign all residual electron density peaks greater than the \
-                given cutoff value as a Carbon atom
-      pruneU = 0.1
-        .type = float(value_min=0.0)
-        .help = Delete all atoms where the Ueq is greater than the given cutoff
-      pruneQ = 1.5
-        .type = float(value_min=0.0)
-        .help = Delete all residual electron density peaks smaller than \
-                the given cutoff value
-      promote = 0.1
-        .type = float
-      assemble = False
-        .type = bool
-        .help = Move all atoms or fragments of the asymmetric unit as \
-                close together as possible
-      tidy = False
-        .type = bool
-        .help = Automatically tidy the structure after refinement according \
-                to the settings
-    }
-
-    last_R1 = n/a
-      .type = str
-      .expert_level = 1
-    graphical_output = False
+  auto {
+    max_peaks = False
       .type = bool
+    assignQ = 2.0
+      .type = float(value_min=0.0)
+      .help = Assign all residual electron density peaks greater than the \
+        given cutoff value as a Carbon atom
+    pruneU = 0.1
+      .type = float(value_min=0.0)
+      .help = Delete all atoms where the Ueq is greater than the given cutoff
+    pruneQ = 1.5
+      .type = float(value_min=0.0)
+      .help = Delete all residual electron density peaks smaller than \
+        the given cutoff value
+    promote = 0.1
+      .type = float
+    assemble = False
+      .type = bool
+      .help = Move all atoms or fragments of the asymmetric unit as \
+        close together as possible
+    tidy = False
+      .type = bool
+      .help = Automatically tidy the structure after refinement according \
+        to the settings
+    invert = False
+      .type = bool
+      .help = If set to TRUE, the structure will be automatically inverted if the inversion seems necessary
   }
+
+  last_R1 = n/a
+    .type = str
+    .expert_level = 1
+  graphical_output = False
+    .type = bool
+}
 
 
   display_quality = 2
@@ -274,7 +287,7 @@ snum {
       .type = str
     title = None
       .type = path
-    image = None
+    image = "No Image"
       .type = path
   }
 
@@ -637,13 +650,13 @@ odac
   is_active = False
     .type = bool
   debug{
-    debug = False
+    debug = True
       .type = bool
-    debug_deep1 = False
+    debug_deep1 = True
       .type = bool
-    debug_deep2 = False
+    debug_deep2 = True
       .type = bool
-    verbose = False
+    verbose = True
       .type = bool
   }
   version{

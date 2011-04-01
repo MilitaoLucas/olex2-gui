@@ -277,6 +277,7 @@ class bijvoet_differences_NPP:
         hooft_analysis = cctbx_olex_adapter.hooft_analysis(use_fcf=use_fcf)
       if not hasattr(hooft_analysis, 'delta_fo2'):
         return
+      hooft_analysis.show()
     self.have_bijvoet_pairs = True
     self.plot = absolute_structure.bijvoet_differences_probability_plot(
       hooft_analysis, use_students_t_distribution=use_students_t)
@@ -309,6 +310,7 @@ class bijvoet_differences_scatter_plot(OlexCctbxAdapter):
         hooft_analysis = cctbx_olex_adapter.hooft_analysis()
       if not hasattr(hooft_analysis, 'delta_fo2'):
         return
+      hooft_analysis.show()
     self.have_bijvoet_pairs = True
     cutoff_factor = 0.12
     selection = (flex.abs(hooft_analysis.delta_fo2.data()) > cutoff_factor

@@ -69,6 +69,7 @@ OV.registerMacro(Skin_instance.run_skin, 'function-The function to call')
 
 
 def change_skin(skin_name=None, force=False):
+
   gui_phil_path = "%s/gui.phil" %(OV.DataDir())
   gui_phil_template_path = "%s/gui_template.phil" %(OV.DataDir())
 
@@ -77,29 +78,32 @@ def change_skin(skin_name=None, force=False):
     t1 = time.time()
     t2 = 0
 
-
-  size_list = ['large', 'standard', 'small']
   if not skin_name:
-    pass
-
-  elif skin_name in size_list:
-    force = True
-    gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_name)
-    if os.path.isfile(gui_skin_phil_path):
-      gui_skin_phil_file = open(gui_skin_phil_path, 'r')
-      gui_skin_phil = gui_skin_phil_file.read()
-      gui_skin_phil_file.close()
-      olx.gui_phil_handler.update(phil_string=gui_skin_phil)
-
+    skin_extension = None
   else:
     force = True
     olx.gui_phil_handler.reset_scope('gui')
-    gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_name)
+    if len(skin_name.split("_")) > 1:
+      skin_extension = skin_name.split("_")[1]
+      skin_name = skin_name.split("_")[0]
+    else: skin_extension = skin_name
+
+  gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_name)
+  if os.path.isfile(gui_skin_phil_path):
+    gui_skin_phil_file = open(gui_skin_phil_path, 'r')
+    gui_skin_phil = gui_skin_phil_file.read()
+    gui_skin_phil_file.close()
+    olx.gui_phil_handler.update(phil_string=gui_skin_phil)
+
+  if skin_extension:
+    force = True
+    gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_extension)
     if os.path.isfile(gui_skin_phil_path):
       gui_skin_phil_file = open(gui_skin_phil_path, 'r')
       gui_skin_phil = gui_skin_phil_file.read()
       gui_skin_phil_file.close()
       olx.gui_phil_handler.update(phil_string=gui_skin_phil)
+
 
   if timing:
     t = time.time()
@@ -143,14 +147,14 @@ def change_skin(skin_name=None, force=False):
   SetMaterials()
 
   OV.setAllMainToolbarTabButtons()
-  
+
   if OV.FileFull() != "none":
     import History
     from History import hist
     hist._make_history_bars()
     a = PilTools.sNumTitle()
     a.run_sNumTitle(force=True)
-  
+
   olx.html_Reload()
 
   if timing:
@@ -238,7 +242,7 @@ def SetMaterials():
   olex.m("SetFont Default %s" %OV.GetParam('gui.console_font'))
   olex.m("SetFont Labels %s" %OV.GetParam('gui.labels_font'))
   olx.HtmlPanelWidth(OV.GetParam('gui.htmlpanelwidth'))
-  
+
   olex.m("lines %s" %OV.GetParam('gui.lines_of_cmd_text'))
 
   OV.SetParam('gui.skin.materials_have_been_set', True)
@@ -252,4 +256,3 @@ def load_user_gui_phil():
     olx.gui_phil_handler.update(phil_string=gui_phil)
 
 OV.registerFunction(load_user_gui_phil)
-

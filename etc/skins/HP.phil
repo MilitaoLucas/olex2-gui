@@ -5,7 +5,7 @@
 
 gui {
   base_colour = #222222
-  logo_colour = #222222
+  logo_colour = #999999
   red = #aa0000
   orange = #ff740e
   green = #00aa00
@@ -17,7 +17,7 @@ gui {
     bg_colour = #444444
     font_colour = #dedede
     highlight_colour = #ff8800
-    input_bg_colour = #555555
+    input_bg_colour = #888888
     link_colour = #ababde
     table_bg_colour = #555555
     table_firstcol_colour = #666666
@@ -37,27 +37,75 @@ gui {
     .type = int
   }
   timage{
+    snumtitle{
+      sg_L = 0.8
+    }
+
+    tab{
+      off_L = 1.6
+      on_L = 1.0
+      hover_L = 1.5
+    }  
   
     cbtn{
       base_colour = #555555
       grad_colour = #777777
-      }  
-  
+      font_colour_L = 1.4
+
+      off_L = 1.2
+      on_L = 1.0
+      hover_L = 1.1
+      }
+
     h1{
       font_colour = #dedede
       font_colour_L = 1.4
       base_colour = #666666
       grad_colour = #666666
       grad_colour_L = 0.3
+      off_L = 1.3
+      on_L = 1.0
+      hover_L = 1.7
+
     }
+
     h3{
       font_colour = #dedede
       font_colour_L = 1.4
       base_colour = #555555
       grad_colour = #555555
       grad_colour_L = 0.3
+      off_L = 1.1
+      on_L = 1.0
+      hover_L = 1.7
     }
 
-    
+    button{
+      base_colour = #555555
+      grad_colour = #787878
+      grad_step = 0.3
+      bg_colour_L = 1.8
+      grad_colour_L = 1.9
+      font_colour_L = 1.2
+      font_colour = #dedede
     }
+    tinybutton{
+      height = 18
+      width = 18
+    }
+  }
+
+  graph{
+    light_grey = #888888
+    grey = #444444
+    dark_grey = #222222
+    filename_colour = #bbbbbb
+    title_colour = #777777
+    fill_colour = #444444
+    outline_colour = #888888
+    fitline_colour = #888888
+    page_colour = #444444
+    axislabel_colour = #ababab
+  }  
+
 }

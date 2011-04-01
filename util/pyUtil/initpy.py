@@ -301,7 +301,7 @@ olexex.check_for_recent_update()
 
 if sys.platform[:3] == 'win':
   OV.SetVar('defeditor','notepad')
-  OV.SetVar('defexplorer','explorer')
+  OV.SetVar('defexplorer','shell')
 #else:
   #olx.SetVar('defeditor','gedit')
   #olx.SetVar('defexplorer','nautilus')
