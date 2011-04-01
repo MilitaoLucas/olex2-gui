@@ -427,15 +427,13 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       mask.show_summary(log=out)
       from iotbx.cif import model
       cif_block = model.block()
-      hklstat = olex_core.GetHklStat()
       merging = self.reflections.merging
       min_d_star_sq, max_d_star_sq = fo2.min_max_d_star_sq()
+      (h_min, k_min, l_min), (h_max, k_max, l_max) = fo2.min_max_indices()
       f = open('%s/%s-mask.log' %(OV.FilePath(), OV.FileName()),'wb')
       print >> f, out.getvalue()
       f.close()
       print out.getvalue()
-      h_min, k_min, l_min = hklstat['FileMinIndexes']
-      h_max, k_max, l_max = hklstat['FileMaxIndexes']
       cif_block['_diffrn_reflns_number'] = fo2.size()
       cif_block['_diffrn_reflns_av_R_equivalents'] = "%.4f" %merging.r_int()
       cif_block['_diffrn_reflns_av_sigmaI/netI'] = "%.4f" %merging.r_sigma()

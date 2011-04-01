@@ -509,12 +509,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
              = "%.4f" %xs.f_000(include_inelastic_part=True)
     #
     fo2 = self.reflections.f_sq_obs
-    hklstat = olex_core.GetHklStat()
     merging = self.reflections.merging
     min_d_star_sq, max_d_star_sq = fo2.min_max_d_star_sq()
-    fo2 = self.reflections.f_sq_obs
-    h_min, k_min, l_min = hklstat['FileMinIndexes']
-    h_max, k_max, l_max = hklstat['FileMaxIndexes']
+    (h_min, k_min, l_min), (h_max, k_max, l_max) = fo2.min_max_indices()
     cif_block['_diffrn_measured_fraction_theta_full'] = fmt % completeness_full
     cif_block['_diffrn_radiation_wavelength'] = self.wavelength
     cif_block['_diffrn_reflns_number'] = fo2.eliminate_sys_absent().size()
@@ -530,7 +527,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       0.5 * uctbx.d_star_sq_as_two_theta(min_d_star_sq, self.wavelength, deg=True))
     cif_block['_diffrn_reflns_theta_max'] = "%.2f" %(
       0.5 * uctbx.d_star_sq_as_two_theta(max_d_star_sq, self.wavelength, deg=True))
-    cif_block['_diffrn_reflns_theta_full'] = two_theta_full/2
+    cif_block['_diffrn_reflns_theta_full'] = fmt % (two_theta_full/2)
     #
     cif_block['_refine_diff_density_max'] = fmt % self.diff_stats.max()
     cif_block['_refine_diff_density_min'] = fmt % self.diff_stats.min()
@@ -559,6 +556,21 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.normal_eqns.weighting_scheme)
     cif_block['_refine_ls_weighting_scheme'] = 'calc'
     cif_block['_refine_ls_wR_factor_ref'] = fmt % self.normal_eqns.wR2()
+    min_d_star_sq, max_d_star_sq = self.normal_eqns.fo_sq.min_max_d_star_sq()
+    (h_min, k_min, l_min), (h_max, k_max, l_max) = self.normal_eqns.fo_sq.min_max_indices()
+    if (self.normal_eqns.fo_sq.space_group().is_centric() or
+        not self.normal_eqns.fo_sq.anomalous_flag()):
+      cif_block['_reflns_Friedel_coverage'] = '0.0'
+    else:
+      cif_block['_reflns_Friedel_coverage'] = "%.3f" %(
+        self.normal_eqns.fo_sq.n_bijvoet_pairs()/
+        self.normal_eqns.fo_sq.complete_set().n_bijvoet_pairs())
+    cif_block['_reflns_limit_h_min'] = h_min
+    cif_block['_reflns_limit_h_max'] = h_max
+    cif_block['_reflns_limit_k_min'] = k_min
+    cif_block['_reflns_limit_k_max'] = k_max
+    cif_block['_reflns_limit_l_min'] = l_min
+    cif_block['_reflns_limit_l_max'] = l_max
     cif_block['_reflns_number_gt'] = (
       self.normal_eqns.fo_sq.data() > 2 * self.normal_eqns.fo_sq.sigmas()).count(True)
     cif_block['_reflns_number_total'] = self.normal_eqns.fo_sq.size()
