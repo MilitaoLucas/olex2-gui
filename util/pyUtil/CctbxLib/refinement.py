@@ -218,7 +218,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     sys.stdout.refresh = False
     self.scale_factor = None
     self.failure = False
-    self.log = open(OV.file_ChangeExt(OV.FileFull(), 'log'), 'wb')
+    self.log = open(OV.file_ChangeExt(OV.FileFull(), 'log'), 'w')
     self.flack = None
 
   def run(self):
@@ -365,7 +365,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.post_peaks(fo_minus_fc, max_peaks=self.max_peaks)
       self.show_summary()
       self.show_comprehensive_summary(log=self.log)
-      f = open(OV.file_ChangeExt(OV.FileFull(), 'cif'), 'wb')
+      f = open(OV.file_ChangeExt(OV.FileFull(), 'cif'), 'w')
       cif = iotbx.cif.model.cif()
       cif[OV.FileName().replace(' ', '')] = self.as_cif_block()
       print >> f, cif
@@ -635,7 +635,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_cell_angle_gamma'] = olx.xf_uc_CellEx('gamma')
     cif_block['_cell_volume'] = olx.xf_uc_VolumeEx()
     cif[OV.FileName().replace(' ', '')] = cif_block
-    f = open(OV.file_ChangeExt(OV.FileFull(), 'fcf'), 'wb')
+    f = open(OV.file_ChangeExt(OV.FileFull(), 'fcf'), 'w')
     cif.show(out=f, loop_format_strings={'_refln':fmt_str})
     f.close()
 
