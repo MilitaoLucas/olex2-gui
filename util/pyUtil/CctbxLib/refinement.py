@@ -613,7 +613,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         anomalous_flag=False)
       fo_sq = fo_sq.eliminate_sys_absent().merge_equivalents(algorithm="shelx").array()
       fo = fo_sq.as_amplitude_array().sort(by_value="packed_indices")
-      fc = fc.common_set(fo)
+      fc, fo = fc.map_to_asu().common_sets(fo)
       mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
         fo, array_type='meas')
       mas_as_cif_block.add_miller_array(
