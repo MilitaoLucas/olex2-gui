@@ -430,7 +430,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       merging = self.reflections.merging
       min_d_star_sq, max_d_star_sq = fo2.min_max_d_star_sq()
       (h_min, k_min, l_min), (h_max, k_max, l_max) = fo2.min_max_indices()
-      f = open('%s/%s-mask.log' %(OV.FilePath(), OV.FileName()),'wb')
+      f = open('%s/%s-mask.log' %(OV.FilePath(), OV.FileName()),'w')
       print >> f, out.getvalue()
       f.close()
       print out.getvalue()
@@ -451,7 +451,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       cif = model.cif()
       data_name = OV.FileName().replace(' ', '')
       cif[data_name] = cif_block
-      f = open('%s/%s-mask.cif' %(filepath, OV.FileName()),'wb')
+      f = open('%s/%s-mask.cif' %(filepath, OV.FileName()),'w')
       print >> f, cif
       f.close()
       OV.SetParam('snum.masks.update_cif', True)
@@ -803,7 +803,7 @@ class as_pdb_file(OlexCctbxAdapter):
   def __init__(self, args):
     OlexCctbxAdapter.__init__(self)
     filepath = args.get('filepath', OV.file_ChangeExt(OV.FileFull(), 'pdb'))
-    f = open(filepath, 'wb')
+    f = open(filepath, 'w')
     fractional_coordinates = \
                            args.get('fractional_coordinates')in (True, 'True', 'true')
     print >> f, self.xray_structure().as_pdb_file(
