@@ -470,7 +470,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       covariance_matrix=self.covariance_matrix_and_annotations.matrix,
       cell_covariance_matrix=cell_vcv,
       parameter_map=xs.parameter_map(),
-      include_bonds_to_hydrogen=True)
+      include_bonds_to_hydrogen=True,
+      fixed_distances=self.reparametrisation.fixed_distances)
     angles = iotbx.cif.geometry.angles_as_cif_loop(
       connectivity_full.pair_asu_table,
       site_labels=xs.scatterers().extract_labels(),
@@ -478,7 +479,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       covariance_matrix=self.covariance_matrix_and_annotations.matrix,
       cell_covariance_matrix=cell_vcv,
       parameter_map=xs.parameter_map(),
-      include_bonds_to_hydrogen=True)
+      include_bonds_to_hydrogen=True,
+      fixed_angles=self.reparametrisation.fixed_angles)
     cif_block.add_loop(distances.loop)
     cif_block.add_loop(angles.loop)
     htabs = [i for i in self.olx_atoms.model['info_tables'] if i['type'] == 'HTAB']
