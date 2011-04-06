@@ -222,35 +222,15 @@ class reflections(object):
         self.f_sq_obs_merged.size() - self.n_filtered_by_resolution - self.f_sq_obs_filtered.size())
       
   def get_observations(self, twin_fractions, twin_components):
-    if twin_components is None: twin_components = ()
     if self.hklf_code == 5:
-      rv = observations.observations(
-        self.f_sq_obs_filtered.indices(),
-        self.f_sq_obs_filtered.data(),
-        self.f_sq_obs_filtered.sigmas(),
-        self.batch_numbers.data(),
-        twin_fractions, twin_components)
-      self.f_sq_obs_filtered = miller.array(
-        miller_set=miller.set(
-          crystal_symmetry=self.f_sq_obs_filtered,
-          indices=rv.indices,
-          anomalous_flag=self.f_sq_obs_filtered.anomalous_flag()),
-        data=rv.data,
-        sigmas=rv.sigmas).set_observation_type(self.f_sq_obs_filtered)
-      rv.fo_sq = self.f_sq_obs_filtered
+      rv = self.f_sq_obs_filtered.as_xray_observations(
+        scale_indices=self.batch_numbers.data(),
+        twin_fractions=twin_fractions,
+        twin_components=twin_components)
+      self.f_sq_obs_filtered = rv.fo_sq
     else:
-      rv = observations.observations(
-        self.f_sq_obs_filtered.indices(),
-        self.f_sq_obs_filtered.data(),
-        self.f_sq_obs_filtered.sigmas(),
-        twin_components)
-      rv.fo_sq = self.f_sq_obs_filtered
-    # have to insure the life-time matches
-    rv.ref_twin_fractions = twin_fractions
-    if len(twin_components) == 0:
-      rv.ref_twin_components = None
-    else:
-      rv.ref_twin_components = twin_components
+      rv = self.f_sq_obs_filtered.as_xray_observations(
+        twin_components=twin_components)
     return rv
       
 
