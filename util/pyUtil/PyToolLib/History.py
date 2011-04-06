@@ -287,31 +287,19 @@ class Node(object):
       if lstPath is not None and os.path.exists(lstPath):
         self.read_lst(lstPath)
 
-      if self.is_solution and OV.GetParam('snum.solution.program') == 'smtbx-solve':
-        self.program = OV.GetParam('snum.solution.program')
-        self.method = OV.GetParam('snum.solution.method')
-      elif OV.GetParam('snum.refinement.program') == 'smtbx-refine':
-        self.program = OV.GetParam('snum.refinement.program')
-        self.method = OV.GetParam('snum.refinement.method')
+      if not self.is_solution and OV.GetParam('snum.refinement.program') == 'smtbx-refine':
         try:
           self.R1 = float(OV.GetParam('snum.refinement.last_R1'))
         except ValueError:
           pass
-      else:
-        self.program = None
-        self.method = None
 
       OV.SetParam('snum.refinement.last_R1', self.R1)
       if self.is_solution:
-        if self.program is None:
-          self.program = OV.GetParam('snum.solution.program')
-        if self.method is None:
-          self.method = OV.GetParam('snum.solution.method')
+        self.program = OV.GetParam('snum.solution.program')
+        self.method = OV.GetParam('snum.solution.method')
       else:
-        if self.program is None:
-          self.program = OV.GetParam('snum.refinement.program')
-        if self.method is None:
-          self.method = OV.GetParam('snum.refinement.method')
+        self.program = OV.GetParam('snum.refinement.program')
+        self.method = OV.GetParam('snum.refinement.method')
     else:
       # XXX backwards compatibility 2010-01-15
       self.R1 = history_leaf.R1
