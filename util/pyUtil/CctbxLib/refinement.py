@@ -392,7 +392,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       else:
         rv += self.twin_components
     return rv
-      
+
   def check_flack(self):
     if (not self.xray_structure().space_group().is_centric()
         and self.normal_eqns.observations.fo_sq.anomalous_flag()):
@@ -480,7 +480,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       cell_covariance_matrix=cell_vcv,
       parameter_map=xs.parameter_map(),
       include_bonds_to_hydrogen=True,
-      fixed_angles=self.reparametrisation.fixed_angles)
+      fixed_angles=self.reparametrisation.fixed_angles,
+      conformer_indices=self.reparametrisation.connectivity_table.conformer_indices)
     cif_block.add_loop(distances.loop)
     cif_block.add_loop(angles.loop)
     htabs = [i for i in self.olx_atoms.model['info_tables'] if i['type'] == 'HTAB']
