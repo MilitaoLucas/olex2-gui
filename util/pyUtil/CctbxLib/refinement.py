@@ -626,8 +626,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
         fo = fo_sq.as_amplitude_array().sort(by_value="packed_indices")
       else:
         fc = self.normal_eqns.f_calc.customized_copy(anomalous_flag=False)
-        fo_sq = self.normal_eqns.fo_sq.customized_copy(
-          data=self.normal_eqns.fo_sq.data()*(1/self.scale_factor),
+        fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
+          data=self.normal_eqns.observations.fo_sq.data()*(1/self.scale_factor),
           anomalous_flag=False)
         fo_sq = fo_sq.eliminate_sys_absent().merge_equivalents(algorithm="shelx").array()
         fo = fo_sq.as_amplitude_array().sort(by_value="packed_indices")
