@@ -1391,7 +1391,7 @@
 <dire help="Opens the current directory in Explorer"
   <body
     <cmd
-      <cmd0 "run(shell 'filepath()')">
+      <cmd0 "shell 'filepath()'">
     \>
   \>
 \>
@@ -1649,7 +1649,7 @@
       <arg1 name="datadir" def="DataDir()">
     \>
     <cmd
-      <cmd0 "run &2E;shell '%1'&2E;">
+      <cmd0 "shell '%1'">
     \>
   \>
 \>
