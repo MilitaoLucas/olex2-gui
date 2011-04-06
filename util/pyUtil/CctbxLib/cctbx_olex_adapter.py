@@ -16,6 +16,7 @@ except:
   olx.current_hklsrc_mtime = None
   olx.current_reflections = None
   olx.current_mask = None
+  olx.current_space_group = None
   olx.current_observations = None
 
 import olex
@@ -148,10 +149,12 @@ class OlexCctbxAdapter(object):
     if (force or
         reflections != olx.current_hklsrc or
         mtime != olx.current_hklsrc_mtime or
-        (olx.current_reflections is not None
-         and hklf_matrix != olx.current_reflections.hklf_matrix)):
+        (olx.current_reflections is not None and
+          (hklf_matrix != olx.current_reflections.hklf_matrix
+            or self.space_group != olx.current_space_group))):
       olx.current_hklsrc = reflections
       olx.current_hklsrc_mtime = mtime
+      olx.current_space_group = self.space_group
       olx.current_reflections = cctbx_controller.reflections(
         self.cell, self.space_group, reflections,
         hklf_code=self.hklf_code,
@@ -161,8 +164,12 @@ class OlexCctbxAdapter(object):
       self.reflections = olx.current_reflections
       self.observations = olx.current_observations
       if self.observations is not None:
-        self.twin_fractions = self.observations.ref_twin_fractions
-        self.twin_components = self.observations.ref_twin_components
+        if not self.update_twinning(self.observations.ref_twin_fractions,
+                                    self.observations.ref_twin_components):
+          self.observations = None
+        else:
+          self.twin_fractions = self.observations.ref_twin_fractions
+          self.twin_components = self.observations.ref_twin_components
     else:
       olx.current_reflections = cctbx_controller.reflections(
         self.cell, self.space_group, reflections,
@@ -245,7 +252,27 @@ class OlexCctbxAdapter(object):
     if self.exti is not None:
       fc = fc.apply_shelxl_extinction_correction(self.exti, self.wavelength)
     return (fo2, fc)
-    
+
+  def update_twinning(self, tw_f, tw_c):
+    if self.twin_fractions is not None:
+      if tw_f is None or len(tw_f) != len(self.twin_fractions):
+        return False
+      for i,f in enumerate(self.twin_fractions):
+        tw_f[i].value = f.value
+    elif tw_f is not None:
+      return False
+
+    if self.twin_components is not None:
+      if tw_c is None or len(tw_c) != len(self.twin_components):
+        return False
+      for i,f in enumerate(self.twin_components):
+        if f.twin_law != tw_c[i].twin_law:
+          return False
+        tw_c[i].value = f.value
+    elif tw_c is not None:
+      return False
+    return True
+
 
 from smtbx import absolute_structure
 
