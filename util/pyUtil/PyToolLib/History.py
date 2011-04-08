@@ -287,7 +287,7 @@ class Node(object):
       if lstPath is not None and os.path.exists(lstPath):
         self.read_lst(lstPath)
 
-      if not self.is_solution and OV.GetParam('snum.refinement.program') == 'smtbx-refine':
+      if not self.is_solution and OV.GetParam('snum.refinement.program') == 'Olex2-refine':
         try:
           self.R1 = float(OV.GetParam('snum.refinement.last_R1'))
         except ValueError:
@@ -648,10 +648,10 @@ class HistoryLeaf:
     self.res = compressFile(resPath)
     ref_program = OV.GetParam('snum.refinement.program')
     sol_program = OV.GetParam('snum.solution.program')
-    if tree.current_refinement == 'solution' and sol_program == 'smtbx-solve':
+    if tree.current_refinement == 'solution' and sol_program == 'Olex2-solve':
       self.solution_program = sol_program
       self.solution_method = OV.GetParam('snum.solution.method')
-    elif tree.current_refinement != 'solution' and ref_program == 'smtbx-refine':
+    elif tree.current_refinement != 'solution' and ref_program == 'Olex2-refine':
       self.refinement_program = ref_program
       self.refinement_method = OV.GetParam('snum.refinement.method')
       try:
