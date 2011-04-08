@@ -1103,7 +1103,7 @@ def get_solution_methods(prg, scope='snum'):
 OV.registerFunction(get_solution_methods)
 
 def which_program(prg):
-  if "smtbx" in prg.name:
+  if "olex2" in prg.name.lower():
     return True
   if prg.name in SPD or prg.name in RPD:
     exec_l = prg.execs

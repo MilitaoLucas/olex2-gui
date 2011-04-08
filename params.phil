@@ -15,7 +15,7 @@ snum {
     }
 
   solution {
-    program = ShelXS ShelXS86 XS 'smtbx-solve' XM ShelXD SIR2008
+    program = ShelXS ShelXS86 XS 'Olex2-solve' XM ShelXD SIR2008
       .type = choice
     method = 'Dual Space' 'Charge Flipping' 'Direct Methods' 'Patterson Method'
       .type = choice
@@ -26,7 +26,7 @@ snum {
   }
 
   refinement {
-    program = ShelXL XL XH ShelXH XLMP ShelXL_ifc 'smtbx-refine'
+    program = ShelXL XL XH ShelXH XLMP ShelXL_ifc 'Olex2-refine'
       .type = choice
     method = 'Least Squares' CGLS 'Gauss-Newton' 'Levenberg-Marquardt' \
       'Full Matrix'
