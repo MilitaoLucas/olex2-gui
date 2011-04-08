@@ -32,11 +32,11 @@ def getDefaultPrgMethod(prgType):
   defaultMethod = '?'
   if prgType == 'Refinement':
     availablePrgs = olexex.get_refinement_programs().split(';')
-    prgList = ('XL', 'ShelXL', 'XH', 'ShelXH', 'smtbx-refine')
+    prgList = ('XL', 'ShelXL', 'Olex2-refine', 'XH', 'ShelXH')
     prgDict = olexex.RPD
   elif prgType == 'Solution':
     availablePrgs = olexex.get_solution_programs().split(';')
-    prgList = ('XS', 'ShelXS', 'smtbx-solve', 'XM', 'ShelXD')
+    prgList = ('XS', 'ShelXS', 'Olex2-solve', 'XM', 'ShelXD')
     prgDict = olexex.SPD
   for prg in prgList:
     if prg in availablePrgs:
@@ -194,6 +194,9 @@ snum {
   else:
     # check if old-style vvd file is present
     structure_phil = VVD_to_phil()
+  # XXX Backwards compatibility 2010-04-08
+  structure_phil = structure_phil.replace('smtbx-refine', 'Olex2-refine')\
+                                 .replace('smtbx-solve', 'Olex2-solve')
   if structure_phil is not None:
     olx.phil_handler.update(phil_string=structure_phil)
   solutionPrg = olx.phil_handler.get_validated_param('snum.solution.program')
