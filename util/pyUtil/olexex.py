@@ -648,7 +648,7 @@ def MakeElementButtonsFromFormula():
   else:
     bm = ButtonMaker(btn_dict)
     bm.run()
-    
+
   cell_volume = 0
   Z = 1
   Z_prime = float(olx.xf_au_GetZprime())
@@ -1896,9 +1896,9 @@ OV.registerFunction(getReportTitleSrc)
 
 def dealWithReportImage():
   #OV.GetParam('snum.re
-  image_name = OV.Getparam('snum.report.image')
+  image_name = OV.GetParam('snum.report.image')
   if image_name == "No Image":
-    OV.SetParam('snum.report.image',None)
+#    OV.SetParam('snum.report.image',None)
     return
   elif image_name == "screenshot":
     olex.m('pict -pq screenshot.png 1')
