@@ -121,8 +121,20 @@ class OlexCctbxAdapter(object):
         self.constraints = create_cctbx_xray_structure.builder.constraints
       self._xray_structure = create_cctbx_xray_structure.structure()
       table = OV.GetParam("snum.smtbx.atomic_form_factor_table")
+      sfac = self.olx_atoms.model.get('sfac')
+      custom_gaussians = {}
+      if sfac is not None:
+        from cctbx import eltbx
+        for element, sfac_dict in sfac.iteritems():
+          custom_gaussians.setdefault(element, eltbx.xray_scattering.gaussian(
+            sfac_dict['gaussian'][0],
+            [-b for b in sfac_dict['gaussian'][1]],
+            sfac_dict['gaussian'][2]))
+        # XXX fp and fdp not yet dealt with
       self._xray_structure.scattering_type_registry(
-        table=table, d_min=self.reflections.f_sq_obs.d_min())
+        custom_dict=custom_gaussians,
+        table=table,
+        d_min=self.reflections.f_sq_obs.d_min())
       if self.reflections._merge < 4:
         from cctbx.eltbx import wavelengths
         inelastic_table = OV.GetParam("snum.smtbx.inelastic_form_factor_table")
@@ -176,7 +188,7 @@ class OlexCctbxAdapter(object):
         hklf_code=self.hklf_code,
         hklf_matrix=hklf_matrix)
       self.reflections = olx.current_reflections
-     
+
     merge = self.olx_atoms.model.get('merge')
     omit = self.olx_atoms.model['omit']
     update = False
@@ -187,12 +199,12 @@ class OlexCctbxAdapter(object):
     if force or omit is None or omit != self.reflections._omit:
       self.reflections.filter(omit, self.olx_atoms.exptl['radiation'])
       update = True
-    
+
     if update or self.observations is None:
       self.observations = self.reflections.get_observations(
         self.twin_fractions, self.twin_components)
       olx.current_observations = self.observations
-      
+
     if verbose:
       self.reflections.show_summary()
 
@@ -235,7 +247,7 @@ class OlexCctbxAdapter(object):
     weighting.observed = fo2
     weighting.compute(fc, scale_factor)
     return weighting.weights
-  
+
   def get_fo_sq_fc(self):
     fo2 = self.reflections.f_sq_obs_filtered
     unique = self.reflections.f_sq_obs.unique_under_symmetry().map_to_asu()
