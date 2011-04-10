@@ -287,7 +287,7 @@ class MergeCif(CifTools):
         os.path.getmtime(file_full) > os.path.getmtime(cif_path)):
       prg = OV.GetParam('snum.refinement.program')
       method = OV.GetParam('snum.refinement.method')
-      if prg == 'smtbx-refine':
+      if prg == 'Olex2-refine':
         OV.set_refinement_program(prg, 'Gauss-Newton')
       else:
         if method == 'CGLS':

@@ -1,209 +1,16 @@
-﻿/* Overal Settings */
-
-body{
-  tab-interval:36.0pt;
-  text-justify-trim:punctuation;
-  text-align: justify !important;
-  color: #666 !important;
-  line-height: 180% !important;
-  
-}
-
-sub, sup {
-  line-height: 0.1em;
-}
-
-.container {
-  margin: 0 auto;
-  padding-top: 0px;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-bottom: 50px;
-  position: relative;
-  width: 800px;
-  background-color: #ffffff !important;
-}
-
-.outside {
-  background-color: #eeeeee;
-}
-
-.highlight{
-  colour=red
-}
-
-p.normal, li.normal, div.normal{
-    margin:0cm;
-    margin-bottom:.0001pt;
-    text-autospace:none;
-    font-size:11.0pt;
-    color:#ababab
-    color: #666 !important;
-    line-height: 160% !important;
-}
-
-p.faint{
-  color:gray;
-}
-
-span.replaceThisChar{
-  color:green;
-  font-weight:bold;
-}
-
-/* The top title bar of the first page */
-div.Title{
-  width:800px;
-  height:50px;
-  text-align:right;
-  vertical-align:bottom;
-  background:#326496;
-  color: #ffffff;
-  margin-right:6.0pt;
-}
-
-/* The table with the submission details on the first page */
-table.Submission{
-  margin-left:2em;
-  margin-top:1em;
-  margin-bottom:2em;
-  border-collapse:collapse;
-}
-
-table.Submission td.id
+body
   {
-    color:#ababab;
+    tab-interval:60.0pt;
+    text-justify-trim:punctuation;
   }
 
-table.Submission td.val
+div.Content
   {
-    color:#326496;
-    text-indent:30px;
-    font-size:1.2em;
+    width:800px;
+    position:relative;
+    left:0px;
+    top:0px;
   }
-
-
-/* The data tables*/
-
-p.cifTableHeadline{
-  margin-top:21.0pt;
-  margin-bottom:6.0pt;
-  font-weight:bold;
-}
-
-
-table.CifTable{
-  margin-left:2em;
-  margin-top:1em;
-  margin-bottom:2em;
-  border-collapse:collapse;
-  width:45em;
-  color:#666;
-}
-
-table.CifTable1{
-  color:#666;
-  margin-left:2em;
-  margin-top:1em;
-  margin-bottom:2em;
-  border-collapse:collapse;
-  width:45em;
-  line-height: 160% !important;
-}
-
-table.CifTable td.leftcol{
-  padding-right:3em;
-}
-
-table.CifTable td.data{
-  width:3em;
-  white-space:nowrap;
-}
-
-table.CifTable td.decimal{
-  tab-stops:decimal 6pt;
-  text-align:".";
-  text-align:right;
-  font-size:11.0pt;
-  font-family:"Courier";
-  width:7em;
-  color:blue;
-  color:#666;
-}
-
-table.CifTable td.decimalWide{
-  tab-stops:decimal 10pt;
-  text-align:".";
-  text-align:right;
-  font-size:11.0pt;
-  font-family:"Courier";
-  width:9em;
-  color:#666;
-}
-
-
-table.CifTable th{
-  tab-stops:decimal 6pt;
-  text-align:".";
-  text-align:right;
-  padding-right:2em;
-  font-weight:bold;
-  color:#326496;
-  height:30px
-}
-
-table.CifTable caption{
-  color:#326496;
-  margin-before:3em;
-  text-align:left;
-  caption-side:top;
-  margin-left:0em;
-  margin-right:0em;
-  margin-top:1em;
-}
-
-table.CifTable1 caption{
-  color:#326496;
-  margin-before:3em;
-  text-align:left;
-  caption-side:top;
-  margin-left:0em;
-  margin-right:0em;
-  margin-top:1em;
-}
-
-/* EXPERIMENTAL NUMBERING OF TABLES
-table.CifTable caption:before{
- content: "Table " counter(level1) ": ";
- counter-increment: level1;
- font-weight: bold;
-}
-*/
-
-.cifTableFirst{
-  font-weight:bold;
-  color:#326496;
-  }
-
-.cifTableFooter{
-  boder-top:solid;
-  font-size:8.0pt;
-  margin-top:1.0pt;
-  margin-left:45.0pt;
-  margin-bottom:1.0pt;
-}
-
-/*
-div.Content{
-  color: #666 !important;
-  width:900px;
-  position:relative;
-  left:0px;
-  top:0px;
-  font-family: Georgia,"Times New Roman",Times,serif !important;
-  color: #666 !important;
-  line-height: 160% !important;
-}
 
 div.Section1
   {
@@ -223,48 +30,103 @@ div.Section3
   {
     width:100%;
     float:left;
+    page:Section3;
   }
 
-*/  
 
+h1
+  {
+  }
 
+p.normal, li.normal, div.normal
+  {
+    font-size:11.0pt;
+    font-family:"Times New Roman";
+  }
 
+p.cifTableHeadline
+  {
+    font-weight:bold;
+  }
+
+span.replaceThisChar
+  {
+    color:red;
+    font-weight:bold;
+  }
+
+table.CifTable
+  {
+    page-break-before: always;
+    mso-special-character:line-break;
+    border-collapse:collapse;
+  }
+
+table.CifTable td.data
+  {
+    width:3em;
+    white-space:nowrap;
+  }
+
+table.CifTable td.decimal
+  {
+    tab-stops:decimal 6pt;
+    text-align:".";
+    text-align:right;
+    font-size:11.0pt;
+    font-family:"Courier";
+    width:6em;
+  }
+
+table.CifTable td.decimalWide
+  {
+    tab-stops:decimal 10pt;
+    text-align:".";
+    text-align:right;
+    font-size:11.0pt;
+    font-family:"Courier";
+    width:8em;
+  }
+
+table.CifTable th
+  {
+    font-weight:bold;
+    text-align:center;
+  }
+
+table.CifTable caption
+  {
+    caption-side:top;
+    font-weight:bold;
+    text-align:left;
+  }
+
+.cifTableFirst
+  {font-weight:bold;}
+
+.cifTableFooter
+  {
+    boder-top:solid;
+    font-size:8.0pt;
+  }
+
+/* Page Definitions */
 @page Section1
   {
-    size:21cm 29.7cm;
-    margin-top:1.5cm;
-    margin-bottom:1.5cm;
-    margin-left:3.00cm;
-    margin-right:2.5cm;
+    size:595.3pt 841.9pt;
+    margin:34.0pt 2.0cm 2.0cm 85.25pt;
   }
-  
-@media screen{
-  div.Section1{
-    font-family: Georgia,"Times New Roman",Times,serif !important;
-  }
-}
-
-@media print{
-
-  #header, #nav, .noprint
+div.Section1
   {
-    display: none;
-  }
-
-  div.Section1{
     page:Section1;
-    background-color: #ffabab !important;
-    page-break-after:always;
   }
-}  
-  
 @page Section2
   {
     size:21cm 29.7cm;
-    margin-top:1.5cm;
-    margin-bottom:1.5cm;
-    margin-left:3.00cm;
-    margin-right:2.5cm;
+    margin-top:2.54cm;
+    margin-bottom:2.54cm;
+    margin-left:3.17cm;
+    margin-right:3.17cm;
   }
 div.Section2
   {
@@ -272,70 +134,10 @@ div.Section2
   }
 @page Section3
   {
-    size:21cm 29.7cm;
-    margin-top:1.5cm;
-    margin-bottom:1.5cm;
-    margin-left:3.00cm;
-    margin-right:2.5cm;
+    size:595.3pt 841.9pt;
+    margin:34.0pt 2.0cm 2.0cm 79.4pt;
   }
 div.Section3
   {
     page:Section3;
   }
-
-
-/*
-div.Submission{
-  float:left;
-  width:300px;
-  font-family: Georgia,"Times New Roman",Times,serif !important;
-  color: #666 !important;
-  line-height: 160% !important;
-}
-*/
-
-
-/*  
-div.Image
-  {
-    float:left;
-    position:relative;
-    top:0px;
-    left:0px;
-  }
-
-div.ImageLogo{
-
-  @media screen {
-    {
-      float:left;
-      position:relative;
-      top:0px;
-      left:0px;
-      height:80px;
-      background-color: #ff0000 !important;
-      
-    }
-  }
-
-  @media print {
-    {
-      float:right;
-      position:relative;
-      top:0px;
-      left:0px;
-      height:80px;
-    }
-  }  
-}  
-*/
-  
-h1{
-  font-family: Georgia,"Times New Roman",Times,serif;
-  margin-top:6.0pt;
-  margin-right:6.0pt;
-  margin-bottom:6.0pt;
-  margin-left:0cm;
-  text-autospace:none;
-  font-weight:bold;
-}
