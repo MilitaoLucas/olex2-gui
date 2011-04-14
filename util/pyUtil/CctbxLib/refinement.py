@@ -612,7 +612,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if list_code == 4:
       fc_sq = self.normal_eqns.fc_sq.sort(by_value="packed_indices")
       fo_sq = self.normal_eqns.observations.fo_sq.sort(by_value="packed_indices")
-      fo_sq = fo_sq.customized_copy(data=fo_sq.data()*(1/self.scale_factor))
+      fo_sq = fo_sq.customized_copy(
+        data=fo_sq.data()*(1/self.scale_factor),
+        sigmas=fo_sq.sigmas()*(1/self.scale_factor))
       mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
         fc_sq, array_type='calc')
       mas_as_cif_block.add_miller_array(fo_sq, array_type='meas')
@@ -629,6 +631,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         fc = self.normal_eqns.f_calc.customized_copy(anomalous_flag=False)
         fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
           data=self.normal_eqns.observations.fo_sq.data()*(1/self.scale_factor),
+          sigmas=self.normal_eqns.observations.fo_sq.sigmas()*(1/self.scale_factor),
           anomalous_flag=False)
         fo_sq = fo_sq.eliminate_sys_absent().merge_equivalents(algorithm="shelx").array()
         fo = fo_sq.as_amplitude_array().sort(by_value="packed_indices")
