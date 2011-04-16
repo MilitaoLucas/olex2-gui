@@ -194,10 +194,10 @@ snum {
   else:
     # check if old-style vvd file is present
     structure_phil = VVD_to_phil()
-  # XXX Backwards compatibility 2010-04-08
-  structure_phil = structure_phil.replace('smtbx-refine', 'Olex2-refine')\
-                                 .replace('smtbx-solve', 'Olex2-solve')
   if structure_phil is not None:
+    # XXX Backwards compatibility 2010-04-08
+    structure_phil = structure_phil.replace('smtbx-refine', 'Olex2-refine')\
+                                   .replace('smtbx-solve', 'Olex2-solve')
     olx.phil_handler.update(phil_string=structure_phil)
   solutionPrg = olx.phil_handler.get_validated_param('snum.solution.program')
   solutionMethod = olx.phil_handler.get_validated_param('snum.solution.method')
