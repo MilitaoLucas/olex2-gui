@@ -6,7 +6,7 @@
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
   <td name=IMAGE_PS_NAME>
-    <input 
+    <input
       type="text"
       height="$spy.GetParam(gui.html.input_height)"
       bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
@@ -80,7 +80,7 @@
     >
   </td>
   <td name=IMAGE_PS_BUTTON>
-$spy.MakeHoverButton(button_small-go@postscript,run 'brad GetValue\(IMAGE_PS_BONDWIDTH)'>>run 'pictps GetValue\(IMAGE_PS_NAME).ps GetData\(COLOR_LINE) GetData\(COLOR_FILL) GetData\(COLOR_BOND) GetData\(IMAGE_PS_PERSPECTIVE) -lw_ellipse=spy.GetParam\(snum.image.ps.outline_width) -lw_octant=spy.GetParam\(snum.image.ps.octant_width) -lw_pie=spy.GetParam\(snum.image.ps.pie_width) -lw_font=spy.GetParam\(snum.image.ps.font_weight) -div_pie=spy.GetParam\(snum.image.ps.octant_count) -scale_hb=spy.GetParam\(snum.image.ps.h_bond_width)'>>brad 0.8>>echo 'Image spy.GetParam\(snum.image.ps.name).ps made and placed in FilePath\()')
+$spy.MakeHoverButton(button_small-go@postscript,run 'brad GetValue\(IMAGE_PS_BONDWIDTH)'>>run 'pictps GetValue\(IMAGE_PS_NAME).ps GetData\(COLOR_LINE) GetData\(COLOR_FILL) GetData\(COLOR_BOND) GetData\(IMAGE_PS_PERSPECTIVE) -lw_ellipse=spy.GetParam\(snum.image.ps.outline_width) -lw_octant=spy.GetParam\(snum.image.ps.octant_width) -lw_pie=spy.GetParam\(snum.image.ps.pie_width) -div_pie=spy.GetParam\(snum.image.ps.octant_count) -scale_hb=spy.GetParam\(snum.image.ps.h_bond_width)'>>brad 0.8>>echo 'Image spy.GetParam\(snum.image.ps.name).ps made and placed in FilePath\()')
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
@@ -97,8 +97,8 @@ $spy.MakeHoverButton(button_small-go@postscript,run 'brad GetValue\(IMAGE_PS_BON
       type="combo"
       height="$spy.GetParam(gui.html.combo_height)"
       width="$spy.GetParam(gui.html.combo_width_2)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
-      items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6" 
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6"
       height="$spy.GetParam(gui.html.input_height)"
       valign='center'
       align='right'
@@ -143,7 +143,7 @@ $spy.MakeHoverButton(button_small-go@postscript,run 'brad GetValue\(IMAGE_PS_BON
       bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
       items="2;3;4;5;6;7;8;9;10;"
       height="$spy.GetParam(gui.html.input_height)"
-      valign='center' 
+      valign='center'
       align='right'
       name="IMAGE_PS_OCTANT_COUNT"
       width="50"
@@ -153,7 +153,7 @@ $spy.MakeHoverButton(button_small-go@postscript,run 'brad GetValue\(IMAGE_PS_BON
     >
   </td>
   <td name=IMAGE_PS_OCTANT_PIEWIDTH width=42%>
-    <input 
+    <input
       type="combo"
       height="$spy.GetParam(gui.html.combo_height)"
       width="$spy.GetParam(gui.html.combo_width_2)"
@@ -197,7 +197,7 @@ $spy.MakeHoverButton(button_small-go@postscript,run 'brad GetValue\(IMAGE_PS_BON
     >
   </td>
   <td name=IMAGE_PS_HBOND width=42%>
-    <input 
+    <input
       type="combo"
       height="$spy.GetParam(gui.html.combo_height)"
       width="$spy.GetParam(gui.html.combo_width_2)"
@@ -220,10 +220,10 @@ $spy.MakeHoverButton(button_small-go@postscript,run 'brad GetValue\(IMAGE_PS_BON
 <!-- #include tool-help-column gui\blocks\tool-first-column.htm;help_ext=mode_name;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td name=ROW_5_LABEL width=16%>
-    <b>%Font%</b>
+    <b>%Atom% %Font%</b>
   </td>
-  <td name=IMAGE_PS_FONTWEIGHT width=42%>
-    <input 
+  <td name=IMAGE_PS_ATOM_LABEL_FONTWEIGHT width=42%>
+    <input
       type="combo"
       height="$spy.GetParam(gui.html.combo_height)"
       width="$spy.GetParam(gui.html.combo_width_2)"
@@ -232,15 +232,15 @@ $spy.MakeHoverButton(button_small-go@postscript,run 'brad GetValue\(IMAGE_PS_BON
       height="$spy.GetParam(gui.html.input_height)"
       valign='center'
       align='right'
-      name="IMAGE_PS_FONTWEIGHT"
+      name="IMAGE_PS_ATOM_LABEL_FONTWEIGHT"
       width="50"
-      value='$spy.GetParam(snum.image.ps.font_weight)'
+      value='$spy.GetParam(snum.image.ps.atom_label.font_weight)'
       label="%images_font_weight% "
-      onleave="spy.SetParam(snum.image.ps.font_weight,GetValue(IMAGE_PS_FONTWEIGHT))"
+      onleave="spy.SetParam(snum.image.ps.atom_label.font_weight,GetValue(IMAGE_PS_ATOM_LABEL_FONTWEIGHT))"
     >
     </td>
-  <td name=IMAGE_PS_FONTSIZE width=42%>
-    <input 
+  <td name=IMAGE_PS_ATOM_LABEL_FONTSIZE width=42%>
+    <input
       type="combo"
       height="$spy.GetParam(gui.html.combo_height)"
       width="$spy.GetParam(gui.html.combo_width_2)"
@@ -249,12 +249,56 @@ $spy.MakeHoverButton(button_small-go@postscript,run 'brad GetValue\(IMAGE_PS_BON
       height="$spy.GetParam(gui.html.input_height)"
       valign='center'
       align='right'
-      name="IMAGE_PS_FONTSIZE"
+      name="IMAGE_PS_ATOM_LABEL_FONTSIZE"
       width="50"
-      value='$spy.GetParam(snum.image.ps.font_size)'
+      value='$spy.GetParam(snum.image.ps.atom_label.font_size)'
       label="%Size% "
-      onchange="spy.SetParam(snum.image.ps.font_size,GetValue(IMAGE_PS_FONTSIZE))>>
-setfont AtomLabels strcat(spy.GetParam(snum.image.ps.font_name),spy.GetParam(snum.image.ps.font_size))"
+      onchange="spy.SetParam(snum.image.ps.atom_label.font_size,GetValue(IMAGE_PS_ATOM_LABEL_FONTSIZE))>>
+setfont AtomLabels strcat(spy.GetParam(snum.image.ps.atom_label.font_name),spy.GetParam(snum.image.ps.atom_label.font_size))"
+    >
+    </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
+
+<tr name=IMAGE_PS_ROW_6>
+<!-- #include tool-help-column gui\blocks\tool-first-column.htm;help_ext=mode_name;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td name=ROW_6_LABEL width=16%>
+    <b>%Bond% %Font%</b>
+  </td>
+  <td name=IMAGE_PS_BOND_LABEL_FONTWEIGHT width=42%>
+    <input
+      type="combo"
+      height="$spy.GetParam(gui.html.combo_height)"
+      width="$spy.GetParam(gui.html.combo_width_2)"
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6;2.0;"
+      height="$spy.GetParam(gui.html.input_height)"
+      valign='center'
+      align='right'
+      name="IMAGE_PS_BOND_LABEL_FONTWEIGHT"
+      width="50"
+      value='$spy.GetParam(snum.image.ps.bond_label.font_weight)'
+      label="%images_font_weight% "
+      onleave="spy.SetParam(snum.image.ps.bond_label.font_weight,GetValue(IMAGE_PS_BOND_LABEL_FONTWEIGHT))"
+    >
+    </td>
+  <td name=IMAGE_PS_BOND_LABEL_FONTSIZE width=42%>
+    <input
+      type="combo"
+      height="$spy.GetParam(gui.html.combo_height)"
+      width="$spy.GetParam(gui.html.combo_width_2)"
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      items="10;12;14;15;16;18;20;22;"
+      height="$spy.GetParam(gui.html.input_height)"
+      valign='center'
+      align='right'
+      name="IMAGE_PS_BOND_LABEL_FONTSIZE"
+      width="50"
+      value='$spy.GetParam(snum.image.ps_bond_label.font_size)'
+      label="%Size% "
+      onchange="spy.SetParam(snum.image.ps.bond_label.font_size,GetValue(IMAGE_PS_BOND_LABEL_FONTSIZE))>>
+setfont BondLabels strcat(spy.GetParam(snum.image.ps.bond_label.font_name),spy.GetParam(snum.image.ps.bond_label.font_size))"
     >
     </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

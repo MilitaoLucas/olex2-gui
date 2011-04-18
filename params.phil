@@ -15,7 +15,7 @@ snum {
     }
 
   solution {
-    program = ShelXS ShelXS86 XS 'Olex2-solve' XM ShelXD SIR2008
+    program = ShelXS ShelXS86 XS 'olex2.solve' XM ShelXD SIR2008
       .type = choice
     method = 'Dual Space' 'Charge Flipping' 'Direct Methods' 'Patterson Method'
       .type = choice
@@ -26,7 +26,7 @@ snum {
   }
 
   refinement {
-    program = ShelXL XL XH ShelXH XLMP ShelXL_ifc 'Olex2-refine'
+    program = ShelXL XL XH ShelXH XLMP ShelXL_ifc 'olex2.refine'
       .type = choice
     method = 'Least Squares' CGLS 'Gauss-Newton' 'Levenberg-Marquardt' \
       'Full Matrix'
@@ -103,8 +103,14 @@ snum {
     bitmap{
       name = None
         .type = str
-      font_name = #olex2.fnt:frb_18
+      atom_label{
+        font_name = #olex2.fnt:frb_18
+          .type = str
+        }
+      bond_label{
+        font_name = #olex2.fnt:frb_14
         .type = str
+      }
       type = png jpg bmp
         .type = choice
     }
@@ -121,12 +127,26 @@ snum {
         .type = float
       bond_width = 0.7
         .type = float
-      font_name = @
-        .type = str
-      font_size = 15
-        .type = int
-      font_weight = 1.0
-        .type = float
+      atom_label{
+        font_name = @
+          .type = str
+        font_size = 15
+          .type = int
+        font_colour = #00000
+          .type = colour
+        font_weight = 1.0
+          .type = float
+      }
+      bond_label{
+        font_name = @
+          .type = str
+        font_size = 15
+          .type = int
+        font_colour = #00000
+          .type = colour
+        font_weight = 1.0
+          .type = float
+      }
       name = None
         .type = str
     }
