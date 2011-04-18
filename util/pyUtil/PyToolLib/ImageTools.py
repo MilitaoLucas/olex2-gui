@@ -552,7 +552,7 @@ class ImageTools(FontInstances):
       encoding = 'unic'
       if self.gui_current_language == "Chinese":
         #font_name = "Simhei TTF"
-        font_name = 'Arial UTF'
+        font_name = OV.GetParam('gui.chinese_font_name')
       else:
         font_name = 'Arial UTF'
       #font_name = "Chinese"
@@ -570,11 +570,11 @@ class ImageTools(FontInstances):
     try:
       txt.encode('ascii')
     except:
-      font_name = 'Arial UTF'
-      top -= 3
-      pass
-
-
+      if self.gui_current_language != "Chinese":
+        font_name = 'Arial UTF'
+        top -= 3
+      else:
+        pass
 
     if valign:
 

@@ -714,10 +714,10 @@ def defineExternalPrograms():
     reference="XM, G.M. Sheldrick, Acta Cryst. (2008). A64, 112-122",
     execs=["xm.exe", "xm"])
   smtbx_solve = Program(
-    name='Olex2-solve',
+    name='olex2.solve',
     program_type='solution',
     author="Luc Bourhis",
-    reference="Olex2-solve (L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, J.A.K. Howard, H. Puschmann, in preparation, 2011)")
+    reference="olex2.solve (L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, J.A.K. Howard, H. Puschmann, in preparation, 2011)")
   SIR97 = Program(
     name='SIR97',
     program_type='solution',
@@ -774,10 +774,10 @@ def defineExternalPrograms():
     reference="SHELXL, G.M. Sheldrick, Acta Cryst. (2008). A64, 112-122",
     execs=["shelxl_ifc"])
   smtbx_refine = Program(
-    name='Olex2-refine',
+    name='olex2.refine',
     program_type='refinement',
     author="L.J. Bourhis, O.V. Dolomanov, R.J. Gildea",
-    reference="Olex2-refine (L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, J.A.K. Howard, H. Puschmann, in preparation, 2011)")
+    reference="olex2.refine (L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, J.A.K. Howard, H. Puschmann, in preparation, 2011)")
 
   for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc):
     for method in (least_squares, cgls):

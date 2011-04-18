@@ -12,29 +12,29 @@ class FontInstances(ArgumentParser):
       OlexFonts = r"%s\OlexFonts.pickle" %self.datadir
       #d = shelve.open(OlexFonts, 'n') # open, with (g)dbm filename -- no suffix
       #self.fonts =  d
-      #d.close()       # close it    
+      #d.close()       # close it
       #OlexFonts = r"%s\OlexFonts.pickle" %self.datadir
       #self.fonts = pickle.load(OlexFonts)
     except:
       pass
-    
+
   def pickleFonts(self, font_name, font_size, font):
     import pickle
 #    a = FontFile.FontFile()
-    
+
     OlexFonts = r"%s\OlexFonts.pickle" %self.datadir
-    
+
     #d = shelve.open(OlexFonts) # open, with (g)dbm filename -- no suffix
     #d = self.fonts   # store data at key (overwrites old data if
                     ## using an existing key)
-    #d.close()       # close it    
-    
-   
-    pFile = open(OlexFonts, 'w') 
+    #d.close()       # close it
+
+
+    pFile = open(OlexFonts, 'w')
     p = pickle.dumps(self.fonts)
     pFile.write(p)
     pFile.close()
-    
+
   def defineFonts(self):
     self.fonts = {
       ##################################################### Cambria
@@ -45,7 +45,7 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
-      
+
       "Cambria Bold":{
         "font_src":(
           r"cambriab.ttc",
@@ -53,7 +53,7 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
-      
+
       "Cambria Italic":{
         "font_src":(
           r"cambriai.ttc",
@@ -69,7 +69,7 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
-      
+
       ##################################################### Gerogia
       "Georgia":{
         "font_src":(
@@ -78,7 +78,7 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
-      
+
       "Georgia Bold":{
         "font_src":(
           r"georgiab.ttf",
@@ -86,7 +86,7 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
-      
+
       "Georgia Italic":{
         "font_src":(
           r"georgiai.ttf",
@@ -102,7 +102,7 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
-      
+
       ##################################################### Verdana
       "Verdana":{
         "font_src":(
@@ -118,7 +118,7 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
-      
+
       "Verdana Italic":{
         "font_src":(
           r"verdanai.ttf",
@@ -142,7 +142,7 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
-      
+
       "Verdana Italic":{
         "font_src":(
           r"GILI____.ttf",
@@ -150,8 +150,8 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
-      
-      
+
+
       ##################################################### Vera
       "Vera":{
         "font_src":(
@@ -181,7 +181,7 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
-          
+
       ##################################################### Vera Mono
       "VeraMono":{
         "font_src":(
@@ -226,7 +226,7 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
-          
+
       ##################################################### Arial
       "Arial":{
         "font_src":(
@@ -235,7 +235,7 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
-          
+
       "Arial Bold":{
         #"font_src":"arialbd.ttf",
         "font_src":(
@@ -244,7 +244,7 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
-          
+
       "Arial UTF":{
         "font_src":(
           "arialuni.ttf",
@@ -252,16 +252,41 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
-      
+
       ##################################################### Chinese
       "Chinese":{
         #"font_src":"arialbd.ttf",
         "font_src":(
           r"%s/etc/gui/fonts/HDZB_7.ttf" %self.basedir,
+          r"MSYH.TTF",
+          r"simsun.ttc",
+          r"arialuni.ttf"
           ),
         "fontInstance":{}
           },
-      
+
+      "Chinese Bold":{
+        #"font_src":"arialbd.ttf",
+        "font_src":(
+          r"MSYHB.TTF",
+          ),
+        "fontInstance":{}
+          },
+
+      "YaHei":{
+        "font_src":(
+          "MSYH.TTF",
+          ),
+        "fontInstance":{}
+          },
+
+      "YaHei Bold":{
+        "font_src":(
+          "MSYHB.TTF",
+          ),
+        "fontInstance":{}
+          },
+
       "Simsun TTC":{
         "font_src":(
           "simsun.ttc",
@@ -277,8 +302,7 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
-      
-      
+
       "Simsun TTF":{
         "font_src":(
           "simsun.ttf",
@@ -286,8 +310,8 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
-      
-      
+
+
       ##################################################### Trebuchet
       "Trebuchet":{
         "font_src":(
@@ -336,8 +360,8 @@ class FontInstances(ArgumentParser):
         "fontInstance":{}
           },
 
-      
-      
+
+
       ##################################################### Garamond
       "Garamond Bold":{
         "font_src":(
@@ -348,7 +372,7 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
-          
+
       ##################################################### Times
       "Times":{
         "font_src":(
@@ -365,7 +389,7 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
-          
+
       "Times Bold":{
         "font_src":(
           "timesbd.ttf",
@@ -382,7 +406,7 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
-          
+
       "Helvetica Bold":{
         "font_src":(
           r"%s/etc/gui/fonts/HelveticaMedCd.ttf" %self.basedir,
@@ -390,7 +414,7 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
-          
+
       "Optane":{
         "font_src":(
           r"%s/etc/gui/fonts/Optane.ttf" %self.basedir,
@@ -398,7 +422,7 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
-          
+
       "Optane Bold":{
         "font_src":(
           r"%s/etc/gui/fonts/Optane Bold.ttf" %self.basedir,
@@ -406,7 +430,7 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
-          
+
       "Potter":{
         "font_src":(
           r"%s/etc/gui/fonts/POTTERYB.ttf" %self.basedir,
@@ -415,7 +439,7 @@ class FontInstances(ArgumentParser):
         "fontInstance":{}
           },
 
-          
+
       "Crystallography":{
         "font_src":(
           r"%s/etc/gui/fonts/Crystallography.ttf" %self.basedir,
@@ -423,7 +447,7 @@ class FontInstances(ArgumentParser):
           ),
         "fontInstance":{}
           },
-          
+
       "Crystallography Bold":{
         "font_src":(
           r"%s/etc/gui/fonts/Crystallography.ttf" %self.basedir,
@@ -455,7 +479,7 @@ class FontInstances(ArgumentParser):
       failsafe = r"%s/etc/gui/fonts/Vera.ttf" %self.basedir
       fontInstance = ImageFont.truetype(failsafe, font_size, encoding=encoding)
       self.fonts[font_name]["fontInstance"].setdefault(font_size,fontInstance)
-  
+
     pleasePickleMe = False
     font_src_t = self.fonts[font_name]["font_src"]
     fontInstance = self.fonts[font_name]["fontInstance"].get(font_size, None)
@@ -472,5 +496,5 @@ class FontInstances(ArgumentParser):
         except:
           failsafe = r"%s/etc/gui/fonts/Vera.ttf" %self.basedir
           fontInstance = ImageFont.truetype(failsafe, font_size, encoding=encoding)
-          self.fonts[font_name]["fontInstance"].setdefault(font_size,fontInstance)     
+          self.fonts[font_name]["fontInstance"].setdefault(font_size,fontInstance)
     return fontInstance
