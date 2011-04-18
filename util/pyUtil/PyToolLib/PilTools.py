@@ -2366,7 +2366,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     iconIndex.setdefault("dot-arrow-down", (7, 2, {'colourise':self.params.green.rgb}))
     iconIndex.setdefault("dot-arrow-up", (7, 3, {'colourise':self.params.green.rgb}))
     iconIndex.setdefault("polyhedra", (6, 9))
-    
+
     also_make_small_icons_l = ['open']
 
     for icon in iconIndex:
@@ -2377,7 +2377,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         name = name.lower()
         OlexVFS.save_image_to_olex(image, name, 2)
       #image.save(r"%s\etc\$toolbar-%s.png" %(datadir, icon), "PNG")
-    
+
       if icon in also_make_small_icons_l:
         states = ["on", "off", "hover", "", "hoveron", "highlight"]
         for state in states:
@@ -2385,7 +2385,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           name = r"toolbar_small-%s%s.png" %(icon,state)
           name = name.lower()
           OlexVFS.save_image_to_olex(image, name, 2)
-      
+
     height = 10
     width = 10
     bg_colour = self.adjust_colour(base_colour, luminosity = 1.6)
@@ -3040,12 +3040,12 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     n = int(len(txt)/2)
     txtbeg = txt[:n]
     txtend = txt [-n:]
-    
+
     if left_start > self.width:
       left_start = 50
     else:
       left_start = left_start
-    
+
     xx = 0
     while tw > self.width - left_start:
       txtbeg = txt[:n]
@@ -3295,7 +3295,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     text = text.split()
     if olx.IsCurrentLanguage('Chinese') == 'true':
-      font_name = "Arial UTF"
+      #font_name = "Arial UTF"
+      font_name = self.params.chinese_font_name
     else:
       font_name = "Vera"
       if self.params.image_font_name:
@@ -3587,7 +3588,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       icon_size = OV.GetParam('gui.skin.icon_size')
     else:
       icon_size = icon_size + 2
-    
+
     image = image.resize(  (icon_size , int(icon_size*(width-2*strip)/width)  ), Image.ANTIALIAS)
     draw = ImageDraw.Draw(image)
 
