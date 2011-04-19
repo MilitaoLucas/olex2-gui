@@ -3,7 +3,10 @@
 # Expect frequent changes!                                  #
 #############################################################
 
-gui {
+gui 
+  {
+  chinese_font_name = YaHei
+    .type = str
   base_colour = #aaaaaa
     .type = colour
   logo_colour = #777777

@@ -1395,7 +1395,11 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
 
 
   OV.SetVar("current_tooltip_number",i)
-  OV.write_to_olex("tip-of-the-day-content.htm", txt.encode('utf-8'))
+  try:
+    txt = txt.encode('utf-8')
+  except:
+    print("Can't decode %s" %txt)
+  OV.write_to_olex("tip-of-the-day-content.htm", txt)
   return True
 OV.registerFunction(getTip)
 

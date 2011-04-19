@@ -294,7 +294,10 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
 
   def write_to_olex(self,fileName,text,copyToDisk = False):
-    text = text.encode('utf-8')
+    try:
+      text = text.encode('utf-8')
+    except:
+      text = text.decode('utf-8')
     try:
       import OlexVFS
       OlexVFS.write_to_olex(fileName, text)
