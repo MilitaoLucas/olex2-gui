@@ -1273,33 +1273,21 @@ def getKeys(key_directory=None):
 
 
 def GetCheckcifReport():
-
   import urllib2
   import urllib2_file
 
-  file_name = '%s/%s.cif' %(OV.FilePath(), OV.FileName())
-  rFile = open(file_name)
-  #file_stat = os.stat(file_name)
-  #cif = rFile.read()
+  file_name = os.path.normpath(OV.FileFull())
+  rFile = open(file_name, 'rb')
   cif = rFile
-
   params = {
     "runtype": "symmonly",
     "referer": "checkcif_server",
     "outputtype": "html",
     "file": cif
   }
-
-  f = urllib2.urlopen("http://vm02.iucr.org/cgi-bin/checkcif.pl", params)
-  print f.read()
-
-  #url = "http://vm02.iucr.org/cgi-bin/checkcif.pl"
-  #data = urllib.urlencode(params)
-  #print data
-  #req = urllib2.Request(url, data)
-  #response = urllib2.urlopen(req,data)
-  #print response.read()
+  print urllib2.urlopen("http://vm02.iucr.org/cgi-bin/checkcif.pl", params).read()
   rFile.close()
+  
 OV.registerFunction(GetCheckcifReport)
 
 def GetHttpFile(f, force=False, fullURL = False):
