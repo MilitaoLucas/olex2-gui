@@ -1148,6 +1148,8 @@ def MakeHoverButton(name, cmds, onoff = "off", btn_bg='table_firstcol_colour'):
 OV.registerFunction(MakeHoverButton)
 
 def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
+  if "None" in name:
+    return ""
   hover_buttons = OV.GetParam('olex2.hover_buttons')
   click_console_feedback = False
   n = name.split("-")
@@ -1201,6 +1203,8 @@ OV.registerFunction(MakeHoverButtonOff)
 
 
 def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
+  if "None" in name:
+    return ""
   hover_buttons = OV.GetParam('olex2.hover_buttons')
   click_console_feedback = False
   n = name.split("-")
