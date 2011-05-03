@@ -1,9 +1,9 @@
-  <input 
-    type='combo' 
+  <input
+    type='combo'
     height='$spy.GetParam(gui.html.combo_height)'
     bgcolor='$spy.GetParam(gui.html.input_bg_colour)'
-    width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 - spy.GetParam(gui.htmlpanelwidth_margin_adjust))' 
-    name='SET_REFLECTIONS'
+    width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 - spy.GetParam(gui.htmlpanelwidth_margin_adjust))'
+    name='SET_REFLECTIONS_#parent_name'
     items='$spy.GetHklFileList()'
     onchange='HKLSrc(GetValue(SET_REFLECTIONS))'
     value='$FileName(HKLSrc()).$FileExt(HKLSrc())'

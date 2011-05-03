@@ -2068,7 +2068,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
     textItems = []
     tabItems = []
-    directories = ["etc/gui", "etc/news", "etc/gui/blocks", "etc/gui/snippets"]
+    directories = ["etc/gui", "etc/news", "etc/gui/blocks", "etc/gui/snippets", "etc/gui/g3"]
     rFile = open("%s/etc/gui/blocks/index-tabs.htm" %(self.basedir), 'r')
     for line in rFile:
       t = line.split("<!-- #include ")[1]
