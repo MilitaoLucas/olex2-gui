@@ -9,13 +9,13 @@
     <font size='2'>
       <input
         type='combo'
-        width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 - spy.GetParam(gui.htmlpanelwidth_margin_adjust))' 
+        width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 - spy.GetParam(gui.htmlpanelwidth_margin_adjust))'
         height="$spy.GetParam(gui.html.combo_height)"
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-        name='SET_SNUM_REFINEMENT_FORMULA'
+        name='SET_SNUM_REFINEMENT_FORMULA_#name'
         items='$spy.GetParam(snum.refinement.original_formula)'
         value='xf.GetFormula()'
-        onchange='xf.SetFormula(GetValue(SET_SNUM_REFINEMENT_FORMULA))>>spy.SetParam(snum.refinement.formula,"GetValue(SET_SNUM_REFINEMENT_FORMULA)")>>updatehtml'
+        onchange='xf.SetFormula(GetValue(SET_SNUM_REFINEMENT_FORMULA_#name))>>spy.SetParam(snum.refinement.formula,"GetValue(SET_SNUM_REFINEMENT_FORMULA_#name)")>>updatehtml'
       >
     </font>
   </td>
@@ -33,10 +33,10 @@
         width=50
         height="$spy.GetParam(gui.html.spin_height)"
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-        name='SET_Z'
+        name='SET_Z_#name'
         min='1'
         value='xf.au.GetZ()'
-        onchange="xf.au.SetZ(GetValue(SET_Z))>>updatehtml"
+        onchange="xf.au.SetZ(GetValue(SET_Z_#name))>>updatehtml"
       >
     </font>
   </td>
@@ -54,9 +54,9 @@
         width="40"
         height="$spy.GetParam(gui.html.spin_height)"
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-        name='SET_Z_PRIME'
+        name='SET_Z_PRIME_#name'
         value='xf.au.GetZprime()'
-        onleave="xf.au.SetZprime(GetValue(SET_Z_PRIME))>>updatehtml"
+        onleave="xf.au.SetZprime(GetValue(SET_Z_PRIME_#name))>>updatehtml"
       >
     </font>
   </td>
@@ -68,7 +68,7 @@
     <b>%Adjust Current Formula to what is on the screen%</b>
   </td>
   <td width='50%' VALIGN='center' ALIGN='right' colspan=1>
-    <a 
+    <a
       href="fixunit xf.au.GetZprime()>>updatehtml"
       target="%Fix Unit-target% ">
       <zimg border="0" src="toolbar-OK.png"/>
