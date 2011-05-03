@@ -666,7 +666,7 @@ class Graph(ImageTools):
       outline_colour = self.outlineColour
 
       if self.decorated:
-        decorated_fill = OV.FindValue('gui_html_highlight_colour')
+        decorated_fill = OV.GetParam('gui.html.highlight_colour')
         barDraw.rectangle(box, fill=decorated_fill, outline=outline_colour)
         barDraw.rectangle((bar_left+3,bar_top+3,bar_right-3,bar_bottom-3), fill=fill)
 
