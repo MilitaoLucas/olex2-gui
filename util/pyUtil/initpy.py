@@ -276,6 +276,9 @@ onstartup()
 #       for bit in sys.path:
 #               print bit
 
+import urllib2
+import urllib2_file
+
 
 if olx.IsPluginInstalled('plugin-Batch') == "true":
   import plugin_batch_exex
@@ -294,6 +297,7 @@ if olx.IsPluginInstalled('MySQL') == "true":
     print "MySQL Plugin is installed but a connection to the default server could not be established"
     print ex
 
+    
 if olexex.getKey():
   olexex.GetACF()
 
@@ -305,6 +309,7 @@ if sys.platform[:3] == 'win':
 #else:
   #olx.SetVar('defeditor','gedit')
   #olx.SetVar('defexplorer','nautilus')
+
 
 try:
   import customScripts

@@ -23,7 +23,7 @@ OV = OlexFunctions()
 class MakeGuiTools(object):
   def __init__(self, tool_fun=None, tool_param=None):
     self.basedir = olx.BaseDir()
-    self.gui_html_bg_colour = OV.FindValue('gui_html_bg_colour')
+    self.gui_html_bg_colour = OV.GetParam('gui.html.bg_colour')
     self.tool_fun = tool_fun
     self.tool_param = tool_param
     tool={}

@@ -942,11 +942,11 @@ def GetRcolour(R1):
   try:
     R1 = float(R1)
     if R1 > 0.20:
-      retVal=OV.FindValue('gui_red')
+      retVal=OV.GetParam('gui.red')
     elif R1 >0.10:
-      retVal=OV.FindValue('gui_orange')
+      retVal=OV.GetParam('gui.orange')
     else:
-      retVal=OV.FindValue('gui_green')
+      retVal=OV.GetParam('gui.green')
   except:
     retVal='grey'
   return str(retVal)
@@ -1276,7 +1276,7 @@ def GetCheckcifReport():
   import urllib2
   import urllib2_file
 
-  file_name = os.path.normpath(OV.FileFull())
+  file_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'cif'))
   rFile = open(file_name, 'rb')
   cif = rFile
   params = {
@@ -1285,9 +1285,11 @@ def GetCheckcifReport():
     "outputtype": "html",
     "file": cif
   }
-  print urllib2.urlopen("http://vm02.iucr.org/cgi-bin/checkcif.pl", params).read()
+  wFile = open("cifreport.htm",'w')
+  wFile.write(urllib2.urlopen("http://vm02.iucr.org/cgi-bin/checkcif.pl", params).read())
+  wFile.close()
   rFile.close()
-  
+  olx.Shell('cifreport.htm')
 OV.registerFunction(GetCheckcifReport)
 
 def GetHttpFile(f, force=False, fullURL = False):
@@ -1733,8 +1735,8 @@ def AvailablePlugins():
   plugins = {
             }
   s = "<hr>"
-  green = OV.FindValue('gui_green', "#00ff00")
-  red = OV.FindValue('gui_red', "#ff0000")
+  green = OV.GetParam('gui.green')
+  red = OV.GetParam('gui.red')
   for plugin in plugins:
     display = plugins[plugin].get('display', plugin)
     blurb = plugins[plugin].get('blurb', plugin)
