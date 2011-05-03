@@ -12,8 +12,9 @@ import shutil
 import re
 import olex
 import olx
-import urllib2_file
+import urllib
 import urllib2
+import urllib2_file
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
@@ -30,7 +31,7 @@ def OlexCheckCIF():
   """
   # Only getting html return from IUCr may need to check on this?
   try:
-    filename = open('%s/%s.cif' %(OV.FilePath(), OV.FileName()))
+    filename = open('%s/%s.cif' %(OV.FilePath(), OV.FileName()), 'rb')
   except IOError:
     print "The file does not exist, creating CIF file"
     OV.cmd("addins acta")
@@ -44,7 +45,9 @@ def OlexCheckCIF():
                              "file": filename
   }
   #print params #Parameter check
+  #params = urllib.urlencode(params)
   f = urllib2.urlopen("http://vm02.iucr.org/cgi-bin/checkcif.pl", params)
+  
   cifcheck_res = open('%s/%s_checkcif_report.%s' %(OV.FilePath(), OV.FileName(), result_filetype), 'w')
   cifcheck_res.write("%s"%f.read())
   cifcheck_res.close()

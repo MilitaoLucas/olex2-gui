@@ -1014,7 +1014,7 @@ class ImageTools(FontInstances):
   #       draw.line((begin ,end), fill=border_colour['right'])
     draw.line((begin ,end), fill=border_colour)
 
-    rect_colour = OV.FindValue('gui_html_bg_colour')
+    rect_colour = OV.GetParam('gui.html.bg_colour')
     pie_colour = bg_colour
 
     pie_colour = (0,0,0,255)

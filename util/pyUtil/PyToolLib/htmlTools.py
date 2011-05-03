@@ -749,7 +749,7 @@ def format_help(string):
 def reg_command(self, string):
   regex = re.compile(r"  ~ (.*?)( [^\~\~]* ) ~ ", re.X)
   m = regex.findall(string)
-  colour = OV.FindValue('gui_html_highlight_colour')
+  colour = OV.GetParam('gui.html.highlight_colour')
   if m:
     s = regex.sub(r'''
     <br>
@@ -794,7 +794,7 @@ def bgcolor(ctrl_name):
   if value in ('?',''):
     colour = 'rgb(255,220,220)'
   else:
-    colour = OV.FindValue('gui_html_input_bg_colour')
+    colour = OV.GetParam('gui.html.input_bg_colour')
   return colour
 OV.registerFunction(bgcolor)
 
