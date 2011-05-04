@@ -8,4 +8,5 @@ import example
 #import OlexPlaton
 #import OlexMail
 #import OlexCheckCIF
+#import OlexCDS
 #import hptools

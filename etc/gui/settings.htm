@@ -158,6 +158,28 @@ $GetCompilationInfo()
       onuncheck="spy.SetParam(gui.use_fader,false)">
       </td>
   </tr>
+  
+<tr>
+<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td></td>
+  </td>
+
+<td  valign='center' colspan='4'>
+<input
+  noroot
+  name="SETTINGS_TREE"
+  type="tree"
+  src="settings_tree.ind"
+  bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+  width="$eval(html.clientwidth(self)-70)"
+  height="120"
+  selected="echo selected"
+  onselect=""
+  onitem="spy.EditParams(html.getvalue(SETTINGS_TREE),2)"
+  onedit="echo(html.getvalue(SETTINGS_TREE),~label~)>>UpdateHtml"
+>
+</td>
+</tr>
+  
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=6;1; -->
 

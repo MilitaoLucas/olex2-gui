@@ -411,6 +411,14 @@ olex2
     .type = bool
   portal_url = http://www.olex2.org
     .type = str
+  checkcif{
+    url = http://vm02.iucr.org/cgi-bin/checkcif.pl
+      .type = str
+      .help = The URL to which the cif file will be sent
+    send = True
+    .type = bool
+      .help = If set to TRUE (default), the cif file will be sent to the checkcif url on pressing 'Validate Cif'
+  }
 }
 
 graphs {

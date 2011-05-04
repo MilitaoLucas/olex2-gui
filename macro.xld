@@ -22,6 +22,7 @@
       <cmd9 "if and(isvar(startup),file.exists(app.getarg(1))) then none else 'reap getVar(startup)>>echo filepath()'">
       <cmd10 "bind wheel 'ShowQ -wheel='">
       <cmd11 "spy.GetTip(0)">
+      <cmd11 "spy.settings_tree()">
     \>
 
   <onterminate
