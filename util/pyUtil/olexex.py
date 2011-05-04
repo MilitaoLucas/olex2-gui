@@ -1286,7 +1286,7 @@ def GetCheckcifReport():
     "file": cif
   }
   wFile = open("cifreport.htm",'w')
-  wFile.write(urllib2.urlopen("http://vm02.iucr.org/cgi-bin/checkcif.pl", params).read())
+  wFile.write(urllib2.urlopen(OV.GetParam('olex2.checkcif.url'), params).read())
   wFile.close()
   rFile.close()
   olx.Shell('cifreport.htm')
@@ -1689,6 +1689,22 @@ def runODAC(cmd):
     print "ODAC has failed to initialize or is not installed"
 
 OV.registerFunction(runODAC)
+
+def settings_tree():
+  handler = olx.phil_handler
+  raw_l = handler.get_root_scope_names()
+  l = []
+  for item in raw_l:
+    l.append("%s\n%s\n" %(item, item))
+#  a = 'A\na\n'
+#  a1 = '\tA1\na1\n'
+#  a2 = '\tA2\na2\n'
+#  b = 'B\nb\n'
+#  b1 = '\tB1\nb1\n'
+#  l = [a,a1,a2,b,b1]
+  OV.write_to_olex('settings_tree.ind', ''.join(l))
+OV.registerFunction(settings_tree)
+
 
 def GetOptionalHyphenString(txt):
   txt = txt.replace ("/", "/" + u"\u200B")
