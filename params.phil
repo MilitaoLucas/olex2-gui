@@ -2,19 +2,32 @@
 # The sNum section. Information belonging to the currently loaded structure
 ##############################################################################
 
-snum {
-  skip_history = False
-    .type = bool
-    .expert_level = 1
 
-  smtbx {
+snum
+  .short_caption = Current Structure
+  .caption = Settings that are saved with each structure
+  {
+  
+  init
+    .short_caption = Other Things
+    {
+    skip_history = False
+      .type = bool
+      .expert_level = 1
+    }
+
+  smtbx
+    .short_caption = Solution & Refinement
+    {
     inelastic_form_factor_table = *henke sasaki
       .type = choice
     atomic_form_factor_table = *it1992 wk1995 n_gaussian
       .type = choice
     }
 
-  solution {
+  solution
+    .short_caption = Structure Solution
+    {
     program = ShelXS ShelXS86 XS 'olex2.solve' XM ShelXD SIR2008
       .type = choice
     method = 'Dual Space' 'Charge Flipping' 'Direct Methods' 'Patterson Method'
@@ -23,9 +36,16 @@ snum {
       .type = bool
     current_atomic_volume = None
       .type = float
-  }
+    }
 
-  refinement {
+  refinement
+    .short_caption = Structure Refinement
+    {
+    last_R1 = n/a
+      .type = str
+      .expert_level = 2
+    graphical_output = False
+      .type = bool
     program = ShelXL XL XH ShelXH XLMP ShelXL_ifc 'olex2.refine'
       .type = choice
     method = 'Least Squares' CGLS 'Gauss-Newton' 'Levenberg-Marquardt' \
@@ -59,52 +79,53 @@ snum {
     check_absolute_structure_after_refinement = True
       .type = bool
 
-  auto {
-    max_peaks = False
-      .type = bool
-    assignQ = 2.0
-      .type = float(value_min=0.0)
-      .help = Assign all residual electron density peaks greater than the \
-        given cutoff value as a Carbon atom
-    pruneU = 0.1
-      .type = float(value_min=0.0)
-      .help = Delete all atoms where the Ueq is greater than the given cutoff
-    pruneQ = 1.5
-      .type = float(value_min=0.0)
-      .help = Delete all residual electron density peaks smaller than \
-        the given cutoff value
-    promote = 0.1
-      .type = float
-    assemble = False
-      .type = bool
-      .help = Move all atoms or fragments of the asymmetric unit as \
-        close together as possible
-    tidy = False
-      .type = bool
-      .help = Automatically tidy the structure after refinement according \
-        to the settings
-    invert = False
-      .type = bool
-      .help = If set to TRUE, the structure will be automatically inverted if the inversion seems necessary
+    auto
+      .short_caption = Autotidy
+      {
+      max_peaks = False
+        .type = bool
+      assignQ = 2.0
+        .type = float(value_min=0.0)
+        .help = Assign all residual electron density peaks greater than the \
+          given cutoff value as a Carbon atom
+      pruneU = 0.1
+        .type = float(value_min=0.0)
+        .help = Delete all atoms where the Ueq is greater than the given cutoff
+      pruneQ = 1.5
+        .type = float(value_min=0.0)
+        .help = Delete all residual electron density peaks smaller than \
+          the given cutoff value
+      promote = 0.1
+        .type = float
+      assemble = False
+        .type = bool
+        .help = Move all atoms or fragments of the asymmetric unit as \
+          close together as possible
+      tidy = False
+        .type = bool
+        .help = Automatically tidy the structure after refinement according \
+          to the settings
+      invert = False
+        .type = bool
+        .help = If set to TRUE, the structure will be automatically inverted if the inversion seems necessary
+      }
   }
-
-  last_R1 = n/a
-    .type = str
-    .expert_level = 1
-  graphical_output = False
-    .type = bool
-}
-
 
   display_quality = 2
     .type = int(value_min=1, value_max=3)
 
-  image{
-    bitmap{
+  image
+    .short_caption = Structure Images
+    {
+    bitmap
+      .short_caption = png, jpg, bmp ...
+      {
       name = None
         .type = str
       atom_label{
         font_name = #olex2.fnt:frb_18
+          .type = str
+        font_colour = "2049;0"
           .type = str
         }
       bond_label{
@@ -114,7 +135,9 @@ snum {
       type = png jpg bmp
         .type = choice
     }
-    ps{
+    ps
+      .short_caption = ORTEP - Postscript
+      {
       outline_width = 1.0
         .type = float
       octant_width = 1.0
@@ -150,7 +173,9 @@ snum {
       name = None
         .type = str
     }
-  image_series{
+  image_series
+    .short_caption = Movie
+    {
     rotation_around_axis=2
       .type = int
     degrees_of_rotation=1.0
@@ -203,7 +228,9 @@ snum {
       .type = str
   }
 
-  metacif {
+  metacif
+    .short_caption = Metadata for CIF
+    {
     publ_author_names = None
       .type = str
     abs_file = None
@@ -294,7 +321,9 @@ snum {
       .expert_level = 2
   }
 
-  report {
+  report
+    .short_caption = Report Metadata
+    {
     date_collected = None
       .type = str
     date_submitted = None
@@ -374,6 +403,7 @@ snum {
 
 olex2
   .expert_level = 2
+  .short_caption = Olex2 Internal Settings
 {
   is_online = True
     .type = bool
@@ -421,7 +451,9 @@ olex2
   }
 }
 
-graphs {
+graphs
+  .short_caption = Analysis Graphs
+  {
   program_analysis {
     font_scale = 0.03
       .type = float(value_min=0.0)
@@ -625,10 +657,19 @@ graphs {
   }
 }
 
-programs {
-  solution {
-    smtbx {
-      cf {
+programs
+  .short_caption = Program Settings
+  {
+
+  solution
+    .short_caption = Structure Solution
+    {
+    smtbx
+      .short_caption = olex2.solve
+      {
+      cf
+        .short_caption = Charge Flipping
+        {
         amplitude_type = F E *quasi-E
           .type = choice
         max_attempts_to_get_phase_transition = 5
@@ -642,7 +683,9 @@ programs {
     }
   }
 
-user {
+user
+  .short_caption = User Specific
+  {
   alert_delete_history = Y
     .type = str
     .expert_level = 1
@@ -660,7 +703,6 @@ user {
     .type = str
   auto_refine_after_anis = True
     .type = bool
-
   image{
     bitmap{
       type = png
@@ -672,6 +714,7 @@ user {
 
 odac
   .expert_level = 2
+  .short_caption = ODAC Settings
 {
   source_dir = None
     .type = path
