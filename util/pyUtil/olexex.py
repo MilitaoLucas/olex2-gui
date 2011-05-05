@@ -1691,17 +1691,27 @@ def runODAC(cmd):
 OV.registerFunction(runODAC)
 
 def settings_tree():
-  handler = olx.phil_handler
-  raw_l = handler.get_root_scope_names()
   l = []
-  for item in raw_l:
-    l.append("%s\n%s\n" %(item, item))
-#  a = 'A\na\n'
-#  a1 = '\tA1\na1\n'
-#  a2 = '\tA2\na2\n'
-#  b = 'B\nb\n'
-#  b1 = '\tB1\nb1\n'
-#  l = [a,a1,a2,b,b1]
+  handlers = [olx.phil_handler, olx.gui_phil_handler]
+  for handler in handlers:
+    raw_l = handler.get_root_scope_names()
+    for item in raw_l:
+      s = handler.get_scope_by_name(item)
+      l.append("%s (%s)\n%s\n" %(item, s.short_caption, item))
+      for tem in s.objects:
+        if tem.is_scope:
+          l.append("\t%s (%s)\n%s.%s\n" %(tem.name, tem.short_caption, item, tem.name))
+          for em in tem.objects:
+            if em.is_scope:
+              l.append("\t\t%s (%s)\n%s.%s.%s\n" %(em.name, em.short_caption, item, tem.name, em.name))
+              for m in em.objects:
+                if m.is_scope:
+                  l.append("\t\t\t%s (%s)\n%s.%s.%s.%s\n" %(m.name, m.short_caption, item, tem.name, em.name, m.name))
+                  for m1 in m.objects:
+                    if m1.is_scope:
+                      l.append("\t\t\t\t%s (%s)\n%s.%s.%s.%s.%s\n" %(m1.name, m1.short_caption, item, tem.name, em.name, m.name, m1.name))
+          
+          
   OV.write_to_olex('settings_tree.ind', ''.join(l))
 OV.registerFunction(settings_tree)
 

@@ -5,8 +5,8 @@
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td name=HREF_MAKE_LABEL>
-    1) <a href='label -type=GetValue(IMAGE_SETTINGS_LABEL_TYPE)'>%images_add_labels_to_atoms%</a>|
-    <a href='sel $H>>sel -i>>label -type=GetValue(IMAGE_SETTINGS_LABEL_TYPE)'>%images_add_labels_to_non_H_atoms%</a>
+    1) <a href='label -type=GetValue(IMAGE_SETTINGS_LABEL_TYPE@#image)'>%images_add_labels_to_atoms%</a>|
+    <a href='sel $H>>sel -i>>label -type=GetValue(IMAGE_SETTINGS_LABEL_TYPE@#image)'>%images_add_labels_to_non_H_atoms%</a>
   </td>
   <td name=IMAGE_SETTINGS_LABEL_TYPE>
     <input
@@ -62,7 +62,7 @@
 
 <!-- FOURTH ROW -->
 <tr name=INCLUDE_H3_BITMAP_IMAGES>
-<!-- #include h3-bitmap-images gui\h3-bitmap-images.htm;gui\blocks\tool-h3-off.htm;image=h3-bitmap-images@#image;onclick=itemstate h3-postscript-images 2>>setfont AtomLabels spy.GetParam(snum.image.bitmap.atom_label.font_name)>>setfont BondLabels spy.GetParam(snum.image.bitmap.bond_label.font_name);colspan=1;2; -->
+<!-- #include h3-bitmap-images gui\h3-bitmap-images.htm;gui\blocks\tool-h3-off.htm;image=h3-bitmap-images@#image;onclick=itemstate h3-postscript-images 2>>setfont AtomLabels spy.GetParam(snum.image.bitmap.atom_label.font_name)>>setfont BondLabels spy.GetParam(snum.image.bitmap.bond_label.font_name)>>SetMaterial PLabels.Text spy.GetParam(snum.image.bitmap.atom_label.font_colour);colspan=1;2; -->
 </tr>
 
 <!-- FIFTH ROW -->
