@@ -10,6 +10,7 @@ snum
   
   init
     .short_caption = Other Things
+    .expert_level = 1
     {
     skip_history = False
       .type = bool
@@ -402,7 +403,6 @@ snum
 }
 
 olex2
-  .expert_level = 2
   .short_caption = Olex2 Internal Settings
 {
   is_online = True
@@ -686,6 +686,8 @@ programs
 user
   .short_caption = User Specific
   {
+  expert_level = 0
+    .type = int
   alert_delete_history = Y
     .type = str
     .expert_level = 1

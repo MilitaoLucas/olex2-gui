@@ -260,6 +260,7 @@ def SaveUserParams():
 OV.registerFunction(SaveUserParams)
 
 def EditParams(scope_name="", expert_level=0, attributes_level=0):
+  expert_level = int(expert_level)
   if scope_name.startswith("gui"):
     handler = olx.gui_phil_handler
   else:
