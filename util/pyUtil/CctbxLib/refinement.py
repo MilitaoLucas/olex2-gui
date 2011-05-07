@@ -672,6 +672,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
         current = site.shared_site(kwds["i_seqs"])
         constraints.append(current)
 
+    shared_rotated_adp  =self.olx_atoms.model.get('shared_rotated_adp', ())
+    for c in shared_rotated_adp:
+      constraints.append(adp.shared_rotated_u(c[0], c[1], c[2][0], c[3][0], c[4]))
+      
     self.shared_param_constraints = []
     vars = self.olx_atoms.model['variables']['variables']
     for i, var in enumerate(vars):
