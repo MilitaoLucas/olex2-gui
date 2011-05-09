@@ -589,7 +589,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_reflns_number_gt'] = (
       refinement_refs.data() > 2 * refinement_refs.sigmas()).count(True)
     cif_block['_reflns_number_total'] = refinement_refs.size()
-    cif_block['_reflns_threshold_expression'] = 'I>2u(I)' # XXX is this correct?
+    cif_block['_reflns_threshold_expression'] = 'I>=2u(I)' # XXX is this correct?
     def sort_key(key, *args):
       if key.startswith('_space_group_symop') or key.startswith('_symmetry_equiv'):
         return -1
@@ -672,7 +672,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         current = site.shared_site(kwds["i_seqs"])
         constraints.append(current)
 
-    shared_rotated_adp  =self.olx_atoms.model.get('shared_rotated_adp', ())
+    shared_rotated_adp = self.olx_atoms.model.get('shared_rotated_adp', ())
     for c in shared_rotated_adp:
       constraints.append(adp.shared_rotated_u(c[0], c[1], c[2][0], c[3][0], c[4]))
       

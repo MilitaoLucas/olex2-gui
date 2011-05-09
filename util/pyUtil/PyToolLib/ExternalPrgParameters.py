@@ -426,7 +426,8 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
         modified_intensities = masks.modified_intensities(fo2, f_model, f_mask)
       if modified_intensities is not None:
         file_out = open(modified_hkl_path, 'w')
-        modified_intensities.export_as_shelx_hklf(file_out)
+        modified_intensities.export_as_shelx_hklf(file_out,
+          normalise_if_format_overflow=True)
         file_out.close()
         OV.HKLSrc(modified_hkl_path)
       #else:
