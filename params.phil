@@ -7,7 +7,7 @@ snum
   .short_caption = Current Structure
   .caption = Settings that are saved with each structure
   {
-  
+
   init
     .short_caption = Other Things
     .expert_level = 1
@@ -705,6 +705,18 @@ user
     .type = str
   auto_refine_after_anis = True
     .type = bool
+  ccdc{
+    user_email = horst.puschmann@gmail.com
+      .type = str
+    ccdc_email = horst.puschmann@gmail.com
+      .type = str
+    portal_url = http://109.109.251.162:8080/StructuresTest/ccdc_submit
+      .type = str
+    portal_username = ccdcsubmit
+      .type = str
+    portal_passwd = ccdcPass
+      .type = str
+  }
   image{
     bitmap{
       type = png
