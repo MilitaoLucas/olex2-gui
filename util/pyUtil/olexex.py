@@ -173,6 +173,8 @@ class OlexRefinementModel(object):
     'simu':'adp_similarity',
     'delu':'rigid_bond',
     'isor':'isotropic_adp',
+    'olex2.restraint.angle':'angle',
+    'olex2.restraint.dihedral':'dihedral',
   }
 
   constraint_types = {
@@ -240,7 +242,7 @@ class OlexRefinementModel(object):
     from libtbx.utils import flat_list
     from cctbx import sgtbx
     for shelxl_restraint in (self.restraint_types):
-      for restraint in self.model[shelxl_restraint]:
+      for restraint in self.model.get(shelxl_restraint, ()):
         restraint_type = self.restraint_types.get(shelxl_restraint)
         if restraint_type is None: continue
         i_seqs = [i[0] for i in restraint['atoms']]
@@ -260,6 +262,8 @@ class OlexRefinementModel(object):
           kwds['sigma_13'] = restraint['esd2'] if restraint['esd2'] != 0 else None
         if restraint_type == 'bond':
           kwds['distance_ideal'] = value
+        elif restraint_type in ('angle', 'dihedral'):
+          kwds['angle_ideal'] = value
         elif restraint_type in ('bond_similarity', 'planarity'):
           kwds['weights'] = [kwds['weight']]*len(i_seqs)
           if restraint_type == 'bond_similarity':
