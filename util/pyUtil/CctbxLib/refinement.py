@@ -206,6 +206,9 @@ class olex2_normal_eqns(least_squares.crystallographic_ls):
     #update EXTI
     if self.reparametrisation.extinction.grad:
       OV.SetExtinction(self.reparametrisation.extinction.value)
+    for (i,r) in enumerate(self.shared_rotated_adps):
+      if r.refine_angle:
+        olx.xf_rm_UpdateCR('olex2.constraint.rotated_adp', i, r.angle.value*180/math.pi)
     olx.xf_EndUpdate()
 
 
@@ -320,6 +323,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       log=self.log
     )
     self.normal_eqns.shared_param_constraints = self.shared_param_constraints
+    self.normal_eqns.shared_rotated_adps = self.shared_rotated_adps
     method = OV.GetParam('snum.refinement.method')
     iterations = solvers.get(method)
     if iterations == None:
@@ -672,9 +676,12 @@ class FullMatrixRefine(OlexCctbxAdapter):
         current = site.shared_site(kwds["i_seqs"])
         constraints.append(current)
 
-    shared_rotated_adp = self.olx_atoms.model.get('shared_rotated_adp', ())
+    shared_rotated_adp = self.olx_atoms.model.get('olex2.constraint.rotated_adp', ())
+    self.shared_rotated_adps = []
     for c in shared_rotated_adp:
-      constraints.append(adp.shared_rotated_u(c[0], c[1], c[2][0], c[3][0], c[4]))
+      current = adp.shared_rotated_u(c[0], c[1], c[2][0], c[3][0], c[4], c[5])
+      constraints.append(current)
+      self.shared_rotated_adps.append(current)
       
     self.shared_param_constraints = []
     vars = self.olx_atoms.model['variables']['variables']
