@@ -252,7 +252,11 @@ class OlexRefinementModel(object):
           kwds['sym_ops'] = [
             (sgtbx.rt_mx(flat_list(i[1][:-1]), i[1][-1]) if i[1] is not None else None)
             for i in restraint['atoms']]
-          kwds['weight'] = 1/math.pow(restraint['esd1'],2)
+          if restraint_type in ('angle', 'dihedral'):
+            esd_val = restraint['esd1']*180/math.pi
+          else:
+            esd_val = restraint['esd1']
+          kwds['weight'] = 1/math.pow(esd_val,2)
         value = restraint['value']
         if restraint_type in ('adp_similarity', 'isotropic_adp'):
           kwds['sigma'] = restraint['esd1']
@@ -1349,7 +1353,7 @@ def check_for_recent_update():
     retVal = False
     #    print "Olex2 has not been updated"
   OV.SetVar('last_version',str(version))
-  OV.StoreParameter('last_version', str(version))
+  OV.StoreParameter('last_version')
   return retVal
 
 def check_for_crypto():
