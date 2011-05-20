@@ -7,6 +7,7 @@ import re
 import olex
 import olx
 import olex_core
+import olexex
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
@@ -26,8 +27,10 @@ class mask(object):
   def __init__(self):
     self.xray_structure = None
     self.params = OV.Params().snum.masks
+    self.olx_atoms = olexex.OlexRefinementModel()
+    self.space_group = "hall: "+str(olx.xf_au_GetCellSymm("hall"))
   
-  def xray_structure(self, construct_restraints=False):
+  def xray_structure(self):
     print "xray_structure"
     restraints_iter = None
     xray_structure = self.xray_structure(
@@ -48,12 +51,11 @@ class mask(object):
               resolution_factor=1/4,
               atom_radii_table=None,
               use_space_group_symmetry=False):
-    if grid_step is not None:
-      d_min = None
+    d_min = 0
     if crystal_gridding is None:
       self.crystal_gridding = maptbx.crystal_gridding(
-        unit_cell=self.xray_structure.unit_cell(),
-        space_group_info=self.xray_structure.space_group_info(),
+        unit_cell=self.olx_atoms.getCell(),
+        space_group_info="hall: "+str(olx.xf_au_GetCellSymm("hall")),
         step=grid_step,
         d_min=d_min,
         resolution_factor=resolution_factor,
@@ -143,7 +145,7 @@ def calcsol():
                shrink_truncation_radius=params.shrink_truncation_radius,
                resolution_factor=params.resolution_factor,
                atom_radii_table=olex_core.GetVdWRadii(),
-               use_space_group_symmetry=True) 
+               use_space_group_symmetry=False) 
   result = m.show_summary()
   
 OV.registerFunction(calcsol)
