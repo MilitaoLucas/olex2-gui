@@ -1,21 +1,47 @@
 from __future__ import division
 
-import os
-import sys
-import shutil
-import re
-import olex
+import os, sys
 import olx
-import olex_core
+import OlexVFS
+import time
+import math
+from cStringIO import StringIO
+
+from PeriodicTable import PeriodicTable
 import olexex
+try:
+  olx.current_hklsrc
+except:
+  olx.current_hklsrc = None
+  olx.current_hklsrc_mtime = None
+  olx.current_reflections = None
+  olx.current_mask = None
+  olx.current_space_group = None
+  olx.current_observations = None
+
+import olex
+import olex_core
+
+import time
+import cctbx_controller as cctbx_controller
+from cctbx import maptbx, miller, uctbx
+from libtbx import easy_pickle, utils
+
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+from scitbx.math import distributions
 
-import cctbx.masks
-from cctbx import maptbx, miller, sgtbx, xray
+from History import hist
+
+from RunPrg import RunRefinementPrg
+
+global twin_laws_d
+twin_laws_d = {}
+
+from scitbx.math import continued_fraction
+from boost import rational
+from cctbx import sgtbx, xray
 from cctbx.array_family import flex
-from scitbx.math import approx_equal_relatively
-from libtbx.utils import xfrange
 
 """
 self.solvent_accessible_volume = self.n_solvent_grid_points() \
@@ -33,14 +59,15 @@ class mask(object):
   def xray_structure(self):
     print "xray_structure"
     restraints_iter = None
-    xray_structure = self.xray_structure(
-      self.unit_cell,
+    create_cctbx_xray_structure = cctbx_controller.create_cctbx_xray_structure(
+      self.cell,
       self.space_group,
       self.olx_atoms.iterator(),
       restraints_iter=restraints_iter,
       constraints_iter=None #self.olx_atoms.constraints_iterator()
     )
-    return self.xray_structure
+    self._xray_structure = create_cctbx_xray_structure.structure()
+    return self._xray_structure
   
   def compute(self,
               solvent_radius,
@@ -55,7 +82,7 @@ class mask(object):
     if crystal_gridding is None:
       self.crystal_gridding = maptbx.crystal_gridding(
         unit_cell=self.olx_atoms.getCell(),
-        space_group_info="hall: "+str(olx.xf_au_GetCellSymm("hall")),
+        space_group_info=self.xray_structure().space_group_info(),
         step=grid_step,
         d_min=d_min,
         resolution_factor=resolution_factor,
