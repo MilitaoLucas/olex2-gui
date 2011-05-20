@@ -2068,6 +2068,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
     textItems = []
     tabItems = []
+    g3tabItems = ['g3-solve', 'g3-refine', 'g3-image', 'g3-report', 'g3-tools']
+    
     directories = ["etc/gui", "etc/news", "etc/gui/blocks", "etc/gui/snippets", "etc/gui/g3"]
     rFile = open("%s/etc/gui/blocks/index-tabs.htm" %(self.basedir), 'r')
     for line in rFile:
@@ -2075,7 +2077,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       t = t.split()[0]
       t = t.split('-')[1]
       tabItems.append(t)
-      self.tabItems = tabItems
+    tabItem_l = [tabItems, g3tabItems]
+    self.tabItems = tabItems
     for directory in directories:
       for htmfile in glob.glob("%s/%s/*.htm" %(self.basedir,  directory)):
         f = (htmfile.replace('\\', '/').split('/')[-1:])
@@ -2118,18 +2121,19 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           #name = "h2-%s-%s.png" %(item, state)
           #image.save("C:/tmp/%s" %name)
 
-    for item in tabItems:
-      states = ["on", "off", "highlight", "", "hover", "hoveron"]
-      for state in states:
-        use_new = True
-        if use_new:
-          width = int(self.available_width/len(tabItems)) - 1
-          image = self.make_timage(item_type='tab', item=item, state=state, width=width)
-        else:
-          image = self.tab_items(item, state)
-
-        name = r"tab-%s%s.png" %(item, state)
-        OlexVFS.save_image_to_olex(image, name, 2)
+    for tabItems in tabItem_l:
+      for item in tabItems:
+        states = ["on", "off", "highlight", "", "hover", "hoveron"]
+        for state in states:
+          use_new = True
+          if use_new:
+            width = int(self.available_width/len(tabItems)) - 1
+            image = self.make_timage(item_type='tab', item=item.lstrip('g3-'), state=state, width=width)
+          else:
+            image = self.tab_items(item, state)
+  
+          name = r"tab-%s%s.png" %(item, state)
+          OlexVFS.save_image_to_olex(image, name, 2)
         #name = r"tab-%s-%s.png" %(item, state)
         #image.save("C:/tmp/%s" %name)
         #image.save(r"%s\etc\$tab-%s-%s.png" %(datadir, item.split("index-")[1], state), "PNG")

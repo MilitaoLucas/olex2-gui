@@ -1557,6 +1557,7 @@
       <cmd2 "itemstate g3-* 0">
       <cmd2 "itemstate states 1">
       <cmd2 "itemstate tasks 1">
+      <cmd2 "itemstate *tab-g3 2">
     \>
   \>
 \>

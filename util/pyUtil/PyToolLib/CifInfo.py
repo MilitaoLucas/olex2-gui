@@ -86,8 +86,8 @@ class ValidateCif(object):
       error_handler = cif_model.validate(cif_dic, show_warnings)
       if error_handler.error_count == 0 and error_handler.warning_count == 0:
         print "No errors found"
-      import olexex
       if OV.GetParam('olex2.checkcif.send'):
+        import olexex
         olexex.GetCheckcifReport()
 
 OV.registerMacro(ValidateCif, """filepath&;cif_dic&;show_warnings""")
@@ -336,6 +336,8 @@ class ExtractCifInfo(CifTools):
     import History
     active_solution = History.tree.active_child_node
     if active_solution is not None and active_solution.is_solution:
+      if active_solution.program == "smtbx-solve":
+        active_solution.program = "olex2.solve"
       solution_reference = SPD.programs[active_solution.program].reference
       atom_sites_solution_primary = SPD.programs[active_solution.program].methods[active_solution.method].atom_sites_solution
       self.update_cif_block({
