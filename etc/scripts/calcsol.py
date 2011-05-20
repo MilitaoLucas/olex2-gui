@@ -22,23 +22,23 @@ self.solvent_accessible_volume = self.n_solvent_grid_points() \
 
 """
 
-def xray_structure(self, construct_restraints=False):
-  self.cell = self.olx_atoms.getCell()
-  self.space_group = "hall: "+str(olx.xf_au_GetCellSymm("hall"))
-  create_cctbx_xray_structure = cctbx_controller.create_cctbx_xray_structure(
-    self.cell,
-    self.space_group,
-    self.olx_atoms.iterator(),
-    restraints_iter=restraints_iter,
-    constraints_iter=None
-  )
-  return xray_structure
-
 class mask(object):
   def __init__(self):
-    self.xray_structure = xray_structure
+    self.xray_structure = None
     self.params = OV.Params().snum.masks
-    
+  
+  def xray_structure(self, construct_restraints=False):
+    print "xray_structure"
+    restraints_iter = None
+    xray_structure = self.xray_structure(
+      self.unit_cell,
+      self.space_group,
+      self.olx_atoms.iterator(),
+      restraints_iter=restraints_iter,
+      constraints_iter=None #self.olx_atoms.constraints_iterator()
+    )
+    return self.xray_structure
+  
   def compute(self,
               solvent_radius,
               shrink_truncation_radius,
@@ -48,8 +48,8 @@ class mask(object):
               resolution_factor=1/4,
               atom_radii_table=None,
               use_space_group_symmetry=False):
-    if grid_step is not None: d_min = None
-    else: d_min = self.fo2.d_min()
+    if grid_step is not None:
+      d_min = None
     if crystal_gridding is None:
       self.crystal_gridding = maptbx.crystal_gridding(
         unit_cell=self.xray_structure.unit_cell(),
@@ -138,12 +138,12 @@ def calcsol():
   print "Test"
   params = OV.Params().snum.masks
   print params
-  
-  mask.compute(self,solvent_radius=params.solvent_radius,
+  m = mask()
+  m.compute(solvent_radius=params.solvent_radius,
                shrink_truncation_radius=params.shrink_truncation_radius,
                resolution_factor=params.resolution_factor,
                atom_radii_table=olex_core.GetVdWRadii(),
-               use_space_group_symmetry=True)               
-  mask.show_summary(self)
+               use_space_group_symmetry=True) 
+  result = m.show_summary()
   
 OV.registerFunction(calcsol)

@@ -23,7 +23,7 @@ To run this script, type spy.OlexCheckCIF() in Olex2
 '''
 
 def OlexCheckCIF():
-  
+
   """if result_filetype >= 1:
     result_filetype = "pdf"
   else:
@@ -39,10 +39,10 @@ def OlexCheckCIF():
     return OlexCheckCIF()
   result_filetype = "html"
   params = {
-                             "runtype": "symmonly",
-                             "referer": "checkcif_server",
-                             "outputtype": result_filetype,
-                             "file": filename
+    "runtype": "symmonly",
+    "referer": "checkcif_server",
+    "outputtype": result_filetype,
+    "file": filename
   }
   #print params #Parameter check
   #params = urllib.urlencode(params)
@@ -53,8 +53,8 @@ def OlexCheckCIF():
   cifcheck_res.close()
   # Now outputs into a html file then opens browser.
   olx.Shell('%s/%s_checkcif_report.%s' %(OV.FilePath(), OV.FileName(), result_filetype)) # Thanks to Richard G. for this
-  
+
   # Need to build a PDF version as well
   print "Completed Check your webrowser"
-  
+
 OV.registerFunction(OlexCheckCIF)

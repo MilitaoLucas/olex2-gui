@@ -2,13 +2,8 @@ import os
 import sys
 import shutil
 import re
+import sets
 from numpy import *
-from pyx import *
-import subprocess
-import math
-from operator import itemgetter, attrgetter
-import collections
-from itertools import izip
 
 # For Olex2
 try:
@@ -21,6 +16,15 @@ try:
 except:
   inOlex = -1
   pass
+
+import subprocess
+import math
+from operator import itemgetter, attrgetter
+import collections
+from itertools import izip
+from pyx import *
+
+
 
 """ 1 Calculate powder pattern from HKL file
 """
@@ -125,6 +129,7 @@ def graph_it(filename):
          [graph.style.line([color.gradient.Rainbow])])
   g.writeEPSfile("change")
   g.writePDFfile("change")
+  0.710174
   """
   return
 
@@ -143,7 +148,7 @@ def LazyOlex(ops='0', pdf='n', wavelength=0.710174, max2theta=60):
     ralpha = degrees_to_radians(float(olx.xf_au_GetCell().split(',')[3]))
     rbeta = degrees_to_radians(float(olx.xf_au_GetCell().split(',')[4]))
     rgamma = degrees_to_radians(float(olx.xf_au_GetCell().split(',')[5]))
-    wavelength = float(olx.xf_exptl_Radiation())
+    #wavelength = float(olx.xf_exptl_Radiation())
     filename = OV.FileName() #"/home/xray/olextrunk/etc/scripts/sucrose" #OV.FileName()
   else:
     # For now assuming test data but could be read from ins file. sucrose
@@ -154,7 +159,7 @@ def LazyOlex(ops='0', pdf='n', wavelength=0.710174, max2theta=60):
     rbeta = degrees_to_radians(102.984)
     rgamma = degrees_to_radians(90.00)
     #wavelength = radiation
-    filename = "./sucrose"
+    filename = "/home/xray/olextrunk/etc/scripts/sucrose"
   if (ops == '0'):
     print "You can: "
     print "1) Run hklgen"
