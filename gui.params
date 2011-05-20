@@ -205,9 +205,9 @@ gui
         .type = str
       font_size = 16
         .type = int
-      top = 3
+      top = 2
         .type = int
-      left = 8
+      left = 6
         .type = int
       rounded = 1100
         .type = str
