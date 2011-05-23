@@ -666,7 +666,7 @@ class Graph(ImageTools):
       outline_colour = self.outlineColour
 
       if self.decorated:
-        decorated_fill = OV.FindValue('gui_html_highlight_colour')
+        decorated_fill = OV.GetParam('gui.html.highlight_colour')
         barDraw.rectangle(box, fill=decorated_fill, outline=outline_colour)
         barDraw.rectangle((bar_left+3,bar_top+3,bar_right-3,bar_bottom-3), fill=fill)
 
@@ -1427,9 +1427,9 @@ class refinement_graph(PrgAnalysis):
 
 class smtbx_refine_graph(refinement_graph):
   def __init__(self):
-    program = ExternalPrgParameters.defineExternalPrograms()[1].programs["Olex2-refine"]
+    program = ExternalPrgParameters.defineExternalPrograms()[1].programs["olex2.refine"]
     method = program.methods["LBFGS"]
-    self.item = "Olex2-refine"
+    self.item = "olex2.refine"
     refinement_graph.__init__(self, program, method)
     y_label = self.get_unicode_characters('Max shift in angstrom')
     metadata={'labels':[], 'y_label':y_label}
@@ -1691,7 +1691,7 @@ class WilsonPlot(Analysis):
 
 class ChargeFlippingPlot(PrgAnalysis):
   def __init__(self):
-    program = ExternalPrgParameters.defineExternalPrograms()[0].programs["Olex2-solve"]
+    program = ExternalPrgParameters.defineExternalPrograms()[0].programs["olex2.solve"]
     method = program.methods["Charge Flipping"]
     self.item = "Charge Flipping"
     PrgAnalysis.__init__(self, program, method)

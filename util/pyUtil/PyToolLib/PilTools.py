@@ -2068,14 +2068,17 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
     textItems = []
     tabItems = []
-    directories = ["etc/gui", "etc/news", "etc/gui/blocks", "etc/gui/snippets"]
+    g3tabItems = ['g3-solve', 'g3-refine', 'g3-image', 'g3-report', 'g3-tools']
+    
+    directories = ["etc/gui", "etc/news", "etc/gui/blocks", "etc/gui/snippets", "etc/gui/g3"]
     rFile = open("%s/etc/gui/blocks/index-tabs.htm" %(self.basedir), 'r')
     for line in rFile:
       t = line.split("<!-- #include ")[1]
       t = t.split()[0]
       t = t.split('-')[1]
       tabItems.append(t)
-      self.tabItems = tabItems
+    tabItem_l = [tabItems, g3tabItems]
+    self.tabItems = tabItems
     for directory in directories:
       for htmfile in glob.glob("%s/%s/*.htm" %(self.basedir,  directory)):
         f = (htmfile.replace('\\', '/').split('/')[-1:])
@@ -2118,18 +2121,19 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           #name = "h2-%s-%s.png" %(item, state)
           #image.save("C:/tmp/%s" %name)
 
-    for item in tabItems:
-      states = ["on", "off", "highlight", "", "hover", "hoveron"]
-      for state in states:
-        use_new = True
-        if use_new:
-          width = int(self.available_width/len(tabItems)) - 1
-          image = self.make_timage(item_type='tab', item=item, state=state, width=width)
-        else:
-          image = self.tab_items(item, state)
-
-        name = r"tab-%s%s.png" %(item, state)
-        OlexVFS.save_image_to_olex(image, name, 2)
+    for tabItems in tabItem_l:
+      for item in tabItems:
+        states = ["on", "off", "highlight", "", "hover", "hoveron"]
+        for state in states:
+          use_new = True
+          if use_new:
+            width = int(self.available_width/len(tabItems)) - 1
+            image = self.make_timage(item_type='tab', item=item.lstrip('g3-'), state=state, width=width)
+          else:
+            image = self.tab_items(item, state)
+  
+          name = r"tab-%s%s.png" %(item, state)
+          OlexVFS.save_image_to_olex(image, name, 2)
         #name = r"tab-%s-%s.png" %(item, state)
         #image.save("C:/tmp/%s" %name)
         #image.save(r"%s\etc\$tab-%s-%s.png" %(datadir, item.split("index-")[1], state), "PNG")
@@ -2366,7 +2370,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     iconIndex.setdefault("dot-arrow-down", (7, 2, {'colourise':self.params.green.rgb}))
     iconIndex.setdefault("dot-arrow-up", (7, 3, {'colourise':self.params.green.rgb}))
     iconIndex.setdefault("polyhedra", (6, 9))
-    
+
     also_make_small_icons_l = ['open']
 
     for icon in iconIndex:
@@ -2377,7 +2381,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         name = name.lower()
         OlexVFS.save_image_to_olex(image, name, 2)
       #image.save(r"%s\etc\$toolbar-%s.png" %(datadir, icon), "PNG")
-    
+
       if icon in also_make_small_icons_l:
         states = ["on", "off", "hover", "", "hoveron", "highlight"]
         for state in states:
@@ -2385,7 +2389,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           name = r"toolbar_small-%s%s.png" %(icon,state)
           name = name.lower()
           OlexVFS.save_image_to_olex(image, name, 2)
-      
+
     height = 10
     width = 10
     bg_colour = self.adjust_colour(base_colour, luminosity = 1.6)
@@ -3040,12 +3044,12 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     n = int(len(txt)/2)
     txtbeg = txt[:n]
     txtend = txt [-n:]
-    
+
     if left_start > self.width:
       left_start = 50
     else:
       left_start = left_start
-    
+
     xx = 0
     while tw > self.width - left_start:
       txtbeg = txt[:n]
@@ -3295,7 +3299,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     text = text.split()
     if olx.IsCurrentLanguage('Chinese') == 'true':
-      font_name = "Arial UTF"
+      #font_name = "Arial UTF"
+      font_name = self.params.chinese_font_name
     else:
       font_name = "Vera"
       if self.params.image_font_name:
@@ -3587,7 +3592,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       icon_size = OV.GetParam('gui.skin.icon_size')
     else:
       icon_size = icon_size + 2
-    
+
     image = image.resize(  (icon_size , int(icon_size*(width-2*strip)/width)  ), Image.ANTIALIAS)
     draw = ImageDraw.Draw(image)
 

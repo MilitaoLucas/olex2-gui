@@ -708,7 +708,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     rFile = open(olx.FileFull(), 'r')
     f_data = rFile.readlines()
 
-    OV.SetParam('snum.skip_history','True')
+    OV.SetParam('snum.init.skip_history','True')
 
     a = RunRefinementPrg()
     self.R1 = a.R1
@@ -717,7 +717,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     OV.SetMaxCycles(curr_cycles)
     OV.set_refinement_program(curr_prg, curr_method)
 
-    OV.SetParam('snum.skip_history','False')
+    OV.SetParam('snum.init.skip_history','False')
     r = olx.Lst("R1")
     olex_refinement_model = OV.GetRefinementModel(False)
     if olex_refinement_model.has_key('twin'):

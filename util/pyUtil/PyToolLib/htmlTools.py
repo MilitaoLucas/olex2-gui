@@ -749,7 +749,7 @@ def format_help(string):
 def reg_command(self, string):
   regex = re.compile(r"  ~ (.*?)( [^\~\~]* ) ~ ", re.X)
   m = regex.findall(string)
-  colour = OV.FindValue('gui_html_highlight_colour')
+  colour = OV.GetParam('gui.html.highlight_colour')
   if m:
     s = regex.sub(r'''
     <br>
@@ -794,7 +794,7 @@ def bgcolor(ctrl_name):
   if value in ('?',''):
     colour = 'rgb(255,220,220)'
   else:
-    colour = OV.FindValue('gui_html_input_bg_colour')
+    colour = OV.GetParam('gui.html.input_bg_colour')
   return colour
 OV.registerFunction(bgcolor)
 
@@ -1148,6 +1148,8 @@ def MakeHoverButton(name, cmds, onoff = "off", btn_bg='table_firstcol_colour'):
 OV.registerFunction(MakeHoverButton)
 
 def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
+  if "None" in name:
+    return ""
   hover_buttons = OV.GetParam('olex2.hover_buttons')
   click_console_feedback = False
   n = name.split("-")
@@ -1201,6 +1203,8 @@ OV.registerFunction(MakeHoverButtonOff)
 
 
 def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
+  if "None" in name:
+    return ""
   hover_buttons = OV.GetParam('olex2.hover_buttons')
   click_console_feedback = False
   n = name.split("-")
@@ -1395,7 +1399,11 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
 
 
   OV.SetVar("current_tooltip_number",i)
-  OV.write_to_olex("tip-of-the-day-content.htm", txt.encode('utf-8'))
+  try:
+    txt = txt.encode('utf-8')
+  except:
+    print("Can't decode %s" %txt)
+  OV.write_to_olex("tip-of-the-day-content.htm", txt)
   return True
 OV.registerFunction(getTip)
 

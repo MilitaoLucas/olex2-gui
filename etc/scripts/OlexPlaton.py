@@ -13,8 +13,9 @@ To run this script, type spy.OlexPlaton("help") in Olex2
 
 def platon(command):
   try:
-    platon_result = olx.Exec(command)
+    #platon_result = olx.Exec(command)
     #platon_result = os.popen("platon %s%s %s"%(tickornot, platonflag, inputfilename)).read()
+    os.popen(command)
   except:
     print "Platon failed to run"
     return
@@ -110,7 +111,7 @@ def OlexPlaton(platonflag="0"):
           print "No CIF present - why not make one with ACTA?"
           print "Or run spy.OlexPlaton(C) and rename the %s.acc to %s.cif?"%(OV.FileName(), OV.FileName())
         inputfilename = OV.FileName() + '.cif'
-      command = "platon %s%s %s"%(tickornot, platonflag, inputfilename)
+      command = "platon \%s%s %s"%(tickornot, platonflag, inputfilename)
       platon(command)
     # Old code works for Linux but not windows thanks to the stupid vritual cmdline built into Platon by LF
     #  platon_extension = platon_result.split(":")[-1].split(".")[-1].split("\n")[0]

@@ -3,13 +3,12 @@
 <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
 
 
-
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_SOLUTION_PROGRAM'>
   <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
-  <td width='50%' VALIGN='center' colspan=2>
+  <td VALIGN='center' colspan=2>
     <b>Solution Program</b>
   </td>
-  <td width='50%' VALIGN='center' ALIGN='right' colspan=2>
+  <td VALIGN='center' ALIGN='right' colspan=2>
 <!-- #include program gui\snippets\snippet-program.htm;scope=snum;prg_type=solution;1; -->
   </td>
 </tr>
@@ -17,10 +16,10 @@
 
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_SOLUTION_METHOD'>
   <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
-  <td width='50%' VALIGN='center' colspan=2>
+  <td VALIGN='center' colspan=2>
     <b>%Solution Method%</b>
   </td>
-  <td width='50%' VALIGN='center' ALIGN='right' colspan=2>
+  <td VALIGN='center' ALIGN='right' colspan=2>
 <!-- #include program gui\snippets\snippet-method.htm;scope=snum;prg_type=solution;1; -->
   </td>
 </tr>
@@ -28,20 +27,20 @@
 
 <tr VALIGN='center' ALIGN='left' NAME='SET_REFLECTIONS'>
   <td width='2' bgcolor='$spy.GetParam(gui.html.table_firstcol_colour)'></td>
-  <td width='50%' VALIGN='center' colspan='2'>
+  <td VALIGN='center' colspan='2'>
     <b>%Reflection File%</b>
   </td>
-  <td width='50%' VALIGN='center' ALIGN='right' colspan='2'>
+  <td VALIGN='center' ALIGN='right' colspan='2'>
 <!-- #include tool-footer gui\snippets\snippet-reflection-file.htm;1; -->
 </td>
 </tr>
 
 <tr VALIGN='center' ALIGN='left' NAME='SET_SNUM_REFINEMENT_FORMULA'>
   <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
-  <td width='50%' VALIGN='center' colspan=2>
+  <td VALIGN='center' colspan=2>
     <b>%Chemical Composition%</b>
   </td>
-  <td width='50%' VALIGN='center' ALIGN='right' colspan=2>
+  <td VALIGN='center' ALIGN='right' colspan=2>
       <input
         type='combo'
         width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 - spy.GetParam(gui.htmlpanelwidth_margin_adjust))'
@@ -57,13 +56,13 @@
 
 <tr VALIGN='center' ALIGN='left' NAME='Z'>
   <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
-  <td width='50%' VALIGN='center' colspan=3>
+  <td VALIGN='center' colspan=3>
     <b>%Number of Formula Units%</b>
   </td>
-  <td width='50%' VALIGN='center' ALIGN='right' colspan=1>
+  <td VALIGN='center' ALIGN='right' colspan=1>
       <input
         type='spin'
-        width='100'
+        width='120'
         height="$spy.GetParam(gui.html.spin_height)"
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name='SET_Z'
@@ -76,13 +75,13 @@
 
 <tr VALIGN='center' ALIGN='left' NAME='Z Prime'>
   <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
-  <td width='50%' VALIGN='center' colspan=3>
+  <td VALIGN='center' colspan=3>
     <b>%Number in Asymmetric Unit%</b>
   </td>
-  <td width='50%' VALIGN='center' ALIGN='right' colspan=1>
+  <td VALIGN='center' ALIGN='right' colspan=1>
       <input
         type='text'
-        width="100"
+        width="120"
         height="$spy.GetParam(gui.html.spin_height)"
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name='SET_Z_PRIME'
@@ -114,7 +113,7 @@
   <td VALIGN='center' ALIGN='right' colspan=1>
       <input
         type='combo'
-        width="100"
+        width="120"
         height="$spy.GetParam(gui.html.combo_height)"
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name='SET_SNUM_REFINEMENT_SPACE_GROUP'
@@ -150,11 +149,15 @@
 </tr>
 -->
 
-<!-- #includeif fs.Exists(solution-settings-h3-solution-settings-extra.htm) solution-settings-h3-solution-settings-extra solution-settings-h3-solution-settings-extra.htm;gui\blocks\tool-h3-off.htm;image=solution-settings-h3-solution-settings-extra;colspan=4;onclick=;onclick=;2; -->
-
-<!-- #includeif fs.Exists(solution_image.htm) solution_image solution_image.htm;1; -->
 
 </table>
+
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+<!-- #includeif fs.Exists(solution-settings-h3-solution-settings-extra.htm) solution-settings-h3-solution-settings-extra solution-settings-h3-solution-settings-extra.htm;gui\blocks\tool-h3-off.htm;image=solution-settings-h3-solution-settings-extra;colspan=4;onclick=;onclick=;2; -->
+<!-- #includeif fs.Exists(solution_image.htm) solution_image solution_image.htm;1; -->
+</table>
+
+
 </font>
 <!--<tr>-->
 <!--<!-- #includeif file.Exists('FilePath()/.olex/xy.htm') XY 'FilePath()/.olex/xy.htm';1; -->
