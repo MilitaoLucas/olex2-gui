@@ -3,7 +3,10 @@
 # Expect frequent changes!                                  #
 #############################################################
 
-gui {
+gui
+  {
+  chinese_font_name = YaHei
+    .type = str
   base_colour = #aaaaaa
     .type = colour
   logo_colour = #777777
@@ -202,9 +205,9 @@ gui {
         .type = str
       font_size = 16
         .type = int
-      top = 3
+      top = 2
         .type = int
-      left = 8
+      left = 6
         .type = int
       rounded = 1100
         .type = str
@@ -512,7 +515,7 @@ gui {
         .type = colour
     }
   }
-  
+
   graph{
     light_grey = #888888
       .type = colour
@@ -535,8 +538,10 @@ gui {
     axislabel_colour = #666666
       .type = colour
   }
-  
+
   g3{
+    task = solve
+      .type = str
     top{
       start_new_structure{
         label = start_new_structure

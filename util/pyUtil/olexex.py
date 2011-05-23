@@ -173,6 +173,9 @@ class OlexRefinementModel(object):
     'simu':'adp_similarity',
     'delu':'rigid_bond',
     'isor':'isotropic_adp',
+    'olex2.restraint.angle':'angle',
+    'olex2.restraint.dihedral':'dihedral',
+    'olex2.restraint.u_eq':'fixed_u_eq_adp',
   }
 
   constraint_types = {
@@ -240,26 +243,35 @@ class OlexRefinementModel(object):
     from libtbx.utils import flat_list
     from cctbx import sgtbx
     for shelxl_restraint in (self.restraint_types):
-      for restraint in self.model[shelxl_restraint]:
+      for restraint in self.model.get(shelxl_restraint, ()):
         restraint_type = self.restraint_types.get(shelxl_restraint)
         if restraint_type is None: continue
         i_seqs = [i[0] for i in restraint['atoms']]
         kwds = dict(i_seqs=i_seqs)
         if restraint_type not in (
-          'adp_similarity', 'rigid_bond', 'isotropic_adp'):
+          'adp_similarity', 'rigid_bond', 'isotropic_adp', 'fixed_u_eq_adp'):
           kwds['sym_ops'] = [
             (sgtbx.rt_mx(flat_list(i[1][:-1]), i[1][-1]) if i[1] is not None else None)
             for i in restraint['atoms']]
-          kwds['weight'] = 1/math.pow(restraint['esd1'],2)
+          if restraint_type in ('angle', 'dihedral'):
+            esd_val = restraint['esd1']*180/math.pi
+          else:
+            esd_val = restraint['esd1']
+          kwds['weight'] = 1/math.pow(esd_val,2)
         value = restraint['value']
-        if restraint_type in ('adp_similarity', 'isotropic_adp'):
+        if restraint_type in ('adp_similarity', 'isotropic_adp', 'fixed_u_eq_adp'):
           kwds['sigma'] = restraint['esd1']
-          kwds['sigma_terminal'] = restraint['esd2'] if restraint['esd2'] != 0 else None
+          if restraint_type in ('adp_similarity', 'isotropic_adp'):
+            kwds['sigma_terminal'] = restraint['esd2'] if restraint['esd2'] != 0 else None
         elif restraint_type == 'rigid_bond':
           kwds['sigma_12'] = restraint['esd1']
           kwds['sigma_13'] = restraint['esd2'] if restraint['esd2'] != 0 else None
         if restraint_type == 'bond':
           kwds['distance_ideal'] = value
+        elif restraint_type in ('angle', 'dihedral'):
+          kwds['angle_ideal'] = value
+        elif restraint_type in ('fixed_u_eq_adp',):
+          kwds['u_eq_ideal'] = value
         elif restraint_type in ('bond_similarity', 'planarity'):
           kwds['weights'] = [kwds['weight']]*len(i_seqs)
           if restraint_type == 'bond_similarity':
@@ -942,11 +954,11 @@ def GetRcolour(R1):
   try:
     R1 = float(R1)
     if R1 > 0.20:
-      retVal=OV.FindValue('gui_red')
+      retVal=OV.GetParam('gui.red')
     elif R1 >0.10:
-      retVal=OV.FindValue('gui_orange')
+      retVal=OV.GetParam('gui.orange')
     else:
-      retVal=OV.FindValue('gui_green')
+      retVal=OV.GetParam('gui.green')
   except:
     retVal='grey'
   return str(retVal)
@@ -1273,33 +1285,23 @@ def getKeys(key_directory=None):
 
 
 def GetCheckcifReport():
-
   import urllib2
   import urllib2_file
 
-  file_name = '%s/%s.cif' %(OV.FilePath(), OV.FileName())
-  rFile = open(file_name)
-  #file_stat = os.stat(file_name)
-  #cif = rFile.read()
+  file_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'cif'))
+  rFile = open(file_name, 'rb')
   cif = rFile
-
   params = {
     "runtype": "symmonly",
     "referer": "checkcif_server",
     "outputtype": "html",
     "file": cif
   }
-
-  f = urllib2.urlopen("http://vm02.iucr.org/cgi-bin/checkcif.pl", params)
-  print f.read()
-
-  #url = "http://vm02.iucr.org/cgi-bin/checkcif.pl"
-  #data = urllib.urlencode(params)
-  #print data
-  #req = urllib2.Request(url, data)
-  #response = urllib2.urlopen(req,data)
-  #print response.read()
+  wFile = open("cifreport.htm",'w')
+  wFile.write(urllib2.urlopen(OV.GetParam('olex2.checkcif.url'), params).read())
+  wFile.close()
   rFile.close()
+  olx.Shell('cifreport.htm')
 OV.registerFunction(GetCheckcifReport)
 
 def GetHttpFile(f, force=False, fullURL = False):
@@ -1355,7 +1357,7 @@ def check_for_recent_update():
     retVal = False
     #    print "Olex2 has not been updated"
   OV.SetVar('last_version',str(version))
-  OV.StoreParameter('last_version', str(version))
+  OV.StoreParameter('last_version')
   return retVal
 
 def check_for_crypto():
@@ -1700,6 +1702,32 @@ def runODAC(cmd):
 
 OV.registerFunction(runODAC)
 
+def settings_tree():
+  l = []
+  handlers = [olx.phil_handler, olx.gui_phil_handler]
+  for handler in handlers:
+    raw_l = handler.get_root_scope_names()
+    for item in raw_l:
+      s = handler.get_scope_by_name(item)
+      l.append("%s (%s)\n%s\n" %(item, s.short_caption, item))
+      for tem in s.objects:
+        if tem.is_scope:
+          l.append("\t%s (%s)\n%s.%s\n" %(tem.name, tem.short_caption, item, tem.name))
+          for em in tem.objects:
+            if em.is_scope:
+              l.append("\t\t%s (%s)\n%s.%s.%s\n" %(em.name, em.short_caption, item, tem.name, em.name))
+              for m in em.objects:
+                if m.is_scope:
+                  l.append("\t\t\t%s (%s)\n%s.%s.%s.%s\n" %(m.name, m.short_caption, item, tem.name, em.name, m.name))
+                  for m1 in m.objects:
+                    if m1.is_scope:
+                      l.append("\t\t\t\t%s (%s)\n%s.%s.%s.%s.%s\n" %(m1.name, m1.short_caption, item, tem.name, em.name, m.name, m1.name))
+
+
+  OV.write_to_olex('settings_tree.ind', ''.join(l))
+OV.registerFunction(settings_tree)
+
+
 def GetOptionalHyphenString(txt):
   txt = txt.replace ("/", "/" + u"\u200B")
   txt = txt.replace ("\\", "\\" + u"\u200B")
@@ -1725,6 +1753,35 @@ def GetTwinLaw(html=False):
   return txt
 OV.registerFunction(GetTwinLaw)
 
+def ccdc_submit():
+  #import urllib2
+  #import urllib2_file
+
+  file_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'cif'))
+  rFile = open(file_name, 'rb')
+  cif = rFile.read()
+
+  url = OV.GetParam('user.ccdc.portal_url')
+  params = {'__ac_password':OV.GetParam('user.ccdc.portal_passwd'),
+            '__ac_name':OV.GetParam('user.ccdc.portal_username'),
+            'context':"None",
+            'cif': cif
+            }
+#  params = urllib.urlencode(params)
+#  f = urllib2.urlopen(url, params)
+
+  try:
+    proxy = get_proxy_from_usettings()
+    proxies = {'http': proxy}
+    proxy_support = urllib2.ProxyHandler(proxies)
+    req = urllib2.Request(url)
+    response = urllib2.urlopen(req,params)
+    f = response.read()
+  except:
+    print('Failed')
+  rFile.close()
+  print f
+OV.registerFunction(ccdc_submit)
 
 def HklStatsAnalysis():
   import olex_core
@@ -1745,8 +1802,8 @@ def AvailablePlugins():
   plugins = {
             }
   s = "<hr>"
-  green = OV.FindValue('gui_green', "#00ff00")
-  red = OV.FindValue('gui_red', "#ff0000")
+  green = OV.GetParam('gui.green')
+  red = OV.GetParam('gui.red')
   for plugin in plugins:
     display = plugins[plugin].get('display', plugin)
     blurb = plugins[plugin].get('blurb', plugin)

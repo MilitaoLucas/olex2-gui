@@ -265,7 +265,9 @@ class RunRefinementPrg(RunPrg):
     self.startRun()
     olx.File(u"'%s/%s.ins'" %(OV.FilePath(),self.original_filename))
     self.setupRefine()
-    if self.terminate: return
+    if self.terminate:
+      self.endRun()
+      return
     self.setupFiles()
     if self.terminate:
       self.endRun()
@@ -346,7 +348,7 @@ class RunRefinementPrg(RunPrg):
     self.method.post_refinement(self)
 
   def doHistoryCreation(self):
-    if self.params.snum.skip_history:
+    if self.params.snum.init.skip_history:
       print ("Skipping History")
     R1 = 0
     self.his_file = ""

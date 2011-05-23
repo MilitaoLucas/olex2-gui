@@ -97,17 +97,20 @@ def make_logon_html():
     y = 400
     olx.Popup(pop_name, 'logon.htm', "-s -b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(pop_name, boxWidth, boxHeight, x, y))
     olx.Echo('html.ShowModal(%s)' %pop_name)
-    
-  
-def web_authenticate():
-  global username
-  global password
-  if not username:
-    make_logon_html()
-    username = olx.GetValue('Logon.WEB_USERNAME')
-    password = olx.GetValue('Logon.WEB_PASSWORD')
-    print username
-OV.registerFunction(web_authenticate)
+
+ 
+##DELETE  
+#def web_authenticate():
+  #global username
+  #global password
+  #if not username:
+    #make_logon_html()
+    #username = olx.GetValue('Logon.WEB_USERNAME')
+    #password = olx.GetValue('Logon.WEB_PASSWORD')
+    #print username
+#OV.registerFunction(web_authenticate)
+
+
 
 
 def web_run_sql(sql = None, script = 'run_sql'):

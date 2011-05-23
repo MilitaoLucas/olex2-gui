@@ -634,9 +634,9 @@ def checkErrLogFile():
 OV.registerFunction(checkErrLogFile)
 
 def weightGuiDisplay():
-  gui_green = OV.FindValue('gui_green')
-  gui_orange = OV.FindValue('gui_orange')
-  gui_red = OV.FindValue('gui_red')
+  gui_green = OV.GetParam('gui.green')
+  gui_orange = OV.GetParam('gui.orange')
+  gui_red = OV.GetParam('gui.red')
   longest = 0
   retVal = ""
   current_weight = olx.Ins('weight')

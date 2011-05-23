@@ -206,6 +206,9 @@ class olex2_normal_eqns(least_squares.crystallographic_ls):
     #update EXTI
     if self.reparametrisation.extinction.grad:
       OV.SetExtinction(self.reparametrisation.extinction.value)
+    for (i,r) in enumerate(self.shared_rotated_adps):
+      if r.refine_angle:
+        olx.xf_rm_UpdateCR('olex2.constraint.rotated_adp', i, r.angle.value*180/math.pi)
     olx.xf_EndUpdate()
 
 
@@ -320,6 +323,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       log=self.log
     )
     self.normal_eqns.shared_param_constraints = self.shared_param_constraints
+    self.normal_eqns.shared_rotated_adps = self.shared_rotated_adps
     method = OV.GetParam('snum.refinement.method')
     iterations = solvers.get(method)
     if iterations == None:
@@ -589,7 +593,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_reflns_number_gt'] = (
       refinement_refs.data() > 2 * refinement_refs.sigmas()).count(True)
     cif_block['_reflns_number_total'] = refinement_refs.size()
-    cif_block['_reflns_threshold_expression'] = 'I>2u(I)' # XXX is this correct?
+    cif_block['_reflns_threshold_expression'] = 'I>=2u(I)' # XXX is this correct?
     def sort_key(key, *args):
       if key.startswith('_space_group_symop') or key.startswith('_symmetry_equiv'):
         return -1
@@ -612,7 +616,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if list_code == 4:
       fc_sq = self.normal_eqns.fc_sq.sort(by_value="packed_indices")
       fo_sq = self.normal_eqns.observations.fo_sq.sort(by_value="packed_indices")
-      fo_sq = fo_sq.customized_copy(data=fo_sq.data()*(1/self.scale_factor))
+      fo_sq = fo_sq.customized_copy(
+        data=fo_sq.data()*(1/self.scale_factor),
+        sigmas=fo_sq.sigmas()*(1/self.scale_factor))
       mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
         fc_sq, array_type='calc')
       mas_as_cif_block.add_miller_array(fo_sq, array_type='meas')
@@ -629,6 +635,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         fc = self.normal_eqns.f_calc.customized_copy(anomalous_flag=False)
         fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
           data=self.normal_eqns.observations.fo_sq.data()*(1/self.scale_factor),
+          sigmas=self.normal_eqns.observations.fo_sq.sigmas()*(1/self.scale_factor),
           anomalous_flag=False)
         fo_sq = fo_sq.eliminate_sys_absent().merge_equivalents(algorithm="shelx").array()
         fo = fo_sq.as_amplitude_array().sort(by_value="packed_indices")
@@ -669,6 +676,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
         current = site.shared_site(kwds["i_seqs"])
         constraints.append(current)
 
+    shared_rotated_adp = self.olx_atoms.model.get('olex2.constraint.rotated_adp', ())
+    self.shared_rotated_adps = []
+    for c in shared_rotated_adp:
+      current = adp.shared_rotated_u(c[0], c[1], c[2][0], c[3][0], c[4], c[5])
+      constraints.append(current)
+      self.shared_rotated_adps.append(current)
+      
     self.shared_param_constraints = []
     vars = self.olx_atoms.model['variables']['variables']
     for i, var in enumerate(vars):

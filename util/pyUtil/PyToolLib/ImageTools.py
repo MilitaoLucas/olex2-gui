@@ -552,7 +552,7 @@ class ImageTools(FontInstances):
       encoding = 'unic'
       if self.gui_current_language == "Chinese":
         #font_name = "Simhei TTF"
-        font_name = 'Arial UTF'
+        font_name = OV.GetParam('gui.chinese_font_name')
       else:
         font_name = 'Arial UTF'
       #font_name = "Chinese"
@@ -570,11 +570,11 @@ class ImageTools(FontInstances):
     try:
       txt.encode('ascii')
     except:
-      font_name = 'Arial UTF'
-      top -= 3
-      pass
-
-
+      if self.gui_current_language != "Chinese":
+        font_name = 'Arial UTF'
+        top -= 3
+      else:
+        pass
 
     if valign:
 
@@ -1014,7 +1014,7 @@ class ImageTools(FontInstances):
   #       draw.line((begin ,end), fill=border_colour['right'])
     draw.line((begin ,end), fill=border_colour)
 
-    rect_colour = OV.FindValue('gui_html_bg_colour')
+    rect_colour = OV.GetParam('gui.html.bg_colour')
     pie_colour = bg_colour
 
     pie_colour = (0,0,0,255)

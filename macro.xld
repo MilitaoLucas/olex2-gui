@@ -22,6 +22,7 @@
       <cmd9 "if and(isvar(startup),file.exists(app.getarg(1))) then none else 'reap getVar(startup)>>echo filepath()'">
       <cmd10 "bind wheel 'ShowQ -wheel='">
       <cmd11 "spy.GetTip(0)">
+      <cmd11 "spy.settings_tree()">
     \>
 
   <onterminate
@@ -1545,16 +1546,18 @@
   \>
 \>
 
-<gui3 help="Switch to Gui3"
+<g3 help="Switch to Gui3"
   <body
     <cmd
-      <cmd2 "SetVar('user_refinement_gui2',True)">
+      <cmd2 "clear">
       <cmd2 "itemstate * 0">
       <cmd2 "itemstate logo1 1">
       <cmd2 "itemstate info-title 1">
-      <cmd2 "itemstate index-all-in-one 1">
-      <cmd2 "itemstate aio-* 0">
-      <cmd2 "itemstate aio-choice 1">
+      <cmd2 "itemstate index-g3 1">
+      <cmd2 "itemstate g3-* 0">
+      <cmd2 "itemstate states 1">
+      <cmd2 "itemstate tasks 1">
+      <cmd2 "itemstate *tab-g3 2">
     \>
   \>
 \>

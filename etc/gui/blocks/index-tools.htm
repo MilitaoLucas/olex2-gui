@@ -8,14 +8,14 @@
 <!-- #include tools-masks gui\maps.htm;gui\blocks\tool-off.htm;image=maps;onclick=;2; -->
 <!-- #includeif file.Exists('FilePath()\FileName().cif') tools-cif gui\cif.htm;gui\blocks\tool-off.htm;image=cif;onclick=;0; -->
 <!-- #includeif IsFileType('ires') tools-twinning gui\twinning.htm;gui\blocks\tool-off.htm;image=twinning;onclick=;2; -->
-<!-- #include tools-settings gui\settings.htm;gui\blocks\tool-off.htm;image=settings;onclick=;onclick=;2; -->
-<!-- #include tools-overlay gui\overlay.htm;gui\blocks\tool-off.htm;image=overlay;onclick=;onclick=;2; -->
+<!-- #include tools-settings gui\settings.htm;gui\blocks\tool-off.htm;image=settings;onclick=;2; -->
+<!-- #include tools-overlay gui\overlay.htm;gui\blocks\tool-off.htm;image=overlay;onclick=;2; -->
 
-<!-- #includeif (false and IsFileType('ires')) tools-cctbx gui\cctbx.htm;gui\blocks\tool-off.htm;image=cctbx;onclick=;2; -->
+<!-- #includeif and(false,IsFileType('ires')) tools-cctbx gui\cctbx.htm;gui\blocks\tool-off.htm;image=cctbx;onclick=;2; -->
 
 <!-- #includeif or(IsFileType('ires'),IsFileType('p4p')) tools-sg gui\space-groups.htm;gui\blocks\tool-off.htm;image=space-groups;onclick=sgd;0; -->
 <!-- #includeif isplugininstalled(plugin-brukersaint) tools-bs gui\bruker-saint.htm;gui\blocks\tool-off.htm;image=bruker-saint;onclick=BSINI;2; -->
-<!-- #includeif isplugininstalled(plugin-Batch) tools-batch gui\batch.htm;gui\blocks\tool-off.htm;image=batch;onclick=;onclick=;2; -->
+<!-- #includeif isplugininstalled(plugin-Batch) tools-batch gui\batch.htm;gui\blocks\tool-off.htm;image=batch;onclick=;2; -->
 <!-- #includeif or(IsFileType('ires'),IsFileType('cif')) tools-refinement gui\refinement.htm;gui\blocks\tool-off.htm;image=refinement;onclick=;0; -->
 <!-- #includeif or(IsFileType('ires'),IsFileType('crs')) tools-solve gui\solve.htm;gui\blocks\tool-off.htm;image=solve;onclick='sg>>spy GuiTools single:solve';0; -->
 

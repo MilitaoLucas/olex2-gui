@@ -263,6 +263,36 @@ def web_run_sql(sql = None, script = 'run_sql'):
   return d
 
 
+def upload_structure(script='test'):
+  global password
+  global username
+  
+  web_authenticate()
+  
+  id = 'ID'
+  url = "%s/%s" %("http://109.109.251.162:8080/StructuresTest/scripts/", script)
+  values = {'__ac_password':password,
+            '__ac_name':username,
+            'id':id,
+            }
+  data = urllib.urlencode(values)
+  req = urllib2.Request(url)
+  response = urllib2.urlopen(req,data)
+  
+  print response.read()
+  
+  try:
+    d = pickle.load(response)
+  except:
+    username =""
+    password = ""
+    return "Unauthorised"
+  return d
+    
+OV.registerFunction(upload_structure)
+    
+
+
 
 def web_translation_item(OXD=None, language='English'):
   global password

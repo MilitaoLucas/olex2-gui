@@ -159,7 +159,7 @@ class OlexFunctions(inheritFunctions):
     except Exception, ex:
       print >> sys.stderr, "Could not set max peaks to %s" %(max_peaks)
       sys.stderr.formatExceptionInfo()
-  
+
   def GetOSF(self):
     try:
       a = float(olx.xf_rm_OSF())
@@ -168,7 +168,7 @@ class OlexFunctions(inheritFunctions):
       return a*a
     except:
       return None
-    
+
   def SetOSF(self, v):
     try:
       olx.xf_rm_OSF(math.sqrt(v))
@@ -181,7 +181,7 @@ class OlexFunctions(inheritFunctions):
       return float(olx.xf_rm_FVar(i))
     except:
       return None
-    
+
   def SetFVar(self, i, v):
     try:
       olx.xf_rm_FVar(i, v)
@@ -204,7 +204,7 @@ class OlexFunctions(inheritFunctions):
       return float(olx.xf_rm_Exti())
     except:
       return None
-    
+
   def SetExtinction(self, v):
     try:
       olx.xf_rm_Exti(v)
@@ -294,7 +294,10 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
 
   def write_to_olex(self,fileName,text,copyToDisk = False):
-    text = text.encode('utf-8')
+    try:
+      text = text.encode('utf-8')
+    except:
+      text = text.decode('utf-8')
     try:
       import OlexVFS
       OlexVFS.write_to_olex(fileName, text)
@@ -336,7 +339,7 @@ class OlexFunctions(inheritFunctions):
 
   def htmlPanelWidth(self):
     olex.m("HtmlPanelWidth")
-    
+
   def reloadStructureAtreap(self, path, file, fader=True):
     fader = self.FindValue('gui_use_fader')
     #print "AtReap %s/%s" %(path, file)
