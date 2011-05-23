@@ -24,6 +24,10 @@ endrad 5.                       ! This is the pore radius that is taken
 
 '''
 To run type spy.Olexhole() in Olex2
+
+endrad is the pore radius by which the probe is in empty space
+
+cm is the cell multiplier 1 = pack cell 2 would be a 2x2x2 cell etc.
 '''
 
 def Olexhole(endrad="3", cm="1"):
@@ -47,7 +51,10 @@ def Olexhole(endrad="3", cm="1"):
   Olex2holeIn = OV.FileName()
   #Olex2 commands here!
   OV.cmd("isot")
-  OV.cmd("pack -%d %d -%d %d -%d %d"%(cm*1, cm*1, cm*1, cm*1, cm*1, cm*1))
+  if cm <= 1:
+    OV.cmd("pack cell")
+  else:
+    OV.cmd("pack -%d %d -%d %d -%d %d"%(cm, cm, cm, cm, cm, cm))
   #OV.cmd("grow")
   OV.cmd("grow -w")
   OV.File("%s/olex_%s.pdb"%(hole2_path, Olex2holeIn))
