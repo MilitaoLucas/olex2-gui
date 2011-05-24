@@ -316,6 +316,13 @@ try:
 except ImportError, err:
   print "Could not import customScripts: %s" %err
 
+try:
+  import userScripts
+except ImportError, err:
+  print "Could not import userScripts: %s" %err
+  
+  
+  
 print "Welcome to Olex2"
 print "\nDolomanov, O.V.; Bourhis, L.J.; Gildea, R.J.; Howard, J.A.K.; Puschmann, H.,\nOLEX2: A complete structure solution, refinement and analysis program (2009).\nJ. Appl. Cryst., 42, 339-341.\n"
 
