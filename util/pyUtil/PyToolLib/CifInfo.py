@@ -336,8 +336,12 @@ class ExtractCifInfo(CifTools):
     import History
     active_solution = History.tree.active_child_node
     if active_solution is not None and active_solution.is_solution:
+
+      ## Backwards Compatibility
       if active_solution.program == "smtbx-solve":
         active_solution.program = "olex2.solve"
+      ## END
+
       solution_reference = SPD.programs[active_solution.program].reference
       atom_sites_solution_primary = SPD.programs[active_solution.program].methods[active_solution.method].atom_sites_solution
       self.update_cif_block({
@@ -346,6 +350,12 @@ class ExtractCifInfo(CifTools):
       })
     active_node = History.tree.active_node
     if active_node is not None and not active_node.is_solution:
+
+      ## Backwards Compatibility
+      if active_solution.program == "smtbx-refine":
+        active_solution.program = "olex2.refine"
+      ## END
+      
       refinement_reference = RPD.programs[active_node.program].reference
       self.update_cif_block({
         '_computing_structure_refinement': refinement_reference})
