@@ -953,8 +953,8 @@ def calcsolv(solvent_radius=1.2, grid_step=0.2):
   # This needs to be done I don't know why but otherwise smtbx farts
   # I tried using the xray_structure inside this file (see line 105 but appears to need hkl file?
   xray_structure = create_cctbx_xray_structure.structure()
-  solvent_radius = shrink_truncation_radius = 1.2 # Angstrom - this could be passed during call?
-  grid_step = 0.2 # Angstrom - a smaller number or variable passed during call?
+  shrink_truncation_radius = solvent_radius = float(solvent_radius) # Angstrom - this could be passed during call?
+  grid_step=float(grid_step)# Angstrom - a smaller number or variable passed during call?
   result = solvent_accessible_volume(
     xray_structure,
     solvent_radius,
