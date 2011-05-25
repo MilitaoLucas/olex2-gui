@@ -12,4 +12,3 @@ import flipsmall
 import OlexBET
 import Olexhole
 #import LazyOlex
-import calcsol
