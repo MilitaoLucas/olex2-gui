@@ -1003,7 +1003,8 @@ class timage(ImageTools):
     self.params = OV.GuiParams()
 
     self.advertise_new = False
-    self.new_l = ['maps']
+
+    self.new_l = open("%s/etc/gui/images/advertise_as_new.txt" %OV.BaseDir(),'r').readlines()
 
     self.available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
 
@@ -2069,7 +2070,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     textItems = []
     tabItems = []
     g3tabItems = ['g3-solve', 'g3-refine', 'g3-image', 'g3-report', 'g3-tools']
-    
+
     directories = ["etc/gui", "etc/news", "etc/gui/blocks", "etc/gui/snippets", "etc/gui/g3"]
     rFile = open("%s/etc/gui/blocks/index-tabs.htm" %(self.basedir), 'r')
     for line in rFile:
@@ -2131,7 +2132,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
             image = self.make_timage(item_type='tab', item=item.lstrip('g3-'), state=state, width=width)
           else:
             image = self.tab_items(item, state)
-  
+
           name = r"tab-%s%s.png" %(item, state)
           OlexVFS.save_image_to_olex(image, name, 2)
         #name = r"tab-%s-%s.png" %(item, state)

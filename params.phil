@@ -378,6 +378,14 @@ snum
       .type = float
   }
 
+  calcsolv {
+    probe = 1.2
+      .type = float
+    grid = 0.2
+      .type = float
+  }
+
+
   masks {
     original_hklsrc = None
       .type = path
