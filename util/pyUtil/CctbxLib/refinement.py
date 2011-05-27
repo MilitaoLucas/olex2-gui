@@ -302,7 +302,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       connectivity_table=connectivity_table,
       twin_fractions=self.get_twin_fractions(),
       temperature=temp,
-      extinction = self.extinction
+      extinction = self.extinction,
+      directions=self.directions
     )
     weight = self.olx_atoms.model['weight']
     params = dict(a=0.1, b=0,
@@ -676,10 +677,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
         current = site.shared_site(kwds["i_seqs"])
         constraints.append(current)
 
+    directions = self.olx_atoms.model.get('olex2.direction', ())
+    self.directions = [d for d in directions]
+
     shared_rotated_adp = self.olx_atoms.model.get('olex2.constraint.rotated_adp', ())
     self.shared_rotated_adps = []
     for c in shared_rotated_adp:
-      current = adp.shared_rotated_u(c[0], c[1], c[2][0], c[3][0], c[4], c[5])
+      current = adp.shared_rotated_u(c[0], c[1], c[2], c[3], c[4])
       constraints.append(current)
       self.shared_rotated_adps.append(current)
       
