@@ -718,7 +718,7 @@ user
       .type = str
     ccdc_email = horst.puschmann@gmail.com
       .type = str
-    portal_url = http://109.109.251.162:8080/StructuresTest/ccdc_submit
+    portal_url = http://localhost/StructureSpace/ccdc_submit
       .type = str
     portal_username = ccdcsubmit
       .type = str
