@@ -195,9 +195,11 @@ class OlexRefinementModel(object):
         self._atoms.append(atom)
         element_type = atom['type']
         self.atom_ids.append(atom['aunit_id'])
-    for var in olex_refinement_model['variables']['variables'][0]['references']:
-      self._fixed_variables.setdefault(var['id'], [])
-      self._fixed_variables[var['id']].append(var)
+    vars = olex_refinement_model['variables']['variables']
+    if len(vars) > 0:
+      for var in vars[0]['references']:
+        self._fixed_variables.setdefault(var['id'], [])
+        self._fixed_variables[var['id']].append(var)
     self._cell = olex_refinement_model['aunit']['cell']
     self.exptl = olex_refinement_model['exptl']
     self._afix = olex_refinement_model['afix']

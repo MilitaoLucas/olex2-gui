@@ -340,6 +340,8 @@ class RunRefinementPrg(RunPrg):
   def runAfterProcess(self):
     RunPrg.runAfterProcess(self)
     self.doHistoryCreation()
+    if self.R1 == 'n/a':
+       return
     if self.params.snum.refinement.auto.tidy:
       self.doAutoTidyAfter()
       OV.File()
