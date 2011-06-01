@@ -1289,7 +1289,7 @@ def getKeys(key_directory=None):
 
 def GetCheckcifReport():
   import urllib2
-  import urllib2_file
+  #import urllib2_file
 
   file_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'cif'))
   rFile = open(file_name, 'rb')

@@ -14,7 +14,7 @@ import olex
 import olx
 import urllib
 import urllib2
-import urllib2_file
+#import urllib2_file
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
