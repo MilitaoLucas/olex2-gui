@@ -40,6 +40,7 @@ class reader(object):
     if abs_type == "SADABS":
       #print "Running SADABS parser"
       #print "PATH", path
+      self._cifItems.setdefault("_exptl_absorpt_correction_type", "multi-scan")
       for line in lines:
         try:
   #	print lines[i]
@@ -98,11 +99,11 @@ class reader(object):
         i += 1
       self._cifItems.setdefault("lambda_correction", "Not present")
       self._cifItems.setdefault("_exptl_absorpt_correction_T_max", "%s" %(1))
-      self._cifItems.setdefault("_exptl_absorpt_correction_type", "multi-scan")
 
     elif abs_type == "TWINABS":
       #print "Running TWINABS parser"
       #print "PATH", path
+      self._cifItems.setdefault("_exptl_absorpt_correction_type", "multi-scan")
       for line in lines:
         #print "line = ", line, lines[line]
         try:
@@ -189,9 +190,7 @@ class reader(object):
           print "there was an error"
           pass
       #print "twin info ", self._twin_cifItems
-
       self._twin_cifItems.setdefault("_exptl_absorpt_correction_T_max", "%s" %(1))
-      self._twin_cifItems.setdefault("_exptl_absorpt_correction_type", "multi-scan")
 
 
   def cifItems(self):

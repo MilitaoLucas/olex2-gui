@@ -149,7 +149,7 @@ class RunPrg(ArgumentParser):
     olex.f('GetVar(cctbx_R1)')
 
   def runAfterProcess(self):
-    if 'smtbx' not in self.program.name:
+    if 'olex2' not in self.program.name:
       self.doFileResInsMagic()
       reflections = OV.HKLSrc() #BEWARE DRAGONS
       OV.reloadStructureAtreap(self.filePath, self.curr_file)
@@ -340,6 +340,8 @@ class RunRefinementPrg(RunPrg):
   def runAfterProcess(self):
     RunPrg.runAfterProcess(self)
     self.doHistoryCreation()
+    if self.R1 == 'n/a':
+      return
     if self.params.snum.refinement.auto.tidy:
       self.doAutoTidyAfter()
       OV.File()
