@@ -213,7 +213,7 @@ class olex2_normal_eqns(least_squares.crystallographic_ls):
 
 
 class FullMatrixRefine(OlexCctbxAdapter):
-  def __init__(self, max_cycles=None, max_peaks=5, verbose=False):
+  def __init__(self, max_cycles=None, max_peaks=5, verbose=False, on_completion=None):
     OlexCctbxAdapter.__init__(self)
     self.max_cycles = max_cycles
     self.max_peaks = max_peaks
@@ -223,6 +223,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.failure = False
     self.log = open(OV.file_ChangeExt(OV.FileFull(), 'log'), 'w')
     self.flack = None
+    self.on_completion = on_completion
 
   def run(self):
     self.reflections.show_summary(log=self.log)
@@ -370,12 +371,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.post_peaks(fo_minus_fc, max_peaks=self.max_peaks)
       self.show_summary()
       self.show_comprehensive_summary(log=self.log)
+      block_name = OV.FileName().replace(' ', '')
       f = open(OV.file_ChangeExt(OV.FileFull(), 'cif'), 'w')
       cif = iotbx.cif.model.cif()
-      cif[OV.FileName().replace(' ', '')] = self.as_cif_block()
+      cif[block_name] = self.as_cif_block()
       print >> f, cif
       f.close()
       self.output_fcf()
+      
+
       new_weighting = weighting.optimise_parameters(
         self.normal_eqns.observations.fo_sq,
         self.normal_eqns.fc_sq,
@@ -383,6 +387,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
         self.reparametrisation.n_independent_params)
       OV.SetParam(
         'snum.refinement.suggested_weight', "%s %s" %(new_weighting.a, new_weighting.b))
+      if self.on_completion:
+        self.on_completion(cif[block_name])
     finally:
       sys.stdout.refresh = True
       self.log.close()

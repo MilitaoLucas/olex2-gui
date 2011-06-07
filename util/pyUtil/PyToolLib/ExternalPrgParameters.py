@@ -289,8 +289,7 @@ class Method_refinement(Method):
 
   def post_refinement(self, RunPrgObject):
     pass
-
-
+  
 class Method_shelx(Method):
 
   def run(self, RunPrgObject):
@@ -570,7 +569,7 @@ class Method_cctbx_refinement(Method_refinement):
     cctbx = FullMatrixRefine(
       max_cycles=RunPrgObject.params.snum.refinement.max_cycles,
       max_peaks=RunPrgObject.params.snum.refinement.max_peaks,
-      verbose=verbose)
+      verbose=verbose, on_completion=self.writeRefinementInfoForGui)
     try:
       cctbx.run()
       self.flack = cctbx.flack
@@ -588,6 +587,18 @@ class Method_cctbx_refinement(Method_refinement):
 
   def getFlack(self):
     return self.flack
+  
+  def writeRefinementInfoForGui(self, cif):
+    for key, value in cif.iteritems():
+      if "." in value:
+        try:
+          cif[key] = "%.4f" %float(value)
+        except:
+          pass
+    f = open("%s/etc/CIF/olex2refinedata.html" %OV.BaseDir())
+    t = f.read() %cif
+    OV.write_to_olex('refinedata.htm',t)  
+
 
 class Method_cctbx_ChargeFlip(Method_solution):
 
