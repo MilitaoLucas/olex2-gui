@@ -904,7 +904,6 @@ class as_pdb_file(OlexCctbxAdapter):
 OV.registerMacro(as_pdb_file, """\
 filepath&;remark&;remarks&;fractional_coordinates-(False)&;resname""")
 
-
 class symmetry_search(OlexCctbxAdapter):
   def __init__(self):
     OlexCctbxAdapter.__init__(self)
@@ -931,3 +930,43 @@ class symmetry_search(OlexCctbxAdapter):
     sf_symm.space_group_info.show_summary()
 
 OV.registerFunction(symmetry_search)
+
+def calcsolv(solvent_radius=1.2, grid_step=0.2):
+  # This routine called with spy.calsolv() will calculate the solvent accessible area
+
+  # If values have been set in PHIL, these will be used.
+  l = ['grid', 'probe']
+  for item in l:
+    if OV.GetParam('snum.calcsolv.%s' %item):
+      solvent_radius = OV.GetParam('snum.calcsolv.%s' %item)
+
+  from smtbx.masks import solvent_accessible_volume
+  # Used to build the xray_structure by getting information from the olex2 refinement model
+  olx_atoms = olexex.OlexRefinementModel()
+  unit_cell = olx_atoms.getCell()
+  restraints_iter=olx_atoms.restraints_iterator()
+  constraints_iter=None
+  space_group = "hall: "+str(olx.xf_au_GetCellSymm("hall"))
+
+  # Creating the xray_structure part
+  create_cctbx_xray_structure = cctbx_controller.create_cctbx_xray_structure(
+    unit_cell,
+    space_group,
+    olx_atoms.iterator(),
+    restraints_iter,
+    constraints_iter
+  )
+  # This needs to be done I don't know why but otherwise smtbx farts
+  # I tried using the xray_structure inside this file (see line 105 but appears to need hkl file?
+  xray_structure = create_cctbx_xray_structure.structure()
+  shrink_truncation_radius = solvent_radius = float(solvent_radius) # Angstrom - this could be passed during call?
+  grid_step=float(grid_step)# Angstrom - a smaller number or variable passed during call?
+  result = solvent_accessible_volume(
+    xray_structure,
+    solvent_radius,
+    shrink_truncation_radius,
+    grid_step=grid_step,
+    use_space_group_symmetry=True) # faster for high symmetry)
+  result.show_summary()
+
+OV.registerFunction(calcsolv)
