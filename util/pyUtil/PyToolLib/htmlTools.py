@@ -828,7 +828,7 @@ OV.registerFunction(getPrintStyles)
 
 def getStylesList():
   styles = os.listdir("%s/etc/CIF/styles" %OV.BaseDir())
-  exclude = ("rsc.css", "thesis.css", "custom.css")
+  exclude = ("rsc.css", "thesis.css", "custom.css", "default.css")
   stylesList = ";".join(style[:-4] for style in styles
                         if style not in exclude and style.endswith('.css'))
   return 'default;' + stylesList

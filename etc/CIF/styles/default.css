@@ -64,7 +64,6 @@ table.CifTable
 
 table.CifTable td.data
   {
-    width:3em;
     white-space:nowrap;
   }
 
