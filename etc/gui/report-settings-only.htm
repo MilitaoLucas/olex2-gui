@@ -50,7 +50,7 @@ $spy.MakeHoverButton(button-validate_cif,spy.ValidateCif)
       items='strcat("<-None;screenshot;",file.ListDirForGui(FilePath(),*.png;*.jpg;*.bmp;*.ps;*.eps))'
       onchange="spy.SetParam(snum.report.image,GetValue(SET_REPORT_IMAGE))"
       width="50%"
-      value="$spy.GetParam(snum.report.image)"
+      value="file.GetName(spy.GetParam(snum.report.image))"
     >
   </td>
 </tr>
