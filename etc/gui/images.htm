@@ -6,7 +6,7 @@
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td name=HREF_MAKE_LABEL>
     1) <a href='label -type=GetValue(IMAGE_SETTINGS_LABEL_TYPE@#image)'>%images_add_labels_to_atoms%</a>|
-    <a href='sel $H>>sel -i>>label -type=GetValue(IMAGE_SETTINGS_LABEL_TYPE@#image)'>%images_add_labels_to_non_H_atoms%</a>
+    <a href='sel $*-H,Q>>label -type=GetValue(IMAGE_SETTINGS_LABEL_TYPE@#image)'>%images_add_labels_to_non_H_atoms%</a>
   </td>
   <td name=IMAGE_SETTINGS_LABEL_TYPE>
     <input
