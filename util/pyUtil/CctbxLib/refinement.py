@@ -378,8 +378,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
       print >> f, cif
       f.close()
       self.output_fcf()
-      
-
       new_weighting = weighting.optimise_parameters(
         self.normal_eqns.observations.fo_sq,
         self.normal_eqns.fc_sq,

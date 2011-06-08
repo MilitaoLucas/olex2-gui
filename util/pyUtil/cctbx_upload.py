@@ -40,7 +40,7 @@ def compile(sse, _platform):
     for dir_path, dir_names, file_names in os.walk(bundle_dir):
       dir_path = dir_path.replace('\\', '/')
       for f in file_names:
-        dest_zip.write(dir_path+'/'+f, dir_path[root_dir_len:] + '/' + f)
+        dest_zip.write(dir_path+'/'+f, 'cctbx/' + dir_path[root_dir_len:] + '/' + f)
     dest_zip.close()
     os.chdir(cwd)
     shutil.rmtree(bundle_dir)
