@@ -221,7 +221,7 @@ def referenceMetadataHtmlMaker():
      'itemName':'%Volume%',
      },
     {'varName':'snum.dimas.reference_journal_pages',
-     'itemName':'%Volume%',
+     'itemName':'%Pages%',
      },
     {'varName':'snum.dimas.reference_journal_year',
      'itemName':'%Year%',
