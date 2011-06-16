@@ -10,7 +10,7 @@
   <td name=REFLECTION_FILE_LABEL>
     <b>%Reflection File%</b>
   </td>
-  <td name=REFLECTION_FILE_INPUT>
+  <td name=REFLECTION_FILE_INPUT align="right">
 <!-- #include reflection-file gui\snippets\snippet-reflection-file.htm;1; -->
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -19,7 +19,7 @@
 <tr>
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td>
+  <td width="20%">
     <input
       type="combo"
       height="$spy.GetParam(gui.html.combo_height)"
@@ -27,7 +27,7 @@
       name="SET_SNUM_MASKS_TYPE"
       items='mask;f_mask;f_model'
       value="$spy.GetParam(snum.masks.type)"
-      width="15%"
+      width="95%"
       height="$spy.GetParam(gui.html.input_height)"
       onchange="
 spy.SetParam(snum.masks.type,GetValue(SET_SNUM_MASKS_TYPE))>>
@@ -39,11 +39,11 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
       readonly
     >
   </td>
-  <td>
+  <td width="20%">
     <input
       type="text"
       name = "SET_SNUM_MASKS_RESOLUTION_FACTOR"
-      width="15%"
+      width="95%"
       height="$spy.GetParam(gui.html.input_height)"
       label="%Res. factor%"
       valign="center"
@@ -53,11 +53,11 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
       onleave="spy.SetParam(snum.masks.resolution_factor,GetValue(SET_SNUM_MASKS_RESOLUTION_FACTOR))"
     >
   </td>
-  <td>
+  <td width="20%">
     <input
       type="text"
       name = "SET_SNUM_MASKS_SOLVENT_RADIUS"
-      width="15%"
+      width="95%"
       height="$spy.GetParam(gui.html.input_height)"
       label="%Solvent rad.%/&Aring "
       valign="center"
@@ -67,11 +67,11 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
       onleave="spy.SetParam(snum.masks.solvent_radius,GetValue(SET_SNUM_MASKS_SOLVENT_RADIUS))"
     >
   </td>
-  <td>
+  <td width="20%">
     <input
       type="text"
       name = "SET_SNUM_MASKS_SHRINK_TRUNCATION_RADIUS"
-      width="15%"
+      width="95%"
       height="$spy.GetParam(gui.html.input_height)"
       label="%Shrink trunc. rad.%/&Aring "
       valign="center"
@@ -91,7 +91,7 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
 <tr>
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td colspan = '1' valign='bottom'>
+  <td valign='bottom'>
     <input
       bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
       fgcolor="$spy.GetParam(gui.html.font_colour)"
@@ -101,7 +101,7 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
       name="SET_SNUM_MASKS_USE_COMPLETE_SET"
       checked="$spy.GetParam(snum.masks.use_set_completion)"
       height="$spy.GetParam(gui.html.input_height)"
-      width='50%'
+      width="50%"
       oncheck="spy.SetParam(snum.masks.use_set_completion,True)"
       onuncheck="spy.SetParam(snum.masks.use_set_completion,False)">
   </td>
