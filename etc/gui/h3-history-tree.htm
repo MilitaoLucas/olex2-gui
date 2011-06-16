@@ -6,7 +6,7 @@
     </td>
   </tr>
   <tr>
-    <td colspan = '1'>
+    <td>
       <input
         bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
         fgcolor="$spy.GetParam(gui.html.font_colour)"
@@ -16,7 +16,7 @@
         name="SNUM_HISTORY_CONDENSED_TREE"
         checked="$spy.GetParam(snum.history.condensed_tree)"
         height='16'
-        width='20%'
+        width='95%'
         oncheck="
 spy.SetParam(snum.history.condensed_tree,True)>>
 spy.make_history_bars()>>
@@ -28,7 +28,7 @@ spy.make_history_bars()>>
 if html.IsPopup(history-tree) then spy.popout_history_tree()>>
 UpdateHtml"
     </td>
-    <td colspan = '1' align="right">
+    <td align="right">
       <a href="spy.popout_history_tree()" target="popout tree">
       <b>Popout</b>
       </a>

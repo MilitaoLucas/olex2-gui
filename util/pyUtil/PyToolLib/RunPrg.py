@@ -237,7 +237,7 @@ class RunSolutionPrg(RunPrg):
 
   def setupSolve(self):
     try:
-      self.sg = olex.f(r'sg(%n)')
+      self.sg = '\'' + olex.f(r'sg(%n)') + '\''
     except:
       self.sg = ""
     self.formula = olx.xf_GetFormula()

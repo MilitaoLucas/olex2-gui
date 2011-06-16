@@ -6,11 +6,11 @@
   <td>
 <!-- #include tool-help-button gui\blocks\tool-help-button.htm;help_ext=calculate-solvent-accessible-voids;1; -->
   </td>
-  <td>
+  <td width="33%">
     <input
       type="text"
       name = "SET_SNUM_CALCSOLV_PROBE"
-      width="15%"
+      width="95%"
       height="$spy.GetParam(gui.html.input_height)"
       label="%Probe%/&Aring "
       valign="center"
@@ -20,11 +20,11 @@
       onleave="spy.SetParam(snum.calcsolv.probe,GetValue(SET_SNUM_CALCSOLV_PROBE))"
     >
   </td>
-  <td>
+  <td width="33%">
     <input
       type="text"
       name = "SET_SNUM_CALCSOLV_GRID"
-      width="15%"
+      width="95%"
       height="$spy.GetParam(gui.html.input_height)"
       label="%Grid%/&Aring "
       valign="center"
@@ -34,7 +34,7 @@
       onleave="spy.SetParam(snum.calcsolv.grid,GetValue(SET_SNUM_CALCSOLV_GRID))"
     >
   </td>
-  <td align='right'>
+  <td align='right' width="34%">
 $spy.MakeHoverButton(button_small-void@solv,spy.CalcSolv\())
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

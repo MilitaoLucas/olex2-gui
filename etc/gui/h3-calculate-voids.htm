@@ -6,11 +6,11 @@
   <td>
 <!-- #include tool-help-button gui\blocks\tool-help-button.htm;help_ext=calculate-voids;1; -->
   </td>
-  <td>
+  <td width="25%">
     <input
       type="text"
       name = "SET_SNUM_CALCVOID_RESOLUTION"
-      width="15%"
+      width="95%"
       height="$spy.GetParam(gui.html.input_height)"
       label="%Res%/&Aring "
       valign="center"
@@ -20,11 +20,11 @@
       onleave="spy.SetParam(snum.calcvoid.resolution,GetValue(SET_SNUM_CALCVOID_RESOLUTION))"
     >
   </td>
-  <td>
+  <td width="25%">
     <input
       type="text"
       name = "SET_SNUM_CALCVOID_DISTANCE"
-      width="15%"
+      width="95%"
       height="$spy.GetParam(gui.html.input_height)"
       label="%Distance%/&Aring "
       valign="center"
@@ -34,7 +34,7 @@
       onleave="spy.SetParam(snum.calcvoid.distance,GetValue(SET_SNUM_CALCVOID_DISTANCE))"
     >
   </td>
-  <td colspan = '1'>
+  <td colspan = '1' width="25%">
     <input
       bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
       fgcolor="$spy.GetParam(gui.html.font_colour)"
@@ -44,7 +44,7 @@
       name="SNUM_CALCVOID_PRECISE"
       checked="$spy.GetParam(snum.calcvoid.precise)"
       height="$spy.GetParam(gui.html.input_height)"
-      width='15%'
+      width="95%"
       oncheck="spy.SetParam(snum.calcvoid.precise,True)"
       onuncheck="spy.SetParam(snum.calcvoid.precise,False)">
   </td>
