@@ -83,13 +83,29 @@ class OlexFunctions(inheritFunctions):
     else:
       return None
 
-  def get_cif_item(self, key, default=None):
+  def get_cif_item(self, key, default=None, html=False):
     if olx.cif_model is not None:
       data_name = self.FileName().replace(' ', '')
       if data_name not in olx.cif_model:
         import CifInfo
         CifInfo.ExtractCifInfo()
-      return olx.cif_model[data_name].get(key, default)
+      tem = olx.cif_model[data_name].get(key, default)
+      retVal = ""
+      if type(tem) == str:
+        if html:
+          tem = tem.replace(';\n','')
+          tem = tem.replace('\n;','')
+          tem = tem.replace('\n','<br>')
+        retVal = tem
+      else:
+        l = []
+        try:
+          for bit in tem:
+            l.append(bit)
+          retVal = ", ".join(l)
+        except Exception, ex:
+          print ex
+      return retVal
     else:
       return default
 
@@ -653,6 +669,39 @@ class OlexFunctions(inheritFunctions):
   def setAllMainToolbarTabButtons(self):
     import olexex
     olexex.setAllMainToolbarTabButtons()
+
+
+
+  def makeGeneralHtmlPop(self, phil_path):
+    pop_name=OV.GetParam('%s.name' %phil_path)
+    htm=OV.GetParam('%s.htm' %phil_path)
+    width=OV.GetParam('%s.width' %phil_path)
+    height=OV.GetParam('%s.height' %phil_path)
+    position=OV.GetParam('%s.position' %phil_path)
+    x=OV.GetParam('%s.x' %phil_path)
+    y=OV.GetParam('%s.y' %phil_path)
+    border=OV.GetParam('%s.border' %phil_path)
+
+    htm = r"%s\%s" %(OV.BaseDir(), htm)
+    if not os.path.exists(htm):
+      OV.write_to_olex('generalPop.htm',htm)
+      htm = 'generalPop.htm'
+    if position == "center":
+      ws = olx.GetWindowSize('gl')
+      ws = ws.split(",")
+      if width < ws[2]:
+        x = int(ws[2])/2 - width/2
+      else: x = 0
+      if height < ws[3]:
+        y = int(ws[3])/2 - height/2
+      else:
+        y = 0
+    pstr = "popup '%s' '%s' -t='%s' -w=%s -h=%s -x=%s -y=%s" %(pop_name, htm, pop_name, width+border*2 +10, height+border*2, x, y)
+    OV.cmd(pstr)
+    olx.html_SetBorders(pop_name,border)
+    OV.cmd(pstr)
+    olx.html_SetBorders(pop_name,border)
+#    olx.html_Reload(pop_name)
 
 
 def GetParam(variable):
