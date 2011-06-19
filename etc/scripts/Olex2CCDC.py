@@ -10,6 +10,9 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import userDictionaries
 
+import zipfile
+import time
+
 import urllib
 import urllib2
 
@@ -32,11 +35,11 @@ class CcdcSubmit():
     self.re_refine()
     self.check_and_get_files()
 
+
     url = OV.GetParam('user.ccdc.portal_url')
     self.params = {'__ac_password':OV.GetParam('user.ccdc.portal_passwd'),
               '__ac_name':OV.GetParam('user.ccdc.portal_username'),
-              'cif': self.cif,
-              'fcf': self.fcf,
+              'zip': self.zip
               }
 
     self.send_request()
@@ -68,11 +71,31 @@ class CcdcSubmit():
 
   def check_and_get_files(self):
     ## No Checking yet - only getting!
-    file_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'cif'))
-    rFile = open(file_name, 'rb')
-    cif = rFile.read()
-    file_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'fcf'))
-    fcf = rFile.read()
+    cif = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'cif'))
+    cif_t = open(cif, 'rb').read()
+    fcf = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'fcf'))
+    fcf_t = open(fcf, 'rb').read()
+    name = OV.FileName()
+    file = zipfile.ZipFile("%s.zip" %name, "w")
+
+    info = zipfile.ZipInfo("%s.cif" %name)
+    info.date_time = time.localtime(time.time())[:6]
+    info.compress_type = zipfile.ZIP_DEFLATED
+    file.writestr(info, cif_t)
+
+    info = zipfile.ZipInfo("%s.fcf" %name)
+    info.date_time = time.localtime(time.time())[:6]
+    info.compress_type = zipfile.ZIP_DEFLATED
+    file.writestr(info, fcf_t)
+
+    file.close()
+
+
+#    file.write('%s.cif' %name, cif, zipfile.ZIP_DEFLATED)
+#    file.write('%s.fcf' %name, fcf, zipfile.ZIP_DEFLATED)
+#    file.close
+    zip = open("%s.zip"%name,'rb').read()
+    self.zip = zip
     self.cif = cif
     self.fcf = fcf
     return True
