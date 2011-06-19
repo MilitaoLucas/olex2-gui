@@ -56,6 +56,7 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
 
   def GetParam(self,variable):
+    retVal = ''
     try:
       if variable.startswith('gui'):
         handler = olx.gui_phil_handler
@@ -67,7 +68,6 @@ class OlexFunctions(inheritFunctions):
     except Exception, ex:
       print >> sys.stderr, "Variable %s could not be found" %(variable)
       sys.stderr.formatExceptionInfo()
-      retVal = ''
     return retVal
 
   def GetParam_as_string(self,variable):
@@ -108,6 +108,36 @@ class OlexFunctions(inheritFunctions):
       return default
 
   def set_cif_item(self, key, value):
+    if olx.cif_model is not None:
+      data_name = self.FileName().replace(' ', '')
+      data_block = olx.cif_model[data_name]
+      if isinstance(value, basestring) and value.strip() == '': value = '?'
+      if key == "_publ_contact_author_name":
+        import userDictionaries
+        if value != '?':
+          data_block["_publ_contact_author_email"] =\
+            userDictionaries.people.getPersonInfo(value, 'email')
+          data_block["_publ_contact_author_phone"] =\
+            userDictionaries.people.getPersonInfo(value, 'phone')
+          data_block["_publ_contact_author_address"] =\
+            userDictionaries.people.getPersonInfo(value, 'address')
+        else:
+          data_block["_publ_contact_author_email"] = '?'
+          data_block["_publ_contact_author_phone"] = '?'
+          data_block["_publ_contact_author_address"] = '?'
+      data_block[key] = value
+    user_modified = self.GetParam('snum.metacif.user_modified')
+    if user_modified is None: user_modified = []
+    if key not in user_modified:
+      user_modified.append(key)
+      self.SetParam('snum.metacif.user_modified', user_modified)
+    if key == '_diffrn_ambient_temperature':
+      value = str(value)
+      if value not in ('?', '.'):
+        if 'K' not in value: value += ' K'
+        olx.xf_exptl_Temperature(value)
+
+  def update_user(self, key, value):
     data_name = self.FileName().replace(' ', '')
     if olx.cif_model is not None:
       if isinstance(value, basestring) and value.strip() == '': value = '?'
