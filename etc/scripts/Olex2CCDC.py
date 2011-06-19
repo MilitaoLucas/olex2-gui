@@ -42,9 +42,6 @@ class CcdcSubmit():
     self.send_request()
 
   def make_pop_box(self):
-    htm = open(r'%s\etc\gui\blocks\templates\pop_ccdc_1.htm' %OV.BaseDir(),'r').read()
-  #  OV.write_to_olex('generalPop.htm',htm)
-  #  htm = 'generalPop.htm'
     OV.makeGeneralHtmlPop('olex2.ccdc.pop')
     res = olx.html_ShowModal('ccdc')
     res = int(res)
