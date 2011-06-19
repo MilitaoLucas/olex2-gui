@@ -77,9 +77,9 @@ class CcdcSubmit():
       self.address = userDictionaries.people.getPersonInfo(self.name,'address')
     else:
       print "Please supply at least a contact author name, address and e-mail!"
-      olex.m("itemstate * 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1"
-             " cbtn* 1 cbtn-report 2 *settings 0 report-settings 1"
-             " report-settings-h3-publication 1")
+      olex.m("itemstate * 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1")
+      olex.m("itemstate cbtn* 1 cbtn-report 2 *settings 0 report-settings 1")
+      olex.m("itemstate report-settings-h3-publication 1")
       return False
     return True
 
