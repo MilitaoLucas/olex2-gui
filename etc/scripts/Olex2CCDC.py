@@ -46,8 +46,7 @@ class CcdcSubmit():
         'file_name': zip_file
       }
   
-      #url = "http://ccdc.opencryst.org/deposit"
-      url = "http://localhost:8080/ccdc_depositor/deposit"
+      url = "http://ccdc.opencryst.org/deposit"
       self.send_request(url)
       return True
     finally:
@@ -69,13 +68,13 @@ class CcdcSubmit():
 
   def check_and_get_prerequisites(self):
     self.name = OV.get_cif_item('_publ_contact_author_name')
-    if len(self.name) > 1 and name != '?':
+    if len(self.name) > 1 and self.name != '?':
       self.email = userDictionaries.people.getPersonInfo(self.name, 'email')
       #http://code.activestate.com/recipes/65215-e-mail-address-validation/      
       if not re.match("^[a-zA-Z0-9._%-]+@[a-zA-Z0-9._%-]+.[a-zA-Z]{2,6}$", self.email):
         print "Failed to validate e-mail address"
         return False
-      self.address = userDictionaries.people.getPersonInfo(name,'address')
+      self.address = userDictionaries.people.getPersonInfo(self.name,'address')
     else:
       print "Please supply at least a contact author name, address and e-mail!"
       olex.m("itemstate * 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1"
