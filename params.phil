@@ -457,6 +457,25 @@ olex2
     .type = bool
       .help = If set to TRUE (default), the cif file will be sent to the checkcif url on pressing 'Validate Cif'
   }
+  ccdc{
+    url = http://ccdc.opencryst.org/
+      .type = str
+      .help = The URL to which the cif/fcf will be sent
+    pop{
+      name=ccdc
+        .type = str
+      htm = \etc\gui\blocks\templates\pop_ccdc_1.htm
+        .type = str
+      width = 600
+        .type = int
+      height = 500
+        .type = int
+      position = center
+        .type = str
+      border = 10
+        .type = int
+    }
+  }
 }
 
 graphs
