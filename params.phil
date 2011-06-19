@@ -464,7 +464,7 @@ olex2
     pop{
       name=ccdc
         .type = str
-      htm = \etc\gui\blocks\templates\pop_ccdc_1.htm
+      htm = \etc\gui\blocks\templates\pop_ccdc_submit.htm
         .type = str
       width = 600
         .type = int
