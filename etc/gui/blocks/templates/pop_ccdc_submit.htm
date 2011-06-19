@@ -1,0 +1,84 @@
+<html>
+<body link='$spy.GetParam(gui.html.link_colour)' bgcolor='$spy.GetParam(gui.html.highlight_colour)'>
+  <font color=$spy.GetParam(gui.html.font_colour)  size=4 face="$spy.GetParam(gui.html.font_name)">
+    <table border="0" style="border-collapse: collapse" width="100%" id="#tool" cellpadding="4" cellspacing="2" >
+      <tr bgcolor='#ffffff'>
+        <td colspan='2' >
+          <zimg border="0" src="/gui/images/src/ccdc_logo.png">
+        </td>
+      </tr>
+
+
+      <tr>
+        <td colspan=2>
+On pressing OK, your structure will be refined again with your last settings, the resulting cif file will be merged with the
+ meta-data information contained within Olex2 and this merged cif file togehter with the structure factor file will be sent
+ to the CCDC. After your structure has been processed in Cambridge, you will receive and e-mail with the CCDC Number of this
+ structure.
+        </td>
+      </tr>
+      <tr>
+        <td width=150 valign='top'>
+          <b>Contact Author:</b>
+        </td>
+        <td valign='top'>
+          $spy.get_cif_item('_publ_contact_author_name')
+        </td>
+      </tr>
+      <tr>
+        <td width=150 valign='top'>
+          <b>Address:</b>
+        </td>
+        <td valign='top'>
+          $spy.get_cif_item('_publ_contact_author_address',,True)
+        </td>
+      </tr>
+      <tr>
+        <td width=150 valign='top'>
+          <b>e-mail:</b>
+        </td>
+        <td valign='top'>
+          $spy.get_cif_item('_publ_contact_author_email')
+        </td>
+      </tr>
+      <tr>
+        <td width=150 valign='top'>
+          <b>Other Authors:</b>
+        </td>
+        <td valign='top'>
+          $spy.get_cif_item('_publ_author_name')
+        </td>
+      </tr>
+
+
+     <tr>
+     <td>
+     </td>
+     <td valign='centre'>
+       <input
+         type="button"
+         bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+         valign='center'
+         width="60"
+         height="22"
+         onclick="html.EndModal(ccdc,1)"
+         name="CCDC OK"
+         value = "OK">
+       <input
+         type="button"
+         bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+         valign='center'
+         width="60"
+         height="22"
+         onclick="html.EndModal(ccdc,0)"
+         name="CCDC CANCEL"
+         value = "Cancel">
+     </td>
+     </tr>
+
+
+    </table>
+  </body>
+  </font>
+</html>
+
