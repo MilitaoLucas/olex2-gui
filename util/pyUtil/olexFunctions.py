@@ -681,14 +681,15 @@ class OlexFunctions(inheritFunctions):
     x=OV.GetParam('%s.x' %phil_path)
     y=OV.GetParam('%s.y' %phil_path)
     border=OV.GetParam('%s.border' %phil_path)
-
+    if x is None: x = 0
+    if y is None: y = 0
     htm = r"%s\%s" %(OV.BaseDir(), htm)
     if not os.path.exists(htm):
       OV.write_to_olex('generalPop.htm',htm)
       htm = 'generalPop.htm'
     if position == "center":
       ws = olx.GetWindowSize('gl')
-      ws = ws.split(",")
+      ws = [int(i) for i in ws.split(",")]
       if width < ws[2]:
         x = int(ws[2])/2 - width/2
       else: x = 0
