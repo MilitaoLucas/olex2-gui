@@ -90,6 +90,8 @@ class OlexFunctions(inheritFunctions):
         import CifInfo
         CifInfo.ExtractCifInfo()
       tem = olx.cif_model[data_name].get(key, default)
+      if tem is None:
+        return default
       retVal = ""
       if type(tem) == str:
         if html:
