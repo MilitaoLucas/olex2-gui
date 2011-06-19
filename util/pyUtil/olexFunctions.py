@@ -83,28 +83,24 @@ class OlexFunctions(inheritFunctions):
     else:
       return None
 
-  def get_cif_item(self, key, default=None, html=False):
+  def get_cif_item(self, key, default="", html=False):
     if olx.cif_model is not None:
       data_name = self.FileName().replace(' ', '')
       if data_name not in olx.cif_model:
         import CifInfo
         CifInfo.ExtractCifInfo()
       tem = olx.cif_model[data_name].get(key, default)
-      if tem is None:
-        return default
-      retVal = ""
+      if tem is None: return default
+      retVal = default
       if type(tem) == str:
         if html:
           tem = tem.replace(';\n','')
           tem = tem.replace('\n;','')
           tem = tem.replace('\n','<br>')
-        retVal = tem
+        return tem
       else:
-        l = []
         try:
-          for bit in tem:
-            l.append(bit)
-          retVal = ", ".join(l)
+          return ", ".join([bit for bit in tem])
         except Exception, ex:
           print ex
       return retVal
