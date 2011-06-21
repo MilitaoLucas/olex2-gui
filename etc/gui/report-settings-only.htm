@@ -29,11 +29,11 @@ $spy.MakeHoverButton(button-validate_cif,spy.ValidateCif)
       type='text'
       valign='center'
       height="$spy.GetParam(gui.html.input_height)"
-      width="$eval((html.clientwidth(self)-180)/2 )"
+      width="$eval((html.clientwidth(self)-180)/2)"
       bgcolor="spy.GetParam(gui.html.input_bg_colour)"
       name='SET_SNUM_REPORT_TITLE'
       value='$spy.GetParam(snum.report.title)'
-      onleave="spy.SetParam(snum.report.title,GetValue(SET_SNUM_REPORT_TITLE))"
+      onchange="spy.SetParam(snum.report.title,GetValue(~name~))"
     >
   </td>
   <td>
@@ -48,7 +48,7 @@ $spy.MakeHoverButton(button-validate_cif,spy.ValidateCif)
       name="SET_REPORT_IMAGE"
       readonly
       items='strcat("<-None;screenshot;",file.ListDirForGui(FilePath(),*.png;*.jpg;*.bmp;*.ps;*.eps))'
-      onchange="spy.SetParam(snum.report.image,GetValue(SET_REPORT_IMAGE))"
+      onchange="spy.SetParam(snum.report.image,GetValue(~name~))"
       width="50%"
       value="file.GetName(spy.GetParam(snum.report.image))"
     >
@@ -68,7 +68,7 @@ $spy.MakeHoverButton(button-validate_cif,spy.ValidateCif)
       value='$spy.GetParam(user.report_style)'
       items='spy.getStylesList()'
       valign='center'
-      onchange="spy.SetParam(user.report_style,GetValue(SET_USER_REPORT_STYLE))"
+      onchange="spy.SetParam(user.report_style,GetValue(~name~))"
     >
   </td>
   <td>
@@ -84,7 +84,7 @@ $spy.MakeHoverButton(button-validate_cif,spy.ValidateCif)
       value='$spy.GetParam(user.report_template)'
       items='spy.getTemplatesList()'
       valign='center'
-      onchange="spy.SetParam(user.report_template,GetValue(SET_USER_REPORT_TEMPLATE))"
+      onchange="spy.SetParam(user.report_template,GetValue(~name~))"
     > &nbsp;
 $spy.MakeHoverButton(toolbar_small-open,exec -o getvar\(defexplorer) 'file.ospath\(basedir\()/etc/CIF/styles)')
 
