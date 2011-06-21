@@ -86,7 +86,7 @@ def diffractionMetadataHtmlMaker():
      'readonly':'',
      'itemName':'%Diffractometer%',
      'items':userDictionaries.localList.getListDiffractometers(),
-     'onchange':"spy.addToLocalList(GetValue(SET_SNUM_REPORT_DIFFRACTOMETER),diffractometers)>>updatehtml",
+     'onchange':"spy.addToLocalList(GetValue(~name~),diffractometers)>>updatehtml",
      },
   )
 
@@ -172,13 +172,13 @@ def collectionMetadataHtmlMaker():
      'itemName':'%Submitter%',
      'items':userDictionaries.people.getListPeople(),
      'readonly':'',
-     'onchange':"spy.SetParam(snum.report.submitter,GetValue(SET_SNUM_REPORT_SUBMITTER))>>spy.addNewPerson(GetValue(SET_SNUM_REPORT_SUBMITTER))>>updatehtml",
+     'onchange':"spy.SetParam(snum.report.submitter,GetValue(~name~))>>spy.addNewPerson(GetValue(~name~))>>updatehtml",
      },
     {'varName':'snum.report.operator',
      'itemName':'%Operator%',
      'items':userDictionaries.people.getListPeople(),
      'readonly':'',
-     'onchange':"spy.SetParam(snum.report.operator,GetValue(SET_SNUM_REPORT_OPERATOR))>>spy.addNewPerson(GetValue(SET_SNUM_REPORT_OPERATOR))>>updatehtml",
+     'onchange':"spy.SetParam(snum.report.operator,GetValue(~name~))>>spy.addNewPerson(GetValue(~name~))>>updatehtml",
      },
     {'varName':'snum.report.date_submitted',
      'itemName':'%Date Submitted%',
@@ -243,23 +243,23 @@ def publicationMetadataHtmlMaker():
      'itemName':'%Contact% %Author%',
      'items':userDictionaries.people.getListPeople(),
      'readonly':'',
-     'onchange':'spy.set_cif_item(_publ_contact_author_name,GetValue(SET__PUBL_CONTACT_AUTHOR_NAME))>>UpdateHtml'
+     'onchange':'spy.gui.report.publication.OnContactAuthorChange(~name~)',
      },
     {'varName':'_publ_contact_author_address',
      'itemName':'%Contact% %Author% %Address%',
      'multiline':'multiline',
      'value':'spy.getPersonInfo(GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),address)',
-     'onleave':'spy.changePersonInfo(GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),address,GetValue(SET__PUBL_CONTACT_AUTHOR_ADDRESS))>>spy.changeBoxColour(SET__PUBL_CONTACT_AUTHOR_ADDRESS,#FFDCDC)'
+     'onchange':'spy.gui.report.publication.OnPersonInfoChange(SET__PUBL_CONTACT_AUTHOR_NAME,address,~name~)'
      },
     {'varName':'_publ_contact_author_email',
      'itemName':'%Contact% %Author% %Email%',
      'value':'spy.getPersonInfo(GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),email)',
-     'onleave':'spy.changePersonInfo(GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),email,GetValue(SET__PUBL_CONTACT_AUTHOR_EMAIL))>>spy.changeBoxColour(SET__PUBL_CONTACT_AUTHOR_EMAIL,#FFDCDC)'
+     'onchange':'spy.gui.report.publication.OnPersonInfoChange(SET__PUBL_CONTACT_AUTHOR_NAME,email,~name~)'
      },
     {'varName':'_publ_contact_author_phone',
      'itemName':'%Contact% %Author% %Phone%',
      'value':'spy.getPersonInfo(GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),phone)',
-     'onleave':'spy.changePersonInfo(GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),phone,GetValue(SET__PUBL_CONTACT_AUTHOR_PHONE))>>spy.changeBoxColour(SET__PUBL_CONTACT_AUTHOR_PHONE,#FFDCDC)'
+     'onchange':'spy.gui.report.publication.OnPersonInfoChange(SET__PUBL_CONTACT_AUTHOR_NAME,phone,~name~)'
      },
   ]
   listAuthors = OV.GetParam('snum.metacif.publ_author_names')
@@ -303,14 +303,14 @@ def publicationMetadataHtmlMaker():
        'itemName':'%Author% %Address%',
        'multiline':'multiline',
        'value':'spy.getPersonInfo(GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),address)' %s,
-       'onleave':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),address,GetValue(SET_PUBL_AUTHOR_ADDRESS))>>spy.changeBoxColour(SET_PUBL_AUTHOR_ADDRESS,#FFDCDC)' %s
+       'onchange':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),address,GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)' %s
        }
     )
     list.append(
       {'varName':'publ_author_email',
        'itemName':'%Author% %Email%',
        'value':'spy.getPersonInfo(GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),email)' %s,
-       'onleave':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),email,GetValue(SET_PUBL_AUTHOR_EMAIL))>>spy.changeBoxColour(SET_PUBL_AUTHOR_EMAIL,#FFDCDC)' %s
+       'onchange':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),email,GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)' %s
        }
     )
   list.append(
@@ -320,19 +320,16 @@ def publicationMetadataHtmlMaker():
      'itemName':'%Add% %Author%',
      'items':userDictionaries.people.getListPeople(),
      'value':'?',
-     'onchange':"spy.AddNameToAuthorList(GetValue(ADD_PUBL_AUTHOR_NAME))>>updatehtml",
-     'onleave':"spy.AddNameToAuthorList(GetValue(ADD_PUBL_AUTHOR_NAME))>>updatehtml",
+     'onchange':"spy.gui.report.publication.OnAddNameToAuthorList(~name~)",
      }
   )
 
   for d in list:
     d.setdefault('ctrl_name','SET_%s' %str.upper(d['varName']).replace('.','_'))
     if 'ctrl_name' in d['varName']:
-      d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)>>updatehtml" %d)
+      d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)>>updatehtml" %d)
     elif 'author_name' in d['varName']:
       d.setdefault('onchange','')
-    elif 'author' in d['varName']:
-      d.setdefault('onleave','')
   retstr = htmlTools.makeHtmlTable(list)
 
   list = [
@@ -340,7 +337,7 @@ def publicationMetadataHtmlMaker():
      'itemName':'%Requested% %Journal%',
      'items':userDictionaries.localList.getListJournals(),
      'readonly':'',
-     'onchange':'spy.addToLocalList(GetValue(SET__PUBL_REQUESTED_JOURNAL),requested_journal)>>spy.changeBoxColour(SET__PUBL_REQUESTED_JOURNAL,#FFDCDC)',
+     'onchange':'spy.addToLocalList(GetValue(~name~),requested_journal)>>spy.changeBoxColour(~name~,#FFDCDC)',
      }
   ]
 
@@ -417,20 +414,6 @@ The paper will be submitted to %s.
     pass
   return ""
 OV.registerFunction(contactLetter)
-
-def AddNameToAuthorList(newName):
-  oldValue = OV.GetParam("snum.metacif.publ_author_names")
-  if newName != '?':
-    if oldValue is None:
-      newValue = newName
-    elif newName in oldValue:
-      newValue = oldValue
-      print "%s is already in the list of authors" %newName
-    else:
-      newValue = oldValue + ";" + newName
-    OV.SetParam("snum.metacif.publ_author_names", newValue)
-  return ""
-OV.registerFunction(AddNameToAuthorList)
 
 def move(arg,name):
   listNames = OV.GetParam('snum.metacif.publ_author_names').split(';')
@@ -540,7 +523,7 @@ def restraint_builder(cmd):
            "value":val,
            "width":width,
            "height":height,
-           "bgcolor":"$spy.GetParam\(gui.html.input_bg_colour)"
+           "bgcolor":"$spy.GetParam(gui.html.input_bg_colour)"
            }
       if items:
         d.setdefault("items",items)

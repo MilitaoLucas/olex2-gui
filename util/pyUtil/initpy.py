@@ -221,6 +221,7 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 if OV.HasGUI():
   import htmlMaker
+  from gui.report import *
 
 def onstartup():
   OV.SetVar('cbtn_solve_on','false')
