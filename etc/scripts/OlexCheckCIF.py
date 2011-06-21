@@ -12,8 +12,12 @@ import shutil
 import re
 import olex
 import olx
-import urllib
-import urllib2
+try:
+	import urllib
+	import urllib2
+except:
+	print "You appear to be missing the urllib modules you will need these for this to work"
+	sys.exit()
 #import urllib2_file
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
