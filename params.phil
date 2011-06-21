@@ -17,6 +17,13 @@ snum
       .expert_level = 1
     }
 
+  current_result{
+    cif = None
+      .type = path
+    fcf = None
+      .type = path
+  }
+
   smtbx
     .short_caption = Solution & Refinement
     {
@@ -270,6 +277,12 @@ snum
     twin_file = None
       .type = path
       .expert_level = 1
+    result_fcf_file = None
+      .type = path
+      .expert_level = 1
+    result_cif_file = None
+      .type = path
+      .expert_level = 1
     abs_type = twinabs sadabs
       .type = choice
     list_sad_files = None
@@ -303,6 +316,12 @@ snum
       .type = strings
       .expert_level = 2
     list_cif_od_files = None
+      .type = strings
+      .expert_level = 2
+    list_result_cif_files = None
+      .type = strings
+      .expert_level = 2
+    list_result_fcf_files = None
       .type = strings
       .expert_level = 2
     user_input_variables = None

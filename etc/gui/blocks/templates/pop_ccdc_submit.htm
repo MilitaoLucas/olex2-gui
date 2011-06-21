@@ -49,12 +49,17 @@ On pressing OK, your structure will be refined again with your last settings, th
           $spy.get_cif_item('_publ_author_name')
         </td>
       </tr>
+</table>
+
+      <table>
+          $spy.currentResultFilesHtmlMaker(cif)
+          $spy.currentResultFilesHtmlMaker(fcf)
+      </table>
 
 
-     <tr>
-     <td>
-     </td>
-     <td valign='centre'>
+<table>
+  <tr>
+     <td width=100% align='right'>
        <input
          type="button"
          bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
@@ -76,9 +81,11 @@ On pressing OK, your structure will be refined again with your last settings, th
      </td>
      </tr>
 
-
     </table>
-  </body>
+
+    </body>
   </font>
+
+
 </html>
 
