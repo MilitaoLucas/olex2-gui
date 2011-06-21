@@ -780,6 +780,7 @@ def bgcolor(ctrl_name):
   if value in ('?',''):
     colour = "#FFDCDC"
   else:
+    #colour = '#ff0000'
     colour = OV.GetParam('gui.html.input_bg_colour').hexadecimal
   return colour
 OV.registerFunction(bgcolor)

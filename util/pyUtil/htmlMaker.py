@@ -1,5 +1,6 @@
 import olx
 import sys
+import os
 sys.path.append(r".\src")
 import userDictionaries
 from olexFunctions import OlexFunctions
@@ -7,6 +8,7 @@ OV = OlexFunctions()
 import htmlTools
 import olexex_setup
 import variableFunctions
+
 
 def sourceFilesHtmlMaker():
   list = [
@@ -50,6 +52,14 @@ def sourceFilesHtmlMaker():
      'itemName':'CrystalClear %File%',
      'chooseFile':{'filter':'CrystalClear.cif files|CrystalClear.cif'}
      },
+    {'varName':'snum.metacif.result_fcf_file',
+     'itemName':'FCF %File%',
+     'chooseFile':{'filter':'.fcf files|*.fcf'}
+     },
+    {'varName':'snum.metacif.result_cif_file',
+     'itemName':'FCF %File%',
+     'chooseFile':{'filter':'.cif files|*.cif'}
+     },
   ]
   text = ''
 
@@ -79,6 +89,29 @@ def sourceFilesHtmlMaker():
 
   return retstr
 OV.registerFunction(sourceFilesHtmlMaker)
+
+
+def currentResultFilesHtmlMaker(type='cif'):
+  var = 'snum.current_result.%s' %type
+  val = OV.GetParam(var)
+  if not val:
+    val = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),type))
+
+  list = (
+    {'varName':str(var),
+      'itemName':'%s File' %type,
+      'value':val,
+      'chooseFile':{
+        'caption':'Choose %s file' %type,
+        'filter':'.%s files|*.%s' %(type, type),
+        'folder':'%s' %OV.FilePath(),
+        'function':''
+        },
+      },
+  )
+  return htmlTools.makeHtmlTable(list)
+OV.registerFunction(currentResultFilesHtmlMaker)
+
 
 def diffractionMetadataHtmlMaker():
   list = (
@@ -704,3 +737,19 @@ def getCellHTML():
 
   return html
 OV.registerFunction(getCellHTML)
+
+def refineDataMaker():
+
+  txt = """
+<tr><td>R1(Fo > 4sig(Fo))</td><td>0.0511</td><td>R1(all data)</td><td>0.0690</td></tr>
+<tr><td>wR2</td><td>0.1138</td><td>GooF</td><td>1.16</td></tr>
+<tr><td>GooF(Restr)</td><td>1.16</td><td>Highest peak</td><td>0.32</td></tr>
+<tr><td>Deepest hole</td><td>-0.32</td><td>Params</td><td>216</td></tr>
+<tr><td>Refs(total)</td><td>6417</td><td>Refs(uni)</td><td>2803</td></tr>
+<tr><td>Refs(Fo > 4sig(Fo))</td><td>2366</td><td>R(int)</td><td>0.061</td></tr>
+<tr><td>R(sigma)</td><td>0.055</td><td>F000</td><td>364</td></tr>
+<tr><td>&rho;/g*mm<sup>-3</sup></td><td>1.574</td><td>&mu;/mm<sup>-1</sup></td><td>0.140</td></tr>
+"""
+  OV.write_to_olex("refinedata.htm", txt)
+  OV.UpdateHtml()
+OV.registerFunction(refineDataMaker)
