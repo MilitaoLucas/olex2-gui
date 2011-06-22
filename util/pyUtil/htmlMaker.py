@@ -105,7 +105,7 @@ def currentResultFilesHtmlMaker(type='cif'):
         'caption':'Choose %s file' %type,
         'filter':'.%s files|*.%s' %(type, type),
         'folder':'%s' %OV.FilePath(),
-        'function':''
+        'function':'spy.SetParam(%s,' %var
         },
       },
   )
