@@ -7,14 +7,12 @@
           <zimg border="0" src="/gui/images/src/ccdc_logo.png">
         </td>
       </tr>
+    </table>
 
-
+    <table>
       <tr>
         <td colspan=2>
-On pressing OK, your structure will be refined again with your last settings, the resulting cif file will be merged with the
- meta-data information contained within Olex2 and this merged cif file togehter with the structure factor file will be sent
- to the CCDC. After your structure has been processed in Cambridge, you will receive and e-mail with the CCDC Number of this
- structure.
+<p>On pressing OK, your cif file togehter with the structure factor file will be sent to the CCDC. After your structure has been processed in Cambridge, you will receive an e-mail with the CCDC Number of this structure.<br>
         </td>
       </tr>
       <tr>
@@ -52,12 +50,17 @@ On pressing OK, your structure will be refined again with your last settings, th
 </table>
 
       <table>
-          $spy.currentResultFilesHtmlMaker(cif)
-          $spy.currentResultFilesHtmlMaker(fcf)
+<!-- #include cif gui\snippets\snippet-choose-file.htm;file_type=cif;var_base=snum.current_result;pop_name=ccdc;1; -->
+<!-- #include fcf gui\snippets\snippet-choose-file.htm;file_type=fcf;var_base=snum.current_result;pop_name=ccdc;1; -->
       </table>
 
-
 <table>
+  <tr>
+    <td></td>
+  </tr>
+  <tr bgcolor=#dedede>
+    <td></td>
+  </tr>
   <tr>
      <td width=100% align='right'>
        <input
@@ -85,7 +88,5 @@ On pressing OK, your structure will be refined again with your last settings, th
 
     </body>
   </font>
-
-
 </html>
 

@@ -52,14 +52,6 @@ def sourceFilesHtmlMaker():
      'itemName':'CrystalClear %File%',
      'chooseFile':{'filter':'CrystalClear.cif files|CrystalClear.cif'}
      },
-    {'varName':'snum.metacif.result_fcf_file',
-     'itemName':'FCF %File%',
-     'chooseFile':{'filter':'.fcf files|*.fcf'}
-     },
-    {'varName':'snum.metacif.result_cif_file',
-     'itemName':'FCF %File%',
-     'chooseFile':{'filter':'.cif files|*.cif'}
-     },
   ]
   text = ''
 
