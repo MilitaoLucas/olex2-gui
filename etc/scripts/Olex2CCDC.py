@@ -28,13 +28,13 @@ class CcdcSubmit():
         return False
       res = self.make_pop_box()
       if res == 0:
-        print "Cancel: Nothing has been sent to the CCDC"
+        f = "Cancel: Nothing has been sent to the CCDC"
+        print f
         return False
       if res == 1:
         print "OK: Will do stuff now!"
   
-      self.re_refine()
-      self.check_and_get_files()
+      self.zip_files()
   
       zip_file = open(self.zip_name, "rb")
       url = OV.GetParam('user.ccdc.portal_url')
@@ -81,17 +81,37 @@ class CcdcSubmit():
       olex.m("itemstate cbtn* 1 cbtn-report 2 *settings 0 report-settings 1")
       olex.m("itemstate report-settings-h3-publication 1")
       return False
+    self.check_files()
     return True
 
-  def check_and_get_files(self):
+  def check_files(self):
+    cif_name =  OV.GetParam('snum.current_result.cif')
+    if not cif_name:
+      cif_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'cif'))
+    fcf_name =  OV.GetParam('snum.current_result.fcf')
+    if not fcf_name:
+      fcf_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'fcf'))
+    if not os.path.exists(cif_name):
+      cif_name = "+++ PLEASE SELECT A CIF FILE +++"
+    if not os.path.exists(fcf_name):
+      fcf_name = "+++ PLEASE SELECT A FCF FILE +++"
+    OV.SetParam('snum.current_result.cif',cif_name)
+    OV.SetParam('snum.current_result.fcf',fcf_name)
+    return True
+  def zip_files(self):
     ## No Checking yet - only getting!
-    cif_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'cif'))
-    fcf_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'fcf'))
+    
+    
+    cif_name = OV.GetParam('snum.current_result.cif')
+    fcf_name = OV.GetParam('snum.current_result.fcf')
+    if not os.path.exists(fcf_name):
+      fcf_name = None
     file_name = OV.FileName()
     self.zip_name = "%s_ccdc_deposition.zip" %file_name
     zip = zipfile.ZipFile(self.zip_name, "w")
     zip.write(cif_name, file_name+".cif")
-    zip.write(fcf_name, file_name+".fcf")
+    if fcf_name:
+      zip.write(fcf_name, file_name+".fcf")
     zip.close();
     return True
 
@@ -113,6 +133,7 @@ class CcdcSubmit():
       print('Data submission failed')
       f = err
     print f
-
+    olex.m('html.SetData cctbx %s' %f)
+    
 CcdcSubmit_instance = CcdcSubmit()
 OV.registerFunction(CcdcSubmit_instance.ccdc_submit)
