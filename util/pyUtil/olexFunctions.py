@@ -671,9 +671,9 @@ class OlexFunctions(inheritFunctions):
 
 
 
-  def makeGeneralHtmlPop(self, phil_path):
+  def makeGeneralHtmlPop(self, phil_path, htm='htm'):
     pop_name=OV.GetParam('%s.name' %phil_path)
-    htm=OV.GetParam('%s.htm' %phil_path)
+    htm=OV.GetParam('%s.%s' %(phil_path,htm))
     width=OV.GetParam('%s.width' %phil_path)
     height=OV.GetParam('%s.height' %phil_path)
     position=OV.GetParam('%s.position' %phil_path)
