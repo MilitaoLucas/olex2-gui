@@ -12,7 +12,7 @@
       <cmd3 "py.run 'basedir()/util/pyUtil/initpy.py'">
       <cmd4 "if isos(linux) then setvar(defeditor,'gedit')">
       <cmd5 "if isos(linux) then setvar(defexplorer,'nautilus')">
-      <cmd6 "if isos(linux) then setvar(defbrowser,'htmlview')">
+      <cmd6 "if isos(linux) then setvar(defbrowser,'xdg-open')">
       <cmd4 "if isos(mac) then setvar(defeditor,'open')">
       <cmd5 "if isos(mac) then setvar(defexplorer,'open')">
       <cmd6 "if isos(mac) then setvar(defbrowser,'open')">
