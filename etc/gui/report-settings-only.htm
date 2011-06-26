@@ -2,8 +2,8 @@
 
 <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_bg_colour)">
 
-<tr align = 'center' name=EDIT_CIF>
-<!-- #include tool-column gui\blocks\tool-first-column.htm;help_ext=cif-info;1; -->
+<tr align = 'center' name=EDIT_CIF width='100%'>
+<!-- #include blank-column gui\blocks\tool-first-column.htm;help_ext=cif-info;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <!-- #include tool-column gui\blocks\tool-help-first-column.htm;help_ext=cif-info;1; -->
   <td name=EDIT_CIF_INFO align='center' VALIGN='center' width='33%'>
@@ -17,6 +17,21 @@ $spy.MakeHoverButton(button-validate_cif,spy.ValidateCif)
   </td>
 </tr>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<tr align = 'center' name=SUBMIT_STUFF>
+<!-- #include blank-column gui\blocks\tool-first-column.htm;help_ext=submit-info;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<!-- #include tool-column gui\blocks\tool-help-first-column.htm;help_ext=submit-info;1; -->
+  <td name=GET_CHECKCIF_REPOET align='center' VALIGN='center' width='50%'>
+$spy.MakeHoverButton(button-get_checkcif_report,spy.GetCheckCifReport\())
+  </td>
+  <td name=REQUEST_CCDC_NUMBER align='center' VALIGN='center' width='50%'>
+$spy.MakeHoverButton(button-request_ccdc_number,spy.ccdc_submit\())
+  </td>
+</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
 
 <tr VALIGN='center' ALIGN='center' NAME='SNUM_REPORT_TITLE' valign='center'>
 <!-- #include tool-column gui\blocks\tool-first-column.htm;help_ext=;1; -->
