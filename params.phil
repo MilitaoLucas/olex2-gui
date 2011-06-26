@@ -468,6 +468,8 @@ olex2
     .type = bool
   portal_url = http://www.olex2.org
     .type = str
+  portal_db_url = http://olex2.opencryst.net/content/DB
+    .type = str
   checkcif{
     url = http://vm02.iucr.org/cgi-bin/checkcif.pl
       .type = str
@@ -487,7 +489,7 @@ olex2
         .type = str
       width = 600
         .type = int
-      height = 420
+      height = 500
         .type = int
       position = center
         .type = str
