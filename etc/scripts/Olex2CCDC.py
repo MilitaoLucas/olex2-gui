@@ -133,7 +133,7 @@ class CcdcSubmit():
     except Exception, err:
       print('Data submission failed')
       f = err
-    print f
+    print "The Structure has been submitted to the CCDC."
     
 CcdcSubmit_instance = CcdcSubmit()
 OV.registerFunction(CcdcSubmit_instance.ccdc_submit)
