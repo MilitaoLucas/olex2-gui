@@ -37,16 +37,17 @@ class CcdcSubmit():
       self.zip_files()
   
       zip_file = open(self.zip_name, "rb")
-      url = OV.GetParam('user.ccdc.portal_url')
+      url = OV.GetParam('olex2.ccdc.portal_url')
+      destination =   OV.GetParam('olex2.ccdc.ccdc_mail')
       self.params = {
         '__ac_password':OV.GetParam('user.ccdc.portal_passwd'),
         '__ac_name':OV.GetParam('user.ccdc.portal_username'),
         'name': self.name,
         'email': self.email,
-        'file_name': zip_file
+        'file_name': zip_file,
+        'destination': destination,
       }
   
-      url = "http://ccdc.opencryst.org/deposit"
       self.send_request(url)
       return True
     finally:

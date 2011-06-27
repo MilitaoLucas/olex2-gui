@@ -464,7 +464,7 @@ olex2
     .type = bool
   mask_vis = False
     .type = bool
-  hover_buttons = False
+  hover_buttons = True
     .type = bool
   portal_url = http://www.olex2.org
     .type = str
@@ -479,9 +479,12 @@ olex2
       .help = If set to TRUE (default), the cif file will be sent to the checkcif url on pressing 'Validate Cif'
   }
   ccdc{
-    url = http://ccdc.opencryst.org/
+    url = http://ccdc.opencryst.org/deposit
       .type = str
       .help = The URL to which the cif/fcf will be sent
+    ccdc_mail = olex2-deposit@ccdc.cam.ac.uk
+      .type = str
+      .help = The email address to which the files will be forwared
     pop{
       name=ccdc
         .type = str
