@@ -37,7 +37,7 @@ class CcdcSubmit():
       self.zip_files()
   
       zip_file = open(self.zip_name, "rb")
-      url = OV.GetParam('olex2.ccdc.portal_url')
+      url = OV.GetParam('olex2.ccdc.url')
       destination =   OV.GetParam('olex2.ccdc.ccdc_mail')
       self.params = {
         '__ac_password':OV.GetParam('user.ccdc.portal_passwd'),
@@ -134,7 +134,6 @@ class CcdcSubmit():
       print('Data submission failed')
       f = err
     print f
-    olex.m('html.SetData cctbx %s' %f)
     
 CcdcSubmit_instance = CcdcSubmit()
 OV.registerFunction(CcdcSubmit_instance.ccdc_submit)

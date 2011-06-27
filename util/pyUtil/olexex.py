@@ -2048,6 +2048,18 @@ def olex_fs_copy(src_file, dst_file):
   olex_fs.NewFile(dst_file,txt)
 OV.registerFunction(olex_fs_copy)
 
+
+def openNotes():
+  f_path = "%s/%s_Notes.txt" %(OV.FilePath(), OV.FileName())
+  if not os.path.exists(f_path):
+    f = open(f_path,'w')
+    now = time.strftime(r"%d/%b/%Y %H:%M", time.time())
+    f.write("Notes for %s. File created by Olex2 on %s\n\n" %(OV.FileName(), now))
+    f.close()
+  olx.Shell(f_path)
+OV.registerFunction(openNotes)
+
+
 def isPro():
   return True
   p = "%s/pro.txt" %OV.BaseDir()
