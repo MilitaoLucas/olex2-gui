@@ -7,6 +7,7 @@
   <shortcut key="Ctrl+A" macro="sel -a">
   <shortcut key="Ctrl+U" macro="sel -u">
   <shortcut key="Ctrl+I" macro="sel -i">
+  <shortcut key="Ctrl+N" macro="spy.openNotes()">
   <shortcut key="Ctrl+Shift+G" macro="group sel">
   <shortcut key="del" macro="kill sel">
   <shortcut key="Ctrl+back" macro="kill sel">
