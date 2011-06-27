@@ -17,6 +17,13 @@ snum
       .expert_level = 1
     }
 
+  current_result{
+    cif = None
+      .type = path
+    fcf = None
+      .type = path
+  }
+
   smtbx
     .short_caption = Solution & Refinement
     {
@@ -270,6 +277,12 @@ snum
     twin_file = None
       .type = path
       .expert_level = 1
+    result_fcf_file = None
+      .type = path
+      .expert_level = 1
+    result_cif_file = None
+      .type = path
+      .expert_level = 1
     abs_type = twinabs sadabs
       .type = choice
     list_sad_files = None
@@ -303,6 +316,12 @@ snum
       .type = strings
       .expert_level = 2
     list_cif_od_files = None
+      .type = strings
+      .expert_level = 2
+    list_result_cif_files = None
+      .type = strings
+      .expert_level = 2
+    list_result_fcf_files = None
       .type = strings
       .expert_level = 2
     user_input_variables = None
@@ -445,9 +464,11 @@ olex2
     .type = bool
   mask_vis = False
     .type = bool
-  hover_buttons = False
+  hover_buttons = True
     .type = bool
   portal_url = http://www.olex2.org
+    .type = str
+  portal_db_url = http://olex2.opencryst.net/content/DB
     .type = str
   checkcif{
     url = http://vm02.iucr.org/cgi-bin/checkcif.pl
@@ -456,6 +477,28 @@ olex2
     send = True
     .type = bool
       .help = If set to TRUE (default), the cif file will be sent to the checkcif url on pressing 'Validate Cif'
+  }
+  ccdc{
+    url = http://ccdc.opencryst.org/deposit
+      .type = str
+      .help = The URL to which the cif/fcf will be sent
+    ccdc_mail = olex2-deposit@ccdc.cam.ac.uk
+      .type = str
+      .help = The email address to which the files will be forwared
+    pop{
+      name=ccdc
+        .type = str
+      htm = \etc\gui\blocks\templates\pop_ccdc_submit.htm
+        .type = str
+      width = 600
+        .type = int
+      height = 500
+        .type = int
+      position = center
+        .type = str
+      border = 10
+        .type = int
+    }
   }
 }
 

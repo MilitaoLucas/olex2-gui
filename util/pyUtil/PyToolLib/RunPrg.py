@@ -378,12 +378,11 @@ class RunRefinementPrg(RunPrg):
     return self.his_file, R1
 
   def isInversionNeeded(self, force=False):
+    if olex_core.SGInfo()['Centrosymmetric'] == 1: return
     from cctbx_olex_adapter import hooft_analysis
     from libtbx.utils import format_float_with_standard_uncertainty
     from cctbx import sgtbx
     from libtbx.utils import Sorry
-    print
-    if olex_core.SGInfo()['Centrosymmetric'] == 1: return
     print "Checking absolute structure..."
     inversion_needed = False
     possible_racemic_twin = False

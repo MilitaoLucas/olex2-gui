@@ -47,33 +47,25 @@ def makeHtmlTable(list):
       if box in input_d.keys():
         box_d = input_d[box]
         box_d.setdefault('ctrl_name', "SET_%s" %str.upper(box_d['varName']).replace('.','_'))
-        box_d.setdefault('bgcolor','spy.bgcolor(%s)' %box_d['ctrl_name'])
+        box_d.setdefault('bgcolor','spy.bgcolor(~name~)')
         if box_d['varName'].startswith('_'): # treat cif items differently
           box_d.setdefault('value', '$spy.get_cif_item(%(varName)s,?)' %box_d)
-          box_d.setdefault('onchange',"spy.set_cif_item(%(varName)s,GetValue(%(ctrl_name)s))>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
-          box_d.setdefault('onleave',"spy.set_cif_item(%(varName)s,GetValue(%(ctrl_name)s))>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
+          box_d.setdefault('onchange',"spy.set_cif_item(%(varName)s,GetValue(~name~))>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
         else:
           box_d.setdefault('value', '$spy.GetParam(%(varName)s)' %box_d)
-          box_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
-          box_d.setdefault('onleave',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
+          box_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(~name~))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(~name~,#FFDCDC)" %box_d)
         boxText += makeHtmlInputBox(box_d)
     if boxText:
       row_d.setdefault('input',boxText)
     else:
       input_d.setdefault('ctrl_name', "SET_%s" %str.upper(input_d['varName']).replace('.','_'))
-      if input_d.has_key('onchange'):
-        input_d.setdefault('onleave',input_d['onchange'])
-      elif input_d.has_key('onleave'):
-        input_d.setdefault('onchange',input_d['onleave'])
       if input_d['varName'].startswith('_'): # treat cif items differently
         input_d.setdefault('value', '$spy.get_cif_item(%(varName)s,?)' %input_d)
-        input_d.setdefault('onchange',"spy.set_cif_item(%(varName)s,GetValue(%(ctrl_name)s))>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
-        input_d.setdefault('onleave',"spy.set_cif_item(%(varName)s,GetValue(%(ctrl_name)s))>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
+        input_d.setdefault('onchange',"spy.set_cif_item(%(varName)s,GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)" %input_d)
       else:
         input_d.setdefault('value', '$spy.GetParam(%(varName)s)' %input_d)
-        input_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
-        input_d.setdefault('onleave',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
-      input_d.setdefault('bgcolor','spy.bgcolor(%s)' %input_d['ctrl_name'])
+        input_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(~name~))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(~name~,#FFDCDC)" %input_d)
+      input_d.setdefault('bgcolor','spy.bgcolor(~name~)')
       row_d.setdefault('input',makeHtmlInputBox(input_d))
       row_d.update(input_d)
 
@@ -93,7 +85,6 @@ def makeHtmlInputBox(inputDictionary):
     'width':'95%%',
     'height':'$spy.GetParam(gui.html.input_height)',
     'onchange':'',
-    'onleave':'',
     'items':'',
     'multiline':'',
     'type':'text',
@@ -118,7 +109,6 @@ items="%(items)s"
 label="%(label)s "
 valign="%(valign)s"
 onchange="%(onchange)s"
-onleave="%(onleave)s"
 %(readonly)s
 bgcolor="%(bgcolor)s"
 >
@@ -466,7 +456,6 @@ def make_input_text_box(d):
          'onchange':'',
          'label':name,
          'valign':'center',
-         'onleave':'',
          'data':'',
          'manage':'',
      }
@@ -483,7 +472,6 @@ def make_input_text_box(d):
        label="%(label)s"
        valign="%(valign)s"
        onchange="%(onchange)s"
-       onleave="%(onleave)s"
        %(manage)s
        data="%(data)s"
 >''' %dic
@@ -500,7 +488,6 @@ def make_combo_text_box(d):
          'halign':'left',
          'width':'70',
          'onchange':'',
-         'onleave':'',
          'data':'',
          'manage':'manage',
          'readonly':'',
@@ -519,7 +506,6 @@ def make_combo_text_box(d):
        width="%(width)s"
        height="%(height)s"
        label="%(label)s"
-       onleave="%(onleave)s"
        onchange="%(onchange)s"
        %(manage)s
        data="%(data)s"
@@ -792,9 +778,10 @@ OV.registerFunction(switchButton)
 def bgcolor(ctrl_name):
   value = olx.GetValue(ctrl_name)
   if value in ('?',''):
-    colour = 'rgb(255,220,220)'
+    colour = "#FFDCDC"
   else:
-    colour = OV.GetParam('gui.html.input_bg_colour')
+    #colour = '#ff0000'
+    colour = OV.GetParam('gui.html.input_bg_colour').hexadecimal
   return colour
 OV.registerFunction(bgcolor)
 
