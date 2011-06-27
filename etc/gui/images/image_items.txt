@@ -51,7 +51,7 @@
   Stereo (Hardware)
   Normal View
   Get CheckCif Report
-  Request CCDC Number
+  Get CCDC Number
 
 
 [SMALL BUTTONS]
