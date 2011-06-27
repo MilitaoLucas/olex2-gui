@@ -1004,7 +1004,8 @@ class timage(ImageTools):
 
     self.advertise_new = False
 
-    self.new_l = open("%s/etc/gui/images/advertise_as_new.txt" %OV.BaseDir(),'r').readlines()
+    new_l = open("%s/etc/gui/images/advertise_as_new.txt" %OV.BaseDir(),'r').readlines()
+    self.new_l = map(lambda s: s.strip(), new_l)
 
     self.available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
 
@@ -1501,11 +1502,14 @@ class timage(ImageTools):
         if width is None: width = max_width
         use_new = True
         if use_new:
+          if txt in self.new_l:
+            self.advertise_new = True
           if btn_type =="_tiny":
             button_type = 'tinybutton'
           else:
             button_type = 'button'
-          IM = self.make_timage(item_type=button_type, item=txt, state=state, width=width)
+          IM = self.make_timage(item_type=button_type, item=txt, state=state, width=width, titleCase=False)
+          self.advertise_new = False
           name = "button%s-%s%s.png" %(btn_type, txt.replace(" ", "_"), state)
           name = name.lower()
           OlexVFS.save_image_to_olex(IM, name, 2)
@@ -2103,7 +2107,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
             img_txt = item.split("-h3-")[1]
           except IndexError:
             img_txt = item.replace('h3-','')
-          if img_txt in self.new_l:
+          if img_txt.lower() in self.new_l:
             self.advertise_new = True
           image = self.make_timage('h3', img_txt, state)
           self.advertise_new = False
@@ -2671,7 +2675,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     return image
 
 
-  def make_timage(self, item_type, item, state, font_name="Vera", width=None, colour=None, whitespace=None):
+  def make_timage(self, item_type, item, state, font_name="Vera", width=None, colour=None, whitespace=None, titleCase=True):
     if not width:
       width = self.width
 
@@ -2739,7 +2743,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     shadow = OV.GetParam('gui.timage.%s.shadow' %item_type)
     if shadow is None: shadow = True
-    title_case = True
     border = False
     arrow_scale = 1.0
 
@@ -2820,7 +2823,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         txt += bit.title() + " "
     else:
       txt = item
-
+    
     ## Actually print the text on the new image item.
     wX, wY = self.write_text_to_draw(draw,
                             txt,
@@ -2831,7 +2834,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                             valign=valign,
                             align=halign,
                             max_width=width,
-                            titleCase=title_case,
+                            titleCase=titleCase,
                             font_colour=font_colour)
     cache = {}
 
@@ -2840,6 +2843,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       colour = OV.GetParam('gui.timage.snumtitle.filefullinfo_colour').rgb
       self.drawFileFullInfo(draw, colour, right_margin=5, height=height, font_size=info_size, left_start=wX + 15)
       self.drawSpaceGroupInfo(draw, luminosity=OV.GetParam('gui.timage.snumtitle.sg_L'), right_margin=3)
+
+    if self.advertise_new:
+      draw = ImageDraw.Draw(image)
+      self.draw_advertise_new(draw, image)
+      self.advertise_new = False
 
     if arrows:
       off_L = OV.GetParam('gui.timage.%s.off_L' %item_type)
@@ -2864,10 +2872,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       rounded = OV.GetParam('gui.timage.%s.rounded' %item_type)
       if rounded is None: rounded = '1111'
       image = self.make_corners(rounded, image, corner_rad, underground)
-
-    if self.advertise_new:
-      draw = ImageDraw.Draw(image)
-      self.draw_advertise_new(draw, image)
 
     if shadow:
       image = self.make_shadow(image, underground, corner_rad)
