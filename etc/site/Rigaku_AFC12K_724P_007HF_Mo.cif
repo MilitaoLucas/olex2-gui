@@ -1,0 +1,46 @@
+_diffrn_detector                      'CCD'
+_diffrn_detector_area_resol_mean      28.5714
+_diffrn_detector_type                 'Rigaku Saturn724+'
+_diffrn_measurement_device            'AFC12 (Right): Kappa 3 circle'
+_diffrn_measurement_device_type       'Rigaku Saturn724+ (2x2 bin mode)'
+_diffrn_measurement_method            'profile data from \w-scans'
+_diffrn_measurement_specimen_support  'Mitegen 50um'
+
+_diffrn_radiation_collimation         0.3
+_diffrn_radiation_monochromator       'Confocal'
+_diffrn_radiation_probe               x-ray
+_diffrn_radiation_type                'Mo K\a'
+_diffrn_radiation_xray_symbol         K-L~3~
+
+_diffrn_radiation_wavelength          0.710747
+
+_diffrn_source_power                    1.2
+_diffrn_source_voltage                  50.0
+_diffrn_source_current                  24.0
+_diffrn_source                          'Rotating Anode'
+_diffrn_source_target                 Mo
+_diffrn_source_type                   'Rotating Anode'
+_computing_data_collection            
+;
+CrystalClear-SM Expert 2.0 r7 (Rigaku, 2011)
+;
+_computing_cell_refinement
+;
+CrystalClear-SM Expert 2.0 r7 (Rigaku, 2011)
+;
+_computing_data_reduction
+;
+CrystalClear-SM Expert 2.0 r7 (Rigaku, 2011)
+;
+
+
+
+
+
+
+
+
+
+
+
+

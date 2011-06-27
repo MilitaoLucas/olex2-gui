@@ -356,8 +356,8 @@ class ExtractCifInfo(CifTools):
     if active_node is not None and not active_node.is_solution:
 
       ## Backwards Compatibility
-      if active_solution.program == "smtbx-refine":
-        active_solution.program = "olex2.refine"
+      if active_node.program == "smtbx-refine":
+        active_node.program = "olex2.refine"
       ## END
       
       refinement_reference = RPD.programs[active_node.program].reference

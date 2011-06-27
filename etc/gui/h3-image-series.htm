@@ -36,7 +36,7 @@ $spy.MakeHoverButton(button_small-go@image-series,spy.run_MakeMovie\())
         name="axis"
         width="30"
         value="$spy.GetParam(snum.image.image_series.rotation_around_axis)"
-        onleave="spy.SetParam(snum.image.image_series.rotation_around_axis,GetValue(ROTATION_AROUND_AXIS))"
+        onchange="spy.SetParam(snum.image.image_series.rotation_around_axis,GetValue(ROTATION_AROUND_AXIS))"
 
       >
     </font>
@@ -56,7 +56,7 @@ $spy.MakeHoverButton(button_small-go@image-series,spy.run_MakeMovie\())
         name="steps"
         width="30"
         value = "$spy.GetParam('snum.image.image_series.degrees_of_rotation')"
-        onleave="spy.SetParam('snum.image.image_series.degrees_of_rotation',GetValue(DEGREES_OF_ROTATION))"
+        onchange="spy.SetParam('snum.image.image_series.degrees_of_rotation',GetValue(DEGREES_OF_ROTATION))"
       >
     </font>
   </td>
@@ -83,7 +83,7 @@ $spy.MakeHoverButton(button_small-go@image-series,spy.run_MakeMovie\())
         name="frames"
         width="30"
         value="$spy.GetParam('snum.image.image_series.number_of_frames')"
-        onleave="spy.SetParam('snum.image.image_series.number_of_frames',GetValue(NUMBER_OF_FRAMES))"
+        onchange="spy.SetParam('snum.image.image_series.number_of_frames',GetValue(NUMBER_OF_FRAMES))"
         
       >
     </font>
@@ -103,7 +103,7 @@ $spy.MakeHoverButton(button_small-go@image-series,spy.run_MakeMovie\())
         name="size"
         width="30"
         value="$spy.GetParam(snum.image.image_series.size_of_frames)"
-        onleave="spy.SetParam(snum.image.image_series.size_of_frames,GetValue(SIZE_OF_FRAMES))"
+        onchange="spy.SetParam(snum.image.image_series.size_of_frames,GetValue(SIZE_OF_FRAMES))"
         >
       </font>
   </td>
