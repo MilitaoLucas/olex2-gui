@@ -1289,22 +1289,29 @@ def getKeys(key_directory=None):
 
 def GetCheckcifReport():
   import urllib2
-  #import urllib2_file
 
   file_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'cif'))
-  rFile = open(file_name, 'rb')
-  cif = rFile
-  params = {
-    "runtype": "symmonly",
-    "referer": "checkcif_server",
-    "outputtype": "html",
-    "file": cif
-  }
-  wFile = open("cifreport.htm",'w')
-  wFile.write(urllib2.urlopen(OV.GetParam('olex2.checkcif.url'), params).read())
-  wFile.close()
-  rFile.close()
-  olx.Shell('cifreport.htm')
+  if not os.path.exists(file_name):
+    print "There is no cif file!"
+    return
+  OV.CreateBitmap('working')
+  try:
+    rFile = open(file_name, 'rb')
+    cif = rFile
+    params = {
+      "runtype": "symmonly",
+      "referer": "checkcif_server",
+      "outputtype": "html",
+      "file": cif
+    }
+    wFile = open("cifreport.htm",'w')
+    wFile.write(urllib2.urlopen(OV.GetParam('olex2.checkcif.url'), params).read())
+    wFile.close()
+    rFile.close()
+    olx.Shell('cifreport.htm')
+  except Exception, ex:
+    print ex
+  OV.DeleteBitmap('working')
 OV.registerFunction(GetCheckcifReport)
 
 def GetHttpFile(f, force=False, fullURL = False):
