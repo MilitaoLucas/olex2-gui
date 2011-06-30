@@ -221,6 +221,7 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 if OV.HasGUI():
   import htmlMaker
+  from gui.home import *
   from gui.report import *
 
 def onstartup():
