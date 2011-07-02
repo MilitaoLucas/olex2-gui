@@ -34,13 +34,12 @@ class Multipart:
       header.append('Content-Type: %s' %mime_type)
       self.file_size = os.fstat(item.fileno())[stat.ST_SIZE]
       header.append('Content-Length: %i' %self.file_size)
-      header.append('')
-      header.append('')
     else:
       header.append('Content-Disposition: form-data; name="%s"' %name)
-      header.append('')
-      header.append(str(item).encode('UTF-8'))
-      header.append('')
+      if not isinstance(self.item, str):
+        self.item = str(self.item)
+    header.append('')
+    header.append('')
     self.header = '\r\n'.join(header)
     
     
@@ -53,17 +52,16 @@ class Multipart:
       while bf:
         sock.send(bf)
         bf = self.item.read(sz)
-      sock.send('\r\n')
+    else:
+      sock.send(self.item)
+    sock.send('\r\n')
   
   def calc_size(self):
     if self.file_size is not None:
       return len(self.header) + self.file_size + 2
-    return len(self.header)
+    return len(self.header) + len(self.item) + 2
 
 class MultipartRequest:
-  """ Creates a multipart request, use 'direct' method for invoking
-  this directly
-  """
   def __init__(self, items):
     self.boundary = mimetools.choose_boundary()
     self.parts = []
@@ -87,7 +85,53 @@ class MultipartRequest:
       p.send(connection)
     connection.send(self.header_ending)
 
-  def direct(self, url, proxy=None):
+  def get_method(self):
+    return 'POST'
+
+class EncodedURLRequest:
+  def __init__(self, items=None):
+    self.data = None
+    if items:
+      self.data = urllib.urlencode(items)
+
+  def do_request(self, connection):
+    if self.data:
+      connection.putheader('Content-Type',
+                           'application/x-www-form-urlencoded')
+      connection.putheader('Content-Length', str(len(self.data)))
+    connection.endheaders()
+    if self.data:
+      connection.send(self.data)
+
+  def get_method(self):
+    if self.data:
+      return 'POST'
+    return 'GET'
+
+# use this for direct invocation
+class DirectRequest:
+  def __init__(self, data=None):
+    self.data = data
+
+  def select_handler(self):
+    has_file = False
+    if self.data is not None:
+      dt = None
+      if isinstance(self.data, dict):
+        dt = self.data.items()
+      elif isinstance(self.data, tuple):
+        dt = self.data
+      if dt is not None:
+        for (k,v) in dt:
+          if isinstance(v, file):
+            has_file = True
+            break
+      if has_file:
+        return MultipartRequest(self.data)
+    return EncodedURLRequest(self.data)
+  
+  def request(self, url, proxy=None):
+    r = self.select_handler()
     if proxy:
       u = urlparse(proxy)
     else:
@@ -95,42 +139,24 @@ class MultipartRequest:
     hc = httplib.HTTPConnection(u.hostname, u.port)
     hc.connect()
     if proxy:
-      hc.putrequest('POST', urllib.quote(url))
+      hc.putrequest(self.get_method(), urllib.quote(url))
     else:
-      hc.putrequest('POST', urllib.quote(u.path))
+      hc.putrequest(self.get_method(), urllib.quote(u.path))
     self.do_request(hc)
     return hc.getresponse()
 
 #below are to be used with urllib2
-class MultipartHandler():
+class RequestHandler():
   def do_open(self, sender, http_class, request):
-    has_file = False
-    items = {}
-    data = request.get_data()
-    if request.has_data():
-      dt = None
-      if isinstance(data, dict):  dt = data.items()
-      elif isinstance(data, tuple):  dt = data
-      if dt is not None:
-        for (k,v) in dt:
-          if isinstance(v, file):
-            has_file = True
-            break
-      if not has_file and dt is not None:
-        data = urllib.urlencode(data)
     host = request.get_host()
     if not host:
       raise urllib2.URLError('no host given')
+    handler = DirectRequest(request.get_data()).select_handler()
     h = http_class(host)
+    h.putrequest(handler.get_method(), request.get_selector())
+    # set request-host
     scheme, sel = urllib.splittype(request.get_selector())
     sel_host, sel_path = urllib.splithost(sel)
-    if request.has_data():
-      h.putrequest('POST', request.get_selector())
-      if request.has_data() and not has_file:
-        h.putheader('Content-Type', 'application/x-www-form-urlencoded')
-        h.putheader('Content-Length', str(len(data)))
-    else:
-      h.putrequest('GET', request.get_selector())
     h.putheader('Host', sel_host or host)
     # add any inherited headers    
     for name, value in sender.parent.addheaders:
@@ -140,13 +166,7 @@ class MultipartHandler():
       for k, v in request.headers.items():
         h.putheader(k, v)
     try:
-      if has_file:
-        mq = MultipartRequest(request.get_data())
-        mq.do_request(h)
-      else:
-        h.endheaders()
-        if request.has_data():
-          h.send(data)
+      handler.do_request(h)
     except socket.error, e:
       raise urllib2.URLError(e)
     code, msg, hdrs = h.getreply()
@@ -159,13 +179,13 @@ class MultipartHandler():
     else:
       return sender.parent.error('http', request, fp, code, msg, hdrs)
 
-class HTTPMultipartHandler(urllib2.HTTPHandler):
+class HTTPHandler(urllib2.HTTPHandler):
   def http_open(self, request):
-    return MultipartHandler().do_open(self, httplib.HTTP, request)
+    return RequestHandler().do_open(self, httplib.HTTP, request)
 
-class HTTPSMultipartHandler(urllib2.HTTPSHandler):
+class HTTPSHandler(urllib2.HTTPSHandler):
   def https_open(self, request):
-    return MultipartHandler().do_open(self, httplib.HTTPS, request)
+    return RequestHandler().do_open(self, httplib.HTTPS, request)
 
-urllib2.HTTPHandler = HTTPMultipartHandler
-urllib2.HTTPSHandler = HTTPSMultipartHandler
+urllib2.HTTPHandler = HTTPHandler
+urllib2.HTTPSHandler = HTTPSHandler
