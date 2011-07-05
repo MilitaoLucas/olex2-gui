@@ -1304,11 +1304,13 @@ def GetCheckcifReport():
       "outputtype": "html",
       "file": cif
     }
-    wFile = open("cifreport.htm",'w')
+    out_name = os.path.normpath(
+      '%s/%s_cifreport.htm' %(OV.FilePath(), OV.FileName()))
+    wFile = open(out_name, 'w')
     wFile.write(urllib2.urlopen(OV.GetParam('olex2.checkcif.url'), params).read())
     wFile.close()
     rFile.close()
-    olx.Shell('cifreport.htm')
+    olx.Shell(out_name)
   except Exception, ex:
     print ex
   OV.DeleteBitmap('working')
