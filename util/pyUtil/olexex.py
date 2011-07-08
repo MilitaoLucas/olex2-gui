@@ -1294,6 +1294,13 @@ def GetCheckcifReport():
   if not os.path.exists(file_name):
     print "There is no cif file!"
     return
+  proxy = get_proxy_from_usettings()
+  if proxy:  
+    proxies = {'http': proxy}
+  else:
+    proxies = {}
+  opener = urllib2.build_opener(
+      urllib2.ProxyHandler(proxies))
   OV.CreateBitmap('working')
   try:
     rFile = open(file_name, 'rb')
@@ -1307,10 +1314,10 @@ def GetCheckcifReport():
     out_name = os.path.normpath(
       '%s/%s_cifreport.htm' %(OV.FilePath(), OV.FileName()))
     wFile = open(out_name, 'w')
-    wFile.write(urllib2.urlopen(OV.GetParam('olex2.checkcif.url'), params).read())
+    wFile.write(opener.open(OV.GetParam('olex2.checkcif.url'), params).read())
     wFile.close()
     rFile.close()
-    olx.Shell(out_name)
+    olx.Shell("'%s'" %out_name)
   except Exception, ex:
     print ex
   OV.DeleteBitmap('working')
@@ -1384,12 +1391,14 @@ def check_for_crypto():
 def make_url_call(url, values):
   #url = "http://www.olex2.org/odac/update"
   proxy = get_proxy_from_usettings()
-  proxies = {'http': proxy}
-  data = urllib.urlencode(values)
+  if proxy:  
+    proxies = {'http': proxy}
+  else:
+    proxies = {}
   try:
-    proxy_support = urllib2.ProxyHandler(proxies)
-    req = urllib2.Request(url)
-    response = urllib2.urlopen(req,data)
+    opener = urllib2.build_opener(
+      urllib2.ProxyHandler(proxies))
+    response = opener.open(url,values)
     f = response.read()
   except:
     print "\n++++++++++++++++++++++++++++++++++++++++++++++"
@@ -1408,7 +1417,7 @@ def get_proxy_from_usettings():
   proxy = None
   for line in lines:
     if line.startswith('proxy='):
-      proxy =  line.split('proxy=')[1]
+      proxy = line.split('proxy=')[1].strip()
   if proxy:
     print "Using Proxy server %s" %proxy
   else:
