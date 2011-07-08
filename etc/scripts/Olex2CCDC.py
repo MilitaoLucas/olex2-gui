@@ -117,18 +117,18 @@ class CcdcSubmit():
     return True
 
   def send_request(self, url):
-    #print "Not sending at the moment!"
-    #return
     try:
       if "localhost" in url or "127.0.0.1" in url:
         proxy_support = urllib2.ProxyHandler({})
         opener = urllib2.build_opener(proxy_support)
-        urllib2.install_opener(opener)
       else:
         proxy = olexex.get_proxy_from_usettings()
-        proxies = {'http': proxy}
-        proxy_support = urllib2.ProxyHandler(proxies)
-      response = urllib2.urlopen(url,self.params)
+        if proxy:
+          proxy_support = urllib2.ProxyHandler({'http': proxy})
+          opener = urllib2.build_opener(proxy_support)
+        else:
+          opener = urllib2.build_opener(urllib2.ProxyHandler({}))
+      response = opener.open(url,self.params)
       f = response.read()
     except Exception, err:
       print('Data submission failed')
