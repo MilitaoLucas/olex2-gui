@@ -961,8 +961,7 @@ def OnModeChange(*args):
     if not last_mode: return
     control = "IMG_%s" %last_mode.upper()
     if OV.IsControl(control):
-      OV.SetImage(control,"up=%soff.png" %last_mode)
-      OV.SetImage(control,"hover=%shover.png" %last_mode)
+      OV.SetImage(control,"up=%soff.png,hover=%shover.png" %(last_mode,last_mode))
     OV.cmd("html.hide pop_%s" %name)
     last_mode = None
     OV.SetParam('olex2.in_mode',None)
@@ -975,14 +974,11 @@ def OnModeChange(*args):
     if active_mode:
       control = "IMG_%s" %active_mode.upper()
       if OV.IsControl(control):
-        OV.SetImage(control,"up=%son.png" %active_mode)
-        OV.SetImage(control,"hover=%son.png" %active_mode)
+        OV.SetImage(control,"up=%son.png,hover=%son.png" %(active_mode,active_mode))
     if last_mode:
-      use_image = "%soff.png" %last_mode
       control = "IMG_%s" %last_mode.upper()
       if OV.IsControl(control):
-        OV.SetImage(control,"up=%son.png" %active_mode)
-        OV.SetImage(control,"hover=%son.png" %active_mode)
+        OV.SetImage(control,"up=%soff.png,hover=%shover.png" %(last_mode,last_mode))
 
     last_mode = active_mode
     OV.SetParam('olex2.in_mode',mode.split("=")[0])

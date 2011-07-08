@@ -680,17 +680,19 @@ def weightGuiDisplay():
        }
   box = htmlTools.make_tick_box_input(d)
 
-  a, b = suggested_weight
+  wght_str = ""
+  for i in suggested_weight:
+    wght_str += " %.4f" %i
   txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update")
   txt_Weight = OV.TranslatePhrase("Weight")
   html = '''
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_UPDATE_WEIGHT'>
   <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
   <td VALIGN='right' colspan=3>
-    <b><a target="%s" href="UpdateWght %.4f %.4f>>UpdateHtml">%s: %s</a></b></td>
+    <b><a target="%s" href="UpdateWght%s>>UpdateHtml">%s: %s</a></b></td>
     <td VALIGN='center' ALIGN='right' colspan=1>%s</td>
 </tr>
-    ''' %(txt_tick_the_box, a, b, txt_Weight, html_scheme, box)
+    ''' %(txt_tick_the_box, wght_str, txt_Weight, html_scheme, box)
   return html
 OV.registerFunction(weightGuiDisplay)
 
