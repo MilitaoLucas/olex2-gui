@@ -528,7 +528,6 @@ def ElementButtonStates(symbol):
     else:
       olex.m('name sel %s' %symbol)
       olex.m('sel -u')
-      OV.htmlReload()
 if haveGUI:
   OV.registerFunction(ElementButtonStates)
 
@@ -580,7 +579,7 @@ def MakeElementButtonsFromFormula():
   type="button"
   image="up=%(namelower)soff.png,down=%(namelower)son.png,hover=%(namelower)shover.png",disable=%(namelower)sdisable.png"
   hint="%(target)s"
-  onclick="%(cmds)s>>echo '%(target)s: OK'"
+  onclick="%(cmds)s"
   bgcolor=%(bgcolor)s
 >''' %d
 #    <a href="%s" target="%s %s">
