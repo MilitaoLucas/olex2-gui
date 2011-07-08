@@ -161,6 +161,7 @@ def set_olex_paths():
   sys.path.append("%s" %basedir)
   sys.path.append("%s/etc/scripts" %basedir)
   sys.path.append("%s/util/pyUtil" %basedir)
+  sys.path.append("%s/util/pyUtil/misc" %basedir)
   sys.path.append("%s/util/pyUtil/PyToolLib" %basedir)
   sys.path.append("%s/util/pyUtil/PyToolLib/FileReaders" %basedir)
   sys.path.append("%s/util/pyUtil/CctbxLib" %basedir)
@@ -221,6 +222,7 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 if OV.HasGUI():
   import htmlMaker
+  from gui.home import *
   from gui.report import *
 
 def onstartup():
@@ -278,7 +280,8 @@ onstartup()
 #               print bit
 
 import urllib2
-import urllib2_file
+# this overwrites the urllib2 default HTTP and HTTPS handlers
+import multipart
 
 
 if olx.IsPluginInstalled('plugin-Batch') == "true":
