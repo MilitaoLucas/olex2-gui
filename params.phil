@@ -776,7 +776,6 @@ user
   }
 }
 
-
 odac
   .expert_level = 2
   .short_caption = ODAC Settings
@@ -786,17 +785,17 @@ odac
   is_active = False
     .type = bool
   debug{
-    debug = True
+    debug = False
       .type = bool
-    debug_deep1 = True
+    debug_deep1 = False
       .type = bool
-    debug_deep2 = True
+    debug_deep2 = False
       .type = bool
-    verbose = True
+    verbose = False
       .type = bool
   }
   version{
-    remote = "r39"
+    remote = "r41"
       .type = str
   }
 }

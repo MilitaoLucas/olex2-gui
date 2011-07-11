@@ -30,7 +30,7 @@ class MakeGuiTools(object):
     self.language = False
     if olx.IsCurrentLanguage("German")=='true':
       self.language = "-de"
-    self.line_left_col_color = OV.FindValue('gui_html_table_firstcol_colour')
+    self.line_left_col_color = OV.GetParam('gui.html.table_firstcol_colour')
     self.line_right_col_color = "#00ff00"
     self.line_left_colwidth = 8
     self.colspan=1
