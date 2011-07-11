@@ -702,7 +702,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     curr_method = OV.GetParam('snum.refinement.method')
     curr_cycles = OV.GetParam('snum.refinement.max_cycles')
     OV.SetMaxCycles(1)
-    if curr_prg != 'smtbx-refine':
+    if curr_prg != 'olex2.refine':
       OV.set_refinement_program(curr_prg, 'CGLS')
     olx.File("%s.ins" %self.filename)
     rFile = open(olx.FileFull(), 'r')
