@@ -39,7 +39,7 @@ class RunPrgTestCase(test_utils.TestCaseBase):
     run = RunPrg.RunSolutionPrg()
 
   #def test_solution_charge_flipping(self):
-    #OV.SetParam('snum.solution.program', 'smtbx-solve')
+    #OV.SetParam('snum.solution.program', 'olex2.solve')
     #OV.SetParam('snum.solution.method', 'Charge Flipping')
     #run = RunPrg.RunSolutionPrg()
 
