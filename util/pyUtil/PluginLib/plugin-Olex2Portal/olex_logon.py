@@ -245,23 +245,18 @@ def web_run_sql(sql = None, script = 'run_sql'):
             '__ac_name':username,
             'sqlQ':sql,
             }
-  data = urllib.urlencode(values)
-  req = urllib2.Request(url)
-  response = urllib2.urlopen(req,data)
+  response = OV.make_url_call(url, values)
+#  data = urllib.urlencode(values)
+#  req = urllib2.Request(url)
+#  response = urllib2.urlopen(req,data)
 
-
-
-  try:
-    d = pickle.load(response)
-  except Exception, err:
-    if "Forgot your password" in response.read():
+  if type(response) is str:
+    if "Forgot your password" in response:
       username =""
       password = ""
       return "Unauthorised"
-    else:
-      d = {}
 
-  return d
+  return response
 
 
 def upload_structure(script='test'):
@@ -270,10 +265,7 @@ def upload_structure(script='test'):
   global username
   import random
 
-  #web_authenticate()
-
-  password = 'fddd-anode'
-  username = 'admin'
+  web_authenticate()
 
   id = OV.FileName()
   image_path = "%s/%s.png" %(OV.FilePath(), id)
@@ -296,8 +288,8 @@ def upload_structure(script='test'):
   #url = "http://localhost:8080/StructuresTest/Members/admin/++add++fred"
   id = str(random.randint(10000, 99999))
 
-  import urllib2
-  import urllib2_file
+#  import urllib2
+#  import urllib2_file
 
   #image = "image"
   #cif = "cif"
@@ -334,28 +326,32 @@ The final <i>wR</i>(<i>F</i><sub>2</sub>) was 0.061963 (all data).
             'ins':ins,
             'checkcif_report':checkcif_report,
             }
-  params = urllib.urlencode(params)
-
-  try:
-#    response = urllib2.urlopen(url, params)
-
-    proxy = olexex.get_proxy_from_usettings()
-    proxies = {'http': proxy}
-    proxy_support = urllib2.ProxyHandler(proxies)
-    req = urllib2.Request(url)
-    response = urllib2.urlopen(req,params)
-    f = response.read()
-  except Exception, err:
-    f = 'Failed in Olex2: %s' %repr(err)
-    print(f)
-
-#  rFile.close()
-#  file_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'htm'))
-#  wFile = open(file_name, 'w')
-#  wFile.write(f)
-#  wFile.close()
-#  olx.Shell(file_name)
+  
+  response = OV.make_url_call(url, params)
+  f = response.read()
   print f
+  #params = urllib.urlencode(params)
+
+  #try:
+##    response = urllib2.urlopen(url, params)
+
+    #proxy = olexex.get_proxy_from_usettings()
+    #proxies = {'http': proxy}
+    #proxy_support = urllib2.ProxyHandler(proxies)
+    #req = urllib2.Request(url)
+    #response = urllib2.urlopen(req,params)
+    #f = response.read()
+  #except Exception, err:
+    #f = 'Failed in Olex2: %s' %repr(err)
+    #print(f)
+
+##  rFile.close()
+##  file_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'htm'))
+##  wFile = open(file_name, 'w')
+##  wFile.write(f)
+##  wFile.close()
+##  olx.Shell(file_name)
+  #print f
 
 
 #################################################
@@ -409,9 +405,10 @@ def web_translation_item(OXD=None, language='English'):
             '__ac_name':username,
             'language':language,
             'OXD':OXD}
-  data = urllib.urlencode(values)
-  req = urllib2.Request(url)
-  response = urllib2.urlopen(req,data)
+  response = OV.make_url_call(url, values)
+  #data = urllib.urlencode(values)
+  #req = urllib2.Request(url)
+  #response = urllib2.urlopen(req,data)
   text = response.read()
 
   if "<!DOCTYPE html PUBLIC" in text:
@@ -455,6 +452,7 @@ class DownloadOlexLanguageDictionary:
     if inputText and inputText != text:
       res = self.uploadSingleTerm(OXD, language, inputText)
       print res
+      self.dictionary_l = []
       res = self.downloadTranslation()
       print res
       OV.cmd('reload dictionary')

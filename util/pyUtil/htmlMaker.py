@@ -494,7 +494,8 @@ def restraint_builder(cmd):
     "EXYZ":["name_EXYZ", "help_exyz-htmhelp"],
     "EADP":["name_EADP", "help_eadp-htmhelp"],
     "AFIX":["name_AFIX", "var_m:6;5;10;11", "var_n:6;9", "help_AFIX-use-help"],
-    "RRINGS":["name_RRINGS", "var_d: ", "var_s1:0.02", "help_rrings-htmhelp"],
+#    "RRINGS":["name_RRINGS", "var_d:1.39 ", "var_s1:0.02", "help_rrings-htmhelp"],
+    "RRINGS":["name_RRINGS", "help_rrings-htmhelp"],
     "TRIA":["name_TRIA", "var_distance: ", "var_angle: ", "help_tria-htmhelp"],
   }
 
@@ -578,6 +579,9 @@ def restraint_builder(cmd):
       "width":50, "height":height,
       "hint":"Removes the current AFIX command from the structure",
     }
+    
+  if name == "RRINGS":
+    post_onclick = ">>sel -u"
 
   has_modes = []
   if name in has_modes:

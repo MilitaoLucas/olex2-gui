@@ -776,11 +776,12 @@ if haveGUI:
   OV.registerFunction(MapView)
 
 def deal_with_map_buttons(onoff, img_bases, map_type):
+  ## First, set all images to hidden
   tl = ['eden', 'void', 'mask']
   for item in tl:
     if item != map_type:
       OV.SetParam('olex2.%s_vis' %item, False)
-
+      
   if not onoff:
     if OV.GetParam('olex2.%s_vis' %map_type) == False:
       onoff = 'on'
@@ -794,6 +795,7 @@ def deal_with_map_buttons(onoff, img_bases, map_type):
       use_image= "up=%soff.png" %img_base
       OV.SetImage("IMG_%s" %img_base.upper(),use_image)
     retVal = True
+    
   if onoff == 'on':
     OV.SetParam('olex2.%s_vis' %map_type,True)
     for img_base in img_bases:
@@ -1293,7 +1295,7 @@ def GetCheckcifReport():
   if not os.path.exists(file_name):
     print "There is no cif file!"
     return
-  proxy = get_proxy_from_usettings()
+  proxy = OV.get_proxy_from_usettings()
   if proxy:  
     proxies = {'http': proxy}
   else:
@@ -1387,41 +1389,40 @@ def check_for_crypto():
     #import olex
     #olex.m(r"InstallPlugin ODAC")
 
-def make_url_call(url, values):
-  #url = "http://www.olex2.org/odac/update"
-  proxy = get_proxy_from_usettings()
-  if proxy:  
-    proxies = {'http': proxy}
-  else:
-    proxies = {}
-  try:
-    opener = urllib2.build_opener(
-      urllib2.ProxyHandler(proxies))
-    response = opener.open(url,values)
-    f = response.read()
-  except:
-    print "\n++++++++++++++++++++++++++++++++++++++++++++++"
-    print "+ Could not reach update server at www.olex2.org"
-    print "+ --------------------------------------------"
-    print "+ Please make sure your computer is online"
-    print "+ and that you can reach www.olex2.org"
-    print "++++++++++++++++++++++++++++++++++++++++++++++\n"
-    return False
-  return f
+#def make_url_call(url, values):
+  #proxy = get_proxy_from_usettings()
+  #if proxy:  
+    #proxies = {'http': proxy}
+  #else:
+    #proxies = {}
+  #try:
+    #opener = urllib2.build_opener(
+      #urllib2.ProxyHandler(proxies))
+    #response = opener.open(url,values)
+    #f = response.read()
+  #except:
+    #print "\n++++++++++++++++++++++++++++++++++++++++++++++"
+    #print "+ Could not reach update server at www.olex2.org"
+    #print "+ --------------------------------------------"
+    #print "+ Please make sure your computer is online"
+    #print "+ and that you can reach www.olex2.org"
+    #print "++++++++++++++++++++++++++++++++++++++++++++++\n"
+    #return False
+  #return f
 
-def get_proxy_from_usettings():
-  rFile = open("%s/usettings.dat" %OV.BaseDir(),'r')
-  lines = rFile.readlines()
-  rFile.close()
-  proxy = None
-  for line in lines:
-    if line.startswith('proxy='):
-      proxy = line.split('proxy=')[1].strip()
-  if proxy:
-    print "Using Proxy server %s" %proxy
-  else:
-    print "No Proxy server is set"
-  return proxy
+#def get_proxy_from_usettings():
+  #rFile = open("%s/usettings.dat" %OV.BaseDir(),'r')
+  #lines = rFile.readlines()
+  #rFile.close()
+  #proxy = None
+  #for line in lines:
+    #if line.startswith('proxy='):
+      #proxy = line.split('proxy=')[1].strip()
+  #if proxy:
+    #print "Using Proxy server %s" %proxy
+  #else:
+    #print "No Proxy server is set"
+  #return proxy
 
 def register_new_odac(username=None, pwd=None):
   OV.Cursor("Please wait while AutoChem will be installed")
@@ -1444,7 +1445,7 @@ def register_new_odac(username=None, pwd=None):
             'username':username,
             'macAddress':mac_address,
             }
-  f = make_url_call(url, values)
+  f = OV.make_url_call(url, values)
 
   if not f:
     print "Please provide a valid username and password, and make sure your computer is online."
@@ -1512,7 +1513,7 @@ def updateACF(force=False):
   password = "update456R"
   institution = keyname.split("-")[0]
   type_of_key = keyname.split("-")[-1]
-  proxy = get_proxy_from_usettings()
+  proxy = OV.get_proxy_from_usettings()
   proxies = {'http': proxy}
 
   for mac_address in OV.GetMacAddress():
@@ -1526,21 +1527,24 @@ def updateACF(force=False):
               'computerName':computer_name,
               'macAddress':mac_address,
               }
-    data = urllib.urlencode(values)
-    #print data
-    try:
-      proxy_support = urllib2.ProxyHandler(proxies)
-      req = urllib2.Request(url)
-      response = urllib2.urlopen(req,data)
-      f = response.read()
-    except:
-      print "\n++++++++++++++++++++++++++++++++++++++++++++++"
-      print "+ Could not reach server at www.olex2.org"
-      print "+ --------------------------------------------"
-      print "+ Please make sure your computer is online"
-      print "+ and that you can reach www.olex2.org"
-      print "++++++++++++++++++++++++++++++++++++++++++++++\n"
-      return
+    
+    f = OV.make_url_call(url, values)
+    
+#    data = urllib.urlencode(values)
+#    #print data
+#    try:
+#      proxy_support = urllib2.ProxyHandler(proxies)
+#      req = urllib2.Request(url)
+#      response = urllib2.urlopen(req,data)
+#      f = response.read()
+#    except:
+#      print "\n++++++++++++++++++++++++++++++++++++++++++++++"
+#      print "+ Could not reach server at www.olex2.org"
+#      print "+ --------------------------------------------"
+#      print "+ Please make sure your computer is online"
+#      print "+ and that you can reach www.olex2.org"
+#      print "++++++++++++++++++++++++++++++++++++++++++++++\n"
+#      return
     if f:
       break
 
@@ -1632,10 +1636,10 @@ def GetACF():
 
   else:
     debug = OV.FindValue('odac_fb', False)
-    debug = [False, True][1]
-    debug_deep1 = [False, True][1]
-    debug_deep2 = [False, True][1]
-    OV.SetVar("ac_verbose", [False, True][1])
+    debug = [False, True][0]
+    debug_deep1 = [False, True][0]
+    debug_deep2 = [False, True][0]
+    OV.SetVar("ac_verbose", [False, True][0])
 
   keyname = getKey()
 

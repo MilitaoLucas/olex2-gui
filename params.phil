@@ -492,7 +492,11 @@ olex2
         .type = str
       width = 600
         .type = int
-      height = 500
+      height = automatic
+        .type = str
+      auto_height_constant = 220
+        .type = int
+      auto_height_line = 20
         .type = int
       position = center
         .type = str
