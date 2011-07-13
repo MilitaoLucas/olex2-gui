@@ -10,6 +10,16 @@ import cProfile
 from subprocess import *
 import guiFunctions
 
+import socket
+import urllib
+import urllib2
+import pickle
+
+# timeout in seconds
+timeout = 15
+socket.setdefaulttimeout(timeout)
+
+
 HasGUI = olx.HasGUI() == 'true'
 if HasGUI:
   inheritFunctions = guiFunctions.GuiFunctions
@@ -669,13 +679,52 @@ class OlexFunctions(inheritFunctions):
     import olexex
     olexex.setAllMainToolbarTabButtons()
 
+  def make_url_call(self, url, values):
+    proxy = self.get_proxy_from_usettings()
+    if proxy:  
+      proxies = {'http': proxy}
+    else:
+      proxies = {}
+    try:
+      opener = urllib2.build_opener(
+        urllib2.ProxyHandler(proxies))
+      response = opener.open(url,values)
+      try:
+        f = pickle.load(response) #This is required in cases where the query returns a dictionary
+      except:
+        f = response.read()
+    except:
+      print "\n++++++++++++++++++++++++++++++++++++++++++++++"
+      print "+ Could not reach update server at www.olex2.org"
+      print "+ --------------------------------------------"
+      print "+ Please make sure your computer is online"
+      print "+ and that you can reach www.olex2.org"
+      print "++++++++++++++++++++++++++++++++++++++++++++++\n"
+      return False
+    return f
+  
+  def get_proxy_from_usettings(self):
+    rFile = open("%s/usettings.dat" %OV.BaseDir(),'r')
+    lines = rFile.readlines()
+    rFile.close()
+    proxy = None
+    for line in lines:
+      if line.startswith('proxy='):
+        proxy = line.split('proxy=')[1].strip()
+    if proxy:
+      print "Using Proxy server %s" %proxy
+    else:
+      print "No Proxy server is set"
+    return proxy
 
 
-  def makeGeneralHtmlPop(self, phil_path, htm='htm'):
+  def makeGeneralHtmlPop(self, phil_path, htm='htm', number_of_lines=0):
     pop_name=OV.GetParam('%s.name' %phil_path)
     htm=OV.GetParam('%s.%s' %(phil_path,htm))
     width=OV.GetParam('%s.width' %phil_path)
     height=OV.GetParam('%s.height' %phil_path)
+    auto_height_constant=OV.GetParam('%s.auto_height_constant' %phil_path)
+    auto_height_line=OV.GetParam('%s.auto_height_line' %phil_path)
     position=OV.GetParam('%s.position' %phil_path)
     x=OV.GetParam('%s.x' %phil_path)
     y=OV.GetParam('%s.y' %phil_path)
@@ -686,6 +735,16 @@ class OlexFunctions(inheritFunctions):
     if not os.path.exists(htm):
       OV.write_to_olex('generalPop.htm',htm)
       htm = 'generalPop.htm'
+      t = htm
+    else:
+      t = open(htm,'r').read()
+    if height == "automatic":
+      number_of_lines = t.count("<br>")
+      number_of_lines += t.count("<tr>")
+      if phil_path == 'olex2.ccdc.pop':
+        number_of_lines += OV.get_cif_item('_publ_contact_author_address').count("\n")
+      height = number_of_lines * auto_height_line + auto_height_constant
+      #print "Number of lines: %s; Height: %s" %(number_of_lines, height)
     if position == "center":
       ws = olx.GetWindowSize('gl')
       ws = [int(i) for i in ws.split(",")]

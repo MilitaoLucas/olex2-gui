@@ -23,6 +23,8 @@ class CcdcSubmit():
 
   def ccdc_submit(self):
     zip_file = None
+    from CifInfo import MergeCif
+    MergeCif()
     try:
       if not self.check_and_get_prerequisites():
         return False
@@ -32,7 +34,7 @@ class CcdcSubmit():
         print f
         return False
       if res == 1:
-        print "OK: Will do stuff now!"
+        print "Sending to the ccdc now..."
   
       self.zip_files()
   
