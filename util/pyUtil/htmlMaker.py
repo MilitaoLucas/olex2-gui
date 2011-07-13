@@ -362,6 +362,7 @@ def publicationMetadataHtmlMaker():
      'itemName':'%Requested% %Journal%',
      'items':userDictionaries.localList.getListJournals(),
      'readonly':'',
+     'value':'spy.get_cif_item(_publ_requested_journal)',
      'onchange':'spy.addToLocalList(GetValue(~name~),requested_journal)>>spy.changeBoxColour(~name~,#FFDCDC)',
      }
   ]
@@ -380,12 +381,12 @@ def publicationMetadataHtmlMaker():
 OV.registerFunction(publicationMetadataHtmlMaker)
 
 def contactLetter():
-  user_input_variables = OV.GetParam('snum.metacif.user_input_variables')
-  if user_input_variables is None or 'publ_contact_letter' not in user_input_variables:
+  letterText = OV.get_cif_item('_publ_contact_letter')
+  if letterText is None:
     import datetime
     today = datetime.date.today()
     date = today.strftime("%x")
-    journal = OV.GetParam('snum.metacif.publ_requested_journal')
+    journal = OV.get_cif_item('_publ_requested_journal')
     fileName = olx.FileName()
     authorList = OV.GetParam('snum.metacif.publ_author_names')
     authors = ''
@@ -424,19 +425,9 @@ the paper 'ENTER PAPER TITLE' by
 The paper will be submitted to %s.
 """ %(date,fileName,authors,journal)
 
-  else:
-    letterText = OV.GetParam('snum.metacif.publ_contact_letter')
-
   inputText = OV.GetUserInput(0,'_publ_contact_letter',letterText)
-  if inputText == '':
-    OV.SetParam('snum.metacif.publ_contact_letter', letterText)
-  elif inputText != letterText:
-    OV.SetParam('snum.metacif.publ_contact_letter', inputText)
-    variableFunctions.AddVariableToUserInputList('publ_contact_letter')
-  elif 'publ_contact_letter' not in OV.GetParam('snum.metacif.user_input_variables'):
-    OV.SetParam('snum.metacif.publ_contact_letter', letterText)
-  else:
-    pass
+  if inputText is not None:
+    OV.set_cif_item('_publ_contact_letter', inputText);
   return ""
 OV.registerFunction(contactLetter)
 
