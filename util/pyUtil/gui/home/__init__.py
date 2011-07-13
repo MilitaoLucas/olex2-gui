@@ -23,7 +23,7 @@ class MultipleDataset:
     current = int(olx.xf_CurrentData())
     cnt = int(olx.xf_DataCount())
     for i in xrange(0, cnt):
-      if i > 0 and (i%4) == 0:
+      if i > 0 and (i%3) == 0:
         html += "</tr><tr>"
       if i == current:
         html += "<td>" + olx.xf_DataName(i) + "&nbsp;(*)</td>"
