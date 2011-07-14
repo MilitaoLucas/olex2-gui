@@ -391,7 +391,6 @@ def GetAvailableSolutionProgs():
   return retStr
 OV.registerFunction(GetAvailableSolutionProgs)
 
-
 def OnMatchStart(argStr):
   OV.write_to_olex('match.htm', "<b>RMS (&Aring;)&nbsp;Matched Fragments</b><br>")
   SpyVar.MatchedFragments = {}

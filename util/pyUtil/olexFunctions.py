@@ -695,10 +695,10 @@ class OlexFunctions(inheritFunctions):
         f = response.read()
     except:
       print "\n++++++++++++++++++++++++++++++++++++++++++++++"
-      print "+ Could not reach update server at www.olex2.org"
+      print "+ Could not reach update server at %s" %url
       print "+ --------------------------------------------"
       print "+ Please make sure your computer is online"
-      print "+ and that you can reach www.olex2.org"
+      print "+ and that you can reach %s" %url
       print "++++++++++++++++++++++++++++++++++++++++++++++\n"
       return False
     return f
