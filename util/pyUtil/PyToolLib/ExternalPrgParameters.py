@@ -640,31 +640,84 @@ class Method_cctbx_ChargeFlip(Method_solution):
     olx.xf_SaveSolution(file)
     olx.Atreap(file)
 
-class Method_SIR97(Method_solution):
+class Method_SIR(Method_solution):
 
   def run(self, RunPrgObject):
-    import OlxSir
-    print 'STARTING SIR97'
-    RunPrgObject.solve = True
-    solving_interval = int(float(self.getArgs().split()[1]))
+    from olexsir import Sir
 
-    formula_l = olx.xf_GetFormula('list')
-    formula_l = formula_l.split(",")
-    formula_d = {}
-    for item in formula_l:
-      item = item.split(":")
-      formula_d.setdefault(item[0], {'count':float(item[1])})
-    olx.xf_EndUpdate()
-    olx.Compaq('-a')
-    olex.m("sel -a")
-    olex.m("fix occu sel")
-    #olx.VSS(True)
-    #olex.m("sel -a")
-    #olex.m("name sel 1")
-    OV.DeleteBitmap('solve')
-    file = r"'%s/%s.res'" %(olx.FilePath(), RunPrgObject.fileName)
-    olx.xf_SaveSolution(file)
-    olx.Atreap(file)
+    print 'STARTING %s %s with %s' %(
+      RunPrgObject.program.name,
+      RunPrgObject.program.program_type, self.name)
+    RunPrgObject.solve = True
+    sirversion = RunPrgObject.program.versions
+    sirfile = "%s.sir"%(OV.FileName())
+    filename = OV.FileName()
+    Z = float(olx.xf_au_GetZ())
+    cell = ''.join(olx.xf_au_GetCell().split(','))
+    hklfile = OV.HKLSrc().split('/')[-1]
+    contents = ''
+    for item in olx.xf_GetFormula('list').split(","):
+        item = item.split(":")
+        item[1] = int(float(item[1]) * Z)
+        contents += "%s %i " %(item[0], item[1])
+
+    oxs = Sir()
+    (data, inv, phase) = oxs.getDirectives()
+
+    filein = open(olx.FileFull(),'r')
+    filedata = filein.readlines()
+    filein.close()
+    esd = []
+    for line in filedata:
+      if 'zerr ' in line.lower():
+        esd = line.split()
+    
+    if len(esd) > 2:
+        del esd[1]
+        del esd[0]
+        try:
+            oxs.setDirectives(errors = ' '.join(esd))
+        except TypeError:
+            pass
+
+    oxs.setDirectives(cell=cell, SPACEGROUP=olx.xf_au_GetCellSymm(),
+            Format='(3i4,2f8.0)', contents=contents, Reflections=hklfile)
+
+    opts = {}
+    for instruction in self.instructions():
+        if OV.FindValue('settings_%s' %instruction.name) in (True, 'True', 'true'):
+            if instruction.name not in ('Gui', 'Data', 'Phase', 'Misc'):
+                opts[instruction.name] = True
+            for option in self.options(instruction.name):
+                value = OV.FindValue('settings_%s_%s'%(instruction.name, option.name))
+                if value not in ('', 'None', None):
+                    if option.name in ('Fvalues', 'RELAX'):
+                        value = str(value)
+                        opts[value] = True
+                    else:
+                        opts[option.name] = value
+
+    if self.name in 'Direct Methods':
+        oxs.setDirectives(Tangent=True)
+    elif self.name in 'Patterson Method':
+        oxs.setDirectives(Patterson=True)
+
+    oxs.setDirectives(**opts)
+
+    if OV.FindValue('settings_Gui') in (True, 'True', 'true'):
+        oxs.Gui = True
+        print 'Starting with GUI'
+    else:
+        oxs.Gui = False
+        print 'Starting without GUI'
+
+    if oxs.write(filename, data, inv, phase):
+        oxs.Exec(sirfile, sirversion)
+        OV.DeleteBitmap('solve')
+        file = r"'%s/%s.res'" %(olx.FilePath(), OV.FileName())
+        olx.Atreap(file)
+    else:
+        print 'No *.sir File!'
 
 def defineExternalPrograms():
   # define solution methods
@@ -673,20 +726,8 @@ def defineExternalPrograms():
   patterson = Method_shelx_solution(patterson_phil)
   dual_space = Method_shelxd(dual_space_phil)
   charge_flipping = Method_cctbx_ChargeFlip(charge_flipping_phil)
-
-# Testing sir97 easy mode
-  #easy = Method_SIR97(
-    #name='SIR97 Easy',
-    #cmd='easy',
-    #args=(
-      #dict(name='easy',
-           #values=[['interval', 60]],
-           #default='true',
-           #optional=True,
-           #),
-      #),
-    #atom_sites_solution='other'
-  #)
+  sir2008_dm = Method_SIR(sir_dm_phil)
+  sir2008_patt = Method_SIR(sir_patt_phil)
 
   # define refinement methods
   least_squares = Method_shelx_refinement(least_squares_phil)
@@ -730,23 +771,25 @@ def defineExternalPrograms():
     program_type='solution',
     author="Luc Bourhis",
     reference="olex2.solve (L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, J.A.K. Howard, H. Puschmann, in preparation, 2011)")
-  SIR97 = Program(
-    name='SIR97',
+  SIR2008 = Program(
+    name='SIR2008',
     program_type='solution',
-    author="TBC",
-    reference="TBC (Erm, 1999)",
-    versions = '97')
+    author="Maria C. Burla, Rocco Caliandro, Mercedes Camalli, Benedetta Carrozzini, Giovanni Luca Cascarano, Liberato De Caro, Carmelo Giacovazzo, Giampiero Polidori, Dritan Siliqi, Riccardo Spagna",
+    reference="J. Appl. Cryst. (2007). 40, 609-613",
+    versions = '2008',
+    execs=["sir2008.exe", "sir2008"])
 
   ShelXS.addMethod(direct_methods)
   ShelXS.addMethod(patterson)
   ShelXS86.addMethod(direct_methods)
   ShelXS86.addMethod(patterson)
-  #SIR97.addMethod(easy)
   XS.addMethod(direct_methods)
   XS.addMethod(patterson)
   ShelXD.addMethod(dual_space)
   XM.addMethod(dual_space)
   smtbx_solve.addMethod(charge_flipping)
+  SIR2008.addMethod(sir2008_dm)
+  SIR2008.addMethod(sir2008_patt)
 
   # define refinement programs
   ShelXL = Program(
@@ -798,7 +841,7 @@ def defineExternalPrograms():
   smtbx_refine.addMethod(levenberg_marquardt)
 
   SPD = ExternalProgramDictionary()
-  for prg in (ShelXS, ShelXS86, XS, ShelXD, XM, smtbx_solve):
+  for prg in (ShelXS, ShelXS86, XS, ShelXD, XM, smtbx_solve, SIR2008):
     SPD.addProgram(prg)
 
   RPD = ExternalProgramDictionary()
@@ -831,6 +874,251 @@ def getFormulaAsDict(formula):
       print >> sys.stderr, "An error occured in the function getFormulaAsDict.\nFormula: %s, item: %s" %(formula, item)
       sys.stderr.formatExceptionInfo()
   return d
+
+sir_dm_phil = phil_interface.parse("""
+name = 'Direct Methods'
+  .type=str
+atom_sites_solution=other
+  .type=str
+instructions {
+  Gui 
+  .optional=True
+  {
+    values {}
+    default=True
+      .type=bool
+    }
+  Data 
+  .optional=True
+  {
+    values {
+        Fvalues = *FOSQUARED FOBS
+          .type = choice
+          .caption = 'F\xc2\xb2/Fo\n'
+        RHOMAX = 0.25
+          .type = float
+        RESMAX = None
+          .type = float
+        BFACTOR = None
+          .type = float
+          .caption = 'BFAC'
+        SFACTORS = None
+          .type = str
+          .caption = 'SFAC'
+    }
+    default=True
+      .type=bool
+    }
+  Phase
+  .optional=True
+    {
+      values {
+        SIZE=*None xs s m l xl xxl
+          .type = choice
+        ITERATION=None
+          .type = int
+        CYCLE=None
+          .type = int
+        FRAGMENT=None
+          .type = str
+          .caption = 'FRAG'
+        RESIDUAL=None
+          .type = float
+          .caption = 'R %'
+          }
+      default=False
+        .type=bool
+      }
+  Misc
+  .optional=True
+    {
+      values {
+        RELAX=*None RELAX UNRELAX
+          .type = choice
+        NREFLECTION = None
+          .type = float
+          .caption = 'NREF'
+        RECORD = None
+          .type = int
+        EXPAND = None
+          .type = float
+        GMIN = None
+          .type = float
+          }
+      default=False
+        .type=bool
+      }
+  Tangent
+  .optional=True
+  {
+    values {
+        STRIAL=None
+          .type = int
+          .caption = 'STRIAL     '
+        TRIAL=None
+          .type = int
+    }
+    default=False
+      .type=bool
+    }
+  Cochran 
+  .optional=True
+  {
+    values {}
+    default=False
+      .type=bool
+    }
+  Nquartets 
+  .optional=True
+  {
+    values {}
+    default=False
+      .type=bool
+    }
+  Nolsq 
+  .optional=True
+  {
+    values {}
+    default=False
+      .type=bool
+    }
+  Nosigma 
+  .optional=True
+  {
+    values {}
+    default=False
+      .type=bool
+    }
+  Electrons 
+  .optional=True
+  {
+    values {}
+    default=False
+      .type=bool
+    }
+  }
+""")
+
+sir_patt_phil = phil_interface.parse("""
+name = 'Patterson Method'
+  .type=str
+atom_sites_solution=other
+  .type=str
+instructions {
+  Gui 
+  .optional=True
+  {
+    values {}
+    default=True
+      .type=bool
+    }
+  Data 
+  .optional=True
+  {
+    values {
+        Fvalues = *FOSQUARED FOBS
+          .type = choice
+          .caption = 'F\xc2\xb2/Fo\n'
+        RHOMAX = 0.25
+          .type = float
+        RESMAX = None
+          .type = float
+        BFACTOR = None
+          .type = float
+          .caption = 'BFAC'
+        SFACTORS = None
+          .type = str
+          .caption = 'SFAC'
+    }
+    default=True
+      .type=bool
+    }
+  Phase
+  .optional=True
+    {
+      values {
+        SIZE=*None xs s m l xl xxl
+          .type = choice
+        ITERATION=None
+          .type = int
+        CYCLE=None
+          .type = int
+        FRAGMENT=None
+          .type = str
+          .caption = 'FRAG'
+        RESIDUAL=None
+          .type = float
+          .caption = 'R %'
+          }
+      default=False
+        .type=bool
+      }
+  Misc
+  .optional=True
+    {
+      values {
+        RELAX=*None RELAX UNRELAX
+          .type = choice
+        NREFLECTION = None
+          .type = float
+          .caption = 'NREF'
+        RECORD = None
+          .type = int
+        EXPAND = None
+          .type = float
+        GMIN = None
+          .type = float
+          }
+      default=False
+        .type=bool
+      }
+  Patterson
+  .optional=True
+  {
+    values {
+        PEAKS=None
+          .type = int
+    }
+    default=False
+      .type=bool
+    }
+  Cochran 
+  .optional=True
+  {
+    values {}
+    default=False
+      .type=bool
+    }
+  Nquartets 
+  .optional=True
+  {
+    values {}
+    default=False
+      .type=bool
+    }
+  Nolsq 
+  .optional=True
+  {
+    values {}
+    default=False
+      .type=bool
+    }
+  Nosigma 
+  .optional=True
+  {
+    values {}
+    default=False
+      .type=bool
+    }
+  Electrons 
+  .optional=True
+  {
+    values {}
+    default=False
+      .type=bool
+    }
+  }
+""")
 
 shelxs_phil = phil_interface.parse("""
 esel
