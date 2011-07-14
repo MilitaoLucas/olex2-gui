@@ -156,7 +156,13 @@ def LoadParams():
   custom_phil = get_custom_phil()
   if custom_phil:
     phil_handler.update(phil_file=custom_phil)
-  olx.phil_handler = phil_handler
+  portal_phil = "%s/util/pyUtil/PluginLib/plugin-Olex2Portal/portal.phil" %(olx.BaseDir())
+  if os.path.exists(portal_phil):
+    phil_handler.merge_param_file(portal_phil)
+    
+    
+
+    olx.phil_handler = phil_handler
   # gui params
   master_gui_phil = phil_interface.parse(file_name="%s/gui.params" %OV.BaseDir())
   gui_phil_handler = phil_interface.phil_handler(
