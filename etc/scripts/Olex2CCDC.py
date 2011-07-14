@@ -50,7 +50,7 @@ class CcdcSubmit():
         'destination': destination,
       }
   
-      self.send_request(url)
+      OV.make_url_call(url, self.params)
       return True
     finally:
       if zip_file is not None:
