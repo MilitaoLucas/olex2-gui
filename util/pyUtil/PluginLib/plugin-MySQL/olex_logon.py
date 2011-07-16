@@ -97,17 +97,20 @@ def make_logon_html():
     y = 400
     olx.Popup(pop_name, 'logon.htm', "-s -b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(pop_name, boxWidth, boxHeight, x, y))
     olx.Echo('html.ShowModal(%s)' %pop_name)
-    
-  
-def web_authenticate():
-  global username
-  global password
-  if not username:
-    make_logon_html()
-    username = olx.GetValue('Logon.WEB_USERNAME')
-    password = olx.GetValue('Logon.WEB_PASSWORD')
-    print username
-OV.registerFunction(web_authenticate)
+
+ 
+##DELETE  
+#def web_authenticate():
+  #global username
+  #global password
+  #if not username:
+    #make_logon_html()
+    #username = olx.GetValue('Logon.WEB_USERNAME')
+    #password = olx.GetValue('Logon.WEB_PASSWORD')
+    #print username
+#OV.registerFunction(web_authenticate)
+
+
 
 
 def web_run_sql(sql = None, script = 'run_sql'):
@@ -128,9 +131,9 @@ def web_run_sql(sql = None, script = 'run_sql'):
             '__ac_name':username,
             'sqlQ':sql,
             }
-  data = urllib.urlencode(values)
-  req = urllib2.Request(url)
-  response = urllib2.urlopen(req,data)
+  response = OV.make_url_call(url, values)
+#  req = urllib2.Request(url)
+#  response = urllib2.urlopen(req,data)
   
   
   try:
@@ -154,9 +157,10 @@ def web_translation_item(OXD=None, language='English'):
             '__ac_name':username,
             'language':language,
             'OXD':OXD}
-  data = urllib.urlencode(values)
-  req = urllib2.Request(url)
-  response = urllib2.urlopen(req,data)
+  response = OV.make_url_call(url, values)
+#  data = urllib.urlencode(values)
+#  req = urllib2.Request(url)
+#  response = urllib2.urlopen(req,data)
   text = response.read()
 
   if "<!DOCTYPE html PUBLIC" in text:

@@ -2,27 +2,59 @@
 # The sNum section. Information belonging to the currently loaded structure
 ##############################################################################
 
-snum {
-  skip_history = False
-    .type = bool
+
+snum
+  .short_caption = Current Structure
+  .caption = Settings that are saved with each structure
+  {
+
+  init
+    .short_caption = Other Things
     .expert_level = 1
-  smtbx {
+    {
+    skip_history = False
+      .type = bool
+      .expert_level = 1
+    }
+
+  current_result{
+    cif = None
+      .type = path
+    fcf = None
+      .type = path
+  }
+
+  smtbx
+    .short_caption = Solution & Refinement
+    {
     inelastic_form_factor_table = *henke sasaki
       .type = choice
     atomic_form_factor_table = *it1992 wk1995 n_gaussian
       .type = choice
-  }
-  solution {
-    program = ShelXS ShelXS86 XS 'smtbx-solve' XM ShelXD SIR2008
+    }
+
+  solution
+    .short_caption = Structure Solution
+    {
+    program = ShelXS ShelXS86 XS 'olex2.solve' XM ShelXD SIR2008
       .type = choice
     method = 'Dual Space' 'Charge Flipping' 'Direct Methods' 'Patterson Method'
       .type = choice
     graphical_output = False
       .type = bool
-  }
+    current_atomic_volume = None
+      .type = float
+    }
 
-  refinement {
-    program = ShelXL XL XH ShelXH XLMP ShelXL_ifc 'smtbx-refine'
+  refinement
+    .short_caption = Structure Refinement
+    {
+    last_R1 = n/a
+      .type = str
+      .expert_level = 2
+    graphical_output = False
+      .type = bool
+    program = ShelXL XL XH ShelXH XLMP ShelXL_ifc 'olex2.refine'
       .type = choice
     method = 'Least Squares' CGLS 'Gauss-Newton' 'Levenberg-Marquardt' \
       'Full Matrix'
@@ -55,56 +87,65 @@ snum {
     check_absolute_structure_after_refinement = True
       .type = bool
 
-  auto {
-    max_peaks = False
-      .type = bool
-    assignQ = 2.0
-      .type = float(value_min=0.0)
-      .help = Assign all residual electron density peaks greater than the \
-        given cutoff value as a Carbon atom
-    pruneU = 0.1
-      .type = float(value_min=0.0)
-      .help = Delete all atoms where the Ueq is greater than the given cutoff
-    pruneQ = 1.5
-      .type = float(value_min=0.0)
-      .help = Delete all residual electron density peaks smaller than \
-        the given cutoff value
-    promote = 0.1
-      .type = float
-    assemble = False
-      .type = bool
-      .help = Move all atoms or fragments of the asymmetric unit as \
-        close together as possible
-    tidy = False
-      .type = bool
-      .help = Automatically tidy the structure after refinement according \
-        to the settings
-    invert = False
-      .type = bool
-      .help = If set to TRUE, the structure will be automatically inverted if the inversion seems necessary
+    auto
+      .short_caption = Autotidy
+      {
+      max_peaks = False
+        .type = bool
+      assignQ = 2.0
+        .type = float(value_min=0.0)
+        .help = Assign all residual electron density peaks greater than the \
+          given cutoff value as a Carbon atom
+      pruneU = 0.1
+        .type = float(value_min=0.0)
+        .help = Delete all atoms where the Ueq is greater than the given cutoff
+      pruneQ = 1.5
+        .type = float(value_min=0.0)
+        .help = Delete all residual electron density peaks smaller than \
+          the given cutoff value
+      promote = 0.1
+        .type = float
+      assemble = False
+        .type = bool
+        .help = Move all atoms or fragments of the asymmetric unit as \
+          close together as possible
+      tidy = False
+        .type = bool
+        .help = Automatically tidy the structure after refinement according \
+          to the settings
+      invert = False
+        .type = bool
+        .help = If set to TRUE, the structure will be automatically inverted if the inversion seems necessary
+      }
   }
-
-  last_R1 = n/a
-    .type = str
-    .expert_level = 1
-  graphical_output = False
-    .type = bool
-}
-
 
   display_quality = 2
     .type = int(value_min=1, value_max=3)
 
-  image{
-    bitmap{
+  image
+    .short_caption = Structure Images
+    {
+    bitmap
+      .short_caption = png, jpg, bmp ...
+      {
       name = None
         .type = str
-      font_name = #olex2.fnt:frb_18
+      atom_label{
+        font_name = #olex2.fnt:frb_18
+          .type = str
+        font_colour = "2049;0"
+          .type = str
+        }
+      bond_label{
+        font_name = #olex2.fnt:frb_14
         .type = str
+      }
       type = png jpg bmp
         .type = choice
     }
-    ps{
+    ps
+      .short_caption = ORTEP - Postscript
+      {
       outline_width = 1.0
         .type = float
       octant_width = 1.0
@@ -117,16 +158,32 @@ snum {
         .type = float
       bond_width = 0.7
         .type = float
-      font_name = @
-        .type = str
-      font_size = 15
-        .type = int
-      font_weight = 1.0
-        .type = float
+      atom_label{
+        font_name = @
+          .type = str
+        font_size = 15
+          .type = int
+        font_colour = #00000
+          .type = colour
+        font_weight = 1.0
+          .type = float
+      }
+      bond_label{
+        font_name = @
+          .type = str
+        font_size = 15
+          .type = int
+        font_colour = #00000
+          .type = colour
+        font_weight = 1.0
+          .type = float
+      }
       name = None
         .type = str
     }
-  image_series{
+  image_series
+    .short_caption = Movie
+    {
     rotation_around_axis=2
       .type = int
     degrees_of_rotation=1.0
@@ -179,7 +236,9 @@ snum {
       .type = str
   }
 
-  metacif {
+  metacif
+    .short_caption = Metadata for CIF
+    {
     publ_author_names = None
       .type = str
     abs_file = None
@@ -218,6 +277,12 @@ snum {
     twin_file = None
       .type = path
       .expert_level = 1
+    result_fcf_file = None
+      .type = path
+      .expert_level = 1
+    result_cif_file = None
+      .type = path
+      .expert_level = 1
     abs_type = twinabs sadabs
       .type = choice
     list_sad_files = None
@@ -253,6 +318,12 @@ snum {
     list_cif_od_files = None
       .type = strings
       .expert_level = 2
+    list_result_cif_files = None
+      .type = strings
+      .expert_level = 2
+    list_result_fcf_files = None
+      .type = strings
+      .expert_level = 2
     user_input_variables = None
       .type = str
       .expert_level = 2
@@ -270,7 +341,9 @@ snum {
       .expert_level = 2
   }
 
-  report {
+  report
+    .short_caption = Report Metadata
+    {
     date_collected = None
       .type = str
     date_submitted = None
@@ -324,6 +397,14 @@ snum {
       .type = float
   }
 
+  calcsolv {
+    probe = 1.2
+      .type = float
+    grid = 0.2
+      .type = float
+  }
+
+
   masks {
     original_hklsrc = None
       .type = path
@@ -349,7 +430,7 @@ snum {
 }
 
 olex2
-  .expert_level = 2
+  .short_caption = Olex2 Internal Settings
 {
   is_online = True
     .type = bool
@@ -383,13 +464,57 @@ olex2
     .type = bool
   mask_vis = False
     .type = bool
-  hover_buttons = False
+  hover_buttons = True
     .type = bool
   portal_url = http://www.olex2.org
     .type = str
+  portal_db_url = http://olex2.opencryst.net/content/DB
+    .type = str
+  checkcif{
+    url = http://vm02.iucr.org/cgi-bin/checkcif.pl
+      .type = str
+      .help = The URL to which the cif file will be sent
+    send = True
+    .type = bool
+      .help = If set to TRUE (default), the cif file will be sent to the checkcif url on pressing 'Validate Cif'
+  }
+
+  structurespace{
+    url = http://www.olexsys.org/structurespace/StructureSpace
+      .type = str
+  }
+
+  ccdc{
+    url = http://ccdc.opencryst.org/deposit
+      .type = str
+      .help = The URL to which the cif/fcf will be sent
+    ccdc_mail = olex2-deposit@ccdc.cam.ac.uk
+      .type = str
+      .help = The email address to which the files will be forwared
+    pop{
+      name=ccdc
+        .type = str
+      htm = \etc\gui\blocks\templates\pop_ccdc_submit.htm
+        .type = str
+      width = 600
+        .type = int
+      height = automatic
+        .type = str
+      auto_height_constant = 220
+        .type = int
+      auto_height_line = 20
+        .type = int
+      position = center
+        .type = str
+      border = 10
+        .type = int
+    }
+  }
 }
 
-graphs {
+graphs
+  .short_caption = Analysis Graphs
+  {
   program_analysis {
     font_scale = 0.03
       .type = float(value_min=0.0)
@@ -593,10 +718,19 @@ graphs {
   }
 }
 
-programs {
-  solution {
-    smtbx {
-      cf {
+programs
+  .short_caption = Program Settings
+  {
+
+  solution
+    .short_caption = Structure Solution
+    {
+    smtbx
+      .short_caption = olex2.solve
+      {
+      cf
+        .short_caption = Charge Flipping
+        {
         amplitude_type = F E *quasi-E
           .type = choice
         max_attempts_to_get_phase_transition = 5
@@ -610,7 +744,11 @@ programs {
     }
   }
 
-user {
+user
+  .short_caption = User Specific
+  {
+  expert_level = 0
+    .type = int
   alert_delete_history = Y
     .type = str
     .expert_level = 1
@@ -628,7 +766,18 @@ user {
     .type = str
   auto_refine_after_anis = True
     .type = bool
-
+  ccdc{
+    user_email = horst.puschmann@gmail.com
+      .type = str
+    ccdc_email = horst.puschmann@gmail.com
+      .type = str
+    portal_url = http://localhost:8080/structurespace/StructureSpace/ccdc_submit
+      .type = str
+    portal_username = ccdcsubmit
+      .type = str
+    portal_passwd = ccdcpass
+      .type = str
+  }
   image{
     bitmap{
       type = png
@@ -637,26 +786,26 @@ user {
   }
 }
 
-
 odac
   .expert_level = 2
+  .short_caption = ODAC Settings
 {
   source_dir = None
     .type = path
   is_active = False
     .type = bool
   debug{
-    debug = True
+    debug = False
       .type = bool
-    debug_deep1 = True
+    debug_deep1 = False
       .type = bool
-    debug_deep2 = True
+    debug_deep2 = False
       .type = bool
-    verbose = True
+    verbose = False
       .type = bool
   }
   version{
-    remote = "r39"
+    remote = "r41"
       .type = str
   }
 }

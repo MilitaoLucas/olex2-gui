@@ -50,6 +50,8 @@
   Stereo (Anaglyph)
   Stereo (Hardware)
   Normal View
+  Get CheckCif Report
+  Get CCDC Number
 
 
 [SMALL BUTTONS]
@@ -77,6 +79,8 @@
   Move Atoms or Model Disorder
   Electron Density Map
   Separate Moieties
+  Solve the Structure
+  Refine the Structure
 
 [TINY BUTTONS]
   a

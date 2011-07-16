@@ -1,5 +1,6 @@
 import olx
 import sys
+import os
 sys.path.append(r".\src")
 import userDictionaries
 from olexFunctions import OlexFunctions
@@ -7,6 +8,7 @@ OV = OlexFunctions()
 import htmlTools
 import olexex_setup
 import variableFunctions
+
 
 def sourceFilesHtmlMaker():
   list = [
@@ -80,13 +82,36 @@ def sourceFilesHtmlMaker():
   return retstr
 OV.registerFunction(sourceFilesHtmlMaker)
 
+
+def currentResultFilesHtmlMaker(type='cif'):
+  var = 'snum.current_result.%s' %type
+  val = OV.GetParam(var)
+  if not val:
+    val = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),type))
+
+  list = (
+    {'varName':str(var),
+      'itemName':'%s File' %type,
+      'value':val,
+      'chooseFile':{
+        'caption':'Choose %s file' %type,
+        'filter':'.%s files|*.%s' %(type, type),
+        'folder':'%s' %OV.FilePath(),
+        'function':'spy.SetParam(%s,' %var
+        },
+      },
+  )
+  return htmlTools.makeHtmlTable(list)
+OV.registerFunction(currentResultFilesHtmlMaker)
+
+
 def diffractionMetadataHtmlMaker():
   list = (
     {'varName':'snum.report.diffractometer',
      'readonly':'',
      'itemName':'%Diffractometer%',
      'items':userDictionaries.localList.getListDiffractometers(),
-     'onchange':"spy.addToLocalList(GetValue(SET_SNUM_REPORT_DIFFRACTOMETER),diffractometers)>>updatehtml",
+     'onchange':"spy.addToLocalList(GetValue(~name~),diffractometers)>>updatehtml",
      },
   )
 
@@ -128,10 +153,10 @@ def crystalMetadataHtmlMaker():
     {'varName':'_exptl_crystal_colour',
      'itemName':'%Colour%',
      'box1':{'varName':'_exptl_crystal_colour_lustre',
-             'items':'?;metallic;dull;clear'
+             'items':'?;.;metallic;dull;clear'
              },
      'box2':{'varName':'_exptl_crystal_colour_modifier',
-             'items':'?;light;dark;whitish;blackish;grayish;brownish;reddish;pinkish;orangish;yellowish;greenish;bluish'
+             'items':'?;.;light;dark;whitish;blackish;grayish;brownish;reddish;pinkish;orangish;yellowish;greenish;bluish'
              },
      'box3':{'varName':'_exptl_crystal_colour_primary',
              'items':'?;colourless;white;black;gray;brown;red;pink;orange;yellow;green;blue;violet'
@@ -172,13 +197,13 @@ def collectionMetadataHtmlMaker():
      'itemName':'%Submitter%',
      'items':userDictionaries.people.getListPeople(),
      'readonly':'',
-     'onchange':"spy.SetParam(snum.report.submitter,GetValue(SET_SNUM_REPORT_SUBMITTER))>>spy.addNewPerson(GetValue(SET_SNUM_REPORT_SUBMITTER))>>updatehtml",
+     'onchange':"spy.SetParam(snum.report.submitter,GetValue(~name~))>>spy.addNewPerson(GetValue(~name~))>>updatehtml",
      },
     {'varName':'snum.report.operator',
      'itemName':'%Operator%',
      'items':userDictionaries.people.getListPeople(),
      'readonly':'',
-     'onchange':"spy.SetParam(snum.report.operator,GetValue(SET_SNUM_REPORT_OPERATOR))>>spy.addNewPerson(GetValue(SET_SNUM_REPORT_OPERATOR))>>updatehtml",
+     'onchange':"spy.SetParam(snum.report.operator,GetValue(~name~))>>spy.addNewPerson(GetValue(~name~))>>updatehtml",
      },
     {'varName':'snum.report.date_submitted',
      'itemName':'%Date Submitted%',
@@ -221,7 +246,7 @@ def referenceMetadataHtmlMaker():
      'itemName':'%Volume%',
      },
     {'varName':'snum.dimas.reference_journal_pages',
-     'itemName':'%Volume%',
+     'itemName':'%Pages%',
      },
     {'varName':'snum.dimas.reference_journal_year',
      'itemName':'%Year%',
@@ -243,23 +268,23 @@ def publicationMetadataHtmlMaker():
      'itemName':'%Contact% %Author%',
      'items':userDictionaries.people.getListPeople(),
      'readonly':'',
-     'onchange':'spy.set_cif_item(_publ_contact_author_name,GetValue(SET__PUBL_CONTACT_AUTHOR_NAME))>>UpdateHtml'
+     'onchange':'spy.gui.report.publication.OnContactAuthorChange(~name~)',
      },
     {'varName':'_publ_contact_author_address',
      'itemName':'%Contact% %Author% %Address%',
      'multiline':'multiline',
      'value':'spy.getPersonInfo(GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),address)',
-     'onleave':'spy.changePersonInfo(GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),address,GetValue(SET__PUBL_CONTACT_AUTHOR_ADDRESS))>>spy.changeBoxColour(SET__PUBL_CONTACT_AUTHOR_ADDRESS,#FFDCDC)'
+     'onchange':'spy.gui.report.publication.OnPersonInfoChange(SET__PUBL_CONTACT_AUTHOR_NAME,address,~name~)'
      },
     {'varName':'_publ_contact_author_email',
      'itemName':'%Contact% %Author% %Email%',
      'value':'spy.getPersonInfo(GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),email)',
-     'onleave':'spy.changePersonInfo(GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),email,GetValue(SET__PUBL_CONTACT_AUTHOR_EMAIL))>>spy.changeBoxColour(SET__PUBL_CONTACT_AUTHOR_EMAIL,#FFDCDC)'
+     'onchange':'spy.gui.report.publication.OnPersonInfoChange(SET__PUBL_CONTACT_AUTHOR_NAME,email,~name~)'
      },
     {'varName':'_publ_contact_author_phone',
      'itemName':'%Contact% %Author% %Phone%',
      'value':'spy.getPersonInfo(GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),phone)',
-     'onleave':'spy.changePersonInfo(GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),phone,GetValue(SET__PUBL_CONTACT_AUTHOR_PHONE))>>spy.changeBoxColour(SET__PUBL_CONTACT_AUTHOR_PHONE,#FFDCDC)'
+     'onchange':'spy.gui.report.publication.OnPersonInfoChange(SET__PUBL_CONTACT_AUTHOR_NAME,phone,~name~)'
      },
   ]
   listAuthors = OV.GetParam('snum.metacif.publ_author_names')
@@ -279,20 +304,20 @@ def publicationMetadataHtmlMaker():
     if numberAuthors == 1:
       authorRow.setdefault('itemName','')
       authorRow.setdefault('field1',{'itemName':'%Author%'})
-      authorRow.setdefault('field2',{'itemName':'<a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Remove author from list"><zimg border="0" src="toolbar-delete.png"></a>' %str(i),
+      authorRow.setdefault('field2',{'itemName':'<a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Remove author from list"><zimg border="0" src="delete.png"></a>' %str(i),
                                      'fieldALIGN':'right'})
 
     elif i == 1:
       authorRow.setdefault('itemName','')
       authorRow.setdefault('field1',{'itemName':'%Authors%'})
-      authorRow.setdefault('field2',{'itemName':'<zimg border="0" src="toolbar-up-off.png"><a href="spy.move(down,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Move author down list"><zimg border="0" src="toolbar-down.png"></a> <a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Remove author from list"><zimg border="0" src="toolbar-delete.png"></a>' %(str(i),str(i)),
+      authorRow.setdefault('field2',{'itemName':'<zimg border="0" src="toolbar-up-off.png"><a href="spy.move(down,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Move author down list"><zimg border="0" src="toolbar-down.png"></a> <a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Remove author from list"><zimg border="0" src="delete.png"></a>' %(str(i),str(i)),
                                      'fieldALIGN':'right'})
     elif i == numberAuthors:
-      authorRow.setdefault('itemName','<a href="spy.move(up,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Move author up list"><zimg border="0" src="toolbar-up.png"></a><zimg border="0" src="toolbar-down-off.png"><a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Remove author from list"><zimg border="0" src="toolbar-delete.png"></a>' %(str(i),str(i)))
+      authorRow.setdefault('itemName','<a href="spy.move(up,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Move author up list"><zimg border="0" src="toolbar-up.png"></a><zimg border="0" src="toolbar-down-off.png"><a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Remove author from list"><zimg border="0" src="delete.png"></a>' %(str(i),str(i)))
       authorRow.setdefault('fieldALIGN','right')
       authorRow['bgcolor'] = OV.GetParam('gui.html.input_bg_colour')
     else:
-      authorRow.setdefault('itemName','<a href="spy.move(up,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Move author up list"><zimg border="0" src="toolbar-up.png"></a> <a href="spy.move(down,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Move author down list"><zimg border="0" src="toolbar-down.png"></a> <a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Remove author from list"><zimg border="0" src="toolbar-delete.png"></a>' %(str(i),str(i),str(i)))
+      authorRow.setdefault('itemName','<a href="spy.move(up,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Move author up list"><zimg border="0" src="toolbar-up.png"></a> <a href="spy.move(down,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Move author down list"><zimg border="0" src="toolbar-down.png"></a> <a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Remove author from list"><zimg border="0" src="delete.png"></a>' %(str(i),str(i),str(i)))
       authorRow.setdefault('fieldALIGN','right')
 
     list.append(authorRow)
@@ -303,14 +328,14 @@ def publicationMetadataHtmlMaker():
        'itemName':'%Author% %Address%',
        'multiline':'multiline',
        'value':'spy.getPersonInfo(GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),address)' %s,
-       'onleave':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),address,GetValue(SET_PUBL_AUTHOR_ADDRESS))>>spy.changeBoxColour(SET_PUBL_AUTHOR_ADDRESS,#FFDCDC)' %s
+       'onchange':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),address,GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)' %s
        }
     )
     list.append(
       {'varName':'publ_author_email',
        'itemName':'%Author% %Email%',
        'value':'spy.getPersonInfo(GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),email)' %s,
-       'onleave':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),email,GetValue(SET_PUBL_AUTHOR_EMAIL))>>spy.changeBoxColour(SET_PUBL_AUTHOR_EMAIL,#FFDCDC)' %s
+       'onchange':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),email,GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)' %s
        }
     )
   list.append(
@@ -320,19 +345,16 @@ def publicationMetadataHtmlMaker():
      'itemName':'%Add% %Author%',
      'items':userDictionaries.people.getListPeople(),
      'value':'?',
-     'onchange':"spy.AddNameToAuthorList(GetValue(ADD_PUBL_AUTHOR_NAME))>>updatehtml",
-     'onleave':"spy.AddNameToAuthorList(GetValue(ADD_PUBL_AUTHOR_NAME))>>updatehtml",
+     'onchange':"spy.gui.report.publication.OnAddNameToAuthorList(~name~)",
      }
   )
 
   for d in list:
     d.setdefault('ctrl_name','SET_%s' %str.upper(d['varName']).replace('.','_'))
     if 'ctrl_name' in d['varName']:
-      d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)>>updatehtml" %d)
+      d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)>>updatehtml" %d)
     elif 'author_name' in d['varName']:
       d.setdefault('onchange','')
-    elif 'author' in d['varName']:
-      d.setdefault('onleave','')
   retstr = htmlTools.makeHtmlTable(list)
 
   list = [
@@ -340,7 +362,8 @@ def publicationMetadataHtmlMaker():
      'itemName':'%Requested% %Journal%',
      'items':userDictionaries.localList.getListJournals(),
      'readonly':'',
-     'onchange':'spy.addToLocalList(GetValue(SET__PUBL_REQUESTED_JOURNAL),requested_journal)>>spy.changeBoxColour(SET__PUBL_REQUESTED_JOURNAL,#FFDCDC)',
+     'value':'spy.get_cif_item(_publ_requested_journal)',
+     'onchange':'spy.addToLocalList(GetValue(~name~),requested_journal)>>spy.changeBoxColour(~name~,#FFDCDC)',
      }
   ]
 
@@ -358,12 +381,12 @@ def publicationMetadataHtmlMaker():
 OV.registerFunction(publicationMetadataHtmlMaker)
 
 def contactLetter():
-  user_input_variables = OV.GetParam('snum.metacif.user_input_variables')
-  if user_input_variables is None or 'publ_contact_letter' not in user_input_variables:
+  letterText = OV.get_cif_item('_publ_contact_letter')
+  if letterText is None:
     import datetime
     today = datetime.date.today()
     date = today.strftime("%x")
-    journal = OV.GetParam('snum.metacif.publ_requested_journal')
+    journal = OV.get_cif_item('_publ_requested_journal')
     fileName = olx.FileName()
     authorList = OV.GetParam('snum.metacif.publ_author_names')
     authors = ''
@@ -402,35 +425,11 @@ the paper 'ENTER PAPER TITLE' by
 The paper will be submitted to %s.
 """ %(date,fileName,authors,journal)
 
-  else:
-    letterText = OV.GetParam('snum.metacif.publ_contact_letter')
-
   inputText = OV.GetUserInput(0,'_publ_contact_letter',letterText)
-  if inputText == '':
-    OV.SetParam('snum.metacif.publ_contact_letter', letterText)
-  elif inputText != letterText:
-    OV.SetParam('snum.metacif.publ_contact_letter', inputText)
-    variableFunctions.AddVariableToUserInputList('publ_contact_letter')
-  elif 'publ_contact_letter' not in OV.GetParam('snum.metacif.user_input_variables'):
-    OV.SetParam('snum.metacif.publ_contact_letter', letterText)
-  else:
-    pass
+  if inputText is not None:
+    OV.set_cif_item('_publ_contact_letter', inputText);
   return ""
 OV.registerFunction(contactLetter)
-
-def AddNameToAuthorList(newName):
-  oldValue = OV.GetParam("snum.metacif.publ_author_names")
-  if newName != '?':
-    if oldValue is None:
-      newValue = newName
-    elif newName in oldValue:
-      newValue = oldValue
-      print "%s is already in the list of authors" %newName
-    else:
-      newValue = oldValue + ";" + newName
-    OV.SetParam("snum.metacif.publ_author_names", newValue)
-  return ""
-OV.registerFunction(AddNameToAuthorList)
 
 def move(arg,name):
   listNames = OV.GetParam('snum.metacif.publ_author_names').split(';')
@@ -486,7 +485,8 @@ def restraint_builder(cmd):
     "EXYZ":["name_EXYZ", "help_exyz-htmhelp"],
     "EADP":["name_EADP", "help_eadp-htmhelp"],
     "AFIX":["name_AFIX", "var_m:6;5;10;11", "var_n:6;9", "help_AFIX-use-help"],
-    "RRINGS":["name_RRINGS", "var_d: ", "var_s1:0.02", "help_rrings-htmhelp"],
+#    "RRINGS":["name_RRINGS", "var_d:1.39 ", "var_s1:0.02", "help_rrings-htmhelp"],
+    "RRINGS":["name_RRINGS", "help_rrings-htmhelp"],
     "TRIA":["name_TRIA", "var_distance: ", "var_angle: ", "help_tria-htmhelp"],
   }
 
@@ -540,7 +540,7 @@ def restraint_builder(cmd):
            "value":val,
            "width":width,
            "height":height,
-           "bgcolor":"$spy.GetParam\(gui.html.input_bg_colour)"
+           "bgcolor":"$spy.GetParam(gui.html.input_bg_colour)"
            }
       if items:
         d.setdefault("items",items)
@@ -570,6 +570,9 @@ def restraint_builder(cmd):
       "width":50, "height":height,
       "hint":"Removes the current AFIX command from the structure",
     }
+    
+  if name == "RRINGS":
+    post_onclick = ">>sel -u"
 
   has_modes = []
   if name in has_modes:
@@ -634,9 +637,9 @@ def checkErrLogFile():
 OV.registerFunction(checkErrLogFile)
 
 def weightGuiDisplay():
-  gui_green = OV.FindValue('gui_green')
-  gui_orange = OV.FindValue('gui_orange')
-  gui_red = OV.FindValue('gui_red')
+  gui_green = OV.GetParam('gui.green')
+  gui_orange = OV.GetParam('gui.orange')
+  gui_red = OV.GetParam('gui.red')
   longest = 0
   retVal = ""
   current_weight = olx.Ins('weight')
@@ -672,17 +675,19 @@ def weightGuiDisplay():
        }
   box = htmlTools.make_tick_box_input(d)
 
-  a, b = suggested_weight
+  wght_str = ""
+  for i in suggested_weight:
+    wght_str += " %.4f" %i
   txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update")
   txt_Weight = OV.TranslatePhrase("Weight")
   html = '''
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_UPDATE_WEIGHT'>
   <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
   <td VALIGN='right' colspan=3>
-    <b><a target="%s" href="UpdateWght %.4f %.4f>>UpdateHtml">%s: %s</a></b></td>
+    <b><a target="%s" href="UpdateWght%s>>UpdateHtml">%s: %s</a></b></td>
     <td VALIGN='center' ALIGN='right' colspan=1>%s</td>
 </tr>
-    ''' %(txt_tick_the_box, a, b, txt_Weight, html_scheme, box)
+    ''' %(txt_tick_the_box, wght_str, txt_Weight, html_scheme, box)
   return html
 OV.registerFunction(weightGuiDisplay)
 
@@ -721,3 +726,19 @@ def getCellHTML():
 
   return html
 OV.registerFunction(getCellHTML)
+
+def refineDataMaker():
+
+  txt = """
+<tr><td>R1(Fo > 4sig(Fo))</td><td>0.0511</td><td>R1(all data)</td><td>0.0690</td></tr>
+<tr><td>wR2</td><td>0.1138</td><td>GooF</td><td>1.16</td></tr>
+<tr><td>GooF(Restr)</td><td>1.16</td><td>Highest peak</td><td>0.32</td></tr>
+<tr><td>Deepest hole</td><td>-0.32</td><td>Params</td><td>216</td></tr>
+<tr><td>Refs(total)</td><td>6417</td><td>Refs(uni)</td><td>2803</td></tr>
+<tr><td>Refs(Fo > 4sig(Fo))</td><td>2366</td><td>R(int)</td><td>0.061</td></tr>
+<tr><td>R(sigma)</td><td>0.055</td><td>F000</td><td>364</td></tr>
+<tr><td>&rho;/g*mm<sup>-3</sup></td><td>1.574</td><td>&mu;/mm<sup>-1</sup></td><td>0.140</td></tr>
+"""
+  OV.write_to_olex("refinedata.htm", txt)
+  OV.UpdateHtml()
+OV.registerFunction(refineDataMaker)

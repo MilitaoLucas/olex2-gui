@@ -38,10 +38,10 @@ solvers_default_method = 'Gauss-Newton'
 class olex2_normal_eqns(least_squares.crystallographic_ls):
   log = None
 
-  def __init__(self, fo_sq, reparametrisation, olx_atoms, **kwds):
+  def __init__(self, observations, reparametrisation, olx_atoms, **kwds):
     self.olx_atoms = olx_atoms
     least_squares.crystallographic_ls.__init__(
-      self, fo_sq, reparametrisation, initial_scale_factor=OV.GetOSF(), **kwds)
+      self, observations, reparametrisation, initial_scale_factor=OV.GetOSF(), **kwds)
 
   def step_forward(self):
     self.xray_structure_pre_cycle = self.xray_structure.deep_copy_scatterers()
@@ -57,7 +57,7 @@ class olex2_normal_eqns(least_squares.crystallographic_ls):
   def show_cycle_summary(self, log=None):
     if log is None: log = sys.stdout
     print >> log, "wR2 = %.4f for %i data and %i parameters" %(
-      self.wR2(), self.fo_sq.size(),
+      self.wR2(), self.observations.fo_sq.size(),
       self.reparametrisation.n_independent_params)
     print >> log, "GooF = %.4f" %(self.goof(),)
     max_shift_site = self.max_shift_site()
@@ -198,19 +198,22 @@ class olex2_normal_eqns(least_squares.crystallographic_ls):
     for var in self.shared_param_constraints:
       OV.SetFVar(var[0], var[1].value.value*var[2])
     #update BASF
-    if self.twin_components is not None:
-      basf = ' '.join('%f' %component.twin_fraction
-                      for component in self.twin_components
-                      if component.grad_twin_fraction)
+    if self.twin_fractions is not None:
+      basf = ' '.join('%f' %fraction.value
+                      for fraction in self.twin_fractions
+                      if fraction.grad)
       if basf: olx.AddIns('BASF ' + basf)
     #update EXTI
     if self.reparametrisation.extinction.grad:
       OV.SetExtinction(self.reparametrisation.extinction.value)
+    for (i,r) in enumerate(self.shared_rotated_adps):
+      if r.refine_angle:
+        olx.xf_rm_UpdateCR('olex2.constraint.rotated_adp', i, r.angle.value*180/math.pi)
     olx.xf_EndUpdate()
 
 
 class FullMatrixRefine(OlexCctbxAdapter):
-  def __init__(self, max_cycles=None, max_peaks=5, verbose=False):
+  def __init__(self, max_cycles=None, max_peaks=5, verbose=False, on_completion=None):
     OlexCctbxAdapter.__init__(self)
     self.max_cycles = max_cycles
     self.max_peaks = max_peaks
@@ -218,8 +221,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
     sys.stdout.refresh = False
     self.scale_factor = None
     self.failure = False
-    self.log = open(OV.file_ChangeExt(OV.FileFull(), 'log'), 'wb')
+    self.log = open(OV.file_ChangeExt(OV.FileFull(), 'log'), 'w')
     self.flack = None
+    self.on_completion = on_completion
 
   def run(self):
     self.reflections.show_summary(log=self.log)
@@ -266,9 +270,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
       conformer_indices=flex.size_t(list(conformer_indices)),
       sym_excl_indices=flex.size_t(list(sym_excl_indices)))
     olx_conn = self.olx_atoms.model['conn']
-    def rt_mx(olx_input):
-      from libtbx.utils import flat_list
-      return sgtbx.rt_mx(flat_list(olx_input[:-1]), olx_input[-1])
     equivs = self.olx_atoms.model['equivalents']
     for i_seq, v in olx_conn['atom'].items():
       for bond_to_delete in v.get('delete', []):
@@ -276,13 +277,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
           connectivity_table.remove_bond(i_seq, bond_to_delete['to'])
         else:
           connectivity_table.remove_bond(
-            i_seq, bond_to_delete['to'], rt_mx(equivs[bond_to_delete['eqiv']]))
+            i_seq, bond_to_delete['to'],
+            rt_mx_from_olx(equivs[bond_to_delete['eqiv']]))
       for bond_to_add in v.get('create', []):
         if bond_to_add['eqiv'] == -1:
           connectivity_table.add_bond(i_seq, bond_to_add['to'])
         else:
           connectivity_table.add_bond(
-            i_seq, bond_to_add['to'], rt_mx(equivs[bond_to_add['eqiv']]))
+            i_seq, bond_to_add['to'],
+            rt_mx_from_olx(equivs[bond_to_add['eqiv']]))
     temp = self.olx_atoms.exptl['temperature']
     if temp < -274: temp = 20
     #set up extinction correction if defined
@@ -298,9 +301,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
       structure=self.xray_structure(),
       constraints=self.constraints,
       connectivity_table=connectivity_table,
-      twin_components=self.twin_components,
+      twin_fractions=self.get_twin_fractions(),
       temperature=temp,
-      extinction = self.extinction
+      extinction = self.extinction,
+      directions=self.directions
     )
     weight = self.olx_atoms.model['weight']
     params = dict(a=0.1, b=0,
@@ -309,10 +313,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
     for param, value in zip(params.keys()[:min(2,len(weight))], weight):
       params[param] = value
     weighting = least_squares.mainstream_shelx_weighting(**params)
-    self.reflections.f_sq_obs_filtered = self.reflections.f_sq_obs_filtered.sort(
-      by_value="resolution")
+    #self.reflections.f_sq_obs_filtered = self.reflections.f_sq_obs_filtered.sort(
+    #  by_value="resolution")
     self.normal_eqns = olex2_normal_eqns(
-      self.reflections.f_sq_obs_filtered,
+      self.observations,
       self.reparametrisation,
       self.olx_atoms,
       f_mask=self.f_mask,
@@ -321,6 +325,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       log=self.log
     )
     self.normal_eqns.shared_param_constraints = self.shared_param_constraints
+    self.normal_eqns.shared_rotated_adps = self.shared_rotated_adps
     method = OV.GetParam('snum.refinement.method')
     iterations = solvers.get(method)
     if iterations == None:
@@ -366,36 +371,50 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.post_peaks(fo_minus_fc, max_peaks=self.max_peaks)
       self.show_summary()
       self.show_comprehensive_summary(log=self.log)
-      f = open(OV.file_ChangeExt(OV.FileFull(), 'cif'), 'wb')
+      block_name = OV.FileName().replace(' ', '')
+      f = open(OV.file_ChangeExt(OV.FileFull(), 'cif'), 'w')
       cif = iotbx.cif.model.cif()
-      cif[OV.FileName().replace(' ', '')] = self.as_cif_block()
+      cif[block_name] = self.as_cif_block()
       print >> f, cif
       f.close()
-      #self.output_fcf()
+      self.output_fcf()
       new_weighting = weighting.optimise_parameters(
-        self.normal_eqns.fo_sq,
+        self.normal_eqns.observations.fo_sq,
         self.normal_eqns.fc_sq,
         self.normal_eqns.scale_factor(),
         self.reparametrisation.n_independent_params)
       OV.SetParam(
         'snum.refinement.suggested_weight', "%s %s" %(new_weighting.a, new_weighting.b))
+      if self.on_completion:
+        self.on_completion(cif[block_name])
     finally:
       sys.stdout.refresh = True
       self.log.close()
 
+  def get_twin_fractions(self):
+    rv = None
+    if self.twin_fractions is not None:
+      rv = self.twin_fractions
+    if self.twin_components is not None:
+      if rv is None:
+        rv = self.twin_components
+      else:
+        rv += self.twin_components
+    return rv
+
   def check_flack(self):
     if (not self.xray_structure().space_group().is_centric()
-        and self.normal_eqns.fo_sq.anomalous_flag()):
+        and self.normal_eqns.observations.fo_sq.anomalous_flag()):
       if (self.twin_components is not None and len(self.twin_components)
           and self.twin_components[0].twin_law == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
-        if self.twin_components[0].grad_twin_fraction:
-          flack = self.twin_components[0].twin_fraction
+        if self.twin_components[0].grad:
+          flack = self.twin_components[0].value
           su = math.sqrt(self.twin_covariance_matrix.matrix_packed_u_diagonal()[0])
           self.flack = utils.format_float_with_standard_uncertainty(flack, su)
       else:
         from smtbx import absolute_structure
         flack = absolute_structure.flack_analysis(
-          self.normal_eqns.xray_structure, self.normal_eqns.fo_sq, self.extinction)
+          self.normal_eqns.xray_structure, self.observations, self.extinction)
         self.flack = utils.format_float_with_standard_uncertainty(
           flack.flack_x, flack.sigma_x)
 
@@ -407,6 +426,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         return "%s%.2f" %(type, count)
       else:
         return "%s%.1f" %(type, count)
+    refinement_refs = self.normal_eqns.observations.fo_sq
     unit_cell_content = self.xray_structure().unit_cell_content()
     formatted_type_count_pairs = []
     count = unit_cell_content.pop('C', None)
@@ -424,9 +444,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     two_theta_full = olx.Ins('acta')
     try: two_theta_full = float(two_theta_full)
     except ValueError: two_theta_full = uctbx.d_star_sq_as_two_theta(
-      uctbx.d_as_d_star_sq(
-        self.normal_eqns.fo_sq.d_max_min()[1]), self.wavelength, deg=True)
-    completeness_full = self.normal_eqns.fo_sq.resolution_filter(
+      uctbx.d_as_d_star_sq(refinement_refs.d_max_min()[1]), self.wavelength, deg=True)
+    completeness_full = refinement_refs.resolution_filter(
       d_min=uctbx.two_theta_as_d(two_theta_full, self.wavelength, deg=True)).completeness()
     shifts_over_su = flex.abs(
       self.normal_eqns.step() /
@@ -453,22 +472,47 @@ class FullMatrixRefine(OlexCctbxAdapter):
     # geometry loops
     cell_vcv = cell_vcv.matrix_symmetric_as_packed_u()
     connectivity_full = self.reparametrisation.connectivity_table
-    distances = iotbx.cif.distances_as_cif_loop(
+    distances = iotbx.cif.geometry.distances_as_cif_loop(
       connectivity_full.pair_asu_table,
       site_labels=xs.scatterers().extract_labels(),
       sites_frac=xs.sites_frac(),
       covariance_matrix=self.covariance_matrix_and_annotations.matrix,
       cell_covariance_matrix=cell_vcv,
-      parameter_map=xs.parameter_map())
-    angles = iotbx.cif.angles_as_cif_loop(
+      parameter_map=xs.parameter_map(),
+      include_bonds_to_hydrogen=True,
+      fixed_distances=self.reparametrisation.fixed_distances)
+    angles = iotbx.cif.geometry.angles_as_cif_loop(
       connectivity_full.pair_asu_table,
       site_labels=xs.scatterers().extract_labels(),
       sites_frac=xs.sites_frac(),
       covariance_matrix=self.covariance_matrix_and_annotations.matrix,
       cell_covariance_matrix=cell_vcv,
-      parameter_map=xs.parameter_map())
+      parameter_map=xs.parameter_map(),
+      include_bonds_to_hydrogen=True,
+      fixed_angles=self.reparametrisation.fixed_angles,
+      conformer_indices=self.reparametrisation.connectivity_table.conformer_indices)
     cif_block.add_loop(distances.loop)
     cif_block.add_loop(angles.loop)
+    htabs = [i for i in self.olx_atoms.model['info_tables'] if i['type'] == 'HTAB']
+    equivs = self.olx_atoms.model['equivalents']
+    hbonds = []
+    for htab in htabs:
+      atoms = htab['atoms']
+      rt_mx = None
+      if atoms[1][1] > -1:
+        rt_mx = rt_mx_from_olx(equivs[atoms[1][1]])
+      hbonds.append(
+        iotbx.cif.geometry.hbond(atoms[0][0], atoms[1][0], rt_mx=rt_mx))
+    if len(hbonds):
+      hbonds_loop = iotbx.cif.geometry.hbonds_as_cif_loop(
+        hbonds,
+        connectivity_full.pair_asu_table,
+        site_labels=xs.scatterers().extract_labels(),
+        sites_frac=xs.sites_frac(),
+        covariance_matrix=self.covariance_matrix_and_annotations.matrix,
+        cell_covariance_matrix=cell_vcv,
+        parameter_map=xs.parameter_map())
+      cif_block.add_loop(hbonds_loop.loop)
     self.restraints_manager().add_to_cif_block(cif_block, xs)
     # cctbx could make e.g. 1.001(1) become 1.0010(10), so use Olex2 values for cell
     cif_block['_cell_length_a'] = olx.xf_uc_CellEx('a')
@@ -488,17 +532,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
              = "%.4f" %xs.f_000(include_inelastic_part=True)
     #
     fo2 = self.reflections.f_sq_obs
-    hklstat = olex_core.GetHklStat()
     merging = self.reflections.merging
     min_d_star_sq, max_d_star_sq = fo2.min_max_d_star_sq()
-    fo2 = self.reflections.f_sq_obs
-    h_min, k_min, l_min = hklstat['MinIndexes']
-    h_max, k_max, l_max = hklstat['MaxIndexes']
+    (h_min, k_min, l_min), (h_max, k_max, l_max) = fo2.min_max_indices()
     cif_block['_diffrn_measured_fraction_theta_full'] = fmt % completeness_full
     cif_block['_diffrn_radiation_wavelength'] = self.wavelength
     cif_block['_diffrn_reflns_number'] = fo2.eliminate_sys_absent().size()
-    cif_block['_diffrn_reflns_av_R_equivalents'] = "%.4f" %merging.r_int()
-    cif_block['_diffrn_reflns_av_unetI/netI'] = "%.4f" %merging.r_sigma()
+    if merging is not None:
+      cif_block['_diffrn_reflns_av_R_equivalents'] = "%.4f" %merging.r_int()
+      cif_block['_diffrn_reflns_av_unetI/netI'] = "%.4f" %merging.r_sigma()
     cif_block['_diffrn_reflns_limit_h_min'] = h_min
     cif_block['_diffrn_reflns_limit_h_max'] = h_max
     cif_block['_diffrn_reflns_limit_k_min'] = k_min
@@ -509,7 +551,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       0.5 * uctbx.d_star_sq_as_two_theta(min_d_star_sq, self.wavelength, deg=True))
     cif_block['_diffrn_reflns_theta_max'] = "%.2f" %(
       0.5 * uctbx.d_star_sq_as_two_theta(max_d_star_sq, self.wavelength, deg=True))
-    cif_block['_diffrn_reflns_theta_full'] = two_theta_full/2
+    cif_block['_diffrn_reflns_theta_full'] = fmt % (two_theta_full/2)
     #
     cif_block['_refine_diff_density_max'] = fmt % self.diff_stats.max()
     cif_block['_refine_diff_density_min'] = fmt % self.diff_stats.min()
@@ -538,10 +580,25 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.normal_eqns.weighting_scheme)
     cif_block['_refine_ls_weighting_scheme'] = 'calc'
     cif_block['_refine_ls_wR_factor_ref'] = fmt % self.normal_eqns.wR2()
+    min_d_star_sq, max_d_star_sq = refinement_refs.min_max_d_star_sq()
+    (h_min, k_min, l_min), (h_max, k_max, l_max) = refinement_refs.min_max_indices()
+    if (refinement_refs.space_group().is_centric() or
+        not refinement_refs.anomalous_flag()):
+      cif_block['_reflns_Friedel_coverage'] = '0.0'
+    else:
+      cif_block['_reflns_Friedel_coverage'] = "%.3f" %(
+        refinement_refs.n_bijvoet_pairs()/
+        refinement_refs.complete_set().n_bijvoet_pairs())
+    cif_block['_reflns_limit_h_min'] = h_min
+    cif_block['_reflns_limit_h_max'] = h_max
+    cif_block['_reflns_limit_k_min'] = k_min
+    cif_block['_reflns_limit_k_max'] = k_max
+    cif_block['_reflns_limit_l_min'] = l_min
+    cif_block['_reflns_limit_l_max'] = l_max
     cif_block['_reflns_number_gt'] = (
-      self.normal_eqns.fo_sq.data() > 2 * self.normal_eqns.fo_sq.sigmas()).count(True)
-    cif_block['_reflns_number_total'] = self.normal_eqns.fo_sq.size()
-    cif_block['_reflns_threshold_expression'] = 'I>2u(I)' # XXX is this correct?
+      refinement_refs.data() > 2 * refinement_refs.sigmas()).count(True)
+    cif_block['_reflns_number_total'] = refinement_refs.size()
+    cif_block['_reflns_threshold_expression'] = 'I>=2u(I)' # XXX is this correct?
     def sort_key(key, *args):
       if key.startswith('_space_group_symop') or key.startswith('_symmetry_equiv'):
         return -1
@@ -557,22 +614,60 @@ class FullMatrixRefine(OlexCctbxAdapter):
     return cif_block
 
   def output_fcf(self):
-    f = open(OV.file_ChangeExt(OV.FileFull(), 'fcf'), 'wb')
+    try: list_code = int(olx.Ins('list'))
+    except: list_code = None
+    if list_code is None: return
     cif = iotbx.cif.model.cif()
-    fc_sq = self.normal_eqns.f_calc.as_intensity_array()
-    fc_sq = fc_sq.customized_copy(data=fc_sq.data()*self.scale_factor)
-    mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
-      fc_sq, array_type='calc')
-    mas_as_cif_block.add_miller_array(
-      self.normal_eqns.fo_sq, array_type='meas')
-    cif[OV.FileName().replace(' ', '')] = mas_as_cif_block.cif_block
-    from libtbx.utils import time_log
-    time_fcf = time_log("fast").start()
-    fmt_str="%4i"*3 + "%12.2f"*2 + "%10.2f"
+    if list_code == 4:
+      fc_sq = self.normal_eqns.fc_sq.sort(by_value="packed_indices")
+      fo_sq = self.normal_eqns.observations.fo_sq.sort(by_value="packed_indices")
+      fo_sq = fo_sq.customized_copy(
+        data=fo_sq.data()*(1/self.scale_factor),
+        sigmas=fo_sq.sigmas()*(1/self.scale_factor))
+      mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
+        fc_sq, array_type='calc')
+      mas_as_cif_block.add_miller_array(fo_sq, array_type='meas')
+      _refln_include_status = fc_sq.array(data=flex.std_string(fc_sq.size(), 'o'))
+      mas_as_cif_block.add_miller_array(
+        #_refln_include_status, column_name='_refln_include_status')
+        _refln_include_status, column_name='_refln_observed_status') # checkCIF only accepts this one
+      fmt_str="%4i"*3 + "%12.2f"*2 + "%10.2f" + " %s"
+    elif list_code == 3:
+      if self.hklf_code == 5:
+        fo_sq, fc = self.get_fo_sq_fc()
+        fo = fo_sq.as_amplitude_array().sort(by_value="packed_indices")
+      else:
+        fc = self.normal_eqns.f_calc.customized_copy(anomalous_flag=False)
+        fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
+          data=self.normal_eqns.observations.fo_sq.data()*(1/self.scale_factor),
+          sigmas=self.normal_eqns.observations.fo_sq.sigmas()*(1/self.scale_factor),
+          anomalous_flag=False)
+        fo_sq = fo_sq.eliminate_sys_absent().merge_equivalents(algorithm="shelx").array()
+        fo = fo_sq.as_amplitude_array().sort(by_value="packed_indices")
+        fc, fo = fc.map_to_asu().common_sets(fo)
+      mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
+        fo, array_type='meas')
+      mas_as_cif_block.add_miller_array(
+        fc, column_names=['_refln_A_calc', '_refln_B_calc'])
+      fmt_str="%4i"*3 + "%12.4f"*4
+    else:
+      print "list code %i not supported" %i
+      return
+    # cctbx could make e.g. 1.001(1) become 1.0010(10), so use Olex2 values for cell
+    cif_block = iotbx.cif.model.block()
+    cif_block['_shelx_refln_list_code'] = list_code
+    cif_block.update(mas_as_cif_block.cif_block)
+
+    cif_block['_cell_length_a'] = olx.xf_uc_CellEx('a')
+    cif_block['_cell_length_b'] = olx.xf_uc_CellEx('b')
+    cif_block['_cell_length_c'] = olx.xf_uc_CellEx('c')
+    cif_block['_cell_angle_alpha'] = olx.xf_uc_CellEx('alpha')
+    cif_block['_cell_angle_beta'] = olx.xf_uc_CellEx('beta')
+    cif_block['_cell_angle_gamma'] = olx.xf_uc_CellEx('gamma')
+    cif_block['_cell_volume'] = olx.xf_uc_VolumeEx()
+    cif[OV.FileName().replace(' ', '')] = cif_block
+    f = open(OV.file_ChangeExt(OV.FileFull(), 'fcf'), 'w')
     cif.show(out=f, loop_format_strings={'_refln':fmt_str})
-    time_fcf.stop()
-    print time_fcf.legend
-    print time_fcf.report()
     f.close()
 
   def setup_shared_parameters_constraints(self):
@@ -586,6 +681,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
         current = site.shared_site(kwds["i_seqs"])
         constraints.append(current)
 
+    directions = self.olx_atoms.model.get('olex2.direction', ())
+    self.directions = [d for d in directions]
+
+    shared_rotated_adp = self.olx_atoms.model.get('olex2.constraint.rotated_adp', ())
+    self.shared_rotated_adps = []
+    for c in shared_rotated_adp:
+      current = adp.shared_rotated_u(c[0], c[1], c[2], c[3], c[4])
+      constraints.append(current)
+      self.shared_rotated_adps.append(current)
+      
     self.shared_param_constraints = []
     vars = self.olx_atoms.model['variables']['variables']
     for i, var in enumerate(vars):
@@ -714,21 +819,25 @@ class FullMatrixRefine(OlexCctbxAdapter):
     wFile.close()
 
   def f_obs_minus_f_calc_map(self, resolution):
-    fo2 = self.normal_eqns.fo_sq.average_bijvoet_mates()
-    f_calc = self.normal_eqns.f_calc.average_bijvoet_mates()
     scale_factor = self.scale_factor
-    if (    self.twin_components is not None
+    if self.hklf_code == 5:
+      fo2, f_calc = self.get_fo_sq_fc()
+    else:
+      fo2 = self.normal_eqns.observations.fo_sq.average_bijvoet_mates()
+      if( self.twin_components is not None
         and self.twin_components[0].twin_law != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
-      import cctbx_controller
-      hemihedral_twinning = cctbx_controller.hemihedral_twinning(
-        self.twin_components[0].twin_law.as_double(), miller_set=fo2)
-      #fo2 = hemihedral_twinning.detwin_with_twin_fraction(
-        #fo2, self.twin_components[0].twin_fraction)
-      f_calc = hemihedral_twinning.twin_complete_set.structure_factors_from_scatterers(
-        self.xray_structure()).f_calc()
-      fo2 = hemihedral_twinning.detwin_with_model_data(
-        fo2, f_calc, self.twin_components[0].twin_fraction)
-      f_calc = f_calc.common_set(fo2)
+        import cctbx_controller
+        hemihedral_twinning = cctbx_controller.hemihedral_twinning(
+          self.twin_components[0].twin_law.as_double(), miller_set=fo2)
+        #fo2 = hemihedral_twinning.detwin_with_twin_fraction(
+          #fo2, self.twin_components[0].twin_fraction)
+        f_calc = hemihedral_twinning.twin_complete_set.structure_factors_from_scatterers(
+          self.xray_structure()).f_calc()
+        fo2 = hemihedral_twinning.detwin_with_model_data(
+          fo2, f_calc, self.twin_components[0].value)
+        f_calc = f_calc.common_set(fo2)
+      else:
+        f_calc = self.normal_eqns.f_calc.average_bijvoet_mates()
     f_obs = fo2.f_sq_as_f()
     if scale_factor is None:
       k = f_obs.scale_factor(f_calc)
@@ -776,7 +885,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     print >> log, str(self.cycles)
     print >> log, "Summary after %i cycles:" %self.cycles.n_iterations
     print >> log, "R1 (all data): %.4f for %i reflections" % self.r1_all_data
-    print >> log, "R1: %.4f for %i reflections I > 2u(I)" % self.r1
+    print >> log, "R1: %.4f for %i reflections I >= 2u(I)" % self.r1
     print >> log, "wR2 = %.4f, GooF: %.4f" % (
       self.normal_eqns.wR2(), self.normal_eqns.goof())
     print >> log, "Difference map: max=%.2f, min=%.2f" %(
@@ -792,7 +901,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
       print >> log, "Twin summary:"
       print >> log, "twin_law  fraction  standard_uncertainty"
       for i, twin in enumerate(self.twin_components):
-        if twin.grad_twin_fraction:
+        if twin.grad:
           print >> log, "%-9s %-9.4f %.4f" %(
-            twin.twin_law.as_hkl(), twin.twin_fraction, math.sqrt(standard_uncertainties[i]))
+            twin.twin_law.as_hkl(), twin.value, math.sqrt(standard_uncertainties[i]))
 
+
+def rt_mx_from_olx(olx_input):
+  from libtbx.utils import flat_list
+  return sgtbx.rt_mx(flat_list(olx_input[:-1]), olx_input[-1])

@@ -179,7 +179,7 @@ def OlexCDS():
           number_of_hits_found = int(number_of_hits.group())
           if number_of_hits_found == 0:
             print "No results found"
-          elif number_of_hits_found > 10:
+          elif number_of_hits_found > 0:
             print "There are %d hits found do you wish to view them via CrystalWeb?"%number_of_hits_found
             #print "There are less than 10 hits we are getting the hits now"
             head = {'Cookie': DLCOOKIE, "action": "cwd4", "enctype" : "application/x-www-form-urlencoded"}
@@ -208,7 +208,7 @@ def OlexCDS():
     
             search_results = response.read()
             #print response.read()
-          else:
+          if number_of_hits_found > 0:
             print "There are %d hits, < 10 hits will be displayed > 10 openned in a browser"%number_of_hits_found
             head = {'Cookie': DLCOOKIE, "action": "cwd4", "enctype" : "application/x-www-form-urlencoded"}
             result_params = urlencode({
