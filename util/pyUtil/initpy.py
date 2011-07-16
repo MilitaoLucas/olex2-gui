@@ -161,6 +161,7 @@ def set_olex_paths():
   sys.path.append("%s" %basedir)
   sys.path.append("%s/etc/scripts" %basedir)
   sys.path.append("%s/util/pyUtil" %basedir)
+  sys.path.append("%s/util/pyUtil/misc" %basedir)
   sys.path.append("%s/util/pyUtil/PyToolLib" %basedir)
   sys.path.append("%s/util/pyUtil/PyToolLib/FileReaders" %basedir)
   sys.path.append("%s/util/pyUtil/CctbxLib" %basedir)
@@ -221,6 +222,8 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 if OV.HasGUI():
   import htmlMaker
+  from gui.home import *
+  from gui.report import *
 
 def onstartup():
   OV.SetVar('cbtn_solve_on','false')
@@ -276,6 +279,10 @@ onstartup()
 #       for bit in sys.path:
 #               print bit
 
+import urllib2
+# this overwrites the urllib2 default HTTP and HTTPS handlers
+import multipart
+
 
 if olx.IsPluginInstalled('plugin-Batch') == "true":
   import plugin_batch_exex
@@ -294,6 +301,7 @@ if olx.IsPluginInstalled('MySQL') == "true":
     print "MySQL Plugin is installed but a connection to the default server could not be established"
     print ex
 
+    
 if olexex.getKey():
   olexex.GetACF()
 
@@ -301,16 +309,24 @@ olexex.check_for_recent_update()
 
 if sys.platform[:3] == 'win':
   OV.SetVar('defeditor','notepad')
-  OV.SetVar('defexplorer','explorer')
+  OV.SetVar('defexplorer','shell')
 #else:
   #olx.SetVar('defeditor','gedit')
   #olx.SetVar('defexplorer','nautilus')
+
 
 try:
   import customScripts
 except ImportError, err:
   print "Could not import customScripts: %s" %err
 
+try:
+  import userScripts
+except ImportError, err:
+  print "Could not import userScripts: %s" %err
+  
+  
+  
 print "Welcome to Olex2"
 print "\nDolomanov, O.V.; Bourhis, L.J.; Gildea, R.J.; Howard, J.A.K.; Puschmann, H.,\nOLEX2: A complete structure solution, refinement and analysis program (2009).\nJ. Appl. Cryst., 42, 339-341.\n"
 

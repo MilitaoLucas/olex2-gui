@@ -7,16 +7,23 @@
   [RSC Journal Format]
 </p>
 
-<p class=journal_h1> 
+<p class=journal_h1>
   Experimental
 </p>
 
 <p class="journal">
   Single crystals of %$xf.getFormula(html)%
 	<span class=replaceThisChar>[%$spy.GetParam(snum.report.title)%]</span>
-	were recrystallised from 
+	were recrystallised from
   <span class=replaceThisChar>[solvents]</span>
-  mounted in inert oil and transferred to the cold gas stream of the diffractometer.
+  mounted in inert oil and transferred to a the gas stream at %27% K of a %$spy.GetParam(snum.report.diffractometer)% diffractometer.
+  Using Olex2 [1], the structure was solved with %$spy.GetParam(snum.solution.program)% [2] using %$spy.GetParam(snum.solution.method)% and refined with
+	%$spy.GetParam(snum.refinement.program)% [3] using %$spy.GetParam(snum.refinement.method)% minimisation.<br><br>
+
+	[1] %_computing_molecular_graphics%<br>
+	[2] %_computing_structure_solution%<br>
+	[3] %_computing_structure_refinement%<br>
+
 </p>
 
 <p class=journal_h2>
@@ -27,20 +34,20 @@
 <p class="journal">
 <b>Crystal Data.</b>
 %$xf.getFormula(html)%,
-<i>M&nbsp;</i>=%3%, 
-%1%, 
+<i>M&nbsp;</i>=%3%,
+%1%,
 <!--<i>a</i>&nbsp;= %5%, -->
 <!--<i>b</i>&nbsp;= %6%, -->
 <!--<i>c</i>&nbsp;= %7%, -->
 %$spy.getCellHTML()%
-<i>U&nbsp;</i>= %11%&nbsp;&Aring;<sup>3</sup>, 
+<i>U&nbsp;</i>= %11%&nbsp;&Aring;<sup>3</sup>,
 <i>T</i>&nbsp;= %27%,
-space group %$sg(%%h)% (no. %75%), 
-<i>Z</i>&nbsp;= %16%, 
+space group %$sg(%%h)% (no. %75%),
+<i>Z</i>&nbsp;= %16%,
 &#956;(%$spy.makeSpecialCifCharacter(\%76\%)%)&nbsp;= %19%,
-%29% reflections measured, 
-%37% unique (<i>R</i><sub>int</sub>&nbsp;= %38%) which were used in all calculations. 
-The final <i>wR</i>(<i>F</i><sub>2</sub>) was %54% (all data). 
+%29% reflections measured,
+%37% unique (<i>R</i><sub>int</sub>&nbsp;= %38%) which were used in all calculations.
+The final <i>wR</i>(<i>F</i><sub>2</sub>) was %54% (all data).
 </p>
 <p>
 

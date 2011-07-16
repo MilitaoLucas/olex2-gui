@@ -1,0 +1,28 @@
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
+
+<!--$spy.make_warning_html(6)-->
+
+<tr>
+  <td valign='top' width="8" align='center' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+  </td>
+  <td width='20%'>
+    <input
+      type="combo"
+      height="$spy.GetParam(gui.html.combo_height)"
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+      name="SET_OLEX_CONRES" 
+      items='RRINGS;TRIA;'
+      value="$spy.GetParam(snum.olex_conres) " 
+      width="70" 
+      onchange="spy.SetParam(snum.olex_conres,GetValue(SET_OLEX_CONRES))>>spy.restraint_builder(GetValue(SET_OLEX_CONRES))"
+      label="%Olex2 Name%"
+      readonly
+    >	
+  </td>
+  <td></td>
+  <td></td>
+
+<!-- #includeif fs.Exists(olex-conres-vars.htm) olex-conres-vars olex-conres-vars.htm;1; -->
+<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
+
+<!-- %rrings-htmhelp%, %tria-htmhelp% -->

@@ -1,0 +1,4 @@
+calculate-solvent-accessible-voids
+Get CheckCif Report
+calculate solvent accessible voids
+Get CCDC Number

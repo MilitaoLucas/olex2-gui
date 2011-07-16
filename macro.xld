@@ -12,7 +12,7 @@
       <cmd3 "py.run 'basedir()/util/pyUtil/initpy.py'">
       <cmd4 "if isos(linux) then setvar(defeditor,'gedit')">
       <cmd5 "if isos(linux) then setvar(defexplorer,'nautilus')">
-      <cmd6 "if isos(linux) then setvar(defbrowser,'htmlview')">
+      <cmd6 "if isos(linux) then setvar(defbrowser,'xdg-open')">
       <cmd4 "if isos(mac) then setvar(defeditor,'open')">
       <cmd5 "if isos(mac) then setvar(defexplorer,'open')">
       <cmd6 "if isos(mac) then setvar(defbrowser,'open')">
@@ -22,6 +22,7 @@
       <cmd9 "if and(isvar(startup),file.exists(app.getarg(1))) then none else 'reap getVar(startup)>>echo filepath()'">
       <cmd10 "bind wheel 'ShowQ -wheel='">
       <cmd11 "spy.GetTip(0)">
+      <cmd11 "spy.settings_tree()">
     \>
 
   <onterminate
@@ -42,7 +43,7 @@
       <arg5 name="base" def="basedir()">
       <arg6 name="ext" def="fileext()">
       <arg7 name="filefull" def="filefull()">
-      
+
       \>
     <cmd
       <cmd0  "xgrid.Visible(false)">
@@ -208,14 +209,13 @@
 />
 />
 
-<report help="Creates structure report"
+<report help="Creates structure report (macro.xld)"
   <body
     <args
     \>
     <cmd
       <cmd4 "cursor(busy, '%Checking for IMAGE file ...%')">
-      <cmd5 "if file.Exists(spy.GetParam(snum.report.image)) then None else 'spy.SetParam(snum.report.image,FilePath()/screenshot.png)'">
-      <cmd6 "if not(strcmp(file.GetName(spy.GetParam(snum.report.image)),screenshot.png)) then None else 'cursor(busy, Creating Image ...)>>pict -pq screenshot.png 1'>>cursor()">
+      <cmd2 "spy.dealWithReportImage()">
       <cmd13 "cursor()">
       <cmd7 "cursor(busy, '%Updating% Cif ...')">
       <cmd8 "spy.ExtractCifInfo()">
@@ -1037,6 +1037,7 @@
       <cmd1 "cursor(busy, %1)">
       <cmd2 "exec 'basedir()/util/pyUtil/pyTools.exe' %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5">
       <cmd3 "cursor()">
+
       \>
 
   <onterminate
@@ -1391,7 +1392,7 @@
 <dire help="Opens the current directory in Explorer"
   <body
     <cmd
-      <cmd0 "exec -o getvar(defexplorer) 'filepath()'">
+      <cmd0 "shell 'filepath()'">
     \>
   \>
 \>
@@ -1545,16 +1546,18 @@
   \>
 \>
 
-<gui3 help="Switch to Gui3"
+<g3 help="Switch to Gui3"
   <body
     <cmd
-      <cmd2 "SetVar('user_refinement_gui2',True)">
+      <cmd2 "clear">
       <cmd2 "itemstate * 0">
       <cmd2 "itemstate logo1 1">
       <cmd2 "itemstate info-title 1">
-      <cmd2 "itemstate index-all-in-one 1">
-      <cmd2 "itemstate aio-* 0">
-      <cmd2 "itemstate aio-choice 1">
+      <cmd2 "itemstate index-g3 1">
+      <cmd2 "itemstate g3-* 0">
+      <cmd2 "itemstate states 1">
+      <cmd2 "itemstate tasks 1">
+      <cmd2 "itemstate *tab-g3 2">
     \>
   \>
 \>
@@ -1643,13 +1646,13 @@
 \>
 
 
-<dires help="open the directory using explorer (Windows only)"
+<dires help="open the directory using explorer"
   <body
     <args
-      <arg1 name="datadir" def="%DataDir()">
+      <arg1 name="datadir" def="DataDir()">
     \>
     <cmd
-      <cmd1 'exec -o explorer %1'>
+      <cmd0 "shell '%1'">
     \>
   \>
 \>

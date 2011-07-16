@@ -10,6 +10,16 @@ import cProfile
 from subprocess import *
 import guiFunctions
 
+import socket
+import urllib
+import urllib2
+import pickle
+
+# timeout in seconds
+timeout = 15
+socket.setdefaulttimeout(timeout)
+
+
 HasGUI = olx.HasGUI() == 'true'
 if HasGUI:
   inheritFunctions = guiFunctions.GuiFunctions
@@ -56,6 +66,7 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
 
   def GetParam(self,variable):
+    retVal = ''
     try:
       if variable.startswith('gui'):
         handler = olx.gui_phil_handler
@@ -67,7 +78,6 @@ class OlexFunctions(inheritFunctions):
     except Exception, ex:
       print >> sys.stderr, "Variable %s could not be found" %(variable)
       sys.stderr.formatExceptionInfo()
-      retVal = ''
     return retVal
 
   def GetParam_as_string(self,variable):
@@ -83,26 +93,41 @@ class OlexFunctions(inheritFunctions):
     else:
       return None
 
-  def get_cif_item(self, key, default=None):
+  def get_cif_item(self, key, default="", html=False):
     if olx.cif_model is not None:
       data_name = self.FileName().replace(' ', '')
       if data_name not in olx.cif_model:
         import CifInfo
         CifInfo.ExtractCifInfo()
-      return olx.cif_model[data_name].get(key, default)
+      tem = olx.cif_model[data_name].get(key, default)
+      if tem is None: return default
+      retVal = default
+      if type(tem) == str:
+        if html:
+          tem = tem.replace(';\n','')
+          tem = tem.replace('\n;','')
+          tem = tem.replace('\n','<br>')
+        return tem
+      else:
+        try:
+          return ", ".join([bit for bit in tem])
+        except Exception, ex:
+          print ex
+      return retVal
     else:
       return default
 
   def set_cif_item(self, key, value):
-    data_name = self.FileName().replace(' ', '')
     if olx.cif_model is not None:
+      data_name = self.FileName().replace(' ', '')
+      data_block = olx.cif_model[data_name]
       if isinstance(value, basestring) and value.strip() == '': value = '?'
-      olx.cif_model[data_name][key] = value
+      data_block[key] = value
     user_modified = self.GetParam('snum.metacif.user_modified')
     if user_modified is None: user_modified = []
     if key not in user_modified:
       user_modified.append(key)
-    self.SetParam('snum.metacif.user_modified', user_modified)
+      self.SetParam('snum.metacif.user_modified', user_modified)
     if key == '_diffrn_ambient_temperature':
       value = str(value)
       if value not in ('?', '.'):
@@ -159,7 +184,7 @@ class OlexFunctions(inheritFunctions):
     except Exception, ex:
       print >> sys.stderr, "Could not set max peaks to %s" %(max_peaks)
       sys.stderr.formatExceptionInfo()
-  
+
   def GetOSF(self):
     try:
       a = float(olx.xf_rm_OSF())
@@ -168,7 +193,7 @@ class OlexFunctions(inheritFunctions):
       return a*a
     except:
       return None
-    
+
   def SetOSF(self, v):
     try:
       olx.xf_rm_OSF(math.sqrt(v))
@@ -181,7 +206,7 @@ class OlexFunctions(inheritFunctions):
       return float(olx.xf_rm_FVar(i))
     except:
       return None
-    
+
   def SetFVar(self, i, v):
     try:
       olx.xf_rm_FVar(i, v)
@@ -204,7 +229,7 @@ class OlexFunctions(inheritFunctions):
       return float(olx.xf_rm_Exti())
     except:
       return None
-    
+
   def SetExtinction(self, v):
     try:
       olx.xf_rm_Exti(v)
@@ -294,7 +319,10 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
 
   def write_to_olex(self,fileName,text,copyToDisk = False):
-    text = text.encode('utf-8')
+    try:
+      text = text.encode('utf-8')
+    except:
+      text = text.decode('utf-8')
     try:
       import OlexVFS
       OlexVFS.write_to_olex(fileName, text)
@@ -336,7 +364,7 @@ class OlexFunctions(inheritFunctions):
 
   def htmlPanelWidth(self):
     olex.m("HtmlPanelWidth")
-    
+
   def reloadStructureAtreap(self, path, file, fader=True):
     fader = self.FindValue('gui_use_fader')
     #print "AtReap %s/%s" %(path, file)
@@ -650,6 +678,89 @@ class OlexFunctions(inheritFunctions):
   def setAllMainToolbarTabButtons(self):
     import olexex
     olexex.setAllMainToolbarTabButtons()
+
+  def make_url_call(self, url, values):
+    proxy = self.get_proxy_from_usettings()
+    if proxy:  
+      proxies = {'http': proxy}
+    else:
+      proxies = {}
+    try:
+      opener = urllib2.build_opener(
+        urllib2.ProxyHandler(proxies))
+      response = opener.open(url,values)
+      try:
+        f = pickle.load(response) #This is required in cases where the query returns a dictionary
+      except:
+        f = response.read()
+    except:
+      print "\n++++++++++++++++++++++++++++++++++++++++++++++"
+      print "+ Could not reach update server at %s" %url
+      print "+ --------------------------------------------"
+      print "+ Please make sure your computer is online"
+      print "+ and that you can reach %s" %url
+      print "++++++++++++++++++++++++++++++++++++++++++++++\n"
+      return False
+    return f
+  
+  def get_proxy_from_usettings(self):
+    rFile = open("%s/usettings.dat" %OV.BaseDir(),'r')
+    lines = rFile.readlines()
+    rFile.close()
+    proxy = None
+    for line in lines:
+      if line.startswith('proxy='):
+        proxy = line.split('proxy=')[1].strip()
+    if proxy:
+      print "Using Proxy server %s" %proxy
+    else:
+      print "No Proxy server is set"
+    return proxy
+
+
+  def makeGeneralHtmlPop(self, phil_path, htm='htm', number_of_lines=0):
+    pop_name=OV.GetParam('%s.name' %phil_path)
+    htm=OV.GetParam('%s.%s' %(phil_path,htm))
+    width=OV.GetParam('%s.width' %phil_path)
+    height=OV.GetParam('%s.height' %phil_path)
+    auto_height_constant=OV.GetParam('%s.auto_height_constant' %phil_path)
+    auto_height_line=OV.GetParam('%s.auto_height_line' %phil_path)
+    position=OV.GetParam('%s.position' %phil_path)
+    x=OV.GetParam('%s.x' %phil_path)
+    y=OV.GetParam('%s.y' %phil_path)
+    border=OV.GetParam('%s.border' %phil_path)
+    if x is None: x = 0
+    if y is None: y = 0
+    htm = r"%s\%s" %(OV.BaseDir(), htm)
+    if not os.path.exists(htm):
+      OV.write_to_olex('generalPop.htm',htm)
+      htm = 'generalPop.htm'
+      t = htm
+    else:
+      t = open(htm,'r').read()
+    if height == "automatic":
+      number_of_lines = t.count("<br>")
+      number_of_lines += t.count("<tr>")
+      if phil_path == 'olex2.ccdc.pop':
+        number_of_lines += OV.get_cif_item('_publ_contact_author_address').count("\n")
+      height = number_of_lines * auto_height_line + auto_height_constant
+      #print "Number of lines: %s; Height: %s" %(number_of_lines, height)
+    if position == "center":
+      ws = olx.GetWindowSize('gl')
+      ws = [int(i) for i in ws.split(",")]
+      if width < ws[2]:
+        x = int(ws[2])/2 - width/2
+      else: x = 0
+      if height < ws[3]:
+        y = int(ws[3])/2 - height/2
+      else:
+        y = 0
+    pstr = "popup '%s' '%s' -t='%s' -w=%s -h=%s -x=%s -y=%s" %(pop_name, htm, pop_name, width+border*2 +10, height+border*2, x, y)
+    OV.cmd(pstr)
+    olx.html_SetBorders(pop_name,border)
+    OV.cmd(pstr)
+    olx.html_SetBorders(pop_name,border)
+#    olx.html_Reload(pop_name)
 
 
 def GetParam(variable):

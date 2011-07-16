@@ -1,16 +1,16 @@
-<CIF_TABLES 
+<CIF_TABLES
 
 <header caption="Tables Header" source="styles/$spy.GetParam(user.report_template).htm">
 <footer caption="Tables Footer" source="styles/footer.htm">
 
-<ang caption=" Bond Angles for $spy.GetParam(snum.report.title)." 
-tita="class=cifTableHeadline"  
+<ang caption=" Bond Angles for $spy.GetParam(snum.report.title)."
+tita="class=cifTableHeadline"
 coln='2'
 colsa='width="50px"'
-tha="class=cifTableFirst" 
+tha="class=cifTableFirst"
 taba="class=CifTable"
-rowa="class=cifTableRow" 
-foota="class=cifTableFooter" 
+rowa="class=cifTableRow"
+foota="class=cifTableFooter"
   <_geom_angle_atom_site_label_1 caption="Atom" atypenotequal="H" visible="true" cola="class='data'"\>
   <_geom_angle_atom_site_label_2 caption="Atom" atypenotequal="H" visible="true" cola="class='data'"\>
   <_geom_angle_atom_site_label_3 caption="Atom" atypenotequal="H" visible="true" cola="class='data'"\>
@@ -18,28 +18,28 @@ foota="class=cifTableFooter"
  \>
 
 
-<angst caption=" Angles for $spy.GetParam(snum.report.title)." 
- coln='2' 
+<angst caption=" Angles for $spy.GetParam(snum.report.title)."
+ coln='2'
  colsa='width="50px"'
  tita="class=angst"
  tha="class=cifTableFirst"
- taba="" 
- tha="" 
- rowa="class=angst" 
+ taba=""
+ tha=""
+ rowa="class=angst"
   <_geom_angle_atom_site_label_1 caption="Atom" visible="true" cola="class='data'"\>
   <_geom_angle_atom_site_label_2 caption="Atom" visible="true" \>
   <_geom_angle_atom_site_label_3 caption="Atom" visible="true" \>
   <_geom_angle caption="Angle/&#730;" visible="true" \>
  \>
 
-<sang caption=" Selected Angles for $spy.GetParam(snum.report.title)." 
-tita="class=cifTableHeadline" 
-coln='2' 
+<sang caption=" Selected Angles for $spy.GetParam(snum.report.title)."
+tita="class=cifTableHeadline"
+coln='2'
 colsa='width="50px"'
-tha="class=cifTableFirst" 
+tha="class=cifTableFirst"
 taba="class=CifTable"
 rowa="class=cifTableRow"
-foota="class=cifTableFooter" 
+foota="class=cifTableFooter"
   <_geom_angle_atom_site_label_1 caption="Atom" visible="true" \>
   <_geom_angle_atom_site_label_2 caption="Atom" visible="true" \>
   <_geom_angle_atom_site_label_3 caption="Atom" visible="true" \>
@@ -47,12 +47,12 @@ foota="class=cifTableFooter"
   <_geom_angle_publ_flag mustequal="y;yes" visible="false"\>
  \>
 
-<anis caption=" Anisotropic Displacement Parameters (&Aring;<SUP>2</SUP>&times;10<SUP>3</SUP>) for $spy.GetParam(snum.report.title). The Anisotropic displacement factor exponent takes the form: -2&pi;<SUP>2</SUP>[h<SUP>2</SUP>a*<SUP>2</SUP>U<sub>11</sub>+...+2hka&times;b&times;U<sub>12</sub>]" 
-tita="class=cifTableHeadline" 
-tha="class=cifTableFirst" 
+<anis caption=" Anisotropic Displacement Parameters (&Aring;<SUP>2</SUP>&times;10<SUP>3</SUP>) for $spy.GetParam(snum.report.title). The Anisotropic displacement factor exponent takes the form: -2&pi;<SUP>2</SUP>[h<SUP>2</SUP>a*<SUP>2</SUP>U<sub>11</sub>+...+2hka&times;b&times;U<sub>12</sub>]"
+tita="class=cifTableHeadline"
+tha="class=cifTableFirst"
 taba="class=CifTable"
-rowa="class=cifTableRow" 
-foota="class=cifTableFooter" 
+rowa="class=cifTableRow"
+foota="class=cifTableFooter"
   <_atom_site_aniso_label caption="Atom" visible="true" cola="class='data'"\>
   <_atom_site_aniso_U_11 caption="U<sub>11</sub>" multiplier="1000" visible="true" cola="class=decimal" \>
   <_atom_site_aniso_U_12 caption="U<sub>12</sub>" multiplier="1000" visible="true" cola="class=decimal"\>
@@ -62,37 +62,37 @@ foota="class=cifTableFooter"
   <_atom_site_aniso_U_33 caption="U<sub>33</sub>" multiplier="1000" visible="true" cola="class=decimal"\>
  \>
 
-<bnd caption="Bond Lengths for $spy.GetParam(snum.report.title)." 
- tita="class=cifTableHeadline" 
- coln='2' 
+<bnd caption="Bond Lengths for $spy.GetParam(snum.report.title)."
+ tita="class=cifTableHeadline"
+ coln='2'
  colsa='width="100px"'
- tha="class=cifTableFirst" 
+ tha="class=cifTableFirst"
  taba="class=CifTable"
  rowa="class=cifTableRow"
- foota="class=cifTableFooter" 
+ foota="class=cifTableFooter"
   <_geom_bond_atom_site_label_1 caption="Atom" atypenotequal="H" visible="true" cola="class='data'"\>
   <_geom_bond_atom_site_label_2 caption="Atom" atypenotequal="H" visible="true" cola="class='data'"\>
   <_geom_bond_distance caption="Length/&Aring;" visible="true" cola="class=decimal"\>
  \>
 
-<sbnd caption="Selected Bond Lengths for $spy.GetParam(snum.report.title)." 
-tita="class=cifTableHeadline" 
-tha="class=cifTableFirst" 
+<sbnd caption="Selected Bond Lengths for $spy.GetParam(snum.report.title)."
+tita="class=cifTableHeadline"
+tha="class=cifTableFirst"
 taba="class=CifTable"
-rowa="class=cifTableRow" 
-foota="class=cifTableFooter" 
+rowa="class=cifTableRow"
+foota="class=cifTableFooter"
   <_geom_bond_atom_site_label_1 caption="Atom" visible="true" cola="class='data'" \>
   <_geom_bond_atom_site_label_2 caption="Atom" visible="true" cola="class='data'" \>
   <_geom_bond_distance caption="Length/&Aring;" visible="true" \>
   <_geom_bond_publ_flag caption="?" mustequal="y;yes" visible="false" \>
  \>
 
-<hcrd caption="Hydrogen Atom Coordinates (&Aring;&times;10<SUP>4</SUP>) and Isotropic Displacement Parameters (&Aring;<SUP>2</SUP>&times;10<SUP>3</SUP>) for $spy.GetParam(snum.report.title). " 
-tita="class=cifTableHeadline" 
-tha="class=cifTableFirst" 
+<hcrd caption="Hydrogen Atom Coordinates (&Aring;&times;10<SUP>4</SUP>) and Isotropic Displacement Parameters (&Aring;<SUP>2</SUP>&times;10<SUP>3</SUP>) for $spy.GetParam(snum.report.title). "
+tita="class=cifTableHeadline"
+tha="class=cifTableFirst"
 taba="class=CifTable"
-rowa="class=cifTableRow" 
-foota="class=cifTableFooter" 
+rowa="class=cifTableRow"
+foota="class=cifTableFooter"
   <_atom_site_label caption="Atom" visible="true" cola="class='data'"\>
   <_atom_site_fract_x caption="<i>x</i>" multiplier="10000" visible="true" cola="class=decimal" \>
   <_atom_site_fract_y caption="<i>y</i>" multiplier="10000" visible="true" cola="class=decimal"\>
@@ -101,12 +101,12 @@ foota="class=cifTableFooter"
   <_atom_site_type_symbol caption="Symbol" mustequal="H" visible="false" \>
  \>
 
-<acrd caption="Fractional Atomic Coordinates (&times;10<SUP>4</SUP>) and Equivalent Isotropic Displacement Parameters (&Aring;<SUP>2</SUP>&times;10<SUP>3</SUP>) for $spy.GetParam(snum.report.title). U<sub>eq</sub> is defined as 1/3 of of the trace of the orthogonalised  U<sub>IJ</sub> tensor." 
-tita="class=cifTableHeadline" 
-tha="class=cifTableFirst" 
+<acrd caption="Fractional Atomic Coordinates (&times;10<SUP>4</SUP>) and Equivalent Isotropic Displacement Parameters (&Aring;<SUP>2</SUP>&times;10<SUP>3</SUP>) for $spy.GetParam(snum.report.title). U<sub>eq</sub> is defined as 1/3 of of the trace of the orthogonalised  U<sub>IJ</sub> tensor."
+tita="class=cifTableHeadline"
+tha="class=cifTableFirst"
 taba="class=CifTable"
-rowa="class=cifTableRow" 
-foota="class=cifTableFooter" 
+rowa="class=cifTableRow"
+foota="class=cifTableFooter"
   <_atom_site_label caption="Atom" visible="true" cola="class='data'" \>
   <_atom_site_fract_x caption="<i>x</i>" multiplier="10000" visible="true" cola="class=decimalWide" \>
   <_atom_site_fract_y caption="<i>y</i>" multiplier="10000" visible="true" cola="class=decimalWide" \>
@@ -114,21 +114,21 @@ foota="class=cifTableFooter"
   <_atom_site_U_iso_or_equiv caption="U(eq)" multiplier="1000" visible="true" cola="class=decimal"\>
   <_atom_site_type_symbol caption="Symbol" mustnotequal="H" visible="false" cola="class=decimal"\>
  \>
- 
-<sym caption="Symmetry Operations" tita="class=cifTableHeadline" 
-tha="height='1'" 
+
+<sym caption="Symmetry Operations" tita="class=cifTableHeadline"
+tha="height='1'"
 coln='4'
 taba="class=CifTable"
-rowa="class=cifTableRow" 
-foota="class=cifTableFooter" 
+rowa="class=cifTableRow"
+foota="class=cifTableFooter"
   <_symmetry_equiv_pos_as_xyz caption="" visible="true" cola="class='data'"\>
  \>
 
-<tang caption="Torsion Angles for $spy.GetParam(snum.report.title)." tita="class=cifTableHeadline" 
-tha="class=cifTableFirst" 
+<tang caption="Torsion Angles for $spy.GetParam(snum.report.title)." tita="class=cifTableHeadline"
+tha="class=cifTableFirst"
 taba="class=CifTable"
-rowa="class=cifTableRow" 
-foota="class=cifTableFooter" 
+rowa="class=cifTableRow"
+foota="class=cifTableFooter"
   <_geom_torsion_atom_site_label_1 caption="A" visible="true" cola="class='data'" \>
   <_geom_torsion_atom_site_label_2 caption="B" visible="true" cola="class='data'"\>
   <_geom_torsion_atom_site_label_3 caption="C" visible="true" cola="class='data'"\>
@@ -137,12 +137,12 @@ foota="class=cifTableFooter"
   <_geom_torsion_publ_flag visible="false"\>
  \>
 
-<stang caption="Selected Torsion Angles for $spy.GetParam(snum.report.title)." 
-tita="class=cifTableHeadline" 
-tha="class=cifTableFirst" 
+<stang caption="Selected Torsion Angles for $spy.GetParam(snum.report.title)."
+tita="class=cifTableHeadline"
+tha="class=cifTableFirst"
 taba="class=CifTable"
-rowa="class=cifTableRow" 
-foota="class=cifTableFooter" 
+rowa="class=cifTableRow"
+foota="class=cifTableFooter"
   <_geom_torsion_atom_site_label_1 caption="A" visible="true" cola="class='data'"\>
   <_geom_torsion_atom_site_label_2 caption="B" visible="true" cola="class='data'"\>
   <_geom_torsion_atom_site_label_3 caption="C" visible="true" cola="class='data'"\>
@@ -151,12 +151,12 @@ foota="class=cifTableFooter"
   <_geom_torsion_publ_flag mustequal="y;yes"\>
  \>
 
-<htab caption="Hydrogen Bonds for $spy.GetParam(snum.report.title). " 
-tita="class=cifTableHeadline" 
-tha="class=cifTableFirst" 
+<htab caption="Hydrogen Bonds for $spy.GetParam(snum.report.title). "
+tita="class=cifTableHeadline"
+tha="class=cifTableFirst"
 taba="class=CifTable"
-rowa="class=cifTableRow" 
-foota="class=cifTableFooter" 
+rowa="class=cifTableRow"
+foota="class=cifTableFooter"
   <_geom_hbond_atom_site_label_D caption="D" visible="true" cola="class='data'"\>
   <_geom_hbond_atom_site_label_H caption="H"  visible="true" cola="class='data'" \>
   <_geom_hbond_atom_site_label_A caption="A"  visible="true" cola="class='data'"\>
@@ -165,5 +165,4 @@ foota="class=cifTableFooter"
   <_geom_hbond_distance_DA caption="d(D-A)/&Aring;"  visible="true" cola="class=decimal"\>
   <_geom_hbond_angle_DHA caption="D-H-A/&deg;" visible="true" cola="class=decimal"\>
  \>
-\> 
-
+\>

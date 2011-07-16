@@ -1,11 +1,6 @@
 """
-Please use this file to add your own imports. We will not update this file.
+Please use this file to add your own imports.
+We will NOT UPDATE this file in the future.
 """
 
 import example
-#import batch_overlay
-#import OlexSir
-#import OlexPlaton
-#import OlexMail
-#import OlexCheckCIF
-#import hptools

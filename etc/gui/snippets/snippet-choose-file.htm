@@ -1,0 +1,37 @@
+<tr VALIGN="center" ALIGN="left" NAME="#var_base#_file_type">
+    <td VALIGN="center" ALIGN="left" width="22%" colspan=2>
+      <b>
+        #file_type File
+      </b>
+    </td>
+      <td VALIGN="left" colspan=2 width="70%">
+        <font size=2>
+          
+<input
+type="text"
+width="95%"
+height="18"
+name="SET_#var_base.#file_type"
+value="spy.GetParam(#var_base.#file_type)"
+items=""
+label=" "
+valign="center"
+onchange="spy.SetParam(#var_base.#file_type,GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)"
+bgcolor="spy.bgcolor(~name~)"
+readonly
+>
+
+        </font>
+    </td>
+    
+    <td>
+      <a href="SetValue(#pop_name.SET_#var_base.#file_type,FileOpen('Choose #file_type file','.#file_type files|*.#file_type',FilePath()))>>spy.SetParam(#var_base.#file_type,GetValue(#pop_name.SET_#var_base.#file_type))" target="%Select% #file_type %File%">
+        <zimg border="0" src="toolbar-open.png">
+      </a>
+    </td>
+    <td>
+      <a href="exec -o getvar(defeditor) spy.GetParam(#var_base.#file_type)" target="%Edit% #file_type %File%">
+        <zimg border="0" src="toolbar-edit.png">
+      </a>
+    </td>
+</tr>

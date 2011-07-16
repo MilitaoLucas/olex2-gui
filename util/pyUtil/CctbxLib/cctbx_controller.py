@@ -14,7 +14,7 @@ from cctbx import adptbx, crystal, miller, sgtbx, xray
 from cctbx.array_family import flex
 from cctbx import xray
 from smtbx.refinement.constraints import rigid
-
+from cctbx.xray import observations
 
 def reflection_statistics(unit_cell, space_group, hkl):
   import iotbx.command_line.reflection_statistics
@@ -104,8 +104,8 @@ class hemihedral_twinning(object):
 
 
 class reflections(object):
-  def __init__(self,  cell, spacegroup, reflection_file, hklf_matrix=None):
-    """ reflections is the filename holding the reflections """
+  """ reflections is the filename holding the reflections """
+  def __init__(self,  cell, spacegroup, reflection_file, hklf_code, hklf_matrix=None):
     cs = crystal.symmetry(cell, spacegroup)
     reflections_server = reflection_file_utils.reflection_file_server(
       crystal_symmetry = cs,
@@ -126,6 +126,8 @@ class reflections(object):
     if len(miller_arrays) > 1:
       self.batch_numbers = miller_arrays[1]
     else:
+      if hklf_code == 5:
+        raise RuntimeError("HKLF5 file format requires batch numbers")
       self.batch_numbers = None
     self._omit = None
     self._merge = None
@@ -133,15 +135,22 @@ class reflections(object):
     self.hklf_matrix = hklf_matrix
     self.f_sq_obs_merged = None
     self.f_sq_obs_filtered = None
+    self.hklf_code = hklf_code
+    #self.observations = self.get_observations(twin_components, twin_fractions)
 
   def merge(self, observations=None, merge=None):
-    if merge is None:
-      merge = 2
-    self._merge = merge
     if observations is None:
       obs = self.f_sq_obs
     else:
       obs = observations
+    if self.hklf_code == 5:
+      self.merging = None
+      self.f_sq_obs_merged = obs
+      self._merge = 0
+      return obs
+    if merge is None:
+      merge = 2
+    self._merge = merge
     obs_merged = obs.eliminate_sys_absent()
     self.n_sys_absent = obs.size() - obs_merged.size()
     if merge > 2:
@@ -159,18 +168,37 @@ class reflections(object):
     two_theta = omit['2theta']
     self.d_min=uctbx.two_theta_as_d(two_theta, wavelength, deg=True)
     hkl = omit.get('hkl')
-    f_sq_obs_filtered = self.f_sq_obs_merged.resolution_filter(d_min=self.d_min)
+    f_sq_obs_filtered = self.f_sq_obs_merged
+    if hkl is None: hkl = ()
+    filter = observations.filter(
+      f_sq_obs_filtered.unit_cell(),
+      f_sq_obs_filtered.crystal_symmetry().space_group(),
+      f_sq_obs_filtered.anomalous_flag(),
+      flex.miller_index(hkl),
+      self.d_min,
+      -1,
+      omit['s']*0.5
+    )
+    if self.hklf_code == 5:
+      batch_numbers = self.batch_numbers.data()
+    else:
+      batch_numbers = flex.int(())
+    filter_res = observations.filter_data(
+      f_sq_obs_filtered.indices(),
+      f_sq_obs_filtered.data(),
+      f_sq_obs_filtered.sigmas(),
+      batch_numbers,
+      filter)
+    f_sq_obs_filtered = f_sq_obs_filtered.select(filter_res.selection)
+    if self.hklf_code == 5:
+      self.batch_numbers = self.batch_numbers.select(filter_res.selection)
     s = omit['s']
     if s < 0:
       weak_cutoff = 0.5 * s * f_sq_obs_filtered.sigmas()
       weak = f_sq_obs_filtered.data() < weak_cutoff
       f_sq_obs_filtered.data().set_selected(weak, weak_cutoff)
-    elif s > 0:
-      pass
-    self.n_filtered_by_resolution = self.f_sq_obs_merged.size() - f_sq_obs_filtered.size()
-    if hkl is not None:
-      f_sq_obs_filtered = f_sq_obs_filtered.select_indices(
-        indices=flex.miller_index(hkl), map_indices_to_asu=True, negate=True)
+    self.n_filtered_by_resolution = filter_res.omitted_count
+    self.n_sys_absent = filter_res.sys_abs_count
     self.f_sq_obs_filtered = f_sq_obs_filtered
 
   def show_summary(self, log=None):
@@ -181,16 +209,31 @@ class reflections(object):
     print >> log, "Merging summary:"
     print >> log, "Total reflections: %i" %self.f_sq_obs.size()
     print >> log, "Unique reflections: %i" %self.f_sq_obs_merged.size()
-    print >> log, "Inconsistent equivalents: %i" %self.merging.inconsistent_equivalents()
-    print >> log, "Systematic Absences: %i removed" %self.n_sys_absent
-    print >> log, "R(int): %f" %self.merging.r_int()
-    print >> log, "R(sigma): %f" %self.merging.r_sigma()
-    self.merging.show_summary(out=log)
+    if self.merging is not None:
+      print >> log, "Inconsistent equivalents: %i" %self.merging.inconsistent_equivalents()
+      print >> log, "Systematic Absences: %i removed" %self.n_sys_absent
+      print >> log, "R(int): %f" %self.merging.r_int()
+      print >> log, "R(sigma): %f" %self.merging.r_sigma()
+      self.merging.show_summary(out=log)
     if self.f_sq_obs_filtered is not None:
       print >> log, "d min: %f" %self.d_min
       print >> log, "n reflections filtered by resolution: %i" %(self.n_filtered_by_resolution)
       print >> log, "n reflections filtered by hkl: %i" %(
         self.f_sq_obs_merged.size() - self.n_filtered_by_resolution - self.f_sq_obs_filtered.size())
+      
+  def get_observations(self, twin_fractions, twin_components):
+    if self.hklf_code == 5:
+      rv = self.f_sq_obs_filtered.as_xray_observations(
+        scale_indices=self.batch_numbers.data(),
+        twin_fractions=twin_fractions,
+        twin_components=twin_components)
+      self.f_sq_obs_filtered = rv.fo_sq
+    else:
+      rv = self.f_sq_obs_filtered.as_xray_observations(
+        twin_components=twin_components)
+    return rv
+      
+
 
 class create_cctbx_xray_structure(object):
 

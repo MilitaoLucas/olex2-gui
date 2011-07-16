@@ -86,6 +86,9 @@ class ValidateCif(object):
       error_handler = cif_model.validate(cif_dic, show_warnings)
       if error_handler.error_count == 0 and error_handler.warning_count == 0:
         print "No errors found"
+      if OV.GetParam('olex2.checkcif.send'):
+        import olexex
+        olexex.GetCheckcifReport()
 
 OV.registerMacro(ValidateCif, """filepath&;cif_dic&;show_warnings""")
 
@@ -148,32 +151,36 @@ class CifTools(ArgumentParser):
 
   def sort_crystal_colour(self):
     colour = self.cif_block.get('_exptl_crystal_colour')
-    if colour is None or colour == '?':
-      colours = []
-      cif_items = ('_exptl_crystal_colour_lustre',
-                   '_exptl_crystal_colour_modifier',
-                   '_exptl_crystal_colour_primary')
-      for item in cif_items:
-        value = self.cif_block.get(item)
-        if value is not None:
-          colours.append(value)
-      if colours:
-        self.cif_block['_exptl_crystal_colour'] = ' '.join(colours)
+#    if colour is None or colour == '?':
+    colours = []
+    cif_items = ('_exptl_crystal_colour_lustre',
+                 '_exptl_crystal_colour_modifier',
+                 '_exptl_crystal_colour_primary')
+    for item in cif_items:
+      value = self.cif_block.get(item)
+      if value is not None and "." not in value:
+        colours.append(value)
+    if colours:
+      self.cif_block['_exptl_crystal_colour'] = ' '.join(colours)
     elif (colour in (
       "colourless","white","black","gray","brown","red","pink","orange",
       "yellow","green","blue","violet")):
       self.cif_block.setdefault('_exptl_crystal_colour_primary', colour)
 
-  def update_cif_block(self, dictionary):
+  def update_cif_block(self, dictionary, force=False):
     user_modified = OV.GetParam('snum.metacif.user_modified')
     user_removed = OV.GetParam('snum.metacif.user_removed')
     user_added = OV.GetParam('snum.metacif.user_added')
     for key, value in dictionary.iteritems():
       if key.startswith('_') and value not in ('?', '.'):
+        if force:
+          self.cif_block[key] = value
+          continue
         if not (user_added is not None and key in user_added or
                 user_modified is not None and key in user_modified or
                 user_removed is not None and key in user_removed):
           self.cif_block[key] = value
+          
     # this requires special treatment
     if '_diffrn_ambient_temperature' in dictionary:
       OV.set_cif_item(
@@ -287,7 +294,7 @@ class MergeCif(CifTools):
         os.path.getmtime(file_full) > os.path.getmtime(cif_path)):
       prg = OV.GetParam('snum.refinement.program')
       method = OV.GetParam('snum.refinement.method')
-      if prg == 'smtbx-refine':
+      if prg == 'olex2.refine':
         OV.set_refinement_program(prg, 'Gauss-Newton')
       else:
         if method == 'CGLS':
@@ -333,12 +340,29 @@ class ExtractCifInfo(CifTools):
     import History
     active_solution = History.tree.active_child_node
     if active_solution is not None and active_solution.is_solution:
+
+      ## Backwards Compatibility
+      if active_solution.program == "smtbx-solve":
+        active_solution.program = "olex2.solve"
+      ## END
+
       solution_reference = SPD.programs[active_solution.program].reference
       atom_sites_solution_primary = SPD.programs[active_solution.program].methods[active_solution.method].atom_sites_solution
       self.update_cif_block({
         '_computing_structure_solution': solution_reference,
         '_atom_sites_solution_primary': atom_sites_solution_primary
       })
+    active_node = History.tree.active_node
+    if active_node is not None and not active_node.is_solution:
+
+      ## Backwards Compatibility
+      if active_node.program == "smtbx-refine":
+        active_node.program = "olex2.refine"
+      ## END
+      
+      refinement_reference = RPD.programs[active_node.program].reference
+      self.update_cif_block({
+        '_computing_structure_refinement': refinement_reference})
 
     p = self.sort_out_path(path, "frames")
     if p and self.metacifFiles.curr_frames != self.metacifFiles.prev_frames:
@@ -402,21 +426,31 @@ class ExtractCifInfo(CifTools):
         abs_type = abs_reader.abs_type(p)
         if abs_type == "SADABS":
           sad = abs_reader.reader(p).cifItems()
+          sad.setdefault('abs_file', p)
           version = self.prepare_computing(sad, versions, "sad")
           version = string.strip((string.split(version, "="))[0])
+          sad.setdefault('version', version)
           t = self.prepare_exptl_absorpt_process_details(sad, version)
           sad.setdefault("_exptl_absorpt_process_details", t)
-          self.update_cif_block(sad)
+          self.update_cif_block(sad, force=True)
         elif abs_type == "TWINABS":
           twin = abs_reader.reader(p).twin_cifItems()
+          twin.setdefault('abs_file', p)
           version = self.prepare_computing(twin, versions, "twin")
           version = string.strip((string.split(version, "="))[0])
+          twin.setdefault('version', version, force=True)
           t = self.prepare_exptl_absorpt_process_details(twin, version)
           twin.setdefault("_exptl_absorpt_process_details", t)
           self.update_cif_block(twin)
       except:
         print "There was an error reading the SADABS/TWINABS output file\n'%s'.\nThe file may be incomplete." %(p)
-
+    else:
+      sad = {'_exptl_absorpt_correction_T_max':'.',
+             '_exptl_absorpt_correction_T_min':'.',
+             '_exptl_absorpt_correction_type':'.',
+             '_exptl_absorpt_process_details':'.'}
+      self.update_cif_block(sad, force=True)
+      
     p = self.sort_out_path(path, "pcf")
     if p and self.metacifFiles.curr_pcf != self.metacifFiles.prev_pcf:
       try:
@@ -437,20 +471,20 @@ class ExtractCifInfo(CifTools):
 
     # Oxford Diffraction data collection CIF
     p = self.sort_out_path(path, "cif_od")
-    if p and self.metacifFiles.curr_cif_od != self.metacifFiles.prev_cif_od:
+    if p: # and self.metacifFiles.curr_cif_od != self.metacifFiles.prev_cif_od:
       try:
         import iotbx.cif
         f = open(p, 'rUb')
         cif_od = iotbx.cif.reader(input_string=f.read()).model().values()[0]
         self.exclude_cif_items(cif_od)
         f.close()
-        self.update_cif_block(cif_od)
+        self.update_cif_block(cif_od, force=True)
       except:
         print "Error reading Oxford Diffraction CIF %s" %p
 
     # Rigaku data collection CIF
     p = self.sort_out_path(path, "crystal_clear")
-    if p and self.metacifFiles.curr_crystal_clear != self.metacifFiles.prev_crystal_clear:
+    if p: # and self.metacifFiles.curr_crystal_clear != self.metacifFiles.prev_crystal_clear:
       try:
         import iotbx.cif
         f = open(p, 'rUb')
@@ -527,14 +561,14 @@ class ExtractCifInfo(CifTools):
         if item.startswith(exclude):
           del cif_block[item]
 
-  def prepare_exptl_absorpt_process_details(self, dictionary, version):
-    parameter_ratio = dictionary["parameter_ratio"]
-    R_int_after = dictionary["Rint_after"]
-    R_int_before = dictionary["Rint_before"]
-    ratiominmax = dictionary["ratiominmax"]
-    lambda_correction = dictionary["lambda_correction"]
+  #def prepare_exptl_absorpt_process_details(self, dictionary, version, p):
+    #parameter_ratio = dictionary["parameter_ratio"]
+    #R_int_after = dictionary["Rint_after"]
+    #R_int_before = dictionary["Rint_before"]
+    #ratiominmax = dictionary["ratiominmax"]
+    #lambda_correction = dictionary["lambda_correction"]
 
-  def prepare_exptl_absorpt_process_details(self, abs, version):
+  def prepare_exptl_absorpt_process_details(self, abs, version,):
     if abs["abs_type"] == "TWINABS":
       t = ["%s was used for absorption correction.\n" %(version)]
       txt = "\n;\n"
@@ -548,24 +582,34 @@ class ExtractCifInfo(CifTools):
         t.append("For component %s:\n" %(component))
         t.append("R(int) was %s before and %s after correction.\n" %(R_int_before, R_int_after))
         t.append("The Ratio of minimum to maximum transmission is %.2f.\n" %(float(ratiominmax)))
-      t.append("The \l/2 correction factor is %s\n;\n" %(lambda_correction))
+        t.append("The \l/2 correction factor is %s\n;\n" %(lambda_correction))
       for me in t:
         txt = txt + " %s"%me
       exptl_absorpt_process_details = "%s"%txt
 
     elif abs["abs_type"] == "SADABS":
-      parameter_ratio = abs["parameter_ratio"]
-      R_int_after = abs["Rint_after"]
-      R_int_before = abs["Rint_before"]
-      ratiominmax = abs["ratiominmax"]
-      lambda_correction = abs["lambda_correction"]
+      #parameter_ratio = abs["parameter_ratio"]
+      #R_int_after = abs["Rint_after"]
+      #R_int_before = abs["Rint_before"]
+      #ratiominmax = abs["ratiominmax"]
+      #lambda_correction = abs["lambda_correction"]
 
-      t = ["%s was used for absorption correction." %(version),
-           "R(int) was %s before and %s after correction." %(R_int_before, R_int_after),
-           "The Ratio of minimum to maximum transmission is %s." %(ratiominmax),
-           "The \l/2 correction factor is %s" %(lambda_correction)]
-
-      txt = " %s\n %s\n %s\n %s" %(t[0], t[1], t[2], t[3])
+      txt = """
+"%(version)s was used for absorption correction.
+R(int) was %(Rint_before)s before and %(Rint_after)s after correction.
+The Ratio of minimum to maximum transmission is %(ratiominmax)s.
+The \l/2 correction factor is %(lambda_correction)s.
+{Info from %(abs_file)s}
+"""%abs
+      
+      
+      #t = ["%s was used for absorption correction." %(version),
+           #"R(int) was %s before and %s after correction." %(R_int_before, R_int_after),
+           #"The Ratio of minimum to maximum transmission is %s." %(ratiominmax),
+           #"The \l/2 correction factor is %s." %(lambda_correction),
+           #"{Info from %s}" %(p),
+           #]
+      #txt = " %s\n %s\n %s\n %s" %(t[0], t[1], t[2], t[3])
       exptl_absorpt_process_details = "\n;\n%s\n;\n" %txt
     return exptl_absorpt_process_details
 
@@ -643,10 +687,12 @@ class ExtractCifInfo(CifTools):
 
     files = []
     for path in glob.glob(os.path.join(directory, name+extension)):
+      path = os.path.normpath(path)
       info = os.stat(path)
       files.append((info.st_mtime, path))
     if files:
-      return OV.standardizePath(self.file_choice(files,tool))
+      p = self.file_choice(files,tool)
+      return p
     else:
       parent = os.path.dirname(directory)
       files = []
@@ -687,6 +733,9 @@ class ExtractCifInfo(CifTools):
       returnvalue = info[0][1]
     else:
       x = OV.GetParam("snum.metacif.%s_file" %tool)
+      if not x:
+        return None
+      x = os.path.normpath(x)
       if x is not None:
         for date, file in info:
           if x in file:

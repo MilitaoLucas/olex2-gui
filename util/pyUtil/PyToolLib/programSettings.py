@@ -153,7 +153,6 @@ def makeArgumentsHTML(program, method, instruction):
            'value':value,
            'label':'%s ' %caption,
            'onchange':onchange,
-           'onleave':onchange,
            }
       options_gui.append(htmlTools.make_input_text_box(d))
 
@@ -162,7 +161,6 @@ def makeArgumentsHTML(program, method, instruction):
            'value':value,
            'label':'%s ' %caption,
            'onchange':onchange,
-           'onleave':onchange,
            }
       options_gui.append(htmlTools.make_input_text_box(d))
 
@@ -188,7 +186,6 @@ def makeArgumentsHTML(program, method, instruction):
            'items':items,
            'value':option.extract(),
            'onchange':onchange,
-           'onleave':onchange,
            'width':'',
            }
       options_gui.append(htmlTools.make_combo_text_box(d))

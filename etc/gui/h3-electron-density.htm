@@ -6,7 +6,7 @@
   <td>
 <!-- #include tool-help-button gui\blocks\tool-help-button.htm;help_ext=electron-density;1; -->
   </td>
-  <td>
+  <td width="25%">
     <input
       type="combo"
       height="$spy.GetParam(gui.html.combo_height)"
@@ -14,17 +14,14 @@
       name="SET_SNUM_MAP_TYPE"
       items='diff;fcalc;2Fo-Fc<-tomc;fobs'
       value="$spy.GetParam(snum.map.type)"
-      width="15%"
-      onchange="
-spy.SetParam(snum.map.type,GetValue(SET_SNUM_MAP_TYPE))>>
-spy.MapView()>>
-html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)')"
+      width="95%"
+      onchange="spy.SetParam(snum.map.type,GetValue(SET_SNUM_MAP_TYPE))>>spy.MapView(off)"
       label="%Map% "
       valign="center"
       readonly
   >
   </td>
-  <td>
+  <td width="25%">
     <input
       type="combo"
       height="$spy.GetParam(gui.html.combo_height)"
@@ -32,32 +29,29 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
       name="SET_SNUM_MAP_SOURCE"
       items='olex;fcf;'
       value="$spy.GetParam(snum.map.source)"
-      width="15%"
-      onchange="
-spy.SetParam(snum.map.source,GetValue(SET_SNUM_MAP_SOURCE))>>
-spy.MapView()>>
-html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)')"
+      width="95%"
+      onchange="spy.SetParam(snum.map.source,GetValue(SET_SNUM_MAP_SOURCE))>>spy.MapView(off)"
       label="%Source% "
       valign="center"
       height="$spy.GetParam(gui.html.combo_height)"
       readonly
   >
   </td>
-  <td>
+  <td width="15%">
     <input
       type="text"
       name = "SET_SNUM_MAP_RESOLUTION"
-      width="15%"
+      width="95%"
       height="$spy.GetParam(gui.html.input_height)"
       label="%Res%/&Aring "
       valign="center"
       bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
       fgcolor="$spy.GetParam(gui.html.font_colour)"
       value="$spy.GetParam(snum.map.resolution)"
-      onleave="spy.SetParam(snum.map.resolution,GetValue(SET_SNUM_MAP_RESOLUTION))"
+      change="spy.SetParam(snum.map.resolution,GetValue(SET_SNUM_MAP_RESOLUTION))>>spy.MapView(off))"
     >
   </td>
-  <td colspan = '1' valign='bottom'>
+  <td valign='bottom' width="35%">
     <input
       bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
       fgcolor="$spy.GetParam(gui.html.font_colour)"
@@ -67,7 +61,7 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
       name="SNUM_MAP_MASK"
       checked="$spy.GetParam(snum.map.mask)"
       height="$spy.GetParam(gui.html.input_height)"
-      width='20%' 
+      width="95%" 
       oncheck="spy.SetParam(snum.map.mask,True)"
       onuncheck="spy.SetParam(snum.map.mask,False)">
   </td>

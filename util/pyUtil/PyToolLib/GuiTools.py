@@ -23,14 +23,14 @@ OV = OlexFunctions()
 class MakeGuiTools(object):
   def __init__(self, tool_fun=None, tool_param=None):
     self.basedir = olx.BaseDir()
-    self.gui_html_bg_colour = OV.FindValue('gui_html_bg_colour')
+    self.gui_html_bg_colour = OV.GetParam('gui.html.bg_colour')
     self.tool_fun = tool_fun
     self.tool_param = tool_param
     tool={}
     self.language = False
     if olx.IsCurrentLanguage("German")=='true':
       self.language = "-de"
-    self.line_left_col_color = OV.FindValue('gui_html_table_firstcol_colour')
+    self.line_left_col_color = OV.GetParam('gui.html.table_firstcol_colour')
     self.line_right_col_color = "#00ff00"
     self.line_left_colwidth = 8
     self.colspan=1

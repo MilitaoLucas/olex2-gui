@@ -1,5 +1,5 @@
 #!/usr/bin/python2
-version = "160311"
+version = "110711"
 """
 =====================================================================
            Submit charge flipping phasing procedure
@@ -10,6 +10,7 @@ version = "160311"
 	  corrected bug in "forcesymmetry=yes" processing ins symcards.
           20-01-11: corrected bug for Olex2 processing
           16-03-11: added keyword 'p1' for triclinic structure solution for metrically non-triclinic lattices
+          11-07-11: preparation symcards.tmp for forcesymmetry=yes completely rewritten
  prepares input file for SUPERFLIP and EDMA program  (L. Palatinus)
 
 
@@ -186,32 +187,39 @@ def process_insfile(flip_keywords,files,derived_info):
         else:
            symcards = open("symcards.tmp", "w")
            print >> symcards, "symmetry"
-           print >> symcards, "X Y Z"
+           print >> symcards, "x1 x2 x3"
            if flip_keywords['p1'] == "no":
-             if ( derived_info['latt'] > 0 ): print >> symcards, " -X -Y -Z"
+             if ( derived_info['latt'] > 0 ): print >> symcards, " -x1 -x2 -x3"
              for line in fileinput.input(files['insin']):
                if "SYMM" in line:
-	          line = string.upper(string.join(string.split(line)[1:]))
-	          for k in ['X', 'Y', 'Z']:
-                      line = string.replace(line,"+ "+k,"+"+k)
-                      line = string.replace(line,"- "+k,"-"+k)
-	          line = string.replace(line,"+"," +")
-     	          line = string.replace(line,"-"," -")
-     	          line = string.replace(line,","," , ")
-                  print >> symcards, line
+	          line = string.split(string.upper(string.replace(line,"SYMM","")),',')
+                  for k in range(len(line)):
+                      line[k] = string.replace(line[k]," ","")
+                      line[k] = string.replace(line[k],"\n","")
+                      line[k] = string.replace(line[k],"X","x1")
+                      line[k] = string.replace(line[k],"Y","x2")
+                      line[k] = string.replace(line[k],"Z","x3")
+                      if ".5" in line[k] and "0.5" not in line[k]: line[k] = string.replace(line[k],".5","0.5")
+                      if ".25" in line[k] and "0.25" not in line[k]: line[k] = string.replace(line[k],".25","0.25")
+                      if ".75" in line[k] and "0.75" not in line[k]: line[k] = string.replace(line[k],".75","0.75")
+                      if ".33" in line[k] and "0.33" not in line[k]: line[k] = string.replace(line[k],".33","0.33")
+                      if ".66" in line[k] and "0.66" not in line[k]: line[k] = string.replace(line[k],".66","0.66")
+                      if ".83" in line[k] and "0.83" not in line[k]: line[k] = string.replace(line[k],".83","0.83")
+                  print >> symcards, string.join(line)
                   if ( derived_info['latt'] > 0 ):
-	             splitline=string.split(line)
-                     invline = ""
-		     for k in splitline:
-                         if ( k[0] == "+" ): l = string.replace(k,'+','-')
-                         if ( k[0] == "-" ): l = string.replace(k,'-','+')
-                         if ( k[0] != "-" ) and ( k[0] != "+" ) and ( k[0] != ","): l = "-"+k
-                         if ( k == "," ): l = k
-			 invline = invline+l
-                     print >> symcards, "%s" % invline
+                     invline = []
+                     for symop in line:
+                         symopinv = ""
+                         for k in range(len(symop)):
+                            if (k == 0 and symop[0] == "x"): symopinv = symopinv + "-x"
+                            if (k == 0 and symop[0] != "x" and symop[0] != "+" and symop[0] != "-"): symopinv = symopinv + symop[k]
+                            if (symop[k] == "+"): symopinv = symopinv + "-"
+                            if (symop[k] == "-"): symopinv = symopinv + "+"
+                            if (k > 0 and symop[k] != "-" and symop[k] != "+"): symopinv = symopinv + symop[k]
+                         invline.append(symopinv)
+                     print >> symcards, "%s" % string.join(invline)
            print  >> symcards, "endsymmetry"
            symcards.close()
-
 
 # Build symcards.tmp from crystal system info
     if ( flip_keywords['forcesymmetry'] == "no" ):
@@ -331,7 +339,7 @@ superposition             ......  %s
 ----------------------------------------------------
        
     """ % (files['insin'], files['hklin'], derived_info['flipcell'], derived_info['crsyst'], flip_keywords['SG'], flip_keywords['ked'], flip_keywords['weak'], flip_keywords['biso'],
-       flip_keywords['maxcycl'], flip_keywords['normalize'], flip_keywords['trial'], flip_keywords['superposition']) 
+       flip_keywords['maxcycl'], flip_keywords['normalize'], flip_keywords['trial'], flip_keywords['superposition'])
 
     if ( flip_keywords['comments'] == 'yes' ): raw_input("\n Press <RETURN> to continue\n")
 
@@ -649,6 +657,7 @@ def find_executable(executable, path=None):
             extlist = pathext
     for ext in extlist:
         execname = executable + ext
+#        print execname
         if os.path.isfile(execname):
             return execname
         else:
@@ -664,7 +673,7 @@ def find_executable(executable, path=None):
 
 def flipsmall (*args):
 
-    if (len(args) == 1) and (not olexrun):
+    if (len(args) == 1) and (not olexrun) and (not guirun):
        print "There should be at least the name of an existing ins-file as command line argument.\nTry again or do 'flipsmall.py --help' to get help."
        return False
     args=list(args)
@@ -735,6 +744,21 @@ def flipsmall (*args):
 
     return
 
+def flip(fargs=[]):
+
+
+
+   guirun = False
+   if fargs[0] == "guirun": guirun = True
+   if not olexrun:
+     comlineargs = tuple(fargs)
+     flipsmall(*comlineargs)
+   if not guirun:
+      sys.exit(0)
+   else:
+      return
+
+global flip_keywords,derived_info,files,exe,olexrun,guirun
 # the main keywords
 flip_keywords=dict(weak=0.20, biso=2.5, maxcycl=10000, comments="yes", edmacontinue="no",
                    normalize="yes", merge="yes", forcesymmetry="no", trial="1", SG="1", missing="zero",
@@ -749,18 +773,17 @@ files=dict(base='name',insin='name.ins',hklin='name.hkl',m81='name.m81',inflip='
            fliplog='name.sflog',edmain='name_edma.inflip',edmaout='name_structure.ins')
 # the external executables
 exe=dict(SF="~/unix/bin/superflip",EDMA="EDMA")
-
-
-olexrun = False
 try:
-  import olex
-  import olx
-  from olexFunctions import OlexFunctions
-  OV = OlexFunctions()
-  olexrun = True
-  OV.registerFunction(flipsmall)
+   import olex
+   import olx
+   from olexFunctions import OlexFunctions
+   OV = OlexFunctions()
+   olexrun = True
+   OV.registerFunction(flipsmall)
 except:
-  comlineargs = tuple(sys.argv)
-  flipsmall(*comlineargs)
-sys.exit(0)
+   olexrun = False
+
+if __name__ == "__main__":
+    flip(sys.argv)
+
 

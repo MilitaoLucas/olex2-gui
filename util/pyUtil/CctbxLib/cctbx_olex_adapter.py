@@ -16,6 +16,8 @@ except:
   olx.current_hklsrc_mtime = None
   olx.current_reflections = None
   olx.current_mask = None
+  olx.current_space_group = None
+  olx.current_observations = None
 
 import olex
 import olex_core
@@ -51,7 +53,10 @@ class OlexCctbxAdapter(object):
     self.olx_atoms = olexex.OlexRefinementModel()
     self.wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
     self.reflections = None
+    self.observations = None
     twinning=self.olx_atoms.model.get('twin')
+    self.twin_fractions = None
+    self.hklf_code = self.olx_atoms.model['hklf']['value']
     if twinning is not None:
       twin_fractions = flex.double(twinning['basf'])
       twin_law = sgtbx.rot_mx([int(twinning['matrix'][j][i])
@@ -83,6 +88,12 @@ class OlexCctbxAdapter(object):
          for law, fraction, grad in zip(
            twin_laws, twin_fractions, grad_twin_fractions)])
     else:
+      olx_tw_f = self.olx_atoms.model['hklf'].get('basf',None)
+      if self.hklf_code == 5 and olx_tw_f is not None:
+        twin_fractions = flex.double(olx_tw_f)
+        self.twin_fractions = tuple(
+          [ xray.twin_fraction(fraction,True)
+            for fraction in twin_fractions])
       self.twin_components = None
 
     self.exti = self.olx_atoms.model.get('exti', None)
@@ -110,8 +121,20 @@ class OlexCctbxAdapter(object):
         self.constraints = create_cctbx_xray_structure.builder.constraints
       self._xray_structure = create_cctbx_xray_structure.structure()
       table = OV.GetParam("snum.smtbx.atomic_form_factor_table")
+      sfac = self.olx_atoms.model.get('sfac')
+      custom_gaussians = {}
+      if sfac is not None:
+        from cctbx import eltbx
+        for element, sfac_dict in sfac.iteritems():
+          custom_gaussians.setdefault(element, eltbx.xray_scattering.gaussian(
+            sfac_dict['gaussian'][0],
+            [-b for b in sfac_dict['gaussian'][1]],
+            sfac_dict['gaussian'][2]))
+        # XXX fp and fdp not yet dealt with
       self._xray_structure.scattering_type_registry(
-        table=table, d_min=self.reflections.f_sq_obs.d_min())
+        custom_dict=custom_gaussians,
+        table=table,
+        d_min=self.reflections.f_sq_obs.d_min())
       if self.reflections._merge < 4:
         from cctbx.eltbx import wavelengths
         inelastic_table = OV.GetParam("snum.smtbx.inelastic_form_factor_table")
@@ -138,25 +161,50 @@ class OlexCctbxAdapter(object):
     if (force or
         reflections != olx.current_hklsrc or
         mtime != olx.current_hklsrc_mtime or
-        (olx.current_reflections is not None
-         and hklf_matrix != olx.current_reflections.hklf_matrix)):
+        (olx.current_reflections is not None and
+          (hklf_matrix != olx.current_reflections.hklf_matrix
+            or self.space_group != olx.current_space_group))):
       olx.current_hklsrc = reflections
       olx.current_hklsrc_mtime = mtime
+      olx.current_space_group = self.space_group
       olx.current_reflections = cctbx_controller.reflections(
-        self.cell, self.space_group, reflections, hklf_matrix)
+        self.cell, self.space_group, reflections,
+        hklf_code=self.hklf_code,
+        hklf_matrix=hklf_matrix)
+      olx.current_observations = None
     if olx.current_reflections:
       self.reflections = olx.current_reflections
+      self.observations = olx.current_observations
+      if self.observations is not None:
+        if not self.update_twinning(self.observations.ref_twin_fractions,
+                                    self.observations.ref_twin_components):
+          self.observations = None
+        else:
+          self.twin_fractions = self.observations.ref_twin_fractions
+          self.twin_components = self.observations.ref_twin_components
     else:
       olx.current_reflections = cctbx_controller.reflections(
-        self.cell, self.space_group, reflections, hklf_matrix)
+        self.cell, self.space_group, reflections,
+        hklf_code=self.hklf_code,
+        hklf_matrix=hklf_matrix)
       self.reflections = olx.current_reflections
+
     merge = self.olx_atoms.model.get('merge')
     omit = self.olx_atoms.model['omit']
+    update = False
     if force or merge is None or merge != self.reflections._merge:
       self.reflections.merge(merge=merge)
       self.reflections.filter(omit, self.olx_atoms.exptl['radiation'])
+      update = True
     if force or omit is None or omit != self.reflections._omit:
       self.reflections.filter(omit, self.olx_atoms.exptl['radiation'])
+      update = True
+
+    if update or self.observations is None:
+      self.observations = self.reflections.get_observations(
+        self.twin_fractions, self.twin_components)
+      olx.current_observations = self.observations
+
     if verbose:
       self.reflections.show_summary()
 
@@ -172,7 +220,7 @@ class OlexCctbxAdapter(object):
       apply_twin_law = False
     if (    apply_twin_law
         and self.twin_components is not None
-        and self.twin_components[0].twin_fraction > 0):
+        and self.twin_components[0].value > 0):
       twin_component = self.twin_components[0]
       twinning = cctbx_controller.hemihedral_twinning(
         twin_component.twin_law.as_double(), miller_set)
@@ -180,7 +228,7 @@ class OlexCctbxAdapter(object):
       fc = twin_set.structure_factors_from_scatterers(
         self.xray_structure(), algorithm=algorithm).f_calc()
       twinned_fc2 = twinning.twin_with_twin_fraction(
-        fc.as_intensity_array(), twin_component.twin_fraction)
+        fc.as_intensity_array(), twin_component.value)
       fc = twinned_fc2.f_sq_as_f().phase_transfer(fc).common_set(miller_set)
     else:
       fc = miller_set.structure_factors_from_scatterers(
@@ -200,6 +248,44 @@ class OlexCctbxAdapter(object):
     weighting.compute(fc, scale_factor)
     return weighting.weights
 
+  def get_fo_sq_fc(self):
+    fo2 = self.reflections.f_sq_obs_filtered
+    unique = self.reflections.f_sq_obs.unique_under_symmetry().map_to_asu()
+    fc = unique.structure_factors_from_scatterers(
+      self.xray_structure(), algorithm="direct").f_calc()
+    i_dtw, s_dtw = self.observations.detwin(
+      fo2.crystal_symmetry().space_group(),
+      fo2.anomalous_flag(),
+      unique.indices(),
+      fc.as_intensity_array().data())
+    fo2 = fo2.customized_copy(data=i_dtw, sigmas=s_dtw)
+    fo2 = fo2.merge_equivalents(algorithm="shelx").array().map_to_asu()
+    fc = fc.common_set(fo2)
+    if self.exti is not None:
+      fc = fc.apply_shelxl_extinction_correction(self.exti, self.wavelength)
+    return (fo2, fc)
+
+  def update_twinning(self, tw_f, tw_c):
+    if self.twin_fractions is not None:
+      if tw_f is None or len(tw_f) != len(self.twin_fractions):
+        return False
+      for i,f in enumerate(self.twin_fractions):
+        tw_f[i].value = f.value
+    elif tw_f is not None:
+      return False
+
+    if self.twin_components is not None:
+      if tw_c is None or len(tw_c) != len(self.twin_components):
+        return False
+      for i,f in enumerate(self.twin_components):
+        if f.twin_law != tw_c[i].twin_law:
+          return False
+        tw_c[i].value = f.value
+    elif tw_c is not None:
+      return False
+    return True
+
+
 from smtbx import absolute_structure
 
 class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):
@@ -218,8 +304,11 @@ class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):
       fc = fc2.f_sq_as_f().phase_transfer(flex.double(fc2.size(), 0))
       scale = 1
     else:
-      fo2 = self.reflections.f_sq_obs_filtered
-      fc = self.f_calc(miller_set=fo2, ignore_inversion_twin=True)
+      if self.hklf_code == 5:
+        fo2, fc = self.get_fo_sq_fc()
+      else:
+        fo2 = self.reflections.f_sq_obs_filtered
+        fc = self.f_calc(miller_set=fo2, ignore_inversion_twin=True)
       weights = self.compute_weights(fo2, fc)
       scale = fo2.scale_factor(fc, weights=weights)
     if not fo2.anomalous_flag():
@@ -427,15 +516,13 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       mask.show_summary(log=out)
       from iotbx.cif import model
       cif_block = model.block()
-      hklstat = olex_core.GetHklStat()
       merging = self.reflections.merging
       min_d_star_sq, max_d_star_sq = fo2.min_max_d_star_sq()
-      f = open('%s/%s-mask.log' %(OV.FilePath(), OV.FileName()),'wb')
+      (h_min, k_min, l_min), (h_max, k_max, l_max) = fo2.min_max_indices()
+      f = open('%s/%s-mask.log' %(OV.FilePath(), OV.FileName()),'w')
       print >> f, out.getvalue()
       f.close()
       print out.getvalue()
-      h_min, k_min, l_min = hklstat['MinIndexes']
-      h_max, k_max, l_max = hklstat['MaxIndexes']
       cif_block['_diffrn_reflns_number'] = fo2.size()
       cif_block['_diffrn_reflns_av_R_equivalents'] = "%.4f" %merging.r_int()
       cif_block['_diffrn_reflns_av_sigmaI/netI'] = "%.4f" %merging.r_sigma()
@@ -453,7 +540,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       cif = model.cif()
       data_name = OV.FileName().replace(' ', '')
       cif[data_name] = cif_block
-      f = open('%s/%s-mask.cif' %(filepath, OV.FileName()),'wb')
+      f = open('%s/%s-mask.cif' %(filepath, OV.FileName()),'w')
       print >> f, cif
       f.close()
       OV.SetParam('snum.masks.update_cif', True)
@@ -615,13 +702,13 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     curr_method = OV.GetParam('snum.refinement.method')
     curr_cycles = OV.GetParam('snum.refinement.max_cycles')
     OV.SetMaxCycles(1)
-    if curr_prg != 'smtbx-refine':
+    if curr_prg != 'olex2.refine':
       OV.set_refinement_program(curr_prg, 'CGLS')
     olx.File("%s.ins" %self.filename)
     rFile = open(olx.FileFull(), 'r')
     f_data = rFile.readlines()
 
-    OV.SetParam('snum.skip_history','True')
+    OV.SetParam('snum.init.skip_history','True')
 
     a = RunRefinementPrg()
     self.R1 = a.R1
@@ -630,7 +717,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     OV.SetMaxCycles(curr_cycles)
     OV.set_refinement_program(curr_prg, curr_method)
 
-    OV.SetParam('snum.skip_history','False')
+    OV.SetParam('snum.init.skip_history','False')
     r = olx.Lst("R1")
     olex_refinement_model = OV.GetRefinementModel(False)
     if olex_refinement_model.has_key('twin'):
@@ -805,7 +892,7 @@ class as_pdb_file(OlexCctbxAdapter):
   def __init__(self, args):
     OlexCctbxAdapter.__init__(self)
     filepath = args.get('filepath', OV.file_ChangeExt(OV.FileFull(), 'pdb'))
-    f = open(filepath, 'wb')
+    f = open(filepath, 'w')
     fractional_coordinates = \
                            args.get('fractional_coordinates')in (True, 'True', 'true')
     print >> f, self.xray_structure().as_pdb_file(
@@ -816,3 +903,70 @@ class as_pdb_file(OlexCctbxAdapter):
 
 OV.registerMacro(as_pdb_file, """\
 filepath&;remark&;remarks&;fractional_coordinates-(False)&;resname""")
+
+class symmetry_search(OlexCctbxAdapter):
+  def __init__(self):
+    OlexCctbxAdapter.__init__(self)
+    from cctbx import symmetry_search
+    xs = self.xray_structure()
+    xs_p1 = xs.expand_to_p1()
+    fo_sq = self.reflections.f_sq_obs.customized_copy(
+      anomalous_flag=False).expand_to_p1().merge_equivalents().array()
+    fo_in_p1 = fo_sq.as_amplitude_array()
+    fc_in_p1 = fo_in_p1.structure_factors_from_scatterers(
+      xray_structure=xs_p1,
+      algorithm="direct").f_calc()
+    fo_complex_in_p1 = fo_in_p1.phase_transfer(fc_in_p1).customized_copy(
+      sigmas=None)
+    #sf_symm = symmetry_search.structure_factor_symmetry(fo_complex_in_p1)
+    fc_in_p1 = miller.build_set(
+      crystal_symmetry=xs_p1,
+      anomalous_flag=False,d_min=fo_sq.d_min()
+      ).structure_factors_from_scatterers(
+        xray_structure=xs_p1,
+        algorithm="direct").f_calc()
+    sf_symm = symmetry_search.structure_factor_symmetry(fc_in_p1)
+    print sf_symm
+    sf_symm.space_group_info.show_summary()
+
+OV.registerFunction(symmetry_search)
+
+def calcsolv(solvent_radius=1.2, grid_step=0.2):
+  # This routine called with spy.calsolv() will calculate the solvent accessible area
+
+  # If values have been set in PHIL, these will be used.
+  l = ['grid', 'probe']
+  for item in l:
+    if OV.GetParam('snum.calcsolv.%s' %item):
+      solvent_radius = OV.GetParam('snum.calcsolv.%s' %item)
+
+  from smtbx.masks import solvent_accessible_volume
+  # Used to build the xray_structure by getting information from the olex2 refinement model
+  olx_atoms = olexex.OlexRefinementModel()
+  unit_cell = olx_atoms.getCell()
+  restraints_iter=olx_atoms.restraints_iterator()
+  constraints_iter=None
+  space_group = "hall: "+str(olx.xf_au_GetCellSymm("hall"))
+
+  # Creating the xray_structure part
+  create_cctbx_xray_structure = cctbx_controller.create_cctbx_xray_structure(
+    unit_cell,
+    space_group,
+    olx_atoms.iterator(),
+    restraints_iter,
+    constraints_iter
+  )
+  # This needs to be done I don't know why but otherwise smtbx farts
+  # I tried using the xray_structure inside this file (see line 105 but appears to need hkl file?
+  xray_structure = create_cctbx_xray_structure.structure()
+  shrink_truncation_radius = solvent_radius = float(solvent_radius) # Angstrom - this could be passed during call?
+  grid_step=float(grid_step)# Angstrom - a smaller number or variable passed during call?
+  result = solvent_accessible_volume(
+    xray_structure,
+    solvent_radius,
+    shrink_truncation_radius,
+    grid_step=grid_step,
+    use_space_group_symmetry=True) # faster for high symmetry)
+  result.show_summary()
+
+OV.registerFunction(calcsolv)
