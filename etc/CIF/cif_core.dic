@@ -6217,6 +6217,7 @@ data_exptl_crystal_colour_lustre
     loop_ _enumeration           metallic
                                  dull
                                  clear
+                                 .
     _related_item              '_exptl_crystal_colour'
     _related_function            alternate
     _definition
@@ -6247,6 +6248,7 @@ data_exptl_crystal_colour_modifier
                                  yellowish
                                  greenish
                                  bluish
+                                 .
     _related_item              '_exptl_crystal_colour'
     _related_function            alternate
     _definition

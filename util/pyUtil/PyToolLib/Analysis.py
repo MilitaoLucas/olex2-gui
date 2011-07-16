@@ -59,7 +59,7 @@ class Graph(ImageTools):
     self.decorated = False
 
     self.guiParams = OV.GuiParams()
-    
+
     self.graphInfo = {
       "TopRightTitle":self.filename,
     }
@@ -263,7 +263,7 @@ class Graph(ImageTools):
     self.fitlineColour = guiParams.graph.fitline_colour.hexadecimal
     self.pageColour = guiParams.graph.page_colour.hexadecimal
     self.axislabelColour = guiParams.graph.axislabel_colour.hexadecimal
-    
+
     self.bSides = round(0.012 * self.imX)
     self.xSpace = 0
     self.axis_x = axis_x
@@ -273,7 +273,7 @@ class Graph(ImageTools):
     self.currX = 0
     self.currY = 0
     size = ((int(self.imX), int(self.imY)))
-    
+
     im = Image.new('RGB', size, self.pageColour)
     draw = ImageDraw.Draw(im)
     self.draw = draw
@@ -666,7 +666,7 @@ class Graph(ImageTools):
       outline_colour = self.outlineColour
 
       if self.decorated:
-        decorated_fill = OV.FindValue('gui_html_highlight_colour')
+        decorated_fill = OV.GetParam('gui.html.highlight_colour')
         barDraw.rectangle(box, fill=decorated_fill, outline=outline_colour)
         barDraw.rectangle((bar_left+3,bar_top+3,bar_right-3,bar_bottom-3), fill=fill)
 
@@ -1427,9 +1427,9 @@ class refinement_graph(PrgAnalysis):
 
 class smtbx_refine_graph(refinement_graph):
   def __init__(self):
-    program = ExternalPrgParameters.defineExternalPrograms()[1].programs["smtbx-refine"]
+    program = ExternalPrgParameters.defineExternalPrograms()[1].programs["olex2.refine"]
     method = program.methods["LBFGS"]
-    self.item = "smtbx-refine"
+    self.item = "olex2.refine"
     refinement_graph.__init__(self, program, method)
     y_label = self.get_unicode_characters('Max shift in angstrom')
     metadata={'labels':[], 'y_label':y_label}
@@ -1691,7 +1691,7 @@ class WilsonPlot(Analysis):
 
 class ChargeFlippingPlot(PrgAnalysis):
   def __init__(self):
-    program = ExternalPrgParameters.defineExternalPrograms()[0].programs["smtbx-solve"]
+    program = ExternalPrgParameters.defineExternalPrograms()[0].programs["olex2.solve"]
     method = program.methods["Charge Flipping"]
     self.item = "Charge Flipping"
     PrgAnalysis.__init__(self, program, method)

@@ -32,11 +32,11 @@ def getDefaultPrgMethod(prgType):
   defaultMethod = '?'
   if prgType == 'Refinement':
     availablePrgs = olexex.get_refinement_programs().split(';')
-    prgList = ('XL', 'ShelXL', 'XH', 'ShelXH', 'smtbx-refine')
+    prgList = ('XL', 'ShelXL', 'olex2.refine', 'XH', 'ShelXH')
     prgDict = olexex.RPD
   elif prgType == 'Solution':
     availablePrgs = olexex.get_solution_programs().split(';')
-    prgList = ('XS', 'ShelXS', 'smtbx-solve', 'XM', 'ShelXD')
+    prgList = ('XS', 'ShelXS', 'olex2.solve', 'XM', 'ShelXD')
     prgDict = olexex.SPD
   for prg in prgList:
     if prg in availablePrgs:
@@ -156,6 +156,11 @@ def LoadParams():
   custom_phil = get_custom_phil()
   if custom_phil:
     phil_handler.update(phil_file=custom_phil)
+#  portal_phil = "%s/util/pyUtil/PluginLib/plugin-Olex2Portal/portal.phil" %(olx.BaseDir())
+#  if os.path.exists(portal_phil):
+#    phil_handler.merge_param_file(portal_phil)
+
+
   olx.phil_handler = phil_handler
   # gui params
   master_gui_phil = phil_interface.parse(file_name="%s/gui.params" %OV.BaseDir())
@@ -167,6 +172,7 @@ OV.registerFunction(LoadParams)
 
 def LoadStructureParams():
   ExternalPrgParameters.definedControls = [] # reset defined controls
+  olx.current_mask = None
   olx.phil_handler.reset_scope('snum', rebuild_index=False)
   solutionPrg, solutionMethod = getDefaultPrgMethod('Solution')
   refinementPrg, refinementMethod = getDefaultPrgMethod('Refinement')
@@ -179,10 +185,9 @@ snum {
   report.title = "%s"
   image.ps.name = "%s"
   image.bitmap.name = "%s"
-  report.image = "%s/screenshot.png"
   }
 """ %(refinementPrg, refinementMethod, solutionPrg, solutionMethod,
-      OV.FileName(), OV.FileName(), OV.FileName(), OV.FilePath())
+      OV.FileName(), OV.FileName(), OV.FileName())
   olx.phil_handler.update(phil_string=snum_phil.encode('utf-8'))
   structure_phil_path = u"%s/.olex/%s.phil" %(OV.FilePath(), OV.FileName())
   if os.path.isfile(structure_phil_path):
@@ -195,6 +200,9 @@ snum {
     # check if old-style vvd file is present
     structure_phil = VVD_to_phil()
   if structure_phil is not None:
+    # XXX Backwards compatibility 2010-04-08
+    structure_phil = structure_phil.replace('smtbx-refine', 'olex2.refine')\
+                                   .replace('smtbx-solve', 'olex2.solve')
     olx.phil_handler.update(phil_string=structure_phil)
   solutionPrg = olx.phil_handler.get_validated_param('snum.solution.program')
   solutionMethod = olx.phil_handler.get_validated_param('snum.solution.method')
@@ -257,6 +265,7 @@ def SaveUserParams():
 OV.registerFunction(SaveUserParams)
 
 def EditParams(scope_name="", expert_level=0, attributes_level=0):
+  expert_level = int(expert_level)
   if scope_name.startswith("gui"):
     handler = olx.gui_phil_handler
   else:

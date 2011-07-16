@@ -552,7 +552,7 @@ class ImageTools(FontInstances):
       encoding = 'unic'
       if self.gui_current_language == "Chinese":
         #font_name = "Simhei TTF"
-        font_name = 'Arial UTF'
+        font_name = OV.GetParam('gui.chinese_font_name')
       else:
         font_name = 'Arial UTF'
       #font_name = "Chinese"
@@ -570,11 +570,11 @@ class ImageTools(FontInstances):
     try:
       txt.encode('ascii')
     except:
-      font_name = 'Arial UTF'
-      top -= 3
-      pass
-
-
+      if self.gui_current_language != "Chinese":
+        font_name = 'Arial UTF'
+        top -= 3
+      else:
+        pass
 
     if valign:
 
@@ -778,40 +778,42 @@ class ImageTools(FontInstances):
     max_width = image.size[0]
     max_height = image.size[1]
     font_name = "%s Bold" %OV.GetParam('gui.html.font_name')
-    font_size = int(max_height) - 1
+    font_size = int(max_height) - 5
     colour = OV.GetParam('gui.html.highlight_colour')
     txt="New!"
     dX, dY = self.getTxtWidthAndHeight(txt, font_name, font_size)
-
-    draw.rectangle((max_width - dX - 3, 2, max_width - 3, max_height - 3), fill='#ffee00')
+    from_right = 15
+    left_start = max_width - dX - from_right
+    draw.rectangle((left_start, 2, max_width - from_right, int(dY*0.75)), fill='#ffee00')
+    #draw.ellipse((left_start, -dY, max_width - from_right, int(dY*0.8)), fill='#ffee00')
 
     self.write_text_to_draw(
       draw,
       txt = txt,
-      top_left=(59, -1),
-      align='right',
+      top_left=(left_start, -1),
+#      align='right',
       max_width=max_width -1,
       font_name=font_name,
       font_size=font_size,
       titleCase=True,
       font_colour=colour,)
 
-    font_size = 8
-    txt = "New!"
-    dX, dY = self.getTxtWidthAndHeight(txt, font_name, font_size)
-    IM = Image.new('RGBA', (dX, dY))
-    IMdraw = ImageDraw.Draw(IM)
-    IMdraw.rectangle((0, 0, dX + 2, dY), fill='#ffee00')
-    self.write_text_to_draw(
-      IMdraw,
-      txt = txt,
-      top_left=(0, -1),
-      max_width=max_width,
-      font_name=font_name,
-      font_size=font_size,
-      titleCase=True,
-      font_colour=colour,)
-    OlexVFS.save_image_to_olex(IM, "new", 2)
+    #font_size = 8
+    #txt = "New!"
+    #dX, dY = self.getTxtWidthAndHeight(txt, font_name, font_size)
+    #IM = Image.new('RGBA', (dX, dY))
+    #IMdraw = ImageDraw.Draw(IM)
+    #IMdraw.rectangle((0, 0, dX + 2, dY), fill='#ffee00')
+    #self.write_text_to_draw(
+      #IMdraw,
+      #txt = txt,
+      #top_left=(0, -1),
+      #max_width=max_width,
+      #font_name=font_name,
+      #font_size=font_size,
+      #titleCase=True,
+      #font_colour=colour,)
+    #OlexVFS.save_image_to_olex(IM, "new", 2)
 
 
   def create_arrows(self, image, draw, height, direction, colour, type='simple', h_space=4, v_space=4, offset_y = 0, char_pos=(0,0), char_char="+", width=10, align='left', scale = 1.0):
@@ -1014,7 +1016,7 @@ class ImageTools(FontInstances):
   #       draw.line((begin ,end), fill=border_colour['right'])
     draw.line((begin ,end), fill=border_colour)
 
-    rect_colour = OV.FindValue('gui_html_bg_colour')
+    rect_colour = OV.GetParam('gui.html.bg_colour')
     pie_colour = bg_colour
 
     pie_colour = (0,0,0,255)

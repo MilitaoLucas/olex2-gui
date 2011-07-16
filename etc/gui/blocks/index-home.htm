@@ -1,10 +1,11 @@
  <!-- #include home-pie pie.htm;1; -->
 
 <!-- #include home-start gui\start.htm;gui\blocks\tool-off.htm;image=start;onclick=;1; -->
+<!-- #includeif spy.gui.home.multiple_dataset.check() home-multiple-data gui\multiple-dataset.htm;gui\blocks\tool-off.htm;image=multiple-dataset;onclick=;1; -->
 <!-- #include home-starter gui\starter.htm;gui\blocks\tool-off.htm;image=start;onclick=;0; -->
 <!-- #include home-recent-files gui\recent-files.htm;gui\blocks\tool-off.htm;image=recent-files;onclick=;2; -->
-<!-- #include home-news news\news.htm;gui\blocks\tool-off.htm;image=news;onclick=itemstate home-tips 2;2; --> 
-<!-- #include home-tips gui\tips-and-tricks.htm;gui\blocks\tool-off.htm;image=tips-&-tricks;onclick=itemstate home-news 2;;2; --> 
+<!-- #include home-news news\news.htm;gui\blocks\tool-off.htm;image=news;onclick=itemstate home-tips 2;1; --> 
+<!-- #include home-tips gui\tips-and-tricks.htm;gui\blocks\tool-off.htm;image=tips-&-tricks;onclick=itemstate home-news 2;2; --> 
 
 $spy.make_gui_edit_link(index-home)
 

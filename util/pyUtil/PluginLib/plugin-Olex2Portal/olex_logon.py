@@ -12,7 +12,7 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
 import olx
-
+import olex
 global username
 username = ""
 global password
@@ -42,7 +42,7 @@ def make_translate_gui_items_html(item_l):
   <font color=$spy.GetParam(gui.html.font_colour)  size=$spy.GetParam(gui.html.font_size) face="$spy.GetParam(gui.html.font_name)">
   <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_bg_colour)">
   '''
-    
+
   for item in item_l:
     if not item:
       continue
@@ -53,51 +53,51 @@ def make_translate_gui_items_html(item_l):
     if not value:
       value = item
     txt += '''
-  
+
   <tr>
     <td>
-    %s: 
+    %s:
     </td>
      <td>
-       <input 
-         type="text" 
-         bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
-         valign='center' 
+       <input
+         type="text"
+         bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+         valign='center'
          name="%s"
          reuse
-         width="300"  
-         height="20" 
+         width="300"
+         height="20"
          value = "%s">
      </td>
      </tr>
      ''' %(item, item, value)
-    
+
   txt += '''
      <tr>
      <td>
      </td>
      <td valign='centre'>
-       <input 
-         type="button" 
-         bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
-         valign='center' 
-         width="60"  
+       <input
+         type="button"
+         bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+         valign='center'
+         width="60"
          height="22"
          onclick="html.EndModal(Translate,1)"
          name="TRANSLATE OK"
          value = "OK">
-       <input 
-         type="button" 
-         bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
-         valign='center' 
-         width="60"  
+       <input
+         type="button"
+         bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+         valign='center'
+         width="60"
          height="22"
          onclick="html.EndModal(Translate,0)"
          name="TRANSLATE CANCEL"
          value = "Cancel">
      </td>
      </tr>
-     
+
      </table>
      </font>
      </body>
@@ -116,9 +116,9 @@ def make_translate_gui_items_html(item_l):
   res = olx.html_ShowModal(pop_name)
   res = int(res)
   return res
-  
-  
-def make_logon_html():
+
+
+def make_logon_html(url='www.olex2.org'):
   pop_name = "Logon"
   if OV.IsControl('%s.WEB_USERNAME'%pop_name):
     olx.html_ShowModal(pop_name)
@@ -126,39 +126,39 @@ def make_logon_html():
     txt='''
   <body link="$spy.GetParam(gui.html.link_colour)" bgcolor="$spy.GetParam(gui.html.bg_colour)">
   <font color=$spy.GetParam(gui.html.font_colour)  size=$spy.GetParam(gui.html.font_size) face="$spy.GetParam(gui.html.font_name)">
-  <b>Please log on to our server with the username and password you use at www.olex2.org.<br></b>
-  <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_bg_colour)">
+  <b>Please log on to our server with the username and password you use at %s.<br></b>
+  <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_bg_colour)">
   <tr>
     <td>
-    %Username%: 
+    Username:
     </td>
      <td>
-     
-       <input 
-         type="text" 
-         bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
-         valign='center' 
+
+       <input
+         type="text"
+         bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+         valign='center'
          name="WEB_USERNAME"
          reuse
-         width="90"  
-         height="20" 
+         width="90"
+         height="20"
          value = "">
      </td>
      </tr>
      <tr>
     <td>
-    %Password%: 
+    Password:
     </td>
      <td>
-       <input 
-         type="text" 
-         bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
-         valign='center' 
+       <input
+         type="text"
+         bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+         valign='center'
          name="WEB_PASSWORD"
          password
          reuse
-         width="90"  
-         height="20" 
+         width="90"
+         height="20"
          onreturn="html.EndModal(Logon,1)"
          value = "">
      </td>
@@ -167,30 +167,30 @@ def make_logon_html():
      <td>
      </td>
      <td valign='centre'>
-       <input 
-         type="button" 
-         bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
-         valign='center' 
-         width="60"  
+       <input
+         type="button"
+         bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+         valign='center'
+         width="60"
          height="22"
          onclick="html.EndModal(Logon,1)"
          value = "OK">
-       <input 
-         type="button" 
-         bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
-         valign='center' 
-         width="60"  
+       <input
+         type="button"
+         bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+         valign='center'
+         width="60"
          height="22"
          onclick="html.EndModal(Logon,0)"
          value = "Cancel">
      </td>
      </tr>
-     
+
      </table>
      </font>
      </body>
-     '''
-  
+     ''' %url
+
     OV.write_to_olex("logon.htm", txt)
     boxWidth = 280
     boxHeight = 180
@@ -200,8 +200,8 @@ def make_logon_html():
     res = olx.html_ShowModal(pop_name)
     res = int(res)
     return res
-    
-  
+
+
 def web_authenticate():
   global username
   global password
@@ -219,6 +219,7 @@ def web_authenticate():
         OV.htmlReload()
         OV.SetParam('olex2.is_logged_on',True)
         return True
+
     else:
       return False
 OV.registerFunction(web_authenticate)
@@ -236,31 +237,92 @@ def web_run_sql(sql = None, script = 'run_sql'):
     #sql = sql.encode('utf-8')
   #except Exception, err:
     #print err
-  sql = base64.b64encode(sql) 
+  sql = base64.b64encode(sql)
   script = "Olex2Sql"
-  url = "http://www.olex2.org/content/DB/%s" %script
-  #url = "http://www.olex2.org/%s" %script
+  url = OV.GetParam('olex2.portal_db_url')
+  url = "%s/%s" %(url, script)
   values = {'__ac_password':password,
             '__ac_name':username,
             'sqlQ':sql,
             }
-  data = urllib.urlencode(values)
-  req = urllib2.Request(url)
-  response = urllib2.urlopen(req,data)
-  
-  
-  
-  try:
-    d = pickle.load(response)
-  except Exception, err:
-    if "Forgot your password" in response.read():
+  response = OV.make_url_call(url, values)
+#  data = urllib.urlencode(values)
+#  req = urllib2.Request(url)
+#  response = urllib2.urlopen(req,data)
+
+  if type(response) is str:
+    if "Forgot your password" in response:
       username =""
       password = ""
       return "Unauthorised"
-    else:
-      d = {}
 
-  return d
+  return response
+
+
+def upload_structure(script='upload_structures'):
+  import olexex
+  global password
+  global username
+  import random
+
+  web_authenticate()
+
+  id = OV.FileName()
+  image_path = "%s/%s.png" %(OV.FilePath(), id)
+  if not os.path.exists(image_path):
+    olex.m("pict %s.png 400" %id)
+  image = open(image_path,'rb').read()
+
+  file_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'cif'))
+  cif = open(file_name, 'r').read()
+
+  file_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'ins'))
+  ins = open(file_name, 'r').read()
+
+  file_name = os.path.normpath('%s_cifreport.htm' %id)
+  checkcif_report = open(file_name, 'r').read()
+
+  date_collected = "2011,5,5"
+#  crystal_data = "Crystal Data: <sub>Fred</sub>"
+  
+  url = "%s/%s" %(OV.GetParam('olex2.structurespace.url'), script)
+  #id = str(random.randint(10000, 99999))
+
+  crystal_data = """
+C<sub>4</sub>H<sub>4</sub>Ag<sub>2</sub>O<sub>4</sub>S,
+<i>M&nbsp;</i>=363.88,
+monoclinic,
+<!--<i>a</i>&nbsp;= 5.1945(2), -->
+<!--<i>b</i>&nbsp;= 20.3339(9), -->
+<!--<i>c</i>&nbsp;= 6.6668(3), -->
+<i>a</i>&nbsp;= 5.1945(2)&nbsp;&Aring;, <i>b</i>&nbsp;= 20.3339(9)&nbsp;&Aring;, <i>c</i>&nbsp;= 6.6668(3)&nbsp;&Aring;, <i>&beta;</i>&nbsp;= 109.095(5)&deg;,
+<i>U&nbsp;</i>= 665.43(6)&nbsp;&Aring;<sup>3</sup>,
+<i>T</i>&nbsp;= 120.0,
+space group P2<sub>1</sub>/c (no. 14),
+<i>Z</i>&nbsp;= 4,
+&#956;(Mo K&alpha;)&nbsp;= 6.149,
+6931 reflections measured,
+1612 unique (<i>R</i><sub>int</sub>&nbsp;= 0.0302) which were used in all calculations.
+The final <i>wR</i>(<i>F</i><sub>2</sub>) was 0.061963 (all data).
+"""
+
+  params = {'__ac_password':password,
+            '__ac_name':username,
+            'context':"None",
+            'sNum':id,
+            'image':image,
+            'cif':cif,
+            'crystal_data':crystal_data,
+            'date_collected':date_collected,
+            'ins':ins,
+            'checkcif_report':checkcif_report,
+            }
+  
+  response = OV.make_url_call(url, params)
+  print response
+
+OV.registerFunction(upload_structure)
+
 
 
 
@@ -273,9 +335,10 @@ def web_translation_item(OXD=None, language='English'):
             '__ac_name':username,
             'language':language,
             'OXD':OXD}
-  data = urllib.urlencode(values)
-  req = urllib2.Request(url)
-  response = urllib2.urlopen(req,data)
+  response = OV.make_url_call(url, values)
+  #data = urllib.urlencode(values)
+  #req = urllib2.Request(url)
+  #response = urllib2.urlopen(req,data)
   text = response.read()
 
   if "<!DOCTYPE html PUBLIC" in text:
@@ -286,7 +349,7 @@ def web_translation_item(OXD=None, language='English'):
 
 class DownloadOlexLanguageDictionary:
   def __init__(self):
-    #self.SQL = SQLFactory.SQLFactory(db='OlexGuiDB')  
+    #self.SQL = SQLFactory.SQLFactory(db='OlexGuiDB')
     #self.basedir = r"C:\Documents and Settings\Horst\Desktop\olex"
     self.basedir = olx.BaseDir()
     self.dictionary_l = []
@@ -307,7 +370,7 @@ class DownloadOlexLanguageDictionary:
   #      text = text.encode('utf-8')
   #    except Exception, err:
   #      print err
-      
+
     if not text:
       return
     inputText = OV.GetUserInput(0,'Modify text for help entry %s in %s' %(OXD, language), text)
@@ -315,10 +378,11 @@ class DownloadOlexLanguageDictionary:
   #      inputText = inputText.encode('utf-8')
   #    except Exception, err:
   #      print err
-        
+
     if inputText and inputText != text:
       res = self.uploadSingleTerm(OXD, language, inputText)
       print res
+      self.dictionary_l = []
       res = self.downloadTranslation()
       print res
       OV.cmd('reload dictionary')
@@ -332,7 +396,7 @@ class DownloadOlexLanguageDictionary:
       return
     language = olx.CurrentLanguage()
     self.language = language
-    
+
     path = "etc"
     if 'index' in OXD:
       path = r"etc/gui/blocks"
@@ -341,22 +405,22 @@ class DownloadOlexLanguageDictionary:
     else:
       tool_name = OXD.split("/")[1].split(".")[0]
       gui_file = r"%s/%s/%s" % (olx.BaseDir(),path, OXD)
-      
+
     #text = olex_logon.web_translation_item(OXD, language)
     language = olx.CurrentLanguage()
     rFile = open(gui_file,'r')
     text = rFile.read()
     if not text:
       return
-    
+
     inputText = OV.GetUserInput(0,'Modify text for help entry %s in %s' %(OXD, language), text)
     if inputText and inputText != text:
       wFile = open(gui_file,'w')
       wFile.write(inputText)
     else:
       inputText = text
-    
-      
+
+
     if "<!-- #include" in inputText:
       rFile = open(gui_file,'r')
       l = rFile.readlines()
@@ -391,12 +455,12 @@ class DownloadOlexLanguageDictionary:
                         print "Not found: %s" %includefile
                         continue
                       inputText += rFile.read()
-      
+
     import re
     regex = re.compile(r"\% (.*?) \%", re.X)
     m = regex.findall(inputText)
     m = list(set(m))
-    
+
     res = make_translate_gui_items_html(m)
     if res:
       cursor_txt = OV.TranslatePhrase("Please wait while uploading your changes")
@@ -417,7 +481,7 @@ class DownloadOlexLanguageDictionary:
       else:
         print "Upload has failed: %s" %ok
       OV.Cursor()
-      
+
   def upload_items(self, m):
     try:
       total = len(m)
@@ -428,7 +492,7 @@ class DownloadOlexLanguageDictionary:
           continue
         if OXD == "Close":
           continue
-        
+
         i += 1
         try:
           value = olx.GetValue('Translate.%s' %OXD)
@@ -440,14 +504,14 @@ class DownloadOlexLanguageDictionary:
       txt = pickle.dumps(l)
       text = web_run_sql(txt)
       return "OK"
-        
+
     except Exception, err:
       return err
-    
-      
-      
+
+
+
   def downloadSingleTerm(self, OXD, language = "English"):
-      
+
     sql = "SELECT * FROM translation WHERE oxd='%s'" %(OXD)
     res = web_run_sql(sql)
     txt = ""
@@ -468,27 +532,27 @@ class DownloadOlexLanguageDictionary:
       txt = '''
   Line before a Table.
   &&
-  
+
   ~Headline~
   Body text
   XX command line text XX
-  
+
   &&
       '''
     return txt
-  
-  
+
+
   def uploadSingleTerm(self, OXD, field, value):
     d = {"OXD":OXD, field:value}
     sql = self.create_insert_or_update_sql(d, 'translation')
-    
+
     text = web_run_sql(sql)
-        
+
     #res = self.SQL.run_sql(sql)
     #print res, field, value
     return text
-        
-        
+
+
   def downloadTranslation(self):
     self.get_help()
     self.write_dict_file()
@@ -496,30 +560,30 @@ class DownloadOlexLanguageDictionary:
     OV.cmd("Reload dictionary")
     print "Reloaded Dictionary"
     return "Done"
-  
+
   def get_help(self):
     placeholder = "."
     Q = "SELECT * FROM translation"
-  
+
     #res = self.SQL.run_select_sql(Q)
     res = web_run_sql(script='run_sql', sql = Q)
     if res == "Unauthorised":
       return
-    
-  
+
+
     #lines = res.split("\n")
     #for line in lines:
     #  self.dictionary_l.append(line)
-    
+
     languages = [('OXD',''),
                  ('English','en'),
                  ('French','fr'),
-                 ('Arabic','ar'), 
-                 ('Russian','ru'), 
-                 ('Japanese','ja'), 
-                 ('German','de'), 
-                 ('Spanish','es'), 
-                 ('Chinese','zh-CN'), 
+                 ('Arabic','ar'),
+                 ('Russian','ru'),
+                 ('Japanese','ja'),
+                 ('German','de'),
+                 ('Spanish','es'),
+                 ('Chinese','zh-CN'),
                  ('Greek','el')]
     i = 0
     for entry in res:
@@ -534,8 +598,8 @@ class DownloadOlexLanguageDictionary:
       except AttributeError, err:
         pass
         #raise err
-      
-      
+
+
       for language in languages:
         lang = language[0]
         short_lang = language[1]
@@ -550,17 +614,17 @@ class DownloadOlexLanguageDictionary:
           #self.uploadD.insertSingleTerm(ID, lang, e)
         #setattr(self, language, e)
         line += "%s\t" %e
-      line = line[:-1]  
+      line = line[:-1]
       line = line.replace("\n", "")
       line = line.replace("\t\t", "\t.\t")
       line += "\n"
       line = line.replace("\t\n", "\t.\n")
       line = line.replace("OXD", "OlexID")
-      
-      
-      
+
+
+
       self.dictionary_l.append(line)
-  
+
   def write_dict_file(self):
     rFile = open(self.dictF, 'r')
     old = rFile.read()
@@ -583,7 +647,7 @@ class DownloadOlexLanguageDictionary:
       wFile = open(self.dictF, 'w')
       wFile.write(old)
       wFile.close()
-      
+
 
   def create_insert_or_update_sql(self, value_for_key, table):
     ''' value_for_key is a dictionary with key:value '''
@@ -595,9 +659,9 @@ class DownloadOlexLanguageDictionary:
       )
     sql = sql_tmpl % value_for_key
     #print sql
-    return sql    
-    
-    
+    return sql
+
+
 DownloadOlexLanguageDictionary_instance = DownloadOlexLanguageDictionary()
 OV.registerFunction(DownloadOlexLanguageDictionary_instance.EditHelpItem)
 OV.registerFunction(DownloadOlexLanguageDictionary_instance.EditGuiItem)

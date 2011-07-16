@@ -149,7 +149,7 @@ class RunPrg(ArgumentParser):
     olex.f('GetVar(cctbx_R1)')
 
   def runAfterProcess(self):
-    if 'smtbx' not in self.program.name:
+    if 'olex2' not in self.program.name:
       self.doFileResInsMagic()
       reflections = OV.HKLSrc() #BEWARE DRAGONS
       OV.reloadStructureAtreap(self.filePath, self.curr_file)
@@ -237,7 +237,7 @@ class RunSolutionPrg(RunPrg):
 
   def setupSolve(self):
     try:
-      self.sg = olex.f(r'sg(%n)')
+      self.sg = '\'' + olex.f(r'sg(%n)') + '\''
     except:
       self.sg = ""
     self.formula = olx.xf_GetFormula()
@@ -265,7 +265,9 @@ class RunRefinementPrg(RunPrg):
     self.startRun()
     olx.File(u"'%s/%s.ins'" %(OV.FilePath(),self.original_filename))
     self.setupRefine()
-    if self.terminate: return
+    if self.terminate:
+      self.endRun()
+      return
     self.setupFiles()
     if self.terminate:
       self.endRun()
@@ -338,6 +340,8 @@ class RunRefinementPrg(RunPrg):
   def runAfterProcess(self):
     RunPrg.runAfterProcess(self)
     self.doHistoryCreation()
+    if self.R1 == 'n/a':
+      return
     if self.params.snum.refinement.auto.tidy:
       self.doAutoTidyAfter()
       OV.File()
@@ -346,7 +350,7 @@ class RunRefinementPrg(RunPrg):
     self.method.post_refinement(self)
 
   def doHistoryCreation(self):
-    if self.params.snum.skip_history:
+    if self.params.snum.init.skip_history:
       print ("Skipping History")
     R1 = 0
     self.his_file = ""
@@ -374,12 +378,11 @@ class RunRefinementPrg(RunPrg):
     return self.his_file, R1
 
   def isInversionNeeded(self, force=False):
+    if olex_core.SGInfo()['Centrosymmetric'] == 1: return
     from cctbx_olex_adapter import hooft_analysis
     from libtbx.utils import format_float_with_standard_uncertainty
     from cctbx import sgtbx
     from libtbx.utils import Sorry
-    print
-    if olex_core.SGInfo()['Centrosymmetric'] == 1: return
     print "Checking absolute structure..."
     inversion_needed = False
     possible_racemic_twin = False

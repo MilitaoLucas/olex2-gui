@@ -47,33 +47,25 @@ def makeHtmlTable(list):
       if box in input_d.keys():
         box_d = input_d[box]
         box_d.setdefault('ctrl_name', "SET_%s" %str.upper(box_d['varName']).replace('.','_'))
-        box_d.setdefault('bgcolor','spy.bgcolor(%s)' %box_d['ctrl_name'])
+        box_d.setdefault('bgcolor','spy.bgcolor(~name~)')
         if box_d['varName'].startswith('_'): # treat cif items differently
           box_d.setdefault('value', '$spy.get_cif_item(%(varName)s,?)' %box_d)
-          box_d.setdefault('onchange',"spy.set_cif_item(%(varName)s,GetValue(%(ctrl_name)s))>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
-          box_d.setdefault('onleave',"spy.set_cif_item(%(varName)s,GetValue(%(ctrl_name)s))>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
+          box_d.setdefault('onchange',"spy.set_cif_item(%(varName)s,GetValue(~name~))>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
         else:
           box_d.setdefault('value', '$spy.GetParam(%(varName)s)' %box_d)
-          box_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
-          box_d.setdefault('onleave',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
+          box_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(~name~))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(~name~,#FFDCDC)" %box_d)
         boxText += makeHtmlInputBox(box_d)
     if boxText:
       row_d.setdefault('input',boxText)
     else:
       input_d.setdefault('ctrl_name', "SET_%s" %str.upper(input_d['varName']).replace('.','_'))
-      if input_d.has_key('onchange'):
-        input_d.setdefault('onleave',input_d['onchange'])
-      elif input_d.has_key('onleave'):
-        input_d.setdefault('onchange',input_d['onleave'])
       if input_d['varName'].startswith('_'): # treat cif items differently
         input_d.setdefault('value', '$spy.get_cif_item(%(varName)s,?)' %input_d)
-        input_d.setdefault('onchange',"spy.set_cif_item(%(varName)s,GetValue(%(ctrl_name)s))>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
-        input_d.setdefault('onleave',"spy.set_cif_item(%(varName)s,GetValue(%(ctrl_name)s))>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
+        input_d.setdefault('onchange',"spy.set_cif_item(%(varName)s,GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)" %input_d)
       else:
         input_d.setdefault('value', '$spy.GetParam(%(varName)s)' %input_d)
-        input_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
-        input_d.setdefault('onleave',"spy.SetParam(%(varName)s,GetValue(%(ctrl_name)s))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %input_d)
-      input_d.setdefault('bgcolor','spy.bgcolor(%s)' %input_d['ctrl_name'])
+        input_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(~name~))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(~name~,#FFDCDC)" %input_d)
+      input_d.setdefault('bgcolor','spy.bgcolor(~name~)')
       row_d.setdefault('input',makeHtmlInputBox(input_d))
       row_d.update(input_d)
 
@@ -90,10 +82,9 @@ def makeHtmlInputBox(inputDictionary):
     inputDictionary.setdefault('height','35')
 
   dictionary = {
-    'width':'55%%',
+    'width':'95%%',
     'height':'$spy.GetParam(gui.html.input_height)',
     'onchange':'',
-    'onleave':'',
     'items':'',
     'multiline':'',
     'type':'text',
@@ -118,7 +109,6 @@ items="%(items)s"
 label="%(label)s "
 valign="%(valign)s"
 onchange="%(onchange)s"
-onleave="%(onleave)s"
 %(readonly)s
 bgcolor="%(bgcolor)s"
 >
@@ -191,7 +181,7 @@ def makeHtmlTableRow(dictionary):
         %(itemName)s
       </b>
     </td>
-      <td VALIGN="center" colspan=2>
+      <td VALIGN="center" colspan=2 width="70%%%%">
         <font %(font)s>
           %(input)s
         </font>
@@ -436,6 +426,20 @@ def make_table_first_col(help_name=None, popout=False, help_image='large'):
 ''' %help
   return html
 
+def make_html_opening():
+  html = '''
+  <html>
+  <body link=$spy.GetParam(gui.html.link_colour) bgcolor=$spy.GetParam(gui.html.bg_colour)>
+  <font color=$spy.GetParam(gui.html.font_colour) size=$spy.GetParam(gui.html.font_size) face="$spy.GetParam(gui.html.font_name)">
+<p> '''
+  return html
+
+def make_html_closing():
+  html = '''
+  </font></body></html>
+  '''
+  return html
+
 def make_help_href(name, popout, image='normal'):
   help = '''
   $spy.MakeHoverButton(btn-info@%s,spy.make_help_box -name='%s' -popout='%s')
@@ -452,7 +456,6 @@ def make_input_text_box(d):
          'onchange':'',
          'label':name,
          'valign':'center',
-         'onleave':'',
          'data':'',
          'manage':'',
      }
@@ -469,7 +472,6 @@ def make_input_text_box(d):
        label="%(label)s"
        valign="%(valign)s"
        onchange="%(onchange)s"
-       onleave="%(onleave)s"
        %(manage)s
        data="%(data)s"
 >''' %dic
@@ -486,7 +488,6 @@ def make_combo_text_box(d):
          'halign':'left',
          'width':'70',
          'onchange':'',
-         'onleave':'',
          'data':'',
          'manage':'manage',
          'readonly':'',
@@ -505,7 +506,6 @@ def make_combo_text_box(d):
        width="%(width)s"
        height="%(height)s"
        label="%(label)s"
-       onleave="%(onleave)s"
        onchange="%(onchange)s"
        %(manage)s
        data="%(data)s"
@@ -735,7 +735,7 @@ def format_help(string):
 def reg_command(self, string):
   regex = re.compile(r"  ~ (.*?)( [^\~\~]* ) ~ ", re.X)
   m = regex.findall(string)
-  colour = OV.FindValue('gui_html_highlight_colour')
+  colour = OV.GetParam('gui.html.highlight_colour')
   if m:
     s = regex.sub(r'''
     <br>
@@ -778,9 +778,10 @@ OV.registerFunction(switchButton)
 def bgcolor(ctrl_name):
   value = olx.GetValue(ctrl_name)
   if value in ('?',''):
-    colour = 'rgb(255,220,220)'
+    colour = "#FFDCDC"
   else:
-    colour = OV.FindValue('gui_html_input_bg_colour')
+    #colour = '#ff0000'
+    colour = OV.GetParam('gui.html.input_bg_colour').hexadecimal
   return colour
 OV.registerFunction(bgcolor)
 
@@ -814,7 +815,7 @@ OV.registerFunction(getPrintStyles)
 
 def getStylesList():
   styles = os.listdir("%s/etc/CIF/styles" %OV.BaseDir())
-  exclude = ("rsc.css", "thesis.css", "custom.css")
+  exclude = ("rsc.css", "thesis.css", "custom.css", "default.css")
   stylesList = ";".join(style[:-4] for style in styles
                         if style not in exclude and style.endswith('.css'))
   return 'default;' + stylesList
@@ -824,7 +825,7 @@ def getTemplatesList():
   templates = os.listdir("%s/etc/CIF/styles" %OV.BaseDir())
   exclude = ("footer.htm")
   templatesList = ";".join(template[:-4] for template in templates
-                        if template not in exclude and template.endswith('.htm'))
+                        if template not in exclude and template.endswith('.htm') or template.endswith('.rtf'))
   return templatesList
 OV.registerFunction(getTemplatesList)
 
@@ -960,8 +961,7 @@ def OnModeChange(*args):
     if not last_mode: return
     control = "IMG_%s" %last_mode.upper()
     if OV.IsControl(control):
-      OV.SetImage(control,"up=%soff.png" %last_mode)
-      OV.SetImage(control,"hover=%shover.png" %last_mode)
+      OV.SetImage(control,"up=%soff.png,hover=%shover.png" %(last_mode,last_mode))
     OV.cmd("html.hide pop_%s" %name)
     last_mode = None
     OV.SetParam('olex2.in_mode',None)
@@ -974,14 +974,11 @@ def OnModeChange(*args):
     if active_mode:
       control = "IMG_%s" %active_mode.upper()
       if OV.IsControl(control):
-        OV.SetImage(control,"up=%son.png" %active_mode)
-        OV.SetImage(control,"hover=%son.png" %active_mode)
+        OV.SetImage(control,"up=%son.png,hover=%son.png" %(active_mode,active_mode))
     if last_mode:
-      use_image = "%soff.png" %last_mode
       control = "IMG_%s" %last_mode.upper()
       if OV.IsControl(control):
-        OV.SetImage(control,"up=%son.png" %active_mode)
-        OV.SetImage(control,"hover=%son.png" %active_mode)
+        OV.SetImage(control,"up=%soff.png,hover=%shover.png" %(last_mode,last_mode))
 
     last_mode = active_mode
     OV.SetParam('olex2.in_mode',mode.split("=")[0])
@@ -1117,7 +1114,7 @@ def _check_modes_and_states(name):
   if name in buttons:
     if OV.GetParam('olex2.reporting') == True:
       return True
-    
+
   return False
 
 
@@ -1134,6 +1131,8 @@ def MakeHoverButton(name, cmds, onoff = "off", btn_bg='table_firstcol_colour'):
 OV.registerFunction(MakeHoverButton)
 
 def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
+  if "None" in name:
+    return ""
   hover_buttons = OV.GetParam('olex2.hover_buttons')
   click_console_feedback = False
   n = name.split("-")
@@ -1176,7 +1175,7 @@ def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
 <input
   name=IMG_%(nameupper)s
   type="button"
-  image="up=%(tool_img)s%(off)s.png,down=%(tool_img)s%(down)s.png,hover=%(tool_img)s%(hover)s.png",disable=%(tool_img)sdisable.png"
+  image="up=%(tool_img)s%(off)s.png,down=%(tool_img)s%(down)s.png,hover=%(tool_img)s%(hover)s.png",disable="%(tool_img)sdisable.png"
   hint="%(target)s"
   onclick="%(cmds)s%(feedback)s"
   bgcolor=%(bgcolor)s
@@ -1187,6 +1186,8 @@ OV.registerFunction(MakeHoverButtonOff)
 
 
 def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
+  if "None" in name:
+    return ""
   hover_buttons = OV.GetParam('olex2.hover_buttons')
   click_console_feedback = False
   n = name.split("-")
@@ -1226,7 +1227,7 @@ def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
 <input
   name=IMG_%(nameupper)s
   type="button"
-  image="up=%(tool_img)s%(on)s.png,down=%(tool_img)s%(down)s.png,hover=%(tool_img)s%(hover)s.png",disable=%(tool_img)sdisable.png"
+  image="up=%(tool_img)s%(on)s.png,down=%(tool_img)s%(down)s.png,hover=%(tool_img)s%(hover)s.png",disable="%(tool_img)sdisable.png"
   hint="%(target)s"
   onclick="%(cmds)s%(feedback)s"
   bgcolor=%(bgcolor)s
@@ -1381,7 +1382,11 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
 
 
   OV.SetVar("current_tooltip_number",i)
-  OV.write_to_olex("tip-of-the-day-content.htm", txt.encode('utf-8'))
+  try:
+    txt = txt.encode('utf-8')
+  except:
+    print("Can't decode %s" %txt)
+  OV.write_to_olex("tip-of-the-day-content.htm", txt)
   return True
 OV.registerFunction(getTip)
 

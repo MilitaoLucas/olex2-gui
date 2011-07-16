@@ -173,6 +173,10 @@ class OlexRefinementModel(object):
     'simu':'adp_similarity',
     'delu':'rigid_bond',
     'isor':'isotropic_adp',
+    'olex2.restraint.angle':'angle',
+    'olex2.restraint.dihedral':'dihedral',
+    'olex2.restraint.u_eq':'fixed_u_eq_adp',
+    'olex2.restraint.u_eq.similar':'u_eq_similarity',
   }
 
   constraint_types = {
@@ -191,9 +195,11 @@ class OlexRefinementModel(object):
         self._atoms.append(atom)
         element_type = atom['type']
         self.atom_ids.append(atom['aunit_id'])
-    for var in olex_refinement_model['variables']['variables'][0]['references']:
-      self._fixed_variables.setdefault(var['id'], [])
-      self._fixed_variables[var['id']].append(var)
+    vars = olex_refinement_model['variables']['variables']
+    if len(vars) > 0:
+      for var in vars[0]['references']:
+        self._fixed_variables.setdefault(var['id'], [])
+        self._fixed_variables[var['id']].append(var)
     self._cell = olex_refinement_model['aunit']['cell']
     self.exptl = olex_refinement_model['exptl']
     self._afix = olex_refinement_model['afix']
@@ -240,26 +246,35 @@ class OlexRefinementModel(object):
     from libtbx.utils import flat_list
     from cctbx import sgtbx
     for shelxl_restraint in (self.restraint_types):
-      for restraint in self.model[shelxl_restraint]:
+      for restraint in self.model.get(shelxl_restraint, ()):
         restraint_type = self.restraint_types.get(shelxl_restraint)
         if restraint_type is None: continue
         i_seqs = [i[0] for i in restraint['atoms']]
         kwds = dict(i_seqs=i_seqs)
         if restraint_type not in (
-          'adp_similarity', 'rigid_bond', 'isotropic_adp'):
+          'adp_similarity', 'u_eq_similarity', 'rigid_bond', 'isotropic_adp', 'fixed_u_eq_adp'):
           kwds['sym_ops'] = [
             (sgtbx.rt_mx(flat_list(i[1][:-1]), i[1][-1]) if i[1] is not None else None)
             for i in restraint['atoms']]
-          kwds['weight'] = 1/math.pow(restraint['esd1'],2)
+          if restraint_type in ('angle', 'dihedral'):
+            esd_val = restraint['esd1']*180/math.pi
+          else:
+            esd_val = restraint['esd1']
+          kwds['weight'] = 1/math.pow(esd_val,2)
         value = restraint['value']
-        if restraint_type in ('adp_similarity', 'isotropic_adp'):
+        if restraint_type in ('adp_similarity', 'u_eq_similarity', 'isotropic_adp', 'fixed_u_eq_adp'):
           kwds['sigma'] = restraint['esd1']
-          kwds['sigma_terminal'] = restraint['esd2'] if restraint['esd2'] != 0 else None
+          if restraint_type in ('adp_similarity', 'isotropic_adp'):
+            kwds['sigma_terminal'] = restraint['esd2'] if restraint['esd2'] != 0 else None
         elif restraint_type == 'rigid_bond':
           kwds['sigma_12'] = restraint['esd1']
           kwds['sigma_13'] = restraint['esd2'] if restraint['esd2'] != 0 else None
         if restraint_type == 'bond':
           kwds['distance_ideal'] = value
+        elif restraint_type in ('angle', 'dihedral'):
+          kwds['angle_ideal'] = value
+        elif restraint_type in ('fixed_u_eq_adp',):
+          kwds['u_eq_ideal'] = value
         elif restraint_type in ('bond_similarity', 'planarity'):
           kwds['weights'] = [kwds['weight']]*len(i_seqs)
           if restraint_type == 'bond_similarity':
@@ -375,7 +390,6 @@ def GetAvailableSolutionProgs():
     retStr += "ShelXS;"
   return retStr
 OV.registerFunction(GetAvailableSolutionProgs)
-
 
 def OnMatchStart(argStr):
   OV.write_to_olex('match.htm', "<b>RMS (&Aring;)&nbsp;Matched Fragments</b><br>")
@@ -513,7 +527,6 @@ def ElementButtonStates(symbol):
     else:
       olex.m('name sel %s' %symbol)
       olex.m('sel -u')
-      OV.htmlReload()
 if haveGUI:
   OV.registerFunction(ElementButtonStates)
 
@@ -565,7 +578,7 @@ def MakeElementButtonsFromFormula():
   type="button"
   image="up=%(namelower)soff.png,down=%(namelower)son.png,hover=%(namelower)shover.png",disable=%(namelower)sdisable.png"
   hint="%(target)s"
-  onclick="%(cmds)s>>echo '%(target)s: OK'"
+  onclick="%(cmds)s"
   bgcolor=%(bgcolor)s
 >''' %d
 #    <a href="%s" target="%s %s">
@@ -648,6 +661,7 @@ def MakeElementButtonsFromFormula():
   else:
     bm = ButtonMaker(btn_dict)
     bm.run()
+
   cell_volume = 0
   Z = 1
   Z_prime = float(olx.xf_au_GetZprime())
@@ -663,10 +677,10 @@ def MakeElementButtonsFromFormula():
   retStr = '\n'.join(html_elements)
   if cell_volume and totalcount:
     atomic_volume = (cell_volume)/(totalcount * Z)
-    OV.SetVar('current_atomic_volume','%.1f' %atomic_volume)
+    OV.SetParam('snum.solution.current_atomic_volume','%.1f' %atomic_volume)
     retStr = retStr.replace("\n","")
   else:
-    OV.SetVar('current_atomic_volume','n/a')
+    OV.SetParam('snum.solution.current_atomic_volume',None)
   return str(retStr)
 if haveGUI:
   OV.registerFunction(MakeElementButtonsFromFormula)
@@ -761,11 +775,12 @@ if haveGUI:
   OV.registerFunction(MapView)
 
 def deal_with_map_buttons(onoff, img_bases, map_type):
+  ## First, set all images to hidden
   tl = ['eden', 'void', 'mask']
   for item in tl:
     if item != map_type:
       OV.SetParam('olex2.%s_vis' %item, False)
-
+      
   if not onoff:
     if OV.GetParam('olex2.%s_vis' %map_type) == False:
       onoff = 'on'
@@ -779,6 +794,7 @@ def deal_with_map_buttons(onoff, img_bases, map_type):
       use_image= "up=%soff.png" %img_base
       OV.SetImage("IMG_%s" %img_base.upper(),use_image)
     retVal = True
+    
   if onoff == 'on':
     OV.SetParam('olex2.%s_vis' %map_type,True)
     for img_base in img_bases:
@@ -941,11 +957,11 @@ def GetRcolour(R1):
   try:
     R1 = float(R1)
     if R1 > 0.20:
-      retVal=OV.FindValue('gui_red')
+      retVal=OV.GetParam('gui.red')
     elif R1 >0.10:
-      retVal=OV.FindValue('gui_orange')
+      retVal=OV.GetParam('gui.orange')
     else:
-      retVal=OV.FindValue('gui_green')
+      retVal=OV.GetParam('gui.green')
   except:
     retVal='grey'
   return str(retVal)
@@ -1102,7 +1118,7 @@ def get_solution_methods(prg, scope='snum'):
 OV.registerFunction(get_solution_methods)
 
 def which_program(prg):
-  if "smtbx" in prg.name:
+  if "olex2" in prg.name.lower():
     return True
   if prg.name in SPD or prg.name in RPD:
     exec_l = prg.execs
@@ -1272,33 +1288,39 @@ def getKeys(key_directory=None):
 
 
 def GetCheckcifReport():
-
   import urllib2
-  import urllib2_file
 
-  file_name = '%s/%s.cif' %(OV.FilePath(), OV.FileName())
-  rFile = open(file_name)
-  #file_stat = os.stat(file_name)
-  #cif = rFile.read()
-  cif = rFile
-
-  params = {
-    "runtype": "symmonly",
-    "referer": "checkcif_server",
-    "outputtype": "html",
-    "file": cif
-  }
-
-  f = urllib2.urlopen("http://vm02.iucr.org/cgi-bin/checkcif.pl", params)
-  print f.read()
-
-  #url = "http://vm02.iucr.org/cgi-bin/checkcif.pl"
-  #data = urllib.urlencode(params)
-  #print data
-  #req = urllib2.Request(url, data)
-  #response = urllib2.urlopen(req,data)
-  #print response.read()
-  rFile.close()
+  file_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'cif'))
+  if not os.path.exists(file_name):
+    print "There is no cif file!"
+    return
+  proxy = OV.get_proxy_from_usettings()
+  if proxy:  
+    proxies = {'http': proxy}
+  else:
+    proxies = {}
+  opener = urllib2.build_opener(
+      urllib2.ProxyHandler(proxies))
+  OV.CreateBitmap('working')
+  try:
+    rFile = open(file_name, 'rb')
+    cif = rFile
+    params = {
+      "runtype": "symmonly",
+      "referer": "checkcif_server",
+      "outputtype": "html",
+      "file": cif
+    }
+    out_name = os.path.normpath(
+      '%s/%s_cifreport.htm' %(OV.FilePath(), OV.FileName()))
+    wFile = open(out_name, 'w')
+    wFile.write(opener.open(OV.GetParam('olex2.checkcif.url'), params).read())
+    wFile.close()
+    rFile.close()
+    olx.Shell("'%s'" %out_name)
+  except Exception, ex:
+    print ex
+  OV.DeleteBitmap('working')
 OV.registerFunction(GetCheckcifReport)
 
 def GetHttpFile(f, force=False, fullURL = False):
@@ -1354,7 +1376,7 @@ def check_for_recent_update():
     retVal = False
     #    print "Olex2 has not been updated"
   OV.SetVar('last_version',str(version))
-  OV.StoreParameter('last_version', str(version))
+  OV.StoreParameter('last_version')
   return retVal
 
 def check_for_crypto():
@@ -1366,39 +1388,40 @@ def check_for_crypto():
     #import olex
     #olex.m(r"InstallPlugin ODAC")
 
-def make_url_call(url, values):
-  #url = "http://www.olex2.org/odac/update"
-  proxy = get_proxy_from_usettings()
-  proxies = {'http': proxy}
-  data = urllib.urlencode(values)
-  try:
-    proxy_support = urllib2.ProxyHandler(proxies)
-    req = urllib2.Request(url)
-    response = urllib2.urlopen(req,data)
-    f = response.read()
-  except:
-    print "\n++++++++++++++++++++++++++++++++++++++++++++++"
-    print "+ Could not reach update server at www.olex2.org"
-    print "+ --------------------------------------------"
-    print "+ Please make sure your computer is online"
-    print "+ and that you can reach www.olex2.org"
-    print "++++++++++++++++++++++++++++++++++++++++++++++\n"
-    return False
-  return f
+#def make_url_call(url, values):
+  #proxy = get_proxy_from_usettings()
+  #if proxy:  
+    #proxies = {'http': proxy}
+  #else:
+    #proxies = {}
+  #try:
+    #opener = urllib2.build_opener(
+      #urllib2.ProxyHandler(proxies))
+    #response = opener.open(url,values)
+    #f = response.read()
+  #except:
+    #print "\n++++++++++++++++++++++++++++++++++++++++++++++"
+    #print "+ Could not reach update server at www.olex2.org"
+    #print "+ --------------------------------------------"
+    #print "+ Please make sure your computer is online"
+    #print "+ and that you can reach www.olex2.org"
+    #print "++++++++++++++++++++++++++++++++++++++++++++++\n"
+    #return False
+  #return f
 
-def get_proxy_from_usettings():
-  rFile = open("%s/usettings.dat" %OV.BaseDir(),'r')
-  lines = rFile.readlines()
-  rFile.close()
-  proxy = None
-  for line in lines:
-    if line.startswith('proxy='):
-      proxy =  line.split('proxy=')[1]
-  if proxy:
-    print "Using Proxy server %s" %proxy
-  else:
-    print "No Proxy server is set"
-  return proxy
+#def get_proxy_from_usettings():
+  #rFile = open("%s/usettings.dat" %OV.BaseDir(),'r')
+  #lines = rFile.readlines()
+  #rFile.close()
+  #proxy = None
+  #for line in lines:
+    #if line.startswith('proxy='):
+      #proxy = line.split('proxy=')[1].strip()
+  #if proxy:
+    #print "Using Proxy server %s" %proxy
+  #else:
+    #print "No Proxy server is set"
+  #return proxy
 
 def register_new_odac(username=None, pwd=None):
   OV.Cursor("Please wait while AutoChem will be installed")
@@ -1421,7 +1444,7 @@ def register_new_odac(username=None, pwd=None):
             'username':username,
             'macAddress':mac_address,
             }
-  f = make_url_call(url, values)
+  f = OV.make_url_call(url, values)
 
   if not f:
     print "Please provide a valid username and password, and make sure your computer is online."
@@ -1489,7 +1512,7 @@ def updateACF(force=False):
   password = "update456R"
   institution = keyname.split("-")[0]
   type_of_key = keyname.split("-")[-1]
-  proxy = get_proxy_from_usettings()
+  proxy = OV.get_proxy_from_usettings()
   proxies = {'http': proxy}
 
   for mac_address in OV.GetMacAddress():
@@ -1503,21 +1526,24 @@ def updateACF(force=False):
               'computerName':computer_name,
               'macAddress':mac_address,
               }
-    data = urllib.urlencode(values)
-    #print data
-    try:
-      proxy_support = urllib2.ProxyHandler(proxies)
-      req = urllib2.Request(url)
-      response = urllib2.urlopen(req,data)
-      f = response.read()
-    except:
-      print "\n++++++++++++++++++++++++++++++++++++++++++++++"
-      print "+ Could not reach server at www.olex2.org"
-      print "+ --------------------------------------------"
-      print "+ Please make sure your computer is online"
-      print "+ and that you can reach www.olex2.org"
-      print "++++++++++++++++++++++++++++++++++++++++++++++\n"
-      return
+    
+    f = OV.make_url_call(url, values)
+    
+#    data = urllib.urlencode(values)
+#    #print data
+#    try:
+#      proxy_support = urllib2.ProxyHandler(proxies)
+#      req = urllib2.Request(url)
+#      response = urllib2.urlopen(req,data)
+#      f = response.read()
+#    except:
+#      print "\n++++++++++++++++++++++++++++++++++++++++++++++"
+#      print "+ Could not reach server at www.olex2.org"
+#      print "+ --------------------------------------------"
+#      print "+ Please make sure your computer is online"
+#      print "+ and that you can reach www.olex2.org"
+#      print "++++++++++++++++++++++++++++++++++++++++++++++\n"
+#      return
     if f:
       break
 
@@ -1609,10 +1635,10 @@ def GetACF():
 
   else:
     debug = OV.FindValue('odac_fb', False)
-    debug = [False, True][1]
-    debug_deep1 = [False, True][1]
-    debug_deep2 = [False, True][1]
-    OV.SetVar("ac_verbose", [False, True][1])
+    debug = [False, True][0]
+    debug_deep1 = [False, True][0]
+    debug_deep2 = [False, True][0]
+    OV.SetVar("ac_verbose", [False, True][0])
 
   keyname = getKey()
 
@@ -1699,6 +1725,32 @@ def runODAC(cmd):
 
 OV.registerFunction(runODAC)
 
+def settings_tree():
+  l = []
+  handlers = [olx.phil_handler, olx.gui_phil_handler]
+  for handler in handlers:
+    raw_l = handler.get_root_scope_names()
+    for item in raw_l:
+      s = handler.get_scope_by_name(item)
+      l.append("%s (%s)\n%s\n" %(item, s.short_caption, item))
+      for tem in s.objects:
+        if tem.is_scope:
+          l.append("\t%s (%s)\n%s.%s\n" %(tem.name, tem.short_caption, item, tem.name))
+          for em in tem.objects:
+            if em.is_scope:
+              l.append("\t\t%s (%s)\n%s.%s.%s\n" %(em.name, em.short_caption, item, tem.name, em.name))
+              for m in em.objects:
+                if m.is_scope:
+                  l.append("\t\t\t%s (%s)\n%s.%s.%s.%s\n" %(m.name, m.short_caption, item, tem.name, em.name, m.name))
+                  for m1 in m.objects:
+                    if m1.is_scope:
+                      l.append("\t\t\t\t%s (%s)\n%s.%s.%s.%s.%s\n" %(m1.name, m1.short_caption, item, tem.name, em.name, m.name, m1.name))
+
+
+  OV.write_to_olex('settings_tree.ind', ''.join(l))
+OV.registerFunction(settings_tree)
+
+
 def GetOptionalHyphenString(txt):
   txt = txt.replace ("/", "/" + u"\u200B")
   txt = txt.replace ("\\", "\\" + u"\u200B")
@@ -1744,8 +1796,8 @@ def AvailablePlugins():
   plugins = {
             }
   s = "<hr>"
-  green = OV.FindValue('gui_green', "#00ff00")
-  red = OV.FindValue('gui_red', "#ff0000")
+  green = OV.GetParam('gui.green')
+  red = OV.GetParam('gui.red')
   for plugin in plugins:
     display = plugins[plugin].get('display', plugin)
     blurb = plugins[plugin].get('blurb', plugin)
@@ -1893,6 +1945,18 @@ def getReportTitleSrc():
   return retVal
 OV.registerFunction(getReportTitleSrc)
 
+def dealWithReportImage():
+  #OV.GetParam('snum.re
+  image_name = OV.GetParam('snum.report.image')
+  if image_name == "No Image":
+#    OV.SetParam('snum.report.image',None)
+    return
+  elif image_name == "screenshot":
+    olex.m('pict -pq screenshot.png 1')
+    OV.SetParam('snum.report.image',"%s\screenshot.png" %OV.FilePath())
+OV.registerFunction(dealWithReportImage)
+
+
 def getReportImageSrc():
   imagePath = OV.GetParam('snum.report.image')
   if OV.FilePath(imagePath) == OV.FilePath():
@@ -1913,8 +1977,14 @@ def getReportImageData(size='w400', imageName=None):
   size = int(size[1:])
   if imageName is None:
     imagePath = OV.GetParam('snum.report.image')
-  else:
-    imagePath = r"%s/etc/CIF/styles/%s.png" %(OV.BaseDir(),imageName)
+  if imagePath == "No Image" or imagePath is None:
+    return ""
+  if not os.path.exists(imagePath):
+    OV.SetParam('snum.report.image',None)
+    print "The previously made screenshot has been removed. Please select 'screenshot' to make a new one"
+    return
+#  else:
+#    imagePath = r"%s/etc/CIF/styles/%s.png" %(OV.BaseDir(),imageName)
   imageLocalSrc = imagePath.split("/")[-1:][0]
   imageLocalSrc = imageLocalSrc.split("\\")[-1:][0]
 
@@ -1998,7 +2068,20 @@ def olex_fs_copy(src_file, dst_file):
   olex_fs.NewFile(dst_file,txt)
 OV.registerFunction(olex_fs_copy)
 
+
+def openNotes():
+  f_path = "%s/%s_Notes.txt" %(OV.FilePath(), OV.FileName())
+  if not os.path.exists(f_path):
+    f = open(f_path,'w')
+    now = time.strftime(r"%d/%b/%Y %H:%M", time.time())
+    f.write("Notes for %s. File created by Olex2 on %s\n\n" %(OV.FileName(), now))
+    f.close()
+  olx.Shell(f_path)
+OV.registerFunction(openNotes)
+
+
 def isPro():
+  return True
   p = "%s/pro.txt" %OV.BaseDir()
   if os.path.exists(p):
     OV.SetParam('olex2.hover_buttons',True)
@@ -2014,7 +2097,4 @@ if not haveGUI:
   #OV.registerFunction(tbxs)
 OV.registerFunction(OV.IsPluginInstalled)
 OV.registerFunction(OV.GetTag)
-
-
-
 
