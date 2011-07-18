@@ -16,7 +16,7 @@ import urllib2
 import pickle
 
 # timeout in seconds
-timeout = 15
+timeout = 30
 socket.setdefaulttimeout(timeout)
 
 

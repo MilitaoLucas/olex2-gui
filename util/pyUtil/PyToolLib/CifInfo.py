@@ -180,11 +180,13 @@ class CifTools(ArgumentParser):
                 user_modified is not None and key in user_modified or
                 user_removed is not None and key in user_removed):
           self.cif_block[key] = value
+        else:
+          print("Not updating %s from file" %key)
           
     # this requires special treatment
-    if '_diffrn_ambient_temperature' in dictionary:
-      OV.set_cif_item(
-        '_diffrn_ambient_temperature', dictionary['_diffrn_ambient_temperature'])
+#    if '_diffrn_ambient_temperature' in dictionary:
+#      OV.set_cif_item(
+#        '_diffrn_ambient_temperature', dictionary['_diffrn_ambient_temperature'])
     import iotbx.cif
     if isinstance(dictionary, iotbx.cif.model.block):
       for key, value in dictionary.loops.iteritems():
@@ -292,17 +294,25 @@ class MergeCif(CifTools):
     file_full = OV.FileFull()
     if (not os.path.isfile('%s/%s.cif' %(OV.FilePath(), OV.FileName())) or
         os.path.getmtime(file_full) > os.path.getmtime(cif_path)):
-      prg = OV.GetParam('snum.refinement.program')
-      method = OV.GetParam('snum.refinement.method')
-      if prg == 'olex2.refine':
-        OV.set_refinement_program(prg, 'Gauss-Newton')
+      if OV.GetParam('user.cif.autorefine_if_no_cif_for_cifmerge'):
+        prg = OV.GetParam('snum.refinement.program')
+        method = OV.GetParam('snum.refinement.method')
+        if prg == 'olex2.refine':
+          OV.set_refinement_program(prg, 'Gauss-Newton')
+        else:
+          if method == 'CGLS':
+            OV.set_refinement_program(prg, 'Least Squares')
+          acta = olx.Ins('ACTA')
+          if acta == 'n/a':
+            olx.AddIns('ACTA')
+          olex.m('refine')
       else:
-        if method == 'CGLS':
-          OV.set_refinement_program(prg, 'Least Squares')
-        acta = olx.Ins('ACTA')
-        if acta == 'n/a':
-          olx.AddIns('ACTA')
-        olex.m('refine')
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("There is no cif from a refinement program for merging.")
+        print("You probably will need to refine your structure again.")
+        print("If you are using SHELX, make sure you use the ACTA command.")
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        return
 
     self.write_metacif_file()
     ## merge metacif file with cif file from refinement
@@ -478,7 +488,7 @@ class ExtractCifInfo(CifTools):
         cif_od = iotbx.cif.reader(input_string=f.read()).model().values()[0]
         self.exclude_cif_items(cif_od)
         f.close()
-        self.update_cif_block(cif_od, force=True)
+        self.update_cif_block(cif_od, force=False)
       except:
         print "Error reading Oxford Diffraction CIF %s" %p
 
@@ -544,10 +554,13 @@ class ExtractCifInfo(CifTools):
         t = format_float_with_standard_uncertainty(t, su)
         self.cif_block['_diffrn_ambient_temperature'] = t
       self.cif_block['_diffrn_ambient_temperature'] = t
-    if '_diffrn_ambient_temperature' in self.cif_block:
-      self.update_cif_block({
-        '_cell_measurement_temperature': self.cif_block['_diffrn_ambient_temperature']
-      })
+
+    ## I have uncommented these lines below on 18/7/11 - I can't see what they were
+    ## doing other than making the wrong temperature make a comeback...
+    #if '_diffrn_ambient_temperature' in self.cif_block:
+      #self.update_cif_block({
+        #'_cell_measurement_temperature': self.cif_block['_diffrn_ambient_temperature']
+      #})
 
     self.write_metacif_file()
 

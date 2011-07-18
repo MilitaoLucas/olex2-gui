@@ -480,7 +480,7 @@ olex2
   }
 
   structurespace{
-    url = http://www.olexsys.org/structurespace/StructureSpace
+    url = http://www.olexsys.org:8092/structurespace/StructureSpace
       .type = str
   }
 
@@ -777,6 +777,10 @@ user
       .type = str
     portal_passwd = ccdcpass
       .type = str
+  }
+  cif{
+    autorefine_if_no_cif_for_cifmerge = True
+    .type = bool
   }
   image{
     bitmap{
