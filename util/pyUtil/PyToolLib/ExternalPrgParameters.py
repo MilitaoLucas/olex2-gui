@@ -383,8 +383,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
 
   def __init__(self, phil_object):
     Method.__init__(self, phil_object)
-    self.original_hklsrc = None
-
+    
   def pre_refinement(self, RunPrgObject):
     if OV.GetParam("snum.refinement.use_solvent_mask"):
       import cctbx_olex_adapter
@@ -392,13 +391,14 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       from libtbx import easy_pickle
       #from iotbx.shelx import hklf
       filepath = OV.StrDir()
-      self.original_hklsrc = OV.HKLSrc()
       modified_intensities = None
       modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
       f_mask, f_model = None, None
       if not OV.HKLSrc() == modified_hkl_path:
         OV.SetParam('snum.masks.original_hklsrc', OV.HKLSrc())
       if OV.GetParam("snum.refinement.recompute_mask_before_refinement"):
+        if OV.HKLSrc() == modified_hkl_path:
+          raise Exception("You can't calculate a mask on an already masked file!")
         cctbx_olex_adapter.OlexCctbxMasks()
         if olx.current_mask.flood_fill.n_voids() > 0:
           f_mask = olx.current_mask.f_mask()
@@ -434,9 +434,12 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
     Method_refinement.pre_refinement(self, RunPrgObject)
 
   def post_refinement(self, RunPrgObject):
-    if self.original_hklsrc is not None:
-      OV.HKLSrc(self.original_hklsrc)
-      OV.File()
+    before_mask = OV.GetParam('snum.masks.original_hklsrc')
+    if before_mask:
+      OV.SetParam('snum.masks.original_hklsrc',None)
+      if OV.HKLSrc() != before_mask:
+        OV.HKLSrc(before_mask)
+        OV.File()
     suggested_weight = olx.Ins('weight1')
     if suggested_weight != 'n/a':
       if len(suggested_weight.split()) == 1:
