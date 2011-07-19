@@ -785,7 +785,7 @@ WHERE (((submission.ID)="%s"));""" %sNum
   def sNumTitleStyle1(self, items, font_name="Arial Bold", font_size=17):
     sNum = items["sNum"]
     a = timage()
-    return a.make_timage('snumtitle', sNum, 'on')
+    return a.make_timage('snumtitle', sNum, 'on', titleCase=False)
     #base_colour = self.params.snumtitle.base_colour.rgb
     #height = self.params.snumtitle.height
     #font_name = self.params.snumtitle.font_name

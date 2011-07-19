@@ -112,18 +112,14 @@ class RunPrg(ArgumentParser):
       except OSError:
         continue
 
-    try:
-      self.hkl_src = OV.HKLSrc()
-      if not os.path.exists(self.hkl_src):
-        self.hkl_src = os.path.splitext(OV.FileFull())[0] + '.hkl'
-        if os.path.exists(self.hkl_src):
-          OV.HKLSrc(self.hkl_src)
-        else:
-          print "Please choose a reflection file"
-          self.terminate = True
-          return
-    except:
+    self.hkl_src = OV.HKLSrc()
+    if not os.path.exists(self.hkl_src):
       self.hkl_src = os.path.splitext(OV.FileFull())[0] + '.hkl'
+      if os.path.exists(self.hkl_src):
+        OV.HKLSrc(self.hkl_src)
+        print "HKL Source Filename reset to default file!"
+      else:
+        raise Exception("Please choose a reflection file")
     self.hkl_src_name = os.path.splitext(os.path.basename(self.hkl_src))[0]
     self.curr_file = OV.FileName()
     copy_from = "%s" %(self.hkl_src)
@@ -264,14 +260,17 @@ class RunRefinementPrg(RunPrg):
   def run(self):
     self.startRun()
     olx.File(u"'%s/%s.ins'" %(OV.FilePath(),self.original_filename))
-    self.setupRefine()
+    try:
+      self.setupRefine()
+      self.setupFiles()
+    except Exception, err:
+      print err
+      self.endRun()
+      return
     if self.terminate:
       self.endRun()
       return
-    self.setupFiles()
-    if self.terminate:
-      self.endRun()
-      return
+    
     if self.params.snum.refinement.graphical_output and self.HasGUI:
       self.method.observe(self)
     RunPrg.run(self)
