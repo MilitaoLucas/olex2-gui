@@ -293,7 +293,7 @@ class MergeCif(CifTools):
     cif_path = '%s/%s.cif' %(OV.FilePath(), OV.FileName())
     file_full = OV.FileFull()
     if (not os.path.isfile('%s/%s.cif' %(OV.FilePath(), OV.FileName())) or
-        os.path.getmtime(file_full) > os.path.getmtime(cif_path)):
+        os.path.getmtime(file_full) - 0.2 < os.path.getmtime(cif_path) > os.path.getmtime(file_full) + 0.2):
       if OV.GetParam('user.cif.autorefine_if_no_cif_for_cifmerge'):
         prg = OV.GetParam('snum.refinement.program')
         method = OV.GetParam('snum.refinement.method')
@@ -309,6 +309,7 @@ class MergeCif(CifTools):
       else:
         print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         print("There is no cif from a refinement program for merging.")
+        print("If there is a cif, it is probably out of date.")
         print("You probably will need to refine your structure again.")
         print("If you are using SHELX, make sure you use the ACTA command.")
         print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")

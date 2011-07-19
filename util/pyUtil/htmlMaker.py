@@ -131,11 +131,11 @@ def diffractionMetadataHtmlMaker():
 
   list += (
     {'varName':'_diffrn_ambient_temperature',
-     'itemName':'%Diffraction Temperature% (K)'
+     'itemName':'%Diffraction T% (K)'
      },
-    #{'varName':'_cell_measurement_temperature',
-     #'itemName':'%Cell Measurement Temperature% (K)'
-     #},
+    {'varName':'_cell_measurement_temperature',
+     'itemName':'%Cell Measurement T% (K)'
+     },
     {'varName':'_diffrn_special_details',
      'itemName':'%Special Details%',
      'multiline':'multiline'
