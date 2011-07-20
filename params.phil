@@ -780,7 +780,9 @@ user
   }
   cif{
     autorefine_if_no_cif_for_cifmerge = True
-    .type = bool
+      .type = bool
+    chckCif_output_format = *PDF htm
+      .type = choice
   }
   image{
     bitmap{
