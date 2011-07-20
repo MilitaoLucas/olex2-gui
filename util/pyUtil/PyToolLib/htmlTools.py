@@ -9,6 +9,7 @@ import olx
 import olex
 
 import time
+from datetime import date
 #import sys
 #sys.path.append(r".\src")
 
@@ -62,6 +63,15 @@ def makeHtmlTable(list):
       if input_d['varName'].startswith('_'): # treat cif items differently
         input_d.setdefault('value', '$spy.get_cif_item(%(varName)s,?)' %input_d)
         input_d.setdefault('onchange',"spy.set_cif_item(%(varName)s,GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)" %input_d)
+      elif input_d['varName'] == 'snum.report.date_collected': # treat date fields differently
+        try:
+          cd = float(OV.GetParam('snum.report.date_collected'))
+          cd = date.fromtimestamp(cd)
+          time_str = cd.strftime("%d-%m-%Y")
+          input_d.setdefault('value', time_str)
+        except:
+          input_d.setdefault('value', OV.GetParam('snum.report.date_collected'))
+        input_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(~name~))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(~name~,#FFDCDC)" %input_d)
       else:
         input_d.setdefault('value', '$spy.GetParam(%(varName)s)' %input_d)
         input_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(~name~))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(~name~,#FFDCDC)" %input_d)

@@ -378,9 +378,9 @@ class ExtractCifInfo(CifTools):
     p = self.sort_out_path(path, "frames")
     if p and self.metacifFiles.curr_frames != self.metacifFiles.prev_frames:
       try:
-        import bruker_frames
-        frames = bruker_frames.reader(p).cifItems()
-        self.update_cif_block(frames)
+        info = os.stat(p)
+        file_time = info.st_mtime
+        
       except:
         print "Error reading Bruker frame file %s" %p
 
@@ -492,6 +492,16 @@ class ExtractCifInfo(CifTools):
         self.update_cif_block(cif_od, force=False)
       except:
         print "Error reading Oxford Diffraction CIF %s" %p
+
+    # OD Data Collection Date
+    p = self.sort_out_path(path, "od_frame_date")
+    if p:
+      try:
+        info = os.stat(p)
+        file_time = info.st_mtime
+        OV.SetParam('snum.report.date_collected', file_time)
+      except:
+        print "Error reading OD frame Date %s" %p
 
     # Rigaku data collection CIF
     p = self.sort_out_path(path, "crystal_clear")
@@ -696,6 +706,12 @@ The \l/2 correction factor is %(lambda_correction)s.
     elif tool == "crystal_clear":
       name = "CrystalClear"
       extension = ".cif"
+    elif tool == "od_frame_date":
+      name = OV.FileName()
+      extension = "_1_1.img"
+      directory_l = OV.FileFull().split("/")
+      directory = ("/").join(directory_l[:-3])
+      directory += '/frames'
     else:
       return "Tool not found"
 

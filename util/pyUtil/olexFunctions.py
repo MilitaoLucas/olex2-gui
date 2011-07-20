@@ -15,6 +15,9 @@ import urllib
 import urllib2
 import pickle
 
+import time
+
+
 # timeout in seconds
 timeout = 30
 socket.setdefaulttimeout(timeout)
@@ -56,6 +59,13 @@ class OlexFunctions(inheritFunctions):
         value = "'%s'" %value.replace("'", "\\'")
       elif type(value) in (list, set):
         value = ' '.join("'%s'" %v.replace("'", "\\'") for v in value)
+      elif "date_" in variable:
+        try:
+          if type(value) is unicode:
+            pattern = '%d-%m-%Y'
+            value = int(time.mktime(time.strptime(value, pattern)))
+        except:
+          pass
       else:
         value = unicode(value)
         value = value.encode('utf-8')
