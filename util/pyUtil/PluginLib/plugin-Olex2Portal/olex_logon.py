@@ -5,6 +5,7 @@ import urllib2
 import urllib
 import pickle
 import time
+import datetime
 import codecs
 import base64
 
@@ -279,33 +280,26 @@ def upload_structure(script='upload_structures'):
   file_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'ins'))
   ins = open(file_name, 'r').read()
 
-  file_name = os.path.normpath('%s_cifreport.htm' %id)
+  file_name = os.path.normpath('%s_cifreport.pdf' %id)
+  if not os.path.exists(file_name):
+    file_name = os.path.normpath('%s_cifreport.htm' %id)
+    if not os.path.exists(file_name):
+      raise Exception("Please obtain a CheckCif Report!")
   checkcif_report = open(file_name, 'r').read()
 
-  date_collected = "2011,5,5"
+  dc = OV.GetParam('snum.report.date_collected')
+  dc = float(dc)
+  dc = datetime.date.fromtimestamp(dc)
+  date_collected = dc
+  
 #  crystal_data = "Crystal Data: <sub>Fred</sub>"
   
   url = "%s/%s" %(OV.GetParam('olex2.structurespace.url'), script)
-  #id = str(random.randint(10000, 99999))
+  id = str(random.randint(10000, 99999))
 
-  crystal_data = """
-C<sub>4</sub>H<sub>4</sub>Ag<sub>2</sub>O<sub>4</sub>S,
-<i>M&nbsp;</i>=363.88,
-monoclinic,
-<!--<i>a</i>&nbsp;= 5.1945(2), -->
-<!--<i>b</i>&nbsp;= 20.3339(9), -->
-<!--<i>c</i>&nbsp;= 6.6668(3), -->
-<i>a</i>&nbsp;= 5.1945(2)&nbsp;&Aring;, <i>b</i>&nbsp;= 20.3339(9)&nbsp;&Aring;, <i>c</i>&nbsp;= 6.6668(3)&nbsp;&Aring;, <i>&beta;</i>&nbsp;= 109.095(5)&deg;,
-<i>U&nbsp;</i>= 665.43(6)&nbsp;&Aring;<sup>3</sup>,
-<i>T</i>&nbsp;= 120.0,
-space group P2<sub>1</sub>/c (no. 14),
-<i>Z</i>&nbsp;= 4,
-&#956;(Mo K&alpha;)&nbsp;= 6.149,
-6931 reflections measured,
-1612 unique (<i>R</i><sub>int</sub>&nbsp;= 0.0302) which were used in all calculations.
-The final <i>wR</i>(<i>F</i><sub>2</sub>) was 0.061963 (all data).
-"""
-
+  crystal_data_file = olex.m("cif2doc crystal_data.htm -n=%s_crystal_data.htm" %OV.FileName())
+  crystal_data = open('%s_crystal_data.htm' %OV.FileName(),'r').read()
+  
   params = {'__ac_password':password,
             '__ac_name':username,
             'context':"None",
