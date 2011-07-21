@@ -246,18 +246,23 @@ def web_run_sql(sql = None, script = 'run_sql'):
             '__ac_name':username,
             'sqlQ':sql,
             }
-  response = OV.make_url_call(url, values)
-#  data = urllib.urlencode(values)
-#  req = urllib2.Request(url)
-#  response = urllib2.urlopen(req,data)
+  try:
+    response = OV.make_url_call(url, values)
+    try:
+      f = pickle.load(response)
+    except:
+      f = response.read()
+  except Exception, err:
+    print err
+    return "Unauthorised"
 
-  if type(response) is str:
-    if "Forgot your password" in response:
+  if type(f) is str:
+    if "Forgot your password" in f:
       username =""
       password = ""
       return "Unauthorised"
 
-  return response
+  return f
 
 
 def upload_structure(script='upload_structures'):
@@ -312,8 +317,12 @@ def upload_structure(script='upload_structures'):
             'checkcif_report':checkcif_report,
             }
   
-  response = OV.make_url_call(url, params)
-  print response
+  try:
+    response = OV.make_url_call(url, params)
+  except Exception, err:
+    print err
+  
+  print response.read()
 
 OV.registerFunction(upload_structure)
 

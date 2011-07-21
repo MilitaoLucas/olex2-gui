@@ -181,7 +181,8 @@ class CifTools(ArgumentParser):
                 user_removed is not None and key in user_removed):
           self.cif_block[key] = value
         else:
-          print("Not updating %s from file" %key)
+          pass
+#          print("Not updating %s from file" %key)
           
     # this requires special treatment
 #    if '_diffrn_ambient_temperature' in dictionary:
@@ -292,8 +293,8 @@ class MergeCif(CifTools):
     # check if cif exists and is up-to-date
     cif_path = '%s/%s.cif' %(OV.FilePath(), OV.FileName())
     file_full = OV.FileFull()
-    if (not os.path.isfile('%s/%s.cif' %(OV.FilePath(), OV.FileName())) or
-        os.path.getmtime(file_full) - 0.2 < os.path.getmtime(cif_path) > os.path.getmtime(file_full) + 0.2):
+    if (not os.path.isfile('%s/%s.cif' %(OV.FilePath(), OV.FileName())) or not
+        os.path.getmtime(file_full) - 1 < os.path.getmtime(cif_path) > os.path.getmtime(file_full) + 1):
       if OV.GetParam('user.cif.autorefine_if_no_cif_for_cifmerge'):
         prg = OV.GetParam('snum.refinement.program')
         method = OV.GetParam('snum.refinement.method')

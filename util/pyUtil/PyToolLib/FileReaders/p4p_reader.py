@@ -58,7 +58,8 @@ class p4p_reader:
         p4p_key["cif"].setdefault(item, value)
 
     if p4p_key["cif"].has_key('_diffrn_source_voltage') and p4p_key["cif"].has_key('_diffrn_source_current'):
-      p4p_key["cif"].setdefault('_diffrn_source_power', (p4p_key["cif"]['_diffrn_source_voltage'] * p4p_key["cif"]['_diffrn_source_current'])/1000)
+      if p4p_key["cif"]['_diffrn_source_voltage'] != "n/a" or p4p_key["cif"]['_diffrn_source_current'] != "n/a":
+        p4p_key["cif"].setdefault('_diffrn_source_power', (p4p_key["cif"]['_diffrn_source_voltage'] * p4p_key["cif"]['_diffrn_source_current'])/1000)
 
     return p4p_key["cif"]
 

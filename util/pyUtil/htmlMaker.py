@@ -261,7 +261,7 @@ OV.registerFunction(referenceMetadataHtmlMaker)
 
 def publicationMetadataHtmlMaker():
   list = [
-    {'varName':'snum.dimas.reference_ccdc_number',
+    {'varName':'_database_code_depnum_ccdc_archive',
      'itemName':'CCDC %Number%',
      },
     {'varName':'_publ_contact_author_name',

@@ -689,30 +689,28 @@ class OlexFunctions(inheritFunctions):
     import olexex
     olexex.setAllMainToolbarTabButtons()
 
-  def make_url_call(self, url, values):
+  def make_url_call(self, url, values, use_system_proxy=True):
     proxy = self.get_proxy_from_usettings()
-    if proxy:  
+    if proxy:
       proxies = {'http': proxy}
     else:
       proxies = {}
     try:
-      opener = urllib2.build_opener(
-        urllib2.ProxyHandler(proxies))
-      response = opener.open(url,values)
-      try:
-        f = pickle.load(response) #This is required in cases where the query returns a dictionary
-      except:
-        f = response.read()
-    except:
-      print "\n++++++++++++++++++++++++++++++++++++++++++++++"
-      print "+ Could not reach update server at %s" %url
-      print "+ --------------------------------------------"
-      print "+ Please make sure your computer is online"
-      print "+ and that you can reach %s" %url
-      print "++++++++++++++++++++++++++++++++++++++++++++++\n"
-      return False
-    return f
-  
+      if not use_system_proxy:
+        opener = urllib2.build_opener(
+          urllib2.ProxyHandler(proxies))
+        return opener.open(url,values)
+      else:
+        return urllib2.urlopen(url,values)
+#      try:
+#        f = pickle.load(response) #This is required in cases where the query returns a dictionary
+#      except:
+#        f = response.read()
+    except Exception:
+      raise
+    finally:
+      print "url call ended"
+      
   def get_proxy_from_usettings(self):
     rFile = open("%s/usettings.dat" %OV.BaseDir(),'r')
     lines = rFile.readlines()
