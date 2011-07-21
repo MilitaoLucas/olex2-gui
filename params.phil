@@ -17,6 +17,13 @@ snum
       .expert_level = 1
     }
 
+  ccdc{
+    note_to_staff = +++ Optional Note To Staff +++
+      .type = str
+    submission_type = +++ Please Choose +++
+      .type = str
+  }    
+    
   current_result{
     cif = None
       .type = path
@@ -500,7 +507,7 @@ olex2
         .type = int
       height = automatic
         .type = str
-      auto_height_constant = 220
+      auto_height_constant = 310
         .type = int
       auto_height_line = 20
         .type = int

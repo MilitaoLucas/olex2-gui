@@ -1291,7 +1291,6 @@ def getKeys(key_directory=None):
 
 def GetCheckcifReport(outputtype='PDF'):
   import urllib2
-  #import urllib2_file
 
   output = OV.GetParam('user.cif.chckCif_output_format')
   if output:
@@ -1307,7 +1306,9 @@ def GetCheckcifReport(outputtype='PDF'):
     "outputtype": outputtype,
     "file": cif
   }
-  response = urllib2.urlopen(OV.GetParam('olex2.checkcif.url'), params)
+  
+  response = OV.make_url_call(OV.GetParam('olex2.checkcif.url'), params)
+  
   rFile.close()
   #outputtype = 'htm'
   if outputtype == "htm":
@@ -1321,8 +1322,8 @@ def GetCheckcifReport(outputtype='PDF'):
       rawFile.write(line)
       if "Download checkCIF report" in line:
         href = line.split('"')[1]
-        #txt = OV.make_url_call(href,"")
-        txt = urllib2.urlopen(href, "")
+        response = OV.make_url_call(href,"")
+        txt = response.read()
         wFile = open("%s_cifreport.%s" %(OV.FileName(), outputtype.lower()),'wb')
         wFile.write(txt.read())
         wFile.close()
@@ -1396,25 +1397,6 @@ def check_for_crypto():
     #import olex
     #olex.m(r"InstallPlugin ODAC")
 
-def make_url_call(url, values):
-  #url = "http://www.olex2.org/odac/update"
-  proxy = get_proxy_from_usettings()
-  proxies = {'http': proxy}
-  data = urllib.urlencode(values)
-  try:
-    proxy_support = urllib2.ProxyHandler(proxies)
-    req = urllib2.Request(url)
-    response = urllib2.urlopen(req,data)
-    f = response.read()
-  except:
-    print "\n++++++++++++++++++++++++++++++++++++++++++++++"
-    print "+ Could not reach update server at www.olex2.org"
-    print "+ --------------------------------------------"
-    print "+ Please make sure your computer is online"
-    print "+ and that you can reach www.olex2.org"
-    print "++++++++++++++++++++++++++++++++++++++++++++++\n"
-    return False
-  return f
 
 def get_proxy_from_usettings():
   rFile = open("%s/usettings.dat" %OV.BaseDir(),'r')
