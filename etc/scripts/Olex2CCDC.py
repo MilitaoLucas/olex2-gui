@@ -55,7 +55,7 @@ class CcdcSubmit():
         'email': self.email,
         'file_name': zip_file,
         'destination': destination,
-        'note_to_staff': note_to_staff,
+        'notes_to_staff': note_to_staff,
         'submission_type': submission_type,
       }
       try:
