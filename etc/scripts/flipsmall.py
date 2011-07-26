@@ -1,5 +1,5 @@
 #!/usr/bin/python2
-version = "110711"
+version = "260711"
 """
 =====================================================================
            Submit charge flipping phasing procedure
@@ -11,6 +11,7 @@ version = "110711"
           20-01-11: corrected bug for Olex2 processing
           16-03-11: added keyword 'p1' for triclinic structure solution for metrically non-triclinic lattices
           11-07-11: preparation symcards.tmp for forcesymmetry=yes completely rewritten
+          26-07-11: cleanup was not done correctly in case of non-convergence
  prepares input file for SUPERFLIP and EDMA program  (L. Palatinus)
 
 
@@ -623,7 +624,11 @@ def cleanup(files):
 
     """ % (files['base'] + '.res')
 
-#clean up
+    remove_files(files)
+    return
+
+
+def remove_files(files):
     if ( flip_keywords['cleanup'] == 'yes' ):
        if  os.path.isfile(files['base']+'.coo'):os.remove(files['base']+'.coo')
        if  os.path.isfile(files['m81']):os.remove(files['m81'])
@@ -632,7 +637,7 @@ def cleanup(files):
        if  os.path.isfile(files['inflip']):os.remove(files['inflip'])
        if  os.path.isfile(files['fliplog']):os.remove(files['fliplog'])
        if  os.path.isfile('symcards.tmp'):os.remove('symcards.tmp')
-
+       return
 
 def find_executable(executable, path=None):
     """Try to find 'executable' in the directories listed in 'path' (a
@@ -720,7 +725,9 @@ def flipsmall (*args):
        print "Superflip has not created an .m81 electron density file. Quitting..."
        return False
     q=analyze_superflip_logfile(flip_keywords,files,derived_info)
-    if not q: return False
+    if not q:
+       remove_files(files)
+       return False
     generate_edma_file(flip_keywords,files,derived_info)
 
     ###################### RUN EDMA #######################################
