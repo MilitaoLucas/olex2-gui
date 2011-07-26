@@ -876,6 +876,7 @@ def makeHtmlBottomPop(args, pb_height = 50, y = 0):
     txt = get_template(name)
     txt = txt.replace(r"<MODENAME>",replace_str.upper())
     txt = txt.replace(r"<MODEQUALIFIERS>",modequalifiers.upper())
+  txt = "$run(focus)\n" + txt
   pop_html = name
   pop_name = name
   htm_location = "%s.htm" %pop_html
