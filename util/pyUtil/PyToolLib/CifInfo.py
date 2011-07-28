@@ -294,7 +294,7 @@ class MergeCif(CifTools):
     cif_path = '%s/%s.cif' %(OV.FilePath(), OV.FileName())
     file_full = OV.FileFull()
     if (not os.path.isfile('%s/%s.cif' %(OV.FilePath(), OV.FileName())) or not
-        os.path.getmtime(file_full) - 1 < os.path.getmtime(cif_path) > os.path.getmtime(file_full) + 1):
+        os.path.getmtime(file_full) - 10 < os.path.getmtime(cif_path)):
       if OV.GetParam('user.cif.autorefine_if_no_cif_for_cifmerge'):
         prg = OV.GetParam('snum.refinement.program')
         method = OV.GetParam('snum.refinement.method')

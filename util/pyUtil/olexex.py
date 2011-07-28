@@ -2048,7 +2048,6 @@ def test_help_boxes():
     htmlTools.make_help_box({'name':box})
 OV.registerFunction(test_help_boxes)
 
-
 def olex_fs_copy(src_file, dst_file):
   txt = olex_fs.ReadFile(src_file)
   olex_fs.NewFile(dst_file,txt)
@@ -2068,13 +2067,31 @@ def switch_tab_for_tutorials(tabname):
   olex.m("itemstate logo 0")
   olex.m("itemstate index-%s 1" %tabname)
   olex.m("itemstate info-title 1")
-  olex.m("itemstate solve-settings 2")
-  olex.m("itemstate refine-settings 2")
-  olex.m("itemstate report-settings 2")
+  if tabname.lower() == "work":
+    olex.m("itemstate solve-settings 2")
+    olex.m("itemstate refine-settings 2")
+    olex.m("itemstate report-settings 2")
+    olex.m("itemstate %s-toolbox 1" %tabname)
   olex.m("itemstate tab* 2")
-  olex.m("itemstate %s-toolbox 1" %tabname)
 OV.registerFunction(switch_tab_for_tutorials)
-  
+
+def revert_to_original():
+  extensions = ['res','ins','cif']
+  for extension in extensions:
+    path = "%s/.olex/originals/%s.%s" %(OV.FilePath(), OV.FileName(), extension)
+    if os.path.exists(path):
+      rFile = open(path,'rb')
+      txt = rFile.read()
+      rFile.close()
+      outpath = OV.file_ChangeExt(OV.FileFull(),'ins')
+      wFile = open(outpath,'wb')
+      wFile.write(txt)
+      wFile.close()
+      OV.AtReap(outpath)
+      print("Reverted to the original file %s" %path)
+      return
+  print("Could not revert to any original file!")
+OV.registerFunction(revert_to_original)
   
 
 if not haveGUI:

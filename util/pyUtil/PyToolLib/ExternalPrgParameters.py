@@ -773,7 +773,7 @@ def defineExternalPrograms():
     name='olex2.solve',
     program_type='solution',
     author="Luc Bourhis",
-    reference="olex2.solve (L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, J.A.K. Howard, H. Puschmann, in preparation, 2011)")
+    reference="olex2.solve (L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, J.A.K. Howard,\n H. Puschmann, in preparation, 2011)")
   SIR2008 = Program(
     name='SIR2008',
     program_type='solution',
@@ -835,7 +835,7 @@ def defineExternalPrograms():
     name='olex2.refine',
     program_type='refinement',
     author="L.J. Bourhis, O.V. Dolomanov, R.J. Gildea",
-    reference="olex2.refine (L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, J.A.K. Howard, H. Puschmann, in preparation, 2011)")
+    reference="olex2.refine (L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, J.A.K. Howard,\n H. Puschmann, in preparation, 2011)")
 
   for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc):
     for method in (least_squares, cgls):
