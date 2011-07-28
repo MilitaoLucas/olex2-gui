@@ -36,18 +36,6 @@ Freeze(false)>>
   </td>
 </tr>
 
-
-<tr>
-  <td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
-  <td valign='center'>
-  <b>%Tutorials%</b>:
-  <a target='Start Tutorial' href="spy.make_help_box -name=getting-started_main-window -popout=False -type=tutorial">%Getting Started%</a> |
-  <a target='Start Tutorial' href="spy.make_help_box -name=sucrose_introduction -popout=False -type=tutorial">%Sucrose%</a> |
-  <a target='Quick Demo' href="@py>>@py from Tutorials import AutoDemo>>spy.run_autodemo()"><b>%QuickDemo%</b></a>
-  </td>
-</tr>
-
-
 <tr>
   <td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
   <td valign='center'>
@@ -58,12 +46,8 @@ Freeze(false)>>
   </td>
 </tr>
 
-<!--
-<tr>
-  <td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
-  <td valign='center'><b><font color="$spy.GetParam(gui.html.highlight_colour)">%bad_gui-msg%: </font></b>
-  <a target='%bad_gui-target%' href="panel"><b>%bad_gui%</b></a>
-  </td>
+<tr name=INCLUDE_H3-TUTORIALS>
+<!-- #include h3-tutorials tutorials\h3-tutorials.htm;gui\blocks\tool-h3-off.htm;image=h3-tutorials;colspan=1;onclick=;2; -->
 </tr>
--->
+
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->

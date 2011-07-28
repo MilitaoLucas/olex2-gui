@@ -2,6 +2,7 @@ import os
 import glob
 import olx
 import olex
+import olexex
 import time
 
 from olexFunctions import OlexFunctions
@@ -33,12 +34,22 @@ class AutoDemo():
     self.name = name
     self.reading_speed = reading_speed
 
-  def run_autodemo(self):
+  def run_autodemo(self, name):
+    if name:
+      self.name = name
     have_hover = OV.GetParam('olex2.hover_buttons')
     OV.SetParam('olex2.hover_buttons', True)
-    rFile = open("%s/etc/tutorials/%s.txt" %(OV.BaseDir(),self.name),'r')
+    
+    ## First read in the commands that preceeds all tutorials
+    rFile = open("%s/etc/tutorials/all_tutorials_preamble.txt" %OV.BaseDir(),'r')
     items = rFile.readlines()
     rFile.close()
+
+    ## Then read in the actual tutorial
+    rFile = open("%s/etc/tutorials/%s.txt" %(OV.BaseDir(),self.name),'r')
+    items = items + rFile.readlines()
+    rFile.close()
+    
     olx.Clear()
     please_exit = False
     if not self.interactive:
@@ -57,6 +68,8 @@ class AutoDemo():
       if not item:
         continue
       if item.startswith('#'):
+        continue
+      if item.startswith('\xef\xbb\xbf'):
         continue
       if item.startswith('set:'):
         var = item.split('set:')[1].split('=')[0]
@@ -81,6 +94,8 @@ class AutoDemo():
           #OV.Refresh()
           res = self.make_tutbox_popup()
           if res == 0:
+            olexex.switch_tab_for_tutorials('home')
+            olex.m('ofiledel 0')
             please_exit = True
         else:
           olx.DeleteBitmap(bitmap)
@@ -167,61 +182,21 @@ class AutoDemo():
     if OV.IsControl('%s'%pop_name):
       olx.html_ShowModal(pop_name)
     else:
-##$spy.MakeHoverButtonOn(button_small-next@tutorial,'html.EndModal\(%(pop_name)s,1)',%(bg_colour)s)
-      txt='''
-    <body link="$spy.GetParam(gui.html.link_colour)" bgcolor='%(bg_colour)s'>
-    <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1">
-
-    <tr align='center'>
-      <td>
-         <input
-           type="button"
-           name=TUTORIAL_CANCEL
-           bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-           valign='center'
-           width="60"
-           height="22"
-           onclick="html.EndModal(%(pop_name)s,0)"
-           value = "Cancel">
-         <input
-           type="button"
-           name=TUTORIAL_NEXT
-           bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-           valign='center'
-           width="60"
-           height="22"
-           onclick="html.EndModal(%(pop_name)s,1)"
-           value = "Next">
-        <br>
-      </td>
-    </tr>
-
-    <tr bgcolor='#006090'>
-      <td></td>
-    </tr>
-
-    <font color='%(font_colour)s' size=4 face="$spy.GetParam(gui.html.font_name)">
-
-    <tr align = 'center'>
-      <td><br><br>
-      %(txt)s
-      </td>
-    </tr>
-       </table>
-       </font>
-       </body>
-       '''%d
+      rFile = open("%s/etc/gui/blocks/templates/pop_tutorials.htm" %OV.BaseDir(),'r')
+      txt = rFile.read() %d
+      rFile.close()
 
       txt = txt.decode('utf-8')
       OV.write_to_olex("%s.htm" %pop_name.lower(), txt)
       boxWidth = 200
-      boxHeight = 500
+      boxHeight = 300
       x = OV.GetHtmlPanelX() - boxWidth - 40
       y = 70
       olx.Popup(pop_name, '%s.htm' %pop_name.lower(), "-s -t='%s' -w=%i -h=%i -x=%i -y=%i" %(pop_name, boxWidth, boxHeight, x, y))
       olx.html_SetFocus(pop_name + '.TUTORIAL_NEXT')
       res = olx.html_ShowModal(pop_name)
       res = int(res)
+
       return res
 
 

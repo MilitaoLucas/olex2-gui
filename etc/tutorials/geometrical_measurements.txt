@@ -1,0 +1,90 @@
+# Please note that all actions from all_tutorials_preamble.txt will be added here!
+
+
+p:This tutorial will look at how to get geometrical measurements and analysis from your 3D model using the Olex2 system and the <b>Sample structure THPP</b>.
+
+c:reap 'DataDir()/samples/THPP/THPP.res'
+c:spy.revert_to_original()
+
+p:To start with you need to click on the <b>view</b> tab.
+h:tab-view
+c:spy.switch_tab_for_tutorials(view)
+
+p:You then need to select the tab <b>Geometry</b>.
+h:h2-geometry
+c:itemstate view-geometry 1
+
+p:In this tab there is 6 different links, each one of these will help to analyse your model and gather data from it, the first one we will look at is <b>Mean Plane(of active selection)</b>
+
+p:In order to use this feature you first need to highlight one of the rings in the strcuture to do this you can hold <b>shift</b> to draw a box over one of the rings or select each atom manually
+c:sel C5 N6 C7 C8 C9 C10 
+
+p:Once the structure is highlighted click on the link and the average plane for the structure will be produced on the model, or the command <c>mpln sel</c> can be entered.
+c:mpln sel
+
+p:Once the mean plane has been worked out a table containing the results should appear in the text along with the data for the plane normal and the RMSD/A.
+
+p:In order to get rid of the plane it first needs to be selected by clicking on it then you can either press the <b>Delete</b> on your keyboard or you can right click on the plane and choose to eiter hide it or delete it from there.
+c:sel TXPlane0
+c:kill sel
+c:refresh
+
+p:The next function will alllow you to find the best line between the selected options by clicking on <b>Best Line(of active selection)</b>
+
+p:You can either choose to get an overall best line by selecting the entire molecule by holding <b>ctrl+A</b>
+c:sel -a
+c:line sel
+
+p:The view will now be down the best line of the normal.
+c:rota y 90
+
+p:...or you can get one between a minimum of 2 atoms in your structure.
+c:sel TXLine0
+c:kill sel
+c:sel N12 C41
+c:line sel
+
+p:This will also view down the best line
+c:rota y 90
+
+p:The next function in the tab is <b>Distance and Angles(of selection)</b> which will give the distance and angle of upto 4 atoms in the molcule by selecting them before hand the data will then be displayed in the text in the command window or you could also type the command <c>sel</c> after you have choosen which atoms you would like to measure.
+c:sel TXLine0
+c:kill sel
+c:sel F1 C7 N6 C5
+c:sel
+
+p:Then there is the <b>Refine and save esd info</b> which needs to be clicked once in order to use the rest of the functions in the list as this will refine the model and claculate the needed esd information.
+c:delins more
+c:addins more -3
+c:refine
+
+p:The next function, <b>Distance and Angles with esd(of selection)</b> will allow you to view the current esd information of upto 4 atoms, select 4 atoms in the structure.
+c:sel N12 C12 C9 C8
+
+p:Then select the link or enter in the command <c>esd</c>
+c:esd
+
+p:This will then cause the data to appear in the command window in the software.
+
+p:The next function to be looked at is <b>Analyse &pi;-&pi; Interactions</b> to use this function simply click on the link without highlighting anything
+c:pipi -g
+c:rota x 90
+
+p:This should have duplicated the molecules to show ring interaction and given some data in the command window
+c:fuse
+
+p:Another command you could also use would be the <c>htab</c> command
+
+p:If the command <c>htab</c> is entered into the command line then this will add in found hydrogen bonds to the list for the refinement programme to add to the CIF file.
+
+p:The next command would not work on the currently loaded molecule so the model for <b>Sucrose</b> will be loaded in order to show an example of the command working.
+c:reap 'DataDir()/samples/Sucrose/Sucrose.res'
+c:spy.revert_to_original()
+
+p:You can also cause the molecules to grow and show hydrogen bond interations between molecules by typing in the command <c>htab -g</c>
+c:htab -g
+
+p:There is also another <b>htab</b> command that can be used which is <c>htab -t</b>  which will allow you to attatch unconventional hydrogen bonds to atoms for example if the command was <b>htab -t=Br,I</b> this would cause the Br to gain a bond with I
+
+c:spy.switch_tab_for_tutorials(home)
+p:End of tutorial. <br><font size='1'>Written by Simon Harries.</font>
