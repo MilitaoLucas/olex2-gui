@@ -1,0 +1,43 @@
+# Please note that all actions from all_tutorials_preamble.txt will be added here!
+
+
+p:If you are wanting to pack the molecule so that it shows how they fit together and interact with each other inside the molecule then first click on <b>view</b>
+h:tab-view
+c:spy.switch_tab_for_tutorials(view)
+
+p:Then you need to open the toolbar called <b>Symmetry Generation</b> by clicking on it, which will extend the tab
+h:h2-symmetry-generation
+c:itemstate view-symmetry-generation 1
+
+p:...you then need to open the tab called <b>Packing</b>
+h:h3-h3-packing
+c:itemstate h3-packing 1
+
+p:You can then either choose using the slider how many units you want to pack the molecule by
+c:html.setbg(slidepackradius,red)
+c:html.setvalue(slidepackradius,15)
+c:html.setvalue(packradius,15)
+c:setvalue(packradius,getvalue(slidepackradius))
+c:pack getvalue(packradius)
+c:refresh
+
+p:...or you can choose to type the command <c>pack</c> to show the maximum amount aloud to be shown
+c:pack
+c:refresh
+
+p:You can move and rotate and use functions on these as you would for a normal single unit of the molecule for example here is the molecule rotating 90 degrees along the x axis
+c:rota x 90
+c:refresh
+
+p:In order to reduce this back down to a single unit again you have to click on the tab called <b>Symmetry Tools</b>
+c:itemstate h3-packing 2
+h:h3-h3-symmetry-tools
+c:itemstate h3-symmetry-tools 1
+
+p:Once on the symmetry tools tab you need to click on <b>fuse</b> in order to reduce the model to one unit again or type the command <c>fuse</c>
+h:button-fuse
+c:fuse
+c:refresh
+
+c:spy.switch_tab_for_tutorials(home)
+p:End of tutorial. <br><font size='1'>Written by Simon Harries.</font>

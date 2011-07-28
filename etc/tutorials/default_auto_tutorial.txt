@@ -1,17 +1,8 @@
-﻿#set:bg_colour=gui.html.bg_colour
-#set:font_colour=gui.html.font_colour
+﻿## Please note that all actions from all_tutorials_preamble.txt will be added here!
 
-set:font_colour_code=#aaaaff
-set:font_colour_bold=gui.html.highlight_colour
-
-c:itemstate index* 0
-c:itemstate index-home 1
-c:itemstate tab* 2
-c:lines 10
 c:showQ True
 
-
-p:欢迎 Welcome to this introductory tutorial. To get the most out of it, please read this text carefully and whey you are done press the <b>Next</b> button - or simply hit the Return key!<br>
+p:Welcome to this introductory tutorial. To get the most out of it, please read this text carefully and when you are done press the <b>Next</b> button - or simply hit the Return key!<br>
 
 p:We suggest that you go through the whole tutorial first, then run it again and exit at a suitable point from which you can try and do for yourself what you have learned from previous times you have gone through the tutorial.
 
@@ -20,19 +11,13 @@ p:In this tutorial, we will be solving and refining one of the sample structures
 p:We load the structure from the <b>Start</b> tool. The tool will be highlighted after you hit return.
 h:h2-start
 c:reap 'DataDir()/samples/sucrose/sucrose.res'
+c:spy.revert_to_original()
 c:mpln -n
 c:refresh
 
 p:By clicking on the <b>Work</b> tab, we get access to the main tools:
 h:tab-work
-c:itemstate index* 0
-c:itemstate logo 0
-c:itemstate index-work 1
-c:itemstate info-title 1
-c:itemstate solve-settings 2
-c:itemstate refine-settings 2
-c:itemstate report-settings 2
-c:itemstate tab* 2
+c:spy.switch_tab_for_tutorials(work)
 
 p:Structure <b>Solution</b>...
 h:btn-solve;1
@@ -53,7 +38,7 @@ h:toolbar-tidy
 c:clean
 c:compaq -a
 
-p:Let's press the <b>Refine</b> button (or type <c>refine</c> and refine what we've got so far.
+p:Let's press the <b>Refine</b> button or type <c>refine</c> and refine what we've got so far.
 h:btn-refine;1
 c:refine
 
@@ -125,5 +110,5 @@ c:lines 10
 c:refresh
 c:itemstate solve-settings 2
 
-p:The End
-
+c:spy.switch_tab_for_tutorials(home)
+p:End of tutorial. <br><font size='1'>Written by Simon Harries.</font>
