@@ -150,6 +150,11 @@ snum
       type = png jpg bmp
         .type = choice
     }
+    povray
+      {
+      name = None
+        .type = str
+    }
     ps
       .short_caption = ORTEP - Postscript
       {
