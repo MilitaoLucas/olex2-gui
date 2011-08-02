@@ -643,6 +643,32 @@ class OlexFunctions(inheritFunctions):
       keyname = item.split("\\")[-1:][0]
       return keyname.split(".")[0]
 
+  def ListFiles(self, dir_name, mask=None):
+    import glob
+    rv = []
+    cd = os.getcwd()
+    try:
+      dir_name = os.path.normpath(dir_name)
+      if not mask:
+        h, t = os.path.split(dir_name)
+        if h:
+          os.chdir(h)
+        else:
+          h = ''
+        for i in glob.glob(t):
+          rv.append(os.path.join(h, i))
+      else:
+        os.chdir(dir_name)
+        masks = mask.split(';')
+        for m in masks:
+          for i in glob.glob("*.%s" %(m)):
+            rv.append(os.path.join(dir_name, i))
+      return rv
+    except:
+      return []
+    finally:
+      os.chdir(cd)
+
   def GetUserComputerName(self):
     import os
     return os.getenv('USERNAME'), os.getenv('COMPUTERNAME')
