@@ -822,32 +822,19 @@ if haveGUI:
   OV.registerFunction(SetXgridView)
 
 def GetHklFileList():
-  reflections_files = []
   reflection_file_extensions = ["hkl", "hkp", "raw", 'hklf5', 'hkc']
-  for extension in reflection_file_extensions:
-    g = glob.glob(r"%s/*.%s" %(OV.FilePath(),extension))
-    reflections_files += g
-  g = reflections_files
+  g = OV.ListFiles(OV.FilePath(), ';'.join(reflection_file_extensions))
   g.sort()
-  reflection_files = ""
   try:
-    a = OV.HKLSrc()
-    if a[:1] == "'":
+    a = OV.HKLSrc().replace('\\', '/')
+    if a[0] == "'" or a[0] == '"':
       a = a[1:-1]
   except:
     a = ""
 
-  if os.path.isfile(a):
-    most_recent_reflection_file = a.split('//')[-1]
-    show_refl_date = time.strftime(r"%d/%b/%Y %H:%M", time.localtime(os.path.getctime(OV.HKLSrc())))
-  else:
-    if g:
-      most_recent_reflection_file = g[0]
-      show_refl_date = time.strftime(r"%d/%b/%Y %H:%M", time.localtime(os.path.getctime(g[0])))
-    else:
-      print "There is no reflection file or the reflection file is not accessible"
-      return
-  most_recent_reflection_file = ""
+  if not os.path.isfile(a) and not g:
+    print "There is no reflection file or the reflection file is not accessible"
+  reflection_files = ""
   for item in g:
     reflection_files+="%s.%s<-%s;" %(OV.FileName(item), OV.FileExt(item), item)
   return reflection_files
@@ -2028,7 +2015,7 @@ def getAllHelpBoxes():
   import glob
   import re
   boxes = []
-  for htmfile in glob.glob("%s/etc/gui/*.htm" %OV.BaseDir()):
+  for htmfile in OV.ListFiles("%s/etc/gui/*.htm" %OV.BaseDir()):
     rFile = open(htmfile,'r')
     f = rFile.read()
     rFile.close()

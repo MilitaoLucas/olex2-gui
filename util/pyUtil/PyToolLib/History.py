@@ -192,7 +192,7 @@ class History(ArgumentParser):
     global tree
     tree = HistoryTree()
     for folder in folders:
-      g = glob.glob(r'%s/*.res' %folder)
+      g = OV.ListFiles(r'%s/*.res' %folder)
       g.sort()
       g = OV.standardizeListOfPaths(g)
       solution = r'%s/Solution.res' %folder
