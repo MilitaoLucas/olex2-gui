@@ -344,7 +344,7 @@ class ExtractCifInfo(CifTools):
     tmp = "%s/%s" %(path, "tmp.cif")
 
     info = ""
-    for p in glob.glob(os.path.join(path, basename + ".cif")):
+    for p in OV.ListFiles(os.path.join(path, basename + ".cif")):
       info = os.stat(p)
 
     versions = self.get_def()
@@ -710,15 +710,14 @@ The \l/2 correction factor is %(lambda_correction)s.
     elif tool == "od_frame_date":
       name = OV.FileName()
       extension = "_1_1.img"
-      directory_l = OV.FileFull().split("/")
+      directory_l = OV.FileFull().replace('\\','/').split("/")
       directory = ("/").join(directory_l[:-3])
       directory += '/frames'
     else:
       return "Tool not found"
 
     files = []
-    for path in glob.glob(os.path.join(directory, name+extension)):
-      path = os.path.normpath(path)
+    for path in OV.ListFiles(os.path.join(directory, name+extension)):
       info = os.stat(path)
       files.append((info.st_mtime, path))
     if files:
@@ -727,7 +726,7 @@ The \l/2 correction factor is %(lambda_correction)s.
     else:
       parent = os.path.dirname(directory)
       files = []
-      for path in glob.glob(os.path.join(parent, name + extension)):
+      for path in OV.ListFiles(os.path.join(parent, name + extension)):
         info = os.stat(path)
         files.append((info.st_mtime, path))
       if files:
@@ -741,18 +740,9 @@ The \l/2 correction factor is %(lambda_correction)s.
 		"""
     info.sort()
     info.reverse()
-    i = 0
-    listFiles = []
     returnvalue = ""
     if self.userInputVariables is None or "%s_file" %tool not in self.userInputVariables:
-      for date, file in info:
-        a = file.split('/')[-2:]
-        shortFilePath = ""
-        for bit in a:
-          shortFilePath += "/" + bit
-        listFiles.append("%s" %shortFilePath)
-        i += 1
-      files = ';'.join(listFiles)
+      files = ';'.join([file for date, file in info])
       try:
         setattr(self.metacifFiles, "prev_%s" %tool, getattr(self.metacifFiles, "curr_%s" %tool))
         OV.SetParam("snum.metacif.list_%s_files" %tool, files)
