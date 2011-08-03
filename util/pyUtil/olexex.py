@@ -391,7 +391,6 @@ def GetAvailableSolutionProgs():
   return retStr
 OV.registerFunction(GetAvailableSolutionProgs)
 
-
 def OnMatchStart(argStr):
   OV.write_to_olex('match.htm', "<b>RMS (&Aring;)&nbsp;Matched Fragments</b><br>")
   SpyVar.MatchedFragments = {}
@@ -528,7 +527,6 @@ def ElementButtonStates(symbol):
     else:
       olex.m('name sel %s' %symbol)
       olex.m('sel -u')
-      OV.htmlReload()
 if haveGUI:
   OV.registerFunction(ElementButtonStates)
 
@@ -580,7 +578,7 @@ def MakeElementButtonsFromFormula():
   type="button"
   image="up=%(namelower)soff.png,down=%(namelower)son.png,hover=%(namelower)shover.png",disable=%(namelower)sdisable.png"
   hint="%(target)s"
-  onclick="%(cmds)s>>echo '%(target)s: OK'"
+  onclick="%(cmds)s"
   bgcolor=%(bgcolor)s
 >''' %d
 #    <a href="%s" target="%s %s">
@@ -777,6 +775,7 @@ if haveGUI:
   OV.registerFunction(MapView)
 
 def deal_with_map_buttons(onoff, img_bases, map_type):
+  ## First, set all images to hidden
   tl = ['eden', 'void', 'mask']
   for item in tl:
     if item != map_type:
@@ -795,6 +794,7 @@ def deal_with_map_buttons(onoff, img_bases, map_type):
       use_image= "up=%soff.png" %img_base
       OV.SetImage("IMG_%s" %img_base.upper(),use_image)
     retVal = True
+
   if onoff == 'on':
     OV.SetParam('olex2.%s_vis' %map_type,True)
     for img_base in img_bases:
@@ -1392,7 +1392,7 @@ def get_proxy_from_usettings():
   proxy = None
   for line in lines:
     if line.startswith('proxy='):
-      proxy =  line.split('proxy=')[1]
+      proxy = line.split('proxy=')[1].strip()
   if proxy:
     print "Using Proxy server %s" %proxy
   else:
