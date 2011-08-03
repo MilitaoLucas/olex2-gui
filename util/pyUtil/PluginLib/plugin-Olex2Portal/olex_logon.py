@@ -1,8 +1,6 @@
 #-*- coding:utf8 -*-
 
 import os.path
-import urllib2
-import urllib
 import pickle
 import time
 import datetime
@@ -11,6 +9,8 @@ import base64
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+
+import HttpTools
 
 import olx
 import olex
@@ -247,7 +247,7 @@ def web_run_sql(sql = None, script = 'run_sql'):
             'sqlQ':sql,
             }
   try:
-    response = OV.make_url_call(url, values)
+    response = HttpTools.make_url_call(url, values)
     try:
       f = pickle.load(response)
     except:
@@ -318,7 +318,7 @@ def upload_structure(script='upload_structures'):
             }
   
   try:
-    response = OV.make_url_call(url, params)
+    response = HttpTools.make_url_call(url, params)
   except Exception, err:
     print err
   
@@ -338,10 +338,7 @@ def web_translation_item(OXD=None, language='English'):
             '__ac_name':username,
             'language':language,
             'OXD':OXD}
-  response = OV.make_url_call(url, values)
-  #data = urllib.urlencode(values)
-  #req = urllib2.Request(url)
-  #response = urllib2.urlopen(req,data)
+  response = HttpTools.make_url_call(url, values)
   text = response.read()
 
   if "<!DOCTYPE html PUBLIC" in text:
