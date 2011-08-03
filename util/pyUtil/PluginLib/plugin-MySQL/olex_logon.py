@@ -131,10 +131,10 @@ def web_run_sql(sql = None, script = 'run_sql'):
             '__ac_name':username,
             'sqlQ':sql,
             }
-  data = urllib.urlencode(values)
-  req = urllib2.Request(url)
-  response = urllib2.urlopen(req,data)
-  
+  try:
+    response = OV.make_url_call(url, values)
+  except Exception, err:
+    print err
   
   try:
     d = pickle.load(response)
@@ -157,9 +157,11 @@ def web_translation_item(OXD=None, language='English'):
             '__ac_name':username,
             'language':language,
             'OXD':OXD}
-  data = urllib.urlencode(values)
-  req = urllib2.Request(url)
-  response = urllib2.urlopen(req,data)
+  try:
+    response = OV.make_url_call(url, values)
+  except Exception, err:
+    print err
+    
   text = response.read()
 
   if "<!DOCTYPE html PUBLIC" in text:

@@ -391,7 +391,6 @@ def GetAvailableSolutionProgs():
   return retStr
 OV.registerFunction(GetAvailableSolutionProgs)
 
-
 def OnMatchStart(argStr):
   OV.write_to_olex('match.htm', "<b>RMS (&Aring;)&nbsp;Matched Fragments</b><br>")
   SpyVar.MatchedFragments = {}
@@ -776,6 +775,7 @@ if haveGUI:
   OV.registerFunction(MapView)
 
 def deal_with_map_buttons(onoff, img_bases, map_type):
+  ## First, set all images to hidden
   tl = ['eden', 'void', 'mask']
   for item in tl:
     if item != map_type:
@@ -794,6 +794,7 @@ def deal_with_map_buttons(onoff, img_bases, map_type):
       use_image= "up=%soff.png" %img_base
       OV.SetImage("IMG_%s" %img_base.upper(),use_image)
     retVal = True
+
   if onoff == 'on':
     OV.SetParam('olex2.%s_vis' %map_type,True)
     for img_base in img_bases:
@@ -821,32 +822,19 @@ if haveGUI:
   OV.registerFunction(SetXgridView)
 
 def GetHklFileList():
-  reflections_files = []
   reflection_file_extensions = ["hkl", "hkp", "raw", 'hklf5', 'hkc']
-  for extension in reflection_file_extensions:
-    g = glob.glob(r"%s/*.%s" %(OV.FilePath(),extension))
-    reflections_files += g
-  g = reflections_files
+  g = OV.ListFiles(OV.FilePath(), ';'.join(reflection_file_extensions))
   g.sort()
-  reflection_files = ""
   try:
-    a = OV.HKLSrc()
-    if a[:1] == "'":
+    a = OV.HKLSrc().replace('\\', '/')
+    if a[0] == "'" or a[0] == '"':
       a = a[1:-1]
   except:
     a = ""
 
-  if os.path.isfile(a):
-    most_recent_reflection_file = a.split('//')[-1]
-    show_refl_date = time.strftime(r"%d/%b/%Y %H:%M", time.localtime(os.path.getctime(OV.HKLSrc())))
-  else:
-    if g:
-      most_recent_reflection_file = g[0]
-      show_refl_date = time.strftime(r"%d/%b/%Y %H:%M", time.localtime(os.path.getctime(g[0])))
-    else:
-      print "There is no reflection file or the reflection file is not accessible"
-      return
-  most_recent_reflection_file = ""
+  if not os.path.isfile(a) and not g:
+    print "There is no reflection file or the reflection file is not accessible"
+  reflection_files = ""
   for item in g:
     reflection_files+="%s.%s<-%s;" %(OV.FileName(item), OV.FileExt(item), item)
   return reflection_files
@@ -1010,6 +998,8 @@ def setAllMainToolbarTabButtons():
           state = "off"
         elif state == '0':
           state = "on"
+        elif state == '1':
+          state = "off"
       else:
         state = 'off'
     OV.CopyVFSFile("cbtn-%s%s.png" %(btn,state),"cbtn-%s.png" %btn)
@@ -1286,40 +1276,47 @@ def getKeys(key_directory=None):
   return kl
 
 
-def GetCheckcifReport():
+def GetCheckcifReport(outputtype='PDF'):
   import urllib2
 
+  output = OV.GetParam('user.cif.chckCif_output_format')
+  if output:
+    outputtype = output
+    
   file_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'cif'))
-  if not os.path.exists(file_name):
-    print "There is no cif file!"
-    return
-  proxy = get_proxy_from_usettings()
-  if proxy:  
-    proxies = {'http': proxy}
-  else:
-    proxies = {}
-  opener = urllib2.build_opener(
-      urllib2.ProxyHandler(proxies))
-  OV.CreateBitmap('working')
-  try:
-    rFile = open(file_name, 'rb')
-    cif = rFile
-    params = {
-      "runtype": "symmonly",
-      "referer": "checkcif_server",
-      "outputtype": "html",
-      "file": cif
-    }
-    out_name = os.path.normpath(
-      '%s/%s_cifreport.htm' %(OV.FilePath(), OV.FileName()))
-    wFile = open(out_name, 'w')
-    wFile.write(opener.open(OV.GetParam('olex2.checkcif.url'), params).read())
+  rFile = open(file_name, 'rb')
+  cif = rFile
+  
+  params = {
+    "runtype": "symmonly",
+    "referer": "checkcif_server",
+    "outputtype": outputtype,
+    "file": cif
+  }
+  
+  response = OV.make_url_call(OV.GetParam('olex2.checkcif.url'), params)
+  
+  rFile.close()
+  #outputtype = 'htm'
+  if outputtype == "htm":
+    wFile = open("%s_cifreport.%s" %(OV.FileName(), outputtype),'w')
+    wFile.write(response.read())
     wFile.close()
-    rFile.close()
-    olx.Shell("'%s'" %out_name)
-  except Exception, ex:
-    print ex
-  OV.DeleteBitmap('working')
+  elif outputtype == "PDF":
+    rawFile = open("raw_cifreport.htm",'w')
+    l = response.readlines()
+    for line in l:
+      rawFile.write(line)
+      if "Download checkCIF report" in line:
+        href = line.split('"')[1]
+        response = OV.make_url_call(href,"")
+        txt = response.read()
+        wFile = open("%s_cifreport.%s" %(OV.FileName(), outputtype.lower()),'wb')
+        wFile.write(txt.read())
+        wFile.close()
+    rawFile.close()
+  olx.Shell("%s_cifreport.%s" %(OV.FileName(), outputtype.lower()))
+
 OV.registerFunction(GetCheckcifReport)
 
 def GetHttpFile(f, force=False, fullURL = False):
@@ -1387,27 +1384,6 @@ def check_for_crypto():
     #import olex
     #olex.m(r"InstallPlugin ODAC")
 
-def make_url_call(url, values):
-  #url = "http://www.olex2.org/odac/update"
-  proxy = get_proxy_from_usettings()
-  if proxy:  
-    proxies = {'http': proxy}
-  else:
-    proxies = {}
-  try:
-    opener = urllib2.build_opener(
-      urllib2.ProxyHandler(proxies))
-    response = opener.open(url,values)
-    f = response.read()
-  except:
-    print "\n++++++++++++++++++++++++++++++++++++++++++++++"
-    print "+ Could not reach update server at www.olex2.org"
-    print "+ --------------------------------------------"
-    print "+ Please make sure your computer is online"
-    print "+ and that you can reach www.olex2.org"
-    print "++++++++++++++++++++++++++++++++++++++++++++++\n"
-    return False
-  return f
 
 def get_proxy_from_usettings():
   rFile = open("%s/usettings.dat" %OV.BaseDir(),'r')
@@ -2039,7 +2015,7 @@ def getAllHelpBoxes():
   import glob
   import re
   boxes = []
-  for htmfile in glob.glob("%s/etc/gui/*.htm" %OV.BaseDir()):
+  for htmfile in OV.ListFiles("%s/etc/gui/*.htm" %OV.BaseDir()):
     rFile = open(htmfile,'r')
     f = rFile.read()
     rFile.close()
@@ -2059,26 +2035,12 @@ def test_help_boxes():
     htmlTools.make_help_box({'name':box})
 OV.registerFunction(test_help_boxes)
 
-
 def olex_fs_copy(src_file, dst_file):
   txt = olex_fs.ReadFile(src_file)
   olex_fs.NewFile(dst_file,txt)
 OV.registerFunction(olex_fs_copy)
 
-
-def openNotes():
-  f_path = "%s/%s_Notes.txt" %(OV.FilePath(), OV.FileName())
-  if not os.path.exists(f_path):
-    f = open(f_path,'w')
-    now = time.strftime(r"%d/%b/%Y %H:%M", time.time())
-    f.write("Notes for %s. File created by Olex2 on %s\n\n" %(OV.FileName(), now))
-    f.close()
-  olx.Shell(f_path)
-OV.registerFunction(openNotes)
-
-
 def isPro():
-  return True
   p = "%s/pro.txt" %OV.BaseDir()
   if os.path.exists(p):
     OV.SetParam('olex2.hover_buttons',True)
@@ -2086,6 +2048,38 @@ def isPro():
   else:
     return False
 OV.registerFunction(isPro)
+
+def switch_tab_for_tutorials(tabname):
+  olex.m("itemstate index* 0")
+  olex.m("itemstate logo 0")
+  olex.m("itemstate index-%s 1" %tabname)
+  olex.m("itemstate info-title 1")
+  if tabname.lower() == "work":
+    olex.m("itemstate solve-settings 2")
+    olex.m("itemstate refine-settings 2")
+    olex.m("itemstate report-settings 2")
+    olex.m("itemstate %s-toolbox 1" %tabname)
+  olex.m("itemstate tab* 2")
+OV.registerFunction(switch_tab_for_tutorials)
+
+def revert_to_original():
+  extensions = ['res','ins','cif']
+  for extension in extensions:
+    path = "%s/.olex/originals/%s.%s" %(OV.FilePath(), OV.FileName(), extension)
+    if os.path.exists(path):
+      rFile = open(path,'rb')
+      txt = rFile.read()
+      rFile.close()
+      outpath = OV.file_ChangeExt(OV.FileFull(),'ins')
+      wFile = open(outpath,'wb')
+      wFile.write(txt)
+      wFile.close()
+      OV.AtReap(outpath)
+      print("Reverted to the original file %s" %path)
+      return
+  print("Could not revert to any original file!")
+OV.registerFunction(revert_to_original)
+  
 
 if not haveGUI:
   def tbxs(name):

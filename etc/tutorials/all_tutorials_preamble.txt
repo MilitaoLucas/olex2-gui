@@ -1,0 +1,13 @@
+﻿#set:bg_colour=gui.html.bg_colour
+#set:font_colour=gui.html.font_colour
+
+set:font_colour_code=#aaaaff
+set:font_colour_bold=gui.html.highlight_colour
+
+c:itemstate index* 0
+c:itemstate index-home 1
+c:itemstate tab* 2
+c:grad False
+c:showQ False
+c:default
+c:lines 10

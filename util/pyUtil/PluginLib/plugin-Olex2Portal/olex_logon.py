@@ -5,6 +5,7 @@ import urllib2
 import urllib
 import pickle
 import time
+import datetime
 import codecs
 import base64
 
@@ -12,7 +13,7 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
 import olx
-
+import olex
 global username
 username = ""
 global password
@@ -118,7 +119,7 @@ def make_translate_gui_items_html(item_l):
   return res
 
 
-def make_logon_html():
+def make_logon_html(url='www.olex2.org'):
   pop_name = "Logon"
   if OV.IsControl('%s.WEB_USERNAME'%pop_name):
     olx.html_ShowModal(pop_name)
@@ -126,11 +127,11 @@ def make_logon_html():
     txt='''
   <body link="$spy.GetParam(gui.html.link_colour)" bgcolor="$spy.GetParam(gui.html.bg_colour)">
   <font color=$spy.GetParam(gui.html.font_colour)  size=$spy.GetParam(gui.html.font_size) face="$spy.GetParam(gui.html.font_name)">
-  <b>Please log on to our server with the username and password you use at www.olex2.org.<br></b>
-  <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_bg_colour)">
+  <b>Please log on to our server with the username and password you use at %s.<br></b>
+  <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_bg_colour)">
   <tr>
     <td>
-    %Username%:
+    Username:
     </td>
      <td>
 
@@ -147,7 +148,7 @@ def make_logon_html():
      </tr>
      <tr>
     <td>
-    %Password%:
+    Password:
     </td>
      <td>
        <input
@@ -189,7 +190,7 @@ def make_logon_html():
      </table>
      </font>
      </body>
-     '''
+     ''' %url
 
     OV.write_to_olex("logon.htm", txt)
     boxWidth = 280
@@ -245,39 +246,37 @@ def web_run_sql(sql = None, script = 'run_sql'):
             '__ac_name':username,
             'sqlQ':sql,
             }
-  data = urllib.urlencode(values)
-  req = urllib2.Request(url)
-  response = urllib2.urlopen(req,data)
-
-
-
   try:
-    d = pickle.load(response)
+    response = OV.make_url_call(url, values)
+    try:
+      f = pickle.load(response)
+    except:
+      f = response.read()
   except Exception, err:
-    if "Forgot your password" in response.read():
+    print err
+    return "Unauthorised"
+
+  if type(f) is str:
+    if "Forgot your password" in f:
       username =""
       password = ""
       return "Unauthorised"
-    else:
-      d = {}
 
-  return d
+  return f
 
 
-def upload_structure(script='test'):
+def upload_structure(script='upload_structures'):
   import olexex
   global password
   global username
   import random
 
-  #web_authenticate()
-
-  password = 'fddd-anode'
-  username = 'admin'
+  web_authenticate()
 
   id = OV.FileName()
   image_path = "%s/%s.png" %(OV.FilePath(), id)
-  #image_path = "%s/1.png" %(OV.BaseDir())
+  if not os.path.exists(image_path):
+    olex.m("pict %s.png 400" %id)
   image = open(image_path,'rb').read()
 
   file_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'cif'))
@@ -286,46 +285,29 @@ def upload_structure(script='test'):
   file_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'ins'))
   ins = open(file_name, 'r').read()
 
-  file_name = os.path.normpath('cifreport.htm')
+  file_name = os.path.normpath('%s_cifreport.pdf' %id)
+  if not os.path.exists(file_name):
+    file_name = os.path.normpath('%s_cifreport.htm' %id)
+    if not os.path.exists(file_name):
+      raise Exception("Please obtain a CheckCif Report!")
   checkcif_report = open(file_name, 'r').read()
 
-  date_collected = "2011,5,5"
-  crystal_data = "Crystal Data: <sub>Fred</sub>"
-  url = "%s/%s" %("http://localhost:8080//StructuresTest/scripts/", script)
-  #url = "http://localhost:8080/StructuresTest/Members/admin/sucrose/edit"
-  #url = "http://localhost:8080/StructuresTest/Members/admin/++add++fred"
+  dc = OV.GetParam('snum.report.date_collected')
+  dc = float(dc)
+  dc = datetime.date.fromtimestamp(dc)
+  date_collected = dc
+  
+#  crystal_data = "Crystal Data: <sub>Fred</sub>"
+  
+  url = "%s/%s" %(OV.GetParam('olex2.structurespace.url'), script)
   id = str(random.randint(10000, 99999))
 
-  import urllib2
-  import urllib2_file
-
-  #image = "image"
-  #cif = "cif"
-  #crystal_data = "data"
-  #date_collected = "date"
-
-  crystal_data = """
-C<sub>4</sub>H<sub>4</sub>Ag<sub>2</sub>O<sub>4</sub>S,
-<i>M&nbsp;</i>=363.88,
-monoclinic,
-<!--<i>a</i>&nbsp;= 5.1945(2), -->
-<!--<i>b</i>&nbsp;= 20.3339(9), -->
-<!--<i>c</i>&nbsp;= 6.6668(3), -->
-<i>a</i>&nbsp;= 5.1945(2)&nbsp;&Aring;, <i>b</i>&nbsp;= 20.3339(9)&nbsp;&Aring;, <i>c</i>&nbsp;= 6.6668(3)&nbsp;&Aring;, <i>&beta;</i>&nbsp;= 109.095(5)&deg;,
-<i>U&nbsp;</i>= 665.43(6)&nbsp;&Aring;<sup>3</sup>,
-<i>T</i>&nbsp;= 120.0,
-space group P2<sub>1</sub>/c (no. 14),
-<i>Z</i>&nbsp;= 4,
-&#956;(Mo K&alpha;)&nbsp;= 6.149,
-6931 reflections measured,
-1612 unique (<i>R</i><sub>int</sub>&nbsp;= 0.0302) which were used in all calculations.
-The final <i>wR</i>(<i>F</i><sub>2</sub>) was 0.061963 (all data).
-"""
-
-
+  crystal_data_file = olex.m("cif2doc crystal_data.htm -n=%s_crystal_data.htm" %OV.FileName())
+  crystal_data = open('%s_crystal_data.htm' %OV.FileName(),'r').read()
+  
   params = {'__ac_password':password,
             '__ac_name':username,
-#            'context':"None",
+            'context':"None",
             'sNum':id,
             'image':image,
             'cif':cif,
@@ -334,66 +316,13 @@ The final <i>wR</i>(<i>F</i><sub>2</sub>) was 0.061963 (all data).
             'ins':ins,
             'checkcif_report':checkcif_report,
             }
-  params = urllib.urlencode(params)
-
+  
   try:
-#    response = urllib2.urlopen(url, params)
-
-    proxy = olexex.get_proxy_from_usettings()
-    proxies = {'http': proxy}
-    proxy_support = urllib2.ProxyHandler(proxies)
-    req = urllib2.Request(url)
-    response = urllib2.urlopen(req,params)
-    f = response.read()
+    response = OV.make_url_call(url, params)
   except Exception, err:
-    f = 'Failed in Olex2: %s' %repr(err)
-    print(f)
-
-#  rFile.close()
-#  file_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'htm'))
-#  wFile = open(file_name, 'w')
-#  wFile.write(f)
-#  wFile.close()
-#  olx.Shell(file_name)
-  print f
-
-
-#################################################
-
-
-  #values = {'__ac_password':password,
-            #'__ac_name':username,
-            #'id':id,
-            #'date_collected':date_collected,
-            #'image':image,
-            #'cif':cif,
-##            'crystal_data':"Fred",
-            #}
-
-  #proxy = olexex.get_proxy_from_usettings()
-  #proxies = {'http': proxy}
-  #proxy_support = urllib2.ProxyHandler(proxies)
-  #values = urllib.urlencode(values)
-  #req = urllib2.Request(url)
-  #response = urllib2.urlopen(req,values)
-  #f = response.read()
-  #wFile = open("%s/2.png" %(OV.FilePath()),'wb')
-  #wFile.write(f)
-  #wFile.close()
-
-##  data = urllib.urlencode(values)
-##  req = urllib2.Request(url)
-##  response = urllib2.urlopen(req,data)
-
-  #print response.read()
-
-  #try:
-    #d = pickle.load(response)
-  #except:
-    #username =""
-    #password = ""
-    #return "Unauthorised"
-  #return d
+    print err
+  
+  print response.read()
 
 OV.registerFunction(upload_structure)
 
@@ -409,9 +338,10 @@ def web_translation_item(OXD=None, language='English'):
             '__ac_name':username,
             'language':language,
             'OXD':OXD}
-  data = urllib.urlencode(values)
-  req = urllib2.Request(url)
-  response = urllib2.urlopen(req,data)
+  response = OV.make_url_call(url, values)
+  #data = urllib.urlencode(values)
+  #req = urllib2.Request(url)
+  #response = urllib2.urlopen(req,data)
   text = response.read()
 
   if "<!DOCTYPE html PUBLIC" in text:
@@ -455,6 +385,7 @@ class DownloadOlexLanguageDictionary:
     if inputText and inputText != text:
       res = self.uploadSingleTerm(OXD, language, inputText)
       print res
+      self.dictionary_l = []
       res = self.downloadTranslation()
       print res
       OV.cmd('reload dictionary')

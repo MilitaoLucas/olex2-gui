@@ -153,11 +153,7 @@ $spy.MakeHoverButton(btn-info@#refinement-masks,spy.make_help_box -name='refinem
         name="SNUM_REFINEMENT_USE_SOLVENT_MASK"
         checked="$spy.GetParam(snum.refinement.use_solvent_mask)"
         oncheck="spy.SetParam(snum.refinement.use_solvent_mask,true)"
-        onuncheck="
-spy.SetParam(snum.refinement.use_solvent_mask,false)>>
-if strcmp(spy.GetParam(snum.masks.original_hklsrc),'') then none else HKLSrc(spy.GetParam(snum.masks.original_hklsrc))>>
-spy.SetParam(snum.masks.original_hklsrc,None)>>
-UpdateHtml"
+        onuncheck="spy.SetParam(snum.refinement.use_solvent_mask,false)"
         value=""
       >
   </td>

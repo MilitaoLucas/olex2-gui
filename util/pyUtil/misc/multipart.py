@@ -183,9 +183,13 @@ class HTTPHandler(urllib2.HTTPHandler):
   def http_open(self, request):
     return RequestHandler().do_open(self, httplib.HTTP, request)
 
-class HTTPSHandler(urllib2.HTTPSHandler):
-  def https_open(self, request):
-    return RequestHandler().do_open(self, httplib.HTTPS, request)
-
 urllib2.HTTPHandler = HTTPHandler
-urllib2.HTTPSHandler = HTTPSHandler
+
+try:
+  class HTTPSHandler(urllib2.HTTPSHandler):
+    def https_open(self, request):
+      return RequestHandler().do_open(self, httplib.HTTPS, request)
+
+  urllib2.HTTPSHandler = HTTPSHandler
+except:
+  print 'HTTPS handler is not installed'

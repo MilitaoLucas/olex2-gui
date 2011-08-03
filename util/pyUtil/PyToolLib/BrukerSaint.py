@@ -587,7 +587,7 @@ class BrukerSaint(ImageTools):
 
 
   def get_p4p_selection(self):
-    g = glob.glob("%s/*.p4p" %(self.frame_directory))
+    g = OV.ListFiles("%s/*.p4p" %(self.frame_directory))
     files = []      
     for path in g:
       info = os.stat(path)

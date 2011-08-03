@@ -13,11 +13,11 @@ import re
 import olex
 import olx
 try:
-	import urllib
-	import urllib2
+  import urllib
+  import urllib2
 except:
-	print "You appear to be missing the urllib modules you will need these for this to work"
-	sys.exit()
+  print "You appear to be missing the urllib modules you will need these for this to work"
+  sys.exit()
 #import urllib2_file
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
@@ -51,7 +51,7 @@ def OlexCheckCIF():
   #print params #Parameter check
   #params = urllib.urlencode(params)
   f = urllib2.urlopen("http://vm02.iucr.org/cgi-bin/checkcif.pl", params)
-  
+
   cifcheck_res = open('%s/%s_checkcif_report.%s' %(OV.FilePath(), OV.FileName(), result_filetype), 'w')
   cifcheck_res.write("%s"%f.read())
   cifcheck_res.close()
