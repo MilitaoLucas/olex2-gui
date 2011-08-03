@@ -14,14 +14,7 @@ from subprocess import *
 
 import htmlTools
 
-import socket
-import urllib
-import urllib2
-URL = "http://dimas.dur.ac.uk/"
-
-# timeout in seconds
-timeout = 15
-socket.setdefaulttimeout(timeout)
+import HttpTools
 
 global _is_online
 _is_online = False
@@ -1277,7 +1270,6 @@ def getKeys(key_directory=None):
 
 
 def GetCheckcifReport(outputtype='PDF'):
-  import urllib2
 
   output = OV.GetParam('user.cif.chckCif_output_format')
   if output:
@@ -1294,7 +1286,7 @@ def GetCheckcifReport(outputtype='PDF'):
     "file": cif
   }
   
-  response = OV.make_url_call(OV.GetParam('olex2.checkcif.url'), params)
+  response = HttpTools.make_url_call(OV.GetParam('olex2.checkcif.url'), params)
   
   rFile.close()
   #outputtype = 'htm'
@@ -1309,7 +1301,7 @@ def GetCheckcifReport(outputtype='PDF'):
       rawFile.write(line)
       if "Download checkCIF report" in line:
         href = line.split('"')[1]
-        response = OV.make_url_call(href,"")
+        response = HttpTools.make_url_call(href,"")
         txt = response.read()
         wFile = open("%s_cifreport.%s" %(OV.FileName(), outputtype.lower()),'wb')
         wFile.write(txt.read())
@@ -1320,6 +1312,7 @@ def GetCheckcifReport(outputtype='PDF'):
 OV.registerFunction(GetCheckcifReport)
 
 def GetHttpFile(f, force=False, fullURL = False):
+  URL = "http://dimas.dur.ac.uk/"
   global _is_online
   retVal = None
   go_online = _is_online
@@ -1331,12 +1324,9 @@ def GetHttpFile(f, force=False, fullURL = False):
       else:
         url = f
       if verbose: print "--> Getting %s" %url,
-      path = urllib.URLopener()
-      path.addheader('pragma', 'no-cache')
-      conn = path.open(url)
-      content = conn.read()
+      response = HttpTools.make_url_call(url,"")
+      content = response.read()
       if verbose: print "OK"
-      conn.close()
       retVal = content
     except Exception, err:
       _is_online = False
@@ -1420,7 +1410,7 @@ def register_new_odac(username=None, pwd=None):
             'username':username,
             'macAddress':mac_address,
             }
-  f = make_url_call(url, values)
+  f = HttpTools.make_url_call(url, values)
 
   if not f:
     print "Please provide a valid username and password, and make sure your computer is online."
@@ -1502,12 +1492,8 @@ def updateACF(force=False):
               'computerName':computer_name,
               'macAddress':mac_address,
               }
-    data = urllib.urlencode(values)
-    #print data
     try:
-      proxy_support = urllib2.ProxyHandler(proxies)
-      req = urllib2.Request(url)
-      response = urllib2.urlopen(req,data)
+      response = HttpTools.make_url_call(url, values)
       f = response.read()
     except:
       print "\n++++++++++++++++++++++++++++++++++++++++++++++"

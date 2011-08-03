@@ -11,16 +11,9 @@ from subprocess import *
 import guiFunctions
 
 import socket
-import urllib
-import urllib2
 import pickle
 
 import time
-
-
-# timeout in seconds
-timeout = 30
-socket.setdefaulttimeout(timeout)
 
 
 HasGUI = olx.HasGUI() == 'true'
@@ -714,43 +707,6 @@ class OlexFunctions(inheritFunctions):
   def setAllMainToolbarTabButtons(self):
     import olexex
     olexex.setAllMainToolbarTabButtons()
-
-  def make_url_call(self, url, values, use_system_proxy=True):
-    proxy = self.get_proxy_from_usettings()
-    if proxy:
-      proxies = {'http': proxy}
-    else:
-      proxies = {}
-    try:
-      if not use_system_proxy:
-        opener = urllib2.build_opener(
-          urllib2.ProxyHandler(proxies))
-        return opener.open(url,values)
-      else:
-        return urllib2.urlopen(url,values)
-#      try:
-#        f = pickle.load(response) #This is required in cases where the query returns a dictionary
-#      except:
-#        f = response.read()
-    except Exception:
-      raise
-    finally:
-      print "url call ended"
-      
-  def get_proxy_from_usettings(self):
-    rFile = open("%s/usettings.dat" %OV.BaseDir(),'r')
-    lines = rFile.readlines()
-    rFile.close()
-    proxy = None
-    for line in lines:
-      if line.startswith('proxy='):
-        proxy = line.split('proxy=')[1].strip()
-    if proxy:
-      print "Using Proxy server %s" %proxy
-    else:
-      print "No Proxy server is set"
-    return proxy
-
 
   def makeGeneralHtmlPop(self, phil_path, htm='htm', number_of_lines=0):
     pop_name=OV.GetParam('%s.name' %phil_path)
