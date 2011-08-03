@@ -497,9 +497,9 @@ olex2
   }
 
   ccdc{
-    url = http://ccdc.opencryst.org/deposit
-      .type = str
-      .help = The URL to which the cif/fcf will be sent
+    url = http://ccdc.opencryst.org/deposit http://ccdc1.opencryst.org/deposit
+      .type = strings
+      .help = List of the OlexSys servers used to forward requests to the CCDC
     ccdc_mail = olex2-deposit@ccdc.cam.ac.uk
       .type = str
       .help = The email address to which the files will be forwared

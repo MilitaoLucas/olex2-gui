@@ -47,7 +47,7 @@ class CcdcSubmit():
         submission_type = "No submission type was indicated"
       
       zip_file = open(self.zip_name, "rb")
-      url = OV.GetParam('olex2.ccdc.url')
+      url_l = OV.GetParam('olex2.ccdc.url')
       destination =   OV.GetParam('olex2.ccdc.ccdc_mail')
       self.params = {
         '__ac_password':OV.GetParam('user.ccdc.portal_passwd'),
@@ -59,16 +59,26 @@ class CcdcSubmit():
         'notes_to_staff': note_to_staff,
         'submission_type': submission_type,
       }
-      try:
-        response = HttpTools.make_url_call(url, self.params)
-      except Exception, err:
-        print err
+      for url in url_l:
+        try:
+          response = HttpTools.make_url_call(url, self.params)
+          retval = True
+          break
+        except Exception, err:
+          print err
+          retval = False
+          continue
+
+      if retval == False:
+        print "Something has gone wrong with this submission. Please try again."
         return False
+      
       if 'successfully' in response.read():
         print "The structure has been submitted. Please check your e-mail for further information"
+        return True
       else:
         print "Something has gone wrong with this submission. Please try again."
-      return True
+        return False
     
     finally:
       if zip_file is not None:
