@@ -68,6 +68,7 @@
   Clear
   Mode
   Next
+  Cancel
   Map
   Mask
   Void

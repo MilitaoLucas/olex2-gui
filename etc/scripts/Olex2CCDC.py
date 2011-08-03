@@ -23,6 +23,8 @@ class CcdcSubmit():
 
   def ccdc_submit(self):
     zip_file = None
+    from CifInfo import MergeCif
+    MergeCif()
     try:
       if not self.check_and_get_prerequisites():
         return False
@@ -32,10 +34,17 @@ class CcdcSubmit():
         print f
         return False
       if res == 1:
-        print "OK: Will do stuff now!"
+        print "Sending to the ccdc now..."
   
       self.zip_files()
-  
+      
+      note_to_staff = OV.GetParam('snum.ccdc.note_to_staff')
+      if "++" in note_to_staff:
+        note_to_staff = "No note to ccdc Staff"
+      submission_type = OV.GetParam('snum.ccdc.submission_type')
+      if "++" in submission_type:
+        submission_type = "No submission type was indicated"
+      
       zip_file = open(self.zip_name, "rb")
       url = OV.GetParam('olex2.ccdc.url')
       destination =   OV.GetParam('olex2.ccdc.ccdc_mail')
@@ -46,15 +55,21 @@ class CcdcSubmit():
         'email': self.email,
         'file_name': zip_file,
         'destination': destination,
+        'notes_to_staff': note_to_staff,
+        'submission_type': submission_type,
       }
-  
-      self.send_request(url)
+      try:
+        response = OV.make_url_call(url, self.params)
+      except Exception, err:
+        print err
+        return False
+      print response
       return True
+    
     finally:
       if zip_file is not None:
         zip_file.close()
       self.zip_name = None
-    return False
 
   def make_pop_box(self):
     OV.makeGeneralHtmlPop('olex2.ccdc.pop')

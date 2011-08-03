@@ -17,6 +17,13 @@ snum
       .expert_level = 1
     }
 
+  ccdc{
+    note_to_staff = +++ Optional Note To Staff +++
+      .type = str
+    submission_type = +++ Please Choose +++
+      .type = str
+  }    
+    
   current_result{
     cif = None
       .type = path
@@ -142,6 +149,11 @@ snum
       }
       type = png jpg bmp
         .type = choice
+    }
+    povray
+      {
+      name = None
+        .type = str
     }
     ps
       .short_caption = ORTEP - Postscript
@@ -478,6 +490,12 @@ olex2
     .type = bool
       .help = If set to TRUE (default), the cif file will be sent to the checkcif url on pressing 'Validate Cif'
   }
+
+  structurespace{
+    url = http://www.olexsys.org:8092/structurespace/StructureSpace
+      .type = str
+  }
+
   ccdc{
     url = http://ccdc.opencryst.org/deposit
       .type = str
@@ -492,7 +510,11 @@ olex2
         .type = str
       width = 600
         .type = int
-      height = 500
+      height = automatic
+        .type = str
+      auto_height_constant = 310
+        .type = int
+      auto_height_line = 20
         .type = int
       position = center
         .type = str
@@ -767,6 +789,12 @@ user
       .type = str
     portal_passwd = ccdcpass
       .type = str
+  }
+  cif{
+    autorefine_if_no_cif_for_cifmerge = True
+      .type = bool
+    chckCif_output_format = *PDF htm
+      .type = choice
   }
   image{
     bitmap{

@@ -785,7 +785,7 @@ WHERE (((submission.ID)="%s"));""" %sNum
   def sNumTitleStyle1(self, items, font_name="Arial Bold", font_size=17):
     sNum = items["sNum"]
     a = timage()
-    return a.make_timage('snumtitle', sNum, 'on')
+    return a.make_timage('snumtitle', sNum, 'on', titleCase=False)
     #base_colour = self.params.snumtitle.base_colour.rgb
     #height = self.params.snumtitle.height
     #font_name = self.params.snumtitle.font_name
@@ -2085,7 +2085,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     tabItem_l = [tabItems, g3tabItems]
     self.tabItems = tabItems
     for directory in directories:
-      for htmfile in glob.glob("%s/%s/*.htm" %(self.basedir,  directory)):
+      for htmfile in OV.ListFiles("%s/%s/*.htm" %(self.basedir,  directory)):
         f = (htmfile.replace('\\', '/').split('/')[-1:])
         f = f[0].split(".")[0]
         if f.split("-")[0] != "index" and f[0] != "_":

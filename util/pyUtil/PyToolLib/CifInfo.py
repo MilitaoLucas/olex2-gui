@@ -180,11 +180,14 @@ class CifTools(ArgumentParser):
                 user_modified is not None and key in user_modified or
                 user_removed is not None and key in user_removed):
           self.cif_block[key] = value
+        else:
+          pass
+#          print("Not updating %s from file" %key)
           
     # this requires special treatment
-    if '_diffrn_ambient_temperature' in dictionary:
-      OV.set_cif_item(
-        '_diffrn_ambient_temperature', dictionary['_diffrn_ambient_temperature'])
+#    if '_diffrn_ambient_temperature' in dictionary:
+#      OV.set_cif_item(
+#        '_diffrn_ambient_temperature', dictionary['_diffrn_ambient_temperature'])
     import iotbx.cif
     if isinstance(dictionary, iotbx.cif.model.block):
       for key, value in dictionary.loops.iteritems():
@@ -290,19 +293,28 @@ class MergeCif(CifTools):
     # check if cif exists and is up-to-date
     cif_path = '%s/%s.cif' %(OV.FilePath(), OV.FileName())
     file_full = OV.FileFull()
-    if (not os.path.isfile('%s/%s.cif' %(OV.FilePath(), OV.FileName())) or
-        os.path.getmtime(file_full) > os.path.getmtime(cif_path)):
-      prg = OV.GetParam('snum.refinement.program')
-      method = OV.GetParam('snum.refinement.method')
-      if prg == 'olex2.refine':
-        OV.set_refinement_program(prg, 'Gauss-Newton')
+    if (not os.path.isfile('%s/%s.cif' %(OV.FilePath(), OV.FileName())) or not
+        os.path.getmtime(file_full) - 10 < os.path.getmtime(cif_path)):
+      if OV.GetParam('user.cif.autorefine_if_no_cif_for_cifmerge'):
+        prg = OV.GetParam('snum.refinement.program')
+        method = OV.GetParam('snum.refinement.method')
+        if prg == 'olex2.refine':
+          OV.set_refinement_program(prg, 'Gauss-Newton')
+        else:
+          if method == 'CGLS':
+            OV.set_refinement_program(prg, 'Least Squares')
+          acta = olx.Ins('ACTA')
+          if acta == 'n/a':
+            olx.AddIns('ACTA')
+          olex.m('refine')
       else:
-        if method == 'CGLS':
-          OV.set_refinement_program(prg, 'Least Squares')
-        acta = olx.Ins('ACTA')
-        if acta == 'n/a':
-          olx.AddIns('ACTA')
-        olex.m('refine')
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print("There is no cif from a refinement program for merging.")
+        print("If there is a cif, it is probably out of date.")
+        print("You probably will need to refine your structure again.")
+        print("If you are using SHELX, make sure you use the ACTA command.")
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        return
 
     self.write_metacif_file()
     ## merge metacif file with cif file from refinement
@@ -332,7 +344,7 @@ class ExtractCifInfo(CifTools):
     tmp = "%s/%s" %(path, "tmp.cif")
 
     info = ""
-    for p in glob.glob(os.path.join(path, basename + ".cif")):
+    for p in OV.ListFiles(os.path.join(path, basename + ".cif")):
       info = os.stat(p)
 
     versions = self.get_def()
@@ -367,9 +379,9 @@ class ExtractCifInfo(CifTools):
     p = self.sort_out_path(path, "frames")
     if p and self.metacifFiles.curr_frames != self.metacifFiles.prev_frames:
       try:
-        import bruker_frames
-        frames = bruker_frames.reader(p).cifItems()
-        self.update_cif_block(frames)
+        info = os.stat(p)
+        file_time = info.st_mtime
+        
       except:
         print "Error reading Bruker frame file %s" %p
 
@@ -478,9 +490,19 @@ class ExtractCifInfo(CifTools):
         cif_od = iotbx.cif.reader(input_string=f.read()).model().values()[0]
         self.exclude_cif_items(cif_od)
         f.close()
-        self.update_cif_block(cif_od, force=True)
+        self.update_cif_block(cif_od, force=False)
       except:
         print "Error reading Oxford Diffraction CIF %s" %p
+
+    # OD Data Collection Date
+    p = self.sort_out_path(path, "od_frame_date")
+    if p:
+      try:
+        info = os.stat(p)
+        file_time = info.st_mtime
+        OV.SetParam('snum.report.date_collected', file_time)
+      except:
+        print "Error reading OD frame Date %s" %p
 
     # Rigaku data collection CIF
     p = self.sort_out_path(path, "crystal_clear")
@@ -544,10 +566,13 @@ class ExtractCifInfo(CifTools):
         t = format_float_with_standard_uncertainty(t, su)
         self.cif_block['_diffrn_ambient_temperature'] = t
       self.cif_block['_diffrn_ambient_temperature'] = t
-    if '_diffrn_ambient_temperature' in self.cif_block:
-      self.update_cif_block({
-        '_cell_measurement_temperature': self.cif_block['_diffrn_ambient_temperature']
-      })
+
+    ## I have uncommented these lines below on 18/7/11 - I can't see what they were
+    ## doing other than making the wrong temperature make a comeback...
+    #if '_diffrn_ambient_temperature' in self.cif_block:
+      #self.update_cif_block({
+        #'_cell_measurement_temperature': self.cif_block['_diffrn_ambient_temperature']
+      #})
 
     self.write_metacif_file()
 
@@ -682,12 +707,17 @@ The \l/2 correction factor is %(lambda_correction)s.
     elif tool == "crystal_clear":
       name = "CrystalClear"
       extension = ".cif"
+    elif tool == "od_frame_date":
+      name = OV.FileName()
+      extension = "_1_1.img"
+      directory_l = OV.FileFull().replace('\\','/').split("/")
+      directory = ("/").join(directory_l[:-3])
+      directory += '/frames'
     else:
       return "Tool not found"
 
     files = []
-    for path in glob.glob(os.path.join(directory, name+extension)):
-      path = os.path.normpath(path)
+    for path in OV.ListFiles(os.path.join(directory, name+extension)):
       info = os.stat(path)
       files.append((info.st_mtime, path))
     if files:
@@ -696,7 +726,7 @@ The \l/2 correction factor is %(lambda_correction)s.
     else:
       parent = os.path.dirname(directory)
       files = []
-      for path in glob.glob(os.path.join(parent, name + extension)):
+      for path in OV.ListFiles(os.path.join(parent, name + extension)):
         info = os.stat(path)
         files.append((info.st_mtime, path))
       if files:
@@ -710,18 +740,9 @@ The \l/2 correction factor is %(lambda_correction)s.
 		"""
     info.sort()
     info.reverse()
-    i = 0
-    listFiles = []
     returnvalue = ""
     if self.userInputVariables is None or "%s_file" %tool not in self.userInputVariables:
-      for date, file in info:
-        a = file.split('/')[-2:]
-        shortFilePath = ""
-        for bit in a:
-          shortFilePath += "/" + bit
-        listFiles.append("%s" %shortFilePath)
-        i += 1
-      files = ';'.join(listFiles)
+      files = ';'.join([file for date, file in info])
       try:
         setattr(self.metacifFiles, "prev_%s" %tool, getattr(self.metacifFiles, "curr_%s" %tool))
         OV.SetParam("snum.metacif.list_%s_files" %tool, files)

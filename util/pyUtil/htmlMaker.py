@@ -65,7 +65,7 @@ def sourceFilesHtmlMaker():
       if ';' in var:
         d.setdefault('items', 'spy.GetParam(%s)' %listFiles)
       x += 1
-      file_type = d['varName'].split('.')[-1].split('_')[0]
+      file_type = '_'.join(d['varName'].split('.')[-1].split('_')[:-1])
       d.setdefault('onchange',"spy.SetParam(%s,'GetValue(SET_%s)')>>spy.AddVariableToUserInputList(%s)" %(d['varName'],str.upper(d['varName']).replace('.','_'),d['varName']))
       d['chooseFile'].setdefault('folder',OV.FilePath())
       d['chooseFile'].setdefault('file_type',file_type)
@@ -131,11 +131,11 @@ def diffractionMetadataHtmlMaker():
 
   list += (
     {'varName':'_diffrn_ambient_temperature',
-     'itemName':'%Diffraction Temperature% (K)'
+     'itemName':'%Diffraction T% (K)'
      },
-    #{'varName':'_cell_measurement_temperature',
-     #'itemName':'%Cell Measurement Temperature% (K)'
-     #},
+    {'varName':'_cell_measurement_temperature',
+     'itemName':'%Cell Measurement T% (K)'
+     },
     {'varName':'_diffrn_special_details',
      'itemName':'%Special Details%',
      'multiline':'multiline'
@@ -261,7 +261,7 @@ OV.registerFunction(referenceMetadataHtmlMaker)
 
 def publicationMetadataHtmlMaker():
   list = [
-    {'varName':'snum.dimas.reference_ccdc_number',
+    {'varName':'_database_code_depnum_ccdc_archive',
      'itemName':'CCDC %Number%',
      },
     {'varName':'_publ_contact_author_name',
@@ -362,6 +362,7 @@ def publicationMetadataHtmlMaker():
      'itemName':'%Requested% %Journal%',
      'items':userDictionaries.localList.getListJournals(),
      'readonly':'',
+     'value':'spy.get_cif_item(_publ_requested_journal)',
      'onchange':'spy.addToLocalList(GetValue(~name~),requested_journal)>>spy.changeBoxColour(~name~,#FFDCDC)',
      }
   ]
@@ -380,12 +381,12 @@ def publicationMetadataHtmlMaker():
 OV.registerFunction(publicationMetadataHtmlMaker)
 
 def contactLetter():
-  user_input_variables = OV.GetParam('snum.metacif.user_input_variables')
-  if user_input_variables is None or 'publ_contact_letter' not in user_input_variables:
+  letterText = OV.get_cif_item('_publ_contact_letter')
+  if letterText is None:
     import datetime
     today = datetime.date.today()
     date = today.strftime("%x")
-    journal = OV.GetParam('snum.metacif.publ_requested_journal')
+    journal = OV.get_cif_item('_publ_requested_journal')
     fileName = olx.FileName()
     authorList = OV.GetParam('snum.metacif.publ_author_names')
     authors = ''
@@ -424,19 +425,9 @@ the paper 'ENTER PAPER TITLE' by
 The paper will be submitted to %s.
 """ %(date,fileName,authors,journal)
 
-  else:
-    letterText = OV.GetParam('snum.metacif.publ_contact_letter')
-
   inputText = OV.GetUserInput(0,'_publ_contact_letter',letterText)
-  if inputText == '':
-    OV.SetParam('snum.metacif.publ_contact_letter', letterText)
-  elif inputText != letterText:
-    OV.SetParam('snum.metacif.publ_contact_letter', inputText)
-    variableFunctions.AddVariableToUserInputList('publ_contact_letter')
-  elif 'publ_contact_letter' not in OV.GetParam('snum.metacif.user_input_variables'):
-    OV.SetParam('snum.metacif.publ_contact_letter', letterText)
-  else:
-    pass
+  if inputText is not None:
+    OV.set_cif_item('_publ_contact_letter', inputText);
   return ""
 OV.registerFunction(contactLetter)
 
@@ -494,7 +485,8 @@ def restraint_builder(cmd):
     "EXYZ":["name_EXYZ", "help_exyz-htmhelp"],
     "EADP":["name_EADP", "help_eadp-htmhelp"],
     "AFIX":["name_AFIX", "var_m:6;5;10;11", "var_n:6;9", "help_AFIX-use-help"],
-    "RRINGS":["name_RRINGS", "var_d: ", "var_s1:0.02", "help_rrings-htmhelp"],
+#    "RRINGS":["name_RRINGS", "var_d:1.39 ", "var_s1:0.02", "help_rrings-htmhelp"],
+    "RRINGS":["name_RRINGS", "help_rrings-htmhelp"],
     "TRIA":["name_TRIA", "var_distance: ", "var_angle: ", "help_tria-htmhelp"],
   }
 
@@ -578,6 +570,9 @@ def restraint_builder(cmd):
       "width":50, "height":height,
       "hint":"Removes the current AFIX command from the structure",
     }
+    
+  if name == "RRINGS":
+    post_onclick = ">>sel -u"
 
   has_modes = []
   if name in has_modes:

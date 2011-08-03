@@ -129,6 +129,7 @@
     <cmd1  "echo Good Bye">
     <cmd2  "spy.saveHistory()">
     <cmd3  "spy.SaveStructureParams()">
+    <cmd3  "spy.SaveUserParams()">
     <cmd2  "spy.SaveCifInfo()">
     <cmd2  "mode off">
     <cmd4  "storeparam startup file.relativePath(filefull())">
@@ -1345,7 +1346,7 @@
       <cmd7 "itemstate info-autochem 0">
       <cmd8 "itemstate info-refinement-indicators 0">
       <cmd9 "itemstate info-recent-files 0">
-      <cmd10 "spy.SetParam(autochem.batch_dir,'%1')">
+      <cmd10 "spy.SetParam(autochem.batch.directory,'%1')">
       <cmd11 "spy.SetParam(autochem.solution_program,Auto)">
       <cmd12 XXX="spy.SetParam(autochem.solution_method,Auto)">
       <cmd13 XXX="spy.SetParam(autochem.refinement_program,Auto)">

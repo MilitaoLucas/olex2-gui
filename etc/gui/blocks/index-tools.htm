@@ -1,12 +1,12 @@
 <!-- #include tools-images gui\images.htm;gui\blocks\tool-off.htm;image=images;onclick=;2; -->
 <!-- #include tools-chemical-tools gui\chemical-tools.htm;gui\blocks\tool-off.htm;image=chemical-tools;onclick=;2; -->
-<!-- #includeif IsFileType('ires') tools-OLEX2-conres gui\OLEX2-conres.htm;gui\blocks\tool-off.htm;image=OLEX2-constraints-and-restraints;onclick='spy.restraint_builder(spy.GetParam(snum.olex_conres))';0; -->
-<!-- #includeif IsFileType('ires') tools-shelx-compatible-constraints gui\shelx-compatible-constraints.htm;gui\blocks\tool-off.htm;image=shelx-compatible-constraints;onclick='spy.restraint_builder(spy.GetParam(gui.shelx_constraints))';2; -->
-<!-- #includeif IsFileType('ires') tools-shelx-compatible-restraints gui\shelx-compatible-restraints.htm;gui\blocks\tool-off.htm;image=shelx-compatible-restraints;onclick='spy.restraint_builder(spy.GetParam(gui.shelx_restraints))';2; -->
+<!-- #includeif IsFileType('ires') tools-OLEX2-conres gui\OLEX2-conres.htm;gui\blocks\tool-off.htm;image=olex2-constraints-restraints;onclick='spy.restraint_builder(spy.GetParam(snum.olex_conres))';2; -->
+<!-- #includeif IsFileType('ires') tools-SHELX-compatible-constraints gui\SHELX-compatible-constraints.htm;gui\blocks\tool-off.htm;image=shelx-compatible-constraints;onclick='spy.restraint_builder(spy.GetParam(gui.shelx_constraints))';2; -->
+<!-- #includeif IsFileType('ires') tools-SHELX-compatible-restraints gui\SHELX-compatible-restraints.htm;gui\blocks\tool-off.htm;image=shelx-compatible-restraints;onclick='spy.restraint_builder(spy.GetParam(gui.shelx_restraints))';2; -->
 <!-- #includeif IsFileType('ires') tools-hydrogen-atoms gui\hydrogen-atoms.htm;gui\blocks\tool-off.htm;image=hydrogen-atoms;onclick=;2; -->
 <!-- #includeif IsFileType('ires') tools-disorder gui\disorder.htm;gui\blocks\tool-off.htm;image=disorder;onclick=;2; -->
 <!-- #include tools-masks gui\maps.htm;gui\blocks\tool-off.htm;image=maps;onclick=;2; -->
-<!-- #includeif file.Exists('FilePath()\FileName().cif') tools-cif gui\cif.htm;gui\blocks\tool-off.htm;image=cif;onclick=;0; -->
+<!-- #includeif file.Exists('FilePath()\FileName().cif') tools-cif gui\cif.htm;gui\blocks\tool-off.htm;image=cif;onclick=;2; -->
 <!-- #includeif IsFileType('ires') tools-twinning gui\twinning.htm;gui\blocks\tool-off.htm;image=twinning;onclick=;2; -->
 <!-- #include tools-settings gui\settings.htm;gui\blocks\tool-off.htm;image=settings;onclick=;2; -->
 <!-- #include tools-overlay gui\overlay.htm;gui\blocks\tool-off.htm;image=overlay;onclick=;2; -->

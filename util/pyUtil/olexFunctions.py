@@ -10,6 +10,19 @@ import cProfile
 from subprocess import *
 import guiFunctions
 
+import socket
+import urllib
+import urllib2
+import pickle
+
+import time
+
+
+# timeout in seconds
+timeout = 30
+socket.setdefaulttimeout(timeout)
+
+
 HasGUI = olx.HasGUI() == 'true'
 if HasGUI:
   inheritFunctions = guiFunctions.GuiFunctions
@@ -46,6 +59,13 @@ class OlexFunctions(inheritFunctions):
         value = "'%s'" %value.replace("'", "\\'")
       elif type(value) in (list, set):
         value = ' '.join("'%s'" %v.replace("'", "\\'") for v in value)
+      elif "date_" in variable:
+        try:
+          if type(value) is unicode:
+            pattern = '%d-%m-%Y'
+            value = int(time.mktime(time.strptime(value, pattern)))
+        except:
+          pass
       else:
         value = unicode(value)
         value = value.encode('utf-8')
@@ -623,6 +643,32 @@ class OlexFunctions(inheritFunctions):
       keyname = item.split("\\")[-1:][0]
       return keyname.split(".")[0]
 
+  def ListFiles(self, dir_name, mask=None):
+    import glob
+    rv = []
+    cd = os.getcwd()
+    try:
+      dir_name = os.path.normpath(dir_name)
+      if not mask:
+        h, t = os.path.split(dir_name)
+        if h:
+          os.chdir(h)
+        else:
+          h = ''
+        for i in glob.glob(t):
+          rv.append(os.path.join(h, i))
+      else:
+        os.chdir(dir_name)
+        masks = mask.split(';')
+        for m in masks:
+          for i in glob.glob("*.%s" %(m)):
+            rv.append(os.path.join(dir_name, i))
+      return rv
+    except:
+      return []
+    finally:
+      os.chdir(cd)
+
   def GetUserComputerName(self):
     import os
     return os.getenv('USERNAME'), os.getenv('COMPUTERNAME')
@@ -669,13 +715,50 @@ class OlexFunctions(inheritFunctions):
     import olexex
     olexex.setAllMainToolbarTabButtons()
 
+  def make_url_call(self, url, values, use_system_proxy=True):
+    proxy = self.get_proxy_from_usettings()
+    if proxy:
+      proxies = {'http': proxy}
+    else:
+      proxies = {}
+    try:
+      if not use_system_proxy:
+        opener = urllib2.build_opener(
+          urllib2.ProxyHandler(proxies))
+        return opener.open(url,values)
+      else:
+        return urllib2.urlopen(url,values)
+#      try:
+#        f = pickle.load(response) #This is required in cases where the query returns a dictionary
+#      except:
+#        f = response.read()
+    except Exception:
+      raise
+    finally:
+      print "url call ended"
+      
+  def get_proxy_from_usettings(self):
+    rFile = open("%s/usettings.dat" %OV.BaseDir(),'r')
+    lines = rFile.readlines()
+    rFile.close()
+    proxy = None
+    for line in lines:
+      if line.startswith('proxy='):
+        proxy = line.split('proxy=')[1].strip()
+    if proxy:
+      print "Using Proxy server %s" %proxy
+    else:
+      print "No Proxy server is set"
+    return proxy
 
 
-  def makeGeneralHtmlPop(self, phil_path, htm='htm'):
+  def makeGeneralHtmlPop(self, phil_path, htm='htm', number_of_lines=0):
     pop_name=OV.GetParam('%s.name' %phil_path)
     htm=OV.GetParam('%s.%s' %(phil_path,htm))
     width=OV.GetParam('%s.width' %phil_path)
     height=OV.GetParam('%s.height' %phil_path)
+    auto_height_constant=OV.GetParam('%s.auto_height_constant' %phil_path)
+    auto_height_line=OV.GetParam('%s.auto_height_line' %phil_path)
     position=OV.GetParam('%s.position' %phil_path)
     x=OV.GetParam('%s.x' %phil_path)
     y=OV.GetParam('%s.y' %phil_path)
@@ -686,6 +769,16 @@ class OlexFunctions(inheritFunctions):
     if not os.path.exists(htm):
       OV.write_to_olex('generalPop.htm',htm)
       htm = 'generalPop.htm'
+      t = htm
+    else:
+      t = open(htm,'r').read()
+    if height == "automatic":
+      number_of_lines = t.count("<br>")
+      number_of_lines += t.count("<tr>")
+      if phil_path == 'olex2.ccdc.pop':
+        number_of_lines += OV.get_cif_item('_publ_contact_author_address').count("\n")
+      height = number_of_lines * auto_height_line + auto_height_constant
+      #print "Number of lines: %s; Height: %s" %(number_of_lines, height)
     if position == "center":
       ws = olx.GetWindowSize('gl')
       ws = [int(i) for i in ws.split(",")]

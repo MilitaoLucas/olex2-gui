@@ -12,6 +12,7 @@ scripts = [
   'OlexBET',
   'Olexhole',
   'Olex2CCDC',
+  'Tutorials',
   #'OlexSir',
   #'LazyOlex',
 ]
