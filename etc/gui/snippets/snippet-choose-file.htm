@@ -25,7 +25,10 @@ readonly
     </td>
     
     <td>
-      <a href="SetValue(#pop_name.SET_#var_base.#file_type,FileOpen('Choose #file_type file','.#file_type files|*.#file_type',FilePath()))>>spy.SetParam(#var_base.#file_type,GetValue(#pop_name.SET_#var_base.#file_type))" target="%Select% #file_type %File%">
+      <a href="SetValue(#pop_name.SET_#var_base.#file_type,
+         spy.gui.dialog.FileOpen('Choose #file_type file','.#file_type files|*.#file_type',FilePath(),
+         GetValue(#pop_name.SET_#var_base.#file_type)))
+        >>spy.SetParam(#var_base.#file_type,GetValue(#pop_name.SET_#var_base.#file_type))" target="%Select% #file_type %File%">
         <zimg border="0" src="toolbar-open.png">
       </a>
     </td>
