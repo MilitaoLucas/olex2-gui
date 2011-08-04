@@ -13,9 +13,7 @@ import userDictionaries
 import zipfile
 import time
 
-import urllib
-import urllib2
-
+import HttpTools
 
 class CcdcSubmit():
   def __init__(self):
@@ -24,6 +22,9 @@ class CcdcSubmit():
   def ccdc_submit(self):
     zip_file = None
     from CifInfo import MergeCif
+
+    OV.CreateBitmap("working")
+    
     MergeCif()
     try:
       if not self.check_and_get_prerequisites():
@@ -46,7 +47,7 @@ class CcdcSubmit():
         submission_type = "No submission type was indicated"
       
       zip_file = open(self.zip_name, "rb")
-      url = OV.GetParam('olex2.ccdc.url')
+      url_l = OV.GetParam('olex2.ccdc.url')
       destination =   OV.GetParam('olex2.ccdc.ccdc_mail')
       self.params = {
         '__ac_password':OV.GetParam('user.ccdc.portal_passwd'),
@@ -58,18 +59,32 @@ class CcdcSubmit():
         'notes_to_staff': note_to_staff,
         'submission_type': submission_type,
       }
-      try:
-        response = OV.make_url_call(url, self.params)
-      except Exception, err:
-        print err
+      for url in url_l:
+        try:
+          response = HttpTools.make_url_call(url, self.params)
+          retval = True
+          break
+        except Exception, err:
+          print err
+          retval = False
+          continue
+
+      if retval == False:
+        print "Something has gone wrong with this submission. Please try again."
         return False
-      print response
-      return True
+      
+      if 'successfully' in response.read():
+        print "The structure has been submitted. Please check your e-mail for further information"
+        return True
+      else:
+        print "Something has gone wrong with this submission. Please try again."
+        return False
     
     finally:
       if zip_file is not None:
         zip_file.close()
       self.zip_name = None
+      OV.DeleteBitmap("working")
 
   def make_pop_box(self):
     OV.makeGeneralHtmlPop('olex2.ccdc.pop')
@@ -131,24 +146,5 @@ class CcdcSubmit():
     zip.close();
     return True
 
-  def send_request(self, url):
-    try:
-      if "localhost" in url or "127.0.0.1" in url:
-        proxy_support = urllib2.ProxyHandler({})
-        opener = urllib2.build_opener(proxy_support)
-      else:
-        proxy = olexex.get_proxy_from_usettings()
-        if proxy:
-          proxy_support = urllib2.ProxyHandler({'http': proxy})
-          opener = urllib2.build_opener(proxy_support)
-        else:
-          opener = urllib2.build_opener(urllib2.ProxyHandler({}))
-      response = opener.open(url,self.params)
-      f = response.read()
-    except Exception, err:
-      print('Data submission failed')
-      f = err
-    print f
-    
 CcdcSubmit_instance = CcdcSubmit()
 OV.registerFunction(CcdcSubmit_instance.ccdc_submit)

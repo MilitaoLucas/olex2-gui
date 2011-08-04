@@ -22,8 +22,8 @@ snum
       .type = str
     submission_type = +++ Please Choose +++
       .type = str
-  }    
-    
+  }
+
   current_result{
     cif = None
       .type = path
@@ -283,6 +283,9 @@ snum
     cif_od_file = None
       .type = path
       .expert_level = 1
+    crystal_image_file = None
+      .type = path
+      .expert_level = 1
     crystal_clear_file = None
       .type = path
       .expert_level = 1
@@ -330,6 +333,9 @@ snum
     list_cif_od_files = None
       .type = strings
       .expert_level = 2
+    list_crystal_images_files = None
+      .type = strings
+      .expert_level = 2
     list_result_cif_files = None
       .type = strings
       .expert_level = 2
@@ -357,6 +363,12 @@ snum
     .short_caption = Report Metadata
     {
     date_collected = None
+      .type = str
+    crystal_image = None
+      .type = str
+    crystal_images_path = None
+      .type = str
+    crystal_mounting_method = None
       .type = str
     date_submitted = None
       .type = str
@@ -497,9 +509,9 @@ olex2
   }
 
   ccdc{
-    url = http://ccdc.opencryst.org/deposit
-      .type = str
-      .help = The URL to which the cif/fcf will be sent
+    url = http://ccdc.opencryst.org/deposit http://ccdc1.opencryst.org/deposit
+      .type = strings
+      .help = List of the OlexSys servers used to forward requests to the CCDC
     ccdc_mail = olex2-deposit@ccdc.cam.ac.uk
       .type = str
       .help = The email address to which the files will be forwared

@@ -124,6 +124,10 @@ $spy.MakeHoverButton(toolbar_small-open,exec -o getvar\(defexplorer) 'file.ospat
 <!-- #include metadata-h3-crystal gui\metadata-h3-crystal.htm;gui\blocks\tool-h3-off.htm;image=metadata-h3-crystal;onclick=;colspan=1=3;2; -->
 </tr>
 
+<tr name=INCLUDE_REPORT_CRYSTAL_IMAGE>
+<!-- #includeif not(strcmp($spy.getParam(snum.report.crystal_image),"")) h3-crystal_image gui\h3-crystal_image.htm;gui\blocks\tool-h3-off.htm;image=h3-crystal_image;colspan=1;onclick=;2; -->
+</tr>
+
 <tr name=INCLUDE_REPORT_PUBLICATION>
 <!-- #include report-settings-h3-publication gui\report-settings-h3-publication.htm;gui\blocks\tool-h3-off.htm;image=report-settings-h3-publication;onclick=;colspan=1;2; -->
 </tr>

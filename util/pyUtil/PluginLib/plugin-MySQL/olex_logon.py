@@ -8,6 +8,8 @@ import pickle
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
+import HttpTools
+
 import olx
 
 global username
@@ -132,7 +134,7 @@ def web_run_sql(sql = None, script = 'run_sql'):
             'sqlQ':sql,
             }
   try:
-    response = OV.make_url_call(url, values)
+    response = HttpTools.make_url_call(url, values)
   except Exception, err:
     print err
   
@@ -158,7 +160,7 @@ def web_translation_item(OXD=None, language='English'):
             'language':language,
             'OXD':OXD}
   try:
-    response = OV.make_url_call(url, values)
+    response = HttpTools.make_url_call(url, values)
   except Exception, err:
     print err
     
