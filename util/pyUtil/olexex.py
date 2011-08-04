@@ -1304,7 +1304,7 @@ def GetCheckcifReport(outputtype='PDF'):
         response = HttpTools.make_url_call(href,"")
         txt = response.read()
         wFile = open("%s_cifreport.%s" %(OV.FileName(), outputtype.lower()),'wb')
-        wFile.write(txt.read())
+        wFile.write(txt)
         wFile.close()
     rawFile.close()
   olx.Shell("%s_cifreport.%s" %(OV.FileName(), outputtype.lower()))
