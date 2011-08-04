@@ -22,8 +22,8 @@ snum
       .type = str
     submission_type = +++ Please Choose +++
       .type = str
-  }    
-    
+  }
+
   current_result{
     cif = None
       .type = path
@@ -357,6 +357,12 @@ snum
     .short_caption = Report Metadata
     {
     date_collected = None
+      .type = str
+    crystal_image = None
+      .type = str
+    crystal_images_path = None
+      .type = str
+    crystal_mounting_method = None
       .type = str
     date_submitted = None
       .type = str

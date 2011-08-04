@@ -1274,20 +1274,20 @@ def GetCheckcifReport(outputtype='PDF'):
   output = OV.GetParam('user.cif.chckCif_output_format')
   if output:
     outputtype = output
-    
+
   file_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'cif'))
   rFile = open(file_name, 'rb')
   cif = rFile
-  
+
   params = {
     "runtype": "symmonly",
     "referer": "checkcif_server",
     "outputtype": outputtype,
     "file": cif
   }
-  
+
   response = HttpTools.make_url_call(OV.GetParam('olex2.checkcif.url'), params)
-  
+
   rFile.close()
   #outputtype = 'htm'
   if outputtype == "htm":
@@ -2065,7 +2065,21 @@ def revert_to_original():
       return
   print("Could not revert to any original file!")
 OV.registerFunction(revert_to_original)
-  
+
+def advance_crystal_image(direction='forward'):
+  p = OV.GetParam('snum.report.crystal_image')
+  n = int(p.split('\\')[-1].split(OV.FileName())[1].split('.')[0])
+  if direction == 'forward':
+    n += 1
+  else:
+    n -= 1
+  base = ("\\").join(p.split('\\')[:-1])
+  p = r"%s\%s%i%s" %(base, OV.FileName(), n, ".jpg")
+  if os.path.exists(p):
+    OV.SetParam('snum.report.crystal_image',p)
+    OV.htmlReload()
+OV.registerFunction(advance_crystal_image)
+
 
 if not haveGUI:
   def tbxs(name):
