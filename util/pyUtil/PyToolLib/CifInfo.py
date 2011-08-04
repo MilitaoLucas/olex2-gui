@@ -40,6 +40,7 @@ class MetacifFiles:
     self.curr_frames = None
     self.curr_p4p = None
     self.curr_cif_od = None
+    self.curr_crystal_images = None
     self.curr_crystal_clear = None
     self.curr_cif_def = None
     self.curr_twin = None
@@ -54,6 +55,7 @@ class MetacifFiles:
     self.prev_frames = None
     self.prev_p4p = None
     self.prev_cif_od = None
+    self.prev_crystal_images = None
     self.prev_crystal_clear = None
     self.prev_cif_def = None
     self.prev_twin = None
@@ -68,6 +70,7 @@ class MetacifFiles:
     self.list_frames = None
     self.list_p4p = None
     self.list_cif_od = None
+    self.list_crystal_images = None
     self.list_crystal_clear = None
     self.list_twin = None
     self.list_abs = None
@@ -183,7 +186,7 @@ class CifTools(ArgumentParser):
         else:
           pass
 #          print("Not updating %s from file" %key)
-          
+
     # this requires special treatment
 #    if '_diffrn_ambient_temperature' in dictionary:
 #      OV.set_cif_item(
@@ -371,7 +374,7 @@ class ExtractCifInfo(CifTools):
       if active_node.program == "smtbx-refine":
         active_node.program = "olex2.refine"
       ## END
-      
+
       refinement_reference = RPD.programs[active_node.program].reference
       self.update_cif_block({
         '_computing_structure_refinement': refinement_reference})
@@ -381,7 +384,7 @@ class ExtractCifInfo(CifTools):
       try:
         info = os.stat(p)
         file_time = info.st_mtime
-        
+
       except:
         print "Error reading Bruker frame file %s" %p
 
@@ -462,7 +465,7 @@ class ExtractCifInfo(CifTools):
              '_exptl_absorpt_correction_type':'.',
              '_exptl_absorpt_process_details':'.'}
       self.update_cif_block(sad, force=True)
-      
+
     p = self.sort_out_path(path, "pcf")
     if p and self.metacifFiles.curr_pcf != self.metacifFiles.prev_pcf:
       try:
@@ -503,6 +506,18 @@ class ExtractCifInfo(CifTools):
         OV.SetParam('snum.report.date_collected', file_time)
       except:
         print "Error reading OD frame Date %s" %p
+
+    # OD Crystal Image
+    p = self.sort_out_path(path, "crystal_images")
+    if p:
+      try:
+        info = os.stat(p)
+        file_time = info.st_mtime
+        OV.SetParam('snum.report.crystal_image', p)
+      except:
+        print "Error reading OD crystal image %s" %p
+
+
 
     # Rigaku data collection CIF
     p = self.sort_out_path(path, "crystal_clear")
@@ -626,8 +641,8 @@ The Ratio of minimum to maximum transmission is %(ratiominmax)s.
 The \l/2 correction factor is %(lambda_correction)s.
 {Info from %(abs_file)s}
 """%abs
-      
-      
+
+
       #t = ["%s was used for absorption correction." %(version),
            #"R(int) was %s before and %s after correction." %(R_int_before, R_int_after),
            #"The Ratio of minimum to maximum transmission is %s." %(ratiominmax),
@@ -713,6 +728,13 @@ The \l/2 correction factor is %(lambda_correction)s.
       directory_l = OV.FileFull().replace('\\','/').split("/")
       directory = ("/").join(directory_l[:-3])
       directory += '/frames'
+    elif tool == "crystal_images":
+      name = OV.FileName()
+      extension = "*.jpg"
+      directory_l = OV.FileFull().replace('\\','/').split("/")
+      directory = ("/").join(directory_l[:-3])
+      directory += '/movie'
+
     else:
       return "Tool not found"
 
@@ -747,7 +769,7 @@ The \l/2 correction factor is %(lambda_correction)s.
         setattr(self.metacifFiles, "prev_%s" %tool, getattr(self.metacifFiles, "curr_%s" %tool))
         OV.SetParam("snum.metacif.list_%s_files" %tool, files)
         setattr(self.metacifFiles, "list_%s" %tool, files)
-        OV.SetParam("snum.metacif.%s_file" %tool, listFiles[0])
+        OV.SetParam("snum.metacif.%s_file" %tool, info[0][1])
         setattr(self.metacifFiles, "curr_%s" %tool, info[0])
       except:
         pass

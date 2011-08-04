@@ -14,14 +14,7 @@ from subprocess import *
 
 import htmlTools
 
-import socket
-import urllib
-import urllib2
-URL = "http://dimas.dur.ac.uk/"
-
-# timeout in seconds
-timeout = 15
-socket.setdefaulttimeout(timeout)
+import HttpTools
 
 global _is_online
 _is_online = False
@@ -1203,7 +1196,7 @@ def createRMSDisplay(outStr):
 
 def haveSelection():
   retVal = False
-  res = olx.Sel()
+  res = OV.olex_function('sel()')
   if res == "":
     retVal = False
   else:
@@ -1277,25 +1270,24 @@ def getKeys(key_directory=None):
 
 
 def GetCheckcifReport(outputtype='PDF'):
-  import urllib2
 
   output = OV.GetParam('user.cif.chckCif_output_format')
   if output:
     outputtype = output
-    
+
   file_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'cif'))
   rFile = open(file_name, 'rb')
   cif = rFile
-  
+
   params = {
     "runtype": "symmonly",
     "referer": "checkcif_server",
     "outputtype": outputtype,
     "file": cif
   }
-  
-  response = OV.make_url_call(OV.GetParam('olex2.checkcif.url'), params)
-  
+
+  response = HttpTools.make_url_call(OV.GetParam('olex2.checkcif.url'), params)
+
   rFile.close()
   #outputtype = 'htm'
   if outputtype == "htm":
@@ -1309,7 +1301,7 @@ def GetCheckcifReport(outputtype='PDF'):
       rawFile.write(line)
       if "Download checkCIF report" in line:
         href = line.split('"')[1]
-        response = OV.make_url_call(href,"")
+        response = HttpTools.make_url_call(href,"")
         txt = response.read()
         wFile = open("%s_cifreport.%s" %(OV.FileName(), outputtype.lower()),'wb')
         wFile.write(txt.read())
@@ -1320,6 +1312,7 @@ def GetCheckcifReport(outputtype='PDF'):
 OV.registerFunction(GetCheckcifReport)
 
 def GetHttpFile(f, force=False, fullURL = False):
+  URL = "http://dimas.dur.ac.uk/"
   global _is_online
   retVal = None
   go_online = _is_online
@@ -1331,12 +1324,9 @@ def GetHttpFile(f, force=False, fullURL = False):
       else:
         url = f
       if verbose: print "--> Getting %s" %url,
-      path = urllib.URLopener()
-      path.addheader('pragma', 'no-cache')
-      conn = path.open(url)
-      content = conn.read()
+      response = HttpTools.make_url_call(url,"")
+      content = response.read()
       if verbose: print "OK"
-      conn.close()
       retVal = content
     except Exception, err:
       _is_online = False
@@ -1420,7 +1410,7 @@ def register_new_odac(username=None, pwd=None):
             'username':username,
             'macAddress':mac_address,
             }
-  f = make_url_call(url, values)
+  f = HttpTools.make_url_call(url, values)
 
   if not f:
     print "Please provide a valid username and password, and make sure your computer is online."
@@ -1502,12 +1492,8 @@ def updateACF(force=False):
               'computerName':computer_name,
               'macAddress':mac_address,
               }
-    data = urllib.urlencode(values)
-    #print data
     try:
-      proxy_support = urllib2.ProxyHandler(proxies)
-      req = urllib2.Request(url)
-      response = urllib2.urlopen(req,data)
+      response = HttpTools.make_url_call(url, values)
       f = response.read()
     except:
       print "\n++++++++++++++++++++++++++++++++++++++++++++++"
@@ -2079,7 +2065,68 @@ def revert_to_original():
       return
   print("Could not revert to any original file!")
 OV.registerFunction(revert_to_original)
+
+def check_for_selection(need_selection=True):
+  res = haveSelection()
+  if not res and need_selection:
+    print "This action requires a selection of atoms!"
+    return False
+  else:
+    return True
+OV.registerFunction(check_for_selection)
+
+
+def play_crystal_images():
+  import time
+  l = OV.GetParam('snum.metacif.list_crystal_images_files')[0].split(';')
+  for image in l:
+    if os.path.exists(image):
+      OV.SetParam('snum.report.crystal_image',image)
+      olx.html_SetImage('CRYSTAL_IMAGE',image)
+      OV.Refresh()
+OV.registerFunction(play_crystal_images)
+
+
+def advance_crystal_image(direction='forward'):
+  l = OV.GetParam('snum.metacif.list_crystal_images_files')[0].split(';')
+  i = 0
+  for image in l:
+    i += 1
+    if image == OV.GetParam('snum.report.crystal_image'):
+      if direction == 'forward':
+        if i != len(l):
+          p = l[i]
+          OV.SetParam('snum.report.crystal_image',p)
+          olx.html_SetImage('CRYSTAL_IMAGE',p)
+          return
+        else:
+          print "Last image of the series!"
+          return
+      else:
+        if i != 1:
+          p = l[i-2]
+          OV.SetParam('snum.report.crystal_image',p)
+          olx.html_SetImage('CRYSTAL_IMAGE',p)
+          return
+        else:
+          print "First image of the series!"
+          return
+    else:
+      continue
   
+  #p = OV.GetParam('snum.report.crystal_image')
+  #n = int(p.split('\\')[-1].split(OV.FileName())[1].split('.')[0])
+  #if direction == 'forward':
+    #n += 1
+  #else:
+    #n -= 1
+  #base = ("\\").join(p.split('\\')[:-1])
+  #p = r"%s\%s%i%s" %(base, OV.FileName(), n, ".jpg")
+  #if os.path.exists(p):
+    #OV.SetParam('snum.report.crystal_image',p)
+    #olx.html_SetImage('CRYSTAL_IMAGE',p)
+OV.registerFunction(advance_crystal_image)
+
 
 if not haveGUI:
   def tbxs(name):
