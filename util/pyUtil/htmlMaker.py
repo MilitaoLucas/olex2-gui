@@ -186,6 +186,10 @@ def crystalMetadataHtmlMaker():
      'itemName':'%Crystallisation Details%',
      'multiline':'multiline',
      },
+    {'varName':'snum.report.crystal_mountin_method',
+     'itemName':'%Crystal Mounting%',
+     'multiline':'multiline',
+     },
   )
 
   return htmlTools.makeHtmlTable(list)
@@ -570,7 +574,7 @@ def restraint_builder(cmd):
       "width":50, "height":height,
       "hint":"Removes the current AFIX command from the structure",
     }
-    
+
   if name == "RRINGS":
     post_onclick = ">>sel -u"
 
