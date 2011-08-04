@@ -78,6 +78,7 @@
 [FULL ROW]
   Run AutoChem
   Move Atoms or Model Disorder
+  Fit Group
   Electron Density Map
   Separate Moieties
   Solve the Structure

@@ -262,7 +262,7 @@ def make_help_box(args):
     title = help_src.replace("-", " ")
 
   elif "-" in name:
-    title = name.replace("-", " ")
+    title = name.replace("-", " ").title()
     help_src = name
   else:
     title = name
@@ -713,7 +713,7 @@ def format_help(string):
   ## find all occurances of strings between ~. These are the entries for the table.
   regex = re.compile(r"  ~ (.*?)( [^\~\~]* ) ~ ", re.X)
   m = regex.findall(string)
-  colour = OV.FindValue('gui_html_highlight_colour')
+  colour = OV.GetParam('gui.html.highlight_colour').hexadecimal
   if m:
     s = regex.sub(r"<tr><td><b><font color='%s'>\2</font></b> " %colour, string)
   else:
@@ -725,7 +725,7 @@ def format_help(string):
   m = regex.findall(string)
   colour = "#232323"
   if m:
-    s = regex.sub(r"<tr bgcolor='$spy.GetParam(gui.html.table_firstcol_colour)'><td><b>\2</b></td></tr><tr><td>", string)
+    s = regex.sub(r"<tr bgcolor='$spy.GetParam(gui.html.table_firstcol_colour)'><td><b>\2</b></td></tr><tr><td>", string.title())
   else:
     s = string
 

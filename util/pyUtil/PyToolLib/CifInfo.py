@@ -40,6 +40,7 @@ class MetacifFiles:
     self.curr_frames = None
     self.curr_p4p = None
     self.curr_cif_od = None
+    self.curr_crystal_images = None
     self.curr_crystal_clear = None
     self.curr_cif_def = None
     self.curr_twin = None
@@ -54,6 +55,7 @@ class MetacifFiles:
     self.prev_frames = None
     self.prev_p4p = None
     self.prev_cif_od = None
+    self.prev_crystal_images = None
     self.prev_crystal_clear = None
     self.prev_cif_def = None
     self.prev_twin = None
@@ -68,6 +70,7 @@ class MetacifFiles:
     self.list_frames = None
     self.list_p4p = None
     self.list_cif_od = None
+    self.list_crystal_images = None
     self.list_crystal_clear = None
     self.list_twin = None
     self.list_abs = None
@@ -505,7 +508,7 @@ class ExtractCifInfo(CifTools):
         print "Error reading OD frame Date %s" %p
 
     # OD Crystal Image
-    p = self.sort_out_path(path, "od_crystal_images")
+    p = self.sort_out_path(path, "crystal_images")
     if p:
       try:
         info = os.stat(p)
@@ -725,7 +728,7 @@ The \l/2 correction factor is %(lambda_correction)s.
       directory_l = OV.FileFull().replace('\\','/').split("/")
       directory = ("/").join(directory_l[:-3])
       directory += '/frames'
-    elif tool == "od_crystal_images":
+    elif tool == "crystal_images":
       name = OV.FileName()
       extension = "*.jpg"
       directory_l = OV.FileFull().replace('\\','/').split("/")
@@ -766,7 +769,7 @@ The \l/2 correction factor is %(lambda_correction)s.
         setattr(self.metacifFiles, "prev_%s" %tool, getattr(self.metacifFiles, "curr_%s" %tool))
         OV.SetParam("snum.metacif.list_%s_files" %tool, files)
         setattr(self.metacifFiles, "list_%s" %tool, files)
-        OV.SetParam("snum.metacif.%s_file" %tool, listFiles[0])
+        OV.SetParam("snum.metacif.%s_file" %tool, info[0][1])
         setattr(self.metacifFiles, "curr_%s" %tool, info[0])
       except:
         pass

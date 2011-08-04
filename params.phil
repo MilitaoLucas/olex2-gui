@@ -283,6 +283,9 @@ snum
     cif_od_file = None
       .type = path
       .expert_level = 1
+    crystal_image_file = None
+      .type = path
+      .expert_level = 1
     crystal_clear_file = None
       .type = path
       .expert_level = 1
@@ -328,6 +331,9 @@ snum
       .type = strings
       .expert_level = 2
     list_cif_od_files = None
+      .type = strings
+      .expert_level = 2
+    list_crystal_images_files = None
       .type = strings
       .expert_level = 2
     list_result_cif_files = None
