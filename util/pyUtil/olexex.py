@@ -1196,7 +1196,7 @@ def createRMSDisplay(outStr):
 
 def haveSelection():
   retVal = False
-  res = olx.Sel()
+  res = OV.olex_function('sel()')
   if res == "":
     retVal = False
   else:
@@ -2065,6 +2065,15 @@ def revert_to_original():
       return
   print("Could not revert to any original file!")
 OV.registerFunction(revert_to_original)
+
+def check_for_selection(need_selection=True):
+  res = haveSelection()
+  if not res and need_selection:
+    print "This action requires a selection of atoms!"
+    return False
+  else:
+    return True
+OV.registerFunction(check_for_selection)
 
 
 def play_crystal_images():
