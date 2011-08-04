@@ -641,6 +641,8 @@ def checkErrLogFile():
 OV.registerFunction(checkErrLogFile)
 
 def weightGuiDisplay():
+  if olx.IsFileType('ires').lower() == 'false':
+    return ''
   gui_green = OV.GetParam('gui.green')
   gui_orange = OV.GetParam('gui.orange')
   gui_red = OV.GetParam('gui.red')
