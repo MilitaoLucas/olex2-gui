@@ -7,6 +7,7 @@ import os
 import sys
 import olx
 import olex
+import olexex
 
 import time
 from datetime import date
@@ -909,6 +910,7 @@ def OnModeChange(*args):
     'grow':'button-grow_mode',
     'split -r=EADP':'button_full-move_atoms_or_model_disorder',
     'split':'button_full-move_atoms_or_model_disorder',
+    'fit':'button_full-fit_group',
     'name':'button_small-name',
     'fixu':'button-fix_u',
     'fixxyz':'button-fix_xyz',
