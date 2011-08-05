@@ -703,13 +703,12 @@ def VoidView(recalculate='0', onoff=None):
   resolution = OV.GetParam("snum.calcvoid.resolution")
   distance = OV.GetParam("snum.calcvoid.distance")
   precise = OV.GetParam("snum.calcvoid.precise")
+  SetXgridView()
   cmd = "calcVoid -r=%s -d=%s" %(resolution, distance)
   if precise:
     cmd += " -p"
   olex.m(cmd)
-  SetXgridView()
   OV.SetParam('olex2.void_vis',True)
-
 
 if haveGUI:
   OV.registerFunction(VoidView)
@@ -718,10 +717,10 @@ def MaskView(onoff=None):
   img_bases = ['button_small-mask']
   if deal_with_map_buttons(onoff, img_bases, 'mask'):
     return
-  olex.m('spy.OlexCctbxMasks()')
   SetXgridView()
+  olex.m('spy.OlexCctbxMasks()')
   OV.SetVar('olex2.mask_vis',True)
-  OV.UpdateHtml()
+
 if haveGUI:
   OV.registerFunction(MaskView)
 
@@ -752,6 +751,8 @@ def MapView(onoff=None):
   else:
     mask_val = ""
 
+  SetXgridView()
+
   if map_source == "olex":
     if OV.GetParam("snum.refinement.use_solvent_mask"):
       modified_hkl = "%s/%s_modified.hkl"
@@ -760,9 +761,7 @@ def MapView(onoff=None):
   else:
     olex.m("calcFourier -%s -%s -r=%s %s" %(map_type, map_source, map_resolution, mask_val))
 
-  SetXgridView()
   OV.SetVar('olex2.eden_vis',True)
-  OV.UpdateHtml()
 
 if haveGUI:
   OV.registerFunction(MapView)
@@ -2113,7 +2112,7 @@ def advance_crystal_image(direction='forward'):
           return
     else:
       continue
-  
+
   #p = OV.GetParam('snum.report.crystal_image')
   #n = int(p.split('\\')[-1].split(OV.FileName())[1].split('.')[0])
   #if direction == 'forward':
