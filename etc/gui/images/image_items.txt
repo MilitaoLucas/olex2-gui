@@ -52,7 +52,8 @@
   Normal View
   Get CheckCif Report
   Get CCDC Number
-
+  Fit Group
+  Fit & Split
 
 [SMALL BUTTONS]
   Delete
