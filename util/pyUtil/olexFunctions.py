@@ -305,6 +305,7 @@ class OlexFunctions(inheritFunctions):
   def CifMerge(self, filepath):
     try:
       olx.CifMerge('"%s"' %filepath)
+      print "Refinement CIF file has been merged with the meta-data cif file"
     except Exception, ex:
       print >> sys.stderr, "An error occured whilst trying to find merge cif files"
       sys.stderr.formatExceptionInfo()
