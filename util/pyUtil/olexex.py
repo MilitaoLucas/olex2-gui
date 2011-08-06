@@ -1270,11 +1270,21 @@ def getKeys(key_directory=None):
 
 def GetCheckcifReport(outputtype='PDF'):
 
+  
+  
+  
   output = OV.GetParam('user.cif.chckCif_output_format')
   if output:
     outputtype = output
 
   file_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'cif'))
+  if not os.path.exists(file_name):
+    print "\n ++ There is no cif file to check! Please add the 'ACTA' command to Shelx!"
+    return
+  
+  metacif_path = '%s/%s.metacif' %(OV.StrDir(), OV.FileName())
+  OV.CifMerge(metacif_path)
+  
   rFile = open(file_name, 'rb')
   cif = rFile
 
@@ -2068,7 +2078,7 @@ OV.registerFunction(revert_to_original)
 def check_for_selection(need_selection=True):
   res = haveSelection()
   if not res and need_selection:
-    print "This action requires a selection of atoms!"
+    print "\n++ This action requires a selection of atoms!"
     return False
   else:
     return True

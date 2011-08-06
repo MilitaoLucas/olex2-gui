@@ -82,8 +82,9 @@
   Fit Group
   Electron Density Map
   Separate Moieties
-  Solve the Structure
-  Refine the Structure
+  Solve this Structure
+  Refine this Structure
+  Create a Report of this Structure
 
 [TINY BUTTONS]
   a
@@ -98,3 +99,8 @@
   H
   Go
   Set
+  
+[G3 BIG BUTTON]
+  Solve this Structure
+  Refine this Structure
+  Create a Report of this Structure

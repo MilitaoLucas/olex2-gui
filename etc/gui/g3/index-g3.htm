@@ -1,0 +1,76 @@
+
+<!-- ##### TASKS AND STATES #### -->
+
+<!-- #include tasks gui\g3\tasks.htm;gui\blocks\tool-off.htm;image=None;1; -->
+<!-- #Xinclude states gui\g3\states.htm;gui\blocks\tool-off.htm;image=None;0; -->
+
+
+<!-- ##### Olex2 Settings #### -->
+<!-- #include g3-tools-settings gui\settings.htm;gui\blocks\tool-off.htm;image=settings;onclick=;0; -->
+<!-- #includeif IsFileType('ires') g3-tools-history gui\history.htm;gui\blocks\tool-off.htm;image=history;onclick=;0; -->
+<!-- #include g3-tools-recent-files gui\recent-files.htm;gui\blocks\tool-off.htm;image=recent-files;onclick=;0; -->
+
+
+<!-- ##### Reflection Analysis #### -->
+<!-- #include g3-prepare-reflections gui\reflections.htm;gui\blocks\tool-off.htm;image=reflections;0; -->
+<!-- #include g3-prepare-space-group gui\space-group.htm;gui\blocks\tool-off.htm;image=space-group;onclick=sg;0; -->
+
+
+<!-- ##### S O L U T I O N #### -->
+<!-- #includeif IsFileType('ires') g3-solve-solution-button gui\g3\solution-button.htm;gui\blocks\tool-off.htm;image=None;onclick=;0; -->
+<!-- #includeif IsFileType('ires') g3-solve-solution-settings gui\g3\solution-settings.htm;gui\blocks\tool-off.htm;image=solution-settings;onclick=;1; -->
+<!-- #Xincludeif IsFileType('ires') g3-solve-solution-indicators gui\solution-indicators.htm;gui\blocks\tool-off.htm;image=solution-indicators;onclick=;0; -->
+<!-- #include g3-solve-formula gui\formula.htm;gui\blocks\tool-off.htm;image=formula;name=g3_solution;0; -->
+
+
+<!-- ##### R E F I N E M E N T #### -->
+<!-- #includeif IsFileType('ires') g3-refine-refinement-button gui\g3\refinement-button.htm;gui\blocks\tool-off.htm;image=None;onclick=;0; -->
+<!-- #include g3-refine-toolbox gui\toolbox-work.htm;gui\blocks\tool-off.htm;image=toolbox-work;onclick=;1; -->
+<!-- #includeif IsFileType('ires') g3-refine-refinement-settings gui\g3\refinement-settings.htm;gui\blocks\tool-off.htm;image=refinement-settings;onclick=;1; -->
+<!-- #includeif IsFileType('ires') g3-refine-refinement-indicators gui\refinement-indicators.htm;gui\blocks\tool-off.htm;image=refinement-indicators;onclick=;0; -->
+<!-- #includeif IsFileType('ires') g3-refine-electron-density-peaks gui\electron-density-peaks.htm;gui\blocks\tool-off.htm;image=electron-density-peaks;onclick=;0; -->
+<!-- #include g3-refine-masks gui\maps.htm;gui\blocks\tool-off.htm;image=maps;onclick=;0; -->
+
+
+<!-- ##### R E P O R T #### -->
+<!-- #include g3-report-report-button gui\g3\report-button.htm;gui\blocks\tool-off.htm;image=None;onclick=;0; -->
+<!-- #include g3-report-report-settings gui\g3\report-settings.htm;gui\blocks\tool-off.htm;image=report-settings;onclick=;1; -->
+<!-- #include g3-report-images gui\images.htm;gui\blocks\tool-off.htm;image=images;onclick=;1; -->
+<!-- #includeif or(IsFileType('ires'),IsFileType('cif')) g3-report-naming gui\naming.htm;gui\blocks\tool-off.htm;image=naming;onclick=;0; -->
+<!-- #includeif IsFileType('ires') g3-report-hydrogen-atoms gui\hydrogen-atoms.htm;gui\blocks\tool-off.htm;image=hydrogen-atoms;onclick=;0; -->
+<!-- #includeif or(IsFileType('ires'),IsFileType('cif')) g3-report-sorting gui\sorting.htm;gui\blocks\tool-off.htm;image=sorting;onclick=;0; -->
+<!-- #includeif file.Exists('FilePath()\FileName().cif') g3-cif gui\cif.htm;gui\blocks\tool-off.htm;image=cif;onclick=;0; -->
+
+<!-- #includeif or(IsFileType('ires'),IsFileType('cif')) g3-select gui\select.htm;gui\blocks\tool-off.htm;image=select;onclick=;0; -->
+<!-- #includeif IsFileType('ires') g3-twinning gui\twinning.htm;gui\blocks\tool-off.htm;image=twinning;onclick=;0; -->
+<!-- #includeif IsFileType('ires') g3-cctbx gui\cctbx.htm;gui\blocks\tool-off.htm;image=cctbx;onclick=;0; -->
+<!-- #includeif isplugininstalled(plugin-Batch) g3-batch gui\batch.htm;gui\blocks\tool-off.htm;image=batch;onclick=;0; -->
+
+
+
+
+<!-- ##### Constraints and Restraints #### -->
+<!-- #includeif IsFileType('ires') g3-disorder-disorder gui\disorder.htm;gui\blocks\tool-off.htm;image=disorder;onclick=;0; -->
+<!-- #includeif IsFileType('ires') g3-disorder-constraints gui\SHELX-compatible-constraints.htm;gui\blocks\tool-off.htm;image=SHELX-compatible-constraints;onclick='spy.restraint_builder(spy.GetParam(gui.shelx_constraints))';0; -->
+<!-- #includeif IsFileType('ires') g3-disorder-restraints gui\SHELX-compatible-restraints.htm;gui\blocks\tool-off.htm;image=SHELX-compatible-restraints;onclick='spy.restraint_builder(spy.GetParam(gui.shelx_restraints))';0; -->
+
+
+<!-- ##### Analyze Geometry #### -->
+<!-- #includeif or(IsFileType('ires'),IsFileType('cif')) g3-analyze-geometry gui\geometry.htm;gui\blocks\tool-off.htm;image=geometry;onclick=;0; -->
+<!-- #includeif or(IsFileType('ires'),IsFileType('cif')) g3-analyze-overlay gui\overlay.htm;gui\blocks\tool-off.htm;image=overlay;onclick=;0; -->
+
+
+<!-- ##### Image #### -->
+<!-- #include g3-image-main gui\images.htm;gui\blocks\tool-off.htm;image=images@main;onclick=;1; -->
+<!-- #includeif or(IsFileType('ires'),IsFileType('cif')) g3-image-quick-drawing-styles gui\quick-drawing-styles.htm;gui\blocks\tool-off.htm;image=quick-drawing-styles;onclick=;0; -->
+
+
+<!-- ##### View Settings #### -->
+<!-- #includeif or(IsFileType('ires'),IsFileType('cif')) g3-quick-drawing-styles gui\quick-drawing-styles.htm;gui\blocks\tool-off.htm;image=quick-drawing-styles;onclick=;0; -->
+<!-- #includeif or(IsFileType('ires'),IsFileType('cif')) g3-show gui\show.htm;gui\blocks\tool-off.htm;image=show;onclick=;0; -->
+<!-- #includeif or(IsFileType('ires'),IsFileType('cif')) g3-rotate gui\rotate.htm;gui\blocks\tool-off.htm;image=rotate;onclick=;0; -->
+
+
+<!-- ##### Symmetry Generation #### -->
+<!-- #includeif or(IsFileType('ires'),IsFileType('cif')) g3-symmetry-generation-analyze gui\symmetry-generation.htm;gui\blocks\tool-off.htm;image=symmetry-generation;onclick=;0; -->
+
