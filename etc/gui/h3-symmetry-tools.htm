@@ -2,13 +2,18 @@
 
 <!-- FIRST ROW -->
 <tr name=SYMM_GEN_ROW_1>
+
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td name=MOVE_NEAR align='center' VALIGN='center' width='33%'>
-$spy.MakeHoverButton(button-move_near,"if strcmp(spy.GetParam(olex2.in_mode),'move sel') then 'mode off' else 'mode move sel'")
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=symmetry-tools-1;1; -->
+
+
+<td name=MOVE_NEAR align='center' VALIGN='center' width='33%'>
+
+$spy.MakeHoverButton(button-move_near,if strcmp\(spy.check_for_selection\(),True) then run\(if strcmp\(spy.GetParam\(olex2.in_mode),'move sel') then 'mode off' else 'mode move sel') else None)
   </td>
   <td name=COPY_NEAR align='center' VALIGN='center' width='33%'>
-$spy.MakeHoverButton(button-copy_near,"if strcmp(spy.GetParam(olex2.in_mode),'move sel -c') then 'mode off' else 'mode move -c sel'")
+$spy.MakeHoverButton(button-copy_near,if strcmp\(spy.check_for_selection\(),True) then run\(if strcmp\(spy.GetParam\(olex2.in_mode),'move sel -c') then 'mode off' else 'mode move -c sel') else None)
 <!--<a-->
       <!--href="if strcmp(spy.GetParam(olex2.in_mode),'move sel -c') then 'mode off' else 'mode move -c sel'"-->
       <!--target="%Copy Near-target%">-->
@@ -26,6 +31,7 @@ $spy.MakeHoverButton(button-assemble,'compaq -a')
 <tr name=SYMM_GEN_2>
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=symmetry-tools-2;1; -->
   <td name=CENTRE_ON_CELL align='center' VALIGN='center' width='33%'>
 $spy.MakeHoverButton(button-centre_on_cell,move)
   </td>
@@ -41,6 +47,7 @@ $spy.MakeHoverButton(button-largest_part,move)
 <tr name=SYMM_GEN_3>
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=symmetry-tools-3;1; -->
   <td name=SHOW_BASIS align='center' VALIGN='center' width='33%'>
 $spy.MakeHoverButton(button-show_basis,basis)
 </td>
@@ -57,6 +64,7 @@ $spy.MakeHoverButton(button-show_cell,cell)
 <tr name=SYMM_GEN_4>
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=symmetry-tools-4;1; -->
   <td name=FUSE width='33%' align='center'>
 $spy.MakeHoverButton(button-fuse,fuse)
   </td>
