@@ -27,6 +27,8 @@ global formula_string
 formula = ""
 formula_string = ""
 
+global tutorial_box_initialised
+tutorial_box_initialised = False
 
 def makeHtmlTable(list):
   """ Pass a list of dictionaries, with one dictionary for each table row.
@@ -243,8 +245,8 @@ def make_gui_edit_link(name):
   return editLink
 OV.registerFunction(make_gui_edit_link)
 
-
 def make_help_box(args):
+  global tutorial_box_initialised
   d = {}
   name = args.get('name', None)
   name = getGenericSwitchName(name)
@@ -385,12 +387,15 @@ def make_help_box(args):
         x = mouseX - 10
 
   else:
-    ws = olx.GetWindowSize('gl')
-    ws = ws.split(',')
-    x = int(ws[0])
-    y = int(ws[1]) + 50
-    boxWidth = int(400)
-    boxHeight = int(ws[3]) - 80
+    if box_type == 'tutorial' and tutorial_box_initialised:
+      pass
+    else:
+      ws = olx.GetWindowSize('gl')
+      ws = ws.split(',')
+      x = int(ws[0])
+      y = int(ws[1]) + 50
+      boxWidth = int(400)
+      boxHeight = int(ws[3]) - 120
 
   if popout:
     if box_type == 'tutorial':
@@ -398,10 +403,14 @@ def make_help_box(args):
       name = "Tutorial"
     else:
       pop_name = "%s-%s"%(name, box_type)
-    olx.Popup(pop_name, wFilePath, "-b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(name, boxWidth, boxHeight, x, y))
-    olx.html_SetBorders(pop_name,5)
-#    olx.Popup(pop_name, wFilePath, "-b=tc -t='%s' -w=%i -d='echo' -h=%i -x=%i -y=%i" %(name, boxWidth, boxHeight, x, y))
-#    olx.html_SetBorders(pop_name,5)
+    if box_type == 'tutorial' and tutorial_box_initialised:
+      olx.Popup(tutorial_box_initialised, wFilePath)
+    else:
+      olx.Popup(pop_name, wFilePath, "-b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(name, boxWidth, boxHeight, x, y))
+      olx.html_SetBorders(pop_name,5)
+      if box_type == 'tutorial':
+        tutorial_box_initialised = pop_name
+
   else:
     olx.html_Load(wFilePath)
 #  popup '%1-tbxh' 'basedir()/etc/gui/help/%1.htm' -b=tc -t='%1' -w=%3 -h=%2 -x=%4 -y=%5">
