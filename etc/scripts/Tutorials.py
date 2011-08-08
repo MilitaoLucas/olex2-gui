@@ -34,7 +34,9 @@ class AutoDemo():
     self.name = name
     self.reading_speed = reading_speed
 
-  def run_autodemo(self, name):
+  def run_autodemo(self, name, popup_name=""):
+    if olx.IsPopup(popup_name):
+      olx.html_Hide(popup_name)
     if name:
       self.name = name
     have_hover = OV.GetParam('olex2.hover_buttons')
