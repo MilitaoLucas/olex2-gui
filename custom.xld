@@ -36,3 +36,19 @@
     \>
   \>
 \>
+
+<note help="Opens a text box for editing custom log"
+  <body
+    <args
+      <arg1 name="File extension" def="txt">
+      <arg2 name="File path" def="filepath()">
+      <arg3 name="File name" def="filename()">
+    \>
+    <cmd
+      <cmd1 cmd1="silent on">
+      <cmd2 cmd1="echo %2%3-log.%1">
+      <cmd3 "file">
+      <cmd4 "exec -o getvar(defeditor) &2E;filepath()/filename()-note.txt&2E;">
+    \>
+  \>
+\>
