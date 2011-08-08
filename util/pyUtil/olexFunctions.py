@@ -722,7 +722,8 @@ class OlexFunctions(inheritFunctions):
     border=OV.GetParam('%s.border' %phil_path)
     if x is None: x = 0
     if y is None: y = 0
-    htm = r"%s\%s" %(OV.BaseDir(), htm)
+    htm = r"%s%s" %(OV.BaseDir(), htm)
+    htm = os.path.normpath(htm.replace('\\', '/'))
     if not os.path.exists(htm):
       OV.write_to_olex('generalPop.htm',htm)
       htm = 'generalPop.htm'
