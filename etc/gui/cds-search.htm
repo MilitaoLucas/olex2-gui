@@ -43,9 +43,9 @@
 	<td valign='left'>
 		<font size='2'>
 			&nbsp;<b>%Size%</b>&nbsp;
-			<input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name = "error_s"  width="40"  height="17" value = "spy.SetParam(snum.olexcds.error_a,GetValue(SET_SNUM_OLEXCDS_ERROR_A))">
+			<input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name = "error_s"  width="40"  height="17" value = "$spy.GetParam(snum.cds.error_s)">
 			&nbsp;<b>%Angle%</b>&nbsp;
-			<input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name = "error_a"  width="40"  height="17" value = "spy.SetParam(snum.olexcds.error_e,GetValue(SET_SNUM_OLEXCDS_ERROR_E))">
+			<input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name = "error_a"  width="40"  height="17" value = "$spy.GetParam(snum.cds.error_a)">
 		</font>
 	</td>
 </tr>
@@ -57,7 +57,7 @@
 		  type="button"
 		  image="up=button_small-gooff.png,down=button_small-gooff.png,hover=button_small-gohover.png",disable="button_small-godisable.png"
 		  hint="Search"
-		  onclick="spy.OlexCDS(SET_SNUM_OLEXCDS_ERROR_A,SET_SNUM_OLEXCDS_ERROR_E)"
+		  onclick="spy.OlexCDS(getvalue(error_a), getvalue(error_s), getvalue(cell_A), getvalue(cell_B), getvalue(cell_C), getvalue(cell_Alpha), getvalue(cell_Beta), getvalue(cell_Gamma))"
 		  bgcolor=#e1e1e1
 		>
 	</td>
