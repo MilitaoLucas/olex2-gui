@@ -13,16 +13,30 @@
 
 <p class="journal">
   Single crystals of %$xf.getFormula(html)%
-	<span class=replaceThisChar>[%$spy.GetParam(snum.report.title)%]</span>
-	were recrystallised from
-  <span class=replaceThisChar>[solvents]</span>
-  mounted in inert oil and transferred to a the gas stream at %27% K of a %$spy.GetParam(snum.report.diffractometer)% diffractometer.
-  Using Olex2 [1], the structure was solved with %$spy.GetParam(snum.solution.program)% [2] using %$spy.GetParam(snum.solution.method)% and refined with
-	%$spy.GetParam(snum.refinement.program)% [3] using %$spy.GetParam(snum.refinement.method)% minimisation.<br><br>
+  <span class=replaceThisChar>[%$spy.GetParam(snum.report.title)%]</span>
+	were
+  <span class=replaceThisChar>[%$spy.get_cif_item('_exptl_crystal_recrystallization_method')]%</span>.
+  A suitable crystal was selected and mounted 
+  <span class=replaceThisChar>%$spy.GetParam(snum.report.crystal_mounting_method)%</span>
+  on a 
+  <span class=replaceThisChar>%$spy.GetParam(snum.report.diffractometer)%</span>
+  diffractometer. The crystal was kept at %27% K.
+  Using Olex2 [1], the structure was solved with the
+  %$spy.GetParam(snum.solution.program)%
+  [2] structure solution program using
+  %$spy.GetParam(snum.solution.method)%
+  and refined with the 
+  %$spy.GetParam(snum.refinement.program)%
+  [3] refinement package using
+  %$spy.GetParam(snum.refinement.method)%
+  minimisation.<br><br>
 
-	[1] %_computing_molecular_graphics%<br>
-	[2] %_computing_structure_solution%<br>
-	[3] %_computing_structure_refinement%<br>
+	[1] %$spy.get_cif_item('_computing_molecular_graphics')%<br>
+	[2] %$spy.get_cif_item('_computing_structure_solution')%<br>
+	[3] %$spy.get_cif_item('_computing_structure_refinement')%<br>
+	
+	
+	
 
 </p>
 
