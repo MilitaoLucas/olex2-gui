@@ -125,7 +125,8 @@ class CifTools(ArgumentParser):
     self.sort_crystal_dimensions()
     self.sort_crystal_colour()
     self.sort_publication_info()
-
+    self.sort_diffractometer()
+    
   def read_metacif_file(self):
     if os.path.isfile(self.metacif_path):
       file_object = open(self.metacif_path, 'rb')
@@ -138,6 +139,11 @@ class CifTools(ArgumentParser):
     print >> f, self.cif_model
     f.close()
 
+  def sort_diffractometer(self):
+    if not OV.GetParam('snum.report.diffractometer'):
+      OV.SetParam('snum.report.diffractometer',self.cif_block.get('_diffrn_measurement_device_type'))
+    
+    
   def sort_crystal_dimensions(self):
     dimensions = []
     exptl_crystal_sizes = ('_exptl_crystal_size_min',
@@ -568,19 +574,21 @@ class ExtractCifInfo(CifTools):
       if '_smtbx_masks_special_details' in self.cif_block:
         del self.cif_block['_smtbx_masks_special_details']
 
-    temp = olx.xf_exptl_Temperature()
-    if temp != 'n/a':
-      temp = temp.split('(')
-      t = 273.15 + float(temp[0].strip('C'))
-      if len(temp) > 1:
-        if '.' in temp[0]:
-          precision = len(temp[0].split('.')[1].strip('C').strip())
-        else:
-          precision = 0
-        su = float(temp[1].split(')')[0]) / math.pow(10, precision)
-        t = format_float_with_standard_uncertainty(t, su)
+    ## I introduced this condition in order NOT to overwrite the temperature value 
+    if '_diffrn_ambient_temperature' not in self.cif_block:
+      temp = olx.xf_exptl_Temperature()
+      if temp != 'n/a':
+        temp = temp.split('(')
+        t = 273.15 + float(temp[0].strip('C'))
+        if len(temp) > 1:
+          if '.' in temp[0]:
+            precision = len(temp[0].split('.')[1].strip('C').strip())
+          else:
+            precision = 0
+          su = float(temp[1].split(')')[0]) / math.pow(10, precision)
+          t = format_float_with_standard_uncertainty(t, su)
+          self.cif_block['_diffrn_ambient_temperature'] = t
         self.cif_block['_diffrn_ambient_temperature'] = t
-      self.cif_block['_diffrn_ambient_temperature'] = t
 
     ## I have uncommented these lines below on 18/7/11 - I can't see what they were
     ## doing other than making the wrong temperature make a comeback...
@@ -828,6 +836,7 @@ def getOrUpdateDimasVar(getOrUpdate):
               ('snum_dimas_diffraction_diffractometer','diffrn_measurement_device_type'),
               ('snum_dimas_diffraction_ambient_temperature','snum_metacif_diffrn_ambient_temperature'),
               ('snum_dimas_diffraction_comment','snum_metacif_diffrn_special_details')
+              ('snum.report.diffractometer','_diffrn_measurement_device_type')
               ]:
     if OV.GetParam(var[0]) != OV.GetParam('snum.metacif.%s' %var[-1]):
       if getOrUpdate == 'get':
