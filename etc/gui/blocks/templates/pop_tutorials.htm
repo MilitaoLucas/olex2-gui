@@ -5,24 +5,35 @@
     <td valign='top'>
       <input
         type="button"
+        name=TUTORIAL_Back
+        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+        valign='center'
+        width="60"
+        height="22"
+        onclick="spy.demo.back_demo_item()"
+        value = "Back">&nbsp;
+<!--      <input
+        type="button"
         name=TUTORIAL_CANCEL
         bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
         valign='center'
         width="60"
         height="22"
-        onclick="html.EndModal(%(pop_name)s,0)"
-        value = "Cancel">&nbsp;
+        onclick="spy.demo.cancel_demo_item()"
+        value = "Cancel">&nbsp; -->
       <input
-          type="button"
-          name=TUTORIAL_NEXT
-          bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-          valign='center'
-          width="60"
-          height="22"
-          onclick="html.EndModal(%(pop_name)s,1)"
-          value = "Next">
+        type="button"
+        name=TUTORIAL_NEXT
+        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+        valign='center'
+        width="60"
+        height="22"
+        onclick="spy.demo.next_demo_item()"
+        value = "Next">
      </td>
    </tr>
+
+
 </table>
    
 <!--

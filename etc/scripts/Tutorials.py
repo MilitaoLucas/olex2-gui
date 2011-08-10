@@ -33,132 +33,77 @@ class AutoDemo():
 
     self.name = name
     self.reading_speed = reading_speed
+    self.pop_name = "Tutorial"
+    self.items = []
+    self.item_counter = 0
+    self.have_box_already = False
 
-  def run_autodemo(self, name, popup_name=""):
-    if olx.IsPopup(popup_name):
-      olx.html_Hide(popup_name)
+
+  def run_autodemo(self, name, other_popup_name=""):
+    self.items = []
+    self.item_counter = 0
+    if olx.IsPopup(other_popup_name):
+      olx.html_Hide(other_popup_name)
+    
     if name:
       self.name = name
-    have_hover = OV.GetParam('olex2.hover_buttons')
-    OV.SetParam('olex2.hover_buttons', True)
     
     ## First read in the commands that preceeds all tutorials
     rFile = open("%s/etc/tutorials/all_tutorials_preamble.txt" %OV.BaseDir(),'r')
-    items = rFile.readlines()
+    self.items = rFile.readlines()
     rFile.close()
 
     ## Then read in the actual tutorial
     rFile = open("%s/etc/tutorials/%s.txt" %(OV.BaseDir(),self.name),'r')
-    items = items + rFile.readlines()
+    self.items = self.items + rFile.readlines()
     rFile.close()
-    
+
+    rFile = open("%s/etc/tutorials/all_tutorials_end.txt" %OV.BaseDir(),'r')
+    self.items = self.items + rFile.readlines()
+    rFile.close()
+
     olx.Clear()
-    please_exit = False
-    if not self.interactive:
-      self.txt = "Press Return to advance this tutorial!"
-      bitmap = self.make_tutbox_image()
-      olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
-      olx.SetMaterial("%s.Plane 2053;2131693327;2131693327"%bitmap)
-      olx.DeleteBitmap(bitmap)
-      olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
-      time.sleep(2)
-    for item in items:
-      if please_exit:
-        olex.m('rota 1 2 3 0 0')
-        break
-      item = item.strip()
-      if not item:
-        continue
-      if item.startswith('#'):
-        continue
-      if item.startswith('\xef\xbb\xbf'):
-        continue
-      if item.startswith('set:'):
-        var = item.split('set:')[1].split('=')[0]
-        val = item.split('=')[1]
-        if "." in val:
-          if 'colour' in val:
-            val = OV.GetParam(val).hexadecimal
-          else:
-            val = OV.GetParam(val)
-        setattr(self, var, val)
+    
+    self.get_demo_item()
+    self.run_demo_item()
+    
+    #please_exit = False
+    #if not self.interactive:
+      #self.txt = "Press Return to advance this tutorial!"
+      #bitmap = self.make_tutbox_image()
+      #olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
+      #olx.SetMaterial("%s.Plane 2053;2131693327;2131693327"%bitmap)
+      #olx.DeleteBitmap(bitmap)
+      #olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
+      #time.sleep(2)
+    #self.item_counter = 0
+    #item = ""
 
-      cmd_type = item.split(":")[0]
-      cmd_content = item.split(":")[1]
-      sleep = 0
-      if cmd_type == "s":
-        sleep = cmd_content
+    #if not self.interactive:
+      #bitmap = self.make_tutbox_image("Done", font_colour=self.font_colour)
+      #olx.DeleteBitmap(bitmap)
+      #olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
+      #time.sleep(1)
+      #olx.DeleteBitmap(bitmap)
+    #OV.SetParam('olex2.hover_buttons', have_hover)
 
-      if cmd_type == 'p':
-        self.txt = "%s" %(cmd_content)
-        if self.interactive:
-          #OV.UpdateHtml()
-          #OV.Refresh()
-          res = self.make_tutbox_popup()
-          if res == 0:
-            olexex.switch_tab_for_tutorials('home')
-            olex.m('ofiledel 0')
-            please_exit = True
-        else:
-          olx.DeleteBitmap(bitmap)
-          bitmap = self.make_tutbox_image()
-          olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
-          sleep = len(cmd_content) * reading_speed
+  def next_demo_item(self):
+    #self.item_counter += 1
+    self.get_demo_item()
+    self.run_demo_item()
 
-
-      if cmd_type == 'c':
-        txt = "%s: %s" %(cmd_type, cmd_content)
-        txt = "%s" %(cmd_content)
-        print(txt)
-
-      if cmd_type == 'h':
-        control = cmd_content
-
-        if ';' in control:
-          n = int(control.split(';')[1])
-          control = control.split(';')[0]
-        else:
-          n = 2
-
-        for i in xrange(n):
-          control_name = "IMG_%s" %control.upper()
-          if "element" in control:
-            new_image = "up=%son.png" %control
-            olx.html_SetImage(control_name,new_image)
-          elif control.endswith('_bg'):
-            cmd = 'html.setBG(%s,%s)' %(control.rstrip('_bg'), self.highlight_colour)
-            olex.m(cmd)
-          else:
-            OV.SetParam('gui.image_highlight',control)
-            OV.UpdateHtml()
-          OV.Refresh()
-          time.sleep(0.1)
-
-          if "element" in control:
-            new_image = "up=%soff.png" %control
-            olx.html_SetImage(control_name,new_image)
-          elif control.endswith('_bg'):
-            cmd = 'html.setBG(%s,%s)' %(control.rstrip('_bg'), '#fffffe')
-            olex.m(cmd)
-          else:
-            OV.SetParam('gui.image_highlight',None)
-            OV.UpdateHtml()
-          OV.Refresh()
-          if i != n-1:
-            time.sleep(0.1)
-      #time.sleep(sleep)
-      #olx.Wait(int(sleep * 1000))
-
-      if cmd_type == 'c':
-        olex.m(cmd_content)
-    if not self.interactive:
-      bitmap = self.make_tutbox_image("Done", font_colour=self.font_colour)
-      olx.DeleteBitmap(bitmap)
-      olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
-      time.sleep(1)
-      olx.DeleteBitmap(bitmap)
-    OV.SetParam('olex2.hover_buttons', have_hover)
-
+  def cancel_demo_item(self):
+    olx.html_EndModal('AutoTutorial',0)
+    
+  def back_demo_item(self):
+    found_p = 2
+    while found_p:
+      self.item_counter -= 1
+      if self.items[self.item_counter].startswith("p:"):
+        found_p -= 1
+        self.item_counter -= 1
+    self.get_demo_item()
+    self.run_demo_item()
 
   def make_tutbox_image(self):
     txt = self.txt
@@ -170,36 +115,42 @@ class AutoDemo():
   def make_tutbox_popup(self):
     txt = self.txt
     have_image = self.make_tutbox_image()
-    pop_name = "AutoTutorial"
 
     self.format_txt()
 
     d = {}
-    d.setdefault('pop_name',pop_name)
+    d.setdefault('pop_name',self.pop_name)
     d.setdefault('bg_colour',self.bg_colour)
     d['bg_colour'] = self.bg_colour
     d.setdefault('font_colour',self.font_colour)
     d.setdefault('txt', self.txt)
 
-    if OV.IsControl('%s'%pop_name):
-      olx.html_ShowModal(pop_name)
+    if OV.IsControl('%s'%self.pop_name):
+      pass
+      #olx.html_ShowModal(self.pop_name)
     else:
       rFile = open("%s/etc/gui/blocks/templates/pop_tutorials.htm" %OV.BaseDir(),'r')
       txt = rFile.read() %d
       rFile.close()
 
       txt = txt.decode('utf-8')
-      OV.write_to_olex("%s.htm" %pop_name.lower(), txt)
-      boxWidth = 200
-      boxHeight = 300
+      OV.write_to_olex("%s.htm" %self.pop_name.lower(), txt)
+      boxWidth = 300
+      boxHeight = 200
       x = OV.GetHtmlPanelX() - boxWidth - 40
       y = 70
-      olx.Popup(pop_name, '%s.htm' %pop_name.lower(), "-s -t='%s' -w=%i -h=%i -x=%i -y=%i" %(pop_name, boxWidth, boxHeight, x, y))
-      olx.html_SetFocus(pop_name + '.TUTORIAL_NEXT')
-      res = olx.html_ShowModal(pop_name)
-      res = int(res)
+      if self.have_box_already:
+        olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(), "-t='%s'" %(self.pop_name,))
+      else:
+        olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(), "-b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(self.pop_name, boxWidth, boxHeight, x, y))
+        self.have_box_already = True
+        #olx.html_Show(self.pop_name)
+      olx.html_SetFocus(self.pop_name + '.TUTORIAL_NEXT')
+      #olx.html_Show(self.pop_name)
+      #res = olx.html_ShowModal(self.pop_name)
+      #res = int(res)
 
-      return res
+      return
 
 
   def tutbox(self):
@@ -228,6 +179,117 @@ class AutoDemo():
     txt = txt.replace('</c>','</font></code></b>')
     self.txt = txt
 
+  def get_demo_item(self):
+    retItem = None
+    while not retItem:
+      item = self.items[self.item_counter]
+      self.item_counter += 1
+      item = item.strip()
+      if not item:
+        continue
+      if item.startswith('#'):
+        continue
+      if item == "END":
+        self.item_counter = 0
+        continue
+      if item.startswith('\xef\xbb\xbf'):
+        continue
+      if item.startswith('set:'):
+        var = item.split('set:')[1].split('=')[0]
+        val = item.split('=')[1]
+        if "." in val:
+          if 'colour' in val:
+            val = OV.GetParam(val).hexadecimal
+          else:
+            val = OV.GetParam(val)
+        setattr(self, var, val)
+        continue
+      
+      retItem = item
+    self.cmd_type = item.split(":")[0]
+    self.cmd_content = item.split(":")[1]
+    
+  def run_demo_item(self):
+    cmd_type = self.cmd_type
+    cmd_content = self.cmd_content
+    if cmd_type == "s":
+      sleep = cmd_content
 
+    if cmd_type == 'p':
+      self.txt = "%s" %(cmd_content)
+      if self.interactive:
+        ##OV.UpdateHtml()
+        ##OV.Refresh()
+        res = self.make_tutbox_popup()#
+        ###GUI CANCEL Button
+        #if res == 0:
+          #olexex.switch_tab_for_tutorials('home')
+          #olex.m('ofiledel 0')
+          #please_exit = True
+        ###GUI BACK Button
+        #if res == 2:
+          #found_p = 2
+          #while found_p:
+            #if self.items[self.item_counter].startswith("p:"):
+              #found_p -= 1
+              #self.self.item_counter -= 1
+      #else:
+        #olx.DeleteBitmap(bitmap)
+        #bitmap = self.make_tutbox_image()
+        #olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
+        #sleep = len(cmd_content) * reading_speed
+
+
+    if cmd_type == 'c':
+      txt = "%s: %s" %(cmd_type, cmd_content)
+      txt = "%s" %(cmd_content)
+      #print(txt)
+
+    if cmd_type == 'h':
+      control = cmd_content
+
+      if ';' in control:
+        n = int(control.split(';')[1])
+        control = control.split(';')[0]
+      else:
+        n = 2
+
+      for i in xrange(n):
+        control_name = "IMG_%s" %control.upper()
+        if "element" in control:
+          new_image = "up=%son.png" %control
+          olx.html_SetImage(control_name,new_image)
+        elif control.endswith('_bg'):
+          cmd = 'html.setBG(%s,%s)' %(control.rstrip('_bg'), self.highlight_colour)
+          olex.m(cmd)
+        else:
+          OV.SetParam('gui.image_highlight',control)
+          OV.UpdateHtml()
+        OV.Refresh()
+        time.sleep(0.1)
+
+        if "element" in control:
+          new_image = "up=%soff.png" %control
+          olx.html_SetImage(control_name,new_image)
+        elif control.endswith('_bg'):
+          cmd = 'html.setBG(%s,%s)' %(control.rstrip('_bg'), '#fffffe')
+          olex.m(cmd)
+        else:
+          OV.SetParam('gui.image_highlight',None)
+          OV.UpdateHtml()
+        OV.Refresh()
+        if i != n-1:
+          time.sleep(0.1)
+    if cmd_type == 'c':
+      olex.m(cmd_content)
+      
+    if cmd_type != 'p':
+      self.get_demo_item()
+      self.run_demo_item()
+
+  
 AutoDemo_istance = AutoDemo()
-OV.registerFunction(AutoDemo_istance.run_autodemo)
+OV.registerFunction(AutoDemo_istance.run_autodemo,False,'demo')
+OV.registerFunction(AutoDemo_istance.next_demo_item,False,'demo')
+OV.registerFunction(AutoDemo_istance.back_demo_item,False,'demo')
+OV.registerFunction(AutoDemo_istance.cancel_demo_item,False,'demo')
