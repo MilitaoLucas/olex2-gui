@@ -14,7 +14,7 @@ IT = ImageTools()
 import OlexVFS
 
 class AutoDemo():
-  def __init__(self, name='default_auto_tutorial', reading_speed=0.06):
+  def __init__(self, name='default_auto_tutorial', reading_speed=0.02):
     self.interactive = True
     self.bg_colour = IT.decimalColorToHTMLcolor(OV.GetParam('gui.skin.clearcolor'))
     self.font_size = 20
@@ -37,17 +37,11 @@ class AutoDemo():
     self.items = []
     self.item_counter = 0
     self.have_box_already = False
+    self.user_structure = None
+    self.bitmap = None
+    self.stop_tutorial = False
 
-
-  def run_autodemo(self, name, other_popup_name=""):
-    self.items = []
-    self.item_counter = 0
-    if olx.IsPopup(other_popup_name):
-      olx.html_Hide(other_popup_name)
-    
-    if name:
-      self.name = name
-    
+  def read_tutorial_definitions(self):
     ## First read in the commands that preceeds all tutorials
     rFile = open("%s/etc/tutorials/all_tutorials_preamble.txt" %OV.BaseDir(),'r')
     self.items = rFile.readlines()
@@ -61,6 +55,33 @@ class AutoDemo():
     rFile = open("%s/etc/tutorials/all_tutorials_end.txt" %OV.BaseDir(),'r')
     self.items = self.items + rFile.readlines()
     rFile.close()
+
+  def run_demo_loop(self):
+    self.items = []
+    self.item_counter = 0
+    self.read_tutorial_definitions()
+    olx.Clear()
+    self.interactive = False
+    for item in self.items:
+      if self.stop_tutorial:
+        self.end_tutorial()
+        return
+      self.get_demo_item()
+      self.run_demo_item()
+    self.interactive = True
+    self.end_tutorial()
+    
+  def run_autodemo(self, name, other_popup_name=""):
+    self.user_structure = OV.FileFull()
+    self.items = []
+    self.item_counter = 0
+    if olx.IsPopup(other_popup_name):
+      olx.html_Hide(other_popup_name)
+    
+    if name:
+      self.name = name
+    
+    self.read_tutorial_definitions()
 
     olx.Clear()
     
@@ -93,7 +114,8 @@ class AutoDemo():
     self.run_demo_item()
 
   def cancel_demo_item(self):
-    olx.html_EndModal('AutoTutorial',0)
+    olx.html_Hide(self.pop_name)
+    self.end_tutorial()
     
   def back_demo_item(self):
     found_p = 2
@@ -106,7 +128,7 @@ class AutoDemo():
     self.run_demo_item()
 
   def make_tutbox_image(self):
-    txt = self.txt
+    txt = self.cmd_content
     IM = IT.make_simple_text_to_image(512, 64, txt, font_size=self.font_size, bg_colour=self.bg_colour, font_colour=self.font_colour)
     IM.save("autotut.png")
     OlexVFS.save_image_to_olex(IM, "autotut.png", 0)
@@ -129,7 +151,11 @@ class AutoDemo():
       pass
       #olx.html_ShowModal(self.pop_name)
     else:
-      rFile = open("%s/etc/gui/blocks/templates/pop_tutorials.htm" %OV.BaseDir(),'r')
+      if self.interactive:
+        rFile = open("%s/etc/gui/blocks/templates/pop_tutorials.htm" %OV.BaseDir(),'r')
+      else:
+        rFile = open("%s/etc/gui/blocks/templates/pop_tutorials_loop.htm" %OV.BaseDir(),'r')
+        
       txt = rFile.read() %d
       rFile.close()
 
@@ -142,16 +168,31 @@ class AutoDemo():
       if self.have_box_already:
         olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(), "-t='%s'" %(self.pop_name,))
       else:
-        olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(), "-b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(self.pop_name, boxWidth, boxHeight, x, y))
+        if self.interactive:
+          olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(), "-b=t -t='%s' -w=%i -h=%i -x=%i -y=%i" %(self.pop_name, boxWidth, boxHeight, x, y))
+        else:
+          boxWidth = 400
+          boxHeight = 250
+          x = OV.GetHtmlPanelX() - boxWidth - 40
+          y = 75
+          olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(), "-t='%s' -w=%i -h=%i -x=%i -y=%i" %(self.pop_name, boxWidth, boxHeight, x, y))
         self.have_box_already = True
         #olx.html_Show(self.pop_name)
       olx.html_SetFocus(self.pop_name + '.TUTORIAL_NEXT')
+      if not self.interactive:
+        sleep = len(self.cmd_content) * self.reading_speed
+        time.sleep(sleep)
+        
+
       #olx.html_Show(self.pop_name)
       #res = olx.html_ShowModal(self.pop_name)
       #res = int(res)
 
       return
 
+  def end_tutorial(self):
+    if self.user_structure:
+      OV.AtReap(self.user_structure)
 
   def tutbox(self):
     txt = self.txt
@@ -179,6 +220,9 @@ class AutoDemo():
     txt = txt.replace('</c>','</font></code></b>')
     self.txt = txt
 
+  def stop_tutorial(self):
+    self.stop_tutorial = True
+    
   def get_demo_item(self):
     retItem = None
     while not retItem:
@@ -191,6 +235,9 @@ class AutoDemo():
         continue
       if item == "END":
         self.item_counter = 0
+        start_again = True
+        continue
+      if item == "BEGIN":
         continue
       if item.startswith('\xef\xbb\xbf'):
         continue
@@ -208,6 +255,8 @@ class AutoDemo():
       retItem = item
     self.cmd_type = item.split(":")[0]
     self.cmd_content = item.split(":")[1]
+  
+    
     
   def run_demo_item(self):
     cmd_type = self.cmd_type
@@ -233,11 +282,13 @@ class AutoDemo():
             #if self.items[self.item_counter].startswith("p:"):
               #found_p -= 1
               #self.self.item_counter -= 1
-      #else:
-        #olx.DeleteBitmap(bitmap)
-        #bitmap = self.make_tutbox_image()
-        #olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
-        #sleep = len(cmd_content) * reading_speed
+      else:
+        res = self.make_tutbox_popup()#
+#        if self.bitmap:
+#          olx.DeleteBitmap(self.bitmap)
+#        self.bitmap = self.make_tutbox_image()
+#        olx.CreateBitmap('-r %s %s' %(self.bitmap, self.bitmap))
+#        sleep = len(self.cmd_content) * self.reading_speed
 
 
     if cmd_type == 'c':
@@ -290,6 +341,7 @@ class AutoDemo():
   
 AutoDemo_istance = AutoDemo()
 OV.registerFunction(AutoDemo_istance.run_autodemo,False,'demo')
+OV.registerFunction(AutoDemo_istance.run_demo_loop,False,'demo')
 OV.registerFunction(AutoDemo_istance.next_demo_item,False,'demo')
 OV.registerFunction(AutoDemo_istance.back_demo_item,False,'demo')
 OV.registerFunction(AutoDemo_istance.cancel_demo_item,False,'demo')
