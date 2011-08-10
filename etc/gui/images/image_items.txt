@@ -44,6 +44,7 @@
   Edit Cif Info
   Merge Cif
   Validate Cif
+  Tutorial
 
 [TWO BUTTONS PER ROW]
   Stereo (Colour)

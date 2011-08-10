@@ -409,10 +409,10 @@ class OlexFunctions(inheritFunctions):
       retVal = ''
     return retVal
 
-  def registerFunction(self,function,profiling=False):
+  def registerFunction(self,function,profiling=False,namespace=""):
     g = self.func_wrap(function)
     g.__name__ = function.__name__
-    olex.registerFunction(g,profiling)
+    olex.registerFunction(g,profiling,namespace)
 
   def unregisterFunction(self,function,profiling=False):
     g = self.func_wrap(function)
