@@ -1,5 +1,6 @@
 ﻿## Please note that all actions from all_tutorials_preamble.txt will be added here!
 
+c:itemstate home-start 2
 c:showQ True
 
 p:Welcome to this introductory tutorial. To get the most out of it, please read this text carefully and when you are done press the <b>Next</b> button - or simply hit the Return key!<br>
@@ -8,12 +9,16 @@ p:We suggest that you go through the whole tutorial first, then run it again and
 
 p:In this tutorial, we will be solving and refining one of the sample structures that come with Olex2 - Sucrose.
 
-p:We load the structure from the <b>Start</b> tool. The tool will be highlighted after you hit return.
-h:h2-start
+p:We load the structure from the <b>Start</b> tool. The tool will be highlighted after you move to the next page.
+h:home-start
+c:itemstate home-start 1
+c:refresh
 c:reap 'DataDir()/samples/sucrose/sucrose.res'
 c:spy.revert_to_original()
 c:mpln -n
 c:refresh
+
+p:In order to open a sample strucute click on one of the links next to the title <b>Sample Structure</b>, the structure should already have been opened since the last page.
 
 p:By clicking on the <b>Work</b> tab, we get access to the main tools:
 h:tab-work
@@ -37,6 +42,7 @@ p:We can tidy this solution by typing <c>clean</c> or by pressing the <b>Clean</
 h:toolbar-tidy
 c:clean
 c:compaq -a
+c:refresh
 
 p:Let's press the <b>Refine</b> button or type <c>refine</c> and refine what we've got so far.
 h:btn-refine;1
@@ -70,11 +76,12 @@ p:Let's add some hydrogen atoms to this. Type <c>hadd</c> or click on the <b>ADD
 h:button_small-add_h
 c:hadd
 c:refine
+c:refresh
 
 p:You can toggle the display of electron density peaks (Q-peaks) by repeatedly pressing the <b>Q</b> button or by <c>CTRL+Q</c>
 h:toolbar-Q
 c:showQ False
-
+c:refresh
 ##
 
 p:Of course, we can change the settings of the solution program.
@@ -92,7 +99,7 @@ p:... set the <b>Formula</b> and can determine the <b>space group</b>.
 h:SET_SNUM_REFINEMENT_FORMULA_bg
 h:SET_SNUM_REFINEMENT_SPACE_GROUP_bg
 
-p:When you click on <b>Suggest SG</b> link (or type <c>sg</c>, watch what happens!
+p:When you click on <b>Suggest SG</b> link, or type <c>sg</c>, watch what happens!
 c:sg
 c:refresh
 

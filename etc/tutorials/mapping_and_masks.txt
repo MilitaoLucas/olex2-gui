@@ -1,7 +1,16 @@
-# Please note that all actions from all_tutorials_preamble.txt will be added here!
+#set:bg_colour=gui.html.bg_colour
+#set:font_colour=gui.html.font_colour
 
+set:font_colour_code=#aaaaff
+set:font_colour_bold=gui.html.highlight_colour
 
-p:This tutorial will explain how to set up different types of maps in order to help understand the shape of the molecule better 
+c:itemstate index* 0
+c:itemstate index-home 1
+c:itemstate tab* 2
+c:lines 10
+c:showQ True
+
+p:This tutorial will explain how to set up different types of maps in order to help understand the structure better 
 
 p:First the <b>Tools</b> needs to be opened by clicking on it
 h:tab-tools
@@ -11,15 +20,15 @@ p:You then need to click on the <b>Maps</b> tab
 h:h2-maps
 c:itemstate tools-masks 1
 
-p:From this screen you can create a map for your 3D model but first you need run a mask
+p:From this screen you can create a map for your 3D model lets start by creating a mask for the model.
 
 p:To run a mask you first need to click on the <b>masks</b> tab
 h:h3-h3-masks
 c:itemstate h3-masks 1
 
-p:Once in the tab leave all the numbers at their default value
+p:Once in the tab leave all the numbers at their default values
 
-p:Now click on the button marked <b>mask</b>
+p:Now click on the button marked <b>Mask</b>
 h:button_small-mask
 c:spy.MaskView()
 c:spy.OlexCctbxMasks()
@@ -31,7 +40,7 @@ c:xgrid.rendermode(plane)
 c:html.call(SET_SNUM_XGRID_VIEW_maps.onchange)
 c:refresh
 
-p:You can then select the type of map you would like, the default selcetion is normally plane which will be a dark square but lets try selecting <b>contour+plane</b> and see what happens
+p:You can then select the type of map you would like, the default selection is normally plane which will be a dark square but lets try selecting <b>contour+plane</b> and see what happens
 c:itemstate h3-masks 2
 c:html.setbg(SET_SNUM_XGRID_VIEW_maps,white)
 c:html.setvalue(SET_SNUM_XGRID_VIEW_maps,contour+plane)
@@ -80,5 +89,6 @@ c:html.setvalue(SET_SNUM_XGRID_VIEW_maps,contour)
 c:xgrid.rendermode(contour)
 c:refresh
 
-c:spy.switch_tab_for_tutorials(home)
-p:End of tutorial. <br><font size='1'>Written by Simon Harries.</font>
+p:End of tutorial.
+c:spy.mapview()
+c:refresh

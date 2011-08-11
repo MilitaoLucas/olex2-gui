@@ -1,9 +1,17 @@
-## Please note that all actions from all_tutorials_preamble.txt will be added here!
+#set:bg_colour=gui.html.bg_colour
+#set:font_colour=gui.html.font_colour
 
+set:font_colour_code=#aaaaff
+set:font_colour_bold=gui.html.highlight_colour
+
+c:fuse
+c:itemstate index* 0
+c:itemstate index-home 1
+c:itemstate tab* 2
+c:lines 10
 
 p:This tutorial will show you how to customise the GUI to a style that may help you to feel more comfartable in using Olex2
 c:reap 'DataDir()/samples/THPP/THPP.res'
-c:spy.revert_to_original()
 
 p:Most of the functions in this technique are command based as not many of them appear in the GUI.
 
@@ -60,7 +68,7 @@ p:You can also choose to have the model shown with Ellipsoids by either selectin
 c:html.setimage(IMG_BUTTON-ELLIPSOIDS_|_H,button-ellipsoids_|_hhighlight.png)
 c:ads elp
 
-p:Another command you can use is <c>ads ort</c> which is the same as elp, but spheres have one of the quadrants cut out this command isn't in the GUI
+p:Another command you can use is <c>ads ort</c> which is the same as elp, but spheres have one of the quadrants cut out this command is not in the GUI
 c:html.setimage(IMG_BUTTON-ELLIPSOIDS_|_H,button-ellipsoids_|_h.png)
 c:ads ort
 c:refresh
@@ -82,7 +90,7 @@ p:The next command is <c>arad pers</c> which is a fixed radii for model viewing
 c:arad pers
 c:refresh
 
-p:The next command is <c>arad isot</c> which gives each atom has it's own radius depending on the value of the Uiso or ADP 
+p:The next command is <c>arad isot</c> which gives each atom its own radius depending on the value of the Uiso or ADP 
 c:arad isot
 c:refresh
 
@@ -115,5 +123,4 @@ p:To return all the atoms back to there actual size simply type in the command <
 c:azoom 100
 c:refresh
 
-c:spy.switch_tab_for_tutorials(home)
-p:End of tutorial. <br><font size='1'>Written by Simon Harries.</font>
+p:End of tutorial
