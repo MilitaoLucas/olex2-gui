@@ -63,7 +63,11 @@ class AutoDemo():
     olx.Clear()
     self.interactive = False
     for item in self.items:
-      if self.stop_tutorial:
+      #if OV.FindValue('stop_current_process'):
+      if OV.GetParam('olex2.stop_current_process'):
+        print "AutoTutorial Interrupted!"
+        #OV.SetVar('stop_current_process',False)
+        OV.SetParam('olex2.stop_current_process',False)
         self.end_tutorial()
         return
       self.get_demo_item()
@@ -153,6 +157,7 @@ class AutoDemo():
     else:
       if self.interactive:
         rFile = open("%s/etc/gui/blocks/templates/pop_tutorials.htm" %OV.BaseDir(),'r')
+        
       else:
         rFile = open("%s/etc/gui/blocks/templates/pop_tutorials_loop.htm" %OV.BaseDir(),'r')
         
@@ -161,8 +166,8 @@ class AutoDemo():
 
       txt = txt.decode('utf-8')
       OV.write_to_olex("%s.htm" %self.pop_name.lower(), txt)
-      boxWidth = 300
-      boxHeight = 200
+      boxWidth = 350
+      boxHeight = 220
       x = OV.GetHtmlPanelX() - boxWidth - 40
       y = 70
       if self.have_box_already:
@@ -170,6 +175,7 @@ class AutoDemo():
       else:
         if self.interactive:
           olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(), "-b=t -t='%s' -w=%i -h=%i -x=%i -y=%i" %(self.pop_name, boxWidth, boxHeight, x, y))
+          olx.html_SetFocus(self.pop_name + '.TUTORIAL_NEXT')
         else:
           boxWidth = 400
           boxHeight = 250
@@ -178,7 +184,7 @@ class AutoDemo():
           olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(), "-t='%s' -w=%i -h=%i -x=%i -y=%i" %(self.pop_name, boxWidth, boxHeight, x, y))
         self.have_box_already = True
         #olx.html_Show(self.pop_name)
-      olx.html_SetFocus(self.pop_name + '.TUTORIAL_NEXT')
+      OV.Refresh()
       if not self.interactive:
         sleep = len(self.cmd_content) * self.reading_speed
         time.sleep(sleep)
@@ -193,6 +199,7 @@ class AutoDemo():
   def end_tutorial(self):
     if self.user_structure:
       OV.AtReap(self.user_structure)
+    #self.have_box_already = False
 
   def tutbox(self):
     txt = self.txt
@@ -267,21 +274,7 @@ class AutoDemo():
     if cmd_type == 'p':
       self.txt = "%s" %(cmd_content)
       if self.interactive:
-        ##OV.UpdateHtml()
-        ##OV.Refresh()
         res = self.make_tutbox_popup()#
-        ###GUI CANCEL Button
-        #if res == 0:
-          #olexex.switch_tab_for_tutorials('home')
-          #olex.m('ofiledel 0')
-          #please_exit = True
-        ###GUI BACK Button
-        #if res == 2:
-          #found_p = 2
-          #while found_p:
-            #if self.items[self.item_counter].startswith("p:"):
-              #found_p -= 1
-              #self.self.item_counter -= 1
       else:
         res = self.make_tutbox_popup()#
 #        if self.bitmap:
@@ -292,6 +285,9 @@ class AutoDemo():
 
 
     if cmd_type == 'c':
+      if not self.interactive:
+        if cmd_content == "text":
+          return
       txt = "%s: %s" %(cmd_type, cmd_content)
       txt = "%s" %(cmd_content)
       #print(txt)
@@ -313,6 +309,8 @@ class AutoDemo():
         elif control.endswith('_bg'):
           cmd = 'html.setBG(%s,%s)' %(control.rstrip('_bg'), self.highlight_colour)
           olex.m(cmd)
+          OV.Refresh()
+
         else:
           OV.SetParam('gui.image_highlight',control)
           OV.UpdateHtml()
@@ -333,10 +331,12 @@ class AutoDemo():
           time.sleep(0.1)
     if cmd_type == 'c':
       olex.m(cmd_content)
+      OV.Refresh()
       
     if cmd_type != 'p':
       self.get_demo_item()
       self.run_demo_item()
+      OV.Refresh()
 
   
 AutoDemo_istance = AutoDemo()

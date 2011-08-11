@@ -29,7 +29,8 @@
   <shortcut key="Ctrl+Shift+r" macro="py.run basedir()\util\pyUtil\CctbxLib\cctbx_olex_adapter.py">
   <shortcut key="Ctrl+Shift+y" macro="spy.SetParam(snum.refinement.auto.tidy,True)>>updatehtml">
   <shortcut key="Ctrl+y" macro="spy.SetParam(snum.refinement.auto.tidy,False)>>updatehtml">
-  <shortcut key="break" macro="SetVar(stop_current_process,True)>>spy.stopShelx()">
+  <shortcut key="break" macro="echo fred>>SetVar(stop_current_process,True)>>spy.stopShelx()">
+  <shortcut key="Ctrl+Shift+u" macro="echo interrupt!>>spy.SetParam(olex2.stop_current_process,True)">
 
 >
 <menus
