@@ -1,7 +1,14 @@
-## Please note that all actions from all_tutorials_preamble.txt will be added here!
+#set:bg_colour=gui.html.bg_colour
+#set:font_colour=gui.html.font_colour
 
+set:font_colour_code=#aaaaff
+set:font_colour_bold=gui.html.highlight_colour
 
-c:showQ False
+c:fuse
+c:itemstate index* 0
+c:itemstate index-home 1
+c:itemstate tab* 2
+c:lines 10
 
 p:This tutorial will teach you how to use the different 3D settings that are available on Olex2
 
@@ -43,7 +50,5 @@ c:refresh
 
 p:This viewing method works like a magic eye book where you have to cross your eyes and the image appears to be 3D
 
+p:End of tutroial.
 c:gl.stereo(normal)
-
-c:spy.switch_tab_for_tutorials(home)
-p:End of tutorial. <br><font size='1'>Written by Simon Harries.</font>

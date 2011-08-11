@@ -1,9 +1,15 @@
-# Please note that all actions from all_tutorials_preamble.txt will be added here!
+#set:bg_colour=gui.html.bg_colour
+#set:font_colour=gui.html.font_colour
 
-c:reap 'DataDir()/samples/Co110/Co110.res'
-c:spy.revert_to_original()
+set:font_colour_code=#aaaaff
+set:font_colour_bold=gui.html.highlight_colour
 
-c:showQ False
+c:itemstate index* 0
+c:itemstate index-home 1
+c:itemstate tab* 2
+c:lines 10
+c:showQ True
+c:showq a false
 
 p:This tutroial will run you through how to capture images of your 3D model using the Olex2 system.
 
@@ -29,7 +35,7 @@ p:...the second link <b>Label Box</b>allows for the colour of the box to be chan
 
 p:...and the third option <b>Transparent Box</b> allows for any boxes that may have been placed on the labels to become transparent without having to go through the settings for the label.
 
-p:Once you have the labels in a way that you like you can now create and image of your model the first tab allows you to create a bitmap image so click on the tab <b>Bitmap Images</b>.
+p:Once you have the labels in a way that you like you can now create an image of your model the first tab allows you to create a bitmap image so click on the tab <b>Bitmap Images</b>.
 h:h3-h3-bitmap-images@images
 c:itemstate h3-bitmap-images 1
 
@@ -76,5 +82,4 @@ h:button_small-go@image-series
 p:The movie file should be saved where the rest of the images get saved to for this model, since it does not show the address for where the file gets saved to.
 c:itemstate h3-image-series 2
 
-c:spy.switch_tab_for_tutorials(home)
-p:End of tutorial. <br><font size='1'>Written by Simon Harries.</font>
+p:End of tutorial
