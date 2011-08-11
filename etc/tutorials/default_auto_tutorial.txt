@@ -79,7 +79,7 @@ c:refine
 c:refresh
 
 p:You can toggle the display of electron density peaks (Q-peaks) by repeatedly pressing the <b>Q</b> button or by <c>CTRL+Q</c>
-h:toolbar-Q
+h:toolbar-q
 c:showQ False
 c:refresh
 ##

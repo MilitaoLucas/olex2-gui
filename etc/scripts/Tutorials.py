@@ -14,7 +14,7 @@ IT = ImageTools()
 import OlexVFS
 
 class AutoDemo():
-  def __init__(self, name='default_auto_tutorial', reading_speed=0.02):
+  def __init__(self, name='default_auto_tutorial', reading_speed=2):
     self.interactive = True
     self.font_size = 20
 
@@ -99,10 +99,8 @@ class AutoDemo():
 
     olx.Clear()
     
-    cmd_type = ""
-    while 'p' not in cmd_type:
-      self.get_demo_item()
-      cmd_type = self.run_demo_item()
+    self.get_demo_item()
+    cmd_type = self.run_demo_item()
     
     #please_exit = False
     #if not self.interactive:
@@ -198,7 +196,7 @@ class AutoDemo():
       OV.Refresh()
       if not self.interactive:
         sleep = len(self.cmd_content) * self.reading_speed
-        time.sleep(sleep)
+        olx.Wait(sleep)
         
 
       #olx.html_Show(self.pop_name)
@@ -312,28 +310,44 @@ class AutoDemo():
       else:
         n = 2
 
+      control_name = "IMG_%s" %control.upper()
       for i in xrange(n):
-        control_name = "IMG_%s" %control.upper()
+        if "element" in control:
+          new_image = "up=%son.png" %control
+          olx.html_SetImage(control_name,new_image)
+        elif control.endswith('_bg'):
+          cmd = 'html.setBG(%s,%s)' %(control.rstrip('_bg'), self.highlight_colour)
+          olex.m(cmd)
+        else:
+          new_image = "up=%soff.png" %control
+          olx.html_SetImage(control_name,new_image)
+        OV.Refresh()
+        olx.Wait(300)
+  
+        if "element" in control:
+          new_image = "up=%soff.png" %control
+          olx.html_SetImage(control_name,new_image)
+        elif control.endswith('_bg'):
+          cmd = 'html.setBG(%s,%s)' %(control.rstrip('_bg'), '#fffffe')
+          olex.m(cmd)
+        else:
+          new_image = "up=%shighlight.png" %control
+          olx.html_SetImage(control_name,new_image)
+        OV.Refresh()
+        olx.Wait(300)
+
+      if not control.endswith('_bg'):
         new_image = "up=%soff.png" %control
         olx.html_SetImage(control_name,new_image)
-        OV.Refresh()
-        time.sleep(0.3)
-        new_image = "up=%shighlight.png" %control
-        olx.html_SetImage(control_name,new_image)
-        OV.Refresh()
-        time.sleep(0.3)
-      new_image = "up=%soff.png" %control
-      olx.html_SetImage(control_name,new_image)
 
     if cmd_type == 'c':
       olex.m(cmd_content)
-      OV.Refresh()
       
-    return cmd_type
-#    if cmd_type != 'p':
-#      self.get_demo_item()
-#      self.run_demo_item()
-#      OV.Refresh()
+    if cmd_type != 'p':
+      self.get_demo_item()
+      self.run_demo_item()
+      
+    OV.Refresh()
 
   
 AutoDemo_istance = AutoDemo()
