@@ -456,6 +456,8 @@ snum
 olex2
   .short_caption = Olex2 Internal Settings
 {
+  stop_current_process = False
+    .type = bool
   is_online = True
     .type = bool
   is_logged_on = False
