@@ -10,7 +10,7 @@ p:We suggest that you go through the whole tutorial first, then run it again and
 p:In this tutorial, we will be solving and refining one of the sample structures that come with Olex2 - Sucrose.
 
 p:We load the structure from the <b>Start</b> tool. The tool will be highlighted after you move to the next page.
-h:home-start
+h:h2-start
 c:itemstate home-start 1
 c:refresh
 c:reap 'DataDir()/samples/sucrose/sucrose.res'
