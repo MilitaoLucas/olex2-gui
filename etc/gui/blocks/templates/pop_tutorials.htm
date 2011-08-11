@@ -1,59 +1,61 @@
 <body link="$spy.GetParam(gui.html.link_colour)" bgcolor='%(bg_colour)s'>
-<table bgcolor='#0051a1' border="0" VALIGN='left' style="border-collapse: collapse" width="100%%" cellpadding="5" cellspacing="1">
 
-  <tr align='center'>
-    <td valign='top'>
-      <input
-        type="button"
-        name=TUTORIAL_Back
-        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-        valign='center'
-        width="60"
-        height="22"
-        onclick="spy.demo.back_demo_item()"
-        value = "Back">&nbsp;
-    </td>
-    <td valign='top'>
-      <input
-        type="button"
-        name=TUTORIAL_CANCEL
-        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-        valign='center'
-        width="60"
-        height="22"
-        onclick="spy.demo.cancel_demo_item()"
-        value = "Cancel">&nbsp;
-    </td>
-    <td valign='top'>
-      <input
-        type="button"
-        name=TUTORIAL_NEXT
-        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-        valign='center'
-        width="60"
-        height="22"
-        onclick="spy.demo.next_demo_item()"
-        value = "Next">
-     </td>
-   </tr>
+<!--<table bgcolor='%(button_bar_colour)s' border="0" VALIGN='left' style="border-collapse: collapse" width="100%%" cellpadding="5" cellspacing="1">-->
 
-
-</table>
+  <!--<tr align='center'>-->
+    <!--<td valign='top'>-->
+      <!--<input-->
+        <!--type="button"-->
+        <!--name=TUTORIAL_Back-->
+        <!--bgcolor="$spy.GetParam(gui.html.input_bg_colour)"-->
+        <!--valign='center'-->
+        <!--width="60"-->
+        <!--height="22"-->
+        <!--onclick="spy.demo.back_demo_item()"-->
+        <!--value = "Back">&nbsp;-->
+    <!--</td>-->
+    <!--<td valign='top'>-->
+      <!--<input-->
+        <!--type="button"-->
+        <!--name=TUTORIAL_CANCEL-->
+        <!--bgcolor="$spy.GetParam(gui.html.input_bg_colour)"-->
+        <!--valign='center'-->
+        <!--width="60"-->
+        <!--height="22"-->
+        <!--onclick="spy.demo.cancel_demo_item()"-->
+        <!--value = "Cancel">&nbsp;-->
+    <!--</td>-->
+    <!--<td valign='top'>-->
+      <!--<input-->
+        <!--type="button"-->
+        <!--name=TUTORIAL_NEXT-->
+        <!--bgcolor="$spy.GetParam(gui.html.input_bg_colour)"-->
+        <!--valign='center'-->
+        <!--width="60"-->
+        <!--height="22"-->
+        <!--onclick="spy.demo.next_demo_item()"-->
+        <!--value = "Next">-->
+     <!--</td>-->
+   <!--</tr>-->
+<!--</table>-->
    
-<!--
-    <tr align='center'>
+
+<table bgcolor='%(button_bar_colour)s' border="0" VALIGN='left' style="border-collapse: collapse" width="100%%" cellpadding="5" cellspacing="1">
+
+<tr align='center'>
     <td>
-$spy.MakeHoverButton(button_small-cancel,html.EndModal\(%(pop_name)s,0))
+$spy.MakeHoverButton(button_small-back,spy.demo.back_demo_item\())
     </td>
     <td>
-$spy.MakeHoverButton(button_small-next,html.EndModal\(%(pop_name)s,1))
+$spy.MakeHoverButton(button_small-cancel,spy.demo.cancel_demo_item\())
+    </td>
+    <td>
+$spy.MakeHoverButton(button_small-next,spy.demo.next_demo_item\()))
     </td>
   </tr>
-    
-    <tr bgcolor='#006090'>
-      <td></td>
-    </tr>
--->
+</table>
+
+
 
 <table bgcolor='%(bg_colour)s' border="0" VALIGN='left' style="border-collapse: collapse" width="100%%" cellpadding="5" cellspacing="1">
 
