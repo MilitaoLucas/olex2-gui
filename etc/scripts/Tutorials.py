@@ -16,20 +16,7 @@ import OlexVFS
 class AutoDemo():
   def __init__(self, name='default_auto_tutorial', reading_speed=0.02):
     self.interactive = True
-    self.bg_colour = IT.decimalColorToHTMLcolor(OV.GetParam('gui.skin.clearcolor'))
     self.font_size = 20
-    self.highlight_colour = OV.GetParam('gui.html.highlight_colour').hexadecimal
-
-    try:
-      self.bg_colour = IT.decimalColorToHTMLcolor(int(olx.gl_lm_ClearColor()))
-      self.font_colour = '#ffffff'
-      self.font_colour_code = '#aaaaff'
-      self.font_colour_bold = '#aaaaff'
-    except:
-      self.bg_colour = '#ffffff'
-      self.font_colour = '#000000'
-      self.font_colour_code = '#000088'
-      self.font_colour_bold = '#444444'
 
     self.name = name
     self.reading_speed = reading_speed
@@ -41,6 +28,28 @@ class AutoDemo():
     self.bitmap = None
     self.stop_tutorial = False
 
+  def set_box_bg_colour(self):
+    self.highlight_colour = OV.GetParam('gui.html.highlight_colour').hexadecimal
+    c = olx.gl_lm_ClearColor()
+    if "," in c:
+      c = c.split(',')
+      c = (float(c[0])*255, float(c[1])*255, float(c[2])*255)
+      c = IT.RGBToHTMLColor(c)
+    else:
+      c = IT.decimalColorToHTMLcolor(int(olx.gl_lm_ClearColor()))
+    
+    if c != "#ffffff":
+      self.font_colour = '#ffffff'
+      self.font_colour_code = '#aaaaff'
+      self.font_colour_bold = '#aaaaff'
+    else:
+      self.font_colour = '#000000'
+      self.font_colour_code = '#000088'
+      self.font_colour_bold = '#444444'
+      
+    self.bg_colour = c
+    self.button_bar_colour = IT.RGBToHTMLColor(IT.adjust_colour(self.bg_colour, luminosity=0.8))
+    
   def read_tutorial_definitions(self):
     ## First read in the commands that preceeds all tutorials
     rFile = open("%s/etc/tutorials/all_tutorials_preamble.txt" %OV.BaseDir(),'r')
@@ -60,7 +69,7 @@ class AutoDemo():
     self.items = []
     self.item_counter = 0
     self.read_tutorial_definitions()
-    olx.Clear()
+    self.set_box_bg_colour()
     self.interactive = False
     for item in self.items:
       #if OV.FindValue('stop_current_process'):
@@ -77,6 +86,7 @@ class AutoDemo():
     
   def run_autodemo(self, name, other_popup_name=""):
     self.user_structure = OV.FileFull()
+    self.set_box_bg_colour()
     self.items = []
     self.item_counter = 0
     if olx.IsPopup(other_popup_name):
@@ -148,6 +158,7 @@ class AutoDemo():
     d.setdefault('pop_name',self.pop_name)
     d.setdefault('bg_colour',self.bg_colour)
     d['bg_colour'] = self.bg_colour
+    d['button_bar_colour'] = self.button_bar_colour
     d.setdefault('font_colour',self.font_colour)
     d.setdefault('txt', self.txt)
 
@@ -294,7 +305,7 @@ class AutoDemo():
 
     if cmd_type == 'h':
       control = cmd_content
-
+      
       if ';' in control:
         n = int(control.split(';')[1])
         control = control.split(';')[0]
@@ -303,32 +314,17 @@ class AutoDemo():
 
       for i in xrange(n):
         control_name = "IMG_%s" %control.upper()
-        if "element" in control:
-          new_image = "up=%son.png" %control
-          olx.html_SetImage(control_name,new_image)
-        elif control.endswith('_bg'):
-          cmd = 'html.setBG(%s,%s)' %(control.rstrip('_bg'), self.highlight_colour)
-          olex.m(cmd)
-          OV.Refresh()
-
-        else:
-          OV.SetParam('gui.image_highlight',control)
-          OV.UpdateHtml()
+        new_image = "up=%soff.png" %control
+        olx.html_SetImage(control_name,new_image)
         OV.Refresh()
-        time.sleep(0.1)
-
-        if "element" in control:
-          new_image = "up=%soff.png" %control
-          olx.html_SetImage(control_name,new_image)
-        elif control.endswith('_bg'):
-          cmd = 'html.setBG(%s,%s)' %(control.rstrip('_bg'), '#fffffe')
-          olex.m(cmd)
-        else:
-          OV.SetParam('gui.image_highlight',None)
-          OV.UpdateHtml()
+        time.sleep(0.3)
+        new_image = "up=%shighlight.png" %control
+        olx.html_SetImage(control_name,new_image)
         OV.Refresh()
-        if i != n-1:
-          time.sleep(0.1)
+        time.sleep(0.3)
+      new_image = "up=%soff.png" %control
+      olx.html_SetImage(control_name,new_image)
+
     if cmd_type == 'c':
       olex.m(cmd_content)
       OV.Refresh()
