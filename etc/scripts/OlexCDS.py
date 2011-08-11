@@ -76,7 +76,7 @@ def strip_html(text):
     return text # leave as is
   return re.sub("(?s)<[^>]*>|&#?\w+;", fixup, text)
 
-def OlexCDS():
+def OlexCDS(cell_error_s=2, cell_error_a=2, cell_a='', cell_b='', cell_c='', cell_alpha='', cell_beta='', cell_gamma=''):
   # First need to login
   # Need to get login credentials from usettings.dat file
   # I would like to MD5sum the password in the release version (not that CDS does that!)
@@ -90,6 +90,10 @@ def OlexCDS():
   cds_username = ""
   cds_password = ""
   URL="cds.dl.ac.uk"
+  #cell_error_s = OV.GetParam('snum.cds.error_s') # This is to make it work with phil
+  #cell_error_a = OV.GetParam('snum.cds.error_a')
+  
+  
   
   # Find the key words
   for usettings_line in usettings:
@@ -129,14 +133,23 @@ def OlexCDS():
     #print response.getheaders()
     DLCOOKIE =  response.getheader('set-cookie').split(',')[1]
     print "Trying A Cell Search"
+    print "Using errors of angles: ", cell_error_a, " and lengths: ", cell_error_s
     # These are our unit cell parameters which will/could come from Olex2
-    cell_a = CDSCell[0]
-    cell_b = CDSCell[1]
-    cell_c = CDSCell[2]
-    cell_alpha = CDSCell[3]
-    cell_beta = CDSCell[4]
-    cell_gamma = CDSCell[5]
+    if cell_a == u'':
+    	cell_a = CDSCell[0]
+    if cell_b == u'':
+    	cell_b = CDSCell[1]
+    if cell_c == u'':
+    	cell_c = CDSCell[2]
+    if cell_alpha == u'':
+    	cell_alpha = CDSCell[3]
+    if cell_beta == u'':
+    	cell_beta = CDSCell[4]
+    if cell_gamma == u'':
+    	cell_gamma = CDSCell[5]
     
+    print "Using following cell lengths: ", cell_a, cell_b, cell_c
+    print "Using following cell angles: ", cell_alpha, cell_beta, cell_gamma
     # Ok, this takes the cell parameters and searches the CDS crystalweb service
     params = urlencode({
         "search" : "search",
@@ -148,8 +161,8 @@ def OlexCDS():
         "alpha": cell_alpha,
         "beta": cell_beta,
         "gamma": cell_gamma,
-        "errs": 1,
-        "erra": 1,
+        "errs": cell_error_s,
+        "erra": cell_error_a,
         #"spgr":
         #"spo":
         "s": "N"
@@ -178,7 +191,8 @@ def OlexCDS():
           number_of_hits = re.search(r'\d+', strip_html(results_line))
           number_of_hits_found = int(number_of_hits.group())
           if number_of_hits_found == 0:
-            print "No results found"
+            print "No results found\n"
+            print "Try increasing the error in your search parameters e.g. spy.olexcds(3,3)"
           elif number_of_hits_found > 0:
             print "There are %d hits found do you wish to view them via CrystalWeb?"%number_of_hits_found
             #print "There are less than 10 hits we are getting the hits now"
@@ -259,7 +273,7 @@ def OlexCDS():
                   compound_cell_alpha = float(fishing.group('alpha'))
                   fishing = re.search('b(?P<b>\d+.\d+)beta(?P<beta>\d+)', lines[i+2])
                   compound_cell_b = float(fishing.group('b'))
-                  compound_cell_beta = float(fishing.group('b'))
+                  compound_cell_beta = float(fishing.group('beta'))
                   fishing = re.search('c(?P<c>\d+.\d+)gamma(?P<gamma>\d+)', lines[i+3])
                   compound_cell_c = float(fishing.group('c'))
                   compound_cell_gamma = float(fishing.group('gamma'))

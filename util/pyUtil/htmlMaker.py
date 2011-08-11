@@ -186,7 +186,7 @@ def crystalMetadataHtmlMaker():
      'itemName':'%Crystallisation Details%',
      'multiline':'multiline',
      },
-    {'varName':'snum.report.crystal_mountin_method',
+    {'varName':'snum.report.crystal_mounting_method',
      'itemName':'%Crystal Mounting%',
      'multiline':'multiline',
      },

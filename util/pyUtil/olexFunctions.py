@@ -305,6 +305,7 @@ class OlexFunctions(inheritFunctions):
   def CifMerge(self, filepath):
     try:
       olx.CifMerge('"%s"' %filepath)
+      print "Refinement CIF file has been merged with the meta-data cif file"
     except Exception, ex:
       print >> sys.stderr, "An error occured whilst trying to find merge cif files"
       sys.stderr.formatExceptionInfo()
@@ -408,10 +409,10 @@ class OlexFunctions(inheritFunctions):
       retVal = ''
     return retVal
 
-  def registerFunction(self,function,profiling=False):
+  def registerFunction(self,function,profiling=False,namespace=""):
     g = self.func_wrap(function)
     g.__name__ = function.__name__
-    olex.registerFunction(g,profiling)
+    olex.registerFunction(g,profiling,namespace)
 
   def unregisterFunction(self,function,profiling=False):
     g = self.func_wrap(function)
@@ -721,7 +722,8 @@ class OlexFunctions(inheritFunctions):
     border=OV.GetParam('%s.border' %phil_path)
     if x is None: x = 0
     if y is None: y = 0
-    htm = r"%s\%s" %(OV.BaseDir(), htm)
+    htm = r"%s%s" %(OV.BaseDir(), htm)
+    htm = os.path.normpath(htm.replace('\\', '/'))
     if not os.path.exists(htm):
       OV.write_to_olex('generalPop.htm',htm)
       htm = 'generalPop.htm'

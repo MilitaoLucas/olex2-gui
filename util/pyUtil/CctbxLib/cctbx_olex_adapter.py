@@ -931,15 +931,38 @@ class symmetry_search(OlexCctbxAdapter):
 
 OV.registerFunction(symmetry_search)
 
-def calcsolv(solvent_radius=1.2, grid_step=0.2):
+def calcsolv(solvent_radius=None, grid_step=None):
   # This routine called with spy.calsolv() will calculate the solvent accessible area
 
   # If values have been set in PHIL, these will be used.
+  
   l = ['grid', 'probe']
   for item in l:
-    if OV.GetParam('snum.calcsolv.%s' %item):
-      solvent_radius = OV.GetParam('snum.calcsolv.%s' %item)
-
+    val = OV.GetParam('snum.calcsolv.%s' %item)
+    if val:
+      if item == 'probe':
+        if not solvent_radius:
+          solvent_radius = val
+        else:
+          OV.SetParam('snum.calcsolv.%s'%item,solvent_radius)
+          if OV.IsControl('SET_SNUM_CALCSOLV_PROBE'):
+            olx.html_SetValue('SET_SNUM_CALCSOLV_PROBE', solvent_radius)
+          
+      elif item == 'grid':
+        if not grid_step:
+          grid_step = val
+        else:
+          OV.SetParam('snum.calcsolv.%s'%item,grid_step)
+          if OV.IsControl('SET_SNUM_CALCSOLV_Grid'):
+            olx.html_SetValue('SET_SNUM_CALCSOLV_GRID', grid_step)
+    else:
+      if item == 'probe':
+        if not solvent_radius:
+          solvent_radius = 1.2
+      elif item == 'grid':
+        if not solvent_radius:
+          solvent_radius = 0.2
+          
   from smtbx.masks import solvent_accessible_volume
   # Used to build the xray_structure by getting information from the olex2 refinement model
   olx_atoms = olexex.OlexRefinementModel()

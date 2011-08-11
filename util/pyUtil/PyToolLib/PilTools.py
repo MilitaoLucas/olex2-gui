@@ -1027,6 +1027,8 @@ class timage(ImageTools):
     if self.timer:
       import time
       self.time = time
+      self.text_time = 0
+
     #if tool_arg:
       #args = tool_arg.split(";")
       #if args[0] == "None":
@@ -1264,7 +1266,6 @@ class timage(ImageTools):
     width = int(available_width/2) - 15
     self.produce_buttons(button_names, crop, cut, max_width,self.sfs,"",width=width)
 
-
     ## THREE buttons in the HTMLpanelWIDTH
     cut = 0*sf, 178*sf, 91*sf, 195*sf
     max_width = cut[2] - cut[0]
@@ -1281,7 +1282,16 @@ class timage(ImageTools):
     width = available_width - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
     self.produce_buttons(button_names, crop, cut, max_width,self.sfs,"_full",width=width)
 
+    ## G3 BIG BUTTON
+    cut = 0*sf, 193*sf, 275*sf, 211*sf
+    max_width = cut[2] - cut[0]
+    crop =  im.crop(cut)
+    button_names = self.image_items_d.get("G3 BIG BUTTON", button_names)
+    width = available_width
+    self.produce_buttons(button_names, crop, cut, max_width,self.sfs,"_g3_big",width=width)
 
+    
+    
     cut = 0*sf, 152*sf, 15*sf, 169*sf
     crop =  im.crop(cut)
     #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=1.98))
@@ -1506,6 +1516,8 @@ class timage(ImageTools):
             self.advertise_new = True
           if btn_type =="_tiny":
             button_type = 'tinybutton'
+          elif btn_type =="_g3_big":
+            button_type = 'g3_big'
           else:
             button_type = 'button'
           IM = self.make_timage(item_type=button_type, item=txt, state=state, width=width, titleCase=False)
@@ -2072,6 +2084,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if olx.fs_Exists(bitmap) == 'true':
       olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
     textItems = []
+    textItems.append("autochem")
     tabItems = []
     g3tabItems = ['g3-solve', 'g3-refine', 'g3-image', 'g3-report', 'g3-tools']
 
@@ -2081,7 +2094,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       t = line.split("<!-- #include ")[1]
       t = t.split()[0]
       t = t.split('-')[1]
-      tabItems.append(t)
+      if t not in tabItems:
+        tabItems.append(t)
     tabItem_l = [tabItems, g3tabItems]
     self.tabItems = tabItems
     for directory in directories:
@@ -2090,8 +2104,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         f = f[0].split(".")[0]
         if f.split("-")[0] != "index" and f[0] != "_":
           f = f.replace("-and-", "-&-")
-          textItems.append(f)
-          textItems.append("autochem")
+          if f not in textItems:
+            textItems.append(f)
         #elif f[0] != "_":
         #  tabItems.append(f)
     for item in ('solution-settings-h3-solution-settings-extra', 'refinement-settings-h3-refinement-settings-extra',
@@ -2099,6 +2113,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       textItems.append(item)
 
     for item in textItems:
+      if self.timer:
+        t1 = time.time()
       states = ["on", "off", "highlight", "", "hover", "hoveron"]
       name = ""
       for state in states:
@@ -2125,8 +2141,14 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           OlexVFS.save_image_to_olex(image, name.lower(), 2)
           #name = "h2-%s-%s.png" %(item, state)
           #image.save("C:/tmp/%s" %name)
+      if self.timer:
+        t = self.time.time()-t1
+        self.text_time += t
+        print "\t - %.3f [%.1f]- to complete %s" %(self.time.time()-t1, self.text_time, item)
 
     for tabItems in tabItem_l:
+      if self.timer:
+        t1 = time.time()
       for item in tabItems:
         states = ["on", "off", "highlight", "", "hover", "hoveron"]
         for state in states:
@@ -2139,6 +2161,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
           name = r"tab-%s%s.png" %(item, state)
           OlexVFS.save_image_to_olex(image, name, 2)
+        if self.timer:
+          print "\t - %s took %.3f s to complete" %(item, self.time.time()-t1)
+
         #name = r"tab-%s-%s.png" %(item, state)
         #image.save("C:/tmp/%s" %name)
         #image.save(r"%s\etc\$tab-%s-%s.png" %(datadir, item.split("index-")[1], state), "PNG")
@@ -2785,6 +2810,16 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       if state == "highlight":
         font_colour = OV.GetParam('gui.html.highlight_colour').rgb
 
+    elif item_type == 'g3_big':
+      underground = OV.GetParam('gui.html.bg_colour').rgb
+      shadow = True
+      buttonmark = True
+      whitespace = "top:4:%s" %OV.GetParam('gui.html.bg_colour').hexadecimal
+      if state == "on":
+        grad_colour = highlight_colour
+      elif state == "hover":
+        grad_colour = IT.adjust_colour(highlight_colour, luminosity = 0.95)
+        
     elif item_type =='cbtn':
       underground = OV.GetParam('gui.html.bg_colour').rgb
       if state == 'on':

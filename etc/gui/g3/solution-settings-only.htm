@@ -1,0 +1,164 @@
+<font color=$spy.GetParam(gui.html.font_colour) size=$spy.GetParam(gui.html.font_size) face=$spy.GetParam(gui.html.font_name)>
+
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+
+
+<tr VALIGN='center' ALIGN='left' NAME='SNUM_SOLUTION_PROGRAM'>
+  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td VALIGN='center' colspan=2>
+    <b>Solution Program</b>
+  </td>
+  <td VALIGN='center' ALIGN='right' colspan=2>
+<!-- #include program gui\snippets\snippet-program.htm;scope=snum;prg_type=solution;1; -->
+  </td>
+</tr>
+
+
+<tr VALIGN='center' ALIGN='left' NAME='SNUM_SOLUTION_METHOD'>
+  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td VALIGN='center' colspan=2>
+    <b>%Solution Method%</b>
+  </td>
+  <td VALIGN='center' ALIGN='right' colspan=2>
+<!-- #include program gui\snippets\snippet-method.htm;scope=snum;prg_type=solution;1; -->
+  </td>
+</tr>
+
+
+<tr VALIGN='center' ALIGN='left' NAME='SET_REFLECTIONS'>
+  <td width='2' bgcolor='$spy.GetParam(gui.html.table_firstcol_colour)'></td>
+  <td VALIGN='center' colspan='2'>
+    <b>%Reflection File%</b>
+  </td>
+  <td VALIGN='center' ALIGN='right' colspan='2'>
+<!-- #include tool-footer gui\snippets\snippet-reflection-file.htm;1; -->
+</td>
+</tr>
+
+<tr VALIGN='center' ALIGN='left' NAME='SET_SNUM_REFINEMENT_FORMULA'>
+  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td VALIGN='center' colspan=2>
+    <b>%Chemical Composition%</b>
+  </td>
+  <td VALIGN='center' ALIGN='right' colspan=2>
+      <input
+        type='combo'
+        width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 - spy.GetParam(gui.htmlpanelwidth_margin_adjust))'
+        height="$spy.GetParam(gui.html.combo_height)"
+        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+        name='SET_SNUM_REFINEMENT_FORMULA'
+        items='$spy.GetParam(snum.refinement.original_formula)'
+        value='xf.GetFormula()'
+        onchange='xf.SetFormula(GetValue(SET_SNUM_REFINEMENT_FORMULA))>>spy.SetParam(snum.refinement.formula,"GetValue(SET_SNUM_REFINEMENT_FORMULA)")>>updatehtml'
+      >
+  </td>
+</tr>
+
+<tr VALIGN='center' ALIGN='left' NAME='Z'>
+  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td VALIGN='center' colspan=3>
+    <b>%Number of Formula Units%</b>
+  </td>
+  <td VALIGN='center' ALIGN='right' colspan=1>
+      <input
+        type='spin'
+        width='120'
+        height="$spy.GetParam(gui.html.spin_height)"
+        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+        name='SET_Z'
+        min='1'
+        value='xf.au.GetZ()'
+        onchange="xf.au.SetZ(GetValue(SET_Z))>>updatehtml"
+      >
+  </td>
+</tr>
+
+<tr VALIGN='center' ALIGN='left' NAME='Z Prime'>
+  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td VALIGN='center' colspan=3>
+    <b>%Number in Asymmetric Unit%</b>
+  </td>
+  <td VALIGN='center' ALIGN='right' colspan=1>
+      <input
+        type='text'
+        width="120"
+        height="$spy.GetParam(gui.html.spin_height)"
+        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+        name='SET_Z_PRIME'
+        value='xf.au.GetZprime()'
+        onleave="xf.au.SetZprime(GetValue(SET_Z_PRIME))>>updatehtml"
+      >
+  </td>
+</tr>
+
+<tr VALIGN='center' ALIGN='left' NAME='Atomic Volume'>
+  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td VALIGN='center' colspan=3>
+    <b>%Current Atomic Volume%</b>
+  </td>
+  <td VALIGN='center' ALIGN='right' colspan=1>
+    <b>
+      $spy.GetParam('snum.solution.current_atomic_volume')
+    </b>
+    &Aring;
+  </td>
+</tr>
+
+<tr VALIGN='center' ALIGN='left' NAME='SPACE GROUP'>
+  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td VALIGN='center' colspan=3>
+    <b>%Space Group%</b>&nbsp;
+    <a href='sg>>spy.SetParam(snum.refinement.sg_list,SGList())>>html.Reload'><b>%Suggest SG%</b></a>
+  </td>
+  <td VALIGN='center' ALIGN='right' colspan=1>
+      <input
+        type='combo'
+        width="120"
+        height="$spy.GetParam(gui.html.combo_height)"
+        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+        name='SET_SNUM_REFINEMENT_SPACE_GROUP'
+        items='$spy.GetParam(snum.refinement.sg_list)'
+        value='$sg(%n)'
+        onchange="reset -s=GetValue(SET_SNUM_REFINEMENT_SPACE_GROUP) -c=GetValue(SET_SNUM_REFINEMENT_FORMULA)>>spy.run_skin sNumTitle>>updatehtml"
+      >
+  </td>
+</tr>
+
+<!--
+<tr VALIGN='center' ALIGN='left' NAME='IGNORE_SETTINGS'>
+  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td VALIGN='center' colspan=3>
+    <b>
+      Graphical Output
+    </b>
+  </td>
+  <td VALIGN='center' ALIGN='right' colspan=1>
+    <font size='2'>
+      <input
+        type='checkbox'
+        width="$spy.GetParam(gui.html.checkbox_height)"
+        height="$spy.GetParam(gui.html.checkbox_height)"
+        name='SNUM_SOLUTION_GRAPHICAL_OUTPUT'
+        checked="$spy.GetParam(snum.solution.graphical_output)"
+        oncheck='spy.SetParam(snum.solution.graphical_output,true)'
+        onuncheck='spy.SetParam(snum.solution.graphical_output,false)>>spy.reset_file_in_OFS(solution_image.htm)>>UpdateHtml'
+        value=''
+      >
+    </font>
+  </td>
+</tr>
+-->
+
+
+</table>
+
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+<!-- #includeif fs.Exists(solution-settings-h3-solution-settings-extra.htm) solution-settings-h3-solution-settings-extra solution-settings-h3-solution-settings-extra.htm;gui\blocks\tool-h3-off.htm;image=solution-settings-h3-solution-settings-extra;colspan=4;onclick=;onclick=;2; -->
+<!-- #includeif fs.Exists(solution_image.htm) solution_image solution_image.htm;1; -->
+</table>
+
+
+</font>
+<!--<tr>-->
+<!--<!-- #includeif file.Exists('FilePath()/.olex/xy.htm') XY 'FilePath()/.olex/xy.htm';1; -->
+<!--</tr>-->

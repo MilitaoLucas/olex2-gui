@@ -27,6 +27,8 @@ global formula_string
 formula = ""
 formula_string = ""
 
+global tutorial_box_initialised
+tutorial_box_initialised = False
 
 def makeHtmlTable(list):
   """ Pass a list of dictionaries, with one dictionary for each table row.
@@ -243,8 +245,8 @@ def make_gui_edit_link(name):
   return editLink
 OV.registerFunction(make_gui_edit_link)
 
-
 def make_help_box(args):
+  global tutorial_box_initialised
   d = {}
   name = args.get('name', None)
   name = getGenericSwitchName(name)
@@ -385,12 +387,15 @@ def make_help_box(args):
         x = mouseX - 10
 
   else:
-    ws = olx.GetWindowSize('gl')
-    ws = ws.split(',')
-    x = int(ws[0])
-    y = int(ws[1]) + 50
-    boxWidth = int(400)
-    boxHeight = int(ws[3]) - 80
+    if box_type == 'tutorial' and tutorial_box_initialised:
+      pass
+    else:
+      ws = olx.GetWindowSize('gl')
+      ws = ws.split(',')
+      x = int(ws[0])
+      y = int(ws[1]) + 50
+      boxWidth = int(400)
+      boxHeight = int(ws[3]) - 120
 
   if popout:
     if box_type == 'tutorial':
@@ -398,10 +403,14 @@ def make_help_box(args):
       name = "Tutorial"
     else:
       pop_name = "%s-%s"%(name, box_type)
-    olx.Popup(pop_name, wFilePath, "-b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(name, boxWidth, boxHeight, x, y))
-    olx.html_SetBorders(pop_name,5)
-#    olx.Popup(pop_name, wFilePath, "-b=tc -t='%s' -w=%i -d='echo' -h=%i -x=%i -y=%i" %(name, boxWidth, boxHeight, x, y))
-#    olx.html_SetBorders(pop_name,5)
+    if box_type == 'tutorial' and tutorial_box_initialised:
+      olx.Popup(tutorial_box_initialised, wFilePath)
+    else:
+      olx.Popup(pop_name, wFilePath, "-b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(name, boxWidth, boxHeight, x, y))
+      olx.html_SetBorders(pop_name,5)
+      if box_type == 'tutorial':
+        tutorial_box_initialised = pop_name
+
   else:
     olx.html_Load(wFilePath)
 #  popup '%1-tbxh' 'basedir()/etc/gui/help/%1.htm' -b=tc -t='%1' -w=%3 -h=%2 -x=%4 -y=%5">
@@ -644,7 +653,7 @@ def format_help(string):
   import re
   d = {}  # initialise a dictionary, which will be used to store metadata.
 
-  ## find all occurances of strings between **..**. These should be comma separated things to highlight.
+  ## find all occurences of strings between **..**. These should be comma separated things to highlight.
   regex = re.compile(r"\*\* (.*?)  \*\*", re.X)
   l = regex.findall(string)
   if l:
@@ -656,7 +665,7 @@ def format_help(string):
 #      string = regex.sub(r"\g<left><font color='$spy.GetParam(gui.html.highlight_colour)'><b>\g<txt></b></font>\g<right>", string)
       string = regex.sub(r"\g<left><b>\g<txt></b>\g<right>", string)
 
-  ## find all occurances of strings between {{..}}. This will be translated into a dictionary and returned with the string.
+  ## find all occurences of strings between {{..}}. This will be translated into a dictionary and returned with the string.
   regex = re.compile(r"\{\{ (.*?)  \}\}", re.X)
   dt = regex.findall(string)
   if dt:
@@ -668,36 +677,46 @@ def format_help(string):
     d = eval(dt)
 
 
-  ## find all occurances of <lb> and replace this with a line-break in a table.
+  ## find all occurences of <lb> and replace this with a line-break in a table.
   regex = re.compile(r"<lb>", re.X)
   string = regex.sub(r"</td></tr><tr><td>", string)
 
-  ## find all occurances of '->' and replace this with an arrow.
+  ## find all occurences of '->' and replace this with an arrow.
   regex = re.compile(r"->", re.X)
   string = regex.sub(r"<b>&rarr;</b>", string)
 
-  ## find all occurances of strings between t^..^t. These are the headers for tip of the day.
+  ## find all occurences of strings between t^..^t. These are the headers for tip of the day.
   regex = re.compile(r"t \^ (.*?)  \^ t", re.X)
   string = regex.sub(r"<font color='$spy.GetParam(gui.html.highlight_colour)'><b>\1</b></font>&nbsp;", string)
 
-  ## find all occurances of strings between <<..>>. These are keys to pressthe headers for tip of the day.
+  ## find all occurences of strings between <<..>>. These are keys to pressthe headers for tip of the day.
   regex = re.compile(r"<< (.*?)  >>", re.X)
   string = regex.sub(r"<b><code>\1</code></b>", string)
 
-  ## find all occurances of strings between n^..^n. These are the notes.
+  ## find all occurences of strings between n^..^n. These are the notes.
   regex = re.compile(r"n \^ (.*?)  \^ n", re.X)
   string = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='1'><tr bgcolor=#efefef><td><font size=-1><b>Note: </b>\1</font></td></tr></table>", string)
 
-  ## find all occurances of strings between l[]. These are links to help or tutorial popup boxes.
+  ### find all occurences of strings between TT..TT. These are keys to pressthe headers for tip of the day.
+  #regex = re.compile(r"TT (.*?)  TT", re.X)
+  #string = regex.sub(r"<tr><td align='right'><a href='spy.run_autodemo(\1)'><zimg src=tutorial.png></a></td></tr>", string)
+
+  ## find all occurences of strings between TT..TT. These are keys to pressthe headers for tip of the day.
+  regex = re.compile(r"TT (.*?)  TT", re.X)
+  sx = string
+  string = regex.sub(r"<tr><td align='right'>$spy.MakeHoverButton(button-tutorial,spy.demo.run_autodemo\\(\1))</td></tr>", string)
+  string = string.replace(r"\\\\",r"\\")
+  
+  ## find all occurences of strings between l[]. These are links to help or tutorial popup boxes.
   regex = re.compile(r"l\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
   string = regex.sub(r"<font size=+1 color='$spy.GetParam(gui.html.highlight_colour)'>&#187;</font><a target='Go to \g<linktext>' href='spy.make_help_box -name=\g<linkurl> -type=\g<linktype>'><b>\g<linktext></b></a>", string)
 
-  ## find all occurances of strings between gui[]. These are links make something happen on the GUI.
+  ## find all occurences of strings between gui[]. These are links make something happen on the GUI.
   regex = re.compile(r"gui\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
   string = regex.sub(r"<font size=+1 color='$spy.GetParam(gui.html.highlight_colour)'>&#187;</font><a target='Show Me' href='\g<linkurl>'><b>\g<linktext></b></a>", string)
 
 
-  ## find all occurances of strings between XX. These are command line entities.
+  ## find all occurences of strings between XX. These are command line entities.
   width = int(OV.GetHtmlPanelwidth()) - 10
   regex = re.compile(r"  XX (.*?)( [^\XX\XX]* ) XX ", re.X)
   m = regex.findall(string)
@@ -711,7 +730,7 @@ def format_help(string):
     s = string
   string = s
 
-  ## find all occurances of strings between ~. These are the entries for the table.
+  ## find all occurences of strings between ~. These are the entries for the table.
   regex = re.compile(r"  ~ (.*?)( [^\~\~]* ) ~ ", re.X)
   m = regex.findall(string)
   colour = OV.GetParam('gui.html.highlight_colour').hexadecimal
@@ -720,7 +739,7 @@ def format_help(string):
   else:
     s = string
 
-  ## find all occurances of strings between@. These are the table headers.
+  ## find all occurences of strings between@. These are the table headers.
   string = s
   regex = re.compile(r"  @ (.*?)( [^\@\@]* ) @ ", re.X)
   m = regex.findall(string)
@@ -730,7 +749,7 @@ def format_help(string):
   else:
     s = string
 
-  ## find all occurances of strings between &. These are the tables.
+  ## find all occurences of strings between &. These are the tables.
   string = s
   #regex = re.compile(r"  (&&) (.*?)( [^\&\&]* ) (&&) ", re.X)
   regex = re.compile(r"  (&&) (.*?) (&&) ", re.X)
