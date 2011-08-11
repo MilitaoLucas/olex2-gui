@@ -99,8 +99,10 @@ class AutoDemo():
 
     olx.Clear()
     
-    self.get_demo_item()
-    self.run_demo_item()
+    cmd_type = ""
+    while 'p' not in cmd_type:
+      self.get_demo_item()
+      cmd_type = self.run_demo_item()
     
     #please_exit = False
     #if not self.interactive:
@@ -168,10 +170,8 @@ class AutoDemo():
     else:
       if self.interactive:
         rFile = open("%s/etc/gui/blocks/templates/pop_tutorials.htm" %OV.BaseDir(),'r')
-        
       else:
         rFile = open("%s/etc/gui/blocks/templates/pop_tutorials_loop.htm" %OV.BaseDir(),'r')
-        
       txt = rFile.read() %d
       rFile.close()
 
@@ -329,10 +329,11 @@ class AutoDemo():
       olex.m(cmd_content)
       OV.Refresh()
       
-    if cmd_type != 'p':
-      self.get_demo_item()
-      self.run_demo_item()
-      OV.Refresh()
+    return cmd_type
+#    if cmd_type != 'p':
+#      self.get_demo_item()
+#      self.run_demo_item()
+#      OV.Refresh()
 
   
 AutoDemo_istance = AutoDemo()
