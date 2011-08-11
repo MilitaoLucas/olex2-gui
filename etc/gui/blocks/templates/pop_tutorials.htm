@@ -5,24 +5,39 @@
     <td valign='top'>
       <input
         type="button"
+        name=TUTORIAL_Back
+        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+        valign='center'
+        width="60"
+        height="22"
+        onclick="spy.demo.back_demo_item()"
+        value = "Back">&nbsp;
+    </td>
+    <td valign='top'>
+      <input
+        type="button"
         name=TUTORIAL_CANCEL
         bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
         valign='center'
         width="60"
         height="22"
-        onclick="html.EndModal(%(pop_name)s,0)"
+        onclick="spy.demo.cancel_demo_item()"
         value = "Cancel">&nbsp;
+    </td>
+    <td valign='top'>
       <input
-          type="button"
-          name=TUTORIAL_NEXT
-          bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-          valign='center'
-          width="60"
-          height="22"
-          onclick="html.EndModal(%(pop_name)s,1)"
-          value = "Next">
+        type="button"
+        name=TUTORIAL_NEXT
+        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+        valign='center'
+        width="60"
+        height="22"
+        onclick="spy.demo.next_demo_item()"
+        value = "Next">
      </td>
    </tr>
+
+
 </table>
    
 <!--
@@ -40,12 +55,12 @@ $spy.MakeHoverButton(button_small-next,html.EndModal\(%(pop_name)s,1))
     </tr>
 -->
 
-<table bgcolor='#ababab' border="0" VALIGN='left' style="border-collapse: collapse" width="100%%" cellpadding="5" cellspacing="1">
+<table bgcolor='%(bg_colour)s' border="0" VALIGN='left' style="border-collapse: collapse" width="100%%" cellpadding="5" cellspacing="1">
 
 
   <tr align = 'left' bgcolor='%(bg_colour)s'>
     <td><br>
-<font color='%(font_colour)s' size=3 face="$spy.GetParam(gui.html.font_name)">
+<font color='%(font_colour)s' size=4 face="$spy.GetParam(gui.html.font_name)">
     %(txt)s
 </font>
     </td>

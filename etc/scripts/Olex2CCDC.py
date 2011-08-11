@@ -30,12 +30,11 @@ class CcdcSubmit():
       if not self.check_and_get_prerequisites():
         return False
       res = self.make_pop_box()
-      if res == 0:
+      if res != 1:
         f = "Cancel: Nothing has been sent to the CCDC"
         print f
         return False
-      if res == 1:
-        print "Sending to the ccdc now..."
+      print "Sending to the CCDC now..."
   
       self.zip_files()
       

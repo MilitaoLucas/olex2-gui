@@ -335,6 +335,7 @@
       <cmd3 "file">
       <cmd4 "if and(IsFileType(ires),or(strcmp(%1,ins),strcmp(%1,res))) then 'listen filepath()/filename().%1' else none">
       <cmd5 "if strcmp(%1,hkl) then 'exec -o getvar(defeditor) &2E;hklsrc()&2E;' else 'exec -o getvar(defeditor) &2E;filepath()/filename().%1&2E;'">
+      <cmd6 "if strcmp(%1,note) then 'exec -o getvar(defeditor) &2E;filepath()/filename()-note.txt&2E;'">
     \>
     <onterminate
       <cmd1 "stop">
@@ -1556,7 +1557,6 @@
       <cmd2 "itemstate info-title 1">
       <cmd2 "itemstate index-g3 1">
       <cmd2 "itemstate g3-* 0">
-      <cmd2 "itemstate states 1">
       <cmd2 "itemstate tasks 1">
       <cmd2 "itemstate *tab-g3 2">
     \>

@@ -1,0 +1,67 @@
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
+<tr>
+	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+	<td valign='center' colspan='2'>
+		<b>Entering no values searchs on current structure</b>
+	</td>
+</tr>
+<tr>
+	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+	<td valign='center' colspan='2'>
+		<b>Cell Parameters</b>
+	</td>
+</tr>
+<tr>
+	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+	</td>
+	<td valign='center' colspan='2'>
+		<table>
+					<tr>
+						<th>a</th>
+						<td><input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name="cell_A" value=""></td>
+						<th>b</th>
+						<td><input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name="cell_B" value=""></td>
+						<th>c</th>
+						<td><input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name="cell_C" value=""></td>
+					</tr>
+					<tr>
+						<th>&#945;</th>
+						<td><input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name="cell_Alpha" value=""></td>
+						<th>&#946;</th>
+						<td><input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name="cell_Beta" value=""></td>
+						<th>&#947;</th>
+						<td><input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name="cell_Gamma" value=""></td>
+					</tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+	<td valign='center'>
+		&nbsp;<b>%Error:%</b>
+	</td>
+	<td valign='left'>
+		<font size='2'>
+			&nbsp;<b>%Size%</b>&nbsp;
+			<input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name = "error_s"  width="40"  height="17" value = "2">
+			&nbsp;<b>%Angle%</b>&nbsp;
+			<input type="text" bgcolor="$spy.GetParam(gui.html.input_bg_colour)" name = "error_a"  width="40"  height="17" value = "2">
+		</font>
+	</td>
+</tr>
+<tr>
+	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+	<td valign='center'>
+		<input
+		  name=IMG_BUTTON_SMALL-SEARCH
+		  type="button"
+		  image="up=button_small-gooff.png,down=button_small-gooff.png,hover=button_small-gohover.png",disable="button_small-godisable.png"
+		  hint="Search"
+		  onclick="spy.OlexCDS(getvalue(error_a), getvalue(error_s), getvalue(cell_A), getvalue(cell_B), getvalue(cell_C), getvalue(cell_Alpha), getvalue(cell_Beta), getvalue(cell_Gamma))"
+		  bgcolor=#e1e1e1
+		>
+	</td>
+</tr>
+
+
+<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->

@@ -1,4 +1,6 @@
-﻿#set:bg_colour=gui.html.bg_colour
+﻿
+BEGIN
+#set:bg_colour=gui.html.bg_colour
 #set:font_colour=gui.html.font_colour
 
 set:font_colour_code=#aaaaff
@@ -9,5 +11,5 @@ c:itemstate index-home 1
 c:itemstate tab* 2
 c:grad False
 c:showQ False
-c:default
+#c:default
 c:lines 10

@@ -44,6 +44,7 @@
   Edit Cif Info
   Merge Cif
   Validate Cif
+  Tutorial
 
 [TWO BUTTONS PER ROW]
   Stereo (Colour)
@@ -52,7 +53,8 @@
   Normal View
   Get CheckCif Report
   Get CCDC Number
-
+  Fit Group
+  Fit & Split
 
 [SMALL BUTTONS]
   Delete
@@ -81,8 +83,9 @@
   Fit Group
   Electron Density Map
   Separate Moieties
-  Solve the Structure
-  Refine the Structure
+  Solve this Structure
+  Refine this Structure
+  Create a Report of this Structure
 
 [TINY BUTTONS]
   a
@@ -97,3 +100,8 @@
   H
   Go
   Set
+  
+[G3 BIG BUTTON]
+  Solve this Structure
+  Refine this Structure
+  Create a Report of this Structure
