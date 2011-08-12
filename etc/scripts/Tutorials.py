@@ -320,15 +320,20 @@ class AutoDemo():
         n = 2
 
       control_name = "IMG_%s" %control.upper()
+      if '@' in control:
+        print "@ in control"
+        control_image = control.lower().split('@')[0]
+      else:
+        control_image = control
       for i in xrange(n):
         if "element" in control:
-          new_image = "up=%son.png" %control
+          new_image = "up=%son.png" %control_image
           olx.html_SetImage(control_name,new_image)
         elif control.endswith('_bg'):
-          cmd = 'html.setBG(%s,%s)' %(control.rstrip('_bg'), self.highlight_colour)
+          cmd = 'html.setBG(%s,%s)' %(control_image.rstrip('_bg'), self.highlight_colour)
           olex.m(cmd)
         else:
-          new_image = "up=%soff.png" %control
+          new_image = "up=%soff.png" %control_image
           olx.html_SetImage(control_name,new_image)
         OV.Refresh()
         olx.Wait(300)
@@ -340,13 +345,13 @@ class AutoDemo():
           cmd = 'html.setBG(%s,%s)' %(control.rstrip('_bg'), '#fffffe')
           olex.m(cmd)
         else:
-          new_image = "up=%shighlight.png" %control
+          new_image = "up=%shighlight.png" %control_image
           olx.html_SetImage(control_name,new_image)
         OV.Refresh()
         olx.Wait(300)
 
       if not control.endswith('_bg'):
-        new_image = "up=%soff.png" %control
+        new_image = "up=%soff.png" %control_image
         olx.html_SetImage(control_name,new_image)
 
     if cmd_type == 'c':
