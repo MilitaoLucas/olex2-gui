@@ -13,8 +13,13 @@ c:showq a false
 p:This tutorial will show you how to use grow on a molecule in order to demonstrate how molecules interact with each other within the structure
 
 p:First we need to load an extended structure model so for this we will use <b>ZZULI2</b> from the <b>sample structures</b>
+
+c:freeze(true)
 c:reap 'DataDir()/samples/ZZULI2/ZZULI2.res'
+c:spy.revert_to_original()
 c:mpln -n
+c:freeze(false)
+
 c:refresh
 
 p:The next thing to do in order to help keep all of the molecule in view is to set the command window to automatic zoom so that it keeps the molecule in view at all times.

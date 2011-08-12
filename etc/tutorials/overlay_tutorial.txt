@@ -10,7 +10,11 @@ c:itemstate index-home 1
 c:itemstate tab* 2
 c:lines 10
 c:showq a false
+
+c:freeze(true)
 c:reap 'DataDir()/samples/sucrose/sucrose.res'
+c:spy.revert_to_original()
+c:freeze(false)
 
 p:This tutorial will show you how to use the overlay feature in Olex2
 

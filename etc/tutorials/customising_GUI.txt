@@ -10,6 +10,11 @@ c:itemstate index-home 1
 c:itemstate tab* 2
 c:lines 10
 
+c:freeze(true)
+c:reap 'DataDir()/samples/sucrose/sucrose.res'
+c:spy.revert_to_original()
+c:freeze(false)
+
 p:This tutorial will show you how to customise the GUI to a style that may help you to feel more comfortable in using Olex2. The sample structure for THPP will now be loaded in order to show how certain functions work later in the tutorial.
 c:reap 'DataDir()/samples/THPP/THPP.res'
 
