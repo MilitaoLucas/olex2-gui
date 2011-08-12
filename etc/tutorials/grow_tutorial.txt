@@ -49,7 +49,7 @@ p:In order to then cause the molecule to grow you have to select the button <b>G
 h:BUTTON_GROW_MODE
 c:run(mode grow GetData(GROW_SHORT) GetData(GROW_SELECTION) GetData(GROW_VDW))
 
-p:You can now make the molecule grow by one molecular unit everytime you click on one of the grey bonds with a purple end, but the screen will not auto zoom if you choose to grow using the GUI method
+p:You can now make the molecule grow by one molecular unit whenever you click on one of the grey bonds with a purple end, but the screen will not auto zoom if you choose to grow using the GUI method
 
 p:...but you can use the command line <c>grow</c> which will make the molecule grow by one each time the command is entered and the screen will auto zoom
 c:mode off
@@ -82,7 +82,7 @@ c:html.setstate(GROW_SELECTION,false)
 c:html.setbg(GROW_SELECTION,lightgrey)
 c:rota y 90
 
-p:Another mode you can use is the <b>VdW (Van der Waal)</b> which will show weak intermolcular forces occuring within the molecules you do this by selecting the box
+p:Another mode you can use is the <b>VdW (Van der Waal)</b> which will show weak intermolecular forces occurring within the molecules you do this by selecting the box
 c:fuse
 c:html.setbg(GROW_VDW,red)
 c:html.setstate(GROW_VDW,true)
@@ -90,7 +90,7 @@ c:html.setstate(GROW_VDW,true)
 p:And again click the <b>Grow Mode</b> button
 c:run(mode grow GetData(GROW_SHORT) GetData(GROW_SELECTION) GetData(GROW_VDW))
 
-p:You can now, using the gray and purple bonds, grow another molecule that has a weak interation with the current model.
+p:You can now, using the grey and purple bonds, grow another molecule that has a weak interaction with the current model.
 c:sgen 3-X,-Y,,2-Z
 c:zoom(-0.045)
 

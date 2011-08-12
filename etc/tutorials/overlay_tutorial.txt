@@ -31,9 +31,9 @@ p:You should now see two models of sucrose on the screen these are the same mode
 c:match
 c:refresh
 
-p:The two models should now be overlayed on top of each other perfectly so that it appears that there is only one model there
+p:The two models should now be overlaid on top of each other perfectly so that it appears that there is only one model there
 
-p:Once you are satisfied that the two models match up you can select the link <b>Unmatch</b> which will seperate the models.
+p:Once you are satisfied that the two models match up you can select the link <b>Unmatch</b> which will separate the models.
 c:fuse
 c:refresh
 
@@ -41,10 +41,10 @@ p:To get rid of the overlay model you can click on the link called <b>Remove Ove
 c:ofiledel 0
 c:refresh
 
-p:To show how this function could be useful there is a sample sucrose model that is exactly the same as the other but the Oxygens have been replaced with Nitrogen
+p:To show how this function could be useful there is a sample sucrose model that is exactly the same as the other but the Oxygen atoms have been replaced with Nitrogen
 c:@reap -* overlay_tutorial.ins
 
-p:Now to see what happpens when the two models are overlayed when the <b>Match All Fragments</b> link is clicked.
+p:Now to see what happens when the two models are overlaid when the <b>Match All Fragments</b> link is clicked.
 c:match
 c:refresh
 

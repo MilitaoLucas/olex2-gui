@@ -49,7 +49,7 @@ c:showstr
 c:showstr
 c:refresh
 
-p:You can also toggle how the hydrogen atoms are shown in the molecule by pressing <b>ctrl+h</b> this will cause them to either disapear,reappear or shows them with internal h bonds
+p:You can also toggle how the hydrogen atoms are shown in the molecule by pressing <b>ctrl+h</b> this will cause them to either disappear,reappear or shows them with internal h bonds
 c:showh
 c:refresh
 

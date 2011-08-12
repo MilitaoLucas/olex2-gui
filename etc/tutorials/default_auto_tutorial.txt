@@ -18,7 +18,7 @@ c:spy.revert_to_original()
 c:mpln -n
 c:refresh
 
-p:In order to open a sample strucute click on one of the links next to the title <b>Sample Structure</b>, the structure should already have been opened since the last page.
+p:In order to open a sample structure click on one of the links next to the title <b>Sample Structure</b>, the structure should already have been opened since the last page.
 
 p:By clicking on the <b>Work</b> tab, we get access to the main tools:
 h:tab-work
@@ -64,7 +64,7 @@ c:refresh
 p:Refine this again...
 c:refine
 
-p:Now it's time to make everything <b>anistropic</b>. Type <c>anis</c> or click on the <b>ANIS</b> button.
+p:Now it's time to make everything <b>anisotropic</b>. Type <c>anis</c> or click on the <b>ANIS</b> button.
 h:toolbar-anis
 c:anis
 c:refine
