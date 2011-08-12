@@ -10,7 +10,13 @@ c:itemstate tab* 2
 c:lines 10
 
 p:This tutorial will look at how to get geometrical measurements and analysis from your 3D model using the Olex2 system and the <b>Sample structure THPP</b>.
+
+
+c:freeze(true)
 c:reap 'DataDir()/samples/THPP/THPP.res'
+c:spy.revert_to_original()
+c:freeze(false)
+
 
 p:To start with you need to click on the <b>View</b> tab.
 h:tab-view
