@@ -10,6 +10,7 @@ c:itemstate tab* 2
 c:lines 10
 c:showQ True
 c:showq a false
+c:reap 'DataDir()/samples/sucrose/sucrose.res'
 
 p:This tutorial will run you through how to capture images of your 3D model using the Olex2 system.
 
@@ -82,4 +83,4 @@ h:button_small-go@image-series
 p:The movie file should be saved where the rest of the images get saved to for this model, since it does not show the address for where the file gets saved to.
 c:itemstate h3-image-series 2
 
-p:End of tutorial
+p:End of tutorial, press next to repeat the tutorial or cancel to exit.

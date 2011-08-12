@@ -21,7 +21,7 @@ h:h2-stereo-view
 c:itemstate view-stereo-view 1
 
 p:In this tab there are 4 different 3D options available, the first option available is Stereo colour.
-h:button-stereo_(Colour)
+h:button-stereo_(colour)
 c:gl.stereo(color)
 c:refresh
 
@@ -33,13 +33,13 @@ c:gl.stereo(normal)
 c:refresh
 
 p:The next button in this tab is <b>Stereo Anaglyph</b> which enables the model to be seen by red blue glasses as well
-h:button-stereo_(Anaglyph)
+h:button-stereo_(anaglyph)
 c:gl.stereo(anaglyph)
 c:refresh
 
 p:The last button in this area is the <b>hardware</b> button which will only work if you have a 3D monitor and the glasses to go with them.
 c:gl.stereo(normal)
-h:button-stereo_(Hardware)
+h:button-stereo_(hardware)
 c:gl.stereo(hardware)
 c:refresh
 
@@ -49,6 +49,6 @@ c:gl.stereo(cross)
 c:refresh
 
 p:This viewing method works like a magic eye book where you have to cross your eyes and the image appears to be 3D
-
-p:End of tutorial.
 c:gl.stereo(normal)
+
+p:End of tutorial, click on the next button to replay the tutorial or the cancel button to exit.

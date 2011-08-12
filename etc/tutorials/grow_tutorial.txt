@@ -108,5 +108,7 @@ c:grow -s
 p:The camera should still auto zoom since you are using a command and not the GUI
 c:grow -s
 
-p:End of tutorial
+p:And again fuse can be used in order to revert back to a single molecule.
 c:fuse
+
+p:End of tutorial, press next to repeat the tutorial or cancel to exit.
