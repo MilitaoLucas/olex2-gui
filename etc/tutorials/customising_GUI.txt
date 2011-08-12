@@ -10,7 +10,7 @@ c:itemstate index-home 1
 c:itemstate tab* 2
 c:lines 10
 
-p:This tutorial will show you how to customise the GUI to a style that may help you to feel more comfortable in using Olex2
+p:This tutorial will show you how to customise the GUI to a style that may help you to feel more comfortable in using Olex2. The sample structure for THPP will now be loaded in order to show how certain functions work later in the tutorial.
 c:reap 'DataDir()/samples/THPP/THPP.res'
 
 p:Most of the functions in this technique are command based as not many of them appear in the GUI.
@@ -123,4 +123,4 @@ p:To return all the atoms back to there actual size simply type in the command <
 c:azoom 100
 c:refresh
 
-p:End of tutorial
+p:End of tutorial, click on the next button to replay the tutorial or the cancel button to exit.

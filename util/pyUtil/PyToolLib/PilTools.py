@@ -2088,7 +2088,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     tabItems = []
     g3tabItems = ['g3-solve', 'g3-refine', 'g3-image', 'g3-report', 'g3-tools']
 
-    directories = ["etc/gui", "etc/news", "etc/gui/blocks", "etc/gui/snippets", "etc/gui/g3"]
+    directories = ["etc/gui", "etc/news", "etc/gui/blocks", "etc/gui/snippets", "etc/gui/g3", "etc/tutorials"]
     rFile = open("%s/etc/gui/blocks/index-tabs.htm" %(self.basedir), 'r')
     for line in rFile:
       t = line.split("<!-- #include ")[1]

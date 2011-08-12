@@ -118,4 +118,4 @@ c:refresh
 c:itemstate solve-settings 2
 
 c:spy.switch_tab_for_tutorials(home)
-p:End of tutorial. <br><font size='1'>Written by Simon Harries.</font>
+p:End of tutorial, press next to repeat the tutorial or cancel to exit. <br><font size='1'>Written by Simon Harries.</font>

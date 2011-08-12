@@ -10,6 +10,7 @@ c:itemstate index-home 1
 c:itemstate tab* 2
 c:lines 10
 c:showQ a false
+c:reap 'DataDir()/samples/sucrose/sucrose.res'
 
 p:Welcome to Olex2 this software will be able to help you in creating 3D models for small-molecule structure solution and refinement.
 
@@ -69,4 +70,4 @@ c:itemstate h3-history-tree 1
 
 p:Then simply choose a past solution by double clicking on it
 
-p:End of tutorial
+p:End of tutorial, press next to repeat the tutorial or cancel to exit.

@@ -9,6 +9,8 @@ c:itemstate index* 0
 c:itemstate tab* 2
 c:itemstate index-home 1
 c:lines 10
+c:showq a false
+c:reap 'DataDir()/samples/sucrose/sucrose.res'
 
 p:This tutorial will show you how to use the sorting options in Olex2
 
@@ -40,6 +42,7 @@ c:text
 
 p:To make it easier to find the relevant information you can also type in the command <c>clear</c> before the the <c>text</c> command as this will only show the table you are wanting to look at now.
 c:clear
+c:sort +ml
 c:text
 
 p:The next button <b>Atom Label</b> sorts the table alphabetically by the Atoms label name
@@ -87,4 +90,4 @@ c:info
 c:refresh
 c:text
 
-p:End of tutorial
+p:End of tutorial, press next to repeat the tutorial or cancel to exit.

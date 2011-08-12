@@ -10,6 +10,7 @@ c:itemstate index-home 1
 c:itemstate tab* 2
 c:lines 10
 c:showq a false
+c:reap 'DataDir()/samples/sucrose/sucrose.res'
 
 p:If you are wanting to pack the structures so that it shows how they interact with each other inside the molecule then first click on <b>View</b>
 h:tab-view
@@ -49,4 +50,4 @@ h:button-fuse
 c:fuse
 c:refresh
 
-p:End of tutorial
+p:End of tutorial, press next to repeat the tutorial or cancel to exit.
