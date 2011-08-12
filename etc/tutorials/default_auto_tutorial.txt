@@ -1,5 +1,6 @@
 ﻿## Please note that all actions from all_tutorials_preamble.txt will be added here!
 
+c:itemstate home-start 2
 c:showQ True
 
 p:Welcome to this introductory tutorial. To get the most out of it, please read this text carefully and when you are done press the <b>Next</b> button - or simply hit the Return key!<br>
@@ -8,12 +9,16 @@ p:We suggest that you go through the whole tutorial first, then run it again and
 
 p:In this tutorial, we will be solving and refining one of the sample structures that come with Olex2 - Sucrose.
 
-p:We load the structure from the <b>Start</b> tool. The tool will be highlighted after you hit return.
+p:We load the structure from the <b>Start</b> tool. The tool will be highlighted after you move to the next page.
 h:h2-start
+c:itemstate home-start 1
+c:refresh
 c:reap 'DataDir()/samples/sucrose/sucrose.res'
 c:spy.revert_to_original()
 c:mpln -n
 c:refresh
+
+p:In order to open a sample structure click on one of the links next to the title <b>Sample Structure</b>, the structure should already have been opened since the last page.
 
 p:By clicking on the <b>Work</b> tab, we get access to the main tools:
 h:tab-work
@@ -31,12 +36,14 @@ h:btn-report;1
 p:For example, we can solve the structure by typing <c>solve</c> or by clicking the <b>Solve</b> button. We will do this now.
 h:btn-solve;1
 c:solve
+c:waitfor process
 c:refresh
 
 p:We can tidy this solution by typing <c>clean</c> or by pressing the <b>Clean</b> button.
 h:toolbar-tidy
 c:clean
 c:compaq -a
+c:refresh
 
 p:Let's press the <b>Refine</b> button or type <c>refine</c> and refine what we've got so far.
 h:btn-refine;1
@@ -58,7 +65,7 @@ c:refresh
 p:Refine this again...
 c:refine
 
-p:Now it's time to make everything <b>anistropic</b>. Type <c>anis</c> or click on the <b>ANIS</b> button.
+p:Now it's time to make everything <b>anisotropic</b>. Type <c>anis</c> or click on the <b>ANIS</b> button.
 h:toolbar-anis
 c:anis
 c:refine
@@ -70,11 +77,12 @@ p:Let's add some hydrogen atoms to this. Type <c>hadd</c> or click on the <b>ADD
 h:button_small-add_h
 c:hadd
 c:refine
+c:refresh
 
 p:You can toggle the display of electron density peaks (Q-peaks) by repeatedly pressing the <b>Q</b> button or by <c>CTRL+Q</c>
-h:toolbar-Q
+h:toolbar-q
 c:showQ False
-
+c:refresh
 ##
 
 p:Of course, we can change the settings of the solution program.
@@ -92,7 +100,7 @@ p:... set the <b>Formula</b> and can determine the <b>space group</b>.
 h:SET_SNUM_REFINEMENT_FORMULA_bg
 h:SET_SNUM_REFINEMENT_SPACE_GROUP_bg
 
-p:When you click on <b>Suggest SG</b> link (or type <c>sg</c>, watch what happens!
+p:When you click on <b>Suggest SG</b> link, or type <c>sg</c>, watch what happens!
 c:sg
 c:refresh
 
@@ -111,4 +119,4 @@ c:refresh
 c:itemstate solve-settings 2
 
 c:spy.switch_tab_for_tutorials(home)
-p:End of tutorial. <br><font size='1'>Written by Simon Harries.</font>
+p:End of tutorial, press next to repeat the tutorial or cancel to exit. <br><font size='1'>Written by Simon Harries.</font>

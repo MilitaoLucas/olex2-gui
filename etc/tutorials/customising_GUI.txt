@@ -1,16 +1,30 @@
-## Please note that all actions from all_tutorials_preamble.txt will be added here!
+#set:bg_colour=gui.html.bg_colour
+#set:font_colour=gui.html.font_colour
 
+set:font_colour_code=#aaaaff
+set:font_colour_bold=gui.html.highlight_colour
 
-p:This tutorial will show you how to customise the GUI to a style that may help you to feel more comfartable in using Olex2
-c:reap 'DataDir()/samples/THPP/THPP.res'
+c:fuse
+c:itemstate index* 0
+c:itemstate index-home 1
+c:itemstate tab* 2
+c:lines 10
+
+c:freeze(true)
+c:reap 'DataDir()/samples/sucrose/sucrose.res'
 c:spy.revert_to_original()
+c:freeze(false)
+
+p:This tutorial will show you how to customise the GUI to a style that may help you to feel more comfortable in using Olex2. The sample structure for THPP will now be loaded in order to show how certain functions work later in the tutorial.
+c:reap 'DataDir()/samples/THPP/THPP.res'
+c:mpln -n
 
 p:Most of the functions in this technique are command based as not many of them appear in the GUI.
 
 p:The first command we are going to look at is the <b>setfont</b> command which will allow you to edit the font for any part of the software as long as the right area command is given after the command of setfont.
 
-p:So for example if you wanted to change the font of pictures and labels you would need to enter in the command <c>setfont picture_labels choosefont()</c> this will allow you to now select the font, font style, size and script.
-c:setfont picture_labels choosefont()
+p:So for example if you wanted to change the font of pictures and labels you would need to enter in the command <c>setfont Picture_labels choosefont()</c> this will allow you to now select the font, font style, size and script.
+c:setfont Picture_labels choosefont()
 
 p:The next command allows you to change the colours for specific areas in the software as long as the correct prefix is added onto the end of the command
 
@@ -26,12 +40,12 @@ p:...<b>error</b> which allows you to edit material for reporting errors in the 
 p:And <b>exception</b> which allows you to edit material for reporting exception in the console 
 
 p:Another useful function that can be entered into the command line is <c>save</c> this will bring up the save as menu if no file name is provided, you also need to add in extra prefixes if you want certain settings saved which are scene, style, view, model
-c:save
+c:save style
 
 p:The next function to look at is <c>load</c> which will open the load menu if no file is provided,  you also need to add in extra prefixes if you want certain settings saved which are scene, style, view, model
-c:load
+c:load style
 
-p:The next function will allow you to change the colours that appear on the background gradient by entering in the command <c>grad</c> this will open up a window from which you can choose the four corner colours which will change the background to any options that you may find eaiser for seing the model or text.
+p:The next function will allow you to change the colours that appear on the background gradient by entering in the command <c>grad</c> this will open up a window from which you can choose the four corner colours which will change the background to any options that you may find easier for seeing the model or text.
 c:grad
 
 p:You can also put an image of your choice as the background by adding a -p to the previous command then the file name which you want to load so it will be something like this <c>grad -p="[file path]"</c> in order for the image to become the background you need to restart Olex2.
@@ -46,7 +60,7 @@ p:The default value for brad is one so in order to get the bonds back to their n
 c:brad 1
 c:refresh
 
-p:This particular command you can use in the GUI by going to View in the toolbar then opening the tab quickdrawing styles.
+p:This particular command you can use in the GUI by going to View in the toolbar then opening the tab quick drawing styles.
 h:tab-view
 c:spy.switch_tab_for_tutorials(view)
 h:h2-quick-drawing-styles
@@ -60,12 +74,12 @@ p:You can also choose to have the model shown with Ellipsoids by either selectin
 c:html.setimage(IMG_BUTTON-ELLIPSOIDS_|_H,button-ellipsoids_|_hhighlight.png)
 c:ads elp
 
-p:Another command you can use is <c>ads ort</c> which is the same as elp, but spheres have one of the quadrants cut out this command isn't in the GUI
+p:Another command you can use is <c>ads ort</c> which is the same as elp, but spheres have one of the quadrants cut out this command is not in the GUI
 c:html.setimage(IMG_BUTTON-ELLIPSOIDS_|_H,button-ellipsoids_|_h.png)
 c:ads ort
 c:refresh
 
-p:The final command for this customization is <c>ads std</c> which is a standalone atom (i.e. grown as a cross in wire-frame mode) which can also be found in the GUI as <b>Tubes</b>
+p:The final command for this customisation is <c>ads std</c> which is a standalone atom (i.e. grown as a cross in wire-frame mode) which can also be found in the GUI as <b>Tubes</b>
 h:button-tubes
 c:ads std
 c:refresh
@@ -82,7 +96,7 @@ p:The next command is <c>arad pers</c> which is a fixed radii for model viewing
 c:arad pers
 c:refresh
 
-p:The next command is <c>arad isot</c> which gives each atom has it's own radius depending on the value of the Uiso or ADP 
+p:The next command is <c>arad isot</c> which gives each atom its own radius depending on the value of the Uiso or ADP 
 c:arad isot
 c:refresh
 
@@ -115,5 +129,4 @@ p:To return all the atoms back to there actual size simply type in the command <
 c:azoom 100
 c:refresh
 
-c:spy.switch_tab_for_tutorials(home)
-p:End of tutorial. <br><font size='1'>Written by Simon Harries.</font>
+p:End of tutorial, click on the next button to replay the tutorial or the cancel button to exit.

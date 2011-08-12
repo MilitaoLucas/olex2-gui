@@ -1,5 +1,20 @@
-## Please note that all actions from all_tutorials_preamble.txt will be added here!
+#set:bg_colour=gui.html.bg_colour
+#set:font_colour=gui.html.font_colour
 
+set:font_colour_code=#aaaaff
+set:font_colour_bold=gui.html.highlight_colour
+
+c:fuse
+c:itemstate index* 0
+c:itemstate index-home 1
+c:itemstate tab* 2
+c:lines 10
+c:showQ a false
+
+c:freeze(true)
+c:reap 'DataDir()/samples/sucrose/sucrose.res'
+c:spy.revert_to_original()
+c:freeze(false)
 
 p:Welcome to Olex2 this software will be able to help you in creating 3D models for small-molecule structure solution and refinement.
 
@@ -17,7 +32,7 @@ p:You should have noticed that the molecule rotated 90 degrees in the x directio
 c:zoom(eval(0.3-zoom()))
 c:refresh
 
-p:The command window will have now zoomed in on the molecule. If your having problems seeing the molecule easily you can quite easily change the gradient colour by pressing <b>F2</b>.
+p:The command window will have now zoomed in on the molecule. If you are having problems seeing the molecule easily ,because of the gradient colour, you can quite easily change the gradient colour by pressing <b>F2</b>.
 c:zoom(eval(0.1-zoom()))
 c:swapbg
 c:refresh
@@ -27,7 +42,6 @@ c:grad -i
 c:refresh
 
 p:Another helpful keyboard shortcut is <b>ctrl+Q</b> this will toggle the electron densities that appear on the molecule
-c:grad -i
 c:showq
 c:refresh
 
@@ -35,9 +49,12 @@ p:As well as being able to toggle the electron densities you can also toggle the
 c:showstr
 c:refresh
 
-p:You can also toggle how the hydrogen atoms are shown in the molecule by pressing <b>ctrl+h</b> this will cause them to either disapear,reappear or shows them with internal h bonds
+p:In order to get the structure to reappear keep toggling through the different options using <b>ctrl+t</b> in order to get the structure to reappear
 c:showstr
 c:showstr
+c:refresh
+
+p:You can also toggle how the hydrogen atoms are shown in the molecule by pressing <b>ctrl+h</b> this will cause them to either disappear,reappear or shows them with internal h bonds
 c:showh
 c:refresh
 
@@ -51,11 +68,10 @@ c:itemstate work-history 1
 
 p:In this tab you should be able to see some coloured columns if you click on one of these columns then it will revert back to a previous version of your structure
 
-p:Also if you've a created a couple of models from the same data set you can go to past solutions by clicking on the tab <b>History Tree</b>
+p:Also if you've created a couple of models from the same data set you can go to past solutions by clicking on the tab <b>History Tree</b>
 h:h3-h3-history-tree
 c:itemstate h3-history-tree 1
 
 p:Then simply choose a past solution by double clicking on it
 
-c:spy.switch_tab_for_tutorials(home)
-p:End of tutorial. <br><font size='1'>Written by Simon Harries.</font>
+p:End of tutorial, press next to repeat the tutorial or cancel to exit.
