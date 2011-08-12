@@ -1,11 +1,22 @@
-# Please note that all actions from all_tutorials_preamble.txt will be added here!
+#set:bg_colour=gui.html.bg_colour
+#set:font_colour=gui.html.font_colour
 
+set:font_colour_code=#aaaaff
+set:font_colour_bold=gui.html.highlight_colour
 
-p:If you are wanting to pack the molecule so that it shows how they fit together and interact with each other inside the molecule then first click on <b>view</b>
+c:fuse
+c:itemstate index* 0
+c:itemstate index-home 1
+c:itemstate tab* 2
+c:lines 10
+c:showq a false
+c:reap 'DataDir()/samples/sucrose/sucrose.res'
+
+p:If you are wanting to pack the structures so that it shows how they interact with each other inside the molecule then first click on <b>View</b>
 h:tab-view
 c:spy.switch_tab_for_tutorials(view)
 
-p:Then you need to open the toolbar called <b>Symmetry Generation</b> by clicking on it, which will extend the tab
+p:Then you need to open the toolbar called <b>Symmetry Generation</b> by clicking it, which will extend the tab
 h:h2-symmetry-generation
 c:itemstate view-symmetry-generation 1
 
@@ -25,7 +36,7 @@ p:...or you can choose to type the command <c>pack</c> to show the maximum amoun
 c:pack
 c:refresh
 
-p:You can move and rotate and use functions on these as you would for a normal single unit of the molecule for example here is the molecule rotating 90 degrees along the x axis
+p:You can move, rotate and use functions on these as you would for a normal single unit of the molecule for example here is the molecule rotating 90 degrees along the x axis
 c:rota x 90
 c:refresh
 
@@ -34,10 +45,9 @@ c:itemstate h3-packing 2
 h:h3-h3-symmetry-tools
 c:itemstate h3-symmetry-tools 1
 
-p:Once on the symmetry tools tab you need to click on <b>fuse</b> in order to reduce the model to one unit again or type the command <c>fuse</c>
+p:Once on the symmetry tools tab you need to click on <b>Fuse</b> in order to reduce the model to one unit again or type the command <c>fuse</c>
 h:button-fuse
 c:fuse
 c:refresh
 
-c:spy.switch_tab_for_tutorials(home)
-p:End of tutorial. <br><font size='1'>Written by Simon Harries.</font>
+p:End of tutorial, press next to repeat the tutorial or cancel to exit.
