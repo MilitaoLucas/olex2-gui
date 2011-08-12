@@ -10,7 +10,7 @@ c:itemstate index-home 1
 c:itemstate tab* 2
 c:lines 10
 
-p:This tutorial will show you how to customise the GUI to a style that may help you to feel more comfartable in using Olex2
+p:This tutorial will show you how to customise the GUI to a style that may help you to feel more comfortable in using Olex2
 c:reap 'DataDir()/samples/THPP/THPP.res'
 
 p:Most of the functions in this technique are command based as not many of them appear in the GUI.
@@ -39,7 +39,7 @@ c:save
 p:The next function to look at is <c>load</c> which will open the load menu if no file is provided,  you also need to add in extra prefixes if you want certain settings saved which are scene, style, view, model
 c:load
 
-p:The next function will allow you to change the colours that appear on the background gradient by entering in the command <c>grad</c> this will open up a window from which you can choose the four corner colours which will change the background to any options that you may find eaiser for seing the model or text.
+p:The next function will allow you to change the colours that appear on the background gradient by entering in the command <c>grad</c> this will open up a window from which you can choose the four corner colours which will change the background to any options that you may find easier for seeing the model or text.
 c:grad
 
 p:You can also put an image of your choice as the background by adding a -p to the previous command then the file name which you want to load so it will be something like this <c>grad -p="[file path]"</c> in order for the image to become the background you need to restart Olex2.
@@ -54,7 +54,7 @@ p:The default value for brad is one so in order to get the bonds back to their n
 c:brad 1
 c:refresh
 
-p:This particular command you can use in the GUI by going to View in the toolbar then opening the tab quickdrawing styles.
+p:This particular command you can use in the GUI by going to View in the toolbar then opening the tab quick drawing styles.
 h:tab-view
 c:spy.switch_tab_for_tutorials(view)
 h:h2-quick-drawing-styles
@@ -73,7 +73,7 @@ c:html.setimage(IMG_BUTTON-ELLIPSOIDS_|_H,button-ellipsoids_|_h.png)
 c:ads ort
 c:refresh
 
-p:The final command for this customization is <c>ads std</c> which is a standalone atom (i.e. grown as a cross in wire-frame mode) which can also be found in the GUI as <b>Tubes</b>
+p:The final command for this customisation is <c>ads std</c> which is a standalone atom (i.e. grown as a cross in wire-frame mode) which can also be found in the GUI as <b>Tubes</b>
 h:button-tubes
 c:ads std
 c:refresh

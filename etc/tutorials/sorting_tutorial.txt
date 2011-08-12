@@ -38,7 +38,7 @@ p:Alternately you could type in the command <c>text</c> in order to bring a wind
 h:toolbar-text
 c:text
 
-p:To make it easier to find the relavent information you can also type in the command <c>clear</c> before the the <c>text</c> command as this will only show the table you are wanting to look at now.
+p:To make it easier to find the relevant information you can also type in the command <c>clear</c> before the the <c>text</c> command as this will only show the table you are wanting to look at now.
 c:clear
 c:text
 
@@ -69,7 +69,7 @@ c:refresh
 p:You can view the results for these through either medium again but it is recommended to view this through the text box as not all the results will fit into the command window.
 c:text
 
-p:You can also mix and match some of these options in order to get different types of sorted tables for all the avialable sort options tpye the command <c>help sort</c>
+p:You can also mix and match some of these options in order to get different types of sorted tables for all the available sort options type the command <c>help sort</c>
 c:help sort
 c:refresh
 

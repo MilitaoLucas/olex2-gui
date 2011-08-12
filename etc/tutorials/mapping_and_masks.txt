@@ -63,7 +63,7 @@ p:Then moving the mouse while holding these buttons you can alter the depth of t
 
 p:You may also want to change the colour of the plane in order to make it more obvious when a part of the molecule is behind it
 
-p:To do this right click on the plane and select drawstyle this then allows you to alter the colours and choose a darker shade through the options on the window.
+p:To do this right click on the plane and select draw-style this then allows you to alter the colours and choose a darker shade through the options on the window.
 c:html.setvalue(snum_xgrid_depth_slide,0)
 c:html.setvalue(snum_xgrid_depth_value,0)
 c:xgrid.depth(eval(getvalue(snum_xgrid_depth_slide)/5))
