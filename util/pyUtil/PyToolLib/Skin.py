@@ -55,6 +55,8 @@ class Skin():
       self.timage_instance.run_timage()
       self.sNumTitle_instance.run_sNumTitle(force=True)
     #self.adjust_font_size_for_ppi()
+    
+    olx.FlushFS()
 
   def adjust_font_size_for_ppi(self):
     ppi = olex_gui.GetPPI()[0]
