@@ -321,7 +321,7 @@ class AutoDemo():
 
       control_name = "IMG_%s" %control.upper()
       if '@' in control:
-        print "@ in control"
+#        print "@ in control"
         control_image = control.lower().split('@')[0]
       else:
         control_image = control
