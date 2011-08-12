@@ -30,7 +30,7 @@ c:itemstate view-geometry 1
 p:In this tab there are 6 different links, each one of these will help to analyse your model and gather data from it, the first one we will look at is <b>Mean Plane(of active selection)</b>
 
 p:In order to use this feature you first need to highlight one of the rings in the structure to do this you can hold <b>shift</b> to draw a box over one of the rings or select each atom manually
-c:sel C5 N6 C7 C8 C9 C10
+c:sel C5 C3 C2 C4 N8 C9
 c:refresh
 
 p:Once the structure is highlighted click on the link and the average plane for the structure will be produced on the model, or the command <c>mpln sel</c> can be entered.
@@ -48,7 +48,14 @@ p:The next function will allow you to find the best line between the selected op
 
 p:You can either choose to get an overall best line by selecting the entire molecule by holding <b>ctrl+A</b>....
 c:sel -a
-c:line sel
+c:line
+
+p:To align the molecule along the best line, use <b>line -n</b>
+c:sel -a
+c:line -n
+
+p:And to get the current view normal, use the <b>direction</b> command
+c:direction
 
 p:The view will now have changed so that you are looking down the best line of the active selection.
 c:rota y 90
