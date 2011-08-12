@@ -209,6 +209,7 @@ class AutoDemo():
     olx.Echo('Tutorial Ended or Interrupted')
     olx.gl_Stereo('normal')
     olx.OFileDel(0)
+    olx.Fuse()
     if self.user_structure:
       OV.AtReap(self.user_structure)
     #self.have_box_already = False
