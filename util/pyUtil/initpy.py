@@ -2,13 +2,6 @@
 import olex
 import sys
 
-debug = True
-if debug == True:
-  try:
-    import wingdbstub
-  except:
-    pass
-
 datadir = olex.f("DataDir()")
 basedir = olex.f("BaseDir()")
 if sys.platform[:3] == 'win':
@@ -47,6 +40,13 @@ stdout_redirection = True
 import os
 import locale
 import time
+
+debug = True
+if debug == True:
+  try:
+    import wingdbstub
+  except:
+    pass
 
 locale.setlocale(locale.LC_ALL, 'C')
 

@@ -43,8 +43,9 @@ p:You can either choose to get an overall best line by selecting the entire mole
 c:sel -a
 c:line sel
 
-p:The view will now be down the best line of the normal.
+p:The view will now have changed so that you are looking down the best line of the active selection.
 c:rota y 90
+c:refresh
 
 p:...or you can get one between a minimum of 2 atoms in your structure.
 c:sel TXLine0
@@ -98,4 +99,4 @@ c:refresh
 
 p:There is also another <b>htab</b> command that can be used which is <c>htab -t</b>  which will allow you to attach unconventional hydrogen bonds to atoms for example if the command was <b>htab -t=Br,I</b> this would cause the Br to gain a bond with I
 
-p:End of tutorial
+p:End of tutorial, click on the next button to replay the tutorial or the cancel button to exit.

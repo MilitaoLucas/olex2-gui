@@ -20,7 +20,7 @@ class AutoDemo():
 
     self.name = name
     self.reading_speed = reading_speed
-    self.pop_name = "Tutorial"
+    self.pop_name = "QuickTutorial"
     self.items = []
     self.item_counter = 0
     self.have_box_already = False
@@ -89,7 +89,7 @@ class AutoDemo():
     self.set_box_bg_colour()
     self.items = []
     self.item_counter = 0
-    if olx.IsPopup(other_popup_name):
+    if other_popup_name and olx.IsPopup(other_popup_name):
       olx.html_Hide(other_popup_name)
     
     if name:
@@ -206,6 +206,9 @@ class AutoDemo():
       return
 
   def end_tutorial(self):
+    olx.Echo('Tutorial Ended or Interrupted')
+    olx.gl_Stereo('normal')
+    olx.OFileDel(0)
     if self.user_structure:
       OV.AtReap(self.user_structure)
     #self.have_box_already = False
