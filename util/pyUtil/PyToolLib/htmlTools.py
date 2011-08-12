@@ -745,7 +745,8 @@ def format_help(string):
   m = regex.findall(string)
   colour = "#232323"
   if m:
-    s = regex.sub(r"<tr bgcolor='$spy.GetParam(gui.html.table_firstcol_colour)'><td><b>\2</b></td></tr><tr><td>", string.title())
+#    s = regex.sub(r"<tr bgcolor='$spy.GetParam(gui.html.table_firstcol_colour)'><td><b>\2</b></td></tr><tr><td>", string.title())
+    s = regex.sub(r"<tr bgcolor='$spy.GetParam(gui.html.table_firstcol_colour)'><td><b>\2</b></td></tr><tr><td>", string)
   else:
     s = string
 

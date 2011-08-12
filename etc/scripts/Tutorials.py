@@ -85,22 +85,26 @@ class AutoDemo():
     self.end_tutorial()
     
   def run_autodemo(self, name, other_popup_name=""):
-    self.user_structure = OV.FileFull()
-    self.set_box_bg_colour()
-    self.items = []
-    self.item_counter = 0
-    if other_popup_name and olx.IsPopup(other_popup_name):
-      olx.html_Hide(other_popup_name)
-    
-    if name:
-      self.name = name
-    
-    self.read_tutorial_definitions()
 
-    olx.Clear()
-    
-    self.get_demo_item()
-    cmd_type = self.run_demo_item()
+    try:
+      self.user_structure = OV.FileFull()
+      self.set_box_bg_colour()
+      self.items = []
+      self.item_counter = 0
+      if other_popup_name and olx.IsPopup(other_popup_name):
+        olx.html_Hide(other_popup_name)
+      
+      if name:
+        self.name = name
+      
+      self.read_tutorial_definitions()
+  
+      olx.Clear()
+      
+      self.get_demo_item()
+      cmd_type = self.run_demo_item()
+    except:
+      self.end_tutorial()
     
     #please_exit = False
     #if not self.interactive:
@@ -206,6 +210,7 @@ class AutoDemo():
       return
 
   def end_tutorial(self):
+    olx.Freeze(False)
     olx.Echo('Tutorial Ended or Interrupted')
     olx.gl_Stereo('normal')
     olx.OFileDel(0)
