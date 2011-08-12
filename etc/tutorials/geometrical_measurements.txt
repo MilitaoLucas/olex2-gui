@@ -37,7 +37,7 @@ c:sel TXPlane0
 c:kill sel
 c:refresh
 
-p:The next function will alllow you to find the best line between the selected options by clicking on <b>Best Line(of active selection)</b>
+p:The next function will allow you to find the best line between the selected options by clicking on <b>Best Line(of active selection)</b>
 
 p:You can either choose to get an overall best line by selecting the entire molecule by holding <b>ctrl+A</b>....
 c:sel -a
@@ -55,18 +55,18 @@ c:line sel
 p:This will also view down the best line
 c:rota y 90
 
-p:The next function in the tab is <b>Distance and Angles(of selection)</b> which will give the distance and angle of upto 4 atoms in the molcule by selecting them before hand or you could also type the command <c>sel</c> after you have choosen which atoms you would like to measure. The data will then be displayed in the text in the command window 
+p:The next function in the tab is <b>Distance and Angles(of selection)</b> which will give the distance and angle of up to 4 atoms in the molecule by selecting them before hand or you could also type the command <c>sel</c> after you have chosen which atoms you would like to measure. The data will then be displayed in the text in the command window 
 c:sel TXLine0
 c:kill sel
 c:sel F1 C7 N6 C5
 c:sel
 
-p:Then there is the <b>Refine and save esd info</b> which needs to be clicked once in order to use the rest of the functions in the list as this will refine the model and claculate the needed esd information.
+p:Then there is the <b>Refine and save esd info</b> which needs to be clicked once in order to use the rest of the functions in the list as this will refine the model and calculate the needed esd information.
 c:delins more
 c:addins more -3
 c:refine
 
-p:The next function, <b>Distance and Angles with esd(of selection)</b> will allow you to view the current esd information of upto 4 atoms, select 4 atoms in the structure.
+p:The next function, <b>Distance and Angles with esd(of selection)</b> will allow you to view the current esd information of up to 4 atoms, select 4 atoms in the structure.
 c:sel N12 C12 C9 C8
 c:refresh
 
@@ -92,10 +92,10 @@ p:If the command <c>htab</c> is entered into the command line then this will add
 p:The next command would not work on the currently loaded molecule so the model for <b>Sucrose</b> will be loaded in order to show an example of the command working.
 c:reap 'DataDir()/samples/Sucrose/Sucrose.res'
 
-p:You can also cause the molecules to grow and show hydrogen bond interations between molecules by typing in the command <c>htab -g</c>
+p:You can also cause the molecules to grow and show hydrogen bond interactions between molecules by typing in the command <c>htab -g</c>
 c:htab -g
 c:refresh
 
-p:There is also another <b>htab</b> command that can be used which is <c>htab -t</b>  which will allow you to attatch unconventional hydrogen bonds to atoms for example if the command was <b>htab -t=Br,I</b> this would cause the Br to gain a bond with I
+p:There is also another <b>htab</b> command that can be used which is <c>htab -t</b>  which will allow you to attach unconventional hydrogen bonds to atoms for example if the command was <b>htab -t=Br,I</b> this would cause the Br to gain a bond with I
 
 p:End of tutorial

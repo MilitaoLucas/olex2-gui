@@ -50,5 +50,5 @@ c:refresh
 
 p:This viewing method works like a magic eye book where you have to cross your eyes and the image appears to be 3D
 
-p:End of tutroial.
+p:End of tutorial.
 c:gl.stereo(normal)

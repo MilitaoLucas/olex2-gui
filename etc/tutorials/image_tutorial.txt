@@ -11,7 +11,7 @@ c:lines 10
 c:showQ True
 c:showq a false
 
-p:This tutroial will run you through how to capture images of your 3D model using the Olex2 system.
+p:This tutorial will run you through how to capture images of your 3D model using the Olex2 system.
 
 p:First you need to click on the tab for <b>Tools</b>.
 h:tab-tools
@@ -23,7 +23,7 @@ c:itemstate tools-images 1
 
 p:When first opened there is a small section at the top that contains links that will help you with editing your model so that you can have labels in the correct position on your model and also of a colour you would like.
 
-p:The first line of links will allow you to add labels, The first link labled <b>Add labels to the selected atoms</b> allows you to add labels to either atoms you have selected and if none are selected it will add them to all atoms
+p:The first line of links will allow you to add labels, The first link labelled <b>Add labels to the selected atoms</b> allows you to add labels to either atoms you have selected and if none are selected it will add them to all atoms
 
 p:The second link <b>to non H atoms</b> adds labels to all atoms except for the Hydrogen atoms.
 
