@@ -64,7 +64,10 @@ c:refresh
 p:As before you can view these in any format that you like.
 
 p:The last button in the tab is <b>Moieties</b> which will allow you to sort molecules like ZP2 into a split format, so for this example ZP2 will be loaded.
+c:freeze(true)
 c:reap 'DataDir()/samples/ZP2/ZP2.res'
+c:spy.revert_to_original()
+c:freeze(false)
 
 p:Now you can click on the <b>Moieties</b> button
 h:button-moieties
