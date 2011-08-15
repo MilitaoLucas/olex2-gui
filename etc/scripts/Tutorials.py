@@ -46,7 +46,10 @@ class AutoDemo():
       self.font_colour = '#000000'
       self.font_colour_code = '#000088'
       self.font_colour_bold = '#444444'
-      
+
+    if type(c) is long:
+      c = IT.decimalColorToHTMLcolor(int(olx.gl_lm_ClearColor()))
+    
     self.bg_colour = c
     self.button_bar_colour = IT.RGBToHTMLColor(IT.adjust_colour(self.bg_colour, luminosity=0.8))
     
