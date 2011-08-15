@@ -2045,16 +2045,16 @@ def isPro():
 OV.registerFunction(isPro)
 
 def switch_tab_for_tutorials(tabname):
-  olex.m("itemstate index* 0")
-  olex.m("itemstate logo 0")
-  olex.m("itemstate index-%s 1" %tabname)
-  olex.m("itemstate info-title 1")
+  olex.m("html.ItemState index* 0")
+  olex.m("html.ItemState logo 0")
+  olex.m("html.ItemState index-%s 1" %tabname)
+  olex.m("html.ItemState info-title 1")
   if tabname.lower() == "work":
-    olex.m("itemstate solve-settings 2")
-    olex.m("itemstate refine-settings 2")
-    olex.m("itemstate report-settings 2")
-    olex.m("itemstate %s-toolbox 1" %tabname)
-  olex.m("itemstate tab* 2")
+    olex.m("html.ItemState solve-settings 2")
+    olex.m("html.ItemState refine-settings 2")
+    olex.m("html.ItemState report-settings 2")
+    olex.m("html.ItemState %s-toolbox 1" %tabname)
+  olex.m("html.ItemState tab* 2")
 OV.registerFunction(switch_tab_for_tutorials)
 
 def revert_to_original():
