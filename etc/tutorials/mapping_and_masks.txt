@@ -10,10 +10,11 @@ c:itemstate tab* 2
 c:lines 10
 c:showq a false
 
+p:This tutorial will explain how to set up different types of maps in order to help understand the structure better, the first thing this tutorial will do is to load sucrose as an example to show this.
+c:freeze(true)
 c:reap 'DataDir()/samples/sucrose/sucrose.res'
 c:spy.revert_to_original()
-
-p:This tutorial will explain how to set up different types of maps in order to help understand the structure better 
+c:freeze(false)
 
 p:First the <b>Tools</b> needs to be opened by clicking on it
 h:tab-tools
