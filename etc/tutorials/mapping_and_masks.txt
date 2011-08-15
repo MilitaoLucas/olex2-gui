@@ -10,10 +10,11 @@ c:html.ItemState tab* 2
 c:lines 10
 c:showq a false
 
+p:This tutorial will explain how to set up different types of maps in order to help understand the structure better, the first thing this tutorial will do is to load sucrose as an example to show this.
+c:freeze(true)
 c:reap 'DataDir()/samples/sucrose/sucrose.res'
 c:spy.revert_to_original()
-
-p:This tutorial will explain how to set up different types of maps in order to help understand the structure better 
+c:freeze(false)
 
 p:First the <b>Tools</b> needs to be opened by clicking on it
 h:tab-tools
@@ -25,7 +26,7 @@ c:html.ItemState tools-masks 1
 
 p:From this screen you can create a map for your 3D model lets start by creating a mask for the model.
 
-p:To run a mask you first need to click on the <b>masks</b> tab
+p:To run a mask you first need to click on the <b>Masks</b> tab
 h:h3-h3-masks
 c:html.ItemState h3-masks 1
 
@@ -35,6 +36,7 @@ p:Now click on the button marked <b>Mask</b>
 h:button_small-mask
 c:spy.MaskView()
 c:spy.OlexCctbxMasks()
+c:refresh
 
 p:Once you have generated a mask you can then go back to the maps part of the tab and select a different type of plane to view by selecting the drop down box next to <b>view</b>
 c:html.setbg(SET_SNUM_XGRID_VIEW_maps,red)
@@ -60,7 +62,7 @@ c:xgrid.depth(eval(getvalue(snum_xgrid_depth_slide)/5))
 c:setvalue(snum_xgrid_depth_value,eval(getvalue(snum_xgrid_depth_slide)/5))
 c:refresh
 
-p:You can also alter the depth of the plane by holding the ctrl key and using the left mouse button to click on the plane, while making sure not to click the molecule.
+p:You can also alter the depth of the plane by holding the ctrl key and using the left mouse button to click on the plane, while making sure not to select any of the molecule.
 
 p:Then moving the mouse while holding these buttons you can alter the depth of the plane.
 

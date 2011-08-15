@@ -11,12 +11,11 @@ c:lines 10
 c:showQ True
 c:showq a false
 
+p:This tutorial will run you through how to capture images of your 3D model using the Olex2 system, the first thing this tutorial will do is to load sucrose as an example to show this.
 c:freeze(true)
 c:reap 'DataDir()/samples/Co110/Co110.res'
 c:spy.revert_to_original()
 c:freeze(false)
-
-p:This tutorial will run you through how to capture images of your 3D model using the Olex2 system.
 
 p:First you need to click on the tab for <b>Tools</b>.
 h:tab-tools
