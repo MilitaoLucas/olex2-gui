@@ -46,7 +46,10 @@ class AutoDemo():
       self.font_colour = '#000000'
       self.font_colour_code = '#000088'
       self.font_colour_bold = '#444444'
-      
+
+    if type(c) is long:
+      c = IT.decimalColorToHTMLcolor(int(olx.gl_lm_ClearColor()))
+    
     self.bg_colour = c
     self.button_bar_colour = IT.RGBToHTMLColor(IT.adjust_colour(self.bg_colour, luminosity=0.8))
     
@@ -103,7 +106,10 @@ class AutoDemo():
       
       self.get_demo_item()
       cmd_type = self.run_demo_item()
-    except:
+      
+      
+    except Exception, err:
+      print "+++ ERROR IN TUTORIALS: %s" %err
       self.end_tutorial()
     
     #please_exit = False
@@ -201,15 +207,12 @@ class AutoDemo():
       if not self.interactive:
         sleep = len(self.cmd_content) * self.reading_speed
         olx.Wait(sleep)
-        
 
-      #olx.html_Show(self.pop_name)
-      #res = olx.html_ShowModal(self.pop_name)
-      #res = int(res)
 
       return
 
   def end_tutorial(self):
+    OV.SetParam('olex2.stop_current_process',False)
     olx.Freeze(False)
     olx.Echo('Tutorial Ended or Interrupted')
     olx.gl_Stereo('normal')

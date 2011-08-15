@@ -13,9 +13,11 @@ p:We load the structure from the <b>Start</b> tool. The tool will be highlighted
 h:h2-start
 c:itemstate home-start 1
 c:refresh
+c:freeze(true)
 c:reap 'DataDir()/samples/sucrose/sucrose.res'
 c:spy.revert_to_original()
 c:mpln -n
+c:freeze(false)
 c:refresh
 
 p:In order to open a sample structure click on one of the links next to the title <b>Sample Structure</b>, the structure should already have been opened since the last page.

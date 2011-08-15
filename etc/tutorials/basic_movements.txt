@@ -11,12 +11,11 @@ c:itemstate tab* 2
 c:lines 10
 c:showQ a false
 
+p:Welcome to Olex2 this software will be able to help you in creating 3D models for small-molecule structure solution and refinement, the first thing this tutorial will do is to load sucrose as an example to show this.
 c:freeze(true)
 c:reap 'DataDir()/samples/sucrose/sucrose.res'
 c:spy.revert_to_original()
 c:freeze(false)
-
-p:Welcome to Olex2 this software will be able to help you in creating 3D models for small-molecule structure solution and refinement.
 
 p:This tutorial will teach you some of the basic controls in order to navigate round this software if you are a new user to Olex2
 
@@ -43,15 +42,6 @@ c:refresh
 
 p:Another helpful keyboard shortcut is <b>ctrl+Q</b> this will toggle the electron densities that appear on the molecule
 c:showq
-c:refresh
-
-p:As well as being able to toggle the electron densities you can also toggle the molecule and the text that appears in the command window by pressing <b>ctrl+t</b> as it may be difficult to see the one you need.
-c:showstr
-c:refresh
-
-p:In order to get the structure to reappear keep toggling through the different options using <b>ctrl+t</b> in order to get the structure to reappear
-c:showstr
-c:showstr
 c:refresh
 
 p:You can also toggle how the hydrogen atoms are shown in the molecule by pressing <b>ctrl+h</b> this will cause them to either disappear,reappear or shows them with internal h bonds
