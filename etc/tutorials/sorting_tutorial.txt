@@ -10,9 +10,12 @@ c:itemstate tab* 2
 c:itemstate index-home 1
 c:lines 10
 c:showq a false
-c:reap 'DataDir()/samples/sucrose/sucrose.res'
 
-p:This tutorial will show you how to use the sorting options in Olex2
+p:This tutorial will show you how to use the sorting options in Olex2, the first thing this tutorial will do is to load sucrose as an example to show this.
+c:freeze(true)
+c:reap 'DataDir()/samples/sucrose/sucrose.res'
+c:spy.revert_to_original()
+c:freeze(false)
 
 p:First you need to click on the <b>Work</b> tab in the top toolbar
 h:tab-work
