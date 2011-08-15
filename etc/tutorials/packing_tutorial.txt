@@ -10,9 +10,14 @@ c:itemstate index-home 1
 c:itemstate tab* 2
 c:lines 10
 c:showq a false
-c:reap 'DataDir()/samples/sucrose/sucrose.res'
 
-p:If you are wanting to pack the structures so that it shows how they interact with each other inside the molecule then first click on <b>View</b>
+p:This tutorial will look at how to use the pack function in Olex 2 in order to show how the molecules interact with each other, the first thing this tutorial will do is to load sucrose as an example to show this.
+c:freeze(true)
+c:reap 'DataDir()/samples/sucrose/sucrose.res'
+c:spy.revert_to_original()
+c:freeze(false)
+
+p:First you need to click on the <b>View</b> tab in the top toolbar.
 h:tab-view
 c:spy.switch_tab_for_tutorials(view)
 
