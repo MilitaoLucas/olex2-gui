@@ -43,10 +43,7 @@ class GuiFunctions(object):
     return retStr
   
   def UpdateHtml(self):
-    olx.UpdateHtml()
-    
-  def HtmlReload(self):
-    olx.HtmlReload()
+    olx.html_Update()
     
   def HtmlLoad(self, path):
     olx.html_Load(path)
@@ -138,9 +135,6 @@ class NoGuiFunctions(object):
     return ''
   
   def UpdateHtml(self):
-    return ''
-  
-  def HtmlReload(self):
     return ''
   
   def HtmlLoad(self, path):

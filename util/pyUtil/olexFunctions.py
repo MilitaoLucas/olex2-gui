@@ -361,10 +361,7 @@ class OlexFunctions(inheritFunctions):
     olx.Reset()
 
   def htmlUpdate(self):
-    olex.m("UpdateHtml")
-
-  def htmlReload(self):
-    olex.m("html.Reload")
+    olex.m("html.Update")
 
   def htmlPanelWidth(self):
     olex.m("HtmlPanelWidth")
@@ -752,7 +749,6 @@ class OlexFunctions(inheritFunctions):
     olx.html_SetBorders(pop_name,border)
     OV.cmd(pstr)
     olx.html_SetBorders(pop_name,border)
-#    olx.html_Reload(pop_name)
 
 
 def GetParam(variable):

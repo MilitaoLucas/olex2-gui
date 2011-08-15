@@ -4,9 +4,9 @@
 set:font_colour_code=#aaaaff
 set:font_colour_bold=gui.html.highlight_colour
 
-c:itemstate index* 0
-c:itemstate index-home 1
-c:itemstate tab* 2
+c:html.ItemState index* 0
+c:html.ItemState index-home 1
+c:html.ItemState tab* 2
 c:lines 10
 c:showq a false
 
@@ -21,13 +21,13 @@ c:spy.switch_tab_for_tutorials(tools)
 
 p:You then need to click on the <b>Maps</b> tab
 h:h2-maps
-c:itemstate tools-masks 1
+c:html.ItemState tools-masks 1
 
 p:From this screen you can create a map for your 3D model lets start by creating a mask for the model.
 
 p:To run a mask you first need to click on the <b>masks</b> tab
 h:h3-h3-masks
-c:itemstate h3-masks 1
+c:html.ItemState h3-masks 1
 
 p:Once in the tab leave all the numbers at their default values
 
@@ -44,7 +44,7 @@ c:html.call(SET_SNUM_XGRID_VIEW_maps.onchange)
 c:refresh
 
 p:You can then select the type of map you would like, the default selection is normally plane which will be a dark square but lets try selecting <b>contour+plane</b> and see what happens
-c:itemstate h3-masks 2
+c:html.ItemState h3-masks 2
 c:html.setbg(SET_SNUM_XGRID_VIEW_maps,white)
 c:html.setvalue(SET_SNUM_XGRID_VIEW_maps,contour+plane)
 c:xgrid.rendermode(contour+plane)
@@ -75,7 +75,7 @@ c:refresh
 
 p:There are also other types of maps you can use by selecting one of the other tabs such as <b>Electron Density</b>
 h:h3-h3-electron-density
-c:itemstate h3-electron-density 1
+c:html.ItemState h3-electron-density 1
 
 p:This will allow you to see the electron densities in the maps and will also change as you move the molecule through the plane
 

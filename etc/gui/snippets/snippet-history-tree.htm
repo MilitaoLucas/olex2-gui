@@ -10,7 +10,7 @@
   selected="$spy.GetParam(snum.history.current_node)"
   onselect=""
   onitem="
-spy.revert_history(html.getvalue(#popupHISTORY_TREE))>>UpdateHtml>>
+spy.revert_history(html.getvalue(#popupHISTORY_TREE))>>html.Update>>
 if html.IsPopup(history-tree) then spy.popout_history_tree()"
-  onedit="spy.rename_history(html.getvalue(#popupHISTORY_TREE),~label~)>>UpdateHtml"
+  onedit="spy.rename_history(html.getvalue(#popupHISTORY_TREE),~label~)>>html.Update"
 >

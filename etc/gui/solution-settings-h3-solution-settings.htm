@@ -23,7 +23,7 @@
 				value='$spy.GetParam(snum.solution.program)'
 				items='$spy.getSolutionPrgs()'
 				label='',
-				onchange="spy.SetSolutionProgram(GetValue(SET_SNUM_SOLUTION_PROGRAM))>>UpdateHtml"
+				onchange="spy.SetSolutionProgram(GetValue(SET_SNUM_SOLUTION_PROGRAM))>>html.Update"
 				readonly='readonly'
 			>
 		</font>
@@ -48,7 +48,7 @@
 				value='$spy.GetParam(snum.solution.method)', 
 				items='$spy.getSolutionMethods($spy.GetParam(snum.solution.program))'
 				label='', 
-				onchange="spy.SetParam(snum.solution.method,GetValue(SET_SNUM_SOLUTION_METHOD))>>UpdateHtml"
+				onchange="spy.SetParam(snum.solution.method,GetValue(SET_SNUM_SOLUTION_METHOD))>>html.Update"
 				readonly='readonly'
 			>
 		</font>

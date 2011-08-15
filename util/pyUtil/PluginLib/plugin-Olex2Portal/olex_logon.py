@@ -217,7 +217,7 @@ def web_authenticate():
         return False
       else:
         print "%s is now logged on." %username
-        OV.htmlReload()
+        OV.UpdateHtml()
         OV.SetParam('olex2.is_logged_on',True)
         return True
 
@@ -477,7 +477,7 @@ class DownloadOlexLanguageDictionary:
           ok = self.upload_items(m)
       if ok == "OK":
         self.downloadTranslation()
-        OV.htmlReload()
+        OV.UpdateHtml()
       else:
         print "Upload has failed: %s" %ok
       OV.Cursor()
