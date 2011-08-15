@@ -1342,7 +1342,7 @@ def doBanner(i):
 #  print i, d.get('name')
   OV.SetParam('snum.refinement.banner_slide', i)
 
-  ist += d.get('itemstate',0)
+  ist += d.get('html.ItemState',0)
   cmds += d.get('cmd',"").split(">>")
 
   OV.setItemstate(ist)

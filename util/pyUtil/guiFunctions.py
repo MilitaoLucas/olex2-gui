@@ -102,7 +102,7 @@ class GuiFunctions(object):
     return olx.HtmlPanelWidth()
 
   def setItemstate(self, txt):
-    olex.m("itemstate %s" %txt)
+    olex.m("html.ItemState %s" %txt)
 
   def SetImage(self, zimg_name, image_file):
     if self.olex_gui.IsControl(zimg_name):

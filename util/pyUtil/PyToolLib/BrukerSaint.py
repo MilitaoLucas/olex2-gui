@@ -835,7 +835,7 @@ INTEGRATE /TITLE="%(title)s" &
     morename = "more-%s.htm" %self.frame_base
     morefile = r"%s/etc/gui/%s" %(self.basedir, morename)
     txt = []
-    txt.append(r'<tr><td width="8" bgcolor="#E9E9E9"><a href="itemstate %s 1 0" target="Expand"><zimg src="$toolbar-expand.png"></a></td>' %("'%s'" %morename))
+    txt.append(r'<tr><td width="8" bgcolor="#E9E9E9"><a href="html.ItemState %s 1 0" target="Expand"><zimg src="$toolbar-expand.png"></a></td>' %("'%s'" %morename))
     nFrames = ""
     txt.append('<td colspan="4">Series <b>%s</b>: (%s)</td></tr>' %(self.frame_base, string.strip(nFrames)))
     framedata_d = {}
@@ -856,7 +856,7 @@ INTEGRATE /TITLE="%(title)s" &
         current=False
 
       if i == 0:
-        mtxt.append(r'<tr><td width="8" bgcolor="#E9E9E9"><a href="itemstate %s 0" target="Collapse"><zimg src="$toolbar-collapse.png"></a></td>' %("'%s'" %morename))
+        mtxt.append(r'<tr><td width="8" bgcolor="#E9E9E9"><a href="html.ItemState %s 0" target="Collapse"><zimg src="$toolbar-collapse.png"></a></td>' %("'%s'" %morename))
       else:
         mtxt.append(r'<tr><td width="8" bgcolor="#E9E9E9"></td>')
       if current:
@@ -920,7 +920,7 @@ INTEGRATE /TITLE="%(title)s" &
     t = """<tr><td><a href="reset -s=getvalue(space_gr) -c=getvalue(formula)>>solve">Solve</a></td>
 <td>Sp.Gr.</td><td><input type="combo" name="space_gr" items="%s" value="%s" width="60"  height="17" value="" readonly></td>
 <td>Formula</td><td><input type="text" name="formula"  width="80"  height="17" value="%s"></td></tr>
-<tr><td><a href="file getvalue(filename).ins>>reset -s=getvalue(space_gr) -c=getvalue(formula)>>HKLSrc(%s.hkl)>>itemstate solution-settings 0 1">Reset structure</a></td>
+<tr><td><a href="file getvalue(filename).ins>>reset -s=getvalue(space_gr) -c=getvalue(formula)>>HKLSrc(%s.hkl)>>html.ItemState solution-settings 0 1">Reset structure</a></td>
 <td>Output File</td><input type="text" name="filename" width="80" height="17" value="%s"></td></tr>
 """%(sglist, sgtop, self.runs[0][1]['formula'], filename, filename)
 
