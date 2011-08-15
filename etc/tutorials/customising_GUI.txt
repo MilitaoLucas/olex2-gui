@@ -37,10 +37,10 @@ p:...<b>error</b> which allows you to edit material for reporting errors in the 
 p:And <b>exception</b> which allows you to edit material for reporting exception in the console 
 
 p:Another useful function that can be entered into the command line is <c>save</c> this will bring up the save as menu if no file name is provided, you also need to add in extra prefixes if you want certain settings saved which are scene, style, view, model
-c:save
+c:save style
 
 p:The next function to look at is <c>load</c> which will open the load menu if no file is provided,  you also need to add in extra prefixes if you want certain settings saved which are scene, style, view, model
-c:load
+c:load style
 
 p:The next function will allow you to change the colours that appear on the background gradient by entering in the command <c>grad</c> this will open up a window from which you can choose the four corner colours which will change the background to any options that you may find easier for seeing the model or text.
 c:grad

@@ -38,6 +38,7 @@ h:btn-report;1
 p:For example, we can solve the structure by typing <c>solve</c> or by clicking the <b>Solve</b> button. We will do this now.
 h:btn-solve;1
 c:solve
+c:waitfor process
 c:refresh
 
 p:We can tidy this solution by typing <c>clean</c> or by pressing the <b>Clean</b> button.

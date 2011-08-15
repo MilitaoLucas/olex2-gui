@@ -44,15 +44,6 @@ p:Another helpful keyboard shortcut is <b>ctrl+Q</b> this will toggle the electr
 c:showq
 c:refresh
 
-p:As well as being able to toggle the electron densities you can also toggle the molecule and the text that appears in the command window by pressing <b>ctrl+t</b> as it may be difficult to see the one you need.
-c:showstr
-c:refresh
-
-p:In order to get the structure to reappear keep toggling through the different options using <b>ctrl+t</b> in order to get the structure to reappear
-c:showstr
-c:showstr
-c:refresh
-
 p:You can also toggle how the hydrogen atoms are shown in the molecule by pressing <b>ctrl+h</b> this will cause them to either disappear,reappear or shows them with internal h bonds
 c:showh
 c:refresh
