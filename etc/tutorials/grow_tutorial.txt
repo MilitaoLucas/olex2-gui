@@ -13,18 +13,16 @@ c:showq a false
 p:This tutorial will show you how to use grow on a molecule in order to demonstrate how molecules interact with each other within the structure
 
 p:First we need to load an extended structure model so for this we will use <b>ZZULI2</b> from the <b>sample structures</b>
-
 c:freeze(true)
 c:reap 'DataDir()/samples/ZZULI2/ZZULI2.res'
 c:spy.revert_to_original()
 c:mpln -n
 c:freeze(false)
-
 c:refresh
 
 p:The next thing to do in order to help keep all of the molecule in view is to set the command window to automatic zoom so that it keeps the molecule in view at all times.
 
-p:To do this in the command line enter <c>echo extrazoom()</c> to check what the default value is set, to this should usually be <b>1.25</b>
+p:To do this in the command line enter <c>echo extrazoom()</c> to check what the default value is set to this should usually be <b>1.25</b>
 c:echo extrazoom()
 
 p:Once you've checked the value you can change it to any value you want here we are going to change it to 1 so enter in <c>echo extrazoom(1)</c>
@@ -51,7 +49,7 @@ c:html.setbg(GROW_SHORT,red)
 c:html.setstate(GROW_SHORT,true)
 
 p:In order to then cause the molecule to grow you have to select the button <b>Grow Mode</b>.
-h:BUTTON_GROW_MODE
+h:button-grow_mode
 c:run(mode grow GetData(GROW_SHORT) GetData(GROW_SELECTION) GetData(GROW_VDW))
 
 p:You can now make the molecule grow by one molecular unit whenever you click on one of the grey bonds with a purple end, but the screen will not auto zoom if you choose to grow using the GUI method

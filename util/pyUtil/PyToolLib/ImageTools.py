@@ -119,7 +119,9 @@ class ImageTools(FontInstances):
   def decimalColorToHTMLcolor(self, dec_colour):
     val = hex(dec_colour)
     val = val.lstrip('0x')
-    if len(val) > 6:
+    if len(val) == 9:
+      val = val[:6]
+    elif len(val) > 6:
       return dec_colour
     while len(val) != 6:
       val = "0" + val
