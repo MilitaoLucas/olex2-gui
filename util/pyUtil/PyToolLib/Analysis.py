@@ -1242,7 +1242,7 @@ class Analysis(Graph):
     pstr = "popup %s '%s' -b=stcr -t='%s' -w=%s -h=%s -x=1 -y=50" %(
       pop_name, htm_location, pop_name, int(width*1.033), int(height*1.1))
     olex.m(pstr)
-    olx.html_SetBorders(pop_name,0)
+    olx.html.SetBorders(pop_name,0)
     OV.UpdateHtml(pop_name)
 
   def analyse_lst(self):
@@ -1385,7 +1385,7 @@ class PrgAnalysis(Analysis):
   def update_image(self):
     OlexVFS.save_image_to_olex(self.im, self.image_location, 0)
     if OV.IsControl('POP_%s_PRG_ANALYSIS' %self.program.program_type.upper()):
-      olx.html_SetImage(
+      olx.html.SetImage(
         'POP_%s_PRG_ANALYSIS' %self.program.program_type.upper(), self.image_location)
     OlexVFS.write_to_olex("%s_image.htm" %self.program.program_type, self.ProgramHtml())
     if self.new_graph:
@@ -2528,8 +2528,8 @@ OV.registerFunction(make_reflection_graph)
 class HealthOfStructure():
   def __init__(self):
     self.hkl_stats = {}
-#    if not olexex.isPro():
-#      return
+    if olx.IsFileLoaded() != 'true':
+      return
     phil_file = r"%s/etc/CIF/diagnostics.phil" %(OV.BaseDir())
     olx.phil_handler.adopt_phil(phil_file=phil_file)
     self.grade_1_colour = OV.GetParam('gui.skin.diagnostics.colour_grade1')

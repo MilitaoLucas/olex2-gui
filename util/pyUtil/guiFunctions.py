@@ -42,14 +42,14 @@ class GuiFunctions(object):
       retStr = None
     return retStr
   
-  def UpdateHtml(self):
-    olx.html_Update()
+  def UpdateHtml(self, html_name=''):
+    olx.html.Update(html_name)
     
   def HtmlLoad(self, path):
-    olx.html_Load(path)
+    olx.html.Load(path)
     
   def HtmlDefineControl(self, d):
-    olx.html_DefineControl('%(name)s %(type)s -v=%(value)s -i=%(items)s' %d)
+    olx.html.DefineControl('%(name)s %(type)s -v=%(value)s -i=%(items)s' %d)
     
   def Cursor(self, state="", text=""):
     if state:
@@ -85,7 +85,7 @@ class GuiFunctions(object):
     
   def GetFormulaDisplay(self):
     str = ""
-    s = olx.xf_GetFormula('list')
+    s = olx.xf.GetFormula('list')
     l = s.split(',')
     for item in l:
       item = item.split(":")
@@ -106,7 +106,7 @@ class GuiFunctions(object):
 
   def SetImage(self, zimg_name, image_file):
     if self.olex_gui.IsControl(zimg_name):
-      olx.html_SetImage(zimg_name,image_file)
+      olx.html.SetImage(zimg_name,image_file)
 
   def setDisplayQuality(self, q=None):
     if not q:
