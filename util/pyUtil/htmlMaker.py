@@ -87,7 +87,7 @@ def currentResultFilesHtmlMaker(type='cif'):
   var = 'snum.current_result.%s' %type
   val = OV.GetParam(var)
   if not val:
-    val = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),type))
+    val = os.path.normpath(olx.file.ChangeExt(OV.FileFull(),type))
 
   list = (
     {'varName':str(var),

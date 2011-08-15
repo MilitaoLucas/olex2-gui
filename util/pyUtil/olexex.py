@@ -324,7 +324,7 @@ class OlexRefinementModel(object):
     return curr_form
 
   def getExpectedPeaks(self):
-    cell_volume = float(olx.xf_au_GetVolume())
+    cell_volume = float(olx.xf.au.GetVolume())
     expected_atoms = cell_volume/15
     #present_atoms = self.numberAtoms()
     present_atoms = self.number_non_hydrogen_atoms()
@@ -376,9 +376,9 @@ OV.registerFunction(GetAvailableRefinementProgs)
 
 def GetAvailableSolutionProgs():
   retStr = "cctbx;"
-  a = olx.file_Which('XS.exe')
+  a = olx.file.Which('XS.exe')
   if a == "":
-    a = olx.file_Which('ShelXS.exe')
+    a = olx.file.Which('ShelXS.exe')
   if a:
     retStr += "ShelXS;"
   return retStr
@@ -453,7 +453,7 @@ def SetFormulaFromInput():
   if not formula:
     return
   f = formula.split()
-  Z = float(olx.xf_au_GetZ())
+  Z = float(olx.xf.au.GetZ())
   argStr = ""
   for element in f:
     try:
@@ -465,7 +465,7 @@ def SetFormulaFromInput():
     argStr += "%s:%i," %(el, n)
   argStr = argStr.strip(',')
   argStr = "'%s'" %argStr
-  olx.xf_SetFormula(argStr)
+  olx.xf.SetFormula(argStr)
   return ""
 if haveGUI:
   OV.registerFunction(SetFormulaFromInput)
@@ -494,7 +494,7 @@ def FindZOfHeaviestAtomInFormua():
   retVal = 0
   PT = PeriodicTable()
   pt = PT.PeriodicTable()
-  f = olx.xf_GetFormula('list')
+  f = olx.xf.GetFormula('list')
   if not f:
     return retVal
   f = f.split(',')
@@ -530,13 +530,13 @@ def MakeElementButtonsFromFormula():
   icon_size = OV.GetParam('gui.html.icon_size')
   totalcount = 0
   btn_dict = {}
-  f = olx.xf_GetFormula('list')
+  f = olx.xf.GetFormula('list')
   if not f:
     return
   f = f.split(',')
   current_formula = OlexRefinementModel().currentFormula()
-  Z_prime = float(olx.xf_au_GetZprime())
-  Z = float(olx.xf_au_GetZ())
+  Z_prime = float(olx.xf.au.GetZprime())
+  Z = float(olx.xf.au.GetZ())
   html_elements = []
   for element in f:
     symbol = element.split(':')[0]
@@ -657,13 +657,13 @@ def MakeElementButtonsFromFormula():
 
   cell_volume = 0
   Z = 1
-  Z_prime = float(olx.xf_au_GetZprime())
+  Z_prime = float(olx.xf.au.GetZprime())
   try:
-    cell_volume = float(olx.xf_au_GetCellVolume())
+    cell_volume = float(olx.xf.au.GetCellVolume())
   except:
     pass
   try:
-    Z = float(olx.xf_au_GetZ())
+    Z = float(olx.xf.au.GetZ())
   except:
     pass
 
@@ -952,7 +952,7 @@ def setMainToolbarTabButtons(btn, state=""):
   for item in btns:
     if item[0] == btn:
       if not state:
-        state = olx.html_GetItemState(item[1])
+        state = olx.html.GetItemState(item[1])
       if state == '-1':
         state = "off"
       elif state == '0':
@@ -974,16 +974,16 @@ def setAllMainToolbarTabButtons():
     btn = item[0]
     if isCif and btn != 'report':
       state = 'inactive'
-      if olx.html_IsItem(item[1]) == 'true':
-        olx.html_ItemState(item[1],'-1')
+      if olx.html.IsItem(item[1]) == 'true':
+        olx.html.ItemState(item[1],'-1')
     else:
       state = ''
       #state = 'off'
     if not state:
       #if OV.IsControl(item[1]):
-      if olx.html_IsItem(item[1]) == 'true':
+      if olx.html.IsItem(item[1]) == 'true':
         try:
-          state = olx.html_GetItemState(item[1])
+          state = olx.html.GetItemState(item[1])
         except RuntimeError:
           pass
         if state == '-1':
@@ -1106,7 +1106,7 @@ def which_program(prg):
   else:
     exec_l = ["%s.exe" %prg, "%s" %prg, "%s" %prg.lower()]
   for item in exec_l:
-    a = olx.file_Which('%s' %item)
+    a = olx.file.Which('%s' %item)
     if a:
       break
   if 'wingx' in a.lower():
@@ -1277,7 +1277,7 @@ def GetCheckcifReport(outputtype='PDF'):
   if output:
     outputtype = output
 
-  file_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'cif'))
+  file_name = os.path.normpath(olx.file.ChangeExt(OV.FileFull(),'cif'))
   if not os.path.exists(file_name):
     print "\n ++ There is no cif file to check! Please add the 'ACTA' command to Shelx!"
     return
@@ -1928,7 +1928,7 @@ OV.registerFunction(dealWithReportImage)
 def getReportImageSrc():
   imagePath = OV.GetParam('snum.report.image')
   if OV.FilePath(imagePath) == OV.FilePath():
-    return olx.file_GetName(imagePath)
+    return olx.file.GetName(imagePath)
   else:
     return 'file:///%s' %imagePath
 OV.registerFunction(getReportImageSrc)
@@ -2091,7 +2091,7 @@ def play_crystal_images():
   for image in l:
     if os.path.exists(image):
       OV.SetParam('snum.report.crystal_image',image)
-      olx.html_SetImage('CRYSTAL_IMAGE',image)
+      olx.html.SetImage('CRYSTAL_IMAGE',image)
       OV.Refresh()
 OV.registerFunction(play_crystal_images)
 
@@ -2106,7 +2106,7 @@ def advance_crystal_image(direction='forward'):
         if i != len(l):
           p = l[i]
           OV.SetParam('snum.report.crystal_image',p)
-          olx.html_SetImage('CRYSTAL_IMAGE',p)
+          olx.html.SetImage('CRYSTAL_IMAGE',p)
           return
         else:
           print "Last image of the series!"
@@ -2115,7 +2115,7 @@ def advance_crystal_image(direction='forward'):
         if i != 1:
           p = l[i-2]
           OV.SetParam('snum.report.crystal_image',p)
-          olx.html_SetImage('CRYSTAL_IMAGE',p)
+          olx.html.SetImage('CRYSTAL_IMAGE',p)
           return
         else:
           print "First image of the series!"
@@ -2133,7 +2133,7 @@ def advance_crystal_image(direction='forward'):
   #p = r"%s\%s%i%s" %(base, OV.FileName(), n, ".jpg")
   #if os.path.exists(p):
     #OV.SetParam('snum.report.crystal_image',p)
-    #olx.html_SetImage('CRYSTAL_IMAGE',p)
+    #olx.html.SetImage('CRYSTAL_IMAGE',p)
 OV.registerFunction(advance_crystal_image)
 
 

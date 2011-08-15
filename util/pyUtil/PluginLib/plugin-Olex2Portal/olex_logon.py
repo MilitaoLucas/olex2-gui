@@ -36,7 +36,7 @@ def make_translate_gui_items_html(item_l):
   pop_name = "Translate"
   boxHeight = 150
   if OV.IsControl('%s.WEB_USERNAME'%pop_name):
-    olx.html_ShowModal(pop_name)
+    olx.html.ShowModal(pop_name)
   else:
     txt='''
   <body link="$spy.GetParam(gui.html.link_colour)" bgcolor="$spy.GetParam(gui.html.bg_colour)">
@@ -114,7 +114,7 @@ def make_translate_gui_items_html(item_l):
   x = 200
   y = 200
   olx.Popup(pop_name, 'Translate.htm', "-s -b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(pop_name, boxWidth, boxHeight, x, y))
-  res = olx.html_ShowModal(pop_name)
+  res = olx.html.ShowModal(pop_name)
   res = int(res)
   return res
 
@@ -122,7 +122,7 @@ def make_translate_gui_items_html(item_l):
 def make_logon_html(url='www.olex2.org'):
   pop_name = "Logon"
   if OV.IsControl('%s.WEB_USERNAME'%pop_name):
-    olx.html_ShowModal(pop_name)
+    olx.html.ShowModal(pop_name)
   else:
     txt='''
   <body link="$spy.GetParam(gui.html.link_colour)" bgcolor="$spy.GetParam(gui.html.bg_colour)">
@@ -198,7 +198,7 @@ def make_logon_html(url='www.olex2.org'):
     x = 200
     y = 200
     olx.Popup(pop_name, 'logon.htm', "-s -b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(pop_name, boxWidth, boxHeight, x, y))
-    res = olx.html_ShowModal(pop_name)
+    res = olx.html.ShowModal(pop_name)
     res = int(res)
     return res
 
@@ -279,10 +279,10 @@ def upload_structure(script='upload_structures'):
     olex.m("pict %s.png 400" %id)
   image = open(image_path,'rb').read()
 
-  file_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'cif'))
+  file_name = os.path.normpath(olx.file.ChangeExt(OV.FileFull(),'cif'))
   cif = open(file_name, 'r').read()
 
-  file_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'ins'))
+  file_name = os.path.normpath(olx.file.ChangeExt(OV.FileFull(),'ins'))
   ins = open(file_name, 'r').read()
 
   file_name = os.path.normpath('%s_cifreport.pdf' %id)
