@@ -10,14 +10,11 @@ c:html.ItemState tab* 2
 c:lines 10
 
 p:This tutorial will look at how to get geometrical measurements and analysis from your 3D model using the Olex2 system and the <b>Sample structure THPP</b>.
-
-
 c:freeze(true)
 c:reap 'DataDir()/samples/THPP/THPP.res'
 c:spy.revert_to_original()
 c:mpln -n
 c:freeze(false)
-
 
 p:To start with you need to click on the <b>View</b> tab.
 h:tab-view
@@ -30,7 +27,7 @@ c:html.ItemState view-geometry 1
 p:In this tab there are 6 different links, each one of these will help to analyse your model and gather data from it, the first one we will look at is <b>Mean Plane(of active selection)</b>
 
 p:In order to use this feature you first need to highlight one of the rings in the structure to do this you can hold <b>shift</b> to draw a box over one of the rings or select each atom manually
-c:sel C5 C3 C2 C4 N8 C9
+c:sel C5 C7 C8 C9 N6 C10
 c:refresh
 
 p:Once the structure is highlighted click on the link and the average plane for the structure will be produced on the model, or the command <c>mpln sel</c> can be entered.
