@@ -1059,7 +1059,7 @@ class timage(ImageTools):
 
 
     do_these = []
-    if olx.fs_Exists("logo.png") == 'false':
+    if olx.fs.Exists("logo.png") == 'false':
       force_images = True
 
     if not self.olex2_has_recently_updated:
@@ -2081,7 +2081,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
   def make_text_and_tab_items(self):
     bitmap = "working"
-    if olx.fs_Exists(bitmap) == 'true':
+    if olx.fs.Exists(bitmap) == 'true':
       olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
     textItems = []
     textItems.append("autochem")

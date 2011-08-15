@@ -135,7 +135,7 @@ class OlexFunctions(inheritFunctions):
       value = str(value)
       if value not in ('?', '.'):
         if 'K' not in value: value += ' K'
-        olx.xf_exptl_Temperature(value)
+        olx.xf.exptl.Temperature(value)
 
   def GuiParams(self):
     if hasattr(olx, 'gui_phil_handler'):
@@ -190,7 +190,7 @@ class OlexFunctions(inheritFunctions):
 
   def GetOSF(self):
     try:
-      a = float(olx.xf_rm_OSF())
+      a = float(olx.xf.rm.OSF())
       if a == 0: #value previously unset
         return None
       return a*a
@@ -199,20 +199,20 @@ class OlexFunctions(inheritFunctions):
 
   def SetOSF(self, v):
     try:
-      olx.xf_rm_OSF(math.sqrt(v))
+      olx.xf.rm.OSF(math.sqrt(v))
       return True
     except:
       return False
 
   def GetFVar(self, i):
     try:
-      return float(olx.xf_rm_FVar(i))
+      return float(olx.xf.rm.FVar(i))
     except:
       return None
 
   def SetFVar(self, i, v):
     try:
-      olx.xf_rm_FVar(i, v)
+      olx.xf.rm.FVar(i, v)
       return True
     except:
       return False
@@ -229,13 +229,13 @@ class OlexFunctions(inheritFunctions):
 
   def GetExtinction(self):
     try:
-      return float(olx.xf_rm_Exti())
+      return float(olx.xf.rm.Exti())
     except:
       return None
 
   def SetExtinction(self, v):
     try:
-      olx.xf_rm_Exti(v)
+      olx.xf.rm.Exti(v)
       return True
     except:
       return False
@@ -381,7 +381,7 @@ class OlexFunctions(inheritFunctions):
 
   def file_ChangeExt(self, path, newExt):
     try:
-      newPath = olx.file_ChangeExt(path, newExt)
+      newPath = olx.file.ChangeExt(path, newExt)
     except Exception, ex:
       print >> sys.stderr, "An error occured"
       sys.stderr.formatExceptionInfo()
@@ -572,10 +572,10 @@ class OlexFunctions(inheritFunctions):
     return self.standardizePath(path)
 
   def GetFormula(self):
-    return olx.xf_GetFormula()
+    return olx.xf.GetFormula()
 
   def GetCellVolume(self):
-    return olx.xf_au_GetCell()
+    return olx.xf.au.GetCell()
 
   def AddIns(self, instruction):
     olx.AddIns(instruction)
@@ -698,7 +698,7 @@ class OlexFunctions(inheritFunctions):
 
   def GetHtmlPanelX(self):
     screen_width = int(olx.GetWindowSize().split(',')[2])
-    html_panelwidth = int(olx.html_ClientWidth('self'))
+    html_panelwidth = int(olx.html.ClientWidth('self'))
     htmlPanelX = screen_width - html_panelwidth
     return htmlPanelX
 
@@ -746,9 +746,9 @@ class OlexFunctions(inheritFunctions):
         y = 0
     pstr = "popup '%s' '%s' -t='%s' -w=%s -h=%s -x=%s -y=%s" %(pop_name, htm, pop_name, width+border*2 +10, height+border*2, x, y)
     OV.cmd(pstr)
-    olx.html_SetBorders(pop_name,border)
+    olx.html.SetBorders(pop_name,border)
     OV.cmd(pstr)
-    olx.html_SetBorders(pop_name,border)
+    olx.html.SetBorders(pop_name,border)
 
 
 def GetParam(variable):
