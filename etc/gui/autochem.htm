@@ -24,7 +24,7 @@
     <a href="spy.ac_run solveit -r">Resume</a> |
     <a href="spy.ac_run solveit -c">Ref Only</a> |
     <a href="spy.ac_run solveit -so">SO</a> |
-    <a href="spy.ac_run -f html>>UpdateHtml">Update List</a>
+    <a href="spy.ac_run -f html>>html.Update">Update List</a>
   </td>
 </tr>
 
@@ -51,7 +51,7 @@
       onchange="spy.SetParam(autochem.batch_dir,strcat(GetValue(SET_AUTOCHEM_DRIVE),GetValue(SET_AUTOCHEM_BATCH_DIR)))"
     >
     &nbsp;
-      <a href="spy.SetParam(autochem.batch_dir,'ChooseDir()')>>updatehtml">
+      <a href="spy.SetParam(autochem.batch_dir,'ChooseDir()')>>html.Update">
       <zimg border="0" src="toolbar-open.png"></a>
   </td>
 </tr>
@@ -229,7 +229,7 @@
 		name = "AutoChemGraph" 
 	  width="20" 
 		value="Go" 
-		onclick = "spy.ac_run -f html>>UpdateHtml>>spy Analysis AutoChem"
+		onclick = "spy.ac_run -f html>>html.Update>>spy Analysis AutoChem"
 	>
 </td>
 </tr>
@@ -327,7 +327,7 @@
 <tr>
 <td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
 <td colspan='2' >
-<a href='itemstate autochem_htm 1 2'>Show/Hide List</a><br>
+<a href='html.ItemState autochem_htm 1 2'>Show/Hide List</a><br>
   <!-- #include autochem_htm DataDir()\autochem.htm;2; -->
   </td>	
   </tr>

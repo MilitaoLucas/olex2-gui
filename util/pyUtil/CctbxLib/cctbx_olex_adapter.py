@@ -585,7 +585,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       html = "<tr><td></td><td>"
       html += "<b>%There are no possible Twin Laws%</b>"
       OV.write_to_olex('twinning-result.htm', html, False)
-      OV.htmlReload()
+      OV.UpdateHtml()
       return
 
     lawcount = 0
@@ -662,7 +662,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       img_src = "%s.png" %image_name
       name = self.twin_laws_d[run].get('name', "XX")
       #href = 'spy.on_twin_image_click(%s)'
-      href = 'spy.revert_history(%s)>>spy.reset_twin_law_img()>>HtmlReload' %(self.twin_laws_d[i].get('history'))
+      href = 'spy.revert_history(%s)>>spy.reset_twin_law_img()>>html.Update' %(self.twin_laws_d[i].get('history'))
       law_txt = "<a href='%s'><zimg src=%s></a>&nbsp;" %(href, image_name)
       self.twin_law_gui_txt += "%s" %(law_txt)
       control = "IMG_%s" %image_name.upper()
@@ -676,7 +676,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     #OV.Refresh()
     #if OV.IsControl(control):
     #  OV.SetImage(control,use_image)
-    OV.HtmlReload()
+    OV.UpdateHtml()
     twin_laws_d = self.twin_laws_d
 #    self.make_gui()
 
@@ -873,7 +873,7 @@ def reset_twin_law_img():
       OV.CopyVFSFile("%son.png" %name, "%s.png" %name,2)
     else:
       OV.CopyVFSFile("%soff.png" %name, "%s.png" %name,2)
-  OV.HtmlReload()
+  OV.UpdateHtml()
 OV.registerFunction(reset_twin_law_img)
 
 

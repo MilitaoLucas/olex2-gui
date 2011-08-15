@@ -5,9 +5,9 @@ set:font_colour_code=#aaaaff
 set:font_colour_bold=gui.html.highlight_colour
 
 c:fuse
-c:itemstate index* 0
-c:itemstate tab* 2
-c:itemstate index-home 1
+c:html.ItemState index* 0
+c:html.ItemState tab* 2
+c:html.ItemState index-home 1
 c:lines 10
 c:showq a false
 c:reap 'DataDir()/samples/sucrose/sucrose.res'
@@ -20,7 +20,7 @@ c:spy.switch_tab_for_tutorials(work)
 
 p:Then you need to select the <b>Sorting</b> tab
 h:h2-sorting
-c:itemstate work-sorting 1
+c:html.ItemState work-sorting 1
 
 p:Once the tab has been opened there will be 4 buttons in the tab, the first button <b>Mass & Label</b> creates a table that sorts the atoms by mass but allows for the labels to be used in other areas
 

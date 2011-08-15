@@ -800,7 +800,7 @@ def switchButton(name,state):
     copy_from = "%son.png" %name
     copy_to = "%s.png" %name
     OV.CopyVFSFile(copy_from, copy_to)
-  OV.htmlReload()
+  OV.UpdateHtml()
   return ""
 OV.registerFunction(switchButton)
 
@@ -915,7 +915,7 @@ def makeHtmlBottomPop(args, pb_height = 50, y = 0):
     olx.html_SetBorders(pop_name,0)
     OV.cmd(pstr)
     olx.html_SetBorders(pop_name,0)
-    olx.html_Reload(pop_name)
+    OV.UpdateHtml(pop_name)
     HaveModeBox = True
 
 OV.registerMacro(makeHtmlBottomPop, 'txt-Text to display&;name-Name of the Bottom html popupbox')
@@ -1396,7 +1396,7 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
       <b>
         %i.
       </b>
-      <a href='spy.GetTip(%i)>>html.Reload'>%s</a>
+      <a href='spy.GetTip(%i)>>html.Update'>%s</a>
       <br>''' %(i, i,t)
     txt = txt.rstrip("<br>")
     i = 0

@@ -49,7 +49,7 @@
         name='SET_SNUM_REFINEMENT_FORMULA'
         items='$spy.GetParam(snum.refinement.original_formula)'
         value='xf.GetFormula()'
-        onchange='xf.SetFormula(GetValue(SET_SNUM_REFINEMENT_FORMULA))>>spy.SetParam(snum.refinement.formula,"GetValue(SET_SNUM_REFINEMENT_FORMULA)")>>updatehtml'
+        onchange='xf.SetFormula(GetValue(SET_SNUM_REFINEMENT_FORMULA))>>spy.SetParam(snum.refinement.formula,"GetValue(SET_SNUM_REFINEMENT_FORMULA)")>>html.Update'
       >
   </td>
 </tr>
@@ -68,7 +68,7 @@
         name='SET_Z'
         min='1'
         value='xf.au.GetZ()'
-        onchange="xf.au.SetZ(GetValue(SET_Z))>>updatehtml"
+        onchange="xf.au.SetZ(GetValue(SET_Z))>>html.Update"
       >
   </td>
 </tr>
@@ -86,7 +86,7 @@
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name='SET_Z_PRIME'
         value='xf.au.GetZprime()'
-        onchange="xf.au.SetZprime(GetValue(~name~))>>updatehtml"
+        onchange="xf.au.SetZprime(GetValue(~name~))>>html.Update"
       >
   </td>
 </tr>
@@ -119,7 +119,7 @@
         name='SET_SNUM_REFINEMENT_SPACE_GROUP'
         items='$spy.GetParam(snum.refinement.sg_list)'
         value='$sg(%n)'
-        onchange="reset -s='GetValue(~name~)' -c=GetValue(SET_SNUM_REFINEMENT_FORMULA)>>spy.run_skin sNumTitle>>updatehtml"
+        onchange="reset -s='GetValue(~name~)' -c=GetValue(SET_SNUM_REFINEMENT_FORMULA)>>spy.run_skin sNumTitle>>html.Update"
       >
   </td>
 </tr>
@@ -141,7 +141,7 @@
         name='SNUM_SOLUTION_GRAPHICAL_OUTPUT'
         checked="$spy.GetParam(snum.solution.graphical_output)"
         oncheck='spy.SetParam(snum.solution.graphical_output,true)'
-        onuncheck='spy.SetParam(snum.solution.graphical_output,false)>>spy.reset_file_in_OFS(solution_image.htm)>>UpdateHtml'
+        onuncheck='spy.SetParam(snum.solution.graphical_output,false)>>spy.reset_file_in_OFS(solution_image.htm)>>html.Update'
         value=''
       >
     </font>

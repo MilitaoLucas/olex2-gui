@@ -4,9 +4,9 @@
 set:font_colour_code=#aaaaff
 set:font_colour_bold=gui.html.highlight_colour
 
-c:itemstate index* 0
-c:itemstate index-home 1
-c:itemstate tab* 2
+c:html.ItemState index* 0
+c:html.ItemState index-home 1
+c:html.ItemState tab* 2
 c:lines 10
 c:showq a false
 
@@ -38,11 +38,11 @@ c:spy.switch_tab_for_tutorials(view)
 
 p:Then click on the tab marked <b>Symmetry Generation</b>
 h:h2-symmetry-generation
-c:itemstate view-symmetry-generation 1
+c:html.ItemState view-symmetry-generation 1
 
 p:Click on the tab marked <b>Growing</b> in order to access some of the different grow modes.
 h:h3-h3-growing
-c:itemstate h3-growing 1
+c:html.ItemState h3-growing 1
 
 p:In the expanded tab it now means you can select 3 different modes of growing.
 
@@ -64,13 +64,13 @@ c:refresh
 
 p:To return the model back to a single molecule simply click on the tab <b>Symmetry Tools</b> then click on the button <b>Fuse</b> or you could simply type in the command <c>fuse</c>
 h:h3-h3-symmetry-tools
-c:itemstate h3-symmetry-tools 1
+c:html.ItemState h3-symmetry-tools 1
 h:button-fuse
 c:fuse
 c:refresh
 
 p:The next mode to look at is <b>Selection</b> which will require you to select an atom before you click the <b>Grow Mode</b> button and then when you select a bond another molecule will be generated from the position of the selected atom.
-c:itemstate h3-symmetry-tools 2
+c:html.ItemState h3-symmetry-tools 2
 c:html.setbg(GROW_SELECTION,red)
 c:html.setstate(GROW_SELECTION,true)
 c:sel N3
@@ -104,8 +104,8 @@ c:mode off
 c:fuse
 c:mpln -n
 c:html.setstate(GROW_VDW,false)
-c:itemstate h3-growing 2
-c:itemstate view-symmetry-generation 2
+c:html.ItemState h3-growing 2
+c:html.ItemState view-symmetry-generation 2
 
 p:In order to do this you need to enter in the command <c>grow -s</c> then using the up key on the keyboard you can keep repeating the command quickly rather than having to keep typing it out.
 c:grow -s

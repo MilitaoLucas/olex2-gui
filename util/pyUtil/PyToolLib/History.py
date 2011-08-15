@@ -556,7 +556,6 @@ def popout_history_tree(width=800, height=500):
   olex.m(pop_str)
   olx.html_SetBorders(pop_name,0)
   olex.m(pop_str)
-  #olx.html_Reload(pop_name)
 OV.registerFunction(popout_history_tree)
 
 

@@ -126,7 +126,7 @@ $spy.MakeHoverButton(btn-info@#autotidy,spy.make_help_box -name='autotidy' -popo
         name='SNUM_REFINEMENT_GRAPHICAL_OUTPUT'
         checked="$spy.GetParam(snum.refinement.graphical_output)"
         oncheck='spy.SetParam(snum.refinement.graphical_output,true)'
-        onuncheck='spy.SetParam(snum.refinement.graphical_output,false)>>spy.reset_file_in_OFS(refinement_image.htm)>>UpdateHtml'
+        onuncheck='spy.SetParam(snum.refinement.graphical_output,false)>>spy.reset_file_in_OFS(refinement_image.htm)>>html.Update'
         value=''
       >
     </font>
@@ -178,7 +178,7 @@ $spy.MakeHoverButton(btn-info@#refinement-masks,spy.make_help_box -name='refinem
         oncheck="
 spy.SetParam(snum.refinement.use_solvent_mask,true)>>
 spy.SetParam(snum.refinement.recompute_mask_before_refinement,true)>>
-UpdateHtml"
+html.Update"
         onuncheck="spy.SetParam(snum.refinement.recompute_mask_before_refinement,false)"
         value=""
       >
