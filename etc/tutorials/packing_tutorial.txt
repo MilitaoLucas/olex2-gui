@@ -5,9 +5,9 @@ set:font_colour_code=#aaaaff
 set:font_colour_bold=gui.html.highlight_colour
 
 c:fuse
-c:itemstate index* 0
-c:itemstate index-home 1
-c:itemstate tab* 2
+c:html.ItemState index* 0
+c:html.ItemState index-home 1
+c:html.ItemState tab* 2
 c:lines 10
 c:showq a false
 c:reap 'DataDir()/samples/sucrose/sucrose.res'
@@ -18,11 +18,11 @@ c:spy.switch_tab_for_tutorials(view)
 
 p:Then you need to open the toolbar called <b>Symmetry Generation</b> by clicking it, which will extend the tab
 h:h2-symmetry-generation
-c:itemstate view-symmetry-generation 1
+c:html.ItemState view-symmetry-generation 1
 
 p:...you then need to open the tab called <b>Packing</b>
 h:h3-h3-packing
-c:itemstate h3-packing 1
+c:html.ItemState h3-packing 1
 
 p:You can then either choose using the slider how many units you want to pack the molecule by
 c:html.setbg(slidepackradius,red)
@@ -41,9 +41,9 @@ c:rota x 90
 c:refresh
 
 p:In order to reduce this back down to a single unit again you have to click on the tab called <b>Symmetry Tools</b>
-c:itemstate h3-packing 2
+c:html.ItemState h3-packing 2
 h:h3-h3-symmetry-tools
-c:itemstate h3-symmetry-tools 1
+c:html.ItemState h3-symmetry-tools 1
 
 p:Once on the symmetry tools tab you need to click on <b>Fuse</b> in order to reduce the model to one unit again or type the command <c>fuse</c>
 h:button-fuse

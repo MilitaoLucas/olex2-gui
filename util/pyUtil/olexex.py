@@ -1770,9 +1770,9 @@ def AvailablePlugins():
     display = plugins[plugin].get('display', plugin)
     blurb = plugins[plugin].get('blurb', plugin)
     if olx.IsPluginInstalled("%s" %plugin) == 'true':
-      s += "<font size='+1'><b>%s</b></font> <a href='spy.install_plugin %s>>html.reload setup-box'><font size='+1' color=%s>Uninstall</font></a><br>%s<br><br>" %(display, plugin, green, blurb)
+      s += "<font size='+1'><b>%s</b></font> <a href='spy.install_plugin %s>>html.Update setup-box'><font size='+1' color=%s>Uninstall</font></a><br>%s<br><br>" %(display, plugin, green, blurb)
     else:
-      s += "<font size='+1'><b>%s</b></font> <a href='spy.install_plugin %s>>html.reload setup-box'><font size='+1' color=%s>Install</font></a><br>%s<br><br>" %(display, plugin, red, blurb)
+      s += "<font size='+1'><b>%s</b></font> <a href='spy.install_plugin %s>>html.Update setup-box'><font size='+1' color=%s>Install</font></a><br>%s<br><br>" %(display, plugin, red, blurb)
   return s
 OV.registerFunction(AvailablePlugins)
 
@@ -1782,9 +1782,9 @@ def AvailableSkins():
   for skin in skins:
 
     if OV.FindValue('gui_skin_name') == skin:
-      s += "<a href='skin %s>>html.reload setup-box'><b>%s</b></a><br>" %(skin, skins[skin].get('display', skin))
+      s += "<a href='skin %s>>html.Update setup-box'><b>%s</b></a><br>" %(skin, skins[skin].get('display', skin))
     else:
-      s += "<a href='skin %s>>html.reload setup-box'>%s</a><br>" %(skin, skins[skin].get('display', skin))
+      s += "<a href='skin %s>>html.Update setup-box'>%s</a><br>" %(skin, skins[skin].get('display', skin))
   return s
 if haveGUI:
   OV.registerFunction(AvailableSkins)

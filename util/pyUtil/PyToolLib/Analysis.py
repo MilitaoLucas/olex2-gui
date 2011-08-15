@@ -741,16 +741,16 @@ class Graph(ImageTools):
   min="2"
   height="$spy.GetParam(gui.html.spin_height)"
   value="$spy.GetParam(graphs.program_analysis.y_scale_factor)"
-  onchange="spy.SetParam(graphs.program_analysis.y_scale_factor,GetValue(HistoryScale))>>spy._make_history_bars()>>html.Reload"
+  onchange="spy.SetParam(graphs.program_analysis.y_scale_factor,GetValue(HistoryScale))>>spy._make_history_bars()>>html.Update"
 >'''
 
         if all_in_one_history:
-          all_in_oneText = "<a href='spy.SetParam(graphs.program_analysis.all_in_one_history,False)>>spy._make_history_bars()>>html.reload'>Split Display</a>"
+          all_in_oneText = "<a href='spy.SetParam(graphs.program_analysis.all_in_one_history,False)>>spy._make_history_bars()>>html.Update'>Split Display</a>"
           previous_img = ""
           next_img = ""
         else:
           all_in_oneText = '''
-<a href='spy.SetParam(graphs.program_analysis.all_in_one_history,True)>>spy._make_history_bars()>>html.reload'>Show All Bars</a>'''
+<a href='spy.SetParam(graphs.program_analysis.all_in_one_history,True)>>spy._make_history_bars()>>html.Update'>Show All Bars</a>'''
           previous_img = "<a href='spy.olex_fs_copy(history-info_%s.htm,history-info.htm)>>updatehtml'><zimg src=previous.png></a>" %(img_no -1)
           next_img = "<a href='spy.olex_fs_copy(history-info_%s.htm,history-info.htm)>>updatehtml'><zimg src=next.png></a>" %(img_no + 1)
 
@@ -1243,7 +1243,7 @@ class Analysis(Graph):
       pop_name, htm_location, pop_name, int(width*1.033), int(height*1.1))
     olex.m(pstr)
     olx.html_SetBorders(pop_name,0)
-    olx.html_Reload(pop_name)
+    OV.UpdateHtml(pop_name)
 
   def analyse_lst(self):
     fl = self.fl
@@ -1389,7 +1389,7 @@ class PrgAnalysis(Analysis):
         'POP_%s_PRG_ANALYSIS' %self.program.program_type.upper(), self.image_location)
     OlexVFS.write_to_olex("%s_image.htm" %self.program.program_type, self.ProgramHtml())
     if self.new_graph:
-      OV.htmlReload()
+      OV.UpdateHtml()
       self.new_graph = False
 
 class refinement_graph(PrgAnalysis):

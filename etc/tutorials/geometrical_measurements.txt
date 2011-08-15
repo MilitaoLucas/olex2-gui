@@ -4,9 +4,9 @@
 set:font_colour_code=#aaaaff
 set:font_colour_bold=gui.html.highlight_colour
 
-c:itemstate index* 0
-c:itemstate index-home 1
-c:itemstate tab* 2
+c:html.ItemState index* 0
+c:html.ItemState index-home 1
+c:html.ItemState tab* 2
 c:lines 10
 
 p:This tutorial will look at how to get geometrical measurements and analysis from your 3D model using the Olex2 system and the <b>Sample structure THPP</b>.
@@ -25,7 +25,7 @@ c:spy.switch_tab_for_tutorials(view)
 
 p:You then need to select the tab <b>Geometry</b>.
 h:h2-geometry
-c:itemstate view-geometry 1
+c:html.ItemState view-geometry 1
 
 p:In this tab there are 6 different links, each one of these will help to analyse your model and gather data from it, the first one we will look at is <b>Mean Plane(of active selection)</b>
 

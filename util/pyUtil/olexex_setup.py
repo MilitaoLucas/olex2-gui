@@ -87,7 +87,7 @@ class SetupWizard(object):
     olex.m("popup setup-box 'setup-%s.htm' -b=tc -t='%s' -w=340 -h=700 -x=50 -y=50" %(name, 'Olex2 Setup'))
     
     olx.html_SetBorders('setup-box', 2)
-    olx.html_Reload('setup-box')
+    OV.UpdateHtml('setup-box')
     return retVal
     
     
