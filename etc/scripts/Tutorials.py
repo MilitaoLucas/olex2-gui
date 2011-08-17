@@ -30,13 +30,13 @@ class AutoDemo():
 
   def set_box_bg_colour(self):
     self.highlight_colour = OV.GetParam('gui.html.highlight_colour').hexadecimal
-    c = olx.gl_lm_ClearColor()
+    c = olx.gl.lm.ClearColor()
     if "," in c:
       c = c.split(',')
       c = (float(c[0])*255, float(c[1])*255, float(c[2])*255)
       c = IT.RGBToHTMLColor(c)
     else:
-      c = IT.decimalColorToHTMLcolor(int(olx.gl_lm_ClearColor()))
+      c = IT.decimalColorToHTMLcolor(int(olx.gl.lm.ClearColor()))
     
     if c != "#ffffff":
       self.font_colour = '#ffffff'
@@ -48,7 +48,7 @@ class AutoDemo():
       self.font_colour_bold = '#444444'
 
     if type(c) is long:
-      c = IT.decimalColorToHTMLcolor(int(olx.gl_lm_ClearColor()))
+      c = IT.decimalColorToHTMLcolor(int(olx.gl.lm.ClearColor()))
     
     self.bg_colour = c
     self.button_bar_colour = IT.RGBToHTMLColor(IT.adjust_colour(self.bg_colour, luminosity=0.8))
@@ -95,7 +95,7 @@ class AutoDemo():
       self.items = []
       self.item_counter = 0
       if other_popup_name and olx.IsPopup(other_popup_name):
-        olx.html_Hide(other_popup_name)
+        olx.html.Hide(other_popup_name)
       
       if name:
         self.name = name
@@ -138,7 +138,7 @@ class AutoDemo():
     self.run_demo_item()
 
   def cancel_demo_item(self):
-    olx.html_Hide(self.pop_name)
+    olx.html.Hide(self.pop_name)
     self.end_tutorial()
     
   def back_demo_item(self):
@@ -174,7 +174,7 @@ class AutoDemo():
 
     if OV.IsControl('%s'%self.pop_name):
       pass
-      #olx.html_ShowModal(self.pop_name)
+      #olx.html.ShowModal(self.pop_name)
     else:
       if self.interactive:
         rFile = open("%s/etc/gui/blocks/templates/pop_tutorials.htm" %OV.BaseDir(),'r')
@@ -194,7 +194,7 @@ class AutoDemo():
       else:
         if self.interactive:
           olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(), "-b=t -t='%s' -w=%i -h=%i -x=%i -y=%i" %(self.pop_name, boxWidth, boxHeight, x, y))
-          olx.html_SetFocus(self.pop_name + '.TUTORIAL_NEXT')
+          olx.html.SetFocus(self.pop_name + '.TUTORIAL_NEXT')
         else:
           boxWidth = 400
           boxHeight = 250
@@ -202,7 +202,7 @@ class AutoDemo():
           y = 75
           olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(), "-t='%s' -w=%i -h=%i -x=%i -y=%i" %(self.pop_name, boxWidth, boxHeight, x, y))
         self.have_box_already = True
-        #olx.html_Show(self.pop_name)
+        #olx.html.Show(self.pop_name)
       OV.Refresh()
       if not self.interactive:
         sleep = len(self.cmd_content) * self.reading_speed
@@ -215,7 +215,7 @@ class AutoDemo():
     OV.SetParam('olex2.stop_current_process',False)
     olx.Freeze(False)
     olx.Echo('Tutorial Ended or Interrupted')
-    olx.gl_Stereo('normal')
+    olx.gl.Stereo('normal')
     olx.OFileDel(0)
     olx.Fuse()
     if self.user_structure:
@@ -331,31 +331,31 @@ class AutoDemo():
       for i in xrange(n):
         if "element" in control:
           new_image = "up=%son.png" %control_image
-          olx.html_SetImage(control_name,new_image)
+          olx.html.SetImage(control_name,new_image)
         elif control.endswith('_bg'):
           cmd = 'html.setBG(%s,%s)' %(control_image.rstrip('_bg'), self.highlight_colour)
           olex.m(cmd)
         else:
           new_image = "up=%soff.png" %control_image
-          olx.html_SetImage(control_name,new_image)
+          olx.html.SetImage(control_name,new_image)
         OV.Refresh()
         olx.Wait(300)
   
         if "element" in control:
           new_image = "up=%soff.png" %control
-          olx.html_SetImage(control_name,new_image)
+          olx.html.SetImage(control_name,new_image)
         elif control.endswith('_bg'):
           cmd = 'html.setBG(%s,%s)' %(control.rstrip('_bg'), '#fffffe')
           olex.m(cmd)
         else:
           new_image = "up=%shighlight.png" %control_image
-          olx.html_SetImage(control_name,new_image)
+          olx.html.SetImage(control_name,new_image)
         OV.Refresh()
         olx.Wait(300)
 
       if not control.endswith('_bg'):
         new_image = "up=%soff.png" %control_image
-        olx.html_SetImage(control_name,new_image)
+        olx.html.SetImage(control_name,new_image)
 
     if cmd_type == 'c':
       olex.m(cmd_content)
