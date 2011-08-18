@@ -52,7 +52,7 @@ class reader(object):
               #txt = string.split(lines[i], '-')
               txt = txt[1].strip()
             self._cifItems.setdefault("prog_version", "%s" %txt) ############################
-          if lines[i][:33] == "Effective data to parameter ratio": ############################
+          if "Effective data to parameter ratio" in lines[i]: ############################
             txt = lines[i].split('=')
             txt = txt[1].strip()
             #print txt
@@ -71,10 +71,10 @@ class reader(object):
             txt = txt[1].strip()
             txt = txt.split('(')
             self._cifItems.setdefault("Rint_after", "%s" %txt[0].strip())
-          if lines[i][:16] == "Ratio of minimum":
+          if "Ratio of minimum" in lines[i]:
             txt = lines[i].split(':')
             #txt = string.split(lines[i], ":")
-            self._cifItems.setdefault("ratiominmax", "%.4f" %txt[1].strip())
+            self._cifItems.setdefault("ratiominmax", "%.4f" %float(txt[1].strip()))
             self._cifItems.setdefault("_exptl_absorpt_correction_T_min", "%s" %txt[1].strip())
           if "Estimated minimum" in lines[i] :
             txt = lines[i].split(':')
@@ -93,8 +93,10 @@ class reader(object):
             txt = lines[i].split('=')
             #txt = string.split(lines[i], "=")
             self._cifItems.setdefault("lambda_correction", "%.4s" %txt[1].strip())
-        except:
+        except Exception, e:
           #i += 1
+          import traceback
+          traceback.print_exc()
           pass
         i += 1
       self._cifItems.setdefault("lambda_correction", "Not present")

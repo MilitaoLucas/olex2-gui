@@ -126,7 +126,7 @@ class CifTools(ArgumentParser):
     self.sort_crystal_colour()
     self.sort_publication_info()
     self.sort_diffractometer()
-    
+
   def read_metacif_file(self):
     if os.path.isfile(self.metacif_path):
       file_object = open(self.metacif_path, 'rb')
@@ -142,8 +142,8 @@ class CifTools(ArgumentParser):
   def sort_diffractometer(self):
     if not OV.GetParam('snum.report.diffractometer'):
       OV.SetParam('snum.report.diffractometer',self.cif_block.get('_diffrn_measurement_device_type'))
-    
-    
+
+
   def sort_crystal_dimensions(self):
     dimensions = []
     exptl_crystal_sizes = ('_exptl_crystal_size_min',
@@ -463,7 +463,9 @@ class ExtractCifInfo(CifTools):
           t = self.prepare_exptl_absorpt_process_details(twin, version)
           twin.setdefault("_exptl_absorpt_process_details", t)
           self.update_cif_block(twin)
-      except:
+      except Exception, e:
+        import traceback
+        traceback.print_exc()
         print "There was an error reading the SADABS/TWINABS output file\n'%s'.\nThe file may be incomplete." %(p)
     else:
       sad = {'_exptl_absorpt_correction_T_max':'.',
@@ -574,7 +576,7 @@ class ExtractCifInfo(CifTools):
       if '_smtbx_masks_special_details' in self.cif_block:
         del self.cif_block['_smtbx_masks_special_details']
 
-    ## I introduced this condition in order NOT to overwrite the temperature value 
+    ## I introduced this condition in order NOT to overwrite the temperature value
     if '_diffrn_ambient_temperature' not in self.cif_block:
       temp = olx.xf_exptl_Temperature()
       if temp != 'n/a':

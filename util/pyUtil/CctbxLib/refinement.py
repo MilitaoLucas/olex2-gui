@@ -362,7 +362,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
         print "Cholesky failure"
       else:
         print "Refinement failed"
-        print e
+        import traceback
+        traceback.print_exc()
       self.failure = True
     else:
       fo_minus_fc = self.f_obs_minus_f_calc_map(0.4)
@@ -690,7 +691,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       current = adp.shared_rotated_u(c[0], c[1], c[2], c[3], c[4])
       constraints.append(current)
       self.shared_rotated_adps.append(current)
-      
+
     self.shared_param_constraints = []
     vars = self.olx_atoms.model['variables']['variables']
     for i, var in enumerate(vars):
