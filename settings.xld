@@ -32,6 +32,7 @@
   <shortcut key="break" macro="echo fred>>SetVar(stop_current_process,True)>>spy.stopShelx()">
   <shortcut key="Ctrl+Shift+u" macro="echo interrupt!>>spy.SetParam(olex2.stop_current_process,True)">
   <shortcut key="Ctrl+Shift+T" macro="spy.run_autodemo(test)">
+  <shortcut key="Ctrl+Shift+A" macro="spy.gui.About()">
   >
 <menus
     <item title="File;Open" macro="reap" before="#">
