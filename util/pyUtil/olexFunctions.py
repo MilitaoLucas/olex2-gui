@@ -68,16 +68,19 @@ class OlexFunctions(inheritFunctions):
       print >> sys.stderr, "Variable %s could not be set with value %s" %(variable,value)
       sys.stderr.formatExceptionInfo()
 
-  def GetParam(self,variable):
-    retVal = ''
+  def GetParam(self,variable, default=None):
+    retVal = default
     try:
       if variable.startswith('gui'):
         handler = olx.gui_phil_handler
       else:
         handler = olx.phil_handler
       retVal = handler.get_validated_param(variable)
-      if isinstance(retVal, str):
-        retVal = retVal.decode('utf-8')
+      if retVal is not None:
+        if isinstance(retVal, str):
+          retVal = retVal.decode('utf-8')
+      else:
+        retVal = default
     except Exception, ex:
       print >> sys.stderr, "Variable %s could not be found" %(variable)
       sys.stderr.formatExceptionInfo()
