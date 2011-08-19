@@ -429,11 +429,14 @@ class ImageTools(FontInstances):
 
   def adjust_colour(self, colour, hue=0, luminosity=1, saturation=1):
     hue = float(hue)
+    if not luminosity:
+      luminosity = 1
     try:
       luminosity = float(luminosity)
       saturation = float(saturation)
     except:
-      pass
+      luminosity = 1
+      saturation = 1
     if colour == 'base':
       colour = self.params.timage.base_colour.rgb
     if colour == "bg":
