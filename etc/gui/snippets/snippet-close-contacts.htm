@@ -38,11 +38,10 @@ DeltaI eval(getvalue(SlideDeltaI)/50)"
     bgcolor="$spy.GetParam(gui.html.table_bg_colour)"  
     fgcolor="$spy.GetParam(gui.html.font_colour)" 
     value="eval(getvalue(SlideDeltaI)/50)" 
-    onchange="SetValue(SlideDeltaI, eval(GetValue(DeltaIValue)*50))>>
+    onreturn="SetValue(SlideDeltaI, eval(GetValue(DeltaIValue)*50))>>
 showH a true>>
 showH b true>>
 mode grow -s>>
-DeltaI GetValue(DeltaIValue)>>
-fuse"
+DeltaI GetValue(DeltaIValue)"
     >
   </td>
