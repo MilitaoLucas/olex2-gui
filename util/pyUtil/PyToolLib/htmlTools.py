@@ -17,8 +17,8 @@ from datetime import date
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
-active_mode = None
 last_mode = None
+last_mode_options = None
 current_tooltip_number = 0
 HaveModeBox = False
 
