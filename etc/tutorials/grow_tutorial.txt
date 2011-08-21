@@ -8,7 +8,7 @@ c:html.ItemState index* 0
 c:html.ItemState index-home 1
 c:html.ItemState tab* 2
 c:lines 10
-c:showq a false
+c:showq false
 
 p:This tutorial will show you how to use grow on a molecule in order to demonstrate how molecules interact with each other within the structure
 
