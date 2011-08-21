@@ -9,7 +9,7 @@ c:html.ItemState index-home 1
 c:html.ItemState tab* 2
 c:lines 10
 c:showQ True
-c:showq a false
+c:showq false
 
 p:This tutorial will run you through how to capture images of your 3D model using the Olex2 system, the first thing this tutorial will do is to load sucrose as an example to show this.
 c:freeze(true)
