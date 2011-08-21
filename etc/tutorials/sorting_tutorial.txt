@@ -9,7 +9,7 @@ c:html.ItemState index* 0
 c:html.ItemState tab* 2
 c:html.ItemState index-home 1
 c:lines 10
-c:showq a false
+c:showq false
 
 p:This tutorial will show you how to use the sorting options in Olex2, the first thing this tutorial will do is to load sucrose as an example to show this.
 c:freeze(true)

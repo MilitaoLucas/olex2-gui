@@ -9,7 +9,7 @@ c:html.ItemState index* 0
 c:html.ItemState index-home 1
 c:html.ItemState tab* 2
 c:lines 10
-c:showQ a false
+c:showQ false
 
 p:Welcome to Olex2 this software will be able to help you in creating 3D models for small-molecule structure solution and refinement, the first thing this tutorial will do is to load sucrose as an example to show this.
 c:freeze(true)
