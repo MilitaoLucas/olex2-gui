@@ -905,6 +905,12 @@ class FullMatrixRefine(OlexCctbxAdapter):
         if twin.grad:
           print >> log, "%-9s %-9.4f %.4f" %(
             twin.twin_law.as_hkl(), twin.value, math.sqrt(standard_uncertainties[i]))
+    print >> log
+    print >> log, "Disagreeable reflections:"
+    self.normal_eqns.observations.fo_sq\
+      .customized_copy(sigmas=flex.sqrt(1/self.normal_eqns.weights))\
+      .apply_scaling(factor=1/self.normal_eqns.scale_factor())\
+      .show_disagreeable_reflections(self.normal_eqns.fc_sq, out=log)
 
 
 def rt_mx_from_olx(olx_input):
