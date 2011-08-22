@@ -448,6 +448,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       uctbx.d_as_d_star_sq(refinement_refs.d_max_min()[1]), self.wavelength, deg=True)
     completeness_full = refinement_refs.resolution_filter(
       d_min=uctbx.two_theta_as_d(two_theta_full, self.wavelength, deg=True)).completeness()
+    completeness_theta_max = refinement_refs.completeness()
     shifts_over_su = flex.abs(
       self.normal_eqns.step() /
       flex.sqrt(self.normal_eqns.covariance_matrix().matrix_packed_u_diagonal()))
@@ -537,6 +538,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     min_d_star_sq, max_d_star_sq = fo2.min_max_d_star_sq()
     (h_min, k_min, l_min), (h_max, k_max, l_max) = fo2.min_max_indices()
     cif_block['_diffrn_measured_fraction_theta_full'] = fmt % completeness_full
+    cif_block['_diffrn_measured_fraction_theta_max'] = fmt % completeness_theta_max
     cif_block['_diffrn_radiation_wavelength'] = self.wavelength
     cif_block['_diffrn_reflns_number'] = fo2.eliminate_sys_absent().size()
     if merging is not None:
