@@ -89,10 +89,10 @@ class reader(object):
 ## Not sure why this was in here. The lambda correction value is present in this version!
 #          if self._cifItems.get("prog_version") == '2008/1':
 #            self._cifItems.setdefault("lambda_correction", "Not present")
-          if lines[i][:6] == "Lambda":
+          if lines[i].strip().startswith("Lambda"):
             txt = lines[i].split('=')
             #txt = string.split(lines[i], "=")
-            self._cifItems.setdefault("lambda_correction", "%.4s" %txt[1].strip())
+            self._cifItems.setdefault("lambda_correction", "%s" %txt[1].strip())
         except Exception, e:
           #i += 1
           import traceback
