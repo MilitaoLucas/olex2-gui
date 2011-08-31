@@ -2075,6 +2075,25 @@ def revert_to_original():
   print("Could not revert to any original file!")
 OV.registerFunction(revert_to_original)
 
+def fade_in(speed=0):
+  speed = OV.GetParam('user.use_fader')
+  if speed == 0:
+    return
+  olex.m("fade 1 0 -%s" %speed)
+  olex.m('waitfor fade')
+  olex.m("ceiling off")
+OV.registerFunction(fade_in)
+
+def fade_out(speed=0):
+  speed = OV.GetParam('user.use_fader')
+  if speed == 0:
+    return
+  olex.m("fader.InitFG()")
+  olex.m("fader.visible(true)")
+  olex.m("fade 0 1 %s" %speed)
+  olex.m("waitfor fade")
+OV.registerFunction(fade_out)
+
 def check_for_selection(need_selection=True):
   res = haveSelection()
   if not res and need_selection:
