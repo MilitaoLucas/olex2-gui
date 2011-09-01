@@ -1420,6 +1420,7 @@ def register_new_odac(username=None, pwd=None):
             'macAddress':mac_address,
             }
   f = HttpTools.make_url_call(url, values)
+  f = f.read()
 
   if not f:
     print "Please provide a valid username and password, and make sure your computer is online."
@@ -1431,8 +1432,8 @@ def register_new_odac(username=None, pwd=None):
     os.makedirs(p)
   else:
     try:
-      os.removedir(p)
-      os.makedir(p)
+      os.removedirs(p)
+      os.makedirs(p)
     except:
       print "The installer could not delete this folder: %s" %p
       print "Please remove all files in this folder manually and run the installer again."
@@ -1923,6 +1924,13 @@ def dealWithReportImage():
     olex.m('pict -pq screenshot.png 1')
     OV.SetParam('snum.report.image',"%s\screenshot.png" %OV.FilePath())
 OV.registerFunction(dealWithReportImage)
+
+def dealWithReportName():
+  report_name = OV.GetParam('snum.report.name')
+  if not report_name:
+    OV.SetParam('snum.report.name',OV.FileName())
+    return
+OV.registerFunction(dealWithReportName)
 
 
 def getReportImageSrc():
