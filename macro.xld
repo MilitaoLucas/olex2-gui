@@ -209,6 +209,7 @@
     <args
     \>
     <cmd
+      <cmd2 "spy.dealWithReportName()">
       <cmd4 "cursor(busy, '%Checking for IMAGE file ...%')">
       <cmd2 "spy.dealWithReportImage()">
       <cmd13 "cursor()">

@@ -1,11 +1,23 @@
 <!-- #include header gui\blocks\tool-table-header.htm;1; -->
 
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=fit-group;1; -->
-  <td align='center'>
-$spy.MakeHoverButton(button-fit_group,if strcmp\(spy.check_for_selection\(),True) then run\(if strcmp\(spy.GetParam\(olex2.in_mode),'fit') then 'mode off' else 'mode fit') else None)
+  <td width='60%'>
+    &nbsp;% Select group or atom(s) and then %
   </td>
-<td align='center'>
-$spy.MakeHoverButton(button-fit_&_split,if strcmp\(spy.check_for_selection\(),True) then run\(if strcmp\(spy.GetParam\(olex2.in_mode),'fit') then 'mode off' else 'mode fit -s') else None)
+
+  <td>
+    <input
+      type="combo"
+      height="$spy.GetParam(gui.html.combo_height)"
+      width="60"
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      name="FIT_OR_SPLIT"
+      items='fit<-;split<-s'
+      value=""
+      onchange="if strcmp(spy.check_for_selection(),True) then run('mode fit -GetValue(~name~)')"
+      valign="center"
+      readonly
+>
 </td>
 </tr>
 </table>
