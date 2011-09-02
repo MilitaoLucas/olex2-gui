@@ -324,7 +324,6 @@ class MergeCif(CifTools):
         print("If you are using SHELX, make sure you use the ACTA command.")
         print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         return
-
     self.write_metacif_file()
     ## merge metacif file with cif file from refinement
     OV.CifMerge(self.metacif_path)
