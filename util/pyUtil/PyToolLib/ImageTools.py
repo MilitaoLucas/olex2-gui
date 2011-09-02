@@ -954,7 +954,6 @@ class ImageTools(FontInstances):
 #      box = (width - height, 0)
 #      image.paste(IM, box)
 
-
   def resize_news_image(self):
     self.resize_to_panelwidth({'i':'news/news.png'})
 
