@@ -378,8 +378,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       cif[block_name] = self.as_cif_block()
       print >> f, cif
       f.close()
-      metacif_path = '%s/%s.metacif' %(OV.StrDir(), OV.FileName())
-      OV.CifMerge(metacif_path, True)
+      OV.CifMerge(None, True, False)
       self.output_fcf()
       new_weighting = weighting.optimise_parameters(
         self.normal_eqns.observations.fo_sq,
