@@ -1269,10 +1269,6 @@ def getKeys(key_directory=None):
 
 
 def GetCheckcifReport(outputtype='PDF'):
-
-  
-  
-  
   output = OV.GetParam('user.cif.chckCif_output_format')
   if output:
     outputtype = output
