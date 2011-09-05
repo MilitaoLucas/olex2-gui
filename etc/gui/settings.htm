@@ -152,10 +152,10 @@ $GetCompilationInfo()
       bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
       fgcolor="$spy.GetParam(gui.html.font_colour)"
       name="USE_FADER"
-      checked="$spy.GetParam(gui.use_fader)"
+      checked="$not(strcmp(spy.GetParam(user.use_fader),0.0))"
       width='53' 
-      oncheck="spy.SetParam(gui.use_fader,true)" 
-      onuncheck="spy.SetParam(gui.use_fader,false)">
+      oncheck="spy.SetParam(user.use_fader,0.4)" 
+      onuncheck="spy.SetParam(user.use_fader,0)">
       </td>
   </tr>
   

@@ -2528,16 +2528,21 @@ OV.registerFunction(make_reflection_graph)
 class HealthOfStructure():
   def __init__(self):
     self.hkl_stats = {}
-    if olx.IsFileLoaded() != 'true':
-      return
     phil_file = r"%s/etc/CIF/diagnostics.phil" %(OV.BaseDir())
     olx.phil_handler.adopt_phil(phil_file=phil_file)
-    self.grade_1_colour = OV.GetParam('gui.skin.diagnostics.colour_grade1')
-    self.grade_2_colour = OV.GetParam('gui.skin.diagnostics.colour_grade2')
-    self.grade_3_colour = OV.GetParam('gui.skin.diagnostics.colour_grade3')
-    self.grade_4_colour = OV.GetParam('gui.skin.diagnostics.colour_grade4')
+    self.grade_1_colour = OV.GetParam('gui.skin.diagnostics.colour_grade1').hexadecimal
+    self.grade_2_colour = OV.GetParam('gui.skin.diagnostics.colour_grade2').hexadecimal
+    self.grade_3_colour = OV.GetParam('gui.skin.diagnostics.colour_grade3').hexadecimal
+    self.grade_4_colour = OV.GetParam('gui.skin.diagnostics.colour_grade4').hexadecimal
     self.available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
+    
+  def make_HOS(self):
+    self.initialise_HOS()
+    self.make_HOS_html()
 
+  def initialise_HOS(self):
+    if olx.IsFileLoaded() != 'true':
+      return
     hkl = OV.HKLSrc()
     if not os.path.exists(hkl):
       print "There is no reflection file associated with this structure"
@@ -2548,7 +2553,6 @@ class HealthOfStructure():
       OV.write_to_olex("hos.htm" , txt)
       return
     self.hkl_stats = olex_core.GetHklStat()
-    self.make_HOS_html()
 
   def make_HOS_html(self):
     txt = "<tr><table width='100%%' cellpadding=0 cellspacing=0><tr>"
@@ -2563,8 +2567,12 @@ class HealthOfStructure():
         value_format = value_format.replace('%','f%%')
         value = value * 100
         #raw_val = value
-      value_format = "%." + value_format
-      value = value_format %value
+      if item == 'Rint' and raw_val == 0:
+        value = "Merged Data!"
+        bg_colour = "#000000"
+      else:
+        value_format = "%." + value_format
+        value = value_format %value
       use_image = False
       if use_image:
         txt += self.make_hos_images(item=item, colour=bg_colour, display=display, value_raw=raw_val, value_display=value, n=len(l))
@@ -2651,4 +2659,5 @@ class HealthOfStructure():
 
     return retVal
 
-OV.registerFunction(HealthOfStructure)
+HOS_instance = HealthOfStructure()
+OV.registerFunction(HOS_instance.make_HOS)
