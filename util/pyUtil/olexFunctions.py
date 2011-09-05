@@ -302,9 +302,12 @@ class OlexFunctions(inheritFunctions):
       retStr = None
     return retStr
 
-  def CifMerge(self, filepath):
+  def CifMerge(self, filepath, update_atoms_loop=False):
     try:
-      olx.CifMerge('"%s"' %filepath)
+      cmd = '"%s"' %filepath
+      if update_atoms_loop:
+        cmd += ' -u'
+      olx.CifMerge(cmd)
       print "Refinement CIF file has been merged with the meta-data cif file"
     except Exception, ex:
       print >> sys.stderr, "An error occured whilst trying to find merge cif files"

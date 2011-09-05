@@ -1,4 +1,4 @@
-# bruker_frames.py
+  # bruker_frames.py
 
 class reader:
   def __init__(self, path):

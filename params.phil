@@ -773,6 +773,8 @@ programs
 user
   .short_caption = User Specific
   {
+  use_fader = 0.4
+    .type = float
   expert_level = 0
     .type = int
   alert_delete_history = Y
