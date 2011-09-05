@@ -120,6 +120,7 @@
         items='$spy.GetParam(snum.refinement.sg_list)'
         value='$sg(%n)'
         onchange="reset -s='GetValue(~name~)' -c=GetValue(SET_SNUM_REFINEMENT_FORMULA)>>spy.run_skin sNumTitle>>html.Update"
+        onreturn="html.Call(~name~.onchange)"
       >
   </td>
 </tr>

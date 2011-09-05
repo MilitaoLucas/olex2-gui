@@ -16,11 +16,11 @@
   <span class=replaceThisChar>[%$spy.GetParam(snum.report.title)%]</span>
 	were
   <span class=replaceThisChar>[%$spy.get_cif_item('_exptl_crystal_recrystallization_method')]%</span>.
-  A suitable crystal was selected and mounted 
+  A suitable crystal was selected and 
   <span class=replaceThisChar>%$spy.GetParam(snum.report.crystal_mounting_method)%</span>
   on a 
   <span class=replaceThisChar>%$spy.GetParam(snum.report.diffractometer)%</span>
-  diffractometer. The crystal was kept at %27% K.
+  diffractometer. The crystal was kept at %27% K during data collection.
   Using Olex2 [1], the structure was solved with the
   %$spy.GetParam(snum.solution.program)%
   [2] structure solution program using
@@ -29,16 +29,14 @@
   %$spy.GetParam(snum.refinement.program)%
   [3] refinement package using
   %$spy.GetParam(snum.refinement.method)%
-  minimisation.<br><br>
+  minimisation.</p>
 
-	[1] %_computing_molecular_graphics%<br>
-	[2] %_computing_structure_solution%<br>
-	[3] %_computing_structure_refinement%<br>
-	
-	
-	
+<ol class="journal_reference">
+	<li>%_computing_molecular_graphics%</li>
+	<li>%_computing_structure_solution%</li>
+	<li>%_computing_structure_refinement%</li>
+</ol>
 
-</p>
 
 <p class=journal_h2>
   Crystal structure determination of

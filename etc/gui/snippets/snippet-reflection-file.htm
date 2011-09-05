@@ -5,7 +5,7 @@
     width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 - spy.GetParam(gui.htmlpanelwidth_margin_adjust))'
     name='SET_REFLECTIONS_#parent_name'
     items='$spy.GetHklFileList()'
-    onchange='HKLSrc(GetValue(SET_REFLECTIONS_#parent_name))'
+    onchange='HKLSrc(GetValue(SET_REFLECTIONS_#parent_name))>>spy.make_HOS()>>html.Update'
     value='$FileName(HKLSrc()).$FileExt(HKLSrc())'
-    readonly='readonly'
+    readonly
   >
