@@ -378,6 +378,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       cif[block_name] = self.as_cif_block()
       print >> f, cif
       f.close()
+      metacif_path = '%s/%s.metacif' %(OV.StrDir(), OV.FileName())
+      OV.CifMerge(metacif_path, True)
       self.output_fcf()
       new_weighting = weighting.optimise_parameters(
         self.normal_eqns.observations.fo_sq,
@@ -448,6 +450,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       uctbx.d_as_d_star_sq(refinement_refs.d_max_min()[1]), self.wavelength, deg=True)
     completeness_full = refinement_refs.resolution_filter(
       d_min=uctbx.two_theta_as_d(two_theta_full, self.wavelength, deg=True)).completeness()
+    completeness_theta_max = refinement_refs.completeness()
     shifts_over_su = flex.abs(
       self.normal_eqns.step() /
       flex.sqrt(self.normal_eqns.covariance_matrix().matrix_packed_u_diagonal()))
@@ -537,6 +540,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     min_d_star_sq, max_d_star_sq = fo2.min_max_d_star_sq()
     (h_min, k_min, l_min), (h_max, k_max, l_max) = fo2.min_max_indices()
     cif_block['_diffrn_measured_fraction_theta_full'] = fmt % completeness_full
+    cif_block['_diffrn_measured_fraction_theta_max'] = fmt % completeness_theta_max
     cif_block['_diffrn_radiation_wavelength'] = self.wavelength
     cif_block['_diffrn_reflns_number'] = fo2.eliminate_sys_absent().size()
     if merging is not None:
@@ -905,6 +909,12 @@ class FullMatrixRefine(OlexCctbxAdapter):
         if twin.grad:
           print >> log, "%-9s %-9.4f %.4f" %(
             twin.twin_law.as_hkl(), twin.value, math.sqrt(standard_uncertainties[i]))
+    print >> log
+    print >> log, "Disagreeable reflections:"
+    self.normal_eqns.observations.fo_sq\
+      .customized_copy(sigmas=flex.sqrt(1/self.normal_eqns.weights))\
+      .apply_scaling(factor=1/self.normal_eqns.scale_factor())\
+      .show_disagreeable_reflections(self.normal_eqns.fc_sq, out=log)
 
 
 def rt_mx_from_olx(olx_input):

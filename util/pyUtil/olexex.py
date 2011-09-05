@@ -1269,10 +1269,6 @@ def getKeys(key_directory=None):
 
 
 def GetCheckcifReport(outputtype='PDF'):
-
-  
-  
-  
   output = OV.GetParam('user.cif.chckCif_output_format')
   if output:
     outputtype = output
@@ -1420,6 +1416,7 @@ def register_new_odac(username=None, pwd=None):
             'macAddress':mac_address,
             }
   f = HttpTools.make_url_call(url, values)
+  f = f.read()
 
   if not f:
     print "Please provide a valid username and password, and make sure your computer is online."
@@ -1431,8 +1428,8 @@ def register_new_odac(username=None, pwd=None):
     os.makedirs(p)
   else:
     try:
-      os.removedir(p)
-      os.makedir(p)
+      os.removedirs(p)
+      os.makedirs(p)
     except:
       print "The installer could not delete this folder: %s" %p
       print "Please remove all files in this folder manually and run the installer again."
@@ -1924,6 +1921,13 @@ def dealWithReportImage():
     OV.SetParam('snum.report.image',"%s\screenshot.png" %OV.FilePath())
 OV.registerFunction(dealWithReportImage)
 
+def dealWithReportName():
+  report_name = OV.GetParam('snum.report.name')
+  if not report_name:
+    OV.SetParam('snum.report.name',OV.FileName())
+    return
+OV.registerFunction(dealWithReportName)
+
 
 def getReportImageSrc():
   imagePath = OV.GetParam('snum.report.image')
@@ -2075,6 +2079,25 @@ def revert_to_original():
   print("Could not revert to any original file!")
 OV.registerFunction(revert_to_original)
 
+def fade_in(speed=0):
+  speed = OV.GetParam('user.use_fader')
+  if speed == 0:
+    return
+  olex.m("fade 1 0 -%s" %speed)
+  olex.m('waitfor fade')
+  olex.m("ceiling off")
+OV.registerFunction(fade_in)
+
+def fade_out(speed=0):
+  speed = OV.GetParam('user.use_fader')
+  if speed == 0:
+    return
+  olex.m("fader.InitFG()")
+  olex.m("fader.visible(true)")
+  olex.m("fade 0 1 %s" %speed)
+  olex.m("waitfor fade")
+OV.registerFunction(fade_out)
+
 def check_for_selection(need_selection=True):
   res = haveSelection()
   if not res and need_selection:
@@ -2135,6 +2158,21 @@ def advance_crystal_image(direction='forward'):
     #OV.SetParam('snum.report.crystal_image',p)
     #olx.html_SetImage('CRYSTAL_IMAGE',p)
 OV.registerFunction(advance_crystal_image)
+
+def get_news_image_from_server(name=""):
+  if not name:
+    url = 'http://www.olex2.org/randomimg'
+  else:
+    url = 'http://www.olex2.org/olex2images/%s/image' %name,''
+  try:
+    image = HttpTools.make_url_call(url,'').read()
+  except Exxception, err:
+    print "Downloading image from %s has failed: %s" %(url, err)
+    return
+  if image:
+    wFile = open('%s/etc/news/news.png' %OV.BaseDir(),'wb')
+    wFile.write(image)
+OV.registerFunction(get_news_image_from_server)
 
 
 if not haveGUI:

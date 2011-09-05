@@ -51,30 +51,24 @@
       <cmd2  "spy.SaveStructureParams()">
       <cmd1  "if strcmp(%4,'none') then none else 'spy.SaveCifInfo()'">
       <cmd3  cmd1="silent on">
-      <cmd4  cmd1="clear">
-      <cmd5  XXXcmd1="fader.InitFG()">
-      <cmd6  XXXcmd1="fader.visible(true)">
-      <cmd7  XXX="fade 0 1 0.05">
-      <cmd8  XXX='waitfor fade'>
+      <cmd4  "clear">
+      <cmd5  "spy.fade_out()">
       <cmd9  "@reap '%1' %2">
+      <cmd5  "spy.fade_in()">
       <cmd10 "if strcmp(filename(),'none') then none else spy.LoadStructureParams()">
       <cmd15 "spy.run_skin sNumTitle">
-      <cmd29 "spy.HealthOfStructure()">
+      <cmd29 "spy.make_HOS()">
       <cmd11 "SetVar(SlideQPeaksVal,0)">
-      <cmd12 XXX="ceiling on">
       <cmd13 "storeparam startup file.relativePath(filefull()) true">
       <cmd15 "spy.setAllMainToolbarTabButtons()">
       <cmd16 "if File.Exists(strdir()/filename().vvd) then none else 'spy.SetParam(snum.refinement.original_formula,xf.GetFormula())'">
       <cmd17 "if strcmp(%7,filefull()) then none else 'spy.loadHistory()'">
       <cmd19 "if and(isplugininstalled(plugin-brukersaint),IsFileType('p4p')) then BSINI else none">
       <cmd20 cmd1="if strcmp(%7,filefull()) then none else 'clear'">
-      <cmd24 "spy.reset_file_in_OFS(solution_image.htm)">
-      <cmd25 "spy.reset_file_in_OFS(refinement_image.htm)">
+      <cmd24 xxx="spy.reset_file_in_OFS(solution_image.htm)">
+      <cmd25 xxx="spy.reset_file_in_OFS(refinement_image.htm)">
       <cmd26 "if strcmp(%7,filefull()) then updatehtml else htmlreload">
       <cnd27 "if html.IsPopup(history-tree) then spy.popout_history_tree()">
-      <cmd26 XXX="fade 1 0 -0.1">
-      <cmd27 XXX='waitfor fade'>
-      <cmd28 XXX="ceiling off">
   \>
 <onabort
   <cmd "ceiling off">
@@ -215,6 +209,7 @@
     <args
     \>
     <cmd
+      <cmd2 "spy.dealWithReportName()">
       <cmd4 "cursor(busy, '%Checking for IMAGE file ...%')">
       <cmd2 "spy.dealWithReportImage()">
       <cmd13 "cursor()">

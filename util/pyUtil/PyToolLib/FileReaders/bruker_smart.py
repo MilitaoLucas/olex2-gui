@@ -34,10 +34,10 @@ class reader:
             j += 1
             if j == 1:
               txt = lines[i].split()
-              special_details.setdefault("scantime", txt[-1:][0])
+              special_details.setdefault("scantime", "%.0f" %float(txt[-1:][0]))
               special_details.setdefault("scanwidth", txt[-3:-2][0])
             txt = lines[i]
-          special_details.setdefault("scans", j)
+          special_details.setdefault("scans", j - 1)
         elif lines[i][:11] == "/WAVELENGTH":
           txt = lines[i].split('=')
           special_details.setdefault("wavelength", float(txt[1]))
@@ -89,7 +89,7 @@ class reader:
     txt = """
  The data collection nominally covered a full sphere of reciprocal space by
  a combination of %(scans)i sets of \\w scans each set at different \\f and/or
- 2\\q angles and each scan (%(scantime)s s exposure) covering %(scanwidth)s\ degrees in \\w.
+ 2\\q angles and each scan (%(scantime)s s exposure) covering %(scanwidth)s\%% degrees in \\w.
  The crystal to detector distance was %(distance)s cm.
 """%smart
     exptl_special_details = "\n;%s;\n" %txt
