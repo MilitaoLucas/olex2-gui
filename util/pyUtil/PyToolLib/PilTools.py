@@ -1047,8 +1047,6 @@ class timage(ImageTools):
     self.sf = sf
     self.sfs = sfs
 
-  def resize_news_image(self):
-    IT.resize_to_panelwidth({'i':'news/news.png'})
 
   def run_timage(self,force_images=False):
 

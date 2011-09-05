@@ -324,7 +324,6 @@ class MergeCif(CifTools):
         print("If you are using SHELX, make sure you use the ACTA command.")
         print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         return
-
     self.write_metacif_file()
     ## merge metacif file with cif file from refinement
     OV.CifMerge(self.metacif_path)
@@ -402,8 +401,8 @@ class ExtractCifInfo(CifTools):
         computing_data_collection = self.prepare_computing(smart, versions, "smart")
         smart.setdefault("_computing_data_collection", computing_data_collection)
         self.update_cif_block(smart)
-      except:
-        print "Error reading Bruker SMART file %s" %p
+      except Exception, err:
+        print "Error reading Bruker SMART file %s: %s" %(p, err)
 
     p = self.sort_out_path(path, "p4p")
     if p and self.metacifFiles != self.metacifFiles.prev_p4p:
@@ -645,21 +644,12 @@ class ExtractCifInfo(CifTools):
       #lambda_correction = abs["lambda_correction"]
 
       txt = """
-"%(version)s was used for absorption correction.
+%(version)s was used for absorption correction.
 R(int) was %(Rint_before)s before and %(Rint_after)s after correction.
 The Ratio of minimum to maximum transmission is %(ratiominmax)s.
 The \l/2 correction factor is %(lambda_correction)s.
-{Info from %(abs_file)s}
 """%abs
 
-
-      #t = ["%s was used for absorption correction." %(version),
-           #"R(int) was %s before and %s after correction." %(R_int_before, R_int_after),
-           #"The Ratio of minimum to maximum transmission is %s." %(ratiominmax),
-           #"The \l/2 correction factor is %s." %(lambda_correction),
-           #"{Info from %s}" %(p),
-           #]
-      #txt = " %s\n %s\n %s\n %s" %(t[0], t[1], t[2], t[3])
       exptl_absorpt_process_details = "\n;\n%s\n;\n" %txt
     return exptl_absorpt_process_details
 
