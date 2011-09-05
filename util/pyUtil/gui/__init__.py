@@ -13,8 +13,8 @@ def About():
   sz = [int(i) for i in olx.GetWindowSize().split(',')]
   w = int(olx.ClientWidth('self'))
   h = int(olx.ClientHeight('self'))
-  sw = 350
-  sh = 250
+  sw = 400+2*15+10
+  sh = 249+2*15+150
   olx.Popup("about '%s/etc/gui/help/about.htm' -x=%d -y=%d -w=%d -h=%d"
             %(olx.BaseDir(),
               sz[0] + w/2 + sw/2,
