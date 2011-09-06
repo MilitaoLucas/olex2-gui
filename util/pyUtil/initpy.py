@@ -328,8 +328,9 @@ except ImportError, err:
   
   
 print "Welcome to Olex2"
+print "\nWe are grateful to our users for testing and supporting Olex2"
+print "Please find the link to credits in the About box"
 print "\nDolomanov, O.V.; Bourhis, L.J.; Gildea, R.J.; Howard, J.A.K.; Puschmann, H.,\nOLEX2: A complete structure solution, refinement and analysis program (2009).\nJ. Appl. Cryst., 42, 339-341.\n"
-
 ## These imports will register macros and functions for spy.
 if OV.HasGUI():
   from Skin import Skin
