@@ -124,12 +124,15 @@ class OlexCctbxAdapter(object):
       sfac = self.olx_atoms.model.get('sfac')
       custom_gaussians = {}
       if sfac is not None:
-        from cctbx import eltbx
-        for element, sfac_dict in sfac.iteritems():
-          custom_gaussians.setdefault(element, eltbx.xray_scattering.gaussian(
-            sfac_dict['gaussian'][0],
-            [-b for b in sfac_dict['gaussian'][1]],
-            sfac_dict['gaussian'][2]))
+        if len(sfac) > 0 and 'gaussian' not in sfac.items()[0][1]:
+          print "Sorry custom DISP is not yet supported"
+        else:
+          from cctbx import eltbx
+          for element, sfac_dict in sfac.iteritems():
+            custom_gaussians.setdefault(element, eltbx.xray_scattering.gaussian(
+              sfac_dict['gaussian'][0],
+              [-b for b in sfac_dict['gaussian'][1]],
+              sfac_dict['gaussian'][2]))
         # XXX fp and fdp not yet dealt with
       self._xray_structure.scattering_type_registry(
         custom_dict=custom_gaussians,
