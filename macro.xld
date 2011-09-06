@@ -19,7 +19,9 @@
       <cmd6 rem="loglevel(mf)>>py.loglevel(mf)">
       <cmd7 "spy.load_user_gui_phil()">
       <cmd8 "spy.change_skin()">
-      <cmd9 "if and(isvar(startup),file.exists(app.getarg(1))) then none else 'reap getVar(startup)>>echo filepath()'">
+      <cmd9 "if not(file.Exists(app.getarg(1))) then
+        'if and(IsVar(startup),file.Exists(GetVar(startup))) then
+              &2E;reap GetVar(startup)&2E;'">
       <cmd10 "bind wheel 'ShowQ -wheel='">
       <cmd11 "spy.GetTip(0)">
       <cmd11 "spy.settings_tree()">
@@ -51,7 +53,7 @@
       <cmd2  "spy.SaveStructureParams()">
       <cmd1  "if strcmp(%4,'none') then none else 'spy.SaveCifInfo()'">
       <cmd3  cmd1="silent on">
-      <cmd4  "clear">
+      <cmd4  "if IsFileLoaded() then clear">
       <cmd5  "spy.fade_out()">
       <cmd9  "@reap '%1' %2">
       <cmd5  "spy.fade_in()">
