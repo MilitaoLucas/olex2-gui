@@ -2537,8 +2537,8 @@ class HealthOfStructure():
     self.available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
     
   def make_HOS(self):
-    self.initialise_HOS()
-    self.make_HOS_html()
+    if self.initialise_HOS():
+      self.make_HOS_html()
 
   def initialise_HOS(self):
     if olx.IsFileLoaded() != 'true':
@@ -2551,8 +2551,9 @@ class HealthOfStructure():
       txt += "</tr></table></tr>"
       txt = txt.decode('utf-8')
       OV.write_to_olex("hos.htm" , txt)
-      return
+      return False
     self.hkl_stats = olex_core.GetHklStat()
+    return True
 
   def make_HOS_html(self):
     txt = "<tr><table width='100%%' cellpadding=0 cellspacing=0><tr>"
