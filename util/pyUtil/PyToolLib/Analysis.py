@@ -751,8 +751,8 @@ class Graph(ImageTools):
         else:
           all_in_oneText = '''
 <a href='spy.SetParam(graphs.program_analysis.all_in_one_history,True)>>spy._make_history_bars()>>html.Update'>Show All Bars</a>'''
-          previous_img = "<a href='spy.olex_fs_copy(history-info_%s.htm,history-info.htm)>>updatehtml'><zimg src=previous.png></a>" %(img_no -1)
-          next_img = "<a href='spy.olex_fs_copy(history-info_%s.htm,history-info.htm)>>updatehtml'><zimg src=next.png></a>" %(img_no + 1)
+          previous_img = "<a href='spy.olex_fs_copy(history-info_%s.htm,history-info.htm)>>html.Update'><zimg src=previous.png></a>" %(img_no -1)
+          next_img = "<a href='spy.olex_fs_copy(history-info_%s.htm,history-info.htm)>>html.Update'><zimg src=next.png></a>" %(img_no + 1)
 
         historyTextNext = '''
 <table width='100%%' border='0' cellpadding='0'>
@@ -2228,7 +2228,7 @@ class HistoryGraph(Analysis):
 
     while node is not None:
       R1 = node.R1
-      href = "spy.revert_history(%s)>>UpdateHtml>>if html.IsPopup(history-tree) then spy.popout_history_tree()" %(node.name)
+      href = "spy.revert_history(%s)>>html.Update>>if html.IsPopup(history-tree) then spy.popout_history_tree()" %(node.name)
       target = '%s (%s)' %(node.program, node.method)
       if node.is_solution:
         R1 = 1
@@ -2462,7 +2462,7 @@ def makeReflectionGraphGui():
      'height':guiParams.html.combo_height,
      'bgcolor':guiParams.html.input_bg_colour,
      'value':value,
-     'onchange':'spy.make_reflection_graph(GetValue(SET_REFLECTION_STATISTICS))>>updatehtml',
+     'onchange':'spy.make_reflection_graph(GetValue(SET_REFLECTION_STATISTICS))>>html.Update',
      'manage':'manage',
      'readonly':'readonly',
      'width':'$eval(html.clientwidth(self)-140)',

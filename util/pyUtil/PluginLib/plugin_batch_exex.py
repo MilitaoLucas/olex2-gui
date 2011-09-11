@@ -26,7 +26,7 @@ def BatchMatch(dirStr, type):
       SpyVar.MatchedRms = []
       st = "'%s'" %structure
       stName = structure.split('\\')[-1:][0]
-      outStr += '<br><a href="reap %s>>match>>UpdateHtml"><b>%s</b></a>&nbsp;' %(st, stName)
+      outStr += '<br><a href="reap %s>>match>>html.Update"><b>%s</b></a>&nbsp;' %(st, stName)
       try:
         olx.Atreap(structure)
       except:

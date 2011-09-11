@@ -774,7 +774,7 @@ image="%(image)s"
              {'category':'work-shelx', 
               'colspan':1, 
               'target':'Changes the formula to that of the current model',
-              'href':'fixunit>>updatehtml',
+              'href':'fixunit>>html.Update',
               'display':'Fix',
               },
 
@@ -902,7 +902,7 @@ image="%(image)s"
              {'category':'work-shelx', 
               'colspan':1, 
               'target':'Changes the formula to that of the current model',
-              'href':'fixunit>>updatehtml',
+              'href':'fixunit>>html.Update',
               'display':'Fix',
               },
 
@@ -960,7 +960,7 @@ def make_program_choice_box(prg_type, prg_det, scope):
       value='$spy.GetParam(%(scope)s.%(prg_type)s.%(prg_det)s)'
       items='$spy.get%(Prg_Type)s%(func)s(%(func_arg)s)'
       label=''
-      onchange="spy.Set%(Prg_Type)s%(Prg_Det)s(GetValue(SET_%(SCOPE)s_%(PRG_TYPE)s_%(PRG_DET)s))>>UpdateHtml"
+      onchange="spy.Set%(Prg_Type)s%(Prg_Det)s(GetValue(SET_%(SCOPE)s_%(PRG_TYPE)s_%(PRG_DET)s))>>html.Update"
       readonly='readonly'
     >
     ''' %d
