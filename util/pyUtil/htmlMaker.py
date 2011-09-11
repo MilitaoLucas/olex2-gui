@@ -111,7 +111,7 @@ def diffractionMetadataHtmlMaker():
      'readonly':'',
      'itemName':'%Diffractometer%',
      'items':userDictionaries.localList.getListDiffractometers(),
-     'onchange':"spy.addToLocalList(GetValue(~name~),diffractometers)>>updatehtml",
+     'onchange':"spy.addToLocalList(GetValue(~name~),diffractometers)>>html.update",
      },
   )
 
@@ -201,13 +201,13 @@ def collectionMetadataHtmlMaker():
      'itemName':'%Submitter%',
      'items':userDictionaries.people.getListPeople(),
      'readonly':'',
-     'onchange':"spy.SetParam(snum.report.submitter,GetValue(~name~))>>spy.addNewPerson(GetValue(~name~))>>updatehtml",
+     'onchange':"spy.SetParam(snum.report.submitter,GetValue(~name~))>>spy.addNewPerson(GetValue(~name~))>>html.update",
      },
     {'varName':'snum.report.operator',
      'itemName':'%Operator%',
      'items':userDictionaries.people.getListPeople(),
      'readonly':'',
-     'onchange':"spy.SetParam(snum.report.operator,GetValue(~name~))>>spy.addNewPerson(GetValue(~name~))>>updatehtml",
+     'onchange':"spy.SetParam(snum.report.operator,GetValue(~name~))>>spy.addNewPerson(GetValue(~name~))>>html.update",
      },
     {'varName':'snum.report.date_submitted',
      'itemName':'%Date Submitted%',
@@ -308,20 +308,20 @@ def publicationMetadataHtmlMaker():
     if numberAuthors == 1:
       authorRow.setdefault('itemName','')
       authorRow.setdefault('field1',{'itemName':'%Author%'})
-      authorRow.setdefault('field2',{'itemName':'<a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Remove author from list"><zimg border="0" src="delete.png"></a>' %str(i),
+      authorRow.setdefault('field2',{'itemName':'<a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.update" target="Remove author from list"><zimg border="0" src="delete.png"></a>' %str(i),
                                      'fieldALIGN':'right'})
 
     elif i == 1:
       authorRow.setdefault('itemName','')
       authorRow.setdefault('field1',{'itemName':'%Authors%'})
-      authorRow.setdefault('field2',{'itemName':'<zimg border="0" src="toolbar-up-off.png"><a href="spy.move(down,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Move author down list"><zimg border="0" src="toolbar-down.png"></a> <a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Remove author from list"><zimg border="0" src="delete.png"></a>' %(str(i),str(i)),
+      authorRow.setdefault('field2',{'itemName':'<zimg border="0" src="toolbar-up-off.png"><a href="spy.move(down,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.update" target="Move author down list"><zimg border="0" src="toolbar-down.png"></a> <a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.update" target="Remove author from list"><zimg border="0" src="delete.png"></a>' %(str(i),str(i)),
                                      'fieldALIGN':'right'})
     elif i == numberAuthors:
-      authorRow.setdefault('itemName','<a href="spy.move(up,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Move author up list"><zimg border="0" src="toolbar-up.png"></a><zimg border="0" src="toolbar-down-off.png"><a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Remove author from list"><zimg border="0" src="delete.png"></a>' %(str(i),str(i)))
+      authorRow.setdefault('itemName','<a href="spy.move(up,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.update" target="Move author up list"><zimg border="0" src="toolbar-up.png"></a><zimg border="0" src="toolbar-down-off.png"><a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.Update" target="Remove author from list"><zimg border="0" src="delete.png"></a>' %(str(i),str(i)))
       authorRow.setdefault('fieldALIGN','right')
       authorRow['bgcolor'] = OV.GetParam('gui.html.input_bg_colour')
     else:
-      authorRow.setdefault('itemName','<a href="spy.move(up,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Move author up list"><zimg border="0" src="toolbar-up.png"></a> <a href="spy.move(down,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Move author down list"><zimg border="0" src="toolbar-down.png"></a> <a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>updatehtml" target="Remove author from list"><zimg border="0" src="delete.png"></a>' %(str(i),str(i),str(i)))
+      authorRow.setdefault('itemName','<a href="spy.move(up,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.Update" target="Move author up list"><zimg border="0" src="toolbar-up.png"></a> <a href="spy.move(down,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.Update" target="Move author down list"><zimg border="0" src="toolbar-down.png"></a> <a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.Update" target="Remove author from list"><zimg border="0" src="delete.png"></a>' %(str(i),str(i),str(i)))
       authorRow.setdefault('fieldALIGN','right')
 
     list.append(authorRow)
@@ -356,7 +356,7 @@ def publicationMetadataHtmlMaker():
   for d in list:
     d.setdefault('ctrl_name','SET_%s' %str.upper(d['varName']).replace('.','_'))
     if 'ctrl_name' in d['varName']:
-      d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)>>updatehtml" %d)
+      d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)>>html.Update" %d)
     elif 'author_name' in d['varName']:
       d.setdefault('onchange','')
   retstr = htmlTools.makeHtmlTable(list)
@@ -377,7 +377,7 @@ def publicationMetadataHtmlMaker():
 <tr VALIGN="center" ALIGN="left">
          <td VALIGN="center" width="40%%" colspan=2>
 
-         <a href="spy.contactLetter()>>updatehtml" target="Edit Contact Letter"><b>Contact Letter</b></a>
+         <a href="spy.contactLetter()>>html.Update" target="Edit Contact Letter"><b>Contact Letter</b></a>
          </td>
 </tr>
 """
@@ -690,7 +690,7 @@ def weightGuiDisplay():
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_UPDATE_WEIGHT'>
   <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
   <td VALIGN='right' colspan=3>
-    <b><a target="%s" href="UpdateWght%s>>UpdateHtml">%s: %s</a></b></td>
+    <b><a target="%s" href="UpdateWght%s>>html.Update">%s: %s</a></b></td>
     <td VALIGN='center' ALIGN='right' colspan=1>%s</td>
 </tr>
     ''' %(txt_tick_the_box, wght_str, txt_Weight, html_scheme, box)

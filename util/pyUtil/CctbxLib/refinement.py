@@ -724,6 +724,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
         current = adp.shared_u(eadp)
         constraints.append(current)
         self.shared_param_constraints.append((i, current, 1))
+
+    same_groups = self.olx_atoms.model.get('olex2.constraint.same_group', ())
+    for sg in same_groups:
+      constraints.append(rigid.same_group(sg))
     return constraints
 
   def setup_rigid_body_constraints(self, afix_iter):
