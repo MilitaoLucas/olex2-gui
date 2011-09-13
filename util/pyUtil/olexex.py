@@ -1430,10 +1430,11 @@ def register_new_odac(username=None, pwd=None):
     print "You may also have used up the number of allowable installs."
     return
   
-  if ".exe" not in f:
-    print "You may have exceeded the number of AutoChem installs."
-    print "Please contact contact xrdapplications@agilent.com for further information."
+  elif not f.endswith(".exe"):
+    print "Please provide valid username and password. If this problem persitsts, please"
+    print "contact xrdapplications@agilent.com for further information."
     return
+    
   
   p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], olex2_tag)
   p = os.path.abspath(p)
@@ -1441,9 +1442,10 @@ def register_new_odac(username=None, pwd=None):
     os.makedirs(p)
   else:
     try:
-      os.removedirs(p)
+      import shutil
+      shutil.rmtree(p)
       os.makedirs(p)
-    except:
+    except Exception, err:
       print "The installer could not delete this folder: %s" %p
       print "Please remove all files in this folder manually and run the installer again."
       olex.m('exec -o explorer "%s"' %p)
