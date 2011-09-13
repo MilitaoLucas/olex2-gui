@@ -1413,15 +1413,28 @@ def register_new_odac(username=None, pwd=None):
             'olex2Tag':olex2_tag,
             'computerName':computer_name,
             'username':username,
+            'context':"None",
             'macAddress':mac_address,
             }
-  f = HttpTools.make_url_call(url, values)
+  try:
+    f = HttpTools.make_url_call(url, values)
+  except Exception, err:
+    print "You may have exceeded the number of AutoChem installs."
+    print "Please contact contact xrdapplications@agilent.com for further information."
+    return
+    
   f = f.read()
 
   if not f:
     print "Please provide a valid username and password, and make sure your computer is online."
     print "You may also have used up the number of allowable installs."
     return
+  
+  if ".exe" not in f:
+    print "You may have exceeded the number of AutoChem installs."
+    print "Please contact contact xrdapplications@agilent.com for further information."
+    return
+  
   p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], olex2_tag)
   p = os.path.abspath(p)
   if not os.path.exists(p):
