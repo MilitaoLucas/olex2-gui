@@ -2139,6 +2139,87 @@ def fade_out(speed=0):
   olex.m("waitfor fade")
 OV.registerFunction(fade_out)
 
+def GetImageFilename(image_type):
+  filename = OV.GetParam('snum.image.%s.name' %image_type.lower())
+  if image_type == "PS":
+    fileext = "eps"
+  elif image_type == "PR":
+    fileext = "pov"
+  else:
+    fileext = OV.GetParam('snum.image.%s.type' %image_type.lower())
+  if not filename:
+    try:
+      filename = OV.GetValue('IMAGE_%s_NAME' % image_type)
+    except:
+      filename = None
+    if not filename:
+      import gui
+      filename = gui.FileOpen("Choose Filename", "*.%s" %fileext, OV.FilePath())
+    if not filename:
+      return None, None, None
+  if filename.endswith(".%s" %fileext):
+    filefull = filename
+  else:
+    filefull = "'%s.%s'" %(filename, fileext)
+  OV.SetParam('snum.image.%s.name' %image_type.lower(),None)
+  return filefull, filename, fileext
+
+def GetBitmapImageInstructions():
+  filefull, filename, fileext = GetImageFilename(image_type = "BITMAP")
+  if not filefull:
+    return
+  filesize = OV.GetValue('IMAGE_BITMAP_SIZE')
+  
+  OV.Cursor('busy','Please Wait. Making image %s.%s. This may take some time' %(filename, fileext))
+  olex.m('pict -pq %s %s' %(filefull, filesize))
+  OV.Cursor()
+OV.registerFunction(GetBitmapImageInstructions)
+
+def GetPRImageInstructions():
+  filefull, filename, fileext = GetImageFilename(image_type = "PR")
+  if not filefull:
+    return
+  OV.Cursor('busy','Please Wait. Making image %s.%s. This may take some time' %(filename, fileext))
+  olex.m('pictPR %s' %filefull)
+  print 'Image %s made and placed in %s' %(filefull, OV.FilePath())
+  OV.Cursor()
+OV.registerFunction(GetPRImageInstructions)
+
+def GetPSImageInstructions():
+  filefull, filename, fileext = GetImageFilename(image_type = "PS")
+  if not filefull:
+    return
+  OV.Cursor('busy','Please Wait. Making image %s.%s. This may take some time' %(filename, fileext))
+  olex.m('brad %s' %OV.GetParam('snum.image.ps.bond_width'))
+  
+  colour_line = OV.GetParam('snum.image.ps.colour_line')
+  colour_bond = OV.GetParam('snum.image.ps.colour_bond')
+  colour_fill = OV.GetParam('snum.image.ps.colour_fill')
+  image_perspective = OV.GetParam('snum.image.ps.perspective')
+  lw_ellipse = str(OV.GetParam('snum.image.ps.outline_width'))
+  lw_octant = str(OV.GetParam('snum.image.ps.octant_width'))
+  lw_pie = str(OV.GetParam('snum.image.ps.pie_width'))
+  lw_font = str(OV.GetParam('snum.image.ps.font_weight'))
+  div_pie = str(OV.GetParam('snum.image.ps.octant_count'))
+  scale_hb = str(OV.GetParam('snum.image.ps.h_bond_width'))
+  
+  olex.m("pictps" + \
+         " " + filename + \
+         " " + colour_line + \
+         " " + colour_bond + \
+         " " + colour_fill + \
+         " " + "-lw_ellipse=" + lw_ellipse + \
+         " " + "-lw_octant=" + lw_octant + \
+         " " + "-lw_pie=" + lw_pie + \
+         " " + "-lw_font=" + lw_font + \
+         " " + "-div_pie=" + div_pie + \
+         " " + "-scale_hb=" + scale_hb)
+  olex.m('brad 0.8')
+  print 'Image %s made and placed in %s' %(filefull, OV.FilePath())
+  OV.Cursor()
+OV.registerFunction(GetPSImageInstructions)
+
+
 def check_for_selection(need_selection=True):
   res = haveSelection()
   if not res and need_selection:
