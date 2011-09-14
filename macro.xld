@@ -1223,7 +1223,7 @@
       <arg1 name="popup_name" def="none">
     >
     <cmd
-      <cmd1 "if strcmp(%1,'none') then 'HtmlDump DataDir()/html.htm' else 'HtmlDump %1 DataDir()/html.htm'">
+      <cmd1 "if strcmp(%1,'none') then 'html.Dump DataDir()/html.htm' else 'html.Dump %1 DataDir()/html.htm'">
       <cmd2 "exec -o getvar(defeditor) 'DataDir()/html.htm'">
     >
   >
