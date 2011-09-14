@@ -1277,10 +1277,10 @@ def GetCheckcifReport(outputtype='PDF'):
   if not os.path.exists(file_name):
     print "\n ++ There is no cif file to check! Please add the 'ACTA' command to Shelx!"
     return
-  
+
   metacif_path = '%s/%s.metacif' %(OV.StrDir(), OV.FileName())
   OV.CifMerge(metacif_path)
-  
+
   rFile = open(file_name, 'rb')
   cif = rFile
 
@@ -1422,20 +1422,20 @@ def register_new_odac(username=None, pwd=None):
     print "You may have exceeded the number of AutoChem installs."
     print "Please contact contact xrdapplications@agilent.com for further information."
     return
-    
+
   f = f.read()
 
   if not f:
     print "Please provide a valid username and password, and make sure your computer is online."
     print "You may also have used up the number of allowable installs."
     return
-  
+
   elif not f.endswith(".exe"):
     print "Please provide valid username and password. If this problem persitsts, please"
     print "contact xrdapplications@agilent.com for further information."
     return
-    
-  
+
+
   p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], olex2_tag)
   p = os.path.abspath(p)
   if not os.path.exists(p):
@@ -1951,6 +1951,32 @@ def getReportImageSrc():
   else:
     return 'file:///%s' %imagePath
 OV.registerFunction(getReportImageSrc)
+
+def getReportExtraCIFItems(name_td_class, value_td_class):
+  cf_name = OV.file_ChangeExt(OV.FileFull(), 'cif')
+  rv = ''
+  if not os.path.exists(cf_name):
+    return rv
+  try:
+    import iotbx
+    fo = file(cf_name, "rUb")
+    reader = iotbx.cif.reader(file_object=fo)
+    fo.close()
+    models = []
+    for k, v in reader.model().iteritems():
+      if k.lower() != 'global':
+        models.append(v)
+    if len(models) > 1:
+      return rv
+    flack = models[0]["_refine_ls_abs_structure_Flack"]
+    if flack:
+      rv = "<tr><td class='%s'>Flack parameter</td><td class='%s'>%s</td></tr>"\
+        %(name_td_class,value_td_class,flack)
+  except Exception, err:
+    print err
+    pass
+  return rv
+OV.registerFunction(getReportExtraCIFItems)
 
 def getReportImageData(size='w400', imageName=None):
   import PIL
