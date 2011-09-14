@@ -40,8 +40,9 @@
       name="IMAGE_BITMAP_NAME"
       width="70"
       height="$spy.GetParam(gui.html.input_height)"
-      value="$spy.GetParam(snum.image.bitmap.name)"
+      value=""
       onchange="spy.SetParam(snum.image.bitmap.name,GetValue(IMAGE_BITMAP_NAME))"
+      manage
 
     >
   </td>
@@ -57,8 +58,8 @@
       items='png;jpg;bmp'
       valign='center'
       name="IMAGE_BITMAP_TYPE"
-      value='$spy.GetParam(user.image.bitmap.type)'
-      onchange='spy.SetParam(user.image.bitmap.type,GetValue(IMAGE_BITMAP_TYPE))'
+      value='$spy.GetParam(snum.image.bitmap.type)'
+      onchange='spy.SetParam(snum.image.bitmap.type,GetValue(IMAGE_BITMAP_TYPE))'
     >
   </td>
   <td>
@@ -78,7 +79,7 @@
     >
   </td>
   <td>
-$spy.MakeHoverButton(button_small-go@bitmap,cursor\(busy,'Please Wait. Making image. This may take some time')>>run 'pict -pq strcat\(GetValue\(IMAGE_BITMAP_NAME).,GetValue\(IMAGE_BITMAP_TYPE)) GetValue\(IMAGE_BITMAP_SIZE)'>>cursor\())
+$spy.MakeHoverButton(button_small-go@bitmap,spy.GetBitmapImageInstructions\())
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
