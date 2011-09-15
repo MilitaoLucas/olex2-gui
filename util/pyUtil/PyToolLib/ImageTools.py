@@ -429,11 +429,14 @@ class ImageTools(FontInstances):
 
   def adjust_colour(self, colour, hue=0, luminosity=1, saturation=1):
     hue = float(hue)
+    if not luminosity:
+      luminosity = 1
     try:
       luminosity = float(luminosity)
       saturation = float(saturation)
     except:
-      pass
+      luminosity = 1
+      saturation = 1
     if colour == 'base':
       colour = self.params.timage.base_colour.rgb
     if colour == "bg":
@@ -1166,7 +1169,7 @@ class ImageTools(FontInstances):
     IM.save("%s/%s.png" %(OV.DataDir(),name))
     OlexVFS.save_image_to_olex(IM, name, 1)
     OlexVFS.write_to_olex('pie.htm',html, True)
-    OV.HtmlReload()
+    OV.UpdateHtml()
 
   def make_pie_map(self, map_l, size):
 

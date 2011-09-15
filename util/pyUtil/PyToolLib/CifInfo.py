@@ -577,7 +577,7 @@ class ExtractCifInfo(CifTools):
 
     ## I introduced this condition in order NOT to overwrite the temperature value
     if '_diffrn_ambient_temperature' not in self.cif_block:
-      temp = olx.xf_exptl_Temperature()
+      temp = olx.xf.exptl.Temperature()
       if temp != 'n/a':
         temp = temp.split('(')
         t = 273.15 + float(temp[0].strip('C'))

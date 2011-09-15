@@ -140,9 +140,9 @@ def makeHtmlTableRow(dictionary):
   if 'chooseFile' in dictionary.keys():
     chooseFile_dict = dictionary['chooseFile']
     if 'file_type' in chooseFile_dict.keys():
-      href = "spy.set_source_file(%(file_type)s,FileOpen('%(caption)s','%(filter)s','%(folder)s'))>>updatehtml" %chooseFile_dict
+      href = "spy.set_source_file(%(file_type)s,FileOpen('%(caption)s','%(filter)s','%(folder)s'))>>html.Update" %chooseFile_dict
     else:
-      href = "%(function)sFileOpen('%(caption)s','%(filter)s','%(folder)s'))>>updatehtml" %chooseFile_dict
+      href = "%(function)sFileOpen('%(caption)s','%(filter)s','%(folder)s'))>>html.Update" %chooseFile_dict
       pass
     chooseFileText = '''
     <td>
@@ -407,12 +407,12 @@ def make_help_box(args):
       olx.Popup(tutorial_box_initialised, wFilePath)
     else:
       olx.Popup(pop_name, wFilePath, "-b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(name, boxWidth, boxHeight, x, y))
-      olx.html_SetBorders(pop_name,5)
+      olx.html.SetBorders(pop_name,5)
       if box_type == 'tutorial':
         tutorial_box_initialised = pop_name
 
   else:
-    olx.html_Load(wFilePath)
+    olx.html.Load(wFilePath)
 #  popup '%1-tbxh' 'basedir()/etc/gui/help/%1.htm' -b=tc -t='%1' -w=%3 -h=%2 -x=%4 -y=%5">
 OV.registerMacro(make_help_box, 'name-Name of the Box&;popout-True/False&;type-Type of Box (help or tutorial)')
 
@@ -784,9 +784,9 @@ def reg_command(self, string):
 
 def changeBoxColour(ctrl_name,colour):
   if olx.GetValue(ctrl_name) in ('?',''):
-    olx.html_SetBG(ctrl_name,colour)
+    olx.html.SetBG(ctrl_name,colour)
   else:
-    olx.html_SetBG(ctrl_name,OV.FindValue('gui_html_input_bg_colour'))
+    olx.html.SetBG(ctrl_name,OV.FindValue('gui_html_input_bg_colour'))
   return ''
 OV.registerFunction(changeBoxColour)
 
@@ -800,7 +800,7 @@ def switchButton(name,state):
     copy_from = "%son.png" %name
     copy_to = "%s.png" %name
     OV.CopyVFSFile(copy_from, copy_to)
-  OV.htmlReload()
+  OV.UpdateHtml()
   return ""
 OV.registerFunction(switchButton)
 
@@ -912,10 +912,10 @@ def makeHtmlBottomPop(args, pb_height = 50, y = 0):
     OV.cmd(pstr)
   else:
     OV.cmd(pstr)
-    olx.html_SetBorders(pop_name,0)
+    olx.html.SetBorders(pop_name,0)
     OV.cmd(pstr)
-    olx.html_SetBorders(pop_name,0)
-    olx.html_Reload(pop_name)
+    olx.html.SetBorders(pop_name,0)
+    OV.UpdateHtml(pop_name)
     HaveModeBox = True
 
 OV.registerMacro(makeHtmlBottomPop, 'txt-Text to display&;name-Name of the Bottom html popupbox')
@@ -1320,7 +1320,7 @@ OV.registerFunction(PopBanner)
 
 def doBanner(i):
   i = int(i)
-  #olx.html_SetImage("BANNER_IMAGE","banner_%i.png" %i)
+  #olx.html.SetImage("BANNER_IMAGE","banner_%i.png" %i)
   OV.CopyVFSFile("banner_%i.png" %i, "banner.png")
   OV.CopyVFSFile("banner_%i.htm" %i, "banner.htm")
   offset = 10
@@ -1343,7 +1343,7 @@ def doBanner(i):
 #  print i, d.get('name')
   OV.SetParam('snum.refinement.banner_slide', i)
 
-  ist += d.get('itemstate',0)
+  ist += d.get('html.ItemState',0)
   cmds += d.get('cmd',"").split(">>")
 
   OV.setItemstate(ist)
@@ -1397,7 +1397,7 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
       <b>
         %i.
       </b>
-      <a href='spy.GetTip(%i)>>html.Reload'>%s</a>
+      <a href='spy.GetTip(%i)>>html.Update'>%s</a>
       <br>''' %(i, i,t)
     txt = txt.rstrip("<br>")
     i = 0
@@ -1467,7 +1467,7 @@ def makeFormulaForsNumInfo():
     return "Periodic Table"
   else:
     colour = ""
-    txt_formula = olx.xf_GetFormula()
+    txt_formula = olx.xf.GetFormula()
     if txt_formula == formula:
       return formula_string
     formula = txt_formula
@@ -1478,7 +1478,7 @@ def makeFormulaForsNumInfo():
     if not colour:
       colour = OV.GetParam('gui.html.font_colour').hexadecimal
     font_size = OV.GetParam('gui.html.font_size_large')
-    html_formula = olx.xf_GetFormula('html',1)
+    html_formula = olx.xf.GetFormula('html',1)
     formula_string = "<font size=%s color=%s>%s</font>" %(font_size, colour, html_formula)
     return formula_string
 OV.registerFunction(makeFormulaForsNumInfo)

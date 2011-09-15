@@ -119,7 +119,7 @@ class Method(object):
       default = params.default
       varName = "settings_%s" %instruction.name
       if instruction.name == 'temp':
-        ins = olx.xf_exptl_Temperature()
+        ins = olx.xf.exptl.Temperature()
       else:
         if instruction.caption is not None:
           ins = olx.Ins(instruction.caption)
@@ -209,22 +209,22 @@ class Method_solution(Method):
     formula = getFormulaAsDict(RunPrgObject.formula)
     if sum(formula.values()) == 0:
       if OV.HasGUI():
-        cell_volume = float(olx.xf_au_GetCellVolume())
-        Z = float(olx.xf_au_GetZ())
+        cell_volume = float(olx.xf.au.GetCellVolume())
+        Z = float(olx.xf.au.GetZ())
         guess_C = int(cell_volume/Z/18)
         f = OV.GetUserInput(1,'Invalid formula','Enter correct formula...')
         if f and f!= 'Enter correct formula...':
           try:
-            olx.xf_SetFormula(f)
-            RunPrgObject.formula = olx.xf_GetFormula()
+            olx.xf.SetFormula(f)
+            RunPrgObject.formula = olx.xf.GetFormula()
           except RuntimeError:
             formula['C'] = guess_C
             RunPrgObject.formula = ' '.join('%s%s' %(type,count) for type,count in formula.items())
-            olx.xf_SetFormula(RunPrgObject.formula)
+            olx.xf.SetFormula(RunPrgObject.formula)
         else:
           formula['C'] = guess_C
           RunPrgObject.formula = ' '.join('%s%s' %(type,count) for type,count in formula.items())
-          olx.xf_SetFormula(RunPrgObject.formula)
+          olx.xf.SetFormula(RunPrgObject.formula)
       else:
         print "Formula is invalid"
     if 'D' in formula.keys():
@@ -264,8 +264,8 @@ class Method_refinement(Method):
 
   def pre_refinement(self, RunPrgObject):
     RunPrgObject.isAllQ = True
-    for i in xrange(int(olx.xf_au_GetAtomCount())):
-      ret = olx.xf_au_IsPeak(i)
+    for i in xrange(int(olx.xf.au.GetAtomCount())):
+      ret = olx.xf.au.IsPeak(i)
       if ret == "false":
         RunPrgObject.isAllQ = False
         break
@@ -287,7 +287,7 @@ class Method_refinement(Method):
     if RunPrgObject.params.snum.auto_hydrogen_naming:
       olx.FixHL()
     
-    wave_length = float(olx.xf_exptl_Radiation())
+    wave_length = float(olx.xf.exptl.Radiation())
     if round(wave_length, 2) == round(0.71073,2) or round(wave_length, 2) == round(1.5414, 2) or round(wave_length, 2)  == round(0.56053, 2):
       pass
     else:
@@ -304,7 +304,7 @@ class Method_shelx(Method):
     """
     print 'STARTING SHELX %s with %s' %(
       RunPrgObject.program.program_type, self.name)
-    prgName = olx.file_GetName(RunPrgObject.shelx)
+    prgName = olx.file.GetName(RunPrgObject.shelx)
     #olex.m("User '%s'" %RunPrgObject.tempPath)
     olx.User("'%s'" %RunPrgObject.tempPath)
     xl_ins_filename = RunPrgObject.shelx_alias
@@ -458,7 +458,7 @@ class Method_shelxd(Method_shelx_solution):
     """
     Method.calculate_defaults(self) # Define controls in Olex2
     #volume = float(olex.f("Cell(volume)"))
-    volume = float(olx.xf_au_GetCellVolume())
+    volume = float(olx.xf.au.GetCellVolume())
     n = int(volume/18) * 0.7
     nmin = int(n * 0.8)
     nmid = int(n * 1.2)
@@ -496,7 +496,7 @@ class Method_shelxd(Method_shelx_solution):
 
   def pre_solution(self, RunPrgObject):
     args = Method_shelx_solution.pre_solution(self, RunPrgObject)
-    volume = float(olx.xf_au_GetCellVolume())
+    volume = float(olx.xf.au.GetCellVolume())
     n = int(volume/18) * 0.7
     nmin = int(n * 0.8)
     nmax = int(n * 1.2)
@@ -524,8 +524,8 @@ class Method_shelxd(Method_shelx_solution):
     """
     olex.m("stop listen")
     Method_shelx_solution.post_solution(self, RunPrgObject)
-    for i in xrange(int(olx.xf_au_GetAtomCount())):
-      olx.xf_au_SetAtomU(i, "0.06")
+    for i in xrange(int(olx.xf.au.GetAtomCount())):
+      olx.xf.au.SetAtomU(i, "0.06")
 
 class Method_cctbx_refinement(Method_refinement):
 
@@ -587,7 +587,7 @@ class Method_cctbx_ChargeFlip(Method_solution):
     #solving_interval = int(float(self.getArgs().split()[1]))
     solving_interval = self.phil_index.params.flipping_interval
 
-    formula_l = olx.xf_GetFormula('list')
+    formula_l = olx.xf.GetFormula('list')
     formula_l = formula_l.split(",")
     formula_d = {}
     for item in formula_l:
@@ -602,7 +602,7 @@ class Method_cctbx_ChargeFlip(Method_solution):
       traceback.print_exc()
     try:
       olx.Freeze(True)
-      olx.xf_EndUpdate()
+      olx.xf.EndUpdate()
       olx.Compaq('-a')
       olx.Move()
     finally:
@@ -612,7 +612,7 @@ class Method_cctbx_ChargeFlip(Method_solution):
     #olex.m("name sel 1")
     OV.DeleteBitmap('solve')
     file = r"%s/%s.res" %(olx.FilePath(), RunPrgObject.fileName)
-    olx.xf_SaveSolution(file)
+    olx.xf.SaveSolution(file)
     olx.Atreap(file)
 
 class Method_SIR(Method_solution):
@@ -627,11 +627,11 @@ class Method_SIR(Method_solution):
     sirversion = RunPrgObject.program.versions
     sirfile = "%s.sir"%(OV.FileName())
     filename = OV.FileName()
-    Z = float(olx.xf_au_GetZ())
-    cell = ''.join(olx.xf_au_GetCell().split(','))
+    Z = float(olx.xf.au.GetZ())
+    cell = ''.join(olx.xf.au.GetCell().split(','))
     hklfile = OV.HKLSrc().split('/')[-1]
     contents = ''
-    for item in olx.xf_GetFormula('list').split(","):
+    for item in olx.xf.GetFormula('list').split(","):
         item = item.split(":")
         item[1] = int(float(item[1]) * Z)
         contents += "%s %i " %(item[0], item[1])
@@ -655,7 +655,7 @@ class Method_SIR(Method_solution):
         except TypeError:
             pass
 
-    oxs.setDirectives(cell=cell, SPACEGROUP=olx.xf_au_GetCellSymm(),
+    oxs.setDirectives(cell=cell, SPACEGROUP=olx.xf.au.GetCellSymm(),
             Format='(3i4,2f8.0)', contents=contents, Reflections=hklfile)
 
     opts = {}

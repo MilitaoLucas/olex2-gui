@@ -57,7 +57,7 @@ class publication:
       olx.GetValue(person_box_name),
       item,
       value)
-    olx.html_SetBG(box_name, BGColorForValue(value))
+    olx.html.SetBG(box_name, BGColorForValue(value))
 
   def AddNameToAuthorList(self, newName):
     oldValue = OV.GetParam("snum.metacif.publ_author_names")

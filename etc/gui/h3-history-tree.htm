@@ -21,12 +21,12 @@
 spy.SetParam(snum.history.condensed_tree,True)>>
 spy.make_history_bars()>>
 if html.IsPopup(history-tree) then spy.popout_history_tree()>>
-UpdateHtml"
+html.Update"
         onuncheck="
 spy.SetParam(snum.history.condensed_tree,False)>>
 spy.make_history_bars()>>
 if html.IsPopup(history-tree) then spy.popout_history_tree()>>
-UpdateHtml"
+html.Update"
     </td>
     <td align="right">
       <a href="spy.popout_history_tree()" target="popout tree">

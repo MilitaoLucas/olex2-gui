@@ -75,7 +75,7 @@ class RunPrg(ArgumentParser):
     copy_to = "%s/listen.res" %(self.datadir)
     if os.path.isfile(copy_from):
       if copy_from.lower() != copy_to.lower():
-        olx.file_Copy(copy_from, copy_to)
+        olx.file.Copy(copy_from, copy_to)
 
   def doFileResInsMagic(self):
     extensions = ['res', 'lst', 'cif', 'fcf', 'mat', 'pdb']
@@ -86,7 +86,7 @@ class RunPrg(ArgumentParser):
       copy_to = "%s/%s.%s" %(self.filePath, self.original_filename, ext)
       if os.path.isfile(copy_from):
         if copy_from.lower() != copy_to.lower():
-          olx.file_Copy(copy_from, copy_to)
+          olx.file.Copy(copy_from, copy_to)
 
   def doHistoryCreation(self, type="normal"):
     if type == "first":
@@ -126,11 +126,11 @@ class RunPrg(ArgumentParser):
     ## All files will be copied to the temp directory in lower case. This is to be compatible with the Linux incarnations of ShelX
     copy_to = "%s/%s.hkl" %(self.tempPath, self.shelx_alias)
     if not os.path.exists(copy_to):
-      olx.file_Copy(copy_from, copy_to)
+      olx.file.Copy(copy_from, copy_to)
     copy_from = "%s/%s.ins" %(self.filePath, self.curr_file)
     copy_to = "%s/%s.ins" %(self.tempPath, self.shelx_alias)
     if not os.path.exists(copy_to):
-      olx.file_Copy(copy_from, copy_to)
+      olx.file.Copy(copy_from, copy_to)
 
   def runCctbxAutoChem(self):
     from AutoChem import OlexSetupRefineCctbxAuto
@@ -236,7 +236,7 @@ class RunSolutionPrg(RunPrg):
       self.sg = '\'' + olex.f(r'sg(%n)') + '\''
     except:
       self.sg = ""
-    self.formula = olx.xf_GetFormula()
+    self.formula = olx.xf.GetFormula()
     if "smtbx" not in self.program.name:
       self.shelx = self.which_shelx(self.program)
     args = self.method.pre_solution(self)
@@ -290,8 +290,8 @@ class RunRefinementPrg(RunPrg):
     if self.params.snum.refinement.auto.pruneU:
       i = 0
       uref = 0
-      for i in xrange(int(olx.xf_au_GetAtomCount())):
-        ueq = float(olx.xf_au_GetAtomUiso(i))
+      for i in xrange(int(olx.xf.au.GetAtomCount())):
+        ueq = float(olx.xf.au.GetAtomUiso(i))
         if uref:
           if uref == ueq:
             continue

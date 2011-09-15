@@ -291,7 +291,7 @@ class GuiSkinChanger(ImageTools):
     width = OV.FindValue('gui_htmlpanelwidth')
     olx.HtmlPanelWidth(width)
     self.setGuiProperties()
-    OV.HtmlReload()
+    OV.UpdateHtml()
 
     #olex.m('panel')
 
@@ -1057,7 +1057,7 @@ class timage(ImageTools):
 
 
     do_these = []
-    if olx.fs_Exists("logo.png") == 'false':
+    if olx.fs.Exists("logo.png") == 'false':
       force_images = True
 
     if not self.olex2_has_recently_updated:
@@ -2079,7 +2079,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
   def make_text_and_tab_items(self):
     bitmap = "working"
-    if olx.fs_Exists(bitmap) == 'true':
+    if olx.fs.Exists(bitmap) == 'true':
       olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
     textItems = []
     textItems.append("autochem")
@@ -2758,10 +2758,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       grad_colour = IT.adjust_colour(grad_colour, luminosity = 0.95)
 #      font_colour = IT.adjust_colour(font_colour, luminosity = 0.9)
 
-    height = int(round(OV.GetParam('gui.timage.%s.height' %item_type) * self.size_factor, 0))
-    top = int(round(OV.GetParam('gui.timage.%s.top' %item_type) * self.size_factor,0))
-    left = int(round(OV.GetParam('gui.timage.%s.left' %item_type) * self.size_factor,0))
-    corner_rad = int(round(OV.GetParam('gui.timage.%s.corner_rad' %item_type) * self.size_factor,0))
+    height = int(round(OV.GetParam('gui.timage.%s.height' %item_type, 20) * self.size_factor, 0))
+    top = int(round(OV.GetParam('gui.timage.%s.top' %item_type, 0) * self.size_factor,0))
+    left = int(round(OV.GetParam('gui.timage.%s.left' %item_type, 0) * self.size_factor,0))
+    corner_rad = int(round(OV.GetParam('gui.timage.%s.corner_rad' %item_type, 0) * self.size_factor,0))
     halign = OV.GetParam('gui.timage.%s.halign' %item_type)
 
     shadow = OV.GetParam('gui.timage.%s.shadow' %item_type)

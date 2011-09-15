@@ -12,7 +12,7 @@
       value="$spy.GetParam(snum.xgrid.view)"
       onchange="spy.SetParam(snum.xgrid.view,GetValue(SET_SNUM_XGRID_VIEW_#suffix))
 >>spy.SetXgridView()
->>UpdateHtml"
+>>html.Update"
       label="%View% "
       valign="center"
       readonly
@@ -27,10 +27,10 @@
     checked="$spy.GetParam(snum.xgrid.extended)"
     oncheck="spy.SetParam(snum.xgrid.extended,True)
 >>spy.SetXgridView()
->>UpdateHtml"
+>>html.Update"
   onuncheck="spy.SetParam(snum.xgrid.extended,False)
 >>spy.SetXgridView()
->>UpdateHtml"
+>>html.Update"
   value=" %Extended% "
   valign="center"
 >
