@@ -1,25 +1,25 @@
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
 
 <!-- FIRST ROW -->
-<tr name=IMAGE_POVRAY_ROW_1>
+<tr name=IMAGE_PR_ROW_1>
 <!-- #include tool-help-column gui\blocks\tool-first-column.htm;help_ext=mode_name;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
-  <td name=IMAGE_POVRAY_NAME>
+  <td name=IMAGE_PR_NAME>
     <input
       type="text"
       height="$spy.GetParam(gui.html.input_height)"
       bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
       valign='center'
-      name="IMAGE_POVRAY_NAME"
+      name="IMAGE_PR_NAME"
       width="100"
       value="$spy.GetParam(snum.image.povray.name)"
       onchange="spy.SetParam(snum.image.povray.name,GetValue(~name~))"
       label='%Name% '
     >
   </td>
-  <td name=IMAGE_POVRAY_BUTTON align='right'>
-$spy.MakeHoverButton(button_small-go@povray,run 'pictPR GetValue\(IMAGE_POVRAY_NAME)')
+  <td name=IMAGE_PR_BUTTON align='right'>
+$spy.MakeHoverButton(button_small-go@povray,spy.GetPRImageInstructions\())
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
