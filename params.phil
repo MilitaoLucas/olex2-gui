@@ -137,6 +137,8 @@ snum
       {
       name = None
         .type = str
+      type = *png jpg bmp
+        .type = choice
       atom_label{
         font_name = #olex2.fnt:frb_18
           .type = str
@@ -147,17 +149,29 @@ snum
         font_name = #olex2.fnt:frb_14
         .type = str
       }
-      type = png jpg bmp
-        .type = choice
     }
     povray
       {
       name = None
         .type = str
+      type = *pov
+        .type = choice
     }
     ps
       .short_caption = ORTEP - Postscript
       {
+      name = None
+        .type = str
+      type = *eps
+        .type = choice
+      colour_line= " "
+        .type = str
+      colour_bond= " "
+        .type = str
+      colour_fill= " "
+        .type = str
+      perspective = " "
+        .type = str
       outline_width = 1.0
         .type = float
       octant_width = 1.0
@@ -170,6 +184,8 @@ snum
         .type = float
       bond_width = 0.7
         .type = float
+      font_weight = 1.2
+        .type = float
       atom_label{
         font_name = @
           .type = str
@@ -183,15 +199,13 @@ snum
       bond_label{
         font_name = @
           .type = str
-        font_size = 15
+        font_size = 8
           .type = int
         font_colour = #00000
           .type = colour
         font_weight = 1.0
           .type = float
       }
-      name = None
-        .type = str
     }
   image_series
     .short_caption = Movie
