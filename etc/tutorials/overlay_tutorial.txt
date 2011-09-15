@@ -5,9 +5,9 @@ set:font_colour_code=#aaaaff
 set:font_colour_bold=gui.html.highlight_colour
 
 c:fuse
-c:itemstate index* 0
-c:itemstate index-home 1
-c:itemstate tab* 2
+c:html.ItemState index* 0
+c:html.ItemState index-home 1
+c:html.ItemState tab* 2
 c:lines 10
 c:showq false
 
@@ -24,7 +24,7 @@ c:refresh
 
 p:Then you need to click on the <b>Overlay</b> tab.
 h:h2-overlay
-c:itemstate tools-overlay 1
+c:html.ItemState tools-overlay 1
 c:refresh
 
 p:Once the tab has been opened you need to select the link that says <b>Overlay Structure</b> this will allow you to open another model and open it in the same screen, this allows you test if multiple data sets give a similar model.

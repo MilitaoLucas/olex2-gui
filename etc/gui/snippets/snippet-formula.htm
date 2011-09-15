@@ -15,7 +15,7 @@
         name='SET_SNUM_REFINEMENT_FORMULA_#name'
         items='$spy.GetParam(snum.refinement.original_formula)'
         value='xf.GetFormula()'
-        onchange='xf.SetFormula(GetValue(~name~))>>spy.SetParam(snum.refinement.formula,"GetValue(SET_SNUM_REFINEMENT_FORMULA_#name)")>>updatehtml'
+        onchange='xf.SetFormula(GetValue(~name~))>>spy.SetParam(snum.refinement.formula,"GetValue(SET_SNUM_REFINEMENT_FORMULA_#name)")>>html.Update'
       >
     </font>
   </td>
@@ -36,7 +36,7 @@
         name='SET_Z_#name'
         min='1'
         value='xf.au.GetZ()'
-        onchange="xf.au.SetZ(GetValue(~name~))>>updatehtml"
+        onchange="xf.au.SetZ(GetValue(~name~))>>html.Update"
       >
     </font>
   </td>
@@ -56,7 +56,7 @@
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name='SET_Z_PRIME_#name'
         value='xf.au.GetZprime()'
-        onchange="xf.au.SetZprime(GetValue(~name~))>>updatehtml"
+        onchange="xf.au.SetZprime(GetValue(~name~))>>html.Update"
       >
     </font>
   </td>
@@ -69,7 +69,7 @@
   </td>
   <td width='50%' VALIGN='center' ALIGN='right' colspan=1>
     <a
-      href="fixunit xf.au.GetZprime()>>updatehtml"
+      href="fixunit xf.au.GetZprime()>>html.Update"
       target="%Fix Unit-target% ">
       <zimg border="0" src="toolbar-ok.png"/>
     </a>

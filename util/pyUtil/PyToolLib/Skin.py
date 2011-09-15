@@ -157,7 +157,7 @@ def change_skin(skin_name=None, force=False):
     a = PilTools.sNumTitle()
     a.run_sNumTitle(force=True)
 
-  olx.html_Reload()
+  OV.UpdateHtml()
 
   if timing:
     t = time.time()

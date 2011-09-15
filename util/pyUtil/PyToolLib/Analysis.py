@@ -741,18 +741,18 @@ class Graph(ImageTools):
   min="2"
   height="$spy.GetParam(gui.html.spin_height)"
   value="$spy.GetParam(graphs.program_analysis.y_scale_factor)"
-  onchange="spy.SetParam(graphs.program_analysis.y_scale_factor,GetValue(HistoryScale))>>spy._make_history_bars()>>html.Reload"
+  onchange="spy.SetParam(graphs.program_analysis.y_scale_factor,GetValue(HistoryScale))>>spy._make_history_bars()>>html.Update"
 >'''
 
         if all_in_one_history:
-          all_in_oneText = "<a href='spy.SetParam(graphs.program_analysis.all_in_one_history,False)>>spy._make_history_bars()>>html.reload'>Split Display</a>"
+          all_in_oneText = "<a href='spy.SetParam(graphs.program_analysis.all_in_one_history,False)>>spy._make_history_bars()>>html.Update'>Split Display</a>"
           previous_img = ""
           next_img = ""
         else:
           all_in_oneText = '''
-<a href='spy.SetParam(graphs.program_analysis.all_in_one_history,True)>>spy._make_history_bars()>>html.reload'>Show All Bars</a>'''
-          previous_img = "<a href='spy.olex_fs_copy(history-info_%s.htm,history-info.htm)>>updatehtml'><zimg src=previous.png></a>" %(img_no -1)
-          next_img = "<a href='spy.olex_fs_copy(history-info_%s.htm,history-info.htm)>>updatehtml'><zimg src=next.png></a>" %(img_no + 1)
+<a href='spy.SetParam(graphs.program_analysis.all_in_one_history,True)>>spy._make_history_bars()>>html.Update'>Show All Bars</a>'''
+          previous_img = "<a href='spy.olex_fs_copy(history-info_%s.htm,history-info.htm)>>html.Update'><zimg src=previous.png></a>" %(img_no -1)
+          next_img = "<a href='spy.olex_fs_copy(history-info_%s.htm,history-info.htm)>>html.Update'><zimg src=next.png></a>" %(img_no + 1)
 
         historyTextNext = '''
 <table width='100%%' border='0' cellpadding='0'>
@@ -1242,8 +1242,8 @@ class Analysis(Graph):
     pstr = "popup %s '%s' -b=stcr -t='%s' -w=%s -h=%s -x=1 -y=50" %(
       pop_name, htm_location, pop_name, int(width*1.033), int(height*1.1))
     olex.m(pstr)
-    olx.html_SetBorders(pop_name,0)
-    olx.html_Reload(pop_name)
+    olx.html.SetBorders(pop_name,0)
+    OV.UpdateHtml(pop_name)
 
   def analyse_lst(self):
     fl = self.fl
@@ -1385,11 +1385,11 @@ class PrgAnalysis(Analysis):
   def update_image(self):
     OlexVFS.save_image_to_olex(self.im, self.image_location, 0)
     if OV.IsControl('POP_%s_PRG_ANALYSIS' %self.program.program_type.upper()):
-      olx.html_SetImage(
+      olx.html.SetImage(
         'POP_%s_PRG_ANALYSIS' %self.program.program_type.upper(), self.image_location)
     OlexVFS.write_to_olex("%s_image.htm" %self.program.program_type, self.ProgramHtml())
     if self.new_graph:
-      OV.htmlReload()
+      OV.UpdateHtml()
       self.new_graph = False
 
 class refinement_graph(PrgAnalysis):
@@ -2228,7 +2228,7 @@ class HistoryGraph(Analysis):
 
     while node is not None:
       R1 = node.R1
-      href = "spy.revert_history(%s)>>UpdateHtml>>if html.IsPopup(history-tree) then spy.popout_history_tree()" %(node.name)
+      href = "spy.revert_history(%s)>>html.Update>>if html.IsPopup(history-tree) then spy.popout_history_tree()" %(node.name)
       target = '%s (%s)' %(node.program, node.method)
       if node.is_solution:
         R1 = 1
@@ -2462,7 +2462,7 @@ def makeReflectionGraphGui():
      'height':guiParams.html.combo_height,
      'bgcolor':guiParams.html.input_bg_colour,
      'value':value,
-     'onchange':'spy.make_reflection_graph(GetValue(SET_REFLECTION_STATISTICS))>>updatehtml',
+     'onchange':'spy.make_reflection_graph(GetValue(SET_REFLECTION_STATISTICS))>>html.Update',
      'manage':'manage',
      'readonly':'readonly',
      'width':'$eval(html.clientwidth(self)-140)',

@@ -152,7 +152,7 @@ class OlexCctbxAdapter(object):
 
   def initialise_reflections(self, force=False, verbose=False):
     self.cell = self.olx_atoms.getCell()
-    self.space_group = "hall: "+str(olx.xf_au_GetCellSymm("hall"))
+    self.space_group = "hall: "+str(olx.xf.au.GetCellSymm("hall"))
     hklf_matrix = utils.flat_list(self.olx_atoms.model['hklf']['matrix'])
     mx = [ continued_fraction.from_real(e, eps=1e-3).as_rational()
            for e in hklf_matrix ]
@@ -399,7 +399,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       max_solving_iterations=params.max_solving_iterations)
     if params.amplitude_type == 'E':
       formula = {}
-      for element in str(olx.xf_GetFormula('list')).split(','):
+      for element in str(olx.xf.GetFormula('list')).split(','):
         element_type, n = element.split(':')
         formula.setdefault(element_type, float(n))
       extra.normalisations_for = lambda f: f.amplitude_normalisations(formula)
@@ -444,9 +444,9 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       return
     sp = (height/self.peak_normaliser)
 
-    id = olx.xf_au_NewAtom("%.2f" %(sp), *xyz)
+    id = olx.xf.au.NewAtom("%.2f" %(sp), *xyz)
     if id != '-1':
-      olx.xf_au_SetAtomU(id, "0.06")
+      olx.xf.au.SetAtomU(id, "0.06")
 
 class OlexCctbxMasks(OlexCctbxAdapter):
 
@@ -588,7 +588,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       html = "<tr><td></td><td>"
       html += "<b>%There are no possible Twin Laws%</b>"
       OV.write_to_olex('twinning-result.htm', html, False)
-      OV.htmlReload()
+      OV.UpdateHtml()
       return
 
     lawcount = 0
@@ -665,7 +665,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       img_src = "%s.png" %image_name
       name = self.twin_laws_d[run].get('name', "XX")
       #href = 'spy.on_twin_image_click(%s)'
-      href = 'spy.revert_history(%s)>>spy.reset_twin_law_img()>>HtmlReload' %(self.twin_laws_d[i].get('history'))
+      href = 'spy.revert_history(%s)>>spy.reset_twin_law_img()>>html.Update' %(self.twin_laws_d[i].get('history'))
       law_txt = "<a href='%s'><zimg src=%s></a>&nbsp;" %(href, image_name)
       self.twin_law_gui_txt += "%s" %(law_txt)
       control = "IMG_%s" %image_name.upper()
@@ -679,7 +679,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     #OV.Refresh()
     #if OV.IsControl(control):
     #  OV.SetImage(control,use_image)
-    OV.HtmlReload()
+    OV.UpdateHtml()
     twin_laws_d = self.twin_laws_d
 #    self.make_gui()
 
@@ -876,7 +876,7 @@ def reset_twin_law_img():
       OV.CopyVFSFile("%son.png" %name, "%s.png" %name,2)
     else:
       OV.CopyVFSFile("%soff.png" %name, "%s.png" %name,2)
-  OV.HtmlReload()
+  OV.UpdateHtml()
 OV.registerFunction(reset_twin_law_img)
 
 
@@ -949,7 +949,7 @@ def calcsolv(solvent_radius=None, grid_step=None):
         else:
           OV.SetParam('snum.calcsolv.%s'%item,solvent_radius)
           if OV.IsControl('SET_SNUM_CALCSOLV_PROBE'):
-            olx.html_SetValue('SET_SNUM_CALCSOLV_PROBE', solvent_radius)
+            olx.html.SetValue('SET_SNUM_CALCSOLV_PROBE', solvent_radius)
           
       elif item == 'grid':
         if not grid_step:
@@ -957,7 +957,7 @@ def calcsolv(solvent_radius=None, grid_step=None):
         else:
           OV.SetParam('snum.calcsolv.%s'%item,grid_step)
           if OV.IsControl('SET_SNUM_CALCSOLV_Grid'):
-            olx.html_SetValue('SET_SNUM_CALCSOLV_GRID', grid_step)
+            olx.html.SetValue('SET_SNUM_CALCSOLV_GRID', grid_step)
     else:
       if item == 'probe':
         if not solvent_radius:
@@ -972,7 +972,7 @@ def calcsolv(solvent_radius=None, grid_step=None):
   unit_cell = olx_atoms.getCell()
   restraints_iter=olx_atoms.restraints_iterator()
   constraints_iter=None
-  space_group = "hall: "+str(olx.xf_au_GetCellSymm("hall"))
+  space_group = "hall: "+str(olx.xf.au.GetCellSymm("hall"))
 
   # Creating the xray_structure part
   create_cctbx_xray_structure = cctbx_controller.create_cctbx_xray_structure(

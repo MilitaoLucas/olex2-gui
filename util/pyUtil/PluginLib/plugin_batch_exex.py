@@ -26,7 +26,7 @@ def BatchMatch(dirStr, type):
       SpyVar.MatchedRms = []
       st = "'%s'" %structure
       stName = structure.split('\\')[-1:][0]
-      outStr += '<br><a href="reap %s>>match>>UpdateHtml"><b>%s</b></a>&nbsp;' %(st, stName)
+      outStr += '<br><a href="reap %s>>match>>html.Update"><b>%s</b></a>&nbsp;' %(st, stName)
       try:
         olx.Atreap(structure)
       except:
@@ -38,13 +38,13 @@ def BatchMatch(dirStr, type):
         olx.Fuse()
       except:
         pass
-      n_frags = int(olx.xf_latt_GetFragmentCount())
+      n_frags = int(olx.xf.latt.GetFragmentCount())
       n_frags_count = ""
       for i in xrange(n_frags):
-        c = len((olx.xf_latt_GetFragmentAtoms(i)).split(","))
+        c = len((olx.xf.latt.GetFragmentAtoms(i)).split(","))
         n_frags_count+= "%i " %c
         if c == 1:
-          atom = olx.xf_latt_GetFragmentAtoms(i)
+          atom = olx.xf.latt.GetFragmentAtoms(i)
           if atom[0] != 'H':
             olx.Kill(atom)
       n_frags_count = n_frags_count.strip()

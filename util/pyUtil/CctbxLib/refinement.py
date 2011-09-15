@@ -189,9 +189,9 @@ class olex2_normal_eqns(least_squares.crystallographic_ls):
 
       id = self.olx_atoms.atom_ids[this_atom_id]
       this_atom_id += 1
-      olx.xf_au_SetAtomCrd(id, *xyz)
-      olx.xf_au_SetAtomU(id, *u_trans)
-      olx.xf_au_SetAtomOccu(id, occu)
+      olx.xf.au.SetAtomCrd(id, *xyz)
+      olx.xf.au.SetAtomU(id, *u_trans)
+      olx.xf.au.SetAtomOccu(id, occu)
     #update OSF
     OV.SetOSF(self.scale_factor())
     #update FVars
@@ -208,8 +208,8 @@ class olex2_normal_eqns(least_squares.crystallographic_ls):
       OV.SetExtinction(self.reparametrisation.extinction.value)
     for (i,r) in enumerate(self.shared_rotated_adps):
       if r.refine_angle:
-        olx.xf_rm_UpdateCR('olex2.constraint.rotated_adp', i, r.angle.value*180/math.pi)
-    olx.xf_EndUpdate()
+        olx.xf.rm.UpdateCR('olex2.constraint.rotated_adp', i, r.angle.value*180/math.pi)
+    olx.xf.EndUpdate()
 
 
 class FullMatrixRefine(OlexCctbxAdapter):
@@ -518,18 +518,18 @@ class FullMatrixRefine(OlexCctbxAdapter):
       cif_block.add_loop(hbonds_loop.loop)
     self.restraints_manager().add_to_cif_block(cif_block, xs)
     # cctbx could make e.g. 1.001(1) become 1.0010(10), so use Olex2 values for cell
-    cif_block['_cell_length_a'] = olx.xf_uc_CellEx('a')
-    cif_block['_cell_length_b'] = olx.xf_uc_CellEx('b')
-    cif_block['_cell_length_c'] = olx.xf_uc_CellEx('c')
-    cif_block['_cell_angle_alpha'] = olx.xf_uc_CellEx('alpha')
-    cif_block['_cell_angle_beta'] = olx.xf_uc_CellEx('beta')
-    cif_block['_cell_angle_gamma'] = olx.xf_uc_CellEx('gamma')
-    cif_block['_cell_volume'] = olx.xf_uc_VolumeEx()
+    cif_block['_cell_length_a'] = olx.xf.uc.CellEx('a')
+    cif_block['_cell_length_b'] = olx.xf.uc.CellEx('b')
+    cif_block['_cell_length_c'] = olx.xf.uc.CellEx('c')
+    cif_block['_cell_angle_alpha'] = olx.xf.uc.CellEx('alpha')
+    cif_block['_cell_angle_beta'] = olx.xf.uc.CellEx('beta')
+    cif_block['_cell_angle_gamma'] = olx.xf.uc.CellEx('gamma')
+    cif_block['_cell_volume'] = olx.xf.uc.VolumeEx()
     fmt = "%.6f"
-    cif_block['_chemical_formula_moiety'] = olx.xf_latt_GetMoiety()
-    cif_block['_chemical_formula_sum'] = olx.xf_au_GetFormula()
-    cif_block['_chemical_formula_weight'] = olx.xf_au_GetWeight()
-    cif_block['_exptl_absorpt_coefficient_mu'] = olx.xf_GetMu()
+    cif_block['_chemical_formula_moiety'] = olx.xf.latt.GetMoiety()
+    cif_block['_chemical_formula_sum'] = olx.xf.au.GetFormula()
+    cif_block['_chemical_formula_weight'] = olx.xf.au.GetWeight()
+    cif_block['_exptl_absorpt_coefficient_mu'] = olx.xf.GetMu()
     cif_block['_exptl_crystal_density_diffrn'] = "%.4f" %xs.crystal_density()
     cif_block['_exptl_crystal_F_000'] \
              = "%.4f" %xs.f_000(include_inelastic_part=True)
@@ -662,13 +662,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_shelx_refln_list_code'] = list_code
     cif_block.update(mas_as_cif_block.cif_block)
 
-    cif_block['_cell_length_a'] = olx.xf_uc_CellEx('a')
-    cif_block['_cell_length_b'] = olx.xf_uc_CellEx('b')
-    cif_block['_cell_length_c'] = olx.xf_uc_CellEx('c')
-    cif_block['_cell_angle_alpha'] = olx.xf_uc_CellEx('alpha')
-    cif_block['_cell_angle_beta'] = olx.xf_uc_CellEx('beta')
-    cif_block['_cell_angle_gamma'] = olx.xf_uc_CellEx('gamma')
-    cif_block['_cell_volume'] = olx.xf_uc_VolumeEx()
+    cif_block['_cell_length_a'] = olx.xf.uc.CellEx('a')
+    cif_block['_cell_length_b'] = olx.xf.uc.CellEx('b')
+    cif_block['_cell_length_c'] = olx.xf.uc.CellEx('c')
+    cif_block['_cell_angle_alpha'] = olx.xf.uc.CellEx('alpha')
+    cif_block['_cell_angle_beta'] = olx.xf.uc.CellEx('beta')
+    cif_block['_cell_angle_gamma'] = olx.xf.uc.CellEx('gamma')
+    cif_block['_cell_volume'] = olx.xf.uc.VolumeEx()
     cif[OV.FileName().replace(' ', '')] = cif_block
     f = open(OV.file_ChangeExt(OV.FileFull(), 'fcf'), 'w')
     cif.show(out=f, loop_format_strings={'_refln':fmt_str})
@@ -724,6 +724,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
         current = adp.shared_u(eadp)
         constraints.append(current)
         self.shared_param_constraints.append((i, current, 1))
+
+    same_groups = self.olx_atoms.model.get('olex2.constraint.same_group', ())
+    for sg in same_groups:
+      constraints.append(rigid.same_group(sg))
     return constraints
 
   def setup_rigid_body_constraints(self, afix_iter):
@@ -869,17 +873,17 @@ class FullMatrixRefine(OlexCctbxAdapter):
     for xyz, height in izip(peaks.sites(), peaks.heights()):
       if i < 3:
         if self.verbose: print "Position of peak %s = %s, Height = %s" %(i, xyz, height)
-      id = olx.xf_au_NewAtom("%.2f" %(height), *xyz)
+      id = olx.xf.au.NewAtom("%.2f" %(height), *xyz)
       if id != '-1':
-        olx.xf_au_SetAtomU(id, "0.06")
+        olx.xf.au.SetAtomU(id, "0.06")
         i = i+1
       if i == 100 or i >= max_peaks:
         break
-    basis = olx.gl_Basis()
+    basis = olx.gl.Basis()
     frozen = olx.Freeze(True)
-    olx.xf_EndUpdate()
+    olx.xf.EndUpdate()
     olx.Compaq('-q')
-    olx.gl_Basis(basis)
+    olx.gl.Basis(basis)
     olx.Freeze(frozen)
     OV.Refresh()
 

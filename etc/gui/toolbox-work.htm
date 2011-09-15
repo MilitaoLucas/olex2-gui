@@ -41,7 +41,7 @@ $spy.MakeHoverButton(toolbar-center,compaq>>compaq -a>>center)
 <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
   <tr>
   <td width='30%' align='center'>
-$spy.MakeHoverButton(toolbar-ok,fixunit GetValue\(SET_Z_PRIME_FIXUNIT)>>xf.au.SetZprime\(GetValue\(SET_Z_PRIME_FIXUNIT))>>updatehtml)
+$spy.MakeHoverButton(toolbar-ok,fixunit GetValue\(SET_Z_PRIME_FIXUNIT)>>xf.au.SetZprime\(GetValue\(SET_Z_PRIME_FIXUNIT))>>html.Update)
 </td>
   <td width='70%' align='center'>
     <input
@@ -54,7 +54,7 @@ $spy.MakeHoverButton(toolbar-ok,fixunit GetValue\(SET_Z_PRIME_FIXUNIT)>>xf.au.Se
         valign='center'
         align='right'
         value='xf.au.GetZprime()'
-        onreturn="xf.au.SetZprime(GetValue(~name~))>>updatehtml"
+        onreturn="xf.au.SetZprime(GetValue(~name~))>>html.update"
       >
   </td>
   </tr></table>
