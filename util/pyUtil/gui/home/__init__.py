@@ -14,22 +14,22 @@ class MultipleDataset:
   def check(self):
     if olx.IsFileType('cif') == 'false':
       return False
-    if int(olx.xf_DataCount()) <= 1:
+    if int(olx.xf.DataCount()) <= 1:
       return False
     return True
   
   def generateHtml(self):
     html = "<table width='100%'><tr>"
-    current = int(olx.xf_CurrentData())
-    cnt = int(olx.xf_DataCount())
+    current = int(olx.xf.CurrentData())
+    cnt = int(olx.xf.DataCount())
     for i in xrange(0, cnt):
       if i > 0 and (i%3) == 0:
         html += "</tr><tr>"
       if i == current:
-        html += "<td>" + olx.xf_DataName(i) + "&nbsp;(*)</td>"
+        html += "<td>" + olx.xf.DataName(i) + "&nbsp;(*)</td>"
       else:
         html += "<td><a href='reap filename().cif#" + str(i) + "'>"\
-           + olx.xf_DataName(i) + "</a></td>"
+           + olx.xf.DataName(i) + "</a></td>"
     return html + "</tr></table>"
   
 mds = MultipleDataset()

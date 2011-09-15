@@ -14,10 +14,10 @@
   <shortcut key="F2" macro="swapbg">
   <shortcut key="F3" macro="labels">
   <shortcut key="F4" macro="grad -i">
-  <shortcut key="F5" macro="itemstate * 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1">
-  <shortcut key="F6" macro="itemstate * 0 tab* 2 tab-view 1 logo1 1 index-view* 1 info-title 1">
-  <shortcut key="F7" macro="itemstate * 0 tab* 2 tab-tools 1 logo1 1 index-tools* 1 info-title 1">
-  <shortcut key="F8" macro="itemstate * 0 tab* 2 tab-info 1 logo1 1 index-info* 1 info-title 1">
+  <shortcut key="F5" macro="html.ItemState * 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1">
+  <shortcut key="F6" macro="html.ItemState * 0 tab* 2 tab-view 1 logo1 1 index-view* 1 info-title 1">
+  <shortcut key="F7" macro="html.ItemState * 0 tab* 2 tab-tools 1 logo1 1 index-tools* 1 info-title 1">
+  <shortcut key="F8" macro="html.ItemState * 0 tab* 2 tab-info 1 logo1 1 index-info* 1 info-title 1">
   <shortcut key="Shift+F11" macro="HtmlPanelVisible">
   <shortcut key="F11" macro="Fullscreen(not(Fullscreen()))">
   <shortcut key="F12" macro="spy.stop_auto">
@@ -27,8 +27,8 @@
   <shortcut key="Ctrl+2" macro="showP 2">
   <shortcut key="Ctrl+Shift+2" macro="showP 0 2">
   <shortcut key="Ctrl+Shift+r" macro="py.run basedir()\util\pyUtil\CctbxLib\cctbx_olex_adapter.py">
-  <shortcut key="Ctrl+Shift+y" macro="spy.SetParam(snum.refinement.auto.tidy,True)>>updatehtml">
-  <shortcut key="Ctrl+y" macro="spy.SetParam(snum.refinement.auto.tidy,False)>>updatehtml">
+  <shortcut key="Ctrl+Shift+y" macro="spy.SetParam(snum.refinement.auto.tidy,True)>>html.Update">
+  <shortcut key="Ctrl+y" macro="spy.SetParam(snum.refinement.auto.tidy,False)>>html.Update">
   <shortcut key="break" macro="echo fred>>SetVar(stop_current_process,True)>>spy.stopShelx()">
   <shortcut key="Ctrl+Shift+u" macro="echo interrupt!>>spy.SetParam(olex2.stop_current_process,True)">
   <shortcut key="Ctrl+Shift+T" macro="spy.run_autodemo(test)">

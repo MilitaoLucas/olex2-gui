@@ -5,9 +5,9 @@ set:font_colour_code=#aaaaff
 set:font_colour_bold=gui.html.highlight_colour
 
 c:fuse
-c:itemstate index* 0
-c:itemstate index-home 1
-c:itemstate tab* 2
+c:html.ItemState index* 0
+c:html.ItemState index-home 1
+c:html.ItemState tab* 2
 c:lines 10
 
 p:This tutorial will show you how to customise the GUI to a style that may help you to feel more comfortable in using Olex2. The sample structure for THPP will now be loaded in order to show how certain functions work later in the tutorial.
@@ -61,7 +61,7 @@ p:This particular command you can use in the GUI by going to View in the toolbar
 h:tab-view
 c:spy.switch_tab_for_tutorials(view)
 h:h2-quick-drawing-styles
-c:itemstate view-quick-drawing-styles 1
+c:html.ItemState view-quick-drawing-styles 1
 
 p:You can also have the model shown as spheres by typing the command <c>ads sph</c> you can also do this by selecting the button <b>Balls & Sticks</b>
 h:button-balls_&_sticks

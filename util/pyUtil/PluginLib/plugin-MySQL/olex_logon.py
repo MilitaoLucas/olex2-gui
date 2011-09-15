@@ -32,7 +32,7 @@ def print_response(response):
 def make_logon_html():
   pop_name = "Logon"
   if OV.IsControl('%s.WEB_USERNAME'%pop_name):
-    olx.html_ShowModal(pop_name)
+    olx.html.ShowModal(pop_name)
   else:
     txt='''
   <body link="$spy.GetParam(gui.html.link_colour)" bgcolor="$spy.GetParam(gui.html.bg_colour)">

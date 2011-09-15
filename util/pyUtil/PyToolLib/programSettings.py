@@ -128,9 +128,9 @@ def makeArgumentsHTML(program, method, instruction):
       onchange = "spy.SetParam('programs.solution.smtbx.cf.%s',GetValue(%s))" %(varName.lstrip('settings_cf'), ctrl_name)
     
     if option.name == 'nls':
-      onchange = '%s>>spy.SetParam(snum.refinement.max_cycles,GetValue(SET_SETTINGS_%s_NLS))>>updatehtml' %(onchange, name.upper())
+      onchange = '%s>>spy.SetParam(snum.refinement.max_cycles,GetValue(SET_SETTINGS_%s_NLS))>>html.Update' %(onchange, name.upper())
     elif option.name == 'npeaks':
-      onchange = '%s>>spy.SetParam(snum.refinement.max_peaks,GetValue(SET_SETTINGS_%s_NPEAKS))>>updatehtml' %(onchange, name.upper())
+      onchange = '%s>>spy.SetParam(snum.refinement.max_peaks,GetValue(SET_SETTINGS_%s_NPEAKS))>>html.Update' %(onchange, name.upper())
     #if data_type == "int":
       #d = {'ctrl_name':ctrl_name,
            #'value':value,
