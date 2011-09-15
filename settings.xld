@@ -112,7 +112,6 @@
     <item title="Select;Previous Sel" macro="selback">
 
     <item title="View;Quick Drawing Styles;Default" macro="default">
-    <item title="View;Quick Drawing Styles;Black & White" macro="bw">
     <item title="View;Quick Drawing Styles;Balls & Sticks" macro="pers>>sel -u">
     <item title="View;Quick Drawing Styles;Ellipsoids" macro="telp>>sel -u">
     <item title="View;Quick Drawing Styles;Ellipsoids (with Hydrogens)" macro="telph>>sel -u">
@@ -122,8 +121,7 @@
 
     <check title="View;Structure;Cell" macro="cell" statedependent="cellvis">
     <check title="View;Structure;Basis" macro="basis" statedependent="basisvis">
-    <check title="View;Structure;Hide Structure" macro="showStr" statedependent="strvis">
-    <check title="View;Structure;Show Map" macro="xgrid.visible(true)" statedependent="mapvis">
+    <check title="View;Structure;Hide/Show Structure" macro="showStr" statedependent="strvis">
 
     <item title="Help;About" macro="spy.gui.About()">
     <item title="Help;Update options" macro="updateoptions">
