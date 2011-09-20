@@ -4,6 +4,8 @@
 #############################################################
 
 diagnostics {
+  debug = False
+    .type = bool
   hkl{
     MeanIOverSigma{
       op = "greater"
@@ -22,6 +24,8 @@ diagnostics {
         .type = float
       top = 25
         .type = float
+      href = ""
+        .type = str
     }
     Rint{
       op = "smaller"
@@ -40,6 +44,28 @@ diagnostics {
         .type = float
       top = 0.15
         .type = float
+      href = ""
+        .type = str
+    }
+    completeness{
+      op = "greater"
+        .type = str
+      display = "Completeness"
+        .type = str
+      value_format= "2%"
+        .type = str
+      grade1  = 0.99
+        .type = float
+      grade2 = 0.95
+        .type = float
+      grade3 = 0.90
+        .type = float
+      grade4 = 0.80
+        .type = float
+      top = 0.15
+        .type = float
+      href = completeness
+        .type = str      
     }
   }
 }

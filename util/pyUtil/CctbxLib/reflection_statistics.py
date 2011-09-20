@@ -43,7 +43,44 @@ class OlexCctbxGraphs(OlexCctbxAdapter):
     finally:
       OV.DeleteBitmap(bitmap)
 
+class OlexCctbxReflectionStats(OlexCctbxAdapter):
+  def __init__(self, *args, **kwds):
+    OlexCctbxAdapter.__init__(self)
+    if self.reflections is None:
+      raise RuntimeError, "There was an error reading the reflection file."
+    twinning=self.olx_atoms.model.get('twin')
+    try:
+      import iotbx.command_line.reflection_statistics
+      import sys
+      saveout = sys.stdout
+      wFile = open(OV.FilePath() + '/tmp.htm','w')
+      sys.stdout = wFile
+      
+      self.cctbx_stats = iotbx.command_line.reflection_statistics.array_cache(self.reflections.f_obs, 10, 3)
+      #self.cctbx_stats.show_completeness()
+      sys.stdout = saveout
+      wFile.close()
+      
+      rFile = open(OV.FilePath() + '/tmp.htm','r')
+      wFile = open(OV.FilePath() + '/reflection-stats-summary.htm','w')
+      lines = rFile.readlines()
+      rFile.close()
+      for line in lines:
+        wFile.write(line + "<br>")
+      wFile.close()
+      
+      bitmap = 'working'
+      OV.CreateBitmap(bitmap)
 
+#      if stat == "completeness":
+#        self.cctbx_stats = completeness_statistics_value(self.reflections, self.wavelength, **kwds)
+
+    except Exception, err:
+      raise Exception, err
+    finally:
+      OV.DeleteBitmap(bitmap)
+
+      
 class r1_factor_vs_resolution(OlexCctbxAdapter):
   def __init__(self, n_bins=10, resolution_as="two_theta"):
     OlexCctbxAdapter.__init__(self)
@@ -386,6 +423,15 @@ def wilson_statistics(model, reflections, n_bins=10):
   if (0 or verbose):
     print "wilson_k, wilson_b:", 1/wp.wilson_intensity_scale_factor, wp.wilson_b
   return wp
+
+class completeness_statistics_value(object):
+  def __init__(self, reflections, wavelength=None, verbose=False):
+    f_obs=reflections.f_obs
+    f_sq_obs = reflections.f_sq_obs_merged
+    f_sq_obs = f_sq_obs.eliminate_sys_absent().average_bijvoet_mates()
+    f_obs = f_sq_obs.f_sq_as_f()
+    missing_set = f_obs.complete_set().lone_set(f_obs).sort()
+    self.completeness_value = f_obs.completeness(use_binning=False)
 
 class completeness_statistics(object):
   def __init__(self, reflections, wavelength=None, reflections_per_bin=20,

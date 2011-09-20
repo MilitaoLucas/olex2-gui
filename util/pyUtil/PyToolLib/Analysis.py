@@ -19,6 +19,8 @@ try:
 except:
   pass
 
+import time
+
 from ImageTools import ImageTools
 IT = ImageTools()
 
@@ -2530,15 +2532,24 @@ class HealthOfStructure():
     self.hkl_stats = {}
     phil_file = r"%s/etc/CIF/diagnostics.phil" %(OV.BaseDir())
     olx.phil_handler.adopt_phil(phil_file=phil_file)
+    self.debug = OV.GetParam('diagnostics.debug')
     self.grade_1_colour = OV.GetParam('gui.skin.diagnostics.colour_grade1').hexadecimal
     self.grade_2_colour = OV.GetParam('gui.skin.diagnostics.colour_grade2').hexadecimal
     self.grade_3_colour = OV.GetParam('gui.skin.diagnostics.colour_grade3').hexadecimal
     self.grade_4_colour = OV.GetParam('gui.skin.diagnostics.colour_grade4').hexadecimal
     self.available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
+    self.stats = None
     
   def make_HOS(self):
+    if self.debug:
+      import time
+      t1 = time.time()
     if self.initialise_HOS():
+      self.summarise_HOS()
       self.make_HOS_html()
+    self.stats = None
+    if self.debug:
+      print "HOS took %.4f seconds" %(time.time() - t1)
 
   def initialise_HOS(self):
     if olx.IsFileLoaded() != 'true':
@@ -2555,14 +2566,36 @@ class HealthOfStructure():
     self.hkl_stats = olex_core.GetHklStat()
     return True
 
+  def get_cctbx_completeness(self):
+    from reflection_statistics import OlexCctbxReflectionStats
+    if not self.stats:
+      self.stats = OlexCctbxReflectionStats()
+    value = self.stats.cctbx_stats.observations.completeness()
+    return value
+  
+  def summarise_HOS(self):
+    txt = ""
+    item = "Completeness"
+    value = self.get_cctbx_completeness()
+    txt += "<tr><td>%s</td><td>%s</td><tr>" %(item, value)
+    l = ['MeanIOverSigma','Rint']
+    for item in self.hkl_stats:
+      value = self.hkl_stats[item]
+      txt += "<tr><td>%s</td><td>%s</td><tr>" %(item, value)
+    OV.write_to_olex("reflection-stats-summary.htm" , txt)
+
   def make_HOS_html(self):
     txt = "<tr><table width='100%%' cellpadding=0 cellspacing=0><tr>"
-    l = ['MeanIOverSigma','Rint']
+    l = ['MeanIOverSigma','Rint','completeness']
     for item in l:
-      bg_colour = self.get_bg_colour(item)
+      if item != 'completeness':
+        value = self.hkl_stats[item]
+      else:
+        value = self.get_cctbx_completeness()
+      bg_colour = self.get_bg_colour(item, value)
       display = OV.GetParam('diagnostics.hkl.%s.display' %item)
       value_format = OV.GetParam('diagnostics.hkl.%s.value_format' %item)
-      value = self.hkl_stats[item]
+      href = OV.GetParam('diagnostics.hkl.%s.href' %item)
       raw_val = value
       if "%" in value_format:
         value_format = value_format.replace('%','f%%')
@@ -2578,11 +2611,15 @@ class HealthOfStructure():
       if use_image:
         txt += self.make_hos_images(item=item, colour=bg_colour, display=display, value_raw=raw_val, value_display=value, n=len(l))
       else:
+        if href:
+          txt = txt + "<a href='%s'>" %(href)
         txt += '''
   <td bgcolor=%s align='center' width='%s%%'><font color='#ffffff'>
     %s: <b>%s</b>
   </font></td>
 '''%(bg_colour, 100/len(l), display, value)
+        if href:
+          txt = txt + "</a>"
 
     txt += "</tr></table></tr>"
     txt = txt.decode('utf-8')
@@ -2637,9 +2674,9 @@ class HealthOfStructure():
 <td align='center'><zimg src=%s></td>''' %item
     return txt
 
-  def get_bg_colour(self, item):
+  def get_bg_colour(self, item, val):
     op = OV.GetParam('diagnostics.hkl.%s.op' %item)
-    val = self.hkl_stats[item]
+    
     for i in xrange(4):
       i += 1
       if op == "greater":
