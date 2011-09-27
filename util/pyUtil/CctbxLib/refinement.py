@@ -58,7 +58,7 @@ class olex2_normal_eqns(least_squares.crystallographic_ls):
     if log is None: log = sys.stdout
     print >> log, "wR2 = %.4f for %i data and %i parameters" %(
       self.wR2(), self.observations.fo_sq.size(),
-      self.reparametrisation.n_independent_params)
+      self.reparametrisation.n_independents)
     print >> log, "GooF = %.4f" %(self.goof(),)
     max_shift_site = self.max_shift_site()
     max_shift_u = self.max_shift_u()
@@ -384,7 +384,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         self.normal_eqns.observations.fo_sq,
         self.normal_eqns.fc_sq,
         self.normal_eqns.scale_factor(),
-        self.reparametrisation.n_independent_params)
+        self.reparametrisation.n_independents)
       OV.SetParam(
         'snum.refinement.suggested_weight', "%s %s" %(new_weighting.a, new_weighting.b))
       if self.on_completion:
@@ -571,7 +571,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     #cif_block['_refine_ls_hydrogen_treatment'] =
     cif_block['_refine_ls_matrix_type'] = 'full'
     cif_block['_refine_ls_number_constraints'] = self.n_constraints
-    cif_block['_refine_ls_number_parameters'] = self.reparametrisation.n_independent_params
+    cif_block['_refine_ls_number_parameters'] = self.reparametrisation.n_independents
     cif_block['_refine_ls_number_reflns'] = self.reflections.f_sq_obs_filtered.size()
     cif_block['_refine_ls_number_restraints'] = self.normal_eqns.n_restraints
     cif_block['_refine_ls_R_factor_all'] = fmt % self.r1_all_data[0]
