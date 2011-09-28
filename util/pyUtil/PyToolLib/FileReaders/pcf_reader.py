@@ -61,13 +61,20 @@ class pcf_reader:
             txt = txt.strip("'").rstrip()
             #txt = str.strip(txt, "'")
             if txt not in self.ignore:
-              pcf.setdefault("%s" %item, "%s" %txt)
+              txt = self.value_exceptions()
+              if txt is not None:
+                pcf.setdefault("%s" %item, "%s" %txt)
         except:
-          #i += 1
           pass
       i += 1
     self.pcf_d = pcf
     return pcf
+  
+  def value_exceptions(self, item, value):
+    ## In some Bruker p4p files the default here is 0, which is rubbish
+    if item == "_exptl_crystal_density_meas":
+      if value == 0: value = "."
+    return value
 
 if __name__ == '__main__':
   a = pcf_reader('C:/datasets/Richard 4th year project/Crystals/06rjg003/work/rjg003_m.pcf')
