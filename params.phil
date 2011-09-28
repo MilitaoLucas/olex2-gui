@@ -519,11 +519,6 @@ olex2
       .help = If set to TRUE (default), the cif file will be sent to the checkcif url on pressing 'Validate Cif'
   }
 
-  structurespace{
-    url = http://www.olexsys.org:8092/structurespace/StructureSpace
-      .type = str
-  }
-
   ccdc{
     url = http://ccdc.opencryst.org/deposit http://ccdc1.opencryst.org/deposit
       .type = strings

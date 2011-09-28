@@ -219,7 +219,7 @@ def web_authenticate():
         print "%s is now logged on." %username
         OV.UpdateHtml()
         OV.SetParam('olex2.is_logged_on',True)
-        return True
+        return username, password
 
     else:
       return False

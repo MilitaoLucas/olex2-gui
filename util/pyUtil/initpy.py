@@ -290,7 +290,15 @@ if olx.IsPluginInstalled('plugin-Batch') == "true":
 if olx.IsPluginInstalled('Olex2Portal') == "true":
     import olex_logon
 
+if olx.IsPluginInstalled('StructureSpace') == "true":
+    import structurespace
 
+if olx.IsPluginInstalled('HPTools') == "true":
+    import hptools
+
+if olx.IsPluginInstalled('SQLAlchemy') == "true":
+    import ACAlchemyStore
+    
 if olx.IsPluginInstalled('MySQL') == "true":
   try:
     import OlexToMySQL
