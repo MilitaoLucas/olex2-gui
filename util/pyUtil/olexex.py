@@ -169,7 +169,7 @@ class OlexRefinementModel(object):
     'olex2.restraint.angle':'angle',
     'olex2.restraint.dihedral':'dihedral',
     'olex2.restraint.u_eq':'fixed_u_eq_adp',
-    'olex2.restraint.u_eq.similar':'u_eq_similarity',
+    'olex2.restraint.u_eq_similar':'u_eq_similarity',
   }
 
   constraint_types = {
@@ -2169,7 +2169,7 @@ def GetBitmapImageInstructions():
   if not filefull:
     return
   filesize = OV.GetValue('IMAGE_BITMAP_SIZE')
-  
+
   OV.Cursor('busy','Please Wait. Making image %s.%s. This may take some time' %(filename, fileext))
   olex.m('pict -pq %s %s' %(filefull, filesize))
   OV.Cursor()
@@ -2191,7 +2191,7 @@ def GetPSImageInstructions():
     return
   OV.Cursor('busy','Please Wait. Making image %s.%s. This may take some time' %(filename, fileext))
   olex.m('brad %s' %OV.GetParam('snum.image.ps.bond_width'))
-  
+
   colour_line = OV.GetParam('snum.image.ps.colour_line')
   colour_bond = OV.GetParam('snum.image.ps.colour_bond')
   colour_fill = OV.GetParam('snum.image.ps.colour_fill')
@@ -2202,7 +2202,7 @@ def GetPSImageInstructions():
   lw_font = str(OV.GetParam('snum.image.ps.font_weight'))
   div_pie = str(OV.GetParam('snum.image.ps.octant_count'))
   scale_hb = str(OV.GetParam('snum.image.ps.h_bond_width'))
-  
+
   olex.m("pictps" + \
          " " + filename + \
          " " + colour_line + \
