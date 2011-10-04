@@ -169,7 +169,8 @@ class OlexRefinementModel(object):
     'olex2.restraint.angle':'angle',
     'olex2.restraint.dihedral':'dihedral',
     'olex2.restraint.u_eq':'fixed_u_eq_adp',
-    'olex2.restraint.u_eq_similar':'u_eq_similarity',
+    'olex2.restraint.u_eq_similar':'adp_u_eq_similarity',
+    'olex2.restraint.adp_volume_similar':'adp_volume_similarity',
   }
 
   constraint_types = {
@@ -245,7 +246,8 @@ class OlexRefinementModel(object):
         i_seqs = [i[0] for i in restraint['atoms']]
         kwds = dict(i_seqs=i_seqs)
         if restraint_type not in (
-          'adp_similarity', 'u_eq_similarity', 'rigid_bond', 'isotropic_adp', 'fixed_u_eq_adp'):
+          'adp_similarity', 'adp_u_eq_similarity', 'adp_volume_similarity',
+          'rigid_bond', 'isotropic_adp', 'fixed_u_eq_adp'):
           kwds['sym_ops'] = [
             (sgtbx.rt_mx(flat_list(i[1][:-1]), i[1][-1]) if i[1] is not None else None)
             for i in restraint['atoms']]
@@ -255,7 +257,9 @@ class OlexRefinementModel(object):
             esd_val = restraint['esd1']
           kwds['weight'] = 1/math.pow(esd_val,2)
         value = restraint['value']
-        if restraint_type in ('adp_similarity', 'u_eq_similarity', 'isotropic_adp', 'fixed_u_eq_adp'):
+        if restraint_type in ('adp_similarity', 'adp_u_eq_similarity',
+                              'adp_volume_similarity',
+                              'isotropic_adp', 'fixed_u_eq_adp'):
           kwds['sigma'] = restraint['esd1']
           if restraint_type in ('adp_similarity', 'isotropic_adp'):
             kwds['sigma_terminal'] = restraint['esd2'] if restraint['esd2'] != 0 else None
