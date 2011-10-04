@@ -85,7 +85,7 @@ def OlexCDS(cell_error_s=2, cell_error_a=2, cell_a='', cell_b='', cell_c='', cel
   Olex2Path = olex.f("BaseDir()")
   #Olex2Path = "/home/xray/olexsvn"
   usettings = open("%s/usettings.dat"%(Olex2Path), 'r')
-  CDSCell = olx.xf_au_GetCell().split(',')
+  CDSCell = olx.xf.au.GetCell().split(',')
   #CDSCell = [9.8808, 11.9626, 7.3414, 90, 105.533, 90]
   cds_username = ""
   cds_password = ""
