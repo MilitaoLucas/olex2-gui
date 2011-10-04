@@ -168,8 +168,8 @@ class OlexRefinementModel(object):
     'isor':'isotropic_adp',
     'olex2.restraint.angle':'angle',
     'olex2.restraint.dihedral':'dihedral',
-    'olex2.restraint.u_eq':'fixed_u_eq_adp',
-    'olex2.restraint.u_eq_similar':'adp_u_eq_similarity',
+    'olex2.restraint.adp_u_eq':'fixed_u_eq_adp',
+    'olex2.restraint.adp_u_eq_similar':'adp_u_eq_similarity',
     'olex2.restraint.adp_volume_similar':'adp_volume_similarity',
   }
 
