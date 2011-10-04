@@ -123,17 +123,17 @@ def OlexBET(probe="N2", trials="5000"):
       break
   
   Olex2BETIn = OV.FileName()
-  BETCompatCell = (olx.xf_au_GetCell().split(','))
-  brokensym = list(olx.xf_au_GetCellSymm())
-  OlexZ = int(olx.xf_au_GetZ())
-  AtomPairs = olx.xf_GetFormula().split()
-  CellV = float(olx.xf_au_GetCellVolume())
+  BETCompatCell = (olx.xf.au.GetCell().split(','))
+  brokensym = list(olx.xf.au.GetCellSymm())
+  OlexZ = int(olx.xf.au.GetZ())
+  AtomPairs = olx.xf.GetFormula().split()
+  CellV = float(olx.xf.au.GetCellVolume())
   
   # Olex2 internal commands here
   OV.cmd("pack cell")
   OV.File("%s/atoms_%s.xyz"%(BET_path, Olex2BETIn))
   OV.AtReap("%s/atoms_%s.xyz"%(BET_path, Olex2BETIn))
-  CalDen = ((float(olx.xf_au_GetWeight()))/(CellV*0.60225))
+  CalDen = ((float(olx.xf.au.GetWeight()))/(CellV*0.60225))
   
   # Back to starting model
   OV.AtReap(Olex2BETIn_start)
@@ -141,9 +141,9 @@ def OlexBET(probe="N2", trials="5000"):
   # General stuff for the user to see in Olex2
   print "Job name", Olex2BETIn
   print "Unit Cell", BETCompatCell
-  print "Olex2 Formula", olx.xf_GetFormula()
-  print "Atom Count", olx.xf_au_GetAtomCount()
-  print "Mw", olx.xf_au_GetWeight()
+  print "Olex2 Formula", olx.xf.GetFormula()
+  print "Atom Count", olx.xf.au.GetAtomCount()
+  print "Mw", olx.xf.au.GetWeight()
   print "New formula using Z", OlexZ
   print "Cell voume", CellV
   print "Calculated density", CalDen

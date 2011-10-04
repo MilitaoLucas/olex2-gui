@@ -50,7 +50,7 @@ def hklgen(cella, cellb, cellc, alpha, beta, gamma, wavelength, filename, max2th
   Uses A. Labail hklgen code, tweaked, to generate a powder pattern
   """
 
-  brokensym = list(olx.xf_au_GetCellSymm())
+  brokensym = list(olx.xf.au.GetCellSymm())
   SirCompatSymmSetting = brokensym.pop(0)
   SirCompatSymmOpps = []
   while len(brokensym) > 0:
@@ -139,16 +139,16 @@ def LazyOlex(ops='0', pdf='n', wavelength=0.710174, max2theta=60):
   steps = 0.01
   points = int((max2theta - min2theta) / steps)
   if inOlex > 0:
-    cella = float(olx.xf_au_GetCell().split(',')[0])
-    cellb = float(olx.xf_au_GetCell().split(',')[1])
-    cellc = float(olx.xf_au_GetCell().split(',')[2])
-    alpha = float(olx.xf_au_GetCell().split(',')[3])
-    beta = float(olx.xf_au_GetCell().split(',')[4])
-    gamma = float(olx.xf_au_GetCell().split(',')[5])
-    ralpha = degrees_to_radians(float(olx.xf_au_GetCell().split(',')[3]))
-    rbeta = degrees_to_radians(float(olx.xf_au_GetCell().split(',')[4]))
-    rgamma = degrees_to_radians(float(olx.xf_au_GetCell().split(',')[5]))
-    #wavelength = float(olx.xf_exptl_Radiation())
+    cella = float(olx.xf.au.GetCell().split(',')[0])
+    cellb = float(olx.xf.au.GetCell().split(',')[1])
+    cellc = float(olx.xf.au.GetCell().split(',')[2])
+    alpha = float(olx.xf.au.GetCell().split(',')[3])
+    beta = float(olx.xf.au.GetCell().split(',')[4])
+    gamma = float(olx.xf.au.GetCell().split(',')[5])
+    ralpha = degrees_to_radians(float(olx.xf.au.GetCell().split(',')[3]))
+    rbeta = degrees_to_radians(float(olx.xf.au.GetCell().split(',')[4]))
+    rgamma = degrees_to_radians(float(olx.xf.au.GetCell().split(',')[5]))
+    #wavelength = float(olx.xf.exptl.Radiation())
     filename = OV.FileName() #"/home/xray/olextrunk/etc/scripts/sucrose" #OV.FileName()
   else:
     # For now assuming test data but could be read from ins file. sucrose
