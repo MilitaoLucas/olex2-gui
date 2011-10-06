@@ -410,6 +410,9 @@ for val, key in external_files.iteritems():
     print "File exist both on the svn and in the binary folder '" + fn + "' skipping..."
     continue
   if not os.path.exists(bin_directory + '/' + val):
+    if option.dev:
+      if len(key) > 0 and key[0] == 'olex-port' and not key[1].startswith('port-win'):
+        continue
     print "Specified binary file does not exist '" + val + "' aborting..."
     os._exit(1)
   for i in range(0, len(key)):
