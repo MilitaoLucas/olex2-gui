@@ -200,6 +200,10 @@ parser.add_option('--alpha',
 		  dest='alpha',
 		  action='store_true',
 		  help='whether to use the normal or the tag-alpha web directory')
+parser.add_option('--dev',
+		  dest='dev',
+		  action='store_true',
+		  help='whether to use the normal or the tag-dev web directory')
 parser.add_option('--revert',
 		  dest='revert',
 		  action='store_true',
@@ -305,6 +309,9 @@ elif option.alpha:
   else:
     web_directory += '-alpha'
     print 'Creating alpha distro...'
+elif option.dev:
+  web_directory += '-dev'
+  print 'Creating dev distro...'
 else:
   if not is_distro_uptodate(web_directory + '-alpha', web_directory + '-beta'):
     print 'Beta distro is not up-to-date, aborting'
@@ -667,41 +674,43 @@ create_portable_distro(
     bin_directory + '/vcredist_x64.exe' : 'vcredist_x64.exe'
   }
 )
-create_portable_distro(
-  port_props=set([suse32_port_name]),
-  zip_name=suse32_port_zip_name,
-  port_zips=suse32_zip_files,
-  prefix=suse32_port_prefix,
-  extra_files =
-  {
-    bin_directory + '/suse-distro/start' : 'olex2/start',
-    bin_directory + '/suse-distro/usettings32.dat' : 'olex2/usettings.dat'
-  }
-)
-create_portable_distro(
-  port_props=set([suse64_port_name]),
-  zip_name=suse64_port_zip_name,
-  port_zips=suse64_zip_files,
-  prefix=suse64_port_prefix,
-  extra_files =
-  {
-    bin_directory + '/suse-distro/start' : 'olex2/start',
-    bin_directory + '/suse-distro/usettings64.dat' : 'olex2/usettings.dat'
-  }
-)
-create_portable_distro(
-  port_props=set([mac_port_name]),
-  zip_name=mac_port_zip_name,
-  port_zips=mac_zip_files,
-  prefix=mac_port_prefix,
-  extra_files =
-  {
-    bin_directory + '/mac-distro/start' : 'start',
-    bin_directory + '/mac-distro/Info.plist' : 'olex2.app/Contents/Info.plist',
-    bin_directory + '/mac-distro/PkgInfo' : 'olex2.app/Contents/PkgInfo',
-    bin_directory + '/mac-distro/usettings.dat' : 'olex2.app/Contents/MacOS/usettings.dat'
-  }
-)
+#create linux and mac distro only in releases
+if not option.dev:
+  create_portable_distro(
+    port_props=set([suse32_port_name]),
+    zip_name=suse32_port_zip_name,
+    port_zips=suse32_zip_files,
+    prefix=suse32_port_prefix,
+    extra_files =
+    {
+      bin_directory + '/suse-distro/start' : 'olex2/start',
+      bin_directory + '/suse-distro/usettings32.dat' : 'olex2/usettings.dat'
+    }
+  )
+  create_portable_distro(
+    port_props=set([suse64_port_name]),
+    zip_name=suse64_port_zip_name,
+    port_zips=suse64_zip_files,
+    prefix=suse64_port_prefix,
+    extra_files =
+    {
+      bin_directory + '/suse-distro/start' : 'olex2/start',
+      bin_directory + '/suse-distro/usettings64.dat' : 'olex2/usettings.dat'
+    }
+  )
+  create_portable_distro(
+    port_props=set([mac_port_name]),
+    zip_name=mac_port_zip_name,
+    port_zips=mac_zip_files,
+    prefix=mac_port_prefix,
+    extra_files =
+    {
+      bin_directory + '/mac-distro/start' : 'start',
+      bin_directory + '/mac-distro/Info.plist' : 'olex2.app/Contents/Info.plist',
+      bin_directory + '/mac-distro/PkgInfo' : 'olex2.app/Contents/PkgInfo',
+      bin_directory + '/mac-distro/usettings.dat' : 'olex2.app/Contents/MacOS/usettings.dat'
+    }
+  )
 
 #create plugin zips with indexes
 plugin_index_file_name = update_directory + 'plugin.ind'
