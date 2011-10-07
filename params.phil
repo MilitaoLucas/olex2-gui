@@ -38,6 +38,8 @@ snum
       .type = choice
     atomic_form_factor_table = *it1992 wk1995 n_gaussian
       .type = choice
+    secondary_ch2_angle = idealise refine *shelxl
+      .type = choice
     }
 
   solution
