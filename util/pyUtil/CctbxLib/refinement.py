@@ -224,8 +224,14 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.log = open(OV.file_ChangeExt(OV.FileFull(), 'log'), 'w')
     self.flack = None
     self.on_completion = on_completion
-    self.idealise_secondary_xh2_angle = False
+    # set the secondary CH2 treatment
     self.refine_secondary_xh2_angle = False
+    self.idealise_secondary_xh2_angle = False
+    sec_ch2_treatment = OV.GetParam('snum.smtbx.secondary_ch2_angle')
+    if sec_ch2_treatment == 'idealise':
+      self.idealise_secondary_xh2_angle = True
+    elif sec_ch2_treatment == 'refine':
+      self.refine_secondary_xh2_angle = True
 
   def run(self):
     self.reflections.show_summary(log=self.log)
