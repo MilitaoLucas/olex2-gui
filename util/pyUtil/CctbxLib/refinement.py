@@ -224,6 +224,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.log = open(OV.file_ChangeExt(OV.FileFull(), 'log'), 'w')
     self.flack = None
     self.on_completion = on_completion
+    self.idealise_secondary_xh2_angle = False
+    self.refine_secondary_xh2_angle = False
 
   def run(self):
     self.reflections.show_summary(log=self.log)
@@ -808,12 +810,20 @@ class FullMatrixRefine(OlexCctbxAdapter):
         stretching = n in (4, 8)
         if bond_length == 0:
           bond_length = None
-        current = constraint_type(
-          rotating=rotating,
-          stretching=stretching,
-          bond_length=bond_length,
-          pivot=pivot,
-          constrained_site_indices=dependent)
+        kwds = {
+          'rotating' : rotating,
+          'stretching' : stretching,
+          'bond_length' : bond_length,
+          'pivot' : pivot,
+          'bond_length' : bond_length,
+          'constrained_site_indices':dependent
+          }
+        if m == 2:
+          if self.idealise_secondary_xh2_angle:
+            kwds['angle'] = 109.47*math.pi/180
+          elif self.refine_secondary_xh2_angle:
+            kwds['flapping'] = True
+        current = constraint_type(**kwds)
         geometrical_constraints.append(current)
 
     return geometrical_constraints
