@@ -42,14 +42,12 @@ def setup_cctbx():
     cctbx_TAG_file = open("%s/TAG" %cctbxSources,'r')
     cctbx_compile_date = cctbx_TAG_file.readline().strip()
     cctbx_TAG_file.close()
-    cctbx_compatible_version = "2010_12_16_0000"
+    cctbx_compatible_version = "2011_10_10_0000"
     if int(cctbx_compile_date.replace('_','')) < int(cctbx_compatible_version.replace('_','')):
       sys.stdout.write("""Warning: An incompatible version of the cctbx is installed.
 Please update to cctbx build '%s' or later.
 Current cctbx build: '%s'
 """ %(cctbx_compatible_version, cctbx_compile_date))
-  if not need_cold_start:
-    need_cold_start = not libtbx.env.has_module('antlr3')
   if need_cold_start:
     cold_start(cctbxSources, build_path)
     import libtbx.load_env
