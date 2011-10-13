@@ -544,7 +544,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     #
     fo2 = self.reflections.f_sq_obs
     merging = self.reflections.merging
-    min_d_star_sq, max_d_star_sq = fo2.min_max_d_star_sq()
+    min_d_star_sq, max_d_star_sq = refinement_refs.min_max_d_star_sq()
     (h_min, k_min, l_min), (h_max, k_max, l_max) = fo2.min_max_indices()
     cif_block['_diffrn_measured_fraction_theta_full'] = fmt % completeness_full
     cif_block['_diffrn_measured_fraction_theta_max'] = fmt % completeness_theta_max
@@ -592,7 +592,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.normal_eqns.weighting_scheme)
     cif_block['_refine_ls_weighting_scheme'] = 'calc'
     cif_block['_refine_ls_wR_factor_ref'] = fmt % self.normal_eqns.wR2()
-    min_d_star_sq, max_d_star_sq = refinement_refs.min_max_d_star_sq()
     (h_min, k_min, l_min), (h_max, k_max, l_max) = refinement_refs.min_max_indices()
     if (refinement_refs.space_group().is_centric() or
         not refinement_refs.anomalous_flag()):
