@@ -53,6 +53,10 @@ snum
       .type = bool
     current_atomic_volume = None
       .type = float
+    Sir2008{
+      gui = False
+        .type = bool
+      }
     }
 
   refinement
@@ -576,7 +580,7 @@ graphs
     font_scale = 0.02
       .type = float(value_min=0.0)
     marker_1 {
-      fill = (254,150,50)
+      fill = (255,150,50)
         .type = colour
       border = (127,75,25)
         .type = colour
@@ -585,6 +589,30 @@ graphs
     }
     marker_2 {
       fill = (160,182,206)
+        .type = colour
+      border = (80,91,103)
+        .type = colour
+      size_factor = 1./80
+        .type = float
+    }
+    marker_3 {
+      fill = (140,182,206)
+        .type = colour
+      border = (80,91,103)
+        .type = colour
+      size_factor = 1./80
+        .type = float
+    }
+    marker_4 {
+      fill = (120,182,206)
+        .type = colour
+      border = (80,91,103)
+        .type = colour
+      size_factor = 1./80
+        .type = float
+    }
+    marker_5 {
+      fill = (100,182,206)
         .type = colour
       border = (80,91,103)
         .type = colour
@@ -778,13 +806,19 @@ programs
           .type = int
         }
       }
+    Sir2008
+      .short_caption = olex2.solve
+      {
+      gui = False
+        .type = bool
+      }
     }
   }
 
 user
   .short_caption = User Specific
   {
-  use_fader = 0.4
+  use_fader = 0
     .type = float
   expert_level = 0
     .type = int

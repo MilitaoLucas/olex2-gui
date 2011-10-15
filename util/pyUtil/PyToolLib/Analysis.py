@@ -42,7 +42,7 @@ class Graph(ImageTools):
   def __init__(self):
     ImageTools.__init__(self)
     self.params = OV.Params().graphs.reflections
-    self.marker_params = (self.params.marker_1, self.params.marker_2)
+    self.marker_params = (self.params.marker_1, self.params.marker_2, self.params.marker_3, self.params.marker_4, self.params.marker_5)
     self.function_params = (self.params.function_1, self.params.function_2, self.params.function_3)
     self.dataset_counter = 0
     self.function_counter = 0
@@ -838,7 +838,11 @@ class Graph(ImageTools):
     scale_y = self.scale_y
     delta_y = self.delta_y
 
-    marker = self.marker_params[self.dataset_counter]
+    try:
+      marker = self.marker_params[self.dataset_counter]
+    except IndexError:
+      marker = self.marker_params[0]
+      
     self.dataset_counter += 1
     fill = marker.fill.rgb
     outline = marker.border.rgb
@@ -2183,15 +2187,35 @@ class X_Y_plot(Analysis):
   def __init__(self):
     Analysis.__init__(self)
     self.item = "X_Y_plot"
+    self.series = []
     print("Good things will come to those who wait")
-    self.run()
 
   def run(self):
 #    filepath = self.file_reader("%s/%s.csv" %(self.datadir,"ac_stats"))
-    filepath = ("%s/%s.csv" %(self.datadir,"ac_stats"))
-    self.get_simple_x_y_pair_data_from_file(filepath)
+#    filepath = ("%s/%s.csv" %(self.datadir,"s"))
+#    self.get_simple_x_y_pair_data_from_file(filepath)
+#    meta = data['meta']
+#    self.graphInfo["imSize"] = meta["imSize"]
+#    self.graphInfo["Title"] = meta["Title"]
+#    self.graphInfo["pop_html"] = meta["pop_html"]
+#    self.graphInfo["pop_name"] = meta["pop_name"]
+#    self.graphInfo["TopRightTitle"] = meta["TopRightTitle"]
+#    self.graphInfo["FontScale"] = meta["FontScale"]
+
+    
+    
     self.graphInfo.update(self.metadata)
     self.make_empty_graph(axis_x = True)
+
+    i = 1
+    for item in self.series:
+      self.data.setdefault('dataset%s'%i,Dataset(x=item[0],
+                                               y=item[1],
+                                               hrefs=item[2],
+                                               targets=item[3],
+                                               ))
+      i += 1
+    
     self.draw_pairs()
     self.graphInfo.setdefault("pop_html", 'acgraph.htm')
     self.graphInfo.setdefault("pop_name", 'acgraph')
@@ -2517,7 +2541,7 @@ def make_reflection_graph(name):
            'normal_probability': Normal_probability_plot,
            'r1_factor_vs_resolution': r1_factor_vs_resolution_plot,
            'scale_factor_vs_resolution': scale_factor_vs_resolution_plot,
-           'bijvoet_differences_probability_plot': bijvoet_differences_NPP,
+           'bijvoet_differences_probability_plotself.data': bijvoet_differences_NPP,
            'bijvoet_differences_scatter_plot': bijvoet_differences_scatter_plot,
            }
   func = run_d.get(name)
@@ -2539,6 +2563,14 @@ class HealthOfStructure():
     self.grade_4_colour = OV.GetParam('gui.skin.diagnostics.colour_grade4').hexadecimal
     self.available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
     self.stats = None
+    
+  def get_HOS_d(self):
+    try:
+      if self.initialise_HOS():
+        return self.summarise_HOS()
+    except Exception, err:
+      print err
+      return None
     
   def make_HOS(self):
     if self.debug:
@@ -2568,21 +2600,24 @@ class HealthOfStructure():
 
   def get_cctbx_completeness(self):
     from reflection_statistics import OlexCctbxReflectionStats
-    if not self.stats:
-      self.stats = OlexCctbxReflectionStats()
+    self.stats = OlexCctbxReflectionStats()
     value = self.stats.cctbx_stats.observations.completeness()
     return value
   
   def summarise_HOS(self):
+    d = {}
     txt = ""
     item = "Completeness"
     value = self.get_cctbx_completeness()
+    d.setdefault('Completeness', value)
     txt += "<tr><td>%s</td><td>%s</td><tr>" %(item, value)
     l = ['MeanIOverSigma','Rint']
     for item in self.hkl_stats:
       value = self.hkl_stats[item]
+      d.setdefault(item, value)
       txt += "<tr><td>%s</td><td>%s</td><tr>" %(item, value)
     OV.write_to_olex("reflection-stats-summary.htm" , txt)
+    return d
 
   def make_HOS_html(self):
     txt = "<tr><table width='100%%' cellpadding=0 cellspacing=0><tr>"

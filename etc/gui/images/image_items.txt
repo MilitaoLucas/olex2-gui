@@ -106,3 +106,10 @@
   Solve this Structure
   Refine this Structure
   Create a Report of this Structure
+
+[G4 BUTTON]
+  Auto
+  Solve
+  Refine
+  Report
+  Images
