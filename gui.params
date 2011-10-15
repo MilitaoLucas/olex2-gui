@@ -179,6 +179,35 @@ gui
       rounded = 1100
         .type = str
     }
+    
+    g4{
+      base_colour = #205c90
+        .type = colour
+      grad_colour = #205c90
+        .type = colour
+      grad_step = 0.1
+        .type = float
+      font_colour = #ffffff
+        .type = colour
+      font_name = Vera Bold
+        .type = str
+      height = 26
+        .type = int
+      corner_rad = 3
+        .type = int
+      font_size = 20
+        .type = int
+      top = 0
+        .type = int
+      left = 3
+        .type = int
+      rounded = "1111"
+        .type = str
+      arrows = "bar:top:2"
+        .type = str
+      off_L = 0.9
+        .type = float
+    }
 
     tab{
       base_colour = #aaaaaa

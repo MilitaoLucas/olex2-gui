@@ -2168,6 +2168,21 @@ def GetImageFilename(image_type):
   OV.SetParam('snum.image.%s.name' %image_type.lower(),None)
   return filefull, filename, fileext
 
+def StringsAreEqual(str1, str2):
+  if str1 == str2:
+    return True
+  else:
+    return False
+OV.registerFunction(StringsAreEqual)
+
+def StringsAreNotEqual(str1, str2):
+  if str1 == str2:
+    return False
+  else:
+    return True
+OV.registerFunction(StringsAreNotEqual)
+
+
 def GetBitmapImageInstructions():
   filefull, filename, fileext = GetImageFilename(image_type = "BITMAP")
   if not filefull:
@@ -2208,7 +2223,7 @@ def GetPSImageInstructions():
   scale_hb = str(OV.GetParam('snum.image.ps.h_bond_width'))
 
   olex.m("pictps" + \
-         " " + filename + \
+         " " + "'%s'" %filename + \
          " " + colour_line + \
          " " + colour_bond + \
          " " + colour_fill + \

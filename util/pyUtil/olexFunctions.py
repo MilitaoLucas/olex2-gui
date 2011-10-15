@@ -714,6 +714,13 @@ class OlexFunctions(inheritFunctions):
   def setAllMainToolbarTabButtons(self):
     import olexex
     olexex.setAllMainToolbarTabButtons()
+    
+  def GetCrystalData(self):
+    crystal_data_file = olex.m("cif2doc crystal_data.htm -n=%s_crystal_data.htm" %OV.FileName())
+    rFile = open('%s_crystal_data.htm' %OV.FileName(),'r')
+    crystal_data = rFile.read()
+    rFile.close()
+    return crystal_data
 
   def makeGeneralHtmlPop(self, phil_path, htm='htm', number_of_lines=0):
     pop_name=OV.GetParam('%s.name' %phil_path)

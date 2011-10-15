@@ -170,6 +170,11 @@ def set_plugins_paths():
   plugins = olexex.InstalledPlugins()
   for plugin in plugins:
     sys.path.append("%s/util/pyUtil/PluginLib/plugin-%s" %(basedir,plugin))
+  for plugin in plugins:
+    try:
+      exec("import " + plugin)
+    except Exception, err:
+      print err
 
     ##Dependencies
     if plugin == "plugin-SQLAlchemy":
@@ -284,20 +289,25 @@ import urllib2
 import multipart
 
 
-if olx.IsPluginInstalled('plugin-Batch') == "true":
-  import plugin_batch_exex
 
-if olx.IsPluginInstalled('Olex2Portal') == "true":
-    import olex_logon
+#if olx.IsPluginInstalled('plugin-Batch') == "true":
+  #import plugin_batch_exex
 
-if olx.IsPluginInstalled('StructureSpace') == "true":
-    import structurespace
+#if olx.IsPluginInstalled('Olex2Portal') == "true":
+    #import Olex2Portal
 
-if olx.IsPluginInstalled('HPTools') == "true":
-    import hptools
+#if olx.IsPluginInstalled('StructureSpace') == "true":
+    #import structurespace
 
-if olx.IsPluginInstalled('SQLAlchemy') == "true":
-    import ACAlchemyStore
+#if olx.IsPluginInstalled('HPTools') == "true":
+    #import hptools
+
+#if olx.IsPluginInstalled('SQLAlchemy') == "true":
+    #import SQLAlchemy
+
+#if olx.IsPluginInstalled('g4') == "true":
+    #import g4
+    
     
 if olx.IsPluginInstalled('MySQL') == "true":
   try:
