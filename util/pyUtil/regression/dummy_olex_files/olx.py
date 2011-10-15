@@ -81,13 +81,13 @@ def LSM():
 def User(filepath):
   os.chdir(filepath.strip("'"))
 
-def xf_au_GetAtomCount():
+def xf.au.GetAtomCount():
   return 54
 
-def xf_GetFormula():
+def xf.GetFormula():
   return 'C16 H16 N4 O4 F6 S2 Co1'
 
-def xf_au_IsPeak(i):
+def xf.au.IsPeak(i):
   return True
 
 def Atreap(*args, **kwds):

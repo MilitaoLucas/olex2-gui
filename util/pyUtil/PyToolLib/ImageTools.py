@@ -43,14 +43,16 @@ class ImageTools(FontInstances):
     self.colorsys = colorsys
     self.abort = False
     self.getOlexVariables()
-    self.gui_language_encoding = OV.CurrentLanguageEncoding()
-    #font = "Vera"
-    #font = "VeraSE"
-    #font = "VeraMono"
+    
+    ##Encodings
+    self.good_encodings = ["ISO8859-1", "ISO8859-2"]
+    self.gui_language_encoding = olx.CurrentLanguageEncoding()
+    self.gui_current_language = olx.CurrentLanguage()
+
+    self.get_font_peculiarities()
+    
     font = "Verdana"
-    #font = "Trebuchet"
-    #font = "HelveticaMedCd"
-    #font = "Optane"
+    
     self.gui_timage_font_name = "%s" %font
     self.gui_tab_font_name = "%s Bold" %font
     self.gui_sNumTitle_font_name = "%s Bold" %font
@@ -531,6 +533,86 @@ class ImageTools(FontInstances):
     im = RoundedCorners.round_image(im, cache, radius, solid_colour=colour)
     return im
   
+  def deal_with_encodings_and_languages(self):
+    ''' Determines the font and some font settings for various encodings '''
+    
+    encoding = 'unic'
+    original_font_size = self.font_size
+    if self.gui_language_encoding not in self.good_encodings:
+      self.gui_language_encoding = "unic"
+      encoding = 'unic'
+      if self.gui_current_language == "Chinese":
+        self.font_name = OV.GetParam('gui.chinese_font_name')
+      else:
+        self.font_name = 'Arial UTF'
+      if not self.translate:
+        self.font_name = 'Vera'
+        self.font_size = original_font_size
+
+    try:
+      self.txt.encode('ascii')
+    except:
+      if self.gui_current_language != "Chinese":
+        self.font_name = 'Arial UTF'
+        self.top -= 3
+      else:
+        pass
+      
+    if self.gui_current_language == "Chinese":
+      font_peculiarities.setdefault("Arial UTF",{"top_adjust":-0.7,
+                                                 "rel_adjust":+0.4})
+    elif self.gui_current_language == "Greek":
+      font_peculiarities.setdefault("Arial UTF",{"top_adjust":-1,
+                                                 "rel_adjust":+0.4})
+    elif self.gui_current_language == "Russian":
+      font_peculiarities.setdefault("Arial UTF",{"top_adjust":-1,
+                                                 "rel_adjust":+0.4})
+  
+    
+  def get_font_peculiarities(self):
+    self.font_peculiarities = {
+      "Paddington":{"top_adjust":0,
+                    "rel_adjust":0},
+      "Verdana":{"top_adjust":-0.1,
+                    "rel_adjust":+0.1},
+      "Trebuchet":{"top_adjust":-0.5,
+                    "rel_adjust":+0.2},
+      "Helvetica":{"top_adjust":-0.5,
+                    "rel_adjust":0.1},
+      "Courier":{"top_adjust":-0.1,
+                    "rel_adjust":+0.1},
+      "Vera":{"top_adjust":0,
+                    "rel_adjust":-0.1},
+      "Simhei TTF":{"top_adjust":-0.2,
+                    "rel_adjust":+0.3},
+      }
+    
+  def get_text_modifications(self):
+    if self.translate:
+      self.txt = OV.Translate("%%%s%%" %self.txt.strip()) ##Language
+    if self.titleCase:
+      self.txt = self.txt.title()
+    if self.lowerCase:
+      self.txt = self.txt.lower()
+      
+  def get_valign_font_modifications(self):
+    if not self.valign:
+      return
+    try:
+      letting_width, lettering_height = self.draw.textsize(self.txt, font=self.font)
+      rel_size = self.valign[1]
+      position = self.valign[0]
+      self.font_size = int(rel_size * self.image_size[1])
+      increase = True
+      while increase:
+        if lettering_height < (self.image_size[1] * (rel_size + self.rel_adjust)):
+          self.font_size += 1
+          self.txt_top += self.top_adjust
+        else:
+          increase = False
+    except Exception,err:
+      print err
+
   def write_text_to_draw(self,
                          draw,
                          txt,
@@ -546,123 +628,31 @@ class ImageTools(FontInstances):
                          valign=None,
                          translate=True,
                          getXY_only=False):
-      
-    if translate:
-      txt = OV.Translate("%%%s%%" %txt.strip()) ##Language
-
-
-    if titleCase:
-      txt = txt.title()
-    if lowerCase:
-      txt = txt.lower()
-    top = top_left[1]
-    left = top_left[0]
-
-    good_encodings = ["ISO8859-1", "ISO8859-2", "ISO8859-7"]
-    good_encodings = ["ISO8859-1", "ISO8859-2"]
-    self.gui_language_encoding = olx.CurrentLanguageEncoding()
-    self.gui_current_language = olx.CurrentLanguage()
-    encoding = 'unic'
-    original_font_size = font_size
-    if self.gui_language_encoding not in good_encodings:
-      self.gui_language_encoding = "unic"
-      encoding = 'unic'
-      if self.gui_current_language == "Chinese":
-        #font_name = "Simhei TTF"
-        font_name = OV.GetParam('gui.chinese_font_name')
-      else:
-        font_name = 'Arial UTF'
-      #font_name = "Chinese"
-      #font_name = "Simsun TTF"
-      #font_name = "Simsun TTC"
-
-      #if font_size < 18:
-      #  font_size = 18
-
-      if not translate:
-        font_name = 'Vera'
-        font_size = original_font_size
-
-
-    try:
-      txt.encode('ascii')
-    except:
-      if self.gui_current_language != "Chinese":
-        font_name = 'Arial UTF'
-        top -= 3
-      else:
-        pass
-
-    if valign:
-      top = top
-      rel_size = valign[1]
-      position = valign[0]
-      font_size = int(rel_size * image_size[1])
-      self.get_font()
-
-      font_peculiarities = {
-        "Paddington":{"top_adjust":0,
-                      "rel_adjust":0},
-        "Verdana":{"top_adjust":-0.1,
-                      "rel_adjust":+0.1},
-        "Trebuchet":{"top_adjust":-0.5,
-                      "rel_adjust":+0.2},
-        "Helvetica":{"top_adjust":-0.5,
-                      "rel_adjust":0.1},
-        "Courier":{"top_adjust":-0.1,
-                      "rel_adjust":+0.1},
-        "Vera":{"top_adjust":0,
-                      "rel_adjust":-0.1},
-        "Simhei TTF":{"top_adjust":-0.2,
-                      "rel_adjust":+0.3},
-        }
-
-      if self.gui_current_language == "Chinese":
-        font_peculiarities.setdefault("Arial UTF",{"top_adjust":-0.7,
-                                            "rel_adjust":+0.4})
-
-      elif self.gui_current_language == "Greek":
-        font_peculiarities.setdefault("Arial UTF",{"top_adjust":-1,
-                                            "rel_adjust":+0.4})
-
-      elif self.gui_current_language == "Russian":
-        font_peculiarities.setdefault("Arial UTF",{"top_adjust":-1,
-                                            "rel_adjust":+0.4})
-
-
-      top_adjust = 0
-      rel_adjust = 0
-      for f in font_peculiarities:
-        if f in font_name:
-          top_adjust = font_peculiarities[f]["top_adjust"]
-          rel_adjust = font_peculiarities[f]["rel_adjust"]
-
-
-      letting_width, lettering_height = draw.textsize(txt, font=font)
-      increase = True
-      while increase:
-        if lettering_height < (image_size[1] * (valign[1]+rel_adjust)):
-          font_size += 1
-          top += top_adjust
-          font = self.registerFontInstance(font_name, font_size)
-          letting_width, lettering_height = draw.textsize(txt, font=font)
-        else:
-          increase = False
-
-
-
-    try:
-      font = self.fonts[font_name]["fontInstance"].get(font_size,None)
-    except:
-      font = self.registerFontInstance(font_name, font_size)
-    if not font:
-      font = self.registerFontInstance(font_name, font_size, encoding=encoding)
-
+    self.font_size = font_size
+    self.font_name = font_name
+    self.translate = translate
+    self.txt = txt
+    self.txt_top = top_left[1]
+    self.txt_left = top_left[0]
+    self.titleCase = titleCase
+    self.lowerCase = lowerCase
+    self.valign = valign
+    self.draw = draw
+    self.image_size = image_size
+    
+    self.get_text_modifications()
+    self.deal_with_encodings_and_languages()
+    txt = self.txt
+    font = self.get_font(font_name=self.font_name, font_size=self.font_size)
+    self.font = font
+    
+    self.get_valign_font_modifications()
 
     if align == "centre" or align == 'middle':
-      left = (self.centre_text(draw, txt, font, max_width))
+      self.txt_left = (self.centre_text(draw, txt, font, max_width))
+      
     elif align == "right":
-      left = (self.align_text(draw, txt, font, max_width, 'right'))
+      self.txt_left = (self.align_text(draw, txt, font, max_width, 'right'))
 
     wX, wY = draw.textsize(txt, font=font)
     if getXY_only:
@@ -699,7 +689,8 @@ class ImageTools(FontInstances):
       try:
         i = 0
         for txt in txt_l:
-          top_n = top + wY * i
+          left = self.txt_left
+          top_n = self.txt_top + wY * i
           fc = font_colour
           f = font
           if '<sub>' in txt:
@@ -753,9 +744,17 @@ class ImageTools(FontInstances):
     return wX, wY
 
   def get_font(self, font_name='Vera', font_size=12):
-    font = self.fonts[font_name]["fontInstance"].get(font_size,None)
-    if not font:
-      font = self.registerFontInstance(font_name, font_size)
+    try:
+      font = self.fonts[font_name]["fontInstance"].get(font_size,None)
+      if not font:
+        font = self.registerFontInstance(font_name, font_size)
+      self.top_adjust = 0  
+      self.rel_adjust = 0  
+      if self.font_peculiarities.get(font_name):
+        self.top_adjust = self.font_peculiarities[self.font_name].get('top_adjust',0)
+        self.rel_adjust = self.font_peculiarities[self.font_name].get('rel_adjust',0)
+    except:
+      pass
     return font
 
   def make_pop_image(self, d):

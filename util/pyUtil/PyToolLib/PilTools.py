@@ -2823,6 +2823,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       underground = OV.GetParam('gui.html.bg_colour').rgb
       shadow = True
       buttonmark = True
+      font_size = 13
       whitespace = "top:4:%s" %OV.GetParam('gui.html.bg_colour').hexadecimal
       if state == "on":
         grad_colour = highlight_colour

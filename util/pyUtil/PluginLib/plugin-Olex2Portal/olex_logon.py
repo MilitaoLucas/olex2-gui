@@ -359,7 +359,7 @@ class DownloadOlexLanguageDictionary:
 
 
   def EditHelpItem(self, OXD, language = "English"):
-    #text = olex_logon.web_translation_item(OXD, language)
+    #text = Olex2Portal.web_translation_item(OXD, language)
     language = olx.CurrentLanguage()
     text = self.downloadSingleTerm(OXD, language)
     try:
@@ -406,7 +406,7 @@ class DownloadOlexLanguageDictionary:
       tool_name = OXD.split("/")[1].split(".")[0]
       gui_file = r"%s/%s/%s" % (olx.BaseDir(),path, OXD)
 
-    #text = olex_logon.web_translation_item(OXD, language)
+    #text = Olex2Portal.web_translation_item(OXD, language)
     language = olx.CurrentLanguage()
     rFile = open(gui_file,'r')
     text = rFile.read()
