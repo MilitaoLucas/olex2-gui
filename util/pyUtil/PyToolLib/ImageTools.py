@@ -519,6 +519,18 @@ class ImageTools(FontInstances):
     return self.write_text_to_draw(draw=draw, txt=txt, font_name=font_name, font_size=font_size, titleCase=titleCase, lowerCase=lowerCase, translate=translate, getXY_only=True)
 
 
+  def get_im_and_draw_from_filename(self, filename):
+    if type(filename) == unicode:
+      if os.path.exists(filename):
+        im = Image.open(filename)
+        draw = ImageDraw.Draw(im)
+    return im, draw
+  
+  def make_round_corners(self, im, radius=10, colour=(80,130,130)):
+    cache = {}
+    im = RoundedCorners.round_image(im, cache, radius, solid_colour=colour)
+    return im
+  
   def write_text_to_draw(self,
                          draw,
                          txt,
@@ -534,6 +546,7 @@ class ImageTools(FontInstances):
                          valign=None,
                          translate=True,
                          getXY_only=False):
+      
     if translate:
       txt = OV.Translate("%%%s%%" %txt.strip()) ##Language
 
@@ -544,7 +557,6 @@ class ImageTools(FontInstances):
       txt = txt.lower()
     top = top_left[1]
     left = top_left[0]
-
 
     good_encodings = ["ISO8859-1", "ISO8859-2", "ISO8859-7"]
     good_encodings = ["ISO8859-1", "ISO8859-2"]
@@ -582,17 +594,11 @@ class ImageTools(FontInstances):
         pass
 
     if valign:
-
       top = top
       rel_size = valign[1]
       position = valign[0]
       font_size = int(rel_size * image_size[1])
-      try:
-        font = self.fonts[font_name]["fontInstance"].get(font_size,None)
-      except:
-        pass
-      if not font:
-        font = self.registerFontInstance(font_name, font_size)
+      self.get_font()
 
       font_peculiarities = {
         "Paddington":{"top_adjust":0,
@@ -678,6 +684,9 @@ class ImageTools(FontInstances):
           wXT = 0
           t = "%s" %word
       txt_l.append(t.strip())
+    elif '<br>' in txt:
+      txt = txt.split('<br>')
+      txt_l = txt
     else:
       txt_l.append(txt)
 
@@ -691,7 +700,26 @@ class ImageTools(FontInstances):
         i = 0
         for txt in txt_l:
           top_n = top + wY * i
-          draw.text((left,int(top_n)), txt, font=font, fill=font_colour)
+          fc = font_colour
+          f = font
+          if '<sub>' in txt:
+            t = txt.split('<sub>')
+            _ = t[1].split('</sub>')
+            t[1] = _[0]
+            t.append(_[1])
+            j = 0
+            for item in t:
+              top = int(top_n)
+              f = font
+              if j == 1:
+                f = self.get_font(font_name, int(font_size * 0.7))
+                top += int(font_size/2)
+              j += 1
+              wX, wY = draw.textsize(item, font=f)
+              draw.text((left,top), item, font=f, fill=font_colour)
+              left += wX
+          else:
+            draw.text((left,int(top_n)), txt, font=font, fill=font_colour)
           i += 1
       except Exception, ex:
         print "Text %s could not be drawn: %s" %(txt, ex)
