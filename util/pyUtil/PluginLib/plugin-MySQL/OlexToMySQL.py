@@ -11,8 +11,7 @@ import SQLFactory
 import string
 import time
 import codecs
-import olex_logon
-
+import Olex2Portal
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
@@ -296,8 +295,8 @@ class DownloadOlexLanguageDictionary:
       print p.translated_text
 
   def EditHelpItem(self, OXD, language = "English"):
-    import olex_logon
-    #text = olex_logon.web_translation_item(OXD, language)
+    import Olex2Portal
+    #text = Olex2Portal.web_translation_item(OXD, language)
     language = olx.CurrentLanguage()
     text = self.downloadSingleTerm(OXD, language)
     text = unicode(text, 'utf-8')
@@ -329,10 +328,10 @@ class DownloadOlexLanguageDictionary:
       
       
   def downloadSingleTerm(self, OXD, language = "English"):
-    import olex_logon
+    import Olex2Portal
     
     sql = "SELECT * FROM translation WHERE oxd='%s'" %(OXD)
-    res = olex_logon.web_run_sql(sql)
+    res = Olex2Portal.web_run_sql(sql)
     
     if res == "Unauthorised":
       return
@@ -368,8 +367,8 @@ XX command line text XX
     d = {"OXD":OXD, field:value}
     sql = self.SQL.create_insert_or_update_sql(d, 'translation')
     
-    import olex_logon
-    text = olex_logon.web_run_sql(sql)
+    import Olex2Portal
+    text = Olex2Portal.web_run_sql(sql)
         
     #res = self.SQL.run_sql(sql)
     #print res, field, value
@@ -389,7 +388,7 @@ XX command line text XX
     Q = "SELECT * FROM translation"
 
     res = self.SQL.run_select_sql(Q)
-    #res = olex_logon.web_run_sql(script='run_sql', sql = Q)
+    #res = Olex2Portal.web_run_sql(script='run_sql', sql = Q)
     if res == "Unauthorised":
       return
     
