@@ -1600,6 +1600,10 @@ OV.registerFunction(updateACF)
 
 def GetACF():
   global _is_online
+  
+  phil_file = r"%s/autochem.phil" %(OV.DataDir())
+  olx.phil_handler.merge_param_file(phil_file)
+  
   no_update = False
   print "Starting ODAC..."
   if no_update:
@@ -1617,10 +1621,10 @@ def GetACF():
     olex.m("installplugin Headless")
 
   updateACF()
-  use_new = False
+  use_new = True
   if use_new:
     debug =  OV.GetParam('odac.debug.debug')
-    OV.SetVar('odac_fb', debug)
+#    OV.SetVar('odac_fb', debug)
     debug_deep1 = OV.GetParam('odac.debug.debug_deep1')
     debug_deep2 = OV.GetParam('odac.debug.debug_deep2')
     OV.SetVar("ac_verbose",  OV.GetParam('odac.debug.verbose'))
@@ -1685,7 +1689,7 @@ def GetACF():
       OV.SetVar("ac_debug_deep1", True)
     if debug_deep2:
       OV.SetVar("ac_debug_deep2", True)
-    p = r"%s/util/pyUtil/PluginLib/plugin-AutoChemSRC/%s" %(olx.BaseDir(), tag)
+    p = r"%s/util/pyUtil/PluginLib/plugin-AutoChem" %(olx.BaseDir())
     sys.path.append(p)
     OV.SetParam('odac.source_dir',p)
     try:
