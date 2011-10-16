@@ -2922,7 +2922,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       info_size = OV.GetParam('gui.timage.snumtitle.filefullinfo_size')
       colour = OV.GetParam('gui.timage.snumtitle.filefullinfo_colour').rgb
       #self.drawFileFullInfo(draw, colour, right_margin=5, height=height, font_size=info_size, left_start=wX + 15)
-      self.drawFileFullInfo(draw, colour, right_margin=5, height=height, font_size=info_size, left_start=2)
+      self.drawFileFullInfo(draw, colour, right_margin=5, height=height, font_size=info_size, left_start=5)
       self.drawSpaceGroupInfo(draw, luminosity=OV.GetParam('gui.timage.snumtitle.sg_L'), right_margin=3)
 
     if self.advertise_new:
