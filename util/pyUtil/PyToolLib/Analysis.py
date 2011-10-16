@@ -446,7 +446,7 @@ class Graph(ImageTools):
         self.draw_fit_line(slope, y_intercept)
       self.draw_data_points(
         dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
-        marker_size_factor=marker_size_factor)
+        marker_size_factor=marker_size_factor, hrefs=dataset.hrefs, targets=dataset.targets)
 
   def map_txt(self):
     return '\n'.join(self.map_txt_list)
@@ -828,7 +828,7 @@ class Graph(ImageTools):
     top_left = (x, legend_top)
     IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=font_size, font_colour=self.axislabelColour)
 
-  def draw_data_points(self, xy_pairs, indices=None, sigmas=None, marker_size_factor=None):
+  def draw_data_points(self, xy_pairs, indices=None, sigmas=None, marker_size_factor=None, hrefs=None, targets=None):
     min_x = self.min_x
     max_x = self.max_x
     scale_x = self.scale_x
@@ -905,6 +905,12 @@ class Graph(ImageTools):
       if self.item == "AutoChem":
         map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="reap %s"  target="%s">"""
                             % (box + (xr, yr)))
+      
+      if hrefs:
+        map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="%s" target="%s">"""
+                            % (box + (hrefs[i], targets[i])))
+        
+        
       else:
         href="UpdateHtml"
         href=""
@@ -2213,6 +2219,7 @@ class X_Y_plot(Analysis):
                                                y=item[1],
                                                hrefs=item[2],
                                                targets=item[3],
+                                               metadata=item[4],
                                                ))
       i += 1
     

@@ -1023,7 +1023,7 @@ class timage(ImageTools):
       except:
         width = float(tool_arg)
     self.font_name = "Vera"
-    self.timer = False
+    self.timer = True
     if self.timer:
       import time
       self.time = time
@@ -1046,6 +1046,7 @@ class timage(ImageTools):
     sfs = sf * 350/int(self.params.htmlpanelwidth)
     self.sf = sf
     self.sfs = sfs
+    self.no_need_to_refresh_image_type = {}
 
 
   def run_timage(self,force_images=False):
@@ -1126,171 +1127,172 @@ class timage(ImageTools):
       OlexVFS.save_image_to_olex(IM, name, 2)
 
   def make_images_from_fb_png(self):
+    self.image_type = "fb"
     sf = self.sf
     image_source = self.imageSource
     self.getImageItemsFromTextFile()
 
     im = image_source
-    cut = 0, 52*sf, 27*sf, 76*sf
-    crop =  im.crop(cut)
-    self.warning =  Image.new('RGBA', crop.size, self.params.html.bg_colour.rgb)
-    self.warning.paste(crop, (0,0), crop)
-    name = "warning.png"
-    self.warning = self.resize_image(self.warning, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
-    OlexVFS.save_image_to_olex(self.warning, name, 2)
+    #cut = 0, 52*sf, 27*sf, 76*sf
+    #crop =  im.crop(cut)
+    #self.warning =  Image.new('RGBA', crop.size, self.params.html.bg_colour.rgb)
+    #self.warning.paste(crop, (0,0), crop)
+    #name = "warning.png"
+    #self.warning = self.resize_image(self.warning, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
+    #OlexVFS.save_image_to_olex(self.warning, name, 2)
 
-    cut = 140*sf, 58*sf, 170*sf, 81*sf
-    crop =  im.crop(cut)
-    IM =  Image.new('RGBA', crop.size, self.params.html.table_firstcol_colour.rgb)
-    IM.paste(crop, (0,0), crop)
-    #draw = ImageDraw.Draw(IM)
-    #draw.rectangle((0, 0, IM.size[0]-1, IM.size[1]-1), outline='#bcbcbc')
-    IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
-    name = "HelpImage.png"
-    OlexVFS.save_image_to_olex(IM, name, 2)
+    #cut = 140*sf, 58*sf, 170*sf, 81*sf
+    #crop =  im.crop(cut)
+    #IM =  Image.new('RGBA', crop.size, self.params.html.table_firstcol_colour.rgb)
+    #IM.paste(crop, (0,0), crop)
+    ##draw = ImageDraw.Draw(IM)
+    ##draw.rectangle((0, 0, IM.size[0]-1, IM.size[1]-1), outline='#bcbcbc')
+    #IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
+    #name = "HelpImage.png"
+    #OlexVFS.save_image_to_olex(IM, name, 2)
 
-    cut = 201*sf, 58*sf, 227*sf, 81*sf
-    crop =  im.crop(cut)
-    IM =  Image.new('RGBA', crop.size, self.params.html.bg_colour.rgb)
-    IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
-    IM.paste(crop, (0,0), crop)
-    #draw = ImageDraw.Draw(IM)
-    #draw.rectangle((0, 0, IM.size[0]-1, IM.size[1]-1), outline='#bcbcbc')
-    IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
-    name = "popout.png"
-    OlexVFS.save_image_to_olex(IM, name, 2)
+    #cut = 201*sf, 58*sf, 227*sf, 81*sf
+    #crop =  im.crop(cut)
+    #IM =  Image.new('RGBA', crop.size, self.params.html.bg_colour.rgb)
+    #IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
+    #IM.paste(crop, (0,0), crop)
+    ##draw = ImageDraw.Draw(IM)
+    ##draw.rectangle((0, 0, IM.size[0]-1, IM.size[1]-1), outline='#bcbcbc')
+    #IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
+    #name = "popout.png"
+    #OlexVFS.save_image_to_olex(IM, name, 2)
 
-    cut = 227*sf, 58*sf, 300*sf, 81*sf
-    crop =  im.crop(cut)
-    IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
-    IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
-    IM.paste(crop, (0,0), crop)
-    #draw = ImageDraw.Draw(IM)
-    #draw.rectangle((0, 0, IM.size[0]-1, IM.size[1]-1), outline='#bcbcbc')
-    IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
-    name = "return.png"
-    OlexVFS.save_image_to_olex(IM, name, 2)
+    #cut = 227*sf, 58*sf, 300*sf, 81*sf
+    #crop =  im.crop(cut)
+    #IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
+    #IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
+    #IM.paste(crop, (0,0), crop)
+    ##draw = ImageDraw.Draw(IM)
+    ##draw.rectangle((0, 0, IM.size[0]-1, IM.size[1]-1), outline='#bcbcbc')
+    #IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
+    #name = "return.png"
+    #OlexVFS.save_image_to_olex(IM, name, 2)
 
-    cut = 0*sf, 0*sf, 275*sf, 55*sf
-    crop =  im.crop(cut)
-    IM =  Image.new('RGBA', crop.size, self.params.html.bg_colour.rgb)
-    IM.paste(crop, (0,0), crop)
-    cut = 0*sf, 95*sf, 100*sf, 150*sf
-    crop =  im.crop(cut)
-    crop_colouriszed = self.colourize(crop, (0,0,0), self.params.html.highlight_colour.rgb)
-    IM.paste(crop_colouriszed, (190,10), crop)
-    IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
-    name = "olex_help_logo.png"
-    OlexVFS.save_image_to_olex(IM, name, 2)
-
-
-    cut = 140*sf, 154*sf, 220*sf, 175*sf
-    max_width = cut[2] - cut[0]
-    crop =  im.crop(cut)
-    txt_l= ("Prepare",
-              "Solve",
-              "Refine",
-              "Analyze", )
-    states = ["on", "off", "", "highlight"]
-    for state in states:
-      if state == "on":
-        colour = self.adjust_colour(self.params.html.highlight_colour.rgb,luminosity=1.3)
-      elif state == "off":
-        colour = self.adjust_colour(self.params.html.base_colour.rgb,luminosity=1.9)
-      elif state == "":
-        colour = self.adjust_colour(self.params.html.base_colour.rgb,luminosity=1.9)
-      for txt in txt_l:
-        #IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
-        #crop_colouriszed = self.colourize(crop, (0,0,0), colour)
-        crop_colouriszed = crop
-        IM =  Image.new('RGBA', crop.size)
-        circle = self.makeCharcterCircles(str('1'), im, self.params.html.table_firstcol_colour.rgb, resize = False)
-        IM.paste(crop_colouriszed, (0,0), crop)
-        IM.paste(circle,(0,0), circle)
-        draw = ImageDraw.Draw(IM)
-        t = txt.replace("blank"," _ ")
-        self.write_text_to_draw(draw,
-                     "%s" %t,
-                     top_left=(10, 6),
-                     font_name = 'Vera',
-                     font_size=48,
-                     titleCase=True,
-                     font_colour="#ff0000",
-                     max_width = max_width,
-                     align='centre'
-                     )
-        IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
-        name = "comp-%s%s.png" %(txt.replace(" ", "_"), state)
-        name = name.lower()
-        OlexVFS.save_image_to_olex(IM, name, 2)
-        if name == "button_small-blank.png":
-          OlexVFS.save_image_to_olex(IM, name, 2)
-#          filename = r"%s/button_small-blank.png" %self.datadir
-#          IM.save(filename)
+    #cut = 0*sf, 0*sf, 275*sf, 55*sf
+    #crop =  im.crop(cut)
+    #IM =  Image.new('RGBA', crop.size, self.params.html.bg_colour.rgb)
+    #IM.paste(crop, (0,0), crop)
+    #cut = 0*sf, 95*sf, 100*sf, 150*sf
+    #crop =  im.crop(cut)
+    #crop_colouriszed = self.colourize(crop, (0,0,0), self.params.html.highlight_colour.rgb)
+    #IM.paste(crop_colouriszed, (190,10), crop)
+    #IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
+    #name = "olex_help_logo.png"
+    #OlexVFS.save_image_to_olex(IM, name, 2)
 
 
-    IM =  Image.new('RGBA', crop.size)
-    IM.paste(crop, (0,0), crop)
-    IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
-    name = "test.png"
-    OlexVFS.save_image_to_olex(IM, name, 2)
+    #cut = 140*sf, 154*sf, 220*sf, 175*sf
+    #max_width = cut[2] - cut[0]
+    #crop =  im.crop(cut)
+    #txt_l= ("Prepare",
+              #"Solve",
+              #"Refine",
+              #"Analyze", )
+    #states = ["on", "off", "", "highlight"]
+    #for state in states:
+      #if state == "on":
+        #colour = self.adjust_colour(self.params.html.highlight_colour.rgb,luminosity=1.3)
+      #elif state == "off":
+        #colour = self.adjust_colour(self.params.html.base_colour.rgb,luminosity=1.9)
+      #elif state == "":
+        #colour = self.adjust_colour(self.params.html.base_colour.rgb,luminosity=1.9)
+      #for txt in txt_l:
+        ##IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
+        ##crop_colouriszed = self.colourize(crop, (0,0,0), colour)
+        #crop_colouriszed = crop
+        #IM =  Image.new('RGBA', crop.size)
+        #circle = self.makeCharcterCircles(str('1'), im, self.params.html.table_firstcol_colour.rgb, resize = False)
+        #IM.paste(crop_colouriszed, (0,0), crop)
+        #IM.paste(circle,(0,0), circle)
+        #draw = ImageDraw.Draw(IM)
+        #t = txt.replace("blank"," _ ")
+        #self.write_text_to_draw(draw,
+                     #"%s" %t,
+                     #top_left=(10, 6),
+                     #font_name = 'Vera',
+                     #font_size=48,
+                     #titleCase=True,
+                     #font_colour="#ff0000",
+                     #max_width = max_width,
+                     #align='centre'
+                     #)
+        #IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
+        #name = "comp-%s%s.png" %(txt.replace(" ", "_"), state)
+        #name = name.lower()
+        #OlexVFS.save_image_to_olex(IM, name, 2)
+        #if name == "button_small-blank.png":
+          #OlexVFS.save_image_to_olex(IM, name, 2)
+##          filename = r"%s/button_small-blank.png" %self.datadir
+##          IM.save(filename)
+
+
+    #IM =  Image.new('RGBA', crop.size)
+    #IM.paste(crop, (0,0), crop)
+    #IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
+    #name = "test.png"
+    #OlexVFS.save_image_to_olex(IM, name, 2)
 
     available_width = self.available_width
 #    available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - OV.GetParam('gui.html.table_firstcol_width'))
     ## TINY buttons
-    cut = 138*sf, 178*sf, 158*sf, 195*sf
-    max_width = cut[2] - cut[0]
-    crop =  im.crop(cut)
+#    cut = 138*sf, 178*sf, 158*sf, 195*sf
+#    max_width = cut[2] - cut[0]
+#    crop =  im.crop(cut)
     button_names = self.image_items_d.get("TINY BUTTONS")
     scale = self.sf / 1.2
     tiny_width= OV.GetParam('gui.timage.tinybutton.width')
-    self.produce_buttons(button_names, crop, cut, max_width, scale,"_tiny",width=tiny_width)
+    self.produce_buttons(button_names, scale,"_tiny",width=tiny_width)
 
     ## SMALL buttons
-    cut = 90*sf, 178*sf, 138*sf, 193*sf
-    max_width = cut[2] - cut[0]
-    crop =  im.crop(cut)
+#    cut = 90*sf, 178*sf, 138*sf, 193*sf
+#    max_width = cut[2] - cut[0]
+#    crop =  im.crop(cut)
     button_names = self.image_items_d.get("SMALL BUTTONS")
     width = OV.GetParam('gui.buttons.small_buttons.width')
     width = int(round(width * self.size_factor,0))
-    self.produce_buttons(button_names, crop, cut, max_width,self.sf,"_small",width=width)
+    self.produce_buttons(button_names, self.sf,"_small",width=width)
 
     ## TWO buttons in the HTMLpanelWIDTH
-    cut = 0*sf, 178*sf, 91*sf, 195*sf
-    max_width = cut[2] - cut[0]
-    crop =  im.crop(cut)
+#    cut = 0*sf, 178*sf, 91*sf, 195*sf
+#    max_width = cut[2] - cut[0]
+#    crop =  im.crop(cut)
     button_names = self.image_items_d.get("TWO BUTTONS PER ROW", button_names)
     width = int(available_width/2) - 15
-    self.produce_buttons(button_names, crop, cut, max_width,self.sfs,"",width=width)
+    self.produce_buttons(button_names, self.sfs,"",width=width)
 
     ## THREE buttons in the HTMLpanelWIDTH
-    cut = 0*sf, 178*sf, 91*sf, 195*sf
-    max_width = cut[2] - cut[0]
-    crop =  im.crop(cut)
+#    cut = 0*sf, 178*sf, 91*sf, 195*sf
+#    max_width = cut[2] - cut[0]
+#    crop =  im.crop(cut)
     button_names = self.image_items_d.get("THREE BUTTONS PER ROW", button_names)
     width = int(available_width/3) - 15
-    self.produce_buttons(button_names, crop, cut, max_width,self.sfs,"",width=width)
+    self.produce_buttons(button_names, self.sfs,"",width=width)
 
     ## FULL ROW buttons in the HTMLpanelWIDTH
-    cut = 0*sf, 193*sf, 275*sf, 211*sf
-    max_width = cut[2] - cut[0]
-    crop =  im.crop(cut)
+#    cut = 0*sf, 193*sf, 275*sf, 211*sf
+#    max_width = cut[2] - cut[0]
+#    crop =  im.crop(cut)
     button_names = self.image_items_d.get("FULL ROW", button_names)
     width = available_width - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
-    self.produce_buttons(button_names, crop, cut, max_width,self.sfs,"_full",width=width)
+    self.produce_buttons(button_names, self.sfs,"_full",width=width)
 
     ## G3 BIG BUTTON
-    cut = 0*sf, 193*sf, 275*sf, 211*sf
-    max_width = cut[2] - cut[0]
-    crop =  im.crop(cut)
+#    cut = 0*sf, 193*sf, 275*sf, 211*sf
+#    max_width = cut[2] - cut[0]
+#    crop =  im.crop(cut)
     button_names = self.image_items_d.get("G3 BIG BUTTON", button_names)
     width = available_width - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
-    self.produce_buttons(button_names, crop, cut, max_width,self.sfs,"_g3_big",width=width)
+    self.produce_buttons(button_names, self.sfs,"_g3_big",width=width)
 
     ## G4 BUTTON
     button_names = self.image_items_d.get("G4 BUTTON", button_names)
     width = available_width - 40
-    self.produce_buttons(button_names, crop, cut, max_width, self.sfs, "_g4",width=width)
+    self.produce_buttons(button_names, self.sfs, "_g4",width=width)
     
     
     cut = 0*sf, 152*sf, 15*sf, 169*sf
@@ -1493,7 +1495,11 @@ class timage(ImageTools):
     name = "warning_big.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
 
-  def produce_buttons(self, button_names, crop, cut, max_width,scale,btn_type,width=None):
+  def produce_buttons(self, button_names, scale,btn_type, max_width=None, width=None, crop=None, cut=None, ):
+    self.image_type = btn_type
+    if self.no_need_to_refresh_image_type.get(self.image_type):
+      return
+    
     states = ["on", "off", "", "highlight", "hover", "hoveron"]
     for state in states:
       if state == "on":
@@ -1523,11 +1529,11 @@ class timage(ImageTools):
             button_type = 'g4'
           else:
             button_type = 'button'
-          IM = self.make_timage(item_type=button_type, item=txt, state=state, width=width, titleCase=False)
+          self.image = image = self.make_timage(item_type=button_type, item=txt, state=state, width=width, titleCase=False)
+          self.name = name = "button%s-%s%s.png" %(btn_type, txt.replace(" ", "_"), state)
+          self.save_with_checking_for_needed()
           self.advertise_new = False
-          name = "button%s-%s%s.png" %(btn_type, txt.replace(" ", "_"), state)
-          name = name.lower()
-          OlexVFS.save_image_to_olex(IM, name, 2)
+          
         else:
 
 
@@ -2017,7 +2023,16 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       if self.timer:
         print "/t%s took %.3f s to complete" %(item, self.time.time()-t1)
 
+  def save_with_checking_for_needed(self):
+    name = self.name.lower()
+    image = self.image
+    _ = OlexVFS.read_from_olex(name)
+    OlexVFS.save_image_to_olex(image, name, 2)
+    if _ ==  OlexVFS.read_from_olex(name):
+      self.no_need_to_refresh_image_type.setdefault(self.image_type,True)
+
   def make_generated_assorted_images(self):
+    image_type = 'assorted'
     size = (6,15)
     colour = self.params.html.table_firstcol_colour.rgb
     #colour = "#00ff00"
@@ -2118,11 +2133,21 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       textItems.append(item)
 
     for item in textItems:
+      image_types = ['h3', 'h2']
+      if 'h3' in item:
+        image_type = 'h3'
+      else:
+        image_type = 'h2'
+      if self.no_need_to_refresh_image_type.get(image_type):
+        continue
+        
       if self.timer:
         t1 = time.time()
       states = ["on", "off", "highlight", "", "hover", "hoveron"]
       name = ""
       for state in states:
+        if self.no_need_to_refresh_image_type.get(image_type):
+          break
         if "h3" in item:
           try:
             img_txt = item.split("-h3-")[1]
@@ -2143,7 +2168,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           name = name.replace(".new.","")
 
         if name:
-          OlexVFS.save_image_to_olex(image, name.lower(), 2)
+          self.name = name
+          self.image = image
+          self.image_type = image_type
+          self.save_with_checking_for_needed()
+
           #name = "h2-%s-%s.png" %(item, state)
           #image.save("C:/tmp/%s" %name)
       if self.timer:
@@ -2152,6 +2181,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         print "\t - %.3f [%.1f]- to complete %s" %(self.time.time()-t1, self.text_time, item)
 
     for tabItems in tabItem_l:
+      image_type = 'tab'
+      if self.no_need_to_refresh_image_type.get(image_type):
+        break
       if self.timer:
         t1 = time.time()
       for item in tabItems:
@@ -2164,19 +2196,19 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
             image = self.make_timage(item_type='tab', item=item.lstrip('g3-'), state=state, width=width)
           else:
             image = self.tab_items(item, state)
-
           name = r"tab-%s%s.png" %(item, state)
-          OlexVFS.save_image_to_olex(image, name, 2)
+          
+          self.name = name
+          self.image = image
+          self.image_type = image_type
+          self.save_with_checking_for_needed()
         if self.timer:
           print "\t - %s took %.3f s to complete" %(item, self.time.time()-t1)
-
-        #name = r"tab-%s-%s.png" %(item, state)
-        #image.save("C:/tmp/%s" %name)
-        #image.save(r"%s\etc\$tab-%s-%s.png" %(datadir, item.split("index-")[1], state), "PNG")
-
+ 
     OV.DeleteBitmap('%s' %bitmap)
 
   def make_note_items(self):
+    image_type = 'note'
     noteItems = [("Clicking on a Space-Group link will reset the structure. Run XS again.","orange","sg", True),
               ("You need an account on dimas.dur.ac.uk to use this feature","orange", "dimas", False),
               ("Click here to reset the history","orange", "historyclear", False),
@@ -2187,10 +2219,12 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
               ("AutoStructure is only availabe at Durham", "orange", "autostructure", True),
             ]
     for item in noteItems:
-      image = self.note_items(item)
-      name = r"note-%s.png" %(item[2])
-      OlexVFS.save_image_to_olex(image, name, 2)
-      #image.save(r"%s\etc\note-%s.png" %(datadir, item[2]), "PNG")
+      if self.no_need_to_refresh_image_type.get(image_type,False):
+        return
+      self.image = image = self.note_items(item)
+      self.name = name = r"note-%s.png" %(item[2])
+      self.image_type = image_type 
+      self.save_with_checking_for_needed()
 
   def make_label_items(self):
     labelItemsControl = [("Start",0), ("Suffix",0), ("Type",0), ("Cycles",0), ("Q-peaks",0),("Axis",0),("Deg",0),("Step",0),("No.",0), ("More",0) ]
@@ -2230,7 +2264,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
             OlexVFS.save_image_to_olex(image,name, 2)
             #image.save("C:/tmp/%s" %name)
             i += 1
-
 
     else:
       if self.params.image_font_name:
@@ -2303,7 +2336,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       BM = ButtonMaker(buttonItems)
       im = BM.run()
 
-
   def make_button_items(self):
     buttonItems = ["btn", "btn-QC", "btn-refine", "btn-solve"]
     for item in buttonItems:
@@ -2333,6 +2365,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       ##image.save(r"%s\etc\$%s.png" %(datadir, imag), "PNG")
 
   def make_icon_items(self):
+    self.image_type = 'icons'
     base_colour = self.params.html.base_colour.rgb
 
     iconIndex = {}
@@ -2413,21 +2446,22 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     also_make_small_icons_l = ['open']
 
     for icon in iconIndex:
+      if self.no_need_to_refresh_image_type.get(self.image_type):
+        print "Skipping making icon images"
+        return
+
       states = ["on", "off", "hover", "", "hoveron", "highlight"]
       for state in states:
-        image = self.icon_items(iconIndex[icon], state)
-        name = r"toolbar-%s%s.png" %(icon,state)
-        name = name.lower()
-        OlexVFS.save_image_to_olex(image, name, 2)
-      #image.save(r"%s\etc\$toolbar-%s.png" %(datadir, icon), "PNG")
+        self.image = image = self.icon_items(iconIndex[icon], state)
+        self.name = name = r"toolbar-%s%s.png" %(icon,state)
+        self.save_with_checking_for_needed()
 
       if icon in also_make_small_icons_l:
         states = ["on", "off", "hover", "", "hoveron", "highlight"]
         for state in states:
-          image = self.icon_items(iconIndex[icon], state, icon_size=OV.GetParam('gui.html.combo_height'))
-          name = r"toolbar_small-%s%s.png" %(icon,state)
-          name = name.lower()
-          OlexVFS.save_image_to_olex(image, name, 2)
+          self.image = image = self.icon_items(iconIndex[icon], state, icon_size=OV.GetParam('gui.html.combo_height'))
+          self.name = name = r"toolbar_small-%s%s.png" %(icon,state)
+          self.save_with_checking_for_needed()
 
     height = 10
     width = 10
@@ -2507,15 +2541,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     font_name = "Vera"
     if self.params.image_font_name:
       font_name = self.params.image_font_name
-
-    #self.write_text_to_draw(draw,
-                 #"TINY BUTTONS",
-                 #top_left=(x_border, -3),
-                 #font_name=font_name,
-                 #font_size=12,
-                 #font_colour="#ff0000")
-    #name = r"$toolbar-delete.png"
-    #OlexVFS.save_image_to_olex(image, name, 2)
 
 
 
@@ -2840,7 +2865,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       elif state == "hover":
         grad_colour = IT.adjust_colour('#b40000', luminosity = 0.95)
         
-        
     elif item_type =='cbtn':
       underground = OV.GetParam('gui.html.bg_colour').rgb
       if state == 'on':
@@ -2897,7 +2921,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if item_type == "snumtitle":
       info_size = OV.GetParam('gui.timage.snumtitle.filefullinfo_size')
       colour = OV.GetParam('gui.timage.snumtitle.filefullinfo_colour').rgb
-      self.drawFileFullInfo(draw, colour, right_margin=5, height=height, font_size=info_size, left_start=wX + 15)
+      #self.drawFileFullInfo(draw, colour, right_margin=5, height=height, font_size=info_size, left_start=wX + 15)
+      self.drawFileFullInfo(draw, colour, right_margin=5, height=height, font_size=info_size, left_start=2)
       self.drawSpaceGroupInfo(draw, luminosity=OV.GetParam('gui.timage.snumtitle.sg_L'), right_margin=3)
 
     if self.advertise_new:
@@ -3095,7 +3120,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           draw.point((x, y), fill)
     return image
 
-  def drawFileFullInfo(self, draw, colour='#ff0000', right_margin=0, height=10, font_name="Verdana", font_size=8, left_start = 40):
+  def drawFileFullInfo(self, draw, colour='#ff0000', right_margin=0, height=10, font_name="Verdana", font_size=8, left_start = 0):
     base_colour = self.params.html.base_colour.rgb
     txt = OV.FileFull()
     if txt == "none":

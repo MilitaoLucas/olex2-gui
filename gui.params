@@ -44,7 +44,7 @@ gui
       .type = str
     logo_name= None
       .type = path
-    logo_is_colourised = False
+    logo_is_colourised = True
       .type = bool
     size_factor = 1.0
       .type = float

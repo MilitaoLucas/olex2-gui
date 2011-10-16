@@ -885,7 +885,7 @@ def tbxs_(name):
   return retVal
 #OV.registerFunction(tbxs)
 
-def GetRInfo(txt=""):
+def GetRInfo(txt="",format='html'):
   use_history_for_R1_display = True
   if use_history_for_R1_display:
     if olx.IsFileType('cif') == "true":
@@ -897,15 +897,24 @@ def GetRInfo(txt=""):
       else:
         R1 = 'n/a'
     font_size = OV.GetParam('gui.html.font_size_large')
-    try:
-      R1 = float(R1)
-      col = GetRcolour(R1)
-      R1 = "%.2f" %(R1*100)
-      t = r"<td colspan='1' align='right' rowspan='2'><font size='%s' color='%s'><b>%s%%</b></font></td>" %(font_size, col, R1)
-    except:
-      t = "<td colspan='1' rowspan='2' align='right'><font size='%s'><b>%s</b></font></td>" %(font_size, R1)
-    finally:
-      return t
+    if format == 'html':
+      try:
+        R1 = float(R1)
+        col = GetRcolour(R1)
+        R1 = "%.2f" %(R1*100)
+        t = r"<td colspan='1' align='right' rowspan='2'><font size='%s' color='%s'><b>%s%%</b></font></td>" %(font_size, col, R1)
+      except:
+        t = "<td colspan='1' rowspan='2' align='right'><font size='%s'><b>%s</b></font></td>" %(font_size, R1)
+      finally:
+        return t
+      
+    elif format == 'float':
+      try:
+        t = float(R1)
+      except:
+        t = 0
+      finally:
+        return t
 
   else:
     if txt:
@@ -1610,7 +1619,6 @@ def GetACF():
   updateACF()
   use_new = False
   if use_new:
-    debug = OV.FindValue('odac_fb', False)
     debug =  OV.GetParam('odac.debug.debug')
     OV.SetVar('odac_fb', debug)
     debug_deep1 = OV.GetParam('odac.debug.debug_deep1')
@@ -1618,16 +1626,15 @@ def GetACF():
     OV.SetVar("ac_verbose",  OV.GetParam('odac.debug.verbose'))
 
   else:
-    debug = OV.FindValue('odac_fb', False)
-    debug = [False, True][0]
-    debug_deep1 = [False, True][0]
-    debug_deep2 = [False, True][0]
-    OV.SetVar("ac_verbose", [False, True][0])
+    debug = [False, True][1]
+    debug_deep1 = [False, True][1]
+    debug_deep2 = [False, True][1]
+    OV.SetVar("ac_verbose", [False, True][1])
 
-  keyname = getKey()
 
 
   if not debug:
+    keyname = getKey()
     p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], tag)
     OV.SetParam('odac.source_dir',p)
     if not os.path.exists(p):
