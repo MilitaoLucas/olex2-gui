@@ -592,7 +592,7 @@ graphs
         .type = colour
       border = (80,91,103)
         .type = colour
-      size_factor = 1./80
+      size_factor = 1./120
         .type = float
     }
     marker_3 {
@@ -600,7 +600,7 @@ graphs
         .type = colour
       border = (80,91,103)
         .type = colour
-      size_factor = 1./80
+      size_factor = 1./120
         .type = float
     }
     marker_4 {
@@ -608,7 +608,7 @@ graphs
         .type = colour
       border = (80,91,103)
         .type = colour
-      size_factor = 1./80
+      size_factor = 1./120
         .type = float
     }
     marker_5 {
