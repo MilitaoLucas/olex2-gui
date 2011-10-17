@@ -1000,6 +1000,8 @@ class timage(ImageTools):
 
   def __init__(self, width=None, tool_arg=None):
     super(timage, self).__init__()
+
+    import olex_fs
     self.params = OV.GuiParams()
 
     self.advertise_new = False
@@ -1291,7 +1293,7 @@ class timage(ImageTools):
 
     ## G4 BUTTON
     button_names = self.image_items_d.get("G4 BUTTON", button_names)
-    width = available_width - 40
+    width = available_width - OV.GetParam('gui.timage.g4.width_adjust')
     self.produce_buttons(button_names, self.sfs, "_g4",width=width)
     
     
@@ -2026,10 +2028,14 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
   def save_with_checking_for_needed(self):
     name = self.name.lower()
     image = self.image
-    _ = OlexVFS.read_from_olex(name)
-    OlexVFS.save_image_to_olex(image, name, 2)
-    if _ ==  OlexVFS.read_from_olex(name):
-      self.no_need_to_refresh_image_type.setdefault(self.image_type,True)
+    if olex_fs.Exists(name):
+      _ = OlexVFS.read_from_olex(name)
+      OlexVFS.save_image_to_olex(image, name, 2)
+      if _ ==  OlexVFS.read_from_olex(name):
+        self.no_need_to_refresh_image_type.setdefault(self.image_type,True)
+    else:
+      OlexVFS.save_image_to_olex(image, name, 2)
+
 
   def make_generated_assorted_images(self):
     image_type = 'assorted'
@@ -2135,10 +2141,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     for item in textItems:
       image_types = ['h3', 'h2']
       if 'h3' in item:
-        image_type = 'h3'
+        self.image_type = 'h3'
       else:
-        image_type = 'h2'
-      if self.no_need_to_refresh_image_type.get(image_type):
+        self.image_type = 'h2'
+      if self.no_need_to_refresh_image_type.get(self.image_type):
         continue
         
       if self.timer:
@@ -2146,7 +2152,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       states = ["on", "off", "highlight", "", "hover", "hoveron"]
       name = ""
       for state in states:
-        if self.no_need_to_refresh_image_type.get(image_type):
+        if self.no_need_to_refresh_image_type.get(self.image_type):
           break
         if "h3" in item:
           try:
@@ -2170,7 +2176,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         if name:
           self.name = name
           self.image = image
-          self.image_type = image_type
           self.save_with_checking_for_needed()
 
           #name = "h2-%s-%s.png" %(item, state)
@@ -2178,7 +2183,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       if self.timer:
         t = self.time.time()-t1
         self.text_time += t
-        print "\t - %.3f [%.1f]- to complete %s" %(self.time.time()-t1, self.text_time, item)
+        print "\t\t - %.3f [%.1f]- to complete %s" %(self.time.time()-t1, self.text_time, item)
 
     for tabItems in tabItem_l:
       image_type = 'tab'
@@ -2189,6 +2194,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       for item in tabItems:
         states = ["on", "off", "highlight", "", "hover", "hoveron"]
         for state in states:
+          if self.no_need_to_refresh_image_type.get(image_type):
+            break
           use_new = True
           if use_new:
             ## need different width for tab items
@@ -2197,13 +2204,12 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           else:
             image = self.tab_items(item, state)
           name = r"tab-%s%s.png" %(item, state)
-          
           self.name = name
           self.image = image
           self.image_type = image_type
           self.save_with_checking_for_needed()
         if self.timer:
-          print "\t - %s took %.3f s to complete" %(item, self.time.time()-t1)
+          print "\t\t - %s took %.3f s to complete" %(item, self.time.time()-t1)
  
     OV.DeleteBitmap('%s' %bitmap)
 
@@ -2447,7 +2453,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     for icon in iconIndex:
       if self.no_need_to_refresh_image_type.get(self.image_type):
-        print "Skipping making icon images"
         return
 
       states = ["on", "off", "hover", "", "hoveron", "highlight"]
