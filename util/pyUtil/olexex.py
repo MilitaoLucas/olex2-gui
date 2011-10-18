@@ -1602,7 +1602,8 @@ def GetACF():
   global _is_online
   
   phil_file = r"%s/autochem.phil" %(OV.DataDir())
-  olx.phil_handler.merge_param_file(phil_file)
+  if os.path.exists(phil_file):
+    olx.phil_handler.merge_param_file(phil_file)
   
   no_update = False
   print "Starting ODAC..."
