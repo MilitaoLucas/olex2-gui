@@ -44,7 +44,7 @@ gui
       .type = str
     logo_name= None
       .type = path
-    logo_is_colourised = True
+    logo_is_colourised = False
       .type = bool
     size_factor = 1.0
       .type = float
@@ -209,6 +209,8 @@ gui
         .type = str
       off_L = 0.9
         .type = float
+      width_adjust = 28
+        .type = int
     }
 
     g4{
@@ -324,13 +326,13 @@ gui
       hover_L = 1.0
         .type = float
 
-      vline = 22
+      vline = 24
         .type = int
       dot_size = 4
         .type = int
       dot_pad = 4
         .type = int
-      dot_left = 2
+      dot_left = 3
         .type = int
       dot_colour_off = #dedede
         .type = colour
@@ -454,7 +456,7 @@ gui
     }
 
     h3{
-      height = 17
+      height = 19
         .type = int
       base_colour = #aaaaaa
         .type = colour
