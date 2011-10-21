@@ -674,9 +674,10 @@ def weightGuiDisplay():
     html_scheme = current_weight
 
   d = {'ctrl_name':'SET_SNUM_REFINEMENT_UPDATE_WEIGHT',
-       'checked':'$spy.GetParam(snum.refinement.update_weight)',
-       'oncheck':'spy.SetParam(snum.refinement.update_weight,true)',
-       'onuncheck':'spy.SetParam(snum.refinement.update_weight,false)',
+       'checked':OV.GetParam('snum.refinement.update_weight'),
+       'oncheck':'spy.SetParam(snum.refinement.update_weight)',
+       'onuncheck':'spy.SetParam(snum.refinement.update_weight)',
+       'bgcolor':'spy.GetParam(gui.html.table_firstcol_colour)',
        'value':'',
        }
   box = htmlTools.make_tick_box_input(d)

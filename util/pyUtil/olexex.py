@@ -1601,7 +1601,7 @@ OV.registerFunction(updateACF)
 def GetACF():
   global _is_online
   
-  phil_file = r"%s/autochem.phil" %(OV.DataDir())
+  phil_file = r"%s/odac_debug.phil" %(OV.DataDir())
   if os.path.exists(phil_file):
     olx.phil_handler.merge_param_file(phil_file)
   
