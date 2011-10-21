@@ -884,7 +884,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       verify_symmetry=False
       ).all()
     i = 0
-    olx.Kill('$Q -au')
+    olx.Kill('$Q')
     for xyz, height in izip(peaks.sites(), peaks.heights()):
       if i < 3:
         if self.verbose: print "Position of peak %s = %s, Height = %s" %(i, xyz, height)
@@ -894,13 +894,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
         i = i+1
       if i == 100 or i >= max_peaks:
         break
-    basis = olx.gl.Basis()
-    frozen = olx.Freeze(True)
+    if OV.HasGUI():
+      basis = olx.gl.Basis()
+      frozen = olx.Freeze(True)
     olx.xf.EndUpdate()
     olx.Compaq('-q')
-    olx.gl.Basis(basis)
-    olx.Freeze(frozen)
-    OV.Refresh()
+    if OV.HasGUI():
+      olx.gl.Basis(basis)
+      olx.Freeze(frozen)
+      OV.Refresh()
 
   def show_summary(self, log=None):
     import sys
@@ -929,10 +931,23 @@ class FullMatrixRefine(OlexCctbxAdapter):
             twin.twin_law.as_hkl(), twin.value, math.sqrt(standard_uncertainties[i]))
     print >> log
     print >> log, "Disagreeable reflections:"
-    self.normal_eqns.observations.fo_sq\
+    
+    fo2 = self.normal_eqns.observations.fo_sq\
       .customized_copy(sigmas=flex.sqrt(1/self.normal_eqns.weights))\
-      .apply_scaling(factor=1/self.normal_eqns.scale_factor())\
-      .show_disagreeable_reflections(self.normal_eqns.fc_sq, out=log)
+      .apply_scaling(factor=1/self.normal_eqns.scale_factor())
+    
+    result = fo2.show_disagreeable_reflections(self.normal_eqns.fc_sq, out=log)
+    result = fo2.disagreeable_reflections(self.normal_eqns.fc_sq)
+    out = sys.stdout
+    print >> out, "  h   k   l       Fo^2      Fc^2   |Fo^2-Fc^2|/sig(F^2)   Fc/max(Fc)  d spacing(A)"
+    for i in range(result.fo_sq.size()):
+      print >> out, "%3i %3i %3i" %result.indices[i],
+      print >> out, " %9.2f %9.2f        %9.2f         %9.2f     %9.2f" %(
+        result.fo_sq.data()[i], result.fc_sq.data()[i],
+        result.delta_f_sq_over_sigma[i],
+        result.fc_over_fc_max[i], result.d_spacings[i])
+
+    
 
 
 def rt_mx_from_olx(olx_input):

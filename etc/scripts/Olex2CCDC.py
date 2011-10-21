@@ -87,7 +87,7 @@ class CcdcSubmit():
 
   def make_pop_box(self):
     OV.makeGeneralHtmlPop('olex2.ccdc.pop')
-    res = olx.html_ShowModal('ccdc')
+    res = olx.html.ShowModal('ccdc')
     return int(res)
 
   def re_refine(self):
@@ -117,10 +117,10 @@ class CcdcSubmit():
   def check_files(self):
     cif_name =  OV.GetParam('snum.current_result.cif')
     if not cif_name:
-      cif_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'cif'))
+      cif_name = os.path.normpath(olx.file.ChangeExt(OV.FileFull(),'cif'))
     fcf_name =  OV.GetParam('snum.current_result.fcf')
     if not fcf_name:
-      fcf_name = os.path.normpath(olx.file_ChangeExt(OV.FileFull(),'fcf'))
+      fcf_name = os.path.normpath(olx.file.ChangeExt(OV.FileFull(),'fcf'))
     if not os.path.exists(cif_name):
       cif_name = "+++ PLEASE SELECT A CIF FILE +++"
     if not os.path.exists(fcf_name):

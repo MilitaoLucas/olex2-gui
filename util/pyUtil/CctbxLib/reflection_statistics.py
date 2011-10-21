@@ -53,18 +53,16 @@ class OlexCctbxReflectionStats(OlexCctbxAdapter):
       import iotbx.command_line.reflection_statistics
       import sys
       saveout = sys.stdout
-      wFile = open(OV.FilePath() + '/tmp.htm','w')
-      sys.stdout = wFile
-      
+      from cStringIO import StringIO
+      s = StringIO()
+      sys.stdout = s
       self.cctbx_stats = iotbx.command_line.reflection_statistics.array_cache(self.reflections.f_obs, 10, 3)
       #self.cctbx_stats.show_completeness()
       sys.stdout = saveout
-      wFile.close()
       
-      rFile = open(OV.FilePath() + '/tmp.htm','r')
-      wFile = open(OV.FilePath() + '/reflection-stats-summary.htm','w')
-      lines = rFile.readlines()
-      rFile.close()
+      wFile = open(OV.StrDir() + '/reflection-stats-summary.htm','w')
+      s.seek(0)
+      lines = s.readlines()
       for line in lines:
         wFile.write(line + "<br>")
       wFile.close()

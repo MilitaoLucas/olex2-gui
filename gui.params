@@ -103,9 +103,9 @@ gui
       .type = colour
     table_bg_colour = #eaeaea
       .type = colour
-    table_firstcol_colour = #e1e1e1
+    table_firstcol_colour = #dedede
       .type = colour
-    table_firstcol_width = 8
+    table_firstcol_width = 30
       .type = int
     MainToolbarTabButtonActive = None
       .type = str
@@ -209,37 +209,8 @@ gui
         .type = str
       off_L = 0.9
         .type = float
-      width_adjust = 28
+      width_adjust = 6
         .type = int
-    }
-
-    g4{
-      base_colour = #205c90
-        .type = colour
-      grad_colour = #205c90
-        .type = colour
-      grad_step = 0.1
-        .type = float
-      font_colour = #ffffff
-        .type = colour
-      font_name = Vera Bold
-        .type = str
-      height = 26
-        .type = int
-      corner_rad = 3
-        .type = int
-      font_size = 20
-        .type = int
-      top = 0
-        .type = int
-      left = 3
-        .type = int
-      rounded = "1111"
-        .type = str
-      arrows = "bar:top:2"
-        .type = str
-      off_L = 0.9
-        .type = float
     }
     
     tab{

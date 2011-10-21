@@ -2606,6 +2606,12 @@ class HealthOfStructure():
     return True
 
   def get_cctbx_completeness(self):
+    from cctbx_olex_adapter import OlexCctbxAdapter
+    OCA = OlexCctbxAdapter()
+    f_sq_obs = OCA.reflections.f_sq_obs_filtered
+    return f_sq_obs.completeness()
+  
+  def get_cctbx_reflection_statistics_html(self):
     from reflection_statistics import OlexCctbxReflectionStats
     self.stats = OlexCctbxReflectionStats()
     value = self.stats.cctbx_stats.observations.completeness()

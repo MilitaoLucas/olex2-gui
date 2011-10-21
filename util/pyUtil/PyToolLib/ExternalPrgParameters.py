@@ -244,7 +244,7 @@ class Method_solution(Method):
     if RunPrgObject.HasGUI:
       #olx.ShowQ('a true')
       #olx.ShowQ('b true')
-      #olx.Compaq('-a')
+      olx.Compaq('-a')
       olx.ShowStr("true")
     self.auto = True
 
@@ -614,6 +614,12 @@ class Method_cctbx_ChargeFlip(Method_solution):
     file = r"%s/%s.res" %(olx.FilePath(), RunPrgObject.fileName)
     olx.xf.SaveSolution(file)
     olx.Atreap(file)
+    
+class Method_Superflip(Method_solution):
+
+  def run(self, RunPrgObject):
+    from flipsmall import flipsmall
+    flipsmall()
 
 class Method_SIR(Method_solution):
 
@@ -687,14 +693,30 @@ class Method_SIR(Method_solution):
         print 'Starting without GUI'
 
     if oxs.write(filename, data, inv, phase):
+        resfile = r"%s/%s.res" %(olx.FilePath(), OV.FileName())
+        if os.path.exists(resfile):
+          os.remove(resfile)
         oxs.Exec(sirfile, sirversion)
         OV.DeleteBitmap('solve')
-        file = r"'%s/%s.res'" %(olx.FilePath(), OV.FileName())
-        olx.Atreap(file)
+        if not os.path.exists(resfile):
+          self.sort_out_sir2011_res_file()
+#        olx.Atreap(resfile) #No need to reap, it will be reaped anyway!
     else:
         print 'No *.sir File!'
 
+  def sort_out_sir2011_res_file(self):
+    import glob
+    import shutil
+    g = glob.glob(r"%s/*.%s" %(OV.FilePath(), "res"))
+    for item in g:
+      f = item.split(".res")[0]
+      f = "%s.res" %f[:-3]
+      shutil.copyfile(item, f)
+      os.remove(item)
+    
+
 def defineExternalPrograms():
+  
   # define solution methods
 
   direct_methods = Method_shelx_direct_methods(direct_methods_phil)
@@ -703,7 +725,10 @@ def defineExternalPrograms():
   charge_flipping = Method_cctbx_ChargeFlip(charge_flipping_phil)
   sir2008_dm = Method_SIR(sir_dm_phil)
   sir2008_patt = Method_SIR(sir_patt_phil)
-
+  sir2011_dm = Method_SIR(sir_dm_phil)
+  sir2011_patt = Method_SIR(sir_patt_phil)
+  superflip_cf = Method_Superflip(superflip_cf_phil)
+  
   # define refinement methods
   least_squares = Method_shelx_refinement(least_squares_phil)
   cgls = Method_shelx_refinement(cgls_phil)
@@ -753,7 +778,22 @@ def defineExternalPrograms():
     reference="J. Appl. Cryst. (2007). 40, 609-613",
     versions = '2008',
     execs=["sir2008.exe", "sir2008"])
+  SIR2011 = Program(
+    name='SIR2011',
+    program_type='solution',
+    author="Maria C. Burla, Rocco Caliandro, Mercedes Camalli, Benedetta Carrozzini, Giovanni Luca Cascarano, Liberato De Caro, Carmelo Giacovazzo, Giampiero Polidori, Dritan Siliqi, Riccardo Spagna",
+    reference="J. Appl. Cryst. (2007). 40, 609-613",
+    versions = '2011',
+    execs=["sir2011.exe", "sir2011"])
+  Superflip = Program(
+    name='Superflip',
+    program_type='solution',
+    author="TBS",
+    reference="TBS",
+    versions = '',
+    execs=["superflip.exe"])
 
+  
   ShelXS.addMethod(direct_methods)
   ShelXS.addMethod(patterson)
   ShelXS86.addMethod(direct_methods)
@@ -765,6 +805,9 @@ def defineExternalPrograms():
   smtbx_solve.addMethod(charge_flipping)
   SIR2008.addMethod(sir2008_dm)
   SIR2008.addMethod(sir2008_patt)
+  SIR2011.addMethod(sir2011_dm)
+  SIR2011.addMethod(sir2011_patt)
+  Superflip.addMethod(superflip_cf)
 
   # define refinement programs
   ShelXL = Program(
@@ -816,7 +859,7 @@ def defineExternalPrograms():
   smtbx_refine.addMethod(levenberg_marquardt)
 
   SPD = ExternalProgramDictionary()
-  for prg in (ShelXS, ShelXS86, XS, ShelXD, XM, smtbx_solve, SIR2008):
+  for prg in (ShelXS, ShelXS86, XS, ShelXD, XM, smtbx_solve, SIR2008, SIR2011, Superflip):
     SPD.addProgram(prg)
 
   RPD = ExternalProgramDictionary()
@@ -849,6 +892,8 @@ def getFormulaAsDict(formula):
       print >> sys.stderr, "An error occured in the function getFormulaAsDict.\nFormula: %s, item: %s" %(formula, item)
       sys.stderr.formatExceptionInfo()
   return d
+
+
 
 sir_dm_phil = phil_interface.parse("""
 name = 'Direct Methods'
@@ -1358,6 +1403,14 @@ instructions {
   #{'name':'PREJ', 'values':['max:3', 'dsp:-0.01', 'mf:1']},
   #{'name':'SEED', 'values':['nrand:0',]},
   #{'name':'MOVE', 'values':['dx:0', 'dy:0', 'dz:0', 'sign:1']},
+
+  
+superflip_cf_phil = phil_interface.parse("""
+name = 'Charge Flipping'
+  .type=str
+atom_sites_solution=other
+  .type=str
+""")
 
 charge_flipping_phil = phil_interface.parse("""
 name = 'Charge Flipping'
