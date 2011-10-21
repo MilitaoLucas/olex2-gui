@@ -422,6 +422,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
       f_calc, shift, cc_peak_height = solving.f_calc_solutions[0]
       fft_map = f_calc.fft_map(
         symmetry_flags=maptbx.use_space_group_symmetry)
+      fft_map.apply_volume_scaling()
       # search and print Fourier peaks
       peaks = fft_map.peak_search(
         parameters=maptbx.peak_search_parameters(
@@ -440,10 +441,10 @@ class OlexCctbxSolve(OlexCctbxAdapter):
     return have_solution
 
   def post_single_peak(self, xyz, height, cutoff=1.0):
-    if height/self.peak_normaliser < cutoff:
-      return
-    sp = (height/self.peak_normaliser)
-
+#    if height/self.peak_normaliser < cutoff:
+#      return
+#    sp = (height/self.peak_normaliser)
+    sp = height #hp
     id = olx.xf.au.NewAtom("%.2f" %(sp), *xyz)
     if id != '-1':
       olx.xf.au.SetAtomU(id, "0.06")

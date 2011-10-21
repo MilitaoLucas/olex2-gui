@@ -45,7 +45,7 @@ snum
   solution
     .short_caption = Structure Solution
     {
-    program = ShelXS ShelXS86 XS 'olex2.solve' XM ShelXD SIR2008
+    program = ShelXS ShelXS86 XS 'olex2.solve' XM ShelXD SIR2008 SIR2011 Superflip
       .type = choice
     method = 'Dual Space' 'Charge Flipping' 'Direct Methods' 'Patterson Method'
       .type = choice

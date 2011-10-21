@@ -275,11 +275,11 @@ class ImageTools(FontInstances):
       im = Image.open(path)
       if colourize:
         im = self.colourize(im, (0,0,0), OV.GetParam('gui.logo_colour'))
-      width = int(width) - 47
+      width = int(width) - 60
       factor = im.size[0]/width
       height = int(im.size[1] / factor)
       im = self.resize_image(im, (width, height))
-      name = name.split(".")[0]
+      name = name[:-4]
       OlexVFS.save_image_to_olex(im, name, 2)
     else:
       pass
@@ -985,7 +985,8 @@ class ImageTools(FontInstances):
 #      image.paste(IM, box)
 
   def resize_news_image(self):
-    self.resize_to_panelwidth({'i':'news/news.png'})
+    tag = OV.GetTag().split('-')[0]
+    self.resize_to_panelwidth({'i':'news/news-%s.png' %tag})
 
   def make_simple_text_to_image(self, width, height, txt, font_name='Vera', font_size=16, bg_colour='#fff6bf', font_colour='#222222'):
     IM = Image.new('RGB', (width, height), bg_colour)
