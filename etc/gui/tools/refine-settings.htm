@@ -1,0 +1,151 @@
+<font color=$spy.GetParam(gui.html.font_colour) size=$spy.GetParam(gui.html.font_size) face=$spy.GetParam(gui.html.font_name)>
+
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+
+<tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_PROGRAM'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Refinement-Program;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td width='50%' VALIGN='center' colspan=2>
+    <b>Refinement Program</b>
+  </td>
+  <td VALIGN='center' colspan=2 align="right">
+<!-- #include program gui\snippets\snippet-program.htm;scope=snum;prg_type=refinement;1; -->
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
+
+<tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_METHOD'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Refinement-Method;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td width='50%' align='left' colspan=2>
+    <b>Refinement Method</b>
+  </td>
+  <td VALIGN='center' colspan='2' align="right">
+<!-- #include method gui\snippets\snippet-method.htm;scope=snum;prg_type=refinement;1; -->
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
+
+<tr VALIGN='center' ALIGN='left' NAME='SET_REFLECTIONS'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Set-Reflection-File;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td width='50%' VALIGN='center' colspan='2'>
+    <b>%Reflection File%</b>
+  </td>
+  <td width='50%' VALIGN='center' ALIGN='right' colspan='2'>
+<!-- #include tool-footer gui\snippets\snippet-reflection-file.htm;1; -->
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
+
+<tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_MAX_CYCLES'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Refinement-Max-Cycles;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td VALIGN='center' colspan=3>
+    <b>Maximum Refinement Iterations</b>
+  </td>
+  <td VALIGN='center' ALIGN='right' colspan=1>
+      <input
+        type='spin'
+        width="50"
+        height="$spy.GetParam(gui.html.spin_height)"
+        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+        name='SET_SNUM_REFINEMENT_MAX_CYCLES'
+        value='$spy.GetParam(snum.refinement.max_cycles)'
+        onchange="spy.SetMaxCycles(GetValue(SET_SNUM_REFINEMENT_MAX_CYCLES))"
+      >
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
+
+<tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_MAX_PEAKS'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Refinement-Max-Peaks;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td VALIGN='center' colspan=3>
+    <b>Number of Residual Peaks</b>
+  </td>
+  <td VALIGN='right' ALIGN='right' colspan=1>
+      <input
+        type="spin"
+        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+        name="SET_SNUM_REFINEMENT_MAX_PEAKS"
+        width="50"
+        height="$spy.GetParam(gui.html.spin_height)"
+        max='1000'
+        value='$eval(abs\(spy.GetParam(snum.refinement.max_peaks)))'
+        onchange='spy.SetMaxPeaks(GetValue(SET_SNUM_REFINEMENT_MAX_PEAKS))'
+      >
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
+
+<tr VALIGN='center' ALIGN='left' NAME='SNUM_WEIGHTING_SCHEME'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Weighting-Scheme;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td VALIGN='center' colspan=3>
+$spy.weightGuiDisplay()
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+<tr VALIGN="center" ALIGN="left" NAME="USE_SOLVENT_MASK">
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=refinement-masks;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td VALIGN="center"  colspan=3>
+    <b>
+      Use solvent mask
+    </b>
+  </td>
+  <td VALIGN="center" ALIGN="right"  colspan=1>
+      <input
+        type="checkbox"
+        width="$spy.GetParam(gui.html.checkbox_width)"
+        height="$spy.GetParam(gui.html.checkbox_height)"
+        fgcolor="$spy.GetParam(gui.html.font_colour)"
+        bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"
+        name="SNUM_REFINEMENT_USE_SOLVENT_MASK"
+        checked="$spy.GetParam(snum.refinement.use_solvent_mask)"
+        oncheck="spy.SetParam(snum.refinement.use_solvent_mask,true)"
+        onuncheck="spy.SetParam(snum.refinement.use_solvent_mask,false)"
+        value=""
+      >
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
+
+<tr VALIGN="center" ALIGN="left" NAME="RECOMPUTE_MASK_BEFORE_REFINEMENT" >
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Recompute-Solvent-Mask;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td VALIGN="center"  colspan=3>
+    <b>
+      Recompute mask before refinement
+    </b>
+  </td>
+  <td VALIGN="center" ALIGN="right"  colspan=1>
+      <input
+        type="checkbox"
+        width="$spy.GetParam(gui.html.checkbox_width)"
+        height="$spy.GetParam(gui.html.checkbox_height)"
+        fgcolor="$spy.GetParam(gui.html.font_colour)"
+        bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"
+        name="SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT"
+        checked="$spy.GetParam(snum.refinement.recompute_mask_before_refinement)"
+        oncheck="
+spy.SetParam(snum.refinement.use_solvent_mask,true)>>
+spy.SetParam(snum.refinement.recompute_mask_before_refinement,true)>>
+html.Update"
+        onuncheck="spy.SetParam(snum.refinement.recompute_mask_before_refinement,false)"
+        value=""
+      >
+  </td>
+</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</table>
+
+
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+
+<!-- #includeif fs.Exists(refinement-settings-h3-refinement-settings-extra.htm) refinement-settings-h3-refinement-settings-extra refinement-settings-h3-refinement-settings-extra.htm;gui\blocks\tool-h3-off.htm;image=refinement-settings-h3-refinement-settings-extra;colspan=4;onclick=;onclick=;2; -->
+<!-- #includeif fs.Exists(refinement_image.htm) refinement_image refinement_image.htm;1; -->
+</font>
+</table>
