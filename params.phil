@@ -7,7 +7,18 @@ snum
   .short_caption = Current Structure
   .caption = Settings that are saved with each structure
   {
-
+  current_process = ""
+    .type = str
+  current_process_details = ""
+    .type = str
+  current_process_status = ""
+    .type = str
+  current_process_diagnostics = ""
+    .type = str
+  current_r1 = 0
+    .type = float
+  
+    
   init
     .short_caption = Other Things
     .expert_level = 1
@@ -31,6 +42,14 @@ snum
       .type = path
   }
 
+  data{
+    completeness_full = 0
+      .type = float
+    fcf = None
+      .type = path
+  }
+
+
   smtbx
     .short_caption = Solution & Refinement
     {
@@ -45,6 +64,8 @@ snum
   solution
     .short_caption = Structure Solution
     {
+    vss = 0
+      .type = float
     program = ShelXS ShelXS86 XS 'olex2.solve' XM ShelXD SIR2008 SIR2011 Superflip
       .type = choice
     method = 'Dual Space' 'Charge Flipping' 'Direct Methods' 'Patterson Method'
@@ -62,6 +83,12 @@ snum
   refinement
     .short_caption = Structure Refinement
     {
+    ata = 0
+      .type = float
+    max_shift_site = None
+      .type = float
+    max_shift_u = None      
+      .type = float
     last_R1 = n/a
       .type = str
       .expert_level = 2

@@ -15,9 +15,9 @@ gui
     .type = str
   purple = #a245a2
     .type = colour
-  red = #aa0000
+  red = #b40000
     .type = colour
-  green = #00aa00
+  green = #00b400
     .type = colour
   blue = #0033ff
     .type = colour
@@ -34,6 +34,39 @@ gui
     negative_surface_material = '245;3628089472;3632300160;1.000,1.000,1.000,0.500;1.000,1.000,1.000,1.000;36;366'
       .type = str
   }
+  css{
+    h1{
+      font_size = 24
+        .type = int
+      font_name = Arial
+        .type = str
+      color = #ffffff
+        .type = colour
+      line_height = 26
+        .type = int
+    }
+    
+    h2{
+      font_size = 12
+        .type = int
+      font_name = Arial
+        .type = str
+      color = #ffffff
+        .type = colour
+      line_height = 14
+        .type = int
+    }
+    big{
+      font_size = 30
+        .type = int
+      font_name = Arial Bold
+        .type = str
+      color = #ffffff
+        .type = colour
+      line_height = 32
+        .type = int
+    }
+  }
 
   skin {
     materials_have_been_set = False
@@ -44,7 +77,7 @@ gui
       .type = str
     logo_name= None
       .type = path
-    logo_is_colourised = False
+    logo_is_colourised = True
       .type = bool
     size_factor = 1.0
       .type = float
@@ -182,36 +215,6 @@ gui
         .type = str
     }
     
-    g4{
-      base_colour = #205c90
-        .type = colour
-      grad_colour = #205c90
-        .type = colour
-      grad_step = 0.1
-        .type = float
-      font_colour = #ffffff
-        .type = colour
-      font_name = Vera Bold
-        .type = str
-      height = 26
-        .type = int
-      corner_rad = 3
-        .type = int
-      font_size = 20
-        .type = int
-      top = 0
-        .type = int
-      left = 3
-        .type = int
-      rounded = "1111"
-        .type = str
-      arrows = "bar:top:2"
-        .type = str
-      off_L = 0.9
-        .type = float
-      width_adjust = 6
-        .type = int
-    }
     
     tab{
       base_colour = #aaaaaa

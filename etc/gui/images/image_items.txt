@@ -108,8 +108,9 @@
   Create a Report of this Structure
 
 [G4 BUTTON]
+  Data
   Auto
   Solve
   Refine
   Report
-  Images
+  Image
