@@ -916,6 +916,29 @@ class FullMatrixRefine(OlexCctbxAdapter):
     print >> log, "Difference map: max=%.2f, min=%.2f" %(
       self.diff_stats.max(), self.diff_stats.min())
 
+  def get_disagreeable_reflections(self, show_in_console=False):
+    import OlexVFS
+    fo2 = self.normal_eqns.observations.fo_sq\
+      .customized_copy(sigmas=flex.sqrt(1/self.normal_eqns.weights))\
+      .apply_scaling(factor=1/self.normal_eqns.scale_factor())
+    
+    if show_in_console:
+      result = fo2.show_disagreeable_reflections(self.normal_eqns.fc_sq, out=log)
+    else:
+      result = fo2.disagreeable_reflections(self.normal_eqns.fc_sq)
+      
+    html = "<tr><b><td>h</td><td>k</td><td>l</td><td>(Fc<sup>2</sup>-Fo<sup>2</sup>)/esd</td><td>OMIT?</td></b></tr>"
+    for i in range(result.fo_sq.size()):
+      html += "<tr><td>%3i</td><td>%3i</td><td>%3i</td>" %result.indices[i]
+      val = result.delta_f_sq_over_sigma[i]
+      if val > 10:
+        _ = "<font color=%s>%s</font>" %(OV.GetParam('gui.red'), val)
+      else:
+        _ = val
+      html += "<td>%9.2f</td>" %_
+      html += "<td><a href='omit %3i %3i %3i'>omit</a></td></tr>" %result.indices[i]
+    OlexVFS.write_to_olex('badrefs.htm',html)
+
   def show_comprehensive_summary(self, log=None):
     import sys
     if log is None: log = sys.stdout
@@ -931,23 +954,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
             twin.twin_law.as_hkl(), twin.value, math.sqrt(standard_uncertainties[i]))
     print >> log
     print >> log, "Disagreeable reflections:"
-    
-    fo2 = self.normal_eqns.observations.fo_sq\
-      .customized_copy(sigmas=flex.sqrt(1/self.normal_eqns.weights))\
-      .apply_scaling(factor=1/self.normal_eqns.scale_factor())
-    
-    result = fo2.show_disagreeable_reflections(self.normal_eqns.fc_sq, out=log)
-    result = fo2.disagreeable_reflections(self.normal_eqns.fc_sq)
-    out = sys.stdout
-    print >> out, "  h   k   l       Fo^2      Fc^2   |Fo^2-Fc^2|/sig(F^2)   Fc/max(Fc)  d spacing(A)"
-    for i in range(result.fo_sq.size()):
-      print >> out, "%3i %3i %3i" %result.indices[i],
-      print >> out, " %9.2f %9.2f        %9.2f         %9.2f     %9.2f" %(
-        result.fo_sq.data()[i], result.fc_sq.data()[i],
-        result.delta_f_sq_over_sigma[i],
-        result.fc_over_fc_max[i], result.d_spacings[i])
-
-    
+    self.get_disagreeable_reflections()
 
 
 def rt_mx_from_olx(olx_input):
