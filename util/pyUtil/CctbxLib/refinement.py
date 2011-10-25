@@ -917,7 +917,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.diff_stats.max(), self.diff_stats.min())
 
   def get_disagreeable_reflections(self, show_in_console=False):
-    import OlexVFS
     fo2 = self.normal_eqns.observations.fo_sq\
       .customized_copy(sigmas=flex.sqrt(1/self.normal_eqns.weights))\
       .apply_scaling(factor=1/self.normal_eqns.scale_factor())
@@ -926,18 +925,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
       result = fo2.show_disagreeable_reflections(self.normal_eqns.fc_sq, out=log)
     else:
       result = fo2.disagreeable_reflections(self.normal_eqns.fc_sq)
-      
-    html = "<tr><b><td>h</td><td>k</td><td>l</td><td>(Fc<sup>2</sup>-Fo<sup>2</sup>)/esd</td><td>OMIT?</td></b></tr>"
+    
+    bad_refs = []
     for i in range(result.fo_sq.size()):
-      html += "<tr><td>%3i</td><td>%3i</td><td>%3i</td>" %result.indices[i]
-      val = result.delta_f_sq_over_sigma[i]
-      if val > 10:
-        _ = "<font color=%s>%s</font>" %(OV.GetParam('gui.red'), val)
-      else:
-        _ = val
-      html += "<td>%9.2f</td>" %_
-      html += "<td><a href='omit %3i %3i %3i'>omit</a></td></tr>" %result.indices[i]
-    OlexVFS.write_to_olex('badrefs.htm',html)
+      sig = math.fabs(
+        result.fo_sq.data()[i]-result.fc_sq.data()[i])/result.delta_f_sq_over_sigma[i]
+      bad_refs.append((
+        result.indices[i][0], result.indices[i][1], result.indices[i][2],
+        result.fo_sq.data()[i], result.fc_sq.data()[i], sig))
+    olex_core.SetBadReflections(bad_refs.__iter__())
 
   def show_comprehensive_summary(self, log=None):
     import sys
