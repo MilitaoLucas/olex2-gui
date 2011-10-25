@@ -2606,10 +2606,14 @@ class HealthOfStructure():
     return True
 
   def get_cctbx_completeness(self):
-    from cctbx_olex_adapter import OlexCctbxAdapter
-    OCA = OlexCctbxAdapter()
-    f_sq_obs = OCA.reflections.f_sq_obs_filtered
-    return f_sq_obs.completeness()
+    retVal = OV.GetParam('snum.data.completeness_full')
+    if not retVal:
+      from cctbx_olex_adapter import OlexCctbxAdapter
+      OCA = OlexCctbxAdapter()
+      f_sq_obs = OCA.reflections.f_sq_obs_filtered
+      retVal = f_sq_obs.completeness()
+      OV.SetParam('snum.data.completeness_full',retVal)
+    return retVal
   
   def get_cctbx_reflection_statistics_html(self):
     from reflection_statistics import OlexCctbxReflectionStats

@@ -57,6 +57,119 @@ class ImageTools(FontInstances):
     self.gui_tab_font_name = "%s Bold" %font
     self.gui_sNumTitle_font_name = "%s Bold" %font
     self.gui_button_font_name = "%s Bold" %font
+    
+    self.available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - OV.GetParam('gui.html.table_firstcol_width'))
+    self.available_width_full = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
+
+    self.css = OV.GuiParams().css
+
+
+  def drawSpaceGroupInfo(self, draw, luminosity=1.9, right_margin=12, font_name="Times Bold", font_colour=None):
+    base_colour = OV.GetParam('gui.html.base_colour').rgb
+    left_start = 120
+    if not font_colour:
+      font_colour = OV.GetParam('gui.html.font_colour').rgb
+    self.width = self.available_width_full
+    try:
+      txt_l = []
+      txt_sub = []
+      txt_norm = []
+      try:
+        txt = OV.olex_function('sg(%h)')
+      except:
+        pass
+      if not txt:
+        txt="ERROR"
+      txt = txt.replace(" 1", "")
+      txt = txt.replace(" ", "")
+      txt_l = txt.split("</sub>")
+      if len(txt_l) == 1:
+        txt_norm = [(txt,0)]
+      try:
+        font_base = "Times"
+        font_bar = self.registerFontInstance("%s Bold" %font_base, 11)
+        font_slash = self.registerFontInstance("%s Bold" %font_base, 18)
+        font_number = self.registerFontInstance("%s Bold" %font_base, 14)
+        font_letter = self.registerFontInstance("%s Bold Italic" %font_base, 15)
+        font_sub = self.registerFontInstance("%s Bold" %font_base, 10)
+        norm_kern = 2
+        sub_kern = 0
+      except:
+        font_name = "Arial"
+        font_bar = self.registerFontInstance("%s Bold" %font_base, 12)
+        font_slash = self.registerFontInstance("%s Bold" %font_base, 18)
+        font_number = self.registerFontInstance("%s Bold" %font_base, 14)
+        font_letter = self.registerFontInstance("%s Bold Italic" %font_base, 15)
+        font_norm = self.registerFontInstance(font_name, 13)
+        font_sub = self.registerFontInstance(font_name, 10)
+        norm_kern = 0
+        sub_kern = 0
+      textwidth = 0
+      for item in txt_l:
+        if item:
+          try:
+            sub = item.split("<sub>")[1]
+          except:
+            sub = ""
+          norm = item.split("<sub>")[0]
+          tw_s = (draw.textsize(sub, font=font_sub)[0]) + sub_kern
+          tw_n = (draw.textsize(norm, font=font_number)[0]) + norm_kern
+          txt_sub.append((sub, tw_s))
+          txt_norm.append((norm, tw_n))
+          textwidth += (tw_s + tw_n)
+    except:
+      txt_l = []
+    if txt_l:
+      i = 0
+      left_start =  (self.width-textwidth) - right_margin -5
+      cur_pos = left_start
+      advance = 0
+      after_kern = 0
+      for item in txt_l:
+        if item:
+          text_normal = txt_norm[i][0]
+          for character in text_normal:
+            if character == "":
+              continue
+            cur_pos += advance
+            cur_pos += after_kern
+            after_kern = 2
+            advance = 0
+            try:
+              int(character)
+              font = font_number
+              top = 0
+              after_kern = 2
+            except:
+              font = font_letter
+              top = -1
+              if character == "P" or character == "I" or character == "C":
+                norm_kern = -2
+                after_kern = 0
+                character = " %s" %character
+            if character == "-":
+              draw.text((cur_pos + 1, -10), "_", font=font_bar, fill=font_colour)
+              draw.text((cur_pos + 1, -9), "_", font=font_bar, fill=font_colour)
+              advance = -1
+              norm_kern = 0
+            elif character == "/":
+              norm_kern = 0
+              after_kern = 0
+              draw.text((cur_pos -2, -3), "/", font=font_slash, fill=font_colour)
+              advance = ((draw.textsize("/", font=font_slash)[0]) + norm_kern) - 1
+            else:
+              draw.text((cur_pos + norm_kern, top), "%s" %character, font=font, fill=font_colour)
+              advance = (draw.textsize(character, font=font)[0]) + norm_kern
+  
+          text_in_superscript = txt_sub[i][0]
+          if text_in_superscript:
+            cur_pos += advance
+            draw.text((cur_pos + sub_kern, 5), "%s" %text_in_superscript, font=font_sub, fill=font_colour)
+            advance = (draw.textsize(text_in_superscript, font=font_sub)[0]) + sub_kern
+            after_kern = -2
+            cur_pos += advance
+        i+= 1
+
 
 
   def show_image(self, IM):
@@ -372,6 +485,11 @@ class ImageTools(FontInstances):
       pass
     return IM
 
+  def make_full_width_empty_image(self, height=100, colour='#b40000'):
+    size = (self.available_width_full,height)
+    im = Image.new("RGB",size,colour)
+    draw = ImageDraw.Draw(im)
+    return im, draw
 
   def add_continue_triangles(self, draw, width, height, shift_up = 4, shift_left = 5, style=('multiple')):
     arrow_top = 8 + shift_up
@@ -448,10 +566,14 @@ class ImageTools(FontInstances):
     if colour == "gui_html_table_bg_colour":
       colour = self.params.html.table_bg_colour.rgb
     else:
-      colour = colour
+      try:
+        colour = colour.rgb
+      except:
+        colour = colour
 
-    if "#" in colour:
-      colour = ImageColor.getrgb(colour)
+    if type(colour) is str:
+      if "#" in colour:
+        colour = ImageColor.getrgb(colour)
     try:
       c = self.colorsys.rgb_to_hls(*[x/255.0 for x in colour])
     except:
@@ -645,6 +767,7 @@ class ImageTools(FontInstances):
     txt = self.txt
     font = self.get_font(font_name=self.font_name, font_size=self.font_size)
     self.font = font
+    self.font_colour = font_colour
     
     self.get_valign_font_modifications()
 
@@ -674,6 +797,11 @@ class ImageTools(FontInstances):
           wXT = 0
           t = "%s" %word
       txt_l.append(t.strip())
+    if "</p>" in txt:
+      self.txt = txt
+      self.print_html_to_draw()
+      return
+    
     elif '<br>' in txt:
       txt = txt.split('<br>')
       txt_l = txt
@@ -717,6 +845,53 @@ class ImageTools(FontInstances):
     else:
       pass
     return wX, wY
+  
+  def print_html_to_draw(self):
+    top = self.txt_top
+    left = self.txt_left
+    gap = 5
+    
+    self.txt = self.txt.strip().replace('\n','')
+    l = self.txt.split('</p>')
+    for line in l:
+      if not line:
+        continue
+      line = line.strip()
+      _ = line.split('>')
+      if 'class' in line:
+        self.css_class = _[0].strip(' ').split('class=')[1]
+        self.set_css_settings()
+      txt = ">".join(_[1:])
+      
+      if '<b>' in txt:
+        l = left
+        t = txt.split('<b>')
+        for item in t:
+          if "</b>" in item:
+            f = self.get_font("%s Bold" %self.font_name, self.font_size)
+            item = item.strip("</b>")
+          else:
+            f = self.font
+          bX, bY = self.draw.textsize(item, font=f)
+          self.draw.text((l,top), item, font=f, fill=self.font_colour)
+          l += bX
+        top += self.line_height
+
+      else:
+        wX, wY = self.draw.textsize(txt, font=self.font)
+        self.draw.text((left,top), txt, font=self.font, fill=self.font_colour)
+        top += self.line_height
+      
+  def set_css_settings(self):
+    c = OV.GetParam('gui.css.%s' %self.css_class)
+    if not c:
+      return
+    self.font_name = OV.GetParam('gui.css.%s.font_name' %self.css_class)
+    self.font_size = OV.GetParam('gui.css.%s.font_size' %self.css_class)
+    self.font_colour = OV.GetParam('gui.css.%s.color' %self.css_class).hexadecimal
+    self.get_font()
+    self.line_height = OV.GetParam('gui.css.%s.line_height' %self.css_class)
+
 
   def addTransparancy(self, im, target_colour = (255,255,255)):
     mask = im.point(lambda i : i == 0 and 0) # create RGB mask
@@ -743,7 +918,9 @@ class ImageTools(FontInstances):
     wX, wY = sizedraw_dummy_draw.textsize(txt, font=font)
     return wX, wY
 
-  def get_font(self, font_name='Vera', font_size=12):
+  def get_font(self, font_name=None, font_size=None):
+    if not font_name: font_name = self.font_name
+    if not font_size: font_size = self.font_size
     try:
       font = self.fonts[font_name]["fontInstance"].get(font_size,None)
       if not font:
@@ -755,6 +932,7 @@ class ImageTools(FontInstances):
         self.rel_adjust = self.font_peculiarities[self.font_name].get('rel_adjust',0)
     except:
       pass
+    self.font = font
     return font
 
   def make_pop_image(self, d):
