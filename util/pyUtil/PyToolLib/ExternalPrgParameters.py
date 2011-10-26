@@ -791,7 +791,7 @@ def defineExternalPrograms():
     author="TBS",
     reference="TBS",
     versions = '',
-    execs=["superflip.exe"])
+    execs=["superflip.exe", "superflip"])
 
   
   ShelXS.addMethod(direct_methods)
