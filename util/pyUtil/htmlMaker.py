@@ -675,8 +675,8 @@ def weightGuiDisplay():
 
   d = {'ctrl_name':'SET_SNUM_REFINEMENT_UPDATE_WEIGHT',
        'checked':OV.GetParam('snum.refinement.update_weight'),
-       'oncheck':'spy.SetParam(snum.refinement.update_weight)',
-       'onuncheck':'spy.SetParam(snum.refinement.update_weight)',
+       'oncheck':'spy.SetParam(snum.refinement.update_weight,true)',
+       'onuncheck':'spy.SetParam(snum.refinement.update_weight,false)',
        'bgcolor':'spy.GetParam(gui.html.table_firstcol_colour)',
        'value':'',
        }
