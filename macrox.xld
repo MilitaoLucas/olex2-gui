@@ -42,7 +42,7 @@
     \>
     <cmd
       <cmd1 XXX="silent on">
-      <cmd2 "py.Export(datadir()/olx.py)">
+      <cmd2 "py.Export(datadir()/olx)">
       <cmd3 XXX="'py.run 'basedir()/util/pyUtil/initpy.py'">
       <cmd3 "py.run 'basedir()/util/pyUtil/initpy.py'">
       <cmd4 "if IsVar(defeditor) then none else setvar(defeditor,'gedit')">
