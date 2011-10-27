@@ -27,24 +27,26 @@ def getOlex2VersionInfo():
   return txt
 
 def getDefaultPrgMethod(prgType):
-  import olexex
-  defaultPrg = '?'
-  defaultMethod = '?'
+#  import olexex
+#  defaultPrg = '?'
+#  defaultMethod = '?'
   if prgType == 'Refinement':
-    availablePrgs = olexex.get_refinement_programs().split(';')
-    prgList = ('XL', 'ShelXL', 'olex2.refine', 'XH', 'ShelXH')
-    prgDict = olexex.RPD
+    return OV.GetParam('snum.refinement.default_program'), OV.GetParam('snum.refinement.default_method'), 
+#    availablePrgs = olexex.get_refinement_programs().split(';')
+#    prgList = ('olex2.refine', 'XL', 'ShelXL', 'XH', 'ShelXH')
+#    prgDict = olexex.RPD
   elif prgType == 'Solution':
-    availablePrgs = olexex.get_solution_programs().split(';')
-    prgList = ('XS', 'ShelXS', 'olex2.solve', 'XM', 'ShelXD')
-    prgDict = olexex.SPD
-  for prg in prgList:
-    if prg in availablePrgs:
-      defaultPrg = prg
-      program = prgDict.programs[prg]
-      defaultMethod = olexex.sortDefaultMethod(program)
-      break
-  return defaultPrg, defaultMethod
+    return OV.GetParam('snum.solution.default_program'), OV.GetParam('snum.solution.default_method'), 
+#    availablePrgs = olexex.get_solution_programs().split(';')
+#    prgList = ('olex2.solve', 'XS', 'ShelXS',  'XM', 'ShelXD')
+#    prgDict = olexex.SPD
+#  for prg in prgList:
+#    if prg in availablePrgs:
+#      defaultPrg = prg
+#      program = prgDict.programs[prg]
+#      defaultMethod = olexex.sortDefaultMethod(program)
+#      break
+#  return defaultPrg, defaultMethod
 
 def Pickle(item,path):
   if "none/.olex" in path:
