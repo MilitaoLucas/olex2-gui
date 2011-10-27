@@ -61,7 +61,11 @@ class olex2_normal_eqns(least_squares.crystallographic_ls):
       self.reparametrisation.n_independents)
     print >> log, "GooF = %.4f" %(self.goof(),)
     max_shift_site = self.max_shift_site()
+    OV.SetParam('snum.refinement.max_shift_site', max_shift_site[0])
+    OV.SetParam('snum.refinement.max_shift_site_atom', max_shift_site[1].label)
     max_shift_u = self.max_shift_u()
+    OV.SetParam('snum.refinement.max_shift_u', max_shift_u[0])
+    OV.SetParam('snum.refinement.max_shift_u_atom', max_shift_u[1].label)
     print >> log, "Max shift site: %.4f A for %s" %(
       max_shift_site[0], max_shift_site[1].label)
     print >> log, "Max dU: %.4f for %s" %(max_shift_u[0], max_shift_u[1].label)
@@ -915,6 +919,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.normal_eqns.wR2(), self.normal_eqns.goof())
     print >> log, "Difference map: max=%.2f, min=%.2f" %(
       self.diff_stats.max(), self.diff_stats.min())
+    OV.SetParam('snum.refinement.max_peak', self.diff_stats.max())
 
   def get_disagreeable_reflections(self, show_in_console=False):
     fo2 = self.normal_eqns.observations.fo_sq\

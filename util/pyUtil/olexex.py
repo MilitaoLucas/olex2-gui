@@ -1723,12 +1723,15 @@ OV.registerFunction(runODAC)
 
 def settings_tree():
   l = []
+  added = []
   handlers = [olx.phil_handler, olx.gui_phil_handler]
   for handler in handlers:
     raw_l = handler.get_root_scope_names()
     for item in raw_l:
       s = handler.get_scope_by_name(item)
-      l.append("%s (%s)\n%s\n" %(item, s.short_caption, item))
+      if item not in added:
+        l.append("%s (%s)\n%s\n" %(item, s.short_caption, item))
+        added.append(item)
       for tem in s.objects:
         if tem.is_scope:
           l.append("\t%s (%s)\n%s.%s\n" %(tem.name, tem.short_caption, item, tem.name))
