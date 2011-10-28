@@ -55,17 +55,17 @@ def makeProgramSettingsGUI(program, method, prgtype):
 
   txt += r'''
 <tr>
-  <td valign="center" width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td valign="center" width="%s" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
   <td colspan="%s">
     %s - %s
   </td>
 </tr>
 <tr>
-  <td valign="center" width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td valign="center" width='$spy.GetParam(gui.html.table_firstcol_width)' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
   %s
 </tr>
 </table>
-''' %(max_colspan, authors, reference, method.extraHtml())
+''' %(OV.GetParam('gui.html.table_firstcol_width'),max_colspan, authors, reference, method.extraHtml())
   
   OlexVFS.write_to_olex(wFilePath, txt)
   return
@@ -73,6 +73,7 @@ def makeProgramSettingsGUI(program, method, prgtype):
 def makeArgumentsHTML(program, method, instruction):
   txt = '<tr>'
   first_col = htmlTools.make_table_first_col()
+  first_col_width = OV.GetParam('gui.html.table_firstcol_width')
   txt += first_col
   if instruction.caption is not None:
     argName = instruction.caption
@@ -95,7 +96,7 @@ def makeArgumentsHTML(program, method, instruction):
   else:
     tick_box_html = ''
   txt += '''
-  <td colspan=5 valign='center' bgcolor='$spy.GetParam(gui.html.table_firstcol_colour)'>
+  <td colspan=5 width='%s' valign='center' bgcolor='$spy.GetParam(gui.html.table_firstcol_colour)'>
     <b>%s</b> %s
   </td>
   <td valign='center' align='right' bgcolor='$spy.GetParam(gui.html.table_firstcol_colour)'>
@@ -104,7 +105,7 @@ def makeArgumentsHTML(program, method, instruction):
 </tr>
 <tr>
 %s
-''' %(argName, help, tick_box_html, first_col)
+''' %(first_col_width, argName, help, tick_box_html, first_col)
 
   options_gui = []
   count = 0

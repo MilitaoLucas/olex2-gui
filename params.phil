@@ -102,6 +102,10 @@ snum
       .type = str
     max_peak = None      
       .type = float
+    has_h = False
+      .type = bool
+    is_anis = False
+      .type = bool
     last_R1 = n/a
       .type = str
       .expert_level = 2
