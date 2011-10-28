@@ -217,7 +217,7 @@ class ImageTools(FontInstances):
 
   def centre_text(self, draw, txt, font, maxWidth):
     txt_size = draw.textsize(txt, font=font)
-    hStart = int((maxWidth - txt_size[0])/2)
+    hStart = self.txt_left + int((maxWidth - txt_size[0])/2)
     return hStart
 
   def align_text(self, draw, txt, font, maxWidth, align):
