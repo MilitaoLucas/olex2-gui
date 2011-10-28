@@ -1878,7 +1878,9 @@ class CompletenessPlot(Analysis):
     metadata.setdefault("y_label", OV.TranslatePhrase("Shell Completeness"))
     metadata.setdefault("x_label", params.resolution_as)
     self.metadata = metadata
-    self.data.setdefault('dataset1', Dataset(xy_plot.x,[i*100 for i in xy_plot.y],metadata=metadata))
+    x = [xy_plot.x[i] for i in range(len(xy_plot.y)) if xy_plot.y[i] is not None]
+    y = [xy_plot.y[i]*100 for i in range(len(xy_plot.y)) if xy_plot.y[i] is not None]
+    self.data.setdefault('dataset1', Dataset(x, y, metadata=metadata))
 
 class SystematicAbsencesPlot(Analysis):
   def __init__(self):
