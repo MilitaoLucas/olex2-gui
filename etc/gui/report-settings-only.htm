@@ -101,7 +101,7 @@ $spy.MakeHoverButton(button-get_ccdc_number,spy.ccdc_submit\())
       valign='center'
       onchange="spy.SetParam(user.report_template,GetValue(~name~))"
     > &nbsp;
-$spy.MakeHoverButton(toolbar_small-open,exec -o getvar\(defexplorer) 'file.ospath\(basedir\()/etc/CIF/styles)')
+$spy.MakeHoverButton(toolbar_small-open,shell 'file.ospath\(basedir\()/etc/CIF/styles)')
 
     </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
