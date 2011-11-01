@@ -42,6 +42,37 @@ snum
       .type = path
   }
 
+  selection{
+    scope{
+      latest = ""
+        .type = str
+      model{
+        is_chosen = True
+          .type = bool
+        }
+      disorder{
+        is_chosen = True
+          .type = bool
+        }
+      geometry{
+        is_chosen = True
+          .type = bool
+        }
+      symmetry{
+        is_chosen = True
+          .type = bool
+        }
+      report{
+        is_chosen = True
+          .type = bool
+        }
+      display{
+        is_chosen = True
+          .type = bool
+        }
+     }
+  }
+
   data{
     completeness_full = 0
       .type = float
