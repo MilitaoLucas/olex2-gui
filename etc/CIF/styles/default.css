@@ -67,6 +67,12 @@ table.CifTable td.data
     white-space:nowrap;
   }
 
+table.CifTable td.leftcol
+  {
+    white-space:nowrap;
+  }
+  
+  
 table.CifTable td.decimal
   {
     tab-stops:decimal 6pt;

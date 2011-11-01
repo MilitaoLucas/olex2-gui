@@ -2229,6 +2229,15 @@ def check_for_selection(need_selection=True):
     return True
 OV.registerFunction(check_for_selection)
 
+def round_to_n_digits(f, n=2):
+  if len(f) < n:
+    return f
+  try:
+    f = float(f)
+    return "%.*f" %(int(n),f)
+  except:
+    return f
+OV.registerFunction(round_to_n_digits)
 
 def play_crystal_images():
   import time
