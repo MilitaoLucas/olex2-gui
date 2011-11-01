@@ -9,30 +9,27 @@
 
 <body lang=EN-US>
 
-<div class=Content>
-<div class=Section1>
 <div class=Title>
 <h1>%$spy.GetParam(snum.report.title)% </h1>
 %$spy.getReportImageData(w500)%
 </div>
 <p>
 
-
 <div class=Section2>
 
 <table class=CifTable>
-  <caption>
-    Table 1&nbsp;Crystal data and structure refinement for %$spy.GetParam(snum.report.title)%
-  </caption>
-  <tr>
-    <td class="leftcol">
-      Identification code
-    </td>
-    <td class="data">
-      %$spy.GetParam(snum.report.title)%
-    </td>
-  </tr>
-  <tr>
+<caption>
+  Table 1&nbsp;Crystal data and structure refinement for %$spy.GetParam(snum.report.title)%
+</caption>
+<tr>
+  <td class="leftcol">
+    Identification code
+  </td>
+  <td class="data">
+    %$spy.GetParam(snum.report.title)%
+  </td>
+</tr>
+<tr>
     <td class="leftcol">
       Empirical formula
     </td>
@@ -164,7 +161,7 @@
       F(000)
     </td>
     <td class="data">
-      %20%
+      %$spy.round_to_n_digits(%%20%%,1)%
     </td>
   </tr>
   <tr>
@@ -193,39 +190,36 @@
       %31% &le; h &le; %32%, %33% &le; k &le; %34%, %35% &le; l &le; %36%
     </td>
   </tr>
-
-
-<tr>
-  <td class="leftcol">
-  Reflections collected
-</td>
-<td class="data">
-  %29%
-</td>
-</tr>
-<tr>
-  <td class="leftcol">
-  Independent reflections
-</td>
-<td class="data">
-  %37%[R(int) =	%38%]
-</td>
-</tr>
-<tr>
-  <td class="leftcol">
-  Data/restraints/parameters
-</td>
-<td class="data">
-  %37%/%77%/%58%
-</td>
-</tr>
-
+  <tr>
+    <td class="leftcol">
+    Reflections collected
+  </td>
+  <td class="data">
+    %29%
+  </td>
+  </tr>
+  <tr>
+    <td class="leftcol">
+    Independent reflections
+  </td>
+  <td class="data">
+    %37%[R(int) =	%38%]
+  </td>
+  </tr>
+  <tr>
+    <td class="leftcol">
+    Data/restraints/parameters
+  </td>
+  <td class="data">
+    %37%/%77%/%58%
+  </td>
+  </tr>
   <tr>
     <td class="leftcol">
       Goodness-of-fit on F<sup>2</sup>
     </td>
     <td class="data">
-      %56%
+      %$spy.round_to_n_digits(%%56%%,3)%
     </td>
   </tr>
   <tr>
@@ -233,8 +227,8 @@
       Final R indexes [I&gt;=2&#963; (I)]
     </td>
     <td class="data">
-      R<sub>1</sub> = %51%, wR<sub>2</sub> =
-    %53%
+      R<sub>1</sub> = %$spy.round_to_n_digits(%%51%%,4)%, wR<sub>2</sub> =
+    %$spy.round_to_n_digits(%%53%%,4)%
     </td>
   </tr>
   <tr>
@@ -242,7 +236,7 @@
       Final R indexes [all data]
     </td>
     <td class="data">
-      R<sub>1</sub> = %52%, wR<sub>2</sub> = %54%
+      R<sub>1</sub> = %$spy.round_to_n_digits(%%52%%,4)%, wR<sub>2</sub> = %$spy.round_to_n_digits(%%54%%,4)%
     </td>
   </tr>
   <tr>
@@ -250,9 +244,9 @@
       Largest diff. peak/hole / e &Aring;<sup>-3</sup>
     </td>
     <td class="data">
-      %59%/%60%
+      %$spy.round_to_n_digits(%%59%%,2)%/%$spy.round_to_n_digits(%%60%%,2)%
     </td>
-  </tr>
   %$spy.getReportExtraCIFItems(leftcol, data)%
 </table>
 <br clear=all>
+</div>
