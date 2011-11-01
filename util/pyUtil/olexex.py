@@ -2230,11 +2230,12 @@ def check_for_selection(need_selection=True):
 OV.registerFunction(check_for_selection)
 
 def round_to_n_digits(f, n=2):
+  n = int(n)
   if len(f) < n:
     return f
   try:
     f = float(f)
-    return "%.*f" %(int(n),f)
+    return "%.*f" %(n,f)
   except:
     return f
 OV.registerFunction(round_to_n_digits)
