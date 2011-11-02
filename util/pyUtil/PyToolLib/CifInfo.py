@@ -580,7 +580,7 @@ class ExtractCifInfo(CifTools):
       temp = olx.xf.exptl.Temperature()
       if temp != 'n/a':
         temp = temp.split('(')
-        t = float(temp[0])
+        t = 273.15 + float(temp[0])
         if len(temp) > 1:
           if '.' in temp[0]:
             precision = len(temp[0].split('.')[1])
