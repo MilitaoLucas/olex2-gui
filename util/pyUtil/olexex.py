@@ -1269,10 +1269,6 @@ def getKeys(key_directory=None):
 
 
 def GetCheckcifReport(outputtype='PDF'):
-
-  
-  
-  
   output = OV.GetParam('user.cif.chckCif_output_format')
   if output:
     outputtype = output
@@ -1281,10 +1277,10 @@ def GetCheckcifReport(outputtype='PDF'):
   if not os.path.exists(file_name):
     print "\n ++ There is no cif file to check! Please add the 'ACTA' command to Shelx!"
     return
-  
+
   metacif_path = '%s/%s.metacif' %(OV.StrDir(), OV.FileName())
   OV.CifMerge(metacif_path)
-  
+
   rFile = open(file_name, 'rb')
   cif = rFile
 
@@ -1417,23 +1413,39 @@ def register_new_odac(username=None, pwd=None):
             'olex2Tag':olex2_tag,
             'computerName':computer_name,
             'username':username,
+            'context':"None",
             'macAddress':mac_address,
             }
-  f = HttpTools.make_url_call(url, values)
+  try:
+    f = HttpTools.make_url_call(url, values)
+  except Exception, err:
+    print "You may have exceeded the number of AutoChem installs."
+    print "Please contact contact xrdapplications@agilent.com for further information."
+    return
+
+  f = f.read()
 
   if not f:
     print "Please provide a valid username and password, and make sure your computer is online."
     print "You may also have used up the number of allowable installs."
     return
+
+  elif not f.endswith(".exe"):
+    print "Please provide valid username and password. If this problem persitsts, please"
+    print "contact xrdapplications@agilent.com for further information."
+    return
+
+
   p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], olex2_tag)
   p = os.path.abspath(p)
   if not os.path.exists(p):
     os.makedirs(p)
   else:
     try:
-      os.removedir(p)
-      os.makedir(p)
-    except:
+      import shutil
+      shutil.rmtree(p)
+      os.makedirs(p)
+    except Exception, err:
       print "The installer could not delete this folder: %s" %p
       print "Please remove all files in this folder manually and run the installer again."
       olex.m('exec -o explorer "%s"' %p)
@@ -1603,10 +1615,10 @@ def GetACF():
 
   else:
     debug = OV.FindValue('odac_fb', False)
-    debug = [False, True][1]
-    debug_deep1 = [False, True][1]
-    debug_deep2 = [False, True][1]
-    OV.SetVar("ac_verbose", [False, True][1])
+    debug = [False, True][0]
+    debug_deep1 = [False, True][0]
+    debug_deep2 = [False, True][0]
+    OV.SetVar("ac_verbose", [False, True][0])
 
   keyname = getKey()
 
@@ -1924,6 +1936,13 @@ def dealWithReportImage():
     OV.SetParam('snum.report.image',"%s\screenshot.png" %OV.FilePath())
 OV.registerFunction(dealWithReportImage)
 
+def dealWithReportName():
+  report_name = OV.GetParam('snum.report.name')
+  if not report_name:
+    OV.SetParam('snum.report.name',OV.FileName())
+    return
+OV.registerFunction(dealWithReportName)
+
 
 def getReportImageSrc():
   imagePath = OV.GetParam('snum.report.image')
@@ -1932,6 +1951,32 @@ def getReportImageSrc():
   else:
     return 'file:///%s' %imagePath
 OV.registerFunction(getReportImageSrc)
+
+def getReportExtraCIFItems(name_td_class, value_td_class):
+  cf_name = OV.file_ChangeExt(OV.FileFull(), 'cif')
+  rv = ''
+  if not os.path.exists(cf_name):
+    return rv
+  try:
+    import iotbx
+    fo = file(cf_name, "rUb")
+    reader = iotbx.cif.reader(file_object=fo)
+    fo.close()
+    models = []
+    for k, v in reader.model().iteritems():
+      if k.lower() != 'global':
+        models.append(v)
+    if len(models) > 1:
+      return rv
+    flack = models[0]["_refine_ls_abs_structure_Flack"]
+    if flack:
+      rv = "<tr><td class='%s'>Flack parameter</td><td class='%s'>%s</td></tr>"\
+        %(name_td_class,value_td_class,flack)
+  except Exception, err:
+    print err
+    pass
+  return rv
+OV.registerFunction(getReportExtraCIFItems)
 
 def getReportImageData(size='w400', imageName=None):
   import PIL
@@ -2075,6 +2120,106 @@ def revert_to_original():
   print("Could not revert to any original file!")
 OV.registerFunction(revert_to_original)
 
+def fade_in(speed=0):
+  speed = OV.GetParam('user.use_fader')
+  if speed == 0:
+    return
+  olex.m("fade 1 0 -%s" %speed)
+  olex.m('waitfor fade')
+  olex.m("ceiling off")
+OV.registerFunction(fade_in)
+
+def fade_out(speed=0):
+  speed = OV.GetParam('user.use_fader')
+  if speed == 0:
+    return
+  olex.m("fader.InitFG()")
+  olex.m("fader.visible(true)")
+  olex.m("fade 0 1 %s" %speed)
+  olex.m("waitfor fade")
+OV.registerFunction(fade_out)
+
+def GetImageFilename(image_type):
+  filename = OV.GetParam('snum.image.%s.name' %image_type.lower())
+  if image_type == "PS":
+    fileext = "eps"
+  elif image_type == "PR":
+    fileext = "pov"
+  else:
+    fileext = OV.GetParam('snum.image.%s.type' %image_type.lower())
+  if not filename:
+    try:
+      filename = OV.GetValue('IMAGE_%s_NAME' % image_type)
+    except:
+      filename = None
+    if not filename:
+      import gui
+      filename = gui.FileOpen("Choose Filename", "*.%s" %fileext, OV.FilePath())
+    if not filename:
+      return None, None, None
+  if filename.endswith(".%s" %fileext):
+    filefull = filename
+  else:
+    filefull = "'%s.%s'" %(filename, fileext)
+  OV.SetParam('snum.image.%s.name' %image_type.lower(),None)
+  return filefull, filename, fileext
+
+def GetBitmapImageInstructions():
+  filefull, filename, fileext = GetImageFilename(image_type = "BITMAP")
+  if not filefull:
+    return
+  filesize = OV.GetValue('IMAGE_BITMAP_SIZE')
+  
+  OV.Cursor('busy','Please Wait. Making image %s.%s. This may take some time' %(filename, fileext))
+  olex.m('pict -pq %s %s' %(filefull, filesize))
+  OV.Cursor()
+OV.registerFunction(GetBitmapImageInstructions)
+
+def GetPRImageInstructions():
+  filefull, filename, fileext = GetImageFilename(image_type = "PR")
+  if not filefull:
+    return
+  OV.Cursor('busy','Please Wait. Making image %s.%s. This may take some time' %(filename, fileext))
+  olex.m('pictPR %s' %filefull)
+  print 'Image %s made and placed in %s' %(filefull, OV.FilePath())
+  OV.Cursor()
+OV.registerFunction(GetPRImageInstructions)
+
+def GetPSImageInstructions():
+  filefull, filename, fileext = GetImageFilename(image_type = "PS")
+  if not filefull:
+    return
+  OV.Cursor('busy','Please Wait. Making image %s.%s. This may take some time' %(filename, fileext))
+  olex.m('brad %s' %OV.GetParam('snum.image.ps.bond_width'))
+  
+  colour_line = OV.GetParam('snum.image.ps.colour_line')
+  colour_bond = OV.GetParam('snum.image.ps.colour_bond')
+  colour_fill = OV.GetParam('snum.image.ps.colour_fill')
+  image_perspective = OV.GetParam('snum.image.ps.perspective')
+  lw_ellipse = str(OV.GetParam('snum.image.ps.outline_width'))
+  lw_octant = str(OV.GetParam('snum.image.ps.octant_width'))
+  lw_pie = str(OV.GetParam('snum.image.ps.pie_width'))
+  lw_font = str(OV.GetParam('snum.image.ps.font_weight'))
+  div_pie = str(OV.GetParam('snum.image.ps.octant_count'))
+  scale_hb = str(OV.GetParam('snum.image.ps.h_bond_width'))
+  
+  olex.m("pictps" + \
+         " " + filename + \
+         " " + colour_line + \
+         " " + colour_bond + \
+         " " + colour_fill + \
+         " " + "-lw_ellipse=" + lw_ellipse + \
+         " " + "-lw_octant=" + lw_octant + \
+         " " + "-lw_pie=" + lw_pie + \
+         " " + "-lw_font=" + lw_font + \
+         " " + "-div_pie=" + div_pie + \
+         " " + "-scale_hb=" + scale_hb)
+  olex.m('brad 0.8')
+  print 'Image %s made and placed in %s' %(filefull, OV.FilePath())
+  OV.Cursor()
+OV.registerFunction(GetPSImageInstructions)
+
+
 def check_for_selection(need_selection=True):
   res = haveSelection()
   if not res and need_selection:
@@ -2084,6 +2229,16 @@ def check_for_selection(need_selection=True):
     return True
 OV.registerFunction(check_for_selection)
 
+def round_to_n_digits(f, n=2):
+  n = int(n)
+  if len(f) < n:
+    return f
+  try:
+    f = float(f)
+    return "%.*f" %(n,f)
+  except:
+    return f
+OV.registerFunction(round_to_n_digits)
 
 def play_crystal_images():
   import time
@@ -2135,6 +2290,21 @@ def advance_crystal_image(direction='forward'):
     #OV.SetParam('snum.report.crystal_image',p)
     #olx.html_SetImage('CRYSTAL_IMAGE',p)
 OV.registerFunction(advance_crystal_image)
+
+def get_news_image_from_server(name=""):
+  if not name:
+    url = 'http://www.olex2.org/randomimg'
+  else:
+    url = 'http://www.olex2.org/olex2images/%s/image' %name,''
+  try:
+    image = HttpTools.make_url_call(url,'').read()
+  except Exxception, err:
+    print "Downloading image from %s has failed: %s" %(url, err)
+    return
+  if image:
+    wFile = open('%s/etc/news/news.png' %OV.BaseDir(),'wb')
+    wFile.write(image)
+OV.registerFunction(get_news_image_from_server)
 
 
 if not haveGUI:

@@ -17,8 +17,8 @@ from datetime import date
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
-active_mode = None
 last_mode = None
+last_mode_options = None
 current_tooltip_number = 0
 HaveModeBox = False
 
@@ -921,8 +921,7 @@ def makeHtmlBottomPop(args, pb_height = 50, y = 0):
 OV.registerMacro(makeHtmlBottomPop, 'txt-Text to display&;name-Name of the Bottom html popupbox')
 
 def OnModeChange(*args):
-  global active_mode
-  global last_mode
+  global last_mode, last_mode_options
   debug = OV.GetParam("olex2.debug")
   d = {
     'movesel':'button-move_near',
@@ -981,8 +980,8 @@ def OnModeChange(*args):
 
 #  mode_disp = "%s" %mode
 
-  if last_mode == active_mode:
-    mode = 'off'
+  if last_mode == active_mode and modequalifiers == last_mode_options:
+    return
 
   if not active_mode:
     active_mode = d.get(mode_disp, None)
@@ -997,6 +996,7 @@ def OnModeChange(*args):
       OV.SetImage(control,"up=%soff.png,hover=%shover.png" %(last_mode,last_mode))
     OV.cmd("html.hide pop_%s" %name)
     last_mode = None
+    last_mode_options = None
     OV.SetParam('olex2.in_mode',None)
     OV.SetParam('olex2.short_mode',None)
     OV.SetParam('olex2.full_mode',None)
@@ -1014,6 +1014,7 @@ def OnModeChange(*args):
         OV.SetImage(control,"up=%soff.png,hover=%shover.png" %(last_mode,last_mode))
 
     last_mode = active_mode
+    last_mode_options = modequalifiers
     OV.SetParam('olex2.in_mode',mode.split("=")[0])
     OV.SetParam('olex2.short_mode',mode_short)
     last_mode = active_mode

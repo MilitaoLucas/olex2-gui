@@ -124,12 +124,15 @@ class OlexCctbxAdapter(object):
       sfac = self.olx_atoms.model.get('sfac')
       custom_gaussians = {}
       if sfac is not None:
-        from cctbx import eltbx
-        for element, sfac_dict in sfac.iteritems():
-          custom_gaussians.setdefault(element, eltbx.xray_scattering.gaussian(
-            sfac_dict['gaussian'][0],
-            [-b for b in sfac_dict['gaussian'][1]],
-            sfac_dict['gaussian'][2]))
+        if len(sfac) > 0 and 'gaussian' not in sfac.items()[0][1]:
+          print "Sorry custom DISP is not yet supported"
+        else:
+          from cctbx import eltbx
+          for element, sfac_dict in sfac.iteritems():
+            custom_gaussians.setdefault(element, eltbx.xray_scattering.gaussian(
+              sfac_dict['gaussian'][0],
+              [-b for b in sfac_dict['gaussian'][1]],
+              sfac_dict['gaussian'][2]))
         # XXX fp and fdp not yet dealt with
       self._xray_structure.scattering_type_registry(
         custom_dict=custom_gaussians,
@@ -298,7 +301,7 @@ class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):
       if not os.path.exists(fcf_path):
         print "No fcf file is present"
         return
-      reflections = miller.array.from_cif(file_path=fcf_path)
+      reflections = miller.array.from_cif(file_path=fcf_path).values()[0]
       fo2 = reflections['_refln_F_squared_meas']
       fc2 = reflections['_refln_F_squared_calc']
       fc = fc2.f_sq_as_f().phase_transfer(flex.double(fc2.size(), 0))

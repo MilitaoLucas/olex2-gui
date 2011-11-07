@@ -21,8 +21,8 @@ p.journal_h2{
   margin-top:6pt;
   margin-bottom:3pt;
 }
-ul.journal_reference li{
-  list-style-type:none;
+ol.journal_reference li{
+  font-size:10.0pt;
 }
 
 .container {
