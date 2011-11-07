@@ -21,12 +21,12 @@ def setup_cctbx():
   sys.path.append(str(cctbxSources)) # needed to work with new cctbx directory structure
   try:
     import libtbx.load_env
-    if os.name == "nt":
-      cleaned_build_path = libtbx.env.abs_path_clean(build_path)
-    else:
-      cleaned_build_path = build_path
-    need_cold_start = (not os.path.exists(libtbx.env.build_path)
-                       or libtbx.env.build_path != cleaned_build_path)
+    envi_path = os.path.normpath(abs(libtbx.env.build_path))
+    if sys.platform.startswith('win'):
+      envi_path = envi_path.lower()
+      build_path = build_path.lower()
+    need_cold_start = (not os.path.exists(envi_path)
+                       or envi_path != build_path)
   except IOError, err:
     if err.args[1] == 'No such file or directory' and err.filename.endswith('libtbx_env'):
       need_cold_start = True
@@ -52,7 +52,8 @@ Current cctbx build: '%s'
     cold_start(cctbxSources, build_path)
     import libtbx.load_env
     reload(libtbx.load_env)
-  sys.path.extend(libtbx.env.pythonpath)
+  for i in libtbx.env.pythonpath:
+    sys.path.append(abs(i))
   if sys.platform.startswith('win'):
     lib_path, lib_sep = 'PATH', ';'
   elif sys.platform.startswith('darwin'):
@@ -66,11 +67,11 @@ Current cctbx build: '%s'
     os.environ['OLEX2_CCTBX_DIR'] = cctbxRoot
   if os.environ.has_key(lib_path):
     if not os.environ[lib_path] or os.environ[lib_path].endswith(lib_sep):
-      os.environ[lib_path] += libtbx.env.lib_path
+      os.environ[lib_path] += abs(libtbx.env.lib_path)
     else:
-      os.environ[lib_path] += lib_sep + libtbx.env.lib_path
+      os.environ[lib_path] += lib_sep + abs(libtbx.env.lib_path)
   else:
-    os.environ[lib_path] = libtbx.env.lib_path
+    os.environ[lib_path] = abs(libtbx.env.lib_path)
 
 def cold_start(cctbx_sources, build_path):
   saved_cwd = os.getcwd()
