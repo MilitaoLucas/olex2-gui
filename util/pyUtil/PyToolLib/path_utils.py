@@ -21,12 +21,16 @@ def setup_cctbx():
   sys.path.append(str(cctbxSources)) # needed to work with new cctbx directory structure
   try:
     import libtbx.load_env
-    envi_path = os.path.normpath(abs(libtbx.env.build_path))
-    if sys.platform.startswith('win'):
-      envi_path = envi_path.lower()
-      build_path = build_path.lower()
-    need_cold_start = (not os.path.exists(envi_path)
-                       or envi_path != build_path)
+    # XXX backward incompatibility 2011-10
+    if not hasattr(libtbx.env, 'relocatable'):
+      need_cold_start = True
+    else:
+      envi_path = os.path.normpath(abs(libtbx.env.build_path))
+      if sys.platform.startswith('win'):
+        envi_path = envi_path.lower()
+        build_path = build_path.lower()
+      need_cold_start = (not os.path.exists(envi_path)
+                         or envi_path != build_path)
   except IOError, err:
     if err.args[1] == 'No such file or directory' and err.filename.endswith('libtbx_env'):
       need_cold_start = True
