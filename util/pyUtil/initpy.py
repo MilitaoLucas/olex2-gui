@@ -58,7 +58,12 @@ else:
 ''' Debug, if possible '''
 
 
+sys.on_sys_exit_raise = None
 def our_sys_exit(i):
+  if sys.on_sys_exit_raise:
+    e = sys.on_sys_exit_raise
+    sys.on_sys_exit_raise = None
+    raise e
   print "Terminate with %i" % i
 sys.exit = our_sys_exit
 
