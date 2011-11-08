@@ -34,6 +34,14 @@ snum
     submission_type = +++ Please Choose +++
       .type = str
   }
+  
+  cds{
+    error_a = 3
+      .type = int
+      
+    error_s = 2
+      .type = int
+  }
 
   current_result{
     cif = None
@@ -100,7 +108,7 @@ snum
       .type = str
     vss = 0
       .type = float
-    program = ShelXS ShelXS86 XS 'olex2.solve' XM ShelXD SIR2008 SIR2011 Superflip
+    program = ShelXS ShelXS86 XS 'olex2.solve' XM ShelXD SIR2002 SIR2004 SIR2008 SIR2011 Superflip
       .type = choice
     method = 'Dual Space' 'Charge Flipping' 'Direct Methods' 'Patterson Method'
       .type = choice
@@ -108,6 +116,14 @@ snum
       .type = bool
     current_atomic_volume = None
       .type = float
+    Sir2002{
+      gui = False
+        .type = bool
+      }
+    Sir2004{
+      gui = False
+        .type = bool
+      }
     Sir2008{
       gui = False
         .type = bool
@@ -142,9 +158,9 @@ snum
       .expert_level = 2
     graphical_output = False
       .type = bool
-    program = ShelXL XL XH ShelXH XLMP ShelXL_ifc 'olex2.refine'
+    program = *ShelXL_ifc XL XH ShelXH XLMP ShelXL 'olex2.refine'
       .type = choice
-    method = 'Least Squares' CGLS 'Gauss-Newton' 'Levenberg-Marquardt' \
+    method = 'Least Squares' *CGLS 'Gauss-Newton' 'Levenberg-Marquardt' \
       'Full Matrix'
     .type = choice
     sg_list = None
@@ -758,7 +774,7 @@ graphs
       .caption = "Fobs/Fcalc vs resolution"
       .help = "Fobs/Fcalc-vs-resolution"
     {
-      resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
+      resolution_as = two_theta *d_spacing d_star_sq stol stol_sq
         .type = choice
         .caption = "Resolution as"
       binning = True
@@ -777,7 +793,7 @@ graphs
       .caption = "Scale factor vs resolution"
       .help = "Scale-factor-vs-resolution"
     {
-      resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
+      resolution_as = two_theta *d_spacing d_star_sq stol stol_sq
         .type = choice
         .caption = "Resolution as"
       n_bins = 10
@@ -793,7 +809,7 @@ graphs
       .caption = "R1 factor vs resolution"
       .help = "R1-factor-vs-resolution"
     {
-      resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
+      resolution_as = two_theta *d_spacing d_star_sq stol stol_sq
         .type = choice
         .caption = "Resolution as"
       n_bins = 10
@@ -812,7 +828,7 @@ graphs
       reflections_per_bin=20
         .type = int(value_min=1)
         .caption = "Reflections per bin"
-      resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
+      resolution_as = two_theta *d_spacing d_star_sq stol stol_sq
         .type = choice
         .caption = "Resolution as"
       output_csv_file = False
@@ -880,6 +896,18 @@ programs
         max_solving_iterations = 500
           .type = int
         }
+      }
+    Sir2002
+      .short_caption = olex2.solve
+      {
+      gui = False
+        .type = bool
+      }
+    Sir2004
+      .short_caption = olex2.solve
+      {
+      gui = False
+        .type = bool
       }
     Sir2008
       .short_caption = olex2.solve
