@@ -679,6 +679,9 @@ class Method_SIR(Method_solution):
                         opts[option.name] = value
 
     if self.name in 'Direct Methods':
+      if RunPrgObject.program.name in 'SIR2002':
+        oxs.setDirectives(Tangent=None)
+      else:
         oxs.setDirectives(Tangent=True)
     elif self.name in 'Patterson Method':
         oxs.setDirectives(Patterson=True)
@@ -696,6 +699,7 @@ class Method_SIR(Method_solution):
         resfile = r"%s/%s.res" %(olx.FilePath(), OV.FileName())
         if os.path.exists(resfile):
           os.remove(resfile)
+        print "FYI", sirfile, sirversion
         oxs.Exec(sirfile, sirversion)
         OV.DeleteBitmap('solve')
         if not os.path.exists(resfile):
@@ -723,6 +727,10 @@ def defineExternalPrograms():
   patterson = Method_shelx_solution(patterson_phil)
   dual_space = Method_shelxd(dual_space_phil)
   charge_flipping = Method_cctbx_ChargeFlip(charge_flipping_phil)
+  sir2002_dm = Method_SIR(sir_dm_phil)
+  sir2002_patt = Method_SIR(sir_patt_phil)
+  sir2004_dm = Method_SIR(sir_dm_phil)
+  sir2004_patt = Method_SIR(sir_patt_phil)
   sir2008_dm = Method_SIR(sir_dm_phil)
   sir2008_patt = Method_SIR(sir_patt_phil)
   sir2011_dm = Method_SIR(sir_dm_phil)
@@ -771,6 +779,20 @@ def defineExternalPrograms():
     program_type='solution',
     author="Luc Bourhis",
     reference="olex2.solve (L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, J.A.K. Howard,\nH. Puschmann, in preparation, 2011)")
+  SIR2002 = Program(
+    name='SIR2002',
+    program_type='solution',
+    author="Maria C. Burla, Rocco Caliandro, Mercedes Camalli, Benedetta Carrozzini, Giovanni Luca Cascarano, Liberato De Caro, Carmelo Giacovazzo, Giampiero Polidori, Dritan Siliqi, Riccardo Spagna",
+    reference="J. Appl. Cryst. (2007). 40, 609-613",
+    versions = '2002',
+    execs=["sir2002.exe", "sir2002"])
+  SIR2004 = Program(
+    name='SIR2004',
+    program_type='solution',
+    author="Maria C. Burla, Rocco Caliandro, Mercedes Camalli, Benedetta Carrozzini, Giovanni Luca Cascarano, Liberato De Caro, Carmelo Giacovazzo, Giampiero Polidori, Dritan Siliqi, Riccardo Spagna",
+    reference="J. Appl. Cryst. (2007). 40, 609-613",
+    versions = '2004',
+    execs=["sir2004.exe", "sir2004"])
   SIR2008 = Program(
     name='SIR2008',
     program_type='solution',
@@ -803,6 +825,10 @@ def defineExternalPrograms():
   ShelXD.addMethod(dual_space)
   XM.addMethod(dual_space)
   smtbx_solve.addMethod(charge_flipping)
+  SIR2002.addMethod(sir2002_dm)
+  SIR2002.addMethod(sir2002_patt)
+  SIR2004.addMethod(sir2004_dm)
+  SIR2004.addMethod(sir2004_patt)
   SIR2008.addMethod(sir2008_dm)
   SIR2008.addMethod(sir2008_patt)
   SIR2011.addMethod(sir2011_dm)
@@ -859,7 +885,7 @@ def defineExternalPrograms():
   smtbx_refine.addMethod(levenberg_marquardt)
 
   SPD = ExternalProgramDictionary()
-  for prg in (ShelXS, ShelXS86, XS, ShelXD, XM, smtbx_solve, SIR2008, SIR2011, Superflip):
+  for prg in (ShelXS, ShelXS86, XS, ShelXD, XM, smtbx_solve, SIR2002, SIR2004, SIR2008, SIR2011, Superflip):
     SPD.addProgram(prg)
 
   RPD = ExternalProgramDictionary()
