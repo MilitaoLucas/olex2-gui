@@ -33,7 +33,6 @@ def make_url_call(url, values):
   else:
     try:
       res = urllib2.urlopen(url,values, http_timeout)
-      OV.use_proxy_settings = False
     except urllib2.URLError: #try setting file
       try:
         proxy = get_proxy_from_usettings()
