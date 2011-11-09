@@ -3,27 +3,45 @@
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
-
+OV.use_proxy_settings = True
 import urllib2
 
+http_timeout = 7
 
-def make_url_call(url, values, use_system_proxy=True):
-  proxy = get_proxy_from_usettings()
+def make_url_call_with_proxy(url, proxy, values):
   if proxy:
     proxies = {'http': proxy}
   else:
     proxies = {}
-  try:
-    if not use_system_proxy:
-      opener = urllib2.build_opener(
-        urllib2.ProxyHandler(proxies))
-      return opener.open(url,values)
-    else:
-      return urllib2.urlopen(url,values)
-  except Exception:
-    raise
-  finally:
-    pass
+  opener = urllib2.build_opener(
+    urllib2.ProxyHandler(proxies))
+  return opener.open(url,values, http_timeout)
+
+
+def make_url_call(url, values):
+  proxy_used = False
+  if OV.use_proxy_settings:
+    try:
+      proxy = get_proxy_from_usettings()
+      res = make_url_call_with_proxy(url, proxy, values)
+    except urllib2.URLError: #try system settings
+      try:
+        res = urllib2.urlopen(url,values, http_timeout)
+        OV.use_proxy_settings = False
+      except Exception:
+        raise
+  else:
+    try:
+      res = urllib2.urlopen(url,values, http_timeout)
+      OV.use_proxy_settings = False
+    except urllib2.URLError: #try setting file
+      try:
+        proxy = get_proxy_from_usettings()
+        res = make_url_call_with_proxy(url, proxy, values)
+        OV.use_proxy_settings = True
+      except Exception:
+        raise
+  return res
       
 def get_proxy_from_usettings():
   rFile = open("%s/usettings.dat" %OV.BaseDir(),'r')
@@ -33,9 +51,4 @@ def get_proxy_from_usettings():
   for line in lines:
     if line.startswith('proxy='):
       proxy = line.split('proxy=')[1].strip()
-  if proxy:
-    print "Using Proxy server %s" %proxy
-  else:
-    pass
-#    print "No Proxy server is set"
   return proxy
