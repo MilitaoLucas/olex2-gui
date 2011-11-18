@@ -124,11 +124,11 @@ class reflections(object):
         crystal_symmetry=cs)
     self.f_obs = self.f_sq_obs.f_sq_as_f()
     if len(miller_arrays) > 1:
-      self.batch_numbers = miller_arrays[1]
+      self.batch_numbers_array = miller_arrays[1]
     else:
       if hklf_code == 5:
         raise RuntimeError("HKLF5 file format requires batch numbers")
-      self.batch_numbers = None
+      self.batch_numbers_array = None
     self._omit = None
     self._merge = None
     self.merging = None
@@ -180,7 +180,7 @@ class reflections(object):
       omit['s']*0.5
     )
     if self.hklf_code == 5:
-      batch_numbers = self.batch_numbers.data()
+      batch_numbers = self.batch_numbers_array.data()
     else:
       batch_numbers = flex.int(())
     filter_res = observations.filter_data(
@@ -191,12 +191,8 @@ class reflections(object):
       filter)
     f_sq_obs_filtered = f_sq_obs_filtered.select(filter_res.selection)
     if self.hklf_code == 5:
-      self.batch_numbers = self.batch_numbers.select(filter_res.selection)
-    s = omit['s']
-    if s < 0:
-      weak_cutoff = 0.5 * s * f_sq_obs_filtered.sigmas()
-      weak = f_sq_obs_filtered.data() < weak_cutoff
-      f_sq_obs_filtered.data().set_selected(weak, weak_cutoff)
+      self.batch_numbers = self.batch_numbers_array.select(
+        filter_res.selection).data()
     self.n_filtered_by_resolution = filter_res.omitted_count
     self.n_sys_absent = filter_res.sys_abs_count
     self.f_sq_obs_filtered = f_sq_obs_filtered
@@ -224,10 +220,11 @@ class reflections(object):
   def get_observations(self, twin_fractions, twin_components):
     if self.hklf_code == 5:
       rv = self.f_sq_obs_filtered.as_xray_observations(
-        scale_indices=self.batch_numbers.data(),
+        scale_indices=self.batch_numbers,
         twin_fractions=twin_fractions,
         twin_components=twin_components)
       self.f_sq_obs_filtered = rv.fo_sq
+      self.batch_numbers = rv.measured_scale_indices
     else:
       rv = self.f_sq_obs_filtered.as_xray_observations(
         twin_components=twin_components)

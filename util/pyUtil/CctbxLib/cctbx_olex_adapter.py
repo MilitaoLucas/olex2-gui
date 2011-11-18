@@ -206,15 +206,20 @@ class OlexCctbxAdapter(object):
     merge = self.olx_atoms.model.get('merge')
     omit = self.olx_atoms.model['omit']
     update = False
+    re_filter = True
     if force or merge is None or merge != self.reflections._merge:
       self.reflections.merge(merge=merge)
       self.reflections.filter(omit, self.olx_atoms.exptl['radiation'])
       update = True
+      re_filter = False
     if force or omit is None or omit != self.reflections._omit:
       self.reflections.filter(omit, self.olx_atoms.exptl['radiation'])
       update = True
+      re_filter = False
 
     if update or self.observations is None:
+      if re_filter:
+        self.reflections.filter(omit, self.olx_atoms.exptl['radiation'])
       self.observations = self.reflections.get_observations(
         self.twin_fractions, self.twin_components)
       olx.current_observations = self.observations
