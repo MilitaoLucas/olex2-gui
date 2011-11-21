@@ -205,9 +205,9 @@ class reflections(object):
     print >> log, "Merging summary:"
     print >> log, "Total reflections: %i" %self.f_sq_obs.size()
     print >> log, "Unique reflections: %i" %self.f_sq_obs_merged.size()
+    print >> log, "Systematic Absences: %i removed" %self.n_sys_absent
     if self.merging is not None:
       print >> log, "Inconsistent equivalents: %i" %self.merging.inconsistent_equivalents()
-      print >> log, "Systematic Absences: %i removed" %self.n_sys_absent
       print >> log, "R(int): %f" %self.merging.r_int()
       print >> log, "R(sigma): %f" %self.merging.r_sigma()
       self.merging.show_summary(out=log)
@@ -216,7 +216,7 @@ class reflections(object):
       print >> log, "n reflections filtered by resolution: %i" %(self.n_filtered_by_resolution)
       print >> log, "n reflections filtered by hkl: %i" %(
         self.f_sq_obs_merged.size() - self.n_filtered_by_resolution - self.f_sq_obs_filtered.size())
-      
+
   def get_observations(self, twin_fractions, twin_components):
     if self.hklf_code == 5:
       rv = self.f_sq_obs_filtered.as_xray_observations(
@@ -229,7 +229,7 @@ class reflections(object):
       rv = self.f_sq_obs_filtered.as_xray_observations(
         twin_components=twin_components)
     return rv
-      
+
 
 
 class create_cctbx_xray_structure(object):
