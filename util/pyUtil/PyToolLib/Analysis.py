@@ -2655,9 +2655,13 @@ class HealthOfStructure():
         value_format = value_format.replace('%','f%%')
         value = value * 100
         #raw_val = value
-      if item == 'Rint' and raw_val == 0:
-        value = "Merged Data!"
-        bg_colour = "#000000"
+      if item == 'Rint':
+        if raw_val == 0:
+          value = "Merged Data!"
+          bg_colour = "#000000"
+        elif raw_val == -1:
+          value = "MERG 0"
+          bg_colour = "#000000"
       else:
         value_format = "%." + value_format
         value = value_format %value
