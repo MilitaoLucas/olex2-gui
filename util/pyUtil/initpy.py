@@ -234,6 +234,7 @@ if OV.HasGUI():
   import htmlMaker
   from gui.home import *
   from gui.report import *
+  from gui.tools import *
 
 def onstartup():
   OV.SetVar('cbtn_solve_on','false')
@@ -312,8 +313,8 @@ import multipart
 
 #if olx.IsPluginInstalled('g4') == "true":
     #import g4
-    
-    
+
+
 if olx.IsPluginInstalled('MySQL') == "true":
   try:
     import OlexToMySQL
@@ -324,7 +325,7 @@ if olx.IsPluginInstalled('MySQL') == "true":
     print "MySQL Plugin is installed but a connection to the default server could not be established"
     print ex
 
-    
+
 if olexex.getKey():
   olexex.GetACF()
 
@@ -347,9 +348,9 @@ try:
   import userScripts
 except ImportError, err:
   print "Could not import userScripts: %s" %err
-  
-  
-  
+
+
+
 print "Welcome to Olex2"
 print "\nWe are grateful to our users for testing and supporting Olex2"
 print "Please find the link to credits in the About box"
