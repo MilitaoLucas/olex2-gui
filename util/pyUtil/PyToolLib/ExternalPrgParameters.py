@@ -679,7 +679,7 @@ class Method_SIR(Method_solution):
                         opts[option.name] = value
 
     if self.name in 'Direct Methods':
-      if RunPrgObject.program.name in 'SIR2002':
+      if RunPrgObject.program.name in 'SIR2002' or RunPrgObject.program.name in 'SIR97':
         oxs.setDirectives(Tangent=None)
       else:
         oxs.setDirectives(Tangent=True)
@@ -699,7 +699,6 @@ class Method_SIR(Method_solution):
         resfile = r"%s/%s.res" %(olx.FilePath(), OV.FileName())
         if os.path.exists(resfile):
           os.remove(resfile)
-        print "FYI", sirfile, sirversion
         oxs.Exec(sirfile, sirversion)
         OV.DeleteBitmap('solve')
         if not os.path.exists(resfile):
@@ -725,8 +724,11 @@ def defineExternalPrograms():
 
   direct_methods = Method_shelx_direct_methods(direct_methods_phil)
   patterson = Method_shelx_solution(patterson_phil)
+  texp = Method_shelx_solution(texp_phil)
   dual_space = Method_shelxd(dual_space_phil)
   charge_flipping = Method_cctbx_ChargeFlip(charge_flipping_phil)
+  sir97_dm = Method_SIR(sir_dm_phil)
+  sir97_patt = Method_SIR(sir_patt_phil)
   sir2002_dm = Method_SIR(sir_dm_phil)
   sir2002_patt = Method_SIR(sir_patt_phil)
   sir2004_dm = Method_SIR(sir_dm_phil)
@@ -779,6 +781,13 @@ def defineExternalPrograms():
     program_type='solution',
     author="Luc Bourhis",
     reference="olex2.solve (L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, J.A.K. Howard,\nH. Puschmann, in preparation, 2011)")
+  SIR97 = Program(
+    name='SIR97',
+    program_type='solution',
+    author="Maria C. Burla, Rocco Caliandro, Mercedes Camalli, Benedetta Carrozzini, Giovanni Luca Cascarano, Liberato De Caro, Carmelo Giacovazzo, Giampiero Polidori, Dritan Siliqi, Riccardo Spagna",
+    reference="J. Appl. Cryst. (2007). 40, 609-613",
+    versions = '97',
+    execs=["sir97.exe", "sir97"])
   SIR2002 = Program(
     name='SIR2002',
     program_type='solution',
@@ -818,13 +827,18 @@ def defineExternalPrograms():
   
   ShelXS.addMethod(direct_methods)
   ShelXS.addMethod(patterson)
+  ShelXS.addMethod(texp)
   ShelXS86.addMethod(direct_methods)
   ShelXS86.addMethod(patterson)
+  ShelXS86.addMethod(texp)
   XS.addMethod(direct_methods)
   XS.addMethod(patterson)
+  XS.addMethod(texp)
   ShelXD.addMethod(dual_space)
   XM.addMethod(dual_space)
   smtbx_solve.addMethod(charge_flipping)
+  SIR97.addMethod(sir97_dm)
+  SIR97.addMethod(sir97_patt)
   SIR2002.addMethod(sir2002_dm)
   SIR2002.addMethod(sir2002_patt)
   SIR2004.addMethod(sir2004_dm)
@@ -885,7 +899,7 @@ def defineExternalPrograms():
   smtbx_refine.addMethod(levenberg_marquardt)
 
   SPD = ExternalProgramDictionary()
-  for prg in (ShelXS, ShelXS86, XS, ShelXD, XM, smtbx_solve, SIR2002, SIR2004, SIR2008, SIR2011, Superflip):
+  for prg in (ShelXS, ShelXS86, XS, ShelXD, XM, smtbx_solve, SIR97, SIR2002, SIR2004, SIR2008, SIR2011, Superflip):
     SPD.addProgram(prg)
 
   RPD = ExternalProgramDictionary()
@@ -1322,6 +1336,64 @@ instructions {
       .type=bool
   }
   include scope ExternalPrgParameters.shelxs_phil
+}
+""", process_includes=True)
+
+#TEXP na [#] nH [0] Ek [1.5]
+texp_phil = phil_interface.parse("""
+name = 'Structure Expansion'
+  .type=str
+atom_sites_solution=heavy
+  .type=str
+instructions {
+  TEXP {
+    values {
+      na=0
+        .type=int
+      nH=1
+        .type=float
+      Ek=1.5
+        .type=float
+    }
+    default=True
+      .type=bool
+  }
+  tref
+  .optional=True
+  {
+    values {
+      np = 500
+        .type=int
+      nE = None
+        .type=int
+      kapscal = None
+        .type=float
+      ntan = None
+        .type=int
+      wn = None
+        .type=float
+    }
+    default=False
+      .type=bool
+  }
+  esel
+  .optional=True
+  {
+    values {
+      Emin=1.2
+        .type=float
+      Emax=5
+        .type=float
+      dU=0.05
+        .type=float
+      renorm=.7
+        .type=float
+      axis=0
+        .type=int
+    }
+    default=False
+      .type=bool
+  }
 }
 """, process_includes=True)
 
