@@ -2595,6 +2595,7 @@ class HealthOfStructure():
   def initialise_HOS(self):
     if olx.IsFileLoaded() != 'true':
       return
+    OV.write_to_olex("reflection-stats-summary.htm" , "n/a")
     hkl = OV.HKLSrc()
     if not os.path.exists(hkl):
       print "There is no reflection file associated with this structure"
@@ -2604,7 +2605,12 @@ class HealthOfStructure():
       txt = txt.decode('utf-8')
       OV.write_to_olex("hos.htm" , txt)
       return False
-    self.hkl_stats = olex_core.GetHklStat()
+    try:
+      self.hkl_stats = olex_core.GetHklStat()
+      if not self.hkl_stats:
+        return False
+    except:
+      return False
     return True
 
   def get_cctbx_completeness(self):
