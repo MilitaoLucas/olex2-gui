@@ -245,6 +245,7 @@ class RunSolutionPrg(RunPrg):
   def doHistoryCreation(self):
     OV.SetParam('snum.refinement.last_R1', 'Solution')
     self.his_file = hist.create_history(solution=True)
+    OV.SetParam('snum.solution.current_history', self.his_file)
     return self.his_file
 
 
@@ -374,6 +375,7 @@ class RunRefinementPrg(RunPrg):
       self.his_file = None
       print "The refinement has failed, no R value was returned by the refinement."
     self.R1 = R1
+    OV.SetParam('snum.refinement.current_history', self.his_file)
     return self.his_file, R1
 
   def isInversionNeeded(self, force=False):

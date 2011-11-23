@@ -938,7 +938,7 @@ def getFormulaAsDict(formula):
 sir_dm_phil = phil_interface.parse("""
 name = 'Direct Methods'
   .type=str
-atom_sites_solution=other
+atom_sites_solution=direct
   .type=str
 instructions {
   Gui 
@@ -1062,7 +1062,7 @@ instructions {
 sir_patt_phil = phil_interface.parse("""
 name = 'Patterson Method'
   .type=str
-atom_sites_solution=other
+atom_sites_solution=heavy
   .type=str
 instructions {
   Gui 
@@ -1506,14 +1506,14 @@ instructions {
 superflip_cf_phil = phil_interface.parse("""
 name = 'Charge Flipping'
   .type=str
-atom_sites_solution=other
+atom_sites_solution=iterative
   .type=str
 """)
 
 charge_flipping_phil = phil_interface.parse("""
 name = 'Charge Flipping'
   .type=str
-atom_sites_solution=other
+atom_sites_solution=iterative
   .type=str
 flipping_interval=60
   .type=int
