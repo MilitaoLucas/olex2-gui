@@ -1,3 +1,6 @@
+<tr name=Q_PEAK_SLIDER height='50'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Electron-Density-Peak-Slider;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
 <td width='40%' name=Q_PAEAK_SLIDER_LABEL colspan = '1' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
   <b>
@@ -6,12 +9,11 @@
 </td>
 
 <td name=Q_PAEAK_SLIDER_BUTTONS align=right colspan='2' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
-$spy.MakeHoverButton(button_small-select@q,sel \$q)
-&nbsp;
-$spy.MakeHoverButton(button_small-delete@q,sel \$q>>kill sel)
+  $spy.MakeHoverButton(button_small-select@q,sel \$q) &nbsp;
+  $spy.MakeHoverButton(button_small-delete@q,sel \$q>>kill sel)
 </td>
-
 </tr>
+
 <tr name=SLIDE_Q_PEAK_SLIDER>
 
 <td name=Q_PAEAK_SLIDER_SLIDER colspan='2'>
@@ -44,3 +46,5 @@ $spy.MakeHoverButton(button_small-delete@q,sel \$q>>kill sel)
     label=""
   >
 </td>
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

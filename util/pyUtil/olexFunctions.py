@@ -99,7 +99,7 @@ class OlexFunctions(inheritFunctions):
     else:
       return None
 
-  def get_cif_item(self, key, default="", html=False):
+  def get_cif_item(self, key, default="", output_format=False):
     if olx.cif_model is not None:
       data_name = self.FileName().replace(' ', '')
       if data_name not in olx.cif_model:
@@ -109,10 +109,16 @@ class OlexFunctions(inheritFunctions):
       if tem is None: return default
       retVal = default
       if type(tem) == str:
-        if html:
+        if output_format == 'html':
           tem = tem.replace(';\n','')
           tem = tem.replace('\n;','')
           tem = tem.replace('\n','<br>')
+        if output_format == 'gui':
+          tem = tem.replace(';\n','')
+          tem = tem.replace('\n;','')
+          tem = tem.replace('\n\n','')
+          tem = tem.rstrip('\n')
+          tem = tem.lstrip('\n')
         return tem
       else:
         try:
@@ -139,6 +145,7 @@ class OlexFunctions(inheritFunctions):
       if value not in ('?', '.'):
         if 'K' not in value: value += ' K'
         olx.xf.exptl.Temperature(value)
+    
 
   def GuiParams(self):
     if hasattr(olx, 'gui_phil_handler'):
