@@ -10,7 +10,7 @@ import olexex_setup
 import variableFunctions
 
 
-def sourceFilesHtmlMaker():
+def source_filesMetadataHtmlMaker():
   list = [
     {'varName':'snum.metacif.abs_file',
      'itemName':'abs %File%',
@@ -80,7 +80,7 @@ def sourceFilesHtmlMaker():
     retstr = text
 
   return retstr
-OV.registerFunction(sourceFilesHtmlMaker)
+OV.registerFunction(source_filesMetadataHtmlMaker)
 
 
 def currentResultFilesHtmlMaker(type='cif'):
@@ -103,6 +103,26 @@ def currentResultFilesHtmlMaker(type='cif'):
   )
   return htmlTools.makeHtmlTable(list)
 OV.registerFunction(currentResultFilesHtmlMaker)
+
+def absorption_correctionMetadataHtmlMaker():
+  list = (
+    {'varName':'_exptl_absorpt_correction_type',
+     'items':'analytical;cylinder;empirical;gaussian;integration;multi-scan;none;numerical;psi-scan;refdelf;sphere',
+     'itemName':'%Abs Type%'
+     },
+    {'varName':'_exptl_absorpt_process_details',
+     'itemName':'%Abs Details%',
+     'multiline':'multiline'
+     },
+    {'varName':'_exptl_absorpt_correction_T_max',
+     'itemName':'%Abs T max%',
+     },
+    {'varName':'_exptl_absorpt_correction_T_min',
+     'itemName':'%Abs T min%',
+     },
+  )
+  return htmlTools.makeHtmlTable(list)
+OV.registerFunction(absorption_correctionMetadataHtmlMaker)
 
 
 def diffractionMetadataHtmlMaker():
@@ -290,6 +310,10 @@ def publicationMetadataHtmlMaker():
      'value':'spy.getPersonInfo(GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),phone)',
      'onchange':'spy.gui.report.publication.OnPersonInfoChange(SET__PUBL_CONTACT_AUTHOR_NAME,phone,~name~)'
      },
+#    {'varName':'InfoLine',
+#     'itemName':'%Contact% %Author% %Phone%',
+#     'value':'Authors to appear on paper. If the contact author should appear, the name needs to be added here.',
+#     },
   ]
   listAuthors = OV.GetParam('snum.metacif.publ_author_names')
   if listAuthors is None:
@@ -373,19 +397,29 @@ def publicationMetadataHtmlMaker():
 
   retstr += htmlTools.makeHtmlTable(list)
 
-  retstr +=       """
+  retstr +="""
 <tr VALIGN="center" ALIGN="left">
-         <td VALIGN="center" width="40%%" colspan=2>
-
-         <a href="spy.contactLetter()>>html.Update" target="Edit Contact Letter"><b>Contact Letter</b></a>
-         </td>
+  <td></td>
+  <td VALIGN="center" width="40%%" colspan=2>
+    <a href="spy.contactLetter()>>html.Update" target="Edit Contact Letter"><b>Contact Letter</b></a>
+  </td>
 </tr>
 """
+
+  retstr +="""
+<tr VALIGN="center" ALIGN="left">
+  <td></td>
+  <td VALIGN="center" colspan=3 bgcolor=$spy.GetParam(gui.html.highlight_colour)>
+    <b>Please add the contact author to the list of Authors if that person is to appear on the paper!</b></a>
+  </td>
+</tr>
+"""
+  
   return retstr
 OV.registerFunction(publicationMetadataHtmlMaker)
 
 def contactLetter():
-  letterText = OV.get_cif_item('_publ_contact_letter')
+  letterText = OV.get_cif_item('_publ_contact_letter','?','gui')
   if letterText is None:
     import datetime
     today = datetime.date.today()

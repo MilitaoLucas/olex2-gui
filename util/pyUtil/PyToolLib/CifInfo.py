@@ -452,7 +452,7 @@ class ExtractCifInfo(CifTools):
           sad.setdefault('version', version)
           t = self.prepare_exptl_absorpt_process_details(sad, version)
           sad.setdefault("_exptl_absorpt_process_details", t)
-          self.update_cif_block(sad, force=True)
+          self.update_cif_block(sad, force=False)
         elif abs_type == "TWINABS":
           twin = abs_reader.reader(p).twin_cifItems()
           twin.setdefault('abs_file', p)

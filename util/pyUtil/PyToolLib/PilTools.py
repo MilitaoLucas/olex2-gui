@@ -1049,6 +1049,7 @@ class timage(ImageTools):
     self.sf = sf
     self.sfs = sfs
     self.no_need_to_refresh_image_type = {}
+    self.getImageItemsFromTextFile()
 
 
   def run_timage(self,force_images=False):
@@ -1132,8 +1133,6 @@ class timage(ImageTools):
     self.image_type = "fb"
     sf = self.sf
     image_source = self.imageSource
-    self.getImageItemsFromTextFile()
-
     im = image_source
     #cut = 0, 52*sf, 27*sf, 76*sf
     #crop =  im.crop(cut)
@@ -1296,8 +1295,10 @@ class timage(ImageTools):
       button_names = self.image_items_d.get("G4 BUTTON", button_names)
       width = available_width - OV.GetParam('gui.timage.g4.width_adjust')
       self.produce_buttons(button_names, self.sfs, "_g4",width=width)
+      
+
     
-    cut = 0*sf, 152*sf, 18*sf, 169*sf
+    cut = 0*sf, 151*sf, 17*sf, 168*sf
     crop =  im.crop(cut)
     #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=1.98))
     states = ['', 'on', 'off', 'hover', 'hoveron']
@@ -2112,6 +2113,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
     textItems = []
     textItems.append("autochem")
+    textItems += self.image_items_d.get('H1',[])
+    textItems += self.image_items_d.get('H2',[])
+    for item in self.image_items_d.get('H3',[]):
+      textItems.append("h3-%s" %item)
+      
     tabItems = []
     g3tabItems = ['g3-solve', 'g3-refine', 'g3-image', 'g3-report', 'g3-tools']
 
@@ -2156,15 +2162,17 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         if self.no_need_to_refresh_image_type.get(self.image_type):
           break
         if "h3" in item:
-          try:
+          if "-h3-" in item:
             img_txt = item.split("-h3-")[1]
-          except IndexError:
+          else:
             img_txt = item.replace('h3-','')
           if img_txt.lower() in self.new_l:
             self.advertise_new = True
+          name = "h3-%s%s.png" %(item, state)
+          name = name.replace("h3-h3-","h3-")
+          name = name.replace("h3-h3-","h3-")
           image = self.make_timage('h3', img_txt, state)
           self.advertise_new = False
-          name = "h3-%s%s.png" %(item, state)
         else:
           img_txt = item
           if img_txt in self.new_l:

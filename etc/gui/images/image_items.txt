@@ -114,3 +114,18 @@
   Refine
   Report
   Image
+
+[H2]
+  AutoChem 2
+  Folder View
+
+[H3]
+  Collection
+  Crystal
+  Crystal Image
+  Diffraction
+  Absorption Correction
+  Publication
+  Reference
+  Source Files
+  Tutorials

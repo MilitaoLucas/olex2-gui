@@ -46,7 +46,10 @@ class FolderView:
 
 
   def list(self, mask=".ins;.res;.cif"):
-    f = olx.ChooseDir('Select folder', '.')
+    r = OV.GetParam('user.folder_view_root')
+    if not r:
+      r = "."
+    f = olx.ChooseDir('Select folder', '%s' %r)
     if f:
       self.root = FolderView.node(f)
       self.root.expand(mask=set(mask.split(';')))
@@ -56,6 +59,7 @@ class FolderView:
     import OlexVFS
     if not self.root:
       return "&nbsp;"
+    OV.SetParam('user.folder_view_root', self.root.name)
     OlexVFS.write_to_olex('folder_view.data', self.root.toStr())
     return "<input type='tree' manage noroot src='folder_view.data' name='fvt'"+\
   " onselect='spy.gui.tools.folder_view.loadStructure(html.GetValue(~name~))'"+\

@@ -195,7 +195,7 @@ class BrukerSaint(ImageTools):
         else:
           olx.Atreap(p4p)
           self.make_reset_structure_gui()
-        olx.UpdateHtml()
+        olx.html.Update()
           
     except Exception, ex:
       print "There was a problem in BrukerSaint"
@@ -373,7 +373,7 @@ class BrukerSaint(ImageTools):
         self.make_box_image()
       self.make_gui_content_evaluate_frames()
       #self.saint_pid.stdout.flush()
-      olx.UpdateHtml()
+      olx.html.Update()
       OV.Refresh()
       
       #global terminated

@@ -33,7 +33,7 @@ class publication:
   def OnContactAuthorChange(self, person_box_name):
     self.ChangeContactAuthor(
       olx.GetValue(person_box_name).strip())
-    olx.UpdateHtml()
+    olx.html.Update()
 
   def ChangePersonInfo(self, person, item, value):
     import userDictionaries
@@ -79,7 +79,7 @@ class publication:
   def OnAddNameToAuthorList(self, box_name):
     value = olx.GetValue(box_name).strip()
     if self.AddNameToAuthorList(value):
-      olx.UpdateHtml()
+      olx.html.Update()
   
 pub = publication()
 olex.registerFunction(pub.OnContactAuthorChange, False, "gui.report.publication")

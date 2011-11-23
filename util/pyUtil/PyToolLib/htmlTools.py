@@ -45,6 +45,10 @@ def makeHtmlTable(list):
     row_d = {}
     row_d.setdefault('itemName',input_d['itemName'])
     row_d.setdefault('ctrl_name', "SET_%s" %str.upper(input_d['varName']).replace('.','_'))
+    
+    if input_d['varName'] == "InfoLine":
+      pass
+      
 
     boxText = ''
     for box in ['box1','box2','box3']:
@@ -53,7 +57,7 @@ def makeHtmlTable(list):
         box_d.setdefault('ctrl_name', "SET_%s" %str.upper(box_d['varName']).replace('.','_'))
         box_d.setdefault('bgcolor','spy.bgcolor(~name~)')
         if box_d['varName'].startswith('_'): # treat cif items differently
-          box_d.setdefault('value', '$spy.get_cif_item(%(varName)s,?)' %box_d)
+          box_d.setdefault('value', '$spy.get_cif_item(%(varName)s,?,gui)' %box_d)
           box_d.setdefault('onchange',"spy.set_cif_item(%(varName)s,GetValue(~name~))>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
         else:
           box_d.setdefault('value', '$spy.GetParam(%(varName)s)' %box_d)
@@ -64,7 +68,7 @@ def makeHtmlTable(list):
     else:
       input_d.setdefault('ctrl_name', "SET_%s" %str.upper(input_d['varName']).replace('.','_'))
       if input_d['varName'].startswith('_'): # treat cif items differently
-        input_d.setdefault('value', '$spy.get_cif_item(%(varName)s,?)' %input_d)
+        input_d.setdefault('value', '$spy.get_cif_item(%(varName)s,?,gui)' %input_d)
         input_d.setdefault('onchange',"spy.set_cif_item(%(varName)s,GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)" %input_d)
       elif input_d['varName'] == 'snum.report.date_collected': # treat date fields differently
         try:
@@ -136,6 +140,8 @@ def makeHtmlTableRow(dictionary):
   dictionary.setdefault('fieldWidth','30%%')
   dictionary.setdefault('fieldVALIGN','center')
   dictionary.setdefault('fieldALIGN','left')
+  dictionary.setdefault('first_col_width', OV.GetParam('gui.html.table_firstcol_width'))
+  dictionary.setdefault('first_col_colour', OV.GetParam('gui.html.table_firstcol_colour'))
 
   if 'chooseFile' in dictionary.keys():
     chooseFile_dict = dictionary['chooseFile']
@@ -163,7 +169,8 @@ def makeHtmlTableRow(dictionary):
       field_d.setdefault('fieldVALIGN','center')
       field_d.setdefault('fieldALIGN','left')
       field_d.setdefault('fieldWidth','20%%')
-      field_d.setdefault('font','size=%s' %OV.GetParam('gui.html.font_size'))
+      field_d.setdefault('font','size=%s' %OV.GetParam('gui.html.table_firstcol_colour'))
+      field_d.setdefault('first_col_width', OV.GetParam('gui.html.table_firstcol_width'))
       FieldText += """
                 <td VALIGN="%(fieldVALIGN)s" ALIGN="%(fieldALIGN)s" width="%(fieldWidth)s" colspan=1>
                   <b>
@@ -176,7 +183,9 @@ def makeHtmlTableRow(dictionary):
 
     htmlTableRowText = '''
   <tr VALIGN="%(trVALIGN)s" ALIGN="%(trALIGN)s" NAME="%(ctrl_name)s">
+    <td bgcolor=#ff0000>
     %(fieldText)s
+    </td>
     <td VALIGN="center" colspan=2>
       <font %(font)s>
         %(input)s
@@ -189,6 +198,7 @@ def makeHtmlTableRow(dictionary):
   else:
     htmlTableRowText = '''
   <tr VALIGN="%(trVALIGN)s" ALIGN="%(trALIGN)s" NAME="%(ctrl_name)s">
+  <td width="%(first_col_width)s" bgcolor="%(first_col_colour)s"></td>
     <td VALIGN="%(fieldVALIGN)s" ALIGN="%(fieldALIGN)s" width="%(fieldWidth)s" colspan=2>
       <b>
         %(itemName)s
@@ -514,7 +524,13 @@ def make_combo_text_box(d):
      }
   dic.update(d)
 
-  html = '''
+  if dic.has_key('readonly'):
+    if dic['readonly']:
+      dic['readonly'] = "readonly"
+    else:
+      dic['readonly'] = ""
+
+    html = '''
 <input
        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
        type="combo"
@@ -529,7 +545,7 @@ def make_combo_text_box(d):
        onchange="%(onchange)s"
        %(manage)s
        data="%(data)s"
-       readonly="%(readonly)s"
+       %(readonly)s
 >''' %dic
   return html
 
@@ -563,13 +579,14 @@ def make_tick_box_input(d):
   width="%(width)s"
   height="%(height)s"
   name="%(ctrl_name)s"
+  value="%(value)s"
   bgcolor="%(bgcolor)s"
   fgcolor="%(fgcolor)s"
   %(state)s
   %(checked)s
   oncheck="%(oncheck)s"
   onuncheck="%(onuncheck)s"
-  value="%(value)s"
+  valign="center"
   %(manage)s
   data="%(data)s"
   >
@@ -1171,7 +1188,10 @@ def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
   click_console_feedback = False
   n = name.split("-")
   d = {'bgcolor': OV.GetParam('gui.html.%s' %btn_bg)}
-  target=n[1]
+  if len(n) > 1:
+    target=n[1]
+  else:
+    target="Not Defined"
   if '@' in name:
     tool_img = name.split('@')[0]
   else:

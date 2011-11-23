@@ -102,24 +102,16 @@ snum
   solution
     .short_caption = Structure Solution
     {
-    default_program = olex2.solve
-      .type = str
-    default_method = 'Charge Flipping'
-      .type = str
     vss = 0
       .type = float
-    program = ShelXS ShelXS86 XS 'olex2.solve' XM ShelXD SIR97 SIR2002 SIR2004 SIR2008 SIR2011 Superflip
+    program = ShelXS ShelXS86 XS '*olex2.solve' XM ShelXD SIR2002 SIR2004 SIR2008 SIR2011 Superflip
       .type = choice
-    method = 'Dual Space' 'Charge Flipping' 'Direct Methods' 'Patterson Method' 'Structure Expansion'
+    method = 'Dual Space' '*Charge Flipping' 'Direct Methods' 'Patterson Method'
       .type = choice
     graphical_output = False
       .type = bool
     current_atomic_volume = None
       .type = float
-    Sir97{
-      gui = True
-        .type = bool
-      }
     Sir2002{
       gui = False
         .type = bool
@@ -137,10 +129,6 @@ snum
   refinement
     .short_caption = Structure Refinement
     {
-    default_program = ShelXL
-      .type = str
-    default_method = CGLS
-      .type = str
     ata = 0
       .type = float
     max_shift_site = None
@@ -162,9 +150,9 @@ snum
       .expert_level = 2
     graphical_output = False
       .type = bool
-    program = ShelXL_ifc XL XH ShelXH XLMP *ShelXL 'olex2.refine'
+    program = ShelXL_ifc XL XH ShelXH XLMP ShelXL '*olex2.refine'
       .type = choice
-    method = 'Least Squares' *CGLS 'Gauss-Newton' 'Levenberg-Marquardt' \
+    method = 'Least Squares' CGLS '*Gauss-Newton' 'Levenberg-Marquardt' \
       'Full Matrix'
     .type = choice
     sg_list = None
@@ -901,12 +889,6 @@ programs
           .type = int
         }
       }
-    Sir97
-      .short_caption = olex2.solve
-      {
-      gui = False
-        .type = bool
-      }
     Sir2002
       .short_caption = olex2.solve
       {
@@ -931,6 +913,8 @@ programs
 user
   .short_caption = User Specific
   {
+  folder_view_root = None
+    .type = path
   use_fader = 0
     .type = float
   expert_level = 0
