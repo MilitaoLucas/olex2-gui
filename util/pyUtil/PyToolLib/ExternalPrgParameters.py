@@ -236,6 +236,8 @@ class Method_solution(Method):
       args += " -c='%s' " % RunPrgObject.formula
     if RunPrgObject.sg:
       args += "-s=%s " % RunPrgObject.sg
+    if self.name == 'Structure Expansion':
+      print "I want my fucking atoms back how to do this please?"
     return args
 
   def post_solution(self, RunPrgObject):
@@ -1346,12 +1348,12 @@ name = 'Structure Expansion'
 atom_sites_solution=heavy
   .type=str
 instructions {
-  TEXP {
+  texp {
     values {
-      na=0
+      na=1
         .type=int
       nH=1
-        .type=float
+        .type=int
       Ek=1.5
         .type=float
     }
