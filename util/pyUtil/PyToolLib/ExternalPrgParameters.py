@@ -821,12 +821,11 @@ def defineExternalPrograms():
   Superflip = Program(
     name='Superflip',
     program_type='solution',
-    author="TBS",
-    reference="TBS",
-    versions = '',
+    author="A van der Lee, C.Dumas & L. Palatinus",
+    reference="J. Appl. Cryst. (2007) 40, 786-790",
+    versions = '260711',
     execs=["superflip.exe", "superflip"])
-
-  
+ 
   ShelXS.addMethod(direct_methods)
   ShelXS.addMethod(patterson)
   ShelXS.addMethod(texp)
@@ -1510,6 +1509,120 @@ name = 'Charge Flipping'
   .type=str
 atom_sites_solution=iterative
   .type=str
+  instructions {
+  trial
+    .optional=True
+  {
+    values {
+      trial=1
+        .type=int
+    }
+    default=False
+      .type=bool
+  }
+  normalize
+    .optional=True
+  {
+    values {
+      normalize=yes
+        .type=str
+    }
+    default=False
+      .type=bool
+  }
+  maxcycl
+    .optional=True
+  {
+    values {
+      maxcycl=10000
+        .type=int
+    }
+    default=False
+      .type=bool
+  }
+  forcesymmetry
+    .optional=True
+  {
+    values {
+      forcesymmetry=No
+        .type=str
+    }
+    default=False
+      .type=bool
+  }
+  p1
+    .optional=True
+  {
+    values {
+      p1=No
+        .type=str
+    }
+    default=False
+      .type=bool
+  }
+  weak
+    .optional=True
+  {
+    values {
+      weak=0.2
+        .type=float
+    }
+    default=False
+      .type=bool
+  }
+  
+  ked
+    .optional=True
+  {
+    values {
+      weak=1.3
+        .type=float
+    }
+    default=False
+      .type=bool
+  }
+  superposition
+    .optional=True
+  {
+    values {
+      superposition=No
+        .type=str
+    }
+    default=False
+      .type=bool
+  }
+  edmacontinue
+    .optional=True
+  {
+    values {
+      edmacontinue=No
+        .type=str
+    }
+    default=False
+      .type=bool
+  }
+  comments
+    .optional=True
+  {
+    values {
+      comments=Yes
+        .type=str
+    }
+    default=False
+      .type=bool
+  }
+  cleanup
+    .optional=True
+  {
+    values {
+      cleanup=Yes
+        .type=str
+    }
+    default=False
+      .type=bool
+  }
+  }
+
 """)
 
 charge_flipping_phil = phil_interface.parse("""
