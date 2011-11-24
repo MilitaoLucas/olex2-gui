@@ -237,7 +237,7 @@ class Method_solution(Method):
     if RunPrgObject.sg:
       args += "-s=%s " % RunPrgObject.sg
     if self.name == 'Structure Expansion':
-      print "I want my fucking atoms back how to do this please?"
+      args += "-atoms"
     return args
 
   def post_solution(self, RunPrgObject):
@@ -288,7 +288,7 @@ class Method_refinement(Method):
       #olx.Name('sel 1 -c')
     if RunPrgObject.params.snum.auto_hydrogen_naming:
       olx.FixHL()
-    
+
     wave_length = float(olx.xf.exptl.Radiation())
     if round(wave_length, 2) == round(0.71073,2) or round(wave_length, 2) == round(1.5414, 2) or round(wave_length, 2)  == round(0.56053, 2):
       pass
@@ -298,7 +298,7 @@ class Method_refinement(Method):
 
   def post_refinement(self, RunPrgObject):
     pass
-  
+
 class Method_shelx(Method):
 
   def run(self, RunPrgObject):
@@ -357,7 +357,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
 
   def __init__(self, phil_object):
     Method.__init__(self, phil_object)
-    
+
   def pre_refinement(self, RunPrgObject):
     if OV.GetParam("snum.refinement.use_solvent_mask"):
       import cctbx_olex_adapter
@@ -564,7 +564,7 @@ class Method_cctbx_refinement(Method_refinement):
 
   def getFlack(self):
     return self.flack
-  
+
   def writeRefinementInfoForGui(self, cif):
     for key, value in cif.iteritems():
       if "." in value:
@@ -574,7 +574,7 @@ class Method_cctbx_refinement(Method_refinement):
           pass
     f = open("%s/etc/CIF/olex2refinedata.html" %OV.BaseDir())
     t = f.read() %cif
-    OV.write_to_olex('refinedata.htm',t)  
+    OV.write_to_olex('refinedata.htm',t)
 
 
 class Method_cctbx_ChargeFlip(Method_solution):
@@ -616,7 +616,7 @@ class Method_cctbx_ChargeFlip(Method_solution):
     file = r"%s/%s.res" %(olx.FilePath(), RunPrgObject.fileName)
     olx.xf.SaveSolution(file)
     olx.Atreap(file)
-    
+
 class Method_Superflip(Method_solution):
 
   def run(self, RunPrgObject):
@@ -654,7 +654,7 @@ class Method_SIR(Method_solution):
     for line in filedata:
       if 'zerr ' in line.lower():
         esd = line.split()
-    
+
     if len(esd) > 2:
         del esd[1]
         del esd[0]
@@ -718,10 +718,10 @@ class Method_SIR(Method_solution):
       f = "%s.res" %f[:-3]
       shutil.copyfile(item, f)
       os.remove(item)
-    
+
 
 def defineExternalPrograms():
-  
+
   # define solution methods
 
   direct_methods = Method_shelx_direct_methods(direct_methods_phil)
@@ -740,7 +740,7 @@ def defineExternalPrograms():
   sir2011_dm = Method_SIR(sir_dm_phil)
   sir2011_patt = Method_SIR(sir_patt_phil)
   superflip_cf = Method_Superflip(superflip_cf_phil)
-  
+
   # define refinement methods
   least_squares = Method_shelx_refinement(least_squares_phil)
   cgls = Method_shelx_refinement(cgls_phil)
@@ -825,7 +825,7 @@ def defineExternalPrograms():
     reference="J. Appl. Cryst. (2007) 40, 786-790",
     versions = '260711',
     execs=["superflip.exe", "superflip"])
- 
+
   ShelXS.addMethod(direct_methods)
   ShelXS.addMethod(patterson)
   ShelXS.addMethod(texp)
@@ -942,14 +942,14 @@ name = 'Direct Methods'
 atom_sites_solution=direct
   .type=str
 instructions {
-  Gui 
+  Gui
   .optional=True
   {
     values {}
     default=False
       .type=bool
     }
-  Data 
+  Data
   .optional=True
   {
     values {
@@ -1022,35 +1022,35 @@ instructions {
     default=False
       .type=bool
     }
-  Cochran 
+  Cochran
   .optional=True
   {
     values {}
     default=False
       .type=bool
     }
-  Nquartets 
+  Nquartets
   .optional=True
   {
     values {}
     default=False
       .type=bool
     }
-  Nolsq 
+  Nolsq
   .optional=True
   {
     values {}
     default=False
       .type=bool
     }
-  Nosigma 
+  Nosigma
   .optional=True
   {
     values {}
     default=False
       .type=bool
     }
-  Electrons 
+  Electrons
   .optional=True
   {
     values {}
@@ -1066,14 +1066,14 @@ name = 'Patterson Method'
 atom_sites_solution=heavy
   .type=str
 instructions {
-  Gui 
+  Gui
   .optional=True
   {
     values {}
     default=True
       .type=bool
     }
-  Data 
+  Data
   .optional=True
   {
     values {
@@ -1143,35 +1143,35 @@ instructions {
     default=False
       .type=bool
     }
-  Cochran 
+  Cochran
   .optional=True
   {
     values {}
     default=False
       .type=bool
     }
-  Nquartets 
+  Nquartets
   .optional=True
   {
     values {}
     default=False
       .type=bool
     }
-  Nolsq 
+  Nolsq
   .optional=True
   {
     values {}
     default=False
       .type=bool
     }
-  Nosigma 
+  Nosigma
   .optional=True
   {
     values {}
     default=False
       .type=bool
     }
-  Electrons 
+  Electrons
   .optional=True
   {
     values {}
@@ -1503,7 +1503,7 @@ instructions {
   #{'name':'SEED', 'values':['nrand:0',]},
   #{'name':'MOVE', 'values':['dx:0', 'dy:0', 'dz:0', 'sign:1']},
 
-  
+
 superflip_cf_phil = phil_interface.parse("""
 name = 'Charge Flipping'
   .type=str
@@ -1570,7 +1570,7 @@ atom_sites_solution=iterative
     default=False
       .type=bool
   }
-  
+
   ked
     .optional=True
   {
