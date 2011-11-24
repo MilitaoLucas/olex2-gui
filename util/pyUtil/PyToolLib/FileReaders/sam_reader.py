@@ -19,7 +19,7 @@ def metareader(sam_file,metadata):
         mFileC = line
       rFileM.close()
       xmldoc = minidom.parse(rFileMeta)
-      keywords= ['Cell', 'CellESD', 'SpaceGroup', 'ScreenScans', 'CollectScans']
+      keywords= ['Cell', 'CellESD','MountType', 'CrystalSize', 'SpaceGroup', 'ScreenScans', 'CollectScans']
       #keywords= ['contributors']
       XScansValues = {}
       for keyword in keywords:
