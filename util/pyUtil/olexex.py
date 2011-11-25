@@ -1099,7 +1099,9 @@ OV.registerFunction(get_solution_programs)
 def get_solution_methods(prg, scope='snum'):
   retval = ""
   if prg == '?': return retval
-  if prg == 'Auto': return 'Auto'
+  if prg == 'Auto':
+    OV.SetParam("%s.solution.method" %scope,'Auto')
+    return 'Auto'
   p = []
   for method in SPD.programs[prg]:
     p.append(method.name)
@@ -1161,7 +1163,9 @@ OV.registerFunction(get_refinement_programs)
 def get_refinement_methods(prg, scope='snum'):
   retval = ""
   if prg == '?': return retval
-  if prg == 'Auto': return 'Auto'
+  if prg == 'Auto':
+    OV.SetParam("%s.refinement.method" %scope,'Auto')
+    return 'Auto'
   p = []
   for method in RPD.programs[prg]:
     p.append(method.name)

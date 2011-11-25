@@ -116,8 +116,10 @@
   Image
 
 [H2]
-  AutoChem 2
+  AC2
+  AutoChem2
   Folder View
+  DataBase
 
 [H3]
   Collection
