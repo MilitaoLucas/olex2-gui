@@ -138,7 +138,7 @@ gui
       .type = colour
     table_firstcol_colour = #dedede
       .type = colour
-    table_firstcol_width = 28
+    table_firstcol_width = 22
       .type = int
     MainToolbarTabButtonActive = None
       .type = str

@@ -581,7 +581,10 @@ class OlexFunctions(inheritFunctions):
       return olx.HKLSrc(new_HKLSrc)
     else:
       path = olx.HKLSrc()
-      return self.standardizePath(path)
+      if path:
+        return self.standardizePath(path)
+      else:
+        return None
 
   def StrDir(self):
     path = olx.StrDir()

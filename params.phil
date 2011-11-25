@@ -104,6 +104,8 @@ snum
     {
     vss = 0
       .type = float
+    vata = 0
+      .type = float
     program = ShelXS ShelXS86 XS '*olex2.solve' XM ShelXD SIR2002 SIR2004 SIR2008 SIR2011 Superflip
       .type = choice
     method = 'Dual Space' '*Charge Flipping' 'Direct Methods' 'Patterson Method' 'Structure Expansion'
