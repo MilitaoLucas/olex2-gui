@@ -6,34 +6,34 @@ datadir = olex.f("DataDir()")
 basedir = olex.f("BaseDir()")
 if sys.platform[:3] == 'win':
   sys.path = [''] # first should be empty string to avoid problem if cctbx needs cold start
-  python_dir = "%s/Python26" %basedir
+  python_dir = r"%s\Python27" %basedir
   sys.path.append(python_dir)
-  sys.path.append("%s/DLLs" %python_dir)
-  sys.path.append("%s/Lib" %python_dir)
-  sys.path.append("%s/Lib/site-packages" %python_dir)
-  sys.path.append("%s/Lib/site-packages/PIL" %python_dir)
+  sys.path.append(r"%s\DLLs" %python_dir)
+  sys.path.append(r"%s\Lib" %python_dir)
+  sys.path.append(r"%s\Lib\site-packages" %python_dir)
+  sys.path.append(r"%s\Lib\site-packages\PIL" %python_dir)
 else:
   set_sys_path = True
   try:
     import os
-    set_sys_path = os.path.exists(basedir + '/Python26')
+    set_sys_path = os.path.exists(basedir + '/Python27')
   except:
     pass
   if set_sys_path:
-    sys.prefix = basedir + '/Python26'
+    sys.prefix = basedir + '/Python27'
     sys.path = ['',
-      sys.prefix + '/python2.6',
-      sys.prefix + '/python2.6/lib-tk',
-      sys.prefix + '/python2.6/lib-old',
-      sys.prefix + '/python2.6/lib-dynload',
-      sys.prefix + '/python2.6/site-packages',
-      sys.prefix + '/python2.6/site-packages/PIL'
+      sys.prefix + '/python2.7',
+      sys.prefix + '/python2.7/lib-tk',
+      sys.prefix + '/python2.7/lib-old',
+      sys.prefix + '/python2.7/lib-dynload',
+      sys.prefix + '/python2.7/site-packages',
+      sys.prefix + '/python2.7/site-packages/PIL'
     ]
     if sys.platform == 'darwin':
-      sys.path.append(sys.prefix + '/python2.6/plat-darwin')
-      sys.path.append(sys.prefix + '/python2.6/plat-mac')
+      sys.path.append(sys.prefix + '/python2.7/plat-darwin')
+      sys.path.append(sys.prefix + '/python2.7/plat-mac')
     elif sys.platform == 'linux2':
-      sys.path.append(sys.prefix + '/python2.6/plat-linux2')
+      sys.path.append(sys.prefix + '/python2.7/plat-linux2')
 sys.path.append(datadir)
 stdout_redirection = True
 
@@ -295,26 +295,6 @@ import urllib2
 import multipart
 
 
-
-#if olx.IsPluginInstalled('plugin-Batch') == "true":
-  #import plugin_batch_exex
-
-#if olx.IsPluginInstalled('Olex2Portal') == "true":
-    #import Olex2Portal
-
-#if olx.IsPluginInstalled('StructureSpace') == "true":
-    #import structurespace
-
-#if olx.IsPluginInstalled('HPTools') == "true":
-    #import hptools
-
-#if olx.IsPluginInstalled('SQLAlchemy') == "true":
-    #import SQLAlchemy
-
-#if olx.IsPluginInstalled('g4') == "true":
-    #import g4
-
-
 if olx.IsPluginInstalled('MySQL') == "true":
   try:
     import OlexToMySQL
@@ -354,7 +334,9 @@ except ImportError, err:
 print "Welcome to Olex2"
 print "\nWe are grateful to our users for testing and supporting Olex2"
 print "Please find the link to credits in the About box"
-print "\nDolomanov, O.V.; Bourhis, L.J.; Gildea, R.J.; Howard, J.A.K.; Puschmann, H.,\nOLEX2: A complete structure solution, refinement and analysis program (2009).\nJ. Appl. Cryst., 42, 339-341.\n"
+print "\nDolomanov, O.V.; Bourhis, L.J.; Gildea, R.J.; Howard, J.A.K.; Puschmann, H.," +\
+      "\nOLEX2: A complete structure solution, refinement and analysis program (2009)."+\
+      "\nJ. Appl. Cryst., 42, 339-341.\n"
 ## These imports will register macros and functions for spy.
 if OV.HasGUI():
   from Skin import Skin
