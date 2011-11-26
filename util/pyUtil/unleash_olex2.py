@@ -2,19 +2,21 @@
 
 """ Olex 2 distro management """
 # these to specify to created separate zip files
-plugins = ('MySQL', 'Batch', 'Crypto', 'ODAC', 'Headless', 'Olex2Portal')
+plugins = ('MySQL', 'Batch', 'Crypto', 'ODAC',
+           'Headless', 'Headless_64',
+           'Olex2Portal')
 #available ports
 # alteartions for binary files : name (properties...), olex-port MUST be specified for non-portable files
-mac_port_name = 'port-mac-intel-py26'
-mac_port_zip_name = 'mac-intel-py26.zip'
+mac_port_name = 'port-mac-intel-py27'
+mac_port_zip_name = 'mac-intel-py27.zip'
 mac_port_prefix = 'olex2.app/Contents/MacOS/'
 
-suse32_port_name = 'port-suse101x32-py26'
-suse32_port_zip_name = 'suse101x32-py26.zip'
+suse32_port_name = 'port-suse101x32-py27'
+suse32_port_zip_name = 'suse101x32-py27.zip'
 suse32_port_prefix = 'olex2/'
 
-suse64_port_name = 'port-suse101x64-py26'
-suse64_port_zip_name = 'suse101x64-py26.zip'
+suse64_port_name = 'port-suse101x64-py27'
+suse64_port_zip_name = 'suse101x64-py27.zip'
 suse64_port_prefix = 'olex2/'
 
 win_port_name = 'port-win32-portable'
@@ -44,29 +46,29 @@ distro_zips = (
 )
 
 external_files = {
-  #windows installer files
+  #windows installer file
   'installer.exe': ('olex-top',), #mind the comma!
-  'installer_64.exe': ('olex-top',),
   #mac
   'olex2-mac.zip': ('olex-port', mac_port_name, 'action:extract', 'action:delete'),
   'unirun-mac.zip': ('olex-port', mac_port_name, 'action:extract', 'action:delete'),
   'cctbx-mac.zip': ('olex-port', mac_port_name, 'action:extract', 'action:delete'),
-  'python26-mac.zip': ('olex-port', mac_port_name, 'action:extract', 'action:delete'),
+  'python27-mac.zip': ('olex-port', mac_port_name, 'action:extract', 'action:delete'),
+  'lib-mac.zip': ('olex-port', mac_port_name, 'action:extract', 'action:delete'),
   #linux32
   'olex2-suse101x32.zip': ('olex-port', suse32_port_name, 'action:extract', 'action:delete'),
   'unirun-suse101x32.zip': ('olex-port', suse32_port_name, 'action:extract', 'action:delete'),
   'cctbx-suse101x32.zip': ('olex-port', suse32_port_name, 'action:extract', 'action:delete'),
-  'python26-suse101x32.zip': ('olex-port', suse32_port_name, 'action:extract', 'action:delete'),
+  'python27-suse101x32.zip': ('olex-port', suse32_port_name, 'action:extract', 'action:delete'),
   'lib-suse101x32.zip': ('olex-port', suse32_port_name, 'action:extract', 'action:delete'),
   #linux64
   'olex2-suse101x64.zip': ('olex-port', suse64_port_name, 'action:extract', 'action:delete'),
   'unirun-suse101x64.zip': ('olex-port', suse64_port_name, 'action:extract', 'action:delete'),
   'cctbx-suse101x64.zip': ('olex-port', suse64_port_name, 'action:extract', 'action:delete'),
-  'python26-suse101x64.zip': ('olex-port', suse64_port_name, 'action:extract', 'action:delete'),
+  'python27-suse101x64.zip': ('olex-port', suse64_port_name, 'action:extract', 'action:delete'),
   'lib-suse101x64.zip': ('olex-port', suse64_port_name, 'action:extract', 'action:delete'),
   #windows
   'launch_exe.zip': ('olex-port', win_port_name,  'action:extract', 'action:delete'),
-  'python26.zip': ('olex-port', win_port_name, 'action:extract', 'action:delete'),
+  'python27.zip': ('olex-port', win_port_name, 'action:extract', 'action:delete'),
   #SSE2
   'cctbx.zip': ('olex-port', win_sse2_port_name, 'action:extract', 'action:delete'),
   'olex2_exe.zip': ('olex-port', win_sse2_port_name, 'action:extract', 'action:delete'),
@@ -75,7 +77,7 @@ external_files = {
   'olex2_exe_sse.zip': ('olex-port', win_sse_port_name, 'action:extract', 'action:delete'),
   #windows 64
   'launch_exe_64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
-  'python26_64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
+  'python27_64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
   'cctbx_64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
   'olex2_exe_64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
   #portables
@@ -88,7 +90,8 @@ external_files = {
   'odac_update.txt': ('olex-install', 'olex-update'),
   'licence.rtf': ('olex-install', 'olex-update'),
   #plugins, no solution for portable plugins yet
-  'olex2c.exe': ('olex-port', 'plugin-Headless')
+  'olex2c_exe.zip': ('olex-port', 'plugin-Headless', 'action:extract', 'action:delete'),
+  'olex2c_exe_64.zip': ('olex-port', 'plugin-Headless_64', 'action:extract', 'action:delete'),
 }
 # special zip files (must have relevant structure), must exist ABOVE as well!!
 #if the associated value is false - the file is non-portable and will not end up in the portable-gui.zip
@@ -100,28 +103,28 @@ set(  ['olex2_fonts.zip',
    )
 win_sse2_zip_files = \
 set(  ['cctbx.zip',      #cctbx/cctb_sources,...
-      'python26.zip',    #Pyhton26/..., ..., + python26.dll!!!
+      'python27.zip',    #Pyhton27/..., ..., + python27.dll!!!
       'launch_exe.zip',  #olex2.exe
       'olex2_exe.zip'   #olex2.dll, it will be veryfied first of all
       ]
    ) | portable_zip_files
 win_sse_zip_files = \
 set(  ['cctbx_sse.zip',    #cctbx/cctb_sources,...
-      'python26.zip',      #Pyhton26/..., ..., + python26.dll!!!
+      'python27.zip',      #Pyhton27/..., ..., + python27.dll!!!
       'launch_exe.zip',    #olex2.exe
       'olex2_exe_sse.zip'  #olex2.dll
       ]
    ) | portable_zip_files
 win64_zip_files = \
 set(  ['cctbx_64.zip',     #cctbx/cctb_sources,...
-      'python26_64.zip',   #Pyhton26/..., ..., + python26.dll!!!
+      'python27_64.zip',   #Pyhton27/..., ..., + python27.dll!!!
       'olex2_exe_64.zip',  #olex2.dll
       'launch_exe_64.zip'  #olex2.exe
       ]
    ) | portable_zip_files
 mac_zip_files = \
 set(  ['cctbx-mac.zip',  #cctbx/cctb_sources,...
-      'python26-mac.zip',#Pyhton26/..., ..., + python26 dlls
+      'python27-mac.zip',#Pyhton27/..., ..., + python27 dlls
       'olex2-mac.zip',    #olex2 executable
       'unirun-mac.zip'
       ]
@@ -129,7 +132,7 @@ set(  ['cctbx-mac.zip',  #cctbx/cctb_sources,...
 
 suse32_zip_files = \
 set(  ['cctbx-suse101x32.zip',  #cctbx/cctb_sources,...
-      'python26-suse101x32.zip',#Pyhton26/..., ..., + python26 dlls
+      'python27-suse101x32.zip',#Pyhton27/..., ..., + python27 dlls
       'lib-suse101x32.zip',     #lib/dlls
       'olex2-suse101x32.zip',    #olex2 executable
       'unirun-suse101x32.zip'
@@ -137,14 +140,15 @@ set(  ['cctbx-suse101x32.zip',  #cctbx/cctb_sources,...
    ) | portable_zip_files
 suse64_zip_files = \
 set(  ['cctbx-suse101x64.zip',  #cctbx/cctb_sources,...
-      'python26-suse101x64.zip',#Pyhton26/..., ..., + python26 dlls
+      'python27-suse101x64.zip',#Pyhton27/..., ..., + python27 dlls
       'lib-suse101x64.zip',     #lib/dlls
       'olex2-suse101x64.zip',    #olex2 executable
       'unirun-suse101x64.zip'
       ]
    ) | portable_zip_files
 # a set of all zip files...
-all_zip_files = win_sse2_zip_files | win_sse_zip_files | win64_zip_files | mac_zip_files | suse32_zip_files | suse64_zip_files
+all_zip_files = win_sse2_zip_files | win_sse_zip_files | win64_zip_files\
+              | mac_zip_files | suse32_zip_files | suse64_zip_files
 
 altered_files = set([])
 altered_dirs = set([])
@@ -708,7 +712,6 @@ if not option.dev:
     prefix=mac_port_prefix,
     extra_files =
     {
-      bin_directory + '/mac-distro/start' : 'start',
       bin_directory + '/mac-distro/Info.plist' : 'olex2.app/Contents/Info.plist',
       bin_directory + '/mac-distro/PkgInfo' : 'olex2.app/Contents/PkgInfo',
       bin_directory + '/mac-distro/usettings.dat' : 'olex2.app/Contents/MacOS/usettings.dat'
@@ -720,7 +723,17 @@ plugin_index_file_name = update_directory + 'plugin.ind'
 for plugin, files in files_for_plugin.items():
   plugin_zip = zipfile.ZipFile(web_directory + '/' + plugin + '.zip', 'w', compression=zipfile.ZIP_DEFLATED)
   for f in files:
-    plugin_zip.write(destination(f,'update'), zip_destination(f))
+    if os.path.splitext(f)[1].lower() == '.zip':
+      src_zip = zipfile.ZipFile(f, 'r')
+      for zip_info in src_zip.infolist():
+        zi = zipfile.ZipInfo(zip_info.filename)
+        zi.date_time = zip_info.date_time;
+        zi.compress_type = zipfile.ZIP_DEFLATED
+        zi.external_attr = 0775 << 16L # it is NEEDED on Linux and Mac
+        plugin_zip.writestr(zi, src_zip.read(zip_info.filename) )
+      src_zip.close()
+    else:
+      plugin_zip.write(destination(f,'update'), zip_destination(f))
   create_index(zip_index_file_name, only_prop='plugin-'+plugin, enforce_only_prop=True)
   plugin_zip.write(zip_index_file_name, 'index.ind')
   plugin_zip.close()
