@@ -126,7 +126,8 @@ mac_zip_files = \
 set(  ['cctbx-mac.zip',  #cctbx/cctb_sources,...
       'python27-mac.zip',#Pyhton27/..., ..., + python27 dlls
       'olex2-mac.zip',    #olex2 executable
-      'unirun-mac.zip'
+      'unirun-mac.zip',
+      'lib-mac.zip'
       ]
    ) | portable_zip_files
 
@@ -644,43 +645,44 @@ def create_portable_distro(port_props, zip_name, port_zips, prefix, extra_files)
   dest_zip.close()
   return
 ####################################################################################################
-create_portable_distro(
-  port_props=None,
-  zip_name=portable_zip_name,
-  port_zips=portable_zip_files,
-  prefix=portable_prefix,
-  extra_files = None
-)
-create_portable_distro(
-  port_props=set([win_sse2_port_name,win_port_name]),
-  zip_name=win_sse2_port_zip_name,
-  port_zips=win_sse2_zip_files,
-  prefix=win_sse2_port_prefix,
-  extra_files =
-  {
-    bin_directory + '/vcredist_x86.exe' : 'vcredist_x86.exe'
-  }
-)
-create_portable_distro(
-  port_props=set([win_sse_port_name,win_port_name]),
-  zip_name=win_sse_port_zip_name,
-  port_zips=win_sse_zip_files,
-  prefix=win_sse_port_prefix,
-  extra_files =
-  {
-    bin_directory + '/vcredist_x86.exe' : 'vcredist_x86.exe'
-  }
-)
-create_portable_distro(
-  port_props=set([win64_port_name]),
-  zip_name=win64_port_zip_name,
-  port_zips=win64_zip_files,
-  prefix=win64_port_prefix,
-  extra_files =
-  {
-    bin_directory + '/vcredist_x64.exe' : 'vcredist_x64.exe'
-  }
-)
+if True:
+  create_portable_distro(
+    port_props=None,
+    zip_name=portable_zip_name,
+    port_zips=portable_zip_files,
+    prefix=portable_prefix,
+    extra_files = None
+  )
+  create_portable_distro(
+    port_props=set([win_sse2_port_name,win_port_name]),
+    zip_name=win_sse2_port_zip_name,
+    port_zips=win_sse2_zip_files,
+    prefix=win_sse2_port_prefix,
+    extra_files =
+    {
+      bin_directory + '/vcredist_x86.exe' : 'vcredist_x86.exe'
+    }
+  )
+  create_portable_distro(
+    port_props=set([win_sse_port_name,win_port_name]),
+    zip_name=win_sse_port_zip_name,
+    port_zips=win_sse_zip_files,
+    prefix=win_sse_port_prefix,
+    extra_files =
+    {
+      bin_directory + '/vcredist_x86.exe' : 'vcredist_x86.exe'
+    }
+  )
+  create_portable_distro(
+    port_props=set([win64_port_name]),
+    zip_name=win64_port_zip_name,
+    port_zips=win64_zip_files,
+    prefix=win64_port_prefix,
+    extra_files =
+    {
+      bin_directory + '/vcredist_x64.exe' : 'vcredist_x64.exe'
+    }
+  )
 #create linux and mac distro only in releases
 if not option.dev:
   create_portable_distro(
