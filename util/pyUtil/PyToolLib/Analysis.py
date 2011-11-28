@@ -842,7 +842,7 @@ class Graph(ImageTools):
       marker = self.marker_params[self.dataset_counter]
     except IndexError:
       marker = self.marker_params[0]
-      
+
     self.dataset_counter += 1
     fill = marker.fill.rgb
     outline = marker.border.rgb
@@ -905,12 +905,12 @@ class Graph(ImageTools):
       if self.item == "AutoChem":
         map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="reap %s"  target="%s">"""
                             % (box + (xr, yr)))
-      
+
       if hrefs:
         map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="%s" target="%s">"""
                             % (box + (hrefs[i], targets[i])))
-        
-        
+
+
       else:
         href="UpdateHtml"
         href=""
@@ -2210,8 +2210,8 @@ class X_Y_plot(Analysis):
 #    self.graphInfo["TopRightTitle"] = meta["TopRightTitle"]
 #    self.graphInfo["FontScale"] = meta["FontScale"]
 
-    
-    
+
+
     self.graphInfo.update(self.metadata)
     self.make_empty_graph(axis_x = True)
 
@@ -2224,7 +2224,7 @@ class X_Y_plot(Analysis):
                                                metadata=item[4],
                                                ))
       i += 1
-    
+
     self.draw_pairs()
     self.graphInfo.setdefault("pop_html", 'acgraph.htm')
     self.graphInfo.setdefault("pop_name", 'acgraph')
@@ -2572,7 +2572,7 @@ class HealthOfStructure():
     self.grade_4_colour = OV.GetParam('gui.skin.diagnostics.colour_grade4').hexadecimal
     self.available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
     self.stats = None
-    
+
   def get_HOS_d(self):
     try:
       if self.initialise_HOS():
@@ -2580,7 +2580,7 @@ class HealthOfStructure():
     except Exception, err:
       print err
       return None
-    
+
   def make_HOS(self):
     if self.debug:
       import time
@@ -2597,7 +2597,7 @@ class HealthOfStructure():
       return
     OV.write_to_olex("reflection-stats-summary.htm" , "n/a")
     hkl = OV.HKLSrc()
-    if not os.path.exists(hkl):
+    if not hkl or not os.path.exists(hkl):
       print "There is no reflection file associated with this structure"
       txt = "<tr><table width='100%%' cellspacing='2'><tr bgcolor=%s align='center'>" %self.grade_4_colour
       txt += "<td colspan='2'><font color=#ffffff>There is no reflection file</font><td>"
@@ -2622,13 +2622,13 @@ class HealthOfStructure():
       retVal = f_sq_obs.completeness()
       OV.SetParam('snum.data.completeness_full',retVal)
     return retVal
-  
+
   def get_cctbx_reflection_statistics_html(self):
     from reflection_statistics import OlexCctbxReflectionStats
     self.stats = OlexCctbxReflectionStats()
     value = self.stats.cctbx_stats.observations.completeness()
     return value
-  
+
   def summarise_HOS(self):
     d = {}
     txt = ""
@@ -2740,7 +2740,7 @@ class HealthOfStructure():
 
   def get_bg_colour(self, item, val):
     op = OV.GetParam('diagnostics.hkl.%s.op' %item)
-    
+
     for i in xrange(4):
       i += 1
       if op == "greater":
