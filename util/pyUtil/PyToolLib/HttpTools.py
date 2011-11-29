@@ -5,6 +5,7 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 OV.use_proxy_settings = True
 import urllib2
+import os
 
 http_timeout = 7
 
