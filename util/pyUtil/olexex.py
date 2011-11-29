@@ -1398,10 +1398,13 @@ def check_for_crypto():
 
 
 def get_proxy_from_usettings():
-  rFile = open("%s/usettings.dat" %OV.BaseDir(),'r')
+  proxy = None
+  settings_filename = "%s/usettings.dat" %OV.BaseDir()
+  if not os.path.exists(settings_filename):
+    return proxy
+  rFile = open(settings_filename,'r')
   lines = rFile.readlines()
   rFile.close()
-  proxy = None
   for line in lines:
     if line.startswith('proxy='):
       proxy = line.split('proxy=')[1].strip()
