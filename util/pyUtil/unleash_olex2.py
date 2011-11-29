@@ -1,10 +1,12 @@
 #!/usr/bin/python
 
 """ Olex 2 distro management """
-# these to specify to created separate zip files
-plugins = ('MySQL', 'Batch', 'Crypto', 'ODAC',
-           'Headless', 'Headless_64',
-           'Olex2Portal')
+
+# plugin properties name-platform-architecture, like Headless-win-32
+# Headless - portables
+# win - portable to windows disregarding the architecture
+# 32 - runs only on 32 bit
+
 #available ports
 # alteartions for binary files : name (properties...), olex-port MUST be specified for non-portable files
 mac_port_name = 'port-mac-intel-py27'
@@ -90,8 +92,8 @@ external_files = {
   'odac_update.txt': ('olex-install', 'olex-update'),
   'licence.rtf': ('olex-install', 'olex-update'),
   #plugins, no solution for portable plugins yet
-  'olex2c_exe.zip': ('olex-port', 'plugin-Headless', 'action:extract', 'action:delete'),
-  'olex2c_exe_64.zip': ('olex-port', 'plugin-Headless_64', 'action:extract', 'action:delete'),
+  'olex2c_exe.zip': ('olex-port', 'plugin-Headless-win-32', 'action:extract', 'action:delete'),
+  'olex2c_exe_64.zip': ('olex-port', 'plugin-Headless-win-64', 'action:extract', 'action:delete'),
 }
 # special zip files (must have relevant structure), must exist ABOVE as well!!
 #if the associated value is false - the file is non-portable and will not end up in the portable-gui.zip
@@ -398,6 +400,18 @@ update_files = filter_out_directories(
 filter_out_directories(
   client.propget('olex-port', working_directory, recurse=True).keys())
 
+#evaluate available properties for plugins
+plugin_props = set()
+for f, ps in client.proplist(working_directory,	recurse=True):
+  for p in ps:
+    if p.startswith('plugin-'):
+      plugin_props.add(p[7:])
+for f, ps in external_files.iteritems():
+  for p in ps:
+    if p.startswith('plugin-'):
+      plugin_props.add(p[7:])
+#end of the plugin property evaluation
+
 installer_files = filter_out_directories(
   client.propget('olex-install', working_directory, recurse=True).keys())
 files_for_plugin = dict(
@@ -406,7 +420,7 @@ files_for_plugin = dict(
        client.propget('plugin-%s'%plugin, working_directory,
 		      recurse=True).keys())
      )
-     for plugin in plugins ])
+     for plugin in plugin_props ])
 
 # process binary files, new folders might get created, so the call is before creating dirs
 for val, key in external_files.iteritems():
@@ -559,6 +573,8 @@ def fileter_installer_file(only_prop=None, port_props = None, portable=False, en
 
 def create_index(index_file_name, only_prop=None, port_props = None, portable=False, enforce_only_prop=False):
   portable_files = set([])
+  if only_prop is None: only_prop = ''
+  only_props = set(only_prop.split(';'))
   idx_file = open(index_file_name, 'w')
   root_entry = IndexEntry(None, -1, None, None, True)
   for dir_path, dir_names, file_names in os.walk(update_directory):
@@ -588,7 +604,8 @@ def create_index(index_file_name, only_prop=None, port_props = None, portable=Fa
       if portable and external_files.has_key(f):
         if 'olex-port' in props and (port_props is None or len(port_props&prop_set) == 0):
             continue
-      elif (enforce_only_prop or f not in all_zip_files) and ((only_prop is not None) and (only_prop not in prop_set)):
+      elif (enforce_only_prop or f not in all_zip_files) and\
+           (only_prop and len(only_props&prop_set) == 0):
         continue
       if portable:
         portable_files.add(normalised_root_dir + f)
@@ -653,6 +670,7 @@ if True:
     prefix=portable_prefix,
     extra_files = None
   )
+if True:
   create_portable_distro(
     port_props=set([win_sse2_port_name,win_port_name]),
     zip_name=win_sse2_port_zip_name,
@@ -684,7 +702,7 @@ if True:
     }
   )
 #create linux and mac distro only in releases
-if not option.dev:
+if False:
   create_portable_distro(
     port_props=set([suse32_port_name]),
     zip_name=suse32_port_zip_name,
@@ -720,23 +738,36 @@ if not option.dev:
     }
   )
 
+#init plugin relations
+plugins_to_del = set()
+for p1, f1 in files_for_plugin.items():
+  p1_toks = p1.split('-')
+  for p2, f2 in files_for_plugin.items():
+    p2_toks = p2.split('-')
+    if len(p2_toks) <= len(p1_toks): continue
+    matches = True
+    for i in range(len(p1_toks)):
+      if p2_toks[i] != p1_toks[i]:
+        matches = False
+        break
+    if not matches: continue
+    f2 += f1
+    plugins_to_del.add(p1)
+for p in plugins_to_del:
+  del files_for_plugin[p]
 #create plugin zips with indexes
 plugin_index_file_name = update_directory + 'plugin.ind'
 for plugin, files in files_for_plugin.items():
   plugin_zip = zipfile.ZipFile(web_directory + '/' + plugin + '.zip', 'w', compression=zipfile.ZIP_DEFLATED)
   for f in files:
-    if os.path.splitext(f)[1].lower() == '.zip':
-      src_zip = zipfile.ZipFile(f, 'r')
-      for zip_info in src_zip.infolist():
-        zi = zipfile.ZipInfo(zip_info.filename)
-        zi.date_time = zip_info.date_time;
-        zi.compress_type = zipfile.ZIP_DEFLATED
-        zi.external_attr = 0775 << 16L # it is NEEDED on Linux and Mac
-        plugin_zip.writestr(zi, src_zip.read(zip_info.filename) )
-      src_zip.close()
-    else:
-      plugin_zip.write(destination(f,'update'), zip_destination(f))
-  create_index(zip_index_file_name, only_prop='plugin-'+plugin, enforce_only_prop=True)
+    plugin_zip.write(destination(f,'update'), zip_destination(f))
+
+  props = [];
+  p_toks = plugin.split('-')
+  while len(p_toks) != 0:
+    props.append('plugin-'+'-'.join(p_toks))
+    del p_toks[len(p_toks)-1]
+  create_index(zip_index_file_name, only_prop=';'.join(props), enforce_only_prop=True)
   plugin_zip.write(zip_index_file_name, 'index.ind')
   plugin_zip.close()
 if os.path.exists(plugin_index_file_name):
