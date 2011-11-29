@@ -397,13 +397,15 @@ gui
         .type = colour
       grad_step = 0.2
         .type = float
-      height = 23
+      height = 22
         .type = int
       corner_rad = 3
         .type = int
       rounded = 1111
         .type = str
-      font_size = 17
+      font_name = Vera Bold
+        .type = str
+      font_size = 16
         .type = int
       top = 2
         .type = int
@@ -413,7 +415,7 @@ gui
         .type = float
       grad_colour_L = 1.3
         .type = float
-      font_colour_L = 0.4
+      font_colour_L = 0.2
         .type = float
       font_colour = #555555
         .type = colour

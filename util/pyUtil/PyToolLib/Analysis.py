@@ -2668,6 +2668,9 @@ class HealthOfStructure():
         elif raw_val == -1:
           value = "MERG 0"
           bg_colour = "#000000"
+        else:
+          value_format = "%." + value_format
+          value = value_format %value
       else:
         value_format = "%." + value_format
         value = value_format %value
