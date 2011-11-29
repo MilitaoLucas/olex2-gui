@@ -1396,24 +1396,6 @@ def check_for_crypto():
     #import olex
     #olex.m(r"InstallPlugin ODAC")
 
-
-def get_proxy_from_usettings():
-  proxy = None
-  settings_filename = "%s/usettings.dat" %OV.BaseDir()
-  if not os.path.exists(settings_filename):
-    return proxy
-  rFile = open(settings_filename,'r')
-  lines = rFile.readlines()
-  rFile.close()
-  for line in lines:
-    if line.startswith('proxy='):
-      proxy = line.split('proxy=')[1].strip()
-  if proxy:
-    print "Using Proxy server %s" %proxy
-  else:
-    print "No Proxy server is set"
-  return proxy
-
 def register_new_odac(username=None, pwd=None):
   OV.Cursor("Please wait while AutoChem will be installed")
   mac_address = OV.GetMacAddress()[0]
@@ -1519,8 +1501,6 @@ def updateACF(force=False):
   password = "update456R"
   institution = keyname.split("-")[0]
   type_of_key = keyname.split("-")[-1]
-  proxy = get_proxy_from_usettings()
-  proxies = {'http': proxy}
 
   for mac_address in OV.GetMacAddress():
     url = "http://www.olex2.org/odac/update"

@@ -43,10 +43,13 @@ def make_url_call(url, values):
   return res
       
 def get_proxy_from_usettings():
+  proxy = None
+  settings_filename = "%s/usettings.dat" %OV.BaseDir()
+  if not os.path.exists(settings_filename):
+    return proxy
   rFile = open("%s/usettings.dat" %OV.BaseDir(),'r')
   lines = rFile.readlines()
   rFile.close()
-  proxy = None
   for line in lines:
     if line.startswith('proxy='):
       proxy = line.split('proxy=')[1].strip()
