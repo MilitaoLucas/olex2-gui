@@ -50,9 +50,9 @@ class SetupWizard(object):
     
     txt += r'''
 <tr VALIGN='center' NAME='Setup Title'>
-  <td width="8" bgcolor="$spy.GetParam(gui.html.highlight_colour)"></td>
-    <td width='80%%' colspan='2' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
-      <font size='4' color="$spy.GetParam(gui.html.font_colour)">
+  <td width="8" bgcolor="$GetVar(HtmlHighlightColour)"></td>
+    <td width='80%%' colspan='2' bgcolor="$GetVar(HtmlTableFirstcolColour)">
+      <font size='4' color="$GetVar(HtmlFontColour">
         <b>
           %%setup-title-%s%%
         </b>
@@ -60,7 +60,7 @@ class SetupWizard(object):
     </td> 
   </tr>
 <tr>
-  <td valign='top' width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td valign='top' width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td colspan = 2>
   <font size = '3'>
     %s
@@ -69,7 +69,7 @@ class SetupWizard(object):
 </tr>
 
 <tr>
-  <td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td colspan='2' align='right'>%s
   
     <a href="html.Hide setup-box ">Close this Window</a>
