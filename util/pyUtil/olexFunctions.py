@@ -715,6 +715,25 @@ class OlexFunctions(inheritFunctions):
   def GetUsername(self):
     return os.getenv('USERNAME')
 
+  def SetHtmlFontSize(self):
+    size = OV.GetParam('gui.html.font_size')
+    if sys.platform[:3] != 'win':
+      size += 1
+    #elif sys.platform[:3] == 'win':
+      #size = 6
+    OV.SetVar('HtmlFontSize', size)
+    return size
+
+  def SetHtmlFontSizeControls(self):
+    size = OV.GetParam('gui.html.font_size_controls')
+    if sys.platform[:3] != 'win':
+      size += 1
+    #elif sys.platform[:3] == 'win':
+      #size = 2
+    OV.SetVar('HtmlFontSizeControls', size)
+    return size
+
+
   def GetHtmlPanelX(self):
     screen_width = int(olx.GetWindowSize().split(',')[2])
     html_panelwidth = int(olx.html.ClientWidth('self'))
@@ -792,3 +811,5 @@ OV.registerFunction(OV.SetParam)
 OV.registerFunction(OV.set_cif_item)
 OV.registerFunction(OV.get_cif_item)
 OV.registerFunction(OV.CopyVFSFile)
+OV.registerFunction(OV.SetHtmlFontSize,False,'gui')
+OV.registerFunction(OV.SetHtmlFontSizeControls,False,'gui')

@@ -379,7 +379,7 @@ class ImageTools(FontInstances):
     OlexVFS.write_to_olex('logo1_txt.htm',txt)
     return "Done"
 
-  def resize_to_panelwidth(self, args):
+  def resize_to_panelwidth(self, args, width_adjust=50):
     name = args['i']
     colourize = args.get('c',False)
     path = ("%s/etc/%s" %(self.basedir, name))
@@ -388,7 +388,7 @@ class ImageTools(FontInstances):
       im = Image.open(path)
       if colourize:
         im = self.colourize(im, (0,0,0), OV.GetParam('gui.logo_colour'))
-      width = int(width) - 60
+      width = int(width) - width_adjust
       factor = im.size[0]/width
       height = int(im.size[1] / factor)
       im = self.resize_image(im, (width, height))
@@ -1164,7 +1164,7 @@ class ImageTools(FontInstances):
 
   def resize_news_image(self):
     tag = OV.GetTag().split('-')[0]
-    self.resize_to_panelwidth({'i':'news/news-%s.png' %tag})
+    self.resize_to_panelwidth({'i':'news/news-%s.png' %tag}, width_adjust=30)
 
   def make_simple_text_to_image(self, width, height, txt, font_name='Vera', font_size=16, bg_colour='#fff6bf', font_colour='#222222'):
     IM = Image.new('RGB', (width, height), bg_colour)
@@ -1436,4 +1436,5 @@ class ImageTools(FontInstances):
 
 a = ImageTools()
 OV.registerMacro(a.resize_to_panelwidth, 'i-Image&;c-Colourize')
-OV.registerFunction(a.make_pie_graph)
+OV.registerFunction(a.make_pie_graph,False,'it')
+OV.registerFunction(a.resize_news_image,False,'it')
