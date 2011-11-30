@@ -59,14 +59,14 @@ class OlexCctbxReflectionStats(OlexCctbxAdapter):
       self.cctbx_stats = iotbx.command_line.reflection_statistics.array_cache(self.reflections.f_obs, 10, 3)
       #self.cctbx_stats.show_completeness()
       sys.stdout = saveout
-      
+
       wFile = open(OV.StrDir() + '/reflection-stats-summary.htm','w')
       s.seek(0)
       lines = s.readlines()
       for line in lines:
         wFile.write(line + "<br>")
       wFile.close()
-      
+
       bitmap = 'working'
       OV.CreateBitmap(bitmap)
 
@@ -78,7 +78,7 @@ class OlexCctbxReflectionStats(OlexCctbxAdapter):
     finally:
       OV.DeleteBitmap(bitmap)
 
-      
+
 class r1_factor_vs_resolution(OlexCctbxAdapter):
   def __init__(self, n_bins=10, resolution_as="two_theta"):
     OlexCctbxAdapter.__init__(self)
@@ -161,9 +161,9 @@ class scale_factor_vs_resolution(OlexCctbxAdapter):
 class f_obs_vs_f_calc(OlexCctbxAdapter):
   def __init__(self, batch_number=None):
     OlexCctbxAdapter.__init__(self)
-    if [batch_number, self.reflections.batch_numbers].count(None) == 0:
-      assert batch_number <= flex.max(self.reflections.batch_numbers.data()), "batch_number <= max(batch_numbers)"
-      selection = (self.reflections.batch_numbers.data() == batch_number)
+    if [batch_number, self.reflections.batch_numbers_array].count(None) == 0:
+      assert batch_number <= flex.max(self.reflections.batch_numbers_array.data()), "batch_number <= max(batch_numbers)"
+      selection = (self.reflections.batch_numbers_array.data() == batch_number)
       f_sq_obs = self.reflections.f_sq_obs.select(selection)
       merging = self.reflections.merge(f_sq_obs)
       f_obs_merged = merging.array().f_sq_as_f()
