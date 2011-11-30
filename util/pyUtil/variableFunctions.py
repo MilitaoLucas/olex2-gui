@@ -13,7 +13,6 @@ import userDictionaries
 import ExternalPrgParameters
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
-import olexex
 from cStringIO import StringIO
 
 import phil_interface
@@ -27,7 +26,7 @@ def getOlex2VersionInfo():
   return txt
 
 def getDefaultPrgMethod(prgType):
-#  import olexex
+  import olexex
 #  defaultPrg = '?'
 #  defaultMethod = '?'
   if prgType == 'Refinement':
@@ -181,24 +180,25 @@ def LoadParams():
 OV.registerFunction(LoadParams)
 
 def LoadStructureParams():
+  import olexex
   ExternalPrgParameters.definedControls = [] # reset defined controls
   olx.current_mask = None
-  olx.phil_handler.reset_scope('snum', rebuild_index=False)
-  solutionPrg, solutionMethod = getDefaultPrgMethod('Solution')
-  refinementPrg, refinementMethod = getDefaultPrgMethod('Refinement')
-  snum_phil = """
-snum {
-  refinement.program = "%s"
-  refinement.method = "%s"
-  solution.program = "%s"
-  solution.method = "%s"
-  report.title = "%s"
-  image.ps.name = "%s"
-  image.bitmap.name = "%s"
-  }
-""" %(refinementPrg, refinementMethod, solutionPrg, solutionMethod,
-      OV.FileName(), OV.FileName(), OV.FileName())
-  olx.phil_handler.update(phil_string=snum_phil.encode('utf-8'))
+  olx.phil_handler.reset_scope('snum', rebuild_index=True)
+  #solutionPrg, solutionMethod = getDefaultPrgMethod('Solution')
+  #refinementPrg, refinementMethod = getDefaultPrgMethod('Refinement')
+  #snum_phil = """
+#snum {
+  #refinement.program = "%s"
+  #refinement.method = "%s"
+  #solution.program = "%s"
+  #solution.method = "%s"
+  #report.title = "%s"
+  #image.ps.name = "%s"
+  #image.bitmap.name = "%s"
+  #}
+#""" %(refinementPrg, refinementMethod, solutionPrg, solutionMethod,
+      #OV.FileName(), OV.FileName(), OV.FileName())
+  #olx.phil_handler.update(phil_string=snum_phil.encode('utf-8'))
   structure_phil_path = u"%s/.olex/%s.phil" %(OV.FilePath(), OV.FileName())
   if os.path.isfile(structure_phil_path):
     structure_phil_file = open(structure_phil_path, 'r')
