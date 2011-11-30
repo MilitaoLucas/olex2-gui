@@ -35,9 +35,9 @@ def make_logon_html():
     olx.html.ShowModal(pop_name)
   else:
     txt='''
-  <body link="$spy.GetParam(gui.html.link_colour)" bgcolor="$spy.GetParam(gui.html.bg_colour)">
-  <font color=$spy.GetParam(gui.html.font_colour)  size=$spy.GetParam(gui.html.font_size) face="$spy.GetParam(gui.html.font_name)">
-  <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_bg_colour)">
+  <body link="$GetVar(HtmlLinkColour)" bgcolor="$GetVar(HtmlBgColour)">
+  <font color=$GetVar(HtmlFontColour  size=$GetVar(HtmlFontSize) face="$GetVar(HtmlFontName)">
+  <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
   <tr>
     <td>
     %Username%: 
@@ -46,7 +46,7 @@ def make_logon_html():
      
        <input 
          type="text" 
-         bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+         bgcolor="$GetVar(HtmlInputBgColour))" 
          valign='center' 
          name="WEB_USERNAME"
          reuse
@@ -62,7 +62,7 @@ def make_logon_html():
      <td>
        <input 
          type="text" 
-         bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+         bgcolor="$GetVar(HtmlInputBgColour))" 
          valign='center' 
          name="WEB_PASSWORD"
          password
@@ -78,7 +78,7 @@ def make_logon_html():
      <td valign='centre'>
        <input 
          type="button" 
-         bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+         bgcolor="$GetVar(HtmlInputBgColour))" 
          valign='center' 
          width="60"  
          height="22"
@@ -99,20 +99,6 @@ def make_logon_html():
     y = 400
     olx.Popup(pop_name, 'logon.htm', "-s -b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(pop_name, boxWidth, boxHeight, x, y))
     olx.Echo('html.ShowModal(%s)' %pop_name)
-
- 
-##DELETE  
-#def web_authenticate():
-  #global username
-  #global password
-  #if not username:
-    #make_logon_html()
-    #username = olx.GetValue('Logon.WEB_USERNAME')
-    #password = olx.GetValue('Logon.WEB_PASSWORD')
-    #print username
-#OV.registerFunction(web_authenticate)
-
-
 
 
 def web_run_sql(sql = None, script = 'run_sql'):

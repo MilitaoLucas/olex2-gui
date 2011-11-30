@@ -409,7 +409,7 @@ def publicationMetadataHtmlMaker():
   retstr +="""
 <tr VALIGN="center" ALIGN="left">
   <td></td>
-  <td VALIGN="center" colspan=3 bgcolor=$spy.GetParam(gui.html.highlight_colour)>
+  <td VALIGN="center" colspan=3 bgcolor=$GetVar(HtmlHighlightColour)>
     <b>Please add the contact author to the list of Authors if that person is to appear on the paper!</b></a>
   </td>
 </tr>
@@ -578,7 +578,7 @@ def restraint_builder(cmd):
            "value":val,
            "width":width,
            "height":height,
-           "bgcolor":"$spy.GetParam(gui.html.input_bg_colour)"
+           "bgcolor":"$GetVar(HtmlInputBgColour))"
            }
       if items:
         d.setdefault("items",items)
@@ -723,7 +723,7 @@ def weightGuiDisplay():
   txt_Weight = OV.TranslatePhrase("Weight")
   html = '''
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_UPDATE_WEIGHT'>
-  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td VALIGN='right' colspan=3>
     <b><a target="%s" href="UpdateWght%s>>html.Update">%s: %s</a></b></td>
     <td VALIGN='center' ALIGN='right' colspan=1>%s</td>

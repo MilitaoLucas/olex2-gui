@@ -39,9 +39,9 @@ def make_translate_gui_items_html(item_l):
     olx.html.ShowModal(pop_name)
   else:
     txt='''
-  <body link="$spy.GetParam(gui.html.link_colour)" bgcolor="$spy.GetParam(gui.html.bg_colour)">
-  <font color=$spy.GetParam(gui.html.font_colour)  size=$spy.GetParam(gui.html.font_size) face="$spy.GetParam(gui.html.font_name)">
-  <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_bg_colour)">
+  <body link="$GetVar(HtmlLinkColour)" bgcolor="$GetVar(HtmlBgColour)">
+  <font color=$GetVar(HtmlFontColour  size=$GetVar(HtmlFontSize) face="$GetVar(HtmlFontName)">
+  <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
   '''
 
   for item in item_l:
@@ -62,7 +62,7 @@ def make_translate_gui_items_html(item_l):
      <td>
        <input
          type="text"
-         bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+         bgcolor="$GetVar(HtmlInputBgColour))"
          valign='center'
          name="%s"
          reuse
@@ -80,7 +80,7 @@ def make_translate_gui_items_html(item_l):
      <td valign='centre'>
        <input
          type="button"
-         bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+         bgcolor="$GetVar(HtmlInputBgColour))"
          valign='center'
          width="60"
          height="22"
@@ -89,7 +89,7 @@ def make_translate_gui_items_html(item_l):
          value = "OK">
        <input
          type="button"
-         bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+         bgcolor="$GetVar(HtmlInputBgColour))"
          valign='center'
          width="60"
          height="22"
@@ -125,10 +125,10 @@ def make_logon_html(url='www.olex2.org'):
     olx.html.ShowModal(pop_name)
   else:
     txt='''
-  <body link="$spy.GetParam(gui.html.link_colour)" bgcolor="$spy.GetParam(gui.html.bg_colour)">
-  <font color=$spy.GetParam(gui.html.font_colour)  size=$spy.GetParam(gui.html.font_size) face="$spy.GetParam(gui.html.font_name)">
+  <body link="$GetVar(HtmlLinkColour)" bgcolor="$GetVar(HtmlBgColour)">
+  <font color=$GetVar(HtmlFontColour  size=$GetVar(HtmlFontSize) face="$GetVar(HtmlFontName)">
   <b>Please log on to our server with the username and password you use at %s.<br></b>
-  <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_bg_colour)">
+  <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
   <tr>
     <td>
     Username:
@@ -137,7 +137,7 @@ def make_logon_html(url='www.olex2.org'):
 
        <input
          type="text"
-         bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+         bgcolor="$GetVar(HtmlInputBgColour))"
          valign='center'
          name="WEB_USERNAME"
          reuse
@@ -153,7 +153,7 @@ def make_logon_html(url='www.olex2.org'):
      <td>
        <input
          type="text"
-         bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+         bgcolor="$GetVar(HtmlInputBgColour))"
          valign='center'
          name="WEB_PASSWORD"
          password
@@ -170,7 +170,7 @@ def make_logon_html(url='www.olex2.org'):
      <td valign='centre'>
        <input
          type="button"
-         bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+         bgcolor="$GetVar(HtmlInputBgColour))"
          valign='center'
          width="60"
          height="22"
@@ -178,7 +178,7 @@ def make_logon_html(url='www.olex2.org'):
          value = "OK">
        <input
          type="button"
-         bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+         bgcolor="$GetVar(HtmlInputBgColour))"
          valign='center'
          width="60"
          height="22"

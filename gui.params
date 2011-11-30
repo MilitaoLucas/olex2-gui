@@ -103,13 +103,19 @@ gui
     bg_colour = #ffffff
       .type = colour
       .caption = "Background colour"
-    font_colour = #222244
+    font_colour = #442244
       .type = colour
     font_name = Arial
       .type = str
     font_size = 2
       .type = int
+    font_size_controls = 2
+      .type = int
     font_size_large = 5
+      .type = int
+    formula_colour = #442244
+      .type = colour
+    formula_size = 5
       .type = int
     highlight_colour = #ff8800
       .type = colour
@@ -122,6 +128,8 @@ gui
     checkbox_height = 18
       .type = int
     checkbox_width = 18
+      .type = int
+    checkbox_width_2 = 18
       .type = int
     combo_width_2 = 50
       .type = int
@@ -179,7 +187,7 @@ gui
         .type = colour
       grad_colour = #205c90
         .type = colour
-      height = 40
+      height = 42
         .type = int
       font_colour = '(237, 237, 237)'
         .type = colour
@@ -199,7 +207,7 @@ gui
         .type = float
       grad_colour_L = 0.75
         .type = float
-      filefullinfo_size = 11
+      filefullinfo_size = 12
         .type = int
       filefullinfo_colour = '(221, 221, 221)'
         .type = colour
@@ -492,7 +500,7 @@ gui
     .type = str
   labels_font = #olex2.fnt:frb_20
     .type = str
-  htmlpanelwidth = 450
+  htmlpanelwidth = 460
     .type = int
   htmlpanelwidth_margin_adjust = 22
     .type = int

@@ -100,7 +100,7 @@ def makeHtmlInputBox(inputDictionary):
 
   dictionary = {
     'width':'95%%',
-    'height':'$spy.GetParam(gui.html.input_height)',
+    'height':'$GetVar(HtmlInputHeight)',
     'onchange':'',
     'items':'',
     'multiline':'',
@@ -115,6 +115,7 @@ def makeHtmlInputBox(inputDictionary):
   dictionary.update(inputDictionary)
 
   htmlInputBoxText = '''
+<font size='$GetVar(HtmlFontSizeControls)'>
 <input
 type="%(type)s"
 %(multiline)s
@@ -129,12 +130,13 @@ onchange="%(onchange)s"
 %(readonly)s
 bgcolor="%(bgcolor)s"
 >
+</font>
 '''%dictionary
 
   return htmlInputBoxText
 
 def makeHtmlTableRow(dictionary):
-  dictionary.setdefault('font', 'size=%s' %OV.GetParam('gui.html.font_size'))
+  dictionary.setdefault('font', 'size=%s' %OV.GetParam('HtmlFontSize'))
   dictionary.setdefault('trVALIGN','center')
   dictionary.setdefault('trALIGN','left')
   dictionary.setdefault('fieldWidth','30%%')
@@ -337,8 +339,8 @@ def make_help_box(args):
   str += r'''
 %s
 <!-- #include tool-top gui/blocks/help-top.htm;image=blank;1; -->
-<tr VALIGN='center' NAME=%s bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
-  <td colspan=1 width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+<tr VALIGN='center' NAME=%s bgcolor="$GetVar(HtmlTableFirstcolColour)">
+  <td colspan=1 width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)">
   </td>
   <td>
     <font size='+2'>
@@ -349,7 +351,7 @@ def make_help_box(args):
   </td>
 </tr>
 <tr>
-  <td valign='top' width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+  <td valign='top' width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)">
   </td>
   <td>
     <font size='+1'>
@@ -358,7 +360,7 @@ def make_help_box(args):
   </td>
 </tr>
 <tr>
-  <td colspan=1 width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+  <td colspan=1 width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)">
   </td>
   <td align='right'>
     %s
@@ -434,7 +436,7 @@ def make_warning_html(colspan):
   html = '''
        <tr>
          %s
-         <td colspan="%s" bgcolor="$spy.GetParam(gui.html.highlight_colour)">
+         <td colspan="%s" bgcolor="$GetVar(HtmlHighlightColour)">
           <b>
             &nbsp;%s
           </b>
@@ -450,7 +452,7 @@ def make_table_first_col(help_name=None, popout=False, help_image='large'):
   else:
     help = make_help_href(help_name, popout, image=help_image)
   html ='''
-<td valign='top' width='2' align='center' bgcolor='$spy.GetParam(gui.html.table_firstcol_colour)'>
+<td valign='top' width='2' align='center' bgcolor='$GetVar(HtmlTableFirstcolColour)'>
   %s
 </td>
 ''' %help
@@ -459,8 +461,8 @@ def make_table_first_col(help_name=None, popout=False, help_image='large'):
 def make_html_opening():
   html = '''
   <html>
-  <body link=$spy.GetParam(gui.html.link_colour) bgcolor=$spy.GetParam(gui.html.bg_colour)>
-  <font color=$spy.GetParam(gui.html.font_colour) size=$spy.GetParam(gui.html.font_size) face="$spy.GetParam(gui.html.font_name)">
+  <body link=$GetVar(HtmlLinkColour) bgcolor=$GetVar(HtmlBgColour)>
+  <font color=$GetVar(HtmlFontColour size=$GetVar(HtmlFontSize) face="$GetVar(HtmlFontName)">
 <p> '''
   return html
 
@@ -479,8 +481,8 @@ def make_help_href(name, popout, image='normal'):
 
 def make_input_text_box(d):
   name = d.get('ctrl_name')
-  dic = {'height':'$spy.GetParam(gui.html.input_height)',
-         'bgcolor':'$spy.GetParam(gui.html.input_bg_colour)',
+  dic = {'height':'$GetVar(HtmlInputHeight)',
+         'bgcolor':'$GetVar(HtmlInputBgColour))',
          'value':'$spy.GetParam(%(varName)s)',
          'width':'45',
          'onchange':'',
@@ -492,8 +494,9 @@ def make_input_text_box(d):
   dic.update(d)
 
   html = '''
+<font size='$GetVar(HtmlFontSizeControls)'>
 <input
-       bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+       bgcolor="$GetVar(HtmlInputBgColour))"
        type="text"
        name="%(ctrl_name)s"
        value="%(value)s"
@@ -504,14 +507,15 @@ def make_input_text_box(d):
        onchange="%(onchange)s"
        %(manage)s
        data="%(data)s"
->''' %dic
+>
+</font>''' %dic
   return html
 
 
 def make_combo_text_box(d):
   name = d.get('ctrl_name')
-  dic = {'height':"$spy.GetParam(gui.html.combo_height)",
-         'bgcolor':'$spy.GetParam(gui.html.input_bg_colour)',
+  dic = {'height':"$GetVar(HtmlComboHeight)",
+         'bgcolor':'$GetVar(HtmlInputBgColour))',
          'value':'$spy.GetParam(%(varName)s)',
          'label':'',
          'valign':'center',
@@ -531,8 +535,9 @@ def make_combo_text_box(d):
       dic['readonly'] = ""
 
     html = '''
+<font size='$GetVar(HtmlFontSizeControls)'>
 <input
-       bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+       bgcolor="$GetVar(HtmlInputBgColour))"
        type="combo"
        name="%(ctrl_name)s"
        value="%(value)s"
@@ -546,18 +551,19 @@ def make_combo_text_box(d):
        %(manage)s
        data="%(data)s"
        %(readonly)s
->''' %dic
+>
+</font>''' %dic
   return html
 
 
 
 def make_tick_box_input(d):
   name = d.get('ctrl_name')
-  dic = {'height':'$spy.GetParam(gui.html.checkbox_height)',
-         'bgcolor':'$spy.GetParam(gui.html.table_bg_colour)',
-         'fgcolor':'$spy.GetParam(gui.html.font_colour)',
+  dic = {'height':'$GetVar(HtmlCheckboxHeight)',
+         'bgcolor':'$GetVar(HtmlTableBgColour)',
+         'fgcolor':'$GetVar(HtmlFontColour',
          'value':'$spy.GetParam(%(varName)s)',
-         'width':'$spy.GetParam(gui.html.checkbox_height)',
+         'width':'$GetVar(HtmlCheckboxHeight)',
          'onchange':'',
          'value':'%s '%name,
          'oncheck':'',
@@ -574,6 +580,7 @@ def make_tick_box_input(d):
 
 
   html = """
+<font size='$GetVar(HtmlFontSizeControls)'>
 <input
   type="checkbox"
   width="%(width)s"
@@ -590,14 +597,15 @@ def make_tick_box_input(d):
   %(manage)s
   data="%(data)s"
   >
+  </font>
 """ %dic
   return html
 
 def make_spin_input(d):
   name = d.get('ctrl_name')
   dic = {'width':'12',
-         'height':'$spy.GetParam(gui.html.spin_height)',
-         'bgcolor':'$spy.GetParam(gui.html.input_bg_colour)',
+         'height':'$GetVar(HtmlSpinHeight)',
+         'bgcolor':'$GetVar(HtmlInputBgColour))',
          'value':'$spy.GetParam(%(varName)s)',
          'max':'99',
          'min':'0',
@@ -610,6 +618,7 @@ def make_spin_input(d):
      }
   dic.update(d)
   html = """
+<font size='$GetVar(HtmlFontSizeControls)'>
 <input
   label="%(label)s"
   valign="%(valign)s"
@@ -624,7 +633,8 @@ def make_spin_input(d):
   value="%(value)s"
   onchange="%(onchange)s"
   manage="%(manage)s"
-  >""" %dic
+  >
+  </font>""" %dic
   return html
 
 def make_input_button(d):
@@ -632,13 +642,14 @@ def make_input_button(d):
          'onup':'',
          'onclick':'',
          'hint':'',
-         'height':"$spy.GetParam(gui.html.button_height)",
-         'bgcolor':"$spy.GetParam(gui.html.input_bg_colour)",
+         'height':"$GetVar(HtmlButtonHeight)",
+         'bgcolor':"$GetVar(HtmlInputBgColour))",
          'valign':'center',
          'halign':'left'
          }
   dic.update(d)
   html = '''
+<font size='$GetVar(HtmlFontSizeControls)'>
 <input
   bgcolor="%(bgcolor)s"
   type="button"
@@ -650,6 +661,8 @@ def make_input_button(d):
   halign="%(halign)s"
   hint="%(hint)s"
   flat
+>
+</font>
 ''' %dic
   if dic['onclick']:
     html += '''
@@ -679,7 +692,7 @@ def format_help(string):
 
     for item in l:
       regex = re.compile(r"((?P<left>\W) (?P<txt>%s) (?P<right>\W))" %item, re.X)
-#      string = regex.sub(r"\g<left><font color='$spy.GetParam(gui.html.highlight_colour)'><b>\g<txt></b></font>\g<right>", string)
+#      string = regex.sub(r"\g<left><font color='$GetVar(HtmlHighlightColour)'><b>\g<txt></b></font>\g<right>", string)
       string = regex.sub(r"\g<left><b>\g<txt></b>\g<right>", string)
 
   ## find all occurences of strings between {{..}}. This will be translated into a dictionary and returned with the string.
@@ -704,7 +717,7 @@ def format_help(string):
 
   ## find all occurences of strings between t^..^t. These are the headers for tip of the day.
   regex = re.compile(r"t \^ (.*?)  \^ t", re.X)
-  string = regex.sub(r"<font color='$spy.GetParam(gui.html.highlight_colour)'><b>\1</b></font>&nbsp;", string)
+  string = regex.sub(r"<font color='$GetVar(HtmlHighlightColour)'><b>\1</b></font>&nbsp;", string)
 
   ## find all occurences of strings between <<..>>. These are keys to pressthe headers for tip of the day.
   regex = re.compile(r"<< (.*?)  >>", re.X)
@@ -726,11 +739,11 @@ def format_help(string):
   
   ## find all occurences of strings between l[]. These are links to help or tutorial popup boxes.
   regex = re.compile(r"l\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
-  string = regex.sub(r"<font size=+1 color='$spy.GetParam(gui.html.highlight_colour)'>&#187;</font><a target='Go to \g<linktext>' href='spy.make_help_box -name=\g<linkurl> -type=\g<linktype>'><b>\g<linktext></b></a>", string)
+  string = regex.sub(r"<font size=+1 color='$GetVar(HtmlHighlightColour)'>&#187;</font><a target='Go to \g<linktext>' href='spy.make_help_box -name=\g<linkurl> -type=\g<linktype>'><b>\g<linktext></b></a>", string)
 
   ## find all occurences of strings between gui[]. These are links make something happen on the GUI.
   regex = re.compile(r"gui\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
-  string = regex.sub(r"<font size=+1 color='$spy.GetParam(gui.html.highlight_colour)'>&#187;</font><a target='Show Me' href='\g<linkurl>'><b>\g<linktext></b></a>", string)
+  string = regex.sub(r"<font size=+1 color='$GetVar(HtmlHighlightColour)'>&#187;</font><a target='Show Me' href='\g<linkurl>'><b>\g<linktext></b></a>", string)
 
 
   ## find all occurences of strings between XX. These are command line entities.
@@ -762,8 +775,8 @@ def format_help(string):
   m = regex.findall(string)
   colour = "#232323"
   if m:
-#    s = regex.sub(r"<tr bgcolor='$spy.GetParam(gui.html.table_firstcol_colour)'><td><b>\2</b></td></tr><tr><td>", string.title())
-    s = regex.sub(r"<tr bgcolor='$spy.GetParam(gui.html.table_firstcol_colour)'><td><b>\2</b></td></tr><tr><td>", string)
+#    s = regex.sub(r"<tr bgcolor='$GetVar(HtmlTableFirstcolColour)'><td><b>\2</b></td></tr><tr><td>", string.title())
+    s = regex.sub(r"<tr bgcolor='$GetVar(HtmlTableFirstcolColour)'><td><b>\2</b></td></tr><tr><td>", string)
   else:
     s = string
 
@@ -1226,6 +1239,7 @@ def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
   d.setdefault('down', down)
   d.setdefault('hover', hover)
   txt = '''
+<font size='$GetVar(HtmlFontSizeControls)'>
 <input
   name=IMG_%(nameupper)s
   type="button"
@@ -1234,6 +1248,7 @@ def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
   onclick="%(cmds)s%(feedback)s"
   bgcolor=%(bgcolor)s
 >
+</font>
 '''%d
   return txt
 OV.registerFunction(MakeHoverButtonOff)
@@ -1278,6 +1293,7 @@ def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
   d.setdefault('hover', hover)
 
   txt = '''
+<font size='$GetVar(HtmlFontSizeControls)'>
 <input
   name=IMG_%(nameupper)s
   type="button"
@@ -1286,6 +1302,7 @@ def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
   onclick="%(cmds)s%(feedback)s"
   bgcolor=%(bgcolor)s
 >
+</font>
 '''%d
   return txt
 OV.registerFunction(MakeHoverButtonOn)
@@ -1496,8 +1513,8 @@ def makeFormulaForsNumInfo():
       if item in txt_formula:
         colour = OV.GetParam('gui.red').hexadecimal
     if not colour:
-      colour = OV.GetParam('gui.html.font_colour').hexadecimal
-    font_size = OV.GetParam('gui.html.font_size_large')
+      colour = OV.GetParam('gui.html.formula_colour').hexadecimal
+    font_size = OV.GetParam('gui.html.formula_size')
     html_formula = olx.xf.GetFormula('html',1)
     formula_string = "<font size=%s color=%s>%s</font>" %(font_size, colour, html_formula)
     return formula_string
