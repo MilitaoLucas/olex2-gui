@@ -1,7 +1,7 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
 
 <tr>
-  <td valign='top' width="8" align='center' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+  <td valign='top' width="8" align='center' bgcolor="$GetVar(HtmlTableFirstcolColour)">
     <a 
       href="spy.make_help_box -name='autochem' -popout='False'" 
       target="Help me with this">
@@ -15,7 +15,7 @@
 
 
 <tr>
-  <td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td  colspan='2' align='left'>
     <b>		
       <a href="spy.ac_run solveit -s">Current</a> |
@@ -29,12 +29,12 @@
 </tr>
 
 <tr align='left'>
-  <td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td colspan='2' align='left'>
     <input 
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+      bgcolor="$GetVar(HtmlInputBgColour)" 
       type="combo"
-      height="$spy.GetParam(gui.html.combo_height)"
+      height="$GetVar(HtmlComboHeight)"
       name="SET_AUTOCHEM_DRIVE" 
       width='45' 
       value="E:"
@@ -42,8 +42,8 @@
     >
     <input
       type="combo"
-      height="$spy.GetParam(gui.html.combo_height)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+      height="$GetVar(HtmlComboHeight)"
+      bgcolor="$GetVar(HtmlInputBgColour)" 
       name="SET_AUTOCHEM_BATCH_DIR" 
       width='$eval(html.clientwidth(self)-140)' 
       value="GetVar(autochem_batch_dir)"
@@ -57,10 +57,10 @@
 </tr>
 
 <tr>
-	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+	<td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
 	<td colspan='1'>
 		<input 
-			bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+			bgcolor="$GetVar(HtmlInputBgColour)" 
 			type="combo" 
 			name="SET_AUTOCHEM_SOLUTION_PROGRAM" 
 			width='$eval(html.clientwidth(self)-eval(html.clientwidth(self)/2)-30)' 
@@ -74,8 +74,8 @@
 	<td colspan='1'>
 		<input
 			type="combo"
-			height="$spy.GetParam(gui.html.combo_height)"
-			bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+			height="$GetVar(HtmlComboHeight)"
+			bgcolor="$GetVar(HtmlInputBgColour)" 
 			name="SET_AUTOCHEM_SOLUTION_METHOD" 
 			width='$eval(html.clientwidth(self)-eval(html.clientwidth(self)/2)-30)' 
 			manage
@@ -88,12 +88,12 @@
 
 
 <tr>
-	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+	<td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
 	<td colspan='1'>
 		<input
 			type="combo"
-			height="$spy.GetParam(gui.html.combo_height)"
-			bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+			height="$GetVar(HtmlComboHeight)"
+			bgcolor="$GetVar(HtmlInputBgColour)" 
 			name="SET_AUTOCHEM_REFINEMENT_PROGRAM" 
 			width='$eval(html.clientwidth(self)-eval(html.clientwidth(self)/2)-35)' 
 			manage
@@ -105,8 +105,8 @@
 	<td colspan='1'>
 		<input
 			type="combo"
-			height="$spy.GetParam(gui.html.combo_height)"
-			bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+			height="$GetVar(HtmlComboHeight)"
+			bgcolor="$GetVar(HtmlInputBgColour)" 
 			name="SET_AUTOCHEM_REFINEMENT_METHOD" 
 			width='$eval(html.clientwidth(self)-eval(html.clientwidth(self)/2)-30)' 
 			manage
@@ -121,10 +121,10 @@
   
 
 <tr>
-<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+<td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
 <td colspan='1'>
 <input 
-  bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+  bgcolor="$GetVar(HtmlInputBgColour)" 
   type="combo" 
     name="SET_AUTOCHEM_CUTOFF1_TYPE" 
       width='$eval(html.clientwidth(self)-eval(html.clientwidth(self)/2)-35)' 
@@ -137,8 +137,8 @@
       <td>
     <input
 			type="combo"
-			height="$spy.GetParam(gui.html.combo_height)"
-		  bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+			height="$GetVar(HtmlComboHeight)"
+		  bgcolor="$GetVar(HtmlInputBgColour)" 
 	    name="SET_AUTOCHEM_CUTOFF1_OPERATOR" 
       width="50" 
       items="<;=;>;<>;!=;cont"	
@@ -147,7 +147,7 @@
       >
       &nbsp;
       <input 
-    bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+    bgcolor="$GetVar(HtmlInputBgColour)" 
     type="combo" 
     name="SET_AUTOCHEM_CUTOFF1_VALUE" 
       width='$eval(html.clientwidth(self)-eval(html.clientwidth(self)/2)-86)' 
@@ -160,12 +160,12 @@
       </tr>
     
   <tr>
-<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+<td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
 <td colspan='1'>
 	<input
 		type="combo"
-		height="$spy.GetParam(gui.html.combo_height)"
-		bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+		height="$GetVar(HtmlComboHeight)"
+		bgcolor="$GetVar(HtmlInputBgColour)" 
 		name="SET_AUTOCHEM_CUTOFF2_TYPE" 
 		width='$eval(html.clientwidth(self)-eval(html.clientwidth(self)/2)-35)' 
 		value="$spy.GetParam(autochem.cutoff2_type)"
@@ -176,8 +176,8 @@
 <td>
 <input
 	type="combo"
-	height="$spy.GetParam(gui.html.combo_height)"
-  bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+	height="$GetVar(HtmlComboHeight)"
+  bgcolor="$GetVar(HtmlInputBgColour)" 
 	name="SET_AUTOCHEM_CUTOFF2_OPERATOR" 
 	width="50" 
 	items="--;<;=;>;<>;!=;cont"	
@@ -187,8 +187,8 @@
 &nbsp;
 <input
 	type="combo"
-	height="$spy.GetParam(gui.html.combo_height)"
-  bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+	height="$GetVar(HtmlComboHeight)"
+  bgcolor="$GetVar(HtmlInputBgColour)" 
 	name="SET_AUTOCHEM_CUTOFF2_VALUE" 
 	width='$eval(html.clientwidth(self)-eval(html.clientwidth(self)/2)-86)' 
 	height="18" 
@@ -200,12 +200,12 @@
 </tr>  
 
 <tr>
-<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+<td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
 <td colspan='1'>
 <input
 	type="combo"
-	height="$spy.GetParam(gui.html.combo_height)"
-  bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+	height="$GetVar(HtmlComboHeight)"
+  bgcolor="$GetVar(HtmlInputBgColour)" 
 	name="SET_PLOT_SERIES_X" 
 	width='$eval(html.clientwidth(self)-eval(html.clientwidth(self)/2)-35)' 
 	value="GetVar(plot_series_x)"
@@ -216,8 +216,8 @@
 <td colspan='1'>
 	<input
 		type="combo"
-		height="$spy.GetParam(gui.html.combo_height)"
-	  bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+		height="$GetVar(HtmlComboHeight)"
+	  bgcolor="$GetVar(HtmlInputBgColour)" 
     name="SET_PLOT_SERIES_Y" 
 		width='$eval(html.clientwidth(self)-eval(html.clientwidth(self)/2)-50)' 
 		value="GetVar(plot_series_y)"
@@ -235,15 +235,15 @@
 </tr>
 
 <tr>
-<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+<td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
 <td colspan='2'>
 <input 
   type='checkbox'  
   width=30  
 	height=12 
 	value="DS" 
-	bgcolor="$spy.GetParam(gui.html.table_bg_colour)" 
-	fgcolor="$spy.GetParam(gui.html.font_colour)" 
+	bgcolor="$GetVar(HtmlTableBgColour)" 
+	fgcolor="$GetVar(HtmlFontColour)" 
 	name = "USE_DURHAM_STRUCTURES" 
 	$spy.CheckBoxValue(autochem_durham_structures) 
 	oncheck = "SetVar('autochem_durham_structures',true)" 
@@ -253,8 +253,8 @@
 	type='checkbox'  
 	width=30  
   height=12 
-	bgcolor="$spy.GetParam(gui.html.table_bg_colour)" 
-	fgcolor="$spy.GetParam(gui.html.font_colour)" 
+	bgcolor="$GetVar(HtmlTableBgColour)" 
+	fgcolor="$GetVar(HtmlFontColour)" 
 	name = "AUTOCHEM_DRY_RUN" 
 	value="DR"
 	$spy.CheckBoxValue(autochem_dry_run) 
@@ -266,8 +266,8 @@
   type='checkbox'  
 	width=30  
   height=12 
-	bgcolor="$spy.GetParam(gui.html.table_bg_colour)" 
-	fgcolor="$spy.GetParam(gui.html.font_colour)" 
+	bgcolor="$GetVar(HtmlTableBgColour)" 
+	fgcolor="$GetVar(HtmlFontColour)" 
 	name = "AUTOCHEM_OMIT_PREVIOUS_STRUCTURES" 
 	value="NR"
 	$spy.CheckBoxValue(autochem_omit_previous_structures) 
@@ -279,8 +279,8 @@
   type='checkbox'  
 	width=30  
   height=12 
-	bgcolor="$spy.GetParam(gui.html.table_bg_colour)" 
-	fgcolor="$spy.GetParam(gui.html.font_colour)" 
+	bgcolor="$GetVar(HtmlTableBgColour)" 
+	fgcolor="$GetVar(HtmlFontColour)" 
 	name = "AUTOCHEM_FAST_RUN" 
 	value="FR"
 	$spy.CheckBoxValue(autochem_fast_run) 
@@ -291,8 +291,8 @@
   type='checkbox'  
 	width=32  
   height=12 
-	bgcolor="$spy.GetParam(gui.html.table_bg_colour)" 
-	fgcolor="$spy.GetParam(gui.html.font_colour)" 
+	bgcolor="$GetVar(HtmlTableBgColour)" 
+	fgcolor="$GetVar(HtmlFontColour)" 
 	name = "AUTOCHEM_DEMO_MODE" 
 	value="DM"
 	$spy.CheckBoxValue(autochem_demo_mode) 
@@ -305,8 +305,8 @@
   type='checkbox'  
 	width=32  
   height=12 
-	bgcolor="$spy.GetParam(gui.html.table_bg_colour)" 
-	fgcolor="$spy.GetParam(gui.html.font_colour)" 
+	bgcolor="$GetVar(HtmlTableBgColour)" 
+	fgcolor="$GetVar(HtmlFontColour)" 
 	name = "AUTOCHEM_HARVEST_MODE" 
 	value="HM"
 	target = "Harvest Mode"
@@ -317,7 +317,7 @@
 </td>
   
 <tr>
-<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+<td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
 <td colspan='2'>
 <!-- #includeif file.Exists(FilePath()/.olex/autochem_single.htm) autochem_single_htm FilePath()/.olex/autochem_single.htm;1; -->
   </td>
@@ -325,7 +325,7 @@
 
  
 <tr>
-<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+<td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
 <td colspan='2' >
 <a href='html.ItemState autochem_htm 1 2'>Show/Hide List</a><br>
   <!-- #include autochem_htm DataDir()\autochem.htm;2; -->

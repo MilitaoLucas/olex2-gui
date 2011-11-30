@@ -1,7 +1,5 @@
-<font color=$spy.GetParam(gui.html.font_colour) size=$spy.GetParam(gui.html.font_size) face=$spy.GetParam(gui.html.font_name)>
-
 <zimg border="0" name=SNUMTITLE src="sNumTitle.png">
-<table border="0" style="border-collapse: collapse" width="100%" id="info-cell" cellpadding="0" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+<table border="0" style="border-collapse: collapse" width="100%" id="info-cell" cellpadding="0" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
 
 
 <tr>
@@ -55,9 +53,6 @@
 <!-- #includeif fs.Exists(hos.htm) hos hos.htm;1 -->
   $spy.GetTwinLaw(html)
 
-  
-  
 <!-- #include more-snum-info gui\blocks\more-snum-info.htm;2 -->
 
 </table>
-</font>

@@ -2,13 +2,13 @@
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Electron-Density-Peak-Slider;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
-<td width='40%' name=Q_PAEAK_SLIDER_LABEL colspan = '1' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+<td width='40%' name=Q_PAEAK_SLIDER_LABEL colspan = '1' bgcolor="$GetVar(HtmlTableFirstcolColour)">
   <b>
     %Electron Density Peaks%
   </b>
 </td>
 
-<td name=Q_PAEAK_SLIDER_BUTTONS align=right colspan='2' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+<td name=Q_PAEAK_SLIDER_BUTTONS align=right colspan='2' bgcolor="$GetVar(HtmlTableFirstcolColour)">
   $spy.MakeHoverButton(button_small-select@q,sel \$q) &nbsp;
   $spy.MakeHoverButton(button_small-delete@q,sel \$q>>kill sel)
 </td>
@@ -17,14 +17,15 @@
 <tr name=SLIDE_Q_PEAK_SLIDER>
 
 <td name=Q_PAEAK_SLIDER_SLIDER colspan='2'>
+  <font size='$GetVar(HtmlFontSizeControls)'>
   <input
     type="slider"
     name = "SlideQPeaks"
-    width="$eval($spy.getParam(gui.htmlpanelwidth)-110)"
+    width="$eval($GetVar(HtmlPanelWidth)-110)"
     height="18"
     value="GetVar(SlideQPeaksVal,0)"
-    bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-    fgcolor="$spy.GetParam(gui.html.font_colour)"
+    bgcolor="$GetVar(HtmlTableBgColour)"
+    fgcolor="$GetVar(HtmlFontColour)"
     min="-20"
     max="20"
     onchange="
@@ -32,19 +33,22 @@
 >>SetLabel(QPeaksValue,eval(abs\(spy.QPeaksSlide(GetValue(SlideQPeaks)))))
 >>ShowQ spy.QPeaksSlide(GetValue(SlideQPeaks))"
   >
+  </font>
 </td>
 
 <td name=Q_PEAK_SLIDER_VALUE align='right'>
+  <font size='$GetVar(HtmlFontSizeControls)'>
   <input
     type="label"
     name = "QPeaksValue"
     width="40"
     height="18"
-    bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-    fgcolor="$spy.GetParam(gui.html.font_colour)"
+    bgcolor="$GetVar(HtmlTableBgColour)"
+    fgcolor="$GetVar(HtmlFontColour)"
     value="eval(abs\(spy.QPeaksSlide(GetValue(SlideQPeaks)))) %"
     label=""
   >
+  </font>
 </td>
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

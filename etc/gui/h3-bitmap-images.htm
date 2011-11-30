@@ -29,54 +29,59 @@
 <!-- #include tool-help-column gui\blocks\tool-first-column.htm;help_ext=mode_name;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td>
-    Name
+     %Name%
   </td>
   <td name=IMAGE_BITMAP_NAME>
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="text"
-      height="$spy.GetParam(gui.html.input_height)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      height="$GetVar(HtmlInputHeight)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       valign='center'
       name="IMAGE_BITMAP_NAME"
       width="70"
-      height="$spy.GetParam(gui.html.input_height)"
+      height="$GetVar(HtmlInputHeight)"
       value=""
       onchange="spy.SetParam(snum.image.bitmap.name,GetValue(IMAGE_BITMAP_NAME))"
       manage
-
     >
+    </font>
   </td>
   <td>
-    Type
+    %Type%
   </td>
   <td name=IMAGE_BITMAP_TYPE>
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="combo"
-      height="$spy.GetParam(gui.html.combo_height)"
-      width="$spy.GetParam(gui.html.combo_width_2)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      height="$GetVar(HtmlComboHeight)"
+      width="$GetVar(HtmlComboWidth2)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       items='png;jpg;bmp'
       valign='center'
       name="IMAGE_BITMAP_TYPE"
       value='$spy.GetParam(snum.image.bitmap.type)'
       onchange='spy.SetParam(snum.image.bitmap.type,GetValue(IMAGE_BITMAP_TYPE))'
     >
+    </font>
   </td>
   <td>
     Size
   </td>
   <td name=IMAGE_BITMAP_SIZE>
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="combo"
-      height="$spy.GetParam(gui.html.combo_height)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      height="$GetVar(HtmlComboHeight)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       items="1;2;4;800px<-800;1200px<-1200;1800px<-1800;3200px<-3200"
-      height="$spy.GetParam(gui.html.input_height)"
+      height="$GetVar(HtmlInputHeight)"
       valign='center'
       name="IMAGE_BITMAP_SIZE"
       width="60"
       value='2'
     >
+    </font>
   </td>
   <td>
 $spy.MakeHoverButton(button_small-go@bitmap,spy.GetBitmapImageInstructions\())

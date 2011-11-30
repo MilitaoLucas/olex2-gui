@@ -1,6 +1,6 @@
 <!-- #include tool-top gui\blocks\help-top.htm;image=blank;1; -->
 <tr VALIGN='center' NAME='Expand Short Contacts'>
-	<td colspan=1 width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+	<td colspan=1 width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
 	<td>
 		<b>	
 			Expand Short Contacts (Hydrogen Bonds)
@@ -8,7 +8,7 @@
 	</td>
 </tr>
 <tr>
-	<td valign='top' width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"><zimg border="0" src="info.png"></td>
+	<td valign='top' width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"><zimg border="0" src="info.png"></td>
 	<td>	
 		%Move the slider to adjust the threshold for short contacts to be displayed. Alternatively, you can add the required value in the text box.%
 		<b>%Note:%</b> %the value has to be between 0.9 and 1.7 Angstrom. Short inter and intramolecular distances will be displayed. If there are intermolecular interactions within the given threshold, clicking on these bonds will expand the missing symmetry equivalent part.%

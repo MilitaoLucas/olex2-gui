@@ -1,6 +1,5 @@
-<font color=$spy.GetParam(gui.html.font_colour)  size=$spy.GetParam(gui.html.font_size)>
 
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_bg_colour)">
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
 
 <tr align = 'center' name=EDIT_CIF width='100%'>
 <!-- #include blank-column gui\blocks\tool-first-column.htm;help_ext=cif-info;1; -->
@@ -40,25 +39,28 @@ $spy.MakeHoverButton(button-get_ccdc_number,spy.ccdc_submit\())
     <b>%Title%</b>
   </td>
   <td>
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type='text'
       valign='center'
-      height="$spy.GetParam(gui.html.input_height)"
+      height="$GetVar(HtmlInputHeight)"
       width="$eval((html.clientwidth(self)-180)/2)"
       bgcolor="spy.GetParam(gui.html.input_bg_colour)"
       name='SET_SNUM_REPORT_TITLE'
       value='$spy.GetParam(snum.report.title)'
       onchange="spy.SetParam(snum.report.title,GetValue(~name~))"
     >
+    </font>
   </td>
   <td>
     <b>%Image%</b>
   </td>
   <td>
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="combo"
       width="$eval((html.clientwidth(self)-180)/2)"
-      height="$spy.GetParam(gui.html.combo_height)"
+      height="$GetVar(HtmlComboHeight)"
       bgcolor="spy.GetParam(gui.html.input_bg_colour)"
       name="SET_REPORT_IMAGE"
       readonly
@@ -67,6 +69,7 @@ $spy.MakeHoverButton(button-get_ccdc_number,spy.ccdc_submit\())
       width="50%"
       value="file.GetName(spy.GetParam(snum.report.image))"
     >
+    </font>
   </td>
 </tr>
 <tr>
@@ -74,10 +77,11 @@ $spy.MakeHoverButton(button-get_ccdc_number,spy.ccdc_submit\())
     <b>%Style%</b>
   </td>
   <td>
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type='combo'
       width="$eval((html.clientwidth(self)-180)/2)"
-      height="$spy.GetParam(gui.html.combo_height)"
+      height="$GetVar(HtmlComboHeight)"
       bgcolor="spy.GetParam(gui.html.input_bg_colour)"
       name='SET_USER_REPORT_STYLE'
       value='$spy.GetParam(user.report_style)'
@@ -85,22 +89,25 @@ $spy.MakeHoverButton(button-get_ccdc_number,spy.ccdc_submit\())
       valign='center'
       onchange="spy.SetParam(user.report_style,GetValue(~name~))"
     >
+    </font>
   </td>
   <td>
     <b>%Template%</b>
   </td>
   <td>
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type='combo'
       width="$eval(((html.clientwidth(self)-21 0)/2) - $spy.GetParam('gui.html.combo_height') - 15)"
-      height="$spy.GetParam(gui.html.combo_height)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      height="$GetVar(HtmlComboHeight)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       name='SET_USER_REPORT_TEMPLATE'
       value='$spy.GetParam(user.report_template)'
       items='spy.getTemplatesList()'
       valign='center'
       onchange="spy.SetParam(user.report_template,GetValue(~name~))"
-    > &nbsp;
+    >
+    </font>&nbsp;
 $spy.MakeHoverButton(toolbar_small-open,exec -o getvar\(defexplorer) 'file.ospath\(basedir\()/etc/CIF/styles)')
 
     </td>
@@ -152,4 +159,3 @@ $spy.MakeHoverButton(toolbar_small-open,exec -o getvar\(defexplorer) 'file.ospat
 <!-- #includeif isplugininstalled(plugin-mysql) report-settings-h3-archive gui\report-settings-h3-archive.htm;gui\blocks\tool-h3-off.htm;image=h3-archive;onclick=;colspan=1;2; -->
 
 </table>
-</font>

@@ -1,4 +1,4 @@
-  <td name=HEADLINE_EXPAND_SHORT_CONTACTS bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+  <td name=HEADLINE_EXPAND_SHORT_CONTACTS bgcolor="$GetVar(HtmlTableFirstcolColour)">
     <b>
       %Expand Short Contacts% (%Hydrogen Bonds%)
     </b>
@@ -12,14 +12,15 @@
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=packing-hydrogen-bonds;1; -->
   <td name=SLIDER_EXPAND_SHORT_CONTACTS>
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input 
       type="slider" 
       name = "SlideDeltaI" 
       width="$eval(html.clientwidth(self)-90)" 
       height="20" 
       value="60" 
-      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"  
-      fgcolor="$spy.GetParam(gui.html.font_colour)" 
+      bgcolor="$GetVar(HtmlTableBgColour)"  
+      fgcolor="$GetVar(HtmlFontColour)" 
       min="46" 
       max="84" 
       onchange="SetValue(DeltaIValue,eval(getvalue(SlideDeltaI)/50))>>
@@ -28,15 +29,17 @@ showH b true>>
 mode grow -s>>
 DeltaI eval(getvalue(SlideDeltaI)/50)"
     >
+    </font>
   </td>
   <td name=DELATA_I_VALUE>
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input 
     type="text" 
     name = "DeltaIValue" 
     width="32" 
     height="20" 
-    bgcolor="$spy.GetParam(gui.html.table_bg_colour)"  
-    fgcolor="$spy.GetParam(gui.html.font_colour)" 
+    bgcolor="$GetVar(HtmlTableBgColour)"  
+    fgcolor="$GetVar(HtmlFontColour)" 
     value="eval(getvalue(SlideDeltaI)/50)" 
     onreturn="SetValue(SlideDeltaI, eval(GetValue(DeltaIValue)*50))>>
 showH a true>>
@@ -44,4 +47,5 @@ showH b true>>
 mode grow -s>>
 DeltaI GetValue(DeltaIValue)"
     >
+    </font>
   </td>

@@ -1,7 +1,7 @@
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan='4';1; -->
 
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_PRUNE_Q'>
-  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td VALIGN='center'  colspan=3>
     <b>Auto-<a href='sel atoms where xatom.peak<$spy.GetParam(snum.refinement.auto.pruneQ)&&xatom.peak>0>>kill sel'>Prune Peaks</a> smaller than</b>
   </td>
@@ -9,7 +9,7 @@
       <input
         type='combo'
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-        width="$spy.GetParam(gui.html.combo_width_2)"
+        width="$GetVar(HtmlComboWidth2)"
         height="17"
         name='SET_SNUM_REFINEMENT_AUTO_PRUNEQ',
         items=' ;0.1;0.5;1.0;1.5;2.0'
@@ -19,7 +19,7 @@
   </td>
 </tr>
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_ASSIGN_Q'>
-  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td VALIGN='center' colspan=3>
     <b>Auto-<a href='sel atoms where xatom.peak>$spy.GetParam(snum.refinement.auto.assignQ)>>name sel C>>sel -a>>name sel 1 -c'>Assign as C</a> Peaks > </b>
   </td>
@@ -27,7 +27,7 @@
       <input
         type='combo'
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-        width="$spy.GetParam(gui.html.combo_width_2)"
+        width="$GetVar(HtmlComboWidth2)"
         height="17"
         name='SET_SNUM_REFINEMENT_AUTO_ASSIGNQ'
         items=' ;1.5;2.0;2.5;3.0'
@@ -37,7 +37,7 @@
   </td>
 </tr>
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_PRUNE_U'>
-  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td VALIGN='center' colspan=3>
     <b>Auto-<a href='sel atoms where xatom.uiso>$spy.GetParam(snum.refinement.auto.pruneU)>>kill sel'>Prune Atoms</a> where U<sub>eq</sub> > </b>
   </td>
@@ -45,7 +45,7 @@
       <input
         type='combo',
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-        width="$spy.GetParam(gui.html.combo_width_2)"
+        width="$GetVar(HtmlComboWidth2)"
         height="17"
         name='SET_SNUM_REFINEMENT_AUTO_PRUNEU',
         items=' ;0.06;0.08;0.10;0.12',
@@ -55,17 +55,17 @@
   </td>
 </tr>
 <tr VALIGN='center' ALIGN='left' NAME='ASSEMBLE_STRUCTURE'>
-  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td VALIGN='center'  colspan=3>
     <b>Auto <a href="compaq -a">Assemble</a> Structure</b>
   </td>
   <td ALIGN='right' colspan=1>
       <input
         type='checkbox'
-        width="$spy.GetParam(gui.html.checkbox_width)"
-        height="$spy.GetParam(gui.html.checkbox_height)"
-        fgcolor="$spy.GetParam(gui.html.font_colour)"
-        bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"
+        width="$GetVar(HtmlCheckboxWidth)"
+        height="$GetVar(HtmlCheckboxHeight)"
+        fgcolor="$GetVar(HtmlFontColour)"
+        bgcolor="$GetVar(HtmlTableFirstcolColour)"
         name='SET_SNUM_REFINEMENT_AUTO_ASSEMBLE'
         checked="$spy.GetParam(snum.refinement.auto.assemble)"
         oncheck='spy.SetParam(snum.refinement.auto.assemble,true)'
@@ -76,17 +76,17 @@
 </tr>
 
 <tr VALIGN='center' ALIGN='left' NAME='INVERT_STRUCTURE'>
-  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td VALIGN='center'  colspan=3>
     <b>Auto <a href="inv -f">Invert</a> Structure</b>
   </td>
   <td ALIGN='right' colspan=1>
       <input
         type='checkbox'
-        width="$spy.GetParam(gui.html.checkbox_width)"
-        height="$spy.GetParam(gui.html.checkbox_height)"
-        fgcolor="$spy.GetParam(gui.html.font_colour)"
-        bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"
+        width="$GetVar(HtmlCheckboxWidth)"
+        height="$GetVar(HtmlCheckboxHeight)"
+        fgcolor="$GetVar(HtmlFontColour)"
+        bgcolor="$GetVar(HtmlTableFirstcolColour)"
         name='SET_SNUM_REFINEMENT_AUTO_INVERT'
         checked="$spy.GetParam(snum.refinement.auto.invert)"
         oncheck='spy.SetParam(snum.refinement.auto.invert,true)'
@@ -98,7 +98,7 @@
 
 
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_UPDATE_WEIGHT'>
-  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td VALIGN='center' colspan=4>
     <a href="spy.save_user_parameters(auto)">
       <b>Save these settings as user default</b>

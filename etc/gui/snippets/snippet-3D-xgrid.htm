@@ -2,6 +2,7 @@
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <tr name=XGRID_SLIDE>
   <td colspan='1'>
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       align="right"
       label="level"
@@ -10,27 +11,30 @@
       width="$eval(html.clientwidth(self)-110)"
       height="18"
       value="$eval(spy.GetParam(snum.xgrid.value)*10)"
-      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      bgcolor="$GetVar(HtmlTableBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
       min="$eval(xgrid.GetMin()*10)"
       max="$eval(xgrid.GetMax()*10)"
       onchange="spy.SetParam(snum.xgrid.value,eval(GetValue(SNUM_XGRID_SLIDE)/10))>>
 SetValue(SNUM_XGRID_VALUE,spy.GetParam(snum.xgrid.value))>>
 xgrid.Scale(GetValue(SNUM_XGRID_VALUE))>>"
-  >
+    >
+    </font>
   <td colspan='1'>
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="text"
       name = "SNUM_XGRID_VALUE"
       width="30"
       height="18"
-      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      bgcolor="$GetVar(HtmlTableBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
       value="$spy.GetParam(snum.xgrid.value)"
       onchange="spy.SetParam(snum.xgrid.value,eval(GetValue(SNUM_XGRID_SLIDE))*10)>>
 xgrid.Scale(GetValue(SNUM_XGRID_VALUE))
 SetValue(XGRID_SCALE,XGrid.Scale())"
     >
+    </font>
   </td>
 </tr>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

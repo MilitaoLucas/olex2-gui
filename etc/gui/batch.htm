@@ -2,7 +2,7 @@
 
 
 <tr>
-	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+	<td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
 </td>
 	<td width='70' align='center'>
 		<a href="spy.BatchMatch GetValue(SET_BATCH_DIR) -t=GetValue(SET_BATCH_TYPE)">%Batch Match%</a>&nbsp;
@@ -10,8 +10,8 @@
 	<td>
 		<input
 			type="text"
-			height="$spy.GetParam(gui.html.input_height)"
-			bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+			height="$GetVar(HtmlInputHeight)"
+			bgcolor="$GetVar(HtmlInputBgColour)" 
 			name="SET_BATCH_DIR" 
 			width="80" 
 			height="18" 
@@ -41,14 +41,14 @@
 
 </tr>
 <tr>
-	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+	<td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
 </td>
 <td colspan='5'>
 <!-- #include batchmatchlist batchmatchlist.htm;1; -->
 </td>
 </tr>
 <tr>
-	<td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+	<td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
 </td>
 <td colspan='5'>
 <!-- #include match match.htm;1; -->

@@ -3,13 +3,13 @@
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
 
-<td width='40%' name=Q_PAEAK_SLIDER_LABEL colspan = '1' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+<td width='40%' name=Q_PAEAK_SLIDER_LABEL colspan = '1' bgcolor="$GetVar(HtmlTableFirstcolColour)">
   <b>
     %Uiso Select Atoms%
   </b>
 </td>
 
-<td name=UISO_SELECT_SLIDER_BUTTONS align=right colspan='2' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+<td name=UISO_SELECT_SLIDER_BUTTONS align=right colspan='2' bgcolor="$GetVar(HtmlTableFirstcolColour)">
 $spy.MakeHoverButton(button_small-delete,kill sel)
 </td>
 
@@ -17,16 +17,15 @@ $spy.MakeHoverButton(button_small-delete,kill sel)
 <tr name=SLIDE_UISO_SELECT_SLIDER>
 
 <td name=UISO_SELECT_SLIDER_SLIDER colspan='2'>
-
-
+  <font size='$GetVar(HtmlFontSizeControls)'>
   <input
     type="slider"
     name = "UISO_SELECT_SLIDER"
-    width="$eval($spy.getParam(gui.htmlpanelwidth)-110)"
+    width="$eval($GetVar(HtmlPanelWidth)-110)"
     height="18"
     value="0"
-    bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-    fgcolor="$spy.GetParam(gui.html.font_colour)"
+    bgcolor="$GetVar(HtmlTableBgColour)"
+    fgcolor="$GetVar(HtmlFontColour)"
     min="-20"
     max="20"
     onchange="
@@ -37,18 +36,21 @@ Freeze(True)
 >>sel atoms where xatom.uiso GetVar(UisoSelectVal)&&xatom.type!='Q''
 >>Freeze(False)
   ">
+  </font>
 </td>
 
 <td align='right' name=UISO_PEAK_SLIDER_VALUE>
+  <font size='$GetVar(HtmlFontSizeControls)'>
   <input
     type="label"
     name = "UisoSelectVal"
     width="40"
     height="18"
-    bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-    fgcolor="$spy.GetParam(gui.html.font_colour)"
+    bgcolor="$GetVar(HtmlTableBgColour)"
+    fgcolor="$GetVar(HtmlFontColour)"
     value="spy.UisoSelectSlide(GetValue(UISO_SELECT_SLIDER))"
   >
+  </font>
 </td>
 
 

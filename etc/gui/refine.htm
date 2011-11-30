@@ -1,7 +1,7 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;1; -->
 
 <tr>
-	<td valign='top' width="8" align='center' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+	<td valign='top' width="8" align='center' bgcolor="$GetVar(HtmlTableFirstcolColour)">
 		<a 
 			href="spy.make_help_box -name='refine' -popout='False'" 
 			target="Help me with this">
@@ -10,7 +10,7 @@
 	</td>
 	<td VALIGN='center'  colspan='2'>
     <input
-			bgcolor="$spy.GetParam(gui.html.table_bg_colour)"  
+			bgcolor="$GetVar(HtmlTableBgColour)"  
 			type="button" 
 			name="RUN_REFINE" 
 			image="button-refine.png"
@@ -30,7 +30,4 @@
 
 <!-- #include refinement-settings-h3-refinement-settings gui\refinement-settings-h3-refinement-settings.htm;gui\blocks\tool-h3-off.htm;image=refinement-settings-h3-refinement-settings;colspan=4;onclick=;onclick=;1 2; -->
 
-	
-</table>	
-</font>
-	
+</table>
