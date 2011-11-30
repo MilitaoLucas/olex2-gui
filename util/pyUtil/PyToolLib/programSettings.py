@@ -36,9 +36,9 @@ OV.registerFunction(doProgramSettings)
 
 def makeProgramSettingsGUI(program, method, prgtype):
   if prgtype == 'solution':
-    wFilePath = 'solution-settings-h3-solution-settings-extra.htm'
+    wFilePath = 'solution-settings-extra.htm'
   else:
-    wFilePath = 'refinement-settings-h3-refinement-settings-extra.htm'
+    wFilePath = 'refinement-settings-extra.htm'
     
   authors = program.author
   reference = program.reference
