@@ -1,7 +1,7 @@
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
 
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_PROGRAM'>
-  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td width='50%' VALIGN='center' colspan=2>
     <b>Refinement Program</b>
   </td>
@@ -11,7 +11,7 @@
 </tr>
 
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_METHOD'>
-  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td width='50%' align='left' colspan=2>
     <b>Refinement Method</b>
   </td>
@@ -23,7 +23,7 @@
 </tr>
 
 <tr VALIGN='center' ALIGN='left' NAME='SET_REFLECTIONS'>
-  <td width='2' bgcolor='$spy.GetParam(gui.html.table_firstcol_colour)'></td>
+  <td width='2' bgcolor='$GetVar(HtmlTableFirstcolColour)'></td>
   <td width='50%' VALIGN='center' colspan='2'>
     <b>%Reflection File%</b>
   </td>
@@ -33,7 +33,7 @@
 </tr>
 
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_MAX_CYCLES'>
-<td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+<td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td VALIGN='center' colspan=3>
     <b>Maximum Refinement Iterations</b>
   </td>
@@ -41,7 +41,7 @@
       <input
         type='spin'
         width="50"
-        height="$spy.GetParam(gui.html.spin_height)"
+        height="$GetVar(HtmlSPinHeight)"
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name='SET_SNUM_REFINEMENT_MAX_CYCLES'
         value='$spy.GetParam(snum.refinement.max_cycles)'
@@ -51,7 +51,7 @@
 </tr>
 
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_MAX_PEAKS'>
-  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td VALIGN='center' colspan=3>
     <b>Number of Residual Peaks</b>
   </td>
@@ -61,7 +61,7 @@
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name="SET_SNUM_REFINEMENT_MAX_PEAKS"
         width="50"
-        height="$spy.GetParam(gui.html.spin_height)"
+        height="$GetVar(HtmlSPinHeight)"
         max='1000'
         value='$eval(abs\(spy.GetParam(snum.refinement.max_peaks)))'
         onchange='spy.SetMaxPeaks(GetValue(SET_SNUM_REFINEMENT_MAX_PEAKS))'
@@ -72,7 +72,7 @@
 $spy.weightGuiDisplay()
 
 <tr VALIGN='center' ALIGN='left' NAME='IGNORE_SETTINGS'>
-  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td VALIGN='center'  colspan=3>
     <b>
     <a href="
@@ -93,10 +93,10 @@ $spy.MakeHoverButton(btn-info@#autotidy,spy.make_help_box -name='autotidy' -popo
 <td VALIGN='center' ALIGN='right'  colspan=1>
   <input
     type='checkbox'
-    fgcolor="$spy.GetParam(gui.html.font_colour)"
-    bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"
-    width="$spy.GetParam(gui.html.checkbox_height)"
-    height="$spy.GetParam(gui.html.checkbox_height)"
+    fgcolor="$GetVar(HtmlFontColour)"
+    bgcolor="$GetVar(HtmlTableFirstcolColour)"
+    width="$GetVar(HtmlCheckboxHeight)"
+    height="$GetVar(HtmlCheckboxHeight)"
     name='SNUM_REFINEMENT_AUTO_TIDY'
     checked="$spy.GetParam(snum.refinement.auto.tidy)"
     oncheck='spy.SetParam(snum.refinement.auto.tidy,True)'
@@ -109,7 +109,7 @@ $spy.MakeHoverButton(btn-info@#autotidy,spy.make_help_box -name='autotidy' -popo
 
 <!--
 <tr VALIGN='center' ALIGN='left' NAME='IGNORE_SETTINGS'>
-  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td VALIGN='center'  colspan=3>
     <b>
       Graphical Output
@@ -119,10 +119,10 @@ $spy.MakeHoverButton(btn-info@#autotidy,spy.make_help_box -name='autotidy' -popo
     <font size='2'>
       <input
         type='checkbox'
-        width="$spy.GetParam(gui.html.checkbox_width)"
-        height="$spy.GetParam(gui.html.checkbox_height)"
-        fgcolor="$spy.GetParam(gui.html.font_colour)"
-        bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+        width="$GetVar(HtmlCheckboxWidth)"
+        height="$GetVar(HtmlCheckboxHeight)"
+        fgcolor="$GetVar(HtmlFontColour)"
+        bgcolor="$GetVar(HtmlTableBgColour)"
         name='SNUM_REFINEMENT_GRAPHICAL_OUTPUT'
         checked="$spy.GetParam(snum.refinement.graphical_output)"
         oncheck='spy.SetParam(snum.refinement.graphical_output,true)'
@@ -135,7 +135,7 @@ $spy.MakeHoverButton(btn-info@#autotidy,spy.make_help_box -name='autotidy' -popo
 -->
 
 <tr VALIGN="center" ALIGN="left" NAME="USE_SOLVENT_MASK">
-  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td VALIGN="center"  colspan=3>
     <b>
       Use solvent mask
@@ -146,10 +146,10 @@ $spy.MakeHoverButton(btn-info@#refinement-masks,spy.make_help_box -name='refinem
   <td VALIGN="center" ALIGN="right"  colspan=1>
       <input
         type="checkbox"
-        width="$spy.GetParam(gui.html.checkbox_width)"
-        height="$spy.GetParam(gui.html.checkbox_height)"
-        fgcolor="$spy.GetParam(gui.html.font_colour)"
-        bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"
+        width="$GetVar(HtmlCheckboxWidth)"
+        height="$GetVar(HtmlCheckboxHeight)"
+        fgcolor="$GetVar(HtmlFontColour)"
+        bgcolor="$GetVar(HtmlTableFirstcolColour)"
         name="SNUM_REFINEMENT_USE_SOLVENT_MASK"
         checked="$spy.GetParam(snum.refinement.use_solvent_mask)"
         oncheck="spy.SetParam(snum.refinement.use_solvent_mask,true)"
@@ -160,7 +160,7 @@ $spy.MakeHoverButton(btn-info@#refinement-masks,spy.make_help_box -name='refinem
 </tr>
 
 <tr VALIGN="center" ALIGN="left" NAME="RECOMPUTE_MASK_BEFORE_REFINEMENT" >
-  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td VALIGN="center"  colspan=3>
     <b>
       Recompute mask before refinement
@@ -169,10 +169,10 @@ $spy.MakeHoverButton(btn-info@#refinement-masks,spy.make_help_box -name='refinem
   <td VALIGN="center" ALIGN="right"  colspan=1>
       <input
         type="checkbox"
-        width="$spy.GetParam(gui.html.checkbox_width)"
-        height="$spy.GetParam(gui.html.checkbox_height)"
-        fgcolor="$spy.GetParam(gui.html.font_colour)"
-        bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"
+        width="$GetVar(HtmlCheckboxWidth)"
+        height="$GetVar(HtmlCheckboxHeight)"
+        fgcolor="$GetVar(HtmlFontColour)"
+        bgcolor="$GetVar(HtmlTableFirstcolColour)"
         name="SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT"
         checked="$spy.GetParam(snum.refinement.recompute_mask_before_refinement)"
         oncheck="
@@ -186,7 +186,7 @@ html.Update"
 </tr>
 
 <!--<tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_UPDATE_WEIGHT'>-->
-  <!--<td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>-->
+  <!--<td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>-->
     <!--<td VALIGN='center'  colspan=4>-->
       <!--<a href="spy.save_user_parameters(refinement)">-->
         <!--<b>Save these settings as user default</b>-->
@@ -196,11 +196,11 @@ html.Update"
 
 </table>
 
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
 <!-- #include refinement-settings-h3-autotidy gui\refinement-settings-h3-autotidy-settings.htm;gui\blocks\tool-h3-off.htm;image=refinement-settings-h3-autotidy-settings;colspan=4;onclick=;onclick=;2; -->
 </table>
 
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
 <!-- #includeif fs.Exists(refinement-settings-h3-refinement-settings-extra.htm) refinement-settings-h3-refinement-settings-extra refinement-settings-h3-refinement-settings-extra.htm;gui\blocks\tool-h3-off.htm;image=refinement-settings-h3-refinement-settings-extra;colspan=4;onclick=;onclick=;2; -->
 </table>
 <!-- #includeif fs.Exists(refinement_image.htm) refinement_image refinement_image.htm;1; -->

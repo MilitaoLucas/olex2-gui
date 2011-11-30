@@ -48,24 +48,28 @@
     %Select atoms where% <b>U<sub>iso</sub></b>
   </td>
   <td VALIGN='center'  colspan='2'>
-      <input
-        type="combo"
-        height="$spy.GetParam(gui.html.combo_height)"
-        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-        name= "compare"
-        items=">;=;<"
-        width="35"
-        value = ">"
-        readonly
-      >
-      <input
-        type="text"
-        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-        name = "uiso"
-        width="30"
-        float height="$spy.GetParam(gui.html.input_height)"
-        value = "0.06"
-      >
+    <font size='$GetVar(HtmlFontSizeControls)'>
+    <input
+      type="combo"
+      height="$GetVar(HtmlComboHeight)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
+      name= "compare"
+      items=">;=;<"
+      width="35"
+      value = ">"
+      readonly
+    >
+    </font>
+    <font size='$GetVar(HtmlFontSizeControls)'>
+    <input
+      type="text"
+      bgcolor="$GetVar(HtmlInputBgColour)"
+      name = "uiso"
+      width="30"
+      float height="$GetVar(HtmlInputHeight)"
+      value = "0.06"
+    >
+    </font>
 &nbsp;
 </td>
 <td width='20%' align='right'>
@@ -79,10 +83,11 @@ $spy.MakeHoverButton(button_small-select@uiso,sel atoms where xatom.uiso getvalu
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;help_ext=;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td VALIGN='center' >
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="combo"
-      height="$spy.GetParam(gui.html.combo_height)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      height="$GetVar(HtmlComboHeight)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       label="%Rings% "
       name="RINGSELECT"
       items="--;C6;C5N;C5;C5O;"
@@ -90,6 +95,7 @@ $spy.MakeHoverButton(button_small-select@uiso,sel atoms where xatom.uiso getvalu
       onchange="if strcmp(GetValue(RINGSELECT),--) then html.SetFocus(RINGSELECT) else 'sel -u'>>sel rings GetValue(RINGSELECT)"
       value=""
     >
+    </font>
   </td>
   <td VALIGN='center' colspan='2'>
     <a href="sel rings C6"><b>%Phenyl%</b></a>&nbsp;

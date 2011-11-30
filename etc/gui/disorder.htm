@@ -35,20 +35,20 @@ href="if strcmp(sel(),'') then none else 'link_parts_occupancies_with ISOR'">
 </tr> 
 
 <tr>
-  <td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td VALIGN='center' width='8'>
     <a href="part sel getvalue(part)"><b>%Assign% <i>sel</i> to Part</b></a>
   </td>
   <td VALIGN='center'>
     <font size='2'>
-      <input type="spin" bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      <input type="spin" bgcolor="$GetVar(HtmlInputBgColour)"
       name="part" width="40" height="16" value="1" min=-100>
     </font>
   </td>
 </tr> 
 
 <tr>
-  <td width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td></td>
+  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td></td>
     <a href="refine">
   <td VALIGN='center' width='100%' colspan='2'>
     <a href="part sel getvalue(part)"><b>%Assign% <i>sel</i> %to 2 parts in order%</b></a>&nbsp

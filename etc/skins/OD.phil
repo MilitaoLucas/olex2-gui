@@ -64,8 +64,8 @@ gui {
     }
     
     cbtn{
-      base_colour = None
-      grad_colour = None
+      base_colour = #777777
+      grad_colour = #999999
       font_colour = None
       height = 24
       corner_rad = 2

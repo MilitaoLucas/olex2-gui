@@ -7,14 +7,16 @@
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Growing;1; -->
 
   <td name=BTN_GROW_MODE>
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       name=IMG_BUTTON-GROW_MODE
       type="button"
       image="up=button-grow_modeoff.png,down=button-grow_modeon.png,hover=button-grow_modehover.png",disable=button-grow_modedisable.png"
       hint="%Mode Grow-target%"
       onclick="if strcmp(spy.GetParam(olex2.short_mode),'grow') then 'mode off'  else run(mode grow GetData(GROW_SHORT) GetData(GROW_SELECTION) GetData(GROW_VDW))"
-      bgcolor=$spy.GetParam(gui.html.table_bg_colour)
+      bgcolor=$GetVar(HtmlTableBgColour)
     >
+    </font>
     <!--<a-->
       <!--href="if strcmp(spy.GetParam(olex2.short_mode),'grow') then 'mode off'  else run(mode grow GetData(GROW_SHORT) GetData(GROW_SELECTION) GetData(GROW_VDW))"-->
       <!--target="%Mode Grow-target%">-->
@@ -22,61 +24,71 @@
     <!--</a>-->
   </td>
   <td name=GROW_SHORT>
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="checkbox"
       value="%Short%"
       valign="center"
-      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      bgcolor="$GetVar(HtmlTableBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
       name="GROW_SHORT"
-      height="$spy.GetParam(gui.html.checkbox_height)"
+      height="$GetVar(HtmlCheckboxHeight)"
       width='50'
       manage
       oncheck="SetData(GROW_VDW,' ')>>SetData(GROW_SELECTION,' ')>>SetData(GROW_SHORT,-s)"
       onuncheck=">SetData(GROW_SHORT,' ')"
     >
+    </font>
   </td>
   <td name=GROW_SELECTION>
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="checkbox"
       value="%Selection%"
       valign="center"
-      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      bgcolor="$GetVar(HtmlTableBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
       name="GROW_SELECTION"
-      height="$spy.GetParam(gui.html.checkbox_height)"
+      height="$GetVar(HtmlCheckboxHeight)"
       width='65'
       manage
       oncheck="SetData(GROW_VDW,' ')>>SetData(GROW_SELECTION,-r)>>SetData(GROW_SHORT,' ')"
-      onuncheck="SetData(GROW_SELECTION,' ')">
+      onuncheck="SetData(GROW_SELECTION,' ')"
+    >
+    </font>
   </td>
   <td name=GROW_VDW>
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
     type="checkbox"
     value="%VdW%"
     valign="center"
-    bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-    fgcolor="$spy.GetParam(gui.html.font_colour)"
+    bgcolor="$GetVar(HtmlTableBgColour)"
+    fgcolor="$GetVar(HtmlFontColour)"
     name="GROW_VDW"
-    height="$spy.GetParam(gui.html.checkbox_height)"
+    height="$GetVar(HtmlCheckboxHeight)"
     width='45'
     manage
     oncheck="SetData(GROW_VDW,-v=GetValue(GROW_VDW_VAL))>>SetData(GROW_SELECTION,' ')>>SetData(GROW_SHORT,' ')"
-    onuncheck="SetData(GROW_VDW,' ')">
+    onuncheck="SetData(GROW_VDW,' ')"
+    >
+    </font>
   </td>
   <td name=GROW_VDW_VAL>
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="text"
       value='2.0'
       valign="center"
-      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      bgcolor="$GetVar(HtmlTableBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
       name="GROW_VDW_VAL"
-      height="$spy.GetParam(gui.html.input_height)"
+      height="$GetVar(HtmlInputHeight)"
       width='30'
       manage
       onchange="SetData(GROW_VDW,'-v=GetValue(GROW_VDW_VAL)')>>SetData(GROW_VDW,-v=GetValue(GROW_VDW_VAL))>>SetData(GROW_SELECTION,' ')>>SetData(GROW_SHORT,' ')"
     >
+    </font>
   </td>
   <td name=ARING>
   &Aring;

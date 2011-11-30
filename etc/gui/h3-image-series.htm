@@ -27,18 +27,17 @@ $spy.MakeHoverButton(button_small-go,spy.run_MakeMovie\())
   </td>
   
   <td name=ROTATION_AROUND_AXIS width=20%>
-    <font size='2' align='center'>
-      <input 
-        name="ROTATION_AROUND_AXIS"
-        type="text" 
-        height="$spy.GetParam(gui.html.input_height)"
-        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-        name="axis"
-        width="30"
-        value="$spy.GetParam(snum.image.image_series.rotation_around_axis)"
-        onchange="spy.SetParam(snum.image.image_series.rotation_around_axis,GetValue(ROTATION_AROUND_AXIS))"
-
-      >
+    <font size=$GetVar(HtmlFontSizeControls)>
+    <input 
+      name="ROTATION_AROUND_AXIS"
+      type="text" 
+      height="$GetVar(HtmlInputHeight)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
+      name="axis"
+      width="30"
+      value="$spy.GetParam(snum.image.image_series.rotation_around_axis)"
+      onchange="spy.SetParam(snum.image.image_series.rotation_around_axis,GetValue(ROTATION_AROUND_AXIS))"
+    >
     </font>
   </td>
   
@@ -47,17 +46,17 @@ $spy.MakeHoverButton(button_small-go,spy.run_MakeMovie\())
   </td>
   
   <td name=DEGREES_OF_ROTATION width=20%>
-    <font size='2'>
-      <input
-        name="DEGREES_OF_ROTATION"
-        type="text"
-        height="$spy.GetParam(gui.html.input_height)"
-        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-        name="steps"
-        width="30"
-        value = "$spy.GetParam('snum.image.image_series.degrees_of_rotation')"
-        onchange="spy.SetParam('snum.image.image_series.degrees_of_rotation',GetValue(DEGREES_OF_ROTATION))"
-      >
+    <font size=$GetVar(HtmlFontSizeControls)>
+    <input
+      name="DEGREES_OF_ROTATION"
+      type="text"
+      height="$GetVar(HtmlInputHeight)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
+      name="steps"
+      width="30"
+      value = "$spy.GetParam('snum.image.image_series.degrees_of_rotation')"
+      onchange="spy.SetParam('snum.image.image_series.degrees_of_rotation',GetValue(DEGREES_OF_ROTATION))"
+    >
     </font>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -74,18 +73,17 @@ $spy.MakeHoverButton(button_small-go,spy.run_MakeMovie\())
     <b>%Number of frames%:</b>
   </td>
   <td name=NUMBER_OF_FRAMES width=20%>
-    <font size='2'>
-      <input
-        name="NUMBER_OF_FRAMES"
-        type="text"
-        height="$spy.GetParam(gui.html.input_height)"
-        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-        name="frames"
-        width="30"
-        value="$spy.GetParam('snum.image.image_series.number_of_frames')"
-        onchange="spy.SetParam('snum.image.image_series.number_of_frames',GetValue(NUMBER_OF_FRAMES))"
-        
-      >
+    <font size=$GetVar(HtmlFontSizeControls)>
+    <input
+      name="NUMBER_OF_FRAMES"
+      type="text"
+      height="$GetVar(HtmlInputHeight)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
+      name="frames"
+      width="30"
+      value="$spy.GetParam('snum.image.image_series.number_of_frames')"
+      onchange="spy.SetParam('snum.image.image_series.number_of_frames',GetValue(NUMBER_OF_FRAMES))"
+    >
     </font>
   </td>
   
@@ -94,17 +92,17 @@ $spy.MakeHoverButton(button_small-go,spy.run_MakeMovie\())
   </td>
 
   <td name=SIZE_OF_FRAMES width=20%>
-    <font size='2'>
-      <input
-        name='SIZE_OF_FRAMES'
-        type="text"
-        height="$spy.GetParam(gui.html.input_height)"
-        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-        name="size"
-        width="30"
-        value="$spy.GetParam(snum.image.image_series.size_of_frames)"
-        onchange="spy.SetParam(snum.image.image_series.size_of_frames,GetValue(SIZE_OF_FRAMES))"
-        >
+    <font size=$GetVar(HtmlFontSizeControls)>
+    <input
+      name='SIZE_OF_FRAMES'
+      type="text"
+      height="$GetVar(HtmlInputHeight)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
+      name="size"
+      width="30"
+      value="$spy.GetParam(snum.image.image_series.size_of_frames)"
+      onchange="spy.SetParam(snum.image.image_series.size_of_frames,GetValue(SIZE_OF_FRAMES))"
+      >
       </font>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
