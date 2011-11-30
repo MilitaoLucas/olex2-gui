@@ -55,6 +55,8 @@
   Get CCDC Number
   Fit Group
   Fit & Split
+  Filter
+  Run Batch
 
 [SMALL BUTTONS]
   Delete
@@ -131,3 +133,5 @@
   Reference
   Source Files
   Tutorials
+  Solution Settings Extra
+  Refinement Settings Extra
