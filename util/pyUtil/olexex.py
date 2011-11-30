@@ -907,7 +907,7 @@ def GetRInfo(txt="",format='html'):
         t = "<td colspan='1' rowspan='2' align='right'><font size='%s'><b>%s</b></font></td>" %(font_size, R1)
       finally:
         return t
-      
+
     elif format == 'float':
       try:
         t = float(R1)
@@ -1587,11 +1587,11 @@ OV.registerFunction(updateACF)
 
 def GetACF():
   global _is_online
-  
+
   phil_file = r"%s/odac_debug.phil" %(OV.DataDir())
   if os.path.exists(phil_file):
     olx.phil_handler.merge_param_file(phil_file)
-  
+
   no_update = False
   print "Starting ODAC..."
   if no_update:
@@ -2192,7 +2192,7 @@ def GetBitmapImageInstructions():
   filesize = OV.GetValue('IMAGE_BITMAP_SIZE')
 
   OV.Cursor('busy','Please Wait. Making image %s.%s. This may take some time' %(filename, fileext))
-  olex.m('pict -pq %s %s' %(filefull, filesize))
+  olex.m('pict -pq "%s" %s' %(filefull, filesize))
   OV.Cursor()
 OV.registerFunction(GetBitmapImageInstructions)
 
