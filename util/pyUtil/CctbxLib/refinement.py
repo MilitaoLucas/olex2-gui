@@ -860,8 +860,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
           #fo2, self.twin_components[0].twin_fraction)
         f_calc = hemihedral_twinning.twin_complete_set.structure_factors_from_scatterers(
           self.xray_structure()).f_calc()
+        val = self.twin_components[0].value
+        if val < 0:
+          val = 0.001
         fo2 = hemihedral_twinning.detwin_with_model_data(
-          fo2, f_calc, self.twin_components[0].value)
+          fo2, f_calc, val)
         f_calc = f_calc.common_set(fo2)
       else:
         f_calc = self.normal_eqns.f_calc.average_bijvoet_mates()
@@ -925,12 +928,12 @@ class FullMatrixRefine(OlexCctbxAdapter):
     fo2 = self.normal_eqns.observations.fo_sq\
       .customized_copy(sigmas=flex.sqrt(1/self.normal_eqns.weights))\
       .apply_scaling(factor=1/self.normal_eqns.scale_factor())
-    
+
     if show_in_console:
       result = fo2.show_disagreeable_reflections(self.normal_eqns.fc_sq, out=log)
     else:
       result = fo2.disagreeable_reflections(self.normal_eqns.fc_sq)
-    
+
     bad_refs = []
     for i in range(result.fo_sq.size()):
       sig = math.fabs(
