@@ -47,7 +47,7 @@ def makeProgramSettingsGUI(program, method, prgtype):
   max_colspan = 6
   txt = r"""
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=4;1; -->
-    <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_bg_colour)">
+    <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
 """
 
   txt += ''.join([makeArgumentsHTML(program, method, instruction)
@@ -55,13 +55,13 @@ def makeProgramSettingsGUI(program, method, prgtype):
 
   txt += r'''
 <tr>
-  <td valign="center" width="%s" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td valign="center" width="%s" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td colspan="%s">
     %s - %s
   </td>
 </tr>
 <tr>
-  <td valign="center" width='$spy.GetParam(gui.html.table_firstcol_width)' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td valign="center" width='$GetVar(HtmlTableFirstcolWidth)' bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   %s
 </tr>
 </table>
@@ -96,10 +96,10 @@ def makeArgumentsHTML(program, method, instruction):
   else:
     tick_box_html = ''
   txt += '''
-  <td colspan=5 width='%s' valign='center' bgcolor='$spy.GetParam(gui.html.table_firstcol_colour)'>
+  <td colspan=5 width='%s' valign='center' bgcolor='$GetVar(HtmlTableFirstcolColour)'>
     <b>%s</b> %s
   </td>
-  <td valign='center' align='right' bgcolor='$spy.GetParam(gui.html.table_firstcol_colour)'>
+  <td valign='center' align='right' bgcolor='$GetVar(HtmlTableFirstcolColour)'>
     %s
   </td>
 </tr>
