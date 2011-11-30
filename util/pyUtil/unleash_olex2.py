@@ -54,19 +54,16 @@ external_files = {
   'olex2-mac.zip': ('olex-port', mac_port_name, 'action:extract', 'action:delete'),
   'unirun-mac.zip': ('olex-port', mac_port_name, 'action:extract', 'action:delete'),
   'cctbx-mac.zip': ('olex-port', mac_port_name, 'action:extract', 'action:delete'),
-  'python27-mac.zip': ('olex-port', mac_port_name, 'action:extract', 'action:delete'),
   'lib-mac.zip': ('olex-port', mac_port_name, 'action:extract', 'action:delete'),
   #linux32
   'olex2-suse101x32.zip': ('olex-port', suse32_port_name, 'action:extract', 'action:delete'),
   'unirun-suse101x32.zip': ('olex-port', suse32_port_name, 'action:extract', 'action:delete'),
   'cctbx-suse101x32.zip': ('olex-port', suse32_port_name, 'action:extract', 'action:delete'),
-  'python27-suse101x32.zip': ('olex-port', suse32_port_name, 'action:extract', 'action:delete'),
   'lib-suse101x32.zip': ('olex-port', suse32_port_name, 'action:extract', 'action:delete'),
   #linux64
   'olex2-suse101x64.zip': ('olex-port', suse64_port_name, 'action:extract', 'action:delete'),
   'unirun-suse101x64.zip': ('olex-port', suse64_port_name, 'action:extract', 'action:delete'),
   'cctbx-suse101x64.zip': ('olex-port', suse64_port_name, 'action:extract', 'action:delete'),
-  'python27-suse101x64.zip': ('olex-port', suse64_port_name, 'action:extract', 'action:delete'),
   'lib-suse101x64.zip': ('olex-port', suse64_port_name, 'action:extract', 'action:delete'),
   #windows
   'launch_exe.zip': ('olex-port', win_port_name,  'action:extract', 'action:delete'),
@@ -126,7 +123,6 @@ set(  ['cctbx_64.zip',     #cctbx/cctb_sources,...
    ) | portable_zip_files
 mac_zip_files = \
 set(  ['cctbx-mac.zip',  #cctbx/cctb_sources,...
-      'python27-mac.zip',#Pyhton27/..., ..., + python27 dlls
       'olex2-mac.zip',    #olex2 executable
       'unirun-mac.zip',
       'lib-mac.zip'
@@ -135,7 +131,6 @@ set(  ['cctbx-mac.zip',  #cctbx/cctb_sources,...
 
 suse32_zip_files = \
 set(  ['cctbx-suse101x32.zip',  #cctbx/cctb_sources,...
-      'python27-suse101x32.zip',#Pyhton27/..., ..., + python27 dlls
       'lib-suse101x32.zip',     #lib/dlls
       'olex2-suse101x32.zip',    #olex2 executable
       'unirun-suse101x32.zip'
@@ -143,7 +138,6 @@ set(  ['cctbx-suse101x32.zip',  #cctbx/cctb_sources,...
    ) | portable_zip_files
 suse64_zip_files = \
 set(  ['cctbx-suse101x64.zip',  #cctbx/cctb_sources,...
-      'python27-suse101x64.zip',#Pyhton27/..., ..., + python27 dlls
       'lib-suse101x64.zip',     #lib/dlls
       'olex2-suse101x64.zip',    #olex2 executable
       'unirun-suse101x64.zip'
