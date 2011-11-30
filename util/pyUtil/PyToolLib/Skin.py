@@ -70,10 +70,36 @@ Skin_instance = Skin()
 OV.registerMacro(Skin_instance.run_skin, 'function-The function to call')
 
 
+def export_parameters():
+  OV.SetVar('HtmlTableFirstcolColour', OV.GetParam('gui.html.table_firstcol_colour').hexadecimal)
+  OV.SetVar('HtmlTableFirstcolWidth', OV.GetParam('gui.html.table_firstcol_width'))
+  OV.SetVar('HtmlTableBgColour', OV.GetParam('gui.html.table_bg_colour').hexadecimal)
+  OV.SetVar('HtmlInputBgColour', OV.GetParam('gui.html.input_bg_colour').hexadecimal)
+  OV.SetVar('HtmlFontColour', OV.GetParam('gui.html.font_colour').hexadecimal)
+  OV.SetVar('HtmlComboHeight', OV.GetParam('gui.html.combo_height'))
+  OV.SetVar('HtmlInputHeight', OV.GetParam('gui.html.input_height'))
+  OV.SetVar('HtmlHighlightColour', OV.GetParam('gui.html.highlight_colour').hexadecimal)
+  OV.SetVar('HtmlCheckboxHeight', OV.GetParam('gui.html.checkbox_height'))
+  OV.SetVar('HtmlCheckboxWidth', OV.GetParam('gui.html.checkbox_width'))
+  OV.SetVar('HtmlCheckboxWidth2', OV.GetParam('gui.html.checkbox_width_2'))
+  OV.SetVar('TimageColour', OV.GetParam('gui.timage.grad_colour').hexadecimal)
+  OV.SetVar('HtmlSpinHeight', OV.GetParam('gui.html.spin_height'))
+  OV.SetVar('HtmlLinkColour', OV.GetParam('gui.html.link_colour').hexadecimal)
+  OV.SetVar('HtmlBgColour', OV.GetParam('gui.html.bg_colour').hexadecimal)
+  OV.SetVar('HtmlFontName', OV.GetParam('gui.html.font_name'))
+  OV.SetVar('HtmlGuiFontSize', OV.GetParam('gui.html.font_size'))
+  OV.SetVar('HtmlPanelWidth', OV.GetParam('gui.htmlpanelwidth'))
+  OV.SetVar('HtmlButtonHeight', OV.GetParam('gui.timage.button.height'))
+
+
 def change_skin(skin_name=None, force=False):
 
   gui_phil_path = "%s/gui.phil" %(OV.DataDir())
   gui_phil_template_path = "%s/gui_template.phil" %(OV.DataDir())
+  
+  OV.SetHtmlFontSize()
+  OV.SetHtmlFontSizeControls()
+  
 
   timing = False
   if timing:
@@ -172,7 +198,7 @@ def change_skin(skin_name=None, force=False):
     t = time.time()
     print "After 'Save PHIL': %.2f s (%.5f s)" % ((t - t1), (t - t2))
     t2 = t
-
+  export_parameters()
 OV.registerFunction(change_skin)
 
 

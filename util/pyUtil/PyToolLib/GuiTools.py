@@ -298,7 +298,7 @@ class MakeGuiTools(object):
     name = r"blocks/tool-header"
     self.txt = []
     self.txt.append("<font color='#6f6f8b' size=")
-    self.txt.append("<!-- #cmd $spy.GetParam(gui.html.font_size) -->")
+    self.txt.append("<!-- #cmd $spy.gui.get_font_size() -->")
     self.txt.append(">\n<p>")
     self.write_tool(name)
 
@@ -503,7 +503,7 @@ class MakeGuiTools(object):
     self.txt.append(r'<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->')
 
   def box(self, box_d):
-    box_d.setdefault('font-size', 2)
+    box_d.setdefault('font-size',OV.GetVar(HtmlFontSizeControls))
     box_d.setdefault('label', 'Label')
     box_d.setdefault('width', 40)
     box_d.setdefault('height', 18)
@@ -528,9 +528,11 @@ class MakeGuiTools(object):
     box_d['sep_on'] = ""
     box_d['sep_off'] = ""
 
+#<font size='%(font-size)s'> #this used to be first line of next block
+
     box = '''
-<font size='%(font-size)s'>
 %(sep_on)s
+<font size='$GetVar(HtmlFontSizeControls)'>
 <input 
 type="%(type)s" 
 label="%(label)s" 
@@ -545,7 +547,7 @@ oncheck="%(oncheck)s"
 onuncheck="%(onuncheck)s" 
 onup="%(onup)s" 
 ondown="%(ondown)s"
-bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+bgcolor="$GetVar(HtmlInputBgColour))" 
 image="%(image)s"
 %(readonly)s
 %(checked)s
@@ -951,11 +953,12 @@ def make_program_choice_box(prg_type, prg_det, scope):
   d['func_arg2'] = func_arg2
 
   txt = '''
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type='combo'
       width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 - spy.GetParam(gui.htmlpanelwidth_margin_adjust))' 
-      height="$spy.GetParam(gui.html.combo_height)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      height="$GetVar(HtmlComboHeight)"
+      bgcolor="$GetVar(HtmlInputBgColour))"
       name='SET_%(SCOPE)s_%(PRG_TYPE)s_%(PRG_DET)s'
       value='$spy.GetParam(%(scope)s.%(prg_type)s.%(prg_det)s)'
       items='$spy.get%(Prg_Type)s%(func)s(%(func_arg)s)'
@@ -963,6 +966,7 @@ def make_program_choice_box(prg_type, prg_det, scope):
       onchange="spy.Set%(Prg_Type)s%(Prg_Det)s(GetValue(SET_%(SCOPE)s_%(PRG_TYPE)s_%(PRG_DET)s))>>html.Update"
       readonly='readonly'
     >
+    </font>
     ''' %d
   return txt
 

@@ -732,19 +732,21 @@ class Graph(ImageTools):
         next_img = img_no + 1
 
         scaleTxt = '''
+<font size='$GetVar(HtmlFontSizeControls)'>
 <input
   type="spin"
   name="HistoryScale"
   width="45"
   label="Scale "
-  bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-  fgcolor="$spy.GetParam(gui.html.font_colour)"
+  bgcolor="$GetVar(HtmlTableBgColour)"
+  fgcolor="$GetVar(HtmlFontColour"
   valign='center'
   min="2"
-  height="$spy.GetParam(gui.html.spin_height)"
+  height="$GetVar(HtmlSpinHeight)"
   value="$spy.GetParam(graphs.program_analysis.y_scale_factor)"
   onchange="spy.SetParam(graphs.program_analysis.y_scale_factor,GetValue(HistoryScale))>>spy._make_history_bars()>>html.Update"
->'''
+>
+</font>'''
 
         if all_in_one_history:
           all_in_oneText = "<a href='spy.SetParam(graphs.program_analysis.all_in_one_history,False)>>spy._make_history_bars()>>html.Update'>Split Display</a>"
