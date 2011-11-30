@@ -1,7 +1,6 @@
 $run(Focus)
-<font color=$spy.GetParam(gui.html.font_colour)  size=$spy.GetParam(gui.html.font_size) face="$spy.GetParam(gui.html.font_name)">
 <html>
-  <body link='$spy.GetParam(gui.html.link_colour)' bgcolor='$spy.GetParam(gui.html.highlight_colour)'>
+  <body link='$GetVar(HtmlLinkColour)' bgcolor='$GetVar(HtmlHighlightColour)'>
     <table border="0" style="border-collapse: collapse" width="100%" id="#tool" cellpadding="1" cellspacing="1" >
       <tr>
         <td>
@@ -21,9 +20,6 @@ $run(Focus)
     </table>
   </body>
 </html>
-
-</font>
-
 
 <!--
 <zimg border="0" src="pop_background.png">

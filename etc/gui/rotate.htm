@@ -10,41 +10,47 @@
   <td name=SPIN_ROTATION_X align='left'>
     $spy.MakeHoverButton(button_tiny-:x,rota 1 eval\(GetValue\(rx)*-1))
     &thinsp;
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="spin"
       name = "rx"
       width="45"
-      height="$spy.GetParam(gui.html.spin_height)"
+      height="$GetVar(HtmlSPinHeight)"
       value="10"
     >
+    </font>
     &thinsp;
     $spy.MakeHoverButton(button_tiny-x:,rota 1 getvalue\(rx))
   </td>
   <td name=SPIN_ROTATION_Y align='center'>
     $spy.MakeHoverButton(button_tiny-:y,rota 2 eval\(GetValue\(ry)*-1))
     &thinsp;
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="spin"
       name = "ry"
       width="45"
-      height="$spy.GetParam(gui.html.spin_height)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      height="$GetVar(HtmlSPinHeight)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       value="10"
     >
+    </font>
     &thinsp;
     $spy.MakeHoverButton(button_tiny-y:,rota 2 getvalue\(ry))
   </td>
   <td name=SPIN_ROTATION_Z align='right'>
     $spy.MakeHoverButton(button_tiny-:z,rota 3 eval\(GetValue\(rz)*-1))
     &thinsp;
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="spin"
       name = "rz"
       width="45"
-      height="$spy.GetParam(gui.html.spin_height)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      height="$GetVar(HtmlSPinHeight)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       value="10"
     >
+    </font>
     &thinsp;
     $spy.MakeHoverButton(button_tiny-z:,rota 3 getvalue\(rz))
   </td>
@@ -59,62 +65,70 @@
     <b>%Auto%:</b>
   </td>
   <td name=CHECK_X>
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="checkbox"
-      height="$spy.GetParam(gui.html.input_height)"
+      height="$GetVar(HtmlInputHeight)"
       name = "x"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
       width="28"
       value="x"
       data = "0"
       oncheck = "setdata(x, '1')>>rota getdata(x) getdata(y) getdata(z) 100000 eval(getvalue(speed)*0.1)"
       onuncheck="setdata(x, '0') >>rota getdata(x) getdata(y) getdata(z) 100000 eval(getvalue(speed)*0.1)"
     >
+    </font>
   </td>
   <td name=CHECK_Y>
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="checkbox"
-      height="$spy.GetParam(gui.html.input_height)"
+      height="$GetVar(HtmlInputHeight)"
       name = "y"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
       width="28"
-      height="$spy.GetParam(gui.html.input_height)"
+      height="$GetVar(HtmlInputHeight)"
       value="y"
       data = "0"
       oncheck = "setdata(y, '1')>>rota getdata(x) getdata(y) getdata(z) 100000 eval(getvalue(speed)*0.1)"
       onuncheck="setdata(y, '0') >>rota getdata(x) getdata(y) getdata(z) 100000 eval(getvalue(speed)*0.1)"
     >
+    </font>
   </td>
   <td name=CHECK_Z>
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="checkbox"
-      height="$spy.GetParam(gui.html.input_height)"
+      height="$GetVar(HtmlInputHeight)"
       name = "z"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
       width="28"
-      height="$spy.GetParam(gui.html.input_height)"
+      height="$GetVar(HtmlInputHeight)"
       value="z"
       data = "0"
       oncheck = "setdata(z, '1')>>rota getdata(x) getdata(y) getdata(z) 100000 eval(getvalue(speed)*0.1)"
       onuncheck="setdata(z, '0') >>rota getdata(x) getdata(y) getdata(z) 100000 eval(getvalue(speed)*0.1)"
     >
+    </font>
   </td>
   <td name=SLIDER_SPEED align='center'>
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="slider"
       name="speed"
       width="70"
       height="20"
-      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      bgcolor="$GetVar(HtmlTableBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
       value="1"
       min="1"
       max="10"
       onchange = "rota getdata(x) getdata(y) getdata(z) 100000 eval(getvalue(speed)*0.1)"
     >
+    </font>
   </td>
   <td name=XYZ align='right'>
     $spy.MakeHoverButton(button_tiny-a,matr 1)

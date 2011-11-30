@@ -8,20 +8,22 @@
     1) <a href='label -type=GetValue(IMAGE_SETTINGS_LABEL_TYPE)'>%images_add_labels_to_atoms%</a>|
     <a href='sel $*-H,Q>>label -type=GetValue(IMAGE_SETTINGS_LABEL_TYPE)'>%images_add_labels_to_non_H_atoms%</a>
   </td>
+  <td>%Style%</td>
   <td name=IMAGE_SETTINGS_LABEL_TYPE>
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="combo"
-      height="$spy.GetParam(gui.html.combo_height)"
+      height="$GetVar(HtmlComboHeight)"
       width="80"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       items="%default%;%subscript%;%brackets%"
-      height="$spy.GetParam(gui.html.input_height)"
+      height="$GetVar(HtmlInputHeight)"
       valign='center'
       name="IMAGE_SETTINGS_LABEL_TYPE"
       value='default'
-      label="%Style% "
       manage
     >
+    </font>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>

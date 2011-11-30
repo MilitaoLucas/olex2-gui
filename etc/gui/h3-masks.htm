@@ -20,15 +20,16 @@
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td width="20%">
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="combo"
-      height="$spy.GetParam(gui.html.combo_height)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      height="$GetVar(HtmlComboHeight)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       name="SET_SNUM_MASKS_TYPE"
       items='mask;f_mask;f_model'
       value="$spy.GetParam(snum.masks.type)"
       width="95%"
-      height="$spy.GetParam(gui.html.input_height)"
+      height="$GetVar(HtmlInputHeight)"
       onchange="
 spy.SetParam(snum.masks.type,GetValue(SET_SNUM_MASKS_TYPE))>>
 spy.OlexCctbxMasks(False)>>
@@ -38,48 +39,55 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
       valign="center"
       readonly
     >
+    </font>
   </td>
   <td width="20%">
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="text"
       name = "SET_SNUM_MASKS_RESOLUTION_FACTOR"
       width="95%"
-      height="$spy.GetParam(gui.html.input_height)"
+      height="$GetVar(HtmlInputHeight)"
       label="%Res. factor%"
       valign="center"
-      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      bgcolor="$GetVar(HtmlTableBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
       value="$spy.GetParam(snum.masks.resolution_factor)"
       onchange="spy.SetParam(snum.masks.resolution_factor,GetValue(SET_SNUM_MASKS_RESOLUTION_FACTOR))"
     >
+    </font>
   </td>
   <td width="20%">
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="text"
       name = "SET_SNUM_MASKS_SOLVENT_RADIUS"
       width="95%"
-      height="$spy.GetParam(gui.html.input_height)"
+      height="$GetVar(HtmlInputHeight)"
       label="%Solvent rad.%/&Aring"
       valign="center"
-      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      bgcolor="$GetVar(HtmlTableBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
       value="$spy.GetParam(snum.masks.solvent_radius)"
       onchange="spy.SetParam(snum.masks.solvent_radius,GetValue(SET_SNUM_MASKS_SOLVENT_RADIUS))"
     >
+    </font>
   </td>
   <td width="20%">
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="text"
       name = "SET_SNUM_MASKS_SHRINK_TRUNCATION_RADIUS"
       width="95%"
-      height="$spy.GetParam(gui.html.input_height)"
+      height="$GetVar(HtmlInputHeight)"
       label="%Shrink trunc. rad.%/&Aring"
       valign="center"
-      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      bgcolor="$GetVar(HtmlTableBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
       value="$spy.GetParam(snum.masks.shrink_truncation_radius)"
       onchange="spy.SetParam(snum.masks.shrink_truncation_radius,GetValue(SET_SNUM_MASKS_SHRINK_TRUNCATION_RADIUS))"
     >
+    </font>
   </td>
 
   <td valign='bottom'>
@@ -92,18 +100,21 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td valign='bottom'>
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
-      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      bgcolor="$GetVar(HtmlTableBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
       type="checkbox"
       value="%Use set completion%"
       valign="bottom"
       name="SET_SNUM_MASKS_USE_COMPLETE_SET"
       checked="$spy.GetParam(snum.masks.use_set_completion)"
-      height="$spy.GetParam(gui.html.input_height)"
+      height="$GetVar(HtmlInputHeight)"
       width="50%"
       oncheck="spy.SetParam(snum.masks.use_set_completion,True)"
-      onuncheck="spy.SetParam(snum.masks.use_set_completion,False)">
+      onuncheck="spy.SetParam(snum.masks.use_set_completion,False)"
+    >
+    </font>
   </td>
 
 

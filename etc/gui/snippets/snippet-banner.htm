@@ -1,16 +1,18 @@
 <zimg name="BANNER_IMAGE" border="0" src="banner.png">
+  <font size='$GetVar(HtmlFontSizeControls)'>
   <input 
     type="slider" 
     name = "BANNER_SLIDE" 
     width="$eval(html.clientwidth(self)-24)" 
     height="20" 
     value="GetVar(snum_refinement_banner_slide)" 
-    bgcolor="$spy.GetParam(gui.html.table_bg_colour)"  
-    fgcolor="$spy.GetParam(gui.html.font_colour)" 
+    bgcolor="$GetVar(HtmlTableBgColour)"  
+    fgcolor="$GetVar(HtmlFontColour)" 
     min="0" 
     max="119" 
     onchange = "SetImage(BANNER_IMAGE,strcat(banner_,GetValue(BANNER_SLIDE).png))"	
     onmouseup = "SetVar(snum_refinement_banner_slide,GetValue(BANNER_SLIDE))>>
 spy.doBanner(GetVar(snum_refinement_banner_slide))
 "
->
+  >
+  </font>

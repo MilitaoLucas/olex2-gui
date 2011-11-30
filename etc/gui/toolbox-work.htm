@@ -36,24 +36,26 @@ $spy.MakeHoverButton(toolbar-H,showH)
 $spy.MakeHoverButton(toolbar-center,compaq>>compaq -a>>center)
   </td>
   <td width = '30%'>
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
   <tr>
   <td width='30%' align='center'>
 $spy.MakeHoverButton(toolbar-ok,fixunit GetValue\(SET_Z_PRIME_FIXUNIT)>>xf.au.SetZprime\(GetValue\(SET_Z_PRIME_FIXUNIT))>>html.Update)
-</td>
+  </td> 
+  <td>Z'</td>
   <td width='70%' align='center'>
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input
-        type='text'
-        width="40"
-        height="$spy.GetParam(gui.html.spin_height)"
-        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-        name='SET_Z_PRIME_FIXUNIT'
-        label="Z'&nbsp;"
-        valign='center'
-        align='right'
-        value='xf.au.GetZprime()'
-        onreturn="xf.au.SetZprime(GetValue(~name~))>>html.update"
+      type='text'
+      width="40"
+      height="$GetVar(HtmlSPinHeight)"
+      bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+      name='SET_Z_PRIME_FIXUNIT'
+      valign='center'
+      align='right'
+      value='xf.au.GetZprime()'
+      onreturn="xf.au.SetZprime(GetValue(~name~))>>html.update"
       >
+    </font>
   </td>
   </tr></table>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -67,18 +69,19 @@ $spy.MakeHoverButton(toolbar-ok,fixunit GetValue\(SET_Z_PRIME_FIXUNIT)>>xf.au.Se
     <b>%Labels%</b>
   </td>
   <td align='right' name=COMBO_LABEL_COMBO_BOX>
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type='combo'
-      width='$eval($spy.getParam(gui.htmlpanelwidth)-140)'
-      height="$spy.GetParam(gui.html.input_height)"
+      width='$eval($GetVar(HtmlPanelWidth)-140)'
+      height="$GetVar(HtmlInputHeight)"
       name='set_label_content'
       value=''
       items='%Toggle On/Off%<-;%Atom Names%<-l;%Crystallographic Occupancy%<-o;%Chemical Occupancy%<-co;%Parts%<-p;%Link-Code%<-v;%H Atom Labels%<-h l;%Fixed Parameters%<-f;Variables<-v;AFIX Commands<-h a;Q Peak Intensities<-qi'
-      label=''
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       onchange="spy.ChooseLabelContent(GetValue(~name~))"
       readonly='readonly'
     >
+    </font>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>

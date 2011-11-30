@@ -34,13 +34,17 @@
   <td>
     <table><tr>
       <td VALIGN='center' width='15%'>
+        <font size=$GetVar(HtmlFontSizeControls)>
         <input
           type="text"
-          bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+          bgcolor="$GetVar(HtmlInputBgColour)"
           name = "HFIX"
           width="30"
           height="17"
-          value = "137">
+          value = "137"
+        >
+        </font>
+          
       </td>
       <td VALIGN='center' width='30%'>
 $spy.MakeHoverButton(button_small-hfix,if strcmp\(spy.GetParam\(olex2.short_mode),'hfix') then 'mode off'  else 'mode hfix getvalue\(HFIX)')
@@ -49,16 +53,18 @@ $spy.MakeHoverButton(button_small-hfix,if strcmp\(spy.GetParam\(olex2.short_mode
       <b>%HIMP%</b>
     </td>
     <td>
+      <font size=$GetVar(HtmlFontSizeControls)>
       <input
         type="combo"
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-        height="$spy.GetParam(gui.html.combo_height)"
+        height="$GetVar(HtmlComboHeight)"
         name = "HIMP_DISTANCE"
         width="100"
         value=""
         items='B-H (1.19)<-1.19;sp3-C-H (1.083)<-1.083;sp2-C-H (1.077)<-1.083;sp3-N-H (1.033)<-1.033;sp2-N-H (1.009)<-1.009;O-H (0.983)<-0.983;'
         onchange = "labels -l -h>>mode himp GetValue(HIMP_DISTANCE)"
       >
+      </font>
     </td>
 </tr></table>
 </tr>

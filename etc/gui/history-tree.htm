@@ -4,6 +4,7 @@
 <tr name=CURRENT_HISTORY_TREE VALIGN='center' ALIGN='left' >
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=History;1; -->
   <td>
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       noroot
       editable
@@ -18,6 +19,7 @@
       onitem="spy.revert_history(html.getvalue(HISTORY_TREE))>>html.Update"
       onedit="spy.rename_history(html.getvalue(HISTORY_TREE),~label~)>>html.Update"
     >
+    </font>
 </td>
 </tr>
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->

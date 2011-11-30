@@ -7,46 +7,53 @@
 <!-- #include tool-help-button gui\blocks\tool-help-button.htm;help_ext=calculate-voids;1; -->
   </td>
   <td width="25%">
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="text"
       name = "SET_SNUM_CALCVOID_RESOLUTION"
       width="95%"
-      height="$spy.GetParam(gui.html.input_height)"
+      height="$GetVar(HtmlInputHeight)"
       label="%Res%/&Aring [0.2]"
       valign="center"
-      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      bgcolor="$GetVar(HtmlTableBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
       value="$spy.GetParam(snum.calcvoid.resolution)"
       onchange="spy.SetParam(snum.calcvoid.resolution,GetValue(SET_SNUM_CALCVOID_RESOLUTION))"
     >
+    </font>
   </td>
   <td width="25%">
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="text"
       name = "SET_SNUM_CALCVOID_DISTANCE"
       width="95%"
-      height="$spy.GetParam(gui.html.input_height)"
+      height="$GetVar(HtmlInputHeight)"
       label="%Distance%/&Aring [0.0]"
       valign="center"
-      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      bgcolor="$GetVar(HtmlTableBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
       value="$spy.GetParam(snum.calcvoid.distance)"
       onchange="spy.SetParam(snum.calcvoid.distance,GetValue(SET_SNUM_CALCVOID_DISTANCE))"
     >
+    </font>
   </td>
   <td colspan = '1' width="25%">
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
-      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      bgcolor="$GetVar(HtmlTableBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
       type="checkbox"
       value="%Precise%"
       valign="bottom"
       name="SNUM_CALCVOID_PRECISE"
       checked="$spy.GetParam(snum.calcvoid.precise)"
-      height="$spy.GetParam(gui.html.input_height)"
+      height="$GetVar(HtmlInputHeight)"
       width="95%"
       oncheck="spy.SetParam(snum.calcvoid.precise,True)"
-      onuncheck="spy.SetParam(snum.calcvoid.precise,False)">
+      onuncheck="spy.SetParam(snum.calcvoid.precise,False)"
+    >
+    </font>
   </td>
   <td align='right'>
 $spy.MakeHoverButton(button_small-void,spy.VoidView\())

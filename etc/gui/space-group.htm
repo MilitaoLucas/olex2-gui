@@ -6,7 +6,7 @@
 
 <table>
 <tr>
-	<td valign='top' width="8" align='center' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+	<td valign='top' width="8" align='center' bgcolor="$GetVar(HtmlTableFirstcolColour)">
 		<a 
 			href="spy.make_help_box -name='reflection-statistics' -popout='False'" 
 			target="Help me with this">
@@ -37,7 +37,7 @@
 <table>
 
 <tr>
-	<td valign='top' width="8" align='center' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+	<td valign='top' width="8" align='center' bgcolor="$GetVar(HtmlTableFirstcolColour)">
 		<a 
 			href="spy.make_help_box -name='reflection-statistics' -popout='False'" 
 			target="Help me with this">
@@ -51,7 +51,7 @@
 	<td colspan='1'>
 		<input 
 			type="text" 
-			bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+			bgcolor="$GetVar(HtmlInputBgColour)" 
 			name="space_group" 
 			items='SGList()' 
 			label = ''
@@ -63,7 +63,7 @@
 </tr>
 
 <tr>
-	<td valign='top' width="8" align='center' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+	<td valign='top' width="8" align='center' bgcolor="$GetVar(HtmlTableFirstcolColour)">
 		<a 
 			href="spy.make_help_box -name='reflection-statistics' -popout='False'" 
 			target="Help me with this">
@@ -73,21 +73,21 @@
 
 	<td colspan='2'>
     <input
-			bgcolor="$spy.GetParam(gui.html.table_bg_colour)"  
+			bgcolor="$GetVar(HtmlTableBgColour)"  
 			type="button" 
 			name="RESET_SPACE_GROUP" 
 			image="button-reset.png"
 			onclick="reset -s=getvalue(space_group)>>echo 'The structure has been reset in $sg(%n). You probably want to solve this structure now.'"
 		>
     <input
-			bgcolor="$spy.GetParam(gui.html.table_bg_colour)"  
+			bgcolor="$GetVar(HtmlTableBgColour)"  
 			type="button" 
 			name="RESET_AND_SOLVE" 
 			image="button-reset_&_solve.png"
 			onclick="reset -s=getvalue(space_group)>>solve>>echo 'The structure has been reset in $sg(%n).'"
 		>
     <input
-			bgcolor="$spy.GetParam(gui.html.table_bg_colour)"  
+			bgcolor="$GetVar(HtmlTableBgColour)"  
 			type="button" 
 			name="SG_INFO" 
 			image="button-sg_info.png"

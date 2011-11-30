@@ -5,18 +5,20 @@
   &nbsp;% Split atoms and Contrain/Restrain them% 
   </rd>
   <td>
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="combo"
-      height="$spy.GetParam(gui.html.combo_height)"
+      height="$GetVar(HtmlComboHeight)"
       width="70"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       name="SET_CONRES_FOR_MODE_SPLIT"
       items=' ;EADP;ISOR;SIMU'
       value=""
       onchange="mode split -r=GetValue(~name~)"
       valign="center"
       readonly
->
+    >
+    </font>
 </td>
 </tr>
 </table>

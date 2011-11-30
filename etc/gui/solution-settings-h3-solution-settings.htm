@@ -1,19 +1,18 @@
 <tr>
-	<td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+	<td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)">
 	</td>
 	<td width='70' align='left' colspan='4'>
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan='4';1; -->
 	</td>
 </tr>
 <tr>
-	<td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+	<td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
 	<td VALIGN='center' width="100" colspan=2>
 			<b>Solution Program</b>
 	</td>	
 
 
 	<td VALIGN='center' ALIGN='right' colspan=2>
-		<font size='2'> 
 			<input 
 				type='combo',
 				width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 -20)' 
@@ -26,19 +25,17 @@
 				onchange="spy.SetSolutionProgram(GetValue(SET_SNUM_SOLUTION_PROGRAM))>>html.Update"
 				readonly='readonly'
 			>
-		</font>
 	</td>
 </tr>
 
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_SOLUTION_METHOD'>
-	<td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+	<td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
 
 	<td VALIGN='center' width="100" colspan=2>
 			<b>%Solution XXXXXXXXXXXXXXXX Method%</b>
 	</td>	
 
 	<td VALIGN='center' ALIGN='right' colspan=2>
-		<font size='2'> 
 			<input 
 				type='combo',
 				width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 -20)' 
@@ -51,7 +48,6 @@
 				onchange="spy.SetParam(snum.solution.method,GetValue(SET_SNUM_SOLUTION_METHOD))>>html.Update"
 				readonly='readonly'
 			>
-		</font>
 	</td>
 </tr>
 
@@ -59,7 +55,7 @@
 
 
 	<tr VALIGN='center' ALIGN='left' NAME='IGNORE_SETTINGS'>
-		<td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+		<td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
 		  <td VALIGN='center'  colspan=3>
 				<b>
 					Graphical Output
@@ -67,7 +63,6 @@
 		  </td>
 
 		  <td VALIGN='center' ALIGN='right'  colspan=1>
-				<font size='2'>
 				<input
 					type='checkbox'
 					width=12
@@ -78,12 +73,10 @@
 					onuncheck='spy.SetParam(snum.solution.graphical_output,false)'
 					value=''
 				>&nbsp;
-			</font>
 		</td>
 	
 	</tr>
 	
 <!-- #includeif fs.Exists(solution-settings-h3-solution-settings-extra.htm) solution-settings-h3-solution-settings-extra solution-settings-h3-solution-settings-extra.htm;gui\blocks\tool-h3-off.htm;image=solution-settings-h3-solution-settings-extra;colspan=4;onclick=;onclick=;2; -->
 	
-	</table>	
-</font>
+	</table>

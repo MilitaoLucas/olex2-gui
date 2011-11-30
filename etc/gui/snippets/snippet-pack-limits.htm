@@ -1,4 +1,4 @@
-  <td name=PACK_LIMITS_LINKS bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+  <td name=PACK_LIMITS_LINKS bgcolor="$GetVar(HtmlTableFirstcolColour)">
     <b>
       <a href='fuse>>
 pack getvalue(anpack) getvalue(appack) getvalue(bnpack) getvalue(bppack) getvalue(cnpack) getvalue(cppack)>>
@@ -22,55 +22,68 @@ grow'>%Pack Limits%
   <td align='center' name=BTN_PACK_LIMITS>
     $spy.MakeHoverButton(button_tiny-a@pack,matr 1)
     &nbsp;
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="text"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       name = "anpack"
       float width="10"
-      float height="$spy.GetParam(gui.html.input_height)"
+      float height="$GetVar(HtmlInputHeight)"
       value = "-0.5"
     >&nbsp;
+    </font>
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="text"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       name = "appack"
       float width="10"
-      float height="$spy.GetParam(gui.html.input_height)"
+      float height="$GetVar(HtmlInputHeight)"
       value = "0.5"
     >&nbsp;
+    </font>
     $spy.MakeHoverButton(button_tiny-b@pack,matr 2)
     &nbsp;
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input type="text"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       name = "bnpack"
       float width="10"
-      float height="$spy.GetParam(gui.html.input_height)"
+      float height="$GetVar(HtmlInputHeight)"
       value = "-0.5"
     >&nbsp;
+    </font>
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="text"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       name = "bppack"
       float width="10"
-      float height="$spy.GetParam(gui.html.input_height)"
+      float height="$GetVar(HtmlInputHeight)"
       value = "0.5"
     >&nbsp;
+    </font>
     $spy.MakeHoverButton(button_tiny-c@pack,matr 3)
     &nbsp;
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="text"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       name = "cnpack"
       float width="10"
-      float height="$spy.GetParam(gui.html.input_height)"
+      float height="$GetVar(HtmlInputHeight)"
       value = "-0.5"
     >&nbsp;
+    <
+    </font>
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="text"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       name = "cppack"
       float width="10"
-      float height="$spy.GetParam(gui.html.input_height)"
+      float height="$GetVar(HtmlInputHeight)"
       value = "0.5"
     >
+    </font>
   </td>

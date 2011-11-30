@@ -1,4 +1,4 @@
-<body link="$spy.GetParam(gui.html.link_colour)" bgcolor='%(bg_colour)s'>
+<body link="$GetVar(HtmlLinkColour)" bgcolor='%(bg_colour)s'>
 
 <!--+++++++++ SYSTEM BUTTONS-->
 <table bgcolor='%(button_bar_colour)s' border="0" VALIGN='left' style="border-collapse: collapse" width="100%%" cellpadding="5" cellspacing="1">
@@ -8,7 +8,7 @@
       <input
         type="button"
         name=TUTORIAL_Back
-        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+        bgcolor="$GetVar(HtmlInputBgColour)"
         valign='center'
         width="60"
         height="22"
@@ -19,7 +19,7 @@
       <input
         type="button"
         name=TUTORIAL_CANCEL
-        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+        bgcolor="$GetVar(HtmlInputBgColour)"
         valign='center'
         width="60"
         height="22"
@@ -30,7 +30,7 @@
       <input
         type="button"
         name=TUTORIAL_NEXT
-        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+        bgcolor="$GetVar(HtmlInputBgColour)"
         valign='center'
         width="60"
         height="22"
@@ -82,7 +82,7 @@
 
   <tr align = 'left' bgcolor='%(bg_colour)s'>
     <td><br>
-<font color='%(font_colour)s' size=4 face="$spy.GetParam(gui.html.font_name)">
+<font color='%(font_colour)s' size=4 face="$GetVar(HtmlFontName)">
     %(txt)s
 </font>
     </td>

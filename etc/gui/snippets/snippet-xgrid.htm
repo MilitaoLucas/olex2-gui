@@ -3,10 +3,11 @@
 <tr>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=xgrid;1; -->
   <td>
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="combo"
-      height="$spy.GetParam(gui.html.combo_height)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      height="$GetVar(HtmlComboHeight)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       name="SET_SNUM_XGRID_VIEW_#suffix"
       items='plane;contour;contour+plane;surface;wire;points'
       value="$spy.GetParam(snum.xgrid.view)"
@@ -16,13 +17,15 @@
       label="%View% "
       valign="center"
       readonly
->
+    >
+    </font>
 </td>
 <td>
+  <font size='$GetVar(HtmlFontSizeControls)'>
   <input
     type="checkbox"
-    height="$spy.GetParam(gui.html.combo_height)"
-    bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
+    height="$GetVar(HtmlComboHeight)"
+    bgcolor="$GetVar(HtmlTableBgColour)"
     name="SET_SNUM_XGRID_EXTENDED_#suffix"
     checked="$spy.GetParam(snum.xgrid.extended)"
     oncheck="spy.SetParam(snum.xgrid.extended,True)
@@ -33,7 +36,8 @@
 >>html.Update"
   value=" %Extended% "
   valign="center"
->
+  >
+  </font>
 </td>
 <td>
   <a href="editmaterial XGrid">%Edit% %style%</a>

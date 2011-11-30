@@ -1,69 +1,69 @@
 <!-- #include header gui\blocks\tool-table-header.htm;1; -->
 
 <tr VALIGN='center' ALIGN='left' NAME='SET_SNUM_REFINEMENT_FORMULA'>
-  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td width='50%' VALIGN='center' colspan=2>
     <b>%Chemical Composition%</b>
   </td>
   <td width='50%' VALIGN='center' ALIGN='right' colspan=2>
-    <font size='2'>
-      <input
-        type='combo'
-        width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 - spy.GetParam(gui.htmlpanelwidth_margin_adjust))'
-        height="$spy.GetParam(gui.html.combo_height)"
-        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-        name='SET_SNUM_REFINEMENT_FORMULA_#name'
-        items='$spy.GetParam(snum.refinement.original_formula)'
-        value='xf.GetFormula()'
-        onchange='xf.SetFormula(GetValue(~name~))>>spy.SetParam(snum.refinement.formula,"GetValue(SET_SNUM_REFINEMENT_FORMULA_#name)")>>html.Update'
-      >
+    <font size='$GetVar(HtmlFontSizeControls)'>
+    <input
+      type='combo'
+      width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 - spy.GetParam(gui.htmlpanelwidth_margin_adjust)/2 - spy.GetParam(gui.html.table_firstcol_width))' 
+      height="$GetVar(HtmlComboHeight)"
+      bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+      name='SET_SNUM_REFINEMENT_FORMULA_#name'
+      items='$spy.GetParam(snum.refinement.original_formula)'
+      value='xf.GetFormula()'
+      onchange='xf.SetFormula(GetValue(~name~))>>spy.SetParam(snum.refinement.formula,"GetValue(SET_SNUM_REFINEMENT_FORMULA_#name)")>>html.Update'
+    >
     </font>
   </td>
 </tr>
 
 <tr VALIGN='center' ALIGN='left' NAME='Z'>
-  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td width='50%' VALIGN='center' colspan=3>
     <b>%Number of Formula Units%</b>
   </td>
   <td width='50%' VALIGN='center' ALIGN='right' colspan=1>
-    <font size='2'>
-      <input
-        type='spin'
-        width=50
-        height="$spy.GetParam(gui.html.spin_height)"
-        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-        name='SET_Z_#name'
-        min='1'
-        value='xf.au.GetZ()'
-        onchange="xf.au.SetZ(GetValue(~name~))>>html.Update"
-      >
+    <font size='$GetVar(HtmlFontSizeControls)'>
+    <input
+      type='spin'
+      width=50
+      height="$GetVar(HtmlSPinHeight)"
+      bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+      name='SET_Z_#name'
+      min='1'
+      value='xf.au.GetZ()'
+      onchange="xf.au.SetZ(GetValue(~name~))>>html.Update"
+    >
     </font>
   </td>
 </tr>
 
 <tr VALIGN='center' ALIGN='left' NAME='Z Prime'>
-  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td width='50%' VALIGN='center' colspan=3>
     <b>%Number in Asymmetric Unit%</b>
   </td>
   <td width='50%' VALIGN='center' ALIGN='right' colspan=1>
-    <font size='2'>
-      <input
-        type='text'
-        width="40"
-        height="$spy.GetParam(gui.html.spin_height)"
-        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-        name='SET_Z_PRIME_#name'
-        value='xf.au.GetZprime()'
-        onchange="xf.au.SetZprime(GetValue(~name~))>>html.Update"
-      >
+    <font size='$GetVar(HtmlFontSizeControls)'>
+    <input
+      type='text'
+      width="40"
+      height="$GetVar(HtmlSPinHeight)"
+      bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+      name='SET_Z_PRIME_#name'
+      value='xf.au.GetZprime()'
+      onchange="xf.au.SetZprime(GetValue(~name~))>>html.Update"
+    >
     </font>
   </td>
 </tr>
 
 <tr VALIGN='center' ALIGN='left' NAME='Z Prime'>
-  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td width='50%' VALIGN='center' colspan=3>
     <b>%Adjust Current Formula to what is on the screen%</b>
   </td>
@@ -78,7 +78,7 @@
 
 
 <tr VALIGN='center' ALIGN='left' NAME='Atomic Volume'>
-  <td width="2" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td VALIGN='center' colspan=3>
     <b>%Current Atomic Volume%</b>
   </td>

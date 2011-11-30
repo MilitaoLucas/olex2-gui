@@ -7,10 +7,11 @@
 <!-- #include tool-help-button gui\blocks\tool-help-button.htm;help_ext=electron-density;1; -->
   </td>
   <td width="25%">
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="combo"
-      height="$spy.GetParam(gui.html.combo_height)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      height="$GetVar(HtmlComboHeight)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       name="SET_SNUM_MAP_TYPE"
       items='diff;fcalc;2Fo-Fc<-tomc;fobs'
       value="$spy.GetParam(snum.map.type)"
@@ -19,13 +20,15 @@
       label="%Map% "
       valign="center"
       readonly
-  >
+    >
+    </font>
   </td>
   <td width="25%">
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="combo"
-      height="$spy.GetParam(gui.html.combo_height)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      height="$GetVar(HtmlComboHeight)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       name="SET_SNUM_MAP_SOURCE"
       items='olex;fcf;'
       value="$spy.GetParam(snum.map.source)"
@@ -33,37 +36,43 @@
       onchange="spy.SetParam(snum.map.source,GetValue(SET_SNUM_MAP_SOURCE))>>spy.MapView(off)"
       label="%Source% "
       valign="center"
-      height="$spy.GetParam(gui.html.combo_height)"
+      height="$GetVar(HtmlComboHeight)"
       readonly
-  >
+    >
+    </font>
   </td>
   <td width="15%">
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="text"
       name = "SET_SNUM_MAP_RESOLUTION"
       width="95%"
-      height="$spy.GetParam(gui.html.input_height)"
+      height="$GetVar(HtmlInputHeight)"
       label="%Res%/&Aring [0.1]"
       valign="center"
-      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      bgcolor="$GetVar(HtmlTableBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
       value="$spy.GetParam(snum.map.resolution)"
       onchange="spy.SetParam(snum.map.resolution,GetValue(SET_SNUM_MAP_RESOLUTION))>>spy.MapView(off))"
     >
+    </font>
   </td>
   <td valign='bottom' width="35%">
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
-      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      bgcolor="$GetVar(HtmlTableBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
       type="checkbox"
       value="%Mask%"
       valign="bottom"
       name="SNUM_MAP_MASK"
       checked="$spy.GetParam(snum.map.mask)"
-      height="$spy.GetParam(gui.html.input_height)"
+      height="$GetVar(HtmlInputHeight)"
       width="95%" 
       oncheck="spy.SetParam(snum.map.mask,True)"
-      onuncheck="spy.SetParam(snum.map.mask,False)">
+      onuncheck="spy.SetParam(snum.map.mask,False)"
+    >
+    </font>
   </td>
   <td colspan='1' valign='bottom' align="center">
 $spy.MakeHoverButton(button_small-map,spy.MapView\())

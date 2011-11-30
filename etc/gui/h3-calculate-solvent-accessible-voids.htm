@@ -7,32 +7,36 @@
 <!-- #include tool-help-button gui\blocks\tool-help-button.htm;help_ext=calculate-solvent-accessible-voids;1; -->
   </td>
   <td width="33%">
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="text"
       name = "SET_SNUM_CALCSOLV_PROBE"
       width="95%"
-      height="$spy.GetParam(gui.html.input_height)"
+      height="$GetVar(HtmlInputHeight)"
       label="%Probe%/&Aring [1.2]"
       valign="center"
-      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      bgcolor="$GetVar(HtmlTableBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
       value="$spy.GetParam(snum.calcsolv.probe)"
       onchange="spy.SetParam(snum.calcsolv.probe,GetValue(SET_SNUM_CALCSOLV_PROBE))"
     >
+    </font>
   </td>
   <td width="33%">
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="text"
       name = "SET_SNUM_CALCSOLV_GRID"
       width="95%"
-      height="$spy.GetParam(gui.html.input_height)"
+      height="$GetVar(HtmlInputHeight)"
       label="%Grid%/&Aring [0.2]"
       valign="center"
-      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"
-      fgcolor="$spy.GetParam(gui.html.font_colour)"
+      bgcolor="$GetVar(HtmlTableBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
       value="$spy.GetParam(snum.calcsolv.grid)"
       onchange="spy.SetParam(snum.calcsolv.grid,GetValue(SET_SNUM_CALCSOLV_GRID))"
     >
+    </font>
   </td>
   <td align='right' width="34%">
 $spy.MakeHoverButton(button_small-void@solv,spy.CalcSolv\())

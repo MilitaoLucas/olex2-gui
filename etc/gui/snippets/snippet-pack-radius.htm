@@ -1,4 +1,4 @@
-  <td name=HEADLINE_PACK_RADIUS bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+  <td name=HEADLINE_PACK_RADIUS bgcolor="$GetVar(HtmlTableFirstcolColour)">
     <b>
       %Pack Radius%
     </b>
@@ -12,14 +12,15 @@
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=packing-radius;1; -->
   <td name=SLIDER_PACK_RADIUS>
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input 
       type="slider" 
       name = "SlidePackRadius" 
       width="$eval(html.clientwidth(self)-90)" 
       height="20" 
       value="0" 
-      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"  
-      fgcolor="$spy.GetParam(gui.html.font_colour)" 
+      bgcolor="$GetVar(HtmlTableBgColour)"  
+      fgcolor="$GetVar(HtmlFontColour)" 
       min="2" 
       max="20" 
       onchange = "
@@ -27,18 +28,21 @@ SetValue(PackRadius,getvalue(SlidePackRadius))>>
 pack getvalue(PackRadius)>>
 "
   >
-  </td>
-  <td name=PACK_RADIUS_VALUE>
+  </font>
+</td>
+<td name=PACK_RADIUS_VALUE>
+    <font size='$GetVar(HtmlFontSizeControls)'>
     <input 
       type="text" 
       name = "PackRadius" 
       width="32" 
       height="20" 
-      bgcolor="$spy.GetParam(gui.html.table_bg_colour)"  
-      fgcolor="$spy.GetParam(gui.html.font_colour)" 
+      bgcolor="$GetVar(HtmlTableBgColour)"  
+      fgcolor="$GetVar(HtmlFontColour)" 
       value="getvalue(SlidePackRadius)" 
       onreturn="SetValue(SlidePackRadius,GetValue(PackRadius))>>
 fuse>>
 pack GetValue(PackRadius)"
     >
+    </font>
   </td>

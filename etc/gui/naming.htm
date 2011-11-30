@@ -5,41 +5,48 @@
 <tr name=MODE_NAME ALIGN='left'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Naming;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td>%Start%</td>
   <td name=MODE_NAME_NUMBER>
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="text"
-      height="$spy.GetParam(gui.html.input_height)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-      label='%Start%&nbsp;'
+      height="$GetVar(HtmlInputHeight)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       valign='center'
       name="MODE_NAME_NUMBER"
       width="35"
-      height="$spy.GetParam(gui.html.input_height)"
-      value = "1">
+      height="$GetVar(HtmlInputHeight)"
+      value = "1"
+    >
+    </font>
   </td>
+  <td>%Suffix%</td>
   <td name=MODE_NAME_SUFFIX>
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="text"
-      height="$spy.GetParam(gui.html.input_height)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-      label='%Suffix%&nbsp;'
+      height="$GetVar(HtmlInputHeight)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       valign='center'
       name = "MODE_NAME_SUFFIX"
       width="25"
       value = ""
     >
+    </font>
   </td>
+  <td>%Type%</td>
   <td name=MODE_NAME_TYPE>
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="text"
-      height="$spy.GetParam(gui.html.input_height)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-      label='%Type%&nbsp;'
+      height="$GetVar(HtmlInputHeight)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       valign='center'
       name = "MODE_NAME_TYPE"
       width="25"
       value = ""
     >
+    </font>
   </td>
   <td name=IMG_BUTTON_SMALL-NAME align='right'>
 $spy.MakeHoverButton(button_small-name,if strcmp(spy.GetParam(olex2.short_mode),'name') then 'mode off'  else 'guinames_m')
@@ -55,14 +62,17 @@ $spy.MakeHoverButton(button_small-name,if strcmp(spy.GetParam(olex2.short_mode),
     %Automatic Hydrogen Naming%
   </td>
   <td name=TICK_AUTO_HYDROGEN_NAMING align='right'>
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="checkbox"
-      height="$spy.GetParam(gui.html.checkbox_height)"
+      height="$GetVar(HtmlCheckboxHeight)"
       name = "TICK_AUTO_HYDROGEN_NAMING"
       width="17"
       checked="$spy.GetParam(snum.auto_hydrogen_naming)"
       oncheck="spy.SetParam(snum.auto_hydrogen_naming,True)"
-      onuncheck="spy.SetParam(snum.auto_hydrogen_naming,False)">
+      onuncheck="spy.SetParam(snum.auto_hydrogen_naming,False)"
+    >
+    </font>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
@@ -75,17 +85,19 @@ $spy.MakeHoverButton(button_small-name,if strcmp(spy.GetParam(olex2.short_mode),
     <a href='match sel -n=getvalue(MATCH_NAME_SUFFIX)'>
     %Equivalent Fragments% (Z' > 1)</a>
   </td>
+  <td>%Suffix%</td>
   <td name=MATCH_NAME_SUFFIX>
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="text"
-      height="$spy.GetParam(gui.html.input_height)"
+      height="$GetVar(HtmlInputHeight)"
       width="30"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-      label='%Suffix%&nbsp;'
+      bgcolor="$GetVar(HtmlInputBgColour)"
       valign='center'
       name = "MATCH_NAME_SUFFIX"
       value = ""
     >
+    </font>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>

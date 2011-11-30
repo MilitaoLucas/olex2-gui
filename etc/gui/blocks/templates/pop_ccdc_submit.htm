@@ -1,6 +1,6 @@
 <html>
-<body link='$spy.GetParam(gui.html.link_colour)' bgcolor='$spy.GetParam(gui.html.highlight_colour)'>
-  <font color='#003c78' size='4' face="$spy.GetParam(gui.html.font_name)">
+<body link='$GetVar(HtmlLinkColour)' bgcolor='$GetVar(HtmlHighlightColour)'>
+  <font color='#003c78' size='4' face="$GetVar(HtmlFontName)">
   
 <table border="0" style="border-collapse: collapse" width="100%" id="#tool" cellpadding="4" cellspacing="2" >
   <tr bgcolor='#ffffff'>
@@ -67,7 +67,7 @@ Data are accepted either in conjunction with <b>publication</b> of crystal struc
      <td width=30% valign='center' bgcolor="#aab403">
        <input
          type="combo"
-         bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+         bgcolor="$GetVar(HtmlInputBgColour)"
          valign='center'
          items='OlexSys Testing;Private Communication;Ready to Publish;Unsure'
          width='160'
@@ -83,7 +83,7 @@ Data are accepted either in conjunction with <b>publication</b> of crystal struc
      <td width=50%>
        <input
          type="text"
-         bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+         bgcolor="$GetVar(HtmlInputBgColour)"
          valign='center'
          width='274'
          height="22"
@@ -95,7 +95,7 @@ Data are accepted either in conjunction with <b>publication</b> of crystal struc
     <td width=13%>
       <input
         type="button"
-        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+        bgcolor="$GetVar(HtmlInputBgColour)"
         valign='center'
         width="60"
         height="22"
@@ -106,7 +106,7 @@ Data are accepted either in conjunction with <b>publication</b> of crystal struc
     <td width=13%>
       <input
         type="button"
-        bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+        bgcolor="$GetVar(HtmlInputBgColour)"
         valign='center'
         width="60"
         height="22"

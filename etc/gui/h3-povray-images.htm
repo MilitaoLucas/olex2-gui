@@ -6,10 +6,11 @@
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
   <td name=IMAGE_PR_NAME>
+    <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="text"
-      height="$spy.GetParam(gui.html.input_height)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      height="$GetVar(HtmlInputHeight)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       valign='center'
       name="IMAGE_PR_NAME"
       width="100"
@@ -17,6 +18,7 @@
       onchange="spy.SetParam(snum.image.povray.name,GetValue(~name~))"
       label='%Name% '
     >
+    </font>
   </td>
   <td name=IMAGE_PR_BUTTON align='right'>
 $spy.MakeHoverButton(button_small-go@povray,spy.GetPRImageInstructions\())

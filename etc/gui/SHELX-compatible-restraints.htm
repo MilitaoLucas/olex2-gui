@@ -3,24 +3,24 @@
 <!--$spy.make_warning_html(6)-->
 
 <tr>
-  <td valign='top' width="8" align='center' bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)">
+  <td valign='top' width="8" align='center' bgcolor="$GetVar(HtmlTableFirstcolColour)">
   </td>
-  <td width='20%'>
+  <td width='40'>%Restraint%</td>
+    <font size='$GetVar(HtmlFontSizeControls)'>
+    <td>
     <input 
       type="combo"
-      height="$spy.GetParam(gui.html.combo_height)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
+      height="$GetVar(HtmlComboHeight)"
+      bgcolor="$GetVar(HtmlInputBgColour)" 
       name="SET_GUI_SHELX_RESTRAINTS" 
       items='DFIX;DANG;SADI;CHIV;FLAT;DELU;SIMU;ISOR;'
       value="GetVar(gui_shelx_restraints)" 
-      width="70" 
+      width="50" 
       onchange="SetVar(gui_shelx_restraints,GetValue(SET_GUI_SHELX_RESTRAINTS))>>spy.restraint_builder(GetVar(gui_shelx_restraints))"
-      label="%Restraint%"
       readonly
     >
+    </font>
   </td>
 
-
 <!-- #includeif fs.Exists(restraint-vars.htm) restraint-vars restraint-vars.htm;1; -->
-
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=7;1; -->
