@@ -730,6 +730,9 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
     OV.SetParam('snum.init.skip_history','True')
 
+    OV.SetParam('snum.refinement.program','olex2.refine')
+    OV.SetParam('snum.refinement.method','Gauss-Newton')
+
     a = RunRefinementPrg()
     self.R1 = a.R1
     his_file = a.his_file
