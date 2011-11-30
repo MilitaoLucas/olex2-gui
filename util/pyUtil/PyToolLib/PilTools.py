@@ -96,7 +96,7 @@ class ButtonMaker(ImageTools):
       vline = d.get('vline', False)
       align = d.get('align', 'centre')
       valign = d.get('valign', ("middle", 0.8))
-      font_name = d.get('font_name', 'Verdana')
+      font_name = d.get('font_name', 'Vera')
       top_left = d.get('top_left', (0,0))
       titleCase = d.get('titleCase', False)
       lowerCase = d.get('lowerCase', False)
@@ -209,7 +209,7 @@ class GuiSkinChanger(ImageTools):
     olex.m("SetMaterial InfoBox.Plane 3077;0,0,0,1;1,1,1,0.5")
     olex.m("SetFont Notes #olex2.fnt:frb_10")
     olex.m("SetFont Default #olex2.fnt:frb_12")
-    olex.m("htmguifontsize %s" %self.params.html.font_size)
+    olex.m("htmguifontsize %s" %OV.GetParam('HtmlFontSize'))
     olex.m("showwindow help false")
     #olex.m("grad true")
 
@@ -656,7 +656,7 @@ class MakeAllRBars(BarGenerator):
     draw = ImageDraw.Draw(image)
     draw.line(((width-2, 0) ,(width-2, height)), fill='#666666')
 
-    font_name = "Verdana Bold"
+    font_name = "Vera Bold"
     font_size = 10
     font = self.registerFontInstance(font_name, font_size)
 
@@ -858,7 +858,7 @@ WHERE (((submission.ID)="%s"));""" %sNum
 
     #return image
 
-  #def drawFileFullInfo(self, draw, colour='#ff0000', right_margin=0, height=10, font_name="Verdana", font_size=8, left_start = 40):
+  #def drawFileFullInfo(self, draw, colour='#ff0000', right_margin=0, height=10, font_name="Vera", font_size=8, left_start = 40):
     #base_colour = self.params.html.base_colour.rgb
     #txt = OV.FileFull()
     #if txt == "none":
@@ -1025,7 +1025,7 @@ class timage(ImageTools):
       except:
         width = float(tool_arg)
     self.font_name = "Vera"
-    self.timer = True
+    self.timer = False
     if self.timer:
       import time
       self.time = time
@@ -1767,6 +1767,7 @@ class timage(ImageTools):
     txt = '''
     </map>
     <zimg name="BANNER_IMAGE" border="0" src="banner.png" usemap="banner_map">
+  <font size='$GetVar(HtmlFontSizeControls)'>
   <input
     type="slider"
     name = "BANNER_SLIDE"
@@ -1782,6 +1783,7 @@ class timage(ImageTools):
 spy.doBanner(GetVar(snum_refinement_banner_slide))
 "
 >
+</font>
 '''
     self.banner_map += txt
 
@@ -3134,7 +3136,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           draw.point((x, y), fill)
     return image
 
-  def drawFileFullInfo(self, draw, colour='#ff0000', right_margin=0, height=10, font_name="Verdana", font_size=8, left_start = 0):
+  def drawFileFullInfo(self, draw, colour='#ff0000', right_margin=0, height=10, font_name="Vera", font_size=8, left_start = 0):
     base_colour = self.params.html.base_colour.rgb
     txt = OV.FileFull()
     if txt == "none":
@@ -3149,7 +3151,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       left_start = 50
     else:
       left_start = left_start
-
+      
     xx = 0
     while tw > self.width - left_start:
       txtbeg = txt[:n]
@@ -3162,7 +3164,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     txt = "%s...%s" %(txtbeg, txtend)
 
     wX, wY  = draw.textsize(txt, font)
-    left_start =  (self.width-wX) - right_margin
+    #left_start =  (self.width-wX) - right_margin
     top = height - wY - 2
     self.write_text_to_draw(draw,
                        txt,
@@ -3522,7 +3524,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     #image = ImageChops.blend(image, dup, 0.05)
     return image
 
-  def label_items_control(self, item, font_name="Verdana"):
+  def label_items_control(self, item, font_name="Vera"):
     #cs = self.cs
     base_colour = self.params.html.base_colour.rgb
     text = item[0]
@@ -3724,7 +3726,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       font_size = 24
       top = -1
 
-    info_bitmap_font = "Verdana"
+    info_bitmap_font = "Vera"
     info_bitmaps = {
       'refine':{'label':'Refining',
                 'name':'refine',

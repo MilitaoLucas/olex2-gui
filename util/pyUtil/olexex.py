@@ -13,7 +13,6 @@ import programSettings
 from subprocess import *
 
 import htmlTools
-
 import HttpTools
 
 global _is_online
@@ -21,7 +20,6 @@ _is_online = False
 
 sys.path.append(r".\src")
 import History
-
 
 import ExternalPrgParameters
 SPD, RPD = ExternalPrgParameters.SPD, ExternalPrgParameters.RPD
@@ -570,6 +568,7 @@ def MakeElementButtonsFromFormula():
     d.setdefault('target', target + symbol)
     d.setdefault('bgcolor', OV.GetParam('gui.html.table_firstcol_colour'))
     html = '''
+<font size='$GetVar(HtmlFontSizeControls)'>
 <input
   name=IMG_BTN-ELEMENT%(symbol)s
   type="button"
@@ -577,7 +576,8 @@ def MakeElementButtonsFromFormula():
   hint="%(target)s"
   onclick="%(cmds)s"
   bgcolor=%(bgcolor)s
->''' %d
+>
+</font>''' %d
 #    <a href="%s" target="%s %s">
 #      <zimg name=IMG_BTN-ELEMENT%s border="0" src="btn-element%s.png"/>
 #    </a>'''%(command, target, symbol, symbol.upper(), symbol)
@@ -596,6 +596,7 @@ def MakeElementButtonsFromFormula():
 
   d['namelower'] = 'btn-element...'
   html_elements.append('''
+<font size='$GetVar(HtmlFontSizeControls)'>
 <input
   name=IMG_BTN-ELEMENT...
   type="button"
@@ -603,7 +604,8 @@ def MakeElementButtonsFromFormula():
   hint="Chose Element from the periodic table"
   onclick="if strcmp(sel(),'') then 'mode name -t=ChooseElement()' else 'name sel ChooseElement()'"
   bgcolor=%(bgcolor)s
->''' %d)
+>
+</font>''' %d)
 
 #<a href="if strcmp(sel(),'') then 'mode name -t=ChooseElement()' else 'name sel ChooseElement()'"
 #   target="Chose Element from the periodic table">
@@ -843,17 +845,17 @@ def tbxs_(name):
 <!-- #include header gui\blocks\tool-header.htm;1; -->
 <table border="0" style="border-collapse: collapse" width="100%" id="#tool" cellpadding="0" cellspacing="1">
         <tr>
-                <td width="100%" bgcolor="$spy.GetParam(gui.html.font_colour)">
+                <td width="100%" bgcolor="$GetVar(HtmlFontColour">
                         <-zimg border="0" src="#image.png">
                 </td>
         </tr>
 </table>
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$spy.GetParam(gui.html.table_bg_colour)">
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
 '''
 
   txt += r'''
 <tr VALIGN='center' NAME='Expand Short Contacts'>
-  <td colspan=1 width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"></td>
+  <td colspan=1 width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
     <td>
       <font size = '4'>
         <b>
@@ -863,7 +865,7 @@ def tbxs_(name):
     </td>
   </tr>
 <tr>
-  <td valign='top' width="8" bgcolor="$spy.GetParam(gui.html.table_firstcol_colour)"><zimg border="0" src="info.png"></td>
+  <td valign='top' width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"><zimg border="0" src="info.png"></td>
   <td>
     %%setup-txt-%s%%
     <br>
@@ -1387,15 +1389,6 @@ def check_for_recent_update():
   OV.StoreParameter('last_version')
   return retVal
 
-def check_for_crypto():
-  pass
-  #if olx.IsPluginInstalled(r"Crypto").lower() == 'false':
-    #import olex
-    #olex.m(r"InstallPlugin Crypto")
-  #if olx.IsPluginInstalled(r"ODAC").lower() == 'false':
-    #import olex
-    #olex.m(r"InstallPlugin ODAC")
-
 def register_new_odac(username=None, pwd=None):
   OV.Cursor("Please wait while AutoChem will be installed")
   mac_address = OV.GetMacAddress()[0]
@@ -1592,12 +1585,12 @@ def GetACF():
   if os.path.exists(phil_file):
     olx.phil_handler.merge_param_file(phil_file)
 
-  no_update = False
+  
+  no_update = False  
   print "Starting ODAC..."
   if no_update:
     _is_online = False
     print "Will not update ODAC Files"
-  check_for_crypto()
 
   cont = None
   tag = OV.GetTag()
@@ -1628,6 +1621,7 @@ def GetACF():
   if not debug:
     keyname = getKey()
     p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], tag)
+    sys.path.append(p)
     OV.SetParam('odac.source_dir',p)
     if not os.path.exists(p):
       os.makedirs(p)
@@ -2313,18 +2307,22 @@ def advance_crystal_image(direction='forward'):
 OV.registerFunction(advance_crystal_image)
 
 def get_news_image_from_server(name=""):
+  from ImageTools import ImageTools
+  IT = ImageTools()
   if not name:
     url = 'http://www.olex2.org/randomimg'
   else:
     url = 'http://www.olex2.org/olex2images/%s/image' %name,''
   try:
     image = HttpTools.make_url_call(url,'').read()
-  except Exxception, err:
+  except Exception, err:
     print "Downloading image from %s has failed: %s" %(url, err)
     return
   if image:
-    wFile = open('%s/etc/news/news.png' %OV.BaseDir(),'wb')
+    tag = OV.GetTag().split('-')[0]
+    wFile = open('%s/etc/news/news-%s.png' %(OV.BaseDir(), tag),'wb')
     wFile.write(image)
+    IT.resize_news_image()
 OV.registerFunction(get_news_image_from_server)
 
 
