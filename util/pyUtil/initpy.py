@@ -16,24 +16,24 @@ else:
   set_sys_path = True
   try:
     import os
-    set_sys_path = os.path.exists(basedir + '/Python27')
+    set_sys_path = os.path.exists(basedir + '/lib/python2.7')
   except:
     pass
   if set_sys_path:
-    sys.prefix = basedir + '/Python27'
+    sys.prefix = basedir + '/lib/python2.7'
     sys.path = ['',
-      sys.prefix + '/python2.7',
-      sys.prefix + '/python2.7/lib-tk',
-      sys.prefix + '/python2.7/lib-old',
-      sys.prefix + '/python2.7/lib-dynload',
-      sys.prefix + '/python2.7/site-packages',
-      sys.prefix + '/python2.7/site-packages/PIL'
+      sys.prefix,
+      sys.prefix + '/lib-tk',
+      sys.prefix + '/lib-old',
+      sys.prefix + '/lib-dynload',
+      sys.prefix + '/site-packages',
+      sys.prefix + '/site-packages/PIL'
     ]
     if sys.platform == 'darwin':
-      sys.path.append(sys.prefix + '/python2.7/plat-darwin')
-      sys.path.append(sys.prefix + '/python2.7/plat-mac')
+      sys.path.append(sys.prefix + '/plat-darwin')
+      sys.path.append(sys.prefix + '/plat-mac')
     elif sys.platform == 'linux2':
-      sys.path.append(sys.prefix + '/python2.7/plat-linux2')
+      sys.path.append(sys.prefix + '/plat-linux2')
 sys.path.append(datadir)
 stdout_redirection = True
 
