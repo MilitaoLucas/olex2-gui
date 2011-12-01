@@ -55,7 +55,7 @@ class Skin():
       self.timage_instance.run_timage()
       self.sNumTitle_instance.run_sNumTitle(force=True)
     #self.adjust_font_size_for_ppi()
-    
+
     olx.FlushFS()
 
   def adjust_font_size_for_ppi(self):
@@ -93,13 +93,10 @@ def export_parameters():
 
 
 def change_skin(skin_name=None, force=False):
-
   gui_phil_path = "%s/gui.phil" %(OV.DataDir())
-  gui_phil_template_path = "%s/gui_template.phil" %(OV.DataDir())
-  
+
   OV.SetHtmlFontSize()
   OV.SetHtmlFontSizeControls()
-  
 
   timing = False
   if timing:
@@ -137,9 +134,6 @@ def change_skin(skin_name=None, force=False):
     t = time.time()
     print "After 'Reading PHIL Stuff': %.2f s (%.2f s)" % ((t - t1), (t - t1))
     t2 = t
-
-  olx.gui_phil_handler.save_param_file(
-    file_name=gui_phil_template_path, scope_name='gui', diff_only=True)
 
   try:
     adjust_skin_luminosity()

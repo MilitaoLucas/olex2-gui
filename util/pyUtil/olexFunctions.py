@@ -47,7 +47,7 @@ class OlexFunctions(inheritFunctions):
         handler = olx.phil_handler
       if value == '': value = None
       elif value in ('Auto','auto','None','none',None):
-        value = value
+        pass
       elif type(value) in (str,unicode) and "'" in value:
         value = "'%s'" %value.replace("'", "\\'")
       elif type(value) in (list, set):
@@ -145,7 +145,7 @@ class OlexFunctions(inheritFunctions):
       if value not in ('?', '.'):
         if 'K' not in value: value += ' K'
         olx.xf.exptl.Temperature(value)
-    
+
 
   def GuiParams(self):
     if hasattr(olx, 'gui_phil_handler'):
@@ -743,7 +743,7 @@ class OlexFunctions(inheritFunctions):
   def setAllMainToolbarTabButtons(self):
     import olexex
     olexex.setAllMainToolbarTabButtons()
-    
+
   def GetCrystalData(self):
     crystal_data_file = olex.m("cif2doc crystal_data.htm -n=%s_crystal_data.htm" %OV.FileName())
     rFile = open('%s_crystal_data.htm' %OV.FileName(),'r')
