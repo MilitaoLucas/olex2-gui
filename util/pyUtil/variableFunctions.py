@@ -272,6 +272,9 @@ def SaveUserParams():
   user_phil_file = "%s/user.phil" %(OV.DataDir())
   olx.phil_handler.save_param_file(
     file_name=user_phil_file, scope_name='user', diff_only=True)
+  gui_phil_file = "%s/gui.phil" %(OV.DataDir())
+  olx.gui_phil_handler.save_param_file(
+    file_name=gui_phil_file, scope_name='gui', diff_only=True)
 OV.registerFunction(SaveUserParams)
 
 def EditParams(scope_name="", expert_level=0, attributes_level=0):
