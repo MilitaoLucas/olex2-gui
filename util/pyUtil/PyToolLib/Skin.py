@@ -77,6 +77,7 @@ def export_parameters():
   OV.SetVar('HtmlInputBgColour', OV.GetParam('gui.html.input_bg_colour').hexadecimal)
   OV.SetVar('HtmlFontColour', OV.GetParam('gui.html.font_colour').hexadecimal)
   OV.SetVar('HtmlComboHeight', OV.GetParam('gui.html.combo_height'))
+  OV.SetVar('HtmlComboWidth2', OV.GetParam('gui.html.combo_width_2'))
   OV.SetVar('HtmlInputHeight', OV.GetParam('gui.html.input_height'))
   OV.SetVar('HtmlHighlightColour', OV.GetParam('gui.html.highlight_colour').hexadecimal)
   OV.SetVar('HtmlCheckboxHeight', OV.GetParam('gui.html.checkbox_height'))

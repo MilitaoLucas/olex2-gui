@@ -7,7 +7,14 @@ def FileOpen(title, filter, location, default=''):
     return default
   return res
 
+def FileSave(title, filter, location, default=''):
+  res = olx.FileSave(title, filter,location)
+  if not res:
+    return default
+  return res
+
 olex.registerFunction(FileOpen, False, "gui.dialog")
+olex.registerFunction(FileSave, False, "gui.dialog")
 
 def About():
   sz = [int(i) for i in olx.GetWindowSize().split(',')]
