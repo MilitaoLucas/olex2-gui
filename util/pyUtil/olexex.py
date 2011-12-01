@@ -1585,8 +1585,8 @@ def GetACF():
   if os.path.exists(phil_file):
     olx.phil_handler.merge_param_file(phil_file)
 
-  
-  no_update = False  
+
+  no_update = False
   print "Starting ODAC..."
   if no_update:
     _is_online = False
@@ -2154,11 +2154,11 @@ def GetImageFilename(image_type):
       filename = None
     if not filename:
       import gui
-      filename = gui.FileOpen("Choose Filename", "*.%s" %fileext, OV.FilePath())
+      filename = gui.FileSave("Choose Filename", "*.%s" %fileext, OV.FilePath())
     if not filename:
       return None, None, None
   if filename.endswith(".%s" %fileext):
-    filefull = filename
+    filefull = "'%s'" %filename
   else:
     filefull = "'%s.%s'" %(filename, fileext)
   OV.SetParam('snum.image.%s.name' %image_type.lower(),None)
@@ -2186,7 +2186,7 @@ def GetBitmapImageInstructions():
   filesize = OV.GetValue('IMAGE_BITMAP_SIZE')
 
   OV.Cursor('busy','Please Wait. Making image %s.%s. This may take some time' %(filename, fileext))
-  olex.m('pict -pq "%s" %s' %(filefull, filesize))
+  olex.m('pict -pq %s %s' %(filefull, filesize))
   OV.Cursor()
 OV.registerFunction(GetBitmapImageInstructions)
 
@@ -2196,7 +2196,7 @@ def GetPRImageInstructions():
     return
   OV.Cursor('busy','Please Wait. Making image %s.%s. This may take some time' %(filename, fileext))
   olex.m('pictPR %s' %filefull)
-  print 'Image %s made and placed in %s' %(filefull, OV.FilePath())
+  print 'Image %s created' %filefull
   OV.Cursor()
 OV.registerFunction(GetPRImageInstructions)
 
@@ -2219,7 +2219,7 @@ def GetPSImageInstructions():
   scale_hb = str(OV.GetParam('snum.image.ps.h_bond_width'))
 
   olex.m("pictps" + \
-         " " + "'%s'" %filename + \
+         " " + filefull + \
          " " + colour_line + \
          " " + colour_bond + \
          " " + colour_fill + \
@@ -2230,7 +2230,7 @@ def GetPSImageInstructions():
          " " + "-div_pie=" + div_pie + \
          " " + "-scale_hb=" + scale_hb)
   olex.m('brad 0.8')
-  print 'Image %s made and placed in %s' %(filefull, OV.FilePath())
+  print 'Image %s created' %filefull
   OV.Cursor()
 OV.registerFunction(GetPSImageInstructions)
 
