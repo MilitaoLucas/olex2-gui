@@ -676,18 +676,18 @@ class ImageTools(FontInstances):
     except:
       if self.gui_current_language != "Chinese":
         self.font_name = 'Arial UTF'
-        self.top -= 3
+        #self.top -= 3
       else:
         pass
       
     if self.gui_current_language == "Chinese":
-      font_peculiarities.setdefault("Arial UTF",{"top_adjust":-0.7,
+      self.font_peculiarities.setdefault("Arial UTF",{"top_adjust":-0.7,
                                                  "rel_adjust":+0.4})
     elif self.gui_current_language == "Greek":
-      font_peculiarities.setdefault("Arial UTF",{"top_adjust":-1,
+      self.font_peculiarities.setdefault("Arial UTF",{"top_adjust":-1,
                                                  "rel_adjust":+0.4})
     elif self.gui_current_language == "Russian":
-      font_peculiarities.setdefault("Arial UTF",{"top_adjust":-1,
+      self.font_peculiarities.setdefault("Arial UTF",{"top_adjust":-1,
                                                  "rel_adjust":+0.4})
   
     
@@ -725,13 +725,13 @@ class ImageTools(FontInstances):
       rel_size = self.valign[1]
       position = self.valign[0]
       self.font_size = int(rel_size * self.image_size[1])
-      increase = True
-      while increase:
+      while True:
         if lettering_height < (self.image_size[1] * (rel_size + self.rel_adjust)):
           self.font_size += 1
+          lettering_height += 1
           self.txt_top += self.top_adjust
         else:
-          increase = False
+          break
     except Exception,err:
       print err
 
