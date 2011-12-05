@@ -696,7 +696,7 @@ if True:
     }
   )
 #create linux and mac distro only in releases
-if False:
+if True:
   create_portable_distro(
     port_props=set([suse32_port_name]),
     zip_name=suse32_port_zip_name,
