@@ -583,8 +583,6 @@ class OlexFunctions(inheritFunctions):
       path = olx.HKLSrc()
       if path:
         return self.standardizePath(path)
-      else:
-        return None
 
   def StrDir(self):
     path = olx.StrDir()
