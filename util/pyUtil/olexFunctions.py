@@ -576,13 +576,14 @@ class OlexFunctions(inheritFunctions):
       print "Printing error %s" %err
       return "Error"
 
-  def HKLSrc(self, new_HKLSrc=None):
+  def HKLSrc(self, new_HKLSrc=''):
     if new_HKLSrc:
       return olx.HKLSrc(new_HKLSrc)
     else:
       path = olx.HKLSrc()
       if path:
         return self.standardizePath(path)
+      return path
 
   def StrDir(self):
     path = olx.StrDir()
