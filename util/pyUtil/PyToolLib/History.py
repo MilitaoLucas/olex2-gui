@@ -523,6 +523,7 @@ def saveOriginals(resPath, lstPath):
 def compressFile(filePath):
   file = open(filePath, "rb")
   fileData = file.read()
+  file.close()
   fileData = zlib.compress(fileData,9)
   return fileData
 

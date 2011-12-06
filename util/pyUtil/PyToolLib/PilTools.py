@@ -262,6 +262,7 @@ class GuiSkinChanger(ImageTools):
         rFile = open(path, 'r')
       else:
         print "The file %s can not be found" %path
+        extensionFile.close()
         return
       files.append(rFile)
       for file in files:
@@ -271,7 +272,7 @@ class GuiSkinChanger(ImageTools):
           l = line.split("=")
           if len(l) > 1:
             config.setdefault(l[0].strip(), l[1].strip())
-
+        file.close()
       try:
         sys.path.append("%s/util/pyUtil/PluginLib/Skins/plugin-%sSkin" %(olx.BaseDir(), skin))
         PilTools = __import__("PilTools_%s" %skin)
@@ -1940,6 +1941,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       else:
         if key:
           im_d[key].append(line.strip())
+    rFile.close()
     self.image_items_d = im_d
 
 
@@ -2131,6 +2133,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       t = t.split('-')[1]
       if t not in tabItems:
         tabItems.append(t)
+    rFile.close()
     tabItem_l = [tabItems, g3tabItems]
     self.tabItems = tabItems
     for directory in directories:

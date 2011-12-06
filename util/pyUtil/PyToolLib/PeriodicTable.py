@@ -17,6 +17,7 @@ class PeriodicTable(object):
       pt[el].setdefault('mass', float(li[1]))
       pt[el].setdefault('name', li[2])
       pt[el].setdefault('Z', i-1)
+    rFile.close()
     return pt
       
 if __name__ == "__main__":

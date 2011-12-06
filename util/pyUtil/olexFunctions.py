@@ -19,6 +19,7 @@ try:
   olx.olex2_tag
 except:
   olx.olex2_tag = None
+  olx.olex2_svn_version = None
 
 
 HasGUI = olx.HasGUI() == 'true'
@@ -492,8 +493,8 @@ class OlexFunctions(inheritFunctions):
 
   if olx.IsPluginInstalled('plugin-CProfile') == 'true':
     #import cProfile
-    outFile = open('%s/profile.txt' %olx.DataDir(), 'w')
-    outFile.close()
+    #outFile = open('%s/profile.txt' %olx.DataDir(), 'w')
+    #outFile.close()
 
     def cprofile_wrap(self,f):
       import pstats
@@ -692,14 +693,17 @@ class OlexFunctions(inheritFunctions):
     return os.getenv('USERNAME'), os.getenv('COMPUTERNAME')
 
   def GetSVNVersion(self):
+    if olx.olex2_svn_version:
+      return olx.olex2_svn_version
     path = "%s/version.txt" %self.BaseDir()
     try:
       rFile = open(path, 'r')
       line = rFile.read()
-      version = int(line.split()[-1])
+      rFile.close()
+      olx.olex2_svn_version = int(line.split()[-1])
     except:
-      version = 1
-    return version
+      olx.olex2_svn_version = 1
+    return olx.olex2_svn_version
 
   def GetMacAddress(self):
     mac = self.GetParam('olex2.mac_address')

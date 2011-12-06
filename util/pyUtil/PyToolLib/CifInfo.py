@@ -806,6 +806,7 @@ The \l/2 correction factor is %(lambda_correction)s.
         versionnumber = line[2]
         versiontext = line[3]
         versions[prgname].setdefault(versionnumber, versiontext)
+    rfile.close()
     return versions
 
 OV.registerFunction(ExtractCifInfo)

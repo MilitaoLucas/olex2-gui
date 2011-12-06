@@ -727,7 +727,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     olx.File("%s.ins" %self.filename)
     rFile = open(olx.FileFull(), 'r')
     f_data = rFile.readlines()
-
+    rFile.close()
     OV.SetParam('snum.init.skip_history','True')
 
     OV.SetParam('snum.refinement.program','olex2.refine')
@@ -923,6 +923,7 @@ class as_pdb_file(OlexCctbxAdapter):
       remarks=args.get('remarks', []),
       fractional_coordinates=fractional_coordinates,
       resname=args.get('resname'))
+    f.close()
 
 OV.registerMacro(as_pdb_file, """\
 filepath&;remark&;remarks&;fractional_coordinates-(False)&;resname""")

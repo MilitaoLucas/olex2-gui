@@ -18,6 +18,7 @@ class reader(object):
       lines[i] = line.strip()
       #lines[i] = string.strip(line)
       i+=1
+    rfile.close()
     i=0
 
     for line in lines:
@@ -210,6 +211,7 @@ def abs_type(path):
     lines[i] = line.strip()
     #lines[i] = string.strip(line)
     i+=1
+  rfile.close()
   i=0
   for line in lines:
     try:

@@ -574,6 +574,7 @@ class Method_cctbx_refinement(Method_refinement):
           pass
     f = open("%s/etc/CIF/olex2refinedata.html" %OV.BaseDir())
     t = f.read() %cif
+    f.close()
     OV.write_to_olex('refinedata.htm',t)
 
 
