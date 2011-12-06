@@ -1921,6 +1921,7 @@ def getReportTitleSrc():
 
   rFile = open(p, 'rb').read()
   data = base64.b64encode(rFile)
+  rFile.close()
   retVal ='data:image/png;base64,' + data
   return retVal
 OV.registerFunction(getReportTitleSrc)
@@ -2019,6 +2020,7 @@ def getReportImageData(size='w400', imageName=None):
 
   rFile = open(p, 'rb').read()
   data = base64.b64encode(rFile)
+  rFile.close()
   d ='data:image/png;base64,' + data
 
   html = '''
