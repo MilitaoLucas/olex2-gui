@@ -2312,7 +2312,7 @@ def get_news_image_from_server(name=""):
   if not name:
     url = 'http://www.olex2.org/randomimg'
   else:
-    url = 'http://www.olex2.org/olex2images/%s/image' %name,''
+    url = 'http://www.olex2.org/olex2images/%s/image' %name
   try:
     image = HttpTools.make_url_call(url,'').read()
   except Exception, err:
@@ -2322,6 +2322,7 @@ def get_news_image_from_server(name=""):
     tag = OV.GetTag().split('-')[0]
     wFile = open('%s/etc/news/news-%s.png' %(OV.BaseDir(), tag),'wb')
     wFile.write(image)
+    wFile.close()
     IT.resize_news_image()
 OV.registerFunction(get_news_image_from_server)
 
