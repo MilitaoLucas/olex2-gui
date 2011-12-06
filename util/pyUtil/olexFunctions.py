@@ -15,6 +15,11 @@ import pickle
 
 import time
 
+try:
+  olx.olex2_tag
+except:
+  olx.olex2_tag = None
+
 
 HasGUI = olx.HasGUI() == 'true'
 if HasGUI:
@@ -638,12 +643,16 @@ class OlexFunctions(inheritFunctions):
     return res
 
   def GetTag(self):
+    if olx.olex2_tag:
+      return olx.olex2_tag
     try:
       rFile = open("%s/olex2.tag" %self.BaseDir(),'r')
       tag = rFile.readline().rstrip("\n")
-      return tag
+      rFile.close()
+      olx.olex2_tag = tag
     except:
-      tag = None
+      pass
+    return olx.olex2_tag
 
   def GetKeyname(self):
     import glob
