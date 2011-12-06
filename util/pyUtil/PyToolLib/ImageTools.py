@@ -43,21 +43,21 @@ class ImageTools(FontInstances):
     self.colorsys = colorsys
     self.abort = False
     self.getOlexVariables()
-    
+
     ##Encodings
     self.good_encodings = ["ISO8859-1", "ISO8859-2"]
     self.gui_language_encoding = olx.CurrentLanguageEncoding()
     self.gui_current_language = olx.CurrentLanguage()
 
     self.get_font_peculiarities()
-    
+
     font = "Verdana"
-    
+
     self.gui_timage_font_name = "%s" %font
     self.gui_tab_font_name = "%s Bold" %font
     self.gui_sNumTitle_font_name = "%s Bold" %font
     self.gui_button_font_name = "%s Bold" %font
-    
+
     self.available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - OV.GetParam('gui.html.table_firstcol_width'))
     self.available_width_full = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
 
@@ -160,7 +160,7 @@ class ImageTools(FontInstances):
             else:
               draw.text((cur_pos + norm_kern, top), "%s" %character, font=font, fill=font_colour)
               advance = (draw.textsize(character, font=font)[0]) + norm_kern
-  
+
           text_in_superscript = txt_sub[i][0]
           if text_in_superscript:
             cur_pos += advance
@@ -649,15 +649,15 @@ class ImageTools(FontInstances):
         im = Image.open(filename)
         draw = ImageDraw.Draw(im)
     return im, draw
-  
+
   def make_round_corners(self, im, radius=10, colour=(80,130,130)):
     cache = {}
     im = RoundedCorners.round_image(im, cache, radius, solid_colour=colour)
     return im
-  
+
   def deal_with_encodings_and_languages(self):
     ''' Determines the font and some font settings for various encodings '''
-    
+
     encoding = 'unic'
     original_font_size = self.font_size
     if self.gui_language_encoding not in self.good_encodings:
@@ -679,7 +679,7 @@ class ImageTools(FontInstances):
         #self.top -= 3
       else:
         pass
-      
+
     if self.gui_current_language == "Chinese":
       self.font_peculiarities.setdefault("Arial UTF",{"top_adjust":-0.7,
                                                  "rel_adjust":+0.4})
@@ -689,8 +689,8 @@ class ImageTools(FontInstances):
     elif self.gui_current_language == "Russian":
       self.font_peculiarities.setdefault("Arial UTF",{"top_adjust":-1,
                                                  "rel_adjust":+0.4})
-  
-    
+
+
   def get_font_peculiarities(self):
     self.font_peculiarities = {
       "Paddington":{"top_adjust":0,
@@ -708,7 +708,7 @@ class ImageTools(FontInstances):
       "Simhei TTF":{"top_adjust":-0.2,
                     "rel_adjust":+0.3},
       }
-    
+
   def get_text_modifications(self):
     if self.translate:
       self.txt = OV.Translate("%%%s%%" %self.txt.strip()) ##Language
@@ -716,7 +716,7 @@ class ImageTools(FontInstances):
       self.txt = self.txt.title()
     if self.lowerCase:
       self.txt = self.txt.lower()
-      
+
   def get_valign_font_modifications(self):
     if not self.valign:
       return
@@ -761,19 +761,19 @@ class ImageTools(FontInstances):
     self.valign = valign
     self.draw = draw
     self.image_size = image_size
-    
+
     self.get_text_modifications()
     self.deal_with_encodings_and_languages()
     txt = self.txt
     font = self.get_font(font_name=self.font_name, font_size=self.font_size)
     self.font = font
     self.font_colour = font_colour
-    
+
     self.get_valign_font_modifications()
 
     if align == "centre" or align == 'middle':
       self.txt_left = (self.centre_text(draw, txt, font, max_width))
-      
+
     elif align == "right":
       self.txt_left = (self.align_text(draw, txt, font, max_width, 'right'))
 
@@ -801,7 +801,7 @@ class ImageTools(FontInstances):
       self.txt = txt
       self.print_html_to_draw()
       return
-    
+
     elif '<br>' in txt:
       txt = txt.split('<br>')
       txt_l = txt
@@ -845,12 +845,12 @@ class ImageTools(FontInstances):
     else:
       pass
     return wX, wY
-  
+
   def print_html_to_draw(self):
     top = self.txt_top
     left = self.txt_left
     gap = 5
-    
+
     self.txt = self.txt.strip().replace('\n','')
     l = self.txt.split('</p>')
     for line in l:
@@ -862,7 +862,7 @@ class ImageTools(FontInstances):
         self.css_class = _[0].strip(' ').split('class=')[1]
         self.set_css_settings()
       txt = ">".join(_[1:])
-      
+
       if '<b>' in txt:
         l = left
         t = txt.split('<b>')
@@ -881,7 +881,7 @@ class ImageTools(FontInstances):
         wX, wY = self.draw.textsize(txt, font=self.font)
         self.draw.text((left,top), txt, font=self.font, fill=self.font_colour)
         top += self.line_height
-      
+
   def set_css_settings(self):
     c = OV.GetParam('gui.css.%s' %self.css_class)
     if not c:
@@ -925,8 +925,8 @@ class ImageTools(FontInstances):
       font = self.fonts[font_name]["fontInstance"].get(font_size,None)
       if not font:
         font = self.registerFontInstance(font_name, font_size)
-      self.top_adjust = 0  
-      self.rel_adjust = 0  
+      self.top_adjust = 0
+      self.rel_adjust = 0
       if self.font_peculiarities.get(font_name):
         self.top_adjust = self.font_peculiarities[self.font_name].get('top_adjust',0)
         self.rel_adjust = self.font_peculiarities[self.font_name].get('rel_adjust',0)
