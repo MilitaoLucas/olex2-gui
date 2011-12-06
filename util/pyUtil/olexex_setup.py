@@ -10,7 +10,7 @@ import htmlTools
 import variableFunctions
 
 class SetupWizard(object):
-    
+
   def tbxs(self, f):
     total_number = 6
     name = f.get('n','0')
@@ -25,29 +25,29 @@ class SetupWizard(object):
     else:
       self.previous = str(current -1)
       self.next = str(current + 1)
-      
+
     txt = '''
 <zimg border="0" src="banner_setup.png" usemap="#map_setup">
 
 <map name="map_setup">
 <!-- Button PREVIOUS -->
-    <area shape="rect" 
-      coords="250,0,295,60" 
+    <area shape="rect"
+      coords="250,0,295,60"
       href='spy.tbxs -n=%s' target='%%previous%%'>
 
 <!-- Button NEXT-->
-    <area shape="rect" 
-      coords="295,0,330,60" 
+    <area shape="rect"
+      coords="295,0,330,60"
       href='spy.tbxs -n=%s' target='%%next%%'>
 </map>
 
 <!-- #include tool-top gui/blocks/help-top.htm;image=blank;1; -->
 
 '''% (self.previous, self.next)
-    
+
     t = OV.TranslatePhrase('setup-txt-%s' %name)
     t, d = htmlTools.format_help(t)
-    
+
     txt += r'''
 <tr VALIGN='center' NAME='Setup Title'>
   <td width="8" bgcolor="$GetVar(HtmlHighlightColour)"></td>
@@ -57,7 +57,7 @@ class SetupWizard(object):
           %%setup-title-%s%%
         </b>
       </font>
-    </td> 
+    </td>
   </tr>
 <tr>
   <td valign='top' width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
@@ -71,26 +71,26 @@ class SetupWizard(object):
 <tr>
   <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td colspan='2' align='right'>%s
-  
+
     <a href="html.Hide setup-box ">Close this Window</a>
   </td>
 </tr>
 
 '''%(name, t, htmlTools.make_edit_link("setup-txt", name))
-      
-      
+
+
     txt += r'''
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=3;1; -->
 '''
     wFilePath = r"setup-%s.htm" %name
     OV.write_to_olex(wFilePath, txt)
     olex.m("popup setup-box 'setup-%s.htm' -b=tc -t='%s' -w=340 -h=700 -x=50 -y=50" %(name, 'Olex2 Setup'))
-    
+
     olx.html.SetBorders('setup-box', 2)
     OV.UpdateHtml('setup-box')
     return retVal
-    
-    
+
+
 a = SetupWizard()
 OV.registerMacro(a.tbxs, 'n-The name of the setup screen')
 
@@ -118,12 +118,12 @@ class ConfigSkin(object):
     val += adjust
     OV.SetVar(var,val)
     self.config_changed_var_val(var)
-    
+
   def read_config_file(self):
     config = {}
-    self.cfgFile = open(self.cfgFileName, 'r')
+    cfgFile = open(self.cfgFileName, 'r')
     i = 0
-    for line in self.cfgFile:
+    for line in cfgFile:
       i += 1
       line= line.strip()
       if line.startswith("#C"):
@@ -138,13 +138,13 @@ class ConfigSkin(object):
         else:
           config.setdefault(l[0], {'num':i, 'val':l[1]})
     self.config = config
-    
+
   def getVarFromOlex(self):
     olexValues = variableFunctions.getVVD('gui')
     for var in self.config:
       if var.lower() in olexValues.keys():
         self.config[var]['val'] = olexValues[var.lower()]
-    
+
   def generate_config_box_text(self):
     str = ""
     cfg = []
@@ -170,14 +170,14 @@ class ConfigSkin(object):
         href = "spy.config_changed_var_val %s Color(hex,%s)" %(var,val)
         if "_grad_" in var.lower():
           href += ">>spy.SetGrad"
-        elif "html_link_" in var.lower() or "html_bg_colour" in var.lower(): 
+        elif "html_link_" in var.lower() or "html_bg_colour" in var.lower():
           href += ">>HtmlLoad index.htm"
         elif "_timage_" in var.lower() or "_snumtitle_" in var.lower() or "_tab_" in var.lower() or "_logo_" in var.lower() or "_highlight_" in var.lower():
           href += ">>panel"
         #str += "<tr valign='center'><td>%s</td><td width=80>some text</td></tr>\n" %var
         str += "<tr valign='center'><td width=%s>%s</td><td><a href='%s' target='Change %s'><zimg border='0' src='%s'></a></td></tr>\n" %(first_col_width, varName, href, varName.lower(), self.IT.make_colour_sample(val))
-        
-        ## This was an attempt to allow darker/lighter adjustment from the gui. It failed, cause the L_Var aren't actually stored in Olex        
+
+        ## This was an attempt to allow darker/lighter adjustment from the gui. It failed, cause the L_Var aren't actually stored in Olex
         #href_lighter = "spy.config_changed_luminosity %s -adjust=0.1" %var
         #href_darker = "spy.config_changed_luminosity %s -adjust=-0.1" %var
         #str += "<a href='%s'>lighter</a>|<a href='%s'>darker</a>" %(href_lighter, href_darker)
@@ -211,7 +211,7 @@ class ConfigSkin(object):
     <br><a href="exec -o GetVar(defeditor) %s">Edit File</a>&nbsp;&nbsp<a href="html.Hide configuration-help ">Close this Window</a>
     ''' %cfgFileName
     OV.write_to_olex(wFilePath, self.str)
-    
+
     if self.popout:
       boxWidth = 600
       length = len(self.str)
@@ -222,7 +222,7 @@ class ConfigSkin(object):
       y = 50
       olx.Popup("%s-help"% self.name, wFilePath, "-b=tc -t='%s' -w=%i -d='echo' -h=%i -x=%i -y=%i" %(self.name, boxWidth, boxHeight, x, y))
     else:
-      olx.html.Load(wFilePath) 
+      olx.html.Load(wFilePath)
 
   def config_box(self, args):
     self.str = ""
@@ -234,15 +234,15 @@ class ConfigSkin(object):
       self.popout = False
     else:
       self.popout = True
-    
+
     #self.config = variableFunctions.getVVD('gui')
     self.read_config_file()
     #self.getVarFromOlex()
     self.generate_config_box_text()
     self.create_config_box()
-      
 
-a = ConfigSkin()   
+
+a = ConfigSkin()
 OV.registerMacro(a.config_box, 'name-Name of the Config Box&;popout-True/False&;config-Name of the configuration file')
 OV.registerMacro(a.config_changed_var_val, 'f')
 #OV.registerMacro(a.config_changed_luminosity, 'adjust-Value to adjust the luminosity by')

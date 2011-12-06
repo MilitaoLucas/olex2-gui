@@ -79,6 +79,7 @@ class MakeGuiTools(object):
         tbx_li = res
       elif file == "tbx_tool":
         tbx_tool = res
+      rFile.close()
     self.gui = {"tbx":tbx,"tbx_li":tbx_li,"tools":tbx_tool}
 
   def read_gui_db_file(self, rFile):
@@ -204,6 +205,7 @@ class MakeGuiTools(object):
             tools[tool][field] = value
 
           i += 1
+    rFile.close()
     self.gui = {"tbx":tbx,"tbx_li":tbx_li,"tools":tools}
 
 

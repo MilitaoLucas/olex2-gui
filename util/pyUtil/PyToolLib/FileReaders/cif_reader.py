@@ -38,6 +38,7 @@ class reader:
         field = l[0].strip()
         value = li.split(field)[1].strip(' \'"')
         self._cifItems.setdefault(field,value)
+    rFile.close()
 
   def cifItems(self):
     return self._cifItems

@@ -25,6 +25,7 @@ class Spy(object):
       basedir = OV.BaseDir()
       rFile = open(r"%s/version.txt" %basedir)
       version = rFile.readline()
+      rFile.close()
       print >> sys.stderr, "===================================== Gui SVN Version: %s -- Olex Compilation Date: %s" %(version, OV.GetCompilationInfo())
       print >> sys.stderr, "A Python Error has occured."
       print >> sys.stderr, "Tool: %s, Function: %s, Parameters: %s"

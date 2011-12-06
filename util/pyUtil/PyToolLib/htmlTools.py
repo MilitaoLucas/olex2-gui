@@ -907,6 +907,7 @@ def get_template(name):
   if os.path.exists(template):
     rFile = open(template, 'r')
     str = rFile.read()
+    rFile.close()
     return str
   else:
     return None

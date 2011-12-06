@@ -1195,6 +1195,7 @@ class Analysis(Graph):
       rfile = open(filepath, 'r')
       for li in rfile:
         fl.append(li)
+      rfile.close()
     except:
       pass
     return fl
