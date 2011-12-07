@@ -1296,7 +1296,15 @@ def GetCheckcifReport(outputtype='PDF'):
   if not os.path.exists(file_name):
     print "\n ++ There is no cif file to check! Please add the 'ACTA' command to Shelx!"
     return
-
+  out_file_name = "%s_cifreport.%s" %(OV.FileName(), outputtype)
+  eindex = 1
+  while os.path.exists(out_file_name):
+    try:
+      os.path.delete(out_file_name)
+    except:
+      out_file_name = "%s_cifreport-%i.%s" %(OV.FileName(), eindex, outputtype)
+      eindex += 1
+      
   metacif_path = '%s/%s.metacif' %(OV.StrDir(), OV.FileName())
   OV.CifMerge(metacif_path)
 
@@ -1315,7 +1323,7 @@ def GetCheckcifReport(outputtype='PDF'):
   rFile.close()
   #outputtype = 'htm'
   if outputtype == "htm":
-    wFile = open("%s_cifreport.%s" %(OV.FileName(), outputtype),'w')
+    wFile = open(out_file_name,'w')
     wFile.write(response.read())
     wFile.close()
   elif outputtype == "PDF":
@@ -1327,11 +1335,11 @@ def GetCheckcifReport(outputtype='PDF'):
         href = line.split('"')[1]
         response = HttpTools.make_url_call(href,"")
         txt = response.read()
-        wFile = open("%s_cifreport.%s" %(OV.FileName(), outputtype.lower()),'wb')
+        wFile = open(out_file_name,'wb')
         wFile.write(txt)
         wFile.close()
     rawFile.close()
-  olx.Shell("%s_cifreport.%s" %(OV.FileName(), outputtype.lower()))
+  olx.Shell(out_file_name)
 
 OV.registerFunction(GetCheckcifReport)
 
