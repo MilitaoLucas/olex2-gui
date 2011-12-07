@@ -1,16 +1,13 @@
-  <td name=HEADLINE_EXPAND_SHORT_CONTACTS bgcolor="$GetVar(HtmlTableFirstcolColour)">
+<tr name=EXPAND_SHORT_CONTACTS_1>
+  <td name=HEADLINE_EXPAND_SHORT_CONTACTS colspan='2' bgcolor="$GetVar(HtmlTableFirstcolColour)">
     <b>
       %Expand Short Contacts% (%Hydrogen Bonds%)
     </b>
   </td>
 </tr>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- SECOND ROW -->
 <tr name=EXPAND_SHORT_CONTACTS_2>
-<!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=packing-hydrogen-bonds;1; -->
   <td name=SLIDER_EXPAND_SHORT_CONTACTS>
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input 
@@ -49,3 +46,4 @@ DeltaI GetValue(DeltaIValue)"
     >
     </font>
   </td>
+</tr>
