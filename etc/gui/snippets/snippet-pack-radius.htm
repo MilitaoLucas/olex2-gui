@@ -1,16 +1,14 @@
-  <td name=HEADLINE_PACK_RADIUS bgcolor="$GetVar(HtmlTableFirstcolColour)">
+<!-- FIRST ROW -->
+<tr name=HEADLINE_PACK_RADIUS_1>
+  <td name=HEADLINE_PACK_RADIUS colspan='2' bgcolor="$GetVar(HtmlTableFirstcolColour)">
     <b>
       %Pack Radius%
     </b>
   </td>
 </tr>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- SECOND ROW -->
 <tr name=PACK_RADIUS_2>
-<!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=packing-radius;1; -->
   <td name=SLIDER_PACK_RADIUS>
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input 
@@ -29,8 +27,8 @@ pack getvalue(PackRadius)>>
 "
   >
   </font>
-</td>
-<td name=PACK_RADIUS_VALUE>
+  </td>
+  <td name=PACK_RADIUS_VALUE>
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input 
       type="text" 
@@ -46,3 +44,4 @@ pack GetValue(PackRadius)"
     >
     </font>
   </td>
+</tr>
