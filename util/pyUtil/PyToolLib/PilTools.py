@@ -2829,7 +2829,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       underground = OV.GetParam('gui.html.bg_colour').rgb
 
     elif item_type == "h3":
-      width -= OV.GetParam('gui.html.table_firstcol_width')
+      width -= OV.GetParam('gui.html.table_firstcol_width') + 3
       underground = OV.GetParam('gui.html.table_firstcol_colour').rgb
 
     elif "tab" in item_type:

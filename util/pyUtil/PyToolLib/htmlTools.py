@@ -144,6 +144,7 @@ def makeHtmlTableRow(dictionary):
   dictionary.setdefault('fieldALIGN','left')
   dictionary.setdefault('first_col_width', OV.GetParam('gui.html.table_firstcol_width'))
   dictionary.setdefault('first_col_colour', OV.GetParam('gui.html.table_firstcol_colour'))
+  dictionary.setdefault('first_column', '<td width="%(first_col_width)s" bgcolor="%(first_col_colour)s"></td>' %dictionary)
 
   if 'chooseFile' in dictionary.keys():
     chooseFile_dict = dictionary['chooseFile']
@@ -198,9 +199,10 @@ def makeHtmlTableRow(dictionary):
 ''' %dictionary
 
   else:
+    
     htmlTableRowText = '''
   <tr VALIGN="%(trVALIGN)s" ALIGN="%(trALIGN)s" NAME="%(ctrl_name)s">
-  <td width="%(first_col_width)s" bgcolor="%(first_col_colour)s"></td>
+  %(first_column)s
     <td VALIGN="%(fieldVALIGN)s" ALIGN="%(fieldALIGN)s" width="%(fieldWidth)s" colspan=2>
       <b>
         %(itemName)s
