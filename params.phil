@@ -82,6 +82,8 @@ snum
   }
 
   data{
+    hkl_stat_file = None
+      .type = path
     completeness_full = 0
       .type = float
     fcf = None
