@@ -287,6 +287,20 @@ class OlexRefinementModel(object):
               distance_ideal=kwds['distance_ideal'],
               i_seqs=kwds['i_seqs'][i*2:(i+1)*2],
               sym_ops=kwds['sym_ops'][i*2:(i+1)*2])
+        elif restraint_type in ('angle', ):
+          for i in range(int(len(i_seqs)/3)):
+            yield restraint_type, dict(
+              weight=kwds['weight'],
+              angle_ideal=kwds['angle_ideal'],
+              i_seqs=kwds['i_seqs'][i*3:(i+1)*3],
+              sym_ops=kwds['sym_ops'][i*3:(i+1)*3])
+        elif restraint_type in ('dihedral', ):
+          for i in range(int(len(i_seqs)/4)):
+            yield restraint_type, dict(
+              weight=kwds['weight'],
+              angle_ideal=kwds['angle_ideal'],
+              i_seqs=kwds['i_seqs'][i*4:(i+1)*4],
+              sym_ops=kwds['sym_ops'][i*4:(i+1)*4])
         else:
           yield restraint_type, kwds
 
@@ -1304,7 +1318,7 @@ def GetCheckcifReport(outputtype='PDF'):
     except:
       out_file_name = "%s_cifreport-%i.%s" %(OV.FileName(), eindex, outputtype)
       eindex += 1
-      
+
   metacif_path = '%s/%s.metacif' %(OV.StrDir(), OV.FileName())
   OV.CifMerge(metacif_path)
 
