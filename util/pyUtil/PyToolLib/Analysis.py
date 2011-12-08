@@ -2617,13 +2617,16 @@ class HealthOfStructure():
     return True
 
   def get_cctbx_completeness(self):
-    retVal = OV.GetParam('snum.data.completeness_full')
-    if not retVal:
+    retVal = None
+    try:
       from cctbx_olex_adapter import OlexCctbxAdapter
       OCA = OlexCctbxAdapter()
       f_sq_obs = OCA.reflections.f_sq_obs_filtered
       retVal = f_sq_obs.completeness()
       OV.SetParam('snum.data.completeness_full',retVal)
+    except Exception, err:
+      print err
+      pass
     return retVal
 
   def get_cctbx_reflection_statistics_html(self):
@@ -2693,7 +2696,8 @@ class HealthOfStructure():
 
     txt += "</tr></table></tr>"
     txt = txt.decode('utf-8')
-    OV.write_to_olex("hos.htm" , txt)
+    OV.write_to_olex("hos.htm",txt)
+    OV.SetParam('snum.data.hkl_stat_file', OV.HKLSrc())
 
   def make_hos_images(self, item='test', colour='#ff0000', display='Display', value_display='10%', value_raw='0.1', n=1):
     boxWidth = self.available_width/n - 10
