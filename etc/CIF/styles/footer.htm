@@ -22,13 +22,13 @@
   <span class=replaceThisChar>%$spy.GetParam(snum.report.diffractometer)%</span>
   diffractometer. The crystal was kept at %27% K during data collection.
   Using Olex2 [1], the structure was solved with the
-  %$spy.GetParam(snum.solution.program)%
+  %$spy.history.get(solution,program)%
   [2] structure solution program using
-  %$spy.GetParam(snum.solution.method)%
+  %$spy.history.get(solution,method)%
   and refined with the 
-  %$spy.GetParam(snum.refinement.program)%
+  %$spy.history.get(refinement,program)%
   [3] refinement package using
-  %$spy.GetParam(snum.refinement.method)%
+  %$spy.history.get(refinement,method)%
   minimisation.</p>
 
 <ol class="journal_reference">
