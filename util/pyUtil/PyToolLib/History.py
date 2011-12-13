@@ -534,6 +534,31 @@ def make_history_bars():
   hist._make_history_bars()
 OV.registerFunction(make_history_bars)
 
+def get(where, what):
+  if where == 'solution':
+    acn = tree.active_child_node
+    solution = True
+  else:
+    acn = tree.active_node
+    solution = False
+  if acn and acn.is_solution == solution:
+    if what == 'program':
+      return acn.program
+    elif what == 'method':
+      return acn.method
+  return 'Unknown'
+OV.registerFunction(get, namespace="history")
+
+def get_refinement_program(what):
+  acn = tree.active_node
+  if acn is not None and not acn.is_solution:
+    if what == 'program':
+      return acn.program
+    elif what == 'method':
+      return acn.method
+  return 'Unknown'
+OV.registerFunction(get_refinement_program, namespace="history")
+
 def popout_history_tree(width=800, height=500):
   width = int(width)
   height = int(height)
