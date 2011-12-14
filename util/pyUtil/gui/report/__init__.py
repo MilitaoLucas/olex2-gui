@@ -8,7 +8,7 @@ def BGColorForValue(value):
   if value == '' or value == '?':
     return "#FFDCDC"
   return OV.GetParam('gui.html.input_bg_colour')
-  
+
 
 class publication:
   def ChangeContactAuthor(self, person):
@@ -75,13 +75,50 @@ class publication:
     if changed:
       OV.SetParam("snum.metacif.publ_author_names", newValue)
     return changed
-  
+
   def OnAddNameToAuthorList(self, box_name):
     value = olx.GetValue(box_name).strip()
     if self.AddNameToAuthorList(value):
       olx.html.Update()
-  
+
 pub = publication()
 olex.registerFunction(pub.OnContactAuthorChange, False, "gui.report.publication")
 olex.registerFunction(pub.OnPersonInfoChange, False, "gui.report.publication")
 olex.registerFunction(pub.OnAddNameToAuthorList, False, "gui.report.publication")
+
+def ResolvePrograms():
+  if not OV.HasGUI():
+    return True
+  import History
+  import olex_gui
+  if not(History.get('solution', 'program') == 'Unknown' or\
+         History.get('refinement', 'program') == 'Unknown'):
+    return True
+  sz = [int(i) for i in olx.GetWindowSize().split(',')]
+  w = int(olx.ClientWidth('self'))
+  h = int(olx.ClientHeight('self'))
+  sw = 650
+  sh = 200
+  pop_name = 'report_resolve'
+  olx.Popup("%s '%s/etc/gui/report-resolve-programs.htm' -x=%d -y=%d -w=%d -h=%d -s"
+            %(pop_name, olx.BaseDir(),
+              sz[0] + w/2 + sw/2,
+              sz[1] + h/2 - sh/2,
+              sw,
+              sh) +
+            " -b=tc -t='Missing data'")
+  res = olx.html.ShowModal(pop_name)
+  if not res or int(res) == 1:
+    return False
+  hs = History.tree
+  if olex_gui.IsControl('solution_method', pop_name):
+    hs.active_child_node.is_solution = True
+    hs.active_child_node.program = olx.html.GetValue("%s.solution_program" %pop_name)
+    hs.active_child_node.method = olx.html.GetValue("%s.solution_method" %pop_name)
+  if olex_gui.IsControl('refinement_method', pop_name):
+    hs.active_node.program = olx.html.GetValue("%s.refinement_program" %pop_name)
+    hs.active_node.method = olx.html.GetValue("%s.refinement_method" %pop_name)
+  History.make_history_bars()
+  return True
+
+olex.registerFunction(ResolvePrograms, False, "report")
