@@ -84,6 +84,7 @@ external_files = {
   'fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
   'acidb.zip': ('olex-update', 'action:extract', 'action:delete'),
   'splash.jpg': ('olex-install', 'olex-update'),
+  'splash.png': ('olex-install', 'olex-update'),
   'version.txt': ('olex-install', 'olex-update'),
   'dictionary.txt': ('olex-install', 'olex-update'),
   'odac_update.txt': ('olex-install', 'olex-update'),
