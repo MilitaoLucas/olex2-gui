@@ -365,8 +365,10 @@ class ExtractCifInfo(CifTools):
       if active_solution.program == "smtbx-solve":
         active_solution.program = "olex2.solve"
       ## END
-
-      solution_reference = SPD.programs[active_solution.program].reference
+      try:
+        solution_reference = SPD.programs[active_solution.program].reference
+      except:
+        solution_reference = 'Unknown'
       atom_sites_solution_primary = SPD.programs[active_solution.program].methods[active_solution.method].atom_sites_solution
       self.update_cif_block({
         '_computing_structure_solution': solution_reference,
@@ -379,8 +381,10 @@ class ExtractCifInfo(CifTools):
       if active_node.program == "smtbx-refine":
         active_node.program = "olex2.refine"
       ## END
-
-      refinement_reference = RPD.programs[active_node.program].reference
+      try:
+        refinement_reference = RPD.programs[active_node.program].reference
+      except:
+        refinement_reference = 'Unknown'
       self.update_cif_block({
         '_computing_structure_refinement': refinement_reference})
 

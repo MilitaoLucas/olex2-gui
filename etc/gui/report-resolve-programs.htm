@@ -1,0 +1,71 @@
+<html><body><table width="100%">
+<tr><td colspan=4>
+
+<font size="+2"><b>
+Please fill in the following details to resolve missing items:
+</b></font>
+
+</td></tr>
+
+<!-- #ignoreif not(strcmp(spy.history.get(solution,program), Unknown))
+<tr><td>Structure solution package</td><td>
+<input
+  type='combo'
+  bgcolor="$GetVar(HtmlInputBgColour)"
+  height="$GetVar(HtmlComboHeight)"
+  name='solution_program'
+  value='$spy.history.get(solution,program)'
+  items='$spy.get_solution_programs()'
+  onchange="html.setitems(report_resolve.solution_method,
+   spy.get_solution_methods(html.getvalue(~name~)))"
+  readonly
+>
+</td><td>Structure solution method</td><td>
+<input 
+  type='combo'
+  height="$GetVar(HtmlComboHeight)"
+  width="150"
+  bgcolor="$GetVar(HtmlInputBgColour)"
+  name='solution_method'
+  value='$spy.history.get(solution,method)'
+  items='$spy.get_solution_methods(spy.history.get(solution,program))'
+  readonly
+>
+</td></tr>
+#ignoreif -->
+
+<!-- #ignoreif not(strcmp(spy.history.get(refinement,program), Unknown))
+<tr><td>Structure refinement package</td><td>
+<input
+  type='combo'
+  bgcolor="$GetVar(HtmlInputBgColour)"
+  height="$GetVar(HtmlComboHeight)"
+  name='refinement_program'
+  value='$spy.history.get(refinement,program)'
+  items='$spy.get_refinement_programs()'
+  onchange="html.setitems(report_resolve.refinement_method,
+   spy.get_refinement_methods(html.getvalue(~name~)))"
+  readonly
+>
+</td><td>Refinement method</td><td>
+<input 
+  type='combo'
+  height="$GetVar(HtmlComboHeight)"
+  width="150"
+  bgcolor="$GetVar(HtmlInputBgColour)"
+  name='refinement_method'
+  value='$spy.history.get(refinement,method)'
+  items='$spy.get_refinement_methods(spy.history.get(refinement,program))'
+  readonly
+>
+</td></tr>
+#ignoreif -->
+
+<tr><td colspan=2>&nbsp;</td><td colspan=2 align=right>
+<input type=button value="OK"
+ onclick="html.endmodal(report_resolve,0)">
+&nbsp;
+<input type=button value="Cancel"
+ onclick="html.endmodal(report_resolve,1)">
+</td></tr>
+</table></body></html>

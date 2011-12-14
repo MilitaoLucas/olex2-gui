@@ -179,7 +179,15 @@ class History(ArgumentParser):
       tree = self._convertHistory(historyFolder)
     else:
       tree = HistoryTree()
-      tree.add_top_level_node(OV.HKLSrc(), OV.FileFull(), os.path.splitext(OV.FileFull())[0] + '.lst', is_solution=False)
+      tree.add_top_level_node(OV.HKLSrc(), OV.FileFull(),
+                              os.path.splitext(OV.FileFull())[0] + '.lst',
+                              is_solution=True)
+      tree.active_node.program = 'Unknown'
+      tree.active_node.method = 'Unknown'
+      tree.add_node(OV.HKLSrc(), OV.FileFull(),
+                    os.path.splitext(OV.FileFull())[0] + '.lst')
+      tree.active_node.program = 'Unknown'
+      tree.active_node.method = 'Unknown'
 
   def _convertHistory(self, historyFolder):
     folders = []
@@ -385,7 +393,8 @@ class Node(object):
     if self.is_solution:
       OV.set_solution_program(self.program, self.method)
     else:
-      OV.set_refinement_program(self.program, self.method)
+      if self.program != 'Unknown':
+        OV.set_refinement_program(self.program, self.method)
 
   def __setstate__(self, state):
     # XXX backwards compatibility 2010-12-12
@@ -548,16 +557,6 @@ def get(where, what):
       return acn.method
   return 'Unknown'
 OV.registerFunction(get, namespace="history")
-
-def get_refinement_program(what):
-  acn = tree.active_node
-  if acn is not None and not acn.is_solution:
-    if what == 'program':
-      return acn.program
-    elif what == 'method':
-      return acn.method
-  return 'Unknown'
-OV.registerFunction(get_refinement_program, namespace="history")
 
 def popout_history_tree(width=800, height=500):
   width = int(width)
