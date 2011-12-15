@@ -141,7 +141,8 @@ class CifTools(ArgumentParser):
 
   def sort_diffractometer(self):
     if not OV.GetParam('snum.report.diffractometer'):
-      OV.SetParam('snum.report.diffractometer',self.cif_block.get('_diffrn_measurement_device_type'))
+      OV.SetParam('snum.report.diffractometer',
+        self.cif_block.get('_diffrn_measurement_device_type'))
 
 
   def sort_crystal_dimensions(self):
@@ -302,8 +303,8 @@ class MergeCif(CifTools):
     # check if cif exists and is up-to-date
     cif_path = '%s/%s.cif' %(OV.FilePath(), OV.FileName())
     file_full = OV.FileFull()
-    if (not os.path.isfile('%s/%s.cif' %(OV.FilePath(), OV.FileName())) or not
-        os.path.getmtime(file_full) - 10 < os.path.getmtime(cif_path)):
+    if (not os.path.isfile(cif_path) or
+        os.path.getmtime(file_full) > os.path.getmtime(cif_path) + 10):
       if OV.GetParam('user.cif.autorefine_if_no_cif_for_cifmerge'):
         prg = OV.GetParam('snum.refinement.program')
         method = OV.GetParam('snum.refinement.method')
@@ -315,7 +316,7 @@ class MergeCif(CifTools):
           acta = olx.Ins('ACTA')
           if acta == 'n/a':
             olx.AddIns('ACTA')
-          olex.m('refine')
+        olex.m('refine')
       else:
         print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         print("There is no cif from a refinement program for merging.")
@@ -367,9 +368,11 @@ class ExtractCifInfo(CifTools):
       ## END
       try:
         solution_reference = SPD.programs[active_solution.program].reference
+        atom_sites_solution_primary = SPD.programs[active_solution.program]\
+          .methods[active_solution.method].atom_sites_solution
       except:
-        solution_reference = 'Unknown'
-      atom_sites_solution_primary = SPD.programs[active_solution.program].methods[active_solution.method].atom_sites_solution
+        atom_sites_solution_primary = '?'
+        solution_reference = '?'
       self.update_cif_block({
         '_computing_structure_solution': solution_reference,
         '_atom_sites_solution_primary': atom_sites_solution_primary
@@ -384,7 +387,7 @@ class ExtractCifInfo(CifTools):
       try:
         refinement_reference = RPD.programs[active_node.program].reference
       except:
-        refinement_reference = 'Unknown'
+        refinement_reference = '?'
       self.update_cif_block({
         '_computing_structure_refinement': refinement_reference})
 
