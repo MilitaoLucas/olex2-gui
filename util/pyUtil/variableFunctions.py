@@ -250,6 +250,7 @@ def LoadStructureParams():
   # End backwards compatibility
   #
   import CifInfo
+  olx.cif_model = None #reset the cif model, #399
   CifInfo.CifTools() # needed to load metacif items
   if OV.IsFileType('ires'):
     if solutionMethod == 'Direct Methods' and olx.Ins('PATT') != 'n/a':
