@@ -3,25 +3,18 @@
 class pcf_reader:
   def __init__(self, path):
     self.path = path
-    self.ignore = ["?", "'?'", ".", "'.'"]
+    self.ignore = set(["?", "'?'", ".", "'.'"])
 
   def read_pcf(self):
     """Reads the .pcf file with the given path.
 
     Returns a dictionary of cif items found in the .pcf file."""
 
-    pcf = {}
     rfile = open(self.path, 'r')
-    lines = {}
+    lines = rfile.readlines()
+    rfile.close()
 
-    i = 0
-    for line in rfile:
-      lines[i] = line.strip()
-      i += 1
-
-    i = 0
-
-    items = [
+    items = set([
       "_symmetry_cell_setting",
       "_symmetry_space_group_name_H-M",
       #"_cell_measurement_temperature",
@@ -46,31 +39,19 @@ class pcf_reader:
       "_cell_measurement_theta_min",
       "_cell_measurement_theta_max",
       #"_diffrn_ambient_temperature",
-    ]
+    ])
 
+    pcf = {}
     for line in lines:
-      for item in items:
-        try:
-          #if line.split()[0] == "%s" %item:
-          if lines[i].split()[0] == "%s" %item:
-            str_list = lines[i].split()[1:]
-            if len(str_list) > 1:
-              txt = ' '.join([s for s in str_list])
-            else:
-              txt = str_list[0]
-            txt = txt.strip("'").rstrip()
-            #txt = str.strip(txt, "'")
-            if txt not in self.ignore:
-              txt = self.value_exceptions()
-              if txt is not None:
-                pcf.setdefault("%s" %item, "%s" %txt)
-        except:
-          #i += 1
-          pass
-      i += 1
+      toks = line.strip().split()
+      if len(toks) < 2: continue
+      if toks[0] in items:
+        val = ' '.join(toks[1:])
+        if val in self.ignore: continue
+        pcf.setdefault(toks[0], val)
     self.pcf_d = pcf
     return pcf
-  
+
   def value_exceptions(self, item, value):
     ## In some Bruker p4p files the default here is 0, which is rubbish
     if item == "_exptl_crystal_density_meas":
