@@ -2047,7 +2047,6 @@ def getReportImageData(size='w400', imageName=None):
   rFile = open(p, 'rb')
   img = rFile.read()
   data = base64.b64encode(img)
-  rFile.close()
   d ='data:image/png;base64,' + data
 
   html = '''
