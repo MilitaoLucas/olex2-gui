@@ -1975,7 +1975,7 @@ def getReportImageSrc():
     return 'file:///%s' %imagePath
 OV.registerFunction(getReportImageSrc)
 
-def getReportExtraCIFItems(name_td_class, value_td_class):
+def getReportExtraCIFItems(name_td_class, value_td_class, type='html'):
   cf_name = OV.file_ChangeExt(OV.FileFull(), 'cif')
   rv = ''
   if not os.path.exists(cf_name):
@@ -1993,8 +1993,12 @@ def getReportExtraCIFItems(name_td_class, value_td_class):
       return rv
     flack = models[0]["_refine_ls_abs_structure_Flack"]
     if flack:
-      rv = "<tr><td class='%s'>Flack parameter</td><td class='%s'>%s</td></tr>"\
-        %(name_td_class,value_td_class,flack)
+      if type == 'html':
+        rv = "<tr><td class='%s'>Flack parameter</td><td class='%s'>%s</td></tr>"\
+          %(name_td_class,value_td_class,flack)
+      else:
+        rv = r"Flack parameter & %s\\" % flack.replace('-', '@@-@@')
+        
   except Exception, err:
     print err
     pass
@@ -2040,8 +2044,9 @@ def getReportImageData(size='w400', imageName=None):
   p = "%s/report_tmp.png" %OV.DataDir()
   IM.save(p, "PNG")
 
-  rFile = open(p, 'rb').read()
-  data = base64.b64encode(rFile)
+  rFile = open(p, 'rb')
+  img = rFile.read()
+  data = base64.b64encode(img)
   rFile.close()
   d ='data:image/png;base64,' + data
 
@@ -2279,6 +2284,10 @@ def round_to_n_digits(f, n=2):
     return f
 OV.registerFunction(round_to_n_digits)
 
+def standardise_path(path):
+  return OV.standardizePath(path)
+OV.registerFunction(standardise_path)
+
 def play_crystal_images():
   import time
   l = OV.GetParam('snum.metacif.list_crystal_images_files')[0].split(';')
@@ -2329,6 +2338,16 @@ def advance_crystal_image(direction='forward'):
     #OV.SetParam('snum.report.crystal_image',p)
     #olx.html.SetImage('CRYSTAL_IMAGE',p)
 OV.registerFunction(advance_crystal_image)
+
+def formatted_date_from_timestamp(dte):
+  from datetime import date
+  if not dte:
+    return None
+  dte = float(dte)
+  dte = date.fromtimestamp(dte)
+  return dte.strftime(OV.GetParam('snum.report.date_format'))
+OV.registerFunction(formatted_date_from_timestamp)
+
 
 def get_news_image_from_server(name=""):
   from ImageTools import ImageTools
