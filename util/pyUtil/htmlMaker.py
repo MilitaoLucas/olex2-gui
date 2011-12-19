@@ -501,7 +501,7 @@ OV.registerFunction(move)
 
 def restraint_builder(cmd):
   height = OV.GetParam('gui.html.combo_height')
-  colspan = 6
+  colspan = 7
 
   constraints = ["EXYZ", "EADP", "AFIX"]
   olex_conres = ["RRINGS", "TRIA"]
@@ -567,11 +567,11 @@ def restraint_builder(cmd):
         items = None
         val = val.strip()
       if items:
-        width = 50
+        width = 40
       else:
-        width=50
+        width=40
       if var == "d":
-        width=50
+        width=40
       d = {"ctrl_name":ctrl_name,
            "label":var,
            "valign":'center',
@@ -583,7 +583,7 @@ def restraint_builder(cmd):
       if items:
         d.setdefault("items",items)
       if var:
-        html.append("<td width='15%%'>%s</td>" %htmlTools.makeHtmlInputBox(d))
+        html.append("<td width='20%%'>%s</td>" %htmlTools.makeHtmlInputBox(d))
 
   if name == "AFIX":
     itemcount += 2
@@ -597,7 +597,7 @@ def restraint_builder(cmd):
       "value":"Mode",
       "ondown":"%s"%mode_ondown,
       "onup":"%s"%mode_onup,
-      "width":50, "height":height,
+      "width":40, "height":height,
       "hint":"Atoms subsequently clicked will become the pivot atom of a new rigid group",
     }
     clear_onclick = "sel atoms where xatom.afix==strcat\(%s,%s)>>Afix 0>>labels -a" %(onclick_list[1],onclick_list[2])
@@ -605,7 +605,7 @@ def restraint_builder(cmd):
       "name":'AFIX_CLEAR',
       "value":"Clear",
       "onclick":"%s"%clear_onclick,
-      "width":50, "height":height,
+      "width":40, "height":height,
       "hint":"Removes the current AFIX command from the structure",
     }
 
@@ -641,6 +641,7 @@ def restraint_builder(cmd):
 
   #Add the help info as the last row in the table
   html.append("</td></tr><tr>")
+  colspan += 1
   html.append(htmlTools.make_table_first_col(help_name=name, popout=True, help_image='normal'))
   html.append("<td colspan=%s bgcolor='%s'>%s</td></tr>" %(colspan, OV.GetParam('gui.html.table_firstcol_colour'), html_help, ))
   if name in constraints:
