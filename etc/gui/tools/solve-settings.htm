@@ -64,34 +64,26 @@
 <tr VALIGN='center' ALIGN='left' NAME='Z'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Z;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td VALIGN='center' colspan=3>
-    <b>%Number of Formula Units%</b>
+  <td VALIGN='left' colspan=3>
+    <b>Number of Formula Units: Unit Cell | Asym. Unit</b>
   </td>
-  <td VALIGN='center' ALIGN='right' colspan=1>
+  <td width='20' align='right'>Z</td>
+  <td VALIGN='right' ALIGN='right' colspan=1>
       <input
-        type='spin'
-        width='120'
+        type='text'
+        width='50'
         height="$GetVar(HtmlSPinHeight)"
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name='SET_Z'
-        min='1'
         value='xf.au.GetZ()'
         onchange="xf.au.SetZ(GetValue(SET_Z))>>html.Update"
       >
   </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</tr>
-
-<tr VALIGN='center' ALIGN='left' NAME='Z Prime'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Z-Prime;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td VALIGN='center' colspan=3>
-    <b>%Number in Asymmetric Unit%</b>
-  </td>
-  <td VALIGN='center' ALIGN='right' colspan=1>
+  <td width='20' align='right'>Z'</td>
+  <td VALIGN='right' ALIGN='right' colspan=1>
       <input
         type='text'
-        width="120"
+        width="50"
         height="$GetVar(HtmlSPinHeight)"
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name='SET_Z_PRIME'
@@ -99,8 +91,11 @@
         onchange="xf.au.SetZprime(GetValue(~name~))>>html.Update"
       >
   </td>
+  
+  
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
+
 
 <tr VALIGN='center' ALIGN='left' NAME='Atomic Volume'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Atomic-Volume;1; -->
