@@ -469,13 +469,29 @@ snum
   report
     .short_caption = Report Metadata
     {
+    type = "AutoChem2 Structure Report"
+      .type = str
+    date_format = "%d-%m-%Y"  
+      .type = str
     date_collected = None
       .type = str
     crystal_image = None
-      .type = str
+      .type = path
+    frame_image = None
+      .type = path
+    notes_file = None
+      .type = path
     crystal_images_path = None
       .type = str
     crystal_mounting_method = None
+      .type = str
+    crystal_mounting_notes = "Nothing special was noted when selecting and mounting the crystal"
+      .type = str
+    submission_special_instructions = "No special instructions were received"  
+      .type = str
+    submission_original_sample_id = "No original ID"  
+      .type = str
+    data_collection_notes = "No notes were made during strategy determination and the data collection process"
       .type = str
     date_submitted = None
       .type = str
@@ -485,10 +501,37 @@ snum
       .type = str
     diffractometer = None
       .type = str
+    diffractometer_image = "C:/Users/Horst/svn/olex-trunk/util/pyUtil/PluginLib/plugin-PDFReport/gemini.jpg"
+      .type = path
     title = None
       .type = path
     image = None
       .type = path
+
+    structure{
+      smiles_string = ""
+        .type = str
+    }
+      
+      
+    lab{
+      logo = "C:/Users/Horst/svn/olex-trunk/util/pyUtil/PluginLib/plugin-PDFReport/DurhamUnivLogoNew.png"
+        .type = path
+      name = Durham Chemical Crystallography Laboratory
+        .type = str
+    } 
+    
+      
+    tex{
+      page = 'a4paper'
+        .type = str
+      fontsize = '10pt'
+        .type = str
+      fleqn = 'fleqn'
+        .type = str
+      table1_caption = 'Crystal data and structure refinement for'
+        .type = str
+    }  
   }
 
   eden_fine_value = 0

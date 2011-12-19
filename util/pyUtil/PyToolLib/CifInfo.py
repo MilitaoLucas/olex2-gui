@@ -521,6 +521,16 @@ class ExtractCifInfo(CifTools):
       except:
         print "Error reading OD frame Date %s" %p
 
+    # OD Frame Image
+    p = self.sort_out_path(path, "od_frame_images")
+    if p:
+      try:
+        info = os.stat(p)
+        file_time = info.st_mtime
+        OV.SetParam('snum.report.frame_image', p)
+      except:
+        print "Error reading OD frame image %s" %p
+
     # OD Crystal Image
     p = self.sort_out_path(path, "crystal_images")
     if p:
@@ -530,6 +540,17 @@ class ExtractCifInfo(CifTools):
         OV.SetParam('snum.report.crystal_image', p)
       except:
         print "Error reading OD crystal image %s" %p
+
+    # OD Notes File
+    p = self.sort_out_path(path, "notes_file")
+    if p:
+      try:
+        info = os.stat(p)
+        file_time = info.st_mtime
+        OV.SetParam('snum.report.notes_file', p)
+      except:
+        print "Error reading OD crystal image %s" %p
+
 
 
 
@@ -735,12 +756,24 @@ The \l/2 correction factor is %(lambda_correction)s.
       directory_l = OV.FileFull().replace('\\','/').split("/")
       directory = ("/").join(directory_l[:-3])
       directory += '/frames'
+    elif tool == "od_frame_images":
+      name = "*"
+      extension = "*.jpg"
+      directory_l = OV.FileFull().replace('\\','/').split("/")
+      directory = ("/").join(directory_l[:-3])
+      directory += '/frames'
     elif tool == "crystal_images":
       name = OV.FileName()
       extension = "*.jpg"
       directory_l = OV.FileFull().replace('\\','/').split("/")
       directory = ("/").join(directory_l[:-3])
       directory += '/movie'
+    elif tool == "notes_file":
+      name = OV.FileName()
+      extension = "*.txt"
+      directory_l = OV.FileFull().replace('\\','/').split("/")
+      directory = ("/").join(directory_l[:-3])
+
 
     else:
       return "Tool not found"
