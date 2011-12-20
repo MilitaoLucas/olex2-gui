@@ -491,7 +491,7 @@ snum
       .type = str
     submission_original_sample_id = "No original ID"  
       .type = str
-    data_collection_notes = "No notes were made during strategy determination and the data collection process"
+    data_collection_notes = ""
       .type = str
     date_submitted = None
       .type = str

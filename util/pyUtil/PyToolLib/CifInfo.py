@@ -547,7 +547,7 @@ class ExtractCifInfo(CifTools):
       try:
         info = os.stat(p)
         file_time = info.st_mtime
-        OV.SetParam('snum.report.notes_file', p)
+        OV.SetParam('snum.report.data_collection_notes', p)
       except:
         print "Error reading OD crystal image %s" %p
 
@@ -770,7 +770,7 @@ The \l/2 correction factor is %(lambda_correction)s.
       directory += '/movie'
     elif tool == "notes_file":
       name = OV.FileName()
-      extension = "*.txt"
+      extension = "_notes.txt"
       directory_l = OV.FileFull().replace('\\','/').split("/")
       directory = ("/").join(directory_l[:-3])
 
