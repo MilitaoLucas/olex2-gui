@@ -2017,6 +2017,8 @@ def getReportImageData(size='w400', imageName=None):
   size = int(size[1:])
   if imageName is None:
     imagePath = OV.GetParam('snum.report.image')
+  elif "snum.report" in imageName:
+    imagePath = OV.GetParam(imageName)
   if imagePath == "No Image" or imagePath is None:
     return ""
   if not os.path.exists(imagePath):
@@ -2050,12 +2052,23 @@ def getReportImageData(size='w400', imageName=None):
   d ='data:image/png;base64,' + data
 
   html = '''
-<!--[if IE]><img width=500 src='%s'><![endif]-->
-<![if !IE]><img width=500 src='data:image/png;base64,%s'><![endif]>
-  '''%(imageLocalSrc, data)
+<!--[if IE]><img width=%s src='%s'><![endif]-->
+<![if !IE]><img width=%s src='data:image/png;base64,%s'><![endif]>
+  '''%(size, imageLocalSrc, size, data)
 
   return html
 OV.registerFunction(getReportImageData)
+
+def getFileContents(p):
+  if "snum.report" in p:
+    p = OV.GetParam(p)
+  if not p:
+    return
+  if not os.path.exists(p):
+    return "%s does not exist" %p
+  return open(p, 'rb').read()
+OV.registerFunction(getFileContents)
+
 
 def stopDebugging():
   try:
@@ -2292,7 +2305,7 @@ def play_crystal_images():
   l = OV.GetParam('snum.metacif.list_crystal_images_files')[0].split(';')
   for image in l:
     if os.path.exists(image):
-      OV.SetParam('snum.report.crystal_image',image)
+      OV.SetParam('snum.report.crystal_image',OV.standardizePath(image))
       olx.html.SetImage('CRYSTAL_IMAGE',image)
       OV.Refresh()
 OV.registerFunction(play_crystal_images)
@@ -2339,10 +2352,15 @@ def advance_crystal_image(direction='forward'):
 OV.registerFunction(advance_crystal_image)
 
 def formatted_date_from_timestamp(dte):
+  if "." in dte:
+    dte = OV.GetParam(dte)
   from datetime import date
   if not dte:
     return None
-  dte = float(dte)
+  try:
+    dte = float(dte)
+  except:
+    return "Not A Date"
   dte = date.fromtimestamp(dte)
   return dte.strftime(OV.GetParam('snum.report.date_format'))
 OV.registerFunction(formatted_date_from_timestamp)

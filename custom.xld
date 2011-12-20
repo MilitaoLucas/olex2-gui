@@ -52,3 +52,27 @@
     \>
   \>
 \>
+
+<g4 help="Switch to Gui3"
+  <body
+    <cmd
+      <cmd2 "clear">
+      <cmd2 "html.ItemState * 0">
+      <cmd2 "html.ItemState logo1 1">
+      <cmd2 "html.ItemState info-title 1">
+      <cmd2 "html.ItemState index-g4 1">
+      <cmd2 "html.ItemState g4-main* 1">
+      <cmd2 "spy.g4.sel_evaluate_selection()">
+    >
+  >
+>
+
+<ac2 help="run ac2"
+  <body
+    <cmd
+      <cmd2 "clear">
+      <cmd2 "html.ItemState * 0 tab* 2 tab-info 1 logo1 1 index-info* 1 info-title 1">
+      <cmd2 "spy.ac2.auto()">
+    >
+  >
+>
