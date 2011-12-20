@@ -892,8 +892,6 @@ def getTemplatesList():
   return templatesList
 OV.registerFunction(getTemplatesList)
 
-
-
 def getPopBoxPosition():
   ws = olx.GetWindowSize('html')
   ws = ws.split(",")
