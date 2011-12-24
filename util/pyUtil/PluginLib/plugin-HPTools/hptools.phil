@@ -1,0 +1,116 @@
+#############################################################
+# The HPTOOLS section. This part is currently under development #
+# Expect frequent changes!                                  #
+#############################################################
+
+hptools {
+  debug = False
+    .type = bool
+
+  batch{
+    database = --
+      .type = str
+    db_table = --
+      .type = str
+    run_new_only = True
+      .type = bool
+    action = "scan"
+      .type = str
+    save_info_to_sd = False
+      .type = bool
+    get_original_metadata = False
+      .type = bool
+    directory = ""
+      .type = path
+    drive_letter = ""
+      .type = path
+    demo_mode=False
+      .type = bool
+    harvest_mode=False
+      .type = bool
+    durham_structures=False
+      .type = bool
+    dry_run=False
+      .type = bool
+    omit_previous_structures=False
+      .type = bool
+    fast_run=False
+      .type = bool
+    exclude_large_structures_volume=15000
+      .type = int
+    filter_1{
+      table = "--"
+        .type = str
+      var = "--"
+        .type = str
+      var_list = ""
+        .type = str
+      operator = "--"
+        .type = str
+      val = "--"
+        .type = str
+      val_list = ""
+        .type = str
+    }
+    filter_2{
+      table = "--"
+        .type = str
+      var = "--"
+        .type = str
+      var_list = ""
+        .type = str
+      operator = "--"
+        .type = str
+      val = "--"
+        .type = str
+      val_list = ""
+        .type = str
+    }
+  }
+
+    
+  db{
+    operator = smaller
+      .type = str
+    comparison_value = 1.5
+      .type = float
+  }    
+    
+  filecrawlies{
+    mask = "res"
+      .type = str
+    path = "C:\DS\Data\1998"
+      .type = str
+    path_from = "Z:"
+      .type = str
+    path_to = "C:\DS\Data\1998"
+      .type = str
+    overwrite = True
+      .type = bool
+    lowercaser = True
+      .type = bool
+    }
+  images{
+    width = 650
+      .type = int
+    addendum = auto
+      .type = str
+    font_name = Vera
+      .type = str
+    font_size = 20
+      .type = int
+    font_size_big = 22
+      .type = int
+    font_size_small = 18
+      .type = int
+    font_colour = #ababab
+      .type = str
+    line_gap = 8
+      .type = int
+    top = 1
+      .type = int
+    left = 5
+      .type = int
+    }
+}
+
