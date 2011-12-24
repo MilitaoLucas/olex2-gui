@@ -489,7 +489,7 @@ snum
       .type = str
     submission_special_instructions = "No special instructions were received"  
       .type = str
-    submission_original_sample_id = "No original ID"  
+    submission_original_sample_id = None
       .type = str
     data_collection_notes = ""
       .type = str
@@ -512,16 +512,12 @@ snum
       smiles_string = ""
         .type = str
     }
-      
-      
     lab{
       logo = "C:/Users/Horst/svn/olex-trunk/util/pyUtil/PluginLib/plugin-PDFReport/DurhamUnivLogoNew.png"
         .type = path
       name = Durham Chemical Crystallography Laboratory
         .type = str
     } 
-    
-      
     tex{
       page = 'a4paper'
         .type = str
@@ -975,9 +971,11 @@ user
   alert_uninstall_plugin = Y
     .type = str
     .expert_level = 1
-  report_style = default
+  report_style = /styles/default.css
     .type = str
-  report_template = default
+  report_template = /styles/default.htm
+    .type = str
+  report_footer = /templates/footer.htm
     .type = str
   report_journal_style = rsc
     .type = str
