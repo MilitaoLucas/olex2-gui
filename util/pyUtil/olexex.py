@@ -2015,15 +2015,17 @@ def getReportImageData(size='w400', imageName=None):
 
   size_type = size[:1]
   size = int(size[1:])
+  
   if imageName is None:
-    imagePath = OV.GetParam('snum.report.image')
-  elif "snum.report" in imageName:
+    imageName = 'snum.report.image'
+    
+  if "snum.report" in imageName:
     imagePath = OV.GetParam(imageName)
   if imagePath == "No Image" or imagePath is None:
     return ""
   if not os.path.exists(imagePath):
-    OV.SetParam('snum.report.image',None)
-    print "The previously made screenshot has been removed. Please select 'screenshot' to make a new one"
+    OV.SetParam(imageName, None)
+#    print "The previously made screenshot has been removed. Please select 'screenshot' to make a new one"
     return
 #  else:
 #    imagePath = r"%s/etc/CIF/styles/%s.png" %(OV.BaseDir(),imageName)
