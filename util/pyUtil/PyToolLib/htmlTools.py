@@ -849,8 +849,11 @@ def bgcolor(ctrl_name):
 OV.registerFunction(bgcolor)
 
 def getStyles(fileName):
-  cssPath = '%s/etc/CIF/styles/%s.css' %(OV.BaseDir(),fileName)
-  if not os.path.exists(cssPath): return ''
+  cssPath = OV.GetParam('user.report_style')
+  if not os.path.exists(cssPath):
+    cssPath = '%s/etc/CIF/%s' %(OV.BaseDir(),cssPath)
+  if not os.path.exists(cssPath): return ""
+    
   css = open(cssPath,'r').read()
   styleHTML = """
 <style type="text/css">
@@ -879,15 +882,15 @@ OV.registerFunction(getPrintStyles)
 def getStylesList():
   styles = os.listdir("%s/etc/CIF/styles" %OV.BaseDir())
   exclude = ("rsc.css", "thesis.css", "custom.css", "default.css")
-  stylesList = ";".join(style[:-4] for style in styles
+  stylesList = ";".join("/styles/%s.css" %style[:-4] for style in styles
                         if style not in exclude and style.endswith('.css'))
   return 'default;' + stylesList
 OV.registerFunction(getStylesList)
 
 def getTemplatesList():
-  templates = os.listdir("%s/etc/CIF/styles" %OV.BaseDir())
+  templates = os.listdir("%s/etc/CIF/templates" %OV.BaseDir())
   exclude = ("footer.htm")
-  templatesList = ";".join(template[:-4] for template in templates
+  templatesList = ";".join("/templates/%s.htm" %template[:-4] for template in templates
                         if template not in exclude and template.endswith('.htm') or template.endswith('.rtf'))
   return templatesList
 OV.registerFunction(getTemplatesList)
