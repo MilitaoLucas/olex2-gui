@@ -125,17 +125,28 @@ class DBReader():
     self.drive_letter = OV.GetParam('hptools.batch.drive_letter')
 
 
-  def get_query(self, use_db=None):
+  def get_query(self, use_db=None, exclude=""):
+    op_disp = None
     if not use_db:
       use_db = OV.GetParam('hptools.batch.database')
     self.session = SQLAlchemy.get_session(use_db)
     if use_db == "--":
+      if not op_disp: op_disp = "--"
       return
+    
+    action = OV.GetParam('hptools.batch.action')
+    new_only = OV.GetParam('hptools.batch.run_new_only')
+    self.q_list = []
+
+    if exclude:
+      table = getattr(SQLAlchemy, exclude)
+      q_previous = self.session.query(table).all()
+      self.q_list.append(q_previous)
+      return "Previously excluded"
     
     filter_display = ""
     use_table1 = OV.GetParam('hptools.batch.filter_1.table')
     use_table2 = OV.GetParam('hptools.batch.filter_2.table')
-    self.q_list = []
     i = 0
     for use_table in [use_table1, use_table2]:
       i += 1
@@ -146,12 +157,11 @@ class DBReader():
       var = OV.GetParam('hptools.batch.filter_%s.var' %i)
       op = OV.GetParam('hptools.batch.filter_%s.operator' %i)
       val = OV.GetParam('hptools.batch.filter_%s.val' %i)
-
-
       table = getattr(SQLAlchemy, use_table)
       if var == "--":
         q = self.session.query(table).all()
         self.q_list.append(q)
+        if not op_disp: op_disp = "--"
         continue
       filter_item = getattr(table, var)
       if op == "<":
@@ -162,8 +172,10 @@ class DBReader():
         op_disp = "&gt;"
       elif op == "=":
         q = self.session.query(table).filter(filter_item == val)
+        op_disp = "="
       elif op == "!=":
         q = self.session.query(table).filter(filter_item != val)
+        op_disp = "!="
       elif op == "cont":
         q = self.session.query(table).filter(filter_item.like("%" + val + "%"))
         op_disp = "contains"
@@ -174,14 +186,11 @@ class DBReader():
       if filter_display:
         filter_display += " and "
       filter_display += "%s %s %s" %(var, op_disp, val)
-
-
-
     return filter_display
 
-  def get_filtered_list(self):
+  def get_filtered_list(self, exclude=""):
     l = []
-    filter_display = self.get_query()
+    filter_display = self.get_query(exclude=exclude)
     i = 0
     for q in self.q_list:
       l.append([])
@@ -426,9 +435,10 @@ class FileCrawlies():
     self._deal_with_phil(operation='save')
     self.get_exclude_l()
     self.use_db = OV.GetParam('hptools.batch.database')
-    
+    action = OV.GetParam('hptools.batch.action')
     self.session = SQLAlchemy.get_session(self.use_db)
     filter_list = []
+    previous_run_dbr_l = []
     self.filter_display = "no filter was used."
     if self.use_db != "--":
       filter_list, self.filter_display = self.DBR.get_filtered_list()
@@ -437,14 +447,27 @@ class FileCrawlies():
       self.exclude_on_run_original = False
       action = 'scan'
       OV.SetParam('hptools.batch.action','ac2')
+    
+    if action == "ac2":
+      previous_run_dbr_l, self.previous_display = self.DBR.get_filtered_list(exclude='ac2')
+      
+    if action == "oda":
+      previous_run_dbr_l, self.previous_display = self.DBR.get_filtered_list(exclude='oda')
+      
+      
     l = self.bulk_action_files(action=action)
     if l:
       if self.use_db != "--":
         m = []
         for item in l:
           tem = item.lstrip(self.drive_letter)
-          if tem.lower() in filter_list:
-            m.append(item)
+          if action == "scan":
+            if tem.lower() not in filter_list:
+              m.append(item)
+          else:
+            if tem.lower() in filter_list:
+              if tem.lower() not in previous_run_dbr_l:
+                m.append(item)
         l = m
     else:
       l = filter_list
@@ -458,7 +481,7 @@ class FileCrawlies():
     else:
       new = True
     self.write_bulk_load_html(l, p="", i=0, new=new)
-    if not action:
+    if not action or action == "filter":
       return
     
     print("There are %s files in the list to do" %len(l))
@@ -483,8 +506,13 @@ class FileCrawlies():
           #self.refine_file(file)
           #res = self.autochem_file(file)
           if action == "scan":
+            olexex.revert_to_original()
             try:
-              self.R1 = float(olx.CalcR().split(",")[1])
+              R1 = olx.CalcR()
+              if R1:
+                self.R1 = float(olx.CalcR().split(",")[1])
+              else:
+                self.add_to_exclude_file(file, 'FailedR1')
             except Exception, err:
               print "Something went wrong with getting the R factor: %s" %err
             try:  
@@ -497,6 +525,7 @@ class FileCrawlies():
               self.session.commit()
             except Exception, err:
               print "Something went wrong with adding to db: %s" %err
+              self.add_to_exclude_file(file, 'FailedR1')
               
           if action == "ac2":
             res = self.run_ac2(file)
@@ -504,7 +533,7 @@ class FileCrawlies():
               try:
                 self.session.commit()
               except:
-                self.add_to_exclude_file(file, "FailedCommit")
+                #self.add_to_exclude_file(file, "FailedCommit")
                 res = res + "</td><td>Failed Commit"
             else:
               res = 'Mystery'
@@ -545,32 +574,41 @@ class FileCrawlies():
     t = (time.time() - t)
     r1 = float(olx.CalcR().split(",")[1])
 
-    setattr(self, "solution_name_%s" %which, "%s_%s" %(OV.GetParam('snum.solution.program'),OV.GetParam('snum.solution.method')))
-    setattr(self, "t_%s" %which, "%.1f" %t)
-    setattr(self, "r1_%s" %which, r1 )
-    setattr(self, "ata_%s" %which, ata)
     
-    try:
-      if which == "oda":
-        self.add_oda_to_db(file)
-      elif which == "ac2":
-        self.add_ac2_to_db(file)
-    except Exception, err:
-      print err
-    
-      
+    achieved = "No"  
     if self.ata_original/ata <= 1:
       font_colour = OV.GetParam('gui.green')
+      achieved = "Yes"
     elif self.ata_original/ata > 1:
       font_colour = OV.GetParam('gui.red')
     ata_ret = "<b>ATA = </b>%.0f/<font color='%s'>%.0f</font>" %(self.ata_original, font_colour, ata)
 
     if self.r1_original/r1 >= 0.8:
       font_colour = OV.GetParam('gui.green')
+      achieved = "Yes"  
     elif self.r1_original/r1 >= 0.7:
       font_colour = OV.GetParam('gui.orange')
+      achieved = "Maybe"  
     elif self.r1_original/r1 < 0.7:
       font_colour = OV.GetParam('gui.red')
+      achieved = "No"  
+
+    setattr(self, "achieved_%s" %which, achieved)
+
+    setattr(self, "solution_name_%s" %which, "%s_%s" %(OV.GetParam('snum.solution.program'),OV.GetParam('snum.solution.method')))
+    setattr(self, "t_%s" %which, "%.1f" %t)
+    setattr(self, "r1_%s" %which, r1 )
+    setattr(self, "ata_%s" %which, ata)
+    path = file.lstrip(self.drive_letter)  
+    try:
+      if which == "oda":
+        self.add_oda_to_db(path)
+      elif which == "ac2":
+        self.add_ac2_to_db(path)
+    except Exception, err:
+      print err
+
+      
     r1_ret = "<b>R1 = </b>%.2f/<font color='%s'>%.2f</font>" %((self.r1_original * 100), font_colour, (r1 * 100))
     t_ret = "<b>t = </b>%.1f" %t
     
@@ -789,15 +827,16 @@ class FileCrawlies():
     self.session.add(_)
 
 
-  def add_ac2_to_db(self, file):
+  def add_ac2_to_db(self, path):
     _ = SQLAlchemy.ac2(ID=str(OV.FileName()),
-                      path=str(file.lower()),
+                      path=path,
                       r1_original=self.r1_original,
                       r1_ac2=self.r1_ac2,
                       ata_original=self.ata_original,
                       ata_ac2=self.ata_ac2,
                       time_ac2=self.t_ac2,
-                      solution_ac2=self.solution_name_ac2)
+                      solution_ac2=self.solution_name_ac2,
+                      achieved_ac2=self.achieved_ac2)
     self.session.add(_)
     
   def add_oda_to_db(self, file):
@@ -848,7 +887,7 @@ class FileCrawlies():
                                    )
       self.session.add(_)
       _ = SQLAlchemy.Reflections(ID=str(OV.FileName()),
-                                   path=str(OV.HKLSrc().lower()),
+                                   path=path,
                                    r_int=hos['Rint'],
                                    completeness=hos['Completeness'],
                                    )
@@ -975,6 +1014,21 @@ def annotate_image_with_text(im_file_name, txt_l):
     i += 1
   return im, draw
 
+def set_hptools_run_batch_image():
+  action = OV.GetParam('hptools.batch.action')
+  control = "IMG_HPTOOLS_RUN_BATCH"
+  if OV.IsControl(control):
+    if action == "ac2":
+      OV.SetImage(control,"button-run_batch_ac2off.png")
+    elif action == "oda":
+      OV.SetImage(control,"button-run_batch_odaoff.png")
+    elif action == "filter":
+      OV.SetImage(control,"button-filter_databaseoff.png")
+    elif action == "scan":
+      OV.SetImage(control,"button-scan_directoryoff.png")
+OV.registerFunction(set_hptools_run_batch_image)
+  
+
 def get_hptools_database_items():
   import glob
   items_l = []
@@ -1031,11 +1085,24 @@ def get_hptools_filter_items(n):
     items_l = [
       '--',
       'r1_original',
-      'r1_after',
+      'r1_ac2',
       'ata_original',
-      'ata_after',
+      'ata_ac2',
       'time_ac2',
+      'solution_ac2',
     ]
+
+  elif table == "oda":
+    items_l = [
+      '--',
+      'r1_original',
+      'r1_oda',
+      'ata_original',
+      'ata_oda',
+      'time_oda',
+      'solution_oda'
+    ]
+
   txt = ""
 
   for item in items_l:

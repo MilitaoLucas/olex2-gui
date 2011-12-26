@@ -56,7 +56,10 @@
   Fit Group
   Fit & Split
   Filter
-  Run Batch
+  Run Batch AC2
+  Run Batch ODA
+  Filter Database
+  Scan Directory
 
 [SMALL BUTTONS]
   Delete

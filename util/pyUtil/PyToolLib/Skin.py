@@ -194,6 +194,8 @@ def change_skin(skin_name=None, force=False):
     print "After 'Save PHIL': %.2f s (%.5f s)" % ((t - t1), (t - t2))
     t2 = t
   export_parameters()
+  olx.FlushFS()
+  
 OV.registerFunction(change_skin)
 
 
