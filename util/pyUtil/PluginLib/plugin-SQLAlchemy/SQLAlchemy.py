@@ -67,7 +67,7 @@ class Structure(Base):
     self.atom_count = atom_count
     self.space_group = space_group
     self.z_prime = z_prime
-    self.r1_shelxl = r1_original
+    self.r1_original = r1_original
     
   def __repr__(self):
     return "<Structure('%s(%s'))>" % (self.ID, self.path)
@@ -152,10 +152,11 @@ class ac2(Base):
   path = Column(String(200))
   r1_original = Column(sqlalchemy.FLOAT)
   r1_ac2 = Column(sqlalchemy.FLOAT)
-  ata_before = Column(sqlalchemy.FLOAT)
+  ata_original = Column(sqlalchemy.FLOAT)
   ata_ac2 = Column(sqlalchemy.FLOAT)
   solution_ac2 = Column(String)
   time_ac2 = Column(sqlalchemy.FLOAT)
+  achieved_ac2 = Column(String)
   
   def __init__(self,
                ID,
@@ -166,15 +167,17 @@ class ac2(Base):
                ata_ac2,
                solution_ac2,
                time_ac2,
+               achieved_ac2,
                ):
     self.ID = ID
     self.path = path
-    self.r1_before = r1_original
-    self.r1_after = r1_ac2
-    self.ata_before = ata_original
-    self.ata_after = ata_ac2
+    self.r1_original = r1_original
+    self.r1_ac2 = r1_ac2
+    self.ata_original = ata_original
+    self.ata_ac2 = ata_ac2
     self.solution_ac2 = solution_ac2
     self.time_ac2 = time_ac2
+    self.achieved_ac2 = achieved_ac2
     
   def __repr__(self):
     return "<ac2('%s(%s'))>" % (self.ID, self.path)
@@ -187,7 +190,7 @@ class oda(Base):
   path = Column(String(200))
   r1_original = Column(sqlalchemy.FLOAT)
   r1_oda = Column(sqlalchemy.FLOAT)
-  ata_before = Column(sqlalchemy.FLOAT)
+  ata_original = Column(sqlalchemy.FLOAT)
   ata_oda = Column(sqlalchemy.FLOAT)
   solution_oda = Column(String)
   time_oda = Column(sqlalchemy.FLOAT)
@@ -204,10 +207,10 @@ class oda(Base):
                ):
     self.ID = ID
     self.path = path
-    self.r1_before = r1_original
-    self.r1_after = r1_oda
-    self.ata_before = ata_original
-    self.ata_after = ata_oda
+    self.r1_original = r1_original
+    self.r1_oda = r1_oda
+    self.ata_original = ata_original
+    self.ata_oda = ata_oda
     self.solution_oda = solution_oda
     self.time_oda = time_oda
     

@@ -4,13 +4,37 @@
 <tr name=AC2_RUN_BATCH>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=bulk-load-files;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td colspan='2' align='left'>
-    <a href="spy.hp.bulk_load_files()">
-    <zimg border="0" src="button-filter.png"></a>
+
+  <td align='left'>
+    <input
+      type="combo"
+      height="$spy.GetParam(gui.html.combo_height)"
+      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
+      name="AC2_SET_HPTOOLS_ACTION" 
+      width='100' 
+      value="$spy.GetParam(hptools.batch.action)"
+      items="scan;ac2;filter"
+      onchange="spy.SetParam(hptools.batch.action,GetValue(AC2_SET_HPTOOLS_ACTION)))>>spy.set_hptools_run_batch_image()"
+    >
+  </td>
+  <td>
+    <input 
+      type='checkbox'
+      width=100 
+      height=12 
+      bgcolor="$GetVar(HtmlTableBgColour)" 
+      fgcolor="$GetVar(HtmlFontColour)" 
+      name="AC2_RUN_NEW_ONLY" 
+      value="%Run New Only%"
+      data=""
+      $spy.CheckBoxValue(hptools.batch.run_new_only)
+      oncheck="spy.SetParam(hptools.batch.run_new_only,true)" 
+      onuncheck="spy.SetParam(hptools.batch.run_new_only,false)"
+    >
   </td>
   <td colspan='2' align='left'>
-    <a href="spy.hp.bulk_load_files(ac2)">
-    <zimg border="0" src="button-run_batch.png"></a>
+    <a href="spy.hp.bulk_load_files()">
+    <zimg border="0" name="IMG_HPTOOLS_RUN_BATCH" src="button-run_batch.png"></a>
   </td>
 </tr>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -51,6 +75,8 @@
 <tr name=DB_SET_DATABASE>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=autochem_database;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td>Database ('--' to create new)</td>
+
   <td colspan='1'>
     <input 
       bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
@@ -61,35 +87,6 @@
       value="$spy.GetParam(hptools.batch.database)"
       items='$spy.get_hptools_database_items()'
       onchange="spy.SetParam(hptools.batch.database,GetValue(AC2_SET_HPTOOLS_BATCH_DATABASE))"
-    >
-  </td>
-  <td>
-    <input 
-      type='checkbox'
-      width=100 
-      height=12 
-      bgcolor="$GetVar(HtmlTableBgColour)" 
-      fgcolor="$GetVar(HtmlFontColour)" 
-      name="AC2_RUN_NEW_ONLY" 
-      value="%Run New Only%"
-      data=""
-      $spy.CheckBoxValue(hptools.batch.run_new_only)
-      oncheck="spy.SetParam(hptools.batch.run_new_only,true)" 
-      onuncheck="spy.SetParam(hptools.batch.run_new_only,false)"
-    >
-  </td>
-
-
-  <td align='left'>
-    <input
-      type="combo"
-      height="$spy.GetParam(gui.html.combo_height)"
-      bgcolor="$spy.GetParam(gui.html.input_bg_colour)"
-      name="AC2_SET_HPTOOLS_ACTION" 
-      width='100' 
-      value="$spy.GetParam(hptools.batch.action)"
-      items="Scan Dir<-scan;Run AC2<-ac2"
-      onchange="spy.SetParam(hptools.batch.action,GetValue(AC2_SET_HPTOOLS_ACTION)))"
     >
   </td>
 
@@ -134,7 +131,7 @@
       bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
       name="AC2_SET_HPTOOLS_BATCH_FILTER_1_OPERATOR" 
       width="50" 
-      items="--;<;=;>;<>;!=;cont"
+      items="--;<;=;>;!=;cont"
       value="$spy.GetParam(hptools.batch.filter_1.operator)"
       onchange="spy.SetParam(hptools.batch.filter_1.operator,GetValue(AC2_SET_HPTOOLS_BATCH_FILTER_1_OPERATOR))"
       >
@@ -189,7 +186,7 @@
     bgcolor="$spy.GetParam(gui.html.input_bg_colour)" 
     name="AC2_SET_HPTOOLS_BATCH_FILTER_2_OPERATOR" 
     width="50"
-    items="--;<;=;>;<>;!=;cont"
+    items="--;<;=;>;!=;cont"
     value="$spy.GetParam(hptools.batch.filter_2.operator)"
     onchange="spy.SetParam(hptools.batch.filter_2.operator,GetValue(AC2_SET_HPTOOLS_BATCH_FILTER_2_OPERATOR))"
   >
