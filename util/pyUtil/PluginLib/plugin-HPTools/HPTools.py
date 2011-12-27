@@ -1090,6 +1090,7 @@ def get_hptools_filter_items(n):
       'ata_ac2',
       'time_ac2',
       'solution_ac2',
+      'achieved_ac2',
     ]
 
   elif table == "oda":
@@ -1101,6 +1102,7 @@ def get_hptools_filter_items(n):
       'ata_oda',
       'time_oda',
       'solution_oda'
+      'achieved_oda',
     ]
 
   txt = ""
@@ -1158,6 +1160,13 @@ def get_hptools_filter_values(n):
       '0.25',
     ]
 
+  elif 'achieved' in var:
+    items_l = [
+      '--',
+      'Yes',
+      'No',
+      'Maybe',
+    ]
   
 
   txt = ""
