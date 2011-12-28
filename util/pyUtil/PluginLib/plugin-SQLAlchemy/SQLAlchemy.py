@@ -47,7 +47,9 @@ class Structure(Base):
   space_group = Column(String(20))
   z_prime = Column(sqlalchemy.FLOAT)
   r1_original = Column(sqlalchemy.FLOAT)
-
+  ata_original = Column(sqlalchemy.FLOAT)
+  max_Z = Column(sqlalchemy.INT)
+  
   def __init__(self,
                ID,
                path,
@@ -58,6 +60,8 @@ class Structure(Base):
                space_group,
                z_prime,
                r1_original,
+               ata_original,
+               max_Z,
                ):
     self.ID = ID
     self.path = path
@@ -68,6 +72,8 @@ class Structure(Base):
     self.space_group = space_group
     self.z_prime = z_prime
     self.r1_original = r1_original
+    self.ata_original = ata_original
+    self.max_Z = max_Z
     
   def __repr__(self):
     return "<Structure('%s(%s'))>" % (self.ID, self.path)

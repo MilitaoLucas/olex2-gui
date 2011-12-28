@@ -873,6 +873,12 @@ class FileCrawlies():
     if not self.session:
       self.session = SQLAlchemy.get_session(self.use_db)
     hos = self.HOS.get_HOS_d()
+    max_Z = olexex.FindZOfHeaviestAtomInFormua()
+    olexex.revert_to_original()
+    r1_original = float(olx.CalcR().split(",")[1])
+    ata = olx.ATA(1)
+    ata_original = float(ata.split(';')[1])
+
     if hos:
       txt = "%.2f%%(comp), %.2f%%(Rint)" %(hos['Completeness']*100, hos['Rint']*100)
       _ = SQLAlchemy.Structure(ID=str(OV.FileName()),
@@ -883,15 +889,17 @@ class FileCrawlies():
                                    atom_count=olx.xf.au.GetAtomCount(),
                                    space_group=olx.xf.au.GetCellSymm(),
                                    z_prime=olx.xf.au.GetZprime(),
-                                   r1_original=self.R1,
+                                   r1_original=r1_original,
+                                   ata_original=ata_original,
+                                   max_Z=max_Z,
                                    )
       self.session.add(_)
-      _ = SQLAlchemy.Reflections(ID=str(OV.FileName()),
-                                   path=path,
-                                   r_int=hos['Rint'],
-                                   completeness=hos['Completeness'],
-                                   )
-      self.session.add(_)
+      #_ = SQLAlchemy.Reflections(ID=str(OV.FileName()),
+      #                             path=path,
+      #                             r_int=hos['Rint'],
+      #                             completeness=hos['Completeness'],
+      #                             )
+      #self.session.add(_)
     else:
       txt = "No Reflection File!"
     print txt
@@ -1072,6 +1080,7 @@ def get_hptools_filter_items(n):
       'path',
       'atom_count',
       'z_prime',
+      'max_Z',
     ]
 
   elif table == "Reflections":
@@ -1124,6 +1133,18 @@ def get_hptools_filter_values(n):
       '1.5',
       '2',
     ]
+
+  elif var == "max_Z":
+    items_l = [
+      '--',
+      '6',
+      '7',
+      '11',
+      '20',
+      '30',
+      '50',
+    ]
+
 
   elif var == "atom_count":
     items_l = [
