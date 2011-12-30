@@ -848,13 +848,15 @@ def bgcolor(ctrl_name):
   return colour
 OV.registerFunction(bgcolor)
 
-def getStyles(fileName):
-  cssPath = OV.GetParam('user.report_style')
-  if not os.path.exists(cssPath):
-    cssPath = '%s/etc/CIF/%s' %(OV.BaseDir(),cssPath)
-  if not os.path.exists(cssPath): return ""
+def getStyles(style_name):
+  if not style_name:
+    style_name = OV.GetParam('user.report_style')
+  if not os.path.exists(style_name):
+    style_name = '%s/etc/CIF/%s' %(OV.BaseDir(),style_name)
+  if not os.path.exists(style_name):
+    style_name = '%s/etc/CIF/styles/default.css' %OV.BaseDir()
     
-  css = open(cssPath,'r').read()
+  css = open(style_name,'r').read()
   styleHTML = """
 <style type="text/css">
 <!--
@@ -881,10 +883,10 @@ OV.registerFunction(getPrintStyles)
 
 def getStylesList():
   styles = os.listdir("%s/etc/CIF/styles" %OV.BaseDir())
-  exclude = ("rsc.css", "thesis.css", "custom.css", "default.css")
-  stylesList = ";".join("/styles/%s.css" %style[:-4] for style in styles
-                        if style not in exclude and style.endswith('.css'))
-  return 'default;' + stylesList
+  exclude = set(("rsc.css", "thesis.css", "custom.css"))
+  stylesList = ";".join("styles/%s" %style for style in styles\
+    if style.endswith('.css') and style not in exclude)
+  return stylesList
 OV.registerFunction(getStylesList)
 
 def getTemplatesList():
