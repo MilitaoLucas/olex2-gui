@@ -10,28 +10,28 @@
 #available ports
 # alteartions for binary files : name (properties...), olex-port MUST be specified for non-portable files
 mac_port_name = 'port-mac-intel-py27'
-mac_port_zip_name = 'mac-intel-py27.zip'
+mac_port_zip_name = 'olex2-mac32-intel.zip'
 mac_port_prefix = 'olex2.app/Contents/MacOS/'
 
 suse32_port_name = 'port-suse101x32-py27'
-suse32_port_zip_name = 'suse101x32-py27.zip'
+suse32_port_zip_name = 'olex2-linux32.zip'
 suse32_port_prefix = 'olex2/'
 
 suse64_port_name = 'port-suse101x64-py27'
-suse64_port_zip_name = 'suse101x64-py27.zip'
+suse64_port_zip_name = 'olex2-linux64.zip'
 suse64_port_prefix = 'olex2/'
 
 win_port_name = 'port-win32-portable'
 win_sse2_port_name = 'port-win32'
-win_sse2_port_zip_name = 'olex2.zip'
+win_sse2_port_zip_name = 'olex2-win32.zip'
 win_sse2_port_prefix = None
 
 win64_port_name = 'port-win64'
-win64_port_zip_name = 'olex2-x64.zip'
+win64_port_zip_name = 'olex2-win64.zip'
 win64_port_prefix = None
 
 win_sse_port_name = 'port-win32-sse'
-win_sse_port_zip_name = 'olex2-sse.zip'
+win_sse_port_zip_name = 'olex2-win32-sse.zip'
 win_sse_port_prefix = None
 
 portable_zip_name = 'portable-gui.zip'
@@ -729,7 +729,8 @@ if True:
     {
       bin_directory + '/mac-distro/Info.plist' : 'olex2.app/Contents/Info.plist',
       bin_directory + '/mac-distro/PkgInfo' : 'olex2.app/Contents/PkgInfo',
-      bin_directory + '/mac-distro/usettings.dat' : 'olex2.app/Contents/MacOS/usettings.dat'
+      bin_directory + '/mac-distro/usettings.dat' : 'olex2.app/Contents/MacOS/usettings.dat',
+      bin_directory + '/mac-distro/olex2.icns' : 'olex2.app/Contents/Resources/olex2.icns'
     }
   )
 
