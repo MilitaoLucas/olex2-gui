@@ -465,10 +465,10 @@ class ExtractCifInfo(CifTools):
           twin.setdefault('abs_file', p)
           version = self.prepare_computing(twin, versions, "twin")
           version = string.strip((string.split(version, "="))[0])
-          twin.setdefault('version', version, force=True)
+          twin.setdefault('version', version)
           t = self.prepare_exptl_absorpt_process_details(twin, version)
           twin.setdefault("_exptl_absorpt_process_details", t)
-          self.update_cif_block(twin)
+          self.update_cif_block(twin, force=True)
       except Exception, e:
         import traceback
         traceback.print_exc()
@@ -647,22 +647,26 @@ class ExtractCifInfo(CifTools):
 
   def prepare_exptl_absorpt_process_details(self, abs, version,):
     if abs["abs_type"] == "TWINABS":
-      t = ["%s was used for absorption correction.\n" %(version)]
+      t = ["%s was used for absorption correction.\n" %abs['version']]
       txt = "\n;\n"
       for component in range(1, int(abs["number_twin_components"])+1):
-        #print "component", component
-        parameter_ratio = abs["%s"%component]["parameter_ratio"]
-        R_int_after = abs["%s"%component]["Rint_after"]
-        R_int_before = abs["%s"%component]["Rint_before"]
-        ratiominmax = abs["%s"%component]["ratiominmax"]
+        comp_d = abs[str(component)]
+        parameter_ratio = comp_d["parameter_ratio"]
+        R_int_after = comp_d["Rint_after"]
+        R_int_before = comp_d["Rint_before"]
+        ratiominmax = comp_d.setdefault("ratiominmax", None)
         lambda_correction = abs["lambda_correction"]
-        t.append("For component %s:\n" %(component))
+        t.append("\nFor component %s:\n" %(component))
         t.append("R(int) was %s before and %s after correction.\n" %(R_int_before, R_int_after))
-        t.append("The Ratio of minimum to maximum transmission is %.2f.\n" %(float(ratiominmax)))
-        t.append("The \l/2 correction factor is %s\n;\n" %(lambda_correction))
+        if ratiominmax != None:
+          t.append("The Ratio of minimum to maximum transmission is %.2f.\n" %(float(ratiominmax)))
+        else:
+          t.append("The Ratio of minimum to maximum transmission not present.\n")
+        t.append("The \l/2 correction factor is %s\n" %(lambda_correction))
       for me in t:
         txt = txt + " %s"%me
-      exptl_absorpt_process_details = "%s"%txt
+      txt += ";\n"
+      exptl_absorpt_process_details = txt
 
     elif abs["abs_type"] == "SADABS":
       #parameter_ratio = abs["parameter_ratio"]
