@@ -501,7 +501,7 @@ snum
       .type = str
     diffractometer = None
       .type = str
-    diffractometer_image = "C:/Users/Horst/svn/olex-trunk/util/pyUtil/PluginLib/plugin-PDFReport/gemini.jpg"
+    diffractometer_image = ""
       .type = path
     title = None
       .type = path
@@ -513,7 +513,7 @@ snum
         .type = str
     }
     lab{
-      logo = "C:/Users/Horst/svn/olex-trunk/util/pyUtil/PluginLib/plugin-PDFReport/DurhamUnivLogoNew.png"
+      logo = ""
         .type = path
       name = Durham Chemical Crystallography Laboratory
         .type = str
@@ -971,11 +971,11 @@ user
   alert_uninstall_plugin = Y
     .type = str
     .expert_level = 1
-  report_style = /styles/default.css
+  report_style = styles/default.css
     .type = str
-  report_template = /styles/default.htm
+  report_template = templates/default.htm
     .type = str
-  report_footer = /templates/footer.htm
+  report_footer = templates/footer.htm
     .type = str
   report_journal_style = rsc
     .type = str
