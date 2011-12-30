@@ -132,7 +132,6 @@ class reader(object):
           if "twin components present" in lines[line]:
             txt = lines[line].split('twin')
             txt = txt[0].strip()
-            print "Total twin components", txt
             number_twin_components = int(txt)
             self._twin_cifItems.setdefault("number_twin_components", "%s" %txt)
             continue
