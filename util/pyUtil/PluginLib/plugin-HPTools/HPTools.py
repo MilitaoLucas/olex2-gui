@@ -342,6 +342,20 @@ class FileCrawlies():
     self.db_table = OV.GetParam('hptools.batch.db_table')
     
     
+  def delete_all_dot_olex_folders(self):
+    p = r"%s%s" %(OV.GetParam('hptools.batch.drive_letter'), OV.GetParam('hptools.batch.directory'))
+    g = glob.glob("%s/%s" %(p,'*'))
+    for folder in g:
+      o = glob.glob("%s/%s" %(folder, '.olex'))
+      for dotolex in o:
+        shutil.rmtree(dotolex)
+      h = glob.glob("%s/%s" %(folder, '*'))
+      for folder1 in h:
+        o = glob.glob("%s/%s" %(folder1,'.olex'))
+        for dotolex in o:
+          shutil.rmtree(dotolex)
+        
+    
   def _deal_with_phil(self, operation='read'):
     user_phil_file = "%s/hptools_user.phil" %(OV.DataDir())
     phil_file = r"%s/util/pyUtil/PluginLib/plugin-HPTools/hptools.phil" %(OV.BaseDir())
@@ -574,24 +588,32 @@ class FileCrawlies():
     t = (time.time() - t)
     r1 = float(olx.CalcR().split(",")[1])
 
+
+    achieved = "No" 
     
-    achieved = "No"  
-    if self.ata_original/ata <= 1:
+    div_by_zero_bit = 0.00001
+    ratio_r = (self.r1_original)/(r1+div_by_zero_bit)
+    if ratio_r >= 0.7:
+      font_colour = OV.GetParam('gui.green')
+      achieved = "Yes"  
+    elif ratio_r >= 0.65:
+      font_colour = OV.GetParam('gui.orange')
+      achieved = "Maybe"  
+    elif ratio_r < 0.6:
+      font_colour = OV.GetParam('gui.red')
+      achieved = "No"  
+    ratio_ata = (self.ata_original)/(ata + div_by_zero_bit)
+    if ratio_ata <= 1:
       font_colour = OV.GetParam('gui.green')
       achieved = "Yes"
-    elif self.ata_original/ata > 1:
+    elif ratio_ata <= 1.1:
+      font_colour = OV.GetParam('gui.orange')
+      achieved = "Maybe"
+    elif ratio_ata > 1.1:
       font_colour = OV.GetParam('gui.red')
     ata_ret = "<b>ATA = </b>%.0f/<font color='%s'>%.0f</font>" %(self.ata_original, font_colour, ata)
 
-    if self.r1_original/r1 >= 0.8:
-      font_colour = OV.GetParam('gui.green')
-      achieved = "Yes"  
-    elif self.r1_original/r1 >= 0.7:
-      font_colour = OV.GetParam('gui.orange')
-      achieved = "Maybe"  
-    elif self.r1_original/r1 < 0.7:
-      font_colour = OV.GetParam('gui.red')
-      achieved = "No"  
+
 
     setattr(self, "achieved_%s" %which, achieved)
 
@@ -976,6 +998,7 @@ FileCrawlies_instance = FileCrawlies()
 OV.registerFunction(FileCrawlies_instance.bulk_copy_files)
 OV.registerFunction(FileCrawlies_instance.bulk_load_files, False, 'hp')
 OV.registerFunction(FileCrawlies_instance.make_image)
+OV.registerFunction(FileCrawlies_instance.delete_all_dot_olex_folders, False, 'hp')
 
 def sort_out_drive(path):
   drive = OV.GetParam('hptools.batch.drive_letter')
@@ -1195,7 +1218,6 @@ def get_hptools_filter_values(n):
     txt += "%s;" %item
   OV.SetParam('hptools.batch.filter_%s.val_list' %n, txt)
   olex.m('SetItems(AC2_SET_HPTOOLS_BATCH_FILTER_%s_VAL,%s)' %(n, txt))
-OV.registerFunction(get_hptools_filter_values)
 
 
 
