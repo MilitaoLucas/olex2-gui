@@ -24,7 +24,7 @@ class CcdcSubmit():
     from CifInfo import MergeCif
 
     OV.CreateBitmap("working")
-    
+
     MergeCif()
     try:
       if not self.check_and_get_prerequisites():
@@ -35,16 +35,16 @@ class CcdcSubmit():
         print f
         return False
       print "Sending to the CCDC now..."
-  
+
       self.zip_files()
-      
+
       note_to_staff = OV.GetParam('snum.ccdc.note_to_staff')
       if "++" in note_to_staff:
         note_to_staff = "No note to ccdc Staff"
       submission_type = OV.GetParam('snum.ccdc.submission_type')
       if "++" in submission_type:
         submission_type = "No submission type was indicated"
-      
+
       zip_file = open(self.zip_name, "rb")
       url_l = OV.GetParam('olex2.ccdc.url')
       destination =   OV.GetParam('olex2.ccdc.ccdc_mail')
@@ -58,27 +58,30 @@ class CcdcSubmit():
         'notes_to_staff': note_to_staff,
         'submission_type': submission_type,
       }
+      err_msg = ""
       for url in url_l:
         try:
           response = HttpTools.make_url_call(url, self.params)
           retval = True
           break
         except Exception, err:
-          print err
+          err_msg = err
           retval = False
           continue
 
       if retval == False:
-        print "Something has gone wrong with this submission. Please try again."
+        print "The data submission has failed. Please try again."
+        print "Details:"
+        print err_msg
         return False
-      
+
       if 'successfully' in response.read():
         print "The structure has been submitted. Please check your e-mail for further information"
         return True
       else:
         print "Something has gone wrong with this submission. Please try again."
         return False
-    
+
     finally:
       if zip_file is not None:
         zip_file.close()
@@ -100,7 +103,7 @@ class CcdcSubmit():
     self.name = OV.get_cif_item('_publ_contact_author_name')
     if len(self.name) > 1 and self.name != '?':
       self.email = userDictionaries.people.getPersonInfo(self.name, 'email')
-      #http://code.activestate.com/recipes/65215-e-mail-address-validation/      
+      #http://code.activestate.com/recipes/65215-e-mail-address-validation/
       if not re.match("^[a-zA-Z0-9._%-]+@[a-zA-Z0-9._%-]+.[a-zA-Z]{2,6}$", self.email):
         print "Failed to validate e-mail address"
         return False
@@ -130,8 +133,8 @@ class CcdcSubmit():
     return True
   def zip_files(self):
     ## No Checking yet - only getting!
-    
-    
+
+
     cif_name = OV.GetParam('snum.current_result.cif')
     fcf_name = OV.GetParam('snum.current_result.fcf')
     if not os.path.exists(fcf_name):
