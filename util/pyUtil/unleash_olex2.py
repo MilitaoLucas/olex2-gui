@@ -89,6 +89,7 @@ external_files = {
   'dictionary.txt': ('olex-install', 'olex-update'),
   'odac_update.txt': ('olex-install', 'olex-update'),
   'licence.rtf': ('olex-install', 'olex-update'),
+  'documentation.zip': ('olex-update', 'action:extract', 'action:delete'),
   #plugins, no solution for portable plugins yet
   'olex2c_exe.zip': ('olex-port', 'plugin-Headless-win-32', 'action:extract', 'action:delete'),
   'olex2c_exe_64.zip': ('olex-port', 'plugin-Headless-win-64', 'action:extract', 'action:delete'),
@@ -98,7 +99,8 @@ external_files = {
 portable_zip_files = \
 set(  ['olex2_fonts.zip',
        'fonts.zip',
-       'acidb.zip'
+       'acidb.zip',
+       'documentation.zip',
       ]
    )
 win_sse2_zip_files = \
