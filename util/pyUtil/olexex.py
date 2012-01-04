@@ -1067,13 +1067,14 @@ def onSolutionProgramChange(prg_name, method=None, scope='snum'):
     #olx.SetValue('SET_autochem_solution_METHOD', 'Auto')
     return
 
-  prg = SPD.programs[prg_name]
-  if method is None or not method:
-    method = sortDefaultMethod(prg)
-    if method == 'Direct Methods' and olx.Ins('PATT') != 'n/a':
-      method = 'Patterson Method' # work-around for bug #48
-  OV.SetParam("%s.solution.method" %scope, method)
-  onSolutionMethodChange(prg_name, method)
+  if prg_name != 'Unknown':
+    prg = SPD.programs[prg_name]
+    if method is None or not method:
+      method = sortDefaultMethod(prg)
+      if method == 'Direct Methods' and olx.Ins('PATT') != 'n/a':
+        method = 'Patterson Method' # work-around for bug #48
+    OV.SetParam("%s.solution.method" %scope, method)
+    onSolutionMethodChange(prg_name, method)
 OV.registerFunction(OV.set_solution_program)
 
 def onSolutionMethodChange(prg_name, method):
@@ -1998,7 +1999,7 @@ def getReportExtraCIFItems(name_td_class, value_td_class, type='html'):
           %(name_td_class,value_td_class,flack)
       else:
         rv = r"Flack parameter & %s\\" % flack.replace('-', '@@-@@')
-        
+
   except Exception, err:
     print err
     pass
@@ -2015,10 +2016,10 @@ def getReportImageData(size='w400', imageName=None):
 
   size_type = size[:1]
   size = int(size[1:])
-  
+
   if imageName is None:
     imageName = 'snum.report.image'
-    
+
   if "snum.report" in imageName:
     imagePath = OV.GetParam(imageName)
   if imagePath == "No Image" or imagePath is None:
