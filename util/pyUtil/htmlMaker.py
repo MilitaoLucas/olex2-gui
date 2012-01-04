@@ -733,41 +733,6 @@ def weightGuiDisplay():
   return html
 OV.registerFunction(weightGuiDisplay)
 
-def getCellHTML():
-  crystal_systems = {
-    'Triclinic':('a', 'b', 'c', '&alpha;', '&beta;', '&gamma;'),
-    'Monoclinic':('a', 'b', 'c', '&beta;'),
-    'Orthorhombic':('a', 'b', 'c'),
-    'Tetragonal':('a', 'c',),
-    'Hexagonal':('a', 'c'),
-    'Trigonal':('a', 'c'),
-    'Cubic':('a',),
-  }
-
-  cell_param_value_pairs = dict(zip(
-    ('a', 'b', 'c', '&alpha;', '&beta;', '&gamma;'),
-    ('_cell_length_a','_cell_length_b','_cell_length_c','_cell_angle_alpha','_cell_angle_beta','_cell_angle_gamma')))
-  cell = {}
-  for param, value in cell_param_value_pairs.items():
-    if param in ('a','b','c'):
-      cell[param] = dict(
-        value = '%%%s%%' %value,
-        unit = '&nbsp;&Aring;'
-      )
-    else:
-      cell[param] = dict(
-        value = '%%%s%%' %value,
-        unit = '&deg;'
-      )
-
-  cell_html = dict((param, '<i>%s</i>&nbsp;= %s%s, ' %(param,cell[param]['value'],cell[param]['unit'])) for param in cell.keys())
-
-  crystal_system = OV.olex_function('sg(%s)')
-
-  html = ''.join(cell_html[param] for param in crystal_systems[crystal_system])
-
-  return html
-OV.registerFunction(getCellHTML)
 
 def refineDataMaker():
 
