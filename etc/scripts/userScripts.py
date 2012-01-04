@@ -1,3 +1,5 @@
+import olx
+
 """
 These imports are of user contributed scripts.
 This file WILL be updated by us
@@ -11,11 +13,16 @@ scripts = [
   'flipsmall',
   'OlexBET',
   'Olexhole',
-  'Olex2CCDC',
-  'Tutorials',
   #'OlexSir',
   #'LazyOlex',
 ]
+
+if olx.HasGUI().lower == "true":
+  scripts += ['Olex2CCDC',
+              'Tutorials',
+              ]
+
+
 
 for script in scripts:
   try:
