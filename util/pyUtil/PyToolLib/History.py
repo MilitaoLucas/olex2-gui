@@ -464,7 +464,7 @@ class HistoryTree(Node):
     self.active_node.active_child_node = node
     self.active_node = node
     self._full_index.setdefault(ref_name, node)
-    if node.hkl not in self.hklFiles:
+    if node.hkl and node.hkl not in self.hklFiles:
       self.hklFiles.setdefault(node.hkl, compressFile(hklPath))
 
   @property
