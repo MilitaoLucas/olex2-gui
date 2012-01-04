@@ -108,9 +108,9 @@ snum
       .type = float
     vata = 0
       .type = float
-    program = ShelXS ShelXS86 XS '*olex2.solve' XM ShelXD SIR2002 SIR2004 SIR2008 SIR2011 Superflip
+    program = ShelXS ShelXS86 XS '*olex2.solve' XM ShelXD SIR2002 SIR2004 SIR2008 SIR2011 Superflip Unknown
       .type = choice
-    method = 'Dual Space' '*Charge Flipping' 'Direct Methods' 'Patterson Method' 'Structure Expansion'
+    method = 'Dual Space' '*Charge Flipping' 'Direct Methods' 'Patterson Method' 'Structure Expansion' Unknowm
       .type = choice
     graphical_output = False
       .type = bool
@@ -154,10 +154,10 @@ snum
       .expert_level = 2
     graphical_output = False
       .type = bool
-    program = ShelXL_ifc XL XH ShelXH XLMP ShelXL '*olex2.refine'
+    program = ShelXL_ifc XL XH ShelXH XLMP ShelXL '*olex2.refine' Unknown
       .type = choice
     method = 'Least Squares' CGLS '*Gauss-Newton' 'Levenberg-Marquardt' \
-      'Full Matrix'
+      'Full Matrix' Unknown
     .type = choice
     sg_list = None
       .type = str
