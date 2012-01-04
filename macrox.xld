@@ -402,13 +402,25 @@
 \>
 
 
+<ac2 help="Launches ac_run"
+  <body
+    <args
+      <arg1 name="single" def="">
+    \>
+    <cmd
+      <cmd6 "spy.ac2.auto()">
+    \>
+  \>
+\>
+
 <start_autochem help="Launches ac_run"
   <body
     <args
       <arg1 name="filefull" def="'FileFull()'">
     \>
     <cmd
-      <cmd6 "spy.ac_run solveit -filefull='%1'">
+      <cmd1 "reap '%1.ins'">
+      <cmd2 "spy.ac2.auto()">
     \>
   \>
 \>
