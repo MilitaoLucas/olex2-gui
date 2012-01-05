@@ -2006,6 +2006,16 @@ def getReportExtraCIFItems(name_td_class, value_td_class, type='html'):
   return rv
 OV.registerFunction(getReportExtraCIFItems)
 
+def getReportPhilItem(philItem=None):
+  item = OV.GetParam(philItem)
+  if not item:
+    philItemU = philItem.replace('snum', 'user')
+    item = OV.GetParam(philItemU)
+    if item:
+      OV.SetParam(philItem, item)
+  return item
+OV.registerFunction(getReportPhilItem)
+
 def getReportImageData(size='w400', imageName=None):
   import PIL
   import Image
@@ -2022,8 +2032,18 @@ def getReportImageData(size='w400', imageName=None):
 
   if "snum.report" in imageName:
     imagePath = OV.GetParam(imageName)
+    
+    if not imagePath:
+      imageNameU = imageName.replace('snum', 'user')
+      imagePath = OV.GetParam(imageNameU)
+      if imagePath:
+        OV.SetParam(imageName, imagePath)
+
   if imagePath == "No Image" or imagePath is None:
     return ""
+  
+  if imagePath.startswith(r'BaseDir()'):
+    imagePath = "%s/%s" %(OV.BaseDir(), imagePath.lstrip('BaseDir()'))
   if not os.path.exists(imagePath):
     OV.SetParam(imageName, None)
 #    print "The previously made screenshot has been removed. Please select 'screenshot' to make a new one"
