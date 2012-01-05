@@ -652,7 +652,7 @@ olex2
   }
 
   pdfplugin{
-    path = '/pdf-plugin/html2pdf.exe.exe'
+    path = 'BaseDir()/pdf-plugin/html2pdf.exe.exe'
       .type = str
       }
 
