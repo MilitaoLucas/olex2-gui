@@ -603,13 +603,14 @@ class Method_cctbx_ChargeFlip(Method_solution):
     except Exception, err:
       print err
       traceback.print_exc()
-    try:
-      olx.Freeze(True)
-      olx.xf.EndUpdate()
-      olx.Compaq('-a')
-      olx.Move()
-    finally:
-      olx.Freeze(False)
+    if OV.HasGUI():
+      try:
+        olx.Freeze(True)
+        olx.xf.EndUpdate()
+        olx.Compaq('-a')
+        olx.Move()
+      finally:
+        olx.Freeze(False)
     #olx.VSS(True)
     #olex.m("sel -a")
     #olex.m("name sel 1")

@@ -108,9 +108,9 @@ snum
       .type = float
     vata = 0
       .type = float
-    program = ShelXS ShelXS86 XS '*olex2.solve' XM ShelXD SIR2002 SIR2004 SIR2008 SIR2011 Superflip
+    program = ShelXS ShelXS86 XS '*olex2.solve' XM ShelXD SIR2002 SIR2004 SIR2008 SIR2011 Superflip Unknown
       .type = choice
-    method = 'Dual Space' '*Charge Flipping' 'Direct Methods' 'Patterson Method' 'Structure Expansion'
+    method = 'Dual Space' '*Charge Flipping' 'Direct Methods' 'Patterson Method' 'Structure Expansion' Unknowm
       .type = choice
     graphical_output = False
       .type = bool
@@ -154,10 +154,10 @@ snum
       .expert_level = 2
     graphical_output = False
       .type = bool
-    program = ShelXL_ifc XL XH ShelXH XLMP ShelXL '*olex2.refine'
+    program = ShelXL_ifc XL XH ShelXH XLMP ShelXL '*olex2.refine' Unknown
       .type = choice
     method = 'Least Squares' CGLS '*Gauss-Newton' 'Levenberg-Marquardt' \
-      'Full Matrix'
+      'Full Matrix' Unknown
     .type = choice
     sg_list = None
       .type = str
@@ -469,7 +469,7 @@ snum
   report
     .short_caption = Report Metadata
     {
-    type = "AutoChem2 Structure Report"
+    type = "Structure Report"
       .type = str
     date_format = "%d-%m-%Y"  
       .type = str
@@ -502,7 +502,7 @@ snum
     diffractometer = None
       .type = str
     diffractometer_image = ""
-      .type = path
+      .type = str
     title = None
       .type = path
     image = None
@@ -514,8 +514,8 @@ snum
     }
     lab{
       logo = ""
-        .type = path
-      name = Durham Chemical Crystallography Laboratory
+        .type = str
+      name = ""
         .type = str
     } 
     tex{
@@ -650,6 +650,11 @@ olex2
     .type = bool
       .help = If set to TRUE (default), the cif file will be sent to the checkcif url on pressing 'Validate Cif'
   }
+
+  pdfplugin{
+    path = 'BaseDir()/pdf-plugin/html2pdf.exe.exe'
+      .type = str
+      }
 
   ccdc{
     url = http://ccdc.opencryst.org/deposit http://ccdc1.opencryst.org/deposit
@@ -979,20 +984,21 @@ user
     .type = str
   report_journal_style = rsc
     .type = str
+    
+  report{
+    lab{
+      logo = "BaseDir()/util/pyUtil/PluginLib/plugin-AutoChem2/images/DurhamUnivLogoNew.png"
+        .type = str
+      name = Durham Chemical Crystallography Laboratory
+        .type = str
+      } 
+    diffractometer_image = "BaseDir()/util/pyUtil/PluginLib/plugin-AutoChem2/images/gemini.jpg"
+      .type = str
+    }
+    
   auto_refine_after_anis = True
     .type = bool
-  ccdc{
-    user_email = horst.puschmann@gmail.com
-      .type = str
-    ccdc_email = horst.puschmann@gmail.com
-      .type = str
-    portal_url = http://localhost:8080/structurespace/StructureSpace/ccdc_submit
-      .type = str
-    portal_username = ccdcsubmit
-      .type = str
-    portal_passwd = ccdcpass
-      .type = str
-  }
+
   cif{
     autorefine_if_no_cif_for_cifmerge = True
       .type = bool

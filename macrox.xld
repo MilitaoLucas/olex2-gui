@@ -42,7 +42,7 @@
     \>
     <cmd
       <cmd1 XXX="silent on">
-      <cmd2 "py.Export(datadir()/olx.py)">
+      <cmd2 "py.Export(datadir()/olx)">
       <cmd3 XXX="'py.run 'basedir()/util/pyUtil/initpy.py'">
       <cmd3 "py.run 'basedir()/util/pyUtil/initpy.py'">
       <cmd4 "if IsVar(defeditor) then none else setvar(defeditor,'gedit')">
@@ -402,13 +402,25 @@
 \>
 
 
+<ac2 help="Launches ac_run"
+  <body
+    <args
+      <arg1 name="single" def="">
+    \>
+    <cmd
+      <cmd6 "spy.ac2.auto()">
+    \>
+  \>
+\>
+
 <start_autochem help="Launches ac_run"
   <body
     <args
       <arg1 name="filefull" def="'FileFull()'">
     \>
     <cmd
-      <cmd6 "spy.ac_run solveit -filefull='%1'">
+      <cmd1 "reap '%1.ins'">
+      <cmd2 "spy.ac2.auto()">
     \>
   \>
 \>
