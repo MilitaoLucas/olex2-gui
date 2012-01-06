@@ -1067,13 +1067,14 @@ def onSolutionProgramChange(prg_name, method=None, scope='snum'):
     #olx.SetValue('SET_autochem_solution_METHOD', 'Auto')
     return
 
-  prg = SPD.programs[prg_name]
-  if method is None or not method:
-    method = sortDefaultMethod(prg)
-    if method == 'Direct Methods' and olx.Ins('PATT') != 'n/a':
-      method = 'Patterson Method' # work-around for bug #48
-  OV.SetParam("%s.solution.method" %scope, method)
-  onSolutionMethodChange(prg_name, method)
+  if prg_name != 'Unknown':
+    prg = SPD.programs[prg_name]
+    if method is None or not method:
+      method = sortDefaultMethod(prg)
+      if method == 'Direct Methods' and olx.Ins('PATT') != 'n/a':
+        method = 'Patterson Method' # work-around for bug #48
+    OV.SetParam("%s.solution.method" %scope, method)
+    onSolutionMethodChange(prg_name, method)
 OV.registerFunction(OV.set_solution_program)
 
 def onSolutionMethodChange(prg_name, method):
@@ -1998,12 +1999,22 @@ def getReportExtraCIFItems(name_td_class, value_td_class, type='html'):
           %(name_td_class,value_td_class,flack)
       else:
         rv = r"Flack parameter & %s\\" % flack.replace('-', '@@-@@')
-        
+
   except Exception, err:
     print err
     pass
   return rv
 OV.registerFunction(getReportExtraCIFItems)
+
+def getReportPhilItem(philItem=None):
+  item = OV.GetParam(philItem)
+  if not item:
+    philItemU = philItem.replace('snum', 'user')
+    item = OV.GetParam(philItemU)
+    if item:
+      OV.SetParam(philItem, item)
+  return item
+OV.registerFunction(getReportPhilItem)
 
 def getReportImageData(size='w400', imageName=None):
   import PIL
@@ -2015,14 +2026,24 @@ def getReportImageData(size='w400', imageName=None):
 
   size_type = size[:1]
   size = int(size[1:])
-  
+
   if imageName is None:
     imageName = 'snum.report.image'
-    
+
   if "snum.report" in imageName:
     imagePath = OV.GetParam(imageName)
+    
+    if not imagePath:
+      imageNameU = imageName.replace('snum', 'user')
+      imagePath = OV.GetParam(imageNameU)
+      if imagePath:
+        OV.SetParam(imageName, imagePath)
+
   if imagePath == "No Image" or imagePath is None:
     return ""
+  
+  if imagePath.startswith(r'BaseDir()'):
+    imagePath = "%s/%s" %(OV.BaseDir(), imagePath.lstrip('BaseDir()'))
   if not os.path.exists(imagePath):
     OV.SetParam(imageName, None)
 #    print "The previously made screenshot has been removed. Please select 'screenshot' to make a new one"
@@ -2352,6 +2373,44 @@ def advance_crystal_image(direction='forward'):
     #OV.SetParam('snum.report.crystal_image',p)
     #olx.html.SetImage('CRYSTAL_IMAGE',p)
 OV.registerFunction(advance_crystal_image)
+
+def getCellHTML():
+  crystal_systems = {
+    'Triclinic':('a', 'b', 'c', '&alpha;', '&beta;', '&gamma;'),
+    'Monoclinic':('a', 'b', 'c', '&beta;'),
+    'Orthorhombic':('a', 'b', 'c'),
+    'Tetragonal':('a', 'c',),
+    'Hexagonal':('a', 'c'),
+    'Trigonal':('a', 'c'),
+    'Cubic':('a',),
+  }
+
+  cell_param_value_pairs = dict(zip(
+    ('a', 'b', 'c', '&alpha;', '&beta;', '&gamma;'),
+    ('_cell_length_a','_cell_length_b','_cell_length_c','_cell_angle_alpha','_cell_angle_beta','_cell_angle_gamma')))
+  cell = {}
+  for param, value in cell_param_value_pairs.items():
+    if param in ('a','b','c'):
+      cell[param] = dict(
+        value = '%%%s%%' %value,
+        unit = '&nbsp;&Aring;'
+      )
+    else:
+      cell[param] = dict(
+        value = '%%%s%%' %value,
+        unit = '&deg;'
+      )
+
+  cell_html = dict((param, '<i>%s</i>&nbsp;= %s%s, ' %(param,cell[param]['value'],cell[param]['unit'])) for param in cell.keys())
+
+  crystal_system = OV.olex_function('sg(%s)')
+
+  html = ''.join(cell_html[param] for param in crystal_systems[crystal_system])
+
+  return html
+OV.registerFunction(getCellHTML)
+
+
 
 def formatted_date_from_timestamp(dte):
   if "." in dte:
