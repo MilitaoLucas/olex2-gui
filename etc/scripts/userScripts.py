@@ -13,6 +13,7 @@ scripts = [
   'flipsmall',
   'OlexBET',
   'Olexhole',
+  'XPlain',
   #'OlexSir',
   #'LazyOlex',
 ]
