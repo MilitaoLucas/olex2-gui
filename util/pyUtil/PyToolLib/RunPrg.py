@@ -414,7 +414,9 @@ class RunRefinementPrg(RunPrg):
         inversion_needed = True
     if force and inversion_needed:
       olex.m('Inv -f')
-    if inversion_needed: print inversion_warning
+      print "The Structure has been inverted"
+    elif inversion_needed:
+      print inversion_warning
     if possible_racemic_twin:
       if (hooft.twin_components is not None and
           hooft.twin_components[0].twin_law != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
