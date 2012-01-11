@@ -48,8 +48,6 @@ distro_zips = (
 )
 
 external_files = {
-  #windows installer file
-  'installer.exe': ('olex-top',), #mind the comma!
   #mac
   'olex2-mac.zip': ('olex-port', mac_port_name, 'action:extract', 'action:delete'),
   'unirun-mac.zip': ('olex-port', mac_port_name, 'action:extract', 'action:delete'),

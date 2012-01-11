@@ -213,7 +213,7 @@ snum
         .type = bool
         .help = Automatically tidy the structure after refinement according \
           to the settings
-      invert = False
+      invert = True
         .type = bool
         .help = If set to TRUE, the structure will be automatically inverted if the inversion seems necessary
       }
