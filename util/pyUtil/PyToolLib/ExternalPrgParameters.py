@@ -559,6 +559,7 @@ class Method_cctbx_refinement(Method_refinement):
       if not self.failure:
         OV.SetVar('cctbx_R1',cctbx.r1[0])
         OV.File('%s.res' %OV.FileName())
+        self.writeRefinementInfoIntoRes()
     finally:
       OV.DeleteBitmap('refine')
 
@@ -576,7 +577,22 @@ class Method_cctbx_refinement(Method_refinement):
     t = f.read() %cif
     f.close()
     OV.write_to_olex('refinedata.htm',t)
+    self.cif = cif
 
+  def writeRefinementInfoIntoRes(self):
+    txt = '''REM R1 = %(_refine_ls_R_factor_gt)s for %(_reflns_number_gt)s Fo > 4sig(Fo) and %(_refine_ls_R_factor_all)s for all %(_reflns_number_total)s data
+REM %(_refine_ls_number_parameters)s parameters refined using %(_refine_ls_number_restraints)s restraints
+REM Highest difference peak %(_refine_diff_density_max)s, deepest hole %(_refine_diff_density_min)s
+REM Mean Shift %(_refine_ls_shift/su_mean)s, Max Shift %(_refine_ls_shift/su_max)s.
+''' %self.cif
+    
+    wFile = open('%s/%s.res' %(OV.FilePath(), OV.FileName()), 'a')
+    wFile.write(txt)
+    wFile.close()
+
+
+
+  
 
 class Method_cctbx_ChargeFlip(Method_solution):
 

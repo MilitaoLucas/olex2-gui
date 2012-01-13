@@ -652,7 +652,7 @@ olex2
   }
 
   pdfplugin{
-    path = 'BaseDir()/pdf-plugin/html2pdf.exe.exe'
+    path = 'BaseDir()/pdf-plugin/qt4-pdf.exe'
       .type = str
       }
 
