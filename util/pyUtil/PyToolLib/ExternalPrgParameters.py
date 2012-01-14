@@ -580,6 +580,7 @@ class Method_cctbx_refinement(Method_refinement):
     self.cif = cif
 
   def writeRefinementInfoIntoRes(self):
+    self.cif.setdefault('_refine_ls_abs_structure_Flack', "n/a")
     txt = '''REM R1 = %(_refine_ls_R_factor_gt)s for %(_reflns_number_gt)s Fo > 4sig(Fo) and %(_refine_ls_R_factor_all)s for all %(_reflns_number_total)s data
 REM %(_refine_ls_number_parameters)s parameters refined using %(_refine_ls_number_restraints)s restraints
 REM Highest difference peak %(_refine_diff_density_max)s, deepest hole %(_refine_diff_density_min)s
