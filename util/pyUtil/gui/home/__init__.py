@@ -44,14 +44,15 @@ class FolderView:
     def __str__(self):
       return name
     def expand(self):
-      for roots, dirs, files in os.walk(name):
-        for f in files:
-          self.content.append(node(f))
-        for d in dirs:
-          dr = node(d)
+      for entry in os.listdir(name):
+        full_name = os.path.join(name,entry)
+        if os.path.isdir(full_name):
+          dr = node(full_name)
           dr.expand()
           if len(dr.content):
             content.append(dr)
+        else:
+          self.content.append(node(full_name))
 
 
   def list(self, folder):
