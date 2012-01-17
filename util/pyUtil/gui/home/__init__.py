@@ -33,38 +33,6 @@ class MultipleDataset:
            + olx.xf.DataName(i) + "</a></td>"
     return html + "</tr></table>"
 
-class FolderView:
-  root = None
-  class node:
-    name = None
-    parent = None
-    content = []
-    def __init__(self, name):
-      self.name = name
-    def __str__(self):
-      return name
-    def expand(self):
-      for roots, dirs, files in os.walk(name):
-        for f in files:
-          self.content.append(node(f))
-        for d in dirs:
-          dr = node(d)
-          dr.expand()
-          if len(dr.content):
-            content.append(dr)
-
-
-  def list(self, folder):
-    root = node(folder)
-    root.expand()
-
-  def generateHtml(self):
-    print root
-    return root
-
 mds = MultipleDataset()
 olex.registerFunction(mds.check, False, "gui.home.multiple_dataset")
 olex.registerFunction(mds.generateHtml, False, "gui.home.multiple_dataset")
-
-fv = FolderView()
-olex.registerFunction(fv.generateHtml, False, "gui.home.folder_view")

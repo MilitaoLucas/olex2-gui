@@ -84,6 +84,7 @@ class Reflections(Base):
   ID = Column(String, primary_key=True)
   path = Column(String(200))
   r_int = Column(sqlalchemy.FLOAT)
+  ios = Column(sqlalchemy.FLOAT)
   completeness = Column(sqlalchemy.FLOAT)
   structure_id = Column(Integer, ForeignKey('structures.ID'))
   structure = relationship("Structure", backref=backref('reflections', order_by=ID))
@@ -92,11 +93,13 @@ class Reflections(Base):
                ID,
                path,
                r_int,
+               ios,
                completeness,
                ):
     self.ID = ID
     self.path = path
     self.r_int = r_int
+    self.ios = ios
     self.completeness = completeness
     
   def __repr__(self):

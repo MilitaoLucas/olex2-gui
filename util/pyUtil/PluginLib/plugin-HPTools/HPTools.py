@@ -1,3 +1,4 @@
+from __future__ import division
 import os
 import glob
 import olx
@@ -32,9 +33,41 @@ def db_test():
 
 import time
 
-def r():
-  import numpy
-  from rpy import *
+def r(name='fred', number_to_average=50):
+  l = []
+  number_to_average = int(number_to_average)
+  rFile = open(r"G:\HP\olex2-trunk\util\pyUtil\PluginLib\plugin-AutoChem2\report\%s.csv" %name, 'r').readlines()
+  m =[]
+  total_number = len(l)
+  a = b = c = 0
+  i = 0
+  j = 0
+  for line in rFile:
+    i += 1
+    j += 1
+    line = line.split(',')
+    if len(line) == 2:
+      a += float(line[0])
+      b += float(line[1])
+      if i == number_to_average or i == total_number:
+        m.append("%s %s %s\n" %(j, a/i, b/i))
+        i = 0
+        a = b = 0
+    elif len(line) == 3:
+      a += float(line[0])
+      b += float(line[1])
+      c += float(line[2])
+      if i == number_to_average or i == total_number:
+        m.append("%s %s %s %s\n" %(j, a/i, b/i, c/i))
+        i = 0
+        a = b = c = 0
+        
+        
+  wFile = open(r"G:\HP\olex2-trunk\util\pyUtil\PluginLib\plugin-AutoChem2\report\%s%s.txt" %(name, number_to_average), 'w')
+  for line in m:
+    wFile.write(line)
+  wFile.close()
+  
 OV.registerFunction(r)
 
 
@@ -86,6 +119,97 @@ def m():
   
 OV.registerFunction(m)
 
+
+def go_through_list():
+  rFile = open(r"G:\HP\olex2-trunk\util\pyUtil\PluginLib\plugin-AutoChem2\report\list.txt", 'r').readlines()
+  open_every_n = 1
+  l = []
+  wFile = open(r"G:\HP\olex2-trunk\util\pyUtil\PluginLib\plugin-AutoChem2\report\list_res.txt", 'w')
+  for p in rFile:
+    p = p.strip()
+    path = '%s%s' % (r"G:/HP/", p)
+    if not os.path.exists(path):
+      continue
+    olex.m('reap %s' %path)
+    
+    html = "<html> Fred </html>"
+    
+    res = make_evaluate_html()
+    if res:
+      evaluate = olx.GetValue('Evaluate.EVALUATE')
+    else:
+      return
+      
+    
+    l.append("%s,%s\n" %(p, evaluate))
+    wFile.write("%s,%s\n" %(p, evaluate))
+    wFile.flush()
+OV.registerFunction(go_through_list)    
+  
+  
+def make_evaluate_html():
+  pop_name = "Evaluate"
+  if OV.IsControl('%s.WEB_USERNAME'%pop_name):
+    olx.html.ShowModal(pop_name)
+  else:
+    txt='''
+  <body link="$GetVar(HtmlLinkColour)" bgcolor="$GetVar(HtmlBgColour)">
+  <font color=$GetVar(HtmlFontColour  size=$GetVar(HtmlFontSize) face="$GetVar(HtmlFontName)">
+  <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
+  <tr>
+    <td>
+    Evaluate:
+    </td>
+     <td>
+
+       <input
+         type="text"
+         bgcolor="$GetVar(HtmlInputBgColour))"
+         valign='center'
+         name="EVALUATE"
+         reuse
+         width="90"
+         height="20"
+         value = "">
+     </td>
+     </tr>
+     <tr>
+     <td>
+     </td>
+     <td valign='centre'>
+       <input
+         type="button"
+         bgcolor="$GetVar(HtmlInputBgColour))"
+         valign='center'
+         width="60"
+         height="22"
+         onclick="html.EndModal(Evaluate,1)"
+         value = "OK">
+       <input
+         type="button"
+         bgcolor="$GetVar(HtmlInputBgColour))"
+         valign='center'
+         width="60"
+         height="22"
+         onclick="html.EndModal(Evaluate,0)"
+         value = "Cancel">
+     </td>
+     </tr>
+
+     </table>
+     </font>
+     </body>
+     '''
+
+    OV.write_to_olex("evaluate.htm", txt)
+    boxWidth = 280
+    boxHeight = 180
+    x = 200
+    y = 200
+    olx.Popup(pop_name, 'evaluate.htm', "-s -b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(pop_name, boxWidth, boxHeight, x, y))
+    res = olx.html.ShowModal(pop_name)
+    res = int(res)
+    return res
 
 
 def t(cmd='hide'):
@@ -539,6 +663,7 @@ class FileCrawlies():
               self.session.commit()
             except Exception, err:
               print "Something went wrong with adding to db: %s" %err
+              self.session.rollback()
               self.add_to_exclude_file(file, 'FailedR1')
               
           if action == "ac2":
@@ -575,6 +700,7 @@ class FileCrawlies():
     self.r1_original = float(olx.CalcR().split(",")[1])
     ata = olx.ATA(1)
     self.ata_original = float(ata.split(';')[1])
+
 
     t = time.time()
     
@@ -916,12 +1042,13 @@ class FileCrawlies():
                                    max_Z=max_Z,
                                    )
       self.session.add(_)
-      #_ = SQLAlchemy.Reflections(ID=str(OV.FileName()),
-      #                             path=path,
-      #                             r_int=hos['Rint'],
-      #                             completeness=hos['Completeness'],
-      #                             )
-      #self.session.add(_)
+      _ = SQLAlchemy.Reflections(ID=str(OV.FileName()),
+                                   path=path,
+                                   r_int=hos['Rint'],
+                                   ios=hos['MeanIOverSigma'],
+                                   completeness=hos['Completeness'],
+                                   )
+      self.session.add(_)
     else:
       txt = "No Reflection File!"
     print txt
