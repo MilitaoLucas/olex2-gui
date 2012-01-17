@@ -196,6 +196,7 @@ class RunPrg(ArgumentParser):
 
   def startRun(self):
     OV.CreateBitmap('%s' %self.bitmap)
+    OV.SetParam('snum.refinement.auto.invert',True)
 
   def endRun(self):
     OV.DeleteBitmap('%s' %self.bitmap)
@@ -414,6 +415,7 @@ class RunRefinementPrg(RunPrg):
         inversion_needed = True
     if force and inversion_needed:
       olex.m('Inv -f')
+      OV.SetParam('snum.refinement.auto.invert',False)
       print "The Structure has been inverted"
     elif inversion_needed:
       print inversion_warning
