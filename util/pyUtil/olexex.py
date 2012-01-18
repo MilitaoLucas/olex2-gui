@@ -1289,11 +1289,8 @@ def getKey(key_directory=None, specific_key = None):
     return keyname.split(".")[0]
 
 
-def getKeys(key_directory=None):
-  keyPath = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], OV.GetTag())
+def getKeys(key_directory):
   kl = []
-  if not key_directory:
-    key_directory = keyPath
   import glob
   g = glob.glob(r"%s/*.%s" %(key_directory, "priv"))
   for item in g:
@@ -1476,10 +1473,14 @@ def register_new_odac(username=None, pwd=None):
     wFile = open("%s/%s" %(p, name),'wb')
     wFile.write(cont)
     wFile.close()
+  else:
+    print "Could not get %s" %f
+    return
   ins = "%s/AutoChem Installer.exe" %p
   cmd = r"%s /S" %ins
 #  print cmd
-  Popen(cmd, shell=False, stdout=PIPE).stdout
+  olx.Shell(ins)
+#  Popen(cmd, shell=True, stdout=PIPE).stdout
   for i in xrange(10):
     try:
       os.remove(ins)

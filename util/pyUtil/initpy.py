@@ -306,9 +306,6 @@ if olx.IsPluginInstalled('MySQL') == "true":
     print ex
 
 
-if olexex.getKey():
-  olexex.GetACF()
-
 if OV.HasGUI():
   olexex.check_for_recent_update()
 
