@@ -987,7 +987,7 @@ user
     
   report{
     lab{
-      logo = "BaseDir()/util/pyUtil/PluginLib/plugin-AutoChem2/images/DurhamUnivLogoNew.png"
+      logo = "BaseDir()/etc/site/images/DurhamLogo.png"
         .type = str
       name = Durham Chemical Crystallography Laboratory
         .type = str
@@ -1017,8 +1017,12 @@ odac
   .expert_level = 2
   .short_caption = ODAC Settings
 {
-  source_dir = None
+  src_dir = None
     .type = path
+  plugin_dir = None
+    .type = path
+  keyname = None
+    .type = str
   is_active = False
     .type = bool
   debug{
