@@ -357,6 +357,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
 
   def __init__(self, phil_object):
     Method.__init__(self, phil_object)
+    self.cif = {}
 
   def pre_refinement(self, RunPrgObject):
     if OV.GetParam("snum.refinement.use_solvent_mask"):
@@ -419,6 +420,26 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       if len(suggested_weight.split()) == 1:
         suggested_weight += ' 0'
       OV.SetParam('snum.refinement.suggested_weight', suggested_weight)
+    self.gather_refinement_information()  
+    writeRefinementInfoIntoRes(self.cif)
+    
+
+  def gather_refinement_information(self):
+    cif = {}
+    cif.setdefault('_refine_ls_R_factor_all', olx.Lst('R1a'))
+    cif.setdefault('_refine_ls_R_factor_gt', olx.Lst('R1'))
+    cif.setdefault('_refine_ls_wR_factor_ref', olx.Lst('wR2'))
+    cif.setdefault('_refine_ls_goodness_of_fit_ref', olx.Lst('s'))
+    cif.setdefault('_refine_ls_shift/su_max', olx.Lst('max_shift'))
+    cif.setdefault('_refine_ls_shift/su_mean', olx.Lst('mean_shift'))
+    cif.setdefault('_reflns_number_total', olx.Lst('ref_total'))
+    cif.setdefault('_reflns_number_gt', olx.Lst('ref_4sig'))
+    cif.setdefault('_refine_ls_number_parameters', olx.Lst('params_n'))
+    cif.setdefault('_refine_ls_number_restraints', olx.Lst('restraints_n'))
+    cif.setdefault('_refine_ls_abs_structure_Flack', olx.Lst('flack'))
+    cif.setdefault('_refine_diff_density_max', olx.Lst('peak'))
+    cif.setdefault('_refine_diff_density_min', olx.Lst('hole'))
+    self.cif = cif
 
   def observe(self, RunPrgObject):
     import Analysis
@@ -429,6 +450,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
     flack = olx.Lst('flack')
     if flack == "n/a":
       flack = None
+    
     return flack
 
 
@@ -559,7 +581,7 @@ class Method_cctbx_refinement(Method_refinement):
       if not self.failure:
         OV.SetVar('cctbx_R1',cctbx.r1[0])
         OV.File('%s.res' %OV.FileName())
-        self.writeRefinementInfoIntoRes()
+        writeRefinementInfoIntoRes(self.cif)
     finally:
       OV.DeleteBitmap('refine')
 
@@ -578,32 +600,6 @@ class Method_cctbx_refinement(Method_refinement):
     f.close()
     OV.write_to_olex('refinedata.htm',t)
     self.cif = cif
-
-  def writeRefinementInfoIntoRes(self):
-    self.cif.setdefault('_refine_ls_abs_structure_Flack', "n/a")
-    txt = '''REM R1 = %(_refine_ls_R_factor_gt)s for %(_reflns_number_gt)s Fo > 4sig(Fo) and %(_refine_ls_R_factor_all)s for all %(_reflns_number_total)s data
-REM %(_refine_ls_number_parameters)s parameters refined using %(_refine_ls_number_restraints)s restraints
-REM Highest difference peak %(_refine_diff_density_max)s, deepest hole %(_refine_diff_density_min)s
-REM Mean Shift %(_refine_ls_shift/su_mean)s, Max Shift %(_refine_ls_shift/su_max)s.
-
-REM +++ Tabular Listing of Refinement Information +++
-REM R1_all = %(_refine_ls_R_factor_all)s
-REM R1_gt %(_refine_ls_R_factor_gt)s
-REM wR_ref = %(_refine_ls_wR_factor_ref)s
-REM GOOF %(_refine_ls_goodness_of_fit_ref)s
-REM Shift_max %(_refine_ls_shift/su_max)s
-REM Shift_mean %(_refine_ls_shift/su_mean)s
-REM ls_param %(_refine_ls_number_parameters)s
-REM ls_restraints %(_refine_ls_number_restraints)s
-REM Flack %(_refine_ls_abs_structure_Flack)s
-
-''' %self.cif
-    
-    wFile = open('%s/%s.res' %(OV.FilePath(), OV.FileName()), 'a')
-    wFile.write(txt)
-    wFile.close()
-
-
 
   
 
@@ -1794,6 +1790,40 @@ levenberg_marquardt_phil = phil_interface.parse("""
 name = 'Levenberg-Marquardt'
   .type=str
 """)
+
+
+def writeRefinementInfoIntoRes(d):
+  ''' Expects a ditionary containing the relevant items with cif identifiers as keyes '''
+  d.setdefault('_refine_ls_abs_structure_Flack', "n/a")
+  txt = '''
+REM The information below was added by Olex2.
+REM
+REM R1 = %(_refine_ls_R_factor_gt)s for %(_reflns_number_gt)s Fo > 4sig(Fo) and %(_refine_ls_R_factor_all)s for all %(_reflns_number_total)s data
+REM %(_refine_ls_number_parameters)s parameters refined using %(_refine_ls_number_restraints)s restraints
+REM Highest difference peak %(_refine_diff_density_max)s, deepest hole %(_refine_diff_density_min)s
+REM Mean Shift %(_refine_ls_shift/su_mean)s, Max Shift %(_refine_ls_shift/su_max)s.
+
+REM +++ Tabular Listing of Refinement Information +++
+REM R1_all = %(_refine_ls_R_factor_all)s
+REM R1_gt = %(_refine_ls_R_factor_gt)s
+REM wR_ref = %(_refine_ls_wR_factor_ref)s
+REM GOOF = %(_refine_ls_goodness_of_fit_ref)s
+REM Shift_max = %(_refine_ls_shift/su_max)s
+REM Shift_mean = %(_refine_ls_shift/su_mean)s
+REM Reflections_all = %(_reflns_number_total)s
+REM Reflections_gt = %(_reflns_number_gt)s
+REM Parameters = %(_refine_ls_number_parameters)s
+REM Hole = %(_refine_diff_density_max)s
+REM Peak = %(_refine_diff_density_min)s
+REM Flack = %(_refine_ls_abs_structure_Flack)s
+
+''' %d
+    
+  wFile = open('%s/%s.res' %(OV.FilePath(), OV.FileName()), 'a')
+  wFile.write(txt)
+  wFile.close()
+
+
 
 SPD, RPD = defineExternalPrograms()
 
