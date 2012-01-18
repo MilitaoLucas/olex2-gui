@@ -666,7 +666,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         fc, column_names=['_refln_A_calc', '_refln_B_calc'])
       fmt_str="%4i"*3 + "%12.4f"*4
     else:
-      print "list code %i not supported" %i
+      print "list code %i not supported" %list_code
       return
     # cctbx could make e.g. 1.001(1) become 1.0010(10), so use Olex2 values for cell
     cif_block = iotbx.cif.model.block()
