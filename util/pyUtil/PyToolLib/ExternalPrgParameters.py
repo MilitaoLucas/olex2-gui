@@ -420,7 +420,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       if len(suggested_weight.split()) == 1:
         suggested_weight += ' 0'
       OV.SetParam('snum.refinement.suggested_weight', suggested_weight)
-    self.gather_refinement_information()  
+    self.gather_refinement_information()
     writeRefinementInfoIntoRes(self.cif)
     
 
@@ -581,13 +581,15 @@ class Method_cctbx_refinement(Method_refinement):
       if not self.failure:
         OV.SetVar('cctbx_R1',cctbx.r1[0])
         OV.File('%s.res' %OV.FileName())
-        writeRefinementInfoIntoRes(self.cif)
     finally:
       OV.DeleteBitmap('refine')
 
   def getFlack(self):
     return self.flack
 
+  def post_refinement(self, RunPrgObject):
+    writeRefinementInfoIntoRes(self.cif)
+    
   def writeRefinementInfoForGui(self, cif):
     for key, value in cif.iteritems():
       if "." in value:

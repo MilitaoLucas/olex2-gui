@@ -340,6 +340,7 @@ class RunRefinementPrg(RunPrg):
 
   def runAfterProcess(self):
     RunPrg.runAfterProcess(self)
+    self.method.post_refinement(self)
     self.doHistoryCreation()
     if self.R1 == 'n/a':
       return
@@ -348,7 +349,6 @@ class RunRefinementPrg(RunPrg):
       OV.File()
     if OV.GetParam('snum.refinement.check_absolute_structure_after_refinement'):
       self.isInversionNeeded(force=self.params.snum.refinement.auto.invert)
-    self.method.post_refinement(self)
 
   def doHistoryCreation(self):
     if self.params.snum.init.skip_history:
