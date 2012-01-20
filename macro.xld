@@ -211,6 +211,7 @@
 <report help="Creates structure report (macro.xld)"
   <body
     <args
+      <arg1 name="show_html" def="True">
     >
     <cmd
       <cmd1 "if not(spy.report.ResolvePrograms()) then abort">
@@ -225,7 +226,7 @@
       <cmd13 "cursor()">
       <cmd10 "cursor(busy, 'Creating Report')">
       <cmd11 "cif2tab header acrd anis bnd ang htab tang hcrd footer -n=spy.GetParam(snum.report.title)_tables">
-      <cmd12 "shell spy.GetParam(snum.report.title)_tables.html">
+      <cmd12 "if %1 then 'shell spy.GetParam(snum.report.title)_tables.html'">
       <cmd13 "cursor()">
     >
     <onterminate
