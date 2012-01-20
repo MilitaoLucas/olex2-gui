@@ -196,7 +196,7 @@ def crystalMetadataHtmlMaker():
      },
     {'varName':'_exptl_crystal_description',
      'itemName':'%Shape%',
-     'items':'?;block;plate;needle;prism;irregular;cube;trapezoid;rect. Prism;rhombohedral;hexagonal;octahedral',
+     'items':'?;block;plate;needle;prism;irregular;cube;trapezoid;rect. Prism;rhombohedral;hexagonal;octahedral;plank',
      },
     {'varName':'_exptl_crystal_preparation',
      'itemName':'%Preparation Details%',
