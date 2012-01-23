@@ -2017,6 +2017,7 @@ def getReportPhilItem(philItem=None):
 OV.registerFunction(getReportPhilItem)
 
 def getReportImageData(size='w400', imageName=None):
+  
   import PIL
   import Image
   import PngImagePlugin
@@ -2024,8 +2025,6 @@ def getReportImageData(size='w400', imageName=None):
   import base64
   import ImageDraw
   import EpsImagePlugin
-  from ImageTools import ImageTools
-  IT = ImageTools()
   make_border = False
   
   size_type = size[:1]
@@ -2034,6 +2033,8 @@ def getReportImageData(size='w400', imageName=None):
   if imageName is None:
     imageName = 'snum.report.image'
     make_border = True
+    if not OV.HasGUI():
+      return "No Image available in Headless Mode! <img width=0 src=''>"
 
   if "snum.report" in imageName:
     imagePath = OV.GetParam(imageName)
@@ -2073,6 +2074,8 @@ def getReportImageData(size='w400', imageName=None):
       IM = IM.resize((nWidth, nHeight), Image.BICUBIC)
 
   if make_border:
+    from ImageTools import ImageTools
+    IT = ImageTools()
     draw = ImageDraw.Draw(IM)
     fill = '#ababab'
     weight = 1
