@@ -987,9 +987,9 @@ user
     
   report{
     lab{
-      logo = "BaseDir()/etc/site/images/DurhamLogo.png"
+      logo = "BaseDir()/etc/site/logo.png"
         .type = str
-      name = Durham Chemical Crystallography Laboratory
+      name = OlexSys Crystallographic Services
         .type = str
       } 
     diffractometer_image = "BaseDir()/util/pyUtil/PluginLib/plugin-AutoChem2/images/gemini.jpg"
