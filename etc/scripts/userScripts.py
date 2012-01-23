@@ -18,7 +18,7 @@ scripts = [
   #'LazyOlex',
 ]
 
-if olx.HasGUI().lower == "true":
+if olx.HasGUI().lower() == "true":
   scripts += ['Olex2CCDC',
               'Tutorials',
               ]

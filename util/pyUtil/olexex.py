@@ -1968,7 +1968,6 @@ def dealWithReportName():
     return
 OV.registerFunction(dealWithReportName)
 
-
 def getReportImageSrc():
   imagePath = OV.GetParam('snum.report.image')
   if OV.FilePath(imagePath) == OV.FilePath():
@@ -2023,13 +2022,18 @@ def getReportImageData(size='w400', imageName=None):
   import PngImagePlugin
   import StringIO
   import base64
+  import ImageDraw
   import EpsImagePlugin
-
+  from ImageTools import ImageTools
+  IT = ImageTools()
+  make_border = False
+  
   size_type = size[:1]
   size = int(size[1:])
 
   if imageName is None:
     imageName = 'snum.report.image'
+    make_border = True
 
   if "snum.report" in imageName:
     imagePath = OV.GetParam(imageName)
@@ -2067,9 +2071,20 @@ def getReportImageData(size='w400', imageName=None):
       nHeight = size
       nWidth = int(oSize[0]*(size/oSize[1]))
       IM = IM.resize((nWidth, nHeight), Image.BICUBIC)
+
+  if make_border:
+    draw = ImageDraw.Draw(IM)
+    fill = '#ababab'
+    weight = 1
+    draw.line((0, 0) + (IM.size[0] - weight, 0), fill=fill, width=weight)
+    draw.line((0, 0) + (0, IM.size[1]), fill=fill, width=weight)
+    draw.line((IM.size[0] - weight, 0) + (IM.size[0] - weight, IM.size[1] - weight), fill=fill, width=weight)
+    draw.line((0, IM.size[1] - weight ) + (IM.size[0] - weight, IM.size[1] - weight) , fill=fill, width=weight)
+    del draw
+    
   p = "%s/report_tmp.png" %OV.DataDir()
   IM.save(p, "PNG")
-
+  
   rFile = open(p, 'rb')
   img = rFile.read()
   data = base64.b64encode(img)
@@ -2078,10 +2093,11 @@ def getReportImageData(size='w400', imageName=None):
   html = '''
 <!--[if IE]><img width=%s src='%s'><![endif]-->
 <![if !IE]><img width=%s src='data:image/png;base64,%s'><![endif]>
-  '''%(size, imageLocalSrc, size, data)
+  '''%(int(size/2), imageLocalSrc, int(size/2), data)
 
   return html
 OV.registerFunction(getReportImageData)
+
 
 def getFileContents(p):
   if "snum.report" in p:
