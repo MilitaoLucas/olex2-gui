@@ -149,27 +149,21 @@
 <report help="Creates structure report"
   <body
     <args
-    \>
+      <arg1 name="show_html" def="False">
+    >
     <cmd
       <cmd0 "if file.Exists('FilePath()/FileName().cif') then None else 'SetVar(snum_refinement_method,Least Squares)'">
       <cmd1 "if file.Exists('FilePath()/FileName().cif') then None else 'DelIns ACTA'">
       <cmd2 "if file.Exists('FilePath()/FileName().cif') then None else 'AddIns ACTA'">
       <cmd3 "if file.Exists('FilePath()/FileName().cif') then None else 'refine'">
-      <cmd4 XXX="cursor(busy, '%Checking for IMAGE file ...%')">
-      <cmd5 "if file.Exists(GetVar(report_image)) then 'SetVar(report_image,GetVar(report_image))' else 'SetVar(report_image,screenshot.png)'">
-      <cmd6 XXX="if not(strcmp(GetVar(report_image),screenshot.png)) then None else 'cursor(busy, %Creating Image ...%)>>pict -pq screenshot.png 1'">
-      <cmd7 XXX="cursor(busy, '%Updating% Cif ...')">
       <cmd8 "spy.ExtractCifInfo()">
       <cmd9 "spy.MergeCif()">
-      <cmd10 XXX="cursor(busy, '%Creating% Report')">
       <cmd11 "cif2tab header acrd anis bnd ang htab tang hcrd footer">
-      <cmd12 XXX="shell tables.html">
+      <cmd12 "if %1 then 'shell spy.GetParam(snum.report.title)_tables.html'">
     \>
     <onterminate
-      <cmd0 "cursor()">
     \>
     <onabort
-      <cmd0 "cursor()">
     \>
   \>
 \>
