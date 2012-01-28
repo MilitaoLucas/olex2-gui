@@ -16,11 +16,11 @@ IT = ImageTools()
 import olex_core
 
 import OlexVFS
-print "Hello"
+print "Importing HPTools ..."
 
 from RunPrg import RunRefinementPrg
 
-from AutoChem2 import AC2
+from AC2 import AC2
 ac2 = AC2()
 
 import SQLAlchemy
@@ -131,16 +131,12 @@ def go_through_list():
     if not os.path.exists(path):
       continue
     olex.m('reap %s' %path)
-    
     html = "<html> Fred </html>"
-    
     res = make_evaluate_html()
     if res:
       evaluate = olx.GetValue('Evaluate.EVALUATE')
     else:
       return
-      
-    
     l.append("%s,%s\n" %(p, evaluate))
     wFile.write("%s,%s\n" %(p, evaluate))
     wFile.flush()
@@ -446,7 +442,8 @@ class FileCrawlies():
     #self.g4 = g4()
     self.DBR = DBReader()
     
-    phil_file = r"%s/util/pyUtil/PluginLib/plugin-HpTools/hptools.phil" %(OV.BaseDir())
+    phil_file = r"%s/util/pyUtil/PluginLib/plugin-HPTools/hptools.phil" %(OV.BaseDir())
+    self.plugin_path = r"%s/util/pyUtil/PluginLib/plugin-HPTools" %(OV.BaseDir())
     olx.phil_handler.adopt_phil(phil_file=phil_file)
     
     self._deal_with_phil()
@@ -464,7 +461,17 @@ class FileCrawlies():
     self.exclude_on_run_original = OV.GetParam('hptools.batch.run_new_only')
     self.drive_letter = OV.GetParam('hptools.batch.drive_letter')
     self.db_table = OV.GetParam('hptools.batch.db_table')
-    
+    self.add_filecrawlies_link_to_index()
+
+
+  def add_filecrawlies_link_to_index(self):
+    ''' Automatically add a link to the HPTools GUI to an Olex2 index file. This link is not currently tidied up on exit. '''
+    txt = OlexVFS.read_from_olex('%s/etc/gui/blocks/index-info.htm' %OV.BaseDir())
+    t = r'''
+<!-- #include database BaseDir()/util/pyUtil/PluginLib/plugin-HPTools/db_graphs.htm;gui\blocks\tool-off.htm;image=Database;onclick=;1; -->'''
+    if t not in txt:
+      txt = OlexVFS.write_to_olex('%s/etc/gui/blocks/index-info.htm' %OV.BaseDir(), txt + t, 0)
+
     
   def delete_all_dot_olex_folders(self):
     p = r"%s%s" %(OV.GetParam('hptools.batch.drive_letter'), OV.GetParam('hptools.batch.directory'))
@@ -529,7 +536,11 @@ class FileCrawlies():
     if new:
       wFile = open("%s/batch_list.htm" %OV.DataDir(), 'w')
     else:
-      wFile = open("%s/batch_list.htm" %OV.DataDir(), 'rb')
+      _ = "%s/batch_list.htm" %OV.DataDir()
+      if not os.path.exists(_):
+        wFile = open(_, 'w')
+        wFile.close()
+      wFile = open(_, 'rb')
       c = wFile.readlines()
       wFile.close()
       wFile = open("%s/batch_list.htm" %OV.DataDir(), 'w')
@@ -538,7 +549,8 @@ class FileCrawlies():
     if new:
       for item in l:
         tem = item.split('/')[-1:][0].split('.')[0]
-        txt = "<tr><td></td><td width='60'><a href='reap %s'>%s</a></td><td>In Queue</td></tr>\n" %(item, tem)
+        txt = '''
+<tr><td></td><td width='60'><a href='reap "%s"'>%s</a></td><td>In Queue</td></tr>\n''' %(item, tem)
         wFile.write(txt)
       #txt += '''
 #<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->'''
@@ -551,7 +563,8 @@ class FileCrawlies():
         if p:
           if p in line:
             tem = p.split('/')[-1:][0].split('.')[0]
-            line = "<tr><td></td><td width='60'><a href='reap %s'>%s</a></td><td>%s</td></tr>\n" %(p, tem, msg)
+            line = '''
+<tr><td></td><td width='60'><a href='reap "%s"'>%s</a></td><td>%s</td></tr>\n''' %(p, tem, msg)
             line = line.replace("<tr><td></td>", "<tr><td bgcolor='#205c90'></td>")
         else:
           for q in l[i:]:
@@ -560,15 +573,45 @@ class FileCrawlies():
               line = line.replace("<tr><td bgcolor='#205c90'></td>", "<tr><td bgcolor='#4b0000'></td>")
               break
             tem = q.split('/')[-1:][0].split('.')[0]
-            line = "<tr><td></td><td width='60'><a href='reap %s'>%s</a></td><td>%s</td></tr>\n" %(q, tem, "In Queue")
+            line = '''
+<tr><td></td><td width='60'><a href='reap "%s"'>%s</a></td><td>%s</td></tr>\n''' %(q, tem, "In Queue")
             line = line.replace("<tr><td></td>", "<tr><td bgcolor='#4b0000'></td>")
             line = line.replace("<tr><td bgcolor='#4b0000'></td>", "<tr><td bgcolor='#205c90'></td>")
             break
         i += 1  
-        wFile.write(line)
+        wFile.write(line.replace('\r',''))
     wFile.close()
     olx.html.Update()
+    
+  def get_list_from_text(self, make_copy=False):
+    l = open(r"%s/list.txt" %self.plugin_path, 'r').readlines()
+    if make_copy:
+      destination = "G:/HP/DS_COPY"
+      for path in l:
+        path = path.lower()
+        path = path.strip()
+        directory = "%s/%s" %(destination, path.split("/")[0])
+        if not os.path.exists(destination):
+          os.makedirs(destination)
+        path_to = destination + "/" + "/".join(path.split("/")[:-1])
+        path_from = self.drive_letter + "/DSA/" + "/".join(path.split("/")[:-1])
+        c_to = "%s/%s" %(destination, path)
+        c_from = "%s/.olex/originals/%s.res" %(path_from, path.split('/')[-1:][0].split('.')[0])
+        if not os.path.exists(c_to):
+          os.makedirs(path_to)
+        shutil.copyfile(c_from, c_to)
+        c_to = c_to.replace('.res', '.hkl')
+        c_from = "%s/%s.hkl" %(path_from, path.split('/')[-1:][0].split('.')[0])
+        shutil.copyfile(c_from, c_to)
+      pass
 
+    m = []
+    for f in l:
+      m.append("%s/%s" %(r'G:/HP/DS_COPY', f.strip()))
+      
+    return m
+  
+       
   def bulk_load_files (self, action=''):
     self._deal_with_phil(operation='save')
     self.get_exclude_l()
@@ -583,22 +626,25 @@ class FileCrawlies():
       self.exclude_on_run_original = OV.GetParam('hptools.batch.run_new_only')
     else:
       self.exclude_on_run_original = False
-      action = 'scan'
+      #action = 'scan'
       OV.SetParam('hptools.batch.action','ac2')
     
     if action == "ac2":
       previous_run_dbr_l, self.previous_display = self.DBR.get_filtered_list(exclude='ac2')
+      
       
     if action == "oda":
       previous_run_dbr_l, self.previous_display = self.DBR.get_filtered_list(exclude='oda')
       
       
     l = self.bulk_action_files(action=action)
+    
     if l:
       if self.use_db != "--":
         m = []
         for item in l:
           tem = item.lstrip(self.drive_letter)
+          if tem.startswith("DS"): tem = tem.lstrip("DS")
           if action == "scan":
             if tem.lower() not in filter_list:
               m.append(item)
@@ -607,7 +653,7 @@ class FileCrawlies():
               if tem.lower() not in previous_run_dbr_l:
                 m.append(item)
         l = m
-    else:
+    elif not l:
       l = filter_list
     
     if not l:
@@ -644,6 +690,7 @@ class FileCrawlies():
           #self.refine_file(file)
           #res = self.autochem_file(file)
           if action == "scan":
+            print "Next up %s" %file
             olexex.revert_to_original()
             try:
               R1 = olx.CalcR()
@@ -666,7 +713,7 @@ class FileCrawlies():
               self.session.rollback()
               self.add_to_exclude_file(file, 'FailedR1')
               
-          if action == "ac2":
+          if action == "ac2" or action == "ac2_list":
             res = self.run_ac2(file)
             if res:
               try:
@@ -916,7 +963,7 @@ class FileCrawlies():
         self.R1_olex2 = 0
    
   def reap_file(self, file):
-    olex.m('reap %s' %file)
+    olex.m("reap '%s'" %file)
     if OV.FileFull().lower() != file.lower():
       self.add_to_exclude_file(file, "FailedReap")
       return False
@@ -1066,9 +1113,19 @@ class FileCrawlies():
       p = path_from
     if action == "ac2":
       p = r"%s%s" %(OV.GetParam('hptools.batch.drive_letter'), OV.GetParam('hptools.batch.directory'))
+    if action == "ac2_list":
+      c_from = r"%s/%s" %(OV.GetParam('hptools.batch.drive_letter'), 'DS_COPY')
+      c_to = r"%s/%s" %(OV.GetParam('hptools.batch.drive_letter'), 'DS_COPY_NEW')
+      if not os.path.exists(c_to):
+        shutil.copytree(c_from, c_to)
+      c_from = r"%s/%s/DS_COPY.sqlite" %(OV.GetParam('hptools.batch.drive_letter'), 'DS_COPY')
+      c_to = r"%s/%s" %(OV.DataDir(), 'DS_COPY.sqlite')
+      if not os.path.exists(c_to):
+        shutil.copyfile(c_from, c_to)
+      action = "ac2"
+      return self.get_list_from_text()
     if action == "scan":
       p = r"%s%s" %(OV.GetParam('hptools.batch.drive_letter'), OV.GetParam('hptools.batch.directory'))
-      
     else:
       p = r"%s%s" %(OV.GetParam('hptools.batch.drive_letter'), OV.GetParam('hptools.batch.directory'))
     if not os.path.exists(p):
