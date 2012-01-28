@@ -38,8 +38,8 @@ from sqlalchemy.orm import column_property
 class Structure(Base):
   __tablename__ = 'structures'
   
-  ID = Column(String, primary_key=True)
-  path = Column(String(200))
+  ID = Column(String)
+  path = Column(String(200), primary_key=True)
   volume = Column(sqlalchemy.FLOAT)
   cell = Column(String(50))
   formula = Column(String(50))
@@ -81,8 +81,8 @@ class Structure(Base):
 class Reflections(Base):
   __tablename__ = 'reflections'
   
-  ID = Column(String, primary_key=True)
-  path = Column(String(200))
+  ID = Column(String)
+  path = Column(String(200), primary_key=True)
   r_int = Column(sqlalchemy.FLOAT)
   ios = Column(sqlalchemy.FLOAT)
   completeness = Column(sqlalchemy.FLOAT)
@@ -157,8 +157,8 @@ class ac2_oda(Base):
 class ac2(Base):
   __tablename__ = 'ac2'
 
-  ID = Column(String, primary_key=True)
-  path = Column(String(200))
+  ID = Column(String)
+  path = Column(String(200), primary_key=True)
   r1_original = Column(sqlalchemy.FLOAT)
   r1_ac2 = Column(sqlalchemy.FLOAT)
   ata_original = Column(sqlalchemy.FLOAT)
