@@ -16,11 +16,15 @@ class XPlain:
   def exists(self):
     return self.exe_file != None
 
-  def run(self):
+  def run(self, run_auto=True):
     if not self.exe_file:
       print 'Could not locate the XPlain executable, aborting...'
       return 1
-        
+
+    if run_auto in ('False', 'false', False):
+      olx.Exec("'%s' -o" %self.exe_file)
+      return 0
+
     loaded_file = OV.FileFull()
     exts = ('ins', 'res', 'cif')
     cell_input_file = None
