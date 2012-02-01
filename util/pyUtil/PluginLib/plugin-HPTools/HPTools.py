@@ -20,7 +20,7 @@ print "Importing HPTools ..."
 
 from RunPrg import RunRefinementPrg
 
-from AC2 import AC2
+from AutoChem2 import AC2
 ac2 = AC2()
 
 import SQLAlchemy
@@ -766,25 +766,25 @@ class FileCrawlies():
     
     div_by_zero_bit = 0.00001
     ratio_r = (self.r1_original)/(r1+div_by_zero_bit)
-    if ratio_r >= 0.7:
+    if ratio_r >= 0.9:
       font_colour = OV.GetParam('gui.green')
       achieved = "Yes"  
-    elif ratio_r >= 0.65:
+    elif ratio_r >= 0.8:
       font_colour = OV.GetParam('gui.orange')
       achieved = "Maybe"  
-    elif ratio_r < 0.6:
+    elif ratio_r < 0.7:
       font_colour = OV.GetParam('gui.red')
       achieved = "No"  
     ratio_ata = (self.ata_original)/(ata + div_by_zero_bit)
     if ratio_ata <= 1:
-      font_colour = OV.GetParam('gui.green')
+      font_colour_a = OV.GetParam('gui.green')
       achieved = "Yes"
     elif ratio_ata <= 1.1:
-      font_colour = OV.GetParam('gui.orange')
+      font_colour_a = OV.GetParam('gui.orange')
       achieved = "Maybe"
     elif ratio_ata > 1.1:
-      font_colour = OV.GetParam('gui.red')
-    ata_ret = "<b>ATA = </b>%.0f/<font color='%s'>%.0f</font>" %(self.ata_original, font_colour, ata)
+      font_colour_a = OV.GetParam('gui.red')
+    ata_ret = "<b>ATA = </b>%.0f/<font color='%s'>%.0f</font>" %(self.ata_original, font_colour_a, ata)
 
 
 
