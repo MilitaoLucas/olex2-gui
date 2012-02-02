@@ -115,11 +115,9 @@
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 <!-- #includeif not(spy.xplain.exists()) olex2_space_group gui\tools\olex2-space-group-row.htm;1; -->
+<!-- #includeif spy.xplain.exists() rigaku_xplain_tool gui\tools\rigaku-xplain.htm;1; -->
 </table>
 
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
-<!-- #includeif spy.xplain.exists() rigaku_xplain_tool gui\tools\rigaku-xplain.htm;image=h3-space group determination;1; -->
-</table>
 
 <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
 <!-- #includeif fs.Exists(solution-settings-extra.htm) solution-settings-extra solution-settings-extra.htm;gui\blocks\tool-h3-off.htm;image=h3-solution settings extra;colspan=4;onclick=;2; -->
