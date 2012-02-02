@@ -77,7 +77,8 @@
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name='SET_Z'
         value='xf.au.GetZ()'
-        onchange="xf.au.SetZ(GetValue(SET_Z))>>html.Update"
+        onleave="xf.au.SetZ(GetValue(SET_Z))>>html.Update"
+        onreturn="html.Call(~name~.onleave)"
       >
   </td>
   <td width='20' align='right'>Z'</td>
@@ -89,7 +90,8 @@
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name='SET_Z_PRIME'
         value='xf.au.GetZprime()'
-        onchange="xf.au.SetZprime(GetValue(~name~))>>html.Update"
+        onleave="xf.au.SetZprime(GetValue(SET_Z_PRIME))>>html.Update"
+        onreturn="html.Call(~name~.onleave)"
       >
   </td>
   
