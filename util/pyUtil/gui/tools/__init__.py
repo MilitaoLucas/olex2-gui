@@ -45,7 +45,7 @@ class FolderView:
             self.content.append(FolderView.node(i, dn))
 
 
-  def list(self, mask=".ins;.res;.cif"):
+  def list(self, mask=".ins;.res;.cif;.oxm"):
     r = OV.GetParam('user.folder_view_root')
     if not r:
       r = "."

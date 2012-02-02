@@ -20,10 +20,10 @@ class XPlain:
     if not self.exe_file:
       print 'Could not locate the XPlain executable, aborting...'
       return 1
-
-    if run_auto in ('False', 'false', False):
-      olx.Exec("'%s' -o" %self.exe_file)
-      return 0
+    run_auto = run_auto not in ('False', 'false', False)
+    #if run_auto:
+      #olx.Exec("'%s' -o" %self.exe_file)
+      #return 0
 
     loaded_file = OV.FileFull()
     exts = ('ins', 'res', 'cif')
@@ -34,6 +34,7 @@ class XPlain:
     if not os.path.exists(hkl_file):
       print 'Could not locate HKL file, aborting...'
       return 1
+    print 'Hkl file: ' + hkl_file
     for e in exts:
       fn = olx.file.ChangeExt(loaded_file, e)
       if os.path.exists(fn):
@@ -43,11 +44,15 @@ class XPlain:
       print 'Could not locate cell input file, aborting...'
       return 1
     out_dir = olx.StrDir() + '\\'
-    out_file = out_dir + olx.FileName() + "-xplain.out"
+    out_file = self.get_output_name()
     hkl_out_file = out_dir + olx.FileName() + "-xplain.hkl"
-    cmdl = self.exe_file + ' /AutomaticChoice=0' + \
-      ' /InputParameterFilename="' + cell_input_file + '"' + \
-      ' /InputReflectionsFilename="' + hkl_file + '"' + \
+    ins_out_file = out_dir + olx.FileName() + "-xplain.ins"
+    cmdl = self.exe_file + ' /InputParameterFilename="' + cell_input_file + '"' + \
+      ' /InputReflectionsFilename="' + hkl_file + '"'
+    if not run_auto:
+      olx.Exec("%s -o" %cmdl)
+      return 0
+    cmdl += ' /AutomaticChoice=0' + \
       ' /OutputParameterFilename="' + out_file + '"' + \
       ' /OutputReflectionsFilename="' + hkl_out_file + '"'
     if not olx.Exec(cmdl + ' -s'):
@@ -73,7 +78,10 @@ class XPlain:
       esd_line = "ConstrainedCellSU%i" %cell_counter
       sg_line = "SpaceGroupNameHMAlt%i" %cell_counter
       hklf_line = "DiffrnReflnsTransfMatrix%i" %cell_counter
-      sg_line_tmpl = "$%s<-$%s,$%s,$%s,$%s" %(sg_line, sg_line, cell_line, esd_line, hklf_line)
+      symm_line = "SpaceGroupSymopOperationXyz%i" %cell_counter
+      latt_line = "SHELXLATT%i" %cell_counter
+      sg_line_tmpl = "$%s<-$%s~$%s~$%s~$%s~$%s" %(sg_line, symm_line, latt_line,
+        cell_line, esd_line, hklf_line)
       sgs.append(Template(sg_line_tmpl).substitute(out))
       if cell_counter == 0: sg0 = out[sg_line]
       cell_counter = cell_counter + 1
@@ -83,10 +91,21 @@ class XPlain:
     OV.SetParam('snum.refinement.sg_list', rv)
     control_name = 'SET_SNUM_REFINEMENT_SPACE_GROUP'
     if olex_gui.IsControl(control_name):
+      v = olx.html.GetValue(control_name)
       olx.html.SetItems(control_name, rv)
-      olx.html.SetValue(control_name, sg0.replace(' ', ''))
+      olx.html.SetValue(control_name, v)
     return 0
+
+  def output_exists(self):
+    return os.path.exists(self.get_output_name())
+
+  def get_output_name(self):
+    out_dir = olx.StrDir() + '\\'
+    return out_dir + olx.FileName() + "-xplain.out"
+
 
 x = XPlain()
 OV.registerFunction(x.exists, False, 'xplain')
 OV.registerFunction(x.run, False, 'xplain')
+OV.registerFunction(x.output_exists, False, 'xplain')
+OV.registerFunction(x.get_output_name, False, 'xplain')
