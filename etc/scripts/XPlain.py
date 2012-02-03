@@ -34,7 +34,7 @@ class XPlain:
     if not os.path.exists(hkl_file):
       print 'Could not locate HKL file, aborting...'
       return 1
-    print 'Hkl file: ' + hkl_file
+    #print 'Hkl file: ' + hkl_file
     for e in exts:
       fn = olx.file.ChangeExt(loaded_file, e)
       if os.path.exists(fn):
@@ -46,7 +46,7 @@ class XPlain:
     out_dir = olx.StrDir() + '\\'
     out_file = self.get_output_name()
     hkl_out_file = out_dir + olx.FileName() + "-xplain.hkl"
-    ins_out_file = out_dir + olx.FileName() + "-xplain.ins"
+    log_out_file = out_dir + olx.FileName() + "-xplain.log"
     cmdl = self.exe_file + ' /InputParameterFilename="' + cell_input_file + '"' + \
       ' /InputReflectionsFilename="' + hkl_file + '"'
     if not run_auto:
@@ -54,10 +54,27 @@ class XPlain:
       return 0
     cmdl += ' /AutomaticChoice=0' + \
       ' /OutputParameterFilename="' + out_file + '"' + \
-      ' /OutputReflectionsFilename="' + hkl_out_file + '"'
+      ' /OutputReflectionsFilename="' + hkl_out_file + '"' + \
+      ' /LogFilename="' + log_out_file + '"'
     if not olx.Exec(cmdl + ' -s'):
       print 'Failed to execute the command...'
       return 1
+
+    version = ''
+    if not(os.path.exists(log_out_file)):
+      print 'Could not locate the output log file'
+      return 1
+    else:
+      f = file(log_out_file)
+      try:
+        f.readline()
+        version = f.readline().strip().split()[1]
+      except:
+        print 'Could not locate XPlain version'
+      f.close()
+    if version:
+      print 'XPlain version: ' + version
+
     out_ = file(out_file, 'rb').readlines()
     out = {}
     for l in out_:
@@ -71,6 +88,7 @@ class XPlain:
     sg0 = ''
     cell_counter = 0
     line_cnt = len(out)
+    print 'Found space groups:'
     while True:
       cell_line = "ConstrainedCell%i" %cell_counter
       if not out.has_key(cell_line):
@@ -85,7 +103,9 @@ class XPlain:
       sgs.append(Template(sg_line_tmpl).substitute(out))
       if cell_counter == 0: sg0 = out[sg_line]
       cell_counter = cell_counter + 1
+      print "%i: %s" %(cell_counter, out[sg_line])
     if len(sgs) == 0:
+      print 'None'
       return 1
     rv = ';'.join(sgs)
     OV.SetParam('snum.refinement.sg_list', rv)
