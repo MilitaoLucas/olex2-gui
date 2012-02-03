@@ -422,7 +422,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       OV.SetParam('snum.refinement.suggested_weight', suggested_weight)
     self.gather_refinement_information()
     writeRefinementInfoIntoRes(self.cif)
-    
+
 
   def gather_refinement_information(self):
     cif = {}
@@ -450,7 +450,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
     flack = olx.Lst('flack')
     if flack == "n/a":
       flack = None
-    
+
     return flack
 
 
@@ -589,7 +589,7 @@ class Method_cctbx_refinement(Method_refinement):
 
   def post_refinement(self, RunPrgObject):
     writeRefinementInfoIntoRes(self.cif)
-    
+
   def writeRefinementInfoForGui(self, cif):
     for key, value in cif.iteritems():
       if "." in value:
@@ -603,7 +603,7 @@ class Method_cctbx_refinement(Method_refinement):
     OV.write_to_olex('refinedata.htm',t)
     self.cif = cif
 
-  
+
 
 class Method_cctbx_ChargeFlip(Method_solution):
 
@@ -884,7 +884,7 @@ def defineExternalPrograms():
     name='ShelXL',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="SHELXL, G.M. Sheldrick, Acta Cryst.\n2008). A64, 112-122",
+    reference="SHELXL, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
     execs=["shelxl.exe", "shelxl"])
   XL = Program(
     name='XL',
@@ -1820,7 +1820,7 @@ REM Peak = %(_refine_diff_density_min)s
 REM Flack = %(_refine_ls_abs_structure_Flack)s
 
 ''' %d
-    
+
   wFile = open('%s/%s.res' %(OV.FilePath(), OV.FileName()), 'a')
   wFile.write(txt)
   wFile.close()
