@@ -6,6 +6,7 @@ import olex
 import olexex
 import time
 import shutil
+import sys
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
@@ -20,6 +21,8 @@ print "Importing HPTools ..."
 
 from RunPrg import RunRefinementPrg
 
+sys.path.append("%s/util/pyUtil/PluginLib/plugin-AutoChem2" %OV.BaseDir())
+
 from AutoChem2 import AC2
 ac2 = AC2()
 
@@ -32,6 +35,21 @@ def db_test():
 #  engine = create_engine('sqlite:///:memory:', echo=True)#
 
 import time
+
+
+def mm_observer(msg):
+  print msg
+
+def mm():
+  f1 = OV.FileFull()
+  f2 = "%s/originals/%s.res" %(OV.StrDir(), OV.FileName())
+  exe = "%s/mm/%s.exe" %(OV.BaseDir(), "SimMKforOlexSys")
+  p = '"%s" "%s" -c 2> %s/mm.txt' %(f1, f2, OV.FilePath())
+  OV.registerCallback("procout", mm_observer)
+  os.system("%s %s" %(exe,p))
+#  olex.m('exec %s %s' %(exe, p))
+  OV.unregisterCallback("procout", mm_observer)
+OV.registerFunction(mm)
 
 def r(name='fred', number_to_average=50):
   l = []
@@ -130,7 +148,7 @@ def go_through_list():
     path = '%s%s' % (r"G:/HP/", p)
     if not os.path.exists(path):
       continue
-    olex.m('reap %s' %path)
+    olex.m('@reap %s' %file)
     html = "<html> Fred </html>"
     res = make_evaluate_html()
     if res:
@@ -532,6 +550,7 @@ class FileCrawlies():
     self.bulk_action_files(action='copy')
 
   def write_bulk_load_html(self, l, p, i, msg="", new=False):
+    return
     first_col = OV.GetParam('gui.html.table_firstcol_width')
     if new:
       wFile = open("%s/batch_list.htm" %OV.DataDir(), 'w')
@@ -629,9 +648,11 @@ class FileCrawlies():
       #action = 'scan'
       OV.SetParam('hptools.batch.action','ac2')
     
+    if action == "scan":
+      previous_run_dbr_l, self.previous_display = self.DBR.get_filtered_list(exclude='Structure')
+
     if action == "ac2":
       previous_run_dbr_l, self.previous_display = self.DBR.get_filtered_list(exclude='ac2')
-      
       
     if action == "oda":
       previous_run_dbr_l, self.previous_display = self.DBR.get_filtered_list(exclude='oda')
@@ -743,16 +764,17 @@ class FileCrawlies():
   def run_auto_file(self, file, which):
     if not OV.HKLSrc():
       return False
-    olexex.revert_to_original()
-    self.r1_original = float(olx.CalcR().split(",")[1])
-    ata = olx.ATA(1)
-    self.ata_original = float(ata.split(';')[1])
-
+#    olexex.revert_to_original()
+#    self.r1_original = float(olx.CalcR().split(",")[1])
+#    ata = olx.ATA(1)
+    self.ata_original = 0.00
+    self.r1_original = 0.00
 
     t = time.time()
     
     if which == "ac2":
       ac2.auto()
+   
     elif which == "oda":  
       olex.m('oda')
       
@@ -786,15 +808,15 @@ class FileCrawlies():
       font_colour_a = OV.GetParam('gui.red')
     ata_ret = "<b>ATA = </b>%.0f/<font color='%s'>%.0f</font>" %(self.ata_original, font_colour_a, ata)
 
-
-
     setattr(self, "achieved_%s" %which, achieved)
-
     setattr(self, "solution_name_%s" %which, "%s_%s" %(OV.GetParam('snum.solution.program'),OV.GetParam('snum.solution.method')))
     setattr(self, "t_%s" %which, "%.1f" %t)
     setattr(self, "r1_%s" %which, r1 )
     setattr(self, "ata_%s" %which, ata)
-    path = file.lstrip(self.drive_letter)  
+    setattr(self, "formula_%s" %which, olx.xf.au.GetFormula())
+    setattr(self, "match_%s" %which, "n/a")
+
+    path = file.lstrip(self.drive_letter)
     try:
       if which == "oda":
         self.add_oda_to_db(path)
@@ -963,7 +985,8 @@ class FileCrawlies():
         self.R1_olex2 = 0
    
   def reap_file(self, file):
-    olex.m("reap '%s'" %file)
+    #olex.m('@reap %s' %file)
+    olex.m('reap %s' %file)
     if OV.FileFull().lower() != file.lower():
       self.add_to_exclude_file(file, "FailedReap")
       return False
@@ -1031,7 +1054,9 @@ class FileCrawlies():
                       ata_ac2=self.ata_ac2,
                       time_ac2=self.t_ac2,
                       solution_ac2=self.solution_name_ac2,
-                      achieved_ac2=self.achieved_ac2)
+                      achieved_ac2=self.achieved_ac2,
+                      formula_ac2=self.formula_ac2,
+                      match_ac2=self.match_ac2)
     self.session.add(_)
     
   def add_oda_to_db(self, file):
