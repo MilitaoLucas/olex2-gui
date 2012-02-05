@@ -166,6 +166,8 @@ class ac2(Base):
   solution_ac2 = Column(String)
   time_ac2 = Column(sqlalchemy.FLOAT)
   achieved_ac2 = Column(String)
+  formula_ac2 = Column(String)
+  match_ac2 = Column(String)
   
   def __init__(self,
                ID,
@@ -177,6 +179,8 @@ class ac2(Base):
                solution_ac2,
                time_ac2,
                achieved_ac2,
+               formula_ac2,
+               match_ac2,
                ):
     self.ID = ID
     self.path = path
@@ -187,6 +191,8 @@ class ac2(Base):
     self.solution_ac2 = solution_ac2
     self.time_ac2 = time_ac2
     self.achieved_ac2 = achieved_ac2
+    self.formula_ac2 = formula_ac2
+    self.match_ac2 = match_ac2
     
   def __repr__(self):
     return "<ac2('%s(%s'))>" % (self.ID, self.path)
