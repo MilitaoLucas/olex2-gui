@@ -23,8 +23,9 @@ from RunPrg import RunRefinementPrg
 
 sys.path.append("%s/util/pyUtil/PluginLib/plugin-AutoChem2" %OV.BaseDir())
 
-from AutoChem2 import AC2
+from AC2 import AC2
 ac2 = AC2()
+
 
 import SQLAlchemy
 
@@ -645,11 +646,11 @@ class FileCrawlies():
       self.exclude_on_run_original = OV.GetParam('hptools.batch.run_new_only')
     else:
       self.exclude_on_run_original = False
-      #action = 'scan'
+      action = 'scan'
       OV.SetParam('hptools.batch.action','ac2')
     
-    if action == "scan":
-      previous_run_dbr_l, self.previous_display = self.DBR.get_filtered_list(exclude='Structure')
+#    if action == "scan":
+#      previous_run_dbr_l, self.previous_display = self.DBR.get_filtered_list(exclude='Structure')
 
     if action == "ac2":
       previous_run_dbr_l, self.previous_display = self.DBR.get_filtered_list(exclude='ac2')
@@ -1098,6 +1099,9 @@ class FileCrawlies():
     r1_original = float(olx.CalcR().split(",")[1])
     ata = olx.ATA(1)
     ata_original = float(ata.split(';')[1])
+    from olexex import OlexRefinementModel
+    ORM = OlexRefinementModel()
+    atom_count = ORM.number_non_hydrogen_atoms()
 
     if hos:
       txt = "%.2f%%(comp), %.2f%%(Rint)" %(hos['Completeness']*100, hos['Rint']*100)
@@ -1106,21 +1110,29 @@ class FileCrawlies():
                                    volume=olx.xf.au.GetVolume(),
                                    cell=olx.xf.au.GetCell(),
                                    formula=olx.xf.GetFormula(),
-                                   atom_count=olx.xf.au.GetAtomCount(),
+                                   atom_count=atom_count,
                                    space_group=olx.xf.au.GetCellSymm(),
                                    z_prime=olx.xf.au.GetZprime(),
                                    r1_original=r1_original,
                                    ata_original=ata_original,
                                    max_Z=max_Z,
                                    )
-      self.session.add(_)
+      __ = self.session.merge(_)
+      self.session.add(__)
+      #try:
+        #self.session.add(_)
+      #except:
+        #self.session.merge(_)
+      #finally:
+        #print "DB PROBLEM"
       _ = SQLAlchemy.Reflections(ID=str(OV.FileName()),
                                    path=path,
                                    r_int=hos['Rint'],
                                    ios=hos['MeanIOverSigma'],
                                    completeness=hos['Completeness'],
                                    )
-      self.session.add(_)
+      __ = self.session.merge(_)
+      self.session.add(__)
     else:
       txt = "No Reflection File!"
     print txt
