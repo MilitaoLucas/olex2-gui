@@ -43,7 +43,7 @@ class Structure(Base):
   volume = Column(sqlalchemy.FLOAT)
   cell = Column(String(50))
   formula = Column(String(50))
-  atom_count = Column(Integer)
+  atom_count = Column(sqlalchemy.FLOAT)
   space_group = Column(String(20))
   z_prime = Column(sqlalchemy.FLOAT)
   r1_original = Column(sqlalchemy.FLOAT)
@@ -196,6 +196,51 @@ class ac2(Base):
     
   def __repr__(self):
     return "<ac2('%s(%s'))>" % (self.ID, self.path)
+
+
+class ac2_1(Base):
+  __tablename__ = 'ac2_1'
+
+  ID = Column(String)
+  path = Column(String(200), primary_key=True)
+  r1_original = Column(sqlalchemy.FLOAT)
+  r1_ac2_1 = Column(sqlalchemy.FLOAT)
+  ata_original = Column(sqlalchemy.FLOAT)
+  ata_ac2_1 = Column(sqlalchemy.FLOAT)
+  solution_ac2_1 = Column(String)
+  time_ac2_1 = Column(sqlalchemy.FLOAT)
+  achieved_ac2_1 = Column(String)
+  formula_ac2_1 = Column(String)
+  match_ac2_1 = Column(String)
+  
+  def __init__(self,
+               ID,
+               path,
+               r1_original,
+               r1_ac2_1,
+               ata_original,
+               ata_ac2_1,
+               solution_ac2_1,
+               time_ac2_1,
+               achieved_ac2_1,
+               formula_ac2_1,
+               match_ac2_1,
+               ):
+    self.ID = ID
+    self.path = path
+    self.r1_original = r1_original
+    self.r1_ac2_1 = r1_ac2_1
+    self.ata_original = ata_original
+    self.ata_ac2_1 = ata_ac2_1
+    self.solution_ac2_1 = solution_ac2_1
+    self.time_ac2_1 = time_ac2_1
+    self.achieved_ac2_1 = achieved_ac2_1
+    self.formula_ac2_1 = formula_ac2_1
+    self.match_ac2_1 = match_ac2_1
+    
+  def __repr__(self):
+    return "<ac2('%s(%s'))>" % (self.ID, self.path)
+
 
 
 class oda(Base):
