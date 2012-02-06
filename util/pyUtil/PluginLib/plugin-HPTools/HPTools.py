@@ -21,7 +21,7 @@ print "Importing HPTools ..."
 
 from RunPrg import RunRefinementPrg
 
-sys.path.append("%s/util/pyUtil/PluginLib/plugin-AutoChem2" %OV.BaseDir())
+sys.path.append("%s/util/pyUtil/PluginLib/plugin-AC2" %OV.BaseDir())
 
 from AC2 import AC2
 ac2 = AC2()
@@ -55,7 +55,7 @@ OV.registerFunction(mm)
 def r(name='fred', number_to_average=50):
   l = []
   number_to_average = int(number_to_average)
-  rFile = open(r"G:\HP\olex2-trunk\util\pyUtil\PluginLib\plugin-AutoChem2\report\%s.csv" %name, 'r').readlines()
+  rFile = open(r"%s\util\pyUtil\PluginLib\plugin-AC2\report\%s.csv" %(OV.BaseDir(),name), 'r').readlines()
   m =[]
   total_number = len(l)
   a = b = c = 0
@@ -82,7 +82,7 @@ def r(name='fred', number_to_average=50):
         a = b = c = 0
         
         
-  wFile = open(r"G:\HP\olex2-trunk\util\pyUtil\PluginLib\plugin-AutoChem2\report\%s%s.txt" %(name, number_to_average), 'w')
+  wFile = open(r"%s\util\pyUtil\PluginLib\plugin-AC2\report\%s%s.txt" %(OV.BaseDir(),name, number_to_average), 'w')
   for line in m:
     wFile.write(line)
   wFile.close()
