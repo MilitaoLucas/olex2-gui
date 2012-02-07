@@ -58,6 +58,7 @@
   Filter
   Run Batch AC2
   Run Batch ODA
+  Run Batch
   Filter Database
   Scan Directory
 
@@ -82,6 +83,7 @@
   HFIX
   Set
   Back
+  Run Batch
 
 [FULL ROW]
   Run AutoChem
@@ -138,3 +140,4 @@
   Tutorials
   Solution Settings Extra
   Refinement Settings Extra
+  Space Group Determination

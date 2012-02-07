@@ -653,7 +653,10 @@ class FileCrawlies():
 #      previous_run_dbr_l, self.previous_display = self.DBR.get_filtered_list(exclude='Structure')
 
     if action == "ac2":
-      previous_run_dbr_l, self.previous_display = self.DBR.get_filtered_list(exclude='ac2')
+      if OV.GetParam('hptools.batch.run_new_only'):
+        previous_run_dbr_l, self.previous_display = self.DBR.get_filtered_list(exclude='ac2')
+      else:
+        previous_run_dbr_l, self.previous_display = self.DBR.get_filtered_list(exclude=None)
       
     if action == "oda":
       previous_run_dbr_l, self.previous_display = self.DBR.get_filtered_list(exclude='oda')
@@ -672,8 +675,13 @@ class FileCrawlies():
               m.append(item)
           else:
             if tem.lower() in filter_list:
-              if tem.lower() not in previous_run_dbr_l:
-                m.append(item)
+              if OV.GetParam('hptools.batch.run_new_only'):
+                if tem.lower() not in previous_run_dbr_l:
+                  m.append(item)
+              else:
+                if tem.lower() in previous_run_dbr_l:
+                  m.append(item)
+                
         l = m
     elif not l:
       l = filter_list
@@ -1058,7 +1066,8 @@ class FileCrawlies():
                       achieved_ac2=self.achieved_ac2,
                       formula_ac2=self.formula_ac2,
                       match_ac2=self.match_ac2)
-    self.session.add(_)
+    __ = self.session.merge(_)
+    self.session.add(__)
     
   def add_oda_to_db(self, file):
     _ = SQLAlchemy.oda(ID=str(OV.FileName()),
@@ -1090,6 +1099,13 @@ class FileCrawlies():
                                    )
     self.session.add(_)
     
+  def check_for_twinning_in_ins(self):
+    txt = open(OV.FileFull(), 'r').read()
+    if "twin" in txt.lower():
+      return "True"
+    else:
+      return "False"
+    
   def add_to_db(self, path):
     if not self.session:
       self.session = SQLAlchemy.get_session(self.use_db)
@@ -1102,6 +1118,7 @@ class FileCrawlies():
     from olexex import OlexRefinementModel
     ORM = OlexRefinementModel()
     atom_count = ORM.number_non_hydrogen_atoms()
+    twin = self.check_for_twinning_in_ins()
 
     if hos:
       txt = "%.2f%%(comp), %.2f%%(Rint)" %(hos['Completeness']*100, hos['Rint']*100)
@@ -1116,6 +1133,7 @@ class FileCrawlies():
                                    r1_original=r1_original,
                                    ata_original=ata_original,
                                    max_Z=max_Z,
+                                   twin=twin,
                                    )
       __ = self.session.merge(_)
       self.session.add(__)
@@ -1125,14 +1143,14 @@ class FileCrawlies():
         #self.session.merge(_)
       #finally:
         #print "DB PROBLEM"
-      _ = SQLAlchemy.Reflections(ID=str(OV.FileName()),
-                                   path=path,
-                                   r_int=hos['Rint'],
-                                   ios=hos['MeanIOverSigma'],
-                                   completeness=hos['Completeness'],
-                                   )
-      __ = self.session.merge(_)
-      self.session.add(__)
+      ##_ = SQLAlchemy.Reflections(ID=str(OV.FileName()),
+                                   ##path=path,
+                                   ##r_int=hos['Rint'],
+                                   ##ios=hos['MeanIOverSigma'],
+                                   ##completeness=hos['Completeness'],
+                                   ##)
+      ##__ = self.session.merge(_)
+      ##self.session.add(__)
     else:
       txt = "No Reflection File!"
     print txt
