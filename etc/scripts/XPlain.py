@@ -100,6 +100,8 @@ class XPlain:
       latt_line = "SHELXLATT%i" %cell_counter
       sg_line_tmpl = "$%s<-$%s~$%s~$%s~$%s~$%s" %(sg_line, symm_line, latt_line,
         cell_line, esd_line, hklf_line)
+      # P1/P-1 and just centered SG will not have this
+      out.setdefault(symm_line, '')
       sgs.append(Template(sg_line_tmpl).substitute(out))
       if cell_counter == 0: sg0 = out[sg_line]
       cell_counter = cell_counter + 1
