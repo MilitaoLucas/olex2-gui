@@ -47,7 +47,8 @@ class ImageTools(FontInstances):
     ##Encodings
     self.good_encodings = ["ISO8859-1", "ISO8859-2"]
     self.gui_language_encoding = olx.CurrentLanguageEncoding()
-    self.gui_current_language = olx.CurrentLanguage()
+    if OV.HasGUI():
+      self.gui_current_language = olx.CurrentLanguage()
 
     self.get_font_peculiarities()
 
@@ -571,9 +572,8 @@ class ImageTools(FontInstances):
       except:
         colour = colour
 
-    if type(colour) is str:
-      if "#" in colour:
-        colour = ImageColor.getrgb(colour)
+    if "#" in str(colour):
+      colour = ImageColor.getrgb(colour)
     try:
       c = self.colorsys.rgb_to_hls(*[x/255.0 for x in colour])
     except:

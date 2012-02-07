@@ -1,7 +1,7 @@
 <input
   type='combo'
   bgcolor="$GetVar(HtmlInputBgColour)"
-  width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 - spy.GetParam(gui.htmlpanelwidth_margin_adjust)/2 - spy.GetParam(gui.html.table_firstcol_width))' 
+  width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 - spy.GetParam(gui.htmlpanelwidth_margin_adjust) - spy.GetParam(gui.html.table_firstcol_width))' 
   height="$GetVar(HtmlComboHeight)"
   name='SET_#scope_#prg_type_PROGRAM'
   value='$spy.GetParam(#scope.#prg_type.program)'

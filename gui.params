@@ -146,7 +146,7 @@ gui
       .type = colour
     table_firstcol_colour = #dedede
       .type = colour
-    table_firstcol_width = 18
+    table_firstcol_width = 16
       .type = int
     MainToolbarTabButtonActive = None
       .type = str
@@ -276,7 +276,7 @@ gui
         .type = colour
       grad_step = 0.2
         .type = float
-      font_colour = None
+      font_colour = #ffffff
         .type = colour
       height = 24
         .type = int
@@ -298,8 +298,11 @@ gui
         .type = int
       rounded = 0101
         .type = str
-      arrows = "bar:right:26,arrow_right:onup:offdown:hoverdown:hoveronup,buttonmark:33"
+      arrows = "bar:right:26,arrow_right:onup:offdown:hoverdown:hoveronup"
         .type = str
+      buttonmark = 5:#b40000:4
+        .type = str
+      
 
       off_L = 1.6
         .type = float
@@ -320,7 +323,8 @@ gui
         .type = colour
       dot_colour_on = #444444
         .type = colour
-
+      shadow = False
+        .type = bool
     }
 
     button{
@@ -330,17 +334,17 @@ gui
         .type = colour
       grad_step = 0.3
         .type = float
-      height = 18
+      height = 20
         .type = int
       corner_rad = 3
         .type = int
-      rounded = 1111
+      rounded = 0000
         .type = str
       font_size = 12
         .type = int
       halign = left
         .type = str
-      top = 1
+      top = 2
         .type = int
       left = 4
         .type = int
@@ -352,7 +356,9 @@ gui
         .type = float
       font_colour = #767676
         .type = colour
-      arrows = buttonmark:11
+      arrows = None
+        .type = str
+      buttonmark = 2:#999999:6
         .type = str
       off_L = 0.9
         .type = float
@@ -360,6 +366,17 @@ gui
         .type = float
       on_L = 1.2
         .type = float
+      border = 1
+        .type = int
+      border_colour = #ababab
+        .type = colour
+      shadow = False
+        .type = bool
+    }
+
+    small_buttons{
+      width = 80
+        .type = int
     }
 
     tinybutton{
@@ -502,7 +519,7 @@ gui
     .type = str
   htmlpanelwidth = 460
     .type = int
-  htmlpanelwidth_margin_adjust = 22
+  htmlpanelwidth_margin_adjust = 18
     .type = int
   grad_top_left = #1f3257
     .type = colour
@@ -543,7 +560,6 @@ gui
         .type = int
     }
   }
-
   report{
     width = 800
       .type = int
