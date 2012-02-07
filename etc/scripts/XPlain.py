@@ -16,11 +16,15 @@ class XPlain:
   def exists(self):
     return self.exe_file != None
 
-  def run(self):
+  def run(self, run_auto=True):
     if not self.exe_file:
       print 'Could not locate the XPlain executable, aborting...'
       return 1
-        
+    run_auto = run_auto not in ('False', 'false', False)
+    #if run_auto:
+      #olx.Exec("'%s' -o" %self.exe_file)
+      #return 0
+
     loaded_file = OV.FileFull()
     exts = ('ins', 'res', 'cif')
     cell_input_file = None
@@ -30,6 +34,7 @@ class XPlain:
     if not os.path.exists(hkl_file):
       print 'Could not locate HKL file, aborting...'
       return 1
+    #print 'Hkl file: ' + hkl_file
     for e in exts:
       fn = olx.file.ChangeExt(loaded_file, e)
       if os.path.exists(fn):
@@ -39,16 +44,37 @@ class XPlain:
       print 'Could not locate cell input file, aborting...'
       return 1
     out_dir = olx.StrDir() + '\\'
-    out_file = out_dir + olx.FileName() + "-xplain.out"
+    out_file = self.get_output_name()
     hkl_out_file = out_dir + olx.FileName() + "-xplain.hkl"
-    cmdl = self.exe_file + ' /AutomaticChoice=0' + \
-      ' /InputParameterFilename="' + cell_input_file + '"' + \
-      ' /InputReflectionsFilename="' + hkl_file + '"' + \
+    log_out_file = out_dir + olx.FileName() + "-xplain.log"
+    cmdl = self.exe_file + ' /InputParameterFilename="' + cell_input_file + '"' + \
+      ' /InputReflectionsFilename="' + hkl_file + '"'
+    if not run_auto:
+      olx.Exec("%s -o" %cmdl)
+      return 0
+    cmdl += ' /AutomaticChoice=0' + \
       ' /OutputParameterFilename="' + out_file + '"' + \
-      ' /OutputReflectionsFilename="' + hkl_out_file + '"'
+      ' /OutputReflectionsFilename="' + hkl_out_file + '"' + \
+      ' /LogFilename="' + log_out_file + '"'
     if not olx.Exec(cmdl + ' -s'):
       print 'Failed to execute the command...'
       return 1
+
+    version = ''
+    if not(os.path.exists(log_out_file)):
+      print 'Could not locate the output log file'
+      return 1
+    else:
+      f = file(log_out_file)
+      try:
+        f.readline()
+        version = f.readline().strip().split()[1]
+      except:
+        print 'Could not locate XPlain version'
+      f.close()
+    if version:
+      print 'XPlain version: ' + version
+
     out_ = file(out_file, 'rb').readlines()
     out = {}
     for l in out_:
@@ -62,6 +88,7 @@ class XPlain:
     sg0 = ''
     cell_counter = 0
     line_cnt = len(out)
+    print 'Found space groups:'
     while True:
       cell_line = "ConstrainedCell%i" %cell_counter
       if not out.has_key(cell_line):
@@ -69,20 +96,38 @@ class XPlain:
       esd_line = "ConstrainedCellSU%i" %cell_counter
       sg_line = "SpaceGroupNameHMAlt%i" %cell_counter
       hklf_line = "DiffrnReflnsTransfMatrix%i" %cell_counter
-      sg_line_tmpl = "$%s<-$%s,$%s,$%s,$%s" %(sg_line, sg_line, cell_line, esd_line, hklf_line)
+      symm_line = "SpaceGroupSymopOperationXyz%i" %cell_counter
+      latt_line = "SHELXLATT%i" %cell_counter
+      sg_line_tmpl = "$%s<-$%s~$%s~$%s~$%s~$%s" %(sg_line, symm_line, latt_line,
+        cell_line, esd_line, hklf_line)
+      # P1/P-1 and just centered SG will not have this
+      out.setdefault(symm_line, '')
       sgs.append(Template(sg_line_tmpl).substitute(out))
       if cell_counter == 0: sg0 = out[sg_line]
       cell_counter = cell_counter + 1
+      print "%i: %s" %(cell_counter, out[sg_line])
     if len(sgs) == 0:
+      print 'None'
       return 1
     rv = ';'.join(sgs)
     OV.SetParam('snum.refinement.sg_list', rv)
     control_name = 'SET_SNUM_REFINEMENT_SPACE_GROUP'
     if olex_gui.IsControl(control_name):
+      v = olx.html.GetValue(control_name)
       olx.html.SetItems(control_name, rv)
-      olx.html.SetValue(control_name, sg0.replace(' ', ''))
+      olx.html.SetValue(control_name, v)
     return 0
+
+  def output_exists(self):
+    return os.path.exists(self.get_output_name())
+
+  def get_output_name(self):
+    out_dir = olx.StrDir() + '\\'
+    return out_dir + olx.FileName() + "-xplain.out"
+
 
 x = XPlain()
 OV.registerFunction(x.exists, False, 'xplain')
 OV.registerFunction(x.run, False, 'xplain')
+OV.registerFunction(x.output_exists, False, 'xplain')
+OV.registerFunction(x.get_output_name, False, 'xplain')

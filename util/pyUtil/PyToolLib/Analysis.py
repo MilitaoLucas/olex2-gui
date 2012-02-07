@@ -822,7 +822,7 @@ class Graph(ImageTools):
     m_offset = 5
     ## Wipe the legend area
     box = (0,legend_top,width,legend_top + 20)
-    self.draw.rectangle(box, fill=self.fillColour)
+    self.draw.rectangle(box, fill=self.pageColour)
     #txt = '%.3f' %(y_value)
     ## Draw Current Numbers
     wX, wY = IT.textsize(self.draw, txt, font_size=font_size)
@@ -1363,7 +1363,9 @@ class PrgAnalysis(Analysis):
     self.params = OV.Params().graphs.program_analysis
     self.counter = 0
     self.attempt = 1
-    size = (int(OV.GetParam('gui.htmlpanelwidth'))- 30, 150)
+    #size = (int(OV.GetParam('gui.htmlpanelwidth'))- 30, 150)
+    size = (OV.GetParam('gui.htmlpanelwidth')- OV.GetParam('gui.html.table_firstcol_width') - 35, 100)
+
     self.item = program.name
     self.graphInfo["Title"] = self.item
     self.params.size_x, self.params.size_y = size
@@ -2242,7 +2244,6 @@ class HistoryGraph(Analysis):
     self.params = OV.Params().graphs.program_analysis
     self.i_bar = 0
     self.tree = history_tree
-    #size = (OV.GetParam('gui.htmlpanelwidth')- 32, 100)
     self.item = "history"
     #self.params.size_x, self.params.size_y = size
     #self.make_empty_graph(draw_title=False)
@@ -2281,7 +2282,7 @@ class HistoryGraph(Analysis):
       bars.append((R1,href,target))
       node = node.active_child_node
     n_bars = len(bars)
-    size = (OV.GetParam('gui.htmlpanelwidth')- 32, 100)
+    size = (OV.GetParam('gui.htmlpanelwidth')- OV.GetParam('gui.html.table_firstcol_width') - 35, 100)
     self.params.size_x, self.params.size_y = size
     self.make_empty_graph(draw_title=False)
 
@@ -2651,7 +2652,7 @@ class HealthOfStructure():
     return d
 
   def make_HOS_html(self):
-    txt = "<tr><table width='100%%' cellpadding=0 cellspacing=0><tr>"
+    txt = "<table width='100%%' cellpadding=0 cellspacing=0><tr>"
     l = ['MeanIOverSigma','Rint','completeness']
     for item in l:
       if item != 'completeness':
@@ -2663,23 +2664,27 @@ class HealthOfStructure():
       value_format = OV.GetParam('diagnostics.hkl.%s.value_format' %item)
       href = OV.GetParam('diagnostics.hkl.%s.href' %item)
       raw_val = value
-      if "%" in value_format:
-        value_format = value_format.replace('%','f%%')
-        value = value * 100
-        #raw_val = value
-      if item == 'Rint':
-        if raw_val == 0:
-          value = "Merged Data!"
-          bg_colour = "#000000"
-        elif raw_val == -1:
-          value = "MERG 0"
-          bg_colour = "#000000"
+      if not value:
+        value = "NO VALUE!"
+        bg_colour = "#000000"
+      else:
+        if "%" in value_format:
+          value_format = value_format.replace('%','f%%')
+          value = value * 100
+          #raw_val = value
+        if item == 'Rint':
+          if raw_val == 0:
+            value = "Merged Data!"
+            bg_colour = "#000000"
+          elif raw_val == -1:
+            value = "MERG 0"
+            bg_colour = "#000000"
+          else:
+            value_format = "%." + value_format
+            value = value_format %value
         else:
           value_format = "%." + value_format
           value = value_format %value
-      else:
-        value_format = "%." + value_format
-        value = value_format %value
       use_image = False
       if use_image:
         txt += self.make_hos_images(item=item, colour=bg_colour, display=display, value_raw=raw_val, value_display=value, n=len(l))
@@ -2694,7 +2699,7 @@ class HealthOfStructure():
         if href:
           txt = txt + "</a>"
 
-    txt += "</tr></table></tr>"
+    txt += "</tr></table>"
     txt = txt.decode('utf-8')
     OV.write_to_olex("hos.htm",txt)
     OV.SetParam('snum.data.hkl_stat_file', OV.HKLSrc())

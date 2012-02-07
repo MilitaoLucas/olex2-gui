@@ -1255,7 +1255,7 @@ class timage(ImageTools):
 #    max_width = cut[2] - cut[0]
 #    crop =  im.crop(cut)
     button_names = self.image_items_d.get("SMALL BUTTONS")
-    width = OV.GetParam('gui.buttons.small_buttons.width')
+    width = OV.GetParam('gui.timage.small_buttons.width')
     width = int(round(width * self.size_factor,0))
     self.produce_buttons(button_names, self.sf,"_small",width=width)
 
@@ -1299,7 +1299,7 @@ class timage(ImageTools):
       
 
     
-    cut = 0*sf, 151*sf, 17*sf, 168*sf
+    cut = 0*sf, 151*sf, 16*sf, 168*sf
     crop =  im.crop(cut)
     #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=1.98))
     states = ['', 'on', 'off', 'hover', 'hoveron']
@@ -2760,7 +2760,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     base_colour = OV.GetParam('gui.timage.%s.base_colour' %item_type)
     highlight_colour = OV.GetParam('gui.html.highlight_colour').rgb
     self.highlight_colour = highlight_colour
-
+    
     if not base_colour:
       base_colour = OV.GetParam('gui.timage.base_colour')
       if not base_colour:
@@ -2773,6 +2773,12 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     grad_step = OV.GetParam('gui.timage.%s.grad_step' %item_type)
     grad_colour = OV.GetParam('gui.timage.%s.grad_colour' %item_type)
     font_colour = OV.GetParam('gui.timage.%s.font_colour' %item_type)
+    shadow = OV.GetParam('gui.timage.%s.shadow' %item_type)
+    border = OV.GetParam('gui.timage.%s.border' %item_type)
+    if border:
+      border_colour = OV.GetParam('gui.timage.%s.border_colour' %item_type).hexadecimal
+
+
 
     #if state == "highlight":
     #  font_colour = OV.GetParam('gui.html.highlight_colour')
@@ -2799,6 +2805,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       valign = False
       font_size = int(round(font_size * self.size_factor,0))
     arrows = OV.GetParam('gui.timage.%s.arrows' %item_type)
+    buttonmarks = OV.GetParam('gui.timage.%s.buttonmark' %item_type)
 
     if state == "highlight":
       grad_colour = OV.GetParam('gui.html.highlight_colour').rgb
@@ -2821,7 +2828,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     shadow = OV.GetParam('gui.timage.%s.shadow' %item_type)
     if shadow is None: shadow = True
-    border = False
+    #border = False
     arrow_scale = 1.0
 
     if item_type == "h1":
@@ -2843,7 +2850,13 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     elif item_type == 'button':
       underground = OV.GetParam('gui.html.table_bg_colour').rgb
-      shadow = False
+#      shadow = True
+
+      if border_colour:
+        border_fill = border_colour
+      else:
+        border_fill = '#ff0000'
+
       buttonmark = True
       if state == "on":
         grad_colour = highlight_colour
@@ -2889,7 +2902,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       if state == 'on':
         font_colour = self.highlight_colour
       else:
-        font_colour = IT.adjust_colour(grad_colour, luminosity = OV.GetParam('gui.timage.font_colour_L'))
+        if not font_colour:
+          font_colour = IT.adjust_colour(grad_colour, luminosity = OV.GetParam('gui.timage.font_colour_L'))
       border = True
       border_weight = 1
       border_fill = IT.adjust_colour(grad_colour, luminosity = 0.8)
@@ -2948,6 +2962,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       draw = ImageDraw.Draw(image)
       self.draw_advertise_new(draw, image)
       self.advertise_new = False
+      
+    if buttonmarks:
+      image = self.make_buttonmarks(state, width, buttonmarks, image, height, base_colour)
 
     if arrows:
       off_L = OV.GetParam('gui.timage.%s.off_L' %item_type)
@@ -2966,7 +2983,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       image = self.make_arrows(state, width, arrows, image, height, base_colour, off_L, on_L, hover_L, arrow_scale)
 
     if border:
-      image = self.make_timage_border(image, fill = border_fill)
+      image = self.make_timage_border(image, fill = border_fill, weight = border)
 
     if corner_rad:
       rounded = OV.GetParam('gui.timage.%s.rounded' %item_type)
@@ -2986,12 +3003,14 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     return image
 
   def make_timage_border (self, image, weight=1, fill='#ababab'):
+    
     width, height = image.size
     draw = ImageDraw.Draw(image)
-    draw.line((0,0,width-1,0), fill = fill)
-    draw.line((0,height -1,width-1,height -1), fill = fill)
-    draw.line((0,0,0,height - 1), fill = fill)
-    draw.line((width -1,0,width-1,height -1), fill = fill)
+    for i in xrange(weight):
+      draw.line((0,0,width-1-i,0), fill = fill)
+      draw.line((0,height -1-i,width-1-i,height -1-i), fill = fill)
+      draw.line((0,0,0,height - 1-i), fill = fill)
+      draw.line((width -1-i,0,width-1-i,height -1-i), fill = fill)
     return image
 
   def make_corners(self, rounded, image, corner_rad, underground):
@@ -3011,7 +3030,47 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     image = self.add_whitespace(image=image, side='bottom', margin_left=corner_rad, weight=1, colour = self.adjust_colour(underground, luminosity = 0.97))
     image = self.add_whitespace(image=image, side='bottom', margin_left=corner_rad, weight=1, colour = self.adjust_colour(underground, luminosity = 0.99))
     return image
+  
+  
+  def make_buttonmarks(self, state, width, buttonmarks, image, height, base_colour):
+    draw = ImageDraw.Draw(image)
+    _ = buttonmarks.split(':')
+    margin = int(_[0])
+    
+    if len(_) >= 2:
+      bm_colour = _[1]
+    else:
+      bm_colour = 1.2
 
+    if len(_) >= 3:
+      bm_width = int(_[2])
+    else:
+      bm_width = 4
+
+    if "#" in str(bm_colour):
+      col = bm_colour
+    else:
+      col = self.font_colour
+      
+    if state == "hover":
+      fill = IT.adjust_colour(col, luminosity=0.8)
+    else:
+      fill = col
+      
+    if fill is None:
+      fill = "#ff0000"
+
+    if not draw:
+      draw = ImageDraw.Draw(image)
+    w,h = image.size
+    margin += bm_width * 2
+    for i in xrange(int(h/2) - 2):
+      y = 2 + i * 2
+      for j in xrange(bm_width):
+        x = (w - margin) + j * 2
+        draw.point((x, y), fill)
+    return image
+  
 
   def make_arrows(self, state, width, arrows, image, height, base_colour, off_L, on_L, hover_L, scale=1.0):
     draw = None
@@ -3122,21 +3181,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       end = (7, 2)
       draw.polygon((begin, middle, end), fill)
 
-    if 'buttonmark' in arrows:
-      if state == "hover":
-        fill = IT.adjust_colour(self.font_colour, luminosity=1.2)
-      else:
-        fill = "#ffffff"
-
-      margin = int(arrows.split('buttonmark:')[1].split(',')[0])
-      if not draw:
-        draw = ImageDraw.Draw(image)
-      w,h = image.size
-      for i in xrange(int(h/2) - 2):
-        y = 2 + i * 2
-        for j in xrange(4):
-          x = (w - margin) + j * 2
-          draw.point((x, y), fill)
     return image
 
   def drawFileFullInfo(self, draw, colour='#ff0000', right_margin=0, height=10, font_name="Vera", font_size=8, left_start = 0):

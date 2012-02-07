@@ -913,12 +913,17 @@ def GetRInfo(txt="",format='html'):
       else:
         R1 = 'n/a'
     font_size = OV.GetParam('gui.html.font_size_large')
-    if format == 'html':
+    if 'html' in format:
       try:
         R1 = float(R1)
         col = GetRcolour(R1)
         R1 = "%.2f" %(R1*100)
-        t = r"<td colspan='1' align='right' rowspan='2'><font size='%s' color='%s'><b>%s%%</b></font></td>" %(font_size, col, R1)
+        
+        if 'report' in format:
+          t = r"<font size='%s'>R1 = <font color='%s'><b>%s%%</b></font></font>" %(font_size, col, R1)
+        else:
+          t = r"<td colspan='1' align='right' rowspan='2'><font size='%s'>R1 = <font color='%s'><b>%s%%</b></font></font></td>" %(font_size, col, R1)
+          
       except:
         t = "<td colspan='1' rowspan='2' align='right'><font size='%s'><b>%s</b></font></td>" %(font_size, R1)
       finally:
@@ -1957,6 +1962,7 @@ def dealWithReportImage():
 #    OV.SetParam('snum.report.image',None)
     return
   elif image_name == "screenshot":
+    olex.m('showq false')
     olex.m('pict -pq screenshot.png 1')
     OV.SetParam('snum.report.image',"%s\screenshot.png" %OV.FilePath())
 OV.registerFunction(dealWithReportImage)
@@ -2005,6 +2011,10 @@ def getReportExtraCIFItems(name_td_class, value_td_class, type='html'):
     pass
   return rv
 OV.registerFunction(getReportExtraCIFItems)
+
+def get_text_from_vfs(item):
+  return OV.get_txt_from_vfs(item)
+OV.registerFunction(get_text_from_vfs)
 
 def getReportPhilItem(philItem=None):
   item = OV.GetParam(philItem)
@@ -2200,6 +2210,8 @@ def revert_to_original():
       wFile.close()
       OV.AtReap(outpath)
       print("Reverted to the original file %s" %path)
+      if OV.HasGUI():
+        olx.html.Update()
       return
   print("Could not revert to any original file!")
 OV.registerFunction(revert_to_original)

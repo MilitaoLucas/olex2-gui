@@ -13,7 +13,6 @@ scripts = [
   'flipsmall',
   'OlexBET',
   'Olexhole',
-  'XPlain',
   #'OlexSir',
   #'LazyOlex',
 ]
@@ -21,6 +20,7 @@ scripts = [
 if olx.HasGUI().lower() == "true":
   scripts += ['Olex2CCDC',
               'Tutorials',
+              'XPlain',
               ]
 
 
