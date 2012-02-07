@@ -1016,12 +1016,12 @@ def OnModeChange(*args):
 
 #  mode_disp = "%s" %mode
 
-  if last_mode == active_mode and modequalifiers == last_mode_options:
+  if last_mode == active_mode and last_mode is not None and\
+     modequalifiers == last_mode_options:
     return
 
   if not active_mode:
     active_mode = d.get(mode_disp, None)
-
 
   if mode == 'off':
     OV.SetParam('olex2.in_mode',None)
