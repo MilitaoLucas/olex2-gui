@@ -114,7 +114,8 @@ class StreamRedirection:
     import tokenize
     traceback.print_exc()
     tb = sys.exc_info()[2]
-    olx.Cursor("")
+    if OV.HasGUI():
+      olx.Cursor("")
     if tb is not None:
       while tb.tb_next is not None: tb = tb.tb_next
       frame = tb.tb_frame
