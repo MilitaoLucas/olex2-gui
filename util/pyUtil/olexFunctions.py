@@ -6,6 +6,7 @@ import sys
 import olx
 import olex
 import olex_core
+import OlexVFS
 import cProfile
 from subprocess import *
 import guiFunctions
@@ -104,6 +105,10 @@ class OlexFunctions(inheritFunctions):
       return olx.phil_handler.get_python_object()
     else:
       return None
+    
+  def get_txt_from_vfs(self, item):
+    _ = item
+    return OlexVFS.read_from_olex(_)
 
   def get_cif_item(self, key, default="", output_format=False):
     if olx.cif_model is not None:

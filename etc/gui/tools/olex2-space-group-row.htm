@@ -1,0 +1,22 @@
+<tr VALIGN='center' ALIGN='left'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Space-Group;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;colspan=#colspan;1; -->
+  <td VALIGN='center'>
+    <b>%Space Group%</b>&nbsp;
+    <a href='sg>>spy.SetParam(snum.refinement.sg_list,SGList())>>html.update'><b>%Suggest SG%</b></a>
+  </td>
+  <td VALIGN='center' ALIGN='right'>
+      <input
+        type='combo'
+        width="120"
+        height="$GetVar(HtmlComboHeight)"
+        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+        name='SET_SNUM_REFINEMENT_SPACE_GROUP'
+        items='$spy.GetParam(snum.refinement.sg_list)'
+        value='$sg(%n)'
+        onchange="reset -s='GetValue(~name~)' -c=GetValue(SET_SNUM_REFINEMENT_FORMULA)>>spy.run_skin sNumTitle>>html.Update"
+        onreturn="html.Call(~name~.onchange)"
+      >
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
