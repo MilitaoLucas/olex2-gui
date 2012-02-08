@@ -13,11 +13,11 @@ mac32_port_name = 'port-mac-intel-py27'
 mac32_port_zip_name = 'olex2-mac32-intel.zip'
 mac32_port_prefix = 'olex2.app/Contents/MacOS/'
 
-linux32_port_name = 'port-linux32-py27'
+linux32_port_name = 'port-suse101x32-py27'
 linux32_port_zip_name = 'olex2-linux32.zip'
 linux32_port_prefix = 'olex2/'
 
-linux64_port_name = 'port-linux64-py27'
+linux64_port_name = 'port-suse101x64-py27'
 linux64_port_zip_name = 'olex2-linux64.zip'
 linux64_port_prefix = 'olex2/'
 
