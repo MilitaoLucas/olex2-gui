@@ -19,6 +19,7 @@ def setup_cctbx():
   sys.path.append(str("%s/libtbx" % cctbxSources)) # needed to work with old cctbx directory structure
   sys.path.append(str("%s/libtbx/pythonpath" % cctbxSources)) # needed to work with new cctbx directory structure
   sys.path.append(str(cctbxSources)) # needed to work with new cctbx directory structure
+  need_cold_start = False
   try:
     sys.on_sys_exit_raise = Exception("cold_start")
     import libtbx.load_env
@@ -43,7 +44,12 @@ def setup_cctbx():
     if str(err) == "cold_start":
       need_cold_start = True
     else:
-      raise
+      TAG_file_path = "%s/TAG" %build_path
+      ENV_file_path = "%s/libtbx_env" %build_path
+      need_cold_start =\
+        os.stat(TAG_file_path).st_mtime > os.stat(ENV_file_path).st_mtime
+      if not need_cold_start:
+        raise
   cctbx_TAG_file_path = "%s/TAG" %cctbxSources
   if not os.path.isdir('%s/.svn' %cctbxSources)\
      and os.path.exists(cctbx_TAG_file_path):
