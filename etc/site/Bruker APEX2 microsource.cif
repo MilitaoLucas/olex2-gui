@@ -1,0 +1,17 @@
+_diffrn_detector                      'Bruker APEX2 area detector'
+_diffrn_detector_area_resol_mean      7.9
+_diffrn_detector_type                 'CCD area detector'
+
+_diffrn_measurement_device            'three-circle diffractometer'
+_diffrn_measurement_device_type       'Bruker SMART APEX2 area detector'
+_diffrn_measurement_method            '\w and \f scans'
+
+_diffrn_radiation_collimation         .
+_diffrn_radiation_monochromator       'mirror optics'
+_diffrn_radiation_probe               x-ray
+_diffrn_radiation_type                'Mo K\a'
+_diffrn_radiation_xray_symbol         K-L~3~
+_diffrn_radiation_wavelength          0.71073
+
+_diffrn_source                        'microfocus sealed X-ray tube'
+_diffrn_source_type                   'Incoatec I\ms'

@@ -467,15 +467,15 @@
 <tubes help="Tubes bonds"
   <body
     <args
-      <arg0 name="File extension" def="ins">
+      <arg0 name="radius" def="0.1">
     >
     <cmd
       <cmd3 "individualise">
       <cmd1 "ads sph">
       <cmd1 "mask atoms 1">
       <cmd1 "mask bonds 48">
-      <cmd2 "arad bond">
-      <cmd3 "azoom 70">
+      <cmd2 "brad eval(%1*10)">
+      <cmd2 "arad %1">
 
   >
 >
