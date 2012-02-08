@@ -9,74 +9,74 @@
 
 #available ports
 # alteartions for binary files : name (properties...), olex-port MUST be specified for non-portable files
-mac_port_name = 'port-mac-intel-py27'
-mac_port_zip_name = 'olex2-mac32-intel.zip'
-mac_port_prefix = 'olex2.app/Contents/MacOS/'
+mac32_port_name = 'port-mac-intel-py27'
+mac32_port_zip_name = 'olex2-mac32-intel.zip'
+mac32_port_prefix = 'olex2.app/Contents/MacOS/'
 
-suse32_port_name = 'port-suse101x32-py27'
-suse32_port_zip_name = 'olex2-linux32.zip'
-suse32_port_prefix = 'olex2/'
+linux32_port_name = 'port-linux32-py27'
+linux32_port_zip_name = 'olex2-linux32.zip'
+linux32_port_prefix = 'olex2/'
 
-suse64_port_name = 'port-suse101x64-py27'
-suse64_port_zip_name = 'olex2-linux64.zip'
-suse64_port_prefix = 'olex2/'
+linux64_port_name = 'port-linux64-py27'
+linux64_port_zip_name = 'olex2-linux64.zip'
+linux64_port_prefix = 'olex2/'
 
-win_port_name = 'port-win32-portable'
-win_sse2_port_name = 'port-win32'
-win_sse2_port_zip_name = 'olex2-win32.zip'
-win_sse2_port_prefix = None
+win32_port_name = 'port-win32-portable'
+win32_sse2_port_name = 'port-win32'
+win32_sse2_port_zip_name = 'olex2-win32.zip'
+win32_sse2_port_prefix = None
 
 win64_port_name = 'port-win64'
 win64_port_zip_name = 'olex2-win64.zip'
 win64_port_prefix = None
 
-win_sse_port_name = 'port-win32-sse'
-win_sse_port_zip_name = 'olex2-win32-sse.zip'
-win_sse_port_prefix = None
+win32_sse_port_name = 'port-win32-sse'
+win32_sse_port_zip_name = 'olex2-win32-sse.zip'
+win32_sse_port_prefix = None
 
 portable_zip_name = 'portable-gui.zip'
 portable_prefix = None
 # iteratable list of zips and prefixes
 distro_zips = (
-  (mac_port_zip_name, mac_port_prefix),
-  (suse32_port_zip_name, suse32_port_prefix),
-  (suse64_port_zip_name, suse64_port_prefix),
-  (win_sse_port_zip_name, win_sse_port_prefix),
-  (win_sse2_port_zip_name, win_sse2_port_prefix),
+  (mac32_port_zip_name, mac32_port_prefix),
+  (linux32_port_zip_name, linux32_port_prefix),
+  (linux64_port_zip_name, linux64_port_prefix),
+  (win32_sse_port_zip_name, win32_sse_port_prefix),
+  (win32_sse2_port_zip_name, win32_sse2_port_prefix),
   (win64_port_zip_name, win64_port_prefix),
   (portable_zip_name, portable_prefix)
 )
 
 external_files = {
   #mac
-  'olex2-mac.zip': ('olex-port', mac_port_name, 'action:extract', 'action:delete'),
-  'unirun-mac.zip': ('olex-port', mac_port_name, 'action:extract', 'action:delete'),
-  'cctbx-mac.zip': ('olex-port', mac_port_name, 'action:extract', 'action:delete'),
-  'lib-mac.zip': ('olex-port', mac_port_name, 'action:extract', 'action:delete'),
+  'olex2-mac32.zip': ('olex-port', mac32_port_name, 'action:extract', 'action:delete'),
+  'unirun-mac32.zip': ('olex-port', mac32_port_name, 'action:extract', 'action:delete'),
+  'cctbx-mac32.zip': ('olex-port', mac32_port_name, 'action:extract', 'action:delete'),
+  'lib-mac32.zip': ('olex-port', mac32_port_name, 'action:extract', 'action:delete'),
   #linux32
-  'olex2-suse101x32.zip': ('olex-port', suse32_port_name, 'action:extract', 'action:delete'),
-  'unirun-suse101x32.zip': ('olex-port', suse32_port_name, 'action:extract', 'action:delete'),
-  'cctbx-suse101x32.zip': ('olex-port', suse32_port_name, 'action:extract', 'action:delete'),
-  'lib-suse101x32.zip': ('olex-port', suse32_port_name, 'action:extract', 'action:delete'),
+  'olex2-linux32.zip': ('olex-port', linux32_port_name, 'action:extract', 'action:delete'),
+  'unirun-linux32.zip': ('olex-port', linux32_port_name, 'action:extract', 'action:delete'),
+  'cctbx-linux32.zip': ('olex-port', linux32_port_name, 'action:extract', 'action:delete'),
+  'lib-linux32.zip': ('olex-port', linux32_port_name, 'action:extract', 'action:delete'),
   #linux64
-  'olex2-suse101x64.zip': ('olex-port', suse64_port_name, 'action:extract', 'action:delete'),
-  'unirun-suse101x64.zip': ('olex-port', suse64_port_name, 'action:extract', 'action:delete'),
-  'cctbx-suse101x64.zip': ('olex-port', suse64_port_name, 'action:extract', 'action:delete'),
-  'lib-suse101x64.zip': ('olex-port', suse64_port_name, 'action:extract', 'action:delete'),
+  'olex2-linux64.zip': ('olex-port', linux64_port_name, 'action:extract', 'action:delete'),
+  'unirun-linux64.zip': ('olex-port', linux64_port_name, 'action:extract', 'action:delete'),
+  'cctbx-linux64.zip': ('olex-port', linux64_port_name, 'action:extract', 'action:delete'),
+  'lib-linux64.zip': ('olex-port', linux64_port_name, 'action:extract', 'action:delete'),
   #windows
-  'launch_exe.zip': ('olex-port', win_port_name,  'action:extract', 'action:delete'),
-  'python27.zip': ('olex-port', win_port_name, 'action:extract', 'action:delete'),
+  'launch-win32.zip': ('olex-port', win32_port_name,  'action:extract', 'action:delete'),
+  'python27-win32.zip': ('olex-port', win32_port_name, 'action:extract', 'action:delete'),
   #SSE2
-  'cctbx.zip': ('olex-port', win_sse2_port_name, 'action:extract', 'action:delete'),
-  'olex2_exe.zip': ('olex-port', win_sse2_port_name, 'action:extract', 'action:delete'),
+  'cctbx-win32-sse2.zip': ('olex-port', win32_sse2_port_name, 'action:extract', 'action:delete'),
+  'olex2-win32-sse2.zip': ('olex-port', win32_sse2_port_name, 'action:extract', 'action:delete'),
   #windows SSE vc SSE2
-  'cctbx_sse.zip': ('olex-port', win_sse_port_name, 'action:extract', 'action:delete'),
-  'olex2_exe_sse.zip': ('olex-port', win_sse_port_name, 'action:extract', 'action:delete'),
+  'cctbx-win32-sse.zip': ('olex-port', win32_sse_port_name, 'action:extract', 'action:delete'),
+  'olex2-win32-sse.zip': ('olex-port', win32_sse_port_name, 'action:extract', 'action:delete'),
   #windows 64
-  'launch_exe_64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
-  'python27_64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
-  'cctbx_64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
-  'olex2_exe_64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
+  'launch-win64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
+  'python27-win64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
+  'cctbx-win64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
+  'olex2-win64.zip': ('olex-port', win64_port_name, 'action:extract', 'action:delete'),
   #portables
   'olex2_fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
   'fonts.zip': ('olex-update', 'action:extract', 'action:delete'),
@@ -88,9 +88,9 @@ external_files = {
   'odac_update.txt': ('olex-install', 'olex-update'),
   'licence.rtf': ('olex-install', 'olex-update'),
   'documentation.zip': ('olex-update', 'action:extract', 'action:delete'),
-  #plugins, no solution for portable plugins yet
-  'olex2c_exe.zip': ('olex-port', 'plugin-Headless-win-32', 'action:extract', 'action:delete'),
-  'olex2c_exe_64.zip': ('olex-port', 'plugin-Headless-win-64', 'action:extract', 'action:delete'),
+  #plugins
+  #'olex2c-win32.zip': ('olex-port', 'plugin-Headless-win-32', 'action:extract', 'action:delete'),
+  #'olex2c-win64.zip': ('olex-port', 'plugin-Headless-win-64', 'action:extract', 'action:delete'),
 }
 # special zip files (must have relevant structure), must exist ABOVE as well!!
 #if the associated value is false - the file is non-portable and will not end up in the portable-gui.zip
@@ -101,52 +101,52 @@ set(  ['olex2_fonts.zip',
        'documentation.zip',
       ]
    )
-win_sse2_zip_files = \
-set(  ['cctbx.zip',      #cctbx/cctb_sources,...
-      'python27.zip',    #Pyhton27/..., ..., + python27.dll!!!
-      'launch_exe.zip',  #olex2.exe
-      'olex2_exe.zip'   #olex2.dll, it will be veryfied first of all
+win32_sse2_zip_files = \
+set(  ['cctbx-win32-sse2.zip',      #cctbx/cctb_sources,...
+      'python27-win32.zip',    #Pyhton27/..., ..., + python27.dll!!!
+      'launch-win32.zip',  #olex2.exe
+      'olex2-win32-sse2.zip'   #olex2.dll, it will be veryfied first of all
       ]
    ) | portable_zip_files
-win_sse_zip_files = \
-set(  ['cctbx_sse.zip',    #cctbx/cctb_sources,...
-      'python27.zip',      #Pyhton27/..., ..., + python27.dll!!!
-      'launch_exe.zip',    #olex2.exe
-      'olex2_exe_sse.zip'  #olex2.dll
+win32_sse_zip_files = \
+set(  ['cctbx-win32-sse.zip',    #cctbx/cctb_sources,...
+      'python27-win32.zip',      #Pyhton27/..., ..., + python27.dll!!!
+      'launch-win32.zip',    #olex2.exe
+      'olex2-win32-sse.zip'  #olex2.dll
       ]
    ) | portable_zip_files
 win64_zip_files = \
-set(  ['cctbx_64.zip',     #cctbx/cctb_sources,...
-      'python27_64.zip',   #Pyhton27/..., ..., + python27.dll!!!
-      'olex2_exe_64.zip',  #olex2.dll
-      'launch_exe_64.zip'  #olex2.exe
+set(  ['cctbx-win64.zip',     #cctbx/cctb_sources,...
+      'python27-win64.zip',   #Pyhton27/..., ..., + python27.dll!!!
+      'olex2-win64.zip',  #olex2.dll
+      'launch-win64.zip'  #olex2.exe
       ]
    ) | portable_zip_files
-mac_zip_files = \
-set(  ['cctbx-mac.zip',  #cctbx/cctb_sources,...
-      'olex2-mac.zip',    #olex2 executable
-      'unirun-mac.zip',
-      'lib-mac.zip'
+mac32_zip_files = \
+set(  ['cctbx-mac32.zip',  #cctbx/cctb_sources,...
+      'olex2-mac32.zip',    #olex2 executable
+      'unirun-mac32.zip',
+      'lib-mac32.zip'
       ]
    ) | portable_zip_files
 
-suse32_zip_files = \
-set(  ['cctbx-suse101x32.zip',  #cctbx/cctb_sources,...
-      'lib-suse101x32.zip',     #lib/dlls
-      'olex2-suse101x32.zip',    #olex2 executable
-      'unirun-suse101x32.zip'
+linux32_zip_files = \
+set(  ['cctbx-linux32.zip',  #cctbx/cctb_sources,...
+      'lib-linux32.zip',     #lib/dlls
+      'olex2-linux32.zip',    #olex2 executable
+      'unirun-linux32.zip'
       ]
    ) | portable_zip_files
-suse64_zip_files = \
-set(  ['cctbx-suse101x64.zip',  #cctbx/cctb_sources,...
-      'lib-suse101x64.zip',     #lib/dlls
-      'olex2-suse101x64.zip',    #olex2 executable
-      'unirun-suse101x64.zip'
+linux64_zip_files = \
+set(  ['cctbx-linux64.zip',  #cctbx/cctb_sources,...
+      'lib-linux64.zip',     #lib/dlls
+      'olex2-linux64.zip',    #olex2 executable
+      'unirun-linux64.zip'
       ]
    ) | portable_zip_files
 # a set of all zip files...
-all_zip_files = win_sse2_zip_files | win_sse_zip_files | win64_zip_files\
-              | mac_zip_files | suse32_zip_files | suse64_zip_files
+all_zip_files = win32_sse2_zip_files | win32_sse_zip_files | win64_zip_files\
+              | mac32_zip_files | linux32_zip_files | linux64_zip_files
 
 altered_files = set([])
 altered_dirs = set([])
@@ -340,15 +340,6 @@ if os.path.exists(bin_directory + '/olex2.exe'):
   olex2_exe_zip.write(bin_directory + '/olex2.exe', 'olex2.dll')
   olex2_exe_zip.close()
   os.remove(bin_directory + '/olex2.exe')
-#validate the olex2_exe.zip file
-
-olex2_exe_zip = zipfile.ZipFile(bin_directory + '/olex2_exe.zip', 'r')
-if 'olex2.dll' not in olex2_exe_zip.namelist():
-  print 'olex2_exe file should contain olex2.dll file, aborting...'
-  olex2_exe_zip.close()
-  sys.exit(1)
-olex2_exe_zip.close()
-#end executable zip file validation and creation
 
 client = pysvn.Client()
 
@@ -667,20 +658,20 @@ if True:
   )
 if True:
   create_portable_distro(
-    port_props=set([win_sse2_port_name,win_port_name]),
-    zip_name=win_sse2_port_zip_name,
-    port_zips=win_sse2_zip_files,
-    prefix=win_sse2_port_prefix,
+    port_props=set([win32_sse2_port_name,win32_port_name]),
+    zip_name=win32_sse2_port_zip_name,
+    port_zips=win32_sse2_zip_files,
+    prefix=win32_sse2_port_prefix,
     extra_files =
     {
       bin_directory + '/vcredist_x86.exe' : 'vcredist_x86.exe'
     }
   )
   create_portable_distro(
-    port_props=set([win_sse_port_name,win_port_name]),
-    zip_name=win_sse_port_zip_name,
-    port_zips=win_sse_zip_files,
-    prefix=win_sse_port_prefix,
+    port_props=set([win32_sse_port_name,win32_port_name]),
+    zip_name=win32_sse_port_zip_name,
+    port_zips=win32_sse_zip_files,
+    prefix=win32_sse_port_prefix,
     extra_files =
     {
       bin_directory + '/vcredist_x86.exe' : 'vcredist_x86.exe'
@@ -699,32 +690,32 @@ if True:
 #create linux and mac distro only in releases
 if True:
   create_portable_distro(
-    port_props=set([suse32_port_name]),
-    zip_name=suse32_port_zip_name,
-    port_zips=suse32_zip_files,
-    prefix=suse32_port_prefix,
+    port_props=set([linux32_port_name]),
+    zip_name=linux32_port_zip_name,
+    port_zips=linux32_zip_files,
+    prefix=linux32_port_prefix,
     extra_files =
     {
-      bin_directory + '/suse-distro/start' : 'olex2/start',
-      bin_directory + '/suse-distro/usettings32.dat' : 'olex2/usettings.dat'
+      bin_directory + '/linux-distro/start' : 'olex2/start',
+      bin_directory + '/linux-distro/usettings32.dat' : 'olex2/usettings.dat'
     }
   )
   create_portable_distro(
-    port_props=set([suse64_port_name]),
-    zip_name=suse64_port_zip_name,
-    port_zips=suse64_zip_files,
-    prefix=suse64_port_prefix,
+    port_props=set([linux64_port_name]),
+    zip_name=linux64_port_zip_name,
+    port_zips=linux64_zip_files,
+    prefix=linux64_port_prefix,
     extra_files =
     {
-      bin_directory + '/suse-distro/start' : 'olex2/start',
-      bin_directory + '/suse-distro/usettings64.dat' : 'olex2/usettings.dat'
+      bin_directory + '/linux-distro/start' : 'olex2/start',
+      bin_directory + '/linux-distro/usettings64.dat' : 'olex2/usettings.dat'
     }
   )
   create_portable_distro(
-    port_props=set([mac_port_name]),
-    zip_name=mac_port_zip_name,
-    port_zips=mac_zip_files,
-    prefix=mac_port_prefix,
+    port_props=set([mac32_port_name]),
+    zip_name=mac32_port_zip_name,
+    port_zips=mac32_zip_files,
+    prefix=mac32_port_prefix,
     extra_files =
     {
       bin_directory + '/mac-distro/Info.plist' : 'olex2.app/Contents/Info.plist',
