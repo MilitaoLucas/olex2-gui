@@ -2705,48 +2705,73 @@ class HealthOfStructure():
     OV.SetParam('snum.data.hkl_stat_file', OV.HKLSrc())
 
   def make_hos_images(self, item='test', colour='#ff0000', display='Display', value_display='10%', value_raw='0.1', n=1):
-    boxWidth = self.available_width/n - 10
-    boxHeight = 20
+    boxWidth = self.available_width/n - 4
+    boxHeight = 30
     boxHalf = 8
-    im = Image.new('RGB', (boxWidth,boxHeight), colour.hexadecimal)
+    if type(colour) != str:
+      colour = colour.hexadecimal
+    colour = "#000000"
+    im = Image.new('RGB', (boxWidth,boxHeight), colour)
     im = Image.new('RGB', (boxWidth,boxHeight), OV.GetParam('gui.html.table_firstcol_colour').hexadecimal)
     draw = ImageDraw.Draw(im)
     value_raw = float(value_raw)
     op = OV.GetParam('diagnostics.hkl.%s.op' %item)
     curr_x = 0
-    for i in xrange(4):
-      i += 1
+    limit_width = 0
+
+
+    fill = self.get_bg_colour(item, value_raw)
+    box = (0,boxHalf,boxWidth,boxHeight)
+    draw.rectangle(box, fill=fill)
+    top = OV.GetParam('diagnostics.hkl.%s.top' %item)
+
+    if item == "completeness":
+      _ = int(boxWidth * (1-value_raw))
+      if _ == 0 and value_raw < 0.95:
+        _ = 1
+      if _ != 0:
+        x = boxWidth - _  
+        box = (x,boxHalf,boxWidth,boxHeight)
+        fill = '#ff0000'
+        draw.rectangle(box, fill=fill)
       top = OV.GetParam('diagnostics.hkl.%s.top' %item)
-      limit = OV.GetParam('diagnostics.hkl.%s.grade%s' %(item, i))
-      print item, limit
-#      if limit > value_raw:
-#        continue
-      limit_width = int((limit/top) * boxWidth)
-      if op == "greater":
-        box = (0,boxHalf,limit_width,boxHeight)
-      elif op == 'smaller':
-        box = (curr_x,boxHalf,limit_width,boxHeight)
-        curr_x += limit_width
-      fill = OV.GetParam('gui.skin.diagnostics.colour_grade%i' %i).hexadecimal
-      draw.rectangle(box, fill=fill)
+
+
+    
+    #for i in xrange(4):
+      #i += 1
+      #limit = OV.GetParam('diagnostics.hkl.%s.grade%s' %(item, i))
+      #print item, limit
+      #curr_x += limit_width
+      #limit_width = int((limit/top) * boxWidth)
+      #if op == "greater":
+        #box = (0,boxHalf,limit_width,boxHeight)
+      #elif op == 'smaller':
+        #box = (curr_x,boxHalf,limit_width,boxHeight)
+      #fill = self.get_bg_colour(item, value_raw)
+      ##fill = OV.GetParam('gui.skin.diagnostics.colour_grade%i' %i).hexadecimal
+      #draw.rectangle(box, fill=fill)
 
     if item == "MeanIOverSigma":
       display = IT.get_unicode_characters("I/sigma")
     if item == "Rint":
       display = "Rint"
-    font = IT.registerFontInstance("Vera", 11)
+    font = IT.registerFontInstance("Vera", 20)
     x = 2
-    y = boxHalf
-    draw.text((x, y), "%s" %display, font=font, fill="#ffffff")
+    y = boxHalf - 1
+    fill = IT.adjust_colour(fill, luminosity=1.6)
+    draw.text((x, y), "%s" %display, font=font, fill=fill)
 #    IT.write_text_to_draw(draw, display, font_colour='#ffffff', font_size=12)
 #    IT.write_text_to_draw(draw, value_display, align='right', max_width=boxWidth - 2, font_colour='#ffffff', font_size=17)
-    IT.write_text_to_draw(draw, str(top), align='right', max_width=boxWidth - 2, font_colour='#ffffff', font_size=11)
-    y = 0
-    r = 18
-    x = int((value_raw/top) * boxWidth - r/2)
-    draw.ellipse(((x, y),(x+r, y+r)), fill="#ff0000")
+#    IT.write_text_to_draw(draw, str(top), align='right', max_width=boxWidth - 2, font_colour='#ffffff', font_size=11)
+    #y = 4
+    #r = 10
+    #x = int((value_raw/top) * boxWidth - r/2)
+    #draw.ellipse(((x, y),(x+r, y+r)), fill="#ffffff")
+    font = IT.registerFontInstance("Vera", 20)
+    y += 0
+    x = 50
     draw.text((x, y), "%s" %value_display, font=font, fill="#ffffff")
-
 
     OlexVFS.save_image_to_olex(im, item, 0)
     txt = '''
