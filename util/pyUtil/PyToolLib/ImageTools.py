@@ -201,6 +201,7 @@ class ImageTools(FontInstances):
     txt = txt.replace("_", " ")
     txt = txt.replace("lambda", unichr(61548))
     txt = txt.replace("theta", unichr(61553))
+    txt = txt.replace("Theta", '\u0398')
     txt = txt.replace("sigma", unichr(61555))
     txt = txt.replace("^2", unichr(178))
     txt = txt.replace("^3", unichr(179))
@@ -213,6 +214,7 @@ class ImageTools(FontInstances):
     #txt = txt.replace("Fo2", "F%s%s" %(unichr(2092),unichr(178)))
     txt = txt.replace("Fexp", "F%s" %(unichr(2091)))
     txt = txt.replace("angstrom", unichr(197))
+    txt = txt.replace("degrees", u"\u00B0")
     return txt
 
 

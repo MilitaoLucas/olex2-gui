@@ -50,7 +50,7 @@ diagnostics {
     completeness{
       op = "greater"
         .type = str
-      display = "Completeness"
+      display = "Compl."
         .type = str
       value_format= "2%"
         .type = str
