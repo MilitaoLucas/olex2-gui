@@ -2687,7 +2687,9 @@ class HealthOfStructure():
           value = value_format %value
       use_image = False
       if use_image:
+        t = time.time()
         txt += self.make_hos_images(item=item, colour=bg_colour, display=display, value_raw=raw_val, value_display=value, n=len(l))
+        print "hos image took %.3f s to make" %(time.time() - t)
       else:
         if href:
           txt = txt + "<a href='%s'>" %(href)
@@ -2705,9 +2707,12 @@ class HealthOfStructure():
     OV.SetParam('snum.data.hkl_stat_file', OV.HKLSrc())
 
   def make_hos_images(self, item='test', colour='#ff0000', display='Display', value_display='10%', value_raw='0.1', n=1):
-    boxWidth = self.available_width/n - 4
-    boxHeight = 30
-    boxHalf = 8
+    scale = 4
+    font_name = 'Vera'
+    value_display_extra = ""
+    boxWidth = (self.available_width/n - 4) * scale
+    boxHeight = 30 * scale
+    boxHalf = 8 *scale
     if type(colour) != str:
       colour = colour.hexadecimal
     colour = "#000000"
@@ -2718,7 +2723,17 @@ class HealthOfStructure():
     op = OV.GetParam('diagnostics.hkl.%s.op' %item)
     curr_x = 0
     limit_width = 0
-
+    od_value = None
+    theoretical_val = value_raw
+    if item == "completeness":
+      od_value = OV.get_cif_item('_reflns_odcompleteness_completeness')
+      if od_value:
+        value_raw = float(od_value)
+        od_2theta = OV.get_cif_item('_reflns_odcompleteness_theta')
+        if od_2theta:
+          od_2theta = float(od_2theta) * 2
+          value_display_extra = "%.0f%% at 2theta=%.0fdegrees" %(value_raw, od_2theta)
+          value_display_extra = IT.get_unicode_characters(value_display_extra)
 
     fill = self.get_bg_colour(item, value_raw)
     box = (0,boxHalf,boxWidth,boxHeight)
@@ -2726,18 +2741,24 @@ class HealthOfStructure():
     top = OV.GetParam('diagnostics.hkl.%s.top' %item)
 
     if item == "completeness":
-      _ = int(boxWidth * (1-value_raw))
-      if _ == 0 and value_raw < 0.95:
+      od_value = OV.get_cif_item('_reflns_odcompleteness_completeness')
+      if od_value:
+        od_2theta = OV.get_cif_item('_reflns_odcompleteness_theta')
+        if od_2theta:
+          od_2theta = float(od_2theta) * 2
+
+      ## Theoretical Limit
+      _ = int(boxWidth * (1-theoretical_val))
+      if _ == 0 and theoretical_val < 0.95:
         _ = 1
       if _ != 0:
         x = boxWidth - _  
         box = (x,boxHalf,boxWidth,boxHeight)
-        fill = '#ff0000'
+        fill = OV.GetParam('gui.red').hexadecimal
         draw.rectangle(box, fill=fill)
+        
       top = OV.GetParam('diagnostics.hkl.%s.top' %item)
 
-
-    
     #for i in xrange(4):
       #i += 1
       #limit = OV.GetParam('diagnostics.hkl.%s.grade%s' %(item, i))
@@ -2756,10 +2777,11 @@ class HealthOfStructure():
       display = IT.get_unicode_characters("I/sigma")
     if item == "Rint":
       display = "Rint"
-    font = IT.registerFontInstance("Vera", 20)
+    font = IT.registerFontInstance(font_name, 10 * scale)
     x = 2
     y = boxHalf - 1
-    fill = IT.adjust_colour(fill, luminosity=1.6)
+#    fill = IT.adjust_colour(fill, luminosity=1.6)
+    fill = '#ffffff'
     draw.text((x, y), "%s" %display, font=font, fill=fill)
 #    IT.write_text_to_draw(draw, display, font_colour='#ffffff', font_size=12)
 #    IT.write_text_to_draw(draw, value_display, align='right', max_width=boxWidth - 2, font_colour='#ffffff', font_size=17)
@@ -2768,11 +2790,26 @@ class HealthOfStructure():
     #r = 10
     #x = int((value_raw/top) * boxWidth - r/2)
     #draw.ellipse(((x, y),(x+r, y+r)), fill="#ffffff")
-    font = IT.registerFontInstance("Vera", 20)
-    y += 0
-    x = 50
-    draw.text((x, y), "%s" %value_display, font=font, fill="#ffffff")
 
+    ## ADD THE ACTUAL VALUE
+    if value_display_extra:
+      font_size = 12
+    else:
+      font_size = 20
+    font = IT.registerFontInstance("Vera", font_size * scale)
+    font_s = IT.registerFontInstance("Vera", 10 * scale)
+    y += 0
+    if value_display_extra:
+      dxs,dxy = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=12 * scale)
+    dx,dy = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=font_size * scale)
+    x = boxWidth - dx - 10
+    draw.text((x, y), "%s" %value_display, font=font, fill="#ffffff")
+    if value_display_extra:
+      draw.text((0, y + dy/2 + 10), "%s" %value_display_extra, font=font_s, fill="#ffffff")
+
+
+
+    im = im.resize((boxWidth/scale, boxHeight/scale), Image.ANTIALIAS)
     OlexVFS.save_image_to_olex(im, item, 0)
     txt = '''
 <td align='center'><zimg src=%s></td>''' %item
