@@ -196,7 +196,6 @@ class RunPrg(ArgumentParser):
 
   def startRun(self):
     OV.CreateBitmap('%s' %self.bitmap)
-    OV.SetParam('snum.refinement.auto.invert',True)
 
   def endRun(self):
     OV.DeleteBitmap('%s' %self.bitmap)
@@ -212,6 +211,7 @@ class RunSolutionPrg(RunPrg):
 
   def run(self):
     self.startRun()
+    OV.SetParam('snum.refinement.auto.invert',True)
     if OV.IsFileType('cif'):
       OV.Reap('%s/%s.ins' %(self.filepath,self.filename))
     self.setupSolve()

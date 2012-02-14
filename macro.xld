@@ -10,6 +10,8 @@
       <cmd1 "silent on">
       <cmd2 "py.Export(datadir()/olx)">
       <cmd3 "py.run 'basedir()/util/pyUtil/initpy.py'">
+      <cmd7 "spy.load_user_gui_phil()">
+      <cmd8 "spy.skin.export_parameters()">
       <cmd4 "if isos(linux) then setvar(defeditor,'gedit')">
       <cmd5 "if isos(linux) then setvar(defexplorer,'nautilus')">
       <cmd6 "if isos(linux) then setvar(defbrowser,'xdg-open')">
@@ -17,8 +19,6 @@
       <cmd5 "if isos(mac) then setvar(defexplorer,'open')">
       <cmd6 "if isos(mac) then setvar(defbrowser,'open')">
       <cmd6 rem="loglevel(mf)>>py.loglevel(mf)">
-      <cmd7 "spy.load_user_gui_phil()">
-      <cmd8 "spy.change_skin()">
       <cmd9 "if not(file.Exists(app.getarg(1))) then
         'if and(IsVar(startup),file.Exists(file.AbsolutePath(GetVar(startup)))) then
               &2E;reap file.AbsolutePath(GetVar(startup))&2E;'">
