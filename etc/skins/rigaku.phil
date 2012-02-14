@@ -27,6 +27,7 @@ gui {
     base_colour = #d4d0c7
     bg_colour = #d4d0c7
     highlight_colour = #fffc65
+    highlight_colour = #ffdf09
     font_colour = #095aa5
     font_name = Arial
     font_size = 2
@@ -76,12 +77,15 @@ gui {
     h3{
       base_colour = #4f6ca6
       grad = True
-      grad_colour = #4f6ca6
+      grad_colour = #999999
       grad_step = 0.1
-      corner_rad = 0
-      rounded = 0000
+      corner_rad = 3
+      rounded = 0101
       font_colour = #ffffff
       height = 18
+      off_L = 0.8
+      on_L = 1
+      shadow = False
     }
 
     tab{
@@ -158,6 +162,8 @@ gui {
   tab_colour = #095aa5
   tab_font_colour = #095aa5
   htmlpanelwidth = 500
+  htmlpanelwidth_margin_adjust = 22
+  htmlpanel_side = left
   gui_grad_top_left=#000000
   gui_grad_top_right=#095aa5
   gui_grad_bottom_left=#095aa5

@@ -71,6 +71,7 @@ OV.registerMacro(Skin_instance.run_skin, 'function-The function to call')
 
 
 def export_parameters():
+  deal_with_gui_phil(action='load')
   OV.SetVar('HtmlTableFirstcolColour', OV.GetParam('gui.html.table_firstcol_colour').hexadecimal)
   OV.SetVar('HtmlTableFirstcolWidth', OV.GetParam('gui.html.table_firstcol_width'))
   OV.SetVar('HtmlTableBgColour', OV.GetParam('gui.html.table_bg_colour').hexadecimal)
@@ -91,51 +92,59 @@ def export_parameters():
   OV.SetVar('HtmlGuiFontSize', OV.GetParam('gui.html.font_size'))
   OV.SetVar('HtmlPanelWidth', OV.GetParam('gui.htmlpanelwidth'))
   OV.SetVar('HtmlButtonHeight', OV.GetParam('gui.timage.button.height'))
+OV.registerFunction(export_parameters,False,'skin')
 
-
-def change_skin(skin_name=None, force=False):
+def deal_with_gui_phil(action='load', skin_name=None, force=False):
   gui_phil_path = "%s/gui.phil" %(OV.DataDir())
-
-  OV.SetHtmlFontSize()
-  OV.SetHtmlFontSizeControls()
-
-  timing = False
-  if timing:
-    t1 = time.time()
-    t2 = 0
-
-  if not skin_name:
-    skin_extension = None
-  else:
-    force = True
-    olx.gui_phil_handler.reset_scope('gui')
-    if len(skin_name.split("_")) > 1:
-      skin_extension = skin_name.split("_")[1]
-      skin_name = skin_name.split("_")[0]
-    else: skin_extension = skin_name
-
-  gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_name)
-  if os.path.isfile(gui_skin_phil_path):
-    gui_skin_phil_file = open(gui_skin_phil_path, 'r')
-    gui_skin_phil = gui_skin_phil_file.read()
-    gui_skin_phil_file.close()
-    olx.gui_phil_handler.update(phil_string=gui_skin_phil)
-
-  if skin_extension:
-    force = True
-    gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_extension)
+  if action == 'load':
+    OV.SetHtmlFontSize()
+    OV.SetHtmlFontSizeControls()
+    timing = False
+    if timing:
+      t1 = time.time()
+      t2 = 0
+    if not skin_name:
+      skin_extension = None
+    else:
+      force = True
+      olx.gui_phil_handler.reset_scope('gui')
+      if len(skin_name.split("_")) > 1:
+        skin_extension = skin_name.split("_")[1]
+        skin_name = skin_name.split("_")[0]
+      else: skin_extension = skin_name
+  
+    gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_name)
     if os.path.isfile(gui_skin_phil_path):
       gui_skin_phil_file = open(gui_skin_phil_path, 'r')
       gui_skin_phil = gui_skin_phil_file.read()
       gui_skin_phil_file.close()
       olx.gui_phil_handler.update(phil_string=gui_skin_phil)
+  
+    if skin_extension:
+      force = True
+      gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_extension)
+      if os.path.isfile(gui_skin_phil_path):
+        gui_skin_phil_file = open(gui_skin_phil_path, 'r')
+        gui_skin_phil = gui_skin_phil_file.read()
+        gui_skin_phil_file.close()
+        olx.gui_phil_handler.update(phil_string=gui_skin_phil)
+  
+    if timing:
+      t = time.time()
+      print "After 'Reading PHIL Stuff': %.2f s (%.2f s)" % ((t - t1), (t - t1))
+      t2 = t
+  else:
+    olx.gui_phil_handler.save_param_file(
+      file_name=gui_phil_path, scope_name='gui', diff_only=True)
 
 
+def change_skin(skin_name=None, force=False):
+  timing = False
   if timing:
-    t = time.time()
-    print "After 'Reading PHIL Stuff': %.2f s (%.2f s)" % ((t - t1), (t - t1))
-    t2 = t
+    t1 = time.time()
+    t2 = 0
 
+  deal_with_gui_phil(action='load', skin_name=skin_name, force=False)
   try:
     adjust_skin_luminosity()
   except:
@@ -146,7 +155,9 @@ def change_skin(skin_name=None, force=False):
     print "After 'adjust_skin_luminosity': %.2f s (%.5f s)" % ((t - t1), (t - t2))
     t2 = t
 
-  IT.resize_skin_logo(OV.GetParam('gui.htmlpanelwidth'))
+  width = OV.GetParam('gui.htmlpanelwidth')
+
+  IT.resize_skin_logo(width)
   IT.resize_news_image()
   if timing:
     t = time.time()
@@ -178,16 +189,15 @@ def change_skin(skin_name=None, force=False):
     a = PilTools.sNumTitle()
     a.run_sNumTitle(force=True)
 
-  OV.UpdateHtml()
+  olex.m('htmlpanelwidth %s' %width)
+  olex.m('htmlpanelswap %s' %OV.GetParam('gui.htmlpanel_side'))
 
   if timing:
     t = time.time()
     print "After 'Reload': %.2f s (%.5f s)" % ((t - t1), (t - t2))
     t2 = t
 
-
-  olx.gui_phil_handler.save_param_file(
-    file_name=gui_phil_path, scope_name='gui', diff_only=True)
+    deal_with_gui_phil(action='save', skin_name=skin_name, force=False)
 
   if timing:
     t = time.time()
@@ -195,6 +205,7 @@ def change_skin(skin_name=None, force=False):
     t2 = t
   export_parameters()
   olx.FlushFS()
+  olex.m('html.load index.htm')
   
 OV.registerFunction(change_skin)
 

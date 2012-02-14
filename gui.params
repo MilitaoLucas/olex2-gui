@@ -519,8 +519,10 @@ gui
     .type = str
   htmlpanelwidth = 460
     .type = int
-  htmlpanelwidth_margin_adjust = 18
+  htmlpanelwidth_margin_adjust = 22
     .type = int
+  htmlpanel_side = right
+    .type = str
   grad_top_left = #1f3257
     .type = colour
   grad_top_right = #1f3257
