@@ -2,9 +2,9 @@
 
 <!-- FIRST ROW -->
 <tr name=IMAGE_PS_ROW_1>
-<!-- #include tool-help-column gui\blocks\tool-first-column.htm;help_ext=mode_name;1; -->
+<!-- #include tool-help-column gui\blocks\tool-help-first-column.htm;help_ext=mode_name;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td>%Name%</td>
+  <td><b>%Name%</b></td>
   <td name=IMAGE_PS_NAME>
     <font size=$GetVar(HtmlFontSizeControls)>
     <input
@@ -95,7 +95,7 @@
     >
     </font>
   </td>
-  <td name=IMAGE_PS_BUTTON>
+  <td name=IMAGE_PS_BUTTON align='right'>
 $spy.MakeHoverButton(button_small-go@ps,spy.GetPsImageInstructions\())
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -122,7 +122,7 @@ $spy.MakeHoverButton(button_small-go@ps,spy.GetPsImageInstructions\())
       name="IMAGE_PS_OUTLINE_LINEWIDTH"
       value='$spy.GetParam(snum.image.ps.outline_width)'
       onchange="spy.SetParam(snum.image.ps.outline_width,GetValue(~name~))"
-      label="%images_outline_line_width%"
+      label="%images_outline_line_width% "
     >
     </font>
   </td>
@@ -141,7 +141,7 @@ $spy.MakeHoverButton(button_small-go@ps,spy.GetPsImageInstructions\())
       width="50"
       value='$spy.GetParam(snum.image.ps.octant_width)'
       onchange="spy.SetParam(snum.image.ps.octant_width,GetValue(~name~))"
-      label="%images_octant_line_width%"
+      label="%images_octant_line_width% "
     >
     </font>
   </td>
@@ -171,7 +171,7 @@ $spy.MakeHoverButton(button_small-go@ps,spy.GetPsImageInstructions\())
       width="50"
       value='$spy.GetParam(snum.image.ps.octant_count)'
       onchange="spy.SetParam(snum.image.ps.octant_count,GetValue(~name~))"
-      label="%images_no_of_dividers%"
+      label="%images_no_of_dividers% "
     >
     </font>
   </td>
@@ -190,7 +190,7 @@ $spy.MakeHoverButton(button_small-go@ps,spy.GetPsImageInstructions\())
       width="50"
       value='$spy.GetParam(snum.image.ps.pie_width)'
       onchange="spy.SetParam(snum.image.ps.pie_width,GetValue(~name~))"
-      label="%images_dividing_line_width%"
+      label="%images_dividing_line_width% "
     >
     </font>
   </td>
@@ -219,7 +219,7 @@ $spy.MakeHoverButton(button_small-go@ps,spy.GetPsImageInstructions\())
       width="50"
       value='$spy.GetParam(snum.image.ps.bond_width)'
       onchange="spy.SetParam(snum.image.ps.bond_width,GetValue(~name~))"
-      label="%images_bond_width%"
+      label="%images_bond_width% "
     >
     </font>
   </td>
@@ -237,7 +237,7 @@ $spy.MakeHoverButton(button_small-go@ps,spy.GetPsImageInstructions\())
       width="50"
       value='$spy.GetParam(snum.image.ps.h_bond_width)'
       onchange="spy.SetParam(snum.image.ps.h_bond_width,GetValue(~name~))"
-      label="%images_H_atom_bonds%"
+      label="%images_H_atom_bonds% "
     >
     </font>
     </td>
@@ -266,7 +266,7 @@ $spy.MakeHoverButton(button_small-go@ps,spy.GetPsImageInstructions\())
       width="50"
       value='$spy.GetParam(snum.image.ps.font_weight)'
       onchange="spy.SetParam(snum.image.ps.font_weight,GetValue(~name~))"
-      label="%images_font_weight%"
+      label="%images_font_weight% "
     >
     </font>
     </td>
@@ -286,7 +286,7 @@ $spy.MakeHoverButton(button_small-go@ps,spy.GetPsImageInstructions\())
       value='$spy.GetParam(snum.image.ps.atom_label.font_size)'
       onchange="spy.SetParam(snum.image.ps.atom_label.font_size,GetValue(~name~))>>
 setfont AtomLabels strcat(spy.GetParam(snum.image.ps.atom_label.font_name),spy.GetParam(snum.image.ps.atom_label.font_size))"
-      label="%Size%"
+      label="%Size% "
     >
     </font>
     </td>
@@ -332,9 +332,35 @@ setfont AtomLabels strcat(spy.GetParam(snum.image.ps.atom_label.font_name),spy.G
       value='$spy.GetParam(snum.image.ps.bond_label.font_size)'
       onchange="spy.SetParam(snum.image.ps.bond_label.font_size,GetValue(~name~))>>
 setfont BondLabels strcat(spy.GetParam(snum.image.ps.bond_label.font_name),spy.GetParam(snum.image.ps.bond_label.font_size))"
-      label="%Size%"
+      label="%Size% "
     >
     </font>
+    </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
+
+
+<tr name=IMAGE_PS_ROW_7>
+<!-- #include tool-help-column gui\blocks\tool-help-first-column.htm;help_ext=octant-atoms;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td name=ROW_7_LABEL width=16% colspan='2'>
+    <b>%Show% %Octants% for these atom types </b>
+  </td>
+  <td name=IMAGE_PS_OCTANTS_ATOMS width=42% colspan='3'>
+    <input
+      type="text"
+      height="$GetVar(HtmlComboHeight)"
+      width="$GetVar(HtmlComboWidth2)"
+      bgcolor="$GetVar(HtmlInputBgColour)"
+      items="C; -C;"
+      height="$GetVar(HtmlInputHeight)"
+      valign='center'
+      align='right'
+      name="IMAGE_PS_OCTANTS_ATOMS"
+      width="250"
+      value='$spy.GetParam(snum.image.ps.octant_atoms)'
+      onchange="spy.SetParam(snum.image.ps.octant_atoms,GetValue(~name~))"
+    >
     </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
