@@ -92,7 +92,6 @@ def export_parameters():
   OV.SetVar('HtmlPanelWidth', OV.GetParam('gui.htmlpanelwidth'))
   OV.SetVar('HtmlButtonHeight', OV.GetParam('gui.timage.button.height'))
 
-
 def change_skin(skin_name=None, force=False):
   gui_phil_path = "%s/gui.phil" %(OV.DataDir())
 
@@ -146,7 +145,9 @@ def change_skin(skin_name=None, force=False):
     print "After 'adjust_skin_luminosity': %.2f s (%.5f s)" % ((t - t1), (t - t2))
     t2 = t
 
-  IT.resize_skin_logo(OV.GetParam('gui.htmlpanelwidth'))
+  width = OV.GetParam('gui.htmlpanelwidth')
+
+  IT.resize_skin_logo(width)
   IT.resize_news_image()
   if timing:
     t = time.time()
@@ -178,7 +179,8 @@ def change_skin(skin_name=None, force=False):
     a = PilTools.sNumTitle()
     a.run_sNumTitle(force=True)
 
-  OV.UpdateHtml()
+  olex.m('htmlpanelwidth %s' %width)
+  olex.m('htmlpanelswap %s' %OV.GetParam('gui.htmlpanel_side'))
 
   if timing:
     t = time.time()
@@ -195,6 +197,7 @@ def change_skin(skin_name=None, force=False):
     t2 = t
   export_parameters()
   olx.FlushFS()
+  olex.m('html.load index.htm')
   
 OV.registerFunction(change_skin)
 

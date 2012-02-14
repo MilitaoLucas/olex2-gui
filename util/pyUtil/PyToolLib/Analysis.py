@@ -225,7 +225,7 @@ class Graph(ImageTools):
     #txt = txt.replace("Fexp2", "Fexp%s" %(unichr(178)))
     #txt = txt.replace("Fo2", "F%s%s" %(unichr(2092),unichr(178)))
     txt = txt.replace("Fexp", "F%s" %(unichr(2091)))
-    txt = txt.replace("angstrom", unichr(197))
+    txt = txt.replace("Angstrom", unichr(197))
     return txt
 
   def make_x_y_plot(self):
@@ -1476,7 +1476,7 @@ class ShelXL_graph(refinement_graph):
       self.data['mean_shift'].add_pair(self.cycle, mean_shift)
     elif "Max. shift = " in line:
       if not self.data.has_key('max_shift'):
-        y_label = self.get_unicode_characters('Max shift in angstrom')
+        y_label = self.get_unicode_characters('Max shift in Angstrom')
         metadata={'labels':[], 'y_label':y_label}
         self.data.setdefault('max_shift', Dataset(metadata=metadata))
       max_shift = float(line.split("Max. shift =")[1].strip().split()[0])
@@ -2574,7 +2574,7 @@ class HealthOfStructure():
     self.grade_2_colour = OV.GetParam('gui.skin.diagnostics.colour_grade2').hexadecimal
     self.grade_3_colour = OV.GetParam('gui.skin.diagnostics.colour_grade3').hexadecimal
     self.grade_4_colour = OV.GetParam('gui.skin.diagnostics.colour_grade4').hexadecimal
-    self.available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
+    self.available_width = int(OV.GetParam('gui.htmlpanelwidth'))
     self.stats = None
 
   def get_HOS_d(self):
@@ -2685,7 +2685,7 @@ class HealthOfStructure():
         else:
           value_format = "%." + value_format
           value = value_format %value
-      use_image = False
+      use_image = True
       if use_image:
         t = time.time()
         txt += self.make_hos_images(item=item, colour=bg_colour, display=display, value_raw=raw_val, value_display=value, n=len(l))
@@ -2707,10 +2707,11 @@ class HealthOfStructure():
     OV.SetParam('snum.data.hkl_stat_file', OV.HKLSrc())
 
   def make_hos_images(self, item='test', colour='#ff0000', display='Display', value_display='10%', value_raw='0.1', n=1):
-    scale = 4
+    scale = 2
     font_name = 'Vera'
     value_display_extra = ""
-    boxWidth = (self.available_width/n - 4) * scale
+    width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
+    boxWidth = (width/n - n) * scale
     boxHeight = 30 * scale
     boxHalf = 8 *scale
     if type(colour) != str:
@@ -2732,7 +2733,7 @@ class HealthOfStructure():
         od_2theta = OV.get_cif_item('_reflns_odcompleteness_theta')
         if od_2theta:
           od_2theta = float(od_2theta) * 2
-          value_display_extra = "%.0f%% at 2theta=%.0fdegrees" %(value_raw, od_2theta)
+          value_display_extra = "at 2theta=%.0fdegrees" %(od_2theta)
           value_display_extra = IT.get_unicode_characters(value_display_extra)
 
     fill = self.get_bg_colour(item, value_raw)
@@ -2793,7 +2794,7 @@ class HealthOfStructure():
 
     ## ADD THE ACTUAL VALUE
     if value_display_extra:
-      font_size = 12
+      font_size = 20
     else:
       font_size = 20
     font = IT.registerFontInstance("Vera", font_size * scale)
@@ -2805,8 +2806,7 @@ class HealthOfStructure():
     x = boxWidth - dx - 10
     draw.text((x, y), "%s" %value_display, font=font, fill="#ffffff")
     if value_display_extra:
-      draw.text((0, y + dy/2 + 10), "%s" %value_display_extra, font=font_s, fill="#ffffff")
-
+      draw.text((0, y + dy/2), "%s" %value_display_extra, font=font_s, fill="#ffffff")
 
 
     im = im.resize((boxWidth/scale, boxHeight/scale), Image.ANTIALIAS)
