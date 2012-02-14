@@ -379,7 +379,7 @@ class ImageTools(FontInstances):
     else:
       txt = " "
 
-    OlexVFS.write_to_olex('logo1_txt.htm',txt)
+    OlexVFS.write_to_olex('logo1_txt.htm',txt,True)
     return "Done"
 
   def resize_to_panelwidth(self, args, width_adjust=50):
