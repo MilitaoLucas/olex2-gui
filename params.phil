@@ -273,6 +273,8 @@ snum
         .type = float
       octant_count = 5
         .type = int
+      octant_atoms = -C
+        .type = str
       h_bond_width = 0.6
         .type = float
       bond_width = 0.7

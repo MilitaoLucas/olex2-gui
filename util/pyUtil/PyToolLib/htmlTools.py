@@ -30,6 +30,10 @@ formula_string = ""
 global tutorial_box_initialised
 tutorial_box_initialised = False
 
+global time_add
+time_add = 0
+
+
 def makeHtmlTable(list):
   """ Pass a list of dictionaries, with one dictionary for each table row.
 
@@ -278,13 +282,18 @@ def make_help_box(args):
     help_src = t[1]
     title = help_src.replace("-", " ")
 
+  if "h3-" in name:
+    t = name.split("h3-")
+    help_src = name
+    title = t[1].replace("-", " ")
+
   elif "-" in name:
     title = name.replace("-", " ").title()
     help_src = name
   else:
     title = name
     help_src = name
-  titleTxt = OV.TranslatePhrase("%s" %title)
+  titleTxt = OV.TranslatePhrase("%s" %title).title()
 #  titleTxt = title
   if box_type == "tutorial":
     titleTxt = titleTxt.title()
@@ -292,6 +301,7 @@ def make_help_box(args):
     if len(t) > 1:
       titleTxt = "%s: %s" %(t[0], t[1])
 
+  title = title.title()
   helpTxt = OV.TranslatePhrase("%s-%s" %(help_src, box_type))
   helpTxt = helpTxt.replace("\r", "")
   helpTxt, d = format_help(helpTxt)
@@ -335,51 +345,17 @@ def make_help_box(args):
 ''' %name
 
   else:
-    str = ""
+    txt = ""
     return_items = ""
 
-  str += r'''
-%s
-<!-- #include tool-top gui/blocks/help-top.htm;image=blank;1; -->
-<tr VALIGN='center' NAME=%s bgcolor="$GetVar(HtmlTableFirstcolColour)">
-  <td colspan=1 width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)">
-  </td>
-  <td>
-    <font size='+2'>
-      <b>
-        %s
-      </b>
-    </font>
-  </td>
-</tr>
-<tr>
-  <td valign='top' width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)">
-  </td>
-  <td>
-    <font size='+1'>
-      %s
-    </font>
-  </td>
-</tr>
-<tr>
-  <td colspan=1 width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)">
-  </td>
-  <td align='right'>
-    %s
-  </td>
-</tr>
-</tr>
-</table>
-<table>
-%s
-</table>
-
-</font>
-''' %(banner_include, name, titleTxt, helpTxt, return_items, editLink)
+  txt = get_template('pop_help')
+  
+  txt = txt %(banner_include, name, titleTxt, helpTxt, return_items, editLink)
   wFilePath = r"%s-%s.htm" %(name, box_type)
-  #str = unicode(str)#
-  str = str.replace(u'\xc5', 'angstrom')
-  OV.write_to_olex(wFilePath, str)
+  #from ImageTools import ImageTools
+  #IT = ImageTools()
+  #txt = IT.get_unicode_characters(txt)
+  OV.write_to_olex(wFilePath, txt)
 
   if box_type == 'help':
     boxWidth = OV.GetParam('gui.help_box.width')
@@ -420,7 +396,7 @@ def make_help_box(args):
     if box_type == 'tutorial' and tutorial_box_initialised:
       olx.Popup(tutorial_box_initialised, wFilePath)
     else:
-      olx.Popup(pop_name, wFilePath, "-b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(name, boxWidth, boxHeight, x, y))
+      olx.Popup(pop_name, wFilePath, "-b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(title, boxWidth, boxHeight, x, y))
       olx.html.SetBorders(pop_name,5)
       if box_type == 'tutorial':
         tutorial_box_initialised = pop_name
@@ -1189,6 +1165,8 @@ def _check_modes_and_states(name):
 
 
 def MakeHoverButton(name, cmds, onoff = "off", btn_bg='table_firstcol_colour'):
+  #global time_add
+  #t = time.time()
   hover_buttons = OV.GetParam('olex2.hover_buttons')
   on = _check_modes_and_states(name)
 
@@ -1196,8 +1174,11 @@ def MakeHoverButton(name, cmds, onoff = "off", btn_bg='table_firstcol_colour'):
     txt = MakeHoverButtonOn(name, cmds, btn_bg)
   else:
     txt = MakeHoverButtonOff(name, cmds, btn_bg)
+  #diff = (time.time() - t)
+  #time_add += diff
+  #print "MakeHoverButtons took %.6fs (%.4f)" %(diff, time_add)
   return txt
-
+  
 OV.registerFunction(MakeHoverButton)
 
 def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):

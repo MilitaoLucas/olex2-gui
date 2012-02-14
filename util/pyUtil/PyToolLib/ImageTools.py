@@ -213,7 +213,7 @@ class ImageTools(FontInstances):
     #txt = txt.replace("Fexp2", "Fexp%s" %(unichr(178)))
     #txt = txt.replace("Fo2", "F%s%s" %(unichr(2092),unichr(178)))
     txt = txt.replace("Fexp", "F%s" %(unichr(2091)))
-    txt = txt.replace("angstrom", unichr(197))
+    txt = txt.replace("Angstrom", unichr(197))
     txt = txt.replace("degrees", u"\u00B0")
     return txt
 

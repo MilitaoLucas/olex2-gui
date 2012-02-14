@@ -1038,7 +1038,7 @@ class timage(ImageTools):
         #self.params.html.base_colour.rgb = OV.FindValue('gui_htmlself.params.html.base_colour.rgb')
       #else:
         #self.params.html.base_colour.rgb = self.HTMLColorToRGB(args[0])
-    self.width = int((width) - 22)
+    self.width = int((width) - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
     if self.width <= 0: self.width = 10
     icon_source = "%s/etc/gui/images/src/icons.png" %self.basedir
     image_source = "%s/etc/gui/images/src/images.png" %self.basedir
@@ -2034,6 +2034,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
   def save_with_checking_for_needed(self):
     name = self.name.lower()
     image = self.image
+    OlexVFS.save_image_to_olex(image, name, 2)
+    return
     if olex_fs.Exists(name):
       _ = OlexVFS.read_from_olex(name)
       OlexVFS.save_image_to_olex(image, name, 2)
@@ -2836,7 +2838,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       underground = OV.GetParam('gui.html.bg_colour').rgb
 
     elif item_type == "h3":
-      width -= OV.GetParam('gui.html.table_firstcol_width') + 3
+      width -= OV.GetParam('gui.html.table_firstcol_width') + 4
       underground = OV.GetParam('gui.html.table_firstcol_colour').rgb
 
     elif "tab" in item_type:
