@@ -7,6 +7,19 @@ diagnostics {
   debug = False
     .type = bool
   hkl{
+    MaxD{
+      value_format= "2f"
+        .type = str
+      display = "d max"
+        .type = str
+    }  
+    MinD{
+      value_format= "2f"
+        .type = str
+      display = "d min"
+        .type = str
+    }  
+  
     MeanIOverSigma{
       op = "greater"
         .type = str
@@ -50,7 +63,7 @@ diagnostics {
     completeness{
       op = "greater"
         .type = str
-      display = "Compl."
+      display = "Complete"
         .type = str
       value_format= "2%"
         .type = str

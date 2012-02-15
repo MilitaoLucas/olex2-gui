@@ -12,6 +12,8 @@ IT = ImageTools()
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
+import OlexVFS
+
 import time
 
 class Skin():
@@ -46,8 +48,16 @@ class Skin():
       a.run_timage(force_images=True)
 
     elif f == 'sNumTitle':
-      a = PilTools.sNumTitle()
-      a.run_sNumTitle(force=True)
+      items = {}
+      sNum = items.setdefault("sNum", OV.FileName())
+      a = PilTools.timage()
+      image = a.make_timage('snumtitle', sNum, 'on', titleCase=False)
+      name = r"sNumTitle.png"
+      OlexVFS.save_image_to_olex(image, name, 1)
+      OV.CopyVFSFile(name, 'SNUMTITLE',2)
+      
+#      a = PilTools.sNumTitle()
+#      a.run_sNumTitle(force=True)#
 
     elif f == 'change':
       self.change()
@@ -69,8 +79,15 @@ class Skin():
 Skin_instance = Skin()
 OV.registerMacro(Skin_instance.run_skin, 'function-The function to call')
 
+def check_for_first_run():
+  if not os.path.exists("%s/global.odb" %OV.DataDir()):
+    change_skin('default')
+    return True
+  return False
 
 def export_parameters():
+  if check_for_first_run():
+    return
   deal_with_gui_phil(action='load')
   OV.SetVar('HtmlTableFirstcolColour', OV.GetParam('gui.html.table_firstcol_colour').hexadecimal)
   OV.SetVar('HtmlTableFirstcolWidth', OV.GetParam('gui.html.table_firstcol_width'))
@@ -95,23 +112,26 @@ def export_parameters():
 OV.registerFunction(export_parameters,False,'skin')
 
 def deal_with_gui_phil(action='load', skin_name=None, force=False):
+  if not skin_name:
+    skin_name = OV.GetParam('gui.skin.name')
+  if not skin_name:
+    skin_name = 'default'
+  
   gui_phil_path = "%s/gui.phil" %(OV.DataDir())
   if action == 'load':
     OV.SetHtmlFontSize()
     OV.SetHtmlFontSizeControls()
     timing = False
+    skin_extension = None
     if timing:
       t1 = time.time()
       t2 = 0
-    if not skin_name:
-      skin_extension = None
     else:
       force = True
       olx.gui_phil_handler.reset_scope('gui')
       if len(skin_name.split("_")) > 1:
         skin_extension = skin_name.split("_")[1]
         skin_name = skin_name.split("_")[0]
-      else: skin_extension = skin_name
   
     gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_name)
     if os.path.isfile(gui_skin_phil_path):
@@ -143,6 +163,8 @@ def change_skin(skin_name=None, force=False):
   if timing:
     t1 = time.time()
     t2 = 0
+
+
 
   deal_with_gui_phil(action='load', skin_name=skin_name, force=False)
   try:
@@ -182,12 +204,17 @@ def change_skin(skin_name=None, force=False):
 
   OV.setAllMainToolbarTabButtons()
 
-  if OV.FileFull() != "none":
-    import History
-    from History import hist
-    hist._make_history_bars()
-    a = PilTools.sNumTitle()
-    a.run_sNumTitle(force=True)
+  #if OV.FileFull() != "none":
+    #import History
+    #from History import hist
+    #try:
+      #hist._make_history_bars()
+    #except:
+      #pass
+      
+  a = PilTools.sNumTitle()
+  a.run_sNumTitle(force=True)
+  olx.FlushFS()
 
   olex.m('htmlpanelwidth %s' %width)
   olex.m('htmlpanelswap %s' %OV.GetParam('gui.htmlpanel_side'))
@@ -203,9 +230,8 @@ def change_skin(skin_name=None, force=False):
     t = time.time()
     print "After 'Save PHIL': %.2f s (%.5f s)" % ((t - t1), (t - t2))
     t2 = t
+
   export_parameters()
-  olx.FlushFS()
-  olex.m('html.load index.htm')
   
 OV.registerFunction(change_skin)
 

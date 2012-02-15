@@ -1028,7 +1028,10 @@ def setAllMainToolbarTabButtons():
           state = "off"
       else:
         state = 'off'
-    OV.CopyVFSFile("cbtn-%s%s.png" %(btn,state),"cbtn-%s.png" %btn)
+    try:
+      OV.CopyVFSFile("cbtn-%s%s.png" %(btn,state),"cbtn-%s.png" %btn)
+    except:
+      olex.m('skin default_new')
     if state == 'on':
       OV.SetVar('gui_MainToolbarTabButtonActive',btn)
   return "Done"

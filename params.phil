@@ -88,6 +88,8 @@ snum
       .type = float
     fcf = None
       .type = path
+    d_min = None
+      .type = float
   }
 
   smtbx
