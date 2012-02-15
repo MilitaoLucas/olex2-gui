@@ -2569,7 +2569,7 @@ class HealthOfStructure():
     self.hkl_stats = {}
     phil_file = r"%s/etc/CIF/diagnostics.phil" %(OV.BaseDir())
     olx.phil_handler.adopt_phil(phil_file=phil_file)
-    self.debug = OV.GetParam('diagnostics.debug')
+    self.debug = bool(OV.GetParam('diagnostics.debug'))
     self.grade_1_colour = OV.GetParam('gui.skin.diagnostics.colour_grade1').hexadecimal
     self.grade_2_colour = OV.GetParam('gui.skin.diagnostics.colour_grade2').hexadecimal
     self.grade_3_colour = OV.GetParam('gui.skin.diagnostics.colour_grade3').hexadecimal
@@ -2585,18 +2585,20 @@ class HealthOfStructure():
       print err
       return None
 
-  def make_HOS(self):
+  def make_HOS(self, force=False):
+    force = bool(force)
     if self.debug:
       import time
       t1 = time.time()
-    if self.initialise_HOS():
+    
+    if self.initialise_HOS(force=force):
       self.summarise_HOS()
       self.make_HOS_html()
     self.stats = None
     if self.debug:
       print "HOS took %.4f seconds" %(time.time() - t1)
 
-  def initialise_HOS(self):
+  def initialise_HOS(self, force=False):
     if olx.IsFileLoaded() != 'true':
       return
     OV.write_to_olex("reflection-stats-summary.htm" , "n/a")
@@ -2611,13 +2613,21 @@ class HealthOfStructure():
       return False
     try:
       self.hkl_stats = olex_core.GetHklStat()
+      if force:
+        return True
+      min_d = "%.4f" %self.hkl_stats['MinD']
+      if OV.GetParam('snum.data.d_min') == float(min_d):
+        if bool(olx.fs.Exists('MinD')):
+          return False
+      else:  
+        OV.SetParam('snum.data.d_min',min_d)
       if not self.hkl_stats:
         return False
     except:
       return False
     return True
 
-  def get_cctbx_completeness(self):
+  def get_cctbx_completeness(self, dmin=None):
     retVal = None
     try:
       from cctbx_olex_adapter import OlexCctbxAdapter
@@ -2650,15 +2660,16 @@ class HealthOfStructure():
       txt += "<tr><td>%s</td><td>%s</td><tr>" %(item, value)
     OV.write_to_olex("reflection-stats-summary.htm" , txt)
     return d
+  
 
   def make_HOS_html(self):
     txt = "<table width='100%%' cellpadding=0 cellspacing=0><tr>"
-    l = ['MeanIOverSigma','Rint','completeness']
+    l = ['MinD', 'MeanIOverSigma','Rint','completeness']
     for item in l:
       if item != 'completeness':
         value = self.hkl_stats[item]
       else:
-        value = self.get_cctbx_completeness()
+        value = self.get_cctbx_completeness(self.hkl_stats['MinD'])
       bg_colour = self.get_bg_colour(item, value)
       display = OV.GetParam('diagnostics.hkl.%s.display' %item)
       value_format = OV.GetParam('diagnostics.hkl.%s.value_format' %item)
@@ -2687,9 +2698,11 @@ class HealthOfStructure():
           value = value_format %value
       use_image = True
       if use_image:
-        t = time.time()
+        if self.debug:
+          t = time.time()
         txt += self.make_hos_images(item=item, colour=bg_colour, display=display, value_raw=raw_val, value_display=value, n=len(l))
-        print "hos image took %.3f s to make" %(time.time() - t)
+        if self.debug:
+          print "hos image took %.3f s to make" %(time.time() - t)
       else:
         if href:
           txt = txt + "<a href='%s'>" %(href)
@@ -2706,12 +2719,19 @@ class HealthOfStructure():
     OV.write_to_olex("hos.htm",txt)
     OV.SetParam('snum.data.hkl_stat_file', OV.HKLSrc())
 
+
   def make_hos_images(self, item='test', colour='#ff0000', display='Display', value_display='10%', value_raw='0.1', n=1):
-    scale = 2
+    scale = 4
     font_name = 'Vera'
     value_display_extra = ""
-    width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
-    boxWidth = (width/n - n) * scale
+    completeness_box_width = 150
+
+    if item == 'completeness':
+      boxWidth = completeness_box_width * scale
+      
+    else:
+      width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - completeness_box_width)
+      boxWidth = (width/(n-1) - (n-1)) * scale
     boxHeight = 30 * scale
     boxHalf = 8 *scale
     if type(colour) != str:
@@ -2720,7 +2740,10 @@ class HealthOfStructure():
     im = Image.new('RGB', (boxWidth,boxHeight), colour)
     im = Image.new('RGB', (boxWidth,boxHeight), OV.GetParam('gui.html.table_firstcol_colour').hexadecimal)
     draw = ImageDraw.Draw(im)
-    value_raw = float(value_raw)
+    try:
+      value_raw = float(value_raw)
+    except:
+      value_raw = 0
     op = OV.GetParam('diagnostics.hkl.%s.op' %item)
     curr_x = 0
     limit_width = 0
@@ -2733,7 +2756,7 @@ class HealthOfStructure():
         od_2theta = OV.get_cif_item('_reflns_odcompleteness_theta')
         if od_2theta:
           od_2theta = float(od_2theta) * 2
-          value_display_extra = "at 2theta=%.0fdegrees" %(od_2theta)
+          value_display_extra = "at 2Theta=%.0fdegrees" %(od_2theta)
           value_display_extra = IT.get_unicode_characters(value_display_extra)
 
     fill = self.get_bg_colour(item, value_raw)
@@ -2778,11 +2801,16 @@ class HealthOfStructure():
       display = IT.get_unicode_characters("I/sigma")
     if item == "Rint":
       display = "Rint"
+      
+    display = IT.get_unicode_characters(display)
+
     font = IT.registerFontInstance(font_name, 10 * scale)
     x = 2
     y = boxHalf - 1
-#    fill = IT.adjust_colour(fill, luminosity=1.6)
-    fill = '#ffffff'
+    if item == "MinD":
+      fill = '#555555'
+    else:
+      fill = '#ffffff'
     draw.text((x, y), "%s" %display, font=font, fill=fill)
 #    IT.write_text_to_draw(draw, display, font_colour='#ffffff', font_size=12)
 #    IT.write_text_to_draw(draw, value_display, align='right', max_width=boxWidth - 2, font_colour='#ffffff', font_size=17)
@@ -2804,7 +2832,7 @@ class HealthOfStructure():
       dxs,dxy = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=12 * scale)
     dx,dy = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=font_size * scale)
     x = boxWidth - dx - 10
-    draw.text((x, y), "%s" %value_display, font=font, fill="#ffffff")
+    draw.text((x, y), "%s" %value_display, font=font, fill=fill)
     if value_display_extra:
       draw.text((0, y + dy/2), "%s" %value_display_extra, font=font_s, fill="#ffffff")
 
@@ -2816,6 +2844,10 @@ class HealthOfStructure():
     return txt
 
   def get_bg_colour(self, item, val):
+
+    if item == "MinD":
+      return "#ffdf09"
+
     op = OV.GetParam('diagnostics.hkl.%s.op' %item)
 
     for i in xrange(4):
