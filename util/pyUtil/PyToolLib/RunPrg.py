@@ -349,6 +349,7 @@ class RunRefinementPrg(RunPrg):
       OV.File()
     if OV.GetParam('snum.refinement.check_absolute_structure_after_refinement'):
       self.isInversionNeeded(force=self.params.snum.refinement.auto.invert)
+    
 
   def doHistoryCreation(self):
     if self.params.snum.init.skip_history:

@@ -1287,18 +1287,16 @@ class timage(ImageTools):
 #    cut = 0*sf, 193*sf, 275*sf, 211*sf
 #    max_width = cut[2] - cut[0]
 #    crop =  im.crop(cut)
-    button_names = self.image_items_d.get("G3 BIG BUTTON", button_names)
-    width = available_width - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
-    self.produce_buttons(button_names, self.sfs,"_g3_big",width=width)
+#    button_names = self.image_items_d.get("G3 BIG BUTTON", button_names)
+#    width = available_width - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+#    self.produce_buttons(button_names, self.sfs,"_g3_big",width=width)
 
     ## G4 BUTTON
     if olx.IsPluginInstalled('g4') == 'true':
       button_names = self.image_items_d.get("G4 BUTTON", button_names)
       width = available_width - OV.GetParam('gui.timage.g4.width_adjust')
       self.produce_buttons(button_names, self.sfs, "_g4",width=width)
-      
 
-    
     cut = 0*sf, 151*sf, 16*sf, 168*sf
     crop =  im.crop(cut)
     #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=1.98))
@@ -2756,6 +2754,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
 
   def make_timage(self, item_type, item, state, font_name="Vera", width=None, colour=None, whitespace=None, titleCase=True):
+    self.scale = 1
     if not width:
       width = self.width
 
@@ -2801,11 +2800,14 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if not font_name:
       font_name = OV.GetParam('gui.timage.font_name')
     font_size = OV.GetParam('gui.timage.%s.font_size' %item_type)
+
     if font_size is None:
       valign = ('middle',0.7,)
     else:
       valign = False
       font_size = int(round(font_size * self.size_factor,0))
+
+    font_size = font_size * self.scale
     arrows = OV.GetParam('gui.timage.%s.arrows' %item_type)
     buttonmarks = OV.GetParam('gui.timage.%s.buttonmark' %item_type)
 
@@ -2847,6 +2849,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         font_colour = self.highlight_colour
 
     elif item_type == "snumtitle":
+      self.scale = 3
       underground = OV.GetParam('gui.html.bg_colour').rgb
       title_case = False
 
@@ -2920,13 +2923,13 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     else:
       height = height
 
-    size = (int(width), int(height))
+    size = (int(width)*self.scale, int(height)*self.scale)
     bg_colour = underground #hp
     image = Image.new('RGBA', size, bg_colour)
     draw = ImageDraw.Draw(image)
 
     if grad_step:
-      self.gradient_bgr(draw, width, height, colour = grad_colour, fraction=1, step=grad_step)
+      self.gradient_bgr(draw, width*self.scale, height*self.scale, colour = grad_colour, fraction=1, step=grad_step)
 
 
     ## Prepare text for printing on the new image. If '-' is present in the string, this will
@@ -2942,23 +2945,22 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     ## Actually print the text on the new image item.
     wX, wY = self.write_text_to_draw(draw,
                             txt,
-                            top_left=(left,top),
+                            top_left=(left * self.scale,top * self.scale),
                             font_name=font_name,
-                            font_size=font_size,
+                            font_size=font_size * self.scale,
                             image_size = image.size,
                             valign=valign,
                             align=halign,
-                            max_width=width,
+                            max_width=width * self.scale,
                             titleCase=titleCase,
                             font_colour=font_colour)
     cache = {}
 
     if item_type == "snumtitle":
-      info_size = OV.GetParam('gui.timage.snumtitle.filefullinfo_size')
+      info_size = OV.GetParam('gui.timage.snumtitle.filefullinfo_size') * self.scale
       colour = OV.GetParam('gui.timage.snumtitle.filefullinfo_colour').rgb
-      #self.drawFileFullInfo(draw, colour, right_margin=5, height=height, font_size=info_size, left_start=wX + 15)
-      self.drawFileFullInfo(draw, colour, right_margin=5, height=height, font_size=info_size, left_start=5)
-      self.drawSpaceGroupInfo(draw, luminosity=OV.GetParam('gui.timage.snumtitle.sg_L'), right_margin=3)
+      self.drawFileFullInfo(draw, image.size, colour, right_margin=5, height=height, font_size=info_size, left_start=5 * self.scale)
+      self.drawSpaceGroupInfo(draw, luminosity=OV.GetParam('gui.timage.snumtitle.sg_L'), right_margin=3 * self.scale)
 
     if self.advertise_new:
       draw = ImageDraw.Draw(image)
@@ -3002,6 +3004,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       bg = w[2]
       image = self.add_whitespace(image, side, weight, bg)
     filename = item
+    
+    if self.scale != 1:
+      image = image.resize((int(width), int(height)), Image.ANTIALIAS)
     return image
 
   def make_timage_border (self, image, weight=1, fill='#ababab'):
@@ -3185,7 +3190,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     return image
 
-  def drawFileFullInfo(self, draw, colour='#ff0000', right_margin=0, height=10, font_name="Vera", font_size=8, left_start = 0):
+  def drawFileFullInfo(self, draw, size, colour='#ff0000', right_margin=0, height=10, font_name="Vera", font_size=8, left_start = 0):
+    
+    height = size[1]
+    width = size[0]
+    
     base_colour = self.params.html.base_colour.rgb
     txt = OV.FileFull()
     if txt == "none":
@@ -3195,37 +3204,39 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     n = int(len(txt)/2)
     txtbeg = txt[:n]
     txtend = txt [-n:]
+    
 
-    if left_start > self.width:
-      left_start = 50
+    if left_start > width:
+      left_start = 50 * self.scale
     else:
       left_start = left_start
       
     xx = 0
-    while tw > self.width - left_start:
+    while tw > width - left_start - 5 * self.scale:
       txtbeg = txt[:n]
       txtend = txt [-n:]
       tw = (draw.textsize("%s...%s" %(txtbeg, txtend), font)[0])
       n -= 1
       xx += 1
-      if xx > 100:
+      if xx > 100 * self.scale:
         break
     txt = "%s...%s" %(txtbeg, txtend)
 
     wX, wY  = draw.textsize(txt, font)
     #left_start =  (self.width-wX) - right_margin
-    top = height - wY - 2
+    top = height - wY - 2 * self.scale
     self.write_text_to_draw(draw,
                        txt,
                        top_left=(left_start, top),
                        font_name=font_name,
                        font_size=font_size,
-                       font_colour=colour)
+                       font_colour=colour,
+                       max_width=width
+                       )
 
 
   def drawSpaceGroupInfo(self, draw, luminosity=1.9, right_margin=8, font_name="Times Bold"):
     base_colour = self.params.html.base_colour.rgb
-    left_start = 150
     font_colour = self.adjust_colour(base_colour, luminosity=luminosity)
     scale = OV.GetParam('gui.timage.snumtitle.sginfo_scale')
     try:
@@ -3249,21 +3260,21 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         #font_number = self.registerFontInstance("Times Bold", 14)
         #font_letter = self.registerFontInstance("Times Bold Italic", 15.5)
         #font_sub = self.registerFontInstance("Times Bold", 10)
-        font_bar = self.registerFontInstance("%s Bold" %font_base, int(11 * scale))
-        font_slash = self.registerFontInstance("%s Bold" %font_base, int(18 * scale))
-        font_number = self.registerFontInstance("%s Bold" %font_base, int(14 * scale))
-        font_letter = self.registerFontInstance("%s Bold Italic" %font_base, int(15 * scale))
-        font_sub = self.registerFontInstance("%s Bold" %font_base, int(10 * scale))
-        norm_kern = 2
-        sub_kern = 0
+        font_bar = self.registerFontInstance("%s Bold" %font_base, int(17 * self.scale))
+        font_slash = self.registerFontInstance("%s Bold" %font_base, int(24 * self.scale))
+        font_number = self.registerFontInstance("%s Bold" %font_base, int(20 * self.scale))
+        font_letter = self.registerFontInstance("%s Bold Italic" %font_base, int(21 * self.scale))
+        font_sub = self.registerFontInstance("%s Bold" %font_base, int(16 * self.scale))
+        norm_kern = 2 * self.scale
+        sub_kern = -2 * self.scale
       except:
         font_name = "Arial"
-        font_bar = self.registerFontInstance("%s Bold" %font_base, 12)
-        font_slash = self.registerFontInstance("%s Bold" %font_base, 18)
-        font_number = self.registerFontInstance("%s Bold" %font_base, 14)
-        font_letter = self.registerFontInstance("%s Bold Italic" %font_base, 15)
-        font_norm = self.registerFontInstance(font_name, 13)
-        font_sub = self.registerFontInstance(font_name, 10)
+        font_bar = self.registerFontInstance("%s Bold" %font_base, 14 * self.scale)
+        font_slash = self.registerFontInstance("%s Bold" %font_base, 20 * self.scale)
+        font_number = self.registerFontInstance("%s Bold" %font_base, 16 * self.scale)
+        font_letter = self.registerFontInstance("%s Bold Italic" %font_base, 17 * self.scale)
+        font_norm = self.registerFontInstance(font_name, 15 * self.scale)
+        font_sub = self.registerFontInstance(font_name, 12 * self.scale)
         norm_kern = 0
         sub_kern = 0
       textwidth = 0
@@ -3283,7 +3294,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       txt_l = []
     if txt_l:
       i = 0
-      left_start =  (self.width-textwidth) - right_margin -5
+      left_start =  (self.width * self.scale - textwidth) - right_margin - 10 * self.scale
       cur_pos = left_start
       advance = 0
       after_kern = 0
@@ -3295,29 +3306,29 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
               continue
             cur_pos += advance
             cur_pos += after_kern
-            after_kern = 2
+            after_kern = 1 * self.scale
             advance = 0
             try:
               int(character)
               font = font_number
-              top = 0
-              after_kern = 2
+              top = 1 * self.scale
+              after_kern = 4 * self.scale
             except:
               font = font_letter
               top = -1
               if character == "P" or character == "I" or character == "C":
-                norm_kern = -2
-                after_kern = 0
+                norm_kern = 0  * self.scale
+                after_kern = 1 *self.scale
                 character = " %s" %character
             if character == "-":
-              draw.text((cur_pos + 1, -10), "_", font=font_bar, fill=font_colour)
-              draw.text((cur_pos + 1, -9), "_", font=font_bar, fill=font_colour)
-              advance = -1
+              draw.text((cur_pos + 1 * self.scale, -15 * self.scale), "_", font=font_bar, fill=font_colour)
+              draw.text((cur_pos + 1 * self.scale, -16 * self.scale), "_", font=font_bar, fill=font_colour)
+              advance = -2 * self.scale
               norm_kern = 0
             elif character == "/":
-              norm_kern = 0
-              after_kern = 0
-              draw.text((cur_pos -2, -3), "/", font=font_slash, fill=font_colour)
+              norm_kern = 0 * self.scale
+              after_kern = -2 * self.scale
+              draw.text((cur_pos -2 * self.scale, -3 * self.scale), "/", font=font_slash, fill=font_colour)
               advance = ((draw.textsize("/", font=font_slash)[0]) + norm_kern) - 1
             else:
               draw.text((cur_pos + norm_kern, top), "%s" %character, font=font, fill=font_colour)
@@ -3326,9 +3337,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           text_in_superscript = txt_sub[i][0]
           if text_in_superscript:
             cur_pos += advance
-            draw.text((cur_pos + sub_kern, 5), "%s" %text_in_superscript, font=font_sub, fill=font_colour)
+            draw.text((cur_pos + sub_kern, 5 * self.scale), "%s" %text_in_superscript, font=font_sub, fill=font_colour)
             advance = (draw.textsize(text_in_superscript, font=font_sub)[0]) + sub_kern
-            after_kern = -2
+            after_kern = -2 * self.scale
             cur_pos += advance
         i+= 1
 

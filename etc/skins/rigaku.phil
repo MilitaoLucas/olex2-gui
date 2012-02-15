@@ -3,7 +3,7 @@ gui {
   logo_colour = #095ba5
 
   skin {
-    name = Ragu
+    name = rigaku
     extension = None
     logo_name= etc/skins/RigakuLogo.png
   }

@@ -201,7 +201,7 @@ class ImageTools(FontInstances):
     txt = txt.replace("_", " ")
     txt = txt.replace("lambda", unichr(61548))
     txt = txt.replace("theta", unichr(61553))
-    txt = txt.replace("Theta", '\u0398')
+    txt = txt.replace("Theta", unichr(61553))
     txt = txt.replace("sigma", unichr(61555))
     txt = txt.replace("^2", unichr(178))
     txt = txt.replace("^3", unichr(179))
