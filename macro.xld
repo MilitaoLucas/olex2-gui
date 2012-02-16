@@ -401,6 +401,7 @@
       <cmd3 "mask atoms 5">
       <cmd4 "mask bonds 48">
       <cmd5 "telpv %1">
+      <cmd6 "brad 1">
     >
   >
 >
@@ -418,6 +419,7 @@
       <cmd3 "mask atoms 5">
       <cmd4 "mask bonds 48">
       <cmd5 "telpv %1">
+      <cmd6 "brad 1">
     >
   >
 >
@@ -434,6 +436,7 @@
       <cmd2 "arad pers">
       <cmd3 "mask atoms 1">
       <cmd4 "mask bonds 48">
+      <cmd5 "brad 1">
     >
   >
 >
