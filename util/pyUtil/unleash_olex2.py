@@ -9,15 +9,18 @@
 
 #available ports
 # alteartions for binary files : name (properties...), olex-port MUST be specified for non-portable files
-mac32_port_name = 'port-mac-intel-py27'
+mac32_legacy_port_name = 'port-mac-intel-py27'
+mac32_port_name = 'port-mac32'
 mac32_port_zip_name = 'olex2-mac32-intel.zip'
 mac32_port_prefix = 'olex2.app/Contents/MacOS/'
 
-linux32_port_name = 'port-suse101x32-py27'
+linux32_legacy_port_name = 'port-suse101x32-py27'
+linux32_port_name = 'port-linux32'
 linux32_port_zip_name = 'olex2-linux32.zip'
 linux32_port_prefix = 'olex2/'
 
-linux64_port_name = 'port-suse101x64-py27'
+linux64_legacy_port_name = 'port-suse101x64-py27'
+linux64_port_name = 'port-linux64'
 linux64_port_zip_name = 'olex2-linux64.zip'
 linux64_port_prefix = 'olex2/'
 
@@ -49,20 +52,32 @@ distro_zips = (
 
 external_files = {
   #mac
-  'olex2-mac32.zip': ('olex-port', mac32_port_name, 'action:extract', 'action:delete'),
-  'unirun-mac32.zip': ('olex-port', mac32_port_name, 'action:extract', 'action:delete'),
-  'cctbx-mac32.zip': ('olex-port', mac32_port_name, 'action:extract', 'action:delete'),
-  'lib-mac32.zip': ('olex-port', mac32_port_name, 'action:extract', 'action:delete'),
+  'olex2-mac32.zip': ('olex-port', mac32_port_name, mac32_legacy_port_name,
+                      'action:extract', 'action:delete'),
+  'unirun-mac32.zip': ('olex-port', mac32_port_name, mac32_legacy_port_name,
+                       'action:extract', 'action:delete'),
+  'cctbx-mac32.zip': ('olex-port', mac32_port_name, mac32_legacy_port_name,
+                      'action:extract', 'action:delete'),
+  'lib-mac32.zip': ('olex-port', mac32_port_name, mac32_legacy_port_name,
+                    'action:extract', 'action:delete'),
   #linux32
-  'olex2-linux32.zip': ('olex-port', linux32_port_name, 'action:extract', 'action:delete'),
-  'unirun-linux32.zip': ('olex-port', linux32_port_name, 'action:extract', 'action:delete'),
-  'cctbx-linux32.zip': ('olex-port', linux32_port_name, 'action:extract', 'action:delete'),
-  'lib-linux32.zip': ('olex-port', linux32_port_name, 'action:extract', 'action:delete'),
+  'olex2-linux32.zip': ('olex-port', linux32_port_name, linux32_legacy_port_name,
+                        'action:extract', 'action:delete'),
+  'unirun-linux32.zip': ('olex-port', linux32_port_name, linux32_legacy_port_name,
+                         'action:extract', 'action:delete'),
+  'cctbx-linux32.zip': ('olex-port', linux32_port_name, linux32_legacy_port_name,
+                        'action:extract', 'action:delete'),
+  'lib-linux32.zip': ('olex-port', linux32_port_name, linux32_legacy_port_name,
+                      'action:extract', 'action:delete'),
   #linux64
-  'olex2-linux64.zip': ('olex-port', linux64_port_name, 'action:extract', 'action:delete'),
-  'unirun-linux64.zip': ('olex-port', linux64_port_name, 'action:extract', 'action:delete'),
-  'cctbx-linux64.zip': ('olex-port', linux64_port_name, 'action:extract', 'action:delete'),
-  'lib-linux64.zip': ('olex-port', linux64_port_name, 'action:extract', 'action:delete'),
+  'olex2-linux64.zip': ('olex-port', linux64_port_name, linux64_legacy_port_name,
+                        'action:extract', 'action:delete'),
+  'unirun-linux64.zip': ('olex-port', linux64_port_name, linux64_legacy_port_name,
+                         'action:extract', 'action:delete'),
+  'cctbx-linux64.zip': ('olex-port', linux64_port_name, linux64_legacy_port_name,
+                        'action:extract', 'action:delete'),
+  'lib-linux64.zip': ('olex-port', linux64_port_name, linux64_legacy_port_name,
+                      'action:extract', 'action:delete'),
   #windows
   'launch-win32.zip': ('olex-port', win32_port_name,  'action:extract', 'action:delete'),
   'python27-win32.zip': ('olex-port', win32_port_name, 'action:extract', 'action:delete'),
