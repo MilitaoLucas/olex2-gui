@@ -1013,7 +1013,6 @@ class timage(ImageTools):
     self.available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - OV.GetParam('gui.html.table_firstcol_width'))
 
 #    self.available_width = OV.htmlPanelWidth() - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
-    self.size_factor = OV.GetParam('gui.skin.size_factor')
 
     #from PilTools import ButtonMaker
     self.abort = False
@@ -1256,7 +1255,7 @@ class timage(ImageTools):
 #    crop =  im.crop(cut)
     button_names = self.image_items_d.get("SMALL BUTTONS")
     width = OV.GetParam('gui.timage.small_buttons.width')
-    width = int(round(width * self.size_factor,0))
+    width = int(round(width * self.scale,0))
     self.produce_buttons(button_names, self.sf,"_small",width=width)
 
     ## TWO buttons in the HTMLpanelWIDTH
@@ -2562,199 +2561,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       font_name = self.params.image_font_name
 
 
-
-  def XXXtimage_style_1(self, item, state):
-    width = self.width
-    height = 18
-    colour = 250, 250, 250
-    size = (int(width), int(height))
-    image = Image.new('RGBA', size, colour)
-    draw = ImageDraw.Draw(image)
-    txt = "%s" %item.replace("-", " ")
-
-    self.write_text_to_draw(draw,
-                       txt,
-                       top_left=(10,0),
-                       font_name=self.font_name,
-                       font_size=12,
-                       font_colour=self.adjust_colour(base_colour, luminosity = 0.8))
-
-    #border top
-    begin = (0, 1)
-    end = (width, 1)
-    draw.line((begin ,end), fill="#f2f2f2")
-
-    #border bottom
-    begin = (0,height-1)
-    end = (width, height-1)
-    draw.line((begin ,end), fill="#707295")
-    begin = (0,height-2)
-    end = (width, height-2)
-    draw.line((begin ,end), fill="#d3d3d3")
-
-    #border left
-    begin = (0,1)
-    end = (0, height-1)
-    draw.line((begin ,end), fill="#4e5086")
-
-    dup = ImageChops.duplicate(image)
-    dup = ImageChops.invert(dup)
-    dup = ImageChops.offset(dup, 1, 1)
-    image = ImageChops.blend(image, dup, 0.1)
-    filename = item
-    return image
-
-  def timage_style_h3(self, item, state, bg_luminosity=1.85, bg_saturation=0.9, luminosity_font=1.0, font_name = "Vera"):
-    if self.params.image_font_name:
-      font_name = self.params.image_font_name
-    width = self.width - 8
-
-    if "GB" in self.gui_language_encoding: #--!--
-      height = 18
-    else:
-      height = 16
-    base_colour = self.params.html.base_colour.rgb
-    bg_colour = self.adjust_colour(base_colour, luminosity=bg_luminosity, saturation=bg_saturation)
-    size = (int(width), int(height))
-    image = Image.new('RGBA', size, bg_colour)
-    draw = ImageDraw.Draw(image)
-    grad_colour = self.adjust_colour(base_colour, luminosity = 1.9)
-    self.gradient_bgr(draw, width, height, colour = grad_colour, fraction=1, step=0.3)
-
-    t = item.split("-")
-    txt = ""
-    for bit in t:
-      txt += bit.title() + " "
-
-    self.write_text_to_draw(draw,
-                       txt,
-                       top_left=(13,0),
-                       font_name=font_name,
-                       font_size=10,
-                       font_colour=self.adjust_colour(base_colour, luminosity=luminosity_font, hue=0),
-                       image_size = image.size,
-                       titleCase=True,
-                       valign = ("middle", 0.7)
-                     )
-
-    cache = {}
-    rad = 1
-    image = RoundedCorners.round_image(image, cache, rad)
-
-
-
-    #self.make_border(rad=11,
-            #draw=draw,
-            #width=width,
-            #height=height,
-            #bg_colour=bg_colour,
-            #border_colour=bg_colour,
-            #border_hls = (0, 0.85, 1),
-            #shift = 0,
-            #cBottomLeft=False,
-            #cBottomRight=False,
-            #cTopLeft=False,
-            #cTopRight=False
-          #)
-
-    if self.advertise_new:
-      self.draw_advertise_new(draw, image)
-
-    if state == "off":
-      fill=self.adjust_colour("bg", luminosity=0.8)
-      self.create_arrows(image, draw, height, direction="right", colour=fill, type='simple')
-    else:
-      fill = self.adjust_colour("highlight",  luminosity = 1.1)
-      self.create_arrows(image, draw, height, direction="up", colour=fill, type='simple')
-
-    image = self.add_whitespace(image=image, side='bottom', weight=1, colour = self.adjust_colour("bg", luminosity = 0.9))
-    filename = item
-    return image
-
-
-  def timage_style_1(self, item, state, font_name="Vera"):
-
-    base_colour = self.params.html.base_colour.rgb
-
-    bg_colour_L = self.params.timage.bg_colour_L
-    grad = self.params.timage.grad
-    grad_colour_L = self.params.timage.grad_colour_L
-    grad_step = self.params.timage.grad_step
-    font_colour_L = self.params.timage.font_colour_L
-
-    bg_colour = self.adjust_colour(base_colour, luminosity = bg_colour_L)
-    grad_colour = self.adjust_colour(base_colour, luminosity = grad_colour_L)
-    font_colour = self.adjust_colour(base_colour, luminosity = font_colour_L)
-
-    height = self.params.timage.height
-    font_name = self.params.timage.font_name
-    font_size = self.params.timage.font_size
-    corner_rad = self.params.timage.corner_rad
-
-    top = self.params.timage.top
-    left = self.params.timage.left
-
-    width = self.width + 1
-
-    if "GB" in self.gui_language_encoding: #--!--
-      height = height + 2
-    else:
-      height = height
-
-    size = (int(width), int(height))
-    image = Image.new('RGBA', size, bg_colour)
-    draw = ImageDraw.Draw(image)
-
-    if grad:
-      self.gradient_bgr(draw, width, height, colour = grad_colour, fraction=1, step=grad_step)
-    t = item.split("-")
-    txt = ""
-    for bit in t:
-      txt += bit.title() + " "
-
-    transtest = False
-    if transtest:
-      image = self.makeTransparentText(image,
-                                          txt,
-                                          font_colour=font_colour,
-                                          top_left=(left,top),
-                                          font_size=font_size,
-                                          font_name=font_name,
-                                        )
-      draw = ImageDraw.Draw(image)
-    else:
-      self.write_text_to_draw(draw,
-                              txt,
-                              top_left=(left,top),
-                              font_name=font_name,
-                              font_size=font_size,
-                              image_size = image.size,
-                              valign=("middle",0.7),
-                              titleCase=True,
-                              font_colour=font_colour)
-      cache = {}
-      rad = 3
-      image = RoundedCorners.round_image(image, cache, corner_rad)
-
-    if state == "off":
-      fill=self.adjust_colour("bg", luminosity=0.6)
-      self.create_arrows(image, draw, height, direction="right", colour=fill, type='simple')
-
-    else:
-      fill = self.adjust_colour("highlight",  luminosity = 1.0)
-      self.create_arrows(image, draw, height, direction="up", colour=fill, type='simple')
-
-    if self.advertise_new:
-      self.draw_advertise_new(draw, image)
-
-    image = self.add_whitespace(image=image, side='bottom', margin_left=rad, weight=1, colour = self.adjust_colour("bg", luminosity = 0.90))
-    image = self.add_whitespace(image=image, side='bottom', margin_left=rad, weight=1, colour = self.adjust_colour("bg", luminosity = 0.95))
-    filename = item
-    return image
-
-
   def make_timage(self, item_type, item, state, font_name="Vera", width=None, colour=None, whitespace=None, titleCase=True):
-    self.scale = 1
     if not width:
       width = self.width
 
@@ -2770,7 +2577,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         base_colour = base_colour.rgb
     else:
       base_colour = base_colour.rgb
-
+    
     grad_step = OV.GetParam('gui.timage.%s.grad_step' %item_type)
     grad_colour = OV.GetParam('gui.timage.%s.grad_colour' %item_type)
     font_colour = OV.GetParam('gui.timage.%s.font_colour' %item_type)
@@ -2801,15 +2608,17 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       font_name = OV.GetParam('gui.timage.font_name')
     font_size = OV.GetParam('gui.timage.%s.font_size' %item_type)
 
+    self.scale = OV.GetParam('gui.timage.%s.scale' %item_type)
+
     if font_size is None:
       valign = ('middle',0.7,)
     else:
       valign = False
-      font_size = int(round(font_size * self.size_factor,0))
+      font_size = int(round(font_size,0))
 
-    font_size = font_size * self.scale
     arrows = OV.GetParam('gui.timage.%s.arrows' %item_type)
     buttonmarks = OV.GetParam('gui.timage.%s.buttonmark' %item_type)
+    corner_rad = OV.GetParam('gui.timage.%s.corner_rad' %item_type)
 
     if state == "highlight":
       grad_colour = OV.GetParam('gui.html.highlight_colour').rgb
@@ -2824,10 +2633,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       grad_colour = IT.adjust_colour(grad_colour, luminosity = 0.95)
 #      font_colour = IT.adjust_colour(font_colour, luminosity = 0.9)
 
-    height = int(round(OV.GetParam('gui.timage.%s.height' %item_type, 20) * self.size_factor, 0))
-    top = int(round(OV.GetParam('gui.timage.%s.top' %item_type, 0) * self.size_factor,0))
-    left = int(round(OV.GetParam('gui.timage.%s.left' %item_type, 0) * self.size_factor,0))
-    corner_rad = int(round(OV.GetParam('gui.timage.%s.corner_rad' %item_type, 0) * self.size_factor,0))
+    height = int(round(OV.GetParam('gui.timage.%s.height' %item_type, 20), 0))
+    top = int(round(OV.GetParam('gui.timage.%s.top' %item_type, 0),0))
+    left = int(round(OV.GetParam('gui.timage.%s.left' %item_type, 0),0))
     halign = OV.GetParam('gui.timage.%s.halign' %item_type)
 
     shadow = OV.GetParam('gui.timage.%s.shadow' %item_type)
@@ -2849,7 +2657,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         font_colour = self.highlight_colour
 
     elif item_type == "snumtitle":
-      self.scale = 3
       underground = OV.GetParam('gui.html.bg_colour').rgb
       title_case = False
 
@@ -2923,6 +2730,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     else:
       height = height
 
+    corner_rad = corner_rad * self.scale
     size = (int(width)*self.scale, int(height)*self.scale)
     bg_colour = underground #hp
     image = Image.new('RGBA', size, bg_colour)
@@ -3120,7 +2928,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         sidefill = fill
       else:
         sidefill = fill
-      image = self.add_whitespace(image=image, side=side, weight=weight, colour = sidefill, overwrite=True)
+      image = self.add_whitespace(image=image, side=side, weight=weight * self.scale, colour = sidefill, overwrite=True)
 
     if 'arrow' in arrows:
       draw = ImageDraw.Draw(image)
@@ -3260,7 +3068,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         #font_number = self.registerFontInstance("Times Bold", 14)
         #font_letter = self.registerFontInstance("Times Bold Italic", 15.5)
         #font_sub = self.registerFontInstance("Times Bold", 10)
-        font_bar = self.registerFontInstance("%s Bold" %font_base, int(17 * self.scale))
+        font_bar = self.registerFontInstance("%s Bold" %font_base, int(16 * self.scale))
         font_slash = self.registerFontInstance("%s Bold" %font_base, int(24 * self.scale))
         font_number = self.registerFontInstance("%s Bold" %font_base, int(20 * self.scale))
         font_letter = self.registerFontInstance("%s Bold Italic" %font_base, int(21 * self.scale))
@@ -3318,11 +3126,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
               top = -1
               if character == "P" or character == "I" or character == "C":
                 norm_kern = 0  * self.scale
-                after_kern = 1 *self.scale
+                after_kern = 2 *self.scale
                 character = " %s" %character
             if character == "-":
-              draw.text((cur_pos + 1 * self.scale, -15 * self.scale), "_", font=font_bar, fill=font_colour)
-              draw.text((cur_pos + 1 * self.scale, -16 * self.scale), "_", font=font_bar, fill=font_colour)
+              draw.text((cur_pos + 0 * self.scale, -14 * self.scale), "_", font=font_bar, fill=font_colour)
+              draw.text((cur_pos + 0 * self.scale, -15 * self.scale), "_", font=font_bar, fill=font_colour)
               advance = -2 * self.scale
               norm_kern = 0
             elif character == "/":
@@ -3337,7 +3145,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           text_in_superscript = txt_sub[i][0]
           if text_in_superscript:
             cur_pos += advance
-            draw.text((cur_pos + sub_kern, 5 * self.scale), "%s" %text_in_superscript, font=font_sub, fill=font_colour)
+            draw.text((cur_pos + sub_kern, 7 * self.scale), "%s" %text_in_superscript, font=font_sub, fill=font_colour)
             advance = (draw.textsize(text_in_superscript, font=font_sub)[0]) + sub_kern
             after_kern = -2 * self.scale
             cur_pos += advance

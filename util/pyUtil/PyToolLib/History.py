@@ -25,6 +25,8 @@ import ires_reader
 
 tree = None
 
+timing = False
+
 class History(ArgumentParser):
   def __init__(self):
     super(History, self).__init__()
@@ -110,10 +112,16 @@ class History(ArgumentParser):
     self._make_history_bars()
 
   def saveHistory(self):
+    if timing:
+      t = time.time()
     self._getItems()
     variableFunctions.Pickle(tree,self.history_filepath)
+    if timing:
+      print "saveHistory took %4fs" %(time.time() - t)
 
   def loadHistory(self):
+    if timing:
+      t = time.time()
     self._getItems()
     global tree
     if os.path.exists(self.history_filepath):
@@ -144,6 +152,8 @@ class History(ArgumentParser):
       self._createNewHistory()
 
     self._make_history_bars()
+    if timing:
+      print "loadHistory took %4fs" %(time.time() - t)
 
   def resetHistory(self):
     self._getItems()
@@ -232,11 +242,16 @@ class History(ArgumentParser):
   def _make_history_bars(self):
     if not OV.HasGUI():
       return
-    full_tree = not OV.GetParam('snum.history.condensed_tree')
-    OV.write_to_olex(
-      'history_tree.ind', ''.join(make_html_tree(tree, [], 0, full_tree)))
-    from Analysis import HistoryGraph
-    HistoryGraph(tree)
+    try:
+      state = olx.html.GetItemState('work-history')
+    except:
+      state = None
+    if state == u'0':
+      full_tree = not OV.GetParam('snum.history.condensed_tree')
+      OV.write_to_olex(
+        'history_tree.ind', ''.join(make_html_tree(tree, [], 0, full_tree)))
+      from Analysis import HistoryGraph
+      HistoryGraph(tree)
     return
 
 hist = History()
