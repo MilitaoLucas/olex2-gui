@@ -6,6 +6,9 @@
 diagnostics {
   debug = False
     .type = bool
+  scale = 2
+    .type = int
+    
   hkl{
     MaxD{
       value_format= "2f"
@@ -60,7 +63,7 @@ diagnostics {
       href = ""
         .type = str
     }
-    completeness{
+    Completeness{
       op = "greater"
         .type = str
       display = "Complete"

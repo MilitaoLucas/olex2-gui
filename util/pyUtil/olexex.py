@@ -342,12 +342,19 @@ class OlexRefinementModel(object):
   def getExpectedPeaks(self):
     cell_volume = float(olx.xf.au.GetVolume())
     expected_atoms = cell_volume/15
-    #present_atoms = self.numberAtoms()
     present_atoms = self.number_non_hydrogen_atoms()
     expected_peaks = expected_atoms - present_atoms
     if expected_peaks < 5: expected_peaks = 5
     return int(expected_peaks)
-##
+
+  def getExpectedPeaks_and_AtomsPresent(self):
+    cell_volume = float(olx.xf.au.GetVolume())
+    expected_atoms = cell_volume/15
+    present_atoms = self.number_non_hydrogen_atoms()
+    expected_peaks = expected_atoms - present_atoms
+    if expected_peaks < 5: expected_peaks = 5
+    return int(expected_peaks), int(present_atoms)
+
 
 def get_refine_ls_hydrogen_treatment():
   afixes_present = []
@@ -922,10 +929,10 @@ def GetRInfo(txt="",format='html'):
         if 'report' in format:
           t = r"<font size='%s'>R1 = <font color='%s'><b>%s%%</b></font></font>" %(font_size, col, R1)
         else:
-          t = r"<td colspan='1' align='right' rowspan='2'><font size='%s'>R1 = <font color='%s'><b>%s%%</b></font></font></td>" %(font_size, col, R1)
+          t = r"<td colspan='2' align='right' rowspan='2'><font size='%s'>R1 = <font color='%s'><b>%s%%</b></font></font></td>" %(font_size, col, R1)
           
       except:
-        t = "<td colspan='1' rowspan='2' align='right'><font size='%s'><b>%s</b></font></td>" %(font_size, R1)
+        t = "<td colspan='2' align='right' rowspan='2' align='right'><font size='%s'><b>%s</b></font></td>" %(font_size, R1)
       finally:
         return t
 
