@@ -28,6 +28,7 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 guiParams = OV.GuiParams()
 
+timing = bool(OV.GetParam('gui.timing'))
 
 from scitbx.math import erf
 
@@ -2576,6 +2577,8 @@ class HealthOfStructure():
     self.grade_4_colour = OV.GetParam('gui.skin.diagnostics.colour_grade4').hexadecimal
     self.available_width = int(OV.GetParam('gui.htmlpanelwidth'))
     self.stats = None
+    self.scale = OV.GetParam('diagnostics.scale')
+
 
   def get_HOS_d(self):
     try:
@@ -2587,7 +2590,7 @@ class HealthOfStructure():
 
   def make_HOS(self, force=False):
     force = bool(force)
-    if self.debug:
+    if timing:
       import time
       t1 = time.time()
     
@@ -2595,7 +2598,7 @@ class HealthOfStructure():
       self.summarise_HOS()
       self.make_HOS_html()
     self.stats = None
-    if self.debug:
+    if timing:
       print "HOS took %.4f seconds" %(time.time() - t1)
 
   def initialise_HOS(self, force=False):
@@ -2649,27 +2652,27 @@ class HealthOfStructure():
   def summarise_HOS(self):
     d = {}
     txt = ""
-    item = "Completeness"
-    value = self.get_cctbx_completeness()
-    d.setdefault('Completeness', value)
-    txt += "<tr><td>%s</td><td>%s</td><tr>" %(item, value)
-    l = ['MeanIOverSigma','Rint']
+#    item = "Completeness"
+#    value = self.get_cctbx_completeness()
+#    d.setdefault('Completeness', value)
+#    txt += "<tr><td>%s</td><td>%s</td><tr>" %(item, value)
+    l = ['Completeness', 'MeanIOverSigma','Rint']
     for item in self.hkl_stats:
       value = self.hkl_stats[item]
       d.setdefault(item, value)
       txt += "<tr><td>%s</td><td>%s</td><tr>" %(item, value)
     OV.write_to_olex("reflection-stats-summary.htm" , txt)
     return d
-  
 
   def make_HOS_html(self):
     txt = "<table width='100%%' cellpadding=0 cellspacing=0><tr>"
-    l = ['MinD', 'MeanIOverSigma','Rint','completeness']
+    l = ['MinD', 'MeanIOverSigma','Rint','Completeness']
     for item in l:
-      if item != 'completeness':
-        value = self.hkl_stats[item]
-      else:
-        value = self.get_cctbx_completeness(self.hkl_stats['MinD'])
+      value = self.hkl_stats[item]
+#      if item != 'completeness':
+#        value = self.hkl_stats[item]
+#      else:
+#        value = self.get_cctbx_completeness(self.hkl_stats['MinD'])
       bg_colour = self.get_bg_colour(item, value)
       display = OV.GetParam('diagnostics.hkl.%s.display' %item)
       value_format = OV.GetParam('diagnostics.hkl.%s.value_format' %item)
@@ -2698,11 +2701,11 @@ class HealthOfStructure():
           value = value_format %value
       use_image = True
       if use_image:
-        if self.debug:
+        if timing:
           t = time.time()
         txt += self.make_hos_images(item=item, colour=bg_colour, display=display, value_raw=raw_val, value_display=value, n=len(l))
-        if self.debug:
-          print "hos image took %.3f s to make" %(time.time() - t)
+        if timing:
+          print ".. hos image took %.3f s (%s) " %((time.time() - t),item)
       else:
         if href:
           txt = txt + "<a href='%s'>" %(href)
@@ -2721,12 +2724,12 @@ class HealthOfStructure():
 
 
   def make_hos_images(self, item='test', colour='#ff0000', display='Display', value_display='10%', value_raw='0.1', n=1):
-    scale = 4
+    scale = self.scale
     font_name = 'Vera'
     value_display_extra = ""
     completeness_box_width = 150
 
-    if item == 'completeness':
+    if item == 'Completeness':
       boxWidth = completeness_box_width * scale
       
     else:

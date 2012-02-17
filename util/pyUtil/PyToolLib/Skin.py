@@ -16,6 +16,8 @@ import OlexVFS
 
 import time
 
+timing = bool(OV.GetParam('gui.timing'))
+
 class Skin():
   def __init__(self):
     return
@@ -43,10 +45,13 @@ class Skin():
     #self.adjust_font_size_for_ppi()
 
   def run_skin(self, f, args=None):
+    if timing:
+      t = time.time()
     if f == 'timage':
       a = PilTools.timage()
       a.run_timage(force_images=True)
-
+      if timing:
+        print "run_skin timage took %.4fs" %(time.time()-t)
     elif f == 'sNumTitle':
       items = {}
       sNum = items.setdefault("sNum", OV.FileName())
@@ -55,16 +60,15 @@ class Skin():
       name = r"sNumTitle.png"
       OlexVFS.save_image_to_olex(image, name, 1)
       OV.CopyVFSFile(name, 'SNUMTITLE',2)
-      
-#      a = PilTools.sNumTitle()
-#      a.run_sNumTitle(force=True)#
+      if timing:
+        print "run_skin sNumTitle took %.4fs" %(time.time()-t)
 
     elif f == 'change':
       self.change()
-      #self.GuiSkinChanger_instance.run_GuiSkinChanger()
       self.timage_instance.run_timage()
       self.sNumTitle_instance.run_sNumTitle(force=True)
-    #self.adjust_font_size_for_ppi()
+      if timing:
+        print "run_skin change took %.4fs" %(time.time()-t)
 
     olx.FlushFS()
 
@@ -86,6 +90,8 @@ def check_for_first_run():
   return False
 
 def export_parameters():
+  if timing:
+    t = time.time()
   if check_for_first_run():
     return
   deal_with_gui_phil(action='load')
@@ -109,6 +115,8 @@ def export_parameters():
   OV.SetVar('HtmlGuiFontSize', OV.GetParam('gui.html.font_size'))
   OV.SetVar('HtmlPanelWidth', OV.GetParam('gui.htmlpanelwidth'))
   OV.SetVar('HtmlButtonHeight', OV.GetParam('gui.timage.button.height'))
+  if timing:
+    print "export_parameters took %.4fs" %(time.time()-t)
 OV.registerFunction(export_parameters,False,'skin')
 
 def deal_with_gui_phil(action='load', skin_name=None, force=False):
@@ -121,7 +129,6 @@ def deal_with_gui_phil(action='load', skin_name=None, force=False):
   if action == 'load':
     OV.SetHtmlFontSize()
     OV.SetHtmlFontSizeControls()
-    timing = False
     skin_extension = None
     if timing:
       t1 = time.time()
@@ -159,12 +166,9 @@ def deal_with_gui_phil(action='load', skin_name=None, force=False):
 
 
 def change_skin(skin_name=None, force=False):
-  timing = False
   if timing:
     t1 = time.time()
     t2 = 0
-
-
 
   deal_with_gui_phil(action='load', skin_name=skin_name, force=False)
   try:
