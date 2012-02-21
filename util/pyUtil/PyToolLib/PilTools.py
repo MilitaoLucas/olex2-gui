@@ -2565,6 +2565,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if not width:
       width = self.width
 
+    self.scale = OV.GetParam('gui.timage.%s.scale' %item_type)
+    if not self.scale:
+      self.scale = 1
+      
     base_colour = OV.GetParam('gui.timage.%s.base_colour' %item_type)
     highlight_colour = OV.GetParam('gui.html.highlight_colour').rgb
     self.highlight_colour = highlight_colour
@@ -2608,7 +2612,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       font_name = OV.GetParam('gui.timage.font_name')
     font_size = OV.GetParam('gui.timage.%s.font_size' %item_type)
 
-    self.scale = OV.GetParam('gui.timage.%s.scale' %item_type)
 
     if font_size is None:
       valign = ('middle',0.7,)
@@ -2910,7 +2913,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         oSize = img.size
         s = oSize[1]/image.size[1]
         nSize = (int(oSize[0]/s), int(oSize[1]/s))
-        img = img.resize(nSize)
+        img = img.resize(nSize, Image.ANTIALIAS)
         image.paste(img,(0,0))
 
     if 'bar' in arrows:
