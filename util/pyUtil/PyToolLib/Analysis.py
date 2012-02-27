@@ -2555,7 +2555,7 @@ def make_reflection_graph(name):
            'normal_probability': Normal_probability_plot,
            'r1_factor_vs_resolution': r1_factor_vs_resolution_plot,
            'scale_factor_vs_resolution': scale_factor_vs_resolution_plot,
-           'bijvoet_differences_probability_plotself.data': bijvoet_differences_NPP,
+           'bijvoet_differences_probability_plot': bijvoet_differences_NPP,
            'bijvoet_differences_scatter_plot': bijvoet_differences_scatter_plot,
            }
   func = run_d.get(name)
