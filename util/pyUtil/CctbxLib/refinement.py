@@ -273,31 +273,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.constraints += self.setup_geometrical_constraints(
       self.olx_atoms.afix_iterator())
     self.n_constraints = len(self.constraints)
-    shelx_parts = flex.int(self.olx_atoms.disorder_parts())
-    conformer_indices = shelx_parts.deep_copy().set_selected(shelx_parts < 0, 0)
-    sym_excl_indices = flex.abs(
-      shelx_parts.deep_copy().set_selected(shelx_parts > 0, 0))
-    connectivity_table = smtbx.utils.connectivity_table(
-      self.xray_structure(),
-      conformer_indices=flex.size_t(list(conformer_indices)),
-      sym_excl_indices=flex.size_t(list(sym_excl_indices)))
-    olx_conn = self.olx_atoms.model['conn']
-    equivs = self.olx_atoms.model['equivalents']
-    for i_seq, v in olx_conn['atom'].items():
-      for bond_to_delete in v.get('delete', []):
-        if bond_to_delete['eqiv'] == -1:
-          connectivity_table.remove_bond(i_seq, bond_to_delete['to'])
-        else:
-          connectivity_table.remove_bond(
-            i_seq, bond_to_delete['to'],
-            rt_mx_from_olx(equivs[bond_to_delete['eqiv']]))
-      for bond_to_add in v.get('create', []):
-        if bond_to_add['eqiv'] == -1:
-          connectivity_table.add_bond(i_seq, bond_to_add['to'])
-        else:
-          connectivity_table.add_bond(
-            i_seq, bond_to_add['to'],
-            rt_mx_from_olx(equivs[bond_to_add['eqiv']]))
     temp = self.olx_atoms.exptl['temperature']
     if temp < -274: temp = 20
     #set up extinction correction if defined
@@ -312,7 +287,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.reparametrisation = constraints.reparametrisation(
       structure=self.xray_structure(),
       constraints=self.constraints,
-      connectivity_table=connectivity_table,
+      connectivity_table=self.connectivity_table,
       twin_fractions=self.get_twin_fractions(),
       temperature=temp,
       extinction = self.extinction,
@@ -428,7 +403,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
       else:
         from smtbx import absolute_structure
         flack = absolute_structure.flack_analysis(
-          self.normal_eqns.xray_structure, self.observations, self.extinction)
+          self.normal_eqns.xray_structure,
+          self.observations,
+          self.extinction,
+          connectivity_table=self.connectivity_table
+        )
         self.flack = utils.format_float_with_standard_uncertainty(
           flack.flack_x, flack.sigma_x)
 
