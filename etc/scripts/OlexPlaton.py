@@ -105,7 +105,7 @@ def OlexPlaton(platonflag="0"):
         print "This option requires a valid CIF file - checking"
         # Check for CIF
         try:
-          cifornot = open("%s.%s"%(OV.FileName(), cif), 'r')
+          cifornot = open("%s.%s"%(OV.FileName(), 'cif'), 'r')
           cifornot.close()
         except:
           print "No CIF present - why not make one with ACTA?"
