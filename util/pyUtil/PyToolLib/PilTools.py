@@ -787,214 +787,6 @@ WHERE (((submission.ID)="%s"));""" %sNum
     sNum = items["sNum"]
     a = timage()
     return a.make_timage('snumtitle', sNum, 'on', titleCase=False)
-    #base_colour = self.params.snumtitle.base_colour.rgb
-    #height = self.params.snumtitle.height
-    #font_name = self.params.snumtitle.font_name
-    #grad_step = self.params.snumtitle.grad_step
-
-    #bg_colour = self.adjust_colour(base_colour, luminosity = self.params.snumtitle.bg_colour_L)
-    #grad_colour = self.adjust_colour(base_colour, luminosity = self.params.snumtitle.grad_colour_L)
-    #font_colour = self.adjust_colour(base_colour, luminosity = self.params.snumtitle.font_colour_L)
-
-
-    #width = self.width
-    #self.height = height
-    #gap = 0
-    #bgap = height - gap
-    #size = (int(width), int(height))
-    ##cs = copy.deepcopy(cS1)
-
-    #if olx.IsFileType("cif") == 'true':
-      #base_colour = (255, 0, 0)
-
-    #image = Image.new('RGBA', size, base_colour)
-
-    #draw = ImageDraw.Draw(image)
-
-    #if grad_step:
-      #self.gradient_bgr(draw, width, height, colour = grad_colour, fraction=1, step=grad_step)
-    #cache = {}
-    #pos = (('Rounded'),('Rounded'),('Square'),('Square'))
-    ##pos = (('Rounded'),('Rounded'),('Rounded'),('Rounded'))
-    ##pos = (('Square'),('Square'),('Square'),('Square'))
-    #image = RoundedCorners.round_image(image, cache, 2, pos=pos) #used to be 10
-
-    ##border_rad=20
-    ##self.make_border(rad=border_rad,
-            ##draw=draw,
-            ##width=width,
-            ##height=height,
-            ##bg_colour=base_colour,
-            ##border_colour=base_colour,
-            ##cBottomLeft=False,
-            ##cBottomRight=False,
-            ##border_hls = (0, 1.2, 1)
-          ##)
-
-    #sNum = items["sNum"]
-    #if sNum == "none": sNum = "No Structure"
-    #wX, wY = self.write_text_to_draw(draw,
-                       #sNum,
-                       #top_left=(6, 1),
-                       #font_name=font_name,
-                       #font_size=17,
-                       #image_size = image.size,
-                       #valign=("middle", 0.8),
-                       #font_colour=self.adjust_colour(base_colour, luminosity = 2.0)
-                      #)
-    #info_size = OV.GetParam('gui.timage.snumtitle.filefullinfo_size')
-    #colour = OV.GetParam('gui.timage.snumtitle.filefullinfo_colour').rgb
-    #self.drawFileFullInfo(draw, colour, right_margin=5, height=height, font_size=info_size, left_start=wX + 15)
-    #self.drawSpaceGroupInfo(draw, luminosity=1.8, right_margin=3)
-
-
-    #### Draw this info ONLY if there is a connection to the MySQL database
-    ##if self.have_connection:
-      ##self.drawDBInfo()
-
-    ##dup = ImageChops.duplicate(image)
-    ##dup = ImageChops.invert(dup)
-    ##dup = ImageChops.offset(dup, 1, 1)
-    ##image = ImageChops.blend(image, dup, 0.05)
-
-    #return image
-
-  #def drawFileFullInfo(self, draw, colour='#ff0000', right_margin=0, height=10, font_name="Vera", font_size=8, left_start = 40):
-    #base_colour = self.params.html.base_colour.rgb
-    #txt = OV.FileFull()
-    #if txt == "none":
-      #return
-    #font = self.registerFontInstance(font_name, font_size)
-    #tw = (draw.textsize(txt, font)[0])
-    #n = int(len(txt)/2)
-    #txtbeg = txt[:n]
-    #txtend = txt [-n:]
-    #while tw > self.width - left_start:
-      #txtbeg = txt[:n]
-      #txtend = txt [-n:]
-      #tw = (draw.textsize("%s...%s" %(txtbeg, txtend), font)[0])
-      #n -= 1
-    #txt = "%s...%s" %(txtbeg, txtend)
-
-    #wX, wY  = draw.textsize(txt, font)
-    #left_start =  (self.width-wX) - right_margin
-    #top = height - wY - 2
-    #self.write_text_to_draw(draw,
-                       #txt,
-                       #top_left=(left_start, top),
-                       #font_name=font_name,
-                       #font_size=font_size,
-                       #font_colour=colour)
-
-
-  #def drawSpaceGroupInfo(self, draw, luminosity=1.9, right_margin=12, font_name="Times Bold"):
-    #base_colour = self.params.html.base_colour.rgb
-    #left_start = 120
-    #font_colour = self.adjust_colour(base_colour, luminosity=luminosity)
-    #scale = OV.GetParam('gui.sginfo.scale')
-    #try:
-      #txt_l = []
-      #txt_sub = []
-      #txt_norm = []
-      #try:
-        #txt = OV.olex_function('sg(%h)')
-      #except:
-        #pass
-      #if not txt:
-        #txt="ERROR"
-      #txt = txt.replace(" 1", "")
-      #txt = txt.replace(" ", "")
-      #txt_l = txt.split("</sub>")
-      #if len(txt_l) == 1:
-        #txt_norm = [(txt,0)]
-      #try:
-        #font_base = "Times"
-        ##font_slash = self.registerFontInstance("Times Bold", 18)
-        ##font_number = self.registerFontInstance("Times Bold", 14)
-        ##font_letter = self.registerFontInstance("Times Bold Italic", 15.5)
-        ##font_sub = self.registerFontInstance("Times Bold", 10)
-        #font_bar = self.registerFontInstance("%s Bold" %font_base, int(11 * scale))
-        #font_slash = self.registerFontInstance("%s Bold" %font_base, int(18 * scale))
-        #font_number = self.registerFontInstance("%s Bold" %font_base, int(14 * scale))
-        #font_letter = self.registerFontInstance("%s Bold Italic" %font_base, int(15 * scale))
-        #font_sub = self.registerFontInstance("%s Bold" %font_base, int(10 * scale))
-        #norm_kern = 2
-        #sub_kern = 0
-      #except:
-        #font_name = "Arial"
-        #font_bar = self.registerFontInstance("%s Bold" %font_base, 12)
-        #font_slash = self.registerFontInstance("%s Bold" %font_base, 18)
-        #font_number = self.registerFontInstance("%s Bold" %font_base, 14)
-        #font_letter = self.registerFontInstance("%s Bold Italic" %font_base, 15)
-        #font_norm = self.registerFontInstance(font_name, 13)
-        #font_sub = self.registerFontInstance(font_name, 10)
-        #norm_kern = 0
-        #sub_kern = 0
-      #textwidth = 0
-      #for item in txt_l:
-        #if item:
-          #try:
-            #sub = item.split("<sub>")[1]
-          #except:
-            #sub = ""
-          #norm = item.split("<sub>")[0]
-          #tw_s = (draw.textsize(sub, font=font_sub)[0]) + sub_kern
-          #tw_n = (draw.textsize(norm, font=font_number)[0]) + norm_kern
-          #txt_sub.append((sub, tw_s))
-          #txt_norm.append((norm, tw_n))
-          #textwidth += (tw_s + tw_n)
-    #except:
-      #txt_l = []
-    #if txt_l:
-      #i = 0
-      #left_start =  (self.width-textwidth) - right_margin -5
-      #cur_pos = left_start
-      #advance = 0
-      #after_kern = 0
-      #for item in txt_l:
-        #if item:
-          #text_normal = txt_norm[i][0]
-          #for character in text_normal:
-            #if character == "":
-              #continue
-            #cur_pos += advance
-            #cur_pos += after_kern
-            #after_kern = 2
-            #advance = 0
-            #try:
-              #int(character)
-              #font = font_number
-              #top = 0
-              #after_kern = 2
-            #except:
-              #font = font_letter
-              #top = -1
-              #if character == "P" or character == "I" or character == "C":
-                #norm_kern = -2
-                #after_kern = 0
-                #character = " %s" %character
-            #if character == "-":
-              #draw.text((cur_pos + 1, -10), "_", font=font_bar, fill=font_colour)
-              #draw.text((cur_pos + 1, -9), "_", font=font_bar, fill=font_colour)
-              #advance = -1
-              #norm_kern = 0
-            #elif character == "/":
-              #norm_kern = 0
-              #after_kern = 0
-              #draw.text((cur_pos -2, -3), "/", font=font_slash, fill=font_colour)
-              #advance = ((draw.textsize("/", font=font_slash)[0]) + norm_kern) - 1
-            #else:
-              #draw.text((cur_pos + norm_kern, top), "%s" %character, font=font, fill=font_colour)
-              #advance = (draw.textsize(character, font=font)[0]) + norm_kern
-
-          #text_in_superscript = txt_sub[i][0]
-          #if text_in_superscript:
-            #cur_pos += advance
-            #draw.text((cur_pos + sub_kern, 5), "%s" %text_in_superscript, font=font_sub, fill=font_colour)
-            #advance = (draw.textsize(text_in_superscript, font=font_sub)[0]) + sub_kern
-            #after_kern = -2
-            #cur_pos += advance
-        #i+= 1
 
 
 class timage(ImageTools):
@@ -2753,6 +2545,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     else:
       txt = item
     
+    ## in case of cif file:
+    if OV.FileFull().endswith('.cif'):
+      current = int(olx.xf.CurrentData())
+      txt = olx.xf.DataName(current)
+    
     ## Actually print the text on the new image item.
     wX, wY = self.write_text_to_draw(draw,
                             txt,
@@ -2771,8 +2568,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       info_size = OV.GetParam('gui.timage.snumtitle.filefullinfo_size') * self.scale
       colour = OV.GetParam('gui.timage.snumtitle.filefullinfo_colour').rgb
       self.drawFileFullInfo(draw, image.size, colour, right_margin=5, height=height, font_size=info_size, left_start=5 * self.scale)
-      self.drawSpaceGroupInfo(draw, luminosity=OV.GetParam('gui.timage.snumtitle.sg_L'), right_margin=3 * self.scale)
-
+      sg, s = self.drawSpaceGroupInfo(draw, luminosity=OV.GetParam('gui.timage.snumtitle.sg_L'), right_margin=3 * self.scale)
+      r,g,b,a = sg.split()
+      image.paste(sg, ((self.width * self.scale) - s[0],0), mask=a)
+      
     if self.advertise_new:
       draw = ImageDraw.Draw(image)
       self.draw_advertise_new(draw, image)
@@ -3046,7 +2845,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                        )
 
 
-  def drawSpaceGroupInfo(self, draw, luminosity=1.9, right_margin=8, font_name="Times Bold"):
+  def drawSpaceGroupInfo(self, draw, luminosity=1.9, right_margin=8, font_name="Times Bold",):
+    dr = draw
+    im = Image.new('RGBA', (self.width, 30 * self.scale), (0,0,0,0))
+    draw = ImageDraw.Draw(im)
+    upon_advance = None
     base_colour = self.params.html.base_colour.rgb
     font_colour = self.adjust_colour(base_colour, luminosity=luminosity)
     scale = OV.GetParam('gui.timage.snumtitle.sginfo_scale')
@@ -3066,18 +2869,19 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       if len(txt_l) == 1:
         txt_norm = [(txt,0)]
       try:
-        font_base = "Times"
-        #font_slash = self.registerFontInstance("Times Bold", 18)
-        #font_number = self.registerFontInstance("Times Bold", 14)
-        #font_letter = self.registerFontInstance("Times Bold Italic", 15.5)
-        #font_sub = self.registerFontInstance("Times Bold", 10)
-        font_bar = self.registerFontInstance("%s Bold" %font_base, int(16 * self.scale))
-        font_slash = self.registerFontInstance("%s Bold" %font_base, int(24 * self.scale))
-        font_number = self.registerFontInstance("%s Bold" %font_base, int(20 * self.scale))
-        font_letter = self.registerFontInstance("%s Bold Italic" %font_base, int(21 * self.scale))
-        font_sub = self.registerFontInstance("%s Bold" %font_base, int(16 * self.scale))
+        font_base = "Serif"
+        font_bar = self.registerFontInstance("%s" %font_base, int(14 * self.scale))
+        font_slash = self.registerFontInstance("%s" %font_base, int(28 * self.scale))
+        font_number = self.registerFontInstance("%s" %font_base, int(24 * self.scale))
+        font_letter = self.registerFontInstance("%s Italic" %font_base, int(24 * self.scale))
+        font_sub = self.registerFontInstance("%s Bold" %font_base, int(14 * self.scale))
         norm_kern = 2 * self.scale
-        sub_kern = -2 * self.scale
+        sub_kern = -1 * self.scale
+        sub_lower = 10 * self.scale
+        p_higher = 0
+        bar_higher = -11 * self.scale
+        ls = 0
+        ts = 3
       except:
         font_name = "Arial"
         font_bar = self.registerFontInstance("%s Bold" %font_base, 14 * self.scale)
@@ -3105,7 +2909,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       txt_l = []
     if txt_l:
       i = 0
-      left_start =  (self.width * self.scale - textwidth) - right_margin - 10 * self.scale
+      left_start = (ls * -1) * self.scale
+      top_start = (ts * -1) * self.scale
       cur_pos = left_start
       advance = 0
       after_kern = 0
@@ -3117,29 +2922,33 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
               continue
             cur_pos += advance
             cur_pos += after_kern
-            after_kern = 1 * self.scale
+            after_kern = 0 * self.scale
             advance = 0
             try:
               int(character)
               font = font_number
-              top = 1 * self.scale
+              top = int(0.5 * self.scale + top_start)
               after_kern = 4 * self.scale
             except:
               font = font_letter
-              top = -1
+              top = 0 * self.scale + top_start
               if character == "P" or character == "I" or character == "C":
                 norm_kern = 0  * self.scale
-                after_kern = 2 *self.scale
+                after_kern = 1 * self.scale
                 character = " %s" %character
+                top = int(p_higher * self.scale + top_start)
             if character == "-":
-              draw.text((cur_pos + 0 * self.scale, -14 * self.scale), "_", font=font_bar, fill=font_colour)
-              draw.text((cur_pos + 0 * self.scale, -15 * self.scale), "_", font=font_bar, fill=font_colour)
+              draw.text((cur_pos + 0 * self.scale, bar_higher), "_", font=font_bar, fill=font_colour)
+              draw.text((cur_pos + 0 * self.scale, bar_higher + int(self.scale * 0.6)), "_", font=font_bar, fill=font_colour)
               advance = -2 * self.scale
               norm_kern = 0
             elif character == "/":
               norm_kern = 0 * self.scale
               after_kern = -2 * self.scale
-              draw.text((cur_pos -2 * self.scale, -3 * self.scale), "/", font=font_slash, fill=font_colour)
+              if upon_advance:
+                cur_pos += upon_advance
+                upon_advance = None
+              draw.text((cur_pos -2 * self.scale, top - int(0.5 * self.scale)), "/", font=font_slash, fill=font_colour)
               advance = ((draw.textsize("/", font=font_slash)[0]) + norm_kern) - 1
             else:
               draw.text((cur_pos + norm_kern, top), "%s" %character, font=font, fill=font_colour)
@@ -3148,11 +2957,17 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           text_in_superscript = txt_sub[i][0]
           if text_in_superscript:
             cur_pos += advance
-            draw.text((cur_pos + sub_kern, 7 * self.scale), "%s" %text_in_superscript, font=font_sub, fill=font_colour)
+            draw.text((cur_pos + sub_kern, sub_lower), "%s" %text_in_superscript, font=font_sub, fill=font_colour)
             advance = (draw.textsize(text_in_superscript, font=font_sub)[0]) + sub_kern
             after_kern = -2 * self.scale
-            cur_pos += advance
+            upon_advance = advance
+#            cur_pos += advance
         i+= 1
+        
+      cut = left_start + ls * self.scale, ts * self.scale, cur_pos + advance + right_margin, 30 * self.scale
+      sg = im.crop(cut)
+      #sg.show()
+      return sg, sg.size
 
   def tab_items(self, item, state, font_name = "Vera", font_size=13):
     if self.params.image_font_name:
