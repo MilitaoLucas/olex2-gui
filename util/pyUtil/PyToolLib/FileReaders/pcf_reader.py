@@ -48,6 +48,8 @@ class pcf_reader:
       if toks[0] in items:
         val = ' '.join(toks[1:])
         if val in self.ignore: continue
+        val = self.value_exceptions(toks[0], val)
+        
         pcf.setdefault(toks[0], val)
     self.pcf_d = pcf
     return pcf
@@ -55,7 +57,7 @@ class pcf_reader:
   def value_exceptions(self, item, value):
     ## In some Bruker p4p files the default here is 0, which is rubbish
     if item == "_exptl_crystal_density_meas":
-      if value == 0: value = "."
+      if str(value) == str(0): value = "."
     return value
 
 if __name__ == '__main__':

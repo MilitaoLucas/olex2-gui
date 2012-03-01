@@ -37,6 +37,39 @@ class FontInstances(ArgumentParser):
 
   def defineFonts(self):
     self.fonts = {
+      ##################################################### texgyretermes
+      "Serif":{
+        "font_src":(
+          r"texgyretermes-regular.otf",
+          r"%s/etc/gui/fonts/texgyretermes-regular.otf" %self.basedir,
+          ),
+        "fontInstance":{}
+          },
+
+      "Serif Bold":{
+        "font_src":(
+          r"texgyretermes-bold.otf",
+          r"%s/etc/gui/fonts/texgyretermes-bold.otf" %self.basedir,
+          ),
+        "fontInstance":{}
+          },
+
+      "Serif Italic":{
+        "font_src":(
+          r"texgyretermes-italic.otf",
+          r"%s/etc/gui/fonts/texgyretermes-italic.otf" %self.basedir,
+          ),
+        "fontInstance":{}
+          },
+
+      "Serif Bold Italic":{
+        "font_src":(
+          r"texgyretermes-bolditalic.otf",
+          r"%s/etc/gui/fonts/texgyretermes-bolditalic.otf" %self.basedir,
+          ),
+        "fontInstance":{}
+          },
+
       ##################################################### Cambria
       "Cambria":{
         "font_src":(
