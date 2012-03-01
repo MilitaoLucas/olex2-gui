@@ -1096,11 +1096,11 @@ class ImageTools(FontInstances):
         middle = (12, 5)
         draw.polygon((begin, middle, end), fill=self.adjust_colour(colour, luminosity = 0.6))
     elif type == "char":
-      font_size = 13
+      font_size = int(13 * scale)
       font_name = "%s Bold" %self.gui_timage_font_name
       if char_pos == "Auto":
         wX, wY = self.getTxtWidthAndHeight(char_char,font_name,font_size)
-        char_pos = (width - wX -5, 1)
+        char_pos = (width * scale - wX -5, 1)
 
       self.write_text_to_draw(
         draw,
