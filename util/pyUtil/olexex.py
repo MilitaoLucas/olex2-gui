@@ -668,7 +668,8 @@ def MakeElementButtonsFromFormula():
     TI = timage()
     for b in btn_dict:
       name = "btn-element%s.png" %(b)
-      if not bool(olx.fs.Exists(name)):
+      
+      if olx.fs.Exists(name) == 'false':
         for state in ['on', 'off', 'hover', '', 'highlight']:
           txt = btn_dict[b].get('txt')
           bgcolour = btn_dict[b].get('bgcolour')

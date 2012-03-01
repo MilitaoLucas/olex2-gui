@@ -166,6 +166,9 @@ def deal_with_gui_phil(action='load', skin_name=None, force=False):
 
 
 def change_skin(skin_name=None, force=False):
+  
+  olx.fs.Clear()
+  
   if timing:
     t1 = time.time()
     t2 = 0
