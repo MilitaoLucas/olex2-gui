@@ -667,18 +667,21 @@ def MakeElementButtonsFromFormula():
     from PilTools import timage
     TI = timage()
     for b in btn_dict:
-      for state in ['on', 'off', 'hover', '', 'highlight']:
-        txt = btn_dict[b].get('txt')
-        bgcolour = btn_dict[b].get('bgcolour')
-        width = OV.GetParam('gui.skin.icon_size')
-        btn_type = 'tiny'
-        bg = OV.GetParam('gui.html.table_firstcol_colour')
-        IM = TI.make_timage(item_type='tinybutton', item=txt, state=state, width=width, colour=bgcolour, whitespace='right:1:%s' %bg)
-        name = "btn-element%s%s.png" %(txt, state)
-        OlexVFS.save_image_to_olex(IM, name, 1)
-        if state == 'off':
-          name = "btn-element%s.png" %(txt)
+      name = "btn-element%s.png" %(b)
+      if not bool(olx.fs.Exists(name)):
+        for state in ['on', 'off', 'hover', '', 'highlight']:
+          txt = btn_dict[b].get('txt')
+          bgcolour = btn_dict[b].get('bgcolour')
+          width = OV.GetParam('gui.skin.icon_size')
+          btn_type = 'tiny'
+          bg = OV.GetParam('gui.html.table_firstcol_colour')
+          width = OV.GetParam('gui.timage.tinybutton.width')
+          IM = TI.make_timage(item_type='tinybutton', item=txt, state=state, width=width, colour=bgcolour, whitespace='right:1:%s' %bg)
+          name = "btn-element%s%s.png" %(txt, state)
           OlexVFS.save_image_to_olex(IM, name, 1)
+          if state == 'off':
+            name = "btn-element%s.png" %(txt)
+            OlexVFS.save_image_to_olex(IM, name, 1)
 
   else:
     bm = ButtonMaker(btn_dict)
