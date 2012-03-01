@@ -893,7 +893,6 @@ class timage(ImageTools):
     self.filename = OV.FileName()
     self.datadir = OV.DataDir()
     self.sNum = self.filename
-
     #MakeAllRBars_instance.run_MakeAllRBars()
 
 
@@ -964,7 +963,7 @@ class timage(ImageTools):
 #    max_width = cut[2] - cut[0]
 #    crop =  im.crop(cut)
     button_names = self.image_items_d.get("THREE BUTTONS PER ROW", button_names)
-    width = int(available_width/3) - 15
+    width = int(available_width/3) - 12
     self.produce_buttons(button_names, self.sfs,"",width=width)
 
     ## FULL ROW buttons in the HTMLpanelWIDTH
