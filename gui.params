@@ -5,6 +5,8 @@
 
 gui
   {
+  timing = False
+    .type = bool
   chinese_font_name = YaHei
     .type = str
   base_colour = #aaaaaa
@@ -183,6 +185,8 @@ gui
       .type = int
 
     snumtitle{
+      scale = 5
+        .type = int
       base_colour = None
         .type = colour
       grad_colour = #205c90
@@ -217,7 +221,7 @@ gui
         .type = float
       sg_L = 1.8
         .type = float
-      corner_rad = 3
+      corner_rad = 5
         .type = int
       rounded = 1100
         .type = str
@@ -225,6 +229,8 @@ gui
     
     
     tab{
+      scale = 1
+        .type = int
       base_colour = #aaaaaa
         .type = colour
       grad_colour = #767676
@@ -270,6 +276,8 @@ gui
     }
 
     cbtn{
+      scale = 1
+        .type = int
       base_colour = #444444
         .type = colour
       grad_colour = #999999
@@ -328,6 +336,8 @@ gui
     }
 
     button{
+      scale = 1
+        .type = int
       base_colour = #e1e1e1
         .type = colour
       grad_colour = #dedede
@@ -375,11 +385,15 @@ gui
     }
 
     small_buttons{
+      scale = 1
+        .type = int
       width = 80
         .type = int
     }
 
     tinybutton{
+      scale = 1
+        .type = int
       base_colour = #e1e1e1
         .type = colour
       grad_colour = #dedede
@@ -416,6 +430,8 @@ gui
 
 
     h1{
+      scale = 1
+        .type = int
       base_colour = #aaaaaa
         .type = colour
       grad_colour = #dddddd
@@ -457,6 +473,8 @@ gui
     }
 
     h3{
+      scale = 1
+        .type = int
       height = 19
         .type = int
       base_colour = #aaaaaa

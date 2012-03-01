@@ -234,7 +234,7 @@ class OlexRefinementModel(object):
       uiso = afix['u']
       yield m, n, pivot, dependent, pivot_neighbours, bond_length
 
-  def restraints_iterator(self):
+  def restraints_iterator(self, pair_sym_table=None):
     from libtbx.utils import flat_list
     from cctbx import sgtbx
     for shelxl_restraint in (self.restraint_types):
@@ -278,6 +278,8 @@ class OlexRefinementModel(object):
                                      for i in range(int(len(i_seqs)/2))]
             kwds['sym_ops'] = [[sym_op for sym_op in sym_ops[i*2:(i+1)*2]]
                                        for i in range(int(len(sym_ops)/2))]
+        if restraint_type in ('adp_similarity', 'isotropic_adp', 'rigid_bond'):
+          kwds['pair_sym_table'] = pair_sym_table
         if 'weights' in kwds:
           del kwds['weight']
         if restraint_type in ('bond', ):
@@ -342,12 +344,19 @@ class OlexRefinementModel(object):
   def getExpectedPeaks(self):
     cell_volume = float(olx.xf.au.GetVolume())
     expected_atoms = cell_volume/15
-    #present_atoms = self.numberAtoms()
     present_atoms = self.number_non_hydrogen_atoms()
     expected_peaks = expected_atoms - present_atoms
     if expected_peaks < 5: expected_peaks = 5
     return int(expected_peaks)
-##
+
+  def getExpectedPeaks_and_AtomsPresent(self):
+    cell_volume = float(olx.xf.au.GetVolume())
+    expected_atoms = cell_volume/15
+    present_atoms = self.number_non_hydrogen_atoms()
+    expected_peaks = expected_atoms - present_atoms
+    if expected_peaks < 5: expected_peaks = 5
+    return int(expected_peaks), int(present_atoms)
+
 
 def get_refine_ls_hydrogen_treatment():
   afixes_present = []
@@ -918,14 +927,14 @@ def GetRInfo(txt="",format='html'):
         R1 = float(R1)
         col = GetRcolour(R1)
         R1 = "%.2f" %(R1*100)
-        
+
         if 'report' in format:
           t = r"<font size='%s'>R1 = <font color='%s'><b>%s%%</b></font></font>" %(font_size, col, R1)
         else:
-          t = r"<td colspan='1' align='right' rowspan='2'><font size='%s'>R1 = <font color='%s'><b>%s%%</b></font></font></td>" %(font_size, col, R1)
-          
+          t = r"<td colspan='2' align='right' rowspan='2'><font size='%s'>R1 = <font color='%s'><b>%s%%</b></font></font></td>" %(font_size, col, R1)
+
       except:
-        t = "<td colspan='1' rowspan='2' align='right'><font size='%s'><b>%s</b></font></td>" %(font_size, R1)
+        t = "<td colspan='2' align='right' rowspan='2' align='right'><font size='%s'><b>%s</b></font></td>" %(font_size, R1)
       finally:
         return t
 
@@ -2030,7 +2039,7 @@ def getReportPhilItem(philItem=None):
 OV.registerFunction(getReportPhilItem)
 
 def getReportImageData(size='w400', imageName=None):
-  
+
   import PIL
   import Image
   import PngImagePlugin
@@ -2039,7 +2048,7 @@ def getReportImageData(size='w400', imageName=None):
   import ImageDraw
   import EpsImagePlugin
   make_border = False
-  
+
   size_type = size[:1]
   size = int(size[1:])
 
@@ -2051,7 +2060,7 @@ def getReportImageData(size='w400', imageName=None):
 
   if "snum.report" in imageName:
     imagePath = OV.GetParam(imageName)
-    
+
     if not imagePath:
       imageNameU = imageName.replace('snum', 'user')
       imagePath = OV.GetParam(imageNameU)
@@ -2060,7 +2069,7 @@ def getReportImageData(size='w400', imageName=None):
 
   if imagePath == "No Image" or imagePath is None:
     return ""
-  
+
   if imagePath.startswith(r'BaseDir()'):
     imagePath = "%s/%s" %(OV.BaseDir(), imagePath.lstrip('BaseDir()'))
   if not os.path.exists(imagePath):
@@ -2097,10 +2106,10 @@ def getReportImageData(size='w400', imageName=None):
     draw.line((IM.size[0] - weight, 0) + (IM.size[0] - weight, IM.size[1] - weight), fill=fill, width=weight)
     draw.line((0, IM.size[1] - weight ) + (IM.size[0] - weight, IM.size[1] - weight) , fill=fill, width=weight)
     del draw
-    
+
   p = "%s/report_tmp.png" %OV.DataDir()
   IM.save(p, "PNG")
-  
+
   rFile = open(p, 'rb')
   img = rFile.read()
   data = base64.b64encode(img)

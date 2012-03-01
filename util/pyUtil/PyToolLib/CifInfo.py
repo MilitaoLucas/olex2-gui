@@ -192,6 +192,9 @@ class CifTools(ArgumentParser):
           self.cif_block[key] = value
         else:
           pass
+      if key == "_exptl_crystal_density_meas":
+        self.cif_block[key] = value
+
 #          print("Not updating %s from file" %key)
 
     # this requires special treatment

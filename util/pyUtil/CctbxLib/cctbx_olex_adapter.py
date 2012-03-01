@@ -42,6 +42,7 @@ from scitbx.math import continued_fraction
 from boost import rational
 from cctbx import sgtbx, xray
 from cctbx.array_family import flex
+import smtbx.utils
 
 
 class OlexCctbxAdapter(object):
@@ -109,13 +110,48 @@ class OlexCctbxAdapter(object):
 
     self.exti = self.olx_atoms.model.get('exti', None)
     self.initialise_reflections()
+    #init the connectivity
+    shelx_parts = flex.int(self.olx_atoms.disorder_parts())
+    conformer_indices = shelx_parts.deep_copy().set_selected(shelx_parts < 0, 0)
+    sym_excl_indices = flex.abs(
+      shelx_parts.deep_copy().set_selected(shelx_parts > 0, 0))
+    olx_conn = self.olx_atoms.model['conn']
+    radii = {}
+    for l, v in olx_conn['type'].items():
+      radii[str(l)] = v['radius'] #unicode->str!
+    connectivity_table = smtbx.utils.connectivity_table(
+      self.xray_structure(),
+      conformer_indices=flex.size_t(list(conformer_indices)),
+      sym_excl_indices=flex.size_t(list(sym_excl_indices)),
+      covalent_bond_tolerance=olx_conn['delta'],
+      radii=radii
+    )
+    equivs = self.olx_atoms.model['equivalents']
+    for i_seq, v in olx_conn['atom'].items():
+      for bond_to_delete in v.get('delete', []):
+        if bond_to_delete['eqiv'] == -1:
+          connectivity_table.remove_bond(i_seq, bond_to_delete['to'])
+        else:
+          connectivity_table.remove_bond(
+            i_seq, bond_to_delete['to'],
+            rt_mx_from_olx(equivs[bond_to_delete['eqiv']]))
+      for bond_to_add in v.get('create', []):
+        if bond_to_add['eqiv'] == -1:
+          connectivity_table.add_bond(i_seq, bond_to_add['to'])
+        else:
+          connectivity_table.add_bond(
+            i_seq, bond_to_add['to'],
+            rt_mx_from_olx(equivs[bond_to_add['eqiv']]))
+    self.connectivity_table = connectivity_table
 
   def __del__(self):
     sys.stdout.refresh = False
 
   def xray_structure(self, construct_restraints=False):
     if self._xray_structure is None or construct_restraints:
-      if construct_restraints: restraints_iter=self.olx_atoms.restraints_iterator()
+      if construct_restraints:
+        restraints_iter=self.olx_atoms.restraints_iterator(
+          self.connectivity_table.pair_sym_table)
       else: restraints_iter = None
       create_cctbx_xray_structure = cctbx_controller.create_cctbx_xray_structure(
         self.cell,
@@ -134,9 +170,11 @@ class OlexCctbxAdapter(object):
       table = OV.GetParam("snum.smtbx.atomic_form_factor_table")
       sfac = self.olx_atoms.model.get('sfac')
       custom_gaussians = {}
+      custom_fp_fdps = {}
       if sfac is not None:
         if len(sfac) > 0 and 'gaussian' not in sfac.items()[0][1]:
-          print "Sorry custom DISP is not yet supported"
+          for element, sfac_dict in sfac.iteritems():
+            custom_fp_fdps.setdefault(element, sfac_dict['fpfdp'])
         else:
           from cctbx import eltbx
           for element, sfac_dict in sfac.iteritems():
@@ -144,12 +182,14 @@ class OlexCctbxAdapter(object):
               sfac_dict['gaussian'][0],
               [-b for b in sfac_dict['gaussian'][1]],
               sfac_dict['gaussian'][2]))
-        # XXX fp and fdp not yet dealt with
+            custom_fp_fdps.setdefault(element, sfac_dict['fpfdp'])
+        self._xray_structure.set_custom_inelastic_form_factors(
+          custom_fp_fdps)
       self._xray_structure.scattering_type_registry(
         custom_dict=custom_gaussians,
         table=table,
         d_min=self.reflections.f_sq_obs.d_min())
-      if self.reflections._merge < 4:
+      if self.reflections._merge < 4 and len(custom_fp_fdps) == 0:
         from cctbx.eltbx import wavelengths
         inelastic_table = OV.GetParam("snum.smtbx.inelastic_form_factor_table")
         self._xray_structure.set_inelastic_form_factors(
@@ -959,7 +999,7 @@ def calcsolv(solvent_radius=None, grid_step=None):
   # This routine called with spy.calsolv() will calculate the solvent accessible area
 
   # If values have been set in PHIL, these will be used.
-  
+
   l = ['grid', 'probe']
   for item in l:
     val = OV.GetParam('snum.calcsolv.%s' %item)
@@ -971,7 +1011,7 @@ def calcsolv(solvent_radius=None, grid_step=None):
           OV.SetParam('snum.calcsolv.%s'%item,solvent_radius)
           if OV.IsControl('SET_SNUM_CALCSOLV_PROBE'):
             olx.html.SetValue('SET_SNUM_CALCSOLV_PROBE', solvent_radius)
-          
+
       elif item == 'grid':
         if not grid_step:
           grid_step = val
@@ -986,7 +1026,7 @@ def calcsolv(solvent_radius=None, grid_step=None):
       elif item == 'grid':
         if not solvent_radius:
           solvent_radius = 0.2
-          
+
   from smtbx.masks import solvent_accessible_volume
   # Used to build the xray_structure by getting information from the olex2 refinement model
   olx_atoms = olexex.OlexRefinementModel()
