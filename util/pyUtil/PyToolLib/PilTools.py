@@ -971,7 +971,7 @@ class timage(ImageTools):
 #    max_width = cut[2] - cut[0]
 #    crop =  im.crop(cut)
     button_names = self.image_items_d.get("FULL ROW", button_names)
-    width = available_width - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+    width = available_width - OV.GetParam('gui.htmlpanelwidth_margin_adjust') + 10
     self.produce_buttons(button_names, self.sfs,"_full",width=width)
 
     ## G3 BIG BUTTON
@@ -988,33 +988,63 @@ class timage(ImageTools):
       width = available_width - OV.GetParam('gui.timage.g4.width_adjust')
       self.produce_buttons(button_names, self.sfs, "_g4",width=width)
 
-    cut = 0*sf, 151*sf, 16*sf, 168*sf
-    crop =  im.crop(cut)
-    #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=1.98))
+    ## HELP INFO ICON
+    height = OV.GetParam('gui.timage.h3.height')
+    fill = '#ffffff'
+    size = (height * 2, height * 3)
+    circle_top = 10
+    height = OV.GetParam('gui.timage.h3.height')
+    IM =  Image.new('RGBA', size,(0,0,0,0))
+    draw = ImageDraw.Draw(IM)
+    xy = (1,circle_top,38, circle_top + 38)
+    draw.ellipse(xy, fill = '#ffffff')
     states = ['', 'on', 'off', 'hover', 'hoveron']
+    r,g,b,a = IM.split()
     for state in states:
       if state == "off":
 #        crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.green.rgb,luminosity=1.3,saturation=0.7))
-        crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=0.9))
+        col = self.colourize(IM, (0,0,0,0), self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=0.8))
       else:
-        crop_colouriszed = self.colourize(crop, (0,0,0), self.highlight_colour)
+        col = self.colourize(IM, (0,0,0,0), self.highlight_colour)
+      fIM =  Image.new('RGBA', size, OV.GetParam('gui.html.table_firstcol_colour').rgb)
+#      fIM =  Image.new('RGBA', size, '#dedede')
+      fIM.paste(col, mask=a)
+      font_info = self.registerFontInstance("Serif Bold Italic", 48 * self.scale)
+      draw = ImageDraw.Draw(fIM)
+      top = circle_top - 18
+      draw.text((14,top), 'i', font=font_info, fill='#ffffff')
+      w = int(round(height * 0.66667))
+      fIM = self.resize_image(fIM, (w, height))
+      OlexVFS.save_image_to_olex(fIM, "btn-info%s.png" %(state), 2)
 
-      IM =  Image.new('RGBA', crop.size, OV.GetParam('gui.html.table_firstcol_colour').rgb)
-      IM.paste(crop_colouriszed, (0,0), crop)
-      name = "info.png"
-      info_size_scale = OV.GetParam('gui.timage.info_size_scale')
-      IM = self.resize_image(IM, (int((cut[2]-cut[0])/info_size_scale), int((cut[3]-cut[1])/info_size_scale)))
-      draw = ImageDraw.Draw(IM)
-      #txt = IT.get_unicode_characters('info')
-      #txt = "i"
-      #self.write_text_to_draw(draw,
-      #             txt,
-      #             top_left=(6, 0),
-      #             font_name = 'Vera',
-      #             font_size=14,
-      #             translate=False,
-      #             font_colour=self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=0.7))
-      OlexVFS.save_image_to_olex(IM, "btn-info%s.png" %(state), 2)
+
+    #cut = 1*sf, 151*sf, 14*sf, 168*sf
+    #crop =  im.crop(cut)
+    ##crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=1.98))
+    #states = ['', 'on', 'off', 'hover', 'hoveron']
+    #for state in states:
+      #if state == "off":
+##        crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.green.rgb,luminosity=1.3,saturation=0.7))
+        #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=0.7))
+      #else:
+        #crop_colouriszed = self.colourize(crop, (0,0,0), self.highlight_colour)
+
+      #IM =  Image.new('RGBA', crop.size, OV.GetParam('gui.html.table_firstcol_colour').rgb)
+      #IM.paste(crop_colouriszed, (0,0), crop)
+      #name = "info.png"
+      #info_size_scale = OV.GetParam('gui.timage.info_size_scale')
+      #IM = self.resize_image(IM, (int((cut[2]-cut[0])/info_size_scale), int((cut[3]-cut[1])/info_size_scale)), Image.ANTIALIAS)
+      #draw = ImageDraw.Draw(IM)
+      ##txt = IT.get_unicode_characters('info')
+      ##txt = "i"
+      ##self.write_text_to_draw(draw,
+      ##             txt,
+      ##             top_left=(6, 0),
+      ##             font_name = 'Vera',
+      ##             font_size=14,
+      ##             translate=False,
+      ##             font_colour=self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=0.7))
+      #OlexVFS.save_image_to_olex(IM, "btn-info%s.png" %(state), 2)
 
     cut = 16*sf, 156*sf, 26*sf, 166*sf
     crop =  im.crop(cut)
@@ -2552,10 +2582,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     width, height = image.size
     draw = ImageDraw.Draw(image)
     for i in xrange(weight):
-      draw.line((0,0,width-1-i,0), fill = fill)
-      draw.line((0,height -1-i,width-1-i,height -1-i), fill = fill)
-      draw.line((0,0,0,height - 1-i), fill = fill)
-      draw.line((width -1-i,0,width-1-i,height -1-i), fill = fill)
+      draw.line((i,i,width-1-i,i), fill = fill)
+      draw.line((i,height -1-i,width-1-i,height -1-i), fill = fill)
+      draw.line((i,i,i,height - 1-i), fill = fill)
+      draw.line((width -1-i,i,width-1-i,height -1-i), fill = fill)
     return image
 
   def make_corners(self, rounded, image, corner_rad, underground):
@@ -3367,7 +3397,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       name = map.get('name','untitled')
       txt = map.get('label', '')
       size = map.get('size')
-      image = Image.new('RGBA', size, colour)
+      image = Image.new('RGB', size, colour)
       draw = ImageDraw.Draw(image)
       self.write_text_to_draw(draw,
                                  txt,
