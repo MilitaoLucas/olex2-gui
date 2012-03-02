@@ -481,8 +481,8 @@ snum
       .type = str
     crystal_image = None
       .type = path
-    frame_image = None
-      .type = path
+    frame_images = None
+      .type = strings
     notes_file = None
       .type = path
     crystal_images_path = None

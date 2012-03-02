@@ -768,7 +768,7 @@ The \l/2 correction factor is %(lambda_correction)s.
       extension = "*.jpg"
       directory_l = OV.FileFull().replace('\\','/').split("/")
       directory = ("/").join(directory_l[:-3])
-      directory += '/frames'
+      directory += '/frames/jpg/'
     elif tool == "crystal_images":
       name = OV.FileName()
       extension = "*.jpg"
