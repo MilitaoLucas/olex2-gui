@@ -479,6 +479,8 @@ snum
       .type = str
     date_collected = None
       .type = str
+    crystal_images = None
+      .type = strings
     crystal_image = None
       .type = path
     frame_images = None
