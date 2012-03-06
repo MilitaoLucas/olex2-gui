@@ -925,7 +925,11 @@ def GetRInfo(txt="",format='html'):
         R1 = tree.active_node.R1
       else:
         R1 = 'n/a'
-    font_size = OV.GetParam('gui.html.font_size_large')
+    if OV.HasGUI():
+      font_size = OV.GetParam('gui.html.font_size_large')
+    else:
+      font_size = 14
+    
     if 'html' in format:
       try:
         R1 = float(R1)
@@ -983,11 +987,21 @@ def GetRcolour(R1):
   try:
     R1 = float(R1)
     if R1 > 0.20:
-      retVal=OV.GetParam('gui.red')
+      if OV.HasGUI():
+        retVal=OV.GetParam('gui.red')
+      else:
+        retVal="#b40000"
     elif R1 >0.10:
-      retVal=OV.GetParam('gui.orange')
+      if OV.HasGUI():
+        retVal=OV.GetParam('gui.orange')
+      else:
+        retVal="#ff8f00"
     else:
-      retVal=OV.GetParam('gui.green')
+      if OV.HasGUI():
+        retVal=OV.GetParam('gui.green')
+      else:
+        retVal = "#00b400"
+        
   except:
     retVal='grey'
   return str(retVal)
@@ -2058,7 +2072,7 @@ def getReportImageData(size='w400', imageName=None):
 
   if imageName is None:
     imageName = 'snum.report.image'
-    make_border = True
+    make_border = OV.GetParam('snum.report.image_border')
     if not OV.HasGUI():
       return "No Image available in Headless Mode! <img width=0 src=''>"
 
@@ -2111,7 +2125,7 @@ def getReportImageData(size='w400', imageName=None):
       IT = ImageTools()
       draw = ImageDraw.Draw(IM)
       fill = '#ababab'
-      weight = 1
+      weight = make_border
       draw.line((0, 0) + (IM.size[0] - weight, 0), fill=fill, width=weight)
       draw.line((0, 0) + (0, IM.size[1]), fill=fill, width=weight)
       draw.line((IM.size[0] - weight, 0) + (IM.size[0] - weight, IM.size[1] - weight), fill=fill, width=weight)
