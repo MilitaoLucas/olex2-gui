@@ -513,6 +513,8 @@ snum
       .type = path
     image = None
       .type = path
+    image_border = 4
+      .type = int
 
     structure{
       smiles_string = ""
