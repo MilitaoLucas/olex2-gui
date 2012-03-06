@@ -2125,12 +2125,18 @@ def getReportImageData(size='w400', imageName=None):
       IT = ImageTools()
       draw = ImageDraw.Draw(IM)
       fill = '#ababab'
-      weight = make_border
-      draw.line((0, 0) + (IM.size[0] - weight, 0), fill=fill, width=weight)
-      draw.line((0, 0) + (0, IM.size[1]), fill=fill, width=weight)
-      draw.line((IM.size[0] - weight, 0) + (IM.size[0] - weight, IM.size[1] - weight), fill=fill, width=weight)
-      draw.line((0, IM.size[1] - weight ) + (IM.size[0] - weight, IM.size[1] - weight) , fill=fill, width=weight)
-      del draw
+      width, height = IM.size
+      for i in xrange(make_border):
+        draw.line((i,i,width-1-i,i), fill = fill)
+        draw.line((i,height -1-i,width-1-i,height -1-i), fill = fill)
+        draw.line((i,i,i,height - 1-i), fill = fill)
+        draw.line((width -1-i,i,width-1-i,height -1-i), fill = fill)
+#      weight = make_border
+#      draw.line((0, int(weight/2)) + (IM.size[0], int(weight/2)), fill=fill, width=weight)
+#      draw.line((0, 0) + (0, IM.size[1]), fill=fill, width=weight)
+#      draw.line((IM.size[0] - weight, 0) + (IM.size[0] - weight, IM.size[1] - weight), fill=fill, width=weight)
+#      draw.line((0, IM.size[1] - weight ) + (IM.size[0] - weight, IM.size[1] - weight) , fill=fill, width=weight)
+#      del draw
   
     p = "%s/report_tmp_%i.png" %(OV.DataDir(), i)
     IM.save(p, "PNG")
