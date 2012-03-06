@@ -43,6 +43,7 @@ class ImageTools(FontInstances):
     self.colorsys = colorsys
     self.abort = False
     self.getOlexVariables()
+    self.scale = None
 
     ##Encodings
     self.good_encodings = ["ISO8859-1", "ISO8859-2"]
@@ -488,11 +489,11 @@ class ImageTools(FontInstances):
       pass
     return IM
 
-  def make_full_width_empty_image(self, height=100, colour='#b40000'):
-    size = (self.available_width_full,height)
+  def make_full_width_empty_image(self, height=100, colour='#b40000', scale=1):
+    size = (self.available_width_full * scale, height * scale)
     im = Image.new("RGB",size,colour)
     draw = ImageDraw.Draw(im)
-    return im, draw
+    return im, draw, self.available_width_full
 
   def add_continue_triangles(self, draw, width, height, shift_up = 4, shift_left = 5, style=('multiple')):
     arrow_top = 8 + shift_up
@@ -751,7 +752,10 @@ class ImageTools(FontInstances):
                          lowerCase=False,
                          valign=None,
                          translate=True,
-                         getXY_only=False):
+                         getXY_only=False,
+                         scale=1):
+    if not self.scale:
+      self.scale = scale
     self.font_size = font_size
     self.font_name = font_name
     self.translate = translate
@@ -861,7 +865,7 @@ class ImageTools(FontInstances):
   def print_html_to_draw(self):
     top = self.txt_top
     left = self.txt_left
-    gap = 5
+    gap = 5 * self.scale
 
     self.txt = self.txt.strip().replace('\n','')
     l = self.txt.split('</p>')
@@ -899,10 +903,10 @@ class ImageTools(FontInstances):
     if not c:
       return
     self.font_name = OV.GetParam('gui.css.%s.font_name' %self.css_class)
-    self.font_size = OV.GetParam('gui.css.%s.font_size' %self.css_class)
+    self.font_size = OV.GetParam('gui.css.%s.font_size' %self.css_class) * self.scale
     self.font_colour = OV.GetParam('gui.css.%s.color' %self.css_class).hexadecimal
     self.get_font()
-    self.line_height = OV.GetParam('gui.css.%s.line_height' %self.css_class)
+    self.line_height = OV.GetParam('gui.css.%s.line_height' %self.css_class) * self.scale
 
 
   def addTransparancy(self, im, target_colour = (255,255,255)):
