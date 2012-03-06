@@ -179,13 +179,15 @@ gui
       .type = float
     font_name = Vera
       .type = str
+    font_size = 12
+      .type = int
     adval = 13
       .type = int
     info_size_scale = 4
       .type = int
 
     snumtitle{
-      scale = 5
+      scale = 2
         .type = int
       base_colour = None
         .type = colour
@@ -225,11 +227,21 @@ gui
         .type = int
       rounded = 1100
         .type = str
+      shadow = False
+        .type = bool
+      border = 0
+        .type = int
+      border_colour = #dedede
+        .type = colour
+      arrows = None
+        .type = str
+      buttonmark = None
+        .type = str
     }
     
     
     tab{
-      scale = 1
+      scale = 2
         .type = int
       base_colour = #aaaaaa
         .type = colour
@@ -251,17 +263,17 @@ gui
 
       font_colour_L = 1.2
         .type = float
-      font_name = Vera Bold
+      font_name = Vera
         .type = str
-      font_size = 18
+      font_size = 20
         .type = int
-      top = 2
+      top = 5
         .type = int
       left = 6
         .type = int
       rounded = 1100
         .type = str
-      arrows = "bar:top:3"
+      arrows = "bar:top:4"
         .type = str
 
       off_L = 0.9
@@ -270,7 +282,10 @@ gui
         .type = float
       on_L = 1.2
         .type = float
-
+      border = 1
+        .type = int
+      border_colour = #ababab
+        .type = colour
       shadow = False
         .type = bool
     }
@@ -333,6 +348,10 @@ gui
         .type = colour
       shadow = False
         .type = bool
+      border = 1
+        .type = int
+      border_colour = #ababab
+        .type = colour
     }
 
     button{
@@ -349,6 +368,8 @@ gui
       corner_rad = 3
         .type = int
       rounded = 0000
+        .type = str
+      font_name = Vera
         .type = str
       font_size = 12
         .type = int
@@ -378,7 +399,7 @@ gui
         .type = float
       border = 1
         .type = int
-      border_colour = #ababab
+      border_colour = #bbbbbb
         .type = colour
       shadow = False
         .type = bool
@@ -392,7 +413,7 @@ gui
     }
 
     tinybutton{
-      scale = 1
+      scale = 2
         .type = int
       base_colour = #e1e1e1
         .type = colour
@@ -400,21 +421,23 @@ gui
         .type = colour
       grad_step = 0.3
         .type = float
-      height = 18
+      height = 22
         .type = int
-      width = 18
+      width = 24
         .type = int
-      corner_rad = 3
+      corner_rad = 0
         .type = int
       rounded = 1111
         .type = str
       font_size = 14
         .type = int
+      font_name = Vera
+        .type = str
       halign = middle
         .type = str
-      top = 2
+      top = 3
         .type = int
-      left = 3
+      left = 0
         .type = int
       bg_colour_L = 1.8
         .type = float
@@ -426,11 +449,19 @@ gui
         .type = colour
       arrows = None
         .type = str
+      border = 1
+        .type = int
+      border_colour = #ababab
+        .type = colour
+      shadow = False
+        .type = bool
+      buttonmark = None
+        .type = str
     }
 
 
     h1{
-      scale = 1
+      scale = 2
         .type = int
       base_colour = #aaaaaa
         .type = colour
@@ -444,13 +475,13 @@ gui
         .type = int
       rounded = 1111
         .type = str
-      font_name = Vera Bold
+      font_name = Vera
         .type = str
       font_size = 16
         .type = int
       top = 2
         .type = int
-      left = 4
+      left = 8
         .type = int
       bg_colour_L = 1.3
         .type = float
@@ -460,7 +491,7 @@ gui
         .type = float
       font_colour = #555555
         .type = colour
-      arrows = "bar:left:5,char:on~:off+:hover+:hoveron~"
+      arrows = "bar:left:5"
         .type = str
       off_L = 1.2
         .type = float
@@ -470,10 +501,14 @@ gui
         .type = float
       shadow = True
         .type = bool
+      border = 1
+        .type = int
+      border_colour = #dddddd
+        .type = colour
     }
 
     h3{
-      scale = 1
+      scale = 2
         .type = int
       height = 19
         .type = int
@@ -483,7 +518,8 @@ gui
         .type = colour
       font_colour = #555555
         .type = colour
-
+      font_name = Vera
+        .type = str
       bg_colour_L = 1.2
         .type = float
       grad_colour_L = 1.2
@@ -501,9 +537,9 @@ gui
         .type = int
       top = 1
         .type = int
-      left = 4
+      left = 6
         .type = int
-      arrows = "bar:left:4,char:on~:off+"
+      arrows = "bar:left:4"
         .type = str
       off_L = 1.0
         .type = float
@@ -513,6 +549,10 @@ gui
         .type = float
       shadow = False
         .type = bool
+      border = 1
+        .type = int
+      border_colour = #dddddd
+        .type = colour
     }
   }
   lines_of_cmd_text = 10
@@ -537,7 +577,7 @@ gui
     .type = str
   htmlpanelwidth = 460
     .type = int
-  htmlpanelwidth_margin_adjust = 22
+  htmlpanelwidth_margin_adjust = 20
     .type = int
   htmlpanel_side = right
     .type = str

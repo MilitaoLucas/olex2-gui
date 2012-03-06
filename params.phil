@@ -479,10 +479,12 @@ snum
       .type = str
     date_collected = None
       .type = str
+    crystal_images = None
+      .type = strings
     crystal_image = None
       .type = path
-    frame_image = None
-      .type = path
+    frame_images = None
+      .type = strings
     notes_file = None
       .type = path
     crystal_images_path = None
@@ -511,6 +513,8 @@ snum
       .type = path
     image = None
       .type = path
+    image_border = 2
+      .type = int
 
     structure{
       smiles_string = ""

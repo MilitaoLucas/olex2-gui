@@ -394,7 +394,7 @@ class ExtractCifInfo(CifTools):
       self.update_cif_block({
         '_computing_structure_refinement': refinement_reference})
 
-    p = self.sort_out_path(path, "frames")
+    p, pp = self.sort_out_path(path, "frames")
     if p and self.metacifFiles.curr_frames != self.metacifFiles.prev_frames:
       try:
         info = os.stat(p)
@@ -403,7 +403,7 @@ class ExtractCifInfo(CifTools):
       except:
         print "Error reading Bruker frame file %s" %p
 
-    p = self.sort_out_path(path, "smart")
+    p, pp = self.sort_out_path(path, "smart")
     if p and self.metacifFiles.curr_smart != self.metacifFiles.prev_smart:
       try:
         import bruker_smart
@@ -414,7 +414,7 @@ class ExtractCifInfo(CifTools):
       except Exception, err:
         print "Error reading Bruker SMART file %s: %s" %(p, err)
 
-    p = self.sort_out_path(path, "p4p")
+    p, pp = self.sort_out_path(path, "p4p")
     if p and self.metacifFiles != self.metacifFiles.prev_p4p:
       try:
         from p4p_reader import p4p_reader
@@ -423,7 +423,7 @@ class ExtractCifInfo(CifTools):
       except:
         print "Error reading p4p file %s" %p
 
-    p = self.sort_out_path(path, "integ")
+    p, pp = self.sort_out_path(path, "integ")
     if p and self.metacifFiles.curr_integ != self.metacifFiles.prev_integ:
       try:
         import bruker_saint_listing
@@ -436,7 +436,7 @@ class ExtractCifInfo(CifTools):
       except:
         print "Error reading Bruker Saint integration file %s" %p
 
-    p = self.sort_out_path(path, "saint")
+    p, pp = self.sort_out_path(path, "saint")
     if p and self.metacifFiles.curr_saint != self.metacifFiles.prev_saint:
       try:
         import bruker_saint
@@ -449,7 +449,7 @@ class ExtractCifInfo(CifTools):
       except:
         print "Error reading Bruker saint.ini"
 
-    p = self.sort_out_path(path, "abs")
+    p, pp = self.sort_out_path(path, "abs")
     if p and self.metacifFiles.curr_abs != self.metacifFiles.prev_abs:
       try:
         import abs_reader
@@ -483,7 +483,7 @@ class ExtractCifInfo(CifTools):
              '_exptl_absorpt_process_details':'.'}
       self.update_cif_block(sad, force=True)
 
-    p = self.sort_out_path(path, "pcf")
+    p, pp = self.sort_out_path(path, "pcf")
     if p and self.metacifFiles.curr_pcf != self.metacifFiles.prev_pcf:
       try:
         from pcf_reader import pcf_reader
@@ -492,7 +492,7 @@ class ExtractCifInfo(CifTools):
       except:
         print "Error reading pcf file %s" %p
 
-    p = self.sort_out_path(path, "cad4")
+    p, pp = self.sort_out_path(path, "cad4")
     if p and self.metacifFiles.curr_cad4 != self.metacifFiles.prev_cad4:
       try:
         from cad4_reader import cad4_reader
@@ -502,7 +502,7 @@ class ExtractCifInfo(CifTools):
         print "Error reading cad4 file %s" %p
 
     # Oxford Diffraction data collection CIF
-    p = self.sort_out_path(path, "cif_od")
+    p,pp  = self.sort_out_path(path, "cif_od")
     if p: # and self.metacifFiles.curr_cif_od != self.metacifFiles.prev_cif_od:
       try:
         import iotbx.cif
@@ -515,7 +515,7 @@ class ExtractCifInfo(CifTools):
         print "Error reading Oxford Diffraction CIF %s" %p
 
     # OD Data Collection Date
-    p = self.sort_out_path(path, "od_frame_date")
+    p, pp = self.sort_out_path(path, "od_frame_date")
     if p:
       try:
         info = os.stat(p)
@@ -525,27 +525,35 @@ class ExtractCifInfo(CifTools):
         print "Error reading OD frame Date %s" %p
 
     # OD Frame Image
-    p = self.sort_out_path(path, "od_frame_images")
+    p, pp = self.sort_out_path(path, "od_frame_images")
     if p:
       try:
-        info = os.stat(p)
-        file_time = info.st_mtime
+        #info = os.stat(p)
+        #file_time = info.st_mtime
         OV.SetParam('snum.report.frame_image', p)
+        OV.SetParam('snum.report.frame_images', pp)
       except:
         print "Error reading OD frame image %s" %p
 
     # OD Crystal Image
-    p = self.sort_out_path(path, "crystal_images")
-    if p:
+    p, pp = self.sort_out_path(path, "crystal_images")
+    if pp:
       try:
-        info = os.stat(p)
-        file_time = info.st_mtime
         OV.SetParam('snum.report.crystal_image', p)
+        l = []
+        j = len(pp)
+        if j <= 5:
+          l = pp
+        else:
+          for i in xrange(6):
+            idx = ((i+1) * j/6) - j/5 + 1
+            l.append(pp[idx])
+        OV.SetParam('snum.report.crystal_images', l)
       except:
         print "Error reading OD crystal image %s" %p
 
     # OD Notes File
-    p = self.sort_out_path(path, "notes_file")
+    p, pp = self.sort_out_path(path, "notes_file")
     if p:
       try:
         info = os.stat(p)
@@ -555,10 +563,8 @@ class ExtractCifInfo(CifTools):
         print "Error reading OD crystal image %s" %p
 
 
-
-
     # Rigaku data collection CIF
-    p = self.sort_out_path(path, "crystal_clear")
+    p, pp = self.sort_out_path(path, "crystal_clear")
     if p: # and self.metacifFiles.curr_crystal_clear != self.metacifFiles.prev_crystal_clear:
       try:
         import iotbx.cif
@@ -768,7 +774,7 @@ The \l/2 correction factor is %(lambda_correction)s.
       extension = "*.jpg"
       directory_l = OV.FileFull().replace('\\','/').split("/")
       directory = ("/").join(directory_l[:-3])
-      directory += '/frames'
+      directory += '/frames/jpg/'
     elif tool == "crystal_images":
       name = OV.FileName()
       extension = "*.jpg"
@@ -790,8 +796,11 @@ The \l/2 correction factor is %(lambda_correction)s.
       info = os.stat(path)
       files.append((info.st_mtime, path))
     if files:
-      p = self.file_choice(files,tool)
-      return p
+      multiple = False
+      if "images" in tool:
+        multiple = True
+      p,pp = self.file_choice(files,tool,multiple)
+      return p,pp
     else:
       parent = os.path.dirname(directory)
       files = []
@@ -799,16 +808,25 @@ The \l/2 correction factor is %(lambda_correction)s.
         info = os.stat(path)
         files.append((info.st_mtime, path))
       if files:
-        return OV.standardizePath(self.file_choice(files,tool))
+        return OV.standardizePath(self.file_choice(files,tool)), None
+      else:
+        return None, None
 
-  def file_choice(self, info, tool):
+  def file_choice(self, info, tool, multiple=False):
     """Given a list of files, it will return the most recent file.
 
 		Sets the list of files as a variable in olex, and also the file that is to be used.
 		By default the most recent file is used.
 		"""
     info.sort()
+    pp = None
+    if multiple:
+      pp = []
+      for ifo in info:
+        pp.append(ifo[1])
+
     info.reverse()
+    
     returnvalue = ""
     if self.userInputVariables is None or "%s_file" %tool not in self.userInputVariables:
       files = ';'.join([file for date, file in info])
@@ -837,7 +855,7 @@ The \l/2 correction factor is %(lambda_correction)s.
       returnvalue = info[0][1]
     else:
       pass
-    return returnvalue
+    return returnvalue, pp
 
   def get_def(self):
     olexdir = self.basedir
