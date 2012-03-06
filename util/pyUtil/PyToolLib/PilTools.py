@@ -985,7 +985,7 @@ class timage(ImageTools):
     ## G4 BUTTON
     if olx.IsPluginInstalled('g4') == 'true':
       button_names = self.image_items_d.get("G4 BUTTON", button_names)
-      width = available_width - OV.GetParam('gui.timage.g4.width_adjust')
+      width = available_width - OV.GetParam('gui.timage.g4.width_adjust') - 20 
       self.produce_buttons(button_names, self.sfs, "_g4",width=width)
 
     ## HELP INFO ICON
