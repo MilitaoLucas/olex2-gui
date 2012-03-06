@@ -513,7 +513,7 @@ snum
       .type = path
     image = None
       .type = path
-    image_border = 4
+    image_border = 2
       .type = int
 
     structure{
