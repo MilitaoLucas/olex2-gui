@@ -16,15 +16,11 @@ class XPlain:
   def exists(self):
     return self.exe_file != None
 
-  def run(self, run_auto=True):
+  def run(self, run_auto=True, sync=False):
     if not self.exe_file:
       print 'Could not locate the XPlain executable, aborting...'
-      return 1
+      return False
     run_auto = run_auto not in ('False', 'false', False)
-    #if run_auto:
-      #olx.Exec("'%s' -o" %self.exe_file)
-      #return 0
-
     loaded_file = OV.FileFull()
     exts = ('ins', 'res', 'cif')
     cell_input_file = None
@@ -33,7 +29,7 @@ class XPlain:
       hkl_file = file.ChangeExt(loaded_file, 'hkl')
     if not os.path.exists(hkl_file):
       print 'Could not locate HKL file, aborting...'
-      return 1
+      return False
     #print 'Hkl file: ' + hkl_file
     for e in exts:
       fn = olx.file.ChangeExt(loaded_file, e)
@@ -41,8 +37,12 @@ class XPlain:
         cell_input_file = fn
         break
     if not cell_input_file:
+      fn = os.path.normpath(olx.FilePath() + '/CrystalClear.cif')
+      if os.path.exists(fn):
+        cell_input_file = fn
+    if not cell_input_file:
       print 'Could not locate cell input file, aborting...'
-      return 1
+      return False
     out_dir = olx.StrDir() + '\\'
     out_file = self.get_output_name()
     hkl_out_file = out_dir + olx.FileName() + "-xplain.hkl"
@@ -50,20 +50,24 @@ class XPlain:
     cmdl = self.exe_file + ' /InputParameterFilename="' + cell_input_file + '"' + \
       ' /InputReflectionsFilename="' + hkl_file + '"'
     if not run_auto:
-      olx.Exec("%s -o" %cmdl)
-      return 0
+      if sync:
+        r = olx.Exec("%s -o -s" %cmdl)
+      else:
+        r = olx.Exec("%s -o" %cmdl)
+      if r == 1: return True
+      return False
     cmdl += ' /AutomaticChoice=0' + \
       ' /OutputParameterFilename="' + out_file + '"' + \
       ' /OutputReflectionsFilename="' + hkl_out_file + '"' + \
       ' /LogFilename="' + log_out_file + '"'
     if not olx.Exec(cmdl + ' -s'):
       print 'Failed to execute the command...'
-      return 1
+      return False
 
     version = ''
     if not(os.path.exists(log_out_file)):
       print 'Could not locate the output log file'
-      return 1
+      return False
     else:
       f = file(log_out_file)
       try:
@@ -108,7 +112,7 @@ class XPlain:
       print "%i: %s" %(cell_counter, out[sg_line])
     if len(sgs) == 0:
       print 'None'
-      return 1
+      return False
     rv = ';'.join(sgs)
     OV.SetParam('snum.refinement.sg_list', rv)
     control_name = 'SET_SNUM_REFINEMENT_SPACE_GROUP'
@@ -116,7 +120,7 @@ class XPlain:
       v = olx.html.GetValue(control_name)
       olx.html.SetItems(control_name, rv)
       olx.html.SetValue(control_name, v)
-    return 0
+    return True
 
   def output_exists(self):
     return os.path.exists(self.get_output_name())
