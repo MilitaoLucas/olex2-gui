@@ -254,6 +254,10 @@ class History(ArgumentParser):
       HistoryGraph(tree)
     return
 
+  def _update_history_display(self):
+    pass
+    
+
 hist = History()
 #OV.registerFunction(hist.delete_history)
 OV.registerFunction(hist.rename_history)
