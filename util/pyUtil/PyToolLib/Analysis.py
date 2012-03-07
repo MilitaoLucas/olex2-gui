@@ -740,7 +740,7 @@ class Graph(ImageTools):
   width="45"
   label="Scale "
   bgcolor="$GetVar(HtmlTableBgColour)"
-  fgcolor="$GetVar(HtmlFontColour"
+  fgcolor="$GetVar(HtmlFontColour)"
   valign='center'
   min="2"
   height="$GetVar(HtmlSpinHeight)"
@@ -757,6 +757,7 @@ class Graph(ImageTools):
           all_in_oneText = '''
 <a href='spy.SetParam(graphs.program_analysis.all_in_one_history,True)>>spy._make_history_bars()>>html.Update'>Show All Bars</a>'''
           previous_img = "<a href='spy.olex_fs_copy(history-info_%s.htm,history-info.htm)>>html.Update'><zimg src=previous.png></a>" %(img_no -1)
+          #previous_img = "<a href='spy.write_to_olex(history-info.htm,Fred)'><zimg src=previous.png></a>"
           next_img = "<a href='spy.olex_fs_copy(history-info_%s.htm,history-info.htm)>>html.Update'><zimg src=next.png></a>" %(img_no + 1)
 
         historyTextNext = '''

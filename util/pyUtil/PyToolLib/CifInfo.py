@@ -373,13 +373,15 @@ class ExtractCifInfo(CifTools):
         solution_reference = SPD.programs[active_solution.program].reference
         atom_sites_solution_primary = SPD.programs[active_solution.program]\
           .methods[active_solution.method].atom_sites_solution
+        force = True
       except:
         atom_sites_solution_primary = '?'
         solution_reference = '?'
+        force = False
       self.update_cif_block({
         '_computing_structure_solution': solution_reference,
         '_atom_sites_solution_primary': atom_sites_solution_primary
-      })
+      }, force = force)
     active_node = History.tree.active_node
     if active_node is not None and not active_node.is_solution:
 
@@ -389,10 +391,12 @@ class ExtractCifInfo(CifTools):
       ## END
       try:
         refinement_reference = RPD.programs[active_node.program].reference
+        force = True
       except:
         refinement_reference = '?'
+        force = False
       self.update_cif_block({
-        '_computing_structure_refinement': refinement_reference})
+        '_computing_structure_refinement': refinement_reference}, force=force)
 
     p, pp = self.sort_out_path(path, "frames")
     if p and self.metacifFiles.curr_frames != self.metacifFiles.prev_frames:
