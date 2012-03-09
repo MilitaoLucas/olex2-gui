@@ -929,7 +929,7 @@ def GetRInfo(txt="",format='html'):
       font_size = OV.GetParam('gui.html.font_size_large')
     else:
       font_size = 14
-    
+
     if 'html' in format:
       try:
         R1 = float(R1)
@@ -1001,7 +1001,7 @@ def GetRcolour(R1):
         retVal=OV.GetParam('gui.green')
       else:
         retVal = "#00b400"
-        
+
   except:
     retVal='grey'
   return str(retVal)
@@ -2106,7 +2106,7 @@ def getReportImageData(size='w400', imageName=None):
   #    imagePath = r"%s/etc/CIF/styles/%s.png" %(OV.BaseDir(),imageName)
     imageLocalSrc = imagePath.split("/")[-1:][0]
     imageLocalSrc = imageLocalSrc.split("\\")[-1:][0]
-  
+
     IM = Image.open(imagePath)
     oSize = IM.size
     if size_type == "w":
@@ -2119,7 +2119,7 @@ def getReportImageData(size='w400', imageName=None):
         nHeight = size
         nWidth = int(oSize[0]*(size/oSize[1]))
         IM = IM.resize((nWidth, nHeight), Image.BICUBIC)
-  
+
     if make_border:
       from ImageTools import ImageTools
       IT = ImageTools()
@@ -2137,15 +2137,15 @@ def getReportImageData(size='w400', imageName=None):
 #      draw.line((IM.size[0] - weight, 0) + (IM.size[0] - weight, IM.size[1] - weight), fill=fill, width=weight)
 #      draw.line((0, IM.size[1] - weight ) + (IM.size[0] - weight, IM.size[1] - weight) , fill=fill, width=weight)
 #      del draw
-  
+
     p = "%s/report_tmp_%i.png" %(OV.DataDir(), i)
     IM.save(p, "PNG")
-  
+
     rFile = open(p, 'rb')
     img = rFile.read()
     data = base64.b64encode(img)
     d ='data:image/png;base64,' + data
-  
+
     html += '''
   <!--[if IE]><img width=%s src='%s'><![endif]-->
   <![if !IE]><img width=%s src='data:image/png;base64,%s'><![endif]>

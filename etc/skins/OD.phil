@@ -112,6 +112,7 @@ gui {
     }
     tinybutton{
       height = 26
+      width = 30
       font_size = 18
       }
   }
