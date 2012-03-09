@@ -130,7 +130,7 @@ def deal_with_gui_phil(action='load', skin_name=None, force=False):
     skin_name = OV.GetParam('gui.skin.name')
   if not skin_name:
     skin_name = 'default'
-  
+
   gui_phil_path = "%s/gui.phil" %(OV.DataDir())
   if action == 'load':
     OV.SetHtmlFontSize()
@@ -145,14 +145,14 @@ def deal_with_gui_phil(action='load', skin_name=None, force=False):
       if len(skin_name.split("_")) > 1:
         skin_extension = skin_name.split("_")[1]
         skin_name = skin_name.split("_")[0]
-  
+
     gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_name)
     if os.path.isfile(gui_skin_phil_path):
       gui_skin_phil_file = open(gui_skin_phil_path, 'r')
       gui_skin_phil = gui_skin_phil_file.read()
       gui_skin_phil_file.close()
       olx.gui_phil_handler.update(phil_string=gui_skin_phil)
-  
+
     if skin_extension:
       force = True
       gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_extension)
@@ -161,7 +161,7 @@ def deal_with_gui_phil(action='load', skin_name=None, force=False):
         gui_skin_phil = gui_skin_phil_file.read()
         gui_skin_phil_file.close()
         olx.gui_phil_handler.update(phil_string=gui_skin_phil)
-  
+
     if timing:
       t = time.time()
       print "After 'Reading PHIL Stuff': %.2f s (%.2f s)" % ((t - t1), (t - t1))
@@ -172,9 +172,9 @@ def deal_with_gui_phil(action='load', skin_name=None, force=False):
 
 
 def change_skin(skin_name=None, force=False):
-  
-  olx.fs.Clear(2)
-  
+
+  olx.fs.Clear(3)
+
   if timing:
     t1 = time.time()
     t2 = 0
@@ -224,7 +224,7 @@ def change_skin(skin_name=None, force=False):
       #hist._make_history_bars()
     #except:
       #pass
-      
+
   a = PilTools.sNumTitle()
   a.run_sNumTitle(force=True)
   olx.FlushFS()
@@ -245,7 +245,7 @@ def change_skin(skin_name=None, force=False):
     t2 = t
 
   export_parameters()
-  
+
 OV.registerFunction(change_skin)
 
 
