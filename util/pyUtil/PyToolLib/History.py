@@ -41,7 +41,10 @@ class History(ArgumentParser):
     self.filefull = OV.FileFull()
     self.filepath = OV.FilePath()
     self.filename = OV.FileName()
-    self.strdir = OV.StrDir()
+    if os.path.exists(self.filefull):
+      self.strdir = OV.StrDir()
+    else:
+      self.strdir = None
     self.datadir = OV.DataDir()
     self.history_filepath = r'%s/%s.hist' %(self.strdir,self.filename)
     self.rename = OV.FindValue('rename')
@@ -115,7 +118,8 @@ class History(ArgumentParser):
     if timing:
       t = time.time()
     self._getItems()
-    variableFunctions.Pickle(tree,self.history_filepath)
+    if self.strdir:
+      variableFunctions.Pickle(tree,self.history_filepath)
     if timing:
       print "saveHistory took %4fs" %(time.time() - t)
 
@@ -256,7 +260,7 @@ class History(ArgumentParser):
 
   def _update_history_display(self):
     pass
-    
+
 
 hist = History()
 #OV.registerFunction(hist.delete_history)
