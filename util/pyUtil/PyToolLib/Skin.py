@@ -89,12 +89,18 @@ def check_for_first_run():
     return True
   return False
 
-def export_parameters():
+def export_parameters(load_phil=True):
+  try:
+    if load_phil.lower() == "false":
+      load_phil = False
+  except:
+    pass
   if timing:
     t = time.time()
   if check_for_first_run():
     return
-  deal_with_gui_phil(action='load')
+  if load_phil:
+    deal_with_gui_phil(action='load')
   OV.SetVar('HtmlTableFirstcolColour', OV.GetParam('gui.html.table_firstcol_colour').hexadecimal)
   OV.SetVar('HtmlTableFirstcolWidth', OV.GetParam('gui.html.table_firstcol_width'))
   OV.SetVar('HtmlTableBgColour', OV.GetParam('gui.html.table_bg_colour').hexadecimal)
