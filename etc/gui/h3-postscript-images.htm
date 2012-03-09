@@ -14,7 +14,7 @@
       valign='center'
       name="IMAGE_PS_NAME"
       width="60"
-      value=""
+      value="spy.GetParam(snum.image.ps.name)"
       onchange="spy.SetParam(snum.image.ps.name,GetValue(~name~))"
       manage
     >
@@ -35,6 +35,7 @@
       bgcolor="$GetVar(HtmlTableBgColour)"
       oncheck="SetData(COLOR_LINE,-color_line)>>spy.SetParam(snum.image.ps.colour_line,-color_line)"
       onuncheck="SetData(COLOR_LINE,' ')>>spy.SetParam(snum.image.ps.colour_line,' ')"
+      checked="$strcmp(spy.GetParam(snum.image.ps.colour_line),-color_line)"
       manage
     >
     </font>
@@ -53,6 +54,7 @@
       bgcolor="$GetVar(HtmlTableBgColour)"
       oncheck="SetData(COLOR_BOND,-color_bond)>>spy.SetParam(snum.image.ps.colour_bond,-color_bond)"
       onuncheck="SetData(COLOR_BOND,' ')>>spy.SetParam(snum.image.ps.colour_bond,' ')"
+      checked="$strcmp(spy.GetParam(snum.image.ps.colour_bond),-color_bond)"
       manage
     >
     </font>
@@ -72,6 +74,7 @@
       bgcolor="$GetVar(HtmlTableBgColour)"
       oncheck="SetData(COLOR_FILL,-color_fill)>>spy.SetParam(snum.image.ps.colour_fill,-color_fill)"
       onuncheck="SetData(COLOR_FILL,' ')>>spy.SetParam(snum.image.ps.colour_fill,' ')"
+      checked="$strcmp(spy.GetParam(snum.image.ps.colour_fill),-color_fill)"
       manage
     >
     </font>
@@ -91,6 +94,7 @@
       bgcolor="$GetVar(HtmlTableBgColour)"
       oncheck="SetData(IMAGE_PS_PERSPECTIVE,-p)>>spy.SetParam(snum.image.ps.perspective,-p)"
       onuncheck="SetData(IMAGE_PS_PERSPECTIVE,' ')>>spy.SetParam(snum.image.ps.perspective,' ')"
+      checked="$strcmp(spy.GetParam(snum.image.ps.perspective),-p)"
       manage
     >
     </font>
