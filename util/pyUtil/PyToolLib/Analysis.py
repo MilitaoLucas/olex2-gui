@@ -740,7 +740,7 @@ class Graph(ImageTools):
   width="45"
   label="Scale "
   bgcolor="$GetVar(HtmlTableBgColour)"
-  fgcolor="$GetVar(HtmlFontColour"
+  fgcolor="$GetVar(HtmlFontColour)"
   valign='center'
   min="2"
   height="$GetVar(HtmlSpinHeight)"
@@ -757,6 +757,7 @@ class Graph(ImageTools):
           all_in_oneText = '''
 <a href='spy.SetParam(graphs.program_analysis.all_in_one_history,True)>>spy._make_history_bars()>>html.Update'>Show All Bars</a>'''
           previous_img = "<a href='spy.olex_fs_copy(history-info_%s.htm,history-info.htm)>>html.Update'><zimg src=previous.png></a>" %(img_no -1)
+          #previous_img = "<a href='spy.write_to_olex(history-info.htm,Fred)'><zimg src=previous.png></a>"
           next_img = "<a href='spy.olex_fs_copy(history-info_%s.htm,history-info.htm)>>html.Update'><zimg src=next.png></a>" %(img_no + 1)
 
         historyTextNext = '''
@@ -2752,7 +2753,7 @@ class HealthOfStructure():
     limit_width = 0
     od_value = None
     theoretical_val = value_raw
-    if item == "completeness":
+    if item == "Completeness":
       od_value = OV.get_cif_item('_reflns_odcompleteness_completeness')
       if od_value:
         value_raw = float(od_value)
@@ -2767,7 +2768,7 @@ class HealthOfStructure():
     draw.rectangle(box, fill=fill)
     top = OV.GetParam('diagnostics.hkl.%s.top' %item)
 
-    if item == "completeness":
+    if item == "Completeness":
       od_value = OV.get_cif_item('_reflns_odcompleteness_completeness')
       if od_value:
         od_2theta = OV.get_cif_item('_reflns_odcompleteness_theta')
