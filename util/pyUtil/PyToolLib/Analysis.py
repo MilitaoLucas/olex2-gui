@@ -2753,7 +2753,7 @@ class HealthOfStructure():
     limit_width = 0
     od_value = None
     theoretical_val = value_raw
-    if item == "completeness":
+    if item == "Completeness":
       od_value = OV.get_cif_item('_reflns_odcompleteness_completeness')
       if od_value:
         value_raw = float(od_value)
@@ -2768,7 +2768,7 @@ class HealthOfStructure():
     draw.rectangle(box, fill=fill)
     top = OV.GetParam('diagnostics.hkl.%s.top' %item)
 
-    if item == "completeness":
+    if item == "Completeness":
       od_value = OV.get_cif_item('_reflns_odcompleteness_completeness')
       if od_value:
         od_2theta = OV.get_cif_item('_reflns_odcompleteness_theta')
