@@ -34,6 +34,22 @@ import OlexVFS
 
 haveGUI = OV.HasGUI()
 
+def txt():
+  try:
+    import uuid
+    # This creates a custom unique filename determined by the the currently loaded in url
+    output_file_name = "%s.txt"%uuid.uuid3(uuid.NAMESPACE_OID, '%s'%str(OV.FileFull()))
+    # This is passed to the altered version of text creating the custom log instead of output.txt
+    # Change:
+    # &nbsp;$spy.MakeHoverButton(toolbar-text, 'Text') to
+    # &nbsp;$spy.MakeHoverButton(toolbar-text, 'spy.txt\()')
+    # in gui/blocks/snum-info.txt to make it default
+    
+    olx.Text(output_file_name)
+  except ImportError, err:
+    print "Could not initialise spy.txt() function: %s" %err
+OV.registerFunction(txt)
+
 if __debug__:
   #gc.set_debug(gc.DEBUG_LEAK | gc.DEBUG_STATS)
   #gc.set_debug(gc.DEBUG_STATS)

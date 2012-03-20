@@ -1,14 +1,15 @@
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <tr name=XGRID_DEPTH_SLIDER>
-  <td colspan='1'>
+  <td width="15%">%Depth%</td>
+  <td colspan='1'  width="75%">
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       align="right"
-      label="depth"
+      #label="depth"
       type="slider"
       name="SNUM_XGRID_DEPTH_SLIDE"
-      width="$eval(html.clientwidth(self)-110)"
+      width="100%"
       height="18"
       value="eval(xgrid.Depth()*5)"
       bgcolor="$GetVar(HtmlTableBgColour)"
@@ -20,7 +21,8 @@ xgrid.Depth(eval(GetValue(SNUM_XGRID_DEPTH_SLIDE)/5))>>
 SetValue(SNUM_XGRID_DEPTH_VALUE,eval(GetValue(SNUM_XGRID_DEPTH_SLIDE)/5))"
     >
     </font>
-  <td colspan='1'>
+  </td>
+  <td width="10%">
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="text"
@@ -39,26 +41,27 @@ SetValue(SNUM_XGRID_DEPTH_SLIDE,eval(GetValue(SNUM_XGRID_DEPTH_VALUE)*5))"
 </tr>
 
 <tr name=XGRID_SIZE_SLIDER>
-  <td>%Size%</td>
-  <td colspan='1'>
+  <td width="15%">%Size%</td>
+  <td colspan='1' width="75%">
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       align="right"
       type="slider"
       name="SNUM_XGRID_SIZE_SLIDE"
-      width="$eval(html.clientwidth(self)-110)"
+      width="100%"
       height="18"
       value="xgrid.Size()"
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
       min="1"
-      max="10"
+      max="20"
       onchange="
 xgrid.Size(GetValue(SNUM_XGRID_SIZE_SLIDE))>>
 SetValue(SNUM_XGRID_SIZE_VALUE,GetValue(SNUM_XGRID_SIZE_SLIDE))"
     >
     </font>
-  <td colspan='1'>
+  </td>
+  <td width="10%">
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="text"
