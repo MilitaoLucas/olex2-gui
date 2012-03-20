@@ -198,10 +198,6 @@ class History(ArgumentParser):
                               is_solution=True)
       tree.active_node.program = 'Unknown'
       tree.active_node.method = 'Unknown'
-      tree.add_node(OV.HKLSrc(), OV.FileFull(),
-                    os.path.splitext(OV.FileFull())[0] + '.lst')
-      tree.active_node.program = 'Unknown'
-      tree.active_node.method = 'Unknown'
 
   def _convertHistory(self, historyFolder):
     folders = []
@@ -250,7 +246,10 @@ class History(ArgumentParser):
       state = olx.html.GetItemState('work-history')
     except:
       state = None
-    if state == u'0':
+    #TODO must be a better way, this does not work when switching between upper
+    #tabs like work and view while the history is still opened - loading another
+    #structure does not update it
+    if state == u'0' or True:
       full_tree = not OV.GetParam('snum.history.condensed_tree')
       OV.write_to_olex(
         'history_tree.ind', ''.join(make_html_tree(tree, [], 0, full_tree)))
