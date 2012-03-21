@@ -1219,7 +1219,7 @@
     >
     <cmd
       <cmd1 "flush log">
-      <cmd2 "exec -o getvar(defeditor) 'DataDir()/olex2.log'">
+      <cmd2 "exec -o getvar(defeditor) 'app.GetLogName()'">
     >
   >
 >
