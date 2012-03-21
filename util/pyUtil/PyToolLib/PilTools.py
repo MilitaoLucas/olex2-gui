@@ -2470,7 +2470,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if self.timage_blanks.has_key(type_key):
       if self.timage_blanks[type_key].has_key(state):
         image = self.timage_blanks[type_key][state]
-        image = self.print_text(image.copy(), item, top, left, font_name, font_size, valign, halign, width, font_colour)
+        image = self.print_text(image.copy(), item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
         if self.scale != 1:
           image = image.resize((int(width), int(height)), Image.ANTIALIAS)
         return image
@@ -2490,7 +2490,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       sg, s = self.drawSpaceGroupInfo(draw, luminosity=OV.GetParam('gui.timage.snumtitle.sg_L'), right_margin=3 * self.scale)
       r,g,b,a = sg.split()
       image.paste(sg, ((self.width * self.scale) - s[0],0), mask=a)
-      image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, width, font_colour)
+      image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
       
     if self.advertise_new:
       draw = ImageDraw.Draw(image)
@@ -2540,13 +2540,13 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     self.timage_blanks.setdefault(type_key,{})
     self.timage_blanks[type_key].setdefault(state,image.copy())
 
-    image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, width, font_colour)
+    image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
     if self.scale != 1:
       image = image.resize((int(width), int(height)), Image.ANTIALIAS)
     return image
     
 
-  def print_text(self, image, item, top, left, font_name, font_size, valign, halign, width, font_colour):
+  def print_text(self, image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type):
     ## Prepare text for printing on the new image. If '-' is present in the string, this will
     ## be replaced with a space and the parts will be made into title case.
     draw = ImageDraw.Draw(image)
@@ -2559,9 +2559,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       txt = item
     
     ## in case of cif file:
-    if OV.FileFull().endswith('.cif'):
+    if OV.FileFull().endswith('.cif') and item_type == 'snumtitle':
       current = int(olx.xf.CurrentData())
       txt = olx.xf.DataName(current)
+      font_colour = '#ffdf09'
     
     ## Actually print the text on the new image item.
     wX, wY = self.write_text_to_draw(draw,
