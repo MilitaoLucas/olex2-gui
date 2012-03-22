@@ -1422,7 +1422,7 @@ def GetCheckcifReport(outputtype='PDF'):
         wFile.write(txt)
         wFile.close()
     rawFile.close()
-  olx.Shell(out_file_name)
+  olx.Shell('%s'%os.path.join(OV.FilePath(),out_file_name))
 
 OV.registerFunction(GetCheckcifReport)
 
