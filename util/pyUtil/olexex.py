@@ -50,6 +50,26 @@ def txt():
     print "Could not initialise spy.txt() function: %s" %err
 OV.registerFunction(txt)
 
+def expand(start, finish, increment=1):
+  """
+  expand creates returns a list based on start, finish and increment
+  So C1, C6 would produce:
+  C1 C2 C3 C4 C5 C6
+  """
+  import string
+  start_atom = str(start).translate(None, string.digits).lower()
+  start_number = int(str(start).translate(None, string.ascii_letters))
+  finish_atom = str(finish).translate(None, string.digits).lower()
+  finish_number = int(str(finish).translate(None, string.ascii_letters))
+  if (finish_atom != start_atom) or (start_number == finish_number):
+    print "The start and end element types must be the same and the numbers different"
+    return
+  return_string = []
+  for x in range(start_number, finish_number+1, increment):
+    return_string.append('%s%d'%(start_atom,x)) 
+  return ' '.join(return_string)
+OV.registerFunction(expand)
+
 if __debug__:
   #gc.set_debug(gc.DEBUG_LEAK | gc.DEBUG_STATS)
   #gc.set_debug(gc.DEBUG_STATS)
