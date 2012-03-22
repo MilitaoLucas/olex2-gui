@@ -44,6 +44,9 @@ from cctbx import sgtbx, xray
 from cctbx.array_family import flex
 import smtbx.utils
 
+def rt_mx_from_olx(olx_input):
+  from libtbx.utils import flat_list
+  return sgtbx.rt_mx(flat_list(olx_input[:-1]), olx_input[-1])
 
 class OlexCctbxAdapter(object):
   def __init__(self):
