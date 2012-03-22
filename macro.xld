@@ -1683,7 +1683,33 @@
   >
 >
 
+<txt help="Open log file in an external text editor but with unique identifier"
+  <body
+    <args
+      <arg1 name="command" def="">
+    >
+    <cmd
+      <cmd1 "spy.txt()">
+    >
+  >
+>
+
+<expand help="Expands sequence from given start, end labels and optional increment"
+  <body
+    <args
+      <arg1 name="start" def="">
+      <arg2 name="finish" def="">
+      <arg3 name="increment" def="1">
+    >
+    <cmd
+      <cmd1 "spy.expand('%1', '%2', '%3')">
+    >
+  >
+>
+
 <user_onstartup help="dummy definition" <body > >
 <custom_on_report help="dummy definition" <body > >
+
+
 
 <#include "custom.xld">
