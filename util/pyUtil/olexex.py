@@ -65,7 +65,7 @@ def expand(start, finish, increment=1):
     print "The start and end element types must be the same and the numbers different"
     return
   return_string = []
-  for x in range(start_number, finish_number+1, increment):
+  for x in range(start_number, finish_number+1, int(increment)):
     return_string.append('%s%d'%(start_atom,x)) 
   return ' '.join(return_string)
 OV.registerFunction(expand)
