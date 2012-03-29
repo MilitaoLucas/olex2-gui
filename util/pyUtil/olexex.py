@@ -44,7 +44,7 @@ def txt():
     # &nbsp;$spy.MakeHoverButton(toolbar-text, 'Text') to
     # &nbsp;$spy.MakeHoverButton(toolbar-text, 'spy.txt\()')
     # in gui/blocks/snum-info.txt to make it default
-    
+
     olx.Text(output_file_name)
   except ImportError, err:
     print "Could not initialise spy.txt() function: %s" %err
@@ -704,7 +704,7 @@ def MakeElementButtonsFromFormula():
     TI = timage()
     for b in btn_dict:
       name = "btn-element%s.png" %(b)
-      
+
       if olx.fs.Exists(name) == 'false':
         for state in ['on', 'off', 'hover', '', 'highlight']:
           txt = btn_dict[b].get('txt')
@@ -1121,6 +1121,7 @@ def onRefinementProgramChange(prg_name, method=None, scope='snum'):
     method = sortDefaultMethod(prg)
     if method == 'Least Squares' and olx.LSM() == 'CGLS':
       method = 'CGLS' # work-around for bug #26
+  OV.SetParam("%s.refinement.program" %scope, prg_name)
   OV.SetParam("%s.refinement.method" %scope, method)
   onRefinementMethodChange(prg_name, method)
 OV.registerFunction(OV.set_refinement_program)
@@ -1144,6 +1145,7 @@ def onSolutionProgramChange(prg_name, method=None, scope='snum'):
       method = sortDefaultMethod(prg)
       if method == 'Direct Methods' and olx.Ins('PATT') != 'n/a':
         method = 'Patterson Method' # work-around for bug #48
+    OV.SetParam("%s.solution.program" %scope, prg_name)
     OV.SetParam("%s.solution.method" %scope, method)
     onSolutionMethodChange(prg_name, method)
 OV.registerFunction(OV.set_solution_program)
