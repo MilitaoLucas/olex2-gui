@@ -879,6 +879,7 @@ class timage(ImageTools):
                   "make_note_items",
                   "make_images_from_fb_png",
                   "make_popup_banners",
+                  "make_element_buttons",
                   "info_bitmaps",
                   "resize_news_image",
                   "create_logo"
@@ -2106,15 +2107,23 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
 
   def make_element_buttons(self):
+    from PeriodicTable import PeriodicTable
+    pt = PeriodicTable().PeriodicTable()
+    htm = "Currently no info about elements available"
+    OV.write_to_olex('element_buttons.htm', htm, 1)
     btn_dict = {}
-    elements = ['H', 'He', 'Li', 'Be', 'B', 'C']
-    tints = [('n',(250,250,250)), ('g',(210,255,210)), ('r',(255,210,210))]
-    for symbol in elements:
+    icon_size = OV.GetParam('gui.skin.icon_size')
+    tints = [("",(250,250,250)), ("b",(210,210,255)), ('g',(210,255,210)), ('r',(255,210,210))]
+    for symbol in pt:
       for tint in tints:
         bgcolour = tint[1]
-        name = "%s_%s" %(symbol, tint[0])
+        c = tint[0]
+        if c:
+          name = "btn-element%s_%s" %(symbol, c)
+        else:
+          name = "btn-element%s" %(symbol)
         btn_dict.setdefault(
-          symbol, {
+          name, {
             'txt':symbol,
             'bgcolour':bgcolour,
             'image_prefix':'element',
@@ -2123,9 +2132,29 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
             'grad':False,
             'name':name
           })
-    
-
-
+      btn_dict.setdefault(
+        'Table', {
+          'txt':'...',
+          'bgcolour':'#efefef',
+          'width':int(icon_size*1.0),
+          'image_prefix':'element',
+          'top_left':(0,-1),
+          'grad':False,
+          'name':'Table',
+        })
+    for b in btn_dict:
+      name = btn_dict[b]['name']
+      for state in ['on', 'off', 'hover', '', 'highlight']:
+        txt = btn_dict[b].get('txt')
+        bgcolour = btn_dict[b].get('bgcolour')
+        width = OV.GetParam('gui.skin.icon_size')
+        btn_type = 'tiny'
+        bg = OV.GetParam('gui.html.table_firstcol_colour')
+        width = OV.GetParam('gui.timage.tinybutton.width')
+        IM = self.make_timage(item_type='tinybutton', item=txt, state=state, width=width, colour=bgcolour, whitespace='right:1:%s' %bg)
+        name_s = "%s%s.png" %(name, state)
+        OlexVFS.save_image_to_olex(IM, name_s, 1)
+ 
   def make_icon_items(self):
     self.image_type = 'icons'
     base_colour = self.params.html.base_colour.rgb
@@ -2490,13 +2519,14 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     bg_colour = underground #hp#
     
     type_key = "%s_%s" %(item_type, self.width)
-    if self.timage_blanks.has_key(type_key):
-      if self.timage_blanks[type_key].has_key(state):
-        image = self.timage_blanks[type_key][state]
-        image = self.print_text(image.copy(), item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
-        if self.scale != 1:
-          image = image.resize((int(width), int(height)), Image.ANTIALIAS)
-        return image
+    if 'tinybutton' not in type_key:
+      if self.timage_blanks.has_key(type_key):
+        if self.timage_blanks[type_key].has_key(state):
+          image = self.timage_blanks[type_key][state]
+          image = self.print_text(image.copy(), item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
+          if self.scale != 1:
+            image = image.resize((int(width), int(height)), Image.ANTIALIAS)
+          return image
     
     image = Image.new('RGBA', size, bg_colour)
     draw = ImageDraw.Draw(image)
