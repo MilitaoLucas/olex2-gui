@@ -683,7 +683,8 @@ class ExtractCifInfo(CifTools):
 #        pass
       #self.make_conflicting_source_gui(conflict_d)  
     else:
-      print "No conflicting information in the sources of metatdata has been found."
+      pass
+      #print "No conflicting information in the sources of metatdata has been found."
       
           
 
