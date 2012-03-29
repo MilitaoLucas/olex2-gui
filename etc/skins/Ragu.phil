@@ -5,7 +5,7 @@ gui {
   skin {
     name = Ragu
     extension = None
-    logo_name= etc/skins/Toma.png
+    logo_name= etc/skins/rigaku/RigakuLogo.png
   }
 
   green = #00aa00
