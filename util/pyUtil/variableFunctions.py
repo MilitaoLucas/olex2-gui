@@ -155,7 +155,7 @@ def get_custom_phil():
 
 def LoadParams():
   # snum params
-  
+
   master_phil = phil_interface.parse(file_name="%s/params.phil" %OV.BaseDir())
 
   phil_handler = phil_interface.phil_handler(
@@ -184,22 +184,12 @@ def LoadStructureParams():
   import olexex
   ExternalPrgParameters.definedControls = [] # reset defined controls
   olx.current_mask = None
+  # read current setting - to use for the new structures
+  solutionPrg = olx.phil_handler.get_validated_param('snum.solution.program')
+  solutionMethod = olx.phil_handler.get_validated_param('snum.solution.method')
+  refinementPrg = olx.phil_handler.get_validated_param('snum.refinement.program')
+  refinementMethod = olx.phil_handler.get_validated_param('snum.refinement.method')
   olx.phil_handler.reset_scope('snum', rebuild_index=True)
-  #solutionPrg, solutionMethod = getDefaultPrgMethod('Solution')
-  #refinementPrg, refinementMethod = getDefaultPrgMethod('Refinement')
-  #snum_phil = """
-#snum {
-  #refinement.program = "%s"
-  #refinement.method = "%s"
-  #solution.program = "%s"
-  #solution.method = "%s"
-  #report.title = "%s"
-  #image.ps.name = "%s"
-  #image.bitmap.name = "%s"
-  #}
-#""" %(refinementPrg, refinementMethod, solutionPrg, solutionMethod,
-      #OV.FileName(), OV.FileName(), OV.FileName())
-  #olx.phil_handler.update(phil_string=snum_phil.encode('utf-8'))
   structure_phil_path = u"%s/.olex/%s.phil" %(OV.FilePath(), OV.FileName())
   if os.path.isfile(structure_phil_path):
     structure_phil_file = open(structure_phil_path, 'r')
@@ -215,10 +205,10 @@ def LoadStructureParams():
     structure_phil = structure_phil.replace('smtbx-refine', 'olex2.refine')\
                                    .replace('smtbx-solve', 'olex2.solve')
     olx.phil_handler.update(phil_string=structure_phil)
-  solutionPrg = olx.phil_handler.get_validated_param('snum.solution.program')
-  solutionMethod = olx.phil_handler.get_validated_param('snum.solution.method')
-  refinementPrg = olx.phil_handler.get_validated_param('snum.refinement.program')
-  refinementMethod = olx.phil_handler.get_validated_param('snum.refinement.method')
+    solutionPrg = olx.phil_handler.get_validated_param('snum.solution.program')
+    solutionMethod = olx.phil_handler.get_validated_param('snum.solution.method')
+    refinementPrg = olx.phil_handler.get_validated_param('snum.refinement.program')
+    refinementMethod = olx.phil_handler.get_validated_param('snum.refinement.method')
   #
   # Start backwards compatibility  2010-06-18
   #
