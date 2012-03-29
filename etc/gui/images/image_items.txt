@@ -45,14 +45,14 @@
   Merge Cif
   Validate Cif
   Tutorial
+  CheckCif Report
+  CCDC Number
 
 [TWO BUTTONS PER ROW]
   Stereo (Colour)
   Stereo (Anaglyph)
   Stereo (Hardware)
   Normal View
-  Get CheckCif Report
-  Get CCDC Number
   Fit Group
   Fit & Split
   Filter

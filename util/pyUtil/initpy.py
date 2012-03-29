@@ -235,7 +235,9 @@ if OV.HasGUI():
   import htmlMaker
   from gui.home import *
   from gui.report import *
+  from gui.cif import *
   from gui.tools import *
+  from gui.metadata import *
 
 def onstartup():
   OV.SetVar('cbtn_solve_on','false')
