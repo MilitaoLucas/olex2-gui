@@ -1569,6 +1569,24 @@
 >
 
 
+<g4 help="Switch to Gui4"
+  <body
+    <cmd
+      <cmd2 "clear">
+      <cmd2 "html.ItemState * 0">
+      <cmd2 "html.ItemState logo1 1">
+      <cmd2 "html.ItemState info-title 1">
+      <cmd2 "html.ItemState index-g4 1">
+      <cmd2 "html.ItemState g4-* 1">
+      <cmd2 "spy.g4.sel_evaluate_selection()">
+      <cmd2 "html.ItemState g4-tasks 1">
+      <cmd2 "html.ItemState g4-status 1">
+      <cmd2 "html.ItemState *tab-g4 1">
+    >
+  >
+>
+
+
 
 <tool help="Show grouped gui tools"
   <body
