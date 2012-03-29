@@ -590,8 +590,10 @@ def MakeElementButtonsFromFormula():
   global last_elements_html
   
   current_formula = OlexRefinementModel().currentFormula()
-  if current_formula == last_formula:
-    return last_elements_html
+
+
+  #if current_formula == last_formula:
+    #return last_elements_html
   
   from PilTools import ButtonMaker
   icon_size = OV.GetParam('gui.skin.icon_size')
@@ -604,7 +606,7 @@ def MakeElementButtonsFromFormula():
   
   Z_prime = float(olx.xf.au.GetZprime())
   Z = float(olx.xf.au.GetZ())
-  html_elements = []
+  html = ""
   for element in f:
     symbol = element.split(':')[0]
     max = float(element.split(':')[1])
@@ -614,26 +616,35 @@ def MakeElementButtonsFromFormula():
       totalcount += max
 
     max = max*Z_prime
-    bgcolour = '#ff0000'
+    c = ""
     if present < max:
       bgcolour = (250,250,250)
+      c = 'b'
     elif present ==  max:
       bgcolour = (210,255,210)
+      c = 'g'
     else:
       bgcolour = (255,210,210)
+      c = 'r'
+
+    if c:
+      name = "btn-element%s_%s" %(symbol, c)
+      
+    else:
+      name = "btn-element%s" %(symbol)
+ 
     command = "if strcmp(sel(),'') then 'mode name -t=%s' else 'name sel %s'>>sel -u" %(symbol, symbol)
     target = OV.TranslatePhrase('change_element-target')
     #command = "if strcmp(spy.GetParam(olex2.in_mode),'mode name -t=%s') then 'mode off' else %%22 if strcmp(sel(),'') then 'mode name -t=%s' else 'name sel %s'>>sel -u%%22" %(symbol, symbol, symbol)
     command = 'spy.ElementButtonStates(%s)' %symbol
-    namelower = 'btn-element%s' %symbol
+    namelower = 'btn-element%s' %(symbol)
     d = {}
-    d.setdefault('namelower', namelower)
+    d.setdefault('namelower', name)
     d.setdefault('symbol', symbol)
     d.setdefault('cmds', command)
     d.setdefault('target', target + symbol)
     d.setdefault('bgcolor', OV.GetParam('gui.html.table_firstcol_colour'))
-    html = '''
-<font size='$GetVar(HtmlFontSizeControls)'>
+    html += '''
 <input
   name=IMG_BTN-ELEMENT%(symbol)s
   type="button"
@@ -642,26 +653,11 @@ def MakeElementButtonsFromFormula():
   onclick="%(cmds)s"
   bgcolor=%(bgcolor)s
 >
-</font>''' %d
-#    <a href="%s" target="%s %s">
-#      <zimg name=IMG_BTN-ELEMENT%s border="0" src="btn-element%s.png"/>
-#    </a>'''%(command, target, symbol, symbol.upper(), symbol)
+''' %d
 
-    html_elements.append(html)
 
-    btn_dict.setdefault(
-      symbol, {
-        'txt':symbol,
-        'bgcolour':bgcolour,
-        'image_prefix':'element',
-        'width':icon_size ,
-        'top_left':(0,-1),
-        'grad':False,
-      })
-
-  d['namelower'] = 'btn-element...'
-  html_elements.append('''
-<font size='$GetVar(HtmlFontSizeControls)'>
+  d['namelower'] = 'Table'
+  html +=  '''
 <input
   name=IMG_BTN-ELEMENT...
   type="button"
@@ -670,66 +666,28 @@ def MakeElementButtonsFromFormula():
   onclick="if strcmp(sel(),'') then 'mode name -t=ChooseElement()' else 'name sel ChooseElement()'"
   bgcolor=%(bgcolor)s
 >
-</font>''' %d)
+''' %d
 
-#<a href="if strcmp(sel(),'') then 'mode name -t=ChooseElement()' else 'name sel ChooseElement()'"
-#   target="Chose Element from the periodic table">
-#<zimg border="0" src="btn-element....png"></a>
-#''')
-
-  btn_dict.setdefault(
-    'Table', {
-      'txt':'...',
-      'bgcolour':'#efefef',
-      'width':int(icon_size*1.0),
-      'image_prefix':'element',
-      'top_left':(0,-1),
-      'grad':False,
-    })
-
-  #hname = 'AddH'
-  #btn_dict.setdefault('ADDH',
-                      #{
-                        #'txt':'%s' %hname,
-                        #'bgcolour':'#efefef',
-                        #'image_prefix':'element',
-                        #'width':int(icon_size * 2),
-                        #'font_size':10,
-                        #'top_left':(2,0),
-                        #'grad':False,
-                      #})
 
   if current_formula != last_formula:
     last_formula = current_formula
-    use_new = True
-  else:
-    use_new = True
 
-  if use_new:
-    from PilTools import timage
-    TI = timage()
-    for b in btn_dict:
-      name = "btn-element%s.png" %(b)
 
-#      if olx.fs.Exists(name) == 'false':
-      for state in ['on', 'off', 'hover', '', 'highlight']:
-        txt = btn_dict[b].get('txt')
-        bgcolour = btn_dict[b].get('bgcolour')
-        width = OV.GetParam('gui.skin.icon_size')
-        btn_type = 'tiny'
-        bg = OV.GetParam('gui.html.table_firstcol_colour')
-        width = OV.GetParam('gui.timage.tinybutton.width')
-        IM = TI.make_timage(item_type='tinybutton', item=txt, state=state, width=width, colour=bgcolour, whitespace='right:1:%s' %bg)
-        name = "btn-element%s%s.png" %(txt, state)
-        OlexVFS.save_image_to_olex(IM, name, 1)
-        if state == 'off':
-          name = "btn-element%s.png" %(txt)
-          OlexVFS.save_image_to_olex(IM, name, 1)
+  OV.write_to_olex('element_buttons.htm', html, 0)
 
-  else:
-    bm = ButtonMaker(btn_dict)
-    bm.run()
 
+  im_name='IMG_BTN-ELEMENT%s' %symbol
+  OV.SetImage(im_name, name)
+  
+  SetAtomicVolumeInSnumPhil(totalcount)
+
+
+
+
+if haveGUI:
+  OV.registerFunction(MakeElementButtonsFromFormula)
+
+def SetAtomicVolumeInSnumPhil(totalcount):
   cell_volume = 0
   Z = 1
   Z_prime = float(olx.xf.au.GetZprime())
@@ -741,19 +699,12 @@ def MakeElementButtonsFromFormula():
     Z = float(olx.xf.au.GetZ())
   except:
     pass
-
-  retStr = '\n'.join(html_elements)
-  last_elements_html = retStr
   
   if cell_volume and totalcount:
     atomic_volume = (cell_volume)/(totalcount * Z)
     OV.SetParam('snum.solution.current_atomic_volume','%.1f' %atomic_volume)
-    retStr = retStr.replace("\n","")
   else:
     OV.SetParam('snum.solution.current_atomic_volume',None)
-  return str(retStr)
-if haveGUI:
-  OV.registerFunction(MakeElementButtonsFromFormula)
 
 def CheckBoxValue(var, def_val='false'):
   if '.' in var:
