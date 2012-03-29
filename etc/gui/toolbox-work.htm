@@ -35,29 +35,29 @@ $spy.MakeHoverButton(toolbar-H,showH)
   <td width='5%'>
 $spy.MakeHoverButton(toolbar-center,compaq>>compaq -a>>center)
   </td>
-  <td width = '30%'>
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
-  <tr>
-  <td width='30%' align='center'>
+  
+  <td width='20%'>
+  </td>
+  
+  <td width = '5%'>
 $spy.MakeHoverButton(toolbar-ok,fixunit GetValue\(SET_Z_PRIME_FIXUNIT)>>xf.au.SetZprime\(GetValue\(SET_Z_PRIME_FIXUNIT))>>html.Update)
   </td> 
-  <td>Z'</td>
-  <td width='70%' align='center'>
+  <td width='30%' align='center'>
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type='text'
       width="40"
-      height="$GetVar(HtmlSPinHeight)"
+      height="$GetVar(HtmlInputHeight)"
       bgcolor="spy.GetParam(gui.html.input_bg_colour)"
       name='SET_Z_PRIME_FIXUNIT'
       valign='center'
       align='right'
       value='xf.au.GetZprime()'
       onreturn="xf.au.SetZprime(GetValue(~name~))>>html.update"
+      label="Z' "
       >
     </font>
   </td>
-  </tr></table>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 

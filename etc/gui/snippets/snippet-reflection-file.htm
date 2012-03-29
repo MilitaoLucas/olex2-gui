@@ -3,7 +3,7 @@
   type='combo'
   height='$GetVar(HtmlComboHeight)'
   bgcolor='$GetVar(HtmlInputBgColour)'
-  width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 - spy.GetParam(gui.htmlpanelwidth_margin_adjust) - spy.GetParam(gui.html.table_firstcol_width))' 
+  width='100%' 
   name='SET_REFLECTIONS_#parent_name'
   items='$spy.GetHklFileList()'
   onchange='HKLSrc(GetValue(SET_REFLECTIONS_#parent_name))>>spy.make_HOS(True)>>html.Update'

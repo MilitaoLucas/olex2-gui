@@ -879,8 +879,8 @@ class timage(ImageTools):
                   "make_note_items",
                   "make_images_from_fb_png",
                   "make_popup_banners",
+                  "make_element_buttons",
                   "info_bitmaps",
-                  #"makeTestBanner",
                   "resize_news_image",
                   "create_logo"
                   ]
@@ -2105,6 +2105,56 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       #OlexVFS.save_image_to_olex(image, name, 2)
       ##image.save(r"%s\etc\$%s.png" %(datadir, imag), "PNG")
 
+
+  def make_element_buttons(self):
+    from PeriodicTable import PeriodicTable
+    pt = PeriodicTable().PeriodicTable()
+    htm = "Currently no info about elements available"
+    OV.write_to_olex('element_buttons.htm', htm, 1)
+    btn_dict = {}
+    icon_size = OV.GetParam('gui.skin.icon_size')
+    tints = [("",(250,250,250)), ("b",(210,210,255)), ('g',(210,255,210)), ('r',(255,210,210))]
+    for symbol in pt:
+      for tint in tints:
+        bgcolour = tint[1]
+        c = tint[0]
+        if c:
+          name = "btn-element%s_%s" %(symbol, c)
+        else:
+          name = "btn-element%s" %(symbol)
+        btn_dict.setdefault(
+          name, {
+            'txt':symbol,
+            'bgcolour':bgcolour,
+            'image_prefix':'element',
+            'width':icon_size ,
+            'top_left':(0,-1),
+            'grad':False,
+            'name':name
+          })
+      btn_dict.setdefault(
+        'Table', {
+          'txt':'...',
+          'bgcolour':'#efefef',
+          'width':int(icon_size*1.0),
+          'image_prefix':'element',
+          'top_left':(0,-1),
+          'grad':False,
+          'name':'Table',
+        })
+    for b in btn_dict:
+      name = btn_dict[b]['name']
+      for state in ['on', 'off', 'hover', '', 'highlight']:
+        txt = btn_dict[b].get('txt')
+        bgcolour = btn_dict[b].get('bgcolour')
+        width = OV.GetParam('gui.skin.icon_size')
+        btn_type = 'tiny'
+        bg = OV.GetParam('gui.html.table_firstcol_colour')
+        width = OV.GetParam('gui.timage.tinybutton.width')
+        IM = self.make_timage(item_type='tinybutton', item=txt, state=state, width=width, colour=bgcolour, whitespace='right:1:%s' %bg)
+        name_s = "%s%s.png" %(name, state)
+        OlexVFS.save_image_to_olex(IM, name_s, 1)
+ 
   def make_icon_items(self):
     self.image_type = 'icons'
     base_colour = self.params.html.base_colour.rgb
@@ -2199,7 +2249,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       if icon in also_make_small_icons_l:
         states = ["on", "off", "hover", "", "hoveron", "highlight"]
         for state in states:
-          self.image = image = self.icon_items(iconIndex[icon], state, icon_size=OV.GetParam('gui.html.combo_height'))
+          self.image = image = self.icon_items(iconIndex[icon], state, icon_size=OV.GetParam('gui.skin.icon_size'))
           self.name = name = r"toolbar_small-%s%s.png" %(icon,state)
           self.save_with_checking_for_needed()
 
@@ -2294,6 +2344,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     self.scale = pams.scale
     if not self.scale:
       self.scale = 1
+
+    self.size_factor = OV.GetParam('gui.skin.size_factor') #An additional scale factor
       
     base_colour = pams.base_colour
     highlight_colour = self.params.html.highlight_colour.rgb
@@ -2467,13 +2519,14 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     bg_colour = underground #hp#
     
     type_key = "%s_%s" %(item_type, self.width)
-    if self.timage_blanks.has_key(type_key):
-      if self.timage_blanks[type_key].has_key(state):
-        image = self.timage_blanks[type_key][state]
-        image = self.print_text(image.copy(), item, top, left, font_name, font_size, valign, halign, width, font_colour)
-        if self.scale != 1:
-          image = image.resize((int(width), int(height)), Image.ANTIALIAS)
-        return image
+    if 'tinybutton' not in type_key:
+      if self.timage_blanks.has_key(type_key):
+        if self.timage_blanks[type_key].has_key(state):
+          image = self.timage_blanks[type_key][state]
+          image = self.print_text(image.copy(), item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
+          if self.scale != 1:
+            image = image.resize((int(width), int(height)), Image.ANTIALIAS)
+          return image
     
     image = Image.new('RGBA', size, bg_colour)
     draw = ImageDraw.Draw(image)
@@ -2490,7 +2543,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       sg, s = self.drawSpaceGroupInfo(draw, luminosity=OV.GetParam('gui.timage.snumtitle.sg_L'), right_margin=3 * self.scale)
       r,g,b,a = sg.split()
       image.paste(sg, ((self.width * self.scale) - s[0],0), mask=a)
-      image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, width, font_colour)
+      image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
       
     if self.advertise_new:
       draw = ImageDraw.Draw(image)
@@ -2540,13 +2593,13 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     self.timage_blanks.setdefault(type_key,{})
     self.timage_blanks[type_key].setdefault(state,image.copy())
 
-    image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, width, font_colour)
+    image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
     if self.scale != 1:
       image = image.resize((int(width), int(height)), Image.ANTIALIAS)
     return image
     
 
-  def print_text(self, image, item, top, left, font_name, font_size, valign, halign, width, font_colour):
+  def print_text(self, image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type):
     ## Prepare text for printing on the new image. If '-' is present in the string, this will
     ## be replaced with a space and the parts will be made into title case.
     draw = ImageDraw.Draw(image)
@@ -2559,9 +2612,13 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       txt = item
     
     ## in case of cif file:
-    if OV.FileFull().endswith('.cif'):
+    if OV.FileFull().endswith('.cif') and item_type == 'snumtitle':
       current = int(olx.xf.CurrentData())
       txt = olx.xf.DataName(current)
+      cnt = int(olx.xf.DataCount())
+      if cnt > 1:
+        txt += (' (+ %s)') %(cnt - 1)
+      font_colour = '#ffdf09'
     
     ## Actually print the text on the new image item.
     wX, wY = self.write_text_to_draw(draw,
@@ -3349,7 +3406,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     elif state == "highlight":
       outline_colour = self.params.html.highlight_colour.rgb
     else:
-      outline_colour = '#bcbcbc'
+      outline_colour = self.params.skin.icon_border_colour.rgb
 
     if border:
       draw.rectangle((0, 0, image.size[0]-1, image.size[1]-1), outline=outline_colour)

@@ -70,7 +70,7 @@ gui {
       font_size = 18
       off_L = 0.8
       on_L = 1
-      arrows = "bar:left:5,char:on~:off+:hover+:hoveron~"
+      arrows = "bar:left:5"
 
     }
     

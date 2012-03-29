@@ -1219,7 +1219,7 @@
     >
     <cmd
       <cmd1 "flush log">
-      <cmd2 "exec -o getvar(defeditor) 'DataDir()/olex2.log'">
+      <cmd2 "exec -o getvar(defeditor) 'app.GetLogName()'">
     >
   >
 >
@@ -1569,6 +1569,24 @@
 >
 
 
+<g4 help="Switch to Gui4"
+  <body
+    <cmd
+      <cmd2 "clear">
+      <cmd2 "html.ItemState * 0">
+      <cmd2 "html.ItemState logo1 1">
+      <cmd2 "html.ItemState info-title 1">
+      <cmd2 "html.ItemState index-g4 1">
+      <cmd2 "html.ItemState g4-* 1">
+      <cmd2 "spy.g4.sel_evaluate_selection()">
+      <cmd2 "html.ItemState g4-tasks 1">
+      <cmd2 "html.ItemState g4-status 1">
+      <cmd2 "html.ItemState *tab-g4 1">
+    >
+  >
+>
+
+
 
 <tool help="Show grouped gui tools"
   <body
@@ -1683,7 +1701,33 @@
   >
 >
 
+<txt help="Open log file in an external text editor but with unique identifier"
+  <body
+    <args
+      <arg1 name="command" def="">
+    >
+    <cmd
+      <cmd1 "spy.txt()">
+    >
+  >
+>
+
+<expand help="Expands sequence from given start, end labels and optional increment"
+  <body
+    <args
+      <arg1 name="start" def="">
+      <arg2 name="finish" def="">
+      <arg3 name="increment" def="1">
+    >
+    <cmd
+      <cmd1 "spy.expand('%1', '%2', '%3')">
+    >
+  >
+>
+
 <user_onstartup help="dummy definition" <body > >
 <custom_on_report help="dummy definition" <body > >
+
+
 
 <#include "custom.xld">

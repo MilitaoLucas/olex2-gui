@@ -2,7 +2,7 @@ from __future__ import division
 
 import math, os, sys
 
-from cctbx_olex_adapter import OlexCctbxAdapter, OlexCctbxMasks
+from cctbx_olex_adapter import OlexCctbxAdapter, OlexCctbxMasks, rt_mx_from_olx
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
@@ -939,7 +939,3 @@ class FullMatrixRefine(OlexCctbxAdapter):
     print >> log, "Disagreeable reflections:"
     self.get_disagreeable_reflections()
 
-
-def rt_mx_from_olx(olx_input):
-  from libtbx.utils import flat_list
-  return sgtbx.rt_mx(flat_list(olx_input[:-1]), olx_input[-1])
