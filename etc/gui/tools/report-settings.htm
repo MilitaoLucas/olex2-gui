@@ -1,17 +1,16 @@
-
 <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
 
 <tr align = 'center' name=EDIT_CIF width='100%'>
 <!-- #include blank-column gui\blocks\tool-first-column.htm;help_ext=cif-info;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <!-- #include tool-column gui\blocks\tool-help-first-column.htm;help_ext=cif-info;1; -->
-  <td name=EDIT_CIF_INFO align='left' VALIGN='center' width='32%'>
+  <td name=EDIT_CIF_INFO align='left' VALIGN='left' width='32%'>
 $spy.MakeHoverButton(button-edit_cif_info,spy.ExtractCifInfo\()>>spy.EditCifInfo\()>>html.Update)
   </td>
   <td name=MERGE_CIF_INFO align='center' VALIGN='center' width='35%'>
 $spy.MakeHoverButton(button-merge_cif,spy.ExtractCifInfo\()>>spy.MergeCif\(True)>>html.Update)
   </td>
-  <td name=VALIDATE_CIF align='right' VALIGN='center' width='32%'>
+  <td name=VALIDATE_CIF align='right' VALIGN='right' width='32%'>
 $spy.MakeHoverButton(button-validate_cif,spy.ValidateCif)
   </td>
 </tr>
@@ -21,11 +20,26 @@ $spy.MakeHoverButton(button-validate_cif,spy.ValidateCif)
 <!-- #include blank-column gui\blocks\tool-first-column.htm;help_ext=submit-info;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <!-- #include tool-column gui\blocks\tool-help-first-column.htm;help_ext=submit-info;1; -->
-  <td name=GET_CHECKCIF_REPOET align='center' VALIGN='center' width='50%'>
-$spy.MakeHoverButton(button-get_checkcif_report,spy.GetCheckCifReport\())
+  <td name=GET_CHECKCIF_REPORT align='center' VALIGN='center' width='30%'>
+$spy.MakeHoverButton(button-checkcif_report,spy.cif.GetCheckCifReport\())
   </td>
-  <td name=REQUEST_CCDC_NUMBER align='center' VALIGN='center' width='50%'>
-$spy.MakeHoverButton(button-get_ccdc_number,spy.ccdc_submit\())
+
+  <td name=GET_CHECKCIF_REPORT_FORMAT align='right' VALIGN='center' width='20%'>
+    <input
+      type='combo'
+      width="100%"
+      height="$GetVar(HtmlComboHeight)"
+      bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+      name='SET_CHECKCIF_FORMAT'
+      value='$spy.GetParam(user.cif.checkcif.format)'
+      items='html;pdf'
+      valign='center'
+      onchange="spy.SetParam(user.cif.checkcif.format,GetValue(~name~))"
+    >
+  </td>
+
+  <td name=REQUEST_CCDC_NUMBER align='right' VALIGN='right' width='50%'>
+$spy.MakeHoverButton(button-ccdc_number,spy.ccdc_submit\())
   </td>
 </tr>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -113,49 +127,8 @@ $spy.MakeHoverButton(toolbar_small-open,exec -o getvar\(defexplorer) 'file.ospat
     </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
+<table>
+<!-- #include report-metadata gui\tools\report-metadata.htm;1; -->
 
 
-<!--<tr name=INCLUDE_REPORT_IMAGE>-->
-<!--<!-- #include report-settings-h3-image gui\report-settings-h3-image.htm;gui\blocks\tool-h3-off.htm;image=image;onclick=;colspan=1;2; -->
-<!--</tr>-->
 
-<tr name=INCLUDE_REPORT_COLLECTION>
-<!-- #include metadata-h3-collection gui\metadata-h3.htm;gui\blocks\tool-h3-off.htm;image=h3-collection;name=collection;onclick=;colspan=1;2; -->
-</tr>
-
-<tr name=INCLUDE_REPORT_CRYSTAL>
-<!-- #include metadata-h3-crystal gui\metadata-h3.htm;gui\blocks\tool-h3-off.htm;image=h3-crystal;name=crystal;onclick=;colspan=1=3;2; -->
-</tr>
-
-<tr name=INCLUDE_REPORT_CRYSTAL_IMAGE>
-<!-- #includeif not(strcmp('spy.getParam(snum.report.crystal_image)',"")) h3-crystal_image gui\h3-crystal_image.htm;gui\blocks\tool-h3-off.htm;image=h3-crystal_image;name=crystal_image;onclick=;colspan=1;2; -->
-</tr>
-
-<tr name=INCLUDE_REPORT_DIFFRACTION>
-<!-- #include metadata-h3-diffraction gui\metadata-h3.htm;gui\blocks\tool-h3-off.htm;image=h3-diffraction;name=diffraction;onclick=;colspan=1;2; -->
-</tr>
-
-<tr name=INCLUDE_REPORT_ABSORPTION_CORRECTION>
-<!-- #include metadata-h3-absorption_correction gui\metadata-h3.htm;gui\blocks\tool-h3-off.htm;image=h3-absorption correction;name=absorption_correction;onclick=;colspan=1;2; -->
-</tr>
-
-
-<tr name=INCLUDE_REPORT_PUBLICATION>
-<!-- #include report-settings-h3-publication gui\metadata-h3.htm;gui\blocks\tool-h3-off.htm;image=h3-publication;name=publication;onclick=;colspan=1;2; -->
-</tr>
-
-<!--<tr name=INCLUDE_REPORT_PROGRESS>-->
-<!--<!-- #include metadata-h3-progress gui\metadata-h3.htm;gui\blocks\tool-h3-off.htm;image=h3-progress;name=progress;onclick=;colspan=1;2; -->
-<!--</tr>-->
-
-<tr name=INCLUDE_REPORT_REFERENCE>
-<!-- #include metadata-h3-reference gui\metadata-h3.htm;gui\blocks\tool-h3-off.htm;image=h3-reference;name=reference;onclick=;colspan=1;2; -->
-</tr>
-
-<tr name=INCLUDE_REPORT_SOURCE_FILES>
-<!-- #include metadata-h3-source-files gui\metadata-h3.htm;gui\blocks\tool-h3-off.htm;image=h3-source files;name=source_files;onclick=;colspan=1;2; -->
-</tr>
-
-<!-- #includeif isplugininstalled(plugin-mysql) report-settings-h3-archive gui\report-settings-h3-archive.htm;gui\blocks\tool-h3-off.htm;image=h3-archive;onclick=;colspan=1;2; -->
-
-</table>

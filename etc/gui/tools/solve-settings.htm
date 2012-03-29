@@ -1,55 +1,51 @@
+<table border="0" style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
 
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="0" cellspacing="0" bgcolor="$GetVar(HtmlTableFirstcolColour)">
-
-
-<tr VALIGN='center' ALIGN='left' NAME='SNUM_SOLUTION_PROGRAM'>
+<tr ALIGN='left' NAME='SNUM_SOLUTION_PROGRAM' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Solution-Program;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td VALIGN='center' colspan=2>
+  <td width='35%'>
     <b>Solution Program</b>
   </td>
-  <td VALIGN='center' ALIGN='right' colspan=2>
+  <td ALIGN='right' width='65%'>
 <!-- #include program gui\snippets\snippet-program.htm;scope=snum;prg_type=solution;1; -->
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
-
-<tr VALIGN='center' ALIGN='left' NAME='SNUM_SOLUTION_METHOD'>
+<tr ALIGN='left' NAME='SNUM_SOLUTION_METHOD' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Solution-Method;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td VALIGN='center' colspan=2>
+  <td width='35%'>
     <b>%Solution Method%</b>
   </td>
-  <td VALIGN='center' ALIGN='right' colspan=2>
+  <td ALIGN='right' width='65%'>
 <!-- #include program gui\snippets\snippet-method.htm;scope=snum;prg_type=solution;1; -->
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
-
-<tr VALIGN='center' ALIGN='left' NAME='SET_REFLECTIONS'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Reflection-File;1; -->
+<tr ALIGN='left' NAME='SET_REFLECTIONS' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Set-Reflection-File;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td VALIGN='center' colspan='2'>
+  <td width='35%'>
     <b>%Reflection File%</b>
   </td>
-  <td VALIGN='center' ALIGN='right' colspan='2'>
+  <td ALIGN='right' width='65%'>
 <!-- #include tool-footer gui\snippets\snippet-reflection-file.htm;1; -->
 </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
-<tr VALIGN='center' ALIGN='left' NAME='SET_SNUM_REFINEMENT_FORMULA'>
+<tr ALIGN='left' NAME='SET_SNUM_REFINEMENT_FORMULA' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Chemical Formula;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td VALIGN='center' colspan=2>
+  <td width='35%'>
     <b>%Chemical Composition%</b>
   </td>
-  <td VALIGN='center' ALIGN='right' colspan=2>
+  <td ALIGN='right' width='65%'>
       <input
         type='combo'
-        width='$eval(spy.GetParam(gui.htmlpanelwidth)/2 - spy.GetParam(gui.htmlpanelwidth_margin_adjust) - spy.GetParam(gui.html.table_firstcol_width))' 
+        width='100%' 
         height="$GetVar(HtmlComboHeight)"
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name='SET_SNUM_REFINEMENT_FORMULA'
@@ -62,64 +58,15 @@
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
-<tr VALIGN='center' ALIGN='left' NAME='Z'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Z;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td VALIGN='left' colspan=3>
-    <b>Number of Formula Units: Unit Cell | Asym. Unit</b>
-  </td>
-  <td width='20' align='right'>Z</td>
-  <td VALIGN='right' ALIGN='right' colspan=1>
-      <input
-        type='text'
-        width='50'
-        height="$GetVar(HtmlSPinHeight)"
-        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-        name='SET_Z'
-        value='xf.au.GetZ()'
-        onleave="xf.au.SetZ(GetValue(SET_Z))>>html.Update"
-        onreturn="html.Call(~name~.onleave)"
-      >
-  </td>
-  <td width='20' align='right'>Z'</td>
-  <td VALIGN='right' ALIGN='right' colspan=1>
-      <input
-        type='text'
-        width="50"
-        height="$GetVar(HtmlSPinHeight)"
-        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-        name='SET_Z_PRIME'
-        value='xf.au.GetZprime()'
-        onleave="xf.au.SetZprime(GetValue(SET_Z_PRIME))>>html.Update"
-        onreturn="html.Call(~name~.onleave)"
-      >
-  </td>
-  
-  
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</tr>
+
+<!-- #include program gui\snippets\snippet-zandzprime.htm;1; -->
 
 
-<tr VALIGN='center' ALIGN='left' NAME='Atomic Volume'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Atomic-Volume;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td VALIGN='center' colspan=3>
-    <b>%Current Atomic Volume%</b>
-  </td>
-  <td VALIGN='center' ALIGN='right' colspan=1>
-    <b>
-      $spy.GetParam('snum.solution.current_atomic_volume')
-    </b>
-    &Aring;
-  </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</tr>
 <!-- #includeif not(spy.xplain.exists()) olex2_space_group gui\tools\olex2-space-group-row.htm;1; -->
 <!-- #includeif spy.xplain.exists() rigaku_xplain_tool gui\tools\rigaku-xplain.htm;1; -->
 </table>
 
-
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
+<table border="0" style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
 <!-- #includeif fs.Exists(solution-settings-extra.htm) solution-settings-extra solution-settings-extra.htm;gui\blocks\tool-h3-off.htm;image=h3-solution settings extra;colspan=4;onclick=;2; -->
 <!-- #includeif fs.Exists(solution_image.htm) solution_image solution_image.htm;1; -->
 </table>

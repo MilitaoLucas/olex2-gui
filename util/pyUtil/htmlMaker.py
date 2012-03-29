@@ -10,78 +10,6 @@ import olexex_setup
 import variableFunctions
 
 
-def source_filesMetadataHtmlMaker():
-  list = [
-    {'varName':'snum.metacif.abs_file',
-     'itemName':'abs %File%',
-     'chooseFile':{'filter':'.abs files|*.abs'}
-     },
-    {'varName':'snum.metacif.pcf_file',
-     'itemName':'pcf %File%',
-     'chooseFile':{'filter':'.pcf files|*.pcf'}
-     },
-    {'varName':'snum.metacif.p4p_file',
-     'itemName':'p4p %File%',
-     'chooseFile':{'filter':'.p4p files|*.p4p'}
-     },
-    {'varName':'snum.metacif.smart_file',
-     'itemName':'SMART %File%',
-     'chooseFile':{'filter':'.ini files|*.ini'}
-     },
-    {'varName':'snum.metacif.saint_file',
-     'itemName':'SAINT %File%',
-     'chooseFile':{'filter':'.ini files|*.ini'}
-     },
-    {'varName':'snum.metacif.frames_file',
-     'itemName':'%Frame% %File%',
-     'chooseFile':{'filter':'All files(*.*)|*.*'}
-     },
-    {'varName':'snum.metacif.integ_file',
-     'itemName':'%Integration% %File%',
-     'chooseFile':{'filter':'._ls files|*._ls'}
-     },
-    {'varName':'snum.metacif.cad4_file',
-     'itemName':'cad4 %File%',
-     'chooseFile':{'filter':'.dat files|*.dat'}
-     },
-    {'varName':'snum.metacif.cif_od_file',
-     'itemName':'Agilent %File%',
-     'chooseFile':{'filter':'.cif_od files|*.cif_od'}
-     },
-    {'varName':'snum.metacif.crystal_clear_file',
-     'itemName':'CrystalClear %File%',
-     'chooseFile':{'filter':'CrystalClear.cif files|CrystalClear.cif'}
-     },
-  ]
-  text = ''
-
-  x = 0
-  for i in range(len(list)):
-    d = list[x]
-    listFiles = 'snum.metacif.list_%s_files'  %'_'.join(
-      d['varName'].split('.')[-1].split('_')[:-1])
-    var = OV.GetParam(listFiles)
-    if var is not None:
-      if ';' in var:
-        d.setdefault('items', 'spy.GetParam(%s)' %listFiles)
-      x += 1
-      file_type = '_'.join(d['varName'].split('.')[-1].split('_')[:-1])
-      d.setdefault('onchange',"spy.SetParam(%s,'GetValue(SET_%s)')>>spy.AddVariableToUserInputList(%s)" %(d['varName'],str.upper(d['varName']).replace('.','_'),d['varName']))
-      d['chooseFile'].setdefault('folder',OV.FilePath())
-      d['chooseFile'].setdefault('file_type',file_type)
-      d['chooseFile'].setdefault('caption',d['itemName'])
-    else:
-      del list[list.index(d)]
-
-  text = htmlTools.makeHtmlTable(list)
-  if text == '':
-    retstr = 'No relevant files found'
-  else:
-    retstr = text
-
-  return retstr
-OV.registerFunction(source_filesMetadataHtmlMaker)
-
 
 def currentResultFilesHtmlMaker(type='cif'):
   var = 'snum.current_result.%s' %type
@@ -723,12 +651,13 @@ def weightGuiDisplay():
   txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update")
   txt_Weight = OV.TranslatePhrase("Weight")
   html = '''
-<tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_UPDATE_WEIGHT'>
-  <td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
-  <td VALIGN='right' colspan=3>
-    <b><a target="%s" href="UpdateWght%s>>html.Update">%s: %s</a></b></td>
-    <td VALIGN='center' ALIGN='right' colspan=1>%s</td>
-</tr>
+  <td ALIGN='left' width='60%%'>
+    <b><a target="%s" href="UpdateWght%s>>html.Update">%s: %s</a></b>
+  </td>
+  <td ALIGN='right' width='35%%'>Auto Update Weights
+  </td>
+  <td ALIGN='right'>%s
+  </td>
     ''' %(txt_tick_the_box, wght_str, txt_Weight, html_scheme, box)
   return html
 OV.registerFunction(weightGuiDisplay)
