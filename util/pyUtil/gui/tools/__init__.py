@@ -73,3 +73,66 @@ fv = FolderView()
 olex.registerFunction(fv.list, False, "gui.tools.folder_view")
 olex.registerFunction(fv.generateHtml, False, "gui.tools.folder_view")
 olex.registerFunction(fv.loadStructure, False, "gui.tools.folder_view")
+
+
+
+def start_where():
+  from gui import SwitchPanel
+  if olx.xf.au.GetAtomCount() == "0":
+    SwitchPanel('work')
+    flash_gui_control('btn-solve')
+    return 
+    
+  if olx.IsVar('start_where') == 'false':
+    where = OV.GetParam('user.start_where').lower()
+    SwitchPanel(where)
+    olx.SetVar('start_where',False)
+
+olex.registerFunction(start_where, False, "gui.tools")
+
+
+def flash_gui_control(control):
+  ''' Flashes a control on the GUI in order to highlight it's position '''
+  if ';' in control:
+    n = int(control.split(';')[1])
+    control = control.split(';')[0]
+  else:
+    n = 2
+
+  control_name = "IMG_%s" %control.upper()
+  if '@' in control:
+    print "@ in control"
+    control_image = control.lower().split('@')[0]
+  else:
+    control_image = control
+  for i in xrange(n):
+    if "element" in control:
+      new_image = "up=%son.png" %control_image
+      olx.html.SetImage(control_name,new_image)
+    elif control.endswith('_bg'):
+      cmd = 'html.setBG(%s,%s)' %(control_image.rstrip('_bg'), self.highlight_colour)
+      olex.m(cmd)
+    else:
+      new_image = "up=%soff.png" %control_image
+      olx.html.SetImage(control_name,new_image)
+    OV.Refresh()
+    olx.Wait(300)
+
+    if "element" in control:
+      new_image = "up=%soff.png" %control
+      olx.html.SetImage(control_name,new_image)
+    elif control.endswith('_bg'):
+      cmd = 'html.setBG(%s,%s)' %(control.rstrip('_bg'), '#fffffe')
+      olex.m(cmd)
+    else:
+      new_image = "up=%shighlight.png" %control_image
+      olx.html.SetImage(control_name,new_image)
+    OV.Refresh()
+    olx.Wait(300)
+
+  if not control.endswith('_bg'):
+    new_image = "up=%soff.png" %control_image
+    olx.html.SetImage(control_name,new_image)
+      
+olex.registerFunction(flash_gui_control, False, "gui.tools")
+      

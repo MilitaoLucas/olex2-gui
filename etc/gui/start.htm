@@ -1,15 +1,34 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
+
 <tr>
   <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
-  <td>
-  <a href="reap">%Open Existing Structure%</a>
+  <td width='60%'>
+    <a href="reap">%Open Existing Structure%</a>
   </td>
+
+
+  <td width='40%'>
+    <input
+      type="combo"
+      height="$GetVar(HtmlInputHeight)"
+      name="START_WHERE"
+      bgcolor="$GetVar(HtmlInputBgColour)"
+      width="100"
+      value="$spy.GetParam(user.start_where)"
+      items="Home;Work;View;Tools;Info"
+      onchange="spy.SetParam(user.start_where,GetValue(~name~))"
+      valign='center'
+      align='right'
+      label="Start Olex2 in "
+    >
+  </td>
+
 </tr>
 
 <tr>
   <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
-  <td valign='center'>
+  <td valign='center' colspan='2'>
   <b>%Sample Structures%</b>:
   <a href="reap '$GetVar(sample_dir)/sucrose/sucrose'">%Sucrose%</a> |
   <a href="reap '$GetVar(sample_dir)/THPP/thpp'">THPP</a> |
@@ -21,7 +40,7 @@
 
 <tr>
   <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
-  <td>
+  <td valign='center' colspan='2'>
   <b>%Settings%</b>:
   <a target="Setup Olex2" href="setup">%Setup Olex2%</a> |
   <a target="Set atom colours and styles" href="
@@ -38,7 +57,7 @@ Freeze(false)>>
 
 <tr>
   <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
-  <td valign='center'>
+  <td valign='center' colspan='2'>
     <b>%Documentation%</b>:
 
   <a target='Documentation' href="shell 'http://www.olex2.org/documentation'"><b>Online</b></a> |
@@ -46,8 +65,5 @@ Freeze(false)>>
   </td>
 </tr>
 
-<tr name=INCLUDE_H3-TUTORIALS>
-<!-- #include h3-tutorials tutorials\h3-tutorials.htm;gui\blocks\tool-h3-off.htm;image=h3-tutorials;colspan=1;onclick=;1; -->
-</tr>
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->

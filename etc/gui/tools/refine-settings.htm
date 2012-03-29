@@ -1,49 +1,48 @@
+<table border="0" style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
 
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
-
-<tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_PROGRAM'>
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_PROGRAM' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Refinement-Program;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width='50%' VALIGN='center' colspan=2>
+  <td width='35%'>
     <b>Refinement Program</b>
   </td>
-  <td VALIGN='center' colspan=2 align="right">
+  <td ALIGN='right' width='65%'>
 <!-- #include program gui\snippets\snippet-program.htm;scope=snum;prg_type=refinement;1; -->
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
-<tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_METHOD'>
+<tr NAME='SNUM_REFINEMENT_METHOD' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Refinement-Method;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width='50%' align='left' colspan=2>
+  <td ALIGN='left' width='35%'>
     <b>Refinement Method</b>
   </td>
-  <td VALIGN='center' colspan='2' align="right">
+  <td ALIGN='right' width='65%'>
 <!-- #include method gui\snippets\snippet-method.htm;scope=snum;prg_type=refinement;1; -->
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
-<tr VALIGN='center' ALIGN='left' NAME='SET_REFLECTIONS'>
+<tr NAME='SET_REFLECTIONS' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Set-Reflection-File;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width='50%' VALIGN='center' colspan='2'>
+  <td ALIGN='left' width='35%'>
     <b>%Reflection File%</b>
   </td>
-  <td width='50%' VALIGN='center' ALIGN='right' colspan='2'>
+  <td ALIGN='right' width='65%'>
 <!-- #include tool-footer gui\snippets\snippet-reflection-file.htm;1; -->
 </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
-<tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_MAX_CYCLES'>
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_MAX_CYCLES'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Refinement-Max-Cycles;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td VALIGN='center' colspan=3>
+  <td ALIGN='left' width='70%'>
     <b>Maximum Refinement Iterations</b>
   </td>
-  <td VALIGN='center' ALIGN='right' colspan=1>
+  <td ALIGN='right' width='30%'>
       <input
         type='spin'
         width="50"
@@ -57,13 +56,13 @@
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
-<tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_MAX_PEAKS'>
+<tr ALIGN='left' NAME='SNUM_REFINEMENT_MAX_PEAKS'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Refinement-Max-Peaks;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td VALIGN='center' colspan=3>
+  <td ALIGN='left' width='70%'>
     <b>Number of Residual Peaks</b>
   </td>
-  <td VALIGN='right' ALIGN='right' colspan=1>
+  <td ALIGN='right' width='30%'>
       <input
         type="spin"
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
@@ -78,24 +77,17 @@
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
-<tr VALIGN='center' ALIGN='left' NAME='SNUM_WEIGHTING_SCHEME'>
+<tr ALIGN='left' NAME='SNUM_WEIGHTING_SCHEME'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Weighting-Scheme;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td VALIGN='center' colspan=3>
 $spy.weightGuiDisplay()
-  </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
 <tr VALIGN="center" ALIGN="left" NAME="USE_SOLVENT_MASK">
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=refinement-masks;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td VALIGN="center"  colspan=3>
-    <b>
-      Use solvent mask
-    </b>
-  </td>
-  <td VALIGN="center" ALIGN="right"  colspan=1>
+  <td ALIGN='center' width='3%'>
       <input
         type="checkbox"
         width="$GetVar(HtmlCheckboxWidth)"
@@ -109,18 +101,12 @@ $spy.weightGuiDisplay()
         value=""
       >
   </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</tr>
-
-<tr VALIGN="center" ALIGN="left" NAME="RECOMPUTE_MASK_BEFORE_REFINEMENT" >
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Recompute-Solvent-Mask;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td VALIGN="center"  colspan=3>
+  <td ALIGN='left' width='47%'>
     <b>
-      Recompute mask before refinement
+      Use solvent mask
     </b>
   </td>
-  <td VALIGN="center" ALIGN="right"  colspan=1>
+  <td ALIGN='center' width='3%'>
       <input
         type="checkbox"
         width="$GetVar(HtmlCheckboxWidth)"
@@ -137,13 +123,16 @@ html.Update"
         value=""
       >
   </td>
+  <td ALIGN='left' width='47%'>
+    <b>
+      Recompute mask
+    </b>
+  </td>
 </tr>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </table>
 
-
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
-
+<table border="0" style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
 <!-- #includeif fs.Exists(refinement-settings-extra.htm) refinement-settings-extra refinement-settings-extra.htm;gui\blocks\tool-h3-off.htm;image=h3-refinement settings extra;colspan=4;onclick=;onclick=;2; -->
 <!-- #includeif fs.Exists(refinement_image.htm) refinement_image refinement_image.htm;1; -->
 </table>

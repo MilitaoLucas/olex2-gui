@@ -4,11 +4,16 @@ gui {
   skin {
     extension = small
     size_factor = 0.8
-  }
-
-  html {
     icon_size = 20
   }
 
-  htmlpanelwidth = 300
+  html{
+    table_firstcol_width = 10
+    font_colour = #ff0000
+    font_name = Arial
+    font_size = 1
+  }
+
+
+  htmlpanelwidth = 350
 }

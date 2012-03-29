@@ -1,26 +1,80 @@
-<html>
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
-<body>
-<font face="Trebuchet MS">
+<tr>
+<!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+</tr>
+  
+<tr>
+  <td valign='center'>
+  
+<table width=100%>
+  <tr>
+   <td>
+      <a target='Start Tutorial' href="spy.make_help_box -name=getting-started_main-window -popout=False -type=tutorial"><b>%Getting Started%</b></a>
+   </td>
+   <td>
+      <a target='Start Tutorial' href="spy.make_help_box -name=sucrose_introduction -popout=False -type=tutorial"><b>%Sucrose%</b></a>
+   </td>
+  </tr>
 
-
-<!-- #include logo \gui\blocks\logo.htm;1; -->
-
-<table border="0" style="border-collapse: collapse" width="100%" id="table1" cellpadding="0" cellspacing="1">
-	<tr>
-		<td width="1"></td>
-		<td>
-			<b><font size="4" color="#008080">Tutorials for different levels 
-            user are available for OLEX</font></b><p>
-<font face="Trebuchet MS">
-
-		<a href="htmlLoad '\tutorials\Functions in Olex\index.htm'"><font color="#808080">Functions in Olex</font></a></font><p>
-			<a href="htmlLoad \tutorials\sucrose\index.htm"><font color="#3399FF">Sucrose: A first example</font></a><font color="#3399FF">&nbsp;
-            </font> <p>
-		<a href="tutorials/03srv164/index.htm"><font color="#008080">Disorder: A more complex example</font></a><p>
-
-	</tr>
+  <tr>
+   <td>
+    <a target='Quick Demo' href=spy.demo.run_autodemo(default_auto_tutorial)"><b>%QuickDemo%</b></a> 
+   </td>
+   <td>
+    <a target="Packing Tutorial" href=spy.demo.run_autodemo(packing_tutorial)"><b>Packing Tutorial</b></a> 
+   </td>
+  </tr>
+    
+   <tr>
+   <td>
+    <a target="Mapping And Masks" href=spy.demo.run_autodemo(mapping_and_masks)"><b>Maps & Masks</b></a>
+   </td> 
+   <td>
+    <a target="Basic Movements" href=spy.demo.run_autodemo(basic_movements)"><b>Basic Movements</b></a>
+   </td>
+  </tr>
+  
+   <tr>
+   <td>
+    <a target="Grow Tutorial" href=spy.demo.run_autodemo(grow_tutorial)"><b>Grow Tutorial</b></a> 
+   </td>   
+   <td>
+    <a target="3D View Tutorial" href=spy.demo.run_autodemo(3D_view_tutorial)"><b>3D View Tutorial</b></a>
+   </td>
+  </tr>
+  
+   <tr>
+   <td>
+    <a target="Geometrical Measurements" href="spy.demo.run_autodemo(geometrical_measurements)"><b>Geometrical Measurements</b></a>
+   </td>   
+   <td>
+     <a target="Image Tutorial" href=spy.demo.run_autodemo(image_tutorial)"><b>Image Tutorial</b></a> 
+   </td>
+  </tr>
+  
+<tr>
+   <td>
+      <a target="Sorting Tutorial" href="spy.demo.run_autodemo(sorting_tutorial)"><b>Sorting Tutorial</b></a>
+   </td>   
+  <td>
+  <a target="Customising The GUI" href=spy.demo.run_autodemo(customising_GUI)"><b>Customising The GUI</b></a>  
+  </td>
+  </tr>
+  
 </table>
+</td>
+</tr>
 
+<tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
 
-<a href="index.htm">Back</a>
+<tr>
+<!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
+
+<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->

@@ -541,7 +541,7 @@ def make_tick_box_input(d):
          'bgcolor':'$GetVar(HtmlTableBgColour)',
          'fgcolor':'$GetVar(HtmlFontColour',
          'value':'$spy.GetParam(%(varName)s)',
-         'width':'$GetVar(HtmlCheckboxHeight)',
+         'width':'$GetVar(HtmlCheckboxWidth)',
          'onchange':'',
          'value':'%s '%name,
          'oncheck':'',

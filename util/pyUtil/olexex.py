@@ -44,11 +44,31 @@ def txt():
     # &nbsp;$spy.MakeHoverButton(toolbar-text, 'Text') to
     # &nbsp;$spy.MakeHoverButton(toolbar-text, 'spy.txt\()')
     # in gui/blocks/snum-info.txt to make it default
-    
+
     olx.Text(output_file_name)
   except ImportError, err:
     print "Could not initialise spy.txt() function: %s" %err
 OV.registerFunction(txt)
+
+def expand(start, finish, increment=1):
+  """
+  expand creates returns a list based on start, finish and increment
+  So C1, C6 would produce:
+  C1 C2 C3 C4 C5 C6
+  """
+  import string
+  start_atom = str(start).translate(None, string.digits).lower()
+  start_number = int(str(start).translate(None, string.ascii_letters))
+  finish_atom = str(finish).translate(None, string.digits).lower()
+  finish_number = int(str(finish).translate(None, string.ascii_letters))
+  if (finish_atom != start_atom) or (start_number == finish_number):
+    print "The start and end element types must be the same and the numbers different"
+    return
+  return_string = []
+  for x in range(start_number, finish_number+1, int(increment)):
+    return_string.append('%s%d'%(start_atom,x)) 
+  return ' '.join(return_string)
+OV.registerFunction(expand)
 
 if __debug__:
   #gc.set_debug(gc.DEBUG_LEAK | gc.DEBUG_STATS)
@@ -567,18 +587,26 @@ if haveGUI:
 
 def MakeElementButtonsFromFormula():
   global last_formula
+  global last_elements_html
+  
+  current_formula = OlexRefinementModel().currentFormula()
+
+
+  #if current_formula == last_formula:
+    #return last_elements_html
+  
   from PilTools import ButtonMaker
-  icon_size = OV.GetParam('gui.html.icon_size')
+  icon_size = OV.GetParam('gui.skin.icon_size')
   totalcount = 0
   btn_dict = {}
   f = olx.xf.GetFormula('list')
   if not f:
     return
   f = f.split(',')
-  current_formula = OlexRefinementModel().currentFormula()
+  
   Z_prime = float(olx.xf.au.GetZprime())
   Z = float(olx.xf.au.GetZ())
-  html_elements = []
+  html = ""
   for element in f:
     symbol = element.split(':')[0]
     max = float(element.split(':')[1])
@@ -588,26 +616,35 @@ def MakeElementButtonsFromFormula():
       totalcount += max
 
     max = max*Z_prime
-    bgcolour = '#ff0000'
+    c = ""
     if present < max:
       bgcolour = (250,250,250)
+      c = 'b'
     elif present ==  max:
       bgcolour = (210,255,210)
+      c = 'g'
     else:
       bgcolour = (255,210,210)
+      c = 'r'
+
+    if c:
+      name = "btn-element%s_%s" %(symbol, c)
+      
+    else:
+      name = "btn-element%s" %(symbol)
+ 
     command = "if strcmp(sel(),'') then 'mode name -t=%s' else 'name sel %s'>>sel -u" %(symbol, symbol)
     target = OV.TranslatePhrase('change_element-target')
     #command = "if strcmp(spy.GetParam(olex2.in_mode),'mode name -t=%s') then 'mode off' else %%22 if strcmp(sel(),'') then 'mode name -t=%s' else 'name sel %s'>>sel -u%%22" %(symbol, symbol, symbol)
     command = 'spy.ElementButtonStates(%s)' %symbol
-    namelower = 'btn-element%s' %symbol
+    namelower = 'btn-element%s' %(symbol)
     d = {}
-    d.setdefault('namelower', namelower)
+    d.setdefault('namelower', name)
     d.setdefault('symbol', symbol)
     d.setdefault('cmds', command)
     d.setdefault('target', target + symbol)
     d.setdefault('bgcolor', OV.GetParam('gui.html.table_firstcol_colour'))
-    html = '''
-<font size='$GetVar(HtmlFontSizeControls)'>
+    html += '''
 <input
   name=IMG_BTN-ELEMENT%(symbol)s
   type="button"
@@ -616,26 +653,11 @@ def MakeElementButtonsFromFormula():
   onclick="%(cmds)s"
   bgcolor=%(bgcolor)s
 >
-</font>''' %d
-#    <a href="%s" target="%s %s">
-#      <zimg name=IMG_BTN-ELEMENT%s border="0" src="btn-element%s.png"/>
-#    </a>'''%(command, target, symbol, symbol.upper(), symbol)
+''' %d
 
-    html_elements.append(html)
 
-    btn_dict.setdefault(
-      symbol, {
-        'txt':symbol,
-        'bgcolour':bgcolour,
-        'image_prefix':'element',
-        'width':icon_size ,
-        'top_left':(0,-1),
-        'grad':False,
-      })
-
-  d['namelower'] = 'btn-element...'
-  html_elements.append('''
-<font size='$GetVar(HtmlFontSizeControls)'>
+  d['namelower'] = 'Table'
+  html +=  '''
 <input
   name=IMG_BTN-ELEMENT...
   type="button"
@@ -644,66 +666,28 @@ def MakeElementButtonsFromFormula():
   onclick="if strcmp(sel(),'') then 'mode name -t=ChooseElement()' else 'name sel ChooseElement()'"
   bgcolor=%(bgcolor)s
 >
-</font>''' %d)
+''' %d
 
-#<a href="if strcmp(sel(),'') then 'mode name -t=ChooseElement()' else 'name sel ChooseElement()'"
-#   target="Chose Element from the periodic table">
-#<zimg border="0" src="btn-element....png"></a>
-#''')
-
-  btn_dict.setdefault(
-    'Table', {
-      'txt':'...',
-      'bgcolour':'#efefef',
-      'width':int(icon_size*1.0),
-      'image_prefix':'element',
-      'top_left':(0,-1),
-      'grad':False,
-    })
-
-  #hname = 'AddH'
-  #btn_dict.setdefault('ADDH',
-                      #{
-                        #'txt':'%s' %hname,
-                        #'bgcolour':'#efefef',
-                        #'image_prefix':'element',
-                        #'width':int(icon_size * 2),
-                        #'font_size':10,
-                        #'top_left':(2,0),
-                        #'grad':False,
-                      #})
 
   if current_formula != last_formula:
     last_formula = current_formula
-    use_new = True
-  else:
-    use_new = True
 
-  if use_new:
-    from PilTools import timage
-    TI = timage()
-    for b in btn_dict:
-      name = "btn-element%s.png" %(b)
-      
-      if olx.fs.Exists(name) == 'false':
-        for state in ['on', 'off', 'hover', '', 'highlight']:
-          txt = btn_dict[b].get('txt')
-          bgcolour = btn_dict[b].get('bgcolour')
-          width = OV.GetParam('gui.skin.icon_size')
-          btn_type = 'tiny'
-          bg = OV.GetParam('gui.html.table_firstcol_colour')
-          width = OV.GetParam('gui.timage.tinybutton.width')
-          IM = TI.make_timage(item_type='tinybutton', item=txt, state=state, width=width, colour=bgcolour, whitespace='right:1:%s' %bg)
-          name = "btn-element%s%s.png" %(txt, state)
-          OlexVFS.save_image_to_olex(IM, name, 1)
-          if state == 'off':
-            name = "btn-element%s.png" %(txt)
-            OlexVFS.save_image_to_olex(IM, name, 1)
 
-  else:
-    bm = ButtonMaker(btn_dict)
-    bm.run()
+  OV.write_to_olex('element_buttons.htm', html, 0)
 
+
+  im_name='IMG_BTN-ELEMENT%s' %symbol
+  OV.SetImage(im_name, name)
+  
+  SetAtomicVolumeInSnumPhil(totalcount)
+
+
+
+
+if haveGUI:
+  OV.registerFunction(MakeElementButtonsFromFormula)
+
+def SetAtomicVolumeInSnumPhil(totalcount):
   cell_volume = 0
   Z = 1
   Z_prime = float(olx.xf.au.GetZprime())
@@ -715,17 +699,12 @@ def MakeElementButtonsFromFormula():
     Z = float(olx.xf.au.GetZ())
   except:
     pass
-
-  retStr = '\n'.join(html_elements)
+  
   if cell_volume and totalcount:
     atomic_volume = (cell_volume)/(totalcount * Z)
     OV.SetParam('snum.solution.current_atomic_volume','%.1f' %atomic_volume)
-    retStr = retStr.replace("\n","")
   else:
     OV.SetParam('snum.solution.current_atomic_volume',None)
-  return str(retStr)
-if haveGUI:
-  OV.registerFunction(MakeElementButtonsFromFormula)
 
 def CheckBoxValue(var, def_val='false'):
   if '.' in var:
@@ -1101,6 +1080,7 @@ def onRefinementProgramChange(prg_name, method=None, scope='snum'):
     method = sortDefaultMethod(prg)
     if method == 'Least Squares' and olx.LSM() == 'CGLS':
       method = 'CGLS' # work-around for bug #26
+  OV.SetParam("%s.refinement.program" %scope, prg_name)
   OV.SetParam("%s.refinement.method" %scope, method)
   onRefinementMethodChange(prg_name, method)
 OV.registerFunction(OV.set_refinement_program)
@@ -1124,6 +1104,7 @@ def onSolutionProgramChange(prg_name, method=None, scope='snum'):
       method = sortDefaultMethod(prg)
       if method == 'Direct Methods' and olx.Ins('PATT') != 'n/a':
         method = 'Patterson Method' # work-around for bug #48
+    OV.SetParam("%s.solution.program" %scope, prg_name)
     OV.SetParam("%s.solution.method" %scope, method)
     onSolutionMethodChange(prg_name, method)
 OV.registerFunction(OV.set_solution_program)
@@ -1348,90 +1329,6 @@ def getKeys(key_directory):
     keyname = item.split("\\")[-1:][0]
     kl.append(keyname.split(".")[0])
   return kl
-
-
-def GetCheckcifReport(outputtype='PDF'):
-  output = OV.GetParam('user.cif.chckCif_output_format')
-  if output:
-    outputtype = output
-
-  file_name = os.path.normpath(olx.file.ChangeExt(OV.FileFull(),'cif'))
-  if not os.path.exists(file_name):
-    print "\n ++ There is no cif file to check! Please add the 'ACTA' command to Shelx!"
-    return
-  out_file_name = "%s_cifreport.%s" %(OV.FileName(), outputtype)
-  eindex = 1
-  while os.path.exists(out_file_name):
-    try:
-      os.path.delete(out_file_name)
-    except:
-      out_file_name = "%s_cifreport-%i.%s" %(OV.FileName(), eindex, outputtype)
-      eindex += 1
-
-  metacif_path = '%s/%s.metacif' %(OV.StrDir(), OV.FileName())
-  OV.CifMerge(metacif_path)
-
-  rFile = open(file_name, 'rb')
-  cif = rFile
-
-  params = {
-    "runtype": "symmonly",
-    "referer": "checkcif_server",
-    "outputtype": outputtype,
-    "file": cif
-  }
-
-  response = HttpTools.make_url_call(OV.GetParam('olex2.checkcif.url'), params)
-
-  rFile.close()
-  #outputtype = 'htm'
-  if outputtype == "htm":
-    wFile = open(out_file_name,'w')
-    wFile.write(response.read())
-    wFile.close()
-  elif outputtype == "PDF":
-    rawFile = open("raw_cifreport.htm",'w')
-    l = response.readlines()
-    for line in l:
-      rawFile.write(line)
-      if "Download checkCIF report" in line:
-        href = line.split('"')[1]
-        response = HttpTools.make_url_call(href,"")
-        txt = response.read()
-        wFile = open(out_file_name,'wb')
-        wFile.write(txt)
-        wFile.close()
-    rawFile.close()
-  olx.Shell(out_file_name)
-
-OV.registerFunction(GetCheckcifReport)
-
-def GetHttpFile(f, force=False, fullURL = False):
-  URL = "http://dimas.dur.ac.uk/"
-  global _is_online
-  retVal = None
-  go_online = _is_online
-  verbose = OV.FindValue("ac_verbose", "False")
-  if go_online or force:
-    try:
-      if not fullURL:
-        url = "%s/%s" %(URL, f.replace(" ",r"%20"))
-      else:
-        url = f
-      if verbose: print "--> Getting %s" %url,
-      response = HttpTools.make_url_call(url,"")
-      content = response.read()
-      if verbose: print "OK"
-      retVal = content
-    except Exception, err:
-      _is_online = False
-      retVal = None
-      print "Olex2 can not reach the update server: %s" %err
-      print url
-  else:
-    retVal = None
-  return retVal
-
 
 def check_for_recent_update():
   retVal = False

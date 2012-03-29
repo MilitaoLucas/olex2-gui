@@ -231,7 +231,6 @@ class AutoDemo():
     else:
       txt = txt
     wFilePath = r"%s.htm" %(name)
-    txt = txt.replace(u'\xc5', 'angstrom')
     OV.write_to_olex(wFilePath, txt)
 
     boxWidth = 300
@@ -315,48 +314,10 @@ class AutoDemo():
 
     if cmd_type == 'h':
       control = cmd_content
+      from gui.tools import flash_gui_control
+      flash_gui_control(control)
       
-      if ';' in control:
-        n = int(control.split(';')[1])
-        control = control.split(';')[0]
-      else:
-        n = 2
-
-      control_name = "IMG_%s" %control.upper()
-      if '@' in control:
-#        print "@ in control"
-        control_image = control.lower().split('@')[0]
-      else:
-        control_image = control
-      for i in xrange(n):
-        if "element" in control:
-          new_image = "up=%son.png" %control_image
-          olx.html.SetImage(control_name,new_image)
-        elif control.endswith('_bg'):
-          cmd = 'html.setBG(%s,%s)' %(control_image.rstrip('_bg'), self.highlight_colour)
-          olex.m(cmd)
-        else:
-          new_image = "up=%soff.png" %control_image
-          olx.html.SetImage(control_name,new_image)
-        OV.Refresh()
-        olx.Wait(300)
-  
-        if "element" in control:
-          new_image = "up=%soff.png" %control
-          olx.html.SetImage(control_name,new_image)
-        elif control.endswith('_bg'):
-          cmd = 'html.setBG(%s,%s)' %(control.rstrip('_bg'), '#fffffe')
-          olex.m(cmd)
-        else:
-          new_image = "up=%shighlight.png" %control_image
-          olx.html.SetImage(control_name,new_image)
-        OV.Refresh()
-        olx.Wait(300)
-
-      if not control.endswith('_bg'):
-        new_image = "up=%soff.png" %control_image
-        olx.html.SetImage(control_name,new_image)
-
+      
     if cmd_type == 'c':
       olex.m(cmd_content)
       
@@ -365,6 +326,8 @@ class AutoDemo():
       self.run_demo_item()
       
     OV.Refresh()
+    
+  
 
   
 AutoDemo_istance = AutoDemo()
