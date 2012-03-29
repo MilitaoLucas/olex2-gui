@@ -30,3 +30,21 @@ def About():
               sh))
 
 olex.registerFunction(About, False, "gui")
+
+def SwitchPanel(name="home"):
+  name = name.lower()
+  if name == "home":
+    olx.html.ItemState("index* 0 index-home 1 tab* 2")
+  elif name == "work":
+    olx.html.ItemState("* 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1")
+  elif name == "view":
+    olx.html.ItemState("* 0 tab* 2 tab-view 1 logo1 1 index-view* 1 info-title 1")
+  elif name == "tools":
+    olx.html.ItemState("* 0 tab* 2 tab-tools 1 logo1 1 index-tools* 1 info-title 1")
+  elif name == "info":
+    olx.html.ItemState("* 0 tab* 2 tab-info 1 logo1 1 index-info* 1 info-title 1")
+  else:
+    print "Invalid argument for the panel name: " + name
+
+olex.registerFunction(SwitchPanel, False, "gui")
+
