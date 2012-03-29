@@ -9,6 +9,7 @@ gui {
     name = "OD"
     logo_name = None
     icon_size = 28
+    icon_border_colour = #dddddd
   }
 
   html {
@@ -76,8 +77,8 @@ gui {
     button {
       grad_colour = #e1e1e1
       grad_step = 0.3
-      height = 20
-      top = 2
+      height = 22
+      top = 3
       bg_colour_L = 1.8
       grad_colour_L = 1.9
       font_colour_L = 0.7

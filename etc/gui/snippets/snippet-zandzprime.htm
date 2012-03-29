@@ -1,0 +1,49 @@
+<tr NAME="Z AND Z'">
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Z;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td ALIGN='left' width='35%'>
+    <b>Z and Z'</b>
+  </td>
+
+
+  <td ALIGN='center'>
+    <b>%Atomic Vol.% =</b>
+      $spy.GetParam('snum.solution.current_atomic_volume')
+    &Aring;&sup3;
+  </td>
+
+
+  <td ALIGN='right' width='17%'>
+    <input
+      type='text'
+      width='50'
+      height="$GetVar(HtmlInputHeight)"
+      bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+      name='SET_Z'
+      valign='center'
+      align='right'
+      value='xf.au.GetZ()'
+      onleave="xf.au.SetZ(GetValue(SET_Z))>>html.Update"
+      onreturn="html.Call(~name~.onleave)"
+      label="Z = "
+    >
+  </td>
+  <td ALIGN='right' width='17%'>
+    <input
+      type='text'
+      width="50"
+      height="$GetVar(HtmlInputHeight)"
+      bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+      name='SET_Z_PRIME'
+      valign='center'
+      align='right'
+      value='xf.au.GetZprime()'
+      onleave="xf.au.SetZprime(GetValue(SET_Z_PRIME))>>html.Update"
+      onreturn="html.Call(~name~.onleave)"
+      label="Z' = "
+    >
+  </td>
+  
+  
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>

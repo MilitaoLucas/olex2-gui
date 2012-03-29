@@ -587,15 +587,21 @@ if haveGUI:
 
 def MakeElementButtonsFromFormula():
   global last_formula
+  global last_elements_html
+  
+  current_formula = OlexRefinementModel().currentFormula()
+  if current_formula == last_formula:
+    return last_elements_html
+  
   from PilTools import ButtonMaker
-  icon_size = OV.GetParam('gui.html.icon_size')
+  icon_size = OV.GetParam('gui.skin.icon_size')
   totalcount = 0
   btn_dict = {}
   f = olx.xf.GetFormula('list')
   if not f:
     return
   f = f.split(',')
-  current_formula = OlexRefinementModel().currentFormula()
+  
   Z_prime = float(olx.xf.au.GetZprime())
   Z = float(olx.xf.au.GetZ())
   html_elements = []
@@ -705,20 +711,20 @@ def MakeElementButtonsFromFormula():
     for b in btn_dict:
       name = "btn-element%s.png" %(b)
 
-      if olx.fs.Exists(name) == 'false':
-        for state in ['on', 'off', 'hover', '', 'highlight']:
-          txt = btn_dict[b].get('txt')
-          bgcolour = btn_dict[b].get('bgcolour')
-          width = OV.GetParam('gui.skin.icon_size')
-          btn_type = 'tiny'
-          bg = OV.GetParam('gui.html.table_firstcol_colour')
-          width = OV.GetParam('gui.timage.tinybutton.width')
-          IM = TI.make_timage(item_type='tinybutton', item=txt, state=state, width=width, colour=bgcolour, whitespace='right:1:%s' %bg)
-          name = "btn-element%s%s.png" %(txt, state)
+#      if olx.fs.Exists(name) == 'false':
+      for state in ['on', 'off', 'hover', '', 'highlight']:
+        txt = btn_dict[b].get('txt')
+        bgcolour = btn_dict[b].get('bgcolour')
+        width = OV.GetParam('gui.skin.icon_size')
+        btn_type = 'tiny'
+        bg = OV.GetParam('gui.html.table_firstcol_colour')
+        width = OV.GetParam('gui.timage.tinybutton.width')
+        IM = TI.make_timage(item_type='tinybutton', item=txt, state=state, width=width, colour=bgcolour, whitespace='right:1:%s' %bg)
+        name = "btn-element%s%s.png" %(txt, state)
+        OlexVFS.save_image_to_olex(IM, name, 1)
+        if state == 'off':
+          name = "btn-element%s.png" %(txt)
           OlexVFS.save_image_to_olex(IM, name, 1)
-          if state == 'off':
-            name = "btn-element%s.png" %(txt)
-            OlexVFS.save_image_to_olex(IM, name, 1)
 
   else:
     bm = ButtonMaker(btn_dict)
@@ -737,6 +743,8 @@ def MakeElementButtonsFromFormula():
     pass
 
   retStr = '\n'.join(html_elements)
+  last_elements_html = retStr
+  
   if cell_volume and totalcount:
     atomic_volume = (cell_volume)/(totalcount * Z)
     OV.SetParam('snum.solution.current_atomic_volume','%.1f' %atomic_volume)
@@ -1370,90 +1378,6 @@ def getKeys(key_directory):
     keyname = item.split("\\")[-1:][0]
     kl.append(keyname.split(".")[0])
   return kl
-
-
-def GetCheckcifReport(outputtype='PDF'):
-  output = OV.GetParam('user.cif.chckCif_output_format')
-  if output:
-    outputtype = output
-
-  file_name = os.path.normpath(olx.file.ChangeExt(OV.FileFull(),'cif'))
-  if not os.path.exists(file_name):
-    print "\n ++ There is no cif file to check! Please add the 'ACTA' command to Shelx!"
-    return
-  out_file_name = "%s_cifreport.%s" %(OV.FileName(), outputtype)
-  eindex = 1
-  while os.path.exists(out_file_name):
-    try:
-      os.path.delete(out_file_name)
-    except:
-      out_file_name = "%s_cifreport-%i.%s" %(OV.FileName(), eindex, outputtype)
-      eindex += 1
-
-  metacif_path = '%s/%s.metacif' %(OV.StrDir(), OV.FileName())
-  OV.CifMerge(metacif_path)
-
-  rFile = open(file_name, 'rb')
-  cif = rFile
-
-  params = {
-    "runtype": "symmonly",
-    "referer": "checkcif_server",
-    "outputtype": outputtype,
-    "file": cif
-  }
-
-  response = HttpTools.make_url_call(OV.GetParam('olex2.checkcif.url'), params)
-
-  rFile.close()
-  #outputtype = 'htm'
-  if outputtype == "htm":
-    wFile = open(out_file_name,'w')
-    wFile.write(response.read())
-    wFile.close()
-  elif outputtype == "PDF":
-    rawFile = open("raw_cifreport.htm",'w')
-    l = response.readlines()
-    for line in l:
-      rawFile.write(line)
-      if "Download checkCIF report" in line:
-        href = line.split('"')[1]
-        response = HttpTools.make_url_call(href,"")
-        txt = response.read()
-        wFile = open(out_file_name,'wb')
-        wFile.write(txt)
-        wFile.close()
-    rawFile.close()
-  olx.Shell('%s'%os.path.join(OV.FilePath(),out_file_name))
-
-OV.registerFunction(GetCheckcifReport)
-
-def GetHttpFile(f, force=False, fullURL = False):
-  URL = "http://dimas.dur.ac.uk/"
-  global _is_online
-  retVal = None
-  go_online = _is_online
-  verbose = OV.FindValue("ac_verbose", "False")
-  if go_online or force:
-    try:
-      if not fullURL:
-        url = "%s/%s" %(URL, f.replace(" ",r"%20"))
-      else:
-        url = f
-      if verbose: print "--> Getting %s" %url,
-      response = HttpTools.make_url_call(url,"")
-      content = response.read()
-      if verbose: print "OK"
-      retVal = content
-    except Exception, err:
-      _is_online = False
-      retVal = None
-      print "Olex2 can not reach the update server: %s" %err
-      print url
-  else:
-    retVal = None
-  return retVal
-
 
 def check_for_recent_update():
   retVal = False

@@ -1,6 +1,10 @@
 import olex
 import olx
 
+from olexFunctions import OlexFunctions
+OV = OlexFunctions()
+
+
 def FileOpen(title, filter, location, default=''):
   res = olx.FileOpen(title, filter,location)
   if not res:
@@ -29,6 +33,7 @@ def About():
               sw,
               sh))
 
+
 olex.registerFunction(About, False, "gui")
 
 def SwitchPanel(name="home"):
@@ -45,6 +50,7 @@ def SwitchPanel(name="home"):
     olx.html.ItemState("* 0 tab* 2 tab-info 1 logo1 1 index-info* 1 info-title 1")
   else:
     print "Invalid argument for the panel name: " + name
+  return ""
 
 olex.registerFunction(SwitchPanel, False, "gui")
 
