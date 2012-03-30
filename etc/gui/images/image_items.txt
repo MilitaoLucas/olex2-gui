@@ -52,6 +52,7 @@
   Stereo (Colour)
   Stereo (Anaglyph)
   Stereo (Hardware)
+  Stereo (Interlaced)
   Normal View
   Fit Group
   Fit & Split
