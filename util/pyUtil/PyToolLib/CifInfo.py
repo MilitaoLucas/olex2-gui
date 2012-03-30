@@ -365,9 +365,9 @@ class ExtractCifInfo(CifTools):
     import History
     active_solution = History.tree.active_child_node
     if active_solution is not None and active_solution.is_solution:
-      
+
       all_sources_d = {}
-      
+
       ## Backwards Compatibility
       if active_solution.program == "smtbx-solve":
         active_solution.program = "olex2.solve"
@@ -419,7 +419,7 @@ class ExtractCifInfo(CifTools):
         smart.setdefault("_computing_data_collection", computing_data_collection)
         self.update_cif_block(smart)
         all_sources_d.setdefault(p, smart)
-        
+
       except Exception, err:
         print "Error reading Bruker SMART file %s: %s" %(p, err)
 
@@ -673,20 +673,20 @@ class ExtractCifInfo(CifTools):
             self.conflict_d.setdefault(k,{'val':val,'source':ld})
         else:
           d.setdefault(k,{'val':val,'source':ld})
-    for k in d:
-      print "%s %s" %(d[k]['source'], k) 
+    #for k in d:
+    #  print "%s %s" %(d[k]['source'], k)
 
     if self.conflict_d:
-      print "There is conflicting information in the sources of metatdata!"
-      
+      print "There is conflicting information in the sources of metadata"
+
 #      for k in self.conflict_d:
 #        pass
-      #self.make_conflicting_source_gui(conflict_d)  
+      #self.make_conflicting_source_gui(conflict_d)
     else:
       pass
       #print "No conflicting information in the sources of metatdata has been found."
-      
-          
+
+
 
   def exclude_cif_items(self, cif_block):
     # ignore cif items that should be provided by the refinement engine
@@ -877,7 +877,7 @@ The \l/2 correction factor is %(lambda_correction)s.
         pp.append(ifo[1])
 
     info.reverse()
-    
+
     returnvalue = ""
     if self.userInputVariables is None or "%s_file" %tool not in self.userInputVariables:
       files = ';'.join([file for date, file in info])
