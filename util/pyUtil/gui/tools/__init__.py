@@ -83,6 +83,7 @@ def start_where():
   if olx.xf.au.GetAtomCount() == "0":
     SwitchPanel('work')
     flash_gui_control('btn-solve')
+    print "Use 'Solve' button to solve the structure"
     return
 
   if olx.IsVar('start_where') == 'false':
