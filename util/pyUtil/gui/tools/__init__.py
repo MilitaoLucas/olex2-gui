@@ -80,7 +80,7 @@ def start_where():
   if olx.IsFileLoaded() == "false":
     return
   from gui import SwitchPanel
-  if olx.xf.au.GetAtomCount() == "0":
+  if olx.xf.au.GetAtomCount() == "0" and olx.IsFileType('ires') == "true":
     SwitchPanel('work')
     flash_gui_control('btn-solve')
     print "Use 'Solve' button to solve the structure"
