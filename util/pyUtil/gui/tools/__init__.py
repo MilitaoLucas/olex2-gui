@@ -5,6 +5,7 @@ import os
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
+
 class FolderView:
   root = None
   class node:
@@ -138,3 +139,58 @@ def flash_gui_control(control):
     olx.html.SetImage(control_name,new_image)
 
 olex.registerFunction(flash_gui_control, False, "gui.tools")
+
+
+def add_tool_to_index(scope="", link="", path="", filetype=""):
+  import OlexVFS
+  if not OV.HasGUI:
+    return
+  
+  if not scope:
+    return
+  
+  if not link:
+    return
+  
+  if not path:
+    return
+  
+  ''' Automatically add a link to GUI to an Olex2 index file. '''
+  location = OV.GetParam('%s.gui.location' %scope)
+  before = OV.GetParam('%s.gui.before' %scope)
+  if not location:
+    return
+  txt = OlexVFS.read_from_olex('%s/etc/gui/blocks/index-%s.htm' %(OV.BaseDir(), location))
+
+  if not filetype:
+    t = r'''
+<!-- #include %s-%s %s/%s.htm;gui\blocks\tool-off.htm;image=%s;onclick=;1; -->''' %(scope, link, path, link, link)
+  else:
+    t = r'''
+<!-- #includeif IsFileType('%s') %s-%s %s/%s.htm;gui\blocks\tool-off.htm;image=%s;onclick=;1; -->''' %(filetype, scope, link, path, link, link)
+    
+
+  index_text = ""
+  if t not in txt:
+    if before not in txt or before.lower() == "end":
+      u = "%s\n%s" %(txt, t)
+    else:
+      u = ""
+      for line in txt.strip().split("\r\n"):
+        if not line:
+          continue
+        if "%s-%s" %(location, before) in line:
+          u += "%s\n%s\n" %(t, line)
+        else:
+          u += "%s\n" %line.strip()
+    OlexVFS.write_to_olex('%s/etc/gui/blocks/index-%s.htm' %(OV.BaseDir(), location), u, 0)
+    index_text = u
+  else:
+    if run:
+      OlexVFS.write_to_olex('%s/etc/gui/blocks/index-%s.htm' %(OV.BaseDir(), location), t, 0)
+    else:
+      if not index_text:
+        text = txt
+      else:
+        text = index_text
+      OlexVFS.write_to_olex('%s/etc/gui/blocks/index-%s.htm' %(OV.BaseDir(), location), text, 0)
