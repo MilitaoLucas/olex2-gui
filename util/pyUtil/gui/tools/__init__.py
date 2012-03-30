@@ -77,12 +77,14 @@ olex.registerFunction(fv.loadStructure, False, "gui.tools.folder_view")
 
 
 def start_where():
+  if olx.IsFileLoaded() == "false":
+    return
   from gui import SwitchPanel
   if olx.xf.au.GetAtomCount() == "0":
     SwitchPanel('work')
     flash_gui_control('btn-solve')
-    return 
-    
+    return
+
   if olx.IsVar('start_where') == 'false':
     where = OV.GetParam('user.start_where').lower()
     SwitchPanel(where)
@@ -133,6 +135,5 @@ def flash_gui_control(control):
   if not control.endswith('_bg'):
     new_image = "up=%soff.png" %control_image
     olx.html.SetImage(control_name,new_image)
-      
+
 olex.registerFunction(flash_gui_control, False, "gui.tools")
-      
