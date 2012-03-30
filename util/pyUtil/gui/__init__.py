@@ -41,7 +41,8 @@ def SwitchPanel(name="home"):
   if name == "home":
     olx.html.ItemState("index* 0 index-home 1 tab* 2")
   elif name == "work":
-    olx.html.ItemState("* 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1")
+    if olx.IsFileLoaded() != "false":
+      olx.html.ItemState("* 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1")
   elif name == "view":
     olx.html.ItemState("* 0 tab* 2 tab-view 1 logo1 1 index-view* 1 info-title 1")
   elif name == "tools":
