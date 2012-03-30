@@ -985,7 +985,7 @@ class timage(ImageTools):
     ## G4 BUTTON
     if olx.IsPluginInstalled('g4') == 'true':
       button_names = self.image_items_d.get("G4 BUTTON", button_names)
-      width = available_width - OV.GetParam('gui.timage.g4.width_adjust') - 20 
+      width = available_width - OV.GetParam('gui.timage.g4.width_adjust') - 20
       self.produce_buttons(button_names, self.sfs, "_g4",width=width)
 
     ## HELP INFO ICON
@@ -1223,7 +1223,7 @@ class timage(ImageTools):
     self.image_type = btn_type
     if self.no_need_to_refresh_image_type.get(self.image_type):
       return
-    
+
     states = ["on", "off", "", "highlight", "hover", "hoveron"]
     for state in states:
       if state == "on":
@@ -1257,7 +1257,7 @@ class timage(ImageTools):
           self.name = name = "button%s-%s%s.png" %(btn_type, txt.replace(" ", "_"), state)
           self.save_with_checking_for_needed()
           self.advertise_new = False
-          
+
         else:
 
 
@@ -1842,7 +1842,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     textItems += self.image_items_d.get('H2',[])
     for item in self.image_items_d.get('H3',[]):
       textItems.append("h3-%s" %item)
-      
+
     tabItems = []
     g3tabItems = ['g3-solve', 'g3-refine', 'g3-image', 'g3-report', 'g3-tools']
 
@@ -1879,7 +1879,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         self.image_type = 'h2'
       if self.no_need_to_refresh_image_type.get(self.image_type):
         continue
-        
+
       if self.timer:
         t1 = time.time()
       states = ["on", "off", "highlight", "", "hover", "hoveron"]
@@ -1945,7 +1945,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           self.save_with_checking_for_needed()
         if self.timer:
           print "\t\t - %s took %.3f s to complete" %(item, self.time.time()-t1)
- 
+
     OV.DeleteBitmap('%s' %bitmap)
 
   def make_note_items(self):
@@ -1964,7 +1964,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         return
       self.image = image = self.note_items(item)
       self.name = name = r"note-%s.png" %(item[2])
-      self.image_type = image_type 
+      self.image_type = image_type
       self.save_with_checking_for_needed()
 
   def make_label_items(self):
@@ -2153,8 +2153,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         width = OV.GetParam('gui.timage.tinybutton.width')
         IM = self.make_timage(item_type='tinybutton', item=txt, state=state, width=width, colour=bgcolour, whitespace='right:1:%s' %bg)
         name_s = "%s%s.png" %(name, state)
-        OlexVFS.save_image_to_olex(IM, name_s, 1)
- 
+        OlexVFS.save_image_to_olex(IM, name_s, 2)
+
   def make_icon_items(self):
     self.image_type = 'icons'
     base_colour = self.params.html.base_colour.rgb
@@ -2334,11 +2334,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
 
   def make_timage(self, item_type, item, state, font_name="Vera", width=None, colour=None, whitespace=None, titleCase=True):
-    
+
     if not width:
       width = self.width
     self.width = width
-    
+
     pams = getattr(self.params.timage, '%s' %item_type)
 
     self.scale = pams.scale
@@ -2346,11 +2346,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       self.scale = 1
 
     self.size_factor = OV.GetParam('gui.skin.size_factor') #An additional scale factor
-      
+
     base_colour = pams.base_colour
     highlight_colour = self.params.html.highlight_colour.rgb
     self.highlight_colour = highlight_colour
-    
+
     if not base_colour:
       base_colour = self.params.timage.base_colour
       if not base_colour:
@@ -2359,11 +2359,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         base_colour = base_colour.rgb
     else:
       base_colour = base_colour.rgb
-    
+
     grad_step = pams.grad_step
     grad_colour = pams.grad_colour
     font_colour = pams.font_colour
-    
+
     shadow = pams.shadow
     border = pams.border
     self.titleCase = titleCase
@@ -2389,7 +2389,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       font_colour = font_colour.rgb
     font_name = pams.font_name
     font_size = pams.font_size
-    
+
     if not font_name:
       font_name = self.params.timage.font_name
     if not font_size:
@@ -2493,7 +2493,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         grad_colour = "#b40000"
       elif state == "hover":
         grad_colour = IT.adjust_colour('#b40000', luminosity = 0.95)
-        
+
     elif item_type =='cbtn':
       if state == 'on':
         font_colour = self.highlight_colour
@@ -2517,7 +2517,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     corner_rad = corner_rad * self.scale
     size = (int(width)*self.scale, int(height)*self.scale)
     bg_colour = underground #hp#
-    
+
     type_key = "%s_%s" %(item_type, self.width)
     if 'tinybutton' not in type_key:
       if self.timage_blanks.has_key(type_key):
@@ -2527,7 +2527,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           if self.scale != 1:
             image = image.resize((int(width), int(height)), Image.ANTIALIAS)
           return image
-    
+
     image = Image.new('RGBA', size, bg_colour)
     draw = ImageDraw.Draw(image)
 
@@ -2544,12 +2544,12 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       r,g,b,a = sg.split()
       image.paste(sg, ((self.width * self.scale) - s[0],0), mask=a)
       image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
-      
+
     if self.advertise_new:
       draw = ImageDraw.Draw(image)
       self.draw_advertise_new(draw, image)
       self.advertise_new = False
-      
+
     if buttonmark:
       image = self.make_buttonmarks(state, width, buttonmark, image, height, base_colour)
 
@@ -2597,7 +2597,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if self.scale != 1:
       image = image.resize((int(width), int(height)), Image.ANTIALIAS)
     return image
-    
+
 
   def print_text(self, image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type):
     ## Prepare text for printing on the new image. If '-' is present in the string, this will
@@ -2610,7 +2610,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         txt += bit.title() + " "
     else:
       txt = item
-    
+
     ## in case of cif file:
     if OV.FileFull().endswith('.cif') and item_type == 'snumtitle':
       current = int(olx.xf.CurrentData())
@@ -2619,7 +2619,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       if cnt > 1:
         txt += (' (+ %s)') %(cnt - 1)
       font_colour = '#ffdf09'
-    
+
     ## Actually print the text on the new image item.
     wX, wY = self.write_text_to_draw(draw,
                             txt,
@@ -2635,7 +2635,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     return image
 
   def make_timage_border (self, image, weight=1, fill='#ababab'):
-    
+
     width, height = image.size
     draw = ImageDraw.Draw(image)
     for i in xrange(weight):
@@ -2662,13 +2662,13 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     image = self.add_whitespace(image=image, side='bottom', margin_left=corner_rad, weight=1, colour = self.adjust_colour(underground, luminosity = 0.97))
     image = self.add_whitespace(image=image, side='bottom', margin_left=corner_rad, weight=1, colour = self.adjust_colour(underground, luminosity = 0.99))
     return image
-  
-  
+
+
   def make_buttonmarks(self, state, width, buttonmark, image, height, base_colour):
     draw = ImageDraw.Draw(image)
     _ = buttonmark.split(':')
     margin = int(_[0])
-    
+
     if len(_) >= 2:
       bm_colour = _[1]
     else:
@@ -2683,12 +2683,12 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       col = bm_colour
     else:
       col = self.font_colour
-      
+
     if state == "hover":
       fill = IT.adjust_colour(col, luminosity=0.8)
     else:
       fill = col
-      
+
     if fill is None:
       fill = "#ff0000"
 
@@ -2702,7 +2702,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         x = (w - margin) + j * 2
         draw.point((x, y), fill)
     return image
-  
+
 
   def make_arrows(self, state, width, arrows, image, height, base_colour, off_L, on_L, hover_L, scale=1.0):
     draw = None
@@ -2816,10 +2816,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     return image
 
   def drawFileFullInfo(self, draw, size, colour='#ff0000', right_margin=0, height=10, font_name="Vera", font_size=8, left_start = 0):
-    
+
     height = size[1]
     width = size[0]
-    
+
     base_colour = self.params.html.base_colour.rgb
     txt = OV.FileFull()
     if txt == "none":
@@ -2829,13 +2829,13 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     n = int(len(txt)/2)
     txtbeg = txt[:n]
     txtend = txt [-n:]
-    
+
 
     if left_start > width:
       left_start = 50 * self.scale
     else:
       left_start = left_start
-      
+
     xx = 0
     while tw > width - left_start - 5 * self.scale:
       txtbeg = txt[:n]
@@ -2978,7 +2978,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
             upon_advance = advance
 #            cur_pos += advance
         i+= 1
-        
+
       cut = left_start + ls * self.scale, ts * self.scale, cur_pos + advance + right_margin, 30 * self.scale
       sg = im.crop(cut)
       #sg.show()

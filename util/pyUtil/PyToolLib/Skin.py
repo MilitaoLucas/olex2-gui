@@ -86,6 +86,11 @@ OV.registerMacro(Skin_instance.run_skin, 'function-The function to call')
 def check_for_first_run():
   if not os.path.exists("%s/global.odb" %OV.DataDir()) or\
      OV.GetParam('olex2.has_recently_updated'):
+    try:
+      olx.SkinUpdated
+      return False
+    except:
+      olx.SkinUpdated = True
     startup_skin = olx.GetVar('startup_skin', 'default')
     change_skin(startup_skin)
     return True

@@ -4,53 +4,6 @@
 <Windows Help="false" Info="false" CmdLine="false" >
 <Defaults Style="" Scene="" BgColor="4194304" WhiteOn="true" Gradient="true" GradientPicture="" language="English" ExtraZoom="1.25" console.blend="true" >
 <Stored_params 
- <gui_archive_last value="--" >
- <gui_grad_bottom_left value="#ffffff" >
- <gui_grad_bottom_right value="#ffffff" >
- <gui_grad_top_left value="#05053c" >
- <gui_grad_top_right value="#05053c" >
- <gui_green value="#00aa00" >
- <gui_grey value="#555555" >
- <gui_gui_MainToolbarTabButtonActive value="none" >
- <gui_html_base_colour value="#6464a0" >
- <gui_html_bg_colour value="#ffffff" >
- <gui_html_font_colour value="#6f6f8b" >
- <gui_html_font_name value="Arial" >
- <gui_html_font_size value="2" >
- <gui_html_highlight_colour value="#ff7800" >
- <gui_html_icon_size value="20" >
- <gui_html_input_bg_colour value="#efefef" >
- <gui_html_link_colour value="#6f6f8b" >
- <gui_html_table_bg_colour value="#F3F3F3" >
- <gui_html_table_firstcol_colour value="#E9E9E9" >
- <gui_htmlpanelwidth value="320" >
- <gui_image_font_name value="Vera" >
- <gui_infobox_plane value="3077;0,0,0,1;1,1,1,0.5" >
- <gui_infobox_text value="2309;0.7,0.7,0.7,1;1,1,1,1" >
- <gui_language_encoding value="ISO8859-1" >
- <gui_logo_colour value="#6464a0" >
- <gui_orange value="#d6620d" >
- <gui_purple value="#a245a2" >
- <gui_red value="#aa0000" >
- <gui_shelx_constraints value="--" >
- <gui_shelx_restraints value="--" >
- <gui_skin_extension value="None" >
- <gui_skin_name value="default" >
- <gui_snumtitle_colour value="#6464a0" >
- <gui_snumtitle_font_colour value="#ff0000" >
- <gui_tab_colour value="#5563a4" >
- <gui_tab_font_colour value="#ff0000" >
- <gui_timage_colour value="#6464a0" >
- <gui_timage_font_colour value="#c4c4db" >
- <gui_use_fader value="false" >
- <olex2_has_recently_updated value="False" >
- <olex2_in_mode value="False" >
- <olex2_is_online value="True" >
- <olex2_last_version value="2363" >
- <olex2_short_mode value="False" >
- <olex2_verbose value="False" >
- <plot_series_x value="--" >
- <plot_series_y value="--" >
  <startup value="datadir()/samples/sucrose/sucrose.ins" >
 >
 <Scene 
