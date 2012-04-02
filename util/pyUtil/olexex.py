@@ -66,7 +66,7 @@ def expand(start, finish, increment=1):
     return
   return_string = []
   for x in range(start_number, finish_number+1, int(increment)):
-    return_string.append('%s%d'%(start_atom,x)) 
+    return_string.append('%s%d'%(start_atom,x))
   return ' '.join(return_string)
 OV.registerFunction(expand)
 
@@ -588,13 +588,13 @@ if haveGUI:
 def MakeElementButtonsFromFormula():
   global last_formula
   global last_elements_html
-  
+
   current_formula = OlexRefinementModel().currentFormula()
 
 
   #if current_formula == last_formula:
     #return last_elements_html
-  
+
   from PilTools import ButtonMaker
   icon_size = OV.GetParam('gui.skin.icon_size')
   totalcount = 0
@@ -603,7 +603,7 @@ def MakeElementButtonsFromFormula():
   if not f:
     return
   f = f.split(',')
-  
+
   Z_prime = float(olx.xf.au.GetZprime())
   Z = float(olx.xf.au.GetZ())
   html = ""
@@ -629,10 +629,10 @@ def MakeElementButtonsFromFormula():
 
     if c:
       name = "btn-element%s_%s" %(symbol, c)
-      
+
     else:
       name = "btn-element%s" %(symbol)
- 
+
     command = "if strcmp(sel(),'') then 'mode name -t=%s' else 'name sel %s'>>sel -u" %(symbol, symbol)
     target = OV.TranslatePhrase('change_element-target')
     #command = "if strcmp(spy.GetParam(olex2.in_mode),'mode name -t=%s') then 'mode off' else %%22 if strcmp(sel(),'') then 'mode name -t=%s' else 'name sel %s'>>sel -u%%22" %(symbol, symbol, symbol)
@@ -678,7 +678,7 @@ def MakeElementButtonsFromFormula():
 
   im_name='IMG_BTN-ELEMENT%s' %symbol
   OV.SetImage(im_name, name)
-  
+
   SetAtomicVolumeInSnumPhil(totalcount)
 
 
@@ -699,7 +699,7 @@ def SetAtomicVolumeInSnumPhil(totalcount):
     Z = float(olx.xf.au.GetZ())
   except:
     pass
-  
+
   if cell_volume and totalcount:
     atomic_volume = (cell_volume)/(totalcount * Z)
     OV.SetParam('snum.solution.current_atomic_volume','%.1f' %atomic_volume)
@@ -2444,3 +2444,29 @@ if not haveGUI:
 OV.registerFunction(OV.IsPluginInstalled)
 OV.registerFunction(OV.GetTag)
 
+#
+def GetHttpFile(f, force=False, fullURL = False):
+  URL = "http://dimas.dur.ac.uk/"
+  global _is_online
+  retVal = None
+  go_online = _is_online
+  verbose = OV.FindValue("ac_verbose", "False")
+  if go_online or force:
+    try:
+      if not fullURL:
+        url = "%s/%s" %(URL, f.replace(" ",r"%20"))
+      else:
+        url = f
+      if verbose: print "--> Getting %s" %url,
+      response = HttpTools.make_url_call(url,"")
+      content = response.read()
+      if verbose: print "OK"
+      retVal = content
+    except Exception, err:
+      _is_online = False
+      retVal = None
+      print "Olex2 can not reach the update server: %s" %err
+      print url
+  else:
+    retVal = None
+  return retVal
