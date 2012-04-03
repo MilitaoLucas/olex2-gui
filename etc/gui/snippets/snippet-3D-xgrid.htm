@@ -1,31 +1,31 @@
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <tr name=XGRID_SLIDE>
-  <td colspan='1'>
+  <td width="15%">%Level%</td>
+  <td width="75%">
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       align="right"
-      label="level"
       type="slider"
       name="SNUM_XGRID_SLIDE"
-      width="$eval(html.clientwidth(self)-110)"
+      width="100%"
       height="18"
       value="$eval(spy.GetParam(snum.xgrid.value)*10)"
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
-      min="$eval(xgrid.GetMin()*10)"
-      max="$eval(xgrid.GetMax()*10)"
-      onchange="spy.SetParam(snum.xgrid.value,eval(GetValue(SNUM_XGRID_SLIDE)/10))>>
+      min="$eval(xgrid.GetMin()*100)"
+      max="$eval(xgrid.GetMax()*100)"
+      onchange="spy.SetParam(snum.xgrid.value,eval(GetValue(SNUM_XGRID_SLIDE)/100))>>
 SetValue(SNUM_XGRID_VALUE,spy.GetParam(snum.xgrid.value))>>
 xgrid.Scale(GetValue(SNUM_XGRID_VALUE))>>"
     >
     </font>
-  <td colspan='1'>
+  <td width="10%">
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="text"
       name = "SNUM_XGRID_VALUE"
-      width="30"
+      width="100%"
       height="18"
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
