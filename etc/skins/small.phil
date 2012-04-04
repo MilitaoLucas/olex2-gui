@@ -14,6 +14,39 @@ gui {
     font_size = 1
   }
 
+  timage{
+
+    h1{
+      height = 20
+      font_size = 15
+      top = 1
+    }
+    
+    h3{
+      height = 19
+      font_size = 14
+      top = 1
+    }
+
+
+    button{
+      height = 15
+      font_size = 10
+      top = 1
+    }
+    tab{
+      height = 20
+      font_size = 14 
+    }
+    
+    cbtn{
+      height = 20
+      font_size = 15
+    }
+
+    
+  }
+
 
   htmlpanelwidth = 350
 }
