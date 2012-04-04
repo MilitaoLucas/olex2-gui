@@ -33,6 +33,8 @@ import MakeMovie
 import OlexVFS
 
 haveGUI = OV.HasGUI()
+if haveGUI:
+  import olex_gui
 
 def txt():
   try:
@@ -789,6 +791,9 @@ def MapView(onoff=None):
   else:
     olex.m("calcFourier -%s -%s -r=%s %s" %(map_type, map_source, map_resolution, mask_val))
 
+  if olex_gui.IsControl('SNUM_XGRID_SLIDE'):
+    olx.html.SetValue('SNUM_XGRID_SLIDE', '%f,%f'
+                      %(float(olx.xgrid.GetMin())*100, float(olx.xgrid.GetMax())*100))
   OV.SetVar('olex2.eden_vis',True)
 
 if haveGUI:
