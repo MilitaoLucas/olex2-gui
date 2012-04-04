@@ -2616,8 +2616,14 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       current = int(olx.xf.CurrentData())
       txt = olx.xf.DataName(current)
       cnt = int(olx.xf.DataCount())
+      counter = 0
+      for i in xrange(0, cnt):
+        if olx.xf.DataName(i) == "global":
+          continue
+        else:
+          counter += 1
       if cnt > 1:
-        txt += (' (+ %s)') %(cnt - 1)
+        txt += (' (+ %s)') %(counter - 1)
       font_colour = '#ffdf09'
 
     ## Actually print the text on the new image item.
