@@ -955,7 +955,6 @@
       <cmd1 "spy.SetParam(olex2.force_images,True)">
       <cmd2 "spy.run_skin timage">
       <cmd3 "spy.run_skin sNumTitle">
-      <cmd15 "spy.run_skin sNumTitle">
       <cmd29 "spy.make_HOS(True)">
       <cmd6 "html.Update">
       <cmd1 "spy.SetParam(olex2.force_images,False)">
