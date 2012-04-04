@@ -128,6 +128,7 @@
     <cmd2  "spy.saveHistory()">
     <cmd3  "spy.SaveStructureParams()">
     <cmd3  "spy.SaveUserParams()">
+    <cmd3  "spy.SaveGuiParams()">
     <cmd2  "spy.SaveCifInfo()">
     <cmd2  "mode off">
     <cmd4  "storeparam startup file.relativePath(filefull())">
@@ -916,6 +917,8 @@
     />
     <cmd
       <cmd1 "spy.change_skin(%1,%2)">
+      <cmd15 "spy.run_skin sNumTitle">
+      <cmd29 "spy.make_HOS(True)">
       <cmd1 "html.load index.htm">
       <cmd3 "spy.setAllMainToolbarTabButtons()">
     />
@@ -946,15 +949,17 @@
       <arg2 name="colour" def="spy.GetParam(gui.timage.base_colour)">
     >
     <cmd
+      <cmd5 "htmlpanelwidth %1">
       <cmd1 "spy.setParam(gui.htmlpanelwidth,'%1')">
       <cmd1 "spy.SetParam(gui.timage.base_colour,'%2')">
       <cmd1 "spy.SetParam(olex2.force_images,True)">
       <cmd2 "spy.run_skin timage">
       <cmd3 "spy.run_skin sNumTitle">
-      <cmd5 "htmlpanelwidth %1">
-      <cmd4 XXX="spy.resize_skin_logo(%1)">
+      <cmd15 "spy.run_skin sNumTitle">
+      <cmd29 "spy.make_HOS(True)">
       <cmd6 "html.Update">
       <cmd1 "spy.SetParam(olex2.force_images,False)">
+      <cmd6 "FlushFS">
     />
   />
 />

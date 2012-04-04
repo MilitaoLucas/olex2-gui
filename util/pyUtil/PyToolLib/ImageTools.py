@@ -383,11 +383,12 @@ class ImageTools(FontInstances):
     OlexVFS.write_to_olex('logo1_txt.htm',txt,True)
     return "Done"
 
-  def resize_to_panelwidth(self, args, width_adjust=50):
+  def resize_to_panelwidth(self, args, width_adjust=0, width=None):
     name = args['i']
     colourize = args.get('c',False)
     path = ("%s/etc/%s" %(self.basedir, name))
-    width = OV.GetParam('gui.htmlpanelwidth')
+    if not width:
+      width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
     if os.path.exists(path):
       im = Image.open(path)
       if colourize:
@@ -1178,9 +1179,9 @@ class ImageTools(FontInstances):
 #      box = (width - height, 0)
 #      image.paste(IM, box)
 
-  def resize_news_image(self):
+  def resize_news_image(self, width_adjust=20, width=None):
     tag = OV.GetTag().split('-')[0]
-    self.resize_to_panelwidth({'i':'news/news-%s.png' %tag}, width_adjust=30)
+    self.resize_to_panelwidth({'i':'news/news-%s.png' %tag}, width=width, width_adjust=width_adjust)
 
   def make_simple_text_to_image(self, width, height, txt, font_name='Vera', font_size=16, bg_colour='#fff6bf', font_colour='#222222'):
     IM = Image.new('RGB', (width, height), bg_colour)
