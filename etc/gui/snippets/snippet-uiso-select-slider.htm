@@ -1,21 +1,20 @@
-<tr name=UISO_SELECT_SLIDER height='50' width='100%'>
+<tr name=UISO_SELECT_SLIDER>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Uiso-Select-Slider;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
-<td width='40%' name=Q_PAEAK_SLIDER_LABEL colspan = '1' bgcolor="$GetVar(HtmlTableFirstcolColour)">
+<td width='40%' name=Q_PAEAK_SLIDER_LABEL bgcolor="$GetVar(HtmlTableFirstcolColour)">
   <b>
     %Uiso Select Atoms%
   </b>
 </td>
-
-<td width='60%' name=UISO_SELECT_SLIDER_BUTTONS align=right colspan='2' bgcolor="$GetVar(HtmlTableFirstcolColour)">
+<td width='60%' name=UISO_SELECT_SLIDER_BUTTONS align="right" bgcolor="$GetVar(HtmlTableFirstcolColour)">
 $spy.MakeHoverButton(button_small-delete,kill sel)
 </td>
-
 </tr>
-<tr name=SLIDE_UISO_SELECT_SLIDER>
 
-<td name=UISO_SELECT_SLIDER_SLIDER colspan='2'>
+<tr name=SLIDE_UISO_SELECT_SLIDER>
+<td colspan="2"><table width="100%"><tr>
+<td name=UISO_SELECT_SLIDER_SLIDER width="85%">
   <font size='$GetVar(HtmlFontSizeControls)'>
   <input
     type="slider"
@@ -38,12 +37,12 @@ Freeze(True)
   </font>
 </td>
 
-<td align='right' name=UISO_PEAK_SLIDER_VALUE>
+<td align='right' name=UISO_PEAK_SLIDER_VALUE width="15%">
   <font size='$GetVar(HtmlFontSizeControls)'>
   <input
     type="label"
     name = "UisoSelectVal"
-    width="40"
+    width="100%"
     height="18"
     bgcolor="$GetVar(HtmlTableBgColour)"
     fgcolor="$GetVar(HtmlFontColour)"
@@ -51,8 +50,7 @@ Freeze(True)
   >
   </font>
 </td>
-
+</tr></table></td>
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
-
