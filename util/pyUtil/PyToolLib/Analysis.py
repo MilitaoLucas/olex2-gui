@@ -2668,7 +2668,7 @@ class HealthOfStructure():
     return d
 
   def make_HOS_html(self):
-    if self.hkl_stats is None:
+    if not self.hkl_stats:
       return
     txt = "<table width='100%%' cellpadding=0 cellspacing=0><tr>"
     l = ['MinD', 'MeanIOverSigma','Rint','Completeness']
