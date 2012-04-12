@@ -2605,7 +2605,7 @@ class HealthOfStructure():
 
   def initialise_HOS(self, force=False):
     if olx.IsFileLoaded() != 'true':
-      return
+      return False
     OV.write_to_olex("reflection-stats-summary.htm" , "n/a")
     hkl = OV.HKLSrc()
     if not hkl or not os.path.exists(hkl):
@@ -2668,6 +2668,8 @@ class HealthOfStructure():
     return d
 
   def make_HOS_html(self):
+    if self.hkl_stats is None:
+      return
     txt = "<table width='100%%' cellpadding=0 cellspacing=0><tr>"
     l = ['MinD', 'MeanIOverSigma','Rint','Completeness']
     for item in l:
