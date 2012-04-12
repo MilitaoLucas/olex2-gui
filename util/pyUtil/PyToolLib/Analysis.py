@@ -2594,7 +2594,7 @@ class HealthOfStructure():
     if timing:
       import time
       t1 = time.time()
-    
+
     if self.initialise_HOS(force=force):
       self.summarise_HOS()
       self.make_HOS_html()
@@ -2624,7 +2624,7 @@ class HealthOfStructure():
       if OV.GetParam('snum.data.d_min') == float(min_d):
         if bool(olx.fs.Exists('MinD')):
           return False
-      else:  
+      else:
         OV.SetParam('snum.data.d_min',min_d)
       if not self.hkl_stats:
         return False
@@ -2778,11 +2778,11 @@ class HealthOfStructure():
       if _ == 0 and theoretical_val < 0.95:
         _ = 1
       if _ != 0:
-        x = boxWidth - _  
+        x = boxWidth - _
         box = (x,boxHalf,boxWidth,boxHeight)
         fill = OV.GetParam('gui.red').hexadecimal
         draw.rectangle(box, fill=fill)
-        
+
       top = OV.GetParam('diagnostics.hkl.%s.top' %item)
 
     #for i in xrange(4):
@@ -2803,7 +2803,7 @@ class HealthOfStructure():
       display = IT.get_unicode_characters("I/sigma")
     if item == "Rint":
       display = "Rint"
-      
+
     display = IT.get_unicode_characters(display)
 
 
@@ -2813,7 +2813,7 @@ class HealthOfStructure():
       x = 2
       y_s = (boxHalf - 1)
       y = boxHeight - 14 * scale
-      
+
     else:
       font_size = 16
       font_size_s = 10
@@ -2834,7 +2834,7 @@ class HealthOfStructure():
 
     ## ADD THE ACTUAL VALUE
 
-      
+
     y += 0
     if value_display_extra:
       dxs,dxy = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=font_size_s * scale)

@@ -53,7 +53,7 @@ class Skin():
       skin_name += "_small"
     #deal_with_gui_phil(action='load', skin_name=skin_name, force=False)
 #    IT.resize_skin_logo(width=new_width)
-    
+
 
     if timing:
       t = time.time()
@@ -195,7 +195,7 @@ def deal_with_gui_phil(action='load', skin_name=None, force=False):
 
 
 def change_skin(skin_name=None, force=False):
- 
+
   new_width = False
   try:
     new_width = int(skin_name)
@@ -208,7 +208,7 @@ def change_skin(skin_name=None, force=False):
       skin_name += "_small"
 
   olx.fs.Clear(3)
-  OlexVFS.write_to_olex('logo1_txt.htm'," ",True)  
+  OlexVFS.write_to_olex('logo1_txt.htm'," ",True)
 
   if timing:
     t1 = time.time()
@@ -218,7 +218,7 @@ def change_skin(skin_name=None, force=False):
   if not new_width:
     new_width = OV.GetParam('gui.htmlpanelwidth')
   olx.HtmlPanelWidth(new_width)
-  
+
   try:
     adjust_skin_luminosity()
   except:
@@ -237,12 +237,12 @@ def change_skin(skin_name=None, force=False):
     t = time.time()
     print "After 'resize_skin_logo': %.2f s (%.5f s)" % ((t - t1), (t - t2))
     t2 = t
-  
+
   a = PilTools.timage()
   a.run_timage(force_images=force)
   im = a.make_timage('snumtitle', OV.FileName(), 'on', titleCase=False)
   OlexVFS.save_image_to_olex(im, "sNumTitle.png", 1)
-  
+
   if timing:
     t = time.time()
     print "After 'run_timage': %.2f s (%.5f s)" % ((t - t1), (t - t2))
@@ -257,7 +257,7 @@ def change_skin(skin_name=None, force=False):
   SetMaterials()
   olx.HtmlPanelWidth(new_width)
   OV.setAllMainToolbarTabButtons()
-  
+
   if OV.FileFull() != "none":
     import History
     from History import hist
@@ -281,9 +281,9 @@ def change_skin(skin_name=None, force=False):
 
   export_parameters()
 
-  from Analysis import HealthOfStructure
-  HealthOfStructure().make_hos_images()
-  
+  from Analysis import HOS_instance
+  HOS_instance.make_HOS_html()
+
   from Skin import Skin
   Skin().run_skin('snumtitle')
 
