@@ -1058,5 +1058,7 @@ def calcsolv(solvent_radius=None, grid_step=None):
     grid_step=grid_step,
     use_space_group_symmetry=True) # faster for high symmetry)
   result.show_summary()
+  
+  return result
 
 OV.registerFunction(calcsolv)

@@ -23,13 +23,17 @@ class MultipleDataset:
     html = "<table width='100%'><tr>"
     current = int(olx.xf.CurrentData())
     cnt = int(olx.xf.DataCount())
+    counter = -1
     for i in xrange(0, cnt):
-      if i > 0 and (i%3) == 0:
-        html += "</tr><tr>"
+      if olx.xf.DataName(i) == "global":
+        continue
+      counter += 1
+      if i > 0 and (counter%4) == 0:
+        html += "</tr><tr width=100%>"
       if i == current:
-        html += "<td>" + olx.xf.DataName(i) + "&nbsp;(*)</td>"
+        html += "<td align='center' width='25%'>Structure <b>" + olx.xf.DataName(i) + "&nbsp;(*)</b></td>"
       else:
-        html += "<td><a href='reap filename().cif#" + str(i) + "'>"\
+        html += "<td align='center' width='25%'><a href='reap filename().cif#" + str(i) + "'>Structure "\
            + olx.xf.DataName(i) + "</a></td>"
     return html + "</tr></table>"
 

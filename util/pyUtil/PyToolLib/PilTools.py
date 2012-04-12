@@ -712,11 +712,10 @@ class sNumTitle(ImageTools):
         pass
 
     self.sNum = self.filename
-    self.width = int((width) - 22)
 
   def run_sNumTitle(self, force=False):
     #self.params.html.base_colour.rgb = OV.FindValue('gui_htmlself.params.html.base_colour.rgb')
-    self.width = OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+    
     self.basedir = OV.BaseDir()
     self.filefull = OV.FileFull()
     self.filepath = OV.FilePath()
@@ -782,7 +781,6 @@ WHERE (((submission.ID)="%s"));""" %sNum
       submitter = record[0]
     items.setdefault("submitter", submitter)
 
-
   def sNumTitleStyle1(self, items, font_name="Arial Bold", font_size=17):
     sNum = items["sNum"]
     a = timage()
@@ -802,25 +800,17 @@ class timage(ImageTools):
     new_l = open("%s/etc/gui/images/advertise_as_new.txt" %OV.BaseDir(),'r').readlines()
     self.new_l = map(lambda s: s.strip(), new_l)
 
-    self.available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - OV.GetParam('gui.html.table_firstcol_width'))
 
-#    self.available_width = OV.htmlPanelWidth() - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
-
-    #from PilTools import ButtonMaker
+    self.width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+    
+    self.max_width = self.width
+    
+    self.available_width = self.width - OV.GetParam('gui.html.table_firstcol_width')
 
 
     self.timage_blanks = {}
-
     self.abort = False
-    width = self.params.htmlpanelwidth
-    self.max_width = self.params.htmlpanelwidth
-    if not width:
-      width = 350
-    else:
-      try:
-        width = float(width)
-      except:
-        width = float(tool_arg)
+    
     self.font_name = "Vera"
     self.timer = False
     if self.timer:
@@ -828,14 +818,6 @@ class timage(ImageTools):
       self.time = time
       self.text_time = 0
 
-    #if tool_arg:
-      #args = tool_arg.split(";")
-      #if args[0] == "None":
-        #self.params.html.base_colour.rgb = OV.FindValue('gui_htmlself.params.html.base_colour.rgb')
-      #else:
-        #self.params.html.base_colour.rgb = self.HTMLColorToRGB(args[0])
-    self.width = int((width) - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
-    self.max_width = self.width
     if self.width <= 0: self.width = 10
     icon_source = "%s/etc/gui/images/src/icons.png" %self.basedir
     image_source = "%s/etc/gui/images/src/images.png" %self.basedir
@@ -854,8 +836,9 @@ class timage(ImageTools):
     self.force_images = force_images
 
     self.highlight_colour = OV.GetParam('gui.html.highlight_colour').rgb
-    self.width = OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
-    self.available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - OV.GetParam('gui.html.table_firstcol_width'))
+    
+    #width = int(olx.html.ClientWidth('self'))
+    #self.available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - OV.GetParam('gui.html.table_firstcol_width'))
 
 
     do_these = []
@@ -867,6 +850,7 @@ class timage(ImageTools):
         do_these = [
                 "make_cbtn_items",
                 "info_bitmaps",
+                
                 ]
     if not do_these:
       do_these = ["make_generated_assorted_images",
@@ -882,11 +866,12 @@ class timage(ImageTools):
                   "make_element_buttons",
                   "info_bitmaps",
                   "resize_news_image",
+                  "resize_skin_logo",
                   "create_logo"
                   ]
 
     #self.params.html.base_colour.rgb = OV.FindValue('gui_htmlself.params.html.base_colour.rgb')
-    self.width = int(OV.GetParam('gui.htmlpanelwidth')) - int(OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
+    width = int(olx.html.ClientWidth('self'))
     self.basedir = OV.BaseDir()
     self.filefull = OV.FileFull()
     self.filepath = OV.FilePath()
@@ -904,7 +889,6 @@ class timage(ImageTools):
       a()
       if self.timer:
         print "\t - %s took %.3f s to complete" %(item, self.time.time()-t1)
-
 
   def make_popup_banners(self):
     txt_l = [('setup',330), ('help',410), ('tutorial',375)]
@@ -1668,7 +1652,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     factor = 4
 
     #create a new image
-    width = self.max_width * factor
+    width = self.width * factor
     size = (width, 55 * factor)
     IM =  Image.new('RGBA', size, OV.GetParam('gui.html.bg_colour').rgb)
 
@@ -1934,7 +1918,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           use_new = True
           if use_new:
             ## need different width for tab items
-            width = int((self.available_width + OV.GetParam('gui.html.table_firstcol_width'))/len(tabItems)) - 1
+            width = (self.width / len(tabItems)) - 2
             image = self.make_timage(item_type='tab', item=item.lstrip('g3-'), state=state, width=width)
           else:
             image = self.tab_items(item, state)
@@ -2335,10 +2319,13 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
   def make_timage(self, item_type, item, state, font_name="Vera", width=None, colour=None, whitespace=None, titleCase=True):
 
+    if not self.width:
+      print "Width not set"
+      return
+    
     if not width:
       width = self.width
-    self.width = width
-
+    
     pams = getattr(self.params.timage, '%s' %item_type)
 
     self.scale = pams.scale
@@ -2518,7 +2505,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     size = (int(width)*self.scale, int(height)*self.scale)
     bg_colour = underground #hp#
 
-    type_key = "%s_%s" %(item_type, self.width)
+    type_key = "%s_%s" %(item_type, width)
     if 'tinybutton' not in type_key:
       if self.timage_blanks.has_key(type_key):
         if self.timage_blanks[type_key].has_key(state):
@@ -2542,7 +2529,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       self.drawFileFullInfo(draw, image.size, colour, right_margin=5, height=height, font_size=info_size, left_start=5 * self.scale)
       sg, s = self.drawSpaceGroupInfo(draw, luminosity=OV.GetParam('gui.timage.snumtitle.sg_L'), right_margin=3 * self.scale)
       r,g,b,a = sg.split()
-      image.paste(sg, ((self.width * self.scale) - s[0],0), mask=a)
+      image.paste(sg, ((width * self.scale) - s[0],0), mask=a)
       image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
 
     if self.advertise_new:
@@ -2589,7 +2576,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
 
     filename = item
-    type_key = "%s_%s" %(item_type, self.width)
+    if item_type == 'snumtitle':
+      filename = 'sNumTitle.png'
+    type_key = "%s_%s" %(item_type, width)
     self.timage_blanks.setdefault(type_key,{})
     self.timage_blanks[type_key].setdefault(state,image.copy())
 
@@ -2616,8 +2605,14 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       current = int(olx.xf.CurrentData())
       txt = olx.xf.DataName(current)
       cnt = int(olx.xf.DataCount())
+      counter = 0
+      for i in xrange(0, cnt):
+        if olx.xf.DataName(i) == "global":
+          continue
+        else:
+          counter += 1
       if cnt > 1:
-        txt += (' (+ %s)') %(cnt - 1)
+        txt += (' (+ %s)') %(counter - 1)
       font_colour = '#ffdf09'
 
     ## Actually print the text on the new image item.
@@ -3418,6 +3413,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     return image
 
+
+  def resize_skin_logo(self):
+    IT.resize_skin_logo(self.width)
+    return "Done"
+
   def info_bitmaps(self):
 
     if olx.CurrentLanguage() == "Chinese":
@@ -3594,6 +3594,7 @@ def drawSpaceGroupInfo(draw, luminosity=1.9, right_margin=12, font_name="Times B
 
 
 
+
 def resize_skin_logo(width):
   IT.resize_skin_logo(width)
   return "Done"
@@ -3603,7 +3604,6 @@ OV.registerFunction(resize_skin_logo)
 class Boxplot(ImageTools):
   def __init__(self, inlist, width=150, height=50):
     super(Boxplot, self).__init__()
-    self.width = width
     self.height = height
     self.list = inlist
     self.getOlexVariables()
