@@ -5,12 +5,12 @@
 <!-- #include tool-help-column gui\blocks\tool-help-first-column.htm;help_ext=HFIX-Quickmodes;1; -->
   <td>
     <table><tr>
-      <td width='35%'>
+      <td width='30%'>
         $spy.MakeHoverButton(toolbar-sp2,mode hfix 43)&nbsp;
         $spy.MakeHoverButton(toolbar-sp2-1H,mode hfix 43)
         $spy.MakeHoverButton(toolbar-sp2-2H,mode hfix 93)
       </td>
-      <td width='35%'>
+      <td width='40%'>
         $spy.MakeHoverButton(toolbar-sp3,mode hfix 13)&nbsp;
         $spy.MakeHoverButton(toolbar-sp3-1H,mode hfix 13)
         $spy.MakeHoverButton(toolbar-sp3-2H,mode hfix 23)
@@ -31,42 +31,44 @@
 <!-- SECOND ROW -->
 <tr name=MAIN_TOOLBAR_HYDROGEN_2>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=toolbar-hydrogen_2;1; -->
-  <td>
-    <table><tr>
+  <td width="100%">
+    <table width="100%">
+    <tr>
       <td VALIGN='center' width='15%'>
         <font size=$GetVar(HtmlFontSizeControls)>
         <input
           type="text"
           bgcolor="$GetVar(HtmlInputBgColour)"
           name = "HFIX"
-          width="30"
+          width="100%"
           height="17"
           value = "137"
         >
         </font>
           
       </td>
-      <td VALIGN='center' width='30%'>
+      <td VALIGN='center' width='10%'>
 $spy.MakeHoverButton(button_small-hfix,if strcmp\(spy.GetParam\(olex2.short_mode),'hfix') then 'mode off'  else 'mode hfix getvalue\(HFIX)')
       </td>
-    <td>
+    <td width="25%" align="right">
       <b>%HIMP%</b>
     </td>
-    <td>
+    <td width="35%">
       <font size=$GetVar(HtmlFontSizeControls)>
       <input
         type="combo"
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         height="$GetVar(HtmlComboHeight)"
         name = "HIMP_DISTANCE"
-        width="100"
+        width="100%"
         value=""
         items='B-H (1.19)<-1.19;sp3-C-H (1.083)<-1.083;sp2-C-H (1.077)<-1.083;sp3-N-H (1.033)<-1.033;sp2-N-H (1.009)<-1.009;O-H (0.983)<-0.983;'
         onchange = "labels -l -h>>mode himp GetValue(HIMP_DISTANCE)"
       >
       </font>
     </td>
-</tr></table>
+    </tr></table>
+  </td>
 </tr>
 
 <!-- THIRD ROW-->

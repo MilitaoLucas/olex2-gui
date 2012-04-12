@@ -11,7 +11,7 @@
 </tr>
 
 <!-- SECOND ROW -->
-<tr name=MAIN_TOOLBAR>
+<tr name=MAIN_TOOLBAR width=100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Quicktools;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td width='5%'>
@@ -34,9 +34,6 @@ $spy.MakeHoverButton(toolbar-H,showH)
   </td>
   <td width='5%'>
 $spy.MakeHoverButton(toolbar-center,compaq>>compaq -a>>center)
-  </td>
-  
-  <td width='20%'>
   </td>
   
   <td width = '5%'>
@@ -72,7 +69,7 @@ $spy.MakeHoverButton(toolbar-ok,fixunit GetValue\(SET_Z_PRIME_FIXUNIT)>>xf.au.Se
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type='combo'
-      width='$eval($GetVar(HtmlPanelWidth)-140)'
+      width='100%'
       height="$GetVar(HtmlInputHeight)"
       name='set_label_content'
       value=''

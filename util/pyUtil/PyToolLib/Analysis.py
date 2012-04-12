@@ -2284,7 +2284,8 @@ class HistoryGraph(Analysis):
       bars.append((R1,href,target))
       node = node.active_child_node
     n_bars = len(bars)
-    size = (OV.GetParam('gui.htmlpanelwidth')- OV.GetParam('gui.html.table_firstcol_width') - 35, 100)
+    width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+    size = (width - OV.GetParam('gui.html.table_firstcol_width')-10, 100)
     self.params.size_x, self.params.size_y = size
     self.make_empty_graph(draw_title=False)
 
@@ -2594,7 +2595,7 @@ class HealthOfStructure():
     if timing:
       import time
       t1 = time.time()
-    
+
     if self.initialise_HOS(force=force):
       self.summarise_HOS()
       self.make_HOS_html()
@@ -2609,10 +2610,11 @@ class HealthOfStructure():
     hkl = OV.HKLSrc()
     if not hkl or not os.path.exists(hkl):
       print "There is no reflection file associated with this structure"
-      txt = "<tr><table width='100%%' cellspacing='2'><tr bgcolor=%s align='center'>" %self.grade_4_colour
-      txt += "<td colspan='2'><font color=#ffffff>There is no reflection file</font><td>"
-      txt += "</tr></table></tr>"
-      txt = txt.decode('utf-8')
+      #txt = "<tr><table width='100%%' cellspacing='2'><tr bgcolor=%s align='center'>" %self.grade_4_colour
+      #txt += "<td colspan='2'><font color=#ffffff>There is no reflection file</font><td>"
+      #txt += "</tr></table></tr>"
+      #txt = txt.decode('utf-8')
+      txt = ""
       OV.write_to_olex("hos.htm" , txt)
       return False
     try:
@@ -2623,7 +2625,7 @@ class HealthOfStructure():
       if OV.GetParam('snum.data.d_min') == float(min_d):
         if bool(olx.fs.Exists('MinD')):
           return False
-      else:  
+      else:
         OV.SetParam('snum.data.d_min',min_d)
       if not self.hkl_stats:
         return False
@@ -2730,13 +2732,10 @@ class HealthOfStructure():
     value_display_extra = ""
     completeness_box_width = 150
 
-    if item == 'Completeness':
-      boxWidth = completeness_box_width * scale
-      
-    else:
-      width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - completeness_box_width)
-      boxWidth = (width/(n-1) - (n-1)) * scale
-    boxHeight = 30 * scale
+    width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - 2
+
+    boxWidth = (width/n) * scale
+    boxHeight = 32 * scale
     boxHalf = 8 *scale
     if type(colour) != str:
       colour = colour.hexadecimal
@@ -2780,11 +2779,11 @@ class HealthOfStructure():
       if _ == 0 and theoretical_val < 0.95:
         _ = 1
       if _ != 0:
-        x = boxWidth - _  
+        x = boxWidth - _
         box = (x,boxHalf,boxWidth,boxHeight)
         fill = OV.GetParam('gui.red').hexadecimal
         draw.rectangle(box, fill=fill)
-        
+
       top = OV.GetParam('diagnostics.hkl.%s.top' %item)
 
     #for i in xrange(4):
@@ -2805,41 +2804,46 @@ class HealthOfStructure():
       display = IT.get_unicode_characters("I/sigma")
     if item == "Rint":
       display = "Rint"
-      
+
     display = IT.get_unicode_characters(display)
 
-    font = IT.registerFontInstance(font_name, 10 * scale)
-    x = 2
-    y = boxHalf - 1
+
+    if boxWidth < 100 * scale:
+      font_size = 14
+      font_size_s = 8
+      x = 2
+      y_s = (boxHalf - 1)
+      y = boxHeight - 14 * scale
+
+    else:
+      font_size = 16
+      font_size_s = 10
+      x = 2
+      y = boxHalf + 7 * scale
+      y_s = boxHalf - 1
+
+    font = IT.registerFontInstance("Vera", font_size * scale)
+    font_s = IT.registerFontInstance("Vera", font_size_s * scale)
+
+    ## ADD THE Key
+
     if item == "MinD":
       fill = '#555555'
     else:
       fill = '#ffffff'
-    draw.text((x, y), "%s" %display, font=font, fill=fill)
-#    IT.write_text_to_draw(draw, display, font_colour='#ffffff', font_size=12)
-#    IT.write_text_to_draw(draw, value_display, align='right', max_width=boxWidth - 2, font_colour='#ffffff', font_size=17)
-#    IT.write_text_to_draw(draw, str(top), align='right', max_width=boxWidth - 2, font_colour='#ffffff', font_size=11)
-    #y = 4
-    #r = 10
-    #x = int((value_raw/top) * boxWidth - r/2)
-    #draw.ellipse(((x, y),(x+r, y+r)), fill="#ffffff")
+    draw.text((x, y_s), "%s" %display, font=font_s, fill=fill)
 
     ## ADD THE ACTUAL VALUE
-    if value_display_extra:
-      font_size = 20
-    else:
-      font_size = 20
-    font = IT.registerFontInstance("Vera", font_size * scale)
-    font_s = IT.registerFontInstance("Vera", 10 * scale)
+
+
     y += 0
     if value_display_extra:
-      dxs,dxy = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=12 * scale)
+      dxs,dxy = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=font_size_s * scale)
     dx,dy = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=font_size * scale)
     x = boxWidth - dx - 10
     draw.text((x, y), "%s" %value_display, font=font, fill=fill)
     if value_display_extra:
       draw.text((0, y + dy/2), "%s" %value_display_extra, font=font_s, fill="#ffffff")
-
 
     im = im.resize((boxWidth/scale, boxHeight/scale), Image.ANTIALIAS)
     OlexVFS.save_image_to_olex(im, item, 0)

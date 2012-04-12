@@ -128,6 +128,7 @@
     <cmd2  "spy.saveHistory()">
     <cmd3  "spy.SaveStructureParams()">
     <cmd3  "spy.SaveUserParams()">
+    <cmd3  "spy.SaveGuiParams()">
     <cmd2  "spy.SaveCifInfo()">
     <cmd2  "mode off">
     <cmd4  "storeparam startup file.relativePath(filefull())">
@@ -912,12 +913,11 @@
   <body
     <args
       <arg1 name="name" def="">
-      <arg2 name="forece" def="false">
+      <arg2 name="force" def="false">
     />
     <cmd
       <cmd1 "spy.change_skin(%1,%2)">
       <cmd1 "html.load index.htm">
-      <cmd3 "spy.setAllMainToolbarTabButtons()">
     />
   />
 />
@@ -931,7 +931,7 @@
     >
     <cmd
       <cmd1 "spy.SetParam(gui.htmlpanelwidth,'%1')">
-      <cmd2 "spy.run_skin timage">
+      <cmd2 xxx="spy.run_skin timage">
       <cmd5 "htmlpanelwidth %1">
       <cmd4 "spy.resize_skin_logo(%1)">
       <cmd4 "spy.resize_to_panelwidth -i='news/news.png'">
@@ -946,15 +946,7 @@
       <arg2 name="colour" def="spy.GetParam(gui.timage.base_colour)">
     >
     <cmd
-      <cmd1 "spy.setParam(gui.htmlpanelwidth,'%1')">
-      <cmd1 "spy.SetParam(gui.timage.base_colour,'%2')">
-      <cmd1 "spy.SetParam(olex2.force_images,True)">
-      <cmd2 "spy.run_skin timage">
-      <cmd3 "spy.run_skin sNumTitle">
-      <cmd5 "htmlpanelwidth %1">
-      <cmd4 XXX="spy.resize_skin_logo(%1)">
-      <cmd6 "html.Update">
-      <cmd1 "spy.SetParam(olex2.force_images,False)">
+      <cmd1 "skin %1">
     />
   />
 />

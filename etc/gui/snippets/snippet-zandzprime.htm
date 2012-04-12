@@ -1,5 +1,5 @@
 <tr NAME="Z AND Z'">
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Z;1; -->
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Z;scope=#scope;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td ALIGN='left' width='35%'>
     <b>Z and Z'</b>
@@ -16,14 +16,14 @@
   <td ALIGN='right' width='17%'>
     <input
       type='text'
-      width='40'
+      width='65%'
       height="$GetVar(HtmlInputHeight)"
       bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-      name='SET_Z'
+      name='SET_Z@#scope'
       valign='center'
       align='right'
       value='xf.au.GetZ()'
-      onleave="xf.au.SetZ(GetValue(SET_Z))>>html.Update"
+      onleave="xf.au.SetZ(GetValue(~name~))>>html.Update"
       onreturn="html.Call(~name~.onleave)"
       label="Z = "
     >
@@ -31,14 +31,14 @@
   <td ALIGN='right' width='17%'>
     <input
       type='text'
-      width="40"
+      width="65%"
       height="$GetVar(HtmlInputHeight)"
       bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-      name='SET_Z_PRIME'
+      name='SET_Z_PRIME#scope'
       valign='center'
       align='right'
       value='xf.au.GetZprime()'
-      onleave="xf.au.SetZprime(GetValue(SET_Z_PRIME))>>html.Update"
+      onleave="xf.au.SetZprime(GetValue(~name~))>>html.Update"
       onreturn="html.Call(~name~.onleave)"
       label="Z' = "
     >
