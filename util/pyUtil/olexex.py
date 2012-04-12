@@ -939,7 +939,7 @@ def GetRInfo(txt="",format='html'):
         if 'report' in format:
           t = r"<font size='%s'>R1 = <font color='%s'><b>%s%%</b></font></font>" %(font_size, col, R1)
         else:
-          t = r"<td colspan='2' align='right' rowspan='2'><font size='%s'>R1 = <font color='%s'><b>%s%%</b></font></font></td>" %(font_size, col, R1)
+          t = r"<font size='%s'>R1 = <font color='%s'><b>%s%%</b></font></font>" %(font_size, col, R1)
 
       except:
         t = "<td colspan='2' align='right' rowspan='2' align='right'><font size='%s'><b>%s</b></font></td>" %(font_size, R1)
@@ -1605,7 +1605,7 @@ def GetACF():
     name = "entry_ac"
     f = "/olex-distro-odac/%s/%s/%s.py" %(tag, keyname, name)
     if not os.path.exists("%s/entry_ac.py" %p):
-      cont = GetHttpFile(f, force=True)
+      cont = HttpTools.GetHttpFile(f, force=True)
       if cont:
         wFile = open("%s/%s.py" %(p, name),'w')
         wFile.write(cont)

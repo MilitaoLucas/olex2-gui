@@ -2734,7 +2734,7 @@ class HealthOfStructure():
     width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - 2
 
     boxWidth = (width/n) * scale
-    boxHeight = 30 * scale
+    boxHeight = 32 * scale
     boxHalf = 8 *scale
     if type(colour) != str:
       colour = colour.hexadecimal
@@ -2815,10 +2815,10 @@ class HealthOfStructure():
       y = boxHeight - 14 * scale
       
     else:
-      font_size = 17
+      font_size = 16
       font_size_s = 10
       x = 2
-      y = boxHalf + 4 * scale
+      y = boxHalf + 7 * scale
       y_s = boxHalf - 1
 
     font = IT.registerFontInstance("Vera", font_size * scale)

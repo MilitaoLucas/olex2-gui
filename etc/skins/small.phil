@@ -9,12 +9,26 @@ gui {
 
   html{
     table_firstcol_width = 10
-    font_colour = #ff0000
     font_name = Arial
     font_size = 1
+    font_size_large = 3
+    formula_size = 3
   }
 
   timage{
+
+    snumtitle{
+      scale = 2
+      height = 36
+      font_colour = '(237, 237, 237)'
+      font_size = 18
+      top = 1
+      left = 5
+      filefullinfo_size = 10
+      sginfo_scale = 1.1
+      corner_rad = 3
+      rounded = 1100
+    }
 
     h1{
       height = 20
@@ -23,7 +37,7 @@ gui {
     }
     
     h3{
-      height = 19
+      height = 21
       font_size = 14
       top = 1
     }
@@ -35,7 +49,7 @@ gui {
       top = 1
     }
     tab{
-      height = 20
+      height = 21
       font_size = 14 
     }
     
@@ -46,7 +60,6 @@ gui {
 
     
   }
-
 
   htmlpanelwidth = 350
 }
