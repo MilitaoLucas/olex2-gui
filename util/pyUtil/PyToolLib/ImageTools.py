@@ -371,7 +371,7 @@ class ImageTools(FontInstances):
     name = r"skin_logo.png"
     if os.path.exists(logopath):
       im = Image.open(logopath)
-      width = int(width) - 20
+      #width = int(width) - 20
       factor = im.size[0]/width
       height = int(im.size[1] / factor)
       im = self.resize_image(im, (width, height))
@@ -379,7 +379,6 @@ class ImageTools(FontInstances):
       txt = '<zimg border="0" src="skin_logo.png">'
     else:
       txt = " "
-
     OlexVFS.write_to_olex('logo1_txt.htm',txt,True)
     return "Done"
 
