@@ -2284,7 +2284,8 @@ class HistoryGraph(Analysis):
       bars.append((R1,href,target))
       node = node.active_child_node
     n_bars = len(bars)
-    size = (OV.GetParam('gui.htmlpanelwidth')- OV.GetParam('gui.html.table_firstcol_width') - 35, 100)
+    width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+    size = (width - OV.GetParam('gui.html.table_firstcol_width')-10, 100)
     self.params.size_x, self.params.size_y = size
     self.make_empty_graph(draw_title=False)
 
