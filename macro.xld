@@ -128,7 +128,6 @@
     <cmd2  "spy.saveHistory()">
     <cmd3  "spy.SaveStructureParams()">
     <cmd3  "spy.SaveUserParams()">
-    <cmd3  "spy.SaveGuiParams()">
     <cmd2  "spy.SaveCifInfo()">
     <cmd2  "mode off">
     <cmd4  "storeparam startup file.relativePath(filefull())">
