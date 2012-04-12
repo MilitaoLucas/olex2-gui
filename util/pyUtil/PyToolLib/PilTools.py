@@ -850,6 +850,7 @@ class timage(ImageTools):
         do_these = [
                 "make_cbtn_items",
                 "info_bitmaps",
+                
                 ]
     if not do_these:
       do_these = ["make_generated_assorted_images",
@@ -865,6 +866,7 @@ class timage(ImageTools):
                   "make_element_buttons",
                   "info_bitmaps",
                   "resize_news_image",
+                  "resize_skin_logo",
                   "create_logo"
                   ]
 
@@ -887,7 +889,6 @@ class timage(ImageTools):
       a()
       if self.timer:
         print "\t - %s took %.3f s to complete" %(item, self.time.time()-t1)
-
 
   def make_popup_banners(self):
     txt_l = [('setup',330), ('help',410), ('tutorial',375)]
@@ -2575,6 +2576,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
 
     filename = item
+    if item_type == 'snumtitle':
+      filename = 'sNumTitle.png'
     type_key = "%s_%s" %(item_type, width)
     self.timage_blanks.setdefault(type_key,{})
     self.timage_blanks[type_key].setdefault(state,image.copy())
@@ -3410,6 +3413,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     return image
 
+
+  def resize_skin_logo(self):
+    IT.resize_skin_logo(self.width)
+    return "Done"
+
   def info_bitmaps(self):
 
     if olx.CurrentLanguage() == "Chinese":
@@ -3583,6 +3591,7 @@ def drawSpaceGroupInfo(draw, luminosity=1.9, right_margin=12, font_name="Times B
           after_kern = -2
           cur_pos += advance
       i+= 1
+
 
 
 
