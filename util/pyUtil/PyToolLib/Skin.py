@@ -102,7 +102,7 @@ def check_for_first_run():
       return False
     except:
       olx.SkinUpdated = True
-    startup_skin = olx.GetVar('startup_skin', 'default')
+    startup_skin = OV.GetParam('gui.skin.name', 'default')
     change_skin(startup_skin)
     return True
   return False
