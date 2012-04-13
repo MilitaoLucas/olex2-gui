@@ -30,7 +30,7 @@
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;help_ext=;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
-  <td colspan=3>
+  <td width='100%'>
     <b>%Selection%:</b>
     <a href="sel -i">%Invert%</a> |
     <a href="sel -u">%Deselect%</a> |
@@ -44,10 +44,11 @@
 <tr name=SELECT_WHERE>
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;help_ext=;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width='40%' VALIGN='center' >
+  <td width='45%' VALIGN='center' >
     %Select atoms where% <b>U<sub>iso</sub></b>
   </td>
-  <td VALIGN='center'  colspan='2'>
+  
+  <td VALIGN='center' width='15%'>
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="combo"
@@ -55,26 +56,28 @@
       bgcolor="$GetVar(HtmlInputBgColour)"
       name= "compare"
       items=">;=;<"
-      width="35"
+      width="100%"
       value = ">"
       readonly
     >
     </font>
+
+  <td VALIGN='center' width='20%'>
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="text"
       bgcolor="$GetVar(HtmlInputBgColour)"
       name = "uiso"
-      width="30"
+      width="100%"
       float height="$GetVar(HtmlInputHeight)"
       value = "0.06"
     >
-    </font>
-&nbsp;
+  </font>
 </td>
+
 <td width='20%' align='right'>
 $spy.MakeHoverButton(button_small-select@uiso,sel atoms where xatom.uiso getvalue\(compare) getvalue\(uiso)&&xatom.type!='Q')
-  </td>
+</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
 
@@ -82,22 +85,25 @@ $spy.MakeHoverButton(button_small-select@uiso,sel atoms where xatom.uiso getvalu
 <tr name=SELECT_RINGS>
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;help_ext=;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td VALIGN='center' >
+  <td width='25%' VALIGN='center' >
+    %Select Rings%
+  </td>
+
+  <td VALIGN='center' width='30%'>
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="combo"
       height="$GetVar(HtmlComboHeight)"
       bgcolor="$GetVar(HtmlInputBgColour)"
-      label="%Rings% "
       name="RINGSELECT"
       items="--;C6;C5N;C5;C5O;"
-      width="80"
+      width="100%"
       onchange="if strcmp(GetValue(RINGSELECT),--) then html.SetFocus(RINGSELECT) else 'sel -u'>>sel rings GetValue(RINGSELECT)"
       value=""
     >
     </font>
   </td>
-  <td VALIGN='center' colspan='2'>
+  <td ALIGN='right' width='45%'>
     <a href="sel rings C6"><b>%Phenyl%</b></a>&nbsp;
     <a href="sel rings C5N"><b>%Pyridine%</b></a>
   </td>

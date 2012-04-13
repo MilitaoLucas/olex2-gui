@@ -2737,12 +2737,11 @@ class HealthOfStructure():
     width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - 2
 
     boxWidth = (width/n) * scale
-    boxHeight = 32 * scale
-    boxHalf = 8 *scale
+    boxHeight = OV.GetParam('gui.timage.tab.height') * scale
+    boxHalf = 3 * scale
     if type(colour) != str:
       colour = colour.hexadecimal
     colour = "#000000"
-    im = Image.new('RGB', (boxWidth,boxHeight), colour)
     im = Image.new('RGB', (boxWidth,boxHeight), OV.GetParam('gui.html.table_firstcol_colour').hexadecimal)
     draw = ImageDraw.Draw(im)
     try:

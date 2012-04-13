@@ -19,7 +19,7 @@
 <tr>
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width="20%">
+  <td width="40%">
     <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="combo"
@@ -57,14 +57,27 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
     >
     </font>
   </td>
-  <td width="20%">
+
+  <td valign='bottom' align='right' width='40%'>
+  $spy.MakeHoverButton(button_small-mask,spy.MaskView\())
+  </td>
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
+
+
+<tr>
+<!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
+  <td width="50%">
     <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="text"
       name = "SET_SNUM_MASKS_SOLVENT_RADIUS"
       width="95%"
       height="$GetVar(HtmlInputHeight)"
-      label="%Solvent rad.%/&Aring"
+      label="%Solvent radius in% &Aring"
       valign="center"
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
@@ -73,14 +86,14 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
     >
     </font>
   </td>
-  <td width="20%">
+  <td width="50%">
     <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="text"
       name = "SET_SNUM_MASKS_SHRINK_TRUNCATION_RADIUS"
       width="95%"
       height="$GetVar(HtmlInputHeight)"
-      label="%Shrink trunc. rad.%/&Aring"
+      label="%Shrink truncation radius in% &Aring"
       valign="center"
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
@@ -90,9 +103,6 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
     </font>
   </td>
 
-  <td valign='bottom'>
-  $spy.MakeHoverButton(button_small-mask,spy.MaskView\())
-  </td>
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
