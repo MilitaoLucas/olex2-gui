@@ -631,7 +631,7 @@ def weightGuiDisplay():
         colour = gui_orange
       else:
         colour = gui_red
-      retVal += "<font size='2' color='%s'>%.4f(%.4f)</font> | " %(colour, curr, sugg)
+      retVal += "<font color='%s'>%.4f(%.4f)</font> | " %(colour, curr, sugg)
     html_scheme = retVal.strip("| ")
   else:
     html_scheme = current_weight

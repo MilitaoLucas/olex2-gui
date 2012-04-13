@@ -13,6 +13,9 @@ gui {
     font_size = 1
     font_size_large = 3
     formula_size = 3
+    font_size_controls = 1
+    input_height = 16
+    combo_height = 16
   }
 
   timage{
@@ -25,7 +28,7 @@ gui {
       top = 1
       left = 5
       filefullinfo_size = 10
-      sginfo_scale = 1.1
+      sginfo_scale = 0.8
       corner_rad = 3
       rounded = 1100
     }
@@ -37,8 +40,8 @@ gui {
     }
     
     h3{
-      height = 21
-      font_size = 14
+      height = 18
+      font_size = 13
       top = 1
     }
 
@@ -48,14 +51,25 @@ gui {
       font_size = 10
       top = 1
     }
+    
+    tinybutton{
+      width = 18
+      font_size = 12
+      top = 2
+    }
+
+
     tab{
-      height = 21
-      font_size = 14 
+      height = 24
+      font_size = 16
     }
     
     cbtn{
-      height = 20
+      height = 18
       font_size = 15
+      top = 1
+      arrows = "bar:right:18,arrow_right:onup:offdown:hoverdown:hoveronup"
+      buttonmark = 5:#b40000:4
     }
 
     
