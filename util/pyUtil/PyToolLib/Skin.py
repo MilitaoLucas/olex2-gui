@@ -204,9 +204,11 @@ def change_skin(skin_name=None, force=False):
     pass
     #new_width = OV.GetParam('gui.htmlpanelwidth')
   if new_width:
-    if new_width < 350:
+    if new_width < 400:
       skin_name += "_small"
-
+      
+  OV.SetParam('gui.skin.name', skin_name)
+  
   olx.fs.Clear(3)
   OlexVFS.write_to_olex('logo1_txt.htm'," ",True)
 
