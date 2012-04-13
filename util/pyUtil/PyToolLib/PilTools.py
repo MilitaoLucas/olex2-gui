@@ -860,7 +860,6 @@ class timage(ImageTools):
                   "make_cbtn_items",
                   "make_icon_items",
                   "make_image_items",
-                  "make_note_items",
                   "make_images_from_fb_png",
                   "make_popup_banners",
                   "make_element_buttons",
@@ -2090,11 +2089,30 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       ##image.save(r"%s\etc\$%s.png" %(datadir, imag), "PNG")
 
 
-  def make_element_buttons(self):
-    from PeriodicTable import PeriodicTable
-    pt = PeriodicTable().PeriodicTable()
+  def make_element_buttons(self, elements='all'):
     htm = "Currently no info about elements available"
     OV.write_to_olex('element_buttons.htm', htm, 1)
+    pt = []
+    if not elements:
+      elements = olx.xf.GetFormula()
+      l = elements.split()
+      for bit in l:
+        el = ""
+        i = 0
+        char = bit[0:1]
+        while unicode.isalpha(char):
+          el += char
+          i += 1
+          char = bit[i:(i+1)]
+        name = "bt-element%s_goff.png" %el
+        if olx.fs.Exists(name) == 'false':
+          pt.append(el)
+    elif elements == 'all':
+      from PeriodicTable import PeriodicTable
+      pt = PeriodicTable().PeriodicTable()
+    else:
+      pt = elements.split()
+          
     btn_dict = {}
     icon_size = OV.GetParam('gui.skin.icon_size')
     tints = [("",(250,250,250)), ("b",(210,210,255)), ('g',(210,255,210)), ('r',(255,210,210))]
@@ -2450,6 +2468,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         grad_colour = IT.adjust_colour(highlight_colour, luminosity = 0.95)
 
     elif item_type == 'tinybutton':
+      height = width
       underground = self.params.html.table_bg_colour.rgb
       shadow = False
       if colour:
@@ -2863,6 +2882,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     base_colour = self.params.html.base_colour.rgb
     font_colour = self.adjust_colour(base_colour, luminosity=luminosity)
     scale = OV.GetParam('gui.timage.snumtitle.sginfo_scale')
+    fscale = self.scale * OV.GetParam('gui.timage.snumtitle.sginfo_scale')
     try:
       txt_l = []
       txt_sub = []
@@ -2880,26 +2900,26 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         txt_norm = [(txt,0)]
       try:
         font_base = "Serif"
-        font_bar = self.registerFontInstance("%s" %font_base, int(14 * self.scale))
-        font_slash = self.registerFontInstance("%s" %font_base, int(28 * self.scale))
-        font_number = self.registerFontInstance("%s" %font_base, int(24 * self.scale))
-        font_letter = self.registerFontInstance("%s Italic" %font_base, int(24 * self.scale))
-        font_sub = self.registerFontInstance("%s Bold" %font_base, int(14 * self.scale))
-        norm_kern = 2 * self.scale
-        sub_kern = -1 * self.scale
-        sub_lower = 10 * self.scale
+        font_bar = self.registerFontInstance("%s" %font_base, int(14 * fscale))
+        font_slash = self.registerFontInstance("%s" %font_base, int(28 * fscale))
+        font_number = self.registerFontInstance("%s" %font_base, int(24 * fscale))
+        font_letter = self.registerFontInstance("%s Italic" %font_base, int(24 * fscale))
+        font_sub = self.registerFontInstance("%s Bold" %font_base, int(14 * fscale))
+        norm_kern = 2 * fscale
+        sub_kern = -1 * fscale
+        sub_lower = 10 * fscale
         p_higher = 0
-        bar_higher = -11 * self.scale
+        bar_higher = -11 * fscale
         ls = 0
         ts = 3
       except:
         font_name = "Arial"
-        font_bar = self.registerFontInstance("%s Bold" %font_base, 14 * self.scale)
-        font_slash = self.registerFontInstance("%s Bold" %font_base, 20 * self.scale)
-        font_number = self.registerFontInstance("%s Bold" %font_base, 16 * self.scale)
-        font_letter = self.registerFontInstance("%s Bold Italic" %font_base, 17 * self.scale)
-        font_norm = self.registerFontInstance(font_name, 15 * self.scale)
-        font_sub = self.registerFontInstance(font_name, 12 * self.scale)
+        font_bar = self.registerFontInstance("%s Bold" %font_base, 14 * fscale)
+        font_slash = self.registerFontInstance("%s Bold" %font_base, 20 * fscale)
+        font_number = self.registerFontInstance("%s Bold" %font_base, 16 * fscale)
+        font_letter = self.registerFontInstance("%s Bold Italic" %font_base, 17 * fscale)
+        font_norm = self.registerFontInstance(font_name, 15 * fscale)
+        font_sub = self.registerFontInstance(font_name, 12 * fscale)
         norm_kern = 0
         sub_kern = 0
       textwidth = 0
@@ -2919,8 +2939,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       txt_l = []
     if txt_l:
       i = 0
-      left_start = (ls * -1) * self.scale
-      top_start = (ts * -1) * self.scale
+      left_start = (ls * -1) * fscale
+      top_start = (ts * -1) * fscale
       cur_pos = left_start
       advance = 0
       after_kern = 0
@@ -2932,33 +2952,33 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
               continue
             cur_pos += advance
             cur_pos += after_kern
-            after_kern = 0 * self.scale
+            after_kern = 0 * fscale
             advance = 0
             try:
               int(character)
               font = font_number
-              top = int(0.5 * self.scale + top_start)
-              after_kern = 4 * self.scale
+              top = int(0.5 * fscale + top_start)
+              after_kern = 4 * fscale
             except:
               font = font_letter
-              top = 0 * self.scale + top_start
+              top = 0 * fscale + top_start
               if character == "P" or character == "I" or character == "C":
-                norm_kern = 0  * self.scale
-                after_kern = 1 * self.scale
+                norm_kern = 0  * fscale
+                after_kern = 1 * fscale
                 character = " %s" %character
-                top = int(p_higher * self.scale + top_start)
+                top = int(p_higher * fscale + top_start)
             if character == "-":
-              draw.text((cur_pos + 0 * self.scale, bar_higher), "_", font=font_bar, fill=font_colour)
-              draw.text((cur_pos + 0 * self.scale, bar_higher + int(self.scale * 0.6)), "_", font=font_bar, fill=font_colour)
-              advance = -2 * self.scale
+              draw.text((cur_pos + 0 * fscale, bar_higher), "_", font=font_bar, fill=font_colour)
+              draw.text((cur_pos + 0 * fscale, bar_higher + int(fscale * 0.6)), "_", font=font_bar, fill=font_colour)
+              advance = -2 * fscale
               norm_kern = 0
             elif character == "/":
-              norm_kern = 0 * self.scale
-              after_kern = -2 * self.scale
+              norm_kern = 0 * fscale
+              after_kern = -2 * fscale
               if upon_advance:
                 cur_pos += upon_advance
                 upon_advance = None
-              draw.text((cur_pos -2 * self.scale, top - int(0.5 * self.scale)), "/", font=font_slash, fill=font_colour)
+              draw.text((cur_pos -2 * fscale, top - int(0.5 * fscale)), "/", font=font_slash, fill=font_colour)
               advance = ((draw.textsize("/", font=font_slash)[0]) + norm_kern) - 1
             else:
               draw.text((cur_pos + norm_kern, top), "%s" %character, font=font, fill=font_colour)
@@ -2969,12 +2989,12 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
             cur_pos += advance
             draw.text((cur_pos + sub_kern, sub_lower), "%s" %text_in_superscript, font=font_sub, fill=font_colour)
             advance = (draw.textsize(text_in_superscript, font=font_sub)[0]) + sub_kern
-            after_kern = -2 * self.scale
+            after_kern = -2 * fscale
             upon_advance = advance
 #            cur_pos += advance
         i+= 1
 
-      cut = left_start + ls * self.scale, ts * self.scale, cur_pos + advance + right_margin, 30 * self.scale
+      cut = int(left_start) + int(ls * self.scale), int(ts * self.scale), int(cur_pos + advance + right_margin), int(30 * self.scale)
       sg = im.crop(cut)
       #sg.show()
       return sg, sg.size
@@ -3654,6 +3674,9 @@ class Boxplot(ImageTools):
 timage_instance_TestBanner = timage()
 OV.registerFunction(timage_instance_TestBanner.makeTestBanner)
 
+
+TI = timage()
+OV.registerFunction(TI.make_element_buttons, False, 'piltools')
 
 
 if __name__ == "__main__":
