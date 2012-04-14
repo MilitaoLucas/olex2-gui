@@ -28,13 +28,21 @@ class MultipleDataset:
       if olx.xf.DataName(i) == "global":
         continue
       counter += 1
+      display = ""
+      name = olx.xf.DataName(i)
+      if len(name) < 3:
+        display = "Structure %s" %name
+      elif len(name) > 15:
+        display = "%s..%s" %(name[:6], name[-6:])
+      else:
+        display = name
       if i > 0 and (counter%4) == 0:
         html += "</tr><tr width=100%>"
       if i == current:
-        html += "<td align='center' width='25%'>Structure <b>" + olx.xf.DataName(i) + "&nbsp;(*)</b></td>"
+        html += "<td align='center' width='25%'><b>" + display + "&nbsp;(*)</b></td>"
       else:
-        html += "<td align='center' width='25%'><a href='reap filename().cif#" + str(i) + "'>Structure "\
-           + olx.xf.DataName(i) + "</a></td>"
+        html += "<td align='center' width='25%'><a href='reap filename().cif#" + str(i) + ">>compaq'>"\
+           + display + "</a></td>"
     return html + "</tr></table>"
 
 mds = MultipleDataset()
