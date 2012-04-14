@@ -76,4 +76,5 @@ gui {
   }
 
   htmlpanelwidth = 350
+  htmlpanelwidth_margin_adjust = 22
 }

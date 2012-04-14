@@ -1820,14 +1820,12 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if olx.fs.Exists(bitmap) == 'true':
       olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
     textItems = []
-    textItems.append("autochem")
     textItems += self.image_items_d.get('H1',[])
     textItems += self.image_items_d.get('H2',[])
     for item in self.image_items_d.get('H3',[]):
       textItems.append("h3-%s" %item)
 
     tabItems = []
-    g3tabItems = ['g3-solve', 'g3-refine', 'g3-image', 'g3-report', 'g3-tools']
 
     directories = ["etc/gui", "etc/news", "etc/gui/blocks", "etc/gui/snippets", "etc/gui/g3", "etc/tutorials"]
     rFile = open("%s/etc/gui/blocks/index-tabs.htm" %(self.basedir), 'r')
@@ -1838,7 +1836,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       if t not in tabItems:
         tabItems.append(t)
     rFile.close()
-    tabItem_l = [tabItems, g3tabItems]
+    tabItem_l = [tabItems]
     self.tabItems = tabItems
     for directory in directories:
       for htmfile in OV.ListFiles("%s/%s/*.htm" %(self.basedir,  directory)):
@@ -1917,7 +1915,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           use_new = True
           if use_new:
             ## need different width for tab items
-            width = (self.width / len(tabItems)) - 2
+            width = (self.width / len(tabItems))
             image = self.make_timage(item_type='tab', item=item.lstrip('g3-'), state=state, width=width)
           else:
             image = self.tab_items(item, state)

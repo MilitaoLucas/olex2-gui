@@ -25,17 +25,20 @@
 
 
 <table name=TABS bgcolor=ffbbbb border="0" style="border-collapse: collapse" width="100%" cellpadding="0" cellspacing="1">
-  <tr bgcolor=bbffbb width='100%'>
-    <td align='left' width='25%'>
+  <tr align='center' bgcolor=bbffbb width='100%'>
+    <td align='left' width='20%'>
+<!-- #includeif file.Exists(FileFull()) tab-home gui\blocks\tab-on.htm;gui\blocks\tab-off.htm;image=home;2; -->
+    </td>
+    <td align='center' width='20%'>
 <!-- #includeif file.Exists(FileFull()) tab-work gui\blocks\tab-on.htm;gui\blocks\tab-off.htm;image=work;2; -->
     </td>
-    <td align='center' width='25%'>
+    <td align='center' width='20%'>
 <!-- #includeif file.Exists(FileFull()) tab-view gui\blocks\tab-on.htm;gui\blocks\tab-off.htm;image=view;2; -->
     </td>
-    <td align='center' width='25%'>
+    <td align='center' width='20%'>
 <!-- #includeif file.Exists(FileFull()) tab-tools gui\blocks\tab-on.htm;gui\blocks\tab-off.htm;image=tools;2; -->
     </td>
-    <td align='center' width='25%'>
+    <td align='right' width='20%'>
 <!-- #includeif file.Exists(FileFull()) tab-info gui\blocks\tab-on.htm;gui\blocks\tab-off.htm;image=info;2; -->
     </td>
   </tr>
