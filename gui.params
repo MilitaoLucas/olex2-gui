@@ -577,7 +577,7 @@ gui
     .type = str
   htmlpanelwidth = 460
     .type = int
-  htmlpanelwidth_margin_adjust = 20
+  htmlpanelwidth_margin_adjust = 21
     .type = int
   htmlpanel_side = right
     .type = str
