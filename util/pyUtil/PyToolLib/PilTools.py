@@ -209,7 +209,7 @@ class GuiSkinChanger(ImageTools):
     olex.m("SetMaterial InfoBox.Plane 3077;0,0,0,1;1,1,1,0.5")
     olex.m("SetFont Notes #olex2.fnt:frb_10")
     olex.m("SetFont Default #olex2.fnt:frb_12")
-    olex.m("htmguifontsize %s" %OV.GetParam('HtmlFontSize'))
+    olex.m("htmguifontsize %s" %OV.GetParam('HtmlGuiFontSize'))
     olex.m("showwindow help false")
     #olex.m("grad true")
 
@@ -1973,6 +1973,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         for item in buttons:
           #cbtn buttons also need special width
           width = int(round((self.available_width + OV.GetParam('gui.html.table_firstcol_width'))/3,0)) - 5
+          width = int(round((self.width/3)-(self.width/130)))
+          
           cut = width - OV.GetParam('gui.timage.cbtn.vline')
           if cut > width:
             cut = width - 1
@@ -2446,10 +2448,12 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     underground = self.params.html.bg_colour.rgb
 
     if item_type == "h1":
-      width += 1
-
+      width += round(width/200)
+      
     elif item_type == "h3":
-      width -= self.params.html.table_firstcol_width + 4
+      width -= (self.params.html.table_firstcol_width + 9)
+      underground = self.params.html.table_bg_colour.rgb
+      
 
     elif "tab" in item_type:
       if state == 'on':
