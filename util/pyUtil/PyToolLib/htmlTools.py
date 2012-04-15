@@ -140,7 +140,7 @@ bgcolor="%(bgcolor)s"
   return htmlInputBoxText
 
 def makeHtmlTableRow(dictionary):
-  dictionary.setdefault('font', 'size=%s' %OV.GetParam('HtmlFontSize'))
+  dictionary.setdefault('font', 'size=%s' %OV.GetParam('HtmlGuiFontSize'))
   dictionary.setdefault('trVALIGN','center')
   dictionary.setdefault('trALIGN','left')
   dictionary.setdefault('fieldWidth','30%%')
@@ -440,7 +440,7 @@ def make_html_opening():
   html = '''
   <html>
   <body link=$GetVar(HtmlLinkColour) bgcolor=$GetVar(HtmlBgColour)>
-  <font color=$GetVar(HtmlFontColour size=$GetVar(HtmlFontSize) face="$GetVar(HtmlFontName)">
+  <font color=$GetVar(HtmlFontColour size=$GetVar(HtmlGuiFontSize) face="$GetVar(HtmlFontName)">
 <p> '''
   return html
 

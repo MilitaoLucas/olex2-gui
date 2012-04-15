@@ -738,7 +738,7 @@ class OlexFunctions(inheritFunctions):
       size += 1
     #elif sys.platform[:3] == 'win':
       #size = 6
-    OV.SetVar('HtmlFontSize', size)
+    OV.SetVar('HtmlGuiFontSize', size)
     return size
 
   def SetHtmlFontSizeControls(self):
