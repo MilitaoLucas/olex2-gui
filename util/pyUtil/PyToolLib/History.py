@@ -584,7 +584,7 @@ def popout_history_tree(width=800, height=500):
   width = int(width)
   height = int(height)
   font_colour = OV.GetParam('gui.html.font_colour')
-  font_size = OV.GetParam('HtmlFontSize')
+  font_size = OV.GetParam('HtmlGuiFontSize')
   html = """
 <html>
   <body>
