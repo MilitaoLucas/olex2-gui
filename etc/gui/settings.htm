@@ -1,10 +1,34 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
+
 <tr>
-  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)">
-    <zimg border="0" src="toolbar-swapbg.png">
+  <td width='2%' bgcolor="$GetVar(HtmlTableFirstcolColour)">
   </td>
-  <td  colspan='4'>
+  <td width='23%'>
+    <b>%Atoms%</b>:
+  <td width='75%' colspan='2'>
+    <a target="Set atom colours and styles" href="
+Freeze(true)>>
+@reap -b 'BaseDir()/sample_data/Periodic Table/Periodic Table.cif' -b>>
+sel -a>>
+conn 0 0>>
+matr 3>>
+rota 2 90>>
+Freeze(false)>>
+">%Atom Styles%
+    </a>
+  </td>
+</tr>
+
+
+
+<tr>
+  <td width='2%' bgcolor="$GetVar(HtmlTableFirstcolColour)">
+  </td>
+  <td width='23%'>
+    <b>Background:</b>
+  </td>
+  <td width='65%' colspan='2'>
     <a 
       href="swapbg" 
       target="%swapbg-target%">
@@ -16,7 +40,16 @@
       target="%graduated-target%">
       %graduated%
     </a> 
-    &nbsp;
+  </td>
+</tr>
+
+<tr>
+  <td width='2%' bgcolor="$GetVar(HtmlTableFirstcolColour)">
+  </td>
+  <td width='23%'>
+    <b>GUI left/right</b>
+  </td>
+  <td width='65%' colspan='2'>
     <a 
       href="htmlpanelswap" 
       target="%htmlpanelswap-target%">
@@ -26,92 +59,103 @@
 </tr>
 
 
-
 <tr>
-  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)">
-    <zimg border="0" src="toolbar-olex.png">
+  <td width='2%' bgcolor="$GetVar(HtmlTableFirstcolColour)">
   </td>
-  <td colspan='1'>
-    <b>%Compile Date%:</b>
-  </td>
-  <td colspan='2'>
-$GetCompilationInfo()
-  </td>
-</tr>
-
-<tr>
-  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)">
-    <zimg border="0" src="toolbar-olex.png"></td>
-  <td colspan='1'>
+  <td width='23%'>
     <b>%Tooltips%:</b>
   </td>
-  <td colspan='1'>
-    <a href="html.tooltips true" target="Switch tooltips on">%On%</a> | <a href="html.tooltips false" target="Switch tooltips off">%Off%</a>
+  <td width='55%' >
+    Show tooltips when hovering
   </td>
-
-  <td colspan='1'>
-    <b>%Help%:</b>
-  </td>
-  <td colspan='1'>
-    <a href="showwindow help true" target="Switch help on">%On%</a> | <a href="showwindow help false" target="Switch help off">%Off%</a>
+  <td width='20%' align='right'>
+    <input 
+      type="checkbox"
+      height="$GetVar(HtmlCheckboxHeight)"
+      name="SHOW_TOOLTIPS"
+      bgcolor="$GetVar(HtmlInputBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
+      checked="$not(strcmp(spy.GetParam(user.show_tooltips),0))"
+      width='28'
+      oncheck="spy.SetParam(user.show_tooltips,1)>>html.tooltips true" 
+      onuncheck="spy.SetParam(user.show_tooltips,0)>>html.tooltips false"
+      target="Show tooltips when hovering over a control"
+ 
+    >
   </td>
 </tr>
 
 <tr>
-  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)">
-    <zimg border="0" src="toolbar-olex.png">
+  <td width='2%' bgcolor="$GetVar(HtmlTableFirstcolColour)">
   </td>
-  <td colspan='1'>
+  <td width='23%'>
     <b>%Info%:</b>
   </td>
-  <td colspan='1'>
-    <a href="showwindow info true">%On%</a> | <a href="showwindow info false">%Off%</a>
+  <td width='55%' >
+    Show bar with structure info
   </td>
-  <td colspan='1'>
+  <td width='20%' align='right'>
+    <input 
+      type="checkbox"
+      height="$GetVar(HtmlCheckboxHeight)"
+      name="SHOW_INFO"
+      bgcolor="$GetVar(HtmlInputBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
+      checked="$not(strcmp(spy.GetParam(user.show_info),0))"
+      width='28'
+      oncheck="spy.SetParam(user.show_info,1)>>showwindow info true" 
+      onuncheck="spy.SetParam(user.show_info,0)>>showwindow info false"
+    >
+  </td>
+</tr>  
+
+<tr>
+  <td width='2%' bgcolor="$GetVar(HtmlTableFirstcolColour)">
+  </td>
+  <td width='23%'>
     <b>%Alerts%:</b>
   </td>
-  <td colspan='1'>
-    <a href="spy.SwitchAllAlertsOn()" target="Switch all alerts on">%On%</a>
+  <td width='55%' >
+    Reset all alerts
   </td>
-
-</tr>
-
-<tr>
-  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)">
-    <zimg border="0" src="toolbar-olex.png"></td>
-  <td colspan='1'>
-    <b>%GUI Font Size%:</b>
-  </td>
-  <td colspan='4'>
-    <a href="spy.SetParam(gui.html.font_size,2)>>html.Update">%Small%</a> | <a href="spy.SetParam(gui.html.font_size,3)>>html.Update">%Medium%</a> | <a href="spy.SetParam(gui.html.font_size,4)>>html.Update">%Large%</a>
+  <td width='20%' align='right'>
+    <a href="spy.SwitchAllAlertsOn()" target="Switch all alerts on">%Reset%</a>
   </td>
 </tr>
 
 <tr>
-  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)">
-    <a href="lines -1">
-      <zimg border="0" src="toolbar-lines.png">
-	</a>
+  <td width='2%' bgcolor="$GetVar(HtmlTableFirstcolColour)">
   </td>
-  <td colspan='1'>
-    <b>%Lines of Text%</b>:
+  <td width='23%'>
+    <b>%Lines%</b>:
   </td>
-  <td colspan='2'>
-    <a href="lines -1">%All%</a>
-    <a href="lines 0">1</a>
-    <a href="lines 1">2</a>
-    <a href="lines 4">5</a>
-    <a href="lines 9">10</a>
-    <a href="lines 19">20</a>
+  <td width='55%' >
+    Number of lines in the console
+  </td>
+  <td width='20%' align='right'>
+     <input
+       type="combo"
+       height="$GetVar(HtmlInputHeight)"
+       name="LINES_OF_TEXT"
+       bgcolor="$GetVar(HtmlInputBgColour)"
+       value=""
+       items="All<--1;1<-2;5<-6;10<-11;20<-21"
+       onchange="lines GetValue(~name~)"
+       valign='center'
+       align='right'
+       width="100%"
+       manage
+     >
   </td>
 </tr>
 
 <tr>
-  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
-  <td colspan='1'>
+  <td width='2%' bgcolor="$GetVar(HtmlTableFirstcolColour)">
+  </td>
+  <td width='23%'>
     <b>%Panel Width%:</b>
   </td>
-  <td colspan='2'>
+  <td width='65%' colspan='2'>
     <a href="panel 400">%Default%</a>
     <a href="panel 300">%Narrow%</a>
     <a href="panel 500">%Wide%</a>
@@ -120,51 +164,58 @@ $GetCompilationInfo()
 
 
 <tr>
-  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
-  <td  valign='center' colspan = '1'>
+  <td width='2%' bgcolor="$GetVar(HtmlTableFirstcolColour)">
+  </td>
+  <td width='23%'>
     <b>%Language%:</b>
   </td>
-  <td colspan='3'>
+  <td width='65%' colspan='2'>
   <a href="CurrentLanguage(English)>>panel">English</a>
     <a href="cursor(busy,'%Changing Language to% %Chinese%')>>CurrentLanguage(Chinese)>>panel>>cursor()">%Chinese%</a>
-    <a href="cursor(busy,'%Changing Language to% %Russian%')>>CurrentLanguage(Russian)>>panel>>cursor()">%Russian%</a>
-    <a href="cursor(busy,'%Changing Language to% %German%')>>CurrentLanguage(German)>>panel>>cursor()">%German%</a>
-    <a href="cursor(busy,'%Changing Language to% %French%')>>CurrentLanguage(French)>>panel>>cursor()">%French%</a>
-    <a href="cursor(busy,'%Changing Language to% %Spanish%')>>CurrentLanguage(Spanish)>>panel>>cursor()">%Spanish%</a>
     </td>
   </tr>
 
-
 <tr>
-  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
-  <td  valign='center' colspan='1'>
+  <td width='2%' bgcolor="$GetVar(HtmlTableFirstcolColour)">
+  </td>
+  <td width='23%'>
    <b>%Use Fader%:</b>
   </td>
-  <td colspan='2'>
+  <td width='55%'>
+    Structures will fade in and out
+  </td>
+  <td width='20%' align='right'>
     <input 
       type="checkbox"
-      float height="$GetVar(HtmlCheckboxHeight)"
-      bgcolor="$GetVar(HtmlTableBgColour)"
-      fgcolor="$GetVar(HtmlFontColour)"
+      height="$GetVar(HtmlCheckboxHeight)"
       name="USE_FADER"
+      bgcolor="$GetVar(HtmlInputBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
       checked="$not(strcmp(spy.GetParam(user.use_fader),0.0))"
-      width='53' 
+      width='28'
       oncheck="spy.SetParam(user.use_fader,0.4)" 
-      onuncheck="spy.SetParam(user.use_fader,0)">
+      onuncheck="spy.SetParam(user.use_fader,0)"
+    >
   </td>
 </tr>
+
 <tr>
-  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
-  <td  valign='center' colspan='1'>
+  <td width='2%' bgcolor="$GetVar(HtmlTableFirstcolColour)">
+  </td>
+  <td width='23%'>
     <b>%Start Olex2 in%:</b>
-   </td>
-   <td width='40%'>
+  </td>
+  <td width='55%'>
+     Where Olex2 will open after restart 
+  </td>
+  <td width='20%' align='right'>
      <input
+
        type="combo"
        height="$GetVar(HtmlInputHeight)"
        name="START_WHERE"
        bgcolor="$GetVar(HtmlInputBgColour)"
-       width="100"
+       width="100%"
        value="$spy.GetParam(user.start_where)"
        items="Home;Work;View;Tools;Info"
        onchange="spy.SetParam(user.start_where,GetValue(~name~))"
@@ -175,49 +226,42 @@ $GetCompilationInfo()
   </td>
 </tr>
 
-<tr bgcolor='$GetVar(HtmlTableFirstcolColour)'>
-  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
-  <td  valign='center' colspan='4'>
-    <input
-      type="combo"
-      height="$GetVar(HtmlComboHeight)"
-      width="35"
-      bgcolor="$GetVar(HtmlInputBgColour)"
-      name="SET_USER_EXPERT_LEVEL"
-      items='0;1;2;3'
-      value="$spy.GetParam(user.expert_level)"
-      onchange="spy.SetParam(user.expert_level,GetValue(SET_USER_EXPERT_LEVEL))"
-      label="User Level "
-      valign="center"
-      readonly
-    >
-  </td>
-</tr>
 
-
-<tr>
-  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
-  <td  valign='center' colspan='4'>
-    <input
-      noroot
-      name="SETTINGS_TREE"
-      type="tree"
-      src="settings_tree.ind"
-      bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-      width="$eval(html.clientwidth(self)-70)"
-      height="120"
-      selected="echo selected"
-      onselect=""
-      onitem="spy.EditParams(html.getvalue(SETTINGS_TREE),html.getvalue(SET_USER_EXPERT_LEVEL))"
-    >
-  </td>
-</tr>
-  
+</table>
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=6;1; -->
 
 
+
+
+
 <!--
+
+
+<tr>
+  <td width='2%' bgcolor="$GetVar(HtmlTableFirstcolColour)">
+  </td>
+  <td width='23%'>
+    <b>Perspective:</b>
+  </td>
+  <td width='70%' colspan='2'>
+    <input 
+    type="slider" 
+      name = "SNUM_PERSPECTIVE_SLIDE" 
+      width="100%" 
+      height="18" 
+      value="0" 
+      bgcolor="$GetVar(HtmlTableBgColour)"  
+      fgcolor="$GetVar(HtmlFontColour)" 
+      min="0" 
+      max="10" 
+      onchange = "gl.Perspective>>
+      gl.Perspective GetValue(SNUM_PERSPECTIVE_SLIDE)"
+    >
+  </td>
+</tr>
+
+
 
 <tr>
 <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td></td>
