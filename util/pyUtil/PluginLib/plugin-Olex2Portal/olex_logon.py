@@ -40,7 +40,7 @@ def make_translate_gui_items_html(item_l):
   else:
     txt='''
   <body link="$GetVar(HtmlLinkColour)" bgcolor="$GetVar(HtmlBgColour)">
-  <font color=$GetVar(HtmlFontColour  size=$GetVar(HtmlFontSize) face="$GetVar(HtmlFontName)">
+  <font color=$GetVar(HtmlFontColour  size=$GetVar(HtmlGuiFontSize) face="$GetVar(HtmlFontName)">
   <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
   '''
 
@@ -126,7 +126,7 @@ def make_logon_html(url='www.olex2.org'):
   else:
     txt='''
   <body link="$GetVar(HtmlLinkColour)" bgcolor="$GetVar(HtmlBgColour)">
-  <font color=$GetVar(HtmlFontColour  size=$GetVar(HtmlFontSize) face="$GetVar(HtmlFontName)">
+  <font color=$GetVar(HtmlFontColour  size=$GetVar(HtmlGuiFontSize) face="$GetVar(HtmlFontName)">
   <b>Please log on to our server with the username and password you use at %s.<br></b>
   <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
   <tr>

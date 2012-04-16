@@ -18,10 +18,13 @@ gui {
   }    
 
   html {
+    help{
+      bg_colour = #ffffff
+    }  
   
     code {
-      bg_colour = #181621
-      fg_colour = #095aa5
+      bg_colour = #dedede
+      fg_colour = #333399
       html_tag = code
      }
     base_colour = #d4d0c7

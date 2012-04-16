@@ -117,6 +117,8 @@ gui
       .type = int
     font_size_large = 5
       .type = int
+    font_size_medium = 3
+      .type = int
     formula_colour = #442244
       .type = colour
     formula_size = 5
@@ -160,6 +162,10 @@ gui
       html_tag = code
         .type = str
       }
+    help{
+      bg_colour = #ffffff
+        .type = colour
+    }  
   }
 
   timage{
@@ -435,7 +441,7 @@ gui
         .type = str
       halign = middle
         .type = str
-      top = 3
+      top = 4
         .type = int
       left = 0
         .type = int
@@ -577,7 +583,7 @@ gui
     .type = str
   htmlpanelwidth = 460
     .type = int
-  htmlpanelwidth_margin_adjust = 20
+  htmlpanelwidth_margin_adjust = 21
     .type = int
   htmlpanel_side = right
     .type = str

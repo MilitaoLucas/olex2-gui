@@ -5,7 +5,6 @@
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;colspan=2;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td>
-<!-- #include tool-help-button gui\blocks\tool-help-button.htm;help_ext=masks;1; -->
   </td>
   <td name=REFLECTION_FILE_LABEL width="45%">
     <b>%Reflection File%</b>
@@ -31,10 +30,9 @@
       width="95%"
       height="$GetVar(HtmlInputHeight)"
       onchange="
-spy.SetParam(snum.masks.type,GetValue(SET_SNUM_MASKS_TYPE))>>
+spy.SetParam(snum.masks.type,GetValue(~name~))>>
 spy.OlexCctbxMasks(False)>>
-spy.SetXGridView()>>
-html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)')"
+spy.gui.maps.SetXGridView()"
       label="%Map% "
       valign="center"
       readonly
@@ -53,13 +51,13 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
       value="$spy.GetParam(snum.masks.resolution_factor)"
-      onchange="spy.SetParam(snum.masks.resolution_factor,GetValue(SET_SNUM_MASKS_RESOLUTION_FACTOR))"
+      onchange="spy.SetParam(snum.masks.resolution_factor,GetValue(~name~))"
     >
     </font>
   </td>
 
   <td valign='bottom' align='right' width='40%'>
-  $spy.MakeHoverButton(button_small-mask,spy.MaskView\())
+  $spy.MakeHoverButton(button_small-mask,spy.gui.maps.MaskView\())
   </td>
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -82,7 +80,7 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
       value="$spy.GetParam(snum.masks.solvent_radius)"
-      onchange="spy.SetParam(snum.masks.solvent_radius,GetValue(SET_SNUM_MASKS_SOLVENT_RADIUS))"
+      onchange="spy.SetParam(snum.masks.solvent_radius,GetValue(~name~))"
     >
     </font>
   </td>
@@ -98,7 +96,7 @@ html.SetValue(SNUM_XGRID_SLIDE,'eval(xgrid.GetMin()*10), eval(xgrid.GetMax()*10)
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
       value="$spy.GetParam(snum.masks.shrink_truncation_radius)"
-      onchange="spy.SetParam(snum.masks.shrink_truncation_radius,GetValue(SET_SNUM_MASKS_SHRINK_TRUNCATION_RADIUS))"
+      onchange="spy.SetParam(snum.masks.shrink_truncation_radius,GetValue(~name~))"
     >
     </font>
   </td>

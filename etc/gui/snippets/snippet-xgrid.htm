@@ -1,24 +1,20 @@
-<!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=xgrid;1; -->
-  <td>
-    <font size='$GetVar(HtmlFontSizeControls)'>
-    <input
-      type="combo"
-      height="$GetVar(HtmlComboHeight)"
-      bgcolor="$GetVar(HtmlInputBgColour)"
-      name="SET_SNUM_XGRID_VIEW_#suffix"
-      items='plane;contour;contour+plane;surface;wire;points'
-      value="$spy.GetParam(snum.xgrid.view)"
-      onchange="spy.SetParam(snum.xgrid.view,GetValue(SET_SNUM_XGRID_VIEW_#suffix))
->>spy.SetXgridView()
+<td>
+  <font size='$GetVar(HtmlFontSizeControls)'>
+  <input
+    type="combo"
+    height="$GetVar(HtmlComboHeight)"
+    bgcolor="$GetVar(HtmlInputBgColour)"
+    name="SET_SNUM_XGRID_VIEW_#suffix"
+    items='plane;contour;contour+plane;surface;wire;points'
+    value="$spy.GetParam(snum.xgrid.view)"
+    onchange="spy.SetParam(snum.xgrid.view,GetValue(~name~))
+>>spy.gui.maps.SetXgridView()
 >>html.Update"
-      label="%View% "
-      valign="center"
-      readonly
-    >
-    </font>
+    label="%View% "
+    valign="center"
+    readonly
+  >
+  </font>
 </td>
 <td>
   <font size='$GetVar(HtmlFontSizeControls)'>
@@ -43,5 +39,3 @@
   <a href="editmaterial XGrid">%Edit% %style%</a>
   <!--<a href="sel WBox">%Select% %Volume%</a>-->
 </td>
-</tr>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
