@@ -1,15 +1,10 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
 <tr>
-
 <!-- #include tool-column gui\blocks\tool-help-first-column.htm;help_ext=xgrid;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<tr>
 <!-- #include xgrid gui\snippets\snippet-xgrid.htm;suffix=maps;colspan=3;1; -->
-</tr>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
-
 </tr>
 
 <tr>
@@ -24,9 +19,6 @@
 <!-- #includeif or(strcmp(xgrid.RenderMode(),'contour'),strcmp(xgrid.RenderMode(),'contour+plane'),strcmp(xgrid.RenderMode(),'plane')) xgrid gui\snippets\snippet-2D-xgrid.htm;colspan=3;1; -->
 </tr>
 
-<tr name=INCLUDE_H3_MASKS>
-<!-- #includeif file.Exists('HKLSrc()') h3-masks gui\h3-masks.htm;gui\blocks\tool-h3-off.htm;image=h3-masks;onclick="html.ItemState h3-calculate-voids 2>>if file.Exists('HKLSrc()') then 'html.ItemState h3-electron-density 2' else none";colspan=1;2; -->
-</tr>
 
 <tr name=INCLUDE_H3_CALCULATE_VOIDS>
 <!-- #include h3-calculate-voids gui\h3-calculate-voids.htm;gui\blocks\tool-h3-off.htm;image=h3-calculate-voids;onclick="if file.Exists('HKLSrc()') then 'html.ItemState h3-masks 2' else none>>if file.Exists('HKLSrc()') then 'html.ItemState h3-electron-density 2' else none";colspan=1;2; -->
@@ -39,5 +31,10 @@
 <tr name=INCLUDE_H3_ELECTRON_DENSITY>
 <!-- #includeif file.Exists('HKLSrc()') h3-electron-density gui\h3-electron-density.htm;gui\blocks\tool-h3-off.htm;image=h3-electron-density;onclick="html.ItemState h3-calculate-voids 2>>html.ItemState h3-masks 2";colspan=1;2; -->
 </tr>
+
+<tr name=INCLUDE_H3_MASKS>
+<!-- #includeif file.Exists('HKLSrc()') h3-masks gui\h3-masks.htm;gui\blocks\tool-h3-off.htm;image=h3-masks;onclick="html.ItemState h3-calculate-voids 2>>if file.Exists('HKLSrc()') then 'html.ItemState h3-electron-density 2' else none";colspan=1;2; -->
+</tr>
+
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=4;1; -->

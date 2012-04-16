@@ -352,6 +352,7 @@ def make_help_box(args):
   
   txt = txt %(banner_include, name, titleTxt, helpTxt, return_items, editLink)
   wFilePath = r"%s-%s.htm" %(name, box_type)
+  wFilePath = wFilePath.replace(" ", "_")
   #from ImageTools import ImageTools
   #IT = ImageTools()
   #txt = IT.get_unicode_characters(txt)
@@ -396,6 +397,8 @@ def make_help_box(args):
     if box_type == 'tutorial' and tutorial_box_initialised:
       olx.Popup(tutorial_box_initialised, wFilePath)
     else:
+      pop_name = pop_name.replace(" ", "_")
+      title = 'Olex2 Help'
       olx.Popup(pop_name, wFilePath, "-b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(title, boxWidth, boxHeight, x, y))
       olx.html.SetBorders(pop_name,5)
       if box_type == 'tutorial':
