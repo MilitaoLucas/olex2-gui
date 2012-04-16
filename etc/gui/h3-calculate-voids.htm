@@ -17,7 +17,7 @@
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
       value="$spy.GetParam(snum.calcvoid.resolution)"
-      onchange="spy.SetParam(snum.calcvoid.resolution,GetValue(SET_SNUM_CALCVOID_RESOLUTION))"
+      onchange="spy.SetParam(snum.calcvoid.resolution,GetValue(~name~))"
     >
     </font>
   </td>
@@ -33,7 +33,7 @@
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
       value="$spy.GetParam(snum.calcvoid.distance)"
-      onchange="spy.SetParam(snum.calcvoid.distance,GetValue(SET_SNUM_CALCVOID_DISTANCE))"
+      onchange="spy.SetParam(snum.calcvoid.distance,GetValue(~name~))"
     >
     </font>
   </td>
@@ -55,7 +55,7 @@
     </font>
   </td>
   <td align='right'>
-$spy.MakeHoverButton(button_small-void,spy.VoidView\())
+$spy.MakeHoverButton(button_small-void,spy.gui.maps.VoidView\())
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
