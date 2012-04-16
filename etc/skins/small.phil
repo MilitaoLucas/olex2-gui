@@ -8,7 +8,7 @@ gui {
   }
 
   html{
-    table_firstcol_width = 10
+    table_firstcol_width = 12
     font_name = Arial
     font_size = 1
     font_size_large = 3
@@ -40,8 +40,8 @@ gui {
     }
     
     h3{
-      height = 18
-      font_size = 13
+      height = 17
+      font_size = 12
       top = 1
     }
 
@@ -76,4 +76,5 @@ gui {
   }
 
   htmlpanelwidth = 350
+  htmlpanelwidth_margin_adjust = 22
 }

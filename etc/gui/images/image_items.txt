@@ -57,8 +57,6 @@
   Fit Group
   Fit & Split
   Filter
-  Run Batch AC2
-  Run Batch ODA
   Run Batch
   Filter Database
   Scan Directory
@@ -111,9 +109,6 @@
   Set
   
 [G3 BIG BUTTON]
-  Solve this Structure
-  Refine this Structure
-  Create a Report of this Structure
 
 [G4 BUTTON]
   Data
@@ -128,6 +123,7 @@
   AutoChem2
   Folder View
   DataBase
+  RSC
 
 [H3]
   Collection

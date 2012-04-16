@@ -209,7 +209,7 @@ class GuiSkinChanger(ImageTools):
     olex.m("SetMaterial InfoBox.Plane 3077;0,0,0,1;1,1,1,0.5")
     olex.m("SetFont Notes #olex2.fnt:frb_10")
     olex.m("SetFont Default #olex2.fnt:frb_12")
-    olex.m("htmguifontsize %s" %OV.GetParam('HtmlFontSize'))
+    olex.m("htmguifontsize %s" %OV.GetParam('HtmlGuiFontSize'))
     olex.m("showwindow help false")
     #olex.m("grad true")
 
@@ -974,12 +974,12 @@ class timage(ImageTools):
     ## HELP INFO ICON
     height = OV.GetParam('gui.timage.h3.height')
     fill = '#ffffff'
-    size = (height * 2, height * 3)
+    size = (height * 2 + 1, height * 3)
     circle_top = 10
     height = OV.GetParam('gui.timage.h3.height')
     IM =  Image.new('RGBA', size,(0,0,0,0))
     draw = ImageDraw.Draw(IM)
-    xy = (1,circle_top,38, circle_top + 38)
+    xy = (0,circle_top, 38, circle_top + 38)
     draw.ellipse(xy, fill = '#ffffff')
     states = ['', 'on', 'off', 'hover', 'hoveron']
     r,g,b,a = IM.split()
@@ -1820,14 +1820,12 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if olx.fs.Exists(bitmap) == 'true':
       olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
     textItems = []
-    textItems.append("autochem")
     textItems += self.image_items_d.get('H1',[])
     textItems += self.image_items_d.get('H2',[])
     for item in self.image_items_d.get('H3',[]):
       textItems.append("h3-%s" %item)
 
     tabItems = []
-    g3tabItems = ['g3-solve', 'g3-refine', 'g3-image', 'g3-report', 'g3-tools']
 
     directories = ["etc/gui", "etc/news", "etc/gui/blocks", "etc/gui/snippets", "etc/gui/g3", "etc/tutorials"]
     rFile = open("%s/etc/gui/blocks/index-tabs.htm" %(self.basedir), 'r')
@@ -1838,7 +1836,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       if t not in tabItems:
         tabItems.append(t)
     rFile.close()
-    tabItem_l = [tabItems, g3tabItems]
+    tabItem_l = [tabItems]
     self.tabItems = tabItems
     for directory in directories:
       for htmfile in OV.ListFiles("%s/%s/*.htm" %(self.basedir,  directory)):
@@ -1917,7 +1915,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           use_new = True
           if use_new:
             ## need different width for tab items
-            width = (self.width / len(tabItems)) - 2
+            width = (self.width / len(tabItems))
             image = self.make_timage(item_type='tab', item=item.lstrip('g3-'), state=state, width=width)
           else:
             image = self.tab_items(item, state)
@@ -1975,6 +1973,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         for item in buttons:
           #cbtn buttons also need special width
           width = int(round((self.available_width + OV.GetParam('gui.html.table_firstcol_width'))/3,0)) - 5
+          width = int(round((self.width/3)-(self.width/130)))
+          
           cut = width - OV.GetParam('gui.timage.cbtn.vline')
           if cut > width:
             cut = width - 1
@@ -2448,10 +2448,12 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     underground = self.params.html.bg_colour.rgb
 
     if item_type == "h1":
-      width += 1
-
+      width += round(width/200)
+      
     elif item_type == "h3":
-      width -= self.params.html.table_firstcol_width + 4
+      width -= (self.params.html.table_firstcol_width + 9)
+      underground = self.params.html.table_bg_colour.rgb
+      
 
     elif "tab" in item_type:
       if state == 'on':

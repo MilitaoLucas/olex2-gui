@@ -965,6 +965,10 @@ user
     .type = path
   use_fader = 0
     .type = float
+  show_tooltips = 1
+    .type = int
+  show_info = 0
+    .type = int
   expert_level = 0
     .type = int
   alert_delete_history = Y

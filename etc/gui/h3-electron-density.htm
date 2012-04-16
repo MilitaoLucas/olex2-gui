@@ -4,7 +4,6 @@
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td>
-<!-- #include tool-help-button gui\blocks\tool-help-button.htm;help_ext=electron-density;1; -->
   </td>
   <td width="25%">
     <font size=$GetVar(HtmlFontSizeControls)>
@@ -16,7 +15,7 @@
       items='diff;fcalc;2Fo-Fc<-tomc;fobs'
       value="$spy.GetParam(snum.map.type)"
       width="95%"
-      onchange="spy.SetParam(snum.map.type,GetValue(SET_SNUM_MAP_TYPE))>>spy.MapView(off)"
+      onchange="spy.SetParam(snum.map.type,GetValue(~name~))>>spy.gui.maps.MapView(off)"
       label="%Map% "
       valign="center"
       readonly
@@ -33,7 +32,7 @@
       items='olex;fcf;'
       value="$spy.GetParam(snum.map.source)"
       width="95%"
-      onchange="spy.SetParam(snum.map.source,GetValue(SET_SNUM_MAP_SOURCE))>>spy.MapView(off)"
+      onchange="spy.SetParam(snum.map.source,GetValue(~name~))>>spy.gui.maps.MapView(off)"
       label="%Source% "
       valign="center"
       height="$GetVar(HtmlComboHeight)"
@@ -53,7 +52,7 @@
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
       value="$spy.GetParam(snum.map.resolution)"
-      onchange="spy.SetParam(snum.map.resolution,GetValue(SET_SNUM_MAP_RESOLUTION))>>spy.MapView(off))"
+      onchange="spy.SetParam(snum.map.resolution,GetValue(~name~))>>spy.gui.maps.MapView(off))"
     >
     </font>
   </td>
@@ -75,7 +74,7 @@
     </font>
   </td>
   <td colspan='1' valign='bottom' align="center">
-$spy.MakeHoverButton(button_small-map,spy.MapView\())
+$spy.MakeHoverButton(button_small-map,spy.gui.maps.MapView\())
   </td>
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

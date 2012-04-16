@@ -2,15 +2,15 @@
 
 
 <tr>
-  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
-  <td width='60%'>
-    <a href="reap">%Open Existing Structure%</a>
+  <td width="2%" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
+  <td width='98%'>
+    <a href="reap">%Open Existing Structure% or Data File (ins, res, hkl, p4p, raw...)</a>
   </td>
 </tr>
 
 <tr>
-  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
-  <td valign='center' colspan='2'>
+  <td width="2%" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
+  <td width='98%'valign='center' colspan='2'>
   <b>%Sample Structures%</b>:
   <a href="reap '$GetVar(sample_dir)/sucrose/sucrose'">%Sucrose%</a> |
   <a href="reap '$GetVar(sample_dir)/THPP/thpp'">THPP</a> |
@@ -20,26 +20,10 @@
   </td>
 </tr>
 
-<tr>
-  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
-  <td valign='center' colspan='2'>
-  <b>%Settings%</b>:
-  <a target="Setup Olex2" href="setup">%Setup Olex2%</a> |
-  <a target="Set atom colours and styles" href="
-Freeze(true)>>
-@reap -b 'BaseDir()/sample_data/Periodic Table/Periodic Table.cif' -b>>
-sel -a>>
-conn 0 0>>
-matr 3>>
-rota 2 90>>
-Freeze(false)>>
-">%Atom Styles%</a>
-  </td>
-</tr>
 
 <tr>
-  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
-  <td valign='center' colspan='2'>
+  <td width="2%" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
+  <td width='98%' valign='center' colspan='2'>
     <b>%Documentation%</b>:
 
   <a target='Documentation' href="shell 'http://www.olex2.org/documentation'"><b>Online</b></a> |
@@ -49,8 +33,8 @@ Freeze(false)>>
 
 
 <tr>
-  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
-  <td valign='center' colspan='2'>
+  <td width="2%" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
+  <td width='98%' valign='center' colspan='2'>
     <b>GUI Width</b>:
 
   <a target='Change the width of the GUI panel to 340 pixel' href="echo 'This will take a while! Please be patient.'>>panel 340"><b>Narrow Panel</b></a> |

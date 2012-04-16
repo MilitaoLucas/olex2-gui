@@ -4,7 +4,6 @@
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td>
-<!-- #include tool-help-button gui\blocks\tool-help-button.htm;help_ext=calculate-voids;1; -->
   </td>
   <td width="25%">
     <font size=$GetVar(HtmlFontSizeControls)>
@@ -18,11 +17,11 @@
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
       value="$spy.GetParam(snum.calcvoid.resolution)"
-      onchange="spy.SetParam(snum.calcvoid.resolution,GetValue(SET_SNUM_CALCVOID_RESOLUTION))"
+      onchange="spy.SetParam(snum.calcvoid.resolution,GetValue(~name~))"
     >
     </font>
   </td>
-  <td width="25%">
+  <td width="20%">
     <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="text"
@@ -34,11 +33,11 @@
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
       value="$spy.GetParam(snum.calcvoid.distance)"
-      onchange="spy.SetParam(snum.calcvoid.distance,GetValue(SET_SNUM_CALCVOID_DISTANCE))"
+      onchange="spy.SetParam(snum.calcvoid.distance,GetValue(~name~))"
     >
     </font>
   </td>
-  <td colspan = '1' width="25%">
+  <td width="20%">
     <font size=$GetVar(HtmlFontSizeControls)>
     <input
       bgcolor="$GetVar(HtmlTableBgColour)"
@@ -56,13 +55,7 @@
     </font>
   </td>
   <td align='right'>
-$spy.MakeHoverButton(button_small-void,spy.VoidView\())
+$spy.MakeHoverButton(button_small-void,spy.gui.maps.VoidView\())
   </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</tr>
-
-<tr>
-<!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
