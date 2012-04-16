@@ -974,12 +974,12 @@ class timage(ImageTools):
     ## HELP INFO ICON
     height = OV.GetParam('gui.timage.h3.height')
     fill = '#ffffff'
-    size = (height * 2, height * 3)
+    size = (height * 2 + 1, height * 3)
     circle_top = 10
     height = OV.GetParam('gui.timage.h3.height')
     IM =  Image.new('RGBA', size,(0,0,0,0))
     draw = ImageDraw.Draw(IM)
-    xy = (1,circle_top,38, circle_top + 38)
+    xy = (0,circle_top, 38, circle_top + 38)
     draw.ellipse(xy, fill = '#ffffff')
     states = ['', 'on', 'off', 'hover', 'hoveron']
     r,g,b,a = IM.split()
