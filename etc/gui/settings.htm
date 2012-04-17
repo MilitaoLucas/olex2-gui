@@ -73,10 +73,9 @@ Freeze(false)>>
       type="checkbox"
       height="$GetVar(HtmlCheckboxHeight)"
       name="SHOW_TOOLTIPS"
-      bgcolor="$GetVar(HtmlInputBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
       checked="$not(strcmp(spy.GetParam(user.show_tooltips),0))"
-      width='28'
+      width='15'
       oncheck="spy.SetParam(user.show_tooltips,1)>>html.tooltips true" 
       onuncheck="spy.SetParam(user.show_tooltips,0)>>html.tooltips false"
       target="Show tooltips when hovering over a control"
@@ -99,10 +98,9 @@ Freeze(false)>>
       type="checkbox"
       height="$GetVar(HtmlCheckboxHeight)"
       name="SHOW_INFO"
-      bgcolor="$GetVar(HtmlInputBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
       checked="$not(strcmp(spy.GetParam(user.show_info),0))"
-      width='28'
+      width='15'
       oncheck="spy.SetParam(user.show_info,1)>>showwindow info true" 
       onuncheck="spy.SetParam(user.show_info,0)>>showwindow info false"
     >
@@ -189,10 +187,9 @@ Freeze(false)>>
       type="checkbox"
       height="$GetVar(HtmlCheckboxHeight)"
       name="USE_FADER"
-      bgcolor="$GetVar(HtmlInputBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
       checked="$not(strcmp(spy.GetParam(user.use_fader),0.0))"
-      width='28'
+      width='15'
       oncheck="spy.SetParam(user.use_fader,0.4)" 
       onuncheck="spy.SetParam(user.use_fader,0)"
     >
