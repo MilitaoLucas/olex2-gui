@@ -25,10 +25,10 @@
     name="SET_SNUM_XGRID_EXTENDED_#suffix"
     checked="$spy.GetParam(snum.xgrid.extended)"
     oncheck="spy.SetParam(snum.xgrid.extended,True)
->>spy.SetXgridView()
+>>spy.gui.maps.SetXgridView()
 >>html.Update"
   onuncheck="spy.SetParam(snum.xgrid.extended,False)
->>spy.SetXgridView()
+>>spy.gui.maps.SetXgridView()
 >>html.Update"
   value=" %Extended% "
   valign="center"
