@@ -360,10 +360,18 @@ class hooft_analysis(OlexCctbxAdapter, absolute_structure.hooft_analysis):
       if not os.path.exists(fcf_path):
         print "No fcf file is present"
         return
-      reflections = miller.array.from_cif(file_path=fcf_path).values()[0]
-      fo2 = reflections['_refln_F_squared_meas']
-      fc2 = reflections['_refln_F_squared_calc']
+      reflections = miller.array.from_cif(file_path=str(fcf_path)).values()[0]
+      try:
+        fo2 = reflections['_refln_F_squared_meas']
+        fc2 = reflections['_refln_F_squared_calc']
+      except:
+        print 'Unsupported format, _refln_F_squared_meas and " +\
+        "_refln_F_squared_calc is expected'
+        return
       fc = fc2.f_sq_as_f().phase_transfer(flex.double(fc2.size(), 0))
+      if self.hklf_code == 5:
+        fo2 = fo2.merge_equivalents(algorithm="shelx").array().map_to_asu()
+        fc = fc.common_set(fo2)
       scale = 1
     else:
       if self.hklf_code == 5:
@@ -1058,7 +1066,7 @@ def calcsolv(solvent_radius=None, grid_step=None):
     grid_step=grid_step,
     use_space_group_symmetry=True) # faster for high symmetry)
   result.show_summary()
-  
+
   return result
 
 OV.registerFunction(calcsolv)
