@@ -929,7 +929,7 @@ class timage(ImageTools):
 #    max_width = cut[2] - cut[0]
 #    crop =  im.crop(cut)
     button_names = self.image_items_d.get("SMALL BUTTONS")
-    width = OV.GetParam('gui.timage.small_buttons.width')
+    width = OV.GetParam('gui.timage.small_button.width')
     #width = int(round(width * self.scale,0))
     self.produce_buttons(button_names, self.sf,"_small",width=width)
 
@@ -973,6 +973,8 @@ class timage(ImageTools):
 
     ## HELP INFO ICON
     height = OV.GetParam('gui.timage.h3.height')
+    if height < 19:
+      height = 19
     fill = '#ffffff'
     size = (height * 2 + 1, height * 3)
     circle_top = 10
@@ -997,7 +999,10 @@ class timage(ImageTools):
       top = circle_top - 18
       draw.text((14,top), 'i', font=font_info, fill='#ffffff')
       w = int(round(height * 0.66667))
-      fIM = self.resize_image(fIM, (w, height))
+      _ = 1
+      if self.width < 400:
+        _ = 0.8
+      fIM = self.resize_image(fIM, (int(w*_), int(height*_)))
       OlexVFS.save_image_to_olex(fIM, "btn-info%s.png" %(state), 2)
 
 
@@ -1234,6 +1239,8 @@ class timage(ImageTools):
             button_type = 'g3_big'
           elif btn_type =="_g4":
             button_type = 'g4'
+          elif btn_type =="_small":
+            button_type = 'small_button'
           else:
             button_type = 'button'
           self.image = image = self.make_timage(item_type=button_type, item=txt, state=state, width=width, titleCase=False)
@@ -2344,7 +2351,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if not width:
       width = self.width
     
-    pams = getattr(self.params.timage, '%s' %item_type)
+    if item_type == "small_button":
+      pams = getattr(self.params.timage, '%s' %'button')
+    else:
+      pams = getattr(self.params.timage, '%s' %item_type)
+      
 
     self.scale = pams.scale
     if not self.scale:
@@ -2461,6 +2472,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     elif item_type == "snumtitle":
       self.title_case = False
+
+    elif item_type == "small_button":
+      underground = self.params.html.table_bg_colour.rgb
+      buttonmark = OV.GetParam('gui.timage.small_button.buttonmark')
 
     elif item_type == 'button':
       #buttonmark = True

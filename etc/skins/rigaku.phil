@@ -152,7 +152,7 @@ gui {
       shadow = True
     }
     
-    small_buttons{
+    small_button{
       width = 80
         .type = int
     }
