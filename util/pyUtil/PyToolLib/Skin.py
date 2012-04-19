@@ -95,15 +95,15 @@ Skin_instance = Skin()
 OV.registerMacro(Skin_instance.run_skin, 'function-The function to call')
 
 def check_for_first_run():
-  if not os.path.exists("%s/global.odb" %OV.DataDir()) or\
-     OV.GetParam('olex2.has_recently_updated'):
+  first_run = not os.path.exists("%s/global.odb" %OV.DataDir())
+  if  first_run or OV.GetParam('olex2.has_recently_updated'):
     try:
       olx.SkinUpdated
       return False
     except:
       olx.SkinUpdated = True
     startup_skin = OV.GetParam('gui.skin.name', 'default')
-    change_skin(startup_skin)
+    change_skin(startup_skin, internal_change=not first_run)
     return True
   return False
 
@@ -194,21 +194,22 @@ def deal_with_gui_phil(action='load', skin_name=None, force=False):
       file_name=gui_phil_path, scope_name='gui', diff_only=True)
 
 
-def change_skin(skin_name=None, force=False):
-
+def change_skin(skin_name=None, force=False, internal_change=False):
   new_width = False
-  try:
-    new_width = int(skin_name)
-    skin_name = OV.GetParam('gui.skin.name')
-  except:
-    pass
-    #new_width = OV.GetParam('gui.htmlpanelwidth')
-  if new_width:
-    if new_width < 400:
-      skin_name += "_small"
-      
-  OV.SetParam('gui.skin.name', skin_name)
-  
+  changing_width = False
+  if not internal_change:
+    try:
+      new_width = int(skin_name)
+      changing_width = True
+      skin_name = OV.GetParam('gui.skin.name')
+    except:
+      pass
+      #new_width = OV.GetParam('gui.htmlpanelwidth')
+    if new_width:
+      if new_width < 400:
+        skin_name += "_small"
+    OV.SetParam('gui.skin.name', skin_name)
+
   olx.fs.Clear(3)
   OlexVFS.write_to_olex('logo1_txt.htm'," ",True)
 
@@ -217,9 +218,10 @@ def change_skin(skin_name=None, force=False):
     t2 = 0
 
   deal_with_gui_phil(action='load', skin_name=skin_name, force=False)
-  if not new_width:
-    new_width = OV.GetParam('gui.htmlpanelwidth')
-  olx.HtmlPanelWidth(new_width)
+  if not internal_change:
+    if not new_width:
+      new_width = OV.GetParam('gui.htmlpanelwidth')
+    olx.HtmlPanelWidth(new_width)
 
   try:
     adjust_skin_luminosity()
@@ -231,10 +233,9 @@ def change_skin(skin_name=None, force=False):
     print "After 'adjust_skin_luminosity': %.2f s (%.5f s)" % ((t - t1), (t - t2))
     t2 = t
 
-    width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
-
+  width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
   IT.resize_skin_logo(int(olx.html.ClientWidth('self')))
-#  IT.resize_news_image(width_adjust=30)
+
   if timing:
     t = time.time()
     print "After 'resize_skin_logo': %.2f s (%.5f s)" % ((t - t1), (t - t2))
@@ -247,34 +248,29 @@ def change_skin(skin_name=None, force=False):
 
   if timing:
     t = time.time()
-    print "After 'run_timage': %.2f s (%.5f s)" % ((t - t1), (t - t2))
-    t2 = t
-
-  if timing:
-    t = time.time()
     print "After 'sNumTitle': %.2f s (%.5f s)" % ((t - t1), (t - t2))
     t2 = t
 
-  SetGrad()
-  SetMaterials()
-  olx.HtmlPanelWidth(new_width)
-  OV.setAllMainToolbarTabButtons()
+  if not internal_change and not changing_width:
+    SetGrad()
+    SetMaterials()
+    olx.HtmlPanelWidth(new_width)
+    OV.setAllMainToolbarTabButtons()
+    olex.m('htmlpanelswap %s' %OV.GetParam('gui.htmlpanel_side'))
 
   if OV.FileFull() != "none":
-    import History
     from History import hist
     try:
       hist._make_history_bars()
     except:
       pass
 
-
   if timing:
     t = time.time()
     print "After 'Reload': %.2f s (%.5f s)" % ((t - t1), (t - t2))
     t2 = t
 
-    deal_with_gui_phil(action='save', skin_name=skin_name, force=False)
+  deal_with_gui_phil(action='save', skin_name=skin_name, force=False)
 
   if timing:
     t = time.time()
@@ -282,16 +278,9 @@ def change_skin(skin_name=None, force=False):
     t2 = t
 
   export_parameters()
-
   from Analysis import HOS_instance
   HOS_instance.make_HOS_html()
-
-  from Skin import Skin
-  Skin().run_skin('snumtitle')
-
   olx.FlushFS()
-
-  olex.m('htmlpanelswap %s' %OV.GetParam('gui.htmlpanel_side'))
 
 OV.registerFunction(change_skin)
 
