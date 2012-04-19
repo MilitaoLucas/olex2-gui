@@ -518,7 +518,7 @@ class OlexCctbxSolve(OlexCctbxAdapter):
 
 class OlexCctbxMasks(OlexCctbxAdapter):
 
-  def __init__(self, recompute=True):
+  def __init__(self, recompute=True, show=False):
     OlexCctbxAdapter.__init__(self)
     from cctbx import miller
     from smtbx import masks
@@ -595,8 +595,9 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       f.close()
       print out.getvalue()
       cif_block['_diffrn_reflns_number'] = fo2.size()
-      cif_block['_diffrn_reflns_av_R_equivalents'] = "%.4f" %merging.r_int()
-      cif_block['_diffrn_reflns_av_sigmaI/netI'] = "%.4f" %merging.r_sigma()
+      if merging: #HKLF5 will not have one
+        cif_block['_diffrn_reflns_av_R_equivalents'] = "%.4f" %merging.r_int()
+        cif_block['_diffrn_reflns_av_sigmaI/netI'] = "%.4f" %merging.r_sigma()
       cif_block['_diffrn_reflns_limit_h_min'] = h_min
       cif_block['_diffrn_reflns_limit_h_max'] = h_max
       cif_block['_diffrn_reflns_limit_k_min'] = k_min
@@ -615,6 +616,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       print >> f, cif
       f.close()
       OV.SetParam('snum.masks.update_cif', True)
+      data = None
     else:
       mask = olx.current_mask
     if self.params.type == "mask":
@@ -627,10 +629,13 @@ class OlexCctbxMasks(OlexCctbxAdapter):
           data = mask.f_mask()
         elif self.params.type == "f_model":
           data = mask.f_model()
+      if not data:
+        print 'Empty mask'
+        return
       model_map = miller.fft_map(crystal_gridding, data)
       output_data = model_map.apply_volume_scaling().real_map()
     self.time_write_grid = time_log("write grid").start()
-    if OV.HasGUI():
+    if OV.HasGUI() and show:
       write_grid_to_olex(output_data)
     self.time_write_grid.stop()
 
