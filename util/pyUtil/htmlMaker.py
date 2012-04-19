@@ -429,10 +429,10 @@ OV.registerFunction(move)
 
 def restraint_builder(cmd):
   height = OV.GetParam('gui.html.combo_height')
-  colspan = 7
+  colspan = 3
 
   constraints = ["EXYZ", "EADP", "AFIX"]
-  olex_conres = ["RRINGS", "TRIA"]
+  olex_conres = ["RRINGS", "TRIA", "ADPUEQ", "ADPVOL", "ANGLE", "DIANG"]
 
   html = []
   atom_pairs =  {
@@ -453,7 +453,11 @@ def restraint_builder(cmd):
     "AFIX":["name_AFIX", "var_m:6;5;10;11", "var_n:6;9", "help_AFIX-use-help"],
 #    "RRINGS":["name_RRINGS", "var_d:1.39 ", "var_s1:0.02", "help_rrings-htmhelp"],
     "RRINGS":["name_RRINGS", "help_rrings-htmhelp"],
-    "TRIA":["name_TRIA", "var_distance: ", "var_angle: ", "help_tria-htmhelp"],
+    "TRIA":["name_TRIA", "var_d: ", "var_angle: ", "help_tria-htmhelp"],
+    "ADPUEQ":["name_ADPUEQ", "var_n:0.05 ", "help_adpueq-htmhelp", "cmd_restrain adp ueq"],
+    "ADPVOL":["name_ADPVOL", "help_adpvol-htmhelp", "cmd_restrain adp volume"],
+    "ANGLE":["name_ANGLE", "var_n: ", "help_angle-htmhelp", "cmd_restrain angle"],
+    "DIANG":["name_DIANG", "var_n: ", "help_diang-htmhelp", "cmd_restrain dihedral"],
   }
 
   if atom_pairs.has_key(cmd):
@@ -469,19 +473,34 @@ def restraint_builder(cmd):
   itemcount = 0
   items = None
   var = None
+  ib = ""
+  varcount = 0
+  cmd = ""
+  for item in l:
+    if "var" in item:
+      varcount += 1
+    if "cmd" in item:
+      cmd = item.split("_")[1]
+
   for item in l:
     itemcount += 1
     id = item.split("_")[0]
     tem = item.split("_")[1]
+    val = ""
     if ":" in tem:
       var = tem.split(":")[0]
       val = tem.split(":")[1]
     if id == "name":
       name = tem
-      onclick += "%s " %name
+      if not cmd:
+        onclick += "%s " %name
+      else:
+        onclick += "%s " %cmd
     elif id == "help":
       html_help = OV.TranslatePhrase(tem)
       html_help, d = htmlTools.format_help(html_help)
+    elif id == "cmd":
+      cmd = val
     elif id == "var":
       ctrl_name = "%s_%s_TEXT_BOX" %(name, var)
       pre_onclick += "SetVar\(%s_value,GetValue\(%s))>>" %(ctrl_name,ctrl_name)
@@ -495,45 +514,68 @@ def restraint_builder(cmd):
         items = None
         val = val.strip()
       if items:
-        width = 40
+        width='100%'
       else:
-        width=40
+        width='100%'
       if var == "d":
-        width=40
+        width='100%'
+      width='33%'
+      b_width='60%'
+      if name == 'AFIX':
+        width='50%'
+        b_width='80%'
       d = {"ctrl_name":ctrl_name,
            "label":var,
            "valign":'center',
            "value":val,
-           "width":width,
+           "width":b_width,
            "height":height,
            "bgcolor":"$GetVar(HtmlInputBgColour))"
            }
       if items:
         d.setdefault("items",items)
       if var:
-        html.append("<td width='20%%'>%s</td>" %htmlTools.makeHtmlInputBox(d))
+        ib += "<td align='left' width='%s'>%s</td>" %(width, htmlTools.makeHtmlInputBox(d))
+       
+  if ib:
+    if name == "AFIX":
+      var_max = 2
+      td_width = '40%'
+    else:
+      var_max = 3
+      td_width = '80%'
+    
+    while varcount < var_max:
+      ib += "<td align='center' width='33%'></td>"
+      varcount += 1
+    
+    html.append("<td width='%s'><table border='0' style='border-collapse: collapse' width='100%%' cellpadding='1' cellspacing='0'><tr>%s</tr></table></td>" %(td_width, ib))
 
   if name == "AFIX":
-    itemcount += 2
+#    itemcount += 2
     onclick_list = onclick.strip().split(' ')
     onclick = 'AFIX strcat\(%s,%s)' %(onclick_list[1],onclick_list[2])
     post_onclick = '>>labels -a'
     mode_ondown = "mode %s" %(onclick.replace('AFIX ','HFIX '))
     mode_onup = "mode off>>sel -u"
+
     mode_button_d = {
       "name":'AFIX_MODE',
       "value":"Mode",
       "ondown":"%s"%mode_ondown,
       "onup":"%s"%mode_onup,
-      "width":40, "height":height,
+      "width":'100%',
+      "height":height,
       "hint":"Atoms subsequently clicked will become the pivot atom of a new rigid group",
     }
     clear_onclick = "sel atoms where xatom.afix==strcat\(%s,%s)>>Afix 0>>labels -a" %(onclick_list[1],onclick_list[2])
+
     clear_button_d = {
       "name":'AFIX_CLEAR',
       "value":"Clear",
       "onclick":"%s"%clear_onclick,
-      "width":40, "height":height,
+      "width":'100%',
+      "height":height,
       "hint":"Removes the current AFIX command from the structure",
     }
 
@@ -555,21 +597,24 @@ def restraint_builder(cmd):
     "name":'%s_GO' %name,
     "value":"GO",
     "onclick":"%s"%onclick,
-    "width":30,
-    "height":28,
+    "width":20,
+    "height":"$GetVar(HtmlComboHeight)",
     "hint":"The %s command will be applied to all currently selected atoms" %name
   }
-  if itemcount < colspan:
+  if varcount == 0:
     html.append("<td></td>"*(colspan-itemcount)) # Space-filler
+  btns = ""
+  width='20%'
   if name == 'AFIX':
-    html.append("<td width='25%%' align='right'>$spy.MakeHoverButton(button_small-clear@Afix,%s)</td>" %clear_onclick)
-    html.append("<td width='25%%' align='right'>$spy.MakeHoverButton(button_small-mode@Afix,%s)</td>" %mode_ondown)
+    btns += '$spy.MakeHoverButton(button_small-clear@Afix,%s)' %clear_onclick
+    btns+= '$spy.MakeHoverButton(button_small-mode@Afix,%s)' %mode_ondown
+    width='60%'
+  btns += '$spy.MakeHoverButton(button_small-go@%s,%s)' %(name, onclick)
 
-  html.append("<td width='25%%' align='right'>$spy.MakeHoverButton(button_small-go@%s,%s)</td>" %(name, onclick))
+  html.append("<td width='%s' align='right'>%s</td>" %(width,btns))
 
   #Add the help info as the last row in the table
   html.append("</td></tr><tr>")
-  colspan += 1
   html.append(htmlTools.make_table_first_col(help_name=name, popout=True, help_image='normal'))
   html.append("<td colspan=%s bgcolor='%s'>%s</td></tr>" %(colspan, OV.GetParam('gui.html.table_firstcol_colour'), html_help, ))
   if name in constraints:
