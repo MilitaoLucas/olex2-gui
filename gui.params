@@ -411,11 +411,13 @@ gui
         .type = bool
     }
 
-    small_buttons{
+    small_button{
       scale = 1
         .type = int
-      width = 80
+      width = 55
         .type = int
+      buttonmark = 2:#999999:6
+        .type = str
     }
 
     tinybutton{

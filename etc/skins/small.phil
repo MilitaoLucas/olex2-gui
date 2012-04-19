@@ -52,6 +52,12 @@ gui {
       top = 1
     }
     
+    small_button{
+      scale = 1
+      width = 40
+      buttonmark = None
+    }
+
     tinybutton{
       width = 18
       font_size = 12
