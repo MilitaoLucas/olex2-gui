@@ -46,14 +46,10 @@ class Skin():
     #self.adjust_font_size_for_ppi()
 
   def run_skin(self, f, args=None):
-
     skin_name = OV.GetParam('gui.skin.name')
     new_width = OV.GetParam('gui.htmlpanelwidth')
     if new_width < 350:
-      skin_name += "_small"
-    #deal_with_gui_phil(action='load', skin_name=skin_name, force=False)
-#    IT.resize_skin_logo(width=new_width)
-
+      OV.SetParam('gui.skin.extension', 'small')
 
     if timing:
       t = time.time()
@@ -145,28 +141,18 @@ def export_parameters(load_phil=True):
     print "export_parameters took %.4fs" %(time.time()-t)
 OV.registerFunction(export_parameters,False,'skin')
 
-def deal_with_gui_phil(action='load', skin_name=None, force=False):
-  if not skin_name:
-    skin_name = OV.GetParam('gui.skin.name')
-  if not skin_name:
-    skin_name = 'default'
+def deal_with_gui_phil(action):
+  skin_name = OV.GetParam('gui.skin.name', 'default')
+  skin_extension = OV.GetParam('gui.skin.extension', None)
+
+  if timing:
+    t = time.time()
 
   gui_phil_path = "%s/gui.phil" %(OV.DataDir())
   if action == 'load':
     OV.SetHtmlFontSize()
     OV.SetHtmlFontSizeControls()
-    skin_extension = None
-    if timing:
-      t1 = time.time()
-      t2 = 0
-    else:
-      force = True
-      olx.gui_phil_handler.reset_scope('gui')
-      if len(skin_name.split("_")) > 1:
-        skin_extension = skin_name.split("_")[1]
-        skin_name = skin_name.split("_")[0]
-
-
+    olx.gui_phil_handler.reset_scope('gui')
     gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_name)
     if not os.path.isfile(gui_skin_phil_path):
       gui_skin_phil_path = "%s/gui.params" %(OV.BaseDir())
@@ -177,38 +163,31 @@ def deal_with_gui_phil(action='load', skin_name=None, force=False):
       olx.gui_phil_handler.update(phil_string=gui_skin_phil)
 
     if skin_extension:
-      force = True
       gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_extension)
       if os.path.isfile(gui_skin_phil_path):
         gui_skin_phil_file = open(gui_skin_phil_path, 'r')
         gui_skin_phil = gui_skin_phil_file.read()
         gui_skin_phil_file.close()
         olx.gui_phil_handler.update(phil_string=gui_skin_phil)
-
-    if timing:
-      t = time.time()
-      print "After 'Reading PHIL Stuff': %.2f s (%.2f s)" % ((t - t1), (t - t1))
-      t2 = t
   else:
     olx.gui_phil_handler.save_param_file(
       file_name=gui_phil_path, scope_name='gui', diff_only=True)
+  if timing:
+    print "After 'Reading/Saving PHIL Stuff': %.2f s" % (time.time() - t)
 
 
-def change_skin(skin_name=None, force=False, internal_change=False):
-  new_width = False
-  changing_width = False
+def change_skin(skin_name, internal_change=False):
+  new_width = None
   if not internal_change:
     try:
       new_width = int(skin_name)
-      changing_width = True
-      skin_name = OV.GetParam('gui.skin.name')
-    except:
-      pass
-      #new_width = OV.GetParam('gui.htmlpanelwidth')
-    if new_width:
       if new_width < 400:
-        skin_name += "_small"
-    OV.SetParam('gui.skin.name', skin_name)
+        OV.SetParam('gui.skin.extension', 'small')
+    except:
+      toks = skin_name.split('_')
+      if len(toks) == 1: toks.append('')
+      OV.SetParam('gui.skin.name', toks[0])
+      OV.SetParam('gui.skin.extension', toks[1])
 
   olx.fs.Clear(3)
   OlexVFS.write_to_olex('logo1_txt.htm'," ",True)
@@ -217,11 +196,13 @@ def change_skin(skin_name=None, force=False, internal_change=False):
     t1 = time.time()
     t2 = 0
 
-  deal_with_gui_phil(action='load', skin_name=skin_name, force=False)
+  deal_with_gui_phil('load')
   if not internal_change:
-    if not new_width:
-      new_width = OV.GetParam('gui.htmlpanelwidth')
-    olx.HtmlPanelWidth(new_width)
+    w = new_width
+    if not w:
+      w = OV.GetParam('gui.htmlpanelwidth', None)
+    if w:
+      olx.HtmlPanelWidth(w)
 
   try:
     adjust_skin_luminosity()
@@ -233,8 +214,9 @@ def change_skin(skin_name=None, force=False, internal_change=False):
     print "After 'adjust_skin_luminosity': %.2f s (%.5f s)" % ((t - t1), (t - t2))
     t2 = t
 
-  width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
-  IT.resize_skin_logo(int(olx.html.ClientWidth('self')))
+  client_width = int(olx.html.ClientWidth('self'))
+  width =  client_width - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+  IT.resize_skin_logo(client_width)
 
   if timing:
     t = time.time()
@@ -242,7 +224,7 @@ def change_skin(skin_name=None, force=False, internal_change=False):
     t2 = t
 
   a = PilTools.timage()
-  a.run_timage(force_images=force)
+  a.run_timage(force_images=True)
   im = a.make_timage('snumtitle', OV.FileName(), 'on', titleCase=False)
   OlexVFS.save_image_to_olex(im, "sNumTitle.png", 1)
 
@@ -251,10 +233,9 @@ def change_skin(skin_name=None, force=False, internal_change=False):
     print "After 'sNumTitle': %.2f s (%.5f s)" % ((t - t1), (t - t2))
     t2 = t
 
-  if not internal_change and not changing_width:
+  if not internal_change and not new_width:
     SetGrad()
     SetMaterials()
-    olx.HtmlPanelWidth(new_width)
     OV.setAllMainToolbarTabButtons()
     olex.m('htmlpanelswap %s' %OV.GetParam('gui.htmlpanel_side'))
 
@@ -270,7 +251,7 @@ def change_skin(skin_name=None, force=False, internal_change=False):
     print "After 'Reload': %.2f s (%.5f s)" % ((t - t1), (t - t2))
     t2 = t
 
-  deal_with_gui_phil(action='save', skin_name=skin_name, force=False)
+  deal_with_gui_phil('save')
 
   if timing:
     t = time.time()
