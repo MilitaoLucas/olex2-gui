@@ -290,7 +290,7 @@ class MakeGuiTools(object):
 
   def write_tool(self, name):
     #filename = r"%s/etc/gui/%s.htm" %(basedir, self.tbx)
-    OlexVFS.write_to_olex(r"%s/etc/gui/%s.htm" %(basedir, self.tbx), self.tool_txt, False)
+    OlexVFS.write_to_olex(r"%s/etc/gui/%s.htm" %(basedir, self.tbx), self.tool_txt, 0)
     #wFile = open(filename, 'w')
     #wFile.write(self.tool_txt)
     #wFile.write("\n")
@@ -444,7 +444,7 @@ class MakeGuiTools(object):
       self.tool_txt += line
     self.tool_txt+=r'<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->'
     #self.write_tool(name)
-    OlexVFS.write_to_olex(r"%s/etc/gui/%s.htm" %(basedir, self.tbx), self.tool_txt, False)
+    OlexVFS.write_to_olex(r"%s/etc/gui/%s.htm" %(basedir, self.tbx), self.tool_txt, 0)
 
 
 
@@ -501,7 +501,7 @@ class MakeGuiTools(object):
 
 
     self.write_tool(name)
-    OlexVFS.write_to_olex(r"%s/etc/gui/%s.htm" %(basedir, self.tbx), self.tool_txt, False)
+    OlexVFS.write_to_olex(r"%s/etc/gui/%s.htm" %(basedir, self.tbx), self.tool_txt, 0)
     self.txt.append(r'<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->')
 
   def box(self, box_d):
