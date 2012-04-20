@@ -1715,6 +1715,20 @@
   >
 >
 
+<changesgs help="Changes the space group settings"
+  <body
+    <args
+      <arg1 name="cell_choice" def="">
+      <arg2 name="axis" def="">
+    >
+    <cmd
+      <cmd1 "sgs %1 %2">
+      <cmd2 "spy.run_skin sNumTitle">
+      <cmd3 "html.Update">
+    >
+  >
+>
+
 <user_onstartup help="dummy definition" <body > >
 <custom_on_report help="dummy definition" <body > >
 
