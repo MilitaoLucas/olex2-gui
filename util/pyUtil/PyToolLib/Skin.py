@@ -190,7 +190,7 @@ def change_skin(skin_name, internal_change=False):
       OV.SetParam('gui.skin.extension', toks[1])
 
   olx.fs.Clear(3)
-  OlexVFS.write_to_olex('logo1_txt.htm'," ",True)
+  OlexVFS.write_to_olex('logo1_txt.htm'," ", 2)
 
   if timing:
     t1 = time.time()
