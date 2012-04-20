@@ -143,7 +143,7 @@ gui {
     }
 
   buttons{
-    small_buttons{
+    small_button{
       width = 55
     }
   }
