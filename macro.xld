@@ -912,11 +912,10 @@
   <body
     <args
       <arg1 name="name" def="">
-      <arg2 name="force" def="false">
     />
     <cmd
-      <cmd1 "spy.change_skin(%1,%2)">
-      <cmd1 "html.load index.htm">
+      <cmd1 "spy.change_skin(%1)">
+      <cmd1 "html.load Basedir()/etc/index.htm">
     />
   />
 />

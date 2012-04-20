@@ -3,10 +3,8 @@
 <!--$spy.make_warning_html(6)-->
 
 <tr>
-  <td valign='top' width="8" align='center' bgcolor="$GetVar(HtmlTableFirstcolColour)">
-  </td>
-  <td width='55'>%Constraint%</td>
-    <td>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Shelx-Constraints;1; -->
+  <td width='18%'>
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input 
       type="combo"
@@ -15,7 +13,7 @@
       name="SET_GUI_SHELX_CONSTRAINTS" 
       items='AFIX;EXYZ;EADP'
       value="GetVar(gui_shelx_constraints)"
-      width="50" 
+      width="100%" 
       onchange =
 "SetVar(gui_shelx_constraints,GetValue(SET_GUI_SHELX_CONSTRAINTS))>>spy.restraint_builder(GetVar(gui_shelx_constraints))"
       readonly

@@ -71,7 +71,7 @@ class MapUtil:
     if self.deal_with_map_buttons(onoff, img_bases, 'mask'):
       return
     self.SetXgridView(False)
-    olex.m('spy.OlexCctbxMasks()')
+    olex.m('spy.OlexCctbxMasks(True, True)')
     self.deal_with_controls()
     OV.SetVar('olex2.mask_vis',True)
 

@@ -105,7 +105,7 @@ class OlexFunctions(inheritFunctions):
       return olx.phil_handler.get_python_object()
     else:
       return None
-    
+
   def get_txt_from_vfs(self, item):
     _ = item
     return OlexVFS.read_from_olex(_)
