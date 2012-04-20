@@ -17,7 +17,7 @@
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td colspan=4 name-=IMAGE_BITMAP_CHOOSE_BOND_LABEL_FONTS>
     <a href="setfont BondLabels ChooseFont(Olex2,spy.GetParam(snum.image.bitmap.bond_label.font_name))>>spy.SetParam(snum.image.bitmap.bond_label.font_name,GetFont(AtomLabels))">Choose Bond Label Font (Olex2)</a> |
-    <a href="setfont BondLabels ChooseFont(System,spy.GetParam(snum.image.bitmap.bond_label.font_name))>>spy.SetParam(snum.image.bitmap.bond_label.font_name,GetFont(AtomLabels))">Choose Bond Label Font (System)</a>
+    <a href="setfont BondLabels ChooseFont(System,spy.GetParam(snum.image.bitmap.bond_label.font_name))>>spy.SetParam(snum.image.bitmap.bond_label.font_name,GetFont(AtomLabels))">(System Font)</a>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
@@ -31,7 +31,7 @@
   <td>
      %Name%
   </td>
-  <td name=IMAGE_BITMAP_NAME>
+  <td name=IMAGE_BITMAP_NAME width='20%'>
     <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="text"
@@ -39,7 +39,7 @@
       bgcolor="$GetVar(HtmlInputBgColour)"
       valign='center'
       name="IMAGE_BITMAP_NAME"
-      width="70"
+      width="100%"
       height="$GetVar(HtmlInputHeight)"
       value=""
       onchange="spy.SetParam(snum.image.bitmap.name,GetValue(IMAGE_BITMAP_NAME))"
@@ -50,12 +50,12 @@
   <td>
     %Type%
   </td>
-  <td name=IMAGE_BITMAP_TYPE>
+  <td name=IMAGE_BITMAP_TYPE width='20%'>
     <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="combo"
       height="$GetVar(HtmlComboHeight)"
-      width="$GetVar(HtmlComboWidth2)"
+      width="100%"
       bgcolor="$GetVar(HtmlInputBgColour)"
       items='png;jpg;bmp'
       valign='center'
@@ -68,7 +68,7 @@
   <td>
     Size
   </td>
-  <td name=IMAGE_BITMAP_SIZE>
+  <td name=IMAGE_BITMAP_SIZE width='20%'>
     <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="combo"
@@ -78,7 +78,7 @@
       height="$GetVar(HtmlInputHeight)"
       valign='center'
       name="IMAGE_BITMAP_SIZE"
-      width="60"
+      width="100%"
       value='2'
     >
     </font>
