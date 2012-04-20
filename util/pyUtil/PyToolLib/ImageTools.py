@@ -379,7 +379,7 @@ class ImageTools(FontInstances):
       txt = '<zimg border="0" src="skin_logo.png">'
     else:
       txt = " "
-    OlexVFS.write_to_olex('logo1_txt.htm',txt,True)
+    OlexVFS.write_to_olex('logo1_txt.htm', txt, 2)
     return "Done"
 
   def resize_to_panelwidth(self, args, width_adjust=0, width=None):
@@ -790,12 +790,12 @@ class ImageTools(FontInstances):
     txt_l = []
     t = ""
     wXT = 0
-    
-    
-    
+
+
+
     if wX > max_width and " " in txt:
       txt_in = txt.split()
-      
+
       for word in txt_in:
         wX, wY = draw.textsize(word, font=font)
         wXT += wX
@@ -806,13 +806,13 @@ class ImageTools(FontInstances):
           wXT = 0
           t = "%s" %word
       txt_l.append(t.strip())
-      
+
     else:
       while wX > max_width:
         txt = txt.rstrip('...')
         txt = txt[:-1] + "..."
         wX, wY = draw.textsize(txt, font=font)
-      
+
     if "</p>" in txt:
       self.txt = txt
       self.print_html_to_draw()
