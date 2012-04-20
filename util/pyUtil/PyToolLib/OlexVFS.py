@@ -27,17 +27,17 @@ ImageToOlexWriter = ImageWriter()
 
 def copy_image(name_from, name_to):
   f = olex.readImage(name_from)
-  olex.writeImage(name_to, f)	
-  
+  olex.writeImage(name_to, f)
+
 def save_image_to_olex(image, name, isPersistent=0):
   ImageToOlexWriter.setName(name)
   image.save(ImageToOlexWriter, "PNG")
   ImageToOlexWriter.endWrite(isPersistent)
 
-def write_to_olex(filename, data, isPersistent=False):
-  olex.writeImage(filename, data, isPersistent)	
-  
+def write_to_olex(filename, data, isPersistent=0):
+  olex.writeImage(filename, data, isPersistent)
+
 def read_from_olex(filename):
   return olex.readImage(filename)
-  
- 
+
+
