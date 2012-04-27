@@ -2604,18 +2604,12 @@ class HealthOfStructure():
       print "HOS took %.4f seconds" %(time.time() - t1)
 
   def initialise_HOS(self, force=False):
+    OV.write_to_olex("hos.htm", "")
+    OV.write_to_olex("reflection-stats-summary.htm" , "n/a")
     if olx.IsFileLoaded() != 'true':
       return False
-    OV.write_to_olex("reflection-stats-summary.htm" , "n/a")
     hkl = OV.HKLSrc()
     if not hkl or not os.path.exists(hkl):
-      print "There is no reflection file associated with this structure"
-      #txt = "<tr><table width='100%%' cellspacing='2'><tr bgcolor=%s align='center'>" %self.grade_4_colour
-      #txt += "<td colspan='2'><font color=#ffffff>There is no reflection file</font><td>"
-      #txt += "</tr></table></tr>"
-      #txt = txt.decode('utf-8')
-      txt = ""
-      OV.write_to_olex("hos.htm" , txt)
       return False
     try:
       self.hkl_stats = olex_core.GetHklStat()

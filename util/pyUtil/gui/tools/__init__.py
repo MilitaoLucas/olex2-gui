@@ -61,7 +61,8 @@ class FolderView:
     if not self.root:
       return "&nbsp;"
     OV.SetParam('user.folder_view_root', self.root.name)
-    OlexVFS.write_to_olex('folder_view.data', self.root.toStr())
+    data = self.root.toStr()
+    OlexVFS.write_to_olex('folder_view.data', data.encode('utf-8'))
     return "<input type='tree' manage noroot src='folder_view.data' name='fvt'"+\
   " onselect='spy.gui.tools.folder_view.loadStructure(html.GetValue(~name~))'"+\
   " height=200 width=" + str(int(olx.html.ClientWidth('self'))-30) + ">"
@@ -145,16 +146,16 @@ def add_tool_to_index(scope="", link="", path="", filetype=""):
   import OlexVFS
   if not OV.HasGUI:
     return
-  
+
   if not scope:
     return
-  
+
   if not link:
     return
-  
+
   if not path:
     return
-  
+
   ''' Automatically add a link to GUI to an Olex2 index file. '''
   location = OV.GetParam('%s.gui.location' %scope)
   before = OV.GetParam('%s.gui.before' %scope)
@@ -168,7 +169,7 @@ def add_tool_to_index(scope="", link="", path="", filetype=""):
   else:
     t = r'''
 <!-- #includeif IsFileType('%s') %s-%s %s/%s.htm;gui\blocks\tool-off.htm;image=%s;onclick=;1; -->''' %(filetype, scope, link, path, link, link)
-    
+
 
   index_text = ""
   if t not in txt:
