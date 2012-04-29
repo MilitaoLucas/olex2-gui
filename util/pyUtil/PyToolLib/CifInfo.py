@@ -364,9 +364,8 @@ class ExtractCifInfo(CifTools):
 
     import History
     active_solution = History.tree.active_child_node
+    all_sources_d = {}
     if active_solution is not None and active_solution.is_solution:
-
-      all_sources_d = {}
 
       ## Backwards Compatibility
       if active_solution.program == "smtbx-solve":
