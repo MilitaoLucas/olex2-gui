@@ -10,7 +10,6 @@ import ires_reader
 import lst_reader
 import p4p_reader
 import pcf_reader
-import sadabs
 
 
 class FileReaderTestCase(unittest.TestCase):
@@ -21,27 +20,6 @@ class FileReaderTestCase(unittest.TestCase):
     else:
       self.assertEqual(FileReader.values(), expected)
     return FileReader
-
-  def test_sadabs(self):
-    # test sad.abs
-    self.exercise_FileReader(
-      sadabs.reader, 'test_files/sad.abs', {
-        '_exptl_absorpt_correction_T_max': '0.9703',
-        'ratiominmax': '0.503349479542',
-        'Rint_before': '0.0728',
-        'lambda_correction': '0.0015',
-        'parameter_ratio': '4.47',
-        'prog_version': '2006/1',
-        '_exptl_absorpt_correction_type': 'multi-scan',
-        'Rint_after': '0.0180',
-        '_exptl_absorpt_correction_T_min': '0.4884'})
-    # test older sadabs version
-    self.exercise_FileReader(
-      sadabs.reader, 'test_files/sad1.abs', {
-        '_exptl_absorpt_correction_type': 'multi-scan',
-        '_exptl_absorpt_correction_T_max': '1',
-        'prog_version': 'Bruker area detector absorption corrections',
-        'parameter_ratio': '5.58'})
 
   def test_bruker_frames(self):
     reader = self.exercise_FileReader(
