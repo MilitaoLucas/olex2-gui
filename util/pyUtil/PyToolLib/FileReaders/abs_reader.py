@@ -10,25 +10,15 @@ class reader(object):
 
     self._cifItems = {}
     self._twin_cifItems = {}
-    rfile = open(path, 'r')
-    lines = {}
-    i = 0
-    abs_type = None
-    for line in rfile:
-      lines[i] = line.strip()
-      #lines[i] = string.strip(line)
-      i+=1
-    rfile.close()
-    i=0
-
+    lines = open(path, 'r').readlines()
     for line in lines:
       try:
-        if "SADABS" in lines[i]:
+        if "SADABS" in line:
           #print "SADABS File Type"
           abs_type = "SADABS"
           self._cifItems.setdefault("abs_type", "SADABS")
           break
-        if "TWINABS" in lines[i]:
+        if "TWINABS" in line:
           #print "TWINABS File Type"
           abs_type = "TWINABS"
           self._twin_cifItems.setdefault("abs_type", "TWINABS")
@@ -36,147 +26,111 @@ class reader(object):
       except:
         print "This is a new type of abs file I do not recognise"
         break
-      i+= 1
-    i = 0
     if abs_type == "SADABS":
-      #print "Running SADABS parser"
-      #print "PATH", path
       self._cifItems.setdefault("_exptl_absorpt_correction_type", "multi-scan")
-      for line in lines:
+      for i in xrange(0, len(lines)):
+        line = lines[i]
         try:
-  #	print lines[i]
-          if "SADABS" in lines[i]:
-            txt = lines[i].split('-')
+          if "SADABS" in line:
+            txt = line.split('-')
             if 'Bruker' in txt[1] and len(txt) == 3:
               txt = txt[2].strip()
             else:
-              #txt = string.split(lines[i], '-')
               txt = txt[1].strip()
             self._cifItems.setdefault("prog_version", "%s" %txt) ############################
-          if "Effective data to parameter ratio" in lines[i]: ############################
-            txt = lines[i].split('=')
+          elif "Effective data to parameter ratio" in line: ############################
+            txt = line.split('=')
             txt = txt[1].strip()
-            #print txt
             self._cifItems.setdefault("parameter_ratio", "%s" %txt) ############################
-          # txt = lines[i+2]
-          # txt = lines[i+2].split()
-            #txt = string.split(lines[i+2])
-          if "(selected reflections only, before parameter refinement)" in lines[i]: ############################
-            #print "wR2(int) Before =", lines[i]
-            txt = lines[i].split('=')
+          elif "(selected reflections only, before parameter refinement)" in line: ############################
+            txt = line.split('=')
+            self._cifItems.setdefault("R_name", txt[0].strip())
             txt = txt[1].strip()
             txt = txt.split('(')
             self._cifItems.setdefault("Rint_before", "%s" %txt[0].strip()) ############################
-          if "(selected reflections only, after parameter refinement)" in lines[i]: ############################
-            txt = lines[i].split('=')
-            txt = txt[1].strip()
-            txt = txt.split('(')
-            self._cifItems.setdefault("Rint_after", "%s" %txt[0].strip())
-          if "Ratio of minimum" in lines[i]:
-            txt = lines[i].split(':')
-            #txt = string.split(lines[i], ":")
+            i += 2 # Cycle  wR2(incid)  wR2(diffr)  Mean wt.
+            while i < len(lines) and lines[i].strip():
+              i += 1
+            i -= 1 #last cycle
+            self._cifItems.setdefault("Rint_after", lines[i].split()[1].strip())
+          elif "Ratio of minimum" in line:
+            txt = line.split(':')
             self._cifItems.setdefault("ratiominmax", "%.4f" %float(txt[1].strip()))
-            self._cifItems.setdefault("_exptl_absorpt_correction_T_min", "%s" %txt[1].strip())
-          if "Estimated minimum" in lines[i] :
-            txt = lines[i].split(':')
+            self._cifItems.setdefault("_exptl_absorpt_correction_T_min", txt[1].strip())
+          elif "Estimated minimum" in line :
+            txt = line.split(':')
             txt = txt[1].strip()
             txt = txt.split(" ")
             min = txt[0].strip()
             max = txt[2].strip()
             ratio = float(min)/float(max)
-            self._cifItems.setdefault("_exptl_absorpt_correction_T_min", "%s" %min)
-            self._cifItems.setdefault("_exptl_absorpt_correction_T_max", "%s" %max)
+            self._cifItems.setdefault("_exptl_absorpt_correction_T_min", min)
+            self._cifItems.setdefault("_exptl_absorpt_correction_T_max", max)
             self._cifItems.setdefault("ratiominmax", "%.4f" %ratio)
-## Not sure why this was in here. The lambda correction value is present in this version!
-#          if self._cifItems.get("prog_version") == '2008/1':
-#            self._cifItems.setdefault("lambda_correction", "Not present")
-          if lines[i].strip().startswith("Lambda"):
-            txt = lines[i].split('=')
-            #txt = string.split(lines[i], "=")
+          elif line.strip().startswith("Lambda"):
+            txt = line.split('=')
             self._cifItems.setdefault("lambda_correction", "%s" %txt[1].strip())
         except Exception, e:
-          #i += 1
           import traceback
           traceback.print_exc()
           pass
-        i += 1
       self._cifItems.setdefault("lambda_correction", "Not present")
       self._cifItems.setdefault("_exptl_absorpt_correction_T_max", "%s" %(1))
 
     elif abs_type == "TWINABS":
-      #print "Running TWINABS parser"
-      #print "PATH", path
       self._cifItems.setdefault("_exptl_absorpt_correction_type", "multi-scan")
-      for line in lines:
-        #print "line = ", line, lines[line]
+      for i in xrange(0, len(lines)):
+        line = lines[i].strip()
         try:
-          #print lines[line]
-          if "TWINABS" in lines[line]:
-            txt = lines[line].split('-')
-            if 'Bruker' in txt[1] and len(txt) == 3:
+          if "TWINABS" in line:
+            txt = line.split('-')
+            if 'Bruker AXS' in txt[1] and len(txt) == 3:
               txt = txt[2].strip()
               txt = txt.split(' ')[1]
             else:
-              #txt = string.split(lines[line], '-')
-              txt = txt[1].strip()
-              txt = txt.split(' ')[1]
+              raise Exception('Unsupported program version: ' + txt[-1].strip())
             self._twin_cifItems.setdefault("prog_version", "%s" %txt)
             self._twin_cifItems.setdefault("lambda_correction", "Not present")
-            continue
-          if "mul" in lines[line]:
-            txt = lines[line].split('file')
+          elif "mul" in line:
+            txt = line.split('file')
             txt = txt[1].strip()
-            #print "Integration file", txt
             self._twin_cifItems.setdefault("integration_file", "%s" %txt)
-            continue
-          if "twin components present" in lines[line]:
-            txt = lines[line].split('twin')
+          elif "twin components present" in line:
+            txt = line.split('twin')
             txt = txt[0].strip()
             number_twin_components = int(txt)
             self._twin_cifItems.setdefault("number_twin_components", "%s" %txt)
-            continue
-          if "Parameter refinement for twin component" in lines[line]:
-            txt = lines[line].split(' ')[-1]
+          elif "Parameter refinement for twin component" in line:
+            txt = line.split(' ')[-1]
             txt = txt.strip()
             twin_component = int(txt)
-            #print "twin component", txt, twin_component
             self._twin_cifItems.setdefault("%i"%twin_component,{})
-            #print "check components", twin_component, self._twin_cifItems
-            continue
-          if "Effective data to parameter ratio" in lines[line]:
-            txt = lines[line].split('=')
+          elif "Effective data to parameter ratio" in line:
+            txt = line.split('=')
             txt = txt[1].strip()
-            #print "Effective paramter ratio", twin_component, txt
             self._twin_cifItems["%s"%twin_component].setdefault("parameter_ratio", "%s" %txt)
-            #print "check parameter_ratio", self._twin_cifItems
-            continue
-          if "(selected reflections only, before parameter refinement)" in lines[line]:
-            txt = lines[line].split('=')
+          elif "(selected reflections only, before parameter refinement)" in line:
+            txt = line.split('=')
+            self._twin_cifItems["%s"%twin_component].setdefault("R_name", txt[0].strip())
             txt = txt[1].strip()
             txt = txt.split('(')
             self._twin_cifItems["%s"%twin_component].setdefault("Rint_before", "%s" %txt[0].strip())
-            #print "check Rint_before", twin_component, self._twin_cifItems
-            continue
-          if "(selected reflections only, after parameter refinement)" in lines[line]:
-            txt = lines[line].split('=')
-            txt = txt[1].strip()
-            txt = txt.split('(')
-            self._twin_cifItems["%s"%twin_component].setdefault("Rint_after", "%s" %txt[0].strip())
-            #print "check Rint_after", twin_component, self._twin_cifItems
-            continue
-          if lines[line][:16] == "Ratio of minimum":
-            txt = lines[line].split(':')
-            #txt = string.split(lines[line], ":")
-            self._twin_cifItems["%s"%twin_component].setdefault("ratiominmax", "%s" %txt[1].strip())
-            self._twin_cifItems["%s"%twin_component].setdefault("_exptl_absorpt_correction_T_min", "%s" %txt[1].strip())
-            #print "check ratiominmax, exptl Tmin", twin_component, self._twin_cifItems
-            continue
-          if "involving domain" in lines[line] :
-            txt = lines[line].split(' ')
+            i += 2 # Cycle  wR2(incid)  wR2(diffr)  Mean wt.
+            while i < len(lines) and lines[i].strip():
+              i += 1
+            i -= 1 #last cycle
+            self._twin_cifItems["%s"%twin_component].setdefault("Rint_after",
+              lines[i].split()[1].strip())
+          elif line[:16] == "Ratio of minimum":
+            txt = line.split(':')
+            self._twin_cifItems["%s"%twin_component].setdefault("ratiominmax", txt[1].strip())
+            self._twin_cifItems["%s"%twin_component].setdefault(
+              "_exptl_absorpt_correction_T_min", txt[1].strip())
+          elif "involving domain" in line :
+            txt = line.split(' ')
             twin_component = txt[-1]
-            #print twin_component
-          if "Minimum and maximum" in lines[line] :
-            txt = lines[line].split(':')
+          elif "Minimum and maximum" in line :
+            txt = line.split(':')
             txt = txt[1].strip()
             txt = txt.split(" ")
             min = txt[0].strip()
@@ -185,13 +139,11 @@ class reader(object):
             self._twin_cifItems["%s"%twin_component].setdefault("_exptl_absorpt_correction_T_min", "%s" %min)
             self._twin_cifItems["%s"%twin_component].setdefault("_exptl_absorpt_correction_T_max", "%s" %max)
             self._twin_cifItems["%s"%twin_component].setdefault("ratiominmax", "%.4f" %ratio)
-            #print "check ratiominmax, exptl Tmin", twin_component, self._twin_cifItems
-          if "HKLF 5" in lines[line]:
+          if "HKLF 5" in line:
             break
         except (RuntimeError, TypeError, NameError):
           print "there was an error"
           pass
-      #print "twin info ", self._twin_cifItems
       self._twin_cifItems.setdefault("_exptl_absorpt_correction_T_max", "%s" %(1))
 
 

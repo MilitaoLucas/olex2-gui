@@ -486,9 +486,13 @@ class ExtractCifInfo(CifTools):
           self.update_cif_block(twin, force=True)
           all_sources_d.setdefault(p, twin)
       except Exception, e:
-        import traceback
-        traceback.print_exc()
-        print "There was an error reading the SADABS/TWINABS output file\n'%s'.\nThe file may be incomplete." %(p)
+        if 'Unsupported program version' in str(e):
+          print "%s for SADABS" %e
+        else:
+          import traceback
+          traceback.print_exc()
+          print "There was an error reading the SADABS/TWINABS output file\n" +\
+                "'%s'" %p + ".\nThe file may be incomplete."
     else:
       sad = {'_exptl_absorpt_correction_T_max':'.',
              '_exptl_absorpt_correction_T_min':'.',
@@ -710,33 +714,24 @@ class ExtractCifInfo(CifTools):
       txt = "\n;\n"
       for component in range(1, int(abs["number_twin_components"])+1):
         comp_d = abs[str(component)]
-        parameter_ratio = comp_d["parameter_ratio"]
-        R_int_after = comp_d["Rint_after"]
-        R_int_before = comp_d["Rint_before"]
-        ratiominmax = comp_d.setdefault("ratiominmax", None)
-        lambda_correction = abs["lambda_correction"]
         t.append("\nFor component %s:\n" %(component))
-        t.append("R(int) was %s before and %s after correction.\n" %(R_int_before, R_int_after))
+        t.append("%s was %s before and %s after correction.\n"
+                 %(comp_d["R_name"], comp_d["Rint_before"], comp_d["Rint_after"]))
+        ratiominmax = comp_d.setdefault("ratiominmax", None)
         if ratiominmax != None:
           t.append("The Ratio of minimum to maximum transmission is %.2f.\n" %(float(ratiominmax)))
         else:
           t.append("The Ratio of minimum to maximum transmission not present.\n")
-        t.append("The \l/2 correction factor is %s\n" %(lambda_correction))
+        t.append("The \l/2 correction factor is %s\n" %(abs["lambda_correction"]))
       for me in t:
         txt = txt + " %s"%me
       txt += ";\n"
       exptl_absorpt_process_details = txt
 
     elif abs["abs_type"] == "SADABS":
-      #parameter_ratio = abs["parameter_ratio"]
-      #R_int_after = abs["Rint_after"]
-      #R_int_before = abs["Rint_before"]
-      #ratiominmax = abs["ratiominmax"]
-      #lambda_correction = abs["lambda_correction"]
-
       txt = """
 %(version)s was used for absorption correction.
-R(int) was %(Rint_before)s before and %(Rint_after)s after correction.
+%(R_name)s was %(Rint_before)s before and %(Rint_after)s after correction.
 The Ratio of minimum to maximum transmission is %(ratiominmax)s.
 The \l/2 correction factor is %(lambda_correction)s.
 """%abs
