@@ -2596,36 +2596,41 @@ class HealthOfStructure():
       import time
       t1 = time.time()
 
-    if self.initialise_HOS(force=force):
+    res = self.initialise_HOS(force=force)
+    if res[0]:
       self.summarise_HOS()
       self.make_HOS_html()
+    elif res[1]:
+      OV.write_to_olex("hos.htm", "")
+      OV.write_to_olex("reflection-stats-summary.htm" , "n/a")
     self.stats = None
     if timing:
       print "HOS took %.4f seconds" %(time.time() - t1)
 
   def initialise_HOS(self, force=False):
-    OV.write_to_olex("hos.htm", "")
-    OV.write_to_olex("reflection-stats-summary.htm" , "n/a")
+    """ Returns (bool, bool) the first boolean specifies if the initialisation
+    was successful, and the second - if the HOS has to be reset
+    """
     if olx.IsFileLoaded() != 'true':
-      return False
+      return (False, True)
     hkl = OV.HKLSrc()
     if not hkl or not os.path.exists(hkl):
-      return False
+      return (False, True)
     try:
       self.hkl_stats = olex_core.GetHklStat()
       if force:
-        return True
+        return (True, None)
       min_d = "%.4f" %self.hkl_stats['MinD']
       if OV.GetParam('snum.data.d_min') == float(min_d):
         if bool(olx.fs.Exists('MinD')):
-          return False
+          return (False, False)
       else:
         OV.SetParam('snum.data.d_min',min_d)
       if not self.hkl_stats:
-        return False
+        return (False, True)
     except:
-      return False
-    return True
+      return (False, True)
+    return (True, None)
 
   def get_cctbx_completeness(self, dmin=None):
     retVal = None
