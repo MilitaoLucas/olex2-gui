@@ -8,13 +8,11 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
 '''
-To run this script, type spy.OlexPlaton("help") in Olex2
+To run this script, type spy.OlexPlaton(help) in Olex2
 '''
 
 def platon(command):
   try:
-    #platon_result = olx.Exec(command)
-    #platon_result = os.popen("platon %s%s %s"%(tickornot, platonflag, inputfilename)).read()
     os.popen(command)
   except:
     print "Platon failed to run"
@@ -22,12 +20,29 @@ def platon(command):
 
 def OlexPlaton(platonflag="0"):
   print "Olex2 to Platon Linker"
+  # initialisation step
+  exe_name = "platon"
+  if sys.platform[:3] == 'win':
+    exe_name += ".exe"
+  exe_name = olx.file.Which(exe_name)
+  if not exe_name:
+    print 'The Platon executable could not be located, aborting'
+    return
+  chk_def = os.getenv("CHECKDEF")
+  if not chk_def or not os.path.exists(chk_def):
+    chk_def = os.path.join(os.path.dirname(exe_name), "check.def")
+    if not os.path.exists(chk_def):
+      print "Could not locate check.def, try setting the CHECKDEF system variable" +\
+          "or place it next to the executable"
+    else:
+      os.putenv("CHECKDEF", chk_def)
+  #end of the initialisation
   print "You are running flag: %s"%(platonflag)
   inputfilename = OV.FileName()
   print "Input file is: ", inputfilename
 
   platonflagcodes = {
-  'a' : ["ORTEP/ADP [PLOT ADP]", "lis"], 
+  'a' : ["ORTEP/ADP [PLOT ADP]", "lis"],
   'b' : ["CSD-Search [CALC GEOM CSD]","lis"],
   'c' : ["Calc Mode [CALC]", "lis"],
   'd' : ["DELABS [CALC DELABS]", "lis"],
@@ -73,7 +88,7 @@ def OlexPlaton(platonflag="0"):
   'X' : ["Stripped SHELXS86 (Direct Methods Only) Mode" , ""],
   'Y' : ["Native Structure Tidy (Parthe & Gelato) Mode" , ""]
   }
-  
+
   # OS Checking
   if sys.platform[:3] == 'lin':
     # Risky but assuming that this is a debroglie version of platon
@@ -84,7 +99,7 @@ def OlexPlaton(platonflag="0"):
   elif sys.platform[:3] == 'dar':
     # Mac assuming like windows
     tickornot = '-o -'
-    
+
   # Checking for help string
   if len(platonflag) > 1 or platonflag == "help":
     print "Unknown option, please check options and try again"
@@ -124,7 +139,7 @@ def OlexPlaton(platonflag="0"):
         for platon_line in platon_result_file:
           print platon_line.rstrip('\n')
         platon_result_file.close()
-      except IOError: 
+      except IOError:
         print "Failed to open file"
       print "You can read this file by typing:"
       print "edit %s"%(platon_extension)
