@@ -6,7 +6,7 @@
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Growing;1; -->
 
-  <td name=BTN_GROW_MODE>
+  <td name=BTN_GROW_MODE width=30%>
     <font size=$GetVar(HtmlFontSizeControls)>
     <input
       name="IMG_BUTTON-GROW_MODE"
@@ -22,7 +22,7 @@
       <!--<zimg name=IMG_BUTTON-GROW_MODE border="0" src="button-grow_mode.png"/>-->
     <!--</a>-->
   </td>
-  <td name=GROW_SHORT>
+  <td name=GROW_SHORT width='30%'>
     <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="combo"
@@ -32,13 +32,13 @@
       fgcolor="$GetVar(HtmlFontColour)"
       name="GROW_WHAT"
       height="$GetVar(HtmlComboHeight)"
-      width='50'
+      width='100%'
       items="Short<--s;Selection<--r;VdW<--v=GetValue(GROW_VDW_VAL)"
       manage
     >
     </font>
   </td>
-  <td name=GROW_SHELLS>
+  <td name=GROW_SHELLS width=20% align='center'>
     <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="checkbox"
@@ -55,7 +55,7 @@
     >
     </font>
   </td>
-  <td name=GROW_VDW_VAL>
+  <td name=GROW_VDW_VAL width=20%>
     <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="text"
