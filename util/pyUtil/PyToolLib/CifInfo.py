@@ -831,21 +831,15 @@ The \l/2 correction factor is %(lambda_correction)s.
       extension = "_notes.txt"
       directory_l = OV.FileFull().replace('\\','/').split("/")
       directory = ("/").join(directory_l[:-3])
-
-
     else:
-      return "Tool not found"
+      return None, None
 
     files = []
     for path in OV.ListFiles(os.path.join(directory, name+extension)):
       info = os.stat(path)
       files.append((info.st_mtime, path))
     if files:
-      multiple = False
-      if "images" in tool:
-        multiple = True
-      p,pp = self.file_choice(files,tool,multiple)
-      return p,pp
+      return self.file_choice(files, tool, "images" in tool)
     else:
       parent = os.path.dirname(directory)
       files = []
@@ -853,22 +847,21 @@ The \l/2 correction factor is %(lambda_correction)s.
         info = os.stat(path)
         files.append((info.st_mtime, path))
       if files:
-        return OV.standardizePath(self.file_choice(files,tool)), None
+        return self.file_choice(files,tool)
       else:
         return None, None
 
   def file_choice(self, info, tool, multiple=False):
     """Given a list of files, it will return the most recent file.
-
-		Sets the list of files as a variable in olex, and also the file that is to be used.
-		By default the most recent file is used.
-		"""
+    Sets the list of files as a variable in Olex2, and also the file that is to
+    be used. By default the most recent file is used.
+    """
     info.sort()
     pp = None
     if multiple:
       pp = []
       for ifo in info:
-        pp.append(ifo[1])
+        pp.append(OV.standardizePath(ifo[1]))
 
     info.reverse()
 
@@ -894,12 +887,10 @@ The \l/2 correction factor is %(lambda_correction)s.
           if x in file:
             setattr(self.metacifFiles,"curr_%s" %tool, (date,file))
             returnvalue = file
-          else:
-            pass
     if not returnvalue:
       returnvalue = info[0][1]
-    else:
-      pass
+    if returnvalue:
+      returnvalur = OV.standardizePath(returnvalue)
     return returnvalue, pp
 
   def get_def(self):
