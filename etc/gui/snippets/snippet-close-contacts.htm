@@ -8,19 +8,19 @@
 
 <!-- SECOND ROW -->
 <tr name=EXPAND_SHORT_CONTACTS_2>
-  <td name=SLIDER_EXPAND_SHORT_CONTACTS>
+  <td name=SLIDER_EXPAND_SHORT_CONTACTS width="85%">
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input 
       type="slider" 
       name = "SlideDeltaI" 
-      width="$eval(html.clientwidth(self)-90)" 
-      height="20" 
+      width="100%"
+      height="$GetVar(HtmlInputHeight)" 
       value="60" 
       bgcolor="$GetVar(HtmlTableBgColour)"  
       fgcolor="$GetVar(HtmlFontColour)" 
-      min="46" 
-      max="84" 
-      onchange="SetValue(DeltaIValue,eval(getvalue(SlideDeltaI)/50))>>
+      min="45" 
+      max="150" 
+      onchange="SetValue(DeltaIValue,eval(getvalue(~name~)/50))>>
 showH a true>>
 showH b true>>
 mode grow -s>>
@@ -28,17 +28,17 @@ DeltaI eval(getvalue(SlideDeltaI)/50)"
     >
     </font>
   </td>
-  <td name=DELATA_I_VALUE>
+  <td name=DELATA_I_VALUE width="15%">
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input 
     type="text" 
     name = "DeltaIValue" 
-    width="32" 
-    height="20" 
+    width="100%"
+    height="$GetVar(HtmlInputHeight)"
     bgcolor="$GetVar(HtmlTableBgColour)"  
     fgcolor="$GetVar(HtmlFontColour)" 
     value="eval(getvalue(SlideDeltaI)/50)" 
-    onreturn="SetValue(SlideDeltaI, eval(GetValue(DeltaIValue)*50))>>
+    onreturn="SetValue(SlideDeltaI, eval(GetValue(~name~)*50))>>
 showH a true>>
 showH b true>>
 mode grow -s>>
