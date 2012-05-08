@@ -634,7 +634,6 @@ class Method_cctbx_ChargeFlip(Method_solution):
       try:
         olx.Freeze(True)
         olx.xf.EndUpdate()
-        olx.Compaq('-a')
         olx.Move()
       finally:
         olx.Freeze(False)
