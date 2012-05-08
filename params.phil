@@ -1004,6 +1004,8 @@ user
     
   auto_refine_after_anis = True
     .type = bool
+  auto_compact = True
+    .type = bool
 
   cif{
     autorefine_if_no_cif_for_cifmerge = True
