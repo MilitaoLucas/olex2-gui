@@ -150,6 +150,8 @@ def makeHtmlTableRow(dictionary):
   dictionary.setdefault('first_col_colour', OV.GetParam('gui.html.table_firstcol_colour'))
   dictionary.setdefault('first_column', '<td width="%(first_col_width)s" bgcolor="%(first_col_colour)s"></td>' %dictionary)
 
+  href_1 = ""
+  href_2 = ""
   if 'chooseFile' in dictionary.keys():
     chooseFile_dict = dictionary['chooseFile']
     if 'file_type' in chooseFile_dict.keys():
@@ -164,9 +166,15 @@ def makeHtmlTableRow(dictionary):
       </a>
     </td>
     ''' %href
-    dictionary['chooseFile'] = chooseFileText
+    href_1 = '<a href="%s">' %href
+    href_2 = '</a>'
+    dictionary['chooseFile'] = ""
+    #dictionary.setdefault('chooseFile','')
+   
   else:
     dictionary.setdefault('chooseFile','')
+  dictionary['href_1'] = href_1
+  dictionary['href_2'] = href_2
 
   FieldText = ''
   for field in ['field1','field2']:
@@ -176,6 +184,9 @@ def makeHtmlTableRow(dictionary):
       field_d.setdefault('fieldVALIGN','center')
       field_d.setdefault('fieldALIGN','left')
       field_d.setdefault('fieldWidth','20%%')
+      field_d.setdefault('href_1',href_1)
+      field_d.setdefault('href_2',href_2)
+      
       field_d.setdefault('font','size=%s' %OV.GetParam('gui.html.table_firstcol_colour'))
       field_d.setdefault('first_col_width', OV.GetParam('gui.html.table_firstcol_width'))
       FieldText += """
@@ -209,7 +220,10 @@ def makeHtmlTableRow(dictionary):
   %(first_column)s
     <td VALIGN="%(fieldVALIGN)s" ALIGN="%(fieldALIGN)s" width="%(fieldWidth)s" colspan=2>
       <b>
-        %(itemName)s
+      <b>
+        %(href_1)s
+          %(itemName)s
+        %(href_2)s
       </b>
     </td>
       <td VALIGN="center" colspan=2 width="70%%%%">

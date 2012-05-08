@@ -429,9 +429,9 @@ gui
         .type = colour
       grad_step = 0.3
         .type = float
-      height = 22
+      height = 18
         .type = int
-      width = 24
+      width = 20
         .type = int
       corner_rad = 0
         .type = int
@@ -624,8 +624,10 @@ gui
 
   buttons{
     small_buttons{
-      width = 56
+      width = 60
         .type = int
+      rounded = 0000
+        .type = str
     }
   }
   report{
