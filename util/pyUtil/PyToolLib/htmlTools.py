@@ -49,10 +49,10 @@ def makeHtmlTable(list):
     row_d = {}
     row_d.setdefault('itemName',input_d['itemName'])
     row_d.setdefault('ctrl_name', "SET_%s" %str.upper(input_d['varName']).replace('.','_'))
-    
+
     if input_d['varName'] == "InfoLine":
       pass
-      
+
 
     boxText = ''
     for box in ['box1','box2','box3']:
@@ -170,7 +170,7 @@ def makeHtmlTableRow(dictionary):
     href_2 = '</a>'
     dictionary['chooseFile'] = ""
     #dictionary.setdefault('chooseFile','')
-   
+
   else:
     dictionary.setdefault('chooseFile','')
   dictionary['href_1'] = href_1
@@ -186,7 +186,7 @@ def makeHtmlTableRow(dictionary):
       field_d.setdefault('fieldWidth','20%%')
       field_d.setdefault('href_1',href_1)
       field_d.setdefault('href_2',href_2)
-      
+
       field_d.setdefault('font','size=%s' %OV.GetParam('gui.html.table_firstcol_colour'))
       field_d.setdefault('first_col_width', OV.GetParam('gui.html.table_firstcol_width'))
       FieldText += """
@@ -214,7 +214,7 @@ def makeHtmlTableRow(dictionary):
 ''' %dictionary
 
   else:
-    
+
     htmlTableRowText = '''
   <tr VALIGN="%(trVALIGN)s" ALIGN="%(trALIGN)s" NAME="%(ctrl_name)s">
   %(first_column)s
@@ -363,7 +363,7 @@ def make_help_box(args):
     return_items = ""
 
   txt = get_template('pop_help')
-  
+
   txt = txt %(banner_include, name, titleTxt, helpTxt, return_items, editLink)
   wFilePath = r"%s-%s.htm" %(name, box_type)
   wFilePath = wFilePath.replace(" ", "_")
@@ -731,7 +731,7 @@ def format_help(string):
   sx = string
   string = regex.sub(r"<tr><td align='right'>$spy.MakeHoverButton(button-tutorial,spy.demo.run_autodemo\\(\1))</td></tr>", string)
   string = string.replace(r"\\\\",r"\\")
-  
+
   ## find all occurences of strings between l[]. These are links to help or tutorial popup boxes.
   regex = re.compile(r"l\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
   string = regex.sub(r"<font size=+1 color='$GetVar(HtmlHighlightColour)'>&#187;</font><a target='Go to \g<linktext>' href='spy.make_help_box -name=\g<linkurl> -type=\g<linktype>'><b>\g<linktext></b></a>", string)
@@ -848,7 +848,7 @@ def getStyles(style_name):
     style_name = '%s/etc/CIF/%s' %(OV.BaseDir(),style_name)
   if not os.path.exists(style_name):
     style_name = '%s/etc/CIF/styles/default.css' %OV.BaseDir()
-    
+
   css = open(style_name,'r').read()
   styleHTML = """
 <style type="text/css">
@@ -912,7 +912,6 @@ def get_template(name):
 
 def makeHtmlBottomPop(args, pb_height = 50, y = 0):
   global HaveModeBox
-  panel_diff = OV.GetParam('gui.htmlpanelwidth_margin_adjust')
   txt = args.get('txt',None)
   name = args.get('name',"test")
   replace_str = args.get('replace',None)
@@ -931,11 +930,12 @@ def makeHtmlBottomPop(args, pb_height = 50, y = 0):
   pop_name = name
   htm_location = "%s.htm" %pop_html
   OlexVFS.write_to_olex(htm_location,txt)
-  width = OV.GetParam('gui.htmlpanelwidth') - panel_diff
-  x = metric[0] + 10
+  width = int(olx.html.ClientWidth('self'))
+  x = metric[0]
   if not y:
-    y = metric[1] - pb_height - 8
-  pstr = "popup %s '%s' -t='%s' -w=%s -h=%s -x=%s  -y=%s" %(pop_name, htm_location, pop_name, width, pb_height, x, y)
+    y = metric[1] - pb_height
+  pstr = "popup %s '%s' -t='%s' -w=%s -h=%s -x=%s  -y=%s" %(
+    pop_name, htm_location, pop_name, width, pb_height, x, y)
 
   if HaveModeBox:
     OV.cmd(pstr)
@@ -1195,7 +1195,7 @@ def MakeHoverButton(name, cmds, onoff = "off", btn_bg='table_firstcol_colour'):
   #time_add += diff
   #print "MakeHoverButtons took %.6fs (%.4f)" %(diff, time_add)
   return txt
-  
+
 OV.registerFunction(MakeHoverButton)
 
 def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):

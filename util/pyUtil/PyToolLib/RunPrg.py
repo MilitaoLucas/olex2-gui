@@ -229,8 +229,6 @@ class RunSolutionPrg(RunPrg):
     OV.SetParam('snum.refinement.suggested_weight','0.1 0')
     OV.SetParam('snum.refinement.update_weight', False)
     RunPrg.runAfterProcess(self)
-    if OV.GetParam('user.auto_compact') == True:
-      olx.Compaq('-a')
     self.method.post_solution(self)
     self.doHistoryCreation()
 

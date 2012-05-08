@@ -54,9 +54,9 @@ $spy.MakeHoverButton(toolbar-ok,fixunit GetValue\(SET_Z_PRIME_FIXUNIT)>>xf.au.Se
     bgcolor=$GetVar(HtmlTableBgColour)
     name='AUTO_COMPACT'
     checked="$spy.GetParam(user.auto_compact)"
-    oncheck='spy.SetParam(user.auto_compact,true)>>echo "Automatically compact structure after solve and refine: TRUE'
-    onuncheck='spy.SetParam(user.auto_compact,false)>>echo "Automatically compact structure after solve and refine: True'
-    target="Automatically compact structure after solve and refine: FALSE"
+    oncheck='spy.SetParam(user.auto_compact,true)>>echo "Automatically compact structure after refine: True"'
+    onuncheck='spy.SetParam(user.auto_compact,false)>>echo "Automatically compact structure after refine: False"'
+    target="Automatically compact structure after refine"
     align='center'
   >
   </font>
