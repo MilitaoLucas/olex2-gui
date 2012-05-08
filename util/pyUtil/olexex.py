@@ -1912,6 +1912,7 @@ def GetPSImageInstructions():
   lw_font = str(OV.GetParam('snum.image.ps.font_weight'))
   div_pie = str(OV.GetParam('snum.image.ps.octant_count'))
   scale_hb = str(OV.GetParam('snum.image.ps.h_bond_width'))
+  octant_atoms = str(OV.GetValue('IMAGE_PS_OCTANTS_ATOMS'))
 
   olex.m("pictps" + \
          " " + filefull + \
@@ -1923,6 +1924,7 @@ def GetPSImageInstructions():
          " " + "-lw_pie=" + lw_pie + \
          " " + "-lw_font=" + lw_font + \
          " " + "-div_pie=" + div_pie + \
+         " " + "-octants=" + octant_atoms + \
          " " + "-scale_hb=" + scale_hb)
   olex.m('brad 0.8')
   print 'Image %s created' %filefull

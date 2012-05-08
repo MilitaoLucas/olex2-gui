@@ -14,36 +14,66 @@
 <tr name=MAIN_TOOLBAR width=100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Quicktools;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width='5%'>
+  <td width='8%'>
 $spy.MakeHoverButton(toolbar-QC,name \$Q C)
   </td>
-  <td width='5%'>
+  <td width='8%'>
 $spy.MakeHoverButton(toolbar-QH,name \$Q H)
   </td>
-  <td width='5%'>
+  <td width='8%'>
 $spy.MakeHoverButton(toolbar-tidy,clean)
   </td>
-  <td width='5%'>
+  <td width='8%'>
 $spy.MakeHoverButton(toolbar-killH,kill \$H)
   </td>
-  <td width='5%'>
+  <td width='8%'>
 $spy.MakeHoverButton(toolbar-Q,showQ)
   </td>
-  <td width='5%'>
+  <td width='8%'>
 $spy.MakeHoverButton(toolbar-H,showH)
   </td>
-  <td width='5%'>
+  <td width='8%'>
 $spy.MakeHoverButton(toolbar-center,compaq>>compaq -a>>center)
   </td>
   
   <td width = '5%'>
 $spy.MakeHoverButton(toolbar-ok,fixunit GetValue\(SET_Z_PRIME_FIXUNIT)>>xf.au.SetZprime\(GetValue\(SET_Z_PRIME_FIXUNIT))>>html.Update)
-  </td> 
-  <td width='30%' align='center'>
+
+<td width='15%' align='right'>
+  <font size=$GetVar(HtmlFontSizeControls)>
+    Assemble
+  </font>
+</td>
+
+<td width='6%' align='right'>
+  <font size=$GetVar(HtmlFontSizeControls)>
+  <input
+    type='checkbox'
+    width='100%'
+    height=$GetVar(HtmlCheckboxHeight)
+    bgcolor=$GetVar(HtmlTableBgColour)
+    name='AUTO_COMPACT'
+    checked="$spy.GetParam(user.auto_compact)"
+    oncheck='spy.SetParam(user.auto_compact,true)>>echo "Automatically compact structure after refine: True"'
+    onuncheck='spy.SetParam(user.auto_compact,false)>>echo "Automatically compact structure after refine: False"'
+    target="Automatically compact structure after refine"
+    align='center'
+  >
+  </font>
+</td>
+
+<td width='4%' align='left'>
+  <font size=$GetVar(HtmlFontSizeControls)>
+    Z'=
+  </font>
+</td>
+
+  </td>
+  <td width='15%' align='right'>
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type='text'
-      width="40"
+      width="100%"
       height="$GetVar(HtmlComboHeight)"
       bgcolor="spy.GetParam(gui.html.input_bg_colour)"
       name='SET_Z_PRIME_FIXUNIT'
@@ -51,7 +81,6 @@ $spy.MakeHoverButton(toolbar-ok,fixunit GetValue\(SET_Z_PRIME_FIXUNIT)>>xf.au.Se
       align='right'
       value='xf.au.GetZprime()'
       onreturn="xf.au.SetZprime(GetValue(~name~))>>html.update"
-      label="Z' "
       >
     </font>
   </td>
