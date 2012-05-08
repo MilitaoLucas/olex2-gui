@@ -9,13 +9,13 @@
 
 <!-- SECOND ROW -->
 <tr name=PACK_RADIUS_2>
-  <td name=SLIDER_PACK_RADIUS>
+  <td name=SLIDER_PACK_RADIUS width="85%">
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input 
       type="slider" 
       name = "SlidePackRadius" 
-      width="$eval(html.clientwidth(self)-90)" 
-      height="20" 
+      width="100%" 
+      height="$GetVar(HtmlInputHeight)" 
       value="0" 
       bgcolor="$GetVar(HtmlTableBgColour)"  
       fgcolor="$GetVar(HtmlFontColour)" 
@@ -28,13 +28,13 @@ pack getvalue(PackRadius)>>
   >
   </font>
   </td>
-  <td name=PACK_RADIUS_VALUE>
+  <td name=PACK_RADIUS_VALUE width="15%">
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input 
       type="text" 
       name = "PackRadius" 
-      width="32" 
-      height="20" 
+      width="100%" 
+      height="$GetVar(HtmlInputHeight)" 
       bgcolor="$GetVar(HtmlTableBgColour)"  
       fgcolor="$GetVar(HtmlFontColour)" 
       value="getvalue(SlidePackRadius)" 
