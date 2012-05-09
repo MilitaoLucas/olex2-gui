@@ -272,7 +272,7 @@ class RunRefinementPrg(RunPrg):
     if self.terminate:
       self.endRun()
       return
-    
+
     if self.params.snum.refinement.graphical_output and self.HasGUI:
       self.method.observe(self)
     RunPrg.run(self)
@@ -347,12 +347,13 @@ class RunRefinementPrg(RunPrg):
     if self.params.snum.refinement.auto.tidy:
       self.doAutoTidyAfter()
       OV.File()
-    if OV.GetParam('user.auto_compact') == True:
+    if OV.GetParam('user.auto_compact') == True and\
+       olx.xf.latt.IsGrown() == 'false':
       olx.Compaq('-a')
       olx.Move()
     if OV.GetParam('snum.refinement.check_absolute_structure_after_refinement'):
       self.isInversionNeeded(force=self.params.snum.refinement.auto.invert)
-    
+
 
   def doHistoryCreation(self):
     if self.params.snum.init.skip_history:
