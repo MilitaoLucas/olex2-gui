@@ -238,6 +238,8 @@ class Method_solution(Method):
       args += "-s=%s " % RunPrgObject.sg
     if self.name == 'Structure Expansion':
       args += "-atoms"
+    if olx.xf.latt.IsGrown() == 'true':
+      olx.Fuse()
     return args
 
   def post_solution(self, RunPrgObject):
