@@ -29,8 +29,8 @@ $spy.MakeHoverButton(button_small-delete,kill sel)
     onchange="
 Freeze(True)
 >>sel -u
->>SetVar(UisoSelectVal,spy.UisoSelectSlide(GetValue(UISO_SELECT_SLIDER)))
->>SetLabel(UisoSelectVal,GetVar(UisoSelectVal))
+>>SetVar(UisoSelectVal,spy.UisoSelectSlide(html.GetValue(~name~)))
+>>html.SetLabel(UisoSelectVal,GetVar(UisoSelectVal))
 >>sel atoms where xatom.uiso GetVar(UisoSelectVal)&&xatom.type!='Q''
 >>Freeze(False)
   ">
@@ -46,7 +46,7 @@ Freeze(True)
     height="18"
     bgcolor="$GetVar(HtmlTableBgColour)"
     fgcolor="$GetVar(HtmlFontColour)"
-    value="spy.UisoSelectSlide(GetValue(UISO_SELECT_SLIDER))"
+    value="spy.UisoSelectSlide(html.GetValue(UISO_SELECT_SLIDER))"
   >
   </font>
 </td>

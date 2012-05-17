@@ -77,14 +77,14 @@
 			type="button" 
 			name="RESET_SPACE_GROUP" 
 			image="button-reset.png"
-			onclick="reset -s=getvalue(space_group)>>echo 'The structure has been reset in $sg(%n). You probably want to solve this structure now.'"
+			onclick="reset -s=html.GetValue(space_group)>>echo 'The structure has been reset in $sg(%n). You probably want to solve this structure now.'"
 		>
     <input
 			bgcolor="$GetVar(HtmlTableBgColour)"  
 			type="button" 
 			name="RESET_AND_SOLVE" 
 			image="button-reset_&_solve.png"
-			onclick="reset -s=getvalue(space_group)>>solve>>echo 'The structure has been reset in $sg(%n).'"
+			onclick="reset -s=html.GetValue(space_group)>>solve>>echo 'The structure has been reset in $sg(%n).'"
 		>
     <input
 			bgcolor="$GetVar(HtmlTableBgColour)"  

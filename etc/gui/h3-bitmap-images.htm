@@ -42,7 +42,7 @@
       width="100%"
       height="$GetVar(HtmlInputHeight)"
       value=""
-      onchange="spy.SetParam(snum.image.bitmap.name,GetValue(IMAGE_BITMAP_NAME))"
+      onchange="spy.SetParam(snum.image.bitmap.name,html.GetValue(~name~))"
       manage
     >
     </font>
@@ -61,7 +61,7 @@
       valign='center'
       name="IMAGE_BITMAP_TYPE"
       value='$spy.GetParam(snum.image.bitmap.type)'
-      onchange='spy.SetParam(snum.image.bitmap.type,GetValue(IMAGE_BITMAP_TYPE))'
+      onchange='spy.SetParam(snum.image.bitmap.type,html.GetValue(~name~))'
     >
     </font>
   </td>

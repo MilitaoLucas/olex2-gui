@@ -15,7 +15,7 @@
       name="IMAGE_PS_NAME"
       width="100%"
       value="spy.GetParam(snum.image.ps.name)"
-      onchange="spy.SetParam(snum.image.ps.name,GetValue(~name~))"
+      onchange="spy.SetParam(snum.image.ps.name,html.GetValue(~name~))"
       manage
     >
     </font>
@@ -125,7 +125,7 @@ $spy.MakeHoverButton(button_small-go@ps,spy.GetPsImageInstructions\())
       align='right'
       name="IMAGE_PS_OUTLINE_LINEWIDTH"
       value='$spy.GetParam(snum.image.ps.outline_width)'
-      onchange="spy.SetParam(snum.image.ps.outline_width,GetValue(~name~))"
+      onchange="spy.SetParam(snum.image.ps.outline_width,html.GetValue(~name~))"
       label="%images_outline_line_width% "
     >
     </font>
@@ -144,7 +144,7 @@ $spy.MakeHoverButton(button_small-go@ps,spy.GetPsImageInstructions\())
       name="IMAGE_PS_OCTANT_LINEWIDTH"
       width="50"
       value='$spy.GetParam(snum.image.ps.octant_width)'
-      onchange="spy.SetParam(snum.image.ps.octant_width,GetValue(~name~))"
+      onchange="spy.SetParam(snum.image.ps.octant_width,html.GetValue(~name~))"
       label="%images_octant_line_width% "
     >
     </font>
@@ -174,7 +174,7 @@ $spy.MakeHoverButton(button_small-go@ps,spy.GetPsImageInstructions\())
       name="IMAGE_PS_OCTANT_COUNT"
       width="100%"
       value='$spy.GetParam(snum.image.ps.octant_count)'
-      onchange="spy.SetParam(snum.image.ps.octant_count,GetValue(~name~))"
+      onchange="spy.SetParam(snum.image.ps.octant_count,html.GetValue(~name~))"
       label="%images_no_of_dividers% "
     >
     </font>
@@ -193,7 +193,7 @@ $spy.MakeHoverButton(button_small-go@ps,spy.GetPsImageInstructions\())
       name="IMAGE_PS_OCTANT_PIEWIDTH"
       width="100%"
       value='$spy.GetParam(snum.image.ps.pie_width)'
-      onchange="spy.SetParam(snum.image.ps.pie_width,GetValue(~name~))"
+      onchange="spy.SetParam(snum.image.ps.pie_width,html.GetValue(~name~))"
       label="%images_dividing_line_width% "
     >
     </font>
@@ -222,7 +222,7 @@ $spy.MakeHoverButton(button_small-go@ps,spy.GetPsImageInstructions\())
       name="IMAGE_PS_BONDWIDTH"
       width="50"
       value='$spy.GetParam(snum.image.ps.bond_width)'
-      onchange="spy.SetParam(snum.image.ps.bond_width,GetValue(~name~))"
+      onchange="spy.SetParam(snum.image.ps.bond_width,html.GetValue(~name~))"
       label="%images_bond_width% "
     >
     </font>
@@ -240,7 +240,7 @@ $spy.MakeHoverButton(button_small-go@ps,spy.GetPsImageInstructions\())
       name="IMAGE_PS_HBOND"
       width="50"
       value='$spy.GetParam(snum.image.ps.h_bond_width)'
-      onchange="spy.SetParam(snum.image.ps.h_bond_width,GetValue(~name~))"
+      onchange="spy.SetParam(snum.image.ps.h_bond_width,html.GetValue(~name~))"
       label="%images_H_atom_bonds% "
     >
     </font>
@@ -269,7 +269,7 @@ $spy.MakeHoverButton(button_small-go@ps,spy.GetPsImageInstructions\())
       name="IMAGE_PS_FONTWEIGHT"
       width="50"
       value='$spy.GetParam(snum.image.ps.font_weight)'
-      onchange="spy.SetParam(snum.image.ps.font_weight,GetValue(~name~))"
+      onchange="spy.SetParam(snum.image.ps.font_weight,html.GetValue(~name~))"
       label="%images_font_weight% "
     >
     </font>
@@ -288,7 +288,7 @@ $spy.MakeHoverButton(button_small-go@ps,spy.GetPsImageInstructions\())
       name="IMAGE_PS_ATOM_LABEL_FONTSIZE"
       width="50"
       value='$spy.GetParam(snum.image.ps.atom_label.font_size)'
-      onchange="spy.SetParam(snum.image.ps.atom_label.font_size,GetValue(~name~))>>
+      onchange="spy.SetParam(snum.image.ps.atom_label.font_size,html.GetValue(~name~))>>
 setfont AtomLabels strcat(spy.GetParam(snum.image.ps.atom_label.font_name),spy.GetParam(snum.image.ps.atom_label.font_size))"
       label="%Size% "
     >
@@ -317,7 +317,7 @@ setfont AtomLabels strcat(spy.GetParam(snum.image.ps.atom_label.font_name),spy.G
       <!--width="50"-->
       <!--value='$spy.GetParam(snum.image.ps.bond_label.font_weight)'-->
       <!--label="%images_font_weight% "-->
-      <!--onchange="spy.SetParam(snum.image.ps.bond_label.font_weight,GetValue(~name~))"-->
+      <!--onchange="spy.SetParam(snum.image.ps.bond_label.font_weight,html.GetValue(~name~))"-->
     <!-->-->
     </td>
   <td name=IMAGE_PS_BOND_LABEL_FONTSIZE width=42%>
@@ -334,7 +334,7 @@ setfont AtomLabels strcat(spy.GetParam(snum.image.ps.atom_label.font_name),spy.G
       name="IMAGE_PS_BOND_LABEL_FONTSIZE"
       width="50"
       value='$spy.GetParam(snum.image.ps.bond_label.font_size)'
-      onchange="spy.SetParam(snum.image.ps.bond_label.font_size,GetValue(~name~))>>
+      onchange="spy.SetParam(snum.image.ps.bond_label.font_size,html.GetValue(~name~))>>
 setfont BondLabels strcat(spy.GetParam(snum.image.ps.bond_label.font_name),spy.GetParam(snum.image.ps.bond_label.font_size))"
       label="%Size% "
     >

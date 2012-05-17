@@ -30,7 +30,7 @@
       width="95%"
       height="$GetVar(HtmlInputHeight)"
       onchange="
-spy.SetParam(snum.masks.type,GetValue(~name~))>>
+spy.SetParam(snum.masks.type,html.GetValue(~name~))>>
 spy.OlexCctbxMasks(False)>>
 spy.gui.maps.SetXGridView()"
       label="%Map% "
@@ -51,7 +51,7 @@ spy.gui.maps.SetXGridView()"
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
       value="$spy.GetParam(snum.masks.resolution_factor)"
-      onchange="spy.SetParam(snum.masks.resolution_factor,GetValue(~name~))"
+      onchange="spy.SetParam(snum.masks.resolution_factor,html.GetValue(~name~))"
     >
     </font>
   </td>
@@ -80,7 +80,7 @@ spy.gui.maps.SetXGridView()"
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
       value="$spy.GetParam(snum.masks.solvent_radius)"
-      onchange="spy.SetParam(snum.masks.solvent_radius,GetValue(~name~))"
+      onchange="spy.SetParam(snum.masks.solvent_radius,html.GetValue(~name~))"
     >
     </font>
   </td>
@@ -96,7 +96,7 @@ spy.gui.maps.SetXGridView()"
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
       value="$spy.GetParam(snum.masks.shrink_truncation_radius)"
-      onchange="spy.SetParam(snum.masks.shrink_truncation_radius,GetValue(~name~))"
+      onchange="spy.SetParam(snum.masks.shrink_truncation_radius,html.GetValue(~name~))"
     >
     </font>
   </td>

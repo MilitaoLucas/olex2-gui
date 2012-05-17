@@ -17,7 +17,7 @@
 				name= "COLOUR_APPEARANCE" 
 				items="metallic;lustrous;translucent;fluorescent;clear" 
 				width="70"  
-				onchange="echo getvalue(COLOUR_APPEARANCE)"
+				onchange="echo html.GetValue(COLOUR_APPEARANCE)"
 			>
 			<input 
 				type="combo"
@@ -27,7 +27,7 @@
 				items="dark;light;intense;pale" 
 				width="70"  
 				value="GetVar(snum_colour_intensity)"
-				onchange="spy.hello(GetValue(SET_SNUM_COLOUR_INTENSITY))>>SetVar(snum_colour_intensity,GetValue(SET_SNUM_COLOUR_INTENSITY))"
+				onchange="spy.hello(html.GetValue(SET_SNUM_COLOUR_INTENSITY))>>SetVar(snum_colour_intensity,html.GetValue(SET_SNUM_COLOUR_INTENSITY))"
 			>
 			<input 
 				type="combo"
@@ -36,7 +36,7 @@
 				name= "COLOUR_BASE" 
 				items="black;blue;bronze;brown;colourless;gold;green;grey;orange;pink;purple;red;silver;violet;white;yellow" 
 				width="70"  
-				onchange="echo getvalue(COLOUR_BASE)"/>
+				onchange="echo html.GetValue(COLOUR_BASE)"/>
 		</font>	
 	</td>
 

@@ -22,8 +22,8 @@
       min="2" 
       max="20" 
       onchange = "
-SetValue(PackRadius,getvalue(SlidePackRadius))>>
-pack getvalue(PackRadius)>>
+html.SetValue(PackRadius,html.GetValue(~name~))>>
+pack html.GetValue(PackRadius)>>
 "
   >
   </font>
@@ -37,10 +37,10 @@ pack getvalue(PackRadius)>>
       height="$GetVar(HtmlInputHeight)" 
       bgcolor="$GetVar(HtmlTableBgColour)"  
       fgcolor="$GetVar(HtmlFontColour)" 
-      value="getvalue(SlidePackRadius)" 
-      onreturn="SetValue(SlidePackRadius,GetValue(PackRadius))>>
+      value="html.GetValue(SlidePackRadius)" 
+      onreturn="html.SetValue(SlidePackRadius,html.GetValue(~name~))>>
 fuse>>
-pack GetValue(PackRadius)"
+pack html.GetValue(~name~)"
     >
     </font>
   </td>
