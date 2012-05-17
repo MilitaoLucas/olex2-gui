@@ -14,7 +14,7 @@
       items='DFIX;DANG;SADI;CHIV;FLAT;DELU;SIMU;ISOR;'
       value="GetVar(gui_shelx_restraints)" 
       width="100%"
-      onchange="SetVar(gui_shelx_restraints,GetValue(SET_GUI_SHELX_RESTRAINTS))>>spy.restraint_builder(GetVar(gui_shelx_restraints))"
+      onchange="SetVar(gui_shelx_restraints,html.GetValue(~name~))>>spy.restraint_builder(GetVar(gui_shelx_restraints))"
       readonly
       manage
     >

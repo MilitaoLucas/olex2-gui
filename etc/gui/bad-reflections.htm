@@ -22,7 +22,7 @@
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=exclude-hkl;1; -->
 
   <td>
-    <a href="HklExclude -c=GetVar(exclude_hkl_and) -h=GetValue(exclude_h) -k=GetValue(exclude_k) -l=GetValue(exclude_l)" >%Exclude%:</a> 
+    <a href="HklExclude -c=GetVar(exclude_hkl_and) -h=html.GetValue(exclude_h) -k=html.GetValue(exclude_k) -l=html.GetValue(exclude_l)" >%Exclude%:</a> 
   </td>
 
 
@@ -80,7 +80,7 @@
   </td>
 
   <td>
-    <a href='SetValue(exclude_h,"")>>SetValue(exclude_k,"")>>SetValue(exclude_l,"")>>HklAppend'>%Reset%</a> 
+    <a href='html.SetValue(exclude_h,"")>>html.SetValue(exclude_k,"")>>html.SetValue(exclude_l,"")>>HklAppend'>%Reset%</a> 
   </td>
 </tr>
 

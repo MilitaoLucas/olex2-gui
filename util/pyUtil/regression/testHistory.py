@@ -72,8 +72,8 @@ class HistoryTestCase(test_utils.TestCaseBase):
     history_bars_html = open('%s/VFS/history-info.htm' %self.tmp).read()
     self.assertFalse(show_diff(history_bars_html, """\
 <zimg border=0 src=vscale.png>
-<a href='spy.revert_history -solution="GetValue(SET_HISTORY_CURRENT_SOLUTION)" -refinement=solution>>html.Update' target=Solution><zimg border=0 width='7' src=vbar-sol.png></a>
-<a href='spy.revert_history -solution="GetValue(SET_HISTORY_CURRENT_SOLUTION)" -refinement="refinement_02">>html.Update' target='R1: 3.12%25, Refinement: ShelXL - Least Squares'><zimg border=0 width='7' src=vbar-31.png></a>
+<a href='spy.revert_history -solution="html.GetValue(SET_HISTORY_CURRENT_SOLUTION)" -refinement=solution>>html.Update' target=Solution><zimg border=0 width='7' src=vbar-sol.png></a>
+<a href='spy.revert_history -solution="html.GetValue(SET_HISTORY_CURRENT_SOLUTION)" -refinement="refinement_02">>html.Update' target='R1: 3.12%25, Refinement: ShelXL - Least Squares'><zimg border=0 width='7' src=vbar-31.png></a>
 <br>
  <b>P -1</b> -  ShelXS - Patterson Method"""))
     # test save/load

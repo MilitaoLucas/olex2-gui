@@ -17,7 +17,7 @@
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
       value="$spy.GetParam(snum.calcsolv.probe)"
-      onchange="spy.SetParam(snum.calcsolv.probe,GetValue(SET_SNUM_CALCSOLV_PROBE))"
+      onchange="spy.SetParam(snum.calcsolv.probe,html.GetValue(~name~))"
     >
     </font>
   </td>
@@ -33,7 +33,7 @@
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
       value="$spy.GetParam(snum.calcsolv.grid)"
-      onchange="spy.SetParam(snum.calcsolv.grid,GetValue(SET_SNUM_CALCSOLV_GRID))"
+      onchange="spy.SetParam(snum.calcsolv.grid,html.GetValue(~name~))"
     >
     </font>
   </td>

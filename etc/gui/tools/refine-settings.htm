@@ -50,7 +50,7 @@
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name='SET_SNUM_REFINEMENT_MAX_CYCLES'
         value='$spy.GetParam(snum.refinement.max_cycles)'
-        onchange="spy.SetMaxCycles(GetValue(SET_SNUM_REFINEMENT_MAX_CYCLES))"
+        onchange="spy.SetMaxCycles(html.GetValue(~name~))"
       >
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -71,7 +71,7 @@
         height="$GetVar(HtmlSPinHeight)"
         max='1000'
         value='$eval(abs\(spy.GetParam(snum.refinement.max_peaks)))'
-        onchange='spy.SetMaxPeaks(GetValue(SET_SNUM_REFINEMENT_MAX_PEAKS))'
+        onchange='spy.SetMaxPeaks(html.GetValue(~name~))'
       >
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

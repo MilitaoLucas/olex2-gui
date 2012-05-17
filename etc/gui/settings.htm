@@ -138,7 +138,7 @@ Freeze(false)>>
        bgcolor="$GetVar(HtmlInputBgColour)"
        value=""
        items="All<--1;1<-2;5<-6;10<-11;20<-21"
-       onchange="lines GetValue(~name~)"
+       onchange="lines html.GetValue(~name~)"
        valign='center'
        align='right'
        width="100%"
@@ -215,7 +215,7 @@ Freeze(false)>>
        width="100%"
        value="$spy.GetParam(user.start_where)"
        items="Home;Work;View;Tools;Info"
-       onchange="spy.SetParam(user.start_where,GetValue(~name~))"
+       onchange="spy.SetParam(user.start_where,html.GetValue(~name~))"
        valign='center'
        align='right'
        readonly
@@ -253,7 +253,7 @@ Freeze(false)>>
       min="0" 
       max="10" 
       onchange = "gl.Perspective>>
-      gl.Perspective GetValue(SNUM_PERSPECTIVE_SLIDE)"
+      gl.Perspective html.GetValue(~name~)"
     >
   </td>
 </tr>
@@ -277,7 +277,7 @@ Freeze(false)>>
       min="0" 
       max="10" 
       onchange = "gl.Perspective>>
-      gl.Perspective GetValue(SNUM_PERSPECTIVE_SLIDE)
+      gl.Perspective html.GetValue(~name~)
 ">
 </td>
   </tr>
@@ -298,7 +298,7 @@ Freeze(false)>>
     <font size='2' align='center'><input type="text" name="col_g"  width="30"  height="17" value = "100"></font>
     <font size='2' align='center'><input type="text" name="col_b"  width="30"  height="17" value = "160"></font>
     <input type="button" name = "MakeMovie" width="20" height="17" value="Go"
-    onclick = "setvar(col_r, getvalue(col_r))>>setvar(col_g, getvalue(col_g))>>setvar(col_b, getvalue(col_b))>>panel"
+    onclick = "setvar(col_r, html.getvalue(col_r))>>setvar(col_g, html.getvalue(col_g))>>setvar(col_b, html.getvalue(col_b))>>panel"
     </td>
   </tr>
 -->

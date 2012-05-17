@@ -13,7 +13,7 @@
       type="button"
       image="up=button-grow_modeoff.png,down=button-grow_modeon.png,hover=button-grow_modehover.png"
       hint="%Mode Grow-target%"
-      onclick="if strcmp(spy.GetParam(olex2.short_mode),'grow') then 'mode off'  else run(mode grow GetValue(GROW_WHAT) GetData(GROW_SHELLS))"
+      onclick="if strcmp(spy.GetParam(olex2.short_mode),'grow') then 'mode off'  else run(mode grow html.GetValue(GROW_WHAT) GetData(GROW_SHELLS))"
     >
     </font>
     <!--<a-->
@@ -33,7 +33,7 @@
       name="GROW_WHAT"
       height="$GetVar(HtmlComboHeight)"
       width='100%'
-      items="Short<--s;Selection<--r;VdW<--v=GetValue(GROW_VDW_VAL)"
+      items="Short<--s;Selection<--r;VdW<--v=html.GetValue(GROW_VDW_VAL)"
       manage
     >
     </font>
@@ -67,7 +67,7 @@
       height="$GetVar(HtmlInputHeight)"
       width='30'
       manage
-      onchange="SetData(GROW_VDW,'-v=GetValue(GROW_VDW_VAL)')>>SetData(GROW_VDW,-v=GetValue(GROW_VDW_VAL))>>SetData(GROW_SELECTION,' ')>>SetData(GROW_SHORT,' ')"
+      onchange="SetData(GROW_VDW,'-v=html.GetValue(GROW_VDW_VAL)')>>SetData(GROW_VDW,-v=html.GetValue(GROW_VDW_VAL))>>SetData(GROW_SELECTION,' ')>>SetData(GROW_SHORT,' ')"
     >
     </font>
   </td>

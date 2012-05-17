@@ -17,8 +17,8 @@
       min="$eval(-2.5/gl.CalcZoom())"
       max="$eval(2.5/gl.CalcZoom())"
       onchange="
-xgrid.Depth(eval(GetValue(~name~)/5))>>
-SetValue(SNUM_XGRID_DEPTH_VALUE,eval(GetValue(~name~)/5))"
+xgrid.Depth(eval(html.GetValue(~name~)/5))>>
+html.SetValue(SNUM_XGRID_DEPTH_VALUE,eval(html.GetValue(~name~)/5))"
     >
     </font>
   </td>
@@ -33,8 +33,8 @@ SetValue(SNUM_XGRID_DEPTH_VALUE,eval(GetValue(~name~)/5))"
       fgcolor="$GetVar(HtmlFontColour)"
       value="xgrid.Depth()"
       onreturn="
-xgrid.Depth(GetValue(~name~))>>
-SetValue(SNUM_XGRID_DEPTH_SLIDE,eval(GetValue(~name~)*5))"
+xgrid.Depth(html.GetValue(~name~))>>
+html.SetValue(SNUM_XGRID_DEPTH_SLIDE,eval(html.GetValue(~name~)*5))"
     >
     </font>
   </td>
@@ -56,8 +56,8 @@ SetValue(SNUM_XGRID_DEPTH_SLIDE,eval(GetValue(~name~)*5))"
       min="1"
       max="20"
       onchange="
-xgrid.Size(GetValue(~name~))>>
-SetValue(SNUM_XGRID_SIZE_VALUE,GetValue(~name~))"
+xgrid.Size(html.GetValue(~name~))>>
+html.SetValue(SNUM_XGRID_SIZE_VALUE,html.GetValue(~name~))"
     >
     </font>
   </td>
@@ -70,10 +70,10 @@ SetValue(SNUM_XGRID_SIZE_VALUE,GetValue(~name~))"
       height="18"
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
-      value="GetValue(SNUM_XGRID_SIZE_SLIDE)"
+      value="html.GetValue(SNUM_XGRID_SIZE_SLIDE)"
       onreturn="
-xgrid.Size(GetValue(~name~))>>
-SetValue(SNUM_XGRID_SIZE_SLIDE,GetValue(~name~))"
+xgrid.Size(html.GetValue(~name~))>>
+html.SetValue(SNUM_XGRID_SIZE_SLIDE,html.GetValue(~name~))"
     >
     </font>
   </td>

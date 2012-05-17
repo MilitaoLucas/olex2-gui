@@ -62,10 +62,10 @@ def makeHtmlTable(list):
         box_d.setdefault('bgcolor','spy.bgcolor(~name~)')
         if box_d['varName'].startswith('_'): # treat cif items differently
           box_d.setdefault('value', '$spy.get_cif_item(%(varName)s,?,gui)' %box_d)
-          box_d.setdefault('onchange',"spy.set_cif_item(%(varName)s,GetValue(~name~))>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
+          box_d.setdefault('onchange',"spy.set_cif_item(%(varName)s,html.GetValue(~name~))>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
         else:
           box_d.setdefault('value', '$spy.GetParam(%(varName)s)' %box_d)
-          box_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(~name~))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(~name~,#FFDCDC)" %box_d)
+          box_d.setdefault('onchange',"spy.SetParam(%(varName)s,html.GetValue(~name~))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(~name~,#FFDCDC)" %box_d)
         boxText += makeHtmlInputBox(box_d)
     if boxText:
       row_d.setdefault('input',boxText)
@@ -73,7 +73,7 @@ def makeHtmlTable(list):
       input_d.setdefault('ctrl_name', "SET_%s" %str.upper(input_d['varName']).replace('.','_'))
       if input_d['varName'].startswith('_'): # treat cif items differently
         input_d.setdefault('value', '$spy.get_cif_item(%(varName)s,?,gui)' %input_d)
-        input_d.setdefault('onchange',"spy.set_cif_item(%(varName)s,GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)" %input_d)
+        input_d.setdefault('onchange',"spy.set_cif_item(%(varName)s,html.GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)" %input_d)
       elif input_d['varName'] == 'snum.report.date_collected': # treat date fields differently
         try:
           cd = float(OV.GetParam('snum.report.date_collected'))
@@ -82,10 +82,10 @@ def makeHtmlTable(list):
           input_d.setdefault('value', time_str)
         except:
           input_d.setdefault('value', OV.GetParam('snum.report.date_collected'))
-        input_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(~name~))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(~name~,#FFDCDC)" %input_d)
+        input_d.setdefault('onchange',"spy.SetParam(%(varName)s,html.GetValue(~name~))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(~name~,#FFDCDC)" %input_d)
       else:
         input_d.setdefault('value', '$spy.GetParam(%(varName)s)' %input_d)
-        input_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(~name~))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(~name~,#FFDCDC)" %input_d)
+        input_d.setdefault('onchange',"spy.SetParam(%(varName)s,html.GetValue(~name~))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(~name~,#FFDCDC)" %input_d)
       input_d.setdefault('bgcolor','spy.bgcolor(~name~)')
       row_d.setdefault('input',makeHtmlInputBox(input_d))
       row_d.update(input_d)
@@ -808,7 +808,7 @@ def reg_command(self, string):
   return s
 
 def changeBoxColour(ctrl_name,colour):
-  if olx.GetValue(ctrl_name) in ('?',''):
+  if olx.html.GetValue(ctrl_name) in ('?',''):
     olx.html.SetBG(ctrl_name,colour)
   else:
     olx.html.SetBG(ctrl_name,OV.FindValue('gui_html_input_bg_colour'))
@@ -832,7 +832,7 @@ OV.registerFunction(switchButton)
 
 
 def bgcolor(ctrl_name):
-  value = olx.GetValue(ctrl_name)
+  value = olx.html.GetValue(ctrl_name)
   if value in ('?',''):
     colour = "#FFDCDC"
   else:

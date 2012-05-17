@@ -48,7 +48,7 @@ $spy.MakeHoverButton(button-get_ccdc_number,spy.ccdc_submit\())
       bgcolor="spy.GetParam(gui.html.input_bg_colour)"
       name='SET_SNUM_REPORT_TITLE'
       value='$spy.GetParam(snum.report.title)'
-      onchange="spy.SetParam(snum.report.title,GetValue(~name~))"
+      onchange="spy.SetParam(snum.report.title,html.GetValue(~name~))"
     >
   </td>
   <td>
@@ -63,7 +63,7 @@ $spy.MakeHoverButton(button-get_ccdc_number,spy.ccdc_submit\())
       name="SET_REPORT_IMAGE"
       readonly
       items='strcat("<-None;screenshot;",file.ListDirForGui(FilePath(),*.png;*.jpg;*.bmp;*.ps;*.eps))'
-      onchange="spy.SetParam(snum.report.image,GetValue(~name~))"
+      onchange="spy.SetParam(snum.report.image,html.GetValue(~name~))"
       width="50%"
       value="file.GetName(spy.GetParam(snum.report.image))"
     >
@@ -83,7 +83,7 @@ $spy.MakeHoverButton(button-get_ccdc_number,spy.ccdc_submit\())
       value='$spy.GetParam(user.report_style)'
       items='spy.getStylesList()'
       valign='center'
-      onchange="spy.SetParam(user.report_style,GetValue(~name~))"
+      onchange="spy.SetParam(user.report_style,html.GetValue(~name~))"
     >
   </td>
   <td>
@@ -99,7 +99,7 @@ $spy.MakeHoverButton(button-get_ccdc_number,spy.ccdc_submit\())
       value='$spy.GetParam(user.report_template)'
       items='spy.getTemplatesList()'
       valign='center'
-      onchange="spy.SetParam(user.report_template,GetValue(~name~))"
+      onchange="spy.SetParam(user.report_template,html.GetValue(~name~))"
     > &nbsp;
 $spy.MakeHoverButton(toolbar_small-open,shell 'file.ospath\(basedir\()/etc/CIF/styles)')
 

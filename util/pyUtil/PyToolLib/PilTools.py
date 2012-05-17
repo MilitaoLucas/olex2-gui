@@ -1488,8 +1488,8 @@ class timage(ImageTools):
     fgcolor="$GetVar(gui_htmlself.params.html.font_colour.rgb)"
     min="0"
     max="119"
-    onchange = "SetImage(BANNER_IMAGE,strcat(banner_,GetValue(BANNER_SLIDE).png))"
-    onmouseup = "SetVar(snum_refinement_banner_slide,GetValue(BANNER_SLIDE))>>
+    onchange = "SetImage(BANNER_IMAGE,strcat(banner_,html.GetValue(BANNER_SLIDE).png))"
+    onmouseup = "SetVar(snum_refinement_banner_slide,html.GetValue(BANNER_SLIDE))>>
 spy.doBanner(GetVar(snum_refinement_banner_slide))
 "
 >

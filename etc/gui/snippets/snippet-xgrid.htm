@@ -7,7 +7,7 @@
     name="SET_SNUM_XGRID_VIEW_#suffix"
     items='plane;contour;contour+plane;surface;wire;points'
     value="$spy.GetParam(snum.xgrid.view)"
-    onchange="spy.SetParam(snum.xgrid.view,GetValue(~name~))
+    onchange="spy.SetParam(snum.xgrid.view,html.GetValue(~name~))
 >>spy.gui.maps.SetXgridView()
 >>html.Update"
     label="%View% "

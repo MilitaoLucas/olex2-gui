@@ -20,11 +20,11 @@
       fgcolor="$GetVar(HtmlFontColour)" 
       min="45" 
       max="150" 
-      onchange="SetValue(DeltaIValue,eval(getvalue(~name~)/50))>>
+      onchange="html.SetValue(DeltaIValue,eval(html.GetValue(~name~)/50))>>
 showH a true>>
 showH b true>>
 mode grow -s>>
-DeltaI eval(getvalue(SlideDeltaI)/50)"
+DeltaI eval(html.GetValue(SlideDeltaI)/50)"
     >
     </font>
   </td>
@@ -37,12 +37,12 @@ DeltaI eval(getvalue(SlideDeltaI)/50)"
     height="$GetVar(HtmlInputHeight)"
     bgcolor="$GetVar(HtmlTableBgColour)"  
     fgcolor="$GetVar(HtmlFontColour)" 
-    value="eval(getvalue(SlideDeltaI)/50)" 
-    onreturn="SetValue(SlideDeltaI, eval(GetValue(~name~)*50))>>
+    value="eval(GetValue(SlideDeltaI)/50)" 
+    onreturn="html.SetValue(SlideDeltaI, eval(html.GetValue(~name~)*50))>>
 showH a true>>
 showH b true>>
 mode grow -s>>
-DeltaI GetValue(DeltaIValue)"
+DeltaI html.GetValue(~name~)"
     >
     </font>
   </td>

@@ -121,17 +121,17 @@ def makeArgumentsHTML(program, method, instruction):
     if value is None:
       value = ''
     ctrl_name = 'SET_%s' %(varName.upper())
-    onchange = 'SetVar(%s,GetValue(%s))>>spy.addInstruction(%s,%s,%s)' %(
+    onchange = 'SetVar(%s,html.GetValue(%s))>>spy.addInstruction(%s,%s,%s)' %(
       varName, ctrl_name, program.name, method.name, name)
     
     if "settings_cf" in varName:
       value = "$spy.GetParam('programs.solution.smtbx.cf.%s')" %(varName.lstrip('settings_cf'))
-      onchange = "spy.SetParam('programs.solution.smtbx.cf.%s',GetValue(%s))" %(varName.lstrip('settings_cf'), ctrl_name)
+      onchange = "spy.SetParam('programs.solution.smtbx.cf.%s',html.GetValue(%s))" %(varName.lstrip('settings_cf'), ctrl_name)
     
     if option.name == 'nls':
-      onchange = '%s>>spy.SetParam(snum.refinement.max_cycles,GetValue(SET_SETTINGS_%s_NLS))>>html.Update' %(onchange, name.upper())
+      onchange = '%s>>spy.SetParam(snum.refinement.max_cycles,html.GetValue(SET_SETTINGS_%s_NLS))>>html.Update' %(onchange, name.upper())
     elif option.name == 'npeaks':
-      onchange = '%s>>spy.SetParam(snum.refinement.max_peaks,GetValue(SET_SETTINGS_%s_NPEAKS))>>html.Update' %(onchange, name.upper())
+      onchange = '%s>>spy.SetParam(snum.refinement.max_peaks,html.GetValue(SET_SETTINGS_%s_NPEAKS))>>html.Update' %(onchange, name.upper())
     #if data_type == "int":
       #d = {'ctrl_name':ctrl_name,
            #'value':value,
@@ -204,7 +204,7 @@ def makeArgumentsHTML(program, method, instruction):
   return txt
 
 def make_ondown(dictionary):
-  args = ''.join([' GetValue(SET_SETTINGS_%s)' %item[0].upper() for item in dictionary['values']])
+  args = ''.join([' html.GetValue(SET_SETTINGS_%s)' %item[0].upper() for item in dictionary['values']])
   txt = 'Addins %s%s' %(dictionary['name'], args)
   return txt
 
@@ -251,7 +251,7 @@ def onMaxCyclesChange(max_cycles):
         OV.SetVar('settings_%s_nls' %item, max_cycles)
         ctrl_name = 'SET_SETTINGS_%s_NLS' %item.upper()
         if OV.HasGUI() and OV.IsControl(ctrl_name):
-          olx.SetValue(ctrl_name, max_cycles)
+          olx.html.SetValue(ctrl_name, max_cycles)
         addInstruction(prg.name, method.name, item)
         return
 OV.registerFunction(OV.SetMaxCycles)
@@ -270,7 +270,7 @@ def onMaxPeaksChange(max_peaks):
       OV.SetVar('settings_plan_npeaks', max_peaks)
       ctrl_name = 'SET_SETTINGS_PLAN_NPEAKS'
       if OV.HasGUI() and OV.IsControl(ctrl_name):
-        olx.SetValue(ctrl_name, max_peaks)
+        olx.html.SetValue(ctrl_name, max_peaks)
       addInstruction(prg.name, method.name, 'plan')
       return
 OV.registerFunction(OV.SetMaxPeaks)

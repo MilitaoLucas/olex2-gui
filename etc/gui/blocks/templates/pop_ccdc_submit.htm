@@ -74,7 +74,7 @@ Data are accepted either in conjunction with <b>publication</b> of crystal struc
          height="22"
          name="CCDC_SUBMISSION_TYPE"
          value="$spy.GetParam(snum.ccdc.submission_type)"
-         onchange="spy.SetParam(snum.ccdc.submission_type,GetValue(ccdc.CCDC_SUBMISSION_TYPE))"
+         onchange="spy.SetParam(snum.ccdc.submission_type,html.GetValue(~name~))"
         >
      </td>
   <td bgcolor="#aab403">
@@ -89,7 +89,7 @@ Data are accepted either in conjunction with <b>publication</b> of crystal struc
          height="22"
          name="CCDC_NOTE_TO_STAFF"
          value="$spy.GetParam(snum.ccdc.note_to_staff)"
-         onchange="spy.SetParam(snum.ccdc.note_to_staff,GetValue(ccdc.CCDC_NOTE_TO_STAFF))"
+         onchange="spy.SetParam(snum.ccdc.note_to_staff,html.GetValue(~name~))"
       >
      </td>
     <td width=13%>

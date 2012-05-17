@@ -512,7 +512,7 @@ if haveGUI:
 #OV.registerFunction(getScreenSize)
 
 def SetFormulaFromInput():
-  formula = olx.GetValue('SET_FORMULA')
+  formula = OV.GetValue('SET_FORMULA')
   if not formula:
     return
   f = formula.split()
@@ -970,7 +970,7 @@ OV.registerFunction(onRefinementMethodChange)
 def onSolutionProgramChange(prg_name, method=None, scope='snum'):
   if prg_name == "Auto":
     OV.SetParam('%s.solution.method' %scope, 'Auto')
-    #olx.SetValue('SET_autochem_solution_METHOD', 'Auto')
+    #olx.html.SetValue('SET_autochem_solution_METHOD', 'Auto')
     return
 
   if prg_name != 'Unknown':

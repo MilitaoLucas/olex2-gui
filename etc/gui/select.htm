@@ -76,7 +76,7 @@
 </td>
 
 <td width='20%' align='right'>
-$spy.MakeHoverButton(button_small-select@uiso,sel atoms where xatom.uiso getvalue\(compare) getvalue\(uiso)&&xatom.type!='Q')
+$spy.MakeHoverButton(button_small-select@uiso,sel atoms where xatom.uiso html.getvalue\(compare) html.getvalue\(uiso)&&xatom.type!='Q')
 </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </tr>
@@ -98,7 +98,7 @@ $spy.MakeHoverButton(button_small-select@uiso,sel atoms where xatom.uiso getvalu
       name="RINGSELECT"
       items="--;C6;C5N;C5;C5O;"
       width="100%"
-      onchange="if strcmp(GetValue(RINGSELECT),--) then html.SetFocus(RINGSELECT) else 'sel -u'>>sel rings GetValue(RINGSELECT)"
+      onchange="if strcmp(html.GetValue(~name~),--) then html.SetFocus(~name~) else 'sel -u'>>sel rings html.GetValue(~name~)"
       value=""
     >
     </font>
