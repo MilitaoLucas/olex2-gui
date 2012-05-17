@@ -745,7 +745,7 @@ class Graph(ImageTools):
   min="2"
   height="$GetVar(HtmlSpinHeight)"
   value="$spy.GetParam(graphs.program_analysis.y_scale_factor)"
-  onchange="spy.SetParam(graphs.program_analysis.y_scale_factor,GetValue(HistoryScale))>>spy._make_history_bars()>>html.Update"
+  onchange="spy.SetParam(graphs.program_analysis.y_scale_factor,html.GetValue(HistoryScale))>>spy._make_history_bars()>>html.Update"
 >
 </font>'''
 
@@ -2403,7 +2403,7 @@ def makeReflectionGraphOptions(graph, name):
            'max':'30',
            'width':'%s' %width,
            'label':'%s ' %caption,
-           'onchange':'spy.SetParam(graphs.reflections.%s.%s,GETVALUE(%s))' %(
+           'onchange':'spy.SetParam(graphs.reflections.%s.%s,html.GetValue(%s))' %(
              graph.name, object.name,ctrl_name),
            }
       options_gui.append(htmlTools.make_spin_input(d))
@@ -2414,7 +2414,7 @@ def makeReflectionGraphOptions(graph, name):
            'value':value,
            'width':'%s' %width,
            'label':'%s ' %caption,
-           'onchange':'spy.SetParam(graphs.reflections.%s.%s,GETVALUE(%s))' %(
+           'onchange':'spy.SetParam(graphs.reflections.%s.%s,html.GetValue(%s))' %(
              graph.name, object.name,ctrl_name),
            'readonly':'readonly',
            }
@@ -2444,7 +2444,7 @@ def makeReflectionGraphOptions(graph, name):
            'label':'%s ' %caption,
            'items':items,
            'value':object.extract(),
-           'onchange':'spy.SetParam(graphs.reflections.%s.%s,GETVALUE(%s))>>spy.make_reflection_graph(GetValue(SET_REFLECTION_STATISTICS))' %(
+           'onchange':'spy.SetParam(graphs.reflections.%s.%s,html.GetValue(%s))>>spy.make_reflection_graph(html.GetValue(SET_REFLECTION_STATISTICS))' %(
              graph.name, object.name,ctrl_name),
            'width':'%s' %width,
            }
@@ -2504,7 +2504,7 @@ def makeReflectionGraphGui():
      'height':guiParams.html.combo_height,
      'bgcolor':guiParams.html.input_bg_colour,
      'value':value,
-     'onchange':'spy.make_reflection_graph(GetValue(SET_REFLECTION_STATISTICS))>>html.Update',
+     'onchange':'spy.make_reflection_graph(html.GetValue(SET_REFLECTION_STATISTICS))>>html.Update',
      'manage':'manage',
      'readonly':'readonly',
      'width':'$eval(html.clientwidth(self)-140)',

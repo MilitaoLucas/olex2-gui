@@ -14,7 +14,7 @@
         name='SET_SNUM_REFINEMENT_AUTO_PRUNEQ',
         items=' ;0.1;0.5;1.0;1.5;2.0'
         value='$spy.GetParam(snum.refinement.auto.pruneQ)'
-        onchange='spy.SetParam(snum.refinement.auto.pruneQ,GetValue(SET_SNUM_REFINEMENT_AUTO_PRUNEQ))'
+        onchange='spy.SetParam(snum.refinement.auto.pruneQ,html.GetValue(~name~))'
       >
   </td>
 </tr>
@@ -32,7 +32,7 @@
         name='SET_SNUM_REFINEMENT_AUTO_ASSIGNQ'
         items=' ;1.5;2.0;2.5;3.0'
         value='$spy.GetParam(snum.refinement.auto.assignQ)'
-        onchange='spy.SetParam(snum.refinement.auto.assignQ,GetValue(SET_SNUM_REFINEMENT_AUTO_ASSIGNQ))'
+        onchange='spy.SetParam(snum.refinement.auto.assignQ,html.GetValue(~name~))'
       >
   </td>
 </tr>
@@ -50,7 +50,7 @@
         name='SET_SNUM_REFINEMENT_AUTO_PRUNEU',
         items=' ;0.06;0.08;0.10;0.12',
         value='$spy.GetParam(snum.refinement.auto.pruneU)',
-        onchange='spy.SetParam(snum.refinement.auto.pruneU,GetValue(SET_SNUM_REFINEMENT_AUTO_PRUNEU))'
+        onchange='spy.SetParam(snum.refinement.auto.pruneU,html.GetValue(~name~))'
       >
   </td>
 </tr>

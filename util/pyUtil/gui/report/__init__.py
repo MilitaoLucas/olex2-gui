@@ -33,7 +33,7 @@ class publication:
 
   def OnContactAuthorChange(self, person_box_name):
     self.ChangeContactAuthor(
-      olx.GetValue(person_box_name).strip())
+      olx.html.GetValue(person_box_name).strip())
     olx.html.Update()
 
   def ChangePersonInfo(self, person, item, value):
@@ -53,9 +53,9 @@ class publication:
         OV.set_cif_item(key, value)
 
   def OnPersonInfoChange(self, person_box_name, item, box_name):
-    value = olx.GetValue(box_name).strip()
+    value = olx.html.GetValue(box_name).strip()
     self.ChangePersonInfo(
-      olx.GetValue(person_box_name),
+      olx.html.GetValue(person_box_name),
       item,
       value)
     olx.html.SetBG(box_name, BGColorForValue(value))
@@ -78,7 +78,7 @@ class publication:
     return changed
 
   def OnAddNameToAuthorList(self, box_name):
-    value = olx.GetValue(box_name).strip()
+    value = olx.html.GetValue(box_name).strip()
     if self.AddNameToAuthorList(value):
       olx.html.Update()
 

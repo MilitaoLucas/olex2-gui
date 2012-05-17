@@ -26,9 +26,9 @@
     min="-20"
     max="20"
     onchange="
->>SetVar(SlideQPeaksVal,GetValue(SlideQPeaks))
->>SetLabel(QPeaksValue,eval(abs\(spy.QPeaksSlide(GetValue(SlideQPeaks)))))
->>ShowQ spy.QPeaksSlide(GetValue(SlideQPeaks))"
+>>SetVar(SlideQPeaksVal,html.GetValue(~name~))
+>>SetLabel(QPeaksValue,eval(abs\(spy.QPeaksSlide(html.GetValue(~name~)))))
+>>ShowQ spy.QPeaksSlide(html.GetValue(~name~))"
   >
   </font>
 </td>
@@ -41,7 +41,7 @@
     height="18"
     bgcolor="$GetVar(HtmlTableBgColour)"
     fgcolor="$GetVar(HtmlFontColour)"
-    value="eval(abs\(spy.QPeaksSlide(GetValue(SlideQPeaks)))) %%"
+    value="eval(abs\(spy.QPeaksSlide(html.GetValue(SlideQPeaks)))) %%"
     label=""
   >
   </font>
