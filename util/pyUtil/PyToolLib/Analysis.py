@@ -2580,7 +2580,7 @@ class HealthOfStructure():
     self.available_width = int(OV.GetParam('gui.htmlpanelwidth'))
     self.stats = None
     self.scale = OV.GetParam('diagnostics.scale')
-
+    self.scope = "hkl"
 
   def get_HOS_d(self):
     try:
@@ -2592,6 +2592,7 @@ class HealthOfStructure():
 
   def make_HOS(self, force=False):
     force = bool(force)
+    self.scope = OV.GetParam('snum.current_process_diagnostics')
     if timing:
       import time
       t1 = time.time()
@@ -2613,23 +2614,29 @@ class HealthOfStructure():
     """
     if olx.IsFileLoaded() != 'true':
       return (False, True)
-    hkl = OV.HKLSrc()
-    if not hkl or not os.path.exists(hkl):
-      return (False, True)
-    try:
-      self.hkl_stats = olex_core.GetHklStat()
-      if force:
-        return (True, None)
-      min_d = "%.4f" %self.hkl_stats['MinD']
-      if OV.GetParam('snum.data.d_min') == float(min_d):
-        if bool(olx.fs.Exists('MinD')):
-          return (False, False)
-      else:
-        OV.SetParam('snum.data.d_min',min_d)
-      if not self.hkl_stats:
+    
+    if self.scope == "refinement":
+      return (True, True)
+    else:
+      self.scope = "hkl"
+      hkl = OV.HKLSrc()
+      if not hkl or not os.path.exists(hkl):
         return (False, True)
-    except:
-      return (False, True)
+      try:
+        self.hkl_stats = olex_core.GetHklStat()
+        if force:
+          return (True, None)
+        min_d = "%.4f" %self.hkl_stats['MinD']
+        if OV.GetParam('snum.hkl.d_min') == float(min_d):
+          if bool(olx.fs.Exists('MinD')):
+            return (False, False)
+        else:
+          OV.SetParam('snum.hkl.d_min',min_d)
+        if not self.hkl_stats:
+          return (False, True)
+      except:
+        return (False, True)
+      
     return (True, None)
 
   def get_cctbx_completeness(self, dmin=None):
@@ -2639,7 +2646,7 @@ class HealthOfStructure():
       OCA = OlexCctbxAdapter()
       f_sq_obs = OCA.reflections.f_sq_obs_filtered
       retVal = f_sq_obs.completeness()
-      OV.SetParam('snum.data.completeness_full',retVal)
+      OV.SetParam('snum.hkl.completeness_full',retVal)
     except Exception, err:
       print err
       pass
@@ -2667,22 +2674,38 @@ class HealthOfStructure():
     return d
 
   def make_HOS_html(self):
-    if not self.hkl_stats:
-      return
+    if self.scope == None:
+      self.scope = 'hkl'
+
+    if self.scope == "refinement":
+      l = ['max_shift_site', 'max_shift_u', 'max_peak', 'max_hole']
+      #missing = olexex.OlexRefinementModel().getMissingAtomsNumber()
+      #OV.SetParam('snum.refinement.expected_peaks', missing)
+    else:
+      self.scope = "hkl"
+      if not self.hkl_stats:
+        return
+      l = ['MinD', 'MeanIOverSigma','Rint','Completeness']
+    
+
     txt = "<table width='100%%' cellpadding=0 cellspacing=0><tr>"
-    l = ['MinD', 'MeanIOverSigma','Rint','Completeness']
+
+
+    counter = 0    
     for item in l:
-      value = self.hkl_stats[item]
-#      if item != 'completeness':
-#        value = self.hkl_stats[item]
-#      else:
-#        value = self.get_cctbx_completeness(self.hkl_stats['MinD'])
+      counter += 1
+      if self.scope == "hkl":
+        value = self.hkl_stats[item]
+      elif self.scope == "refinement":
+        value = OV.GetParam('snum.refinement.%s' %item)
+        
+      display = OV.GetParam('diagnostics.%s.%s.display' %(self.scope,item))
+      value_format = OV.GetParam('diagnostics.%s.%s.value_format' %(self.scope,item))
+      href = OV.GetParam('diagnostics.%s.%s.href' %(self.scope,item))
+      
       bg_colour = self.get_bg_colour(item, value)
-      display = OV.GetParam('diagnostics.hkl.%s.display' %item)
-      value_format = OV.GetParam('diagnostics.hkl.%s.value_format' %item)
-      href = OV.GetParam('diagnostics.hkl.%s.href' %item)
       raw_val = value
-      if not value:
+      if value == None:
         value = "NO VALUE!"
         bg_colour = "#000000"
       else:
@@ -2707,6 +2730,12 @@ class HealthOfStructure():
       if use_image:
         if timing:
           t = time.time()
+        if counter == 1:
+          self.image_position = "first"
+        elif counter == len(l):
+          self.image_position = "last"
+        else:
+          self.image_position = "middle"
         txt += self.make_hos_images(item=item, colour=bg_colour, display=display, value_raw=raw_val, value_display=value, n=len(l))
         if timing:
           print ".. hos image took %.3f s (%s) " %((time.time() - t),item)
@@ -2724,7 +2753,7 @@ class HealthOfStructure():
     txt += "</tr></table>"
     txt = txt.decode('utf-8')
     OV.write_to_olex("hos.htm",txt)
-    OV.SetParam('snum.data.hkl_stat_file', OV.HKLSrc())
+    OV.SetParam('snum.hkl.hkl_stat_file', OV.HKLSrc())
 
 
   def make_hos_images(self, item='test', colour='#ff0000', display='Display', value_display='10%', value_raw='0.1', n=1):
@@ -2736,12 +2765,13 @@ class HealthOfStructure():
     width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - 2
 
     boxWidth = (width/n) * scale
-    boxHeight = OV.GetParam('gui.timage.tab.height') * scale
+    boxHeight = OV.GetParam('gui.timage.h1.height') * scale
     boxHalf = 3 * scale
     if type(colour) != str:
       colour = colour.hexadecimal
     colour = "#000000"
-    im = Image.new('RGB', (boxWidth,boxHeight), OV.GetParam('gui.html.table_firstcol_colour').hexadecimal)
+    bgcolour=  OV.GetParam('gui.html.table_firstcol_colour').hexadecimal
+    im = Image.new('RGBA', (boxWidth,boxHeight), (0,0,0,0))
     draw = ImageDraw.Draw(im)
     try:
       value_raw = float(value_raw)
@@ -2763,7 +2793,7 @@ class HealthOfStructure():
           value_display_extra = IT.get_unicode_characters(value_display_extra)
 
     fill = self.get_bg_colour(item, value_raw)
-    box = (0,boxHalf,boxWidth,boxHeight)
+    box = (0,0,boxWidth,boxHeight)
     draw.rectangle(box, fill=fill)
     top = OV.GetParam('diagnostics.hkl.%s.top' %item)
 
@@ -2812,15 +2842,15 @@ class HealthOfStructure():
       font_size = 14
       font_size_s = 8
       x = 2
-      y_s = (boxHalf - 1)
-      y = boxHeight - 14 * scale
+      y_s = 2 * scale
+      y = 1 * scale
 
     else:
       font_size = 17
       font_size_s = 10
       x = 2
-      y = boxHalf + 8 * scale
-      y_s = boxHalf - 1
+      y = 2 * scale
+      y_s = 1 * scale
 
     font = IT.registerFontInstance("Vera", font_size * scale)
     font_s = IT.registerFontInstance("Vera", font_size_s * scale)
@@ -2845,10 +2875,21 @@ class HealthOfStructure():
     if value_display_extra:
       draw.text((0, y + dy/2), "%s" %value_display_extra, font=font_s, fill="#ffffff")
 
+#    im = IT.make_round_corners(im, radius=4 * self.scale, colour=bgcolour)
+    if self.image_position != "last":
+      im = IT.add_whitespace(im, 'right', 4, bgcolour) 
     im = im.resize((boxWidth/scale, boxHeight/scale), Image.ANTIALIAS)
     OlexVFS.save_image_to_olex(im, item, 0)
-    txt = '''
+    href = OV.GetParam('diagnostics.%s.%s.href' %(self.scope,item))
+    txt = ""
+    if href:
+      if href == "atom":
+        href = "sel %s" %OV.GetParam('snum.refinement.%s_atom' %item)
+      txt += "<a href='%s'>" %(href)
+    txt += '''
 <td align='center'><zimg src=%s></td>''' %item
+    if href:
+      txt = txt + "</a>"
     return txt
 
   def get_bg_colour(self, item, val):
@@ -2856,15 +2897,19 @@ class HealthOfStructure():
     if item == "MinD":
       return "#ffdf09"
 
-    op = OV.GetParam('diagnostics.hkl.%s.op' %item)
-
+    op = OV.GetParam('diagnostics.%s.%s.op' %(self.scope, item))
+    if op == "between":
+      soll = OV.GetParam('diagnostics.%s.%s.soll' %(self.scope, item))
     for i in xrange(4):
       i += 1
       if op == "greater":
-        if val >= OV.GetParam('diagnostics.hkl.%s.grade%s' %(item, i)):
+        if val >= OV.GetParam('diagnostics.%s.%s.grade%s' %(self.scope, item, i)):
           break
       elif op == 'smaller':
-        if val <= OV.GetParam('diagnostics.hkl.%s.grade%s' %(item, i)):
+        if val <= OV.GetParam('diagnostics.%s.%s.grade%s' %(self.scope, item, i)):
+          break
+      elif op == 'between':
+        if val - (OV.GetParam('diagnostics.%s.%s.grade%s' %(self.scope, item, i))) <= val <= val + (OV.GetParam('diagnostics.%s.%s.grade%s' %(self.scope, item, i))):
           break
 
     if i == 1:

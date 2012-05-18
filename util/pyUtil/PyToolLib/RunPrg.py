@@ -231,6 +231,8 @@ class RunSolutionPrg(RunPrg):
     RunPrg.runAfterProcess(self)
     self.method.post_solution(self)
     self.doHistoryCreation()
+    OV.SetParam('snum.current_process_diagnostics','solution')
+    
 
   def setupSolve(self):
     try:
@@ -347,12 +349,9 @@ class RunRefinementPrg(RunPrg):
     if self.params.snum.refinement.auto.tidy:
       self.doAutoTidyAfter()
       OV.File()
-    if OV.GetParam('user.auto_compact') == True:
-      olx.Compaq('-a')
-      olx.Move()
     if OV.GetParam('snum.refinement.check_absolute_structure_after_refinement'):
       self.isInversionNeeded(force=self.params.snum.refinement.auto.invert)
-    
+    OV.SetParam('snum.current_process_diagnostics','refinement')
 
   def doHistoryCreation(self):
     if self.params.snum.init.skip_history:

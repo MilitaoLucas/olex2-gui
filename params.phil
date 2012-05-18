@@ -13,11 +13,12 @@ snum
     .type = str
   current_process_status = ""
     .type = str
-  current_process_diagnostics = ""
+  current_process_diagnostics = "hkl"
     .type = str
   current_r1 = 0
     .type = float
   
+
     
   init
     .short_caption = Other Things
@@ -81,7 +82,7 @@ snum
      }
   }
 
-  data{
+  hkl{
     hkl_stat_file = None
       .type = path
     completeness_full = 0
@@ -147,6 +148,10 @@ snum
       .type = str
     max_peak = None      
       .type = float
+    max_hole = None      
+      .type = float
+    expected_peaks = None      
+      .type = int
     has_h = False
       .type = bool
     is_anis = False
