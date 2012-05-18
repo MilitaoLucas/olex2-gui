@@ -2151,15 +2151,14 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           'grad':False,
           'name':'Table',
         })
+    width = int(OV.GetParam('gui.skin.icon_size') * 0.8)
+    bg = OV.GetParam('gui.html.table_firstcol_colour')
     for b in btn_dict:
       name = btn_dict[b]['name']
       for state in ['on', 'off', 'hover', '', 'highlight']:
         txt = btn_dict[b].get('txt')
         bgcolour = btn_dict[b].get('bgcolour')
-        width = OV.GetParam('gui.skin.icon_size')
         btn_type = 'tiny'
-        bg = OV.GetParam('gui.html.table_firstcol_colour')
-        width = OV.GetParam('gui.timage.tinybutton.width')
         IM = self.make_timage(item_type='tinybutton', item=txt, state=state, width=width, colour=bgcolour, whitespace='right:1:%s' %bg)
         name_s = "%s%s.png" %(name, state)
         OlexVFS.save_image_to_olex(IM, name_s, 2)
@@ -3423,7 +3422,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     cut = (0, strip, width, width - strip)
     image = image.crop(cut)
     if not icon_size:
-      icon_size = self.params.skin.icon_size
       icon_size = OV.GetParam('gui.skin.icon_size')
     else:
       icon_size = icon_size + 2

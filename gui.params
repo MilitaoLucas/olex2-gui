@@ -414,7 +414,9 @@ gui
     small_button{
       scale = 1
         .type = int
-      width = 55
+      width = 65
+        .type = int
+      height = 20
         .type = int
       buttonmark = 2:#999999:6
         .type = str
