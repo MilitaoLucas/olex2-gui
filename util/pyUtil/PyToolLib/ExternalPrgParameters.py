@@ -422,6 +422,12 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       OV.SetParam('snum.refinement.suggested_weight', suggested_weight)
     self.gather_refinement_information()
     writeRefinementInfoIntoRes(self.cif)
+    OV.SetParam('snum.refinement.max_peak', olx.Lst('peak'))
+    OV.SetParam('snum.refinement.max_hole', olx.Lst('hole'))
+    OV.SetParam('snum.refinement.max_shift_site', olx.Lst('max_shift'))
+    OV.SetParam('snum.refinement.max_shift_site_atom', olx.Lst('max_shift_object'))
+    OV.SetParam('snum.refinement.max_shift_u', olx.Lst('max_dU'))
+    OV.SetParam('snum.refinement.max_shift_u_atom', olx.Lst('max_dU_object'))
 
 
   def gather_refinement_information(self):
