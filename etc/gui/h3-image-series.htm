@@ -33,8 +33,9 @@ $spy.MakeHoverButton(button_small-go,spy.run_MakeMovie\())
       type="text" 
       height="$GetVar(HtmlInputHeight)"
       bgcolor="$GetVar(HtmlInputBgColour)"
+	  valign='center'
       name="axis"
-      width="30"
+      width="100%"
       value="$spy.GetParam(snum.image.image_series.rotation_around_axis)"
       onchange="spy.SetParam(snum.image.image_series.rotation_around_axis,GetValue(ROTATION_AROUND_AXIS))"
     >
@@ -52,8 +53,10 @@ $spy.MakeHoverButton(button_small-go,spy.run_MakeMovie\())
       type="text"
       height="$GetVar(HtmlInputHeight)"
       bgcolor="$GetVar(HtmlInputBgColour)"
+	  valign='center'
+      name="axis"
       name="steps"
-      width="30"
+      width="100%"
       value = "$spy.GetParam('snum.image.image_series.degrees_of_rotation')"
       onchange="spy.SetParam('snum.image.image_series.degrees_of_rotation',GetValue(DEGREES_OF_ROTATION))"
     >
@@ -79,8 +82,10 @@ $spy.MakeHoverButton(button_small-go,spy.run_MakeMovie\())
       type="text"
       height="$GetVar(HtmlInputHeight)"
       bgcolor="$GetVar(HtmlInputBgColour)"
+	  valign='center'
+      name="axis"
       name="frames"
-      width="30"
+      width="100%"
       value="$spy.GetParam('snum.image.image_series.number_of_frames')"
       onchange="spy.SetParam('snum.image.image_series.number_of_frames',GetValue(NUMBER_OF_FRAMES))"
     >
@@ -98,8 +103,10 @@ $spy.MakeHoverButton(button_small-go,spy.run_MakeMovie\())
       type="text"
       height="$GetVar(HtmlInputHeight)"
       bgcolor="$GetVar(HtmlInputBgColour)"
+  	  valign='center'
+      name="axis"
       name="size"
-      width="30"
+      width="100%"
       value="$spy.GetParam(snum.image.image_series.size_of_frames)"
       onchange="spy.SetParam(snum.image.image_series.size_of_frames,GetValue(SIZE_OF_FRAMES))"
       >

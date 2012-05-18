@@ -28,16 +28,17 @@
 <tr name=IMAGE_BITMAP_ROW_2>
 <!-- #include tool-help-column gui\blocks\tool-help-first-column.htm;help_ext=Bitmap-Image-Attributes;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td>
+  <td width='10%'>
      %Name%
   </td>
-  <td name=IMAGE_BITMAP_NAME width='20%'>
+  <td name=IMAGE_BITMAP_NAME width='20%' align='right'>
     <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="text"
       height="$GetVar(HtmlInputHeight)"
       bgcolor="$GetVar(HtmlInputBgColour)"
-      valign='center'
+	  fgcolor="#ff0000"
+      valign='left'
       name="IMAGE_BITMAP_NAME"
       width="100%"
       height="$GetVar(HtmlInputHeight)"
@@ -47,25 +48,25 @@
     >
     </font>
   </td>
-  <td>
+  <td width='10%' align='right'>
     %Type%
   </td>
   <td name=IMAGE_BITMAP_TYPE width='20%'>
     <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="combo"
-      height="$GetVar(HtmlComboHeight)"
+      height="$GetVar(HtmlInputHeight)"
       width="100%"
       bgcolor="$GetVar(HtmlInputBgColour)"
       items='png;jpg;bmp'
-      valign='center'
+      valign='left'
       name="IMAGE_BITMAP_TYPE"
       value='$spy.GetParam(snum.image.bitmap.type)'
       onchange='spy.SetParam(snum.image.bitmap.type,GetValue(IMAGE_BITMAP_TYPE))'
     >
     </font>
   </td>
-  <td>
+  <td width='10%' align='right'>
     Size
   </td>
   <td name=IMAGE_BITMAP_SIZE width='20%'>
@@ -76,14 +77,14 @@
       bgcolor="$GetVar(HtmlInputBgColour)"
       items="1;2;4;800px<-800;1200px<-1200;1800px<-1800;3200px<-3200"
       height="$GetVar(HtmlInputHeight)"
-      valign='center'
+      valign='left'
       name="IMAGE_BITMAP_SIZE"
       width="100%"
       value='2'
     >
     </font>
   </td>
-  <td>
+  <td width='10%' align='right'>
 $spy.MakeHoverButton(button_small-go@bitmap,spy.GetBitmapImageInstructions\())
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
