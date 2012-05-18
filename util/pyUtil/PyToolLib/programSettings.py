@@ -39,11 +39,11 @@ def makeProgramSettingsGUI(program, method, prgtype):
     wFilePath = 'solution-settings-extra.htm'
   else:
     wFilePath = 'refinement-settings-extra.htm'
-    
+
   authors = program.author
   reference = program.reference
   help = OV.TranslatePhrase(method.help)
-  
+
   max_colspan = 6
   txt = r"""
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=4;1; -->
@@ -66,7 +66,7 @@ def makeProgramSettingsGUI(program, method, prgtype):
 </tr>
 </table>
 ''' %(OV.GetParam('gui.html.table_firstcol_width'),max_colspan, authors, reference, method.extraHtml())
-  
+
   OlexVFS.write_to_olex(wFilePath, txt)
   return
 
@@ -88,8 +88,8 @@ def makeArgumentsHTML(program, method, instruction):
     tick_box_d.setdefault('ctrl_name', 'SET_SETTINGS_%s' %name.upper())
     tick_box_d.setdefault('checked', '$GetVar(settings_%s)' %name)
     tick_box_d.setdefault('value', '')
-    tick_box_d.setdefault('oncheck', 'SetVar(settings_%s,GetState(SET_SETTINGS_%s))>>spy.addInstruction(%s,%s,%s)' %(
-      name, name, program.name, method.name, name))
+    tick_box_d.setdefault('oncheck', 'SetVar(settings_%s,GetState(~name~))>>spy.addInstruction(%s,%s,%s)' %(
+      name, program.name, method.name, name))
     tick_box_d.setdefault('onuncheck', 'SetVar(settings_%s,GetState(SET_SETTINGS_%s))>>DelIns %s' %(
       name, name, argName))
     tick_box_html = htmlTools.make_tick_box_input(tick_box_d)
@@ -121,13 +121,13 @@ def makeArgumentsHTML(program, method, instruction):
     if value is None:
       value = ''
     ctrl_name = 'SET_%s' %(varName.upper())
-    onchange = 'SetVar(%s,GetValue(%s))>>spy.addInstruction(%s,%s,%s)' %(
-      varName, ctrl_name, program.name, method.name, name)
-    
+    onchange = 'SetVar(%s,GetValue(~name~))>>spy.addInstruction(%s,%s,%s)' %(
+      varName, program.name, method.name, name)
+
     if "settings_cf" in varName:
       value = "$spy.GetParam('programs.solution.smtbx.cf.%s')" %(varName.lstrip('settings_cf'))
-      onchange = "spy.SetParam('programs.solution.smtbx.cf.%s',GetValue(%s))" %(varName.lstrip('settings_cf'), ctrl_name)
-    
+      onchange = "spy.SetParam('programs.solution.smtbx.cf.%s',GetValue(~name~))" %(varName.lstrip('settings_cf'))
+
     if option.name == 'nls':
       onchange = '%s>>spy.SetParam(snum.refinement.max_cycles,GetValue(SET_SETTINGS_%s_NLS))>>html.Update' %(onchange, name.upper())
     elif option.name == 'npeaks':
@@ -232,7 +232,8 @@ def addInstruction(program, method, instruction):
       break
     addins += ' %s' %val
 
-  OV.DelIns(argName)
+  if not argName.lower() in ('plan', 'l.s.'):
+    OV.DelIns(argName)
   OV.AddIns(addins)
 OV.registerFunction(addInstruction)
 
