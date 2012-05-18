@@ -27,6 +27,7 @@ class Skin():
   def change(self):
     skin = OV.GetParam('gui.skin.name')
     skin_extension = OV.GetParam('gui.skin.extension')
+    
     try:
       skin_path = "%s/util/pyUtil/PluginLib/skins/plugin-%sSkin" %(OV.BaseDir(), skin)
       if skin_path not in sys.path:
@@ -137,6 +138,18 @@ def export_parameters(load_phil=True):
   OV.SetVar('HtmlFontSizeControls', OV.GetParam('gui.html.font_size_controls'))
   OV.SetVar('HtmlPanelWidth', OV.GetParam('gui.htmlpanelwidth'))
   OV.SetVar('HtmlButtonHeight', OV.GetParam('gui.timage.button.height'))
+  
+  if check_os() == 'mac':
+    OV.SetVar('HtmlInputBgColour', "")
+    font_size = OV.GetParam('gui.html.font_size') + 1
+    OV.SetVar('HtmlGuiFontSize', font_size)
+    OV.SetVar('HtmlFontSizeControls', font_size)
+    OV.SetParam('gui.html.font_size', font_size)
+
+    OV.SetVar('HtmlCheckboxHeight', 24)
+    OV.SetVar('HtmlComboHeight', 24)
+    OV.SetVar('HtmlInputHeight', 24)
+  
   if timing:
     print "export_parameters took %.4fs" %(time.time()-t)
 OV.registerFunction(export_parameters,False,'skin')
@@ -338,6 +351,14 @@ def SetMaterials():
   olex.m("lines %s" %OV.GetParam('gui.lines_of_cmd_text'))
 
   OV.SetParam('gui.skin.materials_have_been_set', True)
+
+
+def check_os():
+  if sys.platform == 'darwin':
+    return "mac"
+  else:
+    return False
+
 
 def load_user_gui_phil():
   gui_phil_path = "%s/gui.phil" %(OV.DataDir())

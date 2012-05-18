@@ -39,28 +39,10 @@ $spy.MakeHoverButton(toolbar-center,compaq>>compaq -a>>center)
   <td width = '5%'>
 $spy.MakeHoverButton(toolbar-ok,fixunit GetValue\(SET_Z_PRIME_FIXUNIT)>>xf.au.SetZprime\(GetValue\(SET_Z_PRIME_FIXUNIT))>>html.Update)
 
-<td width='15%' align='right'>
-  <font size=$GetVar(HtmlFontSizeControls)>
-    Assemble
-  </font>
+
+<td width='20%'>
 </td>
 
-<td width='6%' align='right'>
-  <font size=$GetVar(HtmlFontSizeControls)>
-  <input
-    type='checkbox'
-    width='100%'
-    height=$GetVar(HtmlCheckboxHeight)
-    bgcolor=$GetVar(HtmlTableBgColour)
-    name='AUTO_COMPACT'
-    checked="$spy.GetParam(user.auto_compact)"
-    oncheck='spy.SetParam(user.auto_compact,true)>>echo "Automatically compact structure after refine: True"'
-    onuncheck='spy.SetParam(user.auto_compact,false)>>echo "Automatically compact structure after refine: False"'
-    target="Automatically compact structure after refine"
-    align='center'
-  >
-  </font>
-</td>
 
 <td width='4%' align='left'>
   <font size=$GetVar(HtmlFontSizeControls)>
