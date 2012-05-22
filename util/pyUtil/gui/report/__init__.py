@@ -96,8 +96,8 @@ def ResolvePrograms():
          History.get('refinement', 'program') == 'Unknown'):
     return True
   sz = [int(i) for i in olx.GetWindowSize().split(',')]
-  w = int(olx.ClientWidth('self'))
-  h = int(olx.ClientHeight('self'))
+  w = int(olx.html.ClientWidth('self'))
+  h = int(olx.html.ClientHeight('self'))
   sw = 650
   sh = 200
   pop_name = 'report_resolve'

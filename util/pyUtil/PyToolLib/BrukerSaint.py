@@ -660,7 +660,7 @@ class BrukerSaint(ImageTools):
       #try:
         #checkboxes = ['NODECAY', 'NOCORFILT', 'BLEND', 'NORESIZE']
         #for box in checkboxes:
-          #s = olx.GetState(box)
+          #s = olx.html.GetState(box)
           #if s == 'true':
             #self.saint_key[box] = ""
           #else:
@@ -723,7 +723,7 @@ INTEGRATE /TITLE="%(title)s" &
     try:
       checkboxes = checkboxes_on + checkboxes_off
       for box in checkboxes:
-        s = olx.GetState(box)
+        s = olx.html.GetState(box)
         if s == 'true':
           self.saint_key[box] = ""
 
