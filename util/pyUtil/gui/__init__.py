@@ -22,8 +22,8 @@ olex.registerFunction(FileSave, False, "gui.dialog")
 
 def About():
   sz = [int(i) for i in olx.GetWindowSize().split(',')]
-  w = int(olx.ClientWidth('self'))
-  h = int(olx.ClientHeight('self'))
+  w = int(olx.html.ClientWidth('self'))
+  h = int(olx.html.ClientHeight('self'))
   sw = 500+2*15+10
   sh = 280+2*15+150
   olx.Popup("about '%s/etc/gui/help/about.htm' -x=%d -y=%d -w=%d -h=%d"
