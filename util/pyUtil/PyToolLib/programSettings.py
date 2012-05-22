@@ -88,9 +88,9 @@ def makeArgumentsHTML(program, method, instruction):
     tick_box_d.setdefault('ctrl_name', 'SET_SETTINGS_%s' %name.upper())
     tick_box_d.setdefault('checked', '$GetVar(settings_%s)' %name)
     tick_box_d.setdefault('value', '')
-    tick_box_d.setdefault('oncheck', 'SetVar(settings_%s,GetState(SET_SETTINGS_%s))>>spy.addInstruction(%s,%s,%s)' %(
+    tick_box_d.setdefault('oncheck', 'SetVar(settings_%s,html.GetState(SET_SETTINGS_%s))>>spy.addInstruction(%s,%s,%s)' %(
       name, name, program.name, method.name, name))
-    tick_box_d.setdefault('onuncheck', 'SetVar(settings_%s,GetState(SET_SETTINGS_%s))>>DelIns %s' %(
+    tick_box_d.setdefault('onuncheck', 'SetVar(settings_%s,html.GetState(SET_SETTINGS_%s))>>DelIns %s' %(
       name, name, argName))
     tick_box_html = htmlTools.make_tick_box_input(tick_box_d)
   else:
