@@ -82,11 +82,11 @@ def start_where():
   if olx.IsFileLoaded() == "false":
     return
   from gui import SwitchPanel
-  if olx.xf.au.GetAtomCount() == "0" and olx.IsFileType('ires') == "true":
-    SwitchPanel('work')
-    flash_gui_control('btn-solve')
-    print "Use 'Solve' button to solve the structure"
-    return
+#  if olx.xf.au.GetAtomCount() == "0" and olx.IsFileType('ires') == "true":
+#    SwitchPanel('work')
+#    flash_gui_control('btn-solve')
+#    print "Use 'Solve' button in tab 'Work' to solve the structure."
+#    return
 
   if olx.IsVar('start_where') == 'false':
     where = OV.GetParam('user.start_where').lower()
