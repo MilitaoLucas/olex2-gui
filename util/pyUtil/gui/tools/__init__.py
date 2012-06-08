@@ -82,11 +82,11 @@ def start_where():
   if olx.IsFileLoaded() == "false":
     return
   from gui import SwitchPanel
-  if olx.xf.au.GetAtomCount() == "0" and olx.IsFileType('ires') == "true":
-    SwitchPanel('work')
-    flash_gui_control('btn-solve')
-    print "Use 'Solve' button to solve the structure"
-    return
+#  if olx.xf.au.GetAtomCount() == "0" and olx.IsFileType('ires') == "true":
+#    SwitchPanel('work')
+#    flash_gui_control('btn-solve')
+#    print "Use 'Solve' button in tab 'Work' to solve the structure."
+#    return
 
   if olx.IsVar('start_where') == 'false':
     where = OV.GetParam('user.start_where').lower()
@@ -142,7 +142,22 @@ def flash_gui_control(control):
 olex.registerFunction(flash_gui_control, False, "gui.tools")
 
 
-def add_tool_to_index(scope="", link="", path="", filetype=""):
+def make_single_gui_image(img_txt="", type='h2'):
+  from PilTools import timage
+  import OlexVFS
+  timage = timage()
+  states = ["on", "off", "highlight", "", "hover", "hoveron"]
+  for state in states:
+    image = timage.make_timage(item_type=type, item=img_txt, state=state)
+    if type == "h1":
+      alias = "h2"
+    else:
+      alias = type
+    name = "%s-%s%s.png" %(alias, img_txt.lower(), state)
+    OlexVFS.save_image_to_olex(image, name, 2)  
+
+
+def add_tool_to_index(scope="", link="", path="", location="", before="", filetype="", level="h1"):
   import OlexVFS
   if not OV.HasGUI:
     return
@@ -157,8 +172,10 @@ def add_tool_to_index(scope="", link="", path="", filetype=""):
     return
 
   ''' Automatically add a link to GUI to an Olex2 index file. '''
-  location = OV.GetParam('%s.gui.location' %scope)
-  before = OV.GetParam('%s.gui.before' %scope)
+  if not location:
+    location = OV.GetParam('%s.gui.location' %scope)
+  if not before:
+    before = OV.GetParam('%s.gui.before' %scope)
   if not location:
     return
   txt = OlexVFS.read_from_olex('%s/etc/gui/blocks/index-%s.htm' %(OV.BaseDir(), location))
@@ -195,3 +212,5 @@ def add_tool_to_index(scope="", link="", path="", filetype=""):
       else:
         text = index_text
       OlexVFS.write_to_olex('%s/etc/gui/blocks/index-%s.htm' %(OV.BaseDir(), location), text, 0)
+
+  make_single_gui_image(link, type=level)
