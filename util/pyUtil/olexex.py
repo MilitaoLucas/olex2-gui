@@ -2046,6 +2046,9 @@ OV.registerFunction(getCellHTML)
 
 
 def formatted_date_from_timestamp(dte):
+  if not dte:
+    return "No Date"
+  
   if "." in dte:
     dte = OV.GetParam(dte)
   from datetime import date
