@@ -337,6 +337,10 @@ class Method_shelx(Method):
       raise RuntimeError(
         'you may be using an outdated version of %s' %(prgName))
     olx.WaitFor('process') # uncomment me!
+    if os.path.getsize("%s.res" %(xl_ins_filename)) == 0:
+      self.failure = True
+    else:
+      self.failure = False
     olex.m("User '%s'" %RunPrgObject.filePath)
     #olx.User("'%s'" %RunPrgObject.filePath)
 
@@ -422,6 +426,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       OV.SetParam('snum.refinement.suggested_weight', suggested_weight)
     self.gather_refinement_information()
     writeRefinementInfoIntoRes(self.cif)
+    
     OV.SetParam('snum.refinement.max_peak', olx.Lst('peak'))
     OV.SetParam('snum.refinement.max_hole', olx.Lst('hole'))
     OV.SetParam('snum.refinement.max_shift_site', olx.Lst('max_shift'))
