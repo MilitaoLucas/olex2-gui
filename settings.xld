@@ -140,3 +140,4 @@
     <radio title="Tools;Settings;Lines of Text;10" macro="lines 10">
     <radio title="Tools;Settings;Lines of Text;20" macro="lines 20">
 <#include "custom_settings.xld" extend='true'>
+<#include "app.ConfigDir()/custom_settings.xld" extend='true'>
