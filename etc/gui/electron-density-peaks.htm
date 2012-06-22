@@ -3,11 +3,8 @@
 <!-- $run("UpdateQPeakTable") -->
 
 <tr>
-</tr> 
-
-  <tr>
-    <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td></td>
-    <td>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=electron-density-transparancy-slider;1; -->
+<td colspan=6>
       <input
         type="slider" 
         name="qpeakscale"
@@ -20,22 +17,11 @@
         min="1"
         max="10"
         onchange="qpeakscale html.GetValue(qpeakscale)">
-  </tr>
-  </table> 
-
-
-<table border="0" style="border-collapse: collapse" width="100%" id="q-peaks" cellpadding="0" bgcolor="$GetVar(HtmlTableBgColour)">
-<tr>
-  <b><td width="10%">
-  </td></b>
-  <td width="10%">
-  </td>
-  <td width="80%">
-  </td>
 </tr>
+
 <font size=1>
 <!-- #include qpeaks qpeaks.htm;1; -->
 </font>
 
-<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
+<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=3;1; -->
 <!-- %Electron Density Peaks% -->

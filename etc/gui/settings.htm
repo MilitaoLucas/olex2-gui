@@ -3,7 +3,6 @@
 
 <tr>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Atom-Styles;1; -->
-  </td>
   <td width='23%'>
     <b>%Atoms%</b>:
   <td width='75%' colspan='2'>
@@ -24,7 +23,6 @@ Freeze(false)>>
 
 <tr>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Background;1; -->
-  </td>
   <td width='23%'>
     <b>Background:</b>
   </td>
@@ -45,7 +43,6 @@ Freeze(false)>>
 
 <tr>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=GUI-Side;1; -->
-  </td>
   <td width='23%'>
     <b>GUI left/right</b>
   </td>
@@ -61,7 +58,6 @@ Freeze(false)>>
 
 <tr>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Tooltips;1; -->
-  </td>
   <td width='23%'>
     <b>%Tooltips%:</b>
   </td>
@@ -86,7 +82,6 @@ Freeze(false)>>
 
 <tr>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Info-Bar;1; -->
-  </td>
   <td width='23%'>
     <b>%Info%:</b>
   </td>
@@ -109,7 +104,6 @@ Freeze(false)>>
 
 <tr>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Reset-Alerts;1; -->
-  </td>
   <td width='23%'>
     <b>%Alerts%:</b>
   </td>
@@ -123,7 +117,6 @@ Freeze(false)>>
 
 <tr>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Console-Lines;1; -->
-  </td>
   <td width='23%'>
     <b>%Lines%</b>:
   </td>
@@ -149,7 +142,6 @@ Freeze(false)>>
 
 <tr>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=GUI-Width;1; -->
-  </td>
   <td width='23%'>
     <b>%Panel Width%:</b>
   </td>
@@ -163,19 +155,17 @@ Freeze(false)>>
 
 <tr>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Language;1; -->
-  </td>
   <td width='23%'>
     <b>%Language%:</b>
   </td>
   <td width='65%' colspan='2'>
-  <a href="CurrentLanguage(English)>>panel">English</a>
-    <a href="cursor(busy,'%Changing Language to% %Chinese%')>>CurrentLanguage(Chinese)>>panel>>cursor()">%Chinese%</a>
-    </td>
+    <a href="CurrentLanguage(English)>>panel">English</a>
+      <a href="cursor(busy,'%Changing Language to% %Chinese%')>>CurrentLanguage(Chinese)>>panel>>cursor()">%Chinese%</a>
+  </td>
   </tr>
 
 <tr>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Fader;1; -->
-  </td>
   <td width='23%'>
    <b>%Use Fader%:</b>
   </td>
@@ -198,7 +188,6 @@ Freeze(false)>>
 
 <tr>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Start-Olex2-in;1; -->
-  </td>
   <td width='23%'>
     <b>%Start Olex2 in%:</b>
   </td>
@@ -207,7 +196,6 @@ Freeze(false)>>
   </td>
   <td width='20%' align='right'>
      <input
-
        type="combo"
        height="$GetVar(HtmlInputHeight)"
        name="START_WHERE"
@@ -223,83 +211,4 @@ Freeze(false)>>
   </td>
 </tr>
 
-
-</table>
-
-<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=6;1; -->
-
-
-
-
-
-<!--
-
-
-<tr>
-  <td width='2%' bgcolor="$GetVar(HtmlTableFirstcolColour)">
-  </td>
-  <td width='23%'>
-    <b>Perspective:</b>
-  </td>
-  <td width='70%' colspan='2'>
-    <input 
-    type="slider" 
-      name = "SNUM_PERSPECTIVE_SLIDE" 
-      width="100%" 
-      height="18" 
-      value="0" 
-      bgcolor="$GetVar(HtmlTableBgColour)"  
-      fgcolor="$GetVar(HtmlFontColour)" 
-      min="0" 
-      max="10" 
-      onchange = "gl.Perspective>>
-      gl.Perspective html.GetValue(~name~)"
-    >
-  </td>
-</tr>
-
-
-
-<tr>
-<td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td></td>
-  </td>
-
-<td  valign='center' colspan = '3'>
-  <b>Perspective:</b>
-    <input 
-    type="slider" 
-      name = "SNUM_PERSPECTIVE_SLIDE" 
-      width="$eval(html.clientwidth(self)-80)" 
-      height="18" 
-      value="0" 
-      bgcolor="$GetVar(HtmlTableBgColour)"  
-      fgcolor="$GetVar(HtmlFontColour)" 
-      min="0" 
-      max="10" 
-      onchange = "gl.Perspective>>
-      gl.Perspective html.GetValue(~name~)
-">
-</td>
-  </tr>
-
-
-
-<tr>
-<td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td></td>
-  </td>
-
-<td  valign='center' >
-  <a href="setvar(col_r,100)>>setvar(col_g,100)>>setvar(col_b,160)>>panel">Blue</a>
-    <a href="setvar(col_r,50)>>setvar(col_g,100)>>setvar(col_b,10)>>panel">Green</a>
-    <a href="setvar(col_r,150)>>setvar(col_g,50)>>setvar(col_b,10)>>panel">Red</a>
-    </td>
-  <td  valign='center' colspan = '2'>
-  <font size='2' align='center'><input type="text" name="col_r"  width="30"  height="17" value = "100"></font>
-    <font size='2' align='center'><input type="text" name="col_g"  width="30"  height="17" value = "100"></font>
-    <font size='2' align='center'><input type="text" name="col_b"  width="30"  height="17" value = "160"></font>
-    <input type="button" name = "MakeMovie" width="20" height="17" value="Go"
-    onclick = "setvar(col_r, html.getvalue(col_r))>>setvar(col_g, html.getvalue(col_g))>>setvar(col_b, html.getvalue(col_b))>>panel"
-    </td>
-  </tr>
--->
-
+<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=4;1; -->

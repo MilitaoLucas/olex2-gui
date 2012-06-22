@@ -651,6 +651,9 @@ class ImageTools(FontInstances):
       if os.path.exists(filename):
         im = Image.open(filename)
         draw = ImageDraw.Draw(im)
+      else:
+        im = None
+        draw = None
     return im, draw
 
   def make_round_corners(self, im, radius=10, colour=(80,130,130)):
