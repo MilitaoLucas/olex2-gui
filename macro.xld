@@ -1735,3 +1735,4 @@
 
 
 <#include "custom.xld">
+<#include "app.ConfigDir()/custom.xld">
