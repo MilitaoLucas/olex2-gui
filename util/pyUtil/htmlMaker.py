@@ -88,7 +88,7 @@ def diffractionMetadataHtmlMaker():
      'itemName':'%Special Details%',
      'multiline':'multiline'
      },
-    {'varName':'_refinement_special_details',
+    {'varName':'_refine_special_details',
      'itemName':'%Refine Special Details%',
      'multiline':'multiline'
      }
