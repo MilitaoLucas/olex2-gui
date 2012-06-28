@@ -713,6 +713,8 @@ class ExtractCifInfo(CifTools):
       t = ["%s was used for absorption correction.\n" %abs['version']]
       txt = "\n;\n"
       for component in range(1, int(abs["number_twin_components"])+1):
+        # is single parameter set refined?
+        if str(component) not in abs: continue
         comp_d = abs[str(component)]
         t.append("\nFor component %s:\n" %(component))
         t.append("%s was %s before and %s after correction.\n"
