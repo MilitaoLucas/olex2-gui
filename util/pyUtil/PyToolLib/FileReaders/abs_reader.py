@@ -105,6 +105,12 @@ class reader(object):
             txt = txt.strip()
             twin_component = int(txt)
             self._twin_cifItems.setdefault("%i"%twin_component,{})
+          elif "Refinement of a single parameter set" in line:
+            i = i+1
+            txt = lines[i].strip().split(' ')[-1]
+            txt = txt.strip()
+            twin_component = int(txt)
+            self._twin_cifItems.setdefault("%i"%twin_component,{})
           elif "Effective data to parameter ratio" in line:
             txt = line.split('=')
             txt = txt[1].strip()
