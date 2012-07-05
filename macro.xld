@@ -1121,9 +1121,9 @@
 <guinames_m
   <body
     <args
-      <arg1 name="number" def="getvalue(MODE_NAME_NUMBER)">
-      <arg2 name="suffix" def="getvalue(MODE_NAME_SUFFIX)">
-      <arg3 name="type" def="getvalue(MODE_NAME_TYPE)">
+      <arg1 name="number" def="html.GetValue(MODE_NAME_NUMBER)">
+      <arg2 name="suffix" def="html.GetValue(MODE_NAME_SUFFIX)">
+      <arg3 name="type" def="html.GetValue(MODE_NAME_TYPE)">
     >
     <cmd
       <cmd1 "mode name %1 -s=%2 -t=%3">
