@@ -1,77 +1,46 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
-<tr>
-  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
-  </td>
-  <td colspan='1'>
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MATCH_1';help_ext=match-1;1 -->
+  <td width='50%'>
     <a 
       href="match" 
       target="Match All Fragments-target">
       %Match All Fragments%
     </a>
   </td>
-  <td colspan='1'>
+  <td width='50%'>
     <a href="match -u">%UnMatch%</a>
   </td>
-</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<tr>
-  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
-  </td>
-  <td colspan='2'>
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MATCH_2';help_ext=match-2;1 -->
+  <td width='100%'>
 <!-- #includeif File.Exists(match.htm) match match.htm;1; -->
-<td>
-</tr>
-
-<tr>
-  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   </td>
-  <td colspan='2'>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MATCH_3';help_ext=match-3;1 -->
+  <td width='100%'>
     <a 
       target="Match Selected Atoms-target" 
       href="match sel">
       %Match Selected Atoms%</a>
   </td>
-</tr>
-<!--
-<tr>
-  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
-  </td>
-  <td>
-    <a href="match sel -s='html.GetValue(SET_FRAG_SUFFIX)'">%Rename Matched Fragments%</a>
-  </td>
-  <td>
-    <font size='2'>
-    <input 
-      type='combo', 
-      width="35" 
-      height="17" 
-      name='SET_FRAG_SUFFIX', 
-      items='A;B;C;D;E;F', 
-      value='B' ,
-    >
-  </font>
-  </td>
-</tr>
--->
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
-<tr>
-  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MATCH_4';help_ext=match-4;1 -->
+  <td width='100%'>
+    <a href="@reap -*>>mode match">%Overlay Structure%</a>&nbsp;|&nbsp;
+    <a href="mode match">%Mode Match%</a>&nbsp;|&nbsp;
+    <a href="ofiledel 0>>mode off">%Remove Overlay%</a>
   </td>
-  <td colspan='2'>
-    <a href="@reap -*>>mode match">%Overlay Structure%</a>&nbsp;|
-    &nbsp;<a href="mode match">%Mode Match%</a>
-    &nbsp;<a href="ofiledel 0>>mode off">%Remove Overlay%</a>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-</td>
-</tr>
-<tr>
-  <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
-  </td>
-  <td colspan='2'>
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MATCH_5';help_ext=match-5;1 -->
+  <td width='100%'>
     %Mode Match-help%
   </td>
-</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=4;1; -->
