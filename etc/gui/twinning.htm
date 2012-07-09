@@ -1,14 +1,10 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
-<tr>
-	<td width="8" bgcolor="#E9E9ff">
-		<zimg border="0" src="toolbar-cctbx.png">
-	</td>
-	<td>
-<a href='spy.OlexCctbxTwinLaws()' target=''>%Search for Twin Laws%</a>&nbsp;
-<a href='cumulative_intensity' target=''>%Show Cumulative Intensities%</a>
-	</td>
-	</tr>
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='TWINNING';help_ext=Twinning;1 -->
+  <td width='100%'>
+    <a href='spy.OlexCctbxTwinLaws()' target=''>%Search for Twin Laws%</a>&nbsp;|&nbsp;
+    <a href='cumulative_intensity' target=''>%Show Cumulative Intensities%</a>
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #includeif fs.Exists(twinning-result.htm) twinning-result twinning-result.htm;1; -->
-
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->

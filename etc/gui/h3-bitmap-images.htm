@@ -1,33 +1,24 @@
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
 
 <!-- FIRST ROW -->
-<tr name=IMAGE_BITMAP_ROW_1>
-<!-- #include tool-help-column gui\blocks\tool-help-first-column.htm;help_ext=bitmap-atom-label-fonts;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='IMAGE_SETTINGS_ROW_1';help_ext=bitmap-atom-label-fonts;1 -->
   <td colspan=4 name-=IMAGE_BITMAP_CHOOSE_ATOM_LABEL_FONTS>
     <a href="setfont AtomLabels ChooseFont(Olex2,spy.GetParam(snum.image.bitmap.atom_label.font_name))>>spy.SetParam(snum.image.bitmap.atom_label.font_name,GetFont(AtomLabels))">%images_bmp_label_olex_font%</a> |
     <a href="setfont AtomLabels ChooseFont(System,spy.GetParam(snum.image.bitmap.atom_label.font_name))>>spy.SetParam(snum.image.bitmap.atom_label.font_name,GetFont(AtomLabels))">%images_bmp_label_system_font%</a>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</tr>
 
 <!-- FIRST ROW A-->
-<tr name=IMAGE_BITMAP_ROW_1a>
-<!-- #include tool-help-column gui\blocks\tool-help-first-column.htm;help_ext=bitmap-bond-label-fonts;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='IMAGE_BITMAP_ROW_1a';help_ext=bitmap-bond-label-fonts;1 -->
   <td colspan=4 name-=IMAGE_BITMAP_CHOOSE_BOND_LABEL_FONTS>
     <a href="setfont BondLabels ChooseFont(Olex2,spy.GetParam(snum.image.bitmap.bond_label.font_name))>>spy.SetParam(snum.image.bitmap.bond_label.font_name,GetFont(AtomLabels))">Choose Bond Label Font (Olex2)</a> |
     <a href="setfont BondLabels ChooseFont(System,spy.GetParam(snum.image.bitmap.bond_label.font_name))>>spy.SetParam(snum.image.bitmap.bond_label.font_name,GetFont(AtomLabels))">(System Font)</a>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</tr>
-
-
 
 <!-- SECOND ROW -->
-<tr name=IMAGE_BITMAP_ROW_2>
-<!-- #include tool-help-column gui\blocks\tool-help-first-column.htm;help_ext=Bitmap-Image-Attributes;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='IMAGE_BITMAP_ROW_2';help_ext=Bitmap-Image-Attributes;1 -->
   <td width='10%'>
      %Name%
   </td>
@@ -37,7 +28,7 @@
       type="text"
       height="$GetVar(HtmlInputHeight)"
       bgcolor="$GetVar(HtmlInputBgColour)"
-	  fgcolor="#ff0000"
+      fgcolor="#ff0000"
       valign='left'
       name="IMAGE_BITMAP_NAME"
       width="100%"
@@ -88,5 +79,3 @@
 $spy.MakeHoverButton(button_small-go@bitmap,spy.GetBitmapImageInstructions\())
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</tr>
-

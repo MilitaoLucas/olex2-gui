@@ -2512,33 +2512,29 @@ def makeReflectionGraphGui():
     }
   gui_d['graph_chooser']=htmlTools.make_combo_text_box(d)
 
-  gui_d['row_table_on'] = htmlTools.include_block('gui/blocks/row_table_on.htm').replace('%','%%')
   gui_d['row_table_off'] = htmlTools.include_block('gui/blocks/row_table_off.htm')
+  gui_d['row_table_on'] = htmlTools.include_block('gui/blocks/row_table_on.htm')
+  gui_d['tool-first-column'] = htmlTools.include_block('gui/blocks/tool-first-column.htm')
   gui_d['bgcolor'] = guiParams.html.table_firstcol_colour
 
 
   txt = '''
-<tr>
-%(help)s
-%(row_table_on)s
-<td>
+<td width='80%%'>
 %(graph_chooser)s
 </td>
-<td align='right'>
+
+<td width='20%%' align='right'>
 %(make_graph_button)s
 </td>
-%(row_table_off)s
-</tr>
 ''' %gui_d
+
   if gui_d['options_gui'] != '':
-    txt += '''
-<tr>
-<td valign='center' width="8" align='center' bgcolor=%(bgcolor)s>
-</td>
+    txt += r'''
+%(row_table_off)s
+<tr name='OPTIONS' bgcolor="$GetVar(HtmlTableBgColour)">
+%(tool-first-column)s
 %(row_table_on)s
 %(options_gui)s
-%(row_table_off)s
-</tr>
 ''' %gui_d
   txt = OV.Translate(txt)
 

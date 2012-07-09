@@ -1,9 +1,7 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
 <!-- FIRST ROW -->
-<tr name=ROTATE>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Rotate;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='ROTATE';help_ext=rotate;1 -->
   <td name=LABEL_ROTATE width='15%'>
     <b>%Rotate%:</b>
   </td>
@@ -55,12 +53,9 @@
     $spy.MakeHoverButton(button_tiny-z:,rota 3 html.getvalue\(rz))
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</tr>
 
 <!-- SECOND ROW -->
-<tr name=AUTO_ROTATION>
-<!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='AUTO_ROTATION';help_ext=Auto-Rotation;1 -->
   <td name=LABEL_AUTO_ROTATION width='15%'>
     <b>%Auto%:</b>
   </td>
@@ -138,7 +133,6 @@
     $spy.MakeHoverButton(button_tiny-c,matr 3)
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</tr>
 
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
