@@ -1,8 +1,6 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
-
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Atom-Styles;1; -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='ATOM_STYLES';help_ext=Atom-Styles;1 -->
   <td width='23%'>
     <b>%Atoms%</b>:
   <td width='75%' colspan='2'>
@@ -17,12 +15,11 @@ Freeze(false)>>
 ">%Atom Styles%
     </a>
   </td>
-</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
 
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Background;1; -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='BACKGROUND';help_ext=background;1 -->
   <td width='23%'>
     <b>Background:</b>
   </td>
@@ -39,10 +36,10 @@ Freeze(false)>>
       %graduated%
     </a> 
   </td>
-</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=GUI-Side;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='GUI_SIDE';help_ext=GUI-Side;1 -->
   <td width='23%'>
     <b>GUI left/right</b>
   </td>
@@ -53,11 +50,10 @@ Freeze(false)>>
       %htmlpanelswap%
     </a> 
   </td>
-</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Tooltips;1; -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='TOOLTIPS';help_ext=Tooltips;1 -->
   <td width='23%'>
     <b>%Tooltips%:</b>
   </td>
@@ -75,13 +71,11 @@ Freeze(false)>>
       oncheck="spy.SetParam(user.show_tooltips,1)>>html.tooltips true" 
       onuncheck="spy.SetParam(user.show_tooltips,0)>>html.tooltips false"
       target="Show tooltips when hovering over a control"
- 
     >
   </td>
-</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Info-Bar;1; -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='INFO_BAR';help_ext=Info-bar;1 -->
   <td width='23%'>
     <b>%Info%:</b>
   </td>
@@ -100,10 +94,10 @@ Freeze(false)>>
       onuncheck="spy.SetParam(user.show_info,0)>>showwindow info false"
     >
   </td>
-</tr>  
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Reset-Alerts;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='RESET_ALERTS';help_ext=Reset-Alerts;1 -->
   <td width='23%'>
     <b>%Alerts%:</b>
   </td>
@@ -113,10 +107,9 @@ Freeze(false)>>
   <td width='20%' align='right'>
     <a href="spy.SwitchAllAlertsOn()" target="Switch all alerts on">%Reset%</a>
   </td>
-</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Console-Lines;1; -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='CONSOLE_LINES';help_ext=Console-Lines;1 -->
   <td width='23%'>
     <b>%Lines%</b>:
   </td>
@@ -138,10 +131,9 @@ Freeze(false)>>
        manage
      >
   </td>
-</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=GUI-Width;1; -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='GUI_WIDTH';help_ext=GUI-Width;1 -->
   <td width='23%'>
     <b>%Panel Width%:</b>
   </td>
@@ -150,11 +142,10 @@ Freeze(false)>>
     <a href="panel 300">%Narrow%</a>
     <a href="panel 500">%Wide%</a>
   </td>
-</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Language;1; -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='LANGUAGE';help_ext=Language;1 -->
   <td width='23%'>
     <b>%Language%:</b>
   </td>
@@ -162,10 +153,10 @@ Freeze(false)>>
     <a href="CurrentLanguage(English)>>panel">English</a>
       <a href="cursor(busy,'%Changing Language to% %Chinese%')>>CurrentLanguage(Chinese)>>panel>>cursor()">%Chinese%</a>
   </td>
-  </tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Fader;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='FADER';help_ext=Fader;1 -->
   <td width='23%'>
    <b>%Use Fader%:</b>
   </td>
@@ -184,10 +175,9 @@ Freeze(false)>>
       onuncheck="spy.SetParam(user.use_fader,0)"
     >
   </td>
-</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Start-Olex2-in;1; -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='START_OLEX2_IN';help_ext=Start-Olex2-In;1 -->
   <td width='23%'>
     <b>%Start Olex2 in%:</b>
   </td>
@@ -209,6 +199,6 @@ Freeze(false)>>
        readonly
      >
   </td>
-</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=4;1; -->
