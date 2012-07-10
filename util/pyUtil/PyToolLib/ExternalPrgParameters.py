@@ -516,14 +516,14 @@ class Method_shelxd(Method_shelx_solution):
       'value':'STOP',
       'width':50,
       'height':28,
-      'onclick':'spy.stopShelx()',
+      'onclick':r'spy.stopShelx()',
     }
     button_html = htmlTools.make_input_button(button_d)
     html = '''
   </tr>
   <tr>
     %s
-  <td>
+  <td colspan='10'>
     %s
   </td>
   ''' %(htmlTools.make_table_first_col(), button_html)
