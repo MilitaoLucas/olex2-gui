@@ -2461,7 +2461,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       width += round(width/200)
       
     elif item_type == "h3":
-      width -= (self.params.html.table_firstcol_width + 9)
+      width -= (self.params.html.table_firstcol_width + self.params.timage.h3.width_adjust)
       underground = self.params.html.table_bg_colour.rgb
       
 

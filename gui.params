@@ -522,6 +522,8 @@ gui
         .type = int
       height = 19
         .type = int
+      width_adjust = 4
+        .type = int
       base_colour = #aaaaaa
         .type = colour
       grad_colour = #cbcbcb
