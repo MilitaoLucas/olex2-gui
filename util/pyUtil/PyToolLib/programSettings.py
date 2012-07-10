@@ -44,7 +44,7 @@ def makeProgramSettingsGUI(program, method, prgtype):
   reference = program.reference
   help = OV.TranslatePhrase(method.help)
   
-  max_colspan = 6
+  max_colspan = 10
   txt = r"""
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=4;1; -->
     <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
@@ -72,14 +72,16 @@ def makeProgramSettingsGUI(program, method, prgtype):
 
 def makeArgumentsHTML(program, method, instruction):
   txt = '<tr>'
+  first_col1 = htmlTools.make_table_first_col(help_name="%s" %instruction.name)
   first_col = htmlTools.make_table_first_col()
   first_col_width = OV.GetParam('gui.html.table_firstcol_width')
-  txt += first_col
+  txt += first_col1
   if instruction.caption is not None:
     argName = instruction.caption
   else:
     argName = instruction.name
-  help = htmlTools.make_help_href(argName, 'true')
+#  help = htmlTools.make_help_href(argName, 'true')
+  help = "++"
 
   name = instruction.name
 
@@ -95,17 +97,21 @@ def makeArgumentsHTML(program, method, instruction):
     tick_box_html = htmlTools.make_tick_box_input(tick_box_d)
   else:
     tick_box_html = ''
+    
+  w = "13%%"
+  if name == 'cf':
+    w = '50'
   txt += '''
-  <td colspan=5 width='%s' valign='center' bgcolor='$GetVar(HtmlTableFirstcolColour)'>
-    <b>%s</b> %s
+  <td valign='center' align='left' width='%s' bgcolor='$GetVar(HtmlTableFirstcolColour)'>
+    <b>%s</b>
   </td>
-  <td valign='center' align='right' bgcolor='$GetVar(HtmlTableFirstcolColour)'>
+  <td valign='center' width='90%%' colspan='10' bgcolor='$GetVar(HtmlTableFirstcolColour)'>
     %s
   </td>
 </tr>
 <tr>
 %s
-''' %(first_col_width, argName, help, tick_box_html, first_col)
+''' %(w, argName.upper(), tick_box_html, first_col)
 
   options_gui = []
   count = 0
@@ -154,6 +160,7 @@ def makeArgumentsHTML(program, method, instruction):
            'value':value,
            'label':'%s ' %caption,
            'onchange':onchange,
+           'width':'100%',
            }
       options_gui.append(htmlTools.make_input_text_box(d))
 
@@ -162,6 +169,7 @@ def makeArgumentsHTML(program, method, instruction):
            'value':value,
            'label':'%s ' %caption,
            'onchange':onchange,
+           'width':'100%',
            }
       options_gui.append(htmlTools.make_input_text_box(d))
 
@@ -171,7 +179,7 @@ def makeArgumentsHTML(program, method, instruction):
            'checked':'%s' %value,
            'oncheck':'SetVar(%s,True)' %(varName),
            'onuncheck':'SetVar(%s,True)' %(varName),
-           'width':80,
+           'width':'100%',
            'bgcolor':"",
            'fgcolor':"",
            }
@@ -187,17 +195,28 @@ def makeArgumentsHTML(program, method, instruction):
            'items':items,
            'value':option.extract(),
            'onchange':onchange,
-           'width':'',
+           'width':'100%',
            }
       options_gui.append(htmlTools.make_combo_text_box(d))
 
-    if count == 7:
-      txt += '</tr><tr>'
-      txt += first_col
+    #if count == 7:
+      #txt += '</tr><tr>'
+      #txt += first_col
+      
+    w = '13%%'
+    if instruction.name == "plop":
+      w = '10%%'
+    if instruction.name.lower() == "cf" and option.name == "amplitude_type":
+        w = '20%%'
     txt += '''
-<td valign='bottom' align='left' width='40' colspan="1">
+<td valign='bottom' align='left' width='%s' colspan="1" _bgcolor='green'>
   %s
-</td>''' %(options_gui[-1])
+</td>''' %(w, options_gui[-1])
+
+
+  while count < 8:
+    txt += "<td width='13%%'></td>"
+    count += 1
 
   txt += '</tr>'
 

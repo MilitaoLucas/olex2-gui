@@ -447,7 +447,7 @@ def make_table_first_col(help_name=None, popout=False, help_image='large'):
   else:
     help = make_help_href(help_name, popout, image=help_image)
   html ='''
-<td valign='top' width='2' align='center' bgcolor='$GetVar(HtmlTableFirstcolColour)'>
+<td valign='top' align='center' bgcolor='$GetVar(HtmlTableFirstcolColour)'>
   %s
 </td>
 ''' %help
@@ -656,22 +656,22 @@ def make_input_button(d):
   halign="%(halign)s"
   hint="%(hint)s"
   flat
->
-</font>
 ''' %dic
   if dic['onclick']:
     html += '''
   onclick="%(onclick)s"
 >
+</font>
 ''' %dic
   elif dic['ondown'] or dic['onup']:
     html += '''
   ondown="%(ondown)s"
   onup="%(onup)s"
   >
+  </font>
 ''' %dic
   else:
-    html += '\n>\n'
+    html += '\n></font>\n'
   return html
 
 def format_help(string):
