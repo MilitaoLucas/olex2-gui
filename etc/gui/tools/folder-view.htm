@@ -1,10 +1,10 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
 <!-- FIRST ROW -->
-<tr>
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='FOLDER_VIEW';help_ext=Folder-View;1 -->
   <td>
   <font size='$GetVar(HtmlFontSizeControls)'>
-  <input type='button' value='Pick a folder'
+  <input type='button' value='Select a folder'
     onclick="spy.gui.tools.folder_view.list()"
   >
   </font>
@@ -14,7 +14,6 @@
   <td>
   $spy.gui.tools.folder_view.generateHtml()
   </td>
-</tr>
-
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
