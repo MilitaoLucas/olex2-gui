@@ -70,8 +70,8 @@
       width="28"
       value="x"
       data = "0"
-      oncheck = "setdata(x, '1')>>rota getdata(x) getdata(y) getdata(z) 100000 eval(html.getvalue(speed)*0.1)"
-      onuncheck="setdata(x, '0') >>rota getdata(x) getdata(y) getdata(z) 100000 eval(html.getvalue(speed)*0.1)"
+      oncheck = "html.setdata(x, '1')>>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 eval(html.getvalue(speed)*0.1)"
+      onuncheck="html.setdata(x, '0') >>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 eval(html.getvalue(speed)*0.1)"
     >
     </font>
   </td>
@@ -87,8 +87,8 @@
       height="$GetVar(HtmlInputHeight)"
       value="y"
       data = "0"
-      oncheck = "setdata(y, '1')>>rota getdata(x) getdata(y) getdata(z) 100000 eval(html.getvalue(speed)*0.1)"
-      onuncheck="setdata(y, '0') >>rota getdata(x) getdata(y) getdata(z) 100000 eval(html.getvalue(speed)*0.1)"
+      oncheck = "html.setdata(y, '1')>>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 eval(html.getvalue(speed)*0.1)"
+      onuncheck="html.setdata(y, '0') >>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 eval(html.getvalue(speed)*0.1)"
     >
     </font>
   </td>
@@ -104,8 +104,8 @@
       height="$GetVar(HtmlInputHeight)"
       value="z"
       data = "0"
-      oncheck = "setdata(z, '1')>>rota getdata(x) getdata(y) getdata(z) 100000 eval(html.getvalue(speed)*0.1)"
-      onuncheck="setdata(z, '0') >>rota getdata(x) getdata(y) getdata(z) 100000 eval(html.getvalue(speed)*0.1)"
+      oncheck = "html.setdata(z, '1')>>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 eval(html.getvalue(speed)*0.1)"
+      onuncheck="html.setdata(z, '0') >>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 eval(html.getvalue(speed)*0.1)"
     >
     </font>
   </td>
@@ -121,7 +121,7 @@
       value="1"
       min="1"
       max="10"
-      onchange = "rota getdata(x) getdata(y) getdata(z) 100000 eval(html.getvalue(speed)*0.1)"
+      onchange = "rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 eval(html.getvalue(speed)*0.1)"
     >
     </font>
   </td>

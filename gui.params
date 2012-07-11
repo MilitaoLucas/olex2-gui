@@ -148,6 +148,8 @@ gui
       .type = colour
     table_bg_colour = #eaeaea
       .type = colour
+    table_row_bg_colour = #ff0000
+      .type = colour
     table_firstcol_colour = #dedede
       .type = colour
     table_firstcol_width = 16
