@@ -2,26 +2,42 @@
 
 <!-- $run("UpdateQPeakTable") -->
 
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=electron-density-transparancy-slider;1; -->
-<td colspan=6>
-      <input
-        type="slider" 
-        name="qpeakscale"
-        float 
-        bgcolor="$GetVar(HtmlTableBgColour)"  
-        fgcolor="$GetVar(HtmlFontColour)" 
-        width="100"
-        height="20"
-        value="3"
-        min="1"
-        max="10"
-        onchange="qpeakscale html.GetValue(qpeakscale)">
-</tr>
 
+<!-- FOURTH ROW -->
+<!-- #include q-peak-slider gui\snippets\snippet-q-peak-slider.htm;1; -->
+
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='Q_TRANSPARANCY';help_ext=electron-density-transparancy-slider;1 -->
+<td width='20%'>
+  <b>Transparancy</b>
+</td>
+<td width='80%'>
+  <input
+    type="slider" 
+    name="qpeakscale"
+    float 
+    bgcolor="$GetVar(HtmlTableBgColour)"  
+    fgcolor="$GetVar(HtmlFontColour)" 
+    width="100%"
+    height="20"
+    value="3"
+    min="1"
+    max="10"
+    onchange="qpeakscale html.GetValue(qpeakscale)">
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='Q_PEAKS';help_ext=electron-density-peaks;1 -->
+
+<td>
 <font size=1>
 <!-- #include qpeaks qpeaks.htm;1; -->
 </font>
+</td>
 
-<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=3;1; -->
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
 <!-- %Electron Density Peaks% -->
