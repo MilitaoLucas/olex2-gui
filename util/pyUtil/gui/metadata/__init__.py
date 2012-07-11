@@ -8,8 +8,6 @@ OV = OlexFunctions()
 
 def sources():
   import htmlTools
-  
-  
   list = [
     {'varName':'snum.metacif.abs_file',
      'itemName':'.abs',
@@ -89,8 +87,11 @@ def sources():
 def conflicts():
   try:
     d = olx.CifInfo_metadata_conflicts.conflict_d
-    txt = "There is conflicting information!"
-    
+    if d:
+      txt = "<font color='red'><b>There is conflicting information!</b></font>"
+    else:
+      txt = "<font color='green'><b>No conflicts in the meta-data</b></font>"
+  
   except:
     return "Not Initialised"
   

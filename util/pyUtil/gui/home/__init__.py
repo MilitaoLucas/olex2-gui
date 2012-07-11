@@ -21,15 +21,22 @@ class MultipleDataset:
 
   def generateHtml(self):
     html = "<table width='100%'><tr>"
-    current = int(olx.xf.CurrentData())
+    if olx.IsFileType('cif') == 'true':
+      current = int(olx.xf.CurrentData())
+    else:
+      current = 1
     cnt = int(olx.xf.DataCount())
     counter = -1
     for i in xrange(0, cnt):
-      if olx.xf.DataName(i) == "global":
-        continue
+      if olx.IsFileType('cif') == 'true':
+        if olx.xf.DataName(i) == "global" or not olx.xf.DataName(i):
+          continue
       counter += 1
       display = ""
-      name = olx.xf.DataName(i)
+      if olx.IsFileType('cif') == 'true':
+        name = olx.xf.DataName(i)
+      else:
+        name = OV.FileName()
       if len(name) < 3:
         display = "Structure %s" %name
       elif len(name) > 15:
