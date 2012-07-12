@@ -2881,6 +2881,8 @@ class HealthOfStructure():
     if href:
       if href == "atom":
         href = "sel %s" %OV.GetParam('snum.refinement.%s_atom' %item)
+      if item == 'max_hole':
+        href = ""
       txt += "<a href='%s'>" %(href)
     txt += '''
 <td align='center'><zimg src=%s></td>''' %item
