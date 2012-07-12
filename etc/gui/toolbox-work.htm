@@ -61,12 +61,29 @@ $spy.MakeHoverButton(toolbar-ok,fixunit html.GetValue\(SET_Z_PRIME_FIXUNIT)>>xf.
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=STRUCTURECHECKING_3; help_ext=Structure-Checking-3;1; -->
+  <td width='15%'>
+    <b>Show</b>
+  </td>
+  <td width='85%' align='right'>
+    <a href='ShowP 0 1'>PART 0 1</a> | 
+    <a href='ShowP 0 2'>PART 0 2</a> |
+    <a href='ShowP 0 -1'>PART 0 -1</a> | 
+    <a href='ShowP 0 -2'>PART 0 -2</a> |
+    <a href='ShowP 0 1'>PART 0 3</a> | 
+    <a href='ShowP 0 2'>PART 0 4</a> |
+    <a href='ShowP'>All</a>
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
 <!-- THIRD ROW -->
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='LABELS';help_ext=Labels;1 -->
-  <td name=LABEL_COMBO_BOX_LABEL width='20%'>
+  <td name=LABEL_COMBO_BOX_LABEL width='15%'>
     <b>%Labels%</b>
   </td>
-  <td align='right' name=COMBO_LABEL_COMBO_BOX>
+  <td width='45%' align='left' name=COMBO_LABEL_COMBO_BOX>
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type='combo'
@@ -80,6 +97,11 @@ $spy.MakeHoverButton(toolbar-ok,fixunit html.GetValue\(SET_Z_PRIME_FIXUNIT)>>xf.
       readonly='readonly'
     >
     </font>
+  </td>
+  <td width='40%' align='right'>
+    <a href='labels -o'>OCCU</a> |
+    <a href='labels -co'>Chem OCCU</a> |
+    <a href='labels -p'>PARTS</a>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
@@ -101,9 +123,9 @@ $spy.MakeHoverButton(toolbar-ok,fixunit html.GetValue\(SET_Z_PRIME_FIXUNIT)>>xf.
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='ELECTRON_DENSITY';help_ext=Electron-Density;1 -->
-<!-- #include calculate-electron-density gui\snippets\snippet-electron-density-map.htm;1; -->
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+<!-- #includeif IsFileType('ires') tool-row-help gui\blocks\tool-row-help.htm;name='ELECTRON_DENSITY';help_ext=Electron-Density;1 -->
+<!-- #includeif IsFileType('ires') calculate-electron-density gui\snippets\snippet-electron-density-map.htm;1; -->
+<!-- #includeif IsFileType('ires') row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
 
