@@ -434,6 +434,10 @@ OV.registerFunction(move)
 def restraint_builder(cmd):
   height = OV.GetParam('gui.html.combo_height')
   colspan = 3
+  
+  first_col_bg = OV.GetParam('gui.html.table_firstcol_colour')
+  table_row_bg = OV.GetParam('gui.html.table_firstcol_colour')
+  
 
   constraints = ["EXYZ", "EADP", "AFIX"]
   olex_conres = ["RRINGS", "TRIA", "ADPUEQ", "ADPVOL", "ANGLE", "DIANG"]
@@ -539,18 +543,18 @@ def restraint_builder(cmd):
       if items:
         d.setdefault("items",items)
       if var:
-        ib += "<td align='left' width='%s'>%s</td>" %(width, htmlTools.makeHtmlInputBox(d))
+        ib += "<td align='left' width='%s' bgcolor='%s'>%s</td>" %(width, table_row_bg, htmlTools.makeHtmlInputBox(d))
        
   if ib:
     if name == "AFIX":
       var_max = 2
-      td_width = '40%'
+      td_width = '35%'
     else:
       var_max = 3
       td_width = '80%'
     
     while varcount < var_max:
-      ib += "<td align='center' width='33%'></td>"
+      ib += "<td align='center' width='33%%' bgcolor='%s'></td>" %table_row_bg
       varcount += 1
     
     html.append("<td width='%s'><table border='0' style='border-collapse: collapse' width='100%%' cellpadding='1' cellspacing='0'><tr>%s</tr></table></td>" %(td_width, ib))
@@ -606,7 +610,10 @@ def restraint_builder(cmd):
     "hint":"The %s command will be applied to all currently selected atoms" %name
   }
   if varcount == 0:
-    html.append("<td></td>"*(colspan-itemcount)) # Space-filler
+    fill = colspan-itemcount
+    if not fill:
+      fill = 1
+    html.append("<td bgcolor='%s' width=100%%></td>"*(fill) %table_row_bg) # Space-filler
   btns = ""
   width='20%'
   if name == 'AFIX':
@@ -615,12 +622,12 @@ def restraint_builder(cmd):
     width='60%'
   btns += '$spy.MakeHoverButton(button_small-go@%s,%s)' %(name, onclick)
 
-  html.append("<td width='%s' align='right'>%s</td>" %(width,btns))
+  html.append("<td width='%s' align='right' bgcolor='%s'>%s</td>" %(width,table_row_bg,btns))
 
   #Add the help info as the last row in the table
-  html.append("</td></tr><tr>")
+  html.append("</td></tr><tr bgcolor='%s'>" %table_row_bg,)
   html.append(htmlTools.make_table_first_col(help_name=name, popout=True, help_image='normal'))
-  html.append("<td colspan=%s bgcolor='%s'>%s</td></tr>" %(colspan, OV.GetParam('gui.html.table_firstcol_colour'), html_help, ))
+  html.append("<td colspan=%s bgcolor='%s'>%s</td></tr>" %(colspan, first_col_bg, html_help, ))
   if name in constraints:
     wFilePath = r"constraint-vars.htm"
   elif name in olex_conres:
