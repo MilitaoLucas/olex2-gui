@@ -209,8 +209,8 @@ def web_authenticate():
   if not username:
     res = make_logon_html()
     if res:
-      username = olx.GetValue('Logon.WEB_USERNAME')
-      password = olx.GetValue('Logon.WEB_PASSWORD')
+      username = olx.html.GetValue('Logon.WEB_USERNAME')
+      password = olx.html.GetValue('Logon.WEB_PASSWORD')
       res = web_run_sql(sql = "SELECT English from translation WHERE OXD = 'English'")
       if res == "Unauthorised":
         print "Login failed"
@@ -495,7 +495,7 @@ class DownloadOlexLanguageDictionary:
 
         i += 1
         try:
-          value = olx.GetValue('Translate.%s' %OXD)
+          value = olx.html.GetValue('Translate.%s' %OXD)
         except:
           continue
         d = {"OXD":OXD, self.language:value}

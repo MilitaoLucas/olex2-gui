@@ -5,7 +5,7 @@
 	<td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
 </td>
 	<td width='70' align='center'>
-		<a href="spy.BatchMatch GetValue(SET_BATCH_DIR) -t=GetValue(SET_BATCH_TYPE)">%Batch Match%</a>&nbsp;
+		<a href="spy.BatchMatch html.GetValue(SET_BATCH_DIR) -t=html.GetValue(SET_BATCH_TYPE)">%Batch Match%</a>&nbsp;
 	</td>
 	<td>
 		<input
@@ -20,7 +20,7 @@
 	</td>
 
 	<td align='center'>
-		<a href="SetValue(SET_BATCH_DIR, 'ChooseDir()')">Dir</a>
+		<a href="html.SetValue(SET_BATCH_DIR, 'ChooseDir()')">Dir</a>
 	</td>
 
 	<td>
@@ -36,7 +36,7 @@
 			</font>
 	</td>
 	<td>
-		<a href="exec explorer -o 'GetValue(SET_BATCH_DIR)\match.csv'">csv</a>
+		<a href="exec explorer -o 'html.GetValue(SET_BATCH_DIR)\match.csv'">csv</a>
 	</td>
 
 </tr>

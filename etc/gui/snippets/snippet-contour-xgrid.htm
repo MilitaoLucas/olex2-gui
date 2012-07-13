@@ -16,8 +16,8 @@
       min="3"
       max="30"
       onchange="
-xgrid.Contours(GetValue(SNUM_XGRID_CONTOUR_SLIDE))>>
-SetValue(SNUM_XGRID_CONTOUR_VALUE,xGrid.Contours())"
+xgrid.Contours(html.GetValue(~name~))>>
+html.SetValue(SNUM_XGRID_CONTOUR_VALUE,xGrid.Contours())"
     >
     </font>
   </td>
@@ -32,8 +32,8 @@ SetValue(SNUM_XGRID_CONTOUR_VALUE,xGrid.Contours())"
       fgcolor="$GetVar(HtmlFontColour)"
       value="$xgrid.Contours()"
       onchange="
-xgrid.Contours(GetValue(SNUM_XGRID_CONTOUR_VALUE))
-SetValue(SNUM_XGRID_CONTOUR_SLIDE,xGrid.Contours())"
+xgrid.Contours(html.GetValue(~name~))
+html.SetValue(SNUM_XGRID_CONTOUR_SLIDE,xGrid.Contours())"
     >
     </font>
   </td>

@@ -39,12 +39,12 @@ def makeProgramSettingsGUI(program, method, prgtype):
     wFilePath = 'solution-settings-extra.htm'
   else:
     wFilePath = 'refinement-settings-extra.htm'
-
+    
   authors = program.author
   reference = program.reference
   help = OV.TranslatePhrase(method.help)
-
-  max_colspan = 6
+  
+  max_colspan = 10
   txt = r"""
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=4;1; -->
     <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
@@ -66,20 +66,22 @@ def makeProgramSettingsGUI(program, method, prgtype):
 </tr>
 </table>
 ''' %(OV.GetParam('gui.html.table_firstcol_width'),max_colspan, authors, reference, method.extraHtml())
-
+  
   OlexVFS.write_to_olex(wFilePath, txt)
   return
 
 def makeArgumentsHTML(program, method, instruction):
   txt = '<tr>'
+  first_col1 = htmlTools.make_table_first_col(help_name="%s" %instruction.name)
   first_col = htmlTools.make_table_first_col()
   first_col_width = OV.GetParam('gui.html.table_firstcol_width')
-  txt += first_col
+  txt += first_col1
   if instruction.caption is not None:
     argName = instruction.caption
   else:
     argName = instruction.name
-  help = htmlTools.make_help_href(argName, 'true')
+#  help = htmlTools.make_help_href(argName, 'true')
+  help = "++"
 
   name = instruction.name
 
@@ -88,24 +90,28 @@ def makeArgumentsHTML(program, method, instruction):
     tick_box_d.setdefault('ctrl_name', 'SET_SETTINGS_%s' %name.upper())
     tick_box_d.setdefault('checked', '$GetVar(settings_%s)' %name)
     tick_box_d.setdefault('value', '')
-    tick_box_d.setdefault('oncheck', 'SetVar(settings_%s,GetState(~name~))>>spy.addInstruction(%s,%s,%s)' %(
-      name, program.name, method.name, name))
-    tick_box_d.setdefault('onuncheck', 'SetVar(settings_%s,GetState(SET_SETTINGS_%s))>>DelIns %s' %(
+    tick_box_d.setdefault('oncheck', 'SetVar(settings_%s,html.GetState(SET_SETTINGS_%s))>>spy.addInstruction(%s,%s,%s)' %(
+      name, name, program.name, method.name, name))
+    tick_box_d.setdefault('onuncheck', 'SetVar(settings_%s,html.GetState(SET_SETTINGS_%s))>>DelIns %s' %(
       name, name, argName))
     tick_box_html = htmlTools.make_tick_box_input(tick_box_d)
   else:
     tick_box_html = ''
+    
+  w = "13%%"
+  if name == 'cf':
+    w = '50'
   txt += '''
-  <td colspan=5 width='%s' valign='center' bgcolor='$GetVar(HtmlTableFirstcolColour)'>
-    <b>%s</b> %s
+  <td valign='center' align='left' width='%s' bgcolor='$GetVar(HtmlTableFirstcolColour)'>
+    <b>%s</b>
   </td>
-  <td valign='center' align='right' bgcolor='$GetVar(HtmlTableFirstcolColour)'>
+  <td valign='center' width='90%%' colspan='10' bgcolor='$GetVar(HtmlTableFirstcolColour)'>
     %s
   </td>
 </tr>
 <tr>
 %s
-''' %(first_col_width, argName, help, tick_box_html, first_col)
+''' %(w, argName.upper(), tick_box_html, first_col)
 
   options_gui = []
   count = 0
@@ -121,17 +127,17 @@ def makeArgumentsHTML(program, method, instruction):
     if value is None:
       value = ''
     ctrl_name = 'SET_%s' %(varName.upper())
-    onchange = 'SetVar(%s,GetValue(~name~))>>spy.addInstruction(%s,%s,%s)' %(
-      varName, program.name, method.name, name)
-
+    onchange = 'SetVar(%s,html.GetValue(%s))>>spy.addInstruction(%s,%s,%s)' %(
+      varName, ctrl_name, program.name, method.name, name)
+    
     if "settings_cf" in varName:
       value = "$spy.GetParam('programs.solution.smtbx.cf.%s')" %(varName.lstrip('settings_cf'))
-      onchange = "spy.SetParam('programs.solution.smtbx.cf.%s',GetValue(~name~))" %(varName.lstrip('settings_cf'))
-
+      onchange = "spy.SetParam('programs.solution.smtbx.cf.%s',html.GetValue(%s))" %(varName.lstrip('settings_cf'), ctrl_name)
+    
     if option.name == 'nls':
-      onchange = '%s>>spy.SetParam(snum.refinement.max_cycles,GetValue(SET_SETTINGS_%s_NLS))>>html.Update' %(onchange, name.upper())
+      onchange = '%s>>spy.SetParam(snum.refinement.max_cycles,html.GetValue(SET_SETTINGS_%s_NLS))>>html.Update' %(onchange, name.upper())
     elif option.name == 'npeaks':
-      onchange = '%s>>spy.SetParam(snum.refinement.max_peaks,GetValue(SET_SETTINGS_%s_NPEAKS))>>html.Update' %(onchange, name.upper())
+      onchange = '%s>>spy.SetParam(snum.refinement.max_peaks,html.GetValue(SET_SETTINGS_%s_NPEAKS))>>html.Update' %(onchange, name.upper())
     #if data_type == "int":
       #d = {'ctrl_name':ctrl_name,
            #'value':value,
@@ -154,6 +160,7 @@ def makeArgumentsHTML(program, method, instruction):
            'value':value,
            'label':'%s ' %caption,
            'onchange':onchange,
+           'width':'100%',
            }
       options_gui.append(htmlTools.make_input_text_box(d))
 
@@ -162,6 +169,7 @@ def makeArgumentsHTML(program, method, instruction):
            'value':value,
            'label':'%s ' %caption,
            'onchange':onchange,
+           'width':'100%',
            }
       options_gui.append(htmlTools.make_input_text_box(d))
 
@@ -171,7 +179,7 @@ def makeArgumentsHTML(program, method, instruction):
            'checked':'%s' %value,
            'oncheck':'SetVar(%s,True)' %(varName),
            'onuncheck':'SetVar(%s,True)' %(varName),
-           'width':80,
+           'width':'100%',
            'bgcolor':"",
            'fgcolor':"",
            }
@@ -187,24 +195,35 @@ def makeArgumentsHTML(program, method, instruction):
            'items':items,
            'value':option.extract(),
            'onchange':onchange,
-           'width':'',
+           'width':'100%',
            }
       options_gui.append(htmlTools.make_combo_text_box(d))
 
-    if count == 7:
-      txt += '</tr><tr>'
-      txt += first_col
+    #if count == 7:
+      #txt += '</tr><tr>'
+      #txt += first_col
+      
+    w = '13%%'
+    if instruction.name == "plop":
+      w = '10%%'
+    if instruction.name.lower() == "cf" and option.name == "amplitude_type":
+        w = '20%%'
     txt += '''
-<td valign='bottom' align='left' width='40' colspan="1">
+<td valign='bottom' align='left' width='%s' colspan="1" _bgcolor='green'>
   %s
-</td>''' %(options_gui[-1])
+</td>''' %(w, options_gui[-1])
+
+
+  while count < 8:
+    txt += "<td width='13%%'></td>"
+    count += 1
 
   txt += '</tr>'
 
   return txt
 
 def make_ondown(dictionary):
-  args = ''.join([' GetValue(SET_SETTINGS_%s)' %item[0].upper() for item in dictionary['values']])
+  args = ''.join([' html.GetValue(SET_SETTINGS_%s)' %item[0].upper() for item in dictionary['values']])
   txt = 'Addins %s%s' %(dictionary['name'], args)
   return txt
 
@@ -232,8 +251,7 @@ def addInstruction(program, method, instruction):
       break
     addins += ' %s' %val
 
-  if not argName.lower() in ('plan', 'l.s.'):
-    OV.DelIns(argName)
+  OV.DelIns(argName)
   OV.AddIns(addins)
 OV.registerFunction(addInstruction)
 
@@ -252,7 +270,7 @@ def onMaxCyclesChange(max_cycles):
         OV.SetVar('settings_%s_nls' %item, max_cycles)
         ctrl_name = 'SET_SETTINGS_%s_NLS' %item.upper()
         if OV.HasGUI() and OV.IsControl(ctrl_name):
-          olx.SetValue(ctrl_name, max_cycles)
+          olx.html.SetValue(ctrl_name, max_cycles)
         addInstruction(prg.name, method.name, item)
         return
 OV.registerFunction(OV.SetMaxCycles)
@@ -271,7 +289,7 @@ def onMaxPeaksChange(max_peaks):
       OV.SetVar('settings_plan_npeaks', max_peaks)
       ctrl_name = 'SET_SETTINGS_PLAN_NPEAKS'
       if OV.HasGUI() and OV.IsControl(ctrl_name):
-        olx.SetValue(ctrl_name, max_peaks)
+        olx.html.SetValue(ctrl_name, max_peaks)
       addInstruction(prg.name, method.name, 'plan')
       return
 OV.registerFunction(OV.SetMaxPeaks)

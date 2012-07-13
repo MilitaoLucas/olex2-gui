@@ -903,6 +903,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     print >> log, "Difference map: max=%.2f, min=%.2f" %(
       self.diff_stats.max(), self.diff_stats.min())
     OV.SetParam('snum.refinement.max_peak', self.diff_stats.max())
+    OV.SetParam('snum.refinement.max_hole', self.diff_stats.min())
 
   def get_disagreeable_reflections(self, show_in_console=False):
     fo2 = self.normal_eqns.observations.fo_sq\

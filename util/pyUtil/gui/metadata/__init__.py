@@ -8,8 +8,6 @@ OV = OlexFunctions()
 
 def sources():
   import htmlTools
-  
-  
   list = [
     {'varName':'snum.metacif.abs_file',
      'itemName':'.abs',
@@ -69,7 +67,7 @@ def sources():
         d.setdefault('items', 'spy.GetParam(%s)' %listFiles)
       x += 1
       file_type = '_'.join(d['varName'].split('.')[-1].split('_')[:-1])
-      d.setdefault('onchange',"spy.SetParam(%s,'GetValue(SET_%s)')>>spy.AddVariableToUserInputList(%s)" %(d['varName'],str.upper(d['varName']).replace('.','_'),d['varName']))
+      d.setdefault('onchange',"spy.SetParam(%s,'html.GetValue(SET_%s)')>>spy.AddVariableToUserInputList(%s)" %(d['varName'],str.upper(d['varName']).replace('.','_'),d['varName']))
       d['chooseFile'].setdefault('folder',OV.FilePath())
       d['chooseFile'].setdefault('file_type',file_type)
       d['chooseFile'].setdefault('caption',d['itemName'])
@@ -89,8 +87,11 @@ def sources():
 def conflicts():
   try:
     d = olx.CifInfo_metadata_conflicts.conflict_d
-    txt = "There is conflicting information!"
-    
+    if d:
+      txt = "<font color='red'><b>There is conflicting information!</b></font>"
+    else:
+      txt = "<font color='green'><b>No conflicts in the meta-data</b></font>"
+  
   except:
     return "Not Initialised"
   

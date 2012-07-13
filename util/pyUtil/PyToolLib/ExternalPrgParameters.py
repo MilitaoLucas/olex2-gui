@@ -238,8 +238,6 @@ class Method_solution(Method):
       args += "-s=%s " % RunPrgObject.sg
     if self.name == 'Structure Expansion':
       args += "-atoms"
-    if olx.xf.latt.IsGrown() == 'true':
-      olx.Fuse()
     return args
 
   def post_solution(self, RunPrgObject):
@@ -339,6 +337,10 @@ class Method_shelx(Method):
       raise RuntimeError(
         'you may be using an outdated version of %s' %(prgName))
     olx.WaitFor('process') # uncomment me!
+    if os.path.getsize("%s.res" %(xl_ins_filename)) == 0:
+      self.failure = True
+    else:
+      self.failure = False
     olex.m("User '%s'" %RunPrgObject.filePath)
     #olx.User("'%s'" %RunPrgObject.filePath)
 
@@ -425,6 +427,13 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
     self.gather_refinement_information()
     writeRefinementInfoIntoRes(self.cif)
 
+    OV.SetParam('snum.refinement.max_peak', olx.Lst('peak'))
+    OV.SetParam('snum.refinement.max_hole', olx.Lst('hole'))
+    OV.SetParam('snum.refinement.max_shift_site', olx.Lst('max_shift'))
+    OV.SetParam('snum.refinement.max_shift_site_atom', olx.Lst('max_shift_object'))
+    OV.SetParam('snum.refinement.max_shift_u', olx.Lst('max_dU'))
+    OV.SetParam('snum.refinement.max_shift_u_atom', olx.Lst('max_dU_object'))
+
 
   def gather_refinement_information(self):
     cif = {}
@@ -507,14 +516,14 @@ class Method_shelxd(Method_shelx_solution):
       'value':'STOP',
       'width':50,
       'height':28,
-      'onclick':'spy.stopShelx()',
+      'onclick':r'spy.stopShelx()',
     }
     button_html = htmlTools.make_input_button(button_d)
     html = '''
   </tr>
   <tr>
     %s
-  <td>
+  <td colspan='10'>
     %s
   </td>
   ''' %(htmlTools.make_table_first_col(), button_html)
@@ -887,6 +896,18 @@ def defineExternalPrograms():
     author="G.M.Sheldrick",
     reference="SHELXL, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
     execs=["shelxl.exe", "shelxl"])
+  ShelXL12 = Program(
+    name='ShelXL-2012',
+    program_type='refinement',
+    author="G.M.Sheldrick",
+    reference="SHELXL, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    execs=["shelxl12.exe", "shelxl12"])
+  ShelXLMP12 = Program(
+    name='ShelXLMP-2012',
+    program_type='refinement',
+    author="G.M.Sheldrick",
+    reference="SHELXL, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    execs=["shelxl_mp12.exe", "shelxl_mp12"])
   XL = Program(
     name='XL',
     program_type='refinement',
@@ -923,7 +944,7 @@ def defineExternalPrograms():
     author="L.J. Bourhis, O.V. Dolomanov, R.J. Gildea",
     reference="olex2.refine (L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, J.A.K. Howard,\nH. Puschmann, in preparation, 2011)")
 
-  for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc):
+  for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc, ShelXL12, ShelXLMP12):
     for method in (least_squares, cgls):
       prg.addMethod(method)
   smtbx_refine.addMethod(gauss_newton)
@@ -934,7 +955,7 @@ def defineExternalPrograms():
     SPD.addProgram(prg)
 
   RPD = ExternalProgramDictionary()
-  for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc, smtbx_refine):
+  for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc, ShelXL12, ShelXLMP12, smtbx_refine):
     RPD.addProgram(prg)
 
   return SPD, RPD

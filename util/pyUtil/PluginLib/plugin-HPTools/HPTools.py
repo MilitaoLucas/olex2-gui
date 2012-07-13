@@ -153,7 +153,7 @@ def go_through_list():
     html = "<html> Fred </html>"
     res = make_evaluate_html()
     if res:
-      evaluate = olx.GetValue('Evaluate.EVALUATE')
+      evaluate = olx.html.GetValue('Evaluate.EVALUATE')
     else:
       return
     l.append("%s,%s\n" %(p, evaluate))

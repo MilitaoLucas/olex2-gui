@@ -1,9 +1,6 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
-
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Atom-Styles;1; -->
-  </td>
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='ATOM_STYLES';help_ext=Atom-Styles;1 -->
   <td width='23%'>
     <b>%Atoms%</b>:
   <td width='75%' colspan='2'>
@@ -18,13 +15,11 @@ Freeze(false)>>
 ">%Atom Styles%
     </a>
   </td>
-</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
 
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Background;1; -->
-  </td>
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='BACKGROUND';help_ext=background;1 -->
   <td width='23%'>
     <b>Background:</b>
   </td>
@@ -41,11 +36,10 @@ Freeze(false)>>
       %graduated%
     </a> 
   </td>
-</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=GUI-Side;1; -->
-  </td>
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='GUI_SIDE';help_ext=GUI-Side;1 -->
   <td width='23%'>
     <b>GUI left/right</b>
   </td>
@@ -56,12 +50,10 @@ Freeze(false)>>
       %htmlpanelswap%
     </a> 
   </td>
-</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Tooltips;1; -->
-  </td>
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='TOOLTIPS';help_ext=Tooltips;1 -->
   <td width='23%'>
     <b>%Tooltips%:</b>
   </td>
@@ -79,14 +71,11 @@ Freeze(false)>>
       oncheck="spy.SetParam(user.show_tooltips,1)>>html.tooltips true" 
       onuncheck="spy.SetParam(user.show_tooltips,0)>>html.tooltips false"
       target="Show tooltips when hovering over a control"
- 
     >
   </td>
-</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Info-Bar;1; -->
-  </td>
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='INFO_BAR';help_ext=Info-bar;1 -->
   <td width='23%'>
     <b>%Info%:</b>
   </td>
@@ -105,11 +94,10 @@ Freeze(false)>>
       onuncheck="spy.SetParam(user.show_info,0)>>showwindow info false"
     >
   </td>
-</tr>  
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Reset-Alerts;1; -->
-  </td>
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='RESET_ALERTS';help_ext=Reset-Alerts;1 -->
   <td width='23%'>
     <b>%Alerts%:</b>
   </td>
@@ -119,11 +107,9 @@ Freeze(false)>>
   <td width='20%' align='right'>
     <a href="spy.SwitchAllAlertsOn()" target="Switch all alerts on">%Reset%</a>
   </td>
-</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Console-Lines;1; -->
-  </td>
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='CONSOLE_LINES';help_ext=Console-Lines;1 -->
   <td width='23%'>
     <b>%Lines%</b>:
   </td>
@@ -138,18 +124,16 @@ Freeze(false)>>
        bgcolor="$GetVar(HtmlInputBgColour)"
        value=""
        items="All<--1;1<-2;5<-6;10<-11;20<-21"
-       onchange="lines GetValue(~name~)"
+       onchange="lines html.GetValue(~name~)"
        valign='center'
        align='right'
        width="100%"
        manage
      >
   </td>
-</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=GUI-Width;1; -->
-  </td>
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='GUI_WIDTH';help_ext=GUI-Width;1 -->
   <td width='23%'>
     <b>%Panel Width%:</b>
   </td>
@@ -158,24 +142,21 @@ Freeze(false)>>
     <a href="panel 300">%Narrow%</a>
     <a href="panel 500">%Wide%</a>
   </td>
-</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Language;1; -->
-  </td>
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='LANGUAGE';help_ext=Language;1 -->
   <td width='23%'>
     <b>%Language%:</b>
   </td>
   <td width='65%' colspan='2'>
-  <a href="CurrentLanguage(English)>>panel">English</a>
-    <a href="cursor(busy,'%Changing Language to% %Chinese%')>>CurrentLanguage(Chinese)>>panel>>cursor()">%Chinese%</a>
-    </td>
-  </tr>
-
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Fader;1; -->
+    <a href="CurrentLanguage(English)>>panel">English</a>
+      <a href="cursor(busy,'%Changing Language to% %Chinese%')>>CurrentLanguage(Chinese)>>panel>>cursor()">%Chinese%</a>
   </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='FADER';help_ext=Fader;1 -->
   <td width='23%'>
    <b>%Use Fader%:</b>
   </td>
@@ -194,11 +175,9 @@ Freeze(false)>>
       onuncheck="spy.SetParam(user.use_fader,0)"
     >
   </td>
-</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Start-Olex2-in;1; -->
-  </td>
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='START_OLEX2_IN';help_ext=Start-Olex2-In;1 -->
   <td width='23%'>
     <b>%Start Olex2 in%:</b>
   </td>
@@ -207,7 +186,6 @@ Freeze(false)>>
   </td>
   <td width='20%' align='right'>
      <input
-
        type="combo"
        height="$GetVar(HtmlInputHeight)"
        name="START_WHERE"
@@ -215,91 +193,12 @@ Freeze(false)>>
        width="100%"
        value="$spy.GetParam(user.start_where)"
        items="Home;Work;View;Tools;Info"
-       onchange="spy.SetParam(user.start_where,GetValue(~name~))"
+       onchange="spy.SetParam(user.start_where,html.GetValue(~name~))"
        valign='center'
        align='right'
        readonly
      >
   </td>
-</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-
-</table>
-
-<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=6;1; -->
-
-
-
-
-
-<!--
-
-
-<tr>
-  <td width='2%' bgcolor="$GetVar(HtmlTableFirstcolColour)">
-  </td>
-  <td width='23%'>
-    <b>Perspective:</b>
-  </td>
-  <td width='70%' colspan='2'>
-    <input 
-    type="slider" 
-      name = "SNUM_PERSPECTIVE_SLIDE" 
-      width="100%" 
-      height="18" 
-      value="0" 
-      bgcolor="$GetVar(HtmlTableBgColour)"  
-      fgcolor="$GetVar(HtmlFontColour)" 
-      min="0" 
-      max="10" 
-      onchange = "gl.Perspective>>
-      gl.Perspective GetValue(SNUM_PERSPECTIVE_SLIDE)"
-    >
-  </td>
-</tr>
-
-
-
-<tr>
-<td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td></td>
-  </td>
-
-<td  valign='center' colspan = '3'>
-  <b>Perspective:</b>
-    <input 
-    type="slider" 
-      name = "SNUM_PERSPECTIVE_SLIDE" 
-      width="$eval(html.clientwidth(self)-80)" 
-      height="18" 
-      value="0" 
-      bgcolor="$GetVar(HtmlTableBgColour)"  
-      fgcolor="$GetVar(HtmlFontColour)" 
-      min="0" 
-      max="10" 
-      onchange = "gl.Perspective>>
-      gl.Perspective GetValue(SNUM_PERSPECTIVE_SLIDE)
-">
-</td>
-  </tr>
-
-
-
-<tr>
-<td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td></td>
-  </td>
-
-<td  valign='center' >
-  <a href="setvar(col_r,100)>>setvar(col_g,100)>>setvar(col_b,160)>>panel">Blue</a>
-    <a href="setvar(col_r,50)>>setvar(col_g,100)>>setvar(col_b,10)>>panel">Green</a>
-    <a href="setvar(col_r,150)>>setvar(col_g,50)>>setvar(col_b,10)>>panel">Red</a>
-    </td>
-  <td  valign='center' colspan = '2'>
-  <font size='2' align='center'><input type="text" name="col_r"  width="30"  height="17" value = "100"></font>
-    <font size='2' align='center'><input type="text" name="col_g"  width="30"  height="17" value = "100"></font>
-    <font size='2' align='center'><input type="text" name="col_b"  width="30"  height="17" value = "160"></font>
-    <input type="button" name = "MakeMovie" width="20" height="17" value="Go"
-    onclick = "setvar(col_r, getvalue(col_r))>>setvar(col_g, getvalue(col_g))>>setvar(col_b, getvalue(col_b))>>panel"
-    </td>
-  </tr>
--->
-
+<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->

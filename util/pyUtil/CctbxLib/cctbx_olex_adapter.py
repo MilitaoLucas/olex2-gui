@@ -1059,6 +1059,7 @@ def calcsolv(solvent_radius=None, grid_step=None):
     restraints_iter,
     constraints_iter
   )
+
   # This needs to be done I don't know why but otherwise smtbx farts
   # I tried using the xray_structure inside this file (see line 105 but appears to need hkl file?
   xray_structure = create_cctbx_xray_structure.structure()
@@ -1069,6 +1070,7 @@ def calcsolv(solvent_radius=None, grid_step=None):
     solvent_radius,
     shrink_truncation_radius,
     grid_step=grid_step,
+    atom_radii_table=olex_core.GetVdWRadii(),
     use_space_group_symmetry=True) # faster for high symmetry)
   result.show_summary()
 

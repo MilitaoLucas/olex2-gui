@@ -59,7 +59,7 @@ def diffractionMetadataHtmlMaker():
      'readonly':'',
      'itemName':'%Diffractometer%',
      'items':userDictionaries.localList.getListDiffractometers(),
-     'onchange':"spy.addToLocalList(GetValue(~name~),diffractometers)>>html.update",
+     'onchange':"spy.addToLocalList(html.GetValue(~name~),diffractometers)>>html.update",
      },
   )
 
@@ -88,7 +88,7 @@ def diffractionMetadataHtmlMaker():
      'itemName':'%Special Details%',
      'multiline':'multiline'
      },
-    {'varName':'_refinement_special_details',
+    {'varName':'_refine_special_details',
      'itemName':'%Refine Special Details%',
      'multiline':'multiline'
      }
@@ -153,13 +153,13 @@ def collectionMetadataHtmlMaker():
      'itemName':'%Submitter%',
      'items':userDictionaries.people.getListPeople(),
      'readonly':'',
-     'onchange':"spy.SetParam(snum.report.submitter,GetValue(~name~))>>spy.addNewPerson(GetValue(~name~))>>html.update",
+     'onchange':"spy.SetParam(snum.report.submitter,html.GetValue(~name~))>>spy.addNewPerson(html.GetValue(~name~))>>html.update",
      },
     {'varName':'snum.report.operator',
      'itemName':'%Operator%',
      'items':userDictionaries.people.getListPeople(),
      'readonly':'',
-     'onchange':"spy.SetParam(snum.report.operator,GetValue(~name~))>>spy.addNewPerson(GetValue(~name~))>>html.update",
+     'onchange':"spy.SetParam(snum.report.operator,html.GetValue(~name~))>>spy.addNewPerson(html.GetValue(~name~))>>html.update",
      },
     {'varName':'snum.report.date_submitted',
      'itemName':'%Date Submitted%',
@@ -229,17 +229,17 @@ def publicationMetadataHtmlMaker():
     {'varName':'_publ_contact_author_address',
      'itemName':'%Contact% %Author% %Address%',
      'multiline':'multiline',
-     'value':'spy.getPersonInfo(GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),address)',
+     'value':'spy.getPersonInfo(html.GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),address)',
      'onchange':'spy.gui.report.publication.OnPersonInfoChange(SET__PUBL_CONTACT_AUTHOR_NAME,address,~name~)'
      },
     {'varName':'_publ_contact_author_email',
      'itemName':'%Contact% %Author% %Email%',
-     'value':'spy.getPersonInfo(GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),email)',
+     'value':'spy.getPersonInfo(html.GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),email)',
      'onchange':'spy.gui.report.publication.OnPersonInfoChange(SET__PUBL_CONTACT_AUTHOR_NAME,email,~name~)'
      },
     {'varName':'_publ_contact_author_phone',
      'itemName':'%Contact% %Author% %Phone%',
-     'value':'spy.getPersonInfo(GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),phone)',
+     'value':'spy.getPersonInfo(html.GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),phone)',
      'onchange':'spy.gui.report.publication.OnPersonInfoChange(SET__PUBL_CONTACT_AUTHOR_NAME,phone,~name~)'
      },
 #    {'varName':'InfoLine',
@@ -287,15 +287,15 @@ def publicationMetadataHtmlMaker():
       {'varName':'publ_author_address',
        'itemName':'%Author% %Address%',
        'multiline':'multiline',
-       'value':'spy.getPersonInfo(GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),address)' %s,
-       'onchange':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),address,GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)' %s
+       'value':'spy.getPersonInfo(html.GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),address)' %s,
+       'onchange':'spy.changePersonInfo(html.GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),address,html.GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)' %s
        }
     )
     list.append(
       {'varName':'publ_author_email',
        'itemName':'%Author% %Email%',
-       'value':'spy.getPersonInfo(GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),email)' %s,
-       'onchange':'spy.changePersonInfo(GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),email,GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)' %s
+       'value':'spy.getPersonInfo(html.GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),email)' %s,
+       'onchange':'spy.changePersonInfo(html.GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),email,html.GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)' %s
        }
     )
   list.append(
@@ -312,7 +312,7 @@ def publicationMetadataHtmlMaker():
   for d in list:
     d.setdefault('ctrl_name','SET_%s' %str.upper(d['varName']).replace('.','_'))
     if 'ctrl_name' in d['varName']:
-      d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)>>html.Update" %d)
+      d.setdefault('onchange',"spy.SetParam(%(varName)s,html.GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)>>html.Update" %d)
     elif 'author_name' in d['varName']:
       d.setdefault('onchange','')
   retstr = htmlTools.makeHtmlTable(list)
@@ -323,7 +323,7 @@ def publicationMetadataHtmlMaker():
      'items':userDictionaries.localList.getListJournals(),
      'readonly':'',
      'value':'spy.get_cif_item(_publ_requested_journal)',
-     'onchange':'spy.addToLocalList(GetValue(~name~),requested_journal)>>spy.changeBoxColour(~name~,#FFDCDC)',
+     'onchange':'spy.addToLocalList(html.GetValue(~name~),requested_journal)>>spy.changeBoxColour(~name~,#FFDCDC)',
      }
   ]
 
@@ -403,7 +403,7 @@ OV.registerFunction(contactLetter)
 
 def move(arg,name):
   listNames = OV.GetParam('snum.metacif.publ_author_names').split(';')
-  name_i = olx.GetValue(name)
+  name_i = olx.html.GetValue(name)
   i = listNames.index(name_i)
 
   if arg.lower() == 'up':
@@ -434,6 +434,10 @@ OV.registerFunction(move)
 def restraint_builder(cmd):
   height = OV.GetParam('gui.html.combo_height')
   colspan = 3
+  
+  first_col_bg = OV.GetParam('gui.html.table_firstcol_colour')
+  table_row_bg = OV.GetParam('gui.html.table_firstcol_colour')
+  
 
   constraints = ["EXYZ", "EADP", "AFIX"]
   olex_conres = ["RRINGS", "TRIA", "ADPUEQ", "ADPVOL", "ANGLE", "DIANG"]
@@ -507,8 +511,8 @@ def restraint_builder(cmd):
       cmd = val
     elif id == "var":
       ctrl_name = "%s_%s_TEXT_BOX" %(name, var)
-      pre_onclick += "SetVar\(%s_value,GetValue\(%s))>>" %(ctrl_name,ctrl_name)
-      onclick += "GetValue\(%s) " %ctrl_name
+      pre_onclick += "SetVar\(%s_value,html.GetValue\(%s))>>" %(ctrl_name,ctrl_name)
+      onclick += "html.GetValue\(%s) " %ctrl_name
       if val == " ":
         val = "$GetVar(%s_value,'')" %ctrl_name
       elif ';' in val:
@@ -539,18 +543,18 @@ def restraint_builder(cmd):
       if items:
         d.setdefault("items",items)
       if var:
-        ib += "<td align='left' width='%s'>%s</td>" %(width, htmlTools.makeHtmlInputBox(d))
+        ib += "<td align='left' width='%s' bgcolor='%s'>%s</td>" %(width, table_row_bg, htmlTools.makeHtmlInputBox(d))
        
   if ib:
     if name == "AFIX":
       var_max = 2
-      td_width = '40%'
+      td_width = '35%'
     else:
       var_max = 3
       td_width = '80%'
     
     while varcount < var_max:
-      ib += "<td align='center' width='33%'></td>"
+      ib += "<td align='center' width='33%%' bgcolor='%s'></td>" %table_row_bg
       varcount += 1
     
     html.append("<td width='%s'><table border='0' style='border-collapse: collapse' width='100%%' cellpadding='1' cellspacing='0'><tr>%s</tr></table></td>" %(td_width, ib))
@@ -606,7 +610,10 @@ def restraint_builder(cmd):
     "hint":"The %s command will be applied to all currently selected atoms" %name
   }
   if varcount == 0:
-    html.append("<td></td>"*(colspan-itemcount)) # Space-filler
+    fill = colspan-itemcount
+    if not fill:
+      fill = 1
+    html.append("<td bgcolor='%s' width=100%%></td>"*(fill) %table_row_bg) # Space-filler
   btns = ""
   width='20%'
   if name == 'AFIX':
@@ -615,12 +622,12 @@ def restraint_builder(cmd):
     width='60%'
   btns += '$spy.MakeHoverButton(button_small-go@%s,%s)' %(name, onclick)
 
-  html.append("<td width='%s' align='right'>%s</td>" %(width,btns))
+  html.append("<td width='%s' align='right' bgcolor='%s'>%s</td>" %(width,table_row_bg,btns))
 
   #Add the help info as the last row in the table
-  html.append("</td></tr><tr>")
+  html.append("</td></tr><tr bgcolor='%s'>" %table_row_bg,)
   html.append(htmlTools.make_table_first_col(help_name=name, popout=True, help_image='normal'))
-  html.append("<td colspan=%s bgcolor='%s'>%s</td></tr>" %(colspan, OV.GetParam('gui.html.table_firstcol_colour'), html_help, ))
+  html.append("<td colspan=%s bgcolor='%s'>%s</td></tr>" %(colspan, first_col_bg, html_help, ))
   if name in constraints:
     wFilePath = r"constraint-vars.htm"
   elif name in olex_conres:

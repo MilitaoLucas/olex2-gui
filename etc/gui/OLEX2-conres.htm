@@ -2,9 +2,9 @@
 
 <!--$spy.make_warning_html(6)-->
 
-<tr>
+<tr bgcolor="$GetVar(HtmlTableBgColour)">
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Olex2-Restraints-and-Constraints;1; -->
-  <td width='25%'>
+  <td width='18%' bgcolor="$GetVar(HtmlTableBgColour)">
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="combo"
@@ -14,7 +14,7 @@
       items='RRINGS;TRIA;ADPUEQ;ADPVOL;ANGLE;DIANG'
       value="GetVar(gui_olex2_conres)" 
       width="100%"
-      onchange="SetVar(gui_olex2_conres,GetValue(SET_OLEX2_CONRES))>>spy.restraint_builder(GetValue(SET_OLEX2_CONRES))"
+      onchange="SetVar(gui_olex2_conres,html.GetValue(~name~))>>spy.restraint_builder(html.GetValue(~name~))"
       readonly
       manage
     >
@@ -24,6 +24,6 @@
 
 <!-- #includeif fs.Exists(olex-conres-vars.htm) olex-conres-vars olex-conres-vars.htm;1; -->
 </tr>
-<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=7;1; -->
+<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=4;1; -->
 
 <!-- %adpvol-htmhelp% %adpueq-htmhelp% %angle-htmhelp% %diang-htmhelp% -->

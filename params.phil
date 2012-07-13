@@ -13,11 +13,12 @@ snum
     .type = str
   current_process_status = ""
     .type = str
-  current_process_diagnostics = ""
+  current_process_diagnostics = "hkl"
     .type = str
   current_r1 = 0
     .type = float
   
+
     
   init
     .short_caption = Other Things
@@ -81,7 +82,7 @@ snum
      }
   }
 
-  data{
+  hkl{
     hkl_stat_file = None
       .type = path
     completeness_full = 0
@@ -147,6 +148,10 @@ snum
       .type = str
     max_peak = None      
       .type = float
+    max_hole = None      
+      .type = float
+    expected_peaks = None      
+      .type = int
     has_h = False
       .type = bool
     is_anis = False
@@ -156,7 +161,7 @@ snum
       .expert_level = 2
     graphical_output = False
       .type = bool
-    program = ShelXL_ifc XL XH ShelXH XLMP ShelXL '*olex2.refine' Unknown
+    program = ShelXL_ifc XL XH ShelXH XLMP ShelXL ShelXL-2012 ShelXLMP-2012 '*olex2.refine' Unknown
       .type = choice
     method = 'Least Squares' CGLS '*Gauss-Newton' 'Levenberg-Marquardt' \
       'Full Matrix' Unknown
@@ -646,10 +651,6 @@ olex2
     .type = bool
   hover_buttons = True
     .type = bool
-  portal_url = http://www.olex2.org
-    .type = str
-  portal_db_url = http://www.dimas.dur.ac.uk:8080/olex/content/DB
-    .type = str
 
   pdfplugin{
     path = 'BaseDir()/pdf-plugin/qt4-pdf.exe'

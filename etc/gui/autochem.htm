@@ -9,7 +9,7 @@
     </a>	
   </td>
   <td colspan='2' align='left'>
-    <a href="spy.ac_run solveit -files=GetValue(SET_AUTOCHEM_BATCH_DIR)"><zimg border="0" src="note-autochem.png"></a>
+    <a href="spy.ac_run solveit -files=html.GetValue(SET_AUTOCHEM_BATCH_DIR)"><zimg border="0" src="note-autochem.png"></a>
   </td>
 </tr>
 
@@ -48,7 +48,7 @@
       width='$eval(html.clientwidth(self)-140)' 
       value="GetVar(autochem_batch_dir)"
       items="ALL;REFCODES;DEMO 1;DEMO 2;BINGO;\DS\Data;\DS\Data\2008;\DS\Data\2007;\DS\Data\2006;\DS\Data\2005;\DS\Data\2004;\DS\Data\2003;\DS\Data\2002;\DS\Data\2001;\DS\Data\2000;\DS\Data\1999;\DS\Data\1998;\DS\Data\1997;\DS\Data\1996"
-      onchange="spy.SetParam(autochem.batch_dir,strcat(GetValue(SET_AUTOCHEM_DRIVE),GetValue(SET_AUTOCHEM_BATCH_DIR)))"
+      onchange="spy.SetParam(autochem.batch_dir,strcat(html.GetValue(SET_AUTOCHEM_DRIVE),html.GetValue(SET_AUTOCHEM_BATCH_DIR)))"
     >
     &nbsp;
       <a href="spy.SetParam(autochem.batch_dir,'ChooseDir()')>>html.Update">
@@ -67,7 +67,7 @@
 			height="18" 
 			manage
 			value="$spy.GetParam(autochem.solution_program)"
-			onchange="spy.SetParam(autochem.solution_program,GetValue(SET_AUTOCHEM_SOLUTION_PROGRAM))"
+			onchange="spy.SetParam(autochem.solution_program,html.GetValue(SET_AUTOCHEM_SOLUTION_PROGRAM))"
 			label='%Solution Program%'
 		>
 	</td>
@@ -80,7 +80,7 @@
 			width='$eval(html.clientwidth(self)-eval(html.clientwidth(self)/2)-30)' 
 			manage
 			value="$spy.GetParam(autochem.solution_method)"
-			onchange="spy.SetParam(autochem.solution_method,GetValue(SET_AUTOCHEM_SOLUTION_METHOD))"
+			onchange="spy.SetParam(autochem.solution_method,html.GetValue(SET_AUTOCHEM_SOLUTION_METHOD))"
 			label='%Solution Method%'
 		>
 	</td>
@@ -98,7 +98,7 @@
 			width='$eval(html.clientwidth(self)-eval(html.clientwidth(self)/2)-35)' 
 			manage
 			value="$spy.GetParam(autochem.refinement_program)"
-			onchange="spy.SetParam(autochem.refinement_program,GetValue(SET_AUTOCHEM_REFINEMENT_PROGRAM))"
+			onchange="spy.SetParam(autochem.refinement_program,html.GetValue(SET_AUTOCHEM_REFINEMENT_PROGRAM))"
 			label='%Refinement Program%'
 		>
 	</td>
@@ -111,7 +111,7 @@
 			width='$eval(html.clientwidth(self)-eval(html.clientwidth(self)/2)-30)' 
 			manage
 			value="$spy.GetParam(autochem.refinement_method)"
-			onchange="spy.SetParam(autochem.refinement_method,GetValue(SET_AUTOCHEM_REFINEMENT_METHOD))"
+			onchange="spy.SetParam(autochem.refinement_method,html.GetValue(SET_AUTOCHEM_REFINEMENT_METHOD))"
 			label='%Refinement Method%'
 		>
 	</td>
@@ -131,7 +131,7 @@
       height="18" 
       value="$spy.GetParam(autochem.cutoff1_type)"
       items="--;solveit_R1;CFOM;Nqual;Ralpa;t;solveit_t;original_R1;volume;VSS;ATA;comment;Max Z;Space Group;Non H Atoms"	
-      onchange="SetParam(autochem.cutoff1_type,GetValue(SET_AUTOCHEM_CUTOFF1_TYPE))"
+      onchange="SetParam(autochem.cutoff1_type,html.GetValue(SET_AUTOCHEM_CUTOFF1_TYPE))"
       >
       </td>
       <td>
@@ -143,7 +143,7 @@
       width="50" 
       items="<;=;>;<>;!=;cont"	
       value="$spy.GetParam(autochem.cutoff1_operator)"
-      onchange="spy.SetParam(autochem.cutoff1_operator,GetValue(SET_AUTOCHEM_CUTOFF1_OPERATOR))"
+      onchange="spy.SetParam(autochem.cutoff1_operator,html.GetValue(SET_AUTOCHEM_CUTOFF1_OPERATOR))"
       >
       &nbsp;
       <input 
@@ -154,7 +154,7 @@
       height="18" 
       items="0.05;0.10;0.20;0.5;1.0;5.0;n/a"	
       value="$spy.GetParam(autochem.cutoff1_value)"
-      onchange="SetParam(autochem.cutoff1_value,GetValue(SET_AUTOCHEM_CUTOFF1_VALUE))"
+      onchange="SetParam(autochem.cutoff1_value,html.GetValue(SET_AUTOCHEM_CUTOFF1_VALUE))"
       >
       </td>
       </tr>
@@ -170,7 +170,7 @@
 		width='$eval(html.clientwidth(self)-eval(html.clientwidth(self)/2)-35)' 
 		value="$spy.GetParam(autochem.cutoff2_type)"
 		items="--;solveit_R1;CFOM;Nqual;Ralpa;t;solveit_t;original_R1;volume;VSS;ATA;comment;Max Z;Space Group;Non H Atoms"	
-		onchange="spy.SetParam(autochem.cutoff2_type,GetValue(SET_AUTOCHEM_CUTOFF2_TYPE))"
+		onchange="spy.SetParam(autochem.cutoff2_type,html.GetValue(SET_AUTOCHEM_CUTOFF2_TYPE))"
 	>
 </td>
 <td>
@@ -182,7 +182,7 @@
 	width="50" 
 	items="--;<;=;>;<>;!=;cont"	
 	value="$spy.GetParam(autochem.cutoff2_operator)"
-	onchange="spy.SetParam(autochem.cutoff2_operator,GetValue(SET_AUTOCHEM_CUTOFF2_OPERATOR))"
+	onchange="spy.SetParam(autochem.cutoff2_operator,html.GetValue(SET_AUTOCHEM_CUTOFF2_OPERATOR))"
 >
 &nbsp;
 <input
@@ -194,7 +194,7 @@
 	height="18" 
 	items="--;0.05;0.10;0.20;0.5;1.0;5.0;n/a"	
 	value="$spy.GetParam(autochem.cutoff2_value)"
-	onchange="spy.SetParam(autochem.cutoff2_value,GetValue(SET_AUTOCHEM_CUTOFF2_VALUE))"
+	onchange="spy.SetParam(autochem.cutoff2_value,html.GetValue(SET_AUTOCHEM_CUTOFF2_VALUE))"
 >
 </td>
 </tr>  
@@ -210,7 +210,7 @@
 	width='$eval(html.clientwidth(self)-eval(html.clientwidth(self)/2)-35)' 
 	value="GetVar(plot_series_x)"
 	items="--;solveit_R1;CFOM;Nqual;Ralpa;t;solveit_t;original_R1;volume;VSS;ATA;comment;Max Z;Space Group;Non H Atoms"	
-	onchange="SetVar(plot_series_x,GetValue(SET_PLOT_SERIES_X))"
+	onchange="SetVar(plot_series_x,html.GetValue(SET_PLOT_SERIES_X))"
 >
 </td>
 <td colspan='1'>
@@ -222,7 +222,7 @@
 		width='$eval(html.clientwidth(self)-eval(html.clientwidth(self)/2)-50)' 
 		value="GetVar(plot_series_y)"
 		items="--;solveit_R1;CFOM;Nqual;Ralpa;t;solveit_t;original_R1;volume;VSS;ATA;comment;Max Z;Space Group;Non H Atoms"	
-		onchange="SetVar(plot_series_y,GetValue(SET_PLOT_SERIES_Y))"
+		onchange="SetVar(plot_series_y,html.GetValue(SET_PLOT_SERIES_Y))"
 	>
 	<input 
     type="button" 
