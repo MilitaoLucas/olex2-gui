@@ -2806,7 +2806,7 @@ class HealthOfStructure():
         _ = 1
       if _ != 0:
         x = boxWidth - _
-        box = (x,boxHalf,boxWidth,boxHeight)
+        box = (x,0,boxWidth,boxHeight)
         fill = OV.GetParam('gui.red').hexadecimal
         draw.rectangle(box, fill=fill)
 
