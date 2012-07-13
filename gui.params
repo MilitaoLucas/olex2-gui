@@ -616,12 +616,12 @@ gui
     width = 450
       .type = int
       .help = Width of the help popup boxes
-    height_factor = 120
+    height_factor = 60
       .type = int
       .help = A factor that helps estimating the height of the help box by the total number of characters in the help text
-    height_constant = 100
+    height_constant = 40
       .type = int
-      .help = Number of pixels to add to the height of a help box
+      .help = Number of pixels to add per row to the height of a help box
     height_max = 500
       .type = int
       .help = Maximum height of the help popup boxes
