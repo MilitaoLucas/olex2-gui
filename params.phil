@@ -651,10 +651,6 @@ olex2
     .type = bool
   hover_buttons = True
     .type = bool
-  portal_url = http://www.olex2.org
-    .type = str
-  portal_db_url = http://www.dimas.dur.ac.uk:8080/olex/content/DB
-    .type = str
 
   pdfplugin{
     path = 'BaseDir()/pdf-plugin/qt4-pdf.exe'
