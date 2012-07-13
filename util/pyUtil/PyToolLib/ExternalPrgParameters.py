@@ -426,7 +426,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       OV.SetParam('snum.refinement.suggested_weight', suggested_weight)
     self.gather_refinement_information()
     writeRefinementInfoIntoRes(self.cif)
-    
+
     OV.SetParam('snum.refinement.max_peak', olx.Lst('peak'))
     OV.SetParam('snum.refinement.max_hole', olx.Lst('hole'))
     OV.SetParam('snum.refinement.max_shift_site', olx.Lst('max_shift'))
@@ -896,6 +896,18 @@ def defineExternalPrograms():
     author="G.M.Sheldrick",
     reference="SHELXL, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
     execs=["shelxl.exe", "shelxl"])
+  ShelXL12 = Program(
+    name='ShelXL-2012',
+    program_type='refinement',
+    author="G.M.Sheldrick",
+    reference="SHELXL, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    execs=["shelxl12.exe", "shelxl12"])
+  ShelXLMP12 = Program(
+    name='ShelXLMP-2012',
+    program_type='refinement',
+    author="G.M.Sheldrick",
+    reference="SHELXL, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    execs=["shelxl_mp12.exe", "shelxl_mp12"])
   XL = Program(
     name='XL',
     program_type='refinement',
@@ -932,7 +944,7 @@ def defineExternalPrograms():
     author="L.J. Bourhis, O.V. Dolomanov, R.J. Gildea",
     reference="olex2.refine (L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, J.A.K. Howard,\nH. Puschmann, in preparation, 2011)")
 
-  for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc):
+  for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc, ShelXL12, ShelXLMP12):
     for method in (least_squares, cgls):
       prg.addMethod(method)
   smtbx_refine.addMethod(gauss_newton)
@@ -943,7 +955,7 @@ def defineExternalPrograms():
     SPD.addProgram(prg)
 
   RPD = ExternalProgramDictionary()
-  for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc, smtbx_refine):
+  for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc, ShelXL12, ShelXLMP12, smtbx_refine):
     RPD.addProgram(prg)
 
   return SPD, RPD
