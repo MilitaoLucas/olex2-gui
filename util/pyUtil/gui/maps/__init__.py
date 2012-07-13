@@ -52,8 +52,8 @@ class MapUtil:
       return
     if OV.IsControl('SNUM_MAP_BUTTON'):
       # set electron density map button to 'up' state
-      olx.SetState('SNUM_MAP_BUTTON','up')
-      olx.SetLabel('SNUM_MAP_BUTTON',OV.Translate('Calculate'))
+      olx.html.SetState('SNUM_MAP_BUTTON','up')
+      olx.html.SetLabel('SNUM_MAP_BUTTON',OV.Translate('Calculate'))
 
     resolution = OV.GetParam("snum.calcvoid.resolution")
     distance = OV.GetParam("snum.calcvoid.distance")
@@ -82,8 +82,8 @@ class MapUtil:
 
     if OV.IsControl('SNUM_CALCVOID_BUTTON'):
       # set calcvoid button to 'up' state
-      olx.SetState('SNUM_CALCVOID_BUTTON','up')
-      olx.SetLabel('SNUM_CALCVOID_BUTTON',OV.Translate('Calculate Voids'))
+      olx.html.SetState('SNUM_CALCVOID_BUTTON','up')
+      olx.html.SetLabel('SNUM_CALCVOID_BUTTON',OV.Translate('Calculate Voids'))
 
     map_type =  OV.GetParam("snum.map.type")
     map_source =  OV.GetParam("snum.map.source")

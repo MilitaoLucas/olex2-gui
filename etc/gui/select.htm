@@ -1,9 +1,7 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
 <!-- FIRST ROW -->
-<tr name=SELECT_EXCLUSIVE_INCLUSIVE>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Select;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SELECT_ATOMS';help_ext=Select-Atoms;1 -->
 
   <td width = "50%">
     %Exclusive%:
@@ -22,13 +20,9 @@
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-</tr>
-
 
 <!-- SECOND ROW -->
-<tr name=SELECT_OTHERS>
-<!-- #include tool-first-column gui\blocks\tool-first-column.htm;help_ext=;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SELECTIONS';help_ext=Selections;1 -->
 
   <td width='100%'>
     <b>%Selection%:</b>
@@ -38,12 +32,9 @@
     <a href="selback">%Previous%</a>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</tr>
 
 <!-- THIRD ROW -->
-<tr name=SELECT_WHERE>
-<!-- #include tool-first-column gui\blocks\tool-first-column.htm;help_ext=;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SELECT_CRITERIA';help_ext=Select-Criteria;1 -->
   <td width='45%' VALIGN='center' >
     %Select atoms where% <b>U<sub>iso</sub></b>
   </td>
@@ -73,18 +64,15 @@
       value = "0.06"
     >
   </font>
-</td>
+  </td>
 
-<td width='20%' align='right'>
-$spy.MakeHoverButton(button_small-select@uiso,sel atoms where xatom.uiso getvalue\(compare) getvalue\(uiso)&&xatom.type!='Q')
-</td>
+  <td width='20%' align='right'>
+  $spy.MakeHoverButton(button_small-select@uiso,sel atoms where xatom.uiso html.getvalue\(compare) html.getvalue\(uiso)&&xatom.type!='Q')
+  </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</tr>
 
 <!-- FOURTH ROW -->
-<tr name=SELECT_RINGS>
-<!-- #include tool-first-column gui\blocks\tool-first-column.htm;help_ext=;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SELECT_RINGS';help_ext=Select-Rings;1 -->
   <td width='25%' VALIGN='center' >
     %Select Rings%
   </td>
@@ -98,7 +86,7 @@ $spy.MakeHoverButton(button_small-select@uiso,sel atoms where xatom.uiso getvalu
       name="RINGSELECT"
       items="--;C6;C5N;C5;C5O;"
       width="100%"
-      onchange="if strcmp(GetValue(RINGSELECT),--) then html.SetFocus(RINGSELECT) else 'sel -u'>>sel rings GetValue(RINGSELECT)"
+      onchange="if strcmp(html.GetValue(~name~),--) then html.SetFocus(~name~) else 'sel -u'>>sel rings html.GetValue(~name~)"
       value=""
     >
     </font>
@@ -108,6 +96,5 @@ $spy.MakeHoverButton(button_small-select@uiso,sel atoms where xatom.uiso getvalu
     <a href="sel rings C5N"><b>%Pyridine%</b></a>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</tr>
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->

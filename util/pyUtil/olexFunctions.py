@@ -36,7 +36,7 @@ class OlexFunctions(inheritFunctions):
       self.olex_gui = olex_gui
 
   def GetValue(self, control_name):
-    retVal = olx.GetValue(control_name)
+    retVal = olx.html.GetValue(control_name)
     return retVal
 
   def SetVar(self,variable,value):

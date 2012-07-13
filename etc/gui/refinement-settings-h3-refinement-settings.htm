@@ -22,7 +22,7 @@
 				value='$spy.GetParam(snum.refinement.program)'
 				items='$spy.getRefinementPrgs()'
 				label='', 
-				onchange="spy.SetRefinementProgram(GetValue(SET_SNUM_REFINEMENT_PROGRAM))>>html.Update"
+				onchange="spy.SetRefinementProgram(html.GetValue(~name~))>>html.Update"
 				readonly='readonly'
 			>
 		</font>
@@ -47,7 +47,7 @@
 				value='$spy.GetParam(snum.refinement.method)', 
 				items='$spy.getRefinementMethods($spy.GetParam(snum.refinement.program))'
 				label='', 
-				onchange="spy.SetParam(snum.refinement.method,'GetValue(SET_SNUM_REFINEMENT_METHOD)')>>html.Update" 
+				onchange="spy.SetParam(snum.refinement.method,'GetValue(~name~)')>>html.Update" 
 				readonly='readonly'
 			>
 		</font>
@@ -68,7 +68,7 @@
 				bgcolor="spy.GetParam(gui.html.input_bg_colour)"
 				name='SNUM_SET_REFLECTIONS', 
 				items='$spy.GetHklFileList()', 
-				onchange='HKLSrc(GetValue(SNUM_SET_REFLECTIONS))', 
+				onchange='HKLSrc(html.GetValue(~name~))', 
 				value='FileName(HKLSrc())', 
 				readonly='readonly'
 			> 
@@ -90,7 +90,7 @@
 				bgcolor="spy.GetParam(gui.html.input_bg_colour)"
 				name='SET_SNUM_REFINEMENT_MAX_CYCLES',
 				value='$spy.GetParam(snum.refinement.max_cycles)', 
-				onchange="spy.SetParam(snum.refinement.max_cycles,'GetValue(SET_SNUM_REFINEMENT_MAX_CYCLES)')"
+				onchange="spy.SetParam(snum.refinement.max_cycles,'html.GetValue(~name~)')"
 			> 
 		</font>
 	</td>
@@ -110,7 +110,7 @@
 						max='1000'
 						bgcolor="spy.GetParam(gui.html.input_bg_colour)"
 						value='$spy.GetParam(snum.refinement.max_peaks)'
-						onchange='spy.SetParam(snum.refinement.max_peaks,GetValue(SET_SNUM_REFINEMENT_MAX_PEAKS))'
+						onchange='spy.SetParam(snum.refinement.max_peaks,html.GetValue(~name~))'
 					>
 				</font>
 		</td>

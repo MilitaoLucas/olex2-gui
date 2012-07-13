@@ -16,8 +16,8 @@
       height="200"
       selected="$spy.GetParam(snum.history.current_node)"
       onselect=""
-      onitem="spy.revert_history(html.getvalue(HISTORY_TREE))>>html.Update"
-      onedit="spy.rename_history(html.getvalue(HISTORY_TREE),~label~)>>html.Update"
+      onitem="spy.revert_history(html.GetValue(~name~))>>html.Update"
+      onedit="spy.rename_history(html.GetValue(~name~),~label~)>>html.Update"
     >
     </font>
 </td>

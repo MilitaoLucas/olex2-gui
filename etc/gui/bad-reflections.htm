@@ -1,11 +1,7 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=bad-reflections;1; -->
-
-</tr>
-
-<td colspan=6>
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='BAD_REFLECTIONS';help_ext=Bad-Reflections;1 -->
+<td>
   <table align='center' border="0" style="border-collapse: collapse" width="100%" cellpadding="0" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
     <tr>
       <td  width='15%'></td>
@@ -17,12 +13,12 @@
 <!-- #include bad-reflections badrefs.htm;1; -->
   </table>
 </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<tr align='left'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=exclude-hkl;1; -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='EXCLUDE_HKL';help_ext=Exclude-hkl;1 -->
 
   <td>
-    <a href="HklExclude -c=GetVar(exclude_hkl_and) -h=GetValue(exclude_h) -k=GetValue(exclude_k) -l=GetValue(exclude_l)" >%Exclude%:</a> 
+    <a href="HklExclude -c=GetVar(exclude_hkl_and) -h=html.GetValue(exclude_h) -k=html.GetValue(exclude_k) -l=html.GetValue(exclude_l)" >%Exclude%:</a> 
   </td>
 
 
@@ -80,19 +76,17 @@
   </td>
 
   <td>
-    <a href='SetValue(exclude_h,"")>>SetValue(exclude_k,"")>>SetValue(exclude_l,"")>>HklAppend'>%Reset%</a> 
+    <a href='html.SetValue(exclude_h,"")>>html.SetValue(exclude_k,"")>>html.SetValue(exclude_l,"")>>HklAppend'>%Reset%</a> 
   </td>
-</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
-<tr>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=edit-reflections;1; -->
-  <td colspan='5' align='left'>	
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='EDIT_REFLECTIONS;help_ext=edit-reflections;1 -->
+  <td align='left'>
     <a href="HklEdit">%Edit Reflections%</a>
   </td>
-</tr>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-
-<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
+<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
 
 <!-- %Bad Reflections% -->

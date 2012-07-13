@@ -2,9 +2,7 @@
 
 
 <!-- FIRST ROW -->
-<tr name=MODE_NAME ALIGN='left'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Naming;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='NAMING';help_ext=Naming;1 -->
   <td>%Start%</td>
   <td name=MODE_NAME_NUMBER>
     <font size=$GetVar(HtmlFontSizeControls)>
@@ -52,12 +50,9 @@
 $spy.MakeHoverButton(button_small-name,if strcmp(spy.GetParam(olex2.short_mode),'name') then 'mode off'  else 'guinames_m')
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</tr>
 
 <!-- SECCOND ROW -->
-<tr name=AUTO_HYDROGEN_NAMING>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Automatic-Hydrogen-Naming;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='AUTOMATIC_HYDROGEN_NAMING';help_ext=Automatic-Hydrogen-Naming;1 -->
   <td name=TICK_AUTO_HYDROGEN_NAMING_LABEL colspan=3>
     %Automatic Hydrogen Naming%
   </td>
@@ -75,14 +70,11 @@ $spy.MakeHoverButton(button_small-name,if strcmp(spy.GetParam(olex2.short_mode),
     </font>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</tr>
 
 <!-- THIRD ROW -->
-<tr name=EQUIVALENT_FRAGMENT_NAMING>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Match-Naming;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MATCH_NAMING';help_ext=Match-Naming;1 -->
   <td name=HREF_EQUIVIVALENT_FRAGMENTS>
-    <a href='match sel -n=getvalue(MATCH_NAME_SUFFIX)'>
+    <a href='match sel -n=html.GetValue(MATCH_NAME_SUFFIX)'>
     %Equivalent Fragments% (Z' > 1)</a>
   </td>
   <td>%Suffix%</td>
@@ -100,7 +92,6 @@ $spy.MakeHoverButton(button_small-name,if strcmp(spy.GetParam(olex2.short_mode),
     </font>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</tr>
 
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->

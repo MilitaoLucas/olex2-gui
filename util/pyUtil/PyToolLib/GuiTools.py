@@ -643,7 +643,7 @@ image="%(image)s"
                                  'name':'cmd_refine',
                                  'image':'btn-refine-on.png',
                                  'value':'%Refine%', 
-                                 'onclick':'ls GetValue(set_method) GetValue(set_iterations)>>refine -1 GetValue(set_PLAN)', 
+                                 'onclick':'ls html.GetValue(set_method) html.GetValue(set_iterations)>>refine -1 html.GetValue(set_PLAN)', 
                                  }),
               },
              'set_method':
@@ -656,7 +656,7 @@ image="%(image)s"
                                  'value':'lsm()', 
                                  'items':lsm_items, 
                                  'label':'', 
-                                 'onchange':'ls GetValue(set_method) GetValue(set_iterations)', 
+                                 'onchange':'ls html.GetValue(set_method) html.GetValue(set_iterations)', 
                                  'readonly':'readonly'}),
               },
              'set_iterations':
@@ -687,7 +687,7 @@ image="%(image)s"
                                  'width':105, 
                                  'name':'Reflections', 
                                  'items':reflection_files, 
-                                 'onchange':'HKLSrc(GetValue(Reflections))', 
+                                 'onchange':'HKLSrc(html.GetValue(Reflections))', 
                                  'value':'FileName(HKLSrc())', 
                                  'label':'', 
                                  'readonly':'readonly'}),
@@ -722,7 +722,7 @@ image="%(image)s"
               'before':self.box({'type':'spin', 
                                  'width':40, 
                                  'name':'WGHT_Q_cutoff_box', 
-                                 'onchange':'SetVar(WGHT_Q_cutoff, GetValue(WGHT_Q_cutoff_box))', 
+                                 'onchange':'SetVar(WGHT_Q_cutoff, html.GetValue(WGHT_Q_cutoff_box))', 
                                  'value':'GetVar(WGHT_Q_cutoff)', 
                                  'label':'Q-cut'})
               },
@@ -837,7 +837,7 @@ image="%(image)s"
                                  'image':'btn-solve-on.png',
                                  'name':'cmd_solve',
                                  'value':'%Solve%', 
-                                 'onclick':'reset GetValue(set_solve_method) -c=\'GetValue(set_formula)\' -s=GetValue(set_space_group)>>solve', 
+                                 'onclick':'reset html.GetValue(set_solve_method) -c=\'html.GetValue(set_formula)\' -s=html.GetValue(set_space_group)>>solve', 
                                  }),
               },
 
@@ -874,7 +874,7 @@ image="%(image)s"
               'colspan':1, 
               'colwidth':'20%', 
               'align':'center', 
-              'href':'tref GetValue(more_solve_tref)', 
+              'href':'tref html.GetValue(more_solve_tref)', 
               'display':'Show'
               },
 
@@ -947,10 +947,10 @@ def make_program_choice_box(prg_type, prg_det, scope):
        }
   if prg_det == 'method':
     func_arg = 'spy.GetParam(%(scope)s.%(prg_type)s.program)' %d
-    func_arg2 = 'GetValue(SET_%(SCOPE)s_%(PRG_TYPE)s_PROGRAM),GetValue(SET_%(SCOPE)s_%(PRG_TYPE)s_METHOD)' %d
+    func_arg2 = 'html.GetValue(SET_%(SCOPE)s_%(PRG_TYPE)s_PROGRAM),html.GetValue(SET_%(SCOPE)s_%(PRG_TYPE)s_METHOD)' %d
   if prg_det == 'program':
-    func_arg = 'GetValue(SET_%(SCOPE)s_%(PRG_TYPE)s_PROGRAM)'
-    func_arg2 = 'GetValue(SET_%(SCOPE)s_%(PRG_TYPE)s_PROGRAM),GetValue(SET_%(SCOPE)s_%(PRG_TYPE)s_METHOD)' %d
+    func_arg = 'html.GetValue(SET_%(SCOPE)s_%(PRG_TYPE)s_PROGRAM)'
+    func_arg2 = 'html.GetValue(SET_%(SCOPE)s_%(PRG_TYPE)s_PROGRAM),html.GetValue(SET_%(SCOPE)s_%(PRG_TYPE)s_METHOD)' %d
   d['func_arg'] = func_arg
   d['func_arg2'] = func_arg2
 
@@ -965,7 +965,7 @@ def make_program_choice_box(prg_type, prg_det, scope):
       value='$spy.GetParam(%(scope)s.%(prg_type)s.%(prg_det)s)'
       items='$spy.get%(Prg_Type)s%(func)s(%(func_arg)s)'
       label=''
-      onchange="spy.Set%(Prg_Type)s%(Prg_Det)s(GetValue(SET_%(SCOPE)s_%(PRG_TYPE)s_%(PRG_DET)s))>>html.Update"
+      onchange="spy.Set%(Prg_Type)s%(Prg_Det)s(html.GetValue(SET_%(SCOPE)s_%(PRG_TYPE)s_%(PRG_DET)s))>>html.Update"
       readonly='readonly'
     >
     </font>

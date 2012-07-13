@@ -22,8 +22,8 @@ olex.registerFunction(FileSave, False, "gui.dialog")
 
 def About():
   sz = [int(i) for i in olx.GetWindowSize().split(',')]
-  w = int(olx.ClientWidth('self'))
-  h = int(olx.ClientHeight('self'))
+  w = int(olx.html.ClientWidth('self'))
+  h = int(olx.html.ClientHeight('self'))
   sw = 500+2*15+10
   sh = 280+2*15+150
   olx.Popup("about '%s/etc/gui/help/about.htm' -x=%d -y=%d -w=%d -h=%d"
@@ -55,4 +55,53 @@ def SwitchPanel(name="home"):
   return ""
 
 olex.registerFunction(SwitchPanel, False, "gui")
+
+def get_OV_path(path):
+  if "()" in path:
+    p = getattr(OV, path.split('()')[0])()
+    path = "%s/%s" %(p, path.split('()')[1])
+  return path
+
+
+def GetFolderList(root="", format="combo_items"):
+  import os
+  t = ""
+  if not root:
+    print "Please provide a root folder!"
+    return
+  root_c = get_OV_path(root)
+  t = []
+  i = 0
+  for root, dirs, files in os.walk(root_c, topdown=True):
+    for dir in dirs:
+      s = "%s/%s" %(root.lstrip(root_c), dir)
+      s = s.lstrip("\\")
+      s = s.lstrip("\\\\")
+      s = s.lstrip(r"/")
+      t.append("%s" %s)
+  t.sort()
+  t = ";".join(t)  
+  return t.replace("\\",'/')
+    
+  #names = [x[1] for x in os.walk(root)]
+  #paths = [x[0] for x in os.walk(root)]
+  #if format == "combo_items":
+    #retVal = ""
+    #i = 1
+    #j = 0
+    #l = names[1:]
+    #for item in names[0]:
+ 
+      #path = paths[i]
+      #retVal += "%s<-%s;" %(item, item)
+      #while l[j]:
+        #retVal += "%s/%s<-%s;" %(item, l[j][0],l[j][0])
+        #j += 1
+      #i += 1
+      #j += 1
+  #return retVal  
+  
+olex.registerFunction(GetFolderList, False, "gui")
+  
+  
 

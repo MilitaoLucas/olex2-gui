@@ -112,7 +112,7 @@ class BrukerSaint(ImageTools):
       
       elif self.fun == 'exec':
         self.have_gui = True
-        self.most_recent_p4p = olx.GetValue('p4p')
+        self.most_recent_p4p = olx.html.GetValue('p4p')
         self.write_saint_ini_file()
         self.write_cmd_file()
         #outdir = r"%s\olex" %(self.filepath)
@@ -660,7 +660,7 @@ class BrukerSaint(ImageTools):
       #try:
         #checkboxes = ['NODECAY', 'NOCORFILT', 'BLEND', 'NORESIZE']
         #for box in checkboxes:
-          #s = olx.GetState(box)
+          #s = olx.html.GetState(box)
           #if s == 'true':
             #self.saint_key[box] = ""
           #else:
@@ -670,12 +670,12 @@ class BrukerSaint(ImageTools):
 
     #if self.have_gui:
       #try:
-        #self.saint_key['pointgroup'] = olx.GetValue("POINTGROUP")
-        #self.saint_key['resolution'] = olx.GetValue("RESOLUTION")
-        #self.saint_key['GREFLIM'] = olx.GetValue("GREFLIM")
-        #self.saint_key['XSIZE'] = olx.GetValue("XSIZE")
-        #self.saint_key['YSIZE'] = olx.GetValue("YSIZE")
-        #self.saint_key['ZSIZE'] = olx.GetValue("ZSIZE")
+        #self.saint_key['pointgroup'] = olx.html.GetValue("POINTGROUP")
+        #self.saint_key['resolution'] = olx.html.GetValue("RESOLUTION")
+        #self.saint_key['GREFLIM'] = olx.html.GetValue("GREFLIM")
+        #self.saint_key['XSIZE'] = olx.html.GetValue("XSIZE")
+        #self.saint_key['YSIZE'] = olx.html.GetValue("YSIZE")
+        #self.saint_key['ZSIZE'] = olx.html.GetValue("ZSIZE")
       #except:
         #pass
     
@@ -723,21 +723,21 @@ INTEGRATE /TITLE="%(title)s" &
     try:
       checkboxes = checkboxes_on + checkboxes_off
       for box in checkboxes:
-        s = olx.GetState(box)
+        s = olx.html.GetState(box)
         if s == 'true':
           self.saint_key[box] = ""
 
         else:
           self.saint_key[box] = "/%s" %box
-      self.saint_key['pointgroup'] = olx.GetValue("POINTGROUP")
+      self.saint_key['pointgroup'] = olx.html.GetValue("POINTGROUP")
       self.saint_key['constrain_integration'] = self.laue_class_def[self.saint_key['pointgroup']]['constraint']
       self.saint_key['constrain_globalrefine'] = self.laue_class_def[self.saint_key['pointgroup']]['constraint']
-      self.saint_key['resolution'] = olx.GetValue("RESOLUTION")
-      self.saint_key['GREFLIM'] = olx.GetValue("GREFLIM")
-      self.saint_key['XSIZE'] = olx.GetValue("XSIZE")
-      self.saint_key['YSIZE'] = olx.GetValue("YSIZE")
-      self.saint_key['ZSIZE'] = olx.GetValue("ZSIZE")
-      self.outdir = olx.GetValue("outdir")
+      self.saint_key['resolution'] = olx.html.GetValue("RESOLUTION")
+      self.saint_key['GREFLIM'] = olx.html.GetValue("GREFLIM")
+      self.saint_key['XSIZE'] = olx.html.GetValue("XSIZE")
+      self.saint_key['YSIZE'] = olx.html.GetValue("YSIZE")
+      self.saint_key['ZSIZE'] = olx.html.GetValue("ZSIZE")
+      self.outdir = olx.html.GetValue("outdir")
     except:
       pass
     
@@ -800,8 +800,8 @@ INTEGRATE /TITLE="%(title)s" &
     
     t = r"""
 <tr><td width="8" bgcolor="#E9E9E9"></td>
-<td width="45%%">Pointgroup:</td><td align='center'><input type="combo" name="POINTGROUP" items="%(POINTGROUP)s" width="50"  height="17" value="%(selPG)s" onchange="echo getvalue(POINTGROUP) readonly"></td>
-<td width="45%%">Resolution/A:</td><td align='center'><input type="text" name="RESOLUTION" width="35" height="17" value="0.71" onchange="echo getvalue(RESOLUTION)"></td>
+<td width="45%%">Pointgroup:</td><td align='center'><input type="combo" name="POINTGROUP" items="%(POINTGROUP)s" width="50"  height="17" value="%(selPG)s" onchange="echo html.getvalue(POINTGROUP) readonly"></td>
+<td width="45%%">Resolution/A:</td><td align='center'><input type="text" name="RESOLUTION" width="35" height="17" value="0.71" onchange="echo html.getvalue(RESOLUTION)"></td>
 
 </tr><tr ><td width="8" bgcolor="#E9E9E9"></td>
 <td width="45%%">X Size</td><td><input type="text" name="XSIZE" width="38"  height="17" value="%(XSIZE)s"></td>
@@ -884,12 +884,12 @@ INTEGRATE /TITLE="%(title)s" &
     
     t = r"""<tr><td width="8" bgcolor="#E9E9E9"></td>
 <td width='20'><a href="spy BrukerSaint exec">Integrate</a></td>
-<td colspan='3'><input type="combo" name="p4p" items="%s" width="180"  height="17" value="%s" onchange="echo getvalue(p4p)" readonly></td>
+<td colspan='3'><input type="combo" name="p4p" items="%s" width="180"  height="17" value="%s" onchange="echo html.getvalue(p4p)" readonly></td>
 </td><tr>"""%(items, self.most_recent_p4p_name)
     txt.append(t)
     t = r"""<tr><td width="8" bgcolor="#E9E9E9"></td>
-<td><a href='setvalue(outdir,choosedir())'>Output<zimg src="$toolbar-open.png"></a>
-<td colspan='3'><input type="text" name="outdir" width="180"  height="17" value="%s" onchange="echo getvalue(outdir)"/></td>
+<td><a href='html.setvalue(outdir,choosedir())'>Output<zimg src="$toolbar-open.png"></a>
+<td colspan='3'><input type="text" name="outdir" width="180"  height="17" value="%s" onchange="echo html.getvalue(outdir)"/></td>
 </td><tr>"""%(self.outdir)
     txt.append(t)
 
@@ -917,10 +917,10 @@ INTEGRATE /TITLE="%(title)s" &
     except:
       sglist = ""
       sgtop = ""
-    t = """<tr><td><a href="reset -s=getvalue(space_gr) -c=getvalue(formula)>>solve">Solve</a></td>
+    t = """<tr><td><a href="reset -s=html.getvalue(space_gr) -c=html.getvalue(formula)>>solve">Solve</a></td>
 <td>Sp.Gr.</td><td><input type="combo" name="space_gr" items="%s" value="%s" width="60"  height="17" value="" readonly></td>
 <td>Formula</td><td><input type="text" name="formula"  width="80"  height="17" value="%s"></td></tr>
-<tr><td><a href="file getvalue(filename).ins>>reset -s=getvalue(space_gr) -c=getvalue(formula)>>HKLSrc(%s.hkl)>>html.ItemState solution-settings 0 1">Reset structure</a></td>
+<tr><td><a href="file html.getvalue(filename).ins>>reset -s=html.getvalue(space_gr) -c=html.getvalue(formula)>>HKLSrc(%s.hkl)>>html.ItemState solution-settings 0 1">Reset structure</a></td>
 <td>Output File</td><input type="text" name="filename" width="80" height="17" value="%s"></td></tr>
 """%(sglist, sgtop, self.runs[0][1]['formula'], filename, filename)
 

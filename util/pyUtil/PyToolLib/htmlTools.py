@@ -62,10 +62,10 @@ def makeHtmlTable(list):
         box_d.setdefault('bgcolor','spy.bgcolor(~name~)')
         if box_d['varName'].startswith('_'): # treat cif items differently
           box_d.setdefault('value', '$spy.get_cif_item(%(varName)s,?,gui)' %box_d)
-          box_d.setdefault('onchange',"spy.set_cif_item(%(varName)s,GetValue(~name~))>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
+          box_d.setdefault('onchange',"spy.set_cif_item(%(varName)s,html.GetValue(~name~))>>spy.changeBoxColour(%(ctrl_name)s,#FFDCDC)" %box_d)
         else:
           box_d.setdefault('value', '$spy.GetParam(%(varName)s)' %box_d)
-          box_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(~name~))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(~name~,#FFDCDC)" %box_d)
+          box_d.setdefault('onchange',"spy.SetParam(%(varName)s,html.GetValue(~name~))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(~name~,#FFDCDC)" %box_d)
         boxText += makeHtmlInputBox(box_d)
     if boxText:
       row_d.setdefault('input',boxText)
@@ -73,7 +73,7 @@ def makeHtmlTable(list):
       input_d.setdefault('ctrl_name', "SET_%s" %str.upper(input_d['varName']).replace('.','_'))
       if input_d['varName'].startswith('_'): # treat cif items differently
         input_d.setdefault('value', '$spy.get_cif_item(%(varName)s,?,gui)' %input_d)
-        input_d.setdefault('onchange',"spy.set_cif_item(%(varName)s,GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)" %input_d)
+        input_d.setdefault('onchange',"spy.set_cif_item(%(varName)s,html.GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)" %input_d)
       elif input_d['varName'] == 'snum.report.date_collected': # treat date fields differently
         try:
           cd = float(OV.GetParam('snum.report.date_collected'))
@@ -82,10 +82,10 @@ def makeHtmlTable(list):
           input_d.setdefault('value', time_str)
         except:
           input_d.setdefault('value', OV.GetParam('snum.report.date_collected'))
-        input_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(~name~))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(~name~,#FFDCDC)" %input_d)
+        input_d.setdefault('onchange',"spy.SetParam(%(varName)s,html.GetValue(~name~))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(~name~,#FFDCDC)" %input_d)
       else:
         input_d.setdefault('value', '$spy.GetParam(%(varName)s)' %input_d)
-        input_d.setdefault('onchange',"spy.SetParam(%(varName)s,GetValue(~name~))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(~name~,#FFDCDC)" %input_d)
+        input_d.setdefault('onchange',"spy.SetParam(%(varName)s,html.GetValue(~name~))>>spy.AddVariableToUserInputList(%(varName)s)>>spy.changeBoxColour(~name~,#FFDCDC)" %input_d)
       input_d.setdefault('bgcolor','spy.bgcolor(~name~)')
       row_d.setdefault('input',makeHtmlInputBox(input_d))
       row_d.update(input_d)
@@ -375,9 +375,13 @@ def make_help_box(args):
   if box_type == 'help':
     boxWidth = OV.GetParam('gui.help_box.width')
     length = len(helpTxt)
-    boxHeight = int(length/(boxWidth/OV.GetParam('gui.help_box.height_factor'))) + OV.GetParam('gui.help_box.height_constant')
+    tr = helpTxt.count('<tr')
+    
+    boxHeight = int(length/(boxWidth/OV.GetParam('gui.help_box.height_factor'))) + int(OV.GetParam('gui.help_box.height_constant') * (tr+2))
     if boxHeight > OV.GetParam('gui.help_box.height_max'):
       boxHeight = OV.GetParam('gui.help_box.height_max')
+    if boxHeight < 150:
+      boxHeight = 150
 
     x = 10
     y = 50
@@ -447,7 +451,7 @@ def make_table_first_col(help_name=None, popout=False, help_image='large'):
   else:
     help = make_help_href(help_name, popout, image=help_image)
   html ='''
-<td valign='top' width='2' align='center' bgcolor='$GetVar(HtmlTableFirstcolColour)'>
+<td valign='top' align='center' bgcolor='$GetVar(HtmlTableFirstcolColour)'>
   %s
 </td>
 ''' %help
@@ -656,22 +660,22 @@ def make_input_button(d):
   halign="%(halign)s"
   hint="%(hint)s"
   flat
->
-</font>
 ''' %dic
   if dic['onclick']:
     html += '''
   onclick="%(onclick)s"
 >
+</font>
 ''' %dic
   elif dic['ondown'] or dic['onup']:
     html += '''
   ondown="%(ondown)s"
   onup="%(onup)s"
   >
+  </font>
 ''' %dic
   else:
-    html += '\n>\n'
+    html += '\n></font>\n'
   return html
 
 def format_help(string):
@@ -735,6 +739,10 @@ def format_help(string):
   ## find all occurences of strings between l[]. These are links to help or tutorial popup boxes.
   regex = re.compile(r"l\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
   string = regex.sub(r"<font size=+1 color='$GetVar(HtmlHighlightColour)'>&#187;</font><a target='Go to \g<linktext>' href='spy.make_help_box -name=\g<linkurl> -type=\g<linktype>'><b>\g<linktext></b></a>", string)
+
+  ## find all occurences of strings between URL[]. These are links to help or tutorial popup boxes.
+  regex = re.compile(r"URL\[\s*(?P<URL>.*?)]", re.X)
+  string = regex.sub(r"<tr><td bgcolor='#205c90' align='right'><b><a href='shell \g<URL>'><font color='#ffffff'>More Info Online</font></a></b></td></tr>" , string)
 
   ## find all occurences of strings between gui[]. These are links make something happen on the GUI.
   regex = re.compile(r"gui\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
@@ -808,7 +816,7 @@ def reg_command(self, string):
   return s
 
 def changeBoxColour(ctrl_name,colour):
-  if olx.GetValue(ctrl_name) in ('?',''):
+  if olx.html.GetValue(ctrl_name) in ('?',''):
     olx.html.SetBG(ctrl_name,colour)
   else:
     olx.html.SetBG(ctrl_name,OV.FindValue('gui_html_input_bg_colour'))
@@ -832,7 +840,7 @@ OV.registerFunction(switchButton)
 
 
 def bgcolor(ctrl_name):
-  value = olx.GetValue(ctrl_name)
+  value = olx.html.GetValue(ctrl_name)
   if value in ('?',''):
     colour = "#FFDCDC"
   else:

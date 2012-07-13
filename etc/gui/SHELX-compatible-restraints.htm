@@ -2,9 +2,9 @@
 
 <!--$spy.make_warning_html(6)-->
 
-<tr>
+<tr bgcolor="$GetVar(HtmlTableBgColour)">
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Shelx-Restraints;1; -->
-  <td width='18%'>
+  <td width='18%' bgcolor="$GetVar(HtmlTableBgColour)">
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input 
       type="combo"
@@ -14,7 +14,7 @@
       items='DFIX;DANG;SADI;CHIV;FLAT;DELU;SIMU;ISOR;'
       value="GetVar(gui_shelx_restraints)" 
       width="100%"
-      onchange="SetVar(gui_shelx_restraints,GetValue(SET_GUI_SHELX_RESTRAINTS))>>spy.restraint_builder(GetVar(gui_shelx_restraints))"
+      onchange="SetVar(gui_shelx_restraints,html.GetValue(~name~))>>spy.restraint_builder(GetVar(gui_shelx_restraints))"
       readonly
       manage
     >
@@ -24,5 +24,5 @@
 
 <!-- #includeif fs.Exists(restraint-vars.htm) restraint-vars restraint-vars.htm;1; -->
 </tr>
-<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=7;1; -->
+<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=4;1; -->
 

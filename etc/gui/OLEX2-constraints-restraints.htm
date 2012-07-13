@@ -2,7 +2,7 @@
 
 <!--$spy.make_warning_html(6)-->
 
-<tr>
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='OLEX2_CONSTRAINTS_RESTRAINTS';help_ext=Olex2-Constraints-Restraints;1 -->
   <td valign='top' width="8" align='center' bgcolor="$GetVar(HtmlTableFirstcolColour)">
   </td>
   <td width='20%'>
@@ -14,10 +14,10 @@
       items='RRINGS;TRIA;'
       value="$spy.GetParam(snum.olex_conres) " 
       width="70" 
-      onchange="spy.SetParam(snum.olex_conres,GetValue(SET_OLEX_CONRES))>>spy.restraint_builder(GetValue(SET_OLEX_CONRES))"
+      onchange="spy.SetParam(snum.olex_conres,html.GetValue(~name~))>>spy.restraint_builder(html.GetValue(~name~))"
       label="%Olex2 Name%"
       readonly
-    >	
+    >
   </td>
   <td></td>
   <td></td>
