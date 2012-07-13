@@ -375,9 +375,13 @@ def make_help_box(args):
   if box_type == 'help':
     boxWidth = OV.GetParam('gui.help_box.width')
     length = len(helpTxt)
-    boxHeight = int(length/(boxWidth/OV.GetParam('gui.help_box.height_factor'))) + OV.GetParam('gui.help_box.height_constant')
+    tr = helpTxt.count('<tr')
+    
+    boxHeight = int(length/(boxWidth/OV.GetParam('gui.help_box.height_factor'))) + int(OV.GetParam('gui.help_box.height_constant') * (tr+2))
     if boxHeight > OV.GetParam('gui.help_box.height_max'):
       boxHeight = OV.GetParam('gui.help_box.height_max')
+    if boxHeight < 150:
+      boxHeight = 150
 
     x = 10
     y = 50
@@ -735,6 +739,10 @@ def format_help(string):
   ## find all occurences of strings between l[]. These are links to help or tutorial popup boxes.
   regex = re.compile(r"l\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
   string = regex.sub(r"<font size=+1 color='$GetVar(HtmlHighlightColour)'>&#187;</font><a target='Go to \g<linktext>' href='spy.make_help_box -name=\g<linkurl> -type=\g<linktype>'><b>\g<linktext></b></a>", string)
+
+  ## find all occurences of strings between URL[]. These are links to help or tutorial popup boxes.
+  regex = re.compile(r"URL\[\s*(?P<URL>.*?)]", re.X)
+  string = regex.sub(r"<tr><td bgcolor='#205c90' align='right'><b><a href='shell \g<URL>'><font color='#ffffff'>More Info Online</font></a></b></td></tr>" , string)
 
   ## find all occurences of strings between gui[]. These are links make something happen on the GUI.
   regex = re.compile(r"gui\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
