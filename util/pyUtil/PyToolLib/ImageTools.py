@@ -1181,7 +1181,7 @@ class ImageTools(FontInstances):
 #      box = (width - height, 0)
 #      image.paste(IM, box)
 
-  def resize_news_image(self, width_adjust=20, width=None):
+  def resize_news_image(self, width_adjust=10, width=None):
     tag = OV.GetTag().split('-')[0]
     self.resize_to_panelwidth({'i':'news/news-%s.png' %tag}, width=width, width_adjust=width_adjust)
 
