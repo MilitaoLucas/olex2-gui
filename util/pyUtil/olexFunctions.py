@@ -734,8 +734,8 @@ class OlexFunctions(inheritFunctions):
 
   def SetHtmlFontSize(self):
     size = OV.GetParam('gui.html.font_size')
-    if sys.platform[:3] != 'win':
-      size += 1
+    #if sys.platform[:3] != 'win':
+      #size += 1
     #elif sys.platform[:3] == 'win':
       #size = 6
     OV.SetVar('HtmlGuiFontSize', size)
