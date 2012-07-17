@@ -148,7 +148,8 @@ def makeHtmlTableRow(dictionary):
   dictionary.setdefault('fieldALIGN','left')
   dictionary.setdefault('first_col_width', OV.GetParam('gui.html.table_firstcol_width'))
   dictionary.setdefault('first_col_colour', OV.GetParam('gui.html.table_firstcol_colour'))
-  dictionary.setdefault('first_column', '<td width="%(first_col_width)s" bgcolor="%(first_col_colour)s"></td>' %dictionary)
+  #dictionary.setdefault('first_column', '<td width="%(first_col_width)s" bgcolor="%(first_col_colour)s"></td>' %dictionary)
+  dictionary.setdefault('first_column', '')
 
   href_1 = ""
   href_2 = ""
