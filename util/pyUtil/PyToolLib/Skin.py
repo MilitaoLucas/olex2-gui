@@ -145,12 +145,10 @@ def export_parameters(load_phil=True):
     font_size = OV.GetParam('gui.html.font_size') + 1
     OV.SetVar('HtmlGuiFontSize', font_size)
     OV.SetVar('HtmlFontSizeControls', font_size)
-    OV.SetParam('gui.html.font_size', font_size)
-
+#    OV.SetParam('gui.html.font_size', font_size)
     OV.SetVar('HtmlCheckboxHeight', 24)
     OV.SetVar('HtmlComboHeight', 24)
     OV.SetVar('HtmlInputHeight', 24)
-  
   if timing:
     print "export_parameters took %.4fs" %(time.time()-t)
 OV.registerFunction(export_parameters,False,'skin')
@@ -357,6 +355,8 @@ def SetMaterials():
 def check_os():
   if sys.platform == 'darwin':
     return "mac"
+  if sys.platform == 'win32':
+    return "win"
   else:
     return False
 
