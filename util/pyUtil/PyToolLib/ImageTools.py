@@ -1396,6 +1396,46 @@ class ImageTools(FontInstances):
     OlexVFS.write_to_olex('pie.htm',html, True)
     OV.UpdateHtml()
 
+  def trim_image(self, im, trimcolour=None, padding=2, border=0.5, border_col='#aaaaaa'):
+    ''' Takes either an image or a path to an image, then trims off all whitespace and either returns the trimmed image or saves it to the same path as the original one '''
+    
+    from PIL import Image, ImageChops, ImageOps
+    p = None
+    if type(im) == str or type(im) == unicode:
+      im = im.strip("'")
+      im = im.strip('"')
+      if os.path.exists(im):
+        p = im
+        im = Image.open(im)
+      else:
+        print "No such image"
+    
+    if not trimcolour:
+      pix = im.load()
+      trimcolour = pix[0,0]
+
+    bg = Image.new(im.mode, im.size, trimcolour)
+    diff = ImageChops.difference(im, bg)
+    bbox = diff.getbbox()
+    padding = int(im.size[0]/100 * padding)
+    border = int(im.size[0]/100 * border)
+    border_col = str(border_col)
+#    border_col = self.HTMLColorToRGB(border_col)
+    
+    if bbox:
+      retImage = im.crop(bbox)
+      retImage = ImageOps.expand(retImage,border=padding,fill=trimcolour)
+      
+      if border:
+        retImage = ImageOps.expand(retImage,border=border,fill=border_col)
+        
+      
+      
+    if p:
+      retImage.save(p)
+    else:
+      return retImage
+    
   def make_pie_map(self, map_l, size):
 
     width = size[0]
@@ -1457,3 +1497,4 @@ a = ImageTools()
 OV.registerMacro(a.resize_to_panelwidth, 'i-Image&;c-Colourize')
 OV.registerFunction(a.make_pie_graph,False,'it')
 OV.registerFunction(a.resize_news_image,False,'it')
+OV.registerFunction(a.trim_image,False,'it')
