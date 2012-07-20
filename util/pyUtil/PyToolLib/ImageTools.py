@@ -757,6 +757,9 @@ class ImageTools(FontInstances):
                          translate=True,
                          getXY_only=False,
                          scale=1):
+    if max_width < 50:
+      max_width = 50
+    
     if not self.scale:
       self.scale = scale
     self.font_size = font_size
