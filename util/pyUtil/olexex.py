@@ -1882,8 +1882,13 @@ def GetBitmapImageInstructions():
     return
   filesize = OV.GetValue('IMAGE_BITMAP_SIZE')
 
+  if olx.html.GetData('BITMAP_NO_BG'):
+    nbg = "-nbg"
+  else:
+    nbg = ""
+
   OV.Cursor('busy','Please Wait. Making image %s.%s. This may take some time' %(filename, fileext))
-  olex.m('pict -pq %s %s' %(filefull, filesize))
+  olex.m('pict -pq %s %s %s' %(nbg, filefull, filesize))
 
   if olx.html.GetData('TRIM_IMAGE'):
     padding = float(olx.html.GetValue('TRIM_PADDING'))

@@ -22,7 +22,7 @@
   <td width='10%'>
      %Name%
   </td>
-  <td name=IMAGE_BITMAP_NAME width='40%' align='right'>
+  <td name=IMAGE_BITMAP_NAME width='25%' align='right'>
     <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="text"
@@ -39,6 +39,28 @@
     >
     </font>
   </td>
+
+  <td width='15%'>
+     Transparent
+  </td>
+  <td width='5%' align='right'>
+    <font size=$GetVar(HtmlFontSizeControls)>
+    <input
+      type="checkbox"
+      height="$GetVar(HtmlCheckboxHeight)"
+      width="$GetVar(HtmlCheckboxWidth)"
+      name = "BITMAP_NO_BG"
+      width="100%"
+      fgcolor="$GetVar(HtmlFontColour)"
+      bgcolor="$GetVar(HtmlTableBgColour)"
+      oncheck="html.SetData(BITMAP_NO_BG,'True')"
+      onuncheck="html.SetData(BITMAP_NO_BG,' ')"
+      manage
+    >
+    </font>
+  </td>
+
+
   <td width='10%' align='right'>
     %Type%
   </td>
