@@ -242,7 +242,9 @@ class ImageTools(FontInstances):
       val = val[:6]
     elif len(val) > 6:
       return dec_colour
-    while len(val) != 6:
+    w_counter = 0
+    while len(val) != 6 and w_counter < 1000:
+      w_counter +=1
       val = "0" + val
     retVal = "#"
     retVal += val[-2:]
@@ -757,9 +759,10 @@ class ImageTools(FontInstances):
                          translate=True,
                          getXY_only=False,
                          scale=1):
-    if max_width < 50:
-      max_width = 50
     
+    #if max_width < 100:
+    #  max_width = OV.GetParam('gui.htmlpanelwidth')
+      
     if not self.scale:
       self.scale = scale
     self.font_size = font_size
@@ -814,11 +817,13 @@ class ImageTools(FontInstances):
       txt_l.append(t.strip())
 
     else:
-      while wX > max_width:
+      w_counter = 0
+      while wX > max_width and w_counter < 100:
+        w_counter += 1
         txt = txt.rstrip('...')
         txt = txt[:-1] + "..."
         wX, wY = draw.textsize(txt, font=font)
-
+        
     if "</p>" in txt:
       self.txt = txt
       self.print_html_to_draw()
@@ -1140,14 +1145,18 @@ class ImageTools(FontInstances):
         fill = colour_on
         i = 0
         top = b - pad
-        while top > pad + dot_size:
+        w_counter = 0
+        while top > (pad + dot_size) and w_counter < 1000:
+          w_counter += 1
           left = l + i * dot_size/2
           top = b - i * dot_size - dot_size
           xy = (int(left), int(top), left + dot_size, top + dot_size)
           draw.ellipse(xy, fill = fill)
           i += 1
         j = i
-        while top < height - pad - dot_size:
+        w_counter = 0
+        while top < (height - pad - dot_size) and w_counter < 1000:
+          w_counter += 1
           left = l + j * dot_size/2
           top = b - i * dot_size - dot_size
           xy = (int(left), int(top), left + dot_size, top + dot_size)
@@ -1158,14 +1167,18 @@ class ImageTools(FontInstances):
         fill = colour_off
         i = 0
         top = t
-        while top < height - pad - dot_size * 2:
+        w_counter = 0
+        while (top < height - pad - dot_size * 2) and w_counter < 1000:
+          w_counter += 1
           left = l + i * dot_size/2
           top = t + i * dot_size
           xy = (int(left), int(top), left + dot_size, top + dot_size)
           draw.ellipse(xy, fill = fill)
           i += 1
         j = i
-        while top > pad:
+        w_counter = 0
+        while top > pad and w_counter < 1000:
+          w_counter += 1
           left = l + j * dot_size/2
           top = t + i * dot_size
           xy = (int(left), int(top), left + dot_size, top + dot_size)

@@ -8,6 +8,7 @@
     >
     <cmd
       <cmd1 "silent on">
+      <cmd1 "htmlpanelvisible True">
       <cmd2 "py.Export(datadir()/olx)">
       <cmd3 "py.run 'basedir()/util/pyUtil/initpy.py'">
       <cmd7 "spy.load_user_gui_phil()">
