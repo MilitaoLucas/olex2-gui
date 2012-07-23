@@ -800,8 +800,11 @@ class timage(ImageTools):
     new_l = open("%s/etc/gui/images/advertise_as_new.txt" %OV.BaseDir(),'r').readlines()
     self.new_l = map(lambda s: s.strip(), new_l)
 
+    c_width = int(olx.html.ClientWidth('self'))
+    if c_width < 100:
+      c_width = OV.GetParam('gui.htmlpanelwidth')
 
-    self.width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+    self.width = c_width - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
     
     self.max_width = self.width
     
