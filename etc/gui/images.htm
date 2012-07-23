@@ -2,21 +2,39 @@
 
 <!-- FIRST ROW -->
 
-<!-- #include tool-row gui\blocks\tool-row.htm;name='LABEL_SETTINGS';1 -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='LABEL_SETTINGS';help_ext=Images;1 -->
   <td name=HREF_MAKE_LABEL>
-    1) <a href='label -type=html.GetValue(IMAGE_SETTINGS_LABEL_TYPE)'>%images_add_labels_to_atoms%</a>|
-    <a href='sel $*-H,Q>>label -type=html.GetValue(IMAGE_SETTINGS_LABEL_TYPE)'>%images_add_labels_to_non_H_atoms%</a>
+    1) <a href='label -type=html.GetValue(IMAGE_SETTINGS_LABEL_TYPE) -symm=html.GetValue(IMAGE_SETTINGS_LABEL_SYMM)'>%images_add_labels_to_atoms%</a>|
+    <a href='sel $*-H,Q>>label -type=html.GetValue(IMAGE_SETTINGS_LABEL_TYPE) -symm=html.GetValue(IMAGE_SETTINGS_LABEL_SYMM)'>%images_add_labels_to_non_H_atoms%</a>
   </td>
-  <td>%Style%</td>
-  <td name=IMAGE_SETTINGS_LABEL_TYPE>
+
+  <td>%Symm%</td>
+  <td name=IMAGE_SETTINGS_LABEL_SYMM width='20%'>
     <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="combo"
       height="$GetVar(HtmlComboHeight)"
-      width="80"
+      width="100%"
       bgcolor="$GetVar(HtmlInputBgColour)"
-      items="%default%;%subscript%;%brackets%"
-      height="$GetVar(HtmlInputHeight)"
+      items="$;#;full"
+      valign='center'
+      name="IMAGE_SETTINGS_LABEL_SYMM"
+      value=' '
+      manage
+    >
+    </font>
+  </td>
+
+
+  <td>%Style%</td>
+  <td name=IMAGE_SETTINGS_LABEL_TYPE width='20%'>
+    <font size=$GetVar(HtmlFontSizeControls)>
+    <input
+      type="combo"
+      height="$GetVar(HtmlComboHeight)"
+      width="100%"
+      bgcolor="$GetVar(HtmlInputBgColour)"
+      items="default;subscript;brackets"
       valign='center'
       name="IMAGE_SETTINGS_LABEL_TYPE"
       value='default'

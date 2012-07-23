@@ -1875,13 +1875,28 @@ OV.registerFunction(StringsAreNotEqual)
 
 
 def GetBitmapImageInstructions():
+  from ImageTools import ImageTools
+  IT = ImageTools()
   filefull, filename, fileext = GetImageFilename(image_type = "BITMAP")
   if not filefull:
     return
   filesize = OV.GetValue('IMAGE_BITMAP_SIZE')
 
+  if olx.html.GetData('BITMAP_NO_BG'):
+    nbg = "-nbg"
+  else:
+    nbg = ""
+
   OV.Cursor('busy','Please Wait. Making image %s.%s. This may take some time' %(filename, fileext))
-  olex.m('pict -pq %s %s' %(filefull, filesize))
+  olex.m('pict -pq %s %s %s' %(nbg, filefull, filesize))
+
+  if olx.html.GetData('TRIM_IMAGE'):
+    padding = float(olx.html.GetValue('TRIM_PADDING'))
+    border = float(olx.html.GetValue('TRIM_BORDER'))
+    colour = olx.html.GetValue('TRIM_BORDER_COLOUR')
+    IT.trim_image(im=filefull, padding=padding, border=border, border_col = colour )
+
+  #import Image
   OV.Cursor()
 OV.registerFunction(GetBitmapImageInstructions)
 

@@ -757,6 +757,9 @@ class ImageTools(FontInstances):
                          translate=True,
                          getXY_only=False,
                          scale=1):
+    if max_width < 50:
+      max_width = 50
+    
     if not self.scale:
       self.scale = scale
     self.font_size = font_size
@@ -1181,7 +1184,7 @@ class ImageTools(FontInstances):
 #      box = (width - height, 0)
 #      image.paste(IM, box)
 
-  def resize_news_image(self, width_adjust=20, width=None):
+  def resize_news_image(self, width_adjust=10, width=None):
     tag = OV.GetTag().split('-')[0]
     self.resize_to_panelwidth({'i':'news/news-%s.png' %tag}, width=width, width_adjust=width_adjust)
 
@@ -1396,6 +1399,46 @@ class ImageTools(FontInstances):
     OlexVFS.write_to_olex('pie.htm',html, True)
     OV.UpdateHtml()
 
+  def trim_image(self, im, trimcolour=None, padding=2, border=0.5, border_col='#aaaaaa'):
+    ''' Takes either an image or a path to an image, then trims off all whitespace and either returns the trimmed image or saves it to the same path as the original one '''
+    
+    from PIL import Image, ImageChops, ImageOps
+    p = None
+    if type(im) == str or type(im) == unicode:
+      im = im.strip("'")
+      im = im.strip('"')
+      if os.path.exists(im):
+        p = im
+        im = Image.open(im)
+      else:
+        print "No such image"
+    
+    if not trimcolour:
+      pix = im.load()
+      trimcolour = pix[0,0]
+
+    bg = Image.new(im.mode, im.size, trimcolour)
+    diff = ImageChops.difference(im, bg)
+    bbox = diff.getbbox()
+    padding = int(im.size[0]/100 * padding)
+    border = int(im.size[0]/100 * border)
+    border_col = str(border_col)
+#    border_col = self.HTMLColorToRGB(border_col)
+    
+    if bbox:
+      retImage = im.crop(bbox)
+      retImage = ImageOps.expand(retImage,border=padding,fill=trimcolour)
+      
+      if border:
+        retImage = ImageOps.expand(retImage,border=border,fill=border_col)
+        
+      
+      
+    if p:
+      retImage.save(p)
+    else:
+      return retImage
+    
   def make_pie_map(self, map_l, size):
 
     width = size[0]
@@ -1457,3 +1500,4 @@ a = ImageTools()
 OV.registerMacro(a.resize_to_panelwidth, 'i-Image&;c-Colourize')
 OV.registerFunction(a.make_pie_graph,False,'it')
 OV.registerFunction(a.resize_news_image,False,'it')
+OV.registerFunction(a.trim_image,False,'it')
