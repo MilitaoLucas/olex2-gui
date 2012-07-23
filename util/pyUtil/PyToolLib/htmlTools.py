@@ -758,7 +758,10 @@ def format_help(string):
   code_fg_colour = OV.GetParam('gui.html.code.fg_colour').hexadecimal
   html_tag = OV.GetParam('gui.html.code.html_tag')
   if m:
-    s = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='1'><tr bgcolor='%s'><td><a href='\2'><b><font size='2' color='%s'><%s>>>\2</%s></font></a></td></tr></table>" %(width,code_bg_colour, code_fg_colour, html_tag, html_tag), string)
+    #s = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='1'><tr bgcolor='%s'><td><a href='\2'><b><font size='2' color='%s'><%s>>>\2</%s></font></a></td></tr></table>" %(width,code_bg_colour, code_fg_colour, html_tag, html_tag), string)
+
+    s = regex.sub(r" <font color='%s'>[&nbsp;<a href='\2'><b><%s>\2</%s></a>&nbsp;]</font>" %( code_fg_colour, html_tag, html_tag), string)
+
 
   else:
     s = string
@@ -779,8 +782,7 @@ def format_help(string):
   m = regex.findall(string)
   colour = "#232323"
   if m:
-#    s = regex.sub(r"<tr bgcolor='$GetVar(HtmlTableFirstcolColour)'><td><b>\2</b></td></tr><tr><td>", string.title())
-    s = regex.sub(r"<tr bgcolor='$GetVar(HtmlTableFirstcolColour)'><td><b>\2</b></td></tr><tr><td>", string)
+    s = regex.sub(r"<tr bgcolor='$GetVar(HtmlTableFirstcolColour)'><td colspan='4'><b>\2</b></td></tr><tr><td>", string)
   else:
     s = string
 

@@ -597,7 +597,8 @@ def restraint_builder(cmd):
     else:
       onclick = "mode %s" %onclick
   else:
-    onclick += " sel"
+    pass
+    #onclick += " sel"
 
   onclick = "%s%s%s" %(pre_onclick, onclick, post_onclick)
 

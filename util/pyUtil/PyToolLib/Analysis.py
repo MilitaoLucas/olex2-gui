@@ -238,6 +238,10 @@ class Graph(ImageTools):
     guiParams = OV.GuiParams()
 
     self.imX = self.params.size_x
+    if self.imX < 100:
+      self.imX = OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+      
+      self.imX = 100
     self.imY = self.params.size_y
     fontsize = int(0.08 * self.imX)
     fontscale = 0.02 * self.imX
@@ -610,6 +614,9 @@ class Graph(ImageTools):
     top = self.graph_top
     marker_width = 5
     width = self.params.size_x
+    if width < 100:
+      if width < 100:
+        width = OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
     height = self.graph_bottom - self.graph_top
     legend_top = height + 20
     labels = dataset.metadata().get('labels')
@@ -2757,8 +2764,12 @@ class HealthOfStructure():
     font_name = 'Vera'
     value_display_extra = ""
     completeness_box_width = 150
+    
+    c_width = int(olx.html.ClientWidth('self'))
+    if c_width < 100:
+      c_width = OV.GetParam('gui.htmlpanelwidth')
 
-    width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - 2
+    width =  c_width - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - 2
 
     boxWidth = (width/n) * scale
     boxHeight = OV.GetParam('gui.timage.h1.height') * scale
