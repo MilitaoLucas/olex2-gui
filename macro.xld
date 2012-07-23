@@ -1202,6 +1202,15 @@
   >
 >
 
+<options help='Edit Olex2 internal options file'
+  <body
+    <args>
+    <cmd
+      <cmd1 "exec -o getvar(defeditor) 'DataDir()/.options'">
+    >
+  >
+>
+
 <log help='Shows the current log file'
   <body
     <args
