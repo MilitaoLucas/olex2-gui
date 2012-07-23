@@ -240,8 +240,6 @@ class Graph(ImageTools):
     self.imX = self.params.size_x
     if self.imX < 100:
       self.imX = OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
-      
-      self.imX = 100
     self.imY = self.params.size_y
     fontsize = int(0.08 * self.imX)
     fontscale = 0.02 * self.imX
