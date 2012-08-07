@@ -896,7 +896,7 @@ OV.registerFunction(getStylesList)
 def getTemplatesList():
   templates = os.listdir("%s/etc/CIF/templates" %OV.BaseDir())
   exclude = ("footer.htm")
-  templatesList = ";".join("/templates/%s.htm" %template[:-4] for template in templates
+  templatesList = ";".join("templates/%s.htm" %template[:-4] for template in templates
                         if template not in exclude and template.endswith('.htm') or template.endswith('.rtf'))
   return templatesList
 OV.registerFunction(getTemplatesList)
