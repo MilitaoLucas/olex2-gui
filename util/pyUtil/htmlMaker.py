@@ -331,8 +331,8 @@ def publicationMetadataHtmlMaker():
 
   retstr +="""
 <tr VALIGN="center" ALIGN="left">
-  <td></td>
-  <td VALIGN="center" width="40%%" colspan=2>
+  <td colspan='2'></td>
+  <td VALIGN="center" width="40%%">
     <a href="spy.contactLetter()>>html.Update" target="Edit Contact Letter"><b>Contact Letter</b></a>
   </td>
 </tr>
@@ -340,13 +340,12 @@ def publicationMetadataHtmlMaker():
 
   retstr +="""
 <tr VALIGN="center" ALIGN="left">
-  <td></td>
-  <td VALIGN="center" colspan=3 bgcolor=$GetVar(HtmlHighlightColour)>
+  <td colspan='3' VALIGN="center" bgcolor=$GetVar(HtmlHighlightColour)>
     <b>Please add the contact author to the list of Authors if that person is to appear on the paper!</b></a>
   </td>
 </tr>
 """
-  
+
   return retstr
 OV.registerFunction(publicationMetadataHtmlMaker)
 
@@ -434,10 +433,10 @@ OV.registerFunction(move)
 def restraint_builder(cmd):
   height = OV.GetParam('gui.html.combo_height')
   colspan = 3
-  
+
   first_col_bg = OV.GetParam('gui.html.table_firstcol_colour')
   table_row_bg = OV.GetParam('gui.html.table_firstcol_colour')
-  
+
 
   constraints = ["EXYZ", "EADP", "AFIX"]
   olex_conres = ["RRINGS", "TRIA", "ADPUEQ", "ADPVOL", "ANGLE", "DIANG"]
@@ -544,7 +543,7 @@ def restraint_builder(cmd):
         d.setdefault("items",items)
       if var:
         ib += "<td align='left' width='%s' bgcolor='%s'>%s</td>" %(width, table_row_bg, htmlTools.makeHtmlInputBox(d))
-       
+
   if ib:
     if name == "AFIX":
       var_max = 2
@@ -552,11 +551,11 @@ def restraint_builder(cmd):
     else:
       var_max = 3
       td_width = '80%'
-    
+
     while varcount < var_max:
       ib += "<td align='center' width='33%%' bgcolor='%s'></td>" %table_row_bg
       varcount += 1
-    
+
     html.append("<td width='%s'><table border='0' style='border-collapse: collapse' width='100%%' cellpadding='1' cellspacing='0'><tr>%s</tr></table></td>" %(td_width, ib))
 
   if name == "AFIX":
