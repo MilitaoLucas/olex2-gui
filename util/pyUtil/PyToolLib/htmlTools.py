@@ -128,7 +128,7 @@ height="%(height)s"
 name="%(ctrl_name)s"
 value="%(value)s"
 items="%(items)s"
-label="%(label)s "
+label="%(label)s"
 valign="%(valign)s"
 onchange="%(onchange)s"
 %(readonly)s
@@ -140,7 +140,7 @@ bgcolor="%(bgcolor)s"
   return htmlInputBoxText
 
 def makeHtmlTableRow(dictionary):
-  dictionary.setdefault('font', 'size=%s' %OV.GetParam('HtmlGuiFontSize'))
+  dictionary.setdefault('font', "size='%s'" %olx.GetVar('HtmlGuiFontSize'))
   dictionary.setdefault('trVALIGN','center')
   dictionary.setdefault('trALIGN','left')
   dictionary.setdefault('fieldWidth','30%%')
@@ -184,32 +184,27 @@ def makeHtmlTableRow(dictionary):
       field_d.setdefault('itemName', '')
       field_d.setdefault('fieldVALIGN','center')
       field_d.setdefault('fieldALIGN','left')
-      field_d.setdefault('fieldWidth','20%%')
+      if field == 'field1':
+        field_d.setdefault('fieldWidth','20%%')
+      else:
+        field_d.setdefault('fieldWidth','10%%')
       field_d.setdefault('href_1',href_1)
       field_d.setdefault('href_2',href_2)
 
-      field_d.setdefault('font','size=%s' %OV.GetParam('gui.html.table_firstcol_colour'))
+      field_d.setdefault('font','color=%s' %OV.GetParam('gui.html.table_firstcol_colour'))
       field_d.setdefault('first_col_width', OV.GetParam('gui.html.table_firstcol_width'))
       FieldText += """
-                <td VALIGN="%(fieldVALIGN)s" ALIGN="%(fieldALIGN)s" width="%(fieldWidth)s" colspan=1>
-                  <b>
-                    %(itemName)s
-                  </b>
+                <td VALIGN="%(fieldVALIGN)s" ALIGN="%(fieldALIGN)s" width="%(fieldWidth)s">
+                  <b>%(itemName)s</b>
                 </td>
                 """ %field_d
   if FieldText:
     dictionary.setdefault('fieldText',FieldText)
 
     htmlTableRowText = '''
-  <tr VALIGN="%(trVALIGN)s" ALIGN="%(trALIGN)s" NAME="%(ctrl_name)s">
-    <td bgcolor=#ff0000>
+  <tr NAME="%(ctrl_name)s">
     %(fieldText)s
-    </td>
-    <td VALIGN="center" colspan=2>
-      <font %(font)s>
-        %(input)s
-       </font>
-    </td>
+    <td valign="center" align="right">%(input)s</td>
     %(chooseFile)s
   </tr>
 ''' %dictionary
@@ -217,20 +212,17 @@ def makeHtmlTableRow(dictionary):
   else:
 
     htmlTableRowText = '''
-  <tr VALIGN="%(trVALIGN)s" ALIGN="%(trALIGN)s" NAME="%(ctrl_name)s">
+  <tr NAME="%(ctrl_name)s">
   %(first_column)s
-    <td VALIGN="%(fieldVALIGN)s" ALIGN="%(fieldALIGN)s" width="%(fieldWidth)s" colspan=2>
-      <b>
+    <td VALIGN="%(fieldVALIGN)s" ALIGN="%(fieldALIGN)s" width="%(fieldWidth)s" colspan='2'>
       <b>
         %(href_1)s
           %(itemName)s
         %(href_2)s
       </b>
     </td>
-      <td VALIGN="center" colspan=2 width="70%%%%">
-        <font %(font)s>
-          %(input)s
-        </font>
+    <td align="right" width="70%%%%">
+      %(input)s
     </td>
     %(chooseFile)s
   </tr>
@@ -377,7 +369,7 @@ def make_help_box(args):
     boxWidth = OV.GetParam('gui.help_box.width')
     length = len(helpTxt)
     tr = helpTxt.count('<tr')
-    
+
     boxHeight = int(length/(boxWidth/OV.GetParam('gui.help_box.height_factor'))) + int(OV.GetParam('gui.help_box.height_constant') * (tr+2))
     if boxHeight > OV.GetParam('gui.help_box.height_max'):
       boxHeight = OV.GetParam('gui.help_box.height_max')
@@ -657,8 +649,6 @@ def make_input_button(d):
   value="%(value)s"
   width="%(width)s"
   height="%(height)s"
-  valign="%(valign)s"
-  halign="%(halign)s"
   hint="%(hint)s"
   flat
 ''' %dic
