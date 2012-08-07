@@ -315,24 +315,22 @@ def publicationMetadataHtmlMaker():
       d.setdefault('onchange',"spy.SetParam(%(varName)s,html.GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)>>html.Update" %d)
     elif 'author_name' in d['varName']:
       d.setdefault('onchange','')
-  retstr = htmlTools.makeHtmlTable(list)
 
-  list = [
+  list.append(
     {'varName':'_publ_requested_journal',
      'itemName':'%Requested% %Journal%',
      'items':userDictionaries.localList.getListJournals(),
      'readonly':'',
      'value':'spy.get_cif_item(_publ_requested_journal)',
      'onchange':'spy.addToLocalList(html.GetValue(~name~),requested_journal)>>spy.changeBoxColour(~name~,#FFDCDC)',
-     }
-  ]
+     })
 
-  retstr += htmlTools.makeHtmlTable(list)
+
+  retstr = htmlTools.makeHtmlTable(list)
 
   retstr +="""
 <tr VALIGN="center" ALIGN="left">
-  <td colspan='2'></td>
-  <td VALIGN="center" width="40%%">
+  <td colspan='2'>
     <a href="spy.contactLetter()>>html.Update" target="Edit Contact Letter"><b>Contact Letter</b></a>
   </td>
 </tr>
@@ -340,7 +338,7 @@ def publicationMetadataHtmlMaker():
 
   retstr +="""
 <tr VALIGN="center" ALIGN="left">
-  <td colspan='3' VALIGN="center" bgcolor=$GetVar(HtmlHighlightColour)>
+  <td colspan='2' VALIGN="center" bgcolor=$GetVar(HtmlHighlightColour)>
     <b>Please add the contact author to the list of Authors if that person is to appear on the paper!</b></a>
   </td>
 </tr>
