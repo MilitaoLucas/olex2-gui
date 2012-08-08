@@ -45,6 +45,7 @@ def makeHtmlTable(list):
   If you wish to change any of the defaults such as bgcolor, height, width, etc., these can be set in the dictionary to be passed.
   """
   text = ''
+
   for input_d in list:
     row_d = {}
     row_d.setdefault('itemName',input_d['itemName'])
@@ -178,16 +179,18 @@ def makeHtmlTableRow(dictionary):
   dictionary['href_2'] = href_2
 
   FieldText = ''
+  count=0
   for field in ['field1','field2']:
     if field in dictionary.keys():
+      count += 1
       field_d = dictionary[field]
       field_d.setdefault('itemName', '')
       field_d.setdefault('fieldVALIGN','center')
       field_d.setdefault('fieldALIGN','left')
       if field == 'field1':
-        field_d.setdefault('fieldWidth','20%%')
+        field_d.setdefault('fieldWidth','30%%')
       else:
-        field_d.setdefault('fieldWidth','10%%')
+        field_d.setdefault('fieldWidth','70%%')
       field_d.setdefault('href_1',href_1)
       field_d.setdefault('href_2',href_2)
 
@@ -198,6 +201,9 @@ def makeHtmlTableRow(dictionary):
                   <b>%(itemName)s</b>
                 </td>
                 """ %field_d
+  if count == 2:
+    FieldText = "<td><table cellpadding='0' cellspacing='0' width='100%%'><tr>%s</tr></table></td>" %FieldText
+
   if FieldText:
     dictionary.setdefault('fieldText',FieldText)
 
@@ -214,7 +220,7 @@ def makeHtmlTableRow(dictionary):
     htmlTableRowText = '''
   <tr NAME="%(ctrl_name)s">
   %(first_column)s
-    <td VALIGN="%(fieldVALIGN)s" ALIGN="%(fieldALIGN)s" width="%(fieldWidth)s" colspan='2'>
+    <td VALIGN="%(fieldVALIGN)s" ALIGN="%(fieldALIGN)s" width="%(fieldWidth)s">
       <b>
         %(href_1)s
           %(itemName)s
@@ -1246,7 +1252,7 @@ def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
   txt = '''
 <font size='$GetVar(HtmlFontSizeControls)'>
 <input
-  name=IMG_%(nameupper)s
+  name="IMG_%(nameupper)s"
   type="button"
   image="up=%(tool_img)s%(off)s.png,down=%(tool_img)s%(down)s.png,hover=%(tool_img)s%(hover)s.png",disable="%(tool_img)sdisable.png"
   hint="%(target)s"
@@ -1300,7 +1306,7 @@ def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
   txt = '''
 <font size='$GetVar(HtmlFontSizeControls)'>
 <input
-  name=IMG_%(nameupper)s
+  name="IMG_%(nameupper)s"
   type="button"
   image="up=%(tool_img)s%(on)s.png,down=%(tool_img)s%(down)s.png,hover=%(tool_img)s%(hover)s.png",disable="%(tool_img)sdisable.png"
   hint="%(target)s"
