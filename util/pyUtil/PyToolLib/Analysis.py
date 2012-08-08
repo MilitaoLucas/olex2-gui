@@ -1529,7 +1529,7 @@ class WilsonPlot(Analysis):
     self.draw_pairs(reverse_y = True)
     grad = self.make_gradient_box(size = ((int(self.imX * 0.64), int(self.imY * 0.1))))
     size = ((self.im.size[0]), (self.im.size[1] + grad.size[1]))
-    colour = self.fillColour
+    colour = self.pageColour
     new = Image.new('RGB', size, colour)
     new.paste(self.im, (0,0))
     new.paste(grad, (int(self.xSpace+self.bSides),int(self.im.size[1]-20)))
@@ -1590,7 +1590,7 @@ class WilsonPlot(Analysis):
     boxWidth = size[0]
     boxHeight = size[1]*0.4
     boxTopOffset = self.imY * 0.035
-    colour = self.fillColour
+    colour = self.pageColour
     im = Image.new('RGB', size, colour)
     draw = ImageDraw.Draw(im)
     #target_left = (0,0,255)
