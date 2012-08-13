@@ -22,7 +22,7 @@
       <cmd6 rem="loglevel(mf)>>py.loglevel(mf)">
       <cmd9 "if not(file.Exists(app.getarg(1))) then
         'if and(IsVar(startup),file.Exists(file.AbsolutePath(GetVar(startup)))) then
-              &2E;reap file.AbsolutePath(GetVar(startup))&2E;'">
+              \"reap file.AbsolutePath(GetVar(startup))\"'">
       <cmd10 "bind wheel 'ShowQ -wheel='">
       <cmd11 xxx="spy.GetTip(0)">
       <cmd12 "spy.settings_tree()">
@@ -335,20 +335,20 @@
     >
     <cmd
       <cmd1 cmd1="silent on">
-      <cmd2 cmd1="echo %2%3.%1">
-      <cmd3 "file">
-      <cmd4 "if and(IsFileType(ires),or(strcmp(%1,ins),strcmp(%1,res))) then 'listen filepath()/filename().%1' else none">
-      <cmd5 "if strcmp(%1,hkl) then 'exec -o getvar(defeditor) &2E;hklsrc()&2E;' else 'exec -o getvar(defeditor) &2E;filepath()/filename().%1&2E;'">
-      <cmd6 "if strcmp(%1,note) then 'exec -o getvar(defeditor) &2E;filepath()/filename()-note.txt&2E;'">
-    >
-    <onterminate
-      <cmd1 "stop">
+      <cmd2 cmd="echo %2%3.%1">
+      <cmd3 "if and(IsFileType(ires),or(strcmp(%1,ins),strcmp(%1,res))) then 
+       'file>>listen filepath()/filename().%1' else none">
+      <cmd4 "if strcmp(%1,hkl) then 
+       'exec -o getvar(defeditor) \"hklsrc()\"' else 
+       'exec -o getvar(defeditor) \"filepath()/filename().%1\" -t=\"stop listen\"'">
+      <cmd5 "if strcmp(%1,note) then 
+       'exec -o getvar(defeditor) \"filepath()/filename()-note.txt\"'">
     >
     <onlisten
-      <cmd1 "'spy.SetParam(snum.refinement.max_peaks,Ins(QNUM))'">
-      <cmd1 "'spy.SetParam(snum.refinement.max_cycles,Ins(LS))'">
-      <cmd1 "spy.doProgramSettings(spy.GetParam(snum.refinement.program),spy.GetParam(snum.refinement.method))">
-      <cmd0 "html.update">
+      <cmd1 "spy.SetParam(snum.refinement.max_peaks,Ins(QNUM))">
+      <cmd2 "spy.SetParam(snum.refinement.max_cycles,Ins(LS))">
+      <cmd3 "spy.doProgramSettings(spy.GetParam(snum.refinement.program),spy.GetParam(snum.refinement.method))">
+      <cmd4 "html.update">
     >
   >
 >
