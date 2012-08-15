@@ -865,7 +865,7 @@ def defineExternalPrograms():
     name='Superflip',
     program_type='solution',
     author="A van der Lee, C.Dumas & L. Palatinus",
-    reference="J. Appl. Cryst. (2007) 40, 786-790",
+    reference="SUPERFLIP, J. Appl. Cryst. (2007) 40, 786-790",
     versions = '260711',
     execs=["superflip.exe", "superflip"])
 

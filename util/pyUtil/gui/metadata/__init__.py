@@ -82,22 +82,72 @@ def sources():
 
   return retstr
 
-
+def set_cif_item(key, value):
+  OV.set_cif_item(key, '%s' %value)
 
 def conflicts():
   try:
     d = olx.CifInfo_metadata_conflicts.conflict_d
     if d:
-      txt = "<font color='red'><b>There is conflicting information!</b></font>"
+      txt = "<table><tr><td colspan='3'><font color='red'><b>There is conflicting information!</b></font></td></tr>"
+      
+      for conflict in d:
+        if not conflict.startswith("_"):
+          if len(d) == 1:
+            return
+          else:
+            continue
+        #from iotbx.cif import model
+        #cif_block = model.block()
+        cif = OV.get_cif_item(conflict)
+        val = d[conflict]['val']
+        if not val:
+          val = 'n/a'
+        val = val.rstrip("'").lstrip("'")
+        conflict_val = d[conflict]['conflict_val']
+        if not conflict_val:
+          conflict_val = 'n/a'
+        conflict_val = conflict_val.rstrip("'").lstrip("'")
+        if val == cif:
+          val1 = val
+          val2 = conflict_val
+          source1 = d[conflict]['val_source'].split(".")[1]
+          source2 = d[conflict]['conflict_source'].split(".")[1]
+        if conflict_val == cif:
+          val1 = conflict_val
+          val2 = val
+          source2 = d[conflict]['val_source'].split(".")[1]
+          source1 = d[conflict]['conflict_source'].split(".")[1]
+        
+        link1 ='''<font color='green'><b>%s</b></font> (%s)''' %(val1, source1)
+
+        link2 ='''
+<a target=%s href='spy.gui.metadata.set_cif_item(%s,"%s")>>spy.MergeCif(False)>>html.Update'>%s (%s)</a>
+'''%(source2, conflict, val2, val2, source2)
+
+        txt += '''
+<tr>
+  <td>
+    <b>%s</b>
+  </td>
+  <td>
+    %s
+  </td>
+  <td>
+    %s
+  </td>
+  ''' %(conflict,
+        link1,
+        link2,
+        )
+      txt += "</tr></table></td>"
     else:
       txt = "<font color='green'><b>No conflicts in the meta-data</b></font>"
   
   except:
-    return "Not Initialised"
-  
-  
+    return "Not Initialised or Something Bad has happened."
   return txt
-
 
 olex.registerFunction(sources, False, "gui.metadata")
 olex.registerFunction(conflicts, False, "gui.metadata")
+olex.registerFunction(set_cif_item, False, "gui.metadata")
