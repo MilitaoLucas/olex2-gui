@@ -13,7 +13,7 @@
       name="GROW"
       height="$GetVar(HtmlComboHeight)"
       width='100%'
-      items="Bonds<--b;Shells<--s;Complete<--w;Asymm. Unit (fuse)<-fuse;"
+      items="Grow All<- ;Shells<--s;Complete<--w;Asymm. Unit (fuse)<-fuse;"
       readonly
       onchange="if strcmp(html.GetValue(~name~),'fuse') then 'fuse' else run(grow html.GetValue(~name~))"
       label='Grow'
