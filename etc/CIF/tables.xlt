@@ -124,10 +124,12 @@ foota="class=cifTableFooter"
  \>
 
 <tang caption="Torsion Angles for $spy.GetParam(snum.report.title)." tita="class=cifTableHeadline"
-tha="class=cifTableFirst"
-taba="class=CifTable"
-rowa="class=cifTableRow"
-foota="class=cifTableFooter"
+ coln='2'
+ colsa='width="100px"'
+ tha="class=cifTableFirst"
+ taba="class=CifTable"
+ rowa="class=cifTableRow"
+ foota="class=cifTableFooter"
   <_geom_torsion_atom_site_label_1 caption="A" visible="true" cola="class='data'" \>
   <_geom_torsion_atom_site_label_2 caption="B" visible="true" cola="class='data'"\>
   <_geom_torsion_atom_site_label_3 caption="C" visible="true" cola="class='data'"\>
