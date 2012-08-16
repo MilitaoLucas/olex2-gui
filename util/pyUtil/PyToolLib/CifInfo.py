@@ -664,8 +664,11 @@ class ExtractCifInfo(CifTools):
     self.conflict_d = {}
     olx.CifInfo_metadata_conflicts = self
     d = {}
+    resolved = OV.GetParam('snum.metadata.resolved_conflict_items')
     for ld in self.all_sources_d:
       for k in self.all_sources_d[ld]:
+        if k in resolved:
+          continue
         val = self.all_sources_d[ld][k]
         dval = d.get(k, 0)
         if dval:

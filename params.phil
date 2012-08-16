@@ -29,6 +29,11 @@ snum
       .expert_level = 1
     }
 
+  metadata{
+    resolved_conflict_items = ""
+      .type = strings
+  }
+
   ccdc{
     note_to_staff = +++ Optional Note To Staff +++
       .type = str
