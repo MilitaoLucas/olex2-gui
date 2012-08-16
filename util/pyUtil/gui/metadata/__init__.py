@@ -82,6 +82,11 @@ def sources():
 
   return retstr
 
+def add_resolved_conflict_item_to_phil(item):
+  l = OV.GetParam('snum.metadata.resolved_conflict_items')
+  l.append(item)
+  OV.SetParam('snum.metadata.resolved_conflict_items', l)
+
 def set_cif_item(key, value):
   OV.set_cif_item(key, '%s' %value)
 
@@ -90,10 +95,11 @@ def make_conflict_link(item, val, src, cif_value):
     return "<b>%s</b>: <font color='green'><b>%s</b></font>" %(src, val)
   else:
     return '''<b>%s</b>:
-    <a href='spy.gui.metadata.set_cif_item(%s,"%s")>>spy.MergeCif(False)>>html.Update'>%s</a>
-'''%(src, item, val, val)
+    <a href='spy.gui.metadata.set_cif_item(%s,"%s")>>spy.MergeCif(False)>>spy.gui.metadata.add_resolved_conflict_item_to_phil(%s)>>html.Update'>%s</a>
+'''%(src, item, val, item, val)
 
 def conflicts():
+  resolved = OV.GetParam('snum.metadata.resolved_conflict_items')
   try:
     d = olx.CifInfo_metadata_conflicts.conflict_d
     if d:
@@ -105,6 +111,8 @@ def conflicts():
 
       for conflict in d:
         if not conflict.startswith("_"): continue
+        if conflict in resolved: continue
+        
         cif = OV.get_cif_item(conflict)
         val = d[conflict]['val']
         if not val:
@@ -144,3 +152,4 @@ def conflicts():
 olex.registerFunction(sources, False, "gui.metadata")
 olex.registerFunction(conflicts, False, "gui.metadata")
 olex.registerFunction(set_cif_item, False, "gui.metadata")
+olex.registerFunction(add_resolved_conflict_item_to_phil, False, "gui.metadata")
