@@ -91,14 +91,21 @@ def set_cif_item(key, value):
   OV.set_cif_item(key, '%s' %value)
 
 def make_conflict_link(item, val, src, cif_value):
-  if val == cif_value:
-    return "<b>%s</b>: <font color='green'><b>%s</b></font>" %(src, val)
-  else:
-    return '''<b>%s</b>:
-    <a href='spy.gui.metadata.set_cif_item(%s,"%s")>>spy.MergeCif(False)>>spy.gui.metadata.add_resolved_conflict_item_to_phil(%s)>>html.Update'>%s</a>
+  retVal = '''
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableRowBgColour)">
+<tr><td><b>%s</b><td><tr><td>
+<a href=
+'spy.gui.metadata.set_cif_item(%s,"%s")
+>>spy.MergeCif(False)
+>>spy.gui.metadata.add_resolved_conflict_item_to_phil(%s)
+>>html.Update'>%s</a></td><tr></table>
 '''%(src, item, val, item, val)
+  if val == cif_value:
+    retVal = "<b>%s</b>" %retVal
+  return retVal
 
 def conflicts():
+  added_count = 0
   resolved = OV.GetParam('snum.metadata.resolved_conflict_items')
   try:
     d = olx.CifInfo_metadata_conflicts.conflict_d
@@ -108,7 +115,6 @@ def conflicts():
   <table cellpadding='0' collspacing='0' width='100%%'>
     <tr><td colspan='2'><font color='red'><b>There is conflicting information!</b></font></td></tr>
       '''
-
       for conflict in d:
         if not conflict.startswith("_"): continue
         if conflict in resolved: continue
@@ -122,31 +128,45 @@ def conflicts():
         if not conflict_val:
           conflict_val = 'n/a'
         conflict_val = conflict_val.strip("'")
-        v_source = os.path.splitext(d[conflict]['val_source'])[1].lstrip('.').upper()
-        c_source = os.path.splitext(d[conflict]['conflict_source'])[1].lstrip('.').upper()
+        v_source = os.path.split(d[conflict]['val_source'])[1]
+        c_source = os.path.split(d[conflict]['conflict_source'])[1]
         added_count += 1
         link2 = make_conflict_link(conflict, val, v_source, cif)
         link3 = make_conflict_link(conflict, conflict_val, c_source, cif)
         txt += '''
-<tr><td width='50%%'><b>%s</b></td><td><font color='green'><b>%s</b></font></td></tr>
-<tr><td colspan='2'>
-  <table width='100%%' cellpadding='0' collspacing='0'>
-   <tr><td width='25%%'>&nbsp;&nbsp;</td><td>%s</td><td>%s</td></tr>
-  </table>
-</td></tr>
+<tr>
+  <td width='50%%'>
+    <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableRowBgColour)">
+
+    <tr><td>
+    <b>%s</b>
+    </td></tr>
+    <tr><td>.</td></tr></table>
+  <td width='25%%'>
+  %s
+  </td>
+  <td width='25%%'>
+  %s
+  </td>
+</tr>
   ''' %(conflict,
-        cif,
         link2,
         link3,
         )
       txt += "</table>"
     else:
-      txt = "<font color='green'><b>No conflicts in the meta-data</b></font>"
+      txt = "<font color='green'><b>No conflicts in the meta-data or all conflicts resolved</b></font><a href='spy.SetParam('snum.metadata.resolved_conflict_items','')"
 
   except:
     return "Not Initialised or Something Bad has happened."
   if added_count == 0:
-    txt = "<font color='green'><b>No conflicts in the meta-data</b></font>"
+    l = []
+    txt = '''
+<font color='green'><b>No conflicts in the meta-data</b></font>'''
+    if len(resolved) > 1:
+      txt += '''
+<a href='spy.SetParam(snum.metadata.resolved_conflict_items,[])>>spy.ExtractCifInfo()>>html.Update'>Reset Previous Conflicts</a>'''
+
   return txt
 
 olex.registerFunction(sources, False, "gui.metadata")
