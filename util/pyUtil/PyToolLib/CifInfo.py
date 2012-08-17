@@ -683,7 +683,7 @@ class ExtractCifInfo(CifTools):
     #for k in d:
     #  print "%s %s" %(d[k]['source'], k)
 
-    if self.conflict_d:
+    if self.conflict_d and len(resolved) == 1:
       print "There is conflicting information in the sources of metadata"
 
 #      for k in self.conflict_d:
