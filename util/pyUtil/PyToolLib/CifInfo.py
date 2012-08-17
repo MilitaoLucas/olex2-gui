@@ -417,7 +417,7 @@ class ExtractCifInfo(CifTools):
         computing_data_collection = self.prepare_computing(smart, versions, "smart")
         smart.setdefault("_computing_data_collection", computing_data_collection)
         self.update_cif_block(smart)
-        all_sources_d.setdefault(p, smart)
+        all_sources_d[p] = smart
 
       except Exception, err:
         print "Error reading Bruker SMART file %s: %s" %(p, err)
@@ -428,7 +428,7 @@ class ExtractCifInfo(CifTools):
         from p4p_reader import p4p_reader
         p4p = p4p_reader(p).read_p4p()
         self.update_cif_block(p4p)
-        all_sources_d.setdefault(p, p4p)
+        all_sources_d[p] = p4p
       except:
         print "Error reading p4p file %s" %p
 
@@ -442,7 +442,7 @@ class ExtractCifInfo(CifTools):
         integ.setdefault("_computing_data_reduction", computing_data_reduction)
         integ["computing_data_reduction"] = computing_data_reduction
         self.update_cif_block(integ)
-        all_sources_d.setdefault(p, integ)
+        all_sources_d[p] = integ
       except:
         print "Error reading Bruker Saint integration file %s" %p
 
@@ -456,7 +456,7 @@ class ExtractCifInfo(CifTools):
         computing_data_reduction = self.prepare_computing(saint, versions, "saint")
         saint.setdefault("_computing_data_reduction", computing_data_reduction)
         self.update_cif_block(saint)
-        all_sources_d.setdefault(p, saint)
+        all_sources_d[p] = saint
       except:
         print "Error reading Bruker saint.ini"
 
@@ -474,7 +474,7 @@ class ExtractCifInfo(CifTools):
           t = self.prepare_exptl_absorpt_process_details(sad, version)
           sad.setdefault("_exptl_absorpt_process_details", t)
           self.update_cif_block(sad, force=False)
-          all_sources_d.setdefault(p, sad)
+          all_sources_d[p] = sad
         elif abs_type == "TWINABS":
           twin = abs_reader.reader(p).twin_cifItems()
           twin.setdefault('abs_file', p)
@@ -484,7 +484,7 @@ class ExtractCifInfo(CifTools):
           t = self.prepare_exptl_absorpt_process_details(twin, version)
           twin.setdefault("_exptl_absorpt_process_details", t)
           self.update_cif_block(twin, force=True)
-          all_sources_d.setdefault(p, twin)
+          all_sources_d[p] = twin
       except Exception, e:
         if 'Unsupported program version' in str(e):
           print "%s for SADABS" %e
@@ -506,19 +506,19 @@ class ExtractCifInfo(CifTools):
         from pcf_reader import pcf_reader
         pcf = pcf_reader(p).read_pcf()
         self.update_cif_block(pcf)
-        all_sources_d.setdefault(p, pcf)
+        all_sources_d[p] = pcf
       except:
         print "Error reading pcf file %s" %p
 
-    p, pp = self.sort_out_path(path, "cad4")
-    if p and self.metacifFiles.curr_cad4 != self.metacifFiles.prev_cad4:
-      try:
-        from cad4_reader import cad4_reader
-        cad4 = cad4_reader(p).read_cad4()
-        self.update_cif_block(cad4)
-        all_sources_d.setdefault(p, cad4)
-      except:
-        print "Error reading cad4 file %s" %p
+    #p, pp = self.sort_out_path(path, "cad4")
+    #if p and self.metacifFiles.curr_cad4 != self.metacifFiles.prev_cad4:
+      #try:
+        #from cad4_reader import cad4_reader
+        #cad4 = cad4_reader(p).read_cad4()
+        #self.update_cif_block(cad4)
+        #all_sources_d[p] = cad4
+      #except:
+        #print "Error reading cad4 file %s" %p
 
     # Oxford Diffraction data collection CIF
     p,pp  = self.sort_out_path(path, "cif_od")
@@ -530,7 +530,7 @@ class ExtractCifInfo(CifTools):
         self.exclude_cif_items(cif_od)
         f.close()
         self.update_cif_block(cif_od, force=False)
-        all_sources_d.setdefault(p, cif_od)
+        all_sources_d[p] = cif_od
       except:
         print "Error reading Oxford Diffraction CIF %s" %p
 
@@ -596,7 +596,7 @@ class ExtractCifInfo(CifTools):
         self.exclude_cif_items(cif_block)
         f.close()
         self.update_cif_block(cif_block)
-        all_sources_d.setdefault(p, cif_block)
+        all_sources_d[p] = cif_block
       except:
         print "Error reading Rigaku CIF %s" %p
 
@@ -661,25 +661,29 @@ class ExtractCifInfo(CifTools):
     self.sort_out_conflicting_sources()
 
   def sort_out_conflicting_sources(self):
+    self.conflict_d = {}
     olx.CifInfo_metadata_conflicts = self
     d = {}
+    resolved = OV.GetParam('snum.metadata.resolved_conflict_items')
     for ld in self.all_sources_d:
       for k in self.all_sources_d[ld]:
+        if k in resolved:
+          continue
         val = self.all_sources_d[ld][k]
         dval = d.get(k, 0)
         if dval:
           source = dval['source']
-          dval = dval['val']
+          dval = dval['val'].strip("'")
           if dval == val:
             pass
           else:
-            self.conflict_d.setdefault(k,{'val':val,'source':ld})
+            self.conflict_d.setdefault(k,{'val':val,'val_source':ld, 'conflict_val':dval,'conflict_source':source, })
         else:
           d.setdefault(k,{'val':val,'source':ld})
     #for k in d:
     #  print "%s %s" %(d[k]['source'], k)
 
-    if self.conflict_d:
+    if self.conflict_d and len(resolved) == 1:
       print "There is conflicting information in the sources of metadata"
 
 #      for k in self.conflict_d:
