@@ -92,10 +92,13 @@ def set_cif_item(key, value):
 
 def make_conflict_link(item, val, src, cif_value):
   if val == cif_value:
-    return '''<font color='green'>
+    return '''
 <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableRowBgColour)">
-<tr><td><b>%s</b></td></tr><tr><td>%s</td></tr></table></font>
-'''%(src, val)
+<tr><td><b>%s</b></td></tr><tr><td>
+<a href='
+spy.gui.metadata.add_resolved_conflict_item_to_phil(%s)
+>>html.Update'><font color='green'>%s</font></a></td></tr></table>
+'''%(src, item, val)
   else:
     return '''
 <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableRowBgColour)">
@@ -140,7 +143,10 @@ def conflicts():
           link2, link3 = link3, link2
         cif_val = '.'
         if cif != val and cif != conflict_val:
-          cif_val = "<font color='green'>%s</font>" %cif
+          cif_val = '''
+<a href='spy.gui.metadata.add_resolved_conflict_item_to_phil(%s)
+>>html.Update'><font color='green'>%s</font></a>''' %(conflict, cif)
+
         txt += '''
 <tr>
   <td width='50%%'>
