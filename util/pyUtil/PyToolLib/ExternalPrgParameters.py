@@ -426,14 +426,18 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       OV.SetParam('snum.refinement.suggested_weight', suggested_weight)
     self.gather_refinement_information()
     writeRefinementInfoIntoRes(self.cif)
-
-    OV.SetParam('snum.refinement.max_peak', olx.Lst('peak'))
-    OV.SetParam('snum.refinement.max_hole', olx.Lst('hole'))
-    OV.SetParam('snum.refinement.max_shift_site', olx.Lst('max_shift'))
-    OV.SetParam('snum.refinement.max_shift_site_atom', olx.Lst('max_shift_object'))
-    OV.SetParam('snum.refinement.max_shift_u', olx.Lst('max_dU'))
-    OV.SetParam('snum.refinement.max_shift_u_atom', olx.Lst('max_dU_object'))
-
+    params = {
+      'snum.refinement.max_peak' : 'peak',
+      'snum.refinement.max_hole' : 'hole',
+      'snum.refinement.max_shift_site' : 'max_shift',
+      'snum.refinement.max_shift_site_atom' : 'max_shift_object',
+      'snum.refinement.max_shift_u' : 'max_dU',
+      'snum.refinement.max_shift_u_atom' : 'max_dU_object',
+    }
+    for k,v in params.iteritems():
+      v = olx.Lst(v)
+      if v == 'n/a':  v = 0
+      OV.SetParam(k, v)
 
   def gather_refinement_information(self):
     cif = {}
@@ -861,7 +865,7 @@ def defineExternalPrograms():
     name='Superflip',
     program_type='solution',
     author="A van der Lee, C.Dumas & L. Palatinus",
-    reference="J. Appl. Cryst. (2007) 40, 786-790",
+    reference="SUPERFLIP, J. Appl. Cryst. (2007) 40, 786-790",
     versions = '260711',
     execs=["superflip.exe", "superflip"])
 
@@ -900,13 +904,13 @@ def defineExternalPrograms():
     name='ShelXL-2012',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="SHELXL, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference="SHELXL-2012, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
     execs=["shelxl12.exe", "shelxl12"])
   ShelXLMP12 = Program(
     name='ShelXLMP-2012',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="SHELXL, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference="SHELXL-2012, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
     execs=["shelxl_mp12.exe", "shelxl_mp12"])
   XL = Program(
     name='XL',
