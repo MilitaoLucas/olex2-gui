@@ -91,18 +91,21 @@ def set_cif_item(key, value):
   OV.set_cif_item(key, '%s' %value)
 
 def make_conflict_link(item, val, src, cif_value):
-  retVal = '''
+  if val == cif_value:
+    return '''<font color='green'>
 <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableRowBgColour)">
-<tr><td><b>%s</b><td><tr><td>
+<tr><td><b>%s</b></td></tr><tr><td>%s</td></tr></table></font>
+'''%(src, val)
+  else:
+    return '''
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableRowBgColour)">
+<tr><td><b>%s</b></td></tr><tr><td>
 <a href=
 'spy.gui.metadata.set_cif_item(%s,"%s")
 >>spy.MergeCif(False)
 >>spy.gui.metadata.add_resolved_conflict_item_to_phil(%s)
->>html.Update'>%s</a></td><tr></table>
+>>html.Update'>%s</a></td></tr></table>
 '''%(src, item, val, item, val)
-  if val == cif_value:
-    retVal = "<b>%s</b>" %retVal
-  return retVal
 
 def conflicts():
   added_count = 0
@@ -118,7 +121,7 @@ def conflicts():
       for conflict in d:
         if not conflict.startswith("_"): continue
         if conflict in resolved: continue
-        
+
         cif = OV.get_cif_item(conflict)
         val = d[conflict]['val']
         if not val:
@@ -133,6 +136,11 @@ def conflicts():
         added_count += 1
         link2 = make_conflict_link(conflict, val, v_source, cif)
         link3 = make_conflict_link(conflict, conflict_val, c_source, cif)
+        if cif == conflict_val:
+          link2, link3 = link3, link2
+        cif_val = '.'
+        if cif != val and cif != conflict_val:
+          cif_val = "<font color='green'>%s</font>" %cif
         txt += '''
 <tr>
   <td width='50%%'>
@@ -141,7 +149,7 @@ def conflicts():
     <tr><td>
     <b>%s</b>
     </td></tr>
-    <tr><td>.</td></tr></table>
+    <tr><td align='center'>%s</td></tr></table>
   <td width='25%%'>
   %s
   </td>
@@ -150,6 +158,7 @@ def conflicts():
   </td>
 </tr>
   ''' %(conflict,
+        cif_val,
         link2,
         link3,
         )
