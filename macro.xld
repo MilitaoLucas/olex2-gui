@@ -258,27 +258,20 @@
     <args
       <arg1 name="l.s." def='-1'>
       <arg2 name="plan" def='-1.1'>
-
     >
     <cmd
       <cmd0 "xgrid.Visible(false)">
       <cmd1 "mode off">
       <cmd2 "user 'filepath()'">
-      <cmd3 x="kill $q">
-      <cmd5 "file">
-      <cmd6 XXX="cursor(busy, 'Refining...')">
-      <cmd7 "if strcmp(%1,'-1') then None else spy.SetMaxCycles(%1)">
-      <cmd8 "if strcmp(%2,'-1.1') then None else spy.SetMaxPeaks(%2)">
-      <cmd10 "spy.RunRefinementPrg()">
-      <cmd29 "spy.make_HOS()">
-      <cmd11 "html.Update">
-    >
-    <onterminate
-      <cmd0 "cursor()">
+      <cmd3 "if not(spy.AnalyseRefinementSource()) then abort">
+      <cmd4 "if strcmp(%1,'-1') then None else spy.SetMaxCycles(%1)">
+      <cmd5 "if strcmp(%2,'-1.1') then None else spy.SetMaxPeaks(%2)">
+      <cmd6 "spy.RunRefinementPrg()">
+      <cmd7 "spy.make_HOS()">
+      <cmd8 "html.Update">
     >
     <onabort
       <cmd "echo lasterror()">
-      <cmd0 "cursor()">
     >
   >
 >
