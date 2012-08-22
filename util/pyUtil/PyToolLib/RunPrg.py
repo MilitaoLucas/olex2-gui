@@ -232,7 +232,7 @@ class RunSolutionPrg(RunPrg):
     self.method.post_solution(self)
     self.doHistoryCreation()
     OV.SetParam('snum.current_process_diagnostics','solution')
-    
+
 
   def setupSolve(self):
     try:
@@ -274,7 +274,7 @@ class RunRefinementPrg(RunPrg):
     if self.terminate:
       self.endRun()
       return
-    
+
     if self.params.snum.refinement.graphical_output and self.HasGUI:
       self.method.observe(self)
     RunPrg.run(self)
@@ -429,5 +429,27 @@ class RunRefinementPrg(RunPrg):
     if not inversion_needed and not possible_racemic_twin:
       print "OK"
 
+def AnalyseRefinementSource():
+  file_name = OV.FileFull()
+  ins_file_name = olx.file.ChangeExt(file_name, 'ins')
+  res_file_name = olx.file.ChangeExt(file_name, 'res')
+  hkl_file_name = olx.file.ChangeExt(file_name, 'hkl')
+  if olx.IsFileType('cif') == 'true':
+    if os.path.exists(ins_file_name) or os.path.exists(res_file_name):
+      print 'Please load a RES or INS file to perform the refinement'
+      return False
+    olx.Export()
+    if os.path.exists(hkl_file_name):
+      olx.HKLSrc(hkl_file_name)
+    if os.path.exists(res_file_name):
+      olex.m("reap '%s'" %res_file_name)
+      print 'Loaded RES file extracted from CIF'
+    else:
+      olx.File("'%s'" %ins_file_name)
+      olex.m("reap '%s'" %ins_file_name)
+      print 'Loaded INS file generated from CIF'
+  return True
+
+OV.registerFunction(AnalyseRefinementSource)
 OV.registerFunction(RunRefinementPrg)
 OV.registerFunction(RunSolutionPrg)
