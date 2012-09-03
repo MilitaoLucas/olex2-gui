@@ -6,7 +6,7 @@
     <b>%Rotate%:</b>
   </td>
   <td name=SPIN_ROTATION_X align='left'>
-    $spy.MakeHoverButton(button_tiny-:x,rota 1 eval\(html.GetValue\(rx)*-1))
+    $spy.MakeHoverButton('button_tiny-:x','rota 1 math.eval(html.GetValue(rx)*-1)')
     &thinsp;
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
@@ -18,10 +18,10 @@
     >
     </font>
     &thinsp;
-    $spy.MakeHoverButton(button_tiny-x:,rota 1 html.getvalue\(rx))
+    $spy.MakeHoverButton('button_tiny-x:','rota 1 html.getvalue(rx)')
   </td>
   <td name=SPIN_ROTATION_Y align='center'>
-    $spy.MakeHoverButton(button_tiny-:y,rota 2 eval\(html.GetValue\(ry)*-1))
+    $spy.MakeHoverButton('button_tiny-:y','rota 2 math.eval(html.GetValue(ry)*-1)')
     &thinsp;
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
@@ -34,10 +34,10 @@
     >
     </font>
     &thinsp;
-    $spy.MakeHoverButton(button_tiny-y:,rota 2 html.getvalue\(ry))
+    $spy.MakeHoverButton('button_tiny-y:','rota 2 html.getvalue(ry)')
   </td>
   <td name=SPIN_ROTATION_Z align='right'>
-    $spy.MakeHoverButton(button_tiny-:z,rota 3 eval\(html.GetValue\(rz)*-1))
+    $spy.MakeHoverButton('button_tiny-:z','rota 3 math.eval(html.GetValue(rz)*-1)')
     &thinsp;
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
@@ -50,7 +50,7 @@
     >
     </font>
     &thinsp;
-    $spy.MakeHoverButton(button_tiny-z:,rota 3 html.getvalue\(rz))
+    $spy.MakeHoverButton('button_tiny-z:','rota 3 html.getvalue(rz)')
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
@@ -70,8 +70,8 @@
       width="28"
       value="x"
       data = "0"
-      oncheck = "html.setdata(x, '1')>>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 eval(html.getvalue(speed)*0.1)"
-      onuncheck="html.setdata(x, '0') >>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 eval(html.getvalue(speed)*0.1)"
+      oncheck = "html.setdata(x, '1')>>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 math.eval(html.getvalue(speed)*0.1)"
+      onuncheck="html.setdata(x, '0') >>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 math.eval(html.getvalue(speed)*0.1)"
     >
     </font>
   </td>
@@ -87,8 +87,8 @@
       height="$GetVar(HtmlInputHeight)"
       value="y"
       data = "0"
-      oncheck = "html.setdata(y, '1')>>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 eval(html.getvalue(speed)*0.1)"
-      onuncheck="html.setdata(y, '0') >>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 eval(html.getvalue(speed)*0.1)"
+      oncheck = "html.setdata(y, '1')>>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 math.eval(html.getvalue(speed)*0.1)"
+      onuncheck="html.setdata(y, '0') >>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 math.eval(html.getvalue(speed)*0.1)"
     >
     </font>
   </td>
@@ -104,8 +104,8 @@
       height="$GetVar(HtmlInputHeight)"
       value="z"
       data = "0"
-      oncheck = "html.setdata(z, '1')>>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 eval(html.getvalue(speed)*0.1)"
-      onuncheck="html.setdata(z, '0') >>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 eval(html.getvalue(speed)*0.1)"
+      oncheck = "html.setdata(z, '1')>>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 math.eval(html.getvalue(speed)*0.1)"
+      onuncheck="html.setdata(z, '0') >>rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 math.eval(html.getvalue(speed)*0.1)"
     >
     </font>
   </td>
@@ -121,16 +121,16 @@
       value="1"
       min="1"
       max="10"
-      onchange = "rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 eval(html.getvalue(speed)*0.1)"
+      onchange = "rota html.getdata(x) html.getdata(y) html.getdata(z) 100000 math.eval(html.getvalue(speed)*0.1)"
     >
     </font>
   </td>
   <td name=XYZ align='right'>
-    $spy.MakeHoverButton(button_tiny-a,matr 1)
+    $spy.MakeHoverButton('button_tiny-a','matr 1')
     &nbsp
-    $spy.MakeHoverButton(button_tiny-b,matr 2)
+    $spy.MakeHoverButton('button_tiny-b','matr 2')
     &nbsp
-    $spy.MakeHoverButton(button_tiny-c,matr 3)
+    $spy.MakeHoverButton('button_tiny-c','matr 3')
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
