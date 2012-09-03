@@ -5,22 +5,22 @@
   <td>
     <table><tr>
       <td width='30%'>
-        $spy.MakeHoverButton(toolbar-sp2,mode hfix 43)&nbsp;
-        $spy.MakeHoverButton(toolbar-sp2-1H,mode hfix 43)
-        $spy.MakeHoverButton(toolbar-sp2-2H,mode hfix 93)
+        $spy.MakeHoverButton('toolbar-sp2','mode hfix 43')&nbsp;
+        $spy.MakeHoverButton('toolbar-sp2-1H','mode hfix 43')
+        $spy.MakeHoverButton('toolbar-sp2-2H','mode hfix 93')
       </td>
       <td width='40%'>
-        $spy.MakeHoverButton(toolbar-sp3,mode hfix 13)&nbsp;
-        $spy.MakeHoverButton(toolbar-sp3-1H,mode hfix 13)
-        $spy.MakeHoverButton(toolbar-sp3-2H,mode hfix 23)
-        $spy.MakeHoverButton(toolbar-sp3-3H,mode hfix 137)
+        $spy.MakeHoverButton('toolbar-sp3','mode hfix 13')&nbsp;
+        $spy.MakeHoverButton('toolbar-sp3-1H','mode hfix 13')
+        $spy.MakeHoverButton('toolbar-sp3-2H','mode hfix 23')
+        $spy.MakeHoverButton('toolbar-sp3-3H','mode hfix 137')
       </td>
       <td width='20%'>
-        $spy.MakeHoverButton(toolbar-OH,mode hfix 147)
-        $spy.MakeHoverButton(toolbar-O-H,mode hfix 83)
+        $spy.MakeHoverButton('toolbar-OH','mode hfix 147')
+        $spy.MakeHoverButton('toolbar-O-H','mode hfix 83')
       </td>
       <td width=10%>
-        $spy.MakeHoverButton(toolbar-ok,mode off)
+        $spy.MakeHoverButton('toolbar-ok','mode off')
       </td>
     </tr></table>
   </td>
@@ -46,7 +46,7 @@
           
       </td>
       <td VALIGN='center' width='10%'>
-$spy.MakeHoverButton(button_small-hfix,if strcmp\(spy.GetParam\(olex2.short_mode),'hfix') then 'mode off'  else 'mode hfix html.getvalue\(HFIX)')
+$spy.MakeHoverButton('button_small-hfix',"if strcmp(spy.GetParam(olex2.short_mode),'hfix') then 'mode off'  else 'mode hfix html.getvalue(HFIX)'")
       </td>
     <td width="25%" align="right">
       <b>%HIMP%</b>

@@ -39,7 +39,7 @@
 			bgcolor="$GetVar(HtmlInputBgColour)" 
 			type="combo" 
 			name="SET_AUTOCHEM_SOLUTION_PROGRAM" 
-			width='$eval(html.clientwidth(self)-eval(html.clientwidth(self)/2)-30)' 
+			width='$math.eval(html.clientwidth(self)-html.clientwidth(self)/2-30)' 
 			height="18" 
 			manage
 			value="$spy.GetParam(autochem.solution_program)"
@@ -53,7 +53,7 @@
 			height="$GetVar(HtmlComboHeight)"
 			bgcolor="$GetVar(HtmlInputBgColour)" 
 			name="SET_AUTOCHEM_SOLUTION_METHOD" 
-			width='$eval(html.clientwidth(self)-eval(html.clientwidth(self)/2)-30)' 
+			width='$math.eval(html.clientwidth(self)-html.clientwidth(self)/2-30)' 
 			manage
 			value="$spy.GetParam(autochem.solution_method)"
 			onchange="spy.SetParam(autochem.solution_method,html.GetValue(SET_AUTOCHEM_SOLUTION_METHOD))"
@@ -71,7 +71,7 @@
 			height="$GetVar(HtmlComboHeight)"
 			bgcolor="$GetVar(HtmlInputBgColour)" 
 			name="SET_AUTOCHEM_REFINEMENT_PROGRAM" 
-			width='$eval(html.clientwidth(self)-eval(html.clientwidth(self)/2)-35)' 
+			width='$math.eval(html.clientwidth(self)-html.clientwidth(self)/2-35)' 
 			manage
 			value="$spy.GetParam(autochem.refinement_program)"
 			onchange="spy.SetParam(autochem.refinement_program,html.GetValue(SET_AUTOCHEM_REFINEMENT_PROGRAM))"
@@ -84,7 +84,7 @@
 			height="$GetVar(HtmlComboHeight)"
 			bgcolor="$GetVar(HtmlInputBgColour)" 
 			name="SET_AUTOCHEM_REFINEMENT_METHOD" 
-			width='$eval(html.clientwidth(self)-eval(html.clientwidth(self)/2)-30)' 
+			width='$math.eval(html.clientwidth(self)-html.clientwidth(self)/2-30)' 
 			manage
 			value="$spy.GetParam(autochem.refinement_method)"
 			onchange="spy.SetParam(autochem.refinement_method,html.GetValue(SET_AUTOCHEM_REFINEMENT_METHOD))"
