@@ -5,13 +5,13 @@
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <!-- #include tool-column gui\blocks\tool-help-first-column.htm;help_ext=cif-info;1; -->
   <td name=EDIT_CIF_INFO align='left' VALIGN='left' width='32%'>
-$spy.MakeHoverButton(button-edit_cif_info,spy.ExtractCifInfo\()>>spy.EditCifInfo\()>>html.Update)
+$spy.MakeHoverButton('button-edit_cif_info','spy.ExtractCifInfo()>>spy.EditCifInfo()>>html.Update')
   </td>
   <td name=MERGE_CIF_INFO align='center' VALIGN='center' width='35%'>
-$spy.MakeHoverButton(button-merge_cif,spy.ExtractCifInfo\()>>spy.MergeCif\(True)>>html.Update)
+$spy.MakeHoverButton('button-merge_cif','spy.ExtractCifInfo()>>spy.MergeCif(True)>>html.Update')
   </td>
   <td name=VALIDATE_CIF align='right' VALIGN='right' width='32%'>
-$spy.MakeHoverButton(button-validate_cif,spy.ValidateCif)
+$spy.MakeHoverButton('button-validate_cif','spy.ValidateCif')
   </td>
 </tr>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -21,7 +21,7 @@ $spy.MakeHoverButton(button-validate_cif,spy.ValidateCif)
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <!-- #include tool-column gui\blocks\tool-help-first-column.htm;help_ext=submit-info;1; -->
   <td name=GET_CHECKCIF_REPORT align='center' VALIGN='center' width='30%'>
-$spy.MakeHoverButton(button-checkcif_report,spy.cif.GetCheckCifReport\())
+$spy.MakeHoverButton('button-checkcif_report','spy.cif.GetCheckCifReport()')
   </td>
 
   <td name=GET_CHECKCIF_REPORT_FORMAT align='right' VALIGN='center' width='20%'>
@@ -40,7 +40,7 @@ $spy.MakeHoverButton(button-checkcif_report,spy.cif.GetCheckCifReport\())
   </td>
 
   <td name=REQUEST_CCDC_NUMBER align='right' VALIGN='right' width='50%'>
-$spy.MakeHoverButton(button-ccdc_number,spy.ccdc_submit\())
+$spy.MakeHoverButton('button-ccdc_number','spy.ccdc_submit()')
   </td>
 </tr>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -59,7 +59,7 @@ $spy.MakeHoverButton(button-ccdc_number,spy.ccdc_submit\())
       type='text'
       valign='center'
       height="$GetVar(HtmlInputHeight)"
-      width="$eval((html.clientwidth(self)-180)/2)"
+      width="$math.eval((html.clientwidth(self)-180)/2)"
       bgcolor="spy.GetParam(gui.html.input_bg_colour)"
       name='SET_SNUM_REPORT_TITLE'
       value='$spy.GetParam(snum.report.title)'
@@ -74,7 +74,7 @@ $spy.MakeHoverButton(button-ccdc_number,spy.ccdc_submit\())
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="combo"
-      width="$eval((html.clientwidth(self)-180)/2)"
+      width="$math.eval((html.clientwidth(self)-180)/2)"
       height="$GetVar(HtmlComboHeight)"
       bgcolor="spy.GetParam(gui.html.input_bg_colour)"
       name="SET_REPORT_IMAGE"
@@ -95,7 +95,7 @@ $spy.MakeHoverButton(button-ccdc_number,spy.ccdc_submit\())
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type='combo'
-      width="$eval((html.clientwidth(self)-180)/2)"
+      width="$math.eval((html.clientwidth(self)-180)/2)"
       height="$GetVar(HtmlComboHeight)"
       bgcolor="spy.GetParam(gui.html.input_bg_colour)"
       name='SET_USER_REPORT_STYLE'
@@ -113,7 +113,7 @@ $spy.MakeHoverButton(button-ccdc_number,spy.ccdc_submit\())
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type='combo'
-      width="$eval(((html.clientwidth(self)-21 0)/2) - $spy.GetParam('gui.html.combo_height') - 15)"
+      width="$math.eval(((html.clientwidth(self)-210)/2) - $spy.GetParam('gui.html.combo_height') - 15)"
       height="$GetVar(HtmlComboHeight)"
       bgcolor="$GetVar(HtmlInputBgColour)"
       name='SET_USER_REPORT_TEMPLATE'
@@ -123,7 +123,7 @@ $spy.MakeHoverButton(button-ccdc_number,spy.ccdc_submit\())
       onchange="spy.SetParam(user.report_template,html.GetValue(~name~))"
     >
     </font>&nbsp;
-$spy.MakeHoverButton(toolbar_small-open,shell 'file.ospath\(basedir\()/etc/CIF/styles)')
+$spy.MakeHoverButton('toolbar_small-open',"shell 'file.ospath(basedir()/etc/CIF/styles)'")
 
     </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
