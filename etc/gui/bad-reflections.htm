@@ -70,8 +70,8 @@
       value="%AND%"
       data=""
       $spy.CheckBoxValue(exclude_hkl_and) 
-      oncheck="SetVar(exclude_hkl_and,true)>>spy.StoreSingleParameter exclude_hkl_and>>SetData(EXCLUDE_AND,'-c')" 
-      onuncheck="SetVar(exclude_hkl_and,false)>>spy.StoreSingleParameter exclude_hkl_and>>SetData(EXCLUDE_AND,'')"
+      oncheck="SetVar(exclude_hkl_and,true)>>spy.StoreSingleParameter exclude_hkl_and>>html.SetData(EXCLUDE_AND,'-c')" 
+      onuncheck="SetVar(exclude_hkl_and,false)>>spy.StoreSingleParameter exclude_hkl_and>>html.SetData(EXCLUDE_AND,'')"
     >
   </td>
 
