@@ -57,6 +57,7 @@ def sources():
   text = ''
 
   x = 0
+  filePath = OV.FilePath()
   for i in range(len(list)):
     d = list[x]
     listFiles = 'snum.metacif.list_%s_files'  %'_'.join(
@@ -65,6 +66,9 @@ def sources():
     if var is not None:
       if ';' in var:
         d.setdefault('items', 'spy.GetParam(%s)' %listFiles)
+      else:
+        d.setdefault('value', olx.file.RelativePath(var[-1], filePath))
+
       x += 1
       file_type = '_'.join(d['varName'].split('.')[-1].split('_')[:-1])
       d.setdefault('onchange',"spy.SetParam(%s,'html.GetValue(SET_%s)')>>spy.AddVariableToUserInputList(%s)" %(d['varName'],str.upper(d['varName']).replace('.','_'),d['varName']))

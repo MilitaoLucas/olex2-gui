@@ -1016,16 +1016,18 @@ user
   cif{
     autorefine_if_no_cif_for_cifmerge = True
       .type = bool
+    finalise = *Ignore Include Exclude
+      .type = choice
     checkcif{
       url = http://vm02.iucr.org/cgi-bin/checkcif.pl
         .type = str
         .help = The URL to which the cif file will be sent
       format = *pdf html
         .type = choice
-      send = True
+      send = False
         .type = bool
         .help = If set to TRUE (default), the cif file will be sent to the checkcif url on pressing 'Validate Cif'
-  }
+    }
   }
   image{
     bitmap{
