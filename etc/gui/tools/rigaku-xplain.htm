@@ -21,7 +21,7 @@
         name='SET_SNUM_REFINEMENT_SPACE_GROUP'
         items='$spy.GetParam(snum.refinement.sg_list)'
         value='$sg(%n)'
-        onchange="reset -s='html.GetValue(~name~)' -c=html.GetValue(SET_SNUM_REFINEMENT_FORMULA)>>spy.run_skin sNumTitle>>html.Update"
+        onchange="reset -s=html.GetValue('~name~') -c=html.GetValue('SET_SNUM_REFINEMENT_FORMULA')>>spy.run_skin sNumTitle>>html.Update"
         onreturn="html.Call(~name~.onchange)"
       >
   </td>
@@ -39,7 +39,7 @@
   <td ALIGN='right'>
 <!-- #ignoreif not(spy.xplain.output_exists())
     <a href='sg>>spy.SetParam(snum.refinement.sg_list,SGList())>>html.update'>
-	  <b><a href="exec -o 'getvar(defeditor)' 'spy.xplain.get_output_name()' ">
+	  <b><a href="exec -o getvar('defeditor') spy.xplain.get_output_name()">
 	    View %Rigaku XPlain% output</a>
 	  </b>
 	</a>
