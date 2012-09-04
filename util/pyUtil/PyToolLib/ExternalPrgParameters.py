@@ -243,9 +243,9 @@ class Method_solution(Method):
   def post_solution(self, RunPrgObject):
     """Things to be done after running the solution program.
     """
+    # TREF sticks if used as TREF 2000
+    olx.DelIns('TREF')
     if RunPrgObject.HasGUI:
-      #olx.ShowQ('a true')
-      #olx.ShowQ('b true')
       olx.Compaq('-a')
       olx.ShowStr("true")
     self.auto = True
