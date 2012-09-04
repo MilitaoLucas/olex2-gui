@@ -615,10 +615,10 @@ def restraint_builder(cmd):
   btns = ""
   width='20%'
   if name == 'AFIX':
-    btns += '$spy.MakeHoverButton(button_small-clear@Afix,%s)' %clear_onclick
-    btns+= '$spy.MakeHoverButton(button_small-mode@Afix,%s)' %mode_ondown
+    btns += '$spy.MakeHoverButton("button_small-clear@Afix","%s")' %clear_onclick
+    btns+= '$spy.MakeHoverButton("button_small-mode@Afix","%s")' %mode_ondown
     width='60%'
-  btns += '$spy.MakeHoverButton(button_small-go@%s,%s)' %(name, onclick)
+  btns += '$spy.MakeHoverButton("button_small-go@%s","%s")' %(name, onclick)
 
   html.append("<td width='%s' align='right' bgcolor='%s'>%s</td>" %(width,table_row_bg,btns))
 
