@@ -579,7 +579,7 @@ snum
   calcvoid {
     resolution = 0.2
       .type = float
-    precise = False
+    precise = True
       .type = bool
     distance = 0.0
       .type = float

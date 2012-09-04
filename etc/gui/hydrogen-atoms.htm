@@ -46,7 +46,7 @@
           
       </td>
       <td VALIGN='center' width='10%'>
-$spy.MakeHoverButton('button_small-hfix',"if strcmp(spy.GetParam(olex2.short_mode),'hfix') then 'mode off'  else 'mode hfix html.getvalue(HFIX)'")
+$spy.MakeHoverButton('button_small-hfix',"if strcmp(spy.GetParam(olex2.short_mode),'hfix') then 'mode off' else 'mode hfix html.getvalue(HFIX)'")
       </td>
     <td width="25%" align="right">
       <b>%HIMP%</b>
@@ -60,7 +60,7 @@ $spy.MakeHoverButton('button_small-hfix',"if strcmp(spy.GetParam(olex2.short_mod
         name = "HIMP_DISTANCE"
         width="100%"
         value=""
-        items='B-H (1.19)<-1.19;sp3-C-H (1.083)<-1.083;sp2-C-H (1.077)<-1.077;sp3-N-H (1.033)<-1.033;sp2-N-H (1.009)<-1.009;O-H (0.983)<-0.983;'
+        items="'B-H (1.19)<-1.19;sp3-C-H (1.083)<-1.083;sp2-C-H (1.077)<-1.077;sp3-N-H (1.033)<-1.033;sp2-N-H (1.009)<-1.009;O-H (0.983)<-0.983;'"
         onchange = "labels -l -h>>mode himp html.GetValue(HIMP_DISTANCE)"
       >
       </font>
