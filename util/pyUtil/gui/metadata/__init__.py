@@ -64,14 +64,20 @@ def sources():
       d['varName'].split('.')[-1].split('_')[:-1])
     var = OV.GetParam(listFiles)
     if var is not None:
-      if ';' in var:
-        d.setdefault('items', 'spy.GetParam(%s)' %listFiles)
+      if ';' in var[-1] > 1:
+        files = ';'.join([olx.file.RelativePath(i, filePath) for i in var[-1].split(';')])
+        d.setdefault('items', files)
+        value_name = 'snum.metacif.%s_file'  %'_'.join(
+          d['varName'].split('.')[-1].split('_')[:-1])
+        value = OV.GetParam(value_name)
       else:
-        d.setdefault('value', olx.file.RelativePath(var[-1], filePath))
+        value = var[-1]
+      d.setdefault('value', olx.file.RelativePath(value, filePath))
 
       x += 1
       file_type = '_'.join(d['varName'].split('.')[-1].split('_')[:-1])
-      d.setdefault('onchange',"spy.SetParam(%s,'html.GetValue(SET_%s)')>>spy.AddVariableToUserInputList(%s)" %(d['varName'],str.upper(d['varName']).replace('.','_'),d['varName']))
+      d.setdefault('onchange',"spy.SetParam('%s',html.GetValue('SET_%s'))>>spy.AddVariableToUserInputList('%s')>>html.Update"
+                    %(d['varName'],str.upper(d['varName']).replace('.','_'),d['varName']))
       d['chooseFile'].setdefault('folder',OV.FilePath())
       d['chooseFile'].setdefault('file_type',file_type)
       d['chooseFile'].setdefault('caption',d['itemName'])
@@ -97,7 +103,7 @@ def set_cif_item(key, value):
 def make_conflict_link(item, val, src, cif_value):
   if val == cif_value:
     return '''
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableRowBgColour)">
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar('HtmlTableRowBgColour')">
 <tr><td><b>%s</b></td></tr><tr><td>
 <a href='
 spy.gui.metadata.add_resolved_conflict_item_to_phil(%s)
@@ -105,20 +111,24 @@ spy.gui.metadata.add_resolved_conflict_item_to_phil(%s)
 '''%(src, item, val)
   else:
     return '''
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableRowBgColour)">
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar('HtmlTableRowBgColour')">
 <tr><td><b>%s</b></td></tr><tr><td>
 <a href=
-'spy.gui.metadata.set_cif_item(%s,"%s")
->>spy.MergeCif(False)
->>spy.gui.metadata.add_resolved_conflict_item_to_phil(%s)
->>html.Update'>%s</a></td></tr></table>
+"spy.gui.metadata.set_cif_item('%s','%s')
+>>spy.MergeCif('False')
+>>spy.gui.metadata.add_resolved_conflict_item_to_phil('%s')
+>>html.Update">%s</a></td></tr></table>
 '''%(src, item, val, item, val)
 
 def conflicts():
   added_count = 0
   resolved = OV.GetParam('snum.metadata.resolved_conflict_items')
   try:
+    if not olx.CifInfo_metadata_conflicts:
+      from CifInfo import ExtractCifInfo
+      ExtractCifInfo()
     d = olx.CifInfo_metadata_conflicts.conflict_d
+    olx.CifInfo_metadata_conflicts = None
     if d:
       added_count = 0
       txt = '''
