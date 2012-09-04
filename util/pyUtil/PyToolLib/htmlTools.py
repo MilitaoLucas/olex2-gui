@@ -434,7 +434,7 @@ def make_warning_html(colspan):
   html = '''
        <tr>
          %s
-         <td colspan="%s" bgcolor="$GetVar(HtmlHighlightColour)">
+         <td colspan="%s" bgcolor="$GetVar('HtmlHighlightColour')">
           <b>
             &nbsp;%s
           </b>
@@ -450,7 +450,7 @@ def make_table_first_col(help_name=None, popout=False, help_image='large'):
   else:
     help = make_help_href(help_name, popout, image=help_image)
   html ='''
-<td valign='top' align='center' bgcolor='$GetVar(HtmlTableFirstcolColour)'>
+<td valign='top' align='center' bgcolor="$GetVar('HtmlTableFirstcolColour')">
   %s
 </td>
 ''' %help
@@ -459,8 +459,8 @@ def make_table_first_col(help_name=None, popout=False, help_image='large'):
 def make_html_opening():
   html = '''
   <html>
-  <body link=$GetVar(HtmlLinkColour) bgcolor=$GetVar(HtmlBgColour)>
-  <font color=$GetVar(HtmlFontColour size=$GetVar(HtmlGuiFontSize) face="$GetVar(HtmlFontName)">
+  <body link=$GetVar(HtmlLinkColour) bgcolor="$GetVar('HtmlBgColour')">
+  <font color="$GetVar('HtmlFontColour')" size="$GetVar('HtmlGuiFontSize')" face="$GetVar('HtmlFontName')">
 <p> '''
   return html
 
@@ -479,9 +479,9 @@ def make_help_href(name, popout, image='normal'):
 
 def make_input_text_box(d):
   name = d.get('ctrl_name')
-  dic = {'height':'$GetVar(HtmlInputHeight)',
-         'bgcolor':'$GetVar(HtmlInputBgColour))',
-         'value':'$spy.GetParam(%(varName)s)',
+  dic = {'height':"$GetVar('HtmlInputHeight')",
+         'bgcolor':"$GetVar('HtmlInputBgColour')",
+         'value':"$spy.GetParam('%(varName)s')",
          'width':'45',
          'onchange':'',
          'label':name,
@@ -492,9 +492,9 @@ def make_input_text_box(d):
   dic.update(d)
 
   html = '''
-<font size='$GetVar(HtmlFontSizeControls)'>
+<font size="$GetVar('HtmlFontSizeControls')">
 <input
-       bgcolor="$GetVar(HtmlInputBgColour))"
+       bgcolor="$GetVar('HtmlInputBgColour')"
        type="text"
        name="%(ctrl_name)s"
        value="%(value)s"
@@ -512,9 +512,9 @@ def make_input_text_box(d):
 
 def make_combo_text_box(d):
   name = d.get('ctrl_name')
-  dic = {'height':"$GetVar(HtmlComboHeight)",
-         'bgcolor':'$GetVar(HtmlInputBgColour))',
-         'value':'$spy.GetParam(%(varName)s)',
+  dic = {'height':"$GetVar('HtmlComboHeight')",
+         'bgcolor':"$GetVar('HtmlInputBgColour')",
+         'value':"$spy.GetParam('%(varName)s')",
          'label':'',
          'valign':'center',
          'halign':'left',
@@ -533,9 +533,9 @@ def make_combo_text_box(d):
       dic['readonly'] = ""
 
     html = '''
-<font size='$GetVar(HtmlFontSizeControls)'>
+<font size="$GetVar('HtmlFontSizeControls')">
 <input
-       bgcolor="$GetVar(HtmlInputBgColour))"
+       bgcolor="$GetVar('HtmlInputBgColour')"
        type="combo"
        name="%(ctrl_name)s"
        value="%(value)s"
@@ -557,11 +557,11 @@ def make_combo_text_box(d):
 
 def make_tick_box_input(d):
   name = d.get('ctrl_name')
-  dic = {'height':'$GetVar(HtmlCheckboxHeight)',
-         'bgcolor':'$GetVar(HtmlTableBgColour)',
-         'fgcolor':'$GetVar(HtmlFontColour',
-         'value':'$spy.GetParam(%(varName)s)',
-         'width':'$GetVar(HtmlCheckboxWidth)',
+  dic = {'height':"$GetVar('HtmlCheckboxHeight')",
+         'bgcolor':"$GetVar('HtmlTableBgColour')",
+         'fgcolor':"$GetVar('HtmlFontColour')",
+         'value':"$spy.GetParam('%(varName)s')",
+         'width':"$GetVar('HtmlCheckboxWidth')",
          'onchange':'',
          'value':'%s '%name,
          'oncheck':'',
@@ -578,7 +578,7 @@ def make_tick_box_input(d):
 
 
   html = """
-<font size='$GetVar(HtmlFontSizeControls)'>
+<font size="$GetVar('HtmlFontSizeControls')">
 <input
   type="checkbox"
   width="%(width)s"
@@ -602,9 +602,9 @@ def make_tick_box_input(d):
 def make_spin_input(d):
   name = d.get('ctrl_name')
   dic = {'width':'12',
-         'height':'$GetVar(HtmlSpinHeight)',
-         'bgcolor':'$GetVar(HtmlInputBgColour))',
-         'value':'$spy.GetParam(%(varName)s)',
+         'height':"$GetVar('HtmlSpinHeight')",
+         'bgcolor':"$GetVar('HtmlInputBgColour')",
+         'value':"$spy.GetParam('%(varName)s')",
          'max':'99',
          'min':'0',
          'width':'45',
@@ -616,7 +616,7 @@ def make_spin_input(d):
      }
   dic.update(d)
   html = """
-<font size='$GetVar(HtmlFontSizeControls)'>
+<font size="$GetVar('HtmlFontSizeControls')">
 <input
   label="%(label)s"
   valign="%(valign)s"
@@ -640,14 +640,14 @@ def make_input_button(d):
          'onup':'',
          'onclick':'',
          'hint':'',
-         'height':"$GetVar(HtmlButtonHeight)",
-         'bgcolor':"$GetVar(HtmlInputBgColour))",
+         'height':"$GetVar('HtmlButtonHeight')",
+         'bgcolor':"$GetVar('HtmlInputBgColour')",
          'valign':'center',
          'halign':'left'
          }
   dic.update(d)
   html = '''
-<font size='$GetVar(HtmlFontSizeControls)'>
+<font size="$GetVar('HtmlFontSizeControls')">
 <input
   bgcolor="%(bgcolor)s"
   type="button"
@@ -730,12 +730,12 @@ def format_help(string):
   ## find all occurences of strings between TT..TT. These are keys to pressthe headers for tip of the day.
   regex = re.compile(r"TT (.*?)  TT", re.X)
   sx = string
-  string = regex.sub(r"<tr><td align='right'>$spy.MakeHoverButton(button-tutorial,spy.demo.run_autodemo\\(\1))</td></tr>", string)
+  string = regex.sub(r"<tr><td align='right'>$spy.MakeHoverButton('button-tutorial','spy.demo.run_autodemo(1)')</td></tr>", string)
   string = string.replace(r"\\\\",r"\\")
 
   ## find all occurences of strings between l[]. These are links to help or tutorial popup boxes.
   regex = re.compile(r"l\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
-  string = regex.sub(r"<font size=+1 color='$GetVar(HtmlHighlightColour)'>&#187;</font><a target='Go to \g<linktext>' href='spy.make_help_box -name=\g<linkurl> -type=\g<linktype>'><b>\g<linktext></b></a>", string)
+  string = regex.sub(r"<font size=+1 color=\"$GetVar('HtmlHighlightColour')\">&#187;</font><a target='Go to \g<linktext>' href='spy.make_help_box -name=\g<linkurl> -type=\g<linktype>'><b>\g<linktext></b></a>", string)
 
   ## find all occurences of strings between URL[]. These are links to help or tutorial popup boxes.
   regex = re.compile(r"URL\[\s*(?P<URL>.*?)]", re.X)
@@ -778,7 +778,7 @@ def format_help(string):
   m = regex.findall(string)
   colour = "#232323"
   if m:
-    s = regex.sub(r"<tr bgcolor='$GetVar(HtmlTableFirstcolColour)'><td colspan='4'><b>\2</b></td></tr><tr><td>", string)
+    s = regex.sub(r"<tr bgcolor=\"$GetVar('HtmlTableFirstcolColour')\"><td colspan='4'><b>\2</b></td></tr><tr><td>", string)
   else:
     s = string
 

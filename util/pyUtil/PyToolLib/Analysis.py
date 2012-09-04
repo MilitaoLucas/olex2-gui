@@ -744,13 +744,13 @@ class Graph(ImageTools):
   name="HistoryScale"
   width="45"
   label="Scale "
-  bgcolor="$GetVar(HtmlTableBgColour)"
-  fgcolor="$GetVar(HtmlFontColour)"
+  bgcolor="$GetVar('HtmlTableBgColour')"
+  fgcolor="$GetVar('HtmlFontColour')"
   valign='center'
   min="2"
-  height="$GetVar(HtmlSpinHeight)"
-  value="$spy.GetParam(graphs.program_analysis.y_scale_factor)"
-  onchange="spy.SetParam(graphs.program_analysis.y_scale_factor,html.GetValue(HistoryScale))>>spy._make_history_bars()>>html.Update"
+  height="$GetVar('HtmlSpinHeight')"
+  value="$spy.GetParam('graphs.program_analysis.y_scale_factor')"
+  onchange="spy.SetParam('graphs.program_analysis.y_scale_factor',html.GetValue('HistoryScale'))>>spy._make_history_bars()>>html.Update"
 >
 </font>'''
 
@@ -760,10 +760,10 @@ class Graph(ImageTools):
           next_img = ""
         else:
           all_in_oneText = '''
-<a href='spy.SetParam(graphs.program_analysis.all_in_one_history,True)>>spy._make_history_bars()>>html.Update'>Show All Bars</a>'''
-          previous_img = "<a href='spy.olex_fs_copy(history-info_%s.htm,history-info.htm)>>html.Update'><zimg src=previous.png></a>" %(img_no -1)
+<a href="spy.SetParam('graphs.program_analysis.all_in_one_history','True')>>spy._make_history_bars()>>html.Update">Show All Bars</a>'''
+          previous_img = '''<a href="spy.olex_fs_copy('history-info_%s.htm','history-info.htm')>>html.Update"><zimg src=previous.png></a>''' %(img_no -1)
           #previous_img = "<a href='spy.write_to_olex(history-info.htm,Fred)'><zimg src=previous.png></a>"
-          next_img = "<a href='spy.olex_fs_copy(history-info_%s.htm,history-info.htm)>>html.Update'><zimg src=next.png></a>" %(img_no + 1)
+          next_img = '''<a href="spy.olex_fs_copy('history-info_%s.htm','history-info.htm')>>html.Update"><zimg src='next.png'></a>''' %(img_no + 1)
 
         historyTextNext = '''
 <table width='100%%' border='0' cellpadding='0'>
