@@ -29,11 +29,7 @@ $spy.MakeHoverButton('toolbar-H','showH')
 $spy.MakeHoverButton('toolbar-center','compaq>>compaq -a>>center')
   </td>
   
-  <td width = '5%'>
-$spy.MakeHoverButton('toolbar-ok',"fixunit html.GetValue(SET_Z_PRIME_FIXUNIT)>>xf.au.SetZprime(html.GetValue(SET_Z_PRIME_FIXUNIT))>>html.Update")
-
-
-<td width='20%'>
+<td width='10%'>
 </td>
 
 
@@ -41,8 +37,6 @@ $spy.MakeHoverButton('toolbar-ok',"fixunit html.GetValue(SET_Z_PRIME_FIXUNIT)>>x
   <font size=$GetVar(HtmlFontSizeControls)>
     Z'=
   </font>
-</td>
-
   </td>
   <td width='15%' align='right'>
     <font size='$GetVar(HtmlFontSizeControls)'>
@@ -58,6 +52,9 @@ $spy.MakeHoverButton('toolbar-ok',"fixunit html.GetValue(SET_Z_PRIME_FIXUNIT)>>x
       onreturn="xf.au.SetZprime(html.GetValue(~name~))>>html.update"
       >
     </font>
+  </td>
+  <td width = '5%'>
+$spy.MakeHoverButton('toolbar-ok',"fixunit html.GetValue(SET_Z_PRIME_FIXUNIT)>>xf.au.SetZprime(html.GetValue(SET_Z_PRIME_FIXUNIT))>>html.Update")
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
