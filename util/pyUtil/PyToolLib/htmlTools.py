@@ -472,7 +472,7 @@ def make_html_closing():
 
 def make_help_href(name, popout, image='normal'):
   help = '''
-  $spy.MakeHoverButton(btn-info@%s,spy.make_help_box -name='%s' -popout='%s')
+  $spy.MakeHoverButton("btn-info@%s","spy.make_help_box -name='%s' -popout='%s'")
   ''' %(name, name, popout)
 
   return help
