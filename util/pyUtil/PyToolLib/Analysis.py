@@ -2617,6 +2617,9 @@ class HealthOfStructure():
       return (False, True)
 
     try:
+      hkl = OV.HKLSrc()
+      if not hkl or not os.path.exists(hkl):
+        return (False, True)
       self.hkl_stats = olex_core.GetHklStat()
     except:
       return (False, True)
@@ -2624,9 +2627,6 @@ class HealthOfStructure():
       return (True, True)
     else:
       self.scope = "hkl"
-      hkl = OV.HKLSrc()
-      if not hkl or not os.path.exists(hkl):
-        return (False, True)
       if force:
         return (True, None)
       try:
