@@ -240,6 +240,17 @@ class RunSolutionPrg(RunPrg):
     except:
       self.sg = ""
     self.formula = olx.xf.GetFormula()
+    if not self.formula:
+      if self.HasGUI:
+        import olex_gui
+        r = olex_gui.GetUserInput(1, "Please enter the structure composition", "")
+        if not r:
+          self.terminate = True
+          return
+        self.formula = r
+      else:
+        print 'Please provide the structure composition'
+        self.terminate = True
     if "smtbx" not in self.program.name:
       self.shelx = self.which_shelx(self.program)
     args = self.method.pre_solution(self)
@@ -282,7 +293,7 @@ class RunRefinementPrg(RunPrg):
   def setupRefine(self):
     self.method.pre_refinement(self)
     self.shelx = self.which_shelx(self.program)
-    if olx.LSM() == "CGLS":
+    if olx.LSM().upper() == "CGLS":
       olx.DelIns('ACTA')
     OV.File()
 
