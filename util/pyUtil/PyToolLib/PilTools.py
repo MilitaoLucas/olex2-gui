@@ -1200,7 +1200,6 @@ class timage(ImageTools):
     name = "pop_background.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
 
-
     cut = 90*sf, 95*sf, 140*sf, 140*sf
     crop =  im.crop(cut)
 #    IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
@@ -1209,6 +1208,12 @@ class timage(ImageTools):
     IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
     name = "warning_big.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
+
+    for col in ['green', 'orange', 'red']:
+      IM =  Image.new('RGBA', (10,10), OV.GetParam('gui.%s' %col).rgb)
+      name = "bar_%s.png" %col
+      OlexVFS.save_image_to_olex(IM, name, 2)
+
 
   def produce_buttons(self, button_names, scale,btn_type, max_width=None, width=None, crop=None, cut=None, ):
     self.image_type = btn_type
@@ -2474,6 +2479,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     elif item_type == "snumtitle":
       self.title_case = False
+      if OV.FileExt() == "cif":
+        grad_colour = self.params.dark_green.rgb
 
     elif item_type == "small_button":
       underground = self.params.html.table_bg_colour.rgb
