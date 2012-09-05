@@ -1209,7 +1209,7 @@ class timage(ImageTools):
     name = "warning_big.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
 
-    for col in ['green', 'orange', 'red']:
+    for col in ['green', 'orange', 'red', 'purple']:
       IM =  Image.new('RGBA', (10,10), OV.GetParam('gui.%s' %col).rgb)
       name = "bar_%s.png" %col
       OlexVFS.save_image_to_olex(IM, name, 2)
