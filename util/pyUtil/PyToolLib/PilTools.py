@@ -2479,8 +2479,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     elif item_type == "snumtitle":
       self.title_case = False
-      if OV.FileExt() == "cif":
-        grad_colour = self.params.dark_green.rgb
+      #=========================================================================
+      # if OV.FileExt() == "cif":
+      #  grad_colour = self.params.dark_green.rgb
+      #=========================================================================
 
     elif item_type == "small_button":
       underground = self.params.html.table_bg_colour.rgb
