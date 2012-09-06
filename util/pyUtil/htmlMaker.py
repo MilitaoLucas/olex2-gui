@@ -196,7 +196,7 @@ def referenceMetadataHtmlMaker():
      },
     {'varName':'snum.dimas.reference_journal_name',
      'itemName':'%Journal%',
-     'items':userDictionaries.localList.getListJournals()
+     'items': userDictionaries.localList.getListJournals()
      },
     {'varName':'snum.dimas.reference_journal_volume',
      'itemName':'%Volume%',
@@ -319,7 +319,7 @@ def publicationMetadataHtmlMaker():
   list.append(
     {'varName':'_publ_requested_journal',
      'itemName':'%Requested% %Journal%',
-     'items':userDictionaries.localList.getListJournals(),
+     'items': "'%s'" %userDictionaries.localList.getListJournals(),
      'readonly':'',
      'value':'spy.get_cif_item(_publ_requested_journal)',
      'onchange':'spy.addToLocalList(html.GetValue(~name~),requested_journal)>>spy.changeBoxColour(~name~,#FFDCDC)',
