@@ -232,7 +232,7 @@ class RunSolutionPrg(RunPrg):
     self.method.post_solution(self)
     self.doHistoryCreation()
     OV.SetParam('snum.current_process_diagnostics','solution')
-    
+
 
   def setupSolve(self):
     try:
@@ -240,6 +240,17 @@ class RunSolutionPrg(RunPrg):
     except:
       self.sg = ""
     self.formula = olx.xf.GetFormula()
+    if not self.formula:
+      if self.HasGUI:
+        import olex_gui
+        r = olex_gui.GetUserInput(1, "Please enter the structure composition", "")
+        if not r:
+          self.terminate = True
+          return
+        self.formula = r
+      else:
+        print 'Please provide the structure composition'
+        self.terminate = True
     if "smtbx" not in self.program.name:
       self.shelx = self.which_shelx(self.program)
     args = self.method.pre_solution(self)
@@ -274,7 +285,7 @@ class RunRefinementPrg(RunPrg):
     if self.terminate:
       self.endRun()
       return
-    
+
     if self.params.snum.refinement.graphical_output and self.HasGUI:
       self.method.observe(self)
     RunPrg.run(self)
@@ -282,7 +293,7 @@ class RunRefinementPrg(RunPrg):
   def setupRefine(self):
     self.method.pre_refinement(self)
     self.shelx = self.which_shelx(self.program)
-    if olx.LSM() == "CGLS":
+    if olx.LSM().upper() == "CGLS":
       olx.DelIns('ACTA')
     OV.File()
 
@@ -429,5 +440,27 @@ class RunRefinementPrg(RunPrg):
     if not inversion_needed and not possible_racemic_twin:
       print "OK"
 
+def AnalyseRefinementSource():
+  file_name = OV.FileFull()
+  ins_file_name = olx.file.ChangeExt(file_name, 'ins')
+  res_file_name = olx.file.ChangeExt(file_name, 'res')
+  hkl_file_name = olx.file.ChangeExt(file_name, 'hkl')
+  if olx.IsFileType('cif') == 'true':
+    if os.path.exists(ins_file_name) or os.path.exists(res_file_name):
+      print 'Please load a RES or INS file to perform the refinement'
+      return False
+    olx.Export()
+    if os.path.exists(hkl_file_name):
+      olx.HKLSrc(hkl_file_name)
+    if os.path.exists(res_file_name):
+      olex.m("reap '%s'" %res_file_name)
+      print 'Loaded RES file extracted from CIF'
+    else:
+      olx.File("'%s'" %ins_file_name)
+      olex.m("reap '%s'" %ins_file_name)
+      print 'Loaded INS file generated from CIF'
+  return True
+
+OV.registerFunction(AnalyseRefinementSource)
 OV.registerFunction(RunRefinementPrg)
 OV.registerFunction(RunSolutionPrg)

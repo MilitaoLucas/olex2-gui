@@ -330,6 +330,12 @@ class OlexFunctions(inheritFunctions):
         cmd = '"%s"' %filepath
       if update_atoms_loop:
         cmd += ' -u'
+      finalise = self.GetParam('user.cif.finalise', 'Ignore')
+      print finalise
+      if finalise == 'Include':
+        cmd  += ' -f=true'
+      elif finalise == 'Exclude':
+        cmd  += ' -f=false'
       olx.CifMerge(cmd)
       if report:
         print "Refinement CIF file has been merged with the meta-data cif file"

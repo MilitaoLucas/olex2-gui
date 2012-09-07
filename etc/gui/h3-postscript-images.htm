@@ -7,16 +7,16 @@
      %Name%
   </td>
   <td name=IMAGE_PS_NAME width='15%' align='right'>
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size=$GetVar('HtmlFontSizeControls')>
     <input
       type="text"
-      height="$GetVar(HtmlInputHeight)"
-      bgcolor="$GetVar(HtmlInputBgColour)"
+      height="$GetVar('HtmlInputHeight')"
+      bgcolor="$GetVar('HtmlInputBgColour')"
       valign='center'
       name="IMAGE_PS_NAME"
       width="100%"
-      value="spy.GetParam(snum.image.ps.name)"
-      onchange="spy.SetParam(snum.image.ps.name,html.GetValue(~name~))"
+      value="spy.GetParam('snum.image.ps.name')"
+      onchange="spy.SetParam('snum.image.ps.name',html.GetValue('~name~'))"
       manage
     >
     </font>
@@ -28,15 +28,15 @@
     <font size=$GetVar(HtmlFontSizeControls)>
     <input
       type="checkbox"
-      height="$GetVar(HtmlCheckboxHeight)"
-      width="$GetVar(HtmlCheckboxWidth)"
+      height="$GetVar('HtmlCheckboxHeight')"
+      width="$GetVar('HtmlCheckboxWidth')"
       name = "COLOR_LINE"
       width="14"
-      fgcolor="$GetVar(HtmlFontColour)"
-      bgcolor="$GetVar(HtmlTableBgColour)"
-      oncheck="SetData(COLOR_LINE,-color_line)>>spy.SetParam(snum.image.ps.colour_line,-color_line)"
-      onuncheck="SetData(COLOR_LINE,' ')>>spy.SetParam(snum.image.ps.colour_line,' ')"
-      checked="$strcmp(spy.GetParam(snum.image.ps.colour_line),-color_line)"
+      fgcolor="$GetVar('HtmlFontColour')"
+      bgcolor="$GetVar('HtmlTableBgColour')"
+      oncheck="html.SetData('~name~','-color_line')>>spy.SetParam('snum.image.ps.colour_line','-color_line')"
+      onuncheck="html.SetData('~name~',' ')>>spy.SetParam('snum.image.ps.colour_line',' ')"
+      checked="$strcmp(spy.GetParam('snum.image.ps.colour_line'),'-color_line')"
       manage
     >
     </font>
@@ -45,17 +45,17 @@
     %Bonds%
   </td>
   <td name=IMAGE_PS_COLOUR_BOND width='15%' align='left'>
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size=$GetVar('HtmlFontSizeControls')>
     <input
       type="checkbox"
-      height="$GetVar(HtmlCheckboxHeight)"
-      width="$GetVar(HtmlCheckboxWidth)"
+      height="$GetVar('HtmlCheckboxHeight')"
+      width="$GetVar('HtmlCheckboxWidth')"
       name = "COLOR_BOND"
-      fgcolor="$GetVar(HtmlFontColour)"
-      bgcolor="$GetVar(HtmlTableBgColour)"
-      oncheck="SetData(COLOR_BOND,-color_bond)>>spy.SetParam(snum.image.ps.colour_bond,-color_bond)"
-      onuncheck="SetData(COLOR_BOND,' ')>>spy.SetParam(snum.image.ps.colour_bond,' ')"
-      checked="$strcmp(spy.GetParam(snum.image.ps.colour_bond),-color_bond)"
+      fgcolor="$GetVar('HtmlFontColour')"
+      bgcolor="$GetVar('HtmlTableBgColour')"
+      oncheck="html.SetData('~name~','-color_bond')>>spy.SetParam('snum.image.ps.colour_bond','-color_bond')"
+      onuncheck="html.SetData('~name~',' ')>>spy.SetParam('snum.image.ps.colour_bond',' ')"
+      checked="$strcmp(spy.GetParam('snum.image.ps.colour_bond'),'-color_bond')"
       manage
     >
     </font>
@@ -64,7 +64,7 @@
     %Fill%
   </td>
   <td name=IMAGE_PS_COLOUR_FILL width='15%' align='left'>
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size=$GetVar('HtmlFontSizeControls')>
     <input
       type="checkbox"
       height="$GetVar(HtmlCheckboxHeight)"
@@ -73,9 +73,9 @@
       width="17"
       fgcolor="$GetVar(HtmlFontColour)"
       bgcolor="$GetVar(HtmlTableBgColour)"
-      oncheck="SetData(COLOR_FILL,-color_fill)>>spy.SetParam(snum.image.ps.colour_fill,-color_fill)"
-      onuncheck="SetData(COLOR_FILL,' ')>>spy.SetParam(snum.image.ps.colour_fill,' ')"
-      checked="$strcmp(spy.GetParam(snum.image.ps.colour_fill),-color_fill)"
+      oncheck="html.SetData('~name~','-color_fill')>>spy.SetParam('snum.image.ps.colour_fill','-color_fill')"
+      onuncheck="html.SetData('~name~',' ')>>spy.SetParam('snum.image.ps.colour_fill',' ')"
+      checked="$strcmp(spy.GetParam('snum.image.ps.colour_fill'),'-color_fill')"
       manage
     >
     </font>
@@ -84,24 +84,24 @@
     %Pers%
   </td>
   <td name=IMAGE_PS_PERSPECTIVE width='15%' align='left'>
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size=$GetVar('HtmlFontSizeControls')>
     <input
       type="checkbox"
-      height="$GetVar(HtmlCheckboxHeight)"
-      width="$GetVar(HtmlCheckboxWidth)"
+      height="$GetVar('HtmlCheckboxHeight')"
+      width="$GetVar('HtmlCheckboxWidth')"
       name = "IMAGE_PS_PERSPECTIVE"
       width="17"
-      fgcolor="$GetVar(HtmlFontColour)"
-      bgcolor="$GetVar(HtmlTableBgColour)"
-      oncheck="SetData(IMAGE_PS_PERSPECTIVE,-p)>>spy.SetParam(snum.image.ps.perspective,-p)"
-      onuncheck="SetData(IMAGE_PS_PERSPECTIVE,' ')>>spy.SetParam(snum.image.ps.perspective,' ')"
-      checked="$strcmp(spy.GetParam(snum.image.ps.perspective),-p)"
+      fgcolor="$GetVar('HtmlFontColour')"
+      bgcolor="$GetVar('HtmlTableBgColour')"
+      oncheck="html.SetData('~name~','-p')>>spy.SetParam('snum.image.ps.perspective','-p')"
+      onuncheck="html.SetData('~name~',' ')>>spy.SetParam('snum.image.ps.perspective',' ')"
+      checked="$strcmp(spy.GetParam('snum.image.ps.perspective'),'-p')"
       manage
     >
     </font>
   </td>
   <td name=IMAGE_PS_BUTTON align='right'>
-$spy.MakeHoverButton(button_small-go@ps,spy.GetPsImageInstructions\())
+$spy.MakeHoverButton('button_small-go@ps','spy.GetPsImageInstructions()')
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
@@ -111,38 +111,38 @@ $spy.MakeHoverButton(button_small-go@ps,spy.GetPsImageInstructions\())
     <b>%Atoms%</b>
   </td>
   <td name=IMAGE_PS_ELLIPSE_LINEWIDTH width=42%>
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size=$GetVar('HtmlFontSizeControls')>
     <input
       type="combo"
-      height="$GetVar(HtmlComboHeight)"
+      height="$GetVar('HtmlComboHeight')"
       width="30%"
-      bgcolor="$GetVar(HtmlInputBgColour)"
+      bgcolor="$GetVar('HtmlInputBgColour')"
       items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6"
-      height="$GetVar(HtmlInputHeight)"
+      height="$GetVar('HtmlInputHeight')"
       valign='center'
       align='right'
       name="IMAGE_PS_OUTLINE_LINEWIDTH"
-      value='$spy.GetParam(snum.image.ps.outline_width)'
-      onchange="spy.SetParam(snum.image.ps.outline_width,html.GetValue(~name~))"
+      value="$spy.GetParam('snum.image.ps.outline_width')"
+      onchange="spy.SetParam('snum.image.ps.outline_width',html.GetValue('~name~'))"
       label="%images_outline_line_width% "
     >
     </font>
   </td>
   <td name=IMAGE_PS_OCTANT_LINEWIDTH width=42%>
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size=$GetVar('HtmlFontSizeControls')>
     <input
       type="combo"
-      height="$GetVar(HtmlComboHeight)"
+      height="$GetVar('HtmlComboHeight')"
       width="30%"
-      bgcolor="$GetVar(HtmlInputBgColour)"
+      bgcolor="$GetVar('HtmlInputBgColour')"
       items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6"
-      height="$GetVar(HtmlInputHeight)"
+      height="$GetVar('HtmlInputHeight')"
       valign='center'
       align='right'
       name="IMAGE_PS_OCTANT_LINEWIDTH"
       width="50"
-      value='$spy.GetParam(snum.image.ps.octant_width)'
-      onchange="spy.SetParam(snum.image.ps.octant_width,html.GetValue(~name~))"
+      value="$spy.GetParam('snum.image.ps.octant_width')"
+      onchange="spy.SetParam('snum.image.ps.octant_width',html.GetValue('~name~'))"
       label="%images_octant_line_width% "
     >
     </font>
@@ -156,39 +156,39 @@ $spy.MakeHoverButton(button_small-go@ps,spy.GetPsImageInstructions\())
   </td>
 
   <td name=IMAGE_PS_OCTANT_COUNT width=42%>
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size=$GetVar('HtmlFontSizeControls')>
     <input
       type="combo"
-      height="$GetVar(HtmlComboHeight)"
+      height="$GetVar('HtmlComboHeight')"
       width="30%"
-      bgcolor="$GetVar(HtmlInputBgColour)"
+      bgcolor="$GetVar('HtmlInputBgColour')"
       items="2;3;4;5;6;7;8;9;10;"
-      height="$GetVar(HtmlInputHeight)"
+      height="$GetVar('HtmlInputHeight')"
       valign='center'
       align='right'
       name="IMAGE_PS_OCTANT_COUNT"
       width="100%"
-      value='$spy.GetParam(snum.image.ps.octant_count)'
-      onchange="spy.SetParam(snum.image.ps.octant_count,html.GetValue(~name~))"
+      value="$spy.GetParam('snum.image.ps.octant_count')"
+      onchange="spy.SetParam('snum.image.ps.octant_count',html.GetValue('~name~'))"
       label="%images_no_of_dividers% "
     >
     </font>
   </td>
   <td name=IMAGE_PS_OCTANT_PIEWIDTH width=42%>
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size=$GetVar('HtmlFontSizeControls')>
     <input
       type="combo"
-      height="$GetVar(HtmlComboHeight)"
+      height="$GetVar('HtmlComboHeight')"
       width="30%"
-      bgcolor="$GetVar(HtmlInputBgColour)"
+      bgcolor="$GetVar('HtmlInputBgColour')"
       items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6"
-      height="$GetVar(HtmlInputHeight)"
+      height="$GetVar('HtmlInputHeight')"
       valign='center'
       align='right'
       name="IMAGE_PS_OCTANT_PIEWIDTH"
       width="100%"
-      value='$spy.GetParam(snum.image.ps.pie_width)'
-      onchange="spy.SetParam(snum.image.ps.pie_width,html.GetValue(~name~))"
+      value='$spy.GetParam('snum.image.ps.pie_width')'
+      onchange="spy.SetParam('snum.image.ps.pie_width',html.GetValue('~name~'))"
       label="%images_dividing_line_width% "
     >
     </font>
@@ -201,38 +201,38 @@ $spy.MakeHoverButton(button_small-go@ps,spy.GetPsImageInstructions\())
     <b>%Bonds%</b>
   </td>
   <td name=IMAGE_PS_BONDWIDTH width=42%>
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size=$GetVar('HtmlFontSizeControls')>
     <input
       type="combo"
-      height="$GetVar(HtmlComboHeight)"
+      height="$GetVar('HtmlComboHeight')"
       width="30%"
-      bgcolor="$GetVar(HtmlInputBgColour)"
+      bgcolor="$GetVar('HtmlInputBgColour')"
       items="0.2;0.3;0.4;0.5;0.6;0.7;0.8;"
-      height="$GetVar(HtmlInputHeight)"
+      height="$GetVar('HtmlInputHeight')"
       valign='center'
       align='right'
       name="IMAGE_PS_BONDWIDTH"
       width="50"
-      value='$spy.GetParam(snum.image.ps.bond_width)'
-      onchange="spy.SetParam(snum.image.ps.bond_width,html.GetValue(~name~))"
+      value="$spy.GetParam('snum.image.ps.bond_width')"
+      onchange="spy.SetParam('snum.image.ps.bond_width',html.GetValue('~name~'))"
       label="%images_bond_width% "
     >
     </font>
   </td>
   <td name=IMAGE_PS_HBOND width=42%>
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size=$GetVar('HtmlFontSizeControls')>
     <input
       type="combo"
-      height="$GetVar(HtmlComboHeight)"
+      height="$GetVar('HtmlComboHeight')"
       width="30%"
-      bgcolor="$GetVar(HtmlInputBgColour)"
+      bgcolor="$GetVar('HtmlInputBgColour')"
       items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6"
       valign='center'
       align='right'
       name="IMAGE_PS_HBOND"
       width="50"
-      value='$spy.GetParam(snum.image.ps.h_bond_width)'
-      onchange="spy.SetParam(snum.image.ps.h_bond_width,html.GetValue(~name~))"
+      value="$spy.GetParam('snum.image.ps.h_bond_width')"
+      onchange="spy.SetParam('snum.image.ps.h_bond_width',html.GetValue('~name~'))"
       label="%images_H_atom_bonds% "
     >
     </font>
@@ -245,40 +245,41 @@ $spy.MakeHoverButton(button_small-go@ps,spy.GetPsImageInstructions\())
     <b>%Font%</b>
   </td>
   <td name=IMAGE_PS_FONTWEIGHT width=42%>
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size=$GetVar('HtmlFontSizeControls')>
     <input
       type="combo"
-      height="$GetVar(HtmlComboHeight)"
+      height="$GetVar('HtmlComboHeight')"
       width="30%"
-      bgcolor="$GetVar(HtmlInputBgColour)"
+      bgcolor="$GetVar('HtmlInputBgColour')"
       items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6;2.0;"
-      height="$GetVar(HtmlInputHeight)"
+      height="$GetVar('HtmlInputHeight')"
       valign='center'
       align='right'
       name="IMAGE_PS_FONTWEIGHT"
       width="50"
-      value='$spy.GetParam(snum.image.ps.font_weight)'
-      onchange="spy.SetParam(snum.image.ps.font_weight,html.GetValue(~name~))"
+      value="$spy.GetParam('snum.image.ps.font_weight')"
+      onchange="spy.SetParam('snum.image.ps.font_weight',html.GetValue('~name~'))"
       label="%images_font_weight% "
     >
     </font>
     </td>
   <td name=IMAGE_PS_ATOM_LABEL_FONTSIZE width=42%>
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size=$GetVar('HtmlFontSizeControls')>
     <input
       type="combo"
-      height="$GetVar(HtmlComboHeight)"
+      height="$GetVar('HtmlComboHeight')"
       width="30%"
-      bgcolor="$GetVar(HtmlInputBgColour)"
+      bgcolor="$GetVar('HtmlInputBgColour')"
       items="10;12;14;15;16;18;20;22;"
-      height="$GetVar(HtmlInputHeight)"
+      height="$GetVar('HtmlInputHeight')"
       valign='center'
       align='right'
       name="IMAGE_PS_ATOM_LABEL_FONTSIZE"
       width="50"
-      value='$spy.GetParam(snum.image.ps.atom_label.font_size)'
-      onchange="spy.SetParam(snum.image.ps.atom_label.font_size,html.GetValue(~name~))>>
-setfont AtomLabels strcat(spy.GetParam(snum.image.ps.atom_label.font_name),spy.GetParam(snum.image.ps.atom_label.font_size))"
+      value="$spy.GetParam('snum.image.ps.atom_label.font_size')"
+      onchange="spy.SetParam('snum.image.ps.atom_label.font_size',html.GetValue('~name~'))>>
+       setfont AtomLabels strcat(spy.GetParam('snum.image.ps.atom_label.font_name'),
+        spy.GetParam('snum.image.ps.atom_label.font_size'))"
       label="%Size% "
     >
     </font>
@@ -294,9 +295,9 @@ setfont AtomLabels strcat(spy.GetParam(snum.image.ps.atom_label.font_name),spy.G
       <!--type="combo"-->
       <!--height="$GetVar(HtmlComboHeight)"-->
       <!--width="$GetVar(HtmlComboWidth2)"-->
-      <!--bgcolor="$GetVar(HtmlInputBgColour)"-->
+      <!--bgcolor="$GetVar('HtmlInputBgColour')"-->
       <!--items="0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6;2.0;"-->
-      <!--height="$GetVar(HtmlInputHeight)"-->
+      <!--height="$GetVar('HtmlInputHeight')"-->
       <!--valign='center'-->
       <!--align='right'-->
       <!--name="IMAGE_PS_BOND_LABEL_FONTWEIGHT"-->
@@ -307,21 +308,23 @@ setfont AtomLabels strcat(spy.GetParam(snum.image.ps.atom_label.font_name),spy.G
     <!-->-->
     </td>
   <td name=IMAGE_PS_BOND_LABEL_FONTSIZE width=42%>
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size=$GetVar('HtmlFontSizeControls')>
     <input
       type="combo"
-      height="$GetVar(HtmlComboHeight)"
+      height="$GetVar('HtmlComboHeight')"
       width="30%"
-      bgcolor="$GetVar(HtmlInputBgColour)"
+      bgcolor="$GetVar('HtmlInputBgColour')"
       items="6;7;8;9;10;12;14;16;"
-      height="$GetVar(HtmlInputHeight)"
+      height="$GetVar('HtmlInputHeight')"
       valign='center'
       align='right'
       name="IMAGE_PS_BOND_LABEL_FONTSIZE"
       width="50"
-      value='$spy.GetParam(snum.image.ps.bond_label.font_size)'
-      onchange="spy.SetParam(snum.image.ps.bond_label.font_size,html.GetValue(~name~))>>
-setfont BondLabels strcat(spy.GetParam(snum.image.ps.bond_label.font_name),spy.GetParam(snum.image.ps.bond_label.font_size))"
+      value="$spy.GetParam('snum.image.ps.bond_label.font_size')"
+      onchange="spy.SetParam('snum.image.ps.bond_label.font_size',html.GetValue('~name~'))>>
+       setfont BondLabels 
+        strcat(spy.GetParam('snum.image.ps.bond_label.font_name'),
+         spy.GetParam('snum.image.ps.bond_label.font_size'))"
       label="%Size% "
     >
     </font>
@@ -336,10 +339,10 @@ setfont BondLabels strcat(spy.GetParam(snum.image.ps.bond_label.font_name),spy.G
   <td name=IMAGE_PS_OCTANTS_ATOMS width='50%'>
     <input
       type="combo"
-      height="$GetVar(HtmlComboHeight)"
-      bgcolor="$GetVar(HtmlInputBgColour)"
+      height="$GetVar('HtmlComboHeight')"
+      bgcolor="$GetVar('HtmlInputBgColour')"
       items="-$C;+$C;"
-      height="$GetVar(HtmlInputHeight)"
+      height="$GetVar('HtmlInputHeight')"
       valign='center'
       align='right'
       name="IMAGE_PS_OCTANTS_ATOMS"

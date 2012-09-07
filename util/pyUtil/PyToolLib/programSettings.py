@@ -39,11 +39,11 @@ def makeProgramSettingsGUI(program, method, prgtype):
     wFilePath = 'solution-settings-extra.htm'
   else:
     wFilePath = 'refinement-settings-extra.htm'
-    
+
   authors = program.author
   reference = program.reference
   help = OV.TranslatePhrase(method.help)
-  
+
   max_colspan = 10
   txt = r"""
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=4;1; -->
@@ -66,7 +66,7 @@ def makeProgramSettingsGUI(program, method, prgtype):
 </tr>
 </table>
 ''' %(OV.GetParam('gui.html.table_firstcol_width'),max_colspan, authors, reference, method.extraHtml())
-  
+
   OlexVFS.write_to_olex(wFilePath, txt)
   return
 
@@ -97,7 +97,7 @@ def makeArgumentsHTML(program, method, instruction):
     tick_box_html = htmlTools.make_tick_box_input(tick_box_d)
   else:
     tick_box_html = ''
-    
+
   w = "13%%"
   if name == 'cf':
     w = '50'
@@ -127,17 +127,17 @@ def makeArgumentsHTML(program, method, instruction):
     if value is None:
       value = ''
     ctrl_name = 'SET_%s' %(varName.upper())
-    onchange = 'SetVar(%s,html.GetValue(%s))>>spy.addInstruction(%s,%s,%s)' %(
+    onchange = "SetVar('%s',html.GetValue('%s'))>>spy.addInstruction('%s','%s','%s')" %(
       varName, ctrl_name, program.name, method.name, name)
-    
+
     if "settings_cf" in varName:
       value = "$spy.GetParam('programs.solution.smtbx.cf.%s')" %(varName.lstrip('settings_cf'))
-      onchange = "spy.SetParam('programs.solution.smtbx.cf.%s',html.GetValue(%s))" %(varName.lstrip('settings_cf'), ctrl_name)
-    
+      onchange = "spy.SetParam('programs.solution.smtbx.cf.%s',html.GetValue('%s'))" %(varName.lstrip('settings_cf'), ctrl_name)
+
     if option.name == 'nls':
-      onchange = '%s>>spy.SetParam(snum.refinement.max_cycles,html.GetValue(SET_SETTINGS_%s_NLS))>>html.Update' %(onchange, name.upper())
+      onchange = "%s>>spy.SetParam('snum.refinement.max_cycles',html.GetValue('SET_SETTINGS_%s_NLS'))>>html.Update" %(onchange, name.upper())
     elif option.name == 'npeaks':
-      onchange = '%s>>spy.SetParam(snum.refinement.max_peaks,html.GetValue(SET_SETTINGS_%s_NPEAKS))>>html.Update' %(onchange, name.upper())
+      onchange = "'%s'>>spy.SetParam('snum.refinement.max_peaks',html.GetValue('SET_SETTINGS_%s_NPEAKS'))>>html.Update" %(onchange, name.upper())
     #if data_type == "int":
       #d = {'ctrl_name':ctrl_name,
            #'value':value,
@@ -202,7 +202,7 @@ def makeArgumentsHTML(program, method, instruction):
     #if count == 7:
       #txt += '</tr><tr>'
       #txt += first_col
-      
+
     w = '13%%'
     if instruction.name == "plop":
       w = '10%%'

@@ -3,7 +3,7 @@
     <b>%Uiso Select Atoms%</b>
   </td>
   <td width='60%' name=UISO_SELECT_SLIDER_BUTTONS align="right" bgcolor="$GetVar(HtmlTableFirstcolColour)">
-$spy.MakeHoverButton(button_small-delete,kill sel)
+$spy.MakeHoverButton('button_small-delete','kill sel')
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
@@ -28,7 +28,7 @@ $spy.MakeHoverButton(button_small-delete,kill sel)
         >>sel -u
         >>SetVar(UisoSelectVal,spy.UisoSelectSlide(html.GetValue(~name~)))
         >>html.SetLabel(UisoSelectVal,GetVar(UisoSelectVal))
-        >>sel atoms where xatom.uiso GetVar(UisoSelectVal)&&xatom.type!='Q''
+        >>sel atoms where xatom.uiso GetVar(UisoSelectVal)&&xatom.type!='Q'
         >>Freeze(False)
           ">
           </font>
@@ -38,7 +38,7 @@ $spy.MakeHoverButton(button_small-delete,kill sel)
           <input
             type="label"
             name = "UisoSelectVal"
-            width="90%"
+            width="100%"
             height="18"
             bgcolor="$GetVar(HtmlTableBgColour)"
             fgcolor="$GetVar(HtmlFontColour)"

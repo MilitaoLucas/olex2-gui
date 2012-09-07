@@ -1,31 +1,32 @@
-<td width='65%' align='left' bgcolor="$GetVar(HtmlTableFirstcolColour)">
+<td width='65%' align='left' bgcolor="$GetVar('HtmlTableFirstcolColour')">
 <!-- #include element_buttons element_buttons.htm;1 -->
 $spy.MakeElementButtonsFromFormula()
 </td>
 
-<td width='5%' align='center' valign='center' bgcolor="$GetVar(HtmlTableFirstcolColour)">
+<td width='5%' align='center' valign='center' bgcolor="$GetVar('HtmlTableFirstcolColour')">
   <font size=$GetVar(HtmlFontSizeControls)>
   <input
     type='checkbox'
     width=18
-    height=$GetVar(HtmlCheckboxHeight)
-    bgcolor=$GetVar(HtmlTableFirstcolColour)
+    height=$GetVar('HtmlCheckboxHeight')
+    bgcolor=$GetVar('HtmlTableFirstcolColour')
     name='USER_AUTO_REFINE_AFTER_ANIS'
-    checked="$spy.GetParam(user.auto_refine_after_anis)"
-    oncheck='spy.SetParam(user.auto_refine_after_anis,true)>>echo "Automatically refine after anis/isot or HADD: True'
-    onuncheck='spy.SetParam(user.auto_refine_after_anis,false)>>echo "Do not automatically refine after anis/isot or HADD: True'
+    checked="$spy.GetParam('user.auto_refine_after_anis')"
+    oncheck="spy.SetParam('user.auto_refine_after_anis','true')"
+    onuncheck="spy.SetParam('user.auto_refine_after_anis','false')"
     target="Automatically refine if anis/isot or HADD is changed"
+    onclick="echo 'Automatically refine after anis/isot or HADD:' html.GetState('~name~')"
     value=''
   >
   </font>
 </td>
 
-<td width='10%' align='center' valign='center' bgcolor="$GetVar(HtmlTableFirstcolColour)">
-$spy.MakeHoverButton(button_small-add_h,showH a true>>HADD>>autorefine)
+<td width='10%' align='center' valign='center' bgcolor="$GetVar('HtmlTableFirstcolColour')">
+$spy.MakeHoverButton('button_small-add_h','showH a true>>HADD>>autorefine')
+</td>
+<td width='10%' align='center' valign='center' bgcolor="$GetVar('HtmlTableFirstcolColour')">
+  $spy.MakeHoverButton('toolbar-anis',"anis>>echo 'Selected (or all, if none selected) atoms set to anistoropic'>>autorefine")
 </td>
 <td width='10%' align='center' valign='center' bgcolor="$GetVar(HtmlTableFirstcolColour)">
-  $spy.MakeHoverButton(toolbar-anis,anis>>echo 'Selected (or all, if none selected) atoms set to anistoropic'>>autorefine)
-</td>
-<td width='10%' align='center' valign='center' bgcolor="$GetVar(HtmlTableFirstcolColour)">
-  $spy.MakeHoverButton(toolbar-isot,isot>>echo 'Selected (or all, if none selected) atoms set to isotropic.'>>autorefine)
+  $spy.MakeHoverButton('toolbar-isot',"isot>>echo 'Selected (or all, if none selected) atoms set to isotropic.'>>autorefine")
 </td>
