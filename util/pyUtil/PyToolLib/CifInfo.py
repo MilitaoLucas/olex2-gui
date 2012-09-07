@@ -90,8 +90,7 @@ class ValidateCif(object):
       if error_handler.error_count == 0 and error_handler.warning_count == 0:
         print "No errors found"
       if OV.GetParam('user.cif.checkcif.send'):
-        import olexex
-        olexex.GetCheckcifReport()
+        olex.m('spy.cif.GetCheckcifReport()')
 
 OV.registerMacro(ValidateCif, """filepath&;cif_dic&;show_warnings""")
 

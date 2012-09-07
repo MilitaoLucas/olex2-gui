@@ -10,12 +10,12 @@
       name="SNUM_XGRID_SLIDE"
       width="100%"
       height="18"
-      value="$eval(spy.GetParam(snum.xgrid.value)*50)"
+      value="$math.eval(spy.GetParam(snum.xgrid.value)*50)"
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
-      min="$eval(xgrid.GetMin()*50)"
-      max="$eval(xgrid.GetMax()*50)"
-      onchange="spy.SetParam(snum.xgrid.value,eval(html.GetValue(~name~)/50))>>
+      min="$math.eval(xgrid.GetMin()*50)"
+      max="$math.eval(xgrid.GetMax()*50)"
+      onchange="spy.SetParam(snum.xgrid.value,math.eval(html.GetValue(~name~)/50))>>
 html.SetValue(SNUM_XGRID_VALUE,spy.GetParam(snum.xgrid.value))>>
 xgrid.Scale(html.GetValue(SNUM_XGRID_VALUE))>>"
     >
@@ -32,7 +32,7 @@ xgrid.Scale(html.GetValue(SNUM_XGRID_VALUE))>>"
       value="$spy.GetParam(snum.xgrid.value)"
       onreturn="spy.SetParam(snum.xgrid.value,html.GetValue(~name~))>>
 xgrid.Scale(html.GetValue(~name~))>>
-html.SetValue(SNUM_XGRID_SLIDE,eval(XGrid.Scale()*50))"
+html.SetValue(SNUM_XGRID_SLIDE,math.eval(XGrid.Scale()*50))"
     >
     </font>
   </td>

@@ -11,14 +11,14 @@
       name="SNUM_XGRID_DEPTH_SLIDE"
       width="100%"
       height="18"
-      value="eval(xgrid.Depth()*5)"
+      value="math.eval(xgrid.Depth()*5)"
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
-      min="$eval(-2.5/gl.CalcZoom())"
-      max="$eval(2.5/gl.CalcZoom())"
+      min="$math.eval(-2.5/gl.CalcZoom())"
+      max="$math.eval(2.5/gl.CalcZoom())"
       onchange="
-xgrid.Depth(eval(html.GetValue(~name~)/5))>>
-html.SetValue(SNUM_XGRID_DEPTH_VALUE,eval(html.GetValue(~name~)/5))"
+xgrid.Depth(math.eval(html.GetValue(~name~)/5))>>
+html.SetValue(SNUM_XGRID_DEPTH_VALUE,math.eval(html.GetValue(~name~)/5))"
     >
     </font>
   </td>
@@ -34,7 +34,7 @@ html.SetValue(SNUM_XGRID_DEPTH_VALUE,eval(html.GetValue(~name~)/5))"
       value="xgrid.Depth()"
       onreturn="
 xgrid.Depth(html.GetValue(~name~))>>
-html.SetValue(SNUM_XGRID_DEPTH_SLIDE,eval(html.GetValue(~name~)*5))"
+html.SetValue(SNUM_XGRID_DEPTH_SLIDE,math.eval(html.GetValue(~name~)*5))"
     >
     </font>
   </td>

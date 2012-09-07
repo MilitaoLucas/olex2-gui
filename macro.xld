@@ -10,7 +10,7 @@
       <cmd1 "silent on">
       <cmd1 "htmlpanelvisible True">
       <cmd2 "py.Export(datadir()/olx)">
-      <cmd3 "py.run 'basedir()/util/pyUtil/initpy.py'">
+      <cmd3 "py.run basedir()/util/pyUtil/initpy.py">
       <cmd7 "spy.load_user_gui_phil()">
       <cmd8 "spy.skin.export_parameters()">
       <cmd4 "if isos(linux) then setvar(defeditor,'gedit')">
@@ -51,13 +51,13 @@
       >
     <cmd
       <cmd0  "xgrid.Visible(false)">
-      <cmd1  "if strcmp(%4,'none') then none else 'spy.saveHistory()'">
+      <cmd1  "if strcmp(%4,'none') then none else spy.saveHistory()">
       <cmd2  "spy.SaveStructureParams()">
       <cmd1  "if strcmp(%4,'none') then none else 'spy.SaveCifInfo()'">
       <cmd3  cmd1="silent on">
       <cmd4  "if IsFileLoaded() then clear">
       <cmd5  "spy.fade_out()">
-      <cmd9  "@reap '%1' %2">
+      <cmd9  "@reap %1 %2">
       <cmd5  "spy.fade_in()">
       <cmd10 "if strcmp(filename(),'none') then none else spy.LoadStructureParams()">
       <cmd15 "spy.run_skin sNumTitle">
@@ -65,10 +65,10 @@
       <cmd11 "SetVar(SlideQPeaksVal,0)">
       <cmd13 "storeparam startup file.relativePath(filefull()) true">
       <cmd15 "spy.setAllMainToolbarTabButtons()">
-      <cmd16 "if File.Exists(strdir()/filename().vvd) then none else 'spy.SetParam(snum.refinement.original_formula,xf.GetFormula())'">
+      <cmd16 "if File.Exists(strdir()/filename().vvd) then none
+       else 'spy.SetParam(snum.refinement.original_formula,xf.GetFormula())'">
       <cmd17 "if strcmp(%7,filefull()) then none else 'spy.loadHistory()'">
-      <cmd19 "if and(isplugininstalled(plugin-brukersaint),IsFileType('p4p')) then BSINI else none">
-      <cmd20 cmd1="if strcmp(%7,filefull()) then none else 'clear'">
+      <cmd20 cmd1="if strcmp(%7,filefull()) then none else clear">
       <cmd24 xxx="spy.reset_file_in_OFS(solution_image.htm)">
       <cmd25 xxx="spy.reset_file_in_OFS(refinement_image.htm)">
       <cmd26 "html.Update">
@@ -172,43 +172,6 @@
 />
 
 
-<BSINI help="Initialise BrukerSaint"
-  <body
-    <args
-    >
-
-  <cmd
-    <cmd1 "cursor(busy,'Initialising BrukerSaint...')">
-    <cmd2 "spy BrukerSaint ini">
-    <cmd3 "cursor()">
-  />
-/>
-/>
-
-
-
-<spy help="run internal python"
-  <body
-    <args
-      <arg1 name="tool" def=" ">
-      <arg2 name="fun" def=" ">
-      <arg3 name="param1" def="None">
-      <arg4 name="param2" def="None">
-      <arg5 name="param3" def="None">
-      <arg6 name="param4" def="None">
-      <arg7 name="param5" def="None">
-      <arg8 name="param6" def="None">
-    >
-
-  <cmd
-    <cmd1 "setvar(tool,'%1')">
-    <cmd2 "setvar(fun,'%2')">
-    <cmd3 "setvar(param,'%3;%4;%5;%6;%7;%8')">
-    <cmd4 "py.run 'basedir()/util/pyUtil/spy.py'">
-  />
-/>
-/>
-
 <report help="Creates structure report (macro.xld)"
   <body
     <args
@@ -248,7 +211,8 @@
       <arg3 name="show_warnings" def="True">
     >
     <cmd
-      <cmd1 "if strcmp(%1,'') then spy.ValidateCif else 'spy.ValidateCif -filepath=%1 -cif_dic=%2 -show_warnings=%3'">
+      <cmd1 "if strcmp(%1,'') then spy.ValidateCif
+       else 'spy.ValidateCif -filepath=%1 -cif_dic=%2 -show_warnings=%3'">
     >
   >
 >
@@ -258,27 +222,20 @@
     <args
       <arg1 name="l.s." def='-1'>
       <arg2 name="plan" def='-1.1'>
-
     >
     <cmd
       <cmd0 "xgrid.Visible(false)">
       <cmd1 "mode off">
-      <cmd2 "user 'filepath()'">
-      <cmd3 x="kill $q">
-      <cmd5 "file">
-      <cmd6 XXX="cursor(busy, 'Refining...')">
-      <cmd7 "if strcmp(%1,'-1') then None else spy.SetMaxCycles(%1)">
-      <cmd8 "if strcmp(%2,'-1.1') then None else spy.SetMaxPeaks(%2)">
-      <cmd10 "spy.RunRefinementPrg()">
-      <cmd29 "spy.make_HOS()">
-      <cmd11 "html.Update">
-    >
-    <onterminate
-      <cmd0 "cursor()">
+      <cmd2 "user filepath()">
+      <cmd3 "if not(spy.AnalyseRefinementSource()) then abort">
+      <cmd4 "if strcmp(%1,'-1') then None else spy.SetMaxCycles(%1)">
+      <cmd5 "if strcmp(%2,'-1.1') then None else spy.SetMaxPeaks(%2)">
+      <cmd6 "spy.RunRefinementPrg()">
+      <cmd7 "spy.make_HOS()">
+      <cmd8 "html.Update">
     >
     <onabort
       <cmd "echo lasterror()">
-      <cmd0 "cursor()">
     >
   >
 >
@@ -291,11 +248,9 @@
     >
     <cmd
       <cmd1 "spy.RunSolutionPrg()">
-      <cmd2 cmd="spy.doProgramSettings(spy.GetParam(snum.refinement.program),spy.GetParam(snum.refinement.method),true)">
+      <cmd2 cmd="spy.doProgramSettings(spy.GetParam(snum.refinement.program),
+        spy.GetParam(snum.refinement.method),true)">
       <cmd3 "spy.make_HOS(True)">
-      >
-    <onterminate
-      <cmd1 cmd1="reap 'filepath()/filename().res'">
     >
   >
 >
@@ -324,8 +279,6 @@
   >
 >
 
-
-
 <edit help="Launches notepad for the file with name of current file and extension passed as parameter"
   <body
     <args
@@ -339,10 +292,10 @@
       <cmd3 "if and(IsFileType(ires),or(strcmp(%1,ins),strcmp(%1,res))) then 
        'file>>listen filepath()/filename().%1' else none">
       <cmd4 "if strcmp(%1,hkl) then 
-       'exec -o getvar(defeditor) \"hklsrc()\"' else 
-       'exec -o getvar(defeditor) \"filepath()/filename().%1\" -t=\"stop listen\"'">
+       'exec -o getvar(defeditor) hklsrc()' else 
+       'exec -o getvar(defeditor) filepath()/filename().%1\-t=\"stop listen\"'">
       <cmd5 "if strcmp(%1,note) then 
-       'exec -o getvar(defeditor) \"filepath()/filename()-note.txt\"'">
+       'exec -o getvar(defeditor) filepath()/filename()-note.txt'">
     >
     <onlisten
       <cmd1 "spy.SetParam(snum.refinement.max_peaks,Ins(QNUM))">
@@ -365,9 +318,6 @@
       <cmd2 "anis sel">
       <cmd3 "refine">
       <cmd4 "telp">
-    >
-    <onterminate
-      <cmd0 "sel -u">
     >
   >
 >
@@ -480,23 +430,12 @@
       <cmd1 "ads sph">
       <cmd1 "mask atoms 1">
       <cmd1 "mask bonds 48">
-      <cmd2 "brad eval(%1*10)">
+      <cmd2 "brad math.eval(%1*10)">
       <cmd2 "arad %1">
 
   >
 >
 >
-
-<bondsc help="Single color bonds"
-  <body
-    <args
-      <arg0 name="File extension" def="ins">
-    >
-    <cmd
-      <cmd1 "mask bonds 1">
-    >
-  >
-\ >
 
 <_xphadd help="Run XP to do HADD"
   <body
@@ -529,24 +468,6 @@
 >
 
 
-
-
-<_hadd_auto help="Add Hydrogen Atoms Geometrically"
-  <body
-    <args
-      <arg0 name="File extension" def="filename().res">
-    >
-    <cmd
-      <cmd1 "tools hadd">
-      <cmd2 "listen %1">
-    >
-    <onterminate
-      <cmd1 "echo %1">
-      <cmd2 "reap %1">
-    >
-  >
->
-
 <xp help="Run XP"
   <body
     <args
@@ -558,7 +479,7 @@
       <cmd3  "file 'filepath()/filename().res'">
       <cmd4  "listen filepath()/filename().ins">
       <cmd5  cmd1="echo exec -o xp 'filename()'">
-      <cmd6  "exec -o xp 'filename()'">
+      <cmd6  "exec -o xp filename()">
       <cmd7  cmdXX="wait 500">
       <cmd8  cmdXX="windowcmd XRAYFWClass fmol/n">
       <cmd9  cmdXX="wait 0">
@@ -588,14 +509,6 @@
 
 
 
-<_durham help="Durham University Only"
-  <body
-    <cmd
-      <cmd1 "htmlLoad snippets/auto.htm">
-    >
-  >
->
-
 <external_edit help="Open file in an external text editor"
   <body
     <args
@@ -617,7 +530,7 @@
     <cmd
       <cmd1 cmd1="silent on">
       <cmd2 cmd1="htmlLoad snippets/work.htm">
-      <cmd3 "@reap '%1' %2">
+      <cmd3 "@reap %1 %2">
       <cmd4 "html.ItemState title 1">
       <cmd5 "html.ItemState tabs-01 1">
       <cmd7 "history">
@@ -671,7 +584,7 @@
     >
     <cmd
       <cmd1 cmd1="silent on">
-      <cmd2 "@reap '%1' %2">
+      <cmd2 "@reap %1 %2">
       <cmd3 "html.ItemState title 1">
       <cmd4 "html.ItemState tabs-01 1">
       <cmd6 cmd1="lines 12">
@@ -688,7 +601,7 @@
     <cmd
       <cmd1 "fade 0 1 0.1">
       <cmd2 'waitfor fade'>
-      <cmd3 "reap '%1'">
+      <cmd3 "reap %1">
       <cmd4 "ceiling on">
       <cmd5 "fade 1 0 -0.1">
       <cmd6 'waitfor fade'>
@@ -713,7 +626,7 @@
       <cmd3 "fader.position(0)">
       <cmd4 "fader.step(0.05)">
       <cmd5 "fader.visible(true)">
-      <cmd6 "@reap '%1' %2">
+      <cmd6 "@reap %1 %2">
     >
     <onabort
       <cmd "echo lasterror()">
@@ -729,8 +642,8 @@
       <arg1 name="options" def="">
     >
     <cmd
-      <cmd1 "@reap '%1' %2">
-      <cmd1 x="@update '%1'">
+      <cmd1 "@reap %1 %2">
+      <cmd1 x="@update %1">
     >
     <onabort
       <cmd "echo lasterror()">
@@ -739,40 +652,11 @@
 >
 
 
-
-
-<_skins help="Change the appearance of Olex2"
-  <body
-    <args
-      <arg1 name="name" def="">
-      <arg2 name="bat" def='basedir()/uti/bat/skins.bat'>
-      <arg3 name="sourceroot" def='basedir()/etc/images/%1'>
-      <arg4 name="destination" def='basedir()/etc/images/Skin'>
-    >
-    <cmd
-      <cmd1 cmd1="silent on">
-      <cmd2 "exec 'basedir()/util/bat/skins.bat' %1 'basedir()/etc/images/%1' 'basedir()/etc/images/Skin'">
-    >
-    <onterminate
-      <cmd1 "html.update">
-    >
-  >
->
-
 <bw help="Change the output to Black and White"
   <body
     <cmd
       <cmd1 "load scene bw">
       <cmd2 "load style bw">
-    >
-  >
->
-
-<bws help="Change the output to Black and White"
-  <body
-    <cmd
-      <cmd1 "scene bw">
-      <cmd2 "style bw">
     >
   >
 >
@@ -785,11 +669,11 @@
   >
 >
 
-<default help="Change the output to default"
+<default help="Change the style to default"
   <body
     <cmd
-      <cmd1 "load style 'basedir()/etc/styles/default.glds'">
-      <cmd2 "load scene 'basedir()/etc/styles/default.glps'">
+      <cmd1 "load style basedir()/etc/styles/default.glds">
+      <cmd2 "load scene basedir()/etc/styles/default.glps">
       <cmd3 "telp 50">
     >
   >
@@ -798,8 +682,8 @@
 <defaultu help="Change current style to default (for some broken graphics drivers on Ubuntu)"
   <body
     <cmd
-      <cmd1 "load style 'basedir()/etc/styles/default.glds'">
-      <cmd2 "load scene 'basedir()/etc/styles/defaultu.glps'">
+      <cmd1 "load style basedir()/etc/styles/default.glds">
+      <cmd2 "load scene basedir()/etc/styles/defaultu.glps">
       <cmd3 "telp 50">
     >
   >
@@ -880,35 +764,6 @@
   >
 >
 
-<_lcells help="Search the in-house database"
-  <body
-    <args
-      <arg1 name="type">
-      <arg2 name="a">
-      <arg3 name="b">
-      <arg4 name="c">
-      <arg5 name="alp">
-      <arg6 name="bet">
-      <arg7 name="gam">
-      <arg8 name="tol">
-      <arg9 name="basedir" def = "basedir()/util/LCELLS/fred.txt">
-    >
-    <cmd
-      <cmd1 "silent on">
-      <cmd2 cmd1="user 'basedir()/util/LCELLS/'">
-      <cmd3 cmd1="echo Hello">
-      <cmd4 "htmlsavedata('%9')">
-      <cmd5 cmd1="echo Hello1">
-      <cmd6 cmd1="echo Hello2">
-      <cmd7 "exec 'basedir()/util/lcells/lcellsb.exe' '%1' %2 %3 %4 %5 %6 %7 %8">
-    >
-    <onterminate
-      <cmd1 "html.Update">
-      <cmd1 "htmlloaddata('%9')">
-    >
-  >
-/>
-
 <skin help="Changes the Olex2 Gui Skin"
   <body
     <args
@@ -951,173 +806,13 @@
 />
 
 
-<_init help="initialise"
-  <body
-    <cmd
-      <cmd1 "exec 'basedir()/util/bat/reset.bat' 'basedir()/etc/olex_data/'">
-      <cmd2 "html.ItemState q-peaks 2">
-      <cmd3 "html.Update">
-      >
-    >
-  >
-
 <edthelp help="Invokes the help editor"
   <body
     <cmd
-      <cmd1 "exec 'basedir()/util/helpedit.exe' 'basedir()/help.xld'">
+      <cmd1 "exec basedir()/util/helpedit.exe basedir()/help.xld">
     >
   >
 >
-
-<dimas help="Gets information from DIMAS"
-  <body
-    <args
-      <arg1 name="tool" def="dimas_info">
-      <arg2 name="para" def="filepath()">
-      <arg3 name="para" def="filename()">
-      <arg4 name="para" def="basedir()">
-    >
-    <cmd
-      <cmd1 "Echo Starting DIMAS INFO with %1">
-      <cmd2 "exec 'basedir()/util/pyUtil/pyTools.exe' %1 %3 %3 %4">
-    >
-  >
->
-
-<_tools help="Launches pyTools"
-  <body
-    <args
-      <arg1 name="tool1" def="">
-      <arg2 name="tool2" def="">
-      <arg3 name="tool3" def="">
-      <arg4 name="tool4" def="">
-      <arg5 name="para" def="">
-      <arg6 name="para" def="basedir()">
-      <arg7 name="para" def="filefull()">
-      <arg8 name="para" def="filepath()">
-      <arg9 name="para" def="filename()">
-      >
-    <cmd
-      <cmd1 "Echo Starting pyTools with %1 %2 %3 %4 %5">
-      <cmd1 cmd1="listen %7/%8.res">
-      <cmd5 "cursor(busy, %1)">
-      <cmd4 "exec 'basedir()/util/pyUtil/pyTools.exe' %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5">
-
-  >
-<onlisten
-  <cmd1 cmd1="silent on">
-  <cmd2 "html.Update">
-  <cmd3 cmd1="load style default">
-  >
-
-  <onterminate
-    <cmd0 "cursor()">
-    >
-  >
->
-
-
-
-<_tool help="Launches pyTools"
-  <body
-    <args
-      <arg1 name="tool1" def="">
-      <arg2 name="tool2" def="">
-      <arg3 name="tool3" def="">
-      <arg4 name="tool4" def="">
-      <arg5 name="para" def="">
-      <arg6 name="para" def="basedir()">
-      <arg7 name="para" def="filefull()">
-      <arg8 name="para" def="filepath()">
-      <arg9 name="para" def="filename()">
-      >
-    <cmd
-      <cmd1 "cursor(busy, %1)">
-      <cmd2 "exec 'basedir()/util/pyUtil/pyTools.exe' %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5">
-      <cmd3 "cursor()">
-
-      >
-
-  <onterminate
-    <cmd0 "cursor()">
-    >
-  >
->
-
-<py help="Launches pyTools"
-  <body
-    <args
-      <arg1 name="tool1" def="">
-      <arg2 name="tool2" def="">
-      <arg3 name="tool3" def="">
-      <arg4 name="tool4" def="">
-      <arg5 name="para" def="">
-      <arg6 name="para" def="basedir()">
-      <arg7 name="para" def="filefull()">
-      <arg8 name="para" def="filepath()">
-      <arg9 name="para" def="filename()">
-      >
-    <cmd
-      <cmd1 "cursor(busy, %1)">
-      <cmd2 "exec python C:/DS/durham_autosolve/horst/Olex_pyTools/pyTools.py %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5">
-      <cmd3 "cursor()">
-      >
-
-  <onterminate
-    <cmd0 "cursor()">
-    >
-  >
->
-
-<_pyt help="Launches pyTools"
-  <body
-    <args
-      <arg1 name="tool1" def="">
-      <arg2 name="tool2" def="">
-      <arg3 name="tool3" def="">
-      <arg4 name="tool4" def="">
-      <arg5 name="para" def="">
-      <arg6 name="para" def="basedir()">
-      <arg7 name="para" def="filefull()">
-      <arg8 name="para" def="filepath()">
-      <arg9 name="para" def="filename()">
-      >
-    <cmd
-      <cmd1 "cursor(busy, %1)">
-      <cmd2 "exec 'basedir()/util/pyUtil/pyTools.exe' %1 '%6' '%7' '%8' '%9' %2 %3 %4 %5">
-      <cmd3 "cursor()">
-      >
-
-  <onterminate
-    <cmd0 "cursor()">
-    >
-  >
->
-
-
-<history help="Creates Refinement History"
-  <body
-    <args
-      <arg1 name="tool1" def="create">
-      <arg2 name="tool2" def="Lst(R1)">
-      <arg3 name="tool3" def="">
-      <arg4 name="tool4" def="">
-      <arg5 name="para" def="">
-      <arg6 name="para" def="basedir()">
-      <arg7 name="para" def="filefull()">
-      <arg8 name="para" def="filepath()">
-      <arg9 name="para" def="filename()">
-      >
-    <cmd
-      <cmd4 "exec 'basedir()/util/pyUtil/pyTools.exe' history_%1:%2 '%6' '%7' '%8' '%9' ">
-      >
-    <onterminate
-      <cmd2 "wait 200">
-      <cmd2 "html.Update">
-      >
-    >
-  >
-
 
 <guinames_m
   <body
@@ -1143,11 +838,8 @@
   >
   <cmd
     <cmd1 "echo Inserting info from file %2 into %3.">
-    <cmd2 "echo cifmerge '%3' '%2'">
-    <cmd3 "cifmerge '%3' '%2'">
-  >
-  <onterminate
-    <cmd1 "echo Done!">
+    <cmd2 "echo cifmerge %3 %2">
+    <cmd3 "cifmerge %3 %2">
   >
 >
 >
@@ -1158,35 +850,11 @@
     <args
     >
     <cmd
-      <cmd1 "user 'basedir()/sample_data'">
+      <cmd1 "user basedir()/sample_data">
       <cmd2 "htmlLoad tutorials/tutorials.htm">
     >
     <onterminate
       <cmd1 "clear">
-    >
-  >
->
-
-
-<_revert help="Revert to a Previous Structure"
-  <body
-    <args
-      <arg0 name="File to revert to" def="" >
-    >
-    <cmd
-      <cmd1  "tools history revert,%1,True">
-      <cmd2  "reap filename().ins">
-    >
-  >
->
-
-
-<_mm help='Create a new macro in the custom.xld file. Follow the instructions!'
-  <body
-    <args
-    >
-    <cmd
-      <cmd1 "exec 'basedir()/util/Bat/mm.bat' mm 'basedir()'">
     >
   >
 >
@@ -1198,7 +866,7 @@
       <arg1 name="filname" def="custom">
     >
     <cmd
-      <cmd1 "exec -o getvar(defeditor) 'basedir()/%1.xld'">
+      <cmd1 "exec -o getvar(defeditor) app.BaseDir()/%1.xld">
     >
   >
 >
@@ -1207,7 +875,7 @@
   <body
     <args>
     <cmd
-      <cmd1 "exec -o getvar(defeditor) 'DataDir()/.options'">
+      <cmd1 "exec -o getvar(defeditor) DataDir()/.options">
     >
   >
 >
@@ -1219,7 +887,7 @@
     >
     <cmd
       <cmd1 "flush log">
-      <cmd2 "exec -o getvar(defeditor) 'app.GetLogName()'">
+      <cmd2 "exec -o getvar(defeditor) app.GetLogName()">
     >
   >
 >
@@ -1230,8 +898,9 @@
       <arg1 name="popup_name" def="none">
     >
     <cmd
-      <cmd1 "if strcmp(%1,'none') then 'html.Dump DataDir()/html.htm' else 'html.Dump %1 DataDir()/html.htm'">
-      <cmd2 "exec -o getvar(defeditor) 'DataDir()/html.htm'">
+      <cmd1 "if strcmp(%1,'none') then 'html.Dump DataDir()/html.htm'
+       else 'html.Dump %1 DataDir()/html.htm'">
+      <cmd2 "exec -o getvar(defeditor) DataDir()/html.htm">
     >
   >
 >
@@ -1242,7 +911,7 @@
       <arg1 name="filname" def="custom">
     >
     <cmd
-      <cmd1 "exec -o getvar(defeditor) 'DataDir()/profile.txt'">
+      <cmd1 "exec -o getvar(defeditor) DataDir()/profile.txt">
     >
   >
 >
@@ -1275,11 +944,8 @@
       <arg5 name="y" def="80">
     >
     <cmd
-      <cmd0 cmd1="popup %1-box 'basedir()/etc/gui/%1.htm' -b=rtc -t=%1 -w=%2 -h=%3 -x=%4 -y=%5">
-      <cmd0 "popup %1-box 'basedir()/etc/gui/%1.htm' -b=tc -t='%1' -w=%2 -h=%3 -x=%4 -y=%5">
-    >
-    <onterminate
-      <cmd1 "cursor()">
+      <cmd0 cmd1="popup %1-box basedir()/etc/gui/%1.htm -b=rtc -t=%1 -w=%2 -h=%3 -x=%4 -y=%5">
+      <cmd0 "popup %1-box basedir()/etc/gui/%1.htm -b=tc -t='%1' -w=%2 -h=%3 -x=%4 -y=%5">
     >
   >
 >
@@ -1295,10 +961,7 @@
       <arg5 name="y" def="200">
     >
     <cmd
-      <cmd0 "popup %1-box 'basedir()/etc/gui/customise.htm' -b=tc -t='%1' -w=%2 -h=%3 -x=%4 -y=%5">
-    >
-    <onterminate
-      <cmd1 "cursor()">
+      <cmd0 "popup %1-box basedir()/etc/gui/customise.htm -b=tc -t='%1' -w=%2 -h=%3 -x=%4 -y=%5">
     >
   >
 >
@@ -1314,7 +977,7 @@
       <arg5 name="y" def="GetMouseY()">
     >
     <cmd
-      <cmd1 "popup '%1-tbxh' 'basedir()/etc/gui/help/%1.htm' -b=tc -t='%1' -w=%3 -h=%2 -x=%4 -y=%5">
+      <cmd1 "popup %1-tbxh basedir()/etc/gui/help/%1.htm -b=tc -t='%1' -w=%3 -h=%2 -x=%4 -y=%5">
     >
     <onterminate
       <cmd0 "cursor()">
@@ -1329,7 +992,7 @@
       <arg1 name="single" def="">
     >
     <cmd
-      <cmd6 "spy.runODAC('spy.ac_run solveit -%1')">
+      <cmd6 "spy.runODAC(spy.ac_run solveit -%1)">
     >
   >
 >
@@ -1367,39 +1030,10 @@
 >
 
 
-<auto help="Launches AutoStructure. Only available in Durham"
-  <body
-    <args
-      <arg1 name="solved" def="Default">
-      <arg2 name="xm_CC" def="Formula,enforce">
-      <arg3 name="tool3" def="">
-      <arg4 name="tool4" def="">
-      <arg5 name="para" def="">
-      <arg9 name="para" def="basedir()">
-      <arg6 name="para" def="filefull()">
-      <arg7 name="para" def="filepath()">
-      <arg8 name="para" def="filename()">
-    >
-    <cmd
-      <cmd1 "Echo Starting pyTools with %1 %2 %3 %4 %5">
-      <cmd5 "cursor(busy, %1)">
-      <cmd6 "exec '\\crystal-02\dcd\olex\pyTools.exe' auto '%6' '%7' '%8' '%9' %2 %3 %4 %5">
-    >
-    <onlisten
-      <cmd2 "html.Update">
-    >
-    <onterminate
-      <cmd0 "cursor()">
-      <cmd2 "delins rem">
-    >
-  >
->
-
-
 <dire help="Opens the current directory in Explorer"
   <body
     <cmd
-      <cmd0 "shell 'filepath()'">
+      <cmd0 "shell filepath()">
     >
   >
 >
@@ -1676,7 +1310,7 @@
       <arg1 name="datadir" def="DataDir()">
     >
     <cmd
-      <cmd0 "shell '%1'">
+      <cmd0 "shell %1">
     >
   >
 >

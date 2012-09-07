@@ -3,55 +3,56 @@
 <!-- FIRST ROW -->
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=SYMM_GROW_ROW_1; help_ext=Growing;1; -->
   <td name=GROW width='32%'>
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="combo"
       value=""
       valign="center"
-      bgcolor="$GetVar(HtmlTableBgColour)"
-      fgcolor="$GetVar(HtmlFontColour)"
+      bgcolor="$GetVar('HtmlTableBgColour')"
+      fgcolor="$GetVar('HtmlFontColour')"
       name="GROW"
-      height="$GetVar(HtmlComboHeight)"
+      height="$GetVar('HtmlComboHeight')"
       width='100%'
-      items="Grow All<- ;Shells<--s;Complete<--w;Asymm. Unit (fuse)<-fuse;"
+      items="'Grow All<- ;Shells<--s;Complete<--w;Asymm. Unit (fuse)<-fuse;'"
       readonly
-      onchange="if strcmp(html.GetValue(~name~),'fuse') then 'fuse' else run(grow html.GetValue(~name~))"
+      onchange="if strcmp(html.GetValue('~name~'),'fuse') then
+       fuse else run(grow html.GetValue('~name~'))"
       label='Grow'
     >
     </font>
   </td>
   <td name=GROW_MODE width='34%'>
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="combo"
       value=""
       valign="center"
-      bgcolor="$GetVar(HtmlTableBgColour)"
-      fgcolor="$GetVar(HtmlFontColour)"
+      bgcolor="$GetVar('HtmlTableBgColour')"
+      fgcolor="$GetVar('HtmlFontColour')"
       name="GROW_WHAT"
-      height="$GetVar(HtmlComboHeight)"
+      height="$GetVar('HtmlComboHeight')"
       width='100%'
       items="Short<--s;Selection<--r=10;VdW<--v;Move<--a;Shells<-shells;"
       readonly
-      onchange="if strcmp(spy.GetParam(olex2.short_mode),'grow') then 'mode off'  else run(mode grow html.GetValue(~name~) html.GetData(GROW_SHELLS))"
+      onchange="run(mode grow html.GetValue(~name~))"
       label='Mode Grow'
     >
     </font>
   </td>
   <td name=COMPAQ width='34%'>
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="combo"
       value=""
       valign="center"
-      bgcolor="$GetVar(HtmlTableBgColour)"
-      fgcolor="$GetVar(HtmlFontColour)"
+      bgcolor="$GetVar('HtmlTableBgColour')"
+      fgcolor="$GetVar('HtmlFontColour')"
       name="COMPAQ"
-      height="$GetVar(HtmlComboHeight)"
+      height="$GetVar('HtmlComboHeight')"
       width='100%'
       items="Broken Fragments<--a;Atom-to-Atom<--c;Metal Last<--m;Peaks<--q;"
       readonly
-      onchange="run(compaq html.GetValue(~name~))"
+      onchange="run(compaq html.GetValue('~name~'))"
       label='Assemble'
     >
     </font>

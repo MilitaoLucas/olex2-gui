@@ -70,7 +70,7 @@
         width="50"
         height="$GetVar(HtmlSPinHeight)"
         max='1000'
-        value='$eval(abs\(spy.GetParam(snum.refinement.max_peaks)))'
+        value='$math.eval(abs(spy.GetParam(snum.refinement.max_peaks)))'
         onchange='spy.SetMaxPeaks(html.GetValue(~name~))'
       >
   </td>

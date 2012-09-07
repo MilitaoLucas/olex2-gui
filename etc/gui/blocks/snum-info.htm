@@ -11,19 +11,19 @@
       </td>
       <td align=right>
         $spy.checkErrLogFile()
-  &nbsp;$spy.MakeHoverButton(toolbar-edit, 'editins>>spy.doProgramSettings\(spy.GetParam\(snum.refinement.program),spy.GetParam\(snum.refinement.method))>>html.Update')
-  &nbsp;$spy.MakeHoverButton(toolbar-editatom, 'editatom')
-  &nbsp;$spy.MakeHoverButton(toolbar-open, 'dire')
-  &nbsp;$spy.MakeHoverButton(toolbar-text, 'text')
-  &nbsp;$spy.MakeHoverButton(toolbar-info, 'html.ItemState more-snum-info 1 2')
+  &nbsp;$spy.MakeHoverButton('toolbar-edit', 'editins>>spy.doProgramSettings(spy.GetParam(snum.refinement.program),spy.GetParam(snum.refinement.method))>>html.Update')
+  &nbsp;$spy.MakeHoverButton('toolbar-editatom', 'editatom')
+  &nbsp;$spy.MakeHoverButton('toolbar-open', 'dire')
+  &nbsp;$spy.MakeHoverButton('toolbar-text', 'text')
+  &nbsp;$spy.MakeHoverButton('toolbar-info', 'html.ItemState more-snum-info 1 2')
      </td>
    </tr>
    </table>
   </td>
 </tr>
 <tr>
-  <td colspan='6' align='right'>
-<!-- #includeif file.Exists(DataDir()/gui/toolbar.htm) user_toolbar DataDir()/gui/toolbar.htm;1 -->
+  <td colspan='5' align='right'>
+<!-- #includeif file.Exists(app.ConfigDir()/gui/toolbar.htm) user_toolbar app.ConfigDir()/gui/toolbar.htm;1 -->
   </td>
 </tr>
 

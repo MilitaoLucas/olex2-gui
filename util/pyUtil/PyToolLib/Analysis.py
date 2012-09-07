@@ -744,13 +744,13 @@ class Graph(ImageTools):
   name="HistoryScale"
   width="45"
   label="Scale "
-  bgcolor="$GetVar(HtmlTableBgColour)"
-  fgcolor="$GetVar(HtmlFontColour)"
+  bgcolor="$GetVar('HtmlTableBgColour')"
+  fgcolor="$GetVar('HtmlFontColour')"
   valign='center'
   min="2"
-  height="$GetVar(HtmlSpinHeight)"
-  value="$spy.GetParam(graphs.program_analysis.y_scale_factor)"
-  onchange="spy.SetParam(graphs.program_analysis.y_scale_factor,html.GetValue(HistoryScale))>>spy._make_history_bars()>>html.Update"
+  height="$GetVar('HtmlSpinHeight')"
+  value="$spy.GetParam('graphs.program_analysis.y_scale_factor')"
+  onchange="spy.SetParam('graphs.program_analysis.y_scale_factor',html.GetValue('HistoryScale'))>>spy._make_history_bars()>>html.Update"
 >
 </font>'''
 
@@ -760,10 +760,10 @@ class Graph(ImageTools):
           next_img = ""
         else:
           all_in_oneText = '''
-<a href='spy.SetParam(graphs.program_analysis.all_in_one_history,True)>>spy._make_history_bars()>>html.Update'>Show All Bars</a>'''
-          previous_img = "<a href='spy.olex_fs_copy(history-info_%s.htm,history-info.htm)>>html.Update'><zimg src=previous.png></a>" %(img_no -1)
+<a href="spy.SetParam('graphs.program_analysis.all_in_one_history','True')>>spy._make_history_bars()>>html.Update">Show All Bars</a>'''
+          previous_img = '''<a href="spy.olex_fs_copy('history-info_%s.htm','history-info.htm')>>html.Update"><zimg src=previous.png></a>''' %(img_no -1)
           #previous_img = "<a href='spy.write_to_olex(history-info.htm,Fred)'><zimg src=previous.png></a>"
-          next_img = "<a href='spy.olex_fs_copy(history-info_%s.htm,history-info.htm)>>html.Update'><zimg src=next.png></a>" %(img_no + 1)
+          next_img = '''<a href="spy.olex_fs_copy('history-info_%s.htm','history-info.htm')>>html.Update"><zimg src='next.png'></a>''' %(img_no + 1)
 
         historyTextNext = '''
 <table width='100%%' border='0' cellpadding='0'>
@@ -2408,7 +2408,7 @@ def makeReflectionGraphOptions(graph, name):
            'max':'30',
            'width':'%s' %width,
            'label':'%s ' %caption,
-           'onchange':'spy.SetParam(graphs.reflections.%s.%s,html.GetValue(%s))' %(
+           'onchange':"spy.SetParam('graphs.reflections.%s.%s',html.GetValue('%s'))" %(
              graph.name, object.name,ctrl_name),
            }
       options_gui.append(htmlTools.make_spin_input(d))
@@ -2419,7 +2419,7 @@ def makeReflectionGraphOptions(graph, name):
            'value':value,
            'width':'%s' %width,
            'label':'%s ' %caption,
-           'onchange':'spy.SetParam(graphs.reflections.%s.%s,html.GetValue(%s))' %(
+           'onchange':"spy.SetParam('graphs.reflections.%s.%s',html.GetValue('%s'))" %(
              graph.name, object.name,ctrl_name),
            'readonly':'readonly',
            }
@@ -2430,9 +2430,9 @@ def makeReflectionGraphOptions(graph, name):
       d = {'ctrl_name':ctrl_name,
            'value':'%s ' %caption,
            'checked':'%s' %value,
-           'oncheck':'spy.SetParam(graphs.reflections.%s.%s,True)' %(
+           'oncheck':"spy.SetParam('graphs.reflections.%s.%s','True')" %(
              graph.name, object.name),
-           'onuncheck':'spy.SetParam(graphs.reflections.%s.%s,False)' %(
+           'onuncheck':"spy.SetParam('graphs.reflections.%s.%s','False')" %(
              graph.name, object.name),
            'width':'%s' %width,
            'bgcolor':'%s' %guiParams.html.table_bg_colour,
@@ -2449,7 +2449,7 @@ def makeReflectionGraphOptions(graph, name):
            'label':'%s ' %caption,
            'items':items,
            'value':object.extract(),
-           'onchange':'spy.SetParam(graphs.reflections.%s.%s,html.GetValue(%s))>>spy.make_reflection_graph(html.GetValue(SET_REFLECTION_STATISTICS))' %(
+           'onchange':"spy.SetParam('graphs.reflections.%s.%s',html.GetValue('%s'))>>spy.make_reflection_graph(html.GetValue('SET_REFLECTION_STATISTICS'))" %(
              graph.name, object.name,ctrl_name),
            'width':'%s' %width,
            }
@@ -2495,7 +2495,7 @@ def makeReflectionGraphGui():
            'valign':'top',
           }
       #gui_d['make_graph_button'] = htmlTools.make_input_button(d)
-      gui_d['make_graph_button'] = '$spy.MakeHoverButton(button_small-go@MakeGraphs,%s)' %onclick
+      gui_d['make_graph_button'] = "$spy.MakeHoverButton('button_small-go@MakeGraphs','%s')" %onclick
 
   gui_d['help'] = htmlTools.make_table_first_col(
     help_name=help_name, popout=False)
@@ -2509,10 +2509,10 @@ def makeReflectionGraphGui():
      'height':guiParams.html.combo_height,
      'bgcolor':guiParams.html.input_bg_colour,
      'value':value,
-     'onchange':'spy.make_reflection_graph(html.GetValue(SET_REFLECTION_STATISTICS))>>html.Update',
+     'onchange':"spy.make_reflection_graph(html.GetValue('SET_REFLECTION_STATISTICS'))>>html.Update",
      'manage':'manage',
      'readonly':'readonly',
-     'width':'$eval(html.clientwidth(self)-140)',
+     'width':'$math.eval(html.clientwidth(self)-140)',
      'readonly':'readonly',
     }
   gui_d['graph_chooser']=htmlTools.make_combo_text_box(d)
@@ -2536,7 +2536,7 @@ def makeReflectionGraphGui():
   if gui_d['options_gui'] != '':
     txt += r'''
 %(row_table_off)s
-<tr name='OPTIONS' bgcolor="$GetVar(HtmlTableBgColour)">
+<tr name='OPTIONS' bgcolor="$GetVar('HtmlTableBgColour')">
 %(tool-first-column)s
 %(row_table_on)s
 %(options_gui)s
@@ -2615,18 +2615,21 @@ class HealthOfStructure():
     """
     if olx.IsFileLoaded() != 'true':
       return (False, True)
-    
+
+    try:
+      hkl = OV.HKLSrc()
+      if not hkl or not os.path.exists(hkl):
+        return (False, True)
+      self.hkl_stats = olex_core.GetHklStat()
+    except:
+      return (False, True)
     if self.scope == "refinement":
       return (True, True)
     else:
       self.scope = "hkl"
-      hkl = OV.HKLSrc()
-      if not hkl or not os.path.exists(hkl):
-        return (False, True)
+      if force:
+        return (True, None)
       try:
-        self.hkl_stats = olex_core.GetHklStat()
-        if force:
-          return (True, None)
         min_d = "%.4f" %self.hkl_stats['MinD']
         if OV.GetParam('snum.hkl.d_min') == float(min_d):
           if bool(olx.fs.Exists('MinD')):
@@ -2637,7 +2640,7 @@ class HealthOfStructure():
           return (False, True)
       except:
         return (False, True)
-      
+
     return (True, None)
 
   def get_cctbx_completeness(self, dmin=None):
@@ -2687,23 +2690,23 @@ class HealthOfStructure():
       if not self.hkl_stats:
         return
       l = ['MinD', 'MeanIOverSigma','Rint','Completeness']
-    
+
 
     txt = "<table width='100%%' cellpadding=0 cellspacing=0><tr>"
 
 
-    counter = 0    
+    counter = 0
     for item in l:
       counter += 1
       if self.scope == "hkl":
         value = self.hkl_stats[item]
       elif self.scope == "refinement":
         value = OV.GetParam('snum.refinement.%s' %item)
-        
+
       display = OV.GetParam('diagnostics.%s.%s.display' %(self.scope,item))
       value_format = OV.GetParam('diagnostics.%s.%s.value_format' %(self.scope,item))
       href = OV.GetParam('diagnostics.%s.%s.href' %(self.scope,item))
-      
+
       bg_colour = self.get_bg_colour(item, value)
       raw_val = value
       if value == None:
@@ -2762,7 +2765,7 @@ class HealthOfStructure():
     font_name = 'Vera'
     value_display_extra = ""
     completeness_box_width = 150
-    
+
     c_width = int(olx.html.ClientWidth('self'))
     if c_width < 100:
       c_width = OV.GetParam('gui.htmlpanelwidth')
@@ -2882,7 +2885,7 @@ class HealthOfStructure():
 
 #    im = IT.make_round_corners(im, radius=4 * self.scale, colour=bgcolour)
     if self.image_position != "last":
-      im = IT.add_whitespace(im, 'right', 4, bgcolour) 
+      im = IT.add_whitespace(im, 'right', 4, bgcolour)
     im = im.resize((boxWidth/scale, boxHeight/scale), Image.ANTIALIAS)
     OlexVFS.save_image_to_olex(im, item, 0)
     href = OV.GetParam('diagnostics.%s.%s.href' %(self.scope,item))
