@@ -10,9 +10,9 @@
       width="100%"
       bgcolor="$GetVar(HtmlInputBgColour)"
       name="FIT_OR_SPLIT"
-      items='fit<-;split<-s'
+      items='fit<-false;split<-true'
       value=""
-      onchange="if strcmp(spy.check_for_selection(),True) then run('mode fit -html.GetValue(~name~)')"
+      onchange="if spy.check_for_selection() then run(mode fit -s=html.GetValue(~name~))"
       valign="center"
       readonly
     >
