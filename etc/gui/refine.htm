@@ -1,28 +1,26 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
 <tr>
-	<td valign='top' width="8" align='center' bgcolor="$GetVar(HtmlTableFirstcolColour)">
-		<a 
-			href="spy.make_help_box -name='refine' -popout='False'" 
-			target="Help me with this">
-			<zimg border="0" src="info.png">
-		</a>	
-	</td>
-	<td VALIGN='center'  colspan='2'>
-    <input
-			bgcolor="$GetVar(HtmlTableBgColour)"  
-			type="button" 
-			name="RUN_REFINE" 
-			image="button-refine.png"
-			onclick="refine>>echo 'Running Refinement Program'"
-		>
-	</td>
-	</tr>
-
+ <td valign='top' width="8" align='center' bgcolor="$GetVar(HtmlTableFirstcolColour)">
+  <a href="spy.make_help_box -name='refine' -popout='False'" 
+    target="Help me with this">
+    <zimg border="0" src="info.png">
+  </a>	
+ </td>
+ <td VALIGN='center'  colspan='2'>
+  <input
+   bgcolor="GetVar('HtmlTableBgColour')"  
+   type="button" 
+   name="RUN_REFINE" 
+   image="button-refine.png"
+   onclick="refine>>echo 'Running Refinement Program'"
+   >
+ </td>
+</tr>
 
 </table>
 
-<!-- #includeif fs.Exists(refinement_image.htm) refinement_image refinement_image.htm;1; -->
+<!-- #includeif fs.Exists('refinement_image.ht'm) refinement_image refinement_image.htm;1; -->
 
 
 <!-- #include tool-table-header gui\blocks\tool-table-header.htm;1; -->

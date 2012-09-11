@@ -54,7 +54,7 @@ $spy.MakeHoverButton('toolbar-center','compaq>>compaq -a>>center')
     </font>
   </td>
   <td width = '5%'>
-$spy.MakeHoverButton('toolbar-ok',"fixunit html.GetValue(SET_Z_PRIME_FIXUNIT)>>xf.au.SetZprime(html.GetValue(SET_Z_PRIME_FIXUNIT))>>html.Update")
+$spy.MakeHoverButton('toolbar-ok',"fixunit html.GetValue('SET_Z_PRIME_FIXUNIT')>>xf.au.SetZprime(html.GetValue('SET_Z_PRIME_FIXUNIT'))>>html.Update")
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
@@ -81,16 +81,16 @@ $spy.MakeHoverButton('toolbar-ok',"fixunit html.GetValue(SET_Z_PRIME_FIXUNIT)>>x
     <b>%Labels%</b>
   </td>
   <td width='45%' align='left' name=COMBO_LABEL_COMBO_BOX>
-    <font size='$GetVar(HtmlFontSizeControls)'>
+    <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type='combo'
       width='100%'
-      height="$GetVar(HtmlInputHeight)"
+      height="$GetVar('HtmlInputHeight')"
       name='set_label_content'
       value=''
-      items='%Toggle On/Off%<-;%Atom Names%<-l;%Crystallographic Occupancy%<-o;%Chemical Occupancy%<-co;%Parts%<-p;%Link-Code%<-v;%H Atom Labels%<-h l;%Fixed Parameters%<-f;Variables<-v;AFIX Commands<-h a;Q Peak Intensities<-qi'
-      bgcolor="$GetVar(HtmlInputBgColour)"
-      onchange="spy.ChooseLabelContent(html.GetValue(~name~))"
+      items="'%Toggle On/Off%<-;%Atom Names%<-l;%Crystallographic Occupancy%<-o;%Chemical Occupancy%<-co;%Parts%<-p;%Link-Code%<-v;%H Atom Labels%<-h l;%Fixed Parameters%<-f;Variables<-v;AFIX Commands<-h a;Q Peak Intensities<-qi'"
+      bgcolor="$GetVar('HtmlInputBgColour')"
+      onchange="spy.ChooseLabelContent(html.GetValue('~name~'))"
       readonly='readonly'
     >
     </font>

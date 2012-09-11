@@ -8,13 +8,13 @@
   <td width='20%'>
     <input
       type="combo"
-      height="$GetVar(HtmlComboHeight)"
-      bgcolor="$GetVar(HtmlInputBgColour)" 
+      height="GetVar('HtmlComboHeight')"
+      bgcolor="GetVar('HtmlInputBgColour')" 
       name="SET_OLEX_CONRES" 
-      items='RRINGS;TRIA;'
-      value="$spy.GetParam(snum.olex_conres) " 
+      items="'RRINGS;TRIA;'"
+      value="spy.GetParam('snum.olex_conres') " 
       width="70" 
-      onchange="spy.SetParam(snum.olex_conres,html.GetValue(~name~))>>spy.restraint_builder(html.GetValue(~name~))"
+      onchange="spy.SetParam('snum.olex_conres',html.GetValue('~name~'))>>spy.restraint_builder(html.GetValue('~name~'))"
       label="%Olex2 Name%"
       readonly
     >
@@ -22,7 +22,7 @@
   <td></td>
   <td></td>
 
-<!-- #includeif fs.Exists(olex-conres-vars.htm) olex-conres-vars olex-conres-vars.htm;1; -->
+<!-- #includeif fs.Exists('olex-conres-vars.htm') olex-conres-vars olex-conres-vars.htm;1; -->
 <!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
 
 <!-- %rrings-htmhelp%, %tria-htmhelp% -->

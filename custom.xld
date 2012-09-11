@@ -76,3 +76,11 @@
     >
   >
 >
+
+<tst help="run ac2"
+  <body
+    <cmd
+      <cmd2 "test f:/share/lock.png">
+    >
+  >
+>

@@ -8,10 +8,10 @@ $spy.MakeElementButtonsFromFormula()
   <input
     type='checkbox'
     width=18
-    height=$GetVar('HtmlCheckboxHeight')
-    bgcolor=$GetVar('HtmlTableFirstcolColour')
+    height="GetVar('HtmlCheckboxHeight')"
+    bgcolor="GetVar('HtmlTableFirstcolColour')"
     name='USER_AUTO_REFINE_AFTER_ANIS'
-    checked="$spy.GetParam('user.auto_refine_after_anis')"
+    checked="spy.GetParam('user.auto_refine_after_anis')"
     oncheck="spy.SetParam('user.auto_refine_after_anis','true')"
     onuncheck="spy.SetParam('user.auto_refine_after_anis','false')"
     target="Automatically refine if anis/isot or HADD is changed"

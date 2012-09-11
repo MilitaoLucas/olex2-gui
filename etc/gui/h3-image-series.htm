@@ -18,17 +18,17 @@ $spy.MakeHoverButton('button_small-go','spy.run_MakeMovie()')
   </td>
   
   <td name=ROTATION_AROUND_AXIS width=20%>
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size="$GetVar('HtmlFontSizeControls')">
     <input 
       name="ROTATION_AROUND_AXIS"
       type="text" 
-      height="$GetVar(HtmlInputHeight)"
-      bgcolor="$GetVar(HtmlInputBgColour)"
+      height="GetVar('HtmlInputHeight')"
+      bgcolor="GetVar('HtmlInputBgColour')"
       valign='center'
       name="axis"
       width="100%"
-      value="$spy.GetParam(snum.image.image_series.rotation_around_axis)"
-      onchange="spy.SetParam(snum.image.image_series.rotation_around_axis,html.GetValue(ROTATION_AROUND_AXIS))"
+      value="spy.GetParam('snum.image.image_series.rotation_around_axis')"
+      onchange="spy.SetParam('snum.image.image_series.rotation_around_axis',html.GetValue('~name~'))"
     >
     </font>
   </td>
@@ -38,18 +38,18 @@ $spy.MakeHoverButton('button_small-go','spy.run_MakeMovie()')
   </td>
   
   <td name=DEGREES_OF_ROTATION width=20%>
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size="$GetVar('HtmlFontSizeControls')">
     <input
       name="DEGREES_OF_ROTATION"
       type="text"
-      height="$GetVar(HtmlInputHeight)"
-      bgcolor="$GetVar(HtmlInputBgColour)"
+      height="GetVar('HtmlInputHeight')"
+      bgcolor="GetVar('HtmlInputBgColour')"
       valign='center'
       name="axis"
       name="steps"
       width="100%"
-      value = "$spy.GetParam('snum.image.image_series.degrees_of_rotation')"
-      onchange="spy.SetParam('snum.image.image_series.degrees_of_rotation',html.GetValue(DEGREES_OF_ROTATION))"
+      value = "spy.GetParam('snum.image.image_series.degrees_of_rotation')"
+      onchange="spy.SetParam('snum.image.image_series.degrees_of_rotation',html.GetValue('~name~'))"
     >
     </font>
   </td>
@@ -62,18 +62,18 @@ $spy.MakeHoverButton('button_small-go','spy.run_MakeMovie()')
     <b>%Number of frames%:</b>
   </td>
   <td name=NUMBER_OF_FRAMES width=20%>
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size="$GetVar('HtmlFontSizeControls')">
     <input
       name="NUMBER_OF_FRAMES"
       type="text"
-      height="$GetVar(HtmlInputHeight)"
-      bgcolor="$GetVar(HtmlInputBgColour)"
+      height="GetVar('HtmlInputHeight')"
+      bgcolor="GetVar('HtmlInputBgColour')"
       valign='center'
       name="axis"
       name="frames"
       width="100%"
-      value="$spy.GetParam('snum.image.image_series.number_of_frames')"
-      onchange="spy.SetParam('snum.image.image_series.number_of_frames',html.GetValue(NUMBER_OF_FRAMES))"
+      value="spy.GetParam('snum.image.image_series.number_of_frames')"
+      onchange="spy.SetParam('snum.image.image_series.number_of_frames',html.GetValue('~name~'))"
     >
     </font>
   </td>
@@ -83,18 +83,18 @@ $spy.MakeHoverButton('button_small-go','spy.run_MakeMovie()')
   </td>
 
   <td name=SIZE_OF_FRAMES width=20%>
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size="$GetVar('HtmlFontSizeControls')">
     <input
       name='SIZE_OF_FRAMES'
       type="text"
-      height="$GetVar(HtmlInputHeight)"
-      bgcolor="$GetVar(HtmlInputBgColour)"
+      height="GetVar('HtmlInputHeight')"
+      bgcolor="GetVar('HtmlInputBgColour')"
       valign='center'
       name="axis"
       name="size"
       width="100%"
-      value="$spy.GetParam(snum.image.image_series.size_of_frames)"
-      onchange="spy.SetParam(snum.image.image_series.size_of_frames,html.GetValue(SIZE_OF_FRAMES))"
+      value="spy.GetParam('snum.image.image_series.size_of_frames')"
+      onchange="spy.SetParam('snum.image.image_series.size_of_frames',html.GetValue('~name~'))"
       >
       </font>
   </td>

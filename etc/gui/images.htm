@@ -13,10 +13,10 @@
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="combo"
-      height="$GetVar('HtmlComboHeight')"
+      height="GetVar('HtmlComboHeight')"
       width="100%"
-      bgcolor="$GetVar('HtmlInputBgColour')"
-      items="none;$;#;full"
+      bgcolor="GetVar('HtmlInputBgColour')"
+      items="'none;$;#;full'"
       valign='center'
       name="IMAGE_SETTINGS_LABEL_SYMM"
       value=' '
@@ -32,10 +32,10 @@
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="combo"
-      height="$GetVar('HtmlComboHeight')"
+      height="GetVar('HtmlComboHeight')"
       width="100%"
-      bgcolor="$GetVar('HtmlInputBgColour')"
-      items="default;subscript;brackets"
+      bgcolor="GetVar('HtmlInputBgColour')"
+      items="'default;subscript;brackets'"
       valign='center'
       name="IMAGE_SETTINGS_LABEL_TYPE"
       value='default'

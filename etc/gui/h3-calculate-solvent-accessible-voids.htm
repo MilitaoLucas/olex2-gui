@@ -6,34 +6,34 @@
   <td>
   </td>
   <td width="33%">
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="text"
       name = "SET_SNUM_CALCSOLV_PROBE"
       width="95%"
-      height="$GetVar(HtmlInputHeight)"
+      height="GetVar('HtmlInputHeight')"
       label="%Probe%/&Aring [1.2]"
       valign="center"
-      bgcolor="$GetVar(HtmlTableBgColour)"
-      fgcolor="$GetVar(HtmlFontColour)"
-      value="$spy.GetParam(snum.calcsolv.probe)"
-      onchange="spy.SetParam(snum.calcsolv.probe,html.GetValue(~name~))"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      fgcolor="GetVar('HtmlFontColour')"
+      value="spy.GetParam('snum.calcsolv.probe')"
+      onchange="spy.SetParam('snum.calcsolv.probe',html.GetValue('~name~'))"
     >
     </font>
   </td>
   <td width="33%">
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="text"
       name = "SET_SNUM_CALCSOLV_GRID"
       width="95%"
-      height="$GetVar(HtmlInputHeight)"
+      height="GetVar('HtmlInputHeight')"
       label="%Grid%/&Aring [0.2]"
       valign="center"
-      bgcolor="$GetVar(HtmlTableBgColour)"
-      fgcolor="$GetVar(HtmlFontColour)"
-      value="$spy.GetParam(snum.calcsolv.grid)"
-      onchange="spy.SetParam(snum.calcsolv.grid,html.GetValue(~name~))"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      fgcolor="GetVar('HtmlFontColour')"
+      value="spy.GetParam('snum.calcsolv.grid')"
+      onchange="spy.SetParam('snum.calcsolv.grid',html.GetValue('~name~'))"
     >
     </font>
   </td>
