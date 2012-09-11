@@ -293,7 +293,7 @@
        'file>>listen filepath()/filename().%1' else none">
       <cmd4 "if strcmp(%1,hkl) then 
        'exec -o getvar(defeditor) hklsrc()' else 
-       'exec -o getvar(defeditor) filepath()/filename().%1\-t=\"stop listen\"'">
+       'exec -o getvar(defeditor) filepath()/filename().%1 -t=\"stop listen\"'">
       <cmd5 "if strcmp(%1,note) then 
        'exec -o getvar(defeditor) filepath()/filename()-note.txt'">
     >

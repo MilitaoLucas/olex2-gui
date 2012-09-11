@@ -242,7 +242,7 @@ snum
       {
       name = None
         .type = str
-      type = *png jpg bmp
+      type = *png jpg bmp tif
         .type = choice
       atom_label{
         font_name = #olex2.fnt:frb_18

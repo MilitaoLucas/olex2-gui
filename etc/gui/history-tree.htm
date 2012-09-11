@@ -12,12 +12,12 @@
       type="tree"
       src="history_tree.ind"
       bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-      width="$math.eval(html.clientwidth(self)-50)"
+      width="math.eval(html.clientwidth(self)-50)"
       height="200"
-      selected="$spy.GetParam(snum.history.current_node)"
+      selected="$spy.GetParam('snum.history.current_node')"
       onselect=""
-      onitem="spy.revert_history(html.GetValue(~name~))>>html.Update"
-      onedit="spy.rename_history(html.GetValue(~name~),~label~)>>html.Update"
+      onitem="spy.revert_history(html.GetValue('~name~'))>>html.Update"
+      onedit="spy.rename_history(html.GetValue('~name~'),'~label~')>>html.Update"
     >
     </font>
 </td>

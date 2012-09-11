@@ -25,11 +25,11 @@
   <td>
     <input 
       type="text"
-      height="$GetVar(HtmlInputHeight)"
+      height="GetVar('HtmlInputHeight')"
       name = "exclude_h" 
       width="22" 
       height="18" 
-      bgcolor="$GetVar(HtmlInputBgColour)" 
+      bgcolor="GetVar('HtmlInputBgColour')" 
       value=""
       manage
       label="h = "
@@ -38,10 +38,10 @@
   <td>
     <input 
       type="text"
-      height="$GetVar(HtmlInputHeight)"
+      height="GetVar('HtmlInputHeight')"
       name = "exclude_k" 
       width="22" 
-      bgcolor="$GetVar(HtmlInputBgColour)" 
+      bgcolor="GetVar('HtmlInputBgColour')" 
       value=""
       manage
       label="k = "
@@ -50,10 +50,10 @@
   <td>
     <input 
       type="text"
-      height="$GetVar(HtmlInputHeight)"
+      height="GetVar('HtmlInputHeight')"
       name = "exclude_l" 
       width="22" 
-      bgcolor="$GetVar(HtmlInputBgColour)" 
+      bgcolor="GetVar('HtmlInputBgColour')" 
       value=""
       manage
       label="l = "
@@ -64,19 +64,19 @@
       type='checkbox'  
       width=40 
       height=12 
-      bgcolor="$GetVar(HtmlTableBgColour)" 
-      fgcolor="$GetVar(HtmlFontColour)" 
+      bgcolor="GetVar('HtmlTableBgColour')" 
+      fgcolor="GetVar('HtmlFontColour')" 
       name="EXCLUDE_AND" 
       value="%AND%"
       data=""
       $spy.CheckBoxValue(exclude_hkl_and) 
-      oncheck="SetVar(exclude_hkl_and,true)>>spy.StoreSingleParameter exclude_hkl_and>>html.SetData(EXCLUDE_AND,'-c')" 
-      onuncheck="SetVar(exclude_hkl_and,false)>>spy.StoreSingleParameter exclude_hkl_and>>html.SetData(EXCLUDE_AND,'')"
+      oncheck="SetVar('exclude_hkl_and','true')>>spy.StoreSingleParameter exclude_hkl_and>>html.SetData('EXCLUDE_AND','-c')" 
+      onuncheck="SetVar('exclude_hkl_and','false')>>spy.StoreSingleParameter exclude_hkl_and>>html.SetData('EXCLUDE_AND','')"
     >
   </td>
 
   <td>
-    <a href='html.SetValue(exclude_h,"")>>html.SetValue(exclude_k,"")>>html.SetValue(exclude_l,"")>>HklAppend'>%Reset%</a> 
+    <a href="html.SetValue('exclude_h','')>>html.SetValue('exclude_k','')>>html.SetValue('exclude_l','')>>HklAppend">%Reset%</a> 
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 

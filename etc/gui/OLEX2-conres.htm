@@ -5,16 +5,16 @@
 <tr bgcolor="$GetVar(HtmlTableBgColour)">
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Olex2-Restraints-and-Constraints;1; -->
   <td width='18%' bgcolor="$GetVar(HtmlTableBgColour)">
-    <font size='$GetVar(HtmlFontSizeControls)'>
+    <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="combo"
-      height="$GetVar(HtmlComboHeight)"
-      bgcolor="$GetVar(HtmlInputBgColour)" 
+      height="GetVar('HtmlComboHeight')"
+      bgcolor="GetVar('HtmlInputBgColour')" 
       name="SET_OLEX2_CONRES" 
-      items='RRINGS;TRIA;ADPUEQ;ADPVOL;ANGLE;DIANG'
-      value="GetVar(gui_olex2_conres)" 
+      items="'RRINGS;TRIA;ADPUEQ;ADPVOL;ANGLE;DIANG'"
+      value="GetVar('gui_olex2_conres')" 
       width="100%"
-      onchange="SetVar(gui_olex2_conres,html.GetValue(~name~))>>spy.restraint_builder(html.GetValue(~name~))"
+      onchange="SetVar('gui_olex2_conres',html.GetValue('~name~'))>>spy.restraint_builder(html.GetValue('~name~'))"
       readonly
       manage
     >

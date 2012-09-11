@@ -52,11 +52,11 @@ $spy.MakeHoverButton('button_small-hfix',"if strcmp(spy.GetParam(olex2.short_mod
       <b>%HIMP%</b>
     </td>
     <td width="35%">
-      <font size=$GetVar(HtmlFontSizeControls)>
+      <font size="$GetVar('HtmlFontSizeControls')">
       <input
         type="combo"
-        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-        height="$GetVar(HtmlComboHeight)"
+        bgcolor="spy.GetParam('gui.html.input_bg_colour')"
+        height="GetVar('HtmlComboHeight')"
         name = "HIMP_DISTANCE"
         width="100%"
         value=""

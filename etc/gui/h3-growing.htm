@@ -8,10 +8,10 @@
       type="combo"
       value=""
       valign="center"
-      bgcolor="$GetVar('HtmlTableBgColour')"
-      fgcolor="$GetVar('HtmlFontColour')"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      fgcolor="GetVar('HtmlFontColour')"
       name="GROW"
-      height="$GetVar('HtmlComboHeight')"
+      height="GetVar('HtmlComboHeight')"
       width='100%'
       items="'Grow All<- ;Shells<--s;Complete<--w;Asymm. Unit (fuse)<-fuse;'"
       readonly
@@ -27,14 +27,14 @@
       type="combo"
       value=""
       valign="center"
-      bgcolor="$GetVar('HtmlTableBgColour')"
-      fgcolor="$GetVar('HtmlFontColour')"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      fgcolor="GetVar('HtmlFontColour')"
       name="GROW_WHAT"
-      height="$GetVar('HtmlComboHeight')"
+      height="GetVar('HtmlComboHeight')"
       width='100%'
-      items="Short<--s;Selection<--r=10;VdW<--v;Move<--a;Shells<-shells;"
+      items="'Short<--s;Selection<--r=10;VdW<--v;Move<--a;Shells<-shells;'"
       readonly
-      onchange="run(mode grow html.GetValue(~name~))"
+      onchange="run(mode grow html.GetValue('~name~'))"
       label='Mode Grow'
     >
     </font>
@@ -45,12 +45,12 @@
       type="combo"
       value=""
       valign="center"
-      bgcolor="$GetVar('HtmlTableBgColour')"
-      fgcolor="$GetVar('HtmlFontColour')"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      fgcolor="GetVar('HtmlFontColour')"
       name="COMPAQ"
-      height="$GetVar('HtmlComboHeight')"
+      height="GetVar('HtmlComboHeight')"
       width='100%'
-      items="Broken Fragments<--a;Atom-to-Atom<--c;Metal Last<--m;Peaks<--q;"
+      items="'Broken Fragments<--a;Atom-to-Atom<--c;Metal Last<--m;Peaks<--q;'"
       readonly
       onchange="run(compaq html.GetValue('~name~'))"
       label='Assemble'
