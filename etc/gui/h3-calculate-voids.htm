@@ -6,51 +6,51 @@
   <td>
   </td>
   <td width="25%">
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="text"
       name = "SET_SNUM_CALCVOID_RESOLUTION"
       width="95%"
-      height="$GetVar(HtmlInputHeight)"
+      height="GetVar('HtmlInputHeight')"
       label="%Res%/&Aring [0.2]"
       valign="center"
-      bgcolor="$GetVar(HtmlTableBgColour)"
-      fgcolor="$GetVar(HtmlFontColour)"
-      value="$spy.GetParam(snum.calcvoid.resolution)"
-      onchange="spy.SetParam(snum.calcvoid.resolution,html.GetValue(~name~))"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      fgcolor="GetVar('HtmlFontColour')"
+      value="$spy.GetParam('snum.calcvoid.resolution')"
+      onchange="spy.SetParam('snum.calcvoid.resolution',html.GetValue('~name~'))"
     >
     </font>
   </td>
   <td width="20%">
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="text"
       name = "SET_SNUM_CALCVOID_DISTANCE"
       width="95%"
-      height="$GetVar(HtmlInputHeight)"
+      height="GetVar('HtmlInputHeight')"
       label="%Distance%/&Aring [0.0]"
       valign="center"
-      bgcolor="$GetVar(HtmlTableBgColour)"
-      fgcolor="$GetVar(HtmlFontColour)"
-      value="$spy.GetParam(snum.calcvoid.distance)"
-      onchange="spy.SetParam(snum.calcvoid.distance,html.GetValue(~name~))"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      fgcolor="GetVar('HtmlFontColour')"
+      value="spy.GetParam('snum.calcvoid.distance')"
+      onchange="spy.SetParam('snum.calcvoid.distance',html.GetValue('~name~'))"
     >
     </font>
   </td>
   <td width="20%">
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size="$GetVar('HtmlFontSizeControls')">
     <input
-      bgcolor="$GetVar(HtmlTableBgColour)"
-      fgcolor="$GetVar(HtmlFontColour)"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      fgcolor="GetVar('HtmlFontColour')"
       type="checkbox"
       value="%Precise%"
       valign="bottom"
       name="SNUM_CALCVOID_PRECISE"
-      checked="$spy.GetParam(snum.calcvoid.precise)"
-      height="$GetVar(HtmlInputHeight)"
+      checked="spy.GetParam('snum.calcvoid.precise')"
+      height="GetVar('HtmlInputHeight')"
       width="95%"
-      oncheck="spy.SetParam(snum.calcvoid.precise,True)"
-      onuncheck="spy.SetParam(snum.calcvoid.precise,False)"
+      oncheck="spy.SetParam('snum.calcvoid.precise','True')"
+      onuncheck="spy.SetParam('snum.calcvoid.precise','False')"
     >
     </font>
   </td>

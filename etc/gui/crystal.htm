@@ -21,18 +21,18 @@
 			>
 			<input 
 				type="combo"
-				height="$GetVar(HtmlComboHeight)"
-				bgcolor="$GetVar(HtmlInputBgColour)" 
+				height="GetVar('HtmlComboHeight')"
+				bgcolor="GetVar('HtmlInputBgColour')" 
 				name= "SET_SNUM_COLOUR_INTENSITY" 
-				items="dark;light;intense;pale" 
+				items="'dark;light;intense;pale'" 
 				width="70"  
 				value="GetVar(snum_colour_intensity)"
 				onchange="spy.hello(html.GetValue(SET_SNUM_COLOUR_INTENSITY))>>SetVar(snum_colour_intensity,html.GetValue(SET_SNUM_COLOUR_INTENSITY))"
 			>
 			<input 
 				type="combo"
-				height="$GetVar(HtmlComboHeight)"
-				bgcolor="$GetVar(HtmlInputBgColour)" 
+				height="GetVar('HtmlComboHeight')"
+				bgcolor="GetVar('HtmlInputBgColour')" 
 				name= "COLOUR_BASE" 
 				items="black;blue;bronze;brown;colourless;gold;green;grey;orange;pink;purple;red;silver;violet;white;yellow" 
 				width="70"  
