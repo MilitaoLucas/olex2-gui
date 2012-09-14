@@ -44,10 +44,10 @@
         height="17"
         bgcolor="spy.GetParam(gui.html.input_bg_colour)"
         name='SET_SNUM_REFINEMENT_METHOD',
-        value='$spy.GetParam(snum.refinement.method)', 
-        items='$spy.getRefinementMethods($spy.GetParam(snum.refinement.program))'
+        value='spy.GetParam(snum.refinement.method)', 
+        items='spy.getRefinementMethods(spy.GetParam(snum.refinement.program))'
         label='', 
-        onchange="spy.SetParam(snum.refinement.method,'GetValue(~name~)')>>html.Update" 
+        onchange="spy.SetParam(snum.refinement.method,GetValue('~name~'))>>html.Update" 
         readonly='readonly'
       >
     </font>
@@ -55,7 +55,7 @@
 </tr>
 
 <tr VALIGN='center' ALIGN='left' NAME='SET_REFLECTIONS'>
-  <td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
+  <td width="2" bgcolor="$GetVar('HtmlTableFirstcolColour')"></td>
     <td VALIGN='center' colspan=2 width="100">
       <b>Reflection File</b>
     </td>
@@ -65,7 +65,7 @@
         type='combo', 
         width='$math.eval(spy.GetParam(gui.htmlpanelwidth)/2 -20)' 
         height="17"
-        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+        bgcolor="spy.GetParam('gui.html.input_bg_colour')"
         name='SNUM_SET_REFLECTIONS', 
         items='$spy.GetHklFileList()', 
         onchange='HKLSrc(html.GetValue(~name~))', 
@@ -77,7 +77,7 @@
 </tr>
 
 <tr VALIGN='center' ALIGN='left' NAME='SNUM_REFINEMENT_MAX_CYCLES'>
-<td width="2" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
+<td width="2" bgcolor="$GetVar('HtmlTableFirstcolColour')"></td>
   <td VALIGN='center' colspan='3'>
     <b>Maximum Refinement Iterations</b>
   </td>
