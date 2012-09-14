@@ -62,6 +62,24 @@
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
+<!-- FOURTH ROW -->
+<!-- #include tool-row gui\blocks\tool-row.htm;name='IMAGE_SETTINGS_ROW_4';1 -->
+  <td>
+    4) Automatically increment picture file name if empty 
+  </td>
+  <td>
+      <input name="IMAGE_SETTINGS_AUTOINCREMENT_NAME"
+       type="checkbox"
+       height="GetVar('HtmlCheckboxHeight')"
+       width="GetVar('HtmlCheckboxWidth')"
+       fgcolor="GetVar('HtmlFontColour')"
+       bgcolor="GetVar('HtmlTableBgColour')"
+       checked="spy.GetParam('snum.image.increment_name')"
+       onclick="spy.SetParam('snum.image.increment_name', html.GetState('~name~'))"
+      >
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
 <!-- SECOND ROW -->
 <!-- #include tool-row gui\blocks\tool-row.htm;name='IMAGE_SETTINGS_ROW_3';1 -->
   <td name=LABEL_INSTRUCTIONS_2>

@@ -237,6 +237,8 @@ snum
   image
     .short_caption = Structure Images
     {
+    increment_name = False
+      .type = bool
     bitmap
       .short_caption = png, jpg, bmp ...
       {
