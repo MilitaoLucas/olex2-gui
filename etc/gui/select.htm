@@ -84,9 +84,9 @@
       height="$GetVar(HtmlComboHeight)"
       bgcolor="$GetVar(HtmlInputBgColour)"
       name="RINGSELECT"
-      items="--;C6;C5N;C5;C5O;"
+      items="'--;C6;C5N;C5;C5O;'"
       width="100%"
-      onchange="if strcmp(html.GetValue(~name~),--) then html.SetFocus(~name~) else 'sel -u'>>sel rings html.GetValue(~name~)"
+      onchange="if strcmp(html.GetValue(~name~),'--') then html.SetFocus('~name~') else 'sel -u'>>sel rings html.GetValue('~name~')"
       value=""
     >
     </font>
