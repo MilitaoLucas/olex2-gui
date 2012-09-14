@@ -7,26 +7,26 @@
 </tr>
 <tr>
   <td>
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size="$GetVar('HtmlFontSizeControls')">
     <input
-      bgcolor="$GetVar(HtmlTableBgColour)"
-      fgcolor="$GetVar(HtmlFontColour)"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      fgcolor="GetVar('HtmlFontColour')"
       type="checkbox"
       value="%Condensed%"
       valign="center"
       name="SNUM_HISTORY_CONDENSED_TREE"
-      checked="$spy.GetParam(snum.history.condensed_tree)"
+      checked="spy.GetParam('snum.history.condensed_tree')"
       height='16'
       width='95%'
       oncheck="
-spy.SetParam(snum.history.condensed_tree,True)>>
+spy.SetParam('snum.history.condensed_tree','True')>>
 spy.make_history_bars()>>
-if html.IsPopup(history-tree) then spy.popout_history_tree()>>
+if html.IsPopup('history-tree') then spy.popout_history_tree()>>
 html.Update"
       onuncheck="
-spy.SetParam(snum.history.condensed_tree,False)>>
+spy.SetParam('snum.history.condensed_tree','False')>>
 spy.make_history_bars()>>
-if html.IsPopup(history-tree) then spy.popout_history_tree()>>
+if html.IsPopup('history-tree') then spy.popout_history_tree()>>
 html.Update"
   >
   </font>

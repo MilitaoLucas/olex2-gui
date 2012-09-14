@@ -46,11 +46,11 @@
       <input
         type='spin'
         width="50"
-        height="$GetVar(HtmlSPinHeight)"
-        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+        height="GetVar('HtmlSPinHeight')"
+        bgcolor="spy.GetParam('gui.html.input_bg_colour')"
         name='SET_SNUM_REFINEMENT_MAX_CYCLES'
-        value='$spy.GetParam(snum.refinement.max_cycles)'
-        onchange="spy.SetMaxCycles(html.GetValue(~name~))"
+        value="spy.GetParam('snum.refinement.max_cycles')"
+        onchange="spy.SetMaxCycles(html.GetValue('~name~'))"
       >
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -65,13 +65,13 @@
   <td ALIGN='right' width='30%'>
       <input
         type="spin"
-        bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+        bgcolor="spy.GetParam('gui.html.input_bg_colour')"
         name="SET_SNUM_REFINEMENT_MAX_PEAKS"
         width="50"
-        height="$GetVar(HtmlSPinHeight)"
+        height="GetVar('HtmlSPinHeight')"
         max='1000'
-        value='$math.eval(abs(spy.GetParam(snum.refinement.max_peaks)))'
-        onchange='spy.SetMaxPeaks(html.GetValue(~name~))'
+        value="math.eval(abs(spy.GetParam(snum.refinement.max_peaks)))"
+        onchange="spy.SetMaxPeaks(html.GetValue('~name~'))"
       >
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -90,14 +90,14 @@ $spy.weightGuiDisplay()
   <td ALIGN='center' width='3%'>
       <input
         type="checkbox"
-        width="$GetVar(HtmlCheckboxWidth)"
-        height="$GetVar(HtmlCheckboxHeight)"
-        fgcolor="$GetVar(HtmlFontColour)"
-        bgcolor="$GetVar(HtmlTableFirstcolColour)"
+        width="GetVar('HtmlCheckboxWidth')"
+        height="GetVar('HtmlCheckboxHeight')"
+        fgcolor="GetVar('HtmlFontColour')"
+        bgcolor="GetVar('HtmlTableFirstcolColour')"
         name="SNUM_REFINEMENT_USE_SOLVENT_MASK"
-        checked="$spy.GetParam(snum.refinement.use_solvent_mask)"
-        oncheck="spy.SetParam(snum.refinement.use_solvent_mask,true)"
-        onuncheck="spy.SetParam(snum.refinement.use_solvent_mask,false)"
+        checked="spy.GetParam('snum.refinement.use_solvent_mask')"
+        oncheck="spy.SetParam('snum.refinement.use_solvent_mask','true')"
+        onuncheck="spy.SetParam('snum.refinement.use_solvent_mask','false')"
         value=""
       >
   </td>
@@ -109,17 +109,17 @@ $spy.weightGuiDisplay()
   <td ALIGN='center' width='3%'>
       <input
         type="checkbox"
-        width="$GetVar(HtmlCheckboxWidth)"
-        height="$GetVar(HtmlCheckboxHeight)"
-        fgcolor="$GetVar(HtmlFontColour)"
-        bgcolor="$GetVar(HtmlTableFirstcolColour)"
+        width="GetVar('HtmlCheckboxWidth')"
+        height="GetVar('HtmlCheckboxHeight')"
+        fgcolor="GetVar('HtmlFontColour')"
+        bgcolor="GetVar('HtmlTableFirstcolColour')"
         name="SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT"
-        checked="$spy.GetParam(snum.refinement.recompute_mask_before_refinement)"
+        checked="spy.GetParam('snum.refinement.recompute_mask_before_refinement')"
         oncheck="
-spy.SetParam(snum.refinement.use_solvent_mask,true)>>
-spy.SetParam(snum.refinement.recompute_mask_before_refinement,true)>>
+spy.SetParam('snum.refinement.use_solvent_mask','true')>>
+spy.SetParam('snum.refinement.recompute_mask_before_refinement','true')>>
 html.Update"
-        onuncheck="spy.SetParam(snum.refinement.recompute_mask_before_refinement,false)"
+        onuncheck="spy.SetParam('snum.refinement.recompute_mask_before_refinement','false')"
         value=""
       >
   </td>
@@ -133,6 +133,6 @@ html.Update"
 </table>
 
 <table border="0" style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
-<!-- #includeif fs.Exists(refinement-settings-extra.htm) refinement-settings-extra refinement-settings-extra.htm;gui\blocks\tool-h3-off.htm;image=h3-refinement settings extra;colspan=4;onclick=;onclick=;2; -->
-<!-- #includeif fs.Exists(refinement_image.htm) refinement_image refinement_image.htm;1; -->
+<!-- #includeif fs.Exists('refinement-settings-extra.htm') refinement-settings-extra refinement-settings-extra.htm;gui\blocks\tool-h3-off.htm;image=h3-refinement settings extra;colspan=4;onclick=;onclick=;2; -->
+<!-- #includeif fs.Exists('refinement_image.htm') refinement_image refinement_image.htm;1; -->
 </table>

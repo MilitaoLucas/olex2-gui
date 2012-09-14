@@ -48,7 +48,7 @@ class MultipleDataset:
       if i == current:
         html += "<td align='center' width='25%'><b>" + display + "&nbsp;(*)</b></td>"
       else:
-        html += "<td align='center' width='25%'><a href='reap filename().cif#" + str(i) + ">>compaq'>"\
+        html += "<td align='center' width='25%'><a href='reap filename().cif#" + str(i) + "'>"\
            + display + "</a></td>"
     return html + "</tr></table>"
 

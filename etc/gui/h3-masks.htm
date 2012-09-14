@@ -19,19 +19,19 @@
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td width="40%">
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="combo"
-      height="$GetVar(HtmlComboHeight)"
-      bgcolor="$GetVar(HtmlInputBgColour)"
+      height="GetVar('HtmlComboHeight')"
+      bgcolor="GetVar('HtmlInputBgColour')"
       name="SET_SNUM_MASKS_TYPE"
-      items='mask;f_mask;f_model'
-      value="$spy.GetParam(snum.masks.type)"
+      items="'mask;f_mask;f_model'"
+      value="spy.GetParam('snum.masks.type')"
       width="95%"
-      height="$GetVar(HtmlInputHeight)"
+      height="GetVar('HtmlInputHeight')"
       onchange="
-spy.SetParam(snum.masks.type,html.GetValue(~name~))>>
-spy.OlexCctbxMasks(False)>>
+spy.SetParam('snum.masks.type',html.GetValue('~name~'))>>
+spy.OlexCctbxMasks('False')>>
 spy.gui.maps.SetXGridView()"
       label="%Map% "
       valign="center"
@@ -40,18 +40,18 @@ spy.gui.maps.SetXGridView()"
     </font>
   </td>
   <td width="20%">
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="text"
       name = "SET_SNUM_MASKS_RESOLUTION_FACTOR"
       width="95%"
-      height="$GetVar(HtmlInputHeight)"
+      height="GetVar('HtmlInputHeight')"
       label="%Res. factor%"
       valign="center"
-      bgcolor="$GetVar(HtmlTableBgColour)"
-      fgcolor="$GetVar(HtmlFontColour)"
-      value="$spy.GetParam(snum.masks.resolution_factor)"
-      onchange="spy.SetParam(snum.masks.resolution_factor,html.GetValue(~name~))"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      fgcolor="GetVar('HtmlFontColour')"
+      value="spy.GetParam('snum.masks.resolution_factor')"
+      onchange="spy.SetParam('snum.masks.resolution_factor',html.GetValue('~name~'))"
     >
     </font>
   </td>
@@ -69,34 +69,34 @@ spy.gui.maps.SetXGridView()"
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
   <td width="50%">
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="text"
       name = "SET_SNUM_MASKS_SOLVENT_RADIUS"
       width="95%"
-      height="$GetVar(HtmlInputHeight)"
+      height="GetVar('HtmlInputHeight')"
       label="%Solvent radius in% &Aring"
       valign="center"
-      bgcolor="$GetVar(HtmlTableBgColour)"
-      fgcolor="$GetVar(HtmlFontColour)"
-      value="$spy.GetParam(snum.masks.solvent_radius)"
-      onchange="spy.SetParam(snum.masks.solvent_radius,html.GetValue(~name~))"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      fgcolor="GetVar('HtmlFontColour')"
+      value="spy.GetParam('snum.masks.solvent_radius')"
+      onchange="spy.SetParam('snum.masks.solvent_radius',html.GetValue('~name~'))"
     >
     </font>
   </td>
   <td width="50%">
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="text"
       name = "SET_SNUM_MASKS_SHRINK_TRUNCATION_RADIUS"
       width="95%"
-      height="$GetVar(HtmlInputHeight)"
+      height="GetVar('HtmlInputHeight')"
       label="%Shrink truncation radius in% &Aring"
       valign="center"
-      bgcolor="$GetVar(HtmlTableBgColour)"
-      fgcolor="$GetVar(HtmlFontColour)"
-      value="$spy.GetParam(snum.masks.shrink_truncation_radius)"
-      onchange="spy.SetParam(snum.masks.shrink_truncation_radius,html.GetValue(~name~))"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      fgcolor="GetVar('HtmlFontColour')"
+      value="spy.GetParam('snum.masks.shrink_truncation_radius')"
+      onchange="spy.SetParam('snum.masks.shrink_truncation_radius',html.GetValue('~name~'))"
     >
     </font>
   </td>
@@ -108,19 +108,19 @@ spy.gui.maps.SetXGridView()"
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td valign='bottom'>
-    <font size=$GetVar(HtmlFontSizeControls)>
+    <font size="$GetVar('HtmlFontSizeControls')">
     <input
-      bgcolor="$GetVar(HtmlTableBgColour)"
-      fgcolor="$GetVar(HtmlFontColour)"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      fgcolor="GetVar('HtmlFontColour')"
       type="checkbox"
       value="%Use set completion%"
       valign="bottom"
       name="SET_SNUM_MASKS_USE_COMPLETE_SET"
-      checked="$spy.GetParam(snum.masks.use_set_completion)"
-      height="$GetVar(HtmlInputHeight)"
+      checked="spy.GetParam('snum.masks.use_set_completion')"
+      height="GetVar('HtmlInputHeight')"
       width="50%"
-      oncheck="spy.SetParam(snum.masks.use_set_completion,True)"
-      onuncheck="spy.SetParam(snum.masks.use_set_completion,False)"
+      oncheck="spy.SetParam('snum.masks.use_set_completion','True')"
+      onuncheck="spy.SetParam('snum.masks.use_set_completion','False')"
     >
     </font>
   </td>
