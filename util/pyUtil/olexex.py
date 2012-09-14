@@ -1848,8 +1848,19 @@ def GetImageFilename(image_type):
     except:
       filename = None
     if not filename:
-      import gui
-      filename = gui.FileSave("Choose Filename", "*.%s" %fileext, OV.FilePath())
+      if OV.GetParam('snum.image.increment_name'):
+        fp = olx.FilePath()
+        fn = olx.FileName()
+        inc = 1
+        while True:
+          tf = os.path.normpath('%s/%s%d.%s' %(fp, fn, inc, fileext))
+          if not os.path.exists(tf):
+            filename = '%s%d' %(fn, inc)
+            break
+          inc += 1
+      else:
+        import gui
+        filename = gui.FileSave("Choose Filename", "*.%s" %fileext, OV.FilePath())
     if not filename:
       return None, None, None
   if filename.endswith(".%s" %fileext):
