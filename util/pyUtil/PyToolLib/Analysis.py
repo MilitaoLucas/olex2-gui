@@ -728,9 +728,9 @@ class Graph(ImageTools):
         self.image_location = "history_%s.png" %img_no
 
         historyText = """\
-        <zimg name="HISTORY_IMAGE" border="0" src="%s">
+        <tr><td><zimg name="HISTORY_IMAGE" border="0" src="%s">
         %s
-        </zimg>
+        </zimg></td></tr>
         """ %(self.image_location, self.map_txt)
 
 
@@ -766,32 +766,32 @@ class Graph(ImageTools):
           next_img = '''<a href="spy.olex_fs_copy('history-info_%s.htm','history-info.htm')>>html.Update"><zimg src='next.png'></a>''' %(img_no + 1)
 
         historyTextNext = '''
-<table width='100%%' border='0' cellpadding='0'>
+<tr><td><table width='100%%' border='0' cellpadding='0'>
 <tr>
   <td align='left' width='20%%'></td>
   <td align='center' width='30%%'>%s</td>
   <td align='center' width='30%%'>%s</td>
   <td align='right' width='20%%'>%s</td>
 </tr>
-</table>''' %(scaleTxt, all_in_oneText, next_img)
+</table></td></tr>''' %(scaleTxt, all_in_oneText, next_img)
         historyTextPrevious = '''
-<table width='100%%' border='0' cellpadding='0'>
+<tr><td><table width='100%%' border='0' cellpadding='0'>
 <tr>
   <td align='left' width='20%%' >%s</td>
   <td align='center' width='30%%'>%s</td>
   <td align='center' width='30%%'>%s</td>
   <td align='right' width='20%%'></td>
 </tr>
-</table>''' %(previous_img, scaleTxt, all_in_oneText)
+</table></td></tr>''' %(previous_img, scaleTxt, all_in_oneText)
         historyTextBoth = '''
-<table width='100%%' border='0' cellpadding='0'>
+<tr><td><table width='100%%' border='0' cellpadding='0'>
 <tr>
   <td align='left' width='20%%'>%s</td>
   <td align='center' width='30%%'>%s</td>
   <td align='center' width='30%%'>%s</td>
   <td align='right' width='20%%'>%s</td>
 </tr>
-</table>''' %(previous_img, scaleTxt, all_in_oneText, next_img)
+</table></td></tr>''' %(previous_img, scaleTxt, all_in_oneText, next_img)
         if img_no == 1 and i != last - 1:
 #          IT.write_text_to_draw(barDraw, 'previous', align='left', max_width=width)
           historyText += historyTextNext
@@ -2744,15 +2744,16 @@ class HealthOfStructure():
         if timing:
           print ".. hos image took %.3f s (%s) " %((time.time() - t),item)
       else:
+        ref_open = ''
+        ref_close = ''
         if href:
-          txt = txt + "<a href='%s'>" %(href)
+          ref_open = "<a href='%s'>" %(href)
+          ref_close = "</a>"
         txt += '''
   <td bgcolor=%s align='center' width='%s%%'><font color='#ffffff'>
-    %s: <b>%s</b>
+    %s: <b>%s%s%s</b>
   </font></td>
-'''%(bg_colour, 100/len(l), display, value)
-        if href:
-          txt = txt + "</a>"
+'''%(bg_colour, 100/len(l), display, ref_open, value, ref_close)
 
     txt += "</tr></table>"
     txt = txt.decode('utf-8')
@@ -2890,16 +2891,16 @@ class HealthOfStructure():
     OlexVFS.save_image_to_olex(im, item, 0)
     href = OV.GetParam('diagnostics.%s.%s.href' %(self.scope,item))
     txt = ""
+    ref_open = ''
+    ref_close = ''
     if href:
       if href == "atom":
         href = "sel %s" %OV.GetParam('snum.refinement.%s_atom' %item)
-      if item == 'max_hole':
-        href = ""
-      txt += "<a href='%s'>" %(href)
+      if item != 'max_hole':
+        ref_open = '<a href="%s">' %(href)
+        ref_close = "</a>"
     txt += '''
-<td align='center'><zimg src=%s></td>''' %item
-    if href:
-      txt = txt + "</a>"
+<td align='center'>%s<zimg src="%s"/>%s</td>''' %(ref_open, item, ref_close)
     return txt
 
   def get_bg_colour(self, item, val):

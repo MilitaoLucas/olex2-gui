@@ -60,8 +60,13 @@
   </td>
 </tr>
 
-<!-- #includeif fs.Exists(hos.htm) hos hos.htm;1 -->
-  $spy.GetTwinLaw(html)
+<!-- #ignoreif not(fs.Exists('hos.htm'))
+<tr><td colspan="5">
+<!-- #include hos hos.htm;1 -->
+</td></tr>
+#ignoreif -->
+
+$spy.GetTwinLaw(html)
 
 <!-- #include more-snum-info gui\blocks\more-snum-info.htm;2 -->
 
