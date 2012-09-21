@@ -404,9 +404,9 @@ class OlexFunctions(inheritFunctions):
     #print "AtReap %s/%s" %(path, file)
     try:
       if fader == 'true':
-        olex.m(r"atreap_fader -b '%s'" %(r"%s/%s.res" %(path, file)))
+        olex.m("atreap_fader -b \"%s\"" %(r"%s/%s.res" %(path, file)))
       else:
-        olex.m(r"atreap_no_fader -b '%s'" %(r"%s/%s.res" %(path, file)))
+        olex.m("atreap_no_fader -b \"%s\"" %(r"%s/%s.res" %(path, file)))
 
     except Exception, ex:
       print >> sys.stderr, "An error occured whilst trying to reload %s/%s" %(path, file)
@@ -422,7 +422,7 @@ class OlexFunctions(inheritFunctions):
 
   def File(self, filename=None):
     if filename is not None:
-      olx.File("'%s'" %filename)
+      olx.File("\"%s\"" %filename)
     else:
       olx.File()
 
