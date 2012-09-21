@@ -47,7 +47,7 @@ def makeProgramSettingsGUI(program, method, prgtype):
   max_colspan = 10
   txt = r"""
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=4;1; -->
-    <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
+    <table border="0" VALIGN='center' width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar('HtmlTableBgColour')">
 """
 
   txt += ''.join([makeArgumentsHTML(program, method, instruction)
@@ -61,7 +61,7 @@ def makeProgramSettingsGUI(program, method, prgtype):
   </td>
 </tr>
 <tr>
-  <td valign="center" width='$GetVar(HtmlTableFirstcolWidth)' bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
+  <td valign="center" width="$GetVar('HtmlTableFirstcolWidth')" bgcolor="$GetVar('HtmlTableFirstcolColour')"></td>
   %s
 </tr>
 </table>
@@ -90,9 +90,9 @@ def makeArgumentsHTML(program, method, instruction):
     tick_box_d.setdefault('ctrl_name', 'SET_SETTINGS_%s' %name.upper())
     tick_box_d.setdefault('checked', '$GetVar(settings_%s)' %name)
     tick_box_d.setdefault('value', '')
-    tick_box_d.setdefault('oncheck', 'SetVar(settings_%s,html.GetState(SET_SETTINGS_%s))>>spy.addInstruction(%s,%s,%s)' %(
+    tick_box_d.setdefault('oncheck', "SetVar('settings_%s',html.GetState('SET_SETTINGS_%s'))>>spy.addInstruction('%s','%s','%s')" %(
       name, name, program.name, method.name, name))
-    tick_box_d.setdefault('onuncheck', 'SetVar(settings_%s,html.GetState(SET_SETTINGS_%s))>>DelIns %s' %(
+    tick_box_d.setdefault('onuncheck', "SetVar('settings_%s',html.GetState('SET_SETTINGS_%s'))>>DelIns %s" %(
       name, name, argName))
     tick_box_html = htmlTools.make_tick_box_input(tick_box_d)
   else:
@@ -102,10 +102,10 @@ def makeArgumentsHTML(program, method, instruction):
   if name == 'cf':
     w = '50'
   txt += '''
-  <td valign='center' align='left' width='%s' bgcolor='$GetVar(HtmlTableFirstcolColour)'>
+  <td valign='center' align='left' width='%s' bgcolor="$GetVar('HtmlTableFirstcolColour')">
     <b>%s</b>
   </td>
-  <td valign='center' width='90%%' colspan='10' bgcolor='$GetVar(HtmlTableFirstcolColour)'>
+  <td valign='center' width='90%%' colspan='10' bgcolor="$GetVar('HtmlTableFirstcolColour')">
     %s
   </td>
 </tr>
@@ -177,8 +177,8 @@ def makeArgumentsHTML(program, method, instruction):
       d = {'ctrl_name':ctrl_name,
            'value':'%s ' %caption,
            'checked':'%s' %value,
-           'oncheck':'SetVar(%s,True)' %(varName),
-           'onuncheck':'SetVar(%s,True)' %(varName),
+           'oncheck':"SetVar('%s','True')" %(varName),
+           'onuncheck':"SetVar('%s','True')" %(varName),
            'width':'100%',
            'bgcolor':"",
            'fgcolor':"",
@@ -223,7 +223,7 @@ def makeArgumentsHTML(program, method, instruction):
   return txt
 
 def make_ondown(dictionary):
-  args = ''.join([' html.GetValue(SET_SETTINGS_%s)' %item[0].upper() for item in dictionary['values']])
+  args = ''.join([" html.GetValue('SET_SETTINGS_%s')" %item[0].upper() for item in dictionary['values']])
   txt = 'Addins %s%s' %(dictionary['name'], args)
   return txt
 
