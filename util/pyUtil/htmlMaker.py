@@ -35,7 +35,7 @@ OV.registerFunction(currentResultFilesHtmlMaker)
 def absorption_correctionMetadataHtmlMaker():
   list = (
     {'varName':'_exptl_absorpt_correction_type',
-     'items':'analytical;cylinder;empirical;gaussian;integration;multi-scan;none;numerical;psi-scan;refdelf;sphere',
+     'items':"'analytical;cylinder;empirical;gaussian;integration;multi-scan;none;numerical;psi-scan;refdelf;sphere'",
      'itemName':'%Abs Type%'
      },
     {'varName':'_exptl_absorpt_process_details',
@@ -58,7 +58,7 @@ def diffractionMetadataHtmlMaker():
     {'varName':'snum.report.diffractometer',
      'readonly':'',
      'itemName':'%Diffractometer%',
-     'items':userDictionaries.localList.getListDiffractometers(),
+     'items': "'%s'" %userDictionaries.localList.getListDiffractometers(),
      'onchange':"spy.addToLocalList(html.GetValue(~name~),diffractometers)>>html.update",
      },
   )
@@ -108,10 +108,10 @@ def crystalMetadataHtmlMaker():
              'items':'?;.;metallic;dull;clear'
              },
      'box2':{'varName':'_exptl_crystal_colour_modifier',
-             'items':'?;.;light;dark;whitish;blackish;grayish;brownish;reddish;pinkish;orangish;yellowish;greenish;bluish'
+             'items':"'?;.;light;dark;whitish;blackish;grayish;brownish;reddish;pinkish;orangish;yellowish;greenish;bluish'"
              },
      'box3':{'varName':'_exptl_crystal_colour_primary',
-             'items':'?;colourless;white;black;gray;brown;red;pink;orange;yellow;green;blue;violet'
+             'items':"'?;colourless;white;black;gray;brown;red;pink;orange;yellow;green;blue;violet'"
              },
      },
     {'varName':'_exptl_crystal_size',
@@ -128,7 +128,7 @@ def crystalMetadataHtmlMaker():
      },
     {'varName':'_exptl_crystal_description',
      'itemName':'%Shape%',
-     'items':'?;block;plate;needle;prism;irregular;cube;trapezoid;rect. Prism;rhombohedral;hexagonal;octahedral;plank',
+     'items': "'?;block;plate;needle;prism;irregular;cube;trapezoid;rect. Prism;rhombohedral;hexagonal;octahedral;plank'",
      },
     {'varName':'_exptl_crystal_preparation',
      'itemName':'%Preparation Details%',
@@ -151,15 +151,15 @@ def collectionMetadataHtmlMaker():
   list = (
     {'varName':'snum.report.submitter',
      'itemName':'%Submitter%',
-     'items':userDictionaries.people.getListPeople(),
+     'items': "'%s'" %userDictionaries.people.getListPeople(),
      'readonly':'',
-     'onchange':"spy.SetParam(snum.report.submitter,html.GetValue(~name~))>>spy.addNewPerson(html.GetValue(~name~))>>html.update",
+     'onchange':"spy.SetParam('snum.report.submitter',html.GetValue('~name~'))>>spy.addNewPerson(html.GetValue('~name~'))>>html.update",
      },
     {'varName':'snum.report.operator',
      'itemName':'%Operator%',
-     'items':userDictionaries.people.getListPeople(),
+     'items': "'%s'" %userDictionaries.people.getListPeople(),
      'readonly':'',
-     'onchange':"spy.SetParam(snum.report.operator,html.GetValue(~name~))>>spy.addNewPerson(html.GetValue(~name~))>>html.update",
+     'onchange':"spy.SetParam('snum.report.operator',html.GetValue('~name~'))>>spy.addNewPerson(html.GetValue('~name~'))>>html.update",
      },
     {'varName':'snum.report.date_submitted',
      'itemName':'%Date Submitted%',
@@ -176,7 +176,7 @@ def progressMetadataHtmlMaker():
   list = (
     {'varName':'snum.dimas.progress_status',
      'itemName':'%Status%',
-     'items':'No Entry;Aborted;Rejected;Withdrawn;Lost;In Queue;Collecting;Reduction;Solving;Refining;Pending;Processing;Finishing;Finished;Publishing;Published;Published Duplicate;Known structure'
+     'items': "'No Entry;Aborted;Rejected;Withdrawn;Lost;In Queue;Collecting;Reduction;Solving;Refining;Pending;Processing;Finishing;Finished;Publishing;Published;Published Duplicate;Known structure'"
      },
     {'varName':'snum.dimas.progress_comment',
      'itemName':'%Comment%',
@@ -196,7 +196,7 @@ def referenceMetadataHtmlMaker():
      },
     {'varName':'snum.dimas.reference_journal_name',
      'itemName':'%Journal%',
-     'items': userDictionaries.localList.getListJournals()
+     'items': "'%s'" %userDictionaries.localList.getListJournals()
      },
     {'varName':'snum.dimas.reference_journal_volume',
      'itemName':'%Volume%',
@@ -222,25 +222,25 @@ def publicationMetadataHtmlMaker():
      },
     {'varName':'_publ_contact_author_name',
      'itemName':'%Contact% %Author%',
-     'items':userDictionaries.people.getListPeople(),
+     'items': "'%s'" %userDictionaries.people.getListPeople(),
      'readonly':'',
      'onchange':'spy.gui.report.publication.OnContactAuthorChange(~name~)',
      },
     {'varName':'_publ_contact_author_address',
      'itemName':'%Contact% %Author% %Address%',
      'multiline':'multiline',
-     'value':'spy.getPersonInfo(html.GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),address)',
-     'onchange':'spy.gui.report.publication.OnPersonInfoChange(SET__PUBL_CONTACT_AUTHOR_NAME,address,~name~)'
+     'value': "spy.getPersonInfo(html.GetValue('SET__PUBL_CONTACT_AUTHOR_NAME'),'address')",
+     'onchange': "spy.gui.report.publication.OnPersonInfoChange('SET__PUBL_CONTACT_AUTHOR_NAME','address','~name~')"
      },
     {'varName':'_publ_contact_author_email',
      'itemName':'%Contact% %Author% %Email%',
-     'value':'spy.getPersonInfo(html.GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),email)',
-     'onchange':'spy.gui.report.publication.OnPersonInfoChange(SET__PUBL_CONTACT_AUTHOR_NAME,email,~name~)'
+     'value': "spy.getPersonInfo(html.GetValue('SET__PUBL_CONTACT_AUTHOR_NAME'),'email')",
+     'onchange':"spy.gui.report.publication.OnPersonInfoChange('SET__PUBL_CONTACT_AUTHOR_NAME','email','~name~')"
      },
     {'varName':'_publ_contact_author_phone',
      'itemName':'%Contact% %Author% %Phone%',
-     'value':'spy.getPersonInfo(html.GetValue(SET__PUBL_CONTACT_AUTHOR_NAME),phone)',
-     'onchange':'spy.gui.report.publication.OnPersonInfoChange(SET__PUBL_CONTACT_AUTHOR_NAME,phone,~name~)'
+     'value': "spy.getPersonInfo(html.GetValue('SET__PUBL_CONTACT_AUTHOR_NAME'),'phone')",
+     'onchange': "spy.gui.report.publication.OnPersonInfoChange('SET__PUBL_CONTACT_AUTHOR_NAME','phone','~name~')"
      },
 #    {'varName':'InfoLine',
 #     'itemName':'%Contact% %Author% %Phone%',
@@ -257,8 +257,8 @@ def publicationMetadataHtmlMaker():
       'varName':'snum.metacif.publ_author_names',
       'ctrl_name':'SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s' %i,
       'readonly':'readonly',
-      'value':"%s" %listAuthors.split(';')[i-1],
-      'bgcolor':"%s" %OV.GetParam('gui.html.table_bg_colour'),
+      'value':"'%s'" %listAuthors.split(';')[i-1],
+      'bgcolor':"'%s'" %OV.GetParam('gui.html.table_bg_colour'),
       'onchange':""
     }
     if numberAuthors == 1:
@@ -287,15 +287,15 @@ def publicationMetadataHtmlMaker():
       {'varName':'publ_author_address',
        'itemName':'%Author% %Address%',
        'multiline':'multiline',
-       'value':'spy.getPersonInfo(html.GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),address)' %s,
-       'onchange':'spy.changePersonInfo(html.GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),address,html.GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)' %s
+       'value':"spy.getPersonInfo(html.GetValue('SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s'),'address')" %s,
+       'onchange':"spy.changePersonInfo(html.GetValue('SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s'),'address',html.GetValue('~name~'))>>spy.changeBoxColour('~name~','#FFDCDC')" %s
        }
     )
     list.append(
       {'varName':'publ_author_email',
        'itemName':'%Author% %Email%',
-       'value':'spy.getPersonInfo(html.GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),email)' %s,
-       'onchange':'spy.changePersonInfo(html.GetValue(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s),email,html.GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)' %s
+       'value': "spy.getPersonInfo(html.GetValue('SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s'),'email')" %s,
+       'onchange':"spy.changePersonInfo(html.GetValue('SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s'),'email',html.GetValue('~name~'))>>spy.changeBoxColour('~name~','#FFDCDC')" %s
        }
     )
   list.append(
@@ -303,16 +303,16 @@ def publicationMetadataHtmlMaker():
      'ctrl_name':'ADD_PUBL_AUTHOR_NAME',
      'readonly':'',
      'itemName':'%Add% %Author%',
-     'items':userDictionaries.people.getListPeople(),
+     'items': "'%s'" %userDictionaries.people.getListPeople(),
      'value':'?',
-     'onchange':"spy.gui.report.publication.OnAddNameToAuthorList(~name~)",
+     'onchange':"spy.gui.report.publication.OnAddNameToAuthorList('~name~')",
      }
   )
 
   for d in list:
     d.setdefault('ctrl_name','SET_%s' %str.upper(d['varName']).replace('.','_'))
     if 'ctrl_name' in d['varName']:
-      d.setdefault('onchange',"spy.SetParam(%(varName)s,html.GetValue(~name~))>>spy.changeBoxColour(~name~,#FFDCDC)>>html.Update" %d)
+      d.setdefault('onchange',"spy.SetParam('%(varName)s',html.GetValue('~name~'))>>spy.changeBoxColour('~name~','#FFDCDC')>>html.Update" %d)
     elif 'author_name' in d['varName']:
       d.setdefault('onchange','')
 
@@ -322,7 +322,7 @@ def publicationMetadataHtmlMaker():
      'items': "'%s'" %userDictionaries.localList.getListJournals(),
      'readonly':'',
      'value':'spy.get_cif_item(_publ_requested_journal)',
-     'onchange':'spy.addToLocalList(html.GetValue(~name~),requested_journal)>>spy.changeBoxColour(~name~,#FFDCDC)',
+     'onchange':"spy.addToLocalList(html.GetValue('~name~'),'requested_journal')>>spy.changeBoxColour('~name~','#FFDCDC')",
      })
 
 
@@ -535,7 +535,7 @@ def restraint_builder(cmd):
            "value":val,
            "width":b_width,
            "height":height,
-           "bgcolor":"$GetVar(HtmlInputBgColour))"
+           "bgcolor":"$GetVar('HtmlInputBgColour')"
            }
       if items:
         d.setdefault("items",items)
