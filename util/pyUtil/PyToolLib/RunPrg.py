@@ -131,6 +131,11 @@ class RunPrg(ArgumentParser):
     copy_to = "%s/%s.ins" %(self.tempPath, self.shelx_alias)
     if not os.path.exists(copy_to):
       olx.file.Copy(copy_from, copy_to)
+    #fab file...
+    copy_from = "%s/%s.fab" %(self.filePath, self.curr_file)
+    copy_to = "%s/%s.fab" %(self.tempPath, self.shelx_alias)
+    if not os.path.exists(copy_to):
+      olx.file.Copy(copy_from, copy_to)
 
   def runCctbxAutoChem(self):
     from AutoChem import OlexSetupRefineCctbxAuto
