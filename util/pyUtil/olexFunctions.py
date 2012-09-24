@@ -93,8 +93,8 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
     return retVal
 
-  def GetParam_as_string(self,variable):
-    retVal = self.GetParam(variable)
+  def GetParam_as_string(self,variable, default=None):
+    retVal = self.GetParam(variable, default)
     if retVal is None:
       return ''
     else:
@@ -819,9 +819,9 @@ class OlexFunctions(inheritFunctions):
     olx.html.SetBorders(pop_name,border)
 
 
-def GetParam(variable):
+def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
-  p = OV.GetParam_as_string(variable)
+  p = OV.GetParam_as_string(variable, default)
   try:
     p = p.decode('utf-8')
   except:
