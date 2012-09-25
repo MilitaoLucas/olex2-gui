@@ -1,18 +1,14 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
 <!-- FIRST ROW -->
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='OPEN';help_ext=History;1 -->
-<td VALIGN='center' colspan=3>
+<tr name='OPEN' bgcolor="$GetVar(HtmlTableBgColour)">
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=History;scope=History;1; -->
+<td>
+<table border="0" width="100%" cellpadding="1" cellspacing="1">
 <!-- #include history history-info.htm;1; -->
-</td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</table>
+</td></tr>
 
-
-<!-- SECOND ROW -->
-<tr name=INCLUDE_H3_HISTORY_TREE>
 <!-- #include h3-history-tree gui\h3-history-tree.htm;gui\blocks\tool-h3-off.htm;image=h3-history-tree;onclick=;colspan=1;2; -->
-</tr>
-
-
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->

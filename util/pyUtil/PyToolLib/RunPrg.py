@@ -131,6 +131,11 @@ class RunPrg(ArgumentParser):
     copy_to = "%s/%s.ins" %(self.tempPath, self.shelx_alias)
     if not os.path.exists(copy_to):
       olx.file.Copy(copy_from, copy_to)
+    #fab file...
+    copy_from = "%s/%s.fab" %(self.filePath, self.curr_file)
+    copy_to = "%s/%s.fab" %(self.tempPath, self.shelx_alias)
+    if not os.path.exists(copy_to):
+      olx.file.Copy(copy_from, copy_to)
 
   def runCctbxAutoChem(self):
     from AutoChem import OlexSetupRefineCctbxAuto
@@ -274,7 +279,7 @@ class RunRefinementPrg(RunPrg):
 
   def run(self):
     self.startRun()
-    olx.File(u"'%s/%s.ins'" %(OV.FilePath(),self.original_filename))
+    OV.File(u"%s/%s.ins" %(OV.FilePath(),self.original_filename))
     try:
       self.setupRefine()
       self.setupFiles()
@@ -456,8 +461,8 @@ def AnalyseRefinementSource():
       olex.m("reap '%s'" %res_file_name)
       print 'Loaded RES file extracted from CIF'
     else:
-      olx.File("'%s'" %ins_file_name)
-      olex.m("reap '%s'" %ins_file_name)
+      OV.File("%s" %ins_file_name)
+      olex.m("reap \"%s\"" %ins_file_name)
       print 'Loaded INS file generated from CIF'
   return True
 

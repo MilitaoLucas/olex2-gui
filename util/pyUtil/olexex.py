@@ -1848,21 +1848,29 @@ def GetImageFilename(image_type):
     except:
       filename = None
     if not filename:
-      if OV.GetParam('snum.image.increment_name'):
-        fp = olx.FilePath()
-        fn = olx.FileName()
-        inc = 1
-        while True:
-          tf = os.path.normpath('%s/%s%d.%s' %(fp, fn, inc, fileext))
-          if not os.path.exists(tf):
-            filename = '%s%d' %(fn, inc)
-            break
-          inc += 1
-      else:
-        import gui
-        filename = gui.FileSave("Choose Filename", "*.%s" %fileext, OV.FilePath())
+      import gui
+      filename = gui.FileSave("Choose Filename", "*.%s" %fileext, OV.FilePath())
     if not filename:
       return None, None, None
+  if_exists = OV.GetParam('snum.image.if_file_exists')
+  if os.path.exists("%s.%s" %(filename, fileext)):
+    if if_exists == 'increment':
+      fp = olx.FilePath()
+      fn = filename
+      inc = 1
+      while True:
+        tf = os.path.normpath('%s/%s%d.%s' %(fp, fn, inc, fileext))
+        if not os.path.exists(tf):
+          filename = '%s%d' %(fn, inc)
+          filefull = "'%s.%s'" %(filename, fileext)
+          break
+        inc += 1
+    elif if_exists == 'ask':
+      import gui
+      filename = gui.FileSave("Choose Filename", "*.%s" %fileext, OV.FilePath(),
+                              default_name=filename)
+      if not filename:
+        return None, None, None
   if filename.endswith(".%s" %fileext):
     filefull = "'%s'" %filename
   else:
@@ -1871,10 +1879,7 @@ def GetImageFilename(image_type):
   return filefull, filename, fileext
 
 def StringsAreEqual(str1, str2):
-  if str1 == str2:
-    return True
-  else:
-    return False
+  return str1 == str2
 OV.registerFunction(StringsAreEqual)
 
 def StringsAreNotEqual(str1, str2):
@@ -2074,7 +2079,7 @@ OV.registerFunction(getCellHTML)
 def formatted_date_from_timestamp(dte):
   if not dte:
     return "No Date"
-  
+
   if "." in dte:
     dte = OV.GetParam(dte)
   from datetime import date

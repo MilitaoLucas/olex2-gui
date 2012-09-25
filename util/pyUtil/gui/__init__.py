@@ -5,14 +5,14 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
 
-def FileOpen(title, filter, location, default=''):
-  res = olx.FileOpen(title, filter,location)
+def FileOpen(title, filter, location, default='', default_name=''):
+  res = olx.FileOpen(title, filter,location, default_name)
   if not res:
     return default
   return res
 
-def FileSave(title, filter, location, default=''):
-  res = olx.FileSave(title, filter,location)
+def FileSave(title, filter, location, default='', default_name=''):
+  res = olx.FileSave(title, filter,location, default_name)
   if not res:
     return default
   return res
@@ -80,9 +80,9 @@ def GetFolderList(root="", format="combo_items"):
       s = s.lstrip(r"/")
       t.append("%s" %s)
   t.sort()
-  t = ";".join(t)  
+  t = ";".join(t)
   return t.replace("\\",'/')
-    
+
   #names = [x[1] for x in os.walk(root)]
   #paths = [x[0] for x in os.walk(root)]
   #if format == "combo_items":
@@ -91,7 +91,7 @@ def GetFolderList(root="", format="combo_items"):
     #j = 0
     #l = names[1:]
     #for item in names[0]:
- 
+
       #path = paths[i]
       #retVal += "%s<-%s;" %(item, item)
       #while l[j]:
@@ -99,9 +99,9 @@ def GetFolderList(root="", format="combo_items"):
         #j += 1
       #i += 1
       #j += 1
-  #return retVal  
-  
+  #return retVal
+
 olex.registerFunction(GetFolderList, False, "gui")
-  
-  
+
+
 
