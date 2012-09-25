@@ -1852,17 +1852,25 @@ def GetImageFilename(image_type):
       filename = gui.FileSave("Choose Filename", "*.%s" %fileext, OV.FilePath())
     if not filename:
       return None, None, None
-  if os.path.exists("%s.%s" %(filename, fileext)) and OV.GetParam('snum.image.increment_name'):
-    fp = olx.FilePath()
-    fn = filename
-    inc = 1
-    while True:
-      tf = os.path.normpath('%s/%s%d.%s' %(fp, fn, inc, fileext))
-      if not os.path.exists(tf):
-        filename = '%s%d' %(fn, inc)
-        filefull = "'%s.%s'" %(filename, fileext)
-        break
-      inc += 1
+  if_exists = OV.GetParam('snum.image.if_file_exists')
+  if os.path.exists("%s.%s" %(filename, fileext)):
+    if if_exists == 'increment':
+      fp = olx.FilePath()
+      fn = filename
+      inc = 1
+      while True:
+        tf = os.path.normpath('%s/%s%d.%s' %(fp, fn, inc, fileext))
+        if not os.path.exists(tf):
+          filename = '%s%d' %(fn, inc)
+          filefull = "'%s.%s'" %(filename, fileext)
+          break
+        inc += 1
+    elif if_exists == 'ask':
+      import gui
+      filename = gui.FileSave("Choose Filename", "*.%s" %fileext, OV.FilePath(),
+                              default_name=filename)
+      if not filename:
+        return None, None, None
   if filename.endswith(".%s" %fileext):
     filefull = "'%s'" %filename
   else:
@@ -2071,7 +2079,7 @@ OV.registerFunction(getCellHTML)
 def formatted_date_from_timestamp(dte):
   if not dte:
     return "No Date"
-  
+
   if "." in dte:
     dte = OV.GetParam(dte)
   from datetime import date
