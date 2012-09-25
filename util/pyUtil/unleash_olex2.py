@@ -103,6 +103,7 @@ external_files = {
   'odac_update.txt': ('olex-install', 'olex-update'),
   'licence.rtf': ('olex-install', 'olex-update'),
   'documentation.zip': ('olex-update', 'action:extract', 'action:delete'),
+  'textures.zip': ('olex-update', 'action:extract', 'action:delete'),
   #plugins
   #'olex2c-win32.zip': ('olex-port', 'plugin-Headless-win-32', 'action:extract', 'action:delete'),
   #'olex2c-win64.zip': ('olex-port', 'plugin-Headless-win-64', 'action:extract', 'action:delete'),
@@ -114,6 +115,7 @@ set(  ['olex2_fonts.zip',
        'fonts.zip',
        'acidb.zip',
        'documentation.zip',
+       'textures.zip'
       ]
    )
 win32_sse2_zip_files = \

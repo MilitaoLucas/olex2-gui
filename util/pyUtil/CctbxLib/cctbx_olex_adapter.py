@@ -780,7 +780,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     OV.SetMaxCycles(1)
     if curr_prg != 'olex2.refine':
       OV.set_refinement_program(curr_prg, 'CGLS')
-    olx.File("%s.ins" %self.filename)
+    OV.File("%s.ins" %self.filename)
     rFile = open(olx.FileFull(), 'r')
     f_data = rFile.readlines()
     rFile.close()

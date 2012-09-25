@@ -93,8 +93,8 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
     return retVal
 
-  def GetParam_as_string(self,variable):
-    retVal = self.GetParam(variable)
+  def GetParam_as_string(self,variable, default=None):
+    retVal = self.GetParam(variable, default)
     if retVal is None:
       return ''
     else:
@@ -404,9 +404,9 @@ class OlexFunctions(inheritFunctions):
     #print "AtReap %s/%s" %(path, file)
     try:
       if fader == 'true':
-        olex.m(r"atreap_fader -b '%s'" %(r"%s/%s.res" %(path, file)))
+        olex.m("atreap_fader -b \"%s\"" %(r"%s/%s.res" %(path, file)))
       else:
-        olex.m(r"atreap_no_fader -b '%s'" %(r"%s/%s.res" %(path, file)))
+        olex.m("atreap_no_fader -b \"%s\"" %(r"%s/%s.res" %(path, file)))
 
     except Exception, ex:
       print >> sys.stderr, "An error occured whilst trying to reload %s/%s" %(path, file)
@@ -422,7 +422,7 @@ class OlexFunctions(inheritFunctions):
 
   def File(self, filename=None):
     if filename is not None:
-      olx.File("'%s'" %filename)
+      olx.File("\"%s\"" %filename)
     else:
       olx.File()
 
@@ -819,9 +819,9 @@ class OlexFunctions(inheritFunctions):
     olx.html.SetBorders(pop_name,border)
 
 
-def GetParam(variable):
+def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
-  p = OV.GetParam_as_string(variable)
+  p = OV.GetParam_as_string(variable, default)
   try:
     p = p.decode('utf-8')
   except:
