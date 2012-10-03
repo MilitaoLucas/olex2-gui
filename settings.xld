@@ -125,8 +125,8 @@
 
     <item title="Help;About" macro="spy.gui.About()">
     <item title="Help;Update options" macro="updateoptions">
-    <item title="Help;Documentation (HTML)" macro="shell 'BaseDir()/etc/documentation/Commands.html'">
-    <item title="Help;Documentation (PDF)" macro="shell 'BaseDir()/etc/documentation/Commands.pdf'">
+    <item title="Help;Documentation (HTML)" macro="shell BaseDir()/etc/documentation/Commands.html">
+    <item title="Help;Documentation (PDF)" macro="shell BaseDir()/etc/documentation/Commands.pdf">
 >
 
     <radio title="Tools;Settings;GUI Font Size;Small" macro="htmguifontsize 2" checkdependent="GetVar(gui_html_font_size)">
