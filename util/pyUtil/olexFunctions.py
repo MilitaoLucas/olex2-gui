@@ -79,6 +79,8 @@ class OlexFunctions(inheritFunctions):
     retVal = default
     try:
       if variable.startswith('gui'):
+        if not HasGUI:
+          return default
         handler = olx.gui_phil_handler
       else:
         handler = olx.phil_handler
