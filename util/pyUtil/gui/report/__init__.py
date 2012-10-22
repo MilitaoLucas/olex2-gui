@@ -71,7 +71,7 @@ class publication:
         newValue = oldValue
         print "%s is already in the list of authors" %newName
       else:
-        newValue = oldValue + ";" + newName
+        newValue = "%s;%s" %(oldValue, newName)
         changed = True
     if changed:
       OV.SetParam("snum.metacif.publ_author_names", newValue)

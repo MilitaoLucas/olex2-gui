@@ -4,34 +4,34 @@
   <body
     <args
       <arg1 name='file' def='DataDir()/samples/sucrose/sucrose.res'>
-    \>
+    >
     <cmd
-      <cmd10 "reap '%1'">
-    \>
-  \>
-\>
+      <cmd10 "reap %1">
+    >
+  >
+>
 
 <b
   <body
     <args
       <arg1 name='file' def='DataDir()/samples/THPP/thpp.res'>
-    \>
+    >
     <cmd
-      <cmd10 "reap '%1'">
-    \>
-  \>
-\>
+      <cmd10 "reap %1">
+    >
+  >
+>
 
 <c
   <body
     <args
       <arg1 name='file' def='DataDir()/samples/Co110/Co110.res'>
-    \>
+    >
     <cmd
-      <cmd10 "reap '%1'">
-    \>
-  \>
-\>
+      <cmd10 "reap %1">
+    >
+  >
+>
 
 
 
@@ -39,12 +39,11 @@
   <body
     <args
       <arg1 name="width" def='100'>
-    \>
+    >
     <cmd
       <cmd1 XXX="silent on">
       <cmd2 "py.Export(datadir()/olx)">
-      <cmd3 XXX="'py.run 'basedir()/util/pyUtil/initpy.py'">
-      <cmd3 "py.run 'basedir()/util/pyUtil/initpy.py'">
+      <cmd3 "py.run basedir()/util/pyUtil/initpy.py">
       <cmd4 "if IsVar(defeditor) then none else setvar(defeditor,'gedit')">
       <cmd5 "if IsVar(defexplorer) then none else setvar(defexplorer,'nautilus')">
       <cmd6 "if IsVar(defbrowser) then none else setvar(defbrowser,'htmlview')">
@@ -52,14 +51,14 @@
       <cmd8 XXX="echo filepath()">
       <cmd9 XXX="panel html.clientwidth(self)">
       <cmd10 XXX="schedule 8 'UpdateFile olex2.exe'">
-    \>
+    >
 
   <onterminate
     <cmd1 cmd1="clear">
     <cmd2 "echo filepath()">
-  \>
-\>
-\>
+  >
+>
+>
 
 <reap help="Load a Crystallographic File"
   <body
@@ -70,12 +69,12 @@
       <arg4 name="filename" def="filename()">
       <arg5 name="base" def="basedir()">
       <arg6 name="ext" def="fileext()">
-      \>
+      >
     <cmd
-      <cmd1  "if strcmp(%4,'none') then none else 'spy.saveHistory()'">
+      <cmd1  "if strcmp(%4,'none') then none else spy.saveHistory()">
       <cmd2  XXX="spy.pickleVVD(structure)">
       <cmd3  cmd1="clear">
-      <cmd4  "@reap '%1'">
+      <cmd4  "@reap %1">
       <cmd10 "if strcmp(filename(),'none') then none else spy.LoadStructureParams()">
 
   <cmd7  "SetVar(snum_refinement_sg,sg(%n))">
@@ -84,7 +83,7 @@
   <cmd10 "if File.Exists(strdir()/filename().vvd) then none else 'SetVar(snum_refinement_original_formula,xf.GetFormula())'">
   <cmd11 "if and(strcmp(%4,filename()),strcmp(%6,fileext())) then none else 'spy.loadHistory()'">
   <cmd14 cmd1="if strcmp(%4,filename()) then none else 'clear'">
-  \>
+  >
 <onabort
 >
 >
@@ -94,7 +93,7 @@
 <onexit help="Executes on program exit"
   <body
     <args
-    \>
+    >
 
   <cmd
     <cmd1  "echo Good Bye">
@@ -102,49 +101,27 @@
     <cmd3  x="spy.pickleVVD(structure)">
     <cmd4  x="storeparam startup filefull()">
     <cmd26 "stop logging">
-\>
+>
 
   <onterminate
-  \>
-\>
-\>
+  >
+>
+>
 
 
 <sgd help="Determine the Space Group"
   <body
     <args
-    \>
+    >
 
   <cmd
     <cmd1 "cursor(busy,'Determining the Space Group...')">
     <cmd2 "sg">
     <cmd3 "cursor()">
-  />
-/>
-/>
+  >
+>
+>
 
-
-<spy help="run internal python"
-  <body
-    <args
-      <arg1 name="tool" def=" ">
-      <arg2 name="fun" def=" ">
-      <arg3 name="param1" def="None">
-      <arg4 name="param2" def="None">
-      <arg5 name="param3" def="None">
-      <arg6 name="param4" def="None">
-      <arg7 name="param5" def="None">
-      <arg8 name="param6" def="None">
-    \>
-
-  <cmd
-    <cmd1 "setvar(tool,'%1')">
-    <cmd2 "setvar(fun,'%2')">
-    <cmd3 "setvar(param,'%3;%4;%5;%6;%7;%8')">
-    <cmd4 "py.run 'basedir()/util/pyUtil/spy.py'">
-  />
-/>
-/>
 
 <report help="Creates structure report"
   <body
@@ -152,21 +129,17 @@
       <arg1 name="show_html" def="False">
     >
     <cmd
-      <cmd0 "if file.Exists('FilePath()/FileName().cif') then None else 'SetVar(snum_refinement_method,Least Squares)'">
-      <cmd1 "if file.Exists('FilePath()/FileName().cif') then None else 'DelIns ACTA'">
-      <cmd2 "if file.Exists('FilePath()/FileName().cif') then None else 'AddIns ACTA'">
-      <cmd3 "if file.Exists('FilePath()/FileName().cif') then None else 'refine'">
+      <cmd0 "if file.Exists(FilePath()/FileName().cif) then None else 'SetVar(snum_refinement_method,Least Squares)'">
+      <cmd1 "if file.Exists(FilePath()/FileName().cif) then None else 'DelIns ACTA'">
+      <cmd2 "if file.Exists(FilePath()/FileName().cif) then None else 'AddIns ACTA'">
+      <cmd3 "if file.Exists(FilePath()/FileName().cif) then None else 'refine'">
       <cmd8 "spy.ExtractCifInfo()">
       <cmd9 "spy.MergeCif()">
       <cmd11 "cif2tab header acrd anis bnd ang htab tang hcrd footer">
       <cmd12 "if %1 then 'shell spy.GetParam(snum.report.title)_tables.html'">
-    \>
-    <onterminate
-    \>
-    <onabort
-    \>
-  \>
-\>
+    >
+  >
+>
 
 <refine help="Launches refine program. Syntax: refine [l.s.=-1] [plan=-1]"
   <body
@@ -174,53 +147,50 @@
       <arg0 name="l.s." def='-1'>
       <arg1 name="plan" def='-1'>
       <arg2 name="xl" def='xl'>
-    \>
+    >
     <cmd
-      <cmd4 "user('filepath')">
+      <cmd4 "user filepath()">
       <cmd3 "kill $q">
       <cmd5 "file">
       <cmd7 "SetVar(snum_refinement_max_cycles,%1)">
       <cmd8 "SetVar(snum_refinement_max_peaks,%2)">
       <cmd10 "spy.RunRefinementPrg()">
-    \>
+    >
     <onterminate
       <cmd0 "cursor()">
-    \>
+    >
     <onabort
       <cmd0 "cursor()">
-    \>
-  \>
-\>
+    >
+  >
+>
 
 
 <solve help="Launches solution program XS"
   <body
     <args
-      <arg1 name="SOLVE" def='SOLVE'\>
-    \>
+      <arg1 name="SOLVE" def='SOLVE'>
+    >
     <cmd
       <cmd10 "spy.RunSolutionPrg()">
       <cmd2 cmd="spy.doProgramSettings(GetVar(snum_refinement_program),GetVar(snum_refinement_method),true)">
-      \>
-    <onterminate
-      <cmd1 cmd1="reap 'filepath()/filename().res'">
-    \>
-  \>
-\>
+      >
+  >
+>
 
 
 <tidy help = "Automatically select things"
   <body
     <args
       <arg1 name="cutoff" def='0.07'>
-    />
+    >
     <cmd
       <cmd1 "sel atoms where xatom.uiso > %1">
       <cmd2 "sel atoms where xatom.peak<2&&xatom.peak>0">
       <cmd3 "updatehtml">
-    />
-  />
-/>
+    >
+  >
+>
 
 
 <edit help="Launches notepad for the file with name of current file and extension passed as parameter"
@@ -229,49 +199,27 @@
       <arg1 name="File extension" def="ins">
       <arg2 name="File path" def="filepath()">
       <arg3 name="File name" def="filename()">
-    \>
+    >
     <cmd
       <cmd1 cmd1="silent on">
       <cmd2 cmd1="echo %2%3.%1">
       <cmd3 "file">
       <cmd4 "if or(IsFileType(ires),IsFileType(cif)) then 'listen filepath()/filename().%1' else none">
-      <cmd5 "if strcmp(%1,hkl) then 'exec -o getvar(defeditor) &2E;hklsrc()&2E;' else 'exec -o getvar(defeditor) &2E;filepath()/filename().%1&2E;'">
-    \>
+      <cmd5 "if strcmp(%1,hkl) then 'exec -o getvar(defeditor) hklsrc()' else 'exec -o getvar(defeditor) filepath()/filename().%1'">
+    >
     <onterminate
       <cmd0 "silent off">
       <cmd1 "stop">
-    \>
+    >
     <onlisten
       <cmd1 cmdXXX="'SetVar(snum_refinement_max_peaks,Ins(QNUM))'">
       <cmd1 cmdXXX="'SetVar(snum_refinement_max_cycles,Ins(LS))'">
       <cmd1 cmdXXX="spy.doProgramSettings(GetVar(snum_refinement_program),GetVar(snum_refinement_method))">
       <cmd0 cmdXXX="updatehtml">
-    \>
-  \>
-\>
+    >
+  >
+>
 
-
-
-<_reap_fade help="Load a Crystallographic File"
-  <body
-    <args
-      <arg0 name="file name" def="">
-      <arg1 name="options" def="">
-    \>
-    <cmd
-      <cmd1 "xgrid.Visible(false)">
-      <cmd2 "fade 0 1 0.1">
-      <cmd3 'waitfor fade'>
-      <cmd4 "@reap %1 %2">
-      <cmd5 "ceiling on">
-      <cmd6 "fade 1 0 -0.1">
-      <cmd7 'waitfor fade'>
-    \>
-    <onabort
-      <cmd1 "ceiling off">
-    \>
-  \>
-\>
 
 
 <atreap_no_fader help="Load a Crystallographic File"
@@ -279,29 +227,15 @@
     <args
       <arg0 name="file name" def="">
       <arg1 name="options" def="">
-    \>
+    >
     <cmd
-      <cmd1 "@reap '%1'">
-    \>
+      <cmd1 "@reap %1">
+    >
     <onabort
-    \>
-  \>
-\>
+    >
+  >
+>
 
-
-<weight help="Use suggested weighting scheme"
-  <body
-    <args
-      <arg1 name="name" def="">
-      <arg2 name="type" def="">
-    \>
-    <cmd
-      <cmd1 "updatewght">
-      <cmd2 "updatehtml">
-      <cmd3 "echo DONE">
-    \>
-  \>
-\>
 
 </ help="Add command to the ins file"
   <body
@@ -311,112 +245,101 @@
       <arg3 name="name" def="">
       <arg4 name="name" def="">
       <arg5 name="name" def="">
-        \>
+        >
     <cmd
       <cmd1 "addins %1 %2 %3 %4 %5">
-    \>
-  \>
-\>
+    >
+  >
+>
 
 
 <emf help='Edit a macro file (macro, auto, custom, ...)'
   <body
     <args
       <arg1 name="filname" def="custom">
-    \>
+    >
     <cmd
-      <cmd1 "exec -o getvar(defeditor) 'basedir()/%1.xld'">
-    \>
-  \>
-\>
+      <cmd1 "exec -o getvar(defeditor) basedir()/%1.xld">
+    >
+  >
+>
 
 <log help='Shows the current log file'
   <body
     <args
       <arg1 name="filname" def="custom">
-    \>
+    >
     <cmd
       <cmd1 "flush log">
-      <cmd2 "exec -o getvar(defeditor) 'app.GetLogName()'">
-    \>
-  \>
-\>
+      <cmd2 "exec -o getvar(defeditor) app.GetLogName()">
+    >
+  >
+>
 
 <config help='Opens the config file'
   <body
     <args
       <arg1 name="filname" def="custom">
-    \>
+    >
     <cmd
-      <cmd1 "exec -o getvar(defeditor) 'BaseDir()/util/pyUtil/PluginLib/plugin-AutoChem/autochem_config.txt'">
-    \>
-  \>
-\>
+      <cmd1 "exec -o getvar(defeditor) BaseDir()/util/pyUtil/PluginLib/plugin-AutoChem/autochem_config.txt">
+    >
+  >
+>
 
 
 <profile help='Opens the profiler output'
   <body
     <args
       <arg1 name="filname" def="custom">
-    \>
+    >
     <cmd
-      <cmd1 "exec -o getvar(defeditor) 'DataDir()/profile.txt'">
-    \>
-  \>
-\>
+      <cmd1 "exec -o getvar(defeditor) DataDir()/profile.txt">
+    >
+  >
+>
 
 <dire help="Opens the current directory in Explorer"
   <body
     <cmd
-      <cmd0 "exec -o getvar(defexplorer) 'filepath()'">
-    \>
-  \>
-\>
-
-<edt help="Edits a particular atom"
-  <body
-    <args
-      <arg1 name="atom" def="">
-    \>
-    <cmd
-      <cmd1 "editatom %1">
-    \>
-  \>
-\>
+      <cmd0 "exec -o getvar(defexplorer) filepath()">
+    >
+  >
+>
 
 <oda help="Launches ac_run"
   <body
     <args
       <arg1 name="single" def="">
-    \>
+    >
     <cmd
       <cmd6 "spy.runODAC('spy.ac_run solveit -%1')">
-    \>
-  \>
-\>
+    >
+  >
+>
 
 
 <ac2 help="Launches ac_run"
   <body
     <args
       <arg1 name="single" def="">
-    \>
+    >
     <cmd
       <cmd6 "spy.ac2.auto()">
-    \>
-  \>
-\>
+    >
+  >
+>
 
 <start_autochem help="Launches ac_run"
   <body
     <args
       <arg1 name="filefull" def="'FileFull()'">
-    \>
+    >
     <cmd
-      <cmd1 "reap '%1.ins'">
+      <cmd1 "reap %1.ins">
       <cmd2 "spy.ac2.auto()">
-    \>
-  \>
-\>
+    >
+  >
+>
 
 <#include "custom.xld">
