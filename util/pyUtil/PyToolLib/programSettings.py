@@ -44,9 +44,8 @@ def makeProgramSettingsGUI(program, method, prgtype):
   reference = program.reference
   help = OV.TranslatePhrase(method.help)
 
-  max_colspan = 10
   txt = r"""
-<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=4;1; -->
+<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;1; -->
     <table border="0" VALIGN='center' width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar('HtmlTableBgColour')">
 """
 
@@ -56,26 +55,22 @@ def makeProgramSettingsGUI(program, method, prgtype):
   txt += r'''
 <tr>
   <td valign="center" width="%s" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
-  <td colspan="%s">
-    %s - %s
-  </td>
+  <td>%s - %s</td>
 </tr>
 <tr>
   <td valign="center" width="$GetVar('HtmlTableFirstcolWidth')" bgcolor="$GetVar('HtmlTableFirstcolColour')"></td>
   %s
 </tr>
 </table>
-''' %(OV.GetParam('gui.html.table_firstcol_width'),max_colspan, authors, reference, method.extraHtml())
+''' %(OV.GetParam('gui.html.table_firstcol_width'), authors, reference, method.extraHtml())
 
   OlexVFS.write_to_olex(wFilePath, txt)
   return
 
 def makeArgumentsHTML(program, method, instruction):
-  txt = '<tr>'
   first_col1 = htmlTools.make_table_first_col(help_name="%s" %instruction.name)
   first_col = htmlTools.make_table_first_col()
   first_col_width = OV.GetParam('gui.html.table_firstcol_width')
-  txt += first_col1
   if instruction.caption is not None:
     argName = instruction.caption
   else:
@@ -101,23 +96,18 @@ def makeArgumentsHTML(program, method, instruction):
   w = "13%%"
   if name == 'cf':
     w = '50'
-  txt += '''
+  argName = argName.upper().replace(' ', '&nbsp;')
+  txt = '''<tr>%s
   <td valign='center' align='left' width='%s' bgcolor="$GetVar('HtmlTableFirstcolColour')">
-    <b>%s</b>
-  </td>
-  <td valign='center' width='90%%' colspan='10' bgcolor="$GetVar('HtmlTableFirstcolColour')">
-    %s
+    <b>%s&nbsp;%s</b>
   </td>
 </tr>
-<tr>
-%s
-''' %(w, argName.upper(), tick_box_html, first_col)
+''' %(first_col1, w, argName, tick_box_html)
 
-  options_gui = []
   count = 0
+  row_txt = ""
   for option in method.options(instruction.name):
     count += 1
-
     varName = 'settings_%s_%s' %(name.lower(), option.name)
     data_type = option.type.phil_type
     caption = option.caption
@@ -127,8 +117,15 @@ def makeArgumentsHTML(program, method, instruction):
     if value is None:
       value = ''
     ctrl_name = 'SET_%s' %(varName.upper())
-    onchange = "SetVar('%s',html.GetValue('%s'))>>spy.addInstruction('%s','%s','%s')" %(
-      varName, ctrl_name, program.name, method.name, name)
+
+    if not instruction.name.endswith('command_line'):
+      onchange = "SetVar('%s',html.GetValue('%s'))>>spy.addInstruction('%s','%s','%s')" %(
+        varName, ctrl_name, program.name, method.name, name)
+    else:
+      param = "snum.%s.command_line_options" %name.split('_')[0]
+      onchange = "spy.SetParam('%s',html.GetValue('SET_SETTINGS_%s_OPTIONS'))" %(
+        param, name.upper())
+      value = "spy.GetParam('%s', '')" %(param)
 
     if "settings_cf" in varName:
       value = "$spy.GetParam('programs.solution.smtbx.cf.%s')" %(varName.lstrip('settings_cf'))
@@ -138,52 +135,36 @@ def makeArgumentsHTML(program, method, instruction):
       onchange = "%s>>spy.SetParam('snum.refinement.max_cycles',html.GetValue('SET_SETTINGS_%s_NLS'))>>html.Update" %(onchange, name.upper())
     elif option.name == 'npeaks':
       onchange = "'%s'>>spy.SetParam('snum.refinement.max_peaks',html.GetValue('SET_SETTINGS_%s_NPEAKS'))>>html.Update" %(onchange, name.upper())
-    #if data_type == "int":
-      #d = {'ctrl_name':ctrl_name,
-           #'value':value,
-           #'label':'%s ' %caption,
-           #'onchange':onchange,
-           #}
-      #if option.type.value_max is not None:
-        #d.setdefault('max', option.type.value_max)
-      #else:
-        #d.setdefault('max', '')
-      #if option.type.value_min is not None:
-        #d.setdefault('min', option.type.value_min)
-      #else:
-        #d.setdefault('min', '')
-      #options_gui.append(htmlTools.make_spin_input(d))
-
-    #elif data_type == "float":
+    input_txt = ""
     if data_type in ("float", "int"):
       d = {'ctrl_name':ctrl_name,
            'value':value,
            'label':'%s ' %caption,
-           'onchange':onchange,
+           'onleave':onchange,
            'width':'100%',
            }
-      options_gui.append(htmlTools.make_input_text_box(d))
+      input_txt = htmlTools.make_input_text_box(d)
 
     elif data_type == "str":
       d = {'ctrl_name':ctrl_name,
            'value':value,
            'label':'%s ' %caption,
-           'onchange':onchange,
+           'onleave':onchange,
            'width':'100%',
            }
-      options_gui.append(htmlTools.make_input_text_box(d))
+      input_txt = htmlTools.make_input_text_box(d)
 
     elif data_type == "bool":
       d = {'ctrl_name':ctrl_name,
            'value':'%s ' %caption,
            'checked':'%s' %value,
            'oncheck':"SetVar('%s','True')" %(varName),
-           'onuncheck':"SetVar('%s','True')" %(varName),
+           'onuncheck':"SetVar('%s','False')" %(varName),
            'width':'100%',
            'bgcolor':"",
            'fgcolor':"",
            }
-      options_gui.append(htmlTools.make_tick_box_input(d))
+      input_txt = htmlTools.make_tick_box_input(d)
 
     elif data_type == "choice":
       items_l = []
@@ -197,29 +178,12 @@ def makeArgumentsHTML(program, method, instruction):
            'onchange':onchange,
            'width':'100%',
            }
-      options_gui.append(htmlTools.make_combo_text_box(d))
+      input_txt = htmlTools.make_combo_text_box(d)
 
-    #if count == 7:
-      #txt += '</tr><tr>'
-      #txt += first_col
+    row_txt += '''<td valign='bottom' align='left'>%s</td>''' %input_txt
 
-    w = '13%%'
-    if instruction.name == "plop":
-      w = '10%%'
-    if instruction.name.lower() == "cf" and option.name == "amplitude_type":
-        w = '20%%'
-    txt += '''
-<td valign='bottom' align='left' width='%s' colspan="1" _bgcolor='green'>
-  %s
-</td>''' %(w, options_gui[-1])
-
-
-  while count < 8:
-    txt += "<td width='13%%'></td>"
-    count += 1
-
-  txt += '</tr>'
-
+  txt ='''%s<tr>%s<td><table width='100%%'><tr>%s</tr></table></td></tr>''' \
+    %(txt, first_col, row_txt)
   return txt
 
 def make_ondown(dictionary):
