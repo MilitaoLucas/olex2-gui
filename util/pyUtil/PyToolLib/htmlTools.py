@@ -489,6 +489,7 @@ def make_input_text_box(d):
          'value':"$spy.GetParam('%(varName)s')",
          'width':'45',
          'onchange':'',
+         'onleave':'',
          'label':name,
          'valign':'center',
          'data':'',
@@ -508,6 +509,7 @@ def make_input_text_box(d):
        label="%(label)s"
        valign="%(valign)s"
        onchange="%(onchange)s"
+       onleave="%(onleave)s"
        %(manage)s
        data="%(data)s"
 >
@@ -1262,7 +1264,7 @@ def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
   image="up=%(tool_img)s%(off)s.png,down=%(tool_img)s%(down)s.png,hover=%(tool_img)s%(hover)s.png"
   hint="%(target)s"
   onclick="%(cmds)s%(feedback)s"
-  bgcolor=%(bgcolor)s
+  bgcolor="%(bgcolor)s"
 >
 </font>
 '''%d
@@ -1316,7 +1318,7 @@ def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
   image="up=%(tool_img)s%(on)s.png,down=%(tool_img)s%(down)s.png,hover=%(tool_img)s%(hover)s.png"
   hint="%(target)s"
   onclick="%(cmds)s%(feedback)s"
-  bgcolor=%(bgcolor)s
+  bgcolor="%(bgcolor)s"
 >
 </font>
 '''%d

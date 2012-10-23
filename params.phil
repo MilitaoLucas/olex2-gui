@@ -124,6 +124,8 @@ snum
       .type = bool
     current_atomic_volume = None
       .type = float
+    command_line_options = ''
+      .type = str
     Sir2002{
       gui = False
         .type = bool
@@ -170,7 +172,7 @@ snum
       .type = choice
     method = 'Least Squares' CGLS '*Gauss-Newton' 'Levenberg-Marquardt' \
       'Full Matrix' Unknown
-    .type = choice
+      .type = choice
     sg_list = None
       .type = str
       .expert_level = 1
@@ -198,6 +200,8 @@ snum
       .type = bool
     check_absolute_structure_after_refinement = True
       .type = bool
+    command_line_options = ''
+      .type = str
 
     auto
       .short_caption = Autotidy

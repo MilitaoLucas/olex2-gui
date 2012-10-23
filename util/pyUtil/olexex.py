@@ -650,7 +650,7 @@ def MakeElementButtonsFromFormula():
 <input
   name=IMG_BTN-ELEMENT%(symbol)s
   type="button"
-  image="up=%(namelower)soff.png,down=%(namelower)son.png,hover=%(namelower)shover.png",disable=%(namelower)sdisable.png"
+  image="up=%(namelower)soff.png,down=%(namelower)son.png,hover=%(namelower)shover.png"
   hint="%(target)s"
   onclick="%(cmds)s"
   bgcolor=%(bgcolor)s
@@ -663,7 +663,7 @@ def MakeElementButtonsFromFormula():
 <input
   name=IMG_BTN-ELEMENT...
   type="button"
-  image="up=%(namelower)soff.png,down=%(namelower)son.png,hover=%(namelower)shover.png",disable=%(namelower)sdisable.png"
+  image="up=%(namelower)soff.png,down=%(namelower)son.png,hover=%(namelower)shover.png"
   hint="Chose Element from the periodic table"
   onclick="if strcmp(sel(),'') then 'mode name -t=ChooseElement()' else 'name sel ChooseElement()'"
   bgcolor=%(bgcolor)s

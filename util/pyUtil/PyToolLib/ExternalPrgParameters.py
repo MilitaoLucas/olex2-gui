@@ -156,6 +156,7 @@ class Method(object):
     args = []
     for instruction in self.instructions():
       if OV.FindValue('settings_%s' %instruction.name) in (True, 'True', 'true'):
+        if instruction.name.endswith('command_line'): continue
         # Check if the argument is selected in the GUI
         if instruction.caption is not None:
           arg = instruction.caption
@@ -300,6 +301,7 @@ class Method_refinement(Method):
     pass
 
 class Method_shelx(Method):
+  command_line_options = None
 
   def run(self, RunPrgObject):
     """Runs any SHELX refinement/solution program
@@ -332,6 +334,8 @@ class Method_shelx(Method):
     #sys.stdout.graph = RunPrgObject.Graph()
     if not RunPrgObject.params.snum.shelx_output:
       command = "-q " + command
+    if self.command_line_options:
+      command = "%s '%s'" %(command, self.command_line_options)
     success = olx.Exec(command)
     if not success:
       raise RuntimeError(
@@ -348,7 +352,10 @@ class Method_shelx(Method):
 class Method_shelx_solution(Method_shelx, Method_solution):
   """Inherits methods specific to shelx solution programs
   """
-
+  def run(self, RunPrgObject):
+    self.command_line_options = OV.GetParam('snum.solution.command_line_options', None)
+    Method_shelx.run(self, RunPrgObject)
+    
   def observe(self, RunPrgObject):
     import Analysis
     self.observer = Analysis.ShelXS_graph(RunPrgObject.program, RunPrgObject.method)
@@ -363,6 +370,10 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
     Method.__init__(self, phil_object)
     self.cif = {}
 
+  def run(self, RunPrgObject):
+    self.command_line_options = OV.GetParam('snum.refinement.command_line_options', None)
+    Method_shelx.run(self, RunPrgObject)
+    
   def pre_refinement(self, RunPrgObject):
     if OV.GetParam("snum.refinement.use_solvent_mask"):
       import cctbx_olex_adapter
@@ -1237,6 +1248,18 @@ instructions {
 """)
 
 shelxs_phil = phil_interface.parse("""
+solution_command_line
+  .optional=False
+  .caption='Command line'
+{
+  values {
+    Options=''
+      .type=str
+  }
+  default=True
+    .type=bool
+}
+
 esel
   .optional=True
 {
@@ -1710,6 +1733,17 @@ instructions {
 """)
 
 shelxl_phil = phil_interface.parse("""
+refinement_command_line
+  .optional=False
+  .caption='Command line'
+{
+  values {
+    Options=''
+      .type=str
+  }
+  default=True
+    .type=bool
+}
 plan
   .optional=True
 {
