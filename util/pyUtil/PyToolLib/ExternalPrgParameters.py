@@ -335,7 +335,9 @@ class Method_shelx(Method):
     if not RunPrgObject.params.snum.shelx_output:
       command = "-q " + command
     if self.command_line_options:
-      command = "%s '%s'" %(command, self.command_line_options)
+      opts = self.command_line_options.split()
+      opts = ' '.join(["'%s'" %o for o in opts])
+      command = "%s %s" %(command, opts)
     success = olx.Exec(command)
     if not success:
       raise RuntimeError(
