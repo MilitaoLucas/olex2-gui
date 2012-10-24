@@ -33,7 +33,8 @@ class ExternalProgramDictionary(object):
 
 
 class Program(object):
-  def __init__(self, name, program_type, author, reference, execs=None, versions=None):
+  def __init__(self, name, program_type, author, reference, execs=None,
+                versions=None, phil_entry_name=None):
     self.name = name
     self.program_type = program_type
     self.author = author
@@ -42,6 +43,7 @@ class Program(object):
     self.versions = versions
     self.methods = {}
     self.counter = 0
+    self.phil_entry_name = phil_entry_name
 
   def __contains__(self, name):
     if type(name) == str:
@@ -59,6 +61,7 @@ class Program(object):
 
 
 class Method(object):
+  command_line_options = None
   failure = False
 
   def __init__(self, phil_object):
@@ -73,12 +76,21 @@ class Method(object):
   def html_gui(self):
     pass
 
-  def run(self, RunPrgObject):
+  def do_run(self, RunPrgObject):
     """Must be redefined in subclass.
 
     It is from within this method that the external program will be run.
     """
-    assert 0, 'run must be defined!'
+    assert 0, 'do_run must be defined!'
+
+  def run(self, RunPrgObject):
+    if RunPrgObject.program.phil_entry_name:
+      name = "snum.%s.%s.command_line" %(
+        RunPrgObject.program.program_type, RunPrgObject.program.phil_entry_name)
+      self.command_line_options = OV.GetParam(name, None)
+    else:
+      self.command_line_options = None
+    self.do_run(RunPrgObject)
 
   def instructions(self):
     scope = self.phil_index.get_scope_by_name('instructions')
@@ -294,16 +306,15 @@ class Method_refinement(Method):
     if round(wave_length, 2) == round(0.71073,2) or round(wave_length, 2) == round(1.5414, 2) or round(wave_length, 2)  == round(0.56053, 2):
       pass
     else:
-      print "Using non-standard wavelegnth (%f) calculating DISP and adding\n"%wave_length
+      print "Using non-standard wavelength (%f) calculating DISP and adding\n"%wave_length
       olx.GenDisp()
 
   def post_refinement(self, RunPrgObject):
     pass
 
 class Method_shelx(Method):
-  command_line_options = None
 
-  def run(self, RunPrgObject):
+  def do_run(self, RunPrgObject):
     """Runs any SHELX refinement/solution program
     """
     print 'STARTING SHELX %s with %s' %(
@@ -354,10 +365,6 @@ class Method_shelx(Method):
 class Method_shelx_solution(Method_shelx, Method_solution):
   """Inherits methods specific to shelx solution programs
   """
-  def run(self, RunPrgObject):
-    self.command_line_options = OV.GetParam('snum.solution.command_line_options', None)
-    Method_shelx.run(self, RunPrgObject)
-    
   def observe(self, RunPrgObject):
     import Analysis
     self.observer = Analysis.ShelXS_graph(RunPrgObject.program, RunPrgObject.method)
@@ -372,10 +379,6 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
     Method.__init__(self, phil_object)
     self.cif = {}
 
-  def run(self, RunPrgObject):
-    self.command_line_options = OV.GetParam('snum.refinement.command_line_options', None)
-    Method_shelx.run(self, RunPrgObject)
-    
   def pre_refinement(self, RunPrgObject):
     if OV.GetParam("snum.refinement.use_solvent_mask"):
       import cctbx_olex_adapter
@@ -537,12 +540,7 @@ class Method_shelxd(Method_shelx_solution):
     }
     button_html = htmlTools.make_input_button(button_d)
     html = '''
-  </tr>
-  <tr>
-    %s
-  <td colspan='10'>
-    %s
-  </td>
+  <tr>%s<td>%s</td></tr>
   ''' %(htmlTools.make_table_first_col(), button_html)
     return html
 
@@ -563,7 +561,7 @@ class Method_shelxd(Method_shelx_solution):
       args += 'NTRY 100\n'
     return args
 
-  def run(self, RunPrgObject):
+  def do_run(self, RunPrgObject):
     """Makes Olex listen to the temporary directory before running the executable
     so that intermediate solutions will be displayed onscreen.
     """
@@ -587,7 +585,7 @@ class Method_cctbx_refinement(Method_refinement):
     RunPrgObject.make_unique_names = True
     Method_refinement.pre_refinement(self, RunPrgObject)
 
-  def run(self, RunPrgObject):
+  def do_run(self, RunPrgObject):
     from refinement import FullMatrixRefine
     from smtbx.refinement.constraints import InvalidConstraint
     self.failure = True
@@ -635,7 +633,7 @@ class Method_cctbx_refinement(Method_refinement):
 
 class Method_cctbx_ChargeFlip(Method_solution):
 
-  def run(self, RunPrgObject):
+  def do_run(self, RunPrgObject):
     from cctbx_olex_adapter import OlexCctbxSolve
     import traceback
     print 'STARTING cctbx Charge Flip'
@@ -675,13 +673,13 @@ class Method_cctbx_ChargeFlip(Method_solution):
 
 class Method_Superflip(Method_solution):
 
-  def run(self, RunPrgObject):
+  def do_run(self, RunPrgObject):
     from flipsmall import flipsmall
     flipsmall()
 
 class Method_SIR(Method_solution):
 
-  def run(self, RunPrgObject):
+  def do_run(self, RunPrgObject):
     from olexsir import Sir
 
     print 'STARTING %s %s with %s' %(
@@ -798,8 +796,10 @@ def defineExternalPrograms():
   superflip_cf = Method_Superflip(superflip_cf_phil)
 
   # define refinement methods
-  least_squares = Method_shelx_refinement(least_squares_phil)
-  cgls = Method_shelx_refinement(cgls_phil)
+  least_squares = Method_shelx_refinement(get_LS_phil('default'))
+  cgls = Method_shelx_refinement(get_CGLS_phil('default'))
+  least_squares_12 = Method_shelx_refinement(get_LS_phil('2012'))
+  cgls_12 = Method_shelx_refinement(get_CGLS_phil('2012'))
   gauss_newton = Method_cctbx_refinement(gauss_newton_phil)
   levenberg_marquardt = Method_cctbx_refinement(levenberg_marquardt_phil)
 
@@ -918,13 +918,15 @@ def defineExternalPrograms():
     program_type='refinement',
     author="G.M.Sheldrick",
     reference="SHELXL-2012, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
-    execs=["shelxl12.exe", "shelxl12"])
+    execs=["shelxl12.exe", "shelxl12"],
+    phil_entry_name='ShelXL12')
   ShelXLMP12 = Program(
     name='ShelXLMP-2012',
     program_type='refinement',
     author="G.M.Sheldrick",
     reference="SHELXL-2012, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
-    execs=["shelxl_mp12.exe", "shelxl_mp12"])
+    execs=["shelxl_mp12.exe", "shelxl_mp12"],
+    phil_entry_name='ShelXMPL12')
   XL = Program(
     name='XL',
     program_type='refinement',
@@ -961,9 +963,12 @@ def defineExternalPrograms():
     author="L.J. Bourhis, O.V. Dolomanov, R.J. Gildea",
     reference="olex2.refine (L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, J.A.K. Howard,\nH. Puschmann, in preparation, 2011)")
 
-  for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc, ShelXL12, ShelXLMP12):
-    for method in (least_squares, cgls):
-      prg.addMethod(method)
+  for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc):
+    prg.addMethod(least_squares)
+    prg.addMethod(cgls)
+  for prg in (ShelXL12, ShelXLMP12):
+    prg.addMethod(least_squares_12)
+    prg.addMethod(cgls_12)
   smtbx_refine.addMethod(gauss_newton)
   smtbx_refine.addMethod(levenberg_marquardt)
 
@@ -1250,18 +1255,6 @@ instructions {
 """)
 
 shelxs_phil = phil_interface.parse("""
-solution_command_line
-  .optional=False
-  .caption='Command line'
-{
-  values {
-    Options=''
-      .type=str
-  }
-  default=True
-    .type=bool
-}
-
 esel
   .optional=True
 {
@@ -1735,17 +1728,6 @@ instructions {
 """)
 
 shelxl_phil = phil_interface.parse("""
-refinement_command_line
-  .optional=False
-  .caption='Command line'
-{
-  values {
-    Options=''
-      .type=str
-  }
-  default=True
-    .type=bool
-}
 plan
   .optional=True
 {
@@ -1786,64 +1768,89 @@ temp
 }
 """)
 
-least_squares_phil = phil_interface.parse("""
-name = 'Least Squares'
-  .type=str
-instructions {
-  ls
-    .caption = 'L.S.'
-  {
-    name='L.S.'
+shelxl12_phil = phil_interface.parse("""
+command_line
+  .optional=False
+  .caption='Command line'
+{
+  values {
+    Options=''
       .type=str
-    values {
-      nls=4
-        .type=int
-      nrf=0
-        .type=int
-      nextra=0
-        .type=int
-      maxvec=511
-        .type=int
-    }
-    default=True
-      .type=bool
   }
-  include scope ExternalPrgParameters.shelxl_phil
-  acta
-    .optional=True
-  {
-    values {
-      two_theta_full=None
-        .caption=2thetafull
-        .type=float
-    }
-    default=False
-      .type=bool
-  }
+  default=True
+    .type=bool
 }
+include scope ExternalPrgParameters.shelxl_phil
 """, process_includes=True)
 
-cgls_phil = phil_interface.parse("""
-name = CGLS
-  .type=str
-instructions {
-  cgls {
-    values {
-      nls=4
-        .type=int
-      nrf=0
-        .type=int
-      nextra=0
-        .type=int
-      maxvec=511
-        .type=int
-    }
-    default=True
-      .type=bool
+def get_LS_phil(version):
+  versions = {
+    '2012' : 'ExternalPrgParameters.shelxl12_phil',
   }
-  include scope ExternalPrgParameters.shelxl_phil
-}
-""", process_includes=True)
+  v = versions.get(version, 'ExternalPrgParameters.shelxl_phil')
+  return phil_interface.parse("""
+  name = 'Least Squares'
+    .type=str
+  instructions {
+    ls
+      .caption = 'L.S.'
+    {
+      name='L.S.'
+        .type=str
+      values {
+        nls=4
+          .type=int
+        nrf=0
+          .type=int
+        nextra=0
+          .type=int
+        maxvec=511
+          .type=int
+      }
+      default=True
+        .type=bool
+    }
+    include scope %s
+    acta
+    .optional=True
+    {
+      values {
+        two_theta_full=None
+          .caption=2thetafull
+          .type=float
+      }
+      default=False
+        .type=bool
+    }
+  }
+    """ %v, process_includes=True)
+
+def get_CGLS_phil(version):
+  versions = {
+    '2012' : 'ExternalPrgParameters.shelxl12_phil',
+  }
+  v = versions.get(version, 'ExternalPrgParameters.shelxl_phil')
+  return phil_interface.parse("""
+    name = CGLS
+      .type=str
+    instructions {
+      cgls {
+        values {
+          nls=4
+            .type=int
+          nrf=0
+            .type=int
+          nextra=0
+            .type=int
+          maxvec=511
+            .type=int
+        }
+        default=True
+          .type=bool
+      }
+      include scope %s
+    }
+    """ %v, process_includes=True)
 
 gauss_newton_phil = phil_interface.parse("""
 name = 'Gauss-Newton'
