@@ -51,16 +51,12 @@ def makeProgramSettingsGUI(program, method, prgtype):
 
   txt += ''.join([makeArgumentsHTML(program, method, instruction)
                   for instruction in method.instructions()])
-
   txt += r'''
 <tr>
   <td valign="center" width="%s" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td>%s - %s</td>
 </tr>
-<tr>
-  <td valign="center" width="$GetVar('HtmlTableFirstcolWidth')" bgcolor="$GetVar('HtmlTableFirstcolColour')"></td>
-  %s
-</tr>
+%s
 </table>
 ''' %(OV.GetParam('gui.html.table_firstcol_width'), authors, reference, method.extraHtml())
 
@@ -93,16 +89,13 @@ def makeArgumentsHTML(program, method, instruction):
   else:
     tick_box_html = ''
 
-  w = "13%%"
-  if name == 'cf':
-    w = '50'
   argName = argName.upper().replace(' ', '&nbsp;')
   txt = '''<tr>%s
-  <td valign='center' align='left' width='%s' bgcolor="$GetVar('HtmlTableFirstcolColour')">
+  <td valign='center' align='left' bgcolor="$GetVar('HtmlTableFirstcolColour')">
     <b>%s&nbsp;%s</b>
   </td>
 </tr>
-''' %(first_col1, w, argName, tick_box_html)
+''' %(first_col1, argName, tick_box_html)
 
   count = 0
   row_txt = ""
@@ -118,11 +111,13 @@ def makeArgumentsHTML(program, method, instruction):
       value = ''
     ctrl_name = 'SET_%s' %(varName.upper())
 
-    if not instruction.name.endswith('command_line'):
+    if instruction.name != 'command_line':
       onchange = "SetVar('%s',html.GetValue('%s'))>>spy.addInstruction('%s','%s','%s')" %(
         varName, ctrl_name, program.name, method.name, name)
     else:
-      param = "snum.%s.command_line_options" %name.split('_')[0]
+      if not program.phil_entry_name:
+        assert 0, 'incompatible phil entries'
+      param = "snum.%s.%s.command_line" %(program.program_type, program.phil_entry_name)
       onchange = "spy.SetParam('%s',html.GetValue('SET_SETTINGS_%s_OPTIONS'))" %(
         param, name.upper())
       value = "spy.GetParam('%s', '')" %(param)

@@ -124,8 +124,6 @@ snum
       .type = bool
     current_atomic_volume = None
       .type = float
-    command_line_options = ''
-      .type = str
     Sir2002{
       gui = False
         .type = bool
@@ -200,8 +198,20 @@ snum
       .type = bool
     check_absolute_structure_after_refinement = True
       .type = bool
-    command_line_options = ''
-      .type = str
+
+    ShelXL12
+      .short_caption = 'Program specific command line'
+    {
+      command_line = ''
+        .type = str
+    }
+
+    ShelXLMP12
+      .short_caption = 'Program specific command line'
+    {
+      command_line = ''
+        .type = str
+    }
 
     auto
       .short_caption = Autotidy
