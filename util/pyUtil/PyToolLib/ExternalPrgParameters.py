@@ -926,7 +926,7 @@ def defineExternalPrograms():
     author="G.M.Sheldrick",
     reference="SHELXL-2012, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
     execs=["shelxl_mp12.exe", "shelxl_mp12"],
-    phil_entry_name='ShelXMPL12')
+    phil_entry_name='ShelXLMP12')
   XL = Program(
     name='XL',
     program_type='refinement',
