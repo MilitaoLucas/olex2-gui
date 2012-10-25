@@ -567,7 +567,7 @@ class Method_shelxd(Method_shelx_solution):
     """
     listen_file = '%s/%s.res' %(RunPrgObject.tempPath,RunPrgObject.hkl_src_name)
     OV.Listen(listen_file)
-    Method_shelx_solution.run(self, RunPrgObject)
+    Method_shelx_solution.do_run(self, RunPrgObject)
 
   def post_solution(self, RunPrgObject):
     """Stops listening to the temporary directory
