@@ -1931,7 +1931,6 @@ def GetPSImageInstructions():
   if not filefull:
     return
   OV.Cursor('busy','Please Wait. Making image %s.%s. This may take some time' %(filename, fileext))
-  olex.m('brad %s' %OV.GetParam('snum.image.ps.bond_width'))
 
   colour_line = OV.GetParam('snum.image.ps.colour_line')
   colour_bond = OV.GetParam('snum.image.ps.colour_bond')
@@ -1957,7 +1956,7 @@ def GetPSImageInstructions():
          " " + "-div_pie=" + div_pie + \
          " " + "-octants=" + octant_atoms + \
          " " + "-scale_hb=" + scale_hb)
-  olex.m('brad 0.8')
+
   print 'Image %s created' %filefull
   OV.Cursor()
 OV.registerFunction(GetPSImageInstructions)
