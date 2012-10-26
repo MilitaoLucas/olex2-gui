@@ -149,10 +149,14 @@ class CifTools(ArgumentParser):
     exptl_crystal_sizes = ('_exptl_crystal_size_min',
                            '_exptl_crystal_size_mid',
                            '_exptl_crystal_size_max')
-    for size in exptl_crystal_sizes:
-      value = self.cif_block.get(size)
-      if value is not None:
-        dimensions.append(float(value))
+    sz = olx.xf.exptl.Size().split('x')
+    if sz[0] != '0':
+      dimensions = sz
+    else:
+      for size in exptl_crystal_sizes:
+        value = self.cif_block.get(size)
+        if value is not None:
+          dimensions.append(float(value))
     if dimensions:
       dimensions.sort()
       for i in range(len(dimensions)):
