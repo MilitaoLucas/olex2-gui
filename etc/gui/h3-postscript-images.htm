@@ -193,22 +193,8 @@ $spy.MakeHoverButton('button_small-go@ps','spy.GetPsImageInstructions()')
   <td name=ROW_4_LABEL width="16%">
     <b>%Bonds%</b>
   </td>
-  <td name=IMAGE_PS_BONDWIDTH width="42%">
-    <font size="$GetVar('HtmlFontSizeControls')">
-    <input
-      type="combo"
-      height="GetVar('HtmlComboHeight')"
-      width="35%"
-      bgcolor="GetVar('HtmlInputBgColour')"
-      items="0.2;0.3;0.4;0.5;0.6;0.7;0.8;"
-      valign='center'
-      align='right'
-      name="IMAGE_PS_BONDWIDTH"
-      value="spy.GetParam('snum.image.ps.bond_width')"
-      onchange="spy.SetParam('snum.image.ps.bond_width',html.GetValue('~name~'))"
-      label="%images_bond_width% "
-    >
-    </font>
+  <td name=IMAGE_PS_BONDWIDTH width="42%" align='right'>
+  Use <b>brad</b> for bond thickness
   </td>
   <td name=IMAGE_PS_HBOND width="42%">
     <font size="$GetVar('HtmlFontSizeControls')">
