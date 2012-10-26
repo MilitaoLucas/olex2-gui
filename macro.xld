@@ -860,13 +860,11 @@
 >
 
 
-<emf help='Edit a macro file (macro, auto, custom, ...)'
+<emf help='Edit a custom macro file'
   <body
-    <args
-      <arg1 name="filname" def="custom">
-    >
+    <args>
     <cmd
-      <cmd1 "exec -o getvar(defeditor) app.BaseDir()/%1.xld">
+      <cmd1 "exec -o getvar(defeditor) app.ConfigDir()/custom.xld">
     >
   >
 >
