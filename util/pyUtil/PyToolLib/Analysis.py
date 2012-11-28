@@ -2047,7 +2047,7 @@ class Fobs_Fcalc_plot(Analysis):
         print "You need some scatterers to do this!"
         return
       else:
-        raise AssertionError, e
+        raise
     self.popout()
     if self.params.fobs_fcalc.output_csv_file:
       self.output_data_as_csv()
@@ -2063,7 +2063,7 @@ class Fobs_Fcalc_plot(Analysis):
     data = Dataset(
       xy_plot.f_calc, xy_plot.f_obs, indices=xy_plot.indices, metadata=metadata)
     self.data.setdefault('dataset1', data)
-    if xy_plot.f_obs_omitted.size():
+    if xy_plot.f_obs_omitted and xy_plot.f_obs_omitted.size():
       data_omitted = Dataset(
         xy_plot.f_calc_omitted, xy_plot.f_obs_omitted, indices=xy_plot.indices_omitted)
       self.data.setdefault('dataset2', data_omitted)
@@ -2182,7 +2182,7 @@ class r1_factor_vs_resolution_plot(Analysis):
         print "You need some scatterers to do this!"
         return
       else:
-        raise AssertionError, e
+        raise
     self.popout()
     if self.params.r1_factor_vs_resolution.output_csv_file:
       self.output_data_as_csv()
