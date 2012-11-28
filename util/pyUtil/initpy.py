@@ -174,6 +174,7 @@ def set_olex_paths():
 
 def set_plugins_paths():
   plugins = olexex.InstalledPlugins()
+  sys.path.append("%s/util/pyUtil/PluginLib" %(basedir))
   for plugin in plugins:
     sys.path.append("%s/util/pyUtil/PluginLib/plugin-%s" %(basedir,plugin))
   for plugin in plugins:
