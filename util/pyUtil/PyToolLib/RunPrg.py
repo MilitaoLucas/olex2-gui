@@ -407,7 +407,7 @@ class RunRefinementPrg(RunPrg):
     print "Checking absolute structure..."
     inversion_needed = False
     possible_racemic_twin = False
-    inversion_warning = "WARNING: Stucture should be inverted (inv -f), unless there is a good reason not to do so."
+    inversion_warning = "WARNING: Structure should be inverted (inv -f), unless there is a good reason not to do so."
     racemic_twin_warning = "WARNING: Structure may be an inversion twin"
     flack = self.method.getFlack()
 
