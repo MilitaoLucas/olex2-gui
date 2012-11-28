@@ -27,13 +27,13 @@ class OlexCctbxGraphs(OlexCctbxAdapter):
 
     try:
       if graph == "wilson":
-        self.xy_plot = wilson_statistics(self.xray_structure(), self.reflections, **kwds)
+        self.xy_plot = wilson_statistics(self.xray_structure(), self, **kwds)
 
       elif graph == "completeness":
         self.xy_plot = completeness_statistics(self.reflections, self.wavelength, **kwds)
 
       elif graph == "cumulative":
-        self.xy_plot = cumulative_intensity_distribution(self.reflections, **kwds)
+        self.xy_plot = cumulative_intensity_distribution(self, **kwds)
 
       elif graph == "sys_absent":
         self.xy_plot = sys_absent_intensity_distribution(self.reflections)
@@ -83,11 +83,10 @@ class r1_factor_vs_resolution(OlexCctbxAdapter):
   def __init__(self, n_bins=10, resolution_as="two_theta"):
     OlexCctbxAdapter.__init__(self)
     self.resolution_as = resolution_as
-    fo2 = self.reflections.f_sq_obs_filtered
-    fo = fo2.f_sq_as_f()
-    fc = self.f_calc(miller_set=fo)
+    fo2, fc = self.get_fo_sq_fc()
     weights = self.compute_weights(fo2, fc)
     scale_factor = fo2.scale_factor(fc, weights=weights)
+    fo = fo2.f_sq_as_f()
     fo.setup_binner(n_bins=n_bins)
     self.info = fo.info()
     self.binned_data = fo.r1_factor(fc, scale_factor=math.sqrt(scale_factor), use_binning=True)
@@ -121,10 +120,9 @@ class scale_factor_vs_resolution(OlexCctbxAdapter):
   def __init__(self, n_bins=10, resolution_as="two_theta", normalize=True):
     OlexCctbxAdapter.__init__(self)
     self.resolution_as = resolution_as
-    fo2 = self.reflections.f_sq_obs_filtered
+    fo2, fc = self.get_fo_sq_fc()
     fo2.setup_binner(n_bins=n_bins)
     self.info = fo2.info()
-    fc = self.f_calc(miller_set=fo2)
     weights = self.compute_weights(fo2, fc)
     self.binned_data = fo2.scale_factor(
       fc, weights=weights, use_binning=True)
@@ -161,26 +159,32 @@ class scale_factor_vs_resolution(OlexCctbxAdapter):
 class f_obs_vs_f_calc(OlexCctbxAdapter):
   def __init__(self, batch_number=None):
     OlexCctbxAdapter.__init__(self)
-    if [batch_number, self.reflections.batch_numbers_array].count(None) == 0:
-      assert batch_number <= flex.max(self.reflections.batch_numbers_array.data()), "batch_number <= max(batch_numbers)"
-      selection = (self.reflections.batch_numbers_array.data() == batch_number)
-      f_sq_obs = self.reflections.f_sq_obs.select(selection)
-      merging = self.reflections.merge(f_sq_obs)
-      f_obs_merged = merging.array().f_sq_as_f()
-      f_obs_filtered = merging.array().f_sq_as_f()
+    if self.hklf_code == 5:
+      f_sq_obs_filtered, f_calc_filtered = self.get_fo_sq_fc()
+      f_obs_filtered = f_sq_obs_filtered.f_sq_as_f()
+      f_obs_omitted = None
+      f_calc_omitted = None
     else:
-      f_obs_merged = self.reflections.f_sq_obs_merged.f_sq_as_f()
-      f_obs_filtered = f_obs_merged.common_set(self.reflections.f_sq_obs_filtered)
+      if [batch_number, self.reflections.batch_numbers_array].count(None) == 0:
+        assert batch_number <= flex.max(self.reflections.batch_numbers_array.data()), "batch_number <= max(batch_numbers)"
+        selection = (self.reflections.batch_numbers_array.data() == batch_number)
+        f_sq_obs = self.reflections.f_sq_obs.select(selection)
+        merging = self.reflections.merge(f_sq_obs)
+        f_obs_merged = merging.array().f_sq_as_f()
+        f_obs_filtered = merging.array().f_sq_as_f()
+      else:
+        f_obs_merged = self.reflections.f_sq_obs_merged.f_sq_as_f()
+        f_obs_filtered = f_obs_merged.common_set(self.reflections.f_sq_obs_filtered)
 
-    f_calc_merged = self.f_calc(miller_set=f_obs_merged)
-    f_calc_filtered = f_calc_merged.common_set(f_obs_filtered)
-    f_obs_omitted = f_obs_merged.lone_set(f_obs_filtered)
-    f_calc_omitted = f_calc_merged.common_set(
-      f_obs_merged).lone_set(f_calc_filtered)
+      f_calc_merged = self.f_calc(miller_set=f_obs_merged)
+      f_calc_filtered = f_calc_merged.common_set(f_obs_filtered)
+      f_obs_omitted = f_obs_merged.lone_set(f_obs_filtered)
+      f_calc_omitted = f_calc_merged.common_set(
+        f_obs_merged).lone_set(f_calc_filtered)
+      f_sq_obs_filtered = self.reflections.f_sq_obs_filtered
 
-    weights = self.compute_weights(
-      self.reflections.f_sq_obs_filtered, f_calc_filtered)
-    k = math.sqrt(self.reflections.f_sq_obs_filtered.scale_factor(
+    weights = self.compute_weights(f_sq_obs_filtered, f_calc_filtered)
+    k = math.sqrt(f_sq_obs_filtered.scale_factor(
       f_calc_filtered, weights=weights))
     fo = flex.abs(f_obs_filtered.data())
     fc = flex.abs(f_calc_filtered.data())
@@ -192,9 +196,16 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
     plot.indices = f_obs_filtered.indices()
     plot.f_obs = fo
     plot.f_calc = fc
-    plot.f_obs_omitted = flex.abs(f_obs_omitted.data())
-    plot.f_calc_omitted = flex.abs(f_calc_omitted.data()) * k
-    plot.indices_omitted = f_obs_omitted.indices()
+    if f_calc_omitted:
+      plot.f_calc_omitted = flex.abs(f_calc_omitted.data()) * k
+    else:
+      plot.f_calc_omitted = None
+    if f_obs_omitted:
+      plot.f_obs_omitted = flex.abs(f_obs_omitted.data())
+      plot.indices_omitted = f_obs_omitted.indices()
+    else:
+      plot.f_obs_omitted = None
+      plot.indices_omitted = None
     plot.fit_slope = fit.slope()
     plot.fit_y_intercept = fit.y_intercept()
     plot.xLegend = "F calc"
@@ -208,9 +219,9 @@ class f_obs_over_f_calc(OlexCctbxAdapter):
                n_bins=None,
                resolution_as="two_theta"):
     OlexCctbxAdapter.__init__(self)
-    f_sq_obs_filtered = self.reflections.f_sq_obs_filtered
+
+    f_sq_obs_filtered, f_calc_filtered = self.get_fo_sq_fc()
     f_obs_filtered = f_sq_obs_filtered.f_sq_as_f()
-    f_calc_filtered = self.f_calc(miller_set=f_obs_filtered)
 
     weights = self.compute_weights(f_sq_obs_filtered, f_calc_filtered)
     k = math.sqrt(
@@ -258,9 +269,8 @@ class normal_probability_plot(OlexCctbxAdapter):
                distribution=None):
     OlexCctbxAdapter.__init__(self)
     from scitbx.math import distributions
-    f_sq_obs = self.reflections.f_sq_obs_filtered
+    f_sq_obs, f_calc = self.get_fo_sq_fc()
     f_obs = f_sq_obs.f_sq_as_f()
-    f_calc = self.f_calc(miller_set=f_obs)
     f_sq_calc = f_calc.as_intensity_array()
     if distribution is None:
       distribution = distributions.normal_distribution()
@@ -381,7 +391,7 @@ class bijvoet_differences_scatter_plot(OlexCctbxAdapter):
     r.sigmas = self.delta_fo2.sigmas()
     return r
 
-def wilson_statistics(model, reflections, n_bins=10):
+def wilson_statistics(model, cctbx_adaptor, n_bins=10):
   from cctbx import sgtbx
 
   p1_space_group = sgtbx.space_group_info(symbol="P 1").group()
@@ -401,10 +411,12 @@ def wilson_statistics(model, reflections, n_bins=10):
     number_carbons = asu_volume/18.0
     asu_contents.setdefault('C', number_carbons)
 
-  f_obs=reflections.f_obs
-  f_obs.space_group = p1_space_group
+  if cctbx_adaptor.hklf_code == 5:
+    f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_filtered.select(
+      cctbx_adaptor.reflections.batch_numbers > 0)
+  else:
+    f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_filtered
 
-  f_sq_obs = reflections.f_sq_obs
   merging = f_sq_obs.merge_equivalents()
   merging.show_summary()
   f_sq_obs = f_sq_obs.average_bijvoet_mates()
@@ -477,10 +489,15 @@ class completeness_statistics(object):
     for indices, resolution in zip(missing_set.indices(), resolutions):
       print ("(%2i %2i %2i)  ") %indices + ("%8.2f") %resolution
 
-def cumulative_intensity_distribution(reflections,
+def cumulative_intensity_distribution(cctbx_adaptor,
                                       n_bins=20,
                                       verbose=False):
-  f_obs=reflections.f_sq_obs_merged.f_sq_as_f()
+  if cctbx_adaptor.hklf_code == 5:
+    f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_filtered.select(
+      cctbx_adaptor.reflections.batch_numbers > 0)
+  else:
+    f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_merged
+  f_obs = f_sq_obs.f_sq_as_f()
   f_obs.setup_binner(
     n_bins=n_bins
   )
