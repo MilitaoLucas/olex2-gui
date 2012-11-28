@@ -217,7 +217,7 @@
   >
 >
 
-<refine help="Launches refine program. Syntax: refine [l.s.=-1] [plan=-1]"
+]<refine help="Launches refine program. Syntax: refine [l.s.=-1] [plan=-1]"
   <body
     <args
       <arg1 name="l.s." def='-1'>
@@ -225,14 +225,15 @@
     >
     <cmd
       <cmd0 "xgrid.Visible(false)">
-      <cmd1 "mode off">
-      <cmd2 "user filepath()">
-      <cmd3 "if not(spy.AnalyseRefinementSource()) then abort">
-      <cmd4 "if strcmp(%1,'-1') then None else spy.SetMaxCycles(%1)">
-      <cmd5 "if strcmp(%2,'-1.1') then None else spy.SetMaxPeaks(%2)">
-      <cmd6 "spy.RunRefinementPrg()">
-      <cmd7 "spy.make_HOS()">
-      <cmd8 "html.Update">
+      <cmd1 "spy.gui.maps.MapView(off)">
+      <cmd2 "mode off">
+      <cmd3 "user filepath()">
+      <cmd4 "if not(spy.AnalyseRefinementSource()) then abort">
+      <cmd5 "if strcmp(%1,'-1') then None else spy.SetMaxCycles(%1)">
+      <cmd6 "if strcmp(%2,'-1.1') then None else spy.SetMaxPeaks(%2)">
+      <cmd7 "spy.RunRefinementPrg()">
+      <cmd8 "spy.make_HOS()">
+      <cmd9 "html.Update">
     >
     <onabort
       <cmd "echo lasterror()">
@@ -474,21 +475,17 @@
       <arg0 name="File extension" def="ins">
     >
     <cmd
-      <cmd1  "user 'filepath()'">
-      <cmd2 "file 'filepath()/filename().ins'">
-      <cmd3  "file 'filepath()/filename().res'">
+      <cmd1  "user filepath()">
+      <cmd2 "file filepath()/filename().ins">
+      <cmd3  "file filepath()/filename().res">
       <cmd4  "listen filepath()/filename().ins">
-      <cmd5  cmd1="echo exec -o xp 'filename()'">
-      <cmd6  "exec -o xp filename()">
-      <cmd7  cmdXX="wait 500">
-      <cmd8  cmdXX="windowcmd XRAYFWClass fmol/n">
-      <cmd9  cmdXX="wait 0">
-      <cmd10 cmdXX="windowcmd XRAYFWClass nl">
-      <cmd11 cmdXX="wait 0">
-      <cmd12 cmdXX="windowcmd XRAYFWClass proj/n nl">
-    >
-    <onlisten
-      <cmd0 XXX"grow">
+      <cmd6  "exec -o xp filename() -t='stop listen'">
+      <cmd7  cmd1="wait 500">
+      <cmd8  cmd1="windowcmd XRAYFWClass fmol/n">
+      <cmd9  cmd1="wait 0">
+      <cmd10 cmd1="windowcmd XRAYFWClass nl">
+      <cmd11 cmd1="wait 0">
+      <cmd12 cmd1="windowcmd XRAYFWClass proj/n nl">
     >
   >
 >
