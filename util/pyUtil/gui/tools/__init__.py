@@ -147,19 +147,20 @@ def get_OV_path(path):
     path = "%s/%s" %(p, path.split('()')[1])
   return path
 
-
-def make_single_gui_image(img_txt="", type='h2'):
+def make_single_gui_image(img_txt="", img_type='h2'):
   from PilTools import timage
   import OlexVFS
   timage = timage()
   states = ["on", "off", "highlight", "", "hover", "hoveron"]
+  alias = img_type
   for state in states:
-    image = timage.make_timage(item_type=type, item=img_txt, state=state)
-    if type == "h1":
-      alias = "h2"
-    else:
-      alias = type
-    name = "%s-%s%s.png" %(alias, img_txt.lower(), state)
+    if img_type == "h2":
+      alias = "h1"
+    elif img_type == "h1":
+      alias = img_type
+      img_type = "h2"
+    image = timage.make_timage(item_type=alias, item=img_txt, state=state, titleCase=False)
+    name = "%s-%s%s.png" %(img_type, img_txt.lower(), state)
     OlexVFS.save_image_to_olex(image, name, 2)  
 
 
@@ -219,4 +220,4 @@ def add_tool_to_index(scope="", link="", path="", location="", before="", filety
         text = index_text
       OlexVFS.write_to_olex('%s/etc/gui/blocks/index-%s.htm' %(OV.BaseDir(), location), text, 0)
 
-  make_single_gui_image(link, type=level)
+  make_single_gui_image(link, img_type=level)
