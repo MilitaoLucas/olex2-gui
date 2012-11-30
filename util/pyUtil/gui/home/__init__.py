@@ -37,9 +37,9 @@ class MultipleDataset:
         name = olx.xf.DataName(i)
       else:
         name = OV.FileName()
-      if len(name) < 3:
-        display = "Structure %s" %name
-      elif len(name) > 15:
+#      if len(name) < 3:
+#        display = "Structure %s" %name
+      if len(name) > 15:
         display = "%s..%s" %(name[:6], name[-6:])
       else:
         display = name
