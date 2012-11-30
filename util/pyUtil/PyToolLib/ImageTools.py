@@ -648,6 +648,26 @@ class ImageTools(FontInstances):
     return self.write_text_to_draw(draw=draw, txt=txt, font_name=font_name, font_size=font_size, titleCase=titleCase, lowerCase=lowerCase, translate=translate, getXY_only=True)
 
 
+  def get_im_data_d_from_filename(self, filename, units='pt'):
+    import base64
+    
+    if type(filename) == unicode or type(filename) == str:
+      if os.path.exists(filename):
+        im = Image.open(filename)
+        data = open(filename, 'rb').read()
+        data = base64.b16encode(data)
+    d = {}
+    if units == 'twip':
+      multiplier = 10
+    else:
+      multiplier = 1
+    d.setdefault('image_height', im.size[1] * multiplier)
+    d.setdefault('image_width', im.size[0] * multiplier)
+    d.setdefault('image_format', im.format)
+    d.setdefault('image_data', data)
+    return d
+
+
   def get_im_and_draw_from_filename(self, filename):
     if type(filename) == unicode:
       if os.path.exists(filename):
@@ -1444,9 +1464,6 @@ class ImageTools(FontInstances):
       
       if border:
         retImage = ImageOps.expand(retImage,border=border,fill=border_col)
-        
-      
-      
     if p:
       retImage.save(p)
     else:
