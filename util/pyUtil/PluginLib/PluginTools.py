@@ -42,8 +42,7 @@ class PluginTools(object):
         #file_name=user_phil_file, scope_name='snum.%s' %self.p_name, diff_only=True)
       
   def setup_gui(self):
-    h1 = [self.p_htm]
-    for item in h1:
-      make_single_gui_image(item, type='h1')
+    for image, img_type in self.p_img:
+      make_single_gui_image(image, img_type=img_type)
     add_tool_to_index(scope=self.p_name, link=self.p_htm, path=self.p_path, location=self.params.gui.location, before=self.params.gui.before, filetype='')
-  
+   
