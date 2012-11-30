@@ -673,7 +673,7 @@ class ExtractCifInfo(CifTools):
         if k in resolved:
           continue
         val = self.all_sources_d[ld][k]
-        dval = d.get(k, 0)
+        dval = d.get(k, None)
         if dval:
           source = dval['source']
           dval = dval['val'].strip("'")
