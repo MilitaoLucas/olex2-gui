@@ -861,6 +861,11 @@
   <body
     <args>
     <cmd
+      <cmd "if not(file.Exists(app.ConfigDir()/custom.xld)) then
+             \"file.Copy(app.BaseDir()/custom.xld, app.ConfigDir()/custom.xld)>>
+               echo 'Create new custom.xld file from a copy'
+             \"
+      ">
       <cmd1 "exec -o getvar(defeditor) app.ConfigDir()/custom.xld">
     >
   >
