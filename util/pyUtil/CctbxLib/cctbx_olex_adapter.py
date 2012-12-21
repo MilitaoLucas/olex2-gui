@@ -190,7 +190,7 @@ class OlexCctbxAdapter(object):
           custom_fp_fdps)
       self._xray_structure.scattering_type_registry(
         custom_dict=custom_gaussians,
-        table=table,
+        table=str(table),
         d_min=self.reflections.f_sq_obs.d_min())
       if self.reflections._merge < 4 and len(custom_fp_fdps) == 0:
         from cctbx.eltbx import wavelengths
