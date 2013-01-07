@@ -734,6 +734,10 @@ class ExtractCifInfo(CifTools):
         t.append("The \l/2 correction factor is %s\n" %(abs["lambda_correction"]))
       for me in t:
         txt = txt + " %s"%me
+      if 'Rint_3sig' in abs and 'Rint' in abs:
+        txt += "\nFinal HKLF 4 output contains %s reflections, Rint = %s\n (%s with I > 3sig(I), Rint = %s)\n" %(
+          abs['Rint_refnum'], abs['Rint'],
+          abs['Rint_3sig_refnum'], abs['Rint_3sig'])
       txt += ";\n"
       exptl_absorpt_process_details = txt
 

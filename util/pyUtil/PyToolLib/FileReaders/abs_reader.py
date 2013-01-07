@@ -145,6 +145,14 @@ class reader(object):
             self._twin_cifItems["%s"%twin_component].setdefault("_exptl_absorpt_correction_T_min", "%s" %min)
             self._twin_cifItems["%s"%twin_component].setdefault("_exptl_absorpt_correction_T_max", "%s" %max)
             self._twin_cifItems["%s"%twin_component].setdefault("ratiominmax", "%.4f" %ratio)
+          elif "Rint =" in line and "I > 3sigma(I)" in line:
+            txt = line.split('=')[1].split()
+            self._twin_cifItems.setdefault("Rint_3sig", txt[0].strip())
+            self._twin_cifItems.setdefault("Rint_3sig_refnum", txt[3].strip())
+          elif "Rint =" in line and "I > 3sigma(I)" not in line:
+            txt = line.split('=')[1].split()
+            self._twin_cifItems.setdefault("Rint", txt[0].strip())
+            self._twin_cifItems.setdefault("Rint_refnum", txt[3].strip())
           if "HKLF 5" in line:
             break
         except (RuntimeError, TypeError, NameError):
