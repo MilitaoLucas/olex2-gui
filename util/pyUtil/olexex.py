@@ -732,7 +732,7 @@ def GetHklFileList():
   reflection_files = ""
   for item in g:
     reflection_files+="%s.%s<-%s;" %(OV.FileName(item), OV.FileExt(item), item)
-  return reflection_files
+  return '"%s"' %reflection_files
 if haveGUI:
   OV.registerFunction(GetHklFileList)
 
