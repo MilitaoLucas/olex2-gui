@@ -217,7 +217,7 @@
   >
 >
 
-]<refine help="Launches refine program. Syntax: refine [l.s.=-1] [plan=-1]"
+<refine help="Launches refine program. Syntax: refine [l.s.=-1] [plan=-1]"
   <body
     <args
       <arg1 name="l.s." def='-1'>
