@@ -115,7 +115,7 @@ def flash_gui_control(control):
       new_image = "up=%son.png" %control_image
       olx.html.SetImage(control_name,new_image)
     elif control.endswith('_bg'):
-      cmd = 'html.setBG(%s,%s)' %(control_image.rstrip('_bg'), self.highlight_colour)
+      cmd = 'html.setBG(%s,%s)' %(control_image.rstrip('_bg'), OV.GetParam('gui.html.highlight_colour','##ff0000'))
       olex.m(cmd)
     else:
       new_image = "up=%soff.png" %control_image
@@ -161,7 +161,7 @@ def make_single_gui_image(img_txt="", img_type='h2'):
       img_type = "h2"
     image = timage.make_timage(item_type=alias, item=img_txt, state=state, titleCase=False)
     name = "%s-%s%s.png" %(img_type, img_txt.lower(), state)
-    OlexVFS.save_image_to_olex(image, name, 2)  
+    OlexVFS.save_image_to_olex(image, name, 2)
 
 
 def add_tool_to_index(scope="", link="", path="", location="", before="", filetype="", level="h1"):

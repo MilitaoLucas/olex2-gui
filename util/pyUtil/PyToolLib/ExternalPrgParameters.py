@@ -457,7 +457,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
 
   def gather_refinement_information(self):
     cif = {}
-    cif.setdefault('_refine_ls_R_factor_all', olx.Lst('R1a'))
+    cif.setdefault('_refine_ls_R_factor_all', olx.Lst('R1all'))
     cif.setdefault('_refine_ls_R_factor_gt', olx.Lst('R1'))
     cif.setdefault('_refine_ls_wR_factor_ref', olx.Lst('wR2'))
     cif.setdefault('_refine_ls_goodness_of_fit_ref', olx.Lst('s'))

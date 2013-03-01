@@ -2672,6 +2672,13 @@ class HealthOfStructure():
     l = ['Completeness', 'MeanIOverSigma','Rint']
     for item in self.hkl_stats:
       value = self.hkl_stats[item]
+      try:
+        fv = float(value)
+        iv = int(value)
+        if fv != iv:
+          value = "%.4f" %fv
+      except:
+        pass
       d.setdefault(item, value)
       txt += "<tr><td>%s</td><td>%s</td><tr>" %(item, value)
     OV.write_to_olex("reflection-stats-summary.htm" , txt)
