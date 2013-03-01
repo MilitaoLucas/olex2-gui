@@ -385,20 +385,31 @@ class ImageTools(FontInstances):
     return "Done"
 
   def resize_to_panelwidth(self, args, width_adjust=0, width=None):
+    import olex
     name = args['i']
+    im = None
+    if name.endswith("@vfs"): #name_tmp@vfs
+      name = name[:-4]
+      s = OlexVFS.read_from_olex(name)
+      olex.writeImage(name, "")
+      name = name[:-4]
+      sio = StringIO(s)
+      im = Image.open(sio)
+    else:
+      path = ("%s/etc/%s" %(self.basedir, name))
+      if os.path.exists(path):
+        im = Image.open(path)
+        name = name[:-4]
     colourize = args.get('c',False)
-    path = ("%s/etc/%s" %(self.basedir, name))
     if not width:
       width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
-    if os.path.exists(path):
-      im = Image.open(path)
+    if im:
       if colourize:
         im = self.colourize(im, (0,0,0), OV.GetParam('gui.logo_colour'))
       width = int(width) - width_adjust
       factor = im.size[0]/width
       height = int(im.size[1] / factor)
       im = self.resize_image(im, (width, height))
-      name = name[:-4]
       OlexVFS.save_image_to_olex(im, name, 2)
     else:
       pass
@@ -1217,9 +1228,12 @@ class ImageTools(FontInstances):
 #      box = (width - height, 0)
 #      image.paste(IM, box)
 
-  def resize_news_image(self, width_adjust=10, width=None):
+  def resize_news_image(self, width_adjust=10, width=None, vfs=False):
     tag = OV.GetTag().split('-')[0]
-    self.resize_to_panelwidth({'i':'news/news-%s.png' %tag}, width=width, width_adjust=width_adjust)
+    name = 'news/news-%s' %tag
+    if vfs: name += '_tmp@vfs'
+    else: name += '.png'
+    self.resize_to_panelwidth({'i':name}, width=width, width_adjust=width_adjust)
 
   def make_simple_text_to_image(self, width, height, txt, font_name='Vera', font_size=16, bg_colour='#fff6bf', font_colour='#222222'):
     IM = Image.new('RGB', (width, height), bg_colour)
