@@ -2111,7 +2111,7 @@ def get_news_image_from_server(name=""):
   try:
     image = HttpTools.make_url_call(url, values = '', http_timeout=0.2).read()
   except Exception, err:
-    print "Downloading image from %s has failed: %s" %(url, err)
+#    print "Downloading image from %s has failed: %s" %(url, err)
     return
   if image:
     tag = OV.GetTag().split('-')[0]
