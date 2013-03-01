@@ -126,6 +126,7 @@
 
   <cmd
     <cmd1  "echo Good Bye">
+    <cmd1a  "spy.finishThreads()">
     <cmd2  "spy.saveHistory()">
     <cmd3  "spy.SaveStructureParams()">
     <cmd3  "spy.SaveUserParams()">
