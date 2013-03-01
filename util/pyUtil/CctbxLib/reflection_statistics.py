@@ -12,6 +12,10 @@ from cctbx import uctbx
 import math
 
 class empty: pass
+def ShowFitSummary(f):
+  print "is_well_defined:", f.is_well_defined()
+  print "y_intercept: %.4f" %f.y_intercept()
+  print "slope: %.4f" %f.slope()
 
 
 class OlexCctbxGraphs(OlexCctbxAdapter):
@@ -190,7 +194,7 @@ class f_obs_vs_f_calc(OlexCctbxAdapter):
     fc = flex.abs(f_calc_filtered.data())
     fc *= k
     fit = flex.linear_regression(fc, fo)
-    fit.show_summary()
+    ShowFitSummary(fit)
 
     plot = empty()
     plot.indices = f_obs_filtered.indices()
@@ -286,12 +290,12 @@ class normal_probability_plot(OlexCctbxAdapter):
     self.indices = f_sq_obs.indices().select(selection)
     fit = flex.linear_regression(self.x[5:-5], self.y[5:-5])
     corr = flex.linear_correlation(self.x[5:-5], self.y[5:-5])
-    fit.show_summary()
+    ShowFitSummary(fit)
     assert fit.is_well_defined()
     self.fit_y_intercept = fit.y_intercept()
     self.fit_slope = fit.slope()
     self.correlation = corr.coefficient()
-    print "coefficient: %f" %self.correlation
+    print "coefficient: %.4f" %self.correlation
 
   def xy_plot_info(self):
     r = empty()

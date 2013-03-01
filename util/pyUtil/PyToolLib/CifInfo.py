@@ -244,7 +244,7 @@ class SaveCifInfo(CifTools):
 OV.registerFunction(SaveCifInfo)
 
 class EditCifInfo(CifTools):
-  def __init__(self):
+  def __init__(self, append=''):
     """First argument should be 'view' or 'merge'.
 
     'view' brings up an internal text editor with the metacif information in cif format.
@@ -255,6 +255,7 @@ class EditCifInfo(CifTools):
     s = StringIO()
     print >> s, self.cif_model
     text = s.getvalue()
+    text += "\n%s" %append
     inputText = OV.GetUserInput(0,'Items to be entered into cif file', text)
     if inputText and inputText != text:
       reader = iotbx.cif.reader(input_string=str(inputText))
@@ -734,6 +735,10 @@ class ExtractCifInfo(CifTools):
         t.append("The \l/2 correction factor is %s\n" %(abs["lambda_correction"]))
       for me in t:
         txt = txt + " %s"%me
+      if 'Rint_3sig' in abs and 'Rint' in abs:
+        txt += "\nFinal HKLF 4 output contains %s reflections, Rint = %s\n (%s with I > 3sig(I), Rint = %s)\n" %(
+          abs['Rint_refnum'], abs['Rint'],
+          abs['Rint_3sig_refnum'], abs['Rint_3sig'])
       txt += ";\n"
       exptl_absorpt_process_details = txt
 

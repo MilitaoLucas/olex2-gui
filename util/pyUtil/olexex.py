@@ -732,7 +732,7 @@ def GetHklFileList():
   reflection_files = ""
   for item in g:
     reflection_files+="%s.%s<-%s;" %(OV.FileName(item), OV.FileExt(item), item)
-  return reflection_files
+  return '"%s"' %reflection_files
 if haveGUI:
   OV.registerFunction(GetHklFileList)
 
@@ -1902,9 +1902,17 @@ def GetBitmapImageInstructions():
     nbg = "-nbg"
   else:
     nbg = ""
+    
+  if fileext == "png/s":
+    filefull = "%s.png" %filename
+    filesize = 1
+    pict = "a "
+  else:
+    pict = " -pq"
+  
 
   OV.Cursor('busy','Please Wait. Making image %s.%s. This may take some time' %(filename, fileext))
-  olex.m('pict -pq %s %s %s' %(nbg, filefull, filesize))
+  olex.m('pict%s %s %s %s' %(pict, nbg, filefull, filesize))
 
   if olx.html.GetData('TRIM_IMAGE'):
     padding = float(olx.html.GetValue('TRIM_PADDING'))
@@ -2101,9 +2109,9 @@ def get_news_image_from_server(name=""):
   else:
     url = 'http://www.olex2.org/olex2images/%s/image' %name
   try:
-    image = HttpTools.make_url_call(url,'').read()
+    image = HttpTools.make_url_call(url, values = '', http_timeout=0.2).read()
   except Exception, err:
-    print "Downloading image from %s has failed: %s" %(url, err)
+#    print "Downloading image from %s has failed: %s" %(url, err)
     return
   if image:
     tag = OV.GetTag().split('-')[0]

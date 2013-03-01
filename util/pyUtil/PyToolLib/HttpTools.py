@@ -7,9 +7,8 @@ OV.use_proxy_settings = True
 import urllib2
 import os
 
-http_timeout = 7
 
-def make_url_call_with_proxy(url, proxy, values):
+def make_url_call_with_proxy(url, proxy, values, http_timeout = 7):
   if proxy:
     proxies = {'http': proxy}
   else:
@@ -19,12 +18,12 @@ def make_url_call_with_proxy(url, proxy, values):
   return opener.open(url,values, http_timeout)
 
 
-def make_url_call(url, values):
+def make_url_call(url, values, http_timeout = 7):
   proxy_used = False
   if OV.use_proxy_settings:
     try:
       proxy = get_proxy_from_usettings()
-      res = make_url_call_with_proxy(url, proxy, values)
+      res = make_url_call_with_proxy(url, proxy, values, http_timeout)
     except urllib2.URLError: #try system settings
       try:
         res = urllib2.urlopen(url,values, http_timeout)

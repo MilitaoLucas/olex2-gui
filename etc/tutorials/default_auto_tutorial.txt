@@ -3,26 +3,26 @@
 c:html.ItemState home-start 2
 c:showQ True
 
-p:Welcome to this introductory tutorial. To get the most out of it, please read this text carefully and when you are done press the <b>Next</b> button - or simply hit the Return key!<br>
+p:Welcome to this first demo introducing you to <font color="rgb(255,100,50)">OLEX2</font color="rgb(255,100,50)">. To get the most out of it, please read this text carefully and when you are done press the <c>Next</c> button.
 
-p:We suggest that you go through the whole tutorial first, then run it again and exit at a suitable point from which you can try and do for yourself what you have learned from previous times you have gone through the tutorial.
+p:We suggest that you go through the whole tutorial for the first time. Exit the tutorial window to move the molecule in the graphics window if you like. If you would like to use the GUI press <c>cancel</c>.
 
-p:In this tutorial, we will be solving and refining one of the sample structures that come with Olex2 - Sucrose.
+p:Structures are loaded from the <b>Start</b> tool. The tool will be highlighted when you press <c>Next</c>.
 
-p:We load the structure from the <b>Start</b> tool. The tool will be highlighted after you move to the next page.
 h:h2-start
 c:html.ItemState home-start 1
+c:reset
+
+p:You can choose a sample structure by clicking one of the links next to the title <b>Sample Structure</b>. In this tutorial, we will be solving and refining one of the sample structures that come with OLEX2 - <font color="yellow">SUCROSE</font color="yellow">. Please press <c>Next</c> to load it.
 c:refresh
 c:freeze(true)
-c:reap 'DataDir()/samples/sucrose/sucrose.res'
+c:reap DataDir()/samples/sucrose/sucrose.res
 c:spy.revert_to_original()
 c:mpln -n
 c:freeze(false)
 c:refresh
 
-p:In order to open a sample structure click on one of the links next to the title <b>Sample Structure</b>, the structure should already have been opened since the last page.
-
-p:By clicking on the <b>Work</b> tab, we get access to the main tools:
+p:By clicking on the <b>Work</b> tab, we get access to the main tools in OLEX2:
 h:tab-work
 c:spy.switch_tab_for_tutorials(work)
 
@@ -35,7 +35,9 @@ h:btn-refine;1
 p:... and make <b>Reports</b>.
 h:btn-report;1
 
-p:For example, we can solve the structure by typing <c>solve</c> or by clicking the <b>Solve</b> button. We will do this now.
+p:To solve your crystal structure with OLEX2 you need to provide a reflection file (name.hkl) and an input file (name.ins) containing the crystallographic unit cell you determined during the diffraction experiment. 
+
+p:We can solve the structure of our example sucrose by typing <c>solve</c> into the graphics window or by clicking the <b>Solve</b> button. We will do this now.
 h:btn-solve;1
 c:solve
 c:waitfor process
@@ -50,6 +52,13 @@ c:refresh
 p:Let's press the <b>Refine</b> button or type <c>refine</c> and refine what we've got so far.
 h:btn-refine;1
 c:refine
+
+p:For every instruction that you can use in the graphics window, a short help description tells you the function and possibly switches. If you type <c>help clean</c>...
+c:help clean
+c:refresh
+
+p:...the macro Clean is described in the graphics window. Let's clean once again.
+c:clean
 
 p:With the <b>Uiso Slider</b> in the <b>Toolbox Work</b> we can select all those atoms that look 'too small'
 c:html.ItemState work-main-toolbar 1
@@ -66,6 +75,9 @@ c:refresh
 
 p:Refine this again...
 c:refine
+
+p:Clean...
+c:clean
 
 p:Now it's time to make everything <b>anisotropic</b>. Type <c>anis</c> or click on the <b>ANIS</b> button.
 h:toolbar-anis
@@ -102,17 +114,12 @@ p:... set the <b>Formula</b> and can determine the <b>space group</b>.
 h:SET_SNUM_REFINEMENT_FORMULA_bg
 h:SET_SNUM_REFINEMENT_SPACE_GROUP_bg
 
-p:When you click on <b>Suggest SG</b> link, or type <c>sg</c>, watch what happens!
+p:When you click on <b>Suggest SG</b> link, or type <c>sg</c>, watch what happens in the graphics window!
 c:sg
 c:refresh
 
-p:In order to see all the console output, you can type <c>lines -1</c>.
+p:In order to see all the console output in the graphics window, you can type <c>lines -1</c>.
 c:lines -1
-c:refresh
-
-p:If you type <c>text</c> or press the little text icon, you will get a 'transcript' of the console in your text editor
-h:toolbar-text
-c:text
 c:refresh
 
 p:To show only 10 lines, type <c>lines 10</c>
@@ -120,5 +127,18 @@ c:lines 10
 c:refresh
 c:html.ItemState solve-settings 2
 
+p:If you type <c>text</c> or press the little text icon, you will get a 'transcript' of the console in your text editor
+h:toolbar-text
+c:text
+c:refresh
+
+p:To clear the console output, type <c>clear</c>
+c:clear
+c:refresh
+c:html.ItemState solve-settings 2
+
+p:We hope you enjoyed this first introduction to <font color="rgb(255,100,50)">OLEX2</font color="rgb(255,100,50)"> - please let us know if we missed out any essential steps in this manual by visiting www.olex2.org and getting engaged in the OLEX2 development.
+
+
 c:spy.switch_tab_for_tutorials(home)
-p:End of tutorial, press next to repeat the tutorial or cancel to exit. <br><font size='1'>Written by Simon Harries.</font>
+p:End of tutorial, press next to repeat the tutorial or cancel to exit. <br><font size='1'>Written by Stefanie Freitag-Pohl.</font>
