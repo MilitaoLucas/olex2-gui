@@ -1038,6 +1038,9 @@ user
       url = http://vm02.iucr.org/cgi-bin/checkcif.pl
         .type = str
         .help = The URL to which the cif file will be sent
+      hkl_url = http://vm02b.iucr.org/cgi-bin/checkcif_hkl.pl
+        .type = str
+        .help = The URL to which the cif and fcf file will be sent
       format = *pdf html
         .type = choice
       send = False
