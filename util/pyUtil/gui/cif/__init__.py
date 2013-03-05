@@ -6,6 +6,9 @@ import time
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
+def threadPrint(str):
+  olx.Schedule(1, "'post \"%s\"'" %str)
+  
 
 def GetCheckcifReport(outputtype='pdf'):
   import HttpTools
@@ -16,7 +19,7 @@ def GetCheckcifReport(outputtype='pdf'):
 
   file_name = os.path.normpath(olx.file.ChangeExt(OV.FileFull(),'cif'))
   if not os.path.exists(file_name):
-    print "\n ++ There is no cif file to check! Please add the 'ACTA' command to Shelx!"
+    threadPrint("\n ++ There is no cif file to check! Please add the 'ACTA' command to Shelx!")
     return
   out_file_name = "%s_cifreport.%s" %(OV.FileName(), outputtype)
   eindex = 1
@@ -40,11 +43,11 @@ def GetCheckcifReport(outputtype='pdf'):
     "file": cif
   }
   response = None
-  print 'Sending report request'
+  threadPrint('Sending report request')
   try:
     response = HttpTools.make_url_call(OV.GetParam('user.cif.checkcif.url'), params)
   except Exception, e:
-    print 'Failed to receive Checkcif report...'
+    threadPrint('Failed to receive Checkcif report...')
     print e
 
   rFile.close()
@@ -60,13 +63,13 @@ def GetCheckcifReport(outputtype='pdf'):
     for line in l:
       if "Download checkCIF report" in line:
         href = line.split('"')[1]
-        print 'Downloading PDF report'
+        threadPrint('Downloading PDF report')
         response = None
         try:
           response = HttpTools.make_url_call(href,"")
-          print 'Done'
+          threadPrint('Done')
         except Exception, e:
-          print 'Failed to download PDF report...'
+          threadPrint('Failed to download PDF report...')
           print e
         if not response:
           return
