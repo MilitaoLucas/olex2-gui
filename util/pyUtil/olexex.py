@@ -31,6 +31,7 @@ import variableFunctions
 import MakeMovie
 
 import OlexVFS
+import threads as olxth
 
 haveGUI = OV.HasGUI()
 if haveGUI:
