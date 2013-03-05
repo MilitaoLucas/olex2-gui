@@ -9,8 +9,15 @@ OV = OlexFunctions()
 def threadPrint(str):
   olx.Schedule(1, "'post \"%s\"'" %str)
   
-
-def GetCheckcifReport(outputtype='pdf'):
+def extractHtmlValueFromLine(line, name):
+  idx = line.find(name)
+  if idx !=-1:
+    toks = line[idx:].split('"')
+    if len(toks) > 3 and toks[1].strip() == 'value=':
+      return toks[2]
+  return None
+  
+def GetCheckcifReport(outputtype='pdf', send_fcf=False):
   import HttpTools
   #t_ = time.time()
   output = OV.GetParam('user.cif.checkcif.format')
@@ -37,27 +44,61 @@ def GetCheckcifReport(outputtype='pdf'):
   cif = rFile
 
   params = {
+    "file": cif,
     "runtype": "symmonly",
     "referer": "checkcif_server",
     "outputtype": outputtype.upper(),
-    "file": cif
+    'validtype': 'checkcif_only'
   }
+
+  fcf_name = os.path.normpath(olx.file.ChangeExt(OV.FileFull(),'fcf'))
+  if send_fcf:
+    if not os.path.exists(fcf_name):
+      send_fcf = False
+    else:
+      params['validtype'] = 'checkcif_with_hkl' 
   response = None
   threadPrint('Sending report request')
   try:
-    response = HttpTools.make_url_call(OV.GetParam('user.cif.checkcif.url'), params)
+    if send_fcf:
+      url = OV.GetParam('user.cif.checkcif.hkl_url')
+    else:
+      url = OV.GetParam('user.cif.checkcif.url')
+    response = HttpTools.make_url_call(url, params)
   except Exception, e:
     threadPrint('Failed to receive Checkcif report...')
-    print e
+  finally:
+    rFile.close()
+    
+  if not response: return
 
-  rFile.close()
-  if not response:
-    return
+  if send_fcf: #file exists, correct URL picked
+    line = ''.join(response.readlines())
+    cif_id = extractHtmlValueFromLine(line, "Qcifid")
+    cif_data_block = extractHtmlValueFromLine(line, "Qdatablock")
+    if cif_id is None or cif_data_block is None:
+      threadPrint("Could not locate CIF identification fields, aborting...")
+      return
+    fcf_file = open(fcf_name, 'rb')
+    params['filehkl'] = fcf_file
+    params['Qcifid'] = cif_id
+    params['Qdatablock'] = cif_data_block
+    del params['file'] 
+    try:
+      response = HttpTools.make_url_call(url, params)
+    except Exception, e:
+      threadPrint('Failed to receive full Checkcif report...')
+    finally:
+      fcf_file.close()
+      
+  if not response: return
+  
   #outputtype = 'htm'
   if outputtype == "html":
     wFile = open(out_file_name,'w')
     wFile.write(response.read())
     wFile.close()
+    threadPrint('Done')
   elif outputtype == "pdf":
     l = response.readlines()
     for line in l:

@@ -68,15 +68,17 @@ class NewsImageRetrivalThread(ThreadEx):
       
 class CheckCifRetrivalThread(ThreadEx):
   instance = None
-  def __init__(self):
+  def __init__(self, send_fcf):
     Thread.__init__(self)
+    self.send_fcf = send_fcf
     CheckCifRetrivalThread.instance = self
     
   def run(self):
     import gui.cif as cif
     try:
-      cif.GetCheckcifReport()
-    except:
+      cif.GetCheckcifReport(send_fcf=self.send_fcf)
+    except Exception, e:
+      #print e
       pass
     finally:
       CheckCifRetrivalThread.instance = None
@@ -93,9 +95,9 @@ def resizeNewsImage():
 olex.registerFunction(resizeNewsImage, False, 'internal')
       
 
-def GetCheckcifReport():
+def GetCheckcifReport(send_fcf=False):
   if CheckCifRetrivalThread.instance is None:
-    CheckCifRetrivalThread().start()
+    CheckCifRetrivalThread(send_fcf in [True, 'true']).start()
   else:
     olx.Alert("Please wait", "The Checkcif request is in progress", "IO")
 olex.registerFunction(GetCheckcifReport, False, 'cif')
