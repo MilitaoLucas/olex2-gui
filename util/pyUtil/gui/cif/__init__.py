@@ -1,6 +1,7 @@
 import olex
 import olx
 import os
+import time
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
@@ -8,7 +9,7 @@ OV = OlexFunctions()
 
 def GetCheckcifReport(outputtype='pdf'):
   import HttpTools
-  
+  #t_ = time.time()
   output = OV.GetParam('user.cif.checkcif.format')
   if output:
     outputtype = output
@@ -38,28 +39,44 @@ def GetCheckcifReport(outputtype='pdf'):
     "outputtype": outputtype.upper(),
     "file": cif
   }
-
-  response = HttpTools.make_url_call(OV.GetParam('user.cif.checkcif.url'), params)
+  response = None
+  print 'Sending report request'
+  try:
+    response = HttpTools.make_url_call(OV.GetParam('user.cif.checkcif.url'), params)
+  except Exception, e:
+    print 'Failed to receive Checkcif report...'
+    print e
 
   rFile.close()
+  if not response:
+    return
   #outputtype = 'htm'
   if outputtype == "html":
     wFile = open(out_file_name,'w')
     wFile.write(response.read())
     wFile.close()
   elif outputtype == "pdf":
-    rawFile = open("raw_cifreport.htm",'w')
     l = response.readlines()
     for line in l:
-      rawFile.write(line)
       if "Download checkCIF report" in line:
         href = line.split('"')[1]
-        response = HttpTools.make_url_call(href,"")
+        print 'Downloading PDF report'
+        response = None
+        try:
+          response = HttpTools.make_url_call(href,"")
+          print 'Done'
+        except Exception, e:
+          print 'Failed to download PDF report...'
+          print e
+        if not response:
+          return
         txt = response.read()
         wFile = open(out_file_name,'wb')
         wFile.write(txt)
         wFile.close()
-    rawFile.close()
-  olx.Shell('%s'%os.path.join(OV.FilePath(),out_file_name))
+  fileName = '%s'%os.path.join(OV.FilePath(),out_file_name)
+  olx.Schedule(1, "'spy.threading.shell.run(\"%s\")'" %fileName)
+  #print time.time() -t_
 
-OV.registerFunction(GetCheckcifReport, False, 'cif')
+
+#OV.registerFunction(GetCheckcifReport, False, 'cif')

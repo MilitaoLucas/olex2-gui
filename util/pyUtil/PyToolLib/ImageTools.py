@@ -394,6 +394,8 @@ class ImageTools(FontInstances):
       olex.writeImage(name, "")
       name = name[:-4]
       sio = StringIO(s)
+      if not sio.len: #resize was called twice in a raw
+        return
       im = Image.open(sio)
     else:
       path = ("%s/etc/%s" %(self.basedir, name))

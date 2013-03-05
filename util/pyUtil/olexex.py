@@ -2101,50 +2101,6 @@ def formatted_date_from_timestamp(dte):
 OV.registerFunction(formatted_date_from_timestamp)
 
 
-img_thread = None
-img_retrieved = False
-def finishThreads():
-  global img_thread
-  if img_thread:
-    img_thread.join()
-
-def get_news_image_from_server(name=""):
-  global img_retrieved
-  if img_retrieved:
-    from ImageTools import ImageTools
-    IT = ImageTools()
-    IT.resize_news_image(vfs=True)
-    img_retrieved = False
-
-  import threading
-  class ImgThread(threading.Thread):
-    def run(self):
-      if not name:
-        url = 'http://www.olex2.org/randomimg'
-      else:
-        url = 'http://www.olex2.org/olex2images/%s/image' %name
-      try:
-        image = HttpTools.make_url_call(url, values = '', http_timeout=0.2).read()
-      except Exception, err:
-    #    print "Downloading image from %s has failed: %s" %(url, err)
-        return
-      if image:
-        tag = OV.GetTag().split('-')[0]
-        olex.writeImage("news/news-%s_tmp" %tag, image)
-        global img_retrieved
-        img_retrieved = True
-    global img_thread
-    img_thread = None
-    
-  global img_thread
-  if not img_thread:
-    img_thread = ImgThread()
-    img_thread.start()
-    
-OV.registerFunction(get_news_image_from_server)
-OV.registerFunction(finishThreads)
-
-
 if not haveGUI:
   def tbxs(name):
     print "This is not available in Headless Olex"
