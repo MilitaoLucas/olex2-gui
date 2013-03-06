@@ -78,6 +78,29 @@
 $spy.weightGuiDisplay()
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
+<tr>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Extinction-Correction;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td align="center" width="3%">
+    <input type="checkbox" 
+      width="GetVar('HtmlCheckboxWidth')"
+      height="GetVar('HtmlCheckboxHeight')"
+      fgcolor="GetVar('HtmlFontColour')"
+      bgcolor="GetVar('HtmlTableFirstcolColour')"
+      name="SNUM_REFINEMENT_EXTI"
+      value=""
+      oncheck="AddIns EXTI"
+      onuncheck="DelIns EXTI"
+      checked="not(strcmp(xf.rm.Exti(),'n/a'))"
+    >
+  </td>
+  <td width="47%">Use extinction correction</td>
+  <td>
+    $xf.rm.Exti()
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</tr>
+
 <tr VALIGN="center" ALIGN="left" NAME="USE_SOLVENT_MASK">
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=refinement-masks;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
