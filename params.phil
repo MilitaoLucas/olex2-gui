@@ -626,6 +626,13 @@ snum
       .type = bool
   }
 
+  cif {
+    htab_max_d = 2.9
+      .type = float
+    htab_min_angle = 120
+      .type = float
+  }
+
 
   olex_conres = RRINGS
     .type = str

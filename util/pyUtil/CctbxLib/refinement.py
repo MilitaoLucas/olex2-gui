@@ -499,11 +499,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
       hbonds.append(
         iotbx.cif.geometry.hbond(atoms[0][0], atoms[1][0], rt_mx=rt_mx))
     if len(hbonds):
+      max_da_distance=float(OV.GetParam('snum.cif.htab_max_d', 2.9))
+      min_dha_angle=float(OV.GetParam('snum.cif.htab_min_angle', 120))
       hbonds_loop = iotbx.cif.geometry.hbonds_as_cif_loop(
         hbonds,
         connectivity_full.pair_asu_table,
         site_labels=xs.scatterers().extract_labels(),
         sites_frac=xs.sites_frac(),
+        min_dha_angle=min_dha_angle,
+        max_da_distance=max_da_distance,
         covariance_matrix=self.covariance_matrix_and_annotations.matrix,
         cell_covariance_matrix=cell_vcv,
         parameter_map=xs.parameter_map())
