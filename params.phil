@@ -626,6 +626,13 @@ snum
       .type = bool
   }
 
+  cif {
+    htab_max_d = 2.9
+      .type = float
+    htab_min_angle = 120
+      .type = float
+  }
+
 
   olex_conres = RRINGS
     .type = str
@@ -1038,6 +1045,9 @@ user
       url = http://vm02.iucr.org/cgi-bin/checkcif.pl
         .type = str
         .help = The URL to which the cif file will be sent
+      hkl_url = http://vm02b.iucr.org/cgi-bin/checkcif_hkl.pl
+        .type = str
+        .help = The URL to which the cif and fcf file will be sent
       format = *pdf html
         .type = choice
       send = False
