@@ -6,6 +6,7 @@ OV = OlexFunctions()
 OV.use_proxy_settings = True
 import urllib2
 import os
+import olx
 
 
 def make_url_call_with_proxy(url, proxy, values, http_timeout = 7):
@@ -44,10 +45,12 @@ def make_url_call(url, values, http_timeout = 7):
       
 def get_proxy_from_usettings():
   proxy = None
-  settings_filename = "%s/usettings.dat" %OV.BaseDir()
+  settings_filename = "%s/usettings.dat" %olx.app.ConfigDir()
+  if not os.path.exists(settings_filename):
+    settings_filename = "%s/usettings.dat" %olx.app.BaseDir()
   if not os.path.exists(settings_filename):
     return proxy
-  rFile = open("%s/usettings.dat" %OV.BaseDir(),'r')
+  rFile = open(settings_filename)
   lines = rFile.readlines()
   rFile.close()
   for line in lines:

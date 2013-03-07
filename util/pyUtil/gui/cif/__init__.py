@@ -1,21 +1,32 @@
 import olex
 import olx
 import os
+import time
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
-
-def GetCheckcifReport(outputtype='pdf'):
-  import HttpTools
+def threadPrint(str):
+  olx.Schedule(1, "'post \"%s\"'" %str)
   
+def extractHtmlValueFromLine(line, name):
+  idx = line.find(name)
+  if idx !=-1:
+    toks = line[idx:].split('"')
+    if len(toks) > 3 and toks[1].strip() == 'value=':
+      return toks[2]
+  return None
+  
+def GetCheckcifReport(outputtype='pdf', send_fcf=False):
+  import HttpTools
+  #t_ = time.time()
   output = OV.GetParam('user.cif.checkcif.format')
   if output:
     outputtype = output
 
   file_name = os.path.normpath(olx.file.ChangeExt(OV.FileFull(),'cif'))
   if not os.path.exists(file_name):
-    print "\n ++ There is no cif file to check! Please add the 'ACTA' command to Shelx!"
+    threadPrint("\n ++ There is no cif file to check! Please add the 'ACTA' command to Shelx!")
     return
   out_file_name = "%s_cifreport.%s" %(OV.FileName(), outputtype)
   eindex = 1
@@ -33,33 +44,85 @@ def GetCheckcifReport(outputtype='pdf'):
   cif = rFile
 
   params = {
+    "file": cif,
     "runtype": "symmonly",
     "referer": "checkcif_server",
     "outputtype": outputtype.upper(),
-    "file": cif
+    'validtype': 'checkcif_only'
   }
 
-  response = HttpTools.make_url_call(OV.GetParam('user.cif.checkcif.url'), params)
+  fcf_name = os.path.normpath(olx.file.ChangeExt(OV.FileFull(),'fcf'))
+  if send_fcf:
+    if not os.path.exists(fcf_name):
+      threadPrint("You have requested full Checkcif report, but unfortunately the FCF file could not be located."+\
+                  "\nPleas make sure that there is LIST 4 instruction is in your INS file before the refinement.")
+      send_fcf = False
+    else:
+      params['validtype'] = 'checkcif_with_hkl' 
+  response = None
+  threadPrint('Sending report request')
+  try:
+    if send_fcf:
+      url = OV.GetParam('user.cif.checkcif.hkl_url')
+    else:
+      url = OV.GetParam('user.cif.checkcif.url')
+    response = HttpTools.make_url_call(url, params)
+  except Exception, e:
+    threadPrint('Failed to receive Checkcif report...')
+  finally:
+    rFile.close()
+    
+  if not response: return
 
-  rFile.close()
+  if send_fcf: #file exists, correct URL picked
+    line = ''.join(response.readlines())
+    cif_id = extractHtmlValueFromLine(line, "Qcifid")
+    cif_data_block = extractHtmlValueFromLine(line, "Qdatablock")
+    if cif_id is None or cif_data_block is None:
+      threadPrint("Could not locate CIF identification fields, aborting...")
+      return
+    fcf_file = open(fcf_name, 'rb')
+    params['filehkl'] = fcf_file
+    params['Qcifid'] = cif_id
+    params['Qdatablock'] = cif_data_block
+    del params['file'] 
+    try:
+      response = HttpTools.make_url_call(url, params)
+    except Exception, e:
+      threadPrint('Failed to receive full Checkcif report...')
+    finally:
+      fcf_file.close()
+      
+  if not response: return
+  
   #outputtype = 'htm'
   if outputtype == "html":
     wFile = open(out_file_name,'w')
     wFile.write(response.read())
     wFile.close()
+    threadPrint('Done')
   elif outputtype == "pdf":
-    rawFile = open("raw_cifreport.htm",'w')
     l = response.readlines()
     for line in l:
-      rawFile.write(line)
       if "Download checkCIF report" in line:
         href = line.split('"')[1]
-        response = HttpTools.make_url_call(href,"")
+        threadPrint('Downloading PDF report')
+        response = None
+        try:
+          response = HttpTools.make_url_call(href,"")
+          threadPrint('Done')
+        except Exception, e:
+          threadPrint('Failed to download PDF report...')
+          print e
+        if not response:
+          return
         txt = response.read()
         wFile = open(out_file_name,'wb')
         wFile.write(txt)
         wFile.close()
-    rawFile.close()
-  olx.Shell('%s'%os.path.join(OV.FilePath(),out_file_name))
+  fileName = '%s'%os.path.join(OV.FilePath(),out_file_name)
+  olx.Schedule(1, "'spy.threading.shell.run(\"%s\")'" %fileName)
+  #print time.time() -t_
 
-OV.registerFunction(GetCheckcifReport, False, 'cif')
+
+#OV.registerFunction(GetCheckcifReport, False, 'cif')

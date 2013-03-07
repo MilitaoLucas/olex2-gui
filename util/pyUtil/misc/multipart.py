@@ -121,6 +121,8 @@ class DirectRequest:
         dt = self.data.items()
       elif isinstance(self.data, tuple):
         dt = self.data
+      elif isinstance(self.data, list):
+        dt = self.data
       if dt is not None:
         for (k,v) in dt:
           if isinstance(v, file):

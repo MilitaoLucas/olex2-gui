@@ -29,9 +29,9 @@ $spy.MakeHoverButton('button-merge_cif','spy.ExtractCifInfo()>>spy.MergeCif(True
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <!-- #include tool-column gui\blocks\tool-help-first-column.htm;help_ext=submit-info;1; -->
   <td name=GET_CHECKCIF_REPORT align='center' VALIGN='center' width='30%'>
-$spy.MakeHoverButton('button-checkcif_report','spy.cif.GetCheckCifReport()')
+$spy.MakeHoverButton('button-checkcif_report','spy.cif.GetCheckCifReport(html.GetState(SET_CHECKCIF_FCF))')
   </td>
-  <td name=GET_CHECKCIF_REPORT_FORMAT align='right' VALIGN='center' width='20%'>
+  <td name=GET_CHECKCIF_REPORT_FORMAT align='right' VALIGN='center' width='15%'>
     <input
       type='combo'
       width="100%"
@@ -43,6 +43,19 @@ $spy.MakeHoverButton('button-checkcif_report','spy.cif.GetCheckCifReport()')
       valign='center'
       onchange="spy.SetParam('user.cif.checkcif.format',html.GetValue('~name~'))"
 	  readonly
+    >
+  </td>
+  <td name=GET_CHECKCIF_REPORT_FORMAT align='right' VALIGN='center' width='20%'>
+    <input
+      type='checkbox'
+      width="100%"
+      height="GetVar('HtmlCheckboxHeight')"
+      bgcolor="spy.GetParam('gui.html.input_bg_colour')"
+      name='SET_CHECKCIF_FCF'
+      value="Send FCF"
+      checked='false'
+      right='false'
+      manage
     >
   </td>
 <td name=VALIDATE_CIF align='right' VALIGN='right' width='48%'>

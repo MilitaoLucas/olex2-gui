@@ -130,6 +130,7 @@ class reflections(object):
         raise RuntimeError("HKLF5 file format requires batch numbers")
       self.batch_numbers_array = None
     self._omit = None
+    self._shel = None
     self._merge = None
     self.merging = None
     self.hklf_matrix = hklf_matrix
@@ -163,20 +164,23 @@ class reflections(object):
     else:
       return merging
 
-  def filter(self, omit, wavelength):
+  def filter(self, omit, shel, wavelength):
     self._omit = omit
+    self._shel = shel
     two_theta = omit['2theta']
     self.d_min=uctbx.two_theta_as_d(two_theta, wavelength, deg=True)
     hkl = omit.get('hkl')
     f_sq_obs_filtered = self.f_sq_obs_merged
     if hkl is None: hkl = ()
+    if self._shel is None:
+      self._shel = {'high' : self.d_min, 'low': -1}
     filter = observations.filter(
       f_sq_obs_filtered.unit_cell(),
       f_sq_obs_filtered.crystal_symmetry().space_group(),
       f_sq_obs_filtered.anomalous_flag(),
       flex.miller_index(hkl),
-      self.d_min,
-      -1,
+      float(self._shel['high']),
+      float(self._shel['low']),
       omit['s']*0.5
     )
     if self.hklf_code == 5:
