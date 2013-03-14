@@ -1,15 +1,11 @@
+<table cellpadding="2" cellspacing="1" width='100%'>
+  <tr>
+    <td bgcolor="#cccccc">
 
-
-
-  <table cellpadding="2" cellspacing="1" width='100%'>
-    <tr>
-      <td bgcolor="#cccccc">
-  
 <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
 
-
 <tr align = 'center' name=EDIT_CIF width='100%'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=CIF_GUI_1;1; -->
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=CIF-Part-1;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td name=EDIT_CIF_INFO align='left' VALIGN='left' width='34%'>
 $spy.MakeHoverButton('button-edit_cif_info','spy.ExtractCifInfo()>>spy.EditCifInfo()>>html.Update')
@@ -32,9 +28,8 @@ $spy.MakeHoverButton('button-merge_cif','spy.ExtractCifInfo()>>spy.MergeCif(True
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-
 <tr align = 'center' name=EDIT_CIF width='100%'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=CIF_GUI_2;1; -->
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=CIF-Part-2;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
   <td name=GET_CHECKCIF_REPORT align='left' VALIGN='center' width='34%'>
@@ -87,9 +82,8 @@ $spy.MakeHoverButton('button-checkcif_report','spy.cif.GetCheckCifReport(html.Ge
 
 
 <tr align = 'center' name=EDIT_CIF width='100%'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=CIF_GUI_3;1; -->
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=CCDC-Number-Request;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-
 
   <td name=REQUEST_CCDC_NUMBER align='left' VALIGN='left' width = '34%'>
 $spy.MakeHoverButton('button-ccdc_number','spy.ccdc_submit()')
@@ -101,26 +95,12 @@ $spy.MakeHoverButton('button-ccdc_number','spy.ccdc_submit()')
   <td align='left'>
 <font size="+1">Submit your structure here!</font>
   </td>
-
-  
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
 </table>
-
-
       </td>
     </tr>
   </table>
-
-
-
-
-
-
-
 <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
-
-
 
 <tr VALIGN='center' ALIGN='center' NAME='SNUM_REPORT_TITLE' valign='center'>
 <!-- #include tool-column gui\blocks\tool-first-column.htm;help_ext=;1; -->
