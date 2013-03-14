@@ -333,7 +333,6 @@ class OlexFunctions(inheritFunctions):
       if update_atoms_loop:
         cmd += ' -u'
       finalise = self.GetParam('user.cif.finalise', 'Ignore')
-      print finalise
       if finalise == 'Include':
         cmd  += ' -f=true'
       elif finalise == 'Exclude':
