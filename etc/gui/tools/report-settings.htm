@@ -35,7 +35,8 @@ $spy.MakeHoverButton('button-merge_cif','spy.ExtractCifInfo()>>spy.MergeCif(True
   <td name=GET_CHECKCIF_REPORT align='left' VALIGN='center' width='34%'>
 $spy.MakeHoverButton('button-checkcif_report','spy.cif.GetCheckCifReport(html.GetState(SET_CHECKCIF_FCF))')
   </td>
-  <td name=GET_CHECKCIF_REPORT_FORMAT align='left' VALIGN='center' width='16%'>
+  
+  <td name=GET_CHECKCIF_REPORT_FORMAT align='left' VALIGN='center' width='14%'>
     <input
       type='combo'
       width="100%"
@@ -49,20 +50,28 @@ $spy.MakeHoverButton('button-checkcif_report','spy.cif.GetCheckCifReport(html.Ge
       readonly
     >
   </td>
-  <td name=GET_CHECKCIF_REPORT_FORMAT align='right' VALIGN='center' width='16%'>
+
+  <td width='15%' align='right'>
+  Send FCF
+  </td>
+
+  <td name=GET_CHECKCIF_REPORT_FORMAT align='right' VALIGN='center' width='4%'>
     <input
       type='checkbox'
       width="100%"
       height="GetVar('HtmlCheckboxHeight')"
       bgcolor="GetVar('HtmlTableBgColour')"
       name='SET_CHECKCIF_FCF'
-      value="send FCF"
       checked='false'
       right='false'
-      manage
     >
 
-<td name=AUTO_MERGE_CIF align='right' VALIGN='right' width='32%'>
+  <td width='29%' align='right'>
+  Update Meta Info 
+  </td>
+
+
+<td name=AUTO_MERGE_CIF align='right' VALIGN='right' width='4%'>
     <input
       type='checkbox'
       width="100%"
@@ -73,7 +82,6 @@ $spy.MakeHoverButton('button-checkcif_report','spy.cif.GetCheckCifReport(html.Ge
       oncheck = "spy.SetParam(snum.refinement.cifmerge_after_refinement,true)" 
       onuncheck= "spy.SetParam(snum.refinement.cifmerge_after_refinement,false)"
       name='SET_CIFMERGE'
-      value="Merge CIF after refine "
       right='false'
     >
 
