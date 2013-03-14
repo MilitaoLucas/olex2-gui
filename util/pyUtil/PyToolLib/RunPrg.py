@@ -177,8 +177,6 @@ class RunPrg(ArgumentParser):
         self.params.snum.refinement.auto.assignQ = 2.0
         OV.SetParam('snum.refinement.auto.pruneQ', 1.5)
         OV.SetParam('snum.refinement.auto.assignQ', 2.0)
-    if self.params.snum.refinement.cifmerge_after_refinement:
-      MergeCif()
       
   def getProgramMethod(self, fun):
     if fun == 'refine':
@@ -372,6 +370,8 @@ class RunRefinementPrg(RunPrg):
     if OV.GetParam('snum.refinement.check_absolute_structure_after_refinement'):
       self.isInversionNeeded(force=self.params.snum.refinement.auto.invert)
     OV.SetParam('snum.current_process_diagnostics','refinement')
+    if self.params.snum.refinement.cifmerge_after_refinement:
+      MergeCif()
 
   def doHistoryCreation(self):
     if self.params.snum.init.skip_history:
