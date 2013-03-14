@@ -11,6 +11,8 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import ExternalPrgParameters
 
+from CifInfo import MergeCif
+
 class RunPrg(ArgumentParser):
   def __init__(self):
     super(RunPrg, self).__init__()
@@ -175,7 +177,9 @@ class RunPrg(ArgumentParser):
         self.params.snum.refinement.auto.assignQ = 2.0
         OV.SetParam('snum.refinement.auto.pruneQ', 1.5)
         OV.SetParam('snum.refinement.auto.assignQ', 2.0)
-
+    if self.params.snum.refinement.cifmerge_after_refinement:
+      MergeCif()
+      
   def getProgramMethod(self, fun):
     if fun == 'refine':
       prgType = 'refinement'
