@@ -161,6 +161,8 @@ snum
       .type = bool
     is_anis = False
       .type = bool
+    is_fully_assigned = False
+      .type = bool
     last_R1 = n/a
       .type = str
       .expert_level = 2
@@ -198,6 +200,9 @@ snum
       .type = bool
     check_absolute_structure_after_refinement = True
       .type = bool
+    cifmerge_after_refinement = True
+      .type = bool
+    
 
     ShelXL12
       .short_caption = 'Program specific command line'
@@ -258,7 +263,7 @@ snum
       {
       name = None
         .type = str
-      type = *png jpg bmp tif
+      type = *png jpg bmp tif png/s
         .type = choice
       atom_label{
         font_name = #olex2.fnt:frb_18

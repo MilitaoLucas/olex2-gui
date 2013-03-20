@@ -325,15 +325,16 @@ class OlexFunctions(inheritFunctions):
       retStr = None
     return retStr
 
-  def CifMerge(self, filepath, update_atoms_loop=False, report=True):
+  def CifMerge(self, filepath, update_atoms_loop=None, report=True):
     try:
       cmd = ''
       if filepath:
         cmd = '"%s"' %filepath
+      if update_atoms_loop is None:
+        update_atoms_loop = (OV.GetParam('snum.refinement.program', '') == 'olex2.refine')
       if update_atoms_loop:
         cmd += ' -u'
       finalise = self.GetParam('user.cif.finalise', 'Ignore')
-      print finalise
       if finalise == 'Include':
         cmd  += ' -f=true'
       elif finalise == 'Exclude':
