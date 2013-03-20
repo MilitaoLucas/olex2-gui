@@ -365,7 +365,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       cif[block_name] = self.as_cif_block()
       print >> f, cif
       f.close()
-      OV.CifMerge(None, True, False)
+      if not OV.GetParam('snum.refinement.cifmerge_after_refinement', False):
+        OV.CifMerge(None, True, False)
       self.output_fcf()
       new_weighting = weighting.optimise_parameters(
         self.normal_eqns.observations.fo_sq,
