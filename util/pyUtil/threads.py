@@ -62,7 +62,7 @@ class NewsImageRetrivalThread(ThreadEx):
         if not NewsImageRetrivalThread.active_image_list:
           NewsImageRetrivalThread.active_image_list = copy.copy(NewsImageRetrivalThread.image_list)
           random.shuffle(NewsImageRetrivalThread.active_image_list)
-        img_url  = self.get_image_from_list()
+        img_url, url = self.get_image_from_list()
 
         if olex_fs.Exists(img_url):
           img_data = olex_fs.ReadFile(img_url)
@@ -73,6 +73,7 @@ class NewsImageRetrivalThread(ThreadEx):
             olex.writeImage(img_url, img_data)
         tag = OV.GetTag().split('-')[0]
         olex.writeImage("news/news-%s_tmp" %tag, img_data)
+        OV.SetParam('olex2.news_img_link_url', url)
         olx.Schedule(1, "'spy.internal.resizeNewsImage()'")
     except:
       pass
@@ -82,10 +83,15 @@ class NewsImageRetrivalThread(ThreadEx):
   def get_image_from_list(self):
     if not NewsImageRetrivalThread.active_image_list:
       return
-    url = NewsImageRetrivalThread.active_image_list.pop(0)
-    if "://" not in url:
-      return "http://%s" %(url.strip())
-    return url
+    res = NewsImageRetrivalThread.active_image_list.pop(0)
+    if "," in res:
+      img_url, url = res.split(',')
+    else:
+      img_url = res
+      url = "www.olex2.org"
+    if "://" not in img_url:
+      return "http://%s" %(img_url.strip()), url.strip()
+    return img_url.strip(), url.strip()
 
   def get_list_from_server(self):
     url = 'http://www.olex2.org/olex2adverts.txt'
