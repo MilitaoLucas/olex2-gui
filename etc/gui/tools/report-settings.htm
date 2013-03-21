@@ -1,4 +1,108 @@
-<table cellpadding="2" cellspacing="1" width='100%'>
+<table cellpadding="1" cellspacing="1" width='100%'>
+  <tr>
+    <td bgcolor="#cccccc">
+
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
+
+<tr VALIGN='center' ALIGN='center' NAME='SNUM_REPORT_TITLE' valign='center'>
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
+  <td width='66%' align='left'>
+    <font size="$GetVar('HtmlFontSizeLarge')" color="#555555">
+    <input
+      type='text'
+      valign='center'
+      height="math.eval(GetVar('HtmlInputHeight')*1.5)"
+      width="100%"
+      bgcolor="spy.GetParam('gui.html.input_bg_colour')"
+      name='SET_SNUM_REPORT_TITLE'
+      value="spy.report.get_report_title()"
+      onchange="spy.SetParam('snum.report.title',html.GetValue('~name~'))"
+    >
+    </font>
+  </td>
+  <td width='34%' align='right'>
+$spy.MakeHoverButton('button-Make_Report','html.ItemState cbtn-solve 1 cbtn-refine solve-settings 0 refine-settings 0>>html.Update>>cursor(busy, 'Checking for CIF file ...')>>report>>cursor()>>html.Update')
+  </td>
+
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<tr VALIGN='center' ALIGN='center' NAME='SNUM_REPORT_TITLE' valign='center'>
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
+  <td width='10%' align='right'>
+    %Image%
+  </td>
+  <td width='26%' align='left'>
+    <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type="combo"
+      width="100%"
+      height="GetVar('HtmlComboHeight')"
+      bgcolor="spy.GetParam('gui.html.input_bg_colour')"
+      name="SET_REPORT_IMAGE"
+      readonly
+      items='strcat("No Image;SCREENSHOT;",file.ListDirForGui(FilePath(),"*.png;*.jpg;*.bmp;*.ps;*.eps"))'
+      onchange="spy.SetParam('snum.report.image',html.GetValue('~name~'))"
+      width="50%"
+      value="file.GetName(spy.GetParam('snum.report.image'))"
+    >
+    </font>
+  </td>
+  <td width='8%' align='right'>
+    %Style%
+  </td>
+  <td width='22%' align='left'>
+    <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type='combo'
+      width="100%"
+      height="GetVar('HtmlComboHeight')"
+      bgcolor="spy.GetParam('gui.html.input_bg_colour')"
+      name='SET_USER_REPORT_STYLE'
+      value="spy.GetParam('user.report.style')"
+      items='spy.getStylesList()'
+      valign='center'
+      onchange="spy.SetReportStyle(html.GetValue('~name~'))"
+    >
+    </font>
+  </td>
+  <td width='15%' align='right'>
+    %Template%
+  </td>
+  <td width='22%'>
+    <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type='combo'
+      width="100%"
+      height="GetVar('HtmlComboHeight')"
+      bgcolor="GetVar('HtmlInputBgColour')"
+      name='SET_USER_REPORT_TEMPLATE'
+      value="spy.GetParam('user.report.template')"
+      items='spy.getTemplatesList()'
+      valign='center'
+      onchange="spy.SetReportTemplate(html.GetValue('~name~'))"
+    >
+    </font>
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</table>
+
+
+      </td>
+    </tr>
+  </table>
+
+
+
+<!-- #include report-metadata gui\tools\report-metadata.htm;1; -->
+
+
+
+
+
+<table cellpadding="1" cellspacing="1" width='100%'>
   <tr>
     <td bgcolor="#cccccc">
 
@@ -108,90 +212,3 @@ $spy.MakeHoverButton('button-ccdc_number','spy.ccdc_submit()')
       </td>
     </tr>
   </table>
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
-
-<tr VALIGN='center' ALIGN='center' NAME='SNUM_REPORT_TITLE' valign='center'>
-<!-- #include tool-column gui\blocks\tool-first-column.htm;help_ext=;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td>
-    <b>%Title%</b>
-  </td>
-  <td>
-    <font size="$GetVar('HtmlFontSizeControls')">
-    <input
-      type='text'
-      valign='center'
-      height="GetVar('HtmlInputHeight')"
-      width="math.eval((html.clientwidth(self)-180)/2)"
-      bgcolor="spy.GetParam('gui.html.input_bg_colour')"
-      name='SET_SNUM_REPORT_TITLE'
-      value="spy.GetParam('snum.report.title')"
-      onchange="spy.SetParam('snum.report.title',html.GetValue('~name~'))"
-    >
-    </font>
-  </td>
-  <td>
-    <b>%Image%</b>
-  </td>
-  <td>
-    <font size="$GetVar('HtmlFontSizeControls')">
-    <input
-      type="combo"
-      width="math.eval((html.clientwidth(self)-180)/2)"
-      height="GetVar('HtmlComboHeight')"
-      bgcolor="spy.GetParam('gui.html.input_bg_colour')"
-      name="SET_REPORT_IMAGE"
-      readonly
-      items='strcat("<-None;screenshot;",file.ListDirForGui(FilePath(),"*.png;*.jpg;*.bmp;*.ps;*.eps"))'
-      onchange="spy.SetParam('snum.report.image',spy.standardise_path(html.GetValue('~name~')))"
-      width="50%"
-      value="file.GetName(spy.GetParam('snum.report.image'))"
-    >
-    </font>
-  </td>
-  </tr>
-  <tr>
-  <td>
-    <b>%Style%</b>
-  </td>
-  <td>
-    <font size="$GetVar('HtmlFontSizeControls')">
-    <input
-      type='combo'
-      width="math.eval((html.clientwidth(self)-180)/2)"
-      height="GetVar('HtmlComboHeight')"
-      bgcolor="spy.GetParam('gui.html.input_bg_colour')"
-      name='SET_USER_REPORT_STYLE'
-      value="spy.GetParam('user.report_style')"
-      items='spy.getStylesList()'
-      valign='center'
-      onchange="spy.SetParam('user.report_style',html.GetValue('~name~'))"
-    >
-    </font>
-  </td>
-  <td>
-    <b>%Template%</b>
-  </td>
-  <td>
-    <font size="$GetVar('HtmlFontSizeControls')">
-    <input
-      type='combo'
-      width="math.eval(((html.clientwidth(self)-210)/2) - spy.GetParam('gui.html.combo_height') - 15)"
-      height="GetVar('HtmlComboHeight')"
-      bgcolor="GetVar('HtmlInputBgColour')"
-      name='SET_USER_REPORT_TEMPLATE'
-      value="spy.GetParam('user.report_template')"
-      items='spy.getTemplatesList()'
-      valign='center'
-      onchange="spy.SetParam('user.report_template',html.GetValue('~name~'))"
-    >
-    </font>&nbsp;
-$spy.MakeHoverButton('toolbar_small-open',"shell file.ospath(basedir()/etc/CIF/styles)")
-
-  </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</table>
-<!-- #include report-metadata gui\tools\report-metadata.htm;1; -->
-
-
-
