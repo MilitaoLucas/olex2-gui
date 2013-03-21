@@ -513,7 +513,7 @@ snum
     crystal_images = None
       .type = strings
     crystal_image = None
-      .type = path
+      .type = str
     frame_images = None
       .type = strings
     notes_file = None
@@ -540,10 +540,10 @@ snum
       .type = str
     diffractometer_image = ""
       .type = str
-    title = None
+    title = FileName()
       .type = path
-    image = None
-      .type = path
+    image = "No Image"
+      .type = str
     image_border = 2
       .type = int
 
@@ -1014,18 +1014,35 @@ user
   alert_uninstall_plugin = Y
     .type = str
     .expert_level = 1
-  report_style = styles/default.css
-    .type = str
-  report_template = templates/default.htm
-    .type = str
-  report_footer = templates/footer.htm
-    .type = str
-  report_journal_style = rsc
-    .type = str
   start_where = home
     .type = str
+  report_style = styles/default.css #kept for back compatibility
+    .type = str
+  report_template = templates/default.htm #kept for back compatibility
+    .type = str
+  report_footer = templates/footer.htm #kept for back compatibility
+    .type = str
+  report_journal_style = rsc #kept for back compatibility
+    .type = str
   report{
- 
+    styles_base_path = "BaseDir()/etc/CIF/styles"
+      .type = str
+    templates_base_path = "BaseDir()/etc/CIF/templates"
+      .type = str
+    template = default.htm
+      .type = str
+    style = default.css
+      .type = str
+    template_full_path = templates/default.htm
+      .type = path
+    style_full_path = styles/default.css
+      .type = path
+    footer = templates/footer.htm
+      .type = str
+    journal_style = rsc
+      .type = str
+
+
     lab{
       logo = "BaseDir()/etc/site/logo.png"
         .type = str

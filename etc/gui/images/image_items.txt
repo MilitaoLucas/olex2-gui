@@ -47,6 +47,7 @@
   Tutorial
   CheckCif Report
   CCDC Number
+  Make Report
 
 [TWO BUTTONS PER ROW]
   Stereo (Colour)

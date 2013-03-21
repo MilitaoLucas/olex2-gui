@@ -125,4 +125,15 @@ def ResolvePrograms():
   History.make_history_bars()
   return True
 
+def get_report_title():
+  title = OV.GetParam('snum.report.title')
+  if not title:
+    title = OV.FileName()
+  if "()" in title:
+    a = getattr(OV, title.strip('()'))
+    title = a()
+  OV.SetParam('snum.report.title', title)
+  return title
+
+olex.registerFunction(get_report_title, False, "report")
 olex.registerFunction(ResolvePrograms, False, "report")
