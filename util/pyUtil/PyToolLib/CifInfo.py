@@ -304,7 +304,7 @@ OV.registerFunction(EditCifInfo)
 
 
 class MergeCif(CifTools):
-  def __init__(self, edit=False):
+  def __init__(self, edit=False, force_create=True):
     super(MergeCif, self).__init__()
     edit = (edit not in ('False','false',False))
     # check if cif exists and is up-to-date
@@ -312,6 +312,8 @@ class MergeCif(CifTools):
     file_full = OV.FileFull()
     if (not os.path.isfile(cif_path) or
         os.path.getmtime(file_full) > os.path.getmtime(cif_path) + 10):
+      if not force_create:
+        return
       if OV.GetParam('user.cif.autorefine_if_no_cif_for_cifmerge'):
         prg = OV.GetParam('snum.refinement.program')
         method = OV.GetParam('snum.refinement.method')
