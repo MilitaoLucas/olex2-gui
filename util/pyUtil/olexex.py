@@ -33,6 +33,9 @@ import MakeMovie
 import OlexVFS
 import threads as olxth
 
+from ImageTools import ImageTools
+IT = ImageTools()
+
 haveGUI = OV.HasGUI()
 if haveGUI:
   import olex_gui
@@ -1543,15 +1546,17 @@ def getReportTitleSrc():
 OV.registerFunction(getReportTitleSrc)
 
 def dealWithReportImage():
-  #OV.GetParam('snum.re
   image_name = OV.GetParam('snum.report.image')
   if image_name == "No Image":
 #    OV.SetParam('snum.report.image',None)
     return
-  elif image_name == "screenshot":
-    olex.m('showq false')
+  elif image_name == "SCREENSHOT":
+    olex.m('showq a false')
+    olex.m('showq b false')
     olex.m('pict -pq screenshot.png 1')
-    OV.SetParam('snum.report.image',"%s\screenshot.png" %OV.FilePath())
+    filefull = "%s/screenshot.png" %OV.FilePath()
+    IT.trim_image(im=filefull, padding=2, border=0.2, border_col = "#ababab")
+    OV.SetParam('snum.report.image',"screenshot.png")
 OV.registerFunction(dealWithReportImage)
 
 def dealWithReportName():
