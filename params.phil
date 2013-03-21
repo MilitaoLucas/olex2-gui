@@ -512,7 +512,7 @@ snum
       .type = str
     crystal_images = None
       .type = strings
-    crystal_image = "No Image"
+    crystal_image = None
       .type = str
     frame_images = None
       .type = strings
@@ -542,8 +542,8 @@ snum
       .type = str
     title = FileName()
       .type = path
-    image = None
-      .type = path
+    image = "No Image"
+      .type = str
     image_border = 2
       .type = int
 
