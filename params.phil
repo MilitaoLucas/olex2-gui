@@ -684,7 +684,8 @@ olex2
     .type = bool
   hover_buttons = True
     .type = bool
-
+  news_img_link_url = "www.olex2.org"
+    .type = str
   pdfplugin{
     path = 'BaseDir()/pdf-plugin/qt4-pdf.exe'
       .type = str
