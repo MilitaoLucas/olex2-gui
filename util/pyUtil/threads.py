@@ -5,10 +5,15 @@ import os
 import sys
 import thread
 import time
+
+import random
+
 from threading import Thread
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+
+import olex_fs
 
 # implement force_exit to premature thread termination
 class ThreadEx(Thread):
@@ -40,31 +45,65 @@ class ShellExec:
     
 class NewsImageRetrivalThread(ThreadEx):
   instance = None
+  image_list = None
+  active_image_list = None
   def __init__(self, name):
     Thread.__init__(self)
     self.name = name
     NewsImageRetrivalThread.instance = self
     
   def run(self):
-    import HttpTools
+    import copy
     try:
-      if not self.name:
-        url = 'http://www.olex2.org/randomimg'
-      else:
-        url = 'http://www.olex2.org/olex2images/%s/image' %self.name
-      try:
-        image = HttpTools.make_url_call(url, values = '', http_timeout=0.2).read()
-      except Exception, err:
-    #    print "Downloading image from %s has failed: %s" %(url, err)
-        return
-      if image:
+      if not NewsImageRetrivalThread.image_list:
+        NewsImageRetrivalThread.image_list = self.get_list_from_server()
+        
+      if NewsImageRetrivalThread.image_list:
+        if not NewsImageRetrivalThread.active_image_list:
+          NewsImageRetrivalThread.active_image_list = copy.copy(NewsImageRetrivalThread.image_list)
+          random.shuffle(NewsImageRetrivalThread.active_image_list)
+        img_url, url = self.get_image_from_list()
+
+        if olex_fs.Exists(img_url):
+          img_data = olex_fs.ReadFile(img_url)
+        else:
+          img = self.make_call(img_url)
+          if img:
+            img_data = img.read()
+            olex.writeImage(img_url, img_data)
         tag = OV.GetTag().split('-')[0]
-        olex.writeImage("news/news-%s_tmp" %tag, image)
+        olex.writeImage("news/news-%s_tmp" %tag, img_data)
+        OV.SetParam('olex2.news_img_link_url', url)
         olx.Schedule(1, "'spy.internal.resizeNewsImage()'")
     except:
       pass
     finally:
       NewsImageRetrivalThread.instance = None
+
+  def get_image_from_list(self):
+    if not NewsImageRetrivalThread.active_image_list:
+      return
+    res = NewsImageRetrivalThread.active_image_list.pop(0)
+    if "," in res:
+      img_url, url = res.split(',')
+    else:
+      img_url = res
+      url = "www.olex2.org"
+    if "://" not in img_url:
+      return "http://%s" %(img_url.strip()), url.strip()
+    return img_url.strip(), url.strip()
+
+  def get_list_from_server(self):
+    url = 'http://www.olex2.org/olex2adverts.txt'
+    return self.make_call(url).readlines()
+
+  def make_call(self, url):
+    import HttpTools
+    try:
+      res = HttpTools.make_url_call(url, values = '', http_timeout=0.2)
+    except Exception, err:
+      return None
+    return res
       
 class CheckCifRetrivalThread(ThreadEx):
   instance = None
