@@ -33,8 +33,6 @@ import MakeMovie
 import OlexVFS
 import threads as olxth
 
-from ImageTools import ImageTools
-IT = ImageTools()
 
 haveGUI = OV.HasGUI()
 if haveGUI:
@@ -1546,6 +1544,8 @@ def getReportTitleSrc():
 OV.registerFunction(getReportTitleSrc)
 
 def dealWithReportImage():
+  from ImageTools import ImageTools
+  IT = ImageTools()
   image_name = OV.GetParam('snum.report.image')
   if image_name == "No Image":
 #    OV.SetParam('snum.report.image',None)
