@@ -887,22 +887,71 @@ def getPrintStyles(fileName):
 """ %css
   return styleHTML
 OV.registerFunction(getPrintStyles)
+def path_from_phil(p):
+  if not p:
+    p = "%s/etc/CIF/templates" %OV.BaseDir()
+  if "()" in p:
+    base = p.split('()')
+    _ = getattr(OV, base[0])
+    path = _()
+    p = "%s/%s" %(path, base[1])
+  return p
 
 def getStylesList():
-  styles = os.listdir("%s/etc/CIF/styles" %OV.BaseDir())
+  styles_path = path_from_phil(OV.GetParam('user.report.styles_base_path'))
+  if not styles_path:
+    styles_path = "%s/etc/CIF/styles" %OV.BaseDir()
+    OV.SetParam('user.report.styles_base_path', styles_path)
+  styles = os.listdir("%s" %styles_path)
   exclude = set(("rsc.css", "thesis.css", "custom.css"))
-  stylesList = ";".join("styles/%s" %style for style in styles\
+  stylesList = ";".join("%s" %style for style in styles\
     if style.endswith('.css') and style not in exclude)
+  stylesList += ";--CHOOSE--"
   return stylesList
 OV.registerFunction(getStylesList)
 
 def getTemplatesList():
-  templates = os.listdir("%s/etc/CIF/templates" %OV.BaseDir())
+  templates_path = path_from_phil(OV.GetParam('user.report.templates_base_path'))
+  if not templates_path:
+    templates_path = "%s/etc/CIF/templates" %OV.BaseDir()
+    OV.SetParam('user.report.templates_base_path', templates_path)
+  templates = os.listdir("%s" %templates_path)
   exclude = ("footer.htm")
-  templatesList = ";".join("templates/%s.htm" %template[:-4] for template in templates
-                        if template not in exclude and template.endswith('.htm') or template.endswith('.rtf'))
+  templatesList = ";".join("%s.htm" %template[:-4] for template in templates
+                        if template not in exclude and template.endswith('.htm') or template.endswith('.rtf') or template.endswith('.tex'))
+  templatesList += ";--CHOOSE--"
   return templatesList
 OV.registerFunction(getTemplatesList)
+
+def SetReportStyle(val):
+  styles_path = path_from_phil(OV.GetParam('user.report.styles_base_path'))
+  if "--" in val:
+    res = olex.f("FileOpen('Choose style File','.css files|*.css','%s')" %styles_path)
+    _ = os.path.split(res)
+    styles_path = _[0]
+    style_file = _[1]
+    OV.SetParam('user.report.styles_base_path', styles_path)
+    OV.UpdateHtml()
+  else:
+    style_file = val
+  OV.SetParam('user.report.style', style_file)
+  OV.SetParam('user.report.style_full_path', "%s/%s" %(styles_path, style_file))
+OV.registerFunction(SetReportStyle)
+
+def SetReportTemplate(val):
+  templates_path = path_from_phil(OV.GetParam('user.report.templates_base_path'))
+  if "--" in val:
+    res = olex.f("FileOpen('Choose Template File','.htm files|*.htm','%s')" %templates_path)
+    _ = os.path.split(res)
+    templates_path = _[0]
+    template_file = _[1]
+    OV.SetParam('user.report.templates_base_path', templates_path)
+    OV.UpdateHtml()
+  else:
+    template_file = val
+  OV.SetParam('user.report.template', template_file)
+  OV.SetParam('user.report.template_full_path', "%s/%s" %(templates_path, template_file))
+OV.registerFunction(SetReportTemplate)
 
 def getPopBoxPosition():
   ws = olx.GetWindowSize('html')
