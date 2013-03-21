@@ -137,6 +137,7 @@ def export_parameters(load_phil=True):
   OV.SetVar('HtmlFontColour', OV.GetParam('gui.html.font_colour').hexadecimal)
   OV.SetVar('HtmlGuiFontSize', OV.GetParam('gui.html.font_size'))
   OV.SetVar('HtmlFontSizeControls', OV.GetParam('gui.html.font_size_controls'))
+  OV.SetVar('HtmlFontSizelarge', OV.GetParam('gui.html.font_size_large'))
   OV.SetVar('HtmlPanelWidth', OV.GetParam('gui.htmlpanelwidth'))
   OV.SetVar('HtmlButtonHeight', OV.GetParam('gui.timage.button.height'))
   
