@@ -168,7 +168,7 @@ snum
       .expert_level = 2
     graphical_output = False
       .type = bool
-    program = ShelXL_ifc XL XH ShelXH XLMP ShelXL ShelXL-2012 ShelXLMP-2012 '*olex2.refine' Unknown
+    program = ShelXL_ifc XL XH ShelXH XLMP ShelXL ShelXL-2012 ShelXLMP-2012 ShelXL-2013 '*olex2.refine' Unknown
       .type = choice
     method = 'Least Squares' CGLS '*Gauss-Newton' 'Levenberg-Marquardt' \
       'Full Matrix' Unknown
@@ -203,15 +203,7 @@ snum
     cifmerge_after_refinement = True
       .type = bool
     
-
-    ShelXL12
-      .short_caption = 'Program specific command line'
-    {
-      command_line = ''
-        .type = str
-    }
-
-    ShelXLMP12
+    ShelXL
       .short_caption = 'Program specific command line'
     {
       command_line = ''

@@ -796,10 +796,8 @@ def defineExternalPrograms():
   superflip_cf = Method_Superflip(superflip_cf_phil)
 
   # define refinement methods
-  least_squares = Method_shelx_refinement(get_LS_phil('default'))
-  cgls = Method_shelx_refinement(get_CGLS_phil('default'))
-  least_squares_12 = Method_shelx_refinement(get_LS_phil('2012'))
-  cgls_12 = Method_shelx_refinement(get_CGLS_phil('2012'))
+  least_squares = Method_shelx_refinement(get_LS_phil())
+  cgls = Method_shelx_refinement(get_CGLS_phil())
   gauss_newton = Method_cctbx_refinement(gauss_newton_phil)
   levenberg_marquardt = Method_cctbx_refinement(levenberg_marquardt_phil)
 
@@ -918,15 +916,19 @@ def defineExternalPrograms():
     program_type='refinement',
     author="G.M.Sheldrick",
     reference="SHELXL-2012, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
-    execs=["shelxl12.exe", "shelxl12"],
-    phil_entry_name='ShelXL12')
+    execs=["shelxl12.exe", "shelxl12"])
   ShelXLMP12 = Program(
     name='ShelXLMP-2012',
     program_type='refinement',
     author="G.M.Sheldrick",
     reference="SHELXL-2012, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
-    execs=["shelxl_mp12.exe", "shelxl_mp12"],
-    phil_entry_name='ShelXLMP12')
+    execs=["shelxl_mp12.exe", "shelxl_mp12"])
+  ShelXL13 = Program(
+    name='ShelXL-2013',
+    program_type='refinement',
+    author="G.M.Sheldrick",
+    reference="SHELXL-2013, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    execs=["shelxl13.exe", "shelxl13"])
   XL = Program(
     name='XL',
     program_type='refinement',
@@ -963,22 +965,20 @@ def defineExternalPrograms():
     author="L.J. Bourhis, O.V. Dolomanov, R.J. Gildea",
     reference="olex2.refine (L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, J.A.K. Howard,\nH. Puschmann, in preparation, 2011)")
 
-  for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc):
+  RPD = ExternalProgramDictionary()
+  for prg in (ShelXL, ShelXL12, ShelXLMP12, ShelXL13, XL, XLMP, ShelXH, XH, ShelXL_ifc):
     prg.addMethod(least_squares)
     prg.addMethod(cgls)
-  for prg in (ShelXL12, ShelXLMP12):
-    prg.addMethod(least_squares_12)
-    prg.addMethod(cgls_12)
+    prg.phil_entry_name = "ShelXL"
+    RPD.addProgram(prg)
   smtbx_refine.addMethod(gauss_newton)
   smtbx_refine.addMethod(levenberg_marquardt)
+  RPD.addProgram(smtbx_refine)
 
   SPD = ExternalProgramDictionary()
   for prg in (ShelXS, ShelXS86, XS, ShelXD, XM, smtbx_solve, SIR97, SIR2002, SIR2004, SIR2008, SIR2011, Superflip):
     SPD.addProgram(prg)
 
-  RPD = ExternalProgramDictionary()
-  for prg in (ShelXL, XL, XLMP, ShelXH, XH, ShelXL_ifc, ShelXL12, ShelXLMP12, smtbx_refine):
-    RPD.addProgram(prg)
 
   return SPD, RPD
 
@@ -1766,9 +1766,6 @@ temp
   default=False
     .type=bool
 }
-""")
-
-shelxl12_phil = phil_interface.parse("""
 command_line
   .optional=False
   .caption='Command line'
@@ -1780,14 +1777,9 @@ command_line
   default=True
     .type=bool
 }
-include scope ExternalPrgParameters.shelxl_phil
-""", process_includes=True)
+""")
 
-def get_LS_phil(version):
-  versions = {
-    '2012' : 'ExternalPrgParameters.shelxl12_phil',
-  }
-  v = versions.get(version, 'ExternalPrgParameters.shelxl_phil')
+def get_LS_phil():
   return phil_interface.parse("""
   name = 'Least Squares'
     .type=str
@@ -1810,7 +1802,7 @@ def get_LS_phil(version):
       default=True
         .type=bool
     }
-    include scope %s
+    include scope ExternalPrgParameters.shelxl_phil
     acta
     .optional=True
     {
@@ -1823,13 +1815,9 @@ def get_LS_phil(version):
         .type=bool
     }
   }
-    """ %v, process_includes=True)
+    """, process_includes=True)
 
-def get_CGLS_phil(version):
-  versions = {
-    '2012' : 'ExternalPrgParameters.shelxl12_phil',
-  }
-  v = versions.get(version, 'ExternalPrgParameters.shelxl_phil')
+def get_CGLS_phil():
   return phil_interface.parse("""
     name = CGLS
       .type=str
@@ -1848,9 +1836,9 @@ def get_CGLS_phil(version):
         default=True
           .type=bool
       }
-      include scope %s
+      include scope ExternalPrgParameters.shelxl_phil
     }
-    """ %v, process_includes=True)
+    """, process_includes=True)
 
 gauss_newton_phil = phil_interface.parse("""
 name = 'Gauss-Newton'
