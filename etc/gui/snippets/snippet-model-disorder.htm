@@ -1,19 +1,19 @@
-  <td width='60%'>
-    &nbsp;% Split atoms & Contrain/Restrain them% 
+  <td width='45%'>
+    &nbsp;%<b>Split</b> atoms you <b>click next</b> with% 
   </td>
-  <td width="40%">
-    <font size='$GetVar(HtmlFontSizeControls)'>
-    <input
-      type="combo"
-      height="$GetVar(HtmlComboHeight)"
-      width="100%"
-      bgcolor="$GetVar(HtmlInputBgColour)"
-      name="SET_CONRES_FOR_MODE_SPLIT"
-      items=' ;EADP;ISOR;SIMU'
-      value=""
-      onchange="mode split -r=html.GetValue(~name~)"
-      valign="center"
-      readonly
-    >
-    </font>
+
+  <td width='18%' align='left'>
+  <a href = "mode split">No Restraint</a>
+  </td>
+
+  <td width='12%' align='center'>
+  <a href = "mode split -r=EADP">EADP</a>
+  </td>
+
+  <td width='13%' align='center'>
+  <a href = "mode split -r=ISOR">ISOR</a>
+  </td>
+
+  <td width='12%' align='right'>
+  <a href = "mode split -r=SIMU">SIMU</a>
   </td>

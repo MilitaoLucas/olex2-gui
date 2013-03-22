@@ -1,20 +1,15 @@
-  <td width='60%'>
-    &nbsp;% Select group or atom(s) and then %
+  <td width='45%'>
+    &nbsp;%<b>Select</b> group or atom(s) and then %
   </td>
 
-  <td width="40%">
-    <font size='$GetVar(HtmlFontSizeControls)'>
-    <input
-      type="combo"
-      height="$GetVar(HtmlComboHeight)"
-      width="100%"
-      bgcolor="$GetVar(HtmlInputBgColour)"
-      name="FIT_OR_SPLIT"
-      items='fit<-false;split<-true'
-      value=""
-      onchange="if spy.check_for_selection() then 'mode fit -s=html.GetValue(~name~)'"
-      valign="center"
-      readonly
-    >
-    </font>
+  <td width='8%'>
+  <a href = "if spy.check_for_selection() then 'mode fit -s=True'">Split</a>
+  </td>
+
+  <td width='8%' align='center'>
+  <a href = "if spy.check_for_selection() then 'mode fit -s=False'">Fit</a>
+  </td>
+  
+  <td width='39%' align='right'>
+  <a href = "'mode split'"><b>Split</b> or <b>Move</b> with SHIFT key</a>
   </td>
