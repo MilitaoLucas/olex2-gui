@@ -140,22 +140,31 @@ def conflicts():
         if conflict in resolved: continue
 
         cif = OV.get_cif_item(conflict)
+        if type(cif) == str:
+          cif = cif.strip("'")
         val = d[conflict]['val']
         if not val:
           val = 'n/a'
-        val = val.strip("'")
+        if type(val) == str:
+          val = val.strip("'")
         conflict_val = d[conflict]['conflict_val']
         if not conflict_val:
           conflict_val = 'n/a'
-        conflict_val = conflict_val.strip("'")
+        if type(conflict_val) == str:
+          conflict_val = conflict_val.strip("'")
         v_source = os.path.split(d[conflict]['val_source'])[1]
         c_source = os.path.split(d[conflict]['conflict_source'])[1]
         added_count += 1
         link2 = make_conflict_link(conflict, val, v_source, cif)
         link3 = make_conflict_link(conflict, conflict_val, c_source, cif)
+        
+        if cif == conflict_val == val:
+          continue
+
         if cif == conflict_val:
           link2, link3 = link3, link2
-        cif_val = '.'
+        #cif_val = '.' I can't work out what this is doing here
+        cif_val = cif
         if cif != val and cif != conflict_val:
           cif_val = '''
 <a href='spy.gui.metadata.add_resolved_conflict_item_to_phil(%s)
