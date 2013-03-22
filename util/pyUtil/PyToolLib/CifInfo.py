@@ -679,7 +679,9 @@ class ExtractCifInfo(CifTools):
         dval = d.get(k, None)
         if dval:
           source = dval['source']
-          dval = dval['val'].strip("'")
+          dval = dval['val']
+          if type(dval) == str:
+            dval = dval.strip("'")
           if dval == val:
             pass
           else:
