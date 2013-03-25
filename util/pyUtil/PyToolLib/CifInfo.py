@@ -675,14 +675,12 @@ class ExtractCifInfo(CifTools):
       for k in self.all_sources_d[ld]:
         if k in resolved:
           continue
-        val = self.all_sources_d[ld][k]
+        val = str(self.all_sources_d[ld][k]).strip("'")
         dval = d.get(k, None)
         if dval:
           source = dval['source']
-          dval = dval['val'].strip("'")
-          if dval == val:
-            pass
-          else:
+          dval = str(dval['val']).strip("'")
+          if dval != val:
             self.conflict_d.setdefault(k,{'val':val,'val_source':ld, 'conflict_val':dval,'conflict_source':source, })
         else:
           d.setdefault(k,{'val':val,'source':ld})
