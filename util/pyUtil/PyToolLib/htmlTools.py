@@ -835,13 +835,14 @@ def getStyles(style_name):
   if not styles_path:
     styles_path = "%s/etc/CIF/styles" %OV.BaseDir()
     OV.SetParam('user.report.styles_base_path', styles_path)
-  if not style_name:
-    style_name = OV.GetParam('user.report.style')
+  if style_name and not style_name.endswith('.css'):
+    style_name += '.css'
+  elif not style_name:
+    return ''
   if not os.path.exists(style_name):
     style_name = '%s/%s' %(styles_path,style_name)
-  if not os.path.exists(style_name):
-    style_name = '%s/default.css' %(styles_path)
-
+  if not os.path.isfile(style_name):
+    return ''
   css = open(style_name,'r').read()
   styleHTML = """
 <style type="text/css">
