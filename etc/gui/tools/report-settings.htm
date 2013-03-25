@@ -136,21 +136,6 @@ $spy.MakeHoverButton('button-checkcif_report','spy.cif.GetCheckCifReport(html.Ge
   </td>
   
   <td name=GET_CHECKCIF_REPORT_FORMAT align='left' VALIGN='center' width='14%'>
-<!-- #ignoreif IsOS(mac) 
-   <input
-      type='combo'
-      width="100%"
-      height="GetVar('HtmlComboHeight')"
-      bgcolor="GetVar('HtmlTableBgColour')"
-      name='SET_CHECKCIF_FORMAT'
-      value="spy.GetParam('user.cif.checkcif.format')"
-      items='html;pdf'
-      valign='center'
-      onchange="spy.SetParam('user.cif.checkcif.format',html.GetValue('~name~'))"
-      readonly
-    >
-#ignoreif -->
-<!-- #ignoreif not(IsOS(mac))
    <input
       type='combo'
       width="60"
@@ -163,7 +148,6 @@ $spy.MakeHoverButton('button-checkcif_report','spy.cif.GetCheckCifReport(html.Ge
       onchange="spy.SetParam('user.cif.checkcif.format',html.GetValue('~name~'))"
       readonly
     >
-#ignoreif -->
   </td>
 
   <td width='15%' align='right'>
