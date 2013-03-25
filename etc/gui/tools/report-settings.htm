@@ -89,7 +89,6 @@ $spy.MakeHoverButton('button-Make_Report','html.ItemState cbtn-solve 1 cbtn-refi
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </table>
 
-
       </td>
     </tr>
   </table>
@@ -97,10 +96,6 @@ $spy.MakeHoverButton('button-Make_Report','html.ItemState cbtn-solve 1 cbtn-refi
 
 
 <!-- #include report-metadata gui\tools\report-metadata.htm;1; -->
-
-
-
-
 
 <table cellpadding="1" cellspacing="1" width='100%'>
   <tr>
@@ -141,7 +136,8 @@ $spy.MakeHoverButton('button-checkcif_report','spy.cif.GetCheckCifReport(html.Ge
   </td>
   
   <td name=GET_CHECKCIF_REPORT_FORMAT align='left' VALIGN='center' width='14%'>
-    <input
+<!-- #ignoreif IsOS(mac) 
+   <input
       type='combo'
       width="100%"
       height="GetVar('HtmlComboHeight')"
@@ -153,13 +149,28 @@ $spy.MakeHoverButton('button-checkcif_report','spy.cif.GetCheckCifReport(html.Ge
       onchange="spy.SetParam('user.cif.checkcif.format',html.GetValue('~name~'))"
       readonly
     >
+#ignoreif -->
+<!-- #ignoreif not(IsOS(mac))
+   <input
+      type='combo'
+      width="60"
+      height="GetVar('HtmlComboHeight')"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      name='SET_CHECKCIF_FORMAT'
+      value="spy.GetParam('user.cif.checkcif.format')"
+      items='html;pdf'
+      valign='center'
+      onchange="spy.SetParam('user.cif.checkcif.format',html.GetValue('~name~'))"
+      readonly
+    >
+#ignoreif -->
   </td>
 
   <td width='15%' align='right'>
   Send FCF
   </td>
 
-  <td name=GET_CHECKCIF_REPORT_FORMAT align='right' VALIGN='center' width='4%'>
+  <td name=GET_CHECKCIF_REPORT_FORMAT align='right' VALIGN='center' width='5%'>
     <input
       type='checkbox'
       width="100%"
@@ -169,13 +180,13 @@ $spy.MakeHoverButton('button-checkcif_report','spy.cif.GetCheckCifReport(html.Ge
       checked='false'
       right='false'
     >
-   </td>
-  <td width='29%' align='right'>
+  </td>
+  <td width='26%' align='right'>
   Update Meta Info 
   </td>
 
 
-<td name=AUTO_MERGE_CIF align='right' VALIGN='right' width='4%'>
+<td name=AUTO_MERGE_CIF align='right' VALIGN='right' width='5%'>
     <input
       type='checkbox'
       width="100%"
@@ -188,8 +199,7 @@ $spy.MakeHoverButton('button-checkcif_report','spy.cif.GetCheckCifReport(html.Ge
       name='SET_CIFMERGE'
       right='false'
     >
-
-  </td>
+</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
