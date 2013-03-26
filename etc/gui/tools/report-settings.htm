@@ -1,161 +1,208 @@
+<table cellpadding="1" cellspacing="1" width='100%'>
+  <tr>
+    <td bgcolor="#cccccc">
+
 <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
 
-<tr align = 'center' name=EDIT_CIF width='100%'>
-<!-- #include blank-column gui\blocks\tool-first-column.htm;help_ext=cif-info;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<!-- #include tool-column gui\blocks\tool-help-first-column.htm;help_ext=cif-info;1; -->
-  <td name=EDIT_CIF_INFO align='left' VALIGN='left' width='32%'>
-$spy.MakeHoverButton('button-edit_cif_info','spy.ExtractCifInfo()>>spy.EditCifInfo()>>html.Update')
-  </td>
-  <td name=MERGE_CIF_INFO align='center' VALIGN='center' width='35%'>
-$spy.MakeHoverButton('button-merge_cif','spy.ExtractCifInfo()>>spy.MergeCif(True)>>html.Update')
-  </td>
-  <td>
-  <input type="combo"
-    name="SET_CIF_FINALISE"
-    label="HKL and RES in CIF"
-	width="100%"
-    items="Include;Exclude;Ignore"
-    value="spy.GetParam('user.cif.finalise')"
-    height="GetVar('HtmlComboHeight')"
-    bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-    onchange="spy.SetParam('user.cif.finalise',html.GetValue('~name~'))"
-    readonly
-  >
-  </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-<tr>
-<!-- #include blank-column gui\blocks\tool-first-column.htm;help_ext=submit-info;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<!-- #include tool-column gui\blocks\tool-help-first-column.htm;help_ext=submit-info;1; -->
-  <td name=GET_CHECKCIF_REPORT align='center' VALIGN='center' width='30%'>
-$spy.MakeHoverButton('button-checkcif_report','spy.cif.GetCheckCifReport(html.GetState(SET_CHECKCIF_FCF))')
-  </td>
-  <td name=GET_CHECKCIF_REPORT_FORMAT align='right' VALIGN='center' width='15%'>
-    <input
-      type='combo'
-      width="100%"
-      height="GetVar('HtmlComboHeight')"
-      bgcolor="spy.GetParam('gui.html.input_bg_colour')"
-      name='SET_CHECKCIF_FORMAT'
-      value="spy.GetParam('user.cif.checkcif.format')"
-      items='html;pdf'
-      valign='center'
-      onchange="spy.SetParam('user.cif.checkcif.format',html.GetValue('~name~'))"
-	  readonly
-    >
-  </td>
-  <td name=GET_CHECKCIF_REPORT_FORMAT align='right' VALIGN='center' width='20%'>
-    <input
-      type='checkbox'
-      width="100%"
-      height="GetVar('HtmlCheckboxHeight')"
-      bgcolor="spy.GetParam('gui.html.input_bg_colour')"
-      name='SET_CHECKCIF_FCF'
-      value="Send FCF"
-      checked='false'
-      right='false'
-      manage
-    >
-  </td>
-<td name=VALIDATE_CIF align='right' VALIGN='right' width='48%'>
-$spy.MakeHoverButton('button-validate_cif','spy.ValidateCif')
-  </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
-<tr align = 'center' name=SUBMIT_STUFF>
-<!-- #include blank-column gui\blocks\tool-first-column.htm;help_ext=submit-info;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<!-- #include blank-column gui\blocks\tool-first-column.htm;1; -->
-  <td name=REQUEST_CCDC_NUMBER align='left' VALIGN='right'>
-$spy.MakeHoverButton('button-ccdc_number','spy.ccdc_submit()')
-  </td>
-  <td></td><td></td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
-
 <tr VALIGN='center' ALIGN='center' NAME='SNUM_REPORT_TITLE' valign='center'>
-<!-- #include tool-column gui\blocks\tool-first-column.htm;help_ext=;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td>
-    <b>%Title%</b>
-  </td>
-  <td>
-    <font size="$GetVar('HtmlFontSizeControls')">
+
+  <td width='66%' align='left'>
+    <font size="$GetVar('HtmlFontSizeLarge')" color="#555555">
     <input
       type='text'
       valign='center'
-      height="GetVar('HtmlInputHeight')"
-      width="math.eval((html.clientwidth(self)-180)/2)"
+      height="math.eval(GetVar('HtmlInputHeight')*1.5)"
+      width="100%"
       bgcolor="spy.GetParam('gui.html.input_bg_colour')"
       name='SET_SNUM_REPORT_TITLE'
-      value="spy.GetParam('snum.report.title')"
+      value="spy.report.get_report_title()"
       onchange="spy.SetParam('snum.report.title',html.GetValue('~name~'))"
     >
     </font>
   </td>
-  <td>
-    <b>%Image%</b>
+  <td width='34%' align='right'>
+$spy.MakeHoverButton('button-Make_Report','html.ItemState cbtn-solve 1 cbtn-refine solve-settings 0 refine-settings 0>>html.Update>>cursor(busy, 'Checking for CIF file ...')>>report>>cursor()>>html.Update')
   </td>
-  <td>
+
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<tr VALIGN='center' ALIGN='center' NAME='SNUM_REPORT_TITLE' valign='center'>
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
+  <td width='10%' align='right'>
+    %Image%
+  </td>
+  <td width='26%' align='left'>
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="combo"
-      width="math.eval((html.clientwidth(self)-180)/2)"
+      width="100%"
       height="GetVar('HtmlComboHeight')"
       bgcolor="spy.GetParam('gui.html.input_bg_colour')"
       name="SET_REPORT_IMAGE"
       readonly
-      items='strcat("<-None;screenshot;",file.ListDirForGui(FilePath(),"*.png;*.jpg;*.bmp;*.ps;*.eps"))'
-      onchange="spy.SetParam('snum.report.image',spy.standardise_path(html.GetValue('~name~')))"
+      items='strcat("No Image;SCREENSHOT;",file.ListDirForGui(FilePath(),"*.png;*.jpg;*.bmp;*.ps;*.eps"))'
+      onchange="spy.SetParam('snum.report.image',html.GetValue('~name~'))"
       width="50%"
       value="file.GetName(spy.GetParam('snum.report.image'))"
     >
     </font>
   </td>
-  </tr>
-  <tr>
-  <td>
-    <b>%Style%</b>
+  <td width='8%' align='right'>
+    %Style%
   </td>
-  <td>
+  <td width='22%' align='left'>
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type='combo'
-      width="math.eval((html.clientwidth(self)-180)/2)"
+      width="100%"
       height="GetVar('HtmlComboHeight')"
       bgcolor="spy.GetParam('gui.html.input_bg_colour')"
       name='SET_USER_REPORT_STYLE'
-      value="spy.GetParam('user.report_style')"
+      value="spy.GetParam('user.report.style')"
       items='spy.getStylesList()'
       valign='center'
-      onchange="spy.SetParam('user.report_style',html.GetValue('~name~'))"
+      onchange="spy.SetReportStyle(html.GetValue('~name~'))"
     >
     </font>
   </td>
-  <td>
-    <b>%Template%</b>
+  <td width='15%' align='right'>
+    %Template%
   </td>
-  <td>
+  <td width='22%'>
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type='combo'
-      width="math.eval(((html.clientwidth(self)-210)/2) - spy.GetParam('gui.html.combo_height') - 15)"
+      width="100%"
       height="GetVar('HtmlComboHeight')"
       bgcolor="GetVar('HtmlInputBgColour')"
       name='SET_USER_REPORT_TEMPLATE'
-      value="spy.GetParam('user.report_template')"
+      value="spy.GetParam('user.report.template')"
       items='spy.getTemplatesList()'
       valign='center'
-      onchange="spy.SetParam('user.report_template',html.GetValue('~name~'))"
+      onchange="spy.SetReportTemplate(html.GetValue('~name~'))"
     >
-    </font>&nbsp;
-$spy.MakeHoverButton('toolbar_small-open',"shell file.ospath(basedir()/etc/CIF/styles)")
-
+    </font>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </table>
+
+      </td>
+    </tr>
+  </table>
+
+
+
 <!-- #include report-metadata gui\tools\report-metadata.htm;1; -->
 
+<table cellpadding="1" cellspacing="1" width='100%'>
+  <tr>
+    <td bgcolor="#cccccc">
+
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
+
+<tr align = 'center' name=EDIT_CIF width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=CIF-Part-1;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td name=EDIT_CIF_INFO align='left' VALIGN='left' width='34%'>
+$spy.MakeHoverButton('button-edit_cif_info','spy.ExtractCifInfo()>>spy.EditCifInfo()>>html.Update')
+  </td>
+  <td name=MERGE_CIF_INFO align='left' VALIGN='right' width='32%'>
+$spy.MakeHoverButton('button-merge_cif','spy.ExtractCifInfo()>>spy.MergeCif(True)>>html.Update')
+  </td>
+  <td width='34%' align='right'>
+  <input type="combo"
+    name="SET_CIF_FINALISE"
+    label=""
+    width="94%"
+    items="Include HKL/RES<-Include;Exclude HKL/RES<-Exclude;Ignore HKL/RES<-Ignore"
+    value="spy.GetParam('user.cif.finalise')"
+    height="GetVar('HtmlComboHeight')"
+    bgcolor="GetVar('HtmlTableBgColour')"
+    onchange="spy.SetParam('user.cif.finalise',html.GetValue('~name~'))"
+    readonly
+  >
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<tr align = 'center' name=EDIT_CIF width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=CIF-Part-2;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
+  <td name=GET_CHECKCIF_REPORT align='left' VALIGN='center' width='34%'>
+$spy.MakeHoverButton('button-checkcif_report','spy.cif.GetCheckCifReport(html.GetState(SET_CHECKCIF_FCF))')
+  </td>
+  
+  <td name=GET_CHECKCIF_REPORT_FORMAT align='left' VALIGN='center' width='14%'>
+   <input
+      type='combo'
+      width="60"
+      height="GetVar('HtmlComboHeight')"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      name='SET_CHECKCIF_FORMAT'
+      value="spy.GetParam('user.cif.checkcif.format')"
+      items='html;pdf'
+      valign='center'
+      onchange="spy.SetParam('user.cif.checkcif.format',html.GetValue('~name~'))"
+      readonly
+    >
+  </td>
+
+  <td width='15%' align='right'>
+  Send FCF
+  </td>
+
+  <td name=GET_CHECKCIF_REPORT_FORMAT align='right' VALIGN='center' width='5%'>
+    <input
+      type='checkbox'
+      width="100%"
+      height="GetVar('HtmlCheckboxHeight')"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      name='SET_CHECKCIF_FCF'
+      checked='false'
+      right='false'
+    >
+  </td>
+  <td width='26%' align='right'>
+  Update Meta Info 
+  </td>
 
 
+<td name=AUTO_MERGE_CIF align='right' VALIGN='right' width='5%'>
+    <input
+      type='checkbox'
+      width="100%"
+      height="GetVar('HtmlCheckboxHeight')"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      name = "CIFMERGE_AFTER_REFINE" 
+      $spy.CheckBoxValue(snum.refinement.cifmerge_after_refinement)
+      oncheck = "spy.SetParam(snum.refinement.cifmerge_after_refinement,true)" 
+      onuncheck= "spy.SetParam(snum.refinement.cifmerge_after_refinement,false)"
+      name='SET_CIFMERGE'
+      right='false'
+    >
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+<tr align = 'center' name=EDIT_CIF width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=CCDC-Number-Request;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
+  <td name=REQUEST_CCDC_NUMBER align='left' VALIGN='left' width = '34%'>
+$spy.MakeHoverButton('button-ccdc_number','spy.ccdc_submit()')
+  </td>
+  <td align='left'>
+<zimg src="gui/images/src/CCDC_tiny.png">
+  </td>
+
+  <td align='left'>
+<font size="+1">Submit your structure here!</font>
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</table>
+      </td>
+    </tr>
+  </table>

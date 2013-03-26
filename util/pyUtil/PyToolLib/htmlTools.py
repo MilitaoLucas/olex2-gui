@@ -32,8 +32,6 @@ tutorial_box_initialised = False
 
 global time_add
 time_add = 0
-
-
 def makeHtmlTable(list):
   """ Pass a list of dictionaries, with one dictionary for each table row.
 
@@ -52,9 +50,8 @@ def makeHtmlTable(list):
     row_d.setdefault('ctrl_name', "SET_%s" %str.upper(input_d['varName']).replace('.','_'))
 
     if input_d['varName'] == "InfoLine":
-      pass
-
-
+      text += "<tr><td colspan='2'><font color='#555555'>%s</font></td></tr>" %input_d['value']
+      continue
     boxText = ''
     for box in ['box1','box2','box3']:
       if box in input_d.keys():
@@ -258,8 +255,6 @@ def make_edit_link(name, box_type):
       </tr>
       ''' %(name, box_type)
   return editLink
-
-
 def make_gui_edit_link(name):
   editLink = ""
   name = name.replace("\\", "/")
@@ -347,8 +342,6 @@ def make_help_box(args):
 
   else:
     banner_include = ""
-
-
   if not popout:
     str = r'''
 <!-- #include help-%s gui\%s.htm;gui\blocks\tool-off.htm;image=%s;onclick=;1; -->
@@ -430,8 +423,6 @@ def make_help_box(args):
     olx.html.Load(wFilePath)
 #  popup '%1-tbxh' 'basedir()/etc/gui/help/%1.htm' -b=tc -t='%1' -w=%3 -h=%2 -x=%4 -y=%5">
 OV.registerMacro(make_help_box, 'name-Name of the Box&;popout-True/False&;type-Type of Box (help or tutorial)')
-
-
 def make_warning_html(colspan):
   txt = "htmltool-warning"
   txt = OV.TranslatePhrase(txt)
@@ -515,8 +506,6 @@ def make_input_text_box(d):
 >
 </font>''' %dic
   return html
-
-
 def make_combo_text_box(d):
   name = d.get('ctrl_name')
   dic = {'height':"$GetVar('HtmlComboHeight')",
@@ -560,8 +549,6 @@ def make_combo_text_box(d):
 </font>''' %dic
   return html
 
-
-
 def make_tick_box_input(d):
   name = d.get('ctrl_name')
   dic = {'height':"$GetVar('HtmlCheckboxHeight')",
@@ -582,8 +569,6 @@ def make_tick_box_input(d):
     dic['checked'] = "checked='%s'" %dic.get('checked')
   else:
     dic.setdefault('checked','')
-
-
   html = """
 <font size="$GetVar('HtmlFontSizeControls')">
 <input
@@ -708,8 +693,6 @@ def format_help(string):
     dt = dt.replace(":", "':'")
     dt = "{'%s'}" %dt
     d = eval(dt)
-
-
   ## find all occurences of <lb> and replace this with a line-break in a table.
   regex = re.compile(r"<lb>", re.X)
   string = regex.sub(r"</td></tr><tr><td>", string)
@@ -751,8 +734,6 @@ def format_help(string):
   ## find all occurences of strings between gui[]. These are links make something happen on the GUI.
   regex = re.compile(r"gui\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
   string = regex.sub(r"<font size=+1 color='$GetVar(HtmlHighlightColour)'>&#187;</font><a target='Show Me' href='\g<linkurl>'><b>\g<linktext></b></a>", string)
-
-
   ## find all occurences of strings between XX. These are command line entities.
   width = int(OV.GetHtmlPanelwidth()) - 10
   regex = re.compile(r"  XX (.*?)( [^\XX\XX]* ) XX ", re.X)
@@ -764,8 +745,6 @@ def format_help(string):
     #s = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='1'><tr bgcolor='%s'><td><a href='\2'><b><font size='2' color='%s'><%s>>>\2</%s></font></a></td></tr></table>" %(width,code_bg_colour, code_fg_colour, html_tag, html_tag), string)
 
     s = regex.sub(r" <font color='%s'>[&nbsp;<a href='\2'><b><%s>\2</%s></a>&nbsp;]</font>" %( code_fg_colour, html_tag, html_tag), string)
-
-
   else:
     s = string
   string = s
@@ -828,8 +807,6 @@ def changeBoxColour(ctrl_name,colour):
     olx.html.SetBG(ctrl_name,OV.FindValue('gui_html_input_bg_colour'))
   return ''
 OV.registerFunction(changeBoxColour)
-
-
 def switchButton(name,state):
   if state == 'off':
     copy_from = "%soff.png" %name
@@ -843,8 +820,6 @@ def switchButton(name,state):
   return ""
 OV.registerFunction(switchButton)
 
-
-
 def bgcolor(ctrl_name):
   value = olx.html.GetValue(ctrl_name)
   if value in ('?',''):
@@ -856,13 +831,18 @@ def bgcolor(ctrl_name):
 OV.registerFunction(bgcolor)
 
 def getStyles(style_name):
-  if not style_name:
-    style_name = OV.GetParam('user.report_style')
+  styles_path = path_from_phil(OV.GetParam('user.report.styles_base_path'))
+  if not styles_path:
+    styles_path = "%s/etc/CIF/styles" %OV.BaseDir()
+    OV.SetParam('user.report.styles_base_path', styles_path)
+  if style_name and not style_name.endswith('.css'):
+    style_name += '.css'
+  elif not style_name:
+    return ''
   if not os.path.exists(style_name):
-    style_name = '%s/etc/CIF/%s' %(OV.BaseDir(),style_name)
-  if not os.path.exists(style_name):
-    style_name = '%s/etc/CIF/styles/default.css' %OV.BaseDir()
-
+    style_name = '%s/%s' %(styles_path,style_name)
+  if not os.path.isfile(style_name):
+    return ''
   css = open(style_name,'r').read()
   styleHTML = """
 <style type="text/css">
@@ -888,21 +868,75 @@ def getPrintStyles(fileName):
   return styleHTML
 OV.registerFunction(getPrintStyles)
 
+def path_from_phil(p):
+  if not p:
+    p = "%s/etc/CIF/templates" %OV.BaseDir()
+  if "()" in p:
+    base = p.split('()')
+    _ = getattr(OV, base[0])
+    path = _()
+    p = "%s/%s" %(path, base[1])
+  return p
+
 def getStylesList():
-  styles = os.listdir("%s/etc/CIF/styles" %OV.BaseDir())
+  styles_path = path_from_phil(OV.GetParam('user.report.styles_base_path'))
+  if not styles_path:
+    styles_path = "%s/etc/CIF/styles" %OV.BaseDir()
+    OV.SetParam('user.report.styles_base_path', styles_path)
+  styles = os.listdir("%s" %styles_path)
   exclude = set(("rsc.css", "thesis.css", "custom.css"))
-  stylesList = ";".join("styles/%s" %style for style in styles\
+  stylesList = ";".join("%s" %style for style in styles\
     if style.endswith('.css') and style not in exclude)
+  stylesList += ";--CHOOSE--"
   return stylesList
 OV.registerFunction(getStylesList)
 
 def getTemplatesList():
-  templates = os.listdir("%s/etc/CIF/templates" %OV.BaseDir())
+  templates_path = path_from_phil(OV.GetParam('user.report.templates_base_path'))
+  if not templates_path:
+    templates_path = "%s/etc/CIF/templates" %OV.BaseDir()
+    OV.SetParam('user.report.templates_base_path', templates_path)
+  templates = os.listdir("%s" %templates_path)
   exclude = ("footer.htm")
-  templatesList = ";".join("templates/%s.htm" %template[:-4] for template in templates
-                        if template not in exclude and template.endswith('.htm') or template.endswith('.rtf'))
+  templatesList = ";".join("%s.htm" %template[:-4] for template in templates
+                        if template not in exclude and template.endswith('.htm') or template.endswith('.rtf') or template.endswith('.tex'))
+  templatesList += ";--CHOOSE--"
   return templatesList
 OV.registerFunction(getTemplatesList)
+
+def SetReportStyle(val):
+  styles_path = path_from_phil(OV.GetParam('user.report.styles_base_path'))
+  if "--" in val:
+    res = olex.f("FileOpen('Choose style File','.css files|*.css','%s')" %styles_path)
+    if not res:
+      return
+    _ = os.path.split(res)
+    styles_path = _[0]
+    style_file = _[1]
+    OV.SetParam('user.report.styles_base_path', styles_path)
+    OV.UpdateHtml()
+  else:
+    style_file = val
+  OV.SetParam('user.report.style', style_file)
+  OV.SetParam('user.report.style_full_path', "%s/%s" %(styles_path, style_file))
+OV.registerFunction(SetReportStyle)
+
+def SetReportTemplate(val):
+  templates_path = path_from_phil(OV.GetParam('user.report.templates_base_path'))
+  if "--" in val:
+    res = olex.f("FileOpen('Choose Template File','.htm files|*.htm','%s')" %templates_path)
+    if not res:
+      return
+    _ = os.path.split(res)
+    templates_path = _[0]
+    template_file = _[1]
+    OV.SetParam('user.report.templates_base_path', templates_path)
+    OV.UpdateHtml()
+  else:
+    template_file = val
+  OV.SetParam('user.report.template', template_file)
+  OV.SetParam('user.report.template_full_path', "%s/%s" %(templates_path, template_file))
+OV.registerFunction(SetReportTemplate)
 
 def getPopBoxPosition():
   ws = olx.GetWindowSize('html')
@@ -980,8 +1014,6 @@ def OnModeChange(*args):
     'occu':'button-set_occu',
     'off':None
   }
-
-
   name = 'mode'
   mode = ""
   i = 0
@@ -1062,8 +1094,6 @@ def OnModeChange(*args):
     OV.SetParam('olex2.short_mode',mode_short)
     last_mode = active_mode
   OV.Refresh()
-
-
 ##  if active_mode == last_mode:
 ##    active_mode = None
 
@@ -1097,8 +1127,6 @@ def OnModeChange(*args):
       #OV.SetVar('olex2_in_mode',mode.split("=")[0])
 
 OV.registerCallback('modechange',OnModeChange)
-
-
 def OnStateChange(*args):
   name = args[0]
   state = args[1]
@@ -1193,8 +1221,6 @@ def _check_modes_and_states(name):
       return True
 
   return False
-
-
 def MakeHoverButton(name, cmds, onoff = "off", btn_bg='table_firstcol_colour'):
   #global time_add
   #t = time.time()
@@ -1270,8 +1296,6 @@ def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
 '''%d
   return txt
 OV.registerFunction(MakeHoverButtonOff)
-
-
 def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
   if "None" in name:
     return ""
@@ -1324,8 +1348,6 @@ def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
 '''%d
   return txt
 OV.registerFunction(MakeHoverButtonOn)
-
-
 def MakeActiveGuiButton(name,cmds,toolname=""):
   n = name.split("-")
   d = {}
@@ -1347,8 +1369,6 @@ def MakeActiveGuiButton(name,cmds,toolname=""):
     '''%d
   return txt
 OV.registerFunction(MakeActiveGuiButton)
-
-
 def InActionButton(name,state,toolname=""):
 
   if state == "on":
@@ -1361,8 +1381,6 @@ def InActionButton(name,state,toolname=""):
   return True
 
 OV.registerFunction(InActionButton)
-
-
 def PopProgram(txt="Fred"):
   name = "pop_prg_analysis"
   makeHtmlBottomPop({'txt':txt, 'name':name}, pb_height=225)
@@ -1371,8 +1389,6 @@ def PopBanner(txt='<zimg src="banner.png">'):
   name = "pop_banner"
   makeHtmlBottomPop({'txt':txt, 'name':name}, pb_height=65, y = 130,panel_diff=22)
 OV.registerFunction(PopBanner)
-
-
 def doBanner(i):
   i = int(i)
   #olx.html.SetImage("BANNER_IMAGE","banner_%i.png" %i)
@@ -1407,8 +1423,6 @@ def doBanner(i):
     OV.cmd(cmd)
 
 OV.registerFunction(doBanner)
-
-
 def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next tip, otherwise get the named tip
   from random import randint
   global current_tooltip_number
@@ -1468,8 +1482,6 @@ def getTip(number=0): ##if number = 0: get random tip, if number = "+1" get next
   txt, d = format_help(txt)
   if number == "list":
     txt = txt.replace("&nbsp;","")
-
-
   OV.SetVar("current_tooltip_number",i)
   try:
     txt = txt.encode('utf-8')

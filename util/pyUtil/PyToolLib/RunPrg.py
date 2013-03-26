@@ -11,6 +11,8 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import ExternalPrgParameters
 
+from CifInfo import MergeCif
+
 class RunPrg(ArgumentParser):
   def __init__(self):
     super(RunPrg, self).__init__()
@@ -368,6 +370,8 @@ class RunRefinementPrg(RunPrg):
     if OV.GetParam('snum.refinement.check_absolute_structure_after_refinement'):
       self.isInversionNeeded(force=self.params.snum.refinement.auto.invert)
     OV.SetParam('snum.current_process_diagnostics','refinement')
+    if self.params.snum.refinement.cifmerge_after_refinement:
+      MergeCif(edit=False, force_create=False)
 
   def doHistoryCreation(self):
     if self.params.snum.init.skip_history:

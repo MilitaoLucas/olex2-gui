@@ -304,7 +304,7 @@ OV.registerFunction(EditCifInfo)
 
 
 class MergeCif(CifTools):
-  def __init__(self, edit=False):
+  def __init__(self, edit=False, force_create=True):
     super(MergeCif, self).__init__()
     edit = (edit not in ('False','false',False))
     # check if cif exists and is up-to-date
@@ -312,6 +312,8 @@ class MergeCif(CifTools):
     file_full = OV.FileFull()
     if (not os.path.isfile(cif_path) or
         os.path.getmtime(file_full) > os.path.getmtime(cif_path) + 10):
+      if not force_create:
+        return
       if OV.GetParam('user.cif.autorefine_if_no_cif_for_cifmerge'):
         prg = OV.GetParam('snum.refinement.program')
         method = OV.GetParam('snum.refinement.method')
@@ -673,14 +675,12 @@ class ExtractCifInfo(CifTools):
       for k in self.all_sources_d[ld]:
         if k in resolved:
           continue
-        val = self.all_sources_d[ld][k]
+        val = str(self.all_sources_d[ld][k]).strip("'")
         dval = d.get(k, None)
         if dval:
           source = dval['source']
-          dval = dval['val'].strip("'")
-          if dval == val:
-            pass
-          else:
+          dval = str(dval['val']).strip("'")
+          if dval != val:
             self.conflict_d.setdefault(k,{'val':val,'val_source':ld, 'conflict_val':dval,'conflict_source':source, })
         else:
           d.setdefault(k,{'val':val,'source':ld})
