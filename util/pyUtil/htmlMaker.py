@@ -3,11 +3,39 @@ import sys
 import os
 sys.path.append(r".\src")
 import userDictionaries
+## This used to be in in init.py. Why? 
+import userDictionaries
+if not userDictionaries.people:
+  userDictionaries.People()
+if not userDictionaries.localList:
+  userDictionaries.LocalList()
+
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import htmlTools
 import olexex_setup
 import variableFunctions
+
+from gui.images import *
+GI = GuiImages()
+
+## Define buttons, actions and hints: UP, DOWN, EDIT and DELETE
+number = "%s"
+onclick="spy.move(up,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.update" %number
+hint="Move author up"
+up = GI.get_action_button_html('up', onclick, hint)
+
+onclick="spy.move(down,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.update" %number
+hint="Move author down"
+down = GI.get_action_button_html('down', onclick, hint)
+
+onclick="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.Update" %number
+hint="Remove author from paper"
+delete = GI.get_action_button_html('delete', onclick, hint)
+
+onclick="spy.gui.report.publication.OnPersonChange(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s,edit=True))>>html.update" %number
+hint="Edit author"
+edit = GI.get_action_button_html('edit', onclick, hint)
 
 
 
@@ -264,21 +292,34 @@ def publicationMetadataHtmlMaker():
     if numberAuthors == 1:
       authorRow.setdefault('itemName','')
       authorRow.setdefault('field1',{'itemName':'%Author%'})
-      authorRow.setdefault('field2',{'itemName':'<a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.update" target="Remove author from list"><zimg border="0" src="delete.png"></a>' %str(i),
-                                     'fieldALIGN':'right'})
+      _ = "%s%s" %(down, delete)
+      _ = _ %(i,i)
+      authorRow.setdefault('field2',{'itemName':_,
+                                    'fieldALIGN':'right'})
 
     elif i == 1:
       authorRow.setdefault('itemName','')
-      authorRow.setdefault('field1',{'itemName':'%Authors%'})
-      authorRow.setdefault('field2',{'itemName':'<zimg border="0" src="toolbar-up-off.png"><a href="spy.move(down,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.update" target="Move author down list"><zimg border="0" src="toolbar-down.png"></a> <a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.update" target="Remove author from list"><zimg border="0" src="delete.png"></a>' %(str(i),str(i)),
-                                     'fieldALIGN':'right'})
+      authorRow.setdefault('field1',{'itemName':'Authors</td><td>'})
+      
+      _ = "%s%s" %(down, delete)
+      _ = _%(i,i)
+      authorRow.setdefault('field2',
+                           {'itemName':_,
+                            'fieldALIGN':'right'}
+                           )
+
     elif i == numberAuthors:
-      authorRow.setdefault('itemName','<a href="spy.move(up,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.update" target="Move author up list"><zimg border="0" src="toolbar-up.png"></a><zimg border="0" src="toolbar-down-off.png"><a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.Update" target="Remove author from list"><zimg border="0" src="delete.png"></a>' %(str(i),str(i)))
+      _ = "%s%s" %(up, delete)
+      _ = _%(i,i)
+      authorRow.setdefault('itemName',_)
       authorRow.setdefault('fieldALIGN','right')
       authorRow['bgcolor'] = OV.GetParam('gui.html.input_bg_colour')
     else:
-      authorRow.setdefault('itemName','<a href="spy.move(up,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.Update" target="Move author up list"><zimg border="0" src="toolbar-up.png"></a> <a href="spy.move(down,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.Update" target="Move author down list"><zimg border="0" src="toolbar-down.png"></a> <a href="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.Update" target="Remove author from list"><zimg border="0" src="delete.png"></a>' %(str(i),str(i),str(i)))
+      _ = "%s%s%s" %(up, down, delete)
+      _ = _%(i,i,i)
+      authorRow.setdefault('itemName',_)
       authorRow.setdefault('fieldALIGN','right')
+      
 
     list.append(authorRow)
   if numberAuthors > 0:
