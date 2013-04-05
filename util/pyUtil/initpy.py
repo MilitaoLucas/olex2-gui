@@ -240,6 +240,7 @@ if OV.HasGUI():
   from gui.tools import *
   from gui.metadata import *
   from gui.maps import *
+  from gui.images import *
 
 def onstartup():
   OV.SetVar('cbtn_solve_on','false')
