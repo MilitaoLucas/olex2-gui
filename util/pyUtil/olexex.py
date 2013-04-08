@@ -1928,6 +1928,8 @@ def GetBitmapImageInstructions():
 
   #import Image
   OV.Cursor()
+  from gui import ImageListener
+  ImageListener.OnChange()
 OV.registerFunction(GetBitmapImageInstructions)
 
 def GetPRImageInstructions():
@@ -1938,6 +1940,8 @@ def GetPRImageInstructions():
   olex.m('pictPR %s' %filefull)
   print 'Image %s created' %filefull
   OV.Cursor()
+  from gui import ImageListener
+  ImageListener.OnChange()
 OV.registerFunction(GetPRImageInstructions)
 
 def GetPSImageInstructions():
@@ -1973,6 +1977,8 @@ def GetPSImageInstructions():
 
   print 'Image %s created' %filefull
   OV.Cursor()
+  from gui import ImageListener
+  ImageListener.OnChange()
 OV.registerFunction(GetPSImageInstructions)
 
 
