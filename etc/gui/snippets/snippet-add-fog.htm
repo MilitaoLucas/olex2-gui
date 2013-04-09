@@ -1,0 +1,93 @@
+<tr name=HYDROGEN_BONDS_1>
+  <td name=HEADLINE_EXPAND_SHORT_CONTACTS colspan='3' bgcolor="$GetVar(HtmlTableFirstcolColour)">
+    <b>
+      <a href="gl.fog gl.lm.ClearColor()">%Add Fog%</a>
+    </b>
+
+    <b>
+      <a href="gl.fog">%Clear Fog%</a>
+    </b>
+
+  </td>
+</tr>
+
+<!-- SECOND ROW -->
+<tr name=HYDROGEN_BONDS_DISTANCE>
+  <td width = 10%>
+  Front
+  </td>
+
+  <td name=SLIDER_FOG_FORE width="75%">
+    <font size='$GetVar(HtmlFontSizeControls)'>
+    <input 
+      type="slider" 
+      name = "SlideFOG_F" 
+      width="100%"
+      height="$GetVar(HtmlInputHeight)" 
+      value="45"
+      bgcolor="$GetVar(HtmlTableBgColour)"  
+      fgcolor="$GetVar(HtmlFontColour)" 
+      min="0" 
+      max="100" 
+      onchange="html.SetValue(FOG_F_Value,math.eval(html.GetValue(~name~)/50))>>
+gl.fog gl.lm.ClearColor() math.eval(html.GetValue(SlideFOG_F)/50) math.eval(html.GetValue(SlideFOG_B)/50)"
+    >
+    </font>
+  </td>
+  <td name=FOG_F_VALUE width="15%">
+    <font size='$GetVar(HtmlFontSizeControls)'>
+    <input 
+    type="text" 
+    name = "FOG_F_VALUE" 
+    width="100%"
+    height="$GetVar(HtmlInputHeight)"
+    bgcolor="$GetVar(HtmlTableBgColour)"  
+    fgcolor="$GetVar(HtmlFontColour)" 
+    value="math.eval(html.GetValue(SlideFOG_F)/50)" 
+    onreturn="html.SetValue(SlideFOG_F, math.eval(html.GetValue(~name~)*50))>>
+gl.fog gl.lm.ClearColor() math.eval(html.GetValue(SlideFOG_F)/50) math.eval(html.GetValue(SlideFOG_B)/50)"
+    >
+    </font>
+  </td>
+</tr>
+
+
+<!-- SECOND ROW -->
+<tr name=HYDROGEN_BONDS_2>
+  <td width = 10%>
+  Back
+  </td>
+
+  <td name=SLIDER_HTAB_A width="75%">
+    <font size='$GetVar(HtmlFontSizeControls)'>
+    <input 
+      type="slider" 
+      name = "SlideFOG_B" 
+      width="100%"
+      height="$GetVar(HtmlInputHeight)" 
+      value="60"
+      bgcolor="$GetVar(HtmlTableBgColour)"  
+      fgcolor="$GetVar(HtmlFontColour)" 
+      min="100" 
+      max="200" 
+      onchange="html.SetValue(FOG_B_Value,math.eval(html.GetValue(~name~)/50))>>
+gl.fog gl.lm.ClearColor() math.eval(html.GetValue(SlideFOG_F)/50) math.eval(html.GetValue(SlideFOG_B)/50)"
+    >
+    </font>
+  </td>
+  <td name=DELATA_I_VALUE width="15%">
+    <font size='$GetVar(HtmlFontSizeControls)'>
+    <input 
+    type="text" 
+    name = "FOG_B_VALUE" 
+    width="100%"
+    height="$GetVar(HtmlInputHeight)"
+    bgcolor="$GetVar(HtmlTableBgColour)"  
+    fgcolor="$GetVar(HtmlFontColour)" 
+    value="math.eval(html.GetValue(SlideFOG_B)/50)"  
+    onreturn="html.SetValue(SlideFOG_B, math.eval(html.GetValue(~name~)*50))>>
+gl.fog gl.lm.ClearColor() math.eval(html.GetValue(SlideFOG_F)/50) math.eval(html.GetValue(SlideFOG_B)/50)"
+    >
+    </font>
+  </td>
+</tr>
