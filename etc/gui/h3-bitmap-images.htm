@@ -1,7 +1,13 @@
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
 
-<!-- FIRST ROW -->
 
+<!-- FIRST ROW -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=ADD_FOG; help_ext=add_fog;1; -->
+<!-- #include close-contacts gui\snippets\snippet-add-fog.htm;1; -->
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+<!-- FIRST ROW -->
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='IMAGE_SETTINGS_ROW_1';help_ext=bitmap-atom-label-fonts;1 -->
   <td colspan=4 name-=IMAGE_BITMAP_CHOOSE_ATOM_LABEL_FONTS>
     <a href="setfont AtomLabels ChooseFont(Olex2,spy.GetParam(snum.image.bitmap.atom_label.font_name))>>spy.SetParam(snum.image.bitmap.atom_label.font_name,GetFont(AtomLabels))">%images_bmp_label_olex_font%</a> |
@@ -69,7 +75,7 @@
       height="GetVar('HtmlInputHeight')"
       width="100%"
       bgcolor="GetVar('HtmlInputBgColour')"
-      items="'png;jpg;bmp;tif'"
+      items="'png;jpg;bmp;tif;png/s'"
       valign='left'
       name="IMAGE_BITMAP_TYPE"
       value="spy.GetParam('snum.image.bitmap.type')"
