@@ -301,15 +301,15 @@ def make_help_box(args):
     title = t[1].replace("-", " ")
 
   elif "-" in name:
-    title = name.replace("-", " ").title()
+    title = name.replace("-", " ")
     help_src = name
   else:
     title = name
     help_src = name
-  titleTxt = OV.TranslatePhrase("%s" %title).title()
+  titleTxt = OV.TranslatePhrase("%s" %title)
 #  titleTxt = title
   if box_type == "tutorial":
-    titleTxt = titleTxt.title()
+    titleTxt = titleTxt
     t = titleTxt.split("_")
     if len(t) > 1:
       titleTxt = "%s: %s" %(t[0], t[1])
@@ -1246,7 +1246,7 @@ def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
   n = name.split("-")
   d = {'bgcolor': OV.GetParam('gui.html.%s' %btn_bg)}
   if len(n) > 1:
-    target=n[1]
+    target=" ".join(n[1:])
   else:
     target="Not Defined"
   if '@' in name:
@@ -1303,7 +1303,7 @@ def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
   click_console_feedback = False
   n = name.split("-")
   d = {'bgcolor': OV.GetParam('gui.html.%s' %btn_bg)}
-  target=n[1]
+  target=" ".join(n[1:])
   if '@' in name:
     tool_img = name.split('@')[0]
   else:
