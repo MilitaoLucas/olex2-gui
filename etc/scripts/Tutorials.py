@@ -319,6 +319,11 @@ class AutoDemo():
       
       
     if cmd_type == 'c':
+      if 'reap' in cmd_content:
+        cmd_content = cmd_content.replace("reap '", "reap ")
+        cmd_content = cmd_content.rstrip("'")
+        cmd_content = cmd_content.replace('reap "', 'reap ')
+        cmd_content = cmd_content.rstrip('"')
       olex.m(cmd_content)
       
     if cmd_type != 'p':
