@@ -17,6 +17,7 @@ from datetime import date
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
+
 last_mode = None
 last_mode_options = None
 current_tooltip_number = 0
@@ -72,9 +73,10 @@ def makeHtmlTable(list):
       if input_d['varName'].startswith('_'): # treat cif items differently
         input_d.setdefault('value', "spy.get_cif_item('%(varName)s','?','gui')" %input_d)
         input_d.setdefault('onchange',"spy.set_cif_item('%(varName)s',html.GetValue('~name~'))>>spy.changeBoxColour('~name~','#FFDCDC')" %input_d)
-      elif input_d['varName'] == 'snum.report.date_collected': # treat date fields differently
+      elif 'snum.report.date_' in input_d['varName']: # treat date fields differently
+        which = input_d['varName'].split("_")[1]
         try:
-          cd = float(OV.GetParam('snum.report.date_collected'))
+          cd = float(OV.GetParam('snum.report.date_%s' %which))
           cd = date.fromtimestamp(cd)
           time_str = cd.strftime("%d-%m-%Y")
           input_d.setdefault('value', "'%s'" %time_str)
@@ -1221,11 +1223,21 @@ def _check_modes_and_states(name):
       return True
 
   return False
+
 def MakeHoverButton(name, cmds, onoff = "off", btn_bg='table_firstcol_colour'):
   #global time_add
   #t = time.time()
   hover_buttons = OV.GetParam('olex2.hover_buttons')
   on = _check_modes_and_states(name)
+  
+
+  if cmds.lower().startswith("html.itemstate") and "h2" in cmds:
+    solo = OV.GetParam('user.solo')
+    item = cmds.split()[1]
+    tab = item.split("h2-")[1].split("-")[0]
+    item_name = item.split("h2-")[1].split("-")[1]
+    if solo:
+      cmds = "html.itemstate h2-%s* 2>>%s" %(tab,cmds) 
 
   if on:
     txt = MakeHoverButtonOn(name, cmds, btn_bg)
@@ -1296,6 +1308,7 @@ def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
 '''%d
   return txt
 OV.registerFunction(MakeHoverButtonOff)
+
 def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
   if "None" in name:
     return ""

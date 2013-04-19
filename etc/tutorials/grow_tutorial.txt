@@ -36,7 +36,7 @@ c:spy.switch_tab_for_tutorials(view)
 
 p:Then click on the tab marked <b>Symmetry Generation</b>
 h:h2-symmetry-generation
-c:html.ItemState view-symmetry-generation 1
+c:html.ItemState h2-view-symmetry-generation 1
 
 p:Click on the tab marked <b>Growing</b> in order to access some of the different grow modes.
 h:h3-h3-growing
@@ -103,7 +103,7 @@ c:fuse
 c:mpln -n
 c:html.setstate(GROW_VDW,false)
 c:html.ItemState h3-growing 2
-c:html.ItemState view-symmetry-generation 2
+c:html.ItemState h2-view-symmetry-generation 2
 
 p:In order to do this you need to enter in the command <c>grow -s</c> then using the up key on the keyboard you can keep repeating the command quickly rather than having to keep typing it out.
 c:grow -s

@@ -61,7 +61,7 @@ p:...the macro Clean is described in the graphics window. Let's clean once again
 c:clean
 
 p:With the <b>Uiso Slider</b> in the <b>Toolbox Work</b> we can select all those atoms that look 'too small'
-c:html.ItemState work-main-toolbar 1
+c:html.ItemState h2-work-main-toolbar 1
 c:html.setBG(UISO_SELECT_SLIDER,#ff0000)
 c:html.setvalue(UISO_SELECT_SLIDER,-7)
 c:html.setvalue(UisoSelectVal,<0.035)

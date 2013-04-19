@@ -61,7 +61,7 @@ p:This particular command you can use in the GUI by going to View in the toolbar
 h:tab-view
 c:spy.switch_tab_for_tutorials(view)
 h:h2-quick-drawing-styles
-c:html.ItemState view-quick-drawing-styles 1
+c:html.ItemState h2-view-quick-drawing-styles 1
 
 p:You can also have the model shown as spheres by typing the command <c>ads sph</c> you can also do this by selecting the button <b>Balls & Sticks</b>
 h:button-balls_&_sticks
