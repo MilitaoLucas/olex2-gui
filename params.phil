@@ -988,6 +988,11 @@ programs
 user
   .short_caption = User Specific
   {
+  solo = True
+    .type = bool
+    .help = "Only one top-level tool can be open at any one time"
+  solo_exceptions = start
+    .type = strings
   folder_view_root = None
     .type = path
   use_fader = 0
@@ -1018,6 +1023,12 @@ user
   report_journal_style = rsc #kept for back compatibility
     .type = str
   report{
+    use_db = False
+      .type = bool
+    db_location = DataDir()/db
+      .type = str
+    db_name = olex2.sqlite
+      .type = str
     styles_base_path = "BaseDir()/etc/CIF/styles"
       .type = str
     templates_base_path = "BaseDir()/etc/CIF/templates"
