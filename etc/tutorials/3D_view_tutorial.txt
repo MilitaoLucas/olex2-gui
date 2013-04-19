@@ -18,7 +18,7 @@ c:spy.switch_tab_for_tutorials(view)
 
 p:Then you need to go on the tab for <b>Stereo View</b>
 h:h2-stereo-view
-c:html.ItemState view-stereo-view 1
+c:html.ItemState h2-view-stereo-view 1
 
 p:In this tab there are 4 different 3D options available, the first option available is Stereo colour.
 h:button-stereo_(colour)

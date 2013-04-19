@@ -22,7 +22,7 @@ c:spy.switch_tab_for_tutorials(view)
 
 p:You then need to select the tab <b>Geometry</b>.
 h:h2-geometry
-c:html.ItemState view-geometry 1
+c:html.ItemState h2-view-geometry 1
 
 p:In this tab there are 6 different links, each one of these will help to analyse your model and gather data from it, the first one we will look at is <b>Mean Plane(of active selection)</b>
 
