@@ -201,4 +201,27 @@ Freeze(false)>>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='START_OLEX2_IN';help_ext=Solo-Mode;1 -->
+  <td width='23%'>
+    <b>%Solo Mode%:</b>
+  </td>
+  <td width='55%'>
+     Only one top-level tool open at a time
+  </td>
+  <td width='20%' align='right'>
+    <input 
+      type="checkbox"
+      height="$GetVar(HtmlCheckboxHeight)"
+      name="SOLO_MODE"
+      fgcolor="$GetVar(HtmlFontColour)"
+      checked="$not(strcmp(spy.GetParam(user.solo),False))"
+      width='15'
+      oncheck="spy.SetParam(user.solo,True)" 
+      onuncheck="spy.SetParam(user.solo,False)"
+    >
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
