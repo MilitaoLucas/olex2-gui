@@ -126,6 +126,7 @@ def export_parameters(load_phil=True):
   OV.SetVar('HtmlComboWidth2', OV.GetParam('gui.html.combo_width_2'))
   OV.SetVar('HtmlInputHeight', OV.GetParam('gui.html.input_height'))
   OV.SetVar('HtmlHighlightColour', OV.GetParam('gui.html.highlight_colour').hexadecimal)
+  OV.SetVar('Grey', OV.GetParam('gui.grey').hexadecimal)
   OV.SetVar('HtmlCheckboxHeight', OV.GetParam('gui.html.checkbox_height'))
   OV.SetVar('HtmlCheckboxWidth', OV.GetParam('gui.html.checkbox_width'))
   OV.SetVar('HtmlCheckboxWidth2', OV.GetParam('gui.html.checkbox_width_2'))
@@ -137,7 +138,7 @@ def export_parameters(load_phil=True):
   OV.SetVar('HtmlFontColour', OV.GetParam('gui.html.font_colour').hexadecimal)
   OV.SetVar('HtmlGuiFontSize', OV.GetParam('gui.html.font_size'))
   OV.SetVar('HtmlFontSizeControls', OV.GetParam('gui.html.font_size_controls'))
-  OV.SetVar('HtmlFontSizelarge', OV.GetParam('gui.html.font_size_large'))
+  OV.SetVar('HtmlFontSizeLarge', OV.GetParam('gui.html.font_size_large'))
   OV.SetVar('HtmlPanelWidth', OV.GetParam('gui.htmlpanelwidth'))
   OV.SetVar('HtmlButtonHeight', OV.GetParam('gui.timage.button.height'))
   
