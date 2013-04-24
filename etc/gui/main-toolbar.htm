@@ -1,15 +1,15 @@
 <table border="0" VALIGN='center' width="100%" cellpadding="0" cellspacing="1">
 <tr VALIGN='center'>
 <td align='left'>
-  $spy.MakeHoverButton('btn-solve','html.ItemState cbtn-refine 1 cbtn-report 1 refine-settings 0 report-settings 0>>html.Update>>solve')
+  $spy.MakeHoverButton('btn-solve','spy.gui.SwitchSettings(solve)>>solve')
 <!-- #include cbtn-solve gui\blocks\cbtn-on.htm;gui\blocks\cbtn-off.htm;image=solve;ondown=;1; -->
 </td>
 <td align='center'>
-  $spy.MakeHoverButton('btn-refine','refine')
+  $spy.MakeHoverButton('btn-refine','spy.gui.SwitchSettings(refine)>>refine')
 <!-- #include cbtn-refine gui\blocks\cbtn-on.htm;gui\blocks\cbtn-off.htm;image=refine;ondown=;1; -->
 </td>
 <td align='right'>
-  $spy.MakeHoverButton('btn-report','html.ItemState cbtn-solve 1 cbtn-refine solve-settings 0 refine-settings 0>>html.Update>>cursor(busy, '%Checking for CIF file ...%')>>report>>cursor()>>html.Update')
+  $spy.MakeHoverButton('btn-report','spy.gui.SwitchSettings(report)>>report')
 <!-- #include cbtn-report gui\blocks\cbtn-on.htm;gui\blocks\cbtn-off.htm;image=report;ondown=spy.ExtractCifInfo();1; -->
 </td>
 
