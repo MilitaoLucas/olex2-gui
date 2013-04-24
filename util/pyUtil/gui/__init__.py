@@ -36,6 +36,18 @@ def About():
 
 olex.registerFunction(About, False, "gui")
 
+def SwitchSettings(name="solve"):
+  name = name.lower()
+  auto_close_settings = OV.GetParam('user.auto_close_settings_panel')
+  if not auto_close_settings:
+    t = "cbtn* 1 cbtn-%s 1 *settings 0 %s-settings 0 1" %(name, name)
+  else:
+    t = "cbtn* 1 cbtn-%s 1 *settings 0" %name
+  olx.html.ItemState(t)
+
+olex.registerFunction(SwitchSettings, False, "gui")
+
+
 def SwitchPanel(name="home"):
   name = name.lower()
   if name == "home":

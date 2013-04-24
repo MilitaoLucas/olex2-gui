@@ -993,6 +993,8 @@ user
     .help = "Only one top-level tool can be open at any one time"
   solo_exceptions = start
     .type = strings
+  auto_close_settings_panel = True
+    .type = bool
   folder_view_root = None
     .type = path
   use_fader = 0
