@@ -116,7 +116,7 @@ snum
       .type = float
     vata = 0
       .type = float
-    program = ShelXS ShelXS86 XS '*olex2.solve' XM ShelXD SIR2002 SIR2004 SIR2008 SIR2011 Superflip Unknown
+    program = ShelXS ShelXS-2013 ShelXS86 XS '*olex2.solve' XM ShelXD ShelXD-2013 SIR2002 SIR2004 SIR2008 SIR2011 Superflip Unknown
       .type = choice
     method = 'Dual Space' '*Charge Flipping' 'Direct Methods' 'Patterson Method' 'Structure Expansion' Unknowm
       .type = choice
@@ -125,7 +125,7 @@ snum
     current_atomic_volume = None
       .type = float
     Sir2002{
-      gui = False
+      gui = True
         .type = bool
       }
     Sir2004{

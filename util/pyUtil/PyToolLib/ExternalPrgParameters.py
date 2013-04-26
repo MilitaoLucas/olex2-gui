@@ -333,9 +333,9 @@ class Method_shelx(Method):
         sys.stdout.write(line)
 # This is super ugly but what can I do?
 # This really be a function rather than a separate file but I can not get it to work yet?
-    if prgName in ('shelxl', 'xl', 'shelxl_ifc', 'XLMP' ):
+    if prgName in ('shelxl', 'xl', 'shelxl_ifc', 'XLMP', 'shelxl13' ):
       names = xl_ins_filename.lower()+'.ins'
-    if prgName in ('shelxs', 'xs', 'shelxs86'):
+    if prgName in ('shelxs', 'xs', 'shelxs86', 'shelxs13'):
       import fileinput, string, sys
       for line in fileinput.input(xl_ins_filename.lower()+'.ins',inplace=1):
         if 'DISP' in line:
@@ -808,6 +808,12 @@ def defineExternalPrograms():
     author="G.M.Sheldrick",
     reference="SHELXS, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
     execs=["shelxs.exe", "shelxs"])
+  ShelXS13 = Program(
+    name='ShelXS-2013',
+    program_type='solution',
+    author="G.M.Sheldrick",
+    reference="SHELXS, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    execs=["shelxs13.exe", "shelxs13"])
   ShelXS86 = Program(
     name='ShelXS86',
     program_type='solution',
@@ -826,6 +832,12 @@ def defineExternalPrograms():
     author="G.M.Sheldrick",
     reference="SHELXD, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
     execs=["shelxd.exe", "shelxd"])
+  ShelXD13 = Program(
+    name='ShelXD-2013',
+    program_type='solution',
+    author="G.M.Sheldrick",
+    reference="SHELXD, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    execs=["shelxd13.exe", "shelxd13"])
   XM = Program(
     name='XM',
     program_type='solution',
@@ -883,6 +895,9 @@ def defineExternalPrograms():
   ShelXS.addMethod(direct_methods)
   ShelXS.addMethod(patterson)
   ShelXS.addMethod(texp)
+  ShelXS13.addMethod(direct_methods)
+  ShelXS13.addMethod(patterson)
+  ShelXS13.addMethod(texp)
   ShelXS86.addMethod(direct_methods)
   ShelXS86.addMethod(patterson)
   ShelXS86.addMethod(texp)
@@ -890,6 +905,7 @@ def defineExternalPrograms():
   XS.addMethod(patterson)
   XS.addMethod(texp)
   ShelXD.addMethod(dual_space)
+  ShelXD13.addMethod(dual_space)
   XM.addMethod(dual_space)
   smtbx_solve.addMethod(charge_flipping)
   SIR97.addMethod(sir97_dm)
@@ -976,7 +992,7 @@ def defineExternalPrograms():
   RPD.addProgram(smtbx_refine)
 
   SPD = ExternalProgramDictionary()
-  for prg in (ShelXS, ShelXS86, XS, ShelXD, XM, smtbx_solve, SIR97, SIR2002, SIR2004, SIR2008, SIR2011, Superflip):
+  for prg in (ShelXS, ShelXS13, ShelXS86, XS, ShelXD, ShelXD13, XM, smtbx_solve, SIR97, SIR2002, SIR2004, SIR2008, SIR2011, Superflip):
     SPD.addProgram(prg)
 
 
