@@ -141,12 +141,6 @@ def flash_gui_control(control):
 
 olex.registerFunction(flash_gui_control, False, "gui.tools")
 
-def get_OV_path(path):
-  if "()" in path:
-    p = getattr(OV, path.split('()')[0])()
-    path = "%s/%s" %(p, path.split('()')[1])
-  return path
-
 def make_single_gui_image(img_txt="", img_type='h2'):
   from PilTools import timage
   import OlexVFS
