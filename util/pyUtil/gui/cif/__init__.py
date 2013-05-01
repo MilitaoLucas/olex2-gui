@@ -8,7 +8,7 @@ OV = OlexFunctions()
 
 def threadPrint(str):
   olx.Schedule(1, "'post \"%s\"'" %str)
-  
+
 def extractHtmlValueFromLine(line, name):
   idx = line.find(name)
   if idx !=-1:
@@ -16,7 +16,7 @@ def extractHtmlValueFromLine(line, name):
     if len(toks) > 3 and toks[1].strip() == 'value=':
       return toks[2]
   return None
-  
+
 def GetCheckcifReport(outputtype='pdf', send_fcf=False):
   import HttpTools
   #t_ = time.time()
@@ -58,7 +58,7 @@ def GetCheckcifReport(outputtype='pdf', send_fcf=False):
                   "\nPleas make sure that there is LIST 4 instruction is in your INS file before the refinement.")
       send_fcf = False
     else:
-      params['validtype'] = 'checkcif_with_hkl' 
+      params['validtype'] = 'checkcif_with_hkl'
   response = None
   threadPrint('Sending report request')
   try:
@@ -71,7 +71,7 @@ def GetCheckcifReport(outputtype='pdf', send_fcf=False):
     threadPrint('Failed to receive Checkcif report...')
   finally:
     rFile.close()
-    
+
   if not response: return
 
   if send_fcf: #file exists, correct URL picked
@@ -85,16 +85,16 @@ def GetCheckcifReport(outputtype='pdf', send_fcf=False):
     params['filehkl'] = fcf_file
     params['Qcifid'] = cif_id
     params['Qdatablock'] = cif_data_block
-    del params['file'] 
+    del params['file']
     try:
       response = HttpTools.make_url_call(url, params)
     except Exception, e:
       threadPrint('Failed to receive full Checkcif report...')
     finally:
       fcf_file.close()
-      
+
   if not response: return
-  
+
   #outputtype = 'htm'
   if outputtype == "html":
     wFile = open(out_file_name,'w')
@@ -104,7 +104,7 @@ def GetCheckcifReport(outputtype='pdf', send_fcf=False):
   elif outputtype == "pdf":
     l = response.readlines()
     for line in l:
-      if "Download checkCIF report" in line:
+      if "checkcif.pdf" in line:
         href = line.split('"')[1]
         threadPrint('Downloading PDF report')
         response = None
