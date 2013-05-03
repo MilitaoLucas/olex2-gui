@@ -504,7 +504,7 @@ snum
   report
     .short_caption = Report Metadata
     {
-    publication_style = Acta
+    publication_style = acta
       .type = str
     publication_paper = ""
       .type = str

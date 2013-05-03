@@ -775,6 +775,16 @@ class Method_SIR(Method_solution):
 
 
 def defineExternalPrograms():
+  reference_style = OV.GetParam('snum.report.publication_style', 'acta')
+  if reference_style == "acta":
+    ref_shelx = "Sheldrick, G. M. (2008). Acta Cryst. A64, 112-122."
+    ref_smtbx = "Bourhis, L.J, Dolomanov, O.V, Gildea, R.J, Howard, J.A.K and\n Puschmann, H. (2013, In Preparation)"
+    ref_superflip = "Palatinus, L.,  Chapuis, G., (2007) J. Appl. Cryst., 40, 786-790;"
+    
+  else:
+    ref_shelx="SHELXS, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122"
+    ref_smtbx = "olex2.solve (L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, J.A.K. Howard,\nH. Puschmann, in preparation, 2011)",
+    ref_superflip = "SUPERFLIP, J. Appl. Cryst. (2007) 40, 786-790"
 
   # define solution methods
 
@@ -802,53 +812,57 @@ def defineExternalPrograms():
   levenberg_marquardt = Method_cctbx_refinement(levenberg_marquardt_phil)
 
   # define solution programs
+  
+ 
   ShelXS = Program(
     name='ShelXS',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference="SHELXS, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["shelxs.exe", "shelxs"])
   ShelXS13 = Program(
     name='ShelXS-2013',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference="SHELXS, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["shelxs13.exe", "shelxs13"])
   ShelXS86 = Program(
     name='ShelXS86',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference="ShelXS86, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["shelxs86.exe", "shelxs86"])
   XS = Program(
     name='XS',
     program_type='solution',
     author="G.M.Sheldrick/Bruker",
-    reference="XS, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["xs.exe", "xs"])
   ShelXD = Program(
     name='ShelXD',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference="SHELXD, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["shelxd.exe", "shelxd"])
   ShelXD13 = Program(
     name='ShelXD-2013',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference="SHELXD, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["shelxd13.exe", "shelxd13"])
   XM = Program(
     name='XM',
     program_type='solution',
     author="G.M.Sheldrick/Bruker",
-    reference="XM, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["xm.exe", "xm"])
   smtbx_solve = Program(
     name='olex2.solve',
     program_type='solution',
     author="Luc Bourhis",
-    reference="olex2.solve (L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, J.A.K. Howard,\nH. Puschmann, in preparation, 2011)")
+    reference=ref_smtbx
+    )
+  
   SIR97 = Program(
     name='SIR97',
     program_type='solution',
@@ -888,7 +902,7 @@ def defineExternalPrograms():
     name='Superflip',
     program_type='solution',
     author="A van der Lee, C.Dumas & L. Palatinus",
-    reference="SUPERFLIP, J. Appl. Cryst. (2007) 40, 786-790",
+    reference = ref_superflip,
     versions = '260711',
     execs=["superflip.exe", "superflip"])
 
@@ -925,62 +939,63 @@ def defineExternalPrograms():
     name='ShelXL',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="SHELXL, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["shelxl.exe", "shelxl"])
   ShelXL12 = Program(
     name='ShelXL-2012',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="SHELXL-2012, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["shelxl12.exe", "shelxl12"])
   ShelXLMP12 = Program(
     name='ShelXLMP-2012',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="SHELXL-2012, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["shelxl_mp12.exe", "shelxl_mp12"])
   ShelXL13 = Program(
     name='ShelXL-2013',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="SHELXL-2013, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["shelxl13.exe", "shelxl13"])
   XL = Program(
     name='XL',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="XL, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["xl.exe", "xl"])
   XLMP = Program(
     name='XLMP',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="XLMP, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["xlmp.exe", "xlmp"])
   ShelXH = Program(
     name='ShelXH',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="SHELXH, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["shelxh.exe", "shelxh"])
   XH = Program(
     name='XH',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="XH, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["xh.exe", "xh"])
   ShelXL_ifc = Program(
     name='ShelXL_ifc',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="SHELXL, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["shelxl_ifc"])
   smtbx_refine = Program(
     name='olex2.refine',
     program_type='refinement',
     author="L.J. Bourhis, O.V. Dolomanov, R.J. Gildea",
-    reference="olex2.refine (L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, J.A.K. Howard,\nH. Puschmann, in preparation, 2011)")
-
+    reference=ref_smtbx
+  )
+  
   RPD = ExternalProgramDictionary()
   for prg in (ShelXL, ShelXL12, ShelXLMP12, ShelXL13, XL, XLMP, ShelXH, XH, ShelXL_ifc):
     prg.addMethod(least_squares)
