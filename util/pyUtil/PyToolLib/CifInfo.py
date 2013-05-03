@@ -21,12 +21,23 @@ from iotbx.cif import model
 from iotbx.cif import validation
 from libtbx.utils import format_float_with_standard_uncertainty
 olx.cif_model = None
-olex2_reference = """\
+
+reference_style = OV.GetParam('snum.report.publication_style', 'acta')
+
+if reference_style == "acta":
+  olex2_reference = """
+\nDolomanov, O.V.; Bourhis, L.J.; Gildea, R.J.; Howard, J.A.K.; Puschmann, H.,
+OLEX2: A complete structure solution, refinement and analysis program (2009).
+J. Appl. Cryst., 42, 339-341.\n"""
+  
+else:
+  olex2_reference = """\
 ;
 O. V. Dolomanov, L. J. Bourhis, R. J. Gildea, J. A. K. Howard and H. Puschmann,
 OLEX2: a complete structure solution, refinement and analysis program.
 J. Appl. Cryst. (2009). 42, 339-341.
-;"""
+;
+"""
 
 
 class MetacifFiles:
@@ -120,7 +131,7 @@ class CifTools(ArgumentParser):
     self.update_cif_block(
       {'_computing_molecular_graphics': olex2_reference,
        '_computing_publication_material': olex2_reference
-       })
+       }, force=True)
     self.sort_crystal_dimensions()
     self.sort_crystal_colour()
     self.sort_publication_info()
@@ -337,9 +348,16 @@ class MergeCif(CifTools):
     self.write_metacif_file()
     ## merge metacif file with cif file from refinement
     OV.CifMerge(self.metacif_path)
-    ## open merged cif file in external text editor
+    for extra_cif in OV.GetParam('snum.report.merge_these_cifs',[]):
+      if extra_cif:
+        OV.CifMerge(extra_cif)
+    OV.CifMerge(self.metacif_path)
+    self.finish_merge_cif()
     if edit:
       OV.external_edit('filepath()/filename().cif')
+  def finish_merge_cif(self):
+    pass
+    
 OV.registerFunction(MergeCif)
 
 
