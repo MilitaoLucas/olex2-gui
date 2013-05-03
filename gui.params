@@ -104,6 +104,8 @@ gui
         .type = colour
       colour_grade4 = #d62613
         .type = colour
+      colour_grade5 = #660066
+        .type = colour
       }
     }
 

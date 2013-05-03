@@ -353,6 +353,17 @@ class ImageTools(FontInstances):
     im.putalpha(alpha)
     return im
 
+
+  def make_colour_pixel(self, colour):
+    if not colour:
+      return
+    size = (10,10)
+    IM = Image.new('RGBA', size, colour)
+    name = r"pixel_%s.png" %colour[1:]
+    OlexVFS.save_image_to_olex(IM, name, 2)
+    return name
+
+
   def make_colour_sample(self, colour, size=(20,12)):
     if not colour:
       return
@@ -504,11 +515,12 @@ class ImageTools(FontInstances):
       pass
     return IM
 
-  def make_full_width_empty_image(self, height=100, colour='#b40000', scale=1):
-    size = (self.available_width_full * scale, height * scale)
+  def make_full_width_empty_image(self, height=100, colour='#b40000', scale=1, width_adjust=0):
+    adjusted_width = self.available_width_full-width_adjust
+    size = (adjusted_width * scale, height * scale)
     im = Image.new("RGB",size,colour)
     draw = ImageDraw.Draw(im)
-    return im, draw, self.available_width_full
+    return im, draw, adjusted_width
 
   def add_continue_triangles(self, draw, width, height, shift_up = 4, shift_left = 5, style=('multiple')):
     arrow_top = 8 + shift_up
