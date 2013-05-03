@@ -773,9 +773,11 @@ class Method_SIR(Method_solution):
       shutil.copyfile(item, f)
       os.remove(item)
 
-
 def defineExternalPrograms():
-  reference_style = OV.GetParam('snum.report.publication_style', 'acta')
+  try:
+    reference_style = OV.GetParam('snum.report.publication_style', 'acta')
+  except:
+    reference_style = "acta"
   if reference_style == "acta":
     ref_shelx = "Sheldrick, G. M. (2008). Acta Cryst. A64, 112-122."
     ref_smtbx = "Bourhis, L.J, Dolomanov, O.V, Gildea, R.J, Howard, J.A.K and\n Puschmann, H. (2013, In Preparation)"
