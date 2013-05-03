@@ -137,6 +137,14 @@ snum
         .type = bool
       }
     }
+    
+  htab{
+    distance = 2.9
+      .type = float
+    angle = 140
+      .type = float
+    }
+
 
   refinement
     .short_caption = Structure Refinement
@@ -496,6 +504,12 @@ snum
   report
     .short_caption = Report Metadata
     {
+    publication_style = Acta
+      .type = str
+    publication_paper = ""
+      .type = str
+    merge_these_cifs = None
+      .type = strings
     type = "Structure Report"
       .type = str
     date_format = "%d-%m-%Y"  
@@ -1025,7 +1039,7 @@ user
   report_journal_style = rsc #kept for back compatibility
     .type = str
   report{
-    use_db = False
+    use_db = True
       .type = bool
     db_location = DataDir()/db
       .type = str
