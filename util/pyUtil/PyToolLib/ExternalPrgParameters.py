@@ -12,6 +12,13 @@ import libtbx.utils
 
 definedControls = []
 
+global RPD
+RPD = {}
+global SPD
+SPD = {}
+global reference_style
+reference_style = ""
+
 class ExternalProgramDictionary(object):
   def __init__(self):
     self.programs = {}
@@ -774,18 +781,15 @@ class Method_SIR(Method_solution):
       os.remove(item)
 
 def defineExternalPrograms():
-  try:
-    reference_style = OV.GetParam('snum.report.publication_style', 'acta')
-  except:
-    reference_style = "acta"
+  reference_style = OV.GetParam('snum.report.publication_style', 'acta').lower()
   if reference_style == "acta":
     ref_shelx = "Sheldrick, G. M. (2008). Acta Cryst. A64, 112-122."
     ref_smtbx = "Bourhis, L.J, Dolomanov, O.V, Gildea, R.J, Howard, J.A.K and\n Puschmann, H. (2013, In Preparation)"
-    ref_superflip = "Palatinus, L.,  Chapuis, G., (2007) J. Appl. Cryst., 40, 786-790;"
+    ref_superflip = "Palatinus, L.,  Chapuis, G., (2007) <i>J. Appl. Cryst.</i>, <b>40</b>, 786-790;"
     
   else:
     ref_shelx="SHELXS, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122"
-    ref_smtbx = "olex2.solve (L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, J.A.K. Howard,\nH. Puschmann, in preparation, 2011)",
+    ref_smtbx = "L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, J.A.K. Howard, H. Puschmann, in preparation (2013)"
     ref_superflip = "SUPERFLIP, J. Appl. Cryst. (2007) 40, 786-790"
 
   # define solution methods
@@ -1915,9 +1919,29 @@ REM Flack = %(_refine_ls_abs_structure_Flack)s
   wFile.write(txt)
   wFile.close()
 
+def get_program_dictionaries(cRPD=None, cSPD=None):
+  global SPD
+  global RPD
+  global reference_style
+  if not reference_style:
+    reference_style = OV.GetParam('snum.report.publication_style', 'acta')
 
+  if not cRPD or not cSPD:
+    if RPD and SPD:
+      if reference_style == OV.GetParam('snum.report.publication_style'):
+        return SPD, RPD
+      else:
+        SPD, RPD = defineExternalPrograms()
+        return SPD, RPD
+    else:
+      SPD, RPD =  defineExternalPrograms()
+      return SPD, RPD
+        
+  elif RPD != RPD or SPD != SPD:
+    SPD, RPD = defineExternalPrograms()
 
-SPD, RPD = defineExternalPrograms()
+  return SPD, RPD
+  
 
 if __name__ == '__main__':
   SPD, RPD = defineExternalPrograms()

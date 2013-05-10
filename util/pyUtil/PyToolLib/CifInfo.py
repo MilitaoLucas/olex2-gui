@@ -14,7 +14,6 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
 import ExternalPrgParameters
-SPD, RPD = ExternalPrgParameters.SPD, ExternalPrgParameters.RPD
 
 import iotbx.cif
 from iotbx.cif import model
@@ -22,22 +21,6 @@ from iotbx.cif import validation
 from libtbx.utils import format_float_with_standard_uncertainty
 olx.cif_model = None
 
-reference_style = OV.GetParam('snum.report.publication_style', 'acta')
-
-if reference_style == "acta":
-  olex2_reference = """
-\nDolomanov, O.V.; Bourhis, L.J.; Gildea, R.J.; Howard, J.A.K.; Puschmann, H.,
-OLEX2: A complete structure solution, refinement and analysis program (2009).
-J. Appl. Cryst., 42, 339-341.\n"""
-  
-else:
-  olex2_reference = """\
-;
-O. V. Dolomanov, L. J. Bourhis, R. J. Gildea, J. A. K. Howard and H. Puschmann,
-OLEX2: a complete structure solution, refinement and analysis program.
-J. Appl. Cryst. (2009). 42, 339-341.
-;
-"""
 
 
 class MetacifFiles:
@@ -119,18 +102,33 @@ class CifTools(ArgumentParser):
     self.cif_model = olx.cif_model
     self.cif_block = olx.cif_model[self.data_name]
     today = datetime.date.today()
+    reference_style = OV.GetParam('snum.report.publication_style', 'acta').lower()
+    self.olex2_reference_short = "Olex2"
+
+    if reference_style == "acta":
+
+      self.olex2_reference = """
+Dolomanov, O.V.; Bourhis, L.J.; Gildea, R.J.; Howard, J.A.K.; Puschmann, H.,
+OLEX2: A complete structure solution, refinement and analysis program (2009).
+J. Appl. Cryst., 42, 339-341."""
+    else:
+      self.olex2_reference = """
+O. V. Dolomanov, L. J. Bourhis, R. J. Gildea, J. A. K. Howard and H. Puschmann,
+OLEX2: a complete structure solution, refinement and analysis program.
+J. Appl. Cryst. (2009). 42, 339-341."""
     self.update_cif_block(
       {'_audit_creation_date': today.strftime('%Y-%m-%d'),
        '_audit_creation_method': """
 ;
-  Olex2 %s
-  (compiled %s, GUI svn.r%i)
+Olex2 %s
+(compiled %s, GUI svn.r%i)
 ;
 """ %(OV.GetTag(), OV.GetCompilationInfo(), OV.GetSVNVersion())
     })
+    olx.SetVar('olex2_reference_short', self.olex2_reference_short)
     self.update_cif_block(
-      {'_computing_molecular_graphics': olex2_reference,
-       '_computing_publication_material': olex2_reference
+      {'_computing_molecular_graphics': self.olex2_reference,
+       '_computing_publication_material': self.olex2_reference
        }, force=True)
     self.sort_crystal_dimensions()
     self.sort_crystal_colour()
@@ -345,13 +343,18 @@ class MergeCif(CifTools):
         print("If you are using SHELX, make sure you use the ACTA command.")
         print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         return
+      
+    ECI = ExtractCifInfo()
+    ECI.run()
     self.write_metacif_file()
     ## merge metacif file with cif file from refinement
     OV.CifMerge(self.metacif_path)
     for extra_cif in OV.GetParam('snum.report.merge_these_cifs',[]):
       if extra_cif:
-        OV.CifMerge(extra_cif)
-    OV.CifMerge(self.metacif_path)
+        olx.Cif2Doc(extra_cif)
+        merge_name = "%s_doc.cif" %OV.FileName()
+        print "Merging with %s" %("%s" %merge_name)
+        OV.CifMerge(merge_name)
     self.finish_merge_cif()
     if edit:
       OV.external_edit('filepath()/filename().cif')
@@ -373,6 +376,8 @@ class ExtractCifInfo(CifTools):
     olx.cif_model = self.cif_model
 
   def run(self):
+    self.SPD, self.RPD = ExternalPrgParameters.get_program_dictionaries()
+    reference_style = OV.GetParam('snum.report.publication_style', 'acta').lower()
     self.userInputVariables = OV.GetParam("snum.metacif.user_input_variables")
     basename = self.filename
     path = self.filepath
@@ -396,8 +401,11 @@ class ExtractCifInfo(CifTools):
         active_solution.program = "olex2.solve"
       ## END
       try:
-        solution_reference = SPD.programs[active_solution.program].reference
-        atom_sites_solution_primary = SPD.programs[active_solution.program]\
+        solution_reference = self.SPD.programs[active_solution.program].reference
+        olx.SetVar('solution_reference_short', self.SPD.programs[active_solution.program].name)
+        olx.SetVar('solution_reference_long', solution_reference)
+        
+        atom_sites_solution_primary = self.SPD.programs[active_solution.program]\
           .methods[active_solution.method].atom_sites_solution
         force = True
       except:
@@ -416,7 +424,9 @@ class ExtractCifInfo(CifTools):
         active_node.program = "olex2.refine"
       ## END
       try:
-        refinement_reference = RPD.programs[active_node.program].reference
+        olx.SetVar('refinement_reference_short', self.RPD.programs[active_node.program].name)
+        refinement_reference = self.RPD.programs[active_node.program].reference
+        olx.SetVar('refinement_reference_long', refinement_reference)
         force = True
       except:
         refinement_reference = '?'
