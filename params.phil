@@ -504,7 +504,7 @@ snum
   report
     .short_caption = Report Metadata
     {
-    publication_style = acta
+    publication_style = general
       .type = str
     publication_paper = ""
       .type = str
@@ -1039,7 +1039,7 @@ user
   report_journal_style = rsc #kept for back compatibility
     .type = str
   report{
-    use_db = True
+    use_db = False
       .type = bool
     db_location = DataDir()/db
       .type = str
