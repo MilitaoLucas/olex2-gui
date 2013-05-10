@@ -22,7 +22,7 @@ sys.path.append(r".\src")
 import History
 
 import ExternalPrgParameters
-SPD, RPD = ExternalPrgParameters.SPD, ExternalPrgParameters.RPD
+SPD, RPD = ExternalPrgParameters.get_program_dictionaries()
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
