@@ -8,6 +8,7 @@ import sys
 import olx
 import olex
 import olexex
+import OlexVFS
 
 import time
 from datetime import date
@@ -33,6 +34,10 @@ tutorial_box_initialised = False
 
 global time_add
 time_add = 0
+
+global hover_buttons
+hover_buttons = OV.GetParam('olex2.hover_buttons')
+
 def makeHtmlTable(list):
   """ Pass a list of dictionaries, with one dictionary for each table row.
 
@@ -158,6 +163,13 @@ def makeHtmlTableRow(dictionary):
 
   href_1 = ""
   href_2 = ""
+
+  if 'href' in dictionary.keys():
+    href_content= dictionary['href']
+    href_1 = '<a href="%s">' %href_content
+    href_2 = '</a>'
+    dictionary['href'] = ""
+
   if 'chooseFile' in dictionary.keys():
     chooseFile_dict = dictionary['chooseFile']
     if 'file_type' in chooseFile_dict.keys():
@@ -1227,10 +1239,7 @@ def _check_modes_and_states(name):
 def MakeHoverButton(name, cmds, onoff = "off", btn_bg='table_firstcol_colour'):
   #global time_add
   #t = time.time()
-  hover_buttons = OV.GetParam('olex2.hover_buttons')
   on = _check_modes_and_states(name)
-  
-
   if cmds.lower().startswith("html.itemstate") and "h2" in cmds:
     solo = OV.GetParam('user.solo')
     item = cmds.split()[1]
@@ -1238,7 +1247,6 @@ def MakeHoverButton(name, cmds, onoff = "off", btn_bg='table_firstcol_colour'):
     item_name = item.split("h2-")[1].split("-")[1]
     if solo:
       cmds = "html.itemstate h2-%s* 2>>%s" %(tab,cmds) 
-
   if on:
     txt = MakeHoverButtonOn(name, cmds, btn_bg)
   else:
@@ -1253,7 +1261,7 @@ OV.registerFunction(MakeHoverButton)
 def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
   if "None" in name:
     return ""
-  hover_buttons = OV.GetParam('olex2.hover_buttons')
+  global hover_buttons
   click_console_feedback = False
   n = name.split("-")
   d = {'bgcolor': OV.GetParam('gui.html.%s' %btn_bg)}
@@ -1312,7 +1320,7 @@ OV.registerFunction(MakeHoverButtonOff)
 def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
   if "None" in name:
     return ""
-  hover_buttons = OV.GetParam('olex2.hover_buttons')
+  global hover_buttons
   click_console_feedback = False
   n = name.split("-")
   d = {'bgcolor': OV.GetParam('gui.html.%s' %btn_bg)}
@@ -1361,6 +1369,7 @@ def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
 '''%d
   return txt
 OV.registerFunction(MakeHoverButtonOn)
+
 def MakeActiveGuiButton(name,cmds,toolname=""):
   n = name.split("-")
   d = {}
