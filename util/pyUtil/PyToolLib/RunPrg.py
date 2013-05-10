@@ -17,7 +17,7 @@ class RunPrg(ArgumentParser):
   def __init__(self):
     super(RunPrg, self).__init__()
     self.demote = False
-    self.SPD, self.RPD = ExternalPrgParameters.SPD, ExternalPrgParameters.RPD
+    self.SPD, self.RPD = ExternalPrgParameters.get_program_dictionaries()
     self.terminate = False
     self.tidy = False
     self.method = ""
