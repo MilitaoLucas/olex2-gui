@@ -1,11 +1,14 @@
 import olex
 import olx
 import os
+import inspect
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
 import userDictionaries
+
+current_py_file_path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 
 
 def BGColorForValue(value):
@@ -25,23 +28,12 @@ class publication:
     if x < 0: x = mouseX 
     if y < 0: y = 0
     return x,y
-    
 
   def make_person_box(self, box, edit=False):
     import userDictionaries
-    if not olx.html.GetValue(box):
-      person = "--"
     person = olx.html.GetValue(box).strip()
-    if not person:
-      person = userDictionaries.people.get_person_details(person)
-      edit = True
     person = userDictionaries.people.get_person_details(person)
-    if not person:
-      person = userDictionaries.people.addNewPerson(olx.html.GetValue(box))
-      edit = True
-    elif type(person) != dict:
-      return person
-    elif person['displayname'] == "New Person" or not person:
+    if person['displayname'] == "New Person":
       edit = True
     if not edit:
       return person
@@ -54,7 +46,8 @@ class publication:
       olx.html.ShowModal(pop_name)
     else:
       person.setdefault('pop_name',pop_name)
-      txt=open("%s/person.htm" %OV.BaseDir(), 'r').read()%person
+      txt=open("%s/person.htm" %current_py_file_path, 'r').read()
+      txt = txt%person
       OV.write_to_olex("person.htm", txt)
       boxWidth = 500
       boxHeight = 400
@@ -74,12 +67,11 @@ class publication:
         email = olx.html.GetValue('Person.PERSON_EMAIL')
         phone = olx.html.GetValue('Person.PERSON_PHONE')
         affiliation = olx.html.GetValue('Person.PERSON_AFFILIATION')
-        displayname = userDictionaries.people.make_display_name(person,format="acta")
-        displayname = displayname.replace("  ", " ")
-        displayname = displayname.replace("  ", " ")
-        displayname = displayname.replace("  ", " ")
-        userDictionaries.people.add_person(firstname, middlename, lastname, email, phone, affiliation, displayname)
-        res = userDictionaries.people.get_person_details(displayname)
+        #displayname = userDictionaries.people.make_display_name(person,person_format="acta")
+        #displayname = displayname.replace("  ", " ")
+        #displayname = displayname.replace("  ", " ")
+        #displayname = displayname.replace("  ", " ")
+        res = userDictionaries.people.add_person(firstname, middlename, lastname, email, phone, affiliation, displayname=None)[6]
       return res
 
   def make_affiliation_box(self, box, edit=False):
@@ -107,7 +99,7 @@ class publication:
       olx.html.ShowModal(pop_name)
     else:
       d.setdefault('pop_name',pop_name)
-      txt=open("%s/affiliation.htm" %OV.BaseDir(), 'r').read()%d
+      txt=open("%s/affiliation.htm" %current_py_file_path, 'r').read()%d
       OV.write_to_olex("affiliation.htm", txt)
       boxWidth = 500
       boxHeight = 400
