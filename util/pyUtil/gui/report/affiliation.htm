@@ -1,0 +1,197 @@
+<body link="$GetVar(HtmlLinkColour)" >
+<font color=$GetVar(HtmlFontColour  size=$GetParam('HtmlFontSize') face="$GetVar(HtmlFontName)">
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
+
+  <tr>
+  <td bgcolor='%(banner_colour)s'></td>
+
+  <td bgcolor='%(banner_colour)s'>
+    <font size='6' color='#ffffff'>
+  <br><b>%(name)s</b>
+    </font>
+  </td>
+
+  </tr>
+
+
+  <tr>
+    <td width='30%%'>
+    Name of University:
+    </td>
+    <td width='70%%'>
+      <input
+        type="text"
+        bgcolor="$GetVar(HtmlInputBgColour))"
+        valign='center'
+        name="AFFILIATION_NAME"
+        value='%(name)s'
+        reuse
+        width="100%%"
+        height="20"
+      >
+    </td>
+  </tr>
+  <tr>
+    <td width='30%%'>
+      Name of Department:
+  </td>
+    <td width='70%%'>
+      <input
+      type="text"
+        bgcolor="$GetVar(HtmlInputBgColour))"
+        valign='center'
+        name="AFFILIATION_DEPARTMENT"
+        value='%(department)s'
+        reuse
+        width="100%%"
+        height="20"
+      >
+    </td>
+  </tr>
+  <tr>
+    <td width='30%%'>
+    Address Line 1:
+    </td>
+    <td width='70%%'>
+      <input
+        type="text"
+        bgcolor="$GetVar(HtmlInputBgColour))"
+        valign='center'
+        name="AFFILIATION_ADDRESS_LINE_1"
+        value='%(address1)s'
+        reuse
+        width="100%%"
+        height="20"
+      >
+    </td>
+  </tr>
+  <tr>
+
+    <td width='30%%'>
+    Address Line 2:
+    </td>
+    <td width='70%%'>
+    <input
+      type="text"
+      bgcolor="$GetVar(HtmlInputBgColour))"
+      valign='center'
+      name="AFFILIATION_ADDRESS_LINE_2"
+      value='%(address2)s'
+      reuse
+      width="100%%"
+      height="20"
+    >
+    </td>
+  </tr>
+  <tr>
+
+    <td width='30%%'>
+    City:
+    </td>
+    <td width='70%%'>
+      <input
+        type="text"
+        bgcolor="$GetVar(HtmlInputBgColour))"
+        valign='center'
+        name="AFFILIATION_CITY"
+        value='%(city)s'
+        reuse
+        width="100%%"
+        height="20"
+      >
+    </td>
+
+  </tr>
+  <tr>
+
+    <td width='20%%'>
+    Post Code:
+    </td>
+    <td width='70%%'>
+      <input
+        type="text"
+        bgcolor="$GetVar(HtmlInputBgColour))"
+        valign='center'
+        name="AFFILIATION_POST_CODE"
+        value='%(post_code)s'
+        width="100%%"
+        height="20"
+      >
+    </td>
+
+  </tr>
+
+
+  <tr>
+    <td width='30%%'>
+    Region:
+    </td>
+    <td width='70%%'>
+      <input
+        type="text"
+        bgcolor="$GetVar(HtmlInputBgColour))"
+        valign='center'
+        name="AFFILIATION_REGION"
+        value='%(country)s'
+        reuse
+        width="100%%"
+        height="20"
+      >
+    </td>
+
+
+  </tr>
+  <tr>
+
+
+
+  <tr>
+    <td width='30%%'>
+    Country:
+    </td>
+    <td width='70%%'>
+      <input
+        type="text"
+        bgcolor="$GetVar(HtmlInputBgColour))"
+        valign='center'
+        name="AFFILIATION_COUNTRY"
+        value='%(country)s'
+        reuse
+        width="100%%"
+        height="20"
+      >
+    </td>
+
+
+  </tr>
+  <tr>
+
+
+
+
+
+  <td>
+  </td>
+  <td valign='centre'>
+    <input
+      type="button"
+      bgcolor="$GetVar(HtmlInputBgColour))"
+      valign='center'
+      width="60"
+      height="22"
+      onclick="html.EndModal(%(pop_name)s,1)"
+      value = "OK">
+    <input
+      type="button"
+      bgcolor="$GetVar(HtmlInputBgColour))"
+      valign='center'
+      width="60"
+      height="22"
+      onclick="html.EndModal(%(pop_name)s,0)"
+      value = "Cancel">
+  </td>
+  </tr>
+
+  </table>
+  </font>
+  </body>

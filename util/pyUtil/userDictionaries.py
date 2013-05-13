@@ -161,13 +161,13 @@ class Affiliations:
     cursor.execute("""CREATE TABLE affiliations
                       (Name TEXT, Department TEXT, Address1 TEXT, Address2 TEXT, City TEXT, PostCode TEXT, Region TEXT, Country TEXT, displayname TEXT UNIQUE) 
                    """)
-    affiliations = [
-      ('Durham University', 'Department of Chemistry', 'South Road', '', 'Durham', 'DH6 1LE', 'County Durham', 'U.K', 'Durham University, Durham'),
-      ('VUW', 'School of Chemical and Physical Sciences', '', '', 'Wellington', '6001', '', 'New Zealand', 'VUW, Wellington'),
-      ('North Maharashtra University', 'School of Chemical Sciences', 'Umavi Nagar', '', 'Jalgaon', '425 001', '', 'India', 'North Maharashtra University Jalagon'),
-      ('Vidyasagar University', 'Department of Chemistry and Chemical Technology', 'South Road', '', 'Midnapore', '7210102', 'West Bengal', 'India', 'Vidyasagar University Midnapore'),
-    ]
-    cursor.executemany("INSERT INTO affiliations VALUES (?,?,?,?,?,?,?,?,?)", affiliations)
+    #affiliations = [
+      #('Durham University', 'Department of Chemistry', 'South Road', '', 'Durham', 'DH6 1LE', 'County Durham', 'U.K', 'Durham University, Durham'),
+      #('VUW', 'School of Chemical and Physical Sciences', '', '', 'Wellington', '6001', '', 'New Zealand', 'VUW, Wellington'),
+      #('North Maharashtra University', 'School of Chemical Sciences', 'Umavi Nagar', '', 'Jalgaon', '425 001', '', 'India', 'North Maharashtra University Jalagon'),
+      #('Vidyasagar University', 'Department of Chemistry and Chemical Technology', 'South Road', '', 'Midnapore', '7210102', 'West Bengal', 'India', 'Vidyasagar University Midnapore'),
+    #]
+    #cursor.executemany("INSERT INTO affiliations VALUES (?,?,?,?,?,?,?,?,?)", affiliations)
     self.conn.commit()
 
   def getListAffiliations(self):
@@ -227,11 +227,11 @@ class Persons:
     cursor.execute("""CREATE TABLE persons
                       (firstname TEXT, middlename TEXT, lastname TEXT, email TEXT, phone TEXT, affiliation TEXT, displayname TEXT UNIQUE) 
                    """)  
-    persons = [
-      ('Horst', '', 'Puschmann', 'horst.puschmann@gmail.com', '+44 191 334 2004', 'Durham University' 'Horst Puschmann'),
-      ('John', '', 'Spencer', 'john.spencer@vuw.ac.uk', '+44 191 334 2004','', ''),
-    ]
-    cursor.executemany("INSERT INTO persons VALUES (?,?,?,?,?,?,?)", persons)
+    #persons = [
+      #('Horst', '', 'Puschmann', 'horst.puschmann@gmail.com', '+44 191 334 2004', 'Durham University' 'Horst Puschmann'),
+      #('John', '', 'Spencer', 'john.spencer@vuw.ac.uk', '+44 191 334 2004','', ''),
+    #]
+    #cursor.executemany("INSERT INTO persons VALUES (?,?,?,?,?,?,?)", persons)
     self.conn.commit()
 
   def addNewPerson(self, name=""):
@@ -299,8 +299,8 @@ class Persons:
       display = self.make_display_name(person)
       retVal_l.append(display)
     retVal_l.sort()
+    retVal_l.append("-- ADD NEW --")
     retVal = ";".join(retVal_l)
-    retVal += ";-- ADD NEW --"
     return retVal
 
   def getPersonInfo(self,person,item):
@@ -360,6 +360,8 @@ class Persons:
     return address
 
   def add_person(self, firstname, middlename, lastname, email, phone, affiliation, displayname):
+    if not displayname:
+      displayname = self.make_display_name((firstname, middlename, lastname))
     cursor = self.cursor
     person = (firstname, middlename, lastname, email, phone, affiliation, displayname)
     cursor.execute("INSERT OR REPLACE INTO persons VALUES (?,?,?,?,?,?,?)", person)
