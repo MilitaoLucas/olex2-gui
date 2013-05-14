@@ -32,6 +32,8 @@ class publication:
   def make_person_box(self, box, edit=False):
     import userDictionaries
     person = olx.html.GetValue(box).strip()
+    if not person:
+      return
     person = userDictionaries.people.get_person_details(person)
     if person['displayname'] == "New Person":
       edit = True
@@ -77,6 +79,8 @@ class publication:
   def make_affiliation_box(self, box, edit=False):
     import userDictionaries
     affiliation = olx.html.GetValue(box).strip()
+    if not affiliation:
+      return
     d = {}
     if '--' in affiliation:
       edit = True
@@ -172,7 +176,8 @@ class publication:
       if "contact" in box.lower():
         self.ChangeContactAuthor(person)
     else:
-      retVal = False
+      olx.html.SetValue(box, "")
+      retVal = 0
     return retVal
 
   def OnPersonAffiliationChange(self, box, author, edit=True):
@@ -236,7 +241,7 @@ class publication:
   
   def OnAddNameToAuthorList(self, box_name):
     value = olx.html.GetValue(box_name).strip()
-    value = self.OnPersonChange(box_name, value)
+    value = self.OnPersonChange(box_name)
     if self.AddNameToAuthorList(value):
       olx.html.Update()
       
