@@ -9,7 +9,7 @@ curr_path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe
 class GuiImages:
 
   def __init__(self):
-    img_root = OV.GetParam("gui.GuiImages.action", "%s/default/action" %curr_path)
+    img_root = OV.GetParam("gui.GuiImages.action", "%s/etc/gui/images/action" %OV.BaseDir())
     height = OV.GetParam('gui.html.input_height')
     self.img_d = {
       'root':img_root,
