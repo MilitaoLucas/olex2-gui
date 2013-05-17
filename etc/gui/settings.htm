@@ -222,6 +222,26 @@ Freeze(false)>>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='START_OLEX2_IN';help_ext=Auto-Close-Settings_Panels;1 -->
+  <td width='23%'>
+    <b>%Close Settings%:</b>
+  </td>
+  <td width='55%'>
+     Solve, Refine and Report panels
+  </td>
+  <td width='20%' align='right'>
+    <input 
+      type="checkbox"
+      height="$GetVar(HtmlCheckboxHeight)"
+      name="AUTO_CLOSE_SETTINGS_PANEL"
+      fgcolor="$GetVar(HtmlFontColour)"
+      checked="$not(strcmp(spy.GetParam(user.auto_close_settings_panel),False))"
+      width='15'
+      oncheck="spy.SetParam(user.auto_close_settings_panel,True)" 
+      onuncheck="spy.SetParam(user.auto_close_settings_panel,False)"
+    >
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->

@@ -116,7 +116,7 @@ snum
       .type = float
     vata = 0
       .type = float
-    program = ShelXS ShelXS-2013 ShelXS86 XS '*olex2.solve' XM ShelXD ShelXD-2013 SIR2002 SIR2004 SIR2008 SIR2011 Superflip Unknown
+    program = ShelXS ShelXS-2013 ShelXS86 XS XT '*olex2.solve' XM ShelXD ShelXD-2013 SIR2002 SIR2004 SIR2008 SIR2011 Superflip Unknown
       .type = choice
     method = 'Dual Space' '*Charge Flipping' 'Direct Methods' 'Patterson Method' 'Structure Expansion' Unknowm
       .type = choice
@@ -191,10 +191,13 @@ snum
       .type = int
       .help = The maximum number of electron density peaks to be returned \
         after refinement
-    update_weight = False
+    update_weight = True
       .type = bool
       .help = Automatically update the weight instruction before the next \
         refinement
+    update_weight_maxR1 = 15
+      .type = float
+      .help = The maximum R1 value below which weighting scheme will be updated automatically
     suggested_weight = None
       .type = floats(size=2)
       .help = The weighting scheme parameters suggested by the refinement \
@@ -1007,7 +1010,9 @@ user
     .help = "Only one top-level tool can be open at any one time"
   solo_exceptions = start
     .type = strings
-  auto_close_settings_panel = True
+  auto_close_settings_panel = False
+    .type = bool
+  auto_insert_acta_stuff = True
     .type = bool
   folder_view_root = None
     .type = path

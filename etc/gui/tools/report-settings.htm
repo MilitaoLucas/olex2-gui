@@ -135,10 +135,10 @@ $spy.MakeHoverButton('button-merge_cif','spy.ExtractCifInfo()>>spy.MergeCif(True
 $spy.MakeHoverButton('button-checkcif_report','spy.cif.GetCheckCifReport(html.GetState(SET_CHECKCIF_FCF))')
   </td>
   
-  <td name=GET_CHECKCIF_REPORT_FORMAT align='left' VALIGN='center' width='14%'>
+  <td name=GET_CHECKCIF_REPORT_FORMAT align='left' VALIGN='center' width='12%'>
    <input
       type='combo'
-      width="60"
+      width="100%"
       height="GetVar('HtmlComboHeight')"
       bgcolor="GetVar('HtmlTableBgColour')"
       name='SET_CHECKCIF_FORMAT'
@@ -165,9 +165,19 @@ $spy.MakeHoverButton('button-checkcif_report','spy.cif.GetCheckCifReport(html.Ge
       right='false'
     >
   </td>
-  <td width='26%' align='right'>
-  Update Meta Info 
+
+  <td name=REQUEST_CCDC_NUMBER align='right' width = '34%'>
+$spy.MakeHoverButton('button-ccdc_number','spy.ccdc_submit()')
   </td>
+
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+<tr align = 'center' name=EDIT_CIF width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=CCDC-Number-Request;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
 
 
 <td name=AUTO_MERGE_CIF align='right' VALIGN='right' width='5%'>
@@ -184,24 +194,18 @@ $spy.MakeHoverButton('button-checkcif_report','spy.cif.GetCheckCifReport(html.Ge
       right='false'
     >
 </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-
-<tr align = 'center' name=EDIT_CIF width='100%'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=CCDC-Number-Request;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-
-  <td name=REQUEST_CCDC_NUMBER align='left' VALIGN='left' width = '34%'>
-$spy.MakeHoverButton('button-ccdc_number','spy.ccdc_submit()')
-  </td>
   <td align='left'>
-<zimg src="gui/images/src/CCDC_tiny.png">
+Merge CIF: <a href='spy.EditCifInfo()'>metacif</a>, $spy.gui.report.publication.DisplayMergeList()
   </td>
 
   <td align='left'>
-<font size="+1">Submit your structure here!</font>
+    
   </td>
+
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
 </table>
       </td>
     </tr>

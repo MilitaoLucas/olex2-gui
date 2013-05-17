@@ -252,9 +252,8 @@ class publication:
     else:
       str = ""
       for item in l:
-        display = item.split('\\')[-1:]
-        href = item
-        str += "<a href='shell %s'>%s</a> " %(href, display)
+        display = os.path.basename(item)
+        str += "<a href='shell %s'>%s</a> " %(item, display)
     return str
 
 

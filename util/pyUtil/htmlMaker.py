@@ -837,7 +837,7 @@ def weightGuiDisplay():
   if suggested_weight:
     for curr, sugg in zip(current_weight, suggested_weight):
       curr = float(curr)
-      if round(curr, 4) == round(sugg, 4):
+      if curr-curr*0.01 < sugg < curr+curr*0.01:
         colour = gui_green
       elif curr-curr*0.1 < sugg < curr+curr*0.1:
         colour = gui_orange
@@ -857,20 +857,39 @@ def weightGuiDisplay():
        }
   box = htmlTools.make_tick_box_input(d)
 
+  box = '''
+<input
+  type='text'
+  width='100%%'
+  height="$GetVar(HtmlInputHeight)"
+  bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+  name='UPDATE_WEIGHT_MINR1'
+  valign='center'
+  align='left'
+  value='%s'
+  onchange="spy.SetParam('snum.refinement.update_weight_maxR1',html.GetValue(~name~))"
+ >
+''' %OV.GetParam('snum.refinement.update_weight_maxR1')
+
+
   wght_str = ""
   for i in suggested_weight:
     wght_str += " %.4f" %i
   txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update")
   txt_Weight = OV.TranslatePhrase("Weight")
   html = '''
-  <td ALIGN='left' width='60%%'>
-    <b><a target="%s" href="UpdateWght%s>>html.Update">%s: %s</a></b>
+  <td ALIGN='left' width='50%%'>
+    <b>%s: <a target="%s" href="UpdateWght%s>>html.Update">%s</a></b>
   </td>
-  <td ALIGN='right' width='35%%'>Auto Update Weights
+  <td ALIGN='right' width='38%%'>Auto-update when R1 &lt;
   </td>
-  <td ALIGN='right'>%s
+  <td ALIGN='right' width='10%%'>%s
   </td>
-    ''' %(txt_tick_the_box, wght_str, txt_Weight, html_scheme, box)
+  <td ALIGN='right' width='2%%'>%%
+  </td>
+  
+  
+    ''' %(txt_Weight, txt_tick_the_box, wght_str, html_scheme, box)
   return html
 OV.registerFunction(weightGuiDisplay)
 

@@ -298,10 +298,36 @@ class Method_refinement(Method):
 
     if RunPrgObject.params.snum.refinement.auto.tidy:
       RunPrgObject.doAutoTidyBefore()
+
     if RunPrgObject.params.snum.refinement.update_weight:
-      suggested_weight = OV.GetParam('snum.refinement.suggested_weight')
-      if suggested_weight is not None:
-        olx.UpdateWght(*suggested_weight)
+      current_R1 = OV.GetParam('snum.current_r1')
+      if current_R1 < OV.GetParam('snum.refinement.update_weight_maxR1'):
+        suggested_weight = OV.GetParam('snum.refinement.suggested_weight')
+        if suggested_weight is not None:
+          olx.UpdateWght(*suggested_weight)
+
+    if RunPrgObject.params.user.auto_insert_acta_stuff:
+      radiation = olx.xf.exptl.Radiation()
+      
+      # Check whether these are present. If so, do nothing.
+      more = olx.Ins('MORE')
+      if more == "n/a":
+        OV.AddIns("'MORE -1'")
+      bond = olx.Ins('BOND')
+      if bond == "n/a":
+        OV.AddIns("'BOND $H'")
+      acta= olx.Ins('ACTA')
+      if acta == "n/a":
+        if radiation == "0.71073":
+          OV.AddIns("'ACTA 52'")
+      #htab= olx.Ins('HTAB')
+      #if acta == "n/a":
+        #OV.AddIns("'HTAB'")
+
+      #Delete and then add again
+      olx.DelIns('CONF')
+      OV.AddIns('CONF')
+
     if RunPrgObject.make_unique_names:
       pass
       #olx.Sel('-a')
@@ -361,10 +387,18 @@ class Method_shelx(Method):
       raise RuntimeError(
         'you may be using an outdated version of %s' %(prgName))
     olx.WaitFor('process') # uncomment me!
-    if os.path.getsize("%s.res" %(xl_ins_filename)) == 0:
-      self.failure = True
-    else:
-      self.failure = False
+    
+    additions = ['', '_a', '_b', '_c', '_d', '_e']
+    for add in additions:
+      p = "%s%s.res" %(xl_ins_filename, add)
+      if os.path.exists(p):
+        if os.path.getsize(p) == 0:
+          self.failure = True
+        else:
+          self.failure = False
+          break
+      else:
+        continue
     olex.m("User '%s'" %RunPrgObject.filePath)
     #olx.User("'%s'" %RunPrgObject.filePath)
 
@@ -683,7 +717,7 @@ class Method_Superflip(Method_solution):
   def do_run(self, RunPrgObject):
     from flipsmall import flipsmall
     flipsmall()
-
+    
 class Method_SIR(Method_solution):
 
   def do_run(self, RunPrgObject):
@@ -844,6 +878,12 @@ def defineExternalPrograms():
     author="G.M.Sheldrick/Bruker",
     reference=ref_shelx,
     execs=["xs.exe", "xs"])
+  XT = Program(
+    name='XT',
+    program_type='solution',
+    author="G.M.Sheldrick/Bruker",
+    reference=ref_shelx,
+    execs=["xt.exe", "xt"])
   ShelXD = Program(
     name='ShelXD',
     program_type='solution',
@@ -924,6 +964,7 @@ def defineExternalPrograms():
   XS.addMethod(direct_methods)
   XS.addMethod(patterson)
   XS.addMethod(texp)
+  XT.addMethod(direct_methods)
   ShelXD.addMethod(dual_space)
   ShelXD13.addMethod(dual_space)
   XM.addMethod(dual_space)
@@ -1013,7 +1054,7 @@ def defineExternalPrograms():
   RPD.addProgram(smtbx_refine)
 
   SPD = ExternalProgramDictionary()
-  for prg in (ShelXS, ShelXS13, ShelXS86, XS, ShelXD, ShelXD13, XM, smtbx_solve, SIR97, SIR2002, SIR2004, SIR2008, SIR2011, Superflip):
+  for prg in (ShelXS, ShelXS13, ShelXS86, XS, XT, ShelXD, ShelXD13, XM, smtbx_solve, SIR97, SIR2002, SIR2004, SIR2008, SIR2011, Superflip):
     SPD.addProgram(prg)
 
 
