@@ -84,7 +84,10 @@ class RunPrg(ArgumentParser):
     if self.broadcast_mode:
       self.doBroadcast()
     for ext in extensions:
-      copy_from = "%s/%s.%s" %(self.tempPath, self.shelx_alias, ext)
+      if "xt" in self.program.name.lower():
+        copy_from = "%s/%s_a.%s" %(self.tempPath, self.shelx_alias, ext)
+      else:
+        copy_from = "%s/%s.%s" %(self.tempPath, self.shelx_alias, ext)
       copy_to = "%s/%s.%s" %(self.filePath, self.original_filename, ext)
       if os.path.isfile(copy_from):
         if copy_from.lower() != copy_to.lower():
