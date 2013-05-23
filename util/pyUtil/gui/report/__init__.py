@@ -44,13 +44,18 @@ class publication:
     person.setdefault('banner_colour', "#005096")
 
     pop_name = "Person"
-    if OV.IsControl('%s'%pop_name):
+    if olx.html.IsPopup('%s'%pop_name) == 'true':
       olx.html.ShowModal(pop_name)
     else:
       person.setdefault('pop_name',pop_name)
       txt=open("%s/person.htm" %current_py_file_path, 'r').read()
       txt = txt%person
       OV.write_to_olex("person.htm", txt)
+      
+      f = file("e:/x.htm", "w+")
+      f.write(txt)
+      f.close()
+      
       boxWidth = 500
       boxHeight = 400
       x,y = self.get_box_x_y(boxWidth, boxHeight)
