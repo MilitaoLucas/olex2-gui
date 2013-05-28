@@ -1,7 +1,10 @@
+import os
 import sys
+import olx
+import olex
+sys.path.append(r"E:\svn\olex2pro\trunk\build\MSVC-2010\x64\Unicode-release-d\dll")
 
 import _plgl
-
 olx.LoadDll("_plgl.pyd")
 def getModule(name):
   dir = os.path.normpath("%s/modules" %(olx.app.SharedDir()))
@@ -44,5 +47,5 @@ def loadModule(name):
   except Exception, e:
     print e
   
-OV.registerFunction(getModule, False, "plugins")
-OV.registerFunction(loadModule, False, "plugins")
+olex.registerFunction(getModule, False, "plugins")
+olex.registerFunction(loadModule, False, "plugins")
