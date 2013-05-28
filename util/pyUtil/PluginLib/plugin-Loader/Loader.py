@@ -1,4 +1,7 @@
+import sys
+
 import _plgl
+
 olx.LoadDll("_plgl.pyd")
 def getModule(name):
   dir = os.path.normpath("%s/modules" %(olx.app.SharedDir()))

@@ -107,6 +107,11 @@ external_files = {
   #plugins
   #'olex2c-win32.zip': ('olex-port', 'plugin-Headless-win-32', 'action:extract', 'action:delete'),
   #'olex2c-win64.zip': ('olex-port', 'plugin-Headless-win-64', 'action:extract', 'action:delete'),
+  'plgl-mac-32.zip': ('olex-port', 'plugin-Loader-mac-32', 'action:extract', 'action:delete'),
+  'plgl-linux-32.zip': ('olex-port', 'plugin-Loader-linux-32', 'action:extract', 'action:delete'),
+  'plgl-linux-64.zip': ('olex-port', 'plugin-Loader-linux-64', 'action:extract', 'action:delete'),
+  'plgl-win-32.zip': ('olex-port', 'plugin-Loader-win-32', 'action:extract', 'action:delete'),
+  'plgl-win-64.zip': ('olex-port', 'plugin-Loader-win-64', 'action:extract', 'action:delete'),
 }
 # special zip files (must have relevant structure), must exist ABOVE as well!!
 #if the associated value is false - the file is non-portable and will not end up in the portable-gui.zip
