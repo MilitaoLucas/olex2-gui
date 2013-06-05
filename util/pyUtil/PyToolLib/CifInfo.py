@@ -366,6 +366,7 @@ OV.registerFunction(MergeCif)
 
 class ExtractCifInfo(CifTools):
   conflict_d = {}
+  
   def __init__(self):
     super(ExtractCifInfo, self).__init__()
     self.ignore = ["?", "'?'", ".", "'.'"]
@@ -376,6 +377,7 @@ class ExtractCifInfo(CifTools):
     olx.cif_model = self.cif_model
 
   def run(self):
+    import iotbx.cif
     self.SPD, self.RPD = ExternalPrgParameters.get_program_dictionaries()
     reference_style = OV.GetParam('snum.report.publication_style', 'acta').lower()
     self.userInputVariables = OV.GetParam("snum.metacif.user_input_variables")
@@ -394,6 +396,14 @@ class ExtractCifInfo(CifTools):
     import History
     active_solution = History.tree.active_child_node
     all_sources_d = {}
+    
+    
+    f = open(OV.file_ChangeExt(OV.FileFull(), 'cif'), 'rUb')
+    current_cif = iotbx.cif.reader(input_string=f.read()).model().values()[0]
+    f.close()
+    all_sources_d[p] = current_cif
+    
+    
     if active_solution is not None and active_solution.is_solution:
 
       ## Backwards Compatibility
@@ -434,15 +444,64 @@ class ExtractCifInfo(CifTools):
       self.update_cif_block({
         '_computing_structure_refinement': refinement_reference}, force=force)
 
+
+    ##RANDOM THINGS
     p, pp = self.sort_out_path(path, "frames")
     if p and self.metacifFiles.curr_frames != self.metacifFiles.prev_frames:
       try:
         info = os.stat(p)
         file_time = info.st_mtime
-
       except:
         print "Error reading Bruker frame file %s" %p
+    # OD Data Collection Date
+    p, pp = self.sort_out_path(path, "od_frame_date")
+    if p:
+      try:
+        info = os.stat(p)
+        file_time = info.st_mtime
+        OV.SetParam('snum.report.date_collected', file_time)
+      except:
+        print "Error reading OD frame Date %s" %p
 
+    # OD Frame Image
+    p, pp = self.sort_out_path(path, "od_frame_images")
+    if p:
+      try:
+        #info = os.stat(p)
+        #file_time = info.st_mtime
+        OV.SetParam('snum.report.frame_image', p)
+        OV.SetParam('snum.report.frame_images', pp)
+      except:
+        print "Error reading OD frame image %s" %p
+
+    # OD Crystal Image
+    p, pp = self.sort_out_path(path, "crystal_images")
+    if pp:
+      try:
+        OV.SetParam('snum.report.crystal_image', p)
+        l = []
+        j = len(pp)
+        if j <= 5:
+          l = pp
+        else:
+          for i in xrange(6):
+            idx = ((i+1) * j/6) - j/5 + 1
+            l.append(pp[idx])
+        OV.SetParam('snum.report.crystal_images', l)
+      except:
+        print "Error reading OD crystal image %s" %p
+
+    # OD Notes File
+    p, pp = self.sort_out_path(path, "notes_file")
+    if p:
+      try:
+        info = os.stat(p)
+        file_time = info.st_mtime
+        OV.SetParam('snum.report.data_collection_notes', p)
+      except:
+        print "Error reading OD crystal image %s" %p
+
+    ##THINGS IN CIF FORMAT
     p, pp = self.sort_out_path(path, "smart")
     if p and self.metacifFiles.curr_smart != self.metacifFiles.prev_smart:
       try:
@@ -554,6 +613,23 @@ class ExtractCifInfo(CifTools):
       #except:
         #print "Error reading cad4 file %s" %p
 
+    merge_files = OV.GetParam('snum.report.merge_these_cifs',[])
+    merge_files.append(self.metacif_path)
+    for p in merge_files:
+      import iotbx.cif
+      f = open(p, 'rUb')
+      content = f.read().strip()
+      if not content.startswith('data_'):
+        if not '\ndata_' in content:
+          content = "data_n\n" + content
+      f.close()
+      c = iotbx.cif.reader(input_string=content).model().values()[0]
+      self.exclude_cif_items(c)
+      f.close()
+      self.update_cif_block(c, force=False)
+      all_sources_d[p] = c
+
+
     # Oxford Diffraction data collection CIF
     p,pp  = self.sort_out_path(path, "cif_od")
     if p: # and self.metacifFiles.curr_cif_od != self.metacifFiles.prev_cif_od:
@@ -568,71 +644,30 @@ class ExtractCifInfo(CifTools):
       except:
         print "Error reading Oxford Diffraction CIF %s" %p
 
-    # OD Data Collection Date
-    p, pp = self.sort_out_path(path, "od_frame_date")
-    if p:
-      try:
-        info = os.stat(p)
-        file_time = info.st_mtime
-        OV.SetParam('snum.report.date_collected', file_time)
-      except:
-        print "Error reading OD frame Date %s" %p
-
-    # OD Frame Image
-    p, pp = self.sort_out_path(path, "od_frame_images")
-    if p:
-      try:
-        #info = os.stat(p)
-        #file_time = info.st_mtime
-        OV.SetParam('snum.report.frame_image', p)
-        OV.SetParam('snum.report.frame_images', pp)
-      except:
-        print "Error reading OD frame image %s" %p
-
-    # OD Crystal Image
-    p, pp = self.sort_out_path(path, "crystal_images")
-    if pp:
-      try:
-        OV.SetParam('snum.report.crystal_image', p)
-        l = []
-        j = len(pp)
-        if j <= 5:
-          l = pp
-        else:
-          for i in xrange(6):
-            idx = ((i+1) * j/6) - j/5 + 1
-            l.append(pp[idx])
-        OV.SetParam('snum.report.crystal_images', l)
-      except:
-        print "Error reading OD crystal image %s" %p
-
-    # OD Notes File
-    p, pp = self.sort_out_path(path, "notes_file")
-    if p:
-      try:
-        info = os.stat(p)
-        file_time = info.st_mtime
-        OV.SetParam('snum.report.data_collection_notes', p)
-      except:
-        print "Error reading OD crystal image %s" %p
-
 
     # Rigaku data collection CIF
     p, pp = self.sort_out_path(path, "crystal_clear")
     if p: # and self.metacifFiles.curr_crystal_clear != self.metacifFiles.prev_crystal_clear:
-      try:
-        import iotbx.cif
-        f = open(p, 'rUb')
-        cif = iotbx.cif.reader(input_string=f.read()).model()
-        for key, cif_block in cif.iteritems():
-          if key.lower() not in ('global', 'general'):
-            break
-        self.exclude_cif_items(cif_block)
-        f.close()
-        self.update_cif_block(cif_block)
-        all_sources_d[p] = cif_block
-      except:
-        print "Error reading Rigaku CIF %s" %p
+      f = open(p, 'rUb')
+      crystal_clear = iotbx.cif.reader(input_string=f.read()).model().values()[0]
+      self.exclude_cif_items(crystal_clear)
+      f.close()
+      self.update_cif_block(crystal_clear, force=False)
+      all_sources_d[p] = crystal_clear
+
+      #try:
+        #import iotbx.cif
+        #f = open(p, 'rUb')
+        #cif = iotbx.cif.reader(input_string=f.read()).model()
+        #for key, cif_block in cif.iteritems():
+          #if key.lower() not in ('global', 'general'):
+            #break
+        #self.exclude_cif_items(cif_block)
+        #f.close()
+        #self.update_cif_block(cif_block)
+        #all_sources_d[p] = cif_block
+      #except:
+        #print "Error reading Rigaku CIF %s" %p
 
     # Diffractometer definition file
     diffractometer = OV.GetParam('snum.report.diffractometer')
@@ -641,12 +676,21 @@ class ExtractCifInfo(CifTools):
     except KeyError:
       p = '?'
     if diffractometer not in ('','?') and p != '?' and os.path.exists(p):
-      try:
-        import cif_reader
-        cif_def = cif_reader.reader(p).cifItems()
-        self.update_cif_block(cif_def)
-      except:
-        print "Error reading local diffractometer definition file %s" %p
+      f = open(p, 'rUb')
+      content = "data_diffractometer_def\n" + f.read()
+      diffractometer_def = iotbx.cif.reader(input_string=content).model().values()[0]
+      self.exclude_cif_items(diffractometer_def)
+      f.close()
+      self.update_cif_block(diffractometer_def, force=False)
+      all_sources_d[p] = diffractometer_def
+
+      #try:
+        #import cif_reader
+        #cif_def = cif_reader.reader(p).cifItems()
+        #self.update_cif_block(cif_def)
+        #all_sources_d[p] = cif_block
+      #except:
+        #print "Error reading local diffractometer definition file %s" %p
 
     # smtbx solvent masks output file
     mask_cif_path = '%s/%s-mask.cif' %(OV.StrDir(), OV.FileName())
@@ -693,45 +737,84 @@ class ExtractCifInfo(CifTools):
     self.write_metacif_file()
     self.all_sources_d = all_sources_d
     self.sort_out_conflicting_sources()
-
+    
   def sort_out_conflicting_sources(self):
     self.conflict_d = {}
     olx.CifInfo_metadata_conflicts = self
     d = {}
-    resolved = OV.GetParam('snum.metadata.resolved_conflict_items')
+    l = []
+    k_l = []
+    have_conflicts = False
     for ld in self.all_sources_d:
+      l.append(ld)
       for k in self.all_sources_d[ld]:
-        if k in resolved:
-          continue
-        val = str(self.all_sources_d[ld][k]).strip("'")
-        dval = d.get(k, None)
-        if dval:
-          source = dval['source']
-          dval = str(dval['val']).strip("'")
-          if dval != val:
-            self.conflict_d.setdefault(k,{'val':val,'val_source':ld, 'conflict_val':dval,'conflict_source':source, })
-        else:
-          d.setdefault(k,{'val':val,'source':ld})
-    #for k in d:
-    #  print "%s %s" %(d[k]['source'], k)
+        if k not in k_l:
+          k_l.append(k)
+    self.conflict_d.setdefault('sources',l)
 
-    if self.conflict_d and len(resolved) == 1:
+    resolved = OV.GetParam('snum.metadata.resolved_conflict_items')
+    for k in k_l:
+      l = []
+      if k in resolved:
+        continue
+      for ld in self.all_sources_d:
+        try:
+          val = self.all_sources_d[ld].get(k,'').strip("'")
+        except Exception, err:
+          pass
+        l.append(val)
+      ll = []
+      for item in l:
+        if item:
+          item = item.strip()
+          item = item.strip("'")
+          item = item.strip('"')
+          if item not in ll:
+            ll.append(item)
+      if len(ll) > 1:
+        have_conflicts = True
+        self.conflict_d.setdefault(k,{})
+        for ld in self.all_sources_d:
+          try:
+            val = self.all_sources_d[ld].get(k,'').strip("'")
+          except Exception, err:
+            print err
+          self.conflict_d[k].setdefault(ld,val)
+
+    if have_conflicts:
       print "There is conflicting information in the sources of metadata"
+      from gui.metadata import conflicts
+      conflicts(True, self.conflict_d)
 
-#      for k in self.conflict_d:
-#        pass
-      #self.make_conflicting_source_gui(conflict_d)
     else:
-      pass
-      #print "No conflicting information in the sources of metatdata has been found."
-
+      wFilePath = r"conflicts.htm"
+      txt = '''
+<tr>
+<td></td>
+<td bgcolor='%s'><font color='white'>
+<b>There is NO conflicting information the sources of metadata</b>
+</font></td></tr>''' %OV.GetParam('gui.green').hexadecimal
+      OV.write_to_olex(wFilePath, txt)
+#      print "There is NO conflicting information the sources of metadata"
 
 
   def exclude_cif_items(self, cif_block):
     # ignore cif items that should be provided by the refinement engine
-    exclude_list = ('_cell_length', '_cell_angle', '_cell_volume', '_cell_formula',
-                    '_cell_oxdiff', '_symmetry', '_exptl_absorpt_coefficient_mu',
-                    '_audit_creation', '_diffrn_reflns_')
+    exclude_list = ('_cell_length',
+                    '_cell_angle',
+                    '_cell_volume',
+                    '_cell_formula',
+                    '_cell_oxdiff',
+                    '_symmetry',
+                    '_exptl_absorpt_coefficient_mu',
+                    '_audit_creation',
+                    '_diffrn_reflns_',
+                    '_diffrn_measurement_details',
+                    '_publ_author',
+                    '_atom_type',
+                    '_space_group_symop',
+                    '_atom_site',
+                    )
     for item in cif_block:
       for exclude in exclude_list:
         if item.startswith(exclude):
