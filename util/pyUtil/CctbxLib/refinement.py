@@ -200,7 +200,10 @@ class olex2_normal_eqns(least_squares.crystallographic_ls):
     OV.SetOSF(self.scale_factor())
     #update FVars
     for var in self.shared_param_constraints:
-      OV.SetFVar(var[0], var[1].value.value*var[2])
+      if var[3]:
+        OV.SetFVar(var[0], var[1].value.value*var[2])
+      else:
+        OV.SetFVar(var[0], 1.0-var[1].value.value*var[2])
     #update BASF
     if self.twin_fractions is not None:
       basf = ' '.join('%f' %fraction.value
@@ -713,9 +716,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
         constraints.append(current)
         if len(as_var) > 0:
           scale = as_var[0][1]
+          as_var = True
         else:
+          as_var = False
           scale = as_var_minus_one[0][1]
-        self.shared_param_constraints.append((i, current, 1./scale))
+        self.shared_param_constraints.append((i, current, 1./scale, as_var))
       elif len(eadp) > 1:
         current = adp.shared_u(eadp)
         constraints.append(current)

@@ -110,12 +110,14 @@ class CifTools(ArgumentParser):
       self.olex2_reference = """
 Dolomanov, O.V.; Bourhis, L.J.; Gildea, R.J.; Howard, J.A.K.; Puschmann, H.,
 OLEX2: A complete structure solution, refinement and analysis program (2009).
-J. Appl. Cryst., 42, 339-341."""
+J. Appl. Cryst., 42, 339-341.
+"""
     else:
       self.olex2_reference = """
 O. V. Dolomanov, L. J. Bourhis, R. J. Gildea, J. A. K. Howard and H. Puschmann,
 OLEX2: a complete structure solution, refinement and analysis program.
-J. Appl. Cryst. (2009). 42, 339-341."""
+J. Appl. Cryst. (2009). 42, 339-341.
+"""
     self.update_cif_block(
       {'_audit_creation_date': today.strftime('%Y-%m-%d'),
        '_audit_creation_method': """
