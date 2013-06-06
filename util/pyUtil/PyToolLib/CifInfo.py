@@ -399,12 +399,12 @@ class ExtractCifInfo(CifTools):
     active_solution = History.tree.active_child_node
     all_sources_d = {}
     
-    
-    f = open(OV.file_ChangeExt(OV.FileFull(), 'cif'), 'rUb')
-    current_cif = iotbx.cif.reader(input_string=f.read()).model().values()[0]
-    f.close()
-    all_sources_d[p] = current_cif
-    
+    curr_cif_p = OV.file_ChangeExt(OV.FileFull(), 'cif')
+    if os.path.exists(curr_cif_p):
+      f = open(curr_cif_p, 'rUb')
+      current_cif = iotbx.cif.reader(input_string=f.read()).model().values()[0]
+      f.close()
+      all_sources_d[curr_cif_p] = current_cif
     
     if active_solution is not None and active_solution.is_solution:
 
@@ -615,10 +615,13 @@ class ExtractCifInfo(CifTools):
       #except:
         #print "Error reading cad4 file %s" %p
 
+    import iotbx.cif
     merge_files = OV.GetParam('snum.report.merge_these_cifs',[])
     merge_files.append(self.metacif_path)
+#    if OV.GetParam('snum.report.merge_these_cifs',[])
     for p in merge_files:
-      import iotbx.cif
+      if not p or not os.path.exists(p):
+        continue
       f = open(p, 'rUb')
       content = f.read().strip()
       if not content.startswith('data_'):
@@ -741,6 +744,7 @@ class ExtractCifInfo(CifTools):
     self.sort_out_conflicting_sources()
     
   def sort_out_conflicting_sources(self):
+    print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
     self.conflict_d = {}
     olx.CifInfo_metadata_conflicts = self
     d = {}
