@@ -511,7 +511,7 @@ snum
       .type = str
     publication_paper = ""
       .type = str
-    merge_these_cifs = None
+    merge_these_cifs = ""
       .type = strings
     type = "Structure Report"
       .type = str

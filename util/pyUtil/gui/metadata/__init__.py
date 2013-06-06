@@ -241,13 +241,13 @@ def conflicts(popout='auto', d=None):
   if number_of_files > 1:
     screen_height = int(olx.GetWindowSize('gl').split(',')[3])
     screen_width = int(olx.GetWindowSize('gl').split(',')[2])
-    box_x = int(screen_width*0.2)
-    box_y = int(screen_height*0.2)
+    box_x = int(screen_width*0.1)
+    box_y = int(screen_height*0.1)
     box_width = screen_width - 2*box_x
-    box_height = screen_height -2*box_y
+    box_height = screen_height - 2*box_y
     main_spacer = box_height - 300
     if olx.html.IsPopup('conflicts') == "false":
-      olx.Popup('conflicts', '%s' %wFilePath, "-b=tc -t='CIF Conflicts' -w=%i -h=%i -x=%i -y=%i" %(box_width, box_height, box_x, box_y))
+      olx.Popup('conflicts', '%s' %wFilePath, "-b=tcr -t='CIF Conflicts' -w=%i -h=%i -x=%i -y=%i" %(box_width, box_height, box_x, box_y))
     else:
       olx.Popup('conflicts', '%s' %wFilePath)
   else:
