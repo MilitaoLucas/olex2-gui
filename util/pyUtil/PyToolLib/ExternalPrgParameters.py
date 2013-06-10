@@ -319,7 +319,7 @@ class Method_refinement(Method):
       acta= olx.Ins('ACTA')
       if acta == "n/a":
         if radiation == "0.71073":
-          OV.AddIns("'ACTA 52'")
+          OV.AddIns("ACTA 52")
       #htab= olx.Ins('HTAB')
       #if acta == "n/a":
         #OV.AddIns("'HTAB'")
