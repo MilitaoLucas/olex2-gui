@@ -765,9 +765,14 @@ class ExtractCifInfo(CifTools):
         continue
       for ld in self.all_sources_d:
         try:
-          val = self.all_sources_d[ld].get(k,'').strip("'")
+          val = self.all_sources_d[ld].get(k,'')
+          if type(val) == str:
+            val = val.strip("'")
+          else:
+            #print "k is %s" %k
+            continue
         except Exception, err:
-          pass
+          print err
         l.append(val)
       ll = []
       for item in l:
@@ -782,7 +787,9 @@ class ExtractCifInfo(CifTools):
         self.conflict_d.setdefault(k,{})
         for ld in self.all_sources_d:
           try:
-            val = self.all_sources_d[ld].get(k,'').strip("'")
+            val = self.all_sources_d[ld].get(k,'')
+            if type(val) == str:
+              val = val.strip("'")
           except Exception, err:
             print err
           self.conflict_d[k].setdefault(ld,val)
