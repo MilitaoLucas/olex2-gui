@@ -32,6 +32,8 @@ snum
   metadata{
     resolved_conflict_items = ""
       .type = strings
+    show_all_cif_sources = False
+      .type = bool
   }
 
   ccdc{
@@ -1005,6 +1007,8 @@ programs
 user
   .short_caption = User Specific
   {
+  brad = 10
+    .type = int
   solo = True
     .type = bool
     .help = "Only one top-level tool can be open at any one time"
@@ -1012,7 +1016,7 @@ user
     .type = strings
   auto_close_settings_panel = False
     .type = bool
-  auto_insert_acta_stuff = True
+  auto_insert_acta_stuff = False
     .type = bool
   folder_view_root = None
     .type = path
