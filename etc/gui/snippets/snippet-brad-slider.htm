@@ -1,0 +1,42 @@
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr>
+        <td align='left' name=BRAD_SLIDER="88%">
+          <font size='$GetVar(HtmlFontSizeControls)'>
+          <input
+            type="slider"
+            align='right'
+            name = "SLIDE_BRAD"
+            width="100%"
+            height="18"
+            value="spy.GetParam(user.brad,10)"
+            bgcolor="$GetVar(HtmlTableBgColour)"
+            fgcolor="$GetVar(HtmlFontColour)"
+            min="1"
+            max="20"
+            onchange="
+        >>spy.SetParam(user.brad,html.GetValue(~name~))
+        >>html.SetValue(BRADValue,html.GetValue(~name~))
+        >>brad math.eval(html.GetValue(~name~)/10)"
+          >
+          </font>
+        </td>
+        <td name=BRAD_VALUE align='right' width="12%">
+          <font size='$GetVar(HtmlFontSizeControls)'>
+          <input
+            type="text"
+            name = "BRADValue"
+            width="90%"
+            height="18"
+            bgcolor="$GetVar(HtmlTableBgColour)"
+            fgcolor="$GetVar(HtmlFontColour)"
+            value="spy.GetParam(user.brad,10)"
+            onchange="
+        >>html.SetValue(SLIDE_BRAD,html.GetValue(~name~))
+        >>spy.SetParam(user.brad,html.GetValue(~name~))
+        >>brad math.eval(html.GetValue(~name~)/10)"
+            label=""
+          >
+          </font>
+        </td>
+      </tr>
+    </table>
