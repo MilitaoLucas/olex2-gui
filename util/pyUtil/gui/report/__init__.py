@@ -51,11 +51,6 @@ class publication:
       txt=open("%s/person.htm" %current_py_file_path, 'r').read()
       txt = txt%person
       OV.write_to_olex("person.htm", txt)
-      
-      f = file("e:/x.htm", "w+")
-      f.write(txt)
-      f.close()
-      
       boxWidth = 500
       boxHeight = 400
       x,y = self.get_box_x_y(boxWidth, boxHeight)
