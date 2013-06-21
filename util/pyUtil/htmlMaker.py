@@ -14,577 +14,606 @@ import variableFunctions
 from gui.images import *
 GI = GuiImages()
 
-use_db = OV.GetParam('user.report.use_db')
 
-## Define buttons, actions and hints: UP, DOWN, EDIT and DELETE
-number = "%s"
-onclick="spy.move(up,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.update" %number
-hint="Move author up"
-up = GI.get_action_button_html('up', onclick, hint)
-
-onclick="spy.move(down,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.update" %number
-hint="Move author down"
-down = GI.get_action_button_html('down', onclick, hint)
-
-onclick="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.Update" %number
-hint="Remove author from paper"
-delete = GI.get_action_button_html('delete', onclick, hint)
-
-
-if use_db:
-  onclick="spy.gui.report.publication.OnPersonChange(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s,edit=True))>>html.update" %number
-  hint="Edit author"
-  edit = GI.get_action_button_html('edit', onclick, hint)
-else:
-  edit = " "
-
-if use_db:
-  onclick="spy.gui.report.publication.OnPersonChange(SET_SNUM_METACIF_%s,edit=True))>>html.update"
-  hint="Edit author"
-  edit_subop = GI.get_action_button_html('edit', onclick, hint)
-else:
-  edit_subop = " "
-
-
-
-def currentResultFilesHtmlMaker(type='cif'):
-  var = 'snum.current_result.%s' %type
-  val = OV.GetParam(var)
-  if not val:
-    val = os.path.normpath(olx.file.ChangeExt(OV.FileFull(),type))
-
-  list = (
-    {'varName':str(var),
-      'itemName':'%s File' %type,
-      'value':val,
-      'chooseFile':{
-        'caption':'Choose %s file' %type,
-        'filter':'.%s files|*.%s' %(type, type),
-        'folder':'%s' %OV.FilePath(),
-        'function':'spy.SetParam(%s,' %var
-        },
-      },
-  )
-  return htmlTools.makeHtmlTable(list)
-OV.registerFunction(currentResultFilesHtmlMaker)
-
-def absorption_correctionMetadataHtmlMaker():
-  list = (
-    {'varName':'_exptl_absorpt_correction_type',
-     'items':"'analytical;cylinder;empirical;gaussian;integration;multi-scan;none;numerical;psi-scan;refdelf;sphere'",
-     'itemName':'%Abs Type%'
-     },
-    {'varName':'_exptl_absorpt_process_details',
-     'itemName':'%Abs Details%',
-     'multiline':'multiline'
-     },
-    {'varName':'_exptl_absorpt_correction_T_max',
-     'itemName':'%Abs T max%',
-     },
-    {'varName':'_exptl_absorpt_correction_T_min',
-     'itemName':'%Abs T min%',
-     },
-  )
-  return htmlTools.makeHtmlTable(list)
-OV.registerFunction(absorption_correctionMetadataHtmlMaker)
-
-
-def diffractionMetadataHtmlMaker():
-
-  list = (
-    {'varName':'snum.report.diffractometer',
-     'readonly':'',
-     'itemName':'%Diffractometer%',
-     'items': "'%s'" %userDictionaries.localList.getListDiffractometers(),
-     'onchange':"spy.addToLocalList(html.GetValue(~name~),diffractometers)>>html.update",
-     },
-  )
-
-  if OV.GetParam('snum.report.diffractometer') != '?':
-    list += (
-      {'varName':'snum.report.diffractometer_definition_file',
-       'itemName':'%Definition File%',
-       'value':userDictionaries.localList.getDiffractometerDefinitionFile(OV.GetParam('snum.report.diffractometer')),
-       'chooseFile':{
-         'caption':'Choose definition file',
-         'filter':'.cif files|*.cif',
-         'folder':'%s/etc/site' %OV.BaseDir(),
-         'function':'spy.setDiffractometerDefinitionFile(spy.GetParam(snum.report.diffractometer),'
-         },
-       },
-    )
-
-  list += (
-    {'varName':'_diffrn_ambient_temperature',
-     'itemName':'%Diffraction T% (K)'
-     },
-    {'varName':'_cell_measurement_temperature',
-     'itemName':'%Cell Measurement T% (K)'
-     },
-    {'varName':'_diffrn_special_details',
-     'itemName':'%Special Details%',
-     'multiline':'multiline'
-     },
-    {'varName':'_refine_special_details',
-     'itemName':'%Refine Special Details%',
-     'multiline':'multiline'
-     }
-  )
-
-  return htmlTools.makeHtmlTable(list)
-OV.registerFunction(diffractionMetadataHtmlMaker)
-
-def crystalMetadataHtmlMaker():
-  list = (
-    {'varName':'_chemical_name_systematic',
-     'itemName':'%Systematic Name%',
-     },
-    {'varName':'_exptl_crystal_colour',
-     'itemName':'%Colour%',
-     'box1':{'varName':'_exptl_crystal_colour_lustre',
-             'items':'?;.;metallic;dull;clear'
-             },
-     'box2':{'varName':'_exptl_crystal_colour_modifier',
-             'items':"'?;.;light;dark;whitish;blackish;grayish;brownish;reddish;pinkish;orangish;yellowish;greenish;bluish'"
-             },
-     'box3':{'varName':'_exptl_crystal_colour_primary',
-             'items':"'?;colourless;white;black;gray;brown;red;pink;orange;yellow;green;blue;violet'"
-             },
-     },
-    {'varName':'_exptl_crystal_size',
-     'itemName':'%Size%',
-     'box1':{'varName':'_exptl_crystal_size_min',
-             'width':'50'
-             },
-     'box2':{'varName':'_exptl_crystal_size_mid',
-             'width':'50'
-             },
-     'box3':{'varName':'_exptl_crystal_size_max',
-             'width':'50'
-             },
-     },
-    {'varName':'_exptl_crystal_description',
-     'itemName':'%Shape%',
-     'items': "'?;block;plate;needle;prism;irregular;cube;trapezoid;rect. Prism;rhombohedral;hexagonal;octahedral;plank'",
-     },
-    {'varName':'_exptl_crystal_preparation',
-     'itemName':'%Preparation Details%',
-     'multiline':'multiline',
-     },
-    {'varName':'_exptl_crystal_recrystallization_method',
-     'itemName':'%Crystallisation Details%',
-     'multiline':'multiline',
-     },
-    {'varName':'snum.report.crystal_mounting_method',
-     'itemName':'%Crystal Mounting%',
-     'multiline':'multiline',
-     },
-  )
-
-  return htmlTools.makeHtmlTable(list)
-OV.registerFunction(crystalMetadataHtmlMaker)
-
-def collectionMetadataHtmlMaker():
-  items = userDictionaries.people.getListPeople()
-  if use_db :
-    onchange = '''
-spy.gui.report.publication.OnPersonChange('~name~')>>spy.SetParam('snum.report.%s',html.GetValue('~name~'))'''
-
-  else:
-    onchange = '''
-spy.SetParam('snum.report.%s',html.GetValue('~name~'))>>spy.addNewPerson(html.GetValue('~name~'))>>html.update'''
-
-
-  subop = ["SUBMITTER", "OPERATOR"]
-
-  list = []
-  for tem in subop:
-    authorRow = {
-      'varName':'snum.report.%s' %tem.lower(),
-      'ctrl_name':'SET_SNUM_METACIF_%s' %tem,
-      'readonly':'',
-      'items': items,
-      'bgcolor':"'%s'" %OV.GetParam('gui.html.table_bg_colour'),
-      'onchange':onchange % tem.lower(),
-    }
-    authorRow.setdefault('itemName','')
-    authorRow.setdefault('field1',
-                         {'itemName':tem.title(),
-                          'fieldWidth':'70%%',
-                          'bgcolor':'#ff0000',
-                          })
-    _ = "%s" %(edit_subop)
-    if use_db:
-      _ = _ %(tem)
-      
-    authorRow.setdefault('field2',{'itemName':_,
-                                   'fieldWidth':'30%%',
-                                   'fieldALIGN':'right'})
-    list.append(authorRow)
-  
-  list.append(
-    {
-    'varName':'snum.report.date_submitted',
-     'itemName':'%Date Submitted%',
-    }
-  )
-  list.append(
-    {
-    'varName':'snum.report.date_collected',
-     'itemName':'%Date Collected%',
-    }
-  )
-
-  return htmlTools.makeHtmlTable(list)
-OV.registerFunction(collectionMetadataHtmlMaker)
-
-def progressMetadataHtmlMaker():
-  list = (
-    {'varName':'snum.dimas.progress_status',
-     'itemName':'%Status%',
-     'items': "'No Entry;Aborted;Rejected;Withdrawn;Lost;In Queue;Collecting;Reduction;Solving;Refining;Pending;Processing;Finishing;Finished;Publishing;Published;Published Duplicate;Known structure'"
-     },
-    {'varName':'snum.dimas.progress_comment',
-     'itemName':'%Comment%',
-     'multiline':'multiline'
-     },
-  )
-  return htmlTools.makeHtmlTable(list)
-OV.registerFunction(progressMetadataHtmlMaker)
-
-def referenceMetadataHtmlMaker():
-  list = (
-    {'varName':'snum.dimas.reference_csd_refcode',
-     'itemName':'%CSD% %Refcode%',
-     },
-    {'varName':'snum.dimas.reference_publ_authors',
-     'itemName':'%Authors%',
-     },
-    {'varName':'snum.dimas.reference_journal_name',
-     'itemName':'%Journal%',
-     'items': "'%s'" %userDictionaries.localList.getListJournals()
-     },
-    {'varName':'snum.dimas.reference_journal_volume',
-     'itemName':'%Volume%',
-     },
-    {'varName':'snum.dimas.reference_journal_pages',
-     'itemName':'%Pages%',
-     },
-    {'varName':'snum.dimas.reference_journal_year',
-     'itemName':'%Year%',
-     },
-    {'varName':'snum.dimas.reference_comment',
-     'itemName':'%Comment%',
-     'multiline':'multiline'
-     },
-  )
-  return htmlTools.makeHtmlTable(list)
-OV.registerFunction(referenceMetadataHtmlMaker)
-
-def publicationMetadataHtmlMaker():
-  items = userDictionaries.people.getListPeople()
-  if use_db:
-    onchange = "spy.gui.report.publication.OnPersonChange('~name~', html.GetValue('SET__PUBL_CONTACT_AUTHOR_NAME'))"
-  else:
-    onchange = "spy.gui.report.publication.OnContactAuthorChange(~name~)"
-
-  list = [
-      {'varName':'user.report.use_db',
-       'readonly':'',
-       'itemName':'%Data Source%',
-       'href':'shell %s/%s' %(OV.GetParam('user.report.db_location'),OV.GetParam('user.report.db_name')),
-       'value':'$spy.GetParam(user.report.use_db)',
-       'items': 'Use Dictionary [legacy]<-False;Use SQLite DB [experimental]<-True' ,
-       'onchange':"spy.SetParam(user.report.use_db,html.GetValue(~name~))>>echo 'Restart of Olex2 is required for this change to take effect!'",
-       },
-
-    {'varName':'_database_code_depnum_ccdc_archive',
-     'itemName':'CCDC %Number%',
-     },
-    {'varName':'_publ_contact_author_name',
-     'itemName':'%Contact% %Author%',
-     'items':items,
-     'readonly':'',
-     'onchange': onchange,
-     }]
-
-  if not use_db:
-    extra_l = [
-    #{'varName':'_publ_contact_author_affiliation',
-     #'itemName':'%Affiliation%',
-##     'items': "'%s'" %userDictionaries.affiliations.getListAffiliations(),
-     #'value': "spy.getPersonInfo(html.GetValue('SET__PUBL_CONTACT_AUTHOR_AFFILIATION'),'affiliation')",
-     #'onchange': "spy.gui.report.publication.OnPersonAffiliationChange('~name~', html.GetValue('SET__PUBL_CONTACT_AUTHOR_NAME'))"
-     #},
+class GeneratedGuiMaker(object):
+  def __init__(self):
     
-    {'varName':'_publ_contact_author_address',
-     'itemName':'%Contact% %Author% %Address%',
-     'multiline':'multiline',
-     'value': "spy.getPersonInfo(html.GetValue('SET__PUBL_CONTACT_AUTHOR_NAME'),'address')",
-     'onchange': "spy.gui.report.publication.OnPersonInfoChange('SET__PUBL_CONTACT_AUTHOR_NAME','address','~name~')"
-     },
+    self.use_db = OV.GetParam('user.report.use_db')
     
-    {'varName':'_publ_contact_author_email',
-     'itemName':'%Contact% %Author% %Email%',
-     'value': "spy.getPersonInfo(html.GetValue('SET__PUBL_CONTACT_AUTHOR_NAME'),'email')",
-     'onchange':"spy.gui.report.publication.OnPersonInfoChange('SET__PUBL_CONTACT_AUTHOR_NAME','email','~name~')"
-     },
-    {'varName':'_publ_contact_author_phone',
-     'itemName':'%Contact% %Author% %Phone%',
-     'value': "spy.getPersonInfo(html.GetValue('SET__PUBL_CONTACT_AUTHOR_NAME'),'phone')",
-     'onchange': "spy.gui.report.publication.OnPersonInfoChange('SET__PUBL_CONTACT_AUTHOR_NAME','phone','~name~')"
-     },
-
-    {'varName':'InfoLine',
-     'itemName':'Info',
-     'value':'<b>Please Note</b>: The Contact Author does not automatically appear in the author list unless that person is explicitly added below.',
-     },
-    ]
-    list = list + extra_l
-
-  listAuthors = OV.GetParam('snum.metacif.publ_author_names')
-  if listAuthors is None:
-    numberAuthors = 0
-  else:
-    numberAuthors = len(listAuthors.split(';'))
-
-  for i in range(1,numberAuthors+1):
-    authorRow = {
-      'varName':'snum.metacif.publ_author_names',
-      'ctrl_name':'SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s' %i,
-      'readonly':'readonly',
-      'value':"'%s'" %listAuthors.split(';')[i-1],
-      'bgcolor':"'%s'" %OV.GetParam('gui.html.table_bg_colour'),
-      'onchange':""
-    }
-    if numberAuthors == 1:
-      authorRow.setdefault('itemName','')
-      authorRow.setdefault('field1',{'itemName':'%Author%'})
-      _ = "%s%s" %(delete, edit)
-      if use_db:
-        _ = _ %(i,i)
-      else:
-        _ = _ %(i)
-      authorRow.setdefault('field2',{'itemName':_,
-                                    'fieldALIGN':'right'})
-
-    elif i == 1:
-      box = "SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s" %i
-      authorRow.setdefault('itemName','')
-      authorRow.setdefault('field1',{'itemName':'Authors</td><td>'})
-      _ = "%s%s%s" %(down, delete, edit)
-      if use_db:
-        _ = _%(i,i,i)
-      else:
-        _ = _%(i,i)
-        
-      authorRow.setdefault('field2',
-                           {'itemName':_,
-                            'fieldALIGN':'right'}
-                           )
-    elif i == numberAuthors:
-      _ = "%s%s%s" %(up, delete, edit)
-      if use_db:
-        _ = _%(i,i,i)
-      else:
-        _ = _%(i,i)
-        
-      authorRow.setdefault('itemName',_)
-      authorRow.setdefault('fieldALIGN','right')
-      authorRow['bgcolor'] = OV.GetParam('gui.html.input_bg_colour')
+    ## Define buttons, actions and hints: UP, DOWN, EDIT and DELETE
+    number = "%s"
+    onclick="spy.move(up,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.update" %number
+    hint="Move author up"
+    self.up = GI.get_action_button_html('up', onclick, hint)
+    
+    onclick="spy.move(down,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.update" %number
+    hint="Move author down"
+    self.down = GI.get_action_button_html('down', onclick, hint)
+    
+    onclick="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.Update" %number
+    hint="Remove author from paper"
+    self.delete = GI.get_action_button_html('delete', onclick, hint)
+    
+    
+    if self.use_db:
+      onclick="spy.gui.report.publication.OnPersonChange(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s,edit=True))>>html.update" %number
+      hint="Edit author"
+      self.edit = GI.get_action_button_html('edit', onclick, hint)
     else:
-      _ = "%s%s%s%s" %(up, down, delete, edit)
-      if use_db:
-        _ = _%(i,i,i,i)
-      else:
-        _ = _%(i,i,i)
-        
-      authorRow.setdefault('itemName',_)
-      authorRow.setdefault('fieldALIGN','right')
+      self.edit = " "
+    
+    if self.use_db:
+      onclick="spy.gui.report.publication.OnPersonChange(SET_SNUM_METACIF_%s,edit=True))>>html.update"
+      hint="Edit author"
+      self.edit_subop = GI.get_action_button_html('edit', onclick, hint)
+    else:
+      self.edit_subop = " "
 
-    list.append(authorRow)
-  if numberAuthors > 0:
-    s = '_' + str(numberAuthors)
-  else:
-    s = None
 
-  if not use_db and s:
-# BEGIN extra
-    #list.append(
-      #{'varName':'_publ_author_affiliation',
-       #'itemName':'%Affiliation%',
-##       'items': "'%s'" %userDictionaries.affiliations.getListAffiliations(),
-       #'value': "spy.getPersonInfo(html.GetValue('SET__PUBL_AUTHOR_AFFILIATION'),'affiliation')",
-       #'onchange': "spy.gui.report.publication.OnPersonAffiliationChange('~name~', html.GetValue('SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s'))"%s,
-       #},
-    #)
-    list.append(
-      {'varName':'publ_author_address',
-       'itemName':'%Author% %Address%',
+  def currentResultFilesHtmlMaker(self, type='cif'):
+    var = 'snum.current_result.%s' %type
+    val = OV.GetParam(var)
+    if not val:
+      val = os.path.normpath(olx.file.ChangeExt(OV.FileFull(),type))
+  
+    list = (
+      {'varName':str(var),
+        'itemName':'%s File' %type,
+        'value':val,
+        'chooseFile':{
+          'caption':'Choose %s file' %type,
+          'filter':'.%s files|*.%s' %(type, type),
+          'folder':'%s' %OV.FilePath(),
+          'function':'spy.SetParam(%s,' %var
+          },
+        },
+    )
+    return htmlTools.makeHtmlTable(list)
+  OV.registerFunction(currentResultFilesHtmlMaker)
+  
+  def absorption_correctionMetadataHtmlMaker(self, ):
+    list = (
+      {'varName':'_exptl_absorpt_correction_type',
+       'items':"'analytical;cylinder;empirical;gaussian;integration;multi-scan;none;numerical;psi-scan;refdelf;sphere'",
+       'itemName':'%Abs Type%'
+       },
+      {'varName':'_exptl_absorpt_process_details',
+       'itemName':'%Abs Details%',
+       'multiline':'multiline'
+       },
+      {'varName':'_exptl_absorpt_correction_T_max',
+       'itemName':'%Abs T max%',
+       },
+      {'varName':'_exptl_absorpt_correction_T_min',
+       'itemName':'%Abs T min%',
+       },
+    )
+    return htmlTools.makeHtmlTable(list)
+  OV.registerFunction(absorption_correctionMetadataHtmlMaker)
+  
+  
+  def diffractionMetadataHtmlMaker(self, ):
+  
+    list = (
+      {'varName':'snum.report.diffractometer',
+       'readonly':'',
+       'itemName':'%Diffractometer%',
+       'items': "'%s'" %userDictionaries.localList.getListDiffractometers(),
+       'onchange':"spy.addToLocalList(html.GetValue(~name~),diffractometers)>>html.update",
+       },
+    )
+  
+    if OV.GetParam('snum.report.diffractometer') != '?':
+      list += (
+        {'varName':'snum.report.diffractometer_definition_file',
+         'itemName':'%Definition File%',
+         'value':userDictionaries.localList.getDiffractometerDefinitionFile(OV.GetParam('snum.report.diffractometer')),
+         'chooseFile':{
+           'caption':'Choose definition file',
+           'filter':'.cif files|*.cif',
+           'folder':'%s/etc/site' %OV.BaseDir(),
+           'function':'spy.setDiffractometerDefinitionFile(spy.GetParam(snum.report.diffractometer),'
+           },
+         },
+      )
+  
+    list += (
+      {'varName':'_diffrn_ambient_temperature',
+       'itemName':'%Diffraction T% (K)'
+       },
+      {'varName':'_cell_measurement_temperature',
+       'itemName':'%Cell Measurement T% (K)'
+       },
+      {'varName':'_diffrn_special_details',
+       'itemName':'%Special Details%',
+       'multiline':'multiline'
+       },
+      {'varName':'_refine_special_details',
+       'itemName':'%Refine Special Details%',
+       'multiline':'multiline'
+       }
+    )
+  
+    return htmlTools.makeHtmlTable(list)
+  OV.registerFunction(diffractionMetadataHtmlMaker)
+  
+  def crystalMetadataHtmlMaker(self):
+    list = (
+      {'varName':'_chemical_name_systematic',
+       'itemName':'%Systematic Name%',
+       'width':'100%'
+       },
+      {'varName':'_exptl_crystal_colour',
+       'itemName':'%Colour%',
+       'box1':{'varName':'_exptl_crystal_colour_lustre',
+               'items':'?;.;metallic;dull;clear',
+               'width':'33%' 
+               },
+       'box2':{'varName':'_exptl_crystal_colour_modifier',
+               'items':"'?;.;light;dark;whiteish;blackish;grayish;brownish;reddish;pinkish;orangish;yellowish;greenish;bluish'",
+               'width':'34%' 
+               },
+       'box3':{'varName':'_exptl_crystal_colour_primary',
+               'items':"'?;colourless;white;black;gray;brown;red;pink;orange;yellow;green;blue;violet'",
+               'width':'33%' 
+               },
+       },
+      {'varName':'_exptl_crystal_size',
+       'itemName':'%Size% & %Shape%',
+       'box1':{'varName':'_exptl_crystal_size_min',
+               'width':'20%'
+               },
+       'box2':{'varName':'_exptl_crystal_size_mid',
+               'width':'20%'
+               },
+       'box3':{'varName':'_exptl_crystal_size_max',
+               'width':'20%'
+               },
+       'box4':{'varName':'_exptl_crystal_description',
+               'items': "'?;block;plate;needle;prism;irregular;cube;trapezoid;rect. Prism;rhombohedral;hexagonal;octahedral;plank'",
+               'width':'40%'
+               },
+       },
+  
+      {'varName':'_exptl_crystal_preparation',
+       'itemName':'%Preparation Details%',
        'multiline':'multiline',
-       'value':"spy.getPersonInfo(html.GetValue('SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s'),'address')" %s,
-       'onchange':"spy.changePersonInfo(html.GetValue('SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s'),'address',html.GetValue('~name~'))>>spy.changeBoxColour('~name~','#FFDCDC')" %s
-       }
+       'width':'100%'
+       },
+  
+  
+      {'varName':'_exptl_crystal_recrystallization_method',
+       'itemName':'%Crystallisation Details%',
+       'multiline':'multiline',
+       'width':'100%'
+  ,
+       },
+  
+      {'varName':'snum.report.crystal_mounting_method',
+       'itemName':'%Crystal Mounting%',
+       'multiline':'multiline',
+       'width':'100%'
+       },
+    )
+  
+    return htmlTools.makeHtmlTable(list)
+  
+  def collectionMetadataHtmlMaker(self, ):
+    items = userDictionaries.people.getListPeople()
+    if self.use_db :
+      onchange = '''
+  spy.gui.report.publication.OnPersonChange('~name~')>>spy.SetParam('snum.report.%s',html.GetValue('~name~'))'''
+  
+    else:
+      onchange = '''
+  spy.SetParam('snum.report.%s',html.GetValue('~name~'))>>spy.addNewPerson(html.GetValue('~name~'))>>html.update'''
+  
+  
+    subop = ["SUBMITTER", "OPERATOR"]
+  
+    list = []
+    for tem in subop:
+      authorRow = {
+        'varName':'snum.report.%s' %tem.lower(),
+        'ctrl_name':'SET_SNUM_METACIF_%s' %tem,
+        'readonly':'',
+        'items': items,
+        'bgcolor':"'%s'" %OV.GetParam('gui.html.table_bg_colour'),
+        'onchange':onchange % tem.lower(),
+      }
+      authorRow.setdefault('itemName','')
+      authorRow.setdefault('field1',
+                           {'itemName':tem.title(),
+                            'fieldWidth':'70%%',
+                            'bgcolor':'#ff0000',
+                            })
+      _ = "%s" %(self.edit_subop)
+      if self.use_db:
+        _ = _ %(tem)
+        
+      authorRow.setdefault('field2',{'itemName':_,
+                                     'fieldWidth':'30%%',
+                                     'fieldALIGN':'right'})
+      list.append(authorRow)
+    
+    list.append(
+      {
+      'varName':'snum.report.date_submitted',
+       'itemName':'%Date Submitted%',
+      }
     )
     list.append(
-      {'varName':'publ_author_email',
-       'itemName':'%Author% %Email%',
-       'value': "spy.getPersonInfo(html.GetValue('SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s'),'email')" %s,
-       'onchange':"spy.changePersonInfo(html.GetValue('SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s'),'email',html.GetValue('~name~'))>>spy.changeBoxColour('~name~','#FFDCDC')" %s
-       }
+      {
+      'varName':'snum.report.date_collected',
+       'itemName':'%Date Collected%',
+      }
     )
-
-  list.append(
-    {'varName':'snum.metacif.publ_author_names',
-     'ctrl_name':'ADD_PUBL_AUTHOR_NAME',
-     'itemName':'%Add% %Author%',
-     'items': "'%s'" %userDictionaries.people.getListPeople(),
-     'value':'?',
-     'onchange':"spy.gui.report.publication.OnAddNameToAuthorList('~name~')",
-     }
-  )
-
-  for d in list:
-    d.setdefault('ctrl_name','SET_%s' %str.upper(d['varName']).replace('.','_'))
-    if 'ctrl_name' in d['varName']:
-      d.setdefault('onchange',"spy.SetParam('%(varName)s',html.GetValue('~name~'))>>spy.changeBoxColour('~name~','#FFDCDC')>>html.Update" %d)
-    elif 'author_name' in d['varName']:
-      d.setdefault('onchange','')
-
-  list.append(
-    {'varName':'_publ_requested_journal',
-     'itemName':'%Requested% %Journal%',
-     'items': "'%s'" %userDictionaries.localList.getListJournals(),
-     'readonly':'',
-     'value':'spy.get_cif_item(_publ_requested_journal)',
-     'onchange':"spy.addToLocalList(html.GetValue('~name~'),'requested_journal')>>spy.changeBoxColour('~name~','#FFDCDC')",
-     })
-
-
-  list.append( {'varName':'snum.report.publication_style', 'readonly':'',
-                'itemName':'%Journal Style%', 'items': "general;acta",
-                'value':"spy.GetParam('snum.report.publication_style')",
-                'onchange':"spy.gui.report.publication.OnPublicationTemplateChange(html.GetValue(~name~))>>html.update",
-                }, )
-
-  #if OV.GetParam('snum.report.publication_paper') != '?':
-    #list += (
-      #{'varName':'snum.report.publication_paper',
-       #'itemName':'%Add Template CIF%',
-       #'value':'$spy.gui.report.publication.DisplayMergeList()',
-       #'chooseFile':{
-         #'caption':'Choose definition file',
-         #'filter':'.cif files|*.cif',
-         #'folder':'%s/CIF/cif_templates' %OV.BaseDir(),
-         #'function':'spy.gui.report.publication.AddTemplateToMergeList('
-         #},
+  
+    return htmlTools.makeHtmlTable(list)
+  OV.registerFunction(collectionMetadataHtmlMaker)
+  
+  
+  def progressMetadataHtmlMaker(self, ):
+    list = (
+      {'varName':'snum.dimas.progress_status',
+       'itemName':'%Status%',
+       'items': "'No Entry;Aborted;Rejected;Withdrawn;Lost;In Queue;Collecting;Reduction;Solving;Refining;Pending;Processing;Finishing;Finished;Publishing;Published;Published Duplicate;Known structure'"
+       },
+      {'varName':'snum.dimas.progress_comment',
+       'itemName':'%Comment%',
+       'multiline':'multiline'
+       },
+    )
+    return htmlTools.makeHtmlTable(list)
+  OV.registerFunction(progressMetadataHtmlMaker)
+  
+  def referenceMetadataHtmlMaker(self, ):
+    list = (
+      {'varName':'snum.dimas.reference_csd_refcode',
+       'itemName':'%CSD% %Refcode%',
+       },
+      {'varName':'snum.dimas.reference_publ_authors',
+       'itemName':'%Authors%',
+       },
+      {'varName':'snum.dimas.reference_journal_name',
+       'itemName':'%Journal%',
+       'items': "'%s'" %userDictionaries.localList.getListJournals()
+       },
+      {'varName':'snum.dimas.reference_journal_volume',
+       'itemName':'%Volume%',
+       },
+      {'varName':'snum.dimas.reference_journal_pages',
+       'itemName':'%Pages%',
+       },
+      {'varName':'snum.dimas.reference_journal_year',
+       'itemName':'%Year%',
+       },
+      {'varName':'snum.dimas.reference_comment',
+       'itemName':'%Comment%',
+       'multiline':'multiline'
+       },
+    )
+    return htmlTools.makeHtmlTable(list)
+  OV.registerFunction(referenceMetadataHtmlMaker)
+  
+  def publicationMetadataHtmlMaker(self, ):
+    items = userDictionaries.people.getListPeople()
+    if self.use_db:
+      onchange = "spy.gui.report.publication.OnPersonChange('~name~', html.GetValue('SET__PUBL_CONTACT_AUTHOR_NAME'))"
+    else:
+      onchange = "spy.gui.report.publication.OnContactAuthorChange(~name~)"
+  
+    list = [
+        {'varName':'user.report.use_db',
+         'readonly':'',
+         'itemName':'%Data Source%',
+         'href':'shell %s/%s' %(OV.GetParam('user.report.db_location'),OV.GetParam('user.report.db_name')),
+         'value':'$spy.GetParam(user.report.use_db)',
+         'items': 'Use Dictionary [legacy]<-False;Use SQLite DB [experimental]<-True' ,
+         'onchange':"spy.SetParam(user.report.use_db,html.GetValue(~name~))>>echo 'Restart of Olex2 is required for this change to take effect!'",
+         },
+  
+      {'varName':'_database_code_depnum_ccdc_archive',
+       'itemName':'CCDC %Number%',
+       },
+      {'varName':'_publ_contact_author_name',
+       'itemName':'%Contact% %Author%',
+       'items':items,
+       'readonly':'',
+       'onchange': onchange,
+       }]
+  
+    if not self.use_db:
+      extra_l = [
+      #{'varName':'_publ_contact_author_affiliation',
+       #'itemName':'%Affiliation%',
+  ##     'items': "'%s'" %userDictionaries.affiliations.getListAffiliations(),
+       #'value': "spy.getPersonInfo(html.GetValue('SET__PUBL_CONTACT_AUTHOR_AFFILIATION'),'affiliation')",
+       #'onchange': "spy.gui.report.publication.OnPersonAffiliationChange('~name~', html.GetValue('SET__PUBL_CONTACT_AUTHOR_NAME'))"
        #},
-    #)
-
-
-
-
-  retstr = htmlTools.makeHtmlTable(list)
-
-  retstr +="""
-<tr VALIGN="center" ALIGN="left">
-  <td colspan='2'>
-    <a href="spy.contactLetter()>>html.Update" target="Edit Contact Letter"><b>Contact Letter</b></a>
-  </td>
-</tr>
-"""
-
-  #retstr +="""
-#<tr VALIGN="center" ALIGN="left">
-  #<td colspan='2' VALIGN="center" bgcolor=$GetVar(HtmlHighlightColour)>
-    #<b>Please add the contact author to the list of Authors if that person is to appear on the paper!</b></a>
-  #</td>
-#</tr>
-#"""
-
-  return retstr
-OV.registerFunction(publicationMetadataHtmlMaker)
-
-def contactLetter():
-  letterText = OV.get_cif_item('_publ_contact_letter','?','gui')
-  if letterText is None:
-    import datetime
-    today = datetime.date.today()
-    date = today.strftime("%x")
-    journal = OV.get_cif_item('_publ_requested_journal')
-    fileName = olx.FileName()
-    authorList = OV.GetParam('snum.metacif.publ_author_names')
-    authors = ''
-    if authorList is None:
+      
+      {'varName':'_publ_contact_author_address',
+       'itemName':'%Contact% %Author% %Address%',
+       'multiline':'multiline',
+       'value': "spy.getPersonInfo(html.GetValue('SET__PUBL_CONTACT_AUTHOR_NAME'),'address')",
+       'onchange': "spy.gui.report.publication.OnPersonInfoChange('SET__PUBL_CONTACT_AUTHOR_NAME','address','~name~')"
+       },
+      
+      {'varName':'_publ_contact_author_email',
+       'itemName':'%Contact% %Author% %Email%',
+       'value': "spy.getPersonInfo(html.GetValue('SET__PUBL_CONTACT_AUTHOR_NAME'),'email')",
+       'onchange':"spy.gui.report.publication.OnPersonInfoChange('SET__PUBL_CONTACT_AUTHOR_NAME','email','~name~')"
+       },
+      {'varName':'_publ_contact_author_phone',
+       'itemName':'%Contact% %Author% %Phone%',
+       'value': "spy.getPersonInfo(html.GetValue('SET__PUBL_CONTACT_AUTHOR_NAME'),'phone')",
+       'onchange': "spy.gui.report.publication.OnPersonInfoChange('SET__PUBL_CONTACT_AUTHOR_NAME','phone','~name~')"
+       },
+  
+      {'varName':'InfoLine',
+       'itemName':'Info',
+       'value':'<b>Please Note</b>: The Contact Author does not automatically appear in the author list unless that person is explicitly added below.',
+       },
+      ]
+      list = list + extra_l
+  
+    listAuthors = OV.GetParam('snum.metacif.publ_author_names')
+    if listAuthors is None:
       numberAuthors = 0
     else:
-      authorList = authorList.split(';')
-      numberAuthors = len(authorList)
-    for i in range(numberAuthors):
-      author = authorList[i]
-      if ',' in author:
-        a = author.split(',')
-        surname = a[0]
-        initials = ''
-        for forename in a[1].split():
-          initials += '%s.' %forename[0].upper()
+      numberAuthors = len(listAuthors.split(';'))
+  
+    for i in range(1,numberAuthors+1):
+      authorRow = {
+        'varName':'snum.metacif.publ_author_names',
+        'ctrl_name':'SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s' %i,
+        'readonly':'readonly',
+        'value':"'%s'" %listAuthors.split(';')[i-1],
+        'bgcolor':"'%s'" %OV.GetParam('gui.html.table_bg_colour'),
+        'onchange':""
+      }
+      if numberAuthors == 1:
+        authorRow.setdefault('itemName','')
+        authorRow.setdefault('field1',{'itemName':'%Author%'})
+        _ = "%s%s" %(self.delete, self.edit)
+        if self.use_db:
+          _ = _ %(i,i)
+        else:
+          _ = _ %(i)
+        authorRow.setdefault('field2',{'itemName':_,
+                                      'fieldALIGN':'right'})
+  
+      elif i == 1:
+        box = "SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s" %i
+        authorRow.setdefault('itemName','')
+        authorRow.setdefault('field1',{'itemName':'Authors</td><td>'})
+        _ = "%s%s%s" %(self.down, self.delete, self.edit)
+        if self.use_db:
+          _ = _%(i,i,i)
+        else:
+          _ = _%(i,i)
+          
+        authorRow.setdefault('field2',
+                             {'itemName':_,
+                              'fieldALIGN':'right'}
+                             )
+      elif i == numberAuthors:
+        _ = "%s%s%s" %(self.up, self.delete, self.edit)
+        if self.use_db:
+          _ = _%(i,i,i)
+        else:
+          _ = _%(i,i)
+          
+        authorRow.setdefault('itemName',_)
+        authorRow.setdefault('fieldALIGN','right')
+        authorRow['bgcolor'] = OV.GetParam('gui.html.input_bg_colour')
       else:
-        a = author.split()
-        surname = a[-1]
-        initials = ''
-        for forename in a[:-1]:
-          initials += '%s.' %forename[0].upper()
-
-      if i < numberAuthors - 2:
-        authorAbbrev = initials + surname + ', '
-      elif i == numberAuthors - 2:
-        authorAbbrev = initials + surname + ' and '
-      elif i > numberAuthors - 2:
-        authorAbbrev = initials + surname
-      authors += authorAbbrev
-    letterText = """Date of submission %s
-
-The CIF file contains data for the structure %s from
-the paper 'ENTER PAPER TITLE' by
-%s.
-The paper will be submitted to %s.
-""" %(date,fileName,authors,journal)
-
-  inputText = OV.GetUserInput(0,'_publ_contact_letter',letterText)
-  if inputText is not None:
-    OV.set_cif_item('_publ_contact_letter', inputText);
-  return ""
-OV.registerFunction(contactLetter)
-
-def move(arg,name):
-  listNames = OV.GetParam('snum.metacif.publ_author_names').split(';')
-  name_i = olx.html.GetValue(name)
-  i = listNames.index(name_i)
-
-  if arg.lower() == 'up':
-    if i != 0:
-      name_i_minus_1 = listNames[i-1]
-      listNames[i] = name_i_minus_1
-      listNames[i-1] = name_i
+        _ = "%s%s%s%s" %(self.up, self.down, self.delete, self.edit)
+        if self.use_db:
+          _ = _%(i,i,i,i)
+        else:
+          _ = _%(i,i,i)
+          
+        authorRow.setdefault('itemName',_)
+        authorRow.setdefault('fieldALIGN','right')
+  
+      list.append(authorRow)
+    if numberAuthors > 0:
+      s = '_' + str(numberAuthors)
     else:
-      pass
+      s = None
+  
+    if not self.use_db and s:
+  # BEGIN extra
+      #list.append(
+        #{'varName':'_publ_author_affiliation',
+         #'itemName':'%Affiliation%',
+  ##       'items': "'%s'" %userDictionaries.affiliations.getListAffiliations(),
+         #'value': "spy.getPersonInfo(html.GetValue('SET__PUBL_AUTHOR_AFFILIATION'),'affiliation')",
+         #'onchange': "spy.gui.report.publication.OnPersonAffiliationChange('~name~', html.GetValue('SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s'))"%s,
+         #},
+      #)
+      list.append(
+        {'varName':'publ_author_address',
+         'itemName':'%Author% %Address%',
+         'multiline':'multiline',
+         'value':"spy.getPersonInfo(html.GetValue('SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s'),'address')" %s,
+         'onchange':"spy.changePersonInfo(html.GetValue('SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s'),'address',html.GetValue('~name~'))>>spy.changeBoxColour('~name~','#FFDCDC')" %s
+         }
+      )
+      list.append(
+        {'varName':'publ_author_email',
+         'itemName':'%Author% %Email%',
+         'value': "spy.getPersonInfo(html.GetValue('SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s'),'email')" %s,
+         'onchange':"spy.changePersonInfo(html.GetValue('SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s'),'email',html.GetValue('~name~'))>>spy.changeBoxColour('~name~','#FFDCDC')" %s
+         }
+      )
+  
+    list.append(
+      {'varName':'snum.metacif.publ_author_names',
+       'ctrl_name':'ADD_PUBL_AUTHOR_NAME',
+       'itemName':'%Add% %Author%',
+       'items': "'%s'" %userDictionaries.people.getListPeople(),
+       'value':'?',
+       'onchange':"spy.gui.report.publication.OnAddNameToAuthorList('~name~')",
+       }
+    )
+  
+    for d in list:
+      d.setdefault('ctrl_name','SET_%s' %str.upper(d['varName']).replace('.','_'))
+      if 'ctrl_name' in d['varName']:
+        d.setdefault('onchange',"spy.SetParam('%(varName)s',html.GetValue('~name~'))>>spy.changeBoxColour('~name~','#FFDCDC')>>html.Update" %d)
+      elif 'author_name' in d['varName']:
+        d.setdefault('onchange','')
+  
+    list.append(
+      {'varName':'_publ_requested_journal',
+       'itemName':'%Requested% %Journal%',
+       'items': "'%s'" %userDictionaries.localList.getListJournals(),
+       'readonly':'',
+       'value':'spy.get_cif_item(_publ_requested_journal)',
+       'onchange':"spy.addToLocalList(html.GetValue('~name~'),'requested_journal')>>spy.changeBoxColour('~name~','#FFDCDC')",
+       })
+  
+  
+    list.append( {'varName':'snum.report.publication_style', 'readonly':'',
+                  'itemName':'%Journal Style%', 'items': "general;acta",
+                  'value':"spy.GetParam('snum.report.publication_style')",
+                  'onchange':"spy.gui.report.publication.OnPublicationTemplateChange(html.GetValue(~name~))>>html.update",
+                  }, )
+  
+    #if OV.GetParam('snum.report.publication_paper') != '?':
+      #list += (
+        #{'varName':'snum.report.publication_paper',
+         #'itemName':'%Add Template CIF%',
+         #'value':'$spy.gui.report.publication.DisplayMergeList()',
+         #'chooseFile':{
+           #'caption':'Choose definition file',
+           #'filter':'.cif files|*.cif',
+           #'folder':'%s/CIF/cif_templates' %OV.BaseDir(),
+           #'function':'spy.gui.report.publication.AddTemplateToMergeList('
+           #},
+         #},
+      #)
+  
+  
+  
+  
+    retstr = htmlTools.makeHtmlTable(list)
+  
+    retstr +="""
+  <tr VALIGN="center" ALIGN="left">
+    <td colspan='2'>
+      <a href="spy.contactLetter()>>html.Update" target="Edit Contact Letter"><b>Contact Letter</b></a>
+    </td>
+  </tr>
+  """
+  
+    #retstr +="""
+  #<tr VALIGN="center" ALIGN="left">
+    #<td colspan='2' VALIGN="center" bgcolor=$GetVar(HtmlHighlightColour)>
+      #<b>Please add the contact author to the list of Authors if that person is to appear on the paper!</b></a>
+    #</td>
+  #</tr>
+  #"""
+  
+    return retstr
+  OV.registerFunction(publicationMetadataHtmlMaker)
+  
+  def contactLetter(self, ):
+    letterText = OV.get_cif_item('_publ_contact_letter','?','gui')
+    if letterText is None:
+      import datetime
+      today = datetime.date.today()
+      date = today.strftime("%x")
+      journal = OV.get_cif_item('_publ_requested_journal')
+      fileName = olx.FileName()
+      authorList = OV.GetParam('snum.metacif.publ_author_names')
+      authors = ''
+      if authorList is None:
+        numberAuthors = 0
+      else:
+        authorList = authorList.split(';')
+        numberAuthors = len(authorList)
+      for i in range(numberAuthors):
+        author = authorList[i]
+        if ',' in author:
+          a = author.split(',')
+          surname = a[0]
+          initials = ''
+          for forename in a[1].split():
+            initials += '%s.' %forename[0].upper()
+        else:
+          a = author.split()
+          surname = a[-1]
+          initials = ''
+          for forename in a[:-1]:
+            initials += '%s.' %forename[0].upper()
+  
+        if i < numberAuthors - 2:
+          authorAbbrev = initials + surname + ', '
+        elif i == numberAuthors - 2:
+          authorAbbrev = initials + surname + ' and '
+        elif i > numberAuthors - 2:
+          authorAbbrev = initials + surname
+        authors += authorAbbrev
+      letterText = """Date of submission %s
+  
+  The CIF file contains data for the structure %s from
+  the paper 'ENTER PAPER TITLE' by
+  %s.
+  The paper will be submitted to %s.
+  """ %(date,fileName,authors,journal)
+  
+    inputText = OV.GetUserInput(0,'_publ_contact_letter',letterText)
+    if inputText is not None:
+      OV.set_cif_item('_publ_contact_letter', inputText);
+    return ""
+  OV.registerFunction(contactLetter)
+  
+  def move(self, arg,name):
+    listNames = OV.GetParam('snum.metacif.publ_author_names').split(';')
+    name_i = olx.html.GetValue(name)
+    i = listNames.index(name_i)
+  
+    if arg.lower() == 'up':
+      if i != 0:
+        name_i_minus_1 = listNames[i-1]
+        listNames[i] = name_i_minus_1
+        listNames[i-1] = name_i
+      else:
+        pass
+  
+    elif arg.lower() == 'down':
+      try:
+        name_i_plus_1 = listNames[i+1]
+        listNames[i] = name_i_plus_1
+        listNames[i+1] = name_i
+      except:
+        pass
+  
+    elif arg in ('del','DEL'):
+      del listNames[i]
+  
+    names = ';'.join(listNames)
+    OV.SetParam('snum.metacif.publ_author_names', names)
+  
+    return ''
+  OV.registerFunction(move)
 
-  elif arg.lower() == 'down':
-    try:
-      name_i_plus_1 = listNames[i+1]
-      listNames[i] = name_i_plus_1
-      listNames[i+1] = name_i
-    except:
-      pass
+GGM = GeneratedGuiMaker()
+OV.registerFunction(GGM.absorption_correctionMetadataHtmlMaker)
+OV.registerFunction(GGM.collectionMetadataHtmlMaker)
+OV.registerFunction(GGM.contactLetter)
+OV.registerFunction(GGM.crystalMetadataHtmlMaker)
+OV.registerFunction(GGM.currentResultFilesHtmlMaker)
+OV.registerFunction(GGM.diffractionMetadataHtmlMaker)
+OV.registerFunction(GGM.progressMetadataHtmlMaker)
+OV.registerFunction(GGM.publicationMetadataHtmlMaker)
+OV.registerFunction(GGM.publicationMetadataHtmlMaker)
+OV.registerFunction(GGM.referenceMetadataHtmlMaker)
 
-  elif arg in ('del','DEL'):
-    del listNames[i]
 
-  names = ';'.join(listNames)
-  OV.SetParam('snum.metacif.publ_author_names', names)
-
-  return ''
-OV.registerFunction(move)
 
 def restraint_builder(cmd):
   height = OV.GetParam('gui.html.combo_height')
