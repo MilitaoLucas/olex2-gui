@@ -61,6 +61,8 @@ class publication:
 
       res = olx.html.ShowModal(pop_name)
       res = int(res)
+      if res == 5101:
+        return
 
       if res:
         firstname = olx.html.GetValue('Person.PERSON_FIRSTNAME')
