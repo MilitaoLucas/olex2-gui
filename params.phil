@@ -17,9 +17,7 @@ snum
     .type = str
   current_r1 = 0
     .type = float
-  
 
-    
   init
     .short_caption = Other Things
     .expert_level = 1
@@ -1039,13 +1037,13 @@ user
     .expert_level = 1
   start_where = home
     .type = str
-  report_style = styles/default.css #kept for back compatibility
+  report_style = styles/default.css
     .type = str
-  report_template = templates/default.htm #kept for back compatibility
+  report_template = templates/default.htm
     .type = str
-  report_footer = templates/footer.htm #kept for back compatibility
+  report_footer = templates/footer.htm
     .type = str
-  report_journal_style = rsc #kept for back compatibility
+  report_journal_style = rsc
     .type = str
   report{
     use_db = False
