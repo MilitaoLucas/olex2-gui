@@ -374,7 +374,7 @@ class RunRefinementPrg(RunPrg):
       self.isInversionNeeded(force=self.params.snum.refinement.auto.invert)
     OV.SetParam('snum.current_process_diagnostics','refinement')
     if self.params.snum.refinement.cifmerge_after_refinement:
-      MergeCif(edit=False, force_create=False)
+      MergeCif(edit=False, force_create=False, evaluate_conflicts=False)
 
   def doHistoryCreation(self):
     if self.params.snum.init.skip_history:
