@@ -108,10 +108,8 @@ class CifTools(ArgumentParser):
     if reference_style == "acta":
 
       self.olex2_reference = """
-Dolomanov, O.V.; Bourhis, L.J.; Gildea, R.J.; Howard, J.A.K.; Puschmann, H.,
-OLEX2: A complete structure solution, refinement and analysis program (2009).
-J. Appl. Cryst., 42, 339-341.
-"""
+Olex2 %s (compiled %s, GUI svn.r%i)
+""" %(OV.GetTag(), OV.GetCompilationInfo(), OV.GetSVNVersion())
     else:
       self.olex2_reference = """
 O. V. Dolomanov, L. J. Bourhis, R. J. Gildea, J. A. K. Howard and H. Puschmann,
@@ -131,7 +129,7 @@ Olex2 %s
     self.update_cif_block(
       {'_computing_molecular_graphics': self.olex2_reference,
        '_computing_publication_material': self.olex2_reference
-       }, force=True)
+       }, force=False)
     self.sort_crystal_dimensions()
     self.sort_crystal_colour()
     self.sort_publication_info()
@@ -315,7 +313,7 @@ OV.registerFunction(EditCifInfo)
 
 
 class MergeCif(CifTools):
-  def __init__(self, edit=False, force_create=True):
+  def __init__(self, edit=False, force_create=True, evaluate_conflicts=True):
     super(MergeCif, self).__init__()
     edit = (edit not in ('False','false',False))
     # check if cif exists and is up-to-date
@@ -346,7 +344,7 @@ class MergeCif(CifTools):
         print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         return
       
-    ECI = ExtractCifInfo()
+    ECI = ExtractCifInfo(evaluate_conflicts=evaluate_conflicts)
     ECI.run()
     self.write_metacif_file()
     ## merge metacif file with cif file from refinement
@@ -369,12 +367,13 @@ OV.registerFunction(MergeCif)
 class ExtractCifInfo(CifTools):
   conflict_d = {}
   
-  def __init__(self):
+  def __init__(self, evaluate_conflicts=True):
     super(ExtractCifInfo, self).__init__()
     self.ignore = ["?", "'?'", ".", "'.'"]
     self.versions = {"default":[],"smart":{},"saint":{},"shelxtl":{},"xprep":{},"sad":{}, "twin":{}, "abs":{}}
     self.metacif = {}
     self.metacifFiles = MetacifFiles()
+    self.evaluate_conflicts=evaluate_conflicts
     self.run()
     olx.cif_model = self.cif_model
 
@@ -413,10 +412,12 @@ class ExtractCifInfo(CifTools):
         active_solution.program = "olex2.solve"
       ## END
       try:
-        solution_reference = self.SPD.programs[active_solution.program].reference
+        if reference_style == 'acta':
+          solution_reference = self.SPD.programs[active_solution.program].name
+        else:
+          solution_reference = self.SPD.programs[active_solution.program].reference
         olx.SetVar('solution_reference_short', self.SPD.programs[active_solution.program].name)
         olx.SetVar('solution_reference_long', solution_reference)
-        
         atom_sites_solution_primary = self.SPD.programs[active_solution.program]\
           .methods[active_solution.method].atom_sites_solution
         force = True
@@ -436,8 +437,11 @@ class ExtractCifInfo(CifTools):
         active_node.program = "olex2.refine"
       ## END
       try:
+        if reference_style == 'acta':
+          refinement_reference = self.RPD.programs[active_node.program].name
+        else:
+          refinement_reference = self.RPD.programs[active_node.program].reference          
         olx.SetVar('refinement_reference_short', self.RPD.programs[active_node.program].name)
-        refinement_reference = self.RPD.programs[active_node.program].reference
         olx.SetVar('refinement_reference_long', refinement_reference)
         force = True
       except:
@@ -741,7 +745,8 @@ class ExtractCifInfo(CifTools):
 
     self.write_metacif_file()
     self.all_sources_d = all_sources_d
-    self.sort_out_conflicting_sources()
+    if self.evaluate_conflicts:
+      self.sort_out_conflicting_sources()
     
   def sort_out_conflicting_sources(self):
     print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -759,10 +764,13 @@ class ExtractCifInfo(CifTools):
     self.conflict_d.setdefault('sources',l)
 
     resolved = OV.GetParam('snum.metadata.resolved_conflict_items')
+    show_all_info = OV.GetParam('snum.metadata.show_all_cif_sources',False)
+
+    already_resolved = 0
     for k in k_l:
       l = []
       if k in resolved:
-        continue
+        already_resolved += 1
       for ld in self.all_sources_d:
         try:
           val = self.all_sources_d[ld].get(k,'')
@@ -782,8 +790,11 @@ class ExtractCifInfo(CifTools):
           item = item.strip('"')
           if item not in ll:
             ll.append(item)
+            if len(ll) > 1:
+              have_conflicts = True
+          if show_all_info:
+            ll.append(item)
       if len(ll) > 1:
-        have_conflicts = True
         self.conflict_d.setdefault(k,{})
         for ld in self.all_sources_d:
           try:
@@ -794,19 +805,29 @@ class ExtractCifInfo(CifTools):
             print err
           self.conflict_d[k].setdefault(ld,val)
 
-    if have_conflicts:
+    if have_conflicts and not already_resolved:
       print "There is conflicting information in the sources of metadata"
+      from gui.metadata import conflicts
+      conflicts(True, self.conflict_d)
+    
+    elif have_conflicts and already_resolved:
+      print "There is conflicting information, but %s conflicts have been resolved" %already_resolved
+      from gui.metadata import conflicts
+      conflicts(True, self.conflict_d)
+      
+    elif show_all_info:
+      print "There are no conflicts. All CIF info is shown in the pop-up window."
       from gui.metadata import conflicts
       conflicts(True, self.conflict_d)
 
     else:
-      wFilePath = r"conflicts.htm"
+      wFilePath = r"conflicts_html_window.htm"
       txt = '''
 <tr>
 <td></td>
 <td bgcolor='%s'><font color='white'>
 <b>There is NO conflicting information the sources of metadata</b>
-</font></td></tr>''' %OV.GetParam('gui.green').hexadecimal
+</font><a href='spy.SetParam(snum.metadata.show_all_cif_sources,True)'>Show ALL</a></td></tr>''' %OV.GetParam('gui.green').hexadecimal
       OV.write_to_olex(wFilePath, txt)
 #      print "There is NO conflicting information the sources of metadata"
 
