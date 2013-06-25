@@ -1896,12 +1896,23 @@ def StringsAreNotEqual(str1, str2):
 OV.registerFunction(StringsAreNotEqual)
 
 
-
 def GetBitmapSize(px_changed=False):
-  resolution = float(OV.GetValue('IMAGE_BITMAP_RESOLUTION'))
-  width = float(OV.GetValue('IMAGE_BITMAP_WIDTH'))
+  resolution = OV.GetValue('IMAGE_BITMAP_RESOLUTION')
+  try:
+    resolution = float(resolution)
+  except:
+    return False, False
+  width = OV.GetValue('IMAGE_BITMAP_WIDTH')
+  try:
+    width = float(width)
+  except:
+    return False, False
   unit = OV.GetValue('IMAGE_BITMAP_WIDTH_UNIT')
-  size = float(OV.GetValue('IMAGE_BITMAP_SIZE'))
+  size = OV.GetValue('IMAGE_BITMAP_SIZE')
+  try:
+    size = float(size)
+  except:
+    return False, False
   factor = 1
   if unit == "cm":
     factor = 0.393700787
@@ -1922,6 +1933,8 @@ def GetBitmapImageInstructions():
   if not filefull:
     return
   resolution, filesize = GetBitmapSize()
+  if not filesize:
+    return
   resolution = "-dpi=%s" %resolution
   if olx.html.GetData('BITMAP_NO_BG'):
     nbg = "-nbg"
