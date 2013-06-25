@@ -1,6 +1,44 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
-<!-- FIRST ROW -->
+
+<!-- FIRST ROW: Name of Image -->
+<!-- #include tool-row gui\blocks\tool-row.htm;name='IMAGE_SETTINGS_ROW_4';1 -->
+  <td name=IMAGE_BITMAP_NAME width='35%' align='right'>
+    <font size="$GetVar('HtmlFontSizeLarge')" color="#555555">
+    <input
+      type="text"
+      bgcolor="GetVar('HtmlInputBgColour')"
+      valign='left'
+      name="IMAGE_NAME"
+      width="100%"
+      height="math.eval(GetVar('HtmlInputHeight')*1.5)"
+      value="spy.GetParam('snum.image.name', FileName())"
+      onchange="spy.SetParam('snum.image.name',html.GetValue('~name~'))"
+    >
+    </font>
+  </td>
+
+  <td width='40%'>
+     &nbsp;If <b>NAME</b> already exists, then:
+  </td>
+
+  <td width="25%">
+      <input name="IMAGE_SETTINGS_AUTOINCREMENT_NAME"
+       type="combo"
+       height="GetVar('HtmlInputHeight')"
+       width="100%"
+       bgcolor="GetVar('HtmlInputBgColour')"
+       value="spy.GetParam('snum.image.if_file_exists')"
+       items="'Ask<-ask;Increment<-increment;Replace<-replace'"
+       onchange="spy.SetParam('snum.image.if_file_exists', html.GetValue('~name~'))"
+       readonly="True"
+      >
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+
+<!-- SECOND ROW: Deal with labels-->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='LABEL_SETTINGS';help_ext=Images;1 -->
   <td name=HREF_MAKE_LABEL>
@@ -46,14 +84,14 @@
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- SECOND ROW -->
+<!-- THIRD ROW More labels -->
 <!-- #include tool-row gui\blocks\tool-row.htm;name='IMAGE_SETTINGS_ROW_1';1 -->
   <td name=LABEL_INSTRUCTIONS_2>
     2) %images_move_labels%
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- THIRD ROW -->
+<!-- FOURTH ROW -->
 <!-- #include tool-row gui\blocks\tool-row.htm;name='IMAGE_SETTINGS_ROW_2';1 -->
   <td name=LABEL_INSTRUCTIONS_3>
     3) <a href="SetMaterial 'PLabels.Text' ChooseMaterial(GetMaterial('PLabels.Text'))">%images_label_colour%</a> |
@@ -62,24 +100,6 @@
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- FOURTH ROW -->
-<!-- #include tool-row gui\blocks\tool-row.htm;name='IMAGE_SETTINGS_ROW_4';1 -->
-  <td with="75%">
-    4) If picture file name already exists
-  </td>
-  <td width="25%">
-      <input name="IMAGE_SETTINGS_AUTOINCREMENT_NAME"
-       type="combo"
-       height="GetVar('HtmlInputHeight')"
-       width="100%"
-       bgcolor="GetVar('HtmlInputBgColour')"
-       value="spy.GetParam('snum.image.if_file_exists')"
-       items="'Ask<-ask;Increment<-increment;Replace<-replace'"
-       onchange="spy.SetParam('snum.image.if_file_exists', html.GetValue('~name~'))"
-       readonly="True"
-      >
-  </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- SECOND ROW -->
 <!-- #include tool-row gui\blocks\tool-row.htm;name='IMAGE_SETTINGS_ROW_3';1 -->
