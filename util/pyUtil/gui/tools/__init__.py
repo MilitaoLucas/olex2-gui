@@ -155,10 +155,20 @@ def make_single_gui_image(img_txt="", img_type='h2'):
       img_type = "h2"
     image = timage.make_timage(item_type=alias, item=img_txt, state=state, titleCase=False)
     name = "%s-%s%s.png" %(img_type, img_txt.lower(), state)
-    OlexVFS.save_image_to_olex(image, name, 2)
+    OlexVFS.save_image_to_olex(image, name, 0)
 
 
-def add_tool_to_index(scope="", link="", path="", location="", before="", filetype="", level="h1"):
+def inject_into_tool(tool, t, where,befaf='before'):
+  import OlexVFS
+  txt = OlexVFS.read_from_olex('%s/%s' %(OV.BaseDir(),tool))
+  if befaf == 'before':
+    txt = txt.replace(where, "%s%s" %(t, where))
+  else:
+    txt = txt.replace(where, "%s%s" %(where, t))
+  OlexVFS.write_to_olex('%s%s' %(OV.BaseDir(), tool), u, txt)
+
+
+def add_tool_to_index(scope="", link="", path="", location="", before="", filetype="", level="h2"):
   import OlexVFS
   if not OV.HasGUI:
     return
@@ -183,10 +193,10 @@ def add_tool_to_index(scope="", link="", path="", location="", before="", filety
 
   if not filetype:
     t = r'''
-<!-- #include %s-%s %s/%s.htm;gui\blocks\tool-off.htm;image=%s;onclick=;1; -->''' %(scope, link, path, link, link)
+<!-- #include %s-%s-%s-%s %s/%s.htm;gui\blocks\tool-off.htm;image=%s;onclick=;2; -->''' %(level, location, scope, link, path, link, link)
   else:
     t = r'''
-<!-- #includeif IsFileType('%s') %s-%s %s/%s.htm;gui\blocks\tool-off.htm;image=%s;onclick=;1; -->''' %(filetype, scope, link, path, link, link)
+<!-- #includeif IsFileType('%s') %s-%s-%s-%s %s/%s.htm;gui\blocks\tool-off.htm;image=%s;onclick=;2; -->''' %(filetype, level, location, scope, link, path, link, link)
 
 
   index_text = ""

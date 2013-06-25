@@ -83,6 +83,10 @@ def unPickle(path):
 
 def AddVariableToUserInputList(variable):
   """Adds the name of the variable to a list of user-edited variables."""
+  val = OV.GetParam(variable,None)
+  if not val:
+    RemoveVariableFromUserInputList(variable)
+    return
   variable_list = OV.GetParam("snum.metacif.user_input_variables")
   variable = str(variable) # get rid of unicode
   if variable_list is None:
@@ -92,6 +96,19 @@ def AddVariableToUserInputList(variable):
     variable_list += ';%s' %variable
     OV.SetParam("snum.metacif.user_input_variables", variable_list)
 OV.registerFunction(AddVariableToUserInputList)
+
+def RemoveVariableFromUserInputList(variable):
+  """Remove the name of the variable from the list of user-edited variables."""
+  variable_list = OV.GetParam("snum.metacif.user_input_variables")
+  variable = str(variable) # get rid of unicode
+  if variable_list is None:
+    pass
+  elif variable_list is not None and variable in variable_list:
+    variable_list = variable_list.replace(';%s' %variable,'')
+    OV.SetParam("snum.metacif.user_input_variables", variable_list)
+OV.registerFunction(RemoveVariableFromUserInputList)
+
+
 
 def SwitchAllAlertsOn():
   alerts = ['user.alert_delete_history',

@@ -33,17 +33,17 @@ class GeneratedGuiMaker(object):
     onclick="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.Update" %number
     hint="Remove author from paper"
     self.delete = GI.get_action_button_html('delete', onclick, hint)
-    
+  
     
     if self.use_db:
-      onclick="spy.gui.report.publication.OnPersonChange(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s,edit=True))>>html.update" %number
+      onclick="spy.gui.report.publication.OnPersonChange(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s,edit=True)>>html.update" %number
       hint="Edit author"
       self.edit = GI.get_action_button_html('edit', onclick, hint)
     else:
       self.edit = " "
     
     if self.use_db:
-      onclick="spy.gui.report.publication.OnPersonChange(SET_SNUM_METACIF_%s,edit=True))>>html.update"
+      onclick="spy.gui.report.publication.OnPersonChange(SET_SNUM_METACIF_%s,edit=True)>>html.update"
       hint="Edit author"
       self.edit_subop = GI.get_action_button_html('edit', onclick, hint)
     else:
@@ -201,12 +201,10 @@ class GeneratedGuiMaker(object):
   def collectionMetadataHtmlMaker(self, ):
     items = userDictionaries.people.getListPeople()
     if self.use_db :
-      onchange = '''
-  spy.gui.report.publication.OnPersonChange('~name~')>>spy.SetParam('snum.report.%s',html.GetValue('~name~'))'''
+      onchange = '''spy.gui.report.publication.OnPersonChange('~name~')>>spy.SetParam('snum.report.%s',html.GetValue('~name~'))'''
   
     else:
-      onchange = '''
-  spy.SetParam('snum.report.%s',html.GetValue('~name~'))>>spy.addNewPerson(html.GetValue('~name~'))>>html.update'''
+      onchange = '''spy.SetParam('snum.report.%s',html.GetValue('~name~'))>>spy.addNewPerson(html.GetValue('~name~'))>>html.update'''
   
   
     subop = ["SUBMITTER", "OPERATOR"]

@@ -819,7 +819,7 @@ def defineExternalPrograms():
   if reference_style == "acta":
     ref_shelx = "Sheldrick, G. M. (2008). Acta Cryst. A64, 112-122."
     ref_smtbx = "Bourhis, L.J, Dolomanov, O.V, Gildea, R.J, Howard, J.A.K and\n Puschmann, H. (2013, In Preparation)"
-    ref_superflip = "Palatinus, L.,  Chapuis, G., (2007) <i>J. Appl. Cryst.</i>, <b>40</b>, 786-790;"
+    ref_superflip = "Palatinus, L.,  Chapuis, G., (2007) <i>J. Appl. Cryst.</i>, <b>40</b>, 786-790"
     
   else:
     ref_shelx="SHELXS, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122"
