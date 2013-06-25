@@ -3,27 +3,10 @@
 <!-- FIRST ROW -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=PS_ROW_1; help_ext=ps_row_1;1; -->
-  <td width='10%'>
-     %Name%
+  <td name=IMAGE_PS_COLOUR_LINE_LABEL width='22%' align='left'>
+    %Coloured Atoms%
   </td>
-  <td name=IMAGE_PS_NAME width='15%' align='right'>
-    <font size="$GetVar('HtmlFontSizeControls')">
-    <input
-      type="text"
-      height="GetVar('HtmlInputHeight')"
-      bgcolor="GetVar('HtmlInputBgColour')"
-      valign='center'
-      name="IMAGE_PS_NAME"
-      width="100%"
-      value="spy.GetParam('snum.image.ps.name', FileName())"
-      onchange="spy.SetParam('snum.image.ps.name',html.GetValue('~name~'))"
-    >
-    </font>
-  </td>
-  <td name=IMAGE_PS_COLOUR_LINE_LABEL width='10%' align='right'>
-    %Lines%
-  </td>
-  <td name=IMAGE_PS_COLOUR_LINE width='15%' align='left'>
+  <td name=IMAGE_PS_COLOUR_LINE width='5%' align='left'>
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="checkbox"
@@ -39,10 +22,10 @@
     >
     </font>
   </td>
-  <td name=IMAGE_PS_COLOUR_BOND_LABEL width='10%' align='right'>
-    %Bonds%
+  <td name=IMAGE_PS_COLOUR_BOND_LABEL width='22%' align='right'>
+    %Coloured Bonds%
   </td>
-  <td name=IMAGE_PS_COLOUR_BOND width='15%' align='left'>
+  <td name=IMAGE_PS_COLOUR_BOND width='5%' align='left'>
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="checkbox"
@@ -58,10 +41,10 @@
     >
     </font>
   </td>
-  <td name=IMAGE_PS_COLOUR_FILL_LABEL width='10%' align='right'>
-    %Fill%
+  <td name=IMAGE_PS_COLOUR_FILL_LABEL width='22%' align='right'>
+    %Filled Atoms%
   </td>
-  <td name=IMAGE_PS_COLOUR_FILL width='15%' align='left'>
+  <td name=IMAGE_PS_COLOUR_FILL width='5%' align='left'>
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="checkbox"

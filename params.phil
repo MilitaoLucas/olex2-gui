@@ -261,6 +261,8 @@ snum
     {
     if_file_exists = *ask increment replace
       .type = choice
+    name = None
+      .type = str
     bitmap
       .short_caption = png, jpg, bmp ...
       {
@@ -276,6 +278,8 @@ snum
         }
       bond_label{
         font_name = #olex2.fnt:frb_14
+        .type = str
+      trim_border_colour = #bbbbbb
         .type = str
       }
     }

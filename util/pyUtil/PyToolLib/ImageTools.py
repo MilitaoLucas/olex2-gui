@@ -1460,7 +1460,7 @@ class ImageTools(FontInstances):
     OlexVFS.write_to_olex('pie.htm',html, True)
     OV.UpdateHtml()
 
-  def trim_image(self, im, trimcolour=None, padding=2, border=0.5, border_col='#aaaaaa'):
+  def trim_image(self, im, trimcolour=None, padding=2, border=0.5, border_col='#aaaaaa', dry=False):
     ''' Takes either an image or a path to an image, then trims off all whitespace and either returns the trimmed image or saves it to the same path as the original one '''
     
     from PIL import Image, ImageChops, ImageOps
@@ -1492,6 +1492,10 @@ class ImageTools(FontInstances):
       
       if border:
         retImage = ImageOps.expand(retImage,border=border,fill=border_col)
+        
+    if dry:
+      return int(retImage.size[0])
+        
     if p:
       retImage.save(p)
     else:

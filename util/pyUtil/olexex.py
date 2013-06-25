@@ -1841,7 +1841,7 @@ def fade_out(speed=0):
 OV.registerFunction(fade_out)
 
 def GetImageFilename(image_type):
-  filename = OV.GetParam('snum.image.%s.name' %image_type.lower())
+  filename = OV.GetParam('snum.image.name')
   if image_type == "PS":
     fileext = "eps"
   elif image_type == "PR":
@@ -1850,7 +1850,7 @@ def GetImageFilename(image_type):
     fileext = OV.GetParam('snum.image.%s.type' %image_type.lower())
   if not filename:
     try:
-      filename = OV.GetValue('IMAGE_%s_NAME' % image_type)
+      filename = OV.GetValue('IMAGE_NAME')
     except:
       filename = None
     if not filename:
@@ -1896,35 +1896,56 @@ def StringsAreNotEqual(str1, str2):
 OV.registerFunction(StringsAreNotEqual)
 
 
+
+def GetBitmapSize(px_changed=False):
+  resolution = float(OV.GetValue('IMAGE_BITMAP_RESOLUTION'))
+  width = float(OV.GetValue('IMAGE_BITMAP_WIDTH'))
+  unit = OV.GetValue('IMAGE_BITMAP_WIDTH_UNIT')
+  size = float(OV.GetValue('IMAGE_BITMAP_SIZE'))
+  factor = 1
+  if unit == "cm":
+    factor = 0.393700787
+  if px_changed:
+    width = size/(resolution * factor)
+    olx.html.SetValue('IMAGE_BITMAP_width',round(width,1))
+  else:
+    size = resolution * width * factor
+    olx.html.SetValue('IMAGE_BITMAP_SIZE',int(round(size,0)))
+  return int(round(resolution,0)), int(round(size,0))
+OV.registerFunction(GetBitmapSize)
+
+
 def GetBitmapImageInstructions():
   from ImageTools import ImageTools
   IT = ImageTools()
   filefull, filename, fileext = GetImageFilename(image_type = "BITMAP")
   if not filefull:
     return
-  filesize = OV.GetValue('IMAGE_BITMAP_SIZE')
-
+  resolution, filesize = GetBitmapSize()
+  resolution = "-dpi=%s" %resolution
   if olx.html.GetData('BITMAP_NO_BG'):
     nbg = "-nbg"
   else:
     nbg = ""
-    
   if fileext == "png/s":
     filefull = "%s.png" %filename
     filesize = 1
     pict = "a "
   else:
     pict = " -pq"
-  
-
   OV.Cursor('busy','Please Wait. Making image %s.%s. This may take some time' %(filename, fileext))
-  olex.m('pict%s %s %s %s' %(pict, nbg, filefull, filesize))
+  
+  filesize = int(round(filesize,0))
+  olex.m('pict%s %s %s %s %s' %(pict, nbg, filefull, resolution, filesize))
 
   if olx.html.GetData('TRIM_IMAGE'):
     padding = float(olx.html.GetValue('TRIM_PADDING'))
     border = float(olx.html.GetValue('TRIM_BORDER'))
     colour = olx.html.GetValue('TRIM_BORDER_COLOUR')
-    IT.trim_image(im=filefull, padding=padding, border=border, border_col = colour )
+    new_width = IT.trim_image(im=filefull, padding=padding, border=border, border_col = colour, dry=True )
+    filesize = filesize * (filesize/new_width)
+    olex.m('pict%s %s %s %s %s' %(pict, nbg, filefull, resolution, int(round(filesize,0))))
+    IT.trim_image(im=filefull, padding=padding, border=border, border_col = colour)
 
   #import Image
   OV.Cursor()
