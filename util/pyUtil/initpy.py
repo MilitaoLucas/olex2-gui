@@ -282,7 +282,7 @@ def onstartup():
   
   import userDictionaries
   if not userDictionaries.people:
-    userDictionaries.init_people()
+    userDictionaries.init_userDictionaries()
   if not userDictionaries.localList:
     userDictionaries.LocalList()
 
