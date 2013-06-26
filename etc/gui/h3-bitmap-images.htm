@@ -11,7 +11,7 @@
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="combo"
-      height="GetVar('HtmlInputHeight')"
+      height="GetVar('HtmlComboHeight')"
       width="100%"
       bgcolor="GetVar('HtmlInputBgColour')"
       items="'png;jpg;bmp;tif;png/s'"
@@ -44,7 +44,7 @@
 
 
   <td width='10%' align='right'>
-$spy.MakeHoverButton('button_small-go@bitmap','spy.GetBitmapImageInstructions()')
+$spy.MakeHoverButton('button_small-go@bitmap','spy.gui.images.GetBitmapImageInstructions()')
   </td>
 
 
@@ -71,7 +71,7 @@ $spy.MakeHoverButton('button_small-go@bitmap','spy.GetBitmapImageInstructions()'
       name="IMAGE_BITMAP_RESOLUTION"
       value='300'
       manage
-      onchange='spy.GetBitmapSize()'
+      onchange='spy.gui.images.GetBitmapSize()'
     >
     </font>
   </td>
@@ -91,7 +91,7 @@ $spy.MakeHoverButton('button_small-go@bitmap','spy.GetBitmapImageInstructions()'
       name="IMAGE_BITMAP_WIDTH"
       value='4'
       manage
-      onchange='spy.GetBitmapSize()'
+      onchange='spy.gui.images.GetBitmapSize()'
     >
     </font>
   </td>
@@ -112,7 +112,7 @@ $spy.MakeHoverButton('button_small-go@bitmap','spy.GetBitmapImageInstructions()'
       value='in'
       manage
       readonly
-      onchange='spy.GetBitmapSize(True)'
+      onchange='spy.gui.images.GetBitmapSize(True)'
     >
     </font>
   </td>
@@ -131,7 +131,7 @@ $spy.MakeHoverButton('button_small-go@bitmap','spy.GetBitmapImageInstructions()'
       valign='left'
       name="IMAGE_BITMAP_SIZE"
       value='1200'
-      onchange='spy.GetBitmapSize(px)'
+      onchange='spy.gui.images.GetBitmapSize(True)'
     >
     </font>
   </td>
@@ -156,17 +156,18 @@ $spy.MakeHoverButton('button_small-go@bitmap','spy.GetBitmapImageInstructions()'
       oncheck="html.SetData('TRIM_IMAGE','True')"
       onuncheck="html.SetData('TRIM_IMAGE',' ')"
       manage
+      checked
     >
     </font>
   </td>
-  <td width='11%' align='right'>
-    Padding
+  <td width='16%' align='right'>
+    Padding (%)
   </td>
   <td  width='12%'>
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="combo"
-      height="GetVar('HtmlInputHeight')"
+      height="GetVar('HtmlComboHeight')"
       width="100%"
       bgcolor="GetVar('HtmlInputBgColour')"
       items='0;1;2;5;9'
@@ -177,8 +178,8 @@ $spy.MakeHoverButton('button_small-go@bitmap','spy.GetBitmapImageInstructions()'
     >
     </font>
   </td>
-  <td width='11%' align='right'>
-    Border
+  <td width='15%' align='right'>
+    Border (%)
   </td>
   <td  width='12%'>
     <font size="$GetVar('HtmlFontSizeControls')">
@@ -214,7 +215,7 @@ $spy.MakeHoverButton('button_small-go@bitmap','spy.GetBitmapImageInstructions()'
     >
     </font>
   </td>
-  <td width='5%'>
+  <td width='2%'>
       <input
         type="text"
         width='100%'
