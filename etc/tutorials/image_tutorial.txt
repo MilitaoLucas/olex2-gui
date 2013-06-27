@@ -23,7 +23,7 @@ c:spy.switch_tab_for_tutorials(tools)
 
 p:Then click on the tab marked <b>Images</b>
 h:h2-images
-c:html.ItemState tools-images 1
+c:html.ItemState h2-tools-images 1
 
 p:When first opened there is a small section at the top that contains links that will help you with editing your model so that you can have labels in the correct position on your model and also of a colour you would like.
 

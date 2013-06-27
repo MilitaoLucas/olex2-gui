@@ -1120,7 +1120,7 @@ class Analysis(Graph):
     self.datadir = OV.DataDir()
     self.gui_html_bg_colour = OV.GetParam('gui.html.bg_colour').rgb
     self.gui_html_highlight_colour = OV.GetParam('gui.html.highlight_colour').rgb
-    self.SPD, self.RPD = ExternalPrgParameters.SPD, ExternalPrgParameters.RPD
+    self.SPD, self.RPD = ExternalPrgParameters.get_program_dictionaries()
     self.debug = False
     self.function = function
     if param:

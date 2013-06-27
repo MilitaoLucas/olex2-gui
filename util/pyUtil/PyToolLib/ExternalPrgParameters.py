@@ -12,6 +12,13 @@ import libtbx.utils
 
 definedControls = []
 
+global RPD
+RPD = {}
+global SPD
+SPD = {}
+global reference_style
+reference_style = ""
+
 class ExternalProgramDictionary(object):
   def __init__(self):
     self.programs = {}
@@ -291,10 +298,36 @@ class Method_refinement(Method):
 
     if RunPrgObject.params.snum.refinement.auto.tidy:
       RunPrgObject.doAutoTidyBefore()
+
     if RunPrgObject.params.snum.refinement.update_weight:
-      suggested_weight = OV.GetParam('snum.refinement.suggested_weight')
-      if suggested_weight is not None:
-        olx.UpdateWght(*suggested_weight)
+      current_R1 = OV.GetParam('snum.current_r1')
+      if current_R1 < OV.GetParam('snum.refinement.update_weight_maxR1'):
+        suggested_weight = OV.GetParam('snum.refinement.suggested_weight')
+        if suggested_weight is not None:
+          olx.UpdateWght(*suggested_weight)
+
+    if RunPrgObject.params.user.auto_insert_acta_stuff:
+      radiation = olx.xf.exptl.Radiation()
+      
+      # Check whether these are present. If so, do nothing.
+      more = olx.Ins('MORE')
+      if more == "n/a":
+        OV.AddIns("'MORE -1'")
+      bond = olx.Ins('BOND')
+      if bond == "n/a":
+        OV.AddIns("'BOND $H'")
+      acta= olx.Ins('ACTA')
+      if acta == "n/a":
+        if radiation == "0.71073":
+          OV.AddIns("ACTA 52")
+      #htab= olx.Ins('HTAB')
+      #if acta == "n/a":
+        #OV.AddIns("'HTAB'")
+
+      #Delete and then add again
+      olx.DelIns('CONF')
+      OV.AddIns('CONF')
+
     if RunPrgObject.make_unique_names:
       pass
       #olx.Sel('-a')
@@ -333,9 +366,9 @@ class Method_shelx(Method):
         sys.stdout.write(line)
 # This is super ugly but what can I do?
 # This really be a function rather than a separate file but I can not get it to work yet?
-    if prgName in ('shelxl', 'xl', 'shelxl_ifc', 'XLMP' ):
+    if prgName in ('shelxl', 'xl', 'shelxl_ifc', 'XLMP', 'shelxl13' ):
       names = xl_ins_filename.lower()+'.ins'
-    if prgName in ('shelxs', 'xs', 'shelxs86'):
+    if prgName in ('shelxs', 'xs', 'shelxs86', 'shelxs13'):
       import fileinput, string, sys
       for line in fileinput.input(xl_ins_filename.lower()+'.ins',inplace=1):
         if 'DISP' in line:
@@ -354,10 +387,18 @@ class Method_shelx(Method):
       raise RuntimeError(
         'you may be using an outdated version of %s' %(prgName))
     olx.WaitFor('process') # uncomment me!
-    if os.path.getsize("%s.res" %(xl_ins_filename)) == 0:
-      self.failure = True
-    else:
-      self.failure = False
+    
+    additions = ['', '_a', '_b', '_c', '_d', '_e']
+    for add in additions:
+      p = "%s%s.res" %(xl_ins_filename, add)
+      if os.path.exists(p):
+        if os.path.getsize(p) == 0:
+          self.failure = True
+        else:
+          self.failure = False
+          break
+      else:
+        continue
     olex.m("User '%s'" %RunPrgObject.filePath)
     #olx.User("'%s'" %RunPrgObject.filePath)
 
@@ -676,7 +717,7 @@ class Method_Superflip(Method_solution):
   def do_run(self, RunPrgObject):
     from flipsmall import flipsmall
     flipsmall()
-
+    
 class Method_SIR(Method_solution):
 
   def do_run(self, RunPrgObject):
@@ -773,8 +814,17 @@ class Method_SIR(Method_solution):
       shutil.copyfile(item, f)
       os.remove(item)
 
-
 def defineExternalPrograms():
+  reference_style = OV.GetParam('snum.report.publication_style', 'acta').lower()
+  if reference_style == "acta":
+    ref_shelx = "Sheldrick, G. M. (2008). Acta Cryst. A64, 112-122."
+    ref_smtbx = "Bourhis, L.J, Dolomanov, O.V, Gildea, R.J, Howard, J.A.K and\n Puschmann, H. (2013, In Preparation)"
+    ref_superflip = "Palatinus, L.,  Chapuis, G., (2007) <i>J. Appl. Cryst.</i>, <b>40</b>, 786-790"
+    
+  else:
+    ref_shelx="SHELXS, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122"
+    ref_smtbx = "L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, J.A.K. Howard, H. Puschmann, in preparation (2013)"
+    ref_superflip = "SUPERFLIP, J. Appl. Cryst. (2007) 40, 786-790"
 
   # define solution methods
 
@@ -802,41 +852,63 @@ def defineExternalPrograms():
   levenberg_marquardt = Method_cctbx_refinement(levenberg_marquardt_phil)
 
   # define solution programs
+  
+ 
   ShelXS = Program(
     name='ShelXS',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference="SHELXS, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["shelxs.exe", "shelxs"])
+  ShelXS13 = Program(
+    name='ShelXS-2013',
+    program_type='solution',
+    author="G.M.Sheldrick",
+    reference=ref_shelx,
+    execs=["shelxs13.exe", "shelxs13"])
   ShelXS86 = Program(
     name='ShelXS86',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference="ShelXS86, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["shelxs86.exe", "shelxs86"])
   XS = Program(
     name='XS',
     program_type='solution',
     author="G.M.Sheldrick/Bruker",
-    reference="XS, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["xs.exe", "xs"])
+  XT = Program(
+    name='XT',
+    program_type='solution',
+    author="G.M.Sheldrick/Bruker",
+    reference=ref_shelx,
+    execs=["xt.exe", "xt"])
   ShelXD = Program(
     name='ShelXD',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference="SHELXD, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["shelxd.exe", "shelxd"])
+  ShelXD13 = Program(
+    name='ShelXD-2013',
+    program_type='solution',
+    author="G.M.Sheldrick",
+    reference=ref_shelx,
+    execs=["shelxd13.exe", "shelxd13"])
   XM = Program(
     name='XM',
     program_type='solution',
     author="G.M.Sheldrick/Bruker",
-    reference="XM, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["xm.exe", "xm"])
   smtbx_solve = Program(
     name='olex2.solve',
     program_type='solution',
     author="Luc Bourhis",
-    reference="olex2.solve (L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, J.A.K. Howard,\nH. Puschmann, in preparation, 2011)")
+    reference=ref_smtbx
+    )
+  
   SIR97 = Program(
     name='SIR97',
     program_type='solution',
@@ -876,20 +948,25 @@ def defineExternalPrograms():
     name='Superflip',
     program_type='solution',
     author="A van der Lee, C.Dumas & L. Palatinus",
-    reference="SUPERFLIP, J. Appl. Cryst. (2007) 40, 786-790",
+    reference = ref_superflip,
     versions = '260711',
     execs=["superflip.exe", "superflip"])
 
   ShelXS.addMethod(direct_methods)
   ShelXS.addMethod(patterson)
   ShelXS.addMethod(texp)
+  ShelXS13.addMethod(direct_methods)
+  ShelXS13.addMethod(patterson)
+  ShelXS13.addMethod(texp)
   ShelXS86.addMethod(direct_methods)
   ShelXS86.addMethod(patterson)
   ShelXS86.addMethod(texp)
   XS.addMethod(direct_methods)
   XS.addMethod(patterson)
   XS.addMethod(texp)
+  XT.addMethod(direct_methods)
   ShelXD.addMethod(dual_space)
+  ShelXD13.addMethod(dual_space)
   XM.addMethod(dual_space)
   smtbx_solve.addMethod(charge_flipping)
   SIR97.addMethod(sir97_dm)
@@ -909,62 +986,63 @@ def defineExternalPrograms():
     name='ShelXL',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="SHELXL, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["shelxl.exe", "shelxl"])
   ShelXL12 = Program(
     name='ShelXL-2012',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="SHELXL-2012, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["shelxl12.exe", "shelxl12"])
   ShelXLMP12 = Program(
     name='ShelXLMP-2012',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="SHELXL-2012, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["shelxl_mp12.exe", "shelxl_mp12"])
   ShelXL13 = Program(
     name='ShelXL-2013',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="SHELXL-2013, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["shelxl13.exe", "shelxl13"])
   XL = Program(
     name='XL',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="XL, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["xl.exe", "xl"])
   XLMP = Program(
     name='XLMP',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="XLMP, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["xlmp.exe", "xlmp"])
   ShelXH = Program(
     name='ShelXH',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="SHELXH, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["shelxh.exe", "shelxh"])
   XH = Program(
     name='XH',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="XH, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["xh.exe", "xh"])
   ShelXL_ifc = Program(
     name='ShelXL_ifc',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference="SHELXL, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122",
+    reference=ref_shelx,
     execs=["shelxl_ifc"])
   smtbx_refine = Program(
     name='olex2.refine',
     program_type='refinement',
     author="L.J. Bourhis, O.V. Dolomanov, R.J. Gildea",
-    reference="olex2.refine (L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, J.A.K. Howard,\nH. Puschmann, in preparation, 2011)")
-
+    reference=ref_smtbx
+  )
+  
   RPD = ExternalProgramDictionary()
   for prg in (ShelXL, ShelXL12, ShelXLMP12, ShelXL13, XL, XLMP, ShelXH, XH, ShelXL_ifc):
     prg.addMethod(least_squares)
@@ -976,7 +1054,7 @@ def defineExternalPrograms():
   RPD.addProgram(smtbx_refine)
 
   SPD = ExternalProgramDictionary()
-  for prg in (ShelXS, ShelXS86, XS, ShelXD, XM, smtbx_solve, SIR97, SIR2002, SIR2004, SIR2008, SIR2011, Superflip):
+  for prg in (ShelXS, ShelXS13, ShelXS86, XS, XT, ShelXD, ShelXD13, XM, smtbx_solve, SIR97, SIR2002, SIR2004, SIR2008, SIR2011, Superflip):
     SPD.addProgram(prg)
 
 
@@ -1882,9 +1960,29 @@ REM Flack = %(_refine_ls_abs_structure_Flack)s
   wFile.write(txt)
   wFile.close()
 
+def get_program_dictionaries(cRPD=None, cSPD=None):
+  global SPD
+  global RPD
+  global reference_style
+  if not reference_style:
+    reference_style = OV.GetParam('snum.report.publication_style', 'acta')
 
+  if not cRPD or not cSPD:
+    if RPD and SPD:
+      if reference_style == OV.GetParam('snum.report.publication_style'):
+        return SPD, RPD
+      else:
+        SPD, RPD = defineExternalPrograms()
+        return SPD, RPD
+    else:
+      SPD, RPD =  defineExternalPrograms()
+      return SPD, RPD
+        
+  elif RPD != RPD or SPD != SPD:
+    SPD, RPD = defineExternalPrograms()
 
-SPD, RPD = defineExternalPrograms()
+  return SPD, RPD
+  
 
 if __name__ == '__main__':
   SPD, RPD = defineExternalPrograms()

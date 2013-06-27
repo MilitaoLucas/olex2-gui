@@ -1,0 +1,82 @@
+data_FileName()
+
+_publ_section_title
+;
+The Title of your Acta paper
+;
+
+
+_publ_section_abstract
+;
+The abstract of your Acta paper
+;
+_publ_section_comment    
+;
+This is the main part of your paper.
+;
+
+_publ_section_exptl_prep
+;
+Preparative details of the material
+;
+
+_publ_section_exptl
+;
+Any special experimental details
+;
+
+_publ_section_exptl_refinement
+;
+Anything you want to say about the refinement
+;
+
+
+_publ_section_figure_captions
+;
+Fig. 1. <i>CHEMDRAW</i> diagram of the title compound.
+
+Fig. 2. The asymmetric unit of the title compound, showing the naming scheme.
+The displacement ellipsoids are shown at the 50%% probability level.
+;
+
+
+_publ_section_acknowledgements
+;
+Any acknowledements you may have
+;
+
+
+_publ_section_table_legends
+;
+;
+
+_publ_section_references
+;
+<b>%$getVar(solution_reference_short)%</b>: %$getVar(solution_reference_long)%
+
+<b>%$getVar(refinement_reference_short)%</b>: %$getVar(refinement_reference_long)%
+
+<b>Olex2</b>: Dolomanov, O. V., Bourhis, L. J., Gildea, R. J., Howard, J. A. K. & and\n
+Puschmann, H. (2009). <i>J. Appl. Cryst.</i> <b>42</b>, 339--341.
+;
+
+_computing_molecular_graphics
+;
+%$getVar(olex2_reference_short)%
+;
+
+_computing_publication_material
+;
+%$getVar(olex2_reference_short)%
+;
+
+_computing_structure_solution
+;
+%$getVar(solution_reference_short)%
+;
+
+_computing_structure_refinement
+;
+%$getVar(refinement_reference_short)%
+;
+

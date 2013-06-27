@@ -36,6 +36,18 @@ def About():
 
 olex.registerFunction(About, False, "gui")
 
+def SwitchSettings(name="solve"):
+  name = name.lower()
+  auto_close_settings = OV.GetParam('user.auto_close_settings_panel')
+  if not auto_close_settings:
+    t = "cbtn* 1 cbtn-%s 1 *settings 0 %s-settings 0 1" %(name, name)
+  else:
+    t = "cbtn* 1 cbtn-%s 1 *settings 0" %name
+  olx.html.ItemState(t)
+
+olex.registerFunction(SwitchSettings, False, "gui")
+
+
 def SwitchPanel(name="home"):
   name = name.lower()
   if name == "home":
@@ -56,52 +68,36 @@ def SwitchPanel(name="home"):
 
 olex.registerFunction(SwitchPanel, False, "gui")
 
-def get_OV_path(path):
-  if "()" in path:
-    p = getattr(OV, path.split('()')[0])()
-    path = "%s/%s" %(p, path.split('()')[1])
-  return path
 
-
-def GetFolderList(root="", format="combo_items"):
+def GetFolderList(root):
   import os
   t = ""
-  if not root:
-    print "Please provide a root folder!"
-    return
-  root_c = get_OV_path(root)
+  assert root
+  root_c = olex.f(root)
   t = []
-  i = 0
   for root, dirs, files in os.walk(root_c, topdown=True):
+    pre = root[len(root_c):].replace('\\', '/').lstrip('/')
     for dir in dirs:
-      s = "%s/%s" %(root.lstrip(root_c), dir)
-      s = s.lstrip("\\")
-      s = s.lstrip("\\\\")
-      s = s.lstrip(r"/")
-      t.append("%s" %s)
+      if pre: dir = "%s/%s" %(pre, dir)
+      t.append(dir)
   t.sort()
   t = ";".join(t)
-  return t.replace("\\",'/')
-
-  #names = [x[1] for x in os.walk(root)]
-  #paths = [x[0] for x in os.walk(root)]
-  #if format == "combo_items":
-    #retVal = ""
-    #i = 1
-    #j = 0
-    #l = names[1:]
-    #for item in names[0]:
-
-      #path = paths[i]
-      #retVal += "%s<-%s;" %(item, item)
-      #while l[j]:
-        #retVal += "%s/%s<-%s;" %(item, l[j][0],l[j][0])
-        #j += 1
-      #i += 1
-      #j += 1
-  #return retVal
+  return t
 
 olex.registerFunction(GetFolderList, False, "gui")
 
-
-
+#'static' class
+class ImageListener_:
+  listeners = []
+  
+  def Register(self, listener):
+    ImageListener.listeners.append(listener)
+    
+  def Unregister(self, listener):
+    ImageListener.listeners.remove(listener)
+    
+  def OnChange(self):
+    for i in ImageListener.listeners:
+      i()
+  
+ImageListener = ImageListener_()

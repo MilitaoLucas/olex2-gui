@@ -22,7 +22,7 @@ sys.path.append(r".\src")
 import History
 
 import ExternalPrgParameters
-SPD, RPD = ExternalPrgParameters.SPD, ExternalPrgParameters.RPD
+SPD, RPD = ExternalPrgParameters.get_program_dictionaries()
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
@@ -1840,50 +1840,6 @@ def fade_out(speed=0):
   olex.m("waitfor fade")
 OV.registerFunction(fade_out)
 
-def GetImageFilename(image_type):
-  filename = OV.GetParam('snum.image.%s.name' %image_type.lower())
-  if image_type == "PS":
-    fileext = "eps"
-  elif image_type == "PR":
-    fileext = "pov"
-  else:
-    fileext = OV.GetParam('snum.image.%s.type' %image_type.lower())
-  if not filename:
-    try:
-      filename = OV.GetValue('IMAGE_%s_NAME' % image_type)
-    except:
-      filename = None
-    if not filename:
-      import gui
-      filename = gui.FileSave("Choose Filename", "*.%s" %fileext, OV.FilePath())
-    if not filename:
-      return None, None, None
-  if_exists = OV.GetParam('snum.image.if_file_exists')
-  if os.path.exists("%s.%s" %(filename, fileext)):
-    if if_exists == 'increment':
-      fp = olx.FilePath()
-      fn = filename
-      inc = 1
-      while True:
-        tf = os.path.normpath('%s/%s%d.%s' %(fp, fn, inc, fileext))
-        if not os.path.exists(tf):
-          filename = '%s%d' %(fn, inc)
-          filefull = "'%s.%s'" %(filename, fileext)
-          break
-        inc += 1
-    elif if_exists == 'ask':
-      import gui
-      filename = gui.FileSave("Choose Filename", "*.%s" %fileext, OV.FilePath(),
-                              default_name=filename)
-      if not filename:
-        return None, None, None
-  if filename.endswith(".%s" %fileext):
-    filefull = "'%s'" %filename
-  else:
-    filefull = "'%s.%s'" %(filename, fileext)
-  OV.SetParam('snum.image.%s.name' %image_type.lower(),None)
-  return filefull, filename, fileext
-
 def StringsAreEqual(str1, str2):
   return str1 == str2
 OV.registerFunction(StringsAreEqual)
@@ -1894,86 +1850,6 @@ def StringsAreNotEqual(str1, str2):
   else:
     return True
 OV.registerFunction(StringsAreNotEqual)
-
-
-def GetBitmapImageInstructions():
-  from ImageTools import ImageTools
-  IT = ImageTools()
-  filefull, filename, fileext = GetImageFilename(image_type = "BITMAP")
-  if not filefull:
-    return
-  filesize = OV.GetValue('IMAGE_BITMAP_SIZE')
-
-  if olx.html.GetData('BITMAP_NO_BG'):
-    nbg = "-nbg"
-  else:
-    nbg = ""
-    
-  if fileext == "png/s":
-    filefull = "%s.png" %filename
-    filesize = 1
-    pict = "a "
-  else:
-    pict = " -pq"
-  
-
-  OV.Cursor('busy','Please Wait. Making image %s.%s. This may take some time' %(filename, fileext))
-  olex.m('pict%s %s %s %s' %(pict, nbg, filefull, filesize))
-
-  if olx.html.GetData('TRIM_IMAGE'):
-    padding = float(olx.html.GetValue('TRIM_PADDING'))
-    border = float(olx.html.GetValue('TRIM_BORDER'))
-    colour = olx.html.GetValue('TRIM_BORDER_COLOUR')
-    IT.trim_image(im=filefull, padding=padding, border=border, border_col = colour )
-
-  #import Image
-  OV.Cursor()
-OV.registerFunction(GetBitmapImageInstructions)
-
-def GetPRImageInstructions():
-  filefull, filename, fileext = GetImageFilename(image_type = "PR")
-  if not filefull:
-    return
-  OV.Cursor('busy','Please Wait. Making image %s.%s. This may take some time' %(filename, fileext))
-  olex.m('pictPR %s' %filefull)
-  print 'Image %s created' %filefull
-  OV.Cursor()
-OV.registerFunction(GetPRImageInstructions)
-
-def GetPSImageInstructions():
-  filefull, filename, fileext = GetImageFilename(image_type = "PS")
-  if not filefull:
-    return
-  OV.Cursor('busy','Please Wait. Making image %s.%s. This may take some time' %(filename, fileext))
-
-  colour_line = OV.GetParam('snum.image.ps.colour_line')
-  colour_bond = OV.GetParam('snum.image.ps.colour_bond')
-  colour_fill = OV.GetParam('snum.image.ps.colour_fill')
-  image_perspective = OV.GetParam('snum.image.ps.perspective')
-  lw_ellipse = str(OV.GetParam('snum.image.ps.outline_width'))
-  lw_octant = str(OV.GetParam('snum.image.ps.octant_width'))
-  lw_pie = str(OV.GetParam('snum.image.ps.pie_width'))
-  lw_font = str(OV.GetParam('snum.image.ps.font_weight'))
-  div_pie = str(OV.GetParam('snum.image.ps.octant_count'))
-  scale_hb = str(OV.GetParam('snum.image.ps.h_bond_width'))
-  octant_atoms = str(OV.GetValue('IMAGE_PS_OCTANTS_ATOMS'))
-
-  olex.m("pictps" + \
-         " " + filefull + \
-         " " + colour_line + \
-         " " + colour_bond + \
-         " " + colour_fill + \
-         " " + "-lw_ellipse=" + lw_ellipse + \
-         " " + "-lw_octant=" + lw_octant + \
-         " " + "-lw_pie=" + lw_pie + \
-         " " + "-lw_font=" + lw_font + \
-         " " + "-div_pie=" + div_pie + \
-         " " + "-octants=" + octant_atoms + \
-         " " + "-scale_hb=" + scale_hb)
-
-  print 'Image %s created' %filefull
-  OV.Cursor()
-OV.registerFunction(GetPSImageInstructions)
 
 
 def check_for_selection(need_selection=True):

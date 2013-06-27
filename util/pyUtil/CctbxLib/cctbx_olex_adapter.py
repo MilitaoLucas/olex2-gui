@@ -1057,8 +1057,8 @@ def calcsolv(solvent_radius=None, grid_step=None):
     unit_cell,
     space_group,
     olx_atoms.iterator(),
-    restraints_iter,
-    constraints_iter
+    restraints_iter=None,
+    constraints_iter=None
   )
 
   # This needs to be done I don't know why but otherwise smtbx farts

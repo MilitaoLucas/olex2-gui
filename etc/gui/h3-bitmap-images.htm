@@ -1,52 +1,30 @@
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
 
 
-<!-- FIRST ROW -->
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=ADD_FOG; help_ext=add_fog;1; -->
-<!-- #include close-contacts gui\snippets\snippet-add-fog.htm;1; -->
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
-
-<!-- FIRST ROW -->
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='IMAGE_SETTINGS_ROW_1';help_ext=bitmap-atom-label-fonts;1 -->
-  <td colspan=4 name-=IMAGE_BITMAP_CHOOSE_ATOM_LABEL_FONTS>
-    <a href="setfont AtomLabels ChooseFont(Olex2,spy.GetParam(snum.image.bitmap.atom_label.font_name))>>spy.SetParam(snum.image.bitmap.atom_label.font_name,GetFont(AtomLabels))">%images_bmp_label_olex_font%</a> |
-    <a href="setfont AtomLabels ChooseFont(System,spy.GetParam(snum.image.bitmap.atom_label.font_name))>>spy.SetParam(snum.image.bitmap.atom_label.font_name,GetFont(AtomLabels))">%images_bmp_label_system_font%</a>
-  </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
-<!-- FIRST ROW A-->
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='IMAGE_BITMAP_ROW_1a';help_ext=bitmap-bond-label-fonts;1 -->
-  <td colspan=4 name-=IMAGE_BITMAP_CHOOSE_BOND_LABEL_FONTS>
-    <a href="setfont BondLabels ChooseFont(Olex2,spy.GetParam(snum.image.bitmap.bond_label.font_name))>>spy.SetParam(snum.image.bitmap.bond_label.font_name,GetFont(AtomLabels))">Choose Bond Label Font (Olex2)</a> |
-    <a href="setfont BondLabels ChooseFont(System,spy.GetParam(snum.image.bitmap.bond_label.font_name))>>spy.SetParam(snum.image.bitmap.bond_label.font_name,GetFont(AtomLabels))">(System Font)</a>
-  </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
 <!-- SECOND ROW -->
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='IMAGE_BITMAP_ROW_2';help_ext=Bitmap-Image-Attributes;1 -->
-  <td width='10%'>
-     %Name%
+
+  <td width='8%' align='left'>
+    %Type%
   </td>
-  <td name=IMAGE_BITMAP_NAME width='25%' align='right'>
+  <td name=IMAGE_BITMAP_TYPE width='13%'>
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
-      type="text"
-      height="GetVar('HtmlInputHeight')"
-      fgcolor="GetVar('HtmlFontColour')"
-      bgcolor="GetVar('HtmlInputBgColour')"
-      valign='left'
-      name="IMAGE_BITMAP_NAME"
+      type="combo"
+      height="GetVar('HtmlComboHeight')"
       width="100%"
-      height="GetVar('HtmlInputHeight')"
-      value="spy.GetParam('snum.image.bitmap.name', FileName())"
-      onchange="spy.SetParam('snum.image.bitmap.name',html.GetValue('~name~'))"
+      bgcolor="GetVar('HtmlInputBgColour')"
+      items="'png;jpg;bmp;tif;png/s'"
+      valign='left'
+      name="IMAGE_BITMAP_TYPE"
+      value="spy.GetParam('snum.image.bitmap.type')"
+      onchange="spy.SetParam('snum.image.bitmap.type',html.GetValue('~name~'))"
     >
     </font>
   </td>
 
-  <td width='15%'>
-     Transparent
+  <td width='35%' align='right'>
+     Transparent Background
   </td>
   <td width='5%' align='right'>
     <font size="$GetVar('HtmlFontSizeControls')">
@@ -66,25 +44,81 @@
 
 
   <td width='10%' align='right'>
-    %Type%
+$spy.MakeHoverButton('button_small-go@bitmap','spy.gui.images.GetBitmapImageInstructions()')
   </td>
-  <td name=IMAGE_BITMAP_TYPE width='13%'>
+
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+
+
+<!-- SECOND ROW -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='IMAGE_BITMAP_ROW_2';help_ext=Bitmap-Image-Attributes1;1 -->
+
+  <td width='20%' align='left'>
+    Resolution (DPI)
+  </td>
+  <td name=IMAGE_BITMAP_RESOLTUION width='12%'>
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="combo"
-      height="GetVar('HtmlInputHeight')"
+      height="GetVar('HtmlComboHeight')"
       width="100%"
       bgcolor="GetVar('HtmlInputBgColour')"
-      items="'png;jpg;bmp;tif;png/s'"
+      items="72;96;120;180;300;600"
       valign='left'
-      name="IMAGE_BITMAP_TYPE"
-      value="spy.GetParam('snum.image.bitmap.type')"
-      onchange="spy.SetParam('snum.image.bitmap.type',html.GetValue('~name~'))"
+      name="IMAGE_BITMAP_RESOLUTION"
+      value='300'
+      manage
+      onchange='spy.gui.images.GetBitmapSize()'
     >
     </font>
   </td>
+
   <td width='10%' align='right'>
-    Size
+    Width
+  </td>
+  <td name=IMAGE_BITMAP_WIDTH width='12%'>
+    <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type="combo"
+      height="GetVar('HtmlComboHeight')"
+      width="100%"
+      bgcolor="GetVar('HtmlInputBgColour')"
+      items="4;8;12;20;30;"
+      valign='left'
+      name="IMAGE_BITMAP_WIDTH"
+      value='4'
+      manage
+      onchange='spy.gui.images.GetBitmapSize()'
+    >
+    </font>
+  </td>
+
+  <td width='8%' align='right'>
+    Unit
+  </td>
+  <td name=IMAGE_BITMAP_WIDTH_UNIT width='10%'>
+    <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type="combo"
+      height="GetVar('HtmlComboHeight')"
+      width="100%"
+      bgcolor="GetVar('HtmlInputBgColour')"
+      items="cm;in"
+      valign='left'
+      name="IMAGE_BITMAP_WIDTH_UNIT"
+      value='in'
+      manage
+      readonly
+      onchange='spy.gui.images.GetBitmapSize(True)'
+    >
+    </font>
+  </td>
+
+  <td width='12%' align='right'>
+    Size (px)
   </td>
   <td name=IMAGE_BITMAP_SIZE width='15%'>
     <font size="$GetVar('HtmlFontSizeControls')">
@@ -93,13 +127,16 @@
       height="GetVar('HtmlComboHeight')"
       width="100%"
       bgcolor="GetVar('HtmlInputBgColour')"
-      items="'1;2;4;800px<-800;1200px<-1200;1800px<-1800;3200px<-3200'"
+      items="'200;400;800;1200;1800;3200'"
       valign='left'
       name="IMAGE_BITMAP_SIZE"
-      value='2'
+      value='1200'
+      onchange='spy.gui.images.GetBitmapSize(True)'
     >
     </font>
   </td>
+
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- THIRD_ROW-->
@@ -119,17 +156,18 @@
       oncheck="html.SetData('TRIM_IMAGE','True')"
       onuncheck="html.SetData('TRIM_IMAGE',' ')"
       manage
+      checked
     >
     </font>
   </td>
-  <td width='11%' align='right'>
-    Padding
+  <td width='16%' align='right'>
+    Padding (%)
   </td>
   <td  width='12%'>
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="combo"
-      height="GetVar('HtmlInputHeight')"
+      height="GetVar('HtmlComboHeight')"
       width="100%"
       bgcolor="GetVar('HtmlInputBgColour')"
       items='0;1;2;5;9'
@@ -140,8 +178,8 @@
     >
     </font>
   </td>
-  <td width='11%' align='right'>
-    Border
+  <td width='15%' align='right'>
+    Border (%)
   </td>
   <td  width='12%'>
     <font size="$GetVar('HtmlFontSizeControls')">
@@ -172,16 +210,42 @@
       valign='left'
       name="TRIM_BORDER_COLOUR"
       value='#bbbbbb'
+      onchange='spy.changeBoxColour(TRIM_BORDER_COLOUR_SAMPLE,html.GetValue(~name~))>>spy.SetParam(snum.image.trim_border_colour,html.GetValue(~name~))'
       manage
     >
     </font>
   </td>
+  <td width='2%'>
+      <input
+        type="text"
+        width='100%'
+        bgcolor='$spy.GetParam(snum.image.trim_border_colour)'
+        name='TRIM_BORDER_COLOUR_SAMPLE'
+    >
 
-
-  <td width='10%' align='right'>
-$spy.MakeHoverButton('button_small-go@bitmap','spy.GetBitmapImageInstructions()')
   </td>
 
 
 
+
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- FIRST ROW -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=ADD_FOG; help_ext=add_fog;1; -->
+<!-- #include add-fog gui\snippets\snippet-add-fog.htm;1; -->
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+<!-- FIRST ROW -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='IMAGE_SETTINGS_ROW_1';help_ext=bitmap-atom-label-fonts;1 -->
+  <td colspan=2 name-=IMAGE_BITMAP_CHOOSE_ATOM_LABEL_FONTS>
+    <a href="setfont AtomLabels ChooseFont(Olex2,spy.GetParam(snum.image.bitmap.atom_label.font_name))>>spy.SetParam(snum.image.bitmap.atom_label.font_name,GetFont(AtomLabels))"><b>Atom</b> Label Font (Olex2)</a> |
+    <a href="setfont AtomLabels ChooseFont(System,spy.GetParam(snum.image.bitmap.atom_label.font_name))>>spy.SetParam(snum.image.bitmap.atom_label.font_name,GetFont(AtomLabels))">(System Font)</a>
+</td>
+ <td colspan=2 name-=IMAGE_BITMAP_CHOOSE_BOND_LABEL_FONTS>
+ 
+    <a href="setfont BondLabels ChooseFont(Olex2,spy.GetParam(snum.image.bitmap.bond_label.font_name))>>spy.SetParam(snum.image.bitmap.bond_label.font_name,GetFont(AtomLabels))"><b>Bond</b> Label Font (Olex2)</a> |
+    <a href="setfont BondLabels ChooseFont(System,spy.GetParam(snum.image.bitmap.bond_label.font_name))>>spy.SetParam(snum.image.bitmap.bond_label.font_name,GetFont(AtomLabels))">(System Font)</a>
+  </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

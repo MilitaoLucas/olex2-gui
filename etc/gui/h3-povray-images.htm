@@ -4,22 +4,7 @@
 
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=PR_ROW_1; help_ext=pr_row_1;1; -->
-  <td name=IMAGE_PR_NAME width='100%'>
-    <font size="$GetVar('HtmlFontSizeControls')">
-    <input
-      type="text"
-      height="GetVar(HtmlInputHeight)"
-      bgcolor="GetVar(HtmlInputBgColour)"
-      valign='center'
-      name="IMAGE_PR_NAME"
-      width="80%"
-      value="spy.GetParam('snum.image.povray.name', FileName())"
-      onchange="spy.SetParam(snum.image.povray.name,html.GetValue('~name~'))"
-      label='%Name% '
-    >
-    </font>
-  </td>
   <td name=IMAGE_PR_BUTTON align='right'>
-$spy.MakeHoverButton('button_small-go@povray','spy.GetPRImageInstructions()')
+$spy.MakeHoverButton('button_small-go@povray','spy.gui.images.GetPRImageInstructions()')
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

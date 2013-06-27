@@ -4,26 +4,31 @@
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='HFIX_QUICKMODES';help_ext=HFIX-Quickmodes;1 -->
   <td>
     <table><tr>
-      <td width='30%'>
-        $spy.MakeHoverButton('toolbar-sp2','mode hfix 43')&nbsp;
-        $spy.MakeHoverButton('toolbar-sp2-1H','mode hfix 43')
-        $spy.MakeHoverButton('toolbar-sp2-2H','mode hfix 93')
-      </td>
-      <td width='40%'>
-        $spy.MakeHoverButton('toolbar-sp3','mode hfix 13')&nbsp;
-        $spy.MakeHoverButton('toolbar-sp3-1H','mode hfix 13')
-        $spy.MakeHoverButton('toolbar-sp3-2H','mode hfix 23')
-        $spy.MakeHoverButton('toolbar-sp3-3H','mode hfix 137')
+      <td width='10%' align='right'>
+        <font size="+2" color="$GetVar(Grey)"><b>sp<sup>2</sup>:</b></font>
       </td>
       <td width='20%'>
-        $spy.MakeHoverButton('toolbar-OH','mode hfix 147')
-        $spy.MakeHoverButton('toolbar-O-H','mode hfix 83')
+        $spy.MakeHoverButton('toolbar-sp2_1H','mode hfix 43')&nbsp;
+        $spy.MakeHoverButton('toolbar-sp2_2H','mode hfix 93')
       </td>
-      <td width=10%>
-        $spy.MakeHoverButton('toolbar-ok','mode off')
+      <td width='10%' align='right'>
+        <font size="+2" color="$GetVar(Grey)"><b>sp<sup>3</sup>:</b></font>
+      </td>
+      <td width='30%'>
+        $spy.MakeHoverButton('toolbar-sp3_1H','mode hfix 13')&nbsp;
+        $spy.MakeHoverButton('toolbar-sp3_2H','mode hfix 23')&nbsp;
+        $spy.MakeHoverButton('toolbar-sp3_3H','mode hfix 137')
+      </td>
+      <td width='11%' align='right'>
+        <font size="+2" color="$GetVar(Grey)"><b>OH:</b></font>
+      </td>
+      <td width='19%' align='right'>
+        $spy.MakeHoverButton('toolbar-OH','mode hfix 147')&nbsp;
+        $spy.MakeHoverButton('toolbar-O_H','mode hfix 83')
       </td>
     </tr></table>
   </td>
+  
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
@@ -78,11 +83,41 @@ $spy.MakeHoverButton('button_small-hfix',"if strcmp(spy.GetParam(olex2.short_mod
       </td>
       <td>
         <a href="labels -h -l">H %Labels%</a>
+      </td>
+      <td>
         <a href="labels -l">No H %Labels%</a>
+      </td>
+      <td>
         <a href="labels -h -a">%Show% AFIX</a>
       </td>
+      <td>
+        <a href="ShowQ a False>>showQ b False">%Hide% Q</a>
+      </td>
+
     </tr>
   </table>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
+
+<!-- FOURTH ROW-->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MAIN_TOOLBAR_HYDROGEN_4';help_ext=HTAB-Slider;1 -->
+
+<!-- #include hydrogen-bbonds gui\snippets\snippet-hydrogen-bonds.htm;1; -->
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+<!-- FIFTH ROW-->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='Hydrogen_Bond_Slider';help_ext=Hydrogen-Bond-Slider;1 -->
+
+<!-- #include close-contacts gui\snippets\snippet-close-contacts.htm;1; -->
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+
+
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
+
+<!-- %hydrogen-target% %hfix-target%-->
+<!-- %sp2_1H-target% %sp2_2H-target% %sp3_1H-target% %sp3_2H-target% %sp3_3H-target% %OH-target% %O_H-target%-->

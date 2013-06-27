@@ -1,0 +1,110 @@
+<tr name=HYDROGEN_BONDS_1>
+  <td name=HEADLINE_EXPAND_SHORT_CONTACTS colspan='3' bgcolor="$GetVar(HtmlTableFirstcolColour)">
+    <b>
+      %Hydrogen Bonds% (HTAB)
+    </b>
+  </td>
+</tr>
+
+<!-- SECOND ROW -->
+<tr name=HYDROGEN_BONDS_DISTANCE>
+  <td width = 10%>
+  Distance
+  </td>
+
+  <td name=SLIDER_HTAB_D width="80%">
+    <font size='$GetVar(HtmlFontSizeControls)'>
+    <input 
+      type="slider" 
+      name = "SlideHTAB_D" 
+      width="100%"
+      height="$GetVar(HtmlInputHeight)" 
+      value="140"
+      bgcolor="$GetVar(HtmlTableBgColour)"  
+      fgcolor="$GetVar(HtmlFontColour)" 
+      min="100" 
+      max="200" 
+      onchange="html.SetValue(HTAB_D_Value,math.eval(html.GetValue(~name~)/50))>>
+delins HTAB>>
+deltaI 1.2>>
+html.SetValue(DeltaIValue, 1.2)>>
+html.SetValue(SlideDeltaI, 60)>>
+HTAB math.eval(html.GetValue(SlideHTAB_D)/50)>>
+fuse"
+    >
+    </font>
+  </td>
+  <td name=HTAB_D_VALUE width="10%">
+    <font size='$GetVar(HtmlFontSizeControls)'>
+    <input 
+    type="text" 
+    name = "HTAB_D_Value" 
+    width="100%"
+    align="center"
+    height="$GetVar(HtmlInputHeight)"
+    bgcolor="$GetVar(HtmlTableBgColour)"  
+    fgcolor="$GetVar(HtmlFontColour)" 
+    value="math.eval(html.GetValue(SlideHTAB_D)/50)" 
+    onreturn="html.SetValue(SlideHTAB_D, math.eval(html.GetValue(~name~)*50))>>
+delins HTAB>>
+deltaI 1.2>>
+html.SetValue(DeltaIValue, 1.2)>>
+html.SetValue(SlideDeltaI, 60)>>
+HTAB math.eval(html.GetValue(SlideHTAB_D)/50) html.GetValue(SlideHTAB_A)>>
+fuse"
+    >
+    </font>
+  </td>
+</tr>
+
+
+<!-- SECOND ROW -->
+<tr name=HYDROGEN_BONDS_2>
+  <td width = 10%>
+  Angle
+  </td>
+
+  <td name=SLIDER_HTAB_A width="80%">
+    <font size='$GetVar(HtmlFontSizeControls)'>
+    <input 
+      type="slider" 
+      name = "SlideHTAB_A" 
+      width="100%"
+      height="$GetVar(HtmlInputHeight)" 
+      value="120"
+      bgcolor="$GetVar(HtmlTableBgColour)"  
+      fgcolor="$GetVar(HtmlFontColour)" 
+      min="90" 
+      max="180" 
+      onchange="html.SetValue(HTAB_A_Value,html.GetValue(~name~))>>
+delins HTAB>>
+deltaI 1.2>>
+html.SetValue(DeltaIValue, 1.2)>>
+html.SetValue(SlideDeltaI, 60)>>
+HTAB math.eval(html.GetValue(SlideHTAB_D)/50) html.GetValue(SlideHTAB_A)>>
+fuse"
+    >
+    </font>
+  </td>
+  <td name=HTAB_A_VALUE width="10%">
+    <font size='$GetVar(HtmlFontSizeControls)'>
+    <input 
+    type="text" 
+    name = "HTAB_A_Value" 
+    width="100%"
+    height="$GetVar(HtmlInputHeight)"
+    align="center"
+    bgcolor="$GetVar(HtmlTableBgColour)"  
+    fgcolor="$GetVar(HtmlFontColour)" 
+    value="html.GetValue(SlideHTAB_A)" 
+    onreturn="html.SetValue(SlideHTAB_A, html.GetValue(~name~))>>
+delins HTAB>>
+deltaI 1.2>>
+html.SetValue(DeltaIValue, 1.2)>>
+html.SetValue(SlideDeltaI, 60)>>
+HTAB math.eval(html.GetValue(SlideHTAB_D)/50) html.GetValue(SlideHTAB_A)>>
+fuse"
+    >
+    </font>
+  </td>
+</tr>

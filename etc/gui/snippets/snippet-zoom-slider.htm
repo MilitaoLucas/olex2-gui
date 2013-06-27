@@ -1,0 +1,50 @@
+<tr name=HYDROGEN_BONDS_1>
+  <td name=HEADLINE_EXPAND_SHORT_CONTACTS colspan='3' bgcolor="$GetVar(HtmlTableFirstcolColour)">
+    <b>
+      %Zoom%
+    </b>
+  </td>
+</tr>
+
+<!-- SECOND ROW -->
+<tr name=ZOOM_SLIDER>
+  <td width = 10%>
+  <a href="gl.zoom">Reset</a>
+  </td>
+
+  <td name=SLIDER_ZOOM width="80%">
+    <font size='$GetVar(HtmlFontSizeControls)'>
+    <input 
+      type="slider" 
+      name = "SlideZoom" 
+      width="100%"
+      height="$GetVar(HtmlInputHeight)" 
+      value="0"
+      bgcolor="$GetVar(HtmlTableBgColour)"  
+      fgcolor="$GetVar(HtmlFontColour)" 
+      min="-40"
+      max="60"
+      onchange="html.SetValue(SlideZoom_Value,html.GetValue(~name~))>>
+gl.zoom>>
+gl.zoom math.eval(gl.GetZoom() * (math.eval(html.GetValue(SlideZoom)/(math.eval(math.eval(50 + gl.GetZoom()*100))))))"
+    >
+    </font>
+  </td>
+  <td name=SlideZoom_VALUE width="10%">
+    <font size='$GetVar(HtmlFontSizeControls)'>
+    <input 
+    type="text" 
+    name = "SlideZoom_Value" 
+    width="100%"
+    align="center"
+    height="$GetVar(HtmlInputHeight)"
+    bgcolor="$GetVar(HtmlTableBgColour)"  
+    fgcolor="$GetVar(HtmlFontColour)" 
+    value="math.eval(html.GetValue(SlideZoom)*400)" 
+    onreturn="html.SetValue(SlideZoom, math.eval(html.GetValue(~name~)))>>
+gl.zoom>>
+gl.zoom math.eval(gl.GetZoom() * (math.eval(html.GetValue(~name~)/(math.eval(math.eval(50 + gl.GetZoom()*100))))))"
+    >
+    </font>
+  </td>
+</tr>

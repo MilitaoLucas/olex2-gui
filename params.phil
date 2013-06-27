@@ -17,9 +17,7 @@ snum
     .type = str
   current_r1 = 0
     .type = float
-  
 
-    
   init
     .short_caption = Other Things
     .expert_level = 1
@@ -32,6 +30,8 @@ snum
   metadata{
     resolved_conflict_items = ""
       .type = strings
+    show_all_cif_sources = False
+      .type = bool
   }
 
   ccdc{
@@ -116,7 +116,7 @@ snum
       .type = float
     vata = 0
       .type = float
-    program = ShelXS ShelXS86 XS '*olex2.solve' XM ShelXD SIR2002 SIR2004 SIR2008 SIR2011 Superflip Unknown
+    program = ShelXS ShelXS-2013 ShelXS86 XS XT '*olex2.solve' XM ShelXD ShelXD-2013 SIR2002 SIR2004 SIR2008 SIR2011 Superflip Unknown
       .type = choice
     method = 'Dual Space' '*Charge Flipping' 'Direct Methods' 'Patterson Method' 'Structure Expansion' Unknowm
       .type = choice
@@ -125,7 +125,7 @@ snum
     current_atomic_volume = None
       .type = float
     Sir2002{
-      gui = False
+      gui = True
         .type = bool
       }
     Sir2004{
@@ -137,6 +137,14 @@ snum
         .type = bool
       }
     }
+    
+  htab{
+    distance = 2.9
+      .type = float
+    angle = 140
+      .type = float
+    }
+
 
   refinement
     .short_caption = Structure Refinement
@@ -183,10 +191,13 @@ snum
       .type = int
       .help = The maximum number of electron density peaks to be returned \
         after refinement
-    update_weight = False
+    update_weight = True
       .type = bool
       .help = Automatically update the weight instruction before the next \
         refinement
+    update_weight_maxR1 = 15
+      .type = float
+      .help = The maximum R1 value below which weighting scheme will be updated automatically
     suggested_weight = None
       .type = floats(size=2)
       .help = The weighting scheme parameters suggested by the refinement \
@@ -250,6 +261,8 @@ snum
     {
     if_file_exists = *ask increment replace
       .type = choice
+    name = None
+      .type = str
     bitmap
       .short_caption = png, jpg, bmp ...
       {
@@ -265,6 +278,8 @@ snum
         }
       bond_label{
         font_name = #olex2.fnt:frb_14
+        .type = str
+      trim_border_colour = #bbbbbb
         .type = str
       }
     }
@@ -496,6 +511,12 @@ snum
   report
     .short_caption = Report Metadata
     {
+    publication_style = general
+      .type = str
+    publication_paper = ""
+      .type = str
+    merge_these_cifs = ""
+      .type = strings
     type = "Structure Report"
       .type = str
     date_format = "%d-%m-%Y"  
@@ -988,6 +1009,17 @@ programs
 user
   .short_caption = User Specific
   {
+  brad = 10
+    .type = int
+  solo = True
+    .type = bool
+    .help = "Only one top-level tool can be open at any one time"
+  solo_exceptions = start
+    .type = strings
+  auto_close_settings_panel = False
+    .type = bool
+  auto_insert_acta_stuff = False
+    .type = bool
   folder_view_root = None
     .type = path
   use_fader = 0
@@ -1009,15 +1041,21 @@ user
     .expert_level = 1
   start_where = home
     .type = str
-  report_style = styles/default.css #kept for back compatibility
+  report_style = styles/default.css
     .type = str
-  report_template = templates/default.htm #kept for back compatibility
+  report_template = templates/default.htm
     .type = str
-  report_footer = templates/footer.htm #kept for back compatibility
+  report_footer = templates/footer.htm
     .type = str
-  report_journal_style = rsc #kept for back compatibility
+  report_journal_style = rsc
     .type = str
   report{
+    use_db = False
+      .type = bool
+    db_location = DataDir()/db
+      .type = str
+    db_name = olex2.sqlite
+      .type = str
     styles_base_path = "BaseDir()/etc/CIF/styles"
       .type = str
     templates_base_path = "BaseDir()/etc/CIF/templates"

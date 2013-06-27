@@ -21,6 +21,8 @@ gui
     .type = colour
   green = #00b400
     .type = colour
+  dark_green = #307125
+    .type = colour
   blue = #0033ff
     .type = colour
   grey = #555555
@@ -29,6 +31,10 @@ gui
     .type = colour
   image_highlight = None
     .type = str
+  GuiImages {
+    action = None
+    .type=str
+  }
 
   xgrid {
     positive_surface_material = '245;3623911424;3632300160;1.000,1.000,1.000,0.500;1.000,1.000,1.000,1.000;36;36'
@@ -97,6 +103,8 @@ gui
       colour_grade3 = #d6a113
         .type = colour
       colour_grade4 = #d62613
+        .type = colour
+      colour_grade5 = #660066
         .type = colour
       }
     }

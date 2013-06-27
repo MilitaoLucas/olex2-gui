@@ -1,5 +1,5 @@
 <tr name=EXPAND_SHORT_CONTACTS_1>
-  <td name=HEADLINE_EXPAND_SHORT_CONTACTS colspan='2' bgcolor="$GetVar(HtmlTableFirstcolColour)">
+  <td name=HEADLINE_EXPAND_SHORT_CONTACTS colspan='3' bgcolor="$GetVar(HtmlTableFirstcolColour)">
     <b>
       %Expand Short Contacts% (%Hydrogen Bonds%)
     </b>
@@ -8,7 +8,12 @@
 
 <!-- SECOND ROW -->
 <tr name=EXPAND_SHORT_CONTACTS_2>
-  <td name=SLIDER_EXPAND_SHORT_CONTACTS width="85%">
+
+  <td width = 10%>
+  Distance
+  </td>
+
+  <td name=SLIDER_EXPAND_SHORT_CONTACTS width="80%">
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input 
       type="slider" 
@@ -28,12 +33,13 @@ DeltaI math.eval(html.GetValue(SlideDeltaI)/50)"
     >
     </font>
   </td>
-  <td name=DELATA_I_VALUE width="15%">
+  <td name=DELATA_I_VALUE width="10%">
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input 
     type="text" 
     name = "DeltaIValue" 
     width="100%"
+    align="center"
     height="$GetVar(HtmlInputHeight)"
     bgcolor="$GetVar(HtmlTableBgColour)"  
     fgcolor="$GetVar(HtmlFontColour)" 

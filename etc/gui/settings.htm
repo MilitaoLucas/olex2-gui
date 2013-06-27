@@ -18,6 +18,15 @@ Freeze(false)>>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='BOND_STYLES';help_ext=Bond-Styles;1 -->
+  <td width='23%'>
+    <b>%Bonds%</b>:
+  <td width='75%' colspan='2'>
+<!-- #include brad_slider gui\snippets\snippet-brad-slider.htm;1; -->
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='BACKGROUND';help_ext=background;1 -->
   <td width='23%'>
@@ -119,7 +128,7 @@ Freeze(false)>>
   <td width='20%' align='right'>
      <input
        type="combo"
-       height="$GetVar(HtmlInputHeight)"
+       height="GetVar('HtmlComboHeight')"
        name="LINES_OF_TEXT"
        bgcolor="$GetVar(HtmlInputBgColour)"
        value=""
@@ -138,9 +147,9 @@ Freeze(false)>>
     <b>%Panel Width%:</b>
   </td>
   <td width='65%' colspan='2'>
-    <a href="panel 400">%Default%</a>
+    <a href="panel 460">%Default%</a>
     <a href="panel 300">%Narrow%</a>
-    <a href="panel 500">%Wide%</a>
+    <a href="panel 520">%Wide%</a>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
@@ -187,7 +196,7 @@ Freeze(false)>>
   <td width='20%' align='right'>
      <input
        type="combo"
-       height="$GetVar(HtmlInputHeight)"
+       height="GetVar('HtmlComboHeight')"
        name="START_WHERE"
        bgcolor="$GetVar(HtmlInputBgColour)"
        width="100%"
@@ -200,5 +209,48 @@ Freeze(false)>>
      >
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='START_OLEX2_IN';help_ext=Solo-Mode;1 -->
+  <td width='23%'>
+    <b>%Solo Mode%:</b>
+  </td>
+  <td width='55%'>
+     Only one top-level tool open at a time
+  </td>
+  <td width='20%' align='right'>
+    <input 
+      type="checkbox"
+      height="$GetVar(HtmlCheckboxHeight)"
+      name="SOLO_MODE"
+      fgcolor="$GetVar(HtmlFontColour)"
+      checked="$not(strcmp(spy.GetParam(user.solo),False))"
+      width='15'
+      oncheck="spy.SetParam(user.solo,True)" 
+      onuncheck="spy.SetParam(user.solo,False)"
+    >
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='START_OLEX2_IN';help_ext=Auto-Close-Settings_Panels;1 -->
+  <td width='23%'>
+    <b>%Close Settings%:</b>
+  </td>
+  <td width='55%'>
+     Solve, Refine and Report panels
+  </td>
+  <td width='20%' align='right'>
+    <input 
+      type="checkbox"
+      height="$GetVar(HtmlCheckboxHeight)"
+      name="AUTO_CLOSE_SETTINGS_PANEL"
+      fgcolor="$GetVar(HtmlFontColour)"
+      checked="$not(strcmp(spy.GetParam(user.auto_close_settings_panel),False))"
+      width='15'
+      oncheck="spy.SetParam(user.auto_close_settings_panel,True)" 
+      onuncheck="spy.SetParam(user.auto_close_settings_panel,False)"
+    >
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->

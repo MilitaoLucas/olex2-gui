@@ -24,7 +24,7 @@ c:refresh
 
 p:Then you need to click on the <b>Overlay</b> tab.
 h:h2-overlay
-c:html.ItemState tools-overlay 1
+c:html.ItemState h2-tools-overlay 1
 c:refresh
 
 p:Once the tab has been opened you need to select the link that says <b>Overlay Structure</b> this will allow you to open another model and open it in the same screen, this allows you test if multiple data sets give a similar model.

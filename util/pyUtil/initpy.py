@@ -193,8 +193,8 @@ def setup_cctbx():
 
   # Import these files now to reduce time taken on running cctbx for the first time
   #import my_refine_util
-  import cctbx_olex_adapter
-  import cctbx_controller
+  #import cctbx_olex_adapter
+  #import cctbx_controller
 
 ''' Redirect prints to Olex '''
 sys.stdout = StreamRedirection(sys.stdout, stdout_redirection)
@@ -240,6 +240,7 @@ if OV.HasGUI():
   from gui.tools import *
   from gui.metadata import *
   from gui.maps import *
+  from gui.images import *
 
 def onstartup():
   OV.SetVar('cbtn_solve_on','false')
@@ -278,9 +279,10 @@ def onstartup():
       continue
 
   ## initialise userDictionaries objects
+  
   import userDictionaries
   if not userDictionaries.people:
-    userDictionaries.People()
+    userDictionaries.init_userDictionaries()
   if not userDictionaries.localList:
     userDictionaries.LocalList()
 

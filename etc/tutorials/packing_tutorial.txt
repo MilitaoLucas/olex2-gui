@@ -23,7 +23,7 @@ c:spy.switch_tab_for_tutorials(view)
 
 p:Then you need to open the toolbar called <b>Symmetry Generation</b> by clicking it, which will extend the tab
 h:h2-symmetry-generation
-c:html.ItemState view-symmetry-generation 1
+c:html.ItemState h2-view-symmetry-generation 1
 
 p:...you then need to open the tab called <b>Packing</b>
 h:h3-h3-packing

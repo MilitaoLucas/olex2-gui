@@ -689,102 +689,102 @@ class MakeAllRBars(BarGenerator):
 MakeAllRBars_instance = MakeAllRBars()
 OV.registerMacro(MakeAllRBars_instance.run_MakeAllRBars, '')
 
+##greyed out on 1/11/12
+#class sNumTitle(ImageTools):
+  #def __init__(self, width=None, tool_arg=None):
+    #super(sNumTitle, self).__init__()
+    #self.params = OV.GuiParams()
+    #self.have_connection = False
+    #width = self.params.htmlpanelwidth
+    #if not width:
+      #width = 290
+    #try:
+      #width = float(width)
+    #except:
+      #width = float(tool_arg)
 
-class sNumTitle(ImageTools):
-  def __init__(self, width=None, tool_arg=None):
-    super(sNumTitle, self).__init__()
-    self.params = OV.GuiParams()
-    self.have_connection = False
-    width = self.params.htmlpanelwidth
-    if not width:
-      width = 290
-    try:
-      width = float(width)
-    except:
-      width = float(tool_arg)
+    #if self.have_connection:
+      #try:
+        #import SQLFactories
+        #self.ds = SQLFactories.SQLFactory()
+      #except:
+        #self.have_connection = False
+        #pass
 
-    if self.have_connection:
-      try:
-        import SQLFactories
-        self.ds = SQLFactories.SQLFactory()
-      except:
-        self.have_connection = False
-        pass
+    #self.sNum = self.filename
 
-    self.sNum = self.filename
-
-  def run_sNumTitle(self, force=False):
-    #self.params.html.base_colour.rgb = OV.FindValue('gui_htmlself.params.html.base_colour.rgb')
+  #def run_sNumTitle(self, force=False):
+    ##self.params.html.base_colour.rgb = OV.FindValue('gui_htmlself.params.html.base_colour.rgb')
     
-    self.basedir = OV.BaseDir()
-    self.filefull = OV.FileFull()
-    self.filepath = OV.FilePath()
-    self.filename = OV.FileName()
-    self.datadir = OV.DataDir()
-    self.sNum = self.filename
-    self.space_group = OV.olex_function('sg(%h)')
-    id_string = self.space_group+self.filefull
-    curr_id = OV.GetParam("olex2.sNum_id_string")
+    #self.basedir = OV.BaseDir()
+    #self.filefull = OV.FileFull()
+    #self.filepath = OV.FilePath()
+    #self.filename = OV.FileName()
+    #self.datadir = OV.DataDir()
+    #self.sNum = self.filename
+    #self.space_group = OV.olex_function('sg(%h)')
+    #id_string = self.space_group+self.filefull
+    #curr_id = OV.GetParam("olex2.sNum_id_string")
 
-    if id_string == curr_id:
-      if not force:
-        return
-    OV.SetParam("olex2.sNum_id_string",id_string)
+    #if id_string == curr_id:
+      #if not force:
+        #return
+    #OV.SetParam("olex2.sNum_id_string",id_string)
 
-    items = {}
-    if self.filename != 'none':
-      if self.have_connection:
-        try:
-          from DimasInfo import dimas_info
-          self.getInfo = dimas_info("info")
-          items = self.getInfo.run()
-          items.setdefault("sNum", olx.FileName())
-        except Exception, ex:
-          raise ex
+    #items = {}
+    #if self.filename != 'none':
+      #if self.have_connection:
+        #try:
+          #from DimasInfo import dimas_info
+          #self.getInfo = dimas_info("info")
+          #items = self.getInfo.run()
+          #items.setdefault("sNum", olx.FileName())
+        #except Exception, ex:
+          #raise ex
 
-    if not items:
-      items.setdefault("operator", "n/a")
-      items.setdefault("submitter", "no info")
-      items.setdefault("type", "none")
-      items.setdefault("sNum", "none")
-      try:
-        items["type"] = olx.FileExt()
-        items["sNum"] = olx.FileName()
-      except Exception, ex:
-        raise ex
-    image = self.sNumTitleStyle1(items)
+    #if not items:
+      #items.setdefault("operator", "n/a")
+      #items.setdefault("submitter", "no info")
+      #items.setdefault("type", "none")
+      #items.setdefault("sNum", "none")
+      #try:
+        #items["type"] = olx.FileExt()
+        #items["sNum"] = olx.FileName()
+      #except Exception, ex:
+        #raise ex
+    #image = self.sNumTitleStyle1(items)
 
-    name = r"sNumTitle.png"
-    OlexVFS.save_image_to_olex(image, name, 1)
-    OV.CopyVFSFile(name, 'SNUMTITLE',2)
+    #name = r"sNumTitle.png"
+    #OlexVFS.save_image_to_olex(image, name, 1)
+    #OV.CopyVFSFile(name, 'SNUMTITLE',2)
 
 
 
-  def own_sql(self): #not currently used
-    sNum = self.sNum
-    sql = """SELECT people_status.Nickname
-FROM submission INNER JOIN people_status ON submission.OperatorID = people_status.ID
-WHERE (((submission.ID)="%s"));""" %sNum
-    rs = self.ds.run_select_sql(sql)
-    nickname = ""
-    for record in rs:
-      nickname = record[0]
-    items.setdefault("nickname", nickname)
+  #def own_sql(self): #not currently used
+    #sNum = self.sNum
+    #sql = """SELECT people_status.Nickname
+#FROM submission INNER JOIN people_status ON submission.OperatorID = people_status.ID
+#WHERE (((submission.ID)="%s"));""" %sNum
+    #rs = self.ds.run_select_sql(sql)
+    #nickname = ""
+    #for record in rs:
+      #nickname = record[0]
+    #items.setdefault("nickname", nickname)
 
-    record = ""
-    sql = """SELECT people_fullnames.display
-FROM submission INNER JOIN people_fullnames ON submission.SubmitterID = people_fullnames.ID
-WHERE (((submission.ID)="%s"));""" %sNum
-    rs = self.ds.run_select_sql(sql)
-    submitter = ""
-    for record in rs:
-      submitter = record[0]
-    items.setdefault("submitter", submitter)
+    #record = ""
+    #sql = """SELECT people_fullnames.display
+#FROM submission INNER JOIN people_fullnames ON submission.SubmitterID = people_fullnames.ID
+#WHERE (((submission.ID)="%s"));""" %sNum
+    #rs = self.ds.run_select_sql(sql)
+    #submitter = ""
+    #for record in rs:
+      #submitter = record[0]
+    #items.setdefault("submitter", submitter)
 
-  def sNumTitleStyle1(self, items, font_name="Arial Bold", font_size=17):
-    sNum = items["sNum"]
-    a = timage()
-    return a.make_timage('snumtitle', sNum, 'on', titleCase=False)
+  #def sNumTitleStyle1(self, items, font_name="Arial Bold", font_size=17):
+    #sNum = items["sNum"]
+    #a = timage()
+    #return a.make_timage('snumtitle', sNum, 'on', titleCase=False)
 
 
 class timage(ImageTools):
@@ -853,6 +853,7 @@ class timage(ImageTools):
         do_these = [
                 "make_cbtn_items",
                 "info_bitmaps",
+                "make_images_from_fb_png",
                 
                 ]
     if not do_these:
@@ -893,7 +894,7 @@ class timage(ImageTools):
         print "\t - %s took %.3f s to complete" %(item, self.time.time()-t1)
 
   def make_popup_banners(self):
-    txt_l = [('setup',330), ('help',410), ('tutorial',375)]
+    txt_l = [('setup',500), ('help',410), ('tutorial',375)]
     image_source = "%s/etc/gui/images/src/banner.png" %self.basedir
     for item in txt_l:
       txt = item[0]
@@ -1150,7 +1151,7 @@ class timage(ImageTools):
     name = "previous.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
 
-    cut = 120*sf, 154*sf, 135*sf, 175*sf
+    cut = 116*sf, 154*sf, 135*sf, 175*sf
     crop =  im.crop(cut)
     IM =  Image.new('RGBA', crop.size)
     IM.paste(crop, (0,0), crop)
@@ -2221,12 +2222,12 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     iconIndex.setdefault("fvar", (4, 2))
     iconIndex.setdefault("occ", (4, 3))
     iconIndex.setdefault("part", (4, 4))
-    iconIndex.setdefault("sp2-1H", (4, 5))
-    iconIndex.setdefault("sp3-1H", (4, 6))
-    iconIndex.setdefault("sp3-2H", (4, 7))
-    iconIndex.setdefault("sp3-3H", (4, 8))
-    iconIndex.setdefault("sp2-2H", (4, 9))
-    iconIndex.setdefault("O-H", (5, 0))
+    iconIndex.setdefault("sp2_1H", (4, 5))
+    iconIndex.setdefault("sp3_1H", (4, 6))
+    iconIndex.setdefault("sp3_2H", (4, 7))
+    iconIndex.setdefault("sp3_3H", (4, 8))
+    iconIndex.setdefault("sp2_2H", (4, 9))
+    iconIndex.setdefault("O_H", (5, 0))
     iconIndex.setdefault("OK", (5, 2))
     iconIndex.setdefault("olex", (5, 3))
     iconIndex.setdefault("cctbx", (5, 4))
@@ -2471,7 +2472,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     elif item_type == "h3":
       width -= (self.params.html.table_firstcol_width + self.params.timage.h3.width_adjust)
       underground = self.params.html.table_bg_colour.rgb
-      
 
     elif "tab" in item_type:
       if state == 'on':
@@ -2522,6 +2522,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     elif item_type == 'g4':
       shadow = False
       buttonmark = False
+      width -= self.params.timage.g4.width_adjust
  #     whitespace = "top:4:%s" %OV.GetParam('gui.html.bg_colour').hexadecimal
       if state == "on":
         grad_colour = "#b40000"
