@@ -3,27 +3,10 @@
 <!-- FIRST ROW -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=PS_ROW_1; help_ext=ps_row_1;1; -->
-  <td width='10%'>
-     %Name%
+  <td name=IMAGE_PS_COLOUR_LINE_LABEL width='22%' align='left'>
+    %Coloured Atoms%
   </td>
-  <td name=IMAGE_PS_NAME width='15%' align='right'>
-    <font size="$GetVar('HtmlFontSizeControls')">
-    <input
-      type="text"
-      height="GetVar('HtmlInputHeight')"
-      bgcolor="GetVar('HtmlInputBgColour')"
-      valign='center'
-      name="IMAGE_PS_NAME"
-      width="100%"
-      value="spy.GetParam('snum.image.ps.name', FileName())"
-      onchange="spy.SetParam('snum.image.ps.name',html.GetValue('~name~'))"
-    >
-    </font>
-  </td>
-  <td name=IMAGE_PS_COLOUR_LINE_LABEL width='10%' align='right'>
-    %Lines%
-  </td>
-  <td name=IMAGE_PS_COLOUR_LINE width='15%' align='left'>
+  <td name=IMAGE_PS_COLOUR_LINE width='5%' align='left'>
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="checkbox"
@@ -39,10 +22,10 @@
     >
     </font>
   </td>
-  <td name=IMAGE_PS_COLOUR_BOND_LABEL width='10%' align='right'>
-    %Bonds%
+  <td name=IMAGE_PS_COLOUR_BOND_LABEL width='22%' align='right'>
+    %Coloured Bonds%
   </td>
-  <td name=IMAGE_PS_COLOUR_BOND width='15%' align='left'>
+  <td name=IMAGE_PS_COLOUR_BOND width='5%' align='left'>
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="checkbox"
@@ -58,10 +41,10 @@
     >
     </font>
   </td>
-  <td name=IMAGE_PS_COLOUR_FILL_LABEL width='10%' align='right'>
-    %Fill%
+  <td name=IMAGE_PS_COLOUR_FILL_LABEL width='22%' align='right'>
+    %Filled Atoms%
   </td>
-  <td name=IMAGE_PS_COLOUR_FILL width='15%' align='left'>
+  <td name=IMAGE_PS_COLOUR_FILL width='5%' align='left'>
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="checkbox"
@@ -97,7 +80,7 @@
     </font>
   </td>
   <td name=IMAGE_PS_BUTTON align='right'>
-$spy.MakeHoverButton('button_small-go@ps','spy.GetPsImageInstructions()')
+$spy.MakeHoverButton('button_small-go@ps','spy.gui.images.GetPsImageInstructions()')
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
@@ -132,7 +115,6 @@ $spy.MakeHoverButton('button_small-go@ps','spy.GetPsImageInstructions()')
       width="35%"
       bgcolor="GetVar('HtmlInputBgColour')"
       items="'0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6'"
-      height="GetVar('HtmlInputHeight')"
       valign='center'
       align='right'
       name="IMAGE_PS_OCTANT_LINEWIDTH"
@@ -158,7 +140,6 @@ $spy.MakeHoverButton('button_small-go@ps','spy.GetPsImageInstructions()')
       width="35%"
       bgcolor="GetVar('HtmlInputBgColour')"
       items="'2;3;4;5;6;7;8;9;10;'"
-      height="GetVar('HtmlInputHeight')"
       valign='center'
       align='right'
       name="IMAGE_PS_OCTANT_COUNT"
@@ -176,7 +157,6 @@ $spy.MakeHoverButton('button_small-go@ps','spy.GetPsImageInstructions()')
       width="35%"
       bgcolor="GetVar('HtmlInputBgColour')"
       items="'0.2;0.4;0.6;0.8;1.0;1.2;1.4;1.6'"
-      height="GetVar('HtmlInputHeight')"
       valign='center'
       align='right'
       name="IMAGE_PS_OCTANT_PIEWIDTH"
@@ -295,7 +275,6 @@ $spy.MakeHoverButton('button_small-go@ps','spy.GetPsImageInstructions()')
       height="GetVar('HtmlComboHeight')"
       bgcolor="GetVar('HtmlInputBgColour')"
       items="-$C;+$C;"
-      height="GetVar('HtmlInputHeight')"
       valign='center'
       align='right'
       name="IMAGE_PS_OCTANTS_ATOMS"

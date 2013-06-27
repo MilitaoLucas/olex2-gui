@@ -8,6 +8,7 @@ import sys
 import olx
 import olex
 import olexex
+import OlexVFS
 
 import time
 from datetime import date
@@ -16,6 +17,7 @@ from datetime import date
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+
 
 last_mode = None
 last_mode_options = None
@@ -32,6 +34,10 @@ tutorial_box_initialised = False
 
 global time_add
 time_add = 0
+
+global hover_buttons
+hover_buttons = OV.GetParam('olex2.hover_buttons')
+
 def makeHtmlTable(list):
   """ Pass a list of dictionaries, with one dictionary for each table row.
 
@@ -53,17 +59,21 @@ def makeHtmlTable(list):
       text += "<tr><td colspan='2'><font color='#555555'>%s</font></td></tr>" %input_d['value']
       continue
     boxText = ''
-    for box in ['box1','box2','box3']:
+    for box in ['box1','box2','box3','box4']:
       if box in input_d.keys():
         box_d = input_d[box]
         box_d.setdefault('ctrl_name', "SET_%s" %str.upper(box_d['varName']).replace('.','_'))
         box_d.setdefault('bgcolor',"spy.bgcolor('~name~')")
         if box_d['varName'].startswith('_'): # treat cif items differently
           box_d.setdefault('value', "spy.get_cif_item('%(varName)s','?','gui')" %box_d)
-          box_d.setdefault('onchange',"spy.set_cif_item('%(varName)s',html.GetValue('~name~'))>>spy.changeBoxColour('%(ctrl_name)s','#FFDCDC')" %box_d)
+          box_d.setdefault('onchange',"spy.set_cif_item('%(varName)s',html.GetValue('~name~'))>>spy.AddVariableToUserInputList('%(varName)s')>>spy.changeBoxColour('%(ctrl_name)s','#FFDCDC')" %box_d)
         else:
           box_d.setdefault('value', "spy.GetParam('%(varName)s')" %box_d)
           box_d.setdefault('onchange',"spy.SetParam('%(varName)s',html.GetValue('~name~'))>>spy.AddVariableToUserInputList('%(varName)s')>>spy.changeBoxColour('~name~','#FFDCDC')" %box_d)
+          
+        if box_d.has_key('extra_onchange'):
+          box_d['onchange'] += ">>%s" %box_d['extra_onchange']
+          
         boxText += makeHtmlInputBox(box_d)
     if boxText:
       row_d.setdefault('input',boxText)
@@ -71,10 +81,11 @@ def makeHtmlTable(list):
       input_d.setdefault('ctrl_name', "SET_%s" %str.upper(input_d['varName']).replace('.','_'))
       if input_d['varName'].startswith('_'): # treat cif items differently
         input_d.setdefault('value', "spy.get_cif_item('%(varName)s','?','gui')" %input_d)
-        input_d.setdefault('onchange',"spy.set_cif_item('%(varName)s',html.GetValue('~name~'))>>spy.changeBoxColour('~name~','#FFDCDC')" %input_d)
-      elif input_d['varName'] == 'snum.report.date_collected': # treat date fields differently
+        input_d.setdefault('onchange',"spy.set_cif_item('%(varName)s',html.GetValue('~name~'))>>spy.AddVariableToUserInputList('%(varName)s')>>spy.changeBoxColour('~name~','#FFDCDC')" %input_d)
+      elif 'snum.report.date_' in input_d['varName']: # treat date fields differently
+        which = input_d['varName'].split("_")[1]
         try:
-          cd = float(OV.GetParam('snum.report.date_collected'))
+          cd = float(OV.GetParam('snum.report.date_%s' %which))
           cd = date.fromtimestamp(cd)
           time_str = cd.strftime("%d-%m-%Y")
           input_d.setdefault('value', "'%s'" %time_str)
@@ -85,8 +96,11 @@ def makeHtmlTable(list):
         input_d.setdefault('value', "spy.GetParam('%(varName)s')" %input_d)
         input_d.setdefault('onchange',"spy.SetParam('%(varName)s',html.GetValue('~name~'))>>spy.AddVariableToUserInputList('%(varName)s')>>spy.changeBoxColour('~name~','#FFDCDC')" %input_d)
       input_d.setdefault('bgcolor',"spy.bgcolor('~name~')")
+      if input_d.has_key('extra_onchange'):
+        input_d['onchange'] += ">>%s" %input_d['extra_onchange']
       row_d.setdefault('input',makeHtmlInputBox(input_d))
       row_d.update(input_d)
+      
 
     text += makeHtmlTableRow(row_d)
 
@@ -143,7 +157,8 @@ bgcolor="%(bgcolor)s"
   return htmlInputBoxText
 
 def makeHtmlTableRow(dictionary):
-  dictionary.setdefault('font', "size='%s'" %olx.GetVar('HtmlGuiFontSize'))
+#  dictionary.setdefault('font', "size='%s'" %olx.GetVar('HtmlGuiFontSize'))
+  dictionary.setdefault('font', "size='2'")
   dictionary.setdefault('trVALIGN','center')
   dictionary.setdefault('trALIGN','left')
   dictionary.setdefault('fieldWidth','30%%')
@@ -156,6 +171,13 @@ def makeHtmlTableRow(dictionary):
 
   href_1 = ""
   href_2 = ""
+
+  if 'href' in dictionary.keys():
+    href_content= dictionary['href']
+    href_1 = '<a href="%s">' %href_content
+    href_2 = '</a>'
+    dictionary['href'] = ""
+
   if 'chooseFile' in dictionary.keys():
     chooseFile_dict = dictionary['chooseFile']
     if 'file_type' in chooseFile_dict.keys():
@@ -1221,12 +1243,18 @@ def _check_modes_and_states(name):
       return True
 
   return False
+
 def MakeHoverButton(name, cmds, onoff = "off", btn_bg='table_firstcol_colour'):
   #global time_add
   #t = time.time()
-  hover_buttons = OV.GetParam('olex2.hover_buttons')
   on = _check_modes_and_states(name)
-
+  if cmds.lower().startswith("html.itemstate") and "h2" in cmds:
+    solo = OV.GetParam('user.solo')
+    item = cmds.split()[1]
+    tab = item.split("h2-")[1].split("-")[0]
+    item_name = item.split("h2-")[1].split("-")[1]
+    if solo:
+      cmds = "html.itemstate h2-%s* 2>>%s" %(tab,cmds) 
   if on:
     txt = MakeHoverButtonOn(name, cmds, btn_bg)
   else:
@@ -1241,7 +1269,7 @@ OV.registerFunction(MakeHoverButton)
 def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
   if "None" in name:
     return ""
-  hover_buttons = OV.GetParam('olex2.hover_buttons')
+  global hover_buttons
   click_console_feedback = False
   n = name.split("-")
   d = {'bgcolor': OV.GetParam('gui.html.%s' %btn_bg)}
@@ -1296,10 +1324,11 @@ def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
 '''%d
   return txt
 OV.registerFunction(MakeHoverButtonOff)
+
 def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
   if "None" in name:
     return ""
-  hover_buttons = OV.GetParam('olex2.hover_buttons')
+  global hover_buttons
   click_console_feedback = False
   n = name.split("-")
   d = {'bgcolor': OV.GetParam('gui.html.%s' %btn_bg)}
@@ -1348,6 +1377,7 @@ def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
 '''%d
   return txt
 OV.registerFunction(MakeHoverButtonOn)
+
 def MakeActiveGuiButton(name,cmds,toolname=""):
   n = name.split("-")
   d = {}

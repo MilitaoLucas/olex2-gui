@@ -402,10 +402,12 @@ class OlexFunctions(inheritFunctions):
   def htmlPanelWidth(self):
     olex.m("HtmlPanelWidth")
 
-  def reloadStructureAtreap(self, path, file, fader=True):
+  def reloadStructureAtreap(self, path, file, fader=True, sg_changed = False):
     fader = self.FindValue('gui_use_fader')
     #print "AtReap %s/%s" %(path, file)
     try:
+      if sg_changed:
+        olex.m('spy.run_skin sNumTitle')
       if fader == 'true':
         olex.m("atreap_fader -b \"%s\"" %(r"%s/%s.res" %(path, file)))
       else:

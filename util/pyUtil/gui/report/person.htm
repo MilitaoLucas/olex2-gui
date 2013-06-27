@@ -1,0 +1,171 @@
+<body link="$GetVar(HtmlLinkColour)" >
+<font color=$GetVar(HtmlFontColour  size=$GetParam('HtmlFontSize') face="$GetVar(HtmlFontName)">
+<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
+
+  <tr>
+  <td bgcolor='%(banner_colour)s'></td>
+
+  <td bgcolor='%(banner_colour)s'>
+    <font size='6' color='#ffffff'>
+  <br><b>%(displayname)s</b>
+    </font>
+  </td>
+
+  </tr>
+  <tr>
+
+  
+    <td width='25%%' align='right' td bgcolor='%(banner_colour)s'>
+    <font color='#ffffff'><b>First Name</b></font>
+    </td>
+    <td width='75%%'>
+      <input
+        type="text"
+        bgcolor="$GetVar(HtmlInputBgColour))"
+        valign='center'
+        name="PERSON_FIRSTNAME"
+        value='%(firstname)s'
+        reuse
+        width="100%%"
+        height="20"
+      >
+    </td>
+  </tr>
+  <tr>
+    <td width='25%%' align='right' td bgcolor='%(banner_colour)s'>
+    <font color='#ffffff'><b>Middle Name(s):</b></font>
+  </td>
+    <td width='75%%'>
+      <input
+      type="text"
+        bgcolor="$GetVar(HtmlInputBgColour))"
+        valign='center'
+        name="PERSON_MIDDLENAME"
+        value='%(middlename)s'
+        reuse
+        width="100%%"
+        height="20"
+      >
+    </td>
+  </tr>
+  <tr>
+    <td width='25%%' align='right' td bgcolor='%(banner_colour)s'>
+    <font color='#ffffff'><b>Last Name:</b></font>
+    </td>
+    <td width='75%%'>
+      <input
+        type="text"
+        bgcolor="$GetVar(HtmlInputBgColour))"
+        valign='center'
+        name="PERSON_LASTNAME"
+        value='%(lastname)s'
+        reuse
+        width="100%%"
+        height="20"
+      >
+    </td>
+  </tr>
+  <tr>
+
+    <td width='25%%' align='right' td bgcolor='%(banner_colour)s'>
+    <font color='#ffffff'><b>e-mail:</b></font>
+    </td>
+    <td width='75%%'>
+    <input
+      type="text"
+      bgcolor="$GetVar(HtmlInputBgColour))"
+      valign='center'
+      name="PERSON_EMAIL"
+      value='%(email)s'
+      reuse
+      width="100%%"
+      height="20"
+    >
+    </td>
+  </tr>
+  <tr>
+
+    <td width='25%%' align='right' td bgcolor='%(banner_colour)s'>
+    <font color='#ffffff'><b>Phone:</b></font>
+    </td>
+    <td width='75%%'>
+      <input
+        type="text"
+        bgcolor="$GetVar(HtmlInputBgColour))"
+        valign='center'
+        name="PERSON_PHONE"
+        value='%(phone)s'
+        reuse
+        width="100%%"
+        height="20"
+      >
+    </td>
+
+  </tr>
+  <tr>
+
+    <td width='25%%' align='right' td bgcolor='%(banner_colour)s'>
+    <font color='#ffffff'><b>Affiliation:</b></font>
+    </td>
+    <td width='75%%'>
+<input
+type="combo"
+width="100%%"
+height="18"
+name="PERSON_AFFILIATION"
+value="%(affiliation)s"
+items="%(list_affiliations)s"
+label=""
+valign="center"
+onchange="spy.gui.report.publication.OnPersonAffiliationChange('~name~',%(displayname)s)"
+onleave=""
+readonly
+bgcolor="spy.bgcolor('~name~')"
+>
+    </td>
+
+
+
+<input
+type="text"
+multiline
+width="100%%"
+height="140"
+name="PEOPLE_FORM_ADDRESS"
+value=""
+items=""
+label=""
+valign="center"
+readonly
+>
+
+  </tr>
+  <tr>
+
+
+
+  <td>
+  </td>
+  <td valign='centre'>
+    <input
+      type="button"
+      bgcolor="$GetVar(HtmlInputBgColour))"
+      valign='center'
+      width="60"
+      height="22"
+      onclick="html.EndModal(%(pop_name)s,1)"
+      value = "OK">
+    <input
+      type="button"
+      bgcolor="$GetVar(HtmlInputBgColour))"
+      valign='center'
+      width="60"
+      height="22"
+      onclick="html.EndModal(%(pop_name)s,0)"
+      value = "Cancel">
+  </td>
+  </tr>
+
+  </table>
+  </font>
+  </body>

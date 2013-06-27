@@ -353,6 +353,17 @@ class ImageTools(FontInstances):
     im.putalpha(alpha)
     return im
 
+
+  def make_colour_pixel(self, colour):
+    if not colour:
+      return
+    size = (10,10)
+    IM = Image.new('RGBA', size, colour)
+    name = r"pixel_%s.png" %colour[1:]
+    OlexVFS.save_image_to_olex(IM, name, 2)
+    return name
+
+
   def make_colour_sample(self, colour, size=(20,12)):
     if not colour:
       return
@@ -504,11 +515,12 @@ class ImageTools(FontInstances):
       pass
     return IM
 
-  def make_full_width_empty_image(self, height=100, colour='#b40000', scale=1):
-    size = (self.available_width_full * scale, height * scale)
+  def make_full_width_empty_image(self, height=100, colour='#b40000', scale=1, width_adjust=0):
+    adjusted_width = self.available_width_full-width_adjust
+    size = (adjusted_width * scale, height * scale)
     im = Image.new("RGB",size,colour)
     draw = ImageDraw.Draw(im)
-    return im, draw, self.available_width_full
+    return im, draw, adjusted_width
 
   def add_continue_triangles(self, draw, width, height, shift_up = 4, shift_left = 5, style=('multiple')):
     arrow_top = 8 + shift_up
@@ -1448,7 +1460,7 @@ class ImageTools(FontInstances):
     OlexVFS.write_to_olex('pie.htm',html, True)
     OV.UpdateHtml()
 
-  def trim_image(self, im, trimcolour=None, padding=2, border=0.5, border_col='#aaaaaa'):
+  def trim_image(self, im, trimcolour=None, padding=2, border=0.5, border_col='#aaaaaa', dry=False, target_size=None):
     ''' Takes either an image or a path to an image, then trims off all whitespace and either returns the trimmed image or saves it to the same path as the original one '''
     
     from PIL import Image, ImageChops, ImageOps
@@ -1466,24 +1478,43 @@ class ImageTools(FontInstances):
       pix = im.load()
       trimcolour = pix[0,0]
 
+    original_width = im.size[0]
     bg = Image.new(im.mode, im.size, trimcolour)
     diff = ImageChops.difference(im, bg)
     bbox = diff.getbbox()
+
+    if bbox:
+      im = im.crop(bbox)
+
     padding = int(im.size[0]/100 * padding)
     border = int(im.size[0]/100 * border)
     border_col = str(border_col)
-#    border_col = self.HTMLColorToRGB(border_col)
     
-    if bbox:
-      retImage = im.crop(bbox)
-      retImage = ImageOps.expand(retImage,border=padding,fill=trimcolour)
-      
-      if border:
-        retImage = ImageOps.expand(retImage,border=border,fill=border_col)
+    adjust = 0
+    if target_size:
+      curr_width = im.size[0] + padding*2 + border*2
+      diff = target_size - curr_width
+      padding += int(diff/2)
+      curr_width = im.size[0] + padding*2 + border*2
+      if curr_width > target_size:
+        adjust = -1
+      elif curr_width < target_size:
+        padding += 1
+        adjust = -1
+
+    if padding:
+      im = ImageOps.expand(im,border=padding,fill=trimcolour)
+    if adjust:
+      bbox = (0,0,im.size[0] -1, im.size[1])
+      im = im.crop(bbox)
+    if border:
+      im = ImageOps.expand(im,border=border,fill=border_col)
+    if dry:
+      return im.size[0], original_width
     if p:
-      retImage.save(p)
+      im.save(p)
     else:
-      return retImage
+      return im
     
   def make_pie_map(self, map_l, size):
 

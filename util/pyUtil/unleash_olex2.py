@@ -107,6 +107,11 @@ external_files = {
   #plugins
   #'olex2c-win32.zip': ('olex-port', 'plugin-Headless-win-32', 'action:extract', 'action:delete'),
   #'olex2c-win64.zip': ('olex-port', 'plugin-Headless-win-64', 'action:extract', 'action:delete'),
+  'plgl-mac-32.zip': ('olex-port', 'plugin-Loader-mac-32', 'action:extract', 'action:delete'),
+  'plgl-linux-32.zip': ('olex-port', 'plugin-Loader-linux-32', 'action:extract', 'action:delete'),
+  'plgl-linux-64.zip': ('olex-port', 'plugin-Loader-linux-64', 'action:extract', 'action:delete'),
+  'plgl-win-32.zip': ('olex-port', 'plugin-Loader-win-32', 'action:extract', 'action:delete'),
+  'plgl-win-64.zip': ('olex-port', 'plugin-Loader-win-64', 'action:extract', 'action:delete'),
 }
 # special zip files (must have relevant structure), must exist ABOVE as well!!
 #if the associated value is false - the file is non-portable and will not end up in the portable-gui.zip
@@ -161,9 +166,19 @@ set(  ['cctbx-linux64.zip',  #cctbx/cctb_sources,...
       'unirun-linux64.zip'
       ]
    ) | portable_zip_files
+
+plugin_zip_files = \
+set(  ['plgl-mac-32.zip',
+      'plgl-win-32.zip',
+      'plgl-win-64.zip',
+      'plgl-linux-32.zip',
+      'plgl-linux-64.zip'
+      ]
+   )
 # a set of all zip files...
 all_zip_files = win32_sse2_zip_files | win32_sse_zip_files | win64_zip_files\
-              | mac32_zip_files | linux32_zip_files | linux64_zip_files
+              | mac32_zip_files | linux32_zip_files | linux64_zip_files\
+              | plugin_zip_files
 
 altered_files = set([])
 altered_dirs = set([])
@@ -559,7 +574,7 @@ class IndexEntry:
     for item in self.items.itervalues():
       item.SaveToFile(idx_file, indent)
 
-def fileter_installer_file(only_prop=None, port_props = None, portable=False, enforce_only_prop=False):
+def filter_installer_file(only_prop=None, port_props = None, portable=False, enforce_only_prop=False):
   portable_files = set([])
   for f in installer_files:
     stats, props = info(f, f)
@@ -639,7 +654,7 @@ olex2_tag_file.close()
 # create portable distro
 def create_portable_distro(port_props, zip_name, port_zips, prefix, extra_files):
   port_files = create_index(zip_index_file_name, only_prop='olex-install', port_props=port_props, portable=True)
-  inst_files = fileter_installer_file(only_prop='olex-install', port_props=port_props, portable=True)
+  inst_files = filter_installer_file(only_prop='olex-install', port_props=port_props, portable=True)
   print 'Creating portable zip: ' + zip_name
   dest_zip = zipfile.ZipFile(web_directory + '/' + zip_name,
                               mode='w', compression=zipfile.ZIP_DEFLATED)

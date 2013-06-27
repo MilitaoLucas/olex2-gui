@@ -17,7 +17,7 @@ class RunPrg(ArgumentParser):
   def __init__(self):
     super(RunPrg, self).__init__()
     self.demote = False
-    self.SPD, self.RPD = ExternalPrgParameters.SPD, ExternalPrgParameters.RPD
+    self.SPD, self.RPD = ExternalPrgParameters.get_program_dictionaries()
     self.terminate = False
     self.tidy = False
     self.method = ""
@@ -84,7 +84,10 @@ class RunPrg(ArgumentParser):
     if self.broadcast_mode:
       self.doBroadcast()
     for ext in extensions:
-      copy_from = "%s/%s.%s" %(self.tempPath, self.shelx_alias, ext)
+      if "xt" in self.program.name.lower():
+        copy_from = "%s/%s_a.%s" %(self.tempPath, self.shelx_alias, ext)
+      else:
+        copy_from = "%s/%s.%s" %(self.tempPath, self.shelx_alias, ext)
       copy_to = "%s/%s.%s" %(self.filePath, self.original_filename, ext)
       if os.path.isfile(copy_from):
         if copy_from.lower() != copy_to.lower():
@@ -371,7 +374,7 @@ class RunRefinementPrg(RunPrg):
       self.isInversionNeeded(force=self.params.snum.refinement.auto.invert)
     OV.SetParam('snum.current_process_diagnostics','refinement')
     if self.params.snum.refinement.cifmerge_after_refinement:
-      MergeCif(edit=False, force_create=False)
+      MergeCif(edit=False, force_create=False, evaluate_conflicts=False)
 
   def doHistoryCreation(self):
     if self.params.snum.init.skip_history:

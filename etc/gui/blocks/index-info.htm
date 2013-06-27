@@ -1,9 +1,9 @@
-<!-- #include info-recent-files gui\recent-files.htm;gui\blocks\tool-off.htm;image=recent-files;onclick=;2; -->
-<!-- #includeif file.Exists(spy.GetParam(odac.source_dir)\autochem.htm) info_autochem spy.GetParam(odac.source_dir)\autochem.htm;gui\blocks\tool-off.htm;image=autochem;onclick=;2; -->
-<!-- #includeif IsFileType('ires') info-electron-density-peaks gui\electron-density-peaks.htm;gui\blocks\tool-off.htm;image=electron-density-peaks;onclick=;2; -->
-<!-- #includeif IsFileType('ires') info-refinement-indicators gui\refinement-indicators.htm;gui\blocks\tool-off.htm;image=refinement-indicators;onclick=;2; -->
-<!-- #includeif IsFileType('ires') info-bad-reflections gui\bad-reflections.htm;gui\blocks\tool-off.htm;image=bad-reflections;button=Bad Reflections;onclick=;2; -->
-<!-- #includeif IsFileType('ires') info-diagnostics gui\diagnostics.htm;gui\blocks\tool-off.htm;image=diagnostics;button=diagnostics;onclick=;0; -->
-<!-- #includeif file.Exists(HKLSrc()) info-reflection-statistics gui\reflection-statistics.htm;gui\blocks\tool-off.htm;image=reflection-statistics;onclick=;2; -->
-<!-- #include info-reflection-statistics-summary gui\reflection-statistics-summary.htm;gui\blocks\tool-off.htm;image=reflection-statistics-summary;onclick='spy.make_HOS(True)';2; -->
+<!-- #include h2-info-recent-files gui\recent-files.htm;gui\blocks\tool-off.htm;image=recent-files;onclick=;2; -->
+<!-- #includeif file.Exists(spy.GetParam(odac.source_dir)\autochem.htm) h2-info_autochem spy.GetParam(odac.source_dir)\autochem.htm;gui\blocks\tool-off.htm;image=autochem;onclick=;2; -->
+<!-- #includeif IsFileType('ires') h2-info-electron-density-peaks gui\electron-density-peaks.htm;gui\blocks\tool-off.htm;image=electron-density-peaks;onclick=;2; -->
+<!-- #includeif IsFileType('ires') h2-info-refinement-indicators gui\refinement-indicators.htm;gui\blocks\tool-off.htm;image=refinement-indicators;onclick=;2; -->
+<!-- #includeif IsFileType('ires') h2-info-bad-reflections gui\bad-reflections.htm;gui\blocks\tool-off.htm;image=bad-reflections;button=Bad Reflections;onclick=;2; -->
+ <!-- #includeif IsFileType('ires') h2-info-diagnostics gui\diagnostics.htm;gui\blocks\tool-off.htm;image=diagnostics;button=diagnostics;onclick=;0; -->
+<!-- #includeif file.Exists(HKLSrc()) h2-info-reflection-statistics gui\reflection-statistics.htm;gui\blocks\tool-off.htm;image=reflection-statistics;onclick=spy.SetParam(snum.current_process_diagnostics,data)>>spy.make_HOS(True);2; -->
+<!-- #includeif file.Exists(HKLSrc()) h2-info-reflection-statistics-summary gui\reflection-statistics-summary.htm;gui\blocks\tool-off.htm;image=reflection-statistics-summary;onclick='spy.make_HOS(True)';2; -->
 $spy.make_gui_edit_link(index-info)
