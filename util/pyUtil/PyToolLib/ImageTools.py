@@ -1468,11 +1468,12 @@ class ImageTools(FontInstances):
     if type(im) == str or type(im) == unicode:
       im = im.strip("'")
       im = im.strip('"')
-      if os.path.exists(im):
+      if os.path.exists("%s" %im):
         p = im
-        im = Image.open(im)
+        im = Image.open("%s" %im)
       else:
         print "No such image"
+        return
     
     if not trimcolour:
       pix = im.load()
