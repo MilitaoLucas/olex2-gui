@@ -70,7 +70,7 @@ class OlexCctbxAdapter(object):
       if twin_multiplicity > 2 or abs(twin_multiplicity) > 4:
         n = twin_multiplicity
         if twin_multiplicity < 0: n /= 2
-        for i in range(n):
+        for i in range(n-2):
           twin_laws.append(twin_laws[-1].multiply(twin_law))
       if twin_multiplicity < 0:
         inv = sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))
