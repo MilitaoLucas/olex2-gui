@@ -82,7 +82,7 @@ def GetBitmapImageInstructions():
   if not filesize:
     return
   resolution = "-dpi=%s" %resolution
-  if olx.html.GetData('BITMAP_NO_BG'):
+  if olx.html.GetState('BITMAP_NO_BG') == 'true':
     nbg = "-nbg"
   else:
     nbg = ""
@@ -96,10 +96,10 @@ def GetBitmapImageInstructions():
   
   filesize = int(round(filesize,0))
 
-  if olx.html.GetData('TRIM_IMAGE'):
+  if olx.html.GetState('TRIM_IMAGE') == 'true':
     temp_name = '%s_temp.bmp' %(filefull.strip("'").replace(".","_"))
     try:
-      olex.m('picta %s 1' %(temp_name))
+      olex.m('picta "%s" 1' %(temp_name))
       padding = float(olx.html.GetValue('TRIM_PADDING'))
       border = float(olx.html.GetValue('TRIM_BORDER'))
       colour = olx.html.GetValue('TRIM_BORDER_COLOUR')
