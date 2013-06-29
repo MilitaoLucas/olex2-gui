@@ -65,7 +65,7 @@ class FolderView:
     OlexVFS.write_to_olex('folder_view.data', data.encode('utf-8'))
     return "<input type='tree' manage noroot src='folder_view.data' name='fvt'"+\
   " onselect='spy.gui.tools.folder_view.loadStructure(html.GetValue(~name~))'"+\
-  " height=200 width=" + str(int(olx.html.ClientWidth('self'))-30) + ">"
+  " height=200 width=" + str(int(olx.html.ClientWidth('self'))-50) + ">"
 
   def loadStructure(self, v):
     if os.path.isfile(v):
