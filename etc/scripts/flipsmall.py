@@ -1,5 +1,5 @@
 #!/usr/bin/python2
-version = "270613"
+version = "010713"
 """
 =====================================================================
            Submit charge flipping phasing procedure
@@ -25,6 +25,7 @@ version = "270613"
                     Forcesymmetry=yes, p1=yes is equivalent to Forcesymmetry=yes, p1=no (p1 keyword does not have effect)
                     Forcesymmetry=no p1=yes: merging is not done (only friedels), but symmetry as found in 
                     electron density map is applied
+          01-07-13: platon executable removed
  prepares input file for SUPERFLIP and EDMA program  (L. Palatinus)
 
 
@@ -914,7 +915,7 @@ derived_info=dict(crsyst='tric', cell="9.0 9.0 9.0 90.0 90.0 90.0", flipcell="9.
 files=dict(base='name',insin='name.ins',hklin='name.hkl',m81='name.m81',inflip='name.inflip',
            fliplog='name.sflog',edmain='name_edma.inflip',edmaout='name_structure.ins')
 # the external executables
-exe=dict(SF="~/unix/bin/superflip",EDMA="EDMA",PLATON="platon")
+exe=dict(SF="~/unix/bin/superflip",EDMA="EDMA")
 try:
    import olex
    import olx
