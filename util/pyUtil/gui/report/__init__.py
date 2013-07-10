@@ -340,5 +340,60 @@ def get_report_title():
   return title
 
 
+def play_crystal_images():
+  import time
+  l = OV.standardizeListOfPaths(OV.GetParam('snum.metacif.list_crystal_images_files')[0].split(';'))
+  ll = []
+  lll = []
+  current_image = OV.standardizePath(OV.GetParam('snum.report.crystal_image'))
+  i = 0
+  exit = False
+  for image in l:
+    if exit: break
+    if image == current_image:
+      lll.append(current_image)
+      for im in l[i+1:]:
+        lll.append(im)
+      for im in ll:
+        lll.append(im)
+        exit = True
+    else:
+      ll.append(image)
+    i += 1
+
+  for image in lll:
+    if os.path.exists(image):
+      olx.html.SetImage('CRYSTAL_IMAGE',image)
+      OV.Refresh()
+OV.registerFunction(play_crystal_images, False, 'gui.report')
+
+def advance_crystal_image(direction='forward'):
+  l = OV.standardizeListOfPaths(OV.GetParam('snum.metacif.list_crystal_images_files')[0].split(';'))
+  i = 0
+  current_image = OV.standardizePath(OV.GetParam('snum.report.crystal_image'))
+  for image in l:
+    i += 1
+    if image == current_image:
+      if direction == 'forward':
+        if i != len(l):
+          p = l[i]
+        else:
+          p = l[0]
+        OV.SetParam('snum.report.crystal_image',p)
+        olx.html.SetImage('CRYSTAL_IMAGE',p)
+        return
+      else:
+        if i != 1:
+          p = l[i-2]
+        else:
+          p = l[len(l)-1]
+        OV.SetParam('snum.report.crystal_image',p)
+        olx.html.SetImage('CRYSTAL_IMAGE',p)
+        return
+    else:
+      continue
+OV.registerFunction(advance_crystal_image, False, 'gui.report')
+
+
 olex.registerFunction(get_report_title, False, "report")
 olex.registerFunction(ResolvePrograms, False, "report")
