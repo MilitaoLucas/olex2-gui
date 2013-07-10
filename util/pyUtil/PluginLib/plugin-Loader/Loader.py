@@ -20,8 +20,8 @@ def getModule(name):
   from zipfile import ZipFile
   from StringIO import StringIO
   try:
-    #url = "http://www.olex2.org/PluginProvider/get"
-    url = "http://localhost:8080/PluginProvider/get"
+    url = "http://www.olex2.org/PluginProvider/get"
+    #url = "http://localhost:8080/PluginProvider/get"
     values = {
       'name': name,
       'at': _plgl.createAuthenticationToken()
