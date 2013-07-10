@@ -343,27 +343,14 @@ def get_report_title():
 def play_crystal_images():
   import time
   l = OV.standardizeListOfPaths(OV.GetParam('snum.metacif.list_crystal_images_files')[0].split(';'))
-  ll = []
-  lll = []
   current_image = OV.standardizePath(OV.GetParam('snum.report.crystal_image'))
-  i = 0
-  exit = False
-  for image in l:
-    if exit: break
-    if image == current_image:
-      lll.append(current_image)
-      for im in l[i+1:]:
-        lll.append(im)
-      for im in ll:
-        lll.append(im)
-        exit = True
-    else:
-      ll.append(image)
-    i += 1
-
-  for image in lll:
-    if os.path.exists(image):
-      olx.html.SetImage('CRYSTAL_IMAGE',image)
+  idx = l.index(current_image)
+  for i in xrange(0,len(l)):
+    idx = idx + 1
+    if idx >= len(l):
+      idx = 0
+    if os.path.exists(l[idx]):
+      olx.html.SetImage('CRYSTAL_IMAGE',l[idx])
       OV.Refresh()
 OV.registerFunction(play_crystal_images, False, 'gui.report')
 
