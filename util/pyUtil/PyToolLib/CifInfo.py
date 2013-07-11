@@ -749,7 +749,7 @@ class ExtractCifInfo(CifTools):
       self.sort_out_conflicting_sources()
     
   def sort_out_conflicting_sources(self):
-    print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+    #print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
     self.conflict_d = {}
     olx.CifInfo_metadata_conflicts = self
     d = {}
