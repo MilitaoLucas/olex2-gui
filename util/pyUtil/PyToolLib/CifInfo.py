@@ -103,7 +103,7 @@ class ValidateCif(object):
         olex.m('spy.cif.GetCheckcifReport()')
 
 OV.registerMacro(ValidateCif, """filepath&;cif_dic&;show_warnings""")
-timer('Register ValidateCif')
+#timer('Register ValidateCif')
 
 class CifTools(ArgumentParser):
   def __init__(self):
@@ -268,7 +268,7 @@ class SaveCifInfo(CifTools):
     self.write_metacif_file()
 
 OV.registerFunction(SaveCifInfo)
-timer('Register SaveCifInfo')
+#timer('Register SaveCifInfo')
 
 class EditCifInfo(CifTools):
   def __init__(self, append=''):
@@ -328,7 +328,7 @@ class EditCifInfo(CifTools):
         OV.SetParam('snum.metacif.user_added', user_added)
 
 OV.registerFunction(EditCifInfo)
-timer('Register EditCifInfo')
+#timer('Register EditCifInfo')
 
 
 class MergeCif(CifTools):
