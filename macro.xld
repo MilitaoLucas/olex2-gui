@@ -121,26 +121,18 @@
 
 <onexit help="Executes on program exit"
   <body
-    <args
-    >
-
+    <args>
   <cmd
-    <cmd1  "echo Good Bye">
-    <cmd1a  "spy.threading.joinAll()">
-    <cmd2  "spy.saveHistory()">
-    <cmd3  "spy.SaveStructureParams()">
-    <cmd3  "spy.SaveUserParams()">
-    <cmd2  "spy.SaveCifInfo()">
-    <cmd2  "mode off">
-    <cmd4  "storeparam startup file.relativePath(filefull())">
-    <cmd5  "storeparam last_version GetVar(last_version)">
-    <cmd99 "stop logging">
-
+    <cmd1 "echo Good Bye">
+    <cmd2 "spy.threading.joinAll()">
+    <cmd3 "if IsFileLoaded() then 'spy.saveHistory()>>spy.SaveStructureParams()>>
+	  spy.SaveCifInfo()>>mode off'">
+    <cmd4 "spy.SaveUserParams()">
+    <cmd5 "storeparam startup file.relativePath(filefull())">
+    <cmd6 "storeparam last_version GetVar(last_version)">
+    <cmd7 "stop logging">
   >
-
-  <onterminate
-  >
->
+ >
 >
 
 
