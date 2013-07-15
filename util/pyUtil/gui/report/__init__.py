@@ -418,5 +418,6 @@ def get_crystal_image(p=None):
 OV.registerFunction(get_crystal_image, False, 'gui.report')
 
 
+
 olex.registerFunction(get_report_title, False, "report")
 olex.registerFunction(ResolvePrograms, False, "report")
