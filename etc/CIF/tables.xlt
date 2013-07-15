@@ -1,7 +1,7 @@
 <CIF_TABLES
 
 <header caption="Tables Header" source="$spy.GetParam(user.report.template_full_path)">
-<footer caption="Tables Footer" source="$spy.GetParam(user.report.footer)">
+<footer caption="Tables Footer" source="$spy.GetParam(user.report.footer_full_path)">
 
 <ang caption=" Bond Angles for $spy.GetParam(snum.report.title)."
 tita="class=cifTableHeadline"
