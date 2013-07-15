@@ -5,6 +5,8 @@ import os
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
+global have_found_python_error
+have_found_python_error= False
 
 class FolderView:
   root = None
