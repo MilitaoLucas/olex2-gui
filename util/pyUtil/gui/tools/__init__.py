@@ -225,3 +225,31 @@ def add_tool_to_index(scope="", link="", path="", location="", before="", filety
       OlexVFS.write_to_olex('%s/etc/gui/blocks/index-%s.htm' %(OV.BaseDir(), location), text, 0)
 
   make_single_gui_image(link, img_type=level)
+  
+def checkErrLogFile():
+  logfile = "%s/PythonError.log" %OV.DataDir()
+  logfile = logfile.replace("\\\\", "\\")
+  global have_found_python_error
+  if not have_found_python_error:
+    f = open(logfile, 'r')
+    if len(f.readlines()) > 0:
+      have_found_python_error = True
+    f.close()
+  if have_found_python_error:
+    return '''
+    <a href='external_edit "%s"'>
+    <zimg border='0' src='toolbar-stop.png'></a>
+    '''%(logfile)
+  else: return ""
+OV.registerFunction(checkErrLogFile,True,'gui.tools')
+
+def checkPlaton():
+  have_platon = olx.file.Which('platon.exe')
+  if have_platon:
+    return '''
+    <a href='platon' target='Open Platon'>
+    <zimg border='0' src='toolbar-platon.png'></a>
+    '''
+  else: return ""
+OV.registerFunction(checkPlaton,True,'gui.tools')
+  
