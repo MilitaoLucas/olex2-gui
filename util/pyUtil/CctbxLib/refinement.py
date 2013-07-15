@@ -414,6 +414,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
         )
         self.flack = utils.format_float_with_standard_uncertainty(
           flack.flack_x, flack.sigma_x)
+        
+  def get_radiation_type(self):
+    from cctbx.eltbx import wavelengths
+    for x in wavelengths.characteristic_iterator():
+      if abs(self.wavelength-x.as_angstrom()) < 1e-4:
+        l = x.label()
+        if len(l) == 2:
+          return l + " K\\a"
+        return "%s K\\%s~%s~" %(l[:2], l[2].lower(), l[3])
+    return 'synchrotron'
 
   def as_cif_block(self):
     def format_type_count(type, count):
@@ -541,6 +551,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_diffrn_measured_fraction_theta_full'] = fmt % completeness_full
     cif_block['_diffrn_measured_fraction_theta_max'] = fmt % completeness_theta_max
     cif_block['_diffrn_radiation_wavelength'] = self.wavelength
+    cif_block['_diffrn_radiation_type'] = self.get_radiation_type()
     cif_block['_diffrn_reflns_number'] = fo2.eliminate_sys_absent().size()
     if merging is not None:
       cif_block['_diffrn_reflns_av_R_equivalents'] = "%.4f" %merging.r_int()

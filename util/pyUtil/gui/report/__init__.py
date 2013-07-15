@@ -1,6 +1,8 @@
 import olex
 import olx
 import os
+import OlexVFS
+
 import inspect
 
 from olexFunctions import OlexFunctions
@@ -10,6 +12,10 @@ import userDictionaries
 
 current_py_file_path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 
+global images_zip
+global images_zip_name
+images_zip = None
+images_zip_name = None
 
 def BGColorForValue(value):
   if value == '' or value == '?':
@@ -338,6 +344,79 @@ def get_report_title():
     title = a()
   OV.SetParam('snum.report.title', title)
   return title
+
+
+def play_crystal_images():
+  import time
+  olx.SetVar('stop_movie',False)
+  l = OV.standardizeListOfPaths(OV.GetParam('snum.metacif.list_crystal_images_files'))
+  current_image = OV.standardizePath(OV.GetParam('snum.report.crystal_image'))
+  idx = l.index(current_image)
+  for i in xrange(0,len(l)):
+    if olx.GetVar('stop_movie') == "True":
+      OV.SetParam('snum.report.crystal_image',l[idx])
+      return
+    idx = idx + 1
+    if idx >= len(l):
+      idx = 0
+    im_path = get_crystal_image(l[idx])
+    olx.html.SetImage('CRYSTAL_IMAGE',im_path)
+    olx.html.SetValue('CURRENT_CRYSTAL_IMAGE', l[idx])
+    OV.Refresh()
+OV.registerFunction(play_crystal_images, False, 'gui.report')
+
+def advance_crystal_image(direction='forward'):
+  l = OV.standardizeListOfPaths(OV.GetParam('snum.metacif.list_crystal_images_files'))
+  i = 0
+  current_image = OV.standardizePath(OV.GetParam('snum.report.crystal_image'))
+  for image in l:
+    i += 1
+    if image == current_image:
+      if direction == 'forward':
+        if i != len(l):
+          p = l[i]
+        else:
+          p = l[0]
+        OV.SetParam('snum.report.crystal_image',p)
+        olx.html.SetImage('CRYSTAL_IMAGE',get_crystal_image(p))
+        olx.html.SetValue('CURRENT_CRYSTAL_IMAGE', p)
+        return
+      else:
+        if i != 1:
+          p = l[i-2]
+        else:
+          p = l[len(l)-1]
+        OV.SetParam('snum.report.crystal_image',p)
+        olx.html.SetImage('CRYSTAL_IMAGE',get_crystal_image(p))
+        olx.html.SetValue('CURRENT_CRYSTAL_IMAGE', p)
+        return
+    else:
+      continue
+OV.registerFunction(advance_crystal_image, False, 'gui.report')
+
+def get_crystal_image(p=None):
+  global images_zip
+  global images_zip_name
+  if not p:
+    current_image = OV.standardizePath(OV.GetParam('snum.report.crystal_image'))
+  else:
+    current_image = p
+  if '.vzs' in current_image:
+    splitbit = '.vzs/'
+    directory = current_image.split(splitbit)[0] + splitbit.replace("/", "")
+    if not images_zip_name == OV.FileName():
+      import zipfile
+      images_zip = zipfile.ZipFile(directory, "r")
+      images_zip_name = OV.FileName()
+    filename = current_image.split(splitbit)[1]
+    content = images_zip.read(filename)
+    OlexVFS.write_to_olex("crystal_image.jpg", content)
+    return "crystal_image.jpg"
+  else:
+    return current_image
+  
+OV.registerFunction(get_crystal_image, False, 'gui.report')
+
 
 
 olex.registerFunction(get_report_title, False, "report")

@@ -96,6 +96,7 @@ def OlexPlaton(platonflag="0"):
   elif sys.platform[:3] == 'win':
     # Windows
     tickornot = '-o -'
+    tickornot = "-"
   elif sys.platform[:3] == 'dar':
     # Mac assuming like windows
     tickornot = '-o -'
@@ -126,8 +127,15 @@ def OlexPlaton(platonflag="0"):
           print "No CIF present - why not make one with ACTA?"
           print "Or run spy.OlexPlaton(C) and rename the %s.acc to %s.cif?"%(OV.FileName(), OV.FileName())
         inputfilename = OV.FileName() + '.cif'
-      command = "platon \%s%s %s"%(tickornot, platonflag, inputfilename)
-      platon(command)
+      if not platonflag:
+        tickornot = ""
+      command = "platon %s%s %s"%(tickornot, platonflag, inputfilename)
+      print "Now running this command %s" %command
+      try:
+        platon(command)
+      except Exception, err:
+        print "PLATON gave up. This is why: %s" %err
+      
     # Old code works for Linux but not windows thanks to the stupid vritual cmdline built into Platon by LF
     #  platon_extension = platon_result.split(":")[-1].split(".")[-1].split("\n")[0]
     # To compensate now check flag against dictionary and then use that file extension, predominantly this is going to be lis

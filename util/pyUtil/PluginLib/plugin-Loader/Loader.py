@@ -2,10 +2,16 @@ import os
 import sys
 import olx
 import olex
-sys.path.append(r"E:\svn\olex2pro\trunk\build\MSVC-2010\x64\Unicode-release-d\dll")
+
+path = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(path)
 
 import _plgl
-olx.LoadDll("_plgl.pyd")
+if sys.platform[:3] == 'win':
+  ext = 'pyd'
+else:
+  ext = 'so'
+olx.LoadDll("%s/_plgl.%s" %(path, ext))
 def getModule(name):
   dir = os.path.normpath("%s/modules" %(olx.app.SharedDir()))
   if not os.path.exists(dir):
@@ -15,6 +21,7 @@ def getModule(name):
   from StringIO import StringIO
   try:
     url = "http://www.olex2.org/PluginProvider/get"
+    #url = "http://localhost:8080/PluginProvider/get"
     values = {
       'name': name,
       'at': _plgl.createAuthenticationToken()
@@ -31,21 +38,26 @@ def getModule(name):
   except Exception, e:
     sys.stdout.formatExceptionInfo()
 
-def loadModule(name):
+def loadAll():
   dir = os.path.normpath("%s/modules" %(olx.app.SharedDir()))
   if not os.path.exists(dir):
-    print "Specified module %s does not exist" %name
     return
-  key = "%s/%s/key" %(dir, name)
-  if not os.path.exists(key):
-    print "The module %s does not contain key file" %name
-    return
-  key = open(key).readline()
-  try:
-    if _plgl.loadPlugin(name, key):
-      print "Module %s has been successfully loaded." %name
-  except Exception, e:
-    print e
+  all = os.listdir(dir)
+  for d in all:
+    dl = os.path.normpath("%s/%s" %(dir, d))
+    if not os.path.isdir(dl): continue
+    key = os.path.normpath("%s/key" %(dl))
+    if not os.path.exists(key):
+      print "The module %s does not contain key file, skipping" %d
+      continue
+    key = open(key, 'rb').readline()
+    try:
+      if _plgl.loadPlugin(d, key):
+        print "Module %s has been successfully loaded." %d
+    except Exception, e:
+      print 'Error occurred while loading module: %s' %d
+      print e
   
 olex.registerFunction(getModule, False, "plugins")
-olex.registerFunction(loadModule, False, "plugins")
+loadAll()
+
