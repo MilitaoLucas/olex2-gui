@@ -822,7 +822,7 @@ def defineExternalPrograms():
     ref_superflip = "Palatinus, L.,  Chapuis, G., (2007) <i>J. Appl. Cryst.</i>, <b>40</b>, 786-790"
     
   else:
-    ref_shelx="SHELXS, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122"
+    ref_shelx="SHELX, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122"
     ref_smtbx = "L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, J.A.K. Howard, H. Puschmann, in preparation (2013)"
     ref_superflip = "SUPERFLIP, J. Appl. Cryst. (2007) 40, 786-790"
 
