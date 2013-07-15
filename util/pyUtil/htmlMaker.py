@@ -825,23 +825,6 @@ OV.registerFunction(restraint_builder)
 
 have_found_python_error = False
 
-def checkErrLogFile():
-  logfile = "%s/PythonError.log" %OV.DataDir()
-  logfile = logfile.replace("\\\\", "\\")
-  global have_found_python_error
-  if not have_found_python_error:
-    f = open(logfile, 'r')
-    if len(f.readlines()) > 0:
-      have_found_python_error = True
-    f.close()
-  if have_found_python_error:
-    return '''
-    <a href='external_edit "%s"'>
-    <zimg border='0' src='toolbar-stop.png'></a>
-    '''%(logfile)
-  else: return ""
-OV.registerFunction(checkErrLogFile)
-
 def weightGuiDisplay():
   if olx.IsFileType('ires').lower() == 'false':
     return ''
