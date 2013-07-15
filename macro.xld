@@ -182,6 +182,7 @@
       <cmd9a "custom_on_report">
       <cmd13 "cursor()">
       <cmd10 "cursor(busy, 'Creating Report')">
+      <cmd10 "echo 'Creating Report...'">
       <cmd11 "cif2tab header acrd anis bnd ang htab tang hcrd footer -n=spy.GetParam(snum.report.title)_tables">
       <cmd12 "if %1 then 'shell spy.GetParam(snum.report.title)_tables.html'">
       <cmd13 "cursor()">
@@ -483,6 +484,16 @@
   >
 >
 
+<platon help="Run PLATON"
+  <body
+    <args
+      <arg0 name="command" def="0">
+    >
+    <cmd
+      <cmd1 "spy.olexPlaton(%1)">
+    >
+  >
+>
 
 <saint help="Run BrukerSaint"
   <body
@@ -1195,7 +1206,6 @@
   >
 >
 
-
 <g4 help="Switch to Gui4"
   <body
     <cmd
@@ -1212,7 +1222,6 @@
     >
   >
 >
-
 
 
 <tool help="Show grouped gui tools"

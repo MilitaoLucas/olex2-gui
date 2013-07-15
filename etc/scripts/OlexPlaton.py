@@ -127,6 +127,8 @@ def OlexPlaton(platonflag="0"):
           print "No CIF present - why not make one with ACTA?"
           print "Or run spy.OlexPlaton(C) and rename the %s.acc to %s.cif?"%(OV.FileName(), OV.FileName())
         inputfilename = OV.FileName() + '.cif'
+      if not platonflag:
+        tickornot = ""
       command = "platon %s%s %s"%(tickornot, platonflag, inputfilename)
       print "Now running this command %s" %command
       try:
