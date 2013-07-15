@@ -97,7 +97,7 @@ def GetBitmapImageInstructions():
   filesize = int(round(filesize,0))
 
   if olx.html.GetState('TRIM_IMAGE') == 'true':
-    temp_name = '%s_temp.bmp' %(filefull.strip("'").replace(".","_"))
+    temp_name = '%s_temp.bmp' %(filefull.strip("'"))
     try:
       olex.m('picta "%s" 1' %(temp_name))
       padding = float(olx.html.GetValue('TRIM_PADDING'))

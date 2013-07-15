@@ -920,6 +920,7 @@ def getTemplatesList():
     OV.SetParam('user.report.templates_base_path', templates_path)
   templates = os.listdir("%s" %templates_path)
   exclude = ("footer.htm")
+  exclude = ()
   templatesList = ";".join("%s.htm" %template[:-4] for template in templates
                         if template not in exclude and template.endswith('.htm') or template.endswith('.rtf') or template.endswith('.tex'))
   templatesList += ";--CHOOSE--"
@@ -943,7 +944,7 @@ def SetReportStyle(val):
   OV.SetParam('user.report.style_full_path', "%s/%s" %(styles_path, style_file))
 OV.registerFunction(SetReportStyle)
 
-def SetReportTemplate(val):
+def SetReportTemplate(val,which):
   templates_path = path_from_phil(OV.GetParam('user.report.templates_base_path'))
   if "--" in val:
     res = olex.f("FileOpen('Choose Template File','.htm files|*.htm','%s')" %templates_path)
@@ -956,8 +957,8 @@ def SetReportTemplate(val):
     OV.UpdateHtml()
   else:
     template_file = val
-  OV.SetParam('user.report.template', template_file)
-  OV.SetParam('user.report.template_full_path', "%s/%s" %(templates_path, template_file))
+  OV.SetParam('user.report.%s' %which, template_file)
+  OV.SetParam('user.report.%s_full_path' %which, "%s/%s" %(templates_path, template_file))
 OV.registerFunction(SetReportTemplate)
 
 def getPopBoxPosition():

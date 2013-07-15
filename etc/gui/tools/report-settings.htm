@@ -7,7 +7,7 @@
 <tr VALIGN='center' ALIGN='center' NAME='SNUM_REPORT_TITLE' valign='center'>
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
-  <td width='66%' align='left'>
+  <td width='35%' align='left'>
     <font size="$GetVar('HtmlFontSizeLarge')" color="#555555">
     <input
       type='text'
@@ -21,20 +21,11 @@
     >
     </font>
   </td>
-  <td width='34%' align='right'>
-$spy.MakeHoverButton('button-Make_Report','html.ItemState cbtn-solve 1 cbtn-refine solve-settings 0 refine-settings 0>>html.Update>>cursor(busy, 'Checking for CIF file ...')>>report>>cursor()>>html.Update')
-  </td>
-
-
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
-<tr VALIGN='center' ALIGN='center' NAME='SNUM_REPORT_TITLE' valign='center'>
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
   <td width='10%' align='right'>
     %Image%
   </td>
-  <td width='26%' align='left'>
+  <td width='20%' align='left'>
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="combo"
@@ -50,6 +41,18 @@ $spy.MakeHoverButton('button-Make_Report','html.ItemState cbtn-solve 1 cbtn-refi
     >
     </font>
   </td>
+
+
+  <td width='34%' align='right'>
+$spy.MakeHoverButton('button-Make_Report','html.ItemState cbtn-solve 1 cbtn-refine solve-settings 0 refine-settings 0>>html.Update>>cursor(busy, 'Checking for CIF file ...')>>report>>cursor()>>html.Update')
+  </td>
+
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<tr VALIGN='center' ALIGN='center' NAME='SNUM_REPORT_TITLE' valign='center'>
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+
   <td width='8%' align='right'>
     %Style%
   </td>
@@ -69,9 +72,9 @@ $spy.MakeHoverButton('button-Make_Report','html.ItemState cbtn-solve 1 cbtn-refi
     </font>
   </td>
   <td width='15%' align='right'>
-    %Template%
+    %Begin with%
   </td>
-  <td width='22%'>
+  <td width='23%'>
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type='combo'
@@ -82,11 +85,34 @@ $spy.MakeHoverButton('button-Make_Report','html.ItemState cbtn-solve 1 cbtn-refi
       value="spy.GetParam('user.report.template')"
       items='spy.getTemplatesList()'
       valign='center'
-      onchange="spy.SetReportTemplate(html.GetValue('~name~'))"
+      onchange="spy.SetReportTemplate(html.GetValue('~name~'),template)"
     >
     </font>
   </td>
+
+
+  <td width='13%' align='right'>
+    %End with%
+  </td>
+  <td width='24%'>
+    <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type='combo'
+      width="100%"
+      height="GetVar('HtmlComboHeight')"
+      bgcolor="GetVar('HtmlInputBgColour')"
+      name='SET_USER_REPORT_FOOTER'
+      value="spy.GetParam('user.report.footer')"
+      items='spy.getTemplatesList()'
+      valign='center'
+      onchange="spy.SetReportTemplate(html.GetValue('~name~'),footer)"
+    >
+    </font>
+  </td>
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
 </table>
 
       </td>

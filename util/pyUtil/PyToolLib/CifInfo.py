@@ -22,6 +22,22 @@ from libtbx.utils import format_float_with_standard_uncertainty
 olx.cif_model = None
 
 
+import time
+global now
+now = time.time()
+start = now
+timings = []
+global sum_totals
+sum_totals = 0
+
+def timer(which="",leader=" -- "):
+  global now
+  global sum_totals
+  diff = time.time()-now
+  sum_totals += diff
+  timings.append("%s%s - %.2f s (%.2f)" %(leader, which, diff, sum_totals))
+  now = time.time()
+
 
 class MetacifFiles:
   def __init__(self):
@@ -87,6 +103,7 @@ class ValidateCif(object):
         olex.m('spy.cif.GetCheckcifReport()')
 
 OV.registerMacro(ValidateCif, """filepath&;cif_dic&;show_warnings""")
+#timer('Register ValidateCif')
 
 class CifTools(ArgumentParser):
   def __init__(self):
@@ -251,6 +268,7 @@ class SaveCifInfo(CifTools):
     self.write_metacif_file()
 
 OV.registerFunction(SaveCifInfo)
+#timer('Register SaveCifInfo')
 
 class EditCifInfo(CifTools):
   def __init__(self, append=''):
@@ -310,6 +328,7 @@ class EditCifInfo(CifTools):
         OV.SetParam('snum.metacif.user_added', user_added)
 
 OV.registerFunction(EditCifInfo)
+#timer('Register EditCifInfo')
 
 
 class MergeCif(CifTools):
@@ -481,7 +500,7 @@ class ExtractCifInfo(CifTools):
         print "Error reading OD frame image %s" %p
 
     # OD Crystal Image
-    p, pp = self.sort_out_path(path, "crystal_images")
+    p, pp = self.sort_out_path(path, "od_crystal_images")
     if pp:
       try:
         OV.SetParam('snum.report.crystal_image', p)
@@ -506,6 +525,25 @@ class ExtractCifInfo(CifTools):
         OV.SetParam('snum.report.data_collection_notes', p)
       except:
         print "Error reading OD crystal image %s" %p
+
+    # Bruker Crystal Image
+    p, pp = self.sort_out_path(path, "bruker_crystal_images")
+    if pp:
+      try:
+        OV.SetParam('snum.report.crystal_image', p)
+        l = []
+        j = len(pp)
+        if j <= 5:
+          l = pp
+        else:
+          for i in xrange(6):
+            idx = ((i+1) * j/6) - j/5 + 1
+            l.append(pp[idx])
+        OV.SetParam('snum.report.crystal_images', l)
+      except:
+        print "Error reading Bruker crystal image %s" %p
+
+
 
     ##THINGS IN CIF FORMAT
     p, pp = self.sort_out_path(path, "smart")
@@ -749,7 +787,7 @@ class ExtractCifInfo(CifTools):
       self.sort_out_conflicting_sources()
     
   def sort_out_conflicting_sources(self):
-    print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+    #print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
     self.conflict_d = {}
     olx.CifInfo_metadata_conflicts = self
     d = {}
@@ -924,11 +962,9 @@ The \l/2 correction factor is %(lambda_correction)s.
 
   def sort_out_path(self, directory, tool):
     """Returns the path of the most recent file in the given directory of the given type.
-
-		Searches for files of the given type in the given directory.
-		If no files are found, the parent directory is then searched.
-		If more than one file is present, the path of the most recent file is returned by default.
-		"""
+Searches for files of the given type in the given directory.
+If no files are found, the parent directory is then searched.
+If more than one file is present, the path of the most recent file is returned by default."""
 
     info = ""
     if tool == "smart":
@@ -979,12 +1015,61 @@ The \l/2 correction factor is %(lambda_correction)s.
       directory_l = OV.FileFull().replace('\\','/').split("/")
       directory = ("/").join(directory_l[:-3])
       directory += '/frames/jpg/'
-    elif tool == "crystal_images":
+
+    elif tool == "bruker_crystal_images":
       name = OV.FileName()
       extension = "*.jpg"
       directory_l = OV.FileFull().replace('\\','/').split("/")
       directory = ("/").join(directory_l[:-3])
+      directory += '/%s.vzs' %OV.FileName()
+      i = 1
+      while not os.path.exists(directory):
+        directory = ("/").join(directory_l[:-(3 - i)])
+        directory += '/%s.vzs' %OV.FileName()
+        i += 1
+        if i == 4:
+          return None, None
+
+      if OV.FileName() not in directory:
+        print "Crystal images found, but crystal name not in path!"
+        return None, None
+
+      zip_n = OV.file_ChangeExt(directory, 'zip')
+      import zipfile
+      z = zipfile.ZipFile(directory, "r")
+      l = []
+      for filename in z.namelist():
+        if filename and ".jpg" in filename:
+          l.append(r'%s/%s' %(directory, filename))
+      OV.SetParam("snum.metacif.list_crystal_images_files", l)
+      setattr(self.metacifFiles, "list_crystal_images_files", l)
+      return l[0], l
+
+    elif tool == "od_crystal_images":
+      name = OV.FileName()
+      extension = "*.jpg"
+      directory_l = OV.FileFull().replace('\\','/').split("/")
       directory += '/movie'
+      i = 1
+      while not os.path.exists(directory):
+        directory = ("/").join(directory_l[:-(3 - i)])
+        directory += '/movie'
+        i += 1
+        if i == 4:
+          return None, None
+
+      if OV.FileName() not in directory:
+        print "Crystal images found, but crystal name not in path!"
+        return None, None
+      
+      l = []
+      for path in OV.ListFiles(os.path.join(directory, "*.jpg")):
+        l.append(path)
+      OV.SetParam("snum.metacif.list_crystal_images_files", (l))
+      setattr(self.metacifFiles, "list_crystal_images_files", (l))
+      return l[0], l
+
+
     elif tool == "notes_file":
       name = OV.FileName()
       extension = "_notes.txt"
@@ -1104,3 +1189,8 @@ def set_source_file(file_type, file_path):
   if file_path != '':
     OV.SetParam('snum.metacif.%s_file' %file_type, file_path)
 OV.registerFunction(set_source_file)
+
+
+for item in timings:
+  print item
+print "Total Time: %s" %(time.time() - start)
