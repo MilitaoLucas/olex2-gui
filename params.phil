@@ -1066,6 +1066,8 @@ user
       .type = str
     template_full_path = templates/default.htm
       .type = path
+    footer_full_path = templates/footer.htm
+      .type = path
     style_full_path = styles/default.css
       .type = path
     footer = templates/footer.htm
