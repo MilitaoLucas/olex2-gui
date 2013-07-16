@@ -275,6 +275,8 @@ class publication:
   def OnPublicationTemplateChange(self, value):
     value = value.strip()
     OV.SetParam('snum.report.publication_style', value.lower())
+    if value == 'general':
+      return
     copy_from = "%s/etc/CIF/cif_templates/%s.cif" %(OV.BaseDir(), value)
     copy_to = "%s/%s_%s.cif" %(OV.FilePath(), OV.FileName(), value)
     if not os.path.isfile(copy_to):

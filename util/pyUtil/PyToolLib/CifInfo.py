@@ -393,7 +393,7 @@ class ExtractCifInfo(CifTools):
     self.metacif = {}
     self.metacifFiles = MetacifFiles()
     self.evaluate_conflicts=evaluate_conflicts
-    self.run()
+    #self.run()
     olx.cif_model = self.cif_model
 
   def run(self):
@@ -468,7 +468,6 @@ class ExtractCifInfo(CifTools):
         force = False
       self.update_cif_block({
         '_computing_structure_refinement': refinement_reference}, force=force)
-
 
     ##RANDOM THINGS
     p, pp = self.sort_out_path(path, "frames")
@@ -657,24 +656,24 @@ class ExtractCifInfo(CifTools):
       #except:
         #print "Error reading cad4 file %s" %p
 
-    import iotbx.cif
-    merge_files = OV.GetParam('snum.report.merge_these_cifs',[])
-    merge_files.append(self.metacif_path)
-#    if OV.GetParam('snum.report.merge_these_cifs',[])
-    for p in merge_files:
-      if not p or not os.path.exists(p):
-        continue
-      f = open(p, 'rUb')
-      content = f.read().strip()
-      if not content.startswith('data_'):
-        if not '\ndata_' in content:
-          content = "data_n\n" + content
-      f.close()
-      c = iotbx.cif.reader(input_string=content).model().values()[0]
-      self.exclude_cif_items(c)
-      f.close()
-      self.update_cif_block(c, force=False)
-      all_sources_d[p] = c
+    #import iotbx.cif
+    #merge_files = OV.GetParam('snum.report.merge_these_cifs',[])
+    #merge_files.append(self.metacif_path)
+##    if OV.GetParam('snum.report.merge_these_cifs',[])
+    #for p in merge_files:
+      #if not p or not os.path.exists(p):
+        #continue
+      #f = open(p, 'rUb')
+      #content = f.read().strip()
+      #if not content.startswith('data_'):
+        #if not '\ndata_' in content:
+          #content = "data_n\n" + content
+      #f.close()
+      #c = iotbx.cif.reader(input_string=content).model().values()[0]
+      #self.exclude_cif_items(c)
+      #f.close()
+      #self.update_cif_block(c, force=False)
+      #all_sources_d[p] = c
 
 
     # Oxford Diffraction data collection CIF
@@ -1193,4 +1192,4 @@ OV.registerFunction(set_source_file)
 
 for item in timings:
   print item
-print "Total Time: %s" %(time.time() - start)
+#print "Total Time: %s" %(time.time() - start)
