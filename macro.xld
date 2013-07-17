@@ -172,7 +172,7 @@
     >
     <cmd
       <cmd1 "if not(spy.report.ResolvePrograms()) then abort">
-      <cmd2 "spy.dealWithReportName()">
+      <cmd2 "spy.report.get_report_title()">
       <cmd4 "cursor(busy, '%Checking for IMAGE file ...%')">
       <cmd2 "spy.dealWithReportImage()">
       <cmd13 "cursor()">

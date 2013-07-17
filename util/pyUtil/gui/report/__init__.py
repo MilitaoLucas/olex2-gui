@@ -336,17 +336,14 @@ def ResolvePrograms():
   History.make_history_bars()
   return True
 
-
 def get_report_title():
   title = OV.GetParam('snum.report.title')
   if not title:
     title = OV.FileName()
   if "()" in title:
-    a = getattr(OV, title.strip('()'))
-    title = a()
+    title = olex.f(title)
   OV.SetParam('snum.report.title', title)
   return title
-
 
 def play_crystal_images():
   import time
