@@ -1559,13 +1559,6 @@ def dealWithReportImage():
     OV.SetParam('snum.report.image',"screenshot.png")
 OV.registerFunction(dealWithReportImage)
 
-def dealWithReportName():
-  report_name = OV.GetParam('snum.report.name')
-  if not report_name:
-    OV.SetParam('snum.report.name',OV.FileName())
-    return
-OV.registerFunction(dealWithReportName)
-
 def getReportImageSrc():
   imagePath = OV.GetParam('snum.report.image')
   if OV.FilePath(imagePath) == OV.FilePath():

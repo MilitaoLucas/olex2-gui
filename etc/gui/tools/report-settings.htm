@@ -133,10 +133,10 @@ $spy.MakeHoverButton('button-Make_Report','html.ItemState cbtn-solve 1 cbtn-refi
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=CIF-Part-1;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td name=EDIT_CIF_INFO align='left' VALIGN='left' width='34%'>
-$spy.MakeHoverButton('button-edit_cif_info','spy.ExtractCifInfo()>>spy.EditCifInfo()>>html.Update')
+$spy.MakeHoverButton('button-edit_cif_info','spy.ExtractCifInfo(True,True)>>spy.EditCifInfo()>>html.Update')
   </td>
   <td name=MERGE_CIF_INFO align='left' VALIGN='right' width='32%'>
-$spy.MakeHoverButton('button-merge_cif','spy.ExtractCifInfo()>>spy.MergeCif(True)>>html.Update')
+$spy.MakeHoverButton('button-merge_cif','spy.ExtractCifInfo(True,True)>>spy.MergeCif(True)>>html.Update')
   </td>
   <td width='34%' align='right'>
   <input type="combo"

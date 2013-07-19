@@ -276,6 +276,17 @@ class publication:
     value = value.strip()
     OV.SetParam('snum.report.publication_style', value.lower())
     if value == 'general':
+      styles = ['acta']
+      OV.SetParam('snum.report.publication_paper', "")
+      a = OV.GetParam('snum.report.merge_these_cifs')
+      l = []
+      for m_cif in a:
+        for style in styles:
+          if "_%s.cif"%style not in m_cif:
+            l.append(m_cif)
+      if not l:
+        l = " "
+      OV.SetParam('snum.report.merge_these_cifs', l)
       return
     copy_from = "%s/etc/CIF/cif_templates/%s.cif" %(OV.BaseDir(), value)
     copy_to = "%s/%s_%s.cif" %(OV.FilePath(), OV.FileName(), value)
@@ -284,7 +295,10 @@ class publication:
         if copy_from.lower() != copy_to.lower():
           txt = open(copy_from,'r').read().replace("FileName()", OV.FileName())
           wFile = open(copy_to,'w').write(txt)
-    OV.SetParam('snum.report.publication_paper', copy_to)
+    a = OV.GetParam('snum.report.merge_these_cifs')
+    if copy_to not in a:
+      a.append(copy_to)
+      OV.SetParam('snum.report.publication_paper', a)
     OV.SetParam('snum.report.merge_these_cifs', copy_to)
     olx.Shell(copy_to)
 
@@ -336,17 +350,14 @@ def ResolvePrograms():
   History.make_history_bars()
   return True
 
-
 def get_report_title():
   title = OV.GetParam('snum.report.title')
   if not title:
     title = OV.FileName()
   if "()" in title:
-    a = getattr(OV, title.strip('()'))
-    title = a()
+    title = olex.f(title)
   OV.SetParam('snum.report.title', title)
   return title
-
 
 def play_crystal_images():
   import time

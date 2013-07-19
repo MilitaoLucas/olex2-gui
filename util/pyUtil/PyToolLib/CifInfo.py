@@ -386,14 +386,23 @@ OV.registerFunction(MergeCif)
 class ExtractCifInfo(CifTools):
   conflict_d = {}
   
-  def __init__(self, evaluate_conflicts=True):
+  def __init__(self, evaluate_conflicts=True, run=False):
     super(ExtractCifInfo, self).__init__()
+    if evaluate_conflicts or str(evaluate_conflicts).lower() == "true":
+      evaluate_conflicts = True
+    else:
+      evaluate_conflicts = False
+    if run or repr(run).lower() == "true":
+      run= True
+    else:
+      run = False
     self.ignore = ["?", "'?'", ".", "'.'"]
     self.versions = {"default":[],"smart":{},"saint":{},"shelxtl":{},"xprep":{},"sad":{}, "twin":{}, "abs":{}}
     self.metacif = {}
     self.metacifFiles = MetacifFiles()
     self.evaluate_conflicts=evaluate_conflicts
-    #self.run()
+    if run:
+      self.run()
     olx.cif_model = self.cif_model
 
   def run(self):
@@ -1153,10 +1162,11 @@ If more than one file is present, the path of the most recent file is returned b
     rfile.close()
     return versions
 
-OV.registerFunction(ExtractCifInfo)
 
 
 ############################################################
+
+OV.registerFunction(ExtractCifInfo)
 
 
 def getOrUpdateDimasVar(getOrUpdate):
