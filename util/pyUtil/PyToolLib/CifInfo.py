@@ -388,7 +388,7 @@ class ExtractCifInfo(CifTools):
   
   def __init__(self, evaluate_conflicts=True, run=False):
     super(ExtractCifInfo, self).__init__()
-    if evaluate_conflicts or repr(evaluate_conflicts).lower == "true":
+    if evaluate_conflicts or str(evaluate_conflicts).lower() == "true":
       evaluate_conflicts = True
     else:
       evaluate_conflicts = False
