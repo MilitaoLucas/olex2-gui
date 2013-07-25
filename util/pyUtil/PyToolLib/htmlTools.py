@@ -73,9 +73,9 @@ def makeHtmlTable(list):
           
         if box_d.has_key('extra_onchange'):
           box_d['onchange'] += ">>%s" %box_d['extra_onchange']
-          
         boxText += makeHtmlInputBox(box_d)
     if boxText:
+      boxText = '<table width="100%" cellpadding="0" cellspacing="0"><tr><td>' + boxText + "</td></tr></table>"
       row_d.setdefault('input',boxText)
     else:
       input_d.setdefault('ctrl_name', "SET_%s" %str.upper(input_d['varName']).replace('.','_'))
@@ -530,7 +530,7 @@ def make_input_text_box(d):
   return html
 def make_combo_text_box(d):
   name = d.get('ctrl_name')
-  dic = {'height':"$GetVar('HtmlComboHeight')",
+  dic = {'height':"%s" %int(olx.GetVar('HtmlComboHeight')),
          'bgcolor':"$GetVar('HtmlInputBgColour')",
          'value':"$spy.GetParam('%(varName)s')",
          'label':'',
