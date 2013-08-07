@@ -2,6 +2,12 @@ import olex
 import olx
 import os
 
+global formula
+global formula_string
+
+formula = ""
+formula_string = ""
+
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
@@ -254,4 +260,32 @@ def checkPlaton():
     '''
   else: return ""
 OV.registerFunction(checkPlaton,True,'gui.tools')
+
+def makeFormulaForsNumInfo():
+  global formula
+  global formula_string
+
+  if olx.FileName() == "Periodic Table":
+    return "Periodic Table"
+  else:
+    colour = ""
+    txt_formula = olx.xf.GetFormula()
+    if txt_formula == formula:
+      return formula_string
+    formula = txt_formula
+    l = ['3333', '6667']
+    for item in l:
+      if item in txt_formula:
+        colour = OV.GetParam('gui.red').hexadecimal
+    if not colour:
+      colour = OV.GetParam('gui.html.formula_colour').hexadecimal
+    font_size = OV.GetParam('gui.html.formula_size')
+    if len(txt_formula) > 25:
+      font_size -= 1
+    
+    html_formula = olx.xf.GetFormula('html',1)
+    formula_string = "<font size=%s color=%s>%s</font>" %(font_size, colour, html_formula)
+    return formula_string
+OV.registerFunction(makeFormulaForsNumInfo)
+
   
