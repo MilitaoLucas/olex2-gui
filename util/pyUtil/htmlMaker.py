@@ -847,13 +847,14 @@ def weightGuiDisplay():
   if suggested_weight:
     for curr, sugg in zip(current_weight, suggested_weight):
       curr = float(curr)
-      if curr-curr*0.01 < sugg < curr+curr*0.01:
+      if curr-curr*0.01 <= sugg <= curr+curr*0.01:
         colour = gui_green
       elif curr-curr*0.1 < sugg < curr+curr*0.1:
         colour = gui_orange
       else:
         colour = gui_red
-      retVal += "<font color='%s'>%.4f(%.4f)</font> | " %(colour, curr, sugg)
+      retVal += "<font color='%s'>%.3f(%.3f)</font> | " %(colour, curr, sugg)
+#      retVal += "<font color='%s'>%.3f(%s)</font> | " %(colour, curr, repr(sugg)[-2:])
     html_scheme = retVal.strip("| ")
   else:
     html_scheme = current_weight
@@ -865,9 +866,9 @@ def weightGuiDisplay():
        'bgcolor':'spy.GetParam(gui.html.table_firstcol_colour)',
        'value':'',
        }
-  box = htmlTools.make_tick_box_input(d)
+  box1 = htmlTools.make_tick_box_input(d)
 
-  box = '''
+  box2 = '''
 <input
   type='text'
   width='100%%'
@@ -881,25 +882,24 @@ def weightGuiDisplay():
  >
 ''' %OV.GetParam('snum.refinement.update_weight_maxR1')
 
-
   wght_str = ""
   for i in suggested_weight:
-    wght_str += " %.4f" %i
+    wght_str += " %.3f" %i
   txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update")
   txt_Weight = OV.TranslatePhrase("Weight")
   html = '''
-  <td ALIGN='left' width='50%%'>
+  <td align='left' width='50%%'>
     <b>%s: <a target="%s" href="UpdateWght%s>>html.Update">%s</a></b>
   </td>
-  <td ALIGN='right' width='38%%'>Auto-update when R1 &lt;
+  <td align="center" width="3%%">%s
   </td>
-  <td ALIGN='right' width='10%%'>%s
+  <td ALIGN='center' width='32%%'><b>Auto-update</b> when R1 &lt;
   </td>
-  <td ALIGN='right' width='2%%'>%%
+  <td ALIGN='center' width='13%%'>%s
   </td>
-  
-  
-    ''' %(txt_Weight, txt_tick_the_box, wght_str, html_scheme, box)
+  <td ALIGN='center' width='2%%'>%%
+  </td>
+    ''' %(txt_Weight, "Update Weighting Scheme", wght_str, html_scheme, box1, box2)
   return html
 OV.registerFunction(weightGuiDisplay)
 
