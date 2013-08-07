@@ -362,7 +362,7 @@ class MergeCif(CifTools):
         print("If you are using SHELX, make sure you use the ACTA command.")
         print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         return
-      
+
     ECI = ExtractCifInfo(evaluate_conflicts=evaluate_conflicts)
     ECI.run()
     self.write_metacif_file()
@@ -379,13 +379,13 @@ class MergeCif(CifTools):
       OV.external_edit('filepath()/filename().cif')
   def finish_merge_cif(self):
     pass
-    
+
 OV.registerFunction(MergeCif)
 
 
 class ExtractCifInfo(CifTools):
   conflict_d = {}
-  
+
   def __init__(self, evaluate_conflicts=True, run=False):
     super(ExtractCifInfo, self).__init__()
     if evaluate_conflicts or str(evaluate_conflicts).lower() == "true":
@@ -425,14 +425,14 @@ class ExtractCifInfo(CifTools):
     import History
     active_solution = History.tree.active_child_node
     all_sources_d = {}
-    
+
     curr_cif_p = OV.file_ChangeExt(OV.FileFull(), 'cif')
     if os.path.exists(curr_cif_p):
       f = open(curr_cif_p, 'rUb')
       current_cif = iotbx.cif.reader(input_string=f.read()).model().values()[0]
       f.close()
       all_sources_d[curr_cif_p] = current_cif
-    
+
     if active_solution is not None and active_solution.is_solution:
 
       ## Backwards Compatibility
@@ -468,7 +468,7 @@ class ExtractCifInfo(CifTools):
         if reference_style == 'acta':
           refinement_reference = self.RPD.programs[active_node.program].name
         else:
-          refinement_reference = self.RPD.programs[active_node.program].reference          
+          refinement_reference = self.RPD.programs[active_node.program].reference
         olx.SetVar('refinement_reference_short', self.RPD.programs[active_node.program].name)
         olx.SetVar('refinement_reference_long', refinement_reference)
         force = True
@@ -793,9 +793,10 @@ class ExtractCifInfo(CifTools):
     self.all_sources_d = all_sources_d
     if self.evaluate_conflicts:
       self.sort_out_conflicting_sources()
-    
+
   def sort_out_conflicting_sources(self):
-    #print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+    if olx.HasGUI() == 'false':
+      return
     self.conflict_d = {}
     olx.CifInfo_metadata_conflicts = self
     d = {}
@@ -855,12 +856,12 @@ class ExtractCifInfo(CifTools):
       print "There is conflicting information in the sources of metadata"
       from gui.metadata import conflicts
       conflicts(True, self.conflict_d)
-    
+
     elif have_conflicts and already_resolved:
       print "There is conflicting information, but %s conflicts have been resolved" %already_resolved
       from gui.metadata import conflicts
       conflicts(True, self.conflict_d)
-      
+
     elif show_all_info:
       print "There are no conflicts. All CIF info is shown in the pop-up window."
       from gui.metadata import conflicts
@@ -1069,7 +1070,7 @@ If more than one file is present, the path of the most recent file is returned b
       if OV.FileName() not in directory:
         print "Crystal images found, but crystal name not in path!"
         return None, None
-      
+
       l = []
       for path in OV.ListFiles(os.path.join(directory, "*.jpg")):
         l.append(path)
