@@ -1383,6 +1383,8 @@ OV.registerFunction(HklStatsAnalysis)
 def InstalledPlugins():
   import olex_core
   l = olex_core.GetPluginList()
+  if l is None:
+    l = []
   return l
 
 def AvailablePlugins():
