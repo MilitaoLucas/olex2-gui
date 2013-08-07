@@ -79,12 +79,12 @@
 $spy.weightGuiDisplay()
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<tr>
+<tr ALIGN='left' NAME='EXTINCTION'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Extinction-Correction;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td align="center" width="3%">
+  <td align="center" width="4%">
     <input type="checkbox" 
-      width="GetVar('HtmlCheckboxWidth')"
+      width="100%"
       height="GetVar('HtmlCheckboxHeight')"
       fgcolor="GetVar('HtmlFontColour')"
       bgcolor="GetVar('HtmlTableFirstcolColour')"
@@ -96,14 +96,14 @@ $spy.weightGuiDisplay()
     >
   </td>
   <td width="32%"><b>Extinction correction</b></td>
-  <td width="15%">
+  <td width="14%">
     $xf.rm.Exti()
   </td>
  
 
-  <td align="center" width="3%">
+  <td align="center" width="4%">
     <input type="checkbox" 
-      width="GetVar('HtmlCheckboxWidth')"
+      width="100%"
       height="GetVar('HtmlCheckboxHeight')"
       fgcolor="GetVar('HtmlFontColour')"
       bgcolor="GetVar('HtmlTableFirstcolColour')"
@@ -121,10 +121,10 @@ $spy.weightGuiDisplay()
 <tr VALIGN="center" ALIGN="left" NAME="USE_SOLVENT_MASK">
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=refinement-masks;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td ALIGN='center' width='3%'>
+  <td ALIGN='center' width='4%'>
       <input
         type="checkbox"
-        width="GetVar('HtmlCheckboxWidth')"
+        width="100%"
         height="GetVar('HtmlCheckboxHeight')"
         fgcolor="GetVar('HtmlFontColour')"
         bgcolor="GetVar('HtmlTableFirstcolColour')"
@@ -135,15 +135,15 @@ $spy.weightGuiDisplay()
         value=""
       >
   </td>
-  <td ALIGN='left' width='47%'>
+  <td ALIGN='left' width='46%'>
     <b>
       Use solvent mask
     </b>
   </td>
-  <td ALIGN='center' width='3%'>
+  <td ALIGN='center' width='4%'>
       <input
         type="checkbox"
-        width="GetVar('HtmlCheckboxWidth')"
+        width="100%"
         height="GetVar('HtmlCheckboxHeight')"
         fgcolor="GetVar('HtmlFontColour')"
         bgcolor="GetVar('HtmlTableFirstcolColour')"
@@ -157,7 +157,7 @@ html.Update"
         value=""
       >
   </td>
-  <td ALIGN='left' width='47%'>
+  <td ALIGN='left' width='46%'>
     <b>
       Recompute mask
     </b>
