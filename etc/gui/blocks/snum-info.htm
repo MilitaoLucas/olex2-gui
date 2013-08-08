@@ -33,24 +33,57 @@
 <td colspan = '5'>
 
   <table border="0" style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1">
-    <tr>
-      <td width='70%'>
-        <b>a=</b>$xf.uc.CellEx('a')
-        <b>b=</b>$xf.uc.CellEx('b')
-        <b>c=</b>$xf.uc.CellEx('c')&Aring;
+    <tr bgcolor=$GetVar(HtmlBgColour)>
+      <td width='20%'>
+        &nbsp;<b>a=</b>$xf.uc.CellEx('a')
       </td>
-      <td width='30%' align='right' rowspan='2'>
-        $spy.GetRInfo()
+
+      <td width='20%'>
+        &nbsp;<b>&alpha;</b>=$xf.uc.CellEx('alpha')&deg;
+      </td>
+
+      <td width='20%'>
+        &nbsp;<b>Z</b>=$xf.au.GetZ()
+      </td>
+
+      <td width='30%' align='center' rowspan='2'>
+        &nbsp;$spy.GetRInfo()
       </td>
     </tr>
 
-  <tr align='left'>
-    <td>
-      <b>&alpha;</b>=$xf.uc.CellEx('alpha')&deg;
-      <b>&beta;</b>=$xf.uc.CellEx('beta')&deg;
-      <b>&gamma;</b>=$xf.uc.CellEx('gamma')&deg;
-    </td>
-  </tr>
+    <tr align='left' bgcolor=$GetVar(HtmlBgColour)>
+      <td width='20%'>
+        &nbsp;<b>b=</b>$xf.uc.CellEx('b')
+      </td>
+
+      <td width='20%'>
+        &nbsp;<b>&beta;</b>=$xf.uc.CellEx('beta')&deg;
+      </td>
+
+      <td width='20%'>
+        &nbsp;<b>Z'</b>=$xf.au.GetZPrime()
+      </td>
+
+    </tr>
+
+
+    <tr align='left' bgcolor=$GetVar(HtmlBgColour)>
+      <td width='20%'>
+        &nbsp;<b>c=</b>$xf.uc.CellEx('c')
+      </td>
+
+      <td width='20%'>
+        &nbsp;<b>&gamma;</b>=$xf.uc.CellEx('gamma')&deg;
+      </td>
+
+      <td width='20%'>
+        &nbsp;<b>V</b>=$xf.uc.VolumeEx()
+      </td>
+
+    </tr>
+
+
+
   </table>
 
 </td>
