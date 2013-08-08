@@ -2889,7 +2889,7 @@ class HealthOfStructure():
     x = boxWidth - dx - 10
     draw.text((x, y), "%s" %value_display, font=font, fill=fill)
     if value_display_extra:
-      draw.text((0, y + dy/2), "%s" %value_display_extra, font=font_s, fill="#ffffff")
+      draw.text((0, y - 1 + dy/2), "%s" %value_display_extra, font=font_s, fill="#ffffff")
 
 #    im = IT.make_round_corners(im, radius=4 * self.scale, colour=bgcolour)
     if self.image_position != "last":
