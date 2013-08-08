@@ -193,7 +193,7 @@ diagnostics {
     Completeness{
       op = "greater"
         .type = str
-      display = "Compl."
+      display = "complete"
         .type = str
       value_format= "0%"
         .type = str
