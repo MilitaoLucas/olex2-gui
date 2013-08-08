@@ -380,6 +380,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
         'snum.refinement.suggested_weight', "%s %s" %(new_weighting.a, new_weighting.b))
       if self.on_completion:
         self.on_completion(cif[block_name])
+      if olx.HasGUI() == 'true':
+        olx.UpdateQPeakTable()
     finally:
       sys.stdout.refresh = True
       self.log.close()
@@ -414,7 +416,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         )
         self.flack = utils.format_float_with_standard_uncertainty(
           flack.flack_x, flack.sigma_x)
-        
+
   def get_radiation_type(self):
     from cctbx.eltbx import wavelengths
     for x in wavelengths.characteristic_iterator():
@@ -887,6 +889,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       parameters=maptbx.peak_search_parameters(
         peak_search_level=3,
         interpolate=False,
+        peak_cutoff=-1,
         min_distance_sym_equiv=1.0,
         max_clusters=max_peaks+len(self.xray_structure().scatterers())),
       verify_symmetry=False
