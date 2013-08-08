@@ -577,6 +577,10 @@ OV.registerFunction(FindZOfHeaviestAtomInFormua)
 last_formula = None
 
 def ElementButtonStates(symbol):
+  if not symbol:
+    e = olx.ChooseElement()
+    if not e:  return
+    symbol = e   
   if OV.GetParam('olex2.full_mode') == 'name -t=%s' %symbol:
     olex.m('mode off')
   else:
@@ -667,7 +671,7 @@ def MakeElementButtonsFromFormula():
   type="button"
   image="up=%(namelower)soff.png,down=%(namelower)son.png,hover=%(namelower)shover.png"
   hint="Chose Element from the periodic table"
-  onclick="if strcmp(sel(),'') then 'mode name -t=ChooseElement()' else 'name sel ChooseElement()'"
+  onclick="spy.ElementButtonStates('')"
   bgcolor=%(bgcolor)s
 >
 ''' %d
@@ -1383,6 +1387,8 @@ OV.registerFunction(HklStatsAnalysis)
 def InstalledPlugins():
   import olex_core
   l = olex_core.GetPluginList()
+  if l is None:
+    l = []
   return l
 
 def AvailablePlugins():

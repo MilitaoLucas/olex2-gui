@@ -123,7 +123,7 @@ gui
       .type = int
     font_size_controls = 2
       .type = int
-    font_size_large = 5
+    font_size_large = 7
       .type = int
     font_size_medium = 3
       .type = int
@@ -137,7 +137,7 @@ gui
     input_bg_colour = #eeeeee
       .type = colour
 
-    input_height = 18
+    input_height = 20
       .type = int
     checkbox_height = 18
       .type = int

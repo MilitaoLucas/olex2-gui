@@ -1,12 +1,22 @@
+from __future__ import division
 import olex
 import olx
 import os
+
+global formula
+global formula_string
+
+formula = ""
+formula_string = ""
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
 global have_found_python_error
 have_found_python_error= False
+
+
+
 
 class FolderView:
   root = None
@@ -66,8 +76,8 @@ class FolderView:
     data = self.root.toStr()
     OlexVFS.write_to_olex('folder_view.data', data.encode('utf-8'))
     return "<input type='tree' manage noroot src='folder_view.data' name='fvt'"+\
-  " onselect='spy.gui.tools.folder_view.loadStructure(html.GetValue(~name~))'"+\
-  " height=200 width=" + str(int(olx.html.ClientWidth('self'))-50) + ">"
+           " onselect='spy.gui.tools.folder_view.loadStructure(html.GetValue(~name~))'"+\
+           " height=200 width=" + str(int(olx.html.ClientWidth('self'))-50) + ">"
 
   def loadStructure(self, v):
     if os.path.isfile(v):
@@ -227,7 +237,7 @@ def add_tool_to_index(scope="", link="", path="", location="", before="", filety
       OlexVFS.write_to_olex('%s/etc/gui/blocks/index-%s.htm' %(OV.BaseDir(), location), text, 0)
 
   make_single_gui_image(link, img_type=level)
-  
+
 def checkErrLogFile():
   logfile = "%s/PythonError.log" %OV.DataDir()
   logfile = logfile.replace("\\\\", "\\")
@@ -254,4 +264,43 @@ def checkPlaton():
     '''
   else: return ""
 OV.registerFunction(checkPlaton,True,'gui.tools')
-  
+
+def makeFormulaForsNumInfo():
+  global formula
+  global formula_string
+
+  if olx.FileName() == "Periodic Table":
+    return "Periodic Table"
+  else:
+    colour = ""
+    txt_formula = olx.xf.GetFormula()
+    if txt_formula == formula:
+      return formula_string
+    formula = txt_formula
+    l = ['3333', '6667']
+    for item in l:
+      if item in txt_formula:
+        colour = OV.GetParam('gui.red').hexadecimal
+    if not colour:
+      colour = OV.GetParam('gui.html.formula_colour').hexadecimal
+    font_size = OV.GetParam('gui.html.formula_size')
+
+    panelwidth = int(olx.html.ClientWidth('self'))
+    
+    q = len(txt_formula)/(panelwidth - (0.6*panelwidth))
+#    print len(txt_formula), q
+    if q > 0.26:
+      font_size -= 4
+    elif q > 0.23:
+      font_size -= 3
+    elif q > 0.20:
+      font_size -= 2
+    elif q > 0.16:
+      font_size -= 1
+    if font_size < 1:
+      font_size = 1
+    html_formula = olx.xf.GetFormula('html',1)
+    formula_string = "<font size=%s color=%s>%s</font>" %(font_size, colour, html_formula)
+    return formula_string
+OV.registerFunction(makeFormulaForsNumInfo)
+
