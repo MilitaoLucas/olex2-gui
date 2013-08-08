@@ -24,11 +24,6 @@ last_mode_options = None
 current_tooltip_number = 0
 HaveModeBox = False
 
-global formula
-global formula_string
-formula = ""
-formula_string = ""
-
 global tutorial_box_initialised
 tutorial_box_initialised = False
 
@@ -73,9 +68,9 @@ def makeHtmlTable(list):
           
         if box_d.has_key('extra_onchange'):
           box_d['onchange'] += ">>%s" %box_d['extra_onchange']
-          
         boxText += makeHtmlInputBox(box_d)
     if boxText:
+      boxText = '<table width="100%" cellpadding="0" cellspacing="0"><tr><td>' + boxText + "</td></tr></table>"
       row_d.setdefault('input',boxText)
     else:
       input_d.setdefault('ctrl_name', "SET_%s" %str.upper(input_d['varName']).replace('.','_'))
@@ -530,7 +525,7 @@ def make_input_text_box(d):
   return html
 def make_combo_text_box(d):
   name = d.get('ctrl_name')
-  dic = {'height':"$GetVar('HtmlComboHeight')",
+  dic = {'height':"%s" %int(olx.GetVar('HtmlComboHeight')),
          'bgcolor':"$GetVar('HtmlInputBgColour')",
          'value':"$spy.GetParam('%(varName)s')",
          'label':'',
@@ -1556,30 +1551,6 @@ def getGenericSwitchNameTranslation(name):
     text = "No text!"
   return text
 OV.registerFunction(getGenericSwitchNameTranslation)
-
-def makeFormulaForsNumInfo():
-  global formula
-  global formula_string
-
-  if olx.FileName() == "Periodic Table":
-    return "Periodic Table"
-  else:
-    colour = ""
-    txt_formula = olx.xf.GetFormula()
-    if txt_formula == formula:
-      return formula_string
-    formula = txt_formula
-    l = ['3333', '6667']
-    for item in l:
-      if item in txt_formula:
-        colour = OV.GetParam('gui.red').hexadecimal
-    if not colour:
-      colour = OV.GetParam('gui.html.formula_colour').hexadecimal
-    font_size = OV.GetParam('gui.html.formula_size')
-    html_formula = olx.xf.GetFormula('html',1)
-    formula_string = "<font size=%s color=%s>%s</font>" %(font_size, colour, html_formula)
-    return formula_string
-OV.registerFunction(makeFormulaForsNumInfo)
 
 def setDisplayQuality(q=None):
   OV.setDisplayQuality(q)
