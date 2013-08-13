@@ -2,6 +2,7 @@ import os
 import sys
 import olx
 import olex
+import shutil
 
 path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(path)
@@ -16,6 +17,16 @@ def getModule(name):
   dir = os.path.normpath("%s/modules" %(olx.app.SharedDir()))
   if not os.path.exists(dir):
     os.mkdir(dir)
+  else:
+    pdir = os.path.normpath("%s/%s" %(dir, name))
+    if os.path.exists(pdir):
+      try:
+        shutil.rmtree(pdir)
+      except Exception, e:
+        print(e)
+        print("An error occurred while installing the plugin. Please restart Olex2 and try again.")
+        return
+    
   import HttpTools
   from zipfile import ZipFile
   from StringIO import StringIO
@@ -29,12 +40,12 @@ def getModule(name):
     f = HttpTools.make_url_call(url, values)
     f = f.read()
     if f.startswith('<html>'):
-      print f
+      print(f)
     else:
       zp = ZipFile(StringIO(f))
       zp.extractall(path=dir)
-    print "Module %s has been successfully installed" %name
-    print "You have 30 days to evaluate this module"
+      print("Module %s has been successfully installed" %name)
+      print("You have 30 days to evaluate this module")
   except Exception, e:
     sys.stdout.formatExceptionInfo()
 
@@ -48,15 +59,15 @@ def loadAll():
     if not os.path.isdir(dl): continue
     key = os.path.normpath("%s/key" %(dl))
     if not os.path.exists(key):
-      print "The module %s does not contain key file, skipping" %d
+      print("The module %s does not contain key file, skipping" %d)
       continue
     key = open(key, 'rb').readline()
     try:
       if _plgl.loadPlugin(d, key):
-        print "Module %s has been successfully loaded." %d
+        print("Module %s has been successfully loaded." %d)
     except Exception, e:
-      print 'Error occurred while loading module: %s' %d
-      print e
+      print("Error occurred while loading module: %s" %d)
+      print(e)
   
 olex.registerFunction(getModule, False, "plugins")
 loadAll()
