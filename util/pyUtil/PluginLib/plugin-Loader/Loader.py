@@ -13,7 +13,10 @@ if sys.platform[:3] == 'win':
 else:
   ext = 'so'
 olx.LoadDll("%s/_plgl.%s" %(path, ext))
-def getModule(name):
+
+def getModule(name, email=None):
+  import HttpTools
+  url_base = "http://www.olex2.org/PluginProvider/"
   dir = os.path.normpath("%s/modules" %(olx.app.SharedDir()))
   if not os.path.exists(dir):
     os.mkdir(dir)
@@ -26,16 +29,48 @@ def getModule(name):
         print(e)
         print("An error occurred while installing the plugin. Please restart Olex2 and try again.")
         return
-    
-  import HttpTools
+
+  etoken = None
+  etoken_fn = os.path.normpath("%s/etoken" %(dir))
+  if email is not None:
+    try:
+      url = url_base + "register"
+      values = {
+        'e': email,
+      }
+      f = HttpTools.make_url_call(url, values)
+      f = f.read().strip()
+      if "Try again" in f:
+        f = HttpTools.make_url_call(url, values)
+        f = f.read().strip()
+      if "Try again" in f:
+        print("Failed to register")
+        return
+      efn = open(etoken_fn, "wb")
+      efn.write(f)
+      efn.close()
+      etoken = f
+    except Exception, e:
+      sys.stdout.formatExceptionInfo()
+      return
+
+  if etoken is None:
+    if os.path.exists(etoken_fn):
+      etoken = open(etoken_fn, "rb").readline().strip()
+  
+  if etoken is None:
+    if email is None:
+      print("Please provide your e-mail address as the second parameter")
+    return
+      
   from zipfile import ZipFile
   from StringIO import StringIO
   try:
-    url = "http://www.olex2.org/PluginProvider/get"
-    #url = "http://localhost:8080/PluginProvider/get"
+    url = url_base + "get"
     values = {
       'name': name,
-      'at': _plgl.createAuthenticationToken()
+      'at': _plgl.createAuthenticationToken(),
+      'et': etoken
     }
     f = HttpTools.make_url_call(url, values)
     f = f.read()
@@ -58,6 +93,9 @@ def loadAll():
     dl = os.path.normpath("%s/%s" %(dir, d))
     if not os.path.isdir(dl): continue
     key = os.path.normpath("%s/key" %(dl))
+    enc = os.path.normpath("%s/%s.pyc" %(dl, d))
+    if not os.path.exists(enc):
+      continue
     if not os.path.exists(key):
       print("The module %s does not contain key file, skipping" %d)
       continue
