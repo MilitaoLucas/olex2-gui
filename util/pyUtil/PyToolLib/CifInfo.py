@@ -836,8 +836,6 @@ class ExtractCifInfo(CifTools):
         item = item.strip().strip("'").strip('"')
         if item not in ll:
           ll.add(item)
-        elif show_all_info:
-          ll.add(item)
       if len(ll) > 1:
         if k.startswith('_'):
           conflict_count += 1
@@ -861,10 +859,15 @@ class ExtractCifInfo(CifTools):
       from gui.metadata import conflicts
       conflicts(True, self.conflict_d)
 
-    elif show_all_info:
-      print "There are no conflicts. All CIF info is shown in the pop-up window."
+    elif conflict_count and already_resolved == conflict_count:
+      print "All %s conflicts have been resolved" %(conflict_count)
       from gui.metadata import conflicts
       conflicts(True, self.conflict_d)
+# o: what is this supposed to do?
+#    elif show_all_info:
+#      print "There are no conflicts. All CIF info is shown in the pop-up window."
+#      from gui.metadata import conflicts
+#      conflicts(True, self.conflict_d)
 
     else:
       wFilePath = r"conflicts_html_window.htm"
@@ -872,7 +875,7 @@ class ExtractCifInfo(CifTools):
 <tr>
 <td></td>
 <td bgcolor='%s'><font color='white'>
-<b>There is no conflicting information the sources of metadata</b>
+<b>There is no conflicting information in the sources of metadata</b>
 </font><a href='spy.SetParam(snum.metadata.show_all_cif_sources,True)'>Show ALL</a></td></tr>''' %OV.GetParam('gui.green').hexadecimal
       OV.write_to_olex(wFilePath, txt)
 #      print "There is NO conflicting information the sources of metadata"
