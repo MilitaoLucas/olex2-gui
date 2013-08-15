@@ -146,8 +146,15 @@ class OlexFunctions(inheritFunctions):
     if olx.cif_model is not None:
       data_name = self.FileName().replace(' ', '')
       data_block = olx.cif_model[data_name]
-      if isinstance(value, basestring) and value.strip() == '': value = '?'
-      data_block[key] = value
+      if isinstance(value, basestring):
+        value = value.strip()
+        if value == '': value = '?'
+        elif '\n' in value and value[0] != ';':
+          data_block[key] = ";%s\n;" %value 
+        else:
+          data_block[key] = value
+      else:
+        data_block[key] = value
     user_modified = self.GetParam('snum.metacif.user_modified')
     if user_modified is None: user_modified = []
     if key not in user_modified:
