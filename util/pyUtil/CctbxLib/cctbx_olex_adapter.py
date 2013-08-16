@@ -8,7 +8,6 @@ import math
 from cStringIO import StringIO
 
 from PeriodicTable import PeriodicTable
-import olexex
 try:
   olx.current_hklsrc
 except:
@@ -33,8 +32,6 @@ from scitbx.math import distributions
 
 from History import hist
 
-from RunPrg import RunRefinementPrg
-
 global twin_laws_d
 twin_laws_d = {}
 
@@ -50,6 +47,7 @@ def rt_mx_from_olx(olx_input):
 
 class OlexCctbxAdapter(object):
   def __init__(self):
+    import olexex
     if OV.HasGUI():
       sys.stdout.refresh = True
     self._xray_structure = None
@@ -790,6 +788,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     OV.SetParam('snum.refinement.program','olex2.refine')
     OV.SetParam('snum.refinement.method','Gauss-Newton')
 
+    from RunPrg import RunRefinementPrg
     a = RunRefinementPrg()
     self.R1 = a.R1
     his_file = a.his_file
@@ -1045,6 +1044,7 @@ def calcsolv(solvent_radius=None, grid_step=None):
           solvent_radius = 0.2
 
   from smtbx.masks import solvent_accessible_volume
+  import olexex
   # Used to build the xray_structure by getting information from the olex2 refinement model
   olx_atoms = olexex.OlexRefinementModel()
   unit_cell = olx_atoms.getCell()
