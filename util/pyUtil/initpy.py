@@ -192,9 +192,9 @@ def setup_cctbx():
   path_utils.setup_cctbx()
 
   # Import these files now to reduce time taken on running cctbx for the first time
-  #import my_refine_util
-  #import cctbx_olex_adapter
-  #import cctbx_controller
+  import my_refine_util
+  import cctbx_olex_adapter
+  import cctbx_controller
 
 ''' Redirect prints to Olex '''
 sys.stdout = StreamRedirection(sys.stdout, stdout_redirection)
