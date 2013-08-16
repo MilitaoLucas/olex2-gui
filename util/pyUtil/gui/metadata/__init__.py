@@ -92,42 +92,23 @@ def sources():
 
   return retstr
 
-def add_resolved_conflict_item_to_phil(item):
+def add_resolved_conflict_item_to_phil(item, value):
   l = OV.GetParam('snum.metadata.resolved_conflict_items')
   l.append(item)
   OV.SetParam('snum.metadata.resolved_conflict_items', l)
+  OV.set_cif_item(item, value)
+  from CifInfo import MergeCif
+  MergeCif()
   conflicts()
 
-def set_cif_item(key, value):
-  OV.set_cif_item(key, '%s' %value)
-
-def make_conflict_link(item, val, src, cif_value):
-  if val == cif_value:
-    return '''
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar('HtmlTableRowBgColour')">
-<tr><td><b>%s</b></td></tr><tr><td>
-<a href='
-spy.gui.metadata.add_resolved_conflict_item_to_phil(%s)
->>html.Update'><font color='green'>%s</font></a></td></tr></table>
-'''%(src, item, val)
-  else:
-    return '''
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar('HtmlTableRowBgColour')">
-<tr><td><b>%s</b></td></tr><tr><td>
-<a href=
-"spy.gui.metadata.set_cif_item('%s','%s')
->>spy.MergeCif('False')
->>spy.gui.metadata.add_resolved_conflict_item_to_phil('%s')
->>html.Update">%s</a></td></tr></table>
-'''%(src, item, val, item, val)
-
-
-def make_no_conflicts_gui(resolved):
-      txt = '''
-  <font color='green'><b>No conflicts in the meta-data</b></font>'''
+def make_no_conflicts_gui(resolved, some_remain=False):
+      if some_remain:
+        txt = "<font color='red'><b>There are unresolved conflicts</b></font>"
+      else:
+        txt = "<font color='green'><b>All conflicts are resolved</b></font>"
       if len(resolved) > 1:
         txt += '''
-  <a href='spy.SetParam(snum.metadata.resolved_conflict_items,[])>>spy.ExtractCifInfo()>>html.Update'>Reset Previously Resolved Conflicts</a>'''
+  <a href='spy.SetParam(snum.metadata.resolved_conflict_items,[])>>spy.ExtractCifInfo(True,True)>>html.Update'>Reset Previously Resolved Conflicts</a>'''
       if olx.html.IsPopup('conflicts') == "true":
         olx.html.Hide('conflicts')
       wFilePath_gui = r"conflicts_html_window.htm"
@@ -137,11 +118,11 @@ def make_no_conflicts_gui(resolved):
 def conflicts(popout='auto', d=None):
   if popout == 'true':
     popout = True
-  added_count = 0
   resolved = OV.GetParam('snum.metadata.resolved_conflict_items')
   head_colour = "#005096"
   col_even = "#cdcdcd"
   col_odd = "#dedede"
+  conflict_count = 0
 
   try:
     if not olx.CifInfo_metadata_conflicts:
@@ -151,20 +132,20 @@ def conflicts(popout='auto', d=None):
       if not d:
         d = olx.CifInfo_metadata_conflicts.conflict_d
     except:
-      return "strange"
+      return 0
     go_on = False
     for conflict in d:
       if conflict == "sources": continue
       if conflict not in resolved:
         go_on = True
+        break
     if not go_on:
       make_no_conflicts_gui(resolved)
-      return
+      return 0
         
     olx.CifInfo_metadata_conflicts = None
     if d:
       number_of_files = len(d['sources'])
-      added_count = 0
       txt = "<table width='100%'><tr><td>" #START: encase everything in a table
       colspan = number_of_files + 1
       txt += '''
@@ -193,11 +174,11 @@ def conflicts(popout='auto', d=None):
   </tr>''' #Close TR for Header Row
 
       for conflict in d:
-        added_count += 1
         txt += '''
   <tr>'''#CONFLICT TR OPEN
         if not conflict.startswith("_"): continue
         if conflict in resolved: continue
+        conflict_count += 1
         cif = str(OV.get_cif_item(conflict)).strip("'")
         txt += '''
     <td width='30%%' bgcolor='%s'><font color='white'><b>%s</b></font></td>''' %(head_colour, conflict)
@@ -214,12 +195,12 @@ def conflicts(popout='auto', d=None):
             display = "--"
           elif cif == val:
             display = '''
-            <a href='spy.gui.metadata.add_resolved_conflict_item_to_phil(%s)
-            >>html.Update'><font color='green'>%s</font></a>''' %(conflict, val)
+            <a href='spy.gui.metadata.add_resolved_conflict_item_to_phil("%s", "%s")'>
+            <font color='green'>%s</font></a>''' %(conflict, val, val)
           else:
             display = '''
-            <a href='spy.gui.metadata.add_resolved_conflict_item_to_phil(%s)
-            >>html.Update'><font color='red'>%s</font></a>''' %(conflict, val)
+            <a href='spy.gui.metadata.add_resolved_conflict_item_to_phil("%s", "%s")'>
+            <font color='red'>%s</font></a>''' %(conflict, val, val)
           txt += '''
     <td width='%i%%' bgcolor='%s'>%s
     </td>''' %(int(70/number_of_files), bg, display) #TD conflict value
@@ -228,30 +209,16 @@ def conflicts(popout='auto', d=None):
       txt += '''
   </td></tr></table>'''
 
-    else:
-      make_no_conflicts_gui(resolved)
-      
-      #txt = "<font color='green'><b>No conflicts in the meta-data or all conflicts resolved</b></font><a href='spy.SetParam('snum.metadata.resolved_conflict_items','')"
-
   except Exception, err:
     print err
-    return "Not Initialised or Something Bad has happened."
-
-  if len(resolved) > 1:
-    make_no_conflicts_gui(resolved)
-    
-    #txt += '''
-#<tr><td><a href='spy.SetParam(snum.metadata.resolved_conflict_items,[])>>spy.ExtractCifInfo()>>html.Update'>Reset Previously Resolved Conflicts</a></td></tr>'''
-  
+    return 0
+  make_no_conflicts_gui(resolved, conflict_count > 0)
+  if conflict_count == 0:
+      olx.html.Update()
+      return
   if number_of_files > 1:
     wFilePath = r"conflicts.htm"
     OV.write_to_olex(wFilePath, txt + "</table>")
-    
-    #t = '''
-#<tr><td><a href='spy.gui.metadata.conflicts(true)'>Popup Conflict Window</a></td></tr>'''
-    #wFilePath_gui = r"conflicts_html_window.htm"
-    #OV.write_to_olex(wFilePath_gui, t)
-    
     screen_height = int(olx.GetWindowSize('gl').split(',')[3])
     screen_width = int(olx.GetWindowSize('gl').split(',')[2])
     box_x = int(screen_width*0.1)
@@ -268,9 +235,8 @@ def conflicts(popout='auto', d=None):
 <tr><td><a href='spy.gui.metadata.conflicts(true)'>Popup Conflict Window</a></td></tr>'''
     wFilePath = r"conflicts.htm"
     OV.write_to_olex(wFilePath, txt)
-    return txt
+  return conflict_count
 
 olex.registerFunction(sources, False, "gui.metadata")
 olex.registerFunction(conflicts, False, "gui.metadata")
-olex.registerFunction(set_cif_item, False, "gui.metadata")
 olex.registerFunction(add_resolved_conflict_item_to_phil, False, "gui.metadata")

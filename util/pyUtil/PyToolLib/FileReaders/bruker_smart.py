@@ -92,7 +92,7 @@ class reader:
  2\\q angles and each scan (%(scantime)s s exposure) covering %(scanwidth)s\%% degrees in \\w.
  The crystal to detector distance was %(distance)s cm.
 """%smart
-    exptl_special_details = "\n;%s;\n" %txt
+    exptl_special_details = txt
     return exptl_special_details
 
   def cifItems(self):

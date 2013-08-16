@@ -46,7 +46,14 @@ if debug == True:
   try:
     import wingdbstub
   except:
-    pass
+    try:
+      py_dev_path = r'E:\eclipse-juno\eclipse\plugins\org.python.pydev_2.6.0.2012062818\pysrc'
+      if os.path.exists(py_dev_path):
+        sys.path.append(py_dev_path)
+        import pydevd
+        pydevd.settrace()
+    except:
+      pass
 
 locale.setlocale(locale.LC_ALL, 'C')
 
@@ -192,9 +199,9 @@ def setup_cctbx():
   path_utils.setup_cctbx()
 
   # Import these files now to reduce time taken on running cctbx for the first time
-  #import my_refine_util
-  #import cctbx_olex_adapter
-  #import cctbx_controller
+  import my_refine_util
+  import cctbx_olex_adapter
+  import cctbx_controller
 
 ''' Redirect prints to Olex '''
 sys.stdout = StreamRedirection(sys.stdout, stdout_redirection)
@@ -279,7 +286,7 @@ def onstartup():
       continue
 
   ## initialise userDictionaries objects
-  
+
   import userDictionaries
   if not userDictionaries.people:
     userDictionaries.init_userDictionaries()
@@ -300,7 +307,7 @@ onstartup()
 import urllib2
 # this overwrites the urllib2 default HTTP and HTTPS handlers
 import multipart
-
+import Loader
 
 if olx.IsPluginInstalled('MySQL') == "true":
   try:
@@ -347,4 +354,3 @@ if OV.HasGUI():
   from Skin import Skin
   from Analysis import Analysis
 from RunPrg import RunPrg
-
