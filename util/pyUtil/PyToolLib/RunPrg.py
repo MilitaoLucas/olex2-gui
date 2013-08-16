@@ -461,9 +461,11 @@ def AnalyseRefinementSource():
     if os.path.exists(ins_file_name) or os.path.exists(res_file_name):
       print 'Please load a RES or INS file to perform the refinement'
       return False
-    olx.Export()
-    if os.path.exists(hkl_file_name):
-      olx.HKLSrc(hkl_file_name)
+    fn = os.path.normpath("%s/%s" %(olx.FilePath(), olx.xf.DataName(olx.xf.CurrentData())))
+    ins_file_name = fn + '.ins'
+    res_file_name = fn + '.res'
+    hkl_file_name = fn + '.hkl'
+    olx.Export(hkl_file_name)
     if os.path.exists(res_file_name):
       olex.m("reap '%s'" %res_file_name)
       print 'Loaded RES file extracted from CIF'
@@ -471,6 +473,8 @@ def AnalyseRefinementSource():
       OV.File("%s" %ins_file_name)
       olex.m("reap \"%s\"" %ins_file_name)
       print 'Loaded INS file generated from CIF'
+    if os.path.exists(hkl_file_name):
+      olx.HKLSrc(hkl_file_name)
   return True
 
 OV.registerFunction(AnalyseRefinementSource)

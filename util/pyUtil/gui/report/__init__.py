@@ -24,16 +24,6 @@ def BGColorForValue(value):
 
 
 class publication:
-  
-  
-  def get_box_x_y(self,w, h):
-    mouseX = int(olx.GetMouseX())
-    mouseY = int(olx.GetMouseY())
-    x = mouseX - w
-    y = mouseY
-    if x < 0: x = mouseX 
-    if y < 0: y = 0
-    return x,y
 
   def make_person_box(self, box, edit=False):
     import userDictionaries
@@ -59,7 +49,7 @@ class publication:
       OV.write_to_olex("person.htm", txt)
       boxWidth = 500
       boxHeight = 400
-      x,y = self.get_box_x_y(boxWidth, boxHeight)
+      x,y = get_box_x_y(boxWidth, boxHeight)
       olx.Popup(pop_name, 'person.htm', "-s -b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(pop_name, boxWidth, boxHeight, x, y))
 
       address = userDictionaries.affiliations.get_affiliation_address(person['affiliation'], list=False)
@@ -115,7 +105,7 @@ class publication:
       OV.write_to_olex("affiliation.htm", txt)
       boxWidth = 500
       boxHeight = 400
-      x,y = self.get_box_x_y(boxWidth, boxHeight)
+      x,y = get_box_x_y(boxWidth, boxHeight)
       olx.Popup(pop_name, 'affiliation.htm', "-s -b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(pop_name, boxWidth, boxHeight, x, y))
 
       res = olx.html.ShowModal(pop_name)
@@ -430,6 +420,14 @@ def get_crystal_image(p=None):
   
 OV.registerFunction(get_crystal_image, False, 'gui.report')
 
+def get_box_x_y(w, h):
+  mouseX = int(olx.GetMouseX())
+  mouseY = int(olx.GetMouseY())
+  x = mouseX - w
+  y = mouseY
+  if x < 0: x = mouseX 
+  if y < 0: y = 0
+  return x,y
 
 
 olex.registerFunction(get_report_title, False, "report")

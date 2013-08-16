@@ -801,19 +801,20 @@ class ExtractCifInfo(CifTools):
     olx.CifInfo_metadata_conflicts = self
     d = {}
     l = []
-    k_l = []
-    have_conflicts = False
+    k_l = set()
     for ld in self.all_sources_d:
       l.append(ld)
       for k in self.all_sources_d[ld]:
         if k not in k_l:
-          k_l.append(k)
+          k_l.add(k)
     self.conflict_d.setdefault('sources',l)
 
     resolved = OV.GetParam('snum.metadata.resolved_conflict_items')
     show_all_info = OV.GetParam('snum.metadata.show_all_cif_sources',False)
 
+    have_conflicts = False
     already_resolved = 0
+    conflict_count = 0
     for k in k_l:
       l = []
       if k in resolved:
@@ -829,19 +830,15 @@ class ExtractCifInfo(CifTools):
         except Exception, err:
           print err
         l.append(val)
-      ll = []
+      ll = set()
       for item in l:
-        if item:
-          item = item.strip()
-          item = item.strip("'")
-          item = item.strip('"')
-          if item not in ll:
-            ll.append(item)
-            if len(ll) > 1:
-              have_conflicts = True
-          if show_all_info:
-            ll.append(item)
+        if not item: continue
+        item = item.strip().strip("'").strip('"')
+        if item not in ll:
+          ll.add(item)
       if len(ll) > 1:
+        if k.startswith('_'):
+          conflict_count += 1
         self.conflict_d.setdefault(k,{})
         for ld in self.all_sources_d:
           try:
@@ -852,20 +849,25 @@ class ExtractCifInfo(CifTools):
             print err
           self.conflict_d[k].setdefault(ld,val)
 
-    if have_conflicts and not already_resolved:
+    if conflict_count and not already_resolved:
       print "There is conflicting information in the sources of metadata"
       from gui.metadata import conflicts
       conflicts(True, self.conflict_d)
 
-    elif have_conflicts and already_resolved:
-      print "There is conflicting information, but %s conflicts have been resolved" %already_resolved
+    elif already_resolved < conflict_count:
+      print "%s Out of %s conflicts have been resolved" %(already_resolved, conflict_count)
       from gui.metadata import conflicts
       conflicts(True, self.conflict_d)
 
-    elif show_all_info:
-      print "There are no conflicts. All CIF info is shown in the pop-up window."
+    elif conflict_count and already_resolved == conflict_count:
+      print "All %s conflicts have been resolved" %(conflict_count)
       from gui.metadata import conflicts
       conflicts(True, self.conflict_d)
+# o: what is this supposed to do?
+#    elif show_all_info:
+#      print "There are no conflicts. All CIF info is shown in the pop-up window."
+#      from gui.metadata import conflicts
+#      conflicts(True, self.conflict_d)
 
     else:
       wFilePath = r"conflicts_html_window.htm"
@@ -873,7 +875,7 @@ class ExtractCifInfo(CifTools):
 <tr>
 <td></td>
 <td bgcolor='%s'><font color='white'>
-<b>There is NO conflicting information the sources of metadata</b>
+<b>There is no conflicting information in the sources of metadata</b>
 </font><a href='spy.SetParam(snum.metadata.show_all_cif_sources,True)'>Show ALL</a></td></tr>''' %OV.GetParam('gui.green').hexadecimal
       OV.write_to_olex(wFilePath, txt)
 #      print "There is NO conflicting information the sources of metadata"
@@ -911,7 +913,7 @@ class ExtractCifInfo(CifTools):
   def prepare_exptl_absorpt_process_details(self, abs, version,):
     if abs["abs_type"] == "TWINABS":
       t = ["%s was used for absorption correction.\n" %abs['version']]
-      txt = "\n;\n"
+      txt = ""
       for component in range(1, int(abs["number_twin_components"])+1):
         # is single parameter set refined?
         if str(component) not in abs: continue
@@ -931,7 +933,6 @@ class ExtractCifInfo(CifTools):
         txt += "\nFinal HKLF 4 output contains %s reflections, Rint = %s\n (%s with I > 3sig(I), Rint = %s)\n" %(
           abs['Rint_refnum'], abs['Rint'],
           abs['Rint_3sig_refnum'], abs['Rint_3sig'])
-      txt += ";\n"
       exptl_absorpt_process_details = txt
 
     elif abs["abs_type"] == "SADABS":
@@ -942,7 +943,7 @@ The Ratio of minimum to maximum transmission is %(ratiominmax)s.
 The \l/2 correction factor is %(lambda_correction)s.
 """%abs
 
-      exptl_absorpt_process_details = "\n;\n%s\n;\n" %txt
+      exptl_absorpt_process_details = txt
     return exptl_absorpt_process_details
 
   def prepare_computing(self, dict, versions, name):

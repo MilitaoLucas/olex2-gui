@@ -51,7 +51,6 @@ class Skin():
     new_width = OV.GetParam('gui.htmlpanelwidth')
     if new_width < 350:
       OV.SetParam('gui.skin.extension', 'small')
-
     if timing:
       t = time.time()
     if f == 'timage':
@@ -139,6 +138,7 @@ def export_parameters(load_phil=True):
   OV.SetVar('HtmlGuiFontSize', OV.GetParam('gui.html.font_size'))
   OV.SetVar('HtmlFontSizeControls', OV.GetParam('gui.html.font_size_controls'))
   OV.SetVar('HtmlFontSizeLarge', OV.GetParam('gui.html.font_size_large'))
+  OV.SetVar('HtmlFontSizeMedium', OV.GetParam('gui.html.font_size_medium'))
   OV.SetVar('HtmlPanelWidth', OV.GetParam('gui.htmlpanelwidth'))
   OV.SetVar('HtmlButtonHeight', OV.GetParam('gui.timage.button.height'))
   
