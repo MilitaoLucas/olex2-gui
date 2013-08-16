@@ -822,10 +822,6 @@ class timage(ImageTools):
       self.text_time = 0
 
     if self.width <= 0: self.width = 10
-    icon_source = "%s/etc/gui/images/src/icons.png" %self.basedir
-    image_source = "%s/etc/gui/images/src/images.png" %self.basedir
-    self.iconSource = Image.open(icon_source)
-    self.imageSource = Image.open(image_source)
     self.olex2_has_recently_updated = OV.GetParam('olex2.has_recently_updated')
     sf = 4 #images are four times larger than the nominal width of 350
     sfs = sf * 350/int(self.params.htmlpanelwidth)
@@ -836,6 +832,14 @@ class timage(ImageTools):
 
 
   def run_timage(self,force_images=False):
+    icon_source = open("%s/etc/gui/images/src/icons.png" %self.basedir, 'rb')
+    image_source = open("%s/etc/gui/images/src/images.png" %self.basedir,'rb')
+    self.iconSource = Image.open(icon_source)
+    self.iconSource.load()
+    self.imageSource = Image.open(image_source)
+    self.imageSource.load()
+    icon_source.close()
+    image_source.close()
     self.force_images = force_images
 
     self.highlight_colour = OV.GetParam('gui.html.highlight_colour').rgb
@@ -2262,6 +2266,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         self.image = image = self.icon_items(iconIndex[icon], state)
         self.name = name = r"toolbar-%s%s.png" %(icon,state)
         self.save_with_checking_for_needed()
+        if state == "off":
+          pass
+          #save_name = name.replace("toolbar-","").replace("off.png",".png")
+          #image.save("D:\\Users\\Horst\\Dropbox\\Olex2Manual\\icons\\" + save_name)
 
       if icon in also_make_small_icons_l:
         states = ["on", "off", "hover", "", "hoveron", "highlight"]
@@ -3458,7 +3466,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       dup = ImageChops.invert(dup)
       dup = ImageChops.offset(dup, 1, 1)
       image = ImageChops.blend(image, dup, 0.05)
-
     return image
 
 
@@ -3699,8 +3706,8 @@ class Boxplot(ImageTools):
     OlexVFS.save_image_to_olex(image, "boxplot.png", 0)
 
 
-timage_instance_TestBanner = timage()
-OV.registerFunction(timage_instance_TestBanner.makeTestBanner)
+#timage_instance_TestBanner = timage()
+#OV.registerFunction(timage_instance_TestBanner.makeTestBanner)
 
 
 TI = timage()

@@ -771,8 +771,10 @@
       <arg1 name="name" def="">
     />
     <cmd
-      <cmd1 "spy.change_skin(%1)">
-      <cmd1 "html.load Basedir()/etc/index.htm">
+      <cmd1 "cursor(busy,'Please Wait ... for a very long time')">
+      <cmd2 "spy.change_skin(%1)">
+      <cmd3 "html.load Basedir()/etc/index.htm">
+      <cmd4 "cursor()">
     />
   />
 />
@@ -801,7 +803,7 @@
       <arg2 name="colour" def="spy.GetParam(gui.timage.base_colour)">
     >
     <cmd
-      <cmd1 "skin %1">
+      <cmd2 "skin %1">
     />
   />
 />
