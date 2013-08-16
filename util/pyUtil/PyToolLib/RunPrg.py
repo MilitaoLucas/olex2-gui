@@ -461,7 +461,7 @@ def AnalyseRefinementSource():
     if os.path.exists(ins_file_name) or os.path.exists(res_file_name):
       print 'Please load a RES or INS file to perform the refinement'
       return False
-    fn = olx.xf.DataName(olx.xf.CurrentData())
+    fn = os.path.normpath("%s/%s" %(olx.FilePath(), olx.xf.DataName(olx.xf.CurrentData())))
     ins_file_name = fn + '.ins'
     res_file_name = fn + '.res'
     hkl_file_name = fn + '.hkl'
