@@ -46,7 +46,14 @@ if debug == True:
   try:
     import wingdbstub
   except:
-    pass
+    try:
+      py_dev_path = r'E:\eclipse-juno\eclipse\plugins\org.python.pydev_2.6.0.2012062818\pysrc'
+      if os.path.exists(py_dev_path):
+        sys.path.append(py_dev_path)
+        import pydevd
+        pydevd.settrace()
+    except:
+      pass
 
 locale.setlocale(locale.LC_ALL, 'C')
 
@@ -279,7 +286,7 @@ def onstartup():
       continue
 
   ## initialise userDictionaries objects
-  
+
   import userDictionaries
   if not userDictionaries.people:
     userDictionaries.init_userDictionaries()
@@ -300,7 +307,7 @@ onstartup()
 import urllib2
 # this overwrites the urllib2 default HTTP and HTTPS handlers
 import multipart
-
+import Loader
 
 if olx.IsPluginInstalled('MySQL') == "true":
   try:
@@ -347,4 +354,3 @@ if OV.HasGUI():
   from Skin import Skin
   from Analysis import Analysis
 from RunPrg import RunPrg
-

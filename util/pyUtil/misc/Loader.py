@@ -4,16 +4,6 @@ import olx
 import olex
 import shutil
 
-path = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(path)
-
-import _plgl
-if sys.platform[:3] == 'win':
-  ext = 'pyd'
-else:
-  ext = 'so'
-olx.LoadDll("%s/_plgl.%s" %(path, ext))
-
 def getModule(name, email=None):
   import HttpTools
   url_base = "http://www.olex2.org/PluginProvider/"
@@ -107,6 +97,21 @@ def loadAll():
       print("Error occurred while loading module: %s" %d)
       print(e)
   
-olex.registerFunction(getModule, False, "plugins")
-loadAll()
+path = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(path)
 
+if sys.platform[:3] == 'win':
+  ext = 'pyd'
+else:
+  ext = 'so'
+lib_name = "%s/_plgl.%s" %(path, ext)
+if os.path.exists(lib_name) or olx.app.IsDebugBuild() == 'true':
+  try:
+    import _plgl
+    olx.LoadDll(lib_name)
+    olex.registerFunction(getModule, False, "plugins")
+    loadAll()
+  except Exception, e:
+    print("Plugin loader initialisation failed: '%s'" %e)
+else:
+  print("Plugin loader is not initialised")
