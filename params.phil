@@ -1007,7 +1007,7 @@ programs
   }
 
 modules{
-  provider_url = "http://wwww.olex2.org/PluginProvider/"
+  provider_url = "http://www.olex2.org/PluginProvider/"
     .type = str
   available_modules_file = "available_modules.txt"
     .type = str
