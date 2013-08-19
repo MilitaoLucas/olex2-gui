@@ -2567,7 +2567,6 @@ def make_reflection_graph(name):
 
 OV.registerFunction(make_reflection_graph)
 
-
 class HealthOfStructure():
   def __init__(self):
     self.hkl_stats = {}
@@ -2687,9 +2686,13 @@ class HealthOfStructure():
   def make_HOS_html(self):
     if self.scope == None:
       self.scope = 'hkl'
-
+      
+    is_CIF = (olx.IsFileType('cif') == 'true')
     if self.scope == "refinement":
-      l = ['max_shift_site', 'max_shift_u', 'max_peak', 'max_hole']
+      if is_CIF:
+        l = ['_refine_ls_shift/su_max', '_refine_diff_density_max', '_refine_diff_density_min']
+      else:
+        l = ['max_shift_site', 'max_shift_u', 'max_peak', 'max_hole']
       #missing = olexex.OlexRefinementModel().getMissingAtomsNumber()
       #OV.SetParam('snum.refinement.expected_peaks', missing)
     else:
@@ -2703,12 +2706,19 @@ class HealthOfStructure():
 
 
     counter = 0
-    for item in l:
+    for idx, item in enumerate(l):
       counter += 1
       if self.scope == "hkl":
         value = self.hkl_stats[item]
       elif self.scope == "refinement":
-        value = OV.GetParam('snum.refinement.%s' %item)
+        if is_CIF:
+          try:
+            value = float(olx.Cif(item))
+          except:
+            value = None
+          item = item.replace('/', '_over_') 
+        else:
+          value = OV.GetParam('snum.refinement.%s' %item)
 
       display = OV.GetParam('diagnostics.%s.%s.display' %(self.scope,item))
       value_format = OV.GetParam('diagnostics.%s.%s.value_format' %(self.scope,item))
