@@ -1874,8 +1874,6 @@ def get_LS_phil():
           .type=int
         nextra=0
           .type=int
-        maxvec=511
-          .type=int
       }
       default=True
         .type=bool
@@ -1907,8 +1905,6 @@ def get_CGLS_phil():
           nrf=0
             .type=int
           nextra=0
-            .type=int
-          maxvec=511
             .type=int
         }
         default=True
