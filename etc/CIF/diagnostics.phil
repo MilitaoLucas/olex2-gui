@@ -13,7 +13,26 @@ diagnostics {
     max_shift_site{
       op = "smaller"
         .type = str
+      value_format= "3f"
+        .type = str
+      grade1  = 0.001
+        .type = float
+      grade2 = 0.005
+        .type = float
+      grade3 = 0.010
+        .type = float
+      grade4 = 0.015
+        .type = float
+      top = 0.15
+        .type = float
       display = "Max Shift"
+        .type = str
+      href = atom
+        .type = str
+    }
+
+    _refine_ls_shift_over_su_max {
+      op = "smaller"
         .type = str
       value_format= "3f"
         .type = str
@@ -27,15 +46,16 @@ diagnostics {
         .type = float
       top = 0.15
         .type = float
-      href = atom
-        .type = str      
+      display = "Max Shift/esd"
+        .type = str
+      href = None
+        .type = str
     }
+
 
     max_shift_u{
       op = "smaller"
         .type = str
-      display = "Max dU"
-        .type = str
       value_format= "3f"
         .type = str
       grade1  = 0.001
@@ -48,8 +68,10 @@ diagnostics {
         .type = float
       top = 0.15
         .type = float
+      display = "Max dU"
+        .type = str
       href = atom
-        .type = str      
+        .type = str
     }
 
     max_peak{
@@ -72,6 +94,26 @@ diagnostics {
       href = sel Q1
         .type = str      
     }
+    _refine_diff_density_max{
+      op = "smaller"
+        .type = str
+      display = "Max Peak"
+        .type = str
+      value_format= "1f"
+        .type = str
+      grade1  = 0.51
+        .type = float
+      grade2 = 1.01
+        .type = float
+      grade3 = 2.01
+        .type = float
+      grade4 = 3.01
+        .type = float
+      top = 5
+        .type = float
+      href = None
+        .type = str
+    }
     max_hole{
       op = "greater"
         .type = str
@@ -91,6 +133,26 @@ diagnostics {
         .type = float
       href = echo "Please add PLAN -n to your ins file first"
         .type = str      
+    }
+    _refine_diff_density_min{
+      op = "greater"
+        .type = str
+      display = "Min Peak"
+        .type = str
+      value_format= "1f"
+        .type = str
+      grade1  = -0.51
+        .type = float
+      grade2 = -1.01
+        .type = float
+      grade3 = -2.01
+        .type = float
+      grade4 = -3.01
+        .type = float
+      top = -5
+        .type = float
+      href = None
+        .type = str
     }
     goof{
       op = "between"
@@ -112,7 +174,7 @@ diagnostics {
       top = 0.5
         .type = float
       href = echo Fred
-        .type = str      
+        .type = str
     }
     expected_peaks{
       op = "smaller"
@@ -132,7 +194,7 @@ diagnostics {
       top = 10
         .type = int
       href = echo Fred
-        .type = str      
+        .type = str
     }
   }
     
@@ -208,7 +270,7 @@ diagnostics {
       top = 0.15
         .type = float
       href = completeness
-        .type = str      
+        .type = str
     }
   }
 }
