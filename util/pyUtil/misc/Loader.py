@@ -6,7 +6,9 @@ import shutil
 
 def getModule(name, email=None):
   import HttpTools
-  url_base = "http://www.olex2.org/PluginProvider/"
+  from olexFunctions import OlexFunctions
+  OV = OlexFunctions()
+  url_base = OV.GetParam('modules.provider_url')
   dir = os.path.normpath("%s/modules" %(olx.app.SharedDir()))
   if not os.path.exists(dir):
     os.mkdir(dir)
@@ -22,7 +24,7 @@ def getModule(name, email=None):
 
   etoken = None
   etoken_fn = os.path.normpath("%s/etoken" %(dir))
-  if email is not None:
+  if email:
     try:
       url = url_base + "register"
       values = {
@@ -49,7 +51,7 @@ def getModule(name, email=None):
       etoken = open(etoken_fn, "rb").readline().strip()
   
   if etoken is None:
-    if email is None:
+    if not email:
       print("Please provide your e-mail address as the second parameter")
     return
       
@@ -102,11 +104,9 @@ def getAvailableModules():
   import HttpTools
   from olexFunctions import OlexFunctions
   OV = OlexFunctions()
-  url_base = OV.GetParam('modules.url')
-  if url_base is None:
-    url_base = "http://www.olex2.org/PluginProvider/"
+  url_base = OV.GetParam('modules.provider_url')
   try:
-    url = url_base + "available_modules.txt"
+    url = url_base + OV.GetParam('modules.available_modules_file')
     f = HttpTools.make_url_call(url, None)
     f = f.readlines()
     all = []
