@@ -96,6 +96,51 @@ def loadAll():
     except Exception, e:
       print("Error occurred while loading module: %s" %d)
       print(e)
+
+
+def getAvailableModules():
+  import HttpTools
+  from olexFunctions import OlexFunctions
+  OV = OlexFunctions()
+  url_base = OV.GetParam('modules.url')
+  if url_base is None:
+    url_base = "http://www.olex2.org/PluginProvider/"
+  try:
+    url = url_base + "available_modules.txt"
+    f = HttpTools.make_url_call(url, None)
+    f = f.readlines()
+    all = []
+    for l in f:
+      l = l.strip().split(' ')
+      if len(l) == 2:
+        try:
+          d = int(l[1])
+          all.append((l[0], d))
+        except:
+          continue
+
+    dir = os.path.normpath("%s/modules" %(olx.app.SharedDir()))
+    rv = []
+    for m in all:
+      md = "%s%s%s" %(dir, os.sep, m[0])
+      if os.path.exists(md):
+        rd = "%s%srelease" %(md, os.sep)
+        d = 0
+        if os.path.exists(rd):
+          try:
+            d = int(file(rd, 'rb').read().strip())
+          except:
+            pass
+        if d < m[1]:
+          rv.append("Update %s<-spy.plugins.GetModule %s spy.getParam(user.email)" %(m[0], m[0]))
+        else:
+          rv.append("%s is up-to-date<-echo '%s is up-to-date'" %(m[0], m[0]))
+      else:
+        rv.append("Install %s<-spy.plugins.GetModule %s spy.getParam(user.email)" %(m[0], m[0]))
+    return ';'.join(rv)
+  except Exception, e:
+    sys.stdout.formatExceptionInfo()
+    return "No modules information available"
   
 path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(path)
@@ -110,6 +155,7 @@ if os.path.exists(lib_name) or olx.app.IsDebugBuild() == 'true':
     import _plgl
     olx.LoadDll(lib_name)
     olex.registerFunction(getModule, False, "plugins")
+    olex.registerFunction(getAvailableModules, False, "plugins")
     loadAll()
   except Exception, e:
     print("Plugin loader initialisation failed: '%s'" %e)
