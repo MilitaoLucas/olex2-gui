@@ -105,9 +105,9 @@ class phil_handler(index):
   def adopt_phil(self, phil_object=None, phil_string=None, phil_file=None):
     assert [phil_object, phil_string, phil_file].count(None) == 2
     if phil_string:
-      phil_object = self.parse(phil_string)
+      phil_object = self.parse(phil_string, process_includes=True)
     elif phil_file:
-      phil_object = libtbx.phil.parse(file_name=phil_file)
+      phil_object = libtbx.phil.parse(file_name=phil_file, process_includes=True)
     if phil_object:
       for object in phil_object.objects:
         self.master_phil.adopt(object)
