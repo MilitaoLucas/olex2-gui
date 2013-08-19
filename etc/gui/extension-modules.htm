@@ -36,7 +36,9 @@ Various extension modules for Olex2 are currently under development. If you are 
       valign='center'
       width="100%"
       bgcolor="spy.GetParam('gui.html.input_bg_colour')"
-      items="spy.modules.getAvailableModules()"
+      items="spy.plugins.getAvailableModules()"
+      onchange="run(html.GetValue('~name~'))"
+      readonly="true"
     >
 </font>
   </td>
