@@ -2706,7 +2706,7 @@ class HealthOfStructure():
 
 
     counter = 0
-    for idx, item in enumerate(l):
+    for item in l:
       counter += 1
       if self.scope == "hkl":
         value = self.hkl_stats[item]
