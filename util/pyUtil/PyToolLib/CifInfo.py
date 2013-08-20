@@ -993,7 +993,7 @@ If more than one file is present, the path of the most recent file is returned b
       name = "*"
       extension = ".abs"
     elif tool == "integ":
-      name = "*m"
+      name = "*"
       extension = "._ls"
     elif tool == "cad4":
       name = "*"
