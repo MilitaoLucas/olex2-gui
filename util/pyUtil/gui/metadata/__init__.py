@@ -102,17 +102,17 @@ def add_resolved_conflict_item_to_phil(item, value):
   conflicts()
 
 def make_no_conflicts_gui(resolved, some_remain=False):
-      if some_remain:
-        txt = "<font color='red'><b>There are unresolved conflicts</b></font>"
-      else:
-        txt = "<font color='green'><b>All conflicts are resolved</b></font>"
-      if len(resolved) > 1:
-        txt += '''
-  <a href='spy.SetParam(snum.metadata.resolved_conflict_items,[])>>spy.ExtractCifInfo(True,True)>>html.Update'>Reset Previously Resolved Conflicts</a>'''
-      if olx.html.IsPopup('conflicts') == "true":
-        olx.html.Hide('conflicts')
-      wFilePath_gui = r"conflicts_html_window.htm"
-      OV.write_to_olex(wFilePath_gui, txt)
+  if some_remain:
+    txt = "<font color='red'><b>There are unresolved conflicts</b></font>"
+  else:
+    txt = "<font color='green'><b>All conflicts are resolved</b></font>"
+  if len(resolved) > 1:
+    txt += '''
+<a href='spy.SetParam(snum.metadata.resolved_conflict_items,[])>>spy.ExtractCifInfo(True,True)>>html.Update'>Reset Previously Resolved Conflicts</a>'''
+  if olx.html.IsPopup('conflicts') == "true":
+    olx.html.Hide('conflicts')
+  wFilePath_gui = r"conflicts_html_window.htm"
+  OV.write_to_olex(wFilePath_gui, txt)
   
 
 def conflicts(popout='auto', d=None):
@@ -181,7 +181,10 @@ def conflicts(popout='auto', d=None):
         conflict_count += 1
         cif = str(OV.get_cif_item(conflict)).strip("'")
         txt += '''
-    <td width='30%%' bgcolor='%s'><font color='white'><b>%s</b></font></td>''' %(head_colour, conflict)
+    <td width='30%%' bgcolor='%s'><font color='white'><b>%s
+    <br><a href='spy.gui.metadata.add_resolved_conflict_item_to_phil("%s", ".")'>Unapplicable (.)</a>
+    &nbsp;<a href='spy.gui.metadata.add_resolved_conflict_item_to_phil("%s", "?")'> Unknown (?)</a>
+    </b></font></td>''' %(head_colour, conflict, conflict, conflict)
         s = 0
         for source in d['sources']:
           s += 1
@@ -218,7 +221,7 @@ def conflicts(popout='auto', d=None):
       return
   if number_of_files > 1:
     wFilePath = r"conflicts.htm"
-    OV.write_to_olex(wFilePath, txt + "</table>")
+    OV.write_to_olex(wFilePath, "<html><body link='yellow'>%s</body></html>" %txt)
     screen_height = int(olx.GetWindowSize('gl').split(',')[3])
     screen_width = int(olx.GetWindowSize('gl').split(',')[2])
     box_x = int(screen_width*0.1)
