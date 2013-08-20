@@ -70,7 +70,7 @@ def makeHtmlTable(list):
           box_d['onchange'] += ">>%s" %box_d['extra_onchange']
         boxText += makeHtmlInputBox(box_d)
     if boxText:
-      boxText = '<table width="100%" cellpadding="0" cellspacing="0"><tr><td>' + boxText + "</td></tr></table>"
+      boxText = '<table width="100%" cellpadding="0" cellspacing="0"><tr><td width="100%%">' + boxText + "</td></tr></table>"
       row_d.setdefault('input',boxText)
     else:
       input_d.setdefault('ctrl_name', "SET_%s" %str.upper(input_d['varName']).replace('.','_'))
@@ -323,7 +323,7 @@ def make_help_box(args):
   else:
     title = name
     help_src = name
-  titleTxt = OV.TranslatePhrase("%s" %title)
+  titleTxt = OV.TranslatePhrase("%s" %title.title())
 #  titleTxt = title
   if box_type == "tutorial":
     titleTxt = titleTxt
@@ -389,7 +389,7 @@ def make_help_box(args):
   if box_type == 'help':
     boxWidth = OV.GetParam('gui.help_box.width')
     length = len(helpTxt)
-    tr = helpTxt.count('<tr')
+    tr = helpTxt.count('<br>')
 
     boxHeight = int(length/(boxWidth/OV.GetParam('gui.help_box.height_factor'))) + int(OV.GetParam('gui.help_box.height_constant') * (tr+2))
     if boxHeight > OV.GetParam('gui.help_box.height_max'):
@@ -418,7 +418,7 @@ def make_help_box(args):
       x = int(ws[0])
       y = int(ws[1]) + 50
       boxWidth = int(400)
-      boxHeight = int(ws[3]) - 120
+      boxHeight = int(ws[3]) - 90
 
   if popout:
     if box_type == 'tutorial':
@@ -431,7 +431,7 @@ def make_help_box(args):
     else:
       pop_name = pop_name.replace(" ", "_")
       title = 'Olex2 Help'
-      olx.Popup(pop_name, wFilePath, "-b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(title, boxWidth, boxHeight, x, y))
+      olx.Popup(pop_name, wFilePath, "-b=tcr -t='%s' -w=%i -h=%i -x=%i -y=%i" %(title, boxWidth, boxHeight, x, y))
       olx.html.SetBorders(pop_name,5)
       if box_type == 'tutorial':
         tutorial_box_initialised = pop_name
@@ -712,7 +712,7 @@ def format_help(string):
     d = eval(dt)
   ## find all occurences of <lb> and replace this with a line-break in a table.
   regex = re.compile(r"<lb>", re.X)
-  string = regex.sub(r"</td></tr><tr><td>", string)
+  string = regex.sub(r"<br>", string)
 
   ## find all occurences of '->' and replace this with an arrow.
   regex = re.compile(r"->", re.X)
@@ -759,9 +759,7 @@ def format_help(string):
   code_fg_colour = OV.GetParam('gui.html.code.fg_colour').hexadecimal
   html_tag = OV.GetParam('gui.html.code.html_tag')
   if m:
-    #s = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='1'><tr bgcolor='%s'><td><a href='\2'><b><font size='2' color='%s'><%s>>>\2</%s></font></a></td></tr></table>" %(width,code_bg_colour, code_fg_colour, html_tag, html_tag), string)
-
-    s = regex.sub(r" <font color='%s'>[&nbsp;<a href='\2'><b><%s>\2</%s></a>&nbsp;]</font>" %( code_fg_colour, html_tag, html_tag), string)
+    s = regex.sub(r" <font color='%s'><b><a href='\2'><%s>\2</%s></a></b></font>" %( code_fg_colour, html_tag, html_tag), string)
   else:
     s = string
   string = s
@@ -771,7 +769,7 @@ def format_help(string):
   m = regex.findall(string)
   colour = OV.GetParam('gui.html.highlight_colour').hexadecimal
   if m:
-    s = regex.sub(r"<tr><td><b><font color='%s'>\2</font></b> " %colour, string)
+    s = regex.sub(r"<p><b><font color='%s'>\2</font></b>&nbsp;" %colour, string)
   else:
     s = string
 
@@ -781,18 +779,16 @@ def format_help(string):
   m = regex.findall(string)
   colour = "#232323"
   if m:
-    s = regex.sub(r"<tr bgcolor=\"$GetVar('HtmlTableFirstcolColour')\"><td colspan='4'><b>\2</b></td></tr><tr><td>", string)
+    s = regex.sub(r"<tr bgcolor=\"$GetVar('HtmlTableFirstcolColour')\"><hr><b>\2</b><br>", string)
   else:
     s = string
 
   ## find all occurences of strings between &. These are the tables.
   string = s
-  #regex = re.compile(r"  (&&) (.*?)( [^\&\&]* ) (&&) ", re.X)
   regex = re.compile(r"  (&&) (.*?) (&&) ", re.X)
-  #regex = re.compile(r"  & (.*?)( [^\&\&]* ) & ", re.X)
   m = regex.findall(string)
   if m:
-    s = regex.sub(r"<table border='0'>\2</table>", string)
+    s = regex.sub(r"\2", string)
   else:
     s = string
 

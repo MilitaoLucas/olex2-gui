@@ -627,7 +627,7 @@ gui
     height_factor = 60
       .type = int
       .help = A factor that helps estimating the height of the help box by the total number of characters in the help text
-    height_constant = 40
+    height_constant = 60
       .type = int
       .help = Number of pixels to add per row to the height of a help box
     height_max = 500
