@@ -6,6 +6,7 @@ import shutil
 
 available_modules = None #list of Module
 current_module = None
+info_file_name = "modules-info.htm"
 
 class Module:
   def __init__(self, name, folder_name, description, url, release_date, action):
@@ -30,8 +31,10 @@ def getModule(name, email=None):
       try:
         shutil.rmtree(pdir)
       except Exception, e:
-        print(e)
-        print("An error occurred while installing the plugin. Please restart Olex2 and try again.")
+        msg = '''
+An error occurred while installing the extension.<br>%s<br>Please restart Olex2 and try again.
+''' %(str(e))
+        olex.writeImage(info_file_name, msg, 0)
         return
 
   etoken = None
@@ -48,14 +51,17 @@ def getModule(name, email=None):
         f = HttpTools.make_url_call(url, values)
         f = f.read().strip()
       if "Try again" in f:
-        print("Failed to register")
+        olex.writeImage(info_file_name, "Failed to register e-mail ''" %email, 0)
         return
       efn = open(etoken_fn, "wb")
       efn.write(f)
       efn.close()
       etoken = f
     except Exception, e:
-      sys.stdout.formatExceptionInfo()
+      msg = '''
+An error occurred while downloading the extension.<br>%s<br>Please restart Olex2 and try again.
+''' %(str(e))
+      olex.writeImage(info_file_name, msg, 0)
       return
 
   if etoken is None:
@@ -64,7 +70,7 @@ def getModule(name, email=None):
   
   if etoken is None:
     if not email:
-      print("Please provide your e-mail address as the second parameter")
+      olex.writeImage(info_file_name, "Please provide your e-mail", 0)
     return
       
   from zipfile import ZipFile
@@ -79,14 +85,23 @@ def getModule(name, email=None):
     f = HttpTools.make_url_call(url, values)
     f = f.read()
     if f.startswith('<html>'):
-      print(f)
+      olex.writeImage(info_file_name, f, 0)
     else:
       zp = ZipFile(StringIO(f))
       zp.extractall(path=dir)
-      print("Module %s has been successfully installed" %name)
-      print("You have 30 days to evaluate this module")
+      msg = "Module %s has been successfully installed" %name
+      msg += "<br>You have 30 days to evaluate this extension module."
+      msg += "<br>Please restart Olex2 to activate the extension module."
+      olex.writeImage(info_file_name, msg, 0)
+      global available_modules
+      idx = available_modules.index(current_module)
+      if idx >= 0:
+        del available_modules[idx]
   except Exception, e:
-    sys.stdout.formatExceptionInfo()
+    msg = '''
+An error occurred while installing the extension.<br>%s<br>Please restart Olex2 and try again.
+''' %(str(e))
+    olex.writeImage(info_file_name, msg, 0)
 
 def loadAll():
   dir = os.path.normpath("%s/modules" %(olx.app.SharedDir()))
@@ -183,6 +198,7 @@ def update(idx):
   global available_modules
   idx = int(idx)
   current_module = available_modules[idx]
+  olex.writeImage(info_file_name, "", 0)
   olx.html.Update()
 
 def getAction():
