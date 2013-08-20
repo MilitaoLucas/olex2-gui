@@ -4,6 +4,18 @@ import olx
 import olex
 import shutil
 
+available_modules = None #list of Module
+current_module = None
+
+class Module:
+  def __init__(self, name, folder_name, description, url, release_date, action):
+    self.name = name
+    self.folder_name = folder_name
+    self.description = description
+    self.url = url
+    self.release_date = release_date
+    self.action = action
+
 def getModule(name, email=None):
   import HttpTools
   from olexFunctions import OlexFunctions
@@ -101,6 +113,12 @@ def loadAll():
 
 
 def getAvailableModules():
+  global current_module
+  global available_modules
+  if available_modules:
+    return
+  current_module = None
+  available_modules = []
   import HttpTools
   from olexFunctions import OlexFunctions
   OV = OlexFunctions()
@@ -109,20 +127,18 @@ def getAvailableModules():
     url = url_base + OV.GetParam('modules.available_modules_file')
     f = HttpTools.make_url_call(url, None)
     f = f.readlines()
-    all = []
     for l in f:
-      l = l.strip().split(' ')
-      if len(l) == 2:
+      l = l.strip().split('&;')
+      if len(l) == 5: # name, readable name, short description, url, release date
         try:
-          d = int(l[1])
-          all.append((l[0], d))
+          d = int(l[4])
+          available_modules.append(Module(l[0], l[1], l[2], l[3], d, 0))
         except:
           continue
 
-    dir = os.path.normpath("%s/modules" %(olx.app.SharedDir()))
-    rv = []
-    for m in all:
-      md = "%s%s%s" %(dir, os.sep, m[0])
+    dir = "%s%smodules" %(olx.app.SharedDir(), os.sep)
+    for m in available_modules:
+      md = "%s%s%s" %(dir, os.sep, m.folder_name)
       if os.path.exists(md):
         rd = "%s%srelease" %(md, os.sep)
         d = 0
@@ -131,17 +147,73 @@ def getAvailableModules():
             d = int(file(rd, 'rb').read().strip())
           except:
             pass
-        if d < m[1]:
-          rv.append("Update %s<-spy.plugins.GetModule %s spy.getParam(user.email)" %(m[0], m[0]))
-        else:
-          rv.append("%s is up-to-date<-echo '%s is up-to-date'" %(m[0], m[0]))
+        if d < m.release_date:
+          m.action = 2
       else:
-        rv.append("Install %s<-spy.plugins.GetModule %s spy.getParam(user.email)" %(m[0], m[0]))
-    return ';'.join(rv)
+        m.action = 1
   except Exception, e:
     sys.stdout.formatExceptionInfo()
     return "No modules information available"
+
+# GUI specific functions
+def getModuleCaption(m):
+  if m.action == 0:
+    return "%s - Up-to-date" %(m.name)
+  elif m.action == 1:
+    return "%s - Install" %(m.name)
+  else:
+    return "%s - Update" %(m.name)
+
+def getModuleList():
+  global available_modules
+  rv = []
+  for idx, m in enumerate(available_modules):
+    rv.append(getModuleCaption(m) + ("<-%d" %(idx)))
+  return ';'.join(rv)
+
+def getInfo():
+  global current_module
+  if not current_module:
+    return ""
+  return "<a href='shell %s'>Module URL: </a> %s<br>%s"\
+     %(current_module.url, current_module.url, current_module.description)
   
+def update(idx):
+  global current_module
+  global available_modules
+  idx = int(idx)
+  current_module = available_modules[idx]
+  olx.html.Update()
+
+def getAction():
+  global current_module
+  if current_module is None:
+    action = 'Please choose a module'
+  elif current_module.action == 1:
+    action = "Install"
+  elif current_module.action == 2:
+    action = "Update"
+  else:
+    action = 'Nothing to do'
+  return action
+
+def doAct():
+  global current_module
+  if current_module is None or current_module.action == 0:
+    return
+  else:
+    getModule(current_module.folder_name, olx.html.GetValue('MODULES_EMAIL'))
+    current_module = None
+    olx.html.Update()
+  
+
+def getCurrentModuleName():
+  global current_module
+  global available_modules
+  if current_module is None:
+    return ""
+  return "%d" %available_modules.index(current_module)
+   
 path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(path)
 
@@ -156,6 +228,12 @@ if os.path.exists(lib_name) or olx.app.IsDebugBuild() == 'true':
     olx.LoadDll(lib_name)
     olex.registerFunction(getModule, False, "plugins")
     olex.registerFunction(getAvailableModules, False, "plugins")
+    olex.registerFunction(getModuleList, False, "plugins.gui")
+    olex.registerFunction(update, False, "plugins.gui")
+    olex.registerFunction(getInfo, False, "plugins.gui")
+    olex.registerFunction(getAction, False, "plugins.gui")
+    olex.registerFunction(getCurrentModuleName, False, "plugins.gui")
+    olex.registerFunction(doAct, False, "plugins.gui")
     loadAll()
   except Exception, e:
     print("Plugin loader initialisation failed: '%s'" %e)
