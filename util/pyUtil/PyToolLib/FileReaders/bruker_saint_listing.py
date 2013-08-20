@@ -14,9 +14,10 @@ class reader:
     two_theta_max = 0
     used = 0
     for i, li in enumerate(lines):
-      if li[:5] == "SAINT":
+      if li.startswith("SAINT"):
         self._cifItems.setdefault("prog_version", li[6:].strip())
       elif "Reflection Summary:" in li:
+        if 'Min.2Th' in lines[i+1]: continue
         info = lines[i+3].split()
         two_theta_min = float(info[-2].strip())
         two_theta_max = float(info[-1].strip())
@@ -30,6 +31,9 @@ class reader:
         best = info[1].strip()
         worst = info[0].strip()
       elif "Orientation least squares, component" in li:
+        u = li.split("(")[1].strip()
+        used = u.split()[0].strip()
+      elif li.startswith("Orientation LS for Sample,"):
         u = li.split("(")[1].strip()
         used = u.split()[0].strip()
 
