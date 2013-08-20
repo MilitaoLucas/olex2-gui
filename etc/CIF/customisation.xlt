@@ -10,12 +10,15 @@
   <sorting
     <pivots
       <pivot "_audit_creation">
+      <pivot "_shelxl_version_number">
       <pivot "_publ">
       <pivot "_chemical_name">  <pivot "_chemical_formula">  <pivot "_chemical">
       <pivot "_atom_type">
+      <pivot "_shelx_space_group">
       <pivot "_space_group">  <pivot "_space_group_symop">
       <pivot "_symmetry">
       <pivot "_cell_length">  <pivot "_cell_angle">  <pivot "_cell_volume">  <pivot "_cell_formula">  <pivot "_cell">
+      <pivot "_shelx_estimated_absorpt_T">
       <pivot "_exptl_">
       <pivot "_diffrn_reflns">  <pivot "_diffrn">
       <pivot "_reflns">
@@ -24,6 +27,9 @@
       <pivot "_atom_sites">  <pivot "_atom_site">  <pivot "_atom_site_aniso">
       <pivot "_geom_special">  <pivot "_geom_bond">  <pivot "_geom_angle">  <pivot "_geom">
       <pivot "_smtbx">
+      <pivot "_shelx_res_file"> <pivot "_shelx_res_checksum">
+      <pivot "_shelx_hkl_file"> <pivot "_shelx_hkl_checksum">
+      <pivot "_shelx">
     >
     <endings
       <ending "_h_min">

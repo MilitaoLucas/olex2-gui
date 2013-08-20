@@ -1006,9 +1006,19 @@ programs
     }
   }
 
+modules{
+  provider_url = "http://www.olex2.org/PluginProvider/"
+    .type = str
+  available_modules_file = "available_modules.txt"
+    .type = str
+  }
+
 user
   .short_caption = User Specific
   {
+  email = ""
+    .type = str
+
   brad = 10
     .type = int
   solo = True
@@ -1074,7 +1084,6 @@ user
       .type = str
     journal_style = rsc
       .type = str
-
 
     lab{
       logo = "BaseDir()/etc/site/logo.png"

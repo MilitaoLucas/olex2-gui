@@ -1,0 +1,73 @@
+$spy.plugins.getAvailableModules()
+
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
+
+<!-- #include tool-row gui\blocks\tool-row-help.htm;name=MODULES_1;help_ext=Modules;1; -->
+  <td width='100%'>
+Various extension modules for Olex2 are currently under development. If you are interested in testing these, please sign up below!
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MODULES_EMAIL';help_ext=Modules-email;1 -->
+  <td width='10%'>
+    <b>e-mail</b>
+  </td>
+
+  <td width='46%'>
+    <font size='2'>
+    <input
+      name="MODULES_EMAIL"
+      type='text'
+      valign='center'
+      width="100%"
+      bgcolor="spy.GetParam('gui.html.input_bg_colour')"
+      value="spy.GetParam('user.email')"
+      onchange="spy.SetParam('user.email',html.GetValue('~name~'))"
+      onleave="html.call('~name~.onchange')"
+    >
+  </font>
+  </td>
+  <td width='14%'>
+    <b>Modules</b>
+  </td>
+
+  <td width='30%'>
+    <font size='2'>
+    <input
+      name="MODULES_AVAILABLE"
+      type='combo'
+      width="100%"
+      bgcolor="spy.GetParam('gui.html.input_bg_colour')"
+      value="spy.plugins.gui.getCurrentModuleName()"
+      items="spy.plugins.gui.getModuleList()"
+      onchange="spy.plugins.gui.update(html.GetValue(~name~))"
+      readonly="true"
+    >
+    </font>
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row gui\blocks\tool-row.htm;name=MODULES_INFO;1; -->
+$spy.plugins.gui.getInfo()
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row gui\blocks\tool-row.htm;name=MODULES_INFO;1; -->
+<!-- #includeif fs.Exists('modules-info.htm') modules-info modules-info.htm;1 -->
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row gui\blocks\tool-row.htm;name=MODULES_ACTION;1; -->
+  <td width='100%'>
+    <font size='2'>
+    <input
+      name="MODULES_ACTION"
+      type='button'
+      value='spy.plugins.gui.getAction()'
+      width="100%"
+      bgcolor="spy.GetParam('gui.html.input_bg_colour')"
+      onclick="spy.plugins.gui.doAct()"
+    >
+    </font>
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
