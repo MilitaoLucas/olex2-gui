@@ -746,7 +746,7 @@ def format_help(string):
 
   ## find all occurences of strings between URL[]. These are links to help or tutorial popup boxes.
   regex = re.compile(r"URL\[\s*(?P<URL>.*?)]", re.X)
-  string = regex.sub(r"<tr><td bgcolor='#205c90' align='right'><b><a href='shell \g<URL>'><font color='#ffffff'>More Info Online</font></a></b></td></tr>" , string)
+  string = regex.sub(r"<b><a href='shell \g<URL>'><font color='#205c90'>More Info Online</font></a></b>" , string)
 
   ## find all occurences of strings between gui[]. These are links make something happen on the GUI.
   regex = re.compile(r"gui\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
