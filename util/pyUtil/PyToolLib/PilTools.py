@@ -898,7 +898,7 @@ class timage(ImageTools):
         print "\t - %s took %.3f s to complete" %(item, self.time.time()-t1)
 
   def make_popup_banners(self):
-    txt_l = [('setup',500), ('help',410), ('tutorial',375)]
+    txt_l = [('setup',330), ('help',410), ('tutorial',375)]
     image_source = "%s/etc/gui/images/src/banner.png" %self.basedir
     for item in txt_l:
       txt = item[0]
