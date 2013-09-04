@@ -762,7 +762,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     olx.File("notwin.ins")
 
   def run_twin_ref_shelx(self, law):
-    law_ins = ' '.join(str(int(i)) for i in law[:9])
+    law_ins = ' '.join(str(i) for i in law[:9])
     print "Testing: %s" %law_ins
     olx.Atreap("-b notwin.ins")
     olx.User("'%s'" %olx.FilePath())
