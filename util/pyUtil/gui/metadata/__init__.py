@@ -92,14 +92,16 @@ def sources():
 
   return retstr
 
+conflic_d = None
+
 def add_resolved_conflict_item_to_phil(item, value):
   l = OV.GetParam('snum.metadata.resolved_conflict_items')
   l.append(item)
   OV.SetParam('snum.metadata.resolved_conflict_items', l)
   OV.set_cif_item(item, value)
-  from CifInfo import MergeCif
-  MergeCif()
-  conflicts()
+  global conflict_d
+  del conflict_d[item]
+  conflicts(d=conflic_d)
 
 def make_no_conflicts_gui(resolved, some_remain=False):
   if some_remain:
@@ -125,14 +127,15 @@ def conflicts(popout='auto', d=None):
   conflict_count = 0
 
   try:
-    if not olx.CifInfo_metadata_conflicts:
-      from CifInfo import ExtractCifInfo
-      ExtractCifInfo()
     try:
       if not d:
-        d = olx.CifInfo_metadata_conflicts.conflict_d
+        from CifInfo import ExtractCifInfo
+        ci = ExtractCifInfo(run=True)
+        d = ci.conflict_d
     except:
       return 0
+    global conflict_d
+    conflict_d = d
     go_on = False
     for conflict in d:
       if conflict == "sources": continue

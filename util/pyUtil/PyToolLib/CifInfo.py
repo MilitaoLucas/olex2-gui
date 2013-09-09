@@ -798,7 +798,6 @@ class ExtractCifInfo(CifTools):
     if olx.HasGUI() == 'false':
       return
     self.conflict_d = {}
-    olx.CifInfo_metadata_conflicts = self
     d = {}
     l = []
     k_l = set()
