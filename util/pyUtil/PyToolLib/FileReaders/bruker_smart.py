@@ -82,6 +82,9 @@ class reader:
     if self._cifItems.has_key('_diffrn_source_voltage') and self._cifItems.has_key('_diffrn_source_current'):
       self._cifItems.setdefault('_diffrn_source_power', (self._cifItems['_diffrn_source_voltage'] * self._cifItems['_diffrn_source_current'])/1000)
     self._cifItems.setdefault('_exptl_special_details', self.prepare_exptl_special_details(special_details))
+    for k,v in self._cifItems.iteritems():
+      if v == '?':
+        del self._cifItems[k] 
 
   def prepare_exptl_special_details(self, smart):
     """Prepares the text for the _exptl_special_details cif item using details obtained from the smart.ini file."""
