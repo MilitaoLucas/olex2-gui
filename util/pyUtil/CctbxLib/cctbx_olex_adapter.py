@@ -783,20 +783,22 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     rFile = open(olx.FileFull(), 'r')
     f_data = rFile.readlines()
     rFile.close()
-    OV.SetParam('snum.init.skip_history','True')
+    OV.SetParam('snum.init.skip_routine','True')
 
     OV.SetParam('snum.refinement.program','olex2.refine')
     OV.SetParam('snum.refinement.method','Gauss-Newton')
 
-    from RunPrg import RunRefinementPrg
-    a = RunRefinementPrg()
-    self.R1 = a.R1
-    his_file = a.his_file
+    try:
+      from RunPrg import RunRefinementPrg
+      a = RunRefinementPrg()
+      self.R1 = a.R1
+      his_file = a.his_file
 
-    OV.SetMaxCycles(curr_cycles)
-    OV.set_refinement_program(curr_prg, curr_method)
+      OV.SetMaxCycles(curr_cycles)
+      OV.set_refinement_program(curr_prg, curr_method)
+    finally:
+      OV.SetParam('snum.init.skip_routine','False')
 
-    OV.SetParam('snum.init.skip_history','False')
     r = olx.Lst("R1")
     olex_refinement_model = OV.GetRefinementModel(False)
     if olex_refinement_model.has_key('twin'):

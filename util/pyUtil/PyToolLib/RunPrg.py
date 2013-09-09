@@ -377,8 +377,6 @@ class RunRefinementPrg(RunPrg):
       MergeCif(edit=False, force_create=False, evaluate_conflicts=False)
 
   def doHistoryCreation(self):
-    if self.params.snum.init.skip_history:
-      print ("Skipping History")
     R1 = 0
     self.his_file = ""
     if OV.IsVar('cctbx_R1'):
@@ -392,11 +390,14 @@ class RunRefinementPrg(RunPrg):
 
     if R1:
       OV.SetParam('snum.refinement.last_R1', str(R1))
-      try:
-        self.his_file = hist.create_history()
-      except Exception, ex:
-        print >> sys.stderr, "History could not be created"
-        sys.stderr.formatExceptionInfo()
+      if not self.params.snum.init.skip_routine:
+        try:
+          self.his_file = hist.create_history()
+        except Exception, ex:
+          print >> sys.stderr, "History could not be created"
+          sys.stderr.formatExceptionInfo()
+      else:
+        print ("Skipping History")
     else:
       R1 = "n/a"
       self.his_file = None
@@ -406,6 +407,9 @@ class RunRefinementPrg(RunPrg):
     return self.his_file, R1
 
   def isInversionNeeded(self, force=False):
+    if self.params.snum.init.skip_routine:
+      print ("Skipping absolute structure validation")
+      return
     if olex_core.SGInfo()['Centrosymmetric'] == 1: return
     from cctbx_olex_adapter import hooft_analysis
     from libtbx.utils import format_float_with_standard_uncertainty

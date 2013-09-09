@@ -19,10 +19,11 @@ snum
     .type = float
 
   init
-    .short_caption = Other Things
+    .short_caption = Skipps history creation and inversion analysis for internal \
+routines requiring structure refinement
     .expert_level = 1
     {
-    skip_history = False
+    skip_routine = False
       .type = bool
       .expert_level = 1
     }
