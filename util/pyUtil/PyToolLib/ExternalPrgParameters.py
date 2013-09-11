@@ -186,14 +186,14 @@ class Method(object):
             value = OV.FindValue('settings_%s_%s' %(instruction.name, option.name))
             if not isinstance(value, int) and not isinstance(value, float):
               if ('(' in value and ')' in value):
-                value = value
+                pass
               elif '.' in value:
                 value = float(value)
               else:
                 value = int(value)
-            arg += ' %s' %value
           except ValueError:
-            break
+            pass
+          arg += ' %s' %value
         args.append(arg)
     return args
 
