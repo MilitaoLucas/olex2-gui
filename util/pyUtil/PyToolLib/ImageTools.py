@@ -673,7 +673,7 @@ class ImageTools(FontInstances):
     return self.write_text_to_draw(draw=draw, txt=txt, font_name=font_name, font_size=font_size, titleCase=titleCase, lowerCase=lowerCase, translate=translate, getXY_only=True)
 
 
-  def get_im_data_d_from_filename(self, filename, units='pt'):
+  def get_im_data_d_from_filename(self, filename, units='pt', target_width=0, max_height=0):
     import base64
     
     if type(filename) == unicode or type(filename) == str:
@@ -686,8 +686,20 @@ class ImageTools(FontInstances):
       multiplier = 10
     else:
       multiplier = 1
-    d.setdefault('image_height', im.size[1] * multiplier)
-    d.setdefault('image_width', im.size[0] * multiplier)
+    if not target_width:
+      d.setdefault('image_height', im.size[1] * multiplier)
+      d.setdefault('image_width', im.size[0] * multiplier)
+    else:
+      h = int((im.size[1]/im.size[0]) * target_width)
+      if max_height and h > max_height:
+        h = max_height
+        w = int((im.size[0]/im.size[1]) * max_height)
+      else:
+        w = target_width
+      d.setdefault('image_height', h)
+      d.setdefault('image_width', w)
+
+      
     d.setdefault('image_format', im.format)
     d.setdefault('image_data', data)
     return d
