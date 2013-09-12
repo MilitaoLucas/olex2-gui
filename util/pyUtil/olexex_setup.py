@@ -10,7 +10,9 @@ import htmlTools
 import variableFunctions
 
 class SetupWizard(object):
-
+  def __init__(self):
+    self.shown_once = False
+    
   def tbxs(self, f):
     total_number = 6
     name = f.get('n','0')
@@ -27,19 +29,10 @@ class SetupWizard(object):
       self.next = str(current + 1)
 
     txt = '''
-<zimg border="0" src="banner_setup.png" usemap="#map_setup">
-
-<map name="map_setup">
-<!-- Button PREVIOUS -->
-    <area shape="rect"
-      coords="250,0,295,60"
-      href='spy.tbxs -n=%s' target='%%previous%%'>
-
-<!-- Button NEXT-->
-    <area shape="rect"
-      coords="295,0,330,60"
-      href='spy.tbxs -n=%s' target='%%next%%'>
-</map>
+<table width="100%%" bgcolor="$GetVar(HtmlTableFirstcolColour)"><tr>
+<td align="left"><a href="spy.tbxs -n=%s">Previous</a></td>
+<td align="right"><a href="spy.tbxs -n=%s">Next</a></td>
+</tr></table>
 
 <!-- #include tool-top gui/blocks/help-top.htm;image=blank;1; -->
 
@@ -51,27 +44,20 @@ class SetupWizard(object):
     txt += r'''
 <tr VALIGN='center' NAME='Setup Title'>
   <td width="8" bgcolor="$GetVar(HtmlHighlightColour)"></td>
-    <td width='80%%' colspan='2' bgcolor="$GetVar(HtmlTableFirstcolColour)">
-      <font size='4' color="$GetVar(HtmlFontColour">
-        <b>
-          %%setup-title-%s%%
-        </b>
-      </font>
-    </td>
-  </tr>
+  <td width='80%%' colspan='2' bgcolor="$GetVar(HtmlTableFirstcolColour)">
+    <font size='4' color="$GetVar(HtmlFontColour">
+      <b>%%setup-title-%s%%</b>
+    </font>
+  </td>
+</tr>
 <tr>
   <td valign='top' width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
-  <td colspan = 2>
-  <font size = '3'>
-    %s
-  </font>
-  </td>
+  <td colspan='2'> <font size='3'>%s</font> </td>
 </tr>
 
 <tr>
   <td width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
   <td colspan='2' align='right'>%s
-
     <a href="html.Hide setup-box ">Close this Window</a>
   </td>
 </tr>
@@ -84,10 +70,14 @@ class SetupWizard(object):
 '''
     wFilePath = r"setup-%s.htm" %name
     OV.write_to_olex(wFilePath, txt)
-    olex.m("popup setup-box 'setup-%s.htm' -b=tc -t='%s' -w=340 -h=700 -x=50 -y=50" %(name, 'Olex2 Setup'))
+    if self.shown_once:
+      OV.UpdateHtml('setup-box')
+      olex.m("popup setup-box 'setup-%s.htm' -b=tc -t='%s'" %(name, 'Olex2 Setup'))
+    else:
+      olex.m("popup setup-box 'setup-%s.htm' -b=tc -t='%s' -w=340 -h=700 -x=50 -y=50" %(name, 'Olex2 Setup'))
+      olx.html.SetBorders('setup-box', 2)
+      self.shown_once = True
 
-    olx.html.SetBorders('setup-box', 2)
-    OV.UpdateHtml('setup-box')
     return retVal
 
 
