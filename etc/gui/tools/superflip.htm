@@ -1,0 +1,234 @@
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SF-EXECUTION';help_ext=SFEXECUTION;1 -->
+<td>%Execution%</td>
+</tr><tr><td>
+ <table cellspacing="0" width="100%">
+  <tr>
+   <td>Repeat mode</td>
+   <td width="20%">$+
+     html.Snippet("gui/snippets/input-combo", "name=sf_repeatmode",
+      "value=GetVar('settings.superflip.repeatmode')",
+      "items=never;nosuccess;always;trials",
+      "onchange=SetVar('settings.superflip.repeatmode', html.GetValue('~name~'))")
+    $-</td>
+   <td>$+
+     html.Snippet("gui/snippets/input-text", "name=sf_trials",
+      "width=35",
+      "value=GetVar('settings.superflip.repeatmode.trials')",
+      "onchange=SetVar('settings.superflip.repeatmode.trials', html.GetValue('~name~'))")
+    $-</td>
+
+   <td>Max cycles</td>
+   <td>$+
+     html.Snippet("gui/snippets/input-text", "name=sf_max_cycles",
+      "width=40",
+      "value=GetVar('settings.superflip.max_cycles')",
+      "onchange=SetVar('settings.superflip.max_cycles', html.GetValue('~name~'))")
+    $-</td>
+
+   <td>Fast FFT</td>
+   <td width="10%" align="right">$+
+     html.Snippet("gui/snippets/input-checkbox", "name=sf_fastfft",
+      "checked=GetVar('settings.superflip.fastfft')",
+      "onclick=SetVar('settings.superflip.fastfft', html.GetState('~name~'))")
+    $-</td>
+   </tr>
+  </table></td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SF-DATA';help_ext=SFDATA;1 -->
+<td>Data</td>
+</tr><tr><td>
+ <table cellpadding="0" cellspacing="0" width="100%"><tr><td>
+  <table cellspacing="0" width="100%">
+   <tr>
+    <td>Normalise</td>
+    <td width="20%">$+
+      html.Snippet("gui/snippets/input-combo", "name=sf_data_normalise",
+       "value=GetVar('settings.superflip.data.normalize')",
+       "items=no;wilson;local",
+       "onchange=SetVar('settings.superflip.data.normalize', html.GetValue('~name~'))")
+     $-</td>
+
+    <td>Number of resolution shells</td>
+    <td>$+
+      html.Snippet("gui/snippets/input-text", "name=sf_nresbins",
+       "width=35",
+       "value=GetVar('settings.superflip.data.nresshells')",
+       "onchange=SetVar('settings.superflip.data.nresshells', html.GetValue('~name~'))")
+     $-</td>
+
+    <td>Weak ratio</td>
+    <td align="right">$+
+      html.Snippet("gui/snippets/input-text", "name=sf_weakratio",
+       "width=35",
+       "value=GetVar('settings.superflip.data.weakratio')",
+       "onchange=SetVar('settings.superflip.data.weakratio', html.GetValue('~name~'))")
+     $-</td>
+    </tr>
+   </table></td></tr><tr><td>
+
+   <table cellspacing="0" width="100%">
+    <tr>
+    <td>Limit resolution</td>
+    <td width="10%">$+
+      html.Snippet("gui/snippets/input-checkbox", "name=sf_resolution_limit",
+       "checked=GetVar('settings.superflip.resolution.limit')",
+       "onclick=SetVar('settings.superflip.resolution.limit', html.GetState('~name~'))")
+     $-</td>
+    <td>Units</td>
+    <td width="20%">$+
+      html.Snippet("gui/snippets/input-combo", "name=sf_resolution_units",
+       "items='d;sthl'",
+       "value=GetVar('settings.superflip.resolution.units')",
+       "onchange=SetVar('settings.superflip.resolution.units', html.GetValue('~name~'))")
+     $-</td>
+    <td>High</td>
+    <td>$+
+      html.Snippet("gui/snippets/input-text", "name=sf_resolution_high",
+       "width=35",
+       "value=GetVar('settings.superflip.resolution.high')",
+       "onchange=SetVar('settings.superflip.resolution.high', html.GetValue('~name~'))")
+    $-</td>
+    <td>Low</td>
+    <td align="right">$+
+      html.Snippet("gui/snippets/input-text", "name=sf_resolution_low",
+       "width=35",
+       "value=GetVar('settings.superflip.resolution.low')",
+       "onchange=SetVar('settings.superflip.resolution.low', html.GetValue('~name~'))")
+     $-</td>
+    </tr>
+   </table></td></tr></table></td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SF-MISSING-DATA';help_ext=SFMISSINGDATA;1 -->
+<td>Missing Data</td>
+</tr><tr><td>
+ <table cellspacing="0" width="100%">
+  <tr>
+  <td>Method</td>
+  <td width="20%">$+
+    html.Snippet("gui/snippets/input-combo", "name=sf_missing_data_process",
+     "value=GetVar('settings.superflip.data.missing.process')",
+     "items=float;bound;boundsum",
+     "onchange=SetVar('settings.superflip.data.missing.process', html.GetValue('~name~'))")
+   $-</td>
+
+  <td>Resolution limit</td>
+  <td>$+
+    html.Snippet("gui/snippets/input-text", "name=sf_missing_data_rlim",
+     "width=35",
+     "value=GetVar('settings.superflip.data.missing.rlim')",
+     "onchange=SetVar('settings.superflip.data.missing.rlim', html.GetValue('~name~'))")
+   $-</td>
+
+  <td>Upper bound</td>
+  <td align="right">$+
+    html.Snippet("gui/snippets/input-text", "name=sf_missing_data_upper_bound",
+     "width=35",
+     "value=GetVar('settings.superflip.data.missing.ubound')",
+     "onchange=SetVar('settings.superflip.data.missing.ubound', html.GetValue('~name~'))")
+   $-</td>
+  </tr>
+ </table></td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SF-CONVERGENCE';help_ext=SFCONVERGENCE;1 -->
+<td>Convergence</td>
+</tr><tr><td>
+ <table cellpadding="0" cellspacing="0" width="100%"><tr><td>
+  <table cellspacing="0" width="100%">
+   <tr>
+   <td>Value</td>
+   <td width="20%">$+
+     html.Snippet("gui/snippets/input-combo", "name=sf_convergence_mode",
+      "value=GetVar('settings.superflip.convergence.mode')",
+      "items=normal;rvalue;charge;peakiness",
+      "onchange=SetVar('settings.superflip.convegence.mode', html.GetValue('~name~'))")
+    $-</td>
+
+   <td>Threshold value</td>
+   <td>$+
+     html.Snippet("gui/snippets/input-text", "name=sf_convergence_th",
+      "width=35",
+      "value=GetVar('settings.superflip.convergence.threshold')",
+      "onchange=SetVar('settings.superflip.convergence.threshold', html.GetValue('~name~'))")
+    $-</td>
+
+   <td>Delta</td>
+   <td width="20%">$+
+     html.Snippet("gui/snippets/input-combo", "name=sf_delta_method",
+      "value=GetVar('settings.superflip.delta.method')",
+      "items=auto;specified value",
+      "onchange=SetVar('settings.superflip.delta.method', html.GetValue('~name~'))")
+    $-</td>
+
+   <td>Delta value</td>
+   <td>$+
+     html.Snippet("gui/snippets/input-text", "name=sf_delta_value",
+      "width=35", "value='Delta value'",
+      "value=GetVar('settings.superflip.delta.value')",
+      "onchange=SetVar('settings.superflip.delta.value', html.GetValue('~name~'))")
+    $-</td>
+   </tr>
+  </table></td></tr><tr><td>
+
+  <table cellspacing="0" width="100%">
+   <tr>
+   <td>Polish</td>
+   <td width="10%">$+
+     html.Snippet("gui/snippets/input-checkbox", "name=sf_polish",
+      "checked=GetVar('settings.superflip.convergence.polish')",
+      "onclick=SetVar('settings.superflip.convergence.polish', html.GetState('~name~'))")
+    $-</td>
+
+   <td align="right">Number of cycles</td>
+   <td align="right">$+
+     html.Snippet("gui/snippets/input-text", "name=sf_polish_cycles",
+      "width=35",
+      "value=GetVar('settings.superflip.convergence.polish.cycles')",
+      "onchange=SetVar('settings.superflip.convergence.polish.cycles', html.GetValue('~name~'))")
+    $-</td>
+   </tr>
+  </table></td></tr></table></td>
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SF-OUTPUT';help_ext=SFOUTPUT;1 -->
+<td>Output</td>
+</tr><tr><td>
+ <table cellpadding="0" cellspacing="0" width="100%"><tr><td>
+   <table cellspacing="0" width="100%">
+    <tr>
+     <td>Derive symmetry</td>
+     <td width="20%" align="left">$+
+       html.Snippet("gui/snippets/input-combo", "name=sf_derive_symmetry",
+        "items=yes;no;use",
+        "value=GetVar('settings.superflip.symmetry.derive')",
+        "onchange=SetVar('settings.superflip.symmetry.derive', html.GetValue('~name~'))")
+     $-</td>
+     <td>Search symmetry</td>
+     <td width="20%" align="left">$+
+       html.Snippet("gui/snippets/input-combo", "name=sf_search_symmetry",
+        "items=no;shift;average",
+        "value=GetVar('settings.superflip.symmetry.search')",
+        "onchange=SetVar('settings.superflip.symmetry.search', html.GetValue('~name~'))")
+      $-</td>
+      <td>Cleanup</td>
+      <td width="10%">$+
+        html.Snippet("gui/snippets/input-checkbox", "name=sf_cleanup",
+         "checked=GetVar('settings.superflip.cleanup')",
+         "onclick=SetVar('settings.superflip.cleanup', html.GetState('~name~'))")
+       $-</td>
+     </tr>
+   </table></td></tr><tr><td>
+   <table cellspacing="0" width="100%">
+    <tr>
+      <td>Use current cell centering</td>
+      <td align="right" width="10%">$+
+        html.Snippet("gui/snippets/input-checkbox", "name=sf_use_cell_centering",
+         "checked=GetVar('settings.superflip.use_centering')",
+         "onclick=SetVar('settings.superflip.use_centering', html.GetState('~name~'))")
+       $-</td>
+     </tr>
+   </table></td></tr></table></td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
