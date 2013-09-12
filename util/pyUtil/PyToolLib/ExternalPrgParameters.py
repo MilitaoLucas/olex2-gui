@@ -2139,8 +2139,8 @@ REM Shift_mean = %(_refine_ls_shift/su_mean)s
 REM Reflections_all = %(_reflns_number_total)s
 REM Reflections_gt = %(_reflns_number_gt)s
 REM Parameters = %(_refine_ls_number_parameters)s
-REM Hole = %(_refine_diff_density_max)s
-REM Peak = %(_refine_diff_density_min)s
+REM Hole = %(_refine_diff_density_min)s
+REM Peak = %(_refine_diff_density_max)s
 REM Flack = %(_refine_ls_abs_structure_Flack)s
 
 ''' %d
