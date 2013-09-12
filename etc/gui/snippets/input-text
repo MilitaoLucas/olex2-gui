@@ -1,0 +1,17 @@
+#value=
+#width=100%
+
+<font size="$GetVar('HtmlFontSizeControls')">
+<input
+  type="text"
+  height="$GetVar('HtmlInputHeight')"
+  bgcolor="$GetVar('HtmlInputBgColour')"
+  valign="center"
+  name="#name"
+  width="#width"
+  height="$GetVar('HtmlInputHeight')"
+  value="#value"
+  onchange="#onchange"
+  onleave="#onleave"
+>
+</font>
