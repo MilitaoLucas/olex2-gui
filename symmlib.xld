@@ -732,7 +732,7 @@
  <2 "X,Y,-Z"\>
  <3 "-X,Y,Z"\>
 \>
-<Abm2 #="39" LATT="-5" HS="A 2 -2c" FULL="A b m 2" 
+<Aem2 #="39" LATT="-5" HS="A 2 -2c" FULL="A e m 2" 
  <1 "-X,-Y,Z"\>
  <2 "-X,Y,0.5+Z"\>
  <3 "X,-Y,0.5+Z"\>
@@ -792,7 +792,7 @@
  <2 "0.5+X,Y,-Z"\>
  <3 "0.5-X,Y,Z"\>
 \>
-<Aba2 #="41" LATT="-5" HS="A 2 -2ac" FULL="A b a 2" 
+<Aea2 #="41" LATT="-5" HS="A 2 -2ac" FULL="A e a 2" 
  <1 "-X,-Y,Z"\>
  <2 "0.5-X,Y,0.5+Z"\>
  <3 "0.5+X,-Y,0.5+Z"\>
@@ -1262,7 +1262,7 @@
  <2 "X,-Y,-Z"\>
  <3 "-X,0.5+Y,-Z"\>
 \>
-<Cmca #="64" LATT="7" HS="-C 2bc 2" FULL="C m c a" 
+<Cmce #="64" LATT="7" HS="-C 2bc 2" FULL="C m c e" 
  <1 "-X,0.5-Y,0.5+Z"\>
  <2 "X,-Y,-Z"\>
  <3 "-X,0.5+Y,0.5-Z"\>
@@ -1322,7 +1322,7 @@
  <2 "X,0.5-Y,-Z"\>
  <3 "-X,Y,-Z"\>
 \>
-<Cmma #="67" LATT="7" HS="-C 2b 2" FULL="C m m a" 
+<Cmme #="67" LATT="7" HS="-C 2b 2" FULL="C m m e" 
  <1 "-X,0.5-Y,Z"\>
  <2 "X,-Y,-Z"\>
  <3 "-X,0.5+Y,-Z"\>
@@ -1352,7 +1352,7 @@
  <2 "X,-Y,-Z"\>
  <3 "-X,Y,0.5-Z"\>
 \>
-<Ccca #="68" LATT="7" HS="-C 2b 2bc" FULL="C c c a"
+<Ccce #="68" LATT="7" HS="-C 2b 2bc" FULL="C c c e"
  <1 "-X,0.5-Y,Z"\>
  <2 "X,0.5-Y,0.5-Z"\>
  <3 "-X,Y,0.5-Z"\>
