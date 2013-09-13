@@ -1,0 +1,19 @@
+#value=
+#checked=false
+#width=100%
+
+<font size="$GetVar('HtmlFontSizeControls')">
+<input
+  type="checkbox"
+  height="$GetVar('HtmlCheckboxHeight')"
+  bgcolor="$GetVar('HtmlInputBgColour')"
+  name="#name"
+  width="#width"
+  height="$GetVar('HtmlInputHeight')"
+  value="#value"
+  checked="#checked"
+  onclick="#onclick"
+  oncheck="#oncheck"
+  onuncheck="#onuncheck"
+>
+</font>

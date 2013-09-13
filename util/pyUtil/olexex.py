@@ -742,54 +742,6 @@ def GetHklFileList():
 if haveGUI:
   OV.registerFunction(GetHklFileList)
 
-def tbxs_(name):
-  retVal = ""
-  txt = r'''
-<!-- #include header gui\blocks\tool-header.htm;1; -->
-<table border="0" style="border-collapse: collapse" width="100%" id="#tool" cellpadding="0" cellspacing="1">
-        <tr>
-                <td width="100%" bgcolor="$GetVar(HtmlFontColour">
-                        <-zimg border="0" src="#image.png">
-                </td>
-        </tr>
-</table>
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
-'''
-
-  txt += r'''
-<tr VALIGN='center' NAME='Expand Short Contacts'>
-  <td colspan=1 width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"></td>
-    <td>
-      <font size = '4'>
-        <b>
-          %%setup-title-%s%%
-        </b>
-      </font>
-    </td>
-  </tr>
-<tr>
-  <td valign='top' width="8" bgcolor="$GetVar(HtmlTableFirstcolColour)"><zimg border="0" src="info.png"></td>
-  <td>
-    %%setup-txt-%s%%
-    <br>
-    <a href=htmlpanelswap>Swap the position of the GUI panel</a>
-    <br>
-    <a href='skin HP'>Skin HP</a>
-    <br>
-    <a href='skin OD'>Skin OD</a>
-  </td>
-</tr>
-'''%(name, name)
-
-  txt += r'''
-<!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
-'''
-  wFilePath = r"setup-%s.htm" %name
-  OV.write_to_olex(wFilePath, txt)
-  olex.m("popup setup-box 'setup-%s.htm' -b=tc -t='%s' -w=400 -h=400 -x=100 -y=200" %(name, name))
-  return retVal
-#OV.registerFunction(tbxs)
-
 def GetRInfo(txt="",format='html'):
   use_history_for_R1_display = True
   if use_history_for_R1_display:

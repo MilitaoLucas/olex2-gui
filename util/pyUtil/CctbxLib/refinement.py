@@ -270,6 +270,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
     restraints_manager = self.restraints_manager()
     #put shared parameter constraints first - to allow proper bookeeping of
     #overrided parameters (U, sites)
+    self.fixed_distances = {}
+    self.fixed_angles = {}
+    
     self.constraints = self.setup_shared_parameters_constraints() + self.constraints
     self.constraints += self.setup_rigid_body_constraints(
       self.olx_atoms.afix_iterator())
@@ -296,6 +299,22 @@ class FullMatrixRefine(OlexCctbxAdapter):
       extinction = self.extinction,
       directions=self.directions
     )
+    self.reparametrisation.fixed_distances.update(self.fixed_distances)
+    self.reparametrisation.fixed_angles.update(self.fixed_angles)
+    
+    #===========================================================================
+    # for l,p in self.reparametrisation.fixed_distances.iteritems():
+    #  label = ""
+    #  for a in l:
+    #    label += "-%s" %self.olx_atoms._atoms[a]['label']
+    #  print label
+    # for l,p in self.reparametrisation.fixed_angles.iteritems():
+    #  label = ""
+    #  for a in l:
+    #    label += "-%s" %self.olx_atoms._atoms[a]['label']
+    #  print label
+    #===========================================================================
+    
     weight = self.olx_atoms.model['weight']
     params = dict(a=0.1, b=0,
                   #c=0, d=0, e=0, f=1./3,
@@ -526,7 +545,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
         max_da_distance=max_da_distance,
         covariance_matrix=self.covariance_matrix_and_annotations.matrix,
         cell_covariance_matrix=cell_vcv,
-        parameter_map=xs.parameter_map())
+        parameter_map=xs.parameter_map(),
+        fixed_distances=self.reparametrisation.fixed_distances,
+        fixed_angles=self.reparametrisation.fixed_angles)
       cif_block.add_loop(hbonds_loop.loop)
     self.restraints_manager().add_to_cif_block(cif_block, xs)
     # cctbx could make e.g. 1.001(1) become 1.0010(10), so use Olex2 values for cell
@@ -737,13 +758,42 @@ class FullMatrixRefine(OlexCctbxAdapter):
       elif len(eadp) > 1:
         current = adp.shared_u(eadp)
         constraints.append(current)
-        self.shared_param_constraints.append((i, current, 1))
+        self.shared_param_constraints.append((i, current, 1, True))
 
     same_groups = self.olx_atoms.model.get('olex2.constraint.same_group', ())
     for sg in same_groups:
       constraints.append(rigid.same_group(sg))
     return constraints
 
+  def fix_rigid_group_params(self, pivot_neighbour, pivot, group, sizable):
+    ##fix angles
+    if pivot_neighbour is not None:
+     for a in group:
+       self.fixed_angles.setdefault((pivot_neighbour, pivot, a), 1)
+
+    if pivot is not None:
+     for i, a in enumerate(group):
+       for j in xrange(i+1, len(group)):
+         self.fixed_angles.setdefault((a, pivot, group[j]), 1)
+        
+    for a in group:
+      ns = self.olx_atoms._atoms[a]['neighbours']
+      for i, b in enumerate(ns):
+        if b not in group: continue
+        for j in xrange(i+1, len(ns)):
+          if ns[j] not in group: continue
+          self.fixed_angles.setdefault((a, b, ns[j]), 1)
+      
+    if not sizable:
+      group = list(group)
+      if pivot is not None:
+        group.append(pivot)
+      for a in group:
+        ns = self.olx_atoms._atoms[a]['neighbours']
+        for b in ns:
+          if b not in group: continue
+          self.fixed_distances.setdefault((a, b), 1)
+            
   def setup_rigid_body_constraints(self, afix_iter):
     rigid_body_constraints = []
     rigid_body = {
@@ -790,6 +840,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
         if current and current not in rigid_body_constraints:
           rigid_body_constraints.append(current)
+          sizable = (n==4 or n==8 or n== 9)
+          if pivot_neighbours:
+            self.fix_rigid_group_params(pivot_neighbours[0], pivot, dependent, sizable)
+          else:
+            self.fix_rigid_group_params(None, pivot, dependent, sizable)
 
     return rigid_body_constraints
 
