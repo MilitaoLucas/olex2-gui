@@ -146,14 +146,13 @@
     <args
       <arg0 name="l.s." def='-1'>
       <arg1 name="plan" def='-1'>
-      <arg2 name="xl" def='xl'>
     >
     <cmd
       <cmd4 "user filepath()">
       <cmd3 "kill $q">
       <cmd5 "file">
-      <cmd7 "SetVar(snum_refinement_max_cycles,%1)">
-      <cmd8 "SetVar(snum_refinement_max_peaks,%2)">
+      <cmd5 "if strcmp(%1,'-1') then None else spy.SetMaxCycles(%1)">
+      <cmd6 "if strcmp(%2,'-1.1') then None else spy.SetMaxPeaks(%2)">
       <cmd10 "spy.RunRefinementPrg()">
     >
     <onterminate
@@ -173,7 +172,8 @@
     >
     <cmd
       <cmd10 "spy.RunSolutionPrg()">
-      <cmd2 cmd="spy.doProgramSettings(GetVar(snum_refinement_program),GetVar(snum_refinement_method),true)">
+      <cmd2 cmd="spy.doProgramSettings(spy.GetParam(snum.refinement.program),
+        spy.GetParam(snum.refinement.method),true)">
       >
   >
 >
