@@ -92,14 +92,16 @@ def sources():
 
   return retstr
 
+conflic_d = None
+
 def add_resolved_conflict_item_to_phil(item, value):
   l = OV.GetParam('snum.metadata.resolved_conflict_items')
   l.append(item)
   OV.SetParam('snum.metadata.resolved_conflict_items', l)
   OV.set_cif_item(item, value)
-  from CifInfo import MergeCif
-  MergeCif()
-  conflicts()
+  global conflict_d
+  del conflict_d[item]
+  conflicts(d=conflic_d)
 
 def make_no_conflicts_gui(resolved, some_remain=False):
   if some_remain:
@@ -125,14 +127,15 @@ def conflicts(popout='auto', d=None):
   conflict_count = 0
 
   try:
-    if not olx.CifInfo_metadata_conflicts:
-      from CifInfo import ExtractCifInfo
-      ExtractCifInfo()
     try:
       if not d:
-        d = olx.CifInfo_metadata_conflicts.conflict_d
+        from CifInfo import ExtractCifInfo
+        ci = ExtractCifInfo(run=True)
+        d = ci.conflict_d
     except:
       return 0
+    global conflict_d
+    conflict_d = d
     go_on = False
     for conflict in d:
       if conflict == "sources": continue
@@ -164,14 +167,18 @@ def conflicts(popout='auto', d=None):
   <tr>
     <td width='30%%'><font color='white'><b></b></font>
     </td>''' #TR for Header Row
-      for i in xrange(number_of_files):
+      col_w = int(70/(number_of_files+1))
+      for i in xrange(number_of_files+1):
+        if i == number_of_files:
+          txt += '''<td width='%i%%' bgcolor='%s'><font color='white'><b>User value</b></font></td>''' %(
+            col_w, head_colour)
+          break
         f = os.path.basename(d['sources'][i])
         txt += '''
     <td width='%i%%' bgcolor='%s'>
       <font color='white'><b>%s</b></font>
-    </td>''' %(int(70/number_of_files), head_colour, f)
-      txt += '''
-  </tr>''' #Close TR for Header Row
+    </td>''' %(col_w, head_colour, f)
+      txt += '</tr>' #Close TR for Header Row
 
       for conflict in d:
         txt += '''
@@ -185,10 +192,8 @@ def conflicts(popout='auto', d=None):
     <br><a href='spy.gui.metadata.add_resolved_conflict_item_to_phil("%s", ".")'>Unapplicable (.)</a>
     &nbsp;<a href='spy.gui.metadata.add_resolved_conflict_item_to_phil("%s", "?")'> Unknown (?)</a>
     </b></font></td>''' %(head_colour, conflict, conflict, conflict)
-        s = 0
-        for source in d['sources']:
-          s += 1
-          if s%2==0:
+        for s, source in enumerate(d['sources']):
+          if (s%2) == 0:
             bg = col_even
           else:
             bg = col_odd
@@ -204,13 +209,20 @@ def conflicts(popout='auto', d=None):
             display = '''
             <a href='spy.gui.metadata.add_resolved_conflict_item_to_phil("%s", "%s")'>
             <font color='red'>%s</font></a>''' %(conflict, val, val)
-          txt += '''
-    <td width='%i%%' bgcolor='%s'>%s
-    </td>''' %(int(70/number_of_files), bg, display) #TD conflict value
-        txt += '''
-  </tr>''' #CONFLICT TR CLOSE
-      txt += '''
-  </td></tr></table>'''
+          #TD conflict value
+          txt += '''<td width='%i%%' bgcolor='%s'>%s </td>''' %(col_w, bg, display)
+        # user resolved value
+        display = '''
+<table width="100%%" cellpadding="0" cellspacing="0"><tr><td>
+  <input type="text" name="%s_edit" value="?" width="100%%"></td></tr><tr><td>
+  <input type="button" value="Use" width="100%%"
+   onclick="spy.gui.metadata.add_resolved_conflict_item_to_phil('%s', html.GetValue('~popup_name~.%s_edit'))">
+</td></tr></table>
+''' %(conflict, conflict, conflict)
+        txt += '''<td width='%i%%' bgcolor='%s'>%s </td>''' %(col_w, bg, display)
+
+        txt += '''</tr>''' #CONFLICT TR CLOSE
+      txt += '''</td></tr></table>'''
 
   except Exception, err:
     print err

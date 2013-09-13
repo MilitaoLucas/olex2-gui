@@ -1,0 +1,20 @@
+#value=
+#width=100%
+#readonly=true
+
+<font size="$GetVar('HtmlFontSizeControls')">
+<input
+  type="combo"
+  height="$GetVar('HtmlInputHeight')"
+  bgcolor="$GetVar('HtmlInputBgColour')"
+  valign="center"
+  name="#name"
+  width="#width"
+  height="$GetVar('HtmlInputHeight')"
+  value="#value"
+  items="#items"
+  onchange="#onchange"
+  onleave="#onleave"
+  readonly="#readonly"
+>
+</font>
