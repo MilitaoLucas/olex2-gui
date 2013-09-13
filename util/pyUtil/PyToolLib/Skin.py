@@ -144,7 +144,7 @@ def export_parameters(load_phil=True):
   
   if check_os() == 'mac':
     OV.SetVar('HtmlInputBgColour', "")
-    font_size = OV.GetParam('gui.html.font_size') + 1
+    font_size = OV.GetParam('gui.html.font_size') # This used to be adjusted +1 for some reason.
     OV.SetVar('HtmlGuiFontSize', font_size)
     OV.SetVar('HtmlFontSizeControls', font_size)
 #    OV.SetParam('gui.html.font_size', font_size)
