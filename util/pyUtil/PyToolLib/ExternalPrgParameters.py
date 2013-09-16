@@ -749,6 +749,9 @@ class Method_Superflip(Method_solution):
     
 
   def pre_solution(self, RunPrgObject):
+    pass
+  
+  def create_input(self):
     self.derive_symmetry = olx.GetVar('settings.superflip.symmetry.search') != 'no' and\
           olx.GetVar('settings.superflip.symmetry.derive') == 'use'
     input = []
@@ -872,16 +875,16 @@ class Method_Superflip(Method_solution):
     return ""
 
   def do_run(self, RunPrgObject):
-    #from flipsmall import flipsmall
-    #flipsmall()
+    self.create_input()
     if olx.Exec("superflip %s" %self.input_file_name):
       olx.WaitFor("process")
       if olx.Exec("edma %s" %self.input_file_name):
         olx.WaitFor("process")
         ZERR = 'ZERR %s %s' %(olx.xf.au.GetZ(),
                             olx.xf.au.GetCell('esd').replace(',', ' '))
-        freeze_status = olx.Freeze()
-        olx.Freeze(True)
+        if OV.HasGUI():
+          freeze_status = olx.Freeze()
+          olx.Freeze(True)
         try:
           olx.Atreap("'%s.ins'" %self.file_name)
           if self.derive_symmetry:
@@ -895,14 +898,16 @@ class Method_Superflip(Method_solution):
                   olx.ChangeSG("'%s'" %hall_symbol)
                   break
               log_file.close()
-              olex.m("spy.run_skin sNumTitle")
+              if OV.HasGUI():
+                olex.m("spy.run_skin sNumTitle")
             else:
               print("Could not locate the SF log file, aborting symmetry processing")
           olx.Compaq('-a')
           olx.AddIns("'%s'" %ZERR)
           olx.File("'%s.res'" %self.file_name)
         finally:
-          olx.Freeze(freeze_status)
+          if OV.HasGUI():
+            olx.Freeze(freeze_status)
           
   def post_solution(self, RunPrgObject):
     if olx.GetVar('settings.superflip.cleanup') == 'true':
