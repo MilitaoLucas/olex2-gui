@@ -129,13 +129,10 @@
       <arg1 name="show_html" def="False">
     >
     <cmd
-      <cmd0 "if file.Exists(FilePath()/FileName().cif) then None else 'SetVar(snum_refinement_method,Least Squares)'">
-      <cmd1 "if file.Exists(FilePath()/FileName().cif) then None else 'DelIns ACTA'">
-      <cmd2 "if file.Exists(FilePath()/FileName().cif) then None else 'AddIns ACTA'">
-      <cmd3 "if file.Exists(FilePath()/FileName().cif) then None else 'refine'">
+      <cmd8 "spy.SetParam(snum.report.title, Process(spy.GetParam(snum.report.title)))">
       <cmd8 "spy.ExtractCifInfo()">
       <cmd9 "spy.MergeCif()">
-      <cmd11 "cif2tab header acrd anis bnd ang htab tang hcrd footer">
+      <cmd11 "cif2tab header acrd anis bnd ang htab tang hcrd footer -n=spy.GetParam(snum.report.title)_tables">
       <cmd12 "if %1 then 'shell spy.GetParam(snum.report.title)_tables.html'">
     >
   >
