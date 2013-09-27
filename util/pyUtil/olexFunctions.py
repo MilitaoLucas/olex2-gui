@@ -410,6 +410,9 @@ class OlexFunctions(inheritFunctions):
     olex.m("HtmlPanelWidth")
 
   def reloadStructureAtreap(self, path, file, fader=True, sg_changed = False):
+    if not self.HasGUI():
+      olex.m("@reap \"%s\"" %(r"%s/%s.res" %(path, file)))
+      return
     fader = self.FindValue('gui_use_fader')
     #print "AtReap %s/%s" %(path, file)
     try:
