@@ -169,9 +169,6 @@
     >
     <cmd
       <cmd10 "spy.RunSolutionPrg()">
-      <cmd2 cmd="spy.doProgramSettings(spy.GetParam(snum.refinement.program),
-        spy.GetParam(snum.refinement.method),true)">
-      >
   >
 >
 

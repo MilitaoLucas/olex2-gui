@@ -2,7 +2,9 @@
   <shortcut key="Ctrl+O" macro="reap">
   <shortcut key="Ctrl+G" macro="mode grow">
   <shortcut key="Ctrl+H" macro="showH">
+  <shortcut key="Ctrl+Shift+H" macro="showH">
   <shortcut key="Ctrl+Q" macro="showQ">
+  <shortcut key="Ctrl+Shift+Q" macro="showQ">
   <shortcut key="Ctrl+T" macro="showStr">
   <shortcut key="Ctrl+A" macro="sel -a">
   <shortcut key="Ctrl+U" macro="sel -u">
