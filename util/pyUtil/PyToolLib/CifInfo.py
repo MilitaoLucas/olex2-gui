@@ -197,7 +197,7 @@ Olex2 %s
                  '_exptl_crystal_colour_primary')
     for item in cif_items:
       value = self.cif_block.get(item)
-      if value is not None and "." not in value:
+      if value not in (None, '?', '.'):
         colours.append(value)
     if colours:
       self.cif_block['_exptl_crystal_colour'] = ' '.join(colours)

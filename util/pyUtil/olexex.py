@@ -893,17 +893,6 @@ def setAllMainToolbarTabButtons():
 if haveGUI:
   OV.registerFunction(setAllMainToolbarTabButtons)
 
-def onCrystalColourChange():
-  if variableFunctions.initialisingVariables:
-    return
-  lustre = OV.FindValue('snum_metacif_exptl_crystal_colour_lustre')
-  modifier = OV.FindValue('snum_metacif_exptl_crystal_colour_modifier')
-  primary = OV.FindValue('snum_metacif_exptl_crystal_colour_primary')
-  colour = ' '.join(item for item in (lustre,modifier,primary) if item != '?')
-  if colour:
-    OV.SetVar('snum_metacif_exptl_crystal_colour', colour)
-OV.registerFunction(onCrystalColourChange)
-
 def onRefinementProgramChange(prg_name, method=None, scope='snum'):
   if prg_name == 'Auto':
     OV.SetParam('autochem.refinement.method','Auto')
