@@ -823,7 +823,7 @@ class Method_Superflip(Method_solution):
                                        olx.GetVar('settings.superflip.data.missing.ubound')))
     
     if olx.GetVar('settings.superflip.resolution.limit') == 'true':
-      input.append('resunit %s' %olx.GetVar('settings.superflip.data.resunit'))
+      input.append('resunit %s' %olx.GetVar('settings.superflip.resolution.units'))
       input.append('reslimit %s %s' %(olx.GetVar('settings.superflip.resolution.high'),
                                       olx.GetVar('settings.superflip.resolution.low')))
 
