@@ -5,10 +5,10 @@ import math
 from itertools import izip
 import ExternalPrgParameters
 import OlexVFS
-import Image
-import ImageFont, ImageDraw, ImageChops
+from PIL import Image
+from PIL import ImageFont, ImageDraw, ImageChops
 from ImageTools import ImageTools
-import ImageFilter
+from PIL import ImageFilter
 import os
 try:
   import olx
@@ -233,8 +233,8 @@ class Graph(ImageTools):
     pass
 
   def make_empty_graph(self, axis_x=False, draw_title=True):
-    import Image
-    import ImageFont, ImageDraw, ImageChops
+    from PIL import Image
+    from PIL import ImageFont, ImageDraw, ImageChops
     guiParams = OV.GuiParams()
 
     self.imX = self.params.size_x
@@ -1071,7 +1071,7 @@ class Graph(ImageTools):
     self.draw.text((x, y), "%s" %txt, font=self.font_small, fill=self.axislabelColour)
 
   #def draw_bars(self):
-    #import ImageFont
+    #from PIL import ImageFont
     #data = []
     #for item in self.graphInfo["Data"]:
       #try:
