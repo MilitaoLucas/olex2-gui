@@ -114,7 +114,7 @@ def GetBitmapImageInstructions():
   else:
     olex.m('pict%s %s %s %s %s' %(pict, nbg, filefull, resolution, filesize))
     
-  #import Image
+  #from PIL import Image
   OV.Cursor()
   from gui import ImageListener
   ImageListener.OnChange()

@@ -2,10 +2,10 @@ from __future__ import division
 #import PngImagePlugin
 import FileSystem as FS
 from ArgumentParser import ArgumentParser
-import Image
+from PIL import Image
 import glob, os
 import copy
-import ImageDraw, ImageChops, ImageColor, ImageEnhance
+from PIL import ImageDraw, ImageChops, ImageColor, ImageEnhance
 import OlexVFS
 #import olex_core
 import pickle
@@ -230,13 +230,13 @@ class GuiSkinChanger(ImageTools):
       self.setGuiAttributesDefault()
       self.setOlexColours()
       path = r"src/default.png"
-      import PilTools
+      from PIL import PilTools
     elif "(" in skin:
       self.set_custom(skin)
       self.setGuiAttributesDefault()
       self.setOlexColours()
       path = r"src/default.png"
-      import PilTools
+      from PIL import PilTools
     #elif skin == "default":
       #self.setGuiAttributesDefault()
       #self.setGuiAttributes()
@@ -327,9 +327,9 @@ class MatrixMaker(ImageTools):
     super(MatrixMaker, self).__init__()
     self.params = OV.GuiParams()
 
-    #import PngImagePlugin
-    #import Image
-    #import ImageDraw, ImageChops
+    #from PIL import PngImagePlugin
+    #from PIL import Image
+    #from PIL import ImageDraw, ImageChops
 
   def make_3x3_matrix_image(self, name, matrix, text_def="", state=''):
     if state == "on":
@@ -413,7 +413,7 @@ class MatrixMaker(ImageTools):
 
 
 def fade_image(image, frames=5, overlay_colour=(255, 255, 255), filename="out.gif"):
-  import Image
+  from PIL import Image
   import gifmaker
   size = image.size
   overlay = Image.new('RGBA', size, overlay_colour)
@@ -2092,7 +2092,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
   def make_image_items(self):
     pass
-    #import ImageOps
+    #from PIL import ImageOps
     #imageIndex = {}
     #imageIndex.setdefault("logo", (0, 0, 275, 55))
     #for imag in imageIndex:

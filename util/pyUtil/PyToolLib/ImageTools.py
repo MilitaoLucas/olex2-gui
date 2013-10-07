@@ -2,8 +2,8 @@
 
 from __future__ import division
 #import PngImagePlugin
-import Image
-import ImageDraw, ImageChops, ImageColor
+from PIL import Image
+from PIL import ImageDraw, ImageChops, ImageColor
 
 from StringIO import StringIO
 
@@ -38,7 +38,7 @@ import math
 
 class ImageTools(FontInstances):
   def __init__(self):
-    import ImageColor
+    from PIL import ImageColor
     super(ImageTools, self).__init__()
     self.colorsys = colorsys
     self.abort = False
@@ -430,7 +430,7 @@ class ImageTools(FontInstances):
 
   def reduce_opacity(self, im, opacity):
     """Returns an image with reduced opacity."""
-    import ImageEnhance
+    from PIL import ImageEnhance
     assert opacity >= 0 and opacity <= 1
     if im.mode != 'RGBA':
         im = im.convert('RGBA')
@@ -503,7 +503,7 @@ class ImageTools(FontInstances):
 
 
   def colourize(self, IM, col_1, col_2):
-    import ImageOps
+    from PIL import ImageOps
     #IM = self.removeTransparancy(IM, (255,255,255))
     IM= IM.convert("L")
     if type(col_1) == str:
