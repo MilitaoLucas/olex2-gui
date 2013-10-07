@@ -250,10 +250,29 @@ class publication:
     else:
       str = ""
       for item in l:
+        if not item:
+          continue
         display = os.path.basename(item)
-        str += "<a href='shell %s'>%s</a> " %(item, display)
+        remove = "<a href='spy.gui.report.publication.remove_cif_from_merge_list(%s)>>html.Update'><font color='red'><b>x</b></font></a>" %item
+        str += "<a href='shell %s'>%s</a>(%s) " %(item, display, remove)
     return str
-
+  
+  def add_cif_to_merge_list(cif_p):
+    if not cif_p:
+      return
+    l = OV.GetParam('snum.report.merge_these_cifs', [])
+    l.append(cif_p)
+    OV.SetParam('snum.report.merge_these_cifs', l)
+    
+  def remove_cif_from_merge_list(cif_p):
+    ll = []
+    l = OV.GetParam('snum.report.merge_these_cifs', [])
+    for item in l:
+      if not item:
+        continue
+      if unicode(cif_p) !=  unicode(item):
+        ll.append(item)
+    OV.SetParam('snum.report.merge_these_cifs', ll)
 
   def AddTemplateToMergeList(self, value=""):
     if not value:
@@ -291,6 +310,11 @@ class publication:
       OV.SetParam('snum.report.publication_paper', a)
     OV.SetParam('snum.report.merge_these_cifs', copy_to)
     olx.Shell(copy_to)
+
+  olex.registerFunction(add_cif_to_merge_list, False, "gui.report.publication")
+  olex.registerFunction(remove_cif_from_merge_list, False, "gui.report.publication")
+
+
 
 pub = publication()
 olex.registerFunction(pub.OnContactAuthorChange, False, "gui.report.publication")
@@ -428,7 +452,6 @@ def get_box_x_y(w, h):
   if x < 0: x = mouseX 
   if y < 0: y = 0
   return x,y
-
 
 olex.registerFunction(get_report_title, False, "report")
 olex.registerFunction(ResolvePrograms, False, "report")
