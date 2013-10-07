@@ -1440,12 +1440,12 @@ OV.registerFunction(makeSpecialCifCharacter)
 
 def getReportTitleSrc():
   import PIL
-  import Image
-  import ImageDraw
-  import PngImagePlugin
+  from PIL import Image
+  from PIL import ImageDraw
+  from PIL import PngImagePlugin
   import StringIO
   import base64
-  import EpsImagePlugin
+  from PIL import EpsImagePlugin
   from ImageTools import ImageTools
   IT = ImageTools()
 
@@ -1561,12 +1561,12 @@ OV.registerFunction(getReportPhilItem)
 def getReportImageData(size='w400', imageName=None):
 
   import PIL
-  import Image
-  import PngImagePlugin
+  from PIL import Image
+  from PIL import PngImagePlugin
   import StringIO
   import base64
-  import ImageDraw
-  import EpsImagePlugin
+  from PIL import ImageDraw
+  from PIL import EpsImagePlugin
   make_border = False
 
   size_type = size[:1]
