@@ -253,8 +253,8 @@ class publication:
         if not item:
           continue
         display = os.path.basename(item)
-        remove = "<a href='spy.gui.report.publication.remove_cif_from_merge_list(%s)>>html.Update'><font color='red'><b>x</b></font></a>" %item
-        str += "<a href='shell %s'>%s</a>(%s) " %(item, display, remove)
+        remove = "<a target='Remove from merge' href='spy.gui.report.publication.remove_cif_from_merge_list(%s)>>html.Update'><font color='red'><b>x</b></font></a>" %item
+        str += "<a target='Edit this CIF' href='shell %s'>%s</a>(%s) " %(item, display, remove)
     return str
   
   def add_cif_to_merge_list(cif_p):
@@ -262,6 +262,8 @@ class publication:
       return
     l = OV.GetParam('snum.report.merge_these_cifs', [])
     l.append(cif_p)
+    if not l:
+      l = ""
     OV.SetParam('snum.report.merge_these_cifs', l)
     
   def remove_cif_from_merge_list(cif_p):
@@ -272,6 +274,8 @@ class publication:
         continue
       if unicode(cif_p) !=  unicode(item):
         ll.append(item)
+    if not ll:
+      ll = ""
     OV.SetParam('snum.report.merge_these_cifs', ll)
 
   def AddTemplateToMergeList(self, value=""):
@@ -279,6 +283,8 @@ class publication:
       return
     l = OV.GetParam('snum.report.merge_these_cifs', [])
     l.append(value)
+    if not l:
+      l = ""
     OV.SetParam('snum.report.merge_these_cifs', l)
 
   def OnPublicationTemplateChange(self, value):
