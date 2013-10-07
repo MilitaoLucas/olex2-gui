@@ -164,6 +164,8 @@ routines requiring structure refinement
       .type = float
     max_hole = None      
       .type = float
+    flack_str = None      
+      .type = str
     expected_peaks = None      
       .type = int
     has_h = False

@@ -364,6 +364,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.r1 = self.normal_eqns.r1_factor(cutoff_factor=2)
       self.r1_all_data = self.normal_eqns.r1_factor()
       self.check_flack()
+      if self.flack:
+        OV.SetParam('snum.refinement.flack_str', self.flack)
+      if self.reparametrisation.extinction.grad:
+        #extinction is the last parameter after the twin fractions
+        diag = self.twin_covariance_matrix.matrix_packed_u_diagonal()
+        su = math.sqrt(diag[len(diag)-1])
+        OV.SetExtinction(self.reparametrisation.extinction.value, su)
     except RuntimeError, e:
       if str(e).startswith("cctbx::adptbx::debye_waller_factor_exp: max_arg exceeded"):
         print "Refinement failed to converge"
