@@ -259,13 +259,19 @@ class OlexFunctions(inheritFunctions):
 
   def GetExtinction(self):
     try:
-      return float(olx.xf.rm.Exti())
+      ev = olx.xf.rm.Exti()
+      if '(' in ev:
+        return float(ev.split('(')[0])
+      return float(ev)
     except:
       return None
 
-  def SetExtinction(self, v):
+  def SetExtinction(self, v, e=None):
     try:
-      olx.xf.rm.Exti(v)
+      if e:
+        olx.xf.rm.Exti(v, e)
+      else:
+        olx.xf.rm.Exti(v)
       return True
     except:
       return False

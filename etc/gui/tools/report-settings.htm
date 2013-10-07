@@ -204,8 +204,6 @@ $spy.MakeHoverButton('button-ccdc_number','spy.ccdc_submit()')
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=CIF-Part-3;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
-
-
 <td name=AUTO_MERGE_CIF align='right' VALIGN='right' width='5%'>
     <input
       type='checkbox'
@@ -232,9 +230,26 @@ Merge CIF:
   <td align='right' width ='12%'>
 <a href="spy.gui.report.publication.add_cif_to_merge_list(FileOpen('Choose definition file','.cif files|*.cif','$BaseDir()/etc/site'))>>html.Update">
   <b>add CIF</b></td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
+<!-- #ignoreif sg('%c')
+<tr align = 'center' name=EDIT_CIF width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=ABS-STR;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td width="50%">Absolute structure determination
+    <br>Flack parameter: $spy.GetParam('snum.refinement.flack_str')
+   </td>
+   <td width="50%">$+
+     html.Snippet("gui/snippets/input-combo", "name=abs_str_determination",
+      "value=spy.get_cif_item('_chemical_absolute_configuration')",
+      "items=Anomalous dispersion<-ad;Reference molecule<-rm;Reference molecule + AD<-rmad;
+Synthesis<-syn;Unknown<-unk;Not applicable<-.;",
+      "onchange=spy.set_cif_item('_chemical_absolute_configuration', html.GetValue('~name~'))")
+    $-</td>
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+#ignoreif -->
+
 
 </table>
       </td>
