@@ -142,15 +142,6 @@ def export_parameters(load_phil=True):
   OV.SetVar('HtmlPanelWidth', OV.GetParam('gui.htmlpanelwidth'))
   OV.SetVar('HtmlButtonHeight', OV.GetParam('gui.timage.button.height'))
   
-  if check_os() == 'mac':
-    OV.SetVar('HtmlInputBgColour', "")
-    font_size = OV.GetParam('gui.html.font_size') # This used to be adjusted +1 for some reason.
-    OV.SetVar('HtmlGuiFontSize', font_size)
-    OV.SetVar('HtmlFontSizeControls', font_size)
-#    OV.SetParam('gui.html.font_size', font_size)
-    OV.SetVar('HtmlCheckboxHeight', 24)
-    OV.SetVar('HtmlComboHeight', 24)
-    OV.SetVar('HtmlInputHeight', 24)
   if timing:
     print "export_parameters took %.4fs" %(time.time()-t)
 OV.registerFunction(export_parameters,False,'skin')
