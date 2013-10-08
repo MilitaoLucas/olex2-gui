@@ -1061,10 +1061,10 @@ If more than one file is present, the path of the most recent file is returned b
       directory += '/movie'
       i = 1
       while not os.path.exists(directory):
-        directory = ("/").join(directory_l[:-(3 - i)])
+        directory = ("/").join(directory_l[:-(i)])
         directory += '/movie'
         i += 1
-        if i == 4:
+        if i == 5:
           return None, None
 
       if OV.FileName() not in directory:
@@ -1072,8 +1072,24 @@ If more than one file is present, the path of the most recent file is returned b
         return None, None
 
       l = []
+      max_char = 0
+      min_char = 1000
       for path in OV.ListFiles(os.path.join(directory, "*.jpg")):
+        chars = len(path)
+        if chars > max_char:
+          max_char = chars
+        if chars < min_char:
+          min_char = chars
         l.append(path)
+
+      def sorting_list(txt):
+        try:
+          cut = len(txt) - min_char + 1
+          return int(txt[-(cut + 4): -4])
+        except:
+          return 0
+       
+      l.sort(key=sorting_list)
       OV.SetParam("snum.metacif.list_crystal_images_files", (l))
       setattr(self.metacifFiles, "list_crystal_images_files", (l))
       return l[0], l
@@ -1104,6 +1120,7 @@ If more than one file is present, the path of the most recent file is returned b
       else:
         return None, None
 
+                 
   def file_choice(self, info, tool, multiple=False):
     """Given a list of files, it will return the most recent file.
     Sets the list of files as a variable in Olex2, and also the file that is to
@@ -1199,6 +1216,8 @@ def set_source_file(file_type, file_path):
   if file_path != '':
     OV.SetParam('snum.metacif.%s_file' %file_type, file_path)
 OV.registerFunction(set_source_file)
+
+
 
 
 for item in timings:
