@@ -129,11 +129,12 @@
 [H3]
   Collection
   Crystal
-  Crystal Image
+  Crystal-Image
   Diffraction
   Absorption Correction
   Publication
   Reference
+  Citations
   Source Files
   Tutorials
   Solution Settings Extra

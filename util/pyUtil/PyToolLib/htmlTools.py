@@ -33,6 +33,7 @@ time_add = 0
 global hover_buttons
 hover_buttons = OV.GetParam('olex2.hover_buttons')
 
+
 def makeHtmlTable(list):
   """ Pass a list of dictionaries, with one dictionary for each table row.
 
@@ -1239,14 +1240,17 @@ def _check_modes_and_states(name):
 def MakeHoverButton(name, cmds, onoff = "off", btn_bg='table_firstcol_colour'):
   #global time_add
   #t = time.time()
+  solo = OV.GetParam('user.solo')
   on = _check_modes_and_states(name)
   if cmds.lower().startswith("html.itemstate") and "h2" in cmds:
-    solo = OV.GetParam('user.solo')
     item = cmds.split()[1]
     tab = item.split("h2-")[1].split("-")[0]
     item_name = item.split("h2-")[1].split("-")[1]
     if solo:
       cmds = "html.itemstate h2-%s* 2>>%s" %(tab,cmds) 
+  if solo:
+    if 'metadata' in cmds:
+      cmds = "html.itemstate metadata* 2>>%s" %(cmds)
   if on:
     txt = MakeHoverButtonOn(name, cmds, btn_bg)
   else:
