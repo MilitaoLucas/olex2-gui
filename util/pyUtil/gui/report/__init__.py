@@ -262,29 +262,22 @@ class publication:
       return
     l = OV.GetParam('snum.report.merge_these_cifs', [])
     l.append(cif_p)
-    if not l:
-      l = ""
     OV.SetParam('snum.report.merge_these_cifs', l)
     
   def remove_cif_from_merge_list(cif_p):
-    ll = []
     l = OV.GetParam('snum.report.merge_these_cifs', [])
-    for item in l:
-      if not item:
-        continue
-      if unicode(cif_p) !=  unicode(item):
-        ll.append(item)
-    if not ll:
-      ll = ""
-    OV.SetParam('snum.report.merge_these_cifs', ll)
+    idx = l.index(cif_p)
+    if idx != -1:
+      del l[idx]
+    if not l:
+      l = ""
+    OV.SetParam('snum.report.merge_these_cifs', l)
 
   def AddTemplateToMergeList(self, value=""):
     if not value:
       return
     l = OV.GetParam('snum.report.merge_these_cifs', [])
     l.append(value)
-    if not l:
-      l = ""
     OV.SetParam('snum.report.merge_these_cifs', l)
 
   def OnPublicationTemplateChange(self, value):
