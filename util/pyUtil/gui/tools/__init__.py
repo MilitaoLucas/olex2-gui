@@ -16,8 +16,6 @@ global have_found_python_error
 have_found_python_error= False
 
 
-
-
 class FolderView:
   root = None
   class node:
@@ -304,3 +302,84 @@ def makeFormulaForsNumInfo():
     return formula_string
 OV.registerFunction(makeFormulaForsNumInfo)
 
+
+def hasDisorder():
+  import olexex
+  olx_atoms = olexex.OlexRefinementModel()
+  if not olx_atoms.disorder_parts():
+    return False
+  else:
+    return True
+OV.registerFunction(hasDisorder,False,'gui.tools')
+
+def make_disorder_quicktools():
+  import olexex
+  parts = set(olexex.OlexRefinementModel().disorder_parts())
+  
+  parts_display = ""
+  for item in parts:
+    if item == 0:
+      continue
+    if item == 1 or item == 2:
+      parts_display += "<a href='ShowP 0 %s'><b>PART %s</b></a> | " %(item, item)
+    else:
+      parts_display += "<a href='ShowP 0 %s'><b>%s</b></a> | " %(item, item)
+      
+  txt = r'''
+  <td width='25%%'>
+    <b>Show PART 0 AND</b>
+  </td>
+  <td width='55%%' align='left'>
+  %s
+    <a href='ShowP'><b>All</b></a>
+  </td>
+  
+  <td width='20%%' align='right'>
+  <font size="$GetVar('HtmlFontSizeControls')">
+  <input
+    type='combo'
+    width='100%%'
+    height="$GetVar('HtmlInputHeight')"
+    name='set_label_content_disorder'
+    value='Labels'
+    items="Occupancy<-o;Chem Occ.<-co;PART No<-p;Link-Code<-v;Labels<-l"
+    bgcolor="$GetVar('HtmlInputBgColour')"
+    onchange="spy.ChooseLabelContent(html.GetValue('~name~'))"
+    readonly='readonly'
+  >
+  </font>
+  </td>
+  ''' %parts_display
+  return txt
+OV.registerFunction(make_disorder_quicktools,False,'gui.tools')
+
+
+
+def md():
+  import markdown
+  import glob
+    
+  #  p = "D:\Users\Horst\Documents\GitHub\Olex2Manual\Sucrose\solving.md"
+  p = r"C:/Users/Horst/Documents/GitHub/Olex2Manual/Sucrose"
+#  p = r"C:\Users\Horst\Documents\GitHub\Olex2Manual\GettingAroundOlex2\atom_label_display_options.md"
+  
+  g = glob.glob(r"%s/*.md" %p)
+
+  text = ""
+  for f in g:
+    try:
+      text += open(f,'r').read().decode('utf-8')
+    except Exception, err:
+      print err, f
+      
+
+  html = markdown.markdown(text, extensions=[])
+#  html = markdown.markdown(text, extensions=['latex'])
+  out = "%s/out.htm" %p
+  wFile = open(out, 'w')
+  wFile.write(html.encode('utf-8'))
+  wFile.close()
+  olx.Shell(out)
+  
+OV.registerFunction(md,False,'md')
+  

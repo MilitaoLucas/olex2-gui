@@ -546,11 +546,7 @@ if haveGUI:
 
 
 def ChooseLabelContent(cmd):
-  s = ""
-  switches = cmd.split()
-  for switch in switches:
-    s += "-%s " %switch
-  olx.Labels(s)
+  olx.Labels(**dict([(k, True) for k in cmd.split()]))
   return ""
 OV.registerFunction(ChooseLabelContent)
 
