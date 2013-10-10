@@ -120,18 +120,11 @@ class CifTools(ArgumentParser):
     self.cif_block = olx.cif_model[self.data_name]
     today = datetime.date.today()
     reference_style = OV.GetParam('snum.report.publication_style', 'acta').lower()
-    self.olex2_reference_short = "Olex2"
 
-    if reference_style == "acta":
-
-      self.olex2_reference = """
-Olex2 %s (compiled %s, GUI svn.r%i)
-""" %(OV.GetTag(), OV.GetCompilationInfo(), OV.GetSVNVersion())
-    else:
-      self.olex2_reference = """
-O. V. Dolomanov, L. J. Bourhis, R. J. Gildea, J. A. K. Howard and H. Puschmann,
-OLEX2: a complete structure solution, refinement and analysis program.
-J. Appl. Cryst. (2009). 42, 339-341.
+    self.olex2_reference_brief = "Olex2 (Dolomanov et al., 2009)"
+    self.olex2_reference = """
+Dolomanov, O.V., Bourhis, L.J., Gildea, R.J, Howard, J.A.K. & Puschmann, H.
+ (2009), J. Appl. Cryst. 42, 339-341.
 """
     self.update_cif_block(
       {'_audit_creation_date': today.strftime('%Y-%m-%d'),
@@ -142,10 +135,11 @@ Olex2 %s
 ;
 """ %(OV.GetTag(), OV.GetCompilationInfo(), OV.GetSVNVersion())
     })
-    olx.SetVar('olex2_reference_short', self.olex2_reference_short)
+    olx.SetVar('olex2_reference_short', self.olex2_reference_brief)
+    olx.SetVar('olex2_reference_long', self.olex2_reference)
     self.update_cif_block(
-      {'_computing_molecular_graphics': self.olex2_reference,
-       '_computing_publication_material': self.olex2_reference
+      {'_computing_molecular_graphics': self.olex2_reference_brief,
+       '_computing_publication_material': self.olex2_reference_brief
        }, force=False)
     self.sort_crystal_dimensions()
     self.sort_crystal_colour()
@@ -433,21 +427,19 @@ class ExtractCifInfo(CifTools):
       f.close()
       all_sources_d[curr_cif_p] = current_cif
 
+    full_references = [self.olex2_reference]
     if active_solution is not None and active_solution.is_solution:
-
       ## Backwards Compatibility
       if active_solution.program == "smtbx-solve":
         active_solution.program = "olex2.solve"
       ## END
       try:
-        if reference_style == 'acta':
-          solution_reference = self.SPD.programs[active_solution.program].name
-        else:
-          solution_reference = self.SPD.programs[active_solution.program].reference
-        olx.SetVar('solution_reference_short', self.SPD.programs[active_solution.program].name)
-        olx.SetVar('solution_reference_long', solution_reference)
-        atom_sites_solution_primary = self.SPD.programs[active_solution.program]\
-          .methods[active_solution.method].atom_sites_solution
+        prg = self.SPD.programs[active_solution.program]
+        solution_reference = "%s (%s)" %(prg.name, prg.brief_reference)
+        full_references.append(prg.reference)
+        olx.SetVar('solution_reference_short', prg.brief_reference)
+        olx.SetVar('solution_reference_long', prg.reference)
+        atom_sites_solution_primary = prg.methods[active_solution.method].atom_sites_solution
         force = True
       except:
         atom_sites_solution_primary = '?'
@@ -457,27 +449,31 @@ class ExtractCifInfo(CifTools):
         '_computing_structure_solution': solution_reference,
         '_atom_sites_solution_primary': atom_sites_solution_primary
       }, force = force)
+    
     active_node = History.tree.active_node
-    if active_node is not None and not active_node.is_solution:
 
+    if active_node is not None and not active_node.is_solution:
       ## Backwards Compatibility
       if active_node.program == "smtbx-refine":
         active_node.program = "olex2.refine"
       ## END
       try:
-        if reference_style == 'acta':
-          refinement_reference = self.RPD.programs[active_node.program].name
-        else:
-          refinement_reference = self.RPD.programs[active_node.program].reference
-        olx.SetVar('refinement_reference_short', self.RPD.programs[active_node.program].name)
-        olx.SetVar('refinement_reference_long', refinement_reference)
+        prg = self.RPD.programs[active_node.program]
+        refinement_reference = "%s (%s)" %(prg.name, prg.brief_reference)
+        full_references.append(prg.reference)
+        olx.SetVar('refinement_reference_short', prg.brief_reference)
+        olx.SetVar('refinement_reference_long', prg.reference)
         force = True
       except:
         refinement_reference = '?'
         force = False
       self.update_cif_block({
         '_computing_structure_refinement': refinement_reference}, force=force)
-
+    
+    full_references.sort()
+    self.update_cif_block({
+      '_publ_section_references': '\n'.join(full_references)}, force=True)
+      
     ##RANDOM THINGS
     p, pp = self.sort_out_path(path, "frames")
     if p and self.metacifFiles.curr_frames != self.metacifFiles.prev_frames:
