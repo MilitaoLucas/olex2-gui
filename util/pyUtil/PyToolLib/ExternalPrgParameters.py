@@ -16,8 +16,6 @@ global RPD
 RPD = {}
 global SPD
 SPD = {}
-global reference_style
-reference_style = ""
 
 class ExternalProgramDictionary(object):
   def __init__(self):
@@ -40,12 +38,14 @@ class ExternalProgramDictionary(object):
 
 
 class Program(object):
-  def __init__(self, name, program_type, author, reference, execs=None,
-                versions=None, phil_entry_name=None):
+  def __init__(self, name, program_type, author, reference, brief_reference,
+               execs=None,
+               versions=None, phil_entry_name=None):
     self.name = name
     self.program_type = program_type
     self.author = author
     self.reference = reference
+    self.brief_reference = brief_reference
     self.execs = execs
     self.versions = versions
     self.methods = {}
@@ -1016,19 +1016,7 @@ class Method_SIR(Method_solution):
       os.remove(item)
 
 def defineExternalPrograms():
-  reference_style = OV.GetParam('snum.report.publication_style', 'acta').lower()
-  if reference_style == "acta":
-    ref_shelx = "Sheldrick, G. M. (2008). Acta Cryst. A64, 112-122."
-    ref_smtbx = "Bourhis, L.J, Dolomanov, O.V, Gildea, R.J, Howard, J.A.K and\n Puschmann, H. (2013, In Preparation)"
-    ref_superflip = "Palatinus, L.,  Chapuis, G., (2007) <i>J. Appl. Cryst.</i>, <b>40</b>, 786-790"
-    
-  else:
-    ref_shelx="SHELX, G.M. Sheldrick, Acta Cryst.\n(2008). A64, 112-122"
-    ref_smtbx = "L.J. Bourhis, O.V. Dolomanov, R.J. Gildea, J.A.K. Howard, H. Puschmann, in preparation (2013)"
-    ref_superflip = "SUPERFLIP, J. Appl. Cryst. (2007) 40, 786-790"
-
   # define solution methods
-
   direct_methods = Method_shelx_direct_methods(direct_methods_phil)
   patterson = Method_shelx_solution(patterson_phil)
   texp = Method_shelx_solution(texp_phil)
@@ -1059,98 +1047,124 @@ def defineExternalPrograms():
     name='ShelXS',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference=ref_shelx,
+    reference="Sheldrick, G.M. (2008). Acta Cryst. A64, 112-122",
+    brief_reference="Sheldrick, 2008",
     execs=["shelxs.exe", "shelxs"])
   ShelXS13 = Program(
     name='ShelXS-2013',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference=ref_shelx,
+    reference=ShelXS.reference,
+    brief_reference=ShelXS.brief_reference,
     execs=["shelxs13.exe", "shelxs13"])
   ShelXS86 = Program(
     name='ShelXS86',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference=ref_shelx,
+    reference=ShelXS.reference,
+    brief_reference=ShelXS.brief_reference,
     execs=["shelxs86.exe", "shelxs86"])
   XS = Program(
     name='XS',
     program_type='solution',
     author="G.M.Sheldrick/Bruker",
-    reference=ref_shelx,
+    reference=ShelXS.reference,
+    brief_reference=ShelXS.brief_reference,
     execs=["xs.exe", "xs"])
   XT = Program(
     name='XT',
     program_type='solution',
     author="G.M.Sheldrick/Bruker",
-    reference=ref_shelx,
+    reference=ShelXS.reference,
+    brief_reference=ShelXS.brief_reference,
     execs=["xt.exe", "xt"])
   ShelXD = Program(
     name='ShelXD',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference=ref_shelx,
+    reference=ShelXS.reference,
+    brief_reference=ShelXS.brief_reference,
     execs=["shelxd.exe", "shelxd"])
   ShelXD13 = Program(
     name='ShelXD-2013',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference=ref_shelx,
+    reference=ShelXS.reference,
+    brief_reference=ShelXS.brief_reference,
     execs=["shelxd13.exe", "shelxd13"])
   XM = Program(
     name='XM',
     program_type='solution',
     author="G.M.Sheldrick/Bruker",
-    reference=ref_shelx,
+    reference=ShelXS.reference,
+    brief_reference=ShelXS.brief_reference,
     execs=["xm.exe", "xm"])
   smtbx_solve = Program(
     name='olex2.solve',
     program_type='solution',
     author="Luc Bourhis",
-    reference=ref_smtbx
+    reference="""
+Bourhis, L.J., Dolomanov, O.V., Gildea, R.J., Howard, J.A.K., Puschmann, H.
+ (2013). in preparation""",
+    brief_reference="Bourhis et al., 2013",
     )
   
   SIR97 = Program(
     name='SIR97',
     program_type='solution',
-    author="Maria C. Burla, Rocco Caliandro, Mercedes Camalli, Benedetta Carrozzini, Giovanni Luca Cascarano, Liberato De Caro, Carmelo Giacovazzo, Giampiero Polidori, Dritan Siliqi, Riccardo Spagna",
-    reference="J. Appl. Cryst. (2007). 40, 609-613",
+    author="Maria C. Burla, Rocco Caliandro, Mercedes Camalli, Benedetta Carrozzini,"+
+        "Giovanni Luca Cascarano, Liberato De Caro, Carmelo Giacovazzo, Giampiero Polidori,"+
+        "Dritan Siliqi, Riccardo Spagna",
+    reference="""
+Burla, M.C., Caliandro, R., Camalli, M., Carrozzini, B., Cascarano, G.L.,
+ De Caro, L., Giacovazzo, C., Polidori, G., Siliqi, D., Spagna, R.
+ (2007). J. Appl. Cryst. 40, 609-613""",
+    brief_reference="Burla et al.,  2007",
     versions = '97',
     execs=["sir97.exe", "sir97"])
   SIR2002 = Program(
     name='SIR2002',
     program_type='solution',
-    author="Maria C. Burla, Rocco Caliandro, Mercedes Camalli, Benedetta Carrozzini, Giovanni Luca Cascarano, Liberato De Caro, Carmelo Giacovazzo, Giampiero Polidori, Dritan Siliqi, Riccardo Spagna",
-    reference="J. Appl. Cryst. (2007). 40, 609-613",
+    author=SIR97.author,
+    reference=SIR97.reference,
+    brief_reference=SIR97.brief_reference,
     versions = '2002',
     execs=["sir2002.exe", "sir2002"])
   SIR2004 = Program(
     name='SIR2004',
     program_type='solution',
-    author="Maria C. Burla, Rocco Caliandro, Mercedes Camalli, Benedetta Carrozzini, Giovanni Luca Cascarano, Liberato De Caro, Carmelo Giacovazzo, Giampiero Polidori, Dritan Siliqi, Riccardo Spagna",
-    reference="J. Appl. Cryst. (2007). 40, 609-613",
+    author=SIR97.author,
+    reference=SIR97.reference,
+    brief_reference=SIR97.brief_reference,
     versions = '2004',
     execs=["sir2004.exe", "sir2004"])
   SIR2008 = Program(
     name='SIR2008',
     program_type='solution',
-    author="Maria C. Burla, Rocco Caliandro, Mercedes Camalli, Benedetta Carrozzini, Giovanni Luca Cascarano, Liberato De Caro, Carmelo Giacovazzo, Giampiero Polidori, Dritan Siliqi, Riccardo Spagna",
-    reference="J. Appl. Cryst. (2007). 40, 609-613",
+    author=SIR97.author,
+    reference=SIR97.reference,
+    brief_reference=SIR97.brief_reference,
     versions = '2008',
     execs=["sir2008.exe", "sir2008"])
   SIR2011 = Program(
     name='SIR2011',
     program_type='solution',
-    author="Maria C. Burla, Rocco Caliandro, Mercedes Camalli, Benedetta Carrozzini, Giovanni Luca Cascarano, Liberato De Caro, Carmelo Giacovazzo, Giampiero Polidori, Dritan Siliqi, Riccardo Spagna",
-    reference="J. Appl. Cryst. (2007). 40, 609-613",
+    author=SIR97.author,
+    reference=SIR97.reference,
+    brief_reference=SIR97.brief_reference,
     versions = '2011',
     execs=["sir2011.exe", "sir2011"])
   Superflip = Program(
     name='Superflip',
     program_type='solution',
     author="A van der Lee, C.Dumas & L. Palatinus",
-    reference = ref_superflip,
-    versions = '260711',
+    reference="""
+Palatinus, L. & Chapuis, G. (2007). J. Appl. Cryst., 40, 786-790;
+Palatinus, L. & van der Lee, A. (2008). J. Appl. Cryst. 41, 975-984;
+Palatinus, L., Prathapa, S. J. & van Smaalen, S. (2012). J. Appl. Cryst. 45,
+ 575-580""",
+    brief_reference="Palatinus & Chapuis, 2007;Palatinus & van der Lee, 2008;Palatinus et al., 2012",
+    versions='260711',
     execs=["superflip.exe", "superflip"])
 
   ShelXS.addMethod(direct_methods)
@@ -1187,61 +1201,71 @@ def defineExternalPrograms():
     name='ShelXL',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference=ref_shelx,
+    reference=ShelXS.reference,
+    brief_reference=ShelXS.brief_reference,
     execs=["shelxl.exe", "shelxl"])
   ShelXL12 = Program(
     name='ShelXL-2012',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference=ref_shelx,
+    reference=ShelXS.reference,
+    brief_reference=ShelXS.brief_reference,
     execs=["shelxl12.exe", "shelxl12"])
   ShelXLMP12 = Program(
     name='ShelXLMP-2012',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference=ref_shelx,
+    reference=ShelXS.reference,
+    brief_reference=ShelXS.brief_reference,
     execs=["shelxl_mp12.exe", "shelxl_mp12"])
   ShelXL13 = Program(
     name='ShelXL-2013',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference=ref_shelx,
+    reference=ShelXS.reference,
+    brief_reference=ShelXS.brief_reference,
     execs=["shelxl13.exe", "shelxl13"])
   XL = Program(
     name='XL',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference=ref_shelx,
+    reference=ShelXS.reference,
+    brief_reference=ShelXS.brief_reference,
     execs=["xl.exe", "xl"])
   XLMP = Program(
     name='XLMP',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference=ref_shelx,
+    reference=ShelXS.reference,
+    brief_reference=ShelXS.brief_reference,
     execs=["xlmp.exe", "xlmp"])
   ShelXH = Program(
     name='ShelXH',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference=ref_shelx,
+    reference=ShelXS.reference,
+    brief_reference=ShelXS.brief_reference,
     execs=["shelxh.exe", "shelxh"])
   XH = Program(
     name='XH',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference=ref_shelx,
+    reference=ShelXS.reference,
+    brief_reference=ShelXS.brief_reference,
     execs=["xh.exe", "xh"])
   ShelXL_ifc = Program(
     name='ShelXL_ifc',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference=ref_shelx,
+    reference=ShelXS.reference,
+    brief_reference=ShelXS.brief_reference,
     execs=["shelxl_ifc"])
   smtbx_refine = Program(
     name='olex2.refine',
     program_type='refinement',
     author="L.J. Bourhis, O.V. Dolomanov, R.J. Gildea",
-    reference=ref_smtbx
+    reference=smtbx_solve.reference,
+    brief_reference=smtbx_solve.brief_reference,
   )
   
   RPD = ExternalProgramDictionary()
@@ -2158,26 +2182,26 @@ REM Flack = %(_refine_ls_abs_structure_Flack)s
 def get_program_dictionaries(cRPD=None, cSPD=None):
   global SPD
   global RPD
-  global reference_style
-  if not reference_style:
-    reference_style = OV.GetParam('snum.report.publication_style', 'acta')
 
   if not cRPD or not cSPD:
     if RPD and SPD:
-      if reference_style == OV.GetParam('snum.report.publication_style'):
-        return SPD, RPD
-      else:
-        SPD, RPD = defineExternalPrograms()
-        return SPD, RPD
+      return SPD, RPD
     else:
       SPD, RPD =  defineExternalPrograms()
-      return SPD, RPD
-        
-  elif RPD != RPD or SPD != SPD:
-    SPD, RPD = defineExternalPrograms()
-
   return SPD, RPD
   
+def get_known(kind):
+  sd, rd = get_program_dictionaries()
+  if kind == 'solution':
+    src = sd
+  else:
+    src = rd
+  rv = []
+  for p in src:
+    rv.append(p.name)
+  return ';'.join(rv)
+
+olex.registerFunction(get_known, False, "programs")
 
 if __name__ == '__main__':
   SPD, RPD = defineExternalPrograms()

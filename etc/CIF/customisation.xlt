@@ -42,6 +42,6 @@
       <ending "_max">
     >
   >
-  <#include "app.ConfigDir()/cif_customisation.xld" extend='true'>
+  <#include "app.ConfigDir()/cif_customisation.xld" extend='false'>
 >
 
