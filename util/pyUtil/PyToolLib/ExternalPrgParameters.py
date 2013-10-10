@@ -1163,7 +1163,8 @@ Palatinus, L. & Chapuis, G. (2007). J. Appl. Cryst., 40, 786-790;
 Palatinus, L. & van der Lee, A. (2008). J. Appl. Cryst. 41, 975-984;
 Palatinus, L., Prathapa, S. J. & van Smaalen, S. (2012). J. Appl. Cryst. 45,
  575-580""",
-    brief_reference="Palatinus & Chapuis, 2007;Palatinus & van der Lee, 2008;Palatinus et al., 2012",
+    brief_reference="""Palatinus & Chapuis, 2007;Palatinus & van der Lee, 2008;
+Palatinus et al., 2012""",
     versions='260711',
     execs=["superflip.exe", "superflip"])
 
