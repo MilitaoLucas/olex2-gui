@@ -402,7 +402,6 @@ class ExtractCifInfo(CifTools):
   def run(self):
     import iotbx.cif
     self.SPD, self.RPD = ExternalPrgParameters.get_program_dictionaries()
-    reference_style = OV.GetParam('snum.report.publication_style', 'acta').lower()
     self.userInputVariables = OV.GetParam("snum.metacif.user_input_variables")
     basename = self.filename
     path = self.filepath
