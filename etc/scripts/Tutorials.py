@@ -190,17 +190,17 @@ class AutoDemo():
       x = OV.GetHtmlPanelX() - boxWidth - 40
       y = 70
       if self.have_box_already:
-        olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(), "-t='%s'" %(self.pop_name,))
+        olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(), {'t'=self.pop_name})
       else:
         if self.interactive:
-          olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(), "-b=t -t='%s' -w=%i -h=%i -x=%i -y=%i" %(self.pop_name, boxWidth, boxHeight, x, y))
+          olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(), **{'b':'t', 't':self.pop_name, 'w':boxWidth, 'h':boxHeight, 'x':x, 'y':y})
           olx.html.SetFocus(self.pop_name + '.TUTORIAL_NEXT')
         else:
           boxWidth = 400
           boxHeight = 250
           x = OV.GetHtmlPanelX() - boxWidth - 40
           y = 75
-          olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(), "-t='%s' -w=%i -h=%i -x=%i -y=%i" %(self.pop_name, boxWidth, boxHeight, x, y))
+          olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(), **{'b':'t', 't':self.pop_name, 'w':boxWidth, 'h':boxHeight, 'x':x, 'y':y})
         self.have_box_already = True
         #olx.html.Show(self.pop_name)
       OV.Refresh()
@@ -237,7 +237,7 @@ class AutoDemo():
     boxHeight = 200
     x = 200
     y = 200
-    olx.Popup(name, wFilePath, "-b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(name, boxWidth, boxHeight, x, y))
+    olx.Popup(name, wFilePath, **{'b':'tc', 't':name, 'w':boxWidth, 'h':boxHeight, 'x':x, 'y':y})
 
   def format_txt(self):
     txt = self.txt
