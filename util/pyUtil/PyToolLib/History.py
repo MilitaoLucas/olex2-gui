@@ -109,7 +109,7 @@ class History(ArgumentParser):
       if os.path.exists(lstFile):
         os.remove(lstFile)
     destination = "%s/%s.res" %(filepath, filename)
-    destination = "'%s'" %destination.strip('"').strip("'")
+    destination = "%s" %destination.strip('"').strip("'")
     olx.Atreap("%s" %destination)
     olx.File() ## needed to make new .ins file
     self._make_history_bars()
@@ -479,7 +479,6 @@ class HistoryTree(Node):
     return self.active_child_node.name
 
   def add_node(self, hklPath, resPath, lstPath=None):
-    assert self.active_child_node is not None
     ref_name = hashlib.md5(time.asctime(time.localtime())).hexdigest()
     node = Node(self.link_table, ref_name, hklPath, resPath, lstPath,
                 primary_parent_node=self.active_node)

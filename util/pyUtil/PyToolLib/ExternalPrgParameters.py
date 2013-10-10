@@ -266,7 +266,7 @@ class Method_solution(Method):
     # TREF sticks if used as TREF 2000
     olx.DelIns('TREF')
     if RunPrgObject.HasGUI:
-      olx.Compaq('-a')
+      olx.Compaq(a=True)
       olx.ShowStr("true")
     self.auto = True
 
@@ -312,17 +312,17 @@ class Method_refinement(Method):
       # Check whether these are present. If so, do nothing.
       more = olx.Ins('MORE')
       if more == "n/a":
-        OV.AddIns("'MORE -1'")
+        OV.AddIns("MORE -1")
       bond = olx.Ins('BOND')
       if bond == "n/a":
-        OV.AddIns("'BOND $H'")
+        OV.AddIns("BOND $H")
       acta= olx.Ins('ACTA')
       if acta == "n/a":
         if radiation == "0.71073":
           OV.AddIns("ACTA 52")
       #htab= olx.Ins('HTAB')
       #if acta == "n/a":
-        #OV.AddIns("'HTAB'")
+        #OV.AddIns("HTAB")
 
       #Delete and then add again
       olx.DelIns('CONF')
@@ -354,7 +354,7 @@ class Method_shelx(Method):
       RunPrgObject.program.program_type, self.name)
     prgName = olx.file.GetName(RunPrgObject.shelx)
     #olex.m("User '%s'" %RunPrgObject.tempPath)
-    olx.User("'%s'" %RunPrgObject.tempPath)
+    olx.User("%s" %RunPrgObject.tempPath)
     xl_ins_filename = RunPrgObject.shelx_alias
 # This is an ugly fix - but good start
     if 'shelxs86' in prgName:
@@ -374,7 +374,7 @@ class Method_shelx(Method):
         if 'DISP' in line:
           continue
         sys.stdout.write(line)
-    command = "%s '%s'" % (prgName, xl_ins_filename.lower()) #This is correct!!!!!!
+    command = "'%s'" % (xl_ins_filename.lower()) #This is correct!!!!!!
     #sys.stdout.graph = RunPrgObject.Graph()
     if not RunPrgObject.params.snum.shelx_output:
       command = "-q " + command
@@ -382,7 +382,7 @@ class Method_shelx(Method):
       opts = self.command_line_options.split()
       opts = ' '.join(["'%s'" %o for o in opts])
       command = "%s %s" %(command, opts)
-    success = olx.Exec(command)
+    success = olx.Exec(prgName, command, q=(not RunPrgObject.params.snum.shelx_output))
     if not success:
       raise RuntimeError(
         'you may be using an outdated version of %s' %(prgName))
@@ -399,8 +399,7 @@ class Method_shelx(Method):
           break
       else:
         continue
-    olex.m("User '%s'" %RunPrgObject.filePath)
-    #olx.User("'%s'" %RunPrgObject.filePath)
+    olx.User("%s" %RunPrgObject.filePath)
 
 
 class Method_shelx_solution(Method_shelx, Method_solution):
@@ -877,9 +876,9 @@ class Method_Superflip(Method_solution):
 
   def do_run(self, RunPrgObject):
     self.create_input()
-    if olx.Exec("superflip '%s'" %self.input_file_name):
+    if olx.Exec("superflip", self.input_file_name):
       olx.WaitFor("process")
-      if olx.Exec("edma '%s'" %self.input_file_name):
+      if olx.Exec("edma", self.input_file_name):
         olx.WaitFor("process")
         ZERR = 'ZERR %s %s' %(olx.xf.au.GetZ(),
                             olx.xf.au.GetCell('esd').replace(',', ' '))
@@ -887,7 +886,7 @@ class Method_Superflip(Method_solution):
           freeze_status = olx.Freeze()
           olx.Freeze(True)
         try:
-          olx.Atreap("'%s.ins'" %self.file_name)
+          olx.Atreap("%s.ins" %self.file_name)
           if self.derive_symmetry:
             log_file_name = "%s.sflog" %self.file_name
             if os.path.exists(log_file_name):
@@ -896,16 +895,16 @@ class Method_Superflip(Method_solution):
                 if "Hall symbol:" in l:
                   l = l.strip()
                   hall_symbol = l.split(':')[1]
-                  olx.ChangeSG("'%s'" %hall_symbol)
+                  olx.ChangeSG("%s" %hall_symbol)
                   break
               log_file.close()
               if OV.HasGUI():
                 olex.m("spy.run_skin sNumTitle")
             else:
               print("Could not locate the SF log file, aborting symmetry processing")
-          olx.Compaq('-a')
-          olx.AddIns("'%s'" %ZERR)
-          olx.File("'%s.res'" %self.file_name)
+          olx.Compaq(a=True)
+          olx.AddIns("%s" %ZERR)
+          olx.File("%s.res" %self.file_name)
         finally:
           if OV.HasGUI():
             olx.Freeze(freeze_status)

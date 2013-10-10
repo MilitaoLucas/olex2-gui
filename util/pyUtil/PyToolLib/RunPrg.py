@@ -102,7 +102,7 @@ class RunPrg(ArgumentParser):
       return
 
   def setupFiles(self):
-    olx.User("'%s'" %OV.FilePath())
+    olx.User("%s" %OV.FilePath())
     self.filePath = OV.FilePath()
     self.fileName = OV.FileName()
     self.tempPath = "%s/.olex/temp" %OV.FilePath()
@@ -355,7 +355,7 @@ class RunRefinementPrg(RunPrg):
       olx.Name('sel C')
       olx.Sel('-u')
     if auto.assemble == True:
-      olx.Compaq('-a')
+      olx.Compaq(a=True)
       olx.Move()
     else:
       pass
