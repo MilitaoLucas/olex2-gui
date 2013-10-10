@@ -453,6 +453,23 @@ class FullMatrixRefine(OlexCctbxAdapter):
         return "%s K\\%s~%s~" %(l[:2], l[2].lower(), l[3])
     return 'synchrotron'
 
+  def wR2_factor(self, cutoff_factor=None):
+    fo_sq = self.normal_eqns.observations.fo_sq
+    if cutoff_factor is not None:
+      strong = fo_sq.data() >= cutoff_factor*fo_sq.sigmas()
+      fo_sq = fo_sq.select(strong)
+      fc_sq = self.normal_eqns.fc_sq.select(strong)
+      wght = self.normal_eqns.weights.select(strong)
+    else:
+      wght = self.normal_eqns.weights
+      fc_sq = self.normal_eqns.fc_sq
+    fc_sq = fc_sq.data()
+    fo_sq = fo_sq.data()
+    fc_sq *= self.normal_eqns.scale_factor()
+    wR2 = flex.sum(wght*flex.pow2((fo_sq-fc_sq)))/flex.sum(wght*flex.pow2(fo_sq))
+    wR2 = math.sqrt(wR2)
+    return wR2
+
   def as_cif_block(self):
     def format_type_count(type, count):
       if round(count, 1) == round(count):
@@ -625,6 +642,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.normal_eqns.weighting_scheme)
     cif_block['_refine_ls_weighting_scheme'] = 'calc'
     cif_block['_refine_ls_wR_factor_ref'] = fmt % self.normal_eqns.wR2()
+    cif_block['_refine_ls_wR_factor_gt'] = fmt % self.wR2_factor(2)
     (h_min, k_min, l_min), (h_max, k_max, l_max) = refinement_refs.min_max_indices()
     if (refinement_refs.space_group().is_centric() or
         not refinement_refs.anomalous_flag()):
