@@ -709,9 +709,9 @@ class Method_cctbx_ChargeFlip(Method_solution):
     #olex.m("sel -a")
     #olex.m("name sel 1")
     OV.DeleteBitmap('solve')
-    file = r"%s/%s.res" %(olx.FilePath(), RunPrgObject.fileName)
-    olx.xf.SaveSolution(file)
-    olx.Atreap(file)
+    file_name = r"%s/%s.res" %(olx.FilePath(), RunPrgObject.fileName)
+    olx.xf.SaveSolution(file_name)
+    olx.Atreap('"%s"' %file_name)
 
 class Method_Superflip(Method_solution):
 
@@ -877,9 +877,9 @@ class Method_Superflip(Method_solution):
 
   def do_run(self, RunPrgObject):
     self.create_input()
-    if olx.Exec("superflip %s" %self.input_file_name):
+    if olx.Exec("superflip '%s'" %self.input_file_name):
       olx.WaitFor("process")
-      if olx.Exec("edma %s" %self.input_file_name):
+      if olx.Exec("edma '%s'" %self.input_file_name):
         olx.WaitFor("process")
         ZERR = 'ZERR %s %s' %(olx.xf.au.GetZ(),
                             olx.xf.au.GetCell('esd').replace(',', ' '))
