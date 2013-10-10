@@ -1838,7 +1838,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
   def make_text_and_tab_items(self):
     bitmap = "working"
     if olx.fs.Exists(bitmap) == 'true':
-      olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
+      OV.CreateBitmap(bitmap)
     textItems = []
     textItems += self.image_items_d.get('H1',[])
     textItems += self.image_items_d.get('H2',[])

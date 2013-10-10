@@ -74,7 +74,7 @@ class NewsImageRetrivalThread(ThreadEx):
         tag = OV.GetTag().split('-')[0]
         olex.writeImage("news/news-%s_tmp" %tag, img_data)
         OV.SetParam('olex2.news_img_link_url', url)
-        olx.Schedule(1, "'spy.internal.resizeNewsImage()'")
+        olx.Schedule(1, "spy.internal.resizeNewsImage()")
     except:
       pass
     finally:
