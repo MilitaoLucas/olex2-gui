@@ -210,7 +210,9 @@ class ConfigSkin(object):
         boxHeight = 700
       x = 10
       y = 50
-      olx.Popup("%s-help"% self.name, wFilePath, "-b=tc -t='%s' -w=%i -d='echo' -h=%i -x=%i -y=%i" %(self.name, boxWidth, boxHeight, x, y))
+      olx.Popup("%s-help"% self.name, wFilePath,
+        b="tc", t=self.name, d="echo",
+        w=boxWidth, h=boxHeight, x=x, y=y)
     else:
       olx.html.Load(wFilePath)
 

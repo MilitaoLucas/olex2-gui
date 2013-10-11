@@ -242,9 +242,11 @@ def conflicts(popout='auto', d=None):
     box_height = screen_height - 2*box_y
     main_spacer = box_height - 300
     if olx.html.IsPopup('conflicts') == "false":
-      olx.Popup('conflicts', '%s' %wFilePath, "-b=tcr -t='CIF Conflicts' -w=%i -h=%i -x=%i -y=%i" %(box_width, box_height, box_x, box_y))
+      olx.Popup('conflicts', '%s' %wFilePath,
+       b="tcr",  t="CIF Conflicts",
+       w=box_width, h=box_height, x=box_x, y=box_y)
     else:
-      olx.Popup('conflicts', '%s' %wFilePath)
+      olx.Popup('conflicts', wFilePath)
   else:
     txt += '''
 <tr><td><a href='spy.gui.metadata.conflicts(true)'>Popup Conflict Window</a></td></tr>'''

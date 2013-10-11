@@ -19,7 +19,7 @@ c:freeze(false)
 
 p:First you need to click on the <b>Tools</b> tab.
 h:tab-tools
-c:spy.switch_tab_for_tutorials(tools)
+c:spy.demo.switch_tab_for_tutorials(tools)
 c:refresh
 
 p:Then you need to click on the <b>Overlay</b> tab.

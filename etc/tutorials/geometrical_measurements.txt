@@ -18,7 +18,7 @@ c:freeze(false)
 
 p:To start with you need to click on the <b>View</b> tab.
 h:tab-view
-c:spy.switch_tab_for_tutorials(view)
+c:spy.demo.switch_tab_for_tutorials(view)
 
 p:You then need to select the tab <b>Geometry</b>.
 h:h2-geometry

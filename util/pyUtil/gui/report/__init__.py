@@ -339,13 +339,9 @@ def ResolvePrograms():
   sw = 650
   sh = 200
   pop_name = 'report_resolve'
-  olx.Popup("%s '%s/etc/gui/report-resolve-programs.htm' -x=%d -y=%d -w=%d -h=%d -s"
-            %(pop_name, olx.BaseDir(),
-              sz[0] + w/2 + sw/2,
-              sz[1] + h/2 - sh/2,
-              sw,
-              sh) +
-            " -b=tc -t='Missing data'")
+  olx.Popup(pop_name, olx.BaseDir() + "/etc/gui/report-resolve-programs.htm",
+   t="Missing data", b="tc",
+   x=sz[0] + w/2 + sw/2, y=sz[1] + h/2 - sh/2, w=sw, h=sh, s=True)
   res = olx.html.ShowModal(pop_name)
   if not res or int(res) == 1:
     return False
