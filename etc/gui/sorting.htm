@@ -4,26 +4,26 @@
    <td width="20%">Sort order</td>
    <td width="20%">$+
      html.Snippet("gui/snippets/input-combo", "name=sorting_cat1",
-      "value=spy.GetParam('user.sorting.cat12', 'Part')",
-      "items=None<-;Z;Mass<-m;Label<-l;Part<-p;Suffix<-s;Numeric<-n",
+      "value=spy.GetParam('user.sorting.cat1', 'Part')",
+      "items=None<-;Z<-z;Mass<-m;Label<-l;Part<-p;Suffix<-s;Numeric<-n",
       "onchange=spy.SetParam('user.sorting.cat1', html.GetValue('~name~'))")
     $-</td>
    <td width="20%">$+
      html.Snippet("gui/snippets/input-combo", "name=sorting_cat2",
       "value=spy.GetParam('user.sorting.cat2', 'Z')",
-      "items=None<-;Z;Mass<-m;Label<-l;Part<-p;Suffix<-s;Numeric<-n",
+      "items=None<-;Z<-z;Mass<-m;Label<-l;Part<-p;Suffix<-s;Numeric<-n",
       "onchange=spy.SetParam('user.sorting.cat2', html.GetValue('~name~'))")
     $-</td>
    <td width="20%">$+
      html.Snippet("gui/snippets/input-combo", "name=sorting_cat3",
       "value=spy.GetParam('user.sorting.cat3', 'Label')",
-      "items=None<-;Z;Mass<-m;Label<-l;Part<-p;Suffix<-s;Numeric<-n",
+      "items=None<-;Z<-z;Mass<-m;Label<-l;Part<-p;Suffix<-s;Numeric<-n",
       "onchange=spy.SetParam('user.sorting.cat3', html.GetValue('~name~'))")
     $-</td>
    <td width="20%">$+
      html.Snippet("gui/snippets/input-combo", "name=sorting_cat4",
       "value=spy.GetParam('user.sorting.cat4', 'None')",
-      "items=None<-;Z;Mass<-m;Label<-l;Part<-p;Suffix<-s;Numeric<-n",
+      "items=None<-;Z<-z;Mass<-m;Label<-l;Part<-p;Suffix<-s;Numeric<-n",
       "onchange=spy.SetParam('user.sorting.cat4', html.GetValue('~name~'))")
     $-</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -39,7 +39,7 @@
    <td width="50%">Treat H atoms independently</td>
    <td width="10%">$+
      html.Snippet("gui/snippets/input-checkbox", "name=sorting_h",
-      "checked=spy.GetParam(user.sorting.h', 'false')",
+      "checked=spy.GetParam('user.sorting.h', 'false')",
       "onclick=spy.SetParam('user.sorting.h', html.GetState('~name~'))")
     $-</td>
 
