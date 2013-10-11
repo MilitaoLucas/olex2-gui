@@ -100,5 +100,19 @@ ImageListener = ImageListener_()
 
 
 def do_sort():
-  pass
+  args = []
+  args.append('+%s%s%s%s' %(OV.GetParam("user.sorting.cat1", ''),
+    OV.GetParam("user.sorting.cat2", ''),
+    OV.GetParam("user.sorting.cat3", ''),
+    OV.GetParam("user.sorting.cat4", '')))
+  if OV.GetParam("user.sorting.h", False):
+    args[0] += 'h'
+  args += olx.GetVar("sorting.atom_order", "").split()
+  arg3 = OV.GetParam("user.sorting.moiety")
+  if arg3:
+    args.append("moiety")
+    args.append('+' + arg3)
+  args += olx.GetVar("sorting.moiety_order", "").split()
+  olx.Sort(*args)
+  
 olex.registerFunction(do_sort, False, "gui")
