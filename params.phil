@@ -1130,6 +1130,20 @@ user
         .type = str
     }
   }
+  sorting {
+    cat1 = "p"
+      .type = str
+    cat2 = "z"
+      .type = str
+    cat3 = "l"
+      .type = str
+    cat4 = ""
+      .type = str
+    moiety = "s"
+     .type = str
+    h = False
+      .type = bool
+  }
 }
 
 odac
