@@ -112,7 +112,7 @@ class CcdcSubmit():
       print "Please supply at least a contact author name, address and e-mail!"
       olex.m("html.ItemState * 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1")
       olex.m("html.ItemState cbtn* 1 cbtn-report 2 *settings 0 report-settings 1")
-      olex.m("html.ItemState report-settings-h3-publication 1")
+      olex.m("html.ItemState metadata-report-settings-h3-publication 1")
       return False
     self.check_files()
     return True
