@@ -19,7 +19,7 @@ c:freeze(false)
 
 p:First you need to click on the <b>Work</b> tab in the top toolbar
 h:tab-work
-c:spy.switch_tab_for_tutorials(work)
+c:spy.demo.switch_tab_for_tutorials(work)
 
 p:Then you need to select the <b>Sorting</b> tab
 h:h2-sorting

@@ -113,7 +113,9 @@ def make_translate_gui_items_html(item_l):
     boxHeight = 500
   x = 200
   y = 200
-  olx.Popup(pop_name, 'Translate.htm', "-s -b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(pop_name, boxWidth, boxHeight, x, y))
+  olx.Popup(pop_name, 'Translate.htm',
+    s=True, b="tc" t=pop_name,
+    w=boxWidth, h=boxHeight, x=x y=y)
   res = olx.html.ShowModal(pop_name)
   res = int(res)
   return res
@@ -197,7 +199,9 @@ def make_logon_html(url='www.olex2.org'):
     boxHeight = 180
     x = 200
     y = 200
-    olx.Popup(pop_name, 'logon.htm', "-s -b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(pop_name, boxWidth, boxHeight, x, y))
+    olx.Popup(pop_name, 'logon.htm',
+      s=True, b="tc" t=opo_name,
+      w=boxWidth, h=boxHeight, x=x, y=y)
     res = olx.html.ShowModal(pop_name)
     res = int(res)
     return res

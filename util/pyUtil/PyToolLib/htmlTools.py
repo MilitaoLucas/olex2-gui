@@ -432,7 +432,8 @@ def make_help_box(args):
     else:
       pop_name = pop_name.replace(" ", "_")
       title = 'Olex2 Help'
-      olx.Popup(pop_name, wFilePath, **{'b':'tcr', 't':title, 'w':boxWidth, 'h':boxHeight, 'x':x, 'y':y})
+      olx.Popup(pop_name, wFilePath,
+        b="tcr", t=title, w=boxWidth, h=boxHeight, x=x, y=y)
       olx.html.SetBorders(pop_name,5)
       if box_type == 'tutorial':
         tutorial_box_initialised = pop_name

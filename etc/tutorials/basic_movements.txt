@@ -50,7 +50,7 @@ c:refresh
 
 p:Also if you make a mistake while constructing your model in order to revert back to an older point in the model you need to click on the tab at the top called <b>work</b>
 h:tab-work
-c:spy.switch_tab_for_tutorials(work)
+c:spy.demo.switch_tab_for_tutorials(work)
 
 p:Then you need to click on the tab called <b>history</b>
 h:h2-history

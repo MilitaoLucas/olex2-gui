@@ -26,12 +26,8 @@ def About():
   h = int(olx.html.ClientHeight('self'))
   sw = 500+2*15+10
   sh = 280+2*15+150
-  olx.Popup("about '%s/etc/gui/help/about.htm' -x=%d -y=%d -w=%d -h=%d"
-            %(olx.BaseDir(),
-              sz[0] + w/2 + sw/2,
-              sz[1] + h/2 - sh/2,
-              sw,
-              sh))
+  olx.Popup("about", olx.BaseDir() + "/etc/gui/help/about.htm",
+            x=sz[0] + w/2 + sw/2, y=sz[1] + h/2 - sh/2, w=sw, h=sh)
 
 
 olex.registerFunction(About, False, "gui")
