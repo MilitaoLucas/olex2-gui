@@ -2,6 +2,7 @@ from __future__ import division
 import olex
 import olx
 import os
+import sys
 
 global formula
 global formula_string
@@ -254,7 +255,10 @@ def checkErrLogFile():
 OV.registerFunction(checkErrLogFile,True,'gui.tools')
 
 def checkPlaton():
-  have_platon = olx.file.Which('platon.exe')
+  prg_name = "platon"
+  if sys.platform[:3] == "win":
+    prg_name += ".exe"
+  have_platon = olx.file.Which(prg_name)
   if have_platon:
     return '''
     <a href='platon' target='Open Platon'>
