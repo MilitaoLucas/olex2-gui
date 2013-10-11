@@ -16,6 +16,9 @@ OV = OlexFunctions()
 global have_found_python_error
 have_found_python_error= False
 
+import olexex
+
+
 
 class FolderView:
   root = None
@@ -308,12 +311,16 @@ OV.registerFunction(makeFormulaForsNumInfo)
 
 
 def hasDisorder():
-  import olexex
   olx_atoms = olexex.OlexRefinementModel()
-  if not olx_atoms.disorder_parts():
+  parts = olx_atoms.disorder_parts()
+  if not parts:
     return False
   else:
-    return True
+    sp = set(parts)
+    if len(sp) == 1 and 0 in sp:
+      return False
+    else:
+      return True
 OV.registerFunction(hasDisorder,False,'gui.tools')
 
 def make_disorder_quicktools():
@@ -325,19 +332,45 @@ def make_disorder_quicktools():
     if item == 0:
       continue
     if item == 1 or item == 2:
-      parts_display += "<a href='ShowP 0 %s'><b>PART %s</b></a> | " %(item, item)
+      parts_display += "<a href='ShowP 0 %s -v=spy.GetParam(user.keep_unique)'><b>PART %s</b></a> | " %(item, item)
     else:
-      parts_display += "<a href='ShowP 0 %s'><b>%s</b></a> | " %(item, item)
+      parts_display += "<a href='ShowP 0 %s -v=spy.GetParam(user.keep_unique)'><b>%s</b></a> | " %(item, item)
+      
+  checkbox = '''
+    <font size=$GetVar(HtmlFontSizeControls)>
+  <input
+    type='checkbox'
+    width=18
+    height="GetVar('HtmlCheckboxHeight')"
+    bgcolor="GetVar('HtmlTableBgColour')"
+    name='KEEP_UNIQUE'
+    checked="spy.GetParam('user.keep_unique')"
+    oncheck="spy.SetParam('user.keep_unique','true')>>uniq"
+    onuncheck="spy.SetParam('user.keep_unique','false')"
+    target="Keep showing single fragments when switching the PART view"
+    onclick=""
+    value=''
+  >
+  </font>'''
+      
       
   txt = r'''
   <td width='25%%'>
     <b>Show PART 0 AND</b>
   </td>
-  <td width='55%%' align='left'>
+  <td width='45%%' align='left'>
   %s
     <a href='ShowP'><b>All</b></a>
   </td>
   
+  <td width='5%%' align='right'>
+  Unique
+  </td>
+
+  <td width='5%%' align='right'>
+  %s
+  </td>
+
   <td width='20%%' align='right'>
   <font size="$GetVar('HtmlFontSizeControls')">
   <input
@@ -353,7 +386,7 @@ def make_disorder_quicktools():
   >
   </font>
   </td>
-  ''' %parts_display
+  ''' %(parts_display, checkbox)
   return txt
 OV.registerFunction(make_disorder_quicktools,False,'gui.tools')
 

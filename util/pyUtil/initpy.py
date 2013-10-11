@@ -248,7 +248,7 @@ if OV.HasGUI():
   from gui.metadata import *
   from gui.maps import *
   from gui.images import *
-  import Tutorials
+  #import Tutorials
 
 def onstartup():
   OV.SetVar('cbtn_solve_on','false')
