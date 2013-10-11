@@ -97,3 +97,8 @@ class ImageListener_:
       i()
   
 ImageListener = ImageListener_()
+
+
+def do_sort():
+  pass
+olex.registerFunction(do_sort, False, "gui")
