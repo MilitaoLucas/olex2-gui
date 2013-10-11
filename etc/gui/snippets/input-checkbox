@@ -1,6 +1,7 @@
 #value=
 #checked=false
 #width=100%
+#manage=false
 
 <font size="$GetVar('HtmlFontSizeControls')">
 <input
@@ -15,5 +16,6 @@
   onclick="#onclick"
   oncheck="#oncheck"
   onuncheck="#onuncheck"
+  manage=#managed
 >
 </font>
