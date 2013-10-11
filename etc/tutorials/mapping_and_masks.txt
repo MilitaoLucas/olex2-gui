@@ -18,7 +18,7 @@ c:freeze(false)
 
 p:First the <b>Tools</b> needs to be opened by clicking on it
 h:tab-tools
-c:spy.switch_tab_for_tutorials(tools)
+c:spy.demo.switch_tab_for_tutorials(tools)
 
 p:You then need to click on the <b>Maps</b> tab
 h:h2-maps

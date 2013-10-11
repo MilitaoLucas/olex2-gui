@@ -14,7 +14,7 @@ p:This tutorial will teach you how to use the different 3D settings that are ava
 
 p:In order to access the different settings go to <b>View</b> in the top tab
 h:tab-view
-c:spy.switch_tab_for_tutorials(view)
+c:spy.demo.switch_tab_for_tutorials(view)
 
 p:Then you need to go on the tab for <b>Stereo View</b>
 h:h2-stereo-view

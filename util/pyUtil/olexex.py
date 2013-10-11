@@ -1724,19 +1724,6 @@ def isPro():
     return False
 OV.registerFunction(isPro)
 
-def switch_tab_for_tutorials(tabname):
-  OV.setItemstate("index* 0")
-  OV.setItemstate("logo 0")
-  OV.setItemstate("index-%s 1" %tabname)
-  OV.setItemstate("info-title 1")
-  if tabname.lower() == "work":
-    OV.setItemstate("solve-settings 2")
-    OV.setItemstate("refine-settings 2")
-    OV.setItemstate("report-settings 2")
-    OV.setItemstate("%s-toolbox 1" %tabname)
-  OV.setItemstate("tab* 2")
-OV.registerFunction(switch_tab_for_tutorials)
-
 def revert_to_original():
   extensions = ['res','ins','cif']
   for extension in extensions:

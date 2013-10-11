@@ -32,7 +32,7 @@ p:This should now make the screen automatically zoom in and out to fit the molec
 
 p:In order to make the molecule grow we need to click on the tab marked <b>View</b>.
 h:tab-view
-c:spy.switch_tab_for_tutorials(view)
+c:spy.demo.switch_tab_for_tutorials(view)
 
 p:Then click on the tab marked <b>Symmetry Generation</b>
 h:h2-symmetry-generation
