@@ -22,8 +22,9 @@
   <shortcut key="Shift+F11" macro="HtmlPanelVisible">
   <shortcut key="F11" macro="Fullscreen(not(Fullscreen()))">
   <shortcut key="F12" macro="spy.stop_auto">
-  <shortcut key="F12" macro="spy.stop_auto">
   <shortcut key="Ctrl+M" macro="spy.gui.maps.MapView()">
+  <shortcut key="Ctrl+S" macro="file">
+  <shortcut key="Ctrl+0" macro="showP 0">
   <shortcut key="Ctrl+1" macro="showP 1">
   <shortcut key="Ctrl+Shift+1" macro="showP 0 1">
   <shortcut key="Ctrl+2" macro="showP 2">
