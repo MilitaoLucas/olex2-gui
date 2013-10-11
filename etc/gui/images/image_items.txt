@@ -140,3 +140,4 @@
   Solution Settings Extra
   Refinement Settings Extra
   Space Group Determination
+  Peak and Uiso Sliders

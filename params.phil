@@ -1062,6 +1062,8 @@ user
     .type = str
   report_journal_style = rsc
     .type = str
+  keep_unique = False
+    .type = bool
   report{
     use_db = False
       .type = bool
