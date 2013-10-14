@@ -50,14 +50,14 @@
    <td width="30%" align="right">$+
      html.Snippet("gui/snippets/input-text", "name=sort_atom_order",
       "width=100%",
-      "value=GetVar('sorting.atom_order')",
+      "value=GetVar('sorting.atom_order', '')",
       "onchange=SetVar('sorting.atom_order', html.GetValue('~name~'))")
     $-</td>
    <td width="20%">Moiety order</td>
    <td width="30%" align="right">$+
      html.Snippet("gui/snippets/input-text", "name=sort_moiety_order",
       "width=100%",
-      "value=GetVar('sorting.moiety_order')",
+      "value=GetVar('sorting.moiety_order', '')",
       "onchange=SetVar('sorting.moiety_order', html.GetValue('~name~'))")
     $-</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

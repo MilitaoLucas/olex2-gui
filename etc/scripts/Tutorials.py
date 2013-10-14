@@ -340,7 +340,7 @@ class AutoDemo():
       OV.setItemstate("solve-settings 2")
       OV.setItemstate("refine-settings 2")
       OV.setItemstate("report-settings 2")
-      #OV.setItemstate("%s-toolbox 1" %tabname)
+      OV.setItemstate("work-main-toolbar 1")
     OV.setItemstate("tab* 2")
 
 AutoDemo_istance = AutoDemo()

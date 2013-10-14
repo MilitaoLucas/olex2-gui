@@ -23,15 +23,15 @@ c:spy.demo.switch_tab_for_tutorials(work)
 
 p:Then you need to select the <b>Sorting</b> tab
 h:h2-sorting
-c:html.ItemState work-sorting 1
+c:html.ItemState h2-work-sorting 1
 
 p:Once the tab has been opened there will be 4 buttons in the tab, the first button <b>Mass & Label</b> creates a table that sorts the atoms by mass but allows for the labels to be used in other areas
 
 p:The table gives you the results for the Atom label, Type, its X,Y and Z position, Ueq, Chemical Occupancy, Peak, R-bond and R-VdW
 
 p:Selecting the button will create a table of results in the command window
-h:button-mass_&_label
-c:sort +ml
+h:button-sort
+c:html.call(IMG_BUTTON-SORT.onclick)
 c:info
 c:refresh
 
@@ -45,7 +45,7 @@ c:text
 
 p:To make it easier to find the relevant information you can also type in the command <c>clear</c> before the the <c>text</c> command as this will only show the table you are wanting to look at now.
 c:clear
-c:sort +ml
+c:html.call(IMG_BUTTON-SORT.onclick)
 c:text
 
 p:The next button <b>Atom Label</b> sorts the table alphabetically by the Atoms label name

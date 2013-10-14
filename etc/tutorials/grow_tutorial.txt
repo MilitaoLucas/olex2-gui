@@ -39,7 +39,7 @@ h:h2-symmetry-generation
 c:html.ItemState h2-view-symmetry-generation 1
 
 p:Click on the tab marked <b>Growing</b> in order to access some of the different grow modes.
-h:h3-h3-growing
+h:h3-growing
 c:html.ItemState h3-growing 1
 
 p:In the expanded tab it now means you can select 3 different modes of growing.
