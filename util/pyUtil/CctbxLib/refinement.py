@@ -461,13 +461,29 @@ class FullMatrixRefine(OlexCctbxAdapter):
       fc_sq = self.normal_eqns.fc_sq.select(strong)
       wght = self.normal_eqns.weights.select(strong)
     else:
+      strong = None
       wght = self.normal_eqns.weights
       fc_sq = self.normal_eqns.fc_sq
     fc_sq = fc_sq.data()
     fo_sq = fo_sq.data()
     fc_sq *= self.normal_eqns.scale_factor()
-    wR2 = flex.sum(wght*flex.pow2((fo_sq-fc_sq)))/flex.sum(wght*flex.pow2(fo_sq))
+    w_diff_sq = wght*flex.pow2((fo_sq-fc_sq))
+    w_diff_sq_sum = flex.sum(w_diff_sq)
+    wR2 = w_diff_sq_sum/flex.sum(wght*flex.pow2(fo_sq))
     wR2 = math.sqrt(wR2)
+    # this way the disagreeable reflections calculated in Shelx
+#    w_diff_sq_av = w_diff_sq_sum/len(w_diff_sq)
+#    w_diff_sq /= w_diff_sq_av
+#    w_diff = flex.sqrt(w_diff_sq)
+#    disagreeable = w_diff >= 4
+#    d_diff = w_diff.select(disagreeable)
+#    if strong:
+#      d_idx = self.normal_eqns.observations.indices.select(strong)
+#    else:
+#      d_idx = self.normal_eqns.observations.indices
+#    d_idx = d_idx.select(disagreeable)
+#    for i, d in enumerate(d_diff):
+#      print d_idx[i], d
     return wR2
 
   def as_cif_block(self):
