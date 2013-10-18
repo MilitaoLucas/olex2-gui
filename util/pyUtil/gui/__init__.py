@@ -26,12 +26,8 @@ def About():
   h = int(olx.html.ClientHeight('self'))
   sw = 500+2*15+10
   sh = 280+2*15+150
-  olx.Popup("about '%s/etc/gui/help/about.htm' -x=%d -y=%d -w=%d -h=%d"
-            %(olx.BaseDir(),
-              sz[0] + w/2 + sw/2,
-              sz[1] + h/2 - sh/2,
-              sw,
-              sh))
+  olx.Popup("about", olx.BaseDir() + "/etc/gui/help/about.htm",
+            x=sz[0] + w/2 + sw/2, y=sz[1] + h/2 - sh/2, w=sw, h=sh)
 
 
 olex.registerFunction(About, False, "gui")
@@ -51,17 +47,17 @@ olex.registerFunction(SwitchSettings, False, "gui")
 def SwitchPanel(name="home"):
   name = name.lower()
   if name == "home":
-    olx.html.ItemState("* 0 tab* 2 tab-home 1 logo1 1 index-home* 1 info-title 1")
+    OV.setItemstate("* 0 tab* 2 tab-home 1 logo1 1 index-home* 1 info-title 1")
     #olx.html.ItemState("index* 0 index-home 1 tab* 2")
   elif name == "work":
     if olx.IsFileLoaded() != "false":
-      olx.html.ItemState("* 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1")
+      OV.setItemstate("* 0 tab* 2 tab-work 1 logo1 1 index-work* 1 info-title 1")
   elif name == "view":
-    olx.html.ItemState("* 0 tab* 2 tab-view 1 logo1 1 index-view* 1 info-title 1")
+    OV.setItemstate("* 0 tab* 2 tab-view 1 logo1 1 index-view* 1 info-title 1")
   elif name == "tools":
-    olx.html.ItemState("* 0 tab* 2 tab-tools 1 logo1 1 index-tools* 1 info-title 1")
+    OV.setItemstate("* 0 tab* 2 tab-tools 1 logo1 1 index-tools* 1 info-title 1")
   elif name == "info":
-    olx.html.ItemState("* 0 tab* 2 tab-info 1 logo1 1 index-info* 1 info-title 1")
+    OV.setItemstate("* 0 tab* 2 tab-info 1 logo1 1 index-info* 1 info-title 1")
   else:
     print "Invalid argument for the panel name: " + name
   return ""
@@ -101,3 +97,22 @@ class ImageListener_:
       i()
   
 ImageListener = ImageListener_()
+
+
+def do_sort():
+  args = []
+  args.append('+%s%s%s%s' %(OV.GetParam("user.sorting.cat1", ''),
+    OV.GetParam("user.sorting.cat2", ''),
+    OV.GetParam("user.sorting.cat3", ''),
+    OV.GetParam("user.sorting.cat4", '')))
+  if OV.GetParam("user.sorting.h", False):
+    args[0] += 'h'
+  args += olx.GetVar("sorting.atom_order", "").split()
+  arg3 = OV.GetParam("user.sorting.moiety")
+  if arg3:
+    args.append("moiety")
+    args.append('+' + arg3)
+  args += olx.GetVar("sorting.moiety_order", "").split()
+  olx.Sort(*args)
+  
+olex.registerFunction(do_sort, False, "gui")

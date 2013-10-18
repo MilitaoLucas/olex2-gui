@@ -6,7 +6,7 @@
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="combo"
-      value=""
+      value="Grow All"
       valign="center"
       bgcolor="GetVar('HtmlTableBgColour')"
       fgcolor="GetVar('HtmlFontColour')"
@@ -17,6 +17,7 @@
       readonly
       onchange="if strcmp(html.GetValue('~name~'),'fuse') then
        fuse else run(grow html.GetValue('~name~'))"
+     onchangealways='true'
       label='Grow'
     >
     </font>
@@ -25,7 +26,7 @@
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="combo"
-      value=""
+      value="Short"
       valign="center"
       bgcolor="GetVar('HtmlTableBgColour')"
       fgcolor="GetVar('HtmlFontColour')"
@@ -35,6 +36,7 @@
       items="'Short<--s;Selection<--r=10;VdW<--v;Move<--a;Shells<--shells;'"
       readonly
       onchange="run(mode grow html.GetValue('~name~'))"
+      onchangealways='true'
       label='Mode Grow'
     >
     </font>
@@ -43,7 +45,7 @@
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="combo"
-      value=""
+      value="Broken Fragments"
       valign="center"
       bgcolor="GetVar('HtmlTableBgColour')"
       fgcolor="GetVar('HtmlFontColour')"
@@ -53,6 +55,7 @@
       items="'Broken Fragments<--a;Atom-to-Atom<--c;Metal Last<--m;Peaks<--q;'"
       readonly
       onchange="run(compaq html.GetValue('~name~'))"
+      onchangealways='true'
       label='Assemble'
     >
     </font>

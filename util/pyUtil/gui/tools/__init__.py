@@ -2,6 +2,7 @@ from __future__ import division
 import olex
 import olx
 import os
+import sys
 
 global formula
 global formula_string
@@ -15,6 +16,7 @@ OV = OlexFunctions()
 global have_found_python_error
 have_found_python_error= False
 
+import olexex
 
 
 
@@ -256,7 +258,10 @@ def checkErrLogFile():
 OV.registerFunction(checkErrLogFile,True,'gui.tools')
 
 def checkPlaton():
-  have_platon = olx.file.Which('platon.exe')
+  prg_name = "platon"
+  if sys.platform[:3] == "win":
+    prg_name += ".exe"
+  have_platon = olx.file.Which(prg_name)
   if have_platon:
     return '''
     <a href='platon' target='Open Platon'>
@@ -304,3 +309,114 @@ def makeFormulaForsNumInfo():
     return formula_string
 OV.registerFunction(makeFormulaForsNumInfo)
 
+
+def hasDisorder():
+  olx_atoms = olexex.OlexRefinementModel()
+  parts = olx_atoms.disorder_parts()
+  if not parts:
+    return False
+  else:
+    sp = set(parts)
+    if len(sp) == 1 and 0 in sp:
+      return False
+    else:
+      return True
+OV.registerFunction(hasDisorder,False,'gui.tools')
+
+def make_disorder_quicktools():
+  import olexex
+  parts = set(olexex.OlexRefinementModel().disorder_parts())
+  
+  parts_display = ""
+  for item in parts:
+    if item == 0:
+      continue
+    if item == 1 or item == 2:
+      parts_display += "<a href='ShowP 0 %s -v=spy.GetParam(user.keep_unique)'><b>PART %s</b></a> | " %(item, item)
+    else:
+      parts_display += "<a href='ShowP 0 %s -v=spy.GetParam(user.keep_unique)'><b>%s</b></a> | " %(item, item)
+      
+  checkbox = '''
+    <font size=$GetVar(HtmlFontSizeControls)>
+  <input
+    type='checkbox'
+    width=18
+    height="GetVar('HtmlCheckboxHeight')"
+    bgcolor="GetVar('HtmlTableBgColour')"
+    name='KEEP_UNIQUE'
+    checked="spy.GetParam('user.keep_unique')"
+    oncheck="spy.SetParam('user.keep_unique','true')>>uniq"
+    onuncheck="spy.SetParam('user.keep_unique','false')"
+    target="Keep showing single fragments when switching the PART view"
+    onclick=""
+    value=''
+  >
+  </font>'''
+      
+      
+  txt = r'''
+  <td width='25%%'>
+    <b>Show PART 0 AND</b>
+  </td>
+  <td width='45%%' align='left'>
+  %s
+    <a href='ShowP'><b>All</b></a>
+  </td>
+  
+  <td width='5%%' align='right'>
+  Unique
+  </td>
+
+  <td width='5%%' align='right'>
+  %s
+  </td>
+
+  <td width='20%%' align='right'>
+  <font size="$GetVar('HtmlFontSizeControls')">
+  <input
+    type='combo'
+    width='100%%'
+    height="$GetVar('HtmlInputHeight')"
+    name='set_label_content_disorder'
+    value='Labels'
+    items="Occupancy<-o;Chem Occ.<-co;PART No<-p;Link-Code<-v;Labels<-l"
+    bgcolor="$GetVar('HtmlInputBgColour')"
+    onchange="spy.ChooseLabelContent(html.GetValue('~name~'))"
+    readonly='readonly'
+  >
+  </font>
+  </td>
+  ''' %(parts_display, checkbox)
+  return txt
+OV.registerFunction(make_disorder_quicktools,False,'gui.tools')
+
+
+
+def md():
+  import markdown
+  import glob
+    
+  #  p = "D:\Users\Horst\Documents\GitHub\Olex2Manual\Sucrose\solving.md"
+  p = r"C:/Users/Horst/Documents/GitHub/Olex2Manual/Sucrose"
+#  p = r"C:\Users\Horst\Documents\GitHub\Olex2Manual\GettingAroundOlex2\atom_label_display_options.md"
+  
+  g = glob.glob(r"%s/*.md" %p)
+
+  text = ""
+  for f in g:
+    try:
+      text += open(f,'r').read().decode('utf-8')
+    except Exception, err:
+      print err, f
+      
+
+  html = markdown.markdown(text, extensions=[])
+#  html = markdown.markdown(text, extensions=['latex'])
+  out = "%s/out.htm" %p
+  wFile = open(out, 'w')
+  wFile.write(html.encode('utf-8'))
+  wFile.close()
+  olx.Shell(out)
+  
+OV.registerFunction(md,False,'md')
+  

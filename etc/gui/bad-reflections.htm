@@ -15,6 +15,22 @@
 </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='BAD_REFLECTIONS_SORTING';help_ext=Bad-Reflections-Sorting;1 -->
+  <td width="90%">Unsigned sorting by Error/esd (refine to update)</td>
+  <td>
+    <input 
+      type="checkbox"
+      width="100%" 
+      height="GetVar('HtmlCheckboxHeight')"
+      bgcolor="GetVar('HtmlTableBgColour')" 
+      fgcolor="GetVar('HtmlFontColour')" 
+      name="BAD_REF_SORTING" 
+      checked="GetVar('olex2.disagreeable.sort_abs','true')"
+      onclick="SetVar('olex2.disagreeable.sort_abs',html.GetState(~name~))" 
+    >
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='EXCLUDE_HKL';help_ext=Exclude-hkl;1 -->
 
   <td>
@@ -63,7 +79,7 @@
     <input 
       type='checkbox'  
       width=40 
-      height=12 
+      height="GetVar('HtmlCheckboxHeight')"
       bgcolor="GetVar('HtmlTableBgColour')" 
       fgcolor="GetVar('HtmlFontColour')" 
       name="EXCLUDE_AND" 

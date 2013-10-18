@@ -259,13 +259,19 @@ class OlexFunctions(inheritFunctions):
 
   def GetExtinction(self):
     try:
-      return float(olx.xf.rm.Exti())
+      ev = olx.xf.rm.Exti()
+      if '(' in ev:
+        return float(ev.split('(')[0])
+      return float(ev)
     except:
       return None
 
-  def SetExtinction(self, v):
+  def SetExtinction(self, v, e=None):
     try:
-      olx.xf.rm.Exti(v)
+      if e:
+        olx.xf.rm.Exti(v, e)
+      else:
+        olx.xf.rm.Exti(v)
       return True
     except:
       return False
@@ -336,17 +342,16 @@ class OlexFunctions(inheritFunctions):
     try:
       cmd = ''
       if filepath:
-        cmd = '"%s"' %filepath
+        cmd = '%s' %filepath
       if update_atoms_loop is None:
         update_atoms_loop = (OV.GetParam('snum.refinement.program', '') == 'olex2.refine')
-      if update_atoms_loop:
-        cmd += ' -u'
       finalise = self.GetParam('user.cif.finalise', 'Ignore')
+      finalise_value = None
       if finalise == 'Include':
-        cmd  += ' -f=true'
+        finalise_value = True
       elif finalise == 'Exclude':
-        cmd  += ' -f=false'
-      olx.CifMerge(cmd)
+        finalise_value = False
+      olx.CifMerge(filepath, f=finalise_value, u=update_atoms_loop)
       if report:
         print "Refinement CIF file has been merged with the meta-data cif file"
     except Exception, ex:
@@ -410,6 +415,9 @@ class OlexFunctions(inheritFunctions):
     olex.m("HtmlPanelWidth")
 
   def reloadStructureAtreap(self, path, file, fader=True, sg_changed = False):
+    if not self.HasGUI():
+      olex.m("@reap \"%s\"" %(r"%s/%s.res" %(path, file)))
+      return
     fader = self.FindValue('gui_use_fader')
     #print "AtReap %s/%s" %(path, file)
     try:

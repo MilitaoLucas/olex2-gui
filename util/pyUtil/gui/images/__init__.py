@@ -114,7 +114,7 @@ def GetBitmapImageInstructions():
   else:
     olex.m('pict%s %s %s %s %s' %(pict, nbg, filefull, resolution, filesize))
     
-  #import Image
+  #from PIL import Image
   OV.Cursor()
   from gui import ImageListener
   ImageListener.OnChange()
@@ -207,9 +207,9 @@ def GetImageFilename(image_type):
       if not filename:
         return None, None, None
   if filename.endswith(".%s" %fileext):
-    filefull = "'%s'" %filename
+    filefull = "%s" %filename
   else:
-    filefull = "'%s.%s'" %(filename, fileext)
+    filefull = "%s.%s" %(filename, fileext)
   OV.SetParam('snum.image.%s.name' %image_type.lower(),None)
   return filefull, filename, fileext
 

@@ -164,6 +164,8 @@ routines requiring structure refinement
       .type = float
     max_hole = None      
       .type = float
+    flack_str = None      
+      .type = str
     expected_peaks = None      
       .type = int
     has_h = False
@@ -1060,6 +1062,8 @@ user
     .type = str
   report_journal_style = rsc
     .type = str
+  keep_unique = False
+    .type = bool
   report{
     use_db = False
       .type = bool
@@ -1125,6 +1129,20 @@ user
       type = png
         .type = str
     }
+  }
+  sorting {
+    cat1 = "p"
+      .type = str
+    cat2 = "z"
+      .type = str
+    cat3 = "l"
+      .type = str
+    cat4 = ""
+      .type = str
+    moiety = "s"
+     .type = str
+    h = False
+      .type = bool
   }
 }
 

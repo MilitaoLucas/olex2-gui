@@ -61,7 +61,7 @@ class GuiFunctions(object):
     olx.Refresh()
       
   def CreateBitmap(self, bitmap):
-    olx.CreateBitmap("-r %s %s" %(bitmap, bitmap))
+    olx.CreateBitmap(bitmap, bitmap, r=True)
     
   def DeleteBitmap(self, bitmap):
     olx.DeleteBitmap('%s' %bitmap)
@@ -102,7 +102,7 @@ class GuiFunctions(object):
     return olx.HtmlPanelWidth()
 
   def setItemstate(self, txt):
-    olex.m("html.ItemState %s" %txt)
+    olx.html.ItemState(*tuple(txt.split()))
 
   def SetImage(self, zimg_name, image_file):
     if self.olex_gui.IsControl(zimg_name):

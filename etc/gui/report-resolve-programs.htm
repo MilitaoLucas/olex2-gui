@@ -15,7 +15,7 @@ Please fill in the following details to resolve missing items:
   height="$GetVar(HtmlComboHeight)"
   name='solution_program'
   value='$spy.history.get(solution,program)'
-  items='$spy.get_solution_programs()'
+  items='$spy.programs.get_known("solution")'
   onchange="html.setitems(report_resolve.solution_method,
    spy.get_solution_methods(html.GetValue(~name~)))"
   readonly
@@ -42,7 +42,7 @@ Please fill in the following details to resolve missing items:
   height="$GetVar(HtmlComboHeight)"
   name='refinement_program'
   value='$spy.history.get(refinement,program)'
-  items='$spy.get_refinement_programs()'
+  items='$spy.programs.get_known("refinement")'
   onchange="html.setitems(report_resolve.refinement_method,
    spy.get_refinement_methods(html.GetValue(~name~)))"
   readonly

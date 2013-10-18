@@ -190,17 +190,18 @@ class AutoDemo():
       x = OV.GetHtmlPanelX() - boxWidth - 40
       y = 70
       if self.have_box_already:
-        olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(), "-t='%s'" %(self.pop_name,))
+        olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(), t=self.pop_name)
       else:
         if self.interactive:
-          olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(), "-b=t -t='%s' -w=%i -h=%i -x=%i -y=%i" %(self.pop_name, boxWidth, boxHeight, x, y))
+          olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(),
+           b='t', t=self.pop_name, w=boxWidth, h=boxHeight, x=x, y=y)
           olx.html.SetFocus(self.pop_name + '.TUTORIAL_NEXT')
         else:
           boxWidth = 400
           boxHeight = 250
           x = OV.GetHtmlPanelX() - boxWidth - 40
           y = 75
-          olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(), "-t='%s' -w=%i -h=%i -x=%i -y=%i" %(self.pop_name, boxWidth, boxHeight, x, y))
+          olx.Popup(self.pop_name, '%s.htm' %self.pop_name.lower(), **{'b':'t', 't':self.pop_name, 'w':boxWidth, 'h':boxHeight, 'x':x, 'y':y})
         self.have_box_already = True
         #olx.html.Show(self.pop_name)
       OV.Refresh()
@@ -237,7 +238,7 @@ class AutoDemo():
     boxHeight = 200
     x = 200
     y = 200
-    olx.Popup(name, wFilePath, "-b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(name, boxWidth, boxHeight, x, y))
+    olx.Popup(name, wFilePath, **{'b':'tc', 't':name, 'w':boxWidth, 'h':boxHeight, 'x':x, 'y':y})
 
   def format_txt(self):
     txt = self.txt
@@ -291,7 +292,7 @@ class AutoDemo():
     if cmd_type == "s":
       sleep = cmd_content
 
-    if cmd_type == 'p':
+    elif cmd_type == 'p':
       self.txt = "%s" %(cmd_content)
       if self.interactive:
         res = self.make_tutbox_popup()#
@@ -303,41 +304,49 @@ class AutoDemo():
 #        olx.CreateBitmap('-r %s %s' %(self.bitmap, self.bitmap))
 #        sleep = len(self.cmd_content) * self.reading_speed
 
-
-    if cmd_type == 'c':
-      if not self.interactive:
-        if cmd_content == "text":
-          return
-      txt = "%s: %s" %(cmd_type, cmd_content)
-      txt = "%s" %(cmd_content)
-      #print(txt)
-
-    if cmd_type == 'h':
-      control = cmd_content
-      from gui.tools import flash_gui_control
-      flash_gui_control(control)
-      
-      
-    if cmd_type == 'c':
-      if 'reap' in cmd_content:
-        cmd_content = cmd_content.replace("reap '", "reap ")
-        cmd_content = cmd_content.rstrip("'")
-        cmd_content = cmd_content.replace('reap "', 'reap ')
-        cmd_content = cmd_content.rstrip('"')
-      olex.m(cmd_content)
-      
-    if cmd_type != 'p':
-      self.get_demo_item()
-      self.run_demo_item()
+    else:
+      if cmd_type == 'c':
+        if not self.interactive:
+          if cmd_content == "text":
+            return
+        #txt = "%s: %s" %(cmd_type, cmd_content)
+        #txt = "%s" %(cmd_content)
+        #print(txt)
+        if 'reap' in cmd_content:
+          cmd_content = cmd_content.replace("reap '", "reap ")
+          cmd_content = cmd_content.rstrip("'")
+          cmd_content = cmd_content.replace('reap "', 'reap ')
+          cmd_content = cmd_content.rstrip('"')
+        olex.m(cmd_content)
+  
+      elif cmd_type == 'h':
+        control = cmd_content
+        from gui.tools import flash_gui_control
+        flash_gui_control(control)
+        
+        
+      if cmd_type != 'p':
+        self.get_demo_item()
+        self.run_demo_item()
       
     OV.Refresh()
     
-  
+  def switch_tab_for_tutorials(self, tabname):
+    OV.setItemstate("index* 0")
+    OV.setItemstate("logo 0")
+    OV.setItemstate("index-%s 1" %tabname)
+    OV.setItemstate("info-title 1")
+    if tabname.lower() == "work":
+      OV.setItemstate("solve-settings 2")
+      OV.setItemstate("refine-settings 2")
+      OV.setItemstate("report-settings 2")
+      OV.setItemstate("work-main-toolbar 1")
+    OV.setItemstate("tab* 2")
 
-  
 AutoDemo_istance = AutoDemo()
 OV.registerFunction(AutoDemo_istance.run_autodemo,False,'demo')
 OV.registerFunction(AutoDemo_istance.run_demo_loop,False,'demo')
 OV.registerFunction(AutoDemo_istance.next_demo_item,False,'demo')
 OV.registerFunction(AutoDemo_istance.back_demo_item,False,'demo')
 OV.registerFunction(AutoDemo_istance.cancel_demo_item,False,'demo')
+OV.registerFunction(AutoDemo_istance.switch_tab_for_tutorials,False,'demo')

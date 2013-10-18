@@ -19,7 +19,7 @@ c:freeze(false)
 
 p:First you need to click on the tab for <b>Tools</b>.
 h:tab-tools
-c:spy.switch_tab_for_tutorials(tools)
+c:spy.demo.switch_tab_for_tutorials(tools)
 
 p:Then click on the tab marked <b>Images</b>
 h:h2-images

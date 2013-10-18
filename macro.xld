@@ -19,12 +19,11 @@
       <cmd4 "if isos(mac) then setvar(defeditor,'open')">
       <cmd5 "if isos(mac) then setvar(defexplorer,'open')">
       <cmd6 "if isos(mac) then setvar(defbrowser,'open')">
-      <cmd6 rem="loglevel(mf)>>py.loglevel(mf)">
-      <cmd9 "if not(file.Exists(app.getarg(1))) then
+      <cmd7 "if file.Exists(app.ConfigDir()/radii.xld) then 'Load radii app.ConfigDir()/radii.xld'">
+      <cmd8 "if not(file.Exists(app.getarg(1))) then
         'if and(IsVar(startup),file.Exists(file.AbsolutePath(GetVar(startup)))) then
               \"reap file.AbsolutePath(GetVar(startup))\"'">
-      <cmd10 "bind wheel 'ShowQ -wheel='">
-      <cmd11 xxx="spy.GetTip(0)">
+      <cmd9 "bind wheel 'ShowQ -wheel='">
       <cmd12 "spy.settings_tree()">
       <cmd13 "deletemenu 'Structure;Export picture (experimental)'">
     >
@@ -881,19 +880,29 @@
   <body
     <args>
     <cmd
-      <cmd1 "exec -o getvar(defeditor) DataDir()/.options">
+      <cmd1 "exec -o getvar(defeditor) app.ConfigDir()/.options">
     >
   >
 >
 
 <log help='Shows the current log file'
   <body
-    <args
-      <arg1 name="filname" def="custom">
-    >
+    <args>
     <cmd
       <cmd1 "flush log">
       <cmd2 "exec -o getvar(defeditor) app.GetLogName()">
+    >
+  >
+>
+
+<text help='Shows the current console buffer'
+  <body
+    <args
+      <arg1 name="file_name" def="output.txt">
+    >
+    <cmd
+      <cmd1 "flush output %1">
+      <cmd2 "exec -o getvar(defeditor) DataDir()/%1">
     >
   >
 >

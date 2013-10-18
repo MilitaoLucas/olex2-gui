@@ -1,6 +1,6 @@
 #import PngImagePlugin
-import Image
-import ImageFont, ImageDraw, ImageChops, ImageColor
+from PIL import Image
+from PIL import ImageFont, ImageDraw, ImageChops, ImageColor
 
 # Rounded corners
 # (c) 2008 www.stani.be

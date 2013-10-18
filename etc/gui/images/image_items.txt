@@ -18,11 +18,6 @@
   Default Style
   Sphere Packing
   Ellipsoids | H
-  Atomic Mass
-  Atom Number
-  Atom Label
-  Mass & Label
-  Moieties
   Reset
   Reset & Solve
   SG Info
@@ -84,6 +79,7 @@
   Set
   Back
   Run Batch
+  Sort
 
 [FULL ROW]
   Run AutoChem
@@ -129,13 +125,15 @@
 [H3]
   Collection
   Crystal
-  Crystal Image
+  Crystal-Image
   Diffraction
   Absorption Correction
   Publication
   Reference
+  Citations
   Source Files
   Tutorials
   Solution Settings Extra
   Refinement Settings Extra
   Space Group Determination
+  Peak and Uiso Sliders

@@ -59,7 +59,7 @@ c:refresh
 
 p:This particular command you can use in the GUI by going to View in the toolbar then opening the tab quick drawing styles.
 h:tab-view
-c:spy.switch_tab_for_tutorials(view)
+c:spy.demo.switch_tab_for_tutorials(view)
 h:h2-quick-drawing-styles
 c:html.ItemState h2-view-quick-drawing-styles 1
 

@@ -1,8 +1,8 @@
 from ArgumentParser import ArgumentParser
-import ImageFont
+from PIL import ImageFont
 #import pickle
 #import shelve
-import PngImagePlugin
+from PIL import PngImagePlugin
 #import FontFile
 
 class FontInstances(ArgumentParser):

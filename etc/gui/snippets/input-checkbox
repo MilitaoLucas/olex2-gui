@@ -1,6 +1,7 @@
 #value=
 #checked=false
 #width=100%
+#manage=false
 
 <font size="$GetVar('HtmlFontSizeControls')">
 <input
@@ -9,11 +10,11 @@
   bgcolor="$GetVar('HtmlInputBgColour')"
   name="#name"
   width="#width"
-  height="$GetVar('HtmlInputHeight')"
   value="#value"
   checked="#checked"
   onclick="#onclick"
   oncheck="#oncheck"
   onuncheck="#onuncheck"
+  manage=#managed
 >
 </font>
