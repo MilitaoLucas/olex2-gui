@@ -880,19 +880,29 @@
   <body
     <args>
     <cmd
-      <cmd1 "exec -o getvar(defeditor) DataDir()/.options">
+      <cmd1 "exec -o getvar(defeditor) app.ConfigDir()/.options">
     >
   >
 >
 
 <log help='Shows the current log file'
   <body
-    <args
-      <arg1 name="filname" def="custom">
-    >
+    <args>
     <cmd
       <cmd1 "flush log">
       <cmd2 "exec -o getvar(defeditor) app.GetLogName()">
+    >
+  >
+>
+
+<text help='Shows the current console buffer'
+  <body
+    <args
+      <arg1 name="file_name" def="output.txt">
+    >
+    <cmd
+      <cmd1 "flush output %1">
+      <cmd2 "exec -o getvar(defeditor) DataDir()/%1">
     >
   >
 >
