@@ -6,7 +6,7 @@
     <item from="_symmetry_Int_Tables_number-M" to="_space_group_IT_number">
     <item from="_diffrn_reflns_av_sigmaI/netI" to="_diffrn_reflns_av_unetI/netI">
     <item from="_diffrn_radiation_source" to="_diffrn_source">
->
+  >
   <sorting
     <pivots
       <pivot "_audit_creation">
@@ -42,4 +42,6 @@
       <ending "_max">
     >
   >
+  <#include "app.ConfigDir()/cif_customisation.xld" extend='false'>
 >
+

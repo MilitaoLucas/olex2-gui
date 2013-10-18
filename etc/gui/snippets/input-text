@@ -1,5 +1,6 @@
 #value=
 #width=100%
+#manage=false
 
 <font size="$GetVar('HtmlFontSizeControls')">
 <input
@@ -9,9 +10,9 @@
   valign="center"
   name="#name"
   width="#width"
-  height="$GetVar('HtmlInputHeight')"
   value="#value"
   onchange="#onchange"
   onleave="#onleave"
+  manage=#manage
 >
 </font>

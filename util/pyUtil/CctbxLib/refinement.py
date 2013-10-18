@@ -364,6 +364,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.r1 = self.normal_eqns.r1_factor(cutoff_factor=2)
       self.r1_all_data = self.normal_eqns.r1_factor()
       self.check_flack()
+      if self.flack:
+        OV.SetParam('snum.refinement.flack_str', self.flack)
+      if self.reparametrisation.extinction.grad:
+        #extinction is the last parameter after the twin fractions
+        diag = self.twin_covariance_matrix.matrix_packed_u_diagonal()
+        su = math.sqrt(diag[len(diag)-1])
+        OV.SetExtinction(self.reparametrisation.extinction.value, su)
     except RuntimeError, e:
       if str(e).startswith("cctbx::adptbx::debye_waller_factor_exp: max_arg exceeded"):
         print "Refinement failed to converge"
@@ -445,6 +452,39 @@ class FullMatrixRefine(OlexCctbxAdapter):
           return l + " K\\a"
         return "%s K\\%s~%s~" %(l[:2], l[2].lower(), l[3])
     return 'synchrotron'
+
+  def wR2_factor(self, cutoff_factor=None):
+    fo_sq = self.normal_eqns.observations.fo_sq
+    if cutoff_factor is not None:
+      strong = fo_sq.data() >= cutoff_factor*fo_sq.sigmas()
+      fo_sq = fo_sq.select(strong)
+      fc_sq = self.normal_eqns.fc_sq.select(strong)
+      wght = self.normal_eqns.weights.select(strong)
+    else:
+      strong = None
+      wght = self.normal_eqns.weights
+      fc_sq = self.normal_eqns.fc_sq
+    fc_sq = fc_sq.data()
+    fo_sq = fo_sq.data()
+    fc_sq *= self.normal_eqns.scale_factor()
+    w_diff_sq = wght*flex.pow2((fo_sq-fc_sq))
+    w_diff_sq_sum = flex.sum(w_diff_sq)
+    wR2 = w_diff_sq_sum/flex.sum(wght*flex.pow2(fo_sq))
+    wR2 = math.sqrt(wR2)
+    # this way the disagreeable reflections calculated in Shelx
+#    w_diff_sq_av = w_diff_sq_sum/len(w_diff_sq)
+#    w_diff_sq /= w_diff_sq_av
+#    w_diff = flex.sqrt(w_diff_sq)
+#    disagreeable = w_diff >= 4
+#    d_diff = w_diff.select(disagreeable)
+#    if strong:
+#      d_idx = self.normal_eqns.observations.indices.select(strong)
+#    else:
+#      d_idx = self.normal_eqns.observations.indices
+#    d_idx = d_idx.select(disagreeable)
+#    for i, d in enumerate(d_diff):
+#      print d_idx[i], d
+    return wR2
 
   def as_cif_block(self):
     def format_type_count(type, count):
@@ -618,6 +658,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.normal_eqns.weighting_scheme)
     cif_block['_refine_ls_weighting_scheme'] = 'calc'
     cif_block['_refine_ls_wR_factor_ref'] = fmt % self.normal_eqns.wR2()
+    cif_block['_refine_ls_wR_factor_gt'] = fmt % self.wR2_factor(2)
     (h_min, k_min, l_min), (h_max, k_max, l_max) = refinement_refs.min_max_indices()
     if (refinement_refs.space_group().is_centric() or
         not refinement_refs.anomalous_flag()):
@@ -965,7 +1006,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       frozen = olx.Freeze(True)
     olx.xf.EndUpdate()
     if olx.xf.latt.IsGrown() == 'false':
-      olx.Compaq('-q')
+      olx.Compaq(q=True)
     if OV.HasGUI():
       olx.gl.Basis(basis)
       olx.Freeze(frozen)

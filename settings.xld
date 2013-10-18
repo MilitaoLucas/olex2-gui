@@ -3,6 +3,7 @@
   <shortcut key="Ctrl+G" macro="mode grow">
   <shortcut key="Ctrl+H" macro="showH">
   <shortcut key="Ctrl+Q" macro="showQ">
+  <shortcut key="Ctrl+R" macro="refine">
   <shortcut key="Ctrl+T" macro="showStr">
   <shortcut key="Ctrl+A" macro="sel -a">
   <shortcut key="Ctrl+U" macro="sel -u">
@@ -21,12 +22,13 @@
   <shortcut key="Shift+F11" macro="HtmlPanelVisible">
   <shortcut key="F11" macro="Fullscreen(not(Fullscreen()))">
   <shortcut key="F12" macro="spy.stop_auto">
+  <shortcut key="Ctrl+M" macro="spy.gui.maps.MapView()">
+  <shortcut key="Ctrl+S" macro="file">
   <shortcut key="Ctrl+0" macro="showP 0">
   <shortcut key="Ctrl+1" macro="showP 1">
   <shortcut key="Ctrl+Shift+1" macro="showP 0 1">
   <shortcut key="Ctrl+2" macro="showP 2">
   <shortcut key="Ctrl+Shift+2" macro="showP 0 2">
-  <shortcut key="Ctrl+Shift+r" macro="py.run basedir()\util\pyUtil\CctbxLib\cctbx_olex_adapter.py">
   <shortcut key="Ctrl+Shift+y" macro="spy.SetParam(snum.refinement.auto.tidy,True)>>html.Update">
   <shortcut key="Ctrl+y" macro="spy.SetParam(snum.refinement.auto.tidy,False)>>html.Update">
   <shortcut key="break" macro="echo ++INTERRUPT++>>spy.SetParam(olex2.stop_current_process,True)>>SetVar(stop_current_process,True)>>spy.stopShelx()">

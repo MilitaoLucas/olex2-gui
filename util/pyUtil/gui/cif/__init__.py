@@ -7,7 +7,7 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
 def threadPrint(str):
-  olx.Schedule(1, "'post \"%s\"'" %str)
+  olx.Schedule(1, "post \"%s\"" %str)
 
 def extractHtmlValueFromLine(line, name):
   idx = line.find(name)
@@ -121,7 +121,7 @@ def GetCheckcifReport(outputtype='pdf', send_fcf=False):
         wFile.write(txt)
         wFile.close()
   fileName = '%s'%os.path.join(OV.FilePath(),out_file_name)
-  olx.Schedule(1, "'spy.threading.shell.run(\"%s\")'" %fileName)
+  olx.Schedule(1, "spy.threading.shell.run(\"%s\")" %fileName)
   #print time.time() -t_
 
 

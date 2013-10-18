@@ -19,7 +19,7 @@ c:freeze(false)
 
 p:First you need to click on the <b>View</b> tab in the top toolbar.
 h:tab-view
-c:spy.switch_tab_for_tutorials(view)
+c:spy.demo.switch_tab_for_tutorials(view)
 
 p:Then you need to open the toolbar called <b>Symmetry Generation</b> by clicking it, which will extend the tab
 h:h2-symmetry-generation

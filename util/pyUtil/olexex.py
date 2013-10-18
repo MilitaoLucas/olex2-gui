@@ -546,11 +546,7 @@ if haveGUI:
 
 
 def ChooseLabelContent(cmd):
-  s = ""
-  switches = cmd.split()
-  for switch in switches:
-    s += "-%s " %switch
-  olx.Labels(s)
+  olx.Labels(**dict([(k, True) for k in cmd.split()]))
   return ""
 OV.registerFunction(ChooseLabelContent)
 
@@ -892,17 +888,6 @@ def setAllMainToolbarTabButtons():
   return "Done"
 if haveGUI:
   OV.registerFunction(setAllMainToolbarTabButtons)
-
-def onCrystalColourChange():
-  if variableFunctions.initialisingVariables:
-    return
-  lustre = OV.FindValue('snum_metacif_exptl_crystal_colour_lustre')
-  modifier = OV.FindValue('snum_metacif_exptl_crystal_colour_modifier')
-  primary = OV.FindValue('snum_metacif_exptl_crystal_colour_primary')
-  colour = ' '.join(item for item in (lustre,modifier,primary) if item != '?')
-  if colour:
-    OV.SetVar('snum_metacif_exptl_crystal_colour', colour)
-OV.registerFunction(onCrystalColourChange)
 
 def onRefinementProgramChange(prg_name, method=None, scope='snum'):
   if prg_name == 'Auto':
@@ -1451,12 +1436,12 @@ OV.registerFunction(makeSpecialCifCharacter)
 
 def getReportTitleSrc():
   import PIL
-  import Image
-  import ImageDraw
-  import PngImagePlugin
+  from PIL import Image
+  from PIL import ImageDraw
+  from PIL import PngImagePlugin
   import StringIO
   import base64
-  import EpsImagePlugin
+  from PIL import EpsImagePlugin
   from ImageTools import ImageTools
   IT = ImageTools()
 
@@ -1572,12 +1557,12 @@ OV.registerFunction(getReportPhilItem)
 def getReportImageData(size='w400', imageName=None):
 
   import PIL
-  import Image
-  import PngImagePlugin
+  from PIL import Image
+  from PIL import PngImagePlugin
   import StringIO
   import base64
-  import ImageDraw
-  import EpsImagePlugin
+  from PIL import ImageDraw
+  from PIL import EpsImagePlugin
   make_border = False
 
   size_type = size[:1]
@@ -1738,19 +1723,6 @@ def isPro():
   else:
     return False
 OV.registerFunction(isPro)
-
-def switch_tab_for_tutorials(tabname):
-  olex.m("html.ItemState index* 0")
-  olex.m("html.ItemState logo 0")
-  olex.m("html.ItemState index-%s 1" %tabname)
-  olex.m("html.ItemState info-title 1")
-  if tabname.lower() == "work":
-    olex.m("html.ItemState solve-settings 2")
-    olex.m("html.ItemState refine-settings 2")
-    olex.m("html.ItemState report-settings 2")
-    olex.m("html.ItemState %s-toolbox 1" %tabname)
-  olex.m("html.ItemState tab* 2")
-OV.registerFunction(switch_tab_for_tutorials)
 
 def revert_to_original():
   extensions = ['res','ins','cif']

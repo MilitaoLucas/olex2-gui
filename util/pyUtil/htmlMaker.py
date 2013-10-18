@@ -250,7 +250,18 @@ class GeneratedGuiMaker(object):
     return htmlTools.makeHtmlTable(list)
   OV.registerFunction(collectionMetadataHtmlMaker)
   
-  
+  def citationsMetadataHtmlMaker(self, ):
+    txt = "<b>Current Citations</b>:<br>"
+    ref_l = OV.get_cif_item('_publ_section_references').split('\n')
+    if not ref_l:
+      ref = "<b>_publ_section_references</b> is currently missing or empty."
+    else:
+      for item in ref_l:
+        item = item.strip()
+        if item:
+          txt += "%s<br>" %item
+    return txt.rstrip('<br>')
+
   def progressMetadataHtmlMaker(self, ):
     list = (
       {'varName':'snum.dimas.progress_status',

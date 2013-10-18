@@ -719,11 +719,6 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
                                     'ins_file':f_data,
                                     'history':history,
                                     }
-#      href = 'spy.on_twin_image_click(%s)'
-#      href = 'spy.revert_history -solution="%s" -refinement="%s"' %(history_solution, history_refinement)
-#      law_txt = "<a href='%s'><zimg src=%s></a>&nbsp;" %(href, image_name)
-#      self.twin_law_gui_txt += "%s" %(law_txt)
-#      self.make_gui()
       l += 1
     #r_list.sort()
     law_txt = ""
@@ -737,7 +732,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       img_src = "%s.png" %image_name
       name = self.twin_laws_d[run].get('name', "XX")
       #href = 'spy.on_twin_image_click(%s)'
-      href = 'spy.revert_history(%s)>>spy.reset_twin_law_img()>>html.Update' %(self.twin_laws_d[i].get('history'))
+      href = 'spy.on_twin_image_click(%s)>>spy.reset_twin_law_img()>>html.Update' %(i,)
       law_txt = "<a href='%s'><zimg src=%s></a>&nbsp;" %(href, image_name)
       self.twin_law_gui_txt += "%s" %(law_txt)
       control = "IMG_%s" %image_name.upper()

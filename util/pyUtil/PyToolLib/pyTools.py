@@ -172,7 +172,7 @@ class pyTools(ArgumentParser):
 
     elif tool == "cctbx":
       bitmap = "working"
-      olx.CreateBitmap('-r %s %s' %(bitmap, bitmap))
+      OV.CreateBitmap(bitmap)
       from cctbx_olex_adapter import OlexCctbxAdapter
       dispatching.setdefault('cctbx', OlexCctbxAdapter)
       OV.DeleteBitmap(bitmap)

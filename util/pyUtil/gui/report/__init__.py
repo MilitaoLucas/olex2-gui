@@ -250,10 +250,28 @@ class publication:
     else:
       str = ""
       for item in l:
+        if not item:
+          continue
         display = os.path.basename(item)
-        str += "<a href='shell %s'>%s</a> " %(item, display)
+        remove = "<a target='Remove from merge' href='spy.gui.report.publication.remove_cif_from_merge_list(%s)>>html.Update'><font color='red'><b>x</b></font></a>" %item
+        str += "<a target='Edit this CIF' href='shell %s'>%s</a>(%s) " %(item, display, remove)
     return str
-
+  
+  def add_cif_to_merge_list(cif_p):
+    if not cif_p:
+      return
+    l = OV.GetParam('snum.report.merge_these_cifs', [])
+    l.append(cif_p)
+    OV.SetParam('snum.report.merge_these_cifs', l)
+    
+  def remove_cif_from_merge_list(cif_p):
+    l = OV.GetParam('snum.report.merge_these_cifs', [])
+    idx = l.index(cif_p)
+    if idx != -1:
+      del l[idx]
+    if not l:
+      l = ""
+    OV.SetParam('snum.report.merge_these_cifs', l)
 
   def AddTemplateToMergeList(self, value=""):
     if not value:
@@ -292,6 +310,11 @@ class publication:
     OV.SetParam('snum.report.merge_these_cifs', copy_to)
     olx.Shell(copy_to)
 
+  olex.registerFunction(add_cif_to_merge_list, False, "gui.report.publication")
+  olex.registerFunction(remove_cif_from_merge_list, False, "gui.report.publication")
+
+
+
 pub = publication()
 olex.registerFunction(pub.OnContactAuthorChange, False, "gui.report.publication")
 olex.registerFunction(pub.OnPersonChange, False, "gui.report.publication")
@@ -316,13 +339,9 @@ def ResolvePrograms():
   sw = 650
   sh = 200
   pop_name = 'report_resolve'
-  olx.Popup("%s '%s/etc/gui/report-resolve-programs.htm' -x=%d -y=%d -w=%d -h=%d -s"
-            %(pop_name, olx.BaseDir(),
-              sz[0] + w/2 + sw/2,
-              sz[1] + h/2 - sh/2,
-              sw,
-              sh) +
-            " -b=tc -t='Missing data'")
+  olx.Popup(pop_name, olx.BaseDir() + "/etc/gui/report-resolve-programs.htm",
+   t="Missing data", b="tc",
+   x=sz[0] + w/2 + sw/2, y=sz[1] + h/2 - sh/2, w=sw, h=sh, s=True)
   res = olx.html.ShowModal(pop_name)
   if not res or int(res) == 1:
     return False
@@ -428,7 +447,6 @@ def get_box_x_y(w, h):
   if x < 0: x = mouseX 
   if y < 0: y = 0
   return x,y
-
 
 olex.registerFunction(get_report_title, False, "report")
 olex.registerFunction(ResolvePrograms, False, "report")

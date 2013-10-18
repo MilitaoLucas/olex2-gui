@@ -205,8 +205,8 @@ class BrukerSaint(ImageTools):
       
   def make_box_image(self):
     #import PngImagePlugin
-    import Image
-    import ImageDraw, ImageChops
+    from PIL import Image
+    from PIL import ImageDraw, ImageChops
     scale = 1
     size = (27, 27)
     im = Image.new('RGBA', size, '#efefef')
