@@ -18,7 +18,6 @@
   Default Style
   Sphere Packing
   Ellipsoids | H
-  Sort
   Reset
   Reset & Solve
   SG Info
@@ -80,6 +79,7 @@
   Set
   Back
   Run Batch
+  Sort
 
 [FULL ROW]
   Run AutoChem

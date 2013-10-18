@@ -1,7 +1,7 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SORTING_ROW_0';help_ext=sorting_cat;1 -->
-   <td width="20%">Sort order</td>
+   <td width="20%"><b>Sort order</b></td>
    <td width="20%">$+
      html.Snippet("gui/snippets/input-combo", "name=sorting_cat1",
       "value=spy.GetParam('user.sorting.cat1', 'Part')",
@@ -29,15 +29,15 @@
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SORTING_ROW_1';help_ext=sorting_moiety;1 -->
-   <td width="20%">Moiety</td>
-   <td width="20%">$+
+   <td width="20%"><b>Moiety</b></td>
+   <td width="40%">$+
      html.Snippet("gui/snippets/input-combo", "name=sorting_moiety",
       "value=spy.GetParam('user.sorting.moiety', 'Size')",
       "items=Size<-s;Heaviest atom<-h;Mass<-m",
       "onchange=spy.SetParam('user.sorting.moiety', html.GetValue('~name~'))")
     $-</td>
-   <td width="50%">Treat H atoms independently</td>
-   <td width="10%">$+
+   <td width="35%" align='left'>Treat H atoms independently</td>
+   <td width="5%" align='right'>$+
      html.Snippet("gui/snippets/input-checkbox", "name=sorting_h",
       "checked=spy.GetParam('user.sorting.h', 'false')",
       "onclick=spy.SetParam('user.sorting.h', html.GetState('~name~'))")
@@ -46,26 +46,26 @@
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SORTING_ROW_1';help_ext=sorting_specifics;1 -->
-   <td width="20%">Atom order</td>
-   <td width="30%" align="right">$+
+   <td width="20%"><b>Specific order</b></td>
+   <td width="11%">Atoms</td>
+   <td width="20%" align="right">$+
      html.Snippet("gui/snippets/input-text", "name=sort_atom_order",
       "width=100%",
       "value=GetVar('sorting.atom_order', '')",
       "onchange=SetVar('sorting.atom_order', html.GetValue('~name~'))")
     $-</td>
-   <td width="20%">Moiety order</td>
-   <td width="30%" align="right">$+
+   <td width="11%">Moieties</td>
+   <td width="20%" align="right">$+
      html.Snippet("gui/snippets/input-text", "name=sort_moiety_order",
       "width=100%",
       "value=GetVar('sorting.moiety_order', '')",
       "onchange=SetVar('sorting.moiety_order', html.GetValue('~name~'))")
     $-</td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SORTING_ROW_1';help_ext=sorting;1 -->
-  <td>
-    $spy.MakeHoverButton("button-sort","spy.gui.do_sort()") &nbsp;
+  <td width="18%" align='right'>
+    $spy.MakeHoverButton("button_small-sort","spy.gui.do_sort()")
   </td>
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 

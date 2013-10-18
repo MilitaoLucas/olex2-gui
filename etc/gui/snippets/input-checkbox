@@ -10,7 +10,6 @@
   bgcolor="$GetVar('HtmlInputBgColour')"
   name="#name"
   width="#width"
-  height="$GetVar('HtmlInputHeight')"
   value="#value"
   checked="#checked"
   onclick="#onclick"
