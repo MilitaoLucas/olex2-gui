@@ -209,7 +209,7 @@ class olex2_normal_eqns(least_squares.crystallographic_ls):
       basf = ' '.join('%f' %fraction.value
                       for fraction in self.twin_fractions
                       if fraction.grad)
-      if basf: olx.AddIns('BASF ' + basf)
+      if basf: olx.AddIns('BASF', basf)
     #update EXTI
     if self.reparametrisation.extinction.grad:
       OV.SetExtinction(self.reparametrisation.extinction.value)
