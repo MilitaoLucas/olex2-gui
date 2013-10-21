@@ -762,7 +762,6 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     file_path = olx.FilePath()
     olx.Atreap("%s/notwin.ins" %file_path, b=True)
     if law != (1, 0, 0, 0, 1, 0, 0, 0, 1):
-    if law_ins != "1 0 0 0 1 0 0 0 1":
       OV.AddIns("TWIN " + law_ins)
       OV.AddIns("BASF 0.5")
     else:
