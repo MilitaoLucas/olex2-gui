@@ -633,7 +633,7 @@ class OlexFunctions(inheritFunctions):
     return olx.xf.au.GetCell()
 
   def AddIns(self, instruction):
-    olx.AddIns(instruction)
+    olx.AddIns(*instruction.split())
 
   def DelIns(self, instruction):
     olx.DelIns(instruction)

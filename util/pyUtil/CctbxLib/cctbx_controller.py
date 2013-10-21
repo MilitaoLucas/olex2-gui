@@ -240,20 +240,16 @@ class create_cctbx_xray_structure(object):
 
   def __init__(self, cell, spacegroup, atom_iter, restraints_iter=None, constraints_iter=None):
     """ cell is a 6-uple, spacegroup a string and atom_iter yields tuples (label, xyz, u, element_type) """
-    import iotbx.constrained_parameters as _
-    if restraints_iter is not None:
-      builder = builders.weighted_constrained_restrained_crystal_structure_builder()
-    else:
-      builder = builders.crystal_structure_builder()
+    builder = builders.weighted_constrained_restrained_crystal_structure_builder()
     unit_cell = uctbx.unit_cell(cell)
     builder.make_crystal_symmetry(cell, spacegroup)
     builder.make_structure()
     u_star = shelx_adp_converter(builder.crystal_symmetry)
     for label, site, occupancy, u, uiso_owner, scattering_type, fixed_vars in atom_iter:
-      behaviour_of_variable = [0]*12
+      behaviour_of_variable = [True]*12
       if fixed_vars is not None:
         for var in fixed_vars:
-          behaviour_of_variable[var['index']] = 1
+          behaviour_of_variable[var['index']] = False
       if len(u) != 1:
         a = xray.scatterer(label=label,
                            site=site,
@@ -269,12 +265,15 @@ class create_cctbx_xray_structure(object):
                            scattering_type=scattering_type)
         behaviour_of_variable = behaviour_of_variable[:6]
         if uiso_owner is not None:
-          behaviour_of_variable[5] = (
-            _.constant_times_u_eq, uiso_owner['k'], uiso_owner['id'])
+          behaviour_of_variable[5] = False
           #behaviour_of_variable[5] = 1 # XXX temporary fix for riding u_iso's
       behaviour_of_variable.pop(0)
       builder.add_scatterer(a, behaviour_of_variable,
                             occupancy_includes_symmetry_factor=True)
+      if uiso_owner is not None:
+        builder.add_u_iso_proportional_to_pivot_u_eq(
+          len(builder.structure.scatterers())-1,
+          uiso_owner['id'], uiso_owner['k'])
     if restraints_iter is not None:
       for restraint_type, kwds in restraints_iter:
         builder.process_restraint(restraint_type, **kwds)
