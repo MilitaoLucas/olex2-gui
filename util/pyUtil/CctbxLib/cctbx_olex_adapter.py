@@ -754,16 +754,17 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     self.filename = olx.FileName()
     olx.DelIns("TWIN")
     olx.DelIns("BASF")
-    olx.File("notwin.ins")
+    olx.File("%s/notwin.ins" %olx.FilePath())
 
   def run_twin_ref_shelx(self, law):
     law_ins = ' '.join(str(i) for i in law[:9])
     print "Testing: %s" %law_ins
-    olx.Atreap("-b notwin.ins")
-    olx.User("'%s'" %olx.FilePath())
+    file_path = olx.FilePath()
+    olx.Atreap("%s/notwin.ins" %file_path, b=True)
     if law != (1, 0, 0, 0, 1, 0, 0, 0, 1):
-      OV.AddIns("TWIN %s" %law_ins)
-      OV.AddIns("BASF %s" %"0.5")
+    if law_ins != "1 0 0 0 1 0 0 0 1":
+      OV.AddIns("TWIN " + law_ins)
+      OV.AddIns("BASF 0.5")
     else:
       OV.DelIns("TWIN")
       OV.DelIns("BASF")
@@ -916,10 +917,8 @@ def charge_flipping_loop(solving, verbose=True):
     print "Total Time: %.2f s" %(time.time() - t0)
 
 def on_twin_image_click(run_number):
-  # arguments is a list
-  # options is a dictionary
-  a = OlexCctbxTwinLaws()
-  file_data = a.twin_laws_d[int(run_number)].get("ins_file")
+  global twin_laws_d
+  file_data = twin_laws_d[int(run_number)].get("ins_file")
   wFile = open(olx.FileFull(), 'w')
   wFile.writelines(file_data)
   wFile.close()
