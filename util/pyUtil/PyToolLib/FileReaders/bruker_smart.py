@@ -38,12 +38,6 @@ class reader:
               special_details.setdefault("scanwidth", txt[-3:-2][0])
             txt = lines[i]
           special_details.setdefault("scans", j - 1)
-        elif lines[i][:11] == "/WAVELENGTH":
-          txt = lines[i].split('=')
-          special_details.setdefault("wavelength", float(txt[1]))
-        elif lines[i][:7] == "/TARGET":
-          txt = lines[i].split('=')
-          self._cifItems.setdefault("_diffrn_source_target", txt[1])
         elif lines[i][:3] == "/KV":
           txt = lines[i].split('=')
           self._cifItems.setdefault("_diffrn_source_voltage", float(txt[1]))

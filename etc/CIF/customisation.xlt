@@ -42,6 +42,14 @@
       <ending "_max">
     >
   >
+  <skip_merge
+    <_diffrn_radiation_wavelength>
+    <_diffrn_radiation_type>
+    <_diffrn_radiation_xray_symbol>
+    <_diffrn_reflns_*>
+    <_reflns_*>
+    <_refine_ls_*>
+  >
   <#include "app.ConfigDir()/cif_customisation.xld" extend='false'>
 >
 

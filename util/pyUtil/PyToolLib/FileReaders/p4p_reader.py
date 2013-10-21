@@ -30,17 +30,11 @@ class p4p_reader:
 
 
     if p4p_key["cif"].has_key('raw'):
-      ciflist=["_diffrn_source","_diffrn_radiation_wavelength","_diffrn_source_voltage","_diffrn_source_current","_diffrn_source_target"]
+      ciflist=["_diffrn_source","_diffrn_source_voltage","_diffrn_source_current",]
       have_cif_item = False
       value = ""
       for item in ciflist:
-        if item == "_diffrn_source_target":
-          if p4p_key["raw"]["SOURCE"]:
-            value = p4p_key["raw"]["SOURCE"].split()[0]
-        elif item == "_diffrn_radiation_wavelength":
-          if p4p_key["raw"]["SOURCE"]:
-            value = p4p_key["raw"]["SOURCE"].split()[1]
-        elif item == "_diffrn_source_voltage":
+        if item == "_diffrn_source_voltage":
           try:
             if p4p_key["raw"]["SOURCE"]:
               value = float(p4p_key["raw"]["SOURCE"].split()[5])
@@ -52,11 +46,7 @@ class p4p_reader:
               value = float(p4p_key["raw"]["SOURCE"].split()[6])
           except:
             value = "n/a"
-  
-        if value and item == "_diffrn_source_target":
-          p4p_key["cif"].setdefault('_diffrn_radiation_type', r"%s K\a" %value)
-          have_cif_item = True
-        elif value:
+        if value:
           p4p_key["cif"].setdefault(item, value)
 
     if p4p_key["cif"].has_key('_diffrn_source_voltage') and p4p_key["cif"].has_key('_diffrn_source_current'):
