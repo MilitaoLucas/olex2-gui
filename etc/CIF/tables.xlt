@@ -125,7 +125,7 @@ foota="class=cifTableFooter"
 
 <tang caption="Torsion Angles for $spy.GetParam(snum.report.title)." tita="class=cifTableHeadline"
  coln='2'
- colsa='width="100px"'
+ colsa='width="50px"'
  tha="class=cifTableFirst"
  taba="class=CifTable"
  rowa="class=cifTableRow"

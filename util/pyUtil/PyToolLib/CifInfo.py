@@ -361,13 +361,13 @@ class MergeCif(CifTools):
     ECI.run()
     self.write_metacif_file()
     ## merge metacif file with cif file from refinement
-    OV.CifMerge(self.metacif_path)
+    merge_with = [self.metacif_path]
     for extra_cif in OV.GetParam('snum.report.merge_these_cifs',[]):
       if extra_cif:
-        olx.Cif2Doc(extra_cif)
-        merge_name = "%s_doc.cif" %OV.FileName()
-        print "Merging with %s" %("%s" %merge_name)
-        OV.CifMerge(merge_name)
+        merge_with.append(extra_cif)
+    if len(merge_with) > 1:
+      print("Merging with: " + ' '.join([os.path.split(x)[1] for x in merge_with[1:]]))
+    OV.CifMerge(merge_with)
     self.finish_merge_cif()
     if edit:
       OV.external_edit('filepath()/filename().cif')
