@@ -5,6 +5,7 @@ import olex
 import shutil
 
 available_modules = None #list of Module
+expired_modules = []
 current_module = None
 info_file_name = "modules-info.htm"
 
@@ -15,7 +16,7 @@ class Module:
     self.description = description
     self.url = url
     self.release_date = release_date
-    self.action = action
+    self.action = action # 0 - nothing, 1 - install, 2 - update, 3-re-install
 
 def getModule(name, email=None):
   import HttpTools
@@ -123,6 +124,9 @@ def loadAll():
       if _plgl.loadPlugin(d, key):
         print("Module %s has been successfully loaded." %d)
     except Exception, e:
+      if "expired" in str(e):
+        global expired_modules
+        expired_modules.append(d)
       print("Error occurred while loading module: %s" %d)
       print(e)
 
@@ -130,6 +134,7 @@ def loadAll():
 def getAvailableModules():
   global current_module
   global available_modules
+  global expired_modules
   if available_modules:
     return
   current_module = None
@@ -162,7 +167,9 @@ def getAvailableModules():
             d = int(file(rd, 'rb').read().strip())
           except:
             pass
-        if d < m.release_date:
+        if m.folder_name in expired_modules:
+          m.action = 3 
+        elif d < m.release_date:
           m.action = 2
       else:
         m.action = 1
@@ -172,12 +179,15 @@ def getAvailableModules():
 
 # GUI specific functions
 def getModuleCaption(m):
-  if m.action == 0:
-    return "%s - Up-to-date" %(m.name)
-  elif m.action == 1:
+  global expired_modules
+  if m.action == 1:
     return "%s - Install" %(m.name)
-  else:
+  elif m.action == 2:
     return "%s - Update" %(m.name)
+  elif m.action == 3:
+    return "%s - Re-install" %(m.name)
+  else:
+    return "%s - Up-to-date" %(m.name)
 
 def getModuleList():
   global available_modules
@@ -190,7 +200,12 @@ def getInfo():
   global current_module
   if not current_module:
     return ""
-  return "<a href='shell %s'>Module URL: </a> %s<br>%s"\
+  preambula = ""
+  if current_module.action == 3:
+    preambula = "This module has <b>expired</b>, please either re-install it or contact"+\
+      " <a href='shell(mailto:enquiries@olexsys.org?subject=Olex2 extensions licence)'>"+\
+      "OlexSys Ltd</a> to extend the licence.<br>"
+  return preambula + "<a href='shell %s'>Module URL: </a> %s<br>%s"\
      %(current_module.url, current_module.url, current_module.description)
   
 def update(idx):
@@ -209,6 +224,8 @@ def getAction():
     action = "Install"
   elif current_module.action == 2:
     action = "Update"
+  elif current_module.action == 3:
+    action = "Re-install"
   else:
     action = 'Nothing to do'
   return action
