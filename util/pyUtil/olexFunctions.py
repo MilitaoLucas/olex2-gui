@@ -351,7 +351,10 @@ class OlexFunctions(inheritFunctions):
         finalise_value = True
       elif finalise == 'Exclude':
         finalise_value = False
-      olx.CifMerge(filepath, f=finalise_value, u=update_atoms_loop)
+      if type(filepath) == list:  
+        olx.CifMerge(*filepath, f=finalise_value, u=update_atoms_loop)
+      else:
+        olx.CifMerge(filepath, f=finalise_value, u=update_atoms_loop)
       if report:
         print "Refinement CIF file has been merged with the meta-data cif file"
     except Exception, ex:
