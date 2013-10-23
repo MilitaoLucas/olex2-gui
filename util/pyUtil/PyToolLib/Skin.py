@@ -99,6 +99,8 @@ def check_for_first_run():
     except:
       olx.SkinUpdated = True
     startup_skin = OV.GetParam('gui.skin.name', 'default')
+    if check_os() == 'mac' and startup_skin == 'default':
+      startup_skin == "mac"
     change_skin(startup_skin, internal_change=not first_run)
     return True
   return False
