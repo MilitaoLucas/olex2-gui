@@ -6,12 +6,11 @@
 <font size="$GetVar('HtmlFontSizeControls')">
 <input
   type="combo"
-  height="$GetVar('HtmlInputHeight')"
+  height="$GetVar('HtmlComboHeight')"
   bgcolor="$GetVar('HtmlInputBgColour')"
   valign="center"
   name="#name"
   width="#width"
-  height="$GetVar('HtmlInputHeight')"
   value="#value"
   items="#items"
   onchange="#onchange"
