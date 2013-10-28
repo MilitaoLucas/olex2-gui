@@ -1021,7 +1021,8 @@ user
   {
   email = ""
     .type = str
-
+  reference = ""
+    .type = str
   brad = 10
     .type = int
   solo = True
