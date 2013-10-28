@@ -142,7 +142,8 @@ def GetCheckcifReport(send_fcf=False):
 olex.registerFunction(GetCheckcifReport, False, 'cif')
   
 
-shellExec = ShellExec()
-olex.registerFunction(shellExec.run, False, "threading.shell")
-
-olex.registerFunction(joinAll, False, "threading")
+shellExec = None
+if not shellExec:
+  shellExec = ShellExec()
+  olex.registerFunction(shellExec.run, False, "threading.shell")
+  olex.registerFunction(joinAll, False, "threading")
