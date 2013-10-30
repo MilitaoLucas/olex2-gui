@@ -20,7 +20,10 @@ class Module:
     self.action = action # 0 - nothing, 1 - install, 2 - update, 3-re-install
 
 def getModulesDir():
-  return "%s%smodules" %(olx.DataDir(), os.sep)
+  from olexFunctions import OlexFunctions
+  OV = OlexFunctions()
+  base = olex.f(OV.GetParam('modules.location'))
+  return "%s%smodules" %(base, os.sep)
   
 def getModule(name, email=None):
   import HttpTools
@@ -272,6 +275,10 @@ def getModuleCaption(m):
     return "%s - Up-to-date" %(m.name)
 
 def getModuleList():
+  global avaialbaleModulesRetrieved
+  if not avaialbaleModulesRetrieved:
+    print("Retrieving module list, please collapse and expand the Extensions tab again.")
+    return
   global available_modules
   rv = []
   for idx, m in enumerate(available_modules):
