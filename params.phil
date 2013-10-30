@@ -1012,7 +1012,7 @@ programs
 modules{
   provider_url = "http://www.olex2.org/PluginProvider1/"
     .type = str
-  available_modules_file = "available_modules.xml"
+  location = "DataDir()"
     .type = str
   }
 
