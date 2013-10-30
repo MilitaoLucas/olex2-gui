@@ -261,6 +261,7 @@ class GeneratedGuiMaker(object):
         if item:
           txt += "%s<br>" %item
     return txt.rstrip('<br>')
+  OV.registerFunction(citationsMetadataHtmlMaker)
 
   def progressMetadataHtmlMaker(self, ):
     list = (
