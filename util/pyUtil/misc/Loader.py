@@ -19,12 +19,15 @@ class Module:
     self.release_date = release_date
     self.action = action # 0 - nothing, 1 - install, 2 - update, 3-re-install
 
+def getModulesDir():
+  return "%s%smodules" %(olx.DataDir(), os.sep)
+  
 def getModule(name, email=None):
   import HttpTools
   from olexFunctions import OlexFunctions
   OV = OlexFunctions()
   url_base = OV.GetParam('modules.provider_url')
-  dir = "%s%smodules" %(olx.app.SharedDir(), os.sep)
+  dir = getModulesDir()
   if not os.path.exists(dir):
     os.mkdir(dir)
 
@@ -87,7 +90,8 @@ An error occurred while installing the extension.<br>%s<br>Please restart Olex2 
       'name': name,
       'at': _plgl.createAuthenticationToken(),
       'et': etoken,
-      'ref': OV.GetParam("user.reference", "")
+      'ref': OV.GetParam("user.reference", ""),
+      't' : OV.GetTag()
     }
     f = HttpTools.make_url_call(url, values)
     f = f.read()
@@ -120,7 +124,7 @@ An error occurred while installing the extension.<br>%s<br>Please restart Olex2 
     return False
 
 def loadAll():
-  dir = "%s%smodules" %(olx.app.SharedDir(), os.sep)
+  dir = getModulesDir()
   if not os.path.exists(dir):
     return
   all = os.listdir(dir)
@@ -151,7 +155,7 @@ def updateKey(module):
   from olexFunctions import OlexFunctions
   OV = OlexFunctions()
   try:
-    dir = "%s%smodules" %(olx.app.SharedDir(), os.sep)
+    dir = getModulesDir()
     etoken_fn = "%s%setoken" %(dir, os.sep)
     if os.path.exists(etoken_fn):
       etoken = open(etoken_fn, "rb").readline().strip()
@@ -199,8 +203,11 @@ def getAvailableModules_():
   OV = OlexFunctions()
   url_base = OV.GetParam('modules.provider_url')
   try:
-    url = url_base + OV.GetParam('modules.available_modules_file')
-    f = HttpTools.make_url_call(url, None)
+    url = url_base + "available"
+    values = {
+     't' : OV.GetTag()
+    }
+    f = HttpTools.make_url_call(url, values)
     xml = et.fromstring(f.read())
     for m in xml.getchildren():
       if m.tag == "module":
@@ -213,7 +220,7 @@ def getAvailableModules_():
           available_modules.append(module)
         except:
           pass
-    dir = "%s%smodules" %(olx.app.SharedDir(), os.sep)
+    dir = getModulesDir()
     for m in available_modules:
       md = "%s%s%s" %(dir, os.sep, m.folder_name)
       if os.path.exists(md):
@@ -329,7 +336,7 @@ def AskToUpdate():
   if not avaialbaleModulesRetrieved:
     olx.Schedule(3, "spy.plugins.AskToUpdate()", g=True)
     return
-  dir = "%s%smodules" %(olx.app.SharedDir(), os.sep)
+  dir = getModulesDir()
   cfg_fn = "%s%smodules.cfg" %(dir, os.sep)
   manual_update = False
   try:
