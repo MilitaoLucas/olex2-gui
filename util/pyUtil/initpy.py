@@ -216,6 +216,11 @@ set_olex_paths()
 
 olx.Clear()
 
+import urllib2
+# this overwrites the urllib2 default HTTP and HTTPS handlers
+import multipart
+
+
 try:
   setup_cctbx()
 except Exception, err:
@@ -305,9 +310,6 @@ onstartup()
 #       for bit in sys.path:
 #               print bit
 
-import urllib2
-# this overwrites the urllib2 default HTTP and HTTPS handlers
-import multipart
 import Loader
 
 if olx.IsPluginInstalled('MySQL') == "true":
