@@ -23,7 +23,8 @@
   </td>
 
   <td width="25%">
-      <input name="IMAGE_SETTINGS_AUTOINCREMENT_NAME"
+    <font size='$GetVar(HtmlFontSizeControls)'>
+    <input name="IMAGE_SETTINGS_AUTOINCREMENT_NAME"
        type="combo"
        height="GetVar('HtmlComboHeight')"
        width="100%"
@@ -33,6 +34,7 @@
        onchange="spy.SetParam('snum.image.if_file_exists', html.GetValue('~name~'))"
        readonly="True"
       >
+    </font>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 

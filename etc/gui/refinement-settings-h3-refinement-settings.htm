@@ -23,7 +23,7 @@
         items='$spy.getRefinementPrgs()'
         label='', 
         onchange="spy.SetRefinementProgram(html.GetValue(~name~))>>html.Update"
-        readonly='readonly'
+        readonly='true'
       >
     </font>
   </td>
@@ -48,7 +48,7 @@
         items='spy.getRefinementMethods(spy.GetParam(snum.refinement.program))'
         label='', 
         onchange="spy.SetParam(snum.refinement.method,GetValue('~name~'))>>html.Update" 
-        readonly='readonly'
+        readonly='true'
       >
     </font>
   </td>
@@ -70,7 +70,7 @@
         items='$spy.GetHklFileList()', 
         onchange='HKLSrc(html.GetValue(~name~))', 
         value='FileName(HKLSrc())', 
-        readonly='readonly'
+        readonly='true'
       > 
     </font>
   </td>

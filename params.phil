@@ -1010,9 +1010,9 @@ programs
   }
 
 modules{
-  provider_url = "http://www.olex2.org/PluginProvider/"
+  provider_url = "http://www.olex2.org/PluginProvider1/"
     .type = str
-  available_modules_file = "available_modules.txt"
+  location = "DataDir()"
     .type = str
   }
 
@@ -1021,7 +1021,8 @@ user
   {
   email = ""
     .type = str
-
+  reference = ""
+    .type = str
   brad = 10
     .type = int
   solo = True

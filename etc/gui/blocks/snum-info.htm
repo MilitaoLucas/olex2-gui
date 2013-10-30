@@ -1,9 +1,11 @@
+<table width="100%" border="0" cellsapceinf="0" cellpadding="0">
+<tr><td>
 <zimg border="0" name=SNUMTITLE src="sNumTitle.png">
-<table border="0" style="border-collapse: collapse" width="100%" id="info-cell" cellpadding="0" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
+</td></tr><tr><td>
 
-
+<table border="0" width="100%" id="info-cell" cellpadding="0" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
 <tr>
-  <td colspan='5'>
+  <td>
   <table width='100%' cellspacing='1' cellpadding='0'>
     <tr>
       <td align=left>
@@ -22,16 +24,15 @@
    </table>
   </td>
 </tr>
+
 <tr>
-  <td colspan='5' align='right'>
+  <td align='right'>
 <!-- #includeif file.Exists(app.ConfigDir()/gui/toolbar.htm) user_toolbar app.ConfigDir()/gui/toolbar.htm;1 -->
   </td>
 </tr>
 
-
 <tr align='left'>
-<td colspan = '5'>
-
+<td>
   <table border="0" style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1">
     <tr bgcolor=$GetVar(HtmlTableBgColour)>
       <td width='22%'>
@@ -90,14 +91,8 @@
 </tr>
 
 
-
-<tr>
-  <td colspan='5'>
-  </td>
-</tr>
-
 <!-- #ignoreif not(fs.Exists('hos.htm'))
-<tr><td colspan="5">
+<tr><td>
 <!-- #include hos hos.htm;1 -->
 </td></tr>
 #ignoreif -->
@@ -107,3 +102,4 @@ $spy.GetTwinLaw(html)
 <!-- #include more-snum-info gui\blocks\more-snum-info.htm;2 -->
 
 </table>
+</td></tr><table>
