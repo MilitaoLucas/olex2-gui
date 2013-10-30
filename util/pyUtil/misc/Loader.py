@@ -19,14 +19,11 @@ class Module:
     self.release_date = release_date
     self.action = action # 0 - nothing, 1 - install, 2 - update, 3-re-install
 
-def getURLBase():
-  return OV.GetParam('modules.provider_url')
-  
 def getModule(name, email=None):
   import HttpTools
   from olexFunctions import OlexFunctions
   OV = OlexFunctions()
-  url_base = getURLBase()
+  url_base = OV.GetParam('modules.provider_url')
   dir = "%s%smodules" %(olx.app.SharedDir(), os.sep)
   if not os.path.exists(dir):
     os.mkdir(dir)
@@ -41,9 +38,9 @@ def getModule(name, email=None):
       }
       f = HttpTools.make_url_call(url, values)
       f = f.read().strip()
-      if "OK" not in f:
-        olex.writeImage(info_file_name, "Failed to register e-mail '%s'" %email, 0)
-        return
+      if "Error" in f:
+        olex.writeImage(info_file_name, "Failed to register e-mail '%s': %s"  %(email, f), 0)
+        return False
       efn = open(etoken_fn, "wb")
       efn.write(f)
       efn.close()
@@ -151,6 +148,8 @@ def loadAll():
 
 def updateKey(module):
   import HttpTools
+  from olexFunctions import OlexFunctions
+  OV = OlexFunctions()
   try:
     dir = "%s%smodules" %(olx.app.SharedDir(), os.sep)
     etoken_fn = "%s%setoken" %(dir, os.sep)
@@ -159,7 +158,7 @@ def updateKey(module):
     else:
       print("Failed to update the key - email is not registered")
       return False
-    url = getURLBase() + "update"
+    url = OV.GetParam('modules.provider_url') + "update"
     values = {
       'n': module.folder_name,
       'at': _plgl.createAuthenticationToken(),
@@ -198,7 +197,7 @@ def getAvailableModules_():
   import HttpTools
   from olexFunctions import OlexFunctions
   OV = OlexFunctions()
-  url_base = getURLBase()
+  url_base = OV.GetParam('modules.provider_url')
   try:
     url = url_base + OV.GetParam('modules.available_modules_file')
     f = HttpTools.make_url_call(url, None)
