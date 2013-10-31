@@ -3,8 +3,7 @@
 <tr bgcolor="$GetVar(HtmlTableBgColour)">
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td>
-  </td>
+  <td></td>
   <td width="25%">
     <font "size=$GetVar('HtmlFontSizeControls')">
     <input
@@ -62,7 +61,7 @@
       fgcolor="GetVar('HtmlFontColour')"
       type="checkbox"
       value="%Mask%"
-      valign="bottom"
+      width="100%"
       name="SNUM_MAP_MASK"
       checked="spy.GetParam('snum.map.mask')"
       oncheck="spy.SetParam('snum.map.mask','True')"
@@ -73,12 +72,9 @@
   <td colspan='1' valign='bottom' align="center">
 $spy.MakeHoverButton('button_small-map','spy.gui.maps.MapView()')
   </td>
-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</tr>
 
 <tr bgcolor="$GetVar(HtmlTableBgColour)">
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</tr>
