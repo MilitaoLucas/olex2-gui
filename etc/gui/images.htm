@@ -116,20 +116,14 @@
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="checkbox"
-      height="GetVar('HtmlCheckboxHeight')"
-      width="GetVar('HtmlCheckboxWidth')"
       name = "MOUSE_LOCK"
       fgcolor="GetVar('HtmlFontColour')"
       bgcolor="GetVar('HtmlTableBgColour')"
-      oncheck="mouse.lock true>>
-      html.setstate(MOUSE_LOCK_ZOOMING,TRUE)
-      html.setstate(MOUSE_LOCK_ROTATION,TRUE)
-      html.setstate(MOUSE_LOCK_TRANSLATION,TRUE)"
-      onuncheck="mouse.lock false>>
-      html.setstate(MOUSE_LOCK_ZOOMING,FALSE)
-      html.setstate(MOUSE_LOCK_ROTATION,FALSE)
-      html.setstate(MOUSE_LOCK_TRANSLATION,FALSE)"
-      manage
+      onclick="mouse.lock html.GetState(~name~)>>
+        html.SetState(MOUSE_LOCK_ZOOMING,html.GetState(~name~))
+        html.SetState(MOUSE_LOCK_ROTATION,html.GetState(~name~))
+        html.SetState(MOUSE_LOCK_TRANSLATION,html.GetState(~name~))"
+      manage="true"
     >
     </font>
   </td>
@@ -142,8 +136,6 @@
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="checkbox"
-      height="GetVar('HtmlCheckboxHeight')"
-      width="GetVar('HtmlCheckboxWidth')"
       name = "MOUSE_LOCK_ZOOMING"
       fgcolor="GetVar('HtmlFontColour')"
       bgcolor="GetVar('HtmlTableBgColour')"
@@ -161,8 +153,6 @@
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="checkbox"
-      height="GetVar('HtmlCheckboxHeight')"
-      width="GetVar('HtmlCheckboxWidth')"
       name = "MOUSE_LOCK_ROTATION"
       fgcolor="GetVar('HtmlFontColour')"
       bgcolor="GetVar('HtmlTableBgColour')"
@@ -179,8 +169,6 @@
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="checkbox"
-      height="GetVar('HtmlCheckboxHeight')"
-      width="GetVar('HtmlCheckboxWidth')"
       name = "MOUSE_LOCK_TRANSLATION"
       fgcolor="GetVar('HtmlFontColour')"
       bgcolor="GetVar('HtmlTableBgColour')"
