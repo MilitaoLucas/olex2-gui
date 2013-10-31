@@ -637,7 +637,7 @@ routines requiring structure refinement
       .type = choice
     solvent_radius = 1.2
       .type = float
-    shrink_truncation_radius = 1.2
+    shrink_truncation_radius = 0.2
       .type = float
     resolution_factor = 1/4
       .type = float
