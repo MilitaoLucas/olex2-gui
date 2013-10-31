@@ -861,29 +861,6 @@ def weightGuiDisplay():
   else:
     html_scheme = current_weight
 
-  d = {'ctrl_name':'SET_SNUM_REFINEMENT_UPDATE_WEIGHT',
-       'checked':OV.GetParam('snum.refinement.update_weight'),
-       'oncheck':'spy.SetParam(snum.refinement.update_weight,true)',
-       'onuncheck':'spy.SetParam(snum.refinement.update_weight,false)',
-       'bgcolor':'spy.GetParam(gui.html.table_firstcol_colour)',
-       'value':'',
-       }
-  box1 = htmlTools.make_tick_box_input(d)
-
-  box2 = '''
-<input
-  type='text'
-  width='100%%'
-  height="$GetVar(HtmlInputHeight)"
-  bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-  name='UPDATE_WEIGHT_MINR1'
-  valign='center'
-  align='left'
-  value='%s'
-  onchange="spy.SetParam('snum.refinement.update_weight_maxR1',html.GetValue(~name~))"
- >
-''' %OV.GetParam('snum.refinement.update_weight_maxR1')
-
   wght_str = ""
   for i in suggested_weight:
     wght_str += " %.3f" %i
@@ -893,15 +870,7 @@ def weightGuiDisplay():
   <td align='left' width='50%%'>
     <b>%s: <a target="%s" href="UpdateWght%s>>html.Update">%s</a></b>
   </td>
-  <td align="center" width="3%%">%s
-  </td>
-  <td ALIGN='center' width='32%%'><b>Auto-update</b> when R1 &lt;
-  </td>
-  <td ALIGN='center' width='13%%'>%s
-  </td>
-  <td ALIGN='center' width='2%%'>%%
-  </td>
-    ''' %(txt_Weight, "Update Weighting Scheme", wght_str, html_scheme, box1, box2)
+    ''' %(txt_Weight, "Update Weighting Scheme", wght_str, html_scheme)
   return html
 OV.registerFunction(weightGuiDisplay)
 

@@ -22,7 +22,7 @@ class Module:
 def getModulesDir():
   from olexFunctions import OlexFunctions
   OV = OlexFunctions()
-  base = olex.f(OV.GetParam('modules.location'))
+  base = olex.f(OV.GetParam('user.modules.location'))
   return "%s%smodules" %(base, os.sep)
   
 def getModule(name, email=None):
@@ -337,29 +337,22 @@ def getCurrentModuleName():
   return "%d" %available_modules.index(current_module)
 
 def AskToUpdate():
-  import ConfigParser
-  global available_modules
   global avaialbaleModulesRetrieved
   if not avaialbaleModulesRetrieved:
     olx.Schedule(3, "spy.plugins.AskToUpdate()", g=True)
     return
+  from olexFunctions import OlexFunctions
+  OV = OlexFunctions()
+  manual_update = OV.GetParam("user.modules.manual_update", False)
+  if manual_update:
+    return
   dir = getModulesDir()
-  cfg_fn = "%s%smodules.cfg" %(dir, os.sep)
-  manual_update = False
-  try:
-    if os.path.exists(cfg_fn):
-      config = ConfigParser.RawConfigParser()
-      config.read(cfg_fn)  
-      manual_update = config.getboolean("Update", "manual")
-      if manual_update:
-        return
-  except:
-    pass
   etoken_fn = "%s%setoken" %(dir, os.sep)
   if not os.path.exists(etoken_fn):
     return
   to_update = []
   to_update_names = []
+  global available_modules
   for m in available_modules:
     if m.action == 2:
       to_update.append(m)
@@ -370,17 +363,7 @@ def AskToUpdate():
           "Updates are available for: " +' '.join(to_update_names),
           "YNR", "Manage modules manually")
     if 'R' in res:
-      try:
-        config = ConfigParser.RawConfigParser()
-        if os.path.exists(cfg_fn):
-          config.read(cfg_fn)
-        if not config.has_section("Update"):
-          config.add_section("Update")
-        config.set("Update", "manual", True)
-        with open(cfg_fn, "wb") as cfg_file:
-          config.write(cfg_file)
-      except:
-        pass
+      OV.SetParam("user.modules.manual_update", True)
     if 'Y' in res:
       for m in to_update:
         status = getModule(m.folder_name)

@@ -72,11 +72,10 @@ Freeze(false)>>
   <td width='20%' align='right'>
     <input 
       type="checkbox"
-      height="$GetVar(HtmlCheckboxHeight)"
       name="SHOW_TOOLTIPS"
-      fgcolor="$GetVar(HtmlFontColour)"
-      checked="$not(strcmp(spy.GetParam(user.show_tooltips),0))"
-      width='15'
+      fgcolor="GetVar(HtmlFontColour)"
+      bgcolor="GetVar('HtmlInputBgColour')"
+      checked="not(strcmp(spy.GetParam(user.show_tooltips),0))"
       oncheck="spy.SetParam(user.show_tooltips,1)>>html.tooltips true" 
       onuncheck="spy.SetParam(user.show_tooltips,0)>>html.tooltips false"
       target="Show tooltips when hovering over a control"
@@ -94,11 +93,10 @@ Freeze(false)>>
   <td width='20%' align='right'>
     <input 
       type="checkbox"
-      height="$GetVar(HtmlCheckboxHeight)"
       name="SHOW_INFO"
-      fgcolor="$GetVar(HtmlFontColour)"
-      checked="$not(strcmp(spy.GetParam(user.show_info),0))"
-      width='15'
+      fgcolor="GetVar(HtmlFontColour)"
+      bgcolor="GetVar('HtmlInputBgColour')"
+      checked="not(strcmp(spy.GetParam(user.show_info),0))"
       oncheck="spy.SetParam(user.show_info,1)>>showwindow info true" 
       onuncheck="spy.SetParam(user.show_info,0)>>showwindow info false"
     >
@@ -175,11 +173,10 @@ Freeze(false)>>
   <td width='20%' align='right'>
     <input 
       type="checkbox"
-      height="$GetVar(HtmlCheckboxHeight)"
       name="USE_FADER"
-      fgcolor="$GetVar(HtmlFontColour)"
-      checked="$not(strcmp(spy.GetParam(user.use_fader),0.0))"
-      width='15'
+      fgcolor="GetVar(HtmlFontColour)"
+      bgcolor="GetVar('HtmlInputBgColour')"
+      checked="not(strcmp(spy.GetParam(user.use_fader),0.0))"
       oncheck="spy.SetParam(user.use_fader,0.4)" 
       onuncheck="spy.SetParam(user.use_fader,0)"
     >
@@ -220,11 +217,10 @@ Freeze(false)>>
   <td width='20%' align='right'>
     <input 
       type="checkbox"
-      height="$GetVar(HtmlCheckboxHeight)"
       name="SOLO_MODE"
-      fgcolor="$GetVar(HtmlFontColour)"
-      checked="$not(strcmp(spy.GetParam(user.solo),False))"
-      width='15'
+      fgcolor="GetVar(HtmlFontColour)"
+      bgcolor="GetVar('HtmlInputBgColour')"
+      checked="not(strcmp(spy.GetParam(user.solo),False))"
       oncheck="spy.SetParam(user.solo,True)" 
       onuncheck="spy.SetParam(user.solo,False)"
     >
@@ -238,18 +234,28 @@ Freeze(false)>>
   <td width='55%'>
      Solve, Refine and Report panels
   </td>
-  <td width='20%' align='right'>
+  <td width='22%' align='right'>
     <input 
       type="checkbox"
-      height="$GetVar(HtmlCheckboxHeight)"
       name="AUTO_CLOSE_SETTINGS_PANEL"
-      fgcolor="$GetVar(HtmlFontColour)"
-      checked="$not(strcmp(spy.GetParam(user.auto_close_settings_panel),False))"
-      width='15'
-      oncheck="spy.SetParam(user.auto_close_settings_panel,True)" 
-      onuncheck="spy.SetParam(user.auto_close_settings_panel,False)"
+      fgcolor="GetVar(HtmlFontColour)"
+      bgcolor="GetVar('HtmlInputBgColour')"
+      checked="not(strcmp(spy.GetParam(user.auto_close_settings_panel),False))"
+      onclick="spy.SetParam(user.auto_close_settings_panel,html.GetState('~name~'))" 
     >
   </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='START_OLEX2_IN';help_ext=Modules-Update_Notification;1 -->
+  <td width='23%'><b>%Modules update%:</b></td>
+  <td width='55%'>
+    Display a notification dialogue when module updates available
+  </td>
+  <td width="22%" align='right'>$+
+    html.Snippet("gui/snippets/input-checkbox", "name=modules_notification",
+     "checked=not(spy.GetParam('user.modules.manual_update', 'false'))",
+     "onclick=spy.SetParam('user.modules.manual_update', not(html.GetState('~name~')))")
+   $-</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 

@@ -5,14 +5,15 @@
 <font size="$GetVar('HtmlFontSizeControls')">
 <input
   type="text"
-  height="$GetVar('HtmlInputHeight')"
-  bgcolor="$GetVar('HtmlInputBgColour')"
+  height="GetVar('HtmlInputHeight')"
+  bgcolor="GetVar('HtmlInputBgColour')"
+  fgcolor="GetVar(HtmlFontColour)"
   valign="center"
   name="#name"
   width="#width"
   value="#value"
   onchange="#onchange"
   onleave="#onleave"
-  manage=#manage
+  manage="#manage"
 >
 </font>
