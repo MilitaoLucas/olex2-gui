@@ -69,7 +69,6 @@ class GeneratedGuiMaker(object):
         },
     )
     return htmlTools.makeHtmlTable(list)
-  OV.registerFunction(currentResultFilesHtmlMaker)
   
   def absorption_correctionMetadataHtmlMaker(self, ):
     list = (
@@ -89,7 +88,6 @@ class GeneratedGuiMaker(object):
        },
     )
     return htmlTools.makeHtmlTable(list)
-  OV.registerFunction(absorption_correctionMetadataHtmlMaker)
   
   
   def diffractionMetadataHtmlMaker(self, ):
@@ -133,9 +131,7 @@ class GeneratedGuiMaker(object):
        'multiline':'multiline'
        }
     )
-  
     return htmlTools.makeHtmlTable(list)
-  OV.registerFunction(diffractionMetadataHtmlMaker)
   
   def crystalMetadataHtmlMaker(self):
     list = (
@@ -195,7 +191,6 @@ class GeneratedGuiMaker(object):
        'width':'100%'
        },
     )
-  
     return htmlTools.makeHtmlTable(list)
   
   def collectionMetadataHtmlMaker(self, ):
@@ -248,7 +243,6 @@ class GeneratedGuiMaker(object):
     )
   
     return htmlTools.makeHtmlTable(list)
-  OV.registerFunction(collectionMetadataHtmlMaker)
   
   def citationsMetadataHtmlMaker(self, ):
     txt = "<b>Current Citations</b>:<br>"
@@ -261,7 +255,6 @@ class GeneratedGuiMaker(object):
         if item:
           txt += "%s<br>" %item
     return txt.rstrip('<br>')
-  OV.registerFunction(citationsMetadataHtmlMaker)
 
   def progressMetadataHtmlMaker(self, ):
     list = (
@@ -275,7 +268,6 @@ class GeneratedGuiMaker(object):
        },
     )
     return htmlTools.makeHtmlTable(list)
-  OV.registerFunction(progressMetadataHtmlMaker)
   
   def referenceMetadataHtmlMaker(self, ):
     list = (
@@ -304,7 +296,6 @@ class GeneratedGuiMaker(object):
        },
     )
     return htmlTools.makeHtmlTable(list)
-  OV.registerFunction(referenceMetadataHtmlMaker)
   
   def publicationMetadataHtmlMaker(self, ):
     items = userDictionaries.people.getListPeople()
@@ -528,7 +519,6 @@ class GeneratedGuiMaker(object):
   #"""
   
     return retstr
-  OV.registerFunction(publicationMetadataHtmlMaker)
   
   def contactLetter(self, ):
     letterText = OV.get_cif_item('_publ_contact_letter','?','gui')
@@ -579,7 +569,6 @@ class GeneratedGuiMaker(object):
     if inputText is not None:
       OV.set_cif_item('_publ_contact_letter', inputText);
     return ""
-  OV.registerFunction(contactLetter)
   
   def move(self, arg,name):
     listNames = OV.GetParam('snum.metacif.publ_author_names').split(';')
@@ -609,7 +598,6 @@ class GeneratedGuiMaker(object):
     OV.SetParam('snum.metacif.publ_author_names', names)
   
     return ''
-  OV.registerFunction(move)
 
 GGM = GeneratedGuiMaker()
 OV.registerFunction(GGM.absorption_correctionMetadataHtmlMaker)
@@ -622,6 +610,7 @@ OV.registerFunction(GGM.progressMetadataHtmlMaker)
 OV.registerFunction(GGM.publicationMetadataHtmlMaker)
 OV.registerFunction(GGM.publicationMetadataHtmlMaker)
 OV.registerFunction(GGM.referenceMetadataHtmlMaker)
+OV.registerFunction(GGM.citationsMetadataHtmlMaker)
 
 
 
