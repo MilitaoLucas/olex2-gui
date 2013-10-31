@@ -3,8 +3,8 @@
 <tr bgcolor="$GetVar(HtmlTableBgColour)">
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width="10%">%Map%</td>
-  <td width="12%">
+  <td width="20%">%Map%</td>
+  <td width="30%">
     <font "size=$GetVar('HtmlFontSizeControls')">
     <input
       type="combo"
@@ -20,8 +20,8 @@
     >
     </font>
   </td>
-  <td width="10%">%Source%</td>
-  <td width="12%">
+  <td width="20%">%Source%</td>
+  <td width="30%">
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="combo"
@@ -37,8 +37,12 @@
     >
     </font>
   </td>
-  <td width="10%">%Res%/&Aring</td>
-  <td width="12%">
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+<tr bgcolor="$GetVar(HtmlTableBgColour)">
+<!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td width="20%">%Res%/&Aring</td>
+  <td width="30%">
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="text"
@@ -53,7 +57,7 @@
     >
     </font>
   </td>
-  <td valign='bottom' width="34%">
+  <td valign='bottom' width="20%">
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       bgcolor="GetVar('HtmlTableBgColour')"
@@ -68,7 +72,7 @@
     >
     </font>
   </td>
-  <td valign='bottom' align="center">
+  <td valign='bottom' align="right">
 $spy.MakeHoverButton('button_small-map','spy.gui.maps.MapView()')
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
