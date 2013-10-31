@@ -6,8 +6,9 @@
 <font size="$GetVar('HtmlFontSizeControls')">
 <input
   type="combo"
-  height="$GetVar('HtmlComboHeight')"
-  bgcolor="$GetVar('HtmlInputBgColour')"
+  height="GetVar('HtmlComboHeight')"
+  bgcolor="GetVar('HtmlInputBgColour')"
+  fgcolor="GetVar(HtmlFontColour)"
   valign="center"
   name="#name"
   width="#width"
@@ -16,6 +17,6 @@
   onchange="#onchange"
   onleave="#onleave"
   readonly="#readonly"
-  manage=#manage
+  manage="#manage"
 >
 </font>

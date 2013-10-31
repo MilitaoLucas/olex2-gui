@@ -30,14 +30,12 @@
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="checkbox"
-      height="GetVar('HtmlCheckboxHeight')"
-      width="GetVar('HtmlCheckboxWidth')"
       name = "BITMAP_NO_BG"
       fgcolor="GetVar('HtmlFontColour')"
       bgcolor="GetVar('HtmlTableBgColour')"
       oncheck="html.SetData('BITMAP_NO_BG','True')"
       onuncheck="html.SetData('BITMAP_NO_BG',' ')"
-      manage
+      manage="true"
     >
     </font>
   </td>
@@ -148,15 +146,13 @@ $spy.MakeHoverButton('button_small-go@bitmap','spy.gui.images.GetBitmapImageInst
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="checkbox"
-      height="GetVar('HtmlCheckboxHeight')"
-      width="GetVar('HtmlCheckboxWidth')"
       name = "TRIM_IMAGE"
       fgcolor="GetVar('HtmlFontColour')"
       bgcolor="GetVar('HtmlTableBgColour')"
       oncheck="html.SetData('TRIM_IMAGE','True')"
       onuncheck="html.SetData('TRIM_IMAGE',' ')"
-      manage
-      checked
+      manage="true"
+      checked="true"
     >
     </font>
   </td>

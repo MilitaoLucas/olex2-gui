@@ -62,12 +62,10 @@
   <td ALIGN='right' colspan=1>
       <input
         type='checkbox'
-        width="$GetVar(HtmlCheckboxWidth)"
-        height="$GetVar(HtmlCheckboxHeight)"
-        fgcolor="$GetVar(HtmlFontColour)"
-        bgcolor="$GetVar(HtmlTableFirstcolColour)"
+        fgcolor="GetVar(HtmlFontColour)"
+        bgcolor="GetVar(HtmlTableFirstcolColour)"
         name='SET_SNUM_REFINEMENT_AUTO_ASSEMBLE'
-        checked="$spy.GetParam(snum.refinement.auto.assemble)"
+        checked="spy.GetParam(snum.refinement.auto.assemble)"
         oncheck='spy.SetParam(snum.refinement.auto.assemble,true)'
         onuncheck='spy.SetParam(snum.refinement.auto.assemble,false)'
         value=''
@@ -83,12 +81,10 @@
   <td ALIGN='right' colspan=1>
       <input
         type='checkbox'
-        width="$GetVar(HtmlCheckboxWidth)"
-        height="$GetVar(HtmlCheckboxHeight)"
         fgcolor="$GetVar(HtmlFontColour)"
         bgcolor="$GetVar(HtmlTableFirstcolColour)"
         name='SET_SNUM_REFINEMENT_AUTO_INVERT'
-        checked="$spy.GetParam(snum.refinement.auto.invert)"
+        checked="spy.GetParam(snum.refinement.auto.invert)"
         oncheck='spy.SetParam(snum.refinement.auto.invert,true)'
         onuncheck='spy.SetParam(snum.refinement.auto.invert,false)'
         value=''

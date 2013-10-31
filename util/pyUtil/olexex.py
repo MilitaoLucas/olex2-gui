@@ -705,19 +705,6 @@ def SetAtomicVolumeInSnumPhil(totalcount):
   else:
     OV.SetParam('snum.solution.current_atomic_volume',None)
 
-def CheckBoxValue(var, def_val='false'):
-  if '.' in var:
-    value = OV.GetParam(var)
-  else:
-    value = OV.FindValue(var,def_val) # XXX this should be gotten rid of
-  if value in (True, 'True', 'true'):
-    retVal = 'checked'
-  else:
-    retVal = ''
-  return str(retVal)
-if haveGUI:
-  OV.registerFunction(CheckBoxValue)
-
 def GetHklFileList():
   reflection_file_extensions = ["hkl", "hkp", "raw", 'hklf5', 'hkc']
   g = OV.ListFiles(OV.FilePath(), ';'.join(reflection_file_extensions))

@@ -340,8 +340,6 @@ def make_disorder_quicktools():
     <font size=$GetVar(HtmlFontSizeControls)>
   <input
     type='checkbox'
-    width=18
-    height="GetVar('HtmlCheckboxHeight')"
     bgcolor="GetVar('HtmlTableBgColour')"
     name='KEEP_UNIQUE'
     checked="spy.GetParam('user.keep_unique')"
