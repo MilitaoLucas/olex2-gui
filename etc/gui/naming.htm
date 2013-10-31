@@ -60,10 +60,8 @@ $spy.MakeHoverButton('button_small-name',"guinames_m")
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="checkbox"
-      height="$GetVar('HtmlCheckboxHeight')"
       name = "TICK_AUTO_HYDROGEN_NAMING"
-      width="17"
-      checked="$spy.GetParam('snum.auto_hydrogen_naming')"
+      checked="spy.GetParam('snum.auto_hydrogen_naming')"
       onclick="spy.SetParam('snum.auto_hydrogen_naming',html.GetState('~name~'))"
     >
     </font>

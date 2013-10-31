@@ -20,8 +20,6 @@
   <td>
     <input 
       type="checkbox"
-      width="100%" 
-      height="GetVar('HtmlCheckboxHeight')"
       bgcolor="GetVar('HtmlTableBgColour')" 
       fgcolor="GetVar('HtmlFontColour')" 
       name="BAD_REF_SORTING" 
@@ -70,24 +68,20 @@
       name = "exclude_l" 
       width="22" 
       bgcolor="GetVar('HtmlInputBgColour')" 
-      value=""
-      manage
+      manage="true"
       label="l = "
     >
   </td>
   <td>
     <input 
       type='checkbox'  
-      width=40 
-      height="GetVar('HtmlCheckboxHeight')"
       bgcolor="GetVar('HtmlTableBgColour')" 
       fgcolor="GetVar('HtmlFontColour')" 
       name="EXCLUDE_AND" 
       value="%AND%"
-      data=""
-      $spy.CheckBoxValue(exclude_hkl_and) 
-      oncheck="SetVar('exclude_hkl_and','true')>>spy.StoreSingleParameter exclude_hkl_and>>html.SetData('EXCLUDE_AND','-c')" 
-      onuncheck="SetVar('exclude_hkl_and','false')>>spy.StoreSingleParameter exclude_hkl_and>>html.SetData('EXCLUDE_AND','')"
+      checked="GetVar('exclude_hkl_and', 'false')"
+      oncheck="SetVar('exclude_hkl_and','true')>>html.SetData('~name~','-c')" 
+      onuncheck="SetVar('exclude_hkl_and','false')>>html.SetData('~name~','')"
     >
   </td>
 

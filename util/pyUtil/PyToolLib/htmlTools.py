@@ -570,11 +570,9 @@ def make_combo_text_box(d):
 
 def make_tick_box_input(d):
   name = d.get('ctrl_name')
-  dic = {'height':"$GetVar('HtmlCheckboxHeight')",
-         'bgcolor':"$GetVar('HtmlTableBgColour')",
-         'fgcolor':"$GetVar('HtmlFontColour')",
+  dic = {'bgcolor':"GetVar('HtmlTableBgColour')",
+         'fgcolor':"GetVar('HtmlFontColour')",
          'value':"$spy.GetParam('%(varName)s')",
-         'width':"$GetVar('HtmlCheckboxWidth')",
          'onchange':'',
          'value':'%s '%name,
          'oncheck':'',
@@ -592,8 +590,6 @@ def make_tick_box_input(d):
 <font size="$GetVar('HtmlFontSizeControls')">
 <input
   type="checkbox"
-  width="%(width)s"
-  height="%(height)s"
   name="%(ctrl_name)s"
   value="%(value)s"
   bgcolor="%(bgcolor)s"

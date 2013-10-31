@@ -183,8 +183,6 @@ $spy.MakeHoverButton('button-checkcif_report','spy.cif.GetCheckCifReport(html.Ge
   <td name=GET_CHECKCIF_REPORT_FORMAT align='right' VALIGN='center' width='5%'>
     <input
       type='checkbox'
-      width="100%"
-      height="GetVar('HtmlCheckboxHeight')"
       bgcolor="GetVar('HtmlTableBgColour')"
       name='SET_CHECKCIF_FCF'
       checked='false'
@@ -207,13 +205,10 @@ $spy.MakeHoverButton('button-ccdc_number','spy.ccdc_submit()')
 <td name=AUTO_MERGE_CIF align='right' VALIGN='right' width='5%'>
     <input
       type='checkbox'
-      width="100%"
-      height="GetVar('HtmlCheckboxHeight')"
       bgcolor="GetVar('HtmlTableBgColour')"
       name = "CIFMERGE_AFTER_REFINE" 
-      $spy.CheckBoxValue(snum.refinement.cifmerge_after_refinement)
-      oncheck = "spy.SetParam(snum.refinement.cifmerge_after_refinement,true)" 
-      onuncheck= "spy.SetParam(snum.refinement.cifmerge_after_refinement,false)"
+      checked = "spy.GetParam(snum.refinement.cifmerge_after_refinement)"
+      onclick = "spy.SetParam(snum.refinement.cifmerge_after_refinement,html.GetState(~name~))" 
       name='SET_CIFMERGE'
       right='false'
     >
