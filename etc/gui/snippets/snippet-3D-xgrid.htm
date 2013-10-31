@@ -1,6 +1,5 @@
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-<tr name=XGRID_SLIDE>
   <td width="15%">%Level%</td>
   <td width="75%">
     <font size='$GetVar(HtmlFontSizeControls)'>
@@ -20,6 +19,7 @@ html.SetValue(SNUM_XGRID_VALUE,spy.GetParam(snum.xgrid.value))>>
 xgrid.Scale(html.GetValue(SNUM_XGRID_VALUE))>>"
     >
     </font>
+  </td>
   <td width="10%">
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
@@ -36,5 +36,4 @@ html.SetValue(SNUM_XGRID_SLIDE,math.eval(XGrid.Scale()*50))"
     >
     </font>
   </td>
-</tr>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

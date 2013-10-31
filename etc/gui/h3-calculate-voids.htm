@@ -3,16 +3,14 @@
 <tr bgcolor="$GetVar(HtmlTableBgColour)">
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td>
-  </td>
-  <td width="25%">
+  <td width="20%">%Resolution%/&Aring</td>
+  <td width="12%">
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="text"
       name = "SET_SNUM_CALCVOID_RESOLUTION"
       width="95%"
       height="GetVar('HtmlInputHeight')"
-      label="%Res%/&Aring [0.2]"
       valign="center"
       bgcolor="GetVar('HtmlTableBgColour')"
       fgcolor="GetVar('HtmlFontColour')"
@@ -21,14 +19,14 @@
     >
     </font>
   </td>
-  <td width="20%">
+  <td width="20%">%Distance%/&Aring</td>
+  <td width="12%">
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="text"
       name = "SET_SNUM_CALCVOID_DISTANCE"
       width="95%"
       height="GetVar('HtmlInputHeight')"
-      label="%Distance%/&Aring [0.0]"
       valign="center"
       bgcolor="GetVar('HtmlTableBgColour')"
       fgcolor="GetVar('HtmlFontColour')"
@@ -45,6 +43,7 @@
       type="checkbox"
       value="%Precise%"
       valign="bottom"
+      width="100%"
       name="SNUM_CALCVOID_PRECISE"
       checked="spy.GetParam('snum.calcvoid.precise')"
       oncheck="spy.SetParam('snum.calcvoid.precise','True')"
@@ -56,4 +55,3 @@
 $spy.MakeHoverButton('button_small-void','spy.gui.maps.VoidView()')
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</tr>

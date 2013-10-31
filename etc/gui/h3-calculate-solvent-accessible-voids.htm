@@ -3,16 +3,14 @@
 <tr bgcolor="$GetVar(HtmlTableBgColour)">
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td>
-  </td>
-  <td width="33%">
+  <td width="20%">%Probe%/&Aring</td>
+  <td width="12%">
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="text"
       name = "SET_SNUM_CALCSOLV_PROBE"
       width="95%"
       height="GetVar('HtmlInputHeight')"
-      label="%Probe%/&Aring [1.2]"
       valign="center"
       bgcolor="GetVar('HtmlTableBgColour')"
       fgcolor="GetVar('HtmlFontColour')"
@@ -21,14 +19,14 @@
     >
     </font>
   </td>
-  <td width="33%">
+  <td width="20%">%Grid%/&Aring</td>
+  <td width="12%">
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="text"
       name = "SET_SNUM_CALCSOLV_GRID"
       width="95%"
       height="GetVar('HtmlInputHeight')"
-      label="%Grid%/&Aring [0.2]"
       valign="center"
       bgcolor="GetVar('HtmlTableBgColour')"
       fgcolor="GetVar('HtmlFontColour')"
@@ -37,8 +35,7 @@
     >
     </font>
   </td>
-  <td align='right' width="34%">
+  <td align='right'>
 $spy.MakeHoverButton('button_small-void@solv','spy.CalcSolv()')
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</tr>
