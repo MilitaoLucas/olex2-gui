@@ -93,7 +93,7 @@ An error occurred while installing the extension.<br>%s<br>Please restart Olex2 
       'name': name,
       'at': _plgl.createAuthenticationToken(),
       'et': etoken,
-      'ref': OV.GetParam("user.reference", ""),
+      'ref': OV.GetParam("user.modules.reference", ""),
       't' : OV.GetTag()
     }
     f = HttpTools.make_url_call(url, values)
