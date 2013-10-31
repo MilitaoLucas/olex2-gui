@@ -69,7 +69,6 @@ class GeneratedGuiMaker(object):
         },
     )
     return htmlTools.makeHtmlTable(list)
-  OV.registerFunction(currentResultFilesHtmlMaker)
   
   def absorption_correctionMetadataHtmlMaker(self, ):
     list = (
@@ -89,7 +88,6 @@ class GeneratedGuiMaker(object):
        },
     )
     return htmlTools.makeHtmlTable(list)
-  OV.registerFunction(absorption_correctionMetadataHtmlMaker)
   
   
   def diffractionMetadataHtmlMaker(self, ):
@@ -133,9 +131,7 @@ class GeneratedGuiMaker(object):
        'multiline':'multiline'
        }
     )
-  
     return htmlTools.makeHtmlTable(list)
-  OV.registerFunction(diffractionMetadataHtmlMaker)
   
   def crystalMetadataHtmlMaker(self):
     list = (
@@ -195,7 +191,6 @@ class GeneratedGuiMaker(object):
        'width':'100%'
        },
     )
-  
     return htmlTools.makeHtmlTable(list)
   
   def collectionMetadataHtmlMaker(self, ):
@@ -248,7 +243,6 @@ class GeneratedGuiMaker(object):
     )
   
     return htmlTools.makeHtmlTable(list)
-  OV.registerFunction(collectionMetadataHtmlMaker)
   
   def citationsMetadataHtmlMaker(self, ):
     txt = "<b>Current Citations</b>:<br>"
@@ -261,7 +255,6 @@ class GeneratedGuiMaker(object):
         if item:
           txt += "%s<br>" %item
     return txt.rstrip('<br>')
-  OV.registerFunction(citationsMetadataHtmlMaker)
 
   def progressMetadataHtmlMaker(self, ):
     list = (
@@ -275,7 +268,6 @@ class GeneratedGuiMaker(object):
        },
     )
     return htmlTools.makeHtmlTable(list)
-  OV.registerFunction(progressMetadataHtmlMaker)
   
   def referenceMetadataHtmlMaker(self, ):
     list = (
@@ -304,7 +296,6 @@ class GeneratedGuiMaker(object):
        },
     )
     return htmlTools.makeHtmlTable(list)
-  OV.registerFunction(referenceMetadataHtmlMaker)
   
   def publicationMetadataHtmlMaker(self, ):
     items = userDictionaries.people.getListPeople()
@@ -528,7 +519,6 @@ class GeneratedGuiMaker(object):
   #"""
   
     return retstr
-  OV.registerFunction(publicationMetadataHtmlMaker)
   
   def contactLetter(self, ):
     letterText = OV.get_cif_item('_publ_contact_letter','?','gui')
@@ -579,7 +569,6 @@ class GeneratedGuiMaker(object):
     if inputText is not None:
       OV.set_cif_item('_publ_contact_letter', inputText);
     return ""
-  OV.registerFunction(contactLetter)
   
   def move(self, arg,name):
     listNames = OV.GetParam('snum.metacif.publ_author_names').split(';')
@@ -609,7 +598,6 @@ class GeneratedGuiMaker(object):
     OV.SetParam('snum.metacif.publ_author_names', names)
   
     return ''
-  OV.registerFunction(move)
 
 GGM = GeneratedGuiMaker()
 OV.registerFunction(GGM.absorption_correctionMetadataHtmlMaker)
@@ -622,6 +610,7 @@ OV.registerFunction(GGM.progressMetadataHtmlMaker)
 OV.registerFunction(GGM.publicationMetadataHtmlMaker)
 OV.registerFunction(GGM.publicationMetadataHtmlMaker)
 OV.registerFunction(GGM.referenceMetadataHtmlMaker)
+OV.registerFunction(GGM.citationsMetadataHtmlMaker)
 
 
 
@@ -872,29 +861,6 @@ def weightGuiDisplay():
   else:
     html_scheme = current_weight
 
-  d = {'ctrl_name':'SET_SNUM_REFINEMENT_UPDATE_WEIGHT',
-       'checked':OV.GetParam('snum.refinement.update_weight'),
-       'oncheck':'spy.SetParam(snum.refinement.update_weight,true)',
-       'onuncheck':'spy.SetParam(snum.refinement.update_weight,false)',
-       'bgcolor':'spy.GetParam(gui.html.table_firstcol_colour)',
-       'value':'',
-       }
-  box1 = htmlTools.make_tick_box_input(d)
-
-  box2 = '''
-<input
-  type='text'
-  width='100%%'
-  height="$GetVar(HtmlInputHeight)"
-  bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-  name='UPDATE_WEIGHT_MINR1'
-  valign='center'
-  align='left'
-  value='%s'
-  onchange="spy.SetParam('snum.refinement.update_weight_maxR1',html.GetValue(~name~))"
- >
-''' %OV.GetParam('snum.refinement.update_weight_maxR1')
-
   wght_str = ""
   for i in suggested_weight:
     wght_str += " %.3f" %i
@@ -904,15 +870,7 @@ def weightGuiDisplay():
   <td align='left' width='50%%'>
     <b>%s: <a target="%s" href="UpdateWght%s>>html.Update">%s</a></b>
   </td>
-  <td align="center" width="3%%">%s
-  </td>
-  <td ALIGN='center' width='32%%'><b>Auto-update</b> when R1 &lt;
-  </td>
-  <td ALIGN='center' width='13%%'>%s
-  </td>
-  <td ALIGN='center' width='2%%'>%%
-  </td>
-    ''' %(txt_Weight, "Update Weighting Scheme", wght_str, html_scheme, box1, box2)
+    ''' %(txt_Weight, "Update Weighting Scheme", wght_str, html_scheme)
   return html
 OV.registerFunction(weightGuiDisplay)
 

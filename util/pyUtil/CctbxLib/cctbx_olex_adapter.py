@@ -300,10 +300,11 @@ class OlexCctbxAdapter(object):
 
   def compute_weights(self, fo2, fc):
     weight = self.olx_atoms.model['weight']
-    params = dict(a=0.1, b=0, c=0, d=0, e=0, f=1./3)
-    for param, value in zip(params.keys()[:len(weight)], weight):
-      params[param] = value
-    weighting = xray.weighting_schemes.shelx_weighting(**params)
+    params = [0.1, 0, 0, 0, 0, 1./3]
+    for i, v in enumerate(weight):
+      params[i] = v
+    weighting = xray.weighting_schemes.shelx_weighting(*params,
+      wavelength=self.wavelength)
     scale_factor = fo2.scale_factor(fc)
     weighting.observed = fo2
     weighting.compute(fc, scale_factor)
