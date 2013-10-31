@@ -16,7 +16,8 @@
 <tr bgcolor="$GetVar(HtmlTableBgColour)">
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width="40%">
+  <td width="10%">%Map%</td>
+  <td width="20%">
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="combo"
@@ -30,12 +31,11 @@
 spy.SetParam('snum.masks.type',html.GetValue('~name~'))>>
 spy.OlexCctbxMasks('False')>>
 spy.gui.maps.SetXGridView()"
-      label="%Map% "
-      valign="center"
-      readonly
+      readonly="true"
     >
     </font>
   </td>
+  <td width="20%">%Res. factor%</td>
   <td width="20%">
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
@@ -43,7 +43,6 @@ spy.gui.maps.SetXGridView()"
       name = "SET_SNUM_MASKS_RESOLUTION_FACTOR"
       width="95%"
       height="GetVar('HtmlInputHeight')"
-      label="%Res. factor%"
       valign="center"
       bgcolor="GetVar('HtmlTableBgColour')"
       fgcolor="GetVar('HtmlFontColour')"
@@ -52,7 +51,7 @@ spy.gui.maps.SetXGridView()"
     >
     </font>
   </td>
-  <td valign='bottom' align='right' width='40%'>
+  <td valign='bottom' align='right' width='30%'>
   $spy.MakeHoverButton('button_small-mask','spy.gui.maps.MaskView()')
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -60,14 +59,14 @@ spy.gui.maps.SetXGridView()"
 <tr bgcolor="$GetVar(HtmlTableBgColour)">
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width="50%">
+  <td width="35%">%Solvent radius in% &Aring</td>
+  <td width="15%">
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="text"
       name = "SET_SNUM_MASKS_SOLVENT_RADIUS"
       width="95%"
       height="GetVar('HtmlInputHeight')"
-      label="%Solvent radius in% &Aring"
       valign="center"
       bgcolor="GetVar('HtmlTableBgColour')"
       fgcolor="GetVar('HtmlFontColour')"
@@ -76,14 +75,14 @@ spy.gui.maps.SetXGridView()"
     >
     </font>
   </td>
-  <td width="50%">
+  <td width="35%">%Shrink truncation radius in% &Aring</td>
+  <td width="15%">
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="text"
       name = "SET_SNUM_MASKS_SHRINK_TRUNCATION_RADIUS"
       width="95%"
       height="GetVar('HtmlInputHeight')"
-      label="%Shrink truncation radius in% &Aring"
       valign="center"
       bgcolor="GetVar('HtmlTableBgColour')"
       fgcolor="GetVar('HtmlFontColour')"
