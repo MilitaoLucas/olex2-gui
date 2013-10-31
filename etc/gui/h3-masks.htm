@@ -4,8 +4,7 @@
 <tr bgcolor="$GetVar(HtmlTableBgColour)">
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;colspan=2;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td>
-  </td>
+  <td></td>
   <td name=REFLECTION_FILE_LABEL width="45%">
     <b>%Reflection File%</b>
   </td>
@@ -13,7 +12,6 @@
 <!-- #include reflection-file gui\snippets\snippet-reflection-file.htm;1; -->
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</tr>
 
 <tr bgcolor="$GetVar(HtmlTableBgColour)">
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
@@ -54,19 +52,14 @@ spy.gui.maps.SetXGridView()"
     >
     </font>
   </td>
-
   <td valign='bottom' align='right' width='40%'>
   $spy.MakeHoverButton('button_small-mask','spy.gui.maps.MaskView()')
   </td>
-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</tr>
-
 
 <tr bgcolor="$GetVar(HtmlTableBgColour)">
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-
   <td width="50%">
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
@@ -99,10 +92,8 @@ spy.gui.maps.SetXGridView()"
     >
     </font>
   </td>
-
-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</tr>
+
 <tr bgcolor="$GetVar(HtmlTableBgColour)">
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
@@ -114,6 +105,7 @@ spy.gui.maps.SetXGridView()"
       type="checkbox"
       value="%Use set completion%"
       valign="bottom"
+      width="100%"
       name="SET_SNUM_MASKS_USE_COMPLETE_SET"
       checked="spy.GetParam('snum.masks.use_set_completion')"
       oncheck="spy.SetParam('snum.masks.use_set_completion','True')"
@@ -121,13 +113,9 @@ spy.gui.maps.SetXGridView()"
     >
     </font>
   </td>
-
-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</tr>
 
 <tr bgcolor="$GetVar(HtmlTableBgColour)">
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-</tr>
