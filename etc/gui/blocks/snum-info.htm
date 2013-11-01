@@ -1,6 +1,6 @@
-<table width="100%" border="0" cellsapceinf="0" cellpadding="0">
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
 <tr><td>
-<zimg border="0" name=SNUMTITLE src="sNumTitle.png">
+<zimg border="0" name="SNUMTITLE" src="sNumTitle.png"/>
 </td></tr><tr><td>
 
 <table border="0" width="100%" id="info-cell" cellpadding="0" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
@@ -8,28 +8,39 @@
   <td>
   <table width='100%' cellspacing='1' cellpadding='0'>
     <tr>
-      <td align=left>
-        &nbsp;$spy.makeFormulaForsNumInfo()
+      <td align='left' width='52%' >
+        &nbsp; $spy.makeFormulaForsNumInfo()
       </td>
-      <td align=right>
-        $spy.gui.tools.checkErrLogFile()
-  &nbsp;$spy.gui.tools.checkPlaton()
-  &nbsp;$spy.MakeHoverButton('toolbar-edit', "editins>>spy.doProgramSettings(spy.GetParam('snum.refinement.program'),spy.GetParam('snum.refinement.method'))>>html.Update")
-  &nbsp;$spy.MakeHoverButton('toolbar-editatom', 'editatom')
-  &nbsp;$spy.MakeHoverButton('toolbar-open', 'dire')
-  &nbsp;$spy.MakeHoverButton('toolbar-text', 'text')
-  &nbsp;$spy.MakeHoverButton('toolbar-center@sNumInfo','compaq>>compaq -a>>center')
+      <td align='right' width='8%'>
+$spy.gui.tools.checkPlaton()
+      </td>
+      <td align='right' width='8%'>
+$spy.MakeHoverButton('toolbar-edit', "editins>>spy.doProgramSettings(spy.GetParam('snum.refinement.program'),spy.GetParam('snum.refinement.method'))>>html.Update")
+      </td>
+      <td align='right' width='8%'>
+$spy.MakeHoverButton('toolbar-editatom', 'editatom')
+      </td>
+      <td align='right' width='8%'>
+$spy.MakeHoverButton('toolbar-open', 'dire')
+      </td>
+      <td align='right' width='8%'>
+$spy.MakeHoverButton('toolbar-text', 'text')
+      </td>
+      <td align='right' width='8%'>
+$spy.MakeHoverButton('toolbar-center@sNumInfo','compaq>>compaq -a>>center')
      </td>
    </tr>
    </table>
   </td>
 </tr>
 
+<!-- #ignoreif not(file.Exists(app.ConfigDir()/gui/toolbar.htm))
 <tr>
   <td align='right'>
-<!-- #includeif file.Exists(app.ConfigDir()/gui/toolbar.htm) user_toolbar app.ConfigDir()/gui/toolbar.htm;1 -->
+<!-- #include user_toolbar app.ConfigDir()/gui/toolbar.htm;1 -->
   </td>
 </tr>
+#ignoreif -->
 
 <tr align='left'>
 <td>
@@ -80,11 +91,7 @@
       <td width='20%'>
         &nbsp;<b>V</b>=$xf.uc.VolumeEx()
       </td>
-
     </tr>
-
-
-
   </table>
 
 </td>
