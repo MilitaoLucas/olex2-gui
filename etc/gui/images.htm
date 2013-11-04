@@ -44,7 +44,7 @@
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='LABEL_SETTINGS';help_ext=Images;1 -->
   <td name=HREF_MAKE_LABEL>
-    1) <a href="label -type=html.GetValue('IMAGE_SETTINGS_LABEL_TYPE') -symm=html.GetValue('IMAGE_SETTINGS_LABEL_SYMM')">%images_add_labels_to_atoms%</a>|
+    <a href="label -type=html.GetValue('IMAGE_SETTINGS_LABEL_TYPE') -symm=html.GetValue('IMAGE_SETTINGS_LABEL_SYMM')"><b>%images_add_labels_to_atoms%</b></a>&nbsp;|
     <a href="label $*-H,Q -type=html.GetValue('IMAGE_SETTINGS_LABEL_TYPE') -symm=html.GetValue('IMAGE_SETTINGS_LABEL_SYMM')">%images_add_labels_to_non_H_atoms%</a>
   </td>
 
@@ -86,18 +86,11 @@
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- THIRD ROW More labels -->
-<!-- #include tool-row gui\blocks\tool-row.htm;name='IMAGE_SETTINGS_ROW_1';1 -->
-  <td name=LABEL_INSTRUCTIONS_2>
-    2) %images_move_labels%
-  </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
 <!-- #include tool-row gui\blocks\tool-row.htm;name='IMAGE_SETTINGS_ROW_2';1 -->
   <td name=LABEL_INSTRUCTIONS_3>
-    3) <a href="SetMaterial 'PLabels.Text' ChooseMaterial(GetMaterial('PLabels.Text'))">%images_label_colour%</a> |
-       <a href="SetMaterial 'PLabels.Plane' ChooseMaterial(GetMaterial('PLabels.Plane'))">%images_label_box%</a> |
-       <a href="SetMaterial 'PLabels.Plane' '3077;0.000,0.000,0.000,1.000;986895'">%images_transparent_box%</a>
+     <a href="kill labels"><b>DELETE all labels</b></a> |
+     <a href="SetMaterial 'PLabels.Text' ChooseMaterial(GetMaterial('PLabels.Text'))">%images_label_colour%</a> |
+     <a href="SetMaterial 'PLabels.Plane' ChooseMaterial(GetMaterial('PLabels.Plane'))">%images_label_box%</a>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
