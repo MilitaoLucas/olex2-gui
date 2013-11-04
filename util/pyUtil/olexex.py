@@ -1297,7 +1297,7 @@ def GetTwinLaw(html=False):
 
   txt = repr(curr_law)
   if html:
-    txt = "<tr><td colspan='4'><b><font color='%s'>TWIN LAW %s</font></b></td></tr>" %(OV.GetParam('gui.red').hexadecimal, repr(curr_law))
+    txt = "<tr><td><b><font color='%s'>TWIN LAW %s</font></b></td></tr>" %(OV.GetParam('gui.red').hexadecimal, txt)
   return txt
 OV.registerFunction(GetTwinLaw)
 
