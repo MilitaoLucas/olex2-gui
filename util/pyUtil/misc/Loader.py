@@ -3,6 +3,9 @@ import sys
 import olx
 import olex
 import shutil
+from threading import Thread
+from threads import ThreadEx
+from threads import ThreadRegistry
 
 available_modules = None #list of Module
 avaialbaleModulesRetrieved = False
@@ -250,18 +253,33 @@ def getAvailableModules_():
   finally:
     avaialbaleModulesRetrieved = True
 
-def getAvailableModules():
-  from threads import ThreadEx
-  class AMT(ThreadEx):
-    instance = None
-    def run(self):
-      AMT.instance = self
-      getAvailableModules_()
-      AMT.instance = None
-  if AMT.instance:
+class ModuleListThread(ThreadEx):
+  instance = None
+  def __init__(self):
+    Thread.__init__(self)
+    ThreadRegistry().register(ModuleListThread)
+    ModuleListThread.instance = self
+    
+  def run(self):
+    import time
+    time.sleep(3)
+    getAvailableModules_()
+    ModuleListThread.instance = None
+
+def getAvailableModules(in_thread=True):
+  global avaialbaleModulesRetrieved
+  if avaialbaleModulesRetrieved:
     return
-  AMT().start()
-  
+  if ModuleListThread.instance:
+    if not in_thread:
+      ModuleListThread.instance.join()
+    else:
+      return
+  else:
+    if in_thread:
+      ModuleListThread().start()
+    else:
+      ModuleListThread().run()
 
 # GUI specific functions
 def getModuleCaption(m):
@@ -276,9 +294,7 @@ def getModuleCaption(m):
 
 def getModuleList():
   global avaialbaleModulesRetrieved
-  if not avaialbaleModulesRetrieved:
-    print("Retrieving module list, please collapse and expand the Extensions tab again.")
-    return
+  getAvailableModules(False)
   global available_modules
   rv = []
   for idx, m in enumerate(available_modules):

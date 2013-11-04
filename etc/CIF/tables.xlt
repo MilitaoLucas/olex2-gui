@@ -84,7 +84,7 @@
   <_geom_bond_atom_site_label_2 caption="Atom" visible="true" cola="class='data'" >
   <_geom_bond_distance caption="Length/&Aring;" visible="true" >
   <_geom_bond_publ_flag caption="?" mustequal="y;yes" visible="false" >
- >
+>
 
 <hcrd caption="Hydrogen Atom Coordinates (&Aring;&times;10<SUP>4</SUP>) and Isotropic Displacement Parameters (&Aring;<SUP>2</SUP>&times;10<SUP>3</SUP>) for $spy.GetParam(snum.report.title). "
  tita="class=cifTableHeadline"
@@ -97,9 +97,8 @@
   <_atom_site_fract_y caption="<i>y</i>" multiplier="10000" visible="true" cola="class=decimal">
   <_atom_site_fract_z caption="<i>z</i>" multiplier="10000" visible="true" cola="class=decimal">
   <_atom_site_U_iso_or_equiv caption="U(eq)" multiplier="1000" visible="true" cola="class=decimal">
-  <_atom_site_occupancy caption="<i>Occupancy</i>" visible="xf.rm.HasOccu()" cola="class=decimalWide" >
   <_atom_site_type_symbol caption="Symbol" mustequal="H" visible="false" >
- >
+>
 
 <acrd caption="Fractional Atomic Coordinates (&times;10<SUP>4</SUP>) and Equivalent Isotropic Displacement Parameters (&Aring;<SUP>2</SUP>&times;10<SUP>3</SUP>) for $spy.GetParam(snum.report.title). U<sub>eq</sub> is defined as 1/3 of of the trace of the orthogonalised  U<sub>IJ</sub> tensor."
  tita="class=cifTableHeadline"
@@ -111,10 +110,9 @@
   <_atom_site_fract_x caption="<i>x</i>" multiplier="10000" visible="true" cola="class=decimalWide" >
   <_atom_site_fract_y caption="<i>y</i>" multiplier="10000" visible="true" cola="class=decimalWide" >
   <_atom_site_fract_z caption="<i>z</i>" multiplier="10000" visible="true" cola="class=decimalWide" >
-  <_atom_site_occupancy caption="<i>Occupancy</i>" visible="xf.rm.HasOccu()" cola="class=decimalWide" >
   <_atom_site_U_iso_or_equiv caption="U(eq)" multiplier="1000" visible="true" cola="class=decimal">
   <_atom_site_type_symbol caption="Symbol" mustnotequal="H" visible="false" cola="class=decimal">
- >
+>
 
 <sym caption="Symmetry Operations" tita="class=cifTableHeadline"
  tha="height='1'"
@@ -123,7 +121,7 @@
  rowa="class=cifTableRow"
  foota="class=cifTableFooter"
   <_symmetry_equiv_pos_as_xyz caption="" visible="true" cola="class='data'">
- >
+>
 
 <tang caption="Torsion Angles for $spy.GetParam(snum.report.title)." tita="class=cifTableHeadline"
  coln='2'
@@ -168,4 +166,17 @@
   <_geom_hbond_distance_DA caption="d(D-A)/&Aring;"  visible="true" cola="class=decimal">
   <_geom_hbond_angle_DHA caption="D-H-A/&deg;" visible="true" cola="class=decimal">
 >
+
+<occu caption="Occupancy for the Atoms for $spy.GetParam(snum.report.title). "
+ tita="class=cifTableHeadline"
+ coln="3"
+ across="true"
+ tha="class=cifTableFirst"
+ taba="class=CifTable"
+ rowa="class=cifTableRow"
+ foota="class=cifTableFooter"
+  <_atom_site_label caption="Atom" visible="true" cola="class='data'">
+  <_atom_site_occupancy caption="<i>Occupancy</i>" mustnotequal="1" visible="true" cola="class=decimalWide" >
+>
+
 >
