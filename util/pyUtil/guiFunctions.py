@@ -113,8 +113,7 @@ class GuiFunctions(object):
       q = self.GetParam('snum.display_quality')
       if not q:
         q = 2
-    d = {1: 'l', 2: 'm', 3: 'h'}
-    olx.Qual(**{d[int(q)]: True})
+    olx.Qual(q)
 
 a = GuiFunctions()
 olex.registerMacro(a.SetGrad, 'f')
