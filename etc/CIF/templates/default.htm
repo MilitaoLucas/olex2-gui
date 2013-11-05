@@ -2,7 +2,6 @@
 
 <head>
   <title>%$spy.GetParam(snum.report.title)%</title>
-  %$spy.getStyles(spy.GetParam(user.report.style))%
   %$spy.getStyles(spy.GetParam(user.report.journal_style))%
   %$spy.getStyles(spy.GetParam(user.report.style))%
 </head>
@@ -178,7 +177,7 @@
       Radiation
     </td>
     <td class="data">
-      %$spy.makeSpecialCifCharacter('\%76\%')% (&lambda; = %15%)
+      %$spy.report.makeSpecialCifCharacter('\%76\%')% (&lambda; = %15%)
     </td>
   </tr>
 
@@ -213,7 +212,7 @@
     Independent reflections
   </td>
   <td class="data">
-    %37%[R(int) =	%38%]
+    %37% [R<sub>int</sub> = %38%, R<sub>sigma</sub> = %78%]
   </td>
   </tr>
   <tr>
