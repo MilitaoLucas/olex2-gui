@@ -3,21 +3,16 @@
 <table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
 
   <tr>
-  <td bgcolor='%(banner_colour)s'></td>
-
-  <td bgcolor='%(banner_colour)s'>
-    <font size='6' color='#ffffff'>
-  <br><b>%(name)s</b>
-    </font>
-  </td>
-
+    <td bgcolor='%(banner_colour)s'></td>
+    <td bgcolor='%(banner_colour)s'>
+      <font size='6' color='#ffffff'>
+       <br><b>%(name)s</b>
+      </font>
+    </td>
   </tr>
 
-
   <tr>
-    <td width='30%%'>
-    Name of University:
-    </td>
+    <td width='30%%'>Institution Name:</td>
     <td width='70%%'>
       <input
         type="text"
@@ -31,13 +26,12 @@
       >
     </td>
   </tr>
+
   <tr>
-    <td width='30%%'>
-      Name of Department:
-  </td>
+    <td width='30%%'>Name of Department:</td>
     <td width='70%%'>
       <input
-      type="text"
+        type="text"
         bgcolor="$GetVar(HtmlInputBgColour))"
         valign='center'
         name="AFFILIATION_DEPARTMENT"
@@ -48,10 +42,9 @@
       >
     </td>
   </tr>
+
   <tr>
-    <td width='30%%'>
-    Address Line 1:
-    </td>
+    <td width='30%%'>Address Line 1:</td>
     <td width='70%%'>
       <input
         type="text"
@@ -65,11 +58,9 @@
       >
     </td>
   </tr>
-  <tr>
 
-    <td width='30%%'>
-    Address Line 2:
-    </td>
+  <tr>
+    <td width='30%%'>Address Line 2:</td>
     <td width='70%%'>
     <input
       type="text"
@@ -83,11 +74,9 @@
     >
     </td>
   </tr>
-  <tr>
 
-    <td width='30%%'>
-    City:
-    </td>
+  <tr>
+    <td width='30%%'>City:</td>
     <td width='70%%'>
       <input
         type="text"
@@ -100,13 +89,10 @@
         height="20"
       >
     </td>
-
   </tr>
-  <tr>
 
-    <td width='20%%'>
-    Post Code:
-    </td>
+  <tr>
+    <td width='20%%'>Post Code:</td>
     <td width='70%%'>
       <input
         type="text"
@@ -118,14 +104,10 @@
         height="20"
       >
     </td>
-
   </tr>
 
-
   <tr>
-    <td width='30%%'>
-    Region:
-    </td>
+    <td width='30%%'>Region:</td>
     <td width='70%%'>
       <input
         type="text"
@@ -138,17 +120,10 @@
         height="20"
       >
     </td>
-
-
   </tr>
-  <tr>
-
-
 
   <tr>
-    <td width='30%%'>
-    Country:
-    </td>
+    <td width='30%%'>Country:</td>
     <td width='70%%'>
       <input
         type="text"
@@ -161,18 +136,11 @@
         height="20"
       >
     </td>
-
-
   </tr>
+
   <tr>
-
-
-
-
-
-  <td>
-  </td>
-  <td valign='centre'>
+    <td></td>
+    <td valign='centre'>
     <input
       type="button"
       bgcolor="$GetVar(HtmlInputBgColour))"
@@ -189,7 +157,7 @@
       height="22"
       onclick="html.EndModal(%(pop_name)s,0)"
       value = "Cancel">
-  </td>
+    </td>
   </tr>
 
   </table>
