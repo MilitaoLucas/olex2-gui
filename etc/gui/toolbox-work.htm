@@ -1,21 +1,24 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
 
-
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='LABELS';help_ext=Labels;1 -->
-  <td width='100%' align='left' name=COMBO_LABEL_COMBO_BOX>
+  <td width='13%'>
+    <b>Labels</b>
+  </td>
+  <td width='87%' align='left' name=COMBO_LABEL_COMBO_BOX>
     <font size="$GetVar('HtmlFontSizeControls')" color='$GetVar(HtmlFontColour)'>
     <input
       type='combo'
       width='100%'
       height="$GetVar('HtmlInputHeight')"
       name='set_label_content'
-      value='Labels OFF'
-      items="'%Labels OFF%<-;%Atom Names%<-l;%Crystallographic Occupancy%<-o;%Chemical Occupancy%<-co;%Parts%<-p;%Link-Code%<-v;%H Atom Labels%<-h l;%Fixed Parameters%<-f;Variables<-v;AFIX Commands<-h a;Q Peak Intensities<-qi'"
+      value='Labels OFF/ON'
+      items="'%Labels OFF/ON%<-;%Atom Names%<-l;%Crystallographic Occupancy%<-o;%Chemical Occupancy%<-co;%Parts%<-p;%Link-Code%<-v;%H Atom Labels%<-h l;%Fixed Parameters%<-f;Variables<-v;AFIX Commands<-h a;Q Peak Intensities<-qi'"
       bgcolor="$GetVar('HtmlInputBgColour')"
       fgcolor="$GetVar(HtmlFontColour)"
       onchange="spy.ChooseLabelContent(html.GetValue('~name~'))"
       readonly='true'
+      onchangealways='true'
       manage
     >
     </font>

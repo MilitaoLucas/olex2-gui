@@ -162,13 +162,6 @@ class Affiliations:
     cursor.execute("""CREATE TABLE affiliations
                       (Name TEXT, Department TEXT, Address1 TEXT, Address2 TEXT, City TEXT, PostCode TEXT, Region TEXT, Country TEXT, displayname TEXT UNIQUE) 
                    """)
-    #affiliations = [
-      #('Durham University', 'Department of Chemistry', 'South Road', '', 'Durham', 'DH6 1LE', 'County Durham', 'U.K', 'Durham University, Durham'),
-      #('VUW', 'School of Chemical and Physical Sciences', '', '', 'Wellington', '6001', '', 'New Zealand', 'VUW, Wellington'),
-      #('North Maharashtra University', 'School of Chemical Sciences', 'Umavi Nagar', '', 'Jalgaon', '425 001', '', 'India', 'North Maharashtra University Jalagon'),
-      #('Vidyasagar University', 'Department of Chemistry and Chemical Technology', 'South Road', '', 'Midnapore', '7210102', 'West Bengal', 'India', 'Vidyasagar University Midnapore'),
-    #]
-    #cursor.executemany("INSERT INTO affiliations VALUES (?,?,?,?,?,?,?,?,?)", affiliations)
     DBConnection.conn.commit()
 
   def getListAffiliations(self):
@@ -222,15 +215,10 @@ class Persons:
     pass
 
   def new_person_db(self):
-    cursor = DBConnection.cursor
+    cursor = DBConnection.conn.cursor()
     cursor.execute("""CREATE TABLE persons
                       (firstname TEXT, middlename TEXT, lastname TEXT, email TEXT, phone TEXT, affiliation TEXT, displayname TEXT UNIQUE) 
                    """)  
-    #persons = [
-      #('Horst', '', 'Puschmann', 'horst.puschmann@gmail.com', '+44 191 334 2004', 'Durham University' 'Horst Puschmann'),
-      #('John', '', 'Spencer', 'john.spencer@vuw.ac.uk', '+44 191 334 2004','', ''),
-    #]
-    #cursor.executemany("INSERT INTO persons VALUES (?,?,?,?,?,?,?)", persons)
     DBConnection.conn.commit()
 
   def addNewPerson(self, name=""):

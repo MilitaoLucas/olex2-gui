@@ -167,9 +167,10 @@
   <_geom_hbond_angle_DHA caption="D-H-A/&deg;" visible="true" cola="class=decimal">
 >
 
-<occu caption="Occupancy for the Atoms for $spy.GetParam(snum.report.title). "
+<occu caption="Atomic Occupancy for $spy.GetParam(snum.report.title). "
  tita="class=cifTableHeadline"
  coln="3"
+ colsa='width="15px"'
  across="true"
  tha="class=cifTableFirst"
  taba="class=CifTable"
@@ -177,6 +178,37 @@
  foota="class=cifTableFooter"
   <_atom_site_label caption="Atom" visible="true" cola="class='data'">
   <_atom_site_occupancy caption="<i>Occupancy</i>" mustnotequal="1" visible="true" cola="class=decimalWide" >
+>
+
+<mask caption="Solvent masks information for $spy.GetParam(snum.report.title). "
+ tita="class=cifTableHeadline"
+ tha="class=cifTableFirst"
+ taba="class=CifTable"
+ rowa="class=cifTableRow"
+ foota="class=cifTableFooter"
+  <_smtbx_masks_void_nr caption="Number" visible="true" cola="class='data'">
+  <_smtbx_masks_void_average_x caption="X" visible="true" cola="class='decimal'">
+  <_smtbx_masks_void_average_y caption="Y" visible="true" cola="class='decimal'">
+  <_smtbx_masks_void_average_z caption="Z" visible="true" cola="class='decimal'">
+  <_smtbx_masks_void_volume caption="Volume" visible="true" cola="class='decimal'">
+  <_smtbx_masks_void_count_electrons caption="Electron count" visible="true" cola="class='decimal'">
+  <_smtbx_masks_void_content caption="Content" visible="true" cola="class='data'">
+>
+
+<sqz caption="Solvent masks information for $spy.GetParam(snum.report.title). "
+ tita="class=cifTableHeadline"
+ across="true"
+ tha="class=cifTableFirst"
+ taba="class=CifTable"
+ rowa="class=cifTableRow"
+ foota="class=cifTableFooter"
+  <_platon_squeeze_void_nr caption="Number" visible="true" cola="class='data'">
+  <_platon_squeeze_void_average_x caption="X" visible="true" cola="class='decimal'">
+  <_platon_squeeze_void_average_y caption="Y" visible="true" cola="class='decimal'">
+  <_platon_squeeze_void_average_z caption="Z" visible="true" cola="class='decimal'">
+  <_platon_squeeze_void_volume caption="Volume" visible="true" cola="class='decimal'">
+  <_platon_squeeze_void_count_electrons caption="Electron count" visible="true" cola="class='decimal'">
+  <_platon_squeeze_void_content caption="Content" visible="true" cola="class='data'">
 >
 
 >
