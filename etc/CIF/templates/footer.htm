@@ -32,9 +32,9 @@
 </ol>
 
 
-<p class=journal_h2>
+<p class="journal_h2">
   Crystal structure determination of
-  <span class=replaceThisChar>[%$spy.GetParam(snum.report.title)%]</span>
+  <span class="replaceThisChar">[%$spy.GetParam(snum.report.title)%]</span>
 </p>
 
 <p class="journal">
@@ -45,29 +45,30 @@ for %$xf.getFormula('html')% (<i>M&nbsp;</i>=%3%):
 <i>V&nbsp;</i>= %11%&nbsp;&Aring;<sup>3</sup>,
 <i>Z</i>&nbsp;= %16%,
 <i>T</i>&nbsp;= %27%&nbsp;K,
-&#956;(%$spy.makeSpecialCifCharacter('\%76\%')%)&nbsp;= %19% mm<sup>-1</sup>,
+&#956;(%$spy.report.makeSpecialCifCharacter('\%76\%')%)&nbsp;= %19% mm<sup>-1</sup>,
 <i>Dcalc</i>&nbsp;= %17%&nbsp;g/mm<sup>3</sup>,
 %29% reflections measured (%61% &le; 2&Theta; &le; %62%),
-%37% unique (<i>R</i><sub>int</sub>&nbsp;= %_diffrn_reflns_av_R_equivalents%) which were used in all calculations.
+%37% unique (<i>R</i><sub>int</sub> = %38%, R<sub>sigma</sub> = %78%) which were used in all calculations.
 The final <i>R</i><sub>1</sub> was %_refine_ls_R_factor_gt%
-(%$spy.makeSpecialCifCharacter('\%_reflns_threshold_expression\%')%) and <i>wR</i><sub>2</sub> was %54% (all data).
+(%$spy.report.makeSpecialCifCharacter('\%_reflns_threshold_expression\%')%) and <i>wR</i><sub>2</sub> was %54% (all data).
 </p>
 <p>
 
-<!--<p class=journal_h1> -->
-  <!--References-->
-<!--</p>-->
-
-<!--<ul class="journal_reference">-->
-	<!--<li>%_computing_data_collection%</li>-->
-	<!--<li>%_computing_data_reduction%</li>-->
-  <!--<li>%_computing_structure_solution%</li>-->
-	<!--<li>%_computing_structure_refinement%</li>-->
-	<!--<li>%_computing_molecular_graphics%</li>-->
-<!--</ul>-->
+<p class="journal_h2">
+  Refinement model description
+</p>
+<p class="journal">Number of restraints - %_refine_ls_number_restraints%,
+number of constraints - %$spy.report.handleNA('\%_refine_ls_number_constraints\%','unknown')%.
+</p>
+<p class="journal_noident">Details:</p>
+<pre class="journal">%$spy.report.makeSpecialCifCharacter('\%_olex2_refinement_description,<br/>\%')%</pre>
 
 <p>
-<font size=1>This report has been created with Olex2, compiled on %$GetCompilationInfo()%. Please let us know if there are any errors or if you would like to have additional featrues.</font></p>
+<font size=1>This report has been created with Olex2, compiled on
+ %$GetCompilationInfo()%. Please
+ <a href="mailto:support@olex2.org?subject=Olex2%%20Report">let us know</a>
+ if there are any errors or if you would like to have additional features.
+ </font></p>
 
 </div>
 </body>

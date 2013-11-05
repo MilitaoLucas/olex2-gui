@@ -287,8 +287,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.extinction = xray.shelx_extinction_correction(
         self.xray_structure().unit_cell(), self.wavelength, exti)
       self.extinction.grad = True
+      self.extinction.expression = 'Fc^*^=kFc[1+0.001xFc^2^\l^3^/sin(2\q)]^-1/4^'
     else:
       self.extinction = xray.dummy_extinction_correction()
+      self.extinction.expression = ''
 
     self.reparametrisation = constraints.reparametrisation(
       structure=self.xray_structure(),
@@ -641,6 +643,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
         cif_block['_refine_ls_abs_structure_Flack'] = self.flack
     cif_block['_refine_ls_d_res_high'] = fmt % d_min
     cif_block['_refine_ls_d_res_low'] = fmt % d_max
+    if self.extinction.expression:
+      cif_block['_refine_ls_extinction_expression'] = self.extinction.expression
     cif_block['_refine_ls_goodness_of_fit_ref'] = fmt % self.normal_eqns.goof()
     #cif_block['_refine_ls_hydrogen_treatment'] =
     cif_block['_refine_ls_matrix_type'] = 'full'
