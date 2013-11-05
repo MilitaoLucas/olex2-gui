@@ -1,10 +1,17 @@
-p.journal{
+p.journal, p.journal_noident {
   text-align:justify;
   font-size:10.0pt;
   line-height:11.0pt;
   margin-top:0pt;
   margin-bottom:0pt;
+}
+p.journal {
   text-indent:1cm;
+}
+pre.journal {
+  font-size:9.0pt;
+  margin-top:0pt;
+  margin-bottom:0pt;
 }
 
 p.journal_h1{
