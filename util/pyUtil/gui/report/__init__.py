@@ -50,7 +50,7 @@ class publication:
       boxWidth = 500
       boxHeight = 400
       x,y = get_box_x_y(boxWidth, boxHeight)
-      olx.Popup(pop_name, 'person.htm', "-s -b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(pop_name, boxWidth, boxHeight, x, y))
+      olx.Popup(pop_name, 'person.htm', s=True, b="tc", t=pop_name, w=boxWidth, h=boxHeight, x=x, y=y)
 
       address = userDictionaries.affiliations.get_affiliation_address(person['affiliation'], list=False)
       olx.html.SetValue('Person.PEOPLE_FORM_ADDRESS', address)
@@ -106,7 +106,7 @@ class publication:
       boxWidth = 500
       boxHeight = 400
       x,y = get_box_x_y(boxWidth, boxHeight)
-      olx.Popup(pop_name, 'affiliation.htm', "-s -b=tc -t='%s' -w=%i -h=%i -x=%i -y=%i" %(pop_name, boxWidth, boxHeight, x, y))
+      olx.Popup(pop_name, 'affiliation.htm', s=True, b="tc", t=pop_name, w=boxWidth, h=boxHeight, x=x, y=y)
 
       res = olx.html.ShowModal(pop_name)
       res = int(res)

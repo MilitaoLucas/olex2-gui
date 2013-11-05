@@ -109,18 +109,15 @@
     </td>
     <td width='75%%'>
 <input
-type="combo"
-width="100%%"
-height="18"
-name="PERSON_AFFILIATION"
-value="%(affiliation)s"
-items="%(list_affiliations)s"
-label=""
-valign="center"
-onchange="spy.gui.report.publication.OnPersonAffiliationChange('~name~',%(displayname)s)"
-onleave=""
-readonly
-bgcolor="spy.bgcolor('~name~')"
+  type="combo"
+  width="100%%"
+  name="PERSON_AFFILIATION"
+  value="%(affiliation)s"
+  items="%(list_affiliations)s"
+  onchange="spy.gui.report.publication.OnPersonAffiliationChange('~name~',%(displayname)s)"
+  readonly="true"
+  bgcolor="spy.bgcolor('~name~')"
+  onchangealways="true"
 >
     </td>
 
