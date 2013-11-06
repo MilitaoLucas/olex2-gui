@@ -141,6 +141,9 @@ Olex2 %s
       {'_computing_molecular_graphics': self.olex2_reference_brief,
        '_computing_publication_material': self.olex2_reference_brief
        }, force=False)
+    self.update_manageable()
+
+  def update_manageable(self):
     self.sort_crystal_dimensions()
     self.sort_crystal_colour()
     self.sort_publication_info()
@@ -784,6 +787,7 @@ class ExtractCifInfo(CifTools):
         #'_cell_measurement_temperature': self.cif_block['_diffrn_ambient_temperature']
       #})
 
+    self.update_manageable()
     self.write_metacif_file()
     self.all_sources_d = all_sources_d
     if self.evaluate_conflicts:
