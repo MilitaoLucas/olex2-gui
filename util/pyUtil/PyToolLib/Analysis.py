@@ -796,7 +796,7 @@ class Graph(ImageTools):
 #          IT.write_text_to_draw(barDraw, 'previous', align='left', max_width=width)
           historyText += historyTextNext
         elif img_no == 1 and i == last - 1 and not all_in_one_history:
-          historyText += scaleTxt
+          historyText += "<tr><td>%s</td></tr>" %scaleTxt
           pass
 #          IT.write_text_to_draw(barDraw, 'previous', align='left', max_width=width)
         elif i == last - 1:
