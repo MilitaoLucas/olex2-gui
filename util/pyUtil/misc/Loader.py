@@ -27,7 +27,7 @@ def getModulesDir():
   OV = OlexFunctions()
   base = olex.f(OV.GetParam('user.modules.location'))
   return "%s%smodules" %(base, os.sep)
-  
+
 def getModule(name, email=None):
   import HttpTools
   from olexFunctions import OlexFunctions
@@ -146,7 +146,7 @@ def loadAll():
       continue
     key = open(key, 'rb').readline()
     try:
-      if _plgl.loadPlugin(d, key):
+      if _plgl.loadPlugin(d, key, dir):
         print("Module %s has been successfully loaded." %d)
     except Exception, e:
       global failed_modules
@@ -259,7 +259,7 @@ class ModuleListThread(ThreadEx):
     Thread.__init__(self)
     ThreadRegistry().register(ModuleListThread)
     ModuleListThread.instance = self
-    
+
   def run(self):
     import time
     time.sleep(3)
@@ -343,7 +343,7 @@ def doAct():
     getModule(current_module.folder_name, olx.html.GetValue('modules_email'))
     current_module = None
     olx.html.Update()
-  
+
 
 def getCurrentModuleName():
   global current_module
@@ -386,7 +386,7 @@ def AskToUpdate():
         if status: status = "OK, restart Olex2 to load new version"
         else: status = "Failed"
         print("Updating '%s': %s" %(m.folder_name, status))
-   
+
 path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(path)
 
