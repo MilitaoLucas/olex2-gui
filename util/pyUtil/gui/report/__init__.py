@@ -123,8 +123,8 @@ class publication:
         userDictionaries.affiliations.add_affiliation(name, department, address1, address2, city, post_code, region, country)
         res = userDictionaries.affiliations.get_affiliation_address(affiliation, list=True)[0]
       return res
-        
-  
+
+
   def ChangeContactAuthor(self, person):
     if person == '': person = '?'
     if olx.cif_model is not None:

@@ -96,7 +96,7 @@ def makeHtmlTable(list):
         input_d['onchange'] += ">>%s" %input_d['extra_onchange']
       row_d.setdefault('input',makeHtmlInputBox(input_d))
       row_d.update(input_d)
-      
+
 
     text += makeHtmlTableRow(row_d)
 
