@@ -54,8 +54,6 @@ def sources():
      'chooseFile':{'filter':'.sams files|.sams'}
      },
   ]
-  text = ''
-
   x = 0
   filePath = OV.FilePath()
   for i in range(len(list)):
@@ -85,12 +83,10 @@ def sources():
       del list[list.index(d)]
 
   text = htmlTools.makeHtmlTable(list)
-  if text == '':
-    retstr = 'No relevant files found'
-  else:
-    retstr = text
+  if not text:
+    text = '<tr><td>No relevant files found</td></tr>'
 
-  return retstr
+  return text
 
 conflic_d = None
 
@@ -114,7 +110,7 @@ def make_no_conflicts_gui(resolved, some_remain=False):
   if olx.html.IsPopup('conflicts') == "true":
     olx.html.Hide('conflicts')
   wFilePath_gui = r"conflicts_html_window.htm"
-  OV.write_to_olex(wFilePath_gui, txt)
+  OV.write_to_olex(wFilePath_gui, "<tr><td>%s</td></tr>" %txt)
   
 
 def conflicts(popout='auto', d=None):
@@ -145,7 +141,7 @@ def conflicts(popout='auto', d=None):
     if not go_on:
       make_no_conflicts_gui(resolved)
       return 0
-        
+
     olx.CifInfo_metadata_conflicts = None
     if d:
       number_of_files = len(d['sources'])

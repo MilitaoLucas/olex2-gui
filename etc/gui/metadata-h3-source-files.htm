@@ -1,12 +1,17 @@
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
 
-
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='METADATA_SOURCES';help_ext=Metadata-Sources;1 -->
+<tr name='#name' bgcolor="$GetVar(HtmlTableBgColour)">
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Metadata-Sources;scope=#scope;1; -->
+<td>
+<table border="0" width="100%" cellpadding="1" cellspacing="1">
     $spy.gui.metadata.sources()
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</table></td></tr>
 
- <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MEATADATA_CONFLICTS';help_ext=Metadata-Conflicts;1 -->
- 
+<!-- #ignoreif not(fs.exists(conflicts_html_window.htm))
+<tr name='#name' bgcolor="$GetVar(HtmlTableBgColour)">
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Metadata-Conflicts;scope=#scope;1; -->
+<td>
+<table border="0" width="100%" cellpadding="1" cellspacing="1">
 <!-- #include conflicts conflicts_html_window.htm;image=#image;colspan=1;1; -->
- 
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</table></td></tr>
+#ignoreif -->

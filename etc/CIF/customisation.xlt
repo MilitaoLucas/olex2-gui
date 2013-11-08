@@ -47,6 +47,8 @@
     <_diffrn_radiation_type>
     <_diffrn_radiation_xray_symbol>
     <_refine_ls_*>
+    <_diffrn_reflns_theta_*>
+    <_diffrn_measured_fraction_*>
   >
   <#include "app.ConfigDir()/cif_customisation.xld" extend='false'>
 >

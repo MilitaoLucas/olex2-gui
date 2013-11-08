@@ -6,7 +6,6 @@
 
 <tr VALIGN='center' ALIGN='center' NAME='SNUM_REPORT_TITLE' valign='center'>
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-
   <td width='35%' align='left'>
     <font size="$GetVar('HtmlFontSizeMedium')" color="#555555">
     <input
@@ -41,18 +40,13 @@
     >
     </font>
   </td>
-
-
   <td width='34%' align='right'>
 $spy.MakeHoverButton('button-Make_Report','html.ItemState cbtn-solve 1 cbtn-refine solve-settings 0 refine-settings 0>>html.Update>>cursor(busy, 'Checking for CIF file ...')>>report>>cursor()>>html.Update')
   </td>
-
-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <tr VALIGN='center' ALIGN='center' NAME='SNUM_REPORT_TITLE' valign='center'>
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-
   <td width='8%' align='right'>
     %Style%
   </td>
@@ -71,6 +65,7 @@ $spy.MakeHoverButton('button-Make_Report','html.ItemState cbtn-solve 1 cbtn-refi
     >
     </font>
   </td>
+
   <td width='15%' align='right'>
     %Begin with%
   </td>
@@ -90,7 +85,6 @@ $spy.MakeHoverButton('button-Make_Report','html.ItemState cbtn-solve 1 cbtn-refi
     </font>
   </td>
 
-
   <td width='13%' align='right'>
     %End with%
   </td>
@@ -109,9 +103,7 @@ $spy.MakeHoverButton('button-Make_Report','html.ItemState cbtn-solve 1 cbtn-refi
     >
     </font>
   </td>
-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
 
 </table>
 
@@ -119,15 +111,13 @@ $spy.MakeHoverButton('button-Make_Report','html.ItemState cbtn-solve 1 cbtn-refi
     </tr>
   </table>
 
-
-
 <!-- #include report-metadata gui\tools\report-metadata.htm;1; -->
 
 <table cellpadding="1" cellspacing="1" width='100%'>
   <tr>
     <td bgcolor="#cccccc">
 
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
+<table border="0" VALIGN='center' width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
 
 <tr align = 'center' name=EDIT_CIF width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=CIF-Part-1;1; -->
@@ -193,8 +183,6 @@ $spy.MakeHoverButton('button-checkcif_report','spy.cif.GetCheckCifReport(html.Ge
   <td name=REQUEST_CCDC_NUMBER align='right' width = '34%'>
 $spy.MakeHoverButton('button-ccdc_number','spy.ccdc_submit()')
   </td>
-
-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
@@ -224,7 +212,8 @@ Merge CIF:
 
   <td align='right' width ='12%'>
 <a href="spy.gui.report.publication.add_cif_to_merge_list(FileOpen('Choose definition file','.cif files|*.cif','$BaseDir()/etc/site'))>>html.Update">
-  <b>add CIF</b></td>
+  <b>add CIF</b>
+  </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #ignoreif sg('%c')

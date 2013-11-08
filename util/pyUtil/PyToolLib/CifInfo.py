@@ -110,7 +110,7 @@ class CifTools(ArgumentParser):
     super(CifTools, self).__init__()
     self.metacif_path = '%s/%s.metacif' %(OV.StrDir(), OV.FileName())
     self.data_name = OV.FileName().replace(' ', '')
-    if olx.cif_model is None or self.data_name not in olx.cif_model.keys():
+    if olx.cif_model is None or self.data_name.lower() not in olx.cif_model.keys():
       if os.path.isfile(self.metacif_path):
         olx.cif_model = self.read_metacif_file()
       else:
@@ -141,6 +141,9 @@ Olex2 %s
       {'_computing_molecular_graphics': self.olex2_reference_brief,
        '_computing_publication_material': self.olex2_reference_brief
        }, force=False)
+    self.update_manageable()
+
+  def update_manageable(self):
     self.sort_crystal_dimensions()
     self.sort_crystal_colour()
     self.sort_publication_info()
@@ -784,6 +787,7 @@ class ExtractCifInfo(CifTools):
         #'_cell_measurement_temperature': self.cif_block['_diffrn_ambient_temperature']
       #})
 
+    self.update_manageable()
     self.write_metacif_file()
     self.all_sources_d = all_sources_d
     if self.evaluate_conflicts:
@@ -867,7 +871,6 @@ class ExtractCifInfo(CifTools):
       wFilePath = r"conflicts_html_window.htm"
       txt = '''
 <tr>
-<td></td>
 <td bgcolor='%s'><font color='white'>
 <b>There is no conflicting information in the sources of metadata</b>
 </font><a href='spy.SetParam(snum.metadata.show_all_cif_sources,True)'>Show ALL</a></td></tr>''' %OV.GetParam('gui.green').hexadecimal
