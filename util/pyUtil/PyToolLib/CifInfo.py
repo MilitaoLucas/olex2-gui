@@ -110,7 +110,7 @@ class CifTools(ArgumentParser):
     super(CifTools, self).__init__()
     self.metacif_path = '%s/%s.metacif' %(OV.StrDir(), OV.FileName())
     self.data_name = OV.FileName().replace(' ', '')
-    if olx.cif_model is None or self.data_name not in olx.cif_model.keys():
+    if olx.cif_model is None or self.data_name.lower() not in olx.cif_model.keys():
       if os.path.isfile(self.metacif_path):
         olx.cif_model = self.read_metacif_file()
       else:
@@ -871,7 +871,6 @@ class ExtractCifInfo(CifTools):
       wFilePath = r"conflicts_html_window.htm"
       txt = '''
 <tr>
-<td></td>
 <td bgcolor='%s'><font color='white'>
 <b>There is no conflicting information in the sources of metadata</b>
 </font><a href='spy.SetParam(snum.metadata.show_all_cif_sources,True)'>Show ALL</a></td></tr>''' %OV.GetParam('gui.green').hexadecimal
