@@ -23,7 +23,7 @@ class PluginTools(object):
 
   def deal_with_phil(self, operation='read', which='user_local'):
     user_phil_file = "%s/%s.phil" %(OV.DataDir(),self.p_scope)
-    phil_file_p = r"%s/%s.phil" %(self.p_path, self.p_name)
+    phil_file_p = r"%s/%s.phil" %(self.p_path, self.p_name.lower())
     gui_phil_file_p = r"%s/gui_%s.phil" %(self.p_path, self.p_name)
     if operation == "read":
       phil_file = open(phil_file_p, 'r')
@@ -89,18 +89,19 @@ def make_new_plugin(name,overwrite=False):
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
+import os
 import htmlTools
-
 import olex
 import olx
 
 instance_path = OV.DataDir()
 
-p_path = "%s/plugin-%(name)s" %%OV.BaseDir()
+p_path = os.path.dirname(os.path.abspath(__file__))
+OV.SetVar('%(name)s_plugin_path', p_path)
 p_name = "%(name)s"
 p_scope = "%(name_lower)s"
 p_htm = "%(name)s"
-p_img = "%(name)s"
+p_img = [(%(name)s,'h1')]
 
 from PluginTools import PluginTools as PT
 
