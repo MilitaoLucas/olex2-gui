@@ -621,11 +621,9 @@ def restraint_builder(cmd):
   first_col_bg = OV.GetParam('gui.html.table_firstcol_colour')
   table_row_bg = OV.GetParam('gui.html.table_firstcol_colour')
 
-
   constraints = ["EXYZ", "EADP", "AFIX"]
   olex_conres = ["RRINGS", "TRIA", "ADPUEQ", "ADPVOL", "ANGLE", "DIANG"]
 
-  html = []
   atom_pairs =  {
     "DFIX":["name_DFIX", "var_d: ", "var_s:0.02", "help_DFIX-use-help"],
     "DANG":["name_DANG", "var_d: ", "var_s:0.04", "help_Select atom pairs"],
@@ -647,7 +645,7 @@ def restraint_builder(cmd):
     "RRINGS":["name_RRINGS", "help_rrings-htmhelp"],
     "TRIA":["name_TRIA", "var_d: ", "var_angle: ", "help_tria-htmhelp"],
     "ADPUEQ":["name_ADPUEQ", "var_n:0.05 ", "help_adpueq-htmhelp", "cmd_restrain adp ueq"],
-    "ADPVOL":["name_ADPVOL", "help_adpvol-htmhelp", "cmd_restrain adp volume"],
+    "ADPVOL":["name_ADPVOL", "var_n: ", "help_adpvol-htmhelp", "cmd_restrain adp volume"],
     "ANGLE":["name_ANGLE", "var_n: ", "help_angle-htmhelp", "cmd_restrain angle"],
     "DIANG":["name_DIANG", "var_n: ", "help_diang-htmhelp", "cmd_restrain dihedral"],
   }
@@ -657,7 +655,7 @@ def restraint_builder(cmd):
   elif atom_names.has_key(cmd):
     l = atom_names[cmd]
   else:
-    return "Please atoms and restraint, then press GO"
+    return "Unknow restraint/constraint"
   onclick = ""
   pre_onclick = ""
   post_onclick = ""
@@ -668,20 +666,19 @@ def restraint_builder(cmd):
   ib = ""
   varcount = 0
   cmd = ""
+  controls = []
   for item in l:
+    itemcount += 1
     if "var" in item:
       varcount += 1
     if "cmd" in item:
       cmd = item.split("_")[1]
 
   for item in l:
-    itemcount += 1
-    id = item.split("_")[0]
-    tem = item.split("_")[1]
+    id, tem = item.split("_")
     val = ""
     if ":" in tem:
-      var = tem.split(":")[0]
-      val = tem.split(":")[1]
+      var, val = tem.split(":")
     if id == "name":
       name = tem
       if not cmd:
@@ -705,12 +702,6 @@ def restraint_builder(cmd):
       else:
         items = None
         val = val.strip()
-      if items:
-        width='100%'
-      else:
-        width='100%'
-      if var == "d":
-        width='100%'
       width='33%'
       b_width='60%'
       if name == 'AFIX':
@@ -727,92 +718,38 @@ def restraint_builder(cmd):
       if items:
         d.setdefault("items",items)
       if var:
-        ib += "<td align='left' width='%s' bgcolor='%s'>%s</td>" %(width, table_row_bg, htmlTools.makeHtmlInputBox(d))
-
-  if ib:
-    if name == "AFIX":
-      var_max = 2
-      td_width = '35%'
-    else:
-      var_max = 3
-      td_width = '80%'
-
-    while varcount < var_max:
-      ib += "<td align='center' width='33%%' bgcolor='%s'></td>" %table_row_bg
-      varcount += 1
-
-    html.append("<td width='%s'><table border='0' style='border-collapse: collapse' width='100%%' cellpadding='1' cellspacing='0'><tr>%s</tr></table></td>" %(td_width, ib))
+        controls.append(htmlTools.makeHtmlInputBox(d))
 
   if name == "AFIX":
-#    itemcount += 2
     onclick_list = onclick.strip().split(' ')
     onclick = 'AFIX strcat\(%s,%s)' %(onclick_list[1],onclick_list[2])
     post_onclick = '>>labels -a'
     mode_ondown = "mode %s" %(onclick.replace('AFIX ','HFIX '))
     mode_onup = "mode off>>sel -u"
-
-    mode_button_d = {
-      "name":'AFIX_MODE',
-      "value":"Mode",
-      "ondown":"%s"%mode_ondown,
-      "onup":"%s"%mode_onup,
-      "width":'100%',
-      "height":height,
-      "hint":"Atoms subsequently clicked will become the pivot atom of a new rigid group",
-    }
     clear_onclick = "sel atoms where xatom.afix==strcat\(%s,%s)>>Afix 0>>labels -a" %(onclick_list[1],onclick_list[2])
-
-    clear_button_d = {
-      "name":'AFIX_CLEAR',
-      "value":"Clear",
-      "onclick":"%s"%clear_onclick,
-      "width":'100%',
-      "height":height,
-      "hint":"Removes the current AFIX command from the structure",
-    }
 
   if name == "RRINGS":
     post_onclick = ">>sel -u"
 
-  has_modes = []
-  if name in has_modes:
-    if haveSelection():
-      onclick += " sel"
-    else:
-      onclick = "mode %s" %onclick
-  else:
-    pass
-    #onclick += " sel"
-
   onclick = "%s%s%s" %(pre_onclick, onclick, post_onclick)
-
-  button_d = {
-    "name":'%s_GO' %name,
-    "value":"GO",
-    "onclick":"%s"%onclick,
-    "width":20,
-    "height":"$GetVar(HtmlComboHeight)",
-    "hint":"The %s command will be applied to all currently selected atoms" %name
-  }
-  if varcount == 0:
-    fill = colspan-itemcount
-    if not fill:
-      fill = 1
-    html.append("<td bgcolor='%s' width=100%%></td>"*(fill) %table_row_bg) # Space-filler
-  btns = ""
-  width='20%'
   if name == 'AFIX':
-    btns += '$spy.MakeHoverButton("button_small-clear@Afix","%s")' %clear_onclick
-    btns+= '$spy.MakeHoverButton("button_small-mode@Afix","%s")' %mode_ondown
-    width='60%'
-  btns += '$spy.MakeHoverButton("button_small-go@%s","%s")' %(name, onclick)
+    controls.append('$spy.MakeHoverButton("button_small-clear@Afix","%s")' %clear_onclick)
+    controls.append('$spy.MakeHoverButton("button_small-mode@Afix","%s")' %mode_ondown)
+  controls.append('$spy.MakeHoverButton("button_small-go@%s","%s")' %(name, onclick))
 
-  html.append("<td width='%s' align='right' bgcolor='%s'>%s</td>" %(width,table_row_bg,btns))
-
+  html = ""
+  colw = 100/len(controls)
+  for i, td in enumerate(controls):
+    if (i+1) == len(controls):
+      align = "right"
+    else:
+      align = "center"
+    html += "<td width='%s%%' align='%s'>%s</td>" %(colw, align, td)
+  html = ["<td><table width='100%%'><tr>%s</tr></table></td>" %html]
   #Add the help info as the last row in the table
-  html.append("</td></tr><tr bgcolor='%s'>" %table_row_bg,)
+  html.append("</tr><tr bgcolor='%s'>" %table_row_bg,)
   html.append(htmlTools.make_table_first_col(help_name=name, popout=True, help_image='normal'))
-  html.append("<td colspan=%s bgcolor='%s'>%s</td></tr>" %(colspan, first_col_bg, html_help, ))
+  html.append("<td bgcolor='%s' colspan='2'>%s</td></tr>" %(first_col_bg, html_help, ))
   if name in constraints:
     wFilePath = r"constraint-vars.htm"
   elif name in olex_conres:
