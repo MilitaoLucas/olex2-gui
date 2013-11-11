@@ -106,13 +106,13 @@ def GetBitmapImageInstructions():
       new_width, old_width = IT.trim_image(im=temp_name,  padding=padding, border=border, border_col=colour, dry=True)
       target_size = filesize
       filesize = filesize * (old_width/new_width)
-      olex.m('pict%s %s %s %s %s' %(pict, nbg, filefull, resolution, int(round(filesize,0))))
+      olex.m('pict%s %s "%s" %s %s' %(pict, nbg, filefull, resolution, int(round(filesize,0))))
       IT.trim_image(im=filefull, padding=padding, border=border, border_col=colour, target_size=target_size)
     finally:
       if os.path.exists(temp_name):
         os.unlink(temp_name)
   else:
-    olex.m('pict%s %s %s %s %s' %(pict, nbg, filefull, resolution, filesize))
+    olex.m('pict%s %s "%s" %s %s' %(pict, nbg, filefull, resolution, filesize))
     
   #from PIL import Image
   OV.Cursor()
@@ -125,7 +125,7 @@ def GetPRImageInstructions():
   if not filefull:
     return
   OV.Cursor('busy','Please Wait. Making image %s.%s. This may take some time' %(filename, fileext))
-  olex.m('pictPR %s' %filefull)
+  olex.m('pictPR "%s"' %filefull)
   print 'Image %s created' %filefull
   OV.Cursor()
   from gui import ImageListener
@@ -151,8 +151,8 @@ def GetPSImageInstructions():
   octant_atoms = str(OV.GetValue('IMAGE_PS_OCTANTS_ATOMS'))
 
   olex.m("pictps" + \
-         " " + filefull + \
-         " " + colour_line + \
+         " '" + filefull + \
+         "' " + colour_line + \
          " " + colour_bond + \
          " " + colour_fill + \
          " " + "-lw_ellipse=" + lw_ellipse + \
