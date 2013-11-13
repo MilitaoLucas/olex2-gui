@@ -110,7 +110,7 @@ class CifTools(ArgumentParser):
     super(CifTools, self).__init__()
     self.metacif_path = '%s/%s.metacif' %(OV.StrDir(), OV.FileName())
     self.data_name = OV.FileName().replace(' ', '')
-    if olx.cif_model is None or self.data_name.lower() not in olx.cif_model.keys():
+    if olx.cif_model is None or self.data_name.lower() not in olx.cif_model.keys_lower.keys():
       if os.path.isfile(self.metacif_path):
         olx.cif_model = self.read_metacif_file()
       else:
