@@ -653,36 +653,6 @@ class ExtractCifInfo(CifTools):
       except:
         print "Error reading pcf file %s" %p
 
-    #p, pp = self.sort_out_path(path, "cad4")
-    #if p and self.metacifFiles.curr_cad4 != self.metacifFiles.prev_cad4:
-      #try:
-        #from cad4_reader import cad4_reader
-        #cad4 = cad4_reader(p).read_cad4()
-        #self.update_cif_block(cad4)
-        #all_sources_d[p] = cad4
-      #except:
-        #print "Error reading cad4 file %s" %p
-
-    #import iotbx.cif
-    #merge_files = OV.GetParam('snum.report.merge_these_cifs',[])
-    #merge_files.append(self.metacif_path)
-##    if OV.GetParam('snum.report.merge_these_cifs',[])
-    #for p in merge_files:
-      #if not p or not os.path.exists(p):
-        #continue
-      #f = open(p, 'rUb')
-      #content = f.read().strip()
-      #if not content.startswith('data_'):
-        #if not '\ndata_' in content:
-          #content = "data_n\n" + content
-      #f.close()
-      #c = iotbx.cif.reader(input_string=content).model().values()[0]
-      #self.exclude_cif_items(c)
-      #f.close()
-      #self.update_cif_block(c, force=False)
-      #all_sources_d[p] = c
-
-
     # Oxford Diffraction data collection CIF
     p,pp  = self.sort_out_path(path, "cif_od")
     if p: # and self.metacifFiles.curr_cif_od != self.metacifFiles.prev_cif_od:
@@ -701,26 +671,19 @@ class ExtractCifInfo(CifTools):
     # Rigaku data collection CIF
     p, pp = self.sort_out_path(path, "crystal_clear")
     if p: # and self.metacifFiles.curr_crystal_clear != self.metacifFiles.prev_crystal_clear:
-      f = open(p, 'rUb')
-      crystal_clear = iotbx.cif.reader(input_string=f.read()).model().values()[0]
-      self.exclude_cif_items(crystal_clear)
-      f.close()
-      self.update_cif_block(crystal_clear, force=False)
-      all_sources_d[p] = crystal_clear
-
-      #try:
-        #import iotbx.cif
-        #f = open(p, 'rUb')
-        #cif = iotbx.cif.reader(input_string=f.read()).model()
-        #for key, cif_block in cif.iteritems():
-          #if key.lower() not in ('global', 'general'):
-            #break
-        #self.exclude_cif_items(cif_block)
-        #f.close()
-        #self.update_cif_block(cif_block)
-        #all_sources_d[p] = cif_block
-      #except:
-        #print "Error reading Rigaku CIF %s" %p
+      try:
+        import iotbx.cif
+        f = open(p, 'rUb')
+        cif = iotbx.cif.reader(input_string=f.read()).model()
+        for key, cif_block in cif.iteritems():
+          if key.lower() not in ('global', 'general'):
+            break
+        self.exclude_cif_items(cif_block)
+        f.close()
+        self.update_cif_block(cif_block)
+        all_sources_d[p] = cif_block
+      except:
+        print "Error reading Rigaku CIF %s" %p
 
     # Diffractometer definition file
     diffractometer = OV.GetParam('snum.report.diffractometer')
@@ -1118,7 +1081,7 @@ If more than one file is present, the path of the most recent file is returned b
       else:
         return None, None
 
-                 
+
   def file_choice(self, info, tool, multiple=False):
     """Given a list of files, it will return the most recent file.
     Sets the list of files as a variable in Olex2, and also the file that is to
