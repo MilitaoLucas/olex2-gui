@@ -47,20 +47,20 @@ class XPlain:
     out_file = self.get_output_name()
     hkl_out_file = out_dir + olx.FileName() + "-xplain.hkl"
     log_out_file = out_dir + olx.FileName() + "-xplain.log"
-    cmdl = self.exe_file + ' /InputParameterFilename="' + cell_input_file + '"' + \
+    cmdl = '/InputParameterFilename="' + cell_input_file + '"' + \
       ' /InputReflectionsFilename="' + hkl_file + '"'
     if not run_auto:
       if sync:
-        r = olx.Exec("%s -o -s" %cmdl)
+        r = olx.Exec(self.exe_file, cmdl, o=True, s=True)
       else:
-        r = olx.Exec("%s -o" %cmdl)
+        r = olx.Exec(self.exe_file, cmdl, o=True)
       if r == 1: return True
       return False
     cmdl += ' /AutomaticChoice=0' + \
       ' /OutputParameterFilename="' + out_file + '"' + \
       ' /OutputReflectionsFilename="' + hkl_out_file + '"' + \
       ' /LogFilename="' + log_out_file + '"'
-    if not olx.Exec(cmdl + ' -s'):
+    if not olx.Exec(self.exe_file, cmdl, s=True):
       print 'Failed to execute the command...'
       return False
 
