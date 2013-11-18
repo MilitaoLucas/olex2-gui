@@ -65,12 +65,12 @@ An error occurred while downloading the extension.<br>%s<br>Please restart Olex2
   if etoken is None:
     if os.path.exists(etoken_fn):
       etoken = open(etoken_fn, "rb").readline().strip()
-  
+
   if etoken is None:
     if not email:
       olex.writeImage(info_file_name, "Please provide your e-mail", 0)
     return False
-      
+
   #try to clean up the folder if already exists
   pdir = "%s%s%s" %(dir, os.sep, name)
   old_folder = None
