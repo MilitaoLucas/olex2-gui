@@ -1,6 +1,7 @@
 #value=
 #width=100%
 #manage=false
+#password=false
 
 <font size="$GetVar('HtmlFontSizeControls')">
 <input
@@ -15,5 +16,6 @@
   onchange="#onchange"
   onleave="#onleave"
   manage="#manage"
+  password="#password"
 >
 </font>
