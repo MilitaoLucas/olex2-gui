@@ -336,7 +336,7 @@
 <telp help="Default telp macro"
   <body
     <args
-      <arg0 name="Prob_factor" def="-1">
+      <arg0 name="Prob_factor" def="-100">
     >
     <cmd
       <cmd3 "individualise">
@@ -345,7 +345,7 @@
       <cmd2 "arad isot">
       <cmd3 "mask atoms 5">
       <cmd4 "mask bonds 48">
-      <cmd5 "telpv %1">
+      <cmd5 "if strcmp(%1,'-100') then 'telpv 50' else 'telpv %1'">
       <cmd6 "brad 1">
     >
   >
@@ -354,7 +354,7 @@
 <telph help="Default telph macro"
   <body
     <args
-      <arg0 name="Prob_factor" def="-1">
+      <arg0 name="Prob_factor" def="-100">
     >
     <cmd
       <cmd3 "individualise">
@@ -363,7 +363,7 @@
       <cmd2 "arad isoth">
       <cmd3 "mask atoms 5">
       <cmd4 "mask bonds 48">
-      <cmd5 "telpv %1">
+      <cmd5 "if strcmp(%1,'-100') then 'telpv 50' else 'telpv %1'">
       <cmd6 "brad 1">
     >
   >
