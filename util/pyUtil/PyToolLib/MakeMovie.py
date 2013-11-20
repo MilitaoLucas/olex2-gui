@@ -9,9 +9,7 @@ class MakeMovie():
   def __init__(self):
     self.i = 0
 
-
   def run_MakeMovie(self):
-    
     self.axis = OV.GetParam('snum.image.image_series.rotation_around_axis')
     self.frames = OV.GetParam('snum.image.image_series.number_of_frames')
     self.steps = OV.GetParam('snum.image.image_series.degrees_of_rotation')
@@ -19,17 +17,16 @@ class MakeMovie():
     self.filepath = OV.FilePath()
     
     print "Making %i frames by rotating around axis %i in %.2f degree steps in size %.2f" %(self.frames, self.axis, self.steps, self.size)
-    try:
-      os.mkdir(r"%s/movie" %(self.filepath))
-    except:
-      pass
+    path = "%s/movie" %(self.filepath)
+    if not os.path.exists(path):
+      os.mkdir(path)
     for i in xrange(self.frames):
-      olx.Rota("%s %s" %(self.axis, self.steps))
+      olx.Rota(self.axis, self.steps)
       OV.Refresh()
-      if i < 100: number = "0%i" %i
-      if i < 10: number = "00%i" %i
       if i > 99: number = i
-      olx.Pict(r"'%s/movie/%s.bmp' %.3f" %(self.filepath, number, self.size))
+      elif i < 10: number = "00%i" %i
+      elif i < 100: number = "0%i" %i
+      olx.Pict("%s/%s.bmp" %(path, number), "%.3f" %(self.size))
 
   def run_complex(self):
     movie = self
