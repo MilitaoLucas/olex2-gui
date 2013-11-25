@@ -366,23 +366,17 @@ class Method_shelx(Method):
         sys.stdout.write(line)
 # This is super ugly but what can I do?
 # This really be a function rather than a separate file but I can not get it to work yet?
-    if prgName in ('shelxl', 'xl', 'shelxl_ifc', 'XLMP', 'shelxl13' ):
-      names = xl_ins_filename.lower()+'.ins'
     if prgName in ('shelxs', 'xs', 'shelxs86', 'shelxs13'):
       import fileinput, string, sys
       for line in fileinput.input(xl_ins_filename.lower()+'.ins',inplace=1):
         if 'DISP' in line:
           continue
         sys.stdout.write(line)
-    command = "'%s'" % (xl_ins_filename.lower()) #This is correct!!!!!!
+    commands = [xl_ins_filename.lower()]  #This is correct!!!!!!
     #sys.stdout.graph = RunPrgObject.Graph()
-    if not RunPrgObject.params.snum.shelx_output:
-      command = "-q " + command
     if self.command_line_options:
-      opts = self.command_line_options.split()
-      opts = ' '.join(["'%s'" %o for o in opts])
-      command = "%s %s" %(command, opts)
-    success = olx.Exec(prgName, command, q=(not RunPrgObject.params.snum.shelx_output))
+      commands += self.command_line_options.split()
+    success = olx.Exec(prgName, *commands, q=(not RunPrgObject.params.snum.shelx_output))
     if not success:
       raise RuntimeError(
         'you may be using an outdated version of %s' %(prgName))
