@@ -1043,13 +1043,15 @@ If more than one file is present, the path of the most recent file is returned b
           min_char = chars
         l.append(path)
 
+      if not l:
+        return None, None
       def sorting_list(txt):
         try:
           cut = len(txt) - min_char + 1
           return int(txt[-(cut + 4): -4])
         except:
           return 0
-       
+
       l.sort(key=sorting_list)
       OV.SetParam("snum.metacif.list_crystal_images_files", (l))
       setattr(self.metacifFiles, "list_crystal_images_files", (l))
