@@ -154,6 +154,7 @@ def GetPSImageInstructions():
          " '" + filefull + \
          "' " + colour_line + \
          " " + colour_bond + \
+         " " + image_perspective + \
          " " + colour_fill + \
          " " + "-lw_ellipse=" + lw_ellipse + \
          " " + "-lw_octant=" + lw_octant + \
