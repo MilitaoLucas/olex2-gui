@@ -80,7 +80,7 @@ class publication:
     if not affiliation:
       return
     d = {}
-    if '--' in affiliation:
+    if '++' in affiliation:
       edit = True
       address = ["","","","","","","","New Affiliation"]
     else:
