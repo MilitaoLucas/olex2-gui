@@ -172,7 +172,7 @@ class Affiliations:
     retVal = ""
     for affiliation in all_affiliations:
       retVal += "%s;" %affiliation[0]
-    retVal += "-- ADD NEW --"
+    retVal += "++ ADD NEW ++"
     return retVal
   
   def get_affiliation_address(self, affiliation, list=False):
@@ -286,7 +286,7 @@ class Persons:
       display = self.make_display_name(person)
       retVal_l.append(display)
     retVal_l.sort()
-    retVal_l.append("-- ADD NEW --")
+    retVal_l.append("++ ADD NEW ++")
     retVal = ";".join(retVal_l)
     return retVal
 
@@ -308,7 +308,7 @@ class Persons:
 
   def get_person_details(self, displayname):
     cursor = DBConnection.conn.cursor()
-    if "--" in displayname or not displayname:
+    if "++" in displayname or not displayname:
       person = ["","","","","","","New Person"]
     else:
       sql = "SELECT * FROM persons WHERE displayname like '%s'" %(displayname)
