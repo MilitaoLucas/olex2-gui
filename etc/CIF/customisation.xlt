@@ -50,6 +50,9 @@
     <_diffrn_reflns_theta_*>
     <_diffrn_measured_fraction_*>
   >
+  <do_merge
+   <_refine_ls_hydrogen_treatment>
+  >
   <#include "app.ConfigDir()/cif_customisation.xld" extend='false'>
 >
 

@@ -67,8 +67,14 @@ class People:
     for item in sorted(self.dictionary[whatList].keys()):
       retStr += '%s;' %item
     return retStr
-  
+
   def get_person_details(self, person):
+    person = self.dictionary['people'].get(person, None)
+    if not person:
+      person = {'firstname': '', 'middlename': '', 'lastname': '',
+         'email': '', 'phone': '', 'affiliation': '',
+         'displayname': 'New Person',
+         }
     return person
 
 class LocalList:
@@ -210,7 +216,7 @@ class Persons:
       self.new_person_db()
     except:
       pass
-    
+
   def changePersonInfo(self,person,item,info):
     pass
 
@@ -327,7 +333,7 @@ class Persons:
          'displayname':person[6],
          }
     return d
-  
+
   def get_person_affiliation(self, displayname, list=False):
     cursor = DBConnection.conn.cursor()
     sql = "SELECT affiliation FROM persons WHERE displayname like '%s'" %displayname
@@ -489,11 +495,11 @@ def init_userDictionaries():
   else:
     people = People()
 #  experimantal = Experimental(conn, cursor)
-  
+
 class DBConnection():
   conn = None
   cursor = None
-  
+
   def __init__(self):
     if DBConnection.conn:
       return

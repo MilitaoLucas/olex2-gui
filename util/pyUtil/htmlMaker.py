@@ -3,7 +3,7 @@ import sys
 import os
 sys.path.append(r".\src")
 import userDictionaries
-## This used to be in in init.py. Why? 
+## This used to be in in init.py. Why?
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
@@ -17,33 +17,32 @@ GI = GuiImages()
 
 class GeneratedGuiMaker(object):
   def __init__(self):
-    
+
     self.use_db = OV.GetParam('user.report.use_db')
-    
+
     ## Define buttons, actions and hints: UP, DOWN, EDIT and DELETE
     number = "%s"
     onclick="spy.move(up,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.update" %number
     hint="Move author up"
     self.up = GI.get_action_button_html('up', onclick, hint)
-    
+
     onclick="spy.move(down,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.update" %number
     hint="Move author down"
     self.down = GI.get_action_button_html('down', onclick, hint)
-    
+
     onclick="spy.move(del,SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)>>html.Update" %number
     hint="Remove author from paper"
     self.delete = GI.get_action_button_html('delete', onclick, hint)
-  
-    
+
     if self.use_db:
-      onclick="spy.gui.report.publication.OnPersonChange(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s,edit=True)>>html.update" %number
+      onclick="spy.gui.report.publication.OnPersonChange(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s,edit=True)" %number
       hint="Edit author"
       self.edit = GI.get_action_button_html('edit', onclick, hint)
     else:
       self.edit = " "
-    
+
     if self.use_db:
-      onclick="spy.gui.report.publication.OnPersonChange(SET_SNUM_METACIF_%s,edit=True)>>html.update"
+      onclick="spy.gui.report.publication.OnPersonChange(SET_SNUM_METACIF_%s,edit=True)"
       hint="Edit author"
       self.edit_subop = GI.get_action_button_html('edit', onclick, hint)
     else:
@@ -55,7 +54,7 @@ class GeneratedGuiMaker(object):
     val = OV.GetParam(var)
     if not val:
       val = os.path.normpath(olx.file.ChangeExt(OV.FileFull(),type))
-  
+
     list = (
       {'varName':str(var),
         'itemName':'%s File' %type,
@@ -69,7 +68,7 @@ class GeneratedGuiMaker(object):
         },
     )
     return htmlTools.makeHtmlTable(list)
-  
+
   def absorption_correctionMetadataHtmlMaker(self, ):
     list = (
       {'varName':'_exptl_absorpt_correction_type',
@@ -88,10 +87,10 @@ class GeneratedGuiMaker(object):
        },
     )
     return htmlTools.makeHtmlTable(list)
-  
-  
+
+
   def diffractionMetadataHtmlMaker(self, ):
-  
+
     list = (
       {'varName':'snum.report.diffractometer',
        'readonly':'',
@@ -100,7 +99,7 @@ class GeneratedGuiMaker(object):
        'onchange':"spy.addToLocalList(html.GetValue(~name~),diffractometers)>>html.update",
        },
     )
-  
+
     if OV.GetParam('snum.report.diffractometer') != '?':
       list += (
         {'varName':'snum.report.diffractometer_definition_file',
@@ -114,7 +113,7 @@ class GeneratedGuiMaker(object):
            },
          },
       )
-  
+
     list += (
       {'varName':'_diffrn_ambient_temperature',
        'itemName':'%Diffraction T% (K)'
@@ -132,7 +131,7 @@ class GeneratedGuiMaker(object):
        }
     )
     return htmlTools.makeHtmlTable(list)
-  
+
   def crystalMetadataHtmlMaker(self):
     list = (
       {'varName':'_chemical_name_systematic',
@@ -143,15 +142,15 @@ class GeneratedGuiMaker(object):
        'itemName':'%Colour%',
        'box1':{'varName':'_exptl_crystal_colour_lustre',
                'items':'?;.;metallic;dull;clear',
-               'width':'33%' 
+               'width':'33%'
                },
        'box2':{'varName':'_exptl_crystal_colour_modifier',
                'items':"'?;.;light;dark;whiteish;blackish;grayish;brownish;reddish;pinkish;orangish;yellowish;greenish;bluish'",
-               'width':'34%' 
+               'width':'34%'
                },
        'box3':{'varName':'_exptl_crystal_colour_primary',
                'items':"'?;colourless;white;black;gray;brown;red;pink;orange;yellow;green;blue;violet'",
-               'width':'33%' 
+               'width':'33%'
                },
        },
       {'varName':'_exptl_crystal_size',
@@ -170,21 +169,21 @@ class GeneratedGuiMaker(object):
                'width':'40%'
                },
        },
-  
+
       {'varName':'_exptl_crystal_preparation',
        'itemName':'%Preparation Details%',
        'multiline':'multiline',
        'width':'100%'
        },
-  
-  
+
+
       {'varName':'_exptl_crystal_recrystallization_method',
        'itemName':'%Crystallisation Details%',
        'multiline':'multiline',
        'width':'100%'
   ,
        },
-  
+
       {'varName':'snum.report.crystal_mounting_method',
        'itemName':'%Crystal Mounting%',
        'multiline':'multiline',
@@ -192,18 +191,17 @@ class GeneratedGuiMaker(object):
        },
     )
     return htmlTools.makeHtmlTable(list)
-  
+
   def collectionMetadataHtmlMaker(self, ):
     items = userDictionaries.people.getListPeople()
     if self.use_db :
       onchange = '''spy.gui.report.publication.OnPersonChange('~name~')>>spy.SetParam('snum.report.%s',html.GetValue('~name~'))'''
-  
     else:
       onchange = '''spy.SetParam('snum.report.%s',html.GetValue('~name~'))>>spy.addNewPerson(html.GetValue('~name~'))>>html.update'''
-  
-  
+
+
     subop = ["SUBMITTER", "OPERATOR"]
-  
+
     list = []
     for tem in subop:
       authorRow = {
@@ -223,12 +221,12 @@ class GeneratedGuiMaker(object):
       _ = "%s" %(self.edit_subop)
       if self.use_db:
         _ = _ %(tem)
-        
+
       authorRow.setdefault('field2',{'itemName':_,
                                      'fieldWidth':'30%%',
                                      'fieldALIGN':'right'})
       list.append(authorRow)
-    
+
     list.append(
       {
       'varName':'snum.report.date_submitted',
@@ -241,9 +239,9 @@ class GeneratedGuiMaker(object):
        'itemName':'%Date Collected%',
       }
     )
-  
+
     return htmlTools.makeHtmlTable(list)
-  
+
   def citationsMetadataHtmlMaker(self, ):
     txt = "<b>Current Citations</b>:<br>"
     ref_l = OV.get_cif_item('_publ_section_references').split('\n')
@@ -268,7 +266,7 @@ class GeneratedGuiMaker(object):
        },
     )
     return htmlTools.makeHtmlTable(list)
-  
+
   def referenceMetadataHtmlMaker(self, ):
     list = (
       {'varName':'snum.dimas.reference_csd_refcode',
@@ -296,14 +294,14 @@ class GeneratedGuiMaker(object):
        },
     )
     return htmlTools.makeHtmlTable(list)
-  
+
   def publicationMetadataHtmlMaker(self, ):
     items = userDictionaries.people.getListPeople()
     if self.use_db:
-      onchange = "spy.gui.report.publication.OnPersonChange('~name~', html.GetValue('SET__PUBL_CONTACT_AUTHOR_NAME'))"
+      onchange = "spy.gui.report.publication.OnPersonChange('~name~')"
     else:
       onchange = "spy.gui.report.publication.OnContactAuthorChange(~name~)"
-  
+
     list = [
         {'varName':'user.report.use_db',
          'readonly':'',
@@ -313,7 +311,7 @@ class GeneratedGuiMaker(object):
          'items': 'Use Dictionary [legacy]<-False;Use SQLite DB [experimental]<-True' ,
          'onchange':"spy.SetParam(user.report.use_db,html.GetValue(~name~))>>echo 'Restart of Olex2 is required for this change to take effect!'",
          },
-  
+
       {'varName':'_database_code_depnum_ccdc_archive',
        'itemName':'CCDC %Number%',
        },
@@ -323,7 +321,7 @@ class GeneratedGuiMaker(object):
        'readonly':'',
        'onchange': onchange,
        }]
-  
+
     if not self.use_db:
       extra_l = [
       #{'varName':'_publ_contact_author_affiliation',
@@ -332,14 +330,14 @@ class GeneratedGuiMaker(object):
        #'value': "spy.getPersonInfo(html.GetValue('SET__PUBL_CONTACT_AUTHOR_AFFILIATION'),'affiliation')",
        #'onchange': "spy.gui.report.publication.OnPersonAffiliationChange('~name~', html.GetValue('SET__PUBL_CONTACT_AUTHOR_NAME'))"
        #},
-      
+
       {'varName':'_publ_contact_author_address',
        'itemName':'%Contact% %Author% %Address%',
        'multiline':'multiline',
        'value': "spy.getPersonInfo(html.GetValue('SET__PUBL_CONTACT_AUTHOR_NAME'),'address')",
        'onchange': "spy.gui.report.publication.OnPersonInfoChange('SET__PUBL_CONTACT_AUTHOR_NAME','address','~name~')"
        },
-      
+
       {'varName':'_publ_contact_author_email',
        'itemName':'%Contact% %Author% %Email%',
        'value': "spy.getPersonInfo(html.GetValue('SET__PUBL_CONTACT_AUTHOR_NAME'),'email')",
@@ -350,20 +348,20 @@ class GeneratedGuiMaker(object):
        'value': "spy.getPersonInfo(html.GetValue('SET__PUBL_CONTACT_AUTHOR_NAME'),'phone')",
        'onchange': "spy.gui.report.publication.OnPersonInfoChange('SET__PUBL_CONTACT_AUTHOR_NAME','phone','~name~')"
        },
-  
+
       {'varName':'InfoLine',
        'itemName':'Info',
        'value':'<b>Please Note</b>: The Contact Author does not automatically appear in the author list unless that person is explicitly added below.',
        },
       ]
       list = list + extra_l
-  
+
     listAuthors = OV.GetParam('snum.metacif.publ_author_names')
     if listAuthors is None:
       numberAuthors = 0
     else:
       numberAuthors = len(listAuthors.split(';'))
-  
+
     for i in range(1,numberAuthors+1):
       authorRow = {
         'varName':'snum.metacif.publ_author_names',
@@ -383,7 +381,7 @@ class GeneratedGuiMaker(object):
           _ = _ %(i)
         authorRow.setdefault('field2',{'itemName':_,
                                       'fieldALIGN':'right'})
-  
+
       elif i == 1:
         box = "SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s" %i
         authorRow.setdefault('itemName','')
@@ -393,7 +391,7 @@ class GeneratedGuiMaker(object):
           _ = _%(i,i,i)
         else:
           _ = _%(i,i)
-          
+
         authorRow.setdefault('field2',
                              {'itemName':_,
                               'fieldALIGN':'right'}
@@ -404,7 +402,7 @@ class GeneratedGuiMaker(object):
           _ = _%(i,i,i)
         else:
           _ = _%(i,i)
-          
+
         authorRow.setdefault('itemName',_)
         authorRow.setdefault('fieldALIGN','right')
         authorRow['bgcolor'] = OV.GetParam('gui.html.input_bg_colour')
@@ -414,16 +412,16 @@ class GeneratedGuiMaker(object):
           _ = _%(i,i,i,i)
         else:
           _ = _%(i,i,i)
-          
+
         authorRow.setdefault('itemName',_)
         authorRow.setdefault('fieldALIGN','right')
-  
+
       list.append(authorRow)
     if numberAuthors > 0:
       s = '_' + str(numberAuthors)
     else:
       s = None
-  
+
     if not self.use_db and s:
   # BEGIN extra
       #list.append(
@@ -449,7 +447,7 @@ class GeneratedGuiMaker(object):
          'onchange':"spy.changePersonInfo(html.GetValue('SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s'),'email',html.GetValue('~name~'))>>spy.changeBoxColour('~name~','#FFDCDC')" %s
          }
       )
-  
+
     list.append(
       {'varName':'snum.metacif.publ_author_names',
        'ctrl_name':'ADD_PUBL_AUTHOR_NAME',
@@ -459,14 +457,14 @@ class GeneratedGuiMaker(object):
        'onchange':"spy.gui.report.publication.OnAddNameToAuthorList('~name~')",
        }
     )
-  
+
     for d in list:
       d.setdefault('ctrl_name','SET_%s' %str.upper(d['varName']).replace('.','_'))
       if 'ctrl_name' in d['varName']:
         d.setdefault('onchange',"spy.SetParam('%(varName)s',html.GetValue('~name~'))>>spy.changeBoxColour('~name~','#FFDCDC')>>html.Update" %d)
       elif 'author_name' in d['varName']:
         d.setdefault('onchange','')
-  
+
     list.append(
       {'varName':'_publ_requested_journal',
        'itemName':'%Requested% %Journal%',
@@ -475,14 +473,14 @@ class GeneratedGuiMaker(object):
        'value':'spy.get_cif_item(_publ_requested_journal)',
        'onchange':"spy.addToLocalList(html.GetValue('~name~'),'requested_journal')>>spy.changeBoxColour('~name~','#FFDCDC')",
        })
-  
-  
+
+
     list.append( {'varName':'snum.report.publication_style', 'readonly':'',
                   'itemName':'%Journal Style%', 'items': "general;acta",
                   'value':"spy.GetParam('snum.report.publication_style')",
                   'onchange':"spy.gui.report.publication.OnPublicationTemplateChange(html.GetValue(~name~))>>html.update",
                   }, )
-  
+
     #if OV.GetParam('snum.report.publication_paper') != '?':
       #list += (
         #{'varName':'snum.report.publication_paper',
@@ -496,12 +494,12 @@ class GeneratedGuiMaker(object):
            #},
          #},
       #)
-  
-  
-  
-  
+
+
+
+
     retstr = htmlTools.makeHtmlTable(list)
-  
+
     retstr +="""
   <tr VALIGN="center" ALIGN="left">
     <td colspan='2'>
@@ -509,7 +507,7 @@ class GeneratedGuiMaker(object):
     </td>
   </tr>
   """
-  
+
     #retstr +="""
   #<tr VALIGN="center" ALIGN="left">
     #<td colspan='2' VALIGN="center" bgcolor=$GetVar(HtmlHighlightColour)>
@@ -517,9 +515,9 @@ class GeneratedGuiMaker(object):
     #</td>
   #</tr>
   #"""
-  
+
     return retstr
-  
+
   def contactLetter(self, ):
     letterText = OV.get_cif_item('_publ_contact_letter','?','gui')
     if letterText is None:
@@ -549,7 +547,7 @@ class GeneratedGuiMaker(object):
           initials = ''
           for forename in a[:-1]:
             initials += '%s.' %forename[0].upper()
-  
+
         if i < numberAuthors - 2:
           authorAbbrev = initials + surname + ', '
         elif i == numberAuthors - 2:
@@ -558,23 +556,23 @@ class GeneratedGuiMaker(object):
           authorAbbrev = initials + surname
         authors += authorAbbrev
       letterText = """Date of submission %s
-  
+
   The CIF file contains data for the structure %s from
   the paper 'ENTER PAPER TITLE' by
   %s.
   The paper will be submitted to %s.
   """ %(date,fileName,authors,journal)
-  
+
     inputText = OV.GetUserInput(0,'_publ_contact_letter',letterText)
     if inputText is not None:
       OV.set_cif_item('_publ_contact_letter', inputText);
     return ""
-  
+
   def move(self, arg,name):
     listNames = OV.GetParam('snum.metacif.publ_author_names').split(';')
     name_i = olx.html.GetValue(name)
     i = listNames.index(name_i)
-  
+
     if arg.lower() == 'up':
       if i != 0:
         name_i_minus_1 = listNames[i-1]
@@ -582,7 +580,7 @@ class GeneratedGuiMaker(object):
         listNames[i-1] = name_i
       else:
         pass
-  
+
     elif arg.lower() == 'down':
       try:
         name_i_plus_1 = listNames[i+1]
@@ -590,13 +588,13 @@ class GeneratedGuiMaker(object):
         listNames[i+1] = name_i
       except:
         pass
-  
+
     elif arg in ('del','DEL'):
       del listNames[i]
-  
+
     names = ';'.join(listNames)
     OV.SetParam('snum.metacif.publ_author_names', names)
-  
+
     return ''
 
 GGM = GeneratedGuiMaker()
@@ -611,6 +609,7 @@ OV.registerFunction(GGM.publicationMetadataHtmlMaker)
 OV.registerFunction(GGM.publicationMetadataHtmlMaker)
 OV.registerFunction(GGM.referenceMetadataHtmlMaker)
 OV.registerFunction(GGM.citationsMetadataHtmlMaker)
+OV.registerFunction(GGM.move)
 
 
 

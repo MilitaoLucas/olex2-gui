@@ -48,7 +48,7 @@
 
 <anis caption=" Anisotropic Displacement Parameters (&Aring;<SUP>2</SUP>&times;10<SUP>3</SUP>)
  for $spy.GetParam(snum.report.title). The Anisotropic displacement factor exponent takes the form:
- -2&pi;<SUP>2</SUP>[h<SUP>2</SUP>a*<SUP>2</SUP>U<sub>11</sub>+2hka*b*U<sub>12</sub>+&hellip;]"
+ -2&pi;<SUP>2</SUP>[h<SUP>2</SUP>a*<SUP>2</SUP>U<sub>11</sub>+2hka*b*U<sub>12</sub>+&hellip;]."
  tita="class=cifTableHeadline"
  tha="class=cifTableFirst"
  taba="class=CifTable"
@@ -88,7 +88,7 @@
   <_geom_bond_publ_flag caption="?" mustequal="y;yes" visible="false" >
 >
 
-<hcrd caption="Hydrogen Atom Coordinates (&Aring;&times;10<SUP>4</SUP>) and Isotropic Displacement Parameters (&Aring;<SUP>2</SUP>&times;10<SUP>3</SUP>) for $spy.GetParam(snum.report.title). "
+<hcrd caption="Hydrogen Atom Coordinates (&Aring;&times;10<SUP>4</SUP>) and Isotropic Displacement Parameters (&Aring;<SUP>2</SUP>&times;10<SUP>3</SUP>) for $spy.GetParam(snum.report.title)."
  tita="class=cifTableHeadline"
  tha="class=cifTableFirst"
  taba="class=CifTable"
@@ -116,7 +116,7 @@
   <_atom_site_type_symbol caption="Symbol" mustnotequal="H" visible="false" cola="class=decimal">
 >
 
-<sym caption="Symmetry Operations" tita="class=cifTableHeadline"
+<sym caption="Symmetry Operations." tita="class=cifTableHeadline"
  tha="height='1'"
  coln='4'
  taba="class=CifTable"
@@ -154,7 +154,7 @@
   <_geom_torsion_publ_flag mustequal="y;yes">
 >
 
-<htab caption="Hydrogen Bonds for $spy.GetParam(snum.report.title). "
+<htab caption="Hydrogen Bonds for $spy.GetParam(snum.report.title)."
  tita="class=cifTableHeadline"
  tha="class=cifTableFirst"
  taba="class=CifTable"
@@ -169,7 +169,7 @@
   <_geom_hbond_angle_DHA caption="D-H-A/&deg;" visible="true" cola="class=decimal">
 >
 
-<occu caption="Atomic Occupancy for $spy.GetParam(snum.report.title). "
+<occu caption="Atomic Occupancy for $spy.GetParam(snum.report.title)."
  tita="class=cifTableHeadline"
  coln="3"
  colsa='width="15px"'
@@ -182,7 +182,7 @@
   <_atom_site_occupancy caption="<i>Occupancy</i>" mustnotequal="1" visible="true" cola="class=decimalWide" >
 >
 
-<mask caption="Solvent masks information for $spy.GetParam(snum.report.title). "
+<mask caption="Solvent masks information for $spy.GetParam(snum.report.title)."
  tita="class=cifTableHeadline"
  tha="class=cifTableFirst"
  taba="class=CifTable"
@@ -197,7 +197,7 @@
   <_smtbx_masks_void_content caption="Content" visible="true" cola="class='data'">
 >
 
-<sqz caption="Solvent masks information for $spy.GetParam(snum.report.title). "
+<sqz caption="Solvent masks information for $spy.GetParam(snum.report.title)."
  tita="class=cifTableHeadline"
  across="true"
  tha="class=cifTableFirst"

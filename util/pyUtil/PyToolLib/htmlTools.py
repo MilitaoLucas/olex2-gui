@@ -898,7 +898,7 @@ def getStylesList():
   exclude = set(("rsc.css", "thesis.css", "custom.css"))
   stylesList = ";".join("%s" %style for style in styles\
     if style.endswith('.css') and style not in exclude)
-  stylesList += ";--CHOOSE--"
+  stylesList += ";++CHOOSE++"
   return stylesList
 OV.registerFunction(getStylesList)
 
@@ -912,13 +912,13 @@ def getTemplatesList():
   exclude = ()
   templatesList = ";".join("%s.htm" %template[:-4] for template in templates
                         if template not in exclude and template.endswith('.htm') or template.endswith('.rtf') or template.endswith('.tex'))
-  templatesList += ";--CHOOSE--"
+  templatesList += ";++CHOOSE++"
   return templatesList
 OV.registerFunction(getTemplatesList)
 
 def SetReportStyle(val):
   styles_path = path_from_phil(OV.GetParam('user.report.styles_base_path'))
-  if "--" in val:
+  if "++" in val:
     res = olex.f("FileOpen('Choose style File','.css files|*.css','%s')" %styles_path)
     if not res:
       return
@@ -935,7 +935,7 @@ OV.registerFunction(SetReportStyle)
 
 def SetReportTemplate(val,which):
   templates_path = path_from_phil(OV.GetParam('user.report.templates_base_path'))
-  if "--" in val:
+  if "++" in val:
     res = olex.f("FileOpen('Choose Template File','.htm files|*.htm','%s')" %templates_path)
     if not res:
       return
