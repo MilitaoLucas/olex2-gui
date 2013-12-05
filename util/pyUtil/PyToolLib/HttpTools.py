@@ -42,7 +42,7 @@ def make_url_call(url, values, http_timeout = 7):
       except Exception:
         raise
   return res
-      
+
 def get_proxy_from_usettings():
   proxy = None
   settings_filename = "%s/usettings.dat" %olx.app.ConfigDir()
