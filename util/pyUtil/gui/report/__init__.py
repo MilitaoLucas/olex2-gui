@@ -29,7 +29,7 @@ class publication:
     import userDictionaries
     person = olx.html.GetValue(box).strip()
     if not person:
-      return
+      return ''
     person = userDictionaries.people.get_person_details(person)
     if person['displayname'] == "New Person":
       edit = True
@@ -56,29 +56,25 @@ class publication:
       olx.html.SetValue('Person.PEOPLE_FORM_ADDRESS', address)
 
       res = olx.html.ShowModal(pop_name)
-      res = int(res)
-      if res == 5101:
-        return
-
-      if res:
+      if res == '1':
         firstname = olx.html.GetValue('Person.PERSON_FIRSTNAME')
         middlename = olx.html.GetValue('Person.PERSON_MIDDLENAME')
         lastname = olx.html.GetValue('Person.PERSON_LASTNAME')
         email = olx.html.GetValue('Person.PERSON_EMAIL')
         phone = olx.html.GetValue('Person.PERSON_PHONE')
         affiliation = olx.html.GetValue('Person.PERSON_AFFILIATION')
-        #displayname = userDictionaries.people.make_display_name(person,person_format="acta")
-        #displayname = displayname.replace("  ", " ")
-        #displayname = displayname.replace("  ", " ")
-        #displayname = displayname.replace("  ", " ")
+        if not lastname.strip():
+          return ''
         res = userDictionaries.people.add_person(firstname, middlename, lastname, email, phone, affiliation, displayname=None)[6]
+      else:
+        return ''
       return res
 
   def make_affiliation_box(self, box, edit=False):
     import userDictionaries
     affiliation = olx.html.GetValue(box).strip()
     if not affiliation:
-      return
+      return ''
     d = {}
     if '++' in affiliation:
       edit = True
@@ -109,9 +105,7 @@ class publication:
       olx.Popup(pop_name, 'affiliation.htm', s=True, b="tc", t=pop_name, w=boxWidth, h=boxHeight, x=x, y=y)
 
       res = olx.html.ShowModal(pop_name)
-      res = int(res)
-
-      if res:
+      if res == '1':
         name = olx.html.GetValue('Affiliation.AFFILIATION_NAME')
         department = olx.html.GetValue('Affiliation.AFFILIATION_DEPARTMENT')
         address1 = olx.html.GetValue('Affiliation.AFFILIATION_ADDRESS_LINE_1')
@@ -120,8 +114,12 @@ class publication:
         post_code = olx.html.GetValue('Affiliation.AFFILIATION_POST_CODE')
         region = olx.html.GetValue('Affiliation.AFFILIATION_REGION')
         country = olx.html.GetValue('Affiliation.AFFILIATION_COUNTRY')
+        if not name.strip():
+          return ''
         userDictionaries.affiliations.add_affiliation(name, department, address1, address2, city, post_code, region, country)
         res = userDictionaries.affiliations.get_affiliation_address(affiliation, list=True)[0]
+      else:
+        return ''
       return res
 
 
@@ -151,7 +149,6 @@ class publication:
       OV.set_cif_item("_publ_contact_author_name", person['displayname'])
     else:
       OV.set_cif_item("_publ_contact_author_name", person)
-    olx.html.Update()
 
   def OnContactAuthorChange(self, person_box_name):
     self.ChangeContactAuthor(
@@ -161,7 +158,9 @@ class publication:
     import userDictionaries
     if edit == "True":
       edit=True
+    new_value = olx.html.GetValue(box).strip()
     person = self.make_person_box(box, edit)
+    retVal = ''
     if person:
       if type(person) == dict:
         address = userDictionaries.affiliations.get_affiliation_address(person['affiliation'], list=False)
@@ -173,12 +172,11 @@ class publication:
         retVal = person
       if "contact" in box.lower():
         self.ChangeContactAuthor(person)
-    else:
-      olx.html.SetValue(box, "")
-      retVal = 0
+      if new_value.startswith('++'):
+        olx.html.Update()
     return retVal
 
-  def OnPersonAffiliationChange(self, box, author, edit=True):
+  def OnPersonAffiliationChange(self, box, author, edit=False):
     import userDictionaries
     if edit == "True":
       edit=True
@@ -192,7 +190,7 @@ class publication:
       OV.set_cif_item('_publ_contact_author_address', address_display)
       self.ChangePersonInfo(author, 'address', address)
       olx.html.Update()
-      
+
   def ChangePersonInfo(self, person, item, value):
     if value == '': value = '?'
     userDictionaries.people.changePersonInfo(person, item, value)
@@ -219,7 +217,6 @@ class publication:
   def AddNameToAuthorList(self, newName):
     oldValue = OV.GetParam("snum.metacif.publ_author_names")
     changed = False
-    
     if not newName:
       return
 
@@ -236,13 +233,13 @@ class publication:
     if changed:
       OV.SetParam("snum.metacif.publ_author_names", newValue)
     return changed
-  
+
   def OnAddNameToAuthorList(self, box_name):
     value = olx.html.GetValue(box_name).strip()
     value = self.OnPersonChange(box_name)
     if self.AddNameToAuthorList(value):
       olx.html.Update()
-      
+
   def DisplayMergeList(self):
     l = OV.GetParam('snum.report.merge_these_cifs', [])
     if not l:
@@ -256,14 +253,14 @@ class publication:
         remove = "<a target='Remove from merge' href='spy.gui.report.publication.remove_cif_from_merge_list(%s)>>html.Update'><font color='red'><b>x</b></font></a>" %item
         str += "<a target='Edit this CIF' href='shell %s'>%s</a>(%s) " %(item, display, remove)
     return str
-  
+
   def add_cif_to_merge_list(cif_p):
     if not cif_p:
       return
     l = OV.GetParam('snum.report.merge_these_cifs', [])
     l.append(cif_p)
     OV.SetParam('snum.report.merge_these_cifs', l)
-    
+
   def remove_cif_from_merge_list(cif_p):
     l = OV.GetParam('snum.report.merge_these_cifs', [])
     idx = l.index(cif_p)
@@ -312,7 +309,6 @@ class publication:
 
   olex.registerFunction(add_cif_to_merge_list, False, "gui.report.publication")
   olex.registerFunction(remove_cif_from_merge_list, False, "gui.report.publication")
-
 
 
 pub = publication()
@@ -436,7 +432,7 @@ def get_crystal_image(p=None):
     return "crystal_image.jpg"
   else:
     return current_image
-  
+
 OV.registerFunction(get_crystal_image, False, 'gui.report')
 
 def get_box_x_y(w, h):
