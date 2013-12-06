@@ -14,69 +14,6 @@ localList = None
 affiliations = None
 experimantal = None
 
-class People:
-  def __init__(self):
-    self.dictionary = getLocalDictionary('people')
-    global people
-    OV.registerFunction(self.getPersonInfo)
-    OV.registerFunction(self.changePersonInfo)
-    OV.registerFunction(self.addNewPerson)
-
-  def getPersonInfo(self,person,item):
-    retStr = '?'
-    if not person:
-      return retStr
-    if not self.isPerson(person):
-      self.addNewPerson(person)
-    currentPersonInfo = self.dictionary['people'][person]
-
-    if item in ('phone','email','address'):
-      retStr = currentPersonInfo[item]
-
-    return retStr
-
-  def changePersonInfo(self,person,item,info):
-    if not person:
-      return
-    elif not self.isPerson(person):
-      self.addNewPerson(person)
-
-    if item in ('email','phone','address'):
-      self.dictionary['people'][person][item] = info
-
-    #print "Changed %s for %s to %s" %(item,person,info)
-    saveLocalDictionary(self.dictionary)
-
-  def isPerson(self,person):
-    return self.dictionary['people'].has_key(person)
-
-  def addNewPerson(self,person):
-    currentPersonInfo = {'email':'?','phone':'?','address':'?'}
-    self.dictionary['people'].setdefault(person, currentPersonInfo)
-    listPeople = ''
-    for item in self.dictionary['people'].keys():
-      listPeople += '%s;' %item
-    OV.SetParam('snum.metacif.list_people', listPeople)
-    saveLocalDictionary(self.dictionary)
-
-  def getListPeople(self):
-    return self.getList('people')
-
-  def getList(self,whatList):
-    retStr = ''
-    for item in sorted(self.dictionary[whatList].keys()):
-      retStr += '%s;' %item
-    return retStr
-
-  def get_person_details(self, person):
-    person = self.dictionary['people'].get(person, None)
-    if not person:
-      person = {'firstname': '', 'middlename': '', 'lastname': '',
-         'email': '', 'phone': '', 'affiliation': '',
-         'displayname': 'New Person',
-         }
-    return person
-
 class LocalList:
   def __init__(self):
     self.dictionary = {}
@@ -151,24 +88,12 @@ class LocalList:
     return cif_def
 
 
-
 class Affiliations:
   def __init__(self):
     global affiliations
     affiliations = self
     OV.registerFunction(self.getListAffiliations)
     OV.registerFunction(self.add_affiliation)
-    try:
-      self.new_affiliation_db()
-    except:
-      pass
-
-  def new_affiliation_db(self):
-    cursor = DBConnection.conn.cursor()
-    cursor.execute("""CREATE TABLE affiliations
-                      (Name TEXT, Department TEXT, Address1 TEXT, Address2 TEXT, City TEXT, PostCode TEXT, Region TEXT, Country TEXT, displayname TEXT UNIQUE) 
-                   """)
-    DBConnection.conn.commit()
 
   def getListAffiliations(self):
     cursor = DBConnection.conn.cursor()
@@ -180,7 +105,7 @@ class Affiliations:
       retVal += "%s;" %affiliation[0]
     retVal += "++ ADD NEW ++"
     return retVal
-  
+
   def get_affiliation_address(self, affiliation, list=False):
     cursor = DBConnection.conn.cursor()
     sql = "SELECT * FROM affiliations WHERE name like '%s'" %affiliation
@@ -212,20 +137,9 @@ class Persons:
     OV.registerFunction(self.getListPeople)
     OV.registerFunction(self.add_person)
     OV.registerFunction(self.getPersonInfo)
-    try:
-      self.new_person_db()
-    except:
-      pass
 
   def changePersonInfo(self,person,item,info):
     pass
-
-  def new_person_db(self):
-    cursor = DBConnection.conn.cursor()
-    cursor.execute("""CREATE TABLE persons
-                      (firstname TEXT, middlename TEXT, lastname TEXT, email TEXT, phone TEXT, affiliation TEXT, displayname TEXT UNIQUE) 
-                   """)  
-    DBConnection.conn.commit()
 
   def addNewPerson(self, name=""):
     firstname = middlename = secondname = ""
@@ -466,9 +380,7 @@ def createNewLocalDictionary(whichDict):
 
 def saveLocalDictionary(dictionary):
   import variableFunctions
-  if dictionary.has_key('people'):
-    picklePath = getPicklePath('people')
-  elif dictionary.has_key('journals'):
+  if dictionary.has_key('journals'):
     picklePath = getPicklePath('journals')
   elif dictionary.has_key('diffractometers'):
     picklePath = getPicklePath('diffractometers')
@@ -486,14 +398,9 @@ def import_from_pickle(conn, cursor):
 def init_userDictionaries():
   global people
   global affiliations
-  use_db = OV.GetParam('user.report.use_db')
-  import_data = False
-  if use_db:
-    DBConnection()
-    people = Persons()
-    affiliations = Affiliations()
-  else:
-    people = People()
+  DBConnection()
+  people = Persons()
+  affiliations = Affiliations()
 #  experimantal = Experimental(conn, cursor)
 
 class DBConnection():
@@ -504,13 +411,22 @@ class DBConnection():
     if DBConnection.conn:
       return
     import sqlite3
-    db_path = OV.GetParam('user.report.db_location').replace("DataDir()", OV.DataDir())
+    db_path = olex.f(OV.GetParam('user.report.db_location'))
     db_name = OV.GetParam('user.report.db_name')
     db_file = "%s/%s" %(db_path, db_name)
     if not os.path.exists(db_path):
       os.makedirs(db_path)
-    if not os.path.exists(db_file):
-      import_data = True
-      wFile = open(db_file,'w')
-      wFile.close()
+    exists = os.path.exists(db_file)
     DBConnection.conn = sqlite3.connect(db_file)
+    if not exists:
+      cursor = DBConnection.conn.cursor()
+      cursor.execute("""CREATE TABLE persons
+                      (firstname TEXT, middlename TEXT, lastname TEXT, email TEXT,
+                       phone TEXT, affiliation TEXT, displayname TEXT UNIQUE) 
+                   """)  
+      cursor.execute("""CREATE TABLE affiliations
+                      (Name TEXT, Department TEXT, Address1 TEXT, Address2 TEXT,
+                       City TEXT, PostCode TEXT, Region TEXT, Country TEXT,
+                        displayname TEXT UNIQUE) 
+                   """)
+      DBConnection.conn.commit()
