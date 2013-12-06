@@ -32,14 +32,16 @@ class GuiImages:
         bgcolor="%(bg)s"
       >''' %self.img_d
     return link
-    
+
   def get_action_button_html(self, which, onclick, hint):
     self.img_d['which'] = which
     self.img_d['onclick'] = onclick
     self.img_d['hint'] = hint
     return self.make_action_button_html()
-  
+
 GI = GuiImages()
+OV.registerFunction(GI.make_action_button_html,False,'gui.images')
+OV.registerFunction(GI.get_action_button_html,False,'gui.images')
 
 ##Moved from olexex: Anything to do with structure image generation
 def GetBitmapSize(px_changed=False):
@@ -93,7 +95,7 @@ def GetBitmapImageInstructions():
   else:
     pict = " -pq"
   OV.Cursor('busy','Please Wait. Making image %s.%s. This may take some time' %(filename, fileext))
-  
+
   filesize = int(round(filesize,0))
 
   if olx.html.GetState('TRIM_IMAGE') == 'true':
@@ -113,7 +115,7 @@ def GetBitmapImageInstructions():
         os.unlink(temp_name)
   else:
     olex.m('pict%s %s "%s" %s %s' %(pict, nbg, filefull, resolution, filesize))
-    
+
   #from PIL import Image
   OV.Cursor()
   from gui import ImageListener

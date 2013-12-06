@@ -175,7 +175,6 @@
     >
    >
    <S_7 Name="AtomParams" Persistent="true" DefDS="2" DefMask="5" DefR="2" DefZ="1" TelpP="1.5382" >
-   <S_8 Name="Atoms" DiskIR="0" DiskOR="1.02" DiskQ="15" DiskS="0.05" RimQ="15" RimR="1.02" RimW="0.05" SphereQ="15" >
    <S_9 Name="Au" 
     <S0 PName="Sphere" 
      <Material Styles.Materials.Prop14 >
