@@ -11,14 +11,10 @@ import htmlTools
 import olexex_setup
 import variableFunctions
 
-from gui.images import *
-GI = GuiImages()
-
+from gui.images import GI
 
 class GeneratedGuiMaker(object):
   def __init__(self):
-
-    self.use_db = OV.GetParam('user.report.use_db')
 
     ## Define buttons, actions and hints: UP, DOWN, EDIT and DELETE
     number = "%s"
@@ -34,20 +30,13 @@ class GeneratedGuiMaker(object):
     hint="Remove author from paper"
     self.delete = GI.get_action_button_html('delete', onclick, hint)
 
-    if self.use_db:
-      onclick="spy.gui.report.publication.OnPersonChange(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s,edit=True)" %number
-      hint="Edit author"
-      self.edit = GI.get_action_button_html('edit', onclick, hint)
-    else:
-      self.edit = " "
+    onclick="spy.gui.report.publication.OnPersonChange(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s,edit=True)" %number
+    hint="Edit author"
+    self.edit = GI.get_action_button_html('edit', onclick, hint)
 
-    if self.use_db:
-      onclick="spy.gui.report.publication.OnPersonChange(SET_SNUM_METACIF_%s,edit=True)"
-      hint="Edit author"
-      self.edit_subop = GI.get_action_button_html('edit', onclick, hint)
-    else:
-      self.edit_subop = " "
-
+    onclick="spy.gui.report.publication.OnPersonChange(SET_SNUM_METACIF_%s,edit=True)"
+    hint="Edit author"
+    self.edit_subop = GI.get_action_button_html('edit', onclick, hint)
 
   def currentResultFilesHtmlMaker(self, type='cif'):
     var = 'snum.current_result.%s' %type
@@ -194,14 +183,8 @@ class GeneratedGuiMaker(object):
 
   def collectionMetadataHtmlMaker(self, ):
     items = userDictionaries.people.getListPeople()
-    if self.use_db :
-      onchange = '''spy.gui.report.publication.OnPersonChange('~name~')>>spy.SetParam('snum.report.%s',html.GetValue('~name~'))'''
-    else:
-      onchange = '''spy.SetParam('snum.report.%s',html.GetValue('~name~'))>>spy.addNewPerson(html.GetValue('~name~'))>>html.update'''
-
-
+    onchange = '''spy.gui.report.publication.OnPersonChange('~name~')>>spy.SetParam('snum.report.%s',html.GetValue('~name~'))'''
     subop = ["SUBMITTER", "OPERATOR"]
-
     list = []
     for tem in subop:
       authorRow = {
@@ -219,8 +202,7 @@ class GeneratedGuiMaker(object):
                             'bgcolor':'#ff0000',
                             })
       _ = "%s" %(self.edit_subop)
-      if self.use_db:
-        _ = _ %(tem)
+      _ = _ %(tem)
 
       authorRow.setdefault('field2',{'itemName':_,
                                      'fieldWidth':'30%%',
@@ -297,21 +279,9 @@ class GeneratedGuiMaker(object):
 
   def publicationMetadataHtmlMaker(self, ):
     items = userDictionaries.people.getListPeople()
-    if self.use_db:
-      onchange = "spy.gui.report.publication.OnPersonChange('~name~')"
-    else:
-      onchange = "spy.gui.report.publication.OnContactAuthorChange(~name~)"
+    onchange = "spy.gui.report.publication.OnPersonChange('~name~')"
 
     list = [
-        {'varName':'user.report.use_db',
-         'readonly':'',
-         'itemName':'%Data Source%',
-         'href':'shell %s/%s' %(OV.GetParam('user.report.db_location'),OV.GetParam('user.report.db_name')),
-         'value':'$spy.GetParam(user.report.use_db)',
-         'items': 'Use Dictionary [legacy]<-False;Use SQLite DB [experimental]<-True' ,
-         'onchange':"spy.SetParam(user.report.use_db,html.GetValue(~name~))>>echo 'Restart of Olex2 is required for this change to take effect!'",
-         },
-
       {'varName':'_database_code_depnum_ccdc_archive',
        'itemName':'CCDC %Number%',
        },
@@ -321,40 +291,6 @@ class GeneratedGuiMaker(object):
        'readonly':'',
        'onchange': onchange,
        }]
-
-    if not self.use_db:
-      extra_l = [
-      #{'varName':'_publ_contact_author_affiliation',
-       #'itemName':'%Affiliation%',
-  ##     'items': "'%s'" %userDictionaries.affiliations.getListAffiliations(),
-       #'value': "spy.getPersonInfo(html.GetValue('SET__PUBL_CONTACT_AUTHOR_AFFILIATION'),'affiliation')",
-       #'onchange': "spy.gui.report.publication.OnPersonAffiliationChange('~name~', html.GetValue('SET__PUBL_CONTACT_AUTHOR_NAME'))"
-       #},
-
-      {'varName':'_publ_contact_author_address',
-       'itemName':'%Contact% %Author% %Address%',
-       'multiline':'multiline',
-       'value': "spy.getPersonInfo(html.GetValue('SET__PUBL_CONTACT_AUTHOR_NAME'),'address')",
-       'onchange': "spy.gui.report.publication.OnPersonInfoChange('SET__PUBL_CONTACT_AUTHOR_NAME','address','~name~')"
-       },
-
-      {'varName':'_publ_contact_author_email',
-       'itemName':'%Contact% %Author% %Email%',
-       'value': "spy.getPersonInfo(html.GetValue('SET__PUBL_CONTACT_AUTHOR_NAME'),'email')",
-       'onchange':"spy.gui.report.publication.OnPersonInfoChange('SET__PUBL_CONTACT_AUTHOR_NAME','email','~name~')"
-       },
-      {'varName':'_publ_contact_author_phone',
-       'itemName':'%Contact% %Author% %Phone%',
-       'value': "spy.getPersonInfo(html.GetValue('SET__PUBL_CONTACT_AUTHOR_NAME'),'phone')",
-       'onchange': "spy.gui.report.publication.OnPersonInfoChange('SET__PUBL_CONTACT_AUTHOR_NAME','phone','~name~')"
-       },
-
-      {'varName':'InfoLine',
-       'itemName':'Info',
-       'value':'<b>Please Note</b>: The Contact Author does not automatically appear in the author list unless that person is explicitly added below.',
-       },
-      ]
-      list = list + extra_l
 
     listAuthors = OV.GetParam('snum.metacif.publ_author_names')
     if listAuthors is None:
@@ -375,10 +311,7 @@ class GeneratedGuiMaker(object):
         authorRow.setdefault('itemName','')
         authorRow.setdefault('field1',{'itemName':'%Author%'})
         _ = "%s%s" %(self.delete, self.edit)
-        if self.use_db:
-          _ = _ %(i,i)
-        else:
-          _ = _ %(i)
+        _ = _ %(i,i)
         authorRow.setdefault('field2',{'itemName':_,
                                       'fieldALIGN':'right'})
 
@@ -387,10 +320,7 @@ class GeneratedGuiMaker(object):
         authorRow.setdefault('itemName','')
         authorRow.setdefault('field1',{'itemName':'Authors</td><td>'})
         _ = "%s%s%s" %(self.down, self.delete, self.edit)
-        if self.use_db:
-          _ = _%(i,i,i)
-        else:
-          _ = _%(i,i)
+        _ = _%(i,i,i)
 
         authorRow.setdefault('field2',
                              {'itemName':_,
@@ -398,20 +328,14 @@ class GeneratedGuiMaker(object):
                              )
       elif i == numberAuthors:
         _ = "%s%s%s" %(self.up, self.delete, self.edit)
-        if self.use_db:
-          _ = _%(i,i,i)
-        else:
-          _ = _%(i,i)
+        _ = _%(i,i,i)
 
         authorRow.setdefault('itemName',_)
         authorRow.setdefault('fieldALIGN','right')
         authorRow['bgcolor'] = OV.GetParam('gui.html.input_bg_colour')
       else:
         _ = "%s%s%s%s" %(self.up, self.down, self.delete, self.edit)
-        if self.use_db:
-          _ = _%(i,i,i,i)
-        else:
-          _ = _%(i,i,i)
+        _ = _%(i,i,i,i)
 
         authorRow.setdefault('itemName',_)
         authorRow.setdefault('fieldALIGN','right')
@@ -421,32 +345,6 @@ class GeneratedGuiMaker(object):
       s = '_' + str(numberAuthors)
     else:
       s = None
-
-    if not self.use_db and s:
-  # BEGIN extra
-      #list.append(
-        #{'varName':'_publ_author_affiliation',
-         #'itemName':'%Affiliation%',
-  ##       'items': "'%s'" %userDictionaries.affiliations.getListAffiliations(),
-         #'value': "spy.getPersonInfo(html.GetValue('SET__PUBL_AUTHOR_AFFILIATION'),'affiliation')",
-         #'onchange': "spy.gui.report.publication.OnPersonAffiliationChange('~name~', html.GetValue('SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s'))"%s,
-         #},
-      #)
-      list.append(
-        {'varName':'publ_author_address',
-         'itemName':'%Author% %Address%',
-         'multiline':'multiline',
-         'value':"spy.getPersonInfo(html.GetValue('SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s'),'address')" %s,
-         'onchange':"spy.changePersonInfo(html.GetValue('SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s'),'address',html.GetValue('~name~'))>>spy.changeBoxColour('~name~','#FFDCDC')" %s
-         }
-      )
-      list.append(
-        {'varName':'publ_author_email',
-         'itemName':'%Author% %Email%',
-         'value': "spy.getPersonInfo(html.GetValue('SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s'),'email')" %s,
-         'onchange':"spy.changePersonInfo(html.GetValue('SET_SNUM_METACIF_PUBL_AUTHOR_NAMES%s'),'email',html.GetValue('~name~'))>>spy.changeBoxColour('~name~','#FFDCDC')" %s
-         }
-      )
 
     list.append(
       {'varName':'snum.metacif.publ_author_names',
@@ -481,22 +379,6 @@ class GeneratedGuiMaker(object):
                   'onchange':"spy.gui.report.publication.OnPublicationTemplateChange(html.GetValue(~name~))>>html.update",
                   }, )
 
-    #if OV.GetParam('snum.report.publication_paper') != '?':
-      #list += (
-        #{'varName':'snum.report.publication_paper',
-         #'itemName':'%Add Template CIF%',
-         #'value':'$spy.gui.report.publication.DisplayMergeList()',
-         #'chooseFile':{
-           #'caption':'Choose definition file',
-           #'filter':'.cif files|*.cif',
-           #'folder':'%s/CIF/cif_templates' %OV.BaseDir(),
-           #'function':'spy.gui.report.publication.AddTemplateToMergeList('
-           #},
-         #},
-      #)
-
-
-
 
     retstr = htmlTools.makeHtmlTable(list)
 
@@ -507,15 +389,6 @@ class GeneratedGuiMaker(object):
     </td>
   </tr>
   """
-
-    #retstr +="""
-  #<tr VALIGN="center" ALIGN="left">
-    #<td colspan='2' VALIGN="center" bgcolor=$GetVar(HtmlHighlightColour)>
-      #<b>Please add the contact author to the list of Authors if that person is to appear on the paper!</b></a>
-    #</td>
-  #</tr>
-  #"""
-
     return retstr
 
   def contactLetter(self, ):
