@@ -17,8 +17,10 @@ experimantal = None
 class LocalList:
   def __init__(self):
     self.dictionary = {}
-    self.dictionary.setdefault('journals',getLocalDictionary('journals')['journals'])
-    self.dictionary.setdefault('diffractometers',getLocalDictionary('diffractometers')['diffractometers'])
+    self.dictionary.setdefault('journals',
+      getLocalDictionary('journals')['journals'])
+    self.dictionary.setdefault('diffractometers',
+      getLocalDictionary('diffractometers')['diffractometers'])
     global localList
     localList = self
     OV.registerFunction(self.addToLocalList)
@@ -119,14 +121,16 @@ class Affiliations:
       return address
     return address
 
-  def add_affiliation(self, name, department, address1, address2, city, postcode, region, country):
+  def add_affiliation(self, name, department, address1, address2, city,
+                       postcode, region, country):
     cursor = DBConnection.conn.cursor()
     conn = DBConnection.conn
     displayname = "%s %s" %(name, city)
-    affiliations = [
-      (name, department, address1, address2, city, postcode, region, country, displayname),
-    ]
-    cursor.executemany("INSERT OR REPLACE INTO affiliations VALUES (?,?,?,?,?,?,?,?,?)", affiliations)
+    affiliation = (name, department, address1, address2, city, postcode,
+                    region, country, displayname)
+    cursor.execute(
+      "INSERT OR REPLACE INTO affiliations VALUES (?,?,?,?,?,?,?,?,?)",
+       affiliation)
     conn.commit()
 
 
@@ -155,7 +159,8 @@ class Persons:
         middlename = name[1]
         secondname = name[2]
     person = (firstname, middlename, secondname, '', '', '', 'New person')
-    DBConnection.conn.cursor().execute("INSERT OR REPLACE INTO persons VALUES (?,?,?,?,?,?,?)", person)
+    DBConnection.conn.cursor().execute(
+      "INSERT OR REPLACE INTO persons VALUES (?,?,?,?,?,?,?)", person)
     DBConnection.conn.commit()
     d = {'firstname':person[0],
          'middlename':person[1],
@@ -250,7 +255,8 @@ class Persons:
 
   def get_person_affiliation(self, displayname, list=False):
     cursor = DBConnection.conn.cursor()
-    sql = "SELECT affiliation FROM persons WHERE displayname like '%s'" %displayname
+    sql = "SELECT affiliation FROM persons WHERE displayname like '%s'" %(
+      displayname)
     cursor.execute(sql)
     affiliation = cursor.fetchone()
     sql = "SELECT * FROM affiliations WHERE name like '%s'" %affiliation
@@ -266,12 +272,15 @@ class Persons:
       return address
     return address
 
-  def add_person(self, firstname, middlename, lastname, email, phone, affiliation, displayname):
+  def add_person(self, firstname, middlename, lastname, email, phone,
+                  affiliation, displayname):
     if not displayname:
       displayname = self.make_display_name((firstname, middlename, lastname))
     cursor = DBConnection.conn.cursor()
-    person = (firstname, middlename, lastname, email, phone, affiliation, displayname)
-    cursor.execute("INSERT OR REPLACE INTO persons VALUES (?,?,?,?,?,?,?)", person)
+    person = (firstname, middlename, lastname, email, phone, affiliation,
+              displayname)
+    cursor.execute("INSERT OR REPLACE INTO persons VALUES (?,?,?,?,?,?,?)",
+                   person)
     DBConnection.conn.commit()
     return person
 
@@ -398,19 +407,81 @@ def import_from_pickle(conn, cursor):
 def init_userDictionaries():
   global people
   global affiliations
-  DBConnection()
+  dbc = DBConnection()
   people = Persons()
   affiliations = Affiliations()
-#  experimantal = Experimental(conn, cursor)
+  if dbc.need_import:
+    try:
+      dbc.doImport()
+    except:
+      import sys
+      sys.stdout.formatExceptionInfo()
+      print('Failed to import legacy data...')
 
 class DBConnection():
   conn = None
   cursor = None
 
+  def doImport(self):
+    name = "people"
+    picklePath = getPicklePath(name)
+    if not os.path.exists(picklePath):
+      return
+    pfile = open(picklePath)
+    dictionary = pickle.load(pfile)
+    pfile.close()
+    dictionary = dictionary[name]
+    for k,v in dictionary.iteritems():
+      a_all = v['address']
+      if '\n' in a_all:
+        a_all = a_all.split('\n')
+      elif ',' in a_all:
+        a_all = a_all.split(',')
+      else:
+        a_all = a_all.split()
+      aname = a_all[0]
+      affiliation = (aname, '', ' '.join(a_all[1:]), '', '', '',
+                      '', '', aname)
+      DBConnection.conn.cursor().execute(
+      "INSERT OR REPLACE INTO affiliations VALUES (?,?,?,?,?,?,?,?,?)",
+       affiliation)
+      DBConnection.conn.commit()
+      firstname = middlename = secondname = ""
+      if ',' in k:
+        name = k.split(',')
+        secondname = name[0]
+        name = name[1].split()
+        firstname = name[0]
+        if len(name) > 1:
+          middlename = ''.join(name[1:])
+      else:
+        name = k.split()
+        if len(name) == 1:
+          secondname = name[0]
+        elif len(name) == 2:
+          firstname = name[0]
+          secondname = name[1]
+        elif len(name) == 3:
+          firstname = name[0]
+          middlename = name[1]
+          secondname = name[2]
+        if not secondname or secondname.endswith('.'):
+          firstname, secondname = secondname, firstname
+      person = [firstname, middlename, secondname, v['email'],
+                v['phone'], aname, '']
+      person[6] = people.make_display_name(
+        {'firstname':person[0],
+         'middlename':person[1],
+         'lastname':person[2]})
+      DBConnection.conn.cursor().execute(
+        "INSERT OR REPLACE INTO persons VALUES (?,?,?,?,?,?,?)", person)
+      DBConnection.conn.commit()
+
   def __init__(self):
     if DBConnection.conn:
       return
     import sqlite3
+    self.need_import = False
     db_path = olex.f(OV.GetParam('user.report.db_location'))
     db_name = OV.GetParam('user.report.db_name')
     db_file = "%s/%s" %(db_path, db_name)
@@ -420,13 +491,25 @@ class DBConnection():
     DBConnection.conn = sqlite3.connect(db_file)
     if not exists:
       cursor = DBConnection.conn.cursor()
-      cursor.execute("""CREATE TABLE persons
-                      (firstname TEXT, middlename TEXT, lastname TEXT, email TEXT,
-                       phone TEXT, affiliation TEXT, displayname TEXT UNIQUE) 
-                   """)  
-      cursor.execute("""CREATE TABLE affiliations
-                      (Name TEXT, Department TEXT, Address1 TEXT, Address2 TEXT,
-                       City TEXT, PostCode TEXT, Region TEXT, Country TEXT,
-                        displayname TEXT UNIQUE) 
-                   """)
+      cursor.execute("""CREATE TABLE persons (
+       firstname TEXT,
+       middlename TEXT,
+       lastname TEXT,
+       email TEXT,
+       phone TEXT,
+       affiliation TEXT,
+       displayname TEXT UNIQUE)
+      """)
+      cursor.execute("""CREATE TABLE affiliations (
+       Name TEXT,
+       Department TEXT,
+       Address1 TEXT,
+       Address2 TEXT,
+       City TEXT,
+       PostCode TEXT,
+       Region TEXT,
+       Country TEXT,
+       displayname TEXT UNIQUE) 
+      """)
       DBConnection.conn.commit()
+      self.need_import = True
