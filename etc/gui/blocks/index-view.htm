@@ -1,3 +1,41 @@
+<table width="100%" cellpadding="0" cellspacing="0" bgcolor="$GetVar(HtmlTableFirstcolColour)">
+<tr><td>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td width="25%"><b>Graphical objects:</b></td>
+  <td width="5%">
+    <a href="cell" target="Unit cell">
+      $spy.MakeHoverButton('toolbar-cell','cell')
+    </a>
+  </td>
+  <td width="5%">
+    <a href="basis" target="Coordinate system">
+      $spy.MakeHoverButton('toolbar-base','basis')
+    </a>
+  </td>
+  <td width="5%">
+  <input
+    type="button"
+    image="up=toolbar-center-on-celloff.png,down=toolbar-center-on-celloff.png,hover=toolbar-center-on-cellhover.png"
+    hint="Show cell 3D selection/cropping frame (right click on it)"
+    onclick="sel wbox cell"
+    bgcolor="#dedede"
+  >
+  </td>
+  <td width="5%">
+  <input
+    type="button"
+    image="up=toolbar-center-on-celloff.png,down=toolbar-center-on-celloff.png,hover=toolbar-center-on-cellhover.png"
+    hint="Show square 3D selection/cropping frame (right click on it)"
+    onclick="sel wbox"
+    bgcolor="#dedede"
+  >
+  </td>
+  <td>&nbsp;</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+</td></tr></table>
+
+
 <!-- #include h2-view-quick-drawing-styles gui\quick-drawing-styles.htm;gui\blocks\tool-off.htm;image=quick-drawing-styles;onclick=;2; -->
 <!-- #include h2-view-symmetry-generation gui\symmetry-generation.htm;gui\blocks\tool-off.htm;image=symmetry-generation;onclick=;2; -->
  <!-- #include h2-view-select gui\select.htm;gui\blocks\tool-off.htm;image=select;onclick=;0; -->
