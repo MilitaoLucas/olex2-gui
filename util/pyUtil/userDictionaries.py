@@ -484,10 +484,10 @@ class DBConnection():
       DBConnection._conn.commit()
 
   def __init__(self):
+    self.need_import = False
     if DBConnection._conn:
       return
     import sqlite3
-    self.need_import = False
     db_path = olex.f(OV.GetParam('user.report.db_location'))
     db_name = OV.GetParam('user.report.db_name')
     db_file = "%s/%s" %(db_path, db_name)
