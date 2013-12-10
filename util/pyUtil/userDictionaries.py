@@ -495,6 +495,12 @@ class DBConnection():
       os.makedirs(db_path)
     exists = os.path.exists(db_file)
     DBConnection._conn = sqlite3.connect(db_file)
+    if exists:
+      cursor = DBConnection._conn.cursor()
+      cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='persons'")
+      if not cursor.fetchall():
+        exists = False
+
     if not exists:
       cursor = DBConnection._conn.cursor()
       cursor.execute("""CREATE TABLE persons (
