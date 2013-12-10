@@ -14,68 +14,13 @@ localList = None
 affiliations = None
 experimantal = None
 
-class People:
-  def __init__(self):
-    self.dictionary = getLocalDictionary('people')
-    global people
-    OV.registerFunction(self.getPersonInfo)
-    OV.registerFunction(self.changePersonInfo)
-    OV.registerFunction(self.addNewPerson)
-
-  def getPersonInfo(self,person,item):
-    retStr = '?'
-    if not person:
-      return retStr
-    if not self.isPerson(person):
-      self.addNewPerson(person)
-    currentPersonInfo = self.dictionary['people'][person]
-
-    if item in ('phone','email','address'):
-      retStr = currentPersonInfo[item]
-
-    return retStr
-
-  def changePersonInfo(self,person,item,info):
-    if not person:
-      return
-    elif not self.isPerson(person):
-      self.addNewPerson(person)
-
-    if item in ('email','phone','address'):
-      self.dictionary['people'][person][item] = info
-
-    #print "Changed %s for %s to %s" %(item,person,info)
-    saveLocalDictionary(self.dictionary)
-
-  def isPerson(self,person):
-    return self.dictionary['people'].has_key(person)
-
-  def addNewPerson(self,person):
-    currentPersonInfo = {'email':'?','phone':'?','address':'?'}
-    self.dictionary['people'].setdefault(person, currentPersonInfo)
-    listPeople = ''
-    for item in self.dictionary['people'].keys():
-      listPeople += '%s;' %item
-    OV.SetParam('snum.metacif.list_people', listPeople)
-    saveLocalDictionary(self.dictionary)
-
-  def getListPeople(self):
-    return self.getList('people')
-
-  def getList(self,whatList):
-    retStr = ''
-    for item in sorted(self.dictionary[whatList].keys()):
-      retStr += '%s;' %item
-    return retStr
-  
-  def get_person_details(self, person):
-    return person
-
 class LocalList:
   def __init__(self):
     self.dictionary = {}
-    self.dictionary.setdefault('journals',getLocalDictionary('journals')['journals'])
-    self.dictionary.setdefault('diffractometers',getLocalDictionary('diffractometers')['diffractometers'])
+    self.dictionary.setdefault('journals',
+      getLocalDictionary('journals')['journals'])
+    self.dictionary.setdefault('diffractometers',
+      getLocalDictionary('diffractometers')['diffractometers'])
     global localList
     localList = self
     OV.registerFunction(self.addToLocalList)
@@ -145,38 +90,26 @@ class LocalList:
     return cif_def
 
 
-
 class Affiliations:
   def __init__(self):
     global affiliations
     affiliations = self
     OV.registerFunction(self.getListAffiliations)
     OV.registerFunction(self.add_affiliation)
-    try:
-      self.new_affiliation_db()
-    except:
-      pass
-
-  def new_affiliation_db(self):
-    cursor = DBConnection.conn.cursor()
-    cursor.execute("""CREATE TABLE affiliations
-                      (Name TEXT, Department TEXT, Address1 TEXT, Address2 TEXT, City TEXT, PostCode TEXT, Region TEXT, Country TEXT, displayname TEXT UNIQUE) 
-                   """)
-    DBConnection.conn.commit()
 
   def getListAffiliations(self):
-    cursor = DBConnection.conn.cursor()
+    cursor = DBConnection().conn.cursor()
     sql = "SELECT * FROM affiliations"
     cursor.execute(sql)
     all_affiliations = cursor.fetchall()
     retVal = ""
     for affiliation in all_affiliations:
       retVal += "%s;" %affiliation[0]
-    retVal += "-- ADD NEW --"
+    retVal += "++ ADD NEW ++"
     return retVal
-  
+
   def get_affiliation_address(self, affiliation, list=False):
-    cursor = DBConnection.conn.cursor()
+    cursor = DBConnection().conn.cursor()
     sql = "SELECT * FROM affiliations WHERE name like '%s'" %affiliation
     cursor.execute(sql)
     address = cursor.fetchall()
@@ -188,15 +121,16 @@ class Affiliations:
       return address
     return address
 
-  def add_affiliation(self, name, department, address1, address2, city, postcode, region, country):
-    cursor = DBConnection.conn.cursor()
-    conn = DBConnection.conn
+  def add_affiliation(self, name, department, address1, address2, city,
+                       postcode, region, country):
+    cursor = DBConnection().conn.cursor()
     displayname = "%s %s" %(name, city)
-    affiliations = [
-      (name, department, address1, address2, city, postcode, region, country, displayname),
-    ]
-    cursor.executemany("INSERT OR REPLACE INTO affiliations VALUES (?,?,?,?,?,?,?,?,?)", affiliations)
-    conn.commit()
+    affiliation = (name, department, address1, address2, city, postcode,
+                    region, country, displayname)
+    cursor.execute(
+      "INSERT OR REPLACE INTO affiliations VALUES (?,?,?,?,?,?,?,?,?)",
+       affiliation)
+    DBConnection().conn.commit()
 
 
 class Persons:
@@ -206,20 +140,9 @@ class Persons:
     OV.registerFunction(self.getListPeople)
     OV.registerFunction(self.add_person)
     OV.registerFunction(self.getPersonInfo)
-    try:
-      self.new_person_db()
-    except:
-      pass
-    
+
   def changePersonInfo(self,person,item,info):
     pass
-
-  def new_person_db(self):
-    cursor = DBConnection.conn.cursor()
-    cursor.execute("""CREATE TABLE persons
-                      (firstname TEXT, middlename TEXT, lastname TEXT, email TEXT, phone TEXT, affiliation TEXT, displayname TEXT UNIQUE) 
-                   """)  
-    DBConnection.conn.commit()
 
   def addNewPerson(self, name=""):
     firstname = middlename = secondname = ""
@@ -235,8 +158,9 @@ class Persons:
         middlename = name[1]
         secondname = name[2]
     person = (firstname, middlename, secondname, '', '', '', 'New person')
-    DBConnection.conn.cursor().execute("INSERT OR REPLACE INTO persons VALUES (?,?,?,?,?,?,?)", person)
-    DBConnection.conn.commit()
+    DBConnection().conn.cursor().execute(
+      "INSERT OR REPLACE INTO persons VALUES (?,?,?,?,?,?,?)", person)
+    DBConnection().conn.commit()
     d = {'firstname':person[0],
          'middlename':person[1],
          'lastname':person[2],
@@ -249,8 +173,8 @@ class Persons:
 
   def deletePersonByDisplayname(self, displayname):
     sql = "DELETE FROM persons WHERE displayname=displayname"
-    DBConnection.conn.cursor().execute(sql)
-    DBConnection.conn.commit()
+    DBConnection().conn.cursor().execute(sql)
+    DBConnection().conn.commit()
 
   def make_display_name(self, person,format="acta"):
     if format == "acta":
@@ -277,7 +201,7 @@ class Persons:
     return display
 
   def getListPeople(self):
-    cursor = DBConnection.conn.cursor()
+    cursor = DBConnection().conn.cursor()
     sql = "SELECT * FROM persons"
     cursor.execute(sql)
     all_persons = cursor.fetchall()
@@ -286,7 +210,7 @@ class Persons:
       display = self.make_display_name(person)
       retVal_l.append(display)
     retVal_l.sort()
-    retVal_l.append("-- ADD NEW --")
+    retVal_l.append("++ ADD NEW ++")
     retVal = ";".join(retVal_l)
     return retVal
 
@@ -307,8 +231,8 @@ class Persons:
     return retStr
 
   def get_person_details(self, displayname):
-    cursor = DBConnection.conn.cursor()
-    if "--" in displayname or not displayname:
+    cursor = DBConnection().conn.cursor()
+    if "++" in displayname or not displayname:
       person = ["","","","","","","New Person"]
     else:
       sql = "SELECT * FROM persons WHERE displayname like '%s'" %(displayname)
@@ -327,10 +251,11 @@ class Persons:
          'displayname':person[6],
          }
     return d
-  
+
   def get_person_affiliation(self, displayname, list=False):
-    cursor = DBConnection.conn.cursor()
-    sql = "SELECT affiliation FROM persons WHERE displayname like '%s'" %displayname
+    cursor = DBConnection().conn.cursor()
+    sql = "SELECT affiliation FROM persons WHERE displayname like '%s'" %(
+      displayname)
     cursor.execute(sql)
     affiliation = cursor.fetchone()
     sql = "SELECT * FROM affiliations WHERE name like '%s'" %affiliation
@@ -346,13 +271,16 @@ class Persons:
       return address
     return address
 
-  def add_person(self, firstname, middlename, lastname, email, phone, affiliation, displayname):
+  def add_person(self, firstname, middlename, lastname, email, phone,
+                  affiliation, displayname):
     if not displayname:
       displayname = self.make_display_name((firstname, middlename, lastname))
-    cursor = DBConnection.conn.cursor()
-    person = (firstname, middlename, lastname, email, phone, affiliation, displayname)
-    cursor.execute("INSERT OR REPLACE INTO persons VALUES (?,?,?,?,?,?,?)", person)
-    DBConnection.conn.commit()
+    cursor = DBConnection().conn.cursor()
+    person = (firstname, middlename, lastname, email, phone, affiliation,
+              displayname)
+    cursor.execute("INSERT OR REPLACE INTO persons VALUES (?,?,?,?,?,?,?)",
+                   person)
+    DBConnection().conn.commit()
     return person
 
 def getLocalDictionary(whichDict):
@@ -460,9 +388,7 @@ def createNewLocalDictionary(whichDict):
 
 def saveLocalDictionary(dictionary):
   import variableFunctions
-  if dictionary.has_key('people'):
-    picklePath = getPicklePath('people')
-  elif dictionary.has_key('journals'):
+  if dictionary.has_key('journals'):
     picklePath = getPicklePath('journals')
   elif dictionary.has_key('diffractometers'):
     picklePath = getPicklePath('diffractometers')
@@ -480,31 +406,116 @@ def import_from_pickle(conn, cursor):
 def init_userDictionaries():
   global people
   global affiliations
-  use_db = OV.GetParam('user.report.use_db')
-  import_data = False
-  if use_db:
-    DBConnection()
-    people = Persons()
-    affiliations = Affiliations()
-  else:
-    people = People()
-#  experimantal = Experimental(conn, cursor)
-  
+  dbc = DBConnection()
+  people = Persons()
+  affiliations = Affiliations()
+  if dbc.need_import:
+    try:
+      dbc.doImport()
+    except:
+      import sys
+      sys.stdout.formatExceptionInfo()
+      print('Failed to import legacy data...')
+
 class DBConnection():
-  conn = None
-  cursor = None
-  
+  _conn = None
+
+  @property
+  def conn(self):
+    return DBConnection._conn
+
+  @conn.setter
+  def conn(c):
+    DBConnection._conn = c
+
+  def doImport(self):
+    name = "people"
+    picklePath = getPicklePath(name)
+    if not os.path.exists(picklePath):
+      return
+    pfile = open(picklePath)
+    dictionary = pickle.load(pfile)
+    pfile.close()
+    dictionary = dictionary[name]
+    for k,v in dictionary.iteritems():
+      a_all = v['address']
+      if '\n' in a_all:
+        a_all = a_all.split('\n')
+      elif ',' in a_all:
+        a_all = a_all.split(',')
+      else:
+        a_all = a_all.split()
+      aname = a_all[0]
+      affiliation = (aname, '', ' '.join(a_all[1:]), '', '', '',
+                      '', '', aname)
+      DBConnection._conn.cursor().execute(
+      "INSERT OR REPLACE INTO affiliations VALUES (?,?,?,?,?,?,?,?,?)",
+       affiliation)
+      DBConnection._conn.commit()
+      firstname = middlename = secondname = ""
+      if ',' in k:
+        name = k.split(',')
+        secondname = name[0]
+        name = name[1].split()
+        firstname = name[0]
+        if len(name) > 1:
+          middlename = ''.join(name[1:])
+      else:
+        name = k.split()
+        if len(name) == 1:
+          secondname = name[0]
+        elif len(name) == 2:
+          firstname = name[0]
+          secondname = name[1]
+        elif len(name) == 3:
+          firstname = name[0]
+          middlename = name[1]
+          secondname = name[2]
+        if not secondname or secondname.endswith('.'):
+          firstname, secondname = secondname, firstname
+      person = [firstname, middlename, secondname, v['email'],
+                v['phone'], aname, '']
+      person[6] = people.make_display_name(
+        {'firstname':person[0],
+         'middlename':person[1],
+         'lastname':person[2]})
+      DBConnection._conn.cursor().execute(
+        "INSERT OR REPLACE INTO persons VALUES (?,?,?,?,?,?,?)", person)
+      DBConnection._conn.commit()
+
   def __init__(self):
-    if DBConnection.conn:
+    if DBConnection._conn:
       return
     import sqlite3
-    db_path = OV.GetParam('user.report.db_location').replace("DataDir()", OV.DataDir())
+    self.need_import = False
+    db_path = olex.f(OV.GetParam('user.report.db_location'))
     db_name = OV.GetParam('user.report.db_name')
     db_file = "%s/%s" %(db_path, db_name)
     if not os.path.exists(db_path):
       os.makedirs(db_path)
-    if not os.path.exists(db_file):
-      import_data = True
-      wFile = open(db_file,'w')
-      wFile.close()
-    DBConnection.conn = sqlite3.connect(db_file)
+    exists = os.path.exists(db_file)
+    DBConnection._conn = sqlite3.connect(db_file)
+    if not exists:
+      cursor = DBConnection._conn.cursor()
+      cursor.execute("""CREATE TABLE persons (
+       firstname TEXT,
+       middlename TEXT,
+       lastname TEXT,
+       email TEXT,
+       phone TEXT,
+       affiliation TEXT,
+       displayname TEXT UNIQUE)
+      """)
+      cursor.execute("""CREATE TABLE affiliations (
+       Name TEXT,
+       Department TEXT,
+       Address1 TEXT,
+       Address2 TEXT,
+       City TEXT,
+       PostCode TEXT,
+       Region TEXT,
+       Country TEXT,
+       displayname TEXT UNIQUE) 
+      """)
+      DBConnection._conn.commit()
+      self.need_import = True

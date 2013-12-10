@@ -1062,8 +1062,6 @@ user
   keep_unique = False
     .type = bool
   report{
-    use_db = False
-      .type = bool
     db_location = DataDir()/db
       .type = str
     db_name = olex2.sqlite
