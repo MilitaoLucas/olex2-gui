@@ -24,7 +24,7 @@ class PluginTools(object):
   def deal_with_phil(self, operation='read', which='user_local'):
     user_phil_file = "%s/%s.phil" %(OV.DataDir(),self.p_scope)
     phil_file_p = r"%s/%s.phil" %(self.p_path, self.p_name.lower())
-    gui_phil_file_p = r"%s/gui_%s.phil" %(self.p_path, self.p_name)
+    gui_phil_file_p = r"%s/gui_%s.phil" %(self.p_path, self.p_name.lower())
     if operation == "read":
       phil_file = open(phil_file_p, 'r')
       phil = phil_file.read()
@@ -32,36 +32,36 @@ class PluginTools(object):
 
       olx.phil_handler.adopt_phil(phil_string=phil)
       olx.phil_handler.rebuild_index()
-      
+
       if os.path.exists(gui_phil_file_p):
         gui_phil_file = open(gui_phil_file_p, 'r')
         gui_phil = gui_phil_file.read()
         gui_phil_file.close()
- 
+
         olx.gui_phil_handler.adopt_phil(phil_string=gui_phil)
         olx.gui_phil_handler.rebuild_index()
         self.g = getattr(olx.gui_phil_handler.get_python_object(), 'gui')
-      
+
       if os.path.exists(user_phil_file):
         olx.phil_handler.update(phil_file=user_phil_file)
-        
+
       self.params = getattr(olx.phil_handler.get_python_object(), self.p_scope)
 
-      
+
     elif operation == "save":
       olx.phil_handler.save_param_file(
         file_name=user_phil_file, scope_name='%s' %self.p_scope, diff_only=False)
       #olx.phil_handler.save_param_file(
         #file_name=user_phil_file, scope_name='snum.%s' %self.p_name, diff_only=True)
-      
+
   def setup_gui(self):
     for image, img_type in self.p_img:
       make_single_gui_image(image, img_type=img_type)
     #olx.FlushFS()
-    
+
     if self.p_htm:
       add_tool_to_index(scope=self.p_name, link=self.p_htm, path=self.p_path, location=self.params.gui.location, before=self.params.gui.before, filetype='')
-      
+
 def make_new_plugin(name,overwrite=False):
   plugin_base = "%s/util/pyUtil/pluginLib/" %OV.BaseDir()
   path = "%s/plugin-%s" %(plugin_base, name)
@@ -79,7 +79,7 @@ def make_new_plugin(name,overwrite=False):
     except:
       print "Failed to make folder %s" %path
       return
-    
+
   d = {'name':name,
        'name_lower':name.lower(),
        'plugin_base':plugin_base,
@@ -142,7 +142,7 @@ print "OK."''' %d
   wFile = open("%(plugin_base)s/plugin-%(name)s/%(name_lower)s.phil"%d,'w')
   wFile.write(phil)
   wFile.close()
-  
+
   rFile = open(xld, 'r')
   xld_content = rFile.readlines()
   rFile.close()
@@ -197,7 +197,7 @@ def register_new_module(module=None, username=None, pwd=None):
     if type(f) == str:
       print "The requested installer could not be made. Instead the server returned: %s" %f
     else:
-      print "An unknown error occured: %s" %repr(f)
+      print "An unknown error occurred: %s" %repr(f)
     return  
 
 

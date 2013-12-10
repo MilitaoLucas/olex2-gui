@@ -1,6 +1,6 @@
 <body link="$GetVar(HtmlLinkColour)" >
-<font color=$GetVar(HtmlFontColour  size=$GetParam('HtmlFontSize') face="$GetVar(HtmlFontName)">
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
+<font color="$GetVar(HtmlFontColour)"  size="$spy.GetParam('HtmlFontSize')" face="$GetVar(HtmlFontName)">
+<table border="0" VALIGN='center' width="100%%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
 
   <tr>
   <td bgcolor='%(banner_colour)s'></td>
@@ -21,7 +21,7 @@
     <td width='75%%'>
       <input
         type="text"
-        bgcolor="$GetVar(HtmlInputBgColour))"
+        bgcolor="$GetVar(HtmlInputBgColour)"
         valign='center'
         name="PERSON_FIRSTNAME"
         value='%(firstname)s'
@@ -38,7 +38,7 @@
     <td width='75%%'>
       <input
       type="text"
-        bgcolor="$GetVar(HtmlInputBgColour))"
+        bgcolor="$GetVar(HtmlInputBgColour)"
         valign='center'
         name="PERSON_MIDDLENAME"
         value='%(middlename)s'
@@ -55,7 +55,7 @@
     <td width='75%%'>
       <input
         type="text"
-        bgcolor="$GetVar(HtmlInputBgColour))"
+        bgcolor="$GetVar(HtmlInputBgColour)"
         valign='center'
         name="PERSON_LASTNAME"
         value='%(lastname)s'
@@ -73,7 +73,7 @@
     <td width='75%%'>
     <input
       type="text"
-      bgcolor="$GetVar(HtmlInputBgColour))"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       valign='center'
       name="PERSON_EMAIL"
       value='%(email)s'
@@ -91,7 +91,7 @@
     <td width='75%%'>
       <input
         type="text"
-        bgcolor="$GetVar(HtmlInputBgColour))"
+        bgcolor="$GetVar(HtmlInputBgColour)"
         valign='center'
         name="PERSON_PHONE"
         value='%(phone)s'
@@ -108,17 +108,26 @@
     <font color='#ffffff'><b>Affiliation:</b></font>
     </td>
     <td width='75%%'>
-<input
-  type="combo"
-  width="100%%"
-  name="PERSON_AFFILIATION"
-  value="%(affiliation)s"
-  items="%(list_affiliations)s"
-  onchange="spy.gui.report.publication.OnPersonAffiliationChange('~name~',%(displayname)s)"
-  readonly="true"
-  bgcolor="spy.bgcolor('~name~')"
-  onchangealways="true"
->
+<table cellpadding='0' cellspacing='0' width="100%%"><tr>
+  <td width="95%%">
+   <input
+    type="combo"
+    width="100%%"
+    name="PERSON_AFFILIATION"
+    value="'%(affiliation)s'"
+    items="'%(list_affiliations)s'"
+    onchange="spy.gui.report.publication.OnPersonAffiliationChange('~name~','%(displayname)s')"
+    readonly="true"
+    bgcolor="spy.bgcolor('~name~')"
+    onchangealways="true"
+   >
+  </td>
+  <td>$+
+    spy.gui.images.get_action_button_html("edit",
+      "spy.gui.report.publication.OnPersonAffiliationChange('~popup_name~.PERSON_AFFILIATION', '%(displayname)s', True)",
+      "Edit affiliation")
+  $-</td></tr>
+</table>
     </td>
 
 
@@ -127,13 +136,13 @@
 type="text"
 multiline
 width="100%%"
-height="140"
+height="120"
 name="PEOPLE_FORM_ADDRESS"
 value=""
 items=""
 label=""
 valign="center"
-readonly
+readonly="true"
 >
 
   </tr>
@@ -146,7 +155,7 @@ readonly
   <td valign='centre'>
     <input
       type="button"
-      bgcolor="$GetVar(HtmlInputBgColour))"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       valign='center'
       width="60"
       height="22"
@@ -154,7 +163,7 @@ readonly
       value = "OK">
     <input
       type="button"
-      bgcolor="$GetVar(HtmlInputBgColour))"
+      bgcolor="$GetVar(HtmlInputBgColour)"
       valign='center'
       width="60"
       height="22"

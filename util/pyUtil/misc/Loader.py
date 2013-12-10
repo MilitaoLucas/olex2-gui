@@ -13,6 +13,8 @@ failed_modules = {}
 current_module = None
 info_file_name = "modules-info.htm"
 
+debug = (olx.app.IsDebugBuild() == 'true')
+
 class Module:
   def __init__(self, name, folder_name, description, url, release_date, action):
     self.name = name
@@ -58,19 +60,20 @@ def getModule(name, email=None):
       msg = '''
 An error occurred while downloading the extension.<br>%s<br>Please restart Olex2 and try again.
 ''' %(str(e))
-      sys.stdout.formatExceptionInfo()
+      if debug:
+        sys.stdout.formatExceptionInfo()
       olex.writeImage(info_file_name, msg, 0)
       return False
 
   if etoken is None:
     if os.path.exists(etoken_fn):
       etoken = open(etoken_fn, "rb").readline().strip()
-  
+
   if etoken is None:
     if not email:
       olex.writeImage(info_file_name, "Please provide your e-mail", 0)
     return False
-      
+
   #try to clean up the folder if already exists
   pdir = "%s%s%s" %(dir, os.sep, name)
   old_folder = None
@@ -160,6 +163,17 @@ def updateKey(module):
   import HttpTools
   from olexFunctions import OlexFunctions
   OV = OlexFunctions()
+  if isinstance(module, basestring):
+    found = False
+    if available_modules:
+      for m in available_modules:
+        if m.folder_name == module:
+          module = m
+          found = True
+          break
+    if not found:
+      print "No modules information available"
+      return
   try:
     dir = getModulesDir()
     etoken_fn = "%s%setoken" %(dir, os.sep)
@@ -190,8 +204,9 @@ def updateKey(module):
       print("Error while reloading '%s': %s" %(module.name, e))
       return False
   except Exception, e:
-    sys.stdout.formatExceptionInfo()
-    print("Error while updating the key for '%s': '%s'" %(module.name, e))
+    if debug:
+      sys.stdout.formatExceptionInfo()
+      print("Error while updating the key for '%s': '%s'" %(module.name, e))
     return False
 
 def getAvailableModules_():
@@ -248,7 +263,8 @@ def getAvailableModules_():
       else:
         m.action = 1
   except Exception, e:
-    sys.stdout.formatExceptionInfo()
+    if debug:
+      sys.stdout.formatExceptionInfo()
     return "No modules information available"
   finally:
     avaialbaleModulesRetrieved = True
@@ -408,6 +424,7 @@ if os.path.exists(lib_name) or olx.app.IsDebugBuild() == 'true':
     olex.registerFunction(getCurrentModuleName, False, "plugins.gui")
     olex.registerFunction(doAct, False, "plugins.gui")
     olex.registerFunction(AskToUpdate, False, "plugins")
+    olex.registerFunction(updateKey, False, "plugins")
     loadAll()
   except Exception, e:
     print("Plugin loader initialisation failed: '%s'" %e)
