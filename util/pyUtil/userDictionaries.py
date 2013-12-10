@@ -98,7 +98,7 @@ class Affiliations:
     OV.registerFunction(self.add_affiliation)
 
   def getListAffiliations(self):
-    cursor = DBConnection.conn.cursor()
+    cursor = DBConnection().conn.cursor()
     sql = "SELECT * FROM affiliations"
     cursor.execute(sql)
     all_affiliations = cursor.fetchall()
@@ -109,7 +109,7 @@ class Affiliations:
     return retVal
 
   def get_affiliation_address(self, affiliation, list=False):
-    cursor = DBConnection.conn.cursor()
+    cursor = DBConnection().conn.cursor()
     sql = "SELECT * FROM affiliations WHERE name like '%s'" %affiliation
     cursor.execute(sql)
     address = cursor.fetchall()
@@ -123,15 +123,14 @@ class Affiliations:
 
   def add_affiliation(self, name, department, address1, address2, city,
                        postcode, region, country):
-    cursor = DBConnection.conn.cursor()
-    conn = DBConnection.conn
+    cursor = DBConnection().conn.cursor()
     displayname = "%s %s" %(name, city)
     affiliation = (name, department, address1, address2, city, postcode,
                     region, country, displayname)
     cursor.execute(
       "INSERT OR REPLACE INTO affiliations VALUES (?,?,?,?,?,?,?,?,?)",
        affiliation)
-    conn.commit()
+    DBConnection().conn.commit()
 
 
 class Persons:
@@ -159,9 +158,9 @@ class Persons:
         middlename = name[1]
         secondname = name[2]
     person = (firstname, middlename, secondname, '', '', '', 'New person')
-    DBConnection.conn.cursor().execute(
+    DBConnection().conn.cursor().execute(
       "INSERT OR REPLACE INTO persons VALUES (?,?,?,?,?,?,?)", person)
-    DBConnection.conn.commit()
+    DBConnection().conn.commit()
     d = {'firstname':person[0],
          'middlename':person[1],
          'lastname':person[2],
@@ -174,8 +173,8 @@ class Persons:
 
   def deletePersonByDisplayname(self, displayname):
     sql = "DELETE FROM persons WHERE displayname=displayname"
-    DBConnection.conn.cursor().execute(sql)
-    DBConnection.conn.commit()
+    DBConnection().conn.cursor().execute(sql)
+    DBConnection().conn.commit()
 
   def make_display_name(self, person,format="acta"):
     if format == "acta":
@@ -202,7 +201,7 @@ class Persons:
     return display
 
   def getListPeople(self):
-    cursor = DBConnection.conn.cursor()
+    cursor = DBConnection().conn.cursor()
     sql = "SELECT * FROM persons"
     cursor.execute(sql)
     all_persons = cursor.fetchall()
@@ -232,7 +231,7 @@ class Persons:
     return retStr
 
   def get_person_details(self, displayname):
-    cursor = DBConnection.conn.cursor()
+    cursor = DBConnection().conn.cursor()
     if "++" in displayname or not displayname:
       person = ["","","","","","","New Person"]
     else:
@@ -254,7 +253,7 @@ class Persons:
     return d
 
   def get_person_affiliation(self, displayname, list=False):
-    cursor = DBConnection.conn.cursor()
+    cursor = DBConnection().conn.cursor()
     sql = "SELECT affiliation FROM persons WHERE displayname like '%s'" %(
       displayname)
     cursor.execute(sql)
@@ -276,12 +275,12 @@ class Persons:
                   affiliation, displayname):
     if not displayname:
       displayname = self.make_display_name((firstname, middlename, lastname))
-    cursor = DBConnection.conn.cursor()
+    cursor = DBConnection().conn.cursor()
     person = (firstname, middlename, lastname, email, phone, affiliation,
               displayname)
     cursor.execute("INSERT OR REPLACE INTO persons VALUES (?,?,?,?,?,?,?)",
                    person)
-    DBConnection.conn.commit()
+    DBConnection().conn.commit()
     return person
 
 def getLocalDictionary(whichDict):
@@ -419,8 +418,15 @@ def init_userDictionaries():
       print('Failed to import legacy data...')
 
 class DBConnection():
-  conn = None
-  cursor = None
+  _conn = None
+
+  @property
+  def conn(self):
+    return DBConnection._conn
+
+  @conn.setter
+  def conn(c):
+    DBConnection._conn = c
 
   def doImport(self):
     name = "people"
@@ -442,10 +448,10 @@ class DBConnection():
       aname = a_all[0]
       affiliation = (aname, '', ' '.join(a_all[1:]), '', '', '',
                       '', '', aname)
-      DBConnection.conn.cursor().execute(
+      DBConnection._conn.cursor().execute(
       "INSERT OR REPLACE INTO affiliations VALUES (?,?,?,?,?,?,?,?,?)",
        affiliation)
-      DBConnection.conn.commit()
+      DBConnection._conn.commit()
       firstname = middlename = secondname = ""
       if ',' in k:
         name = k.split(',')
@@ -473,12 +479,12 @@ class DBConnection():
         {'firstname':person[0],
          'middlename':person[1],
          'lastname':person[2]})
-      DBConnection.conn.cursor().execute(
+      DBConnection._conn.cursor().execute(
         "INSERT OR REPLACE INTO persons VALUES (?,?,?,?,?,?,?)", person)
-      DBConnection.conn.commit()
+      DBConnection._conn.commit()
 
   def __init__(self):
-    if DBConnection.conn:
+    if DBConnection._conn:
       return
     import sqlite3
     self.need_import = False
@@ -488,9 +494,9 @@ class DBConnection():
     if not os.path.exists(db_path):
       os.makedirs(db_path)
     exists = os.path.exists(db_file)
-    DBConnection.conn = sqlite3.connect(db_file)
+    DBConnection._conn = sqlite3.connect(db_file)
     if not exists:
-      cursor = DBConnection.conn.cursor()
+      cursor = DBConnection._conn.cursor()
       cursor.execute("""CREATE TABLE persons (
        firstname TEXT,
        middlename TEXT,
@@ -511,5 +517,5 @@ class DBConnection():
        Country TEXT,
        displayname TEXT UNIQUE) 
       """)
-      DBConnection.conn.commit()
+      DBConnection._conn.commit()
       self.need_import = True
