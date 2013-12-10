@@ -373,7 +373,7 @@ class GeneratedGuiMaker(object):
        })
 
 
-    list.append( {'varName':'snum.report.publication_style', 'readonly':'',
+    list.append( {'varName':'snum.report.publication_style',
                   'itemName':'%Journal Style%', 'items': "general;acta",
                   'value':"spy.GetParam('snum.report.publication_style')",
                   'onchange':"spy.gui.report.publication.OnPublicationTemplateChange(html.GetValue(~name~))>>html.update",
