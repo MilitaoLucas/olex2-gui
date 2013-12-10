@@ -300,17 +300,14 @@ href='spy.gui.report.publication.remove_cif_from_merge_list(%s)>>html.Update'>
     value = value.strip()
     OV.SetParam('snum.report.publication_style', value.lower())
     if value == 'general':
-      styles = ['acta']
       OV.SetParam('snum.report.publication_paper', "")
-      a = OV.GetParam('snum.report.merge_these_cifs')
-      l = []
-      for m_cif in a:
-        for style in styles:
-          if "_%s.cif"%style not in m_cif:
-            l.append(m_cif)
-      if not l:
-        l = " "
-      OV.SetParam('snum.report.merge_these_cifs', l)
+      a = OV.GetParam('snum.report.merge_these_cifs', [])
+      if a:
+        styles = ["_%s.cif" %(s) for s in ['acta']]
+        a = [f for f in a if not s in f for s in styles]
+      if not a:
+        a = "" 
+      OV.SetParam('snum.report.merge_these_cifs', a)
       return
     copy_from = "%s/etc/CIF/cif_templates/%s.cif" %(OV.BaseDir(), value)
     copy_to = "%s/%s_%s.cif" %(OV.FilePath(), OV.FileName(), value)
@@ -318,13 +315,13 @@ href='spy.gui.report.publication.remove_cif_from_merge_list(%s)>>html.Update'>
       if os.path.isfile(copy_from):
         if copy_from.lower() != copy_to.lower():
           txt = open(copy_from,'r').read().replace("FileName()", OV.FileName())
-          wFile = open(copy_to,'w').write(txt)
-    a = OV.GetParam('snum.report.merge_these_cifs')
+          open(copy_to,'w').write(txt)
+    a = OV.GetParam('snum.report.merge_these_cifs', [])
     if copy_to not in a:
       a.append(copy_to)
       OV.SetParam('snum.report.publication_paper', a)
-    OV.SetParam('snum.report.merge_these_cifs', copy_to)
-    olx.Shell(copy_to)
+    OV.SetParam('snum.report.merge_these_cifs', a)
+    #olx.Shell(copy_to)
 
   olex.registerFunction(add_cif_to_merge_list, False, "gui.report.publication")
   olex.registerFunction(remove_cif_from_merge_list, False, "gui.report.publication")
