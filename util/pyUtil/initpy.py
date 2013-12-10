@@ -232,8 +232,6 @@ variableFunctions.LoadParams()
 import olexex
 import CifInfo # import needed to register functions to olex
 
-set_plugins_paths()
-
 #if debug:
 # version = print_python_version()
 #try:
@@ -300,6 +298,8 @@ def onstartup():
     userDictionaries.LocalList()
 
 onstartup()
+
+set_plugins_paths()
 
 #if debug:
 #       keys = os.environ.keys()
