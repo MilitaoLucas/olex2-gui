@@ -34,7 +34,7 @@ def getModule(name, email=None):
   import HttpTools
   from olexFunctions import OlexFunctions
   OV = OlexFunctions()
-  url_base = OV.GetParam('modules.provider_url')
+  url_base = OV.GetParam('user.modules.provider_url')
   dir = getModulesDir()
   if not os.path.exists(dir):
     os.mkdir(dir)
@@ -182,7 +182,7 @@ def updateKey(module):
     else:
       print("Failed to update the key - email is not registered")
       return False
-    url = OV.GetParam('modules.provider_url') + "update"
+    url = OV.GetParam('user.modules.provider_url') + "update"
     values = {
       'n': module.folder_name,
       'at': _plgl.createAuthenticationToken(),
@@ -222,7 +222,7 @@ def getAvailableModules_():
   import HttpTools
   from olexFunctions import OlexFunctions
   OV = OlexFunctions()
-  url_base = OV.GetParam('modules.provider_url')
+  url_base = OV.GetParam('user.modules.provider_url')
   try:
     url = url_base + "available"
     values = {
@@ -256,6 +256,8 @@ def getAvailableModules_():
           if "expired" in failed_modules[m.folder_name]:
             if updateKey(m):
               m.action = 1
+            else:
+              m.action = 3 #reinstall
           else:
             m.action = 3
         elif d < m.release_date:
@@ -328,7 +330,7 @@ def getInfo():
       "OlexSys Ltd</a> to extend the licence.<br>"
   return preambula + "<a href='shell %s'>Module URL: </a> %s<br>%s"\
      %(current_module.url, current_module.url, current_module.description)
-  
+
 def update(idx):
   global current_module
   global available_modules
