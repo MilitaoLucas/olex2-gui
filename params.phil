@@ -637,7 +637,7 @@ routines requiring structure refinement
       .type = choice
     solvent_radius = 1.2
       .type = float
-    shrink_truncation_radius = 0.2
+    shrink_truncation_radius = 1.2
       .type = float
     resolution_factor = 1/4
       .type = float
@@ -1009,13 +1009,6 @@ programs
     }
   }
 
-modules{
-  provider_url = "http://www.olex2.org/PluginProvider1/"
-    .type = str
-  location = "DataDir()"
-    .type = str
-  }
-
 user
   .short_caption = User Specific
   {
@@ -1150,6 +1143,8 @@ user
       .type = str
     manual_update = False
       .type = bool
+    provider_url = "http://www.olex2.org/PluginProvider1/"
+      .type = str
   }
 }
 
