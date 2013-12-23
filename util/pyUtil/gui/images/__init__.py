@@ -43,20 +43,21 @@ GI = GuiImages()
 OV.registerFunction(GI.make_action_button_html,False,'gui.images')
 OV.registerFunction(GI.get_action_button_html,False,'gui.images')
 
+
 ##Moved from olexex: Anything to do with structure image generation
 def GetBitmapSize(px_changed=False):
-  resolution = OV.GetValue('IMAGE_BITMAP_RESOLUTION')
+  resolution = OV.GetParam('user.image.bitmap.resolution')
   try:
     resolution = float(resolution)
   except:
     return False, False
-  width = OV.GetValue('IMAGE_BITMAP_WIDTH')
+  width = OV.GetParam('user.image.bitmap.resolution_width')
   try:
     width = float(width)
   except:
     return False, False
-  unit = OV.GetValue('IMAGE_BITMAP_WIDTH_UNIT')
-  size = OV.GetValue('IMAGE_BITMAP_SIZE')
+  unit = OV.GetParam('user.image.bitmap.resolution_unit')
+  size = OV.GetParam('user.image.bitmap.size')
   try:
     size = float(size)
   except:
@@ -66,15 +67,19 @@ def GetBitmapSize(px_changed=False):
     factor = 0.393700787
   if px_changed:
     width = size/(resolution * factor)
-    olx.html.SetValue('IMAGE_BITMAP_width',round(width,3))
+    if OV.IsControl('IMAGE_BITMAP_width'):
+      olx.html.SetValue('IMAGE_BITMAP_width',round(width,3))
+    OV.SetParam('user.image.bitmap.resolution_width',round(width,3))
   else:
     size = resolution * width * factor
-    olx.html.SetValue('IMAGE_BITMAP_SIZE',int(round(size,0)))
+    if OV.IsControl('IMAGE_BITMAP_SIZE'):
+      olx.html.SetValue('IMAGE_BITMAP_SIZE',int(round(size,0)))
+    OV.SetParam('user.image.bitmap.size',int(round(size,0)))
   return int(round(resolution,0)), int(round(size,0))
 OV.registerFunction(GetBitmapSize,False,'gui.images')
 
 
-def GetBitmapImageInstructions():
+def MakeBitmapImage(notify_listener=True):
   from ImageTools import ImageTools
   IT = ImageTools()
   filefull, filename, fileext = GetImageFilename(image_type = "BITMAP")
@@ -84,7 +89,7 @@ def GetBitmapImageInstructions():
   if not filesize:
     return
   resolution = "-dpi=%s" %resolution
-  if olx.html.GetState('BITMAP_NO_BG') == 'true':
+  if OV.GetParam('user.image.bitmap.transparent_background'):
     nbg = "-nbg"
   else:
     nbg = ""
@@ -98,13 +103,13 @@ def GetBitmapImageInstructions():
 
   filesize = int(round(filesize,0))
 
-  if olx.html.GetState('TRIM_IMAGE') == 'true':
+  if OV.GetParam('user.image.bitmap.trim'):
     temp_name = '%s_temp.bmp' %(filefull.strip("'"))
     try:
       olex.m('picta "%s" 1' %(temp_name))
-      padding = float(olx.html.GetValue('TRIM_PADDING'))
-      border = float(olx.html.GetValue('TRIM_BORDER'))
-      colour = olx.html.GetValue('TRIM_BORDER_COLOUR')
+      padding = OV.GetParam('user.image.bitmap.trim_padding')
+      border = OV.GetParam('user.image.bitmap.trim_border')
+      colour = OV.GetParam('user.image.trim_border_colour')
       new_width, old_width = IT.trim_image(im=temp_name,  padding=padding, border=border, border_col=colour, dry=True)
       target_size = filesize
       filesize = filesize * (old_width/new_width)
@@ -118,9 +123,10 @@ def GetBitmapImageInstructions():
 
   #from PIL import Image
   OV.Cursor()
-  from gui import ImageListener
-  ImageListener.OnChange()
-OV.registerFunction(GetBitmapImageInstructions,False,'gui.images')
+  if notify_listener:
+    from gui import ImageListener
+    ImageListener.OnChange()
+OV.registerFunction(MakeBitmapImage,False,'gui.images')
 
 def GetPRImageInstructions():
   filefull, filename, fileext = GetImageFilename(image_type = "PR")
@@ -134,7 +140,7 @@ def GetPRImageInstructions():
   ImageListener.OnChange()
 OV.registerFunction(GetPRImageInstructions,False,'gui.images')
 
-def GetPSImageInstructions():
+def GetPSImageInstructions(notify_listener=True):
   filefull, filename, fileext = GetImageFilename(image_type = "PS")
   if not filefull:
     return
@@ -150,7 +156,10 @@ def GetPSImageInstructions():
   lw_font = str(OV.GetParam('snum.image.ps.font_weight'))
   div_pie = str(OV.GetParam('snum.image.ps.octant_count'))
   scale_hb = str(OV.GetParam('snum.image.ps.h_bond_width'))
-  octant_atoms = str(OV.GetValue('IMAGE_PS_OCTANTS_ATOMS'))
+  octant_atoms = str(OV.GetParam('snum.image.ps.octant_atoms'))
+
+  if image_perspective.lower() == 'true':
+    image_perspective = "-p"
 
   olex.m("pictps" + \
          " '" + filefull + \
@@ -168,8 +177,9 @@ def GetPSImageInstructions():
 
   print 'Image %s created' %filefull
   OV.Cursor()
-  from gui import ImageListener
-  ImageListener.OnChange()
+  if notify_listener:
+    from gui import ImageListener
+    ImageListener.OnChange()
 OV.registerFunction(GetPSImageInstructions,False,'gui.images')
 
 def GetImageFilename(image_type):
@@ -182,7 +192,7 @@ def GetImageFilename(image_type):
     fileext = OV.GetParam('snum.image.%s.type' %image_type.lower())
   if not filename:
     try:
-      filename = OV.GetValue('IMAGE_NAME')
+      filename = OV.FileName()
     except:
       filename = None
     if not filename:

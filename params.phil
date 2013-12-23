@@ -41,11 +41,11 @@ routines requiring structure refinement
     submission_type = +++ Please Choose +++
       .type = str
   }
-  
+
   cds{
     error_a = 3
       .type = int
-      
+
     error_s = 2
       .type = int
   }
@@ -138,7 +138,7 @@ routines requiring structure refinement
         .type = bool
       }
     }
-    
+
   htab{
     distance = 2.9
       .type = float
@@ -156,17 +156,17 @@ routines requiring structure refinement
       .type = float
     max_shift_site_atom = None
       .type = str
-    max_shift_u = None      
+    max_shift_u = None
       .type = float
-    max_shift_u_atom = None      
+    max_shift_u_atom = None
       .type = str
-    max_peak = None      
+    max_peak = None
       .type = float
-    max_hole = None      
+    max_hole = None
       .type = float
-    flack_str = None      
+    flack_str = None
       .type = str
-    expected_peaks = None      
+    expected_peaks = None
       .type = int
     has_h = False
       .type = bool
@@ -216,7 +216,7 @@ routines requiring structure refinement
       .type = bool
     cifmerge_after_refinement = True
       .type = bool
-    
+
     ShelXL
       .short_caption = 'Program specific command line'
     {
@@ -281,8 +281,6 @@ routines requiring structure refinement
         }
       bond_label{
         font_name = #olex2.fnt:frb_14
-        .type = str
-      trim_border_colour = #bbbbbb
         .type = str
       }
     }
@@ -522,7 +520,7 @@ routines requiring structure refinement
       .type = strings
     type = "Structure Report"
       .type = str
-    date_format = "%d-%m-%Y"  
+    date_format = "%d-%m-%Y"
       .type = str
     date_collected = None
       .type = str
@@ -540,7 +538,7 @@ routines requiring structure refinement
       .type = str
     crystal_mounting_notes = "Nothing special was noted when selecting and mounting the crystal"
       .type = str
-    submission_special_instructions = "No special instructions were received"  
+    submission_special_instructions = "No special instructions were received"
       .type = str
     submission_original_sample_id = None
       .type = str
@@ -572,7 +570,7 @@ routines requiring structure refinement
         .type = str
       name = ""
         .type = str
-    } 
+    }
     tex{
       page = 'a4paper'
         .type = str
@@ -582,7 +580,7 @@ routines requiring structure refinement
         .type = str
       table1_caption = 'Crystal data and structure refinement for'
         .type = str
-    }  
+    }
   }
 
   eden_fine_value = 0
@@ -1087,11 +1085,11 @@ user
         .type = str
       name = OlexSys Crystallographic Services
         .type = str
-      } 
+      }
     diffractometer_image = "BaseDir()/util/pyUtil/PluginLib/plugin-AutoChem2/images/gemini.jpg"
       .type = str
     }
-    
+
   auto_refine_after_anis = True
     .type = bool
   auto_compact = True
@@ -1120,7 +1118,26 @@ user
     bitmap{
       type = png
         .type = str
+      resolution = 300
+        .type = int
+      resolution_unit = in
+        .type = str
+      resolution_width= 4
+        .type = float
+      size= 1200
+        .type = int
+      transparent_background = False
+        .type = bool
+      trim = True
+        .type = bool
+      trim_border_colour = #bbbbbb
+        .type = str
+      trim_padding = 2
+        .type = float
+      trim_border = 0
+        .type = float
     }
+
   }
   sorting {
     cat1 = "p"
