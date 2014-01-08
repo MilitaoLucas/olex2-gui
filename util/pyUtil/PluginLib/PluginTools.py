@@ -146,13 +146,14 @@ print "OK."''' %d
   rFile = open(xld, 'r')
   xld_content = rFile.readlines()
   rFile.close()
-  wFile = open(xld, 'w')
   if name in xld_content:
     return
+  wFile = open(xld, 'w')
   for line in xld_content:
     wFile.write(line)
     if line.strip().lower() == "<plugin":
       wFile.write ("<%(name)s>" %d)
+  wFile.close()
  
 OV.registerFunction(make_new_plugin,False,'pt')
 
