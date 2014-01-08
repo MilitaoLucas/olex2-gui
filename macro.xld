@@ -141,13 +141,10 @@
       <arg1 name="file" def='filename()'>
     >
     <cmd
-      <cmd1 "if File.Exists(%s.p4p) then none else 'file %1.p4p'">
+      <cmd1 "if File.Exists(%1.p4p) then none else 'file %1.p4p'">
       <cmd2 "exec -o xprep %1">
     >
-
-  <onterminate
   >
->
 >
 
 <sgd help="Determine the Space Group"

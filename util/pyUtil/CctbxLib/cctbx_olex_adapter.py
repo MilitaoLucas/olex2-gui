@@ -1044,7 +1044,6 @@ def calcsolv(solvent_radius=None, grid_step=None):
   # Used to build the xray_structure by getting information from the olex2 refinement model
   olx_atoms = olexex.OlexRefinementModel()
   unit_cell = olx_atoms.getCell()
-  restraints_iter=olx_atoms.restraints_iterator()
   constraints_iter=None
   space_group = "hall: "+str(olx.xf.au.GetCellSymm("hall"))
 
