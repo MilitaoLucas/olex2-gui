@@ -113,7 +113,7 @@ class CifTools(ArgumentParser):
     if olx.cif_model is None or self.data_name.lower() not in olx.cif_model.keys_lower.keys():
       if os.path.isfile(self.metacif_path):
         olx.cif_model = self.read_metacif_file()
-      else:
+      if olx.cif_model is None:
         olx.cif_model = model.cif()
         olx.cif_model[self.data_name] = model.block()
     self.cif_model = olx.cif_model
@@ -151,15 +151,17 @@ Olex2 %s
 
   def read_metacif_file(self):
     if os.path.isfile(self.metacif_path):
-      file_object = open(self.metacif_path, 'rb')
-      reader = iotbx.cif.reader(file_object=file_object)
-      file_object.close()
-      return reader.model()
+      try:
+        with open(self.metacif_path, 'rb') as file_object:
+          reader = iotbx.cif.reader(file_object=file_object)
+          return reader.model()
+      except:
+        print("Failed reading the metadata, removing the file")
+    return None
 
   def write_metacif_file(self):
-    f = open(self.metacif_path, 'wb')
-    print >> f, self.cif_model
-    f.close()
+    with open(self.metacif_path, 'wb') as f:
+      print >> f, self.cif_model
 
   def sort_diffractometer(self):
     if not OV.GetParam('snum.report.diffractometer'):
