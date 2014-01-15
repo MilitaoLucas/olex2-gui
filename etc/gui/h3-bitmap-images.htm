@@ -17,8 +17,8 @@
       items="'png;jpg;bmp;tif;png/s'"
       valign='left'
       name="IMAGE_BITMAP_TYPE"
-      value="spy.GetParam('snum.image.bitmap.type')"
-      onchange="spy.SetParam('snum.image.bitmap.type',html.GetValue('~name~'))"
+      value="spy.GetParam('user.image.bitmap.type')"
+      onchange="spy.SetParam('user.image.bitmap.type',html.GetValue('~name~'))"
     >
     </font>
   </td>
@@ -33,8 +33,8 @@
       name = "BITMAP_NO_BG"
       fgcolor="GetVar('HtmlFontColour')"
       bgcolor="GetVar('HtmlTableBgColour')"
-      oncheck="html.SetData('BITMAP_NO_BG','True')"
-      onuncheck="html.SetData('BITMAP_NO_BG',' ')"
+      oncheck="html.SetData('BITMAP_NO_BG','True')>>spy.SetParam('user.image.bitmap.transparent_background',True"
+      onuncheck="html.SetData('BITMAP_NO_BG',' ')>>spy.SetParam('user.image.bitmap.transparent_background',False"
       manage="true"
     >
     </font>
@@ -42,7 +42,7 @@
 
 
   <td width='10%' align='right'>
-$spy.MakeHoverButton('button_small-go@bitmap','spy.gui.images.GetBitmapImageInstructions()')
+$spy.MakeHoverButton('button_small-go@bitmap','spy.gui.images.MakeBitmapImage()')
   </td>
 
 
@@ -67,9 +67,9 @@ $spy.MakeHoverButton('button_small-go@bitmap','spy.gui.images.GetBitmapImageInst
       items="72;96;120;180;300;600"
       valign='left'
       name="IMAGE_BITMAP_RESOLUTION"
-      value='300'
+      value="spy.GetParam(user.image.bitmap.resolution)"
       manage
-      onchange='spy.gui.images.GetBitmapSize()'
+      onchange="spy.SetParam(user.image.bitmap.resolution,html.GetValue('~name~'))>>spy.gui.images.GetBitmapSize()"
     >
     </font>
   </td>
@@ -87,9 +87,9 @@ $spy.MakeHoverButton('button_small-go@bitmap','spy.gui.images.GetBitmapImageInst
       items="4;8;12;20;30;"
       valign='left'
       name="IMAGE_BITMAP_WIDTH"
-      value='4'
+      value="spy.GetParam(user.image.bitmap.resolution_width)"
       manage
-      onchange='spy.gui.images.GetBitmapSize()'
+      onchange="spy.SetParam(user.image.bitmap.resolution_width,html.GetValue('~name~'))>>spy.gui.images.GetBitmapSize()"
     >
     </font>
   </td>
@@ -107,10 +107,10 @@ $spy.MakeHoverButton('button_small-go@bitmap','spy.gui.images.GetBitmapImageInst
       items="cm;in"
       valign='left'
       name="IMAGE_BITMAP_WIDTH_UNIT"
-      value='in'
+      value="spy.GetParam(user.image.bitmap.resolution_unit)"
       manage
       readonly
-      onchange='spy.gui.images.GetBitmapSize(True)'
+      onchange="spy.SetParam(user.image.bitmap.resolution_unit,html.GetValue('~name~'))>>spy.gui.images.GetBitmapSize(True)"
     >
     </font>
   </td>
@@ -128,8 +128,8 @@ $spy.MakeHoverButton('button_small-go@bitmap','spy.gui.images.GetBitmapImageInst
       items="'200;400;800;1200;1800;3200'"
       valign='left'
       name="IMAGE_BITMAP_SIZE"
-      value='1200'
-      onchange='spy.gui.images.GetBitmapSize(True)'
+      value="spy.GetParam(user.image.bitmap.size)"
+      onchange="spy.SetParam(user.image.bitmap.size,html.GetValue('~name~'))>>spy.gui.images.GetBitmapSize(True)"
     >
     </font>
   </td>
@@ -149,8 +149,8 @@ $spy.MakeHoverButton('button_small-go@bitmap','spy.gui.images.GetBitmapImageInst
       name = "TRIM_IMAGE"
       fgcolor="GetVar('HtmlFontColour')"
       bgcolor="GetVar('HtmlTableBgColour')"
-      oncheck="html.SetData('TRIM_IMAGE','True')"
-      onuncheck="html.SetData('TRIM_IMAGE',' ')"
+      oncheck="html.SetData('TRIM_IMAGE','True')>>spy.SetParam('user.image.bitmap.trim',True")
+      onuncheck="html.SetData('TRIM_IMAGE',' ')>>spy.SetParam('user.image.bitmap.trim',False")"
       manage="true"
       checked="true"
     >
@@ -171,6 +171,7 @@ $spy.MakeHoverButton('button_small-go@bitmap','spy.gui.images.GetBitmapImageInst
       name="TRIM_PADDING"
       value='2'
       manage
+      onchange="spy.SetParam('user.image.bitmap.trim_padding',html.GetValue('~name~'))"
     >
     </font>
   </td>
@@ -189,6 +190,7 @@ $spy.MakeHoverButton('button_small-go@bitmap','spy.gui.images.GetBitmapImageInst
       name="TRIM_BORDER"
       value='0'
       manage
+      onchange="spy.SetParam('user.image.bitmap.trim_border',html.GetValue('~name~'))"
     >
     </font>
   </td>
@@ -223,8 +225,6 @@ $spy.MakeHoverButton('button_small-go@bitmap','spy.gui.images.GetBitmapImageInst
 
 
 
-
-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- FIRST ROW -->
@@ -240,7 +240,7 @@ $spy.MakeHoverButton('button_small-go@bitmap','spy.gui.images.GetBitmapImageInst
     <a href="setfont AtomLabels ChooseFont(System,spy.GetParam(snum.image.bitmap.atom_label.font_name))>>spy.SetParam(snum.image.bitmap.atom_label.font_name,GetFont(AtomLabels))">(System Font)</a>
 </td>
  <td colspan=2 name-=IMAGE_BITMAP_CHOOSE_BOND_LABEL_FONTS>
- 
+
     <a href="setfont BondLabels ChooseFont(Olex2,spy.GetParam(snum.image.bitmap.bond_label.font_name))>>spy.SetParam(snum.image.bitmap.bond_label.font_name,GetFont(AtomLabels))"><b>Bond</b> Label Font (Olex2)</a> |
     <a href="setfont BondLabels ChooseFont(System,spy.GetParam(snum.image.bitmap.bond_label.font_name))>>spy.SetParam(snum.image.bitmap.bond_label.font_name,GetFont(AtomLabels))">(System Font)</a>
   </td>

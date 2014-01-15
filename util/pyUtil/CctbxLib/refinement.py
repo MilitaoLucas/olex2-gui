@@ -1008,7 +1008,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if OV.HasGUI():
       basis = olx.gl.Basis()
       frozen = olx.Freeze(True)
-    olx.xf.EndUpdate()
+    olx.xf.EndUpdate(True) #clear LST
     if olx.xf.latt.IsGrown() == 'false':
       olx.Compaq(q=True)
     if OV.HasGUI():
