@@ -2671,13 +2671,16 @@ class HealthOfStructure():
     l = ['Completeness', 'MeanIOverSigma','Rint']
     for item in self.hkl_stats:
       value = self.hkl_stats[item]
-      try:
-        fv = float(value)
-        iv = int(value)
-        if fv != iv:
-          value = "%.4f" %fv
-      except:
-        pass
+      if type(value) == tuple and len(value) > 0 and type(value[0]) == float:
+        value = tuple([round(x,4) for x in value])
+      else:
+        try:
+          fv = float(value)
+          iv = int(value)
+          if fv != iv:
+            value = "%.4f" %fv
+        except:
+          pass
       d.setdefault(item, value)
       txt += "<tr><td>%s</td><td>%s</td><tr>" %(item, value)
     OV.write_to_olex("reflection-stats-summary.htm" , txt)
@@ -2686,7 +2689,7 @@ class HealthOfStructure():
   def make_HOS_html(self):
     if self.scope == None:
       self.scope = 'hkl'
-      
+
     is_CIF = (olx.IsFileType('cif') == 'true')
     if self.scope == "refinement":
       if is_CIF:
@@ -2702,7 +2705,7 @@ class HealthOfStructure():
       l = ['MinD', 'MeanIOverSigma','Rint','Completeness']
 
 
-    txt = "<table width='100%%' cellpadding=0 cellspacing=0><tr>"
+    txt = "<table width='100%%' cellpadding='0' cellspacing='0'><tr>"
 
 
     counter = 0
@@ -2726,6 +2729,11 @@ class HealthOfStructure():
 
       bg_colour = self.get_bg_colour(item, value)
       raw_val = value
+      if type(value) == tuple:
+        if len(value) > 0:
+          value = value[0]
+        else:
+          value = None
       if value == None:
         value = "NO VALUE!"
         bg_colour = "#000000"
@@ -2773,6 +2781,12 @@ class HealthOfStructure():
 '''%(bg_colour, 100/len(l), display, ref_open, value, ref_close)
 
     txt += "</tr></table>"
+    if self.scope == "hkl":
+      completeness = self.hkl_stats['Completeness']
+      if type(completeness) == tuple and len(completeness) > 1:
+        txt = """<table width='100%%' cellpadding='0' cellspacing='0'><tr><td>%s</td></tr>
+          <tr><td><b>Twin component completeness (in P1): %s</b></td></tr></table>""" %(
+            txt, ", ".join(["%.2f%%%%" %(x*100) for x in completeness]))
     txt = txt.decode('utf-8')
     OV.write_to_olex("hos.htm",txt)
     OV.SetParam('snum.hkl.hkl_stat_file', OV.HKLSrc())

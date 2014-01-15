@@ -648,7 +648,13 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
   def __init__(self):
     OlexCctbxAdapter.__init__(self)
-
+    if OV.GetParam('snum.refinement.use_solvent_mask'):
+      txt = "Sorry, using solvent masking and twinning is not supported yet."
+      print(txt)
+      html = "<tr><td></td><td><b>%s</b></td></tr>" %txt
+      OV.write_to_olex('twinning-result.htm', html, False)
+      OV.UpdateHtml()
+      return
     from PilTools import MatrixMaker
     global twin_laws_d
     a = MatrixMaker()
@@ -658,8 +664,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     self.twin_law_gui_txt = ""
     if not twin_laws:
       print "There are no possible twin laws"
-      html = "<tr><td></td><td>"
-      html += "<b>%There are no possible Twin Laws%</b>"
+      html = "<tr><td></td><td><b>%There are no possible Twin Laws%</b></td></tr>"
       OV.write_to_olex('twinning-result.htm', html, False)
       OV.UpdateHtml()
       return
@@ -1044,7 +1049,6 @@ def calcsolv(solvent_radius=None, grid_step=None):
   # Used to build the xray_structure by getting information from the olex2 refinement model
   olx_atoms = olexex.OlexRefinementModel()
   unit_cell = olx_atoms.getCell()
-  restraints_iter=olx_atoms.restraints_iterator()
   constraints_iter=None
   space_group = "hall: "+str(olx.xf.au.GetCellSymm("hall"))
 
