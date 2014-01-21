@@ -127,6 +127,7 @@
     <cmd5 "storeparam startup file.relativePath(filefull())">
     <cmd6 "storeparam last_version GetVar(last_version)">
     <cmd7 "stop logging">
+    <cmd8 "flush history">
   >
  >
 >
@@ -896,6 +897,18 @@
     >
     <cmd
       <cmd1 "flush output %1">
+      <cmd2 "exec -o getvar(defeditor) DataDir()/%1">
+    >
+  >
+>
+
+<history help='Shows previously typed commands'
+  <body
+    <args
+      <arg1 name="file_name" def="history.txt">
+    >
+    <cmd
+      <cmd1 "flush history %1">
       <cmd2 "exec -o getvar(defeditor) DataDir()/%1">
     >
   >
