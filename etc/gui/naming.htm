@@ -70,12 +70,12 @@ $spy.MakeHoverButton('button_small-name',"guinames_m")
 
 <!-- THIRD ROW -->
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MATCH_NAMING';help_ext=Match-Naming;1 -->
-  <td name=HREF_EQUIVIVALENT_FRAGMENTS>
-    <a href="match sel -n=html.GetValue('MATCH_NAME_SUFFIX')">
+  <td>
+    <a href="match sel -n=html.GetValue('MATCH_NAME_SUFFIX') -i=html.GetState(MATCH_NAME_INVERT)">
     %Equivalent Fragments% (Z' > 1)</a>
   </td>
   <td>%Suffix%</td>
-  <td name=MATCH_NAME_SUFFIX>
+  <td>
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="text"
@@ -88,7 +88,11 @@ $spy.MakeHoverButton('button_small-name',"guinames_m")
     >
     </font>
   </td>
+  <td>%Invert for matching%</td>
+  <td align="right">$+
+    html.Snippet("gui/snippets/input-checkbox", "name=MATCH_NAME_INVERT",
+     "manage=true")
+   $-</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
