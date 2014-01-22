@@ -246,7 +246,7 @@ Freeze(false)>>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='START_OLEX2_IN';help_ext=Modules-Update_Notification;1 -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MODULE-UPDATE';help_ext=Modules-Update_Notification;1 -->
   <td width='23%'><b>%Modules update%:</b></td>
   <td width='55%'>
     Display a notification dialogue when module updates available
@@ -258,5 +258,20 @@ Freeze(false)>>
    $-</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='UNITCELL_RENDERING';help_ext=Unitcell-rendering;1 -->
+  <td width='33%'><b>%Unit cell rendering%:</b></td>
+  <td width='16%'>
+    <a href="cell.Drawstyle cone">Cone</a>
+  </td>
+  <td width='16%'>
+    <a href="cell.Drawstyle line">Line</a>
+  </td>
+  <td>%Width%:</td>
+  <td width="22%" align='right'>$+
+    html.Snippet("gui/snippets/input-combo", "name=unitcell_width",
+     "items='1;2;3;4;5'", "value=cell.Thickness()",
+     "onchange=cell.Thickness(html.GetValue('~name~'))")
+   $-</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
