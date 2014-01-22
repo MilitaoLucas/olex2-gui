@@ -85,17 +85,17 @@ olex.registerFunction(GetFolderList, False, "gui")
 #'static' class
 class ImageListener_:
   listeners = []
-  
+
   def Register(self, listener):
     ImageListener.listeners.append(listener)
-    
+
   def Unregister(self, listener):
     ImageListener.listeners.remove(listener)
-    
+
   def OnChange(self):
     for i in ImageListener.listeners:
       i()
-  
+
 ImageListener = ImageListener_()
 
 
@@ -105,6 +105,10 @@ def do_sort():
     OV.GetParam("user.sorting.cat2", ''),
     OV.GetParam("user.sorting.cat3", ''),
     OV.GetParam("user.sorting.cat4", '')))
+  if olx.html.GetState('atom_sequence_inplace') == 'true':
+      args[0] += 'w'
+  elif olx.html.GetState('atom_sequence_first') == 'true':
+      args[0] += 'f'
   if OV.GetParam("user.sorting.h", False):
     args[0] += 'h'
   args += olx.GetVar("sorting.atom_order", "").split()
