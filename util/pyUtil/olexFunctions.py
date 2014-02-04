@@ -499,7 +499,7 @@ class OlexFunctions(inheritFunctions):
       try:
         retVal = f(*args, **kwds)
       except Exception, ex:
-        print >> sys.stderr, "An error occured running the function/macro %s" %(f.__name__)
+        print >> sys.stderr, "An error occurred running the function/macro %s" %(f.__name__)
         sys.stderr.formatExceptionInfo()
         retVal = ''
       return retVal
@@ -515,7 +515,7 @@ class OlexFunctions(inheritFunctions):
         try:
           retVal = f(*args, **kwds)
         except Exception, ex:
-          print >> sys.stderr, "An error occured running the function/macro %s" %(f.__name__)
+          print >> sys.stderr, "An error occurred running the function/macro %s" %(f.__name__)
           sys.stderr.formatExceptionInfo()
           retVal = ''
         #retVal = a.runcall(f, *args, **kwds)
@@ -537,7 +537,7 @@ class OlexFunctions(inheritFunctions):
         try:
           retVal = a.runcall(f, *args, **kwds)
         except Exception, ex:
-          print >> sys.stderr, "An error occured running the function/macro %s" %(f.__name__)
+          print >> sys.stderr, "An error occurred running the function/macro %s" %(f.__name__)
           sys.stderr.formatExceptionInfo()
           retVal = ''
         #retVal = cProfile.runctx('f(*args, **kwds)', {'f':f, 'args':args, 'kwds':kwds}, {}, filename="olex.prof")
@@ -840,6 +840,17 @@ class OlexFunctions(inheritFunctions):
     olx.html.SetBorders(pop_name,border)
     OV.cmd(pstr)
     olx.html.SetBorders(pop_name,border)
+
+  def getCompatibleProgramName(self, name):
+    prgs = {'ShelXS-2013' : 'ShelXS',
+            'ShelXS86' : 'ShelXS',
+            'smtbx-solve' : 'olex2.solve',
+            'ShelXL-2013' : 'ShelXL',
+            'ShelXL-2012' : 'ShelXL',
+            'ShelXLMP-2012' : 'ShelXL',
+            'smtbx-refine' : 'olex2.refine'
+            }
+    return prgs.get(name, name)
 
 
 def GetParam(variable, default=None):

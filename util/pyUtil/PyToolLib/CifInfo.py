@@ -434,8 +434,7 @@ class ExtractCifInfo(CifTools):
     full_references = [self.olex2_reference]
     if active_solution is not None and active_solution.is_solution:
       ## Backwards Compatibility
-      if active_solution.program == "smtbx-solve":
-        active_solution.program = "olex2.solve"
+      active_solution.program = OV.getCompatibleProgramName(active_solution.program)
       ## END
       try:
         prg = self.SPD.programs[active_solution.program]
@@ -453,13 +452,12 @@ class ExtractCifInfo(CifTools):
         '_computing_structure_solution': solution_reference,
         '_atom_sites_solution_primary': atom_sites_solution_primary
       }, force = force)
-    
+
     active_node = History.tree.active_node
 
     if active_node is not None and not active_node.is_solution:
       ## Backwards Compatibility
-      if active_node.program == "smtbx-refine":
-        active_node.program = "olex2.refine"
+      active_node.program = OV.getCompatibleProgramName(active_node.program)
       ## END
       try:
         prg = self.RPD.programs[active_node.program]

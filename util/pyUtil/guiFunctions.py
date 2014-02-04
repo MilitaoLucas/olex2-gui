@@ -25,14 +25,14 @@ class GuiFunctions(object):
       sys.stderr.formatExceptionInfo()
       retStr = None
     return retStr
-  
+
   def IsControl(self, ctrl_name):
     try:
       return bool(olex_gui.IsControl(ctrl_name))
     except Exception, ex:
       print >> sys.stderr, "An error occured."
       sys.stderr.formatExceptionInfo()
-      
+
   def TranslatePhrase(self, text):
     try:
       retStr = olx.TranslatePhrase(text)
@@ -41,31 +41,31 @@ class GuiFunctions(object):
       sys.stderr.formatExceptionInfo()
       retStr = None
     return retStr
-  
+
   def UpdateHtml(self, html_name=''):
     olx.html.Update(html_name)
-    
+
   def HtmlLoad(self, path):
     olx.html.Load(path)
-    
+
   def HtmlDefineControl(self, d):
     olx.html.DefineControl('%(name)s %(type)s -v=%(value)s -i=%(items)s' %d)
-    
+
   def Cursor(self, state="", text=""):
     if state:
       olx.Cursor(state, text)
     else:
       olx.Cursor()
-      
+
   def Refresh(self):
     olx.Refresh()
-      
+
   def CreateBitmap(self, bitmap):
     olx.CreateBitmap(bitmap, bitmap, r=True)
-    
+
   def DeleteBitmap(self, bitmap):
     olx.DeleteBitmap('%s' %bitmap)
-    
+
   def Listen(self, listenFile):
     pass
     #olx.Listen(listenFile)
@@ -124,33 +124,33 @@ class NoGuiFunctions(object):
     print '%s:' %title
     print contentText
     return contentText
-  
+
   def Alert(self, title, text, buttons=None, tickboxText=None):
     return ''
-  
+
   def UpdateHtml(self):
     return ''
-  
+
   def HtmlLoad(self, path):
     return ''
-    
+
   def HtmlDefineControl(self, d):
     return ''
 
   def Cursor(self, state=None, text=None):
     return ''
-  
+
   def CreateBitmap(self, bitmap):
     return ''
-  
+
   def DeleteBitmap(self, bitmap):
     return ''
-  
+
   def Listen(self, listenFile):
     return ''
-  
+
   def TranslatePhrase(self,text):
     return ''
-  
+
   def Refresh(self):
     return ''
