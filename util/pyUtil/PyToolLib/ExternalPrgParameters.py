@@ -70,6 +70,7 @@ class Program(object):
 class Method(object):
   command_line_options = None
   failure = False
+  running = False
 
   def __init__(self, phil_object):
     self.phil_index = phil_interface.phil_handler(phil_object)
@@ -91,13 +92,20 @@ class Method(object):
     assert 0, 'do_run must be defined!'
 
   def run(self, RunPrgObject):
-    if RunPrgObject.program.phil_entry_name:
-      name = "snum.%s.%s.command_line" %(
-        RunPrgObject.program.program_type, RunPrgObject.program.phil_entry_name)
-      self.command_line_options = OV.GetParam(name, None)
-    else:
-      self.command_line_options = None
-    self.do_run(RunPrgObject)
+    if Method.running:
+      return False
+    Method.running = True
+    try:
+      if RunPrgObject.program.phil_entry_name:
+        name = "snum.%s.%s.command_line" %(
+          RunPrgObject.program.program_type, RunPrgObject.program.phil_entry_name)
+        self.command_line_options = OV.GetParam(name, None)
+      else:
+        self.command_line_options = None
+      self.do_run(RunPrgObject)
+      return True
+    finally:
+      Method.running = False
 
   def instructions(self):
     scope = self.phil_index.get_scope_by_name('instructions')
@@ -308,7 +316,7 @@ class Method_refinement(Method):
 
     if RunPrgObject.params.user.auto_insert_acta_stuff:
       radiation = olx.xf.exptl.Radiation()
-      
+
       # Check whether these are present. If so, do nothing.
       more = olx.Ins('MORE')
       if more == "n/a":
@@ -381,7 +389,7 @@ class Method_shelx(Method):
       raise RuntimeError(
         'you may be using an outdated version of %s' %(prgName))
     olx.WaitFor('process') # uncomment me!
-    
+
     additions = ['', '_a', '_b', '_c', '_d', '_e']
     for add in additions:
       p = "%s%s.res" %(xl_ins_filename, add)
@@ -393,7 +401,7 @@ class Method_shelx(Method):
           break
       else:
         continue
-    olx.User("%s" %RunPrgObject.filePath)
+    olx.User(RunPrgObject.filePath)
 
 
 class Method_shelx_solution(Method_shelx, Method_solution):
@@ -740,11 +748,11 @@ class Method_Superflip(Method_solution):
     }
     for k,v in defaults.iteritems():
       olx.SetVar("%s.%s" %(prefix,k), v)
-    
+
 
   def pre_solution(self, RunPrgObject):
     pass
-  
+
   def create_input(self):
     self.derive_symmetry = olx.GetVar('settings.superflip.symmetry.search') != 'no' and\
           olx.GetVar('settings.superflip.symmetry.derive') == 'use'
@@ -776,7 +784,7 @@ class Method_Superflip(Method_solution):
     else:
       input.append('cell ' + olx.xf.au.GetCell().replace(',', ' '))
     input.append('lambda %s' %olx.xf.exptl.Radiation())
-    
+
     input.append('symmetry')
     if self.derive_symmetry:
       input.append("+X +Y +Z")
@@ -784,15 +792,15 @@ class Method_Superflip(Method_solution):
       for i in sg_info['MatricesAll']:
         input.append(olex_core.MatrixToString(i))
     input.append('endsymmetry')
-    
+
     input.append('centers')
     input.append("0 0 0")
     if (not self.derive_symmetry) or (olx.GetVar('settings.superflip.use_centering') == 'true'):
       for i in sg_info['Lattice']['Translations']:
         input.append("%s %s %s" %i)
     input.append('endcenters')
-      
-      
+
+
     v = olx.GetVar('settings.superflip.repeatmode')
     if v == 'trials':
       input.append("repeatmode %s" %olx.GetVar('settings.superflip.repeatmode.trials'))
@@ -902,7 +910,7 @@ class Method_Superflip(Method_solution):
         finally:
           if OV.HasGUI():
             olx.Freeze(freeze_status)
-          
+
   def post_solution(self, RunPrgObject):
     if olx.GetVar('settings.superflip.cleanup') == 'true':
       for f in self.to_cleanup:
@@ -911,7 +919,7 @@ class Method_Superflip(Method_solution):
             os.remove(f)
           except:
             print("Faield to remove: %s" %f)
-    
+
 class Method_SIR(Method_solution):
 
   def do_run(self, RunPrgObject):
@@ -1043,15 +1051,15 @@ def defineExternalPrograms():
     reference="Sheldrick, G.M. (2008). Acta Cryst. A64, 112-122",
     brief_reference="Sheldrick, 2008",
     execs=["shelxs.exe", "shelxs"])
-  ShelXS13 = Program(
-    name='ShelXS-2013',
+  ShelXS97 = Program(
+    name='ShelXS-1997',
     program_type='solution',
     author="G.M.Sheldrick",
     reference=ShelXS.reference,
     brief_reference=ShelXS.brief_reference,
-    execs=["shelxs13.exe", "shelxs13"])
+    execs=["shelxs97.exe", "shelxs97"])
   ShelXS86 = Program(
-    name='ShelXS86',
+    name='ShelXS-1986',
     program_type='solution',
     author="G.M.Sheldrick",
     reference=ShelXS.reference,
@@ -1078,13 +1086,13 @@ def defineExternalPrograms():
     reference=ShelXS.reference,
     brief_reference=ShelXS.brief_reference,
     execs=["shelxd.exe", "shelxd"])
-  ShelXD13 = Program(
-    name='ShelXD-2013',
+  ShelXD97 = Program(
+    name='ShelXD-1997',
     program_type='solution',
     author="G.M.Sheldrick",
     reference=ShelXS.reference,
     brief_reference=ShelXS.brief_reference,
-    execs=["shelxd13.exe", "shelxd13"])
+    execs=["shelxd97.exe", "shelxd97"])
   XM = Program(
     name='XM',
     program_type='solution',
@@ -1164,9 +1172,9 @@ Palatinus et al., 2012""",
   ShelXS.addMethod(direct_methods)
   ShelXS.addMethod(patterson)
   ShelXS.addMethod(texp)
-  ShelXS13.addMethod(direct_methods)
-  ShelXS13.addMethod(patterson)
-  ShelXS13.addMethod(texp)
+  ShelXS97.addMethod(direct_methods)
+  ShelXS97.addMethod(patterson)
+  ShelXS97.addMethod(texp)
   ShelXS86.addMethod(direct_methods)
   ShelXS86.addMethod(patterson)
   ShelXS86.addMethod(texp)
@@ -1175,7 +1183,7 @@ Palatinus et al., 2012""",
   XS.addMethod(texp)
   XT.addMethod(direct_methods)
   ShelXD.addMethod(dual_space)
-  ShelXD13.addMethod(dual_space)
+  ShelXD97.addMethod(dual_space)
   XM.addMethod(dual_space)
   smtbx_solve.addMethod(charge_flipping)
   SIR97.addMethod(sir97_dm)
@@ -1198,27 +1206,13 @@ Palatinus et al., 2012""",
     reference=ShelXS.reference,
     brief_reference=ShelXS.brief_reference,
     execs=["shelxl.exe", "shelxl"])
-  ShelXL12 = Program(
-    name='ShelXL-2012',
+  ShelXL97 = Program(
+    name='ShelXL-1997',
     program_type='refinement',
     author="G.M.Sheldrick",
     reference=ShelXS.reference,
     brief_reference=ShelXS.brief_reference,
-    execs=["shelxl12.exe", "shelxl12"])
-  ShelXLMP12 = Program(
-    name='ShelXLMP-2012',
-    program_type='refinement',
-    author="G.M.Sheldrick",
-    reference=ShelXS.reference,
-    brief_reference=ShelXS.brief_reference,
-    execs=["shelxl_mp12.exe", "shelxl_mp12"])
-  ShelXL13 = Program(
-    name='ShelXL-2013',
-    program_type='refinement',
-    author="G.M.Sheldrick",
-    reference=ShelXS.reference,
-    brief_reference=ShelXS.brief_reference,
-    execs=["shelxl13.exe", "shelxl13"])
+    execs=["shelxl97.exe", "shelxl97"])
   XL = Program(
     name='XL',
     program_type='refinement',
@@ -1233,8 +1227,8 @@ Palatinus et al., 2012""",
     reference=ShelXS.reference,
     brief_reference=ShelXS.brief_reference,
     execs=["xlmp.exe", "xlmp"])
-  ShelXH = Program(
-    name='ShelXH',
+  ShelXH97 = Program(
+    name='ShelXH-1997',
     program_type='refinement',
     author="G.M.Sheldrick",
     reference=ShelXS.reference,
@@ -1263,7 +1257,7 @@ Palatinus et al., 2012""",
   )
   
   RPD = ExternalProgramDictionary()
-  for prg in (ShelXL, ShelXL12, ShelXLMP12, ShelXL13, XL, XLMP, ShelXH, XH, ShelXL_ifc):
+  for prg in (ShelXL, ShelXL97, XL, XLMP, ShelXH97, XH, ShelXL_ifc):
     prg.addMethod(least_squares)
     prg.addMethod(cgls)
     prg.phil_entry_name = "ShelXL"
@@ -1273,7 +1267,7 @@ Palatinus et al., 2012""",
   RPD.addProgram(smtbx_refine)
 
   SPD = ExternalProgramDictionary()
-  for prg in (ShelXS, ShelXS13, ShelXS86, XS, XT, ShelXD, ShelXD13, XM, smtbx_solve, SIR97, SIR2002, SIR2004, SIR2008, SIR2011, Superflip):
+  for prg in (ShelXS, ShelXS97, ShelXS86, XS, XT, ShelXD, ShelXD97, XM, smtbx_solve, SIR97, SIR2002, SIR2004, SIR2008, SIR2011, Superflip):
     SPD.addProgram(prg)
 
 
