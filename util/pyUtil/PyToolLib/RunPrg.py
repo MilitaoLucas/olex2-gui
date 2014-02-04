@@ -12,8 +12,11 @@ OV = OlexFunctions()
 import ExternalPrgParameters
 
 from CifInfo import MergeCif
+import TimeWatch
 
 class RunPrg(ArgumentParser):
+  running = False
+  
   def __init__(self):
     super(RunPrg, self).__init__()
     self.demote = False
@@ -53,12 +56,23 @@ class RunPrg(ArgumentParser):
       self.method.unregisterCallback()
 
   def run(self):
-    res = self.method.run(self)
-    if not self.method.failure:
-      self.runAfterProcess()
-    self.endRun()
-    sys.stdout.refresh = False
-    sys.stdout.graph = False
+    if RunPrg.running:
+      print("Already running. Please wait...")
+      return
+    RunPrg.running = True
+    try:
+      token = TimeWatch.start("Running %s" %self.program.name)
+      res = self.method.run(self)
+      if res == False:
+        return False
+      if not self.method.failure:
+        self.runAfterProcess()
+      self.endRun()
+      TimeWatch.finish(token)
+      sys.stdout.refresh = False
+      sys.stdout.graph = False
+    finally:
+      RunPrg.running = False
 
   def which_shelx(self, type="xl"):
     a = olexex.which_program(type)
@@ -274,6 +288,7 @@ class RunSolutionPrg(RunPrg):
 
 
 class RunRefinementPrg(RunPrg):
+  running = False
   def __init__(self):
     RunPrg.__init__(self)
     self.bitmap = 'refine'
@@ -283,22 +298,29 @@ class RunRefinementPrg(RunPrg):
     self.run()
 
   def run(self):
-    self.startRun()
-    OV.File(u"%s/%s.ins" %(OV.FilePath(),self.original_filename))
+    if RunRefinementPrg.running:
+      print("Already running. Please wait...")
+      return False
+    RunRefinementPrg.running = True
     try:
-      self.setupRefine()
-      self.setupFiles()
-    except Exception, err:
-      print err
-      self.endRun()
-      return
-    if self.terminate:
-      self.endRun()
-      return
+      self.startRun()
+      OV.File(u"%s/%s.ins" %(OV.FilePath(),self.original_filename))
+      try:
+        self.setupRefine()
+        self.setupFiles()
+      except Exception, err:
+        print err
+        self.endRun()
+        return False
+      if self.terminate:
+        self.endRun()
+        return
+      if self.params.snum.refinement.graphical_output and self.HasGUI:
+        self.method.observe(self)
+      RunPrg.run(self)
+    finally:
+      RunRefinementPrg.running = False
 
-    if self.params.snum.refinement.graphical_output and self.HasGUI:
-      self.method.observe(self)
-    RunPrg.run(self)
 
   def setupRefine(self):
     self.method.pre_refinement(self)
