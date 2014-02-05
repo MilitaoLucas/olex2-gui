@@ -2713,6 +2713,8 @@ class HealthOfStructure():
       counter += 1
       if self.scope == "hkl":
         value = self.hkl_stats[item]
+        if type(value) == tuple and len(value) > 0:
+          value = value[0]
       elif self.scope == "refinement":
         if is_CIF:
           try:
