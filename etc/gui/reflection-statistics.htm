@@ -2,12 +2,26 @@
 
 <!-- FIRST ROW -->
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='REFLECTION_FILE';help_ext=reflection-file;1 -->
-  <td name=REFLECTION_FILE_LABEL width="45%">
+  <td name=REFLECTION_FILE_LABEL width="35%">
     <b>%Choose Reflection File%</b>
   </td>
-  <td name=REFLECTION_FILE_INPUT align='right' width="55%">
+  <td name=REFLECTION_FILE_INPUT align='left' width="35%">
 <!-- #include reflection-file gui\snippets\snippet-reflection-file.htm;1; -->
   </td>
+
+  <td name=SHOW_DIAGNOSTICS align='right' width="25%">
+  Pin Summary
+  </td>
+
+  <td name=SHOW_DIAGNOSTICS align='right' width="5%">
+    $+
+    html.Snippet("gui/snippets/input-checkbox", "name=SHOW_DIAGNOSTICS",
+    "checked=spy.GetParam('diagnostics.pin_scopes')",
+    "onclick=spy.SetParam('diagnostics.pin_scopes', html.GetState('~name~'))>>spy.make_HOS(True)>>html.update")
+    $-
+  </td>
+
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- SECOND ROW -->

@@ -38,6 +38,8 @@ GuiGraphChooserComboExists = False
 global PreviousHistoryNode
 PreviousHistoryNode = None
 
+silent = True
+
 
 class Graph(ImageTools):
   def __init__(self):
@@ -1321,7 +1323,7 @@ class Analysis(Graph):
   def make_analysis_image(self):
     if not self.graphInfo:
       image_location = "%s/%s.png" %(self.filepath, self.item)
-      self.im.save(image_location, "PNG")
+      self.im.save(image_location, "PNG", 0)
       return
 
     if self.item == "K":
@@ -1528,11 +1530,13 @@ class WilsonPlot(Analysis):
     self.make_empty_graph(axis_x = True)
     self.draw_pairs(reverse_y = True)
     grad = self.make_gradient_box(size = ((int(self.imX * 0.64), int(self.imY * 0.1))))
-    size = ((self.im.size[0]), (self.im.size[1] + grad.size[1]))
+    #size = ((self.im.size[0]), (self.im.size[1] + grad.size[1]))
+    size = ((self.im.size[0]), self.im.size[1])
     colour = self.pageColour
     new = Image.new('RGB', size, colour)
     new.paste(self.im, (0,0))
-    new.paste(grad, (int(self.xSpace+self.bSides),int(self.im.size[1]-20)))
+#    new.paste(grad, (int(self.xSpace+self.bSides),int(self.im.size[1]-20)))
+    new.paste(grad, (int(self.xSpace+self.bSides),int(self.im.size[1] - grad.size[1])))
     draw = ImageDraw.Draw(new)
 
     imX, imY = new.size
@@ -1546,8 +1550,10 @@ class WilsonPlot(Analysis):
     text.append("<|E^2-1|> = %.3f" %float(metadata.get("<|E^2-1|>", 0)))
     text.append(r"%%|E| > 2 = %.3f"%float(metadata.get(r"%|E| > 2", 0)))
 
+#    left = grad.size[0] + self.xSpace + imX * 0.04
+#    top = self.im.size[1] - imY * 0.02
     left = grad.size[0] + self.xSpace + imX * 0.04
-    top = self.im.size[1] - imY * 0.02
+    top = self.im.size[1] - grad.size[1] + 18
     top_original = top
     i = 0
     for txt in text:
@@ -2581,7 +2587,6 @@ class HealthOfStructure():
     self.stats = None
     self.scale = OV.GetParam('diagnostics.scale')
     self.scope = "hkl"
-
   def get_HOS_d(self):
     try:
       if self.initialise_HOS():
@@ -2592,15 +2597,26 @@ class HealthOfStructure():
 
   def make_HOS(self, force=False):
     force = bool(force)
+    self.scopes = OV.GetParam('diagnostics.scopes')
     self.scope = OV.GetParam('snum.current_process_diagnostics')
     if timing:
       import time
       t1 = time.time()
 
     res = self.initialise_HOS(force=force)
+
+    self.hos_text = ""
     if res[0]:
-      self.summarise_HOS()
-      self.make_HOS_html()
+      if OV.GetParam('diagnostics.pin_scopes'):
+        for scope in self.scopes:
+          self.scope = scope
+          self.summarise_HOS()
+          self.make_HOS_html()
+      else:
+        self.summarise_HOS()
+        self.make_HOS_html()
+      OV.write_to_olex("hos.htm",self.hos_text)
+
     elif res[1]:
       OV.write_to_olex("hos.htm", "")
       OV.write_to_olex("reflection-stats-summary.htm" , "n/a")
@@ -2682,7 +2698,7 @@ class HealthOfStructure():
         except:
           pass
       d.setdefault(item, value)
-      txt += "<tr><td>%s</td><td>%s</td><tr>" %(item, value)
+      txt += "<tr><td>%s</td><td>%s</td></tr>" %(item, value)
     OV.write_to_olex("reflection-stats-summary.htm" , txt)
     return d
 
@@ -2721,7 +2737,7 @@ class HealthOfStructure():
             value = float(olx.Cif(item))
           except:
             value = None
-          item = item.replace('/', '_over_') 
+          item = item.replace('/', '_over_')
         else:
           value = OV.GetParam('snum.refinement.%s' %item)
 
@@ -2786,11 +2802,11 @@ class HealthOfStructure():
     if self.scope == "hkl":
       completeness = self.hkl_stats['Completeness']
       if type(completeness) == tuple and len(completeness) > 1:
-        txt = """<table width='100%%' cellpadding='0' cellspacing='0'><tr><td>%s</td></tr>
+        txt = """<table width='100%%' cellpadding='1' cellspacing='1'><tr><td>%s</td></tr>
           <tr><td><b>Twin component completeness (in P1): %s</b></td></tr></table>""" %(
             txt, ", ".join(["%.2f%%%%" %(x*100) for x in completeness]))
     txt = txt.decode('utf-8')
-    OV.write_to_olex("hos.htm",txt)
+    self.hos_text += txt
     OV.SetParam('snum.hkl.hkl_stat_file', OV.HKLSrc())
 
 
@@ -2804,10 +2820,10 @@ class HealthOfStructure():
     if c_width < 100:
       c_width = OV.GetParam('gui.htmlpanelwidth')
 
-    width =  c_width - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - 2
+    width =  c_width - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - 1
 
     boxWidth = (width/n) * scale
-    boxHeight = OV.GetParam('gui.timage.h1.height') * scale
+    boxHeight = OV.GetParam('gui.timage.h3.height') * scale
     boxHalf = 3 * scale
     if type(colour) != str:
       colour = colour.hexadecimal
@@ -2816,7 +2832,10 @@ class HealthOfStructure():
     im = Image.new('RGBA', (boxWidth,boxHeight), (0,0,0,0))
     draw = ImageDraw.Draw(im)
     try:
-      value_raw = float(value_raw)
+      if type(value_raw) == tuple:
+        value_raw = float(value_raw[0])
+      else:
+        value_raw = float(value_raw)
     except:
       value_raw = 0
     op = OV.GetParam('diagnostics.hkl.%s.op' %item)
@@ -2884,15 +2903,15 @@ class HealthOfStructure():
       font_size = 14
       font_size_s = 8
       x = 2
-      y_s = 2 * scale
+      y_s = 1 * scale #top gap for the small writing
       y = 1 * scale
 
     else:
       font_size = 17
       font_size_s = 10
       x = 2
-      y = 2 * scale
-      y_s = 1 * scale
+      y = int(boxHeight/45 * scale)
+      y_s = 0 * scale
 
     font = IT.registerFontInstance("Vera", font_size * scale)
     font_s = IT.registerFontInstance("Vera", font_size_s * scale)
@@ -2900,7 +2919,9 @@ class HealthOfStructure():
     ## ADD THE Key
 
     if item == "MinD":
-      fill = '#555555'
+#      fill = self.get_bg_colour(item, value_raw)
+#      fill = '#555555'
+      fill = '#ffffff'
     else:
       fill = '#ffffff'
     draw.text((x, y_s), "%s" %display, font=font_s, fill=fill)
@@ -2938,8 +2959,8 @@ class HealthOfStructure():
 
   def get_bg_colour(self, item, val):
 
-    if item == "MinD":
-      return "#ffdf09"
+    #if item == "MinD":
+      #return "#ffdf09"
 
     op = OV.GetParam('diagnostics.%s.%s.op' %(self.scope, item))
     if op == "between":
