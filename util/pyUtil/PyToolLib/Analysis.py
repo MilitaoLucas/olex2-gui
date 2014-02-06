@@ -2802,7 +2802,7 @@ class HealthOfStructure():
     if self.scope == "hkl":
       completeness = self.hkl_stats['Completeness']
       if type(completeness) == tuple and len(completeness) > 1:
-        txt = """<table width='100%%' cellpadding='1' cellspacing='1'><tr><td>%s</td></tr>
+        txt = """<table width='100%%' cellpadding='0' cellspacing='0'><tr><td>%s</td></tr>
           <tr><td><b>Twin component completeness (in P1): %s</b></td></tr></table>""" %(
             txt, ", ".join(["%.2f%%%%" %(x*100) for x in completeness]))
     txt = txt.decode('utf-8')
@@ -2832,10 +2832,7 @@ class HealthOfStructure():
     im = Image.new('RGBA', (boxWidth,boxHeight), (0,0,0,0))
     draw = ImageDraw.Draw(im)
     try:
-      if type(value_raw) == tuple:
-        value_raw = float(value_raw[0])
-      else:
-        value_raw = float(value_raw)
+      value_raw = float(value_raw)
     except:
       value_raw = 0
     op = OV.GetParam('diagnostics.hkl.%s.op' %item)
