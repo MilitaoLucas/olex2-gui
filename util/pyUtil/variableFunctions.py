@@ -22,7 +22,7 @@ import libtbx.phil.command_line
 
 
 def getOlex2VersionInfo():
-  txt = 'Olex2, Durham University (compiled %s)' %OV.GetCompilationInfo()
+  txt = 'Olex2, OlexSys Ltd (compiled %s)' %OV.GetCompilationInfo()
   return txt
 
 def getDefaultPrgMethod(prgType):
@@ -219,12 +219,16 @@ def LoadStructureParams():
     structure_phil = VVD_to_phil()
   if structure_phil is not None:
     # XXX Backwards compatibility 2010-04-08
-    structure_phil = structure_phil.replace('smtbx-refine', 'olex2.refine')\
-                                   .replace('smtbx-solve', 'olex2.solve')
+    structure_phil = structure_phil\
+      .replace('smtbx-refine', 'olex2.refine')\
+      .replace('smtbx-solve', 'olex2.solve')
+
     olx.phil_handler.update(phil_string=structure_phil)
-    solutionPrg = olx.phil_handler.get_validated_param('snum.solution.program')
+    solutionPrg = OV.getCompatibleProgramName(
+      olx.phil_handler.get_validated_param('snum.solution.program'))
     solutionMethod = olx.phil_handler.get_validated_param('snum.solution.method')
-    refinementPrg = olx.phil_handler.get_validated_param('snum.refinement.program')
+    refinementPrg = OV.getCompatibleProgramName(
+      olx.phil_handler.get_validated_param('snum.refinement.program'))
     refinementMethod = olx.phil_handler.get_validated_param('snum.refinement.method')
   #
   # Start backwards compatibility  2010-06-18

@@ -413,10 +413,10 @@ class Node(object):
     OV.SetParam('snum.refinement.last_R1',self.R1)
     OV.SetParam('snum.last_wR2',self.wR2)
     if self.is_solution:
-      OV.set_solution_program(self.program, self.method)
+      OV.set_solution_program(OV.getCompatibleProgramName(self.program), self.method)
     else:
       if self.program != 'Unknown':
-        OV.set_refinement_program(self.program, self.method)
+        OV.set_refinement_program(OV.getCompatibleProgramName(self.program), self.method)
 
   def __setstate__(self, state):
     # XXX backwards compatibility 2010-12-12
