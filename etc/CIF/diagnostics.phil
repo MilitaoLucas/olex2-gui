@@ -8,7 +8,10 @@ diagnostics {
     .type = bool
   scale = 2
     .type = int
-    
+  scopes = hkl refinement
+    .type = strings
+  pin_scopes = False
+    .type = bool
   refinement{
     max_shift_site{
       op = "smaller"
@@ -52,7 +55,6 @@ diagnostics {
         .type = str
     }
 
-
     max_shift_u{
       op = "smaller"
         .type = str
@@ -92,7 +94,7 @@ diagnostics {
       top = 5
         .type = float
       href = sel Q1
-        .type = str      
+        .type = str
     }
     _refine_diff_density_max{
       op = "smaller"
@@ -132,7 +134,7 @@ diagnostics {
       top = -5
         .type = float
       href = echo "Please add PLAN -n to your ins file first"
-        .type = str      
+        .type = str
     }
     _refine_diff_density_min{
       op = "greater"
@@ -197,21 +199,33 @@ diagnostics {
         .type = str
     }
   }
-    
+
   hkl{
     MaxD{
       value_format= "2f"
         .type = str
       display = "d max"
         .type = str
-    }  
+    }
     MinD{
       value_format= "2f"
         .type = str
       display = "d min"
         .type = str
-    }  
-  
+      op = "smaller"
+        .type = str
+      grade1  = 0.70
+        .type = float
+      grade2 = 0.80
+        .type = float
+      grade3 = 0.82
+        .type = float
+      grade4 = 0.85
+        .type = float
+      top = 1.0
+        .type = float
+    }
+
     MeanIOverSigma{
       op = "greater"
         .type = str
