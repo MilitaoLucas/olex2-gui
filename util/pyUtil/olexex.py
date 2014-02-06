@@ -1022,9 +1022,7 @@ def get_refinement_methods(prg, scope='snum'):
   if prg == 'Auto':
     OV.SetParam("%s.refinement.method" %scope,'Auto')
     return 'Auto'
-  p = []
-  for method in RPD.programs[prg]:
-    p.append(method.name)
+  p = [x.name for x in RPD.programs[prg]]
   p.sort()
   for item in p:
     retval += "%s;" %item
