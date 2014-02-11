@@ -306,7 +306,7 @@ href='spy.gui.report.publication.remove_cif_from_merge_list(%s)>>html.Update'>
         styles = ["_%s.cif" %(s) for s in ['acta']]
         a = [f for f in a if not s in f for s in styles]
       if not a:
-        a = "" 
+        a = ""
       OV.SetParam('snum.report.merge_these_cifs', a)
       return
     copy_from = "%s/etc/CIF/cif_templates/%s.cif" %(OV.BaseDir(), value)
@@ -428,26 +428,58 @@ def advance_crystal_image(direction='forward'):
       continue
 OV.registerFunction(advance_crystal_image, False, 'gui.report')
 
-def get_crystal_image(p=None):
+def get_crystal_image(p=None,n=4,get_path_only=True):
   global images_zip
   global images_zip_name
   if not p:
-    current_image = OV.standardizePath(OV.GetParam('snum.report.crystal_image'))
+    current_image = OV.GetParam('snum.report.crystal_image')
+    if get_path_only:
+      if current_image:
+        return OV.standardizePath(current_image)
+      else:
+        return
   else:
     current_image = p
+    if get_path_only:
+      return p
+
   if '.vzs' in current_image:
+    have_zip = True
     splitbit = '.vzs/'
     directory = current_image.split(splitbit)[0] + splitbit.replace("/", "")
-    if not images_zip_name == OV.FileName():
-      import zipfile
-      images_zip = zipfile.ZipFile(directory, "r")
-      images_zip_name = OV.FileName()
-    filename = current_image.split(splitbit)[1]
-    content = images_zip.read(filename)
-    OlexVFS.write_to_olex("crystal_image.jpg", content)
-    return "crystal_image.jpg"
+    import zipfile
+    images_zip = zipfile.ZipFile(directory, "r")
+    images_zip_name = OV.FileName()
+    total = len(images_zip.namelist())
+    file_list = images_zip.filelist
   else:
-    return current_image
+    have_zip = False
+    import glob
+    path = OV.GetParam('snum.report.crystal_images_path')
+    if not path:
+      path = "\\".join(current_image.split("\\")[:-1])
+    file_list = glob.glob("%s/*.jpg" %path)
+    total = len(file_list)
+
+  for j in xrange(n):
+    pos = j * int(total/n)
+    while pos > total:
+      pos -= 1
+    filename = ""
+    while not filename.endswith('.jpg'):
+      if have_zip:
+        filename = file_list[pos].filename
+      else:
+        filename = file_list[pos]
+      pos += 1
+
+    if have_zip:
+      content = images_zip.read(filename)
+    else:
+      content = open(filename, 'rb').read()
+
+    OlexVFS.write_to_olex("crystal_image_%s.jpg" %j, content)
+  return "crystal_image.jpg"
 
 OV.registerFunction(get_crystal_image, False, 'gui.report')
 
@@ -455,9 +487,10 @@ def get_box_x_y(w, h):
   sz = [int(x) for x in olx.GetWindowSize().split(',')]
   y = (sz[3]-sz[1]-w)/2
   x = (sz[2]-sz[0]-w)/2
-  if x < 0: x = 0 
+  if x < 0: x = 0
   if y < 0: y = 0
   return x,y
 
+olex.registerFunction(get_crystal_image, False, "report")
 olex.registerFunction(get_report_title, False, "report")
 olex.registerFunction(ResolvePrograms, False, "report")
