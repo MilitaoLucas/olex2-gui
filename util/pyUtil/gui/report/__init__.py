@@ -461,24 +461,36 @@ def get_crystal_image(p=None,n=4,get_path_only=True):
     file_list = glob.glob("%s/*.jpg" %path)
     total = len(file_list)
 
+  file_list = sort_images_with_integer_names(file_list)
+
+  if n > total:
+    print "There are only %s images, and you wanted to see %s" %(total, n)
+    return
+
   for j in xrange(n):
     pos = j * int(total/n)
-    while pos > total:
-      pos -= 1
+    if pos > total:
+      pos = total - 1
     filename = ""
     while not filename.endswith('.jpg'):
+      if pos >= total:
+        filename = ""
+        break
       if have_zip:
         filename = file_list[pos].filename
       else:
         filename = file_list[pos]
       pos += 1
 
-    if have_zip:
-      content = images_zip.read(filename)
+    if filename:
+      if have_zip:
+        content = images_zip.read(filename)
+      else:
+        content = open(filename, 'rb').read()
+      OlexVFS.write_to_olex("crystal_image_%s.jpg" %j, content)
     else:
-      content = open(filename, 'rb').read()
+      break
 
-    OlexVFS.write_to_olex("crystal_image_%s.jpg" %j, content)
   return "crystal_image.jpg"
 
 OV.registerFunction(get_crystal_image, False, 'gui.report')
@@ -490,6 +502,29 @@ def get_box_x_y(w, h):
   if x < 0: x = 0
   if y < 0: y = 0
   return x,y
+
+def sort_images_with_integer_names(image_list):
+  l = []
+  max_char = 0
+  min_char = 1000
+  for path in image_list:
+    chars = len(path)
+    if chars > max_char:
+      max_char = chars
+    if chars < min_char:
+      min_char = chars
+    l.append(path)
+
+  if not l:
+    return None, None
+  def sorting_list(txt):
+    try:
+      cut = len(txt) - min_char + 1
+      return int(txt[-(cut + 4): -4])
+    except:
+      return 0
+  l.sort(key=sorting_list)
+  return l
 
 olex.registerFunction(get_crystal_image, False, "report")
 olex.registerFunction(get_report_title, False, "report")
