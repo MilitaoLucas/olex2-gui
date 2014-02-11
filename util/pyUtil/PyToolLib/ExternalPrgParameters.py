@@ -328,13 +328,7 @@ class Method_refinement(Method):
       if acta == "n/a":
         if radiation == "0.71073":
           OV.AddIns("ACTA 52")
-      #htab= olx.Ins('HTAB')
-      #if acta == "n/a":
-        #OV.AddIns("HTAB")
-
-      #Delete and then add again
-      olx.DelIns('CONF')
-      OV.AddIns('CONF')
+      OV.AddIns('CONF', quiet=True)
 
     if RunPrgObject.make_unique_names:
       pass
