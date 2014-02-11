@@ -79,10 +79,12 @@ def GetBitmapSize(px_changed=False):
 OV.registerFunction(GetBitmapSize,False,'gui.images')
 
 
-def MakeBitmapImage(notify_listener=True):
+def MakeBitmapImage(notify_listener=True, output_folder=None):
   from ImageTools import ImageTools
   IT = ImageTools()
   filefull, filename, fileext = GetImageFilename(image_type = "BITMAP")
+  if output_folder:
+    filefull = "%s/%s.%s" %(output_folder, filename, fileext)
   if not filefull:
     return
   resolution, filesize = GetBitmapSize()
@@ -140,8 +142,10 @@ def GetPRImageInstructions():
   ImageListener.OnChange()
 OV.registerFunction(GetPRImageInstructions,False,'gui.images')
 
-def GetPSImageInstructions(notify_listener=True):
+def GetPSImageInstructions(notify_listener=True, output_folder=None):
   filefull, filename, fileext = GetImageFilename(image_type = "PS")
+  if output_folder:
+    filefull = "%s/%s.%s" %(output_folder, filename, fileext)
   if not filefull:
     return
   OV.Cursor('busy','Please Wait. Making image %s.%s. This may take some time' %(filename, fileext))
