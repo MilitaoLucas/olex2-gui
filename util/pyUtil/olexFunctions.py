@@ -635,8 +635,8 @@ class OlexFunctions(inheritFunctions):
   def GetCellVolume(self):
     return olx.xf.au.GetCell()
 
-  def AddIns(self, instruction):
-    olx.AddIns(*instruction.split())
+  def AddIns(self, instruction, quiet=False):
+    olx.AddIns(*instruction.split(), q=quiet)
 
   def DelIns(self, instruction):
     olx.DelIns(instruction)
