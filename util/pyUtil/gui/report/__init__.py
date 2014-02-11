@@ -450,7 +450,6 @@ def get_crystal_image(p=None,n=4,get_path_only=True):
     import zipfile
     images_zip = zipfile.ZipFile(directory, "r")
     images_zip_name = OV.FileName()
-    total = len(images_zip.namelist())
     file_list = images_zip.filelist
   else:
     have_zip = False
@@ -459,37 +458,21 @@ def get_crystal_image(p=None,n=4,get_path_only=True):
     if not path:
       path = "\\".join(current_image.split("\\")[:-1])
     file_list = glob.glob("%s/*.jpg" %path)
-    total = len(file_list)
 
-  file_list = sort_images_with_integer_names(file_list)
+  file_list = sort_images_with_integer_names(file_list, '.jpg')
+  total = len(file_list)
 
   if n > total:
     print "There are only %s images, and you wanted to see %s" %(total, n)
     return
-
+  inc = int(total/n)
   for j in xrange(n):
-    pos = j * int(total/n)
-    if pos > total:
-      pos = total - 1
-    filename = ""
-    while not filename.endswith('.jpg'):
-      if pos >= total:
-        filename = ""
-        break
-      if have_zip:
-        filename = file_list[pos].filename
-      else:
-        filename = file_list[pos]
-      pos += 1
-
-    if filename:
-      if have_zip:
-        content = images_zip.read(filename)
-      else:
-        content = open(filename, 'rb').read()
-      OlexVFS.write_to_olex("crystal_image_%s.jpg" %j, content)
+    pos = j * inc
+    if have_zip:
+      content = images_zip.read(file_list[pos].filename)
     else:
-      break
+      content = open(file_list[pos], 'rb').read()
+    OlexVFS.write_to_olex("crystal_image_%s.jpg" %j, content)
 
   return "crystal_image.jpg"
 
@@ -503,11 +486,13 @@ def get_box_x_y(w, h):
   if y < 0: y = 0
   return x,y
 
-def sort_images_with_integer_names(image_list):
+def sort_images_with_integer_names(image_list, ending=None):
   l = []
   max_char = 0
   min_char = 1000
   for path in image_list:
+    if ending and not path.endswith(ending):
+      continue
     chars = len(path)
     if chars > max_char:
       max_char = chars
@@ -516,7 +501,7 @@ def sort_images_with_integer_names(image_list):
     l.append(path)
 
   if not l:
-    return None, None
+    return l
   def sorting_list(txt):
     try:
       cut = len(txt) - min_char + 1

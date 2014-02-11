@@ -23,7 +23,6 @@ from iotbx.cif import validation
 from libtbx.utils import format_float_with_standard_uncertainty
 olx.cif_model = None
 
-import gui.report
 import time
 global now
 now = time.time()
@@ -1062,8 +1061,8 @@ If more than one file is present, the path of the most recent file is returned b
       if OV.FileName() not in directory:
         print "Crystal images found, but crystal name not in path!"
         return None, None
-
-      l = gui.report.sort_images_with_integer_names(OV.ListFiles(os.path.join(directory, "*.jpg")))
+      from gui.report import report
+      l = report.sort_images_with_integer_names(OV.ListFiles(os.path.join(directory, "*.jpg")))
       OV.SetParam("snum.metacif.list_crystal_images_files", (l))
       setattr(self.metacifFiles, "list_crystal_images_files", (l))
       return l[0], l
@@ -1141,29 +1140,28 @@ If more than one file is present, the path of the most recent file is returned b
     olexdir = self.basedir
     versions = self.versions
     file = "%s/etc/site/cif_info.def" %self.basedir
-    rfile = open(file, 'r')
-    for line in rfile:
-      if line[:1] == "_":
-        versions["default"].append(line)
-      elif line[:1] == "=":
-        line = string.split(line, "=",3)
-        prgname = line[1]
-        versionnumber = line[2]
-        versiontext = line[3]
-        versions[prgname].setdefault(versionnumber, versiontext)
-    rfile.close()
+    with open(file, 'r') as rfile:
+      for line in rfile:
+        if line[:1] == "_":
+          versions["default"].append(line)
+        elif line[:1] == "=":
+          line = string.split(line, "=",3)
+          prgname = line[1]
+          versionnumber = line[2]
+          versiontext = line[3]
+          versions[prgname].setdefault(versionnumber, versiontext)
     return versions
 
 
   def get_computing_citation_d(self):
     file_path = "%s/etc/site/computing_citations.def" %self.basedir
-    rfile = open(file_path, 'r')
-    for line in rfile:
-      line = line.strip()
-      if not line or line.startswith("#"):
-        continue
-      li = line.split("::")
-      self.computing_citations_d.setdefault(li[0].strip(), li[1].strip())
+    with open(file_path, 'r') as rfile:
+      for line in rfile:
+        line = line.strip()
+        if not line or line.startswith("#"):
+          continue
+        li = line.split("::")
+        self.computing_citations_d.setdefault(li[0].strip(), li[1].strip())
 
 
 
