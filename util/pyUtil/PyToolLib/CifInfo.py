@@ -23,7 +23,7 @@ from iotbx.cif import validation
 from libtbx.utils import format_float_with_standard_uncertainty
 olx.cif_model = None
 
-
+import gui.report
 import time
 global now
 now = time.time()
@@ -1063,27 +1063,7 @@ If more than one file is present, the path of the most recent file is returned b
         print "Crystal images found, but crystal name not in path!"
         return None, None
 
-      l = []
-      max_char = 0
-      min_char = 1000
-      for path in OV.ListFiles(os.path.join(directory, "*.jpg")):
-        chars = len(path)
-        if chars > max_char:
-          max_char = chars
-        if chars < min_char:
-          min_char = chars
-        l.append(path)
-
-      if not l:
-        return None, None
-      def sorting_list(txt):
-        try:
-          cut = len(txt) - min_char + 1
-          return int(txt[-(cut + 4): -4])
-        except:
-          return 0
-
-      l.sort(key=sorting_list)
+      l = gui.report.sort_images_with_integer_names(OV.ListFiles(os.path.join(directory, "*.jpg")))
       OV.SetParam("snum.metacif.list_crystal_images_files", (l))
       setattr(self.metacifFiles, "list_crystal_images_files", (l))
       return l[0], l
