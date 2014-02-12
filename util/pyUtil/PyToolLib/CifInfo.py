@@ -757,15 +757,15 @@ class ExtractCifInfo(CifTools):
       if item.startswith("_computing"):
         d = {}
         longval = self.cif_block[item]
-        for string in self.computing_citations_d:
-          if string.lower() in longval.lower():
+        for str in self.computing_citations_d:
+          if str.lower() in longval.lower():
             _ = re.findall("\d{4}", longval)
             if not _:
               year = "?"
             else:
               year = _[0]
             d['year'] = year
-            shortval = self.computing_citations_d[string]%d
+            shortval = self.computing_citations_d[str]%d
             self.cif_block["_olex2%s_long" %item] = shortval
             self.cif_block["_olex2%s_long" %item] = longval
             break
