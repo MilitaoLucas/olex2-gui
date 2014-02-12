@@ -1,0 +1,36 @@
+#Crysalis :: CrysAlisPro (Agilent, %(year)s)
+#Cosmo :: Cosmo (Bruker, %(year)s)
+#Saint :: Saint (Bruker, %(year)s)
+
+
+olex2.solve, Bourhis :: olex2.solve (Bourhis et al., 2013)
+olex2.refine, Bourhis :: olex2.refine (Bourhis et al., 2013)
+
+superflip,Palatinus :: Superflip (L. Palatinus & G. Chapuis, 2007)
+
+shelxl,2013 :: ShelXL-2013 (Sheldrick, 2008)
+shelxl,97 :: ShelXL-97 (Sheldrick, 2008)
+shelxl :: ShelXL (Sheldrick, 2008)
+
+shelxs,2013 ::ShelXS-2013 (Sheldrick, 2008)
+shelxs,97 :: ShelXS-97 (Sheldrick, 2008)
+shelxs :: ShelXS (Sheldrick, 2008)
+
+shelxd,2013 ::ShelXD-2013 (Sheldrick, 2008)
+shelxd,97 :: ShelXD-97 (Sheldrick, 2008)
+shelxd :: ShelXD (Sheldrick, 2008)
+
+olex2,dolomanov :: Olex2 (Dolomanov et al., 2009)
+
+cosmo,1.61 :: COSMO (Bruker, V1.61, 2009)
+
+apex2,2008/2 :: APEX2 (Bruker, 2008/2)
+apex2,2013/1 :: APEX2 (Bruker, 2013/1)
+apex2,2013/3 :: APEX2 (Bruker, 2013/3)
+apex2,2014/1 :: APEX2 (Bruker, 2014/1)
+
+sadabs, :: SADABS
+
+xshell, :: XSHELL
+
+shelxtl, :: ShelXTL v6.10 (Sheldrick, 2008)

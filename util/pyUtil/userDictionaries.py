@@ -75,6 +75,7 @@ class LocalList:
       if diffractometer in ('?',''):
         diffractometer = OV.FileName(filepath)
         self.addToLocalList(diffractometer,'diffractometers')
+      self.dictionary['diffractometers'].setdefault(diffractometer, {'cif_def':'?'})
       self.dictionary['diffractometers'][diffractometer]['cif_def'] = filepath
       saveDict = {'diffractometers':self.dictionary['diffractometers']}
       saveLocalDictionary(saveDict)

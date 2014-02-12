@@ -7,6 +7,8 @@ import math
 
 import olx
 import olex
+import re
+
 from ArgumentParser import ArgumentParser
 import userDictionaries
 import variableFunctions
@@ -20,7 +22,6 @@ from iotbx.cif import model
 from iotbx.cif import validation
 from libtbx.utils import format_float_with_standard_uncertainty
 olx.cif_model = None
-
 
 import time
 global now
@@ -124,8 +125,7 @@ class CifTools(ArgumentParser):
     self.olex2_reference_brief = "Olex2 (Dolomanov et al., 2009)"
     self.olex2_reference = """
 Dolomanov, O.V., Bourhis, L.J., Gildea, R.J, Howard, J.A.K. & Puschmann, H.
- (2009), J. Appl. Cryst. 42, 339-341.
-"""
+ (2009), J. Appl. Cryst. 42, 339-341."""
     self.update_cif_block(
       {'_audit_creation_date': today.strftime('%Y-%m-%d'),
        '_audit_creation_method': """
@@ -140,7 +140,7 @@ Olex2 %s
     self.update_cif_block(
       {'_computing_molecular_graphics': self.olex2_reference_brief,
        '_computing_publication_material': self.olex2_reference_brief
-       }, force=False)
+       }, force=True)
     self.update_manageable()
 
   def update_manageable(self):
@@ -397,12 +397,15 @@ class ExtractCifInfo(CifTools):
       run = False
     self.ignore = ["?", "'?'", ".", "'.'"]
     self.versions = {"default":[],"smart":{},"saint":{},"shelxtl":{},"xprep":{},"sad":{}, "twin":{}, "abs":{}}
+    self.computing_citations_d = {}
+    self.get_computing_citation_d()
     self.metacif = {}
     self.metacifFiles = MetacifFiles()
     self.evaluate_conflicts=evaluate_conflicts
     if run:
       self.run()
     olx.cif_model = self.cif_model
+
 
   def run(self):
     import iotbx.cif
@@ -430,6 +433,8 @@ class ExtractCifInfo(CifTools):
       current_cif = iotbx.cif.reader(input_string=f.read()).model().values()[0]
       f.close()
       all_sources_d[curr_cif_p] = current_cif
+
+
 
     full_references = [self.olex2_reference]
     if active_solution is not None and active_solution.is_solution:
@@ -471,11 +476,7 @@ class ExtractCifInfo(CifTools):
         force = False
       self.update_cif_block({
         '_computing_structure_refinement': refinement_reference}, force=force)
-    
-    full_references.sort()
-    self.update_cif_block({
-      '_publ_section_references': '\n'.join(full_references)}, force=True)
-      
+
     ##RANDOM THINGS
     p, pp = self.sort_out_path(path, "frames")
     if p and self.metacifFiles.curr_frames != self.metacifFiles.prev_frames:
@@ -751,7 +752,36 @@ class ExtractCifInfo(CifTools):
       #})
 
     self.update_manageable()
+
+    for item in self.cif_block:
+      if item.startswith("_computing"):
+        d = {}
+        longval = self.cif_block[item]
+        for string in self.computing_citations_d:
+          if string.lower() in longval.lower():
+            _ = re.findall("\d{4}", longval)
+            if not _:
+              year = "?"
+            else:
+              year = _[0]
+            d['year'] = year
+            shortval = self.computing_citations_d[string]%d
+            self.cif_block["_olex2%s_long" %item] = shortval
+            self.cif_block["_olex2%s_long" %item] = longval
+            break
+
+    for item in self.cif_block:
+      if item.startswith("_olex2") and item.endswith("_long"):
+        longval = self.cif_block[item]
+        if longval not in full_references:
+          full_references.append(longval)
+
+    full_references.sort()
+    self.update_cif_block({
+      '_publ_section_references': '\n\n'.join(full_references)}, force=True)
+
     self.write_metacif_file()
+
     self.all_sources_d = all_sources_d
     if self.evaluate_conflicts:
       self.sort_out_conflicting_sources()
@@ -1031,28 +1061,8 @@ If more than one file is present, the path of the most recent file is returned b
       if OV.FileName() not in directory:
         print "Crystal images found, but crystal name not in path!"
         return None, None
-
-      l = []
-      max_char = 0
-      min_char = 1000
-      for path in OV.ListFiles(os.path.join(directory, "*.jpg")):
-        chars = len(path)
-        if chars > max_char:
-          max_char = chars
-        if chars < min_char:
-          min_char = chars
-        l.append(path)
-
-      if not l:
-        return None, None
-      def sorting_list(txt):
-        try:
-          cut = len(txt) - min_char + 1
-          return int(txt[-(cut + 4): -4])
-        except:
-          return 0
-
-      l.sort(key=sorting_list)
+      from gui import report
+      l = report.sort_images_with_integer_names(OV.ListFiles(os.path.join(directory, "*.jpg")))
       OV.SetParam("snum.metacif.list_crystal_images_files", (l))
       setattr(self.metacifFiles, "list_crystal_images_files", (l))
       return l[0], l
@@ -1130,18 +1140,28 @@ If more than one file is present, the path of the most recent file is returned b
     olexdir = self.basedir
     versions = self.versions
     file = "%s/etc/site/cif_info.def" %self.basedir
-    rfile = open(file, 'r')
-    for line in rfile:
-      if line[:1] == "_":
-        versions["default"].append(line)
-      elif line[:1] == "=":
-        line = string.split(line, "=",3)
-        prgname = line[1]
-        versionnumber = line[2]
-        versiontext = line[3]
-        versions[prgname].setdefault(versionnumber, versiontext)
-    rfile.close()
+    with open(file, 'r') as rfile:
+      for line in rfile:
+        if line[:1] == "_":
+          versions["default"].append(line)
+        elif line[:1] == "=":
+          line = string.split(line, "=",3)
+          prgname = line[1]
+          versionnumber = line[2]
+          versiontext = line[3]
+          versions[prgname].setdefault(versionnumber, versiontext)
     return versions
+
+
+  def get_computing_citation_d(self):
+    file_path = "%s/etc/site/computing_citations.def" %self.basedir
+    with open(file_path, 'r') as rfile:
+      for line in rfile:
+        line = line.strip()
+        if not line or line.startswith("#"):
+          continue
+        li = line.split("::")
+        self.computing_citations_d.setdefault(li[0].strip(), li[1].strip())
 
 
 

@@ -306,7 +306,7 @@ href='spy.gui.report.publication.remove_cif_from_merge_list(%s)>>html.Update'>
         styles = ["_%s.cif" %(s) for s in ['acta']]
         a = [f for f in a if not s in f for s in styles]
       if not a:
-        a = "" 
+        a = ""
       OV.SetParam('snum.report.merge_these_cifs', a)
       return
     copy_from = "%s/etc/CIF/cif_templates/%s.cif" %(OV.BaseDir(), value)
@@ -428,26 +428,65 @@ def advance_crystal_image(direction='forward'):
       continue
 OV.registerFunction(advance_crystal_image, False, 'gui.report')
 
-def get_crystal_image(p=None):
+def get_crystal_image(p=None,n=4,get_path_only=True):
   global images_zip
   global images_zip_name
   if not p:
-    current_image = OV.standardizePath(OV.GetParam('snum.report.crystal_image'))
+    current_image = OV.GetParam('snum.report.crystal_image')
   else:
     current_image = p
+
+  if get_path_only:
+    if current_image:
+      if '.vzs' in current_image:
+        splitbit = '.vzs/'
+        directory = current_image.split(splitbit)[0] + splitbit.replace("/", "")
+        if not images_zip_name == OV.FileName():
+          import zipfile
+          images_zip = zipfile.ZipFile(directory, "r")
+          images_zip_name = OV.FileName()
+        filename = current_image.split(splitbit)[1]
+        content = images_zip.read(filename)
+        OlexVFS.write_to_olex("crystal_image.jpg", content)
+        return "crystal_image.jpg"
+      else:
+        return OV.standardizePath(current_image)
+
+
+
   if '.vzs' in current_image:
+    have_zip = True
     splitbit = '.vzs/'
     directory = current_image.split(splitbit)[0] + splitbit.replace("/", "")
-    if not images_zip_name == OV.FileName():
-      import zipfile
-      images_zip = zipfile.ZipFile(directory, "r")
-      images_zip_name = OV.FileName()
-    filename = current_image.split(splitbit)[1]
-    content = images_zip.read(filename)
-    OlexVFS.write_to_olex("crystal_image.jpg", content)
-    return "crystal_image.jpg"
+    import zipfile
+    images_zip = zipfile.ZipFile(directory, "r")
+    images_zip_name = OV.FileName()
+    file_list = [x for x in images_zip.filelist if x.filename.endswith('.jpg')]
+
   else:
-    return current_image
+    have_zip = False
+    import glob
+    path = OV.GetParam('snum.report.crystal_images_path')
+    if not path:
+      path = os.path.split(current_image)[0]
+    file_list = glob.glob("%s/*.jpg" %path)
+    file_list = sort_images_with_integer_names(file_list, '.jpg')
+
+  total = len(file_list)
+
+  if n > total:
+    print "There are only %s images, and you wanted to see %s" %(total, n)
+    return
+  inc = int(total/n)
+  for j in xrange(n):
+    pos = j * inc
+    if have_zip:
+      content = images_zip.read(file_list[pos].filename)
+    else:
+      content = open(file_list[pos], 'rb').read()
+    OlexVFS.write_to_olex("crystal_image_%s.jpg" %j, content)
+
+  return "crystal_image.jpg"
 
 OV.registerFunction(get_crystal_image, False, 'gui.report')
 
@@ -455,9 +494,35 @@ def get_box_x_y(w, h):
   sz = [int(x) for x in olx.GetWindowSize().split(',')]
   y = (sz[3]-sz[1]-w)/2
   x = (sz[2]-sz[0]-w)/2
-  if x < 0: x = 0 
+  if x < 0: x = 0
   if y < 0: y = 0
   return x,y
 
+def sort_images_with_integer_names(image_list, ending=None):
+  l = []
+  max_char = 0
+  min_char = 1000
+  for path in image_list:
+    if ending and not path.endswith(ending):
+      continue
+    chars = len(path)
+    if chars > max_char:
+      max_char = chars
+    if chars < min_char:
+      min_char = chars
+    l.append(path)
+
+  if not l:
+    return l
+  def sorting_list(txt):
+    try:
+      cut = len(txt) - min_char + 1
+      return int(txt[-(cut + 4): -4])
+    except:
+      return 0
+  l.sort(key=sorting_list)
+  return l
+
+olex.registerFunction(get_crystal_image, False, "report")
 olex.registerFunction(get_report_title, False, "report")
 olex.registerFunction(ResolvePrograms, False, "report")
