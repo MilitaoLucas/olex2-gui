@@ -433,15 +433,26 @@ def get_crystal_image(p=None,n=4,get_path_only=True):
   global images_zip_name
   if not p:
     current_image = OV.GetParam('snum.report.crystal_image')
-    if get_path_only:
-      if current_image:
-        return OV.standardizePath(current_image)
-      else:
-        return
   else:
     current_image = p
-    if get_path_only:
-      return p
+
+  if get_path_only:
+    if current_image:
+      if '.vzs' in current_image:
+        splitbit = '.vzs/'
+        directory = current_image.split(splitbit)[0] + splitbit.replace("/", "")
+        if not images_zip_name == OV.FileName():
+          import zipfile
+          images_zip = zipfile.ZipFile(directory, "r")
+          images_zip_name = OV.FileName()
+        filename = current_image.split(splitbit)[1]
+        content = images_zip.read(filename)
+        OlexVFS.write_to_olex("crystal_image.jpg", content)
+        return "crystal_image.jpg"
+      else:
+        return OV.standardizePath(current_image)
+
+
 
   if '.vzs' in current_image:
     have_zip = True
@@ -450,16 +461,17 @@ def get_crystal_image(p=None,n=4,get_path_only=True):
     import zipfile
     images_zip = zipfile.ZipFile(directory, "r")
     images_zip_name = OV.FileName()
-    file_list = images_zip.filelist
+    file_list = [x for x in images_zip.filelist if x.filename.endswith('.jpg')]
+
   else:
     have_zip = False
     import glob
     path = OV.GetParam('snum.report.crystal_images_path')
     if not path:
-      path = "\\".join(current_image.split("\\")[:-1])
+      path = os.path.split(current_image)[0]
     file_list = glob.glob("%s/*.jpg" %path)
+    file_list = sort_images_with_integer_names(file_list, '.jpg')
 
-  file_list = sort_images_with_integer_names(file_list, '.jpg')
   total = len(file_list)
 
   if n > total:
