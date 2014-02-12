@@ -34,6 +34,7 @@ _diffrn_standards_decay_%          .
 =saint=V7.60A=       'SAINT v7.60A (Bruker, 2009)'
 =saint=V7.68A=       'SAINT v7.68A (Bruker, 2009)'
 =saint=V8.27B=       'SAINT v8.27A (Bruker, 2012)'
+=saint=V8.34A=       'SAINT v8.34A (Bruker, 2013)'
 
 =shelxtl=V5.10=      'SHELXTL v6.12 (Bruker, 1998)'
 =shelxtl=V6.12=      'SHELXTL v6.12 (Bruker, 2001)'
