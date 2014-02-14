@@ -1063,8 +1063,11 @@ If more than one file is present, the path of the most recent file is returned b
         return None, None
       from gui import report
       l = report.sort_images_with_integer_names(OV.ListFiles(os.path.join(directory, "*.jpg")))
-      OV.SetParam("snum.metacif.list_crystal_images_files", (l))
       setattr(self.metacifFiles, "list_crystal_images_files", (l))
+      if not l:
+        OV.SetParam("snum.metacif.list_crystal_images_files", "")
+        return None, None
+      OV.SetParam("snum.metacif.list_crystal_images_files", (l))
       return l[0], l
 
 
