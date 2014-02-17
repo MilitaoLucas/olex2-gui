@@ -1299,11 +1299,12 @@ def GetTwinLawAndBASF(html=False):
     txt = repr(curr_law)
   basf_idx = 1
   basf = []
-  while True:
-    basf_val = olx.Lst("basf_%s" %basf_idx)
-    if basf_val == "n/a": break
-    basf.append(basf_val)
-    basf_idx += 1
+  if olx.IsFileType("ires") != "false":
+    while True:
+      basf_val = olx.Lst("basf_%s" %basf_idx)
+      if basf_val == "n/a": break
+      basf.append(basf_val)
+      basf_idx += 1
   if not txt and not basf:
     return ""
   if basf:
