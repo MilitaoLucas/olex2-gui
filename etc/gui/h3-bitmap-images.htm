@@ -19,6 +19,7 @@
       name="IMAGE_BITMAP_TYPE"
       value="spy.GetParam('user.image.bitmap.type')"
       onchange="spy.SetParam('user.image.bitmap.type',html.GetValue('~name~'))"
+      readonly="true"
     >
     </font>
   </td>
@@ -149,8 +150,7 @@ $spy.MakeHoverButton('button_small-go@bitmap','spy.gui.images.MakeBitmapImage()'
       name = "TRIM_IMAGE"
       fgcolor="GetVar('HtmlFontColour')"
       bgcolor="GetVar('HtmlTableBgColour')"
-      oncheck="html.SetData('TRIM_IMAGE','True')>>spy.SetParam('user.image.bitmap.trim',True")
-      onuncheck="html.SetData('TRIM_IMAGE',' ')>>spy.SetParam('user.image.bitmap.trim',False")"
+      onclick="spy.SetParam('user.image.bitmap.trim',html.GetState('~name~'))"
       manage="true"
       checked="true"
     >

@@ -1283,8 +1283,9 @@ def GetOptionalHyphenString(txt):
   return txt
 OV.registerFunction(GetOptionalHyphenString)
 
-def GetTwinLaw(html=False):
+def GetTwinLawAndBASF(html=False):
   olex_refinement_model = OV.GetRefinementModel(False)
+  curr_law = None
   if olex_refinement_model.has_key('twin'):
     c = olex_refinement_model['twin']['matrix']
     curr_law = []
@@ -1292,14 +1293,27 @@ def GetTwinLaw(html=False):
       for el in row:
         curr_law.append(el)
     curr_law = tuple(curr_law)
-  else:
-    return
 
-  txt = repr(curr_law)
+  txt = ""
+  if curr_law:
+    txt = repr(curr_law)
+  basf_idx = 1
+  basf = []
+  while True:
+    basf_val = olx.Lst("basf_%s" %basf_idx)
+    if basf_val == "n/a": break
+    basf.append(basf_val)
+    basf_idx += 1
+  if not txt and not basf:
+    return ""
+  if basf:
+    if txt: txt += ", "
+    txt += "BASF [%s]" % ";".join(basf)
+
   if html:
     txt = "<tr><td><b><font color='%s'>TWIN LAW %s</font></b></td></tr>" %(OV.GetParam('gui.red').hexadecimal, txt)
   return txt
-OV.registerFunction(GetTwinLaw)
+OV.registerFunction(GetTwinLawAndBASF)
 
 
 def HklStatsAnalysis():

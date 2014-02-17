@@ -192,6 +192,8 @@ def GetImageFilename(image_type):
     fileext = "eps"
   elif image_type == "PR":
     fileext = "pov"
+  elif image_type == "BITMAP":
+    fileext = OV.GetParam('user.image.bitmap.type')
   else:
     fileext = OV.GetParam('snum.image.%s.type' %image_type.lower())
   if not filename:
