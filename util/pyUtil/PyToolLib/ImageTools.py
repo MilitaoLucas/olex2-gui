@@ -1474,7 +1474,7 @@ class ImageTools(FontInstances):
 
   def trim_image(self, im, trimcolour=None, padding=2, border=0.5, border_col='#aaaaaa', dry=False, target_size=None):
     ''' Takes either an image or a path to an image, then trims off all whitespace and either returns the trimmed image or saves it to the same path as the original one '''
-    
+
     from PIL import Image, ImageChops, ImageOps
     p = None
     if type(im) == str or type(im) == unicode:
@@ -1482,11 +1482,15 @@ class ImageTools(FontInstances):
       im = im.strip('"')
       if os.path.exists("%s" %im):
         p = im
-        im = Image.open("%s" %im)
+        try:
+          im = Image.open("%s" %im)
+        except:
+          print("Sorry, cannot trim image of this kind")
+          return
       else:
-        print "No such image"
+        print("No such image")
         return
-    
+
     if not trimcolour:
       pix = im.load()
       trimcolour = pix[0,0]
