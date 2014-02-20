@@ -156,7 +156,8 @@ def loadAll():
       failed_modules[d] = str(e)
       print("Error occurred while loading module: %s" %d)
   getAvailableModules() #thread
-  olx.Schedule(2, "spy.plugins.AskToUpdate()", g=True)
+  if olx.HasGUI() == 'true':
+    olx.Schedule(2, "spy.plugins.AskToUpdate()", g=True)
 
 
 def updateKey(module):
@@ -372,7 +373,7 @@ def getCurrentModuleName():
 
 def AskToUpdate():
   global avaialbaleModulesRetrieved
-  if not avaialbaleModulesRetrieved:
+  if not avaialbaleModulesRetrieved and olx.HasGUI() == 'true':
     olx.Schedule(3, "spy.plugins.AskToUpdate()", g=True)
     return
   from olexFunctions import OlexFunctions
