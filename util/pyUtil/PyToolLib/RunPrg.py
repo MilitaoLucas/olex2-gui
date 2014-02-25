@@ -278,7 +278,7 @@ class RunSolutionPrg(RunPrg):
     if "smtbx" not in self.program.name:
       self.shelx = self.which_shelx(self.program)
     args = self.method.pre_solution(self)
-    olx.Reset(args)
+    olex.m('reset ' + args)
 
   def doHistoryCreation(self):
     OV.SetParam('snum.refinement.last_R1', 'Solution')
