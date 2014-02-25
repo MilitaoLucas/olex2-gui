@@ -344,13 +344,11 @@ class Sir(object):#{{{
         if not isFileHasExt(sirfile, 'sir'):
             print 'Invalid Path for Sir Input'
             return False
-
         if self._sirgui:
-            olx.Exec('-o ','sir%s %s'%(sirversion, sirfile))
-            olx.WaitFor('process')
+            olx.Exec('sir%s'%sirversion, sirfile, o=True)
         else:
-            olx.Exec('sir%s %s'%(sirversion, sirfile))
-            olx.WaitFor('process')
+            olx.Exec('sir%s'%sirversion, sirfile)
+        olx.WaitFor('process')
         return True
 #}}}
 
