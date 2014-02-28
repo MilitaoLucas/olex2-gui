@@ -385,16 +385,13 @@ class Method_shelx(Method):
     olx.WaitFor('process') # uncomment me!
 
     additions = ['', '_a', '_b', '_c', '_d', '_e']
+    self.failure = True
     for add in additions:
       p = "%s%s.res" %(xl_ins_filename, add)
       if os.path.exists(p):
-        if os.path.getsize(p) == 0:
-          self.failure = True
-        else:
+        if os.path.getsize(p) != 0:
           self.failure = False
           break
-      else:
-        continue
     olx.User(RunPrgObject.filePath)
 
 
@@ -531,15 +528,14 @@ class Method_shelx_direct_methods(Method_shelx_solution):
   def get_XS_TREF_solution_indicators(self, RunPrgObject):
     """Gets the TREF solution indicators from the .lst file and prints values in Olex2.
     """
-    import lst_reader
     lstPath = "%s/%s.lst" %(OV.FilePath(), OV.FileName())
-    lstValues = lst_reader.reader(path=lstPath).values()
+    if os.path.exists(lstPath):
+      import lst_reader
+      lstValues = lst_reader.reader(path=lstPath).values()
 
-    RunPrgObject.Ralpha = lstValues.get('Ralpha','')
-    RunPrgObject.Nqual = lstValues.get('Nqual','')
-    RunPrgObject.CFOM = lstValues.get('CFOM','')
-
-    print RunPrgObject.Ralpha, RunPrgObject.Nqual, RunPrgObject.CFOM
+      RunPrgObject.Ralpha = lstValues.get('Ralpha','')
+      RunPrgObject.Nqual = lstValues.get('Nqual','')
+      RunPrgObject.CFOM = lstValues.get('CFOM','')
 
 
 class Method_shelxd(Method_shelx_solution):
@@ -1073,6 +1069,13 @@ def defineExternalPrograms():
     reference=ShelXS.reference,
     brief_reference=ShelXS.brief_reference,
     execs=["xt.exe", "xt"])
+  ShelXT = Program(
+    name='ShelXT',
+    program_type='solution',
+    author="G.M.Sheldrick",
+    reference=ShelXS.reference,
+    brief_reference=ShelXS.brief_reference,
+    execs=["shelxt.exe", "shelxt"])
   ShelXD = Program(
     name='ShelXD',
     program_type='solution',
@@ -1103,7 +1106,7 @@ Bourhis, L.J., Dolomanov, O.V., Gildea, R.J., Howard, J.A.K., Puschmann, H.
  (2013). in preparation""",
     brief_reference="Bourhis et al., 2013",
     )
-  
+
   SIR97 = Program(
     name='SIR97',
     program_type='solution',
@@ -1176,6 +1179,7 @@ Palatinus et al., 2012""",
   XS.addMethod(patterson)
   XS.addMethod(texp)
   XT.addMethod(direct_methods)
+  ShelXT.addMethod(direct_methods)
   ShelXD.addMethod(dual_space)
   ShelXD97.addMethod(dual_space)
   XM.addMethod(dual_space)
@@ -1249,7 +1253,7 @@ Palatinus et al., 2012""",
     reference=smtbx_solve.reference,
     brief_reference=smtbx_solve.brief_reference,
   )
-  
+
   RPD = ExternalProgramDictionary()
   for prg in (ShelXL, ShelXL97, XL, XLMP, ShelXH97, XH, ShelXL_ifc):
     prg.addMethod(least_squares)
@@ -1261,7 +1265,8 @@ Palatinus et al., 2012""",
   RPD.addProgram(smtbx_refine)
 
   SPD = ExternalProgramDictionary()
-  for prg in (ShelXS, ShelXS97, ShelXS86, XS, XT, ShelXD, ShelXD97, XM, smtbx_solve, SIR97, SIR2002, SIR2004, SIR2008, SIR2011, Superflip):
+  for prg in (ShelXS, ShelXS97, ShelXS86, XS, XT, ShelXT, ShelXD, ShelXD97, XM,
+              smtbx_solve, SIR97, SIR2002, SIR2004, SIR2008, SIR2011, Superflip):
     SPD.addProgram(prg)
 
 
