@@ -34,8 +34,7 @@
       name = "BITMAP_NO_BG"
       fgcolor="GetVar('HtmlFontColour')"
       bgcolor="GetVar('HtmlTableBgColour')"
-      oncheck="html.SetData('BITMAP_NO_BG','True')>>spy.SetParam('user.image.bitmap.transparent_background',True"
-      onuncheck="html.SetData('BITMAP_NO_BG',' ')>>spy.SetParam('user.image.bitmap.transparent_background',False"
+      onclick="spy.SetParam('user.image.bitmap.transparent_background',html.GetState(~name~))"
       manage="true"
     >
     </font>
