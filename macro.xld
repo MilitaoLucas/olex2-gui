@@ -11,8 +11,8 @@
       <cmd1 "htmlpanelvisible True">
       <cmd2 "py.Export(datadir()/olx)">
       <cmd3 "py.run basedir()/util/pyUtil/initpy.py">
-      <cmd7 "spy.load_user_gui_phil()">
-      <cmd8 "spy.skin.export_parameters()">
+      <cmd7 xx"spy.load_user_gui_phil()">
+      <cmd8 xx"spy.skin.export_parameters()">
       <cmd4 "if isos(linux) then setvar(defeditor,'gedit')">
       <cmd5 "if isos(linux) then setvar(defexplorer,'nautilus')">
       <cmd6 "if isos(linux) then setvar(defbrowser,'xdg-open')">
@@ -57,6 +57,7 @@
       <cmd5  "spy.fade_out()">
       <cmd6  "@reap %1 %2">
       <cmd7  "spy.fade_in()">
+      <cmd15 "if strcmp(%7,filefull()) then none else 'spy.loadHistory()'">
       <cmd8 "if strcmp(filename(),'none') then none else spy.LoadStructureParams()">
       <cmd9 "spy.run_skin sNumTitle">
       <cmd10 "spy.make_HOS(True)">
@@ -65,7 +66,6 @@
       <cmd13 "spy.setAllMainToolbarTabButtons()">
       <cmd14 "if File.Exists(strdir()/filename().vvd) then none
        else 'spy.SetParam(snum.refinement.original_formula,xf.GetFormula())'">
-      <cmd15 "if strcmp(%7,filefull()) then none else 'spy.loadHistory()'">
       <cmd16 "spy.reset_file_in_OFS(twinning-result.htm)">
       <cmd17 "html.Update">
       <cnd18 "if html.IsPopup(history-tree) then spy.popout_history_tree()">
@@ -84,7 +84,7 @@
   <body
     <args>
   <cmd
-    <cmd "if IsFileLoaded() then '@close>>html.ItemState index* 0 index-home 
+    <cmd "if IsFileLoaded() then '@close>>html.ItemState index* 0 index-home
       1 info-title 0 logo 1>>html.Update>>echo File is closed'">
   >
 >
@@ -278,12 +278,12 @@
     <cmd
       <cmd1 cmd1="silent on">
       <cmd2 cmd="echo %2%3.%1">
-      <cmd3 "if and(IsFileType(ires),or(strcmp(%1,ins),strcmp(%1,res))) then 
+      <cmd3 "if and(IsFileType(ires),or(strcmp(%1,ins),strcmp(%1,res))) then
        'file>>listen filepath()/filename().%1' else none">
-      <cmd4 "if strcmp(%1,hkl) then 
-       'exec -o getvar(defeditor) hklsrc()' else 
+      <cmd4 "if strcmp(%1,hkl) then
+       'exec -o getvar(defeditor) hklsrc()' else
        'exec -o getvar(defeditor) filepath()/filename().%1 -t=\"stop listen\"'">
-      <cmd5 "if strcmp(%1,note) then 
+      <cmd5 "if strcmp(%1,note) then
        'exec -o getvar(defeditor) filepath()/filename()-note.txt'">
     >
     <onlisten
