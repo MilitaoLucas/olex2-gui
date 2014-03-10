@@ -723,7 +723,7 @@ def GetHklFileList():
   reflection_files = ""
   for item in g:
     reflection_files+="%s.%s<-%s;" %(OV.FileName(item), OV.FileExt(item), item)
-  return '"%s"' %reflection_files
+  return reflection_files
 if haveGUI:
   OV.registerFunction(GetHklFileList)
 
@@ -1286,6 +1286,7 @@ OV.registerFunction(GetOptionalHyphenString)
 def GetTwinLawAndBASF(html=False):
   olex_refinement_model = OV.GetRefinementModel(False)
   curr_law = None
+  basf_count = len(olex_refinement_model['hklf'].get('basf', []))
   if olex_refinement_model.has_key('twin'):
     c = olex_refinement_model['twin']['matrix']
     curr_law = []
@@ -1297,14 +1298,22 @@ def GetTwinLawAndBASF(html=False):
   txt = ""
   if curr_law:
     txt = repr(curr_law)
-  basf_idx = 1
   basf = []
   if olx.IsFileType("ires") != "false":
-    while True:
-      basf_val = olx.Lst("basf_%s" %basf_idx)
-      if basf_val == "n/a": break
-      basf.append(basf_val)
-      basf_idx += 1
+    try:
+      for i in range(basf_count):
+        v = olx.xf.rm.BASF(i)
+        if '(' not in v:
+          v = ".3f" %float(v)
+        basf.append(v)
+    except:
+      for i in range(basf_count):
+        basf_val = olx.Lst("basf_%s" %(i+1))
+        if basf_val == 'n/a':
+          break
+        basf.append(basf_val)
+      if (len(basf) != basf_count):
+        basf = ["%.3f" %x for x in olex_refinement_model['hklf']['basf']]
   if not txt and not basf:
     return ""
   if basf:
@@ -1312,7 +1321,12 @@ def GetTwinLawAndBASF(html=False):
     txt += "BASF [%s]" % ";".join(basf)
 
   if html:
-    txt = "<tr><td><b><font color='%s'>TWIN LAW %s</font></b></td></tr>" %(OV.GetParam('gui.red').hexadecimal, txt)
+    if curr_law:
+      txt = "<tr><td><b><font color='%s'>TWIN LAW %s</font></b></td></tr>" %(
+        OV.GetParam('gui.red').hexadecimal, txt)
+    else:
+      txt = "<tr><td><b><font color='%s'>HKLF 5 %s</font></b></td></tr>" %(
+        OV.GetParam('gui.red').hexadecimal, txt)
   return txt
 OV.registerFunction(GetTwinLawAndBASF)
 

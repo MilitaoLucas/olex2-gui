@@ -452,7 +452,9 @@ def get_crystal_image(p=None,n=4,get_path_only=True):
       else:
         return OV.standardizePath(current_image)
 
-
+  if not current_image:
+    print "No Current Image!"
+    return None
 
   if '.vzs' in current_image:
     have_zip = True

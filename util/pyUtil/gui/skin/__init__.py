@@ -27,7 +27,7 @@ class Skin():
   def change(self):
     skin = OV.GetParam('gui.skin.name')
     skin_extension = OV.GetParam('gui.skin.extension')
-    
+
     try:
       skin_path = "%s/util/pyUtil/PluginLib/skins/plugin-%sSkin" %(OV.BaseDir(), skin)
       if skin_path not in sys.path:
@@ -67,6 +67,7 @@ class Skin():
       name = r"sNumTitle.png"
       OlexVFS.save_image_to_olex(image, name, 1)
       OV.CopyVFSFile(name, 'SNUMTITLE',2)
+      olx.html.Update()
       if timing:
         print "run_skin sNumTitle took %.4fs" %(time.time()-t)
 
@@ -116,8 +117,8 @@ def export_parameters(load_phil=True):
     t = time.time()
   if check_for_first_run():
     return
-  #if load_phil:
-    #deal_with_gui_phil(action='load')
+  if load_phil:
+    deal_with_gui_phil(action='load')
   OV.SetVar('HtmlTableFirstcolColour', OV.GetParam('gui.html.table_firstcol_colour').hexadecimal)
   OV.SetVar('HtmlTableFirstcolWidth', OV.GetParam('gui.html.table_firstcol_width'))
   OV.SetVar('HtmlTableBgColour', OV.GetParam('gui.html.table_bg_colour').hexadecimal)
@@ -143,7 +144,7 @@ def export_parameters(load_phil=True):
   OV.SetVar('HtmlFontSizeMedium', OV.GetParam('gui.html.font_size_medium'))
   OV.SetVar('HtmlPanelWidth', OV.GetParam('gui.htmlpanelwidth'))
   OV.SetVar('HtmlButtonHeight', OV.GetParam('gui.timage.button.height'))
-  
+
   if timing:
     print "export_parameters took %.4fs" %(time.time()-t)
 OV.registerFunction(export_parameters,False,'skin')

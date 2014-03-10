@@ -152,6 +152,10 @@ routines requiring structure refinement
     {
     ata = 0
       .type = float
+    max_shift_over_esd = None
+      .type = float
+    max_shift_over_esd_atom = None
+      .type = str
     max_shift_site = None
       .type = float
     max_shift_site_atom = None
