@@ -480,6 +480,8 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       'snum.refinement.max_hole' : 'hole',
       'snum.refinement.max_shift_site' : 'max_shift',
       'snum.refinement.max_shift_site_atom' : 'max_shift_object',
+      'snum.refinement.max_shift_over_esd' : 'max_shift/esd',
+      'snum.refinement.max_shift_over_esd_atom' : 'max_shift/esd_object',
       'snum.refinement.max_shift_u' : 'max_dU',
       'snum.refinement.max_shift_u_atom' : 'max_dU_object',
       'snum.refinement.flack_str' : 'flack',
@@ -495,8 +497,8 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
     cif.setdefault('_refine_ls_R_factor_gt', olx.Lst('R1'))
     cif.setdefault('_refine_ls_wR_factor_ref', olx.Lst('wR2'))
     cif.setdefault('_refine_ls_goodness_of_fit_ref', olx.Lst('s'))
-    cif.setdefault('_refine_ls_shift/su_max', olx.Lst('max_shift'))
-    cif.setdefault('_refine_ls_shift/su_mean', olx.Lst('mean_shift'))
+    cif.setdefault('_refine_ls_shift/su_max', olx.Lst('max_shift/esd'))
+    cif.setdefault('_refine_ls_shift/su_mean', olx.Lst('mean_shift/esd'))
     cif.setdefault('_reflns_number_total', olx.Lst('ref_total'))
     cif.setdefault('_reflns_number_gt', olx.Lst('ref_4sig'))
     cif.setdefault('_refine_ls_number_parameters', olx.Lst('params_n'))

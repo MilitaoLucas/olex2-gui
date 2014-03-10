@@ -2711,7 +2711,8 @@ class HealthOfStructure():
       if is_CIF:
         l = ['_refine_ls_shift/su_max', '_refine_diff_density_max', '_refine_diff_density_min']
       else:
-        l = ['max_shift_site', 'max_shift_u', 'max_peak', 'max_hole']
+        #l = ['max_shift_over_esd', 'max_shift_site', 'max_shift_u', 'max_peak', 'max_hole']
+        l = ['max_shift_over_esd', 'max_peak', 'max_hole']
       #missing = olexex.OlexRefinementModel().getMissingAtomsNumber()
       #OV.SetParam('snum.refinement.expected_peaks', missing)
     else:
@@ -2890,7 +2891,7 @@ class HealthOfStructure():
 
     if item == "MeanIOverSigma":
       display = IT.get_unicode_characters("I/sigma")
-    if item == "Rint":
+    elif item == "Rint":
       display = "Rint"
 
     display = IT.get_unicode_characters(display)
@@ -2955,9 +2956,12 @@ class HealthOfStructure():
     return txt
 
   def get_bg_colour(self, item, val):
-
-    #if item == "MinD":
-      #return "#ffdf09"
+    try:
+      val = float(val)
+      if val < 0:
+        val = -val
+    except:
+      val = 0
 
     op = OV.GetParam('diagnostics.%s.%s.op' %(self.scope, item))
     if op == "between":
