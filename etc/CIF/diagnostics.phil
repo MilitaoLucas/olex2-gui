@@ -34,6 +34,27 @@ diagnostics {
         .type = str
     }
 
+    max_shift_over_esd {
+      op = "smaller"
+        .type = str
+      value_format= "3f"
+        .type = str
+      grade1  = 0.001
+        .type = float
+      grade2 = 0.005
+        .type = float
+      grade3 = 0.010
+        .type = float
+      grade4 = 0.015
+        .type = float
+      top = 0.15
+        .type = float
+      display = "Max Shift/esd"
+        .type = str
+      href = atom
+        .type = str
+    }
+
     _refine_ls_shift_over_su_max {
       op = "smaller"
         .type = str

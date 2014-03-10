@@ -272,7 +272,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     #overrided parameters (U, sites)
     self.fixed_distances = {}
     self.fixed_angles = {}
-    
+
     self.constraints = self.setup_shared_parameters_constraints() + self.constraints
     self.constraints += self.setup_rigid_body_constraints(
       self.olx_atoms.afix_iterator())
@@ -303,7 +303,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     )
     self.reparametrisation.fixed_distances.update(self.fixed_distances)
     self.reparametrisation.fixed_angles.update(self.fixed_angles)
-    
+
     #===========================================================================
     # for l,p in self.reparametrisation.fixed_distances.iteritems():
     #  label = ""
@@ -316,7 +316,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     #    label += "-%s" %self.olx_atoms._atoms[a]['label']
     #  print label
     #===========================================================================
-    
+
     weight = self.olx_atoms.model['weight']
     params = dict(a=0.1, b=0,
                   #c=0, d=0, e=0, f=1./3,
@@ -368,11 +368,19 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.check_flack()
       if self.flack:
         OV.SetParam('snum.refinement.flack_str', self.flack)
+      #extract SU on BASF and extinction
+      diag = self.twin_covariance_matrix.matrix_packed_u_diagonal()
+      dlen = len(diag)
       if self.reparametrisation.extinction.grad:
         #extinction is the last parameter after the twin fractions
-        diag = self.twin_covariance_matrix.matrix_packed_u_diagonal()
-        su = math.sqrt(diag[len(diag)-1])
+        su = math.sqrt(diag[dlen-1])
         OV.SetExtinction(self.reparametrisation.extinction.value, su)
+        dlen -= 1
+      try: #remove me for new exe!
+        for i in xrange(dlen):
+          olx.xf.rm.BASF(i, olx.xf.rm.BASF(i), math.sqrt(diag[i]))
+      except:
+        pass
     except RuntimeError, e:
       if str(e).startswith("cctbx::adptbx::debye_waller_factor_exp: max_arg exceeded"):
         print "Refinement failed to converge"
@@ -518,9 +526,27 @@ class FullMatrixRefine(OlexCctbxAdapter):
     completeness_full = refinement_refs.resolution_filter(
       d_min=uctbx.two_theta_as_d(two_theta_full, self.wavelength, deg=True)).completeness()
     completeness_theta_max = refinement_refs.completeness()
-    shifts_over_su = flex.abs(
-      self.normal_eqns.step() /
-      flex.sqrt(self.normal_eqns.covariance_matrix().matrix_packed_u_diagonal()))
+    try:
+      jac_tr = self.normal_eqns.reparametrisation.jacobian_transpose_matching_grad_fc()
+      shifts = jac_tr.transpose() * self.normal_eqns.step()
+      diag = self.covariance_matrix_and_annotations.matrix.matrix_packed_u_diagonal()
+      shifts_over_su = flex.abs(shifts / flex.sqrt(diag))
+      max_shift_idx = 0
+      for i, s in enumerate(shifts_over_su):
+        if (shifts_over_su[max_shift_idx] < s):
+          max_shift_idx = i
+      print("Largest shift/esd is %.4f for %s" %(
+            shifts_over_su[max_shift_idx],
+            self.covariance_matrix_and_annotations.annotations[max_shift_idx]))
+      OV.SetParam("snum.refinement.max_shift_over_esd",
+        shifts_over_su[max_shift_idx])
+      OV.SetParam("snum.refinement.max_shift_over_esd_atom",
+        self.covariance_matrix_and_annotations.annotations[max_shift_idx].split('.')[0])
+    except:
+      OV.SetParam("snum.refinement.max_shift_over_esd", "n/a")
+      OV.SetParam("snum.refinement.max_shift_over_esd_atom", "n/a")
+      shifts_over_su = flex.abs(self.normal_eqns.step() /
+        flex.sqrt(self.normal_eqns.covariance_matrix().matrix_packed_u_diagonal()))
     # cell parameters and errors
     cell_params = self.olx_atoms.getCell()
     cell_errors = self.olx_atoms.getCellErrors()
@@ -838,7 +864,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         for b in ns:
           if b not in group: continue
           self.fixed_distances.setdefault((a, b), 1)
-            
+
   def setup_rigid_body_constraints(self, afix_iter):
     rigid_body_constraints = []
     rigid_body = {
@@ -876,12 +902,21 @@ class FullMatrixRefine(OlexCctbxAdapter):
             current = rigid.rigid_riding_expandable_group(
               pivot, dependent, n == 4)
           elif len(pivot_neighbours) < 1:
-            print "Invalid rigid group for " + scatterers[pivot].label
+            print("Invalid rigid group for " + scatterers[pivot].label)
           else:
-            current = rigid.rigid_pivoted_rotatable_group(
-              pivot, pivot_neighbours[0], dependent,
-              sizeable=n in (4,8),  #nm 4 never coming here from the above
-              rotatable=n in (7,8))
+            if type(pivot_neighbours[0]) == tuple:
+              olx.Echo("Could not create rigid rotating group based on '%s' " %(
+                        scatterers[pivot].label) +
+                       "because the pivot base is symmetry generated, creating " +
+                       "rigid riding group instead - use 'compaq -a' to avoid "+
+                       "this warning", m="warning")
+              current = rigid.rigid_riding_expandable_group(
+                pivot, dependent, False)
+            else:
+              current = rigid.rigid_pivoted_rotatable_group(
+                pivot, pivot_neighbours[0], dependent,
+                sizeable=n in (4,8),  #nm 4 never coming here from the above
+                rotatable=n in (7,8))
 
         if current and current not in rigid_body_constraints:
           rigid_body_constraints.append(current)
