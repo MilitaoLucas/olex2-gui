@@ -107,11 +107,12 @@ def make_no_conflicts_gui(resolved, some_remain=False):
   if len(resolved) > 1:
     txt += '''
 <a href='spy.SetParam(snum.metadata.resolved_conflict_items,[])>>spy.ExtractCifInfo(True,True)>>html.Update'>Reset Previously Resolved Conflicts</a>'''
-  if olx.html.IsPopup('conflicts') == "true":
-    olx.html.Hide('conflicts')
+  if olx.html.IsPopup('conflicts') == "true" and not some_remain:
+    olx.html.EndModal('conflicts', 0)
   wFilePath_gui = r"conflicts_html_window.htm"
   OV.write_to_olex(wFilePath_gui, "<tr><td>%s</td></tr>" %txt)
-  
+
+
 
 def conflicts(popout='auto', d=None):
   if popout == 'true':
@@ -157,9 +158,9 @@ def conflicts(popout='auto', d=None):
     </td>
   </tr>
       ''' %(colspan,colspan)#TOP section
-      
+
       txt += '''
-  
+
   <tr>
     <td width='30%%'><font color='white'><b></b></font>
     </td>''' #TR for Header Row
@@ -193,7 +194,7 @@ def conflicts(popout='auto', d=None):
             bg = col_even
           else:
             bg = col_odd
-          
+
           val = d[conflict].get(source,'n/a')
           if not val:
             display = "--"
@@ -240,9 +241,10 @@ def conflicts(popout='auto', d=None):
     if olx.html.IsPopup('conflicts') == "false":
       olx.Popup('conflicts', '%s' %wFilePath,
        b="tcr",  t="CIF Conflicts",
-       w=box_width, h=box_height, x=box_x, y=box_y)
+       w=box_width, h=box_height, x=box_x, y=box_y, s=False)
+      olx.html.ShowModal('conflicts', True)
     else:
-      olx.Popup('conflicts', wFilePath)
+      olx.html.Update('conflicts')
   else:
     txt += '''
 <tr><td><a href='spy.gui.metadata.conflicts(true)'>Popup Conflict Window</a></td></tr>'''
