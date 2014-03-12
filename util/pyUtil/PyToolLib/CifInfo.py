@@ -1018,29 +1018,28 @@ If more than one file is present, the path of the most recent file is returned b
 
     elif tool == "bruker_crystal_images":
       name = OV.FileName()
-      extension = "*.jpg"
       directory_l = OV.FileFull().replace('\\','/').split("/")
       directory = ("/").join(directory_l[:-3])
-      directory += '/%s.vzs' %OV.FileName()
+      g = glob.glob("%s/*.vzs" %directory)
       i = 1
-      while not os.path.exists(directory):
+      while not g:
         directory = ("/").join(directory_l[:-(3 - i)])
-        directory += '/%s.vzs' %OV.FileName()
+        g = glob.glob("%s/*.vzs" %directory)
         i += 1
-        if i == 4:
+        if i == 3:
           return None, None
+      ## This safegurard seems unenforcable in the Bruker world
+      #if OV.FileName() not in directory:
+        #print "Crystal images found, but crystal name not in path!"
+        #return None, None
 
-      if OV.FileName() not in directory:
-        print "Crystal images found, but crystal name not in path!"
-        return None, None
-
-      zip_n = OV.file_ChangeExt(directory, 'zip')
+      zip_file = g[0]
       import zipfile
-      z = zipfile.ZipFile(directory, "r")
+      z = zipfile.ZipFile(zip_file, "r")
       l = []
       for filename in z.namelist():
         if filename and ".jpg" in filename:
-          l.append(r'%s/%s' %(directory, filename))
+          l.append(r'%s/%s' %(g[0], filename))
       OV.SetParam("snum.metacif.list_crystal_images_files", l)
       setattr(self.metacifFiles, "list_crystal_images_files", l)
       return l[0], l

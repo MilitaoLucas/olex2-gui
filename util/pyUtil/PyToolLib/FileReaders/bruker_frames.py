@@ -33,15 +33,18 @@ class reader:
       except:
         break
 
-    a = header_d['CSIZE'].split('|')
-    a.sort()
-    size = []
-    for i in a:
-      try:
-        float(i)
-        size.append(i)
-      except:
-        pass
+    try:
+      a = header_d['CSIZE'].split('|')
+      a.sort()
+      size = []
+      for i in a:
+        try:
+          float(i)
+          size.append(i)
+        except:
+          pass
+    except:
+      size = 0
 
     matrix = header_d['MATRIX'].split()
 
@@ -49,15 +52,23 @@ class reader:
     self._cifItems['_diffrn_source_current'] = "%.0f" %float(header_d['SOURCEM'])
     #self._cifItems['_diffrn_refln_scan_width'] = "%.2f" %float(header_d['RANGE'])
     self._cifItems['time'] = "%.2f" %float(header_d['CUMULAT'])
+    self._cifItems['scan_rate'] = "%.2f" %float(header_d['CUMULAT'])
+    self._cifItems['scan_width'] = "%.2f" %float(header_d['INCREME'])
+    dist = header_d['DISTANC']
+    if "     " in dist:
+      self._cifItems['detector_distance'] = "%.2f" %float(dist.split()[0])
+    else:
+      self._cifItems['detector_distance'] = "%.2f" %float(dist)
     self._cifItems['formula'] = "%s" %(header_d['CHEM'])
     self._cifItems['_diffrn_radiation_monochromator'] = header_d['FILTER']
     self._cifItems['_diffrn_radiation_wavelength'] = "%f" %float(header_d['WAVELEN'].split()[0])
     self._cifItems['_exptl_crystal_description'] = "%s" %(header_d['MORPH'])
     self._cifItems['_exptl_crystal_colour'] = "%s" %(header_d['CCOLOR'])
-    if len(size) == 3:
-      self._cifItems['_exptl_crystal_size_min'] = "%s" %(size[0])
-      self._cifItems['_exptl_crystal_size_mid'] = "%s" %(size[1])
-      self._cifItems['_exptl_crystal_size_max'] = "%s" %(size[2])
+    if size:
+      if len(size) == 3:
+        self._cifItems['_exptl_crystal_size_min'] = "%s" %(size[0])
+        self._cifItems['_exptl_crystal_size_mid'] = "%s" %(size[1])
+        self._cifItems['_exptl_crystal_size_max'] = "%s" %(size[2])
     self._cifItems['_diffrn_orient_matrix_UB_11'] = "%f" %float(matrix[0])
     self._cifItems['_diffrn_orient_matrix_UB_12'] = "%f" %float(matrix[1])
     self._cifItems['_diffrn_orient_matrix_UB_13'] = "%f" %float(matrix[2])

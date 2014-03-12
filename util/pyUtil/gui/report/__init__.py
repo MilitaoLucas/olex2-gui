@@ -435,6 +435,10 @@ def get_crystal_image(p=None,n=4,get_path_only=True):
     current_image = OV.GetParam('snum.report.crystal_image')
   else:
     current_image = p
+  if not current_image:
+    from CifInfo import ExtractCifInfo
+    ExtractCifInfo(run=True)
+    current_image = OV.GetParam('snum.report.crystal_image')
 
   if get_path_only:
     if current_image:
