@@ -1034,7 +1034,6 @@ If more than one file is present, the path of the most recent file is returned b
         #return None, None
 
       zip_file = g[0]
-      zip_n = OV.file_ChangeExt(zip_file, 'zip')
       import zipfile
       z = zipfile.ZipFile(zip_file, "r")
       l = []
