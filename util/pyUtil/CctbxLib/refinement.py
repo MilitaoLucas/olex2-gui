@@ -206,10 +206,10 @@ class olex2_normal_eqns(least_squares.crystallographic_ls):
         OV.SetFVar(var[0], 1.0-var[1].value.value*var[2])
     #update BASF
     if self.twin_fractions is not None:
-      basf = ' '.join('%f' %fraction.value
+      basf = [fraction.value
                       for fraction in self.twin_fractions
-                      if fraction.grad)
-      if basf: olx.AddIns('BASF', basf)
+                      if fraction.grad]
+      if basf: olx.AddIns('BASF', *basf)
     #update EXTI
     if self.reparametrisation.extinction.grad:
       OV.SetExtinction(self.reparametrisation.extinction.value)
@@ -526,27 +526,26 @@ class FullMatrixRefine(OlexCctbxAdapter):
     completeness_full = refinement_refs.resolution_filter(
       d_min=uctbx.two_theta_as_d(two_theta_full, self.wavelength, deg=True)).completeness()
     completeness_theta_max = refinement_refs.completeness()
+    OV.SetParam("snum.refinement.max_shift_over_esd", None)
+    OV.SetParam("snum.refinement.max_shift_over_esd_atom", None)
+    shifts_over_su = flex.abs(self.normal_eqns.step() /
+      flex.sqrt(self.normal_eqns.covariance_matrix().matrix_packed_u_diagonal()))
     try:
       jac_tr = self.normal_eqns.reparametrisation.jacobian_transpose_matching_grad_fc()
-      shifts = jac_tr.transpose() * self.normal_eqns.step()
-      diag = self.covariance_matrix_and_annotations.matrix.matrix_packed_u_diagonal()
-      shifts_over_su = flex.abs(shifts / flex.sqrt(diag))
+      shifts = jac_tr.transpose() * shifts_over_su
       max_shift_idx = 0
-      for i, s in enumerate(shifts_over_su):
-        if (shifts_over_su[max_shift_idx] < s):
+      for i, s in enumerate(shifts):
+        if (shifts[max_shift_idx] < s):
           max_shift_idx = i
       print("Largest shift/esd is %.4f for %s" %(
-            shifts_over_su[max_shift_idx],
+            shifts[max_shift_idx],
             self.covariance_matrix_and_annotations.annotations[max_shift_idx]))
       OV.SetParam("snum.refinement.max_shift_over_esd",
-        shifts_over_su[max_shift_idx])
+        shifts[max_shift_idx])
       OV.SetParam("snum.refinement.max_shift_over_esd_atom",
         self.covariance_matrix_and_annotations.annotations[max_shift_idx].split('.')[0])
     except:
-      OV.SetParam("snum.refinement.max_shift_over_esd", "n/a")
-      OV.SetParam("snum.refinement.max_shift_over_esd_atom", "n/a")
-      shifts_over_su = flex.abs(self.normal_eqns.step() /
-        flex.sqrt(self.normal_eqns.covariance_matrix().matrix_packed_u_diagonal()))
+      pass
     # cell parameters and errors
     cell_params = self.olx_atoms.getCell()
     cell_errors = self.olx_atoms.getCellErrors()
@@ -846,7 +845,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
      for i, a in enumerate(group):
        for j in xrange(i+1, len(group)):
          self.fixed_angles.setdefault((a, pivot, group[j]), 1)
-        
+
     for a in group:
       ns = self.olx_atoms._atoms[a]['neighbours']
       for i, b in enumerate(ns):
@@ -854,7 +853,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         for j in xrange(i+1, len(ns)):
           if ns[j] not in group: continue
           self.fixed_angles.setdefault((a, b, ns[j]), 1)
-      
+
     if not sizable:
       group = list(group)
       if pivot is not None:
@@ -888,7 +887,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         frag = i_f.generate_fragment(info[0], lengths=lengths)
         frag_sc = [pivot,]
         for i in dependent: frag_sc.append(i)
-        sites = [ uc.orthogonalize(scatterers[i].site) for i in frag_sc]
+        sites = [uc.orthogonalize(scatterers[i].site) for i in frag_sc]
         new_crd = i_f.fit(frag, sites)
         for i, crd in enumerate(new_crd):
           scatterers[frag_sc[i]].site = uc.fractionalize(crd)
@@ -904,7 +903,12 @@ class FullMatrixRefine(OlexCctbxAdapter):
           elif len(pivot_neighbours) < 1:
             print("Invalid rigid group for " + scatterers[pivot].label)
           else:
-            if type(pivot_neighbours[0]) == tuple:
+            neighbour = pivot_neighbours[0]
+            for n in pivot_neighbours[1:]:
+              if type(n) != tuple:
+                neighbour = n
+                break
+            if type(neighbour) == tuple:
               olx.Echo("Could not create rigid rotating group based on '%s' " %(
                         scatterers[pivot].label) +
                        "because the pivot base is symmetry generated, creating " +
@@ -914,7 +918,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
                 pivot, dependent, False)
             else:
               current = rigid.rigid_pivoted_rotatable_group(
-                pivot, pivot_neighbours[0], dependent,
+                pivot, neighbour, dependent,
                 sizeable=n in (4,8),  #nm 4 never coming here from the above
                 rotatable=n in (7,8))
 
