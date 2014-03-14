@@ -388,33 +388,31 @@ def make_disorder_quicktools():
   return txt
 OV.registerFunction(make_disorder_quicktools,False,'gui.tools')
 
+def deal_with_gui_phil(action):
+  skin_name = OV.GetParam('gui.skin.name', 'default')
+  skin_extension = OV.GetParam('gui.skin.extension', None)
 
+  gui_phil_path = "%s/gui.phil" %(OV.DataDir())
+  if action == 'load':
+    OV.SetHtmlFontSize()
+    OV.SetHtmlFontSizeControls()
+    olx.gui_phil_handler.reset_scope('gui')
+    gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_name)
+    if not os.path.isfile(gui_skin_phil_path):
+      gui_skin_phil_path = "%s/gui.params" %(OV.BaseDir())
+    if os.path.isfile(gui_skin_phil_path):
+      gui_skin_phil_file = open(gui_skin_phil_path, 'r')
+      gui_skin_phil = gui_skin_phil_file.read()
+      gui_skin_phil_file.close()
+      olx.gui_phil_handler.update(phil_string=gui_skin_phil)
 
-def md():
-  import markdown
-  import glob
-    
-  #  p = "D:\Users\Horst\Documents\GitHub\Olex2Manual\Sucrose\solving.md"
-  p = r"C:/Users/Horst/Documents/GitHub/Olex2Manual/Sucrose"
-#  p = r"C:\Users\Horst\Documents\GitHub\Olex2Manual\GettingAroundOlex2\atom_label_display_options.md"
-  
-  g = glob.glob(r"%s/*.md" %p)
-
-  text = ""
-  for f in g:
-    try:
-      text += open(f,'r').read().decode('utf-8')
-    except Exception, err:
-      print err, f
-      
-
-  html = markdown.markdown(text, extensions=[])
-#  html = markdown.markdown(text, extensions=['latex'])
-  out = "%s/out.htm" %p
-  wFile = open(out, 'w')
-  wFile.write(html.encode('utf-8'))
-  wFile.close()
-  olx.Shell(out)
-  
-OV.registerFunction(md,False,'md')
-  
+    if skin_extension:
+      gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_extension)
+      if os.path.isfile(gui_skin_phil_path):
+        gui_skin_phil_file = open(gui_skin_phil_path, 'r')
+        gui_skin_phil = gui_skin_phil_file.read()
+        gui_skin_phil_file.close()
+        olx.gui_phil_handler.update(phil_string=gui_skin_phil)
+  else:
+    olx.gui_phil_handler.save_param_file(
+      file_name=gui_phil_path, scope_name='gui', diff_only=True)
