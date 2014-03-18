@@ -58,7 +58,7 @@ def getModule(name, email=None):
       etoken = f
     except Exception, e:
       msg = '''
-An error occurred while downloading the extension.<br>%s<br>Please restart Olex2 and try again.
+<font color='red'><b>An error occurred while downloading the extension.</b></font><br>%s<br>Please restart Olex2 and try again.
 ''' %(str(e))
       if debug:
         sys.stdout.formatExceptionInfo()
@@ -86,7 +86,7 @@ An error occurred while downloading the extension.<br>%s<br>Please restart Olex2
       old_folder = new_name
     except Exception, e:
       msg = '''
-An error occurred while installing the extension.<br>%s<br>Please restart Olex2 and try again.
+<font color='red'><b>An error occurred while installing the extension.</b></font><br>%s<br>Please restart Olex2 and try again.
 ''' %(str(e))
       olex.writeImage(info_file_name, msg, 0)
       return False
@@ -109,9 +109,9 @@ An error occurred while installing the extension.<br>%s<br>Please restart Olex2 
     else:
       zp = ZipFile(StringIO(f))
       zp.extractall(path=dir)
-      msg = "Module %s has been successfully installed/updated" %name
-      msg += "<br>You have 30 days to evaluate this extension module."
-      msg += "<br>Please restart Olex2 to activate the extension module."
+      msg = "Module <b>%s</b> has been successfully installed/updated" %name
+      msg += "<br>You have 30 days to evaluate this extension module. Please contact us for further information."
+      msg += "<br><font color='green'><b><Please restart Olex2 to activate the extension module.</b></font>"
       olex.writeImage(info_file_name, msg, 0)
       global available_modules
       if current_module:
@@ -127,7 +127,7 @@ An error occurred while installing the extension.<br>%s<br>Please restart Olex2 
       return True
   except Exception, e:
     msg = '''
-An error occurred while installing the extension.<br>%s<br>Please restart Olex2 and try again.
+<font color='red'><b>An error occurred while installing the extension.</b></font><br>%s<br>Please restart Olex2 and try again.
 ''' %(str(e))
     olex.writeImage(info_file_name, msg, 0)
     return False
@@ -154,7 +154,9 @@ def loadAll():
     except Exception, e:
       global failed_modules
       failed_modules[d] = str(e)
-      print("Error occurred while loading module: %s" %d)
+      if debug:
+        sys.stdout.formatExceptionInfo()
+        print("Error occurred while loading module: %s" %d)
   getAvailableModules() #thread
   if olx.HasGUI() == 'true':
     olx.Schedule(2, "spy.plugins.AskToUpdate()", g=True)
@@ -326,7 +328,7 @@ def getInfo():
     return ""
   preambula = ""
   if current_module.action == 3:
-    preambula = "This module has <b>expired</b>, please either re-install it or contact"+\
+    preambula = "<font color='red'>This module has <b>expired</b></font>, please either re-install it or contact"+\
       " <a href='shell(mailto:enquiries@olexsys.org?subject=Olex2%20extensions%20licence)'>"+\
       "OlexSys Ltd</a> to extend the licence.<br>"
   return preambula + "<a href='shell %s'>Module URL: </a> %s<br>%s"\
