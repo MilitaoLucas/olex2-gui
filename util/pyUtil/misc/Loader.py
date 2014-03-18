@@ -154,9 +154,9 @@ def loadAll():
     except Exception, e:
       global failed_modules
       failed_modules[d] = str(e)
+      print("Error occurred while loading module: %s" %d)
       if debug:
         sys.stdout.formatExceptionInfo()
-        print("Error occurred while loading module: %s" %d)
   getAvailableModules() #thread
   if olx.HasGUI() == 'true':
     olx.Schedule(2, "spy.plugins.AskToUpdate()", g=True)
