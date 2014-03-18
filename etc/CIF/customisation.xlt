@@ -51,7 +51,7 @@
     <_diffrn_measured_fraction_*>
   >
   <do_merge
-   <_refine_ls_hydrogen_treatment>
+   <_*_details>
   >
   <#include "app.ConfigDir()/cif_customisation.xld" extend='false'>
 >
