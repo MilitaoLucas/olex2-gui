@@ -752,29 +752,22 @@ class ExtractCifInfo(CifTools):
       #})
 
     self.update_manageable()
-
-    for item in self.cif_block:
-      if item.startswith("_computing"):
-        d = {}
-        longval = self.cif_block[item]
-        for str in self.computing_citations_d:
-          if str.lower() in longval.lower():
-            _ = re.findall("\d{4}", longval)
-            if not _:
-              year = "?"
-            else:
-              year = _[0]
-            d['year'] = year
-            shortval = self.computing_citations_d[str]%d
-            self.cif_block["_olex2%s_long" %item] = shortval
-            self.cif_block["_olex2%s_long" %item] = longval
-            break
-
-    for item in self.cif_block:
-      if item.startswith("_olex2") and item.endswith("_long"):
-        longval = self.cif_block[item]
-        if longval not in full_references:
-          full_references.append(longval)
+    # merge references
+    current_refs = self.cif_block.get('_publ_section_references', '')
+    ref = ""
+    full_references_set = set([''.join(x.replace('\r', '').split()) for x in full_references])
+    for l in current_refs.split('\n'):
+      #l = l.rstrip()
+      if not l:
+        if ref:
+          if ''.join(ref.replace('\r', '').split()) not in full_references_set:
+            full_references.append(ref)
+          ref = ""
+      else:
+        if ref:
+          ref = "%s\n%s" %(ref, l)
+        else:
+          ref = l
 
     full_references.sort()
     self.update_cif_block({
