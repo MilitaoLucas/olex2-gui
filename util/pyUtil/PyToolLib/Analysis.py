@@ -1250,7 +1250,7 @@ class Analysis(Graph):
     if not pop_html or not pop_name:
       return
 
-    str = '''
+    s = '''
 <html>
 <body>
 <zimg border="0" src="%s.png">
@@ -1260,7 +1260,7 @@ class Analysis(Graph):
 </html>
 ''' %(self.item, self.map_txt)
     htm_location = "%s.htm" %pop_html
-    OlexVFS.write_to_olex(htm_location, str)
+    OlexVFS.write_to_olex(htm_location, s)
     extraX = 29
     extraY = 48
     pstr = "popup %s '%s' -b=stcr -t='%s' -w=%s -h=%s -x=1 -y=50" %(
