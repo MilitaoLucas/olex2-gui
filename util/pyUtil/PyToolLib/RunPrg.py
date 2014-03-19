@@ -16,7 +16,7 @@ import TimeWatch
 
 class RunPrg(ArgumentParser):
   running = False
-  
+
   def __init__(self):
     super(RunPrg, self).__init__()
     self.demote = False
