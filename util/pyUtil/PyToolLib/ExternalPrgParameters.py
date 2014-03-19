@@ -16,6 +16,8 @@ global RPD
 RPD = {}
 global SPD
 SPD = {}
+global managed_references
+managed_references = set()
 
 class ExternalProgramDictionary(object):
   def __init__(self):
@@ -1040,7 +1042,7 @@ def defineExternalPrograms():
     name='ShelXS',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference="Sheldrick, G.M. (2008). Acta Cryst. A64, 112-122",
+    reference="Sheldrick, G.M. (2008). Acta Cryst. A64, 112-122.",
     brief_reference="Sheldrick, 2008",
     execs=["shelxs.exe", "shelxs"])
   ShelXS97 = Program(
@@ -1104,7 +1106,7 @@ def defineExternalPrograms():
     program_type='solution',
     author="Luc Bourhis",
     reference="""Bourhis, L.J., Dolomanov, O.V., Gildea, R.J., Howard, J.A.K., Puschmann, H.
- (2013). in preparation""",
+ (2013). in preparation.""",
     brief_reference="Bourhis et al., 2013",
     )
 
@@ -1116,7 +1118,7 @@ def defineExternalPrograms():
         "Dritan Siliqi, Riccardo Spagna",
     reference="""Burla, M.C., Caliandro, R., Camalli, M., Carrozzini, B., Cascarano, G.L.,
  De Caro, L., Giacovazzo, C., Polidori, G., Siliqi, D., Spagna, R.
- (2007). J. Appl. Cryst. 40, 609-613""",
+ (2007). J. Appl. Cryst. 40, 609-613.""",
     brief_reference="Burla et al.,  2007",
     versions = '97',
     execs=["sir97.exe", "sir97"])
@@ -1159,7 +1161,7 @@ def defineExternalPrograms():
     reference="""Palatinus, L. & Chapuis, G. (2007). J. Appl. Cryst., 40, 786-790;
 Palatinus, L. & van der Lee, A. (2008). J. Appl. Cryst. 41, 975-984;
 Palatinus, L., Prathapa, S. J. & van Smaalen, S. (2012). J. Appl. Cryst. 45,
- 575-580""",
+ 575-580.""",
     brief_reference="""Palatinus & Chapuis, 2007;Palatinus & van der Lee, 2008;
 Palatinus et al., 2012""",
     versions='260711',
@@ -2175,7 +2177,17 @@ def get_program_dictionaries(cRPD=None, cSPD=None):
     else:
       SPD, RPD =  defineExternalPrograms()
   return SPD, RPD
-  
+
+def get_managed_reference_set():
+  global managed_references
+  if managed_references: return managed_references
+  sd, rd = get_program_dictionaries()
+  rl = []
+  for p in sd: rl.append(p.reference)
+  for p in rd: rl.append(p.reference)
+  managed_references = set([''.join(x.replace('\r', '').split()) for x in rl])
+  return managed_references
+
 def get_known(kind):
   sd, rd = get_program_dictionaries()
   if kind == 'solution':
