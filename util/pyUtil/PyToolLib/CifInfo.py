@@ -119,6 +119,7 @@ class CifTools(ArgumentParser):
         olx.cif_model[self.data_name] = model.block()
     self.cif_model = olx.cif_model
     self.cif_block = olx.cif_model[self.data_name]
+    self.update_authors()
     #since reference formatting got changed - clearing the section to avoid
     #accumulation
     date = self.cif_block.get('_audit_creation_date', '')
@@ -132,22 +133,23 @@ class CifTools(ArgumentParser):
     self.olex2_reference_brief = "Olex2 (Dolomanov et al., 2009)"
     self.olex2_reference = """Dolomanov, O.V., Bourhis, L.J., Gildea, R.J, Howard, J.A.K. & Puschmann, H.
  (2009), J. Appl. Cryst. 42, 339-341."""
-    self.update_cif_block(
-      {'_audit_creation_date': datetime.date.today().strftime('%Y-%m-%d'),
-       '_audit_creation_method': """
-;
-Olex2 %s
-(compiled %s, GUI svn.r%i)
-;
-""" %(OV.GetTag(), OV.GetCompilationInfo(), OV.GetSVNVersion())
-    }, force=True)
     olx.SetVar('olex2_reference_short', self.olex2_reference_brief)
     olx.SetVar('olex2_reference_long', self.olex2_reference)
+
     self.update_cif_block(
-      {'_computing_molecular_graphics': self.olex2_reference_brief,
+      {'_audit_creation_date': datetime.date.today().strftime('%Y-%m-%d'),
+       '_audit_creation_method': 'Olex2 %s\n(compiled %s, GUI svn.r%i)' %(
+         OV.GetTag(), OV.GetCompilationInfo(), OV.GetSVNVersion()),
+       '_computing_molecular_graphics': self.olex2_reference_brief,
        '_computing_publication_material': self.olex2_reference_brief
-       }, force=True)
+    }, force=True)
     self.update_manageable()
+
+  def update_authors(self):
+    author_loop = self.cif_block.get_loop('_publ_author', None)
+    if author_loop:
+      OV.SetParam('snum.metacif.publ_author_names',
+                  ';'.join(author_loop.get('_publ_author_name', [])).replace('\'', '').replace('"', ''))
 
   def update_manageable(self):
     self.sort_crystal_dimensions()
@@ -324,6 +326,8 @@ class EditCifInfo(CifTools):
           user_modified.append(item)
       olx.cif_model = updated_cif_model
       self.cif_model = olx.cif_model
+      self.cif_block = olx.cif_model[self.data_name]
+      self.update_authors()
       self.write_metacif_file()
       if user_modified is not None:
         OV.SetParam('snum.metacif.user_modified', user_modified)
