@@ -141,6 +141,15 @@ Olex2 %s
       {'_computing_molecular_graphics': self.olex2_reference_brief,
        '_computing_publication_material': self.olex2_reference_brief
        }, force=True)
+    #since reference formatting got changed - clearing the section to avoid
+    #accumulation
+    date = self.cif_block.get('_audit_creation_date', '')
+    if date:
+      try:
+        if int(date.replace('-', '')) < 20140319:
+          self.update_cif_block('_publ_section_references', '', True)
+      except:
+        pass
     self.update_manageable()
 
   def update_manageable(self):
@@ -752,31 +761,28 @@ class ExtractCifInfo(CifTools):
       #})
 
     self.update_manageable()
-
-    for item in self.cif_block:
-      if item.startswith("_computing"):
-        d = {}
-        longval = self.cif_block[item]
-        for str in self.computing_citations_d:
-          if str.lower() in longval.lower():
-            _ = re.findall("\d{4}", longval)
-            if not _:
-              year = "?"
-            else:
-              year = _[0]
-            d['year'] = year
-            shortval = self.computing_citations_d[str]%d
-            self.cif_block["_olex2%s_long" %item] = shortval
-            self.cif_block["_olex2%s_long" %item] = longval
-            break
-
-    for item in self.cif_block:
-      if item.startswith("_olex2") and item.endswith("_long"):
-        longval = self.cif_block[item]
-        if longval not in full_references:
-          full_references.append(longval)
-
+    # merge references
+    full_references = [x for x in set(full_references)] #make unique
+    current_refs = self.cif_block.get('_publ_section_references', '')
+    ref = ""
+    full_references_set =\
+     set([''.join(x.replace('\r', '').split()) for x in full_references])\
+      | ExternalPrgParameters.get_managed_reference_set()
+    for l in current_refs.split('\n'):
+      #l = l.rstrip()
+      if not l:
+        if ref:
+          ref_t = ''.join(ref.replace('\r', '').split())
+          if ref_t not in full_references_set:
+            full_references.append(ref)
+          ref = ""
+      else:
+        if ref:
+          ref = "%s\n%s" %(ref, l)
+        else:
+          ref = l
     full_references.sort()
+
     self.update_cif_block({
       '_publ_section_references': '\n\n'.join(full_references)}, force=True)
 
