@@ -125,9 +125,9 @@ class CifTools(ArgumentParser):
     if date:
       try:
         if int(date.replace('-', '')) < 20140319:
-          self.update_cif_block('_publ_section_references', '', True)
+          self.update_cif_block({'_publ_section_references' : ''}, force=True)
       except:
-        self.update_cif_block('_publ_section_references', '', True)
+        self.update_cif_block({'_publ_section_references' : ''}, force=True)
 
     self.olex2_reference_brief = "Olex2 (Dolomanov et al., 2009)"
     self.olex2_reference = """Dolomanov, O.V., Bourhis, L.J., Gildea, R.J, Howard, J.A.K. & Puschmann, H.
@@ -140,7 +140,7 @@ Olex2 %s
 (compiled %s, GUI svn.r%i)
 ;
 """ %(OV.GetTag(), OV.GetCompilationInfo(), OV.GetSVNVersion())
-    })
+    }, force=True)
     olx.SetVar('olex2_reference_short', self.olex2_reference_brief)
     olx.SetVar('olex2_reference_long', self.olex2_reference)
     self.update_cif_block(
