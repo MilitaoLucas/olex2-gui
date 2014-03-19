@@ -1103,8 +1103,7 @@ def defineExternalPrograms():
     name='olex2.solve',
     program_type='solution',
     author="Luc Bourhis",
-    reference="""
-Bourhis, L.J., Dolomanov, O.V., Gildea, R.J., Howard, J.A.K., Puschmann, H.
+    reference="""Bourhis, L.J., Dolomanov, O.V., Gildea, R.J., Howard, J.A.K., Puschmann, H.
  (2013). in preparation""",
     brief_reference="Bourhis et al., 2013",
     )
@@ -1115,8 +1114,7 @@ Bourhis, L.J., Dolomanov, O.V., Gildea, R.J., Howard, J.A.K., Puschmann, H.
     author="Maria C. Burla, Rocco Caliandro, Mercedes Camalli, Benedetta Carrozzini,"+
         "Giovanni Luca Cascarano, Liberato De Caro, Carmelo Giacovazzo, Giampiero Polidori,"+
         "Dritan Siliqi, Riccardo Spagna",
-    reference="""
-Burla, M.C., Caliandro, R., Camalli, M., Carrozzini, B., Cascarano, G.L.,
+    reference="""Burla, M.C., Caliandro, R., Camalli, M., Carrozzini, B., Cascarano, G.L.,
  De Caro, L., Giacovazzo, C., Polidori, G., Siliqi, D., Spagna, R.
  (2007). J. Appl. Cryst. 40, 609-613""",
     brief_reference="Burla et al.,  2007",
@@ -1158,8 +1156,7 @@ Burla, M.C., Caliandro, R., Camalli, M., Carrozzini, B., Cascarano, G.L.,
     name='Superflip',
     program_type='solution',
     author="A van der Lee, C.Dumas & L. Palatinus",
-    reference="""
-Palatinus, L. & Chapuis, G. (2007). J. Appl. Cryst., 40, 786-790;
+    reference="""Palatinus, L. & Chapuis, G. (2007). J. Appl. Cryst., 40, 786-790;
 Palatinus, L. & van der Lee, A. (2008). J. Appl. Cryst. 41, 975-984;
 Palatinus, L., Prathapa, S. J. & van Smaalen, S. (2012). J. Appl. Cryst. 45,
  575-580""",
