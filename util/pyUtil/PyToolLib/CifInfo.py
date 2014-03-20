@@ -107,6 +107,10 @@ OV.registerMacro(ValidateCif, """filepath&;cif_dic&;show_warnings""")
 #timer('Register ValidateCif')
 
 class CifTools(ArgumentParser):
+  specials = {
+    'snum.report.crystal_mounting_method': '_olex2_exptl_crystal_mounting_method',
+  }
+
   def __init__(self):
     super(CifTools, self).__init__()
     self.metacif_path = '%s/%s.metacif' %(OV.StrDir(), OV.FileName())
@@ -119,7 +123,7 @@ class CifTools(ArgumentParser):
         olx.cif_model[self.data_name] = model.block()
     self.cif_model = olx.cif_model
     self.cif_block = olx.cif_model[self.data_name]
-    self.update_authors()
+    self.update_specials()
     #since reference formatting got changed - clearing the section to avoid
     #accumulation
     date = self.cif_block.get('_audit_creation_date', '')
@@ -145,7 +149,20 @@ class CifTools(ArgumentParser):
     }, force=True)
     self.update_manageable()
 
-  def update_authors(self):
+  def save_specials(self):
+    for s, c in CifTools.specials.iteritems():
+      sv = OV.GetParam(s, '')
+      if sv:
+        self.cif_block[c] = sv
+      elif c in self.cif_block:
+        del self.cif_block[c]
+
+  def update_specials(self):
+    for s, c in CifTools.specials.iteritems():
+      if c in self.cif_block:
+        OV.SetParam(s, self.cif_block[c])
+      else:
+        OV.SetParam(s, '')
     author_loop = self.cif_block.get_loop('_publ_author', None)
     if author_loop:
       OV.SetParam('snum.metacif.publ_author_names',
@@ -287,6 +304,7 @@ class EditCifInfo(CifTools):
     super(EditCifInfo, self).__init__()
     ## view metacif information in internal text editor
     s = StringIO()
+    self.save_specials()
     print >> s, self.cif_model
     text = s.getvalue()
     text += "\n%s" %append
@@ -327,7 +345,7 @@ class EditCifInfo(CifTools):
       olx.cif_model = updated_cif_model
       self.cif_model = olx.cif_model
       self.cif_block = olx.cif_model[self.data_name]
-      self.update_authors()
+      self.update_specials()
       self.write_metacif_file()
       if user_modified is not None:
         OV.SetParam('snum.metacif.user_modified', user_modified)
