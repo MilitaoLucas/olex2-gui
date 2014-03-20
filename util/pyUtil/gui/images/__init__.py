@@ -160,7 +160,10 @@ def GetPSImageInstructions(notify_listener=True, output_folder=None):
   lw_font = str(OV.GetParam('snum.image.ps.font_weight'))
   div_pie = str(OV.GetParam('snum.image.ps.octant_count'))
   scale_hb = str(OV.GetParam('snum.image.ps.h_bond_width'))
-  octant_atoms = str(OV.GetParam('snum.image.ps.octant_atoms'))
+  octant_atoms = '-$C'
+  import olex_gui
+  if olex_gui.IsControl('IMAGE_PS_OCTANTS_ATOMS'):
+    octant_atoms = olx.html.GetValue('IMAGE_PS_OCTANTS_ATOMS')
 
   if image_perspective.lower() == 'true':
     image_perspective = "-p"
