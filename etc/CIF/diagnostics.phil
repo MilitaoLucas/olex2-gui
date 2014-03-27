@@ -194,7 +194,7 @@ diagnostics {
         .type = float
       top = 0.5
         .type = float
-      href = "spy.gui.UpdateWeight()"
+      href = "spy.gui.UpdateWeight()>>html.Update"
         .type = str
     }
     expected_peaks{
