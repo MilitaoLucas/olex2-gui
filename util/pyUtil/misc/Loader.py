@@ -408,6 +408,82 @@ def AskToUpdate():
         else: status = "Failed"
         print("Updating '%s': %s" %(m.folder_name, status))
 
+def offlineInstall():
+  import gui
+  src = gui.FileOpen("Please choose the offline module archive", "*.zip", ".")
+  if not src:
+    return
+  from zipfile import ZipFile
+  zip = ZipFile(src)
+  names = zip.namelist()
+  if not names:
+    print("Empty archive...")
+    return
+  module_name = names[0].split('/')[0]
+  if not module_name:
+    print("Invalid archive")
+    return
+  licence_files = ('licence.txt', 'licence.htm')
+  licence_file_name = ''
+  for n in names:
+    for l in licence_files:
+     if n.endswith(l):
+       licence_file_name = n
+       break
+     if licence_file_name:
+       break
+  if licence_file_name:
+    lic = zip.open(licence_file_name).read()
+    sz = [int(i) for i in olx.GetWindowSize().split(',')]
+    w = int(sz[2]*2/3)
+    h = int(sz[3]*2/3)
+    olex.writeImage("module_licence_content", lic)
+    olex.writeImage("module_licence",
+"""
+ <html><body>
+  <table width='100%%'>
+    <tr><td colspan='2'>
+     <input type='text' multiline='true'
+      value="spy.vfs.read_from_olex('module_licence_content')" width='100%%' height='%s' />
+     </td></tr>
+    <tr>
+     <td align='center'><input type='button' value='Accept' onclick="html.EndModal('~popup_name~', 1)"></td>
+     <td align='center'><input type='button' value='Decline' onclick="html.EndModal('~popup_name~', 2)"></td>
+    </tr>
+  </table>
+  </body></html>
+""" %(h-100),
+      0)
+    olx.Popup("module_licence", "module_licence",
+       b="t",  t="Licence agreement",
+       x=sz[0] + sz[2]/2 - w/2, y=sz[1] + sz[3]/2 - h/2,
+       w=w, h=h, s=False)
+    res = olx.html.ShowModal("module_licence", True)
+    olex.writeImage("module_licence_content", "", 0)
+    olex.writeImage("module_licence", "", 0)
+    if int(res) != 1:
+      zip.close()
+      return
+  dir = getModulesDir()
+  if not os.path.exists(dir):
+    os.mkdir(dir)
+  else:
+    mdir = dir + os.sep + module_name
+    if os.path.exists(mdir):
+      res = olx.Alert("Warning", "Destination folder exists.\nOverwrite?", "YCQ")
+      if res != 'Y':
+        return
+      print("Removing previous installation...")
+      try:
+        shutil.rmtree(mdir)
+      except:
+        print("Failed to remove previous installation. Please restart Olex2 and try again...")
+        return
+  zip.extractall(path=dir)
+  zip.close()
+  print("Installed successfully '%s'. Please restart Olex2 to load it." %module_name)
+
+
 path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(path)
 
@@ -430,6 +506,7 @@ if os.path.exists(lib_name) or olx.app.IsDebugBuild() == 'true':
     olex.registerFunction(doAct, False, "plugins.gui")
     olex.registerFunction(AskToUpdate, False, "plugins")
     olex.registerFunction(updateKey, False, "plugins")
+    olex.registerFunction(offlineInstall, False, "plugins")
     loadAll()
   except Exception, e:
     print("Plugin loader initialisation failed: '%s'" %e)
