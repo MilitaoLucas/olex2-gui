@@ -1,8 +1,10 @@
 import olex
 import olx
-
+import os
+import glob
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+import htmlTools
 
 
 def FileOpen(title, filter, location, default='', default_name=''):
@@ -64,6 +66,48 @@ def SwitchPanel(name="home"):
 
 olex.registerFunction(SwitchPanel, False, "gui")
 
+def UpdateWeight():
+  w = OV.GetParam('snum.refinement.suggested_weight')
+  if not w:
+    print "No suggested weighting scheme present. Please refine and try again."
+    return ""
+  olex.m("UpdateWght %s %s" %(w[0], w[1]))
+  print "Weighting scheme has been updated"
+olex.registerFunction(UpdateWeight, False, "gui")
+
+def GetPathParam(variable, default=None):
+  retVal = OV.GetParam(variable, default)
+  if "()" in retVal:
+    func = retVal.split("()")[0]
+    rest = retVal.split("()")[1]
+    res = getattr(OlexFunctions, func)
+    retVal = res(OV) + rest
+  return retVal
+olex.registerFunction(GetPathParam, False, "gui")
+
+
+def GetFileList(root, extensions):
+  l = []
+  if type(extensions) == unicode:
+    extensions = [extensions]
+  for extension in extensions:
+    extension = extension.strip("'")
+    g = glob.glob(r"%s/*.%s" %(root, extension))
+    for f in g:
+      f = OV.standardizePath(f)
+      name = f.split(".%s"%extension)[0].split("/")[-1]
+      l.append((name,f))
+  return l
+olex.registerFunction(GetFileList, False, "gui")
+
+def GetFileListAsDropdownItems(root, extensions):
+  l = GetFileList(root, extensions)
+  txt = ""
+  for item in l:
+    txt += "%s<-%s;" %(item[0], item[1])
+  return txt
+olex.registerFunction(GetFileListAsDropdownItems, False, "gui")
+
 
 def GetFolderList(root):
   import os
@@ -79,7 +123,6 @@ def GetFolderList(root):
   t.sort()
   t = ";".join(t)
   return t
-
 olex.registerFunction(GetFolderList, False, "gui")
 
 #'static' class
@@ -118,5 +161,5 @@ def do_sort():
     args.append('+' + arg3)
   args += olx.GetVar("sorting.moiety_order", "").split()
   olx.Sort(*args)
-  
+
 olex.registerFunction(do_sort, False, "gui")
