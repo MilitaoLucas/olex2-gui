@@ -10,8 +10,6 @@ diagnostics {
     .type = int
   scopes = hkl refinement
     .type = strings
-  pin_scopes = False
-    .type = bool
   refinement{
     max_shift_site{
       op = "smaller"
@@ -49,7 +47,7 @@ diagnostics {
         .type = float
       top = 0.15
         .type = float
-      display = "Max Shift/esd"
+      display = "Shift/esd"
         .type = str
       href = atom
         .type = str
@@ -180,6 +178,8 @@ diagnostics {
     goof{
       op = "between"
         .type = str
+      value_format= "3f"
+        .type = str
       display = "GooF"
         .type = str
       value_format= "1f"
@@ -235,13 +235,13 @@ diagnostics {
         .type = str
       op = "smaller"
         .type = str
-      grade1  = 0.70
+      grade1  = 0.75
         .type = float
-      grade2 = 0.80
+      grade2 = 0.82
         .type = float
-      grade3 = 0.82
+      grade3 = 0.86
         .type = float
-      grade4 = 0.85
+      grade4 = 0.88
         .type = float
       top = 1.0
         .type = float
@@ -254,13 +254,13 @@ diagnostics {
         .type = str
       value_format= "1f"
         .type = str
-      grade1  = 20
+      grade1  = 15
         .type = float
-      grade2 = 15
+      grade2 = 12
         .type = float
-      grade3 = 10
+      grade3 = 9
         .type = float
-      grade4 = 5
+      grade4 = 6
         .type = float
       top = 25
         .type = float
