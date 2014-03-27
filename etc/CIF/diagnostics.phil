@@ -68,7 +68,7 @@ diagnostics {
         .type = float
       top = 0.15
         .type = float
-      display = "Max Shift/esd"
+      display = "Shift/esd"
         .type = str
       href = None
         .type = str
@@ -182,8 +182,6 @@ diagnostics {
         .type = str
       display = "GooF"
         .type = str
-      value_format= "1f"
-        .type = str
       soll = 1.0
         .type = float
       grade1  = 0.1
@@ -196,7 +194,7 @@ diagnostics {
         .type = float
       top = 0.5
         .type = float
-      href = echo Fred
+      href = "spy.gui.UpdateWeight()"
         .type = str
     }
     expected_peaks{

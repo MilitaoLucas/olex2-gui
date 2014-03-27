@@ -168,6 +168,8 @@ routines requiring structure refinement
       .type = float
     max_hole = None
       .type = float
+    goof = None
+      .type = float
     flack_str = None
       .type = str
     expected_peaks = None
@@ -528,6 +530,8 @@ routines requiring structure refinement
       .type = str
     date_collected = None
       .type = str
+    total_time = 0
+      .type = int
     crystal_images = None
       .type = strings
     crystal_image = None
@@ -1060,6 +1064,12 @@ user
     .type = str
   keep_unique = False
     .type = bool
+
+  diagnostics{
+    pin_scopes = False
+      .type = bool
+  }
+
   report{
     db_location = DataDir()/db
       .type = str

@@ -528,6 +528,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     completeness_theta_max = refinement_refs.completeness()
     OV.SetParam("snum.refinement.max_shift_over_esd", None)
     OV.SetParam("snum.refinement.max_shift_over_esd_atom", None)
+
     shifts_over_su = flex.abs(self.normal_eqns.step() /
       flex.sqrt(self.normal_eqns.covariance_matrix().matrix_packed_u_diagonal()))
     try:
@@ -1068,7 +1069,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.diff_stats.max(), self.diff_stats.min())
     OV.SetParam('snum.refinement.max_peak', self.diff_stats.max())
     OV.SetParam('snum.refinement.max_hole', self.diff_stats.min())
-
+    OV.SetParam('snum.refinement.goof', "%.4f" %self.normal_eqns.goof())
   def get_disagreeable_reflections(self, show_in_console=False):
     fo2 = self.normal_eqns.observations.fo_sq\
       .customized_copy(sigmas=flex.sqrt(1/self.normal_eqns.weights))\

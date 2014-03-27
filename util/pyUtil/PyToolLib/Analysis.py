@@ -2607,7 +2607,7 @@ class HealthOfStructure():
 
     self.hos_text = ""
     if res[0]:
-      if OV.GetParam('diagnostics.pin_scopes'):
+      if OV.GetParam('user.diagnostics.pin_scopes'):
         for scope in self.scopes:
           self.scope = scope
           self.summarise_HOS()
@@ -2709,10 +2709,10 @@ class HealthOfStructure():
     is_CIF = (olx.IsFileType('cif') == 'true')
     if self.scope == "refinement":
       if is_CIF:
-        l = ['_refine_ls_shift/su_max', '_refine_diff_density_max', '_refine_diff_density_min']
+        l = ['_refine_ls_shift/su_max', '_refine_diff_density_max', '_refine_diff_density_min', '_refine_ls_goodness_of_fit_ref']
       else:
         #l = ['max_shift_over_esd', 'max_shift_site', 'max_shift_u', 'max_peak', 'max_hole']
-        l = ['max_shift_over_esd', 'max_peak', 'max_hole']
+        l = ['max_shift_over_esd', 'max_peak', 'max_hole', 'goof']
       #missing = olexex.OlexRefinementModel().getMissingAtomsNumber()
       #OV.SetParam('snum.refinement.expected_peaks', missing)
     else:
@@ -2742,7 +2742,17 @@ class HealthOfStructure():
         else:
           value = OV.GetParam('snum.refinement.%s' %item)
 
+      if item == "_refine_ls_goodness_of_fit_ref":
+        item = 'goof'
+      elif item == "_refine_diff_density_max":
+        item = 'max_peak'
+      elif item == "_refine_diff_density_min":
+        item = 'max_hole'
+
+
+
       display = OV.GetParam('diagnostics.%s.%s.display' %(self.scope,item))
+      
       value_format = OV.GetParam('diagnostics.%s.%s.value_format' %(self.scope,item))
       href = OV.GetParam('diagnostics.%s.%s.href' %(self.scope,item))
 
@@ -2754,7 +2764,7 @@ class HealthOfStructure():
         else:
           value = None
       if value == None:
-        value = "NO VALUE!"
+        value = "n/a"
         bg_colour = "#000000"
       else:
         if "%" in value_format:
@@ -2791,7 +2801,10 @@ class HealthOfStructure():
         ref_open = ''
         ref_close = ''
         if href:
-          ref_open = "<a href='%s'>" %(href)
+          dollar = ""
+          if "()" in href:
+            dollar = "$"
+          ref_open = "<a href='%s%s'>" %(dollar, href)
           ref_close = "</a>"
         txt += '''
   <td bgcolor=%s align='center' width='%s%%'><font color='#ffffff'>
@@ -2975,7 +2988,7 @@ class HealthOfStructure():
         if val <= OV.GetParam('diagnostics.%s.%s.grade%s' %(self.scope, item, i)):
           break
       elif op == 'between':
-        if val - (OV.GetParam('diagnostics.%s.%s.grade%s' %(self.scope, item, i))) <= val <= val + (OV.GetParam('diagnostics.%s.%s.grade%s' %(self.scope, item, i))):
+        if val - (OV.GetParam('diagnostics.%s.%s.grade%s' %(self.scope, item, i))) <= soll <= val + (OV.GetParam('diagnostics.%s.%s.grade%s' %(self.scope, item, i))):
           break
 
     if i == 1:
