@@ -4,7 +4,8 @@ $spy.plugins.getAvailableModules()
 
 <!-- #include tool-row gui\blocks\tool-row-help.htm;name=MODULES_1;help_ext=Extension-Modules;1; -->
   <td width='100%'>
-Various extension modules for Olex2 are currently under development. If you are interested in testing these, please sign up below!
+Various extension modules for Olex2 are currently under development. If you are interested in 
+testing these, please sign up below!
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
@@ -60,5 +61,14 @@ Various extension modules for Olex2 are currently under development. If you are 
 <!-- #includeif fs.Exists('modules-info.htm') modules-info modules-info.htm;1 -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
+
+<!-- #include tool-row gui\blocks\tool-row.htm;name=MODULES_OFFLINE;1; -->
+  <td width='100%'>
+  Please use this button if you obtained an offline installation module archive.
+  </td>
+  <td>
+    <input type="button" value="Install offline" onclick="spy.plugins.offlineInstall()"/>
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
