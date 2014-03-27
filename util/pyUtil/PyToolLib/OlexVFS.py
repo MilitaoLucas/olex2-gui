@@ -40,4 +40,4 @@ def write_to_olex(filename, data, isPersistent=0):
 def read_from_olex(filename):
   return olex.readImage(filename)
 
-
+olex.registerFunction(read_from_olex, False, "vfs")
