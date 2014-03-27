@@ -115,15 +115,18 @@ class CifTools(ArgumentParser):
     super(CifTools, self).__init__()
     self.metacif_path = '%s/%s.metacif' %(OV.StrDir(), OV.FileName())
     self.data_name = OV.FileName().replace(' ', '')
+    just_loaded = False
     if olx.cif_model is None or self.data_name.lower() not in olx.cif_model.keys_lower.keys():
       if os.path.isfile(self.metacif_path):
         olx.cif_model = self.read_metacif_file()
       if olx.cif_model is None:
         olx.cif_model = model.cif()
         olx.cif_model[self.data_name] = model.block()
+      just_loaded = True
     self.cif_model = olx.cif_model
     self.cif_block = olx.cif_model[self.data_name]
-    self.update_specials()
+    if just_loaded:
+      self.update_specials()
     #since reference formatting got changed - clearing the section to avoid
     #accumulation
     date = self.cif_block.get('_audit_creation_date', '')
@@ -162,7 +165,9 @@ class CifTools(ArgumentParser):
       if c in self.cif_block:
         OV.SetParam(s, self.cif_block[c])
       else:
-        OV.SetParam(s, '')
+        v = OV.GetParam(s, '')
+        if v:
+          self.cif_block[c] = v
     author_loop = self.cif_block.get_loop('_publ_author', None)
     if author_loop:
       OV.SetParam('snum.metacif.publ_author_names',
@@ -185,6 +190,7 @@ class CifTools(ArgumentParser):
     return None
 
   def write_metacif_file(self):
+    self.save_specials()
     with open(self.metacif_path, 'wb') as f:
       print >> f, self.cif_model
 
