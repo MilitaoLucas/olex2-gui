@@ -12,8 +12,9 @@ import HttpTools
 
 class PluginTools(object):
   def __init__(self):
-    deal_with_gui_phil('load')
-    
+    if olx.HasGUI() == 'true':
+      deal_with_gui_phil('load')
+
   def get_plugin_date(self):
     return time.ctime(os.path.getmtime(self.p_path))
 
@@ -54,8 +55,9 @@ class PluginTools(object):
         #file_name=user_phil_file, scope_name='snum.%s' %self.p_name, diff_only=True)
 
   def setup_gui(self):
-    
-    
+    if olx.HasGUI() != 'true':
+      return
+
     for image, img_type in self.p_img:
       make_single_gui_image(image, img_type=img_type)
     #olx.FlushFS()
