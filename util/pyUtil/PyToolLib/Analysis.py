@@ -2730,9 +2730,7 @@ class HealthOfStructure():
         return
       l = ['MinD', 'MeanIOverSigma','Rint','Completeness']
 
-
     txt = "<table width='100%%' cellpadding='0' cellspacing='0'><tr>"
-
 
     counter = 0
     for item in l:
@@ -2876,6 +2874,13 @@ class HealthOfStructure():
     fill = self.get_bg_colour(item, value_raw)
     box = (0,0,boxWidth,boxHeight)
     draw.rectangle(box, fill=fill)
+
+
+    font_l = IT.registerFontInstance("Vera", 8 * scale)
+    if self.is_CIF:
+      fill = IT.adjust_colour(fill, luminosity=1.9)
+      draw.text((2, boxHeight - 2*8), "CIF", font=font_l, fill=fill)
+
     top = OV.GetParam('diagnostics.hkl.%s.top' %item)
 
     if item == "Completeness":
