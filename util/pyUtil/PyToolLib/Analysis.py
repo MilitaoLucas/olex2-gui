@@ -2963,10 +2963,11 @@ class HealthOfStructure():
     if value_display_extra:
       draw.text((0, y - 1 + dy/2), "%s" %value_display_extra, font=font_s, fill="#ffffff")
 
-#    im = IT.make_round_corners(im, radius=4 * self.scale, colour=bgcolour)
     if self.image_position != "last":
       im = IT.add_whitespace(im, 'right', 4, bgcolour)
     im = im.resize((boxWidth/scale, boxHeight/scale), Image.ANTIALIAS)
+    im = IT.add_whitespace(im, side='bottom', weight=2, colour=bgcolour)
+
     OlexVFS.save_image_to_olex(im, item, 0)
     href = OV.GetParam('diagnostics.%s.%s.href' %(self.scope,item))
     txt = ""
