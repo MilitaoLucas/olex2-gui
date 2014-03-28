@@ -2628,14 +2628,23 @@ class HealthOfStructure():
     """ Returns (bool, bool) the first boolean specifies if the initialisation
     was successful, and the second - if the HOS has to be reset
     """
+    from cctbx import uctbx
     if olx.IsFileLoaded() != 'true':
       return (False, True)
-
+    self.is_CIF = (olx.IsFileType('cif') == 'true')
     try:
-      hkl = OV.HKLSrc()
-      if not hkl or not os.path.exists(hkl):
-        return (False, True)
-      self.hkl_stats = olex_core.GetHklStat()
+      if not self.is_CIF:
+        hkl = OV.HKLSrc()
+        if not hkl or not os.path.exists(hkl):
+          return (False, True)
+        self.hkl_stats = olex_core.GetHklStat()
+      else:
+        self.hkl_stats['Completeness'] = float(olx.Cif('_diffrn_measured_fraction_theta_full'))
+        wl = float(olx.Cif('_diffrn_radiation_wavelength'))
+        twotheta = 2* (float(olx.Cif('_diffrn_reflns_theta_full')))
+        self.hkl_stats['MinD'] = uctbx.two_theta_as_d(twotheta ,wl, True)
+        self.hkl_stats['MeanIOverSigma'] = 1/float(olx.Cif('_diffrn_reflns_av_unetI/netI'))
+        self.hkl_stats['Rint'] = float(olx.Cif('_diffrn_reflns_av_R_equivalents'))
     except:
       return (False, True)
     if self.scope == "refinement":
@@ -2706,9 +2715,9 @@ class HealthOfStructure():
     if self.scope == None:
       self.scope = 'hkl'
 
-    is_CIF = (olx.IsFileType('cif') == 'true')
+#    is_CIF = (olx.IsFileType('cif') == 'true')
     if self.scope == "refinement":
-      if is_CIF:
+      if self.is_CIF:
         l = ['_refine_ls_shift/su_max', '_refine_diff_density_max', '_refine_diff_density_min', '_refine_ls_goodness_of_fit_ref']
       else:
         #l = ['max_shift_over_esd', 'max_shift_site', 'max_shift_u', 'max_peak', 'max_hole']
@@ -2733,7 +2742,7 @@ class HealthOfStructure():
         if type(value) == tuple and len(value) > 0:
           value = value[0]
       elif self.scope == "refinement":
-        if is_CIF:
+        if self.is_CIF:
           try:
             value = float(olx.Cif(item))
           except:
@@ -2752,7 +2761,7 @@ class HealthOfStructure():
 
 
       display = OV.GetParam('diagnostics.%s.%s.display' %(self.scope,item))
-      
+
       value_format = OV.GetParam('diagnostics.%s.%s.value_format' %(self.scope,item))
       href = OV.GetParam('diagnostics.%s.%s.href' %(self.scope,item))
 
