@@ -1286,7 +1286,10 @@ OV.registerFunction(GetOptionalHyphenString)
 def GetTwinLawAndBASF(html=False):
   olex_refinement_model = OV.GetRefinementModel(False)
   curr_law = None
-  basf_count = len(olex_refinement_model['hklf'].get('basf', []))
+  basf_list = olex_refinement_model['hklf'].get('basf', [])
+  if not basf_list:
+    basf_list = olex_refinement_model.get('twin', {}).get('basf', [])
+  basf_count = len(basf_list)
   if olex_refinement_model.has_key('twin'):
     c = olex_refinement_model['twin']['matrix']
     curr_law = []
@@ -1313,7 +1316,7 @@ def GetTwinLawAndBASF(html=False):
           break
         basf.append(basf_val)
       if (len(basf) != basf_count):
-        basf = ["%.3f" %x for x in olex_refinement_model['hklf']['basf']]
+        basf = ["%.3f" %x for x in basf_list]
   if not txt and not basf:
     return ""
   if basf:
