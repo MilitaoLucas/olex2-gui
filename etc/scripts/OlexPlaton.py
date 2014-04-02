@@ -113,7 +113,10 @@ def OlexPlaton(platonflag="0"):
     if platonflag == "0":
       # Start just platon with the INS file
       print "Calling Platon Directly"
-      command = "platon %s.ins"%(inputfilename)
+      inputfile = "%s.cif" %inputfilename
+      if not os.path.exists(inputfile):
+        inputfile = "%s.ins" %inputfilename
+      command = "platon %s"%(inputfile)
       platon(command)
       return
     else:
@@ -135,7 +138,7 @@ def OlexPlaton(platonflag="0"):
         platon(command)
       except Exception, err:
         print "PLATON gave up. This is why: %s" %err
-      
+
     # Old code works for Linux but not windows thanks to the stupid vritual cmdline built into Platon by LF
     #  platon_extension = platon_result.split(":")[-1].split(".")[-1].split("\n")[0]
     # To compensate now check flag against dictionary and then use that file extension, predominantly this is going to be lis
