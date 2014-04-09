@@ -420,6 +420,7 @@ class ImageTools(FontInstances):
       if colourize:
         im = self.colourize(im, (0,0,0), OV.GetParam('gui.logo_colour'))
       width = int(width) - width_adjust
+      if width < 10: return
       factor = im.size[0]/width
       height = int(im.size[1] / factor)
       im = self.resize_image(im, (width, height))
