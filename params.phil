@@ -1130,6 +1130,27 @@ user
   }
   image{
     bitmap{
+      AtomLabels{
+        font = "0;-37;0;0;0;400;0;0;0;0;3;2;1;20;Arial"
+          .type = str
+        font_name = Arial
+          .type = str
+        font_size = 20
+          .type = int
+        font_colour = 20
+          .type = int
+      }
+
+      BondLabels{
+        font = "0;-37;0;0;0;400;0;0;0;0;3;2;1;12;Arial"
+          .type = str
+        font_name = Arial
+          .type = str
+        font_size = 15
+          .type = int
+      font_colour = 20
+        .type = int
+      }
       type = png
         .type = str
       resolution = 300
