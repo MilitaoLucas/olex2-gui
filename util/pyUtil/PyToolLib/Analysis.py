@@ -1249,6 +1249,8 @@ class Analysis(Graph):
     pop_name = self.graphInfo.get("pop_name", None)
     if not pop_html or not pop_name:
       return
+    if olx.GetVar('no_diagnostics_pop', False):
+      return
 
     s = '''
 <html>
