@@ -11,6 +11,9 @@ curr_path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe
 class GuiImages:
 
   def __init__(self):
+    if olx.HasGUI() != 'true':
+      return
+
     img_root = OV.GetParam("gui.GuiImages.action", "%s/etc/gui/images/action" %OV.BaseDir())
     height = OV.GetParam('gui.html.input_height')
     self.img_d = {
@@ -234,4 +237,3 @@ def GetImageFilename(image_type):
     filefull = "%s.%s" %(filename, fileext)
   OV.SetParam('snum.image.%s.name' %image_type.lower(),None)
   return filefull, filename, fileext
-
