@@ -3,6 +3,7 @@ import olx
 import os
 import time
 import glob
+import shutil
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
@@ -64,6 +65,29 @@ class PluginTools(object):
 
     if self.p_htm:
       add_tool_to_index(scope=self.p_name, link=self.p_htm, path=self.p_path, location=self.params.gui.location, before=self.params.gui.before, filetype='')
+
+  def edit_customisation_folder(self):
+    self.get_customisation_path()
+    p = self.customisation_path
+    if not p:
+      p = self.p_path + "_custom"
+      IGNORE_PATTERNS = ('*.pyc', '*.py', '*.git')
+      shutil.copytree(self.p_path, p, ignore=shutil.ignore_patterns(IGNORE_PATTERNS))
+    else:
+      if os.path.exists(p):
+        print "The location %s already exists. No files have been copied" %p
+      else:
+        print "This path %s should exist, but does not." %p
+        return
+    olx.Shell(p)
+
+  def get_customisation_path(self):
+    p = self.p_path + "_custom"
+    if os.path.exists(p):
+      self.customisation_path = p
+    else:
+      self.customisation_path = None
+
 
 def make_new_plugin(name,overwrite=False):
   plugin_base = "%s/util/pyUtil/pluginLib/" %OV.BaseDir()
