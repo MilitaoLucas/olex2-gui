@@ -72,7 +72,9 @@ class PluginTools(object):
     if not p:
       p = self.p_path + "_custom"
       IGNORE_PATTERNS = ('*.pyc', '*.py', '*.git')
-      shutil.copytree(self.p_path, p, ignore=shutil.ignore_patterns(IGNORE_PATTERNS))
+      shutil.copytree(self.p_path, p, ignore=shutil.ignore_patterns(*IGNORE_PATTERNS))
+      os.rename("%s/templates/default" %p, "%s/templates/custom" %p)
+      os.rename("%s/branding/olex2" %p, "%s/branding/custom" %p)
     else:
       if os.path.exists(p):
         print "The location %s already exists. No files have been copied" %p
