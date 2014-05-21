@@ -87,7 +87,7 @@
     <check title="Tools;Settings;Show Tooltips" macro="html.tooltips" statedependent="htmlttvis">
     <item title="Tools;Settings;Show Alerts" macro="spy.SwitchAllAlertsOn()">
     <check title="Tools;Settings;External CMD line" macro="showwindow cmdline" statedependent="cmdlinevis">
-    <item title="Tools;Setttings" macro="setup">
+    <item title="Tools;More Settings..." macro="setup">
 
     <item title="Model;Refine \tCtrl+R" macro="refine" before='Help'>
     <item title="Model;#" macro="">

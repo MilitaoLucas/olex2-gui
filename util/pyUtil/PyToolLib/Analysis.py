@@ -1249,6 +1249,8 @@ class Analysis(Graph):
     pop_name = self.graphInfo.get("pop_name", None)
     if not pop_html or not pop_name:
       return
+    if olx.GetVar('no_diagnostics_pop', 'False') == 'True':
+      return
 
     s = '''
 <html>
@@ -2607,7 +2609,7 @@ class HealthOfStructure():
 
     self.hos_text = ""
     if res[0]:
-      if OV.GetParam('diagnostics.pin_scopes'):
+      if OV.GetParam('user.diagnostics.pin_scopes'):
         for scope in self.scopes:
           self.scope = scope
           self.summarise_HOS()
@@ -2628,14 +2630,23 @@ class HealthOfStructure():
     """ Returns (bool, bool) the first boolean specifies if the initialisation
     was successful, and the second - if the HOS has to be reset
     """
+    from cctbx import uctbx
     if olx.IsFileLoaded() != 'true':
       return (False, True)
-
+    self.is_CIF = (olx.IsFileType('cif') == 'true')
     try:
-      hkl = OV.HKLSrc()
-      if not hkl or not os.path.exists(hkl):
-        return (False, True)
-      self.hkl_stats = olex_core.GetHklStat()
+      if not self.is_CIF:
+        hkl = OV.HKLSrc()
+        if not hkl or not os.path.exists(hkl):
+          return (False, True)
+        self.hkl_stats = olex_core.GetHklStat()
+      else:
+        self.hkl_stats['Completeness'] = float(olx.Cif('_diffrn_measured_fraction_theta_full'))
+        wl = float(olx.Cif('_diffrn_radiation_wavelength'))
+        twotheta = 2* (float(olx.Cif('_diffrn_reflns_theta_full')))
+        self.hkl_stats['MinD'] = uctbx.two_theta_as_d(twotheta ,wl, True)
+        self.hkl_stats['MeanIOverSigma'] = 1/float(olx.Cif('_diffrn_reflns_av_unetI/netI'))
+        self.hkl_stats['Rint'] = float(olx.Cif('_diffrn_reflns_av_R_equivalents'))
     except:
       return (False, True)
     if self.scope == "refinement":
@@ -2706,13 +2717,13 @@ class HealthOfStructure():
     if self.scope == None:
       self.scope = 'hkl'
 
-    is_CIF = (olx.IsFileType('cif') == 'true')
+#    is_CIF = (olx.IsFileType('cif') == 'true')
     if self.scope == "refinement":
-      if is_CIF:
-        l = ['_refine_ls_shift/su_max', '_refine_diff_density_max', '_refine_diff_density_min']
+      if self.is_CIF:
+        l = ['_refine_ls_shift/su_max', '_refine_diff_density_max', '_refine_diff_density_min', '_refine_ls_goodness_of_fit_ref']
       else:
         #l = ['max_shift_over_esd', 'max_shift_site', 'max_shift_u', 'max_peak', 'max_hole']
-        l = ['max_shift_over_esd', 'max_peak', 'max_hole']
+        l = ['max_shift_over_esd', 'max_peak', 'max_hole', 'goof']
       #missing = olexex.OlexRefinementModel().getMissingAtomsNumber()
       #OV.SetParam('snum.refinement.expected_peaks', missing)
     else:
@@ -2721,9 +2732,7 @@ class HealthOfStructure():
         return
       l = ['MinD', 'MeanIOverSigma','Rint','Completeness']
 
-
     txt = "<table width='100%%' cellpadding='0' cellspacing='0'><tr>"
-
 
     counter = 0
     for item in l:
@@ -2733,7 +2742,7 @@ class HealthOfStructure():
         if type(value) == tuple and len(value) > 0:
           value = value[0]
       elif self.scope == "refinement":
-        if is_CIF:
+        if self.is_CIF:
           try:
             value = float(olx.Cif(item))
           except:
@@ -2742,7 +2751,17 @@ class HealthOfStructure():
         else:
           value = OV.GetParam('snum.refinement.%s' %item)
 
+      if item == "_refine_ls_goodness_of_fit_ref":
+        item = 'goof'
+      elif item == "_refine_diff_density_max":
+        item = 'max_peak'
+      elif item == "_refine_diff_density_min":
+        item = 'max_hole'
+
+
+
       display = OV.GetParam('diagnostics.%s.%s.display' %(self.scope,item))
+
       value_format = OV.GetParam('diagnostics.%s.%s.value_format' %(self.scope,item))
       href = OV.GetParam('diagnostics.%s.%s.href' %(self.scope,item))
 
@@ -2754,7 +2773,7 @@ class HealthOfStructure():
         else:
           value = None
       if value == None:
-        value = "NO VALUE!"
+        value = "n/a"
         bg_colour = "#000000"
       else:
         if "%" in value_format:
@@ -2791,7 +2810,10 @@ class HealthOfStructure():
         ref_open = ''
         ref_close = ''
         if href:
-          ref_open = "<a href='%s'>" %(href)
+          dollar = ""
+          if "()" in href:
+            dollar = "$"
+          ref_open = "<a href='%s%s'>" %(dollar, href)
           ref_close = "</a>"
         txt += '''
   <td bgcolor=%s align='center' width='%s%%'><font color='#ffffff'>
@@ -2854,6 +2876,13 @@ class HealthOfStructure():
     fill = self.get_bg_colour(item, value_raw)
     box = (0,0,boxWidth,boxHeight)
     draw.rectangle(box, fill=fill)
+
+
+    font_l = IT.registerFontInstance("Vera", 8 * scale)
+    if self.is_CIF:
+      fill = IT.adjust_colour(fill, luminosity=1.9)
+      draw.text((2, boxHeight - 2*8), "CIF", font=font_l, fill=fill)
+
     top = OV.GetParam('diagnostics.hkl.%s.top' %item)
 
     if item == "Completeness":
@@ -2936,10 +2965,11 @@ class HealthOfStructure():
     if value_display_extra:
       draw.text((0, y - 1 + dy/2), "%s" %value_display_extra, font=font_s, fill="#ffffff")
 
-#    im = IT.make_round_corners(im, radius=4 * self.scale, colour=bgcolour)
     if self.image_position != "last":
       im = IT.add_whitespace(im, 'right', 4, bgcolour)
     im = im.resize((boxWidth/scale, boxHeight/scale), Image.ANTIALIAS)
+    im = IT.add_whitespace(im, side='bottom', weight=2, colour=bgcolour)
+
     OlexVFS.save_image_to_olex(im, item, 0)
     href = OV.GetParam('diagnostics.%s.%s.href' %(self.scope,item))
     txt = ""
@@ -2975,7 +3005,7 @@ class HealthOfStructure():
         if val <= OV.GetParam('diagnostics.%s.%s.grade%s' %(self.scope, item, i)):
           break
       elif op == 'between':
-        if val - (OV.GetParam('diagnostics.%s.%s.grade%s' %(self.scope, item, i))) <= val <= val + (OV.GetParam('diagnostics.%s.%s.grade%s' %(self.scope, item, i))):
+        if val - (OV.GetParam('diagnostics.%s.%s.grade%s' %(self.scope, item, i))) <= soll <= val + (OV.GetParam('diagnostics.%s.%s.grade%s' %(self.scope, item, i))):
           break
 
     if i == 1:

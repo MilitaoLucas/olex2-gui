@@ -487,6 +487,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       'snum.refinement.max_shift_u' : 'max_dU',
       'snum.refinement.max_shift_u_atom' : 'max_dU_object',
       'snum.refinement.flack_str' : 'flack',
+      'snum.refinement.goof' : "s",
     }
     for k,v in params.iteritems():
       v = olx.Lst(v)

@@ -109,6 +109,8 @@ OV.registerMacro(ValidateCif, """filepath&;cif_dic&;show_warnings""")
 class CifTools(ArgumentParser):
   specials = {
     'snum.report.crystal_mounting_method': '_olex2_exptl_crystal_mounting_method',
+    'snum.report.submission_special_instructions': '_olex2_submission_special_instructions',
+    'snum.report.submission_original_sample_id': '_olex2_submission_original_sample_id',
   }
 
   def __init__(self):
@@ -618,6 +620,7 @@ class ExtractCifInfo(CifTools):
         computing_data_reduction = self.prepare_computing(integ, versions, "saint")
         computing_data_reduction = string.strip((string.split(computing_data_reduction, "="))[0])
         integ.setdefault("_computing_data_reduction", computing_data_reduction)
+        integ.setdefault("_computing_cell_refinement", computing_data_reduction)
         integ["computing_data_reduction"] = computing_data_reduction
         self.update_cif_block(integ)
         all_sources_d[p] = integ
@@ -913,7 +916,6 @@ class ExtractCifInfo(CifTools):
                     '_exptl_absorpt_coefficient_mu',
                     '_audit_creation',
                     '_diffrn_reflns_',
-                    '_diffrn_measurement_details',
                     '_publ_author',
                     '_atom_type',
                     '_space_group_symop',

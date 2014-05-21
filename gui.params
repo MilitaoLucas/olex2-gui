@@ -597,7 +597,7 @@ gui
     .type = str
   labels_font = #olex2.fnt:frb_20
     .type = str
-  htmlpanelwidth = 460
+  htmlpanelwidth = 500
     .type = int
   htmlpanelwidth_margin_adjust = 21
     .type = int
