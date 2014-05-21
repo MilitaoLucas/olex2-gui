@@ -55,8 +55,10 @@ def makeHtmlTable(list):
       text += "<tr><td colspan='2'><font color='#555555'>%s</font></td></tr>" %input_d['value']
       continue
     boxText = ''
+    i = 0
     for box in ['box1','box2','box3','box4']:
       if box in input_d.keys():
+        i += 1
         box_d = input_d[box]
         box_d.setdefault('ctrl_name', "SET_%s" %str.upper(box_d['varName']).replace('.','_'))
         box_d.setdefault('bgcolor',"spy.bgcolor('~name~')")
@@ -66,12 +68,26 @@ def makeHtmlTable(list):
         else:
           box_d.setdefault('value', "spy.GetParam('%(varName)s')" %box_d)
           box_d.setdefault('onchange',"spy.SetParam('%(varName)s',html.GetValue('~name~'))>>spy.AddVariableToUserInputList('%(varName)s')>>spy.changeBoxColour('~name~','#FFDCDC')" %box_d)
-          
+
         if box_d.has_key('extra_onchange'):
           box_d['onchange'] += ">>%s" %box_d['extra_onchange']
-        boxText += makeHtmlInputBox(box_d)
+        bt =  makeHtmlInputBox(box_d)
+        #IN
+        label = box_d.get('label')
+        if label:
+          boxText += '<td align="right" width="%(label_w)s">' + label + '</td><td  align="right" width="%(w)s">' + bt + '</td>'
+        else:
+          boxText += bt
+        #OUT
     if boxText:
-      boxText = '<table width="100%" cellpadding="0" cellspacing="0"><tr><td width="100%%">' + boxText + "</td></tr></table>"
+      #IN
+      if label:
+        _ = {'label_w':'20%%', 'w':"%s%%"%int((100-(20*i))/i)}
+      else:
+        _ = {'w':"100"}
+      boxText = boxText%_
+      #OUT
+      boxText = '<table cellpadding="0" cellspacing="0"><tr>'  + boxText + "</tr></table>"
       row_d.setdefault('input',boxText)
     else:
       input_d.setdefault('ctrl_name', "SET_%s" %str.upper(input_d['varName']).replace('.','_'))
@@ -130,6 +146,7 @@ def makeHtmlInputBox(inputDictionary):
     'bgcolor':'',
   }
   dictionary.update(inputDictionary)
+
   htmlInputBoxText = '''
 <font size="$GetVar('HtmlFontSizeControls')">
 <input
@@ -138,9 +155,9 @@ type="%(type)s"
 width="%(width)s"
 height="%(height)s"
 name="%(ctrl_name)s"
+#label="%(label)s"
 value="%(value)s"
 items="%(items)s"
-label="%(label)s"
 valign="%(valign)s"
 onchange="%(onchange)s"
 onleave="%(onleave)s"
@@ -149,8 +166,10 @@ bgcolor="%(bgcolor)s"
 >
 </font>
 '''%dictionary
-
-  return htmlInputBoxText
+  _ = htmlInputBoxText.replace("%%", "@")
+  _ = _.replace("%", "%%")
+  _ = _.replace("@", "%%")
+  return _
 
 def makeHtmlTableRow(dictionary):
 #  dictionary.setdefault('font', "size='%s'" %olx.GetVar('HtmlGuiFontSize'))
@@ -1238,7 +1257,7 @@ def MakeHoverButton(name, cmds, onoff = "off", btn_bg='table_firstcol_colour'):
     tab = item.split("h2-")[1].split("-")[0]
     item_name = item.split("h2-")[1].split("-")[1]
     if solo:
-      cmds = "html.itemstate h2-%s* 2>>%s" %(tab,cmds) 
+      cmds = "html.itemstate h2-%s* 2>>%s" %(tab,cmds)
   if solo:
     if 'metadata' in cmds:
       cmds = "html.itemstate metadata* 2>>%s" %(cmds)

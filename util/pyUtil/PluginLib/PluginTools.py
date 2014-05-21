@@ -3,6 +3,7 @@ import olx
 import os
 import time
 import glob
+import shutil
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
@@ -12,8 +13,9 @@ import HttpTools
 
 class PluginTools(object):
   def __init__(self):
-    deal_with_gui_phil('load')
-    
+    if olx.HasGUI() == 'true':
+      deal_with_gui_phil('load')
+
   def get_plugin_date(self):
     return time.ctime(os.path.getmtime(self.p_path))
 
@@ -54,14 +56,40 @@ class PluginTools(object):
         #file_name=user_phil_file, scope_name='snum.%s' %self.p_name, diff_only=True)
 
   def setup_gui(self):
-    
-    
+    if olx.HasGUI() != 'true':
+      return
+
     for image, img_type in self.p_img:
       make_single_gui_image(image, img_type=img_type)
     #olx.FlushFS()
 
     if self.p_htm:
       add_tool_to_index(scope=self.p_name, link=self.p_htm, path=self.p_path, location=self.params.gui.location, before=self.params.gui.before, filetype='')
+
+  def edit_customisation_folder(self):
+    self.get_customisation_path()
+    p = self.customisation_path
+    if not p:
+      p = self.p_path + "_custom"
+      IGNORE_PATTERNS = ('*.pyc', '*.py', '*.git')
+      shutil.copytree(self.p_path, p, ignore=shutil.ignore_patterns(*IGNORE_PATTERNS))
+      os.rename("%s/templates/default" %p, "%s/templates/custom" %p)
+      os.rename("%s/branding/olex2" %p, "%s/branding/custom" %p)
+    else:
+      if os.path.exists(p):
+        print "The location %s already exists. No files have been copied" %p
+      else:
+        print "This path %s should exist, but does not." %p
+        return
+    olx.Shell(p)
+
+  def get_customisation_path(self):
+    p = self.p_path + "_custom"
+    if os.path.exists(p):
+      self.customisation_path = p
+    else:
+      self.customisation_path = None
+
 
 def make_new_plugin(name,overwrite=False):
   plugin_base = "%s/util/pyUtil/pluginLib/" %OV.BaseDir()

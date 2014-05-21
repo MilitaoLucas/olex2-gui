@@ -1,0 +1,15 @@
+#value=
+#width=100%
+#name=
+
+<font size="$GetVar('HtmlFontSizeControls')">
+
+<input
+  type="button"
+  name="#name"
+  value="#value"
+  width="#width"
+  onclick="#onclick"
+>
+
+</font>

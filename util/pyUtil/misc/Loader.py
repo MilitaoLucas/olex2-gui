@@ -42,6 +42,12 @@ def getModule(name, email=None):
   etoken = None
   etoken_fn = "%s%setoken" %(dir, os.sep)
   if email:
+    import re
+    email = email.strip()
+    if not re.match("^[a-zA-Z0-9._%-]+@[a-zA-Z0-9._%-]+.[a-zA-Z]{2,6}$", email):
+      olex.writeImage(info_file_name, "Failed to validate e-mail address", 0)
+      return False
+  if email:
     try:
       url = url_base + "register"
       values = {
@@ -58,7 +64,8 @@ def getModule(name, email=None):
       etoken = f
     except Exception, e:
       msg = '''
-<font color='red'><b>An error occurred while downloading the extension.</b></font><br>%s<br>Please restart Olex2 and try again.
+<font color='red'><b>An error occurred while downloading the extension.</b></font>
+<br>%s<br>Please restart Olex2 and try again.
 ''' %(str(e))
       if debug:
         sys.stdout.formatExceptionInfo()
@@ -86,7 +93,8 @@ def getModule(name, email=None):
       old_folder = new_name
     except Exception, e:
       msg = '''
-<font color='red'><b>An error occurred while installing the extension.</b></font><br>%s<br>Please restart Olex2 and try again.
+<font color='red'><b>An error occurred while installing the extension.</b></font>
+<br>%s<br>Please restart Olex2 and try again.
 ''' %(str(e))
       olex.writeImage(info_file_name, msg, 0)
       return False
@@ -127,7 +135,8 @@ def getModule(name, email=None):
       return True
   except Exception, e:
     msg = '''
-<font color='red'><b>An error occurred while installing the extension.</b></font><br>%s<br>Please restart Olex2 and try again.
+<font color='red'><b>An error occurred while installing the extension.</b></font>
+<br>%s<br>Please restart Olex2 and try again.
 ''' %(str(e))
     olex.writeImage(info_file_name, msg, 0)
     return False
