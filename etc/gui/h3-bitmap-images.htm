@@ -235,14 +235,14 @@ $spy.MakeHoverButton('button_small-go@bitmap','spy.gui.images.MakeBitmapImage()'
 <!-- FIRST ROW -->
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='IMAGE_SETTINGS_ROW_1';help_ext=bitmap-atom-label-fonts;1 -->
   <td colspan=2 name-=IMAGE_BITMAP_CHOOSE_ATOM_LABEL_FONTS>
-    <a href="setfont AtomLabels ChooseFont(Olex2,spy.GetParam(user.image.bitmap.atom_label.font_name))>>spy.SetParam(snum.image.bitmap.atom_label.font_name,GetFont(AtomLabels))"><b>Atom</b> Label Font (Olex2)</a> |
+    <a href="setfont AtomLabels ChooseFont(Olex2,'$spy.GetParam(user.image.bitmap.AtomLabels.font)')>>spy.SetParam(user.image.bitmap.AtomLabels.font,GetFont(AtomLabels))"><b>Atom</b> Label Font (Olex2)</a> |
     <a href="setfont AtomLabels ChooseFont(System,'$spy.GetParam(user.image.bitmap.AtomLabels.font)')>>spy.SetParam(user.image.bitmap.AtomLabels.font,GetFont(AtomLabels))">(System Font)</a>
 </td>
 
  <td colspan=2 name-=IMAGE_BITMAP_CHOOSE_BOND_LABEL_FONTS>
 
-    <a href="setfont BondLabels ChooseFont(Olex2,spy.GetParam(user.image.bitmap.bond_label.font_name))>>spy.SetParam(snum.image.bitmap.bond_label.font_name,GetFont(AtomLabels))"><b>Bond</b> Label Font (Olex2)</a> |
-    <a href="setfont BondLabels ChooseFont(System,spy.GetParam(user.image.bitmap.BondLabels.font))>>spy.SetParam(user.image.bitmap.BondLabels.font,GetFont(AtomLabels))">(System Font)</a>
+    <a href="setfont BondLabels ChooseFont(Olex2,'$spy.GetParam(user.image.bitmap.BondLabels.font)')>>spy.SetParam(user.image.bitmap.BondLabels.font,GetFont(BondLabels))"><b>Bond</b> Label Font (Olex2)</a> |
+    <a href="setfont BondLabels ChooseFont(System,'$spy.GetParam(user.image.bitmap.BondLabels.font)')>>spy.SetParam(user.image.bitmap.BondLabels.font,GetFont(BondLabels))">(System Font)</a>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
