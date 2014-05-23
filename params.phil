@@ -1131,25 +1131,13 @@ user
   image{
     bitmap{
       AtomLabels{
-        font = "0;-37;0;0;0;400;0;0;0;0;3;2;1;20;Arial"
+        font = '#olex2.fnt:frb_20'
           .type = str
-        font_name = Arial
-          .type = str
-        font_size = 20
-          .type = int
-        font_colour = 20
-          .type = int
       }
 
       BondLabels{
-        font = "0;-37;0;0;0;400;0;0;0;0;3;2;1;12;Arial"
+        font = '#olex2.fnt:fr__14'
           .type = str
-        font_name = Arial
-          .type = str
-        font_size = 15
-          .type = int
-      font_colour = 20
-        .type = int
       }
       type = png
         .type = str
