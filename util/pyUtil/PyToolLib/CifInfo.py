@@ -975,8 +975,26 @@ The \l/2 correction factor is %(lambda_correction)s.
       versiontext = (versions[name])[version].strip().strip("'")
     except KeyError:
       if version != "None":
-        print "Version %s of the programme %s is not in the list of known versions" %(version, name)
-      versiontext = "?"
+        versiontext = ''
+        if '/' in version:
+          if name == 'sad':
+            versiontext = "SADABS-"
+          elif name == 'twin':
+            versiontext = "TWINABS-"
+          elif name == 'xprep':
+            versiontext = "XPREP-"
+          else:
+            versiontext = "?-"
+          if len(versiontext) > 2:
+            versiontext += version
+            versiontext += " (Bruker,%s)" %version.split('/')[0]
+          else:
+            versiontext += version
+        else:
+          print "Version %s of the programme %s is not in the list of known versions" %(version, name)
+          versiontext = "?"
+      else:
+        versiontext = "?"
     return versiontext
 
   def enter_new_version(self, dict, version, name):
