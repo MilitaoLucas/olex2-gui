@@ -2254,6 +2254,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     iconIndex.setdefault("more", (7, 4, {'border':False} ))
     iconIndex.setdefault("less", (7, 5, {'border':False} ))
     iconIndex.setdefault("polyhedra", (6, 9))
+    iconIndex.setdefault("refresh", (7, 6))
 
     also_make_small_icons_l = ['open']
 
