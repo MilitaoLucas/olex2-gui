@@ -4,12 +4,6 @@ import olx
 import os
 import sys
 
-global formula
-global formula_string
-
-formula = ""
-formula_string = ""
-
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
@@ -18,7 +12,7 @@ have_found_python_error= False
 
 import olexex
 
-
+import re
 
 class FolderView:
   root = None
@@ -156,6 +150,7 @@ def flash_gui_control(control):
 olex.registerFunction(flash_gui_control, False, "gui.tools")
 
 def make_single_gui_image(img_txt="", img_type='h2'):
+  return
   from PilTools import timage
   import OlexVFS
   timage = timage()
@@ -271,17 +266,21 @@ def checkPlaton():
 OV.registerFunction(checkPlaton,True,'gui.tools')
 
 def makeFormulaForsNumInfo():
-  global formula
-  global formula_string
-
   if olx.FileName() == "Periodic Table":
     return "Periodic Table"
+
   else:
     colour = ""
     txt_formula = olx.xf.GetFormula()
-    if txt_formula == formula:
-      return formula_string
-    formula = txt_formula
+    if len(txt_formula) > 100:
+      return "Too Much Stuff"
+    update = '<table border="0" cellpadding="0"><tr><td>%s</td></tr></table>'
+    present = olx.xf.au.GetFormula()
+    regex = re.compile(r"([a-zA-Z]) 1 (\s|\b)", re.X|re.M|re.S)
+    txt_formula = regex.sub(r'\1 ',txt_formula).strip()
+    if present != txt_formula:
+      update = '<table border="0" cellpadding="0"><tr><td>%s</td><td>$spy.MakeHoverButton(toolbar-refresh,fixunit xf.au.GetZprime()>>html.update)</td></tr></table>'
+    formula = present
     l = ['3333', '6667']
     for item in l:
       if item in txt_formula:
@@ -289,11 +288,8 @@ def makeFormulaForsNumInfo():
     if not colour:
       colour = OV.GetParam('gui.html.formula_colour').hexadecimal
     font_size = OV.GetParam('gui.html.formula_size')
-
     panelwidth = int(olx.html.ClientWidth('self'))
-    
     q = len(txt_formula)/(panelwidth - (0.6*panelwidth))
-#    print len(txt_formula), q
     if q > 0.26:
       font_size -= 4
     elif q > 0.23:
@@ -306,7 +302,7 @@ def makeFormulaForsNumInfo():
       font_size = 1
     html_formula = olx.xf.GetFormula('html',1)
     formula_string = "<font size=%s color=%s>%s</font>" %(font_size, colour, html_formula)
-    return formula_string
+    return update%formula_string
 OV.registerFunction(makeFormulaForsNumInfo)
 
 
@@ -326,7 +322,7 @@ OV.registerFunction(hasDisorder,False,'gui.tools')
 def make_disorder_quicktools():
   import olexex
   parts = set(olexex.OlexRefinementModel().disorder_parts())
-  
+
   parts_display = ""
   for item in parts:
     if item == 0:
@@ -335,7 +331,7 @@ def make_disorder_quicktools():
       parts_display += "<a href='ShowP 0 %s -v=spy.GetParam(user.keep_unique)'><b>PART %s</b></a> | " %(item, item)
     else:
       parts_display += "<a href='ShowP 0 %s -v=spy.GetParam(user.keep_unique)'><b>%s</b></a> | " %(item, item)
-      
+
   checkbox = '''
     <font size=$GetVar(HtmlFontSizeControls)>
   <input
@@ -350,8 +346,8 @@ def make_disorder_quicktools():
     value=''
   >
   </font>'''
-      
-      
+
+
   txt = r'''
   <td width='25%%'>
     <b>Show PART 0 AND</b>
@@ -360,7 +356,7 @@ def make_disorder_quicktools():
   %s
     <a href='ShowP'><b>All</b></a>
   </td>
-  
+
   <td width='5%%' align='right'>
   Unique
   </td>
