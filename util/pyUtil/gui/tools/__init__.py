@@ -150,7 +150,6 @@ def flash_gui_control(control):
 olex.registerFunction(flash_gui_control, False, "gui.tools")
 
 def make_single_gui_image(img_txt="", img_type='h2'):
-  return
   from PilTools import timage
   import OlexVFS
   timage = timage()
