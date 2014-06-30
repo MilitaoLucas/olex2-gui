@@ -240,7 +240,8 @@ class create_cctbx_xray_structure(object):
 
   def __init__(self, cell, spacegroup, atom_iter, restraints_iter=None, constraints_iter=None):
     """ cell is a 6-uple, spacegroup a string and atom_iter yields tuples (label, xyz, u, element_type) """
-    builder = builders.weighted_constrained_restrained_crystal_structure_builder()
+    builder = builders.weighted_constrained_restrained_crystal_structure_builder(
+      min_distance_sym_equiv=0.2)
     unit_cell = uctbx.unit_cell(cell)
     builder.make_crystal_symmetry(cell, spacegroup)
     builder.make_structure()
