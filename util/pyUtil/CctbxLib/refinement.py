@@ -431,6 +431,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
         rv = self.twin_components
       else:
         rv += self.twin_components
+    if rv:
+      rv = list(set(rv))
     return rv
 
   def check_flack(self):
