@@ -65,9 +65,8 @@ class OlexCctbxAdapter(object):
                   for i in range(3) for j in range(3)])
       twin_multiplicity = twinning.get('n', 2)
       twin_laws = [twin_law]
-      if twin_multiplicity > 2 or abs(twin_multiplicity) > 4:
-        n = twin_multiplicity
-        if twin_multiplicity < 0: n /= 2
+      if abs(twin_multiplicity) > 2:
+        n = abs(twin_multiplicity)
         for i in range(n-2):
           twin_laws.append(twin_laws[-1].multiply(twin_law))
       if twin_multiplicity < 0:
@@ -83,6 +82,9 @@ class OlexCctbxAdapter(object):
         grad_twin_fractions = [False] * (n-1)
       else:
         grad_twin_fractions = [True] * len(twin_fractions)
+      self.twin_fractions = tuple(
+        [xray.twin_fraction(fraction,grad)
+          for fraction, grad in zip(twin_fractions, grad_twin_fractions)])
       if self.hklf_code == 5:
         batch_cnt = len(twin_fractions)-len(twin_laws)
         assert batch_cnt > 0
@@ -95,17 +97,26 @@ class OlexCctbxAdapter(object):
              twin_laws, twin_fractions[batch_cnt:], grad_twin_fractions)])
       else:
         assert len(twin_fractions) == abs(twin_multiplicity) - 1
-        assert len(twin_fractions) == len(twin_laws)
-        self.twin_components = tuple(
-          [xray.twin_component(law, fraction, grad)
-           for law, fraction, grad in zip(
-             twin_laws, twin_fractions, grad_twin_fractions)])
+        if twin_multiplicity > 0:
+          assert len(twin_fractions) == len(twin_laws)
+          self.twin_components = tuple(
+            [xray.twin_component(law, fraction, grad)
+             for law, fraction, grad in zip(
+               twin_laws, twin_fractions, grad_twin_fractions)])
+        else:
+          assert len(twin_fractions) == (len(twin_laws)-1)/2
+          self.twin_components = []
+          for i, f in enumerate(self.twin_fractions):
+            self.twin_components.append(xray.twin_component(twin_laws[i], f))
+            self.twin_components.append(xray.twin_component(twin_laws[len(twin_fractions)+i+1], f))
+          self.twin_components.append(xray.twin_component(twin_laws[len(twin_fractions)]))
+          self.twin_components = tuple(self.twin_components)
     else:
       olx_tw_f = self.olx_atoms.model['hklf'].get('basf',None)
       if self.hklf_code == 5 and olx_tw_f is not None:
         twin_fractions = flex.double(olx_tw_f)
         self.twin_fractions = tuple(
-          [ xray.twin_fraction(fraction,True)
+          [xray.twin_fraction(fraction,True)
             for fraction in twin_fractions])
       self.twin_components = None
 
@@ -275,13 +286,14 @@ class OlexCctbxAdapter(object):
              ignore_inversion_twin=False,
              algorithm="direct"):
     assert self.xray_structure().scatterers().size() > 0, "n_scatterers > 0"
-    if (    ignore_inversion_twin
+    if (ignore_inversion_twin
         and self.twin_components is not None
         and self.twin_components[0].twin_law == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
       apply_twin_law = False
-    if (    apply_twin_law
+    if (apply_twin_law
         and self.twin_components is not None
-        and self.twin_components[0].value > 0):
+        and self.twin_components[0].fraction is not None
+        and self.twin_components[0].fraction.value > 0):
       twin_component = self.twin_components[0]
       twinning = cctbx_controller.hemihedral_twinning(
         twin_component.twin_law.as_double(), miller_set)
@@ -289,7 +301,7 @@ class OlexCctbxAdapter(object):
       fc = twin_set.structure_factors_from_scatterers(
         self.xray_structure(), algorithm=algorithm).f_calc()
       twinned_fc2 = twinning.twin_with_twin_fraction(
-        fc.as_intensity_array(), twin_component.value)
+        fc.as_intensity_array(), twin_component.fraction.value)
       fc = twinned_fc2.f_sq_as_f().phase_transfer(fc).common_set(miller_set)
     else:
       fc = miller_set.structure_factors_from_scatterers(
