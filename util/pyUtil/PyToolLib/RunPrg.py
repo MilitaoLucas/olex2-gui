@@ -469,10 +469,10 @@ class RunRefinementPrg(RunPrg):
       flack_val = float(fs[0])
       flack_esd = float(fs[1].strip(")"))
       if flack_val > 0.8:
-        OV.File()
         inversion_needed = True
     if force and inversion_needed:
       olex.m('Inv -f')
+      OV.File('%s.res' %OV.FileName())
       OV.SetParam('snum.refinement.auto.invert',False)
       print "The Structure has been inverted"
     elif inversion_needed:
