@@ -41,7 +41,7 @@
     </font>
   </td>
   <td width='34%' align='right'>
-$spy.MakeHoverButton('three-Make_Report','html.ItemState cbtn-solve 1 cbtn-refine solve-settings 0 refine-settings 0>>html.Update>>cursor(busy, 'Checking for CIF file ...')>>report>>cursor()>>html.Update')
+$spy.MakeHoverButton('button-Make_Report','html.ItemState cbtn-solve 1 cbtn-refine solve-settings 0 refine-settings 0>>html.Update>>cursor(busy, 'Checking for CIF file ...')>>report>>cursor()>>html.Update')
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
@@ -123,10 +123,10 @@ $spy.MakeHoverButton('three-Make_Report','html.ItemState cbtn-solve 1 cbtn-refin
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=CIF-Part-1;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td name=EDIT_CIF_INFO align='left' VALIGN='left' width='34%'>
-$spy.MakeHoverButton('three-Edit_Cif_Info','spy.ExtractCifInfo(True,True)>>spy.EditCifInfo()>>html.Update')
+$spy.MakeHoverButton('button-edit_cif_info','spy.ExtractCifInfo(True,True)>>spy.EditCifInfo()>>html.Update')
   </td>
   <td name=MERGE_CIF_INFO align='left' VALIGN='right' width='32%'>
-$spy.MakeHoverButton('three-Merge_Cif','spy.ExtractCifInfo(True,True)>>spy.MergeCif(True)>>html.Update')
+$spy.MakeHoverButton('button-merge_cif','spy.ExtractCifInfo(True,True)>>spy.MergeCif(True)>>html.Update')
   </td>
   <td width='34%' align='right'>
   <input type="combo"
@@ -148,9 +148,9 @@ $spy.MakeHoverButton('three-Merge_Cif','spy.ExtractCifInfo(True,True)>>spy.Merge
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
   <td name=GET_CHECKCIF_REPORT align='left' VALIGN='center' width='34%'>
-$spy.MakeHoverButton('three-CheckCif_Report','spy.cif.GetCheckCifReport(html.GetState(SET_CHECKCIF_FCF))')
+$spy.MakeHoverButton('button-checkcif_report','spy.cif.GetCheckCifReport(html.GetState(SET_CHECKCIF_FCF))')
   </td>
-
+  
   <td name=GET_CHECKCIF_REPORT_FORMAT align='left' VALIGN='center' width='12%'>
    <input
       type='combo'
@@ -181,7 +181,7 @@ $spy.MakeHoverButton('three-CheckCif_Report','spy.cif.GetCheckCifReport(html.Get
   </td>
 
   <td name=REQUEST_CCDC_NUMBER align='right' width = '34%'>
-$spy.MakeHoverButton('three-CCDC_Number','spy.ccdc_submit()')
+$spy.MakeHoverButton('button-ccdc_number','spy.ccdc_submit()')
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
@@ -194,9 +194,9 @@ $spy.MakeHoverButton('three-CCDC_Number','spy.ccdc_submit()')
     <input
       type='checkbox'
       bgcolor="GetVar('HtmlTableBgColour')"
-      name = "CIFMERGE_AFTER_REFINE"
+      name = "CIFMERGE_AFTER_REFINE" 
       checked = "spy.GetParam(snum.refinement.cifmerge_after_refinement)"
-      onclick = "spy.SetParam(snum.refinement.cifmerge_after_refinement,html.GetState(~name~))"
+      onclick = "spy.SetParam(snum.refinement.cifmerge_after_refinement,html.GetState(~name~))" 
       name='SET_CIFMERGE'
       right='false'
     >
@@ -205,7 +205,7 @@ $spy.MakeHoverButton('three-CCDC_Number','spy.ccdc_submit()')
   <td align='left' width='15%'>
 Merge CIF:
   </td>
-
+  
   <td align='left' width='68%'>
 <a target='Edit the built-in CIF information' href='spy.EditCifInfo()'>metacif</a> $spy.gui.report.publication.DisplayMergeList()
   </td>
