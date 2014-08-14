@@ -993,7 +993,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     if self.hklf_code == 5:
       fo2, f_calc = self.get_fo_sq_fc()
     else:
-      fo2 = self.normal_eqns.observations.fo_sq.average_bijvoet_mates()
+      fo2 = self.normal_eqns.observations.fo_sq
       if( self.twin_components is not None
         and self.twin_components[0].twin_law != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
         import cctbx_controller
@@ -1010,7 +1010,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           fo2, f_calc, val)
         f_calc = f_calc.common_set(fo2)
       else:
-        f_calc = self.normal_eqns.f_calc.average_bijvoet_mates()
+        f_calc = self.normal_eqns.f_calc
     f_obs = fo2.f_sq_as_f()
     if scale_factor is None:
       k = f_obs.scale_factor(f_calc)
@@ -1024,6 +1024,18 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
   def post_peaks(self, fft_map, max_peaks=5):
     from itertools import izip
+    ####
+    if False:
+      import olex_xgrid
+      grid = fft_map.real_map()
+      gridding = grid.accessor()
+      type = isinstance(grid, flex.int)
+      olex_xgrid.Import(
+        gridding.all(), gridding.focus(), grid.copy_to_byte_str(), type)
+      olex_xgrid.SetMinMax(flex.min(grid), flex.max(grid))
+      olex_xgrid.SetVisible(True)
+      olex_xgrid.InitSurface(True)
+    ###
     #have to get more peaks than max_peaks - cctbx often returns peaks on the atoms
     peaks = fft_map.peak_search(
       parameters=maptbx.peak_search_parameters(
@@ -1069,6 +1081,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     OV.SetParam('snum.refinement.max_peak', self.diff_stats.max())
     OV.SetParam('snum.refinement.max_hole', self.diff_stats.min())
     OV.SetParam('snum.refinement.goof', "%.4f" %self.normal_eqns.goof())
+
   def get_disagreeable_reflections(self, show_in_console=False):
     fo2 = self.normal_eqns.observations.fo_sq\
       .customized_copy(sigmas=flex.sqrt(1/self.normal_eqns.weights))\
