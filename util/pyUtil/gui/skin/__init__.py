@@ -67,7 +67,6 @@ class Skin():
       name = r"sNumTitle.png"
       OlexVFS.save_image_to_olex(image, name, 1)
       OV.CopyVFSFile(name, 'SNUMTITLE',2)
-      olx.html.Update()
       if timing:
         print "run_skin sNumTitle took %.4fs" %(time.time()-t)
 
