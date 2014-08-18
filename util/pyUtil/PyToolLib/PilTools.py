@@ -1994,7 +1994,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           #cbtn buttons also need special width
           width = int(round((self.available_width + OV.GetParam('gui.html.table_firstcol_width'))/3,0)) - 5
           width = int(round((self.width/3)-(self.width/130)))
-          
+
           cut = width - OV.GetParam('gui.timage.cbtn.vline')
           if cut > width:
             cut = width - 1
@@ -2364,15 +2364,15 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if not self.width:
       print "Width not set"
       return
-    
+
     if not width:
       width = self.width
-    
+
     if item_type == "small_button":
       pams = getattr(self.params.timage, '%s' %'button')
     else:
       pams = getattr(self.params.timage, '%s' %item_type)
-      
+
 
     self.scale = pams.scale
     if not self.scale:
@@ -2402,8 +2402,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     self.titleCase = titleCase
     if border:
       border_colour = pams.border_colour.hexadecimal
-
-
 
     #if state == "highlight":
     #  font_colour = OV.GetParam('gui.html.highlight_colour')
@@ -2477,7 +2475,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     if item_type == "h1":
       width += round(width/200)
-      
+
     elif item_type == "h3":
       width -= (self.params.html.table_firstcol_width + self.params.timage.h3.width_adjust)
       underground = self.params.html.table_bg_colour.rgb
