@@ -4,18 +4,18 @@ import os
 from threading import Thread
 from threads import ThreadEx
 from threads import ThreadRegistry
-    
+
 class NewsImageRetrivalThread(ThreadEx):
   instance = None
   image_list = None
   active_image_list = None
-  
+
   def __init__(self, name):
     ThreadRegistry().register(NewsImageRetrivalThread)
     Thread.__init__(self)
     self.name = name
     NewsImageRetrivalThread.instance = self
-    
+
   def run(self):
     from olexFunctions import OlexFunctions
     OV = OlexFunctions()
@@ -25,7 +25,7 @@ class NewsImageRetrivalThread(ThreadEx):
     try:
       if not NewsImageRetrivalThread.image_list:
         NewsImageRetrivalThread.image_list = self.get_list_from_server()
-        
+
       if NewsImageRetrivalThread.image_list:
         if not NewsImageRetrivalThread.active_image_list:
           NewsImageRetrivalThread.active_image_list = copy.copy(NewsImageRetrivalThread.image_list)
@@ -62,7 +62,7 @@ class NewsImageRetrivalThread(ThreadEx):
     return img_url.strip(), url.strip()
 
   def get_list_from_server(self):
-    url = 'http://www.olex2.org/olex2adverts.txt'
+    url = 'http://www.olex2.org/adverts/olex2adverts.txt'
     return self.make_call(url).readlines()
 
   def make_call(self, url):
@@ -72,7 +72,7 @@ class NewsImageRetrivalThread(ThreadEx):
     except Exception, err:
       return None
     return res
-      
+
 class CheckCifRetrivalThread(ThreadEx):
   instance = None
   def __init__(self, send_fcf):
@@ -80,7 +80,7 @@ class CheckCifRetrivalThread(ThreadEx):
     Thread.__init__(self)
     self.send_fcf = send_fcf
     CheckCifRetrivalThread.instance = self
-    
+
   def run(self):
     import gui.cif as cif
     try:
@@ -90,7 +90,7 @@ class CheckCifRetrivalThread(ThreadEx):
       pass
     finally:
       CheckCifRetrivalThread.instance = None
-      
+
 def get_news_image_from_server(name=""):
   if NewsImageRetrivalThread.instance is None:
     NewsImageRetrivalThread(name).start()
@@ -101,7 +101,7 @@ def resizeNewsImage():
   IT = ImageTools()
   IT.resize_news_image(vfs=True)
 olex.registerFunction(resizeNewsImage, False, 'internal')
-      
+
 
 def GetCheckcifReport(send_fcf=False):
   if CheckCifRetrivalThread.instance is None:

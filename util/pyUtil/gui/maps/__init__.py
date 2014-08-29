@@ -47,7 +47,7 @@ class MapUtil:
 
 
   def VoidView(self, recalculate='0', onoff=None):
-    img_bases = ['button_small-void']
+    img_bases = ['small-Void']
     if self.deal_with_map_buttons(onoff, img_bases, 'void'):
       return
     if OV.IsControl('SNUM_MAP_BUTTON'):
@@ -62,13 +62,31 @@ class MapUtil:
     cmd = "calcVoid -r=%s -d=%s" %(resolution, distance)
     if precise:
       cmd += " -p"
+
+    self.void_html = ""
+    voidfile = '%s/voids.txt' %OV.DataDir()
+#    olx.StartLogging(voidfile)
+#    OV.registerCallback("procout", self.void_observer)
     olex.m(cmd)
+#    olx.Flush()
+#    olx.Stop('Logging')
+#    OV.unregisterCallback("procout", self.void_observer)
+
+
     self.deal_with_controls()
     OV.SetParam('olex2.void_vis',True)
 
+  def void_observer(self, msg):
+    try:
+      if "penetrated" in msg:
+        print "@@@@@@@@@@@@@@@@@@@@@@@@@"
+        self.void_html += msg
+    except:
+      pass
+
   def MaskView(self, onoff=None):
-    img_bases = ['button_small-mask']
-    if self.deal_with_map_buttons(onoff, img_bases, 'mask'):
+    img_bases = ['small-Mask']
+    if self.deal_with_map_buttons(onoff, img_bases, 'Mask'):
       return
     self.SetXgridView(False)
     olex.m('spy.OlexCctbxMasks(True, True)')
@@ -76,7 +94,7 @@ class MapUtil:
     OV.SetVar('olex2.mask_vis',True)
 
   def MapView(self, onoff=None):
-    img_bases = ['button_full-electron_density_map', 'button_small-map']
+    img_bases = ['full-Electron_Density_Map', 'small-Map']
     if self.deal_with_map_buttons(onoff, img_bases, 'eden'):
       return
 
