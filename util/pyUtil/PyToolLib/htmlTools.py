@@ -33,6 +33,7 @@ time_add = 0
 global hover_buttons
 hover_buttons = OV.GetParam('olex2.hover_buttons')
 
+from PilTools import TI
 
 def makeHtmlTable(list):
   """ Pass a list of dictionaries, with one dictionary for each table row.
@@ -1247,20 +1248,28 @@ def _check_modes_and_states(name):
 
   return False
 
-def MakeHoverButton(name, cmds, onoff = "off", btn_bg='table_firstcol_colour'):
+def MakeHoverButton(name, cmds, onoff="off", btn_bg='table_firstcol_colour'):
   #global time_add
   #t = time.time()
+  btn_type = name.split("-")[0]
+  btn_name = name.split("@")[0]#.lower()
+
+  if olx.fs.Exists(btn_name + "off.png") != "true":
+    TI.produce_buttons(button_names=[name], btn_type="_%s" %btn_type)
   solo = OV.GetParam('user.solo')
-  on = _check_modes_and_states(name)
-  if cmds.lower().startswith("html.itemstate") and "h2" in cmds:
-    item = cmds.split()[1]
-    tab = item.split("h2-")[1].split("-")[0]
-    item_name = item.split("h2-")[1].split("-")[1]
+  if onoff != "on":
+    on = _check_modes_and_states(name)
+    if cmds.lower().startswith("html.itemstate") and "h2" in cmds:
+      item = cmds.split()[1]
+      tab = item.split("h2-")[1].split("-")[0]
+      item_name = item.split("h2-")[1].split("-")[1]
+      if solo:
+        cmds = "html.itemstate h2-%s* 2>>%s" %(tab,cmds)
     if solo:
-      cmds = "html.itemstate h2-%s* 2>>%s" %(tab,cmds)
-  if solo:
-    if 'metadata' in cmds:
-      cmds = "html.itemstate metadata* 2>>%s" %(cmds)
+      if 'metadata' in cmds:
+        cmds = "html.itemstate metadata* 2>>%s" %(cmds)
+  else:
+    on = True
   if on:
     txt = MakeHoverButtonOn(name, cmds, btn_bg)
   else:
@@ -1286,10 +1295,10 @@ def MakeHoverButtonOff(name, cmds, btn_bg='table_firstcol_colour'):
   if '@' in name:
     tool_img = name.split('@')[0]
   else:
-    tool_img = name.lower()
+    tool_img = name#.lower()
   d.setdefault('tool_img', tool_img)
-  d.setdefault('namelower', name.lower())
   d.setdefault('nameupper', name.upper())
+  d.setdefault('name', name)
   #d.setdefault('bt', n[0])
   #d.setdefault('bn', n[1])
   #d.setdefault('BT', n[0].upper())
@@ -1342,9 +1351,8 @@ def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
   if '@' in name:
     tool_img = name.split('@')[0]
   else:
-    tool_img = name.lower()
+    tool_img = name#.lower()
   d.setdefault('tool_img', tool_img)
-  d.setdefault('namelower', name.lower())
   d.setdefault('nameupper', name.upper())
   d.setdefault('cmds', cmds.replace("\(","("))
   d.setdefault('target', OV.TranslatePhrase("%s-target" %target))
@@ -1388,7 +1396,7 @@ def MakeActiveGuiButton(name,cmds,toolname=""):
   n = name.split("-")
   d = {}
   if toolname:
-    target=toolname.lower()
+    target=toolname#.lower()
   else:
     target=n[1]
   d.setdefault('bt', n[0])
@@ -1398,19 +1406,21 @@ def MakeActiveGuiButton(name,cmds,toolname=""):
   d.setdefault('cmds', cmds.replace("\(","("))
   d.setdefault('target', OV.TranslatePhrase("%s-target" %target))
   d.setdefault('toolname', toolname)
+
   txt = '''
     <a href="spy.InActionButton(%(bt)s-%(bn)s,on,%(toolname)s)>>refresh>>%(cmds)s>>echo '%(target)s: OK'>>spy.InActionButton(%(bt)s-%(bn)s,off,%(toolname)s)" target="%(target)s">
       <zimg name=IMG_%(BT)s-%(BN)s%(toolname)s border="0" src="%(bt)s-%(bn)s.png">
     </a>
     '''%d
+  txt = '''
+$spy.MakeHoverButton(%(name)s,%(cmds)s)''' %d
   return txt
 OV.registerFunction(MakeActiveGuiButton)
-def InActionButton(name,state,toolname=""):
 
+def InActionButton(name,state,toolname=""):
   if state == "on":
     use_image= "%son.png" %name
     OV.SetImage("IMG_%s%s" %(name.upper().lstrip(".PNG"),toolname),use_image)
-
   if state == "off":
     use_image= "%soff.png" %name
     OV.SetImage("IMG_%s%s" %(name.upper().lstrip(".PNG"),toolname), use_image)
