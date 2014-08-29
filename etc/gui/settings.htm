@@ -33,17 +33,17 @@ Freeze(false)>>
     <b>Background:</b>
   </td>
   <td width='65%' colspan='2'>
-    <a 
-      href="swapbg" 
+    <a
+      href="swapbg"
       target="%swapbg-target%">
       %swapbg%
     </a>
     &nbsp;
-    <a 
-      href="grad -i" 
+    <a
+      href="grad -i"
       target="%graduated-target%">
       %graduated%
-    </a> 
+    </a>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
@@ -53,11 +53,11 @@ Freeze(false)>>
     <b>GUI left/right</b>
   </td>
   <td width='65%' colspan='2'>
-    <a 
-      href="htmlpanelswap" 
+    <a
+      href="htmlpanelswap"
       target="%htmlpanelswap-target%">
       %htmlpanelswap%
-    </a> 
+    </a>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
@@ -70,13 +70,13 @@ Freeze(false)>>
     Show tooltips when hovering
   </td>
   <td width='20%' align='right'>
-    <input 
+    <input
       type="checkbox"
       name="SHOW_TOOLTIPS"
       fgcolor="GetVar(HtmlFontColour)"
       bgcolor="GetVar('HtmlInputBgColour')"
       checked="not(strcmp(spy.GetParam(user.show_tooltips),0))"
-      oncheck="spy.SetParam(user.show_tooltips,1)>>html.tooltips true" 
+      oncheck="spy.SetParam(user.show_tooltips,1)>>html.tooltips true"
       onuncheck="spy.SetParam(user.show_tooltips,0)>>html.tooltips false"
       target="Show tooltips when hovering over a control"
     >
@@ -91,13 +91,13 @@ Freeze(false)>>
     Show bar with structure info
   </td>
   <td width='20%' align='right'>
-    <input 
+    <input
       type="checkbox"
       name="SHOW_INFO"
       fgcolor="GetVar(HtmlFontColour)"
       bgcolor="GetVar('HtmlInputBgColour')"
       checked="not(strcmp(spy.GetParam(user.show_info),0))"
-      oncheck="spy.SetParam(user.show_info,1)>>showwindow info true" 
+      oncheck="spy.SetParam(user.show_info,1)>>showwindow info true"
       onuncheck="spy.SetParam(user.show_info,0)>>showwindow info false"
     >
   </td>
@@ -171,13 +171,13 @@ Freeze(false)>>
     Structures will fade in and out
   </td>
   <td width='20%' align='right'>
-    <input 
+    <input
       type="checkbox"
       name="USE_FADER"
       fgcolor="GetVar(HtmlFontColour)"
       bgcolor="GetVar('HtmlInputBgColour')"
       checked="not(strcmp(spy.GetParam(user.use_fader),0.0))"
-      oncheck="spy.SetParam(user.use_fader,0.4)" 
+      oncheck="spy.SetParam(user.use_fader,0.4)"
       onuncheck="spy.SetParam(user.use_fader,0)"
     >
   </td>
@@ -188,7 +188,7 @@ Freeze(false)>>
     <b>%Start Olex2 in%:</b>
   </td>
   <td width='55%'>
-     Where Olex2 will open after restart 
+     Where Olex2 will open after restart
   </td>
   <td width='20%' align='right'>
      <input
@@ -215,13 +215,13 @@ Freeze(false)>>
      Only one top-level tool open at a time
   </td>
   <td width='20%' align='right'>
-    <input 
+    <input
       type="checkbox"
       name="SOLO_MODE"
       fgcolor="GetVar(HtmlFontColour)"
       bgcolor="GetVar('HtmlInputBgColour')"
       checked="not(strcmp(spy.GetParam(user.solo),False))"
-      oncheck="spy.SetParam(user.solo,True)" 
+      oncheck="spy.SetParam(user.solo,True)"
       onuncheck="spy.SetParam(user.solo,False)"
     >
   </td>
@@ -235,13 +235,13 @@ Freeze(false)>>
      Solve, Refine and Report panels
   </td>
   <td width='22%' align='right'>
-    <input 
+    <input
       type="checkbox"
       name="AUTO_CLOSE_SETTINGS_PANEL"
       fgcolor="GetVar(HtmlFontColour)"
       bgcolor="GetVar('HtmlInputBgColour')"
       checked="not(strcmp(spy.GetParam(user.auto_close_settings_panel),False))"
-      onclick="spy.SetParam(user.auto_close_settings_panel,html.GetState('~name~'))" 
+      onclick="spy.SetParam(user.auto_close_settings_panel,html.GetState('~name~'))"
     >
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -259,7 +259,7 @@ Freeze(false)>>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='UNITCELL_RENDERING';help_ext=Unitcell-rendering;1 -->
-  <td width='33%'><b>%Unit cell rendering%:</b></td>
+  <td width='33%'><b>%Unit cell style%:</b></td>
   <td width='16%'>
     <a href="cell.Drawstyle cone">Cone</a>
   </td>
@@ -273,5 +273,18 @@ Freeze(false)>>
      "onchange=cell.Thickness(html.GetValue('~name~'))")
    $-</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='USER_DB_LOCATION';help_ext=user-db-location;1 -->
+  <td width='25%'><b>%User Database%:</b></td>
+  <td width='50%'>
+  <a href="spy.EditParams(user.report)">Edit Settings</a>
+  </td>
+  <td width='25%'>
+  Restart Required!
+   </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
