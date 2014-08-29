@@ -53,7 +53,7 @@ gui
       line_height = 26
         .type = int
     }
-    
+
     h2{
       font_size = 12
         .type = int
@@ -175,7 +175,7 @@ gui
     help{
       bg_colour = #ffffff
         .type = colour
-    }  
+    }
   }
 
   timage{
@@ -254,8 +254,8 @@ gui
       buttonmark = None
         .type = str
     }
-    
-    
+
+
     tab{
       scale = 2
         .type = int
@@ -341,7 +341,7 @@ gui
         .type = str
       buttonmark = 5:#b40000:4
         .type = str
-      
+
 
       off_L = 1.6
         .type = float
@@ -379,7 +379,7 @@ gui
         .type = colour
       grad_step = 0.3
         .type = float
-      height = 20
+      height = 21
         .type = int
       corner_rad = 3
         .type = int
@@ -391,7 +391,7 @@ gui
         .type = int
       halign = left
         .type = str
-      top = 2
+      top = 3
         .type = int
       left = 4
         .type = int
@@ -401,7 +401,7 @@ gui
         .type = float
       font_colour_L = 0.7
         .type = float
-      font_colour = #767676
+      font_colour = #565656
         .type = colour
       arrows = None
         .type = str
@@ -415,7 +415,7 @@ gui
         .type = float
       border = 1
         .type = int
-      border_colour = #bbbbbb
+      border_colour = #888888
         .type = colour
       shadow = False
         .type = bool
