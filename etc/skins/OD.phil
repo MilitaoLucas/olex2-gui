@@ -1,10 +1,11 @@
 gui {
   base_colour = #b6b6b6
   logo_colour = #014e8f
-  htmlpanelwidth = 520
+  htmlpanelwidth = 540
   red = #aa0000
   orange = #ff740e
   green = #00aa00
+
   skin {
     name = "OD"
     logo_name = None
@@ -26,9 +27,8 @@ gui {
     checkbox_width = 20
     combo_width_2 = 55
     combo_height = 20
-
-
   }
+
   timage {
     bg_colour_L = 0.8
     grad_colour_L = 0.7
@@ -57,10 +57,10 @@ gui {
       arrows = "bar:top:5"
       off_L = 0.8
     }
-    
+
     cbtn{
-      base_colour = #777777
-      grad_colour = #999999
+      base_colour = #527bde
+      grad_colour = #527bde
       font_colour = #ffffff
       height = 24
       corner_rad = 2
@@ -73,16 +73,16 @@ gui {
       left = 3
       off_L = 1.2
     }
-    
+
     button {
-      grad_colour = #e1e1e1
+      grad_colour = #88ff88
       grad_step = 0.3
       height = 22
       top = 3
       bg_colour_L = 1.8
       grad_colour_L = 1.9
       font_colour_L = 0.7
-      font_colour = #767676
+      font_colour = #ff740e
     }
     h1 {
       grad_colour = #527bde
@@ -117,8 +117,8 @@ gui {
       font_size = 18
       }
   }
-  
-  
+
+
   graph{
     light_grey = #888888
       .type = colour
@@ -141,8 +141,8 @@ gui {
     axislabel_colour = #666666
       .type = colour
   }
-  
-  
+
+
   button_colouring = #dddddd
   button_writing = #777777
   tab_colour = #5563a4
