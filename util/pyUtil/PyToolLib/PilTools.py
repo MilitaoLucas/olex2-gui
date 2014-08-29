@@ -1267,7 +1267,6 @@ class timage(ImageTools):
     auto_name = ""
     auto_text = ""
     button_type = "button"
-
     for txt in button_names:
       if not width:
         if "three" in btn_type:
@@ -1349,7 +1348,7 @@ class timage(ImageTools):
         elif state == "hoveron":
           colour = self.adjust_colour(self.params.button_colouring.rgb,luminosity=0.5)
 
-        self.image = image = self.make_timage(item_type=button_type, item=t, state=state, width=width, titleCase=False)
+        self.image = image = self.make_timage(item_type=button_type, item=t, state=state, width=width, colour=colour, titleCase=False)
         if not auto_name:
           self.name = name = "button%s-%s%s.png" %(btn_type, txt.replace(" ", "_"), state)
         else:
