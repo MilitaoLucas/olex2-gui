@@ -1027,17 +1027,17 @@ def OnModeChange(*args):
   global last_mode, last_mode_options
   debug = OV.GetParam("olex2.debug")
   d = {
-    'movesel':'button-move_near',
-    'movesel -c=':'button-copy_near',
-    'grow':'button-grow_mode',
-    'split -r=EADP':'button_full-move_atoms_or_model_disorder',
+    'move sel':'three-Move_Near',
+    'move sel -c=':'three-Copy_Near',
+    'grow':'three-Grow_Mode',
+    'split -r=EADP':'button_full-Move_atoms_or_model_disorder',
     'split':'button_full-move_atoms_or_model_disorder',
     'fit':'button_full-fit_group',
-    'name':'button_small-name',
-    'fixu':'button-fix_u',
-    'fixxyz':'button-fix_xyz',
-    'hfix':'button_small-hfix',
-    'occu':'button-set_occu',
+    'name':'small-Name',
+    'fixu':'small-Fix_U',
+    'fixxyz':'small-Fix_xyz',
+    'hfix':'small-HFIX',
+    'occu':'small-Set_OCCU',
     'off':None
   }
   name = 'mode'
@@ -1157,8 +1157,8 @@ def OnStateChange(*args):
   name = args[0]
   state = args[1]
   d = {
-    'basisvis':'button-show_basis',
-    'cellvis':'button-show_cell',
+    'basisvis':'three-Show_Basis',
+    'cellvis':'three-Show_Cell',
     'htmlttvis':'button-tooltips',
     'helpvis':'button-help',
   }
@@ -1220,15 +1220,15 @@ def _check_modes_and_states(name):
   if name == 'button_full-move_atoms_or_model_disorder':
     if OV.GetParam('olex2.in_mode') == 'split -r':
       return True
-  buttons = ['button_full-electron_density_map', 'button_small-map']
+  buttons = ['full-Electron_Density_Map', 'small-Map']
   if name in buttons:
     if OV.GetParam('olex2.eden_vis') == True:
       return True
-  buttons = ['button_small-void']
+  buttons = ['small-Void']
   if name in buttons:
     if OV.GetParam('olex2.void_vis') == True:
       return True
-  buttons = ['button_small-mask']
+  buttons = ['small-Mask']
   if name in buttons:
     if OV.GetParam('olex2.mask_vis') == True:
       return True
