@@ -2,84 +2,31 @@
 
 <!-- FIRST ROW -->
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='QUICK_DRAWING_STYLES';help_ext=Quick-Drawing-Styles;1 -->
-  <td name=IMG_BALL_AND_STICK width=10%>
-    <zimg border="0" src="toolbar-ball-and-stick.png">
+  <td name=IMG_BALL_AND_STICK width=8%>
+$spy.MakeHoverButton('toolbar-ball-and-stick','pers>>sel -u')
   </td>
-  <td name=BTN_BALL_AND_STICK>
-$spy.MakeHoverButton('button-balls_&_sticks','pers>>sel -u')
+  <td name=IMG_ANIS width=8%>
+$spy.MakeHoverButton('toolbar-anis','refresh>>telp>>sel -u')
   </td>
-  <td name=IMG_ANIS width=10%>
-    <zimg border="0" src="toolbar-anis.png">
+  <td name=IMG_ANIS_H width=8%>
+$spy.MakeHoverButton('toolbar-anisH','refresh>>telph>>sel -u')
   </td>
-  <td name=BTN_BALL_AND_STICK>
-<!-- Button Part ELLIPSOIDS -->
-  <map name="map_ellipsoids">
-    <area shape="rect"
-      coords="0,0,60,25"
-      href="spy.InActionButton(button-ellipsoids_|_h,on)>>
-refresh>>
-telp>>
-sel -u>>
-spy.InActionButton(button-ellipsoids_|_h,off)"
-    target="%Show Ellipsoids%"
-    >
-
-<!-- Button Part H Uiso -->
-    <area shape="rect"
-      coords="60,0,500,25"
-      href="spy.InActionButton(button-ellipsoids_|_h,on)>>
-refresh>>
-telph>>
-sel -u>>
-spy.InActionButton(button-ellipsoids_|_h,off)"
-
-      target="%Show Ellipsoids and Hydrogen atom Uiso%"
-    >
-  </map>
-    <zimg border="0" name=IMG_BUTTON-ELLIPSOIDS_|_H src="button-ellipsoids_|_h.png" usemap=#map_ellipsoids>
-</td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
-<!-- SECOND ROW -->
-<!-- #include tool-row gui\blocks\tool-row.htm;name='QUICK_DRAWING_STYLES_2';help_ext=Quick-Drawing-Styles-2;1 -->
-  <td name=IMG_WIREFRAME width=10%>
-    <zimg border="0" src="toolbar-wireframe.png">
+  <td name=IMG_WIREFRAME width=8%>
+$spy.MakeHoverButton('toolbar-wireframe','proj')
   </td>
-  <td name=BTN_WIREFRAME>
-$spy.MakeHoverButton('button-wireframe','proj')
+  <td name=IMG_SPHERE_PACKING width=8%>
+$spy.MakeHoverButton('toolbar-sphere-packing','sfil>>sel -u')
   </td>
-  <td name=IMG_SPHERE_PACKING width=10%>
-    <zimg border="0" src="toolbar-sphere-packing.png">
+  <td name=IMG_BICOLOURED_BONDS width=8%>
+$spy.MakeHoverButton('toolbar-bicoloured-bonds','tubes>>sel -u')
   </td>
-  <td name=BTN_SPHERE_PACKING>
-$spy.MakeHoverButton('button-sphere_packing','sfil>>sel -u')
+  <td name=IMG_POLYHEDRA width=8%>
+$spy.MakeHoverButton('toolbar-polyhedra','mask atoms 37>>sel -u')
   </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
-<!-- THIRD ROW -->
-<!-- #include tool-row gui\blocks\tool-row.htm;name='QUICK_DRAWING_STYLES_3';help_ext=Quick-Drawing-Styles-3;1 -->
-  <td name=IMG_BICOLOURED_BONDS width=10%>
-    <zimg border="0" src="toolbar-bicoloured-bonds.png">
-  </td>
-  <td name=BTN_BICOLOURED_BONDS>
-$spy.MakeHoverButton('button-tubes','tubes>>sel -u')
-  </td>
-  <td name=IMG_DEFAULT width=10%>
-    <zimg border="0" src="toolbar-default.png">
-  </td>
-  <td name=BTN_DEFAULT>
-$spy.MakeHoverButton('button-default_style','default')
-  </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
-<!-- FOURTH ROW -->
-<!-- #include tool-row gui\blocks\tool-row.htm;name='QUICK_DRAWING_STYLES_4';help_ext=Quick-Drawing-Styles-4;1 -->
-  <td name=IMG_POLYHEDRA width=10%>
-    <zimg border="0" src="toolbar-polyhedra.png">
-  </td>
-  <td name=BTN_POLYHEDRA>
-$spy.MakeHoverButton('button-polyhedra','mask atoms 37>>sel -u')
-  </td>
+  <td name=IMG_DEFAULT width=15% align='right'>
+$spy.MakeHoverButton('small-Default','default')
+&nbsp;
+$spy.MakeHoverButton('small-Light','load style BaseDir()/etc/styles/light.glds')
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
