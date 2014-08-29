@@ -20,13 +20,13 @@ $spy.gui.maps.SetXgridView()
 #ignoreif -->
 
 
-<!-- #include h3-calculate-voids gui\h3-calculate-voids.htm;gui\blocks\tool-h3-off.htm;image=h3-calculate-voids;onclick="if file.Exists(HKLSrc()) then 'html.ItemState h3-masks 2' else none>>if file.Exists(HKLSrc()) then 'html.ItemState h3-electron-density 2' else none";colspan=1;2; -->
+<!-- #include h3-calculate-voids gui\h3-calculate-voids.htm;gui\blocks\tool-h3-off.htm;image=h3-Calculate-Voids;onclick="if file.Exists(HKLSrc()) then 'html.ItemState h3-masks 2' else none>>if file.Exists(HKLSrc()) then 'html.ItemState h3-electron-density 2' else none";colspan=1;2; -->
 
-<!-- #include h3-calculate-solvent-accessible-voids gui\h3-calculate-solvent-accessible-voids.htm;gui\blocks\tool-h3-off.htm;image=h3-calculate-solvent-accessible-voids;onclick="if file.Exists(HKLSrc()) then 'html.ItemState h3-masks 2' else none>>if file.Exists(HKLSrc()) then 'html.ItemState h3-electron-density 2' else none";colspan=1;2; -->
+<!-- #include h3-calculate-solvent-accessible-voids gui\h3-calculate-solvent-accessible-voids.htm;gui\blocks\tool-h3-off.htm;image=h3-Calculate-Solvent-Accessible-Voids;onclick="if file.Exists(HKLSrc()) then 'html.ItemState h3-masks 2' else none>>if file.Exists(HKLSrc()) then 'html.ItemState h3-electron-density 2' else none";colspan=1;2; -->
 
-<!-- #includeif file.Exists(HKLSrc()) h3-electron-density gui\h3-electron-density.htm;gui\blocks\tool-h3-off.htm;image=h3-electron-density;onclick="html.ItemState h3-calculate-voids 2>>html.ItemState h3-masks 2";colspan=1;2; -->
+<!-- #includeif file.Exists(HKLSrc()) h3-electron-density gui\h3-electron-density.htm;gui\blocks\tool-h3-off.htm;image=h3-Electron-Density;onclick="html.ItemState h3-calculate-voids 2>>html.ItemState h3-masks 2";colspan=1;2; -->
 
-<!-- #includeif file.Exists(HKLSrc()) h3-masks gui\h3-masks.htm;gui\blocks\tool-h3-off.htm;image=h3-masks;onclick="html.ItemState h3-calculate-voids 2>>if file.Exists(HKLSrc()) then 'html.ItemState h3-electron-density 2' else none";colspan=1;2; -->
+<!-- #includeif file.Exists(HKLSrc()) h3-masks gui\h3-masks.htm;gui\blocks\tool-h3-off.htm;image=h3-Masks;onclick="html.ItemState h3-calculate-voids 2>>if file.Exists(HKLSrc()) then 'html.ItemState h3-electron-density 2' else none";colspan=1;2; -->
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
 
