@@ -150,9 +150,9 @@ def flash_gui_control(control):
 olex.registerFunction(flash_gui_control, False, "gui.tools")
 
 def make_single_gui_image(img_txt="", img_type='h2'):
-  from PilTools import timage
+  import PilTools
   import OlexVFS
-  timage = timage()
+  TI = PilTools.TI
   states = ["on", "off", "highlight", "", "hover", "hoveron"]
   alias = img_type
   for state in states:
@@ -161,7 +161,7 @@ def make_single_gui_image(img_txt="", img_type='h2'):
     elif img_type == "h1":
       alias = img_type
       img_type = "h2"
-    image = timage.make_timage(item_type=alias, item=img_txt, state=state, titleCase=False)
+    image = TI.make_timage(item_type=alias, item=img_txt, state=state, titleCase=False)
     name = "%s-%s%s.png" %(img_type, img_txt.lower(), state)
     OlexVFS.save_image_to_olex(image, name, 0)
 
