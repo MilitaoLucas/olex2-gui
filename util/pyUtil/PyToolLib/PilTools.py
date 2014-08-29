@@ -23,6 +23,8 @@ import olex_fs
 import olx
 import time
 global isPro
+global timage_blanks
+timage_blanks = {}
 
 olx.banner_slide = {}
 
@@ -715,7 +717,7 @@ OV.registerMacro(MakeAllRBars_instance.run_MakeAllRBars, '')
 
   #def run_sNumTitle(self, force=False):
     ##self.params.html.base_colour.rgb = OV.FindValue('gui_htmlself.params.html.base_colour.rgb')
-    
+
     #self.basedir = OV.BaseDir()
     #self.filefull = OV.FileFull()
     #self.filepath = OV.FilePath()
@@ -792,6 +794,9 @@ class timage(ImageTools):
   def __init__(self, width=None, tool_arg=None):
     super(timage, self).__init__()
 
+    self.imageSource = None
+    self.iconSource = None
+
     import olex_fs
     self.params = OV.GuiParams()
 
@@ -800,22 +805,15 @@ class timage(ImageTools):
     new_l = open("%s/etc/gui/images/advertise_as_new.txt" %OV.BaseDir(),'r').readlines()
     self.new_l = map(lambda s: s.strip(), new_l)
 
-    c_width = int(olx.html.ClientWidth('self'))
-    if c_width < 100:
-      c_width = OV.GetParam('gui.htmlpanelwidth')
+    self.get_available_width()
 
-    self.width = c_width - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
-    
-    self.max_width = self.width
-    
-    self.available_width = self.width - OV.GetParam('gui.html.table_firstcol_width')
-
-
-    self.timage_blanks = {}
+    global timage_blanks
+    timage_blanks.setdefault(self.params.skin.name,{})
     self.abort = False
-    
+
     self.font_name = "Vera"
     self.timer = False
+    self.debug = False
     if self.timer:
       import time
       self.time = time
@@ -830,23 +828,25 @@ class timage(ImageTools):
     self.no_need_to_refresh_image_type = {}
     self.getImageItemsFromTextFile()
 
+  def get_available_width(self):
+    c_width = int(olx.html.ClientWidth('self'))
+    if c_width < 100:
+      c_width = OV.GetParam('gui.htmlpanelwidth')
+    self.width = c_width - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+    self.max_width = self.width
+    self.available_width = self.width - OV.GetParam('gui.html.table_firstcol_width')
 
   def run_timage(self,force_images=False):
-    icon_source = open("%s/etc/gui/images/src/icons.png" %self.basedir, 'rb')
-    image_source = open("%s/etc/gui/images/src/images.png" %self.basedir,'rb')
-    self.iconSource = Image.open(icon_source)
-    self.iconSource.load()
-    self.imageSource = Image.open(image_source)
-    self.imageSource.load()
-    icon_source.close()
-    image_source.close()
+
+    global timage_blanks
+    self.params = OV.GuiParams()
+    self.get_available_width()
+    timage_blanks.setdefault(self.params.skin.name,{})
+
     self.force_images = force_images
-
+    if force_images:
+      timage_blanks[self.params.skin.name] = {}
     self.highlight_colour = OV.GetParam('gui.html.highlight_colour').rgb
-    
-    #width = int(olx.html.ClientWidth('self'))
-    #self.available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - OV.GetParam('gui.html.table_firstcol_width'))
-
 
     do_these = []
     if olx.fs.Exists("logo.png") == 'false':
@@ -858,8 +858,14 @@ class timage(ImageTools):
                 "make_cbtn_items",
                 "info_bitmaps",
                 "make_images_from_fb_png",
-                
                 ]
+        do_these = [
+                #"make_cbtn_items",
+                #"info_bitmaps",
+                #"make_images_from_fb_png",
+                ]
+
+
     if not do_these:
       do_these = ["make_generated_assorted_images",
                   "make_text_and_tab_items",
@@ -867,15 +873,32 @@ class timage(ImageTools):
                   "make_button_items",
                   "make_cbtn_items",
                   "make_icon_items",
+                  "make_element_buttons",
                   "make_image_items",
                   "make_images_from_fb_png",
                   "make_popup_banners",
-                  "make_element_buttons",
                   "info_bitmaps",
                   "resize_news_image",
                   "resize_skin_logo",
                   "create_logo"
                   ]
+
+      do_these = ["make_generated_assorted_images",
+#                  "make_text_and_tab_items",
+#                  "make_label_items",
+#                  "make_button_items",
+                  "make_cbtn_items",
+                  "make_icon_items",
+#                  "make_element_buttons",
+#                  "make_image_items",
+#                  "make_images_from_fb_png",
+                  "make_popup_banners",
+                  "info_bitmaps",
+                  "resize_news_image",
+                  "resize_skin_logo",
+                  "create_logo"
+                  ]
+
 
     #self.params.html.base_colour.rgb = OV.FindValue('gui_htmlself.params.html.base_colour.rgb')
     width = int(olx.html.ClientWidth('self'))
@@ -888,7 +911,6 @@ class timage(ImageTools):
     #MakeAllRBars_instance.run_MakeAllRBars()
 
 
-    self.params = OV.GuiParams()
     for item in do_these:
       if self.timer:
         t1 = self.time.time()
@@ -919,12 +941,26 @@ class timage(ImageTools):
       name = "banner_%s.png" %txt
       OlexVFS.save_image_to_olex(IM, name, 2)
 
+  def open_icon_source(self):
+    if not self.iconSource:
+      icon_source = open("%s/etc/gui/images/src/icons.png" %self.basedir, 'rb')
+      self.iconSource = Image.open(icon_source)
+      self.iconSource.load()
+      icon_source.close()
+
+  def open_image_source(self):
+    if not self.imageSource:
+      image_source = open("%s/etc/gui/images/src/images.png" %self.basedir,'rb')
+      self.imageSource = Image.open(image_source)
+      self.imageSource.load()
+      image_source.close()
+
   def make_images_from_fb_png(self):
     self.image_type = "fb"
     sf = self.sf
-    image_source = self.imageSource
-    im = image_source
 
+    self.open_image_source()
+    im = self.imageSource
 
     available_width = self.available_width
     button_names = self.image_items_d.get("TINY BUTTONS")
@@ -1220,71 +1256,108 @@ class timage(ImageTools):
       OlexVFS.save_image_to_olex(IM, name, 2)
 
 
-  def produce_buttons(self, button_names, scale,btn_type, max_width=None, width=None, crop=None, cut=None, ):
+  def produce_buttons(self, button_names, btn_type, scale=None, max_width=None, width=None, crop=None, cut=None, ):
+    self.params = OV.GuiParams()
+    if not scale:
+      scale = self.sf / 1.2
     self.image_type = btn_type
     if self.no_need_to_refresh_image_type.get(self.image_type):
       return
+    states = ["on", "off", "highlight", "hover", "hoveron"]
+    auto_name = ""
+    auto_text = ""
+    button_type = "button"
 
-    states = ["on", "off", "", "highlight", "hover", "hoveron"]
-    for state in states:
-      if state == "on":
-        colour = self.adjust_colour(self.params.html.highlight_colour.rgb,luminosity=1.3)
-      elif state == "off":
-        #colour = self.adjust_colour(self.params.html.base_colour.rgb,luminosity=1.9)
-        colour = self.params.button_colouring.rgb
-      elif state == "":
-        #colour = self.adjust_colour(self.params.html.base_colour.rgb,luminosity=1.9)
-        colour = self.params.button_colouring.rgb
-      elif state == "hover":
-        colour = self.adjust_colour(self.params.button_colouring.rgb,luminosity=1.1)
-      elif state == "hoveron":
-        colour = self.adjust_colour(self.params.button_colouring.rgb,luminosity=0.5)
+    for txt in button_names:
+      if not width:
+        if "three" in btn_type:
+          width = int(self.available_width/3) - 12
+        elif "two" in btn_type:
+          width = int(self.available_width/2) - 12
+        elif "full" in btn_type:
+          auto_name = txt
+          txt = txt.replace("button_full-","")
+          auto_text = txt.replace("full-","")
+          width = int(self.available_width) - 12
+        elif "one" in btn_type:
+          auto_name = txt
+          width = int(self.available_width) - 12
+        elif "element" in txt:
+          element = txt.split("_")[0].lstrip("btn-element")
+          self.make_element_buttons(element)
+          return
+        elif "small" in btn_type:
+          button_type = 'small_button'
+          width = OV.GetParam('gui.timage.small_button.width')
+        elif "tiny" in btn_type:
+          button_type = 'tinybutton'
+          width = OV.GetParam('gui.timage.tinybutton.width')
+        elif "h2" in btn_type:
+          button_type = 'h1'
+          width = OV.GetParam('gui.timage.h2.width')
+          auto_name = txt
+          auto_text = txt.replace("h2-", "")
+        elif "h3" in btn_type:
+          button_type = 'h3'
+        elif "cbtn" in btn_type:
+          button_type = 'cbtn'
+          self.make_cbtn_items()
+          return
+          #width = OV.GetParam('gui.cbtn.width')
+          #width = int(self.available_width/4) - 12
+        elif "tab" in btn_type:
+          self.make_tab_items()
+          return
+        elif "info" in txt:
+          self.make_images_from_fb_png()
+          return
+        elif "small" in txt:
+          button_type = 'small_button'
+        elif "toolbar" in txt:
+          button_type = "toolbar"
+          self.make_icon_items()
+          return
 
-      for txt in button_names:
-        if width is None: width = max_width
-        use_new = True
-        if use_new:
-          if txt in self.new_l:
-            self.advertise_new = True
-          if btn_type =="_tiny":
-            button_type = 'tinybutton'
-          elif btn_type =="_g3_big":
-            button_type = 'g3_big'
-          elif btn_type =="_g4":
-            button_type = 'g4'
-          elif btn_type =="_small":
-            button_type = 'small_button'
+        if not auto_name:
+          auto_name = txt.split("@")[0]
+      if width is None: width = max_width
+
+      if txt in self.new_l:
+        self.advertise_new = True
+      if auto_name:
+        if not auto_text:
+          if "-" in auto_name:
+            t = auto_name.lstrip("%s-" %btn_type)
           else:
-            button_type = 'button'
-          self.image = image = self.make_timage(item_type=button_type, item=txt, state=state, width=width, titleCase=False)
-          self.name = name = "button%s-%s%s.png" %(btn_type, txt.replace(" ", "_"), state)
-          self.save_with_checking_for_needed()
-          self.advertise_new = False
-
+            t = auto_name
         else:
+          t = auto_text
+      else:
+        t = txt.strip("%s-" %btn_type)
 
+      for state in states:
+        if state == "on":
+          colour = self.adjust_colour(self.params.html.highlight_colour.rgb,luminosity=1.3)
+        elif state == "off":
+          #colour = self.adjust_colour(self.params.html.base_colour.rgb,luminosity=1.9)
+          colour = self.params.button_colouring.rgb
+        elif state == "":
+          #colour = self.adjust_colour(self.params.html.base_colour.rgb,luminosity=1.9)
+          colour = self.params.button_colouring.rgb
+        elif state == "hover":
+          colour = self.adjust_colour(self.params.button_colouring.rgb,luminosity=1.1)
+        elif state == "hoveron":
+          colour = self.adjust_colour(self.params.button_colouring.rgb,luminosity=0.5)
 
-          #IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
-          crop = self.make_timage(item_type='button', item="", state=state, width=width)
-          crop_colouriszed = self.colourize(crop, (0,0,0), colour)
-          IM =  Image.new('RGBA', crop.size)
-          IM.paste(crop_colouriszed, (0,0), crop)
-          draw = ImageDraw.Draw(IM)
-          t = txt.replace("blank"," _ ")
-          self.write_text_to_draw(draw,
-                       "%s" %t,
-                       top_left=(4, 7),
-                       font_name = 'Vera',
-                       font_size=40,
-                       titleCase=False,
-                       font_colour=self.params.button_writing,
-                       max_width = max_width,
-                       align='centre'
-                       )
-          IM = self.resize_image(IM, (int((cut[2]-cut[0])/scale), int((cut[3]-cut[1])/scale)))
-          name = "button%s-%s%s.png" %(btn_type, txt.replace(" ", "_"), state)
-          name = name.lower()
-          OlexVFS.save_image_to_olex(IM, name, 2)
+        self.image = image = self.make_timage(item_type=button_type, item=t, state=state, width=width, titleCase=False)
+        if not auto_name:
+          self.name = name = "button%s-%s%s.png" %(btn_type, txt.replace(" ", "_"), state)
+        else:
+          self.name = name = "%s%s.png" %(auto_name.replace(" ", "_"), state)
+        if not image:
+          print "Image %s has not been created" %name
+        self.save_with_checking_for_needed()
+        self.advertise_new = False
 
   def makeTestBanner(self):
     if not OV.FindValue('user_refinement_gui2'):
@@ -1676,8 +1749,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     IM =  Image.new('RGBA', size, OV.GetParam('gui.html.bg_colour').rgb)
 
     #this is the source of the images required for the logo
-    image_source = "%s/etc/gui/images/src/images.png" %self.basedir
-    im = Image.open(image_source)
+    self.open_image_source()
+    im = self.imageSource
 
     #first cut the small logo picture from the source
     cut_right = (int(OV.GetParam('gui.htmlpanelwidth')) - 213) * factor
@@ -1734,6 +1807,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
 
   def run(self):
+
+    self.params = OV.GuiParams()
+
     do_these = ["make_generated_assorted_images",
                 "make_text_and_tab_items",
                 "make_label_items",
@@ -1754,7 +1830,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         print "/t%s took %.3f s to complete" %(item, self.time.time()-t1)
 
   def save_with_checking_for_needed(self):
-    name = self.name.lower()
+    name = self.name#.lower()
     image = self.image
     OlexVFS.save_image_to_olex(image, name, 2)
     return
@@ -1835,29 +1911,13 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     name = "qwedges.png"
     OlexVFS.save_image_to_olex(image, name, 2)
 
-  def make_text_and_tab_items(self):
-    bitmap = "working"
-    if olx.fs.Exists(bitmap) == 'true':
-      OV.CreateBitmap(bitmap)
+  def make_text_items(self):
     textItems = []
     textItems += self.image_items_d.get('H1',[])
     textItems += self.image_items_d.get('H2',[])
     for item in self.image_items_d.get('H3',[]):
       textItems.append("h3-%s" %item)
-
-    tabItems = []
-
     directories = ["etc/gui", "etc/news", "etc/gui/blocks", "etc/gui/snippets", "etc/gui/g3", "etc/tutorials"]
-    rFile = open("%s/etc/gui/blocks/index-tabs.htm" %(self.basedir), 'r')
-    for line in rFile:
-      t = line.split("<!-- #include ")[1]
-      t = t.split()[0]
-      t = t.split('-')[1]
-      if t not in tabItems:
-        tabItems.append(t)
-    rFile.close()
-    tabItem_l = [tabItems]
-    self.tabItems = tabItems
     for directory in directories:
       for htmfile in OV.ListFiles("%s/%s/*.htm" %(self.basedir,  directory)):
         f = (htmfile.replace('\\', '/').split('/')[-1:])
@@ -1921,6 +1981,20 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         self.text_time += t
         print "\t\t - %.3f [%.1f]- to complete %s" %(self.time.time()-t1, self.text_time, item)
 
+
+
+  def make_tab_items(self):
+    tabItems = []
+    rFile = open("%s/etc/gui/blocks/index-tabs.htm" %(self.basedir), 'r')
+    for line in rFile:
+      t = line.split("<!-- #include ")[1]
+      t = t.split()[0]
+      t = t.split('-')[1]
+      if t not in tabItems:
+        tabItems.append(t)
+    rFile.close()
+    tabItem_l = [tabItems]
+    self.tabItems = tabItems
     for tabItems in tabItem_l:
       image_type = 'tab'
       if self.no_need_to_refresh_image_type.get(image_type):
@@ -1946,6 +2020,13 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           self.save_with_checking_for_needed()
         if self.timer:
           print "\t\t - %s took %.3f s to complete" %(item, self.time.time()-t1)
+
+  def make_text_and_tab_items(self):
+    bitmap = "working"
+    if olx.fs.Exists(bitmap) == 'true':
+      OV.CreateBitmap(bitmap)
+    self.make_text_items()
+    self.make_tab_items()
 
     OV.DeleteBitmap('%s' %bitmap)
 
@@ -1989,16 +2070,15 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if new_style:
       buttons = ['Solve', 'Refine', 'Report']
       states = ['on', 'off', 'inactive', 'highlight', 'hover', 'hoveron']
+      width = int(round((self.available_width + OV.GetParam('gui.html.table_firstcol_width'))/3,0)) - 5
+      width = int(round((self.width/3)-(self.width/130)))
+      cut = width - OV.GetParam('gui.timage.cbtn.vline')
+      if cut > width:
+        cut = width - 1
+        print ("WARNING: HtmlPanelWidth is smaller than intended. Some GUI images may not display correctly")
       for state in states:
         for item in buttons:
           #cbtn buttons also need special width
-          width = int(round((self.available_width + OV.GetParam('gui.html.table_firstcol_width'))/3,0)) - 5
-          width = int(round((self.width/3)-(self.width/130)))
-
-          cut = width - OV.GetParam('gui.timage.cbtn.vline')
-          if cut > width:
-            cut = width - 1
-            print ("WARNING: HtmlPanelWidth is smaller than intended. Some GUI images may not display correctly")
           image = self.make_timage(item_type='cbtn', item=item, state=state, width=width)
           images = IT.cut_image(image,(cut,))
           i = 0
@@ -2132,7 +2212,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       pt = PeriodicTable().PeriodicTable()
     else:
       pt = elements.split()
-          
+
     btn_dict = {}
     icon_size = OV.GetParam('gui.skin.icon_size')
     tints = [("",(250,250,250)), ("b",(210,210,255)), ('g',(210,255,210)), ('r',(255,210,210))]
@@ -2177,6 +2257,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         OlexVFS.save_image_to_olex(IM, name_s, 2)
 
   def make_icon_items(self):
+    self.open_icon_source()
     self.image_type = 'icons'
     base_colour = self.params.html.base_colour.rgb
 
@@ -2195,8 +2276,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     iconIndex.setdefault("weight", (1, 1))
     iconIndex.setdefault("ms", (1, 2))
     iconIndex.setdefault("hadd", (1, 3))
-    iconIndex.setdefault("xl", (1, 4))
-    iconIndex.setdefault("xs", (1, 5))
+#    iconIndex.setdefault("XL", (1, 4))
+#    iconIndex.setdefault("XS", (1, 5))
     iconIndex.setdefault("cif", (1, 6))
     iconIndex.setdefault("clear", (1, 7))
     iconIndex.setdefault("default", (1, 8))
@@ -2211,7 +2292,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     iconIndex.setdefault("F", (2, 7))
     iconIndex.setdefault("center", (2, 8, {'colourise':self.params.html.highlight_colour.rgb}))
     iconIndex.setdefault("platon", (2, 9))
-    iconIndex.setdefault("auto", (3, 0))
+#    iconIndex.setdefault("auto", (3, 0))
     iconIndex.setdefault("edit", (3, 1))
     iconIndex.setdefault("tidy", (3, 2))
     iconIndex.setdefault("blank", (3, 3))
@@ -2253,8 +2334,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     iconIndex.setdefault("dot-arrow-up", (7, 3, {'colourise':self.params.green.rgb}))
     iconIndex.setdefault("more", (7, 4, {'border':False} ))
     iconIndex.setdefault("less", (7, 5, {'border':False} ))
+    iconIndex.setdefault("refresh", (7, 6, {'border':False} ))
     iconIndex.setdefault("polyhedra", (6, 9))
     iconIndex.setdefault("refresh", (7, 6))
+    iconIndex.setdefault("anisH", (7, 7))
 
     also_make_small_icons_l = ['open']
 
@@ -2269,6 +2352,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         self.save_with_checking_for_needed()
         if state == "off":
           pass
+        ##Export all icons to disk
           #save_name = name.replace("toolbar-","").replace("off.png",".png")
           #image.save("D:\\Users\\Horst\\Dropbox\\Olex2Manual\\icons\\" + save_name)
 
@@ -2302,7 +2386,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     draw.polygon((begin, middle, end), "#ff0000")
     name = r"toolbar-collapse.png"
     OlexVFS.save_image_to_olex(image, name, 2)
-
 
     image = Image.new('RGBA', (1,1), (0,0,0,0))
     OlexVFS.save_image_to_olex(image, "blank.png", 2)
@@ -2361,6 +2444,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
   def make_timage(self, item_type, item, state, font_name="Vera", width=None, colour=None, whitespace=None, titleCase=True):
 
+    self.params = OV.GuiParams()
     if not self.width:
       print "Width not set"
       return
@@ -2368,11 +2452,14 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if not width:
       width = self.width
 
+    global image_blanks
+
+    type_key = "%s_%s_%s" %(item_type, width, self.params.skin.name)
+
     if item_type == "small_button":
       pams = getattr(self.params.timage, '%s' %'button')
     else:
       pams = getattr(self.params.timage, '%s' %item_type)
-
 
     self.scale = pams.scale
     if not self.scale:
@@ -2402,6 +2489,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     self.titleCase = titleCase
     if border:
       border_colour = pams.border_colour.hexadecimal
+
+
 
     #if state == "highlight":
     #  font_colour = OV.GetParam('gui.html.highlight_colour')
@@ -2498,6 +2587,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     elif item_type == 'button':
       #buttonmark = True
       if state == "on":
+        border_colour = highlight_colour
         grad_colour = highlight_colour
       elif state == "hover":
         grad_colour = IT.adjust_colour(highlight_colour, luminosity = 0.95)
@@ -2560,23 +2650,22 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     size = (int(width)*self.scale, int(height)*self.scale)
     bg_colour = underground #hp#
 
-    type_key = "%s_%s" %(item_type, width)
-    if 'tinybutton' not in type_key:
-      if self.timage_blanks.has_key(type_key):
-        if self.timage_blanks[type_key].has_key(state):
-          image = self.timage_blanks[type_key][state]
-          image = self.print_text(image.copy(), item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
-          if self.scale != 1:
-            image = image.resize((int(width), int(height)), Image.ANTIALIAS)
-          return image
+#    if 'tinybutton' not in type_key:
+    if timage_blanks[self.params.skin.name].has_key(type_key):
+      if timage_blanks[self.params.skin.name][type_key].has_key(state):
+        image = timage_blanks[self.params.skin.name][type_key][state]
+        image = self.print_text(image.copy(), item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
+        if self.debug:
+          print "FROM CACHE: %s (%s)" %(item, state)
+        if self.scale != 1:
+          image = image.resize((int(width), int(height)), Image.ANTIALIAS)
+        return image
 
     image = Image.new('RGBA', size, bg_colour)
     draw = ImageDraw.Draw(image)
 
     if grad_step:
       self.gradient_bgr(draw, width*self.scale, height*self.scale, colour = grad_colour, fraction=1, step=grad_step)
-
-    cache = {}
 
     if item_type == "snumtitle":
       info_size = OV.GetParam('gui.timage.snumtitle.filefullinfo_size') * self.scale
@@ -2633,11 +2722,13 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     filename = item
     if item_type == 'snumtitle':
       filename = 'sNumTitle.png'
-    type_key = "%s_%s" %(item_type, width)
-    self.timage_blanks.setdefault(type_key,{})
-    self.timage_blanks[type_key].setdefault(state,image.copy())
-
+    else:
+      timage_blanks[self.params.skin.name].setdefault(type_key,{})
+      timage_blanks[self.params.skin.name][type_key].setdefault(state,image.copy())
     image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
+    if self.debug:
+      print "FROM SCRATCH: %s" %item
+
     if self.scale != 1:
       image = image.resize((int(width), int(height)), Image.ANTIALIAS)
     return image
