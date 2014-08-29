@@ -150,7 +150,7 @@ class OlexFunctions(inheritFunctions):
         value = value.strip()
         if value == '': value = '?'
         elif '\n' in value and value[0] != ';':
-          data_block[key] = ";%s\n;" %value 
+          data_block[key] = ";%s\n;" %value
         else:
           data_block[key] = value
       else:
@@ -351,7 +351,7 @@ class OlexFunctions(inheritFunctions):
         finalise_value = True
       elif finalise == 'Exclude':
         finalise_value = False
-      if type(filepath) == list:  
+      if type(filepath) == list:
         olx.CifMerge(*filepath, f=finalise_value, u=update_atoms_loop)
       else:
         olx.CifMerge(filepath, f=finalise_value, u=update_atoms_loop)
