@@ -86,7 +86,7 @@ class MapUtil:
 
   def MaskView(self, onoff=None):
     img_bases = ['small-Mask']
-    if self.deal_with_map_buttons(onoff, img_bases, 'Mask'):
+    if self.deal_with_map_buttons(onoff, img_bases, 'mask'):
       return
     self.SetXgridView(False)
     olex.m('spy.OlexCctbxMasks(True, True)')
