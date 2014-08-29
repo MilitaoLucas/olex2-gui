@@ -578,7 +578,7 @@ def ElementButtonStates(symbol):
   if not symbol:
     e = olx.ChooseElement()
     if not e:  return
-    symbol = e   
+    symbol = e
   if OV.GetParam('olex2.full_mode') == 'name -t=%s' %symbol:
     olex.m('mode off')
   else:
@@ -597,12 +597,11 @@ def MakeElementButtonsFromFormula():
 
   current_formula = OlexRefinementModel().currentFormula()
 
-
   #if current_formula == last_formula:
     #return last_elements_html
 
-  from PilTools import ButtonMaker
-  icon_size = OV.GetParam('gui.skin.icon_size')
+#  from PilTools import ButtonMaker
+#  icon_size = OV.GetParam('gui.skin.icon_size')
   totalcount = 0
   btn_dict = {}
   f = olx.xf.GetFormula('list')
@@ -641,26 +640,26 @@ def MakeElementButtonsFromFormula():
 
     command = "if strcmp(sel(),'') then 'mode name -t=%s' else 'name sel %s'>>sel -u" %(symbol, symbol)
     target = OV.TranslatePhrase('change_element-target')
-    #command = "if strcmp(spy.GetParam(olex2.in_mode),'mode name -t=%s') then 'mode off' else %%22 if strcmp(sel(),'') then 'mode name -t=%s' else 'name sel %s'>>sel -u%%22" %(symbol, symbol, symbol)
     command = 'spy.ElementButtonStates(%s)' %symbol
     namelower = 'btn-element%s' %(symbol)
     d = {}
-    d.setdefault('namelower', name)
+    d.setdefault('name', name)
     d.setdefault('symbol', symbol)
     d.setdefault('cmds', command)
     d.setdefault('target', target + symbol)
     d.setdefault('bgcolor', OV.GetParam('gui.html.table_firstcol_colour'))
     html += '''
-<input
-  name=IMG_BTN-ELEMENT%(symbol)s
-  type="button"
-  image="up=%(namelower)soff.png,down=%(namelower)son.png,hover=%(namelower)shover.png"
-  hint="%(target)s"
-  onclick="%(cmds)s"
-  bgcolor=%(bgcolor)s
->
-''' %d
-
+$spy.MakeHoverButton('%(name)s','%(cmds)s') '''%d
+    #html += '''
+#<input
+  #name=IMG_BTN-ELEMENT%(symbol)s
+  #type="button"
+  #image="up=%(namelower)soff.png,down=%(namelower)son.png,hover=%(namelower)shover.png"
+  #hint="%(target)s"
+  #onclick="%(cmds)s"
+  #bgcolor=%(bgcolor)s
+#>
+#''' %d
 
   d['namelower'] = 'Table'
   html +=  '''
@@ -868,10 +867,10 @@ def setAllMainToolbarTabButtons():
           state = "off"
       else:
         state = 'off'
-    try:
-      OV.CopyVFSFile("cbtn-%s%s.png" %(btn,state),"cbtn-%s.png" %btn)
-    except:
-      olex.m('skin default_new')
+    #try:
+      #OV.CopyVFSFile("cbtn-%s%s.png" %(btn,state),"cbtn-%s.png" %btn)
+    #except:
+      #olex.m('skin default_new')
     if state == 'on':
       OV.SetVar('gui_MainToolbarTabButtonActive',btn)
   return "Done"
