@@ -441,7 +441,7 @@ class OlexFunctions(inheritFunctions):
     except Exception, ex:
       print >> sys.stderr, "An error occured"
       sys.stderr.formatExceptionInfo()
-    return self.standardizePath(newPath)
+    return newPath
 
   def File(self, filename=None):
     if filename is not None:
@@ -560,7 +560,10 @@ class OlexFunctions(inheritFunctions):
     return olx.Lst(string)
 
   def standardizePath(self, path):
-    return path.replace('\\','/')
+    path = path.replace('\\','/')
+    if os.sep != '/':
+      path = path.replace('/', os.sep)
+    return path
 
   def standardizeListOfPaths(self, list_of_paths):
     retList = []
@@ -569,44 +572,41 @@ class OlexFunctions(inheritFunctions):
     return retList
 
   def BaseDir(self):
-    path = olx.BaseDir()
-    return self.standardizePath(path)
+    return olx.BaseDir()
 
   def DataDir(self):
-    path = olx.DataDir()
-    return self.standardizePath(path)
+    return olx.DataDir()
 
   def FileDrive(self,FileDrive=None):
     if FileDrive is not None:
       path = olx.FileDrive(FileDrive)
     else:
       path = olx.FileDrive()
-    return self.standardizePath(path)
+    return path
 
   def FileExt(self,FileExt=None):
     if FileExt is not None:
       path = olx.FileExt(FileExt)
     else:
       path = olx.FileExt()
-    return self.standardizePath(path)
+    return path
 
   def FileFull(self):
-    path = olx.FileFull()
-    return self.standardizePath(path)
+    return olx.FileFull()
 
   def FileName(self,FileName=None):
     if FileName is not None:
       path = olx.FileName(FileName)
     else:
       path = olx.FileName()
-    return self.standardizePath(path)
+    return path
 
   def FilePath(self,FilePath=None):
     if FilePath is not None:
       path = olx.FilePath(FilePath)
     else:
       path = olx.FilePath()
-    return self.standardizePath(path)
+    return path
 
   def olex_function(self, str):
     try:
@@ -620,14 +620,10 @@ class OlexFunctions(inheritFunctions):
     if new_HKLSrc:
       return olx.HKLSrc(new_HKLSrc)
     else:
-      path = olx.HKLSrc()
-      if path:
-        return self.standardizePath(path)
-      return path
+      return olx.HKLSrc()
 
   def StrDir(self):
-    path = olx.StrDir()
-    return self.standardizePath(path)
+    return olx.StrDir()
 
   def GetFormula(self):
     return olx.xf.GetFormula()
