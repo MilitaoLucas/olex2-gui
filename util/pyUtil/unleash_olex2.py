@@ -14,6 +14,10 @@ mac32_port_name = 'port-mac32'
 mac32_port_zip_name = 'olex2-mac32-intel.zip'
 mac32_port_prefix = 'olex2.app/Contents/MacOS/'
 
+mac64_port_name = 'port-mac64'
+mac64_port_zip_name = 'olex2-mac64-intel.zip'
+mac64_port_prefix = 'olex2.app/Contents/MacOS/'
+
 linux32_legacy_port_name = 'port-suse101x32-py27'
 linux32_port_name = 'port-linux32'
 linux32_port_zip_name = 'olex2-linux32.zip'
@@ -42,6 +46,7 @@ portable_prefix = None
 # iteratable list of zips and prefixes
 distro_zips = (
   (mac32_port_zip_name, mac32_port_prefix),
+  (mac64_port_zip_name, mac64_port_prefix),
   (linux32_port_zip_name, linux32_port_prefix),
   (linux64_port_zip_name, linux64_port_prefix),
   (win32_sse_port_zip_name, win32_sse_port_prefix),
@@ -51,15 +56,20 @@ distro_zips = (
 )
 
 external_files = {
-  #mac
+  #mac32
   'olex2-mac32.zip': ('olex-port', mac32_port_name, mac32_legacy_port_name,
                       'action:extract', 'action:delete'),
   'unirun-mac32.zip': ('olex-port', mac32_port_name, mac32_legacy_port_name,
                        'action:extract', 'action:delete'),
   'cctbx-mac32.zip': ('olex-port', mac32_port_name, mac32_legacy_port_name,
                       'action:extract', 'action:delete'),
-  'lib-mac32.zip': ('olex-port', mac32_port_name, mac32_legacy_port_name,
+  'lib-mac32.zip': ('olex-port', mac32_port_name, 
                     'action:extract', 'action:delete'),
+  #mac64
+  'olex2-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
+  'unirun-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
+  'cctbx-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
+  'lib-mac64.zip': ('olex-port', mac64_port_name,  'action:extract', 'action:delete'),
   #linux32
   'olex2-linux32.zip': ('olex-port', linux32_port_name, linux32_legacy_port_name,
                         'action:extract', 'action:delete'),
@@ -108,6 +118,7 @@ external_files = {
   #'olex2c-win32.zip': ('olex-port', 'plugin-Headless-win-32', 'action:extract', 'action:delete'),
   #'olex2c-win64.zip': ('olex-port', 'plugin-Headless-win-64', 'action:extract', 'action:delete'),
   'plgl-mac32.zip': ('olex-port', mac32_port_name, 'action:extract', 'action:delete'),
+  'plgl-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
   'plgl-linux32.zip': ('olex-port', linux32_port_name, 'action:extract', 'action:delete'),
   'plgl-linux64.zip': ('olex-port', linux64_port_name, 'action:extract', 'action:delete'),
   'plgl-win32-sse.zip': ('olex-port', win32_sse_port_name, 'action:extract', 'action:delete'),
@@ -157,6 +168,15 @@ set(  ['cctbx-mac32.zip',  #cctbx/cctb_sources,...
       ]
    ) | portable_zip_files
 
+mac64_zip_files = \
+set(  ['cctbx-mac64.zip',  #cctbx/cctb_sources,...
+      'olex2-mac64.zip',    #olex2 executable
+      'unirun-mac64.zip',
+      'plgl-mac64.zip',
+      'lib-mac64.zip'
+      ]
+   ) | portable_zip_files
+
 linux32_zip_files = \
 set(  ['cctbx-linux32.zip',  #cctbx/cctb_sources,...
       'lib-linux32.zip',     #lib/dlls
@@ -176,7 +196,7 @@ set(  ['cctbx-linux64.zip',  #cctbx/cctb_sources,...
 
 # a set of all zip files...
 all_zip_files = win32_sse2_zip_files | win32_sse_zip_files | win64_zip_files\
-              | mac32_zip_files | linux32_zip_files | linux64_zip_files
+              | mac32_zip_files | mac64_zip_files | linux32_zip_files | linux64_zip_files
 
 
 altered_files = set([])
