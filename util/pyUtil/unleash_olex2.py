@@ -266,6 +266,11 @@ parser.add_option('-f', '--file',
                   default='',
 		  action='store',
 		  help='whether to use update any particluare file only')
+parser.add_option('-p', '--platform',
+      dest='release_platform',
+      default='win32-sse,win32,win64,mac32,mac64,lin32,lin64',
+      action='store',
+      help='modify the platform list to release')
 option, args = parser.parse_args()
 
 working_directory = os.path.expanduser(option.working_directory
@@ -394,7 +399,23 @@ if os.path.exists(bin_directory + '/olex2.exe'):
 
 client = pysvn.Client()
 
+platforms = {
+  "win32-sse": False,
+  "win32": True,
+  "win64": True,
+  "mac32": True,
+  "mac64": True,
+  "lin32": True,
+  "lin64": True,
+}
 try:
+  if option.release_platform:
+    toks = option.release_platform.split(',')
+    for k,v in platforms.iteritems():
+      platforms[k] = False
+    for t in toks:
+      platforms[t] = True
+
   if option.update_file:
     filepath = option.update_file
     print 'Updating %s only...' %filepath
@@ -699,7 +720,6 @@ def create_portable_distro(port_props, zip_name, port_zips, prefix, extra_files)
   dest_zip.close()
   return
 ####################################################################################################
-if True:
   create_portable_distro(
     port_props=None,
     zip_name=portable_zip_name,
@@ -707,7 +727,7 @@ if True:
     prefix=portable_prefix,
     extra_files = None
   )
-if True:
+if platforms.get("win32"):
   create_portable_distro(
     port_props=set([win32_sse2_port_name,win32_port_name]),
     zip_name=win32_sse2_port_zip_name,
@@ -718,6 +738,7 @@ if True:
       bin_directory + '/vcredist_x86.exe' : 'vcredist_x86.exe'
     }
   )
+if platforms.get("win32-sse"):
   create_portable_distro(
     port_props=set([win32_sse_port_name,win32_port_name]),
     zip_name=win32_sse_port_zip_name,
@@ -728,6 +749,7 @@ if True:
       bin_directory + '/vcredist_x86.exe' : 'vcredist_x86.exe'
     }
   )
+if platforms.get("win64"):
   create_portable_distro(
     port_props=set([win64_port_name]),
     zip_name=win64_port_zip_name,
@@ -739,7 +761,7 @@ if True:
     }
   )
 #create linux and mac distro only in releases
-if True:
+if platforms.get("lin32"):
   create_portable_distro(
     port_props=set([linux32_port_name]),
     zip_name=linux32_port_zip_name,
@@ -751,6 +773,7 @@ if True:
       bin_directory + '/linux-distro/usettings32.dat' : 'olex2/usettings.dat'
     }
   )
+if platforms.get("win64"):
   create_portable_distro(
     port_props=set([linux64_port_name]),
     zip_name=linux64_port_zip_name,
@@ -762,6 +785,7 @@ if True:
       bin_directory + '/linux-distro/usettings64.dat' : 'olex2/usettings.dat'
     }
   )
+if platforms.get("mac32"):
   create_portable_distro(
     port_props=set([mac32_port_name]),
     zip_name=mac32_port_zip_name,
@@ -771,7 +795,21 @@ if True:
     {
       bin_directory + '/mac-distro/Info.plist' : 'olex2.app/Contents/Info.plist',
       bin_directory + '/mac-distro/PkgInfo' : 'olex2.app/Contents/PkgInfo',
-      bin_directory + '/mac-distro/usettings.dat' : 'olex2.app/Contents/MacOS/usettings.dat',
+      bin_directory + '/mac-distro/usettings32.dat' : 'olex2.app/Contents/MacOS/usettings.dat',
+      bin_directory + '/mac-distro/olex2.icns' : 'olex2.app/Contents/Resources/olex2.icns'
+    }
+  )
+if platforms.get("mac64"):
+  create_portable_distro(
+    port_props=set([mac64_port_name]),
+    zip_name=mac64_port_zip_name,
+    port_zips=mac64_zip_files,
+    prefix=mac64_port_prefix,
+    extra_files =
+    {
+      bin_directory + '/mac-distro/Info.plist' : 'olex2.app/Contents/Info.plist',
+      bin_directory + '/mac-distro/PkgInfo' : 'olex2.app/Contents/PkgInfo',
+      bin_directory + '/mac-distro/usettings64.dat' : 'olex2.app/Contents/MacOS/usettings.dat',
       bin_directory + '/mac-distro/olex2.icns' : 'olex2.app/Contents/Resources/olex2.icns'
     }
   )
