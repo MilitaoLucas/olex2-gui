@@ -23,6 +23,7 @@ class Module:
     self.url = url
     self.release_date = release_date
     self.action = action # 0 - nothing, 1 - install, 2 - update, 3-re-install
+    self.interbal = False
 
 def getModulesDir():
   from olexFunctions import OlexFunctions
@@ -243,15 +244,21 @@ def getAvailableModules_():
     f = HttpTools.make_url_call(url, values)
     xml = et.fromstring(f.read())
     for m in xml.getchildren():
-      if m.tag == "module":
+      if m.tag == "module" or m.tag == "internal_module":
         try:
           module = Module(m.find("title").text,
                           m.find("name").text,
                           m.find("description").text,
                           m.find("url").text,
                           m.find("release").text, 0)
+          if m.tag == "internal_module":
+            module.internal = True
+          else:
+            module.internal = False
           available_modules.append(module)
-        except:
+        except Exception, e:
+          if debug:
+            sys.stdout.formatExceptionInfo()
           pass
     dir = getModulesDir()
     for m in available_modules:
@@ -323,11 +330,11 @@ def getModuleCaption(m):
     return "%s - Up-to-date" %(m.name)
 
 def getModuleList():
-  global avaialbaleModulesRetrieved
   getAvailableModules(False)
   global available_modules
   rv = []
   for idx, m in enumerate(available_modules):
+    if m.internal: continue
     rv.append(getModuleCaption(m) + ("<-%d" %(idx)))
   return ';'.join(rv)
 
