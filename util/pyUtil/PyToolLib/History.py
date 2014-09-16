@@ -25,7 +25,7 @@ import ires_reader
 
 tree = None
 
-timing = False
+timing = False #bool(OV.GetParam('gui.timing'))
 
 class History(ArgumentParser):
   def __init__(self):

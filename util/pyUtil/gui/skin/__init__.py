@@ -16,8 +16,7 @@ import OlexVFS
 
 import time
 
-timing = True
-
+timing = False #bool(OV.GetParam('gui.timing'))
 
 def adjust_skin_colours():
   base_colour = OV.GetParam('gui.html.base_colour')
