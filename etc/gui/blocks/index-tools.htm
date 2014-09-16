@@ -3,10 +3,10 @@
 <!-- #includeif IsFileType('ires') h2-tools-OLEX2-conres gui\OLEX2-conres.htm;gui\blocks\tool-off.htm;image=olex2-constraints-restraints;onclick=;2; -->
 <!-- #includeif IsFileType('ires') h2-tools-SHELX-compatible-constraints gui\SHELX-compatible-constraints.htm;gui\blocks\tool-off.htm;image=shelx-compatible-constraints;onclick=;2; -->
 <!-- #includeif IsFileType('ires') h2-tools-SHELX-compatible-restraints gui\SHELX-compatible-restraints.htm;gui\blocks\tool-off.htm;image=shelx-compatible-restraints;onclick=;2; -->
-<!-- #includeif IsFileType('ires') h2-tools-hydrogen-atoms gui\hydrogen-atoms.htm;gui\blocks\tool-off.htm;image=hydrogen-atoms;onclick=;2; -->
-<!-- #includeif IsFileType('ires') h2-tools-disorder gui\disorder.htm;gui\blocks\tool-off.htm;image=disorder;onclick=;2; -->
-<!-- #include h2-tools-masks gui\maps.htm;gui\blocks\tool-off.htm;image=maps;onclick=;2; -->
-<!-- #includeif IsFileType('ires') h2-tools-twinning gui\twinning.htm;gui\blocks\tool-off.htm;image=twinning;onclick=;2; -->
+<!-- #includeif IsFileType('ires') h2-tools-hydrogen-atoms gui\hydrogen-atoms.htm;gui\blocks\tool-off.htm;image=Hydrogen-Atoms;onclick=;2; -->
+<!-- #includeif IsFileType('ires') h2-tools-disorder gui\disorder.htm;gui\blocks\tool-off.htm;image=Disorder;onclick=;2; -->
+<!-- #include h2-tools-masks gui\maps.htm;gui\blocks\tool-off.htm;image=Maps;onclick=;2; -->
+<!-- #includeif IsFileType('ires') h2-tools-twinning gui\twinning.htm;gui\blocks\tool-off.htm;image=Twinning;onclick=;2; -->
 <!-- #include h2-tools-overlay gui\overlay.htm;gui\blocks\tool-off.htm;image=overlay;onclick=;2; -->
 
 <!-- #includeif and(false,IsFileType('ires')) h2-tools-cctbx gui\cctbx.htm;gui\blocks\tool-off.htm;image=cctbx;onclick=;2; -->
@@ -16,8 +16,10 @@
 <!-- #includeif isplugininstalled(plugin-Batch) h2-tools-batch gui\batch.htm;gui\blocks\tool-off.htm;image=batch;onclick=;2; -->
  <!-- #includeif or(IsFileType('ires'),IsFileType('cif')) h2-tools-refinement gui\refinement.htm;gui\blocks\tool-off.htm;image=refinement;onclick=;0; -->
  <!-- #includeif or(IsFileType('ires'),IsFileType('crs')) h2-tools-solve gui\solve.htm;gui\blocks\tool-off.htm;image=solve;onclick='sg>>spy GuiTools single:solve';0; -->
-<!-- #include h2-tools-folder-view gui\tools\folder-view.htm;gui\blocks\tool-off.htm;image=folder view;onclick=;1; -->
+<!-- #include h2-tools-folder-view gui\tools\folder-view.htm;gui\blocks\tool-off.htm;image=Folder-View;onclick=;1; -->
 
 $spy.make_gui_edit_link(index-tools)
 
 <!-- %tools% -->
+
+ <!-- #include h2-tools-cds-search gui\cds-search.htm;gui\blocks\tool-off.htm;image=cds-search;onclick=;2; -->

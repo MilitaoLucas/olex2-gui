@@ -61,7 +61,7 @@ class PluginTools(object):
 
     for image, img_type in self.p_img:
       make_single_gui_image(image, img_type=img_type)
-    #olx.FlushFS()
+    olx.FlushFS()
 
     if self.p_htm:
       add_tool_to_index(scope=self.p_name, link=self.p_htm, path=self.p_path, location=self.params.gui.location, before=self.params.gui.before, filetype='')

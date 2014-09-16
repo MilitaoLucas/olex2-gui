@@ -719,9 +719,6 @@ olex2
     url = http://ccdc.opencryst.org/deposit http://ccdc1.opencryst.org/deposit
       .type = strings
       .help = List of the OlexSys servers used to forward requests to the CCDC
-    ccdc_mail = deposit@ccdc.cam.ac.uk
-      .type = str
-      .help = The email address to which the files will be forwared
     pop{
       name=ccdc
         .type = str

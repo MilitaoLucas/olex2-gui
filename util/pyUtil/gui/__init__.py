@@ -77,6 +77,8 @@ olex.registerFunction(UpdateWeight, False, "gui")
 
 def GetPathParam(variable, default=None):
   retVal = OV.GetParam(variable, default)
+  if not retVal:
+    return retVal
   if "()" in retVal:
     func = retVal.split("()")[0]
     rest = retVal.split("()")[1]

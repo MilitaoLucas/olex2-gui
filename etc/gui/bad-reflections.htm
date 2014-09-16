@@ -2,7 +2,11 @@
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='OMIT_REFLECTIONS';help_ext=omit-reflections;1 -->
   <td width="10%">
-    <input type="button" value="Omit" fit="true" onclick="Omit html.GetValue(omit_filter)"/>
+
+$spy.MakeHoverButton('small-OMIT','Omit html.GetValue(omit_filter)')
+
+    <!--<input type="button" value="Omit" fit="true" onclick="Omit html.GetValue(omit_filter)"/>-->
+
   </td>
   <td width="50%">
     all reflections where |Error/esd| > than
@@ -43,61 +47,61 @@
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='EXCLUDE_HKL';help_ext=Exclude-hkl;1 -->
 
   <td>
-    <a href="HklExclude -c=GetVar(exclude_hkl_and) -h=html.GetValue(exclude_h) -k=html.GetValue(exclude_k) -l=html.GetValue(exclude_l)" >%Exclude%:</a> 
+    <a href="HklExclude -c=GetVar(exclude_hkl_and) -h=html.GetValue(exclude_h) -k=html.GetValue(exclude_k) -l=html.GetValue(exclude_l)" >%Exclude%:</a>
   </td>
 
 
   <td>
-    <input 
+    <input
       type="text"
       height="GetVar('HtmlInputHeight')"
-      name = "exclude_h" 
-      width="22" 
-      height="18" 
-      bgcolor="GetVar('HtmlInputBgColour')" 
+      name = "exclude_h"
+      width="22"
+      height="18"
+      bgcolor="GetVar('HtmlInputBgColour')"
       value=""
       manage
       label="h = "
     >
   </td>
   <td>
-    <input 
+    <input
       type="text"
       height="GetVar('HtmlInputHeight')"
-      name = "exclude_k" 
-      width="22" 
-      bgcolor="GetVar('HtmlInputBgColour')" 
+      name = "exclude_k"
+      width="22"
+      bgcolor="GetVar('HtmlInputBgColour')"
       value=""
       manage
       label="k = "
     >
   </td>
   <td>
-    <input 
+    <input
       type="text"
       height="GetVar('HtmlInputHeight')"
-      name = "exclude_l" 
-      width="22" 
-      bgcolor="GetVar('HtmlInputBgColour')" 
+      name = "exclude_l"
+      width="22"
+      bgcolor="GetVar('HtmlInputBgColour')"
       manage="true"
       label="l = "
     >
   </td>
   <td>
-    <input 
-      type='checkbox'  
-      bgcolor="GetVar('HtmlTableBgColour')" 
-      fgcolor="GetVar('HtmlFontColour')" 
-      name="EXCLUDE_AND" 
+    <input
+      type='checkbox'
+      bgcolor="GetVar('HtmlTableBgColour')"
+      fgcolor="GetVar('HtmlFontColour')"
+      name="EXCLUDE_AND"
       value="%AND%"
       checked="GetVar('exclude_hkl_and', 'false')"
-      oncheck="SetVar('exclude_hkl_and','true')>>html.SetData('~name~','-c')" 
+      oncheck="SetVar('exclude_hkl_and','true')>>html.SetData('~name~','-c')"
       onuncheck="SetVar('exclude_hkl_and','false')>>html.SetData('~name~','')"
     >
   </td>
 
   <td>
-    <a href="html.SetValue('exclude_h','')>>html.SetValue('exclude_k','')>>html.SetValue('exclude_l','')>>HklAppend">%Reset%</a> 
+    <a href="html.SetValue('exclude_h','')>>html.SetValue('exclude_k','')>>html.SetValue('exclude_l','')>>HklAppend">%Reset%</a>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 

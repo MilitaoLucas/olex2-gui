@@ -97,8 +97,22 @@ def add_resolved_conflict_item_to_phil(item, value):
   OV.set_cif_item(item, value)
   global conflict_d
   del conflict_d[item]
-  conflicts(d=conflic_d)
+  conflicts(d=conflict_d)
 
+def resolve_all(idx):
+  global conflict_d
+  idx = int(idx)
+  key = conflict_d['sources'][idx]
+  l = OV.GetParam('snum.metadata.resolved_conflict_items')
+  for i,v in conflict_d.iteritems():
+    if not i.startswith('_'): continue
+    l.append(i)
+    OV.set_cif_item(i, v[key])
+  OV.SetParam('snum.metadata.resolved_conflict_items', l)
+  print("All conflicts are resolved")
+  conflict_d = None
+  make_no_conflicts_gui(l, False)
+  
 def make_no_conflicts_gui(resolved, some_remain=False):
   if some_remain:
     txt = "<font color='red'><b>There are unresolved conflicts</b></font>"
@@ -111,7 +125,6 @@ def make_no_conflicts_gui(resolved, some_remain=False):
     olx.html.EndModal('conflicts', 0)
   wFilePath_gui = r"conflicts_html_window.htm"
   OV.write_to_olex(wFilePath_gui, "<tr><td>%s</td></tr>" %txt)
-
 
 
 def conflicts(popout='auto', d=None):
@@ -154,7 +167,9 @@ def conflicts(popout='auto', d=None):
     <td colspan='%s'><font size='4' color='red'><b>There is conflicting information!</b></font></td>
   </tr>
   <tr>
-    <td colspan='%s'><font size='2'><b>Some of your files contain conflicting information regarding information that should go into your cif file. Please select the correct values by clicking on the links below.</b></font>
+    <td colspan='%s'><font size='2'><b>Some of your files contain conflicting information regarding
+     information that should go into your cif file. Please select the correct values by clicking on
+     the links below.</b></font>
     </td>
   </tr>
       ''' %(colspan,colspan)#TOP section
@@ -173,8 +188,8 @@ def conflicts(popout='auto', d=None):
         f = os.path.basename(d['sources'][i])
         txt += '''
     <td width='%i%%' bgcolor='%s'>
-      <font color='white'><b>%s</b></font>
-    </td>''' %(col_w, head_colour, f)
+      <font color='white'><b>%s</b></font><input type='button' value="Use all" onclick='spy.gui.metadata.resolve_all(%s)'>
+    </td>''' %(col_w, head_colour, f, i)
       txt += '</tr>' #Close TR for Header Row
 
       for conflict in d:
@@ -255,3 +270,5 @@ def conflicts(popout='auto', d=None):
 olex.registerFunction(sources, False, "gui.metadata")
 olex.registerFunction(conflicts, False, "gui.metadata")
 olex.registerFunction(add_resolved_conflict_item_to_phil, False, "gui.metadata")
+olex.registerFunction(resolve_all, False, "gui.metadata")
+
