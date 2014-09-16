@@ -55,8 +55,10 @@ def makeHtmlTable(list):
       text += "<tr><td colspan='2'><font color='#555555'>%s</font></td></tr>" %input_d['value']
       continue
     boxText = ''
+    i = 0
     for box in ['box1','box2','box3','box4']:
       if box in input_d.keys():
+        i += 1
         box_d = input_d[box]
         box_d.setdefault('ctrl_name', "SET_%s" %str.upper(box_d['varName']).replace('.','_'))
         box_d.setdefault('bgcolor',"spy.bgcolor('~name~')")
@@ -66,12 +68,26 @@ def makeHtmlTable(list):
         else:
           box_d.setdefault('value', "spy.GetParam('%(varName)s')" %box_d)
           box_d.setdefault('onchange',"spy.SetParam('%(varName)s',html.GetValue('~name~'))>>spy.AddVariableToUserInputList('%(varName)s')>>spy.changeBoxColour('~name~','#FFDCDC')" %box_d)
-          
+
         if box_d.has_key('extra_onchange'):
           box_d['onchange'] += ">>%s" %box_d['extra_onchange']
-        boxText += makeHtmlInputBox(box_d)
+        bt =  makeHtmlInputBox(box_d)
+        #IN
+        label = box_d.get('label')
+        if label:
+          boxText += '<td align="right" width="%(label_w)s">' + label + '</td><td  align="right" width="%(w)s">' + bt + '</td>'
+        else:
+          boxText += bt
+        #OUT
     if boxText:
-      boxText = '<table width="100%" cellpadding="0" cellspacing="0"><tr><td width="100%%">' + boxText + "</td></tr></table>"
+      #IN
+      if label:
+        _ = {'label_w':'20%%', 'w':"%s%%"%int((100-(20*i))/i)}
+      else:
+        _ = {'w':"100"}
+      boxText = boxText%_
+      #OUT
+      boxText = '<table cellpadding="0" cellspacing="0"><tr>'  + boxText + "</tr></table>"
       row_d.setdefault('input',boxText)
     else:
       input_d.setdefault('ctrl_name', "SET_%s" %str.upper(input_d['varName']).replace('.','_'))
@@ -130,6 +146,7 @@ def makeHtmlInputBox(inputDictionary):
     'bgcolor':'',
   }
   dictionary.update(inputDictionary)
+
   htmlInputBoxText = '''
 <font size="$GetVar('HtmlFontSizeControls')">
 <input
@@ -138,9 +155,9 @@ type="%(type)s"
 width="%(width)s"
 height="%(height)s"
 name="%(ctrl_name)s"
+#label="%(label)s"
 value="%(value)s"
 items="%(items)s"
-label="%(label)s"
 valign="%(valign)s"
 onchange="%(onchange)s"
 onleave="%(onleave)s"
@@ -149,8 +166,10 @@ bgcolor="%(bgcolor)s"
 >
 </font>
 '''%dictionary
-
-  return htmlInputBoxText
+  _ = htmlInputBoxText.replace("%%", "@")
+  _ = _.replace("%", "%%")
+  _ = _.replace("@", "%%")
+  return _
 
 def makeHtmlTableRow(dictionary):
 #  dictionary.setdefault('font', "size='%s'" %olx.GetVar('HtmlGuiFontSize'))
@@ -361,10 +380,6 @@ def make_help_box(args):
   else:
     banner_include = ""
   if not popout:
-    str = r'''
-<!-- #include help-%s gui\%s.htm;gui\blocks\tool-off.htm;image=%s;onclick=;1; -->
-''' %(name, name, name)
-
     return_items = r'''
   <a href="spy.make_help_box -name='%s' -popout=True>>htmlhome">
     <zimg border='0' src='popout.png'>
@@ -374,7 +389,6 @@ def make_help_box(args):
 ''' %name
 
   else:
-    txt = ""
     return_items = ""
 
   txt = get_template('pop_help')
@@ -682,27 +696,26 @@ def make_input_button(d):
     html += '\n></font>\n'
   return html
 
-def format_help(string):
+def format_help(txt):
   import re
   d = {}  # initialise a dictionary, which will be used to store metadata.
 
   ## find all occurences of strings between **..**. These should be comma separated things to highlight.
   regex = re.compile(r"\*\* (.*?)  \*\*", re.X)
-  l = regex.findall(string)
+  l = regex.findall(txt)
   if l:
     l = l[0].split(",")
-    string = regex.sub(r"", string)
+    txt = regex.sub(r"", txt)
 
     for item in l:
       regex = re.compile(r"((?P<left>\W) (?P<txt>%s) (?P<right>\W))" %item, re.X)
-#      string = regex.sub(r"\g<left><font color='$GetVar(HtmlHighlightColour)'><b>\g<txt></b></font>\g<right>", string)
-      string = regex.sub(r"\g<left><b>\g<txt></b>\g<right>", string)
+      txt = regex.sub(r"\g<left><b>\g<txt></b>\g<right>", txt)
 
-  ## find all occurences of strings between {{..}}. This will be translated into a dictionary and returned with the string.
+  ## find all occurences of strings between {{..}}. This will be translated into a dictionary and returned with the txt.
   regex = re.compile(r"\{\{ (.*?)  \}\}", re.X)
-  dt = regex.findall(string)
+  dt = regex.findall(txt)
   if dt:
-    string = regex.sub(r"", string)
+    txt = regex.sub(r"", txt)
     dt = dt[0]
     dt = dt.replace(",", "','")
     dt = dt.replace(":", "':'")
@@ -710,91 +723,91 @@ def format_help(string):
     d = eval(dt)
   ## find all occurences of <lb> and replace this with a line-break in a table.
   regex = re.compile(r"<lb>", re.X)
-  string = regex.sub(r"<br>", string)
+  txt = regex.sub(r"<br>", txt)
 
   ## find all occurences of '->' and replace this with an arrow.
   regex = re.compile(r"->", re.X)
-  string = regex.sub(r"<b>&rarr;</b>", string)
+  txt = regex.sub(r"<b>&rarr;</b>", txt)
 
   ## find all occurences of strings between t^..^t. These are the headers for tip of the day.
   regex = re.compile(r"t \^ (.*?)  \^ t", re.X)
-  string = regex.sub(r"<font color='$GetVar(HtmlHighlightColour)'><b>\1</b></font>&nbsp;", string)
+  txt = regex.sub(r"<font color='$GetVar(HtmlHighlightColour)'><b>\1</b></font>&nbsp;", txt)
 
   ## find all occurences of strings between <<..>>. These are keys to pressthe headers for tip of the day.
   regex = re.compile(r"<< (.*?)  >>", re.X)
-  string = regex.sub(r"<b><code>\1</code></b>", string)
+  txt = regex.sub(r"<b><code>\1</code></b>", txt)
 
   ## find all occurences of strings between n^..^n. These are the notes.
   regex = re.compile(r"n \^ (.*?)  \^ n", re.X)
-  string = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='1'><tr bgcolor=#efefef><td><font size=-1><b>Note: </b>\1</font></td></tr></table>", string)
+  txt = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='1'><tr bgcolor=#efefef><td><font size=-1><b>Note: </b>\1</font></td></tr></table>", txt)
 
   ### find all occurences of strings between TT..TT. These are keys to pressthe headers for tip of the day.
   #regex = re.compile(r"TT (.*?)  TT", re.X)
-  #string = regex.sub(r"<tr><td align='right'><a href='spy.run_autodemo(\1)'><zimg src=tutorial.png></a></td></tr>", string)
+  #txt = regex.sub(r"<tr><td align='right'><a href='spy.run_autodemo(\1)'><zimg src=tutorial.png></a></td></tr>", txt)
 
   ## find all occurences of strings between TT..TT. These are keys to pressthe headers for tip of the day.
   regex = re.compile(r"TT (.*?)  TT", re.X)
-  sx = string
-  string = regex.sub(r"<tr><td align='right'>$spy.MakeHoverButton('button-tutorial','spy.demo.run_autodemo(1)')</td></tr>", string)
-  string = string.replace(r"\\\\",r"\\")
+  sx = txt
+  txt = regex.sub(r"<tr><td align='right'>$spy.MakeHoverButton('button-tutorial','spy.demo.run_autodemo(1)')</td></tr>", txt)
+  txt = txt.replace(r"\\\\",r"\\")
 
   ## find all occurences of strings between l[]. These are links to help or tutorial popup boxes.
   regex = re.compile(r"l\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
-  string = regex.sub(r"<font size=+1 color=\"$GetVar('HtmlHighlightColour')\">&#187;</font><a target='Go to \g<linktext>' href='spy.make_help_box -name=\g<linkurl> -type=\g<linktype>'><b>\g<linktext></b></a>", string)
+  txt = regex.sub(r"<font size=+1 color=\"$GetVar('HtmlHighlightColour')\">&#187;</font><a target='Go to \g<linktext>' href='spy.make_help_box -name=\g<linkurl> -type=\g<linktype>'><b>\g<linktext></b></a>", txt)
 
   ## find all occurences of strings between URL[]. These are links to help or tutorial popup boxes.
   regex = re.compile(r"URL\[\s*(?P<URL>.*?)]", re.X)
-  string = regex.sub(r"<b><a href='shell \g<URL>'><font color='#205c90'>More Info Online</font></a></b>" , string)
+  txt = regex.sub(r"<b><a href='shell \g<URL>'><font color='#205c90'>More Info Online</font></a></b>" , txt)
 
   ## find all occurences of strings between gui[]. These are links make something happen on the GUI.
   regex = re.compile(r"gui\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
-  string = regex.sub(r"<font size=+1 color='$GetVar(HtmlHighlightColour)'>&#187;</font><a target='Show Me' href='\g<linkurl>'><b>\g<linktext></b></a>", string)
+  txt = regex.sub(r"<font size=+1 color='$GetVar(HtmlHighlightColour)'>&#187;</font><a target='Show Me' href='\g<linkurl>'><b>\g<linktext></b></a>", txt)
   ## find all occurences of strings between XX. These are command line entities.
   width = int(OV.GetHtmlPanelwidth()) - 10
   regex = re.compile(r"  XX (.*?)( [^\XX\XX]* ) XX ", re.X)
-  m = regex.findall(string)
+  m = regex.findall(txt)
   code_bg_colour = OV.GetParam('gui.html.code.bg_colour').hexadecimal
   code_fg_colour = OV.GetParam('gui.html.code.fg_colour').hexadecimal
   html_tag = OV.GetParam('gui.html.code.html_tag')
   if m:
-    s = regex.sub(r" <font color='%s'><b><a href='\2'><%s>\2</%s></a></b></font>" %( code_fg_colour, html_tag, html_tag), string)
+    s = regex.sub(r" <font color='%s'><b><a href='\2'><%s>\2</%s></a></b></font>" %( code_fg_colour, html_tag, html_tag), txt)
   else:
-    s = string
-  string = s
+    s = txt
+  txt = s
 
   ## find all occurences of strings between ~. These are the entries for the table.
   regex = re.compile(r"  ~ (.*?)( [^\~\~]* ) ~ ", re.X)
-  m = regex.findall(string)
+  m = regex.findall(txt)
   colour = OV.GetParam('gui.html.highlight_colour').hexadecimal
   if m:
-    s = regex.sub(r"<p><b><font color='%s'>\2</font></b>&nbsp;" %colour, string)
+    s = regex.sub(r"<p><b><font color='%s'>\2</font></b>&nbsp;" %colour, txt)
   else:
-    s = string
+    s = txt
 
   ## find all occurences of strings between@. These are the table headers.
-  string = s
+  txt = s
   regex = re.compile(r"  @ (.*?)( [^\@\@]* ) @ ", re.X)
-  m = regex.findall(string)
+  m = regex.findall(txt)
   colour = "#232323"
   if m:
-    s = regex.sub(r"<tr bgcolor=\"$GetVar('HtmlTableFirstcolColour')\"><hr><b>\2</b><br>", string)
+    s = regex.sub(r"<tr bgcolor=\"$GetVar('HtmlTableFirstcolColour')\"><hr><b>\2</b><br>", txt)
   else:
-    s = string
+    s = txt
 
   ## find all occurences of strings between &. These are the tables.
-  string = s
+  txt = s
   regex = re.compile(r"  (&&) (.*?) (&&) ", re.X)
-  m = regex.findall(string)
+  m = regex.findall(txt)
   if m:
-    s = regex.sub(r"\2", string)
+    s = regex.sub(r"\2", txt)
   else:
-    s = string
+    s = txt
 
   return s, d
 
-def reg_command(self, string):
+def reg_command(self, txt):
   regex = re.compile(r"  ~ (.*?)( [^\~\~]* ) ~ ", re.X)
-  m = regex.findall(string)
+  m = regex.findall(txt)
   colour = OV.GetParam('gui.html.highlight_colour')
   if m:
     s = regex.sub(r'''
@@ -806,9 +819,9 @@ def reg_command(self, string):
     </font>
     </b>
     <br>
-    ''' %colour, string)
+    ''' %colour, txt)
   else:
-    s = string
+    s = txt
   return s
 
 def changeBoxColour(ctrl_name,colour):
@@ -964,9 +977,9 @@ def get_template(name):
   template = r"%s/etc/gui/blocks/templates/%s.htm" %(olx.BaseDir(),name)
   if os.path.exists(template):
     rFile = open(template, 'r')
-    str = rFile.read()
+    s = rFile.read()
     rFile.close()
-    return str
+    return s
   else:
     return None
 
@@ -1244,7 +1257,7 @@ def MakeHoverButton(name, cmds, onoff = "off", btn_bg='table_firstcol_colour'):
     tab = item.split("h2-")[1].split("-")[0]
     item_name = item.split("h2-")[1].split("-")[1]
     if solo:
-      cmds = "html.itemstate h2-%s* 2>>%s" %(tab,cmds) 
+      cmds = "html.itemstate h2-%s* 2>>%s" %(tab,cmds)
   if solo:
     if 'metadata' in cmds:
       cmds = "html.itemstate metadata* 2>>%s" %(cmds)
@@ -1529,7 +1542,6 @@ OV.registerFunction(getTip)
 
 def getGenericSwitchName(name):
   remove_l = ['work-', 'view-', 'info-', 'tools-', 'aio-', 'home-']
-  str = ""
   name_full = name
   na = name.split("-")
   if len(na) > 1:

@@ -107,41 +107,73 @@ OV.registerMacro(ValidateCif, """filepath&;cif_dic&;show_warnings""")
 #timer('Register ValidateCif')
 
 class CifTools(ArgumentParser):
+  specials = {
+    'snum.report.crystal_mounting_method': '_olex2_exptl_crystal_mounting_method',
+    'snum.report.submission_special_instructions': '_olex2_submission_special_instructions',
+    'snum.report.submission_original_sample_id': '_olex2_submission_original_sample_id',
+  }
+
   def __init__(self):
     super(CifTools, self).__init__()
     self.metacif_path = '%s/%s.metacif' %(OV.StrDir(), OV.FileName())
     self.data_name = OV.FileName().replace(' ', '')
+    just_loaded = False
     if olx.cif_model is None or self.data_name.lower() not in olx.cif_model.keys_lower.keys():
       if os.path.isfile(self.metacif_path):
         olx.cif_model = self.read_metacif_file()
       if olx.cif_model is None:
         olx.cif_model = model.cif()
         olx.cif_model[self.data_name] = model.block()
+      just_loaded = True
     self.cif_model = olx.cif_model
     self.cif_block = olx.cif_model[self.data_name]
-    today = datetime.date.today()
-    reference_style = OV.GetParam('snum.report.publication_style', 'acta').lower()
+    if just_loaded:
+      self.update_specials()
+    #since reference formatting got changed - clearing the section to avoid
+    #accumulation
+    date = self.cif_block.get('_audit_creation_date', '')
+    if date:
+      try:
+        if int(date.replace('-', '')) < 20140319:
+          self.update_cif_block({'_publ_section_references' : ''}, force=True)
+      except:
+        self.update_cif_block({'_publ_section_references' : ''}, force=True)
 
     self.olex2_reference_brief = "Olex2 (Dolomanov et al., 2009)"
-    self.olex2_reference = """
-Dolomanov, O.V., Bourhis, L.J., Gildea, R.J, Howard, J.A.K. & Puschmann, H.
+    self.olex2_reference = """Dolomanov, O.V., Bourhis, L.J., Gildea, R.J, Howard, J.A.K. & Puschmann, H.
  (2009), J. Appl. Cryst. 42, 339-341."""
-    self.update_cif_block(
-      {'_audit_creation_date': today.strftime('%Y-%m-%d'),
-       '_audit_creation_method': """
-;
-Olex2 %s
-(compiled %s, GUI svn.r%i)
-;
-""" %(OV.GetTag(), OV.GetCompilationInfo(), OV.GetSVNVersion())
-    })
     olx.SetVar('olex2_reference_short', self.olex2_reference_brief)
     olx.SetVar('olex2_reference_long', self.olex2_reference)
+
     self.update_cif_block(
-      {'_computing_molecular_graphics': self.olex2_reference_brief,
+      {'_audit_creation_date': datetime.date.today().strftime('%Y-%m-%d'),
+       '_audit_creation_method': 'Olex2 %s\n(compiled %s, GUI svn.r%i)' %(
+         OV.GetTag(), OV.GetCompilationInfo(), OV.GetSVNVersion()),
+       '_computing_molecular_graphics': self.olex2_reference_brief,
        '_computing_publication_material': self.olex2_reference_brief
-       }, force=True)
+    }, force=True)
     self.update_manageable()
+
+  def save_specials(self):
+    for s, c in CifTools.specials.iteritems():
+      sv = OV.GetParam(s, '')
+      if sv:
+        self.cif_block[c] = sv
+      elif c in self.cif_block:
+        del self.cif_block[c]
+
+  def update_specials(self):
+    for s, c in CifTools.specials.iteritems():
+      if c in self.cif_block:
+        OV.SetParam(s, self.cif_block[c])
+      else:
+        v = OV.GetParam(s, '')
+        if v:
+          self.cif_block[c] = v
+    author_loop = self.cif_block.get_loop('_publ_author', None)
+    if author_loop:
+      OV.SetParam('snum.metacif.publ_author_names',
+                  ';'.join(author_loop.get('_publ_author_name', [])).replace('\'', '').replace('"', ''))
 
   def update_manageable(self):
     self.sort_crystal_dimensions()
@@ -160,6 +192,7 @@ Olex2 %s
     return None
 
   def write_metacif_file(self):
+    self.save_specials()
     with open(self.metacif_path, 'wb') as f:
       print >> f, self.cif_model
 
@@ -279,6 +312,7 @@ class EditCifInfo(CifTools):
     super(EditCifInfo, self).__init__()
     ## view metacif information in internal text editor
     s = StringIO()
+    self.save_specials()
     print >> s, self.cif_model
     text = s.getvalue()
     text += "\n%s" %append
@@ -318,6 +352,8 @@ class EditCifInfo(CifTools):
           user_modified.append(item)
       olx.cif_model = updated_cif_model
       self.cif_model = olx.cif_model
+      self.cif_block = olx.cif_model[self.data_name]
+      self.update_specials()
       self.write_metacif_file()
       if user_modified is not None:
         OV.SetParam('snum.metacif.user_modified', user_modified)
@@ -584,6 +620,7 @@ class ExtractCifInfo(CifTools):
         computing_data_reduction = self.prepare_computing(integ, versions, "saint")
         computing_data_reduction = string.strip((string.split(computing_data_reduction, "="))[0])
         integ.setdefault("_computing_data_reduction", computing_data_reduction)
+        integ.setdefault("_computing_cell_refinement", computing_data_reduction)
         integ["computing_data_reduction"] = computing_data_reduction
         self.update_cif_block(integ)
         all_sources_d[p] = integ
@@ -752,31 +789,28 @@ class ExtractCifInfo(CifTools):
       #})
 
     self.update_manageable()
-
-    for item in self.cif_block:
-      if item.startswith("_computing"):
-        d = {}
-        longval = self.cif_block[item]
-        for str in self.computing_citations_d:
-          if str.lower() in longval.lower():
-            _ = re.findall("\d{4}", longval)
-            if not _:
-              year = "?"
-            else:
-              year = _[0]
-            d['year'] = year
-            shortval = self.computing_citations_d[str]%d
-            self.cif_block["_olex2%s_long" %item] = shortval
-            self.cif_block["_olex2%s_long" %item] = longval
-            break
-
-    for item in self.cif_block:
-      if item.startswith("_olex2") and item.endswith("_long"):
-        longval = self.cif_block[item]
-        if longval not in full_references:
-          full_references.append(longval)
-
+    # merge references
+    full_references = [x for x in set(full_references)] #make unique
+    current_refs = self.cif_block.get('_publ_section_references', '')
+    ref = ""
+    full_references_set =\
+     set([''.join(x.replace('\r', '').split()) for x in full_references])\
+      | ExternalPrgParameters.get_managed_reference_set()
+    for l in current_refs.split('\n'):
+      #l = l.rstrip()
+      if not l:
+        if ref:
+          ref_t = ''.join(ref.replace('\r', '').split())
+          if ref_t not in full_references_set:
+            full_references.append(ref)
+          ref = ""
+      else:
+        if ref:
+          ref = "%s\n%s" %(ref, l)
+        else:
+          ref = l
     full_references.sort()
+
     self.update_cif_block({
       '_publ_section_references': '\n\n'.join(full_references)}, force=True)
 
@@ -882,7 +916,6 @@ class ExtractCifInfo(CifTools):
                     '_exptl_absorpt_coefficient_mu',
                     '_audit_creation',
                     '_diffrn_reflns_',
-                    '_diffrn_measurement_details',
                     '_publ_author',
                     '_atom_type',
                     '_space_group_symop',
@@ -942,8 +975,26 @@ The \l/2 correction factor is %(lambda_correction)s.
       versiontext = (versions[name])[version].strip().strip("'")
     except KeyError:
       if version != "None":
-        print "Version %s of the programme %s is not in the list of known versions" %(version, name)
-      versiontext = "?"
+        versiontext = ''
+        if '/' in version:
+          if name == 'sad':
+            versiontext = "SADABS-"
+          elif name == 'twin':
+            versiontext = "TWINABS-"
+          elif name == 'xprep':
+            versiontext = "XPREP-"
+          else:
+            versiontext = "?-"
+          if len(versiontext) > 2:
+            versiontext += version
+            versiontext += " (Bruker,%s)" %version.split('/')[0]
+          else:
+            versiontext += version
+        else:
+          print "Version %s of the programme %s is not in the list of known versions" %(version, name)
+          versiontext = "?"
+      else:
+        versiontext = "?"
     return versiontext
 
   def enter_new_version(self, dict, version, name):
@@ -1018,29 +1069,28 @@ If more than one file is present, the path of the most recent file is returned b
 
     elif tool == "bruker_crystal_images":
       name = OV.FileName()
-      extension = "*.jpg"
       directory_l = OV.FileFull().replace('\\','/').split("/")
       directory = ("/").join(directory_l[:-3])
-      directory += '/%s.vzs' %OV.FileName()
+      g = glob.glob("%s/*.vzs" %directory)
       i = 1
-      while not os.path.exists(directory):
+      while not g:
         directory = ("/").join(directory_l[:-(3 - i)])
-        directory += '/%s.vzs' %OV.FileName()
+        g = glob.glob("%s/*.vzs" %directory)
         i += 1
-        if i == 4:
+        if i == 3:
           return None, None
+      ## This safegurard seems unenforcable in the Bruker world
+      #if OV.FileName() not in directory:
+        #print "Crystal images found, but crystal name not in path!"
+        #return None, None
 
-      if OV.FileName() not in directory:
-        print "Crystal images found, but crystal name not in path!"
-        return None, None
-
-      zip_n = OV.file_ChangeExt(directory, 'zip')
+      zip_file = g[0]
       import zipfile
-      z = zipfile.ZipFile(directory, "r")
+      z = zipfile.ZipFile(zip_file, "r")
       l = []
       for filename in z.namelist():
         if filename and ".jpg" in filename:
-          l.append(r'%s/%s' %(directory, filename))
+          l.append(r'%s/%s' %(g[0], filename))
       OV.SetParam("snum.metacif.list_crystal_images_files", l)
       setattr(self.metacifFiles, "list_crystal_images_files", l)
       return l[0], l

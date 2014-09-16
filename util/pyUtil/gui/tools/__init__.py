@@ -4,12 +4,6 @@ import olx
 import os
 import sys
 
-global formula
-global formula_string
-
-formula = ""
-formula_string = ""
-
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
@@ -18,7 +12,7 @@ have_found_python_error= False
 
 import olexex
 
-
+import re
 
 class FolderView:
   root = None
@@ -271,17 +265,21 @@ def checkPlaton():
 OV.registerFunction(checkPlaton,True,'gui.tools')
 
 def makeFormulaForsNumInfo():
-  global formula
-  global formula_string
-
   if olx.FileName() == "Periodic Table":
     return "Periodic Table"
+
   else:
     colour = ""
     txt_formula = olx.xf.GetFormula()
-    if txt_formula == formula:
-      return formula_string
-    formula = txt_formula
+    if len(txt_formula) > 100:
+      return "Too Much Stuff"
+    update = '<table border="0" cellpadding="0"><tr><td>%s</td></tr></table>'
+    present = olx.xf.au.GetFormula()
+    regex = re.compile(r"([a-zA-Z]) 1 (\s|\b)", re.X|re.M|re.S)
+    txt_formula = regex.sub(r'\1 ',txt_formula).strip()
+    if present != txt_formula:
+      update = '<table border="0" cellpadding="0"><tr><td>%s</td><td>$spy.MakeHoverButton(toolbar-refresh,fixunit xf.au.GetZprime()>>html.update)</td></tr></table>'
+    formula = present
     l = ['3333', '6667']
     for item in l:
       if item in txt_formula:
@@ -289,11 +287,8 @@ def makeFormulaForsNumInfo():
     if not colour:
       colour = OV.GetParam('gui.html.formula_colour').hexadecimal
     font_size = OV.GetParam('gui.html.formula_size')
-
     panelwidth = int(olx.html.ClientWidth('self'))
-    
     q = len(txt_formula)/(panelwidth - (0.6*panelwidth))
-#    print len(txt_formula), q
     if q > 0.26:
       font_size -= 4
     elif q > 0.23:
@@ -306,7 +301,7 @@ def makeFormulaForsNumInfo():
       font_size = 1
     html_formula = olx.xf.GetFormula('html',1)
     formula_string = "<font size=%s color=%s>%s</font>" %(font_size, colour, html_formula)
-    return formula_string
+    return update%formula_string
 OV.registerFunction(makeFormulaForsNumInfo)
 
 
@@ -326,7 +321,7 @@ OV.registerFunction(hasDisorder,False,'gui.tools')
 def make_disorder_quicktools():
   import olexex
   parts = set(olexex.OlexRefinementModel().disorder_parts())
-  
+
   parts_display = ""
   for item in parts:
     if item == 0:
@@ -335,7 +330,7 @@ def make_disorder_quicktools():
       parts_display += "<a href='ShowP 0 %s -v=spy.GetParam(user.keep_unique)'><b>PART %s</b></a> | " %(item, item)
     else:
       parts_display += "<a href='ShowP 0 %s -v=spy.GetParam(user.keep_unique)'><b>%s</b></a> | " %(item, item)
-      
+
   checkbox = '''
     <font size=$GetVar(HtmlFontSizeControls)>
   <input
@@ -350,8 +345,8 @@ def make_disorder_quicktools():
     value=''
   >
   </font>'''
-      
-      
+
+
   txt = r'''
   <td width='25%%'>
     <b>Show PART 0 AND</b>
@@ -360,7 +355,7 @@ def make_disorder_quicktools():
   %s
     <a href='ShowP'><b>All</b></a>
   </td>
-  
+
   <td width='5%%' align='right'>
   Unique
   </td>
@@ -388,33 +383,31 @@ def make_disorder_quicktools():
   return txt
 OV.registerFunction(make_disorder_quicktools,False,'gui.tools')
 
+def deal_with_gui_phil(action):
+  skin_name = OV.GetParam('gui.skin.name', 'default')
+  skin_extension = OV.GetParam('gui.skin.extension', None)
 
+  gui_phil_path = "%s/gui.phil" %(OV.DataDir())
+  if action == 'load':
+    OV.SetHtmlFontSize()
+    OV.SetHtmlFontSizeControls()
+    olx.gui_phil_handler.reset_scope('gui')
+    gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_name)
+    if not os.path.isfile(gui_skin_phil_path):
+      gui_skin_phil_path = "%s/gui.params" %(OV.BaseDir())
+    if os.path.isfile(gui_skin_phil_path):
+      gui_skin_phil_file = open(gui_skin_phil_path, 'r')
+      gui_skin_phil = gui_skin_phil_file.read()
+      gui_skin_phil_file.close()
+      olx.gui_phil_handler.update(phil_string=gui_skin_phil)
 
-def md():
-  import markdown
-  import glob
-    
-  #  p = "D:\Users\Horst\Documents\GitHub\Olex2Manual\Sucrose\solving.md"
-  p = r"C:/Users/Horst/Documents/GitHub/Olex2Manual/Sucrose"
-#  p = r"C:\Users\Horst\Documents\GitHub\Olex2Manual\GettingAroundOlex2\atom_label_display_options.md"
-  
-  g = glob.glob(r"%s/*.md" %p)
-
-  text = ""
-  for f in g:
-    try:
-      text += open(f,'r').read().decode('utf-8')
-    except Exception, err:
-      print err, f
-      
-
-  html = markdown.markdown(text, extensions=[])
-#  html = markdown.markdown(text, extensions=['latex'])
-  out = "%s/out.htm" %p
-  wFile = open(out, 'w')
-  wFile.write(html.encode('utf-8'))
-  wFile.close()
-  olx.Shell(out)
-  
-OV.registerFunction(md,False,'md')
-  
+    if skin_extension:
+      gui_skin_phil_path = "%s/etc/skins/%s.phil" %(OV.BaseDir(), skin_extension)
+      if os.path.isfile(gui_skin_phil_path):
+        gui_skin_phil_file = open(gui_skin_phil_path, 'r')
+        gui_skin_phil = gui_skin_phil_file.read()
+        gui_skin_phil_file.close()
+        olx.gui_phil_handler.update(phil_string=gui_skin_phil)
+  else:
+    olx.gui_phil_handler.save_param_file(
+      file_name=gui_phil_path, scope_name='gui', diff_only=True)

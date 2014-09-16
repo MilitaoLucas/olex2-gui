@@ -16,7 +16,7 @@ import TimeWatch
 
 class RunPrg(ArgumentParser):
   running = False
-  
+
   def __init__(self):
     super(RunPrg, self).__init__()
     self.demote = False
@@ -98,7 +98,7 @@ class RunPrg(ArgumentParser):
     if self.broadcast_mode:
       self.doBroadcast()
     for ext in extensions:
-      if "xt" in self.program.name.lower():
+      if "xt" in self.program.name.lower() and ext != 'lst':
         copy_from = "%s/%s_a.%s" %(self.tempPath, self.shelx_alias, ext)
       else:
         copy_from = "%s/%s.%s" %(self.tempPath, self.shelx_alias, ext)
@@ -169,6 +169,7 @@ class RunPrg(ArgumentParser):
     olex.f('GetVar(cctbx_R1)')
 
   def runAfterProcess(self):
+    #olex.m("spy.run_skin sNumTitle")
     if 'olex2' not in self.program.name:
       self.doFileResInsMagic()
       reflections = OV.HKLSrc() #BEWARE DRAGONS
@@ -278,7 +279,10 @@ class RunSolutionPrg(RunPrg):
     if "smtbx" not in self.program.name:
       self.shelx = self.which_shelx(self.program)
     args = self.method.pre_solution(self)
-    olx.Reset(args)
+    if args:
+      olex.m('reset ' + args)
+    else:
+      olx.Reset()
 
   def doHistoryCreation(self):
     OV.SetParam('snum.refinement.last_R1', 'Solution')
@@ -450,8 +454,10 @@ class RunRefinementPrg(RunPrg):
       print e
     else:
       if hooft.reflections.f_sq_obs_filtered.anomalous_flag():
-        print "Hooft y: %s" %format_float_with_standard_uncertainty(
+        s = format_float_with_standard_uncertainty(
           hooft.hooft_y, hooft.sigma_y)
+        print "Hooft y: %s" %s
+        OV.SetParam('snum.refinement.hooft_str', s)
         if (hooft.p3_racemic_twin is not None and
             round(hooft.p3_racemic_twin, 3) == 1):
           possible_racemic_twin = True

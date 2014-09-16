@@ -251,7 +251,11 @@ if OV.HasGUI():
   from gui.metadata import *
   from gui.maps import *
   from gui.images import *
+  from gui.skin import *
   #import Tutorials
+  load_user_gui_phil()
+  export_parameters()
+  from Analysis import Analysis
 
 def onstartup():
   OV.SetVar('cbtn_solve_on','false')
@@ -353,7 +357,4 @@ print "\nDolomanov, O.V.; Bourhis, L.J.; Gildea, R.J.; Howard, J.A.K.; Puschmann
       "\nOLEX2: A complete structure solution, refinement and analysis program (2009)."+\
       "\nJ. Appl. Cryst., 42, 339-341.\n"
 ## These imports will register macros and functions for spy.
-if OV.HasGUI():
-  from Skin import Skin
-  from Analysis import Analysis
 from RunPrg import RunPrg

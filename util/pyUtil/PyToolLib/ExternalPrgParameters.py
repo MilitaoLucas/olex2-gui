@@ -16,6 +16,8 @@ global RPD
 RPD = {}
 global SPD
 SPD = {}
+global managed_references
+managed_references = set()
 
 class ExternalProgramDictionary(object):
   def __init__(self):
@@ -385,16 +387,13 @@ class Method_shelx(Method):
     olx.WaitFor('process') # uncomment me!
 
     additions = ['', '_a', '_b', '_c', '_d', '_e']
+    self.failure = True
     for add in additions:
       p = "%s%s.res" %(xl_ins_filename, add)
       if os.path.exists(p):
-        if os.path.getsize(p) == 0:
-          self.failure = True
-        else:
+        if os.path.getsize(p) != 0:
           self.failure = False
           break
-      else:
-        continue
     olx.User(RunPrgObject.filePath)
 
 
@@ -483,9 +482,12 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       'snum.refinement.max_hole' : 'hole',
       'snum.refinement.max_shift_site' : 'max_shift',
       'snum.refinement.max_shift_site_atom' : 'max_shift_object',
+      'snum.refinement.max_shift_over_esd' : 'max_shift/esd',
+      'snum.refinement.max_shift_over_esd_atom' : 'max_shift/esd_object',
       'snum.refinement.max_shift_u' : 'max_dU',
       'snum.refinement.max_shift_u_atom' : 'max_dU_object',
       'snum.refinement.flack_str' : 'flack',
+      'snum.refinement.goof' : "s",
     }
     for k,v in params.iteritems():
       v = olx.Lst(v)
@@ -498,8 +500,8 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
     cif.setdefault('_refine_ls_R_factor_gt', olx.Lst('R1'))
     cif.setdefault('_refine_ls_wR_factor_ref', olx.Lst('wR2'))
     cif.setdefault('_refine_ls_goodness_of_fit_ref', olx.Lst('s'))
-    cif.setdefault('_refine_ls_shift/su_max', olx.Lst('max_shift'))
-    cif.setdefault('_refine_ls_shift/su_mean', olx.Lst('mean_shift'))
+    cif.setdefault('_refine_ls_shift/su_max', olx.Lst('max_shift/esd'))
+    cif.setdefault('_refine_ls_shift/su_mean', olx.Lst('mean_shift/esd'))
     cif.setdefault('_reflns_number_total', olx.Lst('ref_total'))
     cif.setdefault('_reflns_number_gt', olx.Lst('ref_4sig'))
     cif.setdefault('_refine_ls_number_parameters', olx.Lst('params_n'))
@@ -531,15 +533,14 @@ class Method_shelx_direct_methods(Method_shelx_solution):
   def get_XS_TREF_solution_indicators(self, RunPrgObject):
     """Gets the TREF solution indicators from the .lst file and prints values in Olex2.
     """
-    import lst_reader
     lstPath = "%s/%s.lst" %(OV.FilePath(), OV.FileName())
-    lstValues = lst_reader.reader(path=lstPath).values()
+    if os.path.exists(lstPath):
+      import lst_reader
+      lstValues = lst_reader.reader(path=lstPath).values()
 
-    RunPrgObject.Ralpha = lstValues.get('Ralpha','')
-    RunPrgObject.Nqual = lstValues.get('Nqual','')
-    RunPrgObject.CFOM = lstValues.get('CFOM','')
-
-    print RunPrgObject.Ralpha, RunPrgObject.Nqual, RunPrgObject.CFOM
+      RunPrgObject.Ralpha = lstValues.get('Ralpha','')
+      RunPrgObject.Nqual = lstValues.get('Nqual','')
+      RunPrgObject.CFOM = lstValues.get('CFOM','')
 
 
 class Method_shelxd(Method_shelx_solution):
@@ -1042,7 +1043,7 @@ def defineExternalPrograms():
     name='ShelXS',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference="Sheldrick, G.M. (2008). Acta Cryst. A64, 112-122",
+    reference="Sheldrick, G.M. (2008). Acta Cryst. A64, 112-122.",
     brief_reference="Sheldrick, 2008",
     execs=["shelxs.exe", "shelxs"])
   ShelXS97 = Program(
@@ -1073,6 +1074,13 @@ def defineExternalPrograms():
     reference=ShelXS.reference,
     brief_reference=ShelXS.brief_reference,
     execs=["xt.exe", "xt"])
+  ShelXT = Program(
+    name='ShelXT',
+    program_type='solution',
+    author="G.M.Sheldrick",
+    reference=ShelXS.reference,
+    brief_reference=ShelXS.brief_reference,
+    execs=["shelxt.exe", "shelxt"])
   ShelXD = Program(
     name='ShelXD',
     program_type='solution',
@@ -1098,22 +1106,20 @@ def defineExternalPrograms():
     name='olex2.solve',
     program_type='solution',
     author="Luc Bourhis",
-    reference="""
-Bourhis, L.J., Dolomanov, O.V., Gildea, R.J., Howard, J.A.K., Puschmann, H.
- (2013). in preparation""",
+    reference="""Bourhis, L.J., Dolomanov, O.V., Gildea, R.J., Howard, J.A.K., Puschmann, H.
+ (2013). in preparation.""",
     brief_reference="Bourhis et al., 2013",
     )
-  
+
   SIR97 = Program(
     name='SIR97',
     program_type='solution',
     author="Maria C. Burla, Rocco Caliandro, Mercedes Camalli, Benedetta Carrozzini,"+
         "Giovanni Luca Cascarano, Liberato De Caro, Carmelo Giacovazzo, Giampiero Polidori,"+
         "Dritan Siliqi, Riccardo Spagna",
-    reference="""
-Burla, M.C., Caliandro, R., Camalli, M., Carrozzini, B., Cascarano, G.L.,
+    reference="""Burla, M.C., Caliandro, R., Camalli, M., Carrozzini, B., Cascarano, G.L.,
  De Caro, L., Giacovazzo, C., Polidori, G., Siliqi, D., Spagna, R.
- (2007). J. Appl. Cryst. 40, 609-613""",
+ (2007). J. Appl. Cryst. 40, 609-613.""",
     brief_reference="Burla et al.,  2007",
     versions = '97',
     execs=["sir97.exe", "sir97"])
@@ -1153,11 +1159,10 @@ Burla, M.C., Caliandro, R., Camalli, M., Carrozzini, B., Cascarano, G.L.,
     name='Superflip',
     program_type='solution',
     author="A van der Lee, C.Dumas & L. Palatinus",
-    reference="""
-Palatinus, L. & Chapuis, G. (2007). J. Appl. Cryst., 40, 786-790;
+    reference="""Palatinus, L. & Chapuis, G. (2007). J. Appl. Cryst., 40, 786-790;
 Palatinus, L. & van der Lee, A. (2008). J. Appl. Cryst. 41, 975-984;
 Palatinus, L., Prathapa, S. J. & van Smaalen, S. (2012). J. Appl. Cryst. 45,
- 575-580""",
+ 575-580.""",
     brief_reference="""Palatinus & Chapuis, 2007;Palatinus & van der Lee, 2008;
 Palatinus et al., 2012""",
     versions='260711',
@@ -1176,6 +1181,7 @@ Palatinus et al., 2012""",
   XS.addMethod(patterson)
   XS.addMethod(texp)
   XT.addMethod(direct_methods)
+  ShelXT.addMethod(direct_methods)
   ShelXD.addMethod(dual_space)
   ShelXD97.addMethod(dual_space)
   XM.addMethod(dual_space)
@@ -1249,7 +1255,7 @@ Palatinus et al., 2012""",
     reference=smtbx_solve.reference,
     brief_reference=smtbx_solve.brief_reference,
   )
-  
+
   RPD = ExternalProgramDictionary()
   for prg in (ShelXL, ShelXL97, XL, XLMP, ShelXH97, XH, ShelXL_ifc):
     prg.addMethod(least_squares)
@@ -1261,7 +1267,8 @@ Palatinus et al., 2012""",
   RPD.addProgram(smtbx_refine)
 
   SPD = ExternalProgramDictionary()
-  for prg in (ShelXS, ShelXS97, ShelXS86, XS, XT, ShelXD, ShelXD97, XM, smtbx_solve, SIR97, SIR2002, SIR2004, SIR2008, SIR2011, Superflip):
+  for prg in (ShelXS, ShelXS97, ShelXS86, XS, XT, ShelXT, ShelXD, ShelXD97, XM,
+              smtbx_solve, SIR97, SIR2002, SIR2004, SIR2008, SIR2011, Superflip):
     SPD.addProgram(prg)
 
 
@@ -2171,7 +2178,17 @@ def get_program_dictionaries(cRPD=None, cSPD=None):
     else:
       SPD, RPD =  defineExternalPrograms()
   return SPD, RPD
-  
+
+def get_managed_reference_set():
+  global managed_references
+  if managed_references: return managed_references
+  sd, rd = get_program_dictionaries()
+  rl = []
+  for p in sd: rl.append(p.reference)
+  for p in rd: rl.append(p.reference)
+  managed_references = set([''.join(x.replace('\r', '').split()) for x in rl])
+  return managed_references
+
 def get_known(kind):
   sd, rd = get_program_dictionaries()
   if kind == 'solution':

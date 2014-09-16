@@ -3,6 +3,7 @@ import olx
 import os
 import time
 import glob
+import shutil
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
@@ -10,11 +11,11 @@ from gui.tools import *
 
 import HttpTools
 
-
 class PluginTools(object):
   def __init__(self):
-    pass
-  
+    if olx.HasGUI() == 'true':
+      deal_with_gui_phil('load')
+
   def get_plugin_date(self):
     return time.ctime(os.path.getmtime(self.p_path))
 
@@ -55,12 +56,40 @@ class PluginTools(object):
         #file_name=user_phil_file, scope_name='snum.%s' %self.p_name, diff_only=True)
 
   def setup_gui(self):
+    if olx.HasGUI() != 'true':
+      return
+
     for image, img_type in self.p_img:
       make_single_gui_image(image, img_type=img_type)
     #olx.FlushFS()
 
     if self.p_htm:
       add_tool_to_index(scope=self.p_name, link=self.p_htm, path=self.p_path, location=self.params.gui.location, before=self.params.gui.before, filetype='')
+
+  def edit_customisation_folder(self):
+    self.get_customisation_path()
+    p = self.customisation_path
+    if not p:
+      p = self.p_path + "_custom"
+      IGNORE_PATTERNS = ('*.pyc', '*.py', '*.git')
+      shutil.copytree(self.p_path, p, ignore=shutil.ignore_patterns(*IGNORE_PATTERNS))
+      os.rename("%s/templates/default" %p, "%s/templates/custom" %p)
+      os.rename("%s/branding/olex2" %p, "%s/branding/custom" %p)
+    else:
+      if os.path.exists(p):
+        print "The location %s already exists. No files have been copied" %p
+      else:
+        print "This path %s should exist, but does not." %p
+        return
+    olx.Shell(p)
+
+  def get_customisation_path(self):
+    p = self.p_path + "_custom"
+    if os.path.exists(p):
+      self.customisation_path = p
+    else:
+      self.customisation_path = None
+
 
 def make_new_plugin(name,overwrite=False):
   plugin_base = "%s/util/pyUtil/pluginLib/" %OV.BaseDir()
@@ -101,7 +130,7 @@ OV.SetVar('%(name)s_plugin_path', p_path)
 p_name = "%(name)s"
 p_scope = "%(name_lower)s"
 p_htm = "%(name)s"
-p_img = [(%(name)s,'h1')]
+p_img = [("%(name)s",'h1')]
 
 from PluginTools import PluginTools as PT
 
@@ -125,7 +154,7 @@ print "OK."''' %d
 
   wFile = open("%(plugin_base)s/plugin-%(name)s/%(name)s.py"%d,'w')
   wFile.write(py)
-  wFile.close()  
+  wFile.close()
 
   phil = '''
 %(name_lower)s{
@@ -143,18 +172,35 @@ print "OK."''' %d
   wFile.write(phil)
   wFile.close()
 
-  rFile = open(xld, 'r')
-  xld_content = rFile.readlines()
-  rFile.close()
-  if name in xld_content:
+
+  html = r'''
+<!-- #include tool-top gui/blocks/tool-top.htm;image=#image;onclick=#onclick;1; -->
+<!-- #include tool-row-help gui/blocks/tool-row-help.htm;name=%(name)s; help_ext=%(name)s;1; -->
+  <td ALIGN='left' width='100%%'>
+    <b>Welcome to your new Plugin: %(name)s</b>
+  </td>
+<!-- #include row_table_off gui/blocks/row_table_off.htm;1; -->
+<!-- #include tool-footer gui/blocks/tool-footer.htm;colspan=2;1; -->
+  ''' %d
+  wFile = open("%(plugin_base)s/plugin-%(name)s/%(name_lower)s.htm"%d,'w')
+  wFile.write(html)
+  wFile.close()
+
+
+  rFile = open(xld, 'rb').read()
+  if name in repr(rFile):
     return
   wFile = open(xld, 'w')
-  for line in xld_content:
+  for line in rFile:
     wFile.write(line)
     if line.strip().lower() == "<plugin":
       wFile.write ("<%(name)s>" %d)
   wFile.close()
- 
+
+  print "New Plugin %s created. Please restart Olex2" %name
+
+
+
 OV.registerFunction(make_new_plugin,False,'pt')
 
 
@@ -199,7 +245,7 @@ def register_new_module(module=None, username=None, pwd=None):
       print "The requested installer could not be made. Instead the server returned: %s" %f
     else:
       print "An unknown error occurred: %s" %repr(f)
-    return  
+    return
 
 
   p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], olex2_tag)

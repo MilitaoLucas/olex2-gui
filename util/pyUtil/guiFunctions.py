@@ -84,7 +84,7 @@ class GuiFunctions(object):
     olex.m("Grad %i %i %i %i" %(v[0], v[1], v[2], v[3]))
     
   def GetFormulaDisplay(self):
-    str = ""
+    rv = ""
     s = olx.xf.GetFormula('list')
     l = s.split(',')
     for item in l:
@@ -95,8 +95,8 @@ class GuiFunctions(object):
         num = float(num)
         num = "%.2f" %num
       if num == "1": num = ""
-      str+="%s<sub>%s</sub>" %(ele, num)
-    return str
+      rv+="%s<sub>%s</sub>" %(ele, num)
+    return rv
 
   def GetHtmlPanelwidth(self):
     return olx.HtmlPanelWidth()

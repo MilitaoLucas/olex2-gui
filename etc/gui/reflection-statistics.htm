@@ -16,8 +16,8 @@
   <td name=SHOW_DIAGNOSTICS align='right' width="5%">
     $+
     html.Snippet("gui/snippets/input-checkbox", "name=SHOW_DIAGNOSTICS",
-    "checked=spy.GetParam('diagnostics.pin_scopes')",
-    "onclick=spy.SetParam('diagnostics.pin_scopes', html.GetState('~name~'))>>spy.make_HOS(True)>>html.update")
+    "checked=spy.GetParam('user.diagnostics.pin_scopes')",
+    "onclick=spy.SetParam('user.diagnostics.pin_scopes', html.GetState('~name~'))>>spy.make_HOS(True)>>html.update")
     $-
   </td>
 

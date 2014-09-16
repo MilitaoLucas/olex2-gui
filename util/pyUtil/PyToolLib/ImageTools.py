@@ -60,10 +60,14 @@ class ImageTools(FontInstances):
     self.gui_sNumTitle_font_name = "%s Bold" %font
     self.gui_button_font_name = "%s Bold" %font
 
-    self.available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - OV.GetParam('gui.html.table_firstcol_width'))
-    self.available_width_full = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
 
-    self.css = OV.GuiParams().css
+    if olx.HasGUI() == "false":
+      self.available_width = 200
+      self.available_width_full = 200
+    else:
+      self.available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - OV.GetParam('gui.html.table_firstcol_width'))
+      self.available_width_full = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
+      self.css = OV.GuiParams().css
 
 
   def drawSpaceGroupInfo(self, draw, luminosity=1.9, right_margin=12, font_name="Times Bold", font_colour=None):
@@ -254,6 +258,8 @@ class ImageTools(FontInstances):
 
 
   def getOlexVariables(self):
+    if olx.HasGUI() != "true":
+      return
     #self.encoding = self.test_encoding(self.gui_language_encoding) ##Language
     #self.language = "English" ##Language
     #if olx.IsCurrentLanguage('Chinese') == "true":
@@ -420,6 +426,7 @@ class ImageTools(FontInstances):
       if colourize:
         im = self.colourize(im, (0,0,0), OV.GetParam('gui.logo_colour'))
       width = int(width) - width_adjust
+      if width < 10: return
       factor = im.size[0]/width
       height = int(im.size[1] / factor)
       im = self.resize_image(im, (width, height))
@@ -675,7 +682,7 @@ class ImageTools(FontInstances):
 
   def get_im_data_d_from_filename(self, filename, units='pt', target_width=0, max_height=0):
     import base64
-    
+
     if type(filename) == unicode or type(filename) == str:
       if os.path.exists(filename):
         im = Image.open(filename)
@@ -699,7 +706,7 @@ class ImageTools(FontInstances):
       d.setdefault('image_height', h)
       d.setdefault('image_width', w)
 
-      
+
     d.setdefault('image_format', im.format)
     d.setdefault('image_data', data)
     return d
@@ -816,10 +823,10 @@ class ImageTools(FontInstances):
                          translate=True,
                          getXY_only=False,
                          scale=1):
-    
+
     #if max_width < 100:
     #  max_width = OV.GetParam('gui.htmlpanelwidth')
-      
+
     if not self.scale:
       self.scale = scale
     self.font_size = font_size
@@ -880,7 +887,7 @@ class ImageTools(FontInstances):
         txt = txt.rstrip('...')
         txt = txt[:-1] + "..."
         wX, wY = draw.textsize(txt, font=font)
-        
+
     if "</p>" in txt:
       self.txt = txt
       self.print_html_to_draw()
@@ -1506,7 +1513,7 @@ class ImageTools(FontInstances):
     padding = int(im.size[0]/100 * padding)
     border = int(im.size[0]/100 * border)
     border_col = str(border_col)
-    
+
     adjust = 0
     if target_size:
       curr_width = im.size[0] + padding*2 + border*2
@@ -1532,7 +1539,7 @@ class ImageTools(FontInstances):
       im.save(p)
     else:
       return im
-    
+
   def make_pie_map(self, map_l, size):
 
     width = size[0]
@@ -1591,7 +1598,8 @@ class ImageTools(FontInstances):
     return map
 
 a = ImageTools()
-OV.registerMacro(a.resize_to_panelwidth, 'i-Image&;c-Colourize')
-OV.registerFunction(a.make_pie_graph,False,'it')
-OV.registerFunction(a.resize_news_image,False,'it')
+if olx.HasGUI == 'true':
+  OV.registerMacro(a.resize_to_panelwidth, 'i-Image&;c-Colourize')
+  OV.registerFunction(a.make_pie_graph,False,'it')
+  OV.registerFunction(a.resize_news_image,False,'it')
 OV.registerFunction(a.trim_image,False,'it')

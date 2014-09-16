@@ -42,6 +42,12 @@ def getModule(name, email=None):
   etoken = None
   etoken_fn = "%s%setoken" %(dir, os.sep)
   if email:
+    import re
+    email = email.strip()
+    if not re.match("^[a-zA-Z0-9._%-]+@[a-zA-Z0-9._%-]+.[a-zA-Z]{2,6}$", email):
+      olex.writeImage(info_file_name, "Failed to validate e-mail address", 0)
+      return False
+  if email:
     try:
       url = url_base + "register"
       values = {
@@ -58,7 +64,8 @@ def getModule(name, email=None):
       etoken = f
     except Exception, e:
       msg = '''
-An error occurred while downloading the extension.<br>%s<br>Please restart Olex2 and try again.
+<font color='red'><b>An error occurred while downloading the extension.</b></font>
+<br>%s<br>Please restart Olex2 and try again.
 ''' %(str(e))
       if debug:
         sys.stdout.formatExceptionInfo()
@@ -86,7 +93,8 @@ An error occurred while downloading the extension.<br>%s<br>Please restart Olex2
       old_folder = new_name
     except Exception, e:
       msg = '''
-An error occurred while installing the extension.<br>%s<br>Please restart Olex2 and try again.
+<font color='red'><b>An error occurred while installing the extension.</b></font>
+<br>%s<br>Please restart Olex2 and try again.
 ''' %(str(e))
       olex.writeImage(info_file_name, msg, 0)
       return False
@@ -109,9 +117,9 @@ An error occurred while installing the extension.<br>%s<br>Please restart Olex2 
     else:
       zp = ZipFile(StringIO(f))
       zp.extractall(path=dir)
-      msg = "Module %s has been successfully installed/updated" %name
-      msg += "<br>You have 30 days to evaluate this extension module."
-      msg += "<br>Please restart Olex2 to activate the extension module."
+      msg = "Module <b>%s</b> has been successfully installed/updated" %name
+      msg += "<br>You have 30 days to evaluate this extension module. Please contact us for further information."
+      msg += "<br><font color='green'><b><Please restart Olex2 to activate the extension module.</b></font>"
       olex.writeImage(info_file_name, msg, 0)
       global available_modules
       if current_module:
@@ -127,7 +135,8 @@ An error occurred while installing the extension.<br>%s<br>Please restart Olex2 
       return True
   except Exception, e:
     msg = '''
-An error occurred while installing the extension.<br>%s<br>Please restart Olex2 and try again.
+<font color='red'><b>An error occurred while installing the extension.</b></font>
+<br>%s<br>Please restart Olex2 and try again.
 ''' %(str(e))
     olex.writeImage(info_file_name, msg, 0)
     return False
@@ -155,8 +164,11 @@ def loadAll():
       global failed_modules
       failed_modules[d] = str(e)
       print("Error occurred while loading module: %s" %d)
+      if debug:
+        sys.stdout.formatExceptionInfo()
   getAvailableModules() #thread
-  olx.Schedule(2, "spy.plugins.AskToUpdate()", g=True)
+  if olx.HasGUI() == 'true':
+    olx.Schedule(2, "spy.plugins.AskToUpdate()", g=True)
 
 
 def updateKey(module):
@@ -325,7 +337,7 @@ def getInfo():
     return ""
   preambula = ""
   if current_module.action == 3:
-    preambula = "This module has <b>expired</b>, please either re-install it or contact"+\
+    preambula = "<font color='red'>This module has <b>expired</b></font>, please either re-install it or contact"+\
       " <a href='shell(mailto:enquiries@olexsys.org?subject=Olex2%20extensions%20licence)'>"+\
       "OlexSys Ltd</a> to extend the licence.<br>"
   return preambula + "<a href='shell %s'>Module URL: </a> %s<br>%s"\
@@ -372,7 +384,7 @@ def getCurrentModuleName():
 
 def AskToUpdate():
   global avaialbaleModulesRetrieved
-  if not avaialbaleModulesRetrieved:
+  if not avaialbaleModulesRetrieved and olx.HasGUI() == 'true':
     olx.Schedule(3, "spy.plugins.AskToUpdate()", g=True)
     return
   from olexFunctions import OlexFunctions
@@ -405,6 +417,82 @@ def AskToUpdate():
         else: status = "Failed"
         print("Updating '%s': %s" %(m.folder_name, status))
 
+def offlineInstall():
+  import gui
+  src = gui.FileOpen("Please choose the offline module archive", "*.zip", ".")
+  if not src:
+    return
+  from zipfile import ZipFile
+  zip = ZipFile(src)
+  names = zip.namelist()
+  if not names:
+    print("Empty archive...")
+    return
+  module_name = names[0].split('/')[0]
+  if not module_name:
+    print("Invalid archive")
+    return
+  licence_files = ('licence.txt', 'licence.htm')
+  licence_file_name = ''
+  for n in names:
+    for l in licence_files:
+     if n.endswith(l):
+       licence_file_name = n
+       break
+     if licence_file_name:
+       break
+  if licence_file_name:
+    lic = zip.open(licence_file_name).read()
+    sz = [int(i) for i in olx.GetWindowSize().split(',')]
+    w = int(sz[2]*2/3)
+    h = int(sz[3]*2/3)
+    olex.writeImage("module_licence_content", lic)
+    olex.writeImage("module_licence",
+"""
+ <html><body>
+  <table width='100%%'>
+    <tr><td colspan='2'>
+     <input type='text' multiline='true'
+      value="spy.vfs.read_from_olex('module_licence_content')" width='100%%' height='%s' />
+     </td></tr>
+    <tr>
+     <td align='center'><input type='button' value='Accept' onclick="html.EndModal('~popup_name~', 1)"></td>
+     <td align='center'><input type='button' value='Decline' onclick="html.EndModal('~popup_name~', 2)"></td>
+    </tr>
+  </table>
+  </body></html>
+""" %(h-100),
+      0)
+    olx.Popup("module_licence", "module_licence",
+       b="t",  t="Licence agreement",
+       x=sz[0] + sz[2]/2 - w/2, y=sz[1] + sz[3]/2 - h/2,
+       w=w, h=h, s=False)
+    res = olx.html.ShowModal("module_licence", True)
+    olex.writeImage("module_licence_content", "", 0)
+    olex.writeImage("module_licence", "", 0)
+    if int(res) != 1:
+      zip.close()
+      return
+  dir = getModulesDir()
+  if not os.path.exists(dir):
+    os.mkdir(dir)
+  else:
+    mdir = dir + os.sep + module_name
+    if os.path.exists(mdir):
+      res = olx.Alert("Warning", "Destination folder exists.\nOverwrite?", "YCQ")
+      if res != 'Y':
+        return
+      print("Removing previous installation...")
+      try:
+        shutil.rmtree(mdir)
+      except:
+        print("Failed to remove previous installation. Please restart Olex2 and try again...")
+        return
+  zip.extractall(path=dir)
+  zip.close()
+  print("Installed successfully '%s'. Please restart Olex2 to load it." %module_name)
+
+
 path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(path)
 
@@ -427,6 +515,7 @@ if os.path.exists(lib_name) or olx.app.IsDebugBuild() == 'true':
     olex.registerFunction(doAct, False, "plugins.gui")
     olex.registerFunction(AskToUpdate, False, "plugins")
     olex.registerFunction(updateKey, False, "plugins")
+    olex.registerFunction(offlineInstall, False, "plugins")
     loadAll()
   except Exception, e:
     print("Plugin loader initialisation failed: '%s'" %e)

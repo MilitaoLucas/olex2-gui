@@ -259,9 +259,9 @@ class publication:
   def DisplayMergeList(self):
     l = OV.GetParam('snum.report.merge_these_cifs', [])
     if not l:
-      str = "Only the built-in metacif file will be merged"
+      s = "Only the built-in metacif file will be merged"
     else:
-      str = ""
+      s = ""
       for item in l:
         if not item:
           continue
@@ -269,9 +269,9 @@ class publication:
         remove = """<a target='Remove from merge'
 href='spy.gui.report.publication.remove_cif_from_merge_list(%s)>>html.Update'>
 <font color='red'><b>x</b></font></a>""" %item
-        str += "<a target='Edit this CIF' href='shell %s'>%s</a>(%s) " %(
+        s += "<a target='Edit this CIF' href='shell %s'>%s</a>(%s) " %(
           item, display, remove)
-    return str
+    return s
 
   def add_cif_to_merge_list(cif_p):
     if not cif_p:
@@ -435,6 +435,10 @@ def get_crystal_image(p=None,n=4,get_path_only=True):
     current_image = OV.GetParam('snum.report.crystal_image')
   else:
     current_image = p
+  if not current_image:
+    from CifInfo import ExtractCifInfo
+    ExtractCifInfo(run=True)
+    current_image = OV.GetParam('snum.report.crystal_image')
 
   if get_path_only:
     if current_image:
@@ -452,7 +456,9 @@ def get_crystal_image(p=None,n=4,get_path_only=True):
       else:
         return OV.standardizePath(current_image)
 
-
+  if not current_image:
+    print "No Current Image!"
+    return None
 
   if '.vzs' in current_image:
     have_zip = True

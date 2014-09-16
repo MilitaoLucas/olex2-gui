@@ -11,6 +11,9 @@ curr_path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe
 class GuiImages:
 
   def __init__(self):
+    if olx.HasGUI() != 'true':
+      return
+
     img_root = OV.GetParam("gui.GuiImages.action", "%s/etc/gui/images/action" %OV.BaseDir())
     height = OV.GetParam('gui.html.input_height')
     self.img_d = {
@@ -160,7 +163,10 @@ def GetPSImageInstructions(notify_listener=True, output_folder=None):
   lw_font = str(OV.GetParam('snum.image.ps.font_weight'))
   div_pie = str(OV.GetParam('snum.image.ps.octant_count'))
   scale_hb = str(OV.GetParam('snum.image.ps.h_bond_width'))
-  octant_atoms = str(OV.GetParam('snum.image.ps.octant_atoms'))
+  octant_atoms = '-$C'
+  import olex_gui
+  if olex_gui.IsControl('IMAGE_PS_OCTANTS_ATOMS'):
+    octant_atoms = olx.html.GetValue('IMAGE_PS_OCTANTS_ATOMS')
 
   if image_perspective.lower() == 'true':
     image_perspective = "-p"
@@ -231,4 +237,3 @@ def GetImageFilename(image_type):
     filefull = "%s.%s" %(filename, fileext)
   OV.SetParam('snum.image.%s.name' %image_type.lower(),None)
   return filefull, filename, fileext
-

@@ -117,7 +117,7 @@ routines requiring structure refinement
       .type = float
     vata = 0
       .type = float
-    program = ShelXS ShelXS-1997 ShelXS-1986 XS XT '*olex2.solve' XM ShelXD ShelXD-1997 SIR2002 SIR2004 SIR2008 SIR2011 Superflip Unknown ShelXS-2013 ShelXS86 ShelXD-2013
+    program = ShelXS ShelXS-1997 ShelXS-1986 XS XT ShelXT '*olex2.solve' XM ShelXD ShelXD-1997 SIR2002 SIR2004 SIR2008 SIR2011 Superflip Unknown ShelXS-2013 ShelXS86 ShelXD-2013
       .type = choice
     method = 'Dual Space' '*Charge Flipping' 'Direct Methods' 'Patterson Method' 'Structure Expansion' Unknowm
       .type = choice
@@ -152,6 +152,10 @@ routines requiring structure refinement
     {
     ata = 0
       .type = float
+    max_shift_over_esd = None
+      .type = float
+    max_shift_over_esd_atom = None
+      .type = str
     max_shift_site = None
       .type = float
     max_shift_site_atom = None
@@ -164,7 +168,11 @@ routines requiring structure refinement
       .type = float
     max_hole = None
       .type = float
+    goof = None
+      .type = float
     flack_str = None
+      .type = str
+    hooft_str = None
       .type = str
     expected_peaks = None
       .type = int
@@ -524,6 +532,8 @@ routines requiring structure refinement
       .type = str
     date_collected = None
       .type = str
+    total_time = 0
+      .type = int
     crystal_images = None
       .type = strings
     crystal_image = None
@@ -709,7 +719,7 @@ olex2
     url = http://ccdc.opencryst.org/deposit http://ccdc1.opencryst.org/deposit
       .type = strings
       .help = List of the OlexSys servers used to forward requests to the CCDC
-    ccdc_mail = olex2-deposit@ccdc.cam.ac.uk
+    ccdc_mail = deposit@ccdc.cam.ac.uk
       .type = str
       .help = The email address to which the files will be forwared
     pop{
@@ -1056,6 +1066,12 @@ user
     .type = str
   keep_unique = False
     .type = bool
+
+  diagnostics{
+    pin_scopes = False
+      .type = bool
+  }
+
   report{
     db_location = DataDir()/db
       .type = str
@@ -1116,6 +1132,15 @@ user
   }
   image{
     bitmap{
+      AtomLabels{
+        font = '#olex2.fnt:frb_20'
+          .type = str
+      }
+
+      BondLabels{
+        font = '#olex2.fnt:fr__14'
+          .type = str
+      }
       type = png
         .type = str
       resolution = 300

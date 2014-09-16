@@ -186,6 +186,14 @@ class GeneratedGuiMaker(object):
     onchange = '''spy.gui.report.publication.OnPersonChange('~name~')>>spy.SetParam('snum.report.%s',html.GetValue('~name~'))'''
     subop = ["SUBMITTER", "OPERATOR"]
     list = []
+
+    list.append(
+      {
+      'varName':'snum.report.submission_original_sample_id',
+       'itemName':'%Sample ID%',
+      }
+    )
+
     for tem in subop:
       authorRow = {
         'varName':'snum.report.%s' %tem.lower(),
@@ -221,7 +229,6 @@ class GeneratedGuiMaker(object):
        'itemName':'%Date Collected%',
       }
     )
-
     return htmlTools.makeHtmlTable(list)
 
   def citationsMetadataHtmlMaker(self, ):

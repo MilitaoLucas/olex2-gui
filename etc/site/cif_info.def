@@ -42,7 +42,7 @@ _diffrn_standards_decay_%          .
 
 =xprep=V6.12=        'XPREP ver.6.12 (Bruker,2001)'
 =xprep=v6.14=        'XPREP ver.6.14 (Bruker,2003)'
-=xprep=2008/2=       'XPREP 008/2 (Bruker,2009)'
+=xprep=2008/2=       'XPREP 2008/2 (Bruker,2008)'
 
 
 =sad=V2.03=          'SADABS v.2.03 (Bruker,200?)'
