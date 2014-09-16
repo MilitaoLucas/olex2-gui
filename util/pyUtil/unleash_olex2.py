@@ -14,6 +14,10 @@ mac32_port_name = 'port-mac32'
 mac32_port_zip_name = 'olex2-mac32-intel.zip'
 mac32_port_prefix = 'olex2.app/Contents/MacOS/'
 
+mac64_port_name = 'port-mac64'
+mac64_port_zip_name = 'olex2-mac64-intel.zip'
+mac64_port_prefix = 'olex2.app/Contents/MacOS/'
+
 linux32_legacy_port_name = 'port-suse101x32-py27'
 linux32_port_name = 'port-linux32'
 linux32_port_zip_name = 'olex2-linux32.zip'
@@ -42,6 +46,7 @@ portable_prefix = None
 # iteratable list of zips and prefixes
 distro_zips = (
   (mac32_port_zip_name, mac32_port_prefix),
+  (mac64_port_zip_name, mac64_port_prefix),
   (linux32_port_zip_name, linux32_port_prefix),
   (linux64_port_zip_name, linux64_port_prefix),
   (win32_sse_port_zip_name, win32_sse_port_prefix),
@@ -51,15 +56,20 @@ distro_zips = (
 )
 
 external_files = {
-  #mac
+  #mac32
   'olex2-mac32.zip': ('olex-port', mac32_port_name, mac32_legacy_port_name,
                       'action:extract', 'action:delete'),
   'unirun-mac32.zip': ('olex-port', mac32_port_name, mac32_legacy_port_name,
                        'action:extract', 'action:delete'),
   'cctbx-mac32.zip': ('olex-port', mac32_port_name, mac32_legacy_port_name,
                       'action:extract', 'action:delete'),
-  'lib-mac32.zip': ('olex-port', mac32_port_name, mac32_legacy_port_name,
+  'lib-mac32.zip': ('olex-port', mac32_port_name, 
                     'action:extract', 'action:delete'),
+  #mac64
+  'olex2-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
+  'unirun-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
+  'cctbx-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
+  'lib-mac64.zip': ('olex-port', mac64_port_name,  'action:extract', 'action:delete'),
   #linux32
   'olex2-linux32.zip': ('olex-port', linux32_port_name, linux32_legacy_port_name,
                         'action:extract', 'action:delete'),
@@ -108,6 +118,7 @@ external_files = {
   #'olex2c-win32.zip': ('olex-port', 'plugin-Headless-win-32', 'action:extract', 'action:delete'),
   #'olex2c-win64.zip': ('olex-port', 'plugin-Headless-win-64', 'action:extract', 'action:delete'),
   'plgl-mac32.zip': ('olex-port', mac32_port_name, 'action:extract', 'action:delete'),
+  'plgl-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
   'plgl-linux32.zip': ('olex-port', linux32_port_name, 'action:extract', 'action:delete'),
   'plgl-linux64.zip': ('olex-port', linux64_port_name, 'action:extract', 'action:delete'),
   'plgl-win32-sse.zip': ('olex-port', win32_sse_port_name, 'action:extract', 'action:delete'),
@@ -157,6 +168,15 @@ set(  ['cctbx-mac32.zip',  #cctbx/cctb_sources,...
       ]
    ) | portable_zip_files
 
+mac64_zip_files = \
+set(  ['cctbx-mac64.zip',  #cctbx/cctb_sources,...
+      'olex2-mac64.zip',    #olex2 executable
+      'unirun-mac64.zip',
+      'plgl-mac64.zip',
+      'lib-mac64.zip'
+      ]
+   ) | portable_zip_files
+
 linux32_zip_files = \
 set(  ['cctbx-linux32.zip',  #cctbx/cctb_sources,...
       'lib-linux32.zip',     #lib/dlls
@@ -176,7 +196,7 @@ set(  ['cctbx-linux64.zip',  #cctbx/cctb_sources,...
 
 # a set of all zip files...
 all_zip_files = win32_sse2_zip_files | win32_sse_zip_files | win64_zip_files\
-              | mac32_zip_files | linux32_zip_files | linux64_zip_files
+              | mac32_zip_files | mac64_zip_files | linux32_zip_files | linux64_zip_files
 
 
 altered_files = set([])
@@ -246,6 +266,11 @@ parser.add_option('-f', '--file',
                   default='',
 		  action='store',
 		  help='whether to use update any particluare file only')
+parser.add_option('-p', '--platform',
+      dest='release_platform',
+      default='win32-sse,win32,win64,mac32,mac64,lin32,lin64',
+      action='store',
+      help='modify the platform list to release')
 option, args = parser.parse_args()
 
 working_directory = os.path.expanduser(option.working_directory
@@ -374,7 +399,23 @@ if os.path.exists(bin_directory + '/olex2.exe'):
 
 client = pysvn.Client()
 
+platforms = {
+  "win32-sse": False,
+  "win32": True,
+  "win64": True,
+  "mac32": True,
+  "mac64": True,
+  "lin32": True,
+  "lin64": True,
+}
 try:
+  if option.release_platform:
+    toks = option.release_platform.split(',')
+    for k,v in platforms.iteritems():
+      platforms[k] = False
+    for t in toks:
+      platforms[t] = True
+
   if option.update_file:
     filepath = option.update_file
     print 'Updating %s only...' %filepath
@@ -679,7 +720,6 @@ def create_portable_distro(port_props, zip_name, port_zips, prefix, extra_files)
   dest_zip.close()
   return
 ####################################################################################################
-if True:
   create_portable_distro(
     port_props=None,
     zip_name=portable_zip_name,
@@ -687,7 +727,7 @@ if True:
     prefix=portable_prefix,
     extra_files = None
   )
-if True:
+if platforms.get("win32"):
   create_portable_distro(
     port_props=set([win32_sse2_port_name,win32_port_name]),
     zip_name=win32_sse2_port_zip_name,
@@ -698,6 +738,7 @@ if True:
       bin_directory + '/vcredist_x86.exe' : 'vcredist_x86.exe'
     }
   )
+if platforms.get("win32-sse"):
   create_portable_distro(
     port_props=set([win32_sse_port_name,win32_port_name]),
     zip_name=win32_sse_port_zip_name,
@@ -708,6 +749,7 @@ if True:
       bin_directory + '/vcredist_x86.exe' : 'vcredist_x86.exe'
     }
   )
+if platforms.get("win64"):
   create_portable_distro(
     port_props=set([win64_port_name]),
     zip_name=win64_port_zip_name,
@@ -719,7 +761,7 @@ if True:
     }
   )
 #create linux and mac distro only in releases
-if True:
+if platforms.get("lin32"):
   create_portable_distro(
     port_props=set([linux32_port_name]),
     zip_name=linux32_port_zip_name,
@@ -731,6 +773,7 @@ if True:
       bin_directory + '/linux-distro/usettings32.dat' : 'olex2/usettings.dat'
     }
   )
+if platforms.get("win64"):
   create_portable_distro(
     port_props=set([linux64_port_name]),
     zip_name=linux64_port_zip_name,
@@ -742,6 +785,7 @@ if True:
       bin_directory + '/linux-distro/usettings64.dat' : 'olex2/usettings.dat'
     }
   )
+if platforms.get("mac32"):
   create_portable_distro(
     port_props=set([mac32_port_name]),
     zip_name=mac32_port_zip_name,
@@ -751,7 +795,21 @@ if True:
     {
       bin_directory + '/mac-distro/Info.plist' : 'olex2.app/Contents/Info.plist',
       bin_directory + '/mac-distro/PkgInfo' : 'olex2.app/Contents/PkgInfo',
-      bin_directory + '/mac-distro/usettings.dat' : 'olex2.app/Contents/MacOS/usettings.dat',
+      bin_directory + '/mac-distro/usettings32.dat' : 'olex2.app/Contents/MacOS/usettings.dat',
+      bin_directory + '/mac-distro/olex2.icns' : 'olex2.app/Contents/Resources/olex2.icns'
+    }
+  )
+if platforms.get("mac64"):
+  create_portable_distro(
+    port_props=set([mac64_port_name]),
+    zip_name=mac64_port_zip_name,
+    port_zips=mac64_zip_files,
+    prefix=mac64_port_prefix,
+    extra_files =
+    {
+      bin_directory + '/mac-distro/Info.plist' : 'olex2.app/Contents/Info.plist',
+      bin_directory + '/mac-distro/PkgInfo' : 'olex2.app/Contents/PkgInfo',
+      bin_directory + '/mac-distro/usettings64.dat' : 'olex2.app/Contents/MacOS/usettings.dat',
       bin_directory + '/mac-distro/olex2.icns' : 'olex2.app/Contents/Resources/olex2.icns'
     }
   )

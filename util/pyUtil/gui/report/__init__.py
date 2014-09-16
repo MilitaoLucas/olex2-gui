@@ -34,6 +34,9 @@ class publication:
     if not person:
       return ''
     person = userDictionaries.people.get_person_details(person)
+    if not person:
+      print "The entry displayed in this field is not in the DB"
+      return ''
     if person['displayname'] == "New Person":
       edit = True
     if not edit:

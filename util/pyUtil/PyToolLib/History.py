@@ -25,7 +25,7 @@ import ires_reader
 
 tree = None
 
-timing = False
+timing = False #bool(OV.GetParam('gui.timing'))
 
 class History(ArgumentParser):
   def __init__(self):
@@ -110,8 +110,12 @@ class History(ArgumentParser):
         os.remove(lstFile)
     destination = "%s/%s.res" %(filepath, filename)
     destination = "%s" %destination.strip('"').strip("'")
+    sg = olex.f("sg()")
     olx.Atreap("%s" %destination)
     olx.File() ## needed to make new .ins file
+    sg1 = olex.f("sg()")
+    if sg != sg1:
+      olex.m("spy.run_skin sNumTitle")
     self._make_history_bars()
 
   def saveHistory(self):

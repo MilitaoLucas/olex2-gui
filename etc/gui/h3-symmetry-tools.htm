@@ -3,10 +3,10 @@
 <!-- FIRST ROW -->
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=SYMM_GEN_ROW_1; help_ext=symmetry-tools-1;1; -->
 <td name=MOVE_NEAR align='center' VALIGN='center' width='33%'>
-$spy.MakeHoverButton('button-move_near',"if strcmp(spy.check_for_selection(),True) then run(if strcmp(spy.GetParam(olex2.in_mode),'move sel') then 'mode off' else 'mode move sel')")
+$spy.MakeHoverButton('three-Move_Near',"if strcmp(spy.check_for_selection(),True) then run(if strcmp(spy.GetParam(olex2.in_mode),'move sel') then 'mode off' else 'mode move sel')")
   </td>
   <td name=COPY_NEAR align='center' VALIGN='center' width='33%'>
-$spy.MakeHoverButton('button-copy_near',"if strcmp(spy.check_for_selection(),True) then run(if strcmp(spy.GetParam(olex2.in_mode),'move sel -c') then 'mode off' else 'mode move -c sel')")
+$spy.MakeHoverButton('three-Copy_Near',"if strcmp(spy.check_for_selection(),True) then run(if strcmp(spy.GetParam(olex2.in_mode),'move sel -c') then 'mode off' else 'mode move -c sel')")
 <!--<a-->
       <!--href="if strcmp(spy.GetParam(olex2.in_mode),'move sel -c') then 'mode off' else 'mode move -c sel'"-->
       <!--target="%Copy Near-target%">-->
@@ -14,7 +14,7 @@ $spy.MakeHoverButton('button-copy_near',"if strcmp(spy.check_for_selection(),Tru
     <!--</a>-->
   </td>
   <td name=ASSEMBLE align='center' VALIGN='center'>
-$spy.MakeHoverButton('button-assemble','compaq -a')
+$spy.MakeHoverButton('three-Assemble','compaq -a')
   </td>
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -22,10 +22,10 @@ $spy.MakeHoverButton('button-assemble','compaq -a')
 <!-- SECOND ROW -->
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=SYMM_GEN_ROW_2; help_ext=symmetry-tools-2;1; -->
   <td name=CENTRE_ON_CELL align='center' VALIGN='center' width='33%'>
-$spy.MakeHoverButton('button-centre_on_cell','move')
+$spy.MakeHoverButton('three-Centre_on_Cell','move')
   </td>
   <td name=CENTER_ON_LARGEST_PART align='center' VALIGN='center' width='33%'>
-$spy.MakeHoverButton('button-largest_part','move')
+$spy.MakeHoverButton('three-Largest_Part','move')
   </td>
   <td name=BLANK>
   </td>
@@ -34,10 +34,10 @@ $spy.MakeHoverButton('button-largest_part','move')
 <!-- THIRD ROW -->
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=SYMM_GEN_ROW_3; help_ext=symmetry-tools-3;1; -->
   <td name=SHOW_BASIS align='center' VALIGN='center' width='33%'>
-$spy.MakeHoverButton('button-show_basis','basis')
+$spy.MakeHoverButton('three-Show_Basis','basis')
 </td>
   <td name=SHOW_CELL align='center' VALIGN='center' width='33%'>
-$spy.MakeHoverButton('button-show_cell','cell')
+$spy.MakeHoverButton('three-Show_Cell','cell')
   </td>
   <td name=QUALITY_SLIDER align='right' VALIGN='center'>
 <!-- #include quality-slider gui\snippets\snippet-quality-slider.htm;1; -->
@@ -47,10 +47,10 @@ $spy.MakeHoverButton('button-show_cell','cell')
 <!-- FOURTH ROW -->
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=SYMM_GEN_ROW_4; help_ext=symmetry-tools-4;1; -->
   <td name=FUSE width='33%' align='center'>
-$spy.MakeHoverButton('button-fuse','fuse')
+$spy.MakeHoverButton('three-Fuse','fuse')
   </td>
   <td name=GROW_ALL width=33% align='center'>
-$spy.MakeHoverButton('button-grow_all','grow')
+$spy.MakeHoverButton('three-Grow_All','grow')
   </td>
   <td name=BLANK>
   </td>

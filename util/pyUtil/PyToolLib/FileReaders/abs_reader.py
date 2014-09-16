@@ -75,7 +75,6 @@ class reader(object):
           traceback.print_exc()
           pass
       self._cifItems.setdefault("lambda_correction", "Not present")
-      self._cifItems.setdefault("_exptl_absorpt_correction_T_max", "%s" %(1))
 
     elif abs_type == "TWINABS":
       self._cifItems.setdefault("_exptl_absorpt_correction_type", "multi-scan")
@@ -158,7 +157,6 @@ class reader(object):
         except (RuntimeError, TypeError, NameError):
           print "there was an error"
           pass
-      self._twin_cifItems.setdefault("_exptl_absorpt_correction_T_max", "%s" %(1))
 
 
   def cifItems(self):

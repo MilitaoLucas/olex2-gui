@@ -126,6 +126,9 @@ class CifTools(ArgumentParser):
         olx.cif_model[self.data_name] = model.block()
       just_loaded = True
     self.cif_model = olx.cif_model
+    if not olx.cif_model:
+      print "The Olex2 metacif file for this structure appears to be empty"
+      return
     self.cif_block = olx.cif_model[self.data_name]
     if just_loaded:
       self.update_specials()
