@@ -5,9 +5,6 @@ import olex_gui
 import olx
 import olex
 import os
-import PilTools
-from ImageTools import ImageTools
-IT = ImageTools()
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
@@ -19,6 +16,7 @@ import time
 timing = False #bool(OV.GetParam('gui.timing'))
 
 def adjust_skin_colours():
+  from PilTools import IT
   base_colour = OV.GetParam('gui.html.base_colour')
   item = ['tab', 'timage', 'snumtitle']
   for tem in item:
@@ -26,9 +24,11 @@ def adjust_skin_colours():
       OV.SetParam('gui.%s.base_colour' %tem, base_colour)
 
   if OV.GetParam('gui.snumtitle.filefullinfo_colour') is None:
-    OV.SetParam('gui.snumtitle.filefullinfo_colour', IT.adjust_colour(base_colour.rgb, luminosity = OV.GetParam('gui.snumtitle.filefullinfo_colour_L')))
+    OV.SetParam('gui.snumtitle.filefullinfo_colour',
+      IT.adjust_colour(base_colour.rgb, luminosity = OV.GetParam('gui.snumtitle.filefullinfo_colour_L')))
 
 def adjust_skin_luminosity():
+  from PilTools import IT
   base_colour = OV.GetParam('gui.base_colour')
 
   scope_l= ['gui',
@@ -54,7 +54,8 @@ def adjust_skin_luminosity():
             if "base_colour" in name:
               OV.SetParam('%s.%s' %(scope,name), base_colour)
             else:
-              OV.SetParam('%s.%s' %(scope,name), IT.adjust_colour(base_colour.rgb, luminosity = OV.GetParam('%s.%s_L' %(scope,name))))
+              OV.SetParam('%s.%s' %(scope,name),
+                IT.adjust_colour(base_colour.rgb, luminosity = OV.GetParam('%s.%s_L' %(scope,name))))
           #print "%s.%s: %s" %(scope, name, OV.GetParam('%s.%s' %(scope,name)))
       except Exception, ex:
         print ex
@@ -62,8 +63,7 @@ def adjust_skin_luminosity():
         #print "Something has gone wrong with SKIN adjust_skin_luminosity: %s" %ex
 
 def SetGrad():
-  from ImageTools import ImageTools
-  IT = ImageTools()
+  from PilTools import IT
   l = ['top_right', 'top_left', 'bottom_right', 'bottom_left']
   v = []
   for i in xrange(4):
@@ -211,6 +211,7 @@ class Skin():
     self.sNum = ""
     self.sg = ""
     skin_name = OV.GetParam('gui.skin.name')
+    import PilTools
     self.TI = PilTools.TI
     OV.registerFunction(self.change_skin)
     #self.change()
@@ -254,7 +255,7 @@ class Skin():
       t2 = t
 
     client_width = int(olx.html.ClientWidth('self'))
-    width =  client_width - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+    from PilTools import IT
     IT.resize_skin_logo(client_width)
 
     if timing:
@@ -262,7 +263,6 @@ class Skin():
       print "After 'resize_skin_logo': %.2f s (%.5f s)" % ((t - t1), (t - t2))
       t2 = t
 
-    self.TI = PilTools.TI
     self.TI.run_timage(force_images=True)
     im = self.TI.make_timage('snumtitle', OV.FileName(), 'on', titleCase=False)
     OlexVFS.save_image_to_olex(im, "sNumTitle.png", 1)
@@ -321,7 +321,6 @@ class Skin():
       raise
     self.GuiSkinChanger_instance = PilTools.GuiSkinChanger()
     self.GuiSkinChanger_instance.run_GuiSkinChanger()
-    self.timage_instance = PilTools.TI
     OV.SetVar('olex2_sNum_id_string',"")
     self.sNumTitle_instance = PilTools.sNumTitle()
     #self.adjust_font_size_for_ppi()
@@ -344,9 +343,7 @@ class Skin():
         return
       items = {}
       sNum = items.setdefault("sNum", OV.FileName())
-      a = PilTools.TI
-      width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
-      image = a.make_timage('snumtitle', sNum, 'on', titleCase=False)
+      image = self.TI.make_timage('snumtitle', sNum, 'on', titleCase=False)
       name = r"sNumTitle.png"
       OlexVFS.save_image_to_olex(image, name, 1)
       OV.CopyVFSFile(name, 'SNUMTITLE',2)
@@ -357,7 +354,7 @@ class Skin():
 
     elif f == 'change':
       self.change()
-      self.timage_instance.run_timage()
+      self.TI.run_timage()
       self.sNumTitle_instance.run_sNumTitle(force=True)
       if timing:
         print "run_skin change took %.4fs" %(time.time()-t)
