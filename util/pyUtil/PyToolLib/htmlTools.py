@@ -33,8 +33,6 @@ time_add = 0
 global hover_buttons
 hover_buttons = OV.GetParam('olex2.hover_buttons')
 
-from PilTools import TI
-
 def makeHtmlTable(list):
   """ Pass a list of dictionaries, with one dictionary for each table row.
 
@@ -1249,6 +1247,7 @@ def _check_modes_and_states(name):
   return False
 
 def MakeHoverButton(name, cmds, onoff="off", btn_bg='table_firstcol_colour'):
+  from PilTools import TI
   #global time_add
   #t = time.time()
   btn_type = name.split("-")[0]

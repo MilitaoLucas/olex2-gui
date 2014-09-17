@@ -10,7 +10,6 @@ OV = OlexFunctions()
 import olx
 import olex_core
 import OlexVFS
-import htmlTools
 
 def doProgramSettings(programName, methodName, postSolution=False):
   if not OV.IsFileType('ires'):
@@ -67,6 +66,7 @@ def makeProgramSettingsGUI(program, method, prgtype):
   return
 
 def makeArgumentsHTML(program, method, instruction):
+  import htmlTools
   first_col1 = htmlTools.make_table_first_col(help_name="%s" %instruction.name)
   first_col = htmlTools.make_table_first_col()
   first_col_width = OV.GetParam('gui.html.table_firstcol_width')
