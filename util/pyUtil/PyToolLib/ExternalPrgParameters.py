@@ -324,8 +324,8 @@ class Method_refinement(Method):
       if more == "n/a":
         OV.AddIns("MORE -1")
       bond = olx.Ins('BOND')
-      if bond == "n/a":
-        OV.AddIns("BOND $H")
+      if bond == "n/a" or not bond:
+        OV.AddIns("BOND $H", quiet=True)
       acta= olx.Ins('ACTA')
       if acta == "n/a":
         if radiation == "0.71073":
