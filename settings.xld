@@ -37,14 +37,58 @@
   <shortcut key="Ctrl+Shift+A" macro="spy.gui.About()">
   >
 <menus
-    <item title="File;Open" macro="reap" before="#">
-    <check title="File;#" macro="">
-    <item title="File;Save" macro="file">
-    <item title="File;Save With Sorting" macro="file -s">
-    <item title="File;Close" macro="Close">
-    <item title="File;Exit" macro="quit">
+    <item title="Help;About" macro="spy.gui.About()">
+    <item title="Help;Update options" macro="updateoptions">
+    <item title="Help;Documentation (HTML)" macro="shell BaseDir()/etc/documentation/Commands.html">
+    <item title="Help;Documentation (PDF)" macro="shell BaseDir()/etc/documentation/Commands.pdf">
 
-    <check title="Mode;HFIX;13 (1 Hydrogen sp3)" macro="mode hfix 13" modedependent="HFIX;13" before='Help'>
+    <item title="Select;All \tCtrl+A" macro="sel -a" before="Help">
+    <item title="Select;None \tCtrl+U" macro="sel -u">
+    <item title="Select;Invert \tCtrl+I" macro="sel -i">
+    <item title="Select;#" macro="">
+    <item title="Select;Previous Sel" macro="selback">
+
+    <item title="Model;Refine \tCtrl+R" macro="refine" before="Select">
+    <item title="Model;#" macro="">
+    <item title="Model;Move;Cell center" macro="move">
+    <item title="Model;Move;Binding" macro="compaq">
+    <item title="Model;Move;Binding ignore metals" macro="compaq -m">
+    <item title="Model;Move;Closest" macro="compaq -c">
+    <item title="Model;Q-->C" macro="name $Q C>>refine">
+    <item title="Model;Tidy" macro="tidy">
+    <item title="Model;#" macro="">
+    <item title="Model;ANIS All" macro="sel -a>>anis sel>>refine">
+    <item title="Model;ISOT All" macro="sel -a>>isot sel>>refine">
+    <item title="Model;ANIS Selected" macro="anis sel">
+    <item title="Model;ISOT Selected" macro="isot sel">
+    <item title="Model;#" macro="">
+    <item title="Model;Reset" macro="reset">
+    <item title="Model;Solve" macro="solve">
+
+    <item title="Tools;Options" macro="setup" before="Model">
+    <item title="Tools;Settings;Toggle Background \tF2" macro="swapbg">
+    <item title="Tools;Settings;Show Labels \tF3" macro="labels">
+    <check title="Tools;Settings;Gradient \tF4" macro="grad -i" statedependent="gradbg">
+    <item title="Tools;Settings;Swap Control Panel" macro="htmlpanelswap">
+    <check title="Tools;Settings;Show Info Bar" macro="showwindow info" statedependent="infovis">
+    <check title="Tools;Settings;Show Help" macro="showwindow help" statedependent="helpvis">
+    <check title="Tools;Settings;Show Tooltips" macro="html.tooltips" statedependent="htmlttvis">
+    <item title="Tools;Settings;Show Alerts" macro="spy.SwitchAllAlertsOn()">
+    <check title="Tools;Settings;External CMD line" macro="showwindow cmdline" statedependent="cmdlinevis">
+    <item title="Tools;More Settings..." macro="setup">
+    <radio title="Tools;Settings;GUI Font Size;Small" macro="htmguifontsize 2" checkdependent="GetVar(gui_html_font_size)">
+    <radio title="Tools;Settings;GUI Font Size;Medium" macro="htmguifontsize 3">
+    <radio title="Tools;Settings;GUI Font Size;Large" macro="htmguifontsize 4">
+    <radio title="Tools;Settings;Lines of Text;All" macro="lines -1">
+    <radio title="Tools;Settings;Lines of Text;0" macro="lines 0">
+    <radio title="Tools;Settings;Lines of Text;1" macro="lines 1">
+    <radio title="Tools;Settings;Lines of Text;2" macro="lines 2">
+    <radio title="Tools;Settings;Lines of Text;5" macro="lines 5">
+    <radio title="Tools;Settings;Lines of Text;10" macro="lines 10">
+    <radio title="Tools;Settings;Lines of Text;20" macro="lines 20">
+
+    <check title="Mode;HFIX;13 (1 Hydrogen sp3)" macro="mode hfix 13" modedependent="HFIX;13"
+      before="Tools">
     <check title="Mode;HFIX;23 (2 Hydrogen sp3)" macro="mode hfix 23" modedependent="HFIX;23">
     <check title="Mode;HFIX;137 (3 Hydrogen sp3)" macro="mode hfix 137" modedependent="HFIX;137">
     <check title="Mode;HFIX;#" macro="">
@@ -53,7 +97,6 @@
     <check title="Mode;HFIX;#" macro="">
     <check title="Mode;HFIX;83 (1 Hydrogen OH)" macro="mode hfix 83" modedependent="HFIX;83">
     <check title="Mode;HFIX;134 (1 Hydrogen OH H-bonded)" macro="mode hfix 134" modedependent="HFIX;134">
-
     <check title="Mode;PART;1" macro="mode part 1" modedependent="PART;1">
     <check title="Mode;PART;2" macro="mode part 2" modedependent="PART;2">
     <check title="Mode;PART;#" macro="">
@@ -76,70 +119,28 @@
     <item  title="Mode;#" macro="">
     <item title="Mode;Clear" macro="mode -1">
 
-
-    <item title="Tools;Options" macro="setup" before="Help">
-    <item title="Tools;Settings;Toggle Background \tF2" macro="swapbg">
-    <item title="Tools;Settings;Show Labels \tF3" macro="labels">
-    <check title="Tools;Settings;Gradient \tF4" macro="grad -i" statedependent="gradbg">
-    <item title="Tools;Settings;Swap Control Panel" macro="htmlpanelswap">
-    <check title="Tools;Settings;Show Info Bar" macro="showwindow info" statedependent="infovis">
-    <check title="Tools;Settings;Show Help" macro="showwindow help" statedependent="helpvis">
-    <check title="Tools;Settings;Show Tooltips" macro="html.tooltips" statedependent="htmlttvis">
-    <item title="Tools;Settings;Show Alerts" macro="spy.SwitchAllAlertsOn()">
-    <check title="Tools;Settings;External CMD line" macro="showwindow cmdline" statedependent="cmdlinevis">
-    <item title="Tools;More Settings..." macro="setup">
-
-    <item title="Model;Refine \tCtrl+R" macro="refine" before='Help'>
-    <item title="Model;#" macro="">
-    <item title="Model;Q-->C" macro="name $Q C>>refine">
-    <item title="Model;Tidy" macro="tidy">
-    <item title="Model;#" macro="">
-    <item title="Model;ANIS All" macro="sel -a>>anis sel>>refine">
-    <item title="Model;ISOT All" macro="sel -a>>isot sel>>refine">
-    <item title="Model;ANIS Selected" macro="anis sel">
-    <item title="Model;ISOT Selected" macro="isot sel">
-    <item title="Model;#" macro="">
-    <item title="Model;Reset" macro="reset">
-    <item title="Model;Solve" macro="solve">
-
-    <item title="Edit;Edit Atoms" macro="editatom" before='Model'>
-    <item title="Edit;Edit Instructions" macro="editins" before='Model'>
-    <item title="Edit;Delete Selection <DEL>" macro="kill sel" before='Model'>
-    <item title="Edit;Undo" macro="undo">
-
-    <item title="Select;All \tCtrl+A" macro="sel -a" before='Help'>
-    <item title="Select;None \tCtrl+U" macro="sel -u">
-    <item title="Select;Invert \tCtrl+I" macro="sel -i">
-    <item title="Select;#" macro="">
-    <item title="Select;Previous Sel" macro="selback">
-
-    <item title="View;Quick Drawing Styles;Default" macro="default">
+    <item title="View;Quick Drawing Styles;Default" macro="default" before="Mode">
     <item title="View;Quick Drawing Styles;Balls & Sticks" macro="pers>>sel -u">
     <item title="View;Quick Drawing Styles;Ellipsoids" macro="telp>>sel -u">
     <item title="View;Quick Drawing Styles;Ellipsoids (with Hydrogens)" macro="telph>>sel -u">
     <item title="View;Quick Drawing Styles;Wire Frame" macro="proj">
     <item title="View;Quick Drawing Styles;Sphere Packing" macro="sfil>>sel -u">
     <item title="View;Quick Drawing Styles;Tubes" macro="tubes>>sel -u">
-
     <check title="View;Structure;Cell" macro="cell" statedependent="cellvis">
     <check title="View;Structure;Basis" macro="basis" statedependent="basisvis">
     <check title="View;Structure;Hide/Show Structure" macro="showStr" statedependent="strvis">
 
-    <item title="Help;About" macro="spy.gui.About()">
-    <item title="Help;Update options" macro="updateoptions">
-    <item title="Help;Documentation (HTML)" macro="shell BaseDir()/etc/documentation/Commands.html">
-    <item title="Help;Documentation (PDF)" macro="shell BaseDir()/etc/documentation/Commands.pdf">
->
+    <item title="Edit;Edit Atoms" macro="editatom" before="View">
+    <item title="Edit;Edit Instructions" macro="editins">
+    <item title="Edit;Delete Selection <DEL>" macro="kill sel">
+    <item title="Edit;Undo" macro="undo">
 
-    <radio title="Tools;Settings;GUI Font Size;Small" macro="htmguifontsize 2" checkdependent="GetVar(gui_html_font_size)">
-    <radio title="Tools;Settings;GUI Font Size;Medium" macro="htmguifontsize 3">
-    <radio title="Tools;Settings;GUI Font Size;Large" macro="htmguifontsize 4">
-    <radio title="Tools;Settings;Lines of Text;All" macro="lines -1">
-    <radio title="Tools;Settings;Lines of Text;0" macro="lines 0">
-    <radio title="Tools;Settings;Lines of Text;1" macro="lines 1">
-    <radio title="Tools;Settings;Lines of Text;2" macro="lines 2">
-    <radio title="Tools;Settings;Lines of Text;5" macro="lines 5">
-    <radio title="Tools;Settings;Lines of Text;10" macro="lines 10">
-    <radio title="Tools;Settings;Lines of Text;20" macro="lines 20">
+    <item title="File;Open" macro="reap" before="#">
+    <check title="File;#" macro="">
+    <item title="File;Save" macro="file">
+    <item title="File;Save With Sorting" macro="file -s">
+    <item title="File;Close" macro="Close">
+    <item title="File;Exit" macro="quit">
+>
 <#include "custom_settings.xld" extend='true'>
 <#include "app.ConfigDir()/custom_settings.xld" extend='true'>
