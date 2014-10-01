@@ -836,7 +836,7 @@ class Method_Superflip(Method_solution):
       input.append("missing %s %s %s"  %(v,
                                        olx.GetVar('settings.superflip.data.missing.rlim'),
                                        olx.GetVar('settings.superflip.data.missing.ubound')))
-    
+
     if olx.GetVar('settings.superflip.resolution.limit') == 'true':
       input.append('resunit %s' %olx.GetVar('settings.superflip.resolution.units'))
       input.append('reslimit %s %s' %(olx.GetVar('settings.superflip.resolution.high'),
@@ -846,7 +846,7 @@ class Method_Superflip(Method_solution):
     input.append('normalise %s' %v)
     if v == 'local':
       input.append('nresshells %s' %olx.GetVar('settings.superflip.data.nresshells'))
-      
+
     input.append("convergencemode %s %s" %(
       olx.GetVar('settings.superflip.convergence.mode'),
       olx.GetVar('settings.superflip.convergence.threshold'))
@@ -931,7 +931,7 @@ class Method_Superflip(Method_solution):
           try:
             os.remove(f)
           except:
-            print("Faield to remove: %s" %f)
+            print("Failed to remove: %s" %f)
 
 class Method_SIR(Method_solution):
 
@@ -1063,7 +1063,8 @@ def defineExternalPrograms():
     author="G.M.Sheldrick",
     reference="Sheldrick, G.M. (2008). Acta Cryst. A64, 112-122.",
     brief_reference="Sheldrick, 2008",
-    execs=["shelxs.exe", "shelxs"])
+    execs=["shelxs.exe", "shelxs"],
+    phil_entry_name="ShelXS")
   ShelXS97 = Program(
     name='ShelXS-1997',
     program_type='solution',
@@ -1084,28 +1085,32 @@ def defineExternalPrograms():
     author="G.M.Sheldrick/Bruker",
     reference=ShelXS.reference,
     brief_reference=ShelXS.brief_reference,
-    execs=["xs.exe", "xs"])
+    execs=["xs.exe", "xs"],
+    phil_entry_name="XS")
   XT = Program(
     name='XT',
     program_type='solution',
     author="G.M.Sheldrick/Bruker",
     reference=ShelXS.reference,
     brief_reference=ShelXS.brief_reference,
-    execs=["xt.exe", "xt"])
+    execs=["xt.exe", "xt"],
+    phil_entry_name="XT")
   ShelXT = Program(
     name='ShelXT',
     program_type='solution',
     author="G.M.Sheldrick",
     reference=ShelXS.reference,
     brief_reference=ShelXS.brief_reference,
-    execs=["shelxt.exe", "shelxt"])
+    execs=["shelxt.exe", "shelxt"],
+    phil_entry_name="ShelXT")
   ShelXD = Program(
     name='ShelXD',
     program_type='solution',
     author="G.M.Sheldrick",
     reference=ShelXS.reference,
     brief_reference=ShelXS.brief_reference,
-    execs=["shelxd.exe", "shelxd"])
+    execs=["shelxd.exe", "shelxd"],
+    phil_entry_name="ShelXD")
   ShelXD97 = Program(
     name='ShelXD-1997',
     program_type='solution',
@@ -1119,7 +1124,8 @@ def defineExternalPrograms():
     author="G.M.Sheldrick/Bruker",
     reference=ShelXS.reference,
     brief_reference=ShelXS.brief_reference,
-    execs=["xm.exe", "xm"])
+    execs=["xm.exe", "xm"],
+    phil_entry_name="XM")
   smtbx_solve = Program(
     name='olex2.solve',
     program_type='solution',
@@ -1223,7 +1229,8 @@ Palatinus et al., 2012""",
     author="G.M.Sheldrick",
     reference=ShelXS.reference,
     brief_reference=ShelXS.brief_reference,
-    execs=["shelxl.exe", "shelxl"])
+    execs=["shelxl.exe", "shelxl"],
+    phil_entry_name="ShelXL")
   ShelXL97 = Program(
     name='ShelXL-1997',
     program_type='refinement',
@@ -1278,8 +1285,8 @@ Palatinus et al., 2012""",
   for prg in (ShelXL, ShelXL97, XL, XLMP, ShelXH97, XH, ShelXL_ifc):
     prg.addMethod(least_squares)
     prg.addMethod(cgls)
-    prg.phil_entry_name = "ShelXL"
     RPD.addProgram(prg)
+
   smtbx_refine.addMethod(gauss_newton)
   smtbx_refine.addMethod(levenberg_marquardt)
   RPD.addProgram(smtbx_refine)
@@ -1615,6 +1622,17 @@ grid
   default=False
     .type=bool
 }
+command_line
+  .optional=False
+  .caption='Command line'
+{
+  values {
+    Options=''
+      .type=str
+  }
+  default=True
+    .type=bool
+}
 """)
 
 direct_methods_phil = phil_interface.parse("""
@@ -1778,6 +1796,17 @@ instructions {
     default=False
       .type=bool
   }
+  command_line
+    .optional=False
+    .caption='Command line'
+  {
+    values {
+      Options=''
+        .type=str
+    }
+    default=True
+      .type=bool
+  }
 }
 """, process_includes=True)
 
@@ -1855,6 +1884,17 @@ instructions {
       j=None
         .type=int
         .caption=10
+    }
+    default=True
+      .type=bool
+  }
+  command_line
+    .optional=False
+    .caption='Command line'
+  {
+    values {
+      Options=''
+        .type=str
     }
     default=True
       .type=bool
