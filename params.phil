@@ -137,6 +137,42 @@ routines requiring structure refinement
       gui = False
         .type = bool
       }
+      ShelXS
+      .short_caption = 'Program specific command line'
+      {
+        command_line = ''
+        .type = str
+      }
+      ShelXD
+      .short_caption = 'Program specific command line'
+      {
+        command_line = ''
+        .type = str
+      }
+      ShelXT
+      .short_caption = 'Program specific command line'
+      {
+        command_line = ''
+        .type = str
+      }
+      XS
+      .short_caption = 'Program specific command line'
+      {
+        command_line = ''
+        .type = str
+      }
+      XM
+      .short_caption = 'Program specific command line'
+      {
+        command_line = ''
+        .type = str
+      }
+      XT
+      .short_caption = 'Program specific command line'
+      {
+        command_line = ''
+        .type = str
+      }
     }
 
   htab{
