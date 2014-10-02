@@ -1,0 +1,14 @@
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
+
+<!-- FIRST ROW -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='PLATON';help_ext=Platon;1 -->
+  <td>$+
+  html.Snippet("gui/snippets/input-combo", "name=platon_cmds",
+    "value=",
+    "items=spy.gui.platon.command_list()",
+    "onchange=run html.GetValue(~name~)",
+    "readonly=true")
+   $-</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
