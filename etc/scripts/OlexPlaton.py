@@ -1,8 +1,5 @@
 import os
 import sys
-import shutil
-import re
-import olex
 import olx
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
@@ -10,37 +7,7 @@ OV = OlexFunctions()
 '''
 To run this script, type spy.OlexPlaton(help) in Olex2
 '''
-
-def platon(command):
-  try:
-    os.popen(command)
-  except:
-    print "Platon failed to run"
-    return
-
-def OlexPlaton(platonflag="0"):
-  print "Olex2 to Platon Linker"
-  # initialisation step
-  exe_name = "platon"
-  if sys.platform[:3] == 'win':
-    exe_name += ".exe"
-  exe_name = olx.file.Which(exe_name)
-  if not exe_name:
-    print 'The Platon executable could not be located, aborting'
-    return
-  chk_def = os.getenv("CHECKDEF")
-  if not chk_def or not os.path.exists(chk_def):
-    chk_def = os.path.join(os.path.dirname(exe_name), "check.def")
-    if not os.path.exists(chk_def):
-      print "Could not locate check.def, try setting the CHECKDEF system variable" +\
-          "or place it next to the executable"
-    else:
-      os.putenv("CHECKDEF", chk_def)
-  #end of the initialisation
-  print "You are running flag: %s"%(platonflag)
-  inputfilename = OV.FileName()
-  print "Input file is: ", inputfilename
-
+class PlatonWrapper:
   platonflagcodes = {
   'a' : ["ORTEP/ADP [PLOT ADP]", "lis"],
   'b' : ["CSD-Search [CALC GEOM CSD]","lis"],
@@ -89,74 +56,118 @@ def OlexPlaton(platonflag="0"):
   'Y' : ["Native Structure Tidy (Parthe & Gelato) Mode" , ""]
   }
 
-  # OS Checking
-  if sys.platform[:3] == 'lin':
-    # Risky but assuming that this is a debroglie version of platon
-    tickornot = '-'
-  elif sys.platform[:3] == 'win':
-    # Windows
-    tickornot = '-o -'
-    tickornot = "-"
-  elif sys.platform[:3] == 'dar':
-    # Mac assuming like windows
-    tickornot = '-o -'
+  def __init__(self):
+    pass
 
-  # Checking for help string
-  if len(platonflag) > 1 or platonflag == "help":
-    print "Unknown option, please check options and try again"
-    #if platonflag == help: # If no options given then we print all the possible commands out LOL
-    # Prefered printing out the raw text but using the dict again is logical but it does not print in order anymore :-(
-    for key in platonflagcodes:
-      print " '%s' - %s"%(key, platonflagcodes[key][0])
-    return
-  else:
-    if platonflag == "0":
-      # Start just platon with the INS file
-      print "Calling Platon Directly"
-      inputfile = "%s.cif" %inputfilename
-      if not os.path.exists(inputfile):
-        inputfile = "%s.ins" %inputfilename
-      command = "platon %s"%(inputfile)
-      platon(command)
+  def run_platon(self, command):
+    try:
+      import olex_core
+      import subprocess
+      p = subprocess.Popen(command)
+      olex_core.OnPlatonRun(p.pid)
+    except:
+      print "Platon failed to run"
+      return
+
+  def OlexPlaton(self, platonflag="0"):
+    print "Olex2 to Platon Linker"
+    # initialisation step
+    exe_name = "platon"
+    if sys.platform[:3] == 'win':
+      exe_name += ".exe"
+    exe_name = olx.file.Which(exe_name)
+    if not exe_name:
+      print 'The Platon executable could not be located, aborting'
+      return
+    chk_def = os.getenv("CHECKDEF")
+    if not chk_def or not os.path.exists(chk_def):
+      chk_def = os.path.join(os.path.dirname(exe_name), "check.def")
+      if not os.path.exists(chk_def):
+        print "Could not locate check.def, try setting the CHECKDEF system variable" +\
+            "or place it next to the executable"
+      else:
+        os.putenv("CHECKDEF", chk_def)
+    #end of the initialisation
+    print "You are running flag: %s"%(platonflag)
+    inputfilename = OV.FileName()
+    print "Input file is: ", inputfilename
+
+    # OS Checking
+    if sys.platform[:3] == 'lin':
+      # Risky but assuming that this is a debroglie version of platon
+      tickornot = '-'
+    elif sys.platform[:3] == 'win':
+      # Windows
+      tickornot = '-o -'
+      tickornot = "-"
+    elif sys.platform[:3] == 'dar':
+      # Mac assuming like windows
+      tickornot = '-o -'
+
+    # Checking for help string
+    if len(platonflag) > 1 or platonflag == "help":
+      print "Unknown option, please check options and try again"
+      #if platonflag == help: # If no options given then we print all the possible commands out LOL
+      # Preferred printing out the raw text but using the dict again is logical but it does not print in order anymore :-(
+      for key in self.platonflagcodes:
+        print " '%s' - %s"%(key, self.platonflagcodes[key][0])
       return
     else:
-      if platonflag == 'U':
-        print "This option requires a valid CIF file - checking"
-        # Check for CIF
+      inputfile = inputfilename + ".cif"
+      if not os.path.exists(inputfile):
+        inputfile = inputfilename + ".ins"
+        if not os.path.exists(inputfile):
+          olx.File(inputfile)
+      if platonflag == "0":
+        # Start just platon with the INS file
+        print "Calling Platon Directly"
+        self.run_platon("platon " + inputfile)
+        return
+      else:
+        if platonflag == 'U':
+          inputfile = OV.FileName() + '.cif'
+          if not os.path.exists(cif_name):
+            print "This option requires a valid CIF file - checking"
+            print "No CIF present - why not make one with ACTA?"
+            print "Or run spy.OlexPlaton(C) and rename the %s.acc to %s.cif?"%(OV.FileName(), OV.FileName())
+            return
+        if not platonflag:
+          tickornot = ""
+        command = "platon %s%s %s"%(tickornot, platonflag, inputfile)
+        print "Now running this command %s" %command
         try:
-          cifornot = open("%s.%s"%(OV.FileName(), 'cif'), 'r')
-          cifornot.close()
-        except:
-          print "No CIF present - why not make one with ACTA?"
-          print "Or run spy.OlexPlaton(C) and rename the %s.acc to %s.cif?"%(OV.FileName(), OV.FileName())
-        inputfilename = OV.FileName() + '.cif'
-      if not platonflag:
-        tickornot = ""
-      command = "platon %s%s %s"%(tickornot, platonflag, inputfilename)
-      print "Now running this command %s" %command
-      try:
-        platon(command)
-      except Exception, err:
-        print "PLATON gave up. This is why: %s" %err
+          self.run_platon(command)
+        except Exception, err:
+          print "PLATON gave up. This is why: %s" %err
 
-    # Old code works for Linux but not windows thanks to the stupid vritual cmdline built into Platon by LF
-    #  platon_extension = platon_result.split(":")[-1].split(".")[-1].split("\n")[0]
-    # To compensate now check flag against dictionary and then use that file extension, predominantly this is going to be lis
-      platon_extension = platonflagcodes[platonflag][1]
-      print "The file extension is: ", platon_extension, " filename is: ", "%s.%s"%(OV.FileName(), platon_extension)
-      try:
-        platon_result_file = open("%s.%s"%(OV.FileName(), platon_extension), 'r')
-        print "Successfully opened file", platon_result_file
-        for platon_line in platon_result_file:
-          print platon_line.rstrip('\n')
-        platon_result_file.close()
-      except IOError:
-        print "Failed to open file"
-      print "You can read this file by typing:"
-      print "edit %s"%(platon_extension)
-      return
+      # Old code works for Linux but not windows thanks to the stupid vritual cmdline built into Platon by LF
+      #  platon_extension = platon_result.split(":")[-1].split(".")[-1].split("\n")[0]
+      # To compensate now check flag against dictionary and then use that file extension, predominantly this is going to be lis
+        platon_extension = self.platonflagcodes[platonflag][1]
+        print "The file extension is: ", platon_extension, " filename is: ", "%s.%s"%(OV.FileName(), platon_extension)
+        try:
+          platon_result_file = open("%s.%s"%(OV.FileName(), platon_extension), 'r')
+          print "Successfully opened file", platon_result_file
+          print platon_result_file.read()
+          platon_result_file.close()
+        except IOError:
+          print "Failed to open file"
+        print "You can read this file by typing:"
+        print "edit %s"%(platon_extension)
+        return
 
-OV.registerFunction(OlexPlaton)
+  def command_list(self):
+    rv = []
+    for k, v in self.platonflagcodes.iteritems():
+      i = "%s<-%s>>echo %s" %(v[0],  "spy.OlexPlaton(%s)" % k, v[1])
+      rv.append(i)
+    rv.sort()
+    return ';'.join(rv)
+
+pwt = PlatonWrapper()
+OV.registerFunction(pwt.OlexPlaton)
+OV.registerFunction(pwt.command_list, False, "gui.platon")
+
 """
     print " 'a' - ORTEP/ADP [PLOT ADP]"
     print " 'b' - CSD-Search [CALC GEOM CSD]"
