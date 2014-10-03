@@ -2,12 +2,14 @@
 
 <!-- FIRST ROW -->
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='PLATON';help_ext=Platon;1 -->
+  <td width="35%">Choose a command</td>
   <td>$+
   html.Snippet("gui/snippets/input-combo", "name=platon_cmds",
     "value=",
     "items=spy.gui.platon.command_list()",
     "onchange=run html.GetValue(~name~)",
-    "readonly=true")
+    "readonly=true",
+    "onchangealways=true")
    $-</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 

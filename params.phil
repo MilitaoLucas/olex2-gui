@@ -267,6 +267,20 @@ routines requiring structure refinement
       command_line = ''
         .type = str
     }
+    ShelXL97
+      .short_caption = 'Program specific command line'
+    {
+      command_line = ''
+        .type = str
+    }
+    XLMP
+      .short_caption = 'Program specific command line'
+    {
+      command_line = ''
+        .type = str
+    }
+
+
 
     auto
       .short_caption = Autotidy
