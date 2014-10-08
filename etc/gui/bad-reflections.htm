@@ -47,7 +47,7 @@ $spy.MakeHoverButton('small-OMIT','Omit html.GetValue(omit_filter)')
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='EXCLUDE_HKL';help_ext=Exclude-hkl;1 -->
 
   <td>
-    <a href="HklExclude -c=GetVar(exclude_hkl_and) -h=html.GetValue(exclude_h) -k=html.GetValue(exclude_k) -l=html.GetValue(exclude_l)" >%Exclude%:</a>
+    <a href="HklExclude -c=html.GetState(exclude_and) -h=html.GetValue(exclude_h) -k=html.GetValue(exclude_k) -l=html.GetValue(exclude_l)" >%Exclude%:</a>
   </td>
 
 
@@ -57,7 +57,6 @@ $spy.MakeHoverButton('small-OMIT','Omit html.GetValue(omit_filter)')
       height="GetVar('HtmlInputHeight')"
       name = "exclude_h"
       width="22"
-      height="18"
       bgcolor="GetVar('HtmlInputBgColour')"
       value=""
       manage
@@ -92,11 +91,9 @@ $spy.MakeHoverButton('small-OMIT','Omit html.GetValue(omit_filter)')
       type='checkbox'
       bgcolor="GetVar('HtmlTableBgColour')"
       fgcolor="GetVar('HtmlFontColour')"
-      name="EXCLUDE_AND"
+      name="exclude_and"
       value="%AND%"
-      checked="GetVar('exclude_hkl_and', 'false')"
-      oncheck="SetVar('exclude_hkl_and','true')>>html.SetData('~name~','-c')"
-      onuncheck="SetVar('exclude_hkl_and','false')>>html.SetData('~name~','')"
+      manage="true"
     >
   </td>
 
