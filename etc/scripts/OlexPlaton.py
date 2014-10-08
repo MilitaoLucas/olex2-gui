@@ -126,7 +126,7 @@ class PlatonWrapper:
       else:
         if platonflag == 'U':
           inputfile = OV.FileName() + '.cif'
-          if not os.path.exists(cif_name):
+          if not os.path.exists(inputfile):
             print "This option requires a valid CIF file - checking"
             print "No CIF present - why not make one with ACTA?"
             print "Or run spy.OlexPlaton(C) and rename the %s.acc to %s.cif?"%(OV.FileName(), OV.FileName())
