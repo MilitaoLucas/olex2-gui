@@ -508,7 +508,7 @@ def AnalyseRefinementSource():
     if os.path.exists(hkl_file_name):
       olx.HKLSrc(hkl_file_name)
     else:
-      print('HKL file is ot in the CIF')
+      print('HKL file is not in the CIF')
       return False
   return True
 
