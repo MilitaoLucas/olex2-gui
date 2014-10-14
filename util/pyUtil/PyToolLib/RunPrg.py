@@ -95,6 +95,8 @@ class RunPrg(ArgumentParser):
 
   def doFileResInsMagic(self):
     extensions = ['res', 'lst', 'cif', 'fcf', 'mat', 'pdb']
+    if "xt" in self.program.name.lower():
+      extensions.append('hkl')
     if self.broadcast_mode:
       self.doBroadcast()
     for ext in extensions:
