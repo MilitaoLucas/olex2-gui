@@ -64,7 +64,7 @@ class PlatonWrapper:
       import olex_core
       import subprocess
       p = subprocess.Popen(command)
-      olex_core.OnPlatonRun(p.pid)
+      return p
     except:
       print "Platon failed to run"
       return
@@ -121,8 +121,8 @@ class PlatonWrapper:
       if platonflag == "0":
         # Start just platon with the INS file
         print "Calling Platon Directly"
-        self.run_platon("platon " + inputfile)
-        return
+        a = self.run_platon("platon " + inputfile)
+        return a
       else:
         if platonflag == 'U':
           inputfile = OV.FileName() + '.cif'
@@ -136,7 +136,8 @@ class PlatonWrapper:
         command = "platon %s%s %s"%(tickornot, platonflag, inputfile)
         print "Now running this command %s" %command
         try:
-          self.run_platon(command)
+          a = self.run_platon(command)
+          return a
         except Exception, err:
           print "PLATON gave up. This is why: %s" %err
 
