@@ -95,6 +95,8 @@ class RunPrg(ArgumentParser):
 
   def doFileResInsMagic(self):
     extensions = ['res', 'lst', 'cif', 'fcf', 'mat', 'pdb']
+    if "xt" in self.program.name.lower():
+      extensions.append('hkl')
     if self.broadcast_mode:
       self.doBroadcast()
     for ext in extensions:
@@ -500,13 +502,16 @@ def AnalyseRefinementSource():
     olx.Export(hkl_file_name)
     if os.path.exists(res_file_name):
       olex.m("reap '%s'" %res_file_name)
-      print 'Loaded RES file extracted from CIF'
+      print('Loaded RES file extracted from CIF')
     else:
       OV.File("%s" %ins_file_name)
       olex.m("reap \"%s\"" %ins_file_name)
-      print 'Loaded INS file generated from CIF'
+      print('Loaded INS file generated from CIF')
     if os.path.exists(hkl_file_name):
       olx.HKLSrc(hkl_file_name)
+    else:
+      print('HKL file is not in the CIF')
+      return False
   return True
 
 OV.registerFunction(AnalyseRefinementSource)
