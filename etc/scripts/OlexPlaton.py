@@ -64,6 +64,7 @@ class PlatonWrapper:
       import olex_core
       import subprocess
       p = subprocess.Popen(command)
+      olex_core.OnPlatonRun(p.pid)
       return p
     except:
       print "Platon failed to run"
@@ -137,7 +138,8 @@ class PlatonWrapper:
         print "Now running this command %s" %command
         try:
           a = self.run_platon(command)
-          return a
+          a.wait()
+          return
         except Exception, err:
           print "PLATON gave up. This is why: %s" %err
 
