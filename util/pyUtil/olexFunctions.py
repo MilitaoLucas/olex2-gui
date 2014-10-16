@@ -400,13 +400,16 @@ class OlexFunctions(inheritFunctions):
       pass
     else:
       path = '"%s"'
-    return olex.m('reap %s' %path)
+    olex.m('reap %s' %path)
 
   def AtReap(self, path):
     path = path.strip("'")
     path = path.strip('"')
     path = '"%s"' %path
-    return olex.m('@reap %s' %path)
+    olex.m('@reap %s' %path)
+    olex.m('spy.run_skin sNumTitle')
+    if OV.HasGUI():
+      olx.html.Update()
 
   def Reset(self):
     olx.Reset()
@@ -424,12 +427,13 @@ class OlexFunctions(inheritFunctions):
     fader = self.FindValue('gui_use_fader')
     #print "AtReap %s/%s" %(path, file)
     try:
-      if sg_changed:
-        olex.m('spy.run_skin sNumTitle')
       if fader == 'true':
         olex.m("atreap_fader -b \"%s\"" %(r"%s/%s.res" %(path, file)))
       else:
         olex.m("atreap_no_fader -b \"%s\"" %(r"%s/%s.res" %(path, file)))
+      olex.m('spy.run_skin sNumTitle')
+      olx.html.Update()
+
 
     except Exception, ex:
       print >> sys.stderr, "An error occured whilst trying to reload %s/%s" %(path, file)
