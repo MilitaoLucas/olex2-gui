@@ -358,6 +358,7 @@ class GeneratedGuiMaker(object):
        'ctrl_name':'ADD_PUBL_AUTHOR_NAME',
        'itemName':'%Add% %Author%',
        'items': "'%s'" %userDictionaries.people.getListPeople(),
+       'onchangealways' : True,
        'value':'?',
        'onchange':"spy.gui.report.publication.OnAddNameToAuthorList('~name~')",
        }
