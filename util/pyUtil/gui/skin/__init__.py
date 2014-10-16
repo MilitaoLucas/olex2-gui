@@ -337,7 +337,7 @@ class Skin():
       if timing:
         print "run_skin timage took %.4fs" %(time.time()-t)
     elif f == 'sNumTitle':
-      if self.sNum == OV.FileName() and self.sg == olex.f('sg(%#)'):
+      if self.sNum == OV.FileName() and self.sg == olex.f('sg()'):
         if timing:
           print "run_skin sNumTitle took %.4fs (not run)" %(time.time()-t)
         return
@@ -347,10 +347,11 @@ class Skin():
       name = r"sNumTitle.png"
       OlexVFS.save_image_to_olex(image, name, 1)
       OV.CopyVFSFile(name, 'SNUMTITLE',2)
+
       if timing:
         print "run_skin sNumTitle took %.4fs" %(time.time()-t)
       self.sNum = OV.FileName()
-      self.sg = olex.f('sg(%#)')
+      self.sg = olex.f('sg()')
 
     elif f == 'change':
       self.change()

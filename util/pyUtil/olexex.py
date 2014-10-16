@@ -1704,8 +1704,6 @@ def revert_to_original():
       wFile.close()
       OV.AtReap(outpath)
       print("Reverted to the original file %s" %path)
-      if OV.HasGUI():
-        olx.html.Update()
       return
   print("Could not revert to any original file!")
 OV.registerFunction(revert_to_original)
