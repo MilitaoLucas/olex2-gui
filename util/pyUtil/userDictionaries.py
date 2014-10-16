@@ -208,6 +208,8 @@ class Persons:
     all_persons = cursor.fetchall()
     retVal_l = []
     for person in all_persons:
+      if not person[0].strip() or not person[2].strip():
+        continue
       display = self.make_display_name(person)
       retVal_l.append(display)
     retVal_l.sort()
