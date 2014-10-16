@@ -133,6 +133,7 @@ def makeHtmlInputBox(inputDictionary):
     'width':'95%%',
     'height':"$GetVar('HtmlInputHeight')",
     'onchange':'',
+    'onchangealways':'false',
     'onleave':'',
     'items':'',
     'multiline':'',
@@ -159,6 +160,7 @@ value="%(value)s"
 items="%(items)s"
 valign="%(valign)s"
 onchange="%(onchange)s"
+onchangealways="%(onchangealways)s"
 onleave="%(onleave)s"
 %(readonly)s
 bgcolor="%(bgcolor)s"
@@ -548,6 +550,7 @@ def make_combo_text_box(d):
          'halign':'left',
          'width':'70',
          'onchange':'',
+         'onchangealways' : 'false',
          'data':'',
          'manage':'manage',
          'readonly':'',
@@ -574,6 +577,7 @@ def make_combo_text_box(d):
        height="%(height)s"
        label="%(label)s"
        onchange="%(onchange)s"
+       onchangealways="%(onchangealways)s"
        %(manage)s
        data="%(data)s"
        %(readonly)s
