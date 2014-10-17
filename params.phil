@@ -1111,6 +1111,8 @@ user
     .type = str
   report_journal_style = rsc
     .type = str
+  report_label_style = 0
+    .type = int
   keep_unique = False
     .type = bool
 
