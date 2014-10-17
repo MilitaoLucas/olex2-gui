@@ -30,11 +30,11 @@ class GeneratedGuiMaker(object):
     hint="Remove author from paper"
     self.delete = GI.get_action_button_html('delete', onclick, hint)
 
-    onclick="spy.gui.report.publication.OnPersonChange(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s,edit=True)" %number
+    onclick="spy.gui.report.publication.EditPersonByName(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)" %number
     hint="Edit author"
     self.edit = GI.get_action_button_html('edit', onclick, hint)
 
-    onclick="spy.gui.report.publication.OnPersonChange(SET_SNUM_METACIF_%s,edit=True)"
+    onclick="spy.gui.report.publication.EditPersonById(SET_SNUM_METACIF_%s)"
     hint="Edit author"
     self.edit_subop = GI.get_action_button_html('edit', onclick, hint)
 
@@ -198,10 +198,11 @@ class GeneratedGuiMaker(object):
       authorRow = {
         'varName':'snum.report.%s' %tem.lower(),
         'ctrl_name':'SET_SNUM_METACIF_%s' %tem,
-        'readonly':'',
+        'readonly':'readonly',
         'items': items,
         'bgcolor':"'%s'" %OV.GetParam('gui.html.table_bg_colour'),
         'onchange':onchange % tem.lower(),
+        'onchangealways':'true',
       }
       authorRow.setdefault('itemName','')
       authorRow.setdefault('field1',
@@ -286,7 +287,7 @@ class GeneratedGuiMaker(object):
 
   def publicationMetadataHtmlMaker(self, ):
     items = userDictionaries.people.getListPeople()
-    onchange = "spy.gui.report.publication.OnPersonChange('~name~')"
+    onchange = "spy.gui.report.publication.OnContactAuthorChange('~name~')"
 
     list = [
       {'varName':'_database_code_depnum_ccdc_archive',
@@ -295,7 +296,7 @@ class GeneratedGuiMaker(object):
       {'varName':'_publ_contact_author_name',
        'itemName':'%Contact% %Author%',
        'items':items,
-       'readonly':'',
+       'readonly':'readonly',
        'onchange': onchange,
        }]
 

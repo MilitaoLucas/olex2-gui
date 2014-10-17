@@ -1,9 +1,4 @@
-<table cellpadding="1" cellspacing="1" width='100%'>
-  <tr>
-    <td bgcolor="#cccccc">
-
-<table border="0" VALIGN='center' style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
-
+<table border="0" VALIGN='center' width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableBgColour)">
 <tr VALIGN='center' ALIGN='center' NAME='SNUM_REPORT_TITLE' valign='center'>
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td width='35%' align='left'>
@@ -104,12 +99,17 @@ $spy.MakeHoverButton('three-Make_Report','html.ItemState cbtn-solve 1 cbtn-refin
     </font>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
+<tr VALIGN='center' ALIGN='center' NAME='SNUM_REPORT_TITLE' valign='center'>
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+<td width="40%">Table label style:</td>
+<td width="60%">$+
+   html.Snippet("gui/snippets/input-combo", "name=report_label_style",
+    "items=As in CIF<-0;In brackets<-1;Subscript<-2;Superscript<-4;In brackets subscript<-3;In brackets superscript<-5",
+    "value=spy.GetParam('user.report_label_style')",
+    "onchange=spy.SetParam('user.report_label_style', html.GetValue('~name~'))")
+$-</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 </table>
-
-      </td>
-    </tr>
-  </table>
 
 <!-- #include report-metadata gui\tools\report-metadata.htm;1; -->
 
