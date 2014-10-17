@@ -48,6 +48,8 @@ if debug == True:
   except:
     try:
       py_dev_path = r'E:\eclipse-juno\eclipse\plugins\org.python.pydev_2.6.0.2012062818\pysrc'
+      if not os.path.exists(py_dev_path):
+        py_dev_path = r'C:\devel\eclipse-juno\plugins\org.python.pydev_2.7.1.2012100913\pysrc'
       if os.path.exists(py_dev_path):
         sys.path.append(py_dev_path)
         import pydevd
