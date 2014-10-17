@@ -131,6 +131,7 @@ class Affiliations:
       "INSERT OR REPLACE INTO affiliation VALUES (?,?,?,?,?,?,?)",
       affiliation)
     DBConnection().conn.commit()
+    return cursor.lastrowid
 
 
 class Persons:
@@ -439,6 +440,35 @@ class DBConnection():
     DBConnection._conn = c
 
   def doImport(self):
+    cursor = self.conn.cursor()
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='persons'")
+    if not cursor.fetchall():
+      self.ImportPickles()
+    else:
+      self.ImportDB()
+
+  def ImportDB(self):
+    cursor = self.conn.cursor()
+    cursor.execute("SELECT * FROM affiliations")
+    affiliations = cursor.fetchall()
+    adict = {}
+    for a in affiliations:
+      cursor.execute("insert into affiliation values (?,?,?,?,?,?,?)",
+                     (None, a[0], a[1], (' '.join(filter(None, a[2:4]))).strip(), a[4], a[5], a[7]))
+      adict[a[8].strip()] = cursor.lastrowid
+      self.conn.commit()
+    cursor.execute("SELECT * FROM persons")
+    persons = cursor.fetchall()
+    for p in persons:
+      aff = adict.get(p[5].strip(), None)
+      if aff is None: continue
+      cursor.execute("insert into person VALUES (?,?,?,?,?,?,?)",
+                      (None, aff) + p[0:5])
+      self.conn.commit()
+    cursor.execute("drop table persons")
+    cursor.execute("drop table affiliations")
+
+  def ImportPickles(self):
     name = "people"
     picklePath = getPicklePath(name)
     if not os.path.exists(picklePath):
