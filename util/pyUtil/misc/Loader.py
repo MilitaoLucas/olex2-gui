@@ -169,7 +169,7 @@ def loadAll():
         sys.stdout.formatExceptionInfo()
   getAvailableModules() #thread
   if olx.HasGUI() == 'true':
-    olx.Schedule(2, "spy.plugins.AskToUpdate()", g=True)
+    olx.Schedule("spy.plugins.AskToUpdate()")
 
 
 def updateKey(module):
@@ -392,7 +392,7 @@ def getCurrentModuleName():
 def AskToUpdate():
   global avaialbaleModulesRetrieved
   if not avaialbaleModulesRetrieved and olx.HasGUI() == 'true':
-    olx.Schedule(3, "spy.plugins.AskToUpdate()", g=True)
+    olx.Schedule("spy.plugins.AskToUpdate()")
     return
   from olexFunctions import OlexFunctions
   OV = OlexFunctions()

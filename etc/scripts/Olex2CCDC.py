@@ -75,11 +75,14 @@ class CcdcSubmit():
         print err_msg
         return False
 
-      if 'successfully' in response.read():
+      msg = response.read()
+      if 'successfully' in msg:
         print "The structure has been submitted. Please check your e-mail for further information"
         return True
       else:
         print "Something has gone wrong with this submission. Please try again."
+        print "Details:"
+        print msg
         return False
 
     finally:
