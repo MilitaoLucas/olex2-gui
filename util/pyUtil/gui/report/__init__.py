@@ -131,8 +131,8 @@ class publication:
       country = olx.html.GetValue('Affiliation.AFFILIATION_COUNTRY')
       if not name.strip():
         return ''
-      userDictionaries.affiliations.add_affiliation(affiliation, name, department,
-        address, city, post_code, country)
+      affiliation = userDictionaries.affiliations.add_affiliation(affiliation,
+        name, department, address, city, post_code, country)
       res = userDictionaries.affiliations.get_affiliation_address(
         affiliation, list=True)
     else:
@@ -171,7 +171,7 @@ class publication:
       olx.html.SetValue(box, person)
       if new_value:
         olx.html.Update()
-    return
+    return person
 
   def OnPersonAffiliationChange(self, box, author, edit=False):
     import userDictionaries
