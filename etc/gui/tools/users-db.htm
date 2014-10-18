@@ -1,0 +1,174 @@
+<html>
+<body>
+  <table border="0" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td align="left"><font color="red"> <input
+          type="label" name="message" width="100%" />
+      </font></td>
+    </tr>
+  </table>
+  <table border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td>
+        <table width="100%">
+          <tr>
+            <td width="30%"><b>Sites</b></td>
+            <td width="70%"><b>Site details</b></td>
+          </tr>
+          <tr>
+            <td><input type="list" name="Sites"
+              items="spy.gui.db.getSiteList()" width="100%" height="150"
+              onselect="spy.gui.db.setSite(html.GetValue(~name~))" /></td>
+            <td valign="top">
+              <table>
+                <tr>
+                  <td>
+                    <table>
+                      <tr>
+                        <td width='40%'>Institution Name:</td>
+                        <td width='60%'><input type="text"
+                          bgcolor="$GetVar(HtmlInputBgColour)"
+                          name="name" width="100%" height="20"></td>
+                      </tr>
+
+                      <tr>
+                        <td width='40%'>Name of Department:</td>
+                        <td width='60%'><input type="text"
+                          bgcolor="$GetVar(HtmlInputBgColour)"
+                          name="department" width="100%" height="20"></td>
+                      </tr>
+
+                      <tr>
+                        <td width='40%'>Address:</td>
+                        <td width='60%'><input type="text"
+                          bgcolor="$GetVar(HtmlInputBgColour)"
+                          name="address" width="100%" height="20"></td>
+                      </tr>
+
+                      <tr>
+                        <td width='40%'>City:</td>
+                        <td width='60%'><input type="text"
+                          bgcolor="$GetVar(HtmlInputBgColour)"
+                          name="city" width="100%" height="20"></td>
+                      </tr>
+
+                      <tr>
+                        <td width='40%'>Post Code:</td>
+                        <td width='60%'><input type="text"
+                          bgcolor="$GetVar(HtmlInputBgColour)"
+                          name="postcode" width="100%" height="20"></td>
+                      </tr>
+
+                      <tr>
+                        <td width='40%'>Country:</td>
+                        <td width='60%'><input type="text"
+                          bgcolor="$GetVar(HtmlInputBgColour)"
+                          name="country" width="100%" height="20"></td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <table>
+                      <tr>
+                        <td><input type="button" name="UpdateSite"
+                          value="Update"
+                          onclick="spy.gui.db.updateSite()" /></td>
+                        <td><input type="button" name="AddSite"
+                          value="Add as new"
+                          onclick="spy.gui.db.addSite()" /></td>
+                        <td><input type="button" name="DeleteSite"
+                          value="Delete"
+                          onclick="spy.gui.db.deleteSite()" /></td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <table width="100%">
+          <tr>
+            <td width="30%"><b>People</b></td>
+            <td width="70%"><b>Person details</b></td>
+          </tr>
+          <tr>
+            <td><input type="list" name="People" width="100%"
+              height="150"
+              onselect="spy.gui.db.setPerson(html.GetValue(~name~))" /></td>
+            <td valign="top">
+              <table>
+                <tr>
+                  <td>
+                    <table>
+                      <tr>
+                        <td width='40%'>First Name</td>
+                        <td width='60%'><input type="text"
+                          bgcolor="$GetVar(HtmlInputBgColour)"
+                          name="firstname" width="100%" height="20"></td>
+                      </tr>
+                      <tr>
+                        <td width='40%'>Middle Name</td>
+                        <td width='60%'><input type="text"
+                          bgcolor="$GetVar(HtmlInputBgColour)"
+                          name="middlename" width="100%" height="20"></td>
+                      </tr>
+                      <tr>
+                        <td width='40%'>Last Name</td>
+                        <td width='60%'><input type="text"
+                          bgcolor="$GetVar(HtmlInputBgColour)"
+                          name="lastname" width="100%" height="20"></td>
+                      </tr>
+                      <tr>
+                        <td width='40%'>Email</td>
+                        <td width='60%'><input type="text"
+                          bgcolor="$GetVar(HtmlInputBgColour)"
+                          name="email" width="100%" height="20"></td>
+                      </tr>
+                      <tr>
+                        <td width='40%'>Phone</td>
+                        <td width='60%'><input type="text"
+                          bgcolor="$GetVar(HtmlInputBgColour)"
+                          name="phone" width="100%" height="20"></td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <table>
+                      <tr>
+                        <td><input type="button"
+                          name="UpdatePerson" value="Update"
+                          onclick="spy.gui.db.updatePerson()" /></td>
+                        <td><input type="button" name="AddPerson"
+                          value="Add as new"
+                          onclick="spy.gui.db.addPerson()" /></td>
+                        <td><input type="button"
+                          name="DeletePerson" value="Delete"
+                          onclick="spy.gui.db.deletePerson()" /></td>
+                      </tr>
+                    </table>
+                  </td>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+  <table border="0" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td align="center"><input type="button" value="OK"
+        onclick="html.EndModal('~popup_name~', 0)"></td>
+    </tr>
+  </table>
+</body>
+</html>
+
