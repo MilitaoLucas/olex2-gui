@@ -98,7 +98,7 @@ class Affiliations:
     OV.registerFunction(self.getListAffiliations)
     OV.registerFunction(self.add_affiliation)
 
-  def getListAffiliations(self):
+  def getListAffiliations(self, add_new=True):
     cursor = DBConnection().conn.cursor()
     sql = "SELECT * FROM affiliation"
     cursor.execute(sql)
@@ -106,7 +106,8 @@ class Affiliations:
     retVal = ""
     for affiliation in all_affiliations:
       retVal += "%s<-%s;" %(affiliation[1], affiliation[0])
-    retVal += "++ ADD NEW ++<--1"
+    if add_new:
+      retVal += "++ ADD NEW ++<--1"
     return retVal
 
   def get_affiliation_address(self, id, list=False):
@@ -122,6 +123,18 @@ class Affiliations:
       return address
     return address
 
+  def get_site_details(self, id):
+    cursor = DBConnection().conn.cursor()
+    sql = "SELECT * FROM affiliation WHERE id=%s" %id
+    cursor.execute(sql)
+    site = cursor.fetchone()
+    return {'id': site[0],
+            'name': site[1],
+            'department': site[2],
+            'address': site[3],
+            'city': site[4],
+            'country': site[5],
+            'postcode': site[6]}
   def add_affiliation(self, id, name, department, address, city,
                        postcode, country):
     cursor = DBConnection().conn.cursor()
@@ -132,6 +145,12 @@ class Affiliations:
       affiliation)
     DBConnection().conn.commit()
     return cursor.lastrowid
+
+  def deleteSiteById(self, id):
+    sql = "DELETE FROM affiliation WHERE id=%s" %id
+    DBConnection().conn.cursor().execute(sql)
+    DBConnection().conn.commit()
+
 
 
 class Persons:
@@ -196,9 +215,12 @@ class Persons:
       display = "%s %s %s" %(person[2], person[3], person[4])
     return display
 
-  def getListPeople(self):
+  def getListPeople(self, site_id = None, add_new=True):
     cursor = DBConnection().conn.cursor()
-    sql = "SELECT * FROM person"
+    if not site_id:
+      sql = "SELECT * FROM person"
+    else:
+      sql = "SELECT * FROM person where affiliationid=%s" %site_id
     cursor.execute(sql)
     all_persons = cursor.fetchall()
     retVal_l = []
@@ -206,7 +228,8 @@ class Persons:
       v = "%s<-%s" %(self.make_display_name(person), person[0])
       retVal_l.append(v)
     retVal_l.sort()
-    retVal_l.append("++ ADD NEW ++<--1")
+    if add_new:
+      retVal_l.append("++ ADD NEW ++<--1")
     retVal = ";".join(retVal_l)
     return retVal
 
@@ -259,7 +282,8 @@ class Persons:
       person = cursor.fetchone()
       if not person:
         return
-    d = {'firstname':person[2],
+    d = {'id': person[0],
+         'firstname':person[2],
          'middlename':person[3],
          'lastname':person[4],
          'email':person[5],
@@ -537,6 +561,7 @@ class DBConnection():
       os.makedirs(db_path)
     exists = os.path.exists(db_file)
     DBConnection._conn = sqlite3.connect(db_file)
+    DBConnection._conn.cursor().execute("pragma foreign_keys=ON")
     if exists:
       cursor = DBConnection._conn.cursor()
       cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='person'")

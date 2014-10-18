@@ -2,7 +2,7 @@ import olex
 import olx
 import os
 import OlexVFS
-
+import gui
 import inspect
 
 from olexFunctions import OlexFunctions
@@ -49,7 +49,7 @@ class publication:
     else:
       boxWidth = 500
       boxHeight = 400
-      x,y = get_box_x_y(boxWidth, boxHeight)
+      x,y = gui.GetBoxPosition(boxWidth, boxHeight)
       olx.Popup(pop_name, 'person.htm', s=True, b="tc", t=pop_name,
                 w=boxWidth, h=boxHeight, x=x, y=y)
       person_box_created = True
@@ -116,7 +116,7 @@ class publication:
     else:
       boxWidth = 500
       boxHeight = 400
-      x,y = get_box_x_y(boxWidth, boxHeight)
+      x,y = gui.GetBoxPosition(boxWidth, boxHeight)
       olx.Popup(pop_name, 'affiliation.htm', s=True, b="tc", t=pop_name,
                 w=boxWidth, h=boxHeight, x=x, y=y)
       affiliation_box_created = True
@@ -477,14 +477,6 @@ def get_crystal_image(p=None,n=4,get_path_only=True):
   return "crystal_image.jpg"
 
 OV.registerFunction(get_crystal_image, False, 'gui.report')
-
-def get_box_x_y(w, h):
-  sz = [int(x) for x in olx.GetWindowSize().split(',')]
-  y = (sz[3]-sz[1]-w)/2
-  x = (sz[2]-sz[0]-w)/2
-  if x < 0: x = 0
-  if y < 0: y = 0
-  return x,y
 
 def sort_images_with_integer_names(image_list, ending=None):
   l = []
