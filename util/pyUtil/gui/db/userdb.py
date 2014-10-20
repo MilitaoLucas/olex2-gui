@@ -44,9 +44,9 @@ class UsersDB:
       olx.html.SetItems(self.ctrl("People"), '')
       return
     from userDictionaries import affiliations
-    self.site = affiliations.get_site_details(t)
+    self.site = affiliations.get_site(t)
     for i in self.site_items:
-      olx.html.SetValue(self.ctrl(i), self.site[i])
+      olx.html.SetValue(self.ctrl(i), self.site.__dict__[i])
     olx.html.SetItems(self.ctrl("People"), self.getPeopleList(t))
     olx.html.SetEnabled(self.ctrl("UpdateSite"), True)
     olx.html.SetEnabled(self.ctrl("DeleteSite"), True)
@@ -55,26 +55,25 @@ class UsersDB:
     self.setMessage()
 
   def updateSite_(self, id):
+    import userDictionaries as ud
     if not self.site:
       if id:
         self.setMessage("Please select a site to update")
         return
-      self.site = {}
+      self.site = ud.site()
     for i in self.site_items:
-      self.site[i] = olx.html.GetValue(self.ctrl(i))
-    name = self.site['name'].strip()
+      self.site.__dict__[i] = olx.html.GetValue(self.ctrl(i))
+    name = self.site.name.strip()
     if not name:
       self.setMessage("Non-empty name is expected")
       return
-    from userDictionaries import affiliations
-    affiliations.add_affiliation(id, name, self.site['address'],
-      self.site['department'], self.site['city'], self.site['postcode'],
-      self.site['country'])
+    self.site.update()
+    self.setSite(None)
     olx.html.SetItems(self.ctrl("Sites"), self.getSiteList())
     self.setMessage()
 
   def updateSite(self):
-    self.updateSite_(self.site['id'])
+    self.updateSite_(self.site.id)
 
   def addSite(self):
     self.updateSite_(None)
@@ -82,7 +81,7 @@ class UsersDB:
 
   def deleteSite(self):
     from userDictionaries import affiliations
-    affiliations.deleteSiteById(self.site['id'])
+    affiliations.deleteSiteById(self.site.id)
     olx.html.SetItems(self.ctrl("Sites"), self.getSiteList())
     self.setSite(None)
 
@@ -99,35 +98,34 @@ class UsersDB:
       self.person = None
       return
     from userDictionaries import persons
-    self.person = persons.get_person_details(t)
+    self.person = persons.get_person(t)
     for i in self.person_items:
-      olx.html.SetValue(self.ctrl(i), self.person[i])
+      olx.html.SetValue(self.ctrl(i), self.person.__dict__[i])
     olx.html.SetEnabled(self.ctrl("UpdatePerson"), True)
     olx.html.SetEnabled(self.ctrl("DeletePerson"), True)
     self.setMessage()
 
   def updatePerson_(self, id):
+    import userDictionaries as ud
     if not self.person:
       if id:
         self.setMessage("Please select a person to update")
         return
-      self.person = {}
+      self.person = ud.person()
     for i in self.person_items:
-      self.person[i] = olx.html.GetValue(self.ctrl(i))
-    lastname = self.person['lastname'].strip()
+      self.person.__dict__[i] = olx.html.GetValue(self.ctrl(i))
+    lastname = self.person.lastname.strip()
     if not lastname:
       self.setMessage("Non-empty last name is expected")
       return
-    from userDictionaries import persons
-    persons.add_person(id, self.site['id'], self.person['firstname'],
-      self.person['middlename'], lastname,
-       self.person['email'], self.person['phone'])
+    self.person.update()
+    self.setPerson(None)
     olx.html.SetItems(self.ctrl("People"),
-      self.getPeopleList(self.site['id']))
+      self.getPeopleList(self.site.id))
     self.setMessage()
 
   def updatePerson(self):
-    self.updatePerson_(self.person['id'])
+    self.updatePerson_(self.person.id)
 
   def addPerson(self):
     self.updatePerson_(None)
@@ -135,9 +133,9 @@ class UsersDB:
 
   def deletePerson(self):
     from userDictionaries import persons
-    persons.deletePersonById(self.person['id'])
+    persons.deletePersonById(self.person.id)
     olx.html.SetItems(self.ctrl("People"),
-      self.getPeopleList(self.site['id']))
+      self.getPeopleList(self.site.id))
     self.setPerson(None)
 
 db = UsersDB()
