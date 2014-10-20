@@ -111,7 +111,7 @@ class UsersDB:
       if id:
         self.setMessage("Please select a person to update")
         return
-      self.person = ud.person()
+      self.person = ud.person(self.site.id)
     for i in self.person_items:
       self.person.__dict__[i] = olx.html.GetValue(self.ctrl(i))
     lastname = self.person.lastname.strip()
