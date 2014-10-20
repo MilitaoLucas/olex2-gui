@@ -253,7 +253,7 @@ class Affiliations:
     all_affiliations = cursor.fetchall()
     retVal = ""
     for affiliation in all_affiliations:
-      retVal += "%s<-%s;" %(affiliation[1], affiliation[0])
+      retVal += "%s [%s]<-%s;" %(affiliation[1], affiliation[2], affiliation[0])
     if add_new:
       retVal += "++ ADD NEW ++<--1"
     return retVal
@@ -510,27 +510,26 @@ class DBConnection():
     affiliations = cursor.fetchall()
     adict = {}
     for a in affiliations:
-      a = site()
-      a.name = a[0]
-      a.department = a[1]
-      a.address = (' '.join(filter(None, a[2:4]))).strip()
-      a.city = a[4]
-      a.poscode = a[5]
-      a.city = a[7]
-      a.update()
+      s = site()
+      s.name = a[0]
+      s.department = a[1]
+      s.address = (' '.join(filter(None, a[2:4]))).strip()
+      s.city = a[4]
+      s.poscode = a[5]
+      s.update()
       self.conn.commit()
+      adict[s.name] = s.lastrowid
     cursor.execute("SELECT * FROM persons")
     persons = cursor.fetchall()
-    for p in persons:
-      aff = adict.get(p[5].strip(), None)
+    for d in persons:
+      aff = adict.get(d[5].strip(), None)
       if aff is None: continue
-      p.affiliationid = aff 
-      p = person()
-      p.firsname = p[0]
-      p.middlename = p[1]
-      p.lastnamename = p[2]
-      p.email= p[3]
-      p.phone = p[4]
+      p = person(aff)
+      p.firstname = d[0]
+      p.middlename = d[1]
+      p.lastname = d[2]
+      p.email= d[3]
+      p.phone = d[4]
       p.update()
     cursor.execute("drop table persons")
     cursor.execute("drop table affiliations")
