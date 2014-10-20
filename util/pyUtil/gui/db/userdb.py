@@ -67,6 +67,7 @@ class UsersDB:
     if not name:
       self.setMessage("Non-empty name is expected")
       return
+    self.site.id = id
     self.site.update()
     self.setSite(None)
     olx.html.SetItems(self.ctrl("Sites"), self.getSiteList())
