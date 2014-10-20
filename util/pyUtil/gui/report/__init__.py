@@ -62,7 +62,7 @@ class publication:
     res = olx.html.ShowModal(pop_name)
     if res == '1':
       person.affiliationid = int(olx.html.GetValue('Person.PERSON_AFFILIATION'))
-      person.firstnane = olx.html.GetValue('Person.PERSON_FIRSTNAME')
+      person.firstname = olx.html.GetValue('Person.PERSON_FIRSTNAME')
       person.middlename = olx.html.GetValue('Person.PERSON_MIDDLENAME')
       person.lastname = olx.html.GetValue('Person.PERSON_LASTNAME')
       person.email = olx.html.GetValue('Person.PERSON_EMAIL')
@@ -127,9 +127,9 @@ class publication:
   def OnContactAuthorChange(self, person_box_name):
     import userDictionaries
     pid = int(olx.html.GetValue(person_box_name))
-    person = userDictionaries.people.get_person_details(pid)
+    person = userDictionaries.people.get_person(pid)
     OV.set_cif_item("_publ_contact_author_name",
-      userDictionaries.persons.make_display_name(person))
+      person.get_display_name())
 
   def EditPersonByName(self, box):
     person = self.make_person_box(box, True)

@@ -82,10 +82,7 @@ class person:
     if self.affiliationid is None:
       return site()
     cursor = DBConnection().conn.cursor()
-    sql = "SELECT affiliationid FROM person WHERE id=%s" %self.id
-    cursor.execute(sql)
-    aid = cursor.fetchone()
-    sql = "SELECT * FROM affiliation WHERE id=%s" %aid[0]
+    sql = "SELECT * FROM affiliation WHERE id=%s" %self.affiliationid
     cursor.execute(sql)
     return site(cursor.fetchone())
 
@@ -346,7 +343,7 @@ class Persons:
 
   def get_person(self, id):
     if id is None:
-      return person()
+      return person(1)
     else:
       cursor = DBConnection().conn.cursor()
       sql = "SELECT * FROM person WHERE id = %s" %(id)
