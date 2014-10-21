@@ -711,18 +711,23 @@ def GetHklFileList():
   g = OV.ListFiles(OV.FilePath(), ';'.join(reflection_file_extensions))
   g.sort()
   try:
-    a = OV.HKLSrc().replace('\\', '/')
-    if a[0] == "'" or a[0] == '"':
+    a = OV.HKLSrc()
+    if a and (a[0] == "'" or a[0] == '"'):
       a = a[1:-1]
   except:
     a = ""
 
-  if not os.path.isfile(a) and not g:
+  if not os.path.exists(a) and not g:
     print "There is no reflection file or the reflection file is not accessible"
-  reflection_files = ""
+  reflection_files = []
+  file_names = set()
   for item in g:
-    reflection_files+="%s.%s<-%s;" %(OV.FileName(item), OV.FileExt(item), item)
-  return reflection_files
+    fn = OV.FileName(item)
+    file_names.add(fn)
+    reflection_files.append("%s.%s<-%s" %(fn, OV.FileExt(item), item))
+  if len(reflection_files) > 1 and OV.FileName() not in file_names:
+    reflection_files.insert(0, "None<-")
+  return ';'.join(reflection_files)
 if haveGUI:
   OV.registerFunction(GetHklFileList)
 
