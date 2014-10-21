@@ -284,6 +284,8 @@ class CifTools(ArgumentParser):
               email = userDictionaries.people.getPersonInfo(id,'email')
               address = userDictionaries.people.getPersonInfo(id,'address')
               cif_loop.add_row((name, email, address))
+            else:
+              cif_loop.add_row((name, "?", "?"))
           if '_publ_author' in self.cif_block.loops:
             del self.cif_block.loops['_publ_author']
           self.cif_block.add_loop(cif_loop)
