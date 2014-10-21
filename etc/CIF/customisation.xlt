@@ -56,6 +56,28 @@
   <do_merge
    <_*_details>
   >
+  <export_metacif
+    <_cell_measurement_*>
+    <_exptl_absorpt_*>
+    <_chemical_name_*>
+    <_exptl_crystal_*>
+    <_*_details>
+    <_diffrn_absorpt_*>
+    <_diffrn_crystal_*>
+    <_diffrn_detector_*>
+    <_computing_structure_solution>
+    <_refine_special_details>
+    <_olex2_*>
+    <_publ_author>
+    <_publ_contact_*>
+    <_exptl_crystal_F_000 skip="true">
+    <_exptl_crystal_density_diffrn skip="true">
+    <_exptl_absorpt_coefficient_mu skip="true">
+    <_geom_special_details skip="true">
+    <_reflns_special_details skip="true">
+    <_olex2_refinement_description skip="true">
+    <_iucr_refine_instructions_details skip="true">
+  >
   <#include "app.ConfigDir()/cif_customisation.xld" extend='false'>
 >
 
