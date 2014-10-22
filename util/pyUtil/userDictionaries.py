@@ -14,6 +14,155 @@ localList = None
 affiliations = None
 experimantal = None
 
+class person:
+  def __init__(self, affiliationid, id=None, firstname="", middlename="",
+               lastname="", email="", phone=""):
+    if type(affiliationid) == tuple:
+      sql_res = affiliationid
+      self.id = sql_res[0]
+      self.affiliationid = sql_res[1]
+      self.firstname = sql_res[2]
+      self.middlename = sql_res[3]
+      self.lastname = sql_res[4]
+      self.email = sql_res[5]
+      self.phone = sql_res[6]
+    else:
+      self.affiliationid = affiliationid
+      self.id = id
+      self.firstname= firstname
+      self.middlename = middlename
+      self.lastname = lastname
+      self.email = email
+      self.phone = phone
+
+  def update(self):
+    cursor = DBConnection().conn.cursor()
+    if self.id is None:
+      sql = "INSERT into person " +\
+       "(id,affiliationid,firstname,middlename,lastname,email,phone) values (" + \
+       "NULL,%s,'%s','%s','%s','%s','%s')" %(self.affiliationid, self.firstname,
+         self.middlename, self.lastname, self.email, self.phone)
+    else:
+      sql = """UPDATE person SET affiliationid=%s, firstname='%s',
+      middlename='%s',lastname='%s', email='%s',phone='%s' where id=%s""" %(
+        self.affiliationid, self.firstname, self.middlename, self.lastname,
+        self.email, self.phone, self.id)
+    cursor.execute(sql)
+    DBConnection().conn.commit()
+    self.lastrowid = cursor.lastrowid
+    return self
+
+  def get_display_name(self, format="acta"):
+    if format == "acta":
+      surname = self.lastname
+      first_initial = self.firstname
+      second_initial = self.middlename
+      if first_initial:
+        first_initial = first_initial[0] + '.'
+      if second_initial and first_initial:
+        second_initial = second_initial[0] + '.'
+      display = "%s, %s%s" %(surname, first_initial, second_initial)
+    else:
+      display = "%s %s %s" %(self.firstname, self.middlename, self.lastname)
+    return display
+
+  def as_dict(self):
+    d = {'id': self.id,
+         'firstname': self.firstname,
+         'middlename': self.middlename,
+         'lastname': self.lastname,
+         'email': self.email,
+         'phone': self.phone,
+         'affiliationid': self.affiliationid
+         }
+    d['displayname'] = self.get_display_name(d)
+    return d
+
+  def get_affiliation(self):
+    if self.affiliationid is None:
+      return site()
+    cursor = DBConnection().conn.cursor()
+    sql = "SELECT * FROM affiliation WHERE id=%s" %self.affiliationid
+    cursor.execute(sql)
+    return site(cursor.fetchone())
+
+class site:
+  def __init__(self, id=None, name="", department="", address="", city="",
+                postcode="", country=""):
+    if id and type(id) == tuple:
+      sql_res = id
+      self.id = sql_res[0]
+      self.name = sql_res[1]
+      self.department = sql_res[2]
+      self.address = sql_res[3]
+      self.city = sql_res[4]
+      self.postcode = sql_res[5]
+      self.country = sql_res[6]
+    else:
+      self.id = id
+      self.name = name
+      self.department = department
+      self.address = address
+      self.city = city
+      self.postcode = postcode
+      self.country = country
+
+  def get_address(self):
+    return '\n'.join(filter(
+      None, (self.address, self.city, self.postcode, self.country)))
+
+  def update(self):
+    cursor = DBConnection().conn.cursor()
+    if self.id is None:
+      sql = "INSERT into affiliation " +\
+       "(id,name,department,address,city,postcode,country) values (" + \
+       "NULL,'%s','%s','%s','%s','%s','%s')" %(self.name, self.department,
+        self.address, self.city, self.postcode, self.country)
+    else:
+      sql = """UPDATE affiliation SET name='%s',department='%s',address='%s',
+      city='%s',postcode='%s',country='%s' where id=%s""" %(self.name,
+        self.department, self.address, self.city, self.postcode, self.country,
+        self.id)
+    cursor.execute(sql)
+    DBConnection().conn.commit()
+    self.lastrowid = cursor.lastrowid
+    return self
+
+  def as_dict(self):
+    return {'id' : self.id,
+            'name': self.name,
+            'department': self.department,
+            'address': self.address,
+            'city': self.city,
+            'postcode': self.postcode,
+            'country': self.country,
+            }
+
+
+def sql_update_str(table_name, d, id_name):
+  sql = ["UPDATE %s SET" %table_name]
+  for k,v in d.iteritems():
+    if k != id_name:
+      sql.append("%s='%s'" %(k, v))
+  sql.append("where %s=''" %(id_name, d[id_name]))
+  return ' '.join(sql)
+
+def sql_insert_str(table_name, d, id_name):
+  sql = ["INSERT INTO %s" %table_name]
+  fields, values = [], []
+  for k,v in d.iteritems():
+    if k != id_name:
+      fields.append(k)
+      values.append("'%s'" %v)
+  sql.append("(%s)" %(''.join(fields)))
+  sql.append("(%s)" %(''.join(values)))
+  return ' '.join(sql)
+
+def get_sql(table_name, d, id_name):
+  if not d.get(id_name, None):
+    return sql_insert_str(table_name, d, id_name)
+  return sql_update_str(table_name, d, id_name)
+
 class LocalList:
   def __init__(self):
     self.dictionary = {}
@@ -96,42 +245,33 @@ class Affiliations:
     global affiliations
     affiliations = self
     OV.registerFunction(self.getListAffiliations)
-    OV.registerFunction(self.add_affiliation)
 
-  def getListAffiliations(self):
+  def getListAffiliations(self, add_new=True):
     cursor = DBConnection().conn.cursor()
-    sql = "SELECT * FROM affiliations"
+    sql = "SELECT * FROM affiliation"
     cursor.execute(sql)
     all_affiliations = cursor.fetchall()
     retVal = ""
     for affiliation in all_affiliations:
-      retVal += "%s;" %affiliation[0]
-    retVal += "++ ADD NEW ++"
+      retVal += "%s [%s]<-%s;" %(affiliation[1], affiliation[2], affiliation[0])
+    if add_new:
+      retVal += "++ ADD NEW ++<--1"
     return retVal
 
-  def get_affiliation_address(self, affiliation, list=False):
-    cursor = DBConnection().conn.cursor()
-    sql = "SELECT * FROM affiliations WHERE name like '%s'" %affiliation
-    cursor.execute(sql)
-    address = cursor.fetchall()
-    if not address:
-      address = "?"
-    if not list:
-      address = ("\n").join(filter(None, address[0]))
+  def get_site(self, id):
+    if id is None:
+      return site()
     else:
-      return address
-    return address
+      cursor = DBConnection().conn.cursor()
+      sql = "SELECT * FROM affiliation WHERE id=%s" %id
+      cursor.execute(sql)
+      return site(cursor.fetchone())
 
-  def add_affiliation(self, name, department, address1, address2, city,
-                       postcode, region, country):
-    cursor = DBConnection().conn.cursor()
-    displayname = "%s %s" %(name, city)
-    affiliation = (name, department, address1, address2, city, postcode,
-                    region, country, displayname)
-    cursor.execute(
-      "INSERT OR REPLACE INTO affiliations VALUES (?,?,?,?,?,?,?,?,?)",
-       affiliation)
+  def deleteSiteById(self, id):
+    sql = "DELETE FROM affiliation WHERE id=%s" %id
+    DBConnection().conn.cursor().execute(sql)
     DBConnection().conn.commit()
+
 
 
 class Persons:
@@ -139,152 +279,77 @@ class Persons:
     global persons
     persons = self
     OV.registerFunction(self.getListPeople)
-    OV.registerFunction(self.add_person)
     OV.registerFunction(self.getPersonInfo)
 
-  def changePersonInfo(self,person,item,info):
-    pass
-
-  def addNewPerson(self, name=""):
-    firstname = middlename = secondname = ""
-    if name:
-      name = name.split()
-      if len(name) == 1:
-        secondname = name[0]
-      elif len(name) == 2:
-        firstname = name[0]
-        secondname = name[1]
-      elif len(name) == 3:
-        firstname = name[0]
-        middlename = name[1]
-        secondname = name[2]
-    person = (firstname, middlename, secondname, '', '', '', 'New person')
-    DBConnection().conn.cursor().execute(
-      "INSERT OR REPLACE INTO persons VALUES (?,?,?,?,?,?,?)", person)
-    DBConnection().conn.commit()
-    d = {'firstname':person[0],
-         'middlename':person[1],
-         'lastname':person[2],
-         'email':person[3],
-         'phone':person[4],
-         'affiliation':person[5],
-         'displayname':person[6],
-         }
-    return d
-
-  def deletePersonByDisplayname(self, displayname):
-    sql = "DELETE FROM persons WHERE displayname=displayname"
+  def deletePersonById(self, id):
+    sql = "DELETE FROM person WHERE id=%s" %id
     DBConnection().conn.cursor().execute(sql)
     DBConnection().conn.commit()
 
-  def make_display_name(self, person,format="acta"):
-    if format == "acta":
-      if type(person) == tuple:
-        surname = person[2]
-        first_initial = person[0]
-        second_initial = person[1]
-      else:
-        surname = person['lastname']
-        first_initial = person['firstname']
-        second_initial = person['middlename']
-      if first_initial:
-        first_initial = first_initial[0] + "."
-      if second_initial:
-        second_initial = second_initial[0] + "."
-
-      display = "%s, %s%s" %(surname, first_initial, second_initial)
-
-    else:
-      display = "%s %s %s" %(person[0], person[1], person[2])
-      display = display.replace("  ", " ")
-      display = display.replace("  ", " ")
-      display = display.replace("  ", " ")
-    return display
-
-  def getListPeople(self):
+  def getListPeople(self, site_id = None, add_new=True):
     cursor = DBConnection().conn.cursor()
-    sql = "SELECT * FROM persons"
+    if not site_id:
+      sql = "SELECT * FROM person"
+    else:
+      sql = "SELECT * FROM person where affiliationid=%s" %site_id
     cursor.execute(sql)
     all_persons = cursor.fetchall()
     retVal_l = []
-    for person in all_persons:
-      if not person[0].strip() or not person[2].strip():
-        continue
-      display = self.make_display_name(person)
-      retVal_l.append(display)
+    for p in all_persons:
+      v = "%s<-%s" %(person(p).get_display_name(), p[0])
+      retVal_l.append(v)
     retVal_l.sort()
-    retVal_l.append("++ ADD NEW ++")
+    if add_new:
+      retVal_l.append("++ ADD NEW ++<--1")
     retVal = ";".join(retVal_l)
     return retVal
 
-  def getPersonInfo(self,person,item):
+  def getPersonInfo(self,id,item):
     retStr = '?'
-    if not person:
+    if not id:
       return retStr
-#    if not self.isPerson(person):
-#      self.addNewPerson(person)
-    currentPersonInfo = self.get_person_details(person)
-    if not currentPersonInfo:
-      return retStr
+    person = self.get_person(id)
     if item in ('phone','email','address'):
       if item == "address":
-        retStr = self.get_person_affiliation(person)
+        retStr = person.get_affiliation().get_address()
       else:
-        retStr = currentPersonInfo[item]
+        retStr = person.__dict__[item]
     return retStr
 
-  def get_person_details(self, displayname):
-    cursor = DBConnection().conn.cursor()
-    if "++" in displayname or not displayname:
-      person = ["","","","","","","New Person"]
+  def findPersonId(self, name, email=None):
+    if email:
+      sql = "SELECT * FROM person WHERE email = '%s'" %(parts[i], parts[j])
     else:
-      sql = "SELECT * FROM persons WHERE displayname like '%s'" %(displayname)
-      cursor.execute(sql)
-      res = cursor.fetchall()
-      if not res:
-        return
+      if ',' in name:
+        parts = [x.strip(' ')for x in name.split(',')]
+      elif ' ' in name:
+        parts = name.split(' ')
       else:
-        person = res[0]
-    d = {'firstname':person[0],
-         'middlename':person[1],
-         'lastname':person[2],
-         'email':person[3],
-         'phone':person[4],
-         'affiliation':person[5],
-         'displayname':person[6],
-         }
-    return d
-
-  def get_person_affiliation(self, displayname, list=False):
+        return None
+      i,j = 0,1
+      if '.' in parts[0]:
+        parts[0] = parts[0].split('.')[0]
+        i,j = j,i
+      elif '.' in parts[1]:
+        parts[1] = parts[1].split('.')[0]
+        pass
+      sql = "SELECT * FROM person WHERE lastname = '%s' AND firstname LIKE '%s%%'" %(parts[i], parts[j])
     cursor = DBConnection().conn.cursor()
-    sql = "SELECT affiliation FROM persons WHERE displayname like '%s'" %(
-      displayname)
     cursor.execute(sql)
-    affiliation = cursor.fetchone()
-    sql = "SELECT * FROM affiliations WHERE name like '%s'" %affiliation
-    cursor.execute(sql)
-    address = cursor.fetchall()
-    if not address:
-      address = "?"
-    if not list:
-      address = ('\n').join(address[0][:-1])
-      address = address.replace('\n\n', '\n')
-      address = address.replace('\n\n', '\n')
+    persons = cursor.fetchall()
+    if not persons or len(persons) > 1:
+      return None
+    return persons[0][0]
+
+  def get_person(self, id):
+    if id is None:
+      return person(1)
     else:
-      return address
-    return address
+      cursor = DBConnection().conn.cursor()
+      sql = "SELECT * FROM person WHERE id = %s" %(id)
+      cursor.execute(sql)
+      return person(cursor.fetchone())
 
-  def add_person(self, firstname, middlename, lastname, email, phone,
-                  affiliation, displayname):
-    if not displayname:
-      displayname = self.make_display_name((firstname, middlename, lastname))
-    cursor = DBConnection().conn.cursor()
-    person = (firstname, middlename, lastname, email, phone, affiliation,
-              displayname)
-    cursor.execute("INSERT OR REPLACE INTO persons VALUES (?,?,?,?,?,?,?)",
-                   person)
-    DBConnection().conn.commit()
-    return person
 
 def getLocalDictionary(whichDict):
   picklePath = getPicklePath(whichDict)
@@ -432,6 +497,44 @@ class DBConnection():
     DBConnection._conn = c
 
   def doImport(self):
+    cursor = self.conn.cursor()
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='persons'")
+    if not cursor.fetchall():
+      self.ImportPickles()
+    else:
+      self.ImportDB()
+
+  def ImportDB(self):
+    cursor = self.conn.cursor()
+    cursor.execute("SELECT * FROM affiliations")
+    affiliations = cursor.fetchall()
+    adict = {}
+    for a in affiliations:
+      s = site()
+      s.name = a[0]
+      s.department = a[1]
+      s.address = (' '.join(filter(None, a[2:4]))).strip()
+      s.city = a[4]
+      s.poscode = a[5]
+      s.update()
+      self.conn.commit()
+      adict[s.name] = s.lastrowid
+    cursor.execute("SELECT * FROM persons")
+    persons = cursor.fetchall()
+    for d in persons:
+      aff = adict.get(d[5].strip(), None)
+      if aff is None: continue
+      p = person(aff)
+      p.firstname = d[0]
+      p.middlename = d[1]
+      p.lastname = d[2]
+      p.email= d[3]
+      p.phone = d[4]
+      p.update()
+    cursor.execute("drop table persons")
+    cursor.execute("drop table affiliations")
+
+  def ImportPickles(self):
     name = "people"
     picklePath = getPicklePath(name)
     if not os.path.exists(picklePath):
@@ -449,12 +552,15 @@ class DBConnection():
       else:
         a_all = a_all.split()
       aname = a_all[0]
-      affiliation = (aname, '', ' '.join(a_all[1:]), '', '', '',
-                      '', '', aname)
-      DBConnection._conn.cursor().execute(
-      "INSERT OR REPLACE INTO affiliations VALUES (?,?,?,?,?,?,?,?,?)",
-       affiliation)
-      DBConnection._conn.commit()
+      sql = "SELECT * FROM affiliation WHERE name like '%s'" %aname
+      cr = DBConnection._conn.cursor()
+      cr.execute(sql)
+      existing_aff = cr.fetchone()
+      if existing_aff:
+        last_aff_id = existing_aff[0]
+      else:
+        s = site(name=aname, address=' '.join(a_all[1:])).update()
+        last_aff_id = s.lastrowid
       firstname = middlename = secondname = ""
       if ',' in k:
         name = k.split(',')
@@ -476,15 +582,9 @@ class DBConnection():
           secondname = name[2]
         if not secondname or secondname.endswith('.'):
           firstname, secondname = secondname, firstname
-      person = [firstname, middlename, secondname, v['email'],
-                v['phone'], aname, '']
-      person[6] = people.make_display_name(
-        {'firstname':person[0],
-         'middlename':person[1],
-         'lastname':person[2]})
-      DBConnection._conn.cursor().execute(
-        "INSERT OR REPLACE INTO persons VALUES (?,?,?,?,?,?,?)", person)
-      DBConnection._conn.commit()
+      p = person(last_aff_id, None, firstname, middlename,
+                  secondname, v['email'], v['phone'])
+      p.update()
 
   def __init__(self):
     self.need_import = False
@@ -498,33 +598,31 @@ class DBConnection():
       os.makedirs(db_path)
     exists = os.path.exists(db_file)
     DBConnection._conn = sqlite3.connect(db_file)
+    DBConnection._conn.cursor().execute("pragma foreign_keys=ON")
     if exists:
       cursor = DBConnection._conn.cursor()
-      cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='persons'")
+      cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='person'")
       if not cursor.fetchall():
         exists = False
+      else:
+        pass #import OLD
 
     if not exists:
       cursor = DBConnection._conn.cursor()
-      cursor.execute("""CREATE TABLE persons (
-       firstname TEXT,
-       middlename TEXT,
-       lastname TEXT,
-       email TEXT,
-       phone TEXT,
-       affiliation TEXT,
-       displayname TEXT UNIQUE)
-      """)
-      cursor.execute("""CREATE TABLE affiliations (
-       Name TEXT,
-       Department TEXT,
-       Address1 TEXT,
-       Address2 TEXT,
-       City TEXT,
-       PostCode TEXT,
-       Region TEXT,
-       Country TEXT,
-       displayname TEXT UNIQUE) 
+      cursor.executescript("""
+CREATE TABLE affiliation (
+  id INTEGER NOT NULL, name TEXT, department TEXT, address TEXT, city TEXT,
+  postcode TEXT, country TEXT, PRIMARY KEY(id));
+CREATE TABLE person (
+  id INTEGER NOT NULL, affiliationid INTEGER NOT NULL,
+  firstname TEXT, middlename TEXT, lastname TEXT,
+  email TEXT, phone TEXT,
+  PRIMARY KEY(id),
+  FOREIGN KEY(affiliationid)
+    REFERENCES affiliation(id)
+      ON DELETE CASCADE
+      ON UPDATE NO ACTION);
+CREATE INDEX affiliationfk ON person (affiliationid);
       """)
       DBConnection._conn.commit()
       self.need_import = True
