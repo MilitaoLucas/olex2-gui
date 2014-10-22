@@ -499,7 +499,7 @@ def AnalyseRefinementSource():
     ins_file_name = fn + '.ins'
     res_file_name = fn + '.res'
     hkl_file_name = fn + '.hkl'
-    olx.Export(hkl_file_name)
+    olex.m("export '%s'" %hkl_file_name)
     if os.path.exists(res_file_name):
       olex.m("reap '%s'" %res_file_name)
       print('Loaded RES file extracted from CIF')
