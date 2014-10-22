@@ -1231,6 +1231,26 @@ If more than one file is present, the path of the most recent file is returned b
 
 OV.registerFunction(ExtractCifInfo)
 
+def reloadMetadata(force=False):
+  """Relaads metadata stored in metacif file if the file name matches the data
+   name or if force is set to True
+  """
+  try:
+    fileName = OV.FileName()
+    metacif_path = '%s/%s.metacif' %(OV.StrDir(), fileName)
+    dataName = fileName.replace(' ', '')
+    #check if the 
+    if dataName != fileName and not force:
+      return
+    if os.path.exists(metacif_path):
+      with open(metacif_path, 'rb') as file_object:
+        reader = iotbx.cif.reader(file_object=file_object)
+        olx.cif_model = reader.model()
+  except Exception, e:
+    print("Failed to reload matadata: %s", e)
+
+OV.registerFunction(reloadMetadata, False, "cif")
+
 
 def getOrUpdateDimasVar(getOrUpdate):
   for var in [('snum_dimas_crystal_colour_base','exptl_crystal_colour_primary'),
