@@ -70,6 +70,7 @@
     <_olex2_*>
     <_publ_author>
     <_publ_contact_*>
+    <_refine_* skip="true">
     <_exptl_crystal_F_000 skip="true">
     <_exptl_crystal_density_diffrn skip="true">
     <_exptl_absorpt_coefficient_mu skip="true">

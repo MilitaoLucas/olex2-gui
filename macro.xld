@@ -245,7 +245,17 @@
   >
 >
 
-
+<export help="Exports data from CIF"
+  <body
+    <args
+      <arg1 name="hkl_name" def="">
+    >
+    <cmd
+      <cmd1 "@export %1">
+      <cmd2 "spy.cif.reloadMetadata()">
+    >
+  >
+>
 
 <tidy help = "Automatically select things"
   <body
