@@ -48,6 +48,8 @@ if debug == True:
   except:
     try:
       py_dev_path = r'E:\eclipse-juno\eclipse\plugins\org.python.pydev_2.6.0.2012062818\pysrc'
+      if not os.path.exists(py_dev_path):
+        pass#py_dev_path = r'C:\devel\eclipse\plugins\org.python.pydev_3.8.0.201409251235\pysrc'
       if os.path.exists(py_dev_path):
         sys.path.append(py_dev_path)
         import pydevd
@@ -252,6 +254,7 @@ if OV.HasGUI():
   from gui.maps import *
   from gui.images import *
   from gui.skin import *
+  from gui.db import *
   #import Tutorials
   load_user_gui_phil()
   export_parameters()

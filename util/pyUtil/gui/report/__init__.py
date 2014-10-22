@@ -2,7 +2,7 @@ import olex
 import olx
 import os
 import OlexVFS
-
+import gui
 import inspect
 
 from olexFunctions import OlexFunctions
@@ -28,27 +28,22 @@ def BGColorForValue(value):
 
 class publication:
 
-  def make_person_box(self, box, edit=False):
-    import userDictionaries
-    person = olx.html.GetValue(box).strip()
-    if not person:
-      return ''
-    person = userDictionaries.people.get_person_details(person)
-    if not person:
-      print "The entry displayed in this field is not in the DB"
-      return ''
-    if person['displayname'] == "New Person":
+  def make_person_box_for_id(self, pid, edit=False):
+    if pid < 0: pid = None
+    person = userDictionaries.people.get_person(pid)
+    if pid is None:
       edit = True
     if not edit:
-      return person
-    person.setdefault('list_affiliations', userDictionaries.
-    affiliations.getListAffiliations())
-    person.setdefault('banner_colour', "#005096")
+      return person.get_display_name()
+    pd = person.as_dict()
+    pd.setdefault('list_affiliations',
+      userDictionaries.affiliations.getListAffiliations())
+    pd.setdefault('banner_colour', "#005096")
 
     pop_name = "Person"
-    person.setdefault('pop_name',pop_name)
+    pd.setdefault('pop_name', pop_name)
     txt=open("%s/person.htm" %current_py_file_path, 'r').read()
-    txt = txt%person
+    txt = txt%pd
     OV.write_to_olex("person.htm", txt)
     global person_box_created
     if person_box_created:
@@ -56,53 +51,47 @@ class publication:
     else:
       boxWidth = 500
       boxHeight = 400
-      x,y = get_box_x_y(boxWidth, boxHeight)
+      x,y = gui.GetBoxPosition(boxWidth, boxHeight)
       olx.Popup(pop_name, 'person.htm', s=True, b="tc", t=pop_name,
                 w=boxWidth, h=boxHeight, x=x, y=y)
       person_box_created = True
 
-    address = userDictionaries.affiliations.get_affiliation_address(
-      person['affiliation'], list=False)
-    olx.html.SetValue('Person.PEOPLE_FORM_ADDRESS', address)
+    site = person.get_affiliation()
+    olx.html.SetValue('Person.PEOPLE_FORM_ADDRESS', site.get_address())
 
     res = olx.html.ShowModal(pop_name)
     if res == '1':
-      firstname = olx.html.GetValue('Person.PERSON_FIRSTNAME')
-      middlename = olx.html.GetValue('Person.PERSON_MIDDLENAME')
-      lastname = olx.html.GetValue('Person.PERSON_LASTNAME')
-      email = olx.html.GetValue('Person.PERSON_EMAIL')
-      phone = olx.html.GetValue('Person.PERSON_PHONE')
-      affiliation = olx.html.GetValue('Person.PERSON_AFFILIATION')
-      if not lastname.strip():
+      person.affiliationid = int(olx.html.GetValue('Person.PERSON_AFFILIATION'))
+      person.firstname = olx.html.GetValue('Person.PERSON_FIRSTNAME')
+      person.middlename = olx.html.GetValue('Person.PERSON_MIDDLENAME')
+      person.lastname = olx.html.GetValue('Person.PERSON_LASTNAME')
+      person.email = olx.html.GetValue('Person.PERSON_EMAIL')
+      person.phone = olx.html.GetValue('Person.PERSON_PHONE')
+      if not person.lastname.strip():
         return ''
-      res = userDictionaries.people.add_person(firstname, middlename, lastname,
-        email, phone, affiliation, displayname=None)[6]
+      return person.update().get_display_name()
     else:
+      return None
+    return None
+
+  def make_person_box(self, box, edit=False):
+    import userDictionaries
+    person = olx.html.GetValue(box).strip()
+    if not person:
       return ''
-    return res
+    pid = userDictionaries.people.findPersonId(person)
+    return self.make_person_box_for_id(pid, edit)
 
   def make_affiliation_box(self, box, edit=False):
     import userDictionaries
-    affiliation = olx.html.GetValue(box).strip()
-    if not affiliation:
-      return ''
-    d = {}
-    if '++' in affiliation:
+    aid = int(olx.html.GetValue(box).strip())
+    if aid < 0:
       edit = True
-      address = ["","","","","","","","New Affiliation"]
-    else:
-      address = userDictionaries.affiliations.get_affiliation_address(
-        affiliation, list=True)[0]
-      if not edit:
-        return address
-
-    d.setdefault('name', address[0])
-    d.setdefault('department', address[1])
-    d.setdefault('address1', address[2])
-    d.setdefault('address2', address[3])
-    d.setdefault('city', address[4])
-    d.setdefault('post_code', address[5])
-    d.setdefault('country', address[6])
+      aid = None
+    affiliation = userDictionaries.affiliations.get_site(aid)
+    if not edit:
+      return affiliation
+    d = affiliation.as_dict()
     d.setdefault('banner_colour', "#005096")
     pop_name = "Affiliation"
     d.setdefault('pop_name',pop_name)
@@ -114,105 +103,77 @@ class publication:
     else:
       boxWidth = 500
       boxHeight = 400
-      x,y = get_box_x_y(boxWidth, boxHeight)
+      x,y = gui.GetBoxPosition(boxWidth, boxHeight)
       olx.Popup(pop_name, 'affiliation.htm', s=True, b="tc", t=pop_name,
                 w=boxWidth, h=boxHeight, x=x, y=y)
       affiliation_box_created = True
 
     res = olx.html.ShowModal(pop_name)
     if res == '1':
-      name = olx.html.GetValue('Affiliation.AFFILIATION_NAME')
-      department = olx.html.GetValue('Affiliation.AFFILIATION_DEPARTMENT')
-      address1 = olx.html.GetValue('Affiliation.AFFILIATION_ADDRESS_LINE_1')
-      address2 = olx.html.GetValue('Affiliation.AFFILIATION_ADDRESS_LINE_2')
-      city = olx.html.GetValue('Affiliation.AFFILIATION_CITY')
-      post_code = olx.html.GetValue('Affiliation.AFFILIATION_POST_CODE')
-      region = olx.html.GetValue('Affiliation.AFFILIATION_REGION')
-      country = olx.html.GetValue('Affiliation.AFFILIATION_COUNTRY')
-      if not name.strip():
+      affiliation.name = olx.html.GetValue('Affiliation.AFFILIATION_NAME')
+      affiliation.department = olx.html.GetValue('Affiliation.AFFILIATION_DEPARTMENT')
+      affiliation.address = olx.html.GetValue('Affiliation.AFFILIATION_ADDRESS')
+      affiliation.city = olx.html.GetValue('Affiliation.AFFILIATION_CITY')
+      affiliation.postcode = olx.html.GetValue('Affiliation.AFFILIATION_POST_CODE')
+      affiliation.country = olx.html.GetValue('Affiliation.AFFILIATION_COUNTRY')
+      if not affiliation.name.strip():
         return ''
-      userDictionaries.affiliations.add_affiliation(name, department, address1,
-        address2, city, post_code, region, country)
-      res = userDictionaries.affiliations.get_affiliation_address(
-        affiliation, list=True)[0]
+      return affiliation.update()
     else:
-      return ''
-    return res
+      return None
+    return None
 
-
-  def ChangeContactAuthor(self, person):
-    if person == '': person = '?'
-    if olx.cif_model is not None:
-      data_name = OV.FileName().replace(' ', '')
-      data_block = olx.cif_model[data_name]
-      import userDictionaries
-      if person != '?':
-        if type(person) == dict:
-          data_block["_publ_contact_author_email"] =\
-          person['email']
-          data_block["_publ_contact_author_phone"] =\
-            person['phone']
-          data_block["_publ_contact_author_address"] =\
-            person['address_display']
-        else:
-          userDictionaries.people.getPersonInfo(person, 'email')
-          userDictionaries.people.getPersonInfo(person, 'phone')
-          userDictionaries.people.getPersonInfo(person, 'address')
-      else:
-        data_block["_publ_contact_author_email"] = '?'
-        data_block["_publ_contact_author_phone"] = '?'
-        data_block["_publ_contact_author_address"] = '?'
-    if type(person) == dict:
-      OV.set_cif_item("_publ_contact_author_name", person['displayname'])
-    else:
-      OV.set_cif_item("_publ_contact_author_name", person)
 
   def OnContactAuthorChange(self, person_box_name):
-    self.ChangeContactAuthor(
-      olx.html.GetValue(person_box_name).strip())
-
-  def OnPersonChange(self, box, edit=False):
     import userDictionaries
-    if edit == "True":
-      edit=True
-    new_value = olx.html.GetValue(box).strip()
-    person = self.make_person_box(box, edit)
-    retVal = ''
+    pid = int(olx.html.GetValue(person_box_name))
+    person = userDictionaries.people.get_person(pid)
+    OV.set_cif_item("_publ_contact_author_name",
+      person.get_display_name())
+
+  def EditPersonByName(self, box):
+    person = self.make_person_box(box, True)
     if person:
-      if type(person) == dict:
-        address = userDictionaries.affiliations.get_affiliation_address(
-          person['affiliation'], list=False)
-        person.setdefault('address_display', address)
-        olx.html.SetValue(box, person['displayname'])
-        retVal = person['displayname']
-      else:
-        olx.html.SetValue(box, person)
-        retVal = person
-      if "contact" in box.lower():
-        self.ChangeContactAuthor(person)
-      if new_value.startswith('++'):
+      olx.html.SetValue(box, person)
+    return
+ 
+  def EditPersonById(self, box):
+    pid = int(olx.html.GetValue(box))
+    person = self.make_person_box_for_id(pid, True)
+    if person:
+      olx.html.SetValue(box, person)
+    return
+ 
+  def OnPersonChange(self, box):
+    import userDictionaries
+    new_value = False
+    pid = int(olx.html.GetValue(box))
+    if pid < 0:
+      new_value = True
+    person = self.make_person_box_for_id(pid)
+    if person:
+      olx.html.SetValue(box, person)
+      if new_value:
         olx.html.Update()
-    return retVal
+    return person
 
   def OnPersonAffiliationChange(self, box, author, edit=False):
     import userDictionaries
     if edit == "True":
       edit=True
-    address = self.make_affiliation_box(box, edit)
-    if address:
-      olx.html.SetValue(box, address[0])
+    site = self.make_affiliation_box(box, edit)
+    if site:
+      olx.html.SetValue(box, site.name)
       olx.html.SetItems('Person.PERSON_AFFILIATION',
         userDictionaries.affiliations.getListAffiliations())
-      olx.html.SetValue('Person.PERSON_AFFILIATION', address[0])
-      address_display = ("\n").join(filter(None, address))
+      olx.html.SetValue('Person.PERSON_AFFILIATION', site.id)
+      address_display = site.get_address()
       olx.html.SetValue('Person.PEOPLE_FORM_ADDRESS', address_display)
       OV.set_cif_item('_publ_contact_author_address', address_display)
       self.ChangePersonInfo(author, 'address', address_display)
-      olx.html.Update()
 
   def ChangePersonInfo(self, person, item, value):
     if value == '': value = '?'
-    userDictionaries.people.changePersonInfo(person, item, value)
     curent_person = OV.get_cif_item("_publ_contact_author_name")
     if curent_person == person:
       key = None
@@ -254,7 +215,6 @@ class publication:
     return changed
 
   def OnAddNameToAuthorList(self, box_name):
-    value = olx.html.GetValue(box_name).strip()
     value = self.OnPersonChange(box_name)
     if self.AddNameToAuthorList(value):
       olx.html.Update()
@@ -332,6 +292,8 @@ href='spy.gui.report.publication.remove_cif_from_merge_list(%s)>>html.Update'>
 
 pub = publication()
 olex.registerFunction(pub.OnContactAuthorChange, False, "gui.report.publication")
+olex.registerFunction(pub.EditPersonByName, False, "gui.report.publication")
+olex.registerFunction(pub.EditPersonById, False, "gui.report.publication")
 olex.registerFunction(pub.OnPersonChange, False, "gui.report.publication")
 olex.registerFunction(pub.OnPersonAffiliationChange, False, "gui.report.publication")
 olex.registerFunction(pub.OnPersonInfoChange, False, "gui.report.publication")
@@ -498,14 +460,6 @@ def get_crystal_image(p=None,n=4,get_path_only=True):
   return "crystal_image.jpg"
 
 OV.registerFunction(get_crystal_image, False, 'gui.report')
-
-def get_box_x_y(w, h):
-  sz = [int(x) for x in olx.GetWindowSize().split(',')]
-  y = (sz[3]-sz[1]-w)/2
-  x = (sz[2]-sz[0]-w)/2
-  if x < 0: x = 0
-  if y < 0: y = 0
-  return x,y
 
 def sort_images_with_integer_names(image_list, ending=None):
   l = []

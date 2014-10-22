@@ -279,9 +279,13 @@ class CifTools(ArgumentParser):
           header=('_publ_author_name','_publ_author_email','_publ_author_address'))
         for name in names:
           if name != '?':
-            email = userDictionaries.people.getPersonInfo(name,'email')
-            address = userDictionaries.people.getPersonInfo(name,'address')
-            cif_loop.add_row((name, email, address))
+            id = userDictionaries.people.findPersonId(name)
+            if id != None:
+              email = userDictionaries.people.getPersonInfo(id,'email')
+              address = userDictionaries.people.getPersonInfo(id,'address')
+              cif_loop.add_row((name, email, address))
+            else:
+              cif_loop.add_row((name, "?", "?"))
           if '_publ_author' in self.cif_block.loops:
             del self.cif_block.loops['_publ_author']
           self.cif_block.add_loop(cif_loop)
@@ -289,13 +293,15 @@ class CifTools(ArgumentParser):
     if publ_contact_author_name is not None and publ_contact_author_name != '?':
       if '_publ_contact_author_name' in self.cif_block:
         del self.cif_block['_publ_contact_author_name'] # hack to make things in the right order
+      id = userDictionaries.people.findPersonId(publ_contact_author_name,
+        OV.get_cif_item('_publ_contact_author_name', None))
       self.cif_block['_publ_contact_author_name'] = publ_contact_author_name
       self.cif_block['_publ_contact_author_email'] \
-        = userDictionaries.people.getPersonInfo(publ_contact_author_name,'email')
+        = userDictionaries.people.getPersonInfo(id,'email')
       self.cif_block['_publ_contact_author_phone'] \
-        = userDictionaries.people.getPersonInfo(publ_contact_author_name,'phone')
+        = userDictionaries.people.getPersonInfo(id,'phone')
       self.cif_block['_publ_contact_author_address'] \
-        = userDictionaries.people.getPersonInfo(publ_contact_author_name,'address')
+        = userDictionaries.people.getPersonInfo(id,'address')
 
 class SaveCifInfo(CifTools):
   def __init__(self):
@@ -1224,6 +1230,26 @@ If more than one file is present, the path of the most recent file is returned b
 ############################################################
 
 OV.registerFunction(ExtractCifInfo)
+
+def reloadMetadata(force=False):
+  """Relaads metadata stored in metacif file if the file name matches the data
+   name or if force is set to True
+  """
+  try:
+    fileName = OV.FileName()
+    metacif_path = '%s/%s.metacif' %(OV.StrDir(), fileName)
+    dataName = fileName.replace(' ', '')
+    #check if the 
+    if dataName != fileName and not force:
+      return
+    if os.path.exists(metacif_path):
+      with open(metacif_path, 'rb') as file_object:
+        reader = iotbx.cif.reader(file_object=file_object)
+        olx.cif_model = reader.model()
+  except Exception, e:
+    print("Failed to reload matadata: %s", e)
+
+OV.registerFunction(reloadMetadata, False, "cif")
 
 
 def getOrUpdateDimasVar(getOrUpdate):
