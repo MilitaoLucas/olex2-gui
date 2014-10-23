@@ -65,11 +65,9 @@
     <_diffrn_absorpt_*>
     <_diffrn_crystal_*>
     <_diffrn_detector_*>
-    <_computing_structure_solution>
-    <_refine_special_details>
+    <_computing_*>
     <_olex2_*>
-    <_publ_author>
-    <_publ_contact_*>
+    <_publ_*>
     <_refine_* skip="true">
     <_exptl_crystal_F_000 skip="true">
     <_exptl_crystal_density_diffrn skip="true">
