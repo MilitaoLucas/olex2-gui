@@ -127,9 +127,15 @@ class publication:
   def OnContactAuthorChange(self, person_box_name):
     import userDictionaries
     pid = int(olx.html.GetValue(person_box_name))
-    person = userDictionaries.people.get_person(pid)
-    OV.set_cif_item("_publ_contact_author_name",
-      person.get_display_name())
+    new_value = False
+    if pid < 0:
+      new_value = True
+    person = self.make_person_box_for_id(pid)
+    if person:
+      olx.html.SetValue(person_box_name, person)
+      OV.set_cif_item("_publ_contact_author_name", person)
+      if new_value:
+        olx.html.Update()
 
   def EditPersonByName(self, box):
     person = self.make_person_box(box, True)

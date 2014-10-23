@@ -4,6 +4,7 @@ import sys
 import olex_gui
 import olx
 import olex
+import olex_fs
 import os
 
 from olexFunctions import OlexFunctions
@@ -337,7 +338,8 @@ class Skin():
       if timing:
         print "run_skin timage took %.4fs" %(time.time()-t)
     elif f == 'sNumTitle':
-      if self.sNum == OV.FileName() and self.sg == olex.f('sg()'):
+      if olex_fs.Exists("sNumTitle.png") and self.sNum == OV.FileName()\
+         and  self.sg == olex.f('sg()'):
         if timing:
           print "run_skin sNumTitle took %.4fs (not run)" %(time.time()-t)
         return
