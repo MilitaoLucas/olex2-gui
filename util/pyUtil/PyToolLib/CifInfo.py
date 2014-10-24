@@ -377,6 +377,9 @@ OV.registerFunction(EditCifInfo)
 
 class MergeCif(CifTools):
   def __init__(self, edit=False, force_create=True, evaluate_conflicts=True):
+    ext = OV.FileExt()
+    if ext and ext.lower() == "cif":
+      return
     super(MergeCif, self).__init__()
     edit = (edit not in ('False','false',False))
     # check if cif exists and is up-to-date
@@ -431,6 +434,9 @@ class ExtractCifInfo(CifTools):
   conflict_d = {}
 
   def __init__(self, evaluate_conflicts=True, run=False):
+    ext = OV.FileExt()
+    if ext and ext.lower() == "cif":
+      return
     super(ExtractCifInfo, self).__init__()
     if evaluate_conflicts or str(evaluate_conflicts).lower() == "true":
       evaluate_conflicts = True
