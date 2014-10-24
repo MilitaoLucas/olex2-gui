@@ -297,6 +297,7 @@ class GeneratedGuiMaker(object):
        'itemName':'%Contact% %Author%',
        'items':items,
        'readonly':'readonly',
+       'onchangealways': True,
        'onchange': onchange,
        }]
 

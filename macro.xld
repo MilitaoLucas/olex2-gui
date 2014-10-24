@@ -182,9 +182,6 @@
       <cmd12 "if %1 then 'shell spy.GetParam(snum.report.title)_tables.html'">
       <cmd13 "cursor()">
     >
-    <onterminate
-      <cmd0 "cursor()">
-    >
     <onabort
       <cmd "echo lasterror()">
       <cmd0 "cursor()">

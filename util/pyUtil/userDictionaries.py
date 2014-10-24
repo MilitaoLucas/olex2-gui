@@ -6,6 +6,7 @@ import olex
 import olx
 
 from olexFunctions import OlexFunctions
+import copy
 OV = OlexFunctions()
 
 people = None
@@ -67,14 +68,7 @@ class person:
     return display
 
   def as_dict(self):
-    d = {'id': self.id,
-         'firstname': self.firstname,
-         'middlename': self.middlename,
-         'lastname': self.lastname,
-         'email': self.email,
-         'phone': self.phone,
-         'affiliationid': self.affiliationid
-         }
+    d = copy.deepcopy(self.__dict__)
     d['displayname'] = self.get_display_name(d)
     return d
 
@@ -129,22 +123,14 @@ class site:
     return self
 
   def as_dict(self):
-    return {'id' : self.id,
-            'name': self.name,
-            'department': self.department,
-            'address': self.address,
-            'city': self.city,
-            'postcode': self.postcode,
-            'country': self.country,
-            }
-
+    return self.__dict__
 
 def sql_update_str(table_name, d, id_name):
   sql = ["UPDATE %s SET" %table_name]
   for k,v in d.iteritems():
     if k != id_name:
       sql.append("%s='%s'" %(k, v))
-  sql.append("where %s=''" %(id_name, d[id_name]))
+  sql.append("where %s='%s'" %(id_name, d[id_name]))
   return ' '.join(sql)
 
 def sql_insert_str(table_name, d, id_name):
@@ -253,7 +239,10 @@ class Affiliations:
     all_affiliations = cursor.fetchall()
     retVal = ""
     for affiliation in all_affiliations:
-      retVal += "%s [%s]<-%s;" %(affiliation[1], affiliation[2], affiliation[0])
+      if affiliation[2]:
+        retVal += "%s [%s]<-%s;" %(affiliation[1], affiliation[2], affiliation[0])
+      else:
+        retVal += "%s<-%s;" %(affiliation[1], affiliation[0])
     if add_new:
       retVal += "++ ADD NEW ++<--1"
     return retVal
@@ -271,7 +260,6 @@ class Affiliations:
     sql = "DELETE FROM affiliation WHERE id=%s" %id
     DBConnection().conn.cursor().execute(sql)
     DBConnection().conn.commit()
-
 
 
 class Persons:
