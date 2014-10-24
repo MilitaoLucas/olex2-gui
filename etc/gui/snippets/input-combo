@@ -3,6 +3,7 @@
 #readonly=true
 #manage=false
 #onchangealways=false
+#setdefault=false
 
 <font size="$GetVar('HtmlFontSizeControls')">
 <input
@@ -14,11 +15,12 @@
   name="#name"
   width="#width"
   value="#value"
+  setdefault="#setdefault"
   items="#items"
   onchange="#onchange"
   onleave="#onleave"
   readonly="#readonly"
-  onchangealways=#onchangealways
+  onchangealways="#onchangealways"
   manage="#manage"
 >
 </font>
