@@ -580,7 +580,11 @@ routines requiring structure refinement
       .type = str
     date_format = "%d-%m-%Y"
       .type = str
+    date_submitted = None
+      .type = str
     date_collected = None
+      .type = str
+    date_completed = None
       .type = str
     total_time = 0
       .type = int
@@ -603,8 +607,6 @@ routines requiring structure refinement
     submission_original_sample_id = None
       .type = str
     data_collection_notes = ""
-      .type = str
-    date_submitted = None
       .type = str
     operator = None
       .type = str
@@ -1180,37 +1182,40 @@ user
     }
   }
   image{
-    bitmap{
-      AtomLabels{
-        font = '#olex2.fnt:frb_20'
-          .type = str
-      }
-
-      BondLabels{
-        font = '#olex2.fnt:fr__14'
-          .type = str
-      }
-      type = png
-        .type = str
-      resolution = 300
-        .type = int
-      resolution_unit = in
-        .type = str
-      resolution_width= 4
-        .type = float
-      size= 1200
-        .type = int
-      transparent_background = False
-        .type = bool
-      trim = True
-        .type = bool
-      trim_border_colour = #bbbbbb
-        .type = str
-      trim_padding = 2
-        .type = float
-      trim_border = 0
-        .type = float
-    }
+    label_symm = none
+      .type=str
+    label_symm_type = default
+      .type=str
+  bitmap{
+     AtomLabels{
+       font = '#olex2.fnt:frb_20'
+         .type = str
+     }
+     BondLabels{
+       font = '#olex2.fnt:fr__14'
+         .type = str
+     }
+     type = png
+       .type = str
+     resolution = 300
+       .type = int
+     resolution_unit = in
+       .type = str
+     resolution_width= 4
+       .type = float
+     size= 1200
+       .type = int
+     transparent_background = False
+       .type = bool
+     trim = True
+       .type = bool
+     trim_border_colour = #bbbbbb
+       .type = str
+     trim_padding = 2
+       .type = float
+     trim_border = 0
+       .type = float
+   }
 
   }
   sorting {
