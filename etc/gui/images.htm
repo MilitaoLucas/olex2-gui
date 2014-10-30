@@ -44,8 +44,8 @@
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='LABEL_SETTINGS';help_ext=Images;1 -->
   <td name=HREF_MAKE_LABEL>
-    <a href="label -type=html.GetValue('IMAGE_SETTINGS_LABEL_TYPE') -symm=html.GetValue('IMAGE_SETTINGS_LABEL_SYMM')"><b>%images_add_labels_to_atoms%</b></a>&nbsp;|
-    <a href="label $*-H,Q -type=html.GetValue('IMAGE_SETTINGS_LABEL_TYPE') -symm=html.GetValue('IMAGE_SETTINGS_LABEL_SYMM')">%images_add_labels_to_non_H_atoms%</a>
+    <a href="label -type=spy.GetParam('user.image.label_symm_type') -symm=spy.GetParam('user.image.label_symm')"><b>%images_add_labels_to_atoms%</b></a>&nbsp;|
+    <a href="label $*-H,Q -type=spy.GetParam('user.image.label_symm_type') -symm=spy.GetParam('user.image.label_symm')">%images_add_labels_to_non_H_atoms%</a>
   </td>
 
   <td>%Symm%</td>
@@ -62,6 +62,7 @@
       value=' '
       manage
       readonly
+      onchange="spy.SetParam(
     >
     </font>
   </td>
@@ -77,7 +78,7 @@
       bgcolor="GetVar('HtmlInputBgColour')"
       items="'default;subscript;brackets'"
       valign='center'
-      name="IMAGE_SETTINGS_LABEL_TYPE"
+      name="IMAGE_SETTINGS_LABEL_SYMM_TYPE"
       value='default'
       manage
       readonly

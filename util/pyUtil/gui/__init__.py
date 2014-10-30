@@ -66,6 +66,23 @@ def SwitchPanel(name="home"):
 
 olex.registerFunction(SwitchPanel, False, "gui")
 
+
+def SwitchTool(name=None):
+  #e.g h2-tools-images
+  l = name.split("-")
+  SwitchPanel(l[1])
+  OV.setItemstate("%s 1" %name)
+olex.registerFunction(SwitchTool, False, "gui")
+
+def PopTool(name=None):
+  #e.g h2-tools-images
+  pop_name = name
+  wFilePath = os.sep.join([OV.BaseDir(), "etc", name])
+  title = name
+  olx.Popup(pop_name, wFilePath,
+    b="tcr", t=title)
+olex.registerFunction(PopTool, False, "gui")
+
 def UpdateWeight():
   w = OV.GetParam('snum.refinement.suggested_weight')
   if not w:
@@ -158,10 +175,13 @@ def do_sort():
     OV.GetParam("user.sorting.cat2", ''),
     OV.GetParam("user.sorting.cat3", ''),
     OV.GetParam("user.sorting.cat4", '')))
-  if olx.html.GetState('atom_sequence_inplace') == 'true':
+  try:
+    if olx.html.GetState('atom_sequence_inplace') == 'true':
       args[0] += 'w'
-  elif olx.html.GetState('atom_sequence_first') == 'true':
+    elif olx.html.GetState('atom_sequence_first') == 'true':
       args[0] += 'f'
+  except:
+    pass
   if OV.GetParam("user.sorting.h", False):
     args[0] += 'h'
   args += olx.GetVar("sorting.atom_order", "").split()
@@ -171,5 +191,4 @@ def do_sort():
     args.append('+' + arg3)
   args += olx.GetVar("sorting.moiety_order", "").split()
   olx.Sort(*args)
-
 olex.registerFunction(do_sort, False, "gui")
