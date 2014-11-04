@@ -101,6 +101,7 @@ def make_new_plugin(name,overwrite=False):
       import shutil
       shutil.rmtree(path)
     else:
+      print "This plugin already exists."
       return
   if not os.path.exists (path):
     try:
@@ -146,6 +147,14 @@ class %(name)s(PT):
     self.deal_with_phil(operation='read')
     self.print_version_date()
     self.setup_gui()
+    OV.registerFunction(self.print_formula,True,"%(name)s")
+
+  def print_formula(self):
+    formula = {}
+    for element in str(olx.xf.GetFormula('list')).split(','):
+      element_type, n = element.split(':')
+      print "%%s: %%s" %%(element_type, n)
+      formula.setdefault(element_type, float(n))
 
 %(name)s_instance = %(name)s()
 print "OK."''' %d
@@ -175,11 +184,18 @@ print "OK."''' %d
 
   html = r'''
 <!-- #include tool-top gui/blocks/tool-top.htm;image=#image;onclick=#onclick;1; -->
-<!-- #include tool-row-help gui/blocks/tool-row-help.htm;name=%(name)s; help_ext=%(name)s;1; -->
+<!-- #include tool-row-help gui/blocks/tool-row-help.htm;name=%(name)s_1; help_ext=%(name)s_1;1; -->
   <td ALIGN='left' width='100%%'>
     <b>Welcome to your new Plugin: %(name)s</b>
   </td>
 <!-- #include row_table_off gui/blocks/row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui/blocks/tool-row-help.htm;name=%(name)s_2; help_ext=%(name)s_2;1; -->
+  <td ALIGN='left' width='100%%'>
+    <b><a href="spy.%(name)s.print_formula()">RUN</a>
+  </td>
+<!-- #include row_table_off gui/blocks/row_table_off.htm;1; -->
+
 <!-- #include tool-footer gui/blocks/tool-footer.htm;colspan=2;1; -->
   ''' %d
   wFile = open("%(plugin_base)s/plugin-%(name)s/%(name_lower)s.htm"%d,'w')
@@ -187,105 +203,26 @@ print "OK."''' %d
   wFile.close()
 
 
-  rFile = open(xld, 'rb').read()
-  if name in repr(rFile):
+  if not os.path.exists(xld):
+    wFile = open(xld, 'w')
+    t = r'''
+<Plugin
+  <%(name)s>
+>''' %d
+    wFile.write(t)
+    return
+
+  rFile = open(xld, 'rb').readlines()
+  if name in " ".join(rFile):
     return
   wFile = open(xld, 'w')
   for line in rFile:
     wFile.write(line)
-    if line.strip().lower() == "<plugin":
-      wFile.write ("<%(name)s>" %d)
+    if line.strip() == "<Plugin":
+      wFile.write (r"  <%(name)s>\n" %d)
   wFile.close()
 
   print "New Plugin %s created. Please restart Olex2" %name
 
 
-
 OV.registerFunction(make_new_plugin,False,'pt')
-
-
-def register_new_module(module=None, username=None, pwd=None):
-  if not module:
-    print "Pleaes provide the name for the module you would like to install."
-    return
-  if not username:
-    print("Please provide a username and password")
-    return
-  if not pwd:
-    print("Please provide a username and password")
-    return
-  OV.Cursor("Please wait while %s will be installed" %module)
-  mac_address = OV.GetMacAddress()[0]
-  computer_name = os.getenv('COMPUTERNAME')
-  url = "http://www.olex2.org/odac/register_new_module"
-  olex2_tag = OV.GetTag()
-  values = {'__ac_password':pwd,
-            '__ac_name':username,
-            'olex2Tag':olex2_tag,
-            'computerName':computer_name,
-            'username':username,
-            'context':"None",
-            'macAddress':mac_address,
-            'module':module,
-            }
-  try:
-    f = HttpTools.make_url_call(url, values)
-  except Exception, err:
-    print "Something went wrong: %s" %err
-    return
-
-  f = f.read()
-
-  if not f:
-    print "Please provide a valid username and password, and make sure your computer is online."
-    return
-
-  elif not f.endswith(".exe"):
-    if type(f) == str:
-      print "The requested installer could not be made. Instead the server returned: %s" %f
-    else:
-      print "An unknown error occurred: %s" %repr(f)
-    return
-
-
-  p = "%s/Olex2u/OD/%s" %(os.environ['ALLUSERSPROFILE'], olex2_tag)
-  p = os.path.abspath(p)
-  if not os.path.exists(p):
-    os.makedirs(p)
-  else:
-    try:
-      import shutil
-      shutil.rmtree(p)
-      os.makedirs(p)
-    except Exception, err:
-      print "The installer could not delete this folder: %s" %p
-      print "Please remove all files in this folder manually and run the installer again."
-      olex.m('exec -o explorer "%s"' %p)
-      return
-
-
-  cont = GetHttpFile(f, force=True, fullURL = True)
-  if cont:
-    name = "%s Installer.exe" %module
-    wFile = open("%s/%s" %(p, name),'wb')
-    wFile.write(cont)
-    wFile.close()
-  else:
-    print "Could not get %s" %f
-    return
-  ins = "%s/%s Installer.exe" %(module, p)
-  cmd = r"%s /S" %ins
-#  print cmd
-  olx.Shell(ins)
-#  Popen(cmd, shell=True, stdout=PIPE).stdout
-  for i in xrange(10):
-    try:
-      os.remove(ins)
-      break
-    except:
-      time.sleep(5)
-  print "%s is now installed on your computer." %module
-  print "Please restart Olex2 now."
-  OV.Cursor()
-
-OV.registerFunction(register_new_module,False,'pt')
