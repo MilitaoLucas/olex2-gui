@@ -25,8 +25,12 @@ def make_url_call_with_proxy(url, proxy, values, http_timeout = 7):
 def make_url_call(url, values, http_timeout = 7):
   global use_proxy_settings
   global proxy
-  proxy_used = False
-  if use_proxy_settings:
+  localhost = False
+  if isinstance(url, urllib2.Request):
+    localhost = 'localhost' in url.get_host().lower()
+  elif isinstance(url, basestring):
+    localhost = 'localhost' in url
+  if use_proxy_settings and not localhost:
     try:
       read_usettings()
       res = make_url_call_with_proxy(url, proxy, values, http_timeout)
