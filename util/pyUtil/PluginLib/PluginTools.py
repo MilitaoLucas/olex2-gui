@@ -210,6 +210,7 @@ print "OK."''' %d
   <%(name)s>
 >''' %d
     wFile.write(t)
+    wFile.close()
     return
 
   rFile = open(xld, 'rb').readlines()
@@ -219,7 +220,9 @@ print "OK."''' %d
   for line in rFile:
     wFile.write(line)
     if line.strip() == "<Plugin":
-      wFile.write (r"  <%(name)s>\n" %d)
+      wFile.write (r'''
+      <%(name)s>
+''' %d)
   wFile.close()
 
   print "New Plugin %s created. Please restart Olex2" %name
