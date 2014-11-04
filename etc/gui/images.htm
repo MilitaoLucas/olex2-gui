@@ -47,7 +47,6 @@
     <a href="label -type=spy.GetParam('user.image.label_symm_type') -symm=spy.GetParam('user.image.label_symm')"><b>%images_add_labels_to_atoms%</b></a>&nbsp;|
     <a href="label $*-H,Q -type=spy.GetParam('user.image.label_symm_type') -symm=spy.GetParam('user.image.label_symm')">%images_add_labels_to_non_H_atoms%</a>
   </td>
-
   <td>%Symm%</td>
   <td name=IMAGE_SETTINGS_LABEL_SYMM width='20%'>
     <font size="$GetVar('HtmlFontSizeControls')">
@@ -59,10 +58,10 @@
       items="'none;$;#;full'"
       valign='center'
       name="IMAGE_SETTINGS_LABEL_SYMM"
-      value=' '
+      value='$spy.GetParam(user.image.label_symm)'
       manage
       readonly
-      onchange="spy.SetParam(
+      onchange="spy.SetParam('user.image.label_symm',html.GetValue('~name~'))"
     >
     </font>
   </td>
@@ -79,9 +78,10 @@
       items="'default;subscript;brackets'"
       valign='center'
       name="IMAGE_SETTINGS_LABEL_SYMM_TYPE"
-      value='default'
+      value='$spy.GetParam(user.image.label_symm_type)'
       manage
       readonly
+      onchange="spy.SetParam('user.image.label_symm_type',html.GetValue('~name~'))"
     >
     </font>
   </td>
