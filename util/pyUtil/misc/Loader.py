@@ -390,6 +390,9 @@ def getCurrentModuleName():
   return "%d" %available_modules.index(current_module)
 
 def AskToUpdate():
+  import HttpTools
+  if not HttpTools.auto_update:
+    return
   global avaialbaleModulesRetrieved
   if not avaialbaleModulesRetrieved and olx.HasGUI() == 'true':
     olx.Schedule("spy.plugins.AskToUpdate()")
