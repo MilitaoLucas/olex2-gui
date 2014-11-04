@@ -65,6 +65,8 @@ class person:
       display = "%s, %s%s" %(surname, first_initial, second_initial)
     else:
       display = "%s %s %s" %(self.firstname, self.middlename, self.lastname)
+      while "  " in display:
+        display = display.replace("  ", " ")
     return display
 
   def as_dict(self):
