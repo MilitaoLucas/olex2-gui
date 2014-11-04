@@ -3,7 +3,10 @@
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
-OV.use_proxy_settings = True
+auto_update = True
+use_proxy_settings = True
+proxy = None
+
 import urllib2
 import os
 import olx
@@ -20,15 +23,17 @@ def make_url_call_with_proxy(url, proxy, values, http_timeout = 7):
 
 
 def make_url_call(url, values, http_timeout = 7):
+  global use_proxy_settings
+  global proxy
   proxy_used = False
-  if OV.use_proxy_settings:
+  if use_proxy_settings:
     try:
-      proxy = get_proxy_from_usettings()
+      read_usettings()
       res = make_url_call_with_proxy(url, proxy, values, http_timeout)
     except urllib2.URLError: #try system settings
       try:
         res = urllib2.urlopen(url,values, http_timeout)
-        OV.use_proxy_settings = False
+        use_proxy_settings = False
       except Exception:
         raise
   else:
@@ -36,24 +41,29 @@ def make_url_call(url, values, http_timeout = 7):
       res = urllib2.urlopen(url,values, http_timeout)
     except urllib2.URLError: #try setting file
       try:
-        proxy = get_proxy_from_usettings()
+        read_usettings()
         res = make_url_call_with_proxy(url, proxy, values)
-        OV.use_proxy_settings = True
+        use_proxy_settings = True
       except Exception:
         raise
   return res
 
-def get_proxy_from_usettings():
-  proxy = None
+def read_usettings():
+  global proxy
+  global auto_update
+  if proxy:
+    return proxy
   settings_filename = "%s/usettings.dat" %olx.app.ConfigDir()
   if not os.path.exists(settings_filename):
     settings_filename = "%s/usettings.dat" %olx.app.BaseDir()
   if not os.path.exists(settings_filename):
     return proxy
-  rFile = open(settings_filename)
-  lines = rFile.readlines()
-  rFile.close()
+  lines = open(settings_filename).readlines()
   for line in lines:
     if line.startswith('proxy='):
-      proxy = line.split('proxy=')[1].strip()
+      proxy = line.split('=')[-1].strip()
+    elif line.startswith('update='):
+      v = line.split('=')[-1].strip()
+      if v == 'Never':
+        auto_update = False
   return proxy
