@@ -61,6 +61,8 @@ class UsersDB:
         self.setMessage("Please select a site to update")
         return
       self.site = ud.site()
+    else:
+      self.site.id = id
     for i in self.site_items:
       self.site.__dict__[i] = olx.html.GetValue(self.ctrl(i))
     name = self.site.name.strip()
@@ -113,6 +115,8 @@ class UsersDB:
         self.setMessage("Please select a person to update")
         return
       self.person = ud.person(self.site.id)
+    else:
+      self.person.id = id
     for i in self.person_items:
       self.person.__dict__[i] = olx.html.GetValue(self.ctrl(i))
     lastname = self.person.lastname.strip()
