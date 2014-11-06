@@ -179,7 +179,7 @@ class CifTools(ArgumentParser):
     author_loop = self.cif_block.get_loop('_publ_author', None)
     if author_loop:
       OV.SetParam('snum.metacif.publ_author_names',
-                  ';'.join(author_loop.get('_publ_author_name', [])).replace('\'', '').replace('"', ''))
+                  ';'.join(author_loop.get('_publ_author_name', [])).replace('"', ''))
 
   def update_manageable(self):
     self.sort_crystal_dimensions()
