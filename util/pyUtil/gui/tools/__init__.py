@@ -104,7 +104,7 @@ def start_where():
 olex.registerFunction(start_where, False, "gui.tools")
 
 
-def flash_gui_control(control):
+def flash_gui_control(control, wait=300):
   ''' Flashes a control on the GUI in order to highlight it's position '''
   if ';' in control:
     n = int(control.split(';')[1])
@@ -118,6 +118,11 @@ def flash_gui_control(control):
     control_image = control.lower().split('@')[0]
   else:
     control_image = control
+
+  if not olx.fs.Exists("%son.png" %control_image):
+    print "This image %s does not exist. So I can't make it blink" %control_image
+    return
+
   for i in xrange(n):
     if "element" in control:
       new_image = "up=%son.png" %control_image
@@ -129,7 +134,7 @@ def flash_gui_control(control):
       new_image = "up=%soff.png" %control_image
       olx.html.SetImage(control_name,new_image)
     OV.Refresh()
-    olx.Wait(300)
+    olx.Wait(wait)
 
     if "element" in control:
       new_image = "up=%soff.png" %control
@@ -141,7 +146,7 @@ def flash_gui_control(control):
       new_image = "up=%shighlight.png" %control_image
       olx.html.SetImage(control_name,new_image)
     OV.Refresh()
-    olx.Wait(300)
+    olx.Wait(wait)
 
   if not control.endswith('_bg'):
     new_image = "up=%soff.png" %control_image

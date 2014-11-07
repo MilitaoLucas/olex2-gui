@@ -37,22 +37,22 @@ class AutoDemo():
       c = IT.RGBToHTMLColor(c)
     else:
       c = IT.decimalColorToHTMLcolor(int(olx.gl.lm.ClearColor()))
-    
+
     if c != "#ffffff":
       self.font_colour = '#ffffff'
       self.font_colour_code = '#aaaaff'
       self.font_colour_bold = '#aaaaff'
     else:
       self.font_colour = '#000000'
-      self.font_colour_code = '#000088'
-      self.font_colour_bold = '#444444'
+      self.font_colour_code = '#222222'
+      self.font_colour_bold = '#555555'
 
     if type(c) is long:
       c = IT.decimalColorToHTMLcolor(int(olx.gl.lm.ClearColor()))
-    
+
     self.bg_colour = c
     self.button_bar_colour = IT.RGBToHTMLColor(IT.adjust_colour(self.bg_colour, luminosity=0.8))
-    
+
   def read_tutorial_definitions(self):
     ## First read in the commands that preceeds all tutorials
     rFile = open("%s/etc/tutorials/all_tutorials_preamble.txt" %OV.BaseDir(),'r')
@@ -86,7 +86,7 @@ class AutoDemo():
       self.run_demo_item()
     self.interactive = True
     self.end_tutorial()
-    
+
   def run_autodemo(self, name, other_popup_name=""):
 
     try:
@@ -96,22 +96,22 @@ class AutoDemo():
       self.item_counter = 0
       if other_popup_name and olx.IsPopup(other_popup_name):
         olx.html.Hide(other_popup_name)
-      
+
       if name:
         self.name = name
-      
+
       self.read_tutorial_definitions()
-  
+
       olx.Clear()
-      
+
       self.get_demo_item()
       cmd_type = self.run_demo_item()
-      
-      
+
+
     except Exception, err:
       print "+++ ERROR IN TUTORIALS: %s" %err
       self.end_tutorial()
-    
+
     #please_exit = False
     #if not self.interactive:
       #self.txt = "Press Return to advance this tutorial!"
@@ -140,7 +140,7 @@ class AutoDemo():
   def cancel_demo_item(self):
     olx.html.Hide(self.pop_name)
     self.end_tutorial()
-    
+
   def back_demo_item(self):
     found_p = 2
     while found_p:
@@ -241,16 +241,16 @@ class AutoDemo():
     olx.Popup(name, wFilePath, **{'b':'tc', 't':name, 'w':boxWidth, 'h':boxHeight, 'x':x, 'y':y})
 
   def format_txt(self):
-    txt = self.txt
-    txt = txt.replace('<b>','<b><font color=%s>' %self.font_colour_bold)
-    txt = txt.replace('</b>','</font></b>')
-    txt = txt.replace('<c>','<b><code><font color=%s>' %self.font_colour_code)
-    txt = txt.replace('</c>','</font></code></b>')
-    self.txt = txt
+    re_l = [
+      ('\*\*(.*?)\*\*', r'<b><font color=%s>\1</b>' %self.font_colour_bold),
+      ('_(.*?)_', r'<code><font color=%s>\1</code>' %self.font_colour_code),
+      ('\*(.*?)\*', r'<i><font color=%s>\1</i>' %self.highlight_colour),
+    ]
+    self.txt = olexex.run_regular_expressions(self.txt, re_l)
 
   def stop_tutorial(self):
     self.stop_tutorial = True
-    
+
   def get_demo_item(self):
     retItem = None
     while not retItem:
@@ -279,13 +279,13 @@ class AutoDemo():
             val = OV.GetParam(val)
         setattr(self, var, val)
         continue
-      
+
       retItem = item
     self.cmd_type = item.split(":")[0]
     self.cmd_content = item.split(":")[1]
-  
-    
-    
+
+
+
   def run_demo_item(self):
     cmd_type = self.cmd_type
     cmd_content = self.cmd_content
@@ -318,19 +318,19 @@ class AutoDemo():
           cmd_content = cmd_content.replace('reap "', 'reap ')
           cmd_content = cmd_content.rstrip('"')
         olex.m(cmd_content)
-  
+
       elif cmd_type == 'h':
         control = cmd_content
         from gui.tools import flash_gui_control
         flash_gui_control(control)
-        
-        
+
+
       if cmd_type != 'p':
         self.get_demo_item()
         self.run_demo_item()
-      
+
     OV.Refresh()
-    
+
   def switch_tab_for_tutorials(self, tabname):
     OV.setItemstate("index* 0")
     OV.setItemstate("logo 0")

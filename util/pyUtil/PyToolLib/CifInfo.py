@@ -111,6 +111,9 @@ class CifTools(ArgumentParser):
     'snum.report.crystal_mounting_method': '_olex2_exptl_crystal_mounting_method',
     'snum.report.submission_special_instructions': '_olex2_submission_special_instructions',
     'snum.report.submission_original_sample_id': '_olex2_submission_original_sample_id',
+    'snum.report.date_submitted': '_olex2_date_sample_submission',
+    'snum.report.date_collected': '_olex2_date_sample_data_collection',
+    'snum.report.date_completed': '_olex2_date_sample_completion',
   }
 
   def __init__(self):
@@ -176,7 +179,7 @@ class CifTools(ArgumentParser):
     author_loop = self.cif_block.get_loop('_publ_author', None)
     if author_loop:
       OV.SetParam('snum.metacif.publ_author_names',
-                  ';'.join(author_loop.get('_publ_author_name', [])).replace('\'', '').replace('"', ''))
+                  ';'.join(author_loop.get('_publ_author_name', [])).replace('"', ''))
 
   def update_manageable(self):
     self.sort_crystal_dimensions()
@@ -533,7 +536,7 @@ class ExtractCifInfo(CifTools):
     if p and self.metacifFiles.curr_frames != self.metacifFiles.prev_frames:
       try:
         info = os.stat(p)
-        file_time = info.st_mtime
+        file_time = time.strftime('%Y-%m-%d', time.localtime(info.st_mtime))
       except:
         print "Error reading Bruker frame file %s" %p
     # OD Data Collection Date
@@ -541,7 +544,7 @@ class ExtractCifInfo(CifTools):
     if p:
       try:
         info = os.stat(p)
-        file_time = info.st_mtime
+        file_time = time.strftime('%Y-%m-%d', time.localtime(info.st_mtime))
         OV.SetParam('snum.report.date_collected', file_time)
       except:
         print "Error reading OD frame Date %s" %p
@@ -1002,7 +1005,7 @@ The \l/2 correction factor is %(lambda_correction)s.
             versiontext = "?-"
           if len(versiontext) > 2:
             versiontext += version
-            versiontext += " (Bruker,%s)" %version.split('/')[0]
+            versiontext += " (Bruker,%s)" %version.split(os.sep)[0]
           else:
             versiontext += version
         else:

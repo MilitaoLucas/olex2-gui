@@ -7,6 +7,7 @@ import olx
 import os
 import time
 import math
+import re
 import olex_core
 import sys
 import programSettings
@@ -732,20 +733,21 @@ if haveGUI:
   OV.registerFunction(GetHklFileList)
 
 def GetRInfo(txt="",format='html'):
+  if not OV.HasGUI():
+    return
+
   use_history_for_R1_display = True
   if use_history_for_R1_display:
     if olx.IsFileType('cif') == "true":
       R1 = olx.Cif('_refine_ls_R_factor_gt')
     else:
-      tree = History.tree
-      if tree.active_node is not None:
-        R1 = tree.active_node.R1
-      else:
-        R1 = 'n/a'
-    if OV.HasGUI():
-      font_size = OV.GetParam('gui.html.font_size_large')
-    else:
-      font_size = 14
+      R1 = OV.GetParam('snum.refinement.last_R1')
+      #tree = History.tree
+      #if tree.active_node is not None:
+        #R1 = tree.active_node.R1
+      #else:
+        #R1 = 'n/a'
+    font_size = OV.GetParam('gui.html.font_size_large')
 
     if 'html' in format:
       try:
@@ -1804,15 +1806,23 @@ def getCellHTML():
   return html
 OV.registerFunction(getCellHTML)
 
-
-
-def formatted_date_from_timestamp(dte):
+def formatted_date_from_timestamp(dte,date_format=None):
+  if not date_format:
+    date_format = OV.GetParam('snum.report.date_format')
+  from datetime import date
+  from datetime import datetime
   if not dte:
     return "No Date"
-
+  if "-" in dte:
+    if len(dte.split("-")[0]) == 4:
+      try:
+        dte = datetime.strptime(dte, "%Y-%m-%d")
+        dte = dte.strftime(date_format)
+        return dte
+      except:
+        return dte
   if "." in dte:
     dte = OV.GetParam(dte)
-  from datetime import date
   if not dte:
     return None
   try:
@@ -1820,9 +1830,8 @@ def formatted_date_from_timestamp(dte):
   except:
     return "Not A Date"
   dte = date.fromtimestamp(dte)
-  return dte.strftime(OV.GetParam('snum.report.date_format'))
+  return dte.strftime(date_format)
 OV.registerFunction(formatted_date_from_timestamp)
-
 
 if not haveGUI:
   def tbxs(name):
@@ -1858,3 +1867,14 @@ def GetHttpFile(f, force=False, fullURL = False):
   else:
     retVal = None
   return retVal
+
+def run_regular_expressions(txt, re_l, specific = ""):
+  for pair in re_l:
+    if specific:
+      if pair[0] != specific:
+        continue
+    regex = re.compile(r"%s" %pair[0], re.X|re.M|re.S)
+    replace = pair[1].strip("'")
+    replace = pair[1].strip('"')
+    txt = regex.sub(r"%s" %replace, txt)
+  return txt
