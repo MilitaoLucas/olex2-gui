@@ -1347,6 +1347,13 @@ def MakeHoverButtonOn(name,cmds,btn_bg='table_firstcol_colour'):
   if "None" in name:
     return ""
   global hover_buttons
+  btn_type = name.split("-")[0]
+  btn_name = name.split("@")[0]#.lower()
+
+  if olx.fs.Exists(btn_name + "off.png") != "true":
+    from PilTools import TI
+    TI.produce_buttons(button_names=[name], btn_type="_%s" %btn_type)
+
   click_console_feedback = False
   n = name.split("-")
   d = {'bgcolor': OV.GetParam('gui.html.%s' %btn_bg)}

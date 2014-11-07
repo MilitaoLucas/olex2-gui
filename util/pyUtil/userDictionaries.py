@@ -15,6 +15,39 @@ localList = None
 affiliations = None
 experimantal = None
 
+def sql_update_str(table_name, d):
+  sql = ["UPDATE %s SET" %table_name]
+  fields = []
+  for k,v in d.iteritems():
+    if k != 'id':
+      if v is None: v = ""
+      elif isinstance(v, basestring):
+        v = v.replace("'", "''")
+      fields.append("%s='%s'" %(k, v))
+  sql.append("%s where id='%s'" %(','.join(fields), d['id']))
+  res = ' '.join(sql)
+  return res
+
+def sql_insert_str(table_name, d):
+  sql = ["INSERT INTO %s" %table_name]
+  fields, values = [], []
+  for k,v in d.iteritems():
+    if k != 'id':
+      fields.append(k)
+      if v is None: v = ""
+      elif isinstance(v, basestring):
+        v = v.replace("'", "''")
+      values.append("'%s'" %v)
+  sql.append("(%s)" %(','.join(fields)))
+  sql.append("VALUES (%s)" %(','.join(values)))
+  res = ' '.join(sql)
+  return res
+
+def get_sql(table_name, d):
+  if not d.get('id', None):
+    return sql_insert_str(table_name, d)
+  return sql_update_str(table_name, d)
+
 class person:
   def __init__(self, affiliationid, id=None, firstname="", middlename="",
                lastname="", email="", phone=""):
@@ -38,17 +71,7 @@ class person:
 
   def update(self):
     cursor = DBConnection().conn.cursor()
-    if self.id is None:
-      sql = "INSERT into person " +\
-       "(id,affiliationid,firstname,middlename,lastname,email,phone) values (" + \
-       "NULL,%s,'%s','%s','%s','%s','%s')" %(self.affiliationid, self.firstname,
-         self.middlename, self.lastname, self.email, self.phone)
-    else:
-      sql = """UPDATE person SET affiliationid=%s, firstname='%s',
-      middlename='%s',lastname='%s', email='%s',phone='%s' where id=%s""" %(
-        self.affiliationid, self.firstname, self.middlename, self.lastname,
-        self.email, self.phone, self.id)
-    cursor.execute(sql)
+    cursor.execute(get_sql('person', self.__dict__))
     DBConnection().conn.commit()
     self.lastrowid = cursor.lastrowid
     return self
@@ -65,6 +88,8 @@ class person:
       display = "%s, %s%s" %(surname, first_initial, second_initial)
     else:
       display = "%s %s %s" %(self.firstname, self.middlename, self.lastname)
+      while "  " in display:
+        display = display.replace("  ", " ")
     return display
 
   def as_dict(self):
@@ -107,47 +132,14 @@ class site:
 
   def update(self):
     cursor = DBConnection().conn.cursor()
-    if self.id is None:
-      sql = "INSERT into affiliation " +\
-       "(id,name,department,address,city,postcode,country) values (" + \
-       "NULL,'%s','%s','%s','%s','%s','%s')" %(self.name, self.department,
-        self.address, self.city, self.postcode, self.country)
-    else:
-      sql = """UPDATE affiliation SET name='%s',department='%s',address='%s',
-      city='%s',postcode='%s',country='%s' where id=%s""" %(self.name,
-        self.department, self.address, self.city, self.postcode, self.country,
-        self.id)
-    cursor.execute(sql)
+    cursor.execute(get_sql('affiliation', self.__dict__))
     DBConnection().conn.commit()
     self.lastrowid = cursor.lastrowid
     return self
 
   def as_dict(self):
-    return self.__dict__
-
-def sql_update_str(table_name, d, id_name):
-  sql = ["UPDATE %s SET" %table_name]
-  for k,v in d.iteritems():
-    if k != id_name:
-      sql.append("%s='%s'" %(k, v))
-  sql.append("where %s='%s'" %(id_name, d[id_name]))
-  return ' '.join(sql)
-
-def sql_insert_str(table_name, d, id_name):
-  sql = ["INSERT INTO %s" %table_name]
-  fields, values = [], []
-  for k,v in d.iteritems():
-    if k != id_name:
-      fields.append(k)
-      values.append("'%s'" %v)
-  sql.append("(%s)" %(''.join(fields)))
-  sql.append("(%s)" %(''.join(values)))
-  return ' '.join(sql)
-
-def get_sql(table_name, d, id_name):
-  if not d.get(id_name, None):
-    return sql_insert_str(table_name, d, id_name)
-  return sql_update_str(table_name, d, id_name)
+    d = copy.deepcopy(self.__dict__)
+    return d
 
 class LocalList:
   def __init__(self):
@@ -321,7 +313,7 @@ class Persons:
       elif '.' in parts[1]:
         parts[1] = parts[1].split('.')[0]
         pass
-      sql = "SELECT * FROM person WHERE lastname = '%s' AND firstname LIKE '%s%%'" %(parts[i], parts[j])
+      sql = 'SELECT * FROM person WHERE lastname = "%s" AND firstname LIKE "%s%%"' %(parts[i], parts[j])
     cursor = DBConnection().conn.cursor()
     cursor.execute(sql)
     persons = cursor.fetchall()
