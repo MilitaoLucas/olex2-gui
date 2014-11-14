@@ -416,3 +416,15 @@ def deal_with_gui_phil(action):
   else:
     olx.gui_phil_handler.save_param_file(
       file_name=gui_phil_path, scope_name='gui', diff_only=True)
+
+
+def run_regular_expressions(txt, re_l, specific = ""):
+  for pair in re_l:
+    if specific:
+      if pair[0] != specific:
+        continue
+    regex = re.compile(r"%s" %pair[0], re.X|re.M|re.S)
+    replace = pair[1].strip("'")
+    replace = pair[1].strip('"')
+    txt = regex.sub(r"%s" %replace, txt)
+  return txt
