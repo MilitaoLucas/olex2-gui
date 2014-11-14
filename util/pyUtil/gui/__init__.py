@@ -106,16 +106,17 @@ olex.registerFunction(GetPathParam, False, "gui")
 
 
 def GetFileList(root, extensions):
+  import ntpath
   l = []
   if type(extensions) == unicode:
-    extensions = [extensions]
+    extensions = extensions.split(";")
   for extension in extensions:
     extension = extension.strip("'")
-    g = glob.glob(r"%s/*.%s" %(root, extension))
+    g = glob.glob(r"%s%s*.%s" %(root, os.sep, extension))
     for f in g:
       f = OV.standardizePath(f)
-      name = f.split(".%s"%extension)[0].split("/")[-1]
-      l.append((name,f))
+      name =  f.split(".%s"%extension)[0].split("/")[-1]
+      l.append((ntpath.basename(f),f))
   return l
 olex.registerFunction(GetFileList, False, "gui")
 
