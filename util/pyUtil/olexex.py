@@ -1867,14 +1867,3 @@ def GetHttpFile(f, force=False, fullURL = False):
   else:
     retVal = None
   return retVal
-
-def run_regular_expressions(txt, re_l, specific = ""):
-  for pair in re_l:
-    if specific:
-      if pair[0] != specific:
-        continue
-    regex = re.compile(r"%s" %pair[0], re.X|re.M|re.S)
-    replace = pair[1].strip("'")
-    replace = pair[1].strip('"')
-    txt = regex.sub(r"%s" %replace, txt)
-  return txt
