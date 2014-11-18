@@ -33,6 +33,9 @@ time_add = 0
 global hover_buttons
 hover_buttons = OV.GetParam('olex2.hover_buttons')
 
+import gui
+
+
 def makeHtmlTable(list):
   """ Pass a list of dictionaries, with one dictionary for each table row.
 
@@ -319,6 +322,7 @@ def make_help_box(args):
   d = {}
   name = args.get('name', None)
   name = getGenericSwitchName(name)
+  helpTxt = args.get('helpTxt', None)
   popout = args.get('popout', False)
   box_type = args.get('type', 'help')
   if popout == 'false':
@@ -353,7 +357,8 @@ def make_help_box(args):
       titleTxt = "%s: %s" %(t[0], t[1])
 
   title = title.title()
-  helpTxt = OV.TranslatePhrase("%s-%s" %(help_src, box_type))
+  if not helpTxt or helpTxt == "#helpTxt":
+    helpTxt = OV.TranslatePhrase("%s-%s" %(help_src, box_type))
   helpTxt = helpTxt.replace("\r", "")
   helpTxt, d = format_help(helpTxt)
   d.setdefault('next',name)
@@ -456,7 +461,9 @@ def make_help_box(args):
   else:
     olx.html.Load(wFilePath)
 #  popup '%1-tbxh' 'basedir()/etc/gui/help/%1.htm' -b=tc -t='%1' -w=%3 -h=%2 -x=%4 -y=%5">
-OV.registerMacro(make_help_box, 'name-Name of the Box&;popout-True/False&;type-Type of Box (help or tutorial)')
+
+OV.registerMacro(make_help_box, 'name-Name of the Box&;popout-True/False&;type-Type of Box (help or tutorial)&;helpTxt-The help text to appear in the help box')
+
 def make_warning_html(colspan):
   txt = "htmltool-warning"
   txt = OV.TranslatePhrase(txt)
@@ -704,6 +711,7 @@ def format_help(txt):
   d = {}  # initialise a dictionary, which will be used to store metadata.
 
   ## find all occurences of strings between **..**. These should be comma separated things to highlight.
+
   regex = re.compile(r"\*\* (.*?)  \*\*", re.X)
   l = regex.findall(txt)
   if l:
@@ -724,6 +732,8 @@ def format_help(txt):
     dt = dt.replace(":", "':'")
     dt = "{'%s'}" %dt
     d = eval(dt)
+
+
   ## find all occurences of <lb> and replace this with a line-break in a table.
   regex = re.compile(r"<lb>", re.X)
   txt = regex.sub(r"<br>", txt)
@@ -744,7 +754,7 @@ def format_help(txt):
   regex = re.compile(r"n \^ (.*?)  \^ n", re.X)
   txt = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='1'><tr bgcolor=#efefef><td><font size=-1><b>Note: </b>\1</font></td></tr></table>", txt)
 
-  ### find all occurences of strings between TT..TT. These are keys to pressthe headers for tip of the day.
+  ### find all occurences of strings between TT..TT. These are keys to press the headers for tip of the day.
   #regex = re.compile(r"TT (.*?)  TT", re.X)
   #txt = regex.sub(r"<tr><td align='right'><a href='spy.run_autodemo(\1)'><zimg src=tutorial.png></a></td></tr>", txt)
 
@@ -805,6 +815,10 @@ def format_help(txt):
     s = regex.sub(r"\2", txt)
   else:
     s = txt
+
+  l = [("\*(.*?)\*", "<b>\\1</b>")]
+  s = gui.tools.run_regular_expressions(s, l)
+
 
   return s, d
 
