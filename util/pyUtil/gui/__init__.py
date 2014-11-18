@@ -104,7 +104,6 @@ def GetPathParam(variable, default=None):
   return retVal
 olex.registerFunction(GetPathParam, False, "gui")
 
-
 def GetFileList(root, extensions):
   import ntpath
   l = []
@@ -115,7 +114,6 @@ def GetFileList(root, extensions):
     g = glob.glob(r"%s%s*.%s" %(root, os.sep, extension))
     for f in g:
       f = OV.standardizePath(f)
-      name =  f.split(".%s"%extension)[0].split("/")[-1]
       l.append((ntpath.basename(f),f))
   return l
 olex.registerFunction(GetFileList, False, "gui")
@@ -127,7 +125,6 @@ def GetFileListAsDropdownItems(root, extensions):
     txt += "%s<-%s;" %(item[0], item[1])
   return txt
 olex.registerFunction(GetFileListAsDropdownItems, False, "gui")
-
 
 def GetFolderList(root):
   import os
