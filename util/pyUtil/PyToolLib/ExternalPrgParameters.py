@@ -1131,8 +1131,8 @@ def defineExternalPrograms():
     program_type='solution',
     author="Luc Bourhis",
     reference="""Bourhis, L.J., Dolomanov, O.V., Gildea, R.J., Howard, J.A.K., Puschmann, H.
- (2013). in preparation.""",
-    brief_reference="Bourhis et al., 2013",
+ (2015). Acta Cryst. A, in press.""",
+    brief_reference="Bourhis et al., 2015",
     )
 
   SIR97 = Program(
