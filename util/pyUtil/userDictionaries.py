@@ -495,7 +495,7 @@ class DBConnection():
       s.department = a[1]
       s.address = (' '.join(filter(None, a[2:4]))).strip()
       s.city = a[4]
-      s.poscode = a[5]
+      s.postcode = a[5]
       s.update()
       self.conn.commit()
       adict[s.name] = s.lastrowid
