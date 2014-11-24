@@ -1528,99 +1528,80 @@ def getReportPhilItem(philItem=None):
 OV.registerFunction(getReportPhilItem)
 
 def getReportImageData(size='w400', imageName=None):
-
-  import PIL
   from PIL import Image
   from PIL import PngImagePlugin
   import StringIO
   import base64
   from PIL import ImageDraw
   from PIL import EpsImagePlugin
-  make_border = False
+  import StringIO
+  make_border = OV.GetParam('snum.report.image_border')
 
   size_type = size[:1]
   size = int(size[1:])
 
   if imageName is None:
     imageName = 'snum.report.image'
-    make_border = OV.GetParam('snum.report.image_border')
     if not OV.HasGUI():
-      return "No Image available in Headless Mode! <img width=0 src=''>"
+      return "No Image available in Headless Mode!"
 
   if "snum.report" in imageName:
     imagePath = OV.GetParam(imageName)
-
     if not imagePath:
       imageNameU = imageName.replace('snum', 'user')
       imagePath = OV.GetParam(imageNameU)
       if imagePath:
         OV.SetParam(imageName, imagePath)
 
-  if imagePath == "No Image" or imagePath is None:
+  if imagePath == "Live Picture":
+    with open(olx.BaseDir()+"%setc%stemplate.lip" %(
+           os.path.sep, os.path.sep), 'rb') as rFile:
+      rv = rFile.read()
+      rv += "<script type='application/json' id='model'>%s</script>" %(
+        olx.JSON())
+      rv += "<script type='application/json' id='style'>%s</script>" %(
+        olx.ExportColors('', 'current'))
+      return rv
+
+  if imagePath == "No Image" or not imagePath:
     return ""
-  if type(imagePath) == unicode:
-    imagePaths = []
-    imagePaths.append(imagePath)
-  else:
-    imagePaths = imagePath
-  html = ""
-  i = 0
-  for imagePath in imagePaths:
-    i += 1
-    if imagePath.startswith(r'BaseDir()'):
-      imagePath = "%s/%s" %(OV.BaseDir(), imagePath.lstrip('BaseDir()'))
-    if not os.path.exists(imagePath):
-      OV.SetParam(imageName, None)
-  #    print "The previously made screenshot has been removed. Please select 'screenshot' to make a new one"
-      return
-  #  else:
-  #    imagePath = r"%s/etc/CIF/styles/%s.png" %(OV.BaseDir(),imageName)
-    imageLocalSrc = imagePath.split("/")[-1:][0]
-    imageLocalSrc = imageLocalSrc.split("\\")[-1:][0]
+  if "Dir()" in imagePath: # data/base/str
+    imagePath = olex.f(imagePath)
+  if not os.path.exists(imagePath):
+    OV.SetParam(imageName, None)
+    return
+  IM = Image.open(imagePath)
+  oSize = IM.size
+  if size_type == "w":
+    if oSize[1] != size:
+      nHeight = int(oSize[1]*(size/oSize[0]))
+      nWidth = size
+      IM = IM.resize((nWidth, nHeight), Image.BICUBIC)
+  elif size_type == "h":
+    if oSize[0] != size:
+      nHeight = size
+      nWidth = int(oSize[0]*(size/oSize[1]))
+      IM = IM.resize((nWidth, nHeight), Image.BICUBIC)
 
-    IM = Image.open(imagePath)
-    oSize = IM.size
-    if size_type == "w":
-      if oSize[1] != size:
-        nHeight = int(oSize[1]*(size/oSize[0]))
-        nWidth = size
-        IM = IM.resize((nWidth, nHeight), Image.BICUBIC)
-    elif size_type == "h":
-      if oSize[0] != size:
-        nHeight = size
-        nWidth = int(oSize[0]*(size/oSize[1]))
-        IM = IM.resize((nWidth, nHeight), Image.BICUBIC)
+  if make_border:
+    from ImageTools import ImageTools
+    IT = ImageTools()
+    draw = ImageDraw.Draw(IM)
+    fill = '#ababab'
+    width, height = IM.size
+    for i in xrange(make_border):
+      draw.line((0,0,width-1,0), fill = fill)
+      draw.line((0,height -1,width-1,height -1), fill = fill)
+      draw.line((0,0,0,height - 1), fill = fill)
+      draw.line((width -1,0,width-1,height -1), fill = fill)
 
-    if make_border:
-      from ImageTools import ImageTools
-      IT = ImageTools()
-      draw = ImageDraw.Draw(IM)
-      fill = '#ababab'
-      width, height = IM.size
-      for i in xrange(make_border):
-        draw.line((i,i,width-1-i,i), fill = fill)
-        draw.line((i,height -1-i,width-1-i,height -1-i), fill = fill)
-        draw.line((i,i,i,height - 1-i), fill = fill)
-        draw.line((width -1-i,i,width-1-i,height -1-i), fill = fill)
-#      weight = make_border
-#      draw.line((0, int(weight/2)) + (IM.size[0], int(weight/2)), fill=fill, width=weight)
-#      draw.line((0, 0) + (0, IM.size[1]), fill=fill, width=weight)
-#      draw.line((IM.size[0] - weight, 0) + (IM.size[0] - weight, IM.size[1] - weight), fill=fill, width=weight)
-#      draw.line((0, IM.size[1] - weight ) + (IM.size[0] - weight, IM.size[1] - weight) , fill=fill, width=weight)
-#      del draw
-
-    p = "%s/report_tmp_%i.png" %(OV.DataDir(), i)
-    IM.save(p, "PNG")
-
-    rFile = open(p, 'rb')
-    img = rFile.read()
-    data = base64.b64encode(img)
-    d ='data:image/png;base64,' + data
-
-    html += '''
-  <!--[if IE]><img width=%s src='%s'><![endif]-->
-  <![if !IE]><img width=%s src='data:image/png;base64,%s'><![endif]>
-    '''%(int(size/2), imageLocalSrc, int(size/2), data)
+  out = StringIO.StringIO()
+  IM.save(out, "PNG")
+  data = base64.b64encode(out.getvalue())
+  html = '''
+<!--[if IE]><img width=%s src='%s'><![endif]-->
+<![if !IE]><img width=%s src='data:image/png;base64,%s'><![endif]>
+  '''%(int(size/2), os.path.split(imagePath)[1], int(size/2), data)
 
   return html
 OV.registerFunction(getReportImageData)
