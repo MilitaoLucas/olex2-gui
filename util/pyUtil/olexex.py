@@ -1554,10 +1554,10 @@ def getReportImageData(size='w400', imageName=None):
         OV.SetParam(imageName, imagePath)
 
   if imagePath == "Live Picture":
+    err = """<font color='red'><b>You may need extra modules to generate live
+ images</b></font>"""
     try:
       model = olx.JSON()
-      err = """<font color='red'><b>You may need extra modules to generate live
- images</b></font>"""
       if model == False:
         return err
       with open(olx.BaseDir()+"%setc%stemplate.lip" %(
