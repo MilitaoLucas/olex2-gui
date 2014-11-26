@@ -222,6 +222,20 @@ def updateKey(module):
       print("Error while updating the key for '%s': '%s'" %(module.name, e))
     return False
 
+def getCurrentPlatformString():
+  import platform
+  sname = platform.system().lower()
+  if sname == "darwin":
+    sname = "mac"
+  else:
+    sname = sname[:3]
+  arch= platform.architecture()[0]
+  if arch == "64bit":
+    sname += "64"
+  else:
+    sname += "32"
+  return sname
+
 def getAvailableModules_():
   global avaialbaleModulesRetrieved
   global current_module
@@ -255,6 +269,10 @@ def getAvailableModules_():
             module.internal = True
           else:
             module.internal = False
+          plat = m.find("platform", "")
+          if plat:
+            if getCurrentPlatformString() not in plat:
+              continue
           available_modules.append(module)
         except Exception, e:
           if debug:
