@@ -947,7 +947,7 @@ class Method_SIR(Method_solution):
     filename = OV.FileName()
     Z = float(olx.xf.au.GetZ())
     cell = ''.join(olx.xf.au.GetCell().split(','))
-    hklfile = OV.HKLSrc().split('/')[-1]
+    hklfile = OV.HKLSrc().split(os.sep)[-1]
     contents = ''
     for item in olx.xf.GetFormula('list').split(","):
         item = item.split(":")
@@ -1055,8 +1055,8 @@ def defineExternalPrograms():
   levenberg_marquardt = Method_cctbx_refinement(levenberg_marquardt_phil)
 
   # define solution programs
-  
- 
+
+
   ShelXS = Program(
     name='ShelXS',
     program_type='solution',
@@ -1972,13 +1972,13 @@ atom_sites_solution=iterative
     default=True
       .type=bool
   }
-  
-  
+
+
   missing
     .optional=True
   {
     values {
-      value=zero *float bound boundum 
+      value=zero *float bound boundum
         .type=choice
       resolution_limit=0.4
         .type=float
@@ -1988,7 +1988,7 @@ atom_sites_solution=iterative
     default=False
       .type=bool
   }
-  
+
   resolution
     .optional=True
   {
@@ -2016,7 +2016,7 @@ atom_sites_solution=iterative
     default=True
       .type=bool
   }
-  
+
   delta
     .optional=False
   {
@@ -2031,7 +2031,7 @@ atom_sites_solution=iterative
     default=True
       .type=bool
   }
-  
+
   output
     .optional=False
   {
