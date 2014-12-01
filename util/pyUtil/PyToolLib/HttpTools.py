@@ -3,6 +3,7 @@
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+settings_read = False
 auto_update = True
 use_proxy_settings = True
 proxy = None
@@ -46,13 +47,16 @@ def make_url_call(url, values, http_timeout = 7):
     except urllib2.URLError: #try setting file
       try:
         read_usettings()
-        res = make_url_call_with_proxy(url, proxy, values)
+        res = make_url_call_with_proxy(url, proxy, values, http_timeout)
         use_proxy_settings = True
       except Exception:
         raise
   return res
 
 def read_usettings():
+  global settings_read
+  if settings_read: return
+  settings_read = True
   global proxy
   global auto_update
   if proxy:
