@@ -41,8 +41,8 @@ class Multipart:
     header.append('')
     header.append('')
     self.header = '\r\n'.join(header)
-    
-    
+
+
   def send(self, sock):
     sock.send(self.header)
     if self.file_size is not None:
@@ -55,7 +55,7 @@ class Multipart:
     else:
       sock.send(self.item)
     sock.send('\r\n')
-  
+
   def calc_size(self):
     if self.file_size is not None:
       return len(self.header) + self.file_size + 2
@@ -68,7 +68,7 @@ class MultipartRequest:
     self.length = 0
     if isinstance(items, dict):
       items = items.items()
-    
+
     for key, value in items:
       mp = Multipart(value, key, self.boundary)
       self.parts.append(mp)
@@ -131,7 +131,7 @@ class DirectRequest:
       if has_file:
         return MultipartRequest(self.data)
     return EncodedURLRequest(self.data)
-  
+
   def request(self, url, proxy=None):
     r = self.select_handler()
     if proxy:
@@ -155,6 +155,7 @@ class RequestHandler():
       raise urllib2.URLError('no host given')
     handler = DirectRequest(request.get_data()).select_handler()
     h = http_class(host)
+    h._conn.timeout = request.timeout
     h.putrequest(handler.get_method(), request.get_selector())
     # set request-host
     scheme, sel = urllib.splittype(request.get_selector())

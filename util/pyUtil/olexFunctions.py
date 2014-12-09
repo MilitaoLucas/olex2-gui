@@ -55,8 +55,8 @@ class OlexFunctions(inheritFunctions):
       if value == '': value = None
       elif value in ('Auto','auto','None','none',None):
         pass
-      elif type(value) in (str,unicode) and "'" in value:
-        value = "'%s'" %value.replace("'", "\\'")
+      elif isinstance(value, basestring):
+        value = "'%s'" %value.replace("'", "\\'").replace('$', '\\$')
       elif type(value) in (list, set):
         value = ' '.join("'%s'" %v.replace("'", "\\'") for v in value)
       elif "date_" in variable:
@@ -87,7 +87,7 @@ class OlexFunctions(inheritFunctions):
       retVal = handler.get_validated_param(variable)
       if retVal is not None:
         if isinstance(retVal, str):
-          retVal = retVal.decode('utf-8')
+          retVal = retVal.decode('utf-8').replace('\\$', '$')
       else:
         retVal = default
     except Exception, ex:
