@@ -55,8 +55,8 @@ class OlexFunctions(inheritFunctions):
       if value == '': value = None
       elif value in ('Auto','auto','None','none',None):
         pass
-      elif type(value) in (str,unicode) and "'" in value:
-        value = "'%s'" %value.replace("'", "\\'")
+      elif isinstance(value, basestring):
+        value = "'%s'" %value.replace("'", "\\'").replace('$', '\\$')
       elif type(value) in (list, set):
         value = ' '.join("'%s'" %v.replace("'", "\\'") for v in value)
       elif "date_" in variable:
@@ -87,7 +87,7 @@ class OlexFunctions(inheritFunctions):
       retVal = handler.get_validated_param(variable)
       if retVal is not None:
         if isinstance(retVal, str):
-          retVal = retVal.decode('utf-8')
+          retVal = retVal.decode('utf-8').replace('\\$', '$')
       else:
         retVal = default
     except Exception, ex:
@@ -852,15 +852,16 @@ class OlexFunctions(inheritFunctions):
             }
     return prgs.get(name, name)
 
+  def canNetwork(self, show_msg=True):
+    if not OV.GetParam("olex2.network"):
+      if show_msg:
+        print("Network communication disabled, aborting")
+      return False
+    return True
 
 def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
-  p = OV.GetParam_as_string(variable, default)
-  try:
-    p = p.decode('utf-8')
-  except:
-    pass
-  return p
+  return OV.GetParam_as_string(variable, default)
 
 OV = OlexFunctions()
 OV.registerFunction(GetParam)

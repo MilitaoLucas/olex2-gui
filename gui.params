@@ -441,7 +441,7 @@ gui
         .type = colour
       grad_colour = #dedede
         .type = colour
-      grad_step = 1
+      grad_step = 0.3
         .type = float
       height = 18
         .type = int
