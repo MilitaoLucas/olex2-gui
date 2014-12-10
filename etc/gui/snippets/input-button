@@ -1,6 +1,8 @@
 #value=
 #width=100%
 #name=
+#fit=false
+#flat=false
 
 <font size="$GetVar('HtmlFontSizeControls')">
 
@@ -10,6 +12,8 @@
   value="#value"
   width="#width"
   onclick="#onclick"
+  fit="#fit"
+  flat="#flat"
 >
 
 </font>

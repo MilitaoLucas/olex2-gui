@@ -75,10 +75,11 @@ Freeze(false)>>
       name="SHOW_TOOLTIPS"
       fgcolor="GetVar(HtmlFontColour)"
       bgcolor="GetVar('HtmlInputBgColour')"
-      checked="not(strcmp(spy.GetParam(user.show_tooltips),0))"
+      checked="CheckState(htmlttvis)"
       oncheck="spy.SetParam(user.show_tooltips,1)>>html.tooltips true"
       onuncheck="spy.SetParam(user.show_tooltips,0)>>html.tooltips false"
       target="Show tooltips when hovering over a control"
+      statedependent="htmlttvis"
     >
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -274,7 +275,6 @@ Freeze(false)>>
    $-</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='USER_DB_LOCATION';help_ext=user-db-location;1 -->
   <td width='25%'><b>%User Database%:</b></td>
   <td width='75%'>
@@ -283,6 +283,17 @@ Freeze(false)>>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MODULE-UPDATE';help_ext=Enable-Network;1 -->
+  <td width='23%'><b>%Network operations%:</b></td>
+  <td width='55%'>
+    Enable/Disable network operations including CheckCif, CSD deposition, modules installation and
+    updates, news banner. This does <b>not</b> control <a href="UpdateOptions">Olex2 update</a>.
+  </td>
+  <td width="22%" align='right'>$+
+    html.Snippet("gui/snippets/input-checkbox", "name=settings_network",
+     "checked=spy.GetParam('olex2.network', 'True')",
+     "onclick=spy.SetParam('olex2.network', html.GetState('~name~'))>>html.Update")
+   $-</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->

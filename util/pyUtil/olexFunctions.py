@@ -852,15 +852,16 @@ class OlexFunctions(inheritFunctions):
             }
     return prgs.get(name, name)
 
+  def canNetwork(self, show_msg=True):
+    if not OV.GetParam("olex2.network"):
+      if show_msg:
+        print("Network communication disabled, aborting")
+      return False
+    return True
 
 def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
-  p = OV.GetParam_as_string(variable, default)
-  try:
-    p = p.decode('utf-8')
-  except:
-    pass
-  return p
+  return OV.GetParam_as_string(variable, default)
 
 OV = OlexFunctions()
 OV.registerFunction(GetParam)

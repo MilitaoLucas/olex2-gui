@@ -766,6 +766,8 @@ olex2
     path = 'BaseDir()/pdf-plugin/qt4-pdf.exe'
       .type = str
       }
+  network = True
+    .type = bool
 
   ccdc{
     url = http://ccdc.opencryst.org/deposit http://ccdc1.opencryst.org/deposit
