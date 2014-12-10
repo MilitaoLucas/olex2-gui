@@ -13,7 +13,7 @@ import os
 import olx
 
 
-def make_url_call_with_proxy(url, proxy, values, http_timeout = 7):
+def make_url_call_with_proxy(url, proxy, values, http_timeout = 5):
   if proxy:
     proxies = {'http': proxy}
   else:
@@ -23,7 +23,7 @@ def make_url_call_with_proxy(url, proxy, values, http_timeout = 7):
   return opener.open(url,values, http_timeout)
 
 
-def make_url_call(url, values, http_timeout = 7):
+def make_url_call(url, values, http_timeout = 5):
   global use_proxy_settings
   global proxy
   localhost = False

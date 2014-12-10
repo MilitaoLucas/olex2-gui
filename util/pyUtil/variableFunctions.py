@@ -158,8 +158,15 @@ def VVD_to_phil():
 
 def get_user_phil():
   user_phil_file = "%s/user.phil" %OV.DataDir()
-  if os.path.isfile(user_phil_file):
+  if os.path.exists(user_phil_file):
     return user_phil_file
+  else:
+    return None
+
+def get_olex2_phil():
+  olex2_phil_file = "%s/olex2.phil" %OV.DataDir()
+  if os.path.exists(olex2_phil_file):
+    return olex2_phil_file
   else:
     return None
 
@@ -179,6 +186,10 @@ def LoadParams():
     master_phil=master_phil,
     parse=phil_interface.parse)
 
+  # Olex2 Phil
+  olex2_phil = get_olex2_phil()
+  if olex2_phil:
+    phil_handler.update(phil_file=olex2_phil)
   # User Phil
   user_phil = get_user_phil()
   if user_phil:
@@ -289,6 +300,12 @@ def SaveUserParams():
   olx.gui_phil_handler.save_param_file(
     file_name=gui_phil_file, scope_name='gui', diff_only=True)
 OV.registerFunction(SaveUserParams)
+
+def SaveOlex2Params():
+  olex2_phil_file = "%s/olex2.phil" %(OV.DataDir())
+  olx.phil_handler.save_param_file(
+    file_name=olex2_phil_file, scope_name='olex2', diff_only=True)
+OV.registerFunction(SaveOlex2Params)
 
 def EditParams(scope_name="", expert_level=0, attributes_level=0):
   expert_level = int(expert_level)
