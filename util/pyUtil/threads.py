@@ -12,20 +12,20 @@ class ThreadRegistry:
 #must be called before destroying host application  
   def __init__(self):
     pass
-  
+
   def register(self, klass):
     ThreadRegistry.threads.add(klass)
-    
+
   def joinAll(self):
     for th in ThreadRegistry.threads:
       try:
         if th.instance: th.instance.join(1)
-        if th.instance:
+        if th.instance and th.instance.is_alive():
           th.instance.force_exit()
       except Exception, e:
         print e
         pass
-  
+
 
 # implement force_exit to premature thread termination
 class ThreadEx(Thread):
@@ -42,7 +42,7 @@ class ThreadEx(Thread):
 class ShellExec:
   def run(self, arg):
     olx.Shell(arg)
-    
+
 shellExec = None
 if not shellExec:
   shellExec = ShellExec()

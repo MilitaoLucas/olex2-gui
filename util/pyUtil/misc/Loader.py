@@ -235,6 +235,8 @@ def getAvailableModules_():
   import HttpTools
   from olexFunctions import OlexFunctions
   OV = OlexFunctions()
+  if not OV.canNetwork(show_msg=False):
+    return
   url_base = OV.GetParam('user.modules.provider_url')
   try:
     url = url_base + "available"
@@ -394,11 +396,13 @@ def AskToUpdate():
   if not HttpTools.auto_update:
     return
   global avaialbaleModulesRetrieved
+  from olexFunctions import OlexFunctions
+  OV = OlexFunctions()
+  if not OV.canNetwork(show_msg=False):
+    return
   if not avaialbaleModulesRetrieved and olx.HasGUI() == 'true':
     olx.Schedule("spy.plugins.AskToUpdate()")
     return
-  from olexFunctions import OlexFunctions
-  OV = OlexFunctions()
   manual_update = OV.GetParam("user.modules.manual_update", False)
   if manual_update:
     return

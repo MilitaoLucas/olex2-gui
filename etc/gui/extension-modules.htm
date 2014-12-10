@@ -1,3 +1,4 @@
+<!-- #ignoreif not(spy.GetParam('olex2.network'))
 $spy.plugins.getAvailableModules()
 
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
@@ -72,3 +73,20 @@ testing these, please sign up below!
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
+#ignoreif -->
+
+<!-- #ignoreif spy.GetParam('olex2.network')
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
+
+<!-- #include tool-row gui\blocks\tool-row-help.htm;name=MODULES_1;help_ext=Extension-Modules;1; -->
+  <td width='75%'>Network commincation is disabled</td><td>
+$+
+  html.Snippet("gui/snippets/input-button", "name=MODULES_ENABLE_NET",
+      "value=Enable", "fit=true", "flat=false",
+      "onclick=spy.SetParam('olex2.network', 'True')>>html.Update")
+$-
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
+#ignoreif -->

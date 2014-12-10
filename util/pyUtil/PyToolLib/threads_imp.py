@@ -92,6 +92,9 @@ class CheckCifRetrivalThread(ThreadEx):
       CheckCifRetrivalThread.instance = None
 
 def get_news_image_from_server(name=""):
+  from olexFunctions import OlexFunctions
+  if not OlexFunctions().canNetwork(show_msg=False):
+    return
   if NewsImageRetrivalThread.instance is None:
     NewsImageRetrivalThread(name).start()
 olex.registerFunction(get_news_image_from_server)
@@ -104,6 +107,9 @@ olex.registerFunction(resizeNewsImage, False, 'internal')
 
 
 def GetCheckcifReport(send_fcf=False):
+  from olexFunctions import OlexFunctions
+  if not OlexFunctions().canNetwork():
+    return
   if CheckCifRetrivalThread.instance is None:
     CheckCifRetrivalThread(send_fcf in [True, 'true']).start()
   else:
