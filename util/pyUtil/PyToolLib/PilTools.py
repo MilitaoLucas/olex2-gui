@@ -966,7 +966,7 @@ class timage(ImageTools):
     button_names = self.image_items_d.get("TINY BUTTONS")
     scale = self.sf / 1.2
     tiny_width= OV.GetParam('gui.timage.tinybutton.width')
-    self.produce_buttons(button_names, scale,"_tiny",width=tiny_width)
+    self.produce_buttons(button_names, "_tiny", scale, width=tiny_width)
 
     ## SMALL buttons
 #    cut = 90*sf, 178*sf, 138*sf, 193*sf
@@ -975,7 +975,7 @@ class timage(ImageTools):
     button_names = self.image_items_d.get("SMALL BUTTONS")
     width = OV.GetParam('gui.timage.small_button.width')
     #width = int(round(width * self.scale,0))
-    self.produce_buttons(button_names, self.sf,"_small",width=width)
+    self.produce_buttons(button_names, "_small", self.sf, width=width)
 
     ## TWO buttons in the HTMLpanelWIDTH
 #    cut = 0*sf, 178*sf, 91*sf, 195*sf
@@ -983,7 +983,7 @@ class timage(ImageTools):
 #    crop =  im.crop(cut)
     button_names = self.image_items_d.get("TWO BUTTONS PER ROW", button_names)
     width = int(available_width/2) - 15
-    self.produce_buttons(button_names, self.sfs,"",width=width)
+    self.produce_buttons(button_names, "", self.sf, width=width)
 
     ## THREE buttons in the HTMLpanelWIDTH
 #    cut = 0*sf, 178*sf, 91*sf, 195*sf
@@ -991,7 +991,7 @@ class timage(ImageTools):
 #    crop =  im.crop(cut)
     button_names = self.image_items_d.get("THREE BUTTONS PER ROW", button_names)
     width = int(available_width/3) - 12
-    self.produce_buttons(button_names, self.sfs,"",width=width)
+    self.produce_buttons(button_names, "", self.sf, width=width)
 
     ## FULL ROW buttons in the HTMLpanelWIDTH
 #    cut = 0*sf, 193*sf, 275*sf, 211*sf
@@ -999,7 +999,7 @@ class timage(ImageTools):
 #    crop =  im.crop(cut)
     button_names = self.image_items_d.get("FULL ROW", button_names)
     width = available_width - OV.GetParam('gui.htmlpanelwidth_margin_adjust') + 10
-    self.produce_buttons(button_names, self.sfs,"_full",width=width)
+    self.produce_buttons(button_names,"_full", self.sf, width=width)
 
     ## G3 BIG BUTTON
 #    cut = 0*sf, 193*sf, 275*sf, 211*sf
@@ -1013,7 +1013,7 @@ class timage(ImageTools):
     if olx.IsPluginInstalled('g4') == 'true':
       button_names = self.image_items_d.get("G4 BUTTON", button_names)
       width = available_width - OV.GetParam('gui.timage.g4.width_adjust') - 20
-      self.produce_buttons(button_names, self.sfs, "_g4",width=width)
+      self.produce_buttons(button_names, "_g4", self.sf, width=width)
 
     ## HELP INFO ICON
     height = OV.GetParam('gui.timage.h3.height')
@@ -1348,7 +1348,8 @@ class timage(ImageTools):
         elif state == "hoveron":
           colour = self.adjust_colour(self.params.button_colouring.rgb,luminosity=0.5)
 
-        self.image = image = self.make_timage(item_type=button_type, item=t, state=state, width=width, colour=colour, titleCase=False)
+        self.image = image = self.make_timage(item_type=button_type, item=t.replace('_', ' '),
+           state=state, width=width, colour=colour, titleCase=False)
         if not auto_name:
           self.name = name = "button%s-%s%s.png" %(btn_type, txt.replace(" ", "_"), state)
         else:
