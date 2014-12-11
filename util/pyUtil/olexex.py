@@ -1563,7 +1563,7 @@ def getReportImageData(size='w400', imageName=None):
       with open(olx.BaseDir()+"%setc%stemplate.lip" %(
              os.path.sep, os.path.sep), 'rb') as rFile:
         rv = rFile.read()
-        rv += model
+        rv += "<script type='application/json' id='model'>%s</script>" %(model)
         rv += "<script type='application/json' id='style'>%s</script>" %(
           olx.ExportColors('', 'current'))
         return rv
