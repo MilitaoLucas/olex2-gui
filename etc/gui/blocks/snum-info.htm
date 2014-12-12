@@ -43,59 +43,26 @@ $spy.MakeHoverButton('toolbar-center@sNumInfo','compaq>>compaq -a>>center')
 #ignoreif -->
 
 <tr align='left'>
-<td>
-  <table border="0" style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1">
-    <tr bgcolor=$GetVar(HtmlTableBgColour)>
-      <td width='22%'>
-        &nbsp;<b>a=</b>$xf.uc.CellEx('a')
-      </td>
 
-      <td width='22%'>
-        &nbsp;<b>&alpha;</b>=$xf.uc.CellEx('alpha')&deg;
-      </td>
+<table border="0"  width="100%" cellpadding="1" cellspacing="1" bgcolor=$GetVar(HtmlTableBgColour)>
+  <tr>
+    <td width='60%' bgcolor=$GetVar(HtmlTableBgColour)>
+      <table border="0"  width="100%" cellpadding="1" cellspacing="1" bgcolor='$GetVar(HtmlTableFirstcolColour)'>
+$spy.gui.tools.make_cell_dimensions_display()
+      </table>
+    </td>
 
-      <td width='22%'>
-        &nbsp;<b>Z</b>=$xf.au.GetZ()
-      </td>
-
-      <td width='24%' align='right' rowspan='3'>
-        &nbsp;$spy.GetRInfo()
-      </td>
-    </tr>
-
-    <tr align='left' bgcolor=$GetVar(HtmlTableBgColour)>
-      <td width='20%'>
-        &nbsp;<b>b=</b>$xf.uc.CellEx('b')
-      </td>
-
-      <td width='20%'>
-        &nbsp;<b>&beta;</b>=$xf.uc.CellEx('beta')&deg;
-      </td>
-
-      <td width='20%'>
-        &nbsp;<b>Z'</b>=$xf.au.GetZPrime()
-      </td>
-
-    </tr>
-
-
-    <tr align='left' bgcolor=$GetVar(HtmlTableBgColour)>
-      <td width='20%'>
-        &nbsp;<b>c=</b>$xf.uc.CellEx('c')
-      </td>
-
-      <td width='20%'>
-        &nbsp;<b>&gamma;</b>=$xf.uc.CellEx('gamma')&deg;
-      </td>
-
-      <td width='20%'>
-        &nbsp;<b>V</b>=$xf.uc.VolumeEx()
-      </td>
-    </tr>
-  </table>
-
-</td>
-</tr>
+    <td width='40%' align='right' bgcolor=$GetVar(HtmlTableBgColour)>
+      <table border="0"  width="100%" height="100%" cellpadding="1" cellspacing="1" >
+        <tr >
+          <td align='right'>
+            $spy.GetRInfo()
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
 
 
 <!-- #ignoreif not(fs.Exists('hos.htm'))
