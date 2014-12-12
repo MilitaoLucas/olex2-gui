@@ -2230,7 +2230,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
             'bgcolour':bgcolour,
             'image_prefix':'element',
             'width':icon_size ,
-            'top_left':(0,-1),
+            'top_left':(0,4),
+            'font_colour':'#333333',
             'grad':False,
             'name':name
           })
@@ -2240,19 +2241,22 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           'bgcolour':'#efefef',
           'width':int(icon_size*1.0),
           'image_prefix':'element',
-          'top_left':(0,-1),
+          'top_left':(0,5),
+          'font_colour':'#333333',
           'grad':False,
           'name':'Table',
         })
     width = int(OV.GetParam('gui.skin.icon_size') * 0.8)
     bg = OV.GetParam('gui.html.table_firstcol_colour')
     for b in btn_dict:
-      name = btn_dict[b]['name']
       for state in ['on', 'off', 'hover', '', 'highlight']:
+        name = btn_dict[b]['name']
         txt = btn_dict[b].get('txt')
         bgcolour = btn_dict[b].get('bgcolour')
+        top_left = btn_dict[b]['top_left']
+        font_colour = btn_dict[b]['font_colour']
         btn_type = 'tiny'
-        IM = self.make_timage(item_type='tinybutton', item=txt, state=state, width=width, colour=bgcolour, whitespace='right:1:%s' %bg)
+        IM = self.make_timage(item_type='tinybutton', item=txt, state=state, width=width, colour=bgcolour, whitespace='right:1:%s' %bg, e_top_left=top_left, e_font_colour=font_colour)
         name_s = "%s%s.png" %(name, state)
         OlexVFS.save_image_to_olex(IM, name_s, 2)
 
@@ -2295,7 +2299,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 #    iconIndex.setdefault("auto", (3, 0))
     iconIndex.setdefault("edit", (3, 1))
     iconIndex.setdefault("tidy", (3, 2))
-    iconIndex.setdefault("blank", (3, 3))
+    iconIndex.setdefault("blank", (3, 3, {'border':False} ))
     iconIndex.setdefault("sphere-packing", (3, 4))
     iconIndex.setdefault("open", (3, 5))
     iconIndex.setdefault("lines", (3, 6))
@@ -2442,7 +2446,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       font_name = self.params.image_font_name
 
 
-  def make_timage(self, item_type, item, state, font_name="Vera", width=None, colour=None, whitespace=None, titleCase=True):
+  def make_timage(self, item_type, item, state, font_name="Vera", width=None, colour=None, whitespace=None, titleCase=True, e_font_colour=None, e_top_left=None):
 
     self.params = OV.GuiParams()
     if not self.width:
@@ -2594,6 +2598,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     elif item_type == 'tinybutton':
       height = width
+      if e_top_left:
+        top = e_top_left[1]
+        left = e_top_left[0]
       underground = self.params.html.table_bg_colour.rgb
       shadow = False
       if colour:
@@ -2605,6 +2612,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           grad_colour = IT.adjust_colour(colour, luminosity=0.9)
       if state == "highlight":
         font_colour = self.params.html.highlight_colour.rgb
+      if e_font_colour:
+        font_colour = e_font_colour
 
     elif item_type == 'g3_big':
       shadow = True
@@ -2650,16 +2659,16 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     size = (int(width)*self.scale, int(height)*self.scale)
     bg_colour = underground #hp#
 
-#    if 'tinybutton' not in type_key:
-    if timage_blanks[self.params.skin.name].has_key(type_key):
-      if timage_blanks[self.params.skin.name][type_key].has_key(state):
-        image = timage_blanks[self.params.skin.name][type_key][state]
-        image = self.print_text(image.copy(), item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
-        if self.debug:
-          print "FROM CACHE: %s (%s)" %(item, state)
-        if self.scale != 1:
-          image = image.resize((int(width), int(height)), Image.ANTIALIAS)
-        return image
+    if 'tinybutton' not in type_key:
+      if timage_blanks[self.params.skin.name].has_key(type_key):
+        if timage_blanks[self.params.skin.name][type_key].has_key(state):
+          image = timage_blanks[self.params.skin.name][type_key][state]
+          image = self.print_text(image.copy(), item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
+          if self.debug:
+            print "FROM CACHE: %s (%s)" %(item, state)
+          if self.scale != 1:
+            image = image.resize((int(width), int(height)), Image.ANTIALIAS)
+          return image
 
     image = Image.new('RGBA', size, bg_colour)
     draw = ImageDraw.Draw(image)

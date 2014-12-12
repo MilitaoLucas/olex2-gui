@@ -3,16 +3,28 @@ import olex
 import olx
 import os
 import sys
-
+import OlexVFS
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
 global have_found_python_error
 have_found_python_error= False
 
+global last_formula
+last_formula = ""
+
+global current_sNum
+current_sNum = ""
+
+haveGUI = OV.HasGUI()
+
+red = OV.GetParam('gui.red').hexadecimal
+
 import olexex
 
 import re
+
+import time
 
 class FolderView:
   root = None
@@ -269,45 +281,279 @@ def checkPlaton():
   else: return ""
 OV.registerFunction(checkPlaton,True,'gui.tools')
 
+
+def MakeElementButtonsFromFormula():
+  t1 = time.time()
+
+  from PilTools import TI
+  global last_formula
+
+  current_formula = olexex.OlexRefinementModel().currentFormula()
+
+  #if current_formula == last_formula:
+    #return
+
+#  from PilTools import ButtonMaker
+#  icon_size = OV.GetParam('gui.skin.icon_size')
+  totalcount = 0
+  btn_dict = {}
+  f = olx.xf.GetFormula('list')
+  if not f:
+    return
+  f = f.split(',')
+
+  Z_prime = float(olx.xf.au.GetZprime())
+  Z = float(olx.xf.au.GetZ())
+  html = ""
+
+  isSame = True
+
+
+  for element in f:
+    symbol = element.split(':')[0]
+    max = float(element.split(':')[1])
+    max = round(max, 2)
+    present = round(current_formula.get(symbol,0),2)
+    if symbol != "H":
+      totalcount += max
+
+    max = max*Z_prime
+    c = ""
+    if present < max:
+      bgcolour = (250,250,250)
+      c = 'b'
+      isSame = False
+    elif present ==  max:
+      bgcolour = (210,255,210)
+      c = 'g'
+    else:
+      bgcolour = (255,210,210)
+      c = 'r'
+      isSame = False
+
+    if c:
+      img_name = "btn-element%s_%s" %(symbol, c)
+
+    name = "btn-element%s" %(symbol)
+
+    target = OV.TranslatePhrase('change_element-target')
+    command = 'spy.ElementButtonStates(%s)' %symbol
+    namelower = 'btn-element%s' %(name)
+    d = {}
+    d.setdefault('name', name)
+    d.setdefault('img_name', img_name)
+    d.setdefault('symbol', symbol)
+    d.setdefault('cmds', command)
+    d.setdefault('target', target + symbol)
+    d.setdefault('bgcolor', OV.GetParam('gui.html.table_firstcol_colour'))
+
+    control = "IMG_%s" %name.upper()
+    #print
+    #print "  EB1: %.5f" %(time.time() - t1)
+    if olx.fs.Exists("%s.png" %img_name) != "true":
+      TI.make_element_buttons(symbol)
+
+    if OV.IsControl(control):
+      olx.html.SetImage(control,"up=%soff.png,down=%son.png,hover=%shover.png" %(img_name,img_name,img_name))
+
+    #print "  EB2: %.5f" %(time.time() - t1)
+
+    #html += '''
+#$spy.MakeHoverButton('%(name)s','%(cmds)s') '''%d
+    html += '''
+<input
+  name=IMG_BTN-ELEMENT%(symbol)s
+  type="button"
+  image="up=%(img_name)soff.png,down=%(img_name)son.png,hover=%(img_name)shover.png"
+  hint="%(target)s"
+  onclick="%(cmds)s"
+  bgcolor=%(bgcolor)s
+>
+''' %d
+
+  d['namelower'] = 'Table'
+  html +=  '''
+<input
+  name=IMG_BTN-ELEMENT...
+  type="button"
+  image="up=%(namelower)soff.png,down=%(namelower)son.png,hover=%(namelower)shover.png"
+  hint="Chose Element from the periodic table"
+  onclick="spy.ElementButtonStates('')"
+  bgcolor=%(bgcolor)s
+>
+''' %d
+
+  if current_formula != last_formula:
+    last_formula = current_formula
+
+  OV.write_to_olex('element_buttons.htm', html, 0)
+
+  im_name='IMG_BTN-ELEMENT%s' %symbol
+  OV.SetImage(im_name, name)
+
+  if isSame:
+    OV.SetImage("IMG_TOOLBAR-REFRESH","up=toolbar-blank.png,down=toolbar-blank.png,hover=toolbar-blank.png")
+  else:
+    OV.SetImage("IMG_TOOLBAR-REFRESH","up=toolbar-refresh.png,down=toolbar-refresh.png,hover=toolbar-refresh.png")
+
+  olexex.SetAtomicVolumeInSnumPhil(totalcount)
+
+  #print "ElementButtons: %.5f" %(time.time() - t1)
+
+
+if haveGUI:
+  OV.registerFunction(MakeElementButtonsFromFormula)
+
+
 def makeFormulaForsNumInfo():
+  global current_sNum
+  t1 = time.time()
+
   if olx.FileName() == "Periodic Table":
     return "Periodic Table"
 
+  isSame = False
+  colour = ""
+  txt_formula = olx.xf.GetFormula()
+  if len(txt_formula) > 100:
+    return "Too Much Stuff"
+  present = olx.xf.au.GetFormula()
+  regex = re.compile(r"(?P<ele>[a-zA-Z]) (\s|\b)", re.X|re.M|re.S)
+  txt_formula = regex.sub(r'\g<ele>1 ',txt_formula).strip()
+  present = regex.sub(r'\g<ele>1 ',present).strip()
+  if present == txt_formula:
+    isSame = True
+    if current_sNum != OV.FileName():
+      current_sNum = OV.FileName()
+
+  l = ['3333', '6667']
+  for item in l:
+    if item in txt_formula:
+      colour = OV.GetParam('gui.red').hexadecimal
+  if not colour:
+    colour = OV.GetParam('gui.html.formula_colour').hexadecimal
+  font_size = OV.GetParam('gui.html.formula_size')
+  panelwidth = int(olx.html.ClientWidth('self'))
+  q = len(txt_formula)/(panelwidth - (0.6*panelwidth))
+  if q > 0.26:
+    font_size -= 4
+  elif q > 0.23:
+    font_size -= 3
+  elif q > 0.20:
+    font_size -= 2
+  elif q > 0.16:
+    font_size -= 1
+  if font_size < 1:
+    font_size = 1
+
+  if not isSame:
+    img_name = 'toolbar-refresh'
+    OV.SetImage("IMG_TOOLBAR-REFRESH","up=toolbar-refresh.png,down=toolbar-refresh.png,hover=toolbar-refresh.png")
   else:
-    colour = ""
-    txt_formula = olx.xf.GetFormula()
-    if len(txt_formula) > 100:
-      return "Too Much Stuff"
-    update = '<table border="0" cellpadding="0"><tr><td>%s</td></tr></table>'
-    present = olx.xf.au.GetFormula()
-    regex = re.compile(r"([a-zA-Z]) 1 (\s|\b)", re.X|re.M|re.S)
-    txt_formula = regex.sub(r'\1 ',txt_formula).strip()
-    if present != txt_formula:
-      update = '<table border="0" cellpadding="0"><tr><td>%s</td><td>$spy.MakeHoverButton(toolbar-refresh,fixunit xf.au.GetZprime()>>html.update)</td></tr></table>'
+    img_name = 'toolbar-blank'
+    OV.SetImage("IMG_TOOLBAR-REFRESH","up=blank.png,down=blank.png,hover=blank.png")
     formula = present
-    l = ['3333', '6667']
-    for item in l:
-      if item in txt_formula:
-        colour = OV.GetParam('gui.red').hexadecimal
-    if not colour:
-      colour = OV.GetParam('gui.html.formula_colour').hexadecimal
-    font_size = OV.GetParam('gui.html.formula_size')
-    panelwidth = int(olx.html.ClientWidth('self'))
-    q = len(txt_formula)/(panelwidth - (0.6*panelwidth))
-    if q > 0.26:
-      font_size -= 4
-    elif q > 0.23:
-      font_size -= 3
-    elif q > 0.20:
-      font_size -= 2
-    elif q > 0.16:
-      font_size -= 1
-    if font_size < 1:
-      font_size = 1
-    html_formula = olx.xf.GetFormula('html',1)
-    formula_string = "<font size=%s color=%s>%s</font>" %(font_size, colour, html_formula)
-    return update%formula_string
+
+  html_formula = olx.xf.GetFormula('html',1)
+  formula_string = "<font size=%s color=%s>%s</font>" %(font_size, colour, html_formula)
+
+  d = {}
+  d.setdefault('img_name', img_name)
+  d.setdefault('cmds', "fixunit xf.au.GetZprime()>>spy.MakeElementButtonsFromFormula()")
+  d.setdefault('target', "Update Formula with current model")
+  d.setdefault('bgcolor', OV.GetParam('gui.html.table_firstcol_colour'))
+  refresh_button = '''
+  <input
+    name=IMG_TOOLBAR-REFRESH
+    type="button"
+    image="up=%(img_name)soff.png,down=%(img_name)son.png,hover=%(img_name)shover.png"
+    hint="%(target)s"
+    onclick="%(cmds)s"
+    bgcolor=%(bgcolor)s
+  >''' %d
+
+  update = '<table border="0" cellpadding="0" cellspacing="0"><tr><td>%s</td><td>%s</td></tr></table>'%(formula_string, refresh_button)
+  OV.write_to_olex('snumformula.htm', update)
+  #print "Formula sNum (2): %.5f" %(time.time() - t1)
+
+  return "<!-- #include snumformula snumformula.htm;1 -->"
 OV.registerFunction(makeFormulaForsNumInfo)
+
+
+def make_cell_dimensions_display():
+  t1 = time.time()
+
+  global current_sNum
+  #if OV.FileName() == current_sNum:
+    #return "<!-- #include celldimensiondisplay celldimensiondisplay.htm;1 -->"
+
+  l = ['a', 'b', 'c', 'alpha', 'beta', 'gamma']
+  d = {}
+  for x in l:
+    val = olx.xf.uc.CellEx(x)
+    if "90.0" in val and "(" in val or '90(' in val:
+      help_txt = "Help from File does not exist. Apologies."
+      help = '''
+$spy.MakeHoverButton('btn-info@cell@%s',"spy.make_help_box -name=cell-not-quite-90 -popout='False' -helpTxt='%s'")''' %(x, help_txt)
+      _ = os.sep.join([OV.BaseDir(), "etc", "gui", "help", "cell_angle_not_quite_90.htm"])
+      if os.path.exists(_):
+        help_txt = open(_,'r').read()
+      href = "spy.make_help_box -name=cell-angle-not-quite-90 -popout=False -helpTxt='%s'" %help_txt
+      val = '<a href="%s"><font color="%s"><b>%s</b></font></a>' %(href, red, val)
+    d[x] = val
+
+  d['volume'] = olx.xf.uc.VolumeEx()
+  d['Z'] = olx.xf.au.GetZ()
+  d['Zprime'] = olx.xf.au.GetZprime()
+
+  t = '''
+  <tr bgcolor=$GetVar(HtmlTableBgColour)>
+    <td width='33%%'>
+      &nbsp;<b>a</b> = %(a)s
+    </td>
+
+    <td width='34%%'>
+      &nbsp;<b>&alpha;</b> = %(alpha)s&deg;
+    </td>
+
+    <td width='33%%'>
+      &nbsp;<b>Z</b> = %(Z)s
+    </td>
+  </tr>
+
+  <tr align='left' bgcolor=$GetVar(HtmlTableBgColour)>
+
+    <td width='33%%'>
+      &nbsp;<b>b</b> = %(b)s
+    </td>
+
+    <td width='34%%'>
+      &nbsp;<b>&beta;</b> = %(beta)s&deg;
+    </td>
+
+    <td width='33%%'>
+      &nbsp;<b>Z'</b> = %(Zprime)s
+    </td>
+  </tr>
+
+  <tr align='left' bgcolor=$GetVar(HtmlTableBgColour)>
+    <td width='34%%' >
+      &nbsp;<b>c</b> = %(c)s
+    </td>
+    <td width='33%%'>
+      &nbsp;<b>&gamma;</b> = %(gamma)s&deg;
+    </td>
+    <td width='33%%'>
+      &nbsp;<b>V</b> = %(volume)s
+    </td>
+  </tr>
+  ''' %d
+  OV.write_to_olex('celldimensiondisplay.htm', t)
+  #print "Cell: %.5f" %(time.time() - t1)
+  return "<!-- #include celldimensiondisplay celldimensiondisplay.htm;1 -->"
+
+OV.registerFunction(make_cell_dimensions_display,True,"gui.tools")
+
 
 
 def hasDisorder():

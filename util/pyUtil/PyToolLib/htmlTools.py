@@ -323,6 +323,10 @@ def make_help_box(args):
   name = args.get('name', None)
   name = getGenericSwitchName(name)
   helpTxt = args.get('helpTxt', None)
+
+  if os.path.exists(helpTxt):
+    helpTxt == open(helpTxt, 'r').read()
+
   popout = args.get('popout', False)
   box_type = args.get('type', 'help')
   if popout == 'false':
@@ -1110,7 +1114,10 @@ def OnModeChange(*args):
     if not last_mode: return
     control = "IMG_%s" %last_mode.upper()
     if OV.IsControl(control):
-      OV.SetImage(control,"up=%soff.png,hover=%shover.png" %(last_mode,last_mode))
+      if "element" in control.lower():
+        gui.tools.MakeElementButtonsFromFormula()
+      else:
+        OV.SetImage(control,"up=%soff.png,hover=%shover.png" %(last_mode,last_mode))
     OV.cmd("html.hide pop_%s" %name)
     last_mode = None
     last_mode_options = None
@@ -1125,6 +1132,7 @@ def OnModeChange(*args):
       control = "IMG_%s" %active_mode.upper()
       if OV.IsControl(control):
         OV.SetImage(control,"up=%son.png,hover=%son.png" %(active_mode,active_mode))
+
     if last_mode:
       control = "IMG_%s" %last_mode.upper()
       if OV.IsControl(control):
@@ -1169,6 +1177,7 @@ def OnModeChange(*args):
       #OV.SetVar('olex2_in_mode',mode.split("=")[0])
 
 OV.registerCallback('modechange',OnModeChange)
+
 def OnStateChange(*args):
   name = args[0]
   state = args[1]
