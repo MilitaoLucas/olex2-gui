@@ -43,8 +43,8 @@ $spy.MakeHoverButton('toolbar-center@sNumInfo','compaq>>compaq -a>>center')
 #ignoreif -->
 
 <tr align='left'>
-
-<table border="0"  width="100%" cellpadding="1" cellspacing="1" bgcolor=$GetVar(HtmlTableBgColour)>
+<td>
+  <table border="0"  width="100%" cellpadding="1" cellspacing="1" bgcolor=$GetVar(HtmlTableBgColour)>
   <tr>
     <td width='60%' bgcolor=$GetVar(HtmlTableBgColour)>
       <table border="0"  width="100%" cellpadding="1" cellspacing="1" bgcolor='$GetVar(HtmlTableFirstcolColour)'>
@@ -54,7 +54,7 @@ $spy.gui.tools.make_cell_dimensions_display()
 
     <td width='40%' align='right' bgcolor=$GetVar(HtmlTableBgColour)>
       <table border="0"  width="100%" height="100%" cellpadding="1" cellspacing="1" >
-        <tr >
+        <tr>
           <td align='right'>
             $spy.GetRInfo()
           </td>
@@ -63,15 +63,12 @@ $spy.gui.tools.make_cell_dimensions_display()
     </td>
   </tr>
 </table>
-
-
 </td></tr>
 
 <!-- #ignoreif not(fs.Exists('hos.htm'))
 <tr><td>
 <!-- #include hos hos.htm;1 -->
-
-
+</td></tr>
 #ignoreif -->
 
 $spy.GetTwinLawAndBASF(html)
