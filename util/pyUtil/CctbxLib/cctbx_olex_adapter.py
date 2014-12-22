@@ -397,7 +397,7 @@ class students_t_hooft_analysis(OlexCctbxAdapter, absolute_structure.students_t_
       if not os.path.exists(fcf_path):
         print "No fcf file is present"
         return
-      reflections = miller.array.from_cif(file_path=fcf_path)
+      reflections = miller.array.from_cif(file_path=str(fcf_path))
       fo2 = reflections['_refln_F_squared_meas']
       fc2 = reflections['_refln_F_squared_calc']
       fc = fc2.f_sq_as_f().phase_transfer(flex.double(fc2.size(), 0))
