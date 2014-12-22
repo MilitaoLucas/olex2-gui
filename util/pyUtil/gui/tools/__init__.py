@@ -491,7 +491,7 @@ def make_cell_dimensions_display():
   d = {}
   for x in l:
     val = olx.xf.uc.CellEx(x)
-    if "90.0" in val and "(" in val or '90(' in val:
+    if "90.0" in val and "(" in val or '90(' in val and not "." in val:
       help_txt = "Help from File does not exist. Apologies."
       help = '''
 $spy.MakeHoverButton('btn-info@cell@%s',"spy.make_help_box -name=cell-not-quite-90 -popout='False' -helpTxt='%s'")''' %(x, help_txt)
