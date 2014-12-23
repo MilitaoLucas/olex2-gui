@@ -1131,7 +1131,7 @@ def defineExternalPrograms():
     program_type='solution',
     author="Luc Bourhis",
     reference="""Bourhis, L.J., Dolomanov, O.V., Gildea, R.J., Howard, J.A.K., Puschmann, H.
- (2015). Acta Cryst. A, in press.""",
+ (2015). Acta Cryst. A71, in press.""",
     brief_reference="Bourhis et al., 2015",
     )
 
