@@ -399,7 +399,7 @@ gui
         .type = float
       grad_colour_L = 1.9
         .type = float
-      font_colour_L = 0.7
+      font_colour_L = 1.7
         .type = float
       font_colour = #565656
         .type = colour
@@ -441,7 +441,7 @@ gui
         .type = colour
       grad_colour = #dedede
         .type = colour
-      grad_step = 0.3
+      grad_step = 0.1
         .type = float
       height = 18
         .type = int
@@ -457,7 +457,7 @@ gui
         .type = str
       halign = middle
         .type = str
-      top = 4
+      top = 1
         .type = int
       left = 0
         .type = int
@@ -467,7 +467,7 @@ gui
         .type = float
       font_colour_L = 0.7
         .type = float
-      font_colour = #767676
+      font_colour = #ffffff
         .type = colour
       arrows = None
         .type = str
