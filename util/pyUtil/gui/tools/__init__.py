@@ -414,7 +414,7 @@ def makeFormulaForsNumInfo():
 
   isSame = False
   colour = ""
-  txt_formula = olx.xf.GetFormula()
+  txt_formula = olx.xf.GetFormula('', 3)
   if len(txt_formula) > 100:
     return "Too Much Stuff"
   present = olx.xf.au.GetFormula()
@@ -459,7 +459,7 @@ def makeFormulaForsNumInfo():
 
   d = {}
   d.setdefault('img_name', img_name)
-  d.setdefault('cmds', "fixunit xf.au.GetZprime()>>spy.MakeElementButtonsFromFormula()")
+  d.setdefault('cmds', "fixunit xf.au.GetZprime()>>spy.MakeElementButtonsFromFormula()>>html.Update")
   d.setdefault('target', "Update Formula with current model")
   d.setdefault('bgcolor', OV.GetParam('gui.html.table_firstcol_colour'))
   refresh_button = '''
