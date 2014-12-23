@@ -169,7 +169,7 @@ def loadAll():
         sys.stdout.formatExceptionInfo()
   getAvailableModules() #thread
   if olx.HasGUI() == 'true':
-    olx.Schedule("spy.plugins.AskToUpdate()")
+    olx.Schedule(2, "spy.plugins.AskToUpdate()", g=True)
 
 
 def updateKey(module):
@@ -401,7 +401,7 @@ def AskToUpdate():
   if not OV.canNetwork(show_msg=False):
     return
   if not avaialbaleModulesRetrieved and olx.HasGUI() == 'true':
-    olx.Schedule("spy.plugins.AskToUpdate()")
+    olx.Schedule(2, "spy.plugins.AskToUpdate()", g=True)
     return
   manual_update = OV.GetParam("user.modules.manual_update", False)
   if manual_update:
