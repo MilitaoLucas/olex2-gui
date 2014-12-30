@@ -66,7 +66,7 @@ def GetCheckcifReport(outputtype='pdf', send_fcf=False):
       url = OV.GetParam('user.cif.checkcif.hkl_url')
     else:
       url = OV.GetParam('user.cif.checkcif.url')
-    response = HttpTools.make_url_call(url, params)
+    response = HttpTools.make_url_call(url, params, http_timeout=120)
   except Exception, e:
     threadPrint('Failed to receive Checkcif report...')
   finally:
@@ -87,7 +87,7 @@ def GetCheckcifReport(outputtype='pdf', send_fcf=False):
     params['Qdatablock'] = cif_data_block
     del params['file']
     try:
-      response = HttpTools.make_url_call(url, params)
+      response = HttpTools.make_url_call(url, params, http_timeout=120)
     except Exception, e:
       threadPrint('Failed to receive full Checkcif report...')
     finally:
