@@ -647,11 +647,12 @@ def GetRInfo(txt="",format='html'):
       R1 = olx.Cif('_refine_ls_R_factor_gt')
     else:
       R1 = OV.GetParam('snum.refinement.last_R1')
-      #tree = History.tree
-      #if tree.active_node is not None:
-        #R1 = tree.active_node.R1
-      #else:
-        #R1 = 'n/a'
+      if not R1:
+        tree = History.tree
+        if tree.active_node is not None:
+          R1 = tree.active_node.R1
+        else:
+          R1 = 'n/a'
     font_size = OV.GetParam('gui.html.font_size_large')
 
     if 'html' in format:
@@ -661,9 +662,9 @@ def GetRInfo(txt="",format='html'):
         R1 = "%.2f" %(R1*100)
 
         if 'report' in format:
-          t = r"<font size='%s'>R1 = <font color='%s'><b>%s%%</b></font></font>" %(font_size, col, R1)
+          t = r"<font size='%s'>R1&#8239;=&#8239;<font color='%s'><b>%s%%</b></font></font>" %(font_size, col, R1)
         else:
-          t = r"<font size='%s'>R1 = <font color='%s'><b>%s%%</b></font></font>" %(font_size, col, R1)
+          t = r"<font size='%s'>R1&#8239;=&#8239;<font color='%s'><b>%s%%</b></font></font>" %(font_size, col, R1)
 
       except:
         t = "<td colspan='2' align='right' rowspan='2' align='right'><font size='%s'><b>%s</b></font></td>" %(font_size, R1)
