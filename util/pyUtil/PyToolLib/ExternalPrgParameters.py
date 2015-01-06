@@ -1091,16 +1091,16 @@ def defineExternalPrograms():
     name='XT',
     program_type='solution',
     author="G.M.Sheldrick/Bruker",
-    reference=ShelXS.reference,
-    brief_reference=ShelXS.brief_reference,
+    reference="Sheldrick, G.M. (2015). Acta Cryst. A71, 3-8.",
+    brief_reference="Sheldrick, 2015",
     execs=["xt.exe", "xt"],
     phil_entry_name="XT")
   ShelXT = Program(
     name='ShelXT',
     program_type='solution',
     author="G.M.Sheldrick",
-    reference=ShelXS.reference,
-    brief_reference=ShelXS.brief_reference,
+    reference=XT.reference,
+    brief_reference=XT.brief_reference,
     execs=["shelxt.exe", "shelxt"],
     phil_entry_name="ShelXT")
   ShelXD = Program(
@@ -1129,9 +1129,9 @@ def defineExternalPrograms():
   smtbx_solve = Program(
     name='olex2.solve',
     program_type='solution',
-    author="Luc Bourhis",
+    author="Luc Bourhis et al",
     reference="""Bourhis, L.J., Dolomanov, O.V., Gildea, R.J., Howard, J.A.K., Puschmann, H.
- (2015). Acta Cryst. A71, in press.""",
+ (2015). Acta Cryst. A71, 59-75.""",
     brief_reference="Bourhis et al., 2015",
     )
 
