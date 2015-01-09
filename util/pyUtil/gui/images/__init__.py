@@ -110,6 +110,7 @@ def MakeBitmapImage(notify_listener=True, output_folder=None):
 
   if OV.GetParam('user.image.bitmap.trim'):
     temp_name = '%s_temp.bmp' %(filefull.strip("'"))
+    temp_name = 'temp.bmp'
     try:
       olex.m('picta "%s" 1' %(temp_name))
       padding = OV.GetParam('user.image.bitmap.trim_padding')
