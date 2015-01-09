@@ -18,8 +18,6 @@ current_sNum = ""
 
 haveGUI = OV.HasGUI()
 
-red = OV.GetParam('gui.red').hexadecimal
-
 import olexex
 
 import re
@@ -499,7 +497,7 @@ $spy.MakeHoverButton('btn-info@cell@%s',"spy.make_help_box -name=cell-not-quite-
       if os.path.exists(_):
         help_txt = open(_,'r').read()
       href = "spy.make_help_box -name=cell-angle-not-quite-90 -popout=False -helpTxt='%s'" %help_txt
-      val = '<a href="%s"><font color="%s"><b>%s</b></font></a>' %(href, red, val)
+      val = '<a href="%s"><font color="%s"><b>%s</b></font></a>' %(href, OV.GetParam('gui.red').hexadecimal, val)
     d[x] = val
 
   d['volume'] = olx.xf.uc.VolumeEx()
