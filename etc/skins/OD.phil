@@ -75,14 +75,14 @@ gui {
     }
 
     button {
-      grad_colour = #88ff88
+      grad_colour = #dddddd
       grad_step = 0.3
       height = 22
-      top = 3
+      top = 4
       bg_colour_L = 1.8
       grad_colour_L = 1.9
       font_colour_L = 0.7
-      font_colour = #ff740e
+      font_colour = #222244
     }
     h1 {
       grad_colour = #527bde
