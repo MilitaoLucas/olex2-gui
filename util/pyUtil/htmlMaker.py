@@ -222,12 +222,21 @@ class GeneratedGuiMaker(object):
       {
       'varName':'snum.report.date_submitted',
        'itemName':'%Date Submitted%',
+       'type': 'date'
       }
     )
     list.append(
       {
       'varName':'snum.report.date_collected',
        'itemName':'%Date Collected%',
+       'type': 'date'
+      }
+    )
+    list.append(
+      {
+      'varName':'snum.report.date_completed',
+       'itemName':'%Date Completed%',
+       'type': 'date'
       }
     )
     return htmlTools.makeHtmlTable(list)

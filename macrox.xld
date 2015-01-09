@@ -129,7 +129,7 @@
       <arg1 name="show_html" def="False">
     >
     <cmd
-      <cmd8 "spy.SetParam(snum.report.title, Process(spy.GetParam(snum.report.title)))">
+      <cmd8 "spy.SetParam(snum.report.title, spy.GetParam(snum.report.title))">
       <cmd8 "spy.ExtractCifInfo()">
       <cmd9 "spy.MergeCif()">
       <cmd11 "cif2tab header acrd anis bnd ang htab tang hcrd footer -n=spy.GetParam(snum.report.title)_tables">
@@ -149,7 +149,7 @@
       <cmd3 "kill $q">
       <cmd5 "file">
       <cmd5 "if strcmp(%1,'-1') then None else spy.SetMaxCycles(%1)">
-      <cmd6 "if strcmp(%2,'-1.1') then None else spy.SetMaxPeaks(%2)">
+      <cmd6 "if strcmp(%2,'-1') then None else spy.SetMaxPeaks(%2)">
       <cmd10 "spy.RunRefinementPrg()">
     >
     <onterminate
