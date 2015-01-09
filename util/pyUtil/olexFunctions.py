@@ -88,6 +88,8 @@ class OlexFunctions(inheritFunctions):
       if retVal is not None:
         if isinstance(retVal, str):
           retVal = retVal.decode('utf-8').replace('\\$', '$')
+        elif isinstance(retVal, unicode):
+          retVal = retVal.replace('\\$', '$')
       else:
         retVal = default
     except Exception, ex:
