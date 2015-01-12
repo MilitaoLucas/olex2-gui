@@ -107,22 +107,35 @@ class reflections(object):
   """ reflections is the filename holding the reflections """
   def __init__(self,  cell, spacegroup, reflection_file, hklf_code, hklf_matrix=None):
     cs = crystal.symmetry(cell, spacegroup)
+    #do we read amplitudes or intensisty?
+    f_hklf_code = hklf_code
+    if f_hklf_code != 3:
+      f_hklf_code = 4
     reflections_server = reflection_file_utils.reflection_file_server(
       crystal_symmetry = cs,
       reflection_files = [
         reflection_file_reader.any_reflection_file(
-          'hklf4=%s' %reflection_file, strict=False)
+          'hklf%s=%s' %(f_hklf_code, reflection_file), strict=False)
       ]
     )
     self.crystal_symmetry = cs
     miller_arrays = reflections_server.get_miller_arrays(None)
-    self.f_sq_obs = miller_arrays[0]
-    if hklf_matrix is not None and not hklf_matrix.is_unit_mx():
-      r = sgtbx.rt_mx(hklf_matrix.new_denominator(24).transpose())
-      cb_op = sgtbx.change_of_basis_op(r).inverse()
-      self.f_sq_obs = self.f_sq_obs.change_basis(cb_op).customized_copy(
-        crystal_symmetry=cs)
-    self.f_obs = self.f_sq_obs.f_sq_as_f()
+    if hklf_code == 3:
+      self.f_obs = miller_arrays[0]
+      if hklf_matrix is not None and not hklf_matrix.is_unit_mx():
+        r = sgtbx.rt_mx(hklf_matrix.new_denominator(24).transpose())
+        cb_op = sgtbx.change_of_basis_op(r).inverse()
+        self.f_obs = self.f_obs.change_basis(cb_op).customized_copy(
+          crystal_symmetry=cs)
+      self.f_sq_obs = self.f_obs.f_as_f_sq()
+    else:
+      self.f_sq_obs = miller_arrays[0]
+      if hklf_matrix is not None and not hklf_matrix.is_unit_mx():
+        r = sgtbx.rt_mx(hklf_matrix.new_denominator(24).transpose())
+        cb_op = sgtbx.change_of_basis_op(r).inverse()
+        self.f_sq_obs = self.f_sq_obs.change_basis(cb_op).customized_copy(
+          crystal_symmetry=cs)
+      self.f_obs = self.f_sq_obs.f_sq_as_f()
     if len(miller_arrays) > 1:
       self.batch_numbers_array = miller_arrays[1]
     else:
