@@ -223,10 +223,11 @@ routines requiring structure refinement
       .expert_level = 2
     graphical_output = False
       .type = bool
-    program = ShelXL_ifc XL XH ShelXH-1997 XLMP ShelXL ShelXL-1997 '*olex2.refine' Unknown  ShelXL-2012 ShelXLMP-2012 ShelXL-2013
+    program = ShelXL_ifc XL XH ShelXH-1997 XLMP ShelXL ShelXL-1997 '*olex2.refine' \
+      Tonto Unknown  ShelXL-2012 ShelXLMP-2012 ShelXL-2013
       .type = choice
     method = 'Least Squares' CGLS '*Gauss-Newton' 'Levenberg-Marquardt' \
-      'Full Matrix' Unknown
+      'Full Matrix' HAR Unknown
       .type = choice
     sg_list = None
       .type = str
