@@ -52,11 +52,13 @@ class OlexFunctions(inheritFunctions):
         handler = olx.gui_phil_handler
       else:
         handler = olx.phil_handler
+      if isinstance(value, basestring):
+        value = value.replace('$', '\\$')
       if value == '': value = None
       elif value in ('Auto','auto','None','none',None):
         pass
-      elif isinstance(value, basestring):
-        value = "'%s'" %value.replace("'", "\\'").replace('$', '\\$')
+      elif type(value) in (str,unicode) and "'" in value:
+        value = "'%s'" %value.replace("'", "\\'")
       elif type(value) in (list, set):
         value = ' '.join("'%s'" %v.replace("'", "\\'") for v in value)
       elif "date_" in variable:
@@ -701,7 +703,7 @@ class OlexFunctions(inheritFunctions):
   def ListFiles(self, dir_name, mask=None):
     import glob
     rv = []
-    cd = os.getcwd()
+    cd = os.getcwdu()
     try:
       dir_name = os.path.normpath(dir_name)
       if not mask:
