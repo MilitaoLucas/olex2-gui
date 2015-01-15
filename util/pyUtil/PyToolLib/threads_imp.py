@@ -76,7 +76,7 @@ class NewsImageRetrivalThread(ThreadEx):
 class CheckCifRetrivalThread(ThreadEx):
   instance = None
   def __init__(self, send_fcf):
-    ThreadRegistry().register(NewsImageRetrivalThread)
+    ThreadRegistry().register(CheckCifRetrivalThread)
     Thread.__init__(self)
     self.send_fcf = send_fcf
     CheckCifRetrivalThread.instance = self
