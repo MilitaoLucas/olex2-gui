@@ -52,13 +52,11 @@ class OlexFunctions(inheritFunctions):
         handler = olx.gui_phil_handler
       else:
         handler = olx.phil_handler
-      if isinstance(value, basestring):
-        value = value.replace('$', '\\$')
       if value == '': value = None
       elif value in ('Auto','auto','None','none',None):
         pass
-      elif type(value) in (str,unicode) and "'" in value:
-        value = "'%s'" %value.replace("'", "\\'")
+      elif isinstance(value, basestring):
+        value = "'%s'" %unicode(value).replace("'", "\\'").replace('$', '\\$').encode('utf-8')
       elif type(value) in (list, set):
         value = ' '.join("'%s'" %v.replace("'", "\\'") for v in value)
       elif "date_" in variable:
@@ -69,9 +67,7 @@ class OlexFunctions(inheritFunctions):
         except:
           pass
       else:
-        value = unicode(value)
-        value = value.encode('utf-8')
-        value = "'%s'" %value
+        value = "'%s'"  %unicode(value).encode('utf-8')
       handler.update_single_param(str(variable), value)
     except Exception, ex:
       print >> sys.stderr, "Variable %s could not be set with value %s" %(variable,value)

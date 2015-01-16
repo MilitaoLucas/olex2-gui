@@ -119,16 +119,16 @@
   <body
     <args>
   <cmd
-    <cmd1 "echo Good Bye">
-    <cmd2 "stop logging">
-    <cmd3 "flush history">
-    <cmd4 "spy.threading.joinAll()">
-    <cmd5 "if IsFileLoaded() then 'spy.saveHistory()>>spy.SaveStructureParams()>>
+    <cmd1 "stop logging">
+    <cmd2 "flush history">
+    <cmd3 "if IsFileLoaded() then 'spy.saveHistory()>>spy.SaveStructureParams()>>
 	  spy.SaveCifInfo()>>mode off'">
-    <cmd6 "spy.SaveUserParams()">
-    <cmd7 "spy.SaveOlex2Params()">
-    <cmd8 "storeparam startup file.relativePath(filefull())">
-    <cmd9 "storeparam last_version GetVar(last_version)">
+    <cmd4 "spy.SaveUserParams()">
+    <cmd5 "spy.SaveOlex2Params()">
+    <cmd6 "storeparam startup file.relativePath(filefull())">
+    <cmd7 "storeparam last_version GetVar(last_version, '')">
+    <cmd8 "spy.threading.joinAll()">
+    <cmd9 "echo Good Bye">
   >
  >
 >
