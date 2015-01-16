@@ -56,7 +56,7 @@ class OlexFunctions(inheritFunctions):
       elif value in ('Auto','auto','None','none',None):
         pass
       elif isinstance(value, basestring):
-        value = "'%s'" %value.replace("'", "\\'").replace('$', '\\$')
+        value = "'%s'" %unicode(value).replace("'", "\\'").replace('$', '\\$').encode('utf-8')
       elif type(value) in (list, set):
         value = ' '.join("'%s'" %v.replace("'", "\\'") for v in value)
       elif "date_" in variable:
@@ -67,9 +67,7 @@ class OlexFunctions(inheritFunctions):
         except:
           pass
       else:
-        value = unicode(value)
-        value = value.encode('utf-8')
-        value = "'%s'" %value
+        value = "'%s'"  %unicode(value).encode('utf-8')
       handler.update_single_param(str(variable), value)
     except Exception, ex:
       print >> sys.stderr, "Variable %s could not be set with value %s" %(variable,value)
@@ -701,7 +699,7 @@ class OlexFunctions(inheritFunctions):
   def ListFiles(self, dir_name, mask=None):
     import glob
     rv = []
-    cd = os.getcwd()
+    cd = os.getcwdu()
     try:
       dir_name = os.path.normpath(dir_name)
       if not mask:
