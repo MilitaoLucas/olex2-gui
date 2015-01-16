@@ -402,7 +402,10 @@ class RunRefinementPrg(RunPrg):
       self.isInversionNeeded(force=self.params.snum.refinement.auto.invert)
     OV.SetParam('snum.current_process_diagnostics','refinement')
     if self.params.snum.refinement.cifmerge_after_refinement:
-      MergeCif(edit=False, force_create=False, evaluate_conflicts=False)
+      try:
+        MergeCif(edit=False, force_create=False, evaluate_conflicts=False)
+      except Exception, e:
+        print("Failed in CifMerge: '%s'" %str(e))
 
   def doHistoryCreation(self):
     R1 = 0
