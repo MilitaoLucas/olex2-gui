@@ -300,7 +300,9 @@ class Method_refinement(Method):
       olx.FixHL()
 
     wave_length = float(olx.xf.exptl.Radiation())
-    if round(wave_length, 2) == round(0.71073,2) or round(wave_length, 2) == round(1.5414, 2) or round(wave_length, 2)  == round(0.56053, 2):
+    if round(wave_length, 2) == round(0.71073,2) or\
+       round(wave_length, 2) == round(1.5414, 2) or\
+       round(wave_length, 2)  == round(0.56053, 2):
       pass
     else:
       print "Using non-standard wavelength (%f) calculating DISP and adding\n"%wave_length
@@ -309,7 +311,7 @@ class Method_refinement(Method):
   def post_refinement(self, RunPrgObject):
     pass
 
-  def writeRefinementInfoIntoRes(self, d):
+  def writeRefinementInfoIntoRes(self, d, file_name=None):
     ''' Expects a dictionary containing the relevant items with cif identifiers as keys '''
     d.setdefault('_refine_ls_abs_structure_Flack', "n/a")
     txt = '''
@@ -335,7 +337,8 @@ class Method_refinement(Method):
   REM Flack = %(_refine_ls_abs_structure_Flack)s
   
   ''' %d
-  
-    wFile = open('%s/%s.res' %(OV.FilePath(), OV.FileName()), 'a')
+    if not file_name:
+      file_name = '%s/%s.res' %(OV.FilePath(), OV.FileName())
+    wFile = open(file_name, 'a')
     wFile.write(txt)
     wFile.close()
