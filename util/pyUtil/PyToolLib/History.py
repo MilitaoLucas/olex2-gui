@@ -318,7 +318,10 @@ class Node(object):
       if resPath is not None and os.path.exists(resPath):
         self.res = compressFile(resPath)
 
-      self.R1 = float(OV.GetParam('snum.refinement.last_R1'))
+      try:
+        self.R1 = float(OV.GetParam('snum.refinement.last_R1'))
+      except:
+        pass
       if self.is_solution:
         self.program = OV.GetParam('snum.solution.program')
         self.method = OV.GetParam('snum.solution.method')
