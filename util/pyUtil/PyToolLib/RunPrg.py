@@ -507,11 +507,12 @@ def AnalyseRefinementSource():
     hkl_file_name = fn + '.hkl'
     olex.m("export '%s'" %hkl_file_name)
     if os.path.exists(res_file_name):
-      olex.m("reap '%s'" %res_file_name)
+      olex.m('reap "%s"' %res_file_name)
       print('Loaded RES file extracted from CIF')
     else:
       OV.File("%s" %ins_file_name)
-      olex.m("reap \"%s\"" %ins_file_name)
+      olex.m('reap "%s"' %ins_file_name)
+      olex.m("free xyz,Uiso")
       print('Loaded INS file generated from CIF')
     if os.path.exists(hkl_file_name):
       olx.HKLSrc(hkl_file_name)

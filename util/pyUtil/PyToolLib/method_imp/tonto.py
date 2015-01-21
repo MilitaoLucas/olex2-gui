@@ -40,6 +40,7 @@ class Method_tonto_HAR(Method_refinement):
         out.write("}\n}\nREVERT")
         out.truncate(out.tell())
     model_file_name = "tonto.%s.cif" %self.file_name
+    olx.Grow()
     olx.File(model_file_name)
     self.result_file = "tonto.%s_%s.accurate.cif" %(self.file_name, self.file_name)
     inp_data = {
@@ -49,12 +50,16 @@ class Method_tonto_HAR(Method_refinement):
       "basis_dir_name" : self.base_dir + "basis_sets",
       "data_name": data_file_name,
       "basis_name" : olx.GetVar('settings.tonto.basis.name'),
+      "method" : olx.GetVar('settings.tonto.method'),
       "thermal_smearing_model" : olx.GetVar('settings.tonto.thermal_smearing_model'),
       "partition_model" : olx.GetVar('settings.tonto.partition_model'),
       "optimise_scale" : olx.GetVar('settings.tonto.optimise_scale'),
       "optimise_extinction" : olx.GetVar('settings.tonto.optimise_extinction'),
       "correct_dispersion" : olx.GetVar('settings.tonto.correct_dispersion'),
-      "convergence" : olx.GetVar('settings.tonto.convergence'),
+      "convergence" : olx.GetVar('settings.tonto.convergence.value'),
+      "convergence_tolerance" : olx.GetVar('settings.tonto.convergence.tolerance'),
+      "refine_h_u_iso" : olx.GetVar('settings.tonto.refine_h_u_iso'),
+      "refine_positions_only" : olx.GetVar('settings.tonto.refine_positions_only'),
       }
     with open("stdin", "w") as inp:
       inp.write("""
@@ -71,6 +76,8 @@ class Method_tonto_HAR(Method_refinement):
    basis_name= %(basis_name)s
    crystal= {
      xray_data= {
+       refine_h_u_iso= %(refine_h_u_iso)s
+       refine_positions_only= %(refine_positions_only)s
        thermal_smearing_model= %(thermal_smearing_model)s
        partition_model= %(partition_model)s
        optimise_extinction= %(optimise_extinction)s
@@ -86,7 +93,7 @@ class Method_tonto_HAR(Method_refinement):
      kind = rhf
      initial_density= promolecule
      convergence= %(convergence)s
-     diis= { convergence_tolerance= 0.00001 }
+     diis= { convergence_tolerance= %(convergence_tolerance)s }
    }
    scf ! << do this
 
@@ -97,7 +104,7 @@ class Method_tonto_HAR(Method_refinement):
      use_SC_cluster_charges= TRUE
      cluster_radius= 8 angstrom
      convergence= %(convergence)s
-     diis= { convergence_tolerance= 0.00001 }
+     diis= { convergence_tolerance= %(convergence_tolerance)s }
    }
 
    ! Do the refinement ...
@@ -148,6 +155,7 @@ class Method_tonto_HAR(Method_refinement):
       for k in cif_set:
         cif[k] = olx.Cif(k)
       olx.SetVar('tonto_R1', cif['_refine_ls_R_factor_gt'])
+      olx.Free("Uiso,XYZ")
       res_file = "%s.res" %self.file_name
       olx.File(res_file)
       self.writeRefinementInfoIntoRes(cif, file_name=res_file)
@@ -168,13 +176,17 @@ class Method_tonto_HAR(Method_refinement):
     return self.basis_list_str
 
   def set_defaults(self):
+    olx.SetVar('settings.tonto.method', 'rhf')
     olx.SetVar('settings.tonto.basis.name', 'DZP')
     olx.SetVar('settings.tonto.thermal_smearing_model', 'hirshfeld')
     olx.SetVar('settings.tonto.partition_model', 'mulliken')
     olx.SetVar('settings.tonto.optimise_extinction', 'false')
     olx.SetVar('settings.tonto.correct_dispersion', 'false')
     olx.SetVar('settings.tonto.optimise_scale', 'true')
-    olx.SetVar('settings.tonto.convergence', '0.00001')
+    olx.SetVar('settings.tonto.convergence.value', '0.00001')
+    olx.SetVar('settings.tonto.convergence.tolerance', '0.00001')
+    olx.SetVar('settings.tonto.refine_h_u_iso', 'false')
+    olx.SetVar('settings.tonto.refine_positions_only', 'false')
 
 tonto_HAR_phil = phil_interface.parse("""
 name = 'HAR'
