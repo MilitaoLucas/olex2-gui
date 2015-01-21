@@ -3,6 +3,7 @@ from Method import Method_refinement
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import olx
+import olex
 import phil_interface
 
 class Method_tonto_HAR(Method_refinement):
@@ -18,13 +19,14 @@ class Method_tonto_HAR(Method_refinement):
       self.basis_list.sort()
       self.basis_list_str = ';'.join(self.basis_list)
       self.register()
+      self.set_defaults()
     else:
       self.basis_list = None
 
   def pre_refinement(self, RunPrgObject):
     Method_refinement.pre_refinement(self, RunPrgObject)
-    file_name = olx.FileName()
-    data_file_name = "data.%s.hkl" %file_name
+    self.file_name = olx.FileName()
+    data_file_name = "tonto.%s.hkl" %self.file_name
     if not os.path.exists(data_file_name):
       from iotbx.shelx import hklf
       import StringIO
@@ -32,22 +34,27 @@ class Method_tonto_HAR(Method_refinement):
       cctbx_adaptor = OlexCctbxAdapter()
       with open(data_file_name, "w") as out:
         out.write("reflection_data= { keys= { h= k= l= i_exp= i_sigma= } data= {\n")
-        hklf.miller_array_export_as_shelx_hklf(cctbx_adaptor.reflections.f_obs,
+        hklf.miller_array_export_as_shelx_hklf(cctbx_adaptor.reflections.f_sq_obs,
                                         out, True)
         out.seek(out.tell()-28)
         out.write("}\n}\nREVERT")
         out.truncate(out.tell())
-    model_file_name = "model.%s.cif" %file_name
-    if not os.path.exists(model_file_name):
-      olx.File(model_file_name)
-
+    model_file_name = "tonto.%s.cif" %self.file_name
+    olx.File(model_file_name)
+    self.result_file = "tonto.%s_%s.accurate.cif" %(self.file_name, self.file_name)
     inp_data = {
       "cif_name" : model_file_name,
-      "cif_data_name" : file_name,
-      "job_name" : file_name,
+      "cif_data_name" : self.file_name,
+      "job_name" : self.file_name,
       "basis_dir_name" : self.base_dir + "basis_sets",
-      "basis_name" : "DZP",
-      "data_name": data_file_name
+      "data_name": data_file_name,
+      "basis_name" : olx.GetVar('settings.tonto.basis.name'),
+      "thermal_smearing_model" : olx.GetVar('settings.tonto.thermal_smearing_model'),
+      "partition_model" : olx.GetVar('settings.tonto.partition_model'),
+      "optimise_scale" : olx.GetVar('settings.tonto.optimise_scale'),
+      "optimise_extinction" : olx.GetVar('settings.tonto.optimise_extinction'),
+      "correct_dispersion" : olx.GetVar('settings.tonto.correct_dispersion'),
+      "convergence" : olx.GetVar('settings.tonto.convergence'),
       }
     with open("stdin", "w") as inp:
       inp.write("""
@@ -63,21 +70,22 @@ class Method_tonto_HAR(Method_refinement):
    basis_directory= %(basis_dir_name)s
    basis_name= %(basis_name)s
    crystal= {
-      xray_data= {
-         thermal_smearing_model= stewart
-         partition_model= gaussian
-         optimise_extinction= NO
-         REDIRECT %(data_name)s
-      }
+     xray_data= {
+       thermal_smearing_model= %(thermal_smearing_model)s
+       partition_model= %(partition_model)s
+       optimise_extinction= %(optimise_extinction)s
+       correct_dispersion = %(correct_dispersion)s
+       REDIRECT %(data_name)s
+     }
    }
    becke_grid = {
-      set_defaults
-      accuracy= high
+     set_defaults
+     accuracy= high
    }
    scfdata= {
      kind = rhf
      initial_density= promolecule
-     convergence= 0.00001
+     convergence= %(convergence)s
      diis= { convergence_tolerance= 0.00001 }
    }
    scf ! << do this
@@ -88,7 +96,7 @@ class Method_tonto_HAR(Method_refinement):
      initial_density= restricted
      use_SC_cluster_charges= TRUE
      cluster_radius= 8 angstrom
-     convergence= 0.00001
+     convergence= %(convergence)s
      diis= { convergence_tolerance= 0.00001 }
    }
 
@@ -102,35 +110,71 @@ class Method_tonto_HAR(Method_refinement):
 """ %inp_data)
 
 
-
   def do_run(self, RunPrgObject):
-    self.failure = True
+    self.failure = False
     print 'STARTING Tonto HAR refinement'
     try:
-      olx.Exec(RunPrgObject.program.name)
+      import CifInfo
+      olx.Exec("%s" %RunPrgObject.program.name)
       olx.WaitFor('process')
+      hkl_src = olx.HKLSrc()
+      cif_file = "%s.cif" %self.file_name
+      if os.path.exists(cif_file):
+        os.remove(cif_file)
+      os.rename(self.result_file, cif_file)
+      olx.Freeze(True)
+      olx.Atreap(cif_file)
+      olx.HKLSrc(hkl_src)
+      params = {
+        '_refine_diff_density_max' : 'snum.refinement.max_peak',
+        '_refine_diff_density_min' : 'snum.refinement.max_hole',
+        '_refine_ls_shift/su_max': 'snum.refinement.max_shift_over_esd',
+        '_refine_ls_goodness_of_fit_ref': 'snum.refinement.goof',
+      }
+      cif_set = set([
+      '_refine_ls_R_factor_all', '_refine_ls_R_factor_gt',
+       '_refine_ls_wR_factor_ref', '_refine_ls_goodness_of_fit_ref',
+       '_refine_ls_shift/su_max', '_refine_ls_shift/su_mean',
+       '_reflns_number_total', '_reflns_number_gt', '_refine_ls_number_parameters',
+       '_refine_ls_number_restraints', '_refine_ls_abs_structure_Flack',
+       '_refine_diff_density_max', '_refine_diff_density_min'
+       ])
+
+      for k,v in params.iteritems():
+        kv = olx.Cif(k)
+        if kv != 'n/a':
+          OV.SetParam(v, kv)
+      cif = {}
+      for k in cif_set:
+        cif[k] = olx.Cif(k)
+      olx.SetVar('tonto_R1', cif['_refine_ls_R_factor_gt'])
+      res_file = "%s.res" %self.file_name
+      olx.File(res_file)
+      self.writeRefinementInfoIntoRes(cif, file_name=res_file)
+      #olex.m("reap '%s'" %res_file)
     except Exception:
       sys.stdout.formatExceptionInfo()
     finally:
       OV.DeleteBitmap('refine')
+      olx.Freeze(False)
 
   def post_refinement(self, RunPrgObject):
-    self.writeRefinementInfoIntoRes(self.cif)
-
-  def writeRefinementInfoForGui(self, cif):
-    for key, value in cif.iteritems():
-      if "." in value:
-        try:
-          cif[key] = "%.4f" %float(value)
-        except:
-          pass
-    self.cif = cif
+    pass
 
   def register(self):
     OV.registerFunction(self.getBasisListStr, False, 'tonto')
 
   def getBasisListStr(self):
     return self.basis_list_str
+
+  def set_defaults(self):
+    olx.SetVar('settings.tonto.basis.name', 'DZP')
+    olx.SetVar('settings.tonto.thermal_smearing_model', 'hirshfeld')
+    olx.SetVar('settings.tonto.partition_model', 'mulliken')
+    olx.SetVar('settings.tonto.optimise_extinction', 'false')
+    olx.SetVar('settings.tonto.correct_dispersion', 'false')
+    olx.SetVar('settings.tonto.optimise_scale', 'true')
+    olx.SetVar('settings.tonto.convergence', '0.00001')
 
 tonto_HAR_phil = phil_interface.parse("""
 name = 'HAR'

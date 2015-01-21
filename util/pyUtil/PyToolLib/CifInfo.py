@@ -483,12 +483,13 @@ class ExtractCifInfo(CifTools):
 
     curr_cif_p = OV.file_ChangeExt(OV.FileFull(), 'cif')
     if os.path.exists(curr_cif_p):
-      f = open(curr_cif_p, 'rUb')
-      current_cif = iotbx.cif.reader(input_string=f.read()).model().values()[0]
-      f.close()
-      all_sources_d[curr_cif_p] = current_cif
-
-
+      try:
+        f = open(curr_cif_p, 'rUb')
+        current_cif = iotbx.cif.reader(input_string=f.read()).model().values()[0]
+        f.close()
+        all_sources_d[curr_cif_p] = current_cif
+      except iotbx.cif.CifParserError:
+        print("Failed to parse the CIF for conflicts analysis")
 
     full_references = [self.olex2_reference]
     if active_solution is not None and active_solution.is_solution:
@@ -1241,7 +1242,7 @@ If more than one file is present, the path of the most recent file is returned b
 OV.registerFunction(ExtractCifInfo)
 
 def reloadMetadata(force=False):
-  """Relaads metadata stored in metacif file if the file name matches the data
+  """Reloads metadata stored in metacif file if the file name matches the data
    name or if force is set to True
   """
   try:

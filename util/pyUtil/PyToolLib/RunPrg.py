@@ -410,14 +410,17 @@ class RunRefinementPrg(RunPrg):
   def doHistoryCreation(self):
     R1 = 0
     self.his_file = ""
-    if OV.IsVar('cctbx_R1'):
-      R1 = float(OV.FindValue('cctbx_R1'))
-      olex.f('UnsetVar(cctbx_R1)')
+    if olx.IsVar('cctbx_R1') == 'true':
+      R1 = float(olx.GetVar('cctbx_R1'))
+      olx.UnsetVar('cctbx_R1')
+    elif olx.IsVar('tonto_R1') == 'true':
+      R1 = float(olx.GetVar('tonto_R1'))
+      olx.UnsetVar('tonto_R1')
     else:
       try:
         R1 = float(olx.Lst('R1'))
       except:
-        R1 = False
+        pass
 
     if R1:
       OV.SetParam('snum.refinement.last_R1', str(R1))
