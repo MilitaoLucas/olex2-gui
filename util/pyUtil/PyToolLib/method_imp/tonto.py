@@ -160,6 +160,11 @@ class Method_tonto_HAR(Method_refinement):
       olx.File(res_file)
       self.writeRefinementInfoIntoRes(cif, file_name=res_file)
       #olex.m("reap '%s'" %res_file)
+      if os.path.exists("stdout"):
+        try:
+          print open("stdout", 'r').read()
+        except:
+          pass
     except Exception:
       sys.stdout.formatExceptionInfo()
     finally:
