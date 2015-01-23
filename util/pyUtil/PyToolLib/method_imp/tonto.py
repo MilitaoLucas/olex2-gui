@@ -40,6 +40,7 @@ class Method_tonto_HAR(Method_refinement):
         out.write("}\n}\nREVERT")
         out.truncate(out.tell())
     model_file_name = "tonto.%s.cif" %self.file_name
+    olx.Kill("$Q")
     olx.Grow()
     olx.File(model_file_name)
     self.result_file = "tonto.%s_%s.accurate.cif" %(self.file_name, self.file_name)
@@ -123,13 +124,13 @@ class Method_tonto_HAR(Method_refinement):
     try:
       import CifInfo
       olx.Exec("%s" %RunPrgObject.program.name)
+      olx.Refresh()
       olx.WaitFor('process')
       hkl_src = olx.HKLSrc()
       cif_file = "%s.cif" %self.file_name
       if os.path.exists(cif_file):
         os.remove(cif_file)
       os.rename(self.result_file, cif_file)
-      olx.Freeze(True)
       olx.Atreap(cif_file)
       olx.HKLSrc(hkl_src)
       params = {
@@ -169,7 +170,6 @@ class Method_tonto_HAR(Method_refinement):
       sys.stdout.formatExceptionInfo()
     finally:
       OV.DeleteBitmap('refine')
-      olx.Freeze(False)
 
   def post_refinement(self, RunPrgObject):
     pass
