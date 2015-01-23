@@ -364,9 +364,13 @@ def getInfo():
     return ""
   preambula = ""
   if current_module.action == 3:
-    preambula = "<font color='red'>This module has <b>expired</b></font>, please either re-install it or contact"+\
-      " <a href='shell(mailto:enquiries@olexsys.org?subject=Olex2%20extensions%20licence)'>"+\
-      "OlexSys Ltd</a> to extend the licence.<br>"
+    t = "<a href='shell(mailto:enquiries@olexsys.org?"+\
+    "subject=Licence extension for: %s&"+\
+    "body=Customer reference: %s)'>OlexSys Ltd</a>" 
+    t = t %(current_module.name, _plgl.createAuthenticationToken())
+    t.replace(' ', '%20')
+    preambula = """<font color='red'>This module has <b>expired</b></font>,
+please either re-install it or contact %s to extend the licence.<br>""" %(t)
   return preambula + "<a href='shell %s'>Module URL: </a> %s<br>%s"\
      %(current_module.url, current_module.url, current_module.description)
 
