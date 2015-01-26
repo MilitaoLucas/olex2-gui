@@ -40,7 +40,7 @@ class History(ArgumentParser):
     self.basedir = OV.BaseDir()
     self.filefull = OV.FileFull()
     self.filepath = OV.FilePath()
-    self.filename = OV.FileName()
+    self.filename = OV.ModelSrc()
     if os.path.exists(self.filefull):
       self.strdir = OV.StrDir()
     else:
