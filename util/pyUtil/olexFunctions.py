@@ -114,7 +114,7 @@ class OlexFunctions(inheritFunctions):
 
   def get_cif_item(self, key, default="", output_format=False):
     if olx.cif_model is not None:
-      data_name = self.FileName().replace(' ', '')
+      data_name = self.ModelSrc().replace(' ', '')
       if data_name not in olx.cif_model:
         import CifInfo
         CifInfo.ExtractCifInfo()
@@ -144,7 +144,7 @@ class OlexFunctions(inheritFunctions):
 
   def set_cif_item(self, key, value):
     if olx.cif_model is not None:
-      data_name = self.FileName().replace(' ', '')
+      data_name = self.ModelSrc().replace(' ', '')
       data_block = olx.cif_model[data_name]
       if isinstance(value, basestring):
         value = value.strip()
@@ -604,6 +604,12 @@ class OlexFunctions(inheritFunctions):
     else:
       path = olx.FileName()
     return path
+
+  def ModelSrc(self):
+    model_src = olx.xf.rm.ModelSrc()
+    if not model_src:
+      return FileName()
+    return model_src
 
   def FilePath(self,FilePath=None):
     if FilePath is not None:
