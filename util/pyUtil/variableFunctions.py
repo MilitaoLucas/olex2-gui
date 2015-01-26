@@ -293,6 +293,20 @@ def SaveStructureParams():
       file_name=structure_phil_file, scope_name='snum', diff_only=True)
 OV.registerFunction(SaveStructureParams)
 
+def OnStructureLoaded(previous):
+  if olx.IsFileLoaded() == 'false':
+    return
+  mf_name = "%s%s%s.metacif" %(OV.StrDir(), os.path.sep, OV.ModelSrc())
+  cif_name = "%s%s%s.cif" %(OV.FilePath(), os.path.sep, OV.FileName())
+  if not os.path.exists(mf_name) and os.path.exists(cif_name):
+    olx.CifExtract(cif_name)
+  if previous != OV.FileFull():
+    import History
+    History.hist.loadHistory()
+  LoadStructureParams()
+
+OV.registerFunction(OnStructureLoaded)
+
 def SaveUserParams():
   user_phil_file = "%s/user.phil" %(OV.DataDir())
   olx.phil_handler.save_param_file(

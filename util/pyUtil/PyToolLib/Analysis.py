@@ -651,6 +651,8 @@ class Graph(ImageTools):
         barDraw = ImageDraw.Draw(barImage)
       last = len(dataset.x)
       x_value, y_value = xy
+      if y_value is None:
+        y_value = 1
 #      bar_left = ((i) * bar_width) + self.bSides + 1
       bar_left = ((j) * bar_width)
       bar_right = bar_left + bar_width
