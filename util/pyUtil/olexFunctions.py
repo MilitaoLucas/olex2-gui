@@ -608,7 +608,7 @@ class OlexFunctions(inheritFunctions):
   def ModelSrc(self):
     model_src = olx.xf.rm.ModelSrc()
     if not model_src:
-      return FileName()
+      return self.FileName()
     return model_src
 
   def FilePath(self,FilePath=None):

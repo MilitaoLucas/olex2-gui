@@ -146,7 +146,7 @@ class History(ArgumentParser):
       try:
         historyName = tree.name
       except AttributeError:
-        historyName = OV.FileName()
+        historyName = OV.ModelSrc()
         tree.name = historyName
 
       if tree.version < 2.0:
@@ -154,7 +154,7 @@ class History(ArgumentParser):
 
       if tree.active_node is None:
         self._createNewHistory()
-      elif tree.name != OV.FileName():
+      elif tree.name != OV.ModelSrc():
         self._createNewHistory()
     else:
       self._createNewHistory()
@@ -189,7 +189,7 @@ class History(ArgumentParser):
     self.setParams()
 
   def _createNewHistory(self):
-    self.filename = olx.FileName()
+    self.filename = OV.ModelSrc()
     historyPicklePath = '/'.join([self.strdir,'%s.history' %self.filename])
     historyFolder = '/'.join([self.strdir,"%s-history" %self.filename])
     global tree
@@ -426,7 +426,7 @@ class HistoryTree(Node):
     self._children = []
     self._active_child_node = None
     self._active_node = None
-    self.name = OV.FileName()
+    self.name = OV.ModelSrc()
     self._full_index = {self.name: self}
     self.version = 2.1
     self.hklFiles = {}
