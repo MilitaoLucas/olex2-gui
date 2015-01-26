@@ -817,12 +817,12 @@ class ExtractCifInfo(CifTools):
      set([''.join(x.replace('\r', '').split()) for x in full_references])\
       | ExternalPrgParameters.get_managed_reference_set()
     for l in current_refs.split('\n'):
-      #l = l.rstrip()
-      if not l:
+      if not l.strip():
         if ref:
           ref_t = ''.join(ref.replace('\r', '').split())
           if ref_t not in full_references_set:
             full_references.append(ref)
+            full_references_set.add(ref_t)
           ref = ""
       else:
         if ref:
@@ -830,7 +830,6 @@ class ExtractCifInfo(CifTools):
         else:
           ref = l
     full_references.sort()
-
     self.update_cif_block({
       '_publ_section_references': '\n\n'.join(full_references)}, force=True)
 
