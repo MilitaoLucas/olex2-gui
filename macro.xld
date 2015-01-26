@@ -57,8 +57,7 @@
       <cmd5  "spy.fade_out()">
       <cmd6  "@reap %1 %2">
       <cmd7  "spy.fade_in()">
-      <cmd15 "if strcmp(%7,filefull()) then none else 'spy.loadHistory()'">
-      <cmd8 "if strcmp(filename(),'none') then none else spy.LoadStructureParams()">
+      <cmd8 "spy.OnStructureLoaded(%7)">
       <cmd9 "spy.run_skin sNumTitle">
       <cmd10 "spy.make_HOS(True)">
       <cmd11 "SetVar(SlideQPeaksVal,0)">
