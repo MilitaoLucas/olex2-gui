@@ -218,7 +218,8 @@ def LoadStructureParams():
   refinementPrg = olx.phil_handler.get_validated_param('snum.refinement.program')
   refinementMethod = olx.phil_handler.get_validated_param('snum.refinement.method')
   olx.phil_handler.reset_scope('snum', rebuild_index=True)
-  structure_phil_path = u"%s/.olex/%s.phil" %(OV.FilePath(), OV.FileName())
+  model_src = OV.ModelSrc()
+  structure_phil_path = u"%s/.olex/%s.phil" %(OV.FilePath(), model_src)
   if os.path.isfile(structure_phil_path):
     structure_phil_file = open(structure_phil_path, 'r')
     structure_phil = structure_phil_file.read()
@@ -244,7 +245,7 @@ def LoadStructureParams():
   #
   # Start backwards compatibility  2010-06-18
   #
-  metacif_path = '%s/%s.metacif' %(OV.StrDir(), OV.FileName())
+  metacif_path = '%s/%s.metacif' %(OV.StrDir(), model_src)
   if not os.path.isfile(metacif_path) and structure_phil is not None:
     from iotbx.cif import model
     master_phil = phil_interface.parse(
@@ -265,7 +266,7 @@ def LoadStructureParams():
       cif_block = model.block()
       for key, value in cif_items:
         cif_block[key] = value
-      cif_model = model.cif({OV.FileName(): cif_block})
+      cif_model = model.cif({model_src: cif_block})
       f = open(metacif_path, 'wb')
       print >> f, cif_model
       f.close()
