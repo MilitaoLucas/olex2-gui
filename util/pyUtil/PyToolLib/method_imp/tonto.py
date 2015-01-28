@@ -33,9 +33,12 @@ class Method_tonto_HAR(Method_refinement):
       from cctbx_olex_adapter import OlexCctbxAdapter
       cctbx_adaptor = OlexCctbxAdapter()
       with open(data_file_name, "w") as out:
+        f_sq_obs = cctbx_adaptor.reflections.f_sq_obs.deep_copy()
+        for i, s in enumerate(f_sq_obs.sigmas()):
+          if s <= 0:
+            f_sq_obs.sigmas()[i] = 0.01
         out.write("reflection_data= { keys= { h= k= l= i_exp= i_sigma= } data= {\n")
-        hklf.miller_array_export_as_shelx_hklf(cctbx_adaptor.reflections.f_sq_obs,
-                                        out, True)
+        hklf.miller_array_export_as_shelx_hklf(f_sq_obs, out, True)
         out.seek(out.tell()-28)
         out.write("}\n}\nREVERT")
         out.truncate(out.tell())
@@ -176,9 +179,22 @@ class Method_tonto_HAR(Method_refinement):
 
   def register(self):
     OV.registerFunction(self.getBasisListStr, False, 'tonto')
+    OV.registerFunction(self.onConvergencePresetChange, False, 'tonto')
 
   def getBasisListStr(self):
     return self.basis_list_str
+
+  def onConvergencePresetChange(self, value):
+    if value == 'strict':
+      olx.SetVar('settings.tonto.convergence.value', '0.00001')
+      olx.html.SetValue('tonto_convergence_val', '0.00001')
+      olx.SetVar('settings.tonto.convergence.tolerance', '0.00001')
+      olx.html.SetValue('tonto_convergence_tol', '0.00001')
+    elif value == 'loose':
+      olx.SetVar('settings.tonto.convergence.value', '0.001')
+      olx.html.SetValue('tonto_convergence_val', '0.001')
+      olx.SetVar('settings.tonto.convergence.tolerance', '0.0002')
+      olx.html.SetValue('tonto_convergence_tol', '0.0002')
 
   def set_defaults(self):
     olx.SetVar('settings.tonto.method', 'rhf')
