@@ -49,20 +49,19 @@ class Method_tonto_HAR(Method_refinement):
     self.file_name = olx.FileName()
     data_file_name = "tonto.%s.hkl" %self.file_name
     if not os.path.exists(data_file_name):
-      from iotbx.shelx import hklf
-      import StringIO
       from cctbx_olex_adapter import OlexCctbxAdapter
       cctbx_adaptor = OlexCctbxAdapter()
       with open(data_file_name, "w") as out:
-        f_sq_obs = cctbx_adaptor.reflections.f_sq_obs.deep_copy()
-        for i, s in enumerate(f_sq_obs.sigmas()):
-          if s <= 0:
-            f_sq_obs.sigmas()[i] = 0.01
         out.write("reflection_data= { keys= { h= k= l= i_exp= i_sigma= } data= {\n")
-        hklf.miller_array_export_as_shelx_hklf(f_sq_obs, out, True)
-        out.seek(out.tell()-28)
+        f_sq_obs = cctbx_adaptor.reflections.f_sq_obs
+        for j, h in enumerate(f_sq_obs.indices()):
+          s = f_sq_obs.sigmas()[j]
+          if s <= 0: s = 0.01
+          i = f_sq_obs.data()[j]
+          if i < 0: i = 0
+          out.write("%d %d %d %.2f %.2f\n" %(h[0], h[1], h[2], i, s))
         out.write("}\n}\nREVERT")
-        out.truncate(out.tell())
+
     model_file_name = "tonto.%s.cif" %self.file_name
     olx.Kill("$Q")
     olx.Grow()
@@ -150,6 +149,14 @@ class Method_tonto_HAR(Method_refinement):
       olx.Exec("%s" %RunPrgObject.program.name)
       olx.Refresh()
       olx.WaitFor('process')
+      olx.UnsetVar('tonto_R1')
+      if not os.path.exists(self.result_file):
+        if os.path.exists("stderr"):
+          try:
+            print open("stderr", 'r').read()
+          except:
+            pass
+        return
       hkl_src = olx.HKLSrc()
       cif_file = "%s.cif" %self.file_name
       if os.path.exists(cif_file):
