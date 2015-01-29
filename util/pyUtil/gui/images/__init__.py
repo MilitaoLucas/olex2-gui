@@ -86,8 +86,11 @@ def MakeBitmapImage(notify_listener=True, output_folder=None):
   from ImageTools import ImageTools
   IT = ImageTools()
   filefull, filename, fileext = GetImageFilename(image_type = "BITMAP")
+  if not filefull:
+    return
   if output_folder:
-    filefull = "%s/%s.%s" %(output_folder, filename, fileext)
+    _ = os.sep.join([output_folder, "%s.%s" %(filename, fileext)])
+    filefull = _
   if not filefull:
     return
   resolution, filesize = GetBitmapSize()

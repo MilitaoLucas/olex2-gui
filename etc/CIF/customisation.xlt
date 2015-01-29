@@ -67,6 +67,7 @@
     <_diffrn_detector_*>
     <_computing_*>
     <_olex2_*>
+    <_local_*>
     <_publ_*>
     <_refine_* skip="true">
     <_exptl_crystal_F_000 skip="true">

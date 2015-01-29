@@ -7,13 +7,12 @@ import shutil
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
-from gui.tools import *
-
 import HttpTools
 
 class PluginTools(object):
   def __init__(self):
     if olx.HasGUI() == 'true':
+      from gui.tools import deal_with_gui_phil
       deal_with_gui_phil('load')
 
   def get_plugin_date(self):
@@ -24,7 +23,7 @@ class PluginTools(object):
 
   def deal_with_phil(self, operation='read', which='user_local'):
     user_phil_file = "%s/%s.phil" %(OV.DataDir(),self.p_scope)
-    phil_file_p = r"%s/%s.phil" %(self.p_path, self.p_name.lower())
+    phil_file_p = r"%s/%s.phil" %(self.p_path, self.p_scope)
     gui_phil_file_p = r"%s/gui_%s.phil" %(self.p_path, self.p_name.lower())
     if operation == "read":
       phil_file = open(phil_file_p, 'r')
@@ -58,6 +57,8 @@ class PluginTools(object):
   def setup_gui(self):
     if olx.HasGUI() != 'true':
       return
+    from gui.tools import make_single_gui_image
+    from gui.tools import add_tool_to_index
 
     for image, img_type in self.p_img:
       make_single_gui_image(image, img_type=img_type)
