@@ -30,7 +30,7 @@ def round_image(image,cache={},radius=100,fill=255,pos=ROUNDED_POS,
   image = image.convert('RGB')
   return image
 
-def create_corner(radius=100,fill=255,factor=2):
+def create_corner(radius=100,fill=255,factor=50):
   corner  = Image.new('L',(factor*radius,factor*radius),0)
   draw    = ImageDraw.Draw(corner)
   draw.pieslice((0,0,2*factor*radius,2*factor*radius),180,270,fill=fill)
@@ -90,7 +90,7 @@ if __name__ == "__main__":
   cache = {}
   image = Image.new('RGB', (50, 20), (80,130,130))
   image.save("C:/fred.png")
-  
+
   #thumbnail = round_image(image.thumbnail(size, filter), cache, radius)
   thumbnail = round_image(image, cache, 10, solid_colour=(80,130,130))
   thumbnail.save("C:/fred1.png")
