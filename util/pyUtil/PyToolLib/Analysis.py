@@ -1914,8 +1914,8 @@ class SystematicAbsencesPlot(Analysis):
     self.graphInfo["TopRightTitle"] = self.filename
     self.auto_axes = True
     self.cctbx_systematic_absences_plot()
+    self.popout()
     if self.have_data:
-      self.popout()
       if self.params.systematic_absences.output_csv_file:
         self.output_data_as_csv()
 
@@ -1928,8 +1928,10 @@ class SystematicAbsencesPlot(Analysis):
     self.metadata = metadata
     if xy_plot.x is None:
       self.have_data = False
+      self.draw_origin = True
+      self.make_empty_graph(axis_x = True)
       print "No systematic absences present"
-      return
+      return None
     self.have_data = True
     self.data.setdefault('dataset1', Dataset(xy_plot.x, xy_plot.y, indices=xy_plot.indices, metadata=metadata))
     self.draw_origin = True
@@ -2647,9 +2649,13 @@ class HealthOfStructure():
         wl = float(olx.Cif('_diffrn_radiation_wavelength'))
         twotheta = 2* (float(olx.Cif('_diffrn_reflns_theta_full')))
         self.hkl_stats['MinD'] = uctbx.two_theta_as_d(twotheta ,wl, True)
-        self.hkl_stats['MeanIOverSigma'] = 1/float(olx.Cif('_diffrn_reflns_av_unetI/netI'))
+        try:
+          self.hkl_stats['MeanIOverSigma'] = 1/float(olx.Cif('_diffrn_reflns_av_unetI/netI'))
+        except:
+          self.hkl_stats['MeanIOverSigma'] = 1/float(olx.Cif('_diffrn_reflns_av_sigmaI/netI'))
         self.hkl_stats['Rint'] = float(olx.Cif('_diffrn_reflns_av_R_equivalents'))
-    except:
+    except Exception, err:
+      print err
       return (False, True)
     if self.scope == "refinement":
       return (True, True)
@@ -2784,7 +2790,7 @@ class HealthOfStructure():
           #raw_val = value
         if item == 'Rint':
           if raw_val == 0:
-            value = "Merged Data!"
+            value = "Merged!"
             bg_colour = "#000000"
           elif raw_val == -1:
             value = "MERG 0"
@@ -2957,7 +2963,6 @@ class HealthOfStructure():
 
     ## ADD THE ACTUAL VALUE
 
-
     y += 0
     if value_display_extra:
       dxs,dxy = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=font_size_s * scale)
@@ -2966,6 +2971,11 @@ class HealthOfStructure():
     draw.text((x, y), "%s" %value_display, font=font, fill=fill)
     if value_display_extra:
       draw.text((0, y - 1 + dy/2), "%s" %value_display_extra, font=font_s, fill="#ffffff")
+
+    _ = im.copy()
+    _ = IT.add_whitespace(im, 'right', 4, "#ffffff")
+    _ = IT.add_whitespace(im, 'left', 4, "#ffffff")
+    OlexVFS.save_image_to_olex(_, "%s_large" %item, 0)
 
     if self.image_position != "last":
       im = IT.add_whitespace(im, 'right', 4, bgcolour)
