@@ -50,6 +50,7 @@ class RunPrg(ArgumentParser):
     self.original_filename = self.filename
     olx.Stop('listen')
     self.shelx_alias = OV.FileName().replace(' ', '').lower()
+    os.environ['FORT_BUFFERED'] = 'TRUE'
 
   def __del__(self):
     if self.method is not None:
