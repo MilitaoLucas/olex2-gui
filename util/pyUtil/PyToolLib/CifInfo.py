@@ -1105,14 +1105,17 @@ If more than one file is present, the path of the most recent file is returned b
 
       zip_file = g[0]
       import zipfile
-      z = zipfile.ZipFile(zip_file, "r")
       l = []
-      for filename in z.namelist():
-        if filename and ".jpg" in filename:
-          l.append(r'%s/%s' %(g[0], filename))
-      OV.SetParam("snum.metacif.list_crystal_images_files", l)
-      setattr(self.metacifFiles, "list_crystal_images_files", l)
-      return l[0], l
+      try:
+        with zipfile.ZipFile(zip_file, "r") as z:
+          for filename in z.namelist():
+            if filename and ".jpg" in filename:
+              l.append(r'%s/%s' %(g[0], filename))
+        OV.SetParam("snum.metacif.list_crystal_images_files", l)
+        setattr(self.metacifFiles, "list_crystal_images_files", l)
+        return l[0], l
+      except:
+        return None, None
 
     elif tool == "od_crystal_images":
       name = OV.FileName()
