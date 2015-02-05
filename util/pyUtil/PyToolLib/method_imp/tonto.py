@@ -36,8 +36,15 @@ class Method_tonto_HAR(Method_refinement):
                     output_buf_size = needed
 
         self.base_dir = get_short_path_name(self.base_dir)
-      self.basis_list = os.listdir(self.base_dir + "basis_sets")
-      self.basis_list.sort()
+
+      bs_dir = self.base_dir + "basis_sets"
+      if not os.path.exists(bs_dir):
+        self.basis_list = []
+        print("The basis_sets directory does not exist - please fix")
+      else:
+        self.basis_list = os.listdir(self.base_dir + "basis_sets")
+        self.basis_list.sort()
+
       self.basis_list_str = ';'.join(self.basis_list)
       self.register()
       self.set_defaults()
@@ -146,7 +153,7 @@ class Method_tonto_HAR(Method_refinement):
     print 'STARTING Tonto HAR refinement'
     try:
       import CifInfo
-      olx.Exec("%s" %RunPrgObject.program.name)
+      olx.Exec("tonto")
       olx.Refresh()
       olx.WaitFor('process')
       olx.UnsetVar('tonto_R1')
