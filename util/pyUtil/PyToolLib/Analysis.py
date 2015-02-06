@@ -2730,10 +2730,7 @@ class HealthOfStructure():
       if self.is_CIF:
         l = ['_refine_ls_shift/su_max', '_refine_diff_density_max', '_refine_diff_density_min', '_refine_ls_goodness_of_fit_ref']
       else:
-        #l = ['max_shift_over_esd', 'max_shift_site', 'max_shift_u', 'max_peak', 'max_hole']
         l = ['max_shift_over_esd', 'max_peak', 'max_hole', 'goof']
-      #missing = olexex.OlexRefinementModel().getMissingAtomsNumber()
-      #OV.SetParam('snum.refinement.expected_peaks', missing)
     else:
       self.scope = "hkl"
       if not self.hkl_stats:
@@ -2765,8 +2762,8 @@ class HealthOfStructure():
         item = 'max_peak'
       elif item == "_refine_diff_density_min":
         item = 'max_hole'
-
-
+      elif item == "_refine_ls_shift_over_su_max":
+        item = 'max_shift_over_esd'
 
       display = OV.GetParam('diagnostics.%s.%s.display' %(self.scope,item))
 
