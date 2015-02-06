@@ -2751,7 +2751,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     txt = ""
     if len(t) > 1:
       for bit in t:
-        txt += bit.title() + " "
+        txt += bit + " "
     else:
       txt = item
 
