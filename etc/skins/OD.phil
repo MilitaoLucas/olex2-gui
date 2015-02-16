@@ -18,7 +18,7 @@ gui {
     font_colour = #222244
     bg_colour = #cecece
     highlight_colour = #ff7800
-    input_bg_colour = #cecece
+    input_bg_colour = #ffffff
     link_colour = #585886
     table_bg_colour = #bcbcbc
     table_firstcol_colour = #bbbbbb
@@ -98,13 +98,12 @@ gui {
       off_L = 0.8
     }
     h3 {
+      grad_colour = #527bde
       height = 19
-      base_colour = None
-      grad_colour = None
-      font_colour = None
       bg_colour_L = 1.2
-      grad_colour_L = 0.95
-      font_colour_L = 0.5
+      grad_colour_L = 0.9
+      font_colour_L = 1.5
+      font_colour = #ffffff
       corner_rad = 3
       top = 1
       left = 8
@@ -112,7 +111,7 @@ gui {
       off_L = 0.6
     }
     tinybutton{
-      height = 26
+      height = 28
       width = 30
       font_size = 18
       }

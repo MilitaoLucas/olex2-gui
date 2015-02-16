@@ -142,14 +142,14 @@ class publication:
     if person:
       olx.html.SetValue(box, person)
     return
- 
+
   def EditPersonById(self, box):
     pid = int(olx.html.GetValue(box))
     person = self.make_person_box_for_id(pid, True)
     if person:
       olx.html.SetValue(box, person)
     return
- 
+
   def OnPersonChange(self, box):
     import userDictionaries
     new_value = False
@@ -428,13 +428,16 @@ def get_crystal_image(p=None,n=4,get_path_only=True):
         return OV.standardizePath(current_image)
 
   if not current_image:
-    print "No Current Image!"
+#    print "No Current Image!"
     return None
 
   if '.vzs' in current_image:
     have_zip = True
     splitbit = '.vzs/'
     directory = current_image.split(splitbit)[0] + splitbit.replace("/", "")
+    if not os.path.exists(directory):
+      print "The path %s should have existed. It does not" %directory
+      return None
     import zipfile
     images_zip = zipfile.ZipFile(directory, "r")
     images_zip_name = OV.FileName()

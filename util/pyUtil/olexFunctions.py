@@ -407,8 +407,8 @@ class OlexFunctions(inheritFunctions):
     path = path.strip('"')
     path = '"%s"' %path
     olex.m('@reap %s' %path)
-    olex.m('spy.run_skin sNumTitle')
     if OV.HasGUI():
+      olex.m('spy.run_skin sNumTitle')
       olx.html.Update()
 
   def Reset(self):
@@ -427,12 +427,13 @@ class OlexFunctions(inheritFunctions):
     fader = self.FindValue('gui_use_fader')
     #print "AtReap %s/%s" %(path, file)
     try:
-      if fader == 'true':
-        olex.m("atreap_fader -b \"%s\"" %(r"%s/%s.res" %(path, file)))
-      else:
-        olex.m("atreap_no_fader -b \"%s\"" %(r"%s/%s.res" %(path, file)))
-      olex.m('spy.run_skin sNumTitle')
-      olx.html.Update()
+      if OV.HasGUI():
+        if fader == 'true':
+          olex.m("atreap_fader -b \"%s\"" %(r"%s/%s.res" %(path, file)))
+        else:
+          olex.m("atreap_no_fader -b \"%s\"" %(r"%s/%s.res" %(path, file)))
+        olex.m('spy.run_skin sNumTitle')
+        olx.html.Update()
 
 
     except Exception, ex:
@@ -606,8 +607,11 @@ class OlexFunctions(inheritFunctions):
     return path
 
   def ModelSrc(self):
-    model_src = olx.xf.rm.ModelSrc()
-    if not model_src:
+    try: #remove later!!HP
+      model_src = olx.xf.rm.ModelSrc()
+      if not model_src:
+        return self.FileName()
+    except:
       return self.FileName()
     return model_src
 
