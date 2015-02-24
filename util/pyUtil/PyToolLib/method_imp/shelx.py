@@ -604,7 +604,7 @@ instructions {
 }
 """)
 
-shelxl_phil = phil_interface.parse("""
+shelxl_phil_str = """
 plan
   .optional=True
 {
@@ -654,7 +654,7 @@ command_line
   default=True
     .type=bool
 }
-""")
+"""
 
 def get_LS_phil():
   return phil_interface.parse("""
@@ -690,7 +690,7 @@ def get_LS_phil():
         .type=bool
     }
   }
-    """ %shelxs_phil_str, process_includes=True)
+    """ %shelxl_phil_str, process_includes=True)
 
 def get_CGLS_phil():
   return phil_interface.parse("""
@@ -711,4 +711,4 @@ def get_CGLS_phil():
       }
       %s
     }
-    """ %shelxs_phil_str, process_includes=True)
+    """ %shelxl_phil_str, process_includes=True)
