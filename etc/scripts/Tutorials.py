@@ -3,6 +3,7 @@ import glob
 import olx
 import olex
 import olexex
+import gui
 import time
 
 from olexFunctions import OlexFunctions
@@ -246,7 +247,7 @@ class AutoDemo():
       ('_(.*?)_', r'<code><font color=%s>\1</code>' %self.font_colour_code),
       ('\*(.*?)\*', r'<i><font color=%s>\1</i>' %self.highlight_colour),
     ]
-    self.txt = olexex.run_regular_expressions(self.txt, re_l)
+    self.txt = gui.tools.run_regular_expressions(self.txt, re_l)
 
   def stop_tutorial(self):
     self.stop_tutorial = True
