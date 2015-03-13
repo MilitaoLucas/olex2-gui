@@ -211,6 +211,7 @@ class Skin():
     export_parameters()
     self.sNum = ""
     self.sg = ""
+    self.data_index = ""
     skin_name = OV.GetParam('gui.skin.name')
     import PilTools
     self.TI = PilTools.TI
@@ -339,7 +340,7 @@ class Skin():
         print "run_skin timage took %.4fs" %(time.time()-t)
     elif f == 'sNumTitle':
       if olex_fs.Exists("sNumTitle.png") and self.sNum == OV.FileName()\
-         and  self.sg == olex.f('sg()'):
+         and  self.sg == olex.f('sg()') and self.data_index == olx.xf.CurrentData():
         if timing:
           print "run_skin sNumTitle took %.4fs (not run)" %(time.time()-t)
         return
@@ -354,6 +355,7 @@ class Skin():
         print "run_skin sNumTitle took %.4fs" %(time.time()-t)
       self.sNum = OV.FileName()
       self.sg = olex.f('sg()')
+      self.data_index = olx.xf.CurrentData()
 
     elif f == 'change':
       self.change()
