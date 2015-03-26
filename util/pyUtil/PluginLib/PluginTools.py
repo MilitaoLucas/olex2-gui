@@ -128,11 +128,21 @@ import olx
 instance_path = OV.DataDir()
 
 p_path = os.path.dirname(os.path.abspath(__file__))
+
+l = open(os.sep.join([p_path, 'def.txt'])).readlines()
+d = {}
+for line in l:
+  line = line.strip()
+  if not line or line.startswith("#"):
+    continue
+  d[line.split("=")[0].strip()] = line.split("=")[1].strip()
+
+p_name = d['p_name']
+p_htm = d['p_htm']
+p_img = eval(d['p_img'])
+p_scope = d['p_scope']
+
 OV.SetVar('%(name)s_plugin_path', p_path)
-p_name = "%(name)s"
-p_scope = "%(name_lower)s"
-p_htm = "%(name)s"
-p_img = [("%(name)s",'h1')]
 
 from PluginTools import PluginTools as PT
 
@@ -159,8 +169,6 @@ class %(name)s(PT):
 
 %(name)s_instance = %(name)s()
 print "OK."''' %d
-
-
 
   wFile = open("%(plugin_base)s/plugin-%(name)s/%(name)s.py"%d,'w')
   wFile.write(py)
@@ -203,6 +211,15 @@ print "OK."''' %d
   wFile.write(html)
   wFile.close()
 
+  def_t = r'''
+  p_name = %(name)s
+  p_htm = %(name)s
+  p_img = [("%(name)s",'h1')]
+  p_scope = %(name_lower)s'''%d
+
+  wFile = open("%(plugin_base)s/plugin-%(name)s/def.txt"%d,'w')
+  wFile.write(def_t)
+  wFile.close()
 
   if not os.path.exists(xld):
     wFile = open(xld, 'w')
@@ -214,16 +231,16 @@ print "OK."''' %d
     wFile.close()
     return
 
-  rFile = open(xld, 'rb').readlines()
+  rFile = open(xld, 'r').read().split()
   if name in " ".join(rFile):
     return
-  wFile = open(xld, 'w')
+  t = ""
   for line in rFile:
-    wFile.write(line)
+    t += "%s\n" %line
     if line.strip() == "<Plugin":
-      wFile.write (r'''
-      <%(name)s>
-''' %d)
+      t += "<%(name)s>\n" %d
+  wFile = open(xld, 'w')
+  wFile.write(t)
   wFile.close()
 
   print "New Plugin %s created. Please restart Olex2" %name

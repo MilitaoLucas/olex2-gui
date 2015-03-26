@@ -339,8 +339,12 @@ class Skin():
       if timing:
         print "run_skin timage took %.4fs" %(time.time()-t)
     elif f == 'sNumTitle':
+      try:
+        data_idx = olx.xf.CurrentData()
+      except:
+        data_idx = False
       if olex_fs.Exists("sNumTitle.png") and self.sNum == OV.FileName()\
-         and  self.sg == olex.f('sg()') and self.data_index == olx.xf.CurrentData():
+         and  self.sg == olex.f('sg()') and self.data_index == data_idx:
         if timing:
           print "run_skin sNumTitle took %.4fs (not run)" %(time.time()-t)
         return
@@ -355,7 +359,10 @@ class Skin():
         print "run_skin sNumTitle took %.4fs" %(time.time()-t)
       self.sNum = OV.FileName()
       self.sg = olex.f('sg()')
-      self.data_index = olx.xf.CurrentData()
+      try:
+        self.data_index = olx.xf.CurrentData()
+      except:
+        self.data_index = False
 
     elif f == 'change':
       self.change()

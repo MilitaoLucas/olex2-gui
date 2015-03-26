@@ -575,21 +575,6 @@ OV.registerFunction(FindZOfHeaviestAtomInFormua)
 
 last_formula = None
 
-def ElementButtonStates(symbol):
-  if not symbol:
-    e = olx.ChooseElement()
-    if not e:  return
-    symbol = e
-  if OV.GetParam('olex2.full_mode') == 'name -t=%s' %symbol:
-    olex.m('mode off')
-  else:
-    if olex.f('Sel()') == '':
-      olex.m('mode name -t=%s' %symbol)
-    else:
-      olex.m('name sel %s' %symbol)
-      olex.m('sel -u')
-if haveGUI:
-  OV.registerFunction(ElementButtonStates)
 
 
 
@@ -726,7 +711,6 @@ def GetRcolour(R1):
         retVal=OV.GetParam('gui.green')
       else:
         retVal = "#00b400"
-
   except:
     retVal='grey'
   return str(retVal)

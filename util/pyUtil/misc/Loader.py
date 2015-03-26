@@ -118,7 +118,7 @@ def getModule(name, email=None):
     else:
       zp = ZipFile(StringIO(f))
       zp.extractall(path=dir)
-      msg = "Module <b>%s</b> has been successfully installed/updated" %name
+      msg = "<zimg src='toolbar-okoff.png'> Module <b>%s</b> has been successfully installed/updated" %name
       msg += "<br>You have 30 days to evaluate this extension module. Please contact us for further information."
       msg += "<br><font color='green'><b><Please restart Olex2 to activate the extension module.</b></font>"
       olex.writeImage(info_file_name, msg, 0)
@@ -368,7 +368,7 @@ def getInfo():
   if current_module.action == 3:
     t = "<a href='shell(mailto:enquiries@olexsys.org?"+\
     "subject=Licence extension for: %s&"+\
-    "body=Customer reference: %s, Olex2 tag: %s)'>OlexSys Ltd</a>" 
+    "body=Customer reference: %s, Olex2 tag: %s)'>OlexSys Ltd</a>"
     t = t %(current_module.name, _plgl.createAuthenticationToken(), OV.GetTag())
     t.replace(' ', '%20')
     preambula = """<font color='red'>This module has <b>expired</b></font>,
@@ -379,7 +379,13 @@ please either re-install it or contact %s to extend the licence.<br>""" %(t)
 def update(idx):
   global current_module
   global available_modules
-  idx = int(idx)
+  from olexFunctions import OlexFunctions
+  OV = OlexFunctions()
+  try:
+    idx = int(idx)
+  except:
+    getModule(idx, OV.GetParam('user.email'))
+    return
   current_module = available_modules[idx]
   olex.writeImage(info_file_name, "", 0)
   olx.html.Update()
