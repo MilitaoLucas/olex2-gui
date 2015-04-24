@@ -107,20 +107,22 @@ def check_os():
     return "mac"
   if sys.platform == 'win32':
     return "win"
-  else:
+  else: 
     return False
 
 def check_for_first_run():
   first_run = not os.path.exists("%s/global.odb" %OV.DataDir())
   if  first_run or OV.GetParam('olex2.has_recently_updated'):
     try:
+      # olx.SkinUpdated is intentionally not there:
       olx.SkinUpdated
       return False
-    except:
+    except Exception as e:
+      #print(e)
       olx.SkinUpdated = True
     startup_skin = OV.GetParam('gui.skin.name', 'default')
-    if check_os() == 'mac' and startup_skin == 'default':
-      startup_skin == "mac"
+    if check_os().upper() == 'mac'.upper() and startup_skin == 'default':
+      startup_skin = "mac"
     _ = Skin()
     _.change_skin(startup_skin, internal_change=not first_run)
     return True
@@ -212,7 +214,6 @@ class Skin():
     self.sNum = ""
     self.sg = ""
     self.data_index = ""
-    skin_name = OV.GetParam('gui.skin.name')
     import PilTools
     self.TI = PilTools.TI
     OV.registerFunction(self.change_skin)
@@ -220,6 +221,7 @@ class Skin():
 
   def change_skin(self, skin_name, internal_change=False):
     new_width = None
+    OV.SetParam('gui.skin.name', skin_name)
     if not internal_change:
       try:
         new_width = int(skin_name)

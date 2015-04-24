@@ -9,14 +9,14 @@ gui {
   }
 
   html {
-    input_height = 20
-    checkbox_height = 20
+    input_height = 28
+    checkbox_height = 28
     checkbox_width = 20
     combo_width_2 = 55
-    combo_height = 20
-    spin_height = 24
+    combo_height = 28
+    spin_height = 28
     font_size = 3
-    font_size_controls = 4
+    font_size_controls = 3
   }
 
   timage {
