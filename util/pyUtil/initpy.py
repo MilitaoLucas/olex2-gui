@@ -41,19 +41,24 @@ import os
 import locale
 import time
 
+# This is more flexible for different computers:
+py_dev_path_dict = {'dkmac': r'/Applications/liclipse/plugins/org.python.pydev_4.0.0.201504092214/pysrc',
+                    'oleg': r'E:\eclipse-juno\eclipse\plugins\org.python.pydev_2.6.0.2012062818\pysrc',
+                    'dk-uni': r'D:\Program Files\Liclipse',
+                    'oleg2': r'C:\devel\eclipse\plugins\org.python.pydev_3.8.0.201409251235\pysrc'}
 debug = True
 if debug == True:
   try:
     import wingdbstub
   except:
     try:
-      py_dev_path = r'E:\eclipse-juno\eclipse\plugins\org.python.pydev_2.6.0.2012062818\pysrc'
-      if not os.path.exists(py_dev_path):
-        pass#py_dev_path = r'C:\devel\eclipse\plugins\org.python.pydev_3.8.0.201409251235\pysrc'
-      if os.path.exists(py_dev_path):
-        sys.path.append(py_dev_path)
-        import pydevd
-        pydevd.settrace()
+      for py_dev_path in py_dev_path_dict.values():
+        if not os.path.exists(py_dev_path):
+          pass
+        if os.path.exists(py_dev_path):
+          sys.path.append(py_dev_path)
+          import pydevd
+          pydevd.settrace()
     except:
       pass
 
@@ -69,6 +74,9 @@ else:
 
 sys.on_sys_exit_raise = None
 def our_sys_exit(i):
+  '''
+  this is not used anywhere (DK)
+  '''
   if sys.on_sys_exit_raise:
     e = sys.on_sys_exit_raise
     sys.on_sys_exit_raise = None
