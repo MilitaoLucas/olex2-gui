@@ -2705,10 +2705,10 @@ class HealthOfStructure():
   def summarise_HOS(self):
     d = {}
     txt = ""
-#    item = "Completeness"
-#    value = self.get_cctbx_completeness()
-#    d.setdefault('Completeness', value)
-#    txt += "<tr><td>%s</td><td>%s</td><tr>" %(item, value)
+    #    item = "Completeness"
+    #    value = self.get_cctbx_completeness()
+    #    d.setdefault('Completeness', value)
+    #    txt += "<tr><td>%s</td><td>%s</td><tr>" %(item, value)
     l = ['Completeness', 'MeanIOverSigma','Rint']
     for item in self.hkl_stats:
       value = self.hkl_stats[item]
@@ -2744,11 +2744,12 @@ class HealthOfStructure():
     if self.scope == None:
       self.scope = 'hkl'
 
-#    is_CIF = (olx.IsFileType('cif') == 'true')
+    # is_CIF = (olx.IsFileType('cif') == 'true')
     if self.scope == "refinement":
       if self.is_CIF:
-        l = ['_refine_ls_shift/su_max', '_refine_diff_density_max', '_refine_diff_density_min', '_refine_ls_goodness_of_fit_ref',
-        '_refine_ls_abs_structure_Flack']
+        l = ['_refine_ls_shift/su_max', '_refine_diff_density_max', 
+             '_refine_diff_density_min', '_refine_ls_goodness_of_fit_ref',
+             '_refine_ls_abs_structure_Flack']
         if olx.Cif('_refine_ls_abs_structure_Flack') == "n/a":
           l.remove("_refine_ls_abs_structure_Flack")
 
