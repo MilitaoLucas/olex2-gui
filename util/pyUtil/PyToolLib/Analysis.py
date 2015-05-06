@@ -2755,7 +2755,7 @@ class HealthOfStructure():
 
       else:
         l = ['max_shift_over_esd', 'max_peak', 'max_hole', 'goof','flack_str']
-        if OV.GetParam('snum.refinement.flack_str')== "0":
+        if OV.GetParam('snum.refinement.flack_str')== "0" or not OV.GetParam('snum.refinement.flack_str'):
           l.remove("flack_str")
     else:
       self.scope = "hkl"
