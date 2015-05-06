@@ -44,10 +44,10 @@ import time
 # This is more flexible for different computers:
 py_dev_path_dict = {'dkmac': r'/Applications/liclipse/plugins/org.python.pydev_4.0.0.201504092214/pysrc',
                     'oleg': r'E:\eclipse-juno\eclipse\plugins\org.python.pydev_2.6.0.2012062818\pysrc',
-                    'dk-uni': r'D:\Program Files\Liclipse',
+                    'dk-uni': r'D:\Programme\Brainwy\LiClipse 1.4.0\plugins\org.python.pydev_3.9.2.201502042042\pysrc',
                     'dk-home': r'C:\Program Files\Brainwy\LiClipse 2.0.0\plugins\org.python.pydev_4.0.0.201504092214\pysrc',
                     'oleg2': r'C:\devel\eclipse\plugins\org.python.pydev_3.8.0.201409251235\pysrc'}
-debug = True
+debug = False
 if debug == True:
   try:
     import wingdbstub
