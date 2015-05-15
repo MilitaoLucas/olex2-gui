@@ -3,14 +3,14 @@
 <!-- FIRST ROW -->
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SELECT_ATOMS';help_ext=Select-Atoms;1 -->
 
-  <td width = "50%">
+  <td width = "30%">
     %Exclusive%:
     <a href="sel -u>> sel $C">C</a>&nbsp;
     <a href="sel -u>> sel $H">H</a>&nbsp;
     <a href="sel -u>> sel $N">N</a>&nbsp;
     <a href="sel -u>> sel $O">O</a>&nbsp;
   </td>
-  <td width = "50%" colspan = 2>
+  <td width = "30%" colspan = 2>
     %Additive%:
     <a href="sel -a">%All%</a>&nbsp;
     <a href="sel $C">C</a>&nbsp;
@@ -18,6 +18,11 @@
     <a href="sel $N">N</a>&nbsp;
     <a href="sel $O">O</a>&nbsp;
   </td>
+
+  <td width = "40%" align='right' colspan = 2>
+$spy.MakeElementButtonsFromFormula('select')
+  </td>
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
@@ -35,41 +40,40 @@
 
 <!-- THIRD ROW -->
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SELECT_CRITERIA';help_ext=Select-Criteria;1 -->
-  <td width='45%' VALIGN='center' >
+  <td width='30%' VALIGN='center' >
     %Select atoms where% <b>U<sub>iso</sub></b>
   </td>
 
-  <td VALIGN='center' width='15%'>
-    <font size='$GetVar(HtmlFontSizeControls)'>
-    <input
-      type="combo"
-      height="$GetVar(HtmlComboHeight)"
-      bgcolor="$GetVar(HtmlInputBgColour)"
-      name= "compare"
-      items=">;=;<"
-      width="100%"
-      value = ">"
-      readonly
-    >
-    </font>
+
+  <td VALIGN='center' width='8%'>
+$+
+    html.Snippet(
+      "gui/snippets/input-combo",
+      "name=COMPARE_OPERATOR",
+      "items=>;=;<",
+      "value=>",
+      "manage=True"
+    )
+$-
   </td>
-  <td VALIGN='center' width='20%'>
-    <font size='$GetVar(HtmlFontSizeControls)'>
-    <input
-      type="text"
-      bgcolor="$GetVar(HtmlInputBgColour)"
-      name = "uiso"
-      width="100%"
-      float height="$GetVar(HtmlInputHeight)"
-      value = "0.06"
-    >
-  </font>
+
+
+  <td VALIGN='center' width='10%'>
+$+
+    html.Snippet(
+      "gui/snippets/input-text",
+      "name=UISO",
+      "value=0.06",
+    )
+$-
   </td>
 
   <td width='20%' align='right'>
-  $spy.MakeHoverButton('small-Select@uiso',"sel atoms where xatom.uiso html.getvalue(compare) html.getvalue(uiso)&&xatom.type!='Q'")
+  $spy.MakeHoverButton('small-Select@uiso',"sel atoms where xatom.uiso html.getvalue(COMPARE_OPERATOR) html.getvalue(UISO)&&xatom.type!='Q'")
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
 
 <!-- FOURTH ROW -->
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SELECT_RINGS';help_ext=Select-Rings;1 -->

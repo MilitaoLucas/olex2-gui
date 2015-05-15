@@ -2651,9 +2651,9 @@ class HealthOfStructure():
           return (False, True)
         self.hkl_stats = olex_core.GetHklStat()
       else:
-        self.hkl_stats['Completeness'] = float(olx.Cif('_diffrn_measured_fraction_theta_full'))
+        self.hkl_stats['Completeness'] = float(olx.Cif('_diffrn_measured_fraction_theta_max'))
         wl = float(olx.Cif('_diffrn_radiation_wavelength'))
-        twotheta = 2* (float(olx.Cif('_diffrn_reflns_theta_full')))
+        twotheta = 2* (float(olx.Cif('_diffrn_reflns_theta_max')))
         self.hkl_stats['MinD'] = uctbx.two_theta_as_d(twotheta ,wl, True)
         try:
           self.hkl_stats['MeanIOverSigma'] = 1/float(olx.Cif('_diffrn_reflns_av_unetI/netI'))
@@ -2747,7 +2747,7 @@ class HealthOfStructure():
     # is_CIF = (olx.IsFileType('cif') == 'true')
     if self.scope == "refinement":
       if self.is_CIF:
-        l = ['_refine_ls_shift/su_max', '_refine_diff_density_max', 
+        l = ['_refine_ls_shift/su_max', '_refine_diff_density_max',
              '_refine_diff_density_min', '_refine_ls_goodness_of_fit_ref',
              '_refine_ls_abs_structure_Flack']
         if olx.Cif('_refine_ls_abs_structure_Flack') == "n/a":
@@ -2831,7 +2831,7 @@ class HealthOfStructure():
           _ = 0.63
 
         bg_val = self.get_bg_colour('flack_val', flack_val)
-        bg_colour = (bg_esd,_,bg_val)
+        bg_colour = (bg_val,_,bg_esd)
 
       if not bg_colour:
         bg_colour = self.get_bg_colour(item, value)
