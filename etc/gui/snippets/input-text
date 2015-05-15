@@ -1,6 +1,6 @@
 #value=
 #width=100%
-#height="GetVar('HtmlInputHeight')"
+#height=GetVar('HtmlInputHeight')
 #manage=false
 #password=false
 #multiline=false
