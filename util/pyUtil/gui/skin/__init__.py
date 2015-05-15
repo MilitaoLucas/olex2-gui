@@ -107,7 +107,7 @@ def check_os():
     return "mac"
   if sys.platform == 'win32':
     return "win"
-  else: 
+  else:
     return False
 
 def check_for_first_run():
@@ -386,5 +386,20 @@ class Skin():
 Skin_instance = Skin()
 OV.registerMacro(Skin_instance.run_skin, 'function-The function to call')
 
-
 OV.registerFunction(load_user_gui_phil)
+
+def change_bond_colour(colour=None):
+  if not colour:
+    colour = OV.GetParam('user.bonds.colour', 'auto')
+  if colour == 'auto':
+    OV.SetParam('user.bonds.mask', 48)
+    olex.m('mask bonds 48')
+  else:
+    OV.SetParam('gui.bonds.mask', 1)
+    c = OV.GetParam('user.bonds.colours.%s' %colour)
+    olex.m("mask bonds 1")
+    olex.m("sel bonds")
+    olex.m("SetMaterial('sel.Single cone', %s)" %c)
+    olex.m("sel -u")
+
+OV.registerFunction(change_bond_colour, True, 'gui.skin')

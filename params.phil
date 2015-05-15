@@ -1160,6 +1160,23 @@ user
       .type = str
     }
 
+  bonds
+  {
+  mask = 48
+    .type = float
+  thickness = 1
+    .type = float
+  colour = orange
+    .type = str
+    colours
+    {
+    orange = "5;4278223103;4278255615"
+      .type = str
+    dark_grey = "5;4282071867;4286611584"
+      .type = str
+    }
+  }
+
   auto_refine_after_anis = True
     .type = bool
   auto_compact = True

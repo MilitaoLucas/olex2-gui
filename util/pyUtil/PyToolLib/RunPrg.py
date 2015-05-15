@@ -176,7 +176,9 @@ class RunPrg(ArgumentParser):
     if 'olex2' not in self.program.name:
       self.doFileResInsMagic()
       reflections = OV.HKLSrc() #BEWARE DRAGONS
+      olx.Freeze(True)
       OV.reloadStructureAtreap(self.filePath, self.curr_file)
+      olx.Freeze(False)
       OV.HKLSrc(reflections)
     else:
       if self.broadcast_mode:

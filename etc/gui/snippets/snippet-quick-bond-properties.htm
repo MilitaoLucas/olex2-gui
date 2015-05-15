@@ -1,0 +1,22 @@
+<td name=BOND_THICKNESS width=15%>
+  $+
+    html.Snippet("gui/snippets/input-combo", "name=BOND_THICKNESS_COMBO",
+    "manage=True",
+    "value=spy.GetParam(user.bonds.thickness)",
+    "items=0.2;0.4;0.6;0.8;1.0;1.2",
+    "onchange=spy.SetParam(user.bonds.thickness,html.GetValue(~name~))>>brad html.GetValue(~name~)"
+    )
+   $-
+</td>
+
+<td name=BOND_COLOUR width=15%>
+  $+
+    html.Snippet("gui/snippets/input-combo", "name=BOND_COLOUR_COMBO",
+    "manage=False",
+    "value=spy.GetParam(user.bonds.colour)",
+    "items=auto;orange;dark grey<-dark_grey",
+    "onchange=spy.SetParam(user.bonds.colour, html.GetValue(~name~))>>spy.gui.skin.change_bond_colour(html.GetValue(~name~))"
+    )
+   $-
+</td>
+
