@@ -1,7 +1,7 @@
 <td name=BOND_THICKNESS width=15%>
   $+
     html.Snippet("gui/snippets/input-combo", "name=BOND_THICKNESS_COMBO",
-    "manage=True",
+    "manage=False",
     "value=spy.GetParam(user.bonds.thickness)",
     "items=0.2;0.4;0.6;0.8;1.0;1.2",
     "onchange=spy.SetParam(user.bonds.thickness,html.GetValue(~name~))>>brad html.GetValue(~name~)"
