@@ -389,16 +389,19 @@ OV.registerMacro(Skin_instance.run_skin, 'function-The function to call')
 OV.registerFunction(load_user_gui_phil)
 
 def change_bond_colour(colour=None):
+  rad = OV.GetParam('user.bonds.thickness')
   if not colour:
     colour = OV.GetParam('user.bonds.colour', 'auto')
-  if colour == 'auto':
+  if colour == 'elements':
     OV.SetParam('user.bonds.mask', 48)
     olex.m('mask bonds 48')
+    olex.m("brad %s" %rad)
   else:
-    OV.SetParam('gui.bonds.mask', 1)
+    OV.SetParam('user.bonds.mask', 1)
     c = OV.GetParam('user.bonds.colours.%s' %colour)
     olex.m("mask bonds 1")
     olex.m("sel bonds")
+    olex.m("brad %s" %rad)
     olex.m("SetMaterial('sel.Single cone', %s)" %c)
     olex.m("sel -u")
 
