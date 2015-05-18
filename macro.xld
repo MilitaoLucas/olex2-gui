@@ -678,6 +678,9 @@
     <cmd
       <cmd1 "load style basedir()/etc/styles/default.glds">
       <cmd2 "load scene basedir()/etc/styles/default.glps">
+      <cmd3 "spy.SetParam(user.bonds.thickness,1)">
+      <cmd3 "spy.SetParam(user.bonds.mask,48)">
+      <cmd3 "spy.SetParam(user.bonds.colour,elements)">
       <cmd3 "telp 50">
     >
   >

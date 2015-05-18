@@ -1166,7 +1166,7 @@ user
     .type = int
   thickness = 1
     .type = float
-  colour = orange
+  colour = "elements"
     .type = str
     colours
     {

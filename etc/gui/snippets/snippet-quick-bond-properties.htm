@@ -14,7 +14,7 @@
     html.Snippet("gui/snippets/input-combo", "name=BOND_COLOUR_COMBO",
     "manage=False",
     "value=spy.GetParam(user.bonds.colour)",
-    "items=auto;orange;dark grey<-dark_grey",
+    "items=elements;orange;dark grey<-dark_grey",
     "onchange=spy.SetParam(user.bonds.colour, html.GetValue(~name~))>>spy.gui.skin.change_bond_colour(html.GetValue(~name~))"
     )
    $-
