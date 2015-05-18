@@ -348,9 +348,9 @@
       <cmd1 "ads elp">
       <cmd2 "arad isot">
       <cmd3 "mask atoms 5">
-      <cmd4 "mask bonds spy.GetParam('gui.bonds.mask')">
+      <cmd4 "mask bonds spy.GetParam('user.bonds.mask')">
       <cmd5 "if strcmp(%1,'-100') then 'telpv 50' else 'telpv %1'">
-      <cmd6 "brad spy.GetParam('gui.bonds.thickness')">
+      <cmd6 "brad spy.GetParam('user.bonds.thickness')">
     >
   >
 >
@@ -366,9 +366,9 @@
       <cmd1 "ads elp">
       <cmd2 "arad isoth">
       <cmd3 "mask atoms 5">
-      <cmd4 "mask bonds spy.GetParam('gui.bonds.mask')">
+      <cmd4 "mask bonds spy.GetParam('user.bonds.mask')">
       <cmd5 "if strcmp(%1,'-100') then 'telpv 50' else 'telpv %1'">
-      <cmd6 "brad spy.GetParam('gui.bonds.thickness')">
+      <cmd6 "brad spy.GetParam('user.bonds.thickness')">
     >
   >
 >
@@ -384,8 +384,8 @@
       <cmd1 "ads sph">
       <cmd2 "arad pers">
       <cmd3 "mask atoms 1">
-      <cmd4 "mask bonds spy.GetParam('gui.bonds.mask')">
-      <cmd6 "brad spy.GetParam('gui.bonds.thickness')">
+      <cmd4 "mask bonds spy.GetParam('user.bonds.mask')">
+      <cmd6 "brad spy.GetParam('user.bonds.thickness')">
     >
   >
 >
@@ -427,7 +427,7 @@
       <cmd3 "individualise">
       <cmd1 "ads sph">
       <cmd1 "mask atoms 1">
-      <cmd4 "mask bonds spy.GetParam('gui.bonds.mask')">
+      <cmd4 "mask bonds spy.GetParam('user.bonds.mask')">
       <cmd2 "brad math.eval(%1*10)">
       <cmd2 "arad %1">
 
