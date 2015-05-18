@@ -1163,7 +1163,7 @@ user
   bonds
   {
   mask = 48
-    .type = float
+    .type = int
   thickness = 1
     .type = float
   colour = orange
