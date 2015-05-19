@@ -171,16 +171,6 @@ def get_prg_roots():
   retval = prg_roots
   return retval
 
-def print_python_version():
-  ''' Print Python Version '''
-  version = sys.version
-  if debug: print
-  if debug: print
-  if debug: print "** %s **" % version
-  version = version[:3]
-  retval = version
-  return version
-
 def set_olex_paths():
   sys.path.append("%s" %basedir)
   sys.path.append("%s/etc/scripts" %basedir)
@@ -199,7 +189,10 @@ def set_plugins_paths():
     try:
       exec("import " + plugin)
     except Exception, err:
-      print err
+      if debug:
+        sys.stdout.formatExceptionInfo()
+      else:
+        print("Failed to load plugin '%s': %s" %(plugin, err))
 
     ##Dependencies
     if plugin == "plugin-SQLAlchemy":

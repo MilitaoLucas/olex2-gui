@@ -206,11 +206,10 @@ def updateKey(module):
     if key.startswith("<html>") or len(key) < 40:
       raise Exception(key[6:])
     keyfn = "%s%s%s%skey" %(dir, os.sep, module.folder_name, os.sep)
-    keyf = open(keyfn, "wb")
-    keyf.write(key)
-    keyf.close()
+    with open(keyfn, "wb") as keyf:
+      keyf.write(key)
     try:
-      if _plgl.loadPlugin(module.folder_name, key):
+      if _plgl.loadPlugin(module.folder_name, key, dir):
         print("Module %s has been successfully loaded." %(module.name))
         return True
     except Exception, e:
