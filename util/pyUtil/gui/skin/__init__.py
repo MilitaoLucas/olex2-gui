@@ -389,6 +389,7 @@ OV.registerMacro(Skin_instance.run_skin, 'function-The function to call')
 OV.registerFunction(load_user_gui_phil)
 
 def change_bond_colour(colour=None):
+  return
   rad = OV.GetParam('user.bonds.thickness')
   if not colour:
     colour = OV.GetParam('user.bonds.colour', 'auto')
