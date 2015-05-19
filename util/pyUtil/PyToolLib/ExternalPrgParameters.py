@@ -266,8 +266,8 @@ Palatinus et al., 2012""",
     name='ShelXL',
     program_type='refinement',
     author="G.M.Sheldrick",
-    reference=ShelXS.reference,
-    brief_reference=ShelXS.brief_reference,
+    reference="Sheldrick, G.M. (2015). Acta Cryst. C71, 3-8.",
+    brief_reference="Sheldrick, 2015",
     execs=["shelxl.exe", "shelxl"],
     phil_entry_name="ShelXL")
   ShelXL97 = Program(
