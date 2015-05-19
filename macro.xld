@@ -56,7 +56,6 @@
       <cmd4  "if IsFileLoaded() then clear">
       <cmd5  "spy.fade_out()">
       <cmd6  "@reap %1 %2">
-      <cmd4  "spy.gui.skin.change_bond_colour()">
       <cmd7  "spy.fade_in()">
       <cmd8  "spy.OnStructureLoaded(%7)">
       <cmd9  "spy.run_skin sNumTitle">
