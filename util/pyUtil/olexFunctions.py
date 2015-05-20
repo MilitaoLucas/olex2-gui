@@ -433,7 +433,6 @@ class OlexFunctions(inheritFunctions):
         else:
           olex.m("atreap_no_fader -b \"%s\"" %(r"%s/%s.res" %(path, file)))
         import gui
-        gui.skin.change_bond_colour()
         olex.m('spy.run_skin sNumTitle')
         olx.html.Update()
 
