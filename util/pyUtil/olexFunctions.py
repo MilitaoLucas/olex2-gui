@@ -46,6 +46,12 @@ class OlexFunctions(inheritFunctions):
       print >> sys.stderr, "Variable %s could not be set with value %s" %(variable,value)
       sys.stderr.formatExceptionInfo()
 
+  def _replace_object(self, scope, object):
+    for i, tobj in enumerate(scope.objects):
+      if tobj.name == object.name:
+        scope.objects[i] = object
+        return
+
   def SetParam(self,variable,value):
     try:
       if variable.startswith('gui'):
@@ -58,7 +64,7 @@ class OlexFunctions(inheritFunctions):
       elif isinstance(value, basestring):
         value = "'%s'" %unicode(value).replace("'", "\\'").replace('$', '\\$').encode('utf-8')
       elif type(value) in (list, set):
-        value = ' '.join("'%s'" %v.replace("'", "\\'") for v in value)
+        value = value[0]
       elif "date_" in variable:
         try:
           if type(value) is unicode:
@@ -73,7 +79,7 @@ class OlexFunctions(inheritFunctions):
       print >> sys.stderr, "Variable %s could not be set with value %s" %(variable,value)
       sys.stderr.formatExceptionInfo()
 
-  def GetParam(self,variable, default=None):
+  def GetParam(self,variable, default=None, get_list=False):
     retVal = default
     try:
       if variable.startswith('gui'):
@@ -82,7 +88,10 @@ class OlexFunctions(inheritFunctions):
         handler = olx.gui_phil_handler
       else:
         handler = olx.phil_handler
-      retVal = handler.get_validated_param(variable)
+      if not get_list:
+        retVal = handler.get_validated_param(variable)
+      else:
+        retVal = handler.get_values_by_name(variable)
       if retVal is not None:
         if isinstance(retVal, str):
           retVal = retVal.decode('utf-8').replace('\\$', '$')
