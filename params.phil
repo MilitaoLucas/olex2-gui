@@ -325,6 +325,8 @@ routines requiring structure refinement
       .type = choice
     name = None
       .type = str
+    trim_border_colour = #dedede
+      .type = str
     bitmap
       .short_caption = png, jpg, bmp ...
       {
@@ -1166,15 +1168,10 @@ user
     .type = int
   thickness = 1
     .type = float
-  colour = "elements"
+  colour = elements
     .type = str
-    colours
-    {
-    orange = "5;4278223103;4278255615"
-      .type = str
-    dark_grey = "5;4282071867;4286611584"
-      .type = str
-    }
+  colours = __elements 5_4278223103_4278255615__orange '5_4282071867_4286611584__dark grey'
+    .type = strings
   }
 
   auto_refine_after_anis = True
@@ -1206,6 +1203,8 @@ user
       .type=str
     label_symm_type = default
       .type=str
+    trim_border_colour = #dedede
+      .type = str
   bitmap{
      AtomLabels{
        font = '#olex2.fnt:frb_20'

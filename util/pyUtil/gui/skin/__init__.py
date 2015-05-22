@@ -388,20 +388,59 @@ OV.registerMacro(Skin_instance.run_skin, 'function-The function to call')
 
 OV.registerFunction(load_user_gui_phil)
 
-def change_bond_colour(colour=None):
+def get_colour_choice(scope,what):
+  import shlex
+  if what == "value":
+    val = OV.GetParam('%s.colour'%scope)
+    return val
+  elif what == "items":
+    t = ""
+    for item in shlex.split(OV.GetParam(variable='%s.colours'%scope, default='[__elements]',get_list=True)[0]):
+      t += "%s;" %(item.split("__")[1])
+    return t + "[Type new colour name]"
+OV.registerFunction(get_colour_choice,False,'gui.skin')
+
+def define_new_bond_colour(name):
+  pass
+
+
+def change_bond_radius():
   rad = OV.GetParam('user.bonds.thickness')
+  olex.m("brad %s" %rad)
+
+def change_bond_colour(colour=None):
+  import shlex
+  if "[" in colour:
+    olx.html.SetValue('BOND_COLOUR_COMBO',"")
+    return
+
   if not colour:
-    colour = OV.GetParam('user.bonds.colour', 'auto')
+    colour = OV.GetParam('user.bonds.colour', 'elements')
   if colour == 'elements':
     OV.SetParam('user.bonds.mask', 48)
     olex.m('mask bonds 48')
-    olex.m("brad %s" %rad)
   else:
+    c = None
+    for item in shlex.split(OV.GetParam(variable='user.bonds.colours', default='[__elements]',get_list=True)[0]):
+      if item.split("__")[1] == colour:
+        c = item.split("__")[0].replace("_",";").replace("*","")
+    if not c:
+      res = olex.m("SetVar(temp,ChooseMaterial())")
+      if not res: return
+      c = olx.GetVar('temp')
+      #c = '5;16744448;4294967168'
+      l = OV.GetParam(variable='user.bonds.colours',default=[], get_list=True)
+      _ = "'%s__%s'" %(c.replace(";","_"), colour)
+      l[0] += " %s" %_
+      OV.SetParam('user.bonds.colours', l)
+    _ = "%s__%s" %(c.replace(";","_"), colour)
+    OV.SetParam('user.bonds.colour', colour)
     OV.SetParam('user.bonds.mask', 1)
-    c = OV.GetParam('user.bonds.colours.%s' %colour)
     olex.m("mask bonds 1")
-    olex.m("brad %s" %rad)
     olex.m("SetMaterial Singlecone '%s'" %c)
+    olex.m("sel -u")
+    olex.m("sel bonds where xbond.b.bai.z == -1")
+    olex.m("mask 48")
     olex.m("sel -u")
 
 OV.registerFunction(change_bond_colour, True, 'gui.skin')
