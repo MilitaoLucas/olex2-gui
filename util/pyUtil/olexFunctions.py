@@ -64,7 +64,7 @@ class OlexFunctions(inheritFunctions):
       elif isinstance(value, basestring):
         value = "'%s'" %unicode(value).replace("'", "\\'").replace('$', '\\$').encode('utf-8')
       elif type(value) in (list, set):
-        value = value[0]
+        value = ' '.join("'%s'" %v.replace("'", "\\'") for v in value)
       elif "date_" in variable:
         try:
           if type(value) is unicode:
