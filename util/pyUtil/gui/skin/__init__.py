@@ -233,7 +233,7 @@ class Skin():
         OV.SetParam('gui.skin.name', toks[0])
         OV.SetParam('gui.skin.extension', toks[1])
 
-    olx.fs.Clear(3)
+    #olx.fs.Clear(3)
     OlexVFS.write_to_olex('logo1_txt.htm'," ", 2)
 
     if timing:

@@ -794,6 +794,8 @@ class timage(ImageTools):
   def __init__(self, width=None, tool_arg=None):
     super(timage, self).__init__()
 
+    OV.registerFunction(self.make_images_from_fb_png)
+
     self.imageSource = None
     self.iconSource = None
 
@@ -1140,6 +1142,7 @@ class timage(ImageTools):
     for letter in l:
       self.makeCharcterCircles(letter, im, colo)
 
+
     cut = 55*sf, 150*sf, 80*sf, 175*sf
     crop =  im.crop(cut)
     IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
@@ -1173,22 +1176,51 @@ class timage(ImageTools):
     name = "bottom.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
 
-    cut = 185*sf, 154*sf, 205*sf, 170*sf
+    up_down_enlarge = 0.82
+    cut = 186*sf, 154*sf, 204*sf, 172*sf
     crop =  im.crop(cut)
-    crop_colouriszed = self.colourize(crop, (0,0,0), self.params.html.highlight_colour.rgb)
+    crop_colouriszed = self.colourize(crop, (0,0,0), self.params.html.base_colour.rgb)
     IM =  Image.new('RGBA', crop.size)
     IM.paste(crop_colouriszed, (0,0), crop)
-    IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
+    IM = self.resize_image(IM, (int((cut[2]-cut[0])/(sf*up_down_enlarge)), int((cut[3]-cut[1])/(sf*up_down_enlarge))))
     name = "next.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
+    name = "right.png"
+    OlexVFS.save_image_to_olex(IM, name, 2)
 
-    cut = 205*sf, 154*sf, 220*sf, 170*sf
+    cut = 204*sf, 154*sf, 222*sf, 172*sf
     crop =  im.crop(cut)
-    crop_colouriszed = self.colourize(crop, (0,0,0), self.params.html.highlight_colour.rgb)
+    crop_colouriszed = self.colourize(crop, (0,0,0), self.params.html.base_colour.rgb)
     IM =  Image.new('RGBA', crop.size)
     IM.paste(crop_colouriszed, (0,0), crop)
-    IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
+    IM = self.resize_image(IM, (int((cut[2]-cut[0])/(sf*up_down_enlarge)), int((cut[3]-cut[1])/(sf*up_down_enlarge))))
     name = "previous.png"
+    OlexVFS.save_image_to_olex(IM, name, 2)
+    name = "down.png"
+    OlexVFS.save_image_to_olex(IM, name, 2)
+
+    cut = 222*sf, 154*sf, 240*sf, 172*sf
+    crop =  im.crop(cut)
+    name = "up_raw.png"
+    IM = self.resize_image(crop, (int((cut[2]-cut[0])/(sf*up_down_enlarge)), int((cut[3]-cut[1])/(sf*up_down_enlarge))))
+    OlexVFS.save_image_to_olex(IM, name, 2)
+    crop_colouriszed = self.colourize(crop, (0,0,0), self.params.html.base_colour.rgb)
+    IM =  Image.new('RGBA', crop.size)
+    IM.paste(crop_colouriszed, (0,0), crop)
+    IM = self.resize_image(IM, (int((cut[2]-cut[0])/(sf*up_down_enlarge)), int((cut[3]-cut[1])/(sf*up_down_enlarge))))
+    name = "up.png"
+    OlexVFS.save_image_to_olex(IM, name, 2)
+
+    cut = 240*sf, 154*sf, 258*sf, 172*sf
+    crop =  im.crop(cut)
+    name = "down_raw.png"
+    IM = self.resize_image(crop, (int((cut[2]-cut[0])/(sf*up_down_enlarge)), int((cut[3]-cut[1])/(sf*up_down_enlarge))))
+    OlexVFS.save_image_to_olex(IM, name, 2)
+    crop_colouriszed = self.colourize(crop, (0,0,0), self.params.html.base_colour.rgb)
+    IM =  Image.new('RGBA', crop.size)
+    IM.paste(crop_colouriszed, (0,0), crop)
+    IM = self.resize_image(IM, (int((cut[2]-cut[0])/(sf*up_down_enlarge)), int((cut[3]-cut[1])/(sf*up_down_enlarge))))
+    name = "down.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
 
     cut = 116*sf, 154*sf, 135*sf, 175*sf
@@ -2816,41 +2848,47 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
   def make_buttonmarks(self, state, width, buttonmark, image, height, base_colour):
     draw = ImageDraw.Draw(image)
-    _ = buttonmark.split(':')
-    margin = int(_[0])
-
-    if len(_) >= 2:
-      bm_colour = _[1]
-    else:
-      bm_colour = 1.2
-
-    if len(_) >= 3:
-      bm_width = int(_[2])
-    else:
-      bm_width = 4
-
-    if "#" in str(bm_colour):
-      col = bm_colour
-    else:
-      col = self.font_colour
-
-    if state == "hover":
-      fill = IT.adjust_colour(col, luminosity=0.8)
-    else:
-      fill = col
-
-    if fill is None:
-      fill = "#ff0000"
-
-    if not draw:
-      draw = ImageDraw.Draw(image)
     w,h = image.size
-    margin += bm_width * 2
-    for i in xrange(int(h/2) - 2):
-      y = 2 + i * 2
-      for j in xrange(bm_width):
-        x = (w - margin) + j * 2
-        draw.point((x, y), fill)
+
+    if ".png" in buttonmark:
+      mark = IT.get_PIL_image_from_olex_VFS(buttonmark)
+      if mark:
+        self.watermark(image, mark, (0,0), 0.5)
+
+    else:
+      _ = buttonmark.split(':')
+      margin = int(_[0])
+
+      if len(_) >= 2:
+        bm_colour = _[1]
+      else:
+        bm_colour = 1.2
+
+      if len(_) >= 3:
+        bm_width = int(_[2])
+      else:
+        bm_width = 4
+
+      if "#" in str(bm_colour):
+        col = bm_colour
+      else:
+        col = self.font_colour
+
+      if state == "hover":
+        fill = IT.adjust_colour(col, luminosity=0.8)
+      else:
+        fill = col
+
+      if fill is None:
+        fill = "#ff0000"
+
+      margin += bm_width * 2
+      for i in xrange(int(h/2) - 2):
+        y = 2 + i * 2
+        for j in xrange(bm_width):
+          x = (w - margin) + j * 2
+          draw.point((x, y), fill)
+
     return image
 
 
@@ -2925,8 +2963,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           fill = IT.adjust_colour(fill,luminosity = 1.6)
         else:
           fill = IT.adjust_colour(fill,luminosity = 0.8)
-
-      self.create_arrows(image, draw, height, direction=direction, colour=fill, type='dots', align = align, width=width, scale = scale)
+      image = self.create_arrows(image, draw, height, direction=direction, colour=fill, type='dots', align = align, width=width, scale = scale)
 
     if 'char' in arrows:
       draw = ImageDraw.Draw(image)

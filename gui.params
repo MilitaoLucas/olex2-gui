@@ -339,9 +339,8 @@ gui
         .type = str
       arrows = "bar:right:26,arrow_right:onup:offdown:hoverdown:hoveronup"
         .type = str
-      buttonmark = 5:#b40000:4
+      buttonmark = None
         .type = str
-
 
       off_L = 1.6
         .type = float
@@ -350,13 +349,13 @@ gui
       hover_L = 1.0
         .type = float
 
-      vline = 24
+      vline = 27
         .type = int
       dot_size = 4
         .type = int
-      dot_pad = 4
+      dot_pad = 1
         .type = int
-      dot_left = 3
+      dot_left = 1
         .type = int
       dot_colour_off = #dedede
         .type = colour
