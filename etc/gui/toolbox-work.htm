@@ -6,26 +6,19 @@
     <b>Labels</b>
   </td>
   <td width='87%' align='left' name=COMBO_LABEL_COMBO_BOX>
-    <font size="$GetVar('HtmlFontSizeControls')" color='$GetVar(HtmlFontColour)'>
-    <input
-      type='combo'
-      width='100%'
-      height="$GetVar('HtmlInputHeight')"
-      name='set_label_content'
-      value='Labels OFF/ON'
-      items="'%Labels OFF/ON%<-;%Atom Names%<-l;%Crystallographic Occupancy%<-o;%Chemical Occupancy%<-co;%Parts%<-p;%Link-Code%<-v;%H Atom Labels%<-h l;%Fixed Parameters%<-f;Variables<-v;AFIX Commands<-h a;Q Peak Intensities<-qi'"
-      bgcolor="$GetVar('HtmlInputBgColour')"
-      fgcolor="$GetVar(HtmlFontColour)"
-      onchange="spy.ChooseLabelContent(html.GetValue('~name~'))"
-      readonly='true'
-      onchangealways='true'
-      manage
-    >
-    </font>
+$+
+    html.Snippet(
+      "gui/snippets/input-combo",
+      "name='set_label_content'",
+      "items=%Labels OFF/ON%<-;%Atom Names%<-l;%Crystallographic Occupancy%<-o;%Chemical Occupancy%<-co;%Parts%<-p;%Link-Code%<-v;%H Atom Labels%<-h l;%Fixed Parameters%<-f;Variables<-v;AFIX Commands<-h a;Q Peak Intensities<-qi'",
+      "value='Labels OFF/ON",
+      "onchange=spy.ChooseLabelContent(html.GetValue('~name~'))",
+      "manage=True",
+      "onchangealways=true",
+    )
+$-
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
-
 
 <!-- FIRST ROW -->
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='TOOLBAR_MODEL';help_ext=Toolbar-Model;1 -->
@@ -65,21 +58,18 @@ $spy.MakeHoverButton('toolbar-center','compaq>>compaq -a>>center')
     Z'=
   </font>
   </td>
+
   <td width='15%' align='right'>
-    <font size='$GetVar(HtmlFontSizeControls)'>
-    <input
-      type='text'
-      width="100%"
-      height="$GetVar(HtmlComboHeight)"
-      bgcolor="spy.GetParam(gui.html.input_bg_colour)"
-      name='SET_Z_PRIME_FIXUNIT'
-      valign='center'
-      align='right'
-      value='xf.au.GetZprime()'
-      onreturn="xf.au.SetZprime(html.GetValue(~name~))>>html.update"
-      >
-    </font>
+$+
+    html.Snippet(
+      "gui/snippets/input-text",
+      "name=SET_Z_PRIME_FIXUNIT",
+      "value=xf.au.GetZprime()",
+      "onchange=xf.au.SetZprime(html.GetValue(~name~))>>html.update"
+    )
+$-
   </td>
+
   <td width = '5%' align='right'>
 $spy.MakeHoverButton('toolbar-OK',"fixunit html.GetValue('SET_Z_PRIME_FIXUNIT')>>xf.au.SetZprime(html.GetValue('SET_Z_PRIME_FIXUNIT'))>>html.Update")
   </td>
@@ -91,8 +81,6 @@ $spy.MakeHoverButton('toolbar-OK',"fixunit html.GetValue('SET_Z_PRIME_FIXUNIT')>
 $spy.gui.tools.make_disorder_quicktools()
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 #ignoreif -->
-
-
 
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SPLIT_GROUP';help_ext=Split-Group;1 -->
@@ -109,15 +97,13 @@ $spy.gui.tools.make_disorder_quicktools()
 <!-- #includeif IsFileType('ires') calculate-electron-density gui\snippets\snippet-electron-density-map.htm;1; -->
 <!-- #includeif IsFileType('ires') row_table_off gui\blocks\row_table_off.htm;1; -->
 
-
-<!-- #include h3-peak-and-uiso-sliders gui\h3-peak-and-uiso-sliders.htm;gui\blocks\tool-h3-off.htm;image=h3-peak-&-Uiso-sliders;onclick=;colspan=1;2; -->
+<!-- #include h3-peak-and-uiso-sliders gui\h3-peak-and-uiso-sliders.htm;gui\blocks\tool-h3-off.htm;image=h3-Peak-&-Uiso-Sliders;onclick=;colspan=1;2; -->
 
 <!-- #include h3-growing gui\h3-growing.htm;gui\blocks\tool-h3-off.htm;image=h3-Growing;onclick=;colspan=1;2; -->
 
 <!-- #include h3-finishing gui\h3-finishing.htm;gui\blocks\tool-h3-off.htm;image=h3-Finishing;onclick=;colspan=1;2; -->
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
-
 
 <!-- %Electron Density Peaks%, %add_h-target% -->
 <!-- %QC-target%, %QH-target%, %tidy-target%, %killH-target%, %Q-target%, %H-target%, %center-target% -->
