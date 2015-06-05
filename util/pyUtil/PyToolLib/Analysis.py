@@ -767,38 +767,26 @@ class Graph(ImageTools):
           next_img = ""
         else:
           all_in_oneText = '''
-<a href="spy.SetParam('graphs.program_analysis.all_in_one_history','True')>>spy._make_history_bars()>>html.Update">Show All Bars</a>'''
+<a href="spy.SetParam('graphs.program_analysis.all_in_one_history','True')>>spy._make_history_bars()>>html.Update">Show All Bars</a>&nbsp;
+<a href="reap '%s\%s.ins'">Reload INS</a>
+''' %(OV.FilePath(), OV.FileName())
           previous_img = '''<a href="spy.olex_fs_copy('history-info_%s.htm','history-info.htm')>>html.Update"><zimg src=previous.png></a>''' %(img_no -1)
           #previous_img = "<a href='spy.write_to_olex(history-info.htm,Fred)'><zimg src=previous.png></a>"
           next_img = '''<a href="spy.olex_fs_copy('history-info_%s.htm','history-info.htm')>>html.Update"><zimg src='next.png'></a>''' %(img_no + 1)
 
-        historyTextNext = '''
+          _ = '''
 <tr><td><table width='100%%' border='0' cellpadding='0'>
 <tr>
-  <td align='left' width='20%%'></td>
-  <td align='center' width='30%%'>%s</td>
-  <td align='center' width='30%%'>%s</td>
-  <td align='right' width='20%%'>%s</td>
+  <td align='left' width='10%%'>%s</td>
+  <td align='center' width='20%%'>%s</td>
+  <td align='center' width='60%%'>%s</td>
+  <td align='right' width='10%%'>%s</td>
 </tr>
-</table></td></tr>''' %(scaleTxt, all_in_oneText, next_img)
-        historyTextPrevious = '''
-<tr><td><table width='100%%' border='0' cellpadding='0'>
-<tr>
-  <td align='left' width='20%%' >%s</td>
-  <td align='center' width='30%%'>%s</td>
-  <td align='center' width='30%%'>%s</td>
-  <td align='right' width='20%%'></td>
-</tr>
-</table></td></tr>''' %(previous_img, scaleTxt, all_in_oneText)
-        historyTextBoth = '''
-<tr><td><table width='100%%' border='0' cellpadding='0'>
-<tr>
-  <td align='left' width='20%%'>%s</td>
-  <td align='center' width='30%%'>%s</td>
-  <td align='center' width='30%%'>%s</td>
-  <td align='right' width='20%%'>%s</td>
-</tr>
-</table></td></tr>''' %(previous_img, scaleTxt, all_in_oneText, next_img)
+</table></td></tr>'''
+
+        historyTextNext =  _%("", scaleTxt, all_in_oneText, next_img)
+        historyTextPrevious = _ %(previous_img, scaleTxt, all_in_oneText, "")
+        historyTextBoth = _%(previous_img, scaleTxt, all_in_oneText, next_img)
         if img_no == 1 and i != last - 1:
 #          IT.write_text_to_draw(barDraw, 'previous', align='left', max_width=width)
           historyText += historyTextNext
