@@ -108,7 +108,7 @@ def check_os():
   if sys.platform == 'win32':
     return "win"
   else:
-    return False
+    return "lin"
 
 def check_for_first_run():
   first_run = not os.path.exists("%s/global.odb" %OV.DataDir())
@@ -121,7 +121,7 @@ def check_for_first_run():
       #print(e)
       olx.SkinUpdated = True
     startup_skin = OV.GetParam('gui.skin.name', 'default')
-    if check_os().upper() == 'mac'.upper() and startup_skin == 'default':
+    if check_os().upper() == 'MAC' and startup_skin == 'default':
       startup_skin = "mac"
     _ = Skin()
     _.change_skin(startup_skin, internal_change=not first_run)
