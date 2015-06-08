@@ -857,14 +857,9 @@ class timage(ImageTools):
     if not self.olex2_has_recently_updated:
       if not OV.GetParam('olex2.force_images') and not force_images:
         do_these = [
-                "make_cbtn_items",
-                "info_bitmaps",
-                "make_images_from_fb_png",
-                ]
-        do_these = [
-                #"make_cbtn_items",
-                #"info_bitmaps",
-                #"make_images_from_fb_png",
+          "make_images_from_fb_png",
+          "make_cbtn_items",
+          "info_bitmaps",
                 ]
 
 
