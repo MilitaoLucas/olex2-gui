@@ -1206,6 +1206,7 @@ class ImageTools(FontInstances):
       r = width - pad
 
       mark = self.get_PIL_image_from_olex_VFS('%s_raw.png' %direction)
+
       if mark:
         watermark = True
         if watermark:
@@ -1493,6 +1494,12 @@ class ImageTools(FontInstances):
 
   def get_PIL_image_from_olex_VFS(self, name):
     from StringIO import StringIO
+
+    if olx.fs.Exists(name) != "true":
+      from PilTools import timage
+      a = timage()
+      a.make_images_from_fb_png()
+
     if olx.fs.Exists(name) == "true":
       _ = OlexVFS.read_from_olex(name)
       sio = StringIO(_)
