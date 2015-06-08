@@ -142,14 +142,14 @@ class publication:
     if person:
       olx.html.SetValue(box, person)
     return
- 
+
   def EditPersonById(self, box):
     pid = int(olx.html.GetValue(box))
     person = self.make_person_box_for_id(pid, True)
     if person:
       olx.html.SetValue(box, person)
     return
- 
+
   def OnPersonChange(self, box):
     import userDictionaries
     new_value = False
@@ -237,7 +237,7 @@ class publication:
         display = os.path.basename(item)
         remove = """<a target='Remove from merge'
 href='spy.gui.report.publication.remove_cif_from_merge_list(%s)>>html.Update'>
-<font color='red'><b>x</b></font></a>""" %item
+<font color='red'><zimg src='delete_small.png'></font></a>""" %item
         s += "<a target='Edit this CIF' href='shell %s'>%s</a>(%s) " %(
           item, display, remove)
     return s
@@ -246,23 +246,28 @@ href='spy.gui.report.publication.remove_cif_from_merge_list(%s)>>html.Update'>
     if not cif_p:
       return
     l = OV.GetParam('snum.report.merge_these_cifs', [])
-    l.append(cif_p)
-    OV.SetParam('snum.report.merge_these_cifs', l)
+    if cif_p not in l:
+      l.append(cif_p)
+      OV.SetParam('snum.report.merge_these_cifs', l)
 
   def remove_cif_from_merge_list(cif_p):
     l = OV.GetParam('snum.report.merge_these_cifs', [])
-    idx = l.index(cif_p)
-    if idx != -1:
-      del l[idx]
+    _ = ("", cif_p)
+    for item in _:
+      if item in l:
+        idx = l.index(item)
+        if idx != -1:
+          del l[idx]
     if not l:
-      l = ""
+      l = []
     OV.SetParam('snum.report.merge_these_cifs', l)
 
   def AddTemplateToMergeList(self, value=""):
     if not value:
       return
     l = OV.GetParam('snum.report.merge_these_cifs', [])
-    l.append(value)
+    if value not in l:
+      l.append(value)
     OV.SetParam('snum.report.merge_these_cifs', l)
 
   def OnPublicationTemplateChange(self, value):
@@ -428,13 +433,16 @@ def get_crystal_image(p=None,n=4,get_path_only=True):
         return OV.standardizePath(current_image)
 
   if not current_image:
-    print "No Current Image!"
+#    print "No Current Image!"
     return None
 
   if '.vzs' in current_image:
     have_zip = True
     splitbit = '.vzs/'
     directory = current_image.split(splitbit)[0] + splitbit.replace("/", "")
+    if not os.path.exists(directory):
+      print "The path %s should have existed. It does not" %directory
+      return None
     import zipfile
     images_zip = zipfile.ZipFile(directory, "r")
     images_zip_name = OV.FileName()

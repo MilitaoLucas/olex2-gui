@@ -54,7 +54,7 @@ def getModule(name, email=None):
       values = {
         'e': email
       }
-      f = HttpTools.make_url_call(url, values)
+      f = HttpTools.make_url_call(url, values, http_timeout=30)
       f = f.read().strip()
       if "Error" in f:
         olex.writeImage(info_file_name, "Failed to register e-mail '%s': %s"  %(email, f), 0)
@@ -111,14 +111,14 @@ def getModule(name, email=None):
       'ref': OV.GetParam("user.modules.reference", ""),
       't' : OV.GetTag()
     }
-    f = HttpTools.make_url_call(url, values)
+    f = HttpTools.make_url_call(url, values, http_timeout=30)
     f = f.read()
     if f.startswith('<html>'):
       olex.writeImage(info_file_name, f[6:], 0)
     else:
       zp = ZipFile(StringIO(f))
       zp.extractall(path=dir)
-      msg = "Module <b>%s</b> has been successfully installed/updated" %name
+      msg = "<zimg src='toolbar-okoff.png'> Module <b>%s</b> has been successfully installed/updated" %name
       msg += "<br>You have 30 days to evaluate this extension module. Please contact us for further information."
       msg += "<br><font color='green'><b><Please restart Olex2 to activate the extension module.</b></font>"
       olex.writeImage(info_file_name, msg, 0)
@@ -201,16 +201,15 @@ def updateKey(module):
       'at': _plgl.createAuthenticationToken(),
       'et': etoken
     }
-    f = HttpTools.make_url_call(url, values)
+    f = HttpTools.make_url_call(url, values, http_timeout=30)
     key = f.read()
     if key.startswith("<html>") or len(key) < 40:
       raise Exception(key[6:])
     keyfn = "%s%s%s%skey" %(dir, os.sep, module.folder_name, os.sep)
-    keyf = open(keyfn, "wb")
-    keyf.write(key)
-    keyf.close()
+    with open(keyfn, "wb") as keyf:
+      keyf.write(key)
     try:
-      if _plgl.loadPlugin(module.folder_name, key):
+      if _plgl.loadPlugin(module.folder_name, key, dir):
         print("Module %s has been successfully loaded." %(module.name))
         return True
     except Exception, e:
@@ -221,6 +220,20 @@ def updateKey(module):
       sys.stdout.formatExceptionInfo()
       print("Error while updating the key for '%s': '%s'" %(module.name, e))
     return False
+
+def getCurrentPlatformString():
+  import platform
+  sname = platform.system().lower()
+  if sname == "darwin":
+    sname = "mac"
+  else:
+    sname = sname[:3]
+  arch= platform.architecture()[0]
+  if arch == "64bit":
+    sname += "64"
+  else:
+    sname += "32"
+  return sname
 
 def getAvailableModules_():
   global avaialbaleModulesRetrieved
@@ -243,7 +256,7 @@ def getAvailableModules_():
     values = {
      't' : OV.GetTag()
     }
-    f = HttpTools.make_url_call(url, values)
+    f = HttpTools.make_url_call(url, values, http_timeout=30)
     xml = et.fromstring(f.read())
     for m in xml.getchildren():
       if m.tag == "module" or m.tag == "internal_module":
@@ -257,6 +270,10 @@ def getAvailableModules_():
             module.internal = True
           else:
             module.internal = False
+          plat = m.find("platform", "")
+          if plat:
+            if getCurrentPlatformString() not in plat:
+              continue
           available_modules.append(module)
         except Exception, e:
           if debug:
@@ -344,18 +361,30 @@ def getInfo():
   global current_module
   if not current_module:
     return ""
+  from olexFunctions import OlexFunctions
+  OV = OlexFunctions()
   preambula = ""
   if current_module.action == 3:
-    preambula = "<font color='red'>This module has <b>expired</b></font>, please either re-install it or contact"+\
-      " <a href='shell(mailto:enquiries@olexsys.org?subject=Olex2%20extensions%20licence)'>"+\
-      "OlexSys Ltd</a> to extend the licence.<br>"
+    t = "<a href='shell(mailto:enquiries@olexsys.org?"+\
+    "subject=Licence extension for: %s&"+\
+    "body=Customer reference: %s, Olex2 tag: %s)'>OlexSys Ltd</a>"
+    t = t %(current_module.name, _plgl.createAuthenticationToken(), OV.GetTag())
+    t.replace(' ', '%20')
+    preambula = """<font color='red'>This module has <b>expired</b></font>,
+please either re-install it or contact %s to extend the licence.<br>""" %(t)
   return preambula + "<a href='shell %s'>Module URL: </a> %s<br>%s"\
      %(current_module.url, current_module.url, current_module.description)
 
 def update(idx):
   global current_module
   global available_modules
-  idx = int(idx)
+  from olexFunctions import OlexFunctions
+  OV = OlexFunctions()
+  try:
+    idx = int(idx)
+  except:
+    getModule(idx, OV.GetParam('user.email'))
+    return
   current_module = available_modules[idx]
   olex.writeImage(info_file_name, "", 0)
   olx.html.Update()

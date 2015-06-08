@@ -1,0 +1,115 @@
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='TONTO';help_ext=TONTO;1 -->
+<td>Welcome to basic Tonto interface</td>
+</tr><tr><td>
+ <table cellpadding="1" cellspacing="2" width="100%">
+   <tr><td width="20%">
+       Basis
+     </td>
+     <td>$+
+       html.Snippet("gui/snippets/input-combo", "name=tonto_basis",
+        "items=spy.tonto.getBasisListStr()",
+        "value=GetVar('settings.tonto.basis.name')",
+        "onchange=SetVar('settings.tonto.basis.name', html.GetValue('~name~'))")
+      $-</td>
+     <td width="20%">
+       Method
+     </td>
+     <td>$+
+       html.Snippet("gui/snippets/input-combo", "name=tonto_method",
+        "items='Restricted Hartee-Fock<-rhf;Restricted Kohn-Sham<-rks'",
+        "value=GetVar('settings.tonto.method')",
+        "onchange=SetVar('settings.tonto.method', html.GetValue('~name~'))")
+      $-</td>
+   </tr>
+   <tr><td width="20%">
+       Thermal smearing model
+     </td>
+     <td>$+
+       html.Snippet("gui/snippets/input-combo", "name=tonto_ts_model",
+        "items='none;hirshfeld;stewart;coppens;tanaka'",
+        "value=GetVar('settings.tonto.thermal_smearing_model')",
+        "onchange=SetVar('settings.tonto.thermal_smearing_model', html.GetValue('~name~'))")
+      $-</td>
+     <td width="20%">
+       Partition model
+     </td>
+     <td>$+
+       html.Snippet("gui/snippets/input-combo", "name=tonto_partition_model",
+        "items='none;mulliken;gaussian'",
+        "value=GetVar('settings.tonto.partition_model')",
+        "onchange=SetVar('settings.tonto.partition_model', html.GetValue('~name~'))")
+      $-</td>
+   </tr>
+   <tr><td width="20%">
+       Optimise scale
+     </td>
+     <td>$+
+       html.Snippet("gui/snippets/input-checkbox", "name=tonto_optimise_scale",
+        "checked=GetVar('settings.tonto.optimise_scale')",
+        "onclick=SetVar('settings.tonto.optimise_scale', html.GetState('~name~'))")
+      $-</td>
+     <td width="20%">
+       Optimise extinction
+     </td>
+     <td>$+
+       html.Snippet("gui/snippets/input-checkbox", "name=tonto_optimise_extinction",
+        "checked=GetVar('settings.tonto.optimise_extinction')",
+        "onclick=SetVar('settings.tonto.optimise_extinction', html.GetState('~name~'))")
+      $-</td>
+   </tr>
+   <tr><td width="20%">
+       Correct dispersion
+     </td>
+     <td>$+
+       html.Snippet("gui/snippets/input-checkbox", "name=tonto_correct_dispersion",
+        "checked=GetVar('settings.tonto.correct_dispersion')",
+        "onclick=SetVar('settings.tonto.correct_dispersion', html.GetState('~name~'))")
+      $-</td>
+     <td width="20%">
+       Isotropic H atoms
+     </td>
+     <td>$+
+       html.Snippet("gui/snippets/input-checkbox", "name=tonto_isot_H",
+        "checked=GetVar('settings.tonto.refine_h_u_iso')",
+        "onclick=SetVar('settings.tonto.refine_h_u_iso', html.GetState('~name~'))")
+      $-</td>
+   </tr>
+   <tr><td width="20%">
+       Convergence
+     </td>
+     <td>$+
+       html.Snippet("gui/snippets/input-text", "name=tonto_convergence_val",
+        "value=GetVar('settings.tonto.convergence.value')",
+        "onchange=SetVar('settings.tonto.convergence.value', html.GetValue('~name~'))")
+      $-</td>
+     <td width="20%">
+       Convergence tolerance
+     </td>
+     <td>$+
+       html.Snippet("gui/snippets/input-text", "name=tonto_convergence_tol",
+        "value=GetVar('settings.tonto.convergence.tolerance')",
+        "onchange=SetVar('settings.tonto.convergence.tolerance', html.GetValue('~name~'))")
+      $-</td>
+   </tr>
+   <tr><td width="20%">
+       Convergence presets
+     </td>
+     <td>$+
+       html.Snippet("gui/snippets/input-combo", "name=tonto_convergence_presets",
+        "items=';strict;loose'",
+        "value=",
+        "onchange=spy.tonto.onConvergencePresetChange(html.GetValue(~name~))")
+      $-</td>
+
+   <td width="20%">
+       Refine positions only
+     </td>
+     <td>$+
+       html.Snippet("gui/snippets/input-checkbox", "name=tonto_positions_only",
+        "checked=GetVar('settings.tonto.refine_positions_only')",
+        "onclick=SetVar('settings.tonto.refine_positions_only', html.GetState('~name~'))")
+      $-</td>
+   </tr>
+ </table>
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

@@ -38,6 +38,9 @@ GuiGraphChooserComboExists = False
 global PreviousHistoryNode
 PreviousHistoryNode = None
 
+global cache
+cache = {}
+
 silent = True
 
 
@@ -651,6 +654,8 @@ class Graph(ImageTools):
         barDraw = ImageDraw.Draw(barImage)
       last = len(dataset.x)
       x_value, y_value = xy
+      if y_value is None:
+        y_value = 1
 #      bar_left = ((i) * bar_width) + self.bSides + 1
       bar_left = ((j) * bar_width)
       bar_right = bar_left + bar_width
@@ -762,38 +767,26 @@ class Graph(ImageTools):
           next_img = ""
         else:
           all_in_oneText = '''
-<a href="spy.SetParam('graphs.program_analysis.all_in_one_history','True')>>spy._make_history_bars()>>html.Update">Show All Bars</a>'''
+<a href="spy.SetParam('graphs.program_analysis.all_in_one_history','True')>>spy._make_history_bars()>>html.Update">Show All Bars</a>&nbsp;
+<a href="reap '%s\%s.ins'">Reload INS</a>
+''' %(OV.FilePath(), OV.FileName())
           previous_img = '''<a href="spy.olex_fs_copy('history-info_%s.htm','history-info.htm')>>html.Update"><zimg src=previous.png></a>''' %(img_no -1)
           #previous_img = "<a href='spy.write_to_olex(history-info.htm,Fred)'><zimg src=previous.png></a>"
           next_img = '''<a href="spy.olex_fs_copy('history-info_%s.htm','history-info.htm')>>html.Update"><zimg src='next.png'></a>''' %(img_no + 1)
 
-        historyTextNext = '''
+          _ = '''
 <tr><td><table width='100%%' border='0' cellpadding='0'>
 <tr>
-  <td align='left' width='20%%'></td>
-  <td align='center' width='30%%'>%s</td>
-  <td align='center' width='30%%'>%s</td>
-  <td align='right' width='20%%'>%s</td>
+  <td align='left' width='10%%'>%s</td>
+  <td align='center' width='20%%'>%s</td>
+  <td align='center' width='60%%'>%s</td>
+  <td align='right' width='10%%'>%s</td>
 </tr>
-</table></td></tr>''' %(scaleTxt, all_in_oneText, next_img)
-        historyTextPrevious = '''
-<tr><td><table width='100%%' border='0' cellpadding='0'>
-<tr>
-  <td align='left' width='20%%' >%s</td>
-  <td align='center' width='30%%'>%s</td>
-  <td align='center' width='30%%'>%s</td>
-  <td align='right' width='20%%'></td>
-</tr>
-</table></td></tr>''' %(previous_img, scaleTxt, all_in_oneText)
-        historyTextBoth = '''
-<tr><td><table width='100%%' border='0' cellpadding='0'>
-<tr>
-  <td align='left' width='20%%'>%s</td>
-  <td align='center' width='30%%'>%s</td>
-  <td align='center' width='30%%'>%s</td>
-  <td align='right' width='20%%'>%s</td>
-</tr>
-</table></td></tr>''' %(previous_img, scaleTxt, all_in_oneText, next_img)
+</table></td></tr>'''
+
+        historyTextNext =  _%("", scaleTxt, all_in_oneText, next_img)
+        historyTextPrevious = _ %(previous_img, scaleTxt, all_in_oneText, "")
+        historyTextBoth = _%(previous_img, scaleTxt, all_in_oneText, next_img)
         if img_no == 1 and i != last - 1:
 #          IT.write_text_to_draw(barDraw, 'previous', align='left', max_width=width)
           historyText += historyTextNext
@@ -1912,8 +1905,8 @@ class SystematicAbsencesPlot(Analysis):
     self.graphInfo["TopRightTitle"] = self.filename
     self.auto_axes = True
     self.cctbx_systematic_absences_plot()
+    self.popout()
     if self.have_data:
-      self.popout()
       if self.params.systematic_absences.output_csv_file:
         self.output_data_as_csv()
 
@@ -1926,8 +1919,10 @@ class SystematicAbsencesPlot(Analysis):
     self.metadata = metadata
     if xy_plot.x is None:
       self.have_data = False
+      self.draw_origin = True
+      self.make_empty_graph(axis_x = True)
       print "No systematic absences present"
-      return
+      return None
     self.have_data = True
     self.data.setdefault('dataset1', Dataset(xy_plot.x, xy_plot.y, indices=xy_plot.indices, metadata=metadata))
     self.draw_origin = True
@@ -2589,6 +2584,7 @@ class HealthOfStructure():
     self.stats = None
     self.scale = OV.GetParam('diagnostics.scale')
     self.scope = "hkl"
+
   def get_HOS_d(self):
     try:
       if self.initialise_HOS():
@@ -2598,6 +2594,8 @@ class HealthOfStructure():
       return None
 
   def make_HOS(self, force=False):
+    global timing
+    timing = bool(OV.GetParam('gui.timing'))
     force = bool(force)
     self.scopes = OV.GetParam('diagnostics.scopes')
     self.scope = OV.GetParam('snum.current_process_diagnostics')
@@ -2641,13 +2639,17 @@ class HealthOfStructure():
           return (False, True)
         self.hkl_stats = olex_core.GetHklStat()
       else:
-        self.hkl_stats['Completeness'] = float(olx.Cif('_diffrn_measured_fraction_theta_full'))
+        self.hkl_stats['Completeness'] = float(olx.Cif('_diffrn_measured_fraction_theta_max'))
         wl = float(olx.Cif('_diffrn_radiation_wavelength'))
-        twotheta = 2* (float(olx.Cif('_diffrn_reflns_theta_full')))
+        twotheta = 2* (float(olx.Cif('_diffrn_reflns_theta_max')))
         self.hkl_stats['MinD'] = uctbx.two_theta_as_d(twotheta ,wl, True)
-        self.hkl_stats['MeanIOverSigma'] = 1/float(olx.Cif('_diffrn_reflns_av_unetI/netI'))
+        try:
+          self.hkl_stats['MeanIOverSigma'] = 1/float(olx.Cif('_diffrn_reflns_av_unetI/netI'))
+        except:
+          self.hkl_stats['MeanIOverSigma'] = 1/float(olx.Cif('_diffrn_reflns_av_sigmaI/netI'))
         self.hkl_stats['Rint'] = float(olx.Cif('_diffrn_reflns_av_R_equivalents'))
-    except:
+    except Exception, err:
+      print err
       return (False, True)
     if self.scope == "refinement":
       return (True, True)
@@ -2691,10 +2693,10 @@ class HealthOfStructure():
   def summarise_HOS(self):
     d = {}
     txt = ""
-#    item = "Completeness"
-#    value = self.get_cctbx_completeness()
-#    d.setdefault('Completeness', value)
-#    txt += "<tr><td>%s</td><td>%s</td><tr>" %(item, value)
+    #    item = "Completeness"
+    #    value = self.get_cctbx_completeness()
+    #    d.setdefault('Completeness', value)
+    #    txt += "<tr><td>%s</td><td>%s</td><tr>" %(item, value)
     l = ['Completeness', 'MeanIOverSigma','Rint']
     for item in self.hkl_stats:
       value = self.hkl_stats[item]
@@ -2713,19 +2715,36 @@ class HealthOfStructure():
     OV.write_to_olex("reflection-stats-summary.htm" , txt)
     return d
 
+  def is_in_cache(self, var, val):
+    global cache
+    if cache.has_key(var):
+      if cache[var]['val'] == val:
+        return True
+      else:
+        cache[var]['val'] = val
+        return False
+    else:
+      cache.setdefault(var,{'val':val, 'img':None})
+      return False
+
+
   def make_HOS_html(self):
     if self.scope == None:
       self.scope = 'hkl'
 
-#    is_CIF = (olx.IsFileType('cif') == 'true')
+    # is_CIF = (olx.IsFileType('cif') == 'true')
     if self.scope == "refinement":
       if self.is_CIF:
-        l = ['_refine_ls_shift/su_max', '_refine_diff_density_max', '_refine_diff_density_min', '_refine_ls_goodness_of_fit_ref']
+        l = ['_refine_ls_shift/su_max', '_refine_diff_density_max',
+             '_refine_diff_density_min', '_refine_ls_goodness_of_fit_ref',
+             '_refine_ls_abs_structure_Flack']
+        if olx.Cif('_refine_ls_abs_structure_Flack') == "n/a":
+          l.remove("_refine_ls_abs_structure_Flack")
+
       else:
-        #l = ['max_shift_over_esd', 'max_shift_site', 'max_shift_u', 'max_peak', 'max_hole']
-        l = ['max_shift_over_esd', 'max_peak', 'max_hole', 'goof']
-      #missing = olexex.OlexRefinementModel().getMissingAtomsNumber()
-      #OV.SetParam('snum.refinement.expected_peaks', missing)
+        l = ['max_shift_over_esd', 'max_peak', 'max_hole', 'goof','flack_str']
+        if OV.GetParam('snum.refinement.flack_str')== "0" or not OV.GetParam('snum.refinement.flack_str'):
+          l.remove("flack_str")
     else:
       self.scope = "hkl"
       if not self.hkl_stats:
@@ -2746,7 +2765,7 @@ class HealthOfStructure():
           try:
             value = float(olx.Cif(item))
           except:
-            value = None
+            value = olx.Cif(item)
           item = item.replace('/', '_over_')
         else:
           value = OV.GetParam('snum.refinement.%s' %item)
@@ -2757,16 +2776,54 @@ class HealthOfStructure():
         item = 'max_peak'
       elif item == "_refine_diff_density_min":
         item = 'max_hole'
-
-
+      elif item == "_refine_ls_shift_over_su_max":
+        item = 'max_shift_over_esd'
+      elif item == "_refine_ls_abs_structure_Flack":
+        item = 'flack_str'
 
       display = OV.GetParam('diagnostics.%s.%s.display' %(self.scope,item))
 
       value_format = OV.GetParam('diagnostics.%s.%s.value_format' %(self.scope,item))
       href = OV.GetParam('diagnostics.%s.%s.href' %(self.scope,item))
 
-      bg_colour = self.get_bg_colour(item, value)
       raw_val = value
+      bg_colour = None
+      if item == "flack_str":
+        #display = ""
+        flack_val = value.split("(")[0]
+        flack_esd = value.split("(")[1].strip(")")
+
+        if len(flack_val.strip("-")) == 3:
+          if len(flack_esd) == 1:
+            flack_esd_f = float("0.%s" %flack_esd)
+          elif len(flack_esd) == 2:
+            flack_esd_f = float("%s.%s" %(flack_esd[0],flack_esd[1]))
+
+        elif len(flack_val.strip("-")) == 4:
+          if len(flack_esd) == 1:
+            flack_esd_f = float("0.0%s" %flack_esd)
+          elif len(flack_esd) == 2:
+            flack_esd_f = float("0.%s" %flack_esd)
+
+        elif len(flack_val.strip("-")) == 5:
+          if len(flack_esd) == 1:
+            flack_esd_f = float("0.00%s" %flack_esd)
+          elif len(flack_esd) == 2:
+            flack_esd_f = float("0.0%s" %flack_esd)
+
+        bg_esd = self.get_bg_colour('flack_esd', flack_esd_f)
+
+        if len(flack_esd) == 1:
+          _ = 0.75
+        else:
+          _ = 0.63
+
+        bg_val = self.get_bg_colour('flack_val', flack_val)
+        bg_colour = (bg_val,_,bg_esd)
+
+      if not bg_colour:
+        bg_colour = self.get_bg_colour(item, value)
+
       if type(value) == tuple:
         if len(value) > 0:
           value = value[0]
@@ -2776,13 +2833,16 @@ class HealthOfStructure():
         value = "n/a"
         bg_colour = "#000000"
       else:
-        if "%" in value_format:
-          value_format = value_format.replace('%','f%%')
-          value = value * 100
-          #raw_val = value
+        try:
+          if "%" in value_format:
+            value_format = value_format.replace('%','f%%')
+            value = value * 100
+            #raw_val = value
+        except:
+          pass
         if item == 'Rint':
           if raw_val == 0:
-            value = "Merged Data!"
+            value = "Merged!"
             bg_colour = "#000000"
           elif raw_val == -1:
             value = "MERG 0"
@@ -2791,8 +2851,11 @@ class HealthOfStructure():
             value_format = "%." + value_format
             value = value_format %value
         else:
-          value_format = "%." + value_format
-          value = value_format %value
+          try:
+            value_format = "%." + value_format
+            value = value_format %value
+          except:
+            pass
       use_image = True
       if use_image:
         if timing:
@@ -2848,9 +2911,9 @@ class HealthOfStructure():
     boxWidth = (width/n) * scale
     boxHeight = OV.GetParam('gui.timage.h3.height') * scale
     boxHalf = 3 * scale
-    if type(colour) != str:
-      colour = colour.hexadecimal
-    colour = "#000000"
+    #if type(colour) != str:
+      #colour = colour.hexadecimal
+    #colour = "#000000"
     bgcolour=  OV.GetParam('gui.html.table_firstcol_colour').hexadecimal
     im = Image.new('RGBA', (boxWidth,boxHeight), (0,0,0,0))
     draw = ImageDraw.Draw(im)
@@ -2873,7 +2936,12 @@ class HealthOfStructure():
           value_display_extra = "at 2Theta=%.0fdegrees" %(od_2theta)
           value_display_extra = IT.get_unicode_characters(value_display_extra)
 
-    fill = self.get_bg_colour(item, value_raw)
+    if type(colour) == tuple:
+      fill = colour[0]
+      second_colour = colour[2]
+      second_colour_begin = colour[1]
+    else:
+      fill = colour
     box = (0,0,boxWidth,boxHeight)
     draw.rectangle(box, fill=fill)
 
@@ -2884,6 +2952,12 @@ class HealthOfStructure():
       draw.text((2, boxHeight - 2*8), "CIF", font=font_l, fill=fill)
 
     top = OV.GetParam('diagnostics.hkl.%s.top' %item)
+
+    if item == "flack_str":
+      x = boxWidth * second_colour_begin
+      box = (x,0,boxWidth,boxHeight)
+      fill = second_colour
+      draw.rectangle(box, fill=fill)
 
     if item == "Completeness":
       od_value = OV.get_cif_item('_reflns_odcompleteness_completeness')
@@ -2904,19 +2978,6 @@ class HealthOfStructure():
 
       top = OV.GetParam('diagnostics.hkl.%s.top' %item)
 
-    #for i in xrange(4):
-      #i += 1
-      #limit = OV.GetParam('diagnostics.hkl.%s.grade%s' %(item, i))
-      #print item, limit
-      #curr_x += limit_width
-      #limit_width = int((limit/top) * boxWidth)
-      #if op == "greater":
-        #box = (0,boxHalf,limit_width,boxHeight)
-      #elif op == 'smaller':
-        #box = (curr_x,boxHalf,limit_width,boxHeight)
-      #fill = self.get_bg_colour(item, value_raw)
-      ##fill = OV.GetParam('gui.skin.diagnostics.colour_grade%i' %i).hexadecimal
-      #draw.rectangle(box, fill=fill)
 
     if item == "MeanIOverSigma":
       display = IT.get_unicode_characters("I/sigma")
@@ -2926,7 +2987,7 @@ class HealthOfStructure():
     display = IT.get_unicode_characters(display)
 
 
-    if boxWidth < 100 * scale:
+    if boxWidth < 80 * scale:
       font_size = 14
       font_size_s = 8
       x = 2
@@ -2955,15 +3016,19 @@ class HealthOfStructure():
 
     ## ADD THE ACTUAL VALUE
 
-
     y += 0
     if value_display_extra:
       dxs,dxy = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=font_size_s * scale)
     dx,dy = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=font_size * scale)
-    x = boxWidth - dx - 10
+    x = boxWidth - dx - 6 #right inside margin
     draw.text((x, y), "%s" %value_display, font=font, fill=fill)
     if value_display_extra:
       draw.text((0, y - 1 + dy/2), "%s" %value_display_extra, font=font_s, fill="#ffffff")
+
+    _ = im.copy()
+    _ = IT.add_whitespace(im, 'right', 4, "#ffffff")
+    _ = IT.add_whitespace(im, 'left', 4, "#ffffff")
+    OlexVFS.save_image_to_olex(_, "%s_large" %item, 0)
 
     if self.image_position != "last":
       im = IT.add_whitespace(im, 'right', 4, bgcolour)
@@ -2972,6 +3037,7 @@ class HealthOfStructure():
 
     OlexVFS.save_image_to_olex(im, item, 0)
     href = OV.GetParam('diagnostics.%s.%s.href' %(self.scope,item))
+    target = OV.GetParam('diagnostics.%s.%s.target' %(self.scope,item))
     txt = ""
     ref_open = ''
     ref_close = ''
@@ -2979,7 +3045,7 @@ class HealthOfStructure():
       if href == "atom":
         href = "sel %s" %OV.GetParam('snum.refinement.%s_atom' %item)
       if item != 'max_hole':
-        ref_open = '<a href="%s">' %(href)
+        ref_open = '<a target="%s" href="%s">' %(target, href)
         ref_close = "</a>"
     txt += '''
 <td align='center'>%s<zimg src="%s"/>%s</td>''' %(ref_open, item, ref_close)

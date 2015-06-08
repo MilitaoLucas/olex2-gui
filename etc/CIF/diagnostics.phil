@@ -11,6 +11,80 @@ diagnostics {
   scopes = hkl refinement
     .type = strings
   refinement{
+
+    flack_str{
+      display = ""
+        .type = str
+      href = Flack
+        .type = str
+      target = "Flack Parameter"
+        .type = str
+    }
+
+    flack_esd{
+      display = "FE"
+        .type = str
+      op = "smaller"
+        .type = str
+      value_format= "3f"
+        .type = str
+      grade1  = 0.04
+        .type = float
+      grade2 = 0.05
+        .type = float
+      grade3 = 0.06
+        .type = float
+      grade4 = 0.07
+        .type = float
+      href = Flack e.s.d
+        .type = str
+      target = "Flack Parameter esd"
+        .type = str
+    }
+
+    flack_val{
+      display = "FV"
+        .type = str
+      op = "smaller"
+        .type = str
+      value_format= "3f"
+        .type = str
+      grade1  = 0.02
+        .type = float
+      grade2 = 0.04
+        .type = float
+      grade3 = 0.08
+        .type = float
+      grade4 = 0.10
+        .type = float
+      href = Flack Value
+        .type = str
+      target = "Flack Parameter Value"
+        .type = str
+    }
+
+
+
+    R1{
+      op = "smaller"
+        .type = str
+      value_format= "3f"
+        .type = str
+      grade1  = 0.05
+        .type = float
+      grade2 = 0.10
+        .type = float
+      grade3 = 0.20
+        .type = float
+      grade4 = 0.50
+        .type = float
+      top = 0.30
+        .type = float
+      display = "Max Shift"
+        .type = str
+      href = atom
+        .type = str
+    }
     max_shift_site{
       op = "smaller"
         .type = str
@@ -30,6 +104,8 @@ diagnostics {
         .type = str
       href = atom
         .type = str
+      target = "Select the site with the largest shift"
+        .type = str
     }
 
     max_shift_over_esd {
@@ -47,9 +123,11 @@ diagnostics {
         .type = float
       top = 0.15
         .type = float
-      display = "Shift/esd"
+      display = "Shift"
         .type = str
       href = atom
+        .type = str
+      target = "Select the atom with the largest shift"
         .type = str
     }
 
@@ -72,6 +150,8 @@ diagnostics {
         .type = str
       href = None
         .type = str
+      target = "Select the atom with the largest shift"
+        .type = str
     }
 
     max_shift_u{
@@ -93,6 +173,8 @@ diagnostics {
         .type = str
       href = atom
         .type = str
+      target = "Select the atom with the largest U shift"
+        .type = str
     }
 
     max_peak{
@@ -113,6 +195,8 @@ diagnostics {
       top = 5
         .type = float
       href = sel Q1
+        .type = str
+      target = "Select the largest peak"
         .type = str
     }
     _refine_diff_density_max{
@@ -196,6 +280,8 @@ diagnostics {
         .type = float
       href = "spy.gui.UpdateWeight()>>html.Update"
         .type = str
+      target = "Update the weighting scheme"
+        .type = str
     }
     expected_peaks{
       op = "smaller"
@@ -264,6 +350,8 @@ diagnostics {
         .type = float
       href = ""
         .type = str
+      target = "Signal to noise ratio"
+        .type = str
     }
     Rint{
       op = "smaller"
@@ -284,6 +372,8 @@ diagnostics {
         .type = float
       href = ""
         .type = str
+      target = "Internal R factor"
+        .type = str
     }
     Completeness{
       op = "greater"
@@ -302,7 +392,9 @@ diagnostics {
         .type = float
       top = 0.15
         .type = float
-      href = completeness
+      href = HklStat
+        .type = str
+      target = "Show reflection statistics - hkl file must be present"
         .type = str
     }
   }

@@ -5,8 +5,9 @@ $spy.plugins.getAvailableModules()
 
 <!-- #include tool-row gui\blocks\tool-row-help.htm;name=MODULES_1;help_ext=Extension-Modules;1; -->
   <td width='100%'>
-Various extension modules for Olex2 are currently under development. If you are interested in 
-testing these, please sign up below!
+Various extension modules for Olex2 are currently under development. If you are interested in
+testing these, please sign up below! Please <b>do not use temporary emails</b> - we may need to
+contact you in the case of new releases or features update.
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
@@ -37,7 +38,7 @@ testing these, please sign up below!
       "value=spy.plugins.gui.getCurrentModuleName()",
       "items=spy.plugins.gui.getModuleList()",
       "onchange=spy.plugins.gui.update(html.GetValue(~name~))",
-      "readonly=true")
+      "readonly=false")
   $-</td>
   <td width='50%'>
     <font size='2'>

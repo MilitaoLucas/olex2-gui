@@ -40,7 +40,7 @@ class History(ArgumentParser):
     self.basedir = OV.BaseDir()
     self.filefull = OV.FileFull()
     self.filepath = OV.FilePath()
-    self.filename = OV.FileName()
+    self.filename = OV.ModelSrc()
     if os.path.exists(self.filefull):
       self.strdir = OV.StrDir()
     else:
@@ -115,7 +115,8 @@ class History(ArgumentParser):
     olx.File() ## needed to make new .ins file
     sg1 = olex.f("sg()")
     if sg != sg1:
-      olex.m("spy.run_skin sNumTitle")
+      if OV.HasGUI():
+        olex.m("spy.run_skin sNumTitle")
     self._make_history_bars()
 
   def saveHistory(self):
@@ -146,7 +147,7 @@ class History(ArgumentParser):
       try:
         historyName = tree.name
       except AttributeError:
-        historyName = OV.FileName()
+        historyName = OV.ModelSrc()
         tree.name = historyName
 
       if tree.version < 2.0:
@@ -154,7 +155,7 @@ class History(ArgumentParser):
 
       if tree.active_node is None:
         self._createNewHistory()
-      elif tree.name != OV.FileName():
+      elif tree.name != OV.ModelSrc():
         self._createNewHistory()
     else:
       self._createNewHistory()
@@ -189,7 +190,7 @@ class History(ArgumentParser):
     self.setParams()
 
   def _createNewHistory(self):
-    self.filename = olx.FileName()
+    self.filename = OV.ModelSrc()
     historyPicklePath = '/'.join([self.strdir,'%s.history' %self.filename])
     historyFolder = '/'.join([self.strdir,"%s-history" %self.filename])
     global tree
@@ -317,17 +318,11 @@ class Node(object):
     if history_leaf is None:
       if resPath is not None and os.path.exists(resPath):
         self.res = compressFile(resPath)
-        self.read_res(resPath)
-      if lstPath is not None and os.path.exists(lstPath):
-        self.read_lst(lstPath)
 
-      if not self.is_solution and OV.GetParam('snum.refinement.program') == 'olex2.refine':
-        try:
-          self.R1 = float(OV.GetParam('snum.refinement.last_R1'))
-        except ValueError:
-          pass
-
-      OV.SetParam('snum.refinement.last_R1', self.R1)
+      try:
+        self.R1 = float(OV.GetParam('snum.refinement.last_R1'))
+      except:
+        pass
       if self.is_solution:
         self.program = OV.GetParam('snum.solution.program')
         self.method = OV.GetParam('snum.solution.method')
@@ -389,30 +384,6 @@ class Node(object):
       self.link_table.append(node)
     self._primary_parent_node = self.link_table.index(node)
 
-  def read_lst(self, filePath):
-    try:
-      lstValues = lst_reader.reader(filePath).values()
-    except:
-      lstValues = {'R1':'','wR2':''}
-    if not self.is_solution:
-      try:
-        self.R1 = float(lstValues.get('R1', 'n/a'))
-        self.wR2 = float(lstValues.get('wR2', 'n/a'))
-      except ValueError:
-        pass
-    self.program_version = lstValues.get('version')
-
-  def read_res(self, filePath):
-    try:
-      iresValues = ires_reader.reader(open(filePath)).values()
-    except:
-      iresValues = {'R1':''}
-    try:
-      self.R1 = float(iresValues['R1'])
-    except ValueError:
-      self.R1 = 'n/a'
-    self.wR2 = 'n/a'
-
   def set_params(self):
     OV.SetParam('snum.refinement.last_R1',self.R1)
     OV.SetParam('snum.last_wR2',self.wR2)
@@ -456,7 +427,7 @@ class HistoryTree(Node):
     self._children = []
     self._active_child_node = None
     self._active_node = None
-    self.name = OV.FileName()
+    self.name = OV.ModelSrc()
     self._full_index = {self.name: self}
     self.version = 2.1
     self.hklFiles = {}

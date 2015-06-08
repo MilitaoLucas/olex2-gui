@@ -46,6 +46,12 @@ class OlexFunctions(inheritFunctions):
       print >> sys.stderr, "Variable %s could not be set with value %s" %(variable,value)
       sys.stderr.formatExceptionInfo()
 
+  def _replace_object(self, scope, object):
+    for i, tobj in enumerate(scope.objects):
+      if tobj.name == object.name:
+        scope.objects[i] = object
+        return
+
   def SetParam(self,variable,value):
     try:
       if variable.startswith('gui'):
@@ -73,7 +79,7 @@ class OlexFunctions(inheritFunctions):
       print >> sys.stderr, "Variable %s could not be set with value %s" %(variable,value)
       sys.stderr.formatExceptionInfo()
 
-  def GetParam(self,variable, default=None):
+  def GetParam(self,variable, default=None, get_list=False):
     retVal = default
     try:
       if variable.startswith('gui'):
@@ -82,7 +88,10 @@ class OlexFunctions(inheritFunctions):
         handler = olx.gui_phil_handler
       else:
         handler = olx.phil_handler
-      retVal = handler.get_validated_param(variable)
+      if not get_list:
+        retVal = handler.get_validated_param(variable)
+      else:
+        retVal = handler.get_values_by_name(variable)
       if retVal is not None:
         if isinstance(retVal, str):
           retVal = retVal.decode('utf-8').replace('\\$', '$')
@@ -114,7 +123,7 @@ class OlexFunctions(inheritFunctions):
 
   def get_cif_item(self, key, default="", output_format=False):
     if olx.cif_model is not None:
-      data_name = self.FileName().replace(' ', '')
+      data_name = self.ModelSrc().replace(' ', '')
       if data_name not in olx.cif_model:
         import CifInfo
         CifInfo.ExtractCifInfo()
@@ -144,7 +153,7 @@ class OlexFunctions(inheritFunctions):
 
   def set_cif_item(self, key, value):
     if olx.cif_model is not None:
-      data_name = self.FileName().replace(' ', '')
+      data_name = self.ModelSrc().replace(' ', '')
       data_block = olx.cif_model[data_name]
       if isinstance(value, basestring):
         value = value.strip()
@@ -407,8 +416,8 @@ class OlexFunctions(inheritFunctions):
     path = path.strip('"')
     path = '"%s"' %path
     olex.m('@reap %s' %path)
-    olex.m('spy.run_skin sNumTitle')
     if OV.HasGUI():
+      olex.m('spy.run_skin sNumTitle')
       olx.html.Update()
 
   def Reset(self):
@@ -427,12 +436,14 @@ class OlexFunctions(inheritFunctions):
     fader = self.FindValue('gui_use_fader')
     #print "AtReap %s/%s" %(path, file)
     try:
-      if fader == 'true':
-        olex.m("atreap_fader -b \"%s\"" %(r"%s/%s.res" %(path, file)))
-      else:
-        olex.m("atreap_no_fader -b \"%s\"" %(r"%s/%s.res" %(path, file)))
-      olex.m('spy.run_skin sNumTitle')
-      olx.html.Update()
+      if OV.HasGUI():
+        if fader == 'true':
+          olex.m("atreap_fader -b \"%s\"" %(r"%s/%s.res" %(path, file)))
+        else:
+          olex.m("atreap_no_fader -b \"%s\"" %(r"%s/%s.res" %(path, file)))
+        import gui
+        olex.m('spy.run_skin sNumTitle')
+        olx.html.Update()
 
 
     except Exception, ex:
@@ -604,6 +615,15 @@ class OlexFunctions(inheritFunctions):
     else:
       path = olx.FileName()
     return path
+
+  def ModelSrc(self):
+    try: #remove later!!HP
+      model_src = olx.xf.rm.ModelSrc()
+      if not model_src:
+        return self.FileName()
+    except:
+      return self.FileName()
+    return model_src
 
   def FilePath(self,FilePath=None):
     if FilePath is not None:

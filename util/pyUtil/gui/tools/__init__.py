@@ -280,7 +280,9 @@ def checkPlaton():
 OV.registerFunction(checkPlaton,True,'gui.tools')
 
 
-def MakeElementButtonsFromFormula():
+def MakeElementButtonsFromFormula(action='mode'):
+  ## Produces buttons for all atom types currently present in the model. Action 'mode' will go to 'change atom type' mode, action 'select' will simply select the atom types in question
+  
   t1 = time.time()
 
   from PilTools import TI
@@ -332,11 +334,16 @@ def MakeElementButtonsFromFormula():
     if c:
       img_name = "btn-element%s_%s" %(symbol, c)
 
-    name = "btn-element%s" %(symbol)
+    name = "btn-element%s#%s" %(symbol,action)
+    if action == "mode":
+      target = OV.TranslatePhrase('change_element-target')
+      command = 'spy.ElementButtonStates(%s)' %symbol
+      namelower = 'btn-element%s' %(name)
+    if action == "select":
+      target = OV.TranslatePhrase('change_element-target')
+      command = 'spy.ElementButtonSelectStates(%s)' %symbol
+      namelower = 'btn-element%s' %(name)
 
-    target = OV.TranslatePhrase('change_element-target')
-    command = 'spy.ElementButtonStates(%s)' %symbol
-    namelower = 'btn-element%s' %(name)
     d = {}
     d.setdefault('name', name)
     d.setdefault('img_name', img_name)
@@ -354,10 +361,6 @@ def MakeElementButtonsFromFormula():
     if OV.IsControl(control):
       olx.html.SetImage(control,"up=%soff.png,down=%son.png,hover=%shover.png" %(img_name,img_name,img_name))
 
-    #print "  EB2: %.5f" %(time.time() - t1)
-
-    #html += '''
-#$spy.MakeHoverButton('%(name)s','%(cmds)s') '''%d
     html += '''
 <input
   name=IMG_BTN-ELEMENT%(symbol)s
@@ -369,22 +372,23 @@ def MakeElementButtonsFromFormula():
 >
 ''' %d
 
-  d['namelower'] = 'Table'
-  html +=  '''
-<input
-  name=IMG_BTN-ELEMENT...
-  type="button"
-  image="up=%(namelower)soff.png,down=%(namelower)son.png,hover=%(namelower)shover.png"
-  hint="Chose Element from the periodic table"
-  onclick="spy.ElementButtonStates('')"
-  bgcolor=%(bgcolor)s
->
-''' %d
+  if action == "mode":
+    d['namelower'] = 'Table'
+    html +=  '''
+  <input
+    name=IMG_BTN-ELEMENT...
+    type="button"
+    image="up=%(namelower)soff.png,down=%(namelower)son.png,hover=%(namelower)shover.png"
+    hint="Chose Element from the periodic table"
+    onclick="spy.ElementButtonStates('')"
+    bgcolor=%(bgcolor)s
+  >
+  ''' %d
 
   if current_formula != last_formula:
     last_formula = current_formula
 
-  OV.write_to_olex('element_buttons.htm', html, 0)
+#  OV.write_to_olex('element_buttons.htm', html, 0)
 
   im_name='IMG_BTN-ELEMENT%s' %symbol
   OV.SetImage(im_name, name)
@@ -395,11 +399,49 @@ def MakeElementButtonsFromFormula():
     OV.SetImage("IMG_TOOLBAR-REFRESH","up=toolbar-refresh.png,down=toolbar-refresh.png,hover=toolbar-refresh.png")
 
   olexex.SetAtomicVolumeInSnumPhil(totalcount)
+  return html
 
-  #print "ElementButtons: %.5f" %(time.time() - t1)
+def ElementButtonStates(symbol):
+  if not symbol:
+    e = olx.ChooseElement()
+    if not e:  return
+    symbol = e
+  if OV.GetParam('olex2.full_mode') == 'name -t=%s' %symbol:
+    olex.m('mode off')
+  else:
+    if olex.f('Sel()') == '':
+      olex.m('mode name -t=%s' %symbol)
+    else:
+      olex.m('name sel %s' %symbol)
+      olex.m('sel -u')
 
+global sel_element
+global sel_list
+sel_element = ""
+sel_list = []
 
+def ElementButtonSelectStates(symbol):
+  global sel_element
+  global sel_list
+  control = "IMG_BTN-ELEMENT%s" %symbol
+  img_name = "btn-element%s" %(symbol)
+
+  if sel_element == symbol or symbol in sel_list:
+    olex.m('sel $%s -u' %symbol)
+    sel_element = ""
+    sel_list.remove(symbol)
+    onoff = "off"
+  else:
+    olex.m('sel $%s' %symbol)
+    sel_element = symbol
+    sel_list.append(symbol)
+    onoff = "on"
+  if OV.IsControl(control):    
+    OV.SetImage(control,"up=%s%s.png,hover=%son.png" %(img_name,onoff, img_name))
+    
 if haveGUI:
+  OV.registerFunction(ElementButtonStates)
+  OV.registerFunction(ElementButtonSelectStates)
   OV.registerFunction(MakeElementButtonsFromFormula)
 
 

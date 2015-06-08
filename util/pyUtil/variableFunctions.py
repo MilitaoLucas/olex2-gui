@@ -218,7 +218,8 @@ def LoadStructureParams():
   refinementPrg = olx.phil_handler.get_validated_param('snum.refinement.program')
   refinementMethod = olx.phil_handler.get_validated_param('snum.refinement.method')
   olx.phil_handler.reset_scope('snum', rebuild_index=True)
-  structure_phil_path = u"%s/.olex/%s.phil" %(OV.FilePath(), OV.FileName())
+  model_src = OV.ModelSrc()
+  structure_phil_path = u"%s/.olex/%s.phil" %(OV.FilePath(), model_src)
   if os.path.isfile(structure_phil_path):
     structure_phil_file = open(structure_phil_path, 'r')
     structure_phil = structure_phil_file.read()
@@ -244,7 +245,7 @@ def LoadStructureParams():
   #
   # Start backwards compatibility  2010-06-18
   #
-  metacif_path = '%s/%s.metacif' %(OV.StrDir(), OV.FileName())
+  metacif_path = '%s/%s.metacif' %(OV.StrDir(), model_src)
   if not os.path.isfile(metacif_path) and structure_phil is not None:
     from iotbx.cif import model
     master_phil = phil_interface.parse(
@@ -265,7 +266,7 @@ def LoadStructureParams():
       cif_block = model.block()
       for key, value in cif_items:
         cif_block[key] = value
-      cif_model = model.cif({OV.FileName(): cif_block})
+      cif_model = model.cif({model_src: cif_block})
       f = open(metacif_path, 'wb')
       print >> f, cif_model
       f.close()
@@ -287,10 +288,24 @@ OV.registerFunction(LoadStructureParams)
 
 def SaveStructureParams():
   if OV.FileName() != 'none':
-    structure_phil_file = "%s/.olex/%s.phil" %(OV.FilePath(), OV.FileName())
+    structure_phil_file = "%s/.olex/%s.phil" %(OV.FilePath(), OV.ModelSrc())
     olx.phil_handler.save_param_file(
       file_name=structure_phil_file, scope_name='snum', diff_only=True)
 OV.registerFunction(SaveStructureParams)
+
+def OnStructureLoaded(previous):
+  if olx.IsFileLoaded() == 'false':
+    return
+  mf_name = "%s%s%s.metacif" %(OV.StrDir(), os.path.sep, OV.ModelSrc())
+  cif_name = "%s%s%s.cif" %(OV.FilePath(), os.path.sep, OV.FileName())
+  if not os.path.exists(mf_name) and os.path.exists(cif_name):
+    olx.CifExtract(cif_name)
+  if previous != OV.FileFull():
+    import History
+    History.hist.loadHistory()
+  LoadStructureParams()
+
+OV.registerFunction(OnStructureLoaded)
 
 def SaveUserParams():
   user_phil_file = "%s/user.phil" %(OV.DataDir())
