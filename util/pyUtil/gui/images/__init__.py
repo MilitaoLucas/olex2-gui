@@ -86,8 +86,11 @@ def MakeBitmapImage(notify_listener=True, output_folder=None):
   from ImageTools import ImageTools
   IT = ImageTools()
   filefull, filename, fileext = GetImageFilename(image_type = "BITMAP")
+  if not filefull:
+    return
   if output_folder:
-    filefull = "%s/%s.%s" %(output_folder, filename, fileext)
+    _ = os.sep.join([output_folder, "%s.%s" %(filename, fileext)])
+    filefull = _
   if not filefull:
     return
   resolution, filesize = GetBitmapSize()
@@ -115,7 +118,7 @@ def MakeBitmapImage(notify_listener=True, output_folder=None):
       olex.m('picta "%s" 1' %(temp_name))
       padding = OV.GetParam('user.image.bitmap.trim_padding')
       border = OV.GetParam('user.image.bitmap.trim_border')
-      colour = OV.GetParam('user.image.trim_border_colour')
+      colour = OV.GetParam('snum.image.trim_border_colour')
       new_width, old_width = IT.trim_image(im=temp_name,  padding=padding, border=border, border_col=colour, dry=True)
       target_size = filesize
       filesize = filesize * (old_width/new_width)

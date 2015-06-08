@@ -1,5 +1,6 @@
 #value=
 #width=100%
+#height=GetVar('HtmlInputHeight')
 #manage=false
 #password=false
 #multiline=false
@@ -7,7 +8,7 @@
 <font size="$GetVar('HtmlFontSizeControls')">
 <input
   type="text"
-  height="GetVar('HtmlInputHeight')"
+  height="#height"
   bgcolor="GetVar('HtmlInputBgColour')"
   fgcolor="GetVar(HtmlFontColour)"
   valign="center"

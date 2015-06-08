@@ -118,8 +118,9 @@ class CifTools(ArgumentParser):
 
   def __init__(self):
     super(CifTools, self).__init__()
-    self.metacif_path = '%s/%s.metacif' %(OV.StrDir(), OV.FileName())
-    self.data_name = OV.FileName().replace(' ', '')
+    model_src = OV.ModelSrc()
+    self.metacif_path = '%s/%s.metacif' %(OV.StrDir(), model_src)
+    self.data_name = model_src.replace(' ', '')
     just_loaded = False
     if olx.cif_model is None or self.data_name.lower() not in olx.cif_model.keys_lower.keys():
       if os.path.isfile(self.metacif_path):
@@ -483,12 +484,13 @@ class ExtractCifInfo(CifTools):
 
     curr_cif_p = OV.file_ChangeExt(OV.FileFull(), 'cif')
     if os.path.exists(curr_cif_p):
-      f = open(curr_cif_p, 'rUb')
-      current_cif = iotbx.cif.reader(input_string=f.read()).model().values()[0]
-      f.close()
-      all_sources_d[curr_cif_p] = current_cif
-
-
+      try:
+        f = open(curr_cif_p, 'rUb')
+        current_cif = iotbx.cif.reader(input_string=f.read()).model().values()[0]
+        f.close()
+        all_sources_d[curr_cif_p] = current_cif
+      except iotbx.cif.CifParserError:
+        print("Failed to parse the CIF for conflicts analysis")
 
     full_references = [self.olex2_reference]
     if active_solution is not None and active_solution.is_solution:
@@ -815,12 +817,12 @@ class ExtractCifInfo(CifTools):
      set([''.join(x.replace('\r', '').split()) for x in full_references])\
       | ExternalPrgParameters.get_managed_reference_set()
     for l in current_refs.split('\n'):
-      #l = l.rstrip()
-      if not l:
+      if not l.strip():
         if ref:
           ref_t = ''.join(ref.replace('\r', '').split())
           if ref_t not in full_references_set:
             full_references.append(ref)
+            full_references_set.add(ref_t)
           ref = ""
       else:
         if ref:
@@ -828,7 +830,6 @@ class ExtractCifInfo(CifTools):
         else:
           ref = l
     full_references.sort()
-
     self.update_cif_block({
       '_publ_section_references': '\n\n'.join(full_references)}, force=True)
 
@@ -1104,14 +1105,17 @@ If more than one file is present, the path of the most recent file is returned b
 
       zip_file = g[0]
       import zipfile
-      z = zipfile.ZipFile(zip_file, "r")
       l = []
-      for filename in z.namelist():
-        if filename and ".jpg" in filename:
-          l.append(r'%s/%s' %(g[0], filename))
-      OV.SetParam("snum.metacif.list_crystal_images_files", l)
-      setattr(self.metacifFiles, "list_crystal_images_files", l)
-      return l[0], l
+      try:
+        with zipfile.ZipFile(zip_file, "r") as z:
+          for filename in z.namelist():
+            if filename and ".jpg" in filename:
+              l.append(r'%s/%s' %(g[0], filename))
+        OV.SetParam("snum.metacif.list_crystal_images_files", l)
+        setattr(self.metacifFiles, "list_crystal_images_files", l)
+        return l[0], l
+      except:
+        return None, None
 
     elif tool == "od_crystal_images":
       name = OV.FileName()
@@ -1241,7 +1245,7 @@ If more than one file is present, the path of the most recent file is returned b
 OV.registerFunction(ExtractCifInfo)
 
 def reloadMetadata(force=False):
-  """Relaads metadata stored in metacif file if the file name matches the data
+  """Reloads metadata stored in metacif file if the file name matches the data
    name or if force is set to True
   """
   try:

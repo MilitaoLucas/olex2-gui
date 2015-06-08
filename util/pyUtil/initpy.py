@@ -41,19 +41,25 @@ import os
 import locale
 import time
 
-debug = True
+# This is more flexible for different computers:
+py_dev_path_dict = {'dkmac': r'/Applications/liclipse/plugins/org.python.pydev_4.0.0.201504092214/pysrc',
+                    'oleg': r'E:\eclipse-juno\eclipse\plugins\org.python.pydev_2.6.0.2012062818\pysrc',
+                    'dk-uni': r'D:\Programme\Brainwy\LiClipse 1.4.0\plugins\org.python.pydev_3.9.2.201502042042\pysrc',
+                    'dk-home': r'C:\Program Files\Brainwy\LiClipse 2.0.0\plugins\org.python.pydev_4.0.0.201504092214\pysrc',
+                    'oleg2': r'C:\devel\eclipse\plugins\org.python.pydev_3.8.0.201409251235\pysrc'}
+debug = False
 if debug == True:
   try:
     import wingdbstub
   except:
     try:
-      py_dev_path = r'E:\eclipse-juno\eclipse\plugins\org.python.pydev_2.6.0.2012062818\pysrc'
-      if not os.path.exists(py_dev_path):
-        pass#py_dev_path = r'C:\devel\eclipse\plugins\org.python.pydev_3.8.0.201409251235\pysrc'
-      if os.path.exists(py_dev_path):
-        sys.path.append(py_dev_path)
-        import pydevd
-        pydevd.settrace()
+      for py_dev_path in py_dev_path_dict.values():
+        if not os.path.exists(py_dev_path):
+          pass
+        if os.path.exists(py_dev_path):
+          sys.path.append(py_dev_path)
+          import pydevd
+          pydevd.settrace()
     except:
       pass
 
@@ -69,6 +75,9 @@ else:
 
 sys.on_sys_exit_raise = None
 def our_sys_exit(i):
+  '''
+  this is not used anywhere (DK)
+  '''
   if sys.on_sys_exit_raise:
     e = sys.on_sys_exit_raise
     sys.on_sys_exit_raise = None
@@ -162,16 +171,6 @@ def get_prg_roots():
   retval = prg_roots
   return retval
 
-def print_python_version():
-  ''' Print Python Version '''
-  version = sys.version
-  if debug: print
-  if debug: print
-  if debug: print "** %s **" % version
-  version = version[:3]
-  retval = version
-  return version
-
 def set_olex_paths():
   sys.path.append("%s" %basedir)
   sys.path.append("%s/etc/scripts" %basedir)
@@ -190,7 +189,10 @@ def set_plugins_paths():
     try:
       exec("import " + plugin)
     except Exception, err:
-      print err
+      if debug:
+        sys.stdout.formatExceptionInfo()
+      else:
+        print("Failed to load plugin '%s': %s" %(plugin, err))
 
     ##Dependencies
     if plugin == "plugin-SQLAlchemy":

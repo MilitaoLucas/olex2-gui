@@ -50,6 +50,8 @@ def makeProgramSettingsGUI(program, method, prgtype):
 """
   if program.name.lower().startswith("superflip"):
     txt += file(os.path.normpath("%s/etc/gui/tools/superflip.htm" %olx.BaseDir()), "r").read()
+  elif program.name.lower().startswith("tonto"):
+    txt += file(os.path.normpath("%s/etc/gui/tools/tonto.htm" %olx.BaseDir()), "r").read()
   else:
     txt += ''.join([makeArgumentsHTML(program, method, instruction)
                     for instruction in method.instructions()])

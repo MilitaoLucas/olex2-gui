@@ -50,6 +50,7 @@ class RunPrg(ArgumentParser):
     self.original_filename = self.filename
     olx.Stop('listen')
     self.shelx_alias = OV.FileName().replace(' ', '').lower()
+    os.environ['FORT_BUFFERED'] = 'TRUE'
 
   def __del__(self):
     if self.method is not None:
@@ -175,7 +176,9 @@ class RunPrg(ArgumentParser):
     if 'olex2' not in self.program.name:
       self.doFileResInsMagic()
       reflections = OV.HKLSrc() #BEWARE DRAGONS
+      olx.Freeze(True)
       OV.reloadStructureAtreap(self.filePath, self.curr_file)
+      olx.Freeze(False)
       OV.HKLSrc(reflections)
     else:
       if self.broadcast_mode:
@@ -410,14 +413,17 @@ class RunRefinementPrg(RunPrg):
   def doHistoryCreation(self):
     R1 = 0
     self.his_file = ""
-    if OV.IsVar('cctbx_R1'):
-      R1 = float(OV.FindValue('cctbx_R1'))
-      olex.f('UnsetVar(cctbx_R1)')
+    if olx.IsVar('cctbx_R1') == 'true':
+      R1 = float(olx.GetVar('cctbx_R1'))
+      olx.UnsetVar('cctbx_R1')
+    elif olx.IsVar('tonto_R1') == 'true':
+      R1 = float(olx.GetVar('tonto_R1'))
+      olx.UnsetVar('tonto_R1')
     else:
       try:
         R1 = float(olx.Lst('R1'))
       except:
-        R1 = False
+        pass
 
     if R1:
       OV.SetParam('snum.refinement.last_R1', str(R1))
@@ -504,11 +510,12 @@ def AnalyseRefinementSource():
     hkl_file_name = fn + '.hkl'
     olex.m("export '%s'" %hkl_file_name)
     if os.path.exists(res_file_name):
-      olex.m("reap '%s'" %res_file_name)
+      olex.m('reap "%s"' %res_file_name)
       print('Loaded RES file extracted from CIF')
     else:
       OV.File("%s" %ins_file_name)
-      olex.m("reap \"%s\"" %ins_file_name)
+      olex.m('reap "%s"' %ins_file_name)
+      olex.m("free xyz,Uiso")
       print('Loaded INS file generated from CIF')
     if os.path.exists(hkl_file_name):
       olx.HKLSrc(hkl_file_name)

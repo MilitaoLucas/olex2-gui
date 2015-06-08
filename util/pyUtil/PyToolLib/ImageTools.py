@@ -1205,56 +1205,69 @@ class ImageTools(FontInstances):
       b = height - pad
       r = width - pad
 
-      if direction == 'up':
-        fill = colour_on
-        i = 0
-        top = b - pad
-        w_counter = 0
-        while top > (pad + dot_size) and w_counter < 1000:
-          w_counter += 1
-          left = l + i * dot_size/2
-          top = b - i * dot_size - dot_size
-          xy = (int(left), int(top), left + dot_size, top + dot_size)
-          draw.ellipse(xy, fill = fill)
-          i += 1
-        j = i
-        w_counter = 0
-        while top < (height - pad - dot_size) and w_counter < 1000:
-          w_counter += 1
-          left = l + j * dot_size/2
-          top = b - i * dot_size - dot_size
-          xy = (int(left), int(top), left + dot_size, top + dot_size)
-          draw.ellipse(xy, fill = fill)
-          i -= 1
-          j += 1
-      elif direction == 'down':
-        fill = colour_off
-        i = 0
-        top = t
-        w_counter = 0
-        while (top < height - pad - dot_size * 2) and w_counter < 1000:
-          w_counter += 1
-          left = l + i * dot_size/2
-          top = t + i * dot_size
-          xy = (int(left), int(top), left + dot_size, top + dot_size)
-          draw.ellipse(xy, fill = fill)
-          i += 1
-        j = i
-        w_counter = 0
-        while top > pad and w_counter < 1000:
-          w_counter += 1
-          left = l + j * dot_size/2
-          top = t + i * dot_size
-          xy = (int(left), int(top), left + dot_size, top + dot_size)
-          draw.ellipse(xy, fill = fill)
-          i -= 1
-          j += 1
+      mark = self.get_PIL_image_from_olex_VFS('%s_raw.png' %direction)
 
+      if mark:
+        watermark = True
+        if watermark:
+          image = self.watermark(image, mark, (l,t), opacity=1)
+        else:
+          mark_colouriszed = self.colourize(mark, (0,0,0), self.params.html.base_colour.rgb)
+          IM =  Image.new('RGBA', mark.size)
+          IM.paste(mark_colouriszed, (0,0), mark)
+          IM = self.resize_image(IM, (int(image.size[1]), int(image.size[1])))
+          image.paste(IM, (l,t))
+        return image
+      else:
+        if direction == "up":
 
-      elif direction == "right":
-        im_data = OlexVFS.read_from_olex('toolbar-dot-arrow-right.png')
-      elif direction == "left":
-        im_data = OlexVFS.read_from_olex('toolbar-dot-arrow-left.png')
+          fill = colour_on
+          i = 0
+          top = b - pad
+          w_counter = 0
+          while top > (pad + dot_size) and w_counter < 1000:
+            w_counter += 1
+            left = l + i * dot_size/2
+            top = b - i * dot_size - dot_size
+            xy = (int(left), int(top), left + dot_size, top + dot_size)
+            draw.ellipse(xy, fill = fill)
+            i += 1
+          j = i
+          w_counter = 0
+          while top < (height - pad - dot_size) and w_counter < 1000:
+            w_counter += 1
+            left = l + j * dot_size/2
+            top = b - i * dot_size - dot_size
+            xy = (int(left), int(top), left + dot_size, top + dot_size)
+            draw.ellipse(xy, fill = fill)
+            i -= 1
+            j += 1
+        elif direction == 'down':
+          fill = colour_off
+          i = 0
+          top = t
+          w_counter = 0
+          while (top < height - pad - dot_size * 2) and w_counter < 1000:
+            w_counter += 1
+            left = l + i * dot_size/2
+            top = t + i * dot_size
+            xy = (int(left), int(top), left + dot_size, top + dot_size)
+            draw.ellipse(xy, fill = fill)
+            i += 1
+          j = i
+          w_counter = 0
+          while top > pad and w_counter < 1000:
+            w_counter += 1
+            left = l + j * dot_size/2
+            top = t + i * dot_size
+            xy = (int(left), int(top), left + dot_size, top + dot_size)
+            draw.ellipse(xy, fill = fill)
+            i -= 1
+            j += 1
+        elif direction == "right":
+          im_data = OlexVFS.read_from_olex('toolbar-dot-arrow-right.png')
+        elif direction == "left":
+          im_data = OlexVFS.read_from_olex('toolbar-dot-arrow-left.png')
 
 #      IM = Image.open(StringIO(im_data))
 #      IM = IM.resize((height, height))
@@ -1479,6 +1492,22 @@ class ImageTools(FontInstances):
     OlexVFS.write_to_olex('pie.htm',html, True)
     OV.UpdateHtml()
 
+  def get_PIL_image_from_olex_VFS(self, name):
+    from StringIO import StringIO
+
+    if olx.fs.Exists(name) != "true":
+      from PilTools import timage
+      a = timage()
+      a.make_images_from_fb_png()
+
+    if olx.fs.Exists(name) == "true":
+      _ = OlexVFS.read_from_olex(name)
+      sio = StringIO(_)
+      retVal = Image.open(sio)
+    else:
+      retVal = False
+    return retVal
+
   def trim_image(self, im, trimcolour=None, padding=2, border=0.5, border_col='#aaaaaa', dry=False, target_size=None):
     ''' Takes either an image or a path to an image, then trims off all whitespace and either returns the trimmed image or saves it to the same path as the original one '''
 
@@ -1500,12 +1529,21 @@ class ImageTools(FontInstances):
 
     if not trimcolour:
       pix = im.load()
-      trimcolour = pix[0,0]
+      trimcolour = pix[1,12]
+      _ = pix[1,18]
+      trim = True
+      if trimcolour != _:
+        print "Images with gradient background can not be automatically trimmed. Please use a uniform backgroun (F4)"
+        padding = 0
+        trim = False
 
     original_width = im.size[0]
     bg = Image.new(im.mode, im.size, trimcolour)
-    diff = ImageChops.difference(im, bg)
-    bbox = diff.getbbox()
+    if trim:
+      diff = ImageChops.difference(im, bg)
+      bbox = diff.getbbox()
+    else:
+      bbox =False
 
     if bbox:
       im = im.crop(bbox)
