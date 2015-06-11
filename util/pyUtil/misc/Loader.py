@@ -15,6 +15,12 @@ info_file_name = "modules-info.htm"
 
 debug = (olx.app.IsDebugBuild() == 'true')
 
+from olexFunctions import OlexFunctions
+OV = OlexFunctions()
+green = OV.GetParam('gui.green')
+orange = OV.GetParam('gui.orange')
+red = OV.GetParam('gui.red')
+
 class Module:
   def __init__(self, name, folder_name, description, url, release_date, action):
     self.name = name
@@ -27,7 +33,6 @@ class Module:
 
 def getModulesDir():
   from olexFunctions import OlexFunctions
-  OV = OlexFunctions()
   base = olex.f(OV.GetParam('user.modules.location'))
   return "%s%smodules" %(base, os.sep)
 
@@ -46,7 +51,7 @@ def getModule(name, email=None):
     import re
     email = email.strip()
     if not re.match("^[a-zA-Z0-9._%-]+@[a-zA-Z0-9._%-]+.[a-zA-Z]{2,6}$", email):
-      olex.writeImage(info_file_name, "Failed to validate e-mail address", 0)
+      olex.writeImage(info_file_name, "<font color='%s'><b>Failed to validate e-mail address</b></font>" %red, 0)
       return False
   if email:
     try:
@@ -57,7 +62,7 @@ def getModule(name, email=None):
       f = HttpTools.make_url_call(url, values, http_timeout=30)
       f = f.read().strip()
       if "Error" in f:
-        olex.writeImage(info_file_name, "Failed to register e-mail '%s': %s"  %(email, f), 0)
+        olex.writeImage(info_file_name, "<font color='%s'><b>Failed to register e-mail '%s': %s</b></font>" %red  %(email, f), 0)
         return False
       efn = open(etoken_fn, "wb")
       efn.write(f)
@@ -65,9 +70,9 @@ def getModule(name, email=None):
       etoken = f
     except Exception, e:
       msg = '''
-<font color='red'><b>An error occurred while downloading the extension.</b></font>
+<font color='%s'><b>An error occurred while downloading the extension.</b></font>
 <br>%s<br>Please restart Olex2 and try again.
-''' %(str(e))
+''' %(red, str(e))
       if debug:
         sys.stdout.formatExceptionInfo()
       olex.writeImage(info_file_name, msg, 0)
@@ -94,9 +99,9 @@ def getModule(name, email=None):
       old_folder = new_name
     except Exception, e:
       msg = '''
-<font color='red'><b>An error occurred while installing the extension.</b></font>
+<font color='%s'><b>An error occurred while installing the extension.</b></font>
 <br>%s<br>Please restart Olex2 and try again.
-''' %(str(e))
+''' %(red, str(e))
       olex.writeImage(info_file_name, msg, 0)
       return False
 
@@ -114,19 +119,25 @@ def getModule(name, email=None):
     f = HttpTools.make_url_call(url, values, http_timeout=30)
     f = f.read()
     if f.startswith('<html>'):
-      olex.writeImage(info_file_name, f[6:], 0)
+      txt = f[6:]
+      txt = txt.replace("Your licence has expired","<font color='%s'><b>Your %s licence has expired</b></font>" %(red,name))
+      txt = txt.replace("Unknown/invalid module name","<font color='%s'><b>Unknown or invalid module %s</b></font>" %(red,name))
+      txt = txt.replace("The activation link is sent. Check your e-mail. Once the download is activated, install the module again","<font color='%s'>Please check your e-mail to activate the <b>%s</b> module and then press the <b>Install</b> button above.</font>" %(green,name))
+      olex.writeImage(info_file_name, txt, 0)
+
     else:
       zp = ZipFile(StringIO(f))
       zp.extractall(path=dir)
-      msg = "<zimg src='toolbar-okoff.png'> Module <b>%s</b> has been successfully installed/updated" %name
-      msg += "<br>You have 30 days to evaluate this extension module. Please contact us for further information."
-      msg += "<br><font color='green'><b><Please restart Olex2 to activate the extension module.</b></font>"
+      msg = "<font color='%s'>Module <b>%s</b> has been successfully installed or updated.</font><br> <font color='%s'>Restart Olex2 and then look for your new module under the <b>'Tools'</b> tab.</font>" %(green, name, red)
+      msg += "<br>Please evaluate this extension module for 30 days and then contact us for further information."
+      msg += "<br><font color='%s'><b><Restart Olex2 to load the new extension module.</b></font>" %orange
       olex.writeImage(info_file_name, msg, 0)
       global available_modules
       if current_module:
-        idx = available_modules.index(current_module)
-        if idx >= 0:
-          del available_modules[idx]
+        current_module.action = 4
+        ##if idx >= 0:
+          ##del available_modules[idx]
+        ##getAvailableModules()
       #clean up the old folder if was created
       if old_folder is not None:
         try:
@@ -136,9 +147,9 @@ def getModule(name, email=None):
       return True
   except Exception, e:
     msg = '''
-<font color='red'><b>An error occurred while installing the extension.</b></font>
+<font color='%s'><b>An error occurred while installing the extension.</b></font>
 <br>%s<br>Please restart Olex2 and try again.
-''' %(str(e))
+''' %(red, str(e))
     olex.writeImage(info_file_name, msg, 0)
     return False
 
@@ -165,6 +176,8 @@ def loadAll():
       global failed_modules
       failed_modules[d] = str(e)
       print("Error occurred while loading module: %s" %d)
+      if "expired" in repr(e):
+        expired_pop(d)
       if debug:
         sys.stdout.formatExceptionInfo()
   getAvailableModules() #thread
@@ -214,12 +227,33 @@ def updateKey(module):
         return True
     except Exception, e:
       print("Error while reloading '%s': %s" %(module.name, e))
+      expired_pop(module.name)
+
       return False
   except Exception, e:
     if debug:
       sys.stdout.formatExceptionInfo()
       print("Error while updating the key for '%s': '%s'" %(module.name, e))
     return False
+
+def expired_pop(name):
+  print "Your licence for module %s has expired. Please click on the link under Home > Extensions to ask for an extension. Thank you." %name
+  pass
+  #pop_name = "Sorry!"
+  #htm = "Fred"
+  #width = 100
+  #border = 4
+  #height = 50
+  #x = 50
+  #y = 50
+
+  #pstr = "popup '%s' '%s' -t='%s' -w=%s -h=%s -x=%s -y=%s" %(pop_name, htm, pop_name, width+border*2 +10, height+border*2, x, y)
+  #OV.cmd(pstr)
+  #olx.html.SetBorders(pop_name,border)
+  #OV.cmd(pstr)
+  #olx.html.SetBorders(pop_name,border)
+
+
 
 def getCurrentPlatformString():
   import platform
@@ -345,22 +379,36 @@ def getModuleCaption(m):
     return "%s - Update" %(m.name)
   elif m.action == 3:
     return "%s - Re-install" %(m.name)
+  elif m.action == 4:
+    return "%s - Restart Olex2" %(m.name)
   else:
     return "%s - Up-to-date" %(m.name)
 
 def getModuleList():
   getAvailableModules(False)
   global available_modules
+  global current_module
   rv = []
   for idx, m in enumerate(available_modules):
     if m.internal: continue
     rv.append(getModuleCaption(m) + ("<-%d" %(idx)))
+  if current_module:
+    _ = getModuleCaption(current_module)
+    if _ not in ';'.join(rv):
+      rv.append(_ + ("<-%d" %(available_modules.index(current_module)))
+)
   return ';'.join(rv)
 
 def getInfo():
   global current_module
   if not current_module:
-    return ""
+    _ = 'Select a module from the drop-down menu or type the name of a custom module'
+    try:
+      if olx.html.GetValue('available_modules') != "":
+        _ = 'Install Custom Module'
+    except:
+      pass
+    return _
   from olexFunctions import OlexFunctions
   OV = OlexFunctions()
   preambula = ""
@@ -370,10 +418,19 @@ def getInfo():
     "body=Customer reference: %s, Olex2 tag: %s)'>OlexSys Ltd</a>"
     t = t %(current_module.name, _plgl.createAuthenticationToken(), OV.GetTag())
     t.replace(' ', '%20')
-    preambula = """<font color='red'>This module has <b>expired</b></font>,
-please either re-install it or contact %s to extend the licence.<br>""" %(t)
-  return preambula + "<a href='shell %s'>Module URL: </a> %s<br>%s"\
-     %(current_module.url, current_module.url, current_module.description)
+    preambula = """<font color='%s'>This module has <b>expired</b></font>,
+please either re-install it or contact %s to extend the licence.<br>""" %(red, t)
+  return preambula + "<font size='3'><b>%s</b></font><br><a href='shell %s'>More Information</a>"\
+     %(current_module.description,current_module.url)
+
+def get_module_idx(name):
+  global available_modules
+  i = 0
+  for m in available_modules:
+    if m.folder_name == name:
+      return i
+    i += 1
+  return None
 
 def update(idx):
   global current_module
@@ -383,22 +440,34 @@ def update(idx):
   try:
     idx = int(idx)
   except:
-    getModule(idx, OV.GetParam('user.email'))
-    return
+    idx = get_module_idx(idx)
+    if idx is None:
+      return
   current_module = available_modules[idx]
+  olx.html.SetItems('available_modules', getModuleList())
   olex.writeImage(info_file_name, "", 0)
+  #except:
+    #getModule(idx, OV.GetParam('user.email'))
   olx.html.Update()
 
 def getAction():
   global current_module
   if current_module is None:
     action = 'Please choose a module'
+    try:
+      if olx.html.GetValue('available_modules') != "":
+        action = 'Install Custom Module'
+    except:
+      pass
+    return action
   elif current_module.action == 1:
     action = "Install"
   elif current_module.action == 2:
     action = "Update"
   elif current_module.action == 3:
     action = "Re-install"
+  elif current_module.action == 4:
+    action = "Restart Olex2"
   else:
     action = 'Nothing to do'
   return action
@@ -407,11 +476,12 @@ def doAct():
   global current_module
   if current_module is None or current_module.action == 0:
     return
+  elif current_module.action == 4:
+    olx.Restart()
   else:
     getModule(current_module.folder_name, olx.html.GetValue('modules_email'))
-    current_module = None
+    #current_module = None
     olx.html.Update()
-
 
 def getCurrentModuleName():
   global current_module
