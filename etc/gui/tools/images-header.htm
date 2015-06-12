@@ -15,11 +15,11 @@
     </font>
   </td>
 
-  <td width='38%'>
-     &nbsp;If <b>NAME</b> already exists, then:
+  <td width='25%'>
+     &nbsp;If <b>NAME</b> exists, then:
   </td>
 
-  <td width="25%">
+  <td width="15%" align='left'>
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input name="IMAGE_SETTINGS_AUTOINCREMENT_NAME"
        type="combo"
@@ -33,6 +33,22 @@
       >
     </font>
   </td>
+
+  <td width="20%">
+    <font size='$GetVar(HtmlFontSizeControls)'>
+    <input name="IMAGE_TYPE"
+       type="combo"
+       height="GetVar('HtmlComboHeight')"
+       width="100%"
+       bgcolor="GetVar('HtmlInputBgColour')"
+       value="spy.GetParam('user.image.img_type')"
+       items="Bitmap;PostScript;PovRay"
+       onchange="spy.SetParam('user.image.img_type', html.GetValue('~name~'))"
+       readonly="True"
+      >
+    </font>
+  </td>
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- SECOND ROW: Deal with labels-->
