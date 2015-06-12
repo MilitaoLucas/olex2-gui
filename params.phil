@@ -1199,6 +1199,8 @@ user
     }
   }
   image{
+    img_type = 'png'
+      .type= str
     label_symm = none
       .type=str
     label_symm_type = default
