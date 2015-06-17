@@ -395,8 +395,8 @@ def get_colour_choice(scope,what):
     return val
   elif what == "items":
     t = ""
-    for item in shlex.split(OV.GetParam(variable='%s.colours'%scope, default='[__elements]',get_list=True)[0]):
-      t += "%s;" %(item.split("__")[1])
+    for item in OV.GetParam(variable='%s.colours'%scope, default='[@@elements]'):
+      t += "%s;" %(item.split("@@")[1])
     return t + "[Type new colour name]"
 OV.registerFunction(get_colour_choice,False,'gui.skin')
 
@@ -413,6 +413,9 @@ def change_bond_colour(colour=None):
   if "[" in colour:
     olx.html.SetValue('BOND_COLOUR_COMBO',"")
     return
+  if "@" in colour:
+    print "Please do not use the '@' character in colour names"
+    return
 
   if not colour:
     colour = OV.GetParam('user.bonds.colour', 'elements')
@@ -420,20 +423,24 @@ def change_bond_colour(colour=None):
     OV.SetParam('user.bonds.mask', 48)
     olex.m('mask bonds 48')
   else:
-    c = None
-    for item in shlex.split(OV.GetParam(variable='user.bonds.colours', default='[__elements]',get_list=True)[0]):
-      if item.split("__")[1] == colour:
-        c = item.split("__")[0].replace("_",";").replace("*","")
+    c = ""
+    cc = ""
+    _ = OV.GetParam('user.bonds.colour')
+    for item in OV.GetParam(variable='user.bonds.colours', default='[@@elements]'):
+      if item.split("@@")[1] == colour:
+        c = item.split("@@")[0].replace("@",";").replace("*","")
+      if item.split("@@")[1] == _:
+        cc = item.split("@@")[0].replace("@",";").replace("*","")
     if not c:
-      res = olex.m("SetVar(temp,ChooseMaterial())")
+      res = olex.m("SetVar(temp,ChooseMaterial(%s))"%cc)
       if not res: return
       c = olx.GetVar('temp')
       #c = '5;16744448;4294967168'
-      l = OV.GetParam(variable='user.bonds.colours',default=[], get_list=True)
-      _ = "'%s__%s'" %(c.replace(";","_"), colour)
-      l[0] += " %s" %_
+      l = OV.GetParam(variable='user.bonds.colours',default=[])
+      _ = "%s@@%s" %(c.replace(";","@"), colour)
+      l.append(_)
       OV.SetParam('user.bonds.colours', l)
-    _ = "%s__%s" %(c.replace(";","_"), colour)
+    _ = "%s@@%s" %(c.replace(";","@"), colour)
     OV.SetParam('user.bonds.colour', colour)
     OV.SetParam('user.bonds.mask', 1)
     olex.m("mask bonds 1")
