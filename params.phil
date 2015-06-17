@@ -1170,7 +1170,7 @@ user
     .type = float
   colour = elements
     .type = str
-  colours = __elements 5_4278223103_4278255615__orange '5_4282071867_4286611584__dark grey'
+  colours = @@elements 5@4278223103@4278255615@@orange '5@4282071867@4286611584@@dark grey'
     .type = strings
   }
 
