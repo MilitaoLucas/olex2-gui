@@ -127,7 +127,7 @@ $-
             type="button"
             value="OK"
             height="25"
-            onclick="spy.plugins.ask_for_licence_extension(%(name)s,%(token)s,%(tag)s,html.GetValue(sorry.institute),html.GetState(sorry.confession_status),html.GetState(sorry.confession_structures),html.GetState(sorry.confession_keep_evaluating),html.GetState(sorry.confession_have_licence),html.GetState(sorry.confession_no_thanks))>>html.EndModal('~popup_name~', 0)">
+            onclick="spy.plugins.ask_for_licence_extension(%(name)s,%(token)s,%(tag)s,html.GetValue('~popup_name~.institute'),html.GetState('~popup_name~.confession_status'),html.GetState('~popup_name~.confession_structures'),html.GetState('~popup_name~.confession_keep_evaluating'),html.GetState('~popup_name~.confession_have_licence'),html.GetState('~popup_name~.confession_no_thanks'))>>html.EndModal('~popup_name~', 0)">
         </td>
       </tr>
 
