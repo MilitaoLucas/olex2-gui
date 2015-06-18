@@ -439,6 +439,14 @@ def change_bond_colour(colour=None):
       l = OV.GetParam(variable='user.bonds.colours',default=[])
       _ = "%s@@%s" %(c.replace(";","@"), colour)
       l.append(_)
+      t = ""
+      for item in l:
+        t += "%s;" %(item.split("@@")[1])
+      try:
+        olx.html.SetItems("BOND_COLOUR_COMBO", t)
+        olx.html.SetValue("BOND_COLOUR_COMBO", colour)
+      except:
+        pass
       OV.SetParam('user.bonds.colours', l)
     _ = "%s@@%s" %(c.replace(";","@"), colour)
     OV.SetParam('user.bonds.colour', colour)
