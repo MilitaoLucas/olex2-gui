@@ -41,12 +41,12 @@ def getModule(name, email=None):
   from olexFunctions import OlexFunctions
   OV = OlexFunctions()
   url_base = OV.GetParam('user.modules.provider_url')
-  dir = getModulesDir()
-  if not os.path.exists(dir):
-    os.mkdir(dir)
+  m_dir = getModulesDir()
+  if not os.path.exists(m_dir):
+    os.mkdir(m_dir)
 
   etoken = None
-  etoken_fn = "%s%setoken" %(dir, os.sep)
+  etoken_fn = "%s%setoken" %(m_dir, os.sep)
   if email:
     import re
     email = email.strip()
@@ -87,26 +87,6 @@ def getModule(name, email=None):
       olex.writeImage(info_file_name, "Please provide your e-mail", 0)
     return False
 
-  #try to clean up the folder if already exists
-  pdir = "%s%s%s" %(dir, os.sep, name)
-  old_folder = None
-  if os.path.exists(pdir):
-    try:
-      new_name = pdir + "_"
-      if os.path.exists(new_name):
-        shutil.rmtree(new_name)
-      os.rename(pdir, new_name)
-      old_folder = new_name
-    except Exception, e:
-      msg = '''
-<font color='%s'><b>An error occurred while installing the extension.</b></font>
-<br>%s<br>Please restart Olex2 and try again.
-''' %(red, str(e))
-      olex.writeImage(info_file_name, msg, 0)
-      return False
-
-  from zipfile import ZipFile
-  from StringIO import StringIO
   try:
     url = url_base + "get"
     values = {
@@ -123,27 +103,30 @@ def getModule(name, email=None):
       txt = txt.replace("Your licence has expired","<font color='%s'><b>Your %s licence has expired</b></font>" %(red,name))
       txt = txt.replace("Unknown/invalid module name","<font color='%s'><b>Unknown or invalid module %s</b></font>" %(red,name))
       txt = txt.replace("The activation link is sent. Check your e-mail. Once the download is activated, install the module again","<font color='%s'>Please check your e-mail to activate the <b>%s</b> module and then press the <b>Install</b> button above.</font>" %(green,name))
+
+      if "expired" in txt:
+        expired_pop(name)
+
       olex.writeImage(info_file_name, txt, 0)
 
     else:
-      zp = ZipFile(StringIO(f))
-      zp.extractall(path=dir)
-      msg = "<font color='%s'>Module <b>%s</b> has been successfully installed or updated.</font><br> <font color='%s'>Restart Olex2 and then look for your new module under the <b>'Tools'</b> tab.</font>" %(green, name, red)
-      msg += "<br>Please evaluate this extension module for 30 days and then contact us for further information."
+      _ = os.sep.join([m_dir, "%s.update" %name])
+      with open(_,'wb') as wFile:
+        wFile.write(f)
+
+      msg = "<font color='%s'>Module <b>%s</b> has been successfully installed or updated.</font><br>" %(green, name)
+      msg += "<br>This module will expire at some point. If that happens, please contact us for further information."
       msg += "<br><font color='%s'><b><Restart Olex2 to load the new extension module.</b></font>" %orange
       olex.writeImage(info_file_name, msg, 0)
+
+      update_or_install(name)
+
       global available_modules
       if current_module:
         current_module.action = 4
         ##if idx >= 0:
           ##del available_modules[idx]
         ##getAvailableModules()
-      #clean up the old folder if was created
-      if old_folder is not None:
-        try:
-          shutil.rmtree(old_folder)
-        except: # must not happen, but not dangerous
-          pass
       return True
   except Exception, e:
     msg = '''
@@ -153,14 +136,53 @@ def getModule(name, email=None):
     olex.writeImage(info_file_name, msg, 0)
     return False
 
+
+def update_or_install(d):
+  m_dir = getModulesDir()
+  if ".update" not in d:
+    update_zip = os.sep.join([m_dir, "%s.update" %d])
+  else:
+    update_zip = os.sep.join([m_dir, d])
+  if os.path.exists(update_zip):
+    #try to clean up the folder if already exists
+    pdir = "%s%s%s" %(m_dir, os.sep, d.rstrip(".update"))
+    if os.path.exists(pdir):
+      if ".update" not in pdir:
+        try:
+          shutil.rmtree(pdir)
+        except Exception, e:
+          print "The original module %s could not be removed" %d
+          return False
+    try:
+      from zipfile import ZipFile
+      zp = ZipFile(update_zip)
+      zp.extractall(path=m_dir)
+      zp.close()
+      print "Module %s has been updated" %d
+      retVal = True
+    except:
+      print "Module %s is no longer present" %d
+      return False
+    try:
+      os.remove(update_zip)
+      retVal = True
+    except:
+      print "Update file for module %s could not be removed" %d
+      return False
+    return retVal
+
+
 def loadAll():
-  dir = getModulesDir()
-  if not os.path.exists(dir):
+  m_dir = getModulesDir()
+  if not os.path.exists(m_dir):
     return
-  all = os.listdir(dir)
+  all = os.listdir(m_dir)
   for d in all:
-    dl = "%s%s%s" %(dir, os.sep, d)
-    if not os.path.isdir(dl): continue
+    if ".update" in d:
+      if not update_or_install(d):
+        continue
+    dl = "%s%s%s" %(m_dir, os.sep, d)
+    if not os.path.isdir(dl):continue
     key = "%s%skey" %(dl, os.sep)
     enc = "%s%s%s.pyc" %(dl, os.sep, d)
     if not os.path.exists(enc):
@@ -168,9 +190,10 @@ def loadAll():
     if not os.path.exists(key):
       print("The module %s does not contain key file, skipping" %d)
       continue
+
     key = open(key, 'rb').readline()
     try:
-      if _plgl.loadPlugin(d, key, dir):
+      if _plgl.loadPlugin(d, key, m_dir):
         print("Module %s has been successfully loaded." %d)
     except Exception, e:
       global failed_modules
@@ -201,8 +224,8 @@ def updateKey(module):
       print "No modules information available"
       return
   try:
-    dir = getModulesDir()
-    etoken_fn = "%s%setoken" %(dir, os.sep)
+    m_dir = getModulesDir()
+    etoken_fn = "%s%setoken" %(m_dir, os.sep)
     if os.path.exists(etoken_fn):
       etoken = open(etoken_fn, "rb").readline().strip()
     else:
@@ -218,11 +241,11 @@ def updateKey(module):
     key = f.read()
     if key.startswith("<html>") or len(key) < 40:
       raise Exception(key[6:])
-    keyfn = "%s%s%s%skey" %(dir, os.sep, module.folder_name, os.sep)
+    keyfn = "%s%s%s%skey" %(m_dir, os.sep, module.folder_name, os.sep)
     with open(keyfn, "wb") as keyf:
       keyf.write(key)
     try:
-      if _plgl.loadPlugin(module.folder_name, key, dir):
+      if _plgl.loadPlugin(module.folder_name, key, m_dir):
         print("Module %s has been successfully loaded." %(module.name))
         return True
     except Exception, e:
@@ -237,22 +260,86 @@ def updateKey(module):
     return False
 
 def expired_pop(name):
-  print "Your licence for module %s has expired. Please click on the link under Home > Extensions to ask for an extension. Thank you." %name
-  pass
-  #pop_name = "Sorry!"
-  #htm = "Fred"
-  #width = 100
-  #border = 4
-  #height = 50
-  #x = 50
-  #y = 50
+  import OlexVFS
+  d = {}
+  d['name'] = name
+  d['email'] = OV.GetParam('user.email')
+  d['token'] = _plgl.createAuthenticationToken()
+  d['tag'] = OV.GetTag()
 
-  #pstr = "popup '%s' '%s' -t='%s' -w=%s -h=%s -x=%s -y=%s" %(pop_name, htm, pop_name, width+border*2 +10, height+border*2, x, y)
-  #OV.cmd(pstr)
+  _ = os.sep.join([OV.BaseDir(), "util", "pyUtil", "misc", "expired_pop.html"])
+  t = open(_,'r').read()%d
+
+  pop_name = "sorry"
+  htm = "sorry.htm"
+  OlexVFS.write_to_olex(htm, t)
+
+  width = 800
+  border = 10
+  height = 500
+  x = 50
+  y = 50
+
+  pstr = "popup '%s' '%s' -t='%s' -w=%s -h=%s -x=%s -y=%s -b=tcr" %(pop_name, htm, pop_name, width+border*2 +10, height+border*2, x, y)
+  olx.Schedule(1, pstr)
+  olx.Schedule(1, "html.ShowModal('sorry', True)")
+
   #olx.html.SetBorders(pop_name,border)
   #OV.cmd(pstr)
   #olx.html.SetBorders(pop_name,border)
 
+
+def ask_for_licence_extension(name, token, tag, institute, confession_status=False, confession_structures=False, confession_have_licence=False, confession_keep_evaluating=False, confession_no_thanks=False):
+
+  d = {}
+  d['institute'] = institute
+  d['name'] = name
+  d['tag'] = tag
+  d['token'] = token
+
+
+  t = "mailto:enquiries@olexsys.org?"+\
+  "subject=Licence extension for: %(name)s&"+\
+  "body=Reference: %(token)s, Olex2 tag: %(tag)s@@"
+
+  t += "@@"
+
+  if institute:
+    t += "Affiliation: %(institute)s@@"
+  else:
+    t += "[Please let us know your affiliation!]@@"
+
+  t += "@@"
+
+  if confession_status == 'true':
+    t += "-- I am a Student or Postdoc@@"
+
+  if confession_structures == 'true':
+    t += "-- I am using this module <b>only</b> for my own work.@@"
+
+  if confession_keep_evaluating == 'true':
+    t += "-- I would like to evaluate this module for some more time.@@"
+
+  if confession_have_licence == 'true':
+    t += "-- My institution has already purchased a licence.@@"
+
+  if confession_no_thanks == 'true':
+    t += "-- I am no longer interested in using this extension module.@@"
+
+  t += "@@"
+
+  t += "If you have any comments or suggestions about %(name)s, please tell us!@@"
+
+  t = t %d
+  t = t.replace('@@', '%0D%0A')
+  t = t.replace(' ', '%20')
+  olx.Shell(t)
+
+  if confession_no_thanks == 'true':
+    getModulesDir()
+    _ = os.sep.join([getModulesDir(), "%s.update" %name])
+    with open(_,'w') as wFile:
+      wFile.write("")
 
 
 def getCurrentPlatformString():
@@ -313,9 +400,9 @@ def getAvailableModules_():
           if debug:
             sys.stdout.formatExceptionInfo()
           pass
-    dir = getModulesDir()
+    m_dir = getModulesDir()
     for m in available_modules:
-      md = "%s%s%s" %(dir, os.sep, m.folder_name)
+      md = "%s%s%s" %(m_dir, os.sep, m.folder_name)
       if os.path.exists(md):
         rd = "%s%srelease" %(md, os.sep)
         d = 0
@@ -505,8 +592,8 @@ def AskToUpdate():
   manual_update = OV.GetParam("user.modules.manual_update", False)
   if manual_update:
     return
-  dir = getModulesDir()
-  etoken_fn = "%s%setoken" %(dir, os.sep)
+  m_dir = getModulesDir()
+  etoken_fn = "%s%setoken" %(m_dir, os.sep)
   if not os.path.exists(etoken_fn):
     return
   to_update = []
@@ -586,11 +673,11 @@ def offlineInstall():
     if int(res) != 1:
       zip.close()
       return
-  dir = getModulesDir()
-  if not os.path.exists(dir):
-    os.mkdir(dir)
+  m_dir = getModulesDir()
+  if not os.path.exists(m_dir):
+    os.mkdir(m_dir)
   else:
-    mdir = dir + os.sep + module_name
+    mdir = m_dir + os.sep + module_name
     if os.path.exists(mdir):
       res = olx.Alert("Warning", "Destination folder exists.\nOverwrite?", "YCQ")
       if res != 'Y':
@@ -601,7 +688,7 @@ def offlineInstall():
       except:
         print("Failed to remove previous installation. Please restart Olex2 and try again...")
         return
-  zip.extractall(path=dir)
+  zip.extractall(path=m_dir)
   zip.close()
   print("Installed successfully '%s'. Please restart Olex2 to load it." %module_name)
 
@@ -629,6 +716,8 @@ if os.path.exists(lib_name) or olx.app.IsDebugBuild() == 'true':
     olex.registerFunction(AskToUpdate, False, "plugins")
     olex.registerFunction(updateKey, False, "plugins")
     olex.registerFunction(offlineInstall, False, "plugins")
+    olex.registerFunction(expired_pop, False, "plugins")
+    olex.registerFunction(ask_for_licence_extension, False, "plugins")
     loadAll()
   except Exception, e:
     print("Plugin loader initialisation failed: '%s'" %e)
