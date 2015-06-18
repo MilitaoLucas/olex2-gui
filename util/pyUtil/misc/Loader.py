@@ -250,7 +250,7 @@ def updateKey(module):
         return True
     except Exception, e:
       print("Error while reloading '%s': %s" %(module.name, e))
-      expired_pop(module.name)
+#      expired_pop(module.name)
 
       return False
   except Exception, e:
@@ -276,11 +276,11 @@ def expired_pop(name):
 
   width = 800
   border = 10
-  height = 500
+  height = 550
   x = 50
   y = 50
 
-  pstr = "popup '%s' '%s' -t='%s' -w=%s -h=%s -x=%s -y=%s -b=tcr" %(pop_name, htm, pop_name, width+border*2 +10, height+border*2, x, y)
+  pstr = "popup '%s' '%s' -t='%s' -w=%s -h=%s -x=%s -y=%s" %(pop_name, htm, pop_name, width+border*2 +10, height+border*2, x, y)
   olx.Schedule(1, pstr)
   olx.Schedule(1, "html.ShowModal('sorry', True)")
 
