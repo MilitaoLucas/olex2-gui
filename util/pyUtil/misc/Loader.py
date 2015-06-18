@@ -261,6 +261,7 @@ def updateKey(module):
 
 def expired_pop(name):
   import OlexVFS
+
   d = {}
   d['name'] = name
   d['email'] = OV.GetParam('user.email')
@@ -270,19 +271,19 @@ def expired_pop(name):
   _ = os.sep.join([OV.BaseDir(), "util", "pyUtil", "misc", "expired_pop.html"])
   t = open(_,'r').read()%d
 
-  pop_name = "sorry"
+  pop_name = "sorry-%s"%name
   htm = "sorry.htm"
   OlexVFS.write_to_olex(htm, t)
 
   width = 800
   border = 10
-  height = 550
+  height = 520
   x = 50
   y = 50
 
   pstr = "popup '%s' '%s' -t='%s' -w=%s -h=%s -x=%s -y=%s" %(pop_name, htm, pop_name, width+border*2 +10, height+border*2, x, y)
   olx.Schedule(1, pstr)
-  olx.Schedule(1, "html.ShowModal('sorry', True)")
+  olx.Schedule(1, "html.ShowModal(%s, True)"%pop_name)
 
   #olx.html.SetBorders(pop_name,border)
   #OV.cmd(pstr)
