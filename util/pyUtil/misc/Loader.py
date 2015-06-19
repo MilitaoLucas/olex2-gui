@@ -176,8 +176,16 @@ def loadAll():
   m_dir = getModulesDir()
   if not os.path.exists(m_dir):
     return
-  all = os.listdir(m_dir)
-  for d in all:
+  all_m = os.listdir(m_dir)
+
+  l = []
+  for d in all_m:
+    if ".update" in d:
+      l.append(d)
+      all_m.remove(d)
+  all_m = l + all_m
+
+  for d in all_m:
     if ".update" in d:
       if not update_or_install(d):
         continue
