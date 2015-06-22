@@ -1,0 +1,166 @@
+<html>
+  <body>
+    <font size='4' color='#777777'>
+      <table width="100%%">
+        <tr>
+          <td align='center' width='20%%' >
+            <img src="\gui\images\src\sad.png">
+          </td>
+          <td align='left' width='60%%'>
+            Your licence for module<br>
+            <b><font color='#004080' size='5'>%(name)s</font></b><br>
+            has expired.
+          </td>
+          <td align='center' width='20%%' >
+          </td>
+        </tr>
+
+        <tr>
+          <td align='center'>
+          </td>
+          <td align='left'>
+            But don't worry! It's easy to extend your licence.
+          </td>
+          <td align='center'>
+            <img src="\gui\images\src\happy.png">
+          </td>
+        </tr>
+
+
+
+        <tr>
+          <td align='right' valign='top'>
+$+
+    html.Snippet
+    (
+    "gui/snippets/input-checkbox",
+    "name=confession_status",
+    "checked='false',
+     )
+$-
+          </td>
+          <td align='left' colspan='2'>
+I am a Student or Post-Doc and I am using this module only for my own work
+        </td>
+      </tr>
+
+        <tr>
+          <td align='right'>
+$+
+    html.Snippet
+    (
+    "gui/snippets/input-checkbox",
+    "name=confession_structures",
+    "checked='false',
+     )
+$-
+          </td>
+          <td align='left' colspan='2'>
+I am using this module only for my own work.
+        </td>
+      </tr>
+
+
+        <tr>
+          <td align='right'>
+$+
+    html.Snippet
+    (
+    "gui/snippets/input-checkbox",
+    "name=confession_keep_evaluating",
+    "checked='false',
+     )
+$-
+          </td>
+          <td align='left' colspan='2'>
+I would like to evaluate this module for some more time.
+        </td>
+      </tr>
+
+
+        <tr>
+          <td align='right'>
+$+
+    html.Snippet
+    (
+    "gui/snippets/input-checkbox",
+    "name=confession_have_licence",
+    "checked='false',
+     )
+$-
+          </td>
+          <td align='left' colspan='2'>
+My institution has already purchased a licence.
+        </td>
+      </tr>
+
+        <tr>
+          <td align='right' valign='top'>
+          </td>
+          <td align='left' colspan='1'>
+
+<table><tr><td width='35%%'>
+I am affiliated with:
+</td>
+<td width='75%%'>
+$+
+    html.Snippet
+    (
+    "gui/snippets/input-text",
+    "name=institute",
+     )
+$-
+</td></tr></table>
+
+        </td>
+          <td align='center'>
+          </td>
+      </tr>
+
+
+
+        <tr>
+          <td align='right'>
+          </td>
+          <td align='left' colspan='2'>
+            <input
+            type="button"
+            value="OK"
+            height="25"
+            onclick="spy.plugins.ask_for_licence_extension(%(name)s,%(token)s,%(tag)s,html.GetValue('~popup_name~.institute'),html.GetState('~popup_name~.confession_status'),html.GetState('~popup_name~.confession_structures'),html.GetState('~popup_name~.confession_keep_evaluating'),html.GetState('~popup_name~.confession_have_licence'),html.GetState('~popup_name~.confession_no_thanks'))>>html.EndModal('~popup_name~', 0)">
+        </td>
+      </tr>
+
+
+        <tr>
+          <td align='right'>
+$+
+    html.Snippet
+    (
+    "gui/snippets/input-checkbox",
+    "name=confession_no_thanks",
+    "checked='false',
+     )
+$-
+          </td>
+          <td align='left' colspan='2'>
+          <font color='#ababab'>
+I am no longer interested in %(name)s. Please remove it from my Olex2 installation.
+</font>
+        </td>
+      </tr>
+
+
+
+        <tr>
+          <td align='center'>
+          </td>
+          <td align='left' colspan='2'>
+            <font size='2' colour='#444444'>%(email)s, %(tag)s, %(token)s</font>
+          <br>
+          </td>
+        </tr>
+      </table>
+  </font>
+  </body>
+</html>

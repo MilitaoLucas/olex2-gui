@@ -203,6 +203,24 @@
   >
 >
 
+
+<draw help="Draw"
+  <body
+    <args
+      <arg1 def='spy.GetParam(user.image.img_type)'>
+    >
+
+    <cmd
+      <cmd0 "run strcat(strcat('spy.gui.images.Make', %1),'Image()')">
+    >
+
+    <onabort
+      <cmd "echo lasterror()">
+    >
+  >
+>
+
+
 <refine help="Launches refine program. Syntax: refine [l.s.=-1] [plan=-1]"
   <body
     <args

@@ -88,10 +88,14 @@ class OlexFunctions(inheritFunctions):
         handler = olx.gui_phil_handler
       else:
         handler = olx.phil_handler
-      if not get_list:
-        retVal = handler.get_validated_param(variable)
-      else:
-        retVal = handler.get_values_by_name(variable)
+
+      retVal = handler.get_validated_param(variable)
+
+      #if not get_list:
+        #retVal = handler.get_validated_param(variable)
+      #else:
+        #retVal = handler.get_values_by_name(variable)
+
       if retVal is not None:
         if isinstance(retVal, str):
           retVal = retVal.decode('utf-8').replace('\\$', '$')

@@ -2788,10 +2788,15 @@ class HealthOfStructure():
 
       raw_val = value
       bg_colour = None
+      flack_esd_f = 0
       if item == "flack_str":
         #display = ""
         flack_val = value.split("(")[0]
         flack_esd = value.split("(")[1].strip(")")
+
+        if len(flack_val.strip("-")) == 1:
+          if len(flack_esd) == 1:
+            flack_esd_f = float("%s" %flack_esd)
 
         if len(flack_val.strip("-")) == 3:
           if len(flack_esd) == 1:

@@ -123,7 +123,7 @@ class ButtonMaker(ImageTools):
       for state in states:
         font_colour = self.params.html.font_colour.rgb
         bgcolour = d.get('bgcolour%s' %state, bgcolour)
-        if txt in ["report", "solve", "refine"]:
+        if txt in ["report", "solve", "draw", "refine"]:
           font_colour = d.get("fontcolour%s" %state, font_colour)
           #font_colour = self.adjust_colour(font_colour, luminosity=0.7)
         image = Image.new('RGBA', size, bgcolour)
@@ -174,7 +174,7 @@ class ButtonMaker(ImageTools):
                                         lowerCase=lowerCase,
                                         valign=valign,
                                       )
-        if txt not in ["report", "solve", "refine"]:
+        if txt not in ["report", "solve", "draw", "refine"]:
           if state == "on":
             outline_colour = self.params.html.highlight_colour.rgb
         draw.rectangle((0, 0, image.size[0]-1, image.size[1]-1), outline=outline_colour)
@@ -2095,10 +2095,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
   def make_cbtn_items(self, font_name = 'Vera'):
     new_style = True
     if new_style:
-      buttons = ['Solve', 'Refine', 'Report']
+      buttons = ['Solve', 'Refine', 'Draw', 'Report']
+      n = len(buttons)
       states = ['on', 'off', 'inactive', 'highlight', 'hover', 'hoveron']
-      width = int(round((self.available_width + OV.GetParam('gui.html.table_firstcol_width'))/3,0)) - 5
-      width = int(round((self.width/3)-(self.width/130)))
+      width = int(round((self.width - 2*n)/n))
+
       cut = width - OV.GetParam('gui.timage.cbtn.vline')
       if cut > width:
         cut = width - 1
