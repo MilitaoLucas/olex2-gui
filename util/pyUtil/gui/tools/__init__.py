@@ -191,7 +191,7 @@ def inject_into_tool(tool, t, where,befaf='before'):
   OlexVFS.write_to_olex('%s%s' %(OV.BaseDir(), tool), u, txt)
 
 
-def add_tool_to_index(scope="", link="", path="", location="", before="", filetype="", level="h2"):
+def add_tool_to_index(scope="", link="", path="", location="", before="", filetype="", level="h2", state="2"):
   import OlexVFS
   if not OV.HasGUI:
     return
@@ -212,7 +212,20 @@ def add_tool_to_index(scope="", link="", path="", location="", before="", filety
     before = OV.GetParam('%s.gui.before' %scope)
   if not location:
     return
-  txt = OlexVFS.read_from_olex('%s/etc/gui/blocks/index-%s.htm' %(OV.BaseDir(), location))
+
+  _ = r"%s/%s" %(OV.BaseDir(), location)
+  if os.path.exists(_):
+    file_to_write_to = _
+  else:
+    file_to_write_to = r'%s/etc/gui/blocks/index-%s.htm' %(OV.BaseDir().replace(r"//","/"), location)
+  if not os.path.exists(file_to_write_to):
+    print "This location does not exist: %s" %file_to_write_to
+    file_to_write_to = '%s/etc/gui/blocks/index-%s.htm' %(OV.BaseDir().replace(r"//","/"), "tools")
+    before = "top"
+
+  file_to_write_to = file_to_write_to.replace(r"//","/")
+  txt = OlexVFS.read_from_olex(file_to_write_to)
+
 
   if not filetype:
     t = r'''
@@ -224,28 +237,34 @@ def add_tool_to_index(scope="", link="", path="", location="", before="", filety
 
   index_text = ""
   if t not in txt:
-    if before not in txt or before.lower() == "end":
+    if before.lower() == "top":
+      u = "%s\n%s" %(t, txt)
+    elif before not in txt or before.lower() == "end":
       u = "%s\n%s" %(txt, t)
     else:
       u = ""
       for line in txt.strip().split("\r\n"):
         if not line:
           continue
+        li = line
+        if r"<!-- #include" not in line: li = ""
         if "%s-%s" %(location, before) in line:
-          u += "%s\n%s\n" %(t, line)
+          u += "%s\n%s\n" %(t, li)
+        elif before in line:
+          u += "%s\n%s\n" %(t, li)
         else:
           u += "%s\n" %line.strip()
-    OlexVFS.write_to_olex('%s/etc/gui/blocks/index-%s.htm' %(OV.BaseDir(), location), u, 0)
+    OlexVFS.write_to_olex(file_to_write_to, u, 0)
     index_text = u
   else:
     if run:
-      OlexVFS.write_to_olex('%s/etc/gui/blocks/index-%s.htm' %(OV.BaseDir(), location), t, 0)
+      OlexVFS.write_to_olex(file_to_write_to, t, 0)
     else:
       if not index_text:
         text = txt
       else:
         text = index_text
-      OlexVFS.write_to_olex('%s/etc/gui/blocks/index-%s.htm' %(OV.BaseDir(), location), text, 0)
+      OlexVFS.write_to_olex(file_to_write_to, text, 0)
 
   make_single_gui_image(link, img_type=level)
 
@@ -280,9 +299,9 @@ def checkPlaton():
 OV.registerFunction(checkPlaton,True,'gui.tools')
 
 
-def MakeElementButtonsFromFormula(action='mode'):
+def MakeElementButtonsFromFormula(action='mode', scope = ""):
   ## Produces buttons for all atom types currently present in the model. Action 'mode' will go to 'change atom type' mode, action 'select' will simply select the atom types in question
-  
+
   t1 = time.time()
 
   from PilTools import TI
@@ -346,6 +365,7 @@ def MakeElementButtonsFromFormula(action='mode'):
 
     d = {}
     d.setdefault('name', name)
+    d.setdefault('scope', scope)
     d.setdefault('img_name', img_name)
     d.setdefault('symbol', symbol)
     d.setdefault('cmds', command)
@@ -363,7 +383,7 @@ def MakeElementButtonsFromFormula(action='mode'):
 
     html += '''
 <input
-  name=IMG_BTN-ELEMENT%(symbol)s
+  name=IMG_BTN-ELEMENT%(symbol)s@%(scope)s
   type="button"
   image="up=%(img_name)soff.png,down=%(img_name)son.png,hover=%(img_name)shover.png"
   hint="%(target)s"
@@ -376,7 +396,7 @@ def MakeElementButtonsFromFormula(action='mode'):
     d['namelower'] = 'Table'
     html +=  '''
   <input
-    name=IMG_BTN-ELEMENT...
+    name=IMG_BTN-ELEMENT...%(scope)s
     type="button"
     image="up=%(namelower)soff.png,down=%(namelower)son.png,hover=%(namelower)shover.png"
     hint="Chose Element from the periodic table"
@@ -436,9 +456,9 @@ def ElementButtonSelectStates(symbol):
     sel_element = symbol
     sel_list.append(symbol)
     onoff = "on"
-  if OV.IsControl(control):    
+  if OV.IsControl(control):
     OV.SetImage(control,"up=%s%s.png,hover=%son.png" %(img_name,onoff, img_name))
-    
+
 if haveGUI:
   OV.registerFunction(ElementButtonStates)
   OV.registerFunction(ElementButtonSelectStates)

@@ -137,7 +137,7 @@ def MakeBitmapImage(notify_listener=True, output_folder=None):
     ImageListener.OnChange()
 OV.registerFunction(MakeBitmapImage,False,'gui.images')
 
-def GetPRImageInstructions():
+def MakePovRayImage():
   filefull, filename, fileext = GetImageFilename(image_type = "PR")
   if not filefull:
     return
@@ -147,9 +147,9 @@ def GetPRImageInstructions():
   OV.Cursor()
   from gui import ImageListener
   ImageListener.OnChange()
-OV.registerFunction(GetPRImageInstructions,False,'gui.images')
+OV.registerFunction(MakePovRayImage,False,'gui.images')
 
-def GetPSImageInstructions(notify_listener=True, output_folder=None):
+def MakePostScriptImage(notify_listener=True, output_folder=None):
   filefull, filename, fileext = GetImageFilename(image_type = "PS")
   if output_folder:
     filefull = "%s/%s.%s" %(output_folder, filename, fileext)
@@ -194,7 +194,7 @@ def GetPSImageInstructions(notify_listener=True, output_folder=None):
   if notify_listener:
     from gui import ImageListener
     ImageListener.OnChange()
-OV.registerFunction(GetPSImageInstructions,False,'gui.images')
+OV.registerFunction(MakePostScriptImage,False,'gui.images')
 
 def GetImageFilename(image_type):
   filename = OV.GetParam('snum.image.name')

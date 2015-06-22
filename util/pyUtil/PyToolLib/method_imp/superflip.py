@@ -123,7 +123,7 @@ class Method_Superflip(Method_solution):
                                       olx.GetVar('settings.superflip.resolution.low')))
 
     v =  olx.GetVar('settings.superflip.data.normalize')
-    input.append('normalise %s' %v)
+    input.append('normalize %s' %v)
     if v == 'local':
       input.append('nresshells %s' %olx.GetVar('settings.superflip.data.nresshells'))
 
