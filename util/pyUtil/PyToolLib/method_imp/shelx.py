@@ -82,7 +82,9 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
       f_mask, f_model = None, None
       if not OV.HKLSrc() == modified_hkl_path:
-        OV.SetParam('snum.masks.original_hklsrc', OV.HKLSrc())
+        olx.SetVar('snum.masks.original_hklsrc', OV.HKLSrc())
+      else:
+        olx.SetVar('snum.masks.original_hklsrc', '')
       if OV.GetParam("snum.refinement.recompute_mask_before_refinement"):
         if OV.HKLSrc() == modified_hkl_path:
           raise Exception("You can't calculate a mask on an already masked file!")
@@ -121,9 +123,9 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
     Method_refinement.pre_refinement(self, RunPrgObject)
 
   def post_refinement(self, RunPrgObject):
-    before_mask = OV.GetParam('snum.masks.original_hklsrc')
+    before_mask = olx.GetVar('snum.masks.original_hklsrc', '')
     if before_mask:
-      OV.SetParam('snum.masks.original_hklsrc',None)
+      olx.UnsetVar('snum.masks.original_hklsrc')
       if OV.HKLSrc() != before_mask:
         OV.HKLSrc(before_mask)
         OV.File()
