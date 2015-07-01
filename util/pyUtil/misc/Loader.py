@@ -104,8 +104,8 @@ def getModule(name, email=None):
       txt = txt.replace("Unknown/invalid module name","<font color='%s'><b>Unknown or invalid module %s</b></font>" %(red,name))
       txt = txt.replace("The activation link is sent. Check your e-mail. Once the download is activated, install the module again","<font color='%s'>Please check your e-mail to activate the <b>%s</b> module and then press the <b>Install</b> button above.</font>" %(green,name))
 
-      if "expired" in txt:
-        expired_pop(name)
+      #if "expired" in txt:
+        #expired_pop(name)
 
       olex.writeImage(info_file_name, txt, 0)
 
@@ -173,6 +173,8 @@ def update_or_install(d):
 
 
 def loadAll():
+  global available_modules
+  getAvailableModules_()
   m_dir = getModulesDir()
   if not os.path.exists(m_dir):
     return
@@ -183,7 +185,18 @@ def loadAll():
     if ".update" in d:
       l.append(d)
       all_m.remove(d)
-  all_m = l + all_m
+
+  for d in all_m:
+    if available_modules:
+      found = False
+      for m in available_modules:
+        if m.folder_name == d:
+          found = True
+      if not found:
+        all_m.remove(d)
+        found = False
+        print "Module %s was found, but it is incompatible with this version of Olex2"%d
+    all_m = l + all_m
 
   for d in all_m:
     if ".update" in d:
@@ -207,7 +220,7 @@ def loadAll():
       global failed_modules
       failed_modules[d] = str(e)
       print("Error occurred while loading module: %s" %d)
-      if "expired" in repr(e):
+      if "expired" in e.message:
         expired_pop(d)
       if debug:
         sys.stdout.formatExceptionInfo()
@@ -257,8 +270,9 @@ def updateKey(module):
         print("Module %s has been successfully loaded." %(module.name))
         return True
     except Exception, e:
-      print("Error while reloading '%s': %s" %(module.name, e))
-#      expired_pop(module.name)
+      if "is expired" in e.message:
+        msg = "The key has expired."
+      print("Error while reloading '%s': %s" %(module.name, msg))
 
       return False
   except Exception, e:
@@ -305,11 +319,11 @@ def ask_for_licence_extension(name, token, tag, institute, confession_status=Fal
   d['name'] = name
   d['tag'] = tag
   d['token'] = token
-
+  d['email'] = OV.GetParam('user.email')
 
   t = "mailto:enquiries@olexsys.org?"+\
   "subject=Licence extension for: %(name)s&"+\
-  "body=Reference: %(token)s, Olex2 tag: %(tag)s@@"
+  "body=Reference: %(token)s, Olex2 tag: %(tag)s, e-mail: %(email)s@@"
 
   t += "@@"
 
@@ -345,11 +359,12 @@ def ask_for_licence_extension(name, token, tag, institute, confession_status=Fal
   olx.Shell(t)
 
   if confession_no_thanks == 'true':
-    getModulesDir()
-    _ = os.sep.join([getModulesDir(), "%s.update" %name])
-    with open(_,'w') as wFile:
-      wFile.write("")
-
+    mdir = getModulesDir() + os.sep + name
+    try:
+      shutil.rmtree(mdir)
+      print "%s has been deleted" %name
+    except:
+      print "Could not delte %s. Is this folder open?" %name
 
 def getCurrentPlatformString():
   import platform
