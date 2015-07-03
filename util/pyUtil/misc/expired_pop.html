@@ -122,13 +122,21 @@ $-
         <tr>
           <td align='right'>
           </td>
-          <td align='left' colspan='2'>
+        <td align='right' colspan='1'>
+            <input
+            type="button"
+            value="Next Time"
+            height="25"
+            onclick="html.EndModal('~popup_name~', 0)">
+        </td>
+          <td align='left' colspan='1'>
             <input
             type="button"
             value="OK"
             height="25"
             onclick="spy.plugins.ask_for_licence_extension(%(name)s,%(token)s,%(tag)s,html.GetValue('~popup_name~.institute'),html.GetState('~popup_name~.confession_status'),html.GetState('~popup_name~.confession_structures'),html.GetState('~popup_name~.confession_keep_evaluating'),html.GetState('~popup_name~.confession_have_licence'),html.GetState('~popup_name~.confession_no_thanks'))>>html.EndModal('~popup_name~', 0)">
         </td>
+
       </tr>
 
 
