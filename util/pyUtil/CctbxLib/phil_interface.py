@@ -100,20 +100,57 @@ def parse(
 #
 # Main interface to Phil
 #
+def _merge_objects(self, object):
+  for obj in object.objects:
+    matching = None
+    for tobj in self.objects:
+      if tobj.name == obj.name:
+        matching = tobj
+        break
+    if matching:
+      try:
+        if matching.is_scope:
+          matching._merge_objects(obj)
+        else:
+          tobj.words = obj.words
+      except Exception, e:
+        print e
+    else:
+      if obj.is_scope:
+        obj.change_primary_parent_scope(self)
+      else:
+        obj.primary_parent_scope = self
+      self.objects.append(obj)
+      print obj.name
+
+def _replace_object(self, object):
+  for i, tobj in enumerate(self.objects):
+    if tobj.name == object.name:
+      self.objects[i] = object
+      return
+
+
 class phil_handler(index):
 
-  def adopt_phil(self, phil_object=None, phil_string=None, phil_file=None):
+  def adopt_phil(self, phil_object=None, phil_string=None, phil_file=None, merge_definitions=True):
     assert [phil_object, phil_string, phil_file].count(None) == 2
     if phil_string:
       phil_object = self.parse(phil_string, process_includes=True)
     elif phil_file:
       phil_object = libtbx.phil.parse(file_name=phil_file, process_includes=True)
     if phil_object:
-      for object in phil_object.objects:
-        self.master_phil.adopt(object)
+      if not merge_definitions:
+        for object in phil_object.objects:
+          self.master_phil.adopt(object)
+          self.master_phil.unique()
+      else:
+        libtbx.phil.scope._merge_objects = _merge_objects
+        self.master_phil._merge_objects(phil_object)
       self.working_phil = self.master_phil.fetch(sources=[self.working_phil])
       self.rebuild_index()
       self.params = self.working_phil.extract()
+
+
 
   def save_param_file(self, file_name, scope_name=None, sources=[], diff_only=False):
     if scope_name is not None:
@@ -199,13 +236,14 @@ class phil_handler(index):
     self.reset_scope(scope_name)
 
   def merge_phil(self, phil_object=None, phil_string=None, phil_file=None,
-                 overwrite_params=True, rebuild_index=True):
+                 overwrite_params=True, rebuild_index=True, merge_definitions=True):
     #XXX don't override this function?
     if phil_string:
       phil_object = self.parse(phil_string)
     elif phil_file:
       phil_object = self.parse(file_name=phil_file)
     if phil_object:
+      #self.master_phil.merge_names(
       old_phil = self.working_phil
       new_phil = self.master_phil.fetch(sources=[old_phil, phil_object])
       if new_phil is not None:

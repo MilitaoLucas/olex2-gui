@@ -1,6 +1,6 @@
 <!-- FIRST ROW: Name of Image -->
 <!-- #include tool-row gui\blocks\tool-row.htm;name='IMAGE_SETTINGS_ROW_4';1 -->
-  <td name=IMAGE_BITMAP_NAME width='37%' align='right'>
+  <td name=IMAGE_BITMAP_NAME width='35%' align='right'>
     <font size="$GetVar('HtmlFontSizeMedium')" color="#555555">
     <input
       type="text"
@@ -15,11 +15,11 @@
     </font>
   </td>
 
-  <td width='25%'>
-     &nbsp;If <b>NAME</b> exists, then:
+  <td width='20%' align='right'>
+     If <b>NAME</b> exists
   </td>
 
-  <td width="15%" align='left'>
+  <td width="17%" align='left'>
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input name="IMAGE_SETTINGS_AUTOINCREMENT_NAME"
        type="combo"
@@ -27,14 +27,19 @@
        width="100%"
        bgcolor="GetVar('HtmlInputBgColour')"
        value="spy.GetParam('snum.image.if_file_exists')"
-       items="'Ask<-ask;Increment<-increment;Replace<-replace'"
+       items="'ask;increment;replace'"
        onchange="spy.SetParam('snum.image.if_file_exists', html.GetValue('~name~'))"
        readonly="True"
       >
     </font>
   </td>
 
-  <td width="20%">
+  <td width='10%' align='right'>
+     Default
+  </td>
+
+
+  <td width="10%">
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input name="IMAGE_TYPE"
        type="combo"
@@ -42,7 +47,7 @@
        width="100%"
        bgcolor="GetVar('HtmlInputBgColour')"
        value="spy.GetParam('user.image.img_type')"
-       items="Bitmap;PostScript;PovRay"
+       items="bitmap;postscript;povray"
        onchange="spy.SetParam('user.image.img_type', html.GetValue('~name~'))"
        readonly="True"
       >
@@ -54,12 +59,14 @@
 <!-- SECOND ROW: Deal with labels-->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='LABEL_SETTINGS';help_ext=Images;1 -->
-  <td name=HREF_MAKE_LABEL>
+  <td name=HREF_MAKE_LABEL width='35%' align='left'>
     <a href="label -type=spy.GetParam('user.image.label_symm_type') -symm=spy.GetParam('user.image.label_symm')"><b>%images_add_labels_to_atoms%</b></a>&nbsp;|
     <a href="label $*-H,Q -type=spy.GetParam('user.image.label_symm_type') -symm=spy.GetParam('user.image.label_symm')">%images_add_labels_to_non_H_atoms%</a>
   </td>
-  <td>%Symm%</td>
-  <td name=IMAGE_SETTINGS_LABEL_SYMM width='20%'>
+
+  <td width='20%' align='right'>Symmetry label </td>
+
+  <td name=IMAGE_SETTINGS_LABEL_SYMM width='17%'>
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="combo"
@@ -77,9 +84,9 @@
     </font>
   </td>
 
+  <td width='10%' align='right'>%Style%</td>
 
-  <td>%Style%</td>
-  <td name=IMAGE_SETTINGS_LABEL_TYPE width='20%'>
+  <td name=IMAGE_SETTINGS_LABEL_TYPE width='10%' align='right'>
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="combo"

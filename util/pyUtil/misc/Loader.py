@@ -195,7 +195,8 @@ def loadAll():
       if not found:
         all_m.remove(d)
         found = False
-        print "Module %s was found, but it is incompatible with this version of Olex2"%d
+        if d not in ["etoken",]:
+          print "Module %s was found, but it is incompatible with this version of Olex2"%d
     all_m = l + all_m
 
   for d in all_m:
