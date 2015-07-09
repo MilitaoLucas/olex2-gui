@@ -1199,11 +1199,11 @@ user
     }
   }
   image{
-    img_type = 'png'
+    img_type = 'bitmap'
       .type= str
-    label_symm = none
+    label_symm = 'none'
       .type=str
-    label_symm_type = default
+    label_symm_type = 'default'
       .type=str
     trim_border_colour = #dedede
       .type = str
