@@ -2790,7 +2790,8 @@ class HealthOfStructure():
       bg_colour = None
       flack_esd_f = 0
       if item == "flack_str":
-        #display = ""
+        if "(" not in str(value):
+          value = str(value) + "()"
         flack_val = value.split("(")[0]
         flack_esd = value.split("(")[1].strip(")")
 
@@ -2823,8 +2824,13 @@ class HealthOfStructure():
         else:
           _ = 0.63
 
-        bg_val = self.get_bg_colour('flack_val', flack_val)
+        if len(flack_esd) == 0:
+          bg_val = "#000000"
+          bg_esd = "#000000"
+        else:
+          bg_val = self.get_bg_colour('flack_val', flack_val)
         bg_colour = (bg_val,_,bg_esd)
+
 
       if not bg_colour:
         bg_colour = self.get_bg_colour(item, value)
