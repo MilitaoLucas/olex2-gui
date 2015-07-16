@@ -22,5 +22,6 @@
   readonly="#readonly"
   onchangealways="#onchangealways"
   manage="#manage"
+  onreturn="#onreturn"
 >
 </font>
