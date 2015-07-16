@@ -174,7 +174,6 @@ def update_or_install(d):
 
 def loadAll():
   global available_modules
-  getAvailableModules_()
   m_dir = getModulesDir()
   if not os.path.exists(m_dir):
     return
@@ -185,19 +184,6 @@ def loadAll():
     if ".update" in d:
       l.append(d)
       all_m.remove(d)
-
-  for d in all_m:
-    if available_modules:
-      found = False
-      for m in available_modules:
-        if m.folder_name == d:
-          found = True
-      if not found:
-        all_m.remove(d)
-        found = False
-        if d not in ["etoken",]:
-          print "Module %s was found, but it is incompatible with this version of Olex2"%d
-    all_m = l + all_m
 
   for d in all_m:
     if ".update" in d:
@@ -221,8 +207,6 @@ def loadAll():
       global failed_modules
       failed_modules[d] = str(e)
       print("Error occurred while loading module: %s" %d)
-      if "expired" in e.message:
-        expired_pop(d)
       if debug:
         sys.stdout.formatExceptionInfo()
   getAvailableModules() #thread
@@ -282,11 +266,14 @@ def updateKey(module):
       print("Error while updating the key for '%s': '%s'" %(module.name, e))
     return False
 
-def expired_pop(name):
+def expired_pop(m):
   import OlexVFS
 
+  name = m.folder_name
+  full_name = m.name
   d = {}
   d['name'] = name
+  d['full_name'] = full_name
   d['email'] = OV.GetParam('user.email')
   d['token'] = _plgl.createAuthenticationToken()
   d['tag'] = OV.GetTag()
@@ -295,7 +282,7 @@ def expired_pop(name):
   t = open(_,'r').read()%d
 
   pop_name = "sorry-%s"%name
-  htm = "sorry.htm"
+  htm = "sorry-%s.htm"%name
   OlexVFS.write_to_olex(htm, t)
 
   width = 800
@@ -425,6 +412,7 @@ def getAvailableModules_():
           if debug:
             sys.stdout.formatExceptionInfo()
           pass
+    queue_pop = []
     m_dir = getModulesDir()
     for m in available_modules:
       md = "%s%s%s" %(m_dir, os.sep, m.folder_name)
@@ -442,12 +430,15 @@ def getAvailableModules_():
               m.action = 1
             else:
               m.action = 3 #reinstall
+              queue_pop.append(m)
           else:
             m.action = 3
         elif d < m.release_date:
           m.action = 2
       else:
         m.action = 1
+    for m in queue_pop:
+      expired_pop(m)
   except Exception, e:
     if debug:
       sys.stdout.formatExceptionInfo()
