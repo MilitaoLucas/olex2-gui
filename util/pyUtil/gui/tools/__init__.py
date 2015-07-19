@@ -68,7 +68,10 @@ class FolderView:
     r = OV.GetParam('user.folder_view_root')
     if not r:
       r = "."
-    f = olx.ChooseDir('Select folder', '%s' %r)
+    try:
+      f = olx.ChooseDir('Select folder', '%s' %r)
+    except RuntimeError:
+      f = None
     if f:
       self.root = FolderView.node(f)
       self.root.expand(mask=set(mask.split(';')))
