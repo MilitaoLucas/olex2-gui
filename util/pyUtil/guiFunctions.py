@@ -18,6 +18,19 @@ class GuiFunctions(object):
     return retStr
 
   def Alert(self, title, text, buttons=None, tickboxText=None):
+    '''
+    Opens an alert window. 
+    :param title: Window title in the title bar
+    :param text: Text content to display in the window.
+    :param buttons: String with different possible flags. 
+                    Flags can be mixed like'YNHR': 
+    'YNCO' yes,no,cancel,ok  -> Text on the buttons
+    'XHEIQ-icon' exclamation,hand,eror,information,question 
+                  --> Icon beside the window text. 
+    'R-show' checkbox --> show a checkbox
+    :param tickboxText: checkbox message
+    :return retStr: returns blooean values of the buttons.
+    '''
     try:
       retStr = olx.Alert(title, text, buttons, tickboxText)
     except Exception, ex:
