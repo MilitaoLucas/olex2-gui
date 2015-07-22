@@ -114,12 +114,16 @@ def getModule(name, email=None):
       with open(_,'wb') as wFile:
         wFile.write(f)
 
+      if not update_or_install(name):
+        msg = "<font color='%s'>Module <b>%s</b> update failed.</font><br>" %(red, name)
+        olex.writeImage(info_file_name, msg, 0)
+        return
+
       msg = "<font color='%s'>Module <b>%s</b> has been successfully installed or updated.</font><br>" %(green, name)
       msg += "<br>This module will expire at some point. If that happens, please contact us for further information."
       msg += "<br><font color='%s'><b><Restart Olex2 to load the new extension module.</b></font>" %orange
       olex.writeImage(info_file_name, msg, 0)
 
-      update_or_install(name)
 
       global available_modules
       if current_module:
@@ -179,16 +183,13 @@ def loadAll():
     return
   all_m = os.listdir(m_dir)
 
-  l = []
-  for d in all_m:
-    if ".update" in d:
-      l.append(d)
-      all_m.remove(d)
-
   for d in all_m:
     if ".update" in d:
       if not update_or_install(d):
         continue
+      all_m.remove(d)
+
+  for d in all_m:
     dl = "%s%s%s" %(m_dir, os.sep, d)
     if not os.path.isdir(dl):continue
     key = "%s%skey" %(dl, os.sep)
