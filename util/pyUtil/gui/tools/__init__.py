@@ -289,16 +289,27 @@ def checkErrLogFile():
 OV.registerFunction(checkErrLogFile,True,'gui.tools')
 
 def checkPlaton():
+  retVal = '''
+  <a href='platon' target='Open Platon'>
+  <zimg border='0' src='toolbar-platon.png'></a>
+  '''
+  try:
+    if olx.GetVar("HavePlaton") == "True":
+      return retVal
+    else:
+      return ""
+  except:
+    pass
   prg_name = "platon"
   if sys.platform[:3] == "win":
     prg_name += ".exe"
   have_platon = olx.file.Which(prg_name)
   if have_platon:
-    return '''
-    <a href='platon' target='Open Platon'>
-    <zimg border='0' src='toolbar-platon.png'></a>
-    '''
-  else: return ""
+    olx.SetVar("HavePlaton", True)
+    return retVal
+  else:
+    olx.SetVar("HavePlaton", False)
+    return ""
 OV.registerFunction(checkPlaton,True,'gui.tools')
 
 
