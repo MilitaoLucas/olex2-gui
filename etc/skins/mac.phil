@@ -1,6 +1,6 @@
 gui {
 
-  htmlpanelwidth = 520
+  htmlpanelwidth = 550
   skin {
     name = "MAC"
     logo_name = None
@@ -20,20 +20,20 @@ gui {
   }
 
   timage {
- 
+
     tab {
       height = 32
     }
-    
+
     cbtn{
       height = 24
     }
-    
+
     button {
       height = 22
       top = 3
     }
- 
+
     h1 {
       height = 26
       font_size = 16
