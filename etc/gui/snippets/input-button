@@ -3,6 +3,7 @@
 #name=
 #fit=false
 #flat=false
+#disabled=false
 
 <font size="$GetVar('HtmlFontSizeControls')">
 
@@ -14,6 +15,7 @@
   onclick="#onclick"
   fit="#fit"
   flat="#flat"
+  disabled="#disabled"
 >
 
 </font>
