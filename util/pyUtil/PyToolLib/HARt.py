@@ -83,7 +83,7 @@ class HARt(object):
     "settings.tonto.HAR.basis.name": ("def2-SVP", "basis"),
     "settings.tonto.HAR.method": ("rks", "scf"),
     "settings.tonto.HAR.hydrogens": ("positions+Uaniso",),
-    "settings.tonto.HAR.extinction.refine": ("True", "extinction"),
+    "settings.tonto.HAR.extinction.refine": ("False", "extinction"),
     "settings.tonto.HAR.convergence.value": ("0.0001", "dtol"),
     "settings.tonto.HAR.cluster.radius": ("8", "cluster-radius"),
     "settings.tonto.HAR.intensity_threshold.value": ("3", "fos"),

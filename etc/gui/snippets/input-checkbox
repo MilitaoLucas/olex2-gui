@@ -6,6 +6,7 @@
 #right=false
 #bgcolor=GetVar('HtmlInputBgColour')
 #fgcolor=GetVar(HtmlFontColour)
+#disabled=false
 
 <font size="$GetVar('HtmlFontSizeControls')">
 <input
@@ -22,5 +23,6 @@
   onuncheck="#onuncheck"
   right="#right"
   manage="#managed"
+  disabled="#disabled"
 >
 </font>
