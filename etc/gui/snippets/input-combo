@@ -4,6 +4,7 @@
 #manage=false
 #onchangealways=false
 #setdefault=false
+#disabled=false
 
 <font size="$GetVar('HtmlFontSizeControls')">
 <input
@@ -17,6 +18,7 @@
   value="#value"
   setdefault="#setdefault"
   items="#items"
+  disabled="#disabled"
   onchange="#onchange"
   onleave="#onleave"
   readonly="#readonly"

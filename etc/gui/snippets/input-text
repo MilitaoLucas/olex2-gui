@@ -4,6 +4,7 @@
 #manage=false
 #password=false
 #multiline=false
+#disabled=false
 
 <font size="$GetVar('HtmlFontSizeControls')">
 <input
@@ -20,5 +21,6 @@
   manage="#manage"
   password="#password"
   multiline="#multiline"
+  disabled="#disabled"
 >
 </font>
