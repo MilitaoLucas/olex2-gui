@@ -1,0 +1,81 @@
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='HAR';help_ext=HAR;1 -->
+<td>Tonto HAR refinement interface</td>
+</tr><tr><td>
+ <table cellpadding="1" cellspacing="2" width="100%">
+   <tr><td width="20%">
+       Basis
+     </td>
+     <td width="30%">$+
+       html.Snippet("gui/snippets/input-combo", "name=tonto_har_basis",
+        "items=spy.tonto.getBasisListStr()",
+        "value=GetVar('settings.tonto.HAR.basis.name')",
+        "onchange=SetVar('settings.tonto.HAR.basis.name', html.GetValue('~name~'))")
+      $-</td>
+     <td width="20%">
+       Method
+     </td>
+     <td>$+
+       html.Snippet("gui/snippets/input-combo", "name=tonto_method",
+        "items='Restricted Hartee-Fock<-rhf;Restricted Kohn-Sham<-rks'",
+        "value=GetVar('settings.tonto.HAR.method')",
+        "onchange=SetVar('settings.tonto.HAR.method', html.GetValue('~name~'))")
+      $-</td>
+   </tr>
+   <tr><td width="20%">
+       Hydrogen refinement
+     </td>
+     <td>$+
+       html.Snippet("gui/snippets/input-combo", "name=tonto_har_h_refinement",
+        "items='positions only;positions+Uiso;positions+Uaniso'",
+        "value=GetVar('settings.tonto.HAR.hydrogens')",
+        "onchange=SetVar('settings.tonto.HAR.hydrogens', html.GetValue('~name~'))")
+      $-</td>
+     <td width="20%">
+       Optimise extinction
+     </td>
+     <td>$+
+       html.Snippet("gui/snippets/input-checkbox", "name=tonto_har_optimise_extinction",
+        "checked=GetVar('settings.tonto.HAR.extinction.refine')",
+        "disabled=true",
+        "onclick=SetVar('settings.tonto.HAR.extinction.refine', html.GetState('~name~'))")
+      $-</td>
+   </tr>
+   <tr><td width="20%">
+       Convergence
+     </td>
+     <td>$+
+       html.Snippet("gui/snippets/input-text", "name=tonto_har_convergence_val",
+        "value=GetVar('settings.tonto.HAR.convergence.value')",
+        "onchange=SetVar('settings.tonto.HAR.convergence.value', html.GetValue('~name~'))")
+      $-</td>
+     <td width="20%">
+       Cluster radius
+     </td>
+     <td>$+
+       html.Snippet("gui/snippets/input-text", "name=tonto_har_cluster_radius",
+        "value=GetVar('settings.tonto.HAR.cluster.radius')",
+        "onchange=SetVar('settings.tonto.HAR.cluster.radius', html.GetValue('~name~'))")
+      $-</td>
+   </tr>
+   <tr><td width="20%">
+       I/sig threshold
+     </td>
+     <td>$+
+       html.Snippet("gui/snippets/input-text", "name=tonto_i_threshold",
+        "value=GetVar('settings.tonto.HAR.intensity_threshold.value')",
+        "onchange=SetVar('settings.tonto.HAR.intensity_threshold.value', html.GetValue('~name~'))")
+      $-</td>
+     <td>&nbsp;</td>
+     <td>$+
+       html.Snippet("gui/snippets/input-button", "name=tonto_har_run",
+        "value=Launch",
+        "onclick=spy.tonto.HAR.launch()")
+     $-</td>
+   </tr>
+ </table>
+</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+$spy.tonto.HAR.list_jobs()
+<!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
