@@ -53,9 +53,8 @@ class Job(object):
     olx.File(model_file_name)
 
     self.save()
-    basis_dir = os.path.join(os.path.split(self.parent.exe)[0], "basis_sets").replace("\\", "/")
     args = [self.parent.exe, model_file_name,
-            "-basis-dir", basis_dir,
+            "-basis-dir", self.parent.basis_dir,
              "-shelx-f2", olx.HKLSrc()]
     #print ' '.join(args)
     for k,v in HARt.options.iteritems():
@@ -98,6 +97,18 @@ class HARt(object):
       self.exe = olx.file.Which("har.exe")
     else:
       self.exe = olx.file.Which("har")
+    if os.path.exists(self.exe):
+      self.basis_dir = os.path.join(os.path.split(self.exe)[0], "basis_sets").replace("\\", "/")
+      if os.path.exists(self.basis_dir):
+        basis_list = os.listdir(self.basis_dir)
+        basis_list.sort()
+        self.basis_list_str = ';'.join(basis_list)
+      else:
+        self.basis_list_str = None
+    else:
+      self.basis_list_str = None
+      self.basis_dir = None
+
     self.set_defaults()
 
   def set_defaults(self):
@@ -105,9 +116,15 @@ class HARt(object):
       olx.SetVar(k, v[0])
 
   def launch(self):
+    if not self.basis_list_str:
+      print("Could not locate usable HARt installation")
+      return
     j = Job(self, olx.FileName())
     j.launch()
 
+  def getBasisListStr(self):
+    return self.basis_list_str
+  
   def list_jobs(self):
     import time
     self.jobs = []
@@ -140,3 +157,4 @@ OV.registerFunction(x.available, False, "tonto.HAR")
 OV.registerFunction(x.list_jobs, False, "tonto.HAR")
 OV.registerFunction(x.view_all, False, "tonto.HAR")
 OV.registerFunction(x.launch, False, "tonto.HAR")
+OV.registerFunction(x.getBasisListStr, False, "tonto.HAR")
