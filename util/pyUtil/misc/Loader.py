@@ -20,6 +20,7 @@ OV = OlexFunctions()
 green = OV.GetParam('gui.green')
 orange = OV.GetParam('gui.orange')
 red = OV.GetParam('gui.red')
+at = None
 
 class Module:
   def __init__(self, name, folder_name, description, url, release_date, action):
@@ -35,6 +36,39 @@ def getModulesDir():
   from olexFunctions import OlexFunctions
   base = olex.f(OV.GetParam('user.modules.location'))
   return "%s%smodules" %(base, os.sep)
+
+def getAuthenticationToken():
+  global at
+  if at:
+    return at
+  tfn = os.path.join(olx.app.SharedDir(), "ext.token")
+  if os.path.exists(tfn):
+    with open(tfn, "r") as tf:
+      at = tf.readline().strip()
+  else:
+    ats = _plgl.createAuthenticationTokens()
+    if ';' in ats:
+      try:
+        import HttpTools
+        url_base = OV.GetParam('user.modules.provider_url')
+        url = url_base + "match"
+        values = {
+          'at': ats
+        }
+        f = HttpTools.make_url_call(url, values, http_timeout=30)
+        f = f.read().strip()
+        if f:
+          if "Error" not in f:
+            at = f
+      except Exception, e:
+        print("Failed to match the authentication tokens %s" %str(e))
+    else:
+      at = ats
+    if at:
+      with open(tfn, "wb") as tf:
+        tf.write(at)
+    else:
+      raise Exception("Could not retrieve authentication token")
 
 def getModule(name, email=None):
   import HttpTools
@@ -62,11 +96,10 @@ def getModule(name, email=None):
       f = HttpTools.make_url_call(url, values, http_timeout=30)
       f = f.read().strip()
       if "Error" in f:
-        olex.writeImage(info_file_name, "<font color='%s'><b>Failed to register e-mail '%s': %s</b></font>" %red  %(email, f), 0)
+        olex.writeImage(info_file_name, "<font color='%s'><b>Failed to register e-mail '%s': %s</b></font>" %(red, email, f), 0)
         return False
-      efn = open(etoken_fn, "wb")
-      efn.write(f)
-      efn.close()
+      with open(etoken_fn, "wb") as efn:
+        efn.write(f)
       etoken = f
     except Exception, e:
       msg = '''
@@ -91,7 +124,7 @@ def getModule(name, email=None):
     url = url_base + "get"
     values = {
       'name': name,
-      'at': _plgl.createAuthenticationToken(),
+      'at': getAuthenticationToken(),
       'et': etoken,
       'ref': OV.GetParam("user.modules.reference", ""),
       't' : OV.GetTag()
@@ -162,7 +195,7 @@ def update_or_install(d):
       zp = ZipFile(update_zip)
       zp.extractall(path=m_dir)
       zp.close()
-      print "Module %s has been updated" %d
+      print "Module %s has been installed/updated" %d
       retVal = True
     except:
       print "Module %s is no longer present" %d
@@ -241,7 +274,7 @@ def updateKey(module):
     url = OV.GetParam('user.modules.provider_url') + "update"
     values = {
       'n': module.folder_name,
-      'at': _plgl.createAuthenticationToken(),
+      'at': getAuthenticationToken(),
       'et': etoken
     }
     f = HttpTools.make_url_call(url, values, http_timeout=30)
@@ -276,7 +309,7 @@ def expired_pop(m):
   d['name'] = name
   d['full_name'] = full_name
   d['email'] = OV.GetParam('user.email')
-  d['token'] = _plgl.createAuthenticationToken()
+  d['token'] = getAuthenticationToken()
   d['tag'] = OV.GetTag()
 
   _ = os.sep.join([OV.BaseDir(), "util", "pyUtil", "misc", "expired_pop.html"])
@@ -520,7 +553,7 @@ def getInfo():
     t = "<a href='shell(mailto:enquiries@olexsys.org?"+\
     "subject=Licence extension for: %s&"+\
     "body=Customer reference: %s, Olex2 tag: %s)'>OlexSys Ltd</a>"
-    t = t %(current_module.name, _plgl.createAuthenticationToken(), OV.GetTag())
+    t = t %(current_module.name, getAuthenticationToken(), OV.GetTag())
     t.replace(' ', '%20')
     preambula = """<font color='%s'>This module has <b>expired</b></font>,
 please either re-install it or contact %s to extend the licence.<br>""" %(red, t)
