@@ -252,14 +252,11 @@ href='spy.gui.report.publication.remove_cif_from_merge_list(%s)>>html.Update'>
 
   def remove_cif_from_merge_list(cif_p):
     l = OV.GetParam('snum.report.merge_these_cifs', [])
-    _ = ("", cif_p)
-    for item in _:
-      if item in l:
-        idx = l.index(item)
-        if idx != -1:
-          del l[idx]
+    idx = l.index(cif_p)
+    if idx != -1:
+      del l[idx]
     if not l:
-      l = []
+      l = ""
     OV.SetParam('snum.report.merge_these_cifs', l)
 
   def AddTemplateToMergeList(self, value=""):
