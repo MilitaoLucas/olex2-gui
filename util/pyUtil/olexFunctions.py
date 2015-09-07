@@ -162,10 +162,7 @@ class OlexFunctions(inheritFunctions):
       if isinstance(value, basestring):
         value = value.strip()
         if value == '': value = '?'
-        elif '\n' in value and value[0] != ';':
-          data_block[key] = ";%s\n;" %value
-        else:
-          data_block[key] = value
+        data_block[key] = value
       else:
         data_block[key] = value
     user_modified = self.GetParam('snum.metacif.user_modified')
