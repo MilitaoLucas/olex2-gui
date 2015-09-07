@@ -60,6 +60,8 @@ def getAuthenticationToken():
         if f:
           if "Error" not in f:
             at = f
+        else:
+          at = ats.split(";")[-1]
       except Exception, e:
         print("Failed to match the authentication tokens %s" %str(e))
     else:
