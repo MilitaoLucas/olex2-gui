@@ -643,7 +643,7 @@ def hasDisorder():
       return True
 OV.registerFunction(hasDisorder,False,'gui.tools')
 
-def make_disorder_quicktools():
+def make_disorder_quicktools(scope='main'):
   import olexex
   parts = set(olexex.OlexRefinementModel().disorder_parts())
 
@@ -661,7 +661,7 @@ def make_disorder_quicktools():
   <input
     type='checkbox'
     bgcolor="GetVar('HtmlTableBgColour')"
-    name='KEEP_UNIQUE'
+    name='KEEP_UNIQUE@%s'
     checked="spy.GetParam('user.keep_unique')"
     oncheck="spy.SetParam('user.keep_unique','true')>>uniq"
     onuncheck="spy.SetParam('user.keep_unique','false')"
@@ -669,7 +669,7 @@ def make_disorder_quicktools():
     onclick=""
     value=''
   >
-  </font>'''
+  </font>'''%scope
 
 
   txt = r'''
@@ -695,7 +695,7 @@ def make_disorder_quicktools():
     type='combo'
     width='100%%'
     height="$GetVar('HtmlInputHeight')"
-    name='set_label_content_disorder'
+    name='set_label_content_disorder@%s'
     value='Labels'
     items="Occupancy<-o;Chem Occ.<-co;PART No<-p;Link-Code<-v;Labels<-l"
     bgcolor="$GetVar('HtmlInputBgColour')"
@@ -704,7 +704,7 @@ def make_disorder_quicktools():
   >
   </font>
   </td>
-  ''' %(parts_display, checkbox)
+  ''' %(parts_display, checkbox, scope)
   return txt
 OV.registerFunction(make_disorder_quicktools,False,'gui.tools')
 
