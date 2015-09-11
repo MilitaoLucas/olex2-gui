@@ -71,6 +71,7 @@ def getAuthenticationToken():
         tf.write(at)
     else:
       raise Exception("Could not retrieve authentication token")
+  return at
 
 def getModule(name, email=None):
   import HttpTools
