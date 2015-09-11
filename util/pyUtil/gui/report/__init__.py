@@ -416,13 +416,13 @@ def get_crystal_image(p=None,n=4,get_path_only=True):
   if get_path_only:
     if current_image:
       if '.vzs' in current_image:
-        splitbit = '.vzs/'
-        directory = current_image.split(splitbit)[0] + splitbit.replace("/", "")
+        splitbit = '.vzs'
+        directory = current_image.split(splitbit)[0] + splitbit
         if not images_zip_name == OV.FileName():
           import zipfile
           images_zip = zipfile.ZipFile(directory, "r")
           images_zip_name = OV.FileName()
-        filename = current_image.split(splitbit)[1]
+        filename = current_image.split(splitbit)[1][1:]
         content = images_zip.read(filename)
         OlexVFS.write_to_olex("crystal_image.jpg", content)
         return "crystal_image.jpg"
@@ -435,8 +435,8 @@ def get_crystal_image(p=None,n=4,get_path_only=True):
 
   if '.vzs' in current_image:
     have_zip = True
-    splitbit = '.vzs/'
-    directory = current_image.split(splitbit)[0] + splitbit.replace("/", "")
+    splitbit = '.vzs'
+    directory = current_image.split(splitbit)[0] + splitbit
     if not os.path.exists(directory):
       print "The path %s should have existed. It does not" %directory
       return None
