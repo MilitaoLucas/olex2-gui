@@ -81,7 +81,7 @@ class PlatonWrapper:
       print 'The Platon executable could not be located, aborting'
       return
     chk_def = os.getenv("CHECKDEF")
-    if not chk_def or not os.path.exists(chk_def):
+    if not chk_def or not os.path.isfile(chk_def):
       chk_def = os.path.join(os.path.dirname(exe_name), "check.def")
       if not os.path.exists(chk_def):
         print "Could not locate check.def, try setting the CHECKDEF system variable" +\
