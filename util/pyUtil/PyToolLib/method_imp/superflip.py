@@ -154,7 +154,14 @@ class Method_Superflip(Method_solution):
     input.append('fullcell no')
     input.append('numberofatoms guess')
     input.append('dataformat shelx')
-    input.append('fbegin %s' %olx.file.GetName(olx.HKLSrc()))
+    self.tmp_hkl = os.path.join(olx.FilePath(), "superflip.hkl")
+    self.to_cleanup.append(self.tmp_hkl)
+    from cctbx_olex_adapter import OlexCctbxAdapter
+    from iotbx import shelx
+    cctbx_adaptor = OlexCctbxAdapter()
+    with open(self.tmp_hkl, "wb") as x:
+      shelx.hklf.miller_array_export_as_shelx_hklf(cctbx_adaptor.reflections.f_sq_obs, x)
+    input.append('fbegin %s' %olx.file.GetName(self.tmp_hkl))
     input.append('endf')
     self.input_file_name = os.path.normpath("%s.sfi" %(self.file_name))
     try:
