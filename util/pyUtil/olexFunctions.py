@@ -430,7 +430,7 @@ class OlexFunctions(inheritFunctions):
   def htmlPanelWidth(self):
     olex.m("HtmlPanelWidth")
 
-  def reloadStructureAtreap(self, path, file, fader=True, sg_changed = False):
+  def reloadStructureAtreap(self, path, file, fader=True, sg_changed = False, update_gui=True):
     if not self.HasGUI():
       olex.m("@reap \"%s\"" %(r"%s/%s.res" %(path, file)))
       return
@@ -444,7 +444,8 @@ class OlexFunctions(inheritFunctions):
           olex.m("atreap_no_fader -b \"%s\"" %(r"%s/%s.res" %(path, file)))
         import gui
         olex.m('spy.run_skin sNumTitle')
-        olx.html.Update()
+        if update_gui:
+          olx.html.Update()
 
 
     except Exception, ex:

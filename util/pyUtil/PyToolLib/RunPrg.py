@@ -175,11 +175,13 @@ class RunPrg(ArgumentParser):
     #olex.m("spy.run_skin sNumTitle")
     if 'olex2' not in self.program.name:
       self.doFileResInsMagic()
-      reflections = OV.HKLSrc() #BEWARE DRAGONS
       olx.Freeze(True)
-      OV.reloadStructureAtreap(self.filePath, self.curr_file)
+      OV.reloadStructureAtreap(self.filePath, self.curr_file, update_gui=False)
       olx.Freeze(False)
-      OV.HKLSrc(reflections)
+      # XT changes the HKL file - so it *will* match the file name
+      if 'xt' not in self.program.name.lower():
+        OV.HKLSrc(self.hkl_src)
+      olx.html.Update()
     else:
       if self.broadcast_mode:
         self.doBroadcast()
@@ -281,7 +283,7 @@ class RunSolutionPrg(RunPrg):
       else:
         print 'Please provide the structure composition'
         self.terminate = True
-    if "smtbx" not in self.program.name:
+    if "olex2" not in self.program.name:
       self.shelx = self.which_shelx(self.program)
     args = self.method.pre_solution(self)
     if args:
