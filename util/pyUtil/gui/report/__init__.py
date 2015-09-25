@@ -29,40 +29,16 @@ def BGColorForValue(value):
 
 class publication:
 
-  def OnContactAuthorChange(self, person_box_name):
+  def OnPersonChange(self, box, param=None):
     import userDictionaries
     from  gui.db import userdb
-    pid = int(olx.html.GetValue(person_box_name))
-    if pid < 0:
-      person = userdb.db.Manage()
-      update = True
-    else:
-      person = userDictionaries.people.get_person(pid)
-      update = False
+    #pid = int(olx.html.GetValue(box))
+    person = userdb.db.Manage()
     if person:
       rv = person.get_display_name()
-      if update:
-        olx.html.SetItems(person_box_name, userDictionaries.people.getListPeople())
-      olx.html.SetValue(person_box_name, rv)
-      OV.set_cif_item("_publ_contact_author_name", rv)
-      return rv
-    return None
-
-  def OnPersonChange(self, box):
-    import userDictionaries
-    from  gui.db import userdb
-    pid = int(olx.html.GetValue(box))
-    if pid < 0:
-      person = userdb.db.Manage()
-      update = True
-    else:
-      person = userDictionaries.people.get_person(pid)
-      update = False
-    if person:
-      rv = person.get_display_name()
-      if update:
-        olx.html.SetItems(box, userDictionaries.people.getListPeople())
       olx.html.SetValue(box, rv)
+      if param:
+        OV.SetParam(param, person.id)
       return rv
     return None
 
@@ -187,7 +163,6 @@ href='spy.gui.report.publication.remove_cif_from_merge_list(%s)>>html.Update'>
 
 
 pub = publication()
-olex.registerFunction(pub.OnContactAuthorChange, False, "gui.report.publication")
 olex.registerFunction(pub.OnPersonChange, False, "gui.report.publication")
 olex.registerFunction(pub.OnPersonInfoChange, False, "gui.report.publication")
 olex.registerFunction(pub.OnAddNameToAuthorList, False, "gui.report.publication")

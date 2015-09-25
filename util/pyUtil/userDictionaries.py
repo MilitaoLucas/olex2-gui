@@ -303,6 +303,8 @@ class Persons:
         retStr = person.get_affiliation().get_address()
       else:
         retStr = person.__dict__[item]
+    elif item == "displayname":
+      retStr = person.get_display_name()
     return retStr
 
   def findPersonId(self, name, email=None):
