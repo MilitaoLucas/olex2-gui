@@ -76,7 +76,7 @@ class person:
     self.lastrowid = cursor.lastrowid
     return self
 
-  def get_display_name(self, format="acta"):
+  def get_display_name(self, format="acta", affiliation=False):
     if format == "acta":
       surname = self.lastname
       first_initial = self.firstname
@@ -90,6 +90,15 @@ class person:
       display = "%s %s %s" %(self.firstname, self.middlename, self.lastname)
       while "  " in display:
         display = display.replace("  ", " ")
+    if affiliation:
+      st = self.get_affiliation()
+      if st.name:
+        if st.department:
+          display = "%s / %s-%s" %(display, st.name, st.department)
+        else:
+          display = "%s / %s" %(display, st.name)
+      else:
+        display = "%s / unknown" %display
     return display
 
   def as_dict(self):
@@ -224,7 +233,7 @@ class Affiliations:
     affiliations = self
     OV.registerFunction(self.getListAffiliations)
 
-  def getListAffiliations(self, add_new=True):
+  def getListAffiliations(self):
     cursor = DBConnection().conn.cursor()
     sql = "SELECT * FROM affiliation"
     cursor.execute(sql)
@@ -235,8 +244,6 @@ class Affiliations:
         retVal += "%s [%s]<-%s;" %(affiliation[1], affiliation[2], affiliation[0])
       else:
         retVal += "%s<-%s;" %(affiliation[1], affiliation[0])
-    if add_new:
-      retVal += "++ ADD NEW ++<--1"
     return retVal
 
   def get_site(self, id):
@@ -266,21 +273,23 @@ class Persons:
     DBConnection().conn.cursor().execute(sql)
     DBConnection().conn.commit()
 
-  def getListPeople(self, site_id = None, add_new=True):
+  def getListPeople(self, site_id = None, edit=True):
     cursor = DBConnection().conn.cursor()
-    if not site_id:
+    if not site_id or site_id == "None":
       sql = "SELECT * FROM person"
+      show_affiliation = False
     else:
+      show_affiliation = False
       sql = "SELECT * FROM person where affiliationid=%s" %site_id
     cursor.execute(sql)
     all_persons = cursor.fetchall()
     retVal_l = []
     for p in all_persons:
-      v = "%s<-%s" %(person(p).get_display_name(), p[0])
+      v = "%s<-%s" %(person(p).get_display_name(affiliation=show_affiliation), p[0])
       retVal_l.append(v)
     retVal_l.sort()
-    if add_new:
-      retVal_l.append("++ ADD NEW ++<--1")
+    if edit and edit != "False":
+      retVal_l.append("Edit...<--1")
     retVal = ";".join(retVal_l)
     return retVal
 

@@ -30,10 +30,6 @@ class GeneratedGuiMaker(object):
     hint="Remove author from paper"
     self.delete = GI.get_action_button_html('delete', onclick, hint)
 
-    onclick="spy.gui.report.publication.EditPersonByName(SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s)" %number
-    hint="Edit author"
-    self.edit = GI.get_action_button_html('edit', onclick, hint)
-
     onclick="spy.gui.report.publication.EditPersonById(SET_SNUM_METACIF_%s)"
     hint="Edit author"
     self.edit_subop = GI.get_action_button_html('edit', onclick, hint)
@@ -328,8 +324,8 @@ class GeneratedGuiMaker(object):
       if numberAuthors == 1:
         authorRow.setdefault('itemName','')
         authorRow.setdefault('field1',{'itemName':'%Author%'})
-        _ = "%s%s" %(self.delete, self.edit)
-        _ = _ %(i,i)
+        _ = "%s" %(self.delete)
+        _ = _ %(i)
         authorRow.setdefault('field2',{'itemName':_,
                                       'fieldALIGN':'right'})
 
@@ -337,23 +333,23 @@ class GeneratedGuiMaker(object):
         box = "SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s" %i
         authorRow.setdefault('itemName','')
         authorRow.setdefault('field1',{'itemName':'Authors</td><td>'})
-        _ = "%s%s%s" %(self.down, self.delete, self.edit)
-        _ = _%(i,i,i)
+        _ = "%s%s" %(self.down, self.delete)
+        _ = _%(i,i)
 
         authorRow.setdefault('field2',
                              {'itemName':_,
                               'fieldALIGN':'right'}
                              )
       elif i == numberAuthors:
-        _ = "%s%s%s" %(self.up, self.delete, self.edit)
-        _ = _%(i,i,i)
+        _ = "%s%s" %(self.up, self.delete)
+        _ = _%(i,i)
 
         authorRow.setdefault('itemName',_)
         authorRow.setdefault('fieldALIGN','right')
         authorRow['bgcolor'] = OV.GetParam('gui.html.input_bg_colour')
       else:
-        _ = "%s%s%s%s" %(self.up, self.down, self.delete, self.edit)
-        _ = _%(i,i,i,i)
+        _ = "%s%s%s" %(self.up, self.down, self.delete)
+        _ = _%(i,i,i)
 
         authorRow.setdefault('itemName',_)
         authorRow.setdefault('fieldALIGN','right')
