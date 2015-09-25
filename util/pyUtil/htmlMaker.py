@@ -291,22 +291,18 @@ class GeneratedGuiMaker(object):
     return htmlTools.makeHtmlTable(list)
 
   def publicationMetadataHtmlMaker(self, ):
-    items = userDictionaries.people.getListPeople()
-    onchange = "spy.gui.report.publication.OnContactAuthorChange('~name~')"
-
+    listAuthors = OV.GetParam('snum.metacif.publ_author_names')
     list = [
       {'varName':'_database_code_depnum_ccdc_archive',
        'itemName':'CCDC %Number%',
        },
       {'varName':'_publ_contact_author_name',
        'itemName':'%Contact% %Author%',
-       'items':items,
-       'readonly':'readonly',
-       'onchangealways': True,
-       'onchange': onchange,
+       'type': 'combo',
+       'items': listAuthors,
+       'onchange': "spy.set_cif_item('_publ_contact_author_name', html.GetValue('~name~'))",
        }]
 
-    listAuthors = OV.GetParam('snum.metacif.publ_author_names')
     if listAuthors is None:
       numberAuthors = 0
     else:
@@ -316,10 +312,10 @@ class GeneratedGuiMaker(object):
       authorRow = {
         'varName':'snum.metacif.publ_author_names',
         'ctrl_name':'SET_SNUM_METACIF_PUBL_AUTHOR_NAMES_%s' %i,
-        'readonly':'readonly',
         'value':"'%s'" %listAuthors.split(';')[i-1],
+        'readonly': 'true',
         'bgcolor':"'%s'" %OV.GetParam('gui.html.table_bg_colour'),
-        'onchange':""
+        'onclick':""
       }
       if numberAuthors == 1:
         authorRow.setdefault('itemName','')
@@ -364,10 +360,9 @@ class GeneratedGuiMaker(object):
       {'varName':'snum.metacif.publ_author_names',
        'ctrl_name':'ADD_PUBL_AUTHOR_NAME',
        'itemName':'%Add% %Author%',
-       'items': "'%s'" %userDictionaries.people.getListPeople(),
-       'onchangealways' : True,
-       'value':'?',
-       'onchange':"spy.gui.report.publication.OnAddNameToAuthorList('~name~')",
+       'type': 'button',
+       'value':'Add...',
+       'onclick':"spy.gui.report.publication.OnAddNameToAuthorList('~name~')",
        }
     )
 
