@@ -138,8 +138,9 @@ def makeHtmlInputBox(inputDictionary):
     'onchange':'',
     'onchangealways':'false',
     'onleave':'',
+    'onclick':'',
     'items':'',
-    'multiline':'',
+    'multiline':'false',
     'type':'text',
     'readonly':'',
     'manage':'',
@@ -154,7 +155,7 @@ def makeHtmlInputBox(inputDictionary):
 <font size="$GetVar('HtmlFontSizeControls')">
 <input
 type="%(type)s"
-%(multiline)s
+multiline=%(multiline)s
 width="%(width)s"
 height="%(height)s"
 name="%(ctrl_name)s"
@@ -165,7 +166,8 @@ valign="%(valign)s"
 onchange="%(onchange)s"
 onchangealways="%(onchangealways)s"
 onleave="%(onleave)s"
-%(readonly)s
+onclick="%(onclick)s"
+readonly=%(readonly)s
 bgcolor="%(bgcolor)s"
 >
 </font>
