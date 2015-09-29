@@ -27,10 +27,13 @@ class UsersDB:
     self.setPerson(None)
     self.setMessage()
     res = olx.html.ShowModal(self.pop_name)
+    if res == "1":
+      return self.person
+    return None
 
   def getSiteList(self):
     from userDictionaries import affiliations
-    return affiliations.getListAffiliations(add_new=False)
+    return affiliations.getListAffiliations()
 
   def setSite(self, t):
     if not t:
@@ -90,7 +93,7 @@ class UsersDB:
 
   def getPeopleList(self, t):
     from userDictionaries import persons
-    return persons.getListPeople(site_id=t, add_new=False)
+    return persons.getListPeople(site_id=t, edit=False)
 
   def setPerson(self, t):
     if not t:
