@@ -142,7 +142,7 @@ def makeHtmlInputBox(inputDictionary):
     'items':'',
     'multiline':'false',
     'type':'text',
-    'readonly':'',
+    'readonly':'false',
     'manage':'',
     'data':'',
     'label':'',
