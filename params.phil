@@ -1174,6 +1174,12 @@ user
     .type = strings
   }
 
+  atoms
+  {
+  style = matt.glds
+    .type = str
+  }
+
   auto_refine_after_anis = True
     .type = bool
   auto_compact = True
