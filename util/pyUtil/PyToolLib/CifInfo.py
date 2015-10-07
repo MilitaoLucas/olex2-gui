@@ -220,7 +220,7 @@ class CifTools(ArgumentParser):
     else:
       for size in exptl_crystal_sizes:
         value = self.cif_block.get(size)
-        if value is not None:
+        if value is not None and value != "?":
           dimensions.append(float(value))
     if dimensions:
       dimensions.sort()

@@ -1,61 +1,10 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='ATOM_STYLES';help_ext=Atom-Styles;1 -->
-  <td width='23%'>
-    <b>%Atoms%</b>:
-  <td width='46%'>
-    <a target="Set atom colours and styles" href="
-            Freeze(true)>>
-            @reap -b BaseDir()'/sample_data/Periodic Table/Periodic Table.cif' -b>>
-            sel -a>>
-            conn 0 0>>
-            matr 3>>
-            rota 2 90>>
-            Freeze(false)>>
-            ">%Edit Atom Styles in Periodic Table%</a>
-  </td>
-  <td width='10%'>
-    <b>%Style%</b>:
-  </td>
-  <td width='10%'>
-    $+
-    html.Snippet("gui/snippets/input-combo",
-    "name=LIST_STYLES",
-    "items=spy.gui.getFileListAsDropdownItems(BaseDir()/etc/styles, 'glds')",
-    "value=''",
-    "onchange=load style -c html.GetValue(~name~)>>telp 50",
-    "readonly=false",
-    )
-    $-
-  </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
+<!-- #include snippet-quick-atom-properties gui\snippets\snippet-quick-atom-properties.htm;scope=settings;1 -->
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='BOND_STYLES';help_ext=Bond-Styles;1 -->
-  <td width='23%'>
-    <b>%Bond Radius%</b>:
-  </td>
-  <td width='47%'>
-<!-- #include brad_slider gui\snippets\snippet-brad-slider.htm;1; -->
-  </td>
-  <td width='10%'>
-    <b>%Colour%</b>:
-  </td>
-  <td width='10'%>
-  $+
-    html.Snippet("gui/snippets/input-combo", 
-    "name=BOND_COLOUR_COMBO",
-    "manage=False",
-    "value=spy.gui.skin.get_colour_choice(user.bonds,value)",
-    "items=spy.gui.skin.get_colour_choice(user.bonds,items)",
-    "onreturn=spy.gui.skin.change_bond_colour(html.GetValue(~name~))",
-    "onchange=spy.gui.skin.change_bond_colour(html.GetValue(~name~))",
-    "onenter=html.SetValue(~name~, '')",    
-    "readonly=false",
-    )
-   $-
-</td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+<!-- #include snippet-quick-bond-properties gui\snippets\snippet-quick-bond-properties.htm;scope=settings;1 -->
+
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='BACKGROUND';help_ext=background;1 -->
 
