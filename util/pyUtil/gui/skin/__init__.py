@@ -123,6 +123,10 @@ def check_for_first_run():
     startup_skin = OV.GetParam('gui.skin.name', 'default')
     if check_os().upper() == 'MAC' and startup_skin == 'default':
       startup_skin = "mac"
+      try:
+        olx.html.SetBorders(8)
+      except:
+        print "Tried to set MAC borders, but failed!"
     _ = Skin()
     _.change_skin(startup_skin, internal_change=not first_run)
     return True
@@ -302,8 +306,7 @@ class Skin():
       t2 = t
 
     export_parameters()
-    from Analysis import HOS_instance
-    HOS_instance.make_HOS_html()
+    olex.m("spy.make_HOS()")
     olx.FlushFS()
 
 
