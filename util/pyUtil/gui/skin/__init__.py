@@ -452,6 +452,7 @@ def change_bond_colour(colour=None):
         pass
       OV.SetParam('user.bonds.colours', l)
     _ = "%s@@%s" %(c.replace(";","@"), colour)
+
     OV.SetParam('user.bonds.colour', colour)
     OV.SetParam('user.bonds.mask', 1)
     olex.m("mask bonds 1")

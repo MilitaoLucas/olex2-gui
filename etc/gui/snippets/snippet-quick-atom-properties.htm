@@ -1,21 +1,17 @@
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='ATOM_STYLES';help_ext=Atom-Styles;1 -->
-  <td width='23%'>
+  <td width='10%' align='left'>
     <b>%Atoms%</b>:
-  <td width='46%'>
-    <a target="Set atom colours and styles" href="
-            Freeze(true)>>
-            @reap -b BaseDir()'/sample_data/Periodic Table/Periodic Table.cif' -b>>
-            sel -a>>
-            conn 0 0>>
-            matr 3>>
-            rota 2 90>>
-            Freeze(false)>>
-            ">%Edit Atom Styles in Periodic Table%</a>
+  </td>
+  <td width='10%' align='right'>
+    Radius:
+  </td>
+  <td width='55%' align='left'>
+<!-- #include arad_slider gui\snippets\snippet-arad-slider.htm;1; -->
   </td>
   <td width='10%'>
     <b>%Style%</b>:
   </td>
-  <td width='10%'>
+  <td width='15%'>
     $+
     html.Snippet("gui/snippets/input-combo",
     "name=LIST_STYLES#scope",

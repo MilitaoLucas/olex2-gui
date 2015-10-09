@@ -643,28 +643,41 @@ def hasDisorder():
       return True
 OV.registerFunction(hasDisorder,False,'gui.tools')
 
+def sel_part(part,sel_bonds=True):
+  select = OV.GetParam('user.parts.select')
+  if not select:
+    return
+  else:
+    olex.m("sel part %s" %part)
+    if sel_bonds:
+      olex.m("sel bonds where xbond.a.selected==true||xbond.b.selected==true")
+OV.registerFunction(sel_part,False,'gui.tools')
+
 def make_disorder_quicktools(scope='main'):
   import olexex
   parts = set(olexex.OlexRefinementModel().disorder_parts())
-
+  select = OV.GetParam('user.parts.select')
   parts_display = ""
+  sel = ""
   for item in parts:
+    if select:
+      sel = ">>sel part %s" %item
     if item == 0:
       continue
     if item == 1 or item == 2:
-      parts_display += "<a href='ShowP 0 %s -v=spy.GetParam(user.keep_unique)'><b>PART %s</b></a> | " %(item, item)
+      parts_display += "<a href='ShowP 0 %s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%s)'><b>PART %s</b></a> | " %(item, item, item)
     else:
-      parts_display += "<a href='ShowP 0 %s -v=spy.GetParam(user.keep_unique)'><b>%s</b></a> | " %(item, item)
+      parts_display += "<a href='ShowP 0 %s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%s)'><b>%s</b></a> | " %(item, item, item)
 
-  checkbox = '''
+  checkbox_unique = '''
     <font size=$GetVar(HtmlFontSizeControls)>
   <input
     type='checkbox'
     bgcolor="GetVar('HtmlTableBgColour')"
     name='KEEP_UNIQUE@%s'
-    checked="spy.GetParam('user.keep_unique')"
-    oncheck="spy.SetParam('user.keep_unique','true')>>uniq"
-    onuncheck="spy.SetParam('user.keep_unique','false')"
+    checked="spy.GetParam('user.parts.keep_unique')"
+    oncheck="spy.SetParam('user.parts.keep_unique','true')>>uniq"
+    onuncheck="spy.SetParam('user.parts.keep_unique','false')"
     target="Keep showing single fragments when switching the PART view"
     onclick=""
     value=''
@@ -672,20 +685,44 @@ def make_disorder_quicktools(scope='main'):
   </font>'''%scope
 
 
+  checkbox_sel = '''
+    <font size=$GetVar(HtmlFontSizeControls)>
+  <input
+    type='checkbox'
+    bgcolor="GetVar('HtmlTableBgColour')"
+    name='SELECT_PARTS@%s'
+    checked="spy.GetParam('user.parts.select')"
+    oncheck="spy.SetParam('user.parts.select','true')"
+    onuncheck="spy.SetParam('user.parts.select','false')"
+    target="Auto-Select PARTS"
+    onclick=""
+    value=''
+  >
+  </font>'''%scope
+
+
   txt = r'''
-  <td width='25%%'>
+  <td width='23%%'>
     <b>Show PART 0 AND</b>
   </td>
-  <td width='45%%' align='left'>
+  <td width='38%%' align='left'>
   %s
     <a href='ShowP'><b>All</b></a>
+  </td>
+
+  <td width='4%%' align='right'>
+  Sel
+  </td>
+
+  <td width='4%%' align='right'>
+  %s
   </td>
 
   <td width='5%%' align='right'>
   Unique
   </td>
 
-  <td width='5%%' align='right'>
+  <td width='4%%' align='right'>
   %s
   </td>
 
@@ -704,7 +741,7 @@ def make_disorder_quicktools(scope='main'):
   >
   </font>
   </td>
-  ''' %(parts_display, checkbox, scope)
+  ''' %(parts_display, checkbox_sel, checkbox_unique, scope)
   return txt
 OV.registerFunction(make_disorder_quicktools,False,'gui.tools')
 
