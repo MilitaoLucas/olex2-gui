@@ -1120,8 +1120,13 @@ user
     .type = str
   report_label_style = 0
     .type = int
-  keep_unique = False
-    .type = bool
+
+  parts{
+    keep_unique = False
+      .type = bool
+    select = True
+      .type = bool
+  }
 
   diagnostics{
     pin_scopes = False
@@ -1178,6 +1183,8 @@ user
   {
   style = matt.glds
     .type = str
+  arad = 1
+    .type = float
   }
 
   auto_refine_after_anis = True
