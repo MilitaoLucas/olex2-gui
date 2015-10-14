@@ -2607,9 +2607,13 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
     elif item_type == "snumtitle":
       self.title_case = False
+      # this had been commented out in this style... it wasn't me... not sure why it was done. Any idea, Oleg?
       #=========================================================================
-      # if OV.FileExt() == "cif":
-      #  grad_colour = self.params.dark_green.rgb
+      if OV.FileExt() == "cif":
+        grad_colour = self.params.dark_green.rgb
+      if OV.FileFull().endswith(".oxm"):
+        grad_colour = self.params.orange.rgb
+        #font_colour = "#222222"
       #=========================================================================
 
     elif item_type == "small_button":
@@ -2795,7 +2799,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         else:
           counter += 1
       if cnt > 1:
-        txt += (' (+ %s)') %(counter - 1)
+        txt += (' (%s/%s)') %(current, counter - 1)
       font_colour = '#ffdf09'
 
     ## Actually print the text on the new image item.
