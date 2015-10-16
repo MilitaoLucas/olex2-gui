@@ -78,10 +78,10 @@ class GeneratedGuiMaker(object):
 
     list = (
       {'varName':'snum.report.diffractometer',
-       'readonly':'',
        'itemName':'%Diffractometer%',
        'items': "'%s'" %userDictionaries.localList.getListDiffractometers(),
        'onchange':"spy.addToLocalList(html.GetValue(~name~),diffractometers)>>html.update",
+       'readonly':False,
        },
     )
 
