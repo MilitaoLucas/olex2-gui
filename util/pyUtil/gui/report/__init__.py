@@ -357,6 +357,35 @@ def sort_images_with_integer_names(image_list, ending=None):
   l.sort(key=sorting_list)
   return l
 
+
+def remove_from_citation_list(item):
+  try:
+    current_refs = OV.get_cif_item('_publ_section_references', []).split('\n\n')
+    idx = current_refs.index(item)
+    if idx != -1:
+      del current_refs[idx]
+    if not current_refs:
+      l = ""
+    OV.set_cif_item('_publ_section_references','\n\n'.join(current_refs))
+  except Exception, err:
+    print "Error in 'report.remove_from_citation: %s" %err
+OV.registerFunction(remove_from_citation_list, False, "report")
+
+def add_to_citation_list(item):
+  try:
+    current_refs = OV.get_cif_item('_publ_section_references', []).split('\n\n')
+    if item in current_refs:
+      return
+    new_list = [item]
+    for item in current_refs:
+      new_list.append(item)
+    new_list.sort()
+    OV.set_cif_item('_publ_section_references','\n\n'.join(new_list))
+  except Exception, err:
+    print "Error in 'report.add_to_citation: %s" %err
+OV.registerFunction(add_to_citation_list, False, "report")
+
+
 olex.registerFunction(get_crystal_image, False, "report")
 olex.registerFunction(get_report_title, False, "report")
 olex.registerFunction(ResolvePrograms, False, "report")
