@@ -400,7 +400,7 @@ def get_colour_choice(scope,what):
     t = ""
     for item in OV.GetParam(variable='%s.colours'%scope, default='[@@elements]'):
       t += "%s;" %(item.split("@@")[1])
-    return t + "[Type new colour name]"
+    return t + "[new colour]"
 OV.registerFunction(get_colour_choice,False,'gui.skin')
 
 def define_new_bond_colour(name):
@@ -411,10 +411,10 @@ def change_bond_radius():
   rad = OV.GetParam('user.bonds.thickness')
   olex.m("brad %s" %rad)
 
-def change_bond_colour(colour=None):
+def change_bond_colour(scope, colour=None):
   import shlex
   if "[" in colour:
-    olx.html.SetValue('BOND_COLOUR_COMBO',"")
+    olx.html.SetValue('BOND_COLOUR_COMBO%s' %scope,"")
     return
   if "@" in colour:
     print "Please do not use the '@' character in colour names"

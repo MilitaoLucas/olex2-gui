@@ -14,6 +14,7 @@
             min="1"
             max="50"
             onchange="
+        >>pers
         >>spy.SetParam(user.atoms.arad,math.eval(html.GetValue(~name~)/100))
         >>html.SetValue(ARADValue,math.eval(html.GetValue(~name~)/100))
         >>arad math.eval(html.GetValue(~name~)/100)"
@@ -30,6 +31,7 @@
             fgcolor="$GetVar(HtmlFontColour)"
             value="spy.GetParam(user.atoms.arad,100)"
             onchange="
+        >>pers
         >>html.SetValue(SLIDE_ARAD,html.GetValue(~name~))
         >>spy.SetParam(user.atoms.arad,math.eval(html.GetValue(~name~)/100))
         >>arad math.eval(html.GetValue(~name~)/100)"
