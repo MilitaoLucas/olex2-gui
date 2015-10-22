@@ -108,6 +108,14 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
     return retVal
 
+  def HtmlGetValue(self, control, default = None):
+    # returns provided default value if control is empty
+    retVal = default
+    val = olx.html.GetValue(control)
+    if val:
+      retVal = val
+    return retVal
+
   def GetParam_as_string(self,variable, default=None):
     retVal = self.GetParam(variable, default)
     if retVal is None:
@@ -890,6 +898,7 @@ def GetParam(variable, default=None):
 OV = OlexFunctions()
 OV.registerFunction(GetParam)
 OV.registerFunction(OV.SetParam)
+OV.registerFunction(OV.HtmlGetValue)
 OV.registerFunction(OV.set_cif_item)
 OV.registerFunction(OV.get_cif_item)
 OV.registerFunction(OV.write_to_olex)
