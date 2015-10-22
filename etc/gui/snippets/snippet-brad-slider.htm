@@ -8,14 +8,14 @@
             name = "SLIDE_BRAD"
             width="100%"
             height="18"
-            value="math.eval(spy.GetParam(user.bonds.thickness,1)*10)"
+            value="math.eval(spy.GetParam(user.bonds.thickness,1)/10)"
             bgcolor="$GetVar(HtmlTableBgColour)"
             fgcolor="$GetVar(HtmlFontColour)"
-            min="1"
-            max="30"
+            min="0"
+            max="20"
             onchange="
-        >>spy.SetParam(user.bonds.thickness,math.eval(html.GetValue(~name~)/10))
-        >>html.SetValue(BRADValue,math.eval(html.GetValue(~name~)/10))
+        >>spy.SetParam(user.bonds.thickness,math.eval(html.GetValue(~name~)*10))
+        >>html.SetValue(BRADValue,math.eval(html.GetValue(~name~)*10))
         >>brad math.eval(html.GetValue(~name~)/10)"
           >
           </font>
@@ -31,8 +31,8 @@
             value="spy.GetParam(user.bonds.thickness,10)"
             onchange="
         >>html.SetValue(SLIDE_BRAD,html.GetValue(~name~))
-        >>spy.SetParam(user.bonds.thickness,math.eval(html.GetValue(~name~)/10))
-        >>brad math.eval(html.GetValue(~name~)/10)"
+        >>spy.SetParam(user.bonds.thickness,math.eval(html.GetValue(~name~)))
+        >>brad math.eval(html.GetValue(~name~)/100)"
             label=""
           >
           </font>
