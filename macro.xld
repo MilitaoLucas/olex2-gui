@@ -63,8 +63,7 @@
       <cmd11 "SetVar(SlideQPeaksVal,0)">
       <cmd12 "storeparam startup file.relativePath(filefull()) true">
       <cmd13 "spy.setAllMainToolbarTabButtons()">
-      <cmd14 "if File.Exists(strdir()/filename().vvd) then none
-       else 'spy.SetParam(snum.refinement.original_formula,xf.GetFormula())'">
+
       <cmd16 "spy.reset_file_in_OFS(twinning-result.htm)">
       <cmd17 "html.Update">
       <cnd18 "if html.IsPopup(history-tree) then spy.popout_history_tree()">
@@ -367,7 +366,7 @@
       <cmd3 "mask atoms 5">
       <cmd4 "mask bonds spy.GetParam('user.bonds.mask')">
       <cmd5 "if strcmp(%1,'-100') then 'telpv 50' else 'telpv %1'">
-      <cmd6 "brad spy.GetParam('user.bonds.thickness')">
+      <cmd6 "brad math.eval(spy.GetParam('user.bonds.thickness')/100)">
     >
   >
 >
@@ -385,7 +384,7 @@
       <cmd3 "mask atoms 5">
       <cmd4 "mask bonds spy.GetParam('user.bonds.mask')">
       <cmd5 "if strcmp(%1,'-100') then 'telpv 50' else 'telpv %1'">
-      <cmd6 "brad spy.GetParam('user.bonds.thickness')">
+      <cmd6 "brad math.eval(spy.GetParam('user.bonds.thickness')/100)">
     >
   >
 >
@@ -402,7 +401,7 @@
       <cmd2 "arad pers">
       <cmd3 "mask atoms 1">
       <cmd4 "mask bonds spy.GetParam('user.bonds.mask')">
-      <cmd6 "brad spy.GetParam('user.bonds.thickness')">
+      <cmd6 "brad math.eval(spy.GetParam('user.bonds.thickness')/100)">
     >
   >
 >
@@ -446,8 +445,7 @@
       <cmd1 "mask atoms 1">
       <cmd4 "mask bonds spy.GetParam('user.bonds.mask')">
       <cmd2 "brad math.eval(%1*10)">
-      <cmd2 "arad %1">
-
+      <cmd2 "arad math.eval(%1*1)">
   >
 >
 >
