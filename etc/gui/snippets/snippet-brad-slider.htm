@@ -11,7 +11,7 @@
             value="math.eval(spy.GetParam(user.bonds.thickness,1)/10)"
             bgcolor="$GetVar(HtmlTableBgColour)"
             fgcolor="$GetVar(HtmlFontColour)"
-            min="0"
+            min="1"
             max="20"
             onchange="
         >>spy.SetParam(user.bonds.thickness,math.eval(html.GetValue(~name~)*10))
@@ -28,11 +28,11 @@
             width="100%"
             bgcolor="$GetVar(HtmlTableBgColour)"
             fgcolor="$GetVar(HtmlFontColour)"
-            value="spy.GetParam(user.bonds.thickness,10)"
+            value="spy.GetParam(user.bonds.thickness,100)"
             onchange="
-        >>html.SetValue(SLIDE_BRAD,html.GetValue(~name~))
-        >>spy.SetParam(user.bonds.thickness,math.eval(html.GetValue(~name~)))
-        >>brad math.eval(html.GetValue(~name~)/100)"
+        >>spy.SetParam(user.bonds.thickness,math.eval(spy.htmlGetValue(~name~,1)*1))
+        >>html.SetValue(SLIDE_BRAD,math.eval(spy.GetParam(user.bonds.thickness)/10))
+        >>brad math.eval(spy.HtmlGetValue(~name~,1)/100)"
             label=""
           >
           </font>
