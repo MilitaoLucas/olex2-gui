@@ -1,40 +1,40 @@
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr>
-        <td align='left' name=ARAD_SLIDER width="85%">
+        <td align='left' name=AZOOM_SLIDER width="85%">
           <font size='$GetVar(HtmlFontSizeControls)'>
           <input
             type="slider"
             align='right'
-            name = "SLIDE_ARAD"
+            name = "SLIDE_AZOOM"
             width="100%"
             height="18"
-            value="math.eval(spy.GetParam(user.atoms.arad,1)*100)"
+            value="math.eval(spy.GetParam(user.atoms.azoom,1)/10)"
             bgcolor="$GetVar(HtmlTableBgColour)"
             fgcolor="$GetVar(HtmlFontColour)"
-            min="1"
-            max="50"
+            min="0"
+            max="20"
             onchange="
         >>pers
-        >>spy.SetParam(user.atoms.arad,math.eval(html.GetValue(~name~)/100))
-        >>html.SetValue(ARADValue,math.eval(html.GetValue(~name~)/100))
-        >>arad math.eval(html.GetValue(~name~)/100)"
+        >>spy.SetParam(user.atoms.azoom,math.eval(html.GetValue(~name~)*10))
+        >>html.SetValue(AZOOMValue,math.eval(html.GetValue(~name~)*10))
+        >>azoom math.eval(html.GetValue(~name~)*10)"
           >
           </font>
         </td>
-        <td name=ARAD_VALUE align='right' width="15%">
+        <td name=AZOOM_VALUE align='right' width="15%">
           <font size='$GetVar(HtmlFontSizeControls)'>
           <input
             type="text"
-            name = "ARADValue"
+            name = "AZOOMValue"
             width="100%"
             bgcolor="$GetVar(HtmlTableBgColour)"
             fgcolor="$GetVar(HtmlFontColour)"
-            value="spy.GetParam(user.atoms.arad,100)"
+            value="spy.GetParam(user.atoms.azoom,100)"
             onchange="
         >>pers
-        >>html.SetValue(SLIDE_ARAD,html.GetValue(~name~))
-        >>spy.SetParam(user.atoms.arad,math.eval(html.GetValue(~name~)/100))
-        >>arad math.eval(html.GetValue(~name~)/100)"
+        >>spy.SetParam(user.atoms.azoom,math.eval(html.GetValue(~name~)*10))
+        >>html.SetValue(AZOOMValue,math.eval(html.GetValue(~name~)*10))
+        >>azoom math.eval(html.GetValue(~name~)/10)"
             label=""
           >
           </font>
