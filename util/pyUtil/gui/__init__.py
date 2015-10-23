@@ -167,6 +167,20 @@ class ImageListener_:
 ImageListener = ImageListener_()
 
 
+def IsMouseLocked(which=None):
+  if which:
+    l = [which]
+  else:
+    l = ["translation", "rotation", "zooming"]
+
+  for which in l:
+    _ = olx.mouse.IsEnabled(which)
+    if _ == "false":
+      return False
+  return True
+olex.registerFunction(IsMouseLocked, False, "gui")
+
+
 def do_sort():
   args = []
   args.append('+%s%s%s%s' %(OV.GetParam("user.sorting.cat1", ''),
