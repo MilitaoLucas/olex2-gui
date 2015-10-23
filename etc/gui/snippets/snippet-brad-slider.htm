@@ -29,10 +29,7 @@
             bgcolor="$GetVar(HtmlTableBgColour)"
             fgcolor="$GetVar(HtmlFontColour)"
             value="spy.GetParam(user.bonds.thickness,100)"
-            onchange="
-        >>spy.SetParam(user.bonds.thickness,math.eval(spy.htmlGetValue(~name~,1)*1))
-        >>html.SetValue(SLIDE_BRAD,math.eval(spy.GetParam(user.bonds.thickness)/10))
-        >>brad math.eval(spy.HtmlGetValue(~name~,1)/100)"
+            onchange="spy.set_bond_thicknes(~name~,100))"
             label=""
           >
           </font>
