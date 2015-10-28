@@ -16,7 +16,6 @@
       name = "MOUSE_LOCK#scope"
       fgcolor="GetVar('HtmlFontColour')"
       bgcolor="GetVar('HtmlTableBgColour')"
-      checked="spy.gui.IsMouseLocked()"
       onclick="mouse.lock html.GetState(~name~)>>
         html.SetState(MOUSE_LOCK_ZOOMING#scope,html.GetState(~name~))
         html.SetState(MOUSE_LOCK_ROTATION#scope,html.GetState(~name~))
@@ -37,9 +36,8 @@
       name = "MOUSE_LOCK_ZOOMING#scope"
       fgcolor="GetVar('HtmlFontColour')"
       bgcolor="GetVar('HtmlTableBgColour')"
-      checked="spy.gui.IsMouseLocked(zooming)"
-      oncheck="mouse.disable zooming"
-      onuncheck="mouse.enable zooming>>html.setstate(MOUSE_LOCK#scope,FALSE)"
+      checked="not mouse.IsEnabled(zooming)"
+      onclick="html.setstate(MOUSE_LOCK#scope,spy.gui.IsMouseLocked('zooming',html.GetState(~name~)))"
     >
     </font>
   </td>
@@ -55,10 +53,8 @@
       name = "MOUSE_LOCK_ROTATION#scope"
       fgcolor="GetVar('HtmlFontColour')"
       bgcolor="GetVar('HtmlTableBgColour')"
-      checked="spy.gui.IsMouseLocked(rotation)"
-      oncheck="mouse.disable rotation"
-      onuncheck="mouse.enable rotation>>html.setstate(MOUSE_LOCK#scope,FALSE)""
-      manage
+      checked="not mouse.IsEnabled(rotation)"
+      onclick="html.setstate(MOUSE_LOCK#scope,spy.gui.IsMouseLocked('rotation',html.GetState(~name~)))"
     >
     </font>
   </td>
@@ -72,10 +68,8 @@
       name = "MOUSE_LOCK_TRANSLATION#scope"
       fgcolor="GetVar('HtmlFontColour')"
       bgcolor="GetVar('HtmlTableBgColour')"
-      checked="spy.gui.IsMouseLocked(translation)"
-      oncheck="mouse.disable translation"
-      onuncheck="mouse.enable translation>>html.setstate(MOUSE_LOCK#scope,FALSE)"
-      manage
+      checked="not mouse.IsEnabled(translation)"
+      onclick="html.setstate(MOUSE_LOCK#scope,spy.gui.IsMouseLocked('translation',html.GetState(~name~)))"
     >
     </font>
   </td>

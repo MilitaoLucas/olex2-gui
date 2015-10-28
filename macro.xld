@@ -366,7 +366,7 @@
       <cmd3 "mask atoms 5">
       <cmd4 "mask bonds spy.GetParam('user.bonds.mask')">
       <cmd5 "if strcmp(%1,'-100') then 'telpv 50' else 'telpv %1'">
-      <cmd6 "brad math.eval(spy.GetParam('user.bonds.thickness')/100)">
+      <cmd6 "brad math.eval(spy.GetParam('user.bonds.bzoom')/100)">
     >
   >
 >
@@ -384,7 +384,7 @@
       <cmd3 "mask atoms 5">
       <cmd4 "mask bonds spy.GetParam('user.bonds.mask')">
       <cmd5 "if strcmp(%1,'-100') then 'telpv 50' else 'telpv %1'">
-      <cmd6 "brad math.eval(spy.GetParam('user.bonds.thickness')/100)">
+      <cmd6 "brad math.eval(spy.GetParam('user.bonds.bzoom')/100)">
     >
   >
 >
@@ -401,7 +401,7 @@
       <cmd2 "arad pers">
       <cmd3 "mask atoms 1">
       <cmd4 "mask bonds spy.GetParam('user.bonds.mask')">
-      <cmd6 "brad math.eval(spy.GetParam('user.bonds.thickness')/100)">
+      <cmd6 "brad math.eval(spy.GetParam('user.bonds.bzoom')/100)">
     >
   >
 >
@@ -693,7 +693,7 @@
     <cmd
       <cmd1 "load style basedir()/etc/styles/default.glds">
       <cmd2 "load scene basedir()/etc/styles/default.glps">
-      <cmd3 "spy.SetParam(user.bonds.thickness,1)">
+      <cmd3 "spy.SetParam(user.bonds.bzoom,80)">
       <cmd3 "spy.SetParam(user.bonds.mask,48)">
       <cmd3 "spy.SetParam(user.bonds.colour,elements)">
       <cmd3 "telp 50">
