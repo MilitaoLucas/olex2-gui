@@ -38,6 +38,7 @@ contact you in the case of new releases or features update.
       "value=spy.plugins.gui.getCurrentModuleName()",
       "items=spy.plugins.gui.getModuleList()",
       "onchange=spy.plugins.gui.update(html.GetValue(~name~))",
+      "onreturn=html.call(~name~.onchange)",
       "readonly=false")
   $-</td>
   <td width='50%'>

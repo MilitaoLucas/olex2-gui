@@ -1120,8 +1120,13 @@ user
     .type = str
   report_label_style = 0
     .type = int
-  keep_unique = False
-    .type = bool
+
+  parts{
+    keep_unique = False
+      .type = bool
+    select = True
+      .type = bool
+  }
 
   diagnostics{
     pin_scopes = False
@@ -1166,12 +1171,20 @@ user
   {
   mask = 48
     .type = int
-  thickness = 1
-    .type = float
+  bzoom = 100
+    .type = int
   colour = elements
     .type = str
   colours = @@elements 5@4278223103@4278255615@@orange '5@4282071867@4286611584@@dark grey'
     .type = strings
+  }
+
+  atoms
+  {
+  style = matt.glds
+    .type = str
+  azoom = 100
+    .type = int
   }
 
   auto_refine_after_anis = True

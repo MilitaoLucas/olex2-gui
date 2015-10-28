@@ -304,7 +304,8 @@ def OnStructureLoaded(previous):
     import History
     History.hist.loadHistory()
   LoadStructureParams()
-
+#  import gui.skin
+#  gui.skin.change_bond_colour('onstructureloaded')
 OV.registerFunction(OnStructureLoaded)
 
 def SaveUserParams():

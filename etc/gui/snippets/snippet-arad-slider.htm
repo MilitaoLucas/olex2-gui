@@ -1,0 +1,43 @@
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr>
+        <td align='left' name=AZOOM_SLIDER width="85%">
+          <font size='$GetVar(HtmlFontSizeControls)'>
+          <input
+            type="slider"
+            align='right'
+            name = "SLIDE_AZOOM"
+            width="100%"
+            height="18"
+            value="math.eval(spy.GetParam(user.atoms.azoom,1)/10)"
+            bgcolor="$GetVar(HtmlTableBgColour)"
+            fgcolor="$GetVar(HtmlFontColour)"
+            min="1"
+            max="20"
+            onchange="
+        >>pers
+        >>spy.SetParam(user.atoms.azoom,math.eval(html.GetValue(~name~)*10))
+        >>html.SetValue(AZOOMValue,math.eval(html.GetValue(~name~)*10))
+        >>azoom math.eval(html.GetValue(~name~)*10)"
+          >
+          </font>
+        </td>
+        <td name=AZOOM_VALUE align='right' width="15%">
+          <font size='$GetVar(HtmlFontSizeControls)'>
+          <input
+            type="text"
+            name = "AZOOMValue"
+            width="100%"
+            bgcolor="$GetVar(HtmlTableBgColour)"
+            fgcolor="$GetVar(HtmlFontColour)"
+            value="spy.GetParam(user.atoms.azoom,100)"
+            onchange="
+        >>pers
+        >>spy.SetParam(user.atoms.azoom,math.eval(spy.htmlGetValue(~name~,1)*10))
+        >>html.SetValue(AZOOMValue,math.eval(spy.GetParam(user.atoms.azoom)/10))
+        >>azoom math.eval(spy.GetParam(user.atoms.azoom)/10)"
+            label=""
+          >
+          </font>
+        </td>
+      </tr>
+    </table>

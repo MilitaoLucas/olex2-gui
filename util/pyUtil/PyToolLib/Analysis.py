@@ -774,7 +774,7 @@ class Graph(ImageTools):
           #previous_img = "<a href='spy.write_to_olex(history-info.htm,Fred)'><zimg src=previous.png></a>"
           next_img = '''<a href="spy.olex_fs_copy('history-info_%s.htm','history-info.htm')>>html.Update"><zimg src='next.png'></a>''' %(img_no + 1)
 
-          _ = '''
+        _ = '''
 <tr><td><table width='100%%' border='0' cellpadding='0'>
 <tr>
   <td align='left' width='10%%'>%s</td>
@@ -2639,15 +2639,28 @@ class HealthOfStructure():
           return (False, True)
         self.hkl_stats = olex_core.GetHklStat()
       else:
-        self.hkl_stats['Completeness'] = float(olx.Cif('_diffrn_measured_fraction_theta_max'))
-        wl = float(olx.Cif('_diffrn_radiation_wavelength'))
-        twotheta = 2* (float(olx.Cif('_diffrn_reflns_theta_max')))
-        self.hkl_stats['MinD'] = uctbx.two_theta_as_d(twotheta ,wl, True)
         try:
-          self.hkl_stats['MeanIOverSigma'] = 1/float(olx.Cif('_diffrn_reflns_av_unetI/netI'))
-        except:
-          self.hkl_stats['MeanIOverSigma'] = 1/float(olx.Cif('_diffrn_reflns_av_sigmaI/netI'))
-        self.hkl_stats['Rint'] = float(olx.Cif('_diffrn_reflns_av_R_equivalents'))
+          self.hkl_stats['Completeness'] = float(olx.Cif('_diffrn_measured_fraction_theta_max'))
+          wl = float(olx.Cif('_diffrn_radiation_wavelength'))
+          twotheta = 2* (float(olx.Cif('_diffrn_reflns_theta_max')))
+          self.hkl_stats['MinD'] = uctbx.two_theta_as_d(twotheta ,wl, True)
+          ##The following items can have alternate/deprecated identifiers
+          l = ['_diffrn_reflns_av_unetI/netI', '_diffrn_reflns_av_sigmaI/netI']
+          self.hkl_stats['MeanIOverSigma'] = 0
+          for item in l:
+            _ = olx.Cif(item)
+            if _ != "n/a":
+              self.hkl_stats['MeanIOverSigma'] = 1/float(_)
+
+          l = ['_diffrn_reflns_av_R_equivalents',]
+          self.hkl_stats['Rint'] = 0
+          for item in l:
+            _ = olx.Cif(item)
+            if _ != "n/a":
+              self.hkl_stats['Rint'] = float(_)
+        except Exception, err:
+          print "Something could not be evaluated [Analysis.py]: %s" %err
+
     except Exception, err:
       print err
       return (False, True)

@@ -53,6 +53,9 @@ class OlexFunctions(inheritFunctions):
         return
 
   def SetParam(self,variable,value):
+    '''
+    Set an olex parameter. Date will converted to d-m-Y
+    '''
     try:
       if variable.startswith('gui'):
         handler = olx.gui_phil_handler
@@ -108,6 +111,47 @@ class OlexFunctions(inheritFunctions):
       sys.stderr.formatExceptionInfo()
     return retVal
 
+  def HtmlGetValue(self, control, default=None):
+    '''
+    returns the value of a html control. 
+    returns provided default value if control is empty. 
+    
+    :param control: html control element
+    :param default: returned value if olx.html.GetValue() returns false
+    '''
+    val = olx.html.GetValue(control)
+    retVal = default 
+    if val:
+      retVal = val
+    return retVal
+
+  def set_bond_thicknes(self, control, default=100):
+    '''
+    sets the molecule bond thickness. Invalid values e.g. too small, too large or 
+    containing characters are reset to default.
+    The bond radius slider SLIDE_BRAD is set to the value simultaneously. 
+    '''
+    value = olx.html.GetValue(control)
+    default = float(default)
+    if value:
+      try:
+        value = int(value)
+      except ValueError:
+        print('This is not a valid bond radius value.')
+        value = default
+      value = float(value)
+      if value > 600:
+        value = default
+        olx.html.SetValue('BRADValue', int(value))
+      if value < 10 or value == 0:
+        value = 10.0
+      OV.SetParam('user.bonds.thickness', value)
+      olx.html.SetValue('SLIDE_BRAD', value/10)
+      OV.cmd('brad {}'.format(value/100))
+    else:
+      return
+    
+  
   def GetParam_as_string(self,variable, default=None):
     retVal = self.GetParam(variable, default)
     if retVal is None:
@@ -578,6 +622,8 @@ class OlexFunctions(inheritFunctions):
 
   def standardizePath(self, path):
     path = path.replace('\\','/')
+    if path.startswith("/") and "//" not in path:
+      path = "/" + path
     if os.sep != '/':
       path = path.replace('/', os.sep)
     return path
@@ -888,6 +934,8 @@ def GetParam(variable, default=None):
 OV = OlexFunctions()
 OV.registerFunction(GetParam)
 OV.registerFunction(OV.SetParam)
+OV.registerFunction(OV.HtmlGetValue)
+OV.registerFunction(OV.set_bond_thicknes)
 OV.registerFunction(OV.set_cif_item)
 OV.registerFunction(OV.get_cif_item)
 OV.registerFunction(OV.write_to_olex)
