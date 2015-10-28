@@ -1,30 +1,30 @@
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr>
-        <td align='left' name=BRAD_SLIDER width="85%">
+        <td align='left' name=BZOOM_SLIDER width="85%">
           <font size='$GetVar(HtmlFontSizeControls)'>
           <input
             type="slider"
             align='right'
-            name = "SLIDE_BRAD"
+            name = "SLIDE_BZOOM"
             width="100%"
             height="18"
-            value="math.eval(spy.GetParam(user.bonds.thickness,1)/10)"
+            value="math.eval(spy.GetParam(user.bonds.bzoom,1)/10)"
             bgcolor="$GetVar(HtmlTableBgColour)"
             fgcolor="$GetVar(HtmlFontColour)"
             min="1"
             max="20"
             onchange="
-        >>spy.SetParam(user.bonds.thickness,math.eval(html.GetValue(~name~)*10))
-        >>html.SetValue(BRADValue,math.eval(html.GetValue(~name~)*10))
+        >>spy.SetParam(user.bonds.bzoom,math.eval(html.GetValue(~name~)*10))
+        >>html.SetValue(BZOOMValue,math.eval(html.GetValue(~name~)*10))
         >>brad math.eval(html.GetValue(~name~)/10)"
           >
           </font>
         </td>
-        <td name=BRAD_VALUE align='right' width="15%">
+        <td name=BZOOM_VALUE align='right' width="15%">
           <font size='$GetVar(HtmlFontSizeControls)'>
           <input
             type="text"
-            name = "BRADValue"
+            name = "BZOOMValue"
             width="100%"
             bgcolor="$GetVar(HtmlTableBgColour)"
             fgcolor="$GetVar(HtmlFontColour)"

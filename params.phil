@@ -1171,7 +1171,7 @@ user
   {
   mask = 48
     .type = int
-  thickness = 100
+  bzoom = 100
     .type = int
   colour = elements
     .type = str
