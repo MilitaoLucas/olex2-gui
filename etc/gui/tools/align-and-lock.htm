@@ -1,0 +1,80 @@
+<!-- #include tool-row gui\blocks\tool-row.htm;name='ARRANGE_MOLECULE';1 -->
+  <td>
+    <b>Align</b>
+  </td>
+  <td >
+    <a href="it -o">View</a>
+  </td>
+  <td >
+    <a href="mpln -n">Plane</a>
+  </td>
+
+  <td align='left'>
+    <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type="checkbox"
+      name = "MOUSE_LOCK#scope"
+      fgcolor="GetVar('HtmlFontColour')"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      onclick="mouse.lock html.GetState(~name~)>>
+        html.SetState(MOUSE_LOCK_ZOOMING#scope,html.GetState(~name~))
+        html.SetState(MOUSE_LOCK_ROTATION#scope,html.GetState(~name~))
+        html.SetState(MOUSE_LOCK_TRANSLATION#scope,html.GetState(~name~))"
+      manage="true"
+    >
+    </font>
+  </td>
+  <td>
+    <b>Lock all</b>
+  </td>
+
+
+  <td >
+    <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type="checkbox"
+      name = "MOUSE_LOCK_ZOOMING#scope"
+      fgcolor="GetVar('HtmlFontColour')"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      checked="not mouse.IsEnabled(zooming)"
+      onclick="html.setstate(MOUSE_LOCK#scope,spy.gui.IsMouseLocked('zooming',html.GetState(~name~)))"
+    >
+    </font>
+  </td>
+  <td>
+    Zoom
+  </td>
+
+
+  <td >
+    <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type="checkbox"
+      name = "MOUSE_LOCK_ROTATION#scope"
+      fgcolor="GetVar('HtmlFontColour')"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      checked="not mouse.IsEnabled(rotation)"
+      onclick="html.setstate(MOUSE_LOCK#scope,spy.gui.IsMouseLocked('rotation',html.GetState(~name~)))"
+    >
+    </font>
+  </td>
+  <td>
+    Rotation
+  </td>
+  <td >
+    <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type="checkbox"
+      name = "MOUSE_LOCK_TRANSLATION#scope"
+      fgcolor="GetVar('HtmlFontColour')"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      checked="not mouse.IsEnabled(translation)"
+      onclick="html.setstate(MOUSE_LOCK#scope,spy.gui.IsMouseLocked('translation',html.GetState(~name~)))"
+    >
+    </font>
+  </td>
+  <td>
+    Translation
+  </td>
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

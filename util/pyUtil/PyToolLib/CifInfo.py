@@ -220,7 +220,7 @@ class CifTools(ArgumentParser):
     else:
       for size in exptl_crystal_sizes:
         value = self.cif_block.get(size)
-        if value is not None:
+        if value is not None and value != "?":
           dimensions.append(float(value))
     if dimensions:
       dimensions.sort()
@@ -829,6 +829,12 @@ class ExtractCifInfo(CifTools):
           ref = "%s\n%s" %(ref, l)
         else:
           ref = l
+    if ref:
+      ref_t = ''.join(ref.replace('\r', '').split())
+      if ref_t not in full_references_set:
+        full_references.append(ref)
+        full_references_set.add(ref_t)
+
     full_references.sort()
     self.update_cif_block({
       '_publ_section_references': '\n\n'.join(full_references)}, force=True)
@@ -1035,7 +1041,7 @@ The \l/2 correction factor is %(lambda_correction)s.
 Searches for files of the given type in the given directory.
 If no files are found, the parent directory is then searched.
 If more than one file is present, the path of the most recent file is returned by default."""
-
+    directory_l = OV.FileFull().split(os.sep)
     info = ""
     if tool == "smart":
       name = "smart"
@@ -1076,32 +1082,23 @@ If more than one file is present, the path of the most recent file is returned b
     elif tool == "od_frame_date":
       name = OV.FileName()
       extension = "_1_1.img"
-      directory_l = OV.FileFull().replace('\\','/').split("/")
-      directory = ("/").join(directory_l[:-3])
-      directory += '/frames'
+      directory = os.sep.join(directory_l[:-3] + ["frames"])
     elif tool == "od_frame_images":
       name = "*"
       extension = "*.jpg"
-      directory_l = OV.FileFull().replace('\\','/').split("/")
-      directory = ("/").join(directory_l[:-3])
-      directory += '/frames/jpg/'
+      directory = os.sep.join(directory_l[:-3] + ["frames", "jpg"])
 
     elif tool == "bruker_crystal_images":
       name = OV.FileName()
-      directory_l = OV.FileFull().replace('\\','/').split("/")
-      directory = ("/").join(directory_l[:-3])
-      g = glob.glob("%s/*.vzs" %directory)
+      directory = os.sep.join(directory_l[:-3] + ["*.vzs"])
+      g = glob.glob(directory)
       i = 1
       while not g:
-        directory = ("/").join(directory_l[:-(3 - i)])
-        g = glob.glob("%s/*.vzs" %directory)
+        directory = os.sep.join(directory_l[:-(3 - i)] + ["*.vzs"])
+        g = glob.glob(directory)
         i += 1
         if i == 3:
           return None, None
-      ## This safegurard seems unenforcable in the Bruker world
-      #if OV.FileName() not in directory:
-        #print "Crystal images found, but crystal name not in path!"
-        #return None, None
 
       zip_file = g[0]
       import zipfile
@@ -1120,19 +1117,16 @@ If more than one file is present, the path of the most recent file is returned b
     elif tool == "od_crystal_images":
       name = OV.FileName()
       extension = "*.jpg"
-      directory_l = OV.FileFull().replace('\\','/').split("/")
-      directory += '/movie'
       i = 1
-      while not os.path.exists(directory):
-        directory = ("/").join(directory_l[:-(i)])
-        directory += '/movie'
+      while not os.path.exists(directory + os.sep + "movie"):
+        directory = os.sep.join(directory_l[:-(i)])
         i += 1
         if i == 5:
           return None, None
-
+      directory = directory + os.sep + "movie"
       if OV.FileName() not in directory:
         print "Crystal images found, but crystal name not in path!"
-        return None, None
+#        return None, None
       from gui import report
       l = report.sort_images_with_integer_names(OV.ListFiles(os.path.join(directory, "*.jpg")))
       setattr(self.metacifFiles, "list_crystal_images_files", (l))
@@ -1146,8 +1140,7 @@ If more than one file is present, the path of the most recent file is returned b
     elif tool == "notes_file":
       name = OV.FileName()
       extension = "_notes.txt"
-      directory_l = OV.FileFull().replace('\\','/').split("/")
-      directory = ("/").join(directory_l[:-3])
+      directory = os.sep.join(directory_l[:-3])
     else:
       return None, None
 
@@ -1252,7 +1245,7 @@ def reloadMetadata(force=False):
     fileName = OV.FileName()
     metacif_path = '%s/%s.metacif' %(OV.StrDir(), fileName)
     dataName = fileName.replace(' ', '')
-    #check if the 
+    #check if the
     if dataName != fileName and not force:
       return
     if os.path.exists(metacif_path):

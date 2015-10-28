@@ -123,6 +123,10 @@ def check_for_first_run():
     startup_skin = OV.GetParam('gui.skin.name', 'default')
     if check_os().upper() == 'MAC' and startup_skin == 'default':
       startup_skin = "mac"
+      try:
+        olx.html.SetBorders(8)
+      except:
+        print "Tried to set MAC borders, but failed!"
     _ = Skin()
     _.change_skin(startup_skin, internal_change=not first_run)
     return True
@@ -233,7 +237,7 @@ class Skin():
         OV.SetParam('gui.skin.name', toks[0])
         OV.SetParam('gui.skin.extension', toks[1])
 
-    #olx.fs.Clear(3)
+    olx.fs.Clear(3)
     OlexVFS.write_to_olex('logo1_txt.htm'," ", 2)
 
     if timing:
@@ -302,8 +306,7 @@ class Skin():
       t2 = t
 
     export_parameters()
-    from Analysis import HOS_instance
-    HOS_instance.make_HOS_html()
+    olex.m("spy.make_HOS()")
     olx.FlushFS()
 
 
@@ -397,7 +400,7 @@ def get_colour_choice(scope,what):
     t = ""
     for item in OV.GetParam(variable='%s.colours'%scope, default='[@@elements]'):
       t += "%s;" %(item.split("@@")[1])
-    return t + "[Type new colour name]"
+    return t + "[new colour]"
 OV.registerFunction(get_colour_choice,False,'gui.skin')
 
 def define_new_bond_colour(name):
@@ -408,10 +411,10 @@ def change_bond_radius():
   rad = OV.GetParam('user.bonds.thickness')
   olex.m("brad %s" %rad)
 
-def change_bond_colour(colour=None):
+def change_bond_colour(scope, colour=None):
   import shlex
   if "[" in colour:
-    olx.html.SetValue('BOND_COLOUR_COMBO',"")
+    olx.html.SetValue('BOND_COLOUR_COMBO%s' %scope,"")
     return
   if "@" in colour:
     print "Please do not use the '@' character in colour names"
@@ -449,6 +452,7 @@ def change_bond_colour(colour=None):
         pass
       OV.SetParam('user.bonds.colours', l)
     _ = "%s@@%s" %(c.replace(";","@"), colour)
+
     OV.SetParam('user.bonds.colour', colour)
     OV.SetParam('user.bonds.mask', 1)
     olex.m("mask bonds 1")
