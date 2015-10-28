@@ -829,6 +829,12 @@ class ExtractCifInfo(CifTools):
           ref = "%s\n%s" %(ref, l)
         else:
           ref = l
+    if ref:
+      ref_t = ''.join(ref.replace('\r', '').split())
+      if ref_t not in full_references_set:
+        full_references.append(ref)
+        full_references_set.add(ref_t)
+
     full_references.sort()
     self.update_cif_block({
       '_publ_section_references': '\n\n'.join(full_references)}, force=True)
