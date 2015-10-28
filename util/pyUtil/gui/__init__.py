@@ -126,6 +126,16 @@ def GetFileListAsDropdownItems(root, extensions):
   return txt
 olex.registerFunction(GetFileListAsDropdownItems, False, "gui")
 
+def GetDropdownItemsFromList(l):
+  txt = ""
+  for item in l:
+    if len(item) == 1:
+      txt += "%s;" %(item)
+    elif len(item) == 2:
+      txt += "%s<-%s;" %(item[0], item[1])
+  return txt
+olex.registerFunction(GetDropdownItemsFromList, False, "gui")
+
 def GetFolderList(root):
   import os
   t = ""
@@ -167,17 +177,28 @@ class ImageListener_:
 ImageListener = ImageListener_()
 
 
-def IsMouseLocked(which=None):
-  if which:
-    l = [which]
-  else:
-    l = ["translation", "rotation", "zooming"]
+def IsMouseLocked(which=None,state=None):
+  if not which:
+    return
 
-  for which in l:
-    _ = olx.mouse.IsEnabled(which)
-    if _ == "false":
-      return False
-  return True
+  l = ["translation", "rotation", "zooming"]
+  l.remove(which)
+
+  all_locked = True
+  for what in l:
+    _ = olx.mouse.IsEnabled(what)
+    if _ == "true":
+      all_locked = False
+      break
+  if all_locked:
+    all_locked = (state=='true')
+
+  if state == "false":
+    olx.mouse.Enable(which)
+  else:
+    olx.mouse.Disable(which)
+
+  return all_locked
 olex.registerFunction(IsMouseLocked, False, "gui")
 
 
