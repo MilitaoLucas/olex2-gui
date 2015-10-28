@@ -187,7 +187,7 @@ $spy.MakeHoverButton('small-Go!@bitmap','spy.gui.images.MakeBitmapImage()')
       items="0;0.2;0.5;1;2"
       valign='left'
       name="TRIM_BORDER"
-      value='0'
+      value="spy.GetParam('user.image.bitmap.trim_border')"
       manage
       onchange="spy.SetParam('user.image.bitmap.trim_border',html.GetValue('~name~'))"
     >

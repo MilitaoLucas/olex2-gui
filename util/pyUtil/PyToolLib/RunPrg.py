@@ -404,7 +404,10 @@ class RunRefinementPrg(RunPrg):
       self.doAutoTidyAfter()
       OV.File()
     if OV.GetParam('snum.refinement.check_absolute_structure_after_refinement'):
-      self.isInversionNeeded(force=self.params.snum.refinement.auto.invert)
+      try:
+        self.isInversionNeeded(force=self.params.snum.refinement.auto.invert)
+      except Exception, e:
+        print "Could not determine whether structure inversion is needed: %s" %e
     OV.SetParam('snum.current_process_diagnostics','refinement')
     if self.params.snum.refinement.cifmerge_after_refinement:
       try:
@@ -480,7 +483,10 @@ class RunRefinementPrg(RunPrg):
       print "Flack x: %s" %flack
       fs = flack.split("(")
       flack_val = float(fs[0])
-      flack_esd = float(fs[1].strip(")"))
+      if len(fs) > 1:
+        flack_esd = float(fs[1].strip(")"))
+      else:
+        flack_esd = None
       if flack_val > 0.8:
         inversion_needed = True
     if force and inversion_needed:
@@ -495,7 +501,8 @@ class RunRefinementPrg(RunPrg):
           hooft.twin_components[0].twin_law != sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
         print racemic_twin_warning
     if not inversion_needed and not possible_racemic_twin:
-      print "OK"
+      #print "OK"
+      pass
 
 def AnalyseRefinementSource():
   file_name = OV.FileFull()
