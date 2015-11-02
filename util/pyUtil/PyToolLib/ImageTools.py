@@ -586,6 +586,14 @@ class ImageTools(FontInstances):
         draw.polygon((begin, middle, end), colour)
 
   def adjust_colour(self, colour, hue=0, luminosity=1, saturation=1):
+    '''
+    Adjusts the colour of a color value. It can be either a pre-defined value
+    like "highlight" or a rgb value. Hue, luminosity and saturation can be 
+    controlled by the optional parameters. 
+    Returns a modified rgb color value. 
+    :type colour: string
+    :return nc: string
+    '''
     hue = float(hue)
     if not luminosity:
       luminosity = 1
