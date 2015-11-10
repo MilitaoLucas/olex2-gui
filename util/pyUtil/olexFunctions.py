@@ -113,23 +113,23 @@ class OlexFunctions(inheritFunctions):
 
   def HtmlGetValue(self, control, default=None):
     '''
-    returns the value of a html control. 
-    returns provided default value if control is empty. 
-    
+    returns the value of a html control.
+    returns provided default value if control is empty.
+
     :param control: html control element
     :param default: returned value if olx.html.GetValue() returns false
     '''
     val = olx.html.GetValue(control)
-    retVal = default 
+    retVal = default
     if val:
       retVal = val
     return retVal
 
   def set_bond_thicknes(self, control, default=100):
     '''
-    sets the molecule bond thickness. Invalid values e.g. too small, too large or 
+    sets the molecule bond thickness. Invalid values e.g. too small, too large or
     containing characters are reset to default.
-    The bond radius slider SLIDE_BRAD is set to the value simultaneously. 
+    The bond radius slider SLIDE_BRAD is set to the value simultaneously.
     '''
     value = olx.html.GetValue(control)
     default = float(default)
@@ -150,8 +150,8 @@ class OlexFunctions(inheritFunctions):
       OV.cmd('brad {}'.format(value/100))
     else:
       return
-    
-  
+
+
   def GetParam_as_string(self,variable, default=None):
     retVal = self.GetParam(variable, default)
     if retVal is None:
@@ -670,8 +670,8 @@ class OlexFunctions(inheritFunctions):
       if not model_src:
         i = int(olx.xf.CurrentData())
         if i != 0:
-          return olx.xf.DataName(i)
-        else: 
+          return "%s@%s" %(self.FileName(), olx.xf.DataName(i))
+        else:
           return self.FileName()
     except:
       return self.FileName()
