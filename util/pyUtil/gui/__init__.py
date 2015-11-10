@@ -101,6 +101,7 @@ def GetPathParam(variable, default=None):
     rest = retVal.split("()")[1]
     res = getattr(OlexFunctions, func)
     retVal = res(OV) + rest
+    retVal = OV.standardizePath(retVal)
   return retVal
 olex.registerFunction(GetPathParam, False, "gui")
 
