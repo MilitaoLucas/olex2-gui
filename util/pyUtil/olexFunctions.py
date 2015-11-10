@@ -668,7 +668,11 @@ class OlexFunctions(inheritFunctions):
     try: #remove later!!HP
       model_src = olx.xf.rm.ModelSrc()
       if not model_src:
-        return self.FileName()
+        i = int(olx.xf.CurrentData())
+        if i != 0:
+          return olx.xf.DataName(i)
+        else: 
+          return self.FileName()
     except:
       return self.FileName()
     return model_src
