@@ -959,10 +959,12 @@ graphs
     }
     r1_factor_vs_resolution
       .short_caption = "R1 vs res."
-      .caption = "R1 factor vs resolution"
+      .caption = "R1 vs. Resolution"
       .help = "R1-factor-vs-resolution"
     {
-      resolution_as = two_theta *d_spacing d_star_sq stol stol_sq
+      title = "R1 vs. Resolution"
+        .type = str
+      resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
         .type = choice
         .caption = "Resolution as"
       n_bins = 10
@@ -973,6 +975,26 @@ graphs
         .type = bool
         .caption = "%Output% csv"
     }
+    i_over_sigma_vs_resolution
+      .short_caption = "I/sig vs res."
+      .caption = "I/sigma vs Resolution"
+      .help = "R1-factor-vs-resolution"
+    {
+      title = "I/sigma vs. Resolution"
+        .type = str
+      resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
+        .type = choice
+        .caption = "Resolution as"
+      n_bins = 20
+        .type = int(value_min=1)
+        .help = Number of bins
+        .caption = %Bins%
+      output_csv_file = False
+        .type = bool
+        .caption = "%Output% csv"
+    }
+
+
     completeness
       .short_caption = "Completeness Plot"
       .caption = "Completeness Plot"
