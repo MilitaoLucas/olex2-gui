@@ -82,6 +82,57 @@ class OlexCctbxReflectionStats(OlexCctbxAdapter):
     finally:
       OV.DeleteBitmap(bitmap)
 
+class item_vs_resolution(OlexCctbxAdapter):
+  def __init__(self, item="r1_factor_vs_resolution", n_bins=10, resolution_as="two_theta"):
+    OlexCctbxAdapter.__init__(self)
+    self.resolution_as = resolution_as
+    self.item = item
+    if self.item == "i_over_sigma_vs_resolution":
+      fo2 = self.reflections.f_sq_obs
+      fo2.setup_binner(n_bins=n_bins)
+      self.info = fo2.info()
+      a = fo2.data()/fo2.sigmas()
+      fo2 = fo2.customized_copy(data=a)
+      fo2.setup_binner(n_bins=n_bins)
+      self.binned_data = fo2.mean(use_binning=True)
+    elif self.item == "r1_factor_vs_resolution":
+      fo2, fc = self.get_fo_sq_fc()
+      weights = self.compute_weights(fo2, fc)
+      scale_factor = fo2.scale_factor(fc, weights=weights)
+      fo = fo2.f_sq_as_f()
+      fo.setup_binner(n_bins=n_bins)
+      self.info = fo.info()
+      self.binned_data = fo.r1_factor(fc, scale_factor=math.sqrt(scale_factor), use_binning=True)
+    self.binned_data.show()
+
+  def xy_plot_info(self):
+    r = empty()
+    r.title = self.item
+    if (self.info is not None):
+      r.title += ": " + str(self.info)
+    d_star_sq = self.binned_data.binner.bin_centers(2)
+    if self.resolution_as == "two_theta":
+      resolution = uctbx.d_star_sq_as_two_theta(
+        d_star_sq, self.wavelength, deg=True)
+    elif self.resolution_as == "d_spacing":
+      resolution = uctbx.d_star_sq_as_d(d_star_sq)
+    elif self.resolution_as == "d_star_sq":
+      resolution = d_star_sq
+    elif self.resolution_as == "stol":
+      resolution = uctbx.d_star_sq_as_stol(d_star_sq)
+    elif self.resolution_as == "stol_sq":
+      resolution = uctbx.d_star_sq_as_stol_sq(d_star_sq)
+    r.x = resolution
+    r.y = self.binned_data.data[1:-1]
+    r.xLegend = self.resolution_as
+    legend_y = "Y-Axis"
+    if "r1" in self.item:
+      legend_y = "R1"
+    elif "i_over_sigma_vs_resolution" in self.item:
+      legend_y = "I/sigma"
+    r.yLegend = legend_y
+    return r
+
 
 class r1_factor_vs_resolution(OlexCctbxAdapter):
   def __init__(self, n_bins=10, resolution_as="two_theta"):
