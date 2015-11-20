@@ -2168,11 +2168,13 @@ class scale_factor_vs_resolution_plot(Analysis):
     reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
     self.draw_pairs(reverse_x=reverse_x)
 
-class r1_factor_vs_resolution_plot(Analysis):
-  def __init__(self):
+class item_vs_resolution_plot(Analysis):
+  def __init__(self, item):
     Analysis.__init__(self)
-    self.item = "r1_factor_vs_resolution"
-    self.graphInfo["Title"] = OV.TranslatePhrase("R1 factor vs resolution")
+    self.item = item
+    params = getattr(self.params, self.item)
+    
+    self.graphInfo["Title"] = params.title
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.filename
@@ -2187,19 +2189,22 @@ class r1_factor_vs_resolution_plot(Analysis):
       else:
         raise
     self.popout()
-    if self.params.r1_factor_vs_resolution.output_csv_file:
+    if params.output_csv_file:
       self.output_data_as_csv()
 
   def make_plot(self):
-    from reflection_statistics import r1_factor_vs_resolution
-    params = self.params.r1_factor_vs_resolution
-    xy_plot = r1_factor_vs_resolution(
-      params.n_bins, params.resolution_as).xy_plot_info()
+    y_factor = 1
+    if "r1" in self.item:
+      y_factor = 100
+    
+    from reflection_statistics import item_vs_resolution
+    params = getattr(self.params, self.item)
+    xy_plot = item_vs_resolution(item=self.item, n_bins=params.n_bins, resolution_as=params.resolution_as).xy_plot_info()
     self.metadata.setdefault("y_label", xy_plot.yLegend)
     self.metadata.setdefault("x_label", xy_plot.xLegend)
     metadata = {}
     data = Dataset(
-      xy_plot.x, [y*100 for y in xy_plot.y], metadata=metadata)
+      xy_plot.x, [y*y_factor for y in xy_plot.y], metadata=metadata)
     self.data.setdefault('dataset1', data)
     self.make_empty_graph(axis_x=True)
     reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
@@ -2381,7 +2386,7 @@ OV.registerFunction(SystematicAbsencesPlot)
 OV.registerFunction(Fobs_Fcalc_plot)
 OV.registerFunction(Fobs_over_Fcalc_plot)
 OV.registerFunction(Normal_probability_plot)
-OV.registerFunction(r1_factor_vs_resolution_plot)
+OV.registerFunction(item_vs_resolution_plot)
 OV.registerFunction(scale_factor_vs_resolution_plot)
 OV.registerFunction(X_Y_plot)
 OV.registerFunction(bijvoet_differences_scatter_plot)
@@ -2398,12 +2403,13 @@ def makeReflectionGraphOptions(graph, name):
   value = graph.short_caption
   options_gui = []
   i = 1
-  for object in graph.active_objects():
+  for obj in graph.active_objects():
     i += 1
-    data_type = object.type.phil_type
-    caption = object.caption
-    value = object.extract()
-    obj_name = name.upper() + "_" +  object.caption.upper().replace(" ","_").replace("%","").replace("-","_")
+    data_type = obj.type.phil_type
+    caption = obj.caption
+    value = obj.extract()
+#    obj_name = name.upper() + "_" +  object.caption.upper().replace(" ","_").replace("%","").replace("-","_")
+    obj_name = name.upper()
     if data_type == "int":
       ctrl_name = 'SPIN_%s' %(obj_name)
       d = {'ctrl_name':ctrl_name,
@@ -2412,7 +2418,7 @@ def makeReflectionGraphOptions(graph, name):
            'width':'%s' %width,
            'label':'%s ' %caption,
            'onchange':"spy.SetParam('graphs.reflections.%s.%s',html.GetValue('%s'))" %(
-             graph.name, object.name,ctrl_name),
+             graph.name, obj.name,ctrl_name),
            }
       options_gui.append(htmlTools.make_spin_input(d))
 
@@ -2423,7 +2429,7 @@ def makeReflectionGraphOptions(graph, name):
            'width':'%s' %width,
            'label':'%s ' %caption,
            'onchange':"spy.SetParam('graphs.reflections.%s.%s',html.GetValue('%s'))" %(
-             graph.name, object.name,ctrl_name),
+             graph.name, obj.name,ctrl_name),
            'readonly':'readonly',
            }
       options_gui.append(htmlTools.make_input_text_box(d))
@@ -2434,9 +2440,9 @@ def makeReflectionGraphOptions(graph, name):
            'value':'%s ' %caption,
            'checked':'%s' %value,
            'oncheck':"spy.SetParam('graphs.reflections.%s.%s','True')" %(
-             graph.name, object.name),
+             graph.name, obj.name),
            'onuncheck':"spy.SetParam('graphs.reflections.%s.%s','False')" %(
-             graph.name, object.name),
+             graph.name, obj.name),
            'width':'%s' %width,
            'bgcolor':'%s' %guiParams.html.table_bg_colour,
            }
@@ -2445,15 +2451,15 @@ def makeReflectionGraphOptions(graph, name):
     elif data_type == "choice":
       items_l = []
       ctrl_name = 'COMBO_%s' %(obj_name)
-      for thing in object.words:
+      for thing in obj.words:
         items_l.append(thing.value.lstrip('*'))
       items = ";".join(items_l)
       d = {'ctrl_name':ctrl_name,
            'label':'%s ' %caption,
            'items':items,
-           'value':object.extract(),
+           'value':obj.extract(),
            'onchange':"spy.SetParam('graphs.reflections.%s.%s',html.GetValue('%s'))>>spy.make_reflection_graph(html.GetValue('SET_REFLECTION_STATISTICS'))" %(
-             graph.name, object.name,ctrl_name),
+             graph.name, obj.name,ctrl_name),
            'width':'%s' %width,
            }
       options_gui.append(htmlTools.make_combo_text_box(d))
@@ -2477,11 +2483,10 @@ def makeReflectionGraphGui():
     value = OV.GetValue('SET_REFLECTION_STATISTICS')
   if not value:
     GuiGraphChooserComboExists = True
-    value = "- %Please Select% -"
     help_name = None
     name = None
   else:
-    name = value.lower().replace(" ", "_").replace("-", "_")
+    name = value.lower().replace(" ", "_").replace("-", "_").replace("/","_over_")
     graph = olx.phil_handler.get_scope_by_name('graphs.reflections.%s' %name)
     if not graph:
       value = "no phil"
@@ -2507,6 +2512,7 @@ def makeReflectionGraphGui():
              "%Systematic Absences%;%Fobs-Fcalc%;%Fobs over Fcalc%;" +\
              "%Completeness%;%Normal Probability%;" +\
              "%Scale factor vs resolution%;%R1 factor vs resolution%;" +\
+             "%I/sigma vs resolution%;" +\
              "%Bijvoet Differences% %Probability Plot%;" +\
              "%Bijvoet Differences% %Scatter Plot%",
      'height':guiParams.html.combo_height,
@@ -2559,13 +2565,20 @@ def make_reflection_graph(name):
            'fobs_over_fcalc': Fobs_over_Fcalc_plot,
            'completeness': CompletenessPlot,
            'normal_probability': Normal_probability_plot,
-           'r1_factor_vs_resolution': r1_factor_vs_resolution_plot,
+           'r1_factor_vs_resolution': (item_vs_resolution_plot, "r1_factor_vs_resolution"),
+           'i/sigma_vs_resolution': (item_vs_resolution_plot, "i_over_sigma_vs_resolution"),
+           'i_over_sigma_vs_resolution': (item_vs_resolution_plot, "i_over_sigma_vs_resolution"),
            'scale_factor_vs_resolution': scale_factor_vs_resolution_plot,
            'bijvoet_differences_probability_plot': bijvoet_differences_NPP,
            'bijvoet_differences_scatter_plot': bijvoet_differences_scatter_plot,
            }
   func = run_d.get(name)
-  if func is not None:
+  arg = None
+  if type(func) is tuple:
+    fun = func[0]
+    arg = func[1]
+    fun(arg)
+  else:
     func()
 
 OV.registerFunction(make_reflection_graph)
