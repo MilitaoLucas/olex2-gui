@@ -1,0 +1,7 @@
+_diffrn_radiation_type            synchrotron
+_diffrn_source                    
+;
+Advanced Light Source, station 11.3.1
+;                       
+_diffrn_measurement_device_type   'Bruker APEX-II CCD diffractometer' 
+_diffrn_measurement_method        '/w scans with narrow frames' 
