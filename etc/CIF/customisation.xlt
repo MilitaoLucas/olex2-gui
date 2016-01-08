@@ -62,6 +62,7 @@
     <_chemical_name_*>
     <_exptl_crystal_*>
     <_*_details>
+    <_diffrn_measurement_*>
     <_diffrn_absorpt_*>
     <_diffrn_crystal_*>
     <_diffrn_detector_*>
