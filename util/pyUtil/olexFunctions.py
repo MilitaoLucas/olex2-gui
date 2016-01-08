@@ -670,7 +670,7 @@ class OlexFunctions(inheritFunctions):
       if not model_src:
         i = int(olx.xf.CurrentData())
         if i != 0:
-          return "%s@%s" %(self.FileName(), olx.xf.DataName(i))
+          return olx.xf.DataName(i)
         else:
           return self.FileName()
     except:
