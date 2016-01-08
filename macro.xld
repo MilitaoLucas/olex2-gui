@@ -266,7 +266,7 @@
     >
     <cmd
       <cmd1 "@export %1">
-      <cmd2 "spy.cif.reloadMetadata()">
+      <cmd2 "spy.cif.reloadMetadata(True)">
     >
   >
 >
