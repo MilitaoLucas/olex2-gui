@@ -18,3 +18,6 @@ splash.jpg
 usettings.dat
 util/pyUtil/misc/_plgl.so
 version.txt
+
+# Ignore the cctbx shipped with the distro
+cctbx_shipped/
