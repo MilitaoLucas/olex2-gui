@@ -21,3 +21,9 @@ version.txt
 
 # Ignore the cctbx shipped with the distro
 cctbx_shipped/
+
+# CCTBX
+cctbx/cctbx_build
+
+# WingIDE debug stub
+util/pyUtil/wingdbstub.py
