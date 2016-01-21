@@ -47,7 +47,7 @@ py_dev_path_dict = {'dkmac': r'/Applications/LiClipse.app/Contents/liclipse/plug
                     'dk-uni': r'D:\Programme\Brainwy\LiClipse 1.4.0\plugins\org.python.pydev_3.9.2.201502042042\pysrc',
                     'dk-home': r'C:\Program Files\Brainwy\LiClipse 2.0.0\plugins\org.python.pydev_4.0.0.201504092214\pysrc',
                     'oleg2': r'C:\devel\eclipse\plugins\org.python.pydev_3.8.0.201409251235\pysrc'}
-debug = False
+debug = False or 'OLEX2_ATTACHED_WITH_PYDEBUGGER' in os.environ
 if debug == True:
   try:
     import wingdbstub
