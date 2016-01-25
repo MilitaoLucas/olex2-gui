@@ -689,11 +689,11 @@ def offlineInstall():
   licence_file_name = ''
   for n in names:
     for l in licence_files:
-     if n.endswith(l):
-       licence_file_name = n
-       break
-     if licence_file_name:
-       break
+      if n.endswith(l):
+        licence_file_name = n
+        break
+      if licence_file_name:
+        break
   if licence_file_name:
     lic = zip.open(licence_file_name).read()
     sz = [int(i) for i in olx.GetWindowSize().split(',')]
