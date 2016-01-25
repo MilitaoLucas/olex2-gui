@@ -47,6 +47,9 @@ class Job(object):
     return False
 
   def launch(self):
+    if olx.xf.latt.IsGrown() == 'true':
+      if olx.Alert("Please confirm", "The structure is grown - do you really want to continue?", "YN", False) == 'N':
+        return
     model_file_name = os.path.join(self.parent.jobs_dir, self.name, self.name) + ".cif"
     olx.Kill("$Q")
     #olx.Grow()
