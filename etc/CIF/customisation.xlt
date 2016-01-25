@@ -51,7 +51,7 @@
     <_diffrn_measured_fraction_*>
     <_exptl_crystal_density_diffrn>
     <_exptl_crystal_F_000>
-    <_chemical_formula_*>
+    <_chemical_formula_sum>
   >
   <do_merge
    <_*_details>
