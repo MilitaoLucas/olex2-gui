@@ -1151,7 +1151,7 @@ user
   }
 
   diagnostics{
-    pin_scopes = False
+    pin_scopes = True
       .type = bool
   }
 
