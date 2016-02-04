@@ -9,10 +9,16 @@ from History import hist
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+debug = bool(OV.GetParam('olex2.debug',False))
+timer = debug
+
 import ExternalPrgParameters
 
 from CifInfo import MergeCif
 import TimeWatch
+import time
+
+import shutil
 
 class RunPrg(ArgumentParser):
   running = False
@@ -57,18 +63,33 @@ class RunPrg(ArgumentParser):
       self.method.unregisterCallback()
 
   def run(self):
+    import time
+
     if RunPrg.running:
       print("Already running. Please wait...")
       return
     RunPrg.running = True
     try:
       token = TimeWatch.start("Running %s" %self.program.name)
+      if timer:
+        t1 = time.time()
       res = self.method.run(self)
+      if timer:
+        print "REFINEMENT: %.3f" %(time.time() - t1)
       if res == False:
         return False
       if not self.method.failure:
+        if timer:
+          t1 = time.time()
         self.runAfterProcess()
+        if timer:
+          print "runAfterProcess: %.3f" %(time.time() - t1)
+      if timer:
+        t1 = time.time()
       self.endRun()
+      if timer:
+        print "endRun: %.3f" %(time.time() - t1)
+
       TimeWatch.finish(token)
       sys.stdout.refresh = False
       sys.stdout.graph = False
@@ -92,7 +113,7 @@ class RunPrg(ArgumentParser):
     copy_to = "%s/listen.res" %(self.datadir)
     if os.path.isfile(copy_from):
       if copy_from.lower() != copy_to.lower():
-        olx.file.Copy(copy_from, copy_to)
+        shutil.copyfile(copy_from, copy_to)
 
   def doFileResInsMagic(self):
     extensions = ['res', 'lst', 'cif', 'fcf', 'mat', 'pdb']
@@ -101,6 +122,8 @@ class RunPrg(ArgumentParser):
     if self.broadcast_mode:
       self.doBroadcast()
     for ext in extensions:
+      if timer:
+        t = time.time()
       if "xt" in self.program.name.lower() and ext != 'lst':
         copy_from = "%s/%s_a.%s" %(self.tempPath, self.shelx_alias, ext)
       else:
@@ -108,8 +131,9 @@ class RunPrg(ArgumentParser):
       copy_to = "%s/%s.%s" %(self.filePath, self.original_filename, ext)
       if os.path.isfile(copy_from):
         if copy_from.lower() != copy_to.lower():
-          olx.file.Copy(copy_from, copy_to)
-
+          shutil.copyfile(copy_from, copy_to)
+      if timer:
+        print "---- copying %s: %.3f" %(copy_from, time.time() -t)
   def doHistoryCreation(self, type="normal"):
     if type == "first":
       historyPath = "%s/%s.history" %(OV.StrDir(), OV.FileName())
@@ -146,18 +170,19 @@ class RunPrg(ArgumentParser):
     self.curr_file = OV.FileName()
     copy_from = "%s" %(self.hkl_src)
     ## All files will be copied to the temp directory in lower case. This is to be compatible with the Linux incarnations of ShelX
-    copy_to = "%s/%s.hkl" %(self.tempPath, self.shelx_alias)
+    copy_to = "%s%s%s.hkl" %(self.tempPath, os.sep, self.shelx_alias)
     if not os.path.exists(copy_to):
-      olx.file.Copy(copy_from, copy_to)
-    copy_from = "%s/%s.ins" %(self.filePath, self.curr_file)
-    copy_to = "%s/%s.ins" %(self.tempPath, self.shelx_alias)
+      shutil.copyfile(copy_from, copy_to)
+    copy_from = "%s%s%s.ins" %(self.filePath, os.sep, self.curr_file)
+    copy_to = "%s%s%s.ins" %(self.tempPath, os.sep, self.shelx_alias)
     if not os.path.exists(copy_to):
-      olx.file.Copy(copy_from, copy_to)
+      shutil.copyfile(copy_from, copy_to)
     #fab file...
-    copy_from = "%s/%s.fab" %(self.filePath, self.curr_file)
-    copy_to = "%s/%s.fab" %(self.tempPath, self.shelx_alias)
-    if not os.path.exists(copy_to):
-      olx.file.Copy(copy_from, copy_to)
+    copy_from = "%s%s%s.fab" %(self.filePath, os.sep, self.curr_file)
+    copy_to = "%s%s%s.fab" %(self.tempPath, os.sep, self.shelx_alias)
+    if os.path.exists(copy_from):
+      if not os.path.exists(copy_to):
+        shutil.copyfile(copy_from, copy_to)
 
   def runCctbxAutoChem(self):
     from AutoChem import OlexSetupRefineCctbxAuto
@@ -174,17 +199,37 @@ class RunPrg(ArgumentParser):
   def runAfterProcess(self):
     #olex.m("spy.run_skin sNumTitle")
     if 'olex2' not in self.program.name:
+      if timer:
+        t = time.time()
       self.doFileResInsMagic()
+      if timer:
+        print "--- doFilseResInsMagic: %.3f" %(time.time() - t)
+
+      if timer:
+        t = time.time()
       olx.Freeze(True)
       OV.reloadStructureAtreap(self.filePath, self.curr_file, update_gui=False)
       olx.Freeze(False)
+      if timer:
+        print "--- reloadStructureAtreap: %.3f" %(time.time() - t)
+
       # XT changes the HKL file - so it *will* match the file name
       if 'xt' not in self.program.name.lower():
         OV.HKLSrc(self.hkl_src)
+
+      if timer:
+        t = time.time()
       olx.html.Update()
+      if timer:
+        print "--- olex.html.Update(): %.3f" %(time.time() - t)
     else:
       if self.broadcast_mode:
+        if timer:
+          t = time.time()
         self.doBroadcast()
+        if timer:
+          print "--- doBroacast: %.3f" %(time.time() - t)
+
       lstFile = '%s/%s.lst' %(self.filePath, self.original_filename)
       if os.path.exists(lstFile):
         os.remove(lstFile)
@@ -396,8 +441,18 @@ class RunRefinementPrg(RunPrg):
 
   def runAfterProcess(self):
     RunPrg.runAfterProcess(self)
+    if timer:
+      t = time.time()
     self.method.post_refinement(self)
+    if timer:
+      print "-- self.method.post_refinement(self): %.3f" %(time.time()-t)
+
+    if timer:
+      t = time.time()
     self.doHistoryCreation()
+    if timer:
+      print "-- self.method.post_refinement(self): %3f" %(time.time()-t)
+
     if self.R1 == 'n/a':
       return
     if self.params.snum.refinement.auto.tidy:
@@ -409,11 +464,16 @@ class RunRefinementPrg(RunPrg):
       except Exception, e:
         print "Could not determine whether structure inversion is needed: %s" %e
     OV.SetParam('snum.current_process_diagnostics','refinement')
+
+    if timer:
+      t = time.time()
     if self.params.snum.refinement.cifmerge_after_refinement:
       try:
         MergeCif(edit=False, force_create=False, evaluate_conflicts=False)
       except Exception, e:
         print("Failed in CifMerge: '%s'" %str(e))
+    if timer:
+      print "-- MergeCif: %.3f" %(time.time()-t)
 
   def doHistoryCreation(self):
     R1 = 0

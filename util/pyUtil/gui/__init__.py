@@ -2,6 +2,7 @@ import olex
 import olx
 import os
 import glob
+import sys
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import htmlTools
@@ -226,3 +227,58 @@ def do_sort():
   args += olx.GetVar("sorting.moiety_order", "").split()
   olx.Sort(*args)
 olex.registerFunction(do_sort, False, "gui")
+
+
+
+def copy_datadir_items():
+  ## copy sample directory to datadir
+  import shutil
+
+  if sys.version_info[0] >= 2 and sys.version_info[1] >=6:
+    ignore_patterns = shutil.ignore_patterns('*.svn')
+  else:
+    ignore_patterns = None # back compatiblity for python < 2.6
+
+  svn_samples_directory = '%s%ssample_data' %(OV.BaseDir(),os.sep)
+  user_samples_directory = OV.GetParam('user.sample_dir')
+  if not user_samples_directory:
+    user_samples_directory = '%s%ssamples' %(OV.DataDir(),os.sep)
+
+  svn_customisation_directory = '%s%setc%scustomisation' %(OV.BaseDir(),os.sep,os.sep)
+  user_customisation_directory = OV.GetParam('user.customisation_dir')
+  if not user_customisation_directory:
+    user_customisation_directory = '%s%scustomisation' %(OV.DataDir(),os.sep)
+
+  dirs = ((svn_samples_directory, user_samples_directory), (svn_customisation_directory, user_customisation_directory))
+
+  for src, dest in dirs:
+    if not os.path.exists(dest):
+      os.mkdir(dest)
+      things = os.listdir(src)
+      for thing in things:
+        if thing == '.svn': continue
+        if not os.path.exists('%s%s%s' %(dest,os.sep,thing)):
+          try:
+            from_f = '%s%s%s' %(src,os.sep,thing)
+            to_f = '%s%s%s' %(dest,os.sep,thing)
+            if os.path.isdir(from_f):
+              if ignore_patterns is not None:
+                shutil.copytree(from_f, to_f, ignore=ignore_patterns)
+              else:
+                shutil.copytree(from_f, to_f)
+            else:
+              shutil.copyfile(from_f, to_f)
+          except:
+            pass
+        else:
+          continue
+    if "sample_data" in src:
+      if not os.path.exists(dest):
+        dest = src
+      OV.SetParam('user.sample_data',dest)
+      OV.SetVar('sample_dir', dest)
+
+    elif "customisation" in src:
+      if not os.path.exists(dest):
+        dest = src
+      OV.SetParam('user.customisation_dir',dest)

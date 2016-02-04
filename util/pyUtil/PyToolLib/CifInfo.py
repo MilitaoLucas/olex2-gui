@@ -14,6 +14,8 @@ import userDictionaries
 import variableFunctions
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+debug = bool(OV.GetParam('olex2.debug', False))
+timer = debug
 
 import ExternalPrgParameters
 
@@ -387,7 +389,7 @@ class MergeCif(CifTools):
     super(MergeCif, self).__init__()
     edit = (edit not in ('False','false',False))
     # check if cif exists and is up-to-date
-    cif_path = '%s/%s.cif' %(OV.FilePath(), OV.FileName())
+    cif_path = '%s%s%s.cif' %(OV.FilePath(), os.sep, OV.FileName())
     file_full = OV.FileFull()
     if (not os.path.isfile(cif_path) or
         os.path.getmtime(file_full) > os.path.getmtime(cif_path) + 10):
@@ -414,9 +416,19 @@ class MergeCif(CifTools):
         print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         return
 
+    if timer:
+      t = time.time()
     ECI = ExtractCifInfo(evaluate_conflicts=evaluate_conflicts)
     ECI.run()
+    if timer:
+      print "-- ECI: %.3f" %(time.time() - t)
+      
+    if timer:
+      t = time.time()
     self.write_metacif_file()
+    if timer:
+      print "-- write_metacif_file(): %.3f" %(time.time() - t)
+    
     ## merge metacif file with cif file from refinement
     merge_with = [self.metacif_path]
     for extra_cif in OV.GetParam('snum.report.merge_these_cifs',[]):
@@ -424,7 +436,11 @@ class MergeCif(CifTools):
         merge_with.append(extra_cif)
     if len(merge_with) > 1:
       print("Merging with: " + ' '.join([os.path.split(x)[1] for x in merge_with[1:]]))
+    if timer:
+      t = time.time()
     OV.CifMerge(merge_with)
+    if timer:
+      print "-- ECI: %.3f" %(time.time() - t)
     self.finish_merge_cif()
     if edit:
       OV.external_edit('filepath()/filename().cif')
@@ -1087,7 +1103,6 @@ If more than one file is present, the path of the most recent file is returned b
       name = "*"
       extension = "*.jpg"
       directory = os.sep.join(directory_l[:-3] + ["frames", "jpg"])
-
     elif tool == "bruker_crystal_images":
       name = OV.FileName()
       directory = os.sep.join(directory_l[:-3] + ["*.vzs"])
@@ -1243,7 +1258,8 @@ def reloadMetadata(force=False):
   """
   try:
     fileName = OV.FileName()
-    metacif_path = '%s/%s.metacif' %(OV.StrDir(), fileName)
+    dataName = OV.ModelSrc()
+    metacif_path = '%s/%s.metacif' %(OV.StrDir(), dataName)
     dataName = fileName.replace(' ', '')
     #check if the
     if dataName != fileName and not force:
