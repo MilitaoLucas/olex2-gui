@@ -1,12 +1,51 @@
-<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
+$+
+SetVar(help_olex2_debug_mode,
+  "
+In debug mode, Olex2 will print out more debug information.
+  ")
+$-
 
+$+
+SetVar(help_background,
+  "The background of the main Olex2 window can be set in various ways
+    ~Swap Solid Colour / White~
+    <br>
+    This toggles between the chosen solid colour and a white background. Also <b>F2</b>
+
+    ~Graduated Background~
+    <br>
+    This switches the graduated background on or off. Also <b>F4</b>
+    <br>
+
+    ~Choose Grad Colours~
+    <br>
+    Set the colours for the four corners of the graduated background.
+  ")
+$-
+
+
+$+
+SetVar(help_solo_mode,
+  "
+In **solo mode**, only one of the main Tool Tabs will be open at any one time.
+  ")
+$-
+
+$+
+SetVar(help_diagnostics,
+  "
+Lintis for the **diagnostics** information displayed on the top right of Olex2 can be set here.")
+$-
+
+
+
+<!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
 <!-- #include snippet-quick-atom-properties gui\snippets\snippet-quick-atom-properties.htm;scope=settings;1 -->
 
 <!-- #include snippet-quick-bond-properties gui\snippets\snippet-quick-bond-properties.htm;scope=settings;1 -->
 
-
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='BACKGROUND';help_ext=background;1 -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='BACKGROUND';help_ext=background;helpTxt=$GetVar(help_background);1 -->
 
   <td width='23%'>
     <b>Background:</b>
@@ -22,6 +61,12 @@
       href="grad -i"
       target="%graduated-target%">
       %graduated%
+    </a>
+    &nbsp;
+    <a
+      href="grad"
+      target="%choose-grad-colours-target%">
+      %choose grad colours%
     </a>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -187,7 +232,7 @@
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='START_OLEX2_IN';help_ext=Solo-Mode;1 -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='START_OLEX2_IN';help_ext=Solo-Mode;helpTxt=$GetVar(help_solo_mode);1 -->
   <td width='23%'>
     <b>%Solo Mode%:</b>
   </td>
@@ -274,5 +319,27 @@
      "onclick=spy.SetParam('olex2.network', html.GetState('~name~'))>>html.Update")
    $-</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='OLEX"_DEBUG';help_ext=olex2-debug-mode;helpTxt=$GetVar(help_olex2_debug_mode);1 -->
+  <td width='23%'><b>%Debug Mode%:</b></td>
+  <td width='75%'>
+  Start Olex2 in Debug Mode (Restart required)
+  <td width="22%" align='right'>$+
+    html.Snippet("gui/snippets/input-checkbox", "name=settings_debug",
+     "checked=spy.GetParam('olex2.debug', 'True')",
+     "onclick=spy.SetParam('olex2.debug', html.GetState('~name~'))>>html.Update")
+   $-</td>
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='OLEX"_DEBUG';help_ext=diagnostics-settings;helpTxt=$GetVar(help_diagnostics);1 -->
+  <td width='23%'>
+    <b>%Various%:</b>
+  </td>
+  <td width="22%" align='left'>
+    <a href="spy.EditParams(user.diagnostics)">Diagnostics</a>
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;1; -->
