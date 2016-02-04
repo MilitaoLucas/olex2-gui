@@ -109,6 +109,8 @@ href='spy.gui.report.publication.remove_cif_from_merge_list(%s)>>html.Update'>
   def add_cif_to_merge_list(cif_p):
     if not cif_p:
       return
+    if not os.path.exists(cif_p):
+      return
     l = OV.GetParam('snum.report.merge_these_cifs', [])
     if cif_p not in l:
       l.append(cif_p)
@@ -385,7 +387,42 @@ def add_to_citation_list(item):
     print "Error in 'report.add_to_citation: %s" %err
 OV.registerFunction(add_to_citation_list, False, "report")
 
+def get_reflections_stats_dictionary():
+  import olex_core
+  d_aliases = {
+    "DataCount": "DataCount",
+    "TotalReflections": "Total reflections (after filtering)",
+    "UniqueReflections": "Unique reflections",
+    "Completeness": "Completeness",
+    "MeanIOverSigma": "Mean I/&sigma;",
+    "FileMaxIndexes": "hkl<sub>max</sub> collected",
+    "FileMinIndexes": "hkl<sub>min</sub> collected",
+    "MaxIndexes": "hkl<sub>max</sub> used",
+    "MinIndexes": "hkl<sub>min</sub> used",
+    "LimDmax": "Lim d<sub>max</sub> collected",
+    "LimDmin": "Lim d<sub>min</sub> collected",
+    "MaxD": "d<sub>max</sub> used",
+    "MinD": "d<sub>min</sub> used",
+    "FriedelPairCount": "Friedel pairs",
+    "FriedelOppositesMerged": "Friedel pairs merged",
+    "InconsistentEquivalents": "Inconsistent equivalents",
+    "Rint": "R<sub>int</sub>",
+    "Rsigma": "R<sub>sigma</sub>",
+    "IntensityTransformed": "Intensity transformed",
+    "OmittedReflections": "Omitted reflections",
+    "OmittedByUser": "Omitted by user (OMIT hkl)",
+    "Redundancy": "Multiplicity",
+    "ReflectionAPotMax": "Maximum multiplicity",
+    "SystematicAbsencesRemoved": "Removed systematic absences",
+    "FilteredOff": "Filtered off (SHEL/OMIT)"
+  }
+  stats = olex_core.GetHklStat()
+  d = {}
+  for item in stats:
+    d.setdefault(item, {"value": stats[item], "html_item": d_aliases[item]})
+  return d
 
 olex.registerFunction(get_crystal_image, False, "report")
 olex.registerFunction(get_report_title, False, "report")
 olex.registerFunction(ResolvePrograms, False, "report")
+olex.registerFunction(get_reflections_stats_dictionary, False, "report")

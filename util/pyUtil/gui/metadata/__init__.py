@@ -8,7 +8,15 @@ OV = OlexFunctions()
 
 def sources():
   import htmlTools
-  list = [
+  list_l = [
+    {'varName':'snum.metacif.cif_od_file',
+     'itemName':'CIF_OD',
+     'chooseFile':{'filter':'.cif_od files|*.cif_od'}
+     },
+    {'varName':'snum.metacif.crystal_clear_file',
+     'itemName':'Rigaku CrystalClear CIF',
+     'chooseFile':{'filter':'CrystalClear.cif files|CrystalClear.cif'}
+     },
     {'varName':'snum.metacif.abs_file',
      'itemName':'.abs',
      'chooseFile':{'filter':'.abs files|*.abs'}
@@ -41,14 +49,6 @@ def sources():
      'itemName':'Nonius cad4',
      'chooseFile':{'filter':'.dat files|*.dat'}
      },
-    {'varName':'snum.metacif.cif_od_file',
-     'itemName':'Agilent CIF',
-     'chooseFile':{'filter':'.cif_od files|*.cif_od'}
-     },
-    {'varName':'snum.metacif.crystal_clear_file',
-     'itemName':'Rigaku CrystalClear CIF',
-     'chooseFile':{'filter':'CrystalClear.cif files|CrystalClear.cif'}
-     },
     {'varName':'snum.metacif.sams_file',
      'itemName':'SAMS',
      'chooseFile':{'filter':'.sams files|.sams'}
@@ -56,10 +56,14 @@ def sources():
   ]
   x = 0
   filePath = OV.FilePath()
-  for i in range(len(list)):
-    d = list[x]
-    listFiles = 'snum.metacif.list_%s_files'  %'_'.join(
+  for i in range(len(list_l)):
+    d = list_l[x]
+    #listFiles = 'snum.metacif.list_%s_files'  %'_'.join(
+      #d['varName'].split('.')[-1].split('_')[:-1])
+
+    listFiles = 'snum.metacif.%s_file'  %'_'.join(
       d['varName'].split('.')[-1].split('_')[:-1])
+
     var = OV.GetParam(listFiles)
     if var is not None:
       if ';' in var[-1] > 1:
@@ -69,7 +73,7 @@ def sources():
           d['varName'].split('.')[-1].split('_')[:-1])
         value = OV.GetParam(value_name)
       else:
-        value = var[-1]
+        value = var
       d.setdefault('value', olx.file.RelativePath(value, filePath))
 
       x += 1
@@ -79,10 +83,15 @@ def sources():
       d['chooseFile'].setdefault('folder',OV.FilePath())
       d['chooseFile'].setdefault('file_type',file_type)
       d['chooseFile'].setdefault('caption',d['itemName'])
-    else:
-      del list[list.index(d)]
 
-  text = htmlTools.makeHtmlTable(list)
+    else:
+      del list_l[list_l.index(d)]
+
+    if "cif_od" in listFiles.lower() or "crystal_clear" in listFiles.lower():
+      del list_l[1:]
+      break
+
+  text = htmlTools.makeHtmlTable(list_l)
   if not text:
     text = '<tr><td>No relevant files found</td></tr>'
 
@@ -112,7 +121,7 @@ def resolve_all(idx):
   print("All conflicts are resolved")
   conflict_d = None
   make_no_conflicts_gui(l, False)
-  
+
 def make_no_conflicts_gui(resolved, some_remain=False):
   if some_remain:
     txt = "<font color='red'><b>There are unresolved conflicts</b></font>"

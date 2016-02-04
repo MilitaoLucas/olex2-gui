@@ -15,7 +15,7 @@
     $+
     html.Snippet("gui/snippets/input-combo",
     "name=LIST_STYLES#scope",
-    "items=spy.gui.getFileListAsDropdownItems(BaseDir()/etc/styles, 'glds')",
+    "items=spy.gui.getFileListAsDropdownItems(spy.GetParam(user.customisation_dir)/styles, 'glds')",
     "value=spy.GetParam(user.atoms.style)",
     "onchange=load style -c html.GetValue(~name~)>>telp 50>>spy.SetParam(user.atoms.style,html.GetValue(~name~))",
     "readonly=false",

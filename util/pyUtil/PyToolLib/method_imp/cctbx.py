@@ -10,6 +10,11 @@ class Method_cctbx_refinement(Method_refinement):
 
   def pre_refinement(self, RunPrgObject):
     RunPrgObject.make_unique_names = True
+    self.cycles = OV.GetParam('snum.refinement.max_cycles')
+    self.cif_finalise = OV.GetParam('user.cif.finalise')
+    OV.SetParam('snum.refinement.max_cycles',20)
+    if OV.GetParam('user.cif.finalise') != 'Exclude':
+      OV.SetParam('user.cif.finalise', "Include")
     Method_refinement.pre_refinement(self, RunPrgObject)
 
   def do_run(self, RunPrgObject):
@@ -41,6 +46,8 @@ class Method_cctbx_refinement(Method_refinement):
     return self.flack
 
   def post_refinement(self, RunPrgObject):
+    OV.SetParam('snum.refinement.max_cycles',self.cycles)
+    OV.SetParam('user.cif.finalise',self.cif_finalise)
     self.writeRefinementInfoIntoRes(self.cif)
     txt = '''
     R1_all=%(_refine_ls_R_factor_all)s;

@@ -6,6 +6,8 @@ import sys
 import OlexVFS
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+debug = bool(OV.GetParam('olex2.debug',False))
+timer = debug
 
 global have_found_python_error
 have_found_python_error= False
@@ -23,6 +25,10 @@ import olexex
 import re
 
 import time
+
+global regex_l
+regex_l = {}
+
 
 class FolderView:
   root = None
@@ -153,7 +159,7 @@ def flash_gui_control(control, wait=300):
       new_image = "up=%soff.png" %control
       olx.html.SetImage(control_name,new_image)
     elif control.endswith('_bg'):
-      cmd = 'html.setBG(%s,%s)' %(control.rstrip('_bg'), '#fffffe')
+      cmd = 'html.setBG(%s,%s)' %(control.rstrip('_bg'), '#fffff')
       olex.m(cmd)
     else:
       new_image = "up=%shighlight.png" %control_image
@@ -774,14 +780,70 @@ def deal_with_gui_phil(action):
     olx.gui_phil_handler.save_param_file(
       file_name=gui_phil_path, scope_name='gui', diff_only=True)
 
-
-def run_regular_expressions(txt, re_l, specific = ""):
-  for pair in re_l:
-    if specific:
-      if pair[0] != specific:
+def get_regex_l(src_file):
+  global regex_l
+  if not src_file:
+    return False
+  if not src_file in regex_l:
+    re_l = []
+    l = open(src_file, 'r').readlines()
+    for item in l:
+      item = item.strip()
+      if item.startswith('#') or not item:
         continue
-    regex = re.compile(r"%s" %pair[0], re.X|re.M|re.S)
-    replace = pair[1].strip("'")
-    replace = pair[1].strip('"')
-    txt = regex.sub(r"%s" %replace, txt)
-  return txt
+      item_l = item.split("::")
+      find = item_l[0].strip().strip("%%")
+      replace = item_l[1].strip()
+      re_l.append((find,replace))
+    regex_l.setdefault('%s'%src_file,re_l)
+  return regex_l[src_file]
+
+def run_regular_expressions(txt, src_file, re_l=None, specific=""):
+  try:
+    global regex_l
+    if not re_l:
+      re_l = get_regex_l(src_file)
+
+    if timer:
+      t_timer=time.time()
+    for pair in re_l:
+      if specific:
+        if pair[0] != specific:
+          continue
+      regex = re.compile(r"%s" %pair[0], re.X|re.M|re.S|re.U)
+      replace = pair[1].strip("'")
+      replace = pair[1].strip('"')
+      try:
+        txt = regex.sub(r"%s" %replace, txt)
+      except Exception, err:
+        print err
+    if timer:
+      print_timer(tt, t_timer, pad="    ", sep="..")
+  except Exception:
+    if debug:
+      PrintException()
+  finally:
+    return txt
+
+class LogListen():
+  def __init__(self):
+    self.printed = []
+    OV.registerCallback("onlog", self.onListen)
+
+  def onListen(self, txt):
+    self.printed.append(txt)
+
+  def endListen(self):
+    OV.unregisterCallback("onlog", self.onListen)
+    l = []
+    for item in self.printed:
+      item = item.split('\r\n')
+      for tem in item:
+        if type(tem) == unicode:
+          l.append(tem)
+        else:
+          for em in tem:
+            l.append(em)
+    return l
+
+

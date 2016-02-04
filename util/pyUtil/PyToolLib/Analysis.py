@@ -26,9 +26,10 @@ IT = ImageTools()
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
-guiParams = OV.GuiParams()
+debug = bool(OV.GetParam('olex2.debug',False))
+timing = debug
 
-timing = bool(OV.GetParam('gui.timing'))
+guiParams = OV.GuiParams()
 
 from scitbx.math import erf
 
@@ -47,7 +48,7 @@ silent = True
 class Graph(ImageTools):
   def __init__(self):
     ImageTools.__init__(self)
-    self.params = OV.Params().graphs.reflections
+    self.params = OV.Params().user.graphs.reflections
     self.marker_params = (self.params.marker_1, self.params.marker_2, self.params.marker_3, self.params.marker_4, self.params.marker_5)
     self.function_params = (self.params.function_1, self.params.function_2, self.params.function_3)
     self.dataset_counter = 0
@@ -756,8 +757,8 @@ class Graph(ImageTools):
   valign='center'
   min="2"
   height="$GetVar('HtmlSpinHeight')"
-  value="$spy.GetParam('graphs.program_analysis.y_scale_factor')"
-  onchange="spy.SetParam('graphs.program_analysis.y_scale_factor',html.GetValue('HistoryScale'))>>spy._make_history_bars()>>html.Update"
+  value="$spy.GetParam('user.graphs.program_analysis.y_scale_factor')"
+  onchange="spy.SetParam('user.graphs.program_analysis.y_scale_factor',html.GetValue('HistoryScale'))>>spy._make_history_bars()>>html.Update"
 >
 </font>'''
 
@@ -767,7 +768,7 @@ class Graph(ImageTools):
           next_img = ""
         else:
           all_in_oneText = '''
-<a href="spy.SetParam('graphs.program_analysis.all_in_one_history','True')>>spy._make_history_bars()>>html.Update">Show All Bars</a>&nbsp;
+<a href="spy.SetParam('user.graphs.program_analysis.all_in_one_history','True')>>spy._make_history_bars()>>html.Update">Show All Bars</a>&nbsp;
 <a href="reap '%s\%s.ins'">Reload INS</a>
 ''' %(OV.FilePath(), OV.FileName())
           previous_img = '''<a href="spy.olex_fs_copy('history-info_%s.htm','history-info.htm')>>html.Update"><zimg src=previous.png></a>''' %(img_no -1)
@@ -1116,7 +1117,6 @@ class Analysis(Graph):
     self.gui_html_bg_colour = OV.GetParam('gui.html.bg_colour').rgb
     self.gui_html_highlight_colour = OV.GetParam('gui.html.highlight_colour').rgb
     self.SPD, self.RPD = ExternalPrgParameters.get_program_dictionaries()
-    self.debug = False
     self.function = function
     if param:
       self.param = param.split(';')
@@ -1329,7 +1329,7 @@ class Analysis(Graph):
       self.make_AutoChem_plot()
 
     ## This whole writing of files to a specific location was only a test, that's been left in by mistake. Sorry John!
-    if self.debug:
+    if debug:
       if sys.platform.startswith('lin'): # This is to alter path for linux
         testpicturepath = "/tmp/test.png"
       elif sys.platform.startswith('win'): # For windows
@@ -1364,7 +1364,7 @@ class Analysis(Graph):
 class PrgAnalysis(Analysis):
   def __init__(self, program, method):
     Analysis.__init__(self)
-    self.params = OV.Params().graphs.program_analysis
+    self.params = OV.Params().user.graphs.program_analysis
     self.counter = 0
     self.attempt = 1
     #size = (int(OV.GetParam('gui.htmlpanelwidth'))- 30, 150)
@@ -2173,7 +2173,7 @@ class item_vs_resolution_plot(Analysis):
     Analysis.__init__(self)
     self.item = item
     params = getattr(self.params, self.item)
-    
+
     self.graphInfo["Title"] = params.title
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
@@ -2196,7 +2196,7 @@ class item_vs_resolution_plot(Analysis):
     y_factor = 1
     if "r1" in self.item:
       y_factor = 100
-    
+
     from reflection_statistics import item_vs_resolution
     params = getattr(self.params, self.item)
     xy_plot = item_vs_resolution(item=self.item, n_bins=params.n_bins, resolution_as=params.resolution_as).xy_plot_info()
@@ -2256,7 +2256,7 @@ class HistoryGraph(Analysis):
 
   def __init__(self, history_tree):
     Analysis.__init__(self)
-    self.params = OV.Params().graphs.program_analysis
+    self.params = OV.Params().user.graphs.program_analysis
     self.i_bar = 0
     self.tree = history_tree
     self.item = "history"
@@ -2417,7 +2417,7 @@ def makeReflectionGraphOptions(graph, name):
            'max':'30',
            'width':'%s' %width,
            'label':'%s ' %caption,
-           'onchange':"spy.SetParam('graphs.reflections.%s.%s',html.GetValue('%s'))" %(
+           'onchange':"spy.SetParam('user.graphs.reflections.%s.%s',html.GetValue('%s'))" %(
              graph.name, obj.name,ctrl_name),
            }
       options_gui.append(htmlTools.make_spin_input(d))
@@ -2428,7 +2428,7 @@ def makeReflectionGraphOptions(graph, name):
            'value':value,
            'width':'%s' %width,
            'label':'%s ' %caption,
-           'onchange':"spy.SetParam('graphs.reflections.%s.%s',html.GetValue('%s'))" %(
+           'onchange':"spy.SetParam('user.graphs.reflections.%s.%s',html.GetValue('%s'))" %(
              graph.name, obj.name,ctrl_name),
            'readonly':'readonly',
            }
@@ -2439,9 +2439,9 @@ def makeReflectionGraphOptions(graph, name):
       d = {'ctrl_name':ctrl_name,
            'value':'%s ' %caption,
            'checked':'%s' %value,
-           'oncheck':"spy.SetParam('graphs.reflections.%s.%s','True')" %(
+           'oncheck':"spy.SetParam('user.graphs.reflections.%s.%s','True')" %(
              graph.name, obj.name),
-           'onuncheck':"spy.SetParam('graphs.reflections.%s.%s','False')" %(
+           'onuncheck':"spy.SetParam('user.graphs.reflections.%s.%s','False')" %(
              graph.name, obj.name),
            'width':'%s' %width,
            'bgcolor':'%s' %guiParams.html.table_bg_colour,
@@ -2458,7 +2458,7 @@ def makeReflectionGraphOptions(graph, name):
            'label':'%s ' %caption,
            'items':items,
            'value':obj.extract(),
-           'onchange':"spy.SetParam('graphs.reflections.%s.%s',html.GetValue('%s'))>>spy.make_reflection_graph(html.GetValue('SET_REFLECTION_STATISTICS'))" %(
+           'onchange':"spy.SetParam('user.graphs.reflections.%s.%s',html.GetValue('%s'))>>spy.make_reflection_graph(html.GetValue('SET_REFLECTION_STATISTICS'))" %(
              graph.name, obj.name,ctrl_name),
            'width':'%s' %width,
            }
@@ -2586,16 +2586,13 @@ OV.registerFunction(make_reflection_graph)
 class HealthOfStructure():
   def __init__(self):
     self.hkl_stats = {}
-    phil_file = r"%s/etc/CIF/diagnostics.phil" %(OV.BaseDir())
-    olx.phil_handler.adopt_phil(phil_file=phil_file)
-    self.debug = bool(OV.GetParam('diagnostics.debug'))
     self.grade_1_colour = OV.GetParam('gui.skin.diagnostics.colour_grade1').hexadecimal
     self.grade_2_colour = OV.GetParam('gui.skin.diagnostics.colour_grade2').hexadecimal
     self.grade_3_colour = OV.GetParam('gui.skin.diagnostics.colour_grade3').hexadecimal
     self.grade_4_colour = OV.GetParam('gui.skin.diagnostics.colour_grade4').hexadecimal
     self.available_width = int(OV.GetParam('gui.htmlpanelwidth'))
     self.stats = None
-    self.scale = OV.GetParam('diagnostics.scale')
+    self.scale = OV.GetParam('user.diagnostics.scale')
     self.scope = "hkl"
 
   def get_HOS_d(self):
@@ -2607,10 +2604,8 @@ class HealthOfStructure():
       return None
 
   def make_HOS(self, force=False):
-    global timing
-    timing = bool(OV.GetParam('gui.timing'))
     force = bool(force)
-    self.scopes = OV.GetParam('diagnostics.scopes')
+    self.scopes = OV.GetParam('user.diagnostics.scopes')
     self.scope = OV.GetParam('snum.current_process_diagnostics')
     if timing:
       import time
@@ -2807,10 +2802,18 @@ class HealthOfStructure():
       elif item == "_refine_ls_abs_structure_Flack":
         item = 'flack_str'
 
-      display = OV.GetParam('diagnostics.%s.%s.display' %(self.scope,item))
+      display = OV.GetParam('user.diagnostics.%s.%s.display' %(self.scope,item))
 
-      value_format = OV.GetParam('diagnostics.%s.%s.value_format' %(self.scope,item))
-      href = OV.GetParam('diagnostics.%s.%s.href' %(self.scope,item))
+      if item == "MinD":
+        _ = olx.xf.exptl.Radiation()
+        if _.startswith("1.54"):
+          _ = "Cu"
+        elif _.startswith("0.71"):
+          _ = "Mo"
+        display += " (%s)" %_
+
+      value_format = OV.GetParam('user.diagnostics.%s.%s.value_format' %(self.scope,item))
+      href = OV.GetParam('user.diagnostics.%s.%s.href' %(self.scope,item))
 
       raw_val = value
       bg_colour = None
@@ -2958,11 +2961,12 @@ class HealthOfStructure():
       value_raw = float(value_raw)
     except:
       value_raw = 0
-    op = OV.GetParam('diagnostics.hkl.%s.op' %item)
+    op = OV.GetParam('user.diagnostics.hkl.%s.op' %item)
     curr_x = 0
     limit_width = 0
     od_value = None
     theoretical_val = value_raw
+
     if item == "Completeness":
       od_value = OV.get_cif_item('_reflns_odcompleteness_completeness')
       if od_value:
@@ -2988,7 +2992,7 @@ class HealthOfStructure():
       fill = IT.adjust_colour(fill, luminosity=1.9)
       draw.text((2, boxHeight - 2*8), "CIF", font=font_l, fill=fill)
 
-    top = OV.GetParam('diagnostics.hkl.%s.top' %item)
+    top = OV.GetParam('user.diagnostics.hkl.%s.top' %item)
 
     if item == "flack_str":
       x = boxWidth * second_colour_begin
@@ -3013,7 +3017,7 @@ class HealthOfStructure():
         fill = OV.GetParam('gui.red').hexadecimal
         draw.rectangle(box, fill=fill)
 
-      top = OV.GetParam('diagnostics.hkl.%s.top' %item)
+      top = OV.GetParam('user.diagnostics.hkl.%s.top' %item)
 
 
     if item == "MeanIOverSigma":
@@ -3057,7 +3061,7 @@ class HealthOfStructure():
     if value_display_extra:
       dxs,dxy = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=font_size_s * scale)
     dx,dy = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=font_size * scale)
-    x = boxWidth - dx - 6 #right inside margin
+    x = boxWidth - dx - 7 #right inside margin
     draw.text((x, y), "%s" %value_display, font=font, fill=fill)
     if value_display_extra:
       draw.text((0, y - 1 + dy/2), "%s" %value_display_extra, font=font_s, fill="#ffffff")
@@ -3073,8 +3077,8 @@ class HealthOfStructure():
     im = IT.add_whitespace(im, side='bottom', weight=2, colour=bgcolour)
 
     OlexVFS.save_image_to_olex(im, item, 0)
-    href = OV.GetParam('diagnostics.%s.%s.href' %(self.scope,item))
-    target = OV.GetParam('diagnostics.%s.%s.target' %(self.scope,item))
+    href = OV.GetParam('user.diagnostics.%s.%s.href' %(self.scope,item))
+    target = OV.GetParam('user.diagnostics.%s.%s.target' %(self.scope,item))
     txt = ""
     ref_open = ''
     ref_close = ''
@@ -3096,19 +3100,22 @@ class HealthOfStructure():
     except:
       val = 0
 
-    op = OV.GetParam('diagnostics.%s.%s.op' %(self.scope, item))
+
+    mindfac = float(olx.xf.exptl.Radiation())/0.71
+
+    op = OV.GetParam('user.diagnostics.%s.%s.op' %(self.scope, item))
     if op == "between":
-      soll = OV.GetParam('diagnostics.%s.%s.soll' %(self.scope, item))
+      soll = OV.GetParam('user.diagnostics.%s.%s.soll' %(self.scope, item))
     for i in xrange(4):
       i += 1
       if op == "greater":
-        if val >= OV.GetParam('diagnostics.%s.%s.grade%s' %(self.scope, item, i)):
+        if val >= OV.GetParam('user.diagnostics.%s.%s.grade%s' %(self.scope, item, i)) * mindfac:
           break
       elif op == 'smaller':
-        if val <= OV.GetParam('diagnostics.%s.%s.grade%s' %(self.scope, item, i)):
+        if val <= OV.GetParam('user.diagnostics.%s.%s.grade%s' %(self.scope, item, i)) * mindfac:
           break
       elif op == 'between':
-        if val - (OV.GetParam('diagnostics.%s.%s.grade%s' %(self.scope, item, i))) <= soll <= val + (OV.GetParam('diagnostics.%s.%s.grade%s' %(self.scope, item, i))):
+        if val - (OV.GetParam('user.diagnostics.%s.%s.grade%s' %(self.scope, item, i))) * mindfac <= soll <= val + (OV.GetParam('user.diagnostics.%s.%s.grade%s' %(self.scope, item, i))) * mindfac:
           break
 
     if i == 1:

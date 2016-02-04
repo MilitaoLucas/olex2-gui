@@ -90,14 +90,18 @@ $spy.MakeHoverButton('three-CCDC_Number','spy.ccdc_submit()')
 Merge CIF:
   </td>
 
-  <td align='left' width='68%'>
+  <td align='left' width='50%'>
 <a target='Edit the built-in CIF information' href='spy.EditCifInfo()'>metacif</a> $spy.gui.report.publication.DisplayMergeList()
   </td>
 
-  <td align='right' width ='12%'>
+  <td align='right' width ='35%'>
+  <b>Add</b>
 <a href="spy.gui.report.publication.add_cif_to_merge_list(FileOpen('Choose definition file','.cif files|*.cif','$FilePath()'))>>html.Update">
-  <b>add CIF</b>
+  <b>local</b></a> |
+<a href="spy.gui.report.publication.add_cif_to_merge_list(FileOpen('Choose definition file','.cif files|*.cif','$spy.GetParam(user.customisation_dir)/cif_templates'))>>html.Update">
+  <b>default</b></a>&nbsp;<b>CIF</b>
   </td>
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #ignoreif sg('%c')
