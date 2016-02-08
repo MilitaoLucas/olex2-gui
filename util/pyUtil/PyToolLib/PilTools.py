@@ -822,7 +822,6 @@ class timage(ImageTools):
       self.text_time = 0
 
     if self.width <= 0: self.width = 10
-    self.olex2_has_recently_updated = OV.GetParam('olex2.has_recently_updated')
     sf = 4 #images are four times larger than the nominal width of 350
     sfs = sf * 350/int(self.params.htmlpanelwidth)
     self.sf = sf
@@ -854,7 +853,7 @@ class timage(ImageTools):
     if olx.fs.Exists("logo.png") == 'false':
       force_images = True
 
-    if not self.olex2_has_recently_updated:
+    if not olexex.check_for_recent_update():
       if not OV.GetParam('olex2.force_images') and not force_images:
         do_these = [
           "make_images_from_fb_png",
