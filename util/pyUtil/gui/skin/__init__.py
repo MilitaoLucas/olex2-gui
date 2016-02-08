@@ -111,8 +111,10 @@ def check_os():
     return "lin"
 
 def check_for_first_run():
-  first_run = not os.path.exists("%s/global.odb" %OV.DataDir())
-  if  first_run or OV.GetParam('olex2.has_recently_updated'):
+  import olexex
+  first_run = not os.path.exists("%s/global.odb" %OV.DataDir()) \
+    or olexex.check_for_recent_update()
+  if first_run:
     try:
       # olx.SkinUpdated is intentionally not there:
       olx.SkinUpdated

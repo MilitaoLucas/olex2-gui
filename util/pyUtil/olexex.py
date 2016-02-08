@@ -1032,31 +1032,25 @@ def getKeys(key_directory):
   return kl
 
 def check_for_recent_update():
-  retVal = False
-  if OV.GetParam('olex2.has_recently_updated'):
-    return True
-
-  version = OV.GetSVNVersion()
   try:
-    V = OV.FindValue('last_version','0')
-    last_version = int(V)
-  except Exception, err:
-    print "Alert: Reset parameter 'last_version'"
-    last_version = 0
-    OV.SetVar('last_version','0')
+    return olx.has_recently_updated
+  except:
+    version = OV.GetSVNVersion()
+    try:
+      V = OV.FindValue('last_version','0')
+      last_version = int(V)
+    except Exception, err:
+      print "Alert: Reset parameter 'last_version'"
+      last_version = 0
+      OV.SetVar('last_version','0')
 
-#  print "Last Version: %i"%last_version
-  if version > last_version:
-    OV.SetParam('olex2.has_recently_updated',True)
-    retVal = True
-#    print "Olex2 has recently been updated"
-  else:
-    OV.SetParam('olex2.has_recently_updated',False)
-    retVal = False
-    #    print "Olex2 has not been updated"
-  OV.SetVar('last_version',str(version))
-  OV.StoreParameter('last_version')
-  return retVal
+    if version > last_version:
+      olx.has_recently_updated = True
+    else:
+      olx.has_recently_updated = False
+    OV.SetVar('last_version',str(version))
+    OV.StoreParameter('last_version')
+    return olx.has_recently_updated
 
 def register_new_odac(username=None, pwd=None):
   OV.Cursor("Please wait while AutoChem will be installed")
