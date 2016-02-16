@@ -84,12 +84,14 @@ def sources():
       d['chooseFile'].setdefault('file_type',file_type)
       d['chooseFile'].setdefault('caption',d['itemName'])
 
+      if "cif_od" in listFiles.lower() or "crystal_clear" in listFiles.lower():
+        if os.path.exists(filePath):
+          del list_l[1:]
+          break
+
     else:
       del list_l[list_l.index(d)]
 
-    if "cif_od" in listFiles.lower() or "crystal_clear" in listFiles.lower():
-      del list_l[1:]
-      break
 
   text = htmlTools.makeHtmlTable(list_l)
   if not text:
