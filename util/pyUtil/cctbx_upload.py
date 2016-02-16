@@ -15,9 +15,9 @@ parser.add_option('--trunk',
 option, args = parser.parse_args()
 
 if option.trunk:
-  destination = 'distro@www2.olex2.org:/var/distro/bin_dir_next/'
+  destination = 'distro@www2.olex2.org:/var/distro/bin_dir_trunk/'
 else:
-  destination = 'distro@dimas.dur.ac.uk:/var/distro/bin_dir/'
+  destination = 'distro@www2.olex2.org:/var/distro/bin_dir/'
 
 tmp_folder = '~/tmp/cctbx/'
 if sys.platform[:3] == 'win':
@@ -73,7 +73,7 @@ def compile(_platform):
         shutil.rmtree(bundle_dir)
       os.mkdir(bundle_dir)
       os.chdir(bundle_dir)
-      if os.system(bin_dir+'python ' + src_dir + 'libtbx/bundle/copy_all.py cctbx') != 0:
+      if os.system(bin_dir+'libtbx.python ' + src_dir + 'libtbx/bundle/copy_all.py cctbx') != 0:
         print 'Failed to create a distribution...'
         return False
 

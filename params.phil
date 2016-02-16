@@ -733,8 +733,6 @@ olex2
     .type = bool
   is_logged_on = False
     .type = bool
-  has_recently_updated = False
-    .type = bool
   mac_address = ""
     .type = str
   verbose = False
