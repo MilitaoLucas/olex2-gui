@@ -47,6 +47,9 @@ stdout_redirection = True
 
 import os
 import locale
+def onexit():
+  pass
+olex.registerFunction(onexit,False)
 
 # This is more flexible for different computers:
 py_dev_path_dict = {'dkmac': r'/Applications/LiClipse.app/Contents/liclipse/plugins/org.python.pydev_4.3.0.201508181931/pysrc',
@@ -72,7 +75,9 @@ if debug == True:
     except:
       pass
 
-locale.setlocale(locale.LC_ALL, 'C')
+# we need to use the user's locale for proper functioning of functions working
+# with multi-byte strings 
+#locale.setlocale(locale.LC_ALL, 'C')
 
 
 if os.environ.get('OLEX_DBG_NO_STDERR_REDIRECTION') is not None:

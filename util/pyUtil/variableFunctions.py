@@ -3,6 +3,7 @@
 import os
 import shutil
 import sys
+import exceptions
 try:
   import cPickle as pickle # faster C reimplementation of pickle module
 except ImportError:
@@ -304,9 +305,23 @@ def OnStructureLoaded(previous):
     import History
     History.hist.loadHistory()
   LoadStructureParams()
-#  import gui.skin
-#  gui.skin.change_bond_colour('onstructureloaded')
+  try:
+    for l in olx.FileChangeListeners:
+      l('structure')
+  except:
+    pass
 OV.registerFunction(OnStructureLoaded)
+
+def OnHKLChange(hkl):
+  olx.HKLSrc(hkl)
+  OV.SetParam('snum.current_process_diagnostics', 'data')
+  olex.m("spy.make_HOS('True')")
+  try:
+    for l in olx.FileChangeListeners:
+      l('hkl')
+  except:
+    pass
+OV.registerFunction(OnHKLChange)
 
 def SaveUserParams():
   user_phil_file = "%s/user.phil" %(OV.DataDir())
