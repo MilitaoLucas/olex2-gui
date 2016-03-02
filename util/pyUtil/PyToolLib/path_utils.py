@@ -4,21 +4,21 @@ import sys
 import olx
 
 def setup_cctbx():
-  basedir = olx.BaseDir()
+  basedir = olx.BaseDir().encode('utf-8')
   cctbx_dir = os.environ.get('OLEX2_CCTBX_DIR')
   if cctbx_dir and os.path.isdir(cctbx_dir):
     cctbxRoot = cctbx_dir
   else:
-    cctbxRoot = str("%s/cctbx" %basedir)
+    cctbxRoot = "%s/cctbx" %basedir
   build_path = os.environ['LIBTBX_BUILD'] = os.path.normpath(
-    str("%s/cctbx_build" % cctbxRoot))
+    "%s/cctbx_build" % cctbxRoot)
   if os.path.isdir("%s/cctbx_project" %cctbxRoot):
     cctbxSources = "%s/cctbx_project" %cctbxRoot
   else:
     cctbxSources = "%s/cctbx_sources" %cctbxRoot
-  sys.path.append(str("%s/libtbx" % cctbxSources)) # needed to work with old cctbx directory structure
-  sys.path.append(str("%s/libtbx/pythonpath" % cctbxSources)) # needed to work with new cctbx directory structure
-  sys.path.append(str(cctbxSources)) # needed to work with new cctbx directory structure
+  sys.path.append("%s/libtbx" % cctbxSources) # needed to work with old cctbx directory structure
+  sys.path.append("%s/libtbx/pythonpath" % cctbxSources) # needed to work with new cctbx directory structure
+  sys.path.append(cctbxSources) # needed to work with new cctbx directory structure
   need_cold_start = False
   try:
     sys.on_sys_exit_raise = Exception("cold_start")
