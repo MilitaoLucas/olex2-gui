@@ -9,6 +9,7 @@ from PIL import Image
 from PIL import ImageFont, ImageDraw, ImageChops
 from ImageTools import ImageTools
 from PIL import ImageFilter
+import math
 import os
 try:
   import olx
@@ -469,6 +470,20 @@ class Graph(ImageTools):
 
     assert len(self.data) > 0
     for dataset in self.data.values():
+      i = 0
+      for y in dataset.y:
+        if math.isnan(y):
+          del dataset.y[i]
+          del dataset.x[i]
+        i += 1
+
+      i = 0
+      for x in dataset.x:
+        if math.isnan(x):
+          del dataset.y[i]
+          del dataset.x[i]
+        i += 1
+
       if self.auto_axes:
         min_xs.append(min(dataset.x))
         if dataset.sigmas is not None:
@@ -899,6 +914,8 @@ class Graph(ImageTools):
                        width=1, fill=self.outlineColour)
 
     for i, (xr, yr) in enumerate(xy_pairs):
+      if math.isnan(yr):
+        continue
       x = x_constant + xr * scale_x
       y = y_constant + yr * scale_y
 
@@ -922,7 +939,9 @@ class Graph(ImageTools):
         if indices is None:
           target = '(%.3f,%.3f)' %(xr, yr)
         else:
-          target = '(%.3f,%.3f) %s' %(xr, yr, indices[i])
+          idx = repr(indices[i]).replace(",","").replace("(","").replace(")","")
+          target = 'OMIT %s' %(idx)
+          href = "OMIT %s>>spy.make_reflection_graph(fobs_fcalc)" %idx
         map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="%s" target="%s">"""
                             % (box + (href, target)))
 
@@ -2207,6 +2226,8 @@ class item_vs_resolution_plot(Analysis):
       xy_plot.x, [y*y_factor for y in xy_plot.y], metadata=metadata)
     self.data.setdefault('dataset1', data)
     self.make_empty_graph(axis_x=True)
+    if self.item == "i_over_sigma_vs_resolution":
+      self.draw_fit_line(slope=0, y_intercept=3, write_equation=False)
     reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
     self.draw_pairs(reverse_x=reverse_x)
 
@@ -2480,30 +2501,32 @@ def makeReflectionGraphGui():
   gui_d.setdefault('graph_chooser', "")
 
   if GuiGraphChooserComboExists:
-    value = OV.GetValue('SET_REFLECTION_STATISTICS')
+    try:
+      value = OV.GetValue('SET_REFLECTION_STATISTICS')
+    except:
+      value = None
   if not value:
     GuiGraphChooserComboExists = True
     help_name = None
     name = None
   else:
     name = value.lower().replace(" ", "_").replace("-", "_").replace("/","_over_")
-    graph = olx.phil_handler.get_scope_by_name('graphs.reflections.%s' %name)
+    graph = olx.phil_handler.get_scope_by_name('user.graphs.reflections.%s' %name)
     if not graph:
       value = "no phil"
       help_name = None
-    else:
-      gui_d['options_gui'], gui_d['colspan'] = makeReflectionGraphOptions(graph, name)
-      help_name = graph.help
-      onclick = 'spy.make_reflection_graph\(%s)' %name
-      d = {'name':'BUTTON_MAKE_REFLECTION_GRAPH',
-           'bgcolor':guiParams.html.input_bg_colour,
-           'onclick': onclick,
-           'width':'30',
-           'value':'Go',
-           'valign':'top',
-          }
-      #gui_d['make_graph_button'] = htmlTools.make_input_button(d)
-      gui_d['make_graph_button'] = "$spy.MakeHoverButton('button_small-go@MakeGraphs','%s')" %onclick
+    gui_d['options_gui'], gui_d['colspan'] = makeReflectionGraphOptions(graph, name)
+    help_name = graph.help
+    onclick = 'spy.make_reflection_graph\(%s)' %name
+    d = {'name':'BUTTON_MAKE_REFLECTION_GRAPH',
+         'bgcolor':guiParams.html.input_bg_colour,
+         'onclick': onclick,
+         'width':'30',
+         'value':'Go',
+         'valign':'top',
+        }
+    #gui_d['make_graph_button'] = htmlTools.make_input_button(d)
+    gui_d['make_graph_button'] = "$spy.MakeHoverButton('button_small-go@MakeGraphs','%s')" %onclick
 
   gui_d['help'] = htmlTools.make_table_first_col(
     help_name=help_name, popout=False)
@@ -2580,7 +2603,6 @@ def make_reflection_graph(name):
     fun(arg)
   else:
     func()
-
 OV.registerFunction(make_reflection_graph)
 
 class HealthOfStructure():
