@@ -1,6 +1,7 @@
 # initpy.py
 import olex
 import sys
+
 import time
 timer = True
 if timer:
@@ -60,6 +61,7 @@ py_dev_path_dict = {'dkmac': r'/Applications/LiClipse.app/Contents/liclipse/plug
                     'oleg3': r'E:\eclipse-luna\plugins\org.python.pydev_3.8.0.201409251235\pysrc',
                     }
 debug = False or 'OLEX2_ATTACHED_WITH_PYDEBUGGER' in os.environ
+debug = True
 if debug == True:
   try:
     import wingdbstub
@@ -76,7 +78,7 @@ if debug == True:
       pass
 
 # we need to use the user's locale for proper functioning of functions working
-# with multi-byte strings 
+# with multi-byte strings
 #locale.setlocale(locale.LC_ALL, 'C')
 
 
@@ -325,10 +327,15 @@ def onstartup():
     userDictionaries.LocalList()
 
   import gui
+  if timer:
+    t = time.time()
   gui.copy_datadir_items()
+  if timer:
+    tt.append("\t%.3f s --> %s" %((time.time() - t), 'gui.copy_datadir_items'))
   sys.path.append("%s/scripts" %OV.GetParam('user.customisation_dir'))
 
 onstartup()
+
 if timer:
   tt.append("%.3f s == onstartup()" %(time.time() - t))
   t = time.time()
