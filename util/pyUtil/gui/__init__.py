@@ -287,6 +287,7 @@ def copy_datadir_items(force=False):
   This will copy the directories containg the shipped samples as well as a directory called 'customisation' to the DataDir(). It will only copy those sub-directories that are NOT present already. When force=True, all directories will be *merged*. Existing files will not be overwritten.
   This function can be called from the command line with spy.gui.copy_datadir_items(TRUE/FALSE) and is called on every startup of Olex2 from InitPy (with FALSE).
   '''
+  import shutil
 
   if sys.version_info[0] >= 2 and sys.version_info[1] >=6:
     ignore_patterns = shutil.ignore_patterns('*.svn')
@@ -306,6 +307,17 @@ def copy_datadir_items(force=False):
   dirs = ((svn_samples_directory, user_samples_directory), (svn_customisation_directory, user_customisation_directory))
 
   for src, dest in dirs:
+    if "sample_data" in src:
+      if not os.path.exists(dest):
+        dest = src
+      OV.SetParam('user.sample_data',dest)
+      OV.SetVar('sample_dir', dest)
+
+    elif "customisation" in src:
+      if not os.path.exists(dest):
+        dest = src
+      OV.SetParam('user.customisation_dir',dest)
+
     if not os.path.exists(dest):
       os.mkdir(dest)
     else:
@@ -327,16 +339,5 @@ def copy_datadir_items(force=False):
       except Exception, err:
         print err
         pass
-
-    if "sample_data" in src:
-      if not os.path.exists(dest):
-        dest = src
-      OV.SetParam('user.sample_data',dest)
-      OV.SetVar('sample_dir', dest)
-
-    elif "customisation" in src:
-      if not os.path.exists(dest):
-        dest = src
-      OV.SetParam('user.customisation_dir',dest)
 
 olex.registerFunction(copy_datadir_items, False, "gui")
