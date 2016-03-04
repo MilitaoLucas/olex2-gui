@@ -3122,8 +3122,9 @@ class HealthOfStructure():
     except:
       val = 0
 
-
-    mindfac = float(olx.xf.exptl.Radiation())/0.71
+    mindfac = 1
+    if item == 'MinD':
+      mindfac = float(olx.xf.exptl.Radiation())/0.71
 
     op = OV.GetParam('user.diagnostics.%s.%s.op' %(self.scope, item))
     if op == "between":
