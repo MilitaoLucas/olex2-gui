@@ -119,7 +119,7 @@ routines requiring structure refinement
       .type = float
     program = ShelXS ShelXS-1997 ShelXS-1986 XS XT ShelXT '*olex2.solve' XM ShelXD ShelXD-1997 SIR2002 SIR2004 SIR2008 SIR2011 Superflip Unknown ShelXS-2013 ShelXS86 ShelXD-2013
       .type = choice
-    method = 'Dual Space' '*Charge Flipping' 'Direct Methods' 'Patterson Method' 'Structure Expansion' Unknowm
+    method = 'Dual Space' '*Charge Flipping' 'Direct Methods' 'Patterson Method' 'Structure Expansion' 'Intrinsic Phasing' Unknown
       .type = choice
     graphical_output = False
       .type = bool
@@ -1082,6 +1082,7 @@ user
           .type = bool
           .caption = "%Output% csv"
       }
+
       i_over_sigma_vs_resolution
         .short_caption = "I/sig vs res."
         .caption = "I/sigma vs Resolution"

@@ -72,6 +72,7 @@ def defineExternalPrograms():
   # define solution methods
   direct_methods = Method_shelx_direct_methods(direct_methods_phil)
   patterson = Method_shelx_solution(patterson_phil)
+  xt_intrinsic_phasing = Method_shelxt(shelxt_phil_str)
   texp = Method_shelx_solution(texp_phil)
   dual_space = Method_shelxd(dual_space_phil)
   charge_flipping = Method_cctbx_ChargeFlip(charge_flipping_phil)
@@ -243,8 +244,8 @@ Palatinus et al., 2012""",
   XS.addMethod(direct_methods)
   XS.addMethod(patterson)
   XS.addMethod(texp)
-  XT.addMethod(direct_methods)
-  ShelXT.addMethod(direct_methods)
+  XT.addMethod(xt_intrinsic_phasing)
+  ShelXT.addMethod(xt_intrinsic_phasing)
   ShelXD.addMethod(dual_space)
   ShelXD97.addMethod(dual_space)
   XM.addMethod(dual_space)

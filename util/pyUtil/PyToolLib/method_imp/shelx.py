@@ -183,6 +183,9 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
     return flack
 
 
+class Method_shelxt(Method_shelx_solution):
+  pass
+
 class Method_shelx_direct_methods(Method_shelx_solution):
 
   def post_solution(self, RunPrgObject):
@@ -402,6 +405,27 @@ instructions {
   %s
 }
 """ %shelxs_phil_str, process_includes=True)
+
+shelxt_phil_str = phil_interface.parse("""
+name = 'Intrinsic Phasing'
+  .type=str
+atom_sites_solution=dual
+  .type=str
+instructions {
+  command_line
+    .optional=False
+    .caption='Command line'
+  {
+    values {
+      Options=''
+        .type=str
+    }
+    default=True
+      .type=bool
+  }
+}
+""", process_includes=True)
+
 
 patterson_phil = phil_interface.parse("""
 name = 'Patterson Method'
