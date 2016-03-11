@@ -5,6 +5,10 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import olex
 import olx
+import glob
+import OlexVFS
+import ntpath
+
 
 class Method_shelx(Method):
 
@@ -182,9 +186,95 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
 
     return flack
 
-
 class Method_shelxt(Method_shelx_solution):
-  pass
+  def pre_solution(self, RunPrgObject):
+    pass
+#    OlexVFS.delete("solution_output.htm")
+
+  def post_solution(self, RunPrgObject):
+    import gui.tools
+    debug = bool(OV.GetParam('olex2.debug',False))
+    f = os.sep.join([OV.StrDir(), "temp", OV.FileName() + '.lxt'])
+    if os.path.exists(f):
+      f = open(f, 'r').readlines()
+    else:
+      return
+    res_l = []
+    i = 0
+    for line in f:
+      if "Rweak" not in line:
+        i += 1
+        continue
+      for j in xrange(len(f) -i):
+        if "Assign" not in f[i+j]:
+          res_l.append(f[i+j])
+        else:
+          break
+
+    s_blank = gui.tools.TemplateProvider.get_template('xt_output_table', force=debug)
+    href = res_l[0][37:50].strip()
+
+    d = {
+      'td1':"<b>%s</b>" %res_l[0][0:6].strip(),
+      'td2':"<b>%s</b>" %res_l[0][7:12].strip(),
+      'td3':"<b>%s</b>" %res_l[0][13:20].strip(),
+      'td4':"<b>%s</b>" %res_l[0][21:37].strip(),
+      'td5':"<b>%s</b>" %href,
+      'td6':"<b>%s</b>" %res_l[0][49:58].strip()
+    }
+    s = s_blank%d
+
+    g = glob.glob(os.sep.join([OV.StrDir(), "temp", "*.res"]))
+    i = 0
+    for item in g:
+      short_p = ntpath.basename(item)
+      if len(g) == 1:
+        s = "<tr><td>ShelXT returned one solution: %s</td></tr>" %short_p
+        break
+      hkl = olx.file.ChangeExt(item, 'hkl')
+
+      sg = "<b>%s</b>" %(res_l[i+1][37:50].strip())
+      href = '''
+<a href="file.copy('%s','%s.res')>>file.copy('%s','%s.hkl')>>reap %s">%s</a>''' %(item, OV.FileName(), hkl, OV.FileName(), OV.FileFull(), sg)
+
+      orientation = res_l[i+1][21:37].strip()
+      flack = res_l[i+1][50:58].strip()
+      R1 = res_l[i+1][0:6].strip()
+      Rweak = res_l[i+1][7:12].strip()
+      Alpha = res_l[i+1][13:20].strip()
+
+      if not flack:
+        flack = "---"
+      else:
+        if 0.4 < float(flack) < 0.6:
+          flack = "<font color='red'>%s</font>" %flack
+        elif -0.1 < float(flack) < 0.1:
+          flack = "<font color='green'>%s</font>" %flack
+        elif float(flack) < -0.2:
+          flack = "<font color='red'>%s</font>" %flack
+
+      d = {
+        'td1':"%s" %R1,
+        'td2':"%s" %Rweak,
+        'td3':"%s" %Alpha,
+        'td4':"%s" %orientation,
+        'td5':"<b>%s</b>" %href,
+        'td6':"%s" %flack
+      }
+
+      s += s_blank %d
+      i += 1
+
+    d = {
+      'program_output_type':'SOLUTION',
+      'program_output_name':'ShelXT',
+      'program_output_content':s
+    }
+    t = gui.tools.TemplateProvider.get_template('program_output', force=debug)%d
+
+    f_name = OV.FileName() + "_solution_output.html"
+    OlexVFS.write_to_olex(f_name, t)
+    olx.html.Update()
 
 class Method_shelx_direct_methods(Method_shelx_solution):
 

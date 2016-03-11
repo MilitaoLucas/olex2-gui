@@ -422,13 +422,13 @@ class MergeCif(CifTools):
     ECI.run()
     if timer:
       print "-- ECI: %.3f" %(time.time() - t)
-      
+
     if timer:
       t = time.time()
     self.write_metacif_file()
     if timer:
       print "-- write_metacif_file(): %.3f" %(time.time() - t)
-    
+
     ## merge metacif file with cif file from refinement
     merge_with = [self.metacif_path]
     for extra_cif in OV.GetParam('snum.report.merge_these_cifs',[]):
@@ -1161,6 +1161,9 @@ If more than one file is present, the path of the most recent file is returned b
 
     files = []
     for path in OV.ListFiles(os.path.join(directory, name+extension)):
+      info = os.stat(path)
+      files.append((info.st_mtime, path))
+    for path in OV.ListFiles(os.path.join(directory, name.replace("_sq","") + extension)): #find the files even if the SQUEEZEd version is used.
       info = os.stat(path)
       files.append((info.st_mtime, path))
     if files:
