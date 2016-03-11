@@ -8,7 +8,7 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 debug = bool(OV.GetParam('olex2.debug',False))
 timer = debug
-
+import glob
 global have_found_python_error
 have_found_python_error= False
 
@@ -845,5 +845,53 @@ class LogListen():
           for em in tem:
             l.append(em)
     return l
+
+class Templates():
+  def __init__(self):
+    self.templates = {}
+    self.get_all_templates()
+
+  def get_template(self, name, force=False, path=None):
+    '''
+    Returns a particular template from the Template.templates dictionary. If it doesn't exist, then it will try and get it, and return a 'not found' string if this does not succeed.
+    -- if force==True, then the template will be reloaded
+    -- if path is provided, then this location will also be searched.
+    '''
+    retVal = self.templates.get(name, None)
+    if not retVal or force:
+      self.get_all_templates(path)
+      retVal = self.templates.get(name, None)
+    if not retVal:
+      return "Template <b>%s</b> has not been found."%name
+    else:
+      return retVal
+
+  def get_all_templates(self, path=None):
+    '''
+    Parses the path for template files.
+    '''
+    if not path:
+      path = os.sep.join([OV.BaseDir(), 'util', 'pyUtil', 'gui', 'templates'])
+
+    g = glob.glob("%s%s*.*" %(path,os.sep))
+    for f_path in g:
+      fc = open(f_path, 'r').read()
+      if not self._extract_templates_from_text(fc):
+        name = os.path.basename(os.path.normpath(f_path))
+        self.templates[name] = content
+
+  def _extract_templates_from_text(self, t):
+    regex = re.compile(r't:(.*?)\{(.*?)\}',re.DOTALL)
+    m=regex.findall(t)
+    if m:
+      for item in m:
+        name = item[0]
+        content = item[1]
+        self.templates[name] = content
+      return True
+    else:
+      return False
+
+TemplateProvider = Templates()
 
 
