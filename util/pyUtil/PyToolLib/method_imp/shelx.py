@@ -157,6 +157,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       if v == 'n/a':  v = 0
       OV.SetParam(k, v)
 
+
   def gather_refinement_information(self):
     cif = {}
     cif.setdefault('_refine_ls_R_factor_all', olx.Lst('R1all'))
@@ -264,23 +265,19 @@ class Method_shelxt(Method_shelx_solution):
 
       s += s_blank %d
       i += 1
-
-    d = {
-      'program_output_type':'SOLUTION',
-      'program_output_name':'ShelXT',
-      'program_output_content':s
-    }
-    t = gui.tools.TemplateProvider.get_template('program_output', force=debug)%d
-
-    f_name = OV.FileName() + "_solution_output.html"
-    OlexVFS.write_to_olex(f_name, t)
-    olx.html.Update()
+    RunPrgObject.post_prg_output_html_message = s
 
 class Method_shelx_direct_methods(Method_shelx_solution):
 
   def post_solution(self, RunPrgObject):
     Method_shelx_solution.post_solution(self, RunPrgObject)
     self.get_XS_TREF_solution_indicators(RunPrgObject)
+
+    import gui.tools
+    debug = bool(OV.GetParam('olex2.debug',False))
+    RunPrgObject.post_prg_output_html_message = "Ralpha=%s, Nqual=%s, CFOM=%s" %(RunPrgObject.Ralpha,RunPrgObject.Nqual,RunPrgObject.CFOM)
+    if OV.GetParam('user.solution.run_auto_vss'):
+      RunPrgObject.please_run_auto_vss = True
 
   def get_XS_TREF_solution_indicators(self, RunPrgObject):
     """Gets the TREF solution indicators from the .lst file and prints values in Olex2.
@@ -828,3 +825,12 @@ def get_CGLS_phil():
       %s
     }
     """ %shelxl_phil_str, process_includes=True)
+
+
+def post_solution_html(d):
+  import gui.tools
+  debug = bool(OV.GetParam('olex2.debug',False))
+  t = gui.tools.TemplateProvider.get_template('program_output', force=debug)%d
+  f_name = OV.FileName() + "_solution_output.html"
+  OlexVFS.write_to_olex(f_name, t)
+  olx.html.Update()
