@@ -895,7 +895,6 @@ user
     .type = str
   report_label_style = 0
     .type = int
-
   parts{
     keep_unique = False
       .type = bool
@@ -903,6 +902,10 @@ user
       .type = bool
   }
 
+  solution{
+    run_auto_vss = False
+      .type = bool
+  }
 
   graphs
     .short_caption = Analysis Graphs
@@ -1554,8 +1557,6 @@ user
       }
     }
   }
-
-
 
   diagnostics{
     pin_scopes = True

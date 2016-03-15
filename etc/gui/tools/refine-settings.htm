@@ -1,3 +1,9 @@
+$+
+run("SetVar(refinement_output, strcat(FileName(),_refinement_output.html))")
+$-
+<!-- #includeif fs.Exists(GetVar(refinement_output)) refinement_output GetVar(refinement_output);1; -->
+
+
 <table border="0" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
 
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_PROGRAM' width='100%'>

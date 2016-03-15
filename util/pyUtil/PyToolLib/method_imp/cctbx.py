@@ -3,6 +3,7 @@ import phil_interface
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import olx
+import olex
 
 class Method_cctbx_refinement(Method_refinement):
 
@@ -136,6 +137,10 @@ class Method_cctbx_ChargeFlip(Method_solution):
     file_name = r"%s/%s.res" %(olx.FilePath(), RunPrgObject.fileName)
     olx.xf.SaveSolution(file_name)
     olx.Atreap('"%s"' %file_name)
+
+  def post_solution(self, RunPrgObject):
+    if OV.GetParam('user.solution.run_auto_vss'):
+      RunPrgObject.please_run_auto_vss = True
 
 charge_flipping_phil = phil_interface.parse("""
 name = 'Charge Flipping'
