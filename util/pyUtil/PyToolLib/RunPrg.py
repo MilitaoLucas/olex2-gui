@@ -4,6 +4,8 @@ import olx
 import olex_core
 import os
 import olexex
+import OlexVFS
+
 from ArgumentParser import ArgumentParser
 from History import hist
 
@@ -38,6 +40,7 @@ class RunPrg(ArgumentParser):
     self.shelx_files = r"%s/util/SHELX/" %self.basedir
     self.isAllQ = False #If all atoms are q-peaks, this will be assigned to True
     self.his_file = None
+    self.please_run_auto_vss = False
 
     self.demo_mode = OV.FindValue('autochem_demo_mode',False)
     self.broadcast_mode = OV.FindValue('broadcast_mode',False)
@@ -48,6 +51,8 @@ class RunPrg(ArgumentParser):
       from Analysis import PrgAnalysis
       self.PrgAnalysis = PrgAnalysis
 
+    OV.registerFunction(self.run_auto_vss,False,'runprg')
+
     self.params = olx.phil_handler.get_python_object()
     OV.SetVar('SlideQPeaksVal','0') # reset q peak slider to display all peaks
     if not self.filename:
@@ -57,6 +62,8 @@ class RunPrg(ArgumentParser):
     olx.Stop('listen')
     self.shelx_alias = OV.FileName().replace(' ', '').lower()
     os.environ['FORT_BUFFERED'] = 'TRUE'
+    self.post_prg_output_html_message = ""
+
 
   def __del__(self):
     if self.method is not None:
@@ -94,7 +101,23 @@ class RunPrg(ArgumentParser):
       sys.stdout.refresh = False
       sys.stdout.graph = False
     finally:
+      olx.html.Update()
       RunPrg.running = False
+
+      if self.please_run_auto_vss:
+        self.run_auto_vss()
+
+  def run_auto_vss(self):
+    olx.Freeze(True)
+    olex.m('compaq')
+    olex.m('compaq -a')
+    olx.VSS(True)
+    olex.m('compaq')
+    olex.m('refine 2 10')
+    olex.m('compaq')
+    olx.ATA()
+    olex.m('refine 2 10')
+    olx.Freeze(False)
 
   def which_shelx(self, type="xl"):
     a = olexex.which_program(type)
@@ -217,11 +240,6 @@ class RunPrg(ArgumentParser):
       if 'xt' not in self.program.name.lower():
         OV.HKLSrc(self.hkl_src)
 
-      if timer:
-        t = time.time()
-      olx.html.Update()
-      if timer:
-        print "--- olex.html.Update(): %.3f" %(time.time() - t)
     else:
       if self.broadcast_mode:
         if timer:
@@ -250,12 +268,12 @@ class RunPrg(ArgumentParser):
 
   def getProgramMethod(self, fun):
     if fun == 'refine':
-      prgType = 'refinement'
+      self.prgType = prgType = 'refinement'
       prgDict = self.RPD
       prg = self.params.snum.refinement.program
       method = self.params.snum.refinement.method
     else:
-      prgType = 'solution'
+      self.prgType = prgType = 'solution'
       prgDict = self.SPD
       prg = self.params.snum.solution.program
       method = self.params.snum.solution.method
@@ -277,6 +295,35 @@ class RunPrg(ArgumentParser):
   def endRun(self):
     OV.DeleteBitmap('%s' %self.bitmap)
     OV.Cursor()
+
+  def post_prg_html(self):
+    import gui.tools
+    debug = bool(OV.GetParam('olex2.debug',False))
+
+    typ = self.prgType.lower()
+
+    if typ=='refinement':
+      return
+
+    extra_msg = ""
+    if typ == "refinement":
+      extra_msg = "$spy.MakeHoverButton('small-Assign@refinement','ATA(1)')"
+    elif typ == "solution" and self.program.name.lower() != "shelxt":
+      extra_msg = gui.tools.TemplateProvider.get_template('run_auto_vss_box', force=debug)
+
+    message = "<td>%s</td><td align='right'>%s</td>" %(self.post_prg_output_html_message, extra_msg)
+
+    d = {
+      'program_output_type':"PROGRAM_OUTPUT_%s" %self.prgType.upper(),
+      'program_output_name':self.program.name,
+      'program_output_content': message
+    }
+
+    t = gui.tools.TemplateProvider.get_template('program_output', force=debug)%d
+    f_name = OV.FileName() + "_%s_output.html" %self.prgType
+    OlexVFS.write_to_olex(f_name, t)
+#    olx.html.Update()
+
 
 
 class RunSolutionPrg(RunPrg):
@@ -307,6 +354,7 @@ class RunSolutionPrg(RunPrg):
     OV.SetParam('snum.refinement.update_weight', False)
     RunPrg.runAfterProcess(self)
     self.method.post_solution(self)
+    self.post_prg_html()
     self.doHistoryCreation()
     OV.SetParam('snum.current_process_diagnostics','solution')
 
@@ -449,6 +497,7 @@ class RunRefinementPrg(RunPrg):
 
     if timer:
       t = time.time()
+    self.post_prg_html()
     self.doHistoryCreation()
     if timer:
       print "-- self.method.post_refinement(self): %3f" %(time.time()-t)
@@ -564,6 +613,7 @@ class RunRefinementPrg(RunPrg):
       #print "OK"
       pass
 
+
 def AnalyseRefinementSource():
   file_name = OV.FileFull()
   ins_file_name = olx.file.ChangeExt(file_name, 'ins')
@@ -596,3 +646,4 @@ def AnalyseRefinementSource():
 OV.registerFunction(AnalyseRefinementSource)
 OV.registerFunction(RunRefinementPrg)
 OV.registerFunction(RunSolutionPrg)
+
