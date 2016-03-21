@@ -61,7 +61,6 @@ py_dev_path_dict = {'dkmac': r'/Applications/LiClipse.app/Contents/liclipse/plug
                     'oleg3': r'E:\eclipse-luna\plugins\org.python.pydev_3.8.0.201409251235\pysrc',
                     }
 debug = False or 'OLEX2_ATTACHED_WITH_PYDEBUGGER' in os.environ
-debug = True
 if debug == True:
   try:
     import wingdbstub
@@ -205,6 +204,7 @@ def set_plugins_paths():
   plugins = olexex.InstalledPlugins()
   sys.path.append("%s/util/pyUtil/PluginLib" %(basedir))
   from PluginTools import PluginTools
+  from AC3 import *
   for plugin in plugins:
     sys.path.append("%s/util/pyUtil/PluginLib/plugin-%s" %(basedir,plugin))
   for plugin in plugins:
