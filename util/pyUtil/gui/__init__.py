@@ -307,6 +307,11 @@ def copy_datadir_items(force=False):
   dirs = ((svn_samples_directory, user_samples_directory), (svn_customisation_directory, user_customisation_directory))
 
   for src, dest in dirs:
+    if not os.path.exists(dest):
+      os.makedirs(dest)
+    else:
+      if not force:
+        continue
     if "sample_data" in src:
       if not os.path.exists(dest):
         dest = src
@@ -317,14 +322,11 @@ def copy_datadir_items(force=False):
       if not os.path.exists(dest):
         dest = src
       OV.SetParam('user.customisation_dir',dest)
-
-    if not os.path.exists(dest):
-      os.mkdir(dest)
-    else:
-      if not force:
-        continue
+    if dest == src:
+      continue
     things = os.listdir(src)
     for thing in things:
+      print thing
       if thing == '.svn': continue
       try:
         from_f = '%s%s%s' %(src,os.sep,thing)
