@@ -52,6 +52,8 @@
     <_exptl_crystal_density_diffrn>
     <_exptl_crystal_F_000>
     <_chemical_formula_sum>
+    <_diffrn_oxdiff_ac3_digest_hkl>
+    <_diffrn_oxdiff_ac3_digest_frames>
   >
   <do_merge
    <_*_details>
