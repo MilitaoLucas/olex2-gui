@@ -35,7 +35,14 @@ solvers = {
 }
 solvers_default_method = 'Gauss-Newton'
 
-class olex2_normal_eqns(least_squares.crystallographic_ls_class()):
+
+def get_parent():
+  try:
+    return least_squares.crystallographic_ls_class()
+  except:
+    return least_squares.crystallographic_ls
+
+class olex2_normal_eqns(get_parent()):
   log = None
 
   def __init__(self, observations, reparametrisation, olx_atoms, **kwds):
