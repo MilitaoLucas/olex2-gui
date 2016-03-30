@@ -121,7 +121,6 @@ def _merge_objects(self, object):
       else:
         obj.primary_parent_scope = self
       self.objects.append(obj)
-      print obj.name
 
 def _replace_object(self, object):
   for i, tobj in enumerate(self.objects):
