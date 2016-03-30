@@ -101,7 +101,8 @@ class RunPrg(ArgumentParser):
       sys.stdout.refresh = False
       sys.stdout.graph = False
     finally:
-      olx.html.Update()
+      if self.HasGUI:
+        olx.html.Update()
       RunPrg.running = False
 
       if self.please_run_auto_vss:
@@ -230,9 +231,11 @@ class RunPrg(ArgumentParser):
 
       if timer:
         t = time.time()
-      olx.Freeze(True)
+      if self.HasGUI:
+        olx.Freeze(True)
       OV.reloadStructureAtreap(self.filePath, self.curr_file, update_gui=False)
-      olx.Freeze(False)
+      if self.HasGUI:
+        olx.Freeze(False)
       if timer:
         print "--- reloadStructureAtreap: %.3f" %(time.time() - t)
 
@@ -297,6 +300,8 @@ class RunPrg(ArgumentParser):
     OV.Cursor()
 
   def post_prg_html(self):
+    if not OV.HasGUI():
+      return
     import gui.tools
     debug = bool(OV.GetParam('olex2.debug',False))
 

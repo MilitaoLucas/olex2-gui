@@ -193,6 +193,8 @@ class Method_shelxt(Method_shelx_solution):
 #    OlexVFS.delete("solution_output.htm")
 
   def post_solution(self, RunPrgObject):
+    if not OV.HasGUI():
+      return
     import gui.tools
     debug = bool(OV.GetParam('olex2.debug',False))
     f = os.sep.join([OV.StrDir(), "temp", OV.FileName() + '.lxt'])
@@ -273,6 +275,8 @@ class Method_shelx_direct_methods(Method_shelx_solution):
     Method_shelx_solution.post_solution(self, RunPrgObject)
     self.get_XS_TREF_solution_indicators(RunPrgObject)
 
+    if not OV.HasGUI():
+      return
     import gui.tools
     debug = bool(OV.GetParam('olex2.debug',False))
     RunPrgObject.post_prg_output_html_message = "Ralpha=%s, Nqual=%s, CFOM=%s" %(RunPrgObject.Ralpha,RunPrgObject.Nqual,RunPrgObject.CFOM)
@@ -828,6 +832,8 @@ def get_CGLS_phil():
 
 
 def post_solution_html(d):
+  if not OV.HasGUI():
+    return
   import gui.tools
   debug = bool(OV.GetParam('olex2.debug',False))
   t = gui.tools.TemplateProvider.get_template('program_output', force=debug)%d
