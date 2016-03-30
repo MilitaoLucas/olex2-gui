@@ -204,7 +204,7 @@ def set_plugins_paths():
   plugins = olexex.InstalledPlugins()
   sys.path.append("%s/util/pyUtil/PluginLib" %(basedir))
   from PluginTools import PluginTools
-  from AC3 import *
+  import AC3
   for plugin in plugins:
     sys.path.append("%s/util/pyUtil/PluginLib/plugin-%s" %(basedir,plugin))
   for plugin in plugins:
