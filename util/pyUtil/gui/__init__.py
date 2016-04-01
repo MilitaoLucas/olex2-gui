@@ -310,6 +310,11 @@ def copy_datadir_items(force=False):
     if not os.path.exists(dest):
       os.makedirs(dest)
     else:
+      if "sample_data" in src:
+        OV.SetParam('user.sample_data',dest)
+        OV.SetVar('sample_dir', dest)
+      elif "customisation" in src:
+        OV.SetParam('user.customisation_dir',dest)
       if not force:
         continue
     if "sample_data" in src:
