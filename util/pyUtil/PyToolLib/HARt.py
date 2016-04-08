@@ -48,8 +48,16 @@ class Job(object):
 
   def launch(self):
     if olx.xf.latt.IsGrown() == 'true':
-      if olx.Alert("Please confirm", "The structure is grown - do you really want to continue?", "YN", False) == 'N':
+      if olx.Alert("Please confirm",\
+"""This is a grown structure. If you have created a cluster of molecules, make sure
+that the structure you see on the screen obeys the crystallographic symmetry.
+If this is not the case, the HAR will not work properly. Continue?""", "YN", False) == 'N':
         return
+    elif olx.xf.au.GetZprime() != '1':
+      olx.Alert("Please confirm",\
+"""This is a  Z' < 1 structure. You have to complete all molecules before you run HARt.""",
+     "O", False)
+      return
     model_file_name = os.path.join(self.parent.jobs_dir, self.name, self.name) + ".cif"
     olx.Kill("$Q")
     #olx.Grow()
