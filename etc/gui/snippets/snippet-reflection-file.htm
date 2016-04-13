@@ -6,7 +6,7 @@
   width='100%' 
   name='SET_REFLECTIONS_#parent_name'
   items="spy.GetHklFileList()"
-  onchange='OV.OnHKLChange(html.GetValue(~name~))>>html.Update'
+  onchange='spy.OnHKLChange(html.GetValue(~name~))>>html.Update'
   value="FileName(HKLSrc())'.'FileExt(HKLSrc())"
   readonly="true"
 >
