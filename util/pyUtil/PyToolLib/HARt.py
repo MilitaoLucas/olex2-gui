@@ -105,9 +105,9 @@ class HARt(object):
       os.mkdir(self.jobs_dir)
     self.jobs = []
     if sys.platform[:3] == 'win':
-      self.exe = olx.file.Which("har.exe")
+      self.exe = olx.file.Which("hart.exe")
     else:
-      self.exe = olx.file.Which("har")
+      self.exe = olx.file.Which("hart")
     if os.path.exists(self.exe):
       self.basis_dir = os.path.join(os.path.split(self.exe)[0], "basis_sets").replace("\\", "/")
       if os.path.exists(self.basis_dir):

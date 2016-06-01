@@ -122,7 +122,7 @@ class PlatonWrapper:
       if platonflag == "0":
         # Start just platon with the INS file
         print "Calling Platon Directly"
-        a = self.run_platon("platon " + inputfile)
+        a = self.run_platon(["platon", inputfile])
         return a
       else:
         if platonflag == 'U':
@@ -134,7 +134,7 @@ class PlatonWrapper:
             return
         if not platonflag:
           tickornot = ""
-        command = "platon %s%s %s"%(tickornot, platonflag, inputfile)
+        command = ["platon", "%s%s"%(tickornot, platonflag), inputfile] 
         print "Now running this command %s" %command
         try:
           a = self.run_platon(command)
