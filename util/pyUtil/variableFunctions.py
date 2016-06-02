@@ -246,8 +246,9 @@ def LoadStructureParams():
   #
   # Start backwards compatibility  2010-06-18
   #
+  StrDir = OV.StrDir()
   metacif_path = '%s/%s.metacif' %(OV.StrDir(), model_src)
-  if not os.path.isfile(metacif_path) and structure_phil is not None:
+  if StrDir and not os.path.isfile(metacif_path) and structure_phil is not None:
     from iotbx.cif import model
     master_phil = phil_interface.parse(
       file_name=os.path.join(OV.BaseDir(), "metacif.phil"))
@@ -295,7 +296,7 @@ def SaveStructureParams():
 OV.registerFunction(SaveStructureParams)
 
 def OnStructureLoaded(previous):
-  if olx.IsFileLoaded() == 'false':
+  if olx.IsFileLoaded() == 'false' or not OV.StrDir():
     return
   mf_name = "%s%s%s.metacif" %(OV.StrDir(), os.path.sep, OV.ModelSrc())
   cif_name = "%s%s%s.cif" %(OV.FilePath(), os.path.sep, OV.FileName())
