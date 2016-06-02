@@ -175,7 +175,10 @@ class OlexFunctions(inheritFunctions):
       if data_name not in olx.cif_model:
         import CifInfo
         CifInfo.ExtractCifInfo()
-      tem = olx.cif_model[data_name].get(key, default)
+      try:
+        tem = olx.cif_model[data_name].get(key, default)
+      except KeyError:
+        return deault
       if tem is None: return default
       retVal = default
       if type(tem) == str:
@@ -699,7 +702,10 @@ class OlexFunctions(inheritFunctions):
       return olx.HKLSrc()
 
   def StrDir(self):
-    return olx.StrDir()
+    try:
+      return olx.StrDir()
+    except:
+      return None
 
   def GetFormula(self):
     return olx.xf.GetFormula()
