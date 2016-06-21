@@ -19,6 +19,8 @@ class Job(object):
       os.mkdir(full_dir)
     self.date = os.path.getctime(full_dir)
     self.result_fn = os.path.join(full_dir, name) + ".accurate.cif"
+    self.error_fn = os.path.join(full_dir, name) + ".err"
+    self.out_fn = os.path.join(full_dir, name) + ".out"
     self.completed = os.path.exists(self.result_fn)
     initialised = False
 
@@ -85,6 +87,7 @@ If this is not the case, the HAR will not work properly. Continue?""", "YN", Fal
           args.append("-h-adps")
           args.append("t")
         pass
+    args.append ("pause")
     subprocess.Popen(args)
 
 
@@ -132,10 +135,12 @@ class HARt(object):
       return
     j = Job(self, olx.FileName())
     j.launch()
+    olx.html.Update()
+
 
   def getBasisListStr(self):
     return self.basis_list_str
-  
+
   def list_jobs(self):
     import time
     self.jobs = []
@@ -145,15 +150,31 @@ class HARt(object):
       if os.path.isdir(fp) and os.path.exists(jof):
         self.jobs.append(Job(self, j))
     sorted(self.jobs, key=lambda s: s.date)
-    rv = "<p><b>Recent jobs</b> (<a href=\"spy.tonto.HAR.view_all()\">View all jobs...</a>)</p>"
-    rv += "<table><tr><th>Job name</th><th>Timestamp</th></tr>"
+    rv = "<b>Recent jobs</b> (<a href=\"spy.tonto.HAR.view_all()\">View all jobs</a>)<br>"
+    rv += "<table><tr><th>Job name</th><th>Timestamp</th><th>Status</th><th>Error</th></tr>"
+    status_running = "<font color='orange'>Running</font>"
+    status_completed = "<font color='green'>Completed</font>"
+    status_error = "<font color='red'>Error!</font>"
     for i in range(min(5, len(self.jobs))):
-      ct = time.strftime("%Y/%m/%d %M:%H", time.gmtime(self.jobs[i].date))
+      error = "--"
+      if os.path.exists(self.jobs[i].error_fn):
+        _ = open(self.jobs[i].error_fn).read().strip()
+        if not _:
+          error = "--"
+        else:
+          error = "<a href='exec -o getvar(defeditor) %s'>Error File</a>" %self.jobs[i].error_fn
+
+      ct = time.strftime("%Y/%m/%d %H:%M", time.gmtime(self.jobs[i].date))
       if not self.jobs[i].completed:
-        rv += "<tr><td>%s</td><td>%s</td></tr>" %(self.jobs[i].name, ct)
+        status = "<a href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_running)
+        rv += "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" %(self.jobs[i].name, ct, status, error)
       else:
-        rv += "<tr><td><a href='reap \"%s\"'>%s</a></td><td>%s</td></tr>" %\
-        (self.jobs[i].result_fn, self.jobs[i].name, ct)
+        if os.path.exists(self.jobs[i].result_fn):
+          status = "<a href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_completed)
+        else:
+          status = "<a href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_error)
+        rv += "<tr><td><a href='reap \"%s\"'>%s</a></td><td>%s</td><td>%s</td><td>%s</td></tr>" %\
+        (self.jobs[i].result_fn, self.jobs[i].name, ct, status, error)
     return rv + "</table>"
 
   def view_all(self):

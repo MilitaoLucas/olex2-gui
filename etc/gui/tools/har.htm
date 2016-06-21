@@ -1,7 +1,7 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='HAR';help_ext=HAR;1 -->
-<td>Tonto HAR refinement interface</td>
+<td><font size="+1"><b>Tonto HAR refinement interface</b></font></td>
 </tr><tr><td>
  <table cellpadding="1" cellspacing="2" width="100%">
    <tr><td width="20%">
@@ -67,7 +67,11 @@
         "value=GetVar('settings.tonto.HAR.intensity_threshold.value')",
         "onchange=SetVar('settings.tonto.HAR.intensity_threshold.value', html.GetValue('~name~'))")
       $-</td>
-     <td>&nbsp;</td>
+     <td>$+
+       html.Snippet("gui/snippets/input-button", "name=update_info",
+        "value=Update Info",
+        "onclick=html.Update")
+     $-</td>
      <td>$+
        html.Snippet("gui/snippets/input-button", "name=tonto_har_run",
         "value=Launch",
@@ -77,5 +81,11 @@
  </table>
 </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='HAR_JOBS';help_ext=HAR_JOBS;1 -->
 $spy.tonto.HAR.list_jobs()
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
