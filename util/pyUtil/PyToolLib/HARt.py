@@ -2,7 +2,7 @@ import os
 import sys
 import olx
 import olex
-import subprocess
+#import subprocess
 import shutil
 
 from olexFunctions import OlexFunctions
@@ -15,13 +15,17 @@ class Job(object):
     self.status = 0
     self.name = name
     full_dir = os.path.join(parent.jobs_dir, self.name)
+    self.full_dir = full_dir
     if not os.path.exists(full_dir):
-      os.mkdir(full_dir)
+      return
     self.date = os.path.getctime(full_dir)
     self.result_fn = os.path.join(full_dir, name) + ".accurate.cif"
     self.error_fn = os.path.join(full_dir, name) + ".err"
     self.out_fn = os.path.join(full_dir, name) + ".out"
+    self.dump_fn = os.path.join(full_dir, "hart.exe.stackdump")
+    self.analysis_fn = os.path.join(full_dir, "stdout.fit_analysis")
     self.completed = os.path.exists(self.result_fn)
+    self.full_dir = full_dir
     initialised = False
 
   def save(self):
@@ -60,6 +64,16 @@ If this is not the case, the HAR will not work properly. Continue?""", "YN", Fal
 """This is a  Z' < 1 structure. You have to complete all molecules before you run HARt.""",
      "O", False)
       return
+
+    if os.path.exists(self.full_dir):
+      if olx.Alert("Please confirm",\
+"""This directory already exists. All data will be deleted. Continue?""", "YN", False) == 'N':
+        return
+      import shutil
+      shutil.rmtree(self.full_dir)
+
+    os.mkdir(self.full_dir)
+
     model_file_name = os.path.join(self.parent.jobs_dir, self.name, self.name) + ".cif"
     olx.Kill("$Q")
     #olx.Grow()
@@ -87,8 +101,14 @@ If this is not the case, the HAR will not work properly. Continue?""", "YN", Fal
           args.append("-h-adps")
           args.append("t")
         pass
-    args.append ("pause")
-    subprocess.Popen(args)
+
+    os.chdir(self.full_dir)
+    #from subprocess import Popen, PIPE, STDOUT
+    #p = Popen(args, shell=False, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
+    #output = p.stdout.read()
+    #print output
+    from subprocess import Popen
+    Popen(args)
 
 
 class HARt(object):
@@ -151,10 +171,10 @@ class HARt(object):
         self.jobs.append(Job(self, j))
     sorted(self.jobs, key=lambda s: s.date)
     rv = "<b>Recent jobs</b> (<a href=\"spy.tonto.HAR.view_all()\">View all jobs</a>)<br>"
-    rv += "<table><tr><th>Job name</th><th>Timestamp</th><th>Status</th><th>Error</th></tr>"
-    status_running = "<font color='orange'>Running</font>"
-    status_completed = "<font color='green'>Completed</font>"
-    status_error = "<font color='red'>Error!</font>"
+    rv += "<table><tr><th width='30%'>Job name</th><th width='25%'>Timestamp</th><th width='15%'>Status</th><th width='15%'>Error</th><th>Dump</th><th width='15%'>Analysis</th></tr>"
+    status_running = "<font color='%s'><b>Running</b></font>" %OV.GetParam('gui.orange')
+    status_completed = "<font color='%s'><b>Completed</b></font>" %OV.GetParam('gui.green')
+    status_error = "<font color='%s'><b>Error!</b></font>" %OV.GetParam('gui.red')
     for i in range(min(5, len(self.jobs))):
       error = "--"
       if os.path.exists(self.jobs[i].error_fn):
@@ -163,18 +183,28 @@ class HARt(object):
           error = "--"
         else:
           error = "<a href='exec -o getvar(defeditor) %s'>Error File</a>" %self.jobs[i].error_fn
+      dump = "--"
+      if os.path.exists(self.jobs[i].dump_fn):
+        dump = "<a href='exec -o getvar(defeditor) %s'>Open</a>" %self.jobs[i].dump_fn
+      analysis = "--"
+      if os.path.exists(self.jobs[i].analysis_fn):
+        analysis = "<a href='exec -o getvar(defeditor) %s'>Open</a>" %self.jobs[i].analysis_fn
 
       ct = time.strftime("%Y/%m/%d %H:%M", time.gmtime(self.jobs[i].date))
       if not self.jobs[i].completed:
-        status = "<a href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_running)
-        rv += "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" %(self.jobs[i].name, ct, status, error)
+        if dump == "--":
+          status = "<a href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_running)
+        else:
+          status = "<a href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_error)
+
+        rv += "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" %(self.jobs[i].name, ct, status, error, dump, analysis)
       else:
-        if os.path.exists(self.jobs[i].result_fn):
+        if os.path.exists(self.jobs[i].analysis_fn):
           status = "<a href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_completed)
         else:
           status = "<a href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_error)
-        rv += "<tr><td><a href='reap \"%s\"'>%s</a></td><td>%s</td><td>%s</td><td>%s</td></tr>" %\
-        (self.jobs[i].result_fn, self.jobs[i].name, ct, status, error)
+        rv += "<tr><td><a href='reap \"%s\"'>%s</a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" %\
+        (self.jobs[i].result_fn, self.jobs[i].name, ct, status, error, dump, analysis)
     return rv + "</table>"
 
   def view_all(self):
