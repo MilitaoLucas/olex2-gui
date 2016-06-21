@@ -171,7 +171,16 @@ class HARt(object):
         self.jobs.append(Job(self, j))
     sorted(self.jobs, key=lambda s: s.date)
     rv = "<b>Recent jobs</b> (<a href=\"spy.tonto.HAR.view_all()\">View all jobs</a>)<br>"
-    rv += "<table><tr><th width='30%'>Job name</th><th width='25%'>Timestamp</th><th width='15%'>Status</th><th width='15%'>Error</th><th>Dump</th><th width='15%'>Analysis</th></tr>"
+    rv += '''
+    <table>
+      <tr>
+        <th width='25%' align='left'>Job name</th>
+        <th width='25%' align='left'>Timestamp</th>
+        <th width='14%' align='middle''>Status</th>
+        <th width='12%' align='middle''>Error</th>
+        <th width='12%' align='middle'>Dump</th>
+        <th width='12%' align='right'>Analysis</th></tr>'''
+    
     status_running = "<font color='%s'><b>Running</b></font>" %OV.GetParam('gui.orange')
     status_completed = "<font color='%s'><b>Completed</b></font>" %OV.GetParam('gui.green')
     status_error = "<font color='%s'><b>Error!</b></font>" %OV.GetParam('gui.red')
@@ -188,7 +197,7 @@ class HARt(object):
         dump = "<a href='exec -o getvar(defeditor) %s'>Open</a>" %self.jobs[i].dump_fn
       analysis = "--"
       if os.path.exists(self.jobs[i].analysis_fn):
-        analysis = "<a href='exec -o getvar(defeditor) %s'>Open</a>" %self.jobs[i].analysis_fn
+        analysis = "<a href='exec -o getvar(defeditor) %s>>spy.tonto.HAR.getAnalysisPlotData(%s)'>Open</a>" %(self.jobs[i].analysis_fn, self.jobs[i].analysis_fn)
 
       ct = time.strftime("%Y/%m/%d %H:%M", time.gmtime(self.jobs[i].date))
       if not self.jobs[i].completed:
@@ -201,6 +210,8 @@ class HARt(object):
       else:
         if os.path.exists(self.jobs[i].analysis_fn):
           status = "<a href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_completed)
+        elif os.path.exists(self.jobs[i].out_fn):
+          status = "<a href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_error)
         else:
           status = "<a href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_error)
         rv += "<tr><td><a href='reap \"%s\"'>%s</a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" %\
@@ -212,7 +223,133 @@ class HARt(object):
 
   def available(self):
     return os.path.exists(self.exe)
+  
+def getAnalysisPlotData(input_f):
+  f = open(input_f, 'r').read()
+  d = {}
+  import re
+  regex = re.compile(r'Labelled QQ plot\:(.*?)The effects of angle\.',re.DOTALL)
+  m=regex.findall(f)
+  if m:
+    raw_data = m[0].strip()
+    raw_data = raw_data.split("\n")
+    xs = []
+    ys = []
+    text = []
+    for pair in raw_data:
+      pair = pair.strip()
+      if not pair:
+        continue
+      xs.append(float(pair.split()[0].strip()))
+      ys.append(float(pair.split()[1].strip()))
+      text.append("%s %s %s" %(pair.split()[2], pair.split()[3], pair.split()[4]))
+    
+  d['QQ Plot'] = {}
+  d['QQ Plot'].setdefault('title', 'QQ Plot')
+  d['QQ Plot']['xs'] = xs
+  d['QQ Plot']['ys'] = ys
+  d['QQ Plot']['text'] = text
 
+
+  regex = re.compile(r'Scatter plot of Delta F \= \(Fexp\-Fpred\) vs sin\(theta\)\/lambda(.*?)The effects of intensity\.',re.DOTALL)
+  m=regex.findall(f)
+  if m:
+    raw_data = m[0].strip()
+    raw_data = raw_data.split("\n")
+    xs = []
+    ys = []
+    text = []
+    for pair in raw_data:
+      pair = pair.strip()
+      if not pair:
+        continue
+      try:
+        x = float(pair.split()[0].strip())
+        y = float(pair.split()[1].strip())
+        xs.append(x)
+        ys.append(y)
+      except:
+        print "can't use %s or %s" %(pair.split()[0].strip(), pair.split()[1].strip())
+
+    d['angle'] = {}
+    d['angle'].setdefault('title', 'Scatter plot of F_z = (Fexp-Fpred)/F_sigma vs Fexp')
+    d['angle']['xs'] = xs
+    d['angle']['ys'] = ys
+
+  regex = re.compile(r'Scatter plot of F\_z \= \(Fexp\-Fpred\)\/F\_sigma vs Fexp(.*?)\Z',re.DOTALL)
+  m=regex.findall(f)
+  if m:
+    raw_data = m[0].strip()
+    raw_data = raw_data.split("\n")
+    xs = []
+    ys = []
+    text = []
+    for pair in raw_data:
+      pair = pair.strip()
+      if not pair:
+        continue
+      try:
+        x = float(pair.split()[0].strip())
+        y = float(pair.split()[1].strip())
+        xs.append(x)
+        ys.append(y)
+      except:
+        print "can't use %s or %s" %(pair.split()[0].strip(), pair.split()[1].strip())
+
+    d['intensity'] = {}
+    d['intensity'].setdefault('title', 'Scatter plot of F_z = (Fexp-Fpred)/F_sigma vs Fexp')
+    d['intensity']['xs'] = xs
+    d['intensity']['ys'] = ys
+
+
+  makePlotlyGraph(d)
+    
+  
+    
+def makePlotlyGraph(d):
+  
+  try:
+    import plotly
+    print plotly.__version__  # version >1.9.4 required
+    from plotly.graph_objs import Scatter, Layout
+    import numpy as np
+    import plotly.plotly as py
+    import plotly.graph_objs as go
+  except:
+    print "Please install plot.ly for python!"
+    return
+  trace = go.Scatter(
+    x = d['QQ Plot']['xs'],
+    y = d['QQ Plot']['ys'],
+    text = d['QQ Plot']['text'],
+    mode = 'markers',
+    name = "QQ"
+    )
+
+  trace2 = go.Scatter(
+    x = d['angle']['xs'],
+    y = d['angle']['ys'],
+    mode = 'markers',
+    name = "Angle"
+    )
+
+  trace3 = go.Scatter(
+    x = d['intensity']['xs'],
+    y = d['intensity']['ys'],
+    mode = 'markers',
+    name = "Intensity"
+    )
+
+  data = [trace, trace2, trace3]
+
+
+  layout = go.Layout(
+      title= "Data Plots",
+      )
+  
+  fig = go.Figure(data=data, layout=layout)  
+  plot_url = plotly.offline.plot(fig, filename='basic-line')
+  
 
 x = HARt()
 OV.registerFunction(x.available, False, "tonto.HAR")
@@ -220,3 +357,5 @@ OV.registerFunction(x.list_jobs, False, "tonto.HAR")
 OV.registerFunction(x.view_all, False, "tonto.HAR")
 OV.registerFunction(x.launch, False, "tonto.HAR")
 OV.registerFunction(x.getBasisListStr, False, "tonto.HAR")
+OV.registerFunction(getAnalysisPlotData, False, "tonto.HAR")
+OV.registerFunction(makePlotlyGraph, False, "tonto.HAR")
