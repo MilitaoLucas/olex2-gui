@@ -588,9 +588,9 @@ class ImageTools(FontInstances):
   def adjust_colour(self, colour, hue=0, luminosity=1, saturation=1):
     '''
     Adjusts the colour of a color value. It can be either a pre-defined value
-    like "highlight" or a rgb value. Hue, luminosity and saturation can be 
-    controlled by the optional parameters. 
-    Returns a modified rgb color value. 
+    like "highlight" or a rgb value. Hue, luminosity and saturation can be
+    controlled by the optional parameters.
+    Returns a modified rgb color value.
     :type colour: string
     :return nc: string
     '''
@@ -1536,14 +1536,22 @@ class ImageTools(FontInstances):
         return
 
     if not trimcolour:
-      pix = im.load()
-      trimcolour = pix[1, 12]
-      _ = pix[1, 18]
+
+      import struct
+      trimcolour = "#%s" %self.dec2hex(int(olx.gl.lm.ClearColor()))
       trim = True
-      if trimcolour != _:
-        print "Images with gradient background can not be automatically trimmed. Please use a uniform backgroun (F4)"
-        padding = 0
-        trim = False
+      _ = struct.unpack("4B",struct.pack(">I",int(olx.gl.lm.ClearColor())))
+      trimcolour = (_[3], _[2], _[1])
+
+
+      #pix = im.load()
+      #trimcolour = pix[1, 12]
+      #_ = pix[1, 18]
+      #trim = True
+      #if trimcolour != _:
+        #print "Images with gradient background can not be automatically trimmed. Please use a uniform backgroun (F4)"
+        #padding = 0
+        #trim = False
 
     original_width = im.size[0]
     bg = Image.new(im.mode, im.size, trimcolour)
