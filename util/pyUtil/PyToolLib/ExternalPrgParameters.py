@@ -219,6 +219,14 @@ def defineExternalPrograms():
     brief_reference=SIR97.brief_reference,
     versions = '2011',
     execs=["sir2011.exe", "sir2011"])
+  SIR2014 = Program(
+    name='SIR2014',
+    program_type='solution',
+    author=SIR97.author,
+    reference=SIR97.reference,
+    brief_reference=SIR97.brief_reference,
+    versions = '2014',
+    execs=["sir2014.exe", "sir2014"])
   Superflip = Program(
     name='Superflip',
     program_type='solution',
