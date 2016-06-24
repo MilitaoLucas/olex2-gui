@@ -180,7 +180,7 @@ class HARt(object):
         <th width='12%' align='middle''>Error</th>
         <th width='12%' align='middle'>Dump</th>
         <th width='12%' align='right'>Analysis</th></tr>'''
-    
+
     status_running = "<font color='%s'><b>Running</b></font>" %OV.GetParam('gui.orange')
     status_completed = "<font color='%s'><b>Completed</b></font>" %OV.GetParam('gui.green')
     status_error = "<font color='%s'><b>Error!</b></font>" %OV.GetParam('gui.red')
@@ -223,7 +223,7 @@ class HARt(object):
 
   def available(self):
     return os.path.exists(self.exe)
-  
+
 def getAnalysisPlotData(input_f):
   f = open(input_f, 'r').read()
   d = {}
@@ -243,7 +243,7 @@ def getAnalysisPlotData(input_f):
       xs.append(float(pair.split()[0].strip()))
       ys.append(float(pair.split()[1].strip()))
       text.append("%s %s %s" %(pair.split()[2], pair.split()[3], pair.split()[4]))
-    
+
   d['QQ Plot'] = {}
   d['QQ Plot'].setdefault('title', 'QQ Plot')
   d['QQ Plot']['xs'] = xs
@@ -303,11 +303,11 @@ def getAnalysisPlotData(input_f):
 
 
   makePlotlyGraph(d)
-    
-  
-    
+
+
+
 def makePlotlyGraph(d):
-  
+
   try:
     import plotly
     print plotly.__version__  # version >1.9.4 required
@@ -346,10 +346,10 @@ def makePlotlyGraph(d):
   layout = go.Layout(
       title= "Data Plots",
       )
-  
-  fig = go.Figure(data=data, layout=layout)  
+
+  fig = go.Figure(data=data, layout=layout)
   plot_url = plotly.offline.plot(fig, filename='basic-line')
-  
+
 
 x = HARt()
 OV.registerFunction(x.available, False, "tonto.HAR")
