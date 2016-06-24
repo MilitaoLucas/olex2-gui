@@ -1,6 +1,36 @@
+$+
+SetVar(help_har_headline,
+  "
+HAR refinement using TONTO is ....
+<br>
+~Basis~
+Ipse lorum...
+
+~Method~
+Ipse lorum...
+  ")
+$-
+
+$+
+SetVar(help_har_jobs,
+  "
+HAR refinements are run as 'jobs': they are submitted to the system as an independent process. At the moment, Olex2 does not automatically monotor the progress of these jobs, but we provide a few tools here to help with this.
+<br>
+~Basis~
+Ipse lorum...
+
+~Method~
+Ipse lorum...
+  ")
+$-
+
+
+
+
+
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='HAR';help_ext=HAR;1 -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='HAR';help_ext=PovrayPlus_1;helpTxt=$GetVar(help_har_headline);1; -->
 <td><font size="+1"><b>Tonto HAR refinement interface</b></font></td>
 </tr><tr><td>
  <table cellpadding="1" cellspacing="2" width="100%">
@@ -83,7 +113,7 @@
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='HAR_JOBS';help_ext=HAR_JOBS;1 -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='HAR';help_ext=PovrayPlus_1;helpTxt=$GetVar(help_har_jobs);1; -->
 $spy.tonto.HAR.list_jobs()
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
