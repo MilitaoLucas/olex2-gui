@@ -484,6 +484,97 @@ if haveGUI:
   OV.registerFunction(ElementButtonSelectStates)
   OV.registerFunction(MakeElementButtonsFromFormula)
 
+def add_mask_content(i,which):
+  is_CIF = (olx.IsFileType('cif') == 'true')
+  i = int(i)
+  global current_sNum
+  bases = ['smtbx', 'squeeze']
+  base = bases[0]
+  current_sNum = OV.ModelSrc()
+  contents = olx.cif_model[current_sNum].get('_%s_masks_void_%s' %(base,which))
+  if not contents:
+    base = bases[1]
+    contents = olx.cif_model[current_sNum].get('_%s_masks_void_%s' %(base,which))
+    if not contents:
+      if is_CIF:
+        contents = olx.Cif('_%s_void_nr' %base).split(",")
+  user_value = str(OV.GetUserInput(0, "Edit Mask %s for Void No %s"%(which, i), contents[i-1]))
+  idx = i -1
+  _ = list(contents)
+  _[idx] = user_value
+  olx.cif_model[current_sNum]['_%s_masks_void_content' %base] = _
+OV.registerFunction(add_mask_content)
+
+
+def copy_mask_infro_from_comment():
+  pass
+
+
+def get_mask_info():
+  global current_sNum
+  import gui
+  current_sNum = OV.ModelSrc()
+  header_row = gui.tools.TemplateProvider.get_template('mask_output_table_header', force=debug)
+  d = {}
+  bases = ['smtbx_masks', 'platon_squeeze']
+  base = bases[0]
+  is_CIF = (olx.IsFileType('cif') == 'true')
+
+  numbers = olx.cif_model[current_sNum].get('_%s_void_nr' %base, None)
+  if not numbers:
+    base = bases[1]
+    numbers = olx.cif_model[current_sNum].get('_%s_void_nr' %base)
+    if not numbers:
+      if is_CIF:
+        numbers = olx.Cif('_%s_void_nr' %base).split(",")
+        if not numbers:
+          return "No mask information"
+      else:
+        return "No mask information"
+
+  if is_CIF:
+    volumes = olx.Cif('_%s_void_volume' %base).split(",")
+    electrons = olx.Cif('_%s_void_count_electrons' %base).split(",")
+    contents = olx.Cif('_%s_void_content' %base).split(",")
+    details = olx.Cif('_%s_details' %base).split(",")
+
+  else:
+    volumes = olx.cif_model[current_sNum].get('_%s_void_volume' %base)
+    electrons = olx.cif_model[current_sNum].get('_%s_void_count_electrons' %base)
+    contents = olx.cif_model[current_sNum].get('_%s_void_content' %base)
+    details = olx.cif_model[current_sNum].get('_%s_details' %base)
+
+  t = "<table>"
+  t += gui.tools.TemplateProvider.get_template('mask_output_table_header', force=debug)
+
+
+  for number, volume, electron, content in zip(numbers, volumes, electrons, contents):
+    d = {}
+    d['number'] = number
+    d['electron'] = electron
+    d['volume'] = volume
+    if float(electron) != 0:
+      v_over_e = "%.2f" %(float(volume)/float(electron))
+      if v_over_e < 3:
+        v_over_e = "<font color='red'>%s</font>" %v_over_e
+      elif v_over_e > 5:
+        v_over_e = "<font color='red'>%s</font>" %v_over_e
+      else:
+        v_over_e = "<font color='green'>%s</font>" %v_over_e
+    else: v_over_e = "n/a"
+
+    d['v_over_e'] = v_over_e
+
+    content = '%s <a href="spy.add_mask_content(%s,content)">Edit</a>' %(content, number)
+    details = '<a href="spy.add_mask_content(%s,detail)">Edit</a>' %(number)
+    d['content'] = content
+    d['details'] = details
+
+    t += gui.tools.TemplateProvider.get_template('mask_output_table_row', force=debug) %d
+  t += "<tr><td>%(details)s</td></tr></table>" %d
+  return t
+OV.registerFunction(get_mask_info)
+
 
 def makeFormulaForsNumInfo():
   global current_sNum
@@ -851,7 +942,7 @@ class Templates():
     self.templates = {}
     self.get_all_templates()
 
-  def get_template(self, name, force=False, path=None):
+  def get_template(self, name, force=False, path=None, mask=None, marker='@B@-@E@'):
     '''
     Returns a particular template from the Template.templates dictionary. If it doesn't exist, then it will try and get it, and return a 'not found' string if this does not succeed.
     -- if force==True, then the template will be reloaded
@@ -859,29 +950,30 @@ class Templates():
     '''
     retVal = self.templates.get(name, None)
     if not retVal or force:
-      self.get_all_templates(path)
+      self.get_all_templates(path=path, mask=mask, marker=marker)
       retVal = self.templates.get(name, None)
     if not retVal:
       return "Template <b>%s</b> has not been found."%name
     else:
       return retVal
 
-  def get_all_templates(self, path=None):
+  def get_all_templates(self, path=None, mask="*.*", marker='{-}'):
     '''
     Parses the path for template files.
     '''
     if not path:
       path = os.sep.join([OV.BaseDir(), 'util', 'pyUtil', 'gui', 'templates'])
 
-    g = glob.glob("%s%s*.*" %(path,os.sep))
+    g = glob.glob("%s%s%s" %(path,os.sep,mask))
     for f_path in g:
       fc = open(f_path, 'r').read()
-      if not self._extract_templates_from_text(fc):
+      if not self._extract_templates_from_text(fc,marker=marker):
         name = os.path.basename(os.path.normpath(f_path))
-        self.templates[name] = content
+        self.templates[name] = fc
 
-  def _extract_templates_from_text(self, t):
-    regex = re.compile(r't:(.*?)\{(.*?)\}',re.DOTALL)
+  def _extract_templates_from_text(self, t, marker):
+    mark = marker.split('-')
+    regex = re.compile(r't:(.*?)\%s(.*?)\%s' %(mark[0], mark[1]),re.DOTALL)
     m=regex.findall(t)
     if m:
       for item in m:
@@ -893,5 +985,9 @@ class Templates():
       return False
 
 TemplateProvider = Templates()
+
+
+
+
 
 

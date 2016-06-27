@@ -3,7 +3,7 @@ t:program_output{
 <table width='100%%' border='0' cellpadding='0'><tr>
 <td width='18%%' bgcolor='green' align='center'><font size='3' color='white'><b>%(program_output_name)s</b></font></td>
 <td width='82%%'>
-<table width='100%%' border='0' cellpadding='0'>%(program_output_content)s<table>
+<table width='100%%' border='0' cellpadding='0'>%(program_output_content)s</table>
 </td>
 </tr></table>
 </tr>}
@@ -45,3 +45,43 @@ $-
 <td align='right' width='15%%'>$spy.MakeHoverButton('small-Assign@solution','spy.runprg.run_auto_vss()')
 </td>
 }
+
+
+t:mask_output_table_header{
+<tr width='100%%'>
+    <td align='center' width='5%%'>
+       <b>&#35;</b>
+    </td>
+    <td align='center' width='12%%'>
+       <b>V (A<sup>3</sup>)</b>
+    </td>
+    <td align='center' width='12%%'>
+       <b>e<sup>-</sup></b>
+    </td>
+    <td align='center' width='12%%'>
+       <b>e/V</b>
+    </td>
+    <td align='left' width='69%%'>
+       <b>Content</b>
+    </td>
+</tr>}
+
+
+t:mask_output_table_row{
+<tr width='100%%'>
+    <td align='center' width='5%%'>
+       <b>%(number)s
+    </td>
+    <td align='center' width='12%%'>
+       %(volume)s
+    </td>
+    <td align='center' width='12%%'>
+       %(electron)s
+    </td>
+    <td align='center' width='12%%'>
+       %(v_over_e)s
+    </td>
+    <td align='center' width='69%%'>
+       %(content)s
+    </td>
+</tr>}
