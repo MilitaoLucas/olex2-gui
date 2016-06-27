@@ -268,6 +268,8 @@ class Method_shelxt(Method_shelx_solution):
       s += s_blank %d
       i += 1
     RunPrgObject.post_prg_output_html_message = s
+    olex.m('delins list')
+    olex.m('addins list 4')
 
 class Method_shelx_direct_methods(Method_shelx_solution):
 

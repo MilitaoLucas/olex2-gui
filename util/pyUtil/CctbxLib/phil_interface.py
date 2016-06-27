@@ -310,3 +310,13 @@ def words_as_string (words, strip_quotes=False) :
     if value_string[0] == '\"' and value_string[-1] == '\"' :
       return value_string[1:-1]
   return value_string
+
+def coerce_value(e):
+  from olexFunctions import OlexFunctions
+  OV = OlexFunctions()
+  if "as an integer expression" in e:
+    _ = e.split("Error interpreting ")[1].split(" ")[0].split("=")
+  try:
+    OV.SetParam(_[0], int(float(_[1].strip('"').strip("'"))))
+  except:
+    print "Please make sure that this value for %s is an integer, and not a text string or a float." %(_[0])

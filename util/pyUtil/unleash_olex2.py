@@ -63,7 +63,7 @@ external_files = {
                        'action:extract', 'action:delete'),
   'cctbx-mac32.zip': ('olex-port', mac32_port_name, mac32_legacy_port_name,
                       'action:extract', 'action:delete'),
-  'lib-mac32.zip': ('olex-port', mac32_port_name, 
+  'lib-mac32.zip': ('olex-port', mac32_port_name,
                     'action:extract', 'action:delete'),
   #mac64
   'olex2-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
@@ -300,7 +300,7 @@ if not os.path.isdir(bin_directory):
 
 # update tags file, the web_dir is transformed to correct form when creating olex2.tag file
 def update_tags_file(dir):
-  up_dir = '/'.join(dir.split('/')[:-1])
+  up_dir = '/'.join(dir.split(os.sep)[:-1])
   #tags = os.listdir(up_dir)
   tags = ['1.2', '1.2-beta', '1.1', '1.2-alpha', '1.0']
   tags_file = open(up_dir + '/tags.txt', 'w')
@@ -341,7 +341,7 @@ def promote_distro(src, dest, forward=True):
   if dest.endswith('/'):  dest = dest[:-1]
   tag_file_name = dest+'/'+'olex2.tag'
   tag_file = open(tag_file_name, 'w+b')
-  print >> tag_file, dest.split('/')[-1]
+  print >> tag_file, dest.split(os.sep)[-1]
   tag_file.close()
   #end creating the tag file
   for zipfi in distro_zips:
@@ -514,12 +514,12 @@ for val, key in external_files.iteritems():
         files_for_plugin[key[i][7:]] = []
       files_for_plugin[key[i][7:]].append(fn)
 
-  dest_dir = '/'.join((working_directory + '/' + val).split('/')[:-1])
+  dest_dir = '/'.join((working_directory + '/' + val).split(os.sep)[:-1])
   if not os.path.exists(dest_dir):
     os.makedirs(dest_dir)
   # also remember the folders contaning the files
   alt_dir = working_directory
-  alt_dirs = val.split('/')[:-1]
+  alt_dirs = val.split(os.sep)[:-1]
   for dir in alt_dirs:
     alt_dir = alt_dir + '/' + dir
     altered_dirs.add(alt_dir)
@@ -658,7 +658,7 @@ def create_index(index_file_name, only_prop=None, port_props = None, portable=Fa
         dir_names[:] = []
         file_names[:] = []
         continue
-      root_entry.FromStrList(d.split('/'), props, stats, True)
+      root_entry.FromStrList(d.split(os.sep), props, stats, True)
     normalised_root_dir = working_dir_path.replace('\\', '/')
     if normalised_root_dir[-1] != '/':
       normalised_root_dir += '/'
@@ -678,7 +678,7 @@ def create_index(index_file_name, only_prop=None, port_props = None, portable=Fa
       if portable:
         portable_files.add(normalised_root_dir + f)
       if d:
-        toks = d.split('/')
+        toks = d.split(os.sep)
       else:
         toks = []
       toks.append(f);
@@ -697,7 +697,7 @@ if web_directory.endswith('/'):
   web_directory = web_directory[:-1]
 olex2_tag_file_name = web_directory+'/'+'olex2.tag'
 olex2_tag_file = open(olex2_tag_file_name, 'w+b')
-print >> olex2_tag_file, web_directory.split('/')[-1]
+print >> olex2_tag_file, web_directory.split(os.sep)[-1]
 olex2_tag_file.close()
 #end creating the tag file
 ####################################################################################################

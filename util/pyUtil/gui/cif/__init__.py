@@ -126,3 +126,25 @@ def GetCheckcifReport(outputtype='pdf', send_fcf=False):
 
 
 #OV.registerFunction(GetCheckcifReport, False, 'cif')
+
+
+def is_it_global(string):
+  retVal = False
+  if 'global' in string.lower():
+    retVal = True
+  if 'general' in string.lower():
+    retVal = True
+  if string == "":
+    retVal = True
+  return retVal
+
+def get_snums_in_cif():
+  snums = []
+  if OV.FileExt() != "cif":
+    return [OV.FileName()]
+  cnt = int(olx.xf.DataCount())
+  for i in xrange(0, cnt):
+    name = olx.xf.DataName(i)
+    if not is_it_global(name):
+      snums.append(name)
+  return snums
