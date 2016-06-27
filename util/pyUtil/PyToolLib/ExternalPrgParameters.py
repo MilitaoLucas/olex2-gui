@@ -86,6 +86,8 @@ def defineExternalPrograms():
   sir2008_patt = Method_SIR(sir_patt_phil)
   sir2011_dm = Method_SIR(sir_dm_phil)
   sir2011_patt = Method_SIR(sir_patt_phil)
+  sir2014_dm = Method_SIR(sir_dm_phil)
+  sir2014_patt = Method_SIR(sir_patt_phil)
   superflip_cf = Method_Superflip(superflip_cf_phil)
 
   # define refinement methods
@@ -268,6 +270,8 @@ Palatinus et al., 2012""",
   SIR2008.addMethod(sir2008_patt)
   SIR2011.addMethod(sir2011_dm)
   SIR2011.addMethod(sir2011_patt)
+  SIR2014.addMethod(sir2014_dm)
+  SIR2014.addMethod(sir2014_patt)
   Superflip.addMethod(superflip_cf)
 
   # define refinement programs
