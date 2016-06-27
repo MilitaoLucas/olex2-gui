@@ -84,7 +84,7 @@ $-
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 $spy.weightGuiDisplay()
 
-   <td width="6%">$+
+   <td width="4%">$+
      html.Snippet("gui/snippets/input-checkbox", "name=SET_SNUM_REFINEMENT_UPDATE_WEIGHT",
       "checked=spy.GetParam('snum.refinement.update_weight')",
       "bgcolor=GetVar('HtmlTableFirstcolColour')",
@@ -106,7 +106,7 @@ $spy.weightGuiDisplay()
 <tr ALIGN='left' NAME='EXTINCTION'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Extinction-Correction;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width="6%">
+  <td width="4%">
     <input type="checkbox"
       fgcolor="GetVar('HtmlFontColour')"
       bgcolor="GetVar('HtmlTableFirstcolColour')"
@@ -122,7 +122,7 @@ $spy.weightGuiDisplay()
   </td>
 
 
-  <td width="6%">
+  <td width="4%">
     <input type="checkbox"
       fgcolor="GetVar('HtmlFontColour')"
       bgcolor="GetVar('HtmlTableFirstcolColour')"
@@ -140,7 +140,7 @@ $spy.weightGuiDisplay()
 <tr VALIGN="center" ALIGN="left" NAME="USE_SOLVENT_MASK">
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=refinement-masks;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width='6%'>
+  <td width='4%'>
       <input
         type="checkbox"
         fgcolor="GetVar('HtmlFontColour')"
@@ -150,12 +150,12 @@ $spy.weightGuiDisplay()
         onclick="spy.SetParam('snum.refinement.use_solvent_mask',html.GetState(~name~))"
       >
   </td>
-  <td ALIGN='left' width='44%'>
+  <td ALIGN='left' width='24%'>
     <b>
       Use solvent mask
     </b>
   </td>
-  <td width='6%'>
+  <td ALIGN='left' width='4%'>
       <input
         type="checkbox"
         fgcolor="GetVar('HtmlFontColour')"
@@ -169,12 +169,22 @@ html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')"
         onuncheck="spy.SetParam('snum.refinement.recompute_mask_before_refinement','false')"
       >
   </td>
-  <td ALIGN='left' width='44%'>
+  <td ALIGN='left' width='24%'>
     <b>
-      Recompute mask
-    </b>
+      Update mask
+  </td>
+
+  <td ALIGN='left' width='44%'>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+<tr ALIGN='left' NAME='MASK_INFO'>
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;help_ext=Extinction-Correction;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+$spy.get_mask_info()
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
 </table>
 
 <table border="0" style="border-collapse: collapse" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">

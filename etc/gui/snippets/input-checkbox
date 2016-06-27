@@ -19,10 +19,10 @@
   value="#value"
   checked="#checked"
   onclick="#onclick"
-  oncheck="#oncheck"
-  onuncheck="#onuncheck"
+  oncheck="html.SetData(~name~,'True')"
+  onuncheck="html.SetData(~name~,' ')"
   right="#right"
-  manage="#managed"
+  manage="#manage"
   disabled="#disabled"
 >
 </font>
