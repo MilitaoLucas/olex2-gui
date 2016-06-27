@@ -179,6 +179,7 @@ class OlexFunctions(inheritFunctions):
         tem = olx.cif_model[data_name].get(key, default)
       except KeyError:
         return deault
+#      print "Accessing %s" %key
       if tem is None: return default
       retVal = default
       if type(tem) == str:
@@ -456,7 +457,7 @@ class OlexFunctions(inheritFunctions):
     if path.startswith("'") or path.startswith('"'):
       pass
     else:
-      path = '"%s"'
+      path = '"%s"' %path
     olex.m('reap %s' %path)
 
   def AtReap(self, path):
