@@ -1561,6 +1561,10 @@ user
   diagnostics{
     pin_scopes = True
       .type = bool
+    use_plotly = False
+      .type = bool
+    save_file= False
+      .type = bool
   }
 
   report{

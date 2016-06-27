@@ -593,6 +593,9 @@ class RunRefinementPrg(RunPrg):
           possible_racemic_twin = True
         elif hooft.p2_false is not None and round(hooft.p2_false, 3) == 1:
           inversion_needed = True
+      else:
+        OV.SetParam('snum.refinement.hooft_str', None)
+
     if flack:
       print "Flack x: %s" %flack
       fs = flack.split("(")
