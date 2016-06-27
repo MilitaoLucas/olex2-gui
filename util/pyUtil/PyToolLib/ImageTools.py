@@ -1539,30 +1539,14 @@ class ImageTools(FontInstances):
 
       import struct
       trimcolour = "#%s" %self.dec2hex(int(olx.gl.lm.ClearColor()))
-      trim = True
       _ = struct.unpack("4B",struct.pack(">I",int(olx.gl.lm.ClearColor())))
       trimcolour = (_[3], _[2], _[1])
 
-
-      #pix = im.load()
-      #trimcolour = pix[1, 12]
-      #_ = pix[1, 18]
-      #trim = True
-      #if trimcolour != _:
-        #print "Images with gradient background can not be automatically trimmed. Please use a uniform backgroun (F4)"
-        #padding = 0
-        #trim = False
-
     original_width = im.size[0]
     bg = Image.new(im.mode, im.size, trimcolour)
-    if trim:
-      diff = ImageChops.difference(im, bg)
-      bbox = diff.getbbox()
-    else:
-      bbox = False
-
-    if bbox:
-      im = im.crop(bbox)
+    diff = ImageChops.difference(im, bg)
+    bbox = diff.getbbox()
+    im = im.crop(bbox)
 
     padding = int(im.size[0] / 100 * padding)
     border = int(im.size[0] / 100 * border)

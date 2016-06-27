@@ -713,7 +713,7 @@ def make_input_button(d):
   return html
 
 def format_help(txt):
-  regex_source = os.sep.join([OV.GetParam("user.customisation_dir"), "regex", "regex_format_help.txt"])
+  regex_source = os.sep.join([OV.BaseDir(), "etc", "regex", "regex_format_help.txt"])
   if os.path.exists(regex_source):
     txt = gui.tools.run_regular_expressions(txt, regex_source)
 

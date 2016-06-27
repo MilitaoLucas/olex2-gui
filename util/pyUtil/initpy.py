@@ -15,7 +15,6 @@ basedir = olex.f("BaseDir()")
 if sys.platform[:3] == 'win':
   sys.path = [''] # first should be empty string to avoid problem if cctbx needs cold start
   python_dir = r"%s\Python27" %basedir
-#  python_dir = r"C:\Python27"
   sys.path.append(python_dir)
   sys.path.append(r"%s\DLLs" %python_dir)
   sys.path.append(r"%s\Lib" %python_dir)
@@ -193,7 +192,7 @@ def get_prg_roots():
 
 def set_olex_paths():
   sys.path.append("%s" %basedir)
-#  sys.path.append("%s/etc/scripts" %basedir)
+  sys.path.append("%s/etc/scripts" %basedir)
   sys.path.append("%s/util/pyUtil" %basedir)
   sys.path.append("%s/util/pyUtil/misc" %basedir)
   sys.path.append("%s/util/pyUtil/PyToolLib" %basedir)
@@ -326,13 +325,6 @@ def onstartup():
   if not userDictionaries.localList:
     userDictionaries.LocalList()
 
-  import gui
-  if timer:
-    t = time.time()
-  gui.copy_datadir_items()
-  if timer:
-    tt.append("\t%.3f s --> %s" %((time.time() - t), 'gui.copy_datadir_items'))
-  sys.path.append("%s/scripts" %OV.GetParam('user.customisation_dir'))
 
 onstartup()
 
@@ -344,15 +336,6 @@ set_plugins_paths()
 if timer:
   tt.append("%.3f s == set_plugins_paths()" %(time.time() - t))
   t = time.time()
-
-#if debug:
-#       keys = os.environ.keys()
-#       keys.sort()
-#       for k in keys:
-#               print "%s\t%s" %(k, os.environ[k])
-#
-#       for bit in sys.path:
-#               print bit
 
 import Loader
 

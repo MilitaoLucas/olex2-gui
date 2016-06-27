@@ -123,7 +123,12 @@ def MakeBitmapImage(notify_listener=True, output_folder=None):
       target_size = filesize
       filesize = filesize * (old_width/new_width)
       olex.m('pict%s %s "%s" %s %s' %(pict, nbg, filefull, resolution, int(round(filesize,0))))
-      IT.trim_image(im=filefull, padding=padding, border=border, border_col=colour, target_size=target_size)
+      if OV.GetParam('user.image.bitmap.transparent_background'):
+        trimcolor=(255,255,255,0)
+      else:
+        trimcolor = None
+      IT.trim_image(im=filefull, trimcolour=trimcolor, padding=padding,
+                     border=border, border_col=colour, target_size=target_size)
     finally:
       if os.path.exists(temp_name):
         os.unlink(temp_name)
