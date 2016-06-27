@@ -1563,6 +1563,10 @@ user
       .type = bool
     use_plotly = False
       .type = bool
+    plotly_username = ""
+      .type = str
+    plotly_password = ""
+      .type = str
     save_file= False
       .type = bool
   }
