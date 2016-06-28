@@ -211,7 +211,7 @@ class HARt(object):
         if os.path.exists(self.jobs[i].analysis_fn):
           status = "<a href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_completed)
         elif os.path.exists(self.jobs[i].out_fn):
-          status = "<a href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_error)
+          status = "<a href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_running)
         else:
           status = "<a href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_error)
         rv += "<tr><td><a href='reap \"%s\"'>%s</a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" %\
