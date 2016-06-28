@@ -2009,7 +2009,7 @@ class CumulativeIntensityDistribution(Analysis):
     self.graphInfo["TopRightTitle"] = self.filename
     self.auto_axes = False
     self.make_cumulative_intensity_distribution()
-    #self.popout()
+    self.popout()
     if self.params.cumulative_intensity.output_csv_file:
       self.output_data_as_csv()
 
