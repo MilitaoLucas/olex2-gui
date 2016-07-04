@@ -33,15 +33,6 @@ timings = []
 global sum_totals
 sum_totals = 0
 
-def timer(which="",leader=" -- "):
-  global now
-  global sum_totals
-  diff = time.time()-now
-  sum_totals += diff
-  timings.append("%s%s - %.2f s (%.2f)" %(leader, which, diff, sum_totals))
-  now = time.time()
-
-
 class MetacifFiles:
   def __init__(self):
     self.curr_smart = None
@@ -106,7 +97,6 @@ class ValidateCif(object):
         olex.m('spy.cif.GetCheckcifReport()')
 
 OV.registerMacro(ValidateCif, """filepath&;cif_dic&;show_warnings""")
-#timer('Register ValidateCif')
 
 class CifTools(ArgumentParser):
   specials = {
@@ -315,7 +305,6 @@ class SaveCifInfo(CifTools):
     self.write_metacif_file()
 
 OV.registerFunction(SaveCifInfo)
-#timer('Register SaveCifInfo')
 
 class EditCifInfo(CifTools):
   def __init__(self, append=''):
@@ -378,7 +367,6 @@ class EditCifInfo(CifTools):
         OV.SetParam('snum.metacif.user_added', user_added)
 
 OV.registerFunction(EditCifInfo)
-#timer('Register EditCifInfo')
 
 
 class MergeCif(CifTools):

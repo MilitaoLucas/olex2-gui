@@ -308,7 +308,7 @@ class Skin():
       t2 = t
 
     export_parameters()
-#    olex.m("spy.make_HOS()")
+    olex.m("spy.make_HOS()")
     olx.FlushFS()
 
 

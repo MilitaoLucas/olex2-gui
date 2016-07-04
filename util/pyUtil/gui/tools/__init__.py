@@ -985,9 +985,3 @@ class Templates():
       return False
 
 TemplateProvider = Templates()
-
-
-
-
-
-
