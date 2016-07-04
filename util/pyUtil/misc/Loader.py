@@ -696,9 +696,10 @@ def AskToUpdate():
       to_update.append(m)
       to_update_names.append(m.name)
   if manual_update or not HttpTools.auto_update:
-    print('Update is available for the following module(s): ' + ' '.join(to_update_names))
-    if not HttpTools.auto_update:
-      print('But updates are disabled')
+    if to_update_names:
+      print('Update is available for the following module(s): ' + ' '.join(to_update_names))
+      if not HttpTools.auto_update:
+        print('But updates are disabled')
     return
   if to_update:
     res = olx.Alert("Module updates available",
