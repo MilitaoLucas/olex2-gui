@@ -203,7 +203,7 @@ set(  ['cctbx-linux64.zip',  #cctbx/cctb_sources,...
       'olex2-linux64.zip',    #olex2 executable
       'plgl-linux64.zip',
       'unirun-linux64.zip',
-      'hart-lix64.zip'
+      'hart-lin64.zip'
       ]
    ) | portable_zip_files
 
