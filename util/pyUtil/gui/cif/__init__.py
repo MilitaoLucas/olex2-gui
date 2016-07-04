@@ -132,9 +132,9 @@ def is_it_global(string):
   retVal = False
   if 'global' in string.lower():
     retVal = True
-  if 'general' in string.lower():
+  elif 'general' in string.lower():
     retVal = True
-  if string == "":
+  elif string == "":
     retVal = True
   return retVal
 
