@@ -88,6 +88,8 @@ external_files = {
                         'action:extract', 'action:delete'),
   'lib-linux64.zip': ('olex-port', linux64_port_name, linux64_legacy_port_name,
                       'action:extract', 'action:delete'),
+  'hart-lin64.zip': ('olex-port', linux64_port_name, linux64_legacy_port_name,
+                      'action:extract', 'action:delete'),
   #windows
   'launch-win32.zip': ('olex-port', win32_port_name,  'action:extract', 'action:delete'),
   'python27-win32.zip': ('olex-port', win32_port_name, 'action:extract', 'action:delete'),
@@ -200,7 +202,8 @@ set(  ['cctbx-linux64.zip',  #cctbx/cctb_sources,...
       'lib-linux64.zip',     #lib/dlls
       'olex2-linux64.zip',    #olex2 executable
       'plgl-linux64.zip',
-      'unirun-linux64.zip'
+      'unirun-linux64.zip',
+      'hart-lix64.zip'
       ]
    ) | portable_zip_files
 
