@@ -324,7 +324,13 @@ def onstartup():
     userDictionaries.init_userDictionaries()
   if not userDictionaries.localList:
     userDictionaries.LocalList()
-
+  import gui
+  if timer:
+    t = time.time()
+  gui.copy_datadir_items()
+  if timer:
+    tt.append("\t%.3f s --> %s" %((time.time() - t), 'gui.copy_datadir_items'))
+  sys.path.append("%s/scripts" %OV.GetParam('user.customisation_dir'))
 
 onstartup()
 
