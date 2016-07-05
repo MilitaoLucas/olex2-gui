@@ -175,7 +175,11 @@ class OlexFunctions(inheritFunctions):
       if data_name not in olx.cif_model:
         import CifInfo
         CifInfo.ExtractCifInfo()
-      tem = olx.cif_model[data_name].get(key, default)
+      try:
+        tem = olx.cif_model[data_name].get(key, default)
+      except KeyError:
+        return deault
+#      print "Accessing %s" %key
       if tem is None: return default
       retVal = default
       if type(tem) == str:
@@ -453,7 +457,7 @@ class OlexFunctions(inheritFunctions):
     if path.startswith("'") or path.startswith('"'):
       pass
     else:
-      path = '"%s"'
+      path = '"%s"' %path
     olex.m('reap %s' %path)
 
   def AtReap(self, path):
@@ -699,7 +703,10 @@ class OlexFunctions(inheritFunctions):
       return olx.HKLSrc()
 
   def StrDir(self):
-    return olx.StrDir()
+    try:
+      return olx.StrDir()
+    except:
+      return None
 
   def GetFormula(self):
     return olx.xf.GetFormula()

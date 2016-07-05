@@ -1,0 +1,9 @@
+\*\* (.*?)  \*\* :: <b>\1</b>
+<lb> :: <br>
+-> :: <b>&rarr;</b>
+t \^ (.*?)  \^ t :: b><code>\1</code></b>
+n \^ (.*?)  \^ n :: <table width='%s' border='0' cellpadding='0' cellspacing='1'><tr bgcolor=#efefef><td><font size=-1><b>Note: </b>\1</font></td></tr></table>
+TT (.*?)  TT :: <tr><td align='right'>$spy.MakeHoverButton('button-tutorial','spy.demo.run_autodemo(1)')</td></tr>
+~ (.*?)( [^\~\~]* ) ~  :: <p><b><font color=$spy.GetParam(gui.html.highlight_colour)>\2</font></b>&nbsp;
+@ (.*?)( [^\@\@]* ) @ :: <tr bgcolor=\"$GetVar(HtmlTableFirstcolColour)\"><hr><b>\2</b><br>
+(&&) (.*?) (&&)  :: \2

@@ -119,7 +119,7 @@ routines requiring structure refinement
       .type = float
     program = ShelXS ShelXS-1997 ShelXS-1986 XS XT ShelXT '*olex2.solve' XM ShelXD ShelXD-1997 SIR2002 SIR2004 SIR2008 SIR2011 Superflip Unknown ShelXS-2013 ShelXS86 ShelXD-2013
       .type = choice
-    method = 'Dual Space' '*Charge Flipping' 'Direct Methods' 'Patterson Method' 'Structure Expansion' Unknowm
+    method = 'Dual Space' '*Charge Flipping' 'Direct Methods' 'Patterson Method' 'Structure Expansion' 'Intrinsic Phasing' Unknown
       .type = choice
     graphical_output = False
       .type = bool
@@ -795,257 +795,6 @@ olex2
   }
 }
 
-graphs
-  .short_caption = Analysis Graphs
-  {
-  program_analysis {
-    font_scale = 0.03
-      .type = float(value_min=0.0)
-    size_x = None
-      .type = int(value_min=0)
-    size_y = None
-      .type = int(value_min=0)
-    max_bars = 12
-      .type = int
-    all_in_one_history = False
-      .type = bool
-    y_scale_factor = 3
-      .type = int
-  }
-  reflections {
-    n_divisions = 5
-      .type = int(value_min=0)
-    size_x = 900
-      .type = int(value_min=0)
-    size_y = 500
-      .type = int(value_min=0)
-    font_scale = 0.02
-      .type = float(value_min=0.0)
-    marker_1 {
-      fill = (255,150,50)
-        .type = colour
-      border = (127,75,25)
-        .type = colour
-      size_factor = 1./80
-        .type = float
-    }
-    marker_2 {
-      fill = (160,182,206)
-        .type = colour
-      border = (80,91,103)
-        .type = colour
-      size_factor = 1./120
-        .type = float
-    }
-    marker_3 {
-      fill = (140,182,206)
-        .type = colour
-      border = (80,91,103)
-        .type = colour
-      size_factor = 1./120
-        .type = float
-    }
-    marker_4 {
-      fill = (120,182,206)
-        .type = colour
-      border = (80,91,103)
-        .type = colour
-      size_factor = 1./120
-        .type = float
-    }
-    marker_5 {
-      fill = (100,182,206)
-        .type = colour
-      border = (80,91,103)
-        .type = colour
-      size_factor = 1./80
-        .type = float
-    }
-    function_1 {
-      colour = (0,0,0)
-        .type = colour
-    }
-    function_2 {
-      colour = (0,0,255)
-        .type = colour
-    }
-    function_3 {
-      colour = (255,0,0)
-        .type = colour
-    }
-    cumulative_intensity
-      .short_caption = "Cumulative Intensity"
-      .caption = "Cumulative Intensity Distribution"
-      .help = "Cumulative-Intensity-Distribution"
-    {
-      n_bins = 20
-        .type = int(value_min=1)
-        .help = Number of bins
-        .caption = %Bins%
-      output_csv_file = False
-        .type = bool
-        .caption = "%Output% csv"
-    }
-    wilson_plot
-      .short_caption = "Wilson Plot"
-      .caption = "Wilson Plot"
-      .help = "Wilson-Plot"
-    {
-      n_bins = 10
-        .type = int(value_min=1)
-        .help = Number of bins
-        .caption = %Bins%
-      method = *Olex2 cctbx
-        .type = choice
-        .caption = "%Method%"
-      output_csv_file = False
-        .type = bool
-        .caption = "%Output% csv"
-    }
-    systematic_absences
-      .short_caption = "Systematic Absences"
-      .caption = "Systematic Absences"
-      .help = "Systematic-Absences"
-    {
-      output_csv_file = False
-        .type = bool
-        .caption = "%Output% csv"
-    }
-    fobs_fcalc
-      .short_caption = "Fobs-Fcalc"
-      .caption = "Fobs-Fcalc"
-      .help = "Fobs-vs-Fcalc"
-    {
-      output_csv_file = False
-        .type = bool
-        .caption = "%Output% csv"
-    }
-    fobs_over_fcalc
-      .short_caption = "Fobs/Fcalc"
-      .caption = "Fobs/Fcalc vs resolution"
-      .help = "Fobs/Fcalc-vs-resolution"
-    {
-      resolution_as = two_theta *d_spacing d_star_sq stol stol_sq
-        .type = choice
-        .caption = "Resolution as"
-      binning = True
-        .type=bool
-        .caption= "Binning"
-      n_bins = 10
-        .type = int(value_min=1)
-        .help = Number of bins
-        .caption = %Bins%
-      output_csv_file = False
-        .type = bool
-        .caption = "%Output% csv"
-    }
-    scale_factor_vs_resolution
-      .short_caption = "scale vs res."
-      .caption = "Scale factor vs resolution"
-      .help = "Scale-factor-vs-resolution"
-    {
-      resolution_as = two_theta *d_spacing d_star_sq stol stol_sq
-        .type = choice
-        .caption = "Resolution as"
-      n_bins = 10
-        .type = int(value_min=1)
-        .help = Number of bins
-        .caption = %Bins%
-      output_csv_file = False
-        .type = bool
-        .caption = "%Output% csv"
-    }
-    r1_factor_vs_resolution
-      .short_caption = "R1 vs res."
-      .caption = "R1 vs. Resolution"
-      .help = "R1-factor-vs-resolution"
-    {
-      title = "R1 vs. Resolution"
-        .type = str
-      resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
-        .type = choice
-        .caption = "Resolution as"
-      n_bins = 10
-        .type = int(value_min=1)
-        .help = Number of bins
-        .caption = %Bins%
-      output_csv_file = False
-        .type = bool
-        .caption = "%Output% csv"
-    }
-    i_over_sigma_vs_resolution
-      .short_caption = "I/sig vs res."
-      .caption = "I/sigma vs Resolution"
-      .help = "R1-factor-vs-resolution"
-    {
-      title = "I/sigma vs. Resolution"
-        .type = str
-      resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
-        .type = choice
-        .caption = "Resolution as"
-      n_bins = 20
-        .type = int(value_min=1)
-        .help = Number of bins
-        .caption = %Bins%
-      output_csv_file = False
-        .type = bool
-        .caption = "%Output% csv"
-    }
-
-
-    completeness
-      .short_caption = "Completeness Plot"
-      .caption = "Completeness Plot"
-      .help = "Completeness-Plot"
-    {
-      reflections_per_bin=20
-        .type = int(value_min=1)
-        .caption = "Reflections per bin"
-      resolution_as = two_theta *d_spacing d_star_sq stol stol_sq
-        .type = choice
-        .caption = "Resolution as"
-      output_csv_file = False
-        .type = bool
-        .caption = "%Output% csv"
-    }
-    normal_probability
-      .short_caption = "Normal Probability Plot"
-      .caption = "Normal Probability Plot"
-      .help = "Normal-Probability-Plot"
-    {
-      output_csv_file = False
-        .type = bool
-        .caption = "%Output% csv"
-    }
-    bijvoet_differences_probability_plot
-      .short_caption = "Bijvoet Differences Probability Plot"
-      .caption = "Bijvoet Differences Probability Plot"
-      .help = "Bijvoet-differences-NPP"
-    {
-      output_csv_file = False
-        .type = bool
-        .caption = "%Output% csv"
-      use_students_t = False
-        .type = bool
-        .caption = "%Student's t%"
-      source = *Olex2 fcf
-        .type = choice
-        .caption = "%Source%"
-    }
-    bijvoet_differences_scatter_plot
-      .short_caption = "Bijvoet Differences Scatter Plot"
-      .caption = "Bijvoet Differences Scatter Plot"
-      .help = "Bijvoet-differences-scatter-plot"
-    {
-      output_csv_file = False
-        .type = bool
-        .caption = "%Output% csv"
-      use_students_t = False
-        .type = bool
-        .caption = "%Student's t%"
-    }
-  }
-}
 
 programs
   .short_caption = Program Settings
@@ -1094,6 +843,12 @@ programs
 user
   .short_caption = User Specific
   {
+  sample_dir = ""
+    .type = str
+  customisation_dir = ""
+    .type = str
+  cif_templates_dir = ""
+    .type = str
   email = ""
     .type = str
   reference = ""
@@ -1140,7 +895,6 @@ user
     .type = str
   report_label_style = 0
     .type = int
-
   parts{
     keep_unique = False
       .type = bool
@@ -1148,8 +902,672 @@ user
       .type = bool
   }
 
+  solution{
+    run_auto_vss = False
+      .type = bool
+  }
+
+  graphs
+    .short_caption = Analysis Graphs
+    {
+    program_analysis {
+      font_scale = 0.03
+        .type = float(value_min=0.0)
+      size_x = None
+        .type = int(value_min=0)
+      size_y = None
+        .type = int(value_min=0)
+      max_bars = 12
+        .type = int
+      all_in_one_history = False
+        .type = bool
+      y_scale_factor = 3
+        .type = int
+    }
+    reflections {
+      n_divisions = 5
+        .type = int(value_min=0)
+      size_x = 900
+        .type = int(value_min=0)
+      size_y = 500
+        .type = int(value_min=0)
+      font_scale = 0.02
+        .type = float(value_min=0.0)
+      marker_1 {
+        fill = (255,150,50)
+          .type = colour
+        border = (127,75,25)
+          .type = colour
+        size_factor = 1./80
+          .type = float
+      }
+      marker_2 {
+        fill = (160,182,206)
+          .type = colour
+        border = (80,91,103)
+          .type = colour
+        size_factor = 1./120
+          .type = float
+      }
+      marker_3 {
+        fill = (140,182,206)
+          .type = colour
+        border = (80,91,103)
+          .type = colour
+        size_factor = 1./120
+          .type = float
+      }
+      marker_4 {
+        fill = (120,182,206)
+          .type = colour
+        border = (80,91,103)
+          .type = colour
+        size_factor = 1./120
+          .type = float
+      }
+      marker_5 {
+        fill = (100,182,206)
+          .type = colour
+        border = (80,91,103)
+          .type = colour
+        size_factor = 1./80
+          .type = float
+      }
+      function_1 {
+        colour = (0,0,0)
+          .type = colour
+      }
+      function_2 {
+        colour = (0,0,255)
+          .type = colour
+      }
+      function_3 {
+        colour = (255,0,0)
+          .type = colour
+      }
+      cumulative_intensity
+        .short_caption = "Cumulative Intensity"
+        .caption = "Cumulative Intensity Distribution"
+        .help = "Cumulative-Intensity-Distribution"
+      {
+        n_bins = 20
+          .type = int(value_min=1)
+          .help = Number of bins
+          .caption = %Bins%
+        output_csv_file = False
+          .type = bool
+          .caption = "%Output% csv"
+      }
+      wilson_plot
+        .short_caption = "Wilson Plot"
+        .caption = "Wilson Plot"
+        .help = "Wilson-Plot"
+      {
+        n_bins = 10
+          .type = int(value_min=1)
+          .help = Number of bins
+          .caption = %Bins%
+        method = *Olex2 cctbx
+          .type = choice
+          .caption = "%Method%"
+        output_csv_file = False
+          .type = bool
+          .caption = "%Output% csv"
+      }
+      systematic_absences
+        .short_caption = "Systematic Absences"
+        .caption = "Systematic Absences"
+        .help = "Systematic-Absences"
+      {
+        output_csv_file = False
+          .type = bool
+          .caption = "%Output% csv"
+      }
+      fobs_fcalc
+        .short_caption = "Fobs-Fcalc"
+        .caption = "Fobs-Fcalc"
+        .help = "Fobs-vs-Fcalc"
+      {
+        output_csv_file = False
+          .type = bool
+          .caption = "%Output% csv"
+      }
+      fobs_over_fcalc
+        .short_caption = "Fobs/Fcalc"
+        .caption = "Fobs/Fcalc vs resolution"
+        .help = "Fobs/Fcalc-vs-resolution"
+      {
+        resolution_as = two_theta *d_spacing d_star_sq stol stol_sq
+          .type = choice
+          .caption = "Resolution as"
+        binning = True
+          .type=bool
+          .caption= "Binning"
+        n_bins = 10
+          .type = int(value_min=1)
+          .help = Number of bins
+          .caption = %Bins%
+        output_csv_file = False
+          .type = bool
+          .caption = "%Output% csv"
+      }
+      scale_factor_vs_resolution
+        .short_caption = "scale vs res."
+        .caption = "Scale factor vs resolution"
+        .help = "Scale-factor-vs-resolution"
+      {
+        resolution_as = two_theta *d_spacing d_star_sq stol stol_sq
+          .type = choice
+          .caption = "Resolution as"
+        n_bins = 10
+          .type = int(value_min=1)
+          .help = Number of bins
+          .caption = %Bins%
+        output_csv_file = False
+          .type = bool
+          .caption = "%Output% csv"
+      }
+      r1_factor_vs_resolution
+        .short_caption = "R1 vs res."
+        .caption = "R1 vs. Resolution"
+        .help = "R1-factor-vs-resolution"
+      {
+        title = "R1 vs. Resolution"
+          .type = str
+        resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
+          .type = choice
+          .caption = "Resolution as"
+        n_bins = 10
+          .type = int(value_min=1)
+          .help = Number of bins
+          .caption = %Bins%
+        output_csv_file = False
+          .type = bool
+          .caption = "%Output% csv"
+      }
+
+      i_over_sigma_vs_resolution
+        .short_caption = "I/sig vs res."
+        .caption = "I/sigma vs Resolution"
+        .help = "R1-factor-vs-resolution"
+      {
+        title = "I/sigma vs. Resolution"
+          .type = str
+        resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
+          .type = choice
+          .caption = "Resolution as"
+        n_bins = 20
+          .type = int(value_min=1)
+          .help = Number of bins
+          .caption = %Bins%
+        output_csv_file = False
+          .type = bool
+          .caption = "%Output% csv"
+      }
+
+
+      completeness
+        .short_caption = "Completeness Plot"
+        .caption = "Completeness Plot"
+        .help = "Completeness-Plot"
+      {
+        reflections_per_bin=20
+          .type = int(value_min=1)
+          .caption = "Reflections per bin"
+        resolution_as = two_theta *d_spacing d_star_sq stol stol_sq
+          .type = choice
+          .caption = "Resolution as"
+        output_csv_file = False
+          .type = bool
+          .caption = "%Output% csv"
+      }
+      normal_probability
+        .short_caption = "Normal Probability Plot"
+        .caption = "Normal Probability Plot"
+        .help = "Normal-Probability-Plot"
+      {
+        output_csv_file = False
+          .type = bool
+          .caption = "%Output% csv"
+      }
+      bijvoet_differences_probability_plot
+        .short_caption = "Bijvoet Differences Probability Plot"
+        .caption = "Bijvoet Differences Probability Plot"
+        .help = "Bijvoet-differences-NPP"
+      {
+        output_csv_file = False
+          .type = bool
+          .caption = "%Output% csv"
+        use_students_t = False
+          .type = bool
+          .caption = "%Student's t%"
+        source = *Olex2 fcf
+          .type = choice
+          .caption = "%Source%"
+      }
+      bijvoet_differences_scatter_plot
+        .short_caption = "Bijvoet Differences Scatter Plot"
+        .caption = "Bijvoet Differences Scatter Plot"
+        .help = "Bijvoet-differences-scatter-plot"
+      {
+        output_csv_file = False
+          .type = bool
+          .caption = "%Output% csv"
+        use_students_t = False
+          .type = bool
+          .caption = "%Student's t%"
+      }
+    }
+  }
+
+
+  diagnostics {
+    debug = False
+      .type = bool
+    scale = 2
+      .type = int
+    scopes = hkl refinement
+      .type = strings
+    refinement{
+
+      flack_str{
+        display = ""
+          .type = str
+        href = Flack
+          .type = str
+        target = "Flack Parameter"
+          .type = str
+      }
+
+      flack_esd{
+        display = "FE"
+          .type = str
+        op = "smaller"
+          .type = str
+        value_format= "3f"
+          .type = str
+        grade1  = 0.04
+          .type = float
+        grade2 = 0.05
+          .type = float
+        grade3 = 0.06
+          .type = float
+        grade4 = 0.07
+          .type = float
+        href = Flack e.s.d
+          .type = str
+        target = "Flack Parameter esd"
+          .type = str
+      }
+
+      flack_val{
+        display = "FV"
+          .type = str
+        op = "smaller"
+          .type = str
+        value_format= "3f"
+          .type = str
+        grade1  = 0.02
+          .type = float
+        grade2 = 0.04
+          .type = float
+        grade3 = 0.08
+          .type = float
+        grade4 = 0.10
+          .type = float
+        href = Flack Value
+          .type = str
+        target = "Flack Parameter Value"
+          .type = str
+      }
+
+
+
+      R1{
+        op = "smaller"
+          .type = str
+        value_format= "3f"
+          .type = str
+        grade1  = 0.05
+          .type = float
+        grade2 = 0.10
+          .type = float
+        grade3 = 0.20
+          .type = float
+        grade4 = 0.50
+          .type = float
+        top = 0.30
+          .type = float
+        display = "Max Shift"
+          .type = str
+        href = atom
+          .type = str
+      }
+      max_shift_site{
+        op = "smaller"
+          .type = str
+        value_format= "3f"
+          .type = str
+        grade1  = 0.001
+          .type = float
+        grade2 = 0.005
+          .type = float
+        grade3 = 0.010
+          .type = float
+        grade4 = 0.015
+          .type = float
+        top = 0.15
+          .type = float
+        display = "Max Shift"
+          .type = str
+        href = atom
+          .type = str
+        target = "Select the site with the largest shift"
+          .type = str
+      }
+
+      max_shift_over_esd {
+        op = "smaller"
+          .type = str
+        value_format= "3f"
+          .type = str
+        grade1  = 0.001
+          .type = float
+        grade2 = 0.005
+          .type = float
+        grade3 = 0.010
+          .type = float
+        grade4 = 0.015
+          .type = float
+        top = 0.15
+          .type = float
+        display = "Shift"
+          .type = str
+        href = atom
+          .type = str
+        target = "Select the atom with the largest shift"
+          .type = str
+      }
+
+      _refine_ls_shift_over_su_max {
+        op = "smaller"
+          .type = str
+        value_format= "3f"
+          .type = str
+        grade1  = 0.001
+          .type = float
+        grade2 = 0.005
+          .type = float
+        grade3 = 0.010
+          .type = float
+        grade4 = 0.015
+          .type = float
+        top = 0.15
+          .type = float
+        display = "Shift/esd"
+          .type = str
+        href = None
+          .type = str
+        target = "Select the atom with the largest shift"
+          .type = str
+      }
+
+      max_shift_u{
+        op = "smaller"
+          .type = str
+        value_format= "3f"
+          .type = str
+        grade1  = 0.001
+          .type = float
+        grade2 = 0.005
+          .type = float
+        grade3 = 0.010
+          .type = float
+        grade4 = 0.015
+          .type = float
+        top = 0.15
+          .type = float
+        display = "Max dU"
+          .type = str
+        href = atom
+          .type = str
+        target = "Select the atom with the largest U shift"
+          .type = str
+      }
+
+      max_peak{
+        op = "smaller"
+          .type = str
+        display = "Max Peak"
+          .type = str
+        value_format= "1f"
+          .type = str
+        grade1  = 0.51
+          .type = float
+        grade2 = 1.01
+          .type = float
+        grade3 = 2.01
+          .type = float
+        grade4 = 3.01
+          .type = float
+        top = 5
+          .type = float
+        href = sel Q1
+          .type = str
+        target = "Select the largest peak"
+          .type = str
+      }
+      _refine_diff_density_max{
+        op = "smaller"
+          .type = str
+        display = "Max Peak"
+          .type = str
+        value_format= "1f"
+          .type = str
+        grade1  = 0.51
+          .type = float
+        grade2 = 1.01
+          .type = float
+        grade3 = 2.01
+          .type = float
+        grade4 = 3.01
+          .type = float
+        top = 5
+          .type = float
+        href = None
+          .type = str
+      }
+      max_hole{
+        op = "greater"
+          .type = str
+        display = "Min Peak"
+          .type = str
+        value_format= "1f"
+          .type = str
+        grade1  = -0.51
+          .type = float
+        grade2 = -1.01
+          .type = float
+        grade3 = -2.01
+          .type = float
+        grade4 = -3.01
+          .type = float
+        top = -5
+          .type = float
+        href = echo "Please add PLAN -n to your ins file first"
+          .type = str
+      }
+      _refine_diff_density_min{
+        op = "greater"
+          .type = str
+        display = "Min Peak"
+          .type = str
+        value_format= "1f"
+          .type = str
+        grade1  = -0.51
+          .type = float
+        grade2 = -1.01
+          .type = float
+        grade3 = -2.01
+          .type = float
+        grade4 = -3.01
+          .type = float
+        top = -5
+          .type = float
+        href = None
+          .type = str
+      }
+      goof{
+        op = "between"
+          .type = str
+        value_format= "3f"
+          .type = str
+        display = "GooF"
+          .type = str
+        soll = 1.0
+          .type = float
+        grade1  = 0.1
+          .type = float
+        grade2 =  0.2
+          .type = float
+        grade3 =  0.3
+          .type = float
+        grade4 =  0.5
+          .type = float
+        top = 0.5
+          .type = float
+        href = "spy.gui.UpdateWeight()>>html.Update"
+          .type = str
+        target = "Update the weighting scheme"
+          .type = str
+      }
+      expected_peaks{
+        op = "smaller"
+          .type = str
+        display = "Missing"
+          .type = str
+        value_format= "0f"
+          .type = str
+        grade1  = 0
+          .type = int
+        grade2 =  1
+          .type = int
+        grade3 =  2
+          .type = int
+        grade4 = 5
+          .type = int
+        top = 10
+          .type = int
+        href = echo Fred
+          .type = str
+      }
+    }
+
+    hkl{
+      MaxD{
+        value_format= "2f"
+          .type = str
+        display = "d max"
+          .type = str
+      }
+      MinD{
+        value_format= "2f"
+          .type = str
+        display = "d min"
+          .type = str
+        op = "smaller"
+          .type = str
+        grade1  = 0.75
+          .type = float
+        grade2 = 0.82
+          .type = float
+        grade3 = 0.86
+          .type = float
+        grade4 = 0.88
+          .type = float
+        top = 1.0
+          .type = float
+      }
+
+      MeanIOverSigma{
+        op = "greater"
+          .type = str
+        display = "Mean I/&sigma;"
+          .type = str
+        value_format= "1f"
+          .type = str
+        grade1  = 15
+          .type = float
+        grade2 = 12
+          .type = float
+        grade3 = 9
+          .type = float
+        grade4 = 6
+          .type = float
+        top = 25
+          .type = float
+        href = ""
+          .type = str
+        target = "Signal to noise ratio"
+          .type = str
+      }
+      Rint{
+        op = "smaller"
+          .type = str
+        display = "R<sub>int</sub>"
+          .type = str
+        value_format= "2%"
+          .type = str
+        grade1  = 0.04
+          .type = float
+        grade2 = 0.06
+          .type = float
+        grade3 = 0.10
+          .type = float
+        grade4 = 0.15
+          .type = float
+        top = 0.15
+          .type = float
+        href = ""
+          .type = str
+        target = "Internal R factor"
+          .type = str
+      }
+      Completeness{
+        op = "greater"
+          .type = str
+        display = "complete"
+          .type = str
+        value_format= "0%"
+          .type = str
+        grade1  = 0.99
+          .type = float
+        grade2 = 0.95
+          .type = float
+        grade3 = 0.90
+          .type = float
+        grade4 = 0.80
+          .type = float
+        top = 0.15
+          .type = float
+        href = HklStat
+          .type = str
+        target = "Show reflection statistics - hkl file must be present"
+          .type = str
+      }
+    }
+  }
+
   diagnostics{
-    pin_scopes = False
+    pin_scopes = True
+      .type = bool
+    use_plotly = False
+      .type = bool
+    plotly_username = ""
+      .type = str
+    plotly_password = ""
+      .type = str
+    save_file= False
       .type = bool
   }
 

@@ -1,7 +1,43 @@
+$+
+SetVar(help_har_headline,
+  "
+The <b>H</b>irshfeld <b>A</b>tom <b>R</b>efinement is being developed by Prof. Simon Grabowski at Bremen University. Please contact Prof. Grabowski directrly with any support queries regarding the HAR refinement.
+  ")
+$-
+
+$+
+SetVar(help_har_jobs,
+  "
+HAR refinements are run as 'jobs': they are submitted to the system as an independent process. At the moment, Olex2 does not automatically monotor the progress of these jobs, but we provide a few tools here to help with this.
+<br>
+~Job Name~
+Once the job is finished, the name will be displayed as a link. Clicking on this link will open the finished HAR structure.
+
+~Timestamp~
+The time when the job was submitted.
+
+~Status~
+Olex2 tries to 'guess' the status of the job from the files it finds in the folder. This is a temporary measure.
+
+~Error~
+If the HAR refinement produces an error file, a link to this file will appear.
+
+~Dump~
+If HAR crashes, and link to the dump file of the HAR process will appear.
+
+~Analysis~
+This opens the result output file of the HAR refinement. If the plotly extension is installed, graphs of the data contained in these files will be generated and shown in the browser.
+  ")
+$-
+
+
+
+
+
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='HAR';help_ext=HAR;1 -->
-<td>Tonto HAR refinement interface</td>
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='HAR_HEADER';help_ext=HAR Refinement;helpTxt=$GetVar(help_har_headline);1; -->
+<td><font size="+1"><b>Tonto HAR refinement interface (Woi&#324;ska et al. Sci. Adv. 2016;2)</b></font></td>
 </tr><tr><td>
  <table cellpadding="1" cellspacing="2" width="100%">
    <tr><td width="20%">
@@ -67,7 +103,11 @@
         "value=GetVar('settings.tonto.HAR.intensity_threshold.value')",
         "onchange=SetVar('settings.tonto.HAR.intensity_threshold.value', html.GetValue('~name~'))")
       $-</td>
-     <td>&nbsp;</td>
+     <td>$+
+       html.Snippet("gui/snippets/input-button", "name=update_info",
+        "value=Update Info",
+        "onclick=html.Update")
+     $-</td>
      <td>$+
        html.Snippet("gui/snippets/input-button", "name=tonto_har_run",
         "value=Launch",
@@ -77,5 +117,11 @@
  </table>
 </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='HAR_JOBS';help_ext=HAR Jobs;helpTxt=$GetVar(help_har_jobs);1; -->
 $spy.tonto.HAR.list_jobs()
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->

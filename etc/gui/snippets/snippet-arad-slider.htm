@@ -14,7 +14,6 @@
             min="1"
             max="20"
             onchange="
-        >>pers
         >>spy.SetParam(user.atoms.azoom,math.eval(html.GetValue(~name~)*10))
         >>html.SetValue(AZOOMValue,math.eval(html.GetValue(~name~)*10))
         >>azoom math.eval(html.GetValue(~name~)*10)"
@@ -31,7 +30,6 @@
             fgcolor="$GetVar(HtmlFontColour)"
             value="spy.GetParam(user.atoms.azoom,100)"
             onchange="
-        >>pers
         >>spy.SetParam(user.atoms.azoom,math.eval(spy.htmlGetValue(~name~,1)*10))
         >>html.SetValue(AZOOMValue,math.eval(spy.GetParam(user.atoms.azoom)/10))
         >>azoom math.eval(spy.GetParam(user.atoms.azoom)/10)"

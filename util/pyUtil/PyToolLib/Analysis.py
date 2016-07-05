@@ -9,6 +9,7 @@ from PIL import Image
 from PIL import ImageFont, ImageDraw, ImageChops
 from ImageTools import ImageTools
 from PIL import ImageFilter
+import math
 import os
 try:
   import olx
@@ -26,9 +27,10 @@ IT = ImageTools()
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
-guiParams = OV.GuiParams()
+debug = bool(OV.GetParam('olex2.debug',False))
+timing = debug
 
-timing = bool(OV.GetParam('gui.timing'))
+guiParams = OV.GuiParams()
 
 from scitbx.math import erf
 
@@ -43,11 +45,10 @@ cache = {}
 
 silent = True
 
-
 class Graph(ImageTools):
   def __init__(self):
     ImageTools.__init__(self)
-    self.params = OV.Params().graphs.reflections
+    self.params = OV.Params().user.graphs.reflections
     self.marker_params = (self.params.marker_1, self.params.marker_2, self.params.marker_3, self.params.marker_4, self.params.marker_5)
     self.function_params = (self.params.function_1, self.params.function_2, self.params.function_3)
     self.dataset_counter = 0
@@ -440,9 +441,165 @@ class Graph(ImageTools):
       IT.write_text_to_draw(
         self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
 
+  def test_plotly(self):
+
+    import plotly
+    print plotly.__version__  # version >1.9.4 required
+    from plotly.graph_objs import Scatter, Layout
+    import numpy as np
+
+    import plotly.graph_objs as go
+    title = title_replace("%s for <b>%s</b>" %(self.graphInfo.get('Title'), self.graphInfo.get('TopRightTitle')))
+    name= "%s_%s" %(OV.FileName(), self.graphInfo.get('pop_html'))
+
+    #self.graphX = 1200
+    #self.graphY = 800
+
+    min_x = 100000
+    min_y = 100000
+    max_x = 0
+    max_y = 0
+    data = []
+    indices = []
+    marker = []
+    i = 0
+
+
+    for dataset in self.data.values():
+      metadata = dataset.metadata()
+      xs_raw = list(dataset.x)
+      xs = [ '%.3f' % elem for elem in xs_raw ]
+      ys_raw = list(dataset.y)
+      ys = [ '%.3f' % elem for elem in ys_raw ]
+
+      if float(min(xs_raw)) < min_x: min_x = float(min(xs_raw))
+      if float(min(ys_raw)) < min_y: min_y = float(min(ys_raw))
+      if float(max(ys_raw)) > max_x: max_x = float(max(xs_raw))
+      if float(max(ys_raw)) > max_y: max_y = float(max(ys_raw))
+
+      trace_name = metadata.get('name',r'n/a')
+      try:
+        indices = [repr(elem) for elem in list(dataset.indices)]
+      except:
+        indices = []
+      try:
+        marker = metadata.get('marker',{})
+      except:
+        marker = {}
+      try:
+        amplitudes = metadata.get('amplitudes',[])
+      except:
+        amplitudes = []
+
+      i += 1
+
+      trace = go.Scatter(
+        x = xs,
+        y = ys,
+        mode = 'markers',
+        name = trace_name,
+        text = indices,
+        type = 'scatter',
+        marker = marker,
+
+
+        #marker = dict(
+                #color = amplitudes, #set color equal to a variable
+##                colorscale='Viridis',
+                #colorscale='Jet',
+                #showscale=True
+            #)
+      )
+      data.append(trace)
+
+    if min_x < 0.5 * max_x: min_x = 0
+    if min_y < 0.5* max_y: min_y = 0
+    minmax = {'min_x':min_x, 'max_x':max_x, 'min_y':min_y, 'max_y':max_y}
+
+
+    equations = self.metadata.get('equations')
+    if equations:
+      for equation in equations:
+        eq = equation['eq']
+        trace_name = equation['name']
+        linspace = np.linspace(min_x, max_x,num=200)
+        exs = []
+        eys = []
+        locals = {}
+
+        for x in linspace:
+          exs.append(x)
+          locals['x'] = x
+          eys.append(eval(eq, math.__dict__, locals))
+        trace = go.Scatter(
+          x = exs,
+          y = eys,
+          mode = 'lines',
+          name = trace_name,
+          )
+        data.append(trace)
+
+    shapes_l = []
+    shapes = self.metadata.get('shapes')
+    if shapes:
+      for shape in shapes:
+        xy = shape['xy']
+        shape_type = shape['type']
+        if shape_type == 'line':
+          s =  {
+              'type': 'line',
+              'x0': xy[0]%minmax,
+              'y0': xy[1]%minmax,
+              'x1': xy[2]%minmax,
+              'y1': xy[3]%minmax,
+              'line': shape['line']
+          }
+          shapes_l.append(s)
+
+    layout = go.Layout(
+        title= title,
+        hovermode='closest',
+        width=self.graphX,
+        height=self.graphY,
+        xaxis=dict(
+            title = title_replace(self.metadata.get("x_label", "x Axis Label")),
+            ticklen=5,
+            zeroline=True,
+            gridwidth=2,
+        ),
+        yaxis=dict(
+          title = title_replace(self.metadata.get("y_label", "y Axis Label")),
+            ticklen=5,
+            gridwidth=2,
+        ),
+        shapes = shapes_l
+    )
+
+    fig = go.Figure(data=data, layout=layout)
+    plot_url = plotly.offline.plot(fig, filename='%s.html' %name)
+    if OV.GetParam('user.diagnostics.save_file'):
+      username = OV.GetParam('user.diagnostics.plotly_username')
+      password = OV.GetParam('user.diagnostics.plotly_password')
+      if not password:
+        print("If you want to save plotly graphs directly, you must get a plotly account. Alternatively, please save the graph from your browser manually")
+        return
+      import plotly.plotly as py
+      py.sign_in(username, password)
+      py.image.save_as(fig, filename='%s.png' %name)
+
+    #self.popout(htm_location=plot_url.replace(r"file://",''))
+
+
   def draw_pairs(self, reverse_y=False, reverse_x=False, marker_size_factor=None):
     self.reverse_y = reverse_y
     self.reverse_x = reverse_x
+    use_plotly = OV.GetParam('user.diagnostics.use_plotly')
+    if use_plotly:
+      if olx.IsPluginInstalled('plotly').lower() == 'false':
+        print("Please install the plotly extension for Olex2 to make plots using plotly")
+        return
+      self.test_plotly()
+
     self.ax_marker_length = int(self.imX * 0.006)
     self.get_division_spacings_and_scale()
     self.draw_x_axis()
@@ -468,6 +625,20 @@ class Graph(ImageTools):
 
     assert len(self.data) > 0
     for dataset in self.data.values():
+      i = 0
+      for y in dataset.y:
+        if math.isnan(y):
+          del dataset.y[i]
+          del dataset.x[i]
+        i += 1
+
+      i = 0
+      for x in dataset.x:
+        if math.isnan(x):
+          del dataset.y[i]
+          del dataset.x[i]
+        i += 1
+
       if self.auto_axes:
         min_xs.append(min(dataset.x))
         if dataset.sigmas is not None:
@@ -756,8 +927,8 @@ class Graph(ImageTools):
   valign='center'
   min="2"
   height="$GetVar('HtmlSpinHeight')"
-  value="$spy.GetParam('graphs.program_analysis.y_scale_factor')"
-  onchange="spy.SetParam('graphs.program_analysis.y_scale_factor',html.GetValue('HistoryScale'))>>spy._make_history_bars()>>html.Update"
+  value="$spy.GetParam('user.graphs.program_analysis.y_scale_factor')"
+  onchange="spy.SetParam('user.graphs.program_analysis.y_scale_factor',html.GetValue('HistoryScale'))>>spy._make_history_bars()>>html.Update"
 >
 </font>'''
 
@@ -767,7 +938,7 @@ class Graph(ImageTools):
           next_img = ""
         else:
           all_in_oneText = '''
-<a href="spy.SetParam('graphs.program_analysis.all_in_one_history','True')>>spy._make_history_bars()>>html.Update">Show All Bars</a>&nbsp;
+<a href="spy.SetParam('user.graphs.program_analysis.all_in_one_history','True')>>spy._make_history_bars()>>html.Update">Show All Bars</a>&nbsp;
 <a href="reap '%s\%s.ins'">Reload INS</a>
 ''' %(OV.FilePath(), OV.FileName())
           previous_img = '''<a href="spy.olex_fs_copy('history-info_%s.htm','history-info.htm')>>html.Update"><zimg src=previous.png></a>''' %(img_no -1)
@@ -898,6 +1069,10 @@ class Graph(ImageTools):
                        width=1, fill=self.outlineColour)
 
     for i, (xr, yr) in enumerate(xy_pairs):
+      if math.isnan(yr):
+        continue
+      if math.isnan(xr):
+        continue
       x = x_constant + xr * scale_x
       y = y_constant + yr * scale_y
 
@@ -921,7 +1096,9 @@ class Graph(ImageTools):
         if indices is None:
           target = '(%.3f,%.3f)' %(xr, yr)
         else:
-          target = '(%.3f,%.3f) %s' %(xr, yr, indices[i])
+          idx = repr(indices[i]).replace(",","").replace("(","").replace(")","")
+          target = 'OMIT %s' %(idx)
+          href = "OMIT %s>>spy.make_reflection_graph(fobs_fcalc)" %idx
         map_txt_list.append("""<zrect coords="%i,%i,%i,%i" href="%s" target="%s">"""
                             % (box + (href, target)))
 
@@ -1116,7 +1293,6 @@ class Analysis(Graph):
     self.gui_html_bg_colour = OV.GetParam('gui.html.bg_colour').rgb
     self.gui_html_highlight_colour = OV.GetParam('gui.html.highlight_colour').rgb
     self.SPD, self.RPD = ExternalPrgParameters.get_program_dictionaries()
-    self.debug = False
     self.function = function
     if param:
       self.param = param.split(';')
@@ -1233,7 +1409,18 @@ class Analysis(Graph):
     self.data.setdefault('dataset1',Dataset(x,y,metadata=metadata))
     self.metadata = metadata
 
-  def popout(self):
+  def popout(self, htm_location = None):
+    use_plotly = False
+    #if use_plotly:
+      #url = htm_location
+      #app = wx.App()
+      #dialog = MyBrowser(None, -1)
+      #html_string = open(url, 'rb')
+      #dialog.browser.SetPage(html_string,"")
+      #dialog.Show()
+      #app.MainLoop()
+      #return
+
     assert self.item is not None
     image_location = "%s.png" %(self.item)
     OlexVFS.save_image_to_olex(self.im, image_location, 1)
@@ -1254,8 +1441,15 @@ class Analysis(Graph):
 </body>
 </html>
 ''' %(self.item, self.map_txt)
-    htm_location = "%s.htm" %pop_html
-    OlexVFS.write_to_olex(htm_location, s)
+    if not htm_location:
+      htm_location = "%s.htm" %pop_html
+      pop_name = htm_location
+      OlexVFS.write_to_olex(htm_location, s)
+    #else:
+      #f = open(htm_location,'rb').read()
+      #htm_location = "fred.htm"
+      #OlexVFS.write_to_olex(htm_location, f)
+
     extraX = 29
     extraY = 48
     pstr = "popup %s '%s' -b=stcr -t='%s' -w=%s -h=%s -x=1 -y=50" %(
@@ -1329,7 +1523,7 @@ class Analysis(Graph):
       self.make_AutoChem_plot()
 
     ## This whole writing of files to a specific location was only a test, that's been left in by mistake. Sorry John!
-    if self.debug:
+    if debug:
       if sys.platform.startswith('lin'): # This is to alter path for linux
         testpicturepath = "/tmp/test.png"
       elif sys.platform.startswith('win'): # For windows
@@ -1364,7 +1558,7 @@ class Analysis(Graph):
 class PrgAnalysis(Analysis):
   def __init__(self, program, method):
     Analysis.__init__(self)
-    self.params = OV.Params().graphs.program_analysis
+    self.params = OV.Params().user.graphs.program_analysis
     self.counter = 0
     self.attempt = 1
     #size = (int(OV.GetParam('gui.htmlpanelwidth'))- 30, 150)
@@ -1823,13 +2017,17 @@ class CumulativeIntensityDistribution(Analysis):
     acentric = "1-exp(-x)"
     centric = "sqrt(erf(0.5*x))"
     twinned_acentric = "1-(1+2*x)*exp(-2*x)" # E. Stanley, J.Appl.Cryst (1972). 5, 191
+
     locals = {'erf':erf}
     self.cctbx_cumulative_intensity_distribution()
     self.make_empty_graph(axis_x = True)
     self.plot_function(centric, locals=locals)
     self.plot_function(acentric, locals=locals)
     self.plot_function(twinned_acentric, locals=locals)
-
+    self.metadata['equations'] = [{'eq':acentric, 'name':'acentric'},
+                                  {'eq':centric, 'name':'centric'},
+                                  {'eq':twinned_acentric, 'name':"twinned acentric"},
+                                  ]
     key = self.draw_key(({'type': 'function',
                          'number': 1,
                          #'label': OV.TranslatePhrase('Centric')},
@@ -1858,6 +2056,8 @@ class CumulativeIntensityDistribution(Analysis):
     metadata = {}
     metadata.setdefault("y_label", xy_plot.yLegend)
     metadata.setdefault("x_label", xy_plot.xLegend)
+    metadata.setdefault("name", 'Cumulative')
+    metadata['marker'] = {'size':12}
     self.metadata = metadata
     self.data.setdefault('dataset1', Dataset(xy_plot.x, xy_plot.y,metadata=metadata))
     if verbose:
@@ -1890,6 +2090,7 @@ class CompletenessPlot(Analysis):
     metadata = {}
     metadata.setdefault("y_label", OV.TranslatePhrase("Shell Completeness"))
     metadata.setdefault("x_label", params.resolution_as)
+    metadata.setdefault("name", 'Completeness')
     self.metadata = metadata
     x = [xy_plot.x[i] for i in range(len(xy_plot.y)) if xy_plot.y[i] is not None]
     y = [xy_plot.y[i]*100 for i in range(len(xy_plot.y)) if xy_plot.y[i] is not None]
@@ -1916,6 +2117,7 @@ class SystematicAbsencesPlot(Analysis):
     metadata = {}
     metadata.setdefault("y_label", xy_plot.yLegend)
     metadata.setdefault("x_label", xy_plot.xLegend)
+    metadata.setdefault("name", 'Systematic Absences')
     self.metadata = metadata
     if xy_plot.x is None:
       self.have_data = False
@@ -1950,6 +2152,7 @@ class bijvoet_differences_scatter_plot(Analysis):
     metadata.setdefault("fit_y_intercept", xy_plot.fit_y_intercept)
     metadata.setdefault("y_label", xy_plot.yLegend)
     metadata.setdefault("x_label", xy_plot.xLegend)
+    metadata.setdefault("name", 'Bijvoet Differences')
     self.metadata = metadata
 
     self.have_data = True
@@ -2002,7 +2205,7 @@ class Normal_probability_plot(Analysis):
   def __init__(self):
     Analysis.__init__(self)
     self.item = "Normal_probability_plot"
-    self.graphInfo["Title"] = OV.TranslatePhrase("Normal probability plot")
+    self.graphInfo["Title"] = OV.TranslatePhrase("Normal Probability Plot")
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
     self.graphInfo["TopRightTitle"] = self.filename
@@ -2021,6 +2224,8 @@ class Normal_probability_plot(Analysis):
     metadata = {}
     metadata.setdefault("fit_slope", xy_plot.fit_slope)
     metadata.setdefault("fit_y_intercept", xy_plot.fit_y_intercept)
+    amplitudes = [elem[1] for elem in list(xy_plot.amplitudes_array)]
+    metadata['amplitudes'] = amplitudes
     data = Dataset(
       xy_plot.x, xy_plot.y, indices=xy_plot.indices, metadata=metadata)
     self.data.setdefault('dataset1', data)
@@ -2058,18 +2263,39 @@ class Fobs_Fcalc_plot(Analysis):
   def make_f_obs_f_calc_plot(self):
     from reflection_statistics import f_obs_vs_f_calc
     xy_plot = f_obs_vs_f_calc(batch_number=self.batch_number).xy_plot
+    self.metadata['shapes'] = []
     self.metadata.setdefault("y_label", xy_plot.yLegend)
     self.metadata.setdefault("x_label", xy_plot.xLegend)
+
+    equal_line = {'type':'line',
+                   'xy':('0','0','%(max_x)s','%(max_x)s'),
+                   'line': {
+                     'color': 'rgb(100, 100, 100)',
+                     'width': 1,
+                     'dash':'dashdot'
+                   }
+                   }
+
+    self.metadata["shapes"].append(equal_line)
+
+    ## Included Data
     metadata = {}
-    metadata.setdefault("fit_slope", xy_plot.fit_slope)
-    metadata.setdefault("fit_y_intercept", xy_plot.fit_y_intercept)
+#    metadata.setdefault("fit_slope", xy_plot.fit_slope)
+#    metadata.setdefault("fit_y_intercept", xy_plot.fit_y_intercept)
+    metadata["name"] = "Included Data"
     data = Dataset(
       xy_plot.f_calc, xy_plot.f_obs, indices=xy_plot.indices, metadata=metadata)
     self.data.setdefault('dataset1', data)
+
+    ## Omitted Data
+    metadata = {}
+    metadata["name"] = "Omitted Data"
     if xy_plot.f_obs_omitted and xy_plot.f_obs_omitted.size():
       data_omitted = Dataset(
-        xy_plot.f_calc_omitted, xy_plot.f_obs_omitted, indices=xy_plot.indices_omitted)
+        xy_plot.f_calc_omitted, xy_plot.f_obs_omitted, indices=xy_plot.indices_omitted, metadata=metadata)
       self.data.setdefault('dataset2', data_omitted)
+
+
     self.make_empty_graph(axis_x = True)
     self.draw_pairs()
     key = self.draw_key(({'type': 'marker',
@@ -2123,6 +2349,8 @@ class Fobs_over_Fcalc_plot(Analysis):
     data = Dataset(
       xy_plot.resolution, xy_plot.f_obs_over_f_calc,
       indices=indices, metadata=metadata)
+
+
     reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
     self.data.setdefault('dataset1', data)
     self.make_empty_graph(axis_x=True)
@@ -2173,7 +2401,7 @@ class item_vs_resolution_plot(Analysis):
     Analysis.__init__(self)
     self.item = item
     params = getattr(self.params, self.item)
-    
+
     self.graphInfo["Title"] = params.title
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
@@ -2196,17 +2424,41 @@ class item_vs_resolution_plot(Analysis):
     y_factor = 1
     if "r1" in self.item:
       y_factor = 100
-    
+
     from reflection_statistics import item_vs_resolution
     params = getattr(self.params, self.item)
     xy_plot = item_vs_resolution(item=self.item, n_bins=params.n_bins, resolution_as=params.resolution_as).xy_plot_info()
     self.metadata.setdefault("y_label", xy_plot.yLegend)
     self.metadata.setdefault("x_label", xy_plot.xLegend)
+    self.metadata.setdefault("shapes",[])
+    cutoff_line = {'type':'line',
+                   'xy':('%(min_x)s','3','%(max_x)s','3'),
+                   'line': {
+                     'color': 'rgb(100, 100, 100)',
+                     'width': 1,
+                     'dash':'dashdot'
+                   }
+                   }
+
+    IUCr_limit= {'type':'line',
+                   'xy':('50', '%(min_y)s', '50', '%(max_y)s'),
+                   'line': {
+                     'color': 'rgb(100, 100, 100)',
+                     'width': 1,
+                     'dash':'dashdot'
+                   }
+                   }
+
+    self.metadata["shapes"].append(cutoff_line)
+    self.metadata["shapes"].append(IUCr_limit)
+
     metadata = {}
     data = Dataset(
       xy_plot.x, [y*y_factor for y in xy_plot.y], metadata=metadata)
     self.data.setdefault('dataset1', data)
     self.make_empty_graph(axis_x=True)
+    if self.item == "i_over_sigma_vs_resolution":
+      self.draw_fit_line(slope=0, y_intercept=3, write_equation=False)
     reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
     self.draw_pairs(reverse_x=reverse_x)
 
@@ -2256,7 +2508,7 @@ class HistoryGraph(Analysis):
 
   def __init__(self, history_tree):
     Analysis.__init__(self)
-    self.params = OV.Params().graphs.program_analysis
+    self.params = OV.Params().user.graphs.program_analysis
     self.i_bar = 0
     self.tree = history_tree
     self.item = "history"
@@ -2417,7 +2669,7 @@ def makeReflectionGraphOptions(graph, name):
            'max':'30',
            'width':'%s' %width,
            'label':'%s ' %caption,
-           'onchange':"spy.SetParam('graphs.reflections.%s.%s',html.GetValue('%s'))" %(
+           'onchange':"spy.SetParam('user.graphs.reflections.%s.%s',html.GetValue('%s'))" %(
              graph.name, obj.name,ctrl_name),
            }
       options_gui.append(htmlTools.make_spin_input(d))
@@ -2428,7 +2680,7 @@ def makeReflectionGraphOptions(graph, name):
            'value':value,
            'width':'%s' %width,
            'label':'%s ' %caption,
-           'onchange':"spy.SetParam('graphs.reflections.%s.%s',html.GetValue('%s'))" %(
+           'onchange':"spy.SetParam('user.graphs.reflections.%s.%s',html.GetValue('%s'))" %(
              graph.name, obj.name,ctrl_name),
            'readonly':'readonly',
            }
@@ -2439,9 +2691,9 @@ def makeReflectionGraphOptions(graph, name):
       d = {'ctrl_name':ctrl_name,
            'value':'%s ' %caption,
            'checked':'%s' %value,
-           'oncheck':"spy.SetParam('graphs.reflections.%s.%s','True')" %(
+           'oncheck':"spy.SetParam('user.graphs.reflections.%s.%s','True')" %(
              graph.name, obj.name),
-           'onuncheck':"spy.SetParam('graphs.reflections.%s.%s','False')" %(
+           'onuncheck':"spy.SetParam('user.graphs.reflections.%s.%s','False')" %(
              graph.name, obj.name),
            'width':'%s' %width,
            'bgcolor':'%s' %guiParams.html.table_bg_colour,
@@ -2458,7 +2710,7 @@ def makeReflectionGraphOptions(graph, name):
            'label':'%s ' %caption,
            'items':items,
            'value':obj.extract(),
-           'onchange':"spy.SetParam('graphs.reflections.%s.%s',html.GetValue('%s'))>>spy.make_reflection_graph(html.GetValue('SET_REFLECTION_STATISTICS'))" %(
+           'onchange':"spy.SetParam('user.graphs.reflections.%s.%s',html.GetValue('%s'))>>spy.make_reflection_graph(html.GetValue('SET_REFLECTION_STATISTICS'))" %(
              graph.name, obj.name,ctrl_name),
            'width':'%s' %width,
            }
@@ -2480,30 +2732,32 @@ def makeReflectionGraphGui():
   gui_d.setdefault('graph_chooser', "")
 
   if GuiGraphChooserComboExists:
-    value = OV.GetValue('SET_REFLECTION_STATISTICS')
+    try:
+      value = OV.GetValue('SET_REFLECTION_STATISTICS')
+    except:
+      value = None
   if not value:
     GuiGraphChooserComboExists = True
     help_name = None
     name = None
   else:
     name = value.lower().replace(" ", "_").replace("-", "_").replace("/","_over_")
-    graph = olx.phil_handler.get_scope_by_name('graphs.reflections.%s' %name)
+    graph = olx.phil_handler.get_scope_by_name('user.graphs.reflections.%s' %name)
     if not graph:
       value = "no phil"
       help_name = None
-    else:
-      gui_d['options_gui'], gui_d['colspan'] = makeReflectionGraphOptions(graph, name)
-      help_name = graph.help
-      onclick = 'spy.make_reflection_graph\(%s)' %name
-      d = {'name':'BUTTON_MAKE_REFLECTION_GRAPH',
-           'bgcolor':guiParams.html.input_bg_colour,
-           'onclick': onclick,
-           'width':'30',
-           'value':'Go',
-           'valign':'top',
-          }
-      #gui_d['make_graph_button'] = htmlTools.make_input_button(d)
-      gui_d['make_graph_button'] = "$spy.MakeHoverButton('button_small-go@MakeGraphs','%s')" %onclick
+    gui_d['options_gui'], gui_d['colspan'] = makeReflectionGraphOptions(graph, name)
+    help_name = graph.help
+    onclick = 'spy.make_reflection_graph\(%s)' %name
+    d = {'name':'BUTTON_MAKE_REFLECTION_GRAPH',
+         'bgcolor':guiParams.html.input_bg_colour,
+         'onclick': onclick,
+         'width':'30',
+         'value':'Go',
+         'valign':'top',
+        }
+    #gui_d['make_graph_button'] = htmlTools.make_input_button(d)
+    gui_d['make_graph_button'] = "$spy.MakeHoverButton('button_small-go@MakeGraphs','%s')" %onclick
 
   gui_d['help'] = htmlTools.make_table_first_col(
     help_name=help_name, popout=False)
@@ -2580,23 +2834,20 @@ def make_reflection_graph(name):
     fun(arg)
   else:
     func()
-
 OV.registerFunction(make_reflection_graph)
 
 class HealthOfStructure():
   def __init__(self):
     self.hkl_stats = {}
-    phil_file = r"%s/etc/CIF/diagnostics.phil" %(OV.BaseDir())
-    olx.phil_handler.adopt_phil(phil_file=phil_file)
-    self.debug = bool(OV.GetParam('diagnostics.debug'))
     self.grade_1_colour = OV.GetParam('gui.skin.diagnostics.colour_grade1').hexadecimal
     self.grade_2_colour = OV.GetParam('gui.skin.diagnostics.colour_grade2').hexadecimal
     self.grade_3_colour = OV.GetParam('gui.skin.diagnostics.colour_grade3').hexadecimal
     self.grade_4_colour = OV.GetParam('gui.skin.diagnostics.colour_grade4').hexadecimal
     self.available_width = int(OV.GetParam('gui.htmlpanelwidth'))
     self.stats = None
-    self.scale = OV.GetParam('diagnostics.scale')
+    self.scale = OV.GetParam('user.diagnostics.scale')
     self.scope = "hkl"
+    self.supplied_cif = False
 
   def get_HOS_d(self):
     try:
@@ -2606,11 +2857,10 @@ class HealthOfStructure():
       print err
       return None
 
-  def make_HOS(self, force=False):
-    global timing
-    timing = bool(OV.GetParam('gui.timing'))
+  def make_HOS(self, force=False, supplied_cif=False):
     force = bool(force)
-    self.scopes = OV.GetParam('diagnostics.scopes')
+    self.supplied_cif = supplied_cif
+    self.scopes = OV.GetParam('user.diagnostics.scopes')
     self.scope = OV.GetParam('snum.current_process_diagnostics')
     if timing:
       import time
@@ -2783,7 +3033,11 @@ class HealthOfStructure():
     for item in l:
       counter += 1
       if self.scope == "hkl":
-        value = self.hkl_stats[item]
+        if self.supplied_cif and item == "Rint":
+          value = self.supplied_cif.getValue('_diffrn_reflns_av_R_equivalents',0)
+        else:
+          value = self.hkl_stats[item]
+
         if type(value) == tuple and len(value) > 0:
           value = value[0]
       elif self.scope == "refinement":
@@ -2807,10 +3061,18 @@ class HealthOfStructure():
       elif item == "_refine_ls_abs_structure_Flack":
         item = 'flack_str'
 
-      display = OV.GetParam('diagnostics.%s.%s.display' %(self.scope,item))
+      display = OV.GetParam('user.diagnostics.%s.%s.display' %(self.scope,item))
 
-      value_format = OV.GetParam('diagnostics.%s.%s.value_format' %(self.scope,item))
-      href = OV.GetParam('diagnostics.%s.%s.href' %(self.scope,item))
+      if item == "MinD":
+        _ = olx.xf.exptl.Radiation()
+        if _.startswith("1.54"):
+          _ = "Cu"
+        elif _.startswith("0.71"):
+          _ = "Mo"
+        display += " (%s)" %_
+
+      value_format = OV.GetParam('user.diagnostics.%s.%s.value_format' %(self.scope,item))
+      href = OV.GetParam('user.diagnostics.%s.%s.href' %(self.scope,item))
 
       raw_val = value
       bg_colour = None
@@ -2958,11 +3220,12 @@ class HealthOfStructure():
       value_raw = float(value_raw)
     except:
       value_raw = 0
-    op = OV.GetParam('diagnostics.hkl.%s.op' %item)
+    op = OV.GetParam('user.diagnostics.hkl.%s.op' %item)
     curr_x = 0
     limit_width = 0
     od_value = None
     theoretical_val = value_raw
+
     if item == "Completeness":
       od_value = OV.get_cif_item('_reflns_odcompleteness_completeness')
       if od_value:
@@ -2988,7 +3251,7 @@ class HealthOfStructure():
       fill = IT.adjust_colour(fill, luminosity=1.9)
       draw.text((2, boxHeight - 2*8), "CIF", font=font_l, fill=fill)
 
-    top = OV.GetParam('diagnostics.hkl.%s.top' %item)
+    top = OV.GetParam('user.diagnostics.hkl.%s.top' %item)
 
     if item == "flack_str":
       x = boxWidth * second_colour_begin
@@ -3013,7 +3276,7 @@ class HealthOfStructure():
         fill = OV.GetParam('gui.red').hexadecimal
         draw.rectangle(box, fill=fill)
 
-      top = OV.GetParam('diagnostics.hkl.%s.top' %item)
+      top = OV.GetParam('user.diagnostics.hkl.%s.top' %item)
 
 
     if item == "MeanIOverSigma":
@@ -3057,7 +3320,7 @@ class HealthOfStructure():
     if value_display_extra:
       dxs,dxy = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=font_size_s * scale)
     dx,dy = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=font_size * scale)
-    x = boxWidth - dx - 6 #right inside margin
+    x = boxWidth - dx - 7 #right inside margin
     draw.text((x, y), "%s" %value_display, font=font, fill=fill)
     if value_display_extra:
       draw.text((0, y - 1 + dy/2), "%s" %value_display_extra, font=font_s, fill="#ffffff")
@@ -3073,8 +3336,8 @@ class HealthOfStructure():
     im = IT.add_whitespace(im, side='bottom', weight=2, colour=bgcolour)
 
     OlexVFS.save_image_to_olex(im, item, 0)
-    href = OV.GetParam('diagnostics.%s.%s.href' %(self.scope,item))
-    target = OV.GetParam('diagnostics.%s.%s.target' %(self.scope,item))
+    href = OV.GetParam('user.diagnostics.%s.%s.href' %(self.scope,item))
+    target = OV.GetParam('user.diagnostics.%s.%s.target' %(self.scope,item))
     txt = ""
     ref_open = ''
     ref_close = ''
@@ -3096,19 +3359,23 @@ class HealthOfStructure():
     except:
       val = 0
 
-    op = OV.GetParam('diagnostics.%s.%s.op' %(self.scope, item))
+    mindfac = 1
+    if item == 'MinD':
+      mindfac = float(olx.xf.exptl.Radiation())/0.71
+
+    op = OV.GetParam('user.diagnostics.%s.%s.op' %(self.scope, item))
     if op == "between":
-      soll = OV.GetParam('diagnostics.%s.%s.soll' %(self.scope, item))
+      soll = OV.GetParam('user.diagnostics.%s.%s.soll' %(self.scope, item))
     for i in xrange(4):
       i += 1
       if op == "greater":
-        if val >= OV.GetParam('diagnostics.%s.%s.grade%s' %(self.scope, item, i)):
+        if val >= OV.GetParam('user.diagnostics.%s.%s.grade%s' %(self.scope, item, i)) * mindfac:
           break
       elif op == 'smaller':
-        if val <= OV.GetParam('diagnostics.%s.%s.grade%s' %(self.scope, item, i)):
+        if val <= OV.GetParam('user.diagnostics.%s.%s.grade%s' %(self.scope, item, i)) * mindfac:
           break
       elif op == 'between':
-        if val - (OV.GetParam('diagnostics.%s.%s.grade%s' %(self.scope, item, i))) <= soll <= val + (OV.GetParam('diagnostics.%s.%s.grade%s' %(self.scope, item, i))):
+        if val - (OV.GetParam('user.diagnostics.%s.%s.grade%s' %(self.scope, item, i))) * mindfac <= soll <= val + (OV.GetParam('user.diagnostics.%s.%s.grade%s' %(self.scope, item, i))) * mindfac:
           break
 
     if i == 1:
@@ -3124,3 +3391,14 @@ class HealthOfStructure():
 
 HOS_instance = HealthOfStructure()
 OV.registerFunction(HOS_instance.make_HOS)
+
+
+def title_replace(title):
+  title = title.replace("sigma", "&sigma;")
+  title = title.replace("two_theta", "2&Theta; / &deg;")
+  title = title.replace("d_spacing", "d-spacing / &Aring;")
+  title = title.replace("Fobs", "F<sub>obs</sub>")
+  title = title.replace("Fobs", "F<sub>calc</sub>")
+  title = title.replace(" vs ", " <i>vs</i>")
+  title = title.replace("_", "-")
+  return title

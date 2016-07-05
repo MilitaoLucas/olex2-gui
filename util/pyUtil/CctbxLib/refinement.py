@@ -35,17 +35,25 @@ solvers = {
 }
 solvers_default_method = 'Gauss-Newton'
 
-class olex2_normal_eqns(least_squares.crystallographic_ls):
+
+def get_parent():
+  try:
+    return least_squares.crystallographic_ls_class()
+  except:
+    return least_squares.crystallographic_ls
+
+class olex2_normal_eqns(get_parent()):
   log = None
 
   def __init__(self, observations, reparametrisation, olx_atoms, **kwds):
+    super(olex2_normal_eqns, self).__init__(
+      observations, reparametrisation, initial_scale_factor=OV.GetOSF(), **kwds)
     self.olx_atoms = olx_atoms
-    least_squares.crystallographic_ls.__init__(
-      self, observations, reparametrisation, initial_scale_factor=OV.GetOSF(), **kwds)
+    print self.__class__.__bases__[0].__bases__
 
   def step_forward(self):
     self.xray_structure_pre_cycle = self.xray_structure.deep_copy_scatterers()
-    least_squares.crystallographic_ls.step_forward(self)
+    super(olex2_normal_eqns, self).step_forward()
     self.show_cycle_summary(log=self.log)
     self.show_sorted_shifts(max_items=10, log=self.log)
     self.restraints_manager.show_sorted(

@@ -339,6 +339,7 @@ class normal_probability_plot(OlexCctbxAdapter):
     self.x = distribution.quantiles(f_sq_obs.size())
     self.y = observed_deviations.select(selection)
     self.indices = f_sq_obs.indices().select(selection)
+    self.amplitudes_array = f_obs.as_amplitude_array()
     fit = flex.linear_regression(self.x[5:-5], self.y[5:-5])
     corr = flex.linear_correlation(self.x[5:-5], self.y[5:-5])
     ShowFitSummary(fit)
@@ -358,6 +359,7 @@ class normal_probability_plot(OlexCctbxAdapter):
     r.indices = self.indices
     r.fit_slope = self.fit_slope
     r.fit_y_intercept = self.fit_y_intercept
+    r.amplitudes_array = self.amplitudes_array
     r.xLegend = "Expected deviations"
     r.yLegend = "Observed deviations"
     return r

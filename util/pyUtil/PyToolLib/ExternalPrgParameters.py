@@ -72,6 +72,7 @@ def defineExternalPrograms():
   # define solution methods
   direct_methods = Method_shelx_direct_methods(direct_methods_phil)
   patterson = Method_shelx_solution(patterson_phil)
+  xt_intrinsic_phasing = Method_shelxt(shelxt_phil_str)
   texp = Method_shelx_solution(texp_phil)
   dual_space = Method_shelxd(dual_space_phil)
   charge_flipping = Method_cctbx_ChargeFlip(charge_flipping_phil)
@@ -85,6 +86,8 @@ def defineExternalPrograms():
   sir2008_patt = Method_SIR(sir_patt_phil)
   sir2011_dm = Method_SIR(sir_dm_phil)
   sir2011_patt = Method_SIR(sir_patt_phil)
+  sir2014_dm = Method_SIR(sir_dm_phil)
+  sir2014_patt = Method_SIR(sir_patt_phil)
   superflip_cf = Method_Superflip(superflip_cf_phil)
 
   # define refinement methods
@@ -218,6 +221,14 @@ def defineExternalPrograms():
     brief_reference=SIR97.brief_reference,
     versions = '2011',
     execs=["sir2011.exe", "sir2011"])
+  SIR2014 = Program(
+    name='SIR2014',
+    program_type='solution',
+    author=SIR97.author,
+    reference=SIR97.reference,
+    brief_reference=SIR97.brief_reference,
+    versions = '2014',
+    execs=["sir2014.exe", "sir2014"])
   Superflip = Program(
     name='Superflip',
     program_type='solution',
@@ -243,8 +254,8 @@ Palatinus et al., 2012""",
   XS.addMethod(direct_methods)
   XS.addMethod(patterson)
   XS.addMethod(texp)
-  XT.addMethod(direct_methods)
-  ShelXT.addMethod(direct_methods)
+  XT.addMethod(xt_intrinsic_phasing)
+  ShelXT.addMethod(xt_intrinsic_phasing)
   ShelXD.addMethod(dual_space)
   ShelXD97.addMethod(dual_space)
   XM.addMethod(dual_space)
@@ -259,6 +270,8 @@ Palatinus et al., 2012""",
   SIR2008.addMethod(sir2008_patt)
   SIR2011.addMethod(sir2011_dm)
   SIR2011.addMethod(sir2011_patt)
+  SIR2014.addMethod(sir2014_dm)
+  SIR2014.addMethod(sir2014_patt)
   Superflip.addMethod(superflip_cf)
 
   # define refinement programs

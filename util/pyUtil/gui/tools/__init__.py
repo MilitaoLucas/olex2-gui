@@ -6,7 +6,9 @@ import sys
 import OlexVFS
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
-
+debug = bool(OV.GetParam('olex2.debug',False))
+timer = debug
+import glob
 global have_found_python_error
 have_found_python_error= False
 
@@ -23,6 +25,10 @@ import olexex
 import re
 
 import time
+
+global regex_l
+regex_l = {}
+
 
 class FolderView:
   root = None
@@ -153,7 +159,7 @@ def flash_gui_control(control, wait=300):
       new_image = "up=%soff.png" %control
       olx.html.SetImage(control_name,new_image)
     elif control.endswith('_bg'):
-      cmd = 'html.setBG(%s,%s)' %(control.rstrip('_bg'), '#fffffe')
+      cmd = 'html.setBG(%s,%s)' %(control.rstrip('_bg'), '#fffff')
       olex.m(cmd)
     else:
       new_image = "up=%shighlight.png" %control_image
@@ -232,7 +238,7 @@ def add_tool_to_index(scope="", link="", path="", location="", before="", filety
 
   if not filetype:
     t = r'''
-<!-- #include %s-%s-%s-%s %s/%s.htm;gui\blocks\tool-off.htm;image=%s;onclick=;2; -->''' %(level, location, scope, link, path, link, link)
+<!-- #include %s-%s-%s-%s "'%s/%s.htm'";gui\blocks\tool-off.htm;image=%s;onclick=;2; -->''' %(level, location, scope, link, path, link, link)
   else:
     t = r'''
 <!-- #includeif IsFileType('%s') %s-%s-%s-%s %s/%s.htm;gui\blocks\tool-off.htm;image=%s;onclick=;2; -->''' %(filetype, level, location, scope, link, path, link, link)
@@ -477,6 +483,97 @@ if haveGUI:
   OV.registerFunction(ElementButtonStates)
   OV.registerFunction(ElementButtonSelectStates)
   OV.registerFunction(MakeElementButtonsFromFormula)
+
+def add_mask_content(i,which):
+  is_CIF = (olx.IsFileType('cif') == 'true')
+  i = int(i)
+  global current_sNum
+  bases = ['smtbx', 'squeeze']
+  base = bases[0]
+  current_sNum = OV.ModelSrc()
+  contents = olx.cif_model[current_sNum].get('_%s_masks_void_%s' %(base,which))
+  if not contents:
+    base = bases[1]
+    contents = olx.cif_model[current_sNum].get('_%s_masks_void_%s' %(base,which))
+    if not contents:
+      if is_CIF:
+        contents = olx.Cif('_%s_void_nr' %base).split(",")
+  user_value = str(OV.GetUserInput(0, "Edit Mask %s for Void No %s"%(which, i), contents[i-1]))
+  idx = i -1
+  _ = list(contents)
+  _[idx] = user_value
+  olx.cif_model[current_sNum]['_%s_masks_void_content' %base] = _
+OV.registerFunction(add_mask_content)
+
+
+def copy_mask_infro_from_comment():
+  pass
+
+
+def get_mask_info():
+  global current_sNum
+  import gui
+  current_sNum = OV.ModelSrc()
+  header_row = gui.tools.TemplateProvider.get_template('mask_output_table_header', force=debug)
+  d = {}
+  bases = ['smtbx_masks', 'platon_squeeze']
+  base = bases[0]
+  is_CIF = (olx.IsFileType('cif') == 'true')
+
+  numbers = olx.cif_model[current_sNum].get('_%s_void_nr' %base, None)
+  if not numbers:
+    base = bases[1]
+    numbers = olx.cif_model[current_sNum].get('_%s_void_nr' %base)
+    if not numbers:
+      if is_CIF:
+        numbers = olx.Cif('_%s_void_nr' %base).split(",")
+        if not numbers:
+          return "No mask information"
+      else:
+        return "No mask information"
+
+  if is_CIF:
+    volumes = olx.Cif('_%s_void_volume' %base).split(",")
+    electrons = olx.Cif('_%s_void_count_electrons' %base).split(",")
+    contents = olx.Cif('_%s_void_content' %base).split(",")
+    details = olx.Cif('_%s_details' %base).split(",")
+
+  else:
+    volumes = olx.cif_model[current_sNum].get('_%s_void_volume' %base)
+    electrons = olx.cif_model[current_sNum].get('_%s_void_count_electrons' %base)
+    contents = olx.cif_model[current_sNum].get('_%s_void_content' %base)
+    details = olx.cif_model[current_sNum].get('_%s_details' %base)
+
+  t = "<table>"
+  t += gui.tools.TemplateProvider.get_template('mask_output_table_header', force=debug)
+
+
+  for number, volume, electron, content in zip(numbers, volumes, electrons, contents):
+    d = {}
+    d['number'] = number
+    d['electron'] = electron
+    d['volume'] = volume
+    if float(electron) != 0:
+      v_over_e = "%.2f" %(float(volume)/float(electron))
+      if v_over_e < 3:
+        v_over_e = "<font color='red'>%s</font>" %v_over_e
+      elif v_over_e > 5:
+        v_over_e = "<font color='red'>%s</font>" %v_over_e
+      else:
+        v_over_e = "<font color='green'>%s</font>" %v_over_e
+    else: v_over_e = "n/a"
+
+    d['v_over_e'] = v_over_e
+
+    content = '%s <a href="spy.add_mask_content(%s,content)">Edit</a>' %(content, number)
+    details = '<a href="spy.add_mask_content(%s,detail)">Edit</a>' %(number)
+    d['content'] = content
+    d['details'] = details
+
+    t += gui.tools.TemplateProvider.get_template('mask_output_table_row', force=debug) %d
+  t += "<tr><td>%(details)s</td></tr></table>" %d
+  return t
+OV.registerFunction(get_mask_info)
 
 
 def makeFormulaForsNumInfo():
@@ -774,14 +871,117 @@ def deal_with_gui_phil(action):
     olx.gui_phil_handler.save_param_file(
       file_name=gui_phil_path, scope_name='gui', diff_only=True)
 
-
-def run_regular_expressions(txt, re_l, specific = ""):
-  for pair in re_l:
-    if specific:
-      if pair[0] != specific:
+def get_regex_l(src_file):
+  global regex_l
+  if not src_file:
+    return False
+  if not src_file in regex_l:
+    re_l = []
+    l = open(src_file, 'r').readlines()
+    for item in l:
+      item = item.strip()
+      if item.startswith('#') or not item:
         continue
-    regex = re.compile(r"%s" %pair[0], re.X|re.M|re.S)
-    replace = pair[1].strip("'")
-    replace = pair[1].strip('"')
-    txt = regex.sub(r"%s" %replace, txt)
-  return txt
+      item_l = item.split("::")
+      find = item_l[0].strip().strip("%%")
+      replace = item_l[1].strip()
+      re_l.append((find,replace))
+    regex_l.setdefault('%s'%src_file,re_l)
+  return regex_l[src_file]
+
+def run_regular_expressions(txt, src_file, re_l=None, specific=""):
+  try:
+    global regex_l
+    if not re_l:
+      re_l = get_regex_l(src_file)
+
+    if timer:
+      t_timer=time.time()
+    for pair in re_l:
+      if specific:
+        if pair[0] != specific:
+          continue
+      regex = re.compile(r"%s" %pair[0], re.X|re.M|re.S|re.U)
+      replace = pair[1].strip("'")
+      replace = pair[1].strip('"')
+      try:
+        txt = regex.sub(r"%s" %replace, txt)
+      except Exception, err:
+        print err
+    if timer:
+      print_timer(tt, t_timer, pad="    ", sep="..")
+  except Exception:
+    if debug:
+      PrintException()
+  finally:
+    return txt
+
+class LogListen():
+  def __init__(self):
+    self.printed = []
+    OV.registerCallback("onlog", self.onListen)
+
+  def onListen(self, txt):
+    self.printed.append(txt)
+
+  def endListen(self):
+    OV.unregisterCallback("onlog", self.onListen)
+    l = []
+    for item in self.printed:
+      item = item.split('\r\n')
+      for tem in item:
+        if type(tem) == unicode:
+          l.append(tem)
+        else:
+          for em in tem:
+            l.append(em)
+    return l
+
+class Templates():
+  def __init__(self):
+    self.templates = {}
+    self.get_all_templates()
+
+  def get_template(self, name, force=False, path=None, mask=None, marker='@B@-@E@'):
+    '''
+    Returns a particular template from the Template.templates dictionary. If it doesn't exist, then it will try and get it, and return a 'not found' string if this does not succeed.
+    -- if force==True, then the template will be reloaded
+    -- if path is provided, then this location will also be searched.
+    '''
+    retVal = self.templates.get(name, None)
+    if not retVal or force:
+      self.get_all_templates(path=path, mask=mask, marker=marker)
+      retVal = self.templates.get(name, None)
+    if not retVal:
+      return "Template <b>%s</b> has not been found."%name
+    else:
+      return retVal
+
+  def get_all_templates(self, path=None, mask="*.*", marker='{-}'):
+    '''
+    Parses the path for template files.
+    '''
+    if not path:
+      path = os.sep.join([OV.BaseDir(), 'util', 'pyUtil', 'gui', 'templates'])
+
+    g = glob.glob("%s%s%s" %(path,os.sep,mask))
+    for f_path in g:
+      fc = open(f_path, 'r').read()
+      if not self._extract_templates_from_text(fc,marker=marker):
+        name = os.path.basename(os.path.normpath(f_path))
+        self.templates[name] = fc
+
+  def _extract_templates_from_text(self, t, marker):
+    mark = marker.split('-')
+    regex = re.compile(r't:(.*?)\%s(.*?)\%s' %(mark[0], mark[1]),re.DOTALL)
+    m=regex.findall(t)
+    if m:
+      for item in m:
+        name = item[0]
+        content = item[1]
+        self.templates[name] = content
+      return True
+    else:
+      return False
+
+TemplateProvider = Templates()

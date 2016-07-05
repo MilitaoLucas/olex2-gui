@@ -638,7 +638,7 @@ def GetRInfo(txt="",format='html'):
           R1 = tree.active_node.R1
         else:
           R1 = 'n/a'
-    font_size = OV.GetParam('gui.html.font_size_large')
+    font_size = OV.GetParam('gui.html.font_size_extra_large')
 
     if 'html' in format:
       try:
@@ -647,9 +647,9 @@ def GetRInfo(txt="",format='html'):
         R1 = "%.2f" %(R1*100)
 
         if 'report' in format:
-          t = r"<font size='%s'>R1&#8239;=&#8239;<font color='%s'><b>%s%%</b></font></font>" %(font_size, col, R1)
+          t = r"<font size='%s'><font color='%s'><b>%s%%</b></font></font>" %(font_size, col, R1)
         else:
-          t = r"<font size='%s'>R1&#8239;=&#8239;<font color='%s'><b>%s%%</b></font></font>" %(font_size, col, R1)
+          t = r"<font size='%s'><font color='%s'><b>%s%%</b></font></font>" %(font_size, col, R1)
 
       except:
         t = "<td colspan='2' align='right' rowspan='2' align='right'><font size='%s'><b>%s</b></font></td>" %(font_size, R1)
@@ -683,12 +683,9 @@ def GetRInfo(txt="",format='html'):
         R1 = float(R1)
         col = GetRcolour(R1)
         R1 = "%.2f" %(R1*100)
-        t = r"<td colspan='1' align='center' rowspan='2'><font size='4' color='%s'><b>%s%%</b></font></td>" %(col, R1)
+        t = r"<td colspan='1' align='center' rowspan='2'><font size='%s' color='%s'><b>%s%%</b></font></td>" %(OV.GetParam('gui.html.font_size_extra_large'), col, R1)
       except:
         t = "<td colspan='1' rowspan='2' align='center'><font size='4'><b>%s</b></font></td>" %R1
-    #wFile = open(r"%s/displayR.htm" %olx.StrDir(), 'w')
-    #wFile.write(t)
-    #wFile.close()
     return t
 OV.registerFunction(GetRInfo)
 

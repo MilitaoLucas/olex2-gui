@@ -177,18 +177,34 @@ def getModule(name, email=None):
     return False
 
 
-def update_or_install(d):
+def rollback(d):
+  print "Rolling back extension module %s" %d
+  update_or_install(d,rollback=True)
+
+def update_or_install(d, rollback=False):
+  """Update or install extension modules.
+
+  Updating or installing happens from a ZIP file. This can be a file obtained from the distro or can be a previous version of the module (rollback).
+ """
+
   m_dir = getModulesDir()
-  if ".update" not in d:
+  if rollback:
+    update_zip = os.sep.join([m_dir, "%s.rollback.zip" %d])
+  elif ".update" not in d:
     update_zip = os.sep.join([m_dir, "%s.update" %d])
   else:
     update_zip = os.sep.join([m_dir, d])
+
   if os.path.exists(update_zip):
     #try to clean up the folder if already exists
-    pdir = "%s%s%s" %(m_dir, os.sep, d.rstrip(".update"))
+    pdir = "%s%s%s" %(m_dir, os.sep, d.replace(".update",""))
     if os.path.exists(pdir):
       if ".update" not in pdir:
         try:
+          if not rollback:
+            rollback_zip = os.sep.join(["%s.rollback" %pdir])
+            shutil.make_archive(rollback_zip, 'zip', pdir)
+            print "The original module %s has been backed up." %d
           shutil.rmtree(pdir)
         except Exception, e:
           print "The original module %s could not be removed" %d
@@ -196,7 +212,10 @@ def update_or_install(d):
     try:
       from zipfile import ZipFile
       zp = ZipFile(update_zip)
-      zp.extractall(path=m_dir)
+      path = m_dir
+      if rollback:
+        path = os.sep.join([m_dir, d])
+      zp.extractall(path=path)
       zp.close()
       print "Module %s has been installed/updated" %d
       retVal = True
@@ -210,7 +229,9 @@ def update_or_install(d):
       print "Update file for module %s could not be removed" %d
       return False
     return retVal
-
+  else:
+    print "This function expected the file %s, but it could not be found." %update_zip
+    return False
 
 def loadAll():
   global available_modules
@@ -247,8 +268,6 @@ def loadAll():
       if debug:
         sys.stdout.formatExceptionInfo()
   getAvailableModules() #thread
-  if olx.HasGUI() == 'true':
-    olx.Schedule(2, "spy.plugins.AskToUpdate()", g=True)
 
 
 def updateKey(module):
@@ -290,6 +309,7 @@ def updateKey(module):
     try:
       if _plgl.loadPlugin(module.folder_name, key, m_dir):
         print("Module %s has been successfully loaded." %(module.name))
+        module.action = 0
         return True
     except Exception, e:
       msg = e.message
@@ -303,6 +323,14 @@ def updateKey(module):
       print("Error while updating the key for '%s': '%s'" %(module.name, e))
     return False
 
+def updateKeys():
+  global available_modules
+  for m in available_modules:
+    if m.folder_name in failed_modules and "expired" in failed_modules[m.folder_name]:
+      updateKey(m)
+  olx.Schedule(1, "spy.plugins.CheckLicences()", g=True)
+
+
 def expired_pop(m):
   import OlexVFS
 
@@ -315,8 +343,16 @@ def expired_pop(m):
   d['token'] = getAuthenticationToken()
   d['tag'] = OV.GetTag()
 
-  _ = os.sep.join([OV.BaseDir(), "util", "pyUtil", "misc", "expired_pop.html"])
-  t = open(_,'r').read()%d
+  _ = None
+  try:
+    import threads_imp
+    _ = threads_imp.get_news_image_from_server("expired_pop.htm")
+  except Exception, err:
+    print err
+
+  if not _:
+    _ = os.sep.join([OV.BaseDir(), "util", "pyUtil", "misc", "expired_pop.html"])
+    t = open(_,'r').read()%d
 
   pop_name = "sorry-%s"%name
   htm = "sorry-%s.htm"%name
@@ -328,7 +364,8 @@ def expired_pop(m):
   x = 50
   y = 50
 
-  pstr = "popup '%s' '%s' -t='%s' -w=%s -h=%s -x=%s -y=%s" %(pop_name, htm, pop_name, width+border*2 +10, height+border*2, x, y)
+  pstr = "popup '%s' '%s' -t='%s' -w=%s -h=%s -x=%s -y=%s" %(
+    pop_name, htm, pop_name, width+border*2 +10, height+border*2, x, y)
   olx.Schedule(1, pstr)
   olx.Schedule(1, "html.ShowModal(%s, True)"%pop_name)
 
@@ -337,7 +374,9 @@ def expired_pop(m):
   #olx.html.SetBorders(pop_name,border)
 
 
-def ask_for_licence_extension(name, token, tag, institute, confession_status=False, confession_structures=False, confession_have_licence=False, confession_keep_evaluating=False, confession_no_thanks=False):
+def ask_for_licence_extension(name, token, tag, institute, confession_status=False,
+                              confession_structures=False, confession_have_licence=False,
+                              confession_keep_evaluating=False, confession_no_thanks=False):
 
   d = {}
   d['institute'] = institute
@@ -389,7 +428,14 @@ def ask_for_licence_extension(name, token, tag, institute, confession_status=Fal
       shutil.rmtree(mdir)
       print "%s has been deleted" %name
     except:
-      print "Could not delte %s. Is this folder open?" %name
+      print "Could not delete %s. Is this folder open?" %name
+
+def checkLicences():
+  queue_pop = [m for m in available_modules if m.action == 3]
+  for m in queue_pop:
+    expired_pop(m)
+  if olx.HasGUI() == 'true':
+    olx.Schedule(1, "spy.plugins.AskToUpdate()", g=True)
 
 def getCurrentPlatformString():
   import platform
@@ -449,7 +495,6 @@ def getAvailableModules_():
           if debug:
             sys.stdout.formatExceptionInfo()
           pass
-    queue_pop = []
     m_dir = getModulesDir()
     for m in available_modules:
       md = "%s%s%s" %(m_dir, os.sep, m.folder_name)
@@ -463,25 +508,20 @@ def getAvailableModules_():
             pass
         if m.folder_name in failed_modules:
           if "expired" in failed_modules[m.folder_name]:
-            if updateKey(m):
-              m.action = 1
-            else:
-              m.action = 3 #reinstall
-              queue_pop.append(m)
-          else:
-            m.action = 3
+            m.action = 3 #reinstall
         elif d < m.release_date:
           m.action = 2
       else:
         m.action = 1
-    for m in queue_pop:
-      expired_pop(m)
   except Exception, e:
     if debug:
       sys.stdout.formatExceptionInfo()
     return "No modules information available"
   finally:
     avaialbaleModulesRetrieved = True
+    olx.Schedule(1, "spy.plugins.updateKeys()", g=False)
+
+
 
 class ModuleListThread(ThreadEx):
   instance = None
@@ -632,22 +672,21 @@ def getCurrentModuleName():
 
 def AskToUpdate():
   import HttpTools
-  if not HttpTools.auto_update:
-    return
   global avaialbaleModulesRetrieved
   from olexFunctions import OlexFunctions
   OV = OlexFunctions()
   if not OV.canNetwork(show_msg=False):
     return
-  if not avaialbaleModulesRetrieved and olx.HasGUI() == 'true':
-    olx.Schedule(2, "spy.plugins.AskToUpdate()", g=True)
+  if not avaialbaleModulesRetrieved:
+    if olx.HasGUI() == 'true':
+      olx.Schedule(1, "spy.plugins.AskToUpdate()", g=True)
     return
   manual_update = OV.GetParam("user.modules.manual_update", False)
-  if manual_update:
-    return
   m_dir = getModulesDir()
   etoken_fn = "%s%setoken" %(m_dir, os.sep)
   if not os.path.exists(etoken_fn):
+    if debug:
+      print("No email token found - aborting")
     return
   to_update = []
   to_update_names = []
@@ -656,6 +695,12 @@ def AskToUpdate():
     if m.action == 2:
       to_update.append(m)
       to_update_names.append(m.name)
+  if manual_update or not HttpTools.auto_update:
+    if to_update_names:
+      print('Update is available for the following module(s): ' + ' '.join(to_update_names))
+      if not HttpTools.auto_update:
+        print('But updates are disabled')
+    return
   if to_update:
     res = olx.Alert("Module updates available",
           "Would you like to try updating the Olex2 extension modules?\n"+
@@ -768,9 +813,12 @@ if os.path.exists(lib_name) or olx.app.IsDebugBuild() == 'true':
     olex.registerFunction(doAct, False, "plugins.gui")
     olex.registerFunction(AskToUpdate, False, "plugins")
     olex.registerFunction(updateKey, False, "plugins")
+    olex.registerFunction(updateKeys, False, "plugins")
     olex.registerFunction(offlineInstall, False, "plugins")
     olex.registerFunction(expired_pop, False, "plugins")
+    olex.registerFunction(checkLicences, False, "plugins")
     olex.registerFunction(ask_for_licence_extension, False, "plugins")
+    olex.registerFunction(rollback, False, "plugins")
     loadAll()
   except Exception, e:
     print("Plugin loader initialisation failed: '%s'" %e)

@@ -1,7 +1,7 @@
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width="15%">%Level%</td>
-  <td width="75%">
+  <td width="10%">%Level%</td>
+  <td width="70%">
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       align="right"
@@ -13,7 +13,7 @@
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
       min="$math.eval(xgrid.GetMin()*50)"
-      max="$math.eval(xgrid.GetMax()*50)"
+      max="0"
       onchange="spy.SetParam(snum.xgrid.value,math.eval(html.GetValue(~name~)/50))>>
 html.SetValue(SNUM_XGRID_VALUE,spy.GetParam(snum.xgrid.value))>>
 xgrid.Scale(html.GetValue(SNUM_XGRID_VALUE))>>"
@@ -35,5 +35,8 @@ xgrid.Scale(html.GetValue(~name~))>>
 html.SetValue(SNUM_XGRID_SLIDE,math.eval(XGrid.Scale()*50))"
     >
     </font>
+  </td>
+  <td width='10%' align='right'>
+  e / &Aring;<sup>3</sup>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

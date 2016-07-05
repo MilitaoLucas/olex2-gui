@@ -4,15 +4,23 @@ import olx
 import olex_core
 import os
 import olexex
+import OlexVFS
+
 from ArgumentParser import ArgumentParser
 from History import hist
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+debug = bool(OV.GetParam('olex2.debug',False))
+timer = debug
+
 import ExternalPrgParameters
 
 from CifInfo import MergeCif
 import TimeWatch
+import time
+
+import shutil
 
 class RunPrg(ArgumentParser):
   running = False
@@ -32,6 +40,7 @@ class RunPrg(ArgumentParser):
     self.shelx_files = r"%s/util/SHELX/" %self.basedir
     self.isAllQ = False #If all atoms are q-peaks, this will be assigned to True
     self.his_file = None
+    self.please_run_auto_vss = False
 
     self.demo_mode = OV.FindValue('autochem_demo_mode',False)
     self.broadcast_mode = OV.FindValue('broadcast_mode',False)
@@ -42,6 +51,8 @@ class RunPrg(ArgumentParser):
       from Analysis import PrgAnalysis
       self.PrgAnalysis = PrgAnalysis
 
+    OV.registerFunction(self.run_auto_vss,False,'runprg')
+
     self.params = olx.phil_handler.get_python_object()
     OV.SetVar('SlideQPeaksVal','0') # reset q peak slider to display all peaks
     if not self.filename:
@@ -51,29 +62,63 @@ class RunPrg(ArgumentParser):
     olx.Stop('listen')
     self.shelx_alias = OV.FileName().replace(' ', '').lower()
     os.environ['FORT_BUFFERED'] = 'TRUE'
+    self.post_prg_output_html_message = ""
+
 
   def __del__(self):
     if self.method is not None:
       self.method.unregisterCallback()
 
   def run(self):
+    import time
+
     if RunPrg.running:
       print("Already running. Please wait...")
       return
     RunPrg.running = True
     try:
       token = TimeWatch.start("Running %s" %self.program.name)
+      if timer:
+        t1 = time.time()
       res = self.method.run(self)
+      if timer:
+        print "REFINEMENT: %.3f" %(time.time() - t1)
       if res == False:
         return False
       if not self.method.failure:
+        if timer:
+          t1 = time.time()
         self.runAfterProcess()
+        if timer:
+          print "runAfterProcess: %.3f" %(time.time() - t1)
+      if timer:
+        t1 = time.time()
       self.endRun()
+      if timer:
+        print "endRun: %.3f" %(time.time() - t1)
+
       TimeWatch.finish(token)
       sys.stdout.refresh = False
       sys.stdout.graph = False
     finally:
+      if self.HasGUI:
+        olx.html.Update()
       RunPrg.running = False
+
+      if self.please_run_auto_vss:
+        self.run_auto_vss()
+
+  def run_auto_vss(self):
+    olx.Freeze(True)
+    olex.m('compaq')
+    olex.m('compaq -a')
+    olx.VSS(True)
+    olex.m('compaq')
+    olex.m('refine 2 10')
+    olex.m('compaq')
+    olx.ATA()
+    olex.m('refine 2 10')
+    olx.Freeze(False)
 
   def which_shelx(self, type="xl"):
     a = olexex.which_program(type)
@@ -92,7 +137,7 @@ class RunPrg(ArgumentParser):
     copy_to = "%s/listen.res" %(self.datadir)
     if os.path.isfile(copy_from):
       if copy_from.lower() != copy_to.lower():
-        olx.file.Copy(copy_from, copy_to)
+        shutil.copyfile(copy_from, copy_to)
 
   def doFileResInsMagic(self):
     extensions = ['res', 'lst', 'cif', 'fcf', 'mat', 'pdb']
@@ -101,6 +146,8 @@ class RunPrg(ArgumentParser):
     if self.broadcast_mode:
       self.doBroadcast()
     for ext in extensions:
+      if timer:
+        t = time.time()
       if "xt" in self.program.name.lower() and ext != 'lst':
         copy_from = "%s/%s_a.%s" %(self.tempPath, self.shelx_alias, ext)
       else:
@@ -108,8 +155,9 @@ class RunPrg(ArgumentParser):
       copy_to = "%s/%s.%s" %(self.filePath, self.original_filename, ext)
       if os.path.isfile(copy_from):
         if copy_from.lower() != copy_to.lower():
-          olx.file.Copy(copy_from, copy_to)
-
+          shutil.copyfile(copy_from, copy_to)
+      if timer:
+        print "---- copying %s: %.3f" %(copy_from, time.time() -t)
   def doHistoryCreation(self, type="normal"):
     if type == "first":
       historyPath = "%s/%s.history" %(OV.StrDir(), OV.FileName())
@@ -146,18 +194,19 @@ class RunPrg(ArgumentParser):
     self.curr_file = OV.FileName()
     copy_from = "%s" %(self.hkl_src)
     ## All files will be copied to the temp directory in lower case. This is to be compatible with the Linux incarnations of ShelX
-    copy_to = "%s/%s.hkl" %(self.tempPath, self.shelx_alias)
+    copy_to = "%s%s%s.hkl" %(self.tempPath, os.sep, self.shelx_alias)
     if not os.path.exists(copy_to):
-      olx.file.Copy(copy_from, copy_to)
-    copy_from = "%s/%s.ins" %(self.filePath, self.curr_file)
-    copy_to = "%s/%s.ins" %(self.tempPath, self.shelx_alias)
+      shutil.copyfile(copy_from, copy_to)
+    copy_from = "%s%s%s.ins" %(self.filePath, os.sep, self.curr_file)
+    copy_to = "%s%s%s.ins" %(self.tempPath, os.sep, self.shelx_alias)
     if not os.path.exists(copy_to):
-      olx.file.Copy(copy_from, copy_to)
+      shutil.copyfile(copy_from, copy_to)
     #fab file...
-    copy_from = "%s/%s.fab" %(self.filePath, self.curr_file)
-    copy_to = "%s/%s.fab" %(self.tempPath, self.shelx_alias)
-    if not os.path.exists(copy_to):
-      olx.file.Copy(copy_from, copy_to)
+    copy_from = "%s%s%s.fab" %(self.filePath, os.sep, self.curr_file)
+    copy_to = "%s%s%s.fab" %(self.tempPath, os.sep, self.shelx_alias)
+    if os.path.exists(copy_from):
+      if not os.path.exists(copy_to):
+        shutil.copyfile(copy_from, copy_to)
 
   def runCctbxAutoChem(self):
     from AutoChem import OlexSetupRefineCctbxAuto
@@ -174,17 +223,34 @@ class RunPrg(ArgumentParser):
   def runAfterProcess(self):
     #olex.m("spy.run_skin sNumTitle")
     if 'olex2' not in self.program.name:
+      if timer:
+        t = time.time()
       self.doFileResInsMagic()
-      olx.Freeze(True)
+      if timer:
+        print "--- doFilseResInsMagic: %.3f" %(time.time() - t)
+
+      if timer:
+        t = time.time()
+      if self.HasGUI:
+        olx.Freeze(True)
       OV.reloadStructureAtreap(self.filePath, self.curr_file, update_gui=False)
-      olx.Freeze(False)
+      if self.HasGUI:
+        olx.Freeze(False)
+      if timer:
+        print "--- reloadStructureAtreap: %.3f" %(time.time() - t)
+
       # XT changes the HKL file - so it *will* match the file name
       if 'xt' not in self.program.name.lower():
         OV.HKLSrc(self.hkl_src)
-      olx.html.Update()
+
     else:
       if self.broadcast_mode:
+        if timer:
+          t = time.time()
         self.doBroadcast()
+        if timer:
+          print "--- doBroacast: %.3f" %(time.time() - t)
+
       lstFile = '%s/%s.lst' %(self.filePath, self.original_filename)
       if os.path.exists(lstFile):
         os.remove(lstFile)
@@ -205,12 +271,12 @@ class RunPrg(ArgumentParser):
 
   def getProgramMethod(self, fun):
     if fun == 'refine':
-      prgType = 'refinement'
+      self.prgType = prgType = 'refinement'
       prgDict = self.RPD
       prg = self.params.snum.refinement.program
       method = self.params.snum.refinement.method
     else:
-      prgType = 'solution'
+      self.prgType = prgType = 'solution'
       prgDict = self.SPD
       prg = self.params.snum.solution.program
       method = self.params.snum.solution.method
@@ -232,6 +298,37 @@ class RunPrg(ArgumentParser):
   def endRun(self):
     OV.DeleteBitmap('%s' %self.bitmap)
     OV.Cursor()
+
+  def post_prg_html(self):
+    if not OV.HasGUI():
+      return
+    import gui.tools
+    debug = bool(OV.GetParam('olex2.debug',False))
+
+    typ = self.prgType.lower()
+
+    if typ=='refinement':
+      return
+
+    extra_msg = ""
+    if typ == "refinement":
+      extra_msg = "$spy.MakeHoverButton('small-Assign@refinement','ATA(1)')"
+    elif typ == "solution" and self.program.name.lower() != "shelxt":
+      extra_msg = gui.tools.TemplateProvider.get_template('run_auto_vss_box', force=debug)
+
+    message = "<td>%s</td><td align='right'>%s</td>" %(self.post_prg_output_html_message, extra_msg)
+
+    d = {
+      'program_output_type':"PROGRAM_OUTPUT_%s" %self.prgType.upper(),
+      'program_output_name':self.program.name,
+      'program_output_content': message
+    }
+
+    t = gui.tools.TemplateProvider.get_template('program_output', force=debug)%d
+    f_name = OV.FileName() + "_%s_output.html" %self.prgType
+    OlexVFS.write_to_olex(f_name, t)
+#    olx.html.Update()
+
 
 
 class RunSolutionPrg(RunPrg):
@@ -262,6 +359,7 @@ class RunSolutionPrg(RunPrg):
     OV.SetParam('snum.refinement.update_weight', False)
     RunPrg.runAfterProcess(self)
     self.method.post_solution(self)
+    self.post_prg_html()
     self.doHistoryCreation()
     OV.SetParam('snum.current_process_diagnostics','solution')
 
@@ -396,8 +494,19 @@ class RunRefinementPrg(RunPrg):
 
   def runAfterProcess(self):
     RunPrg.runAfterProcess(self)
+    if timer:
+      t = time.time()
     self.method.post_refinement(self)
+    if timer:
+      print "-- self.method.post_refinement(self): %.3f" %(time.time()-t)
+
+    if timer:
+      t = time.time()
+    self.post_prg_html()
     self.doHistoryCreation()
+    if timer:
+      print "-- self.method.post_refinement(self): %3f" %(time.time()-t)
+
     if self.R1 == 'n/a':
       return
     if self.params.snum.refinement.auto.tidy:
@@ -409,11 +518,16 @@ class RunRefinementPrg(RunPrg):
       except Exception, e:
         print "Could not determine whether structure inversion is needed: %s" %e
     OV.SetParam('snum.current_process_diagnostics','refinement')
+
+    if timer:
+      t = time.time()
     if self.params.snum.refinement.cifmerge_after_refinement:
       try:
         MergeCif(edit=False, force_create=False, evaluate_conflicts=False)
       except Exception, e:
         print("Failed in CifMerge: '%s'" %str(e))
+    if timer:
+      print "-- MergeCif: %.3f" %(time.time()-t)
 
   def doHistoryCreation(self):
     R1 = 0
@@ -479,6 +593,9 @@ class RunRefinementPrg(RunPrg):
           possible_racemic_twin = True
         elif hooft.p2_false is not None and round(hooft.p2_false, 3) == 1:
           inversion_needed = True
+      else:
+        OV.SetParam('snum.refinement.hooft_str', None)
+
     if flack:
       print "Flack x: %s" %flack
       fs = flack.split("(")
@@ -503,6 +620,7 @@ class RunRefinementPrg(RunPrg):
     if not inversion_needed and not possible_racemic_twin:
       #print "OK"
       pass
+
 
 def AnalyseRefinementSource():
   file_name = OV.FileFull()
@@ -536,3 +654,4 @@ def AnalyseRefinementSource():
 OV.registerFunction(AnalyseRefinementSource)
 OV.registerFunction(RunRefinementPrg)
 OV.registerFunction(RunSolutionPrg)
+
