@@ -713,6 +713,10 @@ def make_input_button(d):
   return html
 
 def format_help(txt):
+  regex_source = os.sep.join([OV.BaseDir(), "etc", "regex", "regex_format_help.txt"])
+  if os.path.exists(regex_source):
+    txt = gui.tools.run_regular_expressions(txt, regex_source)
+
   import re
   d = {}  # initialise a dictionary, which will be used to store metadata.
 
@@ -740,35 +744,35 @@ def format_help(txt):
     d = eval(dt)
 
 
-  ## find all occurences of <lb> and replace this with a line-break in a table.
-  regex = re.compile(r"<lb>", re.X)
-  txt = regex.sub(r"<br>", txt)
+  ### find all occurences of <lb> and replace this with a line-break in a table.
+  #regex = re.compile(r"<lb>", re.X)
+  #txt = regex.sub(r"<br>", txt)
 
-  ## find all occurences of '->' and replace this with an arrow.
-  regex = re.compile(r"->", re.X)
-  txt = regex.sub(r"<b>&rarr;</b>", txt)
+  ### find all occurences of '->' and replace this with an arrow.
+  #regex = re.compile(r"->", re.X)
+  #txt = regex.sub(r"<b>&rarr;</b>", txt)
 
-  ## find all occurences of strings between t^..^t. These are the headers for tip of the day.
-  regex = re.compile(r"t \^ (.*?)  \^ t", re.X)
-  txt = regex.sub(r"<font color='$GetVar(HtmlHighlightColour)'><b>\1</b></font>&nbsp;", txt)
+  ### find all occurences of strings between t^..^t. These are the headers for tip of the day.
+  #regex = re.compile(r"t \^ (.*?)  \^ t", re.X)
+  #txt = regex.sub(r"<font color='$GetVar(HtmlHighlightColour)'><b>\1</b></font>&nbsp;", txt)
 
-  ## find all occurences of strings between <<..>>. These are keys to pressthe headers for tip of the day.
-  regex = re.compile(r"<< (.*?)  >>", re.X)
-  txt = regex.sub(r"<b><code>\1</code></b>", txt)
+  ### find all occurences of strings between <<..>>. These are keys to pressthe headers for tip of the day.
+  #regex = re.compile(r"<< (.*?)  >>", re.X)
+  #txt = regex.sub(r"<b><code>\1</code></b>", txt)
 
-  ## find all occurences of strings between n^..^n. These are the notes.
-  regex = re.compile(r"n \^ (.*?)  \^ n", re.X)
-  txt = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='1'><tr bgcolor=#efefef><td><font size=-1><b>Note: </b>\1</font></td></tr></table>", txt)
+  ### find all occurences of strings between n^..^n. These are the notes.
+  #regex = re.compile(r"n \^ (.*?)  \^ n", re.X)
+  #txt = regex.sub(r"<table width='%s' border='0' cellpadding='0' cellspacing='1'><tr bgcolor=#efefef><td><font size=-1><b>Note: </b>\1</font></td></tr></table>", txt)
 
   ### find all occurences of strings between TT..TT. These are keys to press the headers for tip of the day.
   #regex = re.compile(r"TT (.*?)  TT", re.X)
   #txt = regex.sub(r"<tr><td align='right'><a href='spy.run_autodemo(\1)'><zimg src=tutorial.png></a></td></tr>", txt)
 
-  ## find all occurences of strings between TT..TT. These are keys to pressthe headers for tip of the day.
-  regex = re.compile(r"TT (.*?)  TT", re.X)
-  sx = txt
-  txt = regex.sub(r"<tr><td align='right'>$spy.MakeHoverButton('button-tutorial','spy.demo.run_autodemo(1)')</td></tr>", txt)
-  txt = txt.replace(r"\\\\",r"\\")
+  ### find all occurences of strings between TT..TT. These are keys to pressthe headers for tip of the day.
+  #regex = re.compile(r"TT (.*?)  TT", re.X)
+  #sx = txt
+  #txt = regex.sub(r"<tr><td align='right'>$spy.MakeHoverButton('button-tutorial','spy.demo.run_autodemo(1)')</td></tr>", txt)
+  #txt = txt.replace(r"\\\\",r"\\")
 
   ## find all occurences of strings between l[]. These are links to help or tutorial popup boxes.
   regex = re.compile(r"l\[\s*(?P<linktext>.*?)\s*,\s*(?P<linkurl>.*?)\s*\,\s*(?P<linktype>.*?)\s*\]", re.X)
@@ -794,37 +798,33 @@ def format_help(txt):
     s = txt
   txt = s
 
-  ## find all occurences of strings between ~. These are the entries for the table.
-  regex = re.compile(r"  ~ (.*?)( [^\~\~]* ) ~ ", re.X)
-  m = regex.findall(txt)
-  colour = OV.GetParam('gui.html.highlight_colour').hexadecimal
-  if m:
-    s = regex.sub(r"<p><b><font color='%s'>\2</font></b>&nbsp;" %colour, txt)
-  else:
-    s = txt
+  ### find all occurences of strings between ~. These are the entries for the table.
+  #regex = re.compile(r"  ~ (.*?)( [^\~\~]* ) ~ ", re.X)
+  #m = regex.findall(txt)
+  #colour = OV.GetParam('gui.html.highlight_colour').hexadecimal
+  #if m:
+    #s = regex.sub(r"<p><b><font color='%s'>\2</font></b>&nbsp;" %colour, txt)
+  #else:
+    #s = txt
 
-  ## find all occurences of strings between@. These are the table headers.
-  txt = s
-  regex = re.compile(r"  @ (.*?)( [^\@\@]* ) @ ", re.X)
-  m = regex.findall(txt)
-  colour = "#232323"
-  if m:
-    s = regex.sub(r"<tr bgcolor=\"$GetVar('HtmlTableFirstcolColour')\"><hr><b>\2</b><br>", txt)
-  else:
-    s = txt
+  ### find all occurences of strings between@. These are the table headers.
+  #txt = s
+  #regex = re.compile(r"  @ (.*?)( [^\@\@]* ) @ ", re.X)
+  #m = regex.findall(txt)
+  #colour = "#232323"
+  #if m:
+    #s = regex.sub(r"<tr bgcolor=\"$GetVar('HtmlTableFirstcolColour')\"><hr><b>\2</b><br>", txt)
+  #else:
+    #s = txt
 
-  ## find all occurences of strings between &. These are the tables.
-  txt = s
-  regex = re.compile(r"  (&&) (.*?) (&&) ", re.X)
-  m = regex.findall(txt)
-  if m:
-    s = regex.sub(r"\2", txt)
-  else:
-    s = txt
-
-  l = [("\*(.*?)\*", "<b>\\1</b>")]
-  s = gui.tools.run_regular_expressions(s, l)
-
+  ### find all occurences of strings between &. These are the tables.
+  #txt = s
+  #regex = re.compile(r"  (&&) (.*?) (&&) ", re.X)
+  #m = regex.findall(txt)
+  #if m:
+    #s = regex.sub(r"\2", txt)
+  #else:
+    #s = txt
 
   return s, d
 

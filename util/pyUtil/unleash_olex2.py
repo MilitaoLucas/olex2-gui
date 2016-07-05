@@ -63,7 +63,7 @@ external_files = {
                        'action:extract', 'action:delete'),
   'cctbx-mac32.zip': ('olex-port', mac32_port_name, mac32_legacy_port_name,
                       'action:extract', 'action:delete'),
-  'lib-mac32.zip': ('olex-port', mac32_port_name, 
+  'lib-mac32.zip': ('olex-port', mac32_port_name,
                     'action:extract', 'action:delete'),
   #mac64
   'olex2-mac64.zip': ('olex-port', mac64_port_name, 'action:extract', 'action:delete'),
@@ -87,6 +87,8 @@ external_files = {
   'cctbx-linux64.zip': ('olex-port', linux64_port_name, linux64_legacy_port_name,
                         'action:extract', 'action:delete'),
   'lib-linux64.zip': ('olex-port', linux64_port_name, linux64_legacy_port_name,
+                      'action:extract', 'action:delete'),
+  'hart-lin64.zip': ('olex-port', linux64_port_name, linux64_legacy_port_name,
                       'action:extract', 'action:delete'),
   #windows
   'launch-win32.zip': ('olex-port', win32_port_name,  'action:extract', 'action:delete'),
@@ -114,6 +116,7 @@ external_files = {
   'licence.rtf': ('olex-install', 'olex-update'),
   'documentation.zip': ('olex-update', 'action:extract', 'action:delete'),
   'textures.zip': ('olex-update', 'action:extract', 'action:delete'),
+  'ac3.zip': ('olex-update', 'action:extract', 'action:delete'),
   #plugins
   #'olex2c-win32.zip': ('olex-port', 'plugin-Headless-win-32', 'action:extract', 'action:delete'),
   #'olex2c-win64.zip': ('olex-port', 'plugin-Headless-win-64', 'action:extract', 'action:delete'),
@@ -137,7 +140,8 @@ set(  ['olex2_fonts.zip',
        'fonts.zip',
        'acidb.zip',
        'documentation.zip',
-       'textures.zip'
+       'textures.zip',
+       'ac3.zip'
       ]
    )
 win32_sse2_zip_files = \
@@ -198,7 +202,8 @@ set(  ['cctbx-linux64.zip',  #cctbx/cctb_sources,...
       'lib-linux64.zip',     #lib/dlls
       'olex2-linux64.zip',    #olex2 executable
       'plgl-linux64.zip',
-      'unirun-linux64.zip'
+      'unirun-linux64.zip',
+      'hart-lin64.zip'
       ]
    ) | portable_zip_files
 

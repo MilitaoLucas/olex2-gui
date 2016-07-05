@@ -1,0 +1,29 @@
+# Files coming from olex2 distro which are not on the GUI SVN
+acidb.db
+acidb.db.map
+dictionary.txt
+etc/Fonts/
+etc/Textures/
+etc/documentation/Commands.pdf
+etc/gui/fonts/
+include/
+index.ind
+lib/
+licence.rtf
+odac_update.txt
+olex2
+olex2.tag
+olex2_exe
+splash.jpg
+usettings.dat
+util/pyUtil/misc/_plgl.so
+version.txt
+
+# Ignore the cctbx shipped with the distro
+cctbx_shipped/
+
+# CCTBX
+cctbx/cctbx_build
+
+# WingIDE debug stub
+util/pyUtil/wingdbstub.py

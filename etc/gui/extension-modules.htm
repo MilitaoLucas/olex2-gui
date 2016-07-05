@@ -32,16 +32,16 @@ contact you in the case of new releases or features update.
 
 <!-- #include tool-row gui\blocks\tool-row.htm;name=MODULES_ACTION;1; -->
   <td width='15%'><b>Modules</b></td>
-  <td width="35%" align="right">$+
+  <td width="50%" align="right">$+
      html.Snippet("gui/snippets/input-combo", "name=available_modules",
       "width=100%",
-      "value=spy.plugins.gui.getCurrentModuleName()",
       "items=spy.plugins.gui.getModuleList()",
+      "value=spy.plugins.gui.getCurrentModuleName()",
       "onchange=spy.plugins.gui.update(html.GetValue(~name~))",
       "onreturn=html.call(~name~.onchange)",
       "readonly=false")
   $-</td>
-  <td width='50%'>
+  <td width='35%'>
     <font size='2'>
     <input
       name="MODULES_ACTION"
@@ -56,7 +56,7 @@ contact you in the case of new releases or features update.
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row gui\blocks\tool-row.htm;name=MODULES_INFO;1; -->
-<td>$spy.plugins.gui.getInfo()</td>
+<td bgcolor="#FFD699">$spy.plugins.gui.getInfo()</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #ignoreif not(fs.Exists('modules-info.htm'))
@@ -67,7 +67,7 @@ contact you in the case of new releases or features update.
 
 <!-- #include tool-row gui\blocks\tool-row.htm;name=MODULES_OFFLINE;1; -->
   <td width='100%'>
-  Please use this button if you obtained an offline installation module archive.
+  Install offline module in ZIP format.
   </td>
   <td>
     <input type="button" value="Install offline" onclick="spy.plugins.offlineInstall()"/>

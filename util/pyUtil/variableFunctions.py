@@ -3,6 +3,7 @@
 import os
 import shutil
 import sys
+import exceptions
 try:
   import cPickle as pickle # faster C reimplementation of pickle module
 except ImportError:
@@ -245,8 +246,9 @@ def LoadStructureParams():
   #
   # Start backwards compatibility  2010-06-18
   #
+  StrDir = OV.StrDir()
   metacif_path = '%s/%s.metacif' %(OV.StrDir(), model_src)
-  if not os.path.isfile(metacif_path) and structure_phil is not None:
+  if StrDir and not os.path.isfile(metacif_path) and structure_phil is not None:
     from iotbx.cif import model
     master_phil = phil_interface.parse(
       file_name=os.path.join(OV.BaseDir(), "metacif.phil"))
@@ -294,7 +296,7 @@ def SaveStructureParams():
 OV.registerFunction(SaveStructureParams)
 
 def OnStructureLoaded(previous):
-  if olx.IsFileLoaded() == 'false':
+  if olx.IsFileLoaded() == 'false' or not OV.StrDir():
     return
   mf_name = "%s%s%s.metacif" %(OV.StrDir(), os.path.sep, OV.ModelSrc())
   cif_name = "%s%s%s.cif" %(OV.FilePath(), os.path.sep, OV.FileName())
@@ -304,9 +306,23 @@ def OnStructureLoaded(previous):
     import History
     History.hist.loadHistory()
   LoadStructureParams()
-#  import gui.skin
-#  gui.skin.change_bond_colour('onstructureloaded')
+  try:
+    for l in olx.FileChangeListeners:
+      l('structure')
+  except:
+    pass
 OV.registerFunction(OnStructureLoaded)
+
+def OnHKLChange(hkl):
+  olx.HKLSrc(hkl)
+  OV.SetParam('snum.current_process_diagnostics', 'data')
+  olex.m("spy.make_HOS('True')")
+  try:
+    for l in olx.FileChangeListeners:
+      l('hkl')
+  except:
+    pass
+OV.registerFunction(OnHKLChange)
 
 def SaveUserParams():
   user_phil_file = "%s/user.phil" %(OV.DataDir())

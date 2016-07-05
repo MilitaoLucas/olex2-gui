@@ -3,12 +3,148 @@ gui {
 
   skin {
     extension = large
-    size_factor = 1.2
-  }
+    size_factor = 1.8
+    icon_size = 50
+    }
 
-  htmlpanelwidth = 480
+  
+  htmlpanelwidth = 850
   
   html {
-    icon_size = 30
+    bg_colour = #ffffff
+    font_colour = #442244
+    font_name = Open Sans
+    font_size = 5
+    font_size_controls = 4
+    font_size_large = 12
+	font_size_extra_large = 12  
+    font_size_medium = 7
+    formula_size = 10
+    input_height = 28
+    checkbox_height = 28
+    checkbox_width = 28
+    checkbox_width_2 = 28
+    combo_width_2 = 50
+    combo_height = 20
+    spin_height = 28
+    table_firstcol_width = 22
   }
-}
+
+    timage{
+    font_name = Vera
+    font_size = 15
+    adval = 13
+    info_size_scale = 4
+
+    snumtitle{
+      scale = 2
+      height = 65
+      font_name = Vera Bold
+      font_size = 30
+      top = 1
+      left = 5
+      filefullinfo_size = 18
+      sginfo_scale = 1.2
+      corner_rad = 5
+      rounded = 1100
+      border = 0
+    }
+
+
+    tab{
+      scale = 2
+      height = 45
+      corner_rad = 5
+      font_name = Vera
+      font_size = 26
+      top = 10
+      left = 6
+      rounded = 1100
+      arrows = "bar:top:8"
+    }
+
+    cbtn{
+      scale = 1
+      height = 30
+      corner_rad = 2
+      font_name = Vera Bold
+      font_size = 22
+      top = 3
+      left = 3
+      rounded = 0101
+      arrows = "bar:right:40,arrow_right:onup:offdown:hoverdown:hoveronup"
+
+      vline = 40
+      dot_size = 6
+      dot_pad = 1
+      dot_left = 1
+      dot_colour_off = #dedede
+      dot_colour_on = #444444
+      border = 1
+    }
+
+    button{
+      scale = 1
+      height = 26
+      corner_rad = 3
+      rounded = 0000
+      font_name = Vera
+      font_size = 16
+      top = 3
+      left = 4
+      buttonmark = 2:#999999:6
+      border = 1
+    }
+
+    small_button{
+      rounded = 0000
+      scale = 1
+      width = 85
+      height = 25
+      buttonmark = 2:#999999:6
+    }
+
+    tinybutton{
+      scale = 2
+      height = 25
+      width = 25
+      corner_rad = 0
+      rounded = 0000
+      font_size = 26
+      font_name = Vera
+      top = 1
+      left = 0
+      border = 1
+    }
+
+
+    h1{
+      scale = 2
+      grad_step = 0.2
+      height = 32
+      corner_rad = 3
+      rounded = 1111
+      font_name = Vera
+      font_size = 23
+      top = 2
+      left = 14
+      arrows = "bar:left:10"
+      border = 1
+      border_colour = #dddddd
+    }
+
+    h3{
+      scale = 2
+      height = 25
+      width_adjust = 4
+      font_name = Vera
+      corner_rad = 3
+      rounded = 1111
+      font_size = 18
+      top = 2
+      left = 12
+      arrows = "bar:left:8"
+      border = 1
+    }
+  }
+  }

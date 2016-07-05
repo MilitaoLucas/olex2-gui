@@ -125,6 +125,8 @@ gui
       .type = int
     font_size_large = 7
       .type = int
+    font_size_extra_large = 9
+      .type = int
     font_size_medium = 4
       .type = int
     formula_colour = #442244

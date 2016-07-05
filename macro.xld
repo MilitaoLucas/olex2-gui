@@ -126,6 +126,7 @@
     <cmd6 "storeparam startup file.relativePath(filefull())">
     <cmd7 "storeparam last_version GetVar(last_version, '')">
     <cmd8 "spy.threading.joinAll()">
+    <cmd8 "spy.onexit()">
     <cmd9 "echo Good Bye">
   >
  >

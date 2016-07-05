@@ -2,6 +2,14 @@
 import olex
 import sys
 
+import time
+timer = True
+if timer:
+  t = time.time()
+  beginning_of_t = t
+  tt = []
+  tt.append("= T I M I N G S ============================================")
+
 datadir = olex.f("DataDir()")
 basedir = olex.f("BaseDir()")
 if sys.platform[:3] == 'win':
@@ -39,7 +47,9 @@ stdout_redirection = True
 
 import os
 import locale
-import time
+def onexit():
+  pass
+olex.registerFunction(onexit,False)
 
 # This is more flexible for different computers:
 py_dev_path_dict = {'dkmac': r'/Applications/LiClipse.app/Contents/liclipse/plugins/org.python.pydev_4.3.0.201508181931/pysrc',
@@ -65,7 +75,9 @@ if debug == True:
     except:
       pass
 
-locale.setlocale(locale.LC_ALL, 'C')
+# we need to use the user's locale for proper functioning of functions working
+# with multi-byte strings
+#locale.setlocale(locale.LC_ALL, 'C')
 
 
 if os.environ.get('OLEX_DBG_NO_STDERR_REDIRECTION') is not None:
@@ -73,6 +85,10 @@ if os.environ.get('OLEX_DBG_NO_STDERR_REDIRECTION') is not None:
 else:
   stderr_redirection = True
 ''' Debug, if possible '''
+
+if timer:
+  tt.append("Initial imports took %.3f s" %(time.time() - t))
+  t = time.time()
 
 
 sys.on_sys_exit_raise = None
@@ -86,6 +102,7 @@ def our_sys_exit(i):
     raise e
   print "Terminate with %i" % i
 sys.exit = our_sys_exit
+
 
 
 class StreamRedirection:
@@ -185,9 +202,13 @@ def set_olex_paths():
 def set_plugins_paths():
   plugins = olexex.InstalledPlugins()
   sys.path.append("%s/util/pyUtil/PluginLib" %(basedir))
+  from PluginTools import PluginTools
+  import AC3
   for plugin in plugins:
     sys.path.append("%s/util/pyUtil/PluginLib/plugin-%s" %(basedir,plugin))
   for plugin in plugins:
+    if timer:
+      t = time.time()
     try:
       exec("import " + plugin)
     except Exception, err:
@@ -199,6 +220,9 @@ def set_plugins_paths():
     ##Dependencies
     if plugin == "plugin-SQLAlchemy":
       sys.path.append("%s/util/pyUtil/PythonLib/sqlalchemy" %basedir)
+
+    if timer:
+      tt.append("\t%.3f s --> %s" %((time.time() - t), plugin))
 
 def setup_cctbx():
   import path_utils
@@ -213,12 +237,20 @@ def setup_cctbx():
 sys.stdout = StreamRedirection(sys.stdout, stdout_redirection)
 sys.stderr = StreamRedirection(sys.stderr, stderr_redirection)
 
+
+t = time.time()
 import olx
+if timer:
+  tt.append("%.3f s == import olx" %(time.time() - t))
+  t = time.time()
 
 basedir = olx.BaseDir()
 datadir = olx.DataDir()
 
 set_olex_paths()
+if timer:
+  tt.append("%.3f s == set_olex_paths()" %(time.time() - t))
+  t = time.time()
 
 olx.Clear()
 
@@ -226,28 +258,42 @@ import urllib2
 # this overwrites the urllib2 default HTTP and HTTPS handlers
 import multipart
 
-
+t = time.time()
 try:
   setup_cctbx()
 except Exception, err:
   print "There is a problem with the cctbx"
   print err
+if timer:
+  tt.append("%.3f s == setup_cctbx()" %(time.time() - t))
+  t = time.time()
 
 import variableFunctions
+if timer:
+  tt.append("%.3f s == variableFunctions" %(time.time() - t))
+  t = time.time()
 variableFunctions.LoadParams()
+if timer:
+  tt.append("%.3f s == variableFunctions.LoadParams" %(time.time() - t))
+  t = time.time()
+
 import olexex
+if timer:
+  tt.append("%.3f s == olexex" %(time.time() - t))
+  t = time.time()
+
 import CifInfo # import needed to register functions to olex
-
-#if debug:
-# version = print_python_version()
-#try:
-# prg_roots = get_prg_roots()
-#except:
-# pass
-
+if timer:
+  tt.append("%.3f s == CifInfo" %(time.time() - t))
+  t = time.time()
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+
+if timer:
+  tt.append("%.3f s == olxFunctions" %(time.time() - t))
+  t = time.time()
+
 if OV.HasGUI():
   import htmlMaker
   from gui.home import *
@@ -260,47 +306,18 @@ if OV.HasGUI():
   from gui.skin import *
   from gui.db import *
   #import Tutorials
-  load_user_gui_phil()
-  export_parameters()
+  #load_user_gui_phil()
+  #export_parameters()
   from Analysis import Analysis
+
+if timer:
+  tt.append("%.3f s == GUI Imports" %(time.time() - t))
+  t = time.time()
 
 def onstartup():
   OV.SetVar('cbtn_solve_on','false')
   OV.SetVar('cbtn_refine_on','false')
   OV.SetVar('cbtn_report_on','false')
-
-  ## copy sample directory to datadir
-  import shutil
-  svn_samples_directory = '%s/sample_data' %OV.BaseDir()
-  user_samples_directory = '%s/samples' %OV.DataDir()
-  if os.path.exists(user_samples_directory):
-    OV.SetVar('sample_dir',user_samples_directory)
-  else:
-    os.mkdir(user_samples_directory)
-
-  if sys.version_info[0] >= 2 and sys.version_info[1] >=6:
-    ignore_patterns = shutil.ignore_patterns('*.svn')
-  else:
-    ignore_patterns = None # back compatiblity for python < 2.6
-
-  samples = os.listdir(svn_samples_directory)
-  for sample in samples:
-    if sample == '.svn': continue
-    if not os.path.exists('%s/%s' %(user_samples_directory,sample)):
-      try:
-        dirname1 = '%s/%s' %(svn_samples_directory,sample)
-        dirname2 = '%s/%s' %(user_samples_directory,sample)
-        if ignore_patterns is not None:
-          shutil.copytree(dirname1, dirname2, ignore=ignore_patterns)
-        else:
-          shutil.copytree(dirname1, dirname2)
-        OV.SetVar('sample_dir','%s/samples' %OV.DataDir())
-      except:
-        pass
-    else:
-      continue
-
-  ## initialise userDictionaries objects
 
   import userDictionaries
   if not userDictionaries.people:
@@ -308,20 +325,23 @@ def onstartup():
   if not userDictionaries.localList:
     userDictionaries.LocalList()
 
+
 onstartup()
 
+if timer:
+  tt.append("%.3f s == onstartup()" %(time.time() - t))
+  t = time.time()
+  tt.append("IMPORTING PLUGINS...")
 set_plugins_paths()
-
-#if debug:
-#       keys = os.environ.keys()
-#       keys.sort()
-#       for k in keys:
-#               print "%s\t%s" %(k, os.environ[k])
-#
-#       for bit in sys.path:
-#               print bit
+if timer:
+  tt.append("%.3f s == set_plugins_paths()" %(time.time() - t))
+  t = time.time()
 
 import Loader
+
+if timer:
+  tt.append("%.3f s == Loader" %(time.time() - t))
+  t = time.time()
 
 if olx.IsPluginInstalled('MySQL') == "true":
   try:
@@ -332,7 +352,9 @@ if olx.IsPluginInstalled('MySQL') == "true":
   except Exception, ex:
     print "MySQL Plugin is installed but a connection to the default server could not be established"
     print ex
-
+if timer:
+  tt.append("%.3f s == MySQL()" %(time.time() - t))
+  t = time.time()
 
 if OV.HasGUI():
   olexex.check_for_recent_update()
@@ -344,7 +366,7 @@ if sys.platform[:3] == 'win':
   #olx.SetVar('defeditor','gedit')
   #olx.SetVar('defexplorer','nautilus')
 
-
+t = time.time()
 try:
   import customScripts
 except ImportError, err:
@@ -354,9 +376,15 @@ try:
   import userScripts
 except ImportError, err:
   print "Could not import userScripts: %s" %err
+if timer:
+  tt.append("%.3f s == Custom and User Scripts" %(time.time() - t))
+  t = time.time()
 
-
-
+if timer:
+  tt.append("InitPy took %s s" %(time.time() - beginning_of_t))
+  tt.append("==================================================")
+  for item in tt:
+    print item
 print "Welcome to Olex2"
 print "\nWe are grateful to our users for testing and supporting Olex2"
 print "Please find the link to credits in the About box"

@@ -3,10 +3,10 @@
   type='combo'
   height='$GetVar(HtmlComboHeight)'
   bgcolor='$GetVar(HtmlInputBgColour)'
-  width='100%' 
+  width='100%'
   name='SET_REFLECTIONS_#parent_name'
   items="spy.GetHklFileList()"
-  onchange='HKLSrc(html.GetValue(~name~))>>spy.SetParam(snum.current_process_diagnostics,data)>>spy.make_HOS(True)>>html.Update'
+  onchange='spy.OnHKLChange(html.GetValue(~name~))>>html.Update'
   value="FileName(HKLSrc())'.'FileExt(HKLSrc())"
   readonly="true"
 >

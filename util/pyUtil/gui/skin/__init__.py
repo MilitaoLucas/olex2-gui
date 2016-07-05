@@ -413,7 +413,7 @@ def change_bond_radius():
   rad = OV.GetParam('user.bonds.thickness')
   olex.m("brad %s" %rad)
 
-def change_bond_colour(scope, colour=None):
+def change_bond_colour(scope, colour=""):
   import shlex
   if "[" in colour:
     olx.html.SetValue('BOND_COLOUR_COMBO%s' %scope,"")

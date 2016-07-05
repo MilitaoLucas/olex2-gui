@@ -2,6 +2,7 @@ import olex
 import olx
 import os
 import glob
+import sys
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import htmlTools
@@ -226,3 +227,124 @@ def do_sort():
   args += olx.GetVar("sorting.moiety_order", "").split()
   olx.Sort(*args)
 olex.registerFunction(do_sort, False, "gui")
+
+
+def copytree(src, dst, symlinks=False, ignore=None):
+  ## From https://groups.google.com/forum/embed/#!topic/comp.lang.python/8MpGFEhFCm0
+  import os
+  from shutil import copy2, copystat, Error
+
+  names = os.listdir(src)
+  if ignore is not None:
+      ignored_names = ignore(src, names)
+  else:
+      ignored_names = set()
+
+  try:
+      os.makedirs(dst)
+  except OSError, exc:
+      # XXX - this is pretty ugly
+      if "file already exists" in exc[1]:  # Windows
+          pass
+      elif "File exists" in exc[1]:        # Linux
+          pass
+      else:
+          raise
+
+  errors = []
+  for name in names:
+      if name in ignored_names:
+          continue
+      srcname = os.path.join(src, name)
+      dstname = os.path.join(dst, name)
+      try:
+          if symlinks and os.path.islink(srcname):
+              linkto = os.readlink(srcname)
+              os.symlink(linkto, dstname)
+          elif os.path.isdir(srcname):
+              copytree(srcname, dstname, symlinks, ignore)
+          else:
+              copy2(srcname, dstname)
+          # XXX What about devices, sockets etc.?
+      except (IOError, os.error), why:
+          errors.append((srcname, dstname, str(why)))
+      # catch the Error from the recursive copytree so that we can
+      # continue with other files
+      except Error, err:
+          errors.extend(err.args[0])
+  try:
+      copystat(src, dst)
+  except WindowsError:
+      # can't copy file access times on Windows
+      pass
+  except OSError, why:
+      errors.extend((src, dst, str(why)))
+  if errors:
+      raise Error, errors
+
+def copy_datadir_items(force=False):
+  '''
+  This will copy the directories containg the shipped samples as well as a directory called 'customisation' to the DataDir(). It will only copy those sub-directories that are NOT present already. When force=True, all directories will be *merged*. Existing files will not be overwritten.
+  This function can be called from the command line with spy.gui.copy_datadir_items(TRUE/FALSE) and is called on every startup of Olex2 from InitPy (with FALSE).
+  '''
+  import shutil
+
+  if sys.version_info[0] >= 2 and sys.version_info[1] >=6:
+    ignore_patterns = shutil.ignore_patterns('*.svn')
+  else:
+    ignore_patterns = None # back compatiblity for python < 2.6
+
+  svn_samples_directory = '%s%ssample_data' %(OV.BaseDir(),os.sep)
+  user_samples_directory = OV.GetParam('user.sample_dir')
+  if not user_samples_directory:
+    user_samples_directory = '%s%ssamples' %(OV.DataDir(),os.sep)
+
+  svn_customisation_directory = '%s%setc%scustomisation' %(OV.BaseDir(),os.sep,os.sep)
+  user_customisation_directory = OV.GetParam('user.customisation_dir')
+  if not user_customisation_directory:
+    user_customisation_directory = '%s%scustomisation' %(OV.DataDir(),os.sep)
+
+  dirs = ((svn_samples_directory, user_samples_directory), (svn_customisation_directory, user_customisation_directory))
+
+  for src, dest in dirs:
+    if not os.path.exists(dest):
+      os.makedirs(dest)
+    else:
+      if "sample_data" in src:
+        OV.SetParam('user.sample_data',dest)
+        OV.SetVar('sample_dir', dest)
+      elif "customisation" in src:
+        OV.SetParam('user.customisation_dir',dest)
+      if not force:
+        continue
+    if "sample_data" in src:
+      if not os.path.exists(dest):
+        dest = src
+      OV.SetParam('user.sample_data',dest)
+      OV.SetVar('sample_dir', dest)
+
+    elif "customisation" in src:
+      if not os.path.exists(dest):
+        dest = src
+      OV.SetParam('user.customisation_dir',dest)
+    if dest == src:
+      continue
+    things = os.listdir(src)
+    for thing in things:
+      print thing
+      if thing == '.svn': continue
+      try:
+        from_f = '%s%s%s' %(src,os.sep,thing)
+        to_f = '%s%s%s' %(dest,os.sep,thing)
+        if os.path.isdir(from_f):
+          if ignore_patterns is not None:
+            copytree(from_f, to_f)
+          else:
+            copytree(from_f, to_f)
+        else:
+          copytree(from_f, to_f)
+      except Exception, err:
+        print err
+        pass
+
+olex.registerFunction(copy_datadir_items, False, "gui")

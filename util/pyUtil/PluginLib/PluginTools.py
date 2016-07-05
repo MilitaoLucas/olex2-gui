@@ -19,7 +19,7 @@ class PluginTools(object):
     return time.ctime(os.path.getmtime(self.p_path))
 
   def print_version_date(self):
-    print "Loading %s (Version %s)" %(self.p_name, self.get_plugin_date()),
+    print "Loading %s (Version %s)\n" %(self.p_name, self.get_plugin_date()),
 
   def deal_with_phil(self, operation='read', which='user_local'):
     user_phil_file = "%s/%s.phil" %(OV.DataDir(),self.p_scope)

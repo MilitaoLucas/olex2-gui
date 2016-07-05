@@ -3,6 +3,7 @@ import phil_interface
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import olx
+import olex
 
 class Method_cctbx_refinement(Method_refinement):
 
@@ -10,9 +11,18 @@ class Method_cctbx_refinement(Method_refinement):
 
   def pre_refinement(self, RunPrgObject):
     RunPrgObject.make_unique_names = True
+    self.cycles = OV.GetParam('snum.refinement.max_cycles')
+    self.cif_finalise = OV.GetParam('user.cif.finalise')
+    OV.SetParam('snum.refinement.max_cycles',20)
+    if OV.GetParam('user.cif.finalise') != 'Exclude':
+      OV.SetParam('user.cif.finalise', "Include")
     Method_refinement.pre_refinement(self, RunPrgObject)
 
   def do_run(self, RunPrgObject):
+    debug = bool(OV.GetParam('olex2.debug',False))
+    timer = debug
+    import time
+
     from refinement import FullMatrixRefine
     from smtbx.refinement.constraints import InvalidConstraint
     self.failure = True
@@ -23,8 +33,17 @@ class Method_cctbx_refinement(Method_refinement):
       max_peaks=RunPrgObject.params.snum.refinement.max_peaks,
       verbose=verbose, on_completion=self.writeRefinementInfoForGui)
     try:
+      if timer:
+        t1 = time.time()
       cctbx.run()
+      if timer:
+        print "-- do_run(): %.3f" %(time.time() - t1)
+      if timer:
+        t1 = time.time()
       self.flack = cctbx.flack
+      if timer:
+        print "-- cctbx.flack: %.3f" %(time.time() - t1)
+
     except InvalidConstraint, e:
       print e
     except NotImplementedError, e:
@@ -41,7 +60,11 @@ class Method_cctbx_refinement(Method_refinement):
     return self.flack
 
   def post_refinement(self, RunPrgObject):
+    OV.SetParam('snum.refinement.max_cycles',self.cycles)
+    OV.SetParam('user.cif.finalise',self.cif_finalise)
     self.writeRefinementInfoIntoRes(self.cif)
+    if OV.GetParam('user.cif.finalise') != 'Exclude':
+      OV.SetParam('user.cif.finalise', "Ignore")
     txt = '''
     R1_all=%(_refine_ls_R_factor_all)s;
     R1_gt = %(_refine_ls_R_factor_gt)s;
@@ -114,6 +137,10 @@ class Method_cctbx_ChargeFlip(Method_solution):
     file_name = r"%s/%s.res" %(olx.FilePath(), RunPrgObject.fileName)
     olx.xf.SaveSolution(file_name)
     olx.Atreap('"%s"' %file_name)
+
+  def post_solution(self, RunPrgObject):
+    if OV.GetParam('user.solution.run_auto_vss'):
+      RunPrgObject.please_run_auto_vss = True
 
 charge_flipping_phil = phil_interface.parse("""
 name = 'Charge Flipping'
