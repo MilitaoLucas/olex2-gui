@@ -32,11 +32,15 @@ In **solo mode**, only one of the main Tool Tabs will be open at any one time.
 $-
 
 $+
+SetVar(help_path,  "Prepends system **PATH** with the given value.
+<br/> Restart is needed for this to take effect.")
+$-
+
+$+
 SetVar(help_diagnostics,
   "
 Lintis for the **diagnostics** information displayed on the top right of Olex2 can be set here.")
 $-
-
 
 
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
@@ -332,11 +336,23 @@ $-
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='OLEX"_DEBUG';help_ext=diagnostics-settings;helpTxt=$GetVar(help_diagnostics);1 -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='PATH';help_ext=path-settings;helpTxt=$GetVar(help_path);1 -->
+  <td width='23%'>
+    <b>%PATH%:</b>
+  </td>
+  <td align='left'>$+
+    html.Snippet("gui/snippets/input-text", "name=path_extra",
+    "width=100%",
+    "value=app.OptValue('path', '')",
+    "onchange=app.SetOption('path', html.GetValue('~name~'))")
+   $-</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='OLEX_DEBUG';help_ext=diagnostics-settings;helpTxt=$GetVar(help_diagnostics);1 -->
   <td width='23%'>
     <b>%Various%:</b>
   </td>
-  <td width="22%" align='left'>
+  <td align='left'>
     <a href="spy.EditParams(user.diagnostics)">Diagnostics</a>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
