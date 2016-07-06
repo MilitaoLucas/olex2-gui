@@ -304,7 +304,7 @@ def copy_datadir_items(force=False):
   if not user_customisation_directory:
     user_customisation_directory = '%s%scustomisation' %(OV.DataDir(),os.sep)
 
-  dirs = ((svn_samples_directory, user_samples_directory), (svn_customisation_directory, user_customisation_directory))
+  dirs = ((svn_samples_directory, user_samples_directory), )
 
   for src, dest in dirs:
     if not os.path.exists(dest):
