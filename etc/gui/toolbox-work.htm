@@ -10,7 +10,20 @@ $+
     html.Snippet(
       "gui/snippets/input-combo",
       "name='set_label_content'",
-      "items=%Labels OFF/ON%<-;%Atom Names%<-l;%Crystallographic Occupancy%<-o;%Chemical Occupancy%<-co;%Parts%<-p;%Link-Code%<-v;%H Atom Labels%<-h l;%Fixed Parameters%<-f;Variables<-v;AFIX Commands<-h a;Q Peak Intensities<-qi",
+      "items=%Labels OFF/ON%<-;
+%Atom Names%<-l;
+%Crystallographic Occupancy%<-o;
+%Chemical Occupancy%<-co;
+%Parts%<-p;%Link-Code%<-v;
+%H Atom Labels%<-h l;
+%Fixed Parameters%<-f;
+Variables<-v;
+AFIX Commands<-h a;
+Q Peak Intensities<-qi;
+Label + residue number<-l rn;
+Residue numbers<-rn;
+Residue class<-rc;
+",
       "value='Labels OFF/ON",
       "onchange=spy.ChooseLabelContent(html.GetValue('~name~'))",
       "manage=True",
