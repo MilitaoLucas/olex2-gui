@@ -190,23 +190,35 @@ def LoadParams():
   # Olex2 Phil
   olex2_phil = get_olex2_phil()
   if olex2_phil:
-    phil_handler.update(phil_file=olex2_phil)
+    try:
+      phil_handler.update(phil_file=olex2_phil)
+    except:
+      print("Failed to read olex2.phil")
   # User Phil
   user_phil = get_user_phil()
   if user_phil:
-    phil_handler.update(phil_file=user_phil)
+    try:
+      phil_handler.update(phil_file=user_phil)
+    except:
+      print("Failed to read user.phil")
   custom_phil = get_custom_phil()
   if custom_phil:
-    phil_handler.update(phil_file=custom_phil)
+    try:
+      phil_handler.update(phil_file=custom_phil)
+    except:
+      print("Failed to read custom.phil")
   olx.phil_handler = phil_handler
 
   # GUI Phil
   if OV.HasGUI():
-    master_gui_phil = phil_interface.parse(file_name="%s/gui.params" %OV.BaseDir())
-    gui_phil_handler = phil_interface.phil_handler(
-      master_phil=master_gui_phil,
-      parse=phil_interface.parse)
-    olx.gui_phil_handler = gui_phil_handler
+    try:
+      master_gui_phil = phil_interface.parse(file_name="%s/gui.params" %OV.BaseDir())
+      gui_phil_handler = phil_interface.phil_handler(
+        master_phil=master_gui_phil,
+        parse=phil_interface.parse)
+      olx.gui_phil_handler = gui_phil_handler
+    except:
+      print("Failed to read gui.phil")
 OV.registerFunction(LoadParams)
 
 def LoadStructureParams():

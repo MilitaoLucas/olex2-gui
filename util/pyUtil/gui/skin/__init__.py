@@ -112,8 +112,9 @@ def check_os():
 
 def check_for_first_run():
   import olexex
-  first_run = not os.path.exists("%s/global.odb" %OV.DataDir()) \
-    or olexex.check_for_recent_update()
+  first_run = not os.path.exists("%s/global.odb" %OV.DataDir())
+## 2016-07-26 do we need changing skin on update any longer? I doubt
+#    or olexex.check_for_recent_update()
   if first_run:
     try:
       # olx.SkinUpdated is intentionally not there:
