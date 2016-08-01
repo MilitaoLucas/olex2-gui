@@ -148,7 +148,7 @@ class CcdcSubmit():
       fcf_name = None
     file_name = OV.FileName()
     self.zip_name = "%s_ccdc_deposition.zip" %file_name
-    zip = zipfile.ZipFile(self.zip_name, "w")
+    zip = zipfile.ZipFile(self.zip_name, "w", compression=zipfile.ZIP_DEFLATED)
     zip.write(cif_name, file_name+".cif")
     if fcf_name:
       zip.write(fcf_name, file_name+".fcf")
