@@ -1068,11 +1068,22 @@ class Graph(ImageTools):
         self.draw.line(((x, y_minus_dy), (x+marker_width, y_minus_dy)),
                        width=1, fill=self.outlineColour)
 
+    # Checking for isnan and isinf in xy pairs. These should not be there!
     for i, (xr, yr) in enumerate(xy_pairs):
       if math.isnan(yr):
+        print "-- got isnan (yr)"
         continue
       if math.isnan(xr):
+        print "-- got isnan (xr)"
         continue
+      if math.isinf(yr):
+        print "-- got isinf (yr)"
+        continue
+      if math.isinf(xr):
+        print "-- got isinf (xr)"
+        continue
+
+
       x = x_constant + xr * scale_x
       y = y_constant + yr * scale_y
 
