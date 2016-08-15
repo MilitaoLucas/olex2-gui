@@ -30,6 +30,9 @@
       <pivot "_shelx_res_file"> <pivot "_shelx_res_checksum">
       <pivot "_shelx_hkl_file"> <pivot "_shelx_hkl_checksum">
       <pivot "_shelx">
+      <pivot "_refln">
+      <pivot "_iucr">
+
     >
     <endings
       <ending "_h_min">
@@ -47,6 +50,7 @@
     <_diffrn_radiation_type>
     <_diffrn_radiation_xray_symbol>
     <_refine_ls_*>
+    <_refine_diff_*>
     <_diffrn_reflns_theta_*>
     <_diffrn_measured_fraction_*>
     <_exptl_crystal_density_diffrn>
