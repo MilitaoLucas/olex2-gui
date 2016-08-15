@@ -503,6 +503,8 @@ def add_mask_content(i,which):
   _ = list(contents)
   _[idx] = user_value
   olx.cif_model[current_sNum]['_%s_masks_void_content' %base] = _
+  olx.html.Update()
+
 OV.registerFunction(add_mask_content)
 
 
@@ -553,27 +555,32 @@ def get_mask_info():
     d['number'] = number
     d['electron'] = electron
     d['volume'] = volume
+    content = content.strip("'")
+
+    if float(volume) < 20:
+      continue
     if float(electron) != 0:
-      v_over_e = "%.2f" %(float(volume)/float(electron))
+      v_over_e  = float(volume)/float(electron)
       if v_over_e < 3:
-        v_over_e = "<font color='red'>%s</font>" %v_over_e
-      elif v_over_e > 5:
-        v_over_e = "<font color='red'>%s</font>" %v_over_e
+        v_over_e_html = "<font color='red'><b>%.2f</b></font>" %v_over_e
+      elif v_over_e > 7:
+        v_over_e_html = "<font color='red'><b>%.2f</b></font>" %v_over_e
       else:
-        v_over_e = "<font color='green'>%s</font>" %v_over_e
-    else: v_over_e = "n/a"
+        v_over_e_html = "<font color='green'><b>%.2f</b></font>" %v_over_e
+    else: v_over_e_html = "n/a"
 
-    d['v_over_e'] = v_over_e
+    d['v_over_e'] = v_over_e_html
 
-    content = '%s <a href="spy.add_mask_content(%s,content)">Edit</a>' %(content, number)
-    details = '<a href="spy.add_mask_content(%s,detail)">Edit</a>' %(number)
+    content = '%s <a target="Please enter the contents that are present in this void. After re-caluclating the mask, this information will get lost, so please enter it once all solvent masking work has been done." href="spy.add_mask_content(%s,content)">(Edit)</a>' %(content, number)
+    details = '<a href="spy.add_mask_content(%s,detail)"> (Edit)</a>' %(number)
     d['content'] = content
     d['details'] = details
 
     t += gui.tools.TemplateProvider.get_template('mask_output_table_row', force=debug) %d
-  t += "<tr><td>%(details)s</td></tr></table>" %d
+#  t += "<tr><td>%(details)s</td></tr></table>" %d
+  t += "</table>"
   return t
-OV.registerFunction(get_mask_info)
+OV.registerFunction(get_mask_info, False, 'gui.tools')
 
 
 def makeFormulaForsNumInfo():

@@ -147,7 +147,7 @@ $spy.weightGuiDisplay()
         bgcolor="GetVar('HtmlTableFirstcolColour')"
         name="SNUM_REFINEMENT_USE_SOLVENT_MASK"
         checked="spy.GetParam('snum.refinement.use_solvent_mask')"
-        onclick="spy.SetParam('snum.refinement.use_solvent_mask',html.GetState(~name~))"
+        onclick="spy.SetMasking(html.GetState(~name~))"
       >
   </td>
   <td ALIGN='left' width='24%'>
@@ -182,7 +182,7 @@ html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')"
 <tr ALIGN='left' NAME='MASK_INFO'>
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;help_ext=Extinction-Correction;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-$spy.get_mask_info()
+$spy.gui.tools.get_mask_info()
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 </table>

@@ -49,7 +49,7 @@ class olex2_normal_eqns(get_parent()):
     super(olex2_normal_eqns, self).__init__(
       observations, reparametrisation, initial_scale_factor=OV.GetOSF(), **kwds)
     self.olx_atoms = olx_atoms
-    print self.__class__.__bases__[0].__bases__
+    #print self.__class__.__bases__[0].__bases__
 
   def step_forward(self):
     self.xray_structure_pre_cycle = self.xray_structure.deep_copy_scatterers()
@@ -249,6 +249,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.refine_secondary_xh2_angle = True
 
   def run(self):
+    debug = bool(OV.GetParam('olex2.debug',False))
+    timer = debug
+    import time
+    t1 = time.time()
     self.reflections.show_summary(log=self.log)
 
     wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
@@ -275,18 +279,26 @@ class FullMatrixRefine(OlexCctbxAdapter):
         if not fo_sq.space_group().is_centric():
           self.f_mask = self.f_mask.generate_bijvoet_mates()
         self.f_mask = self.f_mask.common_set(fo_sq)
+    if timer:
+      t1 = time.time()
     restraints_manager = self.restraints_manager()
+    if timer:
+      print "--- restraint manager: %.3f" %(time.time() - t1)
     #put shared parameter constraints first - to allow proper bookeeping of
     #overrided parameters (U, sites)
     self.fixed_distances = {}
     self.fixed_angles = {}
-
+    if timer:
+      t1 = time.time()
     self.constraints = self.setup_shared_parameters_constraints() + self.constraints
     self.constraints += self.setup_rigid_body_constraints(
       self.olx_atoms.afix_iterator())
     self.constraints += self.setup_geometrical_constraints(
       self.olx_atoms.afix_iterator())
     self.n_constraints = len(self.constraints)
+    if timer:
+      print "--- self.constraints things: %.3f" %(time.time() - t1)
+
     temp = self.olx_atoms.exptl['temperature']
     if temp < -274: temp = 20
     #set up extinction correction if defined
@@ -299,7 +311,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     else:
       self.extinction = xray.dummy_extinction_correction()
       self.extinction.expression = ''
-
+    if timer:
+      t1 = time.time()
     self.reparametrisation = constraints.reparametrisation(
       structure=self.xray_structure(),
       constraints=self.constraints,
@@ -311,6 +324,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
     )
     self.reparametrisation.fixed_distances.update(self.fixed_distances)
     self.reparametrisation.fixed_angles.update(self.fixed_angles)
+
+    if timer:
+      print "--- reparametrisation: %.3f" %(time.time() - t1)
 
     #===========================================================================
     # for l,p in self.reparametrisation.fixed_distances.iteritems():
@@ -334,6 +350,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     weighting = least_squares.mainstream_shelx_weighting(**params)
     #self.reflections.f_sq_obs_filtered = self.reflections.f_sq_obs_filtered.sort(
     #  by_value="resolution")
+    if timer:
+      t1 = time.time()
     self.normal_eqns = olex2_normal_eqns(
       self.observations,
       self.reparametrisation,
@@ -345,6 +363,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
     )
     self.normal_eqns.shared_param_constraints = self.shared_param_constraints
     self.normal_eqns.shared_rotated_adps = self.shared_rotated_adps
+    if timer:
+      print "--- normal equations: %.3f" %(time.time() - t1)
+
     method = OV.GetParam('snum.refinement.method')
     iterations = solvers.get(method)
     if iterations == None:
@@ -355,6 +376,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     assert iterations is not None
     try:
       damping = OV.GetDampingParams()
+      if timer:
+        t1 = time.time()
       self.cycles = iterations(self.normal_eqns,
                                n_max_iterations=self.max_cycles,
                                track_all=True,
@@ -365,20 +388,46 @@ class FullMatrixRefine(OlexCctbxAdapter):
                                step_threshold=1e-8)
                                #gradient_threshold=1e-5,
                                #step_threshold=1e-5)
+      if timer:
+        print "--- iterations: %.3f" %(time.time() - t1)
+
+      if timer:
+        t1 = time.time()
       self.scale_factor = self.cycles.scale_factor_history[-1]
+      if timer:
+        print "--- scale factor: %.3f" %(time.time() - t1)
+      if timer:
+        t1 = time.time()
       self.covariance_matrix_and_annotations=self.normal_eqns.covariance_matrix_and_annotations()
+      if timer:
+        print "--- covariance matrix: %.3f" %(time.time() - t1)
+
       self.twin_covariance_matrix = self.normal_eqns.covariance_matrix(
         jacobian_transpose=self.reparametrisation.jacobian_transpose_matching(
           self.reparametrisation.mapping_to_grad_fc_independent_scalars))
+      if timer:
+        t1 = time.time()
       self.export_var_covar(self.covariance_matrix_and_annotations)
+      if timer:
+        print "--- export var_covar: %.3f" %(time.time() - t1)
+
       self.r1 = self.normal_eqns.r1_factor(cutoff_factor=2)
       self.r1_all_data = self.normal_eqns.r1_factor()
+      if timer:
+        t1 = time.time()
       self.check_flack()
       if self.flack:
         OV.SetParam('snum.refinement.flack_str', self.flack)
+      if timer:
+        print "--- Flack: %.3f" %(time.time() - t1)
       #extract SU on BASF and extinction
+      if timer:
+        t1 = time.time()
       diag = self.twin_covariance_matrix.matrix_packed_u_diagonal()
       dlen = len(diag)
+      if timer:
+        print "--- diag: %.3f" %(time.time() - t1)
+
       if self.reparametrisation.extinction.grad:
         #extinction is the last parameter after the twin fractions
         su = math.sqrt(diag[dlen-1])
@@ -400,21 +449,39 @@ class FullMatrixRefine(OlexCctbxAdapter):
         traceback.print_exc()
       self.failure = True
     else:
+      if timer:
+        t1 = time.time()
       fo_minus_fc = self.f_obs_minus_f_calc_map(0.4)
       fo_minus_fc.apply_volume_scaling()
+      if timer:
+        print "---- finishing stuff: fo_minus_fc: %.3f" %(time.time() - t1)
       self.diff_stats = fo_minus_fc.statistics()
+      if timer:
+        t1 = time.time()
       self.post_peaks(fo_minus_fc, max_peaks=self.max_peaks)
+      if timer:
+        print "---- finishing stuff: post_peaks: %.3f" %(time.time() - t1)
       self.show_summary()
       self.show_comprehensive_summary(log=self.log)
       block_name = OV.FileName().replace(' ', '')
+      if timer:
+        t1 = time.time()
       f = open(OV.file_ChangeExt(OV.FileFull(), 'cif'), 'w')
       cif = iotbx.cif.model.cif()
       cif[block_name] = self.as_cif_block()
       print >> f, cif
       f.close()
+      if timer:
+        print "---- finishing stuff: CIF stuff %.3f" %(time.time() - t1)
+
       if not OV.GetParam('snum.refinement.cifmerge_after_refinement', False):
         OV.CifMerge(None, True, False)
+      if timer:
+        t1 = time.time()
       self.output_fcf()
+      if timer:
+        print "---- finishing stuff: output fcf: %.3f" %(time.time() - t1)
+
       new_weighting = weighting.optimise_parameters(
         self.normal_eqns.observations.fo_sq,
         self.normal_eqns.fc_sq,
@@ -426,6 +493,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
         self.on_completion(cif[block_name])
       if olx.HasGUI() == 'true':
         olx.UpdateQPeakTable()
+      if timer:
+        print "--- finishing stuff: %.3f" %(time.time() - t1)
+
     finally:
       sys.stdout.refresh = True
       self.log.close()
@@ -642,7 +712,14 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_exptl_crystal_density_diffrn'] = "%.4f" %xs.crystal_density()
     cif_block['_exptl_crystal_F_000'] \
              = "%.4f" %xs.f_000(include_inelastic_part=True)
-    #
+
+    fcf_cif, fmt_str = self.create_fcf_content(list_code=4, add_weights=True, fixed_format=False)
+    import StringIO
+    f = StringIO.StringIO()
+    fcf_cif.show(out=f,loop_format_strings={'_refln':fmt_str})
+
+    cif_block['_iucr_refine_fcf_details'] = f.getvalue()
+
     fo2 = self.reflections.f_sq_obs
     merging = self.reflections.merging
     min_d_star_sq, max_d_star_sq = refinement_refs.min_max_d_star_sq()
@@ -729,25 +806,38 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block.sort(key=sort_key)
     return cif_block
 
-  def output_fcf(self):
-    try: list_code = int(olx.Ins('list'))
-    except: list_code = None
-    if list_code is None: return
-    cif = iotbx.cif.model.cif()
+  def create_fcf_content(self, list_code=None, add_weights=False, fixed_format=True):
     if list_code == 4:
       fc_sq = self.normal_eqns.fc_sq.sort(by_value="packed_indices")
       fo_sq = self.normal_eqns.observations.fo_sq.sort(by_value="packed_indices")
       fo_sq = fo_sq.customized_copy(
         data=fo_sq.data()*(1/self.scale_factor),
         sigmas=fo_sq.sigmas()*(1/self.scale_factor))
+
       mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
         fc_sq, array_type='calc')
       mas_as_cif_block.add_miller_array(fo_sq, array_type='meas')
+
+      if add_weights:
+        weights = self.normal_eqns.weights
+        _refln_F_squared_weight = fc_sq.array(data=weights*len(weights)*100/sum(weights))
+        mas_as_cif_block.add_miller_array(
+          _refln_F_squared_weight, column_name='_refln_F_squared_weight')
+        if fixed_format:
+          fmt_str="%4i"*3 + "%12.2f"*2 + "%10.2f"*2 + " %s"
+        else:
+          fmt_str = "%i %i %i %.3f %.3f %.3f %.3f %s"
+
+      else:
+        if fixed_format:
+          fmt_str="%4i"*3 + "%12.2f"*2 + "%10.2f" + " %s"
+        else:
+          fmt_str = "%i %i %i %.3f %.3f %.3f %s"
+
       _refln_include_status = fc_sq.array(data=flex.std_string(fc_sq.size(), 'o'))
       mas_as_cif_block.add_miller_array(
-        #_refln_include_status, column_name='_refln_include_status')
         _refln_include_status, column_name='_refln_observed_status') # checkCIF only accepts this one
-      fmt_str="%4i"*3 + "%12.2f"*2 + "%10.2f" + " %s"
+
     elif list_code == 3:
       if self.hklf_code == 5:
         fo_sq, fc = self.get_fo_sq_fc()
@@ -765,12 +855,19 @@ class FullMatrixRefine(OlexCctbxAdapter):
         fo, array_type='meas')
       mas_as_cif_block.add_miller_array(
         fc, column_names=['_refln_A_calc', '_refln_B_calc'])
-      fmt_str="%4i"*3 + "%12.4f"*4
+      if fixed_format:
+        fmt_str="%4i"*3 + "%12.4f"*4
+      else:
+        fmt_str = "%i %i %i %f %f %f %f"
+
     else:
       print "list code %i not supported" %list_code
       return
     # cctbx could make e.g. 1.001(1) become 1.0010(10), so use Olex2 values for cell
+
+    cif = iotbx.cif.model.cif()
     cif_block = iotbx.cif.model.block()
+    cif_block['_computing_structure_refinement'] = OV.get_cif_item('_computing_structure_refinement')
     cif_block['_shelx_refln_list_code'] = list_code
     cif_block.update(mas_as_cif_block.cif_block)
 
@@ -782,8 +879,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_cell_angle_gamma'] = olx.xf.uc.CellEx('gamma')
     cif_block['_cell_volume'] = olx.xf.uc.VolumeEx()
     cif[OV.FileName().replace(' ', '')] = cif_block
+
+    return cif, fmt_str
+
+  def output_fcf(self):
+    try: list_code = int(olx.Ins('list'))
+    except: return
+
+    fcf_cif, fmt_str = self.create_fcf_content(list_code)
     f = open(OV.file_ChangeExt(OV.FileFull(), 'fcf'), 'w')
-    cif.show(out=f, loop_format_strings={'_refln':fmt_str})
+    fcf_cif.show(out=f, loop_format_strings={'_refln':fmt_str})
     f.close()
 
   def setup_shared_parameters_constraints(self):
