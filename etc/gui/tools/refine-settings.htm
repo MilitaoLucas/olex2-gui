@@ -147,7 +147,7 @@ $spy.weightGuiDisplay()
         bgcolor="GetVar('HtmlTableFirstcolColour')"
         name="SNUM_REFINEMENT_USE_SOLVENT_MASK"
         checked="spy.GetParam('snum.refinement.use_solvent_mask')"
-        onclick="spy.SetParam('snum.refinement.use_solvent_mask',html.GetState(~name~))"
+        onclick="spy.SetMasking(html.GetState(~name~))"
       >
   </td>
   <td ALIGN='left' width='24%'>

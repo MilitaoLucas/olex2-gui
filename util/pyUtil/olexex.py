@@ -1711,6 +1711,14 @@ if not haveGUI:
 OV.registerFunction(OV.IsPluginInstalled)
 OV.registerFunction(OV.GetTag)
 
+def SetMasking(v):
+  if v == 'true':
+    olx.AddIns('ABIN', q=True)
+  else:
+    olx.DelIns('ABIN')
+  OV.SetParam('snum.refinement.use_solvent_mask', v)
+OV.registerFunction(SetMasking)
+
 #
 def GetHttpFile(f, force=False, fullURL = False):
   URL = "http://dimas.dur.ac.uk/"
