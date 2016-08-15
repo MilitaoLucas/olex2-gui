@@ -84,7 +84,9 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       filepath = OV.StrDir()
       modified_intensities = None
       modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
+      fab_path = "%s/%s.fab" %(OV.FilePath(), OV.FileName())
       f_mask, f_model = None, None
+      # backward compatibility - just in case
       if not OV.HKLSrc() == modified_hkl_path:
         olx.SetVar('snum.masks.original_hklsrc', OV.HKLSrc())
       else:
@@ -96,8 +98,8 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
         if olx.current_mask.flood_fill.n_voids() > 0:
           f_mask = olx.current_mask.f_mask()
           f_model = olx.current_mask.f_model()
-      elif os.path.exists(modified_hkl_path):
-        OV.HKLSrc(modified_hkl_path)
+      elif os.path.exists(fab_path):
+        pass
       elif os.path.exists("%s/%s-f_mask.pickle" %(filepath, OV.FileName())):
         f_mask = easy_pickle.load("%s/%s-f_mask.pickle" %(filepath, OV.FileName()))
         f_model = easy_pickle.load("%s/%s-f_model.pickle" %(filepath, OV.FileName()))
@@ -115,13 +117,11 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
           f_model = f_model.common_set(fo2)
           if f_mask.size() != fo2.size():
             raise RuntimeError("f_mask array doesn't match hkl file")
-        modified_intensities = masks.modified_intensities(fo2, f_model, f_mask)
-      if modified_intensities is not None:
-        file_out = open(modified_hkl_path, 'w')
-        modified_intensities.export_as_shelx_hklf(file_out,
-          normalise_if_format_overflow=True)
-        file_out.close()
-        OV.HKLSrc(modified_hkl_path)
+      if f_mask is not None:
+        with open(fab_path, "w") as f:
+          for i,h in enumerate(f_mask.indices()):
+            line = "%5d%5d%5d" %h + "%10.4f%10.4f" % (f_mask.data()[i].real, f_mask.data()[i].imag)
+            print >> f, line
       #else:
         #print "No mask present"
     Method_refinement.pre_refinement(self, RunPrgObject)
