@@ -64,7 +64,7 @@ class Method_cctbx_refinement(Method_refinement):
     OV.SetParam('user.cif.finalise',self.cif_finalise)
     self.writeRefinementInfoIntoRes(self.cif)
     if OV.GetParam('user.cif.finalise') != 'Exclude':
-      OV.SetParam('user.cif.finalise', "Ignore")
+      OV.SetParam('user.cif.finalise', "Include")
     txt = '''
     R1_all=%(_refine_ls_R_factor_all)s;
     R1_gt = %(_refine_ls_R_factor_gt)s;
