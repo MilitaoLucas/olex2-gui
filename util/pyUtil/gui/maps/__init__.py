@@ -121,8 +121,6 @@ class MapUtil:
     self.SetXgridView(False)
 
     if map_source == "olex":
-      if OV.GetParam("snum.refinement.use_solvent_mask"):
-        modified_hkl = "%s/%s_modified.hkl"
       olex.m("calcFourier -%s -r=%s %s" %(map_type, map_resolution, mask_val))
     else:
       olex.m("calcFourier -%s -%s -r=%s %s" %(map_type, map_source, map_resolution, mask_val))
