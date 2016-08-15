@@ -49,7 +49,7 @@ class olex2_normal_eqns(get_parent()):
     super(olex2_normal_eqns, self).__init__(
       observations, reparametrisation, initial_scale_factor=OV.GetOSF(), **kwds)
     self.olx_atoms = olx_atoms
-    print self.__class__.__bases__[0].__bases__
+    #print self.__class__.__bases__[0].__bases__
 
   def step_forward(self):
     self.xray_structure_pre_cycle = self.xray_structure.deep_copy_scatterers()
@@ -820,19 +820,19 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
       if add_weights:
         weights = self.normal_eqns.weights
-        _refln_F_squared_weight = fc_sq.array(data=weights)
+        _refln_F_squared_weight = fc_sq.array(data=weights*len(weights)*100/sum(weights))
         mas_as_cif_block.add_miller_array(
           _refln_F_squared_weight, column_name='_refln_F_squared_weight')
         if fixed_format:
           fmt_str="%4i"*3 + "%12.2f"*2 + "%10.2f"*2 + " %s"
         else:
-          fmt_str = "%i %i %i %f %f %f %f %s"
+          fmt_str = "%i %i %i %.3f %.3f %.3f %.3f %s"
 
       else:
         if fixed_format:
           fmt_str="%4i"*3 + "%12.2f"*2 + "%10.2f" + " %s"
         else:
-          fmt_str = "%i %i %i %f %f %f %s"
+          fmt_str = "%i %i %i %.3f %.3f %.3f %s"
 
       _refln_include_status = fc_sq.array(data=flex.std_string(fc_sq.size(), 'o'))
       mas_as_cif_block.add_miller_array(
