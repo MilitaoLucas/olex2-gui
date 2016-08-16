@@ -120,7 +120,7 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       if f_mask is not None:
         with open(fab_path, "w") as f:
           for i,h in enumerate(f_mask.indices()):
-            line = "%5d%5d%5d" %h + "%10.4f%10.4f" % (f_mask.data()[i].real, f_mask.data()[i].imag)
+            line = "%d %d %d " %h + "%.4f %.4f" % (f_mask.data()[i].real, f_mask.data()[i].imag)
             print >> f, line
       #else:
         #print "No mask present"
