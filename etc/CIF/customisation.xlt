@@ -69,6 +69,7 @@
     <_chemical_name_*>
     <_exptl_crystal_*>
     <_*_details>
+    <_iucr_refine_fcf_details skip="true">
     <_diffrn_measurement_*>
     <_diffrn_absorpt_*>
     <_diffrn_crystal_*>
