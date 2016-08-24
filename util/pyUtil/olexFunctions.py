@@ -416,7 +416,7 @@ class OlexFunctions(inheritFunctions):
       if report:
         print "Refinement CIF file has been merged with the meta-data cif file"
     except Exception, ex:
-      print >> sys.stderr, "An error occured whilst trying to find merge cif files"
+      print >> sys.stderr, "An error occurred whilst trying to find merge cif files"
       sys.stderr.formatExceptionInfo()
 
   def reset_file_in_OFS(self,fileName,txt=" ",copyToDisk = False):
