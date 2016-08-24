@@ -391,9 +391,9 @@ class MergeCif(CifTools):
         else:
           if method == 'CGLS':
             OV.set_refinement_program(prg, 'Least Squares')
-          acta = olx.Ins('ACTA')
-          if acta == 'n/a':
-            olx.AddIns('ACTA')
+        acta = olx.Ins('ACTA')
+        if acta == 'n/a':
+          olx.AddIns('ACTA')
         olex.m('refine')
       else:
         print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
@@ -1020,24 +1020,23 @@ The \l/2 correction factor is %(lambda_correction)s.
           else:
             versiontext += version
         else:
-          print "Version %s of the programme %s is not in the list of known versions" %(version, name)
-          versiontext = "?"
+          versiontext = self.enter_new_version(version, name).strip()
+          if not versiontext:
+            versiontext = "?"
+          else:
+            versions[name][version] = versiontext
       else:
         versiontext = "?"
     return versiontext
 
-  def enter_new_version(self, dict, version, name):
-    arg = 1
-    title = "Enter new version"
-    contentText = "Please type the text you wish to see in the CIF for %s %s: \n"%(name, version)
-    txt = OV.GetUserInput(arg, title, contentText)
-    txt = "'" + txt + "'\n"
-    yn = OV.Alert("Olex2", "Do you wish to add this to the list of known versions?", "YN")
-    if yn == "Y":
-      afile = olexdir + "/util/Cif/" + "cif_info.def"
-      afile = open(afile, 'a')
-      afile.writelines("\n=%s=     %s=%s =" %(name, version, txt))
-      afile.close()
+  def enter_new_version(self, version, name):
+    title = "Enter new program version citation for %s %s which you want to appear in the CIF" %(name.upper(), version)
+    contentText = "%s %s (?, 2016)" %(name.upper(), version)
+    txt = OV.GetUserInput(1, title, contentText)
+    if txt:
+      afile = os.path.join(OV.DataDir(), "cif_info.def")
+      with open(afile, 'a') as afile:
+        afile.writelines("\n=%s=%s=     '%s'" %(name, version, txt))
     return txt
 
   def sort_out_path(self, directory, tool):
@@ -1213,8 +1212,12 @@ If more than one file is present, the path of the most recent file is returned b
   def get_def(self):
     olexdir = self.basedir
     versions = self.versions
-    file = "%s/etc/site/cif_info.def" %self.basedir
-    with open(file, 'r') as rfile:
+    afile = os.path.join(OV.DataDir(), "cif_info.def")
+    if not os.path.exists(afile):
+      import shutil
+      file = os.path.join(self.basedir, "etc", "site", "cif_info.def")
+      shutil.copy(file, afile)
+    with open(afile, 'r') as rfile:
       for line in rfile:
         if line[:1] == "_":
           versions["default"].append(line)
