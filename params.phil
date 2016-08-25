@@ -1711,7 +1711,7 @@ user
       .type = str
     manual_update = False
       .type = bool
-    provider_url = "http://www.olex2.org/PluginProvider1/"
+    provider_url = "https://secure.olexsys.org/PluginProvider1/"
       .type = str
   }
 }
