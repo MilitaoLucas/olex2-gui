@@ -401,14 +401,17 @@ class OlexFunctions(inheritFunctions):
       cmd = ''
       if filepath:
         cmd = '%s' %filepath
-      if update_atoms_loop is None:
-        update_atoms_loop = (OV.GetParam('snum.refinement.program', '') == 'olex2.refine')
+      olex2_refine = (OV.GetParam('snum.refinement.program', '') == 'olex2.refine')
       finalise = self.GetParam('user.cif.finalise', 'Ignore')
       finalise_value = None
       if finalise == 'Include':
         finalise_value = True
       elif finalise == 'Exclude':
         finalise_value = False
+      elif olex2_refine:
+        finalise_value = True
+      if update_atoms_loop is None:
+        update_atoms_loop = olex2_refine
       if type(filepath) == list:
         olx.CifMerge(*filepath, f=finalise_value, u=update_atoms_loop)
       else:
