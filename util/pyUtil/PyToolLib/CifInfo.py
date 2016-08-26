@@ -404,19 +404,9 @@ class MergeCif(CifTools):
         print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         return
 
-    if timer:
-      t = time.time()
     ECI = ExtractCifInfo(evaluate_conflicts=evaluate_conflicts)
     ECI.run()
-    if timer:
-      print "-- ECI: %.3f" %(time.time() - t)
-
-    if timer:
-      t = time.time()
     self.write_metacif_file()
-    if timer:
-      print "-- write_metacif_file(): %.3f" %(time.time() - t)
-
     ## merge metacif file with cif file from refinement
     merge_with = [self.metacif_path]
     for extra_cif in OV.GetParam('snum.report.merge_these_cifs',[]):
@@ -424,11 +414,7 @@ class MergeCif(CifTools):
         merge_with.append(extra_cif)
     if len(merge_with) > 1:
       print("Merging with: " + ' '.join([os.path.split(x)[1] for x in merge_with[1:]]))
-    if timer:
-      t = time.time()
     OV.CifMerge(merge_with)
-    if timer:
-      print "-- ECI: %.3f" %(time.time() - t)
     self.finish_merge_cif()
     if edit:
       OV.external_edit('filepath()/filename().cif')
