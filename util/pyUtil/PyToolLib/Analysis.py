@@ -3218,9 +3218,9 @@ class HealthOfStructure():
 
     width =  c_width - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - 1
 
-    boxWidth = (width/n) * scale
-    boxHeight = OV.GetParam('gui.timage.h3.height') * scale
-    boxHalf = 3 * scale
+    boxWidth = int((width/n) * scale)
+    boxHeight = int(OV.GetParam('gui.timage.h3.height') * scale)
+    boxHalf = int(3 * scale)
     #if type(colour) != str:
       #colour = colour.hexadecimal
     #colour = "#000000"
@@ -3257,7 +3257,7 @@ class HealthOfStructure():
     draw.rectangle(box, fill=fill)
 
 
-    font_l = IT.registerFontInstance("Vera", 8 * scale)
+    font_l = IT.registerFontInstance("Vera", int(8 * scale))
     if self.is_CIF:
       fill = IT.adjust_colour(fill, luminosity=1.9)
       draw.text((2, boxHeight - 2*8), "CIF", font=font_l, fill=fill)
@@ -3312,8 +3312,8 @@ class HealthOfStructure():
       y = int(boxHeight/45 * scale)
       y_s = 0 * scale
 
-    font = IT.registerFontInstance("Vera", font_size * scale)
-    font_s = IT.registerFontInstance("Vera", font_size_s * scale)
+    font = IT.registerFontInstance("Vera", int(font_size * scale))
+    font_s = IT.registerFontInstance("Vera", int(font_size_s * scale))
 
     ## ADD THE Key
 
@@ -3329,8 +3329,8 @@ class HealthOfStructure():
 
     y += 0
     if value_display_extra:
-      dxs,dxy = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=font_size_s * scale)
-    dx,dy = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=font_size * scale)
+      dxs,dxy = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=int(font_size_s * scale))
+    dx,dy = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=int(font_size * scale))
     x = boxWidth - dx - 7 #right inside margin
     draw.text((x, y), "%s" %value_display, font=font, fill=fill)
     if value_display_extra:
@@ -3343,7 +3343,7 @@ class HealthOfStructure():
 
     if self.image_position != "last":
       im = IT.add_whitespace(im, 'right', 4, bgcolour)
-    im = im.resize((boxWidth/scale, boxHeight/scale), Image.ANTIALIAS)
+    im = im.resize((int(boxWidth/scale), int(boxHeight/scale)), Image.ANTIALIAS)
     im = IT.add_whitespace(im, side='bottom', weight=2, colour=bgcolour)
 
     OlexVFS.save_image_to_olex(im, item, 0)
