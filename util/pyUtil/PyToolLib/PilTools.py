@@ -2492,10 +2492,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     else:
       pams = getattr(self.params.timage, '%s' %item_type)
 
-    self.scale = pams.scale
-    if not self.scale:
-      self.scale = 1
-
     self.size_factor = OV.GetParam('gui.skin.size_factor') #An additional scale factor
 
     base_colour = pams.base_colour
