@@ -1,4 +1,4 @@
-#from __future__ import division
+from __future__ import division
 # -*- coding: latin-1 -*-
 
 import math
@@ -17,6 +17,7 @@ try:
   import olexex
   import htmlTools
   import olex_core
+  import olex_gui
 except:
   pass
 
@@ -42,6 +43,8 @@ PreviousHistoryNode = None
 
 global cache
 cache = {}
+
+import olex_gui
 
 silent = True
 
@@ -2560,7 +2563,8 @@ class HistoryGraph(Analysis):
       bars.append((R1,href,target))
       node = node.active_child_node
     n_bars = len(bars)
-    width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+    #width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+    width = int(OV.GetVar('htmlpanelwidth')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
     size = (width - OV.GetParam('gui.html.table_firstcol_width')-10, 100)
     self.params.size_x, self.params.size_y = size
     self.make_empty_graph(draw_title=False)
@@ -2854,6 +2858,7 @@ class HealthOfStructure():
     self.grade_2_colour = OV.GetParam('gui.skin.diagnostics.colour_grade2').hexadecimal
     self.grade_3_colour = OV.GetParam('gui.skin.diagnostics.colour_grade3').hexadecimal
     self.grade_4_colour = OV.GetParam('gui.skin.diagnostics.colour_grade4').hexadecimal
+
     self.available_width = int(OV.GetParam('gui.htmlpanelwidth'))
     self.stats = None
     self.scale = OV.GetParam('user.diagnostics.scale')
@@ -3212,10 +3217,11 @@ class HealthOfStructure():
     value_display_extra = ""
     completeness_box_width = 150
 
-    c_width = int(olx.html.ClientWidth('self'))
-    if c_width < 100:
-      c_width = OV.GetParam('gui.htmlpanelwidth')
+    #c_width = int(olx.html.ClientWidth('self'))
+    #if c_width < 100:
+      #c_width = OV.GetParam('gui.htmlpanelwidth')
 
+    c_width = OV.GetParam('gui.htmlpanelwidth')
     width =  c_width - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - 1
 
     boxWidth = int((width/n) * scale)
@@ -3297,7 +3303,6 @@ class HealthOfStructure():
 
     display = IT.get_unicode_characters(display)
 
-
     if boxWidth < 80 * scale:
       font_size = 14
       font_size_s = 8
@@ -3337,14 +3342,15 @@ class HealthOfStructure():
       draw.text((0, y - 1 + dy/2), "%s" %value_display_extra, font=font_s, fill="#ffffff")
 
     _ = im.copy()
-    _ = IT.add_whitespace(im, 'right', 4, "#ffffff")
-    _ = IT.add_whitespace(im, 'left', 4, "#ffffff")
+    _ = IT.add_whitespace(im, 'right', 4*scale, "#ffffff")
+    _ = IT.add_whitespace(im, 'left', 4*scale, "#ffffff")
     OlexVFS.save_image_to_olex(_, "%s_large" %item, 0)
 
     if self.image_position != "last":
       im = IT.add_whitespace(im, 'right', 4, bgcolour)
-    im = im.resize((int(boxWidth/scale), int(boxHeight/scale)), Image.ANTIALIAS)
-    im = IT.add_whitespace(im, side='bottom', weight=2, colour=bgcolour)
+    im = IT.add_whitespace(im, side='bottom', weight=2*scale, colour=bgcolour)
+
+    im = IT.resize_image(im, ((boxWidth/scale),(boxHeight/scale)))
 
     OlexVFS.save_image_to_olex(im, item, 0)
     href = OV.GetParam('user.diagnostics.%s.%s.href' %(self.scope,item))
