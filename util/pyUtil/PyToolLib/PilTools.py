@@ -20,11 +20,15 @@ IT = ImageTools()
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import olex_fs
+import olex_gui
 import olx
 import time
 global isPro
 global timage_blanks
 timage_blanks = {}
+
+global dpi_scale
+dpi_scale = olex_gui.GetPPI()[0]/96
 
 olx.banner_slide = {}
 
@@ -821,7 +825,6 @@ class timage(ImageTools):
       self.time = time
       self.text_time = 0
 
-    if self.width <= 0: self.width = 10
     sf = 4 #images are four times larger than the nominal width of 350
     sfs = sf * 350/int(self.params.htmlpanelwidth)
     self.sf = sf
@@ -829,11 +832,19 @@ class timage(ImageTools):
     self.no_need_to_refresh_image_type = {}
     self.getImageItemsFromTextFile()
 
+    global dpi_scale
+    olx.HtmlPanelWidth(OV.GetParam('gui.htmlpanelwidth'))
+
+
   def get_available_width(self):
-    c_width = int(olx.html.ClientWidth('self'))
-    if c_width < 100:
-      c_width = OV.GetParam('gui.htmlpanelwidth')
-    self.width = c_width - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+    import gui.skin
+    #self.available_width, self.max_width = gui.tools._get_available_html_width()
+    #c_width = int(olx.html.ClientWidth('self'))
+    #if c_width < 100:
+      #c_width = OV.GetParam('gui.htmlpanelwidth')
+
+    width = OV.GetParam('gui.htmlpanelwidth')
+    self.width = width - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
     self.max_width = self.width
     self.available_width = self.width - OV.GetParam('gui.html.table_firstcol_width')
 
@@ -860,7 +871,6 @@ class timage(ImageTools):
           "make_cbtn_items",
           "info_bitmaps",
                 ]
-
 
     if not do_these:
       do_these = ["make_generated_assorted_images",
@@ -898,6 +908,7 @@ class timage(ImageTools):
 
     #self.params.html.base_colour.rgb = OV.FindValue('gui_htmlself.params.html.base_colour.rgb')
     width = int(olx.html.ClientWidth('self'))
+    
     self.basedir = OV.BaseDir()
     self.filefull = OV.FileFull()
     self.filepath = OV.FilePath()
@@ -2035,7 +2046,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           use_new = True
           if use_new:
             ## need different width for tab items
-            width = (self.width / len(tabItems))
+            width = (int(self.width / len(tabItems)) - int(round((1 * self.scale))))
             image = self.make_timage(item_type='tab', item=item.lstrip('g3-'), state=state, width=width)
           else:
             image = self.tab_items(item, state)
@@ -2472,7 +2483,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if self.params.image_font_name:
       font_name = self.params.image_font_name
 
-
   def make_timage(self, item_type, item, state, font_name="Vera", width=None, colour=None, whitespace=None, titleCase=True, e_font_colour=None, e_top_left=None):
 
     self.params = OV.GuiParams()
@@ -2491,6 +2501,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       pams = getattr(self.params.timage, '%s' %'button')
     else:
       pams = getattr(self.params.timage, '%s' %item_type)
+
+    self.scale = pams.scale
+    if not self.scale:
+      self.scale = 1
 
     self.size_factor = OV.GetParam('gui.skin.size_factor') #An additional scale factor
 
@@ -2693,9 +2707,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           image = self.print_text(image.copy(), item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
           if self.debug:
             print "FROM CACHE: %s (%s)" %(item, state)
-          if self.scale != 1:
-            image = image.resize((int(width), int(height)), Image.ANTIALIAS)
-          return image
+          return self.finally_make_mage(image=image, width=width, height=height)
 
     image = Image.new('RGBA', size, bg_colour)
     draw = ImageDraw.Draw(image)
@@ -2765,9 +2777,17 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if self.debug:
       print "FROM SCRATCH: %s" %item
 
-    if self.scale != 1:
-      image = image.resize((int(width), int(height)), Image.ANTIALIAS)
+    return self.finally_make_mage(image=image, width=width, height=height)
+
+  def finally_make_mage(self, image, width, height):
+    #if self.scale != 1:
+      #image = image.resize((int(width), int(height)), Image.ANTIALIAS)
+    #return image
+    global dpi_scale
+    if self.scale != 1 or dpi_scale != 1:
+      image = image.resize((int(width*dpi_scale), int(height*dpi_scale)), Image.ANTIALIAS)
     return image
+
 
 
   def print_text(self, image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type):
@@ -3270,6 +3290,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
   def note_items(self, item):
     #cs = self.cs
+
     base_colour = self.params.html.base_colour.rgb
     needs_warning=item[3]
     font_size = 9
