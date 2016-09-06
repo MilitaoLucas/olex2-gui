@@ -18,7 +18,12 @@ import os
 global sizedraw
 sizedraw_dummy_draw = ImageDraw.Draw(Image.new('RGBA', (300, 300)))
 import olx
+import olex_gui
 import math
+
+global dpi_scale
+dpi_scale = olex_gui.GetPPI()[0]/96
+
 
 # self.params.html.highlight_colour.rgb = self.params.html.highlight_colour.rgb
 # self.params.timage.colour.rgb = self.params.timage.colour.rgb
@@ -319,7 +324,8 @@ class ImageTools(FontInstances):
             float(im.size[0]) / mark.size[0], float(im.size[1]) / mark.size[1])
         w = int(mark.size[0] * ratio)
         h = int(mark.size[1] * ratio)
-        mark = mark.resize((w, h))
+        global dpi_scale
+        mark = mark.resize((w*dpi_scale, h*dpi_scale))
         layer.paste(mark, ((im.size[0] - w) / 2, (im.size[1] - h) / 2))
     else:
         layer.paste(mark, position)
@@ -382,7 +388,10 @@ class ImageTools(FontInstances):
     return name
 
   def resize_image(self, image, size):
-    image = image.resize(size, Image.ANTIALIAS)
+    global dpi_scale
+    width = int(size[0] * dpi_scale)
+    height = int(size[1] * dpi_scale)
+    image = image.resize((width,height), Image.ANTIALIAS)
     return image
 
   def resize_skin_logo(self, width):
@@ -390,7 +399,6 @@ class ImageTools(FontInstances):
     name = r"skin_logo.png"
     if os.path.exists(logopath):
       im = Image.open(logopath)
-      # width = int(width) - 20
       factor = im.size[0] / width
       height = int(im.size[1] / factor)
       im = self.resize_image(im, (width, height))
@@ -421,7 +429,9 @@ class ImageTools(FontInstances):
         name = name[:-4]
     colourize = args.get('c', False)
     if not width:
-      width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+      #width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+      width = OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+
     if im:
       if colourize:
         im = self.colourize(im, (0, 0, 0), OV.GetParam('gui.logo_colour'))
@@ -429,6 +439,7 @@ class ImageTools(FontInstances):
       if width < 10: return
       factor = im.size[0] / width
       height = int(im.size[1] / factor)
+      global dpi_scale
       im = self.resize_image(im, (width, height))
       OlexVFS.save_image_to_olex(im, name, 2)
     else:
@@ -464,6 +475,7 @@ class ImageTools(FontInstances):
     pass
 
   def add_whitespace(self, image, side, weight, colour, margin_left=0, margin_right=0, margin_top=0, margin_bottom=0, overwrite=False):
+    weight = int(weight)
     width, height = image.size
     top = 0 + margin_top
     left = 0 + margin_left
@@ -729,6 +741,7 @@ class ImageTools(FontInstances):
         im = None
         draw = None
     return im, draw
+
 
   def make_round_corners(self, im, radius=10, colour=(80, 130, 130)):
     cache = {}
@@ -1223,7 +1236,8 @@ class ImageTools(FontInstances):
           mark_colouriszed = self.colourize(mark, (0, 0, 0), self.params.html.base_colour.rgb)
           IM = Image.new('RGBA', mark.size)
           IM.paste(mark_colouriszed, (0, 0), mark)
-          IM = self.resize_image(IM, (int(image.size[1]), int(image.size[1])))
+          global dpi_scale
+          IM = self.resize_image(IM, (int(image.size[1]*dpi_scale), int(image.size[1]*dpi_scale)))
           image.paste(IM, (l, t))
         return image
       else:

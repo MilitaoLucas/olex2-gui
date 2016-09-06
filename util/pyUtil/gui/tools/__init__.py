@@ -21,6 +21,7 @@ current_sNum = ""
 haveGUI = OV.HasGUI()
 
 import olexex
+import olex_gui
 
 import re
 
@@ -992,3 +993,23 @@ class Templates():
       return False
 
 TemplateProvider = Templates()
+
+def _get_available_html_width(margin_adjust = True, first_col_width_adjust=True, ppi_aware=True):
+  width = int(olx.html.ClientWidth('self'))
+  max_width = width
+  if width < 100:
+    width = OV.GetParam('gui.htmlpanelwidth')
+  if margin_adjust:
+    width = width - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+  if first_col_width_adjust:
+    width = width - OV.GetParam('gui.html.table_firstcol_width')
+  if ppi_aware:
+    width = int(width * olex_gui.GetPPI()[0]/96)
+    max_width = int(max_width * olex_gui.GetPPI()[0]/96)
+
+  if width <= 0:
+    width = 10
+  if max_width <= 0:
+    max_width = 10
+
+  return width, max_width
