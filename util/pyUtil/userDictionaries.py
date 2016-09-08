@@ -50,7 +50,7 @@ def get_sql(table_name, d):
 
 class person:
   def __init__(self, affiliationid, id=None, firstname="", middlename="",
-               lastname="", email="", phone=""):
+               lastname="", email="", phone="", orchid_id=""):
     if type(affiliationid) == tuple:
       sql_res = affiliationid
       self.id = sql_res[0]
@@ -60,12 +60,14 @@ class person:
       self.lastname = sql_res[4]
       self.email = sql_res[5]
       self.phone = sql_res[6]
+      self.orchid_id = sql_res[7]
     else:
       self.affiliationid = affiliationid
       self.id = id
       self.firstname= firstname
       self.middlename = middlename
       self.lastname = lastname
+      self.orchid_id = orchid_id
       self.email = email
       self.phone = phone
 
@@ -298,7 +300,7 @@ class Persons:
     if not id:
       return retStr
     person = self.get_person(id)
-    if item in ('phone','email','address'):
+    if item in ('phone','email','address', 'orchid_id'):
       if item == "address":
         retStr = person.get_affiliation().get_address()
       else:
@@ -607,7 +609,7 @@ CREATE TABLE affiliation (
 CREATE TABLE person (
   id INTEGER NOT NULL, affiliationid INTEGER NOT NULL,
   firstname TEXT, middlename TEXT, lastname TEXT,
-  email TEXT, phone TEXT,
+  email TEXT, phone TEXT, orchid_id TEXT,
   PRIMARY KEY(id),
   FOREIGN KEY(affiliationid)
     REFERENCES affiliation(id)
@@ -617,3 +619,11 @@ CREATE INDEX affiliationfk ON person (affiliationid);
       """)
       DBConnection._conn.commit()
       self.need_import = True
+    else: # check missing columns
+      cursor = DBConnection._conn.cursor()
+      try:
+        cursor.execute("SELECT orchid_id FROM person limit 1")
+      except Exception, e:
+        cursor.execute("Alter table person add column orchid_id TEXT default ''")
+        print("Added orchid_id to person")
+

@@ -5,7 +5,7 @@ import olx
 
 class UsersDB:
   site_items = ('name', 'department', 'address', 'city', 'country', 'postcode')
-  person_items = ('firstname', 'middlename', 'lastname', 'email', 'phone')
+  person_items = ('firstname', 'middlename', 'lastname', 'email', 'phone', 'orchid_id')
   def __init__(self):
     self.site = None
     self.person = None
