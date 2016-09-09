@@ -23,8 +23,7 @@ except:
 
 import time
 
-from ImageTools import ImageTools
-IT = ImageTools()
+from ImageTools import IT
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
@@ -2564,8 +2563,8 @@ class HistoryGraph(Analysis):
       node = node.active_child_node
     n_bars = len(bars)
     #width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
-    width = int(OV.GetVar('htmlpanelwidth')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
-    size = (width - OV.GetParam('gui.html.table_firstcol_width')-10, 100)
+    width = IT.skin_width_table
+    size = (width, 100)
     self.params.size_x, self.params.size_y = size
     self.make_empty_graph(draw_title=False)
 
@@ -2861,7 +2860,7 @@ class HealthOfStructure():
 
     self.available_width = int(OV.GetParam('gui.htmlpanelwidth'))
     self.stats = None
-    self.scale = OV.GetParam('user.diagnostics.scale')
+    self.scale = OV.GetParam('gui.internal_scale')
     self.scope = "hkl"
     self.supplied_cif = False
 
@@ -2875,6 +2874,7 @@ class HealthOfStructure():
 
   def make_HOS(self, force=False, supplied_cif=False):
     force = bool(force)
+    self.width = int(IT.skin_width*0.95)
     self.supplied_cif = supplied_cif
     self.scopes = OV.GetParam('user.diagnostics.scopes')
     self.scope = OV.GetParam('snum.current_process_diagnostics')
@@ -3212,24 +3212,18 @@ class HealthOfStructure():
 
 
   def make_hos_images(self, item='test', colour='#ff0000', display='Display', value_display='10%', value_raw='0.1', n=1):
+    width = self.width
     scale = self.scale
     font_name = 'Vera'
     value_display_extra = ""
     completeness_box_width = 150
+    targetWidth = round(width/n)
+    targetHeight = round(OV.GetParam('gui.timage.h1.height'))
 
-    #c_width = int(olx.html.ClientWidth('self'))
-    #if c_width < 100:
-      #c_width = OV.GetParam('gui.htmlpanelwidth')
-
-    c_width = OV.GetParam('gui.htmlpanelwidth')
-    width =  c_width - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - 1
-
-    boxWidth = int((width/n) * scale)
-    boxHeight = int(OV.GetParam('gui.timage.h3.height') * scale)
+    boxWidth = int(targetWidth * scale)
+    boxHeight = int(targetHeight * scale)
     boxHalf = int(3 * scale)
-    #if type(colour) != str:
-      #colour = colour.hexadecimal
-    #colour = "#000000"
+
     bgcolour=  OV.GetParam('gui.html.table_firstcol_colour').hexadecimal
     im = Image.new('RGBA', (boxWidth,boxHeight), (0,0,0,0))
     draw = ImageDraw.Draw(im)
@@ -3346,11 +3340,11 @@ class HealthOfStructure():
     _ = IT.add_whitespace(im, 'left', 4*scale, "#ffffff")
     OlexVFS.save_image_to_olex(_, "%s_large" %item, 0)
 
-    if self.image_position != "last":
-      im = IT.add_whitespace(im, 'right', 4, bgcolour)
-    im = IT.add_whitespace(im, side='bottom', weight=2*scale, colour=bgcolour)
+    #if self.image_position != "last":
+      #im = IT.add_whitespace(im, 'right', 4, bgcolour)
+    im = IT.add_whitespace(im, side='bottom', weight=3*scale, colour=bgcolour)
 
-    im = IT.resize_image(im, ((boxWidth/scale),(boxHeight/scale)))
+    im = IT.resize_image(im, ((targetWidth),(targetHeight)))
 
     OlexVFS.save_image_to_olex(im, item, 0)
     href = OV.GetParam('user.diagnostics.%s.%s.href' %(self.scope,item))

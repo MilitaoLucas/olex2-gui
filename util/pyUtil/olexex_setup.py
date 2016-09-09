@@ -12,7 +12,7 @@ import variableFunctions
 class SetupWizard(object):
   def __init__(self):
     self.shown_once = False
-    
+
   def tbxs(self, f):
     total_number = 6
     name = f.get('n','0')
@@ -87,8 +87,7 @@ OV.registerMacro(a.tbxs, 'n-The name of the setup screen')
 
 class ConfigSkin(object):
   def __init__(self):
-    from ImageTools import ImageTools
-    self.IT = ImageTools()
+    from ImageTools import IT
 
   def config_changed_var_val(self, var, value, args={}):
     #if "font_name" in var.lower():
@@ -123,7 +122,7 @@ class ConfigSkin(object):
         if "_COLOUR" in l[0]:
           val = l[1]
           if "(" in val:
-            val = self.IT.RGBToHTMLColor(eval(val))
+            val = IT.RGBToHTMLColor(eval(val))
           config.setdefault(l[0], {'num':i, 'val':val})
         else:
           config.setdefault(l[0], {'num':i, 'val':l[1]})
@@ -165,7 +164,7 @@ class ConfigSkin(object):
         elif "_timage_" in var.lower() or "_snumtitle_" in var.lower() or "_tab_" in var.lower() or "_logo_" in var.lower() or "_highlight_" in var.lower():
           href += ">>panel"
         #str += "<tr valign='center'><td>%s</td><td width=80>some text</td></tr>\n" %var
-        str += "<tr valign='center'><td width=%s>%s</td><td><a href='%s' target='Change %s'><zimg border='0' src='%s'></a></td></tr>\n" %(first_col_width, varName, href, varName.lower(), self.IT.make_colour_sample(val))
+        str += "<tr valign='center'><td width=%s>%s</td><td><a href='%s' target='Change %s'><zimg border='0' src='%s'></a></td></tr>\n" %(first_col_width, varName, href, varName.lower(), IT.make_colour_sample(val))
 
         ## This was an attempt to allow darker/lighter adjustment from the gui. It failed, cause the L_Var aren't actually stored in Olex
         #href_lighter = "spy.config_changed_luminosity %s -adjust=0.1" %var

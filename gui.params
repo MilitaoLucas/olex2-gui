@@ -5,6 +5,10 @@
 
 gui
   {
+  dpi_scaling = True
+    .type = bool
+  internal_scale = 2
+    .type = int
   timing = False
     .type = bool
   chinese_font_name = YaHei
@@ -77,6 +81,8 @@ gui
   }
 
   skin {
+    base_width = 500
+      .type = int
     materials_have_been_set = False
       .type = bool
     name = default
@@ -484,7 +490,7 @@ gui
 
 
     h1{
-      scale = 2
+      scale = 1
         .type = int
       base_colour = #aaaaaa
         .type = colour
