@@ -21,8 +21,14 @@ import olx
 import olex_gui
 import math
 
+debug = bool(OV.GetParam('olex2.debug',False))
+
 global dpi_scale
 dpi_scale = olex_gui.GetPPI()[0]/96
+
+global dpi_scaling
+dpi_scaling = OV.GetParam('gui.dpi_scaling')
+
 
 
 # self.params.html.highlight_colour.rgb = self.params.html.highlight_colour.rgb
@@ -70,10 +76,31 @@ class ImageTools(FontInstances):
       self.available_width = 200
       self.available_width_full = 200
     else:
-      self.available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - OV.GetParam('gui.html.table_firstcol_width'))
-      self.available_width_full = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
+      self.get_available_width()
       self.css = OV.GuiParams().css
 
+  def get_available_width(self):
+    global dpi_scale
+
+    global dpi_scaling
+    dpi_scaling = OV.GetParam('gui.dpi_scaling')
+
+    if dpi_scaling:
+      w = OV.GetParam('gui.skin.base_width')
+    else:
+      w = olx.html.ClientWidth('self')
+
+    self.skin_width = w
+    self.skin_width_margin = w - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+    self.skin_width_table = self.skin_width_margin - OV.GetParam('gui.html.table_firstcol_width')
+    self.max_width = w
+
+    self.skin_width = self.skin_width_margin
+
+    self.dpi_scale = (int(olx.html.ClientWidth('self'))-OV.GetParam('gui.htmlpanelwidth_margin_adjust'))/self.skin_width
+
+    if debug:
+      print("====== dpi_scaling set to %s ======" %self.dpi_scale)
 
   def drawSpaceGroupInfo(self, draw, luminosity=1.9, right_margin=12, font_name="Times Bold", font_colour=None):
     base_colour = OV.GetParam('gui.html.base_colour').rgb
@@ -324,8 +351,7 @@ class ImageTools(FontInstances):
             float(im.size[0]) / mark.size[0], float(im.size[1]) / mark.size[1])
         w = int(mark.size[0] * ratio)
         h = int(mark.size[1] * ratio)
-        global dpi_scale
-        mark = mark.resize((w*dpi_scale, h*dpi_scale))
+        mark = mark.resize((w, h))
         layer.paste(mark, ((im.size[0] - w) / 2, (im.size[1] - h) / 2))
     else:
         layer.paste(mark, position)
@@ -387,10 +413,34 @@ class ImageTools(FontInstances):
     OlexVFS.save_image_to_olex(IM, name, 2)
     return name
 
+  def set_htmlpanel_width(self, new_width):
+    if not new_width:
+      return
+    new_width = float(new_width)
+    #if dpi_scaling:
+      #new_width = int(round(new_width*dpi_scale))
+    if new_width <=1:
+      olx.HtmlPanelWidth("%i %%" %int(new_width*100))
+    else:
+      olx.HtmlPanelWidth(new_width)
+    self.get_available_width()
+    if debug:
+      print("============== resized panel to %s, using dpi_scaling: %s ==============" %(new_width, repr(dpi_scaling)))
+      print("---- IT.max_width = %s" %IT.max_width)
+      print("---- gui.htmlpanelwidth = %s" %OV.GetParam('gui.htmlpanelwidth'))
+      print("---- gui.skin.base_width = %s" %OV.GetParam('gui.skin.base_width'))
+      print("---- self.dpi_scale = %s" %IT.dpi_scale)
+      print("======================================================")
+
   def resize_image(self, image, size):
-    global dpi_scale
-    width = int(size[0] * dpi_scale)
-    height = int(size[1] * dpi_scale)
+    s = int(olx.html.ClientWidth('self'))/self.skin_width
+    print s
+    if dpi_scaling:
+      width = int(size[0] * s)
+      height = int(size[1] * s)
+    else:
+      width = int(size[0])
+      height = int(size[1])
     image = image.resize((width,height), Image.ANTIALIAS)
     return image
 
@@ -430,7 +480,7 @@ class ImageTools(FontInstances):
     colourize = args.get('c', False)
     if not width:
       #width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
-      width = OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+      width = int(IT.skin_width*0.97)
 
     if im:
       if colourize:
@@ -439,7 +489,6 @@ class ImageTools(FontInstances):
       if width < 10: return
       factor = im.size[0] / width
       height = int(im.size[1] / factor)
-      global dpi_scale
       im = self.resize_image(im, (width, height))
       OlexVFS.save_image_to_olex(im, name, 2)
     else:
@@ -1221,7 +1270,7 @@ class ImageTools(FontInstances):
       left_start = OV.GetParam('gui.timage.cbtn.dot_left')
       colour_off = OV.GetParam('gui.timage.cbtn.dot_colour_off').hexadecimal
       colour_on = OV.GetParam('gui.timage.cbtn.dot_colour_on').hexadecimal
-      l = width - height + left_start
+      l = (width - height + left_start) * scale
       t = pad
       b = height - pad
       r = width - pad
@@ -1231,13 +1280,14 @@ class ImageTools(FontInstances):
       if mark:
         watermark = True
         if watermark:
-          image = self.watermark(image, mark, (l, t), opacity=1)
+          _ = image.size[1] - (pad*scale*2)
+          mark = mark.resize((_,_), Image.ANTIALIAS)
+          image = self.watermark(image, mark, (int(round(l)), int(round(t))), opacity=1)
         else:
           mark_colouriszed = self.colourize(mark, (0, 0, 0), self.params.html.base_colour.rgb)
           IM = Image.new('RGBA', mark.size)
           IM.paste(mark_colouriszed, (0, 0), mark)
-          global dpi_scale
-          IM = self.resize_image(IM, (int(image.size[1]*dpi_scale), int(image.size[1]*dpi_scale)))
+          IM = self.resize_image(IM, image.size[1], image.size[1])
           image.paste(IM, (l, t))
         return image
       else:
@@ -1649,9 +1699,10 @@ class ImageTools(FontInstances):
     map += "</map>"
     return map
 
-a = ImageTools()
+IT = ImageTools()
 if olx.HasGUI == 'true':
-  OV.registerMacro(a.resize_to_panelwidth, 'i-Image&;c-Colourize')
-  OV.registerFunction(a.make_pie_graph, False, 'it')
-  OV.registerFunction(a.resize_news_image, False, 'it')
-OV.registerFunction(a.trim_image, False, 'it')
+  IT.get_available_width()
+  OV.registerMacro(IT.resize_to_panelwidth, 'i-Image&;c-Colourize')
+  OV.registerFunction(IT.make_pie_graph, False, 'it')
+  OV.registerFunction(IT.resize_news_image, False, 'it')
+OV.registerFunction(IT.trim_image, False, 'it')

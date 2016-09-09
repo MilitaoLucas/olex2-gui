@@ -16,7 +16,7 @@ import sys
 import olexex
 #OV = olexex.OlexFunctions()
 from ImageTools import ImageTools
-IT = ImageTools()
+from ImageTools import IT
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import olex_fs
@@ -27,8 +27,13 @@ global isPro
 global timage_blanks
 timage_blanks = {}
 
+debug = bool(OV.GetParam('olex2.debug',False))
+
 global dpi_scale
 dpi_scale = olex_gui.GetPPI()[0]/96
+
+global dpi_scaling
+dpi_scaling = OV.GetParam('gui.dpi_scaling')
 
 olx.banner_slide = {}
 
@@ -42,6 +47,8 @@ try:
 #       _mkdir(newdir)
 except:
   pass
+
+
 
 
 #self.params.html.highlight_colour.rgb = self.params.html.highlight_colour.rgb
@@ -296,7 +303,7 @@ class GuiSkinChanger(ImageTools):
     #sNumTitle_instance.run_sNumTitle()
     #timage_instance.run_timage()
     width = OV.FindValue('gui_htmlpanelwidth')
-    olx.HtmlPanelWidth(width)
+    #olx.HtmlPanelWidth(width)
     self.setGuiProperties()
     OV.UpdateHtml()
 
@@ -803,6 +810,9 @@ class timage(ImageTools):
     self.imageSource = None
     self.iconSource = None
 
+    self.scale = OV.GetParam('gui.internal_scale')
+
+
     import olex_fs
     self.params = OV.GuiParams()
 
@@ -811,7 +821,8 @@ class timage(ImageTools):
     new_l = open("%s/etc/gui/images/advertise_as_new.txt" %OV.BaseDir(),'r').readlines()
     self.new_l = map(lambda s: s.strip(), new_l)
 
-    self.get_available_width()
+    self.width = IT.skin_width
+    self.max_width = IT.max_width
 
     global timage_blanks
     timage_blanks.setdefault(self.params.skin.name,{})
@@ -832,27 +843,17 @@ class timage(ImageTools):
     self.no_need_to_refresh_image_type = {}
     self.getImageItemsFromTextFile()
 
-    global dpi_scale
-    olx.HtmlPanelWidth(OV.GetParam('gui.htmlpanelwidth'))
+    #global dpi_scale
+    #olx.HtmlPanelWidth(int(OV.GetParam('gui.htmlpanelwidth')*dpi_scale))
+    #print "resize panel!===================="
 
-
-  def get_available_width(self):
-    import gui.skin
-    #self.available_width, self.max_width = gui.tools._get_available_html_width()
-    #c_width = int(olx.html.ClientWidth('self'))
-    #if c_width < 100:
-      #c_width = OV.GetParam('gui.htmlpanelwidth')
-
-    width = OV.GetParam('gui.htmlpanelwidth')
-    self.width = width - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
-    self.max_width = self.width
-    self.available_width = self.width - OV.GetParam('gui.html.table_firstcol_width')
 
   def run_timage(self,force_images=False):
-
+    IT.get_available_width()
     global timage_blanks
     self.params = OV.GuiParams()
-    self.get_available_width()
+    self.width = IT.skin_width
+
     timage_blanks.setdefault(self.params.skin.name,{})
 
     self.force_images = force_images
@@ -907,8 +908,8 @@ class timage(ImageTools):
 
 
     #self.params.html.base_colour.rgb = OV.FindValue('gui_htmlself.params.html.base_colour.rgb')
-    width = int(olx.html.ClientWidth('self'))
-    
+    #width = int(olx.html.ClientWidth('self'))
+
     self.basedir = OV.BaseDir()
     self.filefull = OV.FileFull()
     self.filepath = OV.FilePath()
@@ -969,121 +970,10 @@ class timage(ImageTools):
     self.open_image_source()
     im = self.imageSource
 
-    available_width = self.available_width
-    button_names = self.image_items_d.get("TINY BUTTONS")
-    scale = self.sf / 1.2
-    tiny_width= OV.GetParam('gui.timage.tinybutton.width')
-    self.produce_buttons(button_names, "_tiny", scale, width=tiny_width)
+    available_width = IT.skin_width
 
-    ## SMALL buttons
-#    cut = 90*sf, 178*sf, 138*sf, 193*sf
-#    max_width = cut[2] - cut[0]
-#    crop =  im.crop(cut)
-    button_names = self.image_items_d.get("SMALL BUTTONS")
-    width = OV.GetParam('gui.timage.small_button.width')
-    #width = int(round(width * self.scale,0))
-    self.produce_buttons(button_names, "_small", self.sf, width=width)
-
-    ## TWO buttons in the HTMLpanelWIDTH
-#    cut = 0*sf, 178*sf, 91*sf, 195*sf
-#    max_width = cut[2] - cut[0]
-#    crop =  im.crop(cut)
-    button_names = self.image_items_d.get("TWO BUTTONS PER ROW", button_names)
-    width = int(available_width/2) - 15
-    self.produce_buttons(button_names, "", self.sf, width=width)
-
-    ## THREE buttons in the HTMLpanelWIDTH
-#    cut = 0*sf, 178*sf, 91*sf, 195*sf
-#    max_width = cut[2] - cut[0]
-#    crop =  im.crop(cut)
-    button_names = self.image_items_d.get("THREE BUTTONS PER ROW", button_names)
-    width = int(available_width/3) - 12
-    self.produce_buttons(button_names, "", self.sf, width=width)
-
-    ## FULL ROW buttons in the HTMLpanelWIDTH
-#    cut = 0*sf, 193*sf, 275*sf, 211*sf
-#    max_width = cut[2] - cut[0]
-#    crop =  im.crop(cut)
-    button_names = self.image_items_d.get("FULL ROW", button_names)
-    width = available_width - OV.GetParam('gui.htmlpanelwidth_margin_adjust') + 10
-    self.produce_buttons(button_names,"_full", self.sf, width=width)
-
-    ## G3 BIG BUTTON
-#    cut = 0*sf, 193*sf, 275*sf, 211*sf
-#    max_width = cut[2] - cut[0]
-#    crop =  im.crop(cut)
-#    button_names = self.image_items_d.get("G3 BIG BUTTON", button_names)
-#    width = available_width - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
-#    self.produce_buttons(button_names, self.sfs,"_g3_big",width=width)
-
-    ## G4 BUTTON
-    if olx.IsPluginInstalled('g4') == 'true':
-      button_names = self.image_items_d.get("G4 BUTTON", button_names)
-      width = available_width - OV.GetParam('gui.timage.g4.width_adjust') - 20
-      self.produce_buttons(button_names, "_g4", self.sf, width=width)
-
-    ## HELP INFO ICON
-    height = OV.GetParam('gui.timage.h3.height')
-    if height < 19:
-      height = 19
-    fill = '#ffffff'
-    size = (height * 2 + 1, height * 3)
-    circle_top = 10
-    height = OV.GetParam('gui.timage.h3.height')
-    IM =  Image.new('RGBA', size,(0,0,0,0))
-    draw = ImageDraw.Draw(IM)
-    xy = (0,circle_top, 38, circle_top + 38)
-    draw.ellipse(xy, fill = '#ffffff')
-    states = ['', 'on', 'off', 'hover', 'hoveron']
-    r,g,b,a = IM.split()
-    for state in states:
-      if state == "off":
-#        crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.green.rgb,luminosity=1.3,saturation=0.7))
-        col = self.colourize(IM, (0,0,0,0), self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=0.8))
-      else:
-        col = self.colourize(IM, (0,0,0,0), self.highlight_colour)
-      fIM =  Image.new('RGBA', size, OV.GetParam('gui.html.table_firstcol_colour').rgb)
-#      fIM =  Image.new('RGBA', size, '#dedede')
-      fIM.paste(col, mask=a)
-      font_info = self.registerFontInstance("Serif Bold Italic", 48 * self.scale)
-      draw = ImageDraw.Draw(fIM)
-      top = circle_top - 18
-      draw.text((14,top), 'i', font=font_info, fill='#ffffff')
-      w = int(round(height * 0.66667))
-      _ = 1
-      if self.width < 400:
-        _ = 0.8
-      fIM = self.resize_image(fIM, (int(w*_), int(height*_)))
-      OlexVFS.save_image_to_olex(fIM, "btn-info%s.png" %(state), 2)
-
-
-    #cut = 1*sf, 151*sf, 14*sf, 168*sf
-    #crop =  im.crop(cut)
-    ##crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=1.98))
-    #states = ['', 'on', 'off', 'hover', 'hoveron']
-    #for state in states:
-      #if state == "off":
-##        crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.green.rgb,luminosity=1.3,saturation=0.7))
-        #crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=0.7))
-      #else:
-        #crop_colouriszed = self.colourize(crop, (0,0,0), self.highlight_colour)
-
-      #IM =  Image.new('RGBA', crop.size, OV.GetParam('gui.html.table_firstcol_colour').rgb)
-      #IM.paste(crop_colouriszed, (0,0), crop)
-      #name = "info.png"
-      #info_size_scale = OV.GetParam('gui.timage.info_size_scale')
-      #IM = self.resize_image(IM, (int((cut[2]-cut[0])/info_size_scale), int((cut[3]-cut[1])/info_size_scale)), Image.ANTIALIAS)
-      #draw = ImageDraw.Draw(IM)
-      ##txt = IT.get_unicode_characters('info')
-      ##txt = "i"
-      ##self.write_text_to_draw(draw,
-      ##             txt,
-      ##             top_left=(6, 0),
-      ##             font_name = 'Vera',
-      ##             font_size=14,
-      ##             translate=False,
-      ##             font_colour=self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=0.7))
-      #OlexVFS.save_image_to_olex(IM, "btn-info%s.png" %(state), 2)
+    self.make_buttons()
+    self.make_round_info_buttons()
 
     cut = 16*sf, 156*sf, 26*sf, 166*sf
     crop =  im.crop(cut)
@@ -1181,7 +1071,7 @@ class timage(ImageTools):
     name = "bottom.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
 
-    up_down_enlarge = 0.82
+    up_down_enlarge = 1/self.scale
     cut = 186*sf, 154*sf, 204*sf, 172*sf
     crop =  im.crop(cut)
     crop_colouriszed = self.colourize(crop, (0,0,0), self.params.html.base_colour.rgb)
@@ -1292,6 +1182,75 @@ class timage(ImageTools):
       name = "bar_%s.png" %col
       OlexVFS.save_image_to_olex(IM, name, 2)
 
+  def make_buttons(self):
+    available_width = IT.skin_width_table
+    scale = self.sf / 1.2
+
+    button_names = self.image_items_d.get("TINY BUTTONS")
+    tiny_width= OV.GetParam('gui.timage.tinybutton.width')
+    self.produce_buttons(button_names, "_tiny", scale, width=tiny_width)
+
+    ## SMALL buttons
+    button_names = self.image_items_d.get("SMALL BUTTONS")
+    width = OV.GetParam('gui.timage.small_button.width')
+    self.produce_buttons(button_names, "_small", self.sf, width=width)
+
+    available_width = IT.skin_width_table - 44 - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+
+    ## TWO buttons in the HTMLpanelWIDTH
+    button_names = self.image_items_d.get("TWO BUTTONS PER ROW", button_names)
+    width = int(available_width/2) - 15
+    self.produce_buttons(button_names, "", self.sf, width=width)
+
+    ## THREE buttons in the HTMLpanelWIDTH
+    button_names = self.image_items_d.get("THREE BUTTONS PER ROW", button_names)
+    width = int(available_width/3) - 12
+    self.produce_buttons(button_names, "", self.sf, width=width)
+
+    ## FULL ROW buttons in the HTMLpanelWIDTH
+    button_names = self.image_items_d.get("FULL ROW", button_names)
+    width = available_width
+    self.produce_buttons(button_names,"_full", self.sf, width=width)
+
+    ## G4 BUTTON
+    if olx.IsPluginInstalled('g4') == 'true':
+      button_names = self.image_items_d.get("G4 BUTTON", button_names)
+      width = available_width - OV.GetParam('gui.timage.g4.width_adjust') - 20
+      self.produce_buttons(button_names, "_g4", self.sf, width=width)
+
+
+
+  def make_round_info_buttons(self):
+    # MAKE ROUND INFO BUTTONS
+    height = OV.GetParam('gui.timage.h3.height')
+    fill = '#ffffff'
+    width = height * 2
+    height = int(round(width*1.5))
+    size = (width * self.scale, height * self.scale)
+    circle_top = 12 * self.scale
+    IM =  Image.new('RGBA', size,(0,0,0,0))
+    draw = ImageDraw.Draw(IM)
+    xy = (2 * self.scale, circle_top, 36 * self.scale, circle_top + 36 * self.scale)
+    draw.ellipse(xy, fill = '#ffffff')
+    states = ['', 'on', 'off', 'hover', 'hoveron']
+    r,g,b,a = IM.split()
+
+    font_info = self.registerFontInstance("Serif Bold Italic", 42 * self.scale)
+    top = circle_top - 13 * self.scale
+    adjust = 1 * self.scale
+    if self.width < 400:
+      adjust = 0.8 * self.scale
+    for state in states:
+      if state == "off":
+        col = self.colourize(IM, (0,0,0,0), self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=0.8))
+      else:
+        col = self.colourize(IM, (0,0,0,0), self.highlight_colour)
+      fIM =  Image.new('RGBA', size, OV.GetParam('gui.html.table_firstcol_colour').rgb)
+      fIM.paste(col, mask=a)
+      draw = ImageDraw.Draw(fIM)
+      draw.text((14*self.scale,top), 'i', font=font_info, fill='#ffffff')
+      fIM = self.resize_image(fIM, (int(round((width*adjust/(self.scale*2.5)))), int(round(height*adjust/(self.scale*2.7)))))
+      OlexVFS.save_image_to_olex(fIM, "btn-info%s.png" %(state), 2)
 
   def produce_buttons(self, button_names, btn_type, scale=None, max_width=None, width=None, crop=None, cut=None, ):
     self.params = OV.GuiParams()
@@ -1305,19 +1264,20 @@ class timage(ImageTools):
     auto_text = ""
     button_type = "button"
     for txt in button_names:
+      w = IT.skin_width_table
       if not width:
         if "three" in btn_type:
-          width = int(self.available_width/3) - 12
+          width = int(w/3) - 12
         elif "two" in btn_type:
-          width = int(self.available_width/2) - 12
-        elif "full" in btn_type:
+          width = int(w/2) - 12
+        if "full" in btn_type:
           auto_name = txt
           txt = txt.replace("button_full-","")
           auto_text = txt.replace("full-","")
-          width = int(self.available_width) - 12
+          width = w - 12
         elif "one" in btn_type:
           auto_name = txt
-          width = int(self.available_width) - 12
+          width = w - 12
         elif "element" in txt:
           element = txt.split("_")[0].lstrip("btn-element")
           self.make_element_buttons(element)
@@ -1327,7 +1287,7 @@ class timage(ImageTools):
           width = OV.GetParam('gui.timage.small_button.width')
         elif "tiny" in btn_type:
           button_type = 'tinybutton'
-          width = OV.GetParam('gui.timage.tinybutton.width')
+#          width = OV.GetParam('gui.timage.tinybutton.width')
         elif "h2" in btn_type:
           button_type = 'h1'
           width = OV.GetParam('gui.timage.h2.width')
@@ -1356,7 +1316,7 @@ class timage(ImageTools):
 
         if not auto_name:
           auto_name = txt.split("@")[0]
-      if width is None: width = max_width
+      if width is None: width = IT.skin_width
 
       if txt in self.new_l:
         self.advertise_new = True
@@ -2038,6 +1998,9 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         break
       if self.timer:
         t1 = time.time()
+
+      _ = IT.skin_width*0.99
+      width = int(_ / len(tabItems))
       for item in tabItems:
         states = ["on", "off", "highlight", "", "hover", "hoveron"]
         for state in states:
@@ -2046,7 +2009,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           use_new = True
           if use_new:
             ## need different width for tab items
-            width = (int(self.width / len(tabItems)) - int(round((1 * self.scale))))
             image = self.make_timage(item_type='tab', item=item.lstrip('g3-'), state=state, width=width)
           else:
             image = self.tab_items(item, state)
@@ -2109,7 +2071,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       n = len(buttons)
       states = ['on', 'off', 'inactive', 'highlight', 'hover', 'hoveron']
       width = int(round((self.width - 2*n)/n))
-
       cut = width - OV.GetParam('gui.timage.cbtn.vline')
       if cut > width:
         cut = width - 1
@@ -2123,7 +2084,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           for image in images:
             prefixes = ['btn', 'cbtn']
             name = '%s-%s%s.png' %(prefixes[i], item.lower(), state)
-            OlexVFS.save_image_to_olex(image,name, 2)
+            try:
+              OlexVFS.save_image_to_olex(image,name, 2)
+            except:
+              print "Oh-OH!!!"
             #image.save("C:/tmp/%s" %name)
             i += 1
 
@@ -2493,6 +2457,10 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if not width:
       width = self.width
 
+    if width < 2:
+      print "Width of this object is too small!"
+      return
+
     global image_blanks
 
     type_key = "%s_%s_%s" %(item_type, width, self.params.skin.name)
@@ -2502,9 +2470,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     else:
       pams = getattr(self.params.timage, '%s' %item_type)
 
-    self.scale = pams.scale
-    if not self.scale:
-      self.scale = 1
+    #self.scale = pams.scale
+    #if not self.scale:
+      #self.scale = 1
+
+    self.scale = OV.GetParam('gui.internal_scale')
 
     self.size_factor = OV.GetParam('gui.skin.size_factor') #An additional scale factor
 
@@ -2630,7 +2600,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       buttonmark = OV.GetParam('gui.timage.small_button.buttonmark')
 
     elif item_type == 'button':
-      #buttonmark = True
       if state == "on":
         border_colour = highlight_colour
         grad_colour = highlight_colour
@@ -2685,7 +2654,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       border = True
       border_weight = 1
       border_colour = IT.adjust_colour(grad_colour, luminosity = 0.8)
-      arrow_scale = 0.7
+      arrow_scale = 0.7 * self.scale
+      arrow_scale = self.scale
       bg_colour = '#229922'
 
     self.font_colour = font_colour
@@ -2707,7 +2677,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           image = self.print_text(image.copy(), item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
           if self.debug:
             print "FROM CACHE: %s (%s)" %(item, state)
-          return self.finally_make_mage(image=image, width=width, height=height)
+          return self.finally_make_image(image=image, width=width, height=height)
 
     image = Image.new('RGBA', size, bg_colour)
     draw = ImageDraw.Draw(image)
@@ -2777,15 +2747,20 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if self.debug:
       print "FROM SCRATCH: %s" %item
 
-    return self.finally_make_mage(image=image, width=width, height=height)
+    return self.finally_make_image(image=image, width=width, height=height)
 
-  def finally_make_mage(self, image, width, height):
+  def finally_make_image(self, image, width, height):
     #if self.scale != 1:
       #image = image.resize((int(width), int(height)), Image.ANTIALIAS)
     #return image
-    global dpi_scale
+
+
     if self.scale != 1 or dpi_scale != 1:
-      image = image.resize((int(width*dpi_scale), int(height*dpi_scale)), Image.ANTIALIAS)
+      if dpi_scaling:
+        image = image.resize((int(width*IT.dpi_scale), int(height*IT.dpi_scale)), Image.ANTIALIAS)
+      else:
+        image = image.resize((int(width), int(height)), Image.ANTIALIAS)
+
     return image
 
 
@@ -2978,7 +2953,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           fill = IT.adjust_colour(fill,luminosity = 1.6)
         else:
           fill = IT.adjust_colour(fill,luminosity = 0.8)
-      image = self.create_arrows(image, draw, height, direction=direction, colour=fill, type='dots', align = align, width=width, scale = scale)
+      image = self.create_arrows(image, draw, height, direction=direction, colour=fill, type='dots', align = align, width=width, scale=scale)
 
     if 'char' in arrows:
       draw = ImageDraw.Draw(image)
@@ -3214,7 +3189,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     top = self.params.tab.top
     left = self.params.tab.left
 
-    width = self.width/len(self.tabItems)-2
+    width = self.width/len(self.tabItems)-1
     if language == "Chinese":
       height = height + 2
       top += 2

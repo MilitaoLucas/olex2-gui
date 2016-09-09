@@ -6,6 +6,7 @@ import olx
 import olex
 import olex_fs
 import os
+from ImageTools import IT
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
@@ -17,7 +18,6 @@ import time
 timing = False #bool(OV.GetParam('gui.timing'))
 
 def adjust_skin_colours():
-  from PilTools import IT
   base_colour = OV.GetParam('gui.html.base_colour')
   item = ['tab', 'timage', 'snumtitle']
   for tem in item:
@@ -29,7 +29,6 @@ def adjust_skin_colours():
       IT.adjust_colour(base_colour.rgb, luminosity = OV.GetParam('gui.snumtitle.filefullinfo_colour_L')))
 
 def adjust_skin_luminosity():
-  from PilTools import IT
   base_colour = OV.GetParam('gui.base_colour')
 
   scope_l= ['gui',
@@ -64,7 +63,6 @@ def adjust_skin_luminosity():
         #print "Something has gone wrong with SKIN adjust_skin_luminosity: %s" %ex
 
 def SetGrad():
-  from PilTools import IT
   l = ['top_right', 'top_left', 'bottom_right', 'bottom_left']
   v = []
   for i in xrange(4):
@@ -86,7 +84,7 @@ def SetMaterials():
   olex.m("gl.lm.ClearColor(%s)" %OV.GetParam('gui.skin.clearcolor'))
   olex.m("SetFont Default %s" %OV.GetParam('gui.console_font'))
   olex.m("SetFont Labels %s" %OV.GetParam('gui.labels_font'))
-  olx.HtmlPanelWidth(OV.GetParam('gui.htmlpanelwidth'))
+  #olx.HtmlPanelWidth(OV.GetParam('gui.htmlpanelwidth'))
 
   olex.m("lines %s" %OV.GetParam('gui.lines_of_cmd_text'))
 
@@ -226,34 +224,45 @@ class Skin():
     OV.registerFunction(self.change_skin)
     #self.change()
 
-  def change_skin(self, skin_name, internal_change=False):
+  def change_skin(self, info, internal_change=False):
     new_width = None
-    OV.SetParam('gui.skin.name', skin_name)
+    if not info:
+      info = olx.html.ClientWidth('self')
+
     if not internal_change:
       try:
-        new_width = int(skin_name)
+        _ = float(info)
+        if _ > 1:
+          new_width = int(info)
+        else:
+          new_width = info
+
         if new_width < 400:
           OV.SetParam('gui.skin.extension', 'small')
+        if new_width > 600:
+          OV.SetVar('gui_html_font_size',html_font_size +2)
+
       except:
-        toks = skin_name.split('_')
+        toks = info.split('_')
         if len(toks) == 1: toks.append('')
         OV.SetParam('gui.skin.name', toks[0])
         OV.SetParam('gui.skin.extension', toks[1])
+        deal_with_gui_phil('load')
 
-    olx.fs.Clear(3)
+    olx.fs.Clear()
     OlexVFS.write_to_olex('logo1_txt.htm'," ", 2)
 
     if timing:
       t1 = time.time()
       t2 = 0
 
-    deal_with_gui_phil('load')
     if not internal_change:
       w = new_width
       if not w:
         w = OV.GetParam('gui.htmlpanelwidth', None)
       if w:
-        olx.HtmlPanelWidth(w)
+        IT.set_htmlpanel_width(new_width)
+#        olx.HtmlPanelWidth(w)
 
     try:
       adjust_skin_luminosity()
@@ -265,18 +274,18 @@ class Skin():
       print "After 'adjust_skin_luminosity': %.2f s (%.5f s)" % ((t - t1), (t - t2))
       t2 = t
 
-    client_width = int(olx.html.ClientWidth('self'))
-    from PilTools import IT
-    IT.resize_skin_logo(client_width)
+    self.TI.run_timage(force_images=False)
+    im = self.TI.make_timage('snumtitle', OV.FileName(), 'on', titleCase=False)
+    OlexVFS.save_image_to_olex(im, "sNumTitle.png", 1)
+    #import initpy
+    #initpy.set_plugins_paths()
 
     if timing:
       t = time.time()
       print "After 'resize_skin_logo': %.2f s (%.5f s)" % ((t - t1), (t - t2))
       t2 = t
 
-    self.TI.run_timage(force_images=True)
-    im = self.TI.make_timage('snumtitle', OV.FileName(), 'on', titleCase=False)
-    OlexVFS.save_image_to_olex(im, "sNumTitle.png", 1)
+
 
     if timing:
       t = time.time()
@@ -310,6 +319,7 @@ class Skin():
 
     export_parameters()
     olex.m("spy.make_HOS()")
+#    olx.HtmlPanelWidth(int(olx.html.ClientWidth('self')) + 22)#HP Beware Dragons
     olx.FlushFS()
 
 
