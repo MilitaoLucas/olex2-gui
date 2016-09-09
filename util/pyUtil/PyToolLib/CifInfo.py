@@ -272,7 +272,7 @@ class CifTools(ArgumentParser):
       names = publ_author_names.split(';')
       if len(names):
         cif_loop = model.loop(
-          header=('_publ_author_name','_publ_author_email','_publ_author_address'))
+          header=('_publ_author_name', '_publ_author_email', '_publ_author_address'))
         for name in names:
           if name != '?':
             id = userDictionaries.people.findPersonId(name)
@@ -298,6 +298,8 @@ class CifTools(ArgumentParser):
         = userDictionaries.people.getPersonInfo(id,'phone')
       self.cif_block['_publ_contact_author_address'] \
         = userDictionaries.people.getPersonInfo(id,'address')
+      self.cif_block['_publ_contact_author_id_orcid'] \
+        = userDictionaries.people.getPersonInfo(id,'orchid_id')
 
 class SaveCifInfo(CifTools):
   def __init__(self):
