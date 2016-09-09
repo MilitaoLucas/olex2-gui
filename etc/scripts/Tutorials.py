@@ -9,8 +9,7 @@ import time
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
-from ImageTools import ImageTools
-IT = ImageTools()
+from ImageTools import IT
 
 import OlexVFS
 

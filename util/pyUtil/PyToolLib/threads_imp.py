@@ -100,8 +100,7 @@ def get_news_image_from_server(name=""):
 olex.registerFunction(get_news_image_from_server)
 
 def resizeNewsImage():
-  from ImageTools import ImageTools
-  IT = ImageTools()
+  from ImageTools import IT
   IT.resize_news_image(vfs=True)
 olex.registerFunction(resizeNewsImage, False, 'internal')
 
