@@ -14,6 +14,7 @@ class PluginTools(object):
     if olx.HasGUI() == 'true':
       from gui.tools import deal_with_gui_phil
       deal_with_gui_phil('load')
+      olx.InstalledPlugins.add(self)
 
   def get_plugin_date(self):
     return time.ctime(os.path.getmtime(self.p_path))
@@ -67,8 +68,8 @@ class PluginTools(object):
     if self.p_htm:
       add_tool_to_index(scope=self.p_name, link=self.p_htm, path=self.p_path, location=self.params.gui.location, before=self.params.gui.before, filetype='')
 
-  def edit_customisation_folder(self):
-    self.get_customisation_path()
+  def edit_customisation_folder(self,custom_name=None):
+    self.get_customisation_path(custom_name=None)
     p = self.customisation_path
     if not p:
       p = self.p_path + "_custom"
@@ -84,13 +85,14 @@ class PluginTools(object):
         return
     olx.Shell(p)
 
-  def get_customisation_path(self):
-    p = self.p_path + "_custom"
-    if os.path.exists(p):
-      self.customisation_path = p
-    else:
-      self.customisation_path = None
-
+  def get_customisation_path(self,custom_name=None):
+    if custom_name:
+      p = self.p_path + custom_name
+      if os.path.exists(p):
+        self.customisation_path = p
+      else:
+        self.customisation_path = None
+    else: self.customisation_path = None
 
 def make_new_plugin(name,overwrite=False):
   plugin_base = "%s/util/pyUtil/pluginLib/" %OV.BaseDir()
