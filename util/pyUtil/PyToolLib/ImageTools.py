@@ -79,6 +79,8 @@ class ImageTools(FontInstances):
       self.get_available_width()
       self.css = OV.GuiParams().css
 
+    self.im_cache = {}
+
   def get_available_width(self):
     global dpi_scale
 
@@ -432,17 +434,26 @@ class ImageTools(FontInstances):
       print("---- self.dpi_scale = %s" %IT.dpi_scale)
       print("======================================================")
 
-  def resize_image(self, image, size):
-    s = int(olx.html.ClientWidth('self'))/self.skin_width
-    print s
-    if dpi_scaling:
-      width = int(size[0] * s)
-      height = int(size[1] * s)
+  def resize_image(self, image, size, name):
+    cache_name = "%s_%s" %(name, size)
+    _ = self.im_cache.get(cache_name,None)
+    if _:
+      if debug:
+        print "Return %s from Cache!" %name
+      return _
     else:
-      width = int(size[0])
-      height = int(size[1])
-    image = image.resize((width,height), Image.ANTIALIAS)
-    return image
+      s = self.dpi_scale
+      if debug:
+        print "IT: Resize %s using scale %s" %(name, s)
+      if dpi_scaling:
+        width = int(size[0] * s)
+        height = int(size[1] * s)
+      else:
+        width = int(size[0])
+        height = int(size[1])
+      image = image.resize((width,height), Image.ANTIALIAS)
+      self.im_cache[cache_name] = image
+      return image
 
   def resize_skin_logo(self, width):
     logopath = "%s/%s" % (self.basedir, OV.GetParam('gui.skin.logo_name'))
@@ -451,7 +462,7 @@ class ImageTools(FontInstances):
       im = Image.open(logopath)
       factor = im.size[0] / width
       height = int(im.size[1] / factor)
-      im = self.resize_image(im, (width, height))
+      im = self.resize_image(im, (width, height), name=name)
       OlexVFS.save_image_to_olex(im, name, 2)
       txt = '<zimg border="0" src="skin_logo.png">'
     else:
@@ -489,7 +500,7 @@ class ImageTools(FontInstances):
       if width < 10: return
       factor = im.size[0] / width
       height = int(im.size[1] / factor)
-      im = self.resize_image(im, (width, height))
+      im = self.resize_image(im, (width, height), name=name)
       OlexVFS.save_image_to_olex(im, name, 2)
     else:
       pass
@@ -1287,7 +1298,7 @@ class ImageTools(FontInstances):
           mark_colouriszed = self.colourize(mark, (0, 0, 0), self.params.html.base_colour.rgb)
           IM = Image.new('RGBA', mark.size)
           IM.paste(mark_colouriszed, (0, 0), mark)
-          IM = self.resize_image(IM, image.size[1], image.size[1])
+          IM = self.resize_image(IM, (image.size[1], image.size[1]), name="mark_colourised")
           image.paste(IM, (l, t))
         return image
       else:
@@ -1346,7 +1357,7 @@ class ImageTools(FontInstances):
 #      box = (width - height, 0)
 #      image.paste(IM, box)
 
-  def resize_news_image(self, width_adjust=10, width=None, vfs=False):
+  def resize_news_image(self, width_adjust=0, width=None, vfs=False):
     tag = OV.GetTag().split('-')[0]
     name = 'news/news-%s' % tag
     if vfs: name += '_tmp@vfs'
