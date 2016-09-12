@@ -202,6 +202,7 @@ def set_olex_paths():
 def set_plugins_paths():
   plugins = olexex.InstalledPlugins()
   sys.path.append("%s/util/pyUtil/PluginLib" %(basedir))
+  olx.InstalledPlugins = set()
   from PluginTools import PluginTools
   import AC3
   for plugin in plugins:

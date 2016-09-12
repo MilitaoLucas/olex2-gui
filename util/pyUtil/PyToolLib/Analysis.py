@@ -2864,6 +2864,15 @@ class HealthOfStructure():
     self.scope = "hkl"
     self.supplied_cif = False
 
+    self.im_cache = {}
+    _ = ['Completeness', 'MeanIOverSigma','Rint']
+    _ += ['_refine_ls_shift/su_max', '_refine_diff_density_max',
+         '_refine_diff_density_min', '_refine_ls_goodness_of_fit_ref',
+         '_refine_ls_abs_structure_Flack']
+
+    for item in _:
+      self.im_cache.setdefault(item,{})
+
   def get_HOS_d(self):
     try:
       if self.initialise_HOS():
@@ -2874,7 +2883,7 @@ class HealthOfStructure():
 
   def make_HOS(self, force=False, supplied_cif=False):
     force = bool(force)
-    self.width = int(IT.skin_width*0.95)
+    self.width = int(IT.skin_width*0.98)
     self.supplied_cif = supplied_cif
     self.scopes = OV.GetParam('user.diagnostics.scopes')
     self.scope = OV.GetParam('snum.current_process_diagnostics')
@@ -3218,7 +3227,27 @@ class HealthOfStructure():
     value_display_extra = ""
     completeness_box_width = 150
     targetWidth = round(width/n)
-    targetHeight = round(OV.GetParam('gui.timage.h1.height'))
+    targetHeight = round(OV.GetParam('gui.timage.h3.height'))
+
+    href = OV.GetParam('user.diagnostics.%s.%s.href' %(self.scope,item))
+    target = OV.GetParam('user.diagnostics.%s.%s.target' %(self.scope,item))
+    txt = ""
+    ref_open = ''
+    ref_close = ''
+    if href:
+      if href == "atom":
+        href = "sel %s" %OV.GetParam('snum.refinement.%s_atom' %item)
+      if item != 'max_hole':
+        ref_open = '<a target="%s" href="%s">' %(target, href)
+        ref_close = "</a>"
+    txt += '''
+<td align='center'>%s<zimg src="%s"/>%s</td>''' %(ref_open, item, ref_close)
+
+
+    cache_entry = "%s_%s_%s" %(item, value_raw, targetWidth)
+    if self.im_cache.get(cache_entry,None):
+      return txt
+
 
     boxWidth = int(targetWidth * scale)
     boxHeight = int(targetHeight * scale)
@@ -3342,24 +3371,12 @@ class HealthOfStructure():
 
     #if self.image_position != "last":
       #im = IT.add_whitespace(im, 'right', 4, bgcolour)
-    im = IT.add_whitespace(im, side='bottom', weight=3*scale, colour=bgcolour)
+    im = IT.add_whitespace(im, side='bottom', weight=2*scale, colour=bgcolour)
 
-    im = IT.resize_image(im, ((targetWidth),(targetHeight)))
+    self.im_cache[cache_entry] = im
+    im = IT.resize_image(im, ((targetWidth),(targetHeight+2)), name=item)
 
     OlexVFS.save_image_to_olex(im, item, 0)
-    href = OV.GetParam('user.diagnostics.%s.%s.href' %(self.scope,item))
-    target = OV.GetParam('user.diagnostics.%s.%s.target' %(self.scope,item))
-    txt = ""
-    ref_open = ''
-    ref_close = ''
-    if href:
-      if href == "atom":
-        href = "sel %s" %OV.GetParam('snum.refinement.%s_atom' %item)
-      if item != 'max_hole':
-        ref_open = '<a target="%s" href="%s">' %(target, href)
-        ref_close = "</a>"
-    txt += '''
-<td align='center'>%s<zimg src="%s"/>%s</td>''' %(ref_open, item, ref_close)
     return txt
 
   def get_bg_colour(self, item, val):

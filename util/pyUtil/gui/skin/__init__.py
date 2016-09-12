@@ -318,8 +318,39 @@ class Skin():
       t2 = t
 
     export_parameters()
+    
+    _ = int(olx.html.ClientWidth('self'))
+    if _ > 950:
+      OV.SetVar('HtmlGuiFontSize',OV.GetParam('gui.html.font_size')+3)
+      OV.SetVar('HtmlFontSizeControls', OV.GetParam('gui.html.font_size_controls')+3)
+      OV.SetVar('HtmlFontSizeLarge', OV.GetParam('gui.html.font_size_large')+3)
+      OV.SetVar('HtmlFontSizeMedium', OV.GetParam('gui.html.font_size_medium')+3)
+
+    elif _ > 750:
+      OV.SetVar('HtmlGuiFontSize',OV.GetParam('gui.html.font_size')+2)
+      OV.SetVar('HtmlFontSizeControls', OV.GetParam('gui.html.font_size_controls')+2)
+      OV.SetVar('HtmlFontSizeLarge', OV.GetParam('gui.html.font_size_large')+2)
+      OV.SetVar('HtmlFontSizeMedium', OV.GetParam('gui.html.font_size_medium')+2)
+
+    elif _ > 550:
+      OV.SetVar('HtmlGuiFontSize',OV.GetParam('gui.html.font_size')+1)
+      OV.SetVar('HtmlFontSizeControls', OV.GetParam('gui.html.font_size_controls')+1)
+      OV.SetVar('HtmlFontSizeLarge', OV.GetParam('gui.html.font_size_large')+1)
+      OV.SetVar('HtmlFontSizeMedium', OV.GetParam('gui.html.font_size_medium')+1)
+    
+
+
+      
+   
     olex.m("spy.make_HOS()")
-#    olx.HtmlPanelWidth(int(olx.html.ClientWidth('self')) + 22)#HP Beware Dragons
+
+    try:
+      for plugin in olx.InstalledPlugins:
+        plugin.setup_gui()
+    except:
+      pass
+
+
     olx.FlushFS()
 
 

@@ -975,13 +975,18 @@ class timage(ImageTools):
     self.make_buttons()
     self.make_round_info_buttons()
 
+
+    cut_size = (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf))
+
+
     cut = 16*sf, 156*sf, 26*sf, 166*sf
     crop =  im.crop(cut)
     crop_colouriszed = self.colourize(crop, (0,0,0), self.adjust_colour(self.params.html.table_firstcol_colour.rgb,luminosity=1.7))
     IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
     IM.paste(crop_colouriszed, (0,0), crop)
-    IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
+
     name = "info_tiny.png"
+    IM = self.resize_image(IM, size=_, name=name)
     draw = ImageDraw.Draw(IM)
     txt = IT.get_unicode_characters('info')
     self.write_text_to_draw(draw,
@@ -999,7 +1004,7 @@ class timage(ImageTools):
     IM =  Image.new('RGBA', crop.size, self.params.html.table_firstcol_colour.rgb)
     IM.paste(crop_colouriszed, (0,0), crop)
     draw = ImageDraw.Draw(IM)
-    IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
+    IM = self.resize_image(IM, size=cut_size, name=name)
     self.write_text_to_draw(draw,
                  "iX",
                  top_left=(2, 1),
@@ -1014,7 +1019,8 @@ class timage(ImageTools):
     crop_colouriszed = self.colourize(crop, (0,0,0), self.params.html.highlight_colour.rgb)
     IM =  Image.new('RGBA', crop.size, self.params.html.table_firstcol_colour.rgb)
     IM.paste(crop_colouriszed, (0,0), crop)
-    IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
+    name = "info_tiny_new.png"
+    IM = self.resize_image(IM, size=cut_size, name=name)
     draw = ImageDraw.Draw(IM)
     self.write_text_to_draw(draw,
                  "iY",
@@ -1022,7 +1028,6 @@ class timage(ImageTools):
                  font_name = 'Vera Bold Italic',
                  font_size=11,
                  font_colour="#ffffff")
-    name = "info_tiny_new.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
 
     ## Create big circles with Writing In
@@ -1042,24 +1047,24 @@ class timage(ImageTools):
     crop =  im.crop(cut)
     IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
     IM.paste(crop, (0,0), crop)
-    IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
     name = "settings_small.png"
+    IM = self.resize_image(IM, size=cut_size, name=name)
     OlexVFS.save_image_to_olex(IM, name, 2)
 
     cut = 80*sf, 154*sf, 100*sf, 171*sf
     crop =  im.crop(cut)
     IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
     IM.paste(crop, (0,0), crop)
-    IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
     name = "delete.png"
+    IM = self.resize_image(IM, size=cut_size, name=name)
     OlexVFS.save_image_to_olex(IM, name, 2)
 
     cut = 101*sf, 154*sf, 117*sf, 165*sf
     crop =  im.crop(cut)
     IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
     IM.paste(crop, (0,0), crop)
-    IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
     name = "delete_small.png"
+    IM = self.resize_image(IM, size=cut_size, name=name)
     OlexVFS.save_image_to_olex(IM, name, 2)
 
     cut = 136*sf, 154*sf, 185*sf, 170*sf
@@ -1067,8 +1072,8 @@ class timage(ImageTools):
     crop_colouriszed = self.colourize(crop, (0,0,0), self.params.html.base_colour.rgb)
     IM =  Image.new('RGBA', crop.size)
     IM.paste(crop_colouriszed, (0,0), crop)
-    IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
     name = "bottom.png"
+    IM = self.resize_image(IM, size=cut_size, name=name)
     OlexVFS.save_image_to_olex(IM, name, 2)
 
     up_down_enlarge = 1/self.scale
@@ -1122,8 +1127,8 @@ class timage(ImageTools):
     crop =  im.crop(cut)
     IM =  Image.new('RGBA', crop.size)
     IM.paste(crop, (0,0), crop)
-    IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
     name = "warning.png"
+    IM = self.resize_image(IM, size=cut_size, name=name)
     OlexVFS.save_image_to_olex(IM, name, 2)
 
     cut = 140*sf, 98*sf, 400*sf, 140*sf
@@ -1143,8 +1148,8 @@ class timage(ImageTools):
                  max_width=max_width
                  )
     sfm = sf*0.95
-    IM = self.resize_image(IM, (int((cut[2]-cut[0])/sfm), int((cut[3]-cut[1])/sfm)))
     name = "pop_background.png"
+    IM = self.resize_image(IM, size=cut_size, name=name)
     OlexVFS.save_image_to_olex(IM, name, 2)
 
     cut = 140*sf, 98*sf, 400*sf, 140*sf
@@ -1164,8 +1169,8 @@ class timage(ImageTools):
                  max_width=max_width
                  )
     sfm = sf*0.95
-    IM = self.resize_image(IM, (int((cut[2]-cut[0])/sfm), int((cut[3]-cut[1])/sfm)))
     name = "pop_background.png"
+    IM = self.resize_image(IM, size=cut_size, name=name)
     OlexVFS.save_image_to_olex(IM, name, 2)
 
     cut = 90*sf, 95*sf, 140*sf, 140*sf
@@ -1173,8 +1178,8 @@ class timage(ImageTools):
 #    IM =  Image.new('RGBA', crop.size, self.params.html.table_bg_colour.rgb)
     IM =  Image.new('RGBA', crop.size)
     IM.paste(crop, (0,0), crop)
-    IM = self.resize_image(IM, (int((cut[2]-cut[0])/sf), int((cut[3]-cut[1])/sf)))
     name = "warning_big.png"
+    IM = self.resize_image(IM, size=cut_size, name=name)
     OlexVFS.save_image_to_olex(IM, name, 2)
 
     for col in ['green', 'orange', 'red', 'purple']:
@@ -1249,8 +1254,10 @@ class timage(ImageTools):
       fIM.paste(col, mask=a)
       draw = ImageDraw.Draw(fIM)
       draw.text((14*self.scale,top), 'i', font=font_info, fill='#ffffff')
-      fIM = self.resize_image(fIM, (int(round((width*adjust/(self.scale*2.5)))), int(round(height*adjust/(self.scale*2.7)))))
-      OlexVFS.save_image_to_olex(fIM, "btn-info%s.png" %(state), 2)
+      _ = int(round((width*adjust/(self.scale*2.5)))), int(round(height*adjust/(self.scale*2.7)))
+      name = "btn-info%s.png" %(state)
+      fIM = self.resize_image(fIM, size=_, name=name)
+      OlexVFS.save_image_to_olex(fIM, name, 2)
 
   def produce_buttons(self, button_names, btn_type, scale=None, max_width=None, width=None, crop=None, cut=None, ):
     self.params = OV.GuiParams()
@@ -1741,7 +1748,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     factor = 4
 
     #create a new image
-    width = self.width * factor
+    width = IT.skin_width * factor
     size = (width, 55 * factor)
     IM =  Image.new('RGBA', size, OV.GetParam('gui.html.bg_colour').rgb)
 
@@ -1798,7 +1805,8 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
 
     #finally resize and save the final image
-    IM = self.resize_image(IM, (self.max_width, 55))
+    #IM = self.resize_image(IM, (int(olx.html.ClientWidth('self')), 55))
+    IM = IT.resize_image(IM, (IT.skin_width,55), name=name)
     name = r"logo.png"
     OlexVFS.save_image_to_olex(IM, name, 2)
 
@@ -2677,7 +2685,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           image = self.print_text(image.copy(), item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
           if self.debug:
             print "FROM CACHE: %s (%s)" %(item, state)
-          return self.finally_make_image(image=image, width=width, height=height)
+          return self.finally_make_image(image=image, width=width, height=height, name = "%s+%s" %(item,state))
 
     image = Image.new('RGBA', size, bg_colour)
     draw = ImageDraw.Draw(image)
@@ -2747,19 +2755,22 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if self.debug:
       print "FROM SCRATCH: %s" %item
 
-    return self.finally_make_image(image=image, width=width, height=height)
+    return self.finally_make_image(image=image, width=width, height=height, name = "CACHE %s+%s" %(item,state))
 
-  def finally_make_image(self, image, width, height):
+  def finally_make_image(self, image, width, height, name):
+    return IT.resize_image(image=image, size=(width, height), name=name)
+
+
     #if self.scale != 1:
       #image = image.resize((int(width), int(height)), Image.ANTIALIAS)
     #return image
 
 
-    if self.scale != 1 or dpi_scale != 1:
-      if dpi_scaling:
-        image = image.resize((int(width*IT.dpi_scale), int(height*IT.dpi_scale)), Image.ANTIALIAS)
-      else:
-        image = image.resize((int(width), int(height)), Image.ANTIALIAS)
+    #if self.scale != 1 or dpi_scale != 1:
+      #if dpi_scaling:
+        #image = image.resize((int(width*IT.dpi_scale), int(height*IT.dpi_scale)), Image.ANTIALIAS)
+      #else:
+        #image = image.resize((int(width), int(height)), Image.ANTIALIAS)
 
     return image
 
