@@ -76,9 +76,9 @@ class ImageTools(FontInstances):
       self.available_width = 200
       self.available_width_full = 200
     else:
-      self.get_available_width()
+#      self.get_available_width()
       self.css = OV.GuiParams().css
-
+    self.dpi_scale=None
     self.im_cache = {}
 
   def get_available_width(self):
@@ -434,26 +434,32 @@ class ImageTools(FontInstances):
       print("---- self.dpi_scale = %s" %IT.dpi_scale)
       print("======================================================")
 
-  def resize_image(self, image, size, name):
-    cache_name = "%s_%s" %(name, size)
-    _ = self.im_cache.get(cache_name,None)
-    if _:
-      if debug:
-        print "Return %s from Cache!" %name
-      return _
+  def resize_image(self, image, size, name=None):
+    if not self.dpi_scale:
+      self.get_available_width()
+    s = self.dpi_scale
+    if dpi_scaling:
+      width = int(size[0] * s)
+      height = int(size[1] * s)
     else:
-      s = self.dpi_scale
-      if debug:
-        print "IT: Resize %s using scale %s" %(name, s)
-      if dpi_scaling:
-        width = int(size[0] * s)
-        height = int(size[1] * s)
-      else:
-        width = int(size[0])
-        height = int(size[1])
-      image = image.resize((width,height), Image.ANTIALIAS)
+      width = int(size[0])
+      height = int(size[1])
+
+    if name:
+      cache_name = "%s_%s" %(name, width)
+      _ = self.im_cache.get(cache_name,None)
+      if _:
+        if repr(width) in cache_name:
+          if debug:
+            print "--- Return %s from Cache!" %name
+          return _
+
+    image = image.resize((width,height), Image.ANTIALIAS)
+    if debug:
+      print "+++ Resize %s (%s)!" %(name, s)
+    if name:
       self.im_cache[cache_name] = image
-      return image
+    return image
 
   def resize_skin_logo(self, width):
     logopath = "%s/%s" % (self.basedir, OV.GetParam('gui.skin.logo_name'))
@@ -1711,7 +1717,7 @@ class ImageTools(FontInstances):
     return map
 
 IT = ImageTools()
-if olx.HasGUI == 'true':
+if olx.HasGUI() == 'true':
   IT.get_available_width()
   OV.registerMacro(IT.resize_to_panelwidth, 'i-Image&;c-Colourize')
   OV.registerFunction(IT.make_pie_graph, False, 'it')

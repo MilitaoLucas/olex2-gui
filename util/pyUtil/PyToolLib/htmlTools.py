@@ -1275,6 +1275,19 @@ def _check_modes_and_states(name):
 
   return False
 
+def CheckForImage(name):
+  from PilTools import TI
+  if olx.fs.Exists(name) != "true":
+    if "logo" in name:
+      TI.create_logo()
+    elif "sNumTitle" in name:
+      sNum = OV.FileName()
+      image = TI.make_timage('snumtitle', sNum, 'on', titleCase=False)
+      name = r"sNumTitle.png"
+      OlexVFS.save_image_to_olex(image, name, 1)
+      OV.CopyVFSFile(name, 'SNUMTITLE',2)
+OV.registerFunction(CheckForImage)
+
 def MakeHoverButton(name, cmds, onoff="off", btn_bg='table_firstcol_colour'):
   from PilTools import TI
   #global time_add
