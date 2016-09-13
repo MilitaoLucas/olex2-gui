@@ -169,18 +169,42 @@ def deal_with_gui_phil(action):
 
 
 def export_parameters(load_phil=True):
-  #try:
-    #if load_phil.lower() == "false":
-      #load_phil = False
-  #except:
-    #load_phil = False
-    #pass
+
+
   if timing:
     t = time.time()
   if check_for_first_run():
     return
   if load_phil:
     deal_with_gui_phil(action='load')
+
+
+  _ = int(olx.html.ClientWidth('self'))
+  if _ > 950:
+    OV.SetParam('gui.html.font_size',OV.GetParam('gui.html.font_size')+3)
+    OV.SetParam('gui.html.font_size_controls', OV.GetParam('gui.html.font_size_controls')+3)
+    OV.SetParam('gui.html.font_size_large', OV.GetParam('gui.html.font_size_large')+3)
+    OV.SetParam('gui.html.font_size_medium', OV.GetParam('gui.html.font_size_medium')+3)
+
+  elif _ > 750:
+    OV.SetParam('gui.html.font_size',OV.GetParam('gui.html.font_size')+2)
+    OV.SetParam('gui.html.font_size_controls', OV.GetParam('gui.html.font_size_controls')+2)
+    OV.SetParam('gui.html.font_size_large', OV.GetParam('gui.html.font_size_large')+2)
+    OV.SetParam('gui.html.font_size_medium', OV.GetParam('gui.html.font_size_medium')+2)
+
+  elif _ > 550:
+    OV.SetParam('gui.html.font_size',OV.GetParam('gui.html.font_size')+1)
+    OV.SetParam('gui.html.font_size_controls', OV.GetParam('gui.html.font_size_controls')+1)
+    OV.SetParam('gui.html.font_size_large', OV.GetParam('gui.html.font_size_large')+1)
+    OV.SetParam('gui.html.font_size_medium', OV.GetParam('gui.html.font_size_medium')+1)
+
+  elif _ < 420:
+    OV.SetParam('gui.html.font_size',OV.GetParam('gui.html.font_size')-1)
+    OV.SetParam('gui.html.font_size_controls', OV.GetParam('gui.html.font_size_controls')-1)
+    OV.SetParam('gui.html.font_size_large', OV.GetParam('gui.html.font_size_large')-1)
+    OV.SetParam('gui.html.font_size_medium', OV.GetParam('gui.html.font_size_medium')-1)
+
+
   OV.SetVar('HtmlTableFirstcolColour', OV.GetParam('gui.html.table_firstcol_colour').hexadecimal)
   OV.SetVar('HtmlTableFirstcolWidth', OV.GetParam('gui.html.table_firstcol_width'))
   OV.SetVar('HtmlTableBgColour', OV.GetParam('gui.html.table_bg_colour').hexadecimal)
@@ -310,38 +334,14 @@ class Skin():
       print "After 'Reload': %.2f s (%.5f s)" % ((t - t1), (t - t2))
       t2 = t
 
-    deal_with_gui_phil('save')
-
     if timing:
       t = time.time()
       print "After 'Save PHIL': %.2f s (%.5f s)" % ((t - t1), (t - t2))
       t2 = t
 
     export_parameters()
-    
-    _ = int(olx.html.ClientWidth('self'))
-    if _ > 950:
-      OV.SetVar('HtmlGuiFontSize',OV.GetParam('gui.html.font_size')+3)
-      OV.SetVar('HtmlFontSizeControls', OV.GetParam('gui.html.font_size_controls')+3)
-      OV.SetVar('HtmlFontSizeLarge', OV.GetParam('gui.html.font_size_large')+3)
-      OV.SetVar('HtmlFontSizeMedium', OV.GetParam('gui.html.font_size_medium')+3)
+    deal_with_gui_phil('save')
 
-    elif _ > 750:
-      OV.SetVar('HtmlGuiFontSize',OV.GetParam('gui.html.font_size')+2)
-      OV.SetVar('HtmlFontSizeControls', OV.GetParam('gui.html.font_size_controls')+2)
-      OV.SetVar('HtmlFontSizeLarge', OV.GetParam('gui.html.font_size_large')+2)
-      OV.SetVar('HtmlFontSizeMedium', OV.GetParam('gui.html.font_size_medium')+2)
-
-    elif _ > 550:
-      OV.SetVar('HtmlGuiFontSize',OV.GetParam('gui.html.font_size')+1)
-      OV.SetVar('HtmlFontSizeControls', OV.GetParam('gui.html.font_size_controls')+1)
-      OV.SetVar('HtmlFontSizeLarge', OV.GetParam('gui.html.font_size_large')+1)
-      OV.SetVar('HtmlFontSizeMedium', OV.GetParam('gui.html.font_size_medium')+1)
-    
-
-
-      
-   
     olex.m("spy.make_HOS()")
 
     try:
@@ -349,7 +349,6 @@ class Skin():
         plugin.setup_gui()
     except:
       pass
-
 
     olx.FlushFS()
 

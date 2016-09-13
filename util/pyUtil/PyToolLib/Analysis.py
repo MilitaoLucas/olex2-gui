@@ -3243,11 +3243,14 @@ class HealthOfStructure():
     txt += '''
 <td align='center'>%s<zimg src="%s"/>%s</td>''' %(ref_open, item, ref_close)
 
-
     cache_entry = "%s_%s_%s" %(item, value_raw, targetWidth)
-    if self.im_cache.get(cache_entry,None):
+    cache_image = self.im_cache.get(cache_entry,None)
+    if cache_image:
+      if debug:
+        print "HOS from Cache: %s" %cache_entry
+      im = IT.resize_image(cache_image, (targetWidth, targetHeight), name=cache_entry)
+      OlexVFS.save_image_to_olex(im, item, 0)
       return txt
-
 
     boxWidth = int(targetWidth * scale)
     boxHeight = int(targetHeight * scale)
@@ -3374,7 +3377,7 @@ class HealthOfStructure():
     im = IT.add_whitespace(im, side='bottom', weight=2*scale, colour=bgcolour)
 
     self.im_cache[cache_entry] = im
-    im = IT.resize_image(im, ((targetWidth),(targetHeight+2)), name=item)
+    im = IT.resize_image(im, ((targetWidth),(targetHeight+2)), name=cache_entry)
 
     OlexVFS.save_image_to_olex(im, item, 0)
     return txt
