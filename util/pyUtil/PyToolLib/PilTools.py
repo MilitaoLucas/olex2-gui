@@ -2095,7 +2095,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       n = len(buttons)
       states = ['on', 'off', 'inactive', 'highlight', 'hover', 'hoveron']
       width = int(round((self.width - 2*n)/n))
-      cut = width - OV.GetParam('gui.timage.cbtn.vline')
+#      cut = width - OV.GetParam('gui.timage.cbtn.vline') * self.scale
+      cut = width - int(OV.GetParam('gui.timage.cbtn.arrows').split('bar:')[1].split(',')[0].split(':')[1])
+
+      cut = int(cut * IT.dpi_scale)
+
       if cut > width:
         cut = width - 1
         print ("WARNING: HtmlPanelWidth is smaller than intended. Some GUI images may not display correctly")
@@ -2702,7 +2706,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           image = self.print_text(image.copy(), item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
           if self.debug:
             print "FROM CACHE: %s (%s)" %(item, state)
-          return self.finally_make_image(image=image, width=width, height=height, name = "%s+%s" %(item,state))
+          return self.finally_make_image(image=image, width=width, height=height, name = "%s+%s+%s" %(item,item_type, state))
 
     image = Image.new('RGBA', size, bg_colour)
     draw = ImageDraw.Draw(image)
@@ -2772,9 +2776,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if self.debug:
       print "FROM SCRATCH: %s" %item
 
-    return self.finally_make_image(image=image, width=width, height=height, name = "CACHE %s+%s" %(item,state))
+    return self.finally_make_image(image=image, width=width, height=height, name = "CACHE %s+%s+%s" %(item,item_type, state))
 
   def finally_make_image(self, image, width, height, name):
+    if "snumtitle" in name:
+      name = None
     return IT.resize_image(image=image, size=(width, height), name=name)
 
 
