@@ -9,6 +9,7 @@ from PIL import Image
 from PIL import ImageFont, ImageDraw, ImageChops
 from ImageTools import ImageTools
 from PIL import ImageFilter
+from ArgumentParser import ArgumentParser
 import math
 import os
 try:
@@ -27,7 +28,9 @@ from ImageTools import IT
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
-debug = bool(OV.GetParam('olex2.debug',False))
+#debug = bool(OV.GetParam('olex2.debug',False))
+debug = False
+
 timing = debug
 
 guiParams = OV.GuiParams()
@@ -47,9 +50,11 @@ import olex_gui
 
 silent = True
 
-class Graph(ImageTools):
+
+
+class Graph(ArgumentParser):
   def __init__(self):
-    ImageTools.__init__(self)
+    super(Graph, self).__init__()
     self.params = OV.Params().user.graphs.reflections
     self.marker_params = (self.params.marker_1, self.params.marker_2, self.params.marker_3, self.params.marker_4, self.params.marker_5)
     self.function_params = (self.params.function_1, self.params.function_2, self.params.function_3)
@@ -255,16 +260,16 @@ class Graph(ImageTools):
     fontscale = f * self.imX
     font_name = "Vera"
     self.font_size_large = int(1.4 * fontscale)
-    self.font_large = self.registerFontInstance(font_name, self.font_size_large)
+    self.font_large = IT.registerFontInstance(font_name, self.font_size_large)
     self.font_size_normal = int(1.0 * fontscale)
-    self.font_normal = self.registerFontInstance(font_name, self.font_size_normal)
+    self.font_normal = IT.registerFontInstance(font_name, self.font_size_normal)
     self.font_size_small = int(0.9 *fontscale)
-    self.font_small = self.registerFontInstance(font_name, self.font_size_small)
+    self.font_small = IT.registerFontInstance(font_name, self.font_size_small)
     self.font_size_tiny = int(0.7 * fontscale)
-    self.font_tiny = self.registerFontInstance(font_name, self.font_size_tiny)
+    self.font_tiny = IT.registerFontInstance(font_name, self.font_size_tiny)
     font_name = "Vera Bold"
-    self.font_bold_large = self.registerFontInstance(font_name, int(1.4 * fontscale))
-    self.font_bold_normal = self.registerFontInstance(font_name, int(1.0 * fontscale))
+    self.font_bold_large = IT.registerFontInstance(font_name, int(1.4 * fontscale))
+    self.font_bold_normal = IT.registerFontInstance(font_name, int(1.0 * fontscale))
 
     self.light_grey = guiParams.graph.light_grey.hexadecimal
     self.grey = guiParams.graph.grey.hexadecimal
@@ -1283,7 +1288,7 @@ class Graph(ImageTools):
       #font_size = int(barX/2)
       #if font_size > 11: font_size = 11
       #font_name = "Verdana"
-      #font = self.registerFontInstance(font_name, font_size)
+      #font = IT.registerFontInstance(font_name, font_size)
       #if item >= 10:
         #txt = "%.0f" %item
       #else:
@@ -1983,7 +1988,7 @@ class ChargeFlippingPlot(PrgAnalysis):
       self.draw.rectangle(box, fill=(rR, rG, rB), outline=(rR/2, rG/2, 0))
       font_name = "Vera"
       font_size = 10
-      font = self.registerFontInstance(font_name, font_size)
+      font = IT.registerFontInstance(font_name, font_size)
 
       legend_top = height + 20
       legend_top = self.graph_bottom + 1

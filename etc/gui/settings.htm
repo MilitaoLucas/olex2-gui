@@ -112,6 +112,27 @@ $-
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='TOOLTIPS';help_ext=Tooltips;1 -->
+  <td width='23%'>
+    <b>%Legend%:</b>
+  </td>
+  <td width='55%' >
+    Show the legend of atom types
+  </td>
+  <td width='20%' align='right'>
+    <input
+      type="checkbox"
+      name="LEGEND"
+      fgcolor="GetVar(HtmlFontColour)"
+      bgcolor="GetVar('HtmlInputBgColour')"
+      checked="spy.GetParam(user.show_legend)"
+      onclick="spy.SetParam(user.show_legend,html.GetState(~name~))>>legend spy.GetParam(user.show_legend)"
+      target="Show or hide the atom type legend"
+    >
+  </td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='INFO_BAR';help_ext=Info-bar;1 -->
   <td width='23%'>
     <b>%Info%:</b>
