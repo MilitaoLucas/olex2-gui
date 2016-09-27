@@ -90,15 +90,16 @@ If this is not the case, the HAR will not work properly. Continue?""", "YN", Fal
     data_file_name = os.path.join(self.parent.jobs_dir, self.name, self.name) + ".hkl"
     if not os.path.exists(data_file_name):
       from cctbx_olex_adapter import OlexCctbxAdapter
+      from iotbx.shelx import hklf
       cctbx_adaptor = OlexCctbxAdapter()
       with open(data_file_name, "w") as out:
         f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_filtered
         for j, h in enumerate(f_sq_obs.indices()):
           s = f_sq_obs.sigmas()[j]
-          if s <= 0: s = 0.01
+          if s <= 0: f_sq_obs.sigmas()[j] = 0.01
           i = f_sq_obs.data()[j]
-          if i < 0: i = 0
-          out.write("%4d%4d%4d%8.2f%8.2f\n" %(h[0], h[1], h[2], i, s))
+          if i < 0: f_sq_obs.data()[j] = 0
+        f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
 
     self.save()
     args = [self.parent.exe, self.name+".cif",
@@ -185,7 +186,6 @@ class HARt(object):
     return self.basis_list_str
 
   def list_jobs(self):
-    import time
     self.jobs = []
     for j in os.listdir(self.jobs_dir):
       fp  = os.path.join(self.jobs_dir, j)
@@ -223,7 +223,7 @@ class HARt(object):
         analysis = "<a href='exec -o getvar(defeditor) %s>>spy.tonto.HAR.getAnalysisPlotData(%s)'>Open</a>" %(
           self.jobs[i].analysis_fn, self.jobs[i].analysis_fn)
 
-      ct = time.strftime("%Y/%m/%d %H:%M", time.gmtime(self.jobs[i].date))
+      ct = time.strftime("%Y/%m/%d %H:%M", time.localtime(self.jobs[i].date))
       if not self.jobs[i].completed:
         if dump == "--":
           status = "<a href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_running)
