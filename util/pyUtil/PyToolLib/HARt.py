@@ -4,6 +4,7 @@ import olx
 import olex
 #import subprocess
 import shutil
+import time
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
@@ -71,18 +72,38 @@ If this is not the case, the HAR will not work properly. Continue?""", "YN", Fal
         return
       import shutil
       shutil.rmtree(self.full_dir)
-
-    os.mkdir(self.full_dir)
+    tries = 0
+    while not os.path.exists(self.full_dir) and tries < 5:
+      try:
+        os.mkdir(self.full_dir)
+        break
+      except:
+        time.sleep(0.1)
+        tries += 1
+        pass
 
     model_file_name = os.path.join(self.parent.jobs_dir, self.name, self.name) + ".cif"
     olx.Kill("$Q")
     #olx.Grow()
     olx.File(model_file_name)
 
+    data_file_name = os.path.join(self.parent.jobs_dir, self.name, self.name) + ".hkl"
+    if not os.path.exists(data_file_name):
+      from cctbx_olex_adapter import OlexCctbxAdapter
+      cctbx_adaptor = OlexCctbxAdapter()
+      with open(data_file_name, "w") as out:
+        f_sq_obs = cctbx_adaptor.reflections.f_sq_obs_filtered
+        for j, h in enumerate(f_sq_obs.indices()):
+          s = f_sq_obs.sigmas()[j]
+          if s <= 0: s = 0.01
+          i = f_sq_obs.data()[j]
+          if i < 0: i = 0
+          out.write("%4d%4d%4d%8.2f%8.2f\n" %(h[0], h[1], h[2], i, s))
+
     self.save()
-    args = [self.parent.exe, model_file_name,
+    args = [self.parent.exe, self.name+".cif",
             "-basis-dir", self.parent.basis_dir,
-             "-shelx-f2", olx.HKLSrc()]
+             "-shelx-f2", self.name+".hkl"]
     #print ' '.join(args)
     for k,v in HARt.options.iteritems():
       val = olx.GetVar(k, None)
@@ -102,6 +123,7 @@ If this is not the case, the HAR will not work properly. Continue?""", "YN", Fal
           args.append("t")
         pass
 
+    cwd = os.getcwdu()
     os.chdir(self.full_dir)
     #from subprocess import Popen, PIPE, STDOUT
     #p = Popen(args, shell=False, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
@@ -109,6 +131,7 @@ If this is not the case, the HAR will not work properly. Continue?""", "YN", Fal
     #print output
     from subprocess import Popen
     Popen(args)
+    os.chdir(cwd)
 
 
 class HARt(object):
@@ -197,7 +220,8 @@ class HARt(object):
         dump = "<a href='exec -o getvar(defeditor) %s'>Open</a>" %self.jobs[i].dump_fn
       analysis = "--"
       if os.path.exists(self.jobs[i].analysis_fn):
-        analysis = "<a href='exec -o getvar(defeditor) %s>>spy.tonto.HAR.getAnalysisPlotData(%s)'>Open</a>" %(self.jobs[i].analysis_fn, self.jobs[i].analysis_fn)
+        analysis = "<a href='exec -o getvar(defeditor) %s>>spy.tonto.HAR.getAnalysisPlotData(%s)'>Open</a>" %(
+          self.jobs[i].analysis_fn, self.jobs[i].analysis_fn)
 
       ct = time.strftime("%Y/%m/%d %H:%M", time.gmtime(self.jobs[i].date))
       if not self.jobs[i].completed:
@@ -206,7 +230,8 @@ class HARt(object):
         else:
           status = "<a href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_error)
 
-        rv += "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" %(self.jobs[i].name, ct, status, error, dump, analysis)
+        rv += "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" %(
+          self.jobs[i].name, ct, status, error, dump, analysis)
       else:
         if os.path.exists(self.jobs[i].analysis_fn):
           status = "<a href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_completed)
