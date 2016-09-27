@@ -3,6 +3,26 @@
 <!-- FIRST ROW -->
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='QUICK_DRAWING_STYLES';help_ext=Quick-Drawing-Styles;1 -->
 <!-- #include snippet-quick-drawing-styles gui\snippets\snippet-quick-drawing-styles.htm;1; -->
+
+<td width='5%'>
+Legend
+</td>
+
+<td width='5%'>
+    <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type="checkbox"
+      name = "LEGEND#scope"
+      fgcolor="GetVar('HtmlFontColour')"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      checked="spy.GetParam(user.show_legend)"
+      onclick="spy.SetParam(user.show_legend,html.GetState(~name~))>>legend spy.GetParam(user.show_legend)"
+      target="Show or hide the atom type legend"
+    >
+    </font>
+</td>
+
+
   <td name=IMG_DEFAULT width=15% align='right'>
 $spy.MakeHoverButton('small-Default','default')
 &nbsp;

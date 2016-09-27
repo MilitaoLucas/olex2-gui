@@ -9,7 +9,6 @@ from StringIO import StringIO
 
 import OlexVFS
 import RoundedCorners
-from ArgumentParser import ArgumentParser
 import colorsys
 from olexFunctions import OlexFunctions
 from FontInstances import FontInstances
@@ -21,7 +20,8 @@ import olx
 import olex_gui
 import math
 
-debug = bool(OV.GetParam('olex2.debug',False))
+#debug = bool(OV.GetParam('olex2.debug',False))
+debug = False
 
 global dpi_scale
 dpi_scale = olex_gui.GetPPI()[0]/96
@@ -70,7 +70,7 @@ class ImageTools(FontInstances):
     self.gui_tab_font_name = "%s Bold" % font
     self.gui_sNumTitle_font_name = "%s Bold" % font
     self.gui_button_font_name = "%s Bold" % font
-
+    self.params = OV.GuiParams()
 
     if olx.HasGUI() == "false":
       self.available_width = 200
@@ -109,7 +109,7 @@ class ImageTools(FontInstances):
     left_start = 120
     if not font_colour:
       font_colour = OV.GetParam('gui.html.font_colour').rgb
-    self.width = self.available_width_full
+    self.width = self.skin_width_margin
     try:
       txt_l = []
       txt_sub = []
@@ -1363,13 +1363,6 @@ class ImageTools(FontInstances):
 #      box = (width - height, 0)
 #      image.paste(IM, box)
 
-  def resize_news_image(self, width_adjust=0, width=None, vfs=False):
-    tag = OV.GetTag().split('-')[0]
-    name = 'news/news-%s' % tag
-    if vfs: name += '_tmp@vfs'
-    else: name += '.png'
-    self.resize_to_panelwidth({'i':name}, width=width, width_adjust=width_adjust)
-
   def make_simple_text_to_image(self, width, height, txt, font_name='Vera', font_size=16, bg_colour='#fff6bf', font_colour='#222222'):
     IM = Image.new('RGB', (width, height), bg_colour)
     draw = ImageDraw.Draw(IM)
@@ -1721,5 +1714,4 @@ if olx.HasGUI() == 'true':
   IT.get_available_width()
   OV.registerMacro(IT.resize_to_panelwidth, 'i-Image&;c-Colourize')
   OV.registerFunction(IT.make_pie_graph, False, 'it')
-  OV.registerFunction(IT.resize_news_image, False, 'it')
 OV.registerFunction(IT.trim_image, False, 'it')

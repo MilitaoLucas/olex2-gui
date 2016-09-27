@@ -897,7 +897,7 @@ def get_regex_l(src_file):
     regex_l.setdefault('%s'%src_file,re_l)
   return regex_l[src_file]
 
-def run_regular_expressions(txt, src_file, re_l=None, specific=""):
+def run_regular_expressions(txt, src_file=None, re_l=None, specific=""):
   try:
     global regex_l
     if not re_l:
