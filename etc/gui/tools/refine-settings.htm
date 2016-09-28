@@ -163,7 +163,7 @@ $spy.weightGuiDisplay()
         name="SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT"
         checked="spy.GetParam('snum.refinement.recompute_mask_before_refinement')"
         oncheck="
-spy.SetParam('snum.refinement.use_solvent_mask','true')>>
+spy.SetMasking(html.GetState(~name~))>>
 spy.SetParam('snum.refinement.recompute_mask_before_refinement','true')>>
 html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')"
         onuncheck="spy.SetParam('snum.refinement.recompute_mask_before_refinement','false')"
