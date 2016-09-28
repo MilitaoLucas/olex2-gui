@@ -281,7 +281,6 @@ def getAnalysisPlotData(input_f):
     text = []
     m=regex.findall(f)
     if m:
-      print "Evaluated REGEX %s OK." %repr(regex_t)
       mm = ""
       for _ in m:
         if len(_) < 10:
@@ -296,7 +295,6 @@ def getAnalysisPlotData(input_f):
       for pair in raw_data:
         pair = pair.strip()
         if not pair:
-          print " ======================== >>> NO DATA! <<<========================"
           continue
         xs.append(float(pair.split()[0].strip()))
         ys.append(float(pair.split()[1].strip()))
@@ -342,10 +340,26 @@ def makePlotlyGraph(d):
       )
     data.append(_)
 
+    layout = go.Layout(
+        title='HAR Result',
+        xaxis=dict(
+            title='x Axis',
+            titlefont=dict(
+                family='Courier New, monospace',
+                size=18,
+                color='#7f7f7f'
+            )
+        ),
+        yaxis=dict(
+            title='y Axis',
+            titlefont=dict(
+                family='Courier New, monospace',
+                size=18,
+                color='#7f7f7f'
+            )
+        )
+    )
 
-  layout = go.Layout(
-      title= "Data Plots",
-      )
 
   fig = go.Figure(data=data, layout=layout)
   plot_url = plotly.offline.plot(fig, filename='basic-line')
