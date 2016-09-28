@@ -2740,7 +2740,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       sg, s = self.drawSpaceGroupInfo(draw, luminosity=OV.GetParam('gui.timage.snumtitle.sg_L'), right_margin=3 * self.scale)
       r,g,b,a = sg.split()
       image.paste(sg, ((width * self.scale) - s[0],0), mask=a)
-      image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
+      image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, int(width-s[0]), font_colour, item_type)
 
     if self.advertise_new:
       draw = ImageDraw.Draw(image)
@@ -2791,7 +2791,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     else:
       timage_blanks[self.params.skin.name].setdefault(type_key,{})
       timage_blanks[self.params.skin.name][type_key].setdefault(state,image.copy())
-    image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
+      image = self.print_text(image, item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
     if self.debug:
       print "FROM SCRATCH: %s" %item
 
@@ -3056,26 +3056,6 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       return
     font = IT.registerFontInstance(font_name, font_size)
     tw = (draw.textsize(txt, font)[0])
-    n = int(len(txt)/2)
-    txtbeg = txt[:n]
-    txtend = txt [-n:]
-
-
-    if left_start > width:
-      left_start = 50 * self.scale
-    else:
-      left_start = left_start
-
-    xx = 0
-    while tw > width - left_start - 5 * self.scale:
-      txtbeg = txt[:n]
-      txtend = txt [-n:]
-      tw = (draw.textsize("%s...%s" %(txtbeg, txtend), font)[0])
-      n -= 1
-      xx += 1
-      if xx > 100 * self.scale:
-        break
-    txt = "%s...%s" %(txtbeg, txtend)
 
     wX, wY  = draw.textsize(txt, font)
     #left_start =  (self.width-wX) - right_margin
