@@ -894,6 +894,32 @@ class ImageTools(FontInstances):
     except Exception, err:
       print err
 
+  def _shorten_text(self, txt, draw, left_start, width, font):
+    tw = (draw.textsize(txt, font)[0])
+    if tw < width:
+      return txt
+
+    n = int(len(txt)/2)
+    txtbeg = txt[:n]
+    txtend = txt [-n:]
+
+    if left_start > width:
+      left_start = 50 * self.scale
+    else:
+      left_start = left_start
+
+    xx = 0
+    while tw > width - left_start - 5 * self.scale:
+      txtbeg = txt[:n]
+      txtend = txt [-n:]
+      tw = (draw.textsize("%s...%s" %(txtbeg, txtend), font)[0])
+      n -= 1
+      xx += 1
+      if xx > 100 * self.scale:
+        break
+    return "%s...%s" %(txtbeg, txtend)
+
+
   def write_text_to_draw(self,
                          draw,
                          txt,
@@ -933,6 +959,9 @@ class ImageTools(FontInstances):
     txt = self.txt
     font = self.get_font(font_name=self.font_name, font_size=self.font_size)
     self.font = font
+
+    txt = self._shorten_text(txt=txt, draw=draw, font=font, left_start=self.txt_left, width=max_width)
+
     self.font_colour = font_colour
 
     self.get_valign_font_modifications()

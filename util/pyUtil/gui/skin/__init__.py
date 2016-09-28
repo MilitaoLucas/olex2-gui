@@ -179,31 +179,19 @@ def export_parameters(load_phil=True):
     deal_with_gui_phil(action='load')
 
 
+  ##Stepwise ajust relative font size according to cut-off
+  font_size_steps = OV.GetParam('gui.font_size_steps')
+  font_size_rel_size = OV.GetParam('gui.font_size_rel_size')
   _ = int(olx.html.ClientWidth('self'))
-  if _ > 950:
-    OV.SetParam('gui.html.font_size',OV.GetParam('gui.html.font_size')+3)
-    OV.SetParam('gui.html.font_size_controls', OV.GetParam('gui.html.font_size_controls')+3)
-    OV.SetParam('gui.html.font_size_large', OV.GetParam('gui.html.font_size_large')+3)
-    OV.SetParam('gui.html.font_size_medium', OV.GetParam('gui.html.font_size_medium')+3)
-
-  elif _ > 750:
-    OV.SetParam('gui.html.font_size',OV.GetParam('gui.html.font_size')+2)
-    OV.SetParam('gui.html.font_size_controls', OV.GetParam('gui.html.font_size_controls')+2)
-    OV.SetParam('gui.html.font_size_large', OV.GetParam('gui.html.font_size_large')+2)
-    OV.SetParam('gui.html.font_size_medium', OV.GetParam('gui.html.font_size_medium')+2)
-
-  elif _ > 550:
-    OV.SetParam('gui.html.font_size',OV.GetParam('gui.html.font_size')+1)
-    OV.SetParam('gui.html.font_size_controls', OV.GetParam('gui.html.font_size_controls')+1)
-    OV.SetParam('gui.html.font_size_large', OV.GetParam('gui.html.font_size_large')+1)
-    OV.SetParam('gui.html.font_size_medium', OV.GetParam('gui.html.font_size_medium')+1)
-
-  elif _ < 420:
-    OV.SetParam('gui.html.font_size',OV.GetParam('gui.html.font_size')-1)
-    OV.SetParam('gui.html.font_size_controls', OV.GetParam('gui.html.font_size_controls')-1)
-    OV.SetParam('gui.html.font_size_large', OV.GetParam('gui.html.font_size_large')-1)
-    OV.SetParam('gui.html.font_size_medium', OV.GetParam('gui.html.font_size_medium')-1)
-
+  for step, s in zip(font_size_steps, font_size_rel_size):
+    step = int(step)
+    s = int(s)
+    if _ > step:
+      OV.SetVar('HtmlGuiFontSize',OV.GetParam('gui.html.font_size')+s)
+      OV.SetVar('HtmlFontSizeControls',OV.GetParam('gui.html.font_size_controls')+s)
+      OV.SetVar('HtmlFontSizeLarge',OV.GetParam('gui.html.font_size_large')+s)
+      OV.SetVar('HtmlFontSizeMedium',OV.GetParam('gui.html.font_size_medium')+s)
+      break
 
   OV.SetVar('HtmlTableFirstcolColour', OV.GetParam('gui.html.table_firstcol_colour').hexadecimal)
   OV.SetVar('HtmlTableFirstcolWidth', OV.GetParam('gui.html.table_firstcol_width'))
@@ -224,10 +212,6 @@ def export_parameters(load_phil=True):
   OV.SetVar('HtmlBgColour', OV.GetParam('gui.html.bg_colour').hexadecimal)
   OV.SetVar('HtmlFontName', OV.GetParam('gui.html.font_name'))
   OV.SetVar('HtmlFontColour', OV.GetParam('gui.html.font_colour').hexadecimal)
-  OV.SetVar('HtmlGuiFontSize', OV.GetParam('gui.html.font_size'))
-  OV.SetVar('HtmlFontSizeControls', OV.GetParam('gui.html.font_size_controls'))
-  OV.SetVar('HtmlFontSizeLarge', OV.GetParam('gui.html.font_size_large'))
-  OV.SetVar('HtmlFontSizeMedium', OV.GetParam('gui.html.font_size_medium'))
   OV.SetVar('HtmlPanelWidth', OV.GetParam('gui.htmlpanelwidth'))
   OV.SetVar('HtmlButtonHeight', OV.GetParam('gui.timage.button.height'))
 

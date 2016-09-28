@@ -872,6 +872,8 @@ user
     .type = int
   show_info = 0
     .type = int
+  show_legend = True
+    .type = bool
   expert_level = 0
     .type = int
   alert_delete_history = Y
