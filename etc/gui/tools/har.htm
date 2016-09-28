@@ -49,7 +49,7 @@ $-
         "value=GetVar('settings.tonto.HAR.basis.name')",
         "onchange=SetVar('settings.tonto.HAR.basis.name', html.GetValue('~name~'))")
       $-</td>
-     <td width="20%">
+     <td width="20%" align='right'>
        Method
      </td>
      <td>$+
@@ -60,7 +60,7 @@ $-
       $-</td>
    </tr>
    <tr><td width="20%">
-       Hydrogen refinement
+       Refine Hydrogen
      </td>
      <td>$+
        html.Snippet("gui/snippets/input-combo", "name=tonto_har_h_refinement",
@@ -68,8 +68,8 @@ $-
         "value=GetVar('settings.tonto.HAR.hydrogens')",
         "onchange=SetVar('settings.tonto.HAR.hydrogens', html.GetValue('~name~'))")
       $-</td>
-     <td width="20%">
-       Optimise extinction
+     <td width="20%" align='right'>
+       Extinction
      </td>
      <td>$+
        html.Snippet("gui/snippets/input-checkbox", "name=tonto_har_optimise_extinction",
