@@ -131,15 +131,12 @@ If this is not the case, the HAR will not work properly. Continue?""", "YN", Fal
           args.append("t")
         pass
 
-    cwd = os.getcwdu()
-    os.chdir(self.full_dir)
-    #from subprocess import Popen, PIPE, STDOUT
-    #p = Popen(args, shell=False, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
-    #output = p.stdout.read()
-    #print output
+    os.environ['hart_cmd'] = '+&-'.join(args)
+    os.environ['hart_file'] = self.name
+    os.environ['hart_dir'] = self.full_dir
     from subprocess import Popen
-    Popen(args)
-    os.chdir(cwd)
+    Popen([os.path.join(olx.BaseDir(), "pyl"),
+           os.path.join(olx.BaseDir(), "util", "pyUtil", "PyToolLib", "HARt-launch.py")])
 
 
 class HARt(object):
