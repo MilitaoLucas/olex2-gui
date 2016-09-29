@@ -326,8 +326,8 @@ def make_help_box(args):
   name = getGenericSwitchName(name)
   helpTxt = args.get('helpTxt', None)
 
-  if os.path.exists(helpTxt):
-    helpTxt == open(helpTxt, 'r').read()
+  if helpTxt and os.path.exists(helpTxt):
+    helpTxt = open(helpTxt, 'r').read()
 
   popout = args.get('popout', False)
   box_type = args.get('type', 'help')
