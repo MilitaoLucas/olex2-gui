@@ -142,11 +142,11 @@ If this is not the case, the HAR will not work properly. Continue?""", "YN", Fal
 class HARt(object):
   options = {
     "settings.tonto.HAR.basis.name": ("def2-SVP", "basis"),
-    "settings.tonto.HAR.method": ("rks", "scf"),
+    "settings.tonto.HAR.method": ("rhf", "scf"),
     "settings.tonto.HAR.hydrogens": ("positions+Uaniso",),
     "settings.tonto.HAR.extinction.refine": ("False", "extinction"),
     "settings.tonto.HAR.convergence.value": ("0.0001", "dtol"),
-    "settings.tonto.HAR.cluster.radius": ("8", "cluster-radius"),
+    "settings.tonto.HAR.cluster.radius": ("0", "cluster-radius"),
     "settings.tonto.HAR.intensity_threshold.value": ("3", "fos"),
   }
 
