@@ -216,14 +216,18 @@ class HARt(object):
     status_completed = "<font color='%s'><b>Finished</b></font>" %OV.GetParam('gui.green')
     status_error = "<font color='%s'><b>Error!</b></font>" %OV.GetParam('gui.red')
     status_stopped = "<font color='%s'><b>Stopped</b></font>" %OV.GetParam('gui.red')
+    status_nostart = "<font color='%s'><b>No Start/b></font>" %OV.GetParam('gui.red')
 
     for i in range(min(5, len(self.jobs))):
       OUT_file = self.jobs[i].out_fn
 
       try:
-        os.rename(OUT_file, "_.txt")
-        os.rename("_.txt", OUT_file)
-        status = "<a target='Open .out file' href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_stopped)
+        if not os.path.exists(OUT_file):
+          status = "<a target='Open .out file' href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_nostart)
+        else:
+          os.rename(OUT_file, "_.txt")
+          os.rename("_.txt", OUT_file)
+          status = "<a target='Open .out file' href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_stopped)
       except:
         status = "<a target='Open .out file' href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_running)
 
