@@ -1,63 +1,95 @@
-$+
-SetVar(help_har_headline,
-  "
-The <b>H</b>irshfeld <b>A</b>tom <b>R</b>efinement is being developed by Prof. Simon Grabowski at Bremen University in conjunction with Prof Dylan Jyatilaka at the University of Western Australia in Perth. Please contact Prof. Grabowski directrly with any support queries regarding the HAR refinement.<br>
-~Literature~<br>
--- (Woi&#324;ska et al. Sci. Adv. 2016;2)
-  ")
-$-
+ $+
+ SetVar(help_har_headline,
+   "
+ The <b>H</b>irshfeld <b>A</b>tom <b>R</b>efinement employs aspherical
+ atomic scattering factors calculated from a theoretical density. This
+ approach allows for an accurate localization of hydrogen atoms, an
+ accurate determination of non-hydrogen ADPs and an anisotropic
+ refinement of hydrogen atoms. It is being developed by Prof. Dylan
+ Jayatilaka at the University of Western Australia in Perth in
+ conjunction with Prof. Simon Grabowsky at the University of Bremen. <br>
+ ~Literature~<br>
+ -- (Jayatilaka & Dittrich. Acta Cryst. 2008; A64)<br>
+ -- (Capelli et al. IUCrJ. 2014; 1)<br>
+ -- (Woi&#324;ska et al. Sci. Adv. 2016;2)
+   ")
+ $-
+ $+
+ SetVar(help_har_basis_method,
+   "
+ ~Basis~
+ This specifies the basis set for the calculation of the theoretical
+ density. The default basis set is **def2-SVP**. **STO-3G** is
+ recommended only for test purposes.
 
 
-$+
-SetVar(help_har_basis_method,
-  "
-~Basis~
-The default Basis Set is **def2-SVP**.
-
-~Method~
-The default Method is **Restricted Hartee-Fock**.
-  ")
-$-
-
-$+
-SetVar(help_har_hydrogen,
-  "
-Hydrogen refinement in HAR.
-  ")
-$-
+ ~Method~
+ The default method used for the calculation of the theoretical density
+ is **Restricted Hartee-Fock**. **Restricted Kohn-Sham** may be
+ superior in some cases (especially for the treatment of hydrogen
+ atoms), but tends to be unstable in some cases.
+   ")
+ $-
 
 
-$+
-SetVar(help_har_run_jobs,
-  "
-Launch HAR jobs as a separate process. Olex2 can be closed and the process will continue to run. Please note, that HAR jobs can take a **very** long time -- from a few **hours** to a few **weeks**!
-  ")
-$-
 
-$+
-SetVar(help_har_jobs,
-  "
-HAR refinements are run as 'jobs': they are submitted to the system as an independent process. At the moment, Olex2 does not automatically monotor the progress of these jobs, but we provide a few tools here to help with this.
-<br>
-~Job Name~
-Once the job is finished, the name will be displayed as a link. Clicking on this link will open the finished HAR structure.
+ $+
+ SetVar(help_har_hydrogen,
+   "
+ This option specifies how hydrogen atoms are treated in HAR. Hydrogens
+ can be refined anisotropically, isotropically, only positions, or kept
+ fixed.
+   ")
+ $-
 
-~Timestamp~
-The time when the job was submitted.
 
-~Status~
-Olex2 tries to 'guess' the status of the job from the files it finds in the folder. This is a temporary measure.
 
-~Error~
-If the HAR refinement produces an error file, a link to this file will appear.
 
-~Dump~
-If HAR crashes, and link to the dump file of the HAR process will appear.
 
-~Analysis~
-This opens the result output file of the HAR refinement. If the plotly extension is installed, graphs of the data contained in these files will be generated and shown in the browser.
-  ")
-$-
+ $+
+ SetVar(help_har_run_jobs,
+   "
+ Launch HAR jobs as a separate process. Olex2 can be closed and the
+ process will continue to run. Please note, that HAR jobs can take a
+ **very** long time -- from a few **hours** to a few **weeks**!
+   ")
+ $-
+
+
+
+
+ $+
+ SetVar(help_har_jobs,
+   "
+ HAR refinements are run as 'jobs': they are submitted to the system as
+ an independent process. At the moment, Olex2 does not automatically
+ monitor the progress of these jobs, but we provide a few tools here to
+ help with this.
+ <br>
+ ~Job Name~
+ Once the job is finished, the name will be displayed as a link.
+ Clicking on this link will open the finished HAR structure.
+
+ ~Timestamp~
+ The time when the job was submitted.
+
+ ~Status~
+ Olex2 tries to 'guess' the status of the job from the files it finds
+ in the folder. This is a temporary measure.
+
+ ~Error~
+ If the HAR refinement produces an error file, a link to this file will
+ appear.
+
+ ~Dump~
+ If HAR crashes, and link to the dump file of the HAR process will appear.
+
+ ~Analysis~
+ This opens the result output file of the HAR refinement. If the plotly
+ extension is installed, graphs of the data contained in these files
+ will be generated and shown in the browser.
+   ")
+ $-
 
 
 
@@ -149,17 +181,18 @@ $-
 
 
      <td width="20%" align='left'>
-       Check out every
+       <!--Check out every-->
      </td>
 
-     <td width="8%" >$+
-       html.Snippet("gui/snippets/input-text", "name=checking_interval",
-        "value=0",
-        "onchange=SetVar(check_output_interval, html.GetValue('~name~'))")
-      $-
+     <td width="8%" >
+     <!--$+-->
+       <!--html.Snippet("gui/snippets/input-text", "name=checking_interval",-->
+        <!--"value=0",-->
+        <!--"onchange=SetVar(check_output_interval, html.GetValue('~name~'))")-->
+      <!--$--->
      </td>
      <td width="10%" align='right'>
-       seconds
+       <!--seconds-->
      </td>
 
      <td width="33%" >$+
