@@ -135,7 +135,11 @@ If this is not the case, the HAR will not work properly. Continue?""", "YN", Fal
     os.environ['hart_file'] = self.name
     os.environ['hart_dir'] = self.full_dir
     from subprocess import Popen
-    Popen([os.path.join(olx.BaseDir(), "pyl"),
+    pyl = OV.getPYLPath()
+    if not pyl:
+      print("A problem with pyl is encountered, aborting.")
+      retur
+    Popen([pyl,
            os.path.join(olx.BaseDir(), "util", "pyUtil", "PyToolLib", "HARt-launch.py")])
 
 

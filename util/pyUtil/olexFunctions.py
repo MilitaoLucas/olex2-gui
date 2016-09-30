@@ -941,6 +941,24 @@ class OlexFunctions(inheritFunctions):
       return False
     return True
 
+  def getPYLPath(self):
+    pyl = os.path.join(olx.BaseDir(), "pyl")
+    if sys.platform[:3] == 'win':
+      pyl += '.exe'
+    else:
+      if not self.GetParam("olex2.check_executable.pyl", True):
+        return pyl
+      import stat
+      if not (os.stat(pyl)[stat.ST_MODE] & stat.S_IXUSR):
+        print("The pyl is not executable, trying to fix")
+        try:
+          os.chmod(pyl, stat.S_IXUSR)
+          self.SetParam("olex2.check_executable.pyl", False)
+        except:
+          print("Failed to make pyl executable. Please fix manually.")
+          return None
+    return pyl
+  
 def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
   return OV.GetParam_as_string(variable, default)
