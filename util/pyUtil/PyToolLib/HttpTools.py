@@ -12,7 +12,6 @@ import urllib2
 import os
 import olx
 
-
 def make_url_call_with_proxy(url, proxy, values, http_timeout = 5):
   if proxy:
     proxies = {'http': proxy}

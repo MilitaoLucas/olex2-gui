@@ -1,4 +1,4 @@
-#from __future__ import division
+from __future__ import division
 # -*- coding: latin-1 -*-
 
 import math
@@ -9,6 +9,7 @@ from PIL import Image
 from PIL import ImageFont, ImageDraw, ImageChops
 from ImageTools import ImageTools
 from PIL import ImageFilter
+from ArgumentParser import ArgumentParser
 import math
 import os
 try:
@@ -17,17 +18,19 @@ try:
   import olexex
   import htmlTools
   import olex_core
+  import olex_gui
 except:
   pass
 
 import time
 
-from ImageTools import ImageTools
-IT = ImageTools()
+from ImageTools import IT
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
-debug = bool(OV.GetParam('olex2.debug',False))
+#debug = bool(OV.GetParam('olex2.debug',False))
+debug = False
+
 timing = debug
 
 guiParams = OV.GuiParams()
@@ -43,11 +46,15 @@ PreviousHistoryNode = None
 global cache
 cache = {}
 
+import olex_gui
+
 silent = True
 
-class Graph(ImageTools):
+
+
+class Graph(ArgumentParser):
   def __init__(self):
-    ImageTools.__init__(self)
+    super(Graph, self).__init__()
     self.params = OV.Params().user.graphs.reflections
     self.marker_params = (self.params.marker_1, self.params.marker_2, self.params.marker_3, self.params.marker_4, self.params.marker_5)
     self.function_params = (self.params.function_1, self.params.function_2, self.params.function_3)
@@ -253,16 +260,16 @@ class Graph(ImageTools):
     fontscale = f * self.imX
     font_name = "Vera"
     self.font_size_large = int(1.4 * fontscale)
-    self.font_large = self.registerFontInstance(font_name, self.font_size_large)
+    self.font_large = IT.registerFontInstance(font_name, self.font_size_large)
     self.font_size_normal = int(1.0 * fontscale)
-    self.font_normal = self.registerFontInstance(font_name, self.font_size_normal)
+    self.font_normal = IT.registerFontInstance(font_name, self.font_size_normal)
     self.font_size_small = int(0.9 *fontscale)
-    self.font_small = self.registerFontInstance(font_name, self.font_size_small)
+    self.font_small = IT.registerFontInstance(font_name, self.font_size_small)
     self.font_size_tiny = int(0.7 * fontscale)
-    self.font_tiny = self.registerFontInstance(font_name, self.font_size_tiny)
+    self.font_tiny = IT.registerFontInstance(font_name, self.font_size_tiny)
     font_name = "Vera Bold"
-    self.font_bold_large = self.registerFontInstance(font_name, int(1.4 * fontscale))
-    self.font_bold_normal = self.registerFontInstance(font_name, int(1.0 * fontscale))
+    self.font_bold_large = IT.registerFontInstance(font_name, int(1.4 * fontscale))
+    self.font_bold_normal = IT.registerFontInstance(font_name, int(1.0 * fontscale))
 
     self.light_grey = guiParams.graph.light_grey.hexadecimal
     self.grey = guiParams.graph.grey.hexadecimal
@@ -1281,7 +1288,7 @@ class Graph(ImageTools):
       #font_size = int(barX/2)
       #if font_size > 11: font_size = 11
       #font_name = "Verdana"
-      #font = self.registerFontInstance(font_name, font_size)
+      #font = IT.registerFontInstance(font_name, font_size)
       #if item >= 10:
         #txt = "%.0f" %item
       #else:
@@ -1981,7 +1988,7 @@ class ChargeFlippingPlot(PrgAnalysis):
       self.draw.rectangle(box, fill=(rR, rG, rB), outline=(rR/2, rG/2, 0))
       font_name = "Vera"
       font_size = 10
-      font = self.registerFontInstance(font_name, font_size)
+      font = IT.registerFontInstance(font_name, font_size)
 
       legend_top = height + 20
       legend_top = self.graph_bottom + 1
@@ -2560,8 +2567,9 @@ class HistoryGraph(Analysis):
       bars.append((R1,href,target))
       node = node.active_child_node
     n_bars = len(bars)
-    width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
-    size = (width - OV.GetParam('gui.html.table_firstcol_width')-10, 100)
+    #width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+    width = IT.skin_width_table
+    size = (width, 100)
     self.params.size_x, self.params.size_y = size
     self.make_empty_graph(draw_title=False)
 
@@ -2854,11 +2862,21 @@ class HealthOfStructure():
     self.grade_2_colour = OV.GetParam('gui.skin.diagnostics.colour_grade2').hexadecimal
     self.grade_3_colour = OV.GetParam('gui.skin.diagnostics.colour_grade3').hexadecimal
     self.grade_4_colour = OV.GetParam('gui.skin.diagnostics.colour_grade4').hexadecimal
+
     self.available_width = int(OV.GetParam('gui.htmlpanelwidth'))
     self.stats = None
-    self.scale = OV.GetParam('user.diagnostics.scale')
+    self.scale = OV.GetParam('gui.internal_scale')
     self.scope = "hkl"
     self.supplied_cif = False
+
+    self.im_cache = {}
+    _ = ['Completeness', 'MeanIOverSigma','Rint']
+    _ += ['_refine_ls_shift/su_max', '_refine_diff_density_max',
+         '_refine_diff_density_min', '_refine_ls_goodness_of_fit_ref',
+         '_refine_ls_abs_structure_Flack']
+
+    for item in _:
+      self.im_cache.setdefault(item,{})
 
   def get_HOS_d(self):
     try:
@@ -2870,6 +2888,7 @@ class HealthOfStructure():
 
   def make_HOS(self, force=False, supplied_cif=False):
     force = bool(force)
+    self.width = int(IT.skin_width*0.98)
     self.supplied_cif = supplied_cif
     self.scopes = OV.GetParam('user.diagnostics.scopes')
     self.scope = OV.GetParam('snum.current_process_diagnostics')
@@ -3207,23 +3226,41 @@ class HealthOfStructure():
 
 
   def make_hos_images(self, item='test', colour='#ff0000', display='Display', value_display='10%', value_raw='0.1', n=1):
+    width = self.width
     scale = self.scale
     font_name = 'Vera'
     value_display_extra = ""
     completeness_box_width = 150
+    targetWidth = round(width/n)
+    targetHeight = round(OV.GetParam('gui.timage.h3.height'))
 
-    c_width = int(olx.html.ClientWidth('self'))
-    if c_width < 100:
-      c_width = OV.GetParam('gui.htmlpanelwidth')
+    href = OV.GetParam('user.diagnostics.%s.%s.href' %(self.scope,item))
+    target = OV.GetParam('user.diagnostics.%s.%s.target' %(self.scope,item))
+    txt = ""
+    ref_open = ''
+    ref_close = ''
+    if href:
+      if href == "atom":
+        href = "sel %s" %OV.GetParam('snum.refinement.%s_atom' %item)
+      if item != 'max_hole':
+        ref_open = '<a target="%s" href="%s">' %(target, href)
+        ref_close = "</a>"
+    txt += '''
+<td align='center'>%s<zimg src="%s"/>%s</td>''' %(ref_open, item, ref_close)
 
-    width =  c_width - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - 1
+    cache_entry = "%s_%s_%s" %(item, value_raw, targetWidth)
+    cache_image = self.im_cache.get(cache_entry,None)
+    if cache_image:
+      if debug:
+        print "HOS from Cache: %s" %cache_entry
+      im = IT.resize_image(cache_image, (targetWidth, targetHeight), name=cache_entry)
+      OlexVFS.save_image_to_olex(im, item, 0)
+      return txt
 
-    boxWidth = (width/n) * scale
-    boxHeight = OV.GetParam('gui.timage.h3.height') * scale
-    boxHalf = 3 * scale
-    #if type(colour) != str:
-      #colour = colour.hexadecimal
-    #colour = "#000000"
+    boxWidth = int(targetWidth * scale)
+    boxHeight = int(targetHeight * scale)
+    boxHalf = int(3 * scale)
+
     bgcolour=  OV.GetParam('gui.html.table_firstcol_colour').hexadecimal
     im = Image.new('RGBA', (boxWidth,boxHeight), (0,0,0,0))
     draw = ImageDraw.Draw(im)
@@ -3257,7 +3294,7 @@ class HealthOfStructure():
     draw.rectangle(box, fill=fill)
 
 
-    font_l = IT.registerFontInstance("Vera", 8 * scale)
+    font_l = IT.registerFontInstance("Vera", int(8 * scale))
     if self.is_CIF:
       fill = IT.adjust_colour(fill, luminosity=1.9)
       draw.text((2, boxHeight - 2*8), "CIF", font=font_l, fill=fill)
@@ -3297,7 +3334,6 @@ class HealthOfStructure():
 
     display = IT.get_unicode_characters(display)
 
-
     if boxWidth < 80 * scale:
       font_size = 14
       font_size_s = 8
@@ -3312,8 +3348,8 @@ class HealthOfStructure():
       y = int(boxHeight/45 * scale)
       y_s = 0 * scale
 
-    font = IT.registerFontInstance("Vera", font_size * scale)
-    font_s = IT.registerFontInstance("Vera", font_size_s * scale)
+    font = IT.registerFontInstance("Vera", int(font_size * scale))
+    font_s = IT.registerFontInstance("Vera", int(font_size_s * scale))
 
     ## ADD THE Key
 
@@ -3329,37 +3365,26 @@ class HealthOfStructure():
 
     y += 0
     if value_display_extra:
-      dxs,dxy = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=font_size_s * scale)
-    dx,dy = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=font_size * scale)
+      dxs,dxy = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=int(font_size_s * scale))
+    dx,dy = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=int(font_size * scale))
     x = boxWidth - dx - 7 #right inside margin
     draw.text((x, y), "%s" %value_display, font=font, fill=fill)
     if value_display_extra:
       draw.text((0, y - 1 + dy/2), "%s" %value_display_extra, font=font_s, fill="#ffffff")
 
     _ = im.copy()
-    _ = IT.add_whitespace(im, 'right', 4, "#ffffff")
-    _ = IT.add_whitespace(im, 'left', 4, "#ffffff")
+    _ = IT.add_whitespace(im, 'right', 4*scale, "#ffffff")
+    _ = IT.add_whitespace(im, 'left', 4*scale, "#ffffff")
     OlexVFS.save_image_to_olex(_, "%s_large" %item, 0)
 
-    if self.image_position != "last":
-      im = IT.add_whitespace(im, 'right', 4, bgcolour)
-    im = im.resize((boxWidth/scale, boxHeight/scale), Image.ANTIALIAS)
-    im = IT.add_whitespace(im, side='bottom', weight=2, colour=bgcolour)
+    #if self.image_position != "last":
+      #im = IT.add_whitespace(im, 'right', 4, bgcolour)
+    im = IT.add_whitespace(im, side='bottom', weight=2*scale, colour=bgcolour)
+
+    self.im_cache[cache_entry] = im
+    im = IT.resize_image(im, ((targetWidth),(targetHeight+2)), name=cache_entry)
 
     OlexVFS.save_image_to_olex(im, item, 0)
-    href = OV.GetParam('user.diagnostics.%s.%s.href' %(self.scope,item))
-    target = OV.GetParam('user.diagnostics.%s.%s.target' %(self.scope,item))
-    txt = ""
-    ref_open = ''
-    ref_close = ''
-    if href:
-      if href == "atom":
-        href = "sel %s" %OV.GetParam('snum.refinement.%s_atom' %item)
-      if item != 'max_hole':
-        ref_open = '<a target="%s" href="%s">' %(target, href)
-        ref_close = "</a>"
-    txt += '''
-<td align='center'>%s<zimg src="%s"/>%s</td>''' %(ref_open, item, ref_close)
     return txt
 
   def get_bg_colour(self, item, val):
