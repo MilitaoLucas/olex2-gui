@@ -186,11 +186,12 @@ def export_parameters(load_phil=True):
   for step, s in zip(font_size_steps, font_size_rel_size):
     step = int(step)
     s = int(s)
-    if _ > step:
+    if _ >= step:
       OV.SetVar('HtmlGuiFontSize',OV.GetParam('gui.html.font_size')+s)
       OV.SetVar('HtmlFontSizeControls',OV.GetParam('gui.html.font_size_controls')+s)
       OV.SetVar('HtmlFontSizeLarge',OV.GetParam('gui.html.font_size_large')+s)
       OV.SetVar('HtmlFontSizeMedium',OV.GetParam('gui.html.font_size_medium')+s)
+      OV.SetVar('HtmlFontSizeMedium',OV.GetParam('gui.html.font_size_extra_large')+s)
       break
 
   OV.SetVar('HtmlTableFirstcolColour', OV.GetParam('gui.html.table_firstcol_colour').hexadecimal)
@@ -244,11 +245,6 @@ class Skin():
           new_width = int(info)
         else:
           new_width = info
-
-        if new_width < 400:
-          OV.SetParam('gui.skin.extension', 'small')
-        if new_width > 600:
-          OV.SetVar('gui_html_font_size',html_font_size +2)
 
       except:
         toks = info.split('_')
