@@ -2121,7 +2121,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
 
       if cut > width:
         cut = width - 1
-        print ("WARNING: HtmlPanelWidth is smaller than intended. Some GUI images may not display correctly")
+        #print ("WARNING: HtmlPanelWidth is smaller than intended. Some GUI images may not display correctly")
       for state in states:
         for item in buttons:
           #cbtn buttons also need special width
