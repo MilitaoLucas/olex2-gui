@@ -269,7 +269,7 @@ class Skin():
       if not w:
         w = OV.GetParam('gui.htmlpanelwidth', None)
       if w:
-        IT.set_htmlpanel_width(new_width)
+        IT.set_htmlpanel_width(w)
 #        olx.HtmlPanelWidth(w)
 
     try:
