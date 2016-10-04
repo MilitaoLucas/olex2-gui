@@ -23,7 +23,9 @@ while not os.path.exists(out_fn):
     exit(1)
 with open(out_fn, "rU") as stdout:
   while p.poll() is None:
-    print stdout.read()
+    x = stdout.read()
+    if x:
+      print x
     time.sleep(3)
 with open(err_fn, "rU") as stderr:
   print stderr.read()
