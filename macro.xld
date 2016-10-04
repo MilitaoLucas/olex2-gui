@@ -821,7 +821,7 @@
 <panel help="Set the width of the Control Panel"
   <body
     <args
-      <arg1 name="width" def="spy.GetParam(gui.htmlpanelwidth)">
+      <arg1 name="width" def="html.ClientWidth('self')">
       <arg2 name="colour" def="spy.GetParam(gui.timage.base_colour)">
     >
     <cmd

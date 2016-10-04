@@ -9,7 +9,6 @@ from StringIO import StringIO
 
 import OlexVFS
 import RoundedCorners
-from ArgumentParser import ArgumentParser
 import colorsys
 from olexFunctions import OlexFunctions
 from FontInstances import FontInstances
@@ -18,7 +17,19 @@ import os
 global sizedraw
 sizedraw_dummy_draw = ImageDraw.Draw(Image.new('RGBA', (300, 300)))
 import olx
+import olex_gui
 import math
+
+#debug = bool(OV.GetParam('olex2.debug',False))
+debug = False
+
+global dpi_scale
+dpi_scale = olex_gui.GetPPI()[0]/96
+
+global dpi_scaling
+dpi_scaling = OV.GetParam('gui.dpi_scaling')
+
+
 
 # self.params.html.highlight_colour.rgb = self.params.html.highlight_colour.rgb
 # self.params.timage.colour.rgb = self.params.timage.colour.rgb
@@ -59,23 +70,46 @@ class ImageTools(FontInstances):
     self.gui_tab_font_name = "%s Bold" % font
     self.gui_sNumTitle_font_name = "%s Bold" % font
     self.gui_button_font_name = "%s Bold" % font
-
+    self.params = OV.GuiParams()
 
     if olx.HasGUI() == "false":
       self.available_width = 200
       self.available_width_full = 200
     else:
-      self.available_width = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust') - OV.GetParam('gui.html.table_firstcol_width'))
-      self.available_width_full = int(OV.GetParam('gui.htmlpanelwidth') - OV.GetParam('gui.htmlpanelwidth_margin_adjust'))
+#      self.get_available_width()
       self.css = OV.GuiParams().css
+    self.dpi_scale=None
+    self.im_cache = {}
 
+  def get_available_width(self):
+    global dpi_scale
+
+    global dpi_scaling
+    dpi_scaling = OV.GetParam('gui.dpi_scaling')
+
+    if dpi_scaling:
+      w = OV.GetParam('gui.skin.base_width')
+    else:
+      w = olx.html.ClientWidth('self')
+
+    self.skin_width = w
+    self.skin_width_margin = w - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+    self.skin_width_table = self.skin_width_margin - OV.GetParam('gui.html.table_firstcol_width')
+    self.max_width = w
+
+    self.skin_width = self.skin_width_margin
+
+    self.dpi_scale = (int(olx.html.ClientWidth('self'))-OV.GetParam('gui.htmlpanelwidth_margin_adjust'))/self.skin_width
+
+    if debug:
+      print("====== dpi_scaling set to %s ======" %self.dpi_scale)
 
   def drawSpaceGroupInfo(self, draw, luminosity=1.9, right_margin=12, font_name="Times Bold", font_colour=None):
     base_colour = OV.GetParam('gui.html.base_colour').rgb
     left_start = 120
     if not font_colour:
       font_colour = OV.GetParam('gui.html.font_colour').rgb
-    self.width = self.available_width_full
+    self.width = self.skin_width_margin
     try:
       txt_l = []
       txt_sub = []
@@ -381,8 +415,50 @@ class ImageTools(FontInstances):
     OlexVFS.save_image_to_olex(IM, name, 2)
     return name
 
-  def resize_image(self, image, size):
-    image = image.resize(size, Image.ANTIALIAS)
+  def set_htmlpanel_width(self, new_width):
+    if not new_width:
+      return
+    new_width = float(new_width)
+    #if dpi_scaling:
+      #new_width = int(round(new_width*dpi_scale))
+    if new_width <=1:
+      olx.HtmlPanelWidth("%i %%" %int(new_width*100))
+    else:
+      olx.HtmlPanelWidth(new_width)
+    self.get_available_width()
+    if debug:
+      print("============== resized panel to %s, using dpi_scaling: %s ==============" %(new_width, repr(dpi_scaling)))
+      print("---- IT.max_width = %s" %IT.max_width)
+      print("---- gui.htmlpanelwidth = %s" %OV.GetParam('gui.htmlpanelwidth'))
+      print("---- gui.skin.base_width = %s" %OV.GetParam('gui.skin.base_width'))
+      print("---- self.dpi_scale = %s" %IT.dpi_scale)
+      print("======================================================")
+
+  def resize_image(self, image, size, name=None):
+    if not self.dpi_scale:
+      self.get_available_width()
+    s = self.dpi_scale
+    if dpi_scaling:
+      width = int(size[0] * s)
+      height = int(size[1] * s)
+    else:
+      width = int(size[0])
+      height = int(size[1])
+
+    if name:
+      cache_name = "%s_%s" %(name, width)
+      _ = self.im_cache.get(cache_name,None)
+      if _:
+        if repr(width) in cache_name:
+          if debug:
+            print "--- Return %s from Cache!" %name
+          return _
+
+    image = image.resize((width,height), Image.ANTIALIAS)
+    if debug:
+      print "+++ Resize %s (%s)!" %(name, s)
+    if name:
+      self.im_cache[cache_name] = image
     return image
 
   def resize_skin_logo(self, width):
@@ -390,10 +466,9 @@ class ImageTools(FontInstances):
     name = r"skin_logo.png"
     if os.path.exists(logopath):
       im = Image.open(logopath)
-      # width = int(width) - 20
       factor = im.size[0] / width
       height = int(im.size[1] / factor)
-      im = self.resize_image(im, (width, height))
+      im = self.resize_image(im, (width, height), name=name)
       OlexVFS.save_image_to_olex(im, name, 2)
       txt = '<zimg border="0" src="skin_logo.png">'
     else:
@@ -421,7 +496,9 @@ class ImageTools(FontInstances):
         name = name[:-4]
     colourize = args.get('c', False)
     if not width:
-      width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+      #width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+      width = int(IT.skin_width*0.97)
+
     if im:
       if colourize:
         im = self.colourize(im, (0, 0, 0), OV.GetParam('gui.logo_colour'))
@@ -429,7 +506,7 @@ class ImageTools(FontInstances):
       if width < 10: return
       factor = im.size[0] / width
       height = int(im.size[1] / factor)
-      im = self.resize_image(im, (width, height))
+      im = self.resize_image(im, (width, height), name=name)
       OlexVFS.save_image_to_olex(im, name, 2)
     else:
       pass
@@ -464,6 +541,7 @@ class ImageTools(FontInstances):
     pass
 
   def add_whitespace(self, image, side, weight, colour, margin_left=0, margin_right=0, margin_top=0, margin_bottom=0, overwrite=False):
+    weight = int(weight)
     width, height = image.size
     top = 0 + margin_top
     left = 0 + margin_left
@@ -730,6 +808,7 @@ class ImageTools(FontInstances):
         draw = None
     return im, draw
 
+
   def make_round_corners(self, im, radius=10, colour=(80, 130, 130)):
     cache = {}
     im = RoundedCorners.round_image(im, cache, radius, solid_colour=colour)
@@ -815,6 +894,32 @@ class ImageTools(FontInstances):
     except Exception, err:
       print err
 
+  def _shorten_text(self, txt, draw, left_start, width, font):
+    tw = (draw.textsize(txt, font)[0])
+    if tw < width:
+      return txt
+
+    n = int(len(txt)/2)
+    txtbeg = txt[:n]
+    txtend = txt [-n:]
+
+    if left_start > width:
+      left_start = 50 * self.scale
+    else:
+      left_start = left_start
+
+    xx = 0
+    while tw > width - left_start - 5 * self.scale:
+      txtbeg = txt[:n]
+      txtend = txt [-n:]
+      tw = (draw.textsize("%s...%s" %(txtbeg, txtend), font)[0])
+      n -= 1
+      xx += 1
+      if xx > 100 * self.scale:
+        break
+    return "%s...%s" %(txtbeg, txtend)
+
+
   def write_text_to_draw(self,
                          draw,
                          txt,
@@ -854,6 +959,9 @@ class ImageTools(FontInstances):
     txt = self.txt
     font = self.get_font(font_name=self.font_name, font_size=self.font_size)
     self.font = font
+
+    txt = self._shorten_text(txt=txt, draw=draw, font=font, left_start=self.txt_left, width=max_width)
+
     self.font_colour = font_colour
 
     self.get_valign_font_modifications()
@@ -1208,7 +1316,7 @@ class ImageTools(FontInstances):
       left_start = OV.GetParam('gui.timage.cbtn.dot_left')
       colour_off = OV.GetParam('gui.timage.cbtn.dot_colour_off').hexadecimal
       colour_on = OV.GetParam('gui.timage.cbtn.dot_colour_on').hexadecimal
-      l = width - height + left_start
+      l = (width - height + left_start) * scale
       t = pad
       b = height - pad
       r = width - pad
@@ -1218,12 +1326,14 @@ class ImageTools(FontInstances):
       if mark:
         watermark = True
         if watermark:
-          image = self.watermark(image, mark, (l, t), opacity=1)
+          _ = image.size[1] - (pad*scale*2)
+          mark = mark.resize((_,_), Image.ANTIALIAS)
+          image = self.watermark(image, mark, (int(round(l)), int(round(t))), opacity=1)
         else:
           mark_colouriszed = self.colourize(mark, (0, 0, 0), self.params.html.base_colour.rgb)
           IM = Image.new('RGBA', mark.size)
           IM.paste(mark_colouriszed, (0, 0), mark)
-          IM = self.resize_image(IM, (int(image.size[1]), int(image.size[1])))
+          IM = self.resize_image(IM, (image.size[1], image.size[1]), name="mark_colourised")
           image.paste(IM, (l, t))
         return image
       else:
@@ -1281,13 +1391,6 @@ class ImageTools(FontInstances):
 #      IM = IM.resize((height, height))
 #      box = (width - height, 0)
 #      image.paste(IM, box)
-
-  def resize_news_image(self, width_adjust=10, width=None, vfs=False):
-    tag = OV.GetTag().split('-')[0]
-    name = 'news/news-%s' % tag
-    if vfs: name += '_tmp@vfs'
-    else: name += '.png'
-    self.resize_to_panelwidth({'i':name}, width=width, width_adjust=width_adjust)
 
   def make_simple_text_to_image(self, width, height, txt, font_name='Vera', font_size=16, bg_colour='#fff6bf', font_colour='#222222'):
     IM = Image.new('RGB', (width, height), bg_colour)
@@ -1635,9 +1738,9 @@ class ImageTools(FontInstances):
     map += "</map>"
     return map
 
-a = ImageTools()
-if olx.HasGUI == 'true':
-  OV.registerMacro(a.resize_to_panelwidth, 'i-Image&;c-Colourize')
-  OV.registerFunction(a.make_pie_graph, False, 'it')
-  OV.registerFunction(a.resize_news_image, False, 'it')
-OV.registerFunction(a.trim_image, False, 'it')
+IT = ImageTools()
+if olx.HasGUI() == 'true':
+  IT.get_available_width()
+  OV.registerMacro(IT.resize_to_panelwidth, 'i-Image&;c-Colourize')
+  OV.registerFunction(IT.make_pie_graph, False, 'it')
+OV.registerFunction(IT.trim_image, False, 'it')

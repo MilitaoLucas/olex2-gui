@@ -6,6 +6,7 @@ import olx
 import olex
 import olex_fs
 import os
+from ImageTools import IT
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
@@ -17,7 +18,6 @@ import time
 timing = False #bool(OV.GetParam('gui.timing'))
 
 def adjust_skin_colours():
-  from PilTools import IT
   base_colour = OV.GetParam('gui.html.base_colour')
   item = ['tab', 'timage', 'snumtitle']
   for tem in item:
@@ -29,7 +29,6 @@ def adjust_skin_colours():
       IT.adjust_colour(base_colour.rgb, luminosity = OV.GetParam('gui.snumtitle.filefullinfo_colour_L')))
 
 def adjust_skin_luminosity():
-  from PilTools import IT
   base_colour = OV.GetParam('gui.base_colour')
 
   scope_l= ['gui',
@@ -64,7 +63,6 @@ def adjust_skin_luminosity():
         #print "Something has gone wrong with SKIN adjust_skin_luminosity: %s" %ex
 
 def SetGrad():
-  from PilTools import IT
   l = ['top_right', 'top_left', 'bottom_right', 'bottom_left']
   v = []
   for i in xrange(4):
@@ -86,7 +84,7 @@ def SetMaterials():
   olex.m("gl.lm.ClearColor(%s)" %OV.GetParam('gui.skin.clearcolor'))
   olex.m("SetFont Default %s" %OV.GetParam('gui.console_font'))
   olex.m("SetFont Labels %s" %OV.GetParam('gui.labels_font'))
-  olx.HtmlPanelWidth(OV.GetParam('gui.htmlpanelwidth'))
+  #olx.HtmlPanelWidth(OV.GetParam('gui.htmlpanelwidth'))
 
   olex.m("lines %s" %OV.GetParam('gui.lines_of_cmd_text'))
 
@@ -171,18 +169,31 @@ def deal_with_gui_phil(action):
 
 
 def export_parameters(load_phil=True):
-  #try:
-    #if load_phil.lower() == "false":
-      #load_phil = False
-  #except:
-    #load_phil = False
-    #pass
+
+
   if timing:
     t = time.time()
   if check_for_first_run():
     return
   if load_phil:
     deal_with_gui_phil(action='load')
+
+
+  ##Stepwise ajust relative font size according to cut-off
+  font_size_steps = OV.GetParam('gui.font_size_steps')
+  font_size_rel_size = OV.GetParam('gui.font_size_rel_size')
+  _ = int(olx.html.ClientWidth('self'))
+  for step, s in zip(font_size_steps, font_size_rel_size):
+    step = int(step)
+    s = int(s)
+    if _ >= step:
+      OV.SetVar('HtmlGuiFontSize',OV.GetParam('gui.html.font_size')+s)
+      OV.SetVar('HtmlFontSizeControls',OV.GetParam('gui.html.font_size_controls')+s)
+      OV.SetVar('HtmlFontSizeLarge',OV.GetParam('gui.html.font_size_large')+s)
+      OV.SetVar('HtmlFontSizeMedium',OV.GetParam('gui.html.font_size_medium')+s)
+      OV.SetVar('HtmlFontSizeExtraLarge',OV.GetParam('gui.html.font_size_extra_large')+s)
+      break
+
   OV.SetVar('HtmlTableFirstcolColour', OV.GetParam('gui.html.table_firstcol_colour').hexadecimal)
   OV.SetVar('HtmlTableFirstcolWidth', OV.GetParam('gui.html.table_firstcol_width'))
   OV.SetVar('HtmlTableBgColour', OV.GetParam('gui.html.table_bg_colour').hexadecimal)
@@ -202,10 +213,6 @@ def export_parameters(load_phil=True):
   OV.SetVar('HtmlBgColour', OV.GetParam('gui.html.bg_colour').hexadecimal)
   OV.SetVar('HtmlFontName', OV.GetParam('gui.html.font_name'))
   OV.SetVar('HtmlFontColour', OV.GetParam('gui.html.font_colour').hexadecimal)
-  OV.SetVar('HtmlGuiFontSize', OV.GetParam('gui.html.font_size'))
-  OV.SetVar('HtmlFontSizeControls', OV.GetParam('gui.html.font_size_controls'))
-  OV.SetVar('HtmlFontSizeLarge', OV.GetParam('gui.html.font_size_large'))
-  OV.SetVar('HtmlFontSizeMedium', OV.GetParam('gui.html.font_size_medium'))
   OV.SetVar('HtmlPanelWidth', OV.GetParam('gui.htmlpanelwidth'))
   OV.SetVar('HtmlButtonHeight', OV.GetParam('gui.timage.button.height'))
 
@@ -226,34 +233,40 @@ class Skin():
     OV.registerFunction(self.change_skin)
     #self.change()
 
-  def change_skin(self, skin_name, internal_change=False):
+  def change_skin(self, info, internal_change=False):
     new_width = None
-    OV.SetParam('gui.skin.name', skin_name)
+    if not info:
+      info = olx.html.ClientWidth('self')
+
     if not internal_change:
       try:
-        new_width = int(skin_name)
-        if new_width < 400:
-          OV.SetParam('gui.skin.extension', 'small')
+        _ = float(info)
+        if _ > 1:
+          new_width = int(info)
+        else:
+          new_width = info
+
       except:
-        toks = skin_name.split('_')
+        toks = info.split('_')
         if len(toks) == 1: toks.append('')
         OV.SetParam('gui.skin.name', toks[0])
         OV.SetParam('gui.skin.extension', toks[1])
+        deal_with_gui_phil('load')
 
-    olx.fs.Clear(3)
+    olx.fs.Clear()
     OlexVFS.write_to_olex('logo1_txt.htm'," ", 2)
 
     if timing:
       t1 = time.time()
       t2 = 0
 
-    deal_with_gui_phil('load')
     if not internal_change:
       w = new_width
       if not w:
         w = OV.GetParam('gui.htmlpanelwidth', None)
       if w:
-        olx.HtmlPanelWidth(w)
+        IT.set_htmlpanel_width(w)
+#        olx.HtmlPanelWidth(w)
 
     try:
       adjust_skin_luminosity()
@@ -265,18 +278,16 @@ class Skin():
       print "After 'adjust_skin_luminosity': %.2f s (%.5f s)" % ((t - t1), (t - t2))
       t2 = t
 
-    client_width = int(olx.html.ClientWidth('self'))
-    from PilTools import IT
-    IT.resize_skin_logo(client_width)
+    self.TI.run_timage(force_images=False)
+    im = self.TI.make_timage('snumtitle', OV.FileName(), 'on', titleCase=False)
+    OlexVFS.save_image_to_olex(im, "sNumTitle.png", 1)
+    #import initpy
+    #initpy.set_plugins_paths()
 
     if timing:
       t = time.time()
       print "After 'resize_skin_logo': %.2f s (%.5f s)" % ((t - t1), (t - t2))
       t2 = t
-
-    self.TI.run_timage(force_images=True)
-    im = self.TI.make_timage('snumtitle', OV.FileName(), 'on', titleCase=False)
-    OlexVFS.save_image_to_olex(im, "sNumTitle.png", 1)
 
     if timing:
       t = time.time()
@@ -301,15 +312,22 @@ class Skin():
       print "After 'Reload': %.2f s (%.5f s)" % ((t - t1), (t - t2))
       t2 = t
 
-    deal_with_gui_phil('save')
-
     if timing:
       t = time.time()
       print "After 'Save PHIL': %.2f s (%.5f s)" % ((t - t1), (t - t2))
       t2 = t
 
     export_parameters()
+    deal_with_gui_phil('save')
+
     olex.m("spy.make_HOS()")
+
+    try:
+      for plugin in olx.InstalledPlugins:
+        plugin.setup_gui()
+    except:
+      pass
+
     olx.FlushFS()
 
 
