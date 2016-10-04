@@ -7,9 +7,9 @@ gui
   {
   dpi_scaling = True
     .type = bool
-  font_size_steps = 950 750 550 450 420
+  font_size_steps = 950 750 540 450 420 0
     .type = strings
-  font_size_rel_size = '+3' '+2' '+1' '0' '-1'
+  font_size_rel_size = '+3' '+2' '+1' '0' '-1' '-2'
     .type = strings
   internal_scale = 2
     .type = int
