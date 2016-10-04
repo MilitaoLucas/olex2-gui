@@ -34,6 +34,10 @@ import MakeMovie
 import OlexVFS
 import threads_imp as olxth
 
+global cache
+cache = {}
+
+
 
 haveGUI = OV.HasGUI()
 if haveGUI:
@@ -626,6 +630,7 @@ def GetRInfo(txt="",format='html'):
   if not OV.HasGUI():
     return
 
+
   use_history_for_R1_display = True
   if use_history_for_R1_display:
     if olx.IsFileType('cif') == "true":
@@ -638,8 +643,11 @@ def GetRInfo(txt="",format='html'):
           R1 = tree.active_node.R1
         else:
           R1 = 'n/a'
-    font_size = OV.GetParam('gui.html.font_size_extra_large')
+    if R1 == cache.get('R1', None):
+      return cache.get('GetRInfo', 'XXX')
 
+    cache['R1'] = R1
+    font_size = olx.GetVar('HtmlFontSizeExtraLarge')
     if 'html' in format:
       try:
         R1 = float(R1)
@@ -654,7 +662,7 @@ def GetRInfo(txt="",format='html'):
       except:
         t = "<td colspan='2' align='right' rowspan='2' align='right'><font size='%s'><b>%s</b></font></td>" %(font_size, R1)
       finally:
-        return t
+        retVal = t
 
     elif format == 'float':
       try:
@@ -662,7 +670,7 @@ def GetRInfo(txt="",format='html'):
       except:
         t = 0
       finally:
-        return t
+        retVal = t
 
   else:
     if txt:
@@ -683,10 +691,18 @@ def GetRInfo(txt="",format='html'):
         R1 = float(R1)
         col = GetRcolour(R1)
         R1 = "%.2f" %(R1*100)
-        t = r"<td colspan='1' align='center' rowspan='2'><font size='%s' color='%s'><b>%s%%</b></font></td>" %(OV.GetParam('gui.html.font_size_extra_large'), col, R1)
+        t = r"""
+<td colspan='1' align='center' rowspan='2'>
+  <font size='%s' color='%s'>
+    <b>%s%%</b>
+  </font>
+</td>
+""" %(OV.GetParam('gui.html.font_size_extra_large'), col, R1)
       except:
         t = "<td colspan='1' rowspan='2' align='center'><font size='4'><b>%s</b></font></td>" %R1
-    return t
+    retVal = t
+  cache['GetRInfo'] = retVal
+  return retVal
 OV.registerFunction(GetRInfo)
 
 def GetRcolour(R1):

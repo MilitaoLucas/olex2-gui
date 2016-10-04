@@ -191,7 +191,7 @@ def export_parameters(load_phil=True):
       OV.SetVar('HtmlFontSizeControls',OV.GetParam('gui.html.font_size_controls')+s)
       OV.SetVar('HtmlFontSizeLarge',OV.GetParam('gui.html.font_size_large')+s)
       OV.SetVar('HtmlFontSizeMedium',OV.GetParam('gui.html.font_size_medium')+s)
-      OV.SetVar('HtmlFontSizeMedium',OV.GetParam('gui.html.font_size_extra_large')+s)
+      OV.SetVar('HtmlFontSizeExtraLarge',OV.GetParam('gui.html.font_size_extra_large')+s)
       break
 
   OV.SetVar('HtmlTableFirstcolColour', OV.GetParam('gui.html.table_firstcol_colour').hexadecimal)
