@@ -293,8 +293,6 @@ class Skin():
       print "After 'resize_skin_logo': %.2f s (%.5f s)" % ((t - t1), (t - t2))
       t2 = t
 
-
-
     if timing:
       t = time.time()
       print "After 'sNumTitle': %.2f s (%.5f s)" % ((t - t1), (t - t2))
