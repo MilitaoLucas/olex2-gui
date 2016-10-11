@@ -524,6 +524,10 @@ def get_mask_info():
   is_CIF = (olx.IsFileType('cif') == 'true')
 
   numbers = olx.cif_model[current_sNum].get('_%s_void_nr' %base, None)
+
+  if numbers == [u'n/a']:
+    return "no mask info"
+
   if not numbers:
     base = bases[1]
     numbers = olx.cif_model[current_sNum].get('_%s_void_nr' %base)
@@ -557,6 +561,9 @@ def get_mask_info():
     d['electron'] = electron
     d['volume'] = volume
     content = content.strip("'")
+
+    if volume == "n/a":
+      return
 
     if float(volume) < 20:
       continue
