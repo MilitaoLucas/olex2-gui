@@ -124,10 +124,6 @@ def check_for_first_run():
     startup_skin = OV.GetParam('gui.skin.name', 'default')
     if check_os().upper() == 'MAC' and startup_skin == 'default':
       startup_skin = "mac"
-      try:
-        olx.html.SetBorders(8)
-      except:
-        print "Tried to set MAC borders, but failed!"
     _ = Skin()
     _.change_skin(startup_skin, internal_change=not first_run)
     return True
@@ -324,7 +320,10 @@ class Skin():
 
     try:
       for plugin in olx.InstalledPlugins:
-        plugin.setup_gui()
+        try:
+          plugin.setup_gui()
+        except:
+          print "Could not update images for plugin '%s'" %plugin
     except:
       pass
 
