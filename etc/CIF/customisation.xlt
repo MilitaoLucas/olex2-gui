@@ -51,7 +51,7 @@
     <_diffrn_radiation_xray_symbol>
     <_refine_ls_*>
     <_refine_diff_*>
-    <_diffrn_reflns_theta_*>
+    <_diffrn_reflns_*>
     <_diffrn_measured_fraction_*>
     <_exptl_crystal_density_diffrn>
     <_exptl_crystal_F_000>
