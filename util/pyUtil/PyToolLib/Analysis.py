@@ -940,7 +940,7 @@ class Graph(ArgumentParser):
 </font>'''
 
         if all_in_one_history:
-          all_in_oneText = "<a href='spy.SetParam(graphs.program_analysis.all_in_one_history,False)>>spy._make_history_bars()>>html.Update'>Split Display</a>"
+          all_in_oneText = "<a href='spy.SetParam(user.graphs.program_analysis.all_in_one_history,False)>>spy._make_history_bars()>>html.Update'>Split Display</a>"
           previous_img = ""
           next_img = ""
         else:
