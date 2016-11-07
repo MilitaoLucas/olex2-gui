@@ -1248,16 +1248,19 @@ def _check_modes_and_states(name):
     if OV.GetParam('olex2.in_mode') == 'split -r':
       return True
   buttons = ['full-Electron_Density_Map', 'small-Map']
+  vis = False
+  if olx.xgrid.Visible() == 'true' and OV.GetVar("olex2.map_type") == "eden":
+    vis = True
   if name in buttons:
-    if OV.GetParam('olex2.eden_vis') == True:
+    if vis:
       return True
   buttons = ['small-Void']
   if name in buttons:
-    if OV.GetParam('olex2.void_vis') == True:
+    if vis:
       return True
   buttons = ['small-Mask']
   if name in buttons:
-    if OV.GetParam('olex2.mask_vis') == True:
+    if vis:
       return True
 
   buttons = ['btn-solve']

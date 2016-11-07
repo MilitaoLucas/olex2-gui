@@ -753,12 +753,6 @@ olex2
     .type = str
   main_toolbar_vline_position = 100
     .type = int
-  eden_vis = False
-    .type = bool
-  void_vis = False
-    .type = bool
-  mask_vis = False
-    .type = bool
   hover_buttons = True
     .type = bool
   news_img_link_url = "www.olex2.org"
