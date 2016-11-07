@@ -10,13 +10,14 @@ class MapUtil:
 
   def deal_with_map_buttons(self, onoff, img_bases, map_type):
     ## First, set all images to hidden
-    if olx.xgrid.Visible() == 'true':
-      if OV.GetVar("olex2.map_type") != map_type:
-        onoff = "on"
+    if onoff is None:
+      if olx.xgrid.Visible() == 'true':
+        if OV.GetVar("olex2.map_type") != map_type:
+          onoff = "on"
+        else:
+          onoff = "off"
       else:
-        onoff = "off"
-    else:
-      onoff = "on"
+        onoff = "on"
 
     if onoff == 'off':
       olex.m('xgrid.visible(false)')
