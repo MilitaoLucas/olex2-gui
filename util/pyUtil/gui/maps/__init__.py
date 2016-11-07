@@ -10,19 +10,15 @@ class MapUtil:
 
   def deal_with_map_buttons(self, onoff, img_bases, map_type):
     ## First, set all images to hidden
-    tl = ['eden', 'void', 'mask']
-    for item in tl:
-      if item != map_type:
-        OV.SetParam('olex2.%s_vis' %item, False)
-
-    if not onoff:
-      if OV.GetParam('olex2.%s_vis' %map_type) == False:
-        onoff = 'on'
-      elif OV.GetParam('olex2.%s_vis' %map_type) == True:
-        onoff = 'off'
+    if olx.xgrid.Visible() == 'true':
+      if OV.GetVar("olex2.map_type") != map_type:
+        onoff = "on"
+      else:
+        onoff = "off"
+    else:
+      onoff = "on"
 
     if onoff == 'off':
-      OV.SetParam('olex2.%s_vis' %map_type,False)
       olex.m('xgrid.visible(false)')
       for img_base in img_bases:
         use_image= "up=%soff.png" %img_base
@@ -30,7 +26,6 @@ class MapUtil:
       retVal = True
 
     if onoff == 'on':
-      OV.SetParam('olex2.%s_vis' %map_type,True)
       for img_base in img_bases:
         use_image= "up=%son.png" %img_base
         OV.SetImage("IMG_%s" %img_base.upper(),use_image)
@@ -74,7 +69,7 @@ class MapUtil:
 
 
     self.deal_with_controls()
-    OV.SetParam('olex2.void_vis',True)
+    OV.SetVar('olex2.map_type', 'void')
 
   def void_observer(self, msg):
     try:
@@ -91,7 +86,7 @@ class MapUtil:
     self.SetXgridView(False)
     olex.m('spy.OlexCctbxMasks(True, True)')
     self.deal_with_controls()
-    OV.SetVar('olex2.mask_vis',True)
+    OV.SetVar('olex2.map_type', 'mask')
 
   def MapView(self, onoff=None):
     img_bases = ['full-Electron_Density_Map', 'small-Map']
@@ -126,7 +121,7 @@ class MapUtil:
       olex.m("calcFourier -%s -%s -r=%s %s" %(map_type, map_source, map_resolution, mask_val))
 
     self.deal_with_controls()
-    OV.SetVar('olex2.eden_vis',True)
+    OV.SetVar('olex2.map_type', 'eden')
 
   def SetXgridView(self, update_controls=True):
     view = OV.GetParam("snum.xgrid.view")

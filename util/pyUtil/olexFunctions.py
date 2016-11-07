@@ -46,6 +46,13 @@ class OlexFunctions(inheritFunctions):
       print >> sys.stderr, "Variable %s could not be set with value %s" %(variable,value)
       sys.stderr.formatExceptionInfo()
 
+  def GetVar(self,variable,def_val=""):
+    try:
+      return olex_core.FindValue(variable,def_val)
+    except Exception, ex:
+      print >> sys.stderr, "Variable %s could not be retrieved" %(variable)
+      sys.stderr.formatExceptionInfo()
+
   def _replace_object(self, scope, object):
     for i, tobj in enumerate(scope.objects):
       if tobj.name == object.name:

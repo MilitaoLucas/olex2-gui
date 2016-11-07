@@ -110,9 +110,9 @@ def check_os():
 
 def check_for_first_run():
   import olexex
-  first_run = not os.path.exists("%s/global.odb" %OV.DataDir())
+  first_run = not os.path.exists("%s/global.odb" %OV.DataDir()) or olexex.check_for_recent_update()
 ## 2016-07-26 do we need changing skin on update any longer? I doubt
-#    or olexex.check_for_recent_update()
+## With the new scalable skins it should now be OK to run this.
   if first_run:
     try:
       # olx.SkinUpdated is intentionally not there:
@@ -124,10 +124,6 @@ def check_for_first_run():
     startup_skin = OV.GetParam('gui.skin.name', 'default')
     if check_os().upper() == 'MAC' and startup_skin == 'default':
       startup_skin = "mac"
-      try:
-        olx.html.SetBorders(8)
-      except:
-        print "Tried to set MAC borders, but failed!"
     _ = Skin()
     _.change_skin(startup_skin, internal_change=not first_run)
     return True
@@ -324,7 +320,10 @@ class Skin():
 
     try:
       for plugin in olx.InstalledPlugins:
-        plugin.setup_gui()
+        try:
+          plugin.setup_gui()
+        except:
+          print "Could not update images for plugin '%s'" %plugin
     except:
       pass
 

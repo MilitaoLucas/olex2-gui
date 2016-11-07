@@ -216,9 +216,9 @@ class HARt(object):
     status_completed = "<font color='%s'><b>Finished</b></font>" %OV.GetParam('gui.green')
     status_error = "<font color='%s'><b>Error!</b></font>" %OV.GetParam('gui.red')
     status_stopped = "<font color='%s'><b>Stopped</b></font>" %OV.GetParam('gui.red')
-    status_nostart = "<font color='%s'><b>No Start/b></font>" %OV.GetParam('gui.red')
+    status_nostart = "<font color='%s'><b>No Start</b></font>" %OV.GetParam('gui.red')
 
-    for i in range(min(5, len(self.jobs))):
+    for i in range(len(self.jobs)):
       OUT_file = self.jobs[i].out_fn
 
       try:
