@@ -2446,6 +2446,10 @@ class item_vs_resolution_plot(Analysis):
     from reflection_statistics import item_vs_resolution
     params = getattr(self.params, self.item)
     xy_plot = item_vs_resolution(item=self.item, n_bins=params.n_bins, resolution_as=params.resolution_as).xy_plot_info()
+    while None in xy_plot.y:
+      params.n_bins -= 1
+      xy_plot = item_vs_resolution(item=self.item, n_bins=params.n_bins, resolution_as=params.resolution_as).xy_plot_info()
+
     self.metadata.setdefault("y_label", xy_plot.yLegend)
     self.metadata.setdefault("x_label", xy_plot.xLegend)
     self.metadata.setdefault("shapes",[])
@@ -3064,7 +3068,7 @@ class HealthOfStructure():
       counter += 1
       if self.scope == "hkl":
         if self.supplied_cif and item == "Rint":
-          value = self.supplied_cif.getValue('_diffrn_reflns_av_R_equivalents',0)
+          value = self.supplied_cif.get('_diffrn_reflns_av_R_equivalents',0)
         else:
           value = self.hkl_stats[item]
 
@@ -3250,7 +3254,10 @@ class HealthOfStructure():
 
     cache_entry = "%s_%s_%s" %(item, value_raw, targetWidth)
     cache_image = self.im_cache.get(cache_entry,None)
-    if cache_image:
+    cache_entry_large = "%s_large_%s_%s" %(item, value_raw, targetWidth)
+    cache_image_large = self.im_cache.get(cache_entry_large,None)
+
+    if cache_image and cache_image_large:
       if debug:
         print "HOS from Cache: %s" %cache_entry
       im = IT.resize_image(cache_image, (targetWidth, targetHeight), name=cache_entry)
