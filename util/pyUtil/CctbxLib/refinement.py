@@ -267,8 +267,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
           self.f_mask = olx.current_mask.f_mask()
       elif os.path.exists("%s/%s-f_mask.pickle" %(filepath, OV.FileName())):
         self.f_mask = easy_pickle.load("%s/%s-f_mask.pickle" %(filepath, OV.FileName()))
+      fab_path = "%s/%s.fab" %(OV.FilePath(), OV.FileName())
       if self.f_mask is None:
-        fab_path = "%s/%s.fab" %(OV.FilePath(), OV.FileName())
         if os.path.exists(fab_path):
           with open(fab_path) as fab:
             indices = []
@@ -288,6 +288,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
         if not fo_sq.space_group().is_centric():
           self.f_mask = self.f_mask.generate_bijvoet_mates()
         self.f_mask = self.f_mask.common_set(fo_sq)
+        with open(fab_path, "w") as f:
+          for i,h in enumerate(self.f_mask.indices()):
+            line = "%d %d %d " %h + "%.4f %.4f" % (self.f_mask.data()[i].real, self.f_mask.data()[i].imag)
+            print >> f, line
     restraints_manager = self.restraints_manager()
     #put shared parameter constraints first - to allow proper bookkeeping of
     #overrided parameters (U, sites)
