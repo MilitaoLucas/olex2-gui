@@ -1,7 +1,5 @@
-<!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width="15%">%Contours%</td>
-  <td colspan='1' width="75%">
+  <td width="12%">%Contours%</td>
+  <td width="80%">
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       align="right"
@@ -20,7 +18,7 @@ html.SetValue(SNUM_XGRID_CONTOUR_VALUE,xGrid.Contours())"
     >
     </font>
   </td>
-  <td cwidth="10%">
+  <td width="8%">
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="text"
@@ -37,3 +35,80 @@ html.SetValue(SNUM_XGRID_CONTOUR_SLIDE,xGrid.Contours())"
     </font>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MAP_2D_FIX';help_ext=map-2D-fix;1 -->
+
+  <td width="12%">%Step%</td>
+  <td width="30%">
+    <font size='$GetVar(HtmlFontSizeControls)'>
+    <input
+      align="right"
+      type="slider"
+      name="SNUM_XGRID_STEP_SLIDE"
+      width="100%"
+      height="18"
+      value="1"
+      bgcolor="$GetVar(HtmlTableBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
+      min="0"
+      max="20"
+      onchange="
+html.SetValue(SNUM_XGRID_STEP_VALUE,math.eval(0.05*html.GetValue(~name~)))>>
+xgrid.fix(html.GetValue(SNUM_XGRID_FIX_VALUE), html.GetValue(SNUM_XGRID_STEP_VALUE))"
+    >
+    </font>
+  </td>
+  <td width="8%">
+    <font size='$GetVar(HtmlFontSizeControls)'>
+    <input
+      type="text"
+      name = "SNUM_XGRID_STEP_VALUE"
+      width="100%"
+      height="18"
+      bgcolor="$GetVar(HtmlTableBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
+      value="0.1"
+      onchange="
+html.SetValue(SNUM_XGRID_STEP_SLIDE,math.eval(20*html.GetValue(~name~)))>>
+xgrid.fix(html.GetValue(SNUM_XGRID_FIX_VALUE), html.GetValue(SNUM_XGRID_STEP_VALUE))"
+    >
+    </font>
+
+
+  <td width="12%">%Fix Value%</td>
+  <td width="30%">
+    <font size='$GetVar(HtmlFontSizeControls)'>
+    <input
+      align="right"
+      type="slider"
+      name="SNUM_XGRID_FIX_SLIDE"
+      width="100%"
+      height="18"
+      value="math.eval(10*spy.gui.maps.Round(xgrid.GetMin(),1))"
+      bgcolor="$GetVar(HtmlTableBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
+      min="-20"
+      max="20"
+      onchange="
+html.SetValue(SNUM_XGRID_FIX_VALUE,math.eval(0.1*html.GetValue(~name~)))>>
+xgrid.fix(html.GetValue(SNUM_XGRID_FIX_VALUE), html.GetValue(SNUM_XGRID_STEP_VALUE))"
+    >
+    </font>
+  </td>
+  <td width="8%">
+    <font size='$GetVar(HtmlFontSizeControls)'>
+    <input
+      type="text"
+      name = "SNUM_XGRID_FIX_VALUE"
+      width="100%"
+      height="18"
+      bgcolor="$GetVar(HtmlTableBgColour)"
+      fgcolor="$GetVar(HtmlFontColour)"
+      value="spy.gui.maps.Round(xgrid.GetMin(),1)"
+      onchange="
+html.SetValue(SNUM_XGRID_FIX_SLIDE,math.eval(10*html.GetValue(~name~)))>>
+xgrid.fix(html.GetValue(SNUM_XGRID_FIX_VALUE), html.GetValue(SNUM_XGRID_STEP_VALUE))"
+    >
+    </font>
+  </td>
