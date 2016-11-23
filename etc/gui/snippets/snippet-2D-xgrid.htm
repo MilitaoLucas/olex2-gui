@@ -1,6 +1,13 @@
-<!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width="15%">%Depth%</td>
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MAP_2D_CONTOURS';help_ext=map-2D-contours;1 -->
+
+<!-- #include 2D-contours gui\snippets\snippet-contour-xgrid.htm;1; -->
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MAP_2D_DEPTH_SIZE';help_ext=map-2D-depth-size;1 -->
+  <td width="12%">%Depth%</td>
   <td colspan='1'  width="75%">
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
@@ -40,7 +47,7 @@ html.SetValue(SNUM_XGRID_DEPTH_SLIDE,math.eval(html.GetValue(~name~)*5))"
 </tr>
 
 <tr name=XGRID_SIZE_SLIDER>
-  <td width="15%">%Size%</td>
+  <td width="12%">%Size%</td>
   <td colspan='1' width="75%">
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
