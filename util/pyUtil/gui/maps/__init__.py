@@ -136,10 +136,16 @@ class MapUtil:
     elif view == "points":
       olex.m("xgrid.RenderMode(point)")
     else:
-      olex.m("xgrid.RenderMode(%s)" %view)
+      view += " " + OV.GetParam("snum.xgrid.heat_colours","")
+      olex.m("xgrid.RenderMode %s" %view)
     olex.m("xgrid.Extended(%s)" %extended)
     if update_controls in (True, 'true'):
       self.deal_with_controls()
+
+  def Round(self, value, digits):
+    value = float(value)
+    e = "%%.%sf" %digits
+    return e%value
 
 
 if OV.HasGUI():
@@ -148,3 +154,4 @@ if OV.HasGUI():
   OV.registerFunction(mu.SetXgridView, False, "gui.maps")
   OV.registerFunction(mu.MapView, False, "gui.maps")
   OV.registerFunction(mu.MaskView, False, "gui.maps")
+  OV.registerFunction(mu.Round, False, "gui.maps")

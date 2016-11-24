@@ -1,8 +1,8 @@
 <td width='10%'>
-View 
+View
 </td>
 
-<td width='30%'>
+<td width='25%'>
   <font size='$GetVar(HtmlFontSizeControls)'>
   <input
     type="combo"
@@ -20,8 +20,66 @@ View
   </font>
 </td>
 
+
+<!-- #ignoreif not(or(strcmp(xgrid.RenderMode(),'contour+plane'),strcmp(xgrid.RenderMode(),'plane')))
+<td width='10%'>
+Colours
+</td>
+
+<td width='10%'>
+  <input
+    type="combo"
+    height="$GetVar(HtmlComboHeight)"
+    width='30'
+    bgcolor="$GetVar(HtmlInputBgColour)"
+    name="SET_SNUM_XGRID_HEAT_COLOURS#suffix"
+    items='2;3;5;7'
+    value="$spy.GetParam(snum.xgrid.heat_colours)"
+    onchange="spy.SetParam(snum.xgrid.heat_colours,html.GetValue(~name~))
+>>spy.gui.maps.SetXgridView()
+>>html.Update"
+    valign="center"
+    readonly
+  >
+</td>
+
+<td width='15%'>
+min:
+<b>
+$spy.gui.maps.Round(xgrid.GetMin(),3)
+</b>
+</td>
+
+<td width='15%'>
+max:
+<b>
+$spy.gui.maps.Round(xgrid.GetMax(),3)
+</b>
+</td>
+
+
+<!--<td width='10%' align='centre'>-->
+<!--<b>-->
+<!--<input-->
+  <!--type='label'-->
+  <!--value='spy.gui.maps.Round(xgrid.GetMax(),3)'-->
+  <!--name='XGRID_MAX'-->
+  <!--width='100%'-->
+  <!--bgcolor="GetVar(HtmlTableBgColour)"-->
+<!-->-->
+<!--</b>-->
+<!--</td>-->
+
+
+#ignoreif -->
+
+
+
+
+<!-- #ignoreif or(strcmp(xgrid.RenderMode(),'contour+plane'),strcmp(xgrid.RenderMode(),'plane'),strcmp(xgrid.RenderMode(),'contour'))
+
 <td width='12%'>
-Extended 
+Extended
 </td>
 
 <td width='8%'>
@@ -42,6 +100,10 @@ Extended
   >
   </font>
 </td>
+#ignoreif -->
+
+
+
 <td align='right'>
   <a href="editmaterial XGrid">%Edit% %style%</a>
   <!--<a href="sel WBox">%Select% %Volume%</a>-->
