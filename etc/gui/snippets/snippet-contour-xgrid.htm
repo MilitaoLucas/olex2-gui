@@ -1,5 +1,5 @@
-  <td width="12%">%Contours%</td>
-  <td width="80%">
+  <td width="10%">%Contour%</td>
+  <td width="82%">
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       align="right"
@@ -39,8 +39,8 @@ html.SetValue(SNUM_XGRID_CONTOUR_SLIDE,xGrid.Contours())"
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MAP_2D_FIX';help_ext=map-2D-fix;1 -->
 
-  <td width="12%">%Step%</td>
-  <td width="30%">
+  <td width="10%"><a href="xgrid.fix 1 0>>html.SetValue(SNUM_XGRID_STEP_VALUE,0)>>html.SetValue(SNUM_XGRID_STEP_SLIDE,0)">%Step%</a></td>
+  <td width="32%">
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       align="right"
@@ -51,8 +51,8 @@ html.SetValue(SNUM_XGRID_CONTOUR_SLIDE,xGrid.Contours())"
       value="1"
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
-      min="0"
-      max="20"
+      min="-10"
+      max="10"
       onchange="
 html.SetValue(SNUM_XGRID_STEP_VALUE,math.eval(0.05*html.GetValue(~name~)))>>
 xgrid.fix(html.GetValue(SNUM_XGRID_FIX_VALUE), html.GetValue(SNUM_XGRID_STEP_VALUE))"
@@ -68,7 +68,7 @@ xgrid.fix(html.GetValue(SNUM_XGRID_FIX_VALUE), html.GetValue(SNUM_XGRID_STEP_VAL
       height="18"
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
-      value="0.1"
+      value="0"
       onchange="
 html.SetValue(SNUM_XGRID_STEP_SLIDE,math.eval(20*html.GetValue(~name~)))>>
 xgrid.fix(html.GetValue(SNUM_XGRID_FIX_VALUE), html.GetValue(SNUM_XGRID_STEP_VALUE))"
@@ -76,7 +76,7 @@ xgrid.fix(html.GetValue(SNUM_XGRID_FIX_VALUE), html.GetValue(SNUM_XGRID_STEP_VAL
     </font>
 
 
-  <td width="12%">%Fix Value%</td>
+  <td width="12%" align='right'>%Fix Value%</td>
   <td width="30%">
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input

@@ -1,6 +1,6 @@
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MAP_3D';help_ext=map-3D;1 -->
-  <td width="10%">%Level%</td>
-  <td width="70%">
+  <td width="15%">%Level%&nbsp;/e&Aring;<sup>-3</sup></td>
+  <td width="75%">
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       align="right"
@@ -8,18 +8,18 @@
       name="SNUM_XGRID_SLIDE"
       width="100%"
       height="18"
-      value="$math.eval(spy.GetParam(snum.xgrid.value)*50)"
+      value="$spy.gui.maps.Round(xgrid.Scale(),3)"
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
-      min="$math.eval(xgrid.GetMin()*50)"
-      max="0"
-      onchange="spy.SetParam(snum.xgrid.value,math.eval(html.GetValue(~name~)/50))>>
+      min="$math.eval(xgrid.GetMin()*10)"
+      max="$math.eval(xgrid.Getmax()*10)"
+      onchange="spy.SetParam(snum.xgrid.value,math.eval(html.GetValue(~name~)/10))>>
 html.SetValue(SNUM_XGRID_VALUE,spy.GetParam(snum.xgrid.value))>>
 xgrid.Scale(html.GetValue(SNUM_XGRID_VALUE))>>"
     >
     </font>
   </td>
-  <td width="10%">
+  <td width="8%" align='right'>
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type="text"
@@ -31,11 +31,7 @@ xgrid.Scale(html.GetValue(SNUM_XGRID_VALUE))>>"
       value="$spy.GetParam(snum.xgrid.value)"
       onreturn="spy.SetParam(snum.xgrid.value,html.GetValue(~name~))>>
 xgrid.Scale(html.GetValue(~name~))>>
-html.SetValue(SNUM_XGRID_SLIDE,math.eval(XGrid.Scale()*50))"
+html.SetValue(SNUM_XGRID_SLIDE,math.eval(XGrid.Scale()*10))"
     >
     </font>
-  </td>
-  <td width='10%' align='right'>
-  e / &Aring;<sup>3</sup>
-  </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

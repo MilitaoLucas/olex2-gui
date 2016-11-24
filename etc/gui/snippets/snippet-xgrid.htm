@@ -43,17 +43,32 @@ Colours
   >
 </td>
 
-<td width='10%'>
+<td width='15%'>
+min:
 <b>
 $spy.gui.maps.Round(xgrid.GetMin(),3)
 </b>
 </td>
 
-<td width='10%'>
+<td width='15%'>
+max:
 <b>
 $spy.gui.maps.Round(xgrid.GetMax(),3)
 </b>
 </td>
+
+
+<!--<td width='10%' align='centre'>-->
+<!--<b>-->
+<!--<input-->
+  <!--type='label'-->
+  <!--value='spy.gui.maps.Round(xgrid.GetMax(),3)'-->
+  <!--name='XGRID_MAX'-->
+  <!--width='100%'-->
+  <!--bgcolor="GetVar(HtmlTableBgColour)"-->
+<!-->-->
+<!--</b>-->
+<!--</td>-->
 
 
 #ignoreif -->
@@ -62,6 +77,7 @@ $spy.gui.maps.Round(xgrid.GetMax(),3)
 
 
 <!-- #ignoreif or(strcmp(xgrid.RenderMode(),'contour+plane'),strcmp(xgrid.RenderMode(),'plane'),strcmp(xgrid.RenderMode(),'contour'))
+
 <td width='12%'>
 Extended
 </td>
