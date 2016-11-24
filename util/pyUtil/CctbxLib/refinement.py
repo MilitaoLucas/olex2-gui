@@ -811,8 +811,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
         fmt_str = "%i %i %i %f %f %f %f"
 
     else:
-      print "list code %i not supported" %list_code
-      return
+      print "LIST code %i not supported" %list_code
+      return None, None
     # cctbx could make e.g. 1.001(1) become 1.0010(10), so use Olex2 values for cell
 
     cif = iotbx.cif.model.cif()
@@ -837,6 +837,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
     except: return
 
     fcf_cif, fmt_str = self.create_fcf_content(list_code)
+    if not fcf_cif:
+      print "Unsupported list (fcf) format."
+      return
     f = open(OV.file_ChangeExt(OV.FileFull(), 'fcf'), 'w')
     fcf_cif.show(out=f, loop_format_strings={'_refln':fmt_str})
     f.close()
