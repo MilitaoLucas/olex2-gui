@@ -13,6 +13,11 @@ import variableFunctions
 
 from gui.images import GI
 
+gui_green = OV.GetParam('gui.green')
+gui_orange = OV.GetParam('gui.orange')
+gui_red = OV.GetParam('gui.red')
+
+
 class GeneratedGuiMaker(object):
   def __init__(self):
 
@@ -646,12 +651,23 @@ OV.registerFunction(restraint_builder)
 
 have_found_python_error = False
 
+def actaGuiDisplay():
+  t = ""
+  _ = olx.Ins('acta')
+  if _ == "n/a":
+    t = "<font color='%s'>No ACTA</font>" %gui_red
+  elif not _:
+    t = "<font color='%s'>ACTA</font>" %gui_green
+  else:
+    t = "<font color='%s'>ACTA %s</font>" %(gui_green, _)
+  return t
+OV.registerFunction(actaGuiDisplay)
+
+
+
 def weightGuiDisplay():
   if olx.IsFileType('ires').lower() == 'false':
     return ''
-  gui_green = OV.GetParam('gui.green')
-  gui_orange = OV.GetParam('gui.orange')
-  gui_red = OV.GetParam('gui.red')
   longest = 0
   retVal = ""
   current_weight = olx.Ins('weight')
@@ -686,9 +702,7 @@ def weightGuiDisplay():
   txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update")
   txt_Weight = OV.TranslatePhrase("Weight")
   html = '''
-  <td align='left' width='50%%'>
     <b>%s: <a target="%s" href="UpdateWght%s>>html.Update">%s</a></b>
-  </td>
     ''' %(txt_Weight, "Update Weighting Scheme", wght_str, html_scheme)
   return html
 OV.registerFunction(weightGuiDisplay)
