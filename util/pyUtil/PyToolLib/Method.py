@@ -3,6 +3,7 @@ import olx
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
+
 definedControls = []
 
 class Method(object):
@@ -30,6 +31,9 @@ class Method(object):
     assert 0, 'do_run must be defined!'
 
   def run(self, RunPrgObject):
+    debug = bool(OV.GetParam('olex2.debug',False))
+    timer = debug
+    import time
     if Method.running:
       return False
     Method.running = True
@@ -40,7 +44,11 @@ class Method(object):
         self.command_line_options = OV.GetParam(name, None)
       else:
         self.command_line_options = None
+      if timer:
+        t1 = time.time()
       self.do_run(RunPrgObject)
+      if timer:
+        print "-- self.do_run(RunPrgObject): %.3f" %(time.time() - t1)
       return True
     finally:
       Method.running = False
@@ -277,20 +285,20 @@ class Method_refinement(Method):
           olx.UpdateWght(*suggested_weight)
 
     if RunPrgObject.params.user.auto_insert_acta_stuff:
-      radiation = olx.xf.exptl.Radiation()
+#      radiation = olx.xf.exptl.Radiation()
 
       # Check whether these are present. If so, do nothing.
-      more = olx.Ins('MORE')
-      if more == "n/a":
-        OV.AddIns("MORE -1")
-      bond = olx.Ins('BOND')
-      if bond == "n/a" or not bond:
-        OV.AddIns("BOND $H", quiet=True)
+      #more = olx.Ins('MORE')
+      #if more == "n/a":
+        #OV.AddIns("MORE -1")
+      #bond = olx.Ins('BOND')
+      #if bond == "n/a" or not bond:
+        #OV.AddIns("BOND $H", quiet=True)
       acta= olx.Ins('ACTA')
       if acta == "n/a":
-        if radiation == "0.71073":
-          OV.AddIns("ACTA 52")
-      OV.AddIns('CONF', quiet=True)
+ #       if radiation == "0.71073":
+        OV.AddIns("ACTA")
+      #OV.AddIns('CONF', quiet=True)
 
     if RunPrgObject.make_unique_names:
       pass
@@ -321,7 +329,7 @@ class Method_refinement(Method):
   REM %(_refine_ls_number_parameters)s parameters refined using %(_refine_ls_number_restraints)s restraints
   REM Highest difference peak %(_refine_diff_density_max)s, deepest hole %(_refine_diff_density_min)s
   REM Mean Shift %(_refine_ls_shift/su_mean)s, Max Shift %(_refine_ls_shift/su_max)s.
-  
+
   REM +++ Tabular Listing of Refinement Information +++
   REM R1_all = %(_refine_ls_R_factor_all)s
   REM R1_gt = %(_refine_ls_R_factor_gt)s
@@ -335,7 +343,7 @@ class Method_refinement(Method):
   REM Hole = %(_refine_diff_density_min)s
   REM Peak = %(_refine_diff_density_max)s
   REM Flack = %(_refine_ls_abs_structure_Flack)s
-  
+
   ''' %d
     if not file_name:
       file_name = '%s/%s.res' %(OV.FilePath(), OV.FileName())

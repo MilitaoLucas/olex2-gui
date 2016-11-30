@@ -478,9 +478,11 @@ class ImageTools(FontInstances):
 
   def resize_to_panelwidth(self, args, width_adjust=0, width=None):
     import olex
+    do_cache_image = True
     name = args['i']
     im = None
     if name.endswith("@vfs"):  # name_tmp@vfs
+      do_cache_image = False
       name = name[:-4]
       s = OlexVFS.read_from_olex(name)
       olex.writeImage(name, "")
@@ -506,7 +508,10 @@ class ImageTools(FontInstances):
       if width < 10: return
       factor = im.size[0] / width
       height = int(im.size[1] / factor)
-      im = self.resize_image(im, (width, height), name=name)
+      if do_cache_image:
+        im = self.resize_image(im, (width, height), name=name)
+      else:
+        im = self.resize_image(im, (width, height))
       OlexVFS.save_image_to_olex(im, name, 2)
     else:
       pass

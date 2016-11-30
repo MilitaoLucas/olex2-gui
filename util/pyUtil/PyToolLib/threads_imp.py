@@ -5,6 +5,7 @@ from threading import Thread
 from threads import ThreadEx
 from threads import ThreadRegistry
 
+
 class NewsImageRetrivalThread(ThreadEx):
   instance = None
   image_list = None
@@ -31,7 +32,7 @@ class NewsImageRetrivalThread(ThreadEx):
           NewsImageRetrivalThread.active_image_list = copy.copy(NewsImageRetrivalThread.image_list)
           random.shuffle(NewsImageRetrivalThread.active_image_list)
         img_url, url = self.get_image_from_list()
-
+        #print img_url, url
         if olex_fs.Exists(img_url):
           img_data = olex_fs.ReadFile(img_url)
         else:
@@ -63,7 +64,13 @@ class NewsImageRetrivalThread(ThreadEx):
 
   def get_list_from_server(self):
     url = 'http://www.olex2.org/adverts/olex2adverts.txt'
-    return self.make_call(url).readlines()
+    l = self.make_call(url).readlines()
+    _ = []
+    for line in l:
+      if line.strip().startswith("#"):
+        continue
+      _.append(line)
+    return _
 
   def make_call(self, url):
     import HttpTools
