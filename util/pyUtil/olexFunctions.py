@@ -185,7 +185,7 @@ class OlexFunctions(inheritFunctions):
       try:
         tem = olx.cif_model[data_name].get(key, default)
       except KeyError:
-        return deault
+        return default
 #      print "Accessing %s" %key
       if tem is None: return default
       retVal = default
@@ -965,7 +965,7 @@ class OlexFunctions(inheritFunctions):
           print("Failed to make pyl executable. Please fix manually.")
           return None
     return pyl
-  
+
 def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
   return OV.GetParam_as_string(variable, default)
