@@ -708,15 +708,20 @@ class ExtractCifInfo(CifTools):
     p,pp  = self.sort_out_path(path, "cif_od")
     if p: # and self.metacifFiles.curr_cif_od != self.metacifFiles.prev_cif_od:
       try:
-        import iotbx.cif
-        f = open(p, 'rUb')
-        cif_od = iotbx.cif.reader(input_string=f.read()).model().values()[0]
-        self.exclude_cif_items(cif_od)
-        f.close()
-        self.update_cif_block(cif_od, force=False)
-        all_sources_d[p] = cif_od
+        l = OV.GetParam('snum.report.merge_these_cifs', [])
+        if p not in l and os.path.exists(p):
+          import gui
+          gui.report.publication.add_cif_to_merge_list.im_func(p)
+
+        #f = open(p, 'rUb')
+        #cif_od = iotbx.cif.reader(input_string=f.read()).model().values()[0]
+        #self.exclude_cif_items(cif_od)
+        #f.close()
+        #self.update_cif_block(cif_od, force=False)
+        #all_sources_d[p] = cif_od
       except:
         print "Error reading Oxford Diffraction CIF %s" %p
+
 
 
     # Rigaku data collection CIF
