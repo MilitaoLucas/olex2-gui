@@ -10,7 +10,7 @@
   <sorting
     <pivots
       <pivot "_audit_creation">
-      <pivot "_shelxl_version_number">
+      <pivot "_shelxl_version_number"> <pivot "_shelx_SHELXL_version_number">
       <pivot "_publ">
       <pivot "_chemical_name">  <pivot "_chemical_formula">  <pivot "_chemical">
       <pivot "_atom_type">
@@ -29,10 +29,11 @@
       <pivot "_smtbx">
       <pivot "_shelx_res_file"> <pivot "_shelx_res_checksum">
       <pivot "_shelx_hkl_file"> <pivot "_shelx_hkl_checksum">
+      <pivot "_shelx_fab_file"> <pivot "_shelx_fab_checksum">
+      <pivot "_platon">
       <pivot "_shelx">
       <pivot "_refln">
       <pivot "_iucr">
-
     >
     <endings
       <ending "_h_min">

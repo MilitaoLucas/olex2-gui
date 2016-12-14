@@ -85,7 +85,7 @@ class ValidateCif(object):
     cif_dic = args.get('cif_dic', 'cif_core.dic')
     show_warnings=(args.get('show_warnings', True) in (True, 'True', 'true'))
     if os.path.isfile(filepath):
-      f = open(filepath, 'rUb')
+      f = open(filepath, 'rb')
       cif_model = iotbx.cif.fast_reader(input_string=f.read()).model()
       f.close()
       print "Validating %s" %filepath
@@ -154,21 +154,21 @@ class CifTools(ArgumentParser):
     self.update_manageable()
 
   def save_specials(self):
-    for s, c in CifTools.specials.iteritems():
-      sv = OV.GetParam(s, '')
+    for special_item, special_cif in CifTools.specials.iteritems():
+      sv = OV.GetParam(special_item, '')
       if sv:
-        self.cif_block[c] = sv
-      elif c in self.cif_block:
-        del self.cif_block[c]
+        self.cif_block[special_cif] = sv
+      elif special_cif in self.cif_block:
+        del self.cif_block[special_cif]
 
   def update_specials(self):
-    for s, c in CifTools.specials.iteritems():
-      if c in self.cif_block:
-        OV.SetParam(s, self.cif_block[c])
+    for special_item, special_cif in CifTools.specials.iteritems():
+      if special_cif in self.cif_block:
+        OV.SetParam(special_item, self.cif_block[special_cif])
       else:
-        v = OV.GetParam(s, '')
-        if v:
-          self.cif_block[c] = v
+        sv = OV.GetParam(special_item, '')
+        if sv:
+          self.cif_block[special_cif] = sv
     author_loop = self.cif_block.get_loop('_publ_author', None)
     if author_loop:
       OV.SetParam('snum.metacif.publ_author_names',
@@ -275,10 +275,10 @@ class CifTools(ArgumentParser):
           header=('_publ_author_name', '_publ_author_email', '_publ_author_address'))
         for name in names:
           if name != '?':
-            id = userDictionaries.people.findPersonId(name)
-            if id != None:
-              email = userDictionaries.people.getPersonInfo(id,'email')
-              address = userDictionaries.people.getPersonInfo(id,'address')
+            ID = userDictionaries.people.findPersonId(name)
+            if ID != None:
+              email = userDictionaries.people.getPersonInfo(ID,'email')
+              address = userDictionaries.people.getPersonInfo(ID,'address')
               cif_loop.add_row((name, email, address))
             else:
               cif_loop.add_row((name, "?", "?"))
@@ -289,17 +289,17 @@ class CifTools(ArgumentParser):
     if publ_contact_author_name is not None and publ_contact_author_name != '?':
       if '_publ_contact_author_name' in self.cif_block:
         del self.cif_block['_publ_contact_author_name'] # hack to make things in the right order
-      id = userDictionaries.people.findPersonId(publ_contact_author_name,
+      ID = userDictionaries.people.findPersonId(publ_contact_author_name,
         OV.get_cif_item('_publ_contact_author_name', None))
       self.cif_block['_publ_contact_author_name'] = publ_contact_author_name
       self.cif_block['_publ_contact_author_email'] \
-        = userDictionaries.people.getPersonInfo(id,'email')
+        = userDictionaries.people.getPersonInfo(ID,'email')
       self.cif_block['_publ_contact_author_phone'] \
-        = userDictionaries.people.getPersonInfo(id,'phone')
+        = userDictionaries.people.getPersonInfo(ID,'phone')
       self.cif_block['_publ_contact_author_address'] \
-        = userDictionaries.people.getPersonInfo(id,'address')
+        = userDictionaries.people.getPersonInfo(ID,'address')
       self.cif_block['_publ_contact_author_id_orcid'] \
-        = userDictionaries.people.getPersonInfo(id,'orchid_id')
+        = userDictionaries.people.getPersonInfo(ID,'orchid_id')
 
 class SaveCifInfo(CifTools):
   def __init__(self):
@@ -341,21 +341,21 @@ class EditCifInfo(CifTools):
       user_modified = OV.GetParam('snum.metacif.user_modified')
       user_removed = OV.GetParam('snum.metacif.user_removed')
       user_added = OV.GetParam('snum.metacif.user_added')
-      for item in added_items:
+      for tem in added_items:
         if user_added is None:
-          user_added = [item]
-        elif item not in user_added:
-          user_added.append(item)
-      for item in removed_items:
+          user_added = [tem]
+        elif tem not in user_added:
+          user_added.append(tem)
+      for tem in removed_items:
         if user_removed is None:
-          user_removed = [item]
-        elif item not in user_removed:
-          user_removed.append(item)
-      for item in modified_items:
+          user_removed = [tem]
+        elif tem not in user_removed:
+          user_removed.append(tem)
+      for tem in modified_items:
         if user_modified is None:
-          user_modified = [item]
-        elif item not in user_modified:
-          user_modified.append(item)
+          user_modified = [tem]
+        elif tem not in user_modified:
+          user_modified.append(tem)
       olx.cif_model = updated_cif_model
       self.cif_model = olx.cif_model
       self.cif_block = olx.cif_model[self.data_name]
@@ -478,7 +478,7 @@ class ExtractCifInfo(CifTools):
     curr_cif_p = OV.file_ChangeExt(OV.FileFull(), 'cif')
     if os.path.exists(curr_cif_p):
       try:
-        f = open(curr_cif_p, 'rUb')
+        f = open(curr_cif_p, 'rb')
         current_cif = iotbx.cif.reader(input_string=f.read()).model().values()[0]
         f.close()
         all_sources_d[curr_cif_p] = current_cif
@@ -611,7 +611,6 @@ class ExtractCifInfo(CifTools):
         smart.setdefault("_computing_data_collection", computing_data_collection)
         self.update_cif_block(smart)
         all_sources_d[p] = smart
-
       except Exception, err:
         print "Error reading Bruker SMART file %s: %s" %(p, err)
 
@@ -706,33 +705,34 @@ class ExtractCifInfo(CifTools):
 
     # Oxford Diffraction data collection CIF
     p,pp  = self.sort_out_path(path, "cif_od")
-    if p: # and self.metacifFiles.curr_cif_od != self.metacifFiles.prev_cif_od:
+    if p:
       try:
-        import iotbx.cif
-        f = open(p, 'rUb')
-        cif_od = iotbx.cif.reader(input_string=f.read()).model().values()[0]
-        self.exclude_cif_items(cif_od)
-        f.close()
-        self.update_cif_block(cif_od, force=False)
-        all_sources_d[p] = cif_od
+        l = OV.GetParam('snum.report.merge_these_cifs', [])
+        if p not in l and os.path.exists(p):
+          ## Add this file to list of merged files
+          import gui
+          gui.report.publication.add_cif_to_merge_list.im_func(p)
+
+        ##Previously this was added to the metacif
+        #f = open(p, 'rb')
+        #cif_od = iotbx.cif.reader(input_string=f.read()).model().values()[0]
+        #self.exclude_cif_items(cif_od)
+        #f.close()
+        #self.update_cif_block(cif_od, force=False)
+        #all_sources_d[p] = cif_od
       except:
         print "Error reading Oxford Diffraction CIF %s" %p
 
 
     # Rigaku data collection CIF
     p, pp = self.sort_out_path(path, "crystal_clear")
-    if p: # and self.metacifFiles.curr_crystal_clear != self.metacifFiles.prev_crystal_clear:
+    if p:
       try:
-        import iotbx.cif
-        f = open(p, 'rUb')
-        cif = iotbx.cif.reader(input_string=f.read()).model()
-        for key, cif_block in cif.iteritems():
-          if key.lower() not in ('global', 'general'):
-            break
-        self.exclude_cif_items(cif_block)
-        f.close()
-        self.update_cif_block(cif_block)
-        all_sources_d[p] = cif_block
+        l = OV.GetParam('snum.report.merge_these_cifs', [])
+        if p not in l and os.path.exists(p):
+          ## Add this file to list of merged files
+          import gui
+          gui.report.publication.add_cif_to_merge_list.im_func(p)
       except:
         print "Error reading Rigaku CIF %s" %p
 
@@ -743,7 +743,7 @@ class ExtractCifInfo(CifTools):
     except KeyError:
       p = '?'
     if diffractometer not in ('','?') and p != '?' and os.path.exists(p):
-      f = open(p, 'rUb')
+      f = open(p, 'rb')
       content = "data_diffractometer_def\n" + f.read()
       diffractometer_def = iotbx.cif.reader(input_string=content).model().values()[0]
       self.exclude_cif_items(diffractometer_def)
@@ -766,7 +766,7 @@ class ExtractCifInfo(CifTools):
         and (OV.GetParam('snum.masks.update_cif')
              or '_smtbx_masks_void' not in self.cif_block)):
       import iotbx.cif
-      f = open(mask_cif_path, 'rUb')
+      f = open(mask_cif_path, 'rb')
       cif_block = iotbx.cif.reader(file_object=f).model().get(self.data_name)
       f.close()
       if cif_block is not None:
@@ -874,11 +874,11 @@ class ExtractCifInfo(CifTools):
           print err
         l.append(val)
       ll = set()
-      for item in l:
-        if not item: continue
-        item = item.strip().strip("'").strip('"')
-        if item not in ll:
-          ll.add(item)
+      for tem in l:
+        if not tem: continue
+        tem = tem.strip().strip("'").strip('"')
+        if tem not in ll:
+          ll.add(tem)
       if len(ll) > 1:
         if k.startswith('_'):
           conflict_count += 1
@@ -951,14 +951,14 @@ class ExtractCifInfo(CifTools):
     #ratiominmax = dictionary["ratiominmax"]
     #lambda_correction = dictionary["lambda_correction"]
 
-  def prepare_exptl_absorpt_process_details(self, abs, version,):
-    if abs["abs_type"] == "TWINABS":
-      t = ["%s was used for absorption correction.\n" %abs['version']]
+  def prepare_exptl_absorpt_process_details(self, ABS, version,):
+    if ABS["abs_type"] == "TWINABS":
+      t = ["%s was used for absorption correction.\n" %ABS['version']]
       txt = ""
-      for component in range(1, int(abs["number_twin_components"])+1):
+      for component in range(1, int(ABS["number_twin_components"])+1):
         # is single parameter set refined?
-        if str(component) not in abs: continue
-        comp_d = abs[str(component)]
+        if str(component) not in ABS: continue
+        comp_d = ABS[str(component)]
         t.append("\nFor component %s:\n" %(component))
         t.append("%s was %s before and %s after correction.\n"
                  %(comp_d["R_name"], comp_d["Rint_before"], comp_d["Rint_after"]))
@@ -967,28 +967,28 @@ class ExtractCifInfo(CifTools):
           t.append("The Ratio of minimum to maximum transmission is %.2f.\n" %(float(ratiominmax)))
         else:
           t.append("The Ratio of minimum to maximum transmission not present.\n")
-        t.append("The \l/2 correction factor is %s\n" %(abs["lambda_correction"]))
+        t.append("The \l/2 correction factor is %s\n" %(ABS["lambda_correction"]))
       for me in t:
         txt = txt + " %s"%me
-      if 'Rint_3sig' in abs and 'Rint' in abs:
+      if 'Rint_3sig' in ABS and 'Rint' in ABS:
         txt += "\nFinal HKLF 4 output contains %s reflections, Rint = %s\n (%s with I > 3sig(I), Rint = %s)\n" %(
-          abs['Rint_refnum'], abs['Rint'],
-          abs['Rint_3sig_refnum'], abs['Rint_3sig'])
+          ABS['Rint_refnum'], ABS['Rint'],
+          ABS['Rint_3sig_refnum'], ABS['Rint_3sig'])
       exptl_absorpt_process_details = txt
 
-    elif abs["abs_type"] == "SADABS":
+    elif ABS["abs_type"] == "SADABS":
       txt = """
 %(version)s was used for absorption correction.
 %(R_name)s was %(Rint_before)s before and %(Rint_after)s after correction.
 The Ratio of minimum to maximum transmission is %(ratiominmax)s.
 The \l/2 correction factor is %(lambda_correction)s.
-"""%abs
+"""%ABS
 
       exptl_absorpt_process_details = txt
     return exptl_absorpt_process_details
 
-  def prepare_computing(self, dict, versions, name):
-    version = dict.get("prog_version","None")
+  def prepare_computing(self, DICT, versions, name):
+    version = DICT.get("prog_version","None")
     try:
       versiontext = (versions[name])[version].strip().strip("'")
     except KeyError:
@@ -1172,7 +1172,7 @@ If more than one file is present, the path of the most recent file is returned b
 
     returnvalue = ""
     if self.userInputVariables is None or "%s_file" %tool not in self.userInputVariables:
-      files = ';'.join([file for date, file in info])
+      files = ';'.join([FILE for date, FILE in info])
       try:
         setattr(self.metacifFiles, "prev_%s" %tool, getattr(self.metacifFiles, "curr_%s" %tool))
         OV.SetParam("snum.metacif.list_%s_files" %tool, files)
@@ -1188,10 +1188,10 @@ If more than one file is present, the path of the most recent file is returned b
         return None
       x = os.path.normpath(x)
       if x is not None:
-        for date, file in info:
-          if x in file:
-            setattr(self.metacifFiles,"curr_%s" %tool, (date,file))
-            returnvalue = file
+        for date, FILE in info:
+          if x in FILE:
+            setattr(self.metacifFiles,"curr_%s" %tool, (date,FILE))
+            returnvalue = FILE
     if not returnvalue:
       returnvalue = info[0][1]
     if returnvalue:
@@ -1204,8 +1204,8 @@ If more than one file is present, the path of the most recent file is returned b
     afile = os.path.join(OV.DataDir(), "cif_info.def")
     if not os.path.exists(afile):
       import shutil
-      file = os.path.join(self.basedir, "etc", "site", "cif_info.def")
-      shutil.copy(file, afile)
+      FILE = os.path.join(self.basedir, "etc", "site", "cif_info.def")
+      shutil.copy(FILE, afile)
     with open(afile, 'r') as rfile:
       for line in rfile:
         if line[:1] == "_":
