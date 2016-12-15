@@ -1453,7 +1453,7 @@ def getReportImageData(size='w400', imageName=None):
   if imagePath == "Live Picture":
     err = """<font color='red'><b>You need DrawPlus installed for this feature</b></font>"""
     try:
-      model = olx.JSON()
+      model = olex.f("JSON()")
       if model == False:
         return err
       base = os.path.join(olex.f(OV.GetParam('user.modules.location')), "modules")
