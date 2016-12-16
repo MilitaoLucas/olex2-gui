@@ -111,10 +111,10 @@ href='spy.gui.report.publication.remove_cif_from_merge_list(%s)>>html.Update'>
       return
     if not os.path.exists(cif_p):
       return
-    l = OV.GetParam('snum.report.merge_these_cifs', [])
-    if cif_p not in l:
-      l.append(cif_p)
-      OV.SetParam('snum.report.merge_these_cifs', l)
+    ciflist = OV.GetCifMergeFilesList()
+    if cif_p not in ciflist:
+      ciflist.append(cif_p)
+      OV.SetParam('snum.report.merge_these_cifs', ciflist)
 
   def remove_cif_from_merge_list(cif_p):
     ciflist = OV.GetCifMergeFilesList()

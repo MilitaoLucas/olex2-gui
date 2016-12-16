@@ -411,7 +411,7 @@ class MergeCif(CifTools):
     self.write_metacif_file()
     ## merge metacif file with cif file from refinement
     merge_with = []
-    for extra_cif in OV.standardizeListOfPaths(OV.GetParam('snum.report.merge_these_cifs')):
+    for extra_cif in OV.GetCifFileList():
       if extra_cif:
         merge_with.append(extra_cif)
     merge_with.append(self.metacif_path+"&force=true")
