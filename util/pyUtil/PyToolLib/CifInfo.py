@@ -411,7 +411,7 @@ class MergeCif(CifTools):
     self.write_metacif_file()
     ## merge metacif file with cif file from refinement
     merge_with = []
-    for extra_cif in OV.GetParam('snum.report.merge_these_cifs',[]):
+    for extra_cif in OV.standardizeListOfPaths(OV.GetParam('snum.report.merge_these_cifs')):
       if extra_cif:
         merge_with.append(extra_cif)
     merge_with.append(self.metacif_path+"&force=true")
@@ -707,8 +707,8 @@ class ExtractCifInfo(CifTools):
     p,pp  = self.sort_out_path(path, "cif_od")
     if p:
       try:
-        l = OV.GetParam('snum.report.merge_these_cifs', [])
-        if p not in l and os.path.exists(p):
+        ciflist = OV.standardizeListOfPaths(OV.GetParam('snum.report.merge_these_cifs'))
+        if p not in ciflist and os.path.exists(p):
           ## Add this file to list of merged files
           import gui
           gui.report.publication.add_cif_to_merge_list.im_func(p)
