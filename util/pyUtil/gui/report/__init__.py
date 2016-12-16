@@ -90,12 +90,12 @@ class publication:
       olx.html.Update()
 
   def DisplayMergeList(self):
-    l = OV.GetParam('snum.report.merge_these_cifs', [])
-    if not l:
+    ciflist = OV.GetCifMergeFilesList()
+    if not ciflist:
       s = "Only the built-in metacif file will be merged"
     else:
       s = ""
-      for item in l:
+      for item in ciflist:
         if not item:
           continue
         display = os.path.basename(item)
@@ -111,40 +111,40 @@ href='spy.gui.report.publication.remove_cif_from_merge_list(%s)>>html.Update'>
       return
     if not os.path.exists(cif_p):
       return
-    l = OV.GetParam('snum.report.merge_these_cifs', [])
-    if cif_p not in l:
-      l.append(cif_p)
-      OV.SetParam('snum.report.merge_these_cifs', l)
+    ciflist = OV.GetCifMergeFilesList()
+    if cif_p not in ciflist:
+      ciflist.append(cif_p)
+      OV.SetParam('snum.report.merge_these_cifs', ciflist)
 
   def remove_cif_from_merge_list(cif_p):
-    l = OV.GetParam('snum.report.merge_these_cifs', [])
-    idx = l.index(cif_p)
+    ciflist = OV.GetCifMergeFilesList()
+    idx = ciflist.index(cif_p)
     if idx != -1:
-      del l[idx]
-    if not l:
-      l = ""
-    OV.SetParam('snum.report.merge_these_cifs', l)
+      del ciflist[idx]
+    if not ciflist:
+      ciflist = ""
+    OV.SetParam('snum.report.merge_these_cifs', ciflist)
 
   def AddTemplateToMergeList(self, value=""):
     if not value:
       return
-    l = OV.GetParam('snum.report.merge_these_cifs', [])
-    if value not in l:
-      l.append(value)
-    OV.SetParam('snum.report.merge_these_cifs', l)
+    ciflist = OV.GetCifMergeFilesList()
+    if value not in ciflist:
+      ciflist.append(value)
+    OV.SetParam('snum.report.merge_these_cifs', ciflist)
 
   def OnPublicationTemplateChange(self, value):
     value = value.strip()
     OV.SetParam('snum.report.publication_style', value.lower())
     if value == 'general':
       OV.SetParam('snum.report.publication_paper', "")
-      a = OV.GetParam('snum.report.merge_these_cifs', [])
-      if a:
+      ciflist = OV.GetCifMergeFilesList()
+      if ciflist:
         styles = ["_%s.cif" %(s) for s in ['acta']]
-        a = [f for f in a if not s in f for s in styles]
-      if not a:
-        a = ""
-      OV.SetParam('snum.report.merge_these_cifs', a)
+        ciflist = [f for f in ciflist if not s in f for s in styles]
+      if not ciflist:
+        ciflist = ""
+      OV.SetParam('snum.report.merge_these_cifs', ciflist)
       return
     copy_from = "%s/etc/CIF/cif_templates/%s.cif" %(OV.BaseDir(), value)
     copy_to = "%s/%s_%s.cif" %(OV.FilePath(), OV.FileName(), value)
@@ -153,11 +153,11 @@ href='spy.gui.report.publication.remove_cif_from_merge_list(%s)>>html.Update'>
         if copy_from.lower() != copy_to.lower():
           txt = open(copy_from,'r').read().replace("FileName()", OV.FileName())
           open(copy_to,'w').write(txt)
-    a = OV.GetParam('snum.report.merge_these_cifs', [])
-    if copy_to not in a:
-      a.append(copy_to)
-      OV.SetParam('snum.report.publication_paper', a)
-    OV.SetParam('snum.report.merge_these_cifs', a)
+    ciflist = OV.GetCifMergeFilesList()
+    if copy_to not in ciflist:
+      ciflist.append(copy_to)
+      OV.SetParam('snum.report.publication_paper', ciflist)
+    OV.SetParam('snum.report.merge_these_cifs', ciflist)
     #olx.Shell(copy_to)
 
   olex.registerFunction(add_cif_to_merge_list, False, "gui.report.publication")
@@ -218,43 +218,43 @@ def get_report_title():
 def play_crystal_images():
   import time
   olx.SetVar('stop_movie',False)
-  l = OV.standardizeListOfPaths(OV.GetParam('snum.metacif.list_crystal_images_files'))
+  imagelist = OV.standardizeListOfPaths(OV.GetParam('snum.metacif.list_crystal_images_files'))
   current_image = OV.standardizePath(OV.GetParam('snum.report.crystal_image'))
-  idx = l.index(current_image)
-  for i in xrange(0,len(l)):
+  idx = imagelist.index(current_image)
+  for i in xrange(0,len(imagelist)):
     if olx.GetVar('stop_movie') == "True":
-      OV.SetParam('snum.report.crystal_image',l[idx])
+      OV.SetParam('snum.report.crystal_image',imagelist[idx])
       return
     idx = idx + 1
-    if idx >= len(l):
+    if idx >= len(imagelist):
       idx = 0
-    im_path = get_crystal_image(l[idx])
+    im_path = get_crystal_image(imagelist[idx])
     olx.html.SetImage('CRYSTAL_IMAGE',im_path)
-    olx.html.SetValue('CURRENT_CRYSTAL_IMAGE', l[idx])
+    olx.html.SetValue('CURRENT_CRYSTAL_IMAGE', imagelist[idx])
     OV.Refresh()
 OV.registerFunction(play_crystal_images, False, 'gui.report')
 
 def advance_crystal_image(direction='forward'):
-  l = OV.standardizeListOfPaths(OV.GetParam('snum.metacif.list_crystal_images_files'))
+  imagelist = OV.standardizeListOfPaths(OV.GetParam('snum.metacif.list_crystal_images_files'))
   i = 0
   current_image = OV.standardizePath(OV.GetParam('snum.report.crystal_image'))
-  for image in l:
+  for image in imagelist:
     i += 1
     if image == current_image:
       if direction == 'forward':
-        if i != len(l):
-          p = l[i]
+        if i != len(imagelist):
+          p = imagelist[i]
         else:
-          p = l[0]
+          p = imagelist[0]
         OV.SetParam('snum.report.crystal_image',p)
         olx.html.SetImage('CRYSTAL_IMAGE',get_crystal_image(p))
         olx.html.SetValue('CURRENT_CRYSTAL_IMAGE', p)
         return
       else:
         if i != 1:
-          p = l[i-2]
+          p = imagelist[i-2]
         else:
-          p = l[len(l)-1]
+          p = imagelist[len(imagelist)-1]
         OV.SetParam('snum.report.crystal_image',p)
         olx.html.SetImage('CRYSTAL_IMAGE',get_crystal_image(p))
         olx.html.SetValue('CURRENT_CRYSTAL_IMAGE', p)

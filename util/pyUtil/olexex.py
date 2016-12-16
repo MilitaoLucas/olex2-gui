@@ -1453,7 +1453,7 @@ def getReportImageData(size='w400', imageName=None):
   if imagePath == "Live Picture":
     err = """<font color='red'><b>You need DrawPlus installed for this feature</b></font>"""
     try:
-      model = olx.JSON()
+      model = olex.f("JSON()")
       if model == False:
         return err
       base = os.path.join(olex.f(OV.GetParam('user.modules.location')), "modules")
@@ -1761,3 +1761,12 @@ def GetHttpFile(f, force=False, fullURL = False):
   else:
     retVal = None
   return retVal
+
+def EditIns():
+  olx.EditIns()
+  programSettings.doProgramSettings(
+    OV.GetParam('snum.refinement.program'),
+    OV.GetParam('snum.refinement.method'))
+  OV.SetParam("snum.refinement.use_solvent_mask", olx.Ins("ABIN") != "n/a")
+  olx.html.Update()
+OV.registerFunction(EditIns)
