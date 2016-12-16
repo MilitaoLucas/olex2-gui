@@ -318,6 +318,7 @@ def OnStructureLoaded(previous):
     import History
     History.hist.loadHistory()
   LoadStructureParams()
+  OV.SetParam("snum.refinement.use_solvent_mask", olx.Ins("ABIN") != "n/a")
   try:
     for l in olx.FileChangeListeners:
       l('structure')
