@@ -89,6 +89,11 @@ class OlexFunctions(inheritFunctions):
       print >> sys.stderr, "Variable %s could not be set with value %s" %(variable,value)
       sys.stderr.formatExceptionInfo()
 
+  def GetCifMergeFilesList(self):
+    return self.standardizeListOfPaths(OV.GetParam('snum.report.merge_these_cifs'))
+
+
+
   def GetParam(self,variable, default=None, get_list=False):
     retVal = default
     try:
@@ -982,3 +987,4 @@ OV.registerFunction(OV.CopyVFSFile)
 OV.registerFunction(OV.SetHtmlFontSize,False,'gui')
 OV.registerFunction(OV.SetHtmlFontSizeControls,False,'gui')
 OV.registerFunction(OV.ModelSrc)
+OV.registerFunction(OV.GetCifMergeFilesList)
