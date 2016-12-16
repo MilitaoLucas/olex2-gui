@@ -90,7 +90,7 @@ class publication:
       olx.html.Update()
 
   def DisplayMergeList(self):
-    ciflist = OV.standardizeListOfPaths(OV.GetParam('snum.report.merge_these_cifs'))
+    ciflist = OV.GetCifMergeFilesList()
     if not ciflist:
       s = "Only the built-in metacif file will be merged"
     else:
@@ -117,7 +117,7 @@ href='spy.gui.report.publication.remove_cif_from_merge_list(%s)>>html.Update'>
       OV.SetParam('snum.report.merge_these_cifs', l)
 
   def remove_cif_from_merge_list(cif_p):
-    ciflist = OV.standardizeListOfPaths(OV.GetParam('snum.report.merge_these_cifs'))
+    ciflist = OV.GetCifMergeFilesList()
     idx = ciflist.index(cif_p)
     if idx != -1:
       del ciflist[idx]
@@ -128,7 +128,7 @@ href='spy.gui.report.publication.remove_cif_from_merge_list(%s)>>html.Update'>
   def AddTemplateToMergeList(self, value=""):
     if not value:
       return
-    ciflist = OV.standardizeListOfPaths(OV.GetParam('snum.report.merge_these_cifs'))
+    ciflist = OV.GetCifMergeFilesList()
     if value not in ciflist:
       ciflist.append(value)
     OV.SetParam('snum.report.merge_these_cifs', ciflist)
@@ -138,7 +138,7 @@ href='spy.gui.report.publication.remove_cif_from_merge_list(%s)>>html.Update'>
     OV.SetParam('snum.report.publication_style', value.lower())
     if value == 'general':
       OV.SetParam('snum.report.publication_paper', "")
-      ciflist = OV.standardizeListOfPaths(OV.GetParam('snum.report.merge_these_cifs'))
+      ciflist = OV.GetCifMergeFilesList()
       if ciflist:
         styles = ["_%s.cif" %(s) for s in ['acta']]
         ciflist = [f for f in ciflist if not s in f for s in styles]
@@ -153,7 +153,7 @@ href='spy.gui.report.publication.remove_cif_from_merge_list(%s)>>html.Update'>
         if copy_from.lower() != copy_to.lower():
           txt = open(copy_from,'r').read().replace("FileName()", OV.FileName())
           open(copy_to,'w').write(txt)
-    ciflist = OV.standardizeListOfPaths(OV.GetParam('snum.report.merge_these_cifs'))
+    ciflist = OV.GetCifMergeFilesList()
     if copy_to not in ciflist:
       ciflist.append(copy_to)
       OV.SetParam('snum.report.publication_paper', ciflist)
