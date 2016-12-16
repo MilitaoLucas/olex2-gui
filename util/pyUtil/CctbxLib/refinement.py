@@ -292,6 +292,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
           for i,h in enumerate(self.f_mask.indices()):
             line = "%d %d %d " %h + "%.4f %.4f" % (self.f_mask.data()[i].real, self.f_mask.data()[i].imag)
             print >> f, line
+          print >> f, "0 0 0 0.0 0.0"
     restraints_manager = self.restraints_manager()
     #put shared parameter constraints first - to allow proper bookkeeping of
     #overrided parameters (U, sites)
