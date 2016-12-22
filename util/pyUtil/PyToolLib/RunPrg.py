@@ -102,7 +102,8 @@ class RunPrg(ArgumentParser):
       sys.stdout.graph = False
     finally:
       if self.HasGUI:
-        olx.html.Update()
+        pass
+        #olx.html.Update()
       RunPrg.running = False
 
       if self.please_run_auto_vss:
@@ -176,9 +177,10 @@ class RunPrg(ArgumentParser):
 
     ## clear temp folder to avoid problems
     old_temp_files = os.listdir(self.tempPath)
-    for file in old_temp_files:
+    for file_n in old_temp_files:
       try:
-        os.remove(r'%s/%s' %(self.tempPath,file))
+        if "_.res" or "_.hkl" not in file_n:
+          os.remove(r'%s/%s' %(self.tempPath,file_n))
       except OSError:
         continue
 
@@ -546,6 +548,7 @@ class RunRefinementPrg(RunPrg):
 
     if R1:
       OV.SetParam('snum.refinement.last_R1', str(R1))
+      #OV.SetParam('snum.refinement.last_wR2',self.wR2)
       if not self.params.snum.init.skip_routine:
         try:
           self.his_file = hist.create_history()
