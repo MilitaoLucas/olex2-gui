@@ -12,17 +12,20 @@ $spy.MakeHoverButton('three-EditCifInfo','spy.ExtractCifInfo(True,True)>>spy.Edi
   <td name=MERGE_CIF_INFO align='left' VALIGN='right' width='32%'>
 $spy.MakeHoverButton('three-Merge_Cif','spy.ExtractCifInfo(True,True)>>spy.MergeCif(True)>>html.Update')
   </td>
-  <td width='34%' align='right'>
+  <td width='14%' align='right'>
+    HKL/RES
+  </td>
+  <td width='20%' align='right'>
   <input type="combo"
     name="SET_CIF_FINALISE"
     label=""
     width="94%"
-    items="Include HKL/RES<-Include;Exclude HKL/RES<-Exclude;Ignore HKL/RES<-Ignore"
+    items="Include [IUcr]<-Include;Exclude<-Exclude;Leave as is<-Ignore"
     value="spy.GetParam('user.cif.finalise')"
     height="GetVar('HtmlComboHeight')"
     bgcolor="GetVar('HtmlTableBgColour')"
     onchange="spy.SetParam('user.cif.finalise',html.GetValue('~name~'))"
-    readonly
+    readonly="true"
   >
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -101,8 +104,27 @@ Merge CIF:
 <a href="spy.gui.report.publication.add_cif_to_merge_list(FileOpen('Choose definition file','.cif files|*.cif','$BaseDir()/etc/site'))>>html.Update">
   <b>default</b></a>&nbsp;<b>CIF</b>
   </td>
-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<tr align = 'center' width='100%'>
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=CIF-Part-4;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td name="Force metacif" align='right' VALIGN='right' width='5%'>
+    <input
+      type='checkbox'
+      bgcolor="GetVar('HtmlTableBgColour')"
+      name = "FORCE_METACIF"
+      checked = "spy.GetParam(snum.metadata.force_metacif)"
+      onclick = "spy.SetParam(snum.metadata.force_metacif,html.GetState(~name~))"
+      name='SET_CIFMERGE'
+      right='false'
+    >
+  </td>
+  <td>
+    Force metacif item then merging
+  <td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
 
 <!-- #ignoreif sg('%c')
 <tr align = 'center' name=EDIT_CIF width='100%'>
