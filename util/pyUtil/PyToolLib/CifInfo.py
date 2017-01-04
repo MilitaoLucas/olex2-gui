@@ -414,7 +414,7 @@ class MergeCif(CifTools):
     for extra_cif in OV.GetCifMergeFilesList():
       if extra_cif:
         merge_with.append(extra_cif)
-    merge_with.append(self.metacif_path+"&force=true")
+    merge_with.append(self.metacif_path+"&force=" + str(OV.GetParam('snum.metadata.force_metacif', False)))
     if len(merge_with) > 1:
       print("Merging with: " + ' '.join([os.path.split(x)[1] for x in merge_with[1:]]))
     OV.CifMerge(merge_with)

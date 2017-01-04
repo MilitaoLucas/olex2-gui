@@ -33,6 +33,8 @@ routines requiring structure refinement
       .type = strings
     show_all_cif_sources = False
       .type = bool
+    force_metacif = False
+      .type = bool
   }
 
   ccdc{

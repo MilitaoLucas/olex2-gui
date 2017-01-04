@@ -256,6 +256,7 @@
       <cmd2 cmd="spy.doProgramSettings(spy.GetParam(snum.refinement.program),
         spy.GetParam(snum.refinement.method),true)">
       <cmd3 "spy.make_HOS(True)">
+      <cmd4 "html.Update">
     >
   >
 >
