@@ -705,34 +705,48 @@ class ExtractCifInfo(CifTools):
 
     # Oxford Diffraction data collection CIF
     p,pp  = self.sort_out_path(path, "cif_od")
+    sidefile = False
     if p:
       try:
-        ciflist = OV.GetCifMergeFilesList()
-        if p not in ciflist and os.path.exists(p):
-          ## Add this file to list of merged files
-          import gui
-          gui.report.publication.add_cif_to_merge_list.im_func(p)
+        if sidefile:
+          ##Adding as sidefile
+          ciflist = OV.GetCifMergeFilesList()
+          if p not in ciflist and os.path.exists(p):
+            ## Add this file to list of merged files
+            import gui
+            gui.report.publication.add_cif_to_merge_list.im_func(p)
 
-        ##Previously this was added to the metacif
-        #f = open(p, 'rb')
-        #cif_od = iotbx.cif.reader(input_string=f.read()).model().values()[0]
-        #self.exclude_cif_items(cif_od)
-        #f.close()
-        #self.update_cif_block(cif_od, force=False)
-        #all_sources_d[p] = cif_od
+        else:
+          ##Previously this was added to the metacif
+          f = open(p, 'rb')
+          cif_od = iotbx.cif.reader(input_string=f.read()).model().values()[0]
+          self.exclude_cif_items(cif_od)
+          f.close()
+          self.update_cif_block(cif_od, force=False)
+          all_sources_d[p] = cif_od
       except:
         print "Error reading Oxford Diffraction CIF %s" %p
 
 
     # Rigaku data collection CIF
     p, pp = self.sort_out_path(path, "crystal_clear")
+    sidefile = False
     if p:
       try:
-        ciflist = OV.GetCifMergeFilesList()
-        if p not in ciflist and os.path.exists(p):
-          ## Add this file to list of merged files
-          import gui
-          gui.report.publication.add_cif_to_merge_list.im_func(p)
+        if sidefile:
+          ciflist = OV.GetCifMergeFilesList()
+          if p not in ciflist and os.path.exists(p):
+            ## Add this file to list of merged files
+            import gui
+            gui.report.publication.add_cif_to_merge_list.im_func(p)
+        else:
+          f = open(p, 'rb')
+          crystal_clear = iotbx.cif.reader(input_string=f.read()).model().values()[0]
+          self.exclude_cif_items(crystal_clear)
+          f.close()
+          self.update_cif_block(crystal_clear, force=False)
+          all_sources_d[p] = crystal_clear
+
       except:
         print "Error reading Rigaku CIF %s" %p
 
