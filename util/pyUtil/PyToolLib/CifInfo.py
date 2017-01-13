@@ -324,7 +324,12 @@ class EditCifInfo(CifTools):
     text += "\n%s" %append
     inputText = OV.GetUserInput(0,'Items to be entered into cif file', text)
     if inputText and inputText != text:
-      reader = iotbx.cif.reader(input_string=str(inputText))
+      inputText = inputText.replace(u"\u2018", u"'")\
+        .replace(u"\u2019", u"'")\
+        .replace(u"\u201c", u"\"")\
+        .replace(u"\u201d", u"\"")\
+        .encode("ascii")
+      reader = iotbx.cif.reader(input_string=inputText)
       if reader.error_count():
         return
       updated_cif_model = reader.model()
@@ -705,34 +710,46 @@ class ExtractCifInfo(CifTools):
 
     # Oxford Diffraction data collection CIF
     p,pp  = self.sort_out_path(path, "cif_od")
+    sidefile = False
     if p:
       try:
-        ciflist = OV.GetCifMergeFilesList()
-        if p not in ciflist and os.path.exists(p):
-          ## Add this file to list of merged files
-          import gui
-          gui.report.publication.add_cif_to_merge_list.im_func(p)
+        if sidefile:
+          ##Adding as sidefile
+          ciflist = OV.GetCifMergeFilesList()
+          if p not in ciflist and os.path.exists(p):
+            ## Add this file to list of merged files
+            import gui
+            gui.report.publication.add_cif_to_merge_list.im_func(p)
 
-        ##Previously this was added to the metacif
-        #f = open(p, 'rb')
-        #cif_od = iotbx.cif.reader(input_string=f.read()).model().values()[0]
-        #self.exclude_cif_items(cif_od)
-        #f.close()
-        #self.update_cif_block(cif_od, force=False)
-        #all_sources_d[p] = cif_od
+        else:
+          ##Previously this was added to the metacif
+          with open(p, 'rb') as f:
+            cif_od = iotbx.cif.reader(input_string=f.read()).model().values()[0]
+            self.exclude_cif_items(cif_od)
+          self.update_cif_block(cif_od, force=False)
+          all_sources_d[p] = cif_od
       except:
         print "Error reading Oxford Diffraction CIF %s" %p
 
 
     # Rigaku data collection CIF
     p, pp = self.sort_out_path(path, "crystal_clear")
+    sidefile = False
     if p:
       try:
-        ciflist = OV.GetCifMergeFilesList()
-        if p not in ciflist and os.path.exists(p):
-          ## Add this file to list of merged files
-          import gui
-          gui.report.publication.add_cif_to_merge_list.im_func(p)
+        if sidefile:
+          ciflist = OV.GetCifMergeFilesList()
+          if p not in ciflist and os.path.exists(p):
+            ## Add this file to list of merged files
+            import gui
+            gui.report.publication.add_cif_to_merge_list.im_func(p)
+        else:
+          with open(p, 'rb') as f:
+            crystal_clear = iotbx.cif.reader(input_string=f.read()).model().values()[0]
+            self.exclude_cif_items(crystal_clear)
+          self.update_cif_block(crystal_clear, force=False)
+          all_sources_d[p] = crystal_clear
+
       except:
         print "Error reading Rigaku CIF %s" %p
 
@@ -743,11 +760,14 @@ class ExtractCifInfo(CifTools):
     except KeyError:
       p = '?'
     if diffractometer not in ('','?') and p != '?' and os.path.exists(p):
-      f = open(p, 'rb')
-      content = "data_diffractometer_def\n" + f.read()
-      diffractometer_def = iotbx.cif.reader(input_string=content).model().values()[0]
-      self.exclude_cif_items(diffractometer_def)
-      f.close()
+      with open(p, 'rb') as f:
+        content = "data_diffractometer_def\n" + f.read()
+        content = content.replace("\xe2\x80\x98", "'")\
+          .replace("\xe2\x80\x99", "'")\
+          .replace("\xe2\x80\x9c", "\"")\
+          .replace("\xe2\x80\x9d", "\"")
+        diffractometer_def = iotbx.cif.reader(input_string=content).model().values()[0]
+        self.exclude_cif_items(diffractometer_def)
       self.update_cif_block(diffractometer_def, force=False)
       all_sources_d[p] = diffractometer_def
 
