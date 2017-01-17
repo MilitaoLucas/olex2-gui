@@ -301,24 +301,24 @@ def LoadStructureParams():
 OV.registerFunction(LoadStructureParams)
 
 def SaveStructureParams():
-  auto_save_view = bool(OV.GetParam('user.auto_save_view'))
   if OV.FileName() != 'none':
     structure_phil_file = "%s/.olex/%s.phil" %(OV.FilePath(), OV.ModelSrc())
     olx.phil_handler.save_param_file(
       file_name=structure_phil_file, scope_name='snum', diff_only=True)
-    if auto_save_view:
+    auto_save_view = OV.GetParam('user.auto_save_view', False)
+    if auto_save_view and olx.IsFileType('oxm') != 'true':
       oxvf = os.sep.join([OV.StrDir(), OV.ModelSrc() + '.oxv'])
-      olex.m("save gview %s" %oxvf)
+      olex.m("save gview '%s'" %oxvf)
 OV.registerFunction(SaveStructureParams)
 
 def OnStructureLoaded(previous):
-  auto_save_view = bool(OV.GetParam('user.auto_save_view'))
   if olx.IsFileLoaded() == 'false' or not OV.StrDir():
     return
-  if auto_save_view:
+  auto_save_view = OV.GetParam('user.auto_save_view', False)
+  if auto_save_view and olx.IsFileType('oxm') != 'true':
     oxvf = os.sep.join([OV.StrDir(), OV.ModelSrc() + '.oxv'])
     if os.path.exists(oxvf):
-      olex.m("load gview %s" %oxvf)
+      olex.m("load gview '%s'" %oxvf)
   mf_name = "%s%s%s.metacif" %(OV.StrDir(), os.path.sep, OV.ModelSrc())
   cif_name = "%s%s%s.cif" %(OV.FilePath(), os.path.sep, OV.FileName())
   if not os.path.exists(mf_name) and os.path.exists(cif_name):
