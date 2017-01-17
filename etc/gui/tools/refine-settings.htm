@@ -124,18 +124,21 @@ $spy.weightGuiDisplay()
     $xf.rm.Exti()
   </td>
 
+<td width='16%' align='right'>
+</td>
 
-  <!--<td width="4%">-->
-    <!--<input type="checkbox"-->
-      <!--fgcolor="GetVar('HtmlFontColour')"-->
-      <!--bgcolor="GetVar('HtmlTableFirstcolColour')"-->
-      <!--name="SNUM_REFINEMENT_ACTA"-->
-      <!--oncheck="spy.SetParam(user.auto_insert_acta_stuff,True)"-->
-      <!--onuncheck="spy.SetParam(user.auto_insert_acta_stuff,False)"-->
-      <!--checked="spy.GetParam(user.auto_insert_acta_stuff)"-->
-    <!-->-->
-  <!--</td>-->
-  <td width="22%"><b>Current ACTA status: $spy.actaGuiDisplay()</b></td>
+<td width='30%' align='right'>
+$+
+    html.Snippet("gui/snippets/input-combo",
+    "name=REFINEMENT_ACTA",
+    "items=No ACTA;ACTA NOHKL;ACTA",
+    "value=Ins('acta')",
+    "onchange=spy.actaGuiDisplay(html.GetValue('~name~'))",
+    "readonly=False",
+    "onchangealways=True",
+    "bgcolor=spy.refinement_acta_bg_colour()",
+      )
+  $-</td>
 
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

@@ -10,7 +10,7 @@ OV = OlexFunctions()
 import htmlTools
 import olexex_setup
 import variableFunctions
-
+import olex
 from gui.images import GI
 
 gui_green = OV.GetParam('gui.green')
@@ -651,19 +651,48 @@ OV.registerFunction(restraint_builder)
 
 have_found_python_error = False
 
-def actaGuiDisplay():
-  t = ""
-  _ = olx.Ins('acta')
-  if _ == "n/a":
-    t = "<font color='%s'>No ACTA</font>" %gui_red
-  elif not _:
-    t = "<font color='%s'>ACTA</font>" %gui_green
+def actaGuiDisplay(val=None):
+  if val:
+    curr_acta = olx.Ins('acta')
+    if curr_acta != val:
+      olex.m('delins acta')
+    if val != "No ACTA":
+      olex.m("addins %s" %val)
+
   else:
-    t = "<font color='%s'>ACTA %s</font>" %(gui_green, _)
-  return t
+    val = olx.Ins('acta')
+  if val == "n/a":
+    val = "No ACTA"
+  elif not val:
+    val = "ACTA"
+
+  olx.html.SetItems('REFINEMENT_ACTA','No ACTA;ACTA NOHKL;ACTA')
+  olx.html.SetValue('REFINEMENT_ACTA', val)
+  olx.html.SetBG('REFINEMENT_ACTA',refinement_acta_bg_colour())
+
 OV.registerFunction(actaGuiDisplay)
 
-
+def refinement_acta_bg_colour():
+  olx.html.SetFG('REFINEMENT_ACTA','#000000')
+  retVal = gui_red.hexadecimal
+  val = olx.Ins('acta')
+  if not val:
+    retVal = gui_green.hexadecimal
+    olx.html.SetValue('REFINEMENT_ACTA', 'ACTA')
+  elif val == "n/a":
+    olx.html.SetValue('REFINEMENT_ACTA', 'No ACTA')
+    olx.html.SetFG('REFINEMENT_ACTA','#ffffff')
+  elif val == "NOHKL":
+    retVal = gui_orange.hexadecimal
+  else:
+    try:
+      int(val)
+      retVal = gui_green.hexadecimal
+      olx.html.SetValue('REFINEMENT_ACTA', 'ACTA %s' %val)
+    except:
+      pass
+  return retVal
+OV.registerFunction(refinement_acta_bg_colour)
 
 def weightGuiDisplay():
   if olx.IsFileType('ires').lower() == 'false':
