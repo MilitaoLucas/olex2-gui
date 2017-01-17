@@ -20,8 +20,14 @@ def FileSave(title, filter, location, default='', default_name=''):
     return default
   return res
 
+def SaveModel():
+  fn = FileSave("Please choose the file to save to", "Olex2 model files|*.oxm", olx.FilePath())
+  if fn:
+    olx.Save("model", fn)
+
 olex.registerFunction(FileOpen, False, "gui.dialog")
 olex.registerFunction(FileSave, False, "gui.dialog")
+olex.registerFunction(SaveModel, False, "gui.dialog")
 
 def About():
   sz = [int(i) for i in olx.GetWindowSize().split(',')]
