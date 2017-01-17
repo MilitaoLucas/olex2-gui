@@ -241,17 +241,11 @@ $-
   <td width='55%'>
     Save the current view when exiting a structure
   </td>
-  <td width='20%' align='right'>
-    <input
-      type="checkbox"
-      name="AUTO_SAVE_VIEW"
-      fgcolor="GetVar(HtmlFontColour)"
-      bgcolor="GetVar('HtmlInputBgColour')"
-      checked="not(strcmp(spy.GetParam(user.auto_save_view),False))"
-      oncheck="spy.SetParam(user.auto_save_view,True)"
-      onuncheck="spy.SetParam(user.auto_save_view,False)"
-    >
-  </td>
+  <td width='20%' align="right">$+
+    html.Snippet("gui/snippets/input-checkbox", "name=AUTO_SAVE_VIEW",
+     "checked=spy.GetParam(user.auto_save_view, 'False')",
+     "onclick=spy.SetParam('user.auto_save_view', html.GetState(~name~))")
+   $-</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
