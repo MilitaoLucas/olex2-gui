@@ -683,6 +683,7 @@ def refinement_acta_bg_colour():
     olx.html.SetValue('REFINEMENT_ACTA', 'No ACTA')
     olx.html.SetFG('REFINEMENT_ACTA','#ffffff')
   elif val == "NOHKL":
+    olx.html.SetValue('REFINEMENT_ACTA', 'ACTA NOHKL')
     retVal = gui_orange.hexadecimal
   else:
     try:
