@@ -64,9 +64,10 @@ class olex2_normal_eqns(get_parent()):
 
   def show_cycle_summary(self, log=None):
     if log is None: log = sys.stdout
+    # self.reparametrisation.n_independents + OSF
     print >> log, "wR2 = %.4f for %i data and %i parameters" %(
       self.wR2(), self.observations.fo_sq.size(),
-      self.reparametrisation.n_independents)
+      self.reparametrisation.n_independents + 1)
     print >> log, "GooF = %.4f" %(self.goof(),)
     max_shift_site = self.max_shift_site()
     OV.SetParam('snum.refinement.max_shift_site', max_shift_site[0])
@@ -711,9 +712,14 @@ class FullMatrixRefine(OlexCctbxAdapter):
     #cif_block['_refine_ls_hydrogen_treatment'] =
     cif_block['_refine_ls_matrix_type'] = 'full'
     cif_block['_refine_ls_number_constraints'] = self.n_constraints
-    cif_block['_refine_ls_number_parameters'] = self.reparametrisation.n_independents
+    # add the OSF!
+    cif_block['_refine_ls_number_parameters'] = self.reparametrisation.n_independents + 1
     cif_block['_refine_ls_number_reflns'] = self.reflections.f_sq_obs_filtered.size()
-    cif_block['_refine_ls_number_restraints'] = self.normal_eqns.n_restraints
+    # need to take the origin fixing restraint into the account!
+    n_restraints = self.normal_eqns.n_restraints
+    if self.normal_eqns.origin_fixing_restraint.has_floating_directions:
+      n_restraints += 1
+    cif_block['_refine_ls_number_restraints'] = n_restraints
     cif_block['_refine_ls_R_factor_all'] = fmt % self.r1_all_data[0]
     cif_block['_refine_ls_R_factor_gt'] = fmt % self.r1[0]
     cif_block['_refine_ls_restrained_S_all'] = fmt % self.normal_eqns.restrained_goof()
