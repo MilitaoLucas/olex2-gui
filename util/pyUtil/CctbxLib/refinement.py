@@ -716,9 +716,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_refine_ls_number_parameters'] = self.reparametrisation.n_independents + 1
     cif_block['_refine_ls_number_reflns'] = self.reflections.f_sq_obs_filtered.size()
     # need to take the origin fixing restraint into the account!
-    n_restraints = self.normal_eqns.n_restraints
-    if self.normal_eqns.origin_fixing_restraint.has_floating_directions:
-      n_restraints += 1
+    n_restraints = self.normal_eqns.n_restraints +\
+      len(self.normal_eqns.origin_fixing_restraint.singular_directions)
     cif_block['_refine_ls_number_restraints'] = n_restraints
     cif_block['_refine_ls_R_factor_all'] = fmt % self.r1_all_data[0]
     cif_block['_refine_ls_R_factor_gt'] = fmt % self.r1[0]
