@@ -218,6 +218,7 @@ class olex2_normal_eqns(get_parent()):
       basf = [fraction.value
                       for fraction in self.twin_fractions
                       if fraction.grad]
+      olx.DelIns('BASF')
       if basf: olx.AddIns('BASF', *basf)
     #update EXTI
     if self.reparametrisation.extinction.grad:
