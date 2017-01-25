@@ -199,7 +199,10 @@ def export_parameters(load_phil=True):
   OV.SetVar('HtmlComboWidth2', OV.GetParam('gui.html.combo_width_2'))
   OV.SetVar('HtmlInputHeight', OV.GetParam('gui.html.input_height'))
   OV.SetVar('HtmlHighlightColour', OV.GetParam('gui.html.highlight_colour').hexadecimal)
-  OV.SetVar('Grey', OV.GetParam('gui.grey').hexadecimal)
+  OV.SetVar('gui.grey', OV.GetParam('gui.grey').hexadecimal)
+  OV.SetVar('gui.green', OV.GetParam('gui.green').hexadecimal)
+  OV.SetVar('gui.orange', OV.GetParam('gui.orange').hexadecimal)
+  OV.SetVar('gui.red', OV.GetParam('gui.red').hexadecimal)
   OV.SetVar('HtmlCheckboxHeight', OV.GetParam('gui.html.checkbox_height'))
   OV.SetVar('HtmlCheckboxWidth', OV.GetParam('gui.html.checkbox_width'))
   OV.SetVar('HtmlCheckboxWidth2', OV.GetParam('gui.html.checkbox_width_2'))
@@ -365,7 +368,7 @@ class Skin():
         print "run_skin timage took %.4fs" %(time.time()-t)
     elif f == 'sNumTitle':
       try:
-        data_idx = olx.xf.CurrentData()
+        data_idx = olx.xf.CurrentData() + olx.FileExt()
       except:
         data_idx = False
       if olex_fs.Exists("sNumTitle.png") and self.sNum == OV.FileName()\

@@ -323,7 +323,7 @@ def OnStructureLoaded(previous):
   cif_name = "%s%s%s.cif" %(OV.FilePath(), os.path.sep, OV.FileName())
   if not os.path.exists(mf_name) and os.path.exists(cif_name):
     olx.CifExtract(cif_name)
-  if previous != OV.FileFull():
+  if previous != OV.FileFull() and olx.FileExt() != "cif":
     import History
     History.hist.loadHistory()
   LoadStructureParams()
