@@ -2,9 +2,10 @@ import olex
 import olx
 import os
 import time
-
+import gui
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+debug = bool(OV.GetParam('olex2.debug',False))
 
 def threadPrint(str):
   olx.Schedule(1, "post \"%s\"" %str)
@@ -148,3 +149,17 @@ def get_snums_in_cif():
     if not is_it_global(name):
       snums.append(name)
   return snums
+
+def check_for_embedded_hkl():
+  retVal = "<font color=$GetVar(gui.orange)>You need a res/ins and hkl file to refine this structure</font>"
+  d = {}
+  retVal = t = gui.tools.TemplateProvider.get_template('cif_no_embedded_files',force=debug)%d
+
+  res = olx.Cif('_shelx_hkl_file')
+  if res != "n/a":
+    reapfile = "%s%s" %(olx.xf.DataName(olx.xf.CurrentData()),".res")
+    d.setdefault('reapfile',reapfile)
+    retVal = t = gui.tools.TemplateProvider.get_template('cif_export_gui',force=debug)%d
+
+  return retVal
+olex.registerFunction(check_for_embedded_hkl, False, "gui.cif")

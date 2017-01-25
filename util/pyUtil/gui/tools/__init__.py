@@ -967,7 +967,7 @@ class Templates():
     self.templates = {}
     self.get_all_templates()
 
-  def get_template(self, name, force=False, path=None, mask=None, marker='@B@-@E@'):
+  def get_template(self, name, force=False, path=None, mask="*.*", marker='{-}'):
     '''
     Returns a particular template from the Template.templates dictionary. If it doesn't exist, then it will try and get it, and return a 'not found' string if this does not succeed.
     -- if force==True, then the template will be reloaded
@@ -1030,3 +1030,16 @@ def _get_available_html_width(margin_adjust = True, first_col_width_adjust=True,
     max_width = 10
 
   return width, max_width
+
+def resize_pdf(f_in, setting='printer'):
+  if ".pdf" in f_in:
+    small_file = f_in.split(".")[0] + "_small" + f_in.split(".")[1]
+    big_file = f_in
+  else:
+    small_file = f_in + "_small.pdf"
+    big_file = f_in + ".pdf"
+
+  options = "-sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/%s -dNOPAUSE -dQUIET -dBATCH -sOutputFile=%s %s" %(setting, small_file, big_file)
+  cmd = r'"C:\Program Files\gs\gs9.06\bin\gswin64" ' + options
+  os.system(cmd)
+OV.registerFunction(resize_pdf,False,'gui.tools')
