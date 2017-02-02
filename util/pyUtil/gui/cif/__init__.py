@@ -151,15 +151,20 @@ def get_snums_in_cif():
   return snums
 
 def check_for_embedded_hkl():
-  retVal = "<font color=$GetVar(gui.orange)>You need a res/ins and hkl file to refine this structure</font>"
-  d = {}
-  retVal = t = gui.tools.TemplateProvider.get_template('cif_no_embedded_files',force=debug)%d
-
+  if olx.IsFileType('CIF') == 'false':
+    return ""
+  hklfile = os.path.join(olx.FilePath(), "%s%s" %(olx.xf.DataName(olx.xf.CurrentData()),".hkl"))
+  if os.path.exists(hklfile):
+    return ""
   res = olx.Cif('_shelx_hkl_file')
+  if res == 'n/a':
+    res = olx.Cif('_refln', 0)
   if res != "n/a":
     reapfile = "%s%s" %(olx.xf.DataName(olx.xf.CurrentData()),".res")
-    d.setdefault('reapfile',reapfile)
-    retVal = t = gui.tools.TemplateProvider.get_template('cif_export_gui',force=debug)%d
+    d = {'reapfile': reapfile}
+    retVal = gui.tools.TemplateProvider.get_template('cif_export_gui',force=debug)%d
+  else:
+    retVal = gui.tools.TemplateProvider.get_template('cif_no_embedded_files',force=debug)%d
 
   return retVal
 olex.registerFunction(check_for_embedded_hkl, False, "gui.cif")
