@@ -215,11 +215,11 @@ class olex2_normal_eqns(get_parent()):
         OV.SetFVar(var[0], 1.0-var[1].value.value*var[2])
     #update BASF
     if self.twin_fractions is not None:
-      basf = [fraction.value
-                      for fraction in self.twin_fractions
-                      if fraction.grad]
-      olx.DelIns('BASF')
-      if basf: olx.AddIns('BASF', *basf)
+      idx = 0
+      for fraction in self.twin_fractions:
+        if fraction.grad:
+          olx.xf.rm.BASF(idx, fraction.value)
+          idx += 1
     #update EXTI
     if self.reparametrisation.extinction.grad:
       OV.SetExtinction(self.reparametrisation.extinction.value)
@@ -403,7 +403,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         su = math.sqrt(diag[dlen-1])
         OV.SetExtinction(self.reparametrisation.extinction.value, su)
         dlen -= 1
-      try: #remove me for new exe!
+      try:
         for i in xrange(dlen):
           olx.xf.rm.BASF(i, olx.xf.rm.BASF(i), math.sqrt(diag[i]))
       except:
