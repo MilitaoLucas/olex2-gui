@@ -233,6 +233,22 @@ $-
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='AUTO_SAVE_VIEW';help_ext=auto-save-view;1 -->
+  <td width='23%'>
+   <b>%Save View%:</b>
+  </td>
+  <td width='55%'>
+    Save the current view when exiting a structure
+  </td>
+  <td width='20%' align="right">$+
+    html.Snippet("gui/snippets/input-checkbox", "name=AUTO_SAVE_VIEW",
+     "checked=spy.GetParam(user.auto_save_view, 'False')",
+     "onclick=spy.SetParam('user.auto_save_view', html.GetState(~name~))")
+   $-</td>
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='START_OLEX2_IN';help_ext=Start-Olex2-In;1 -->
   <td width='23%'>
     <b>%Start Olex2 in%:</b>

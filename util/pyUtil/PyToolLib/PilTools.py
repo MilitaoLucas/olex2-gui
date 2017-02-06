@@ -2305,7 +2305,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         top_left = btn_dict[b]['top_left']
         font_colour = btn_dict[b]['font_colour']
         btn_type = 'tiny'
-        IM = self.make_timage(item_type='tinybutton', item=txt, state=state, width=width, colour=bgcolour, whitespace='right:1:%s' %bg, e_top_left=top_left, e_font_colour=font_colour)
+        IM = self.make_timage(item_type='tinybutton', item=txt, state=state, width=width, colour=bgcolour, whitespace='right:1:%s' %bg, e_top_left=top_left, e_font_colour=font_colour,outside_name=name)
         name_s = "%s%s.png" %(name, state)
         OlexVFS.save_image_to_olex(IM, name_s, 2)
 
@@ -2495,7 +2495,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if self.params.image_font_name:
       font_name = self.params.image_font_name
 
-  def make_timage(self, item_type, item, state, font_name="Vera", width=None, colour=None, whitespace=None, titleCase=True, e_font_colour=None, e_top_left=None):
+  def make_timage(self, item_type, item, state, font_name="Vera", width=None, colour=None, whitespace=None, titleCase=True, e_font_colour=None, e_top_left=None,outside_name=None):
 
     self.params = OV.GuiParams()
     if not self.width:
@@ -2725,7 +2725,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
           image = self.print_text(image.copy(), item, top, left, font_name, font_size, valign, halign, width, font_colour, item_type)
           if self.debug:
             print "FROM CACHE: %s (%s)" %(item, state)
-          return self.finally_make_image(image=image, width=width, height=height, name = "%s+%s+%s" %(item,item_type, state))
+
+          nam = item
+          if outside_name:
+            nam = outside_name
+          return self.finally_make_image(image=image, width=width, height=height, name = "%s+%s+%s" %(nam,item_type, state))
 
     image = Image.new('RGBA', size, bg_colour)
     draw = ImageDraw.Draw(image)
@@ -2795,7 +2799,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     if self.debug:
       print "FROM SCRATCH: %s" %item
 
-    return self.finally_make_image(image=image, width=width, height=height, name = "CACHE %s+%s+%s" %(item,item_type, state))
+    nam = item
+    if outside_name:
+      nam = outside_name
+
+    return self.finally_make_image(image=image, width=width, height=height, name = "CACHE %s+%s+%s" %(nam,item_type, state))
 
   def finally_make_image(self, image, width, height, name):
     if "snumtitle" in name:

@@ -54,22 +54,25 @@
       <cmd2  "spy.SaveStructureParams()">
       <cmd3  "if strcmp(%4,'none') then none else 'spy.SaveCifInfo()'">
       <cmd4  "if IsFileLoaded() then clear">
-      <cmd5  "spy.fade_out()">
-      <cmd6  "@reap %1 %2">
-      <cmd7  "spy.fade_in()">
-      <cmd8  "spy.OnStructureLoaded(%7)">
-      <cmd9  "spy.run_skin sNumTitle">
-      <cmd10 "spy.make_HOS(True)">
-      <cmd11 "SetVar(SlideQPeaksVal,0)">
-      <cmd12 "storeparam startup file.relativePath(filefull()) true">
-      <cmd13 "spy.setAllMainToolbarTabButtons()">
+      <cmd5  "freeze true">
+      <cmd6  "spy.fade_out()">
+      <cmd7  "@reap %1 %2">
+      <cmd8  "spy.fade_in()">
+      <cmd9  "spy.OnStructureLoaded(%7)">
+      <cmd9a  "freeze false">
+      <cmd10 "spy.run_skin sNumTitle">
+      <cmd11 "spy.make_HOS(True)">
+      <cmd12 "SetVar(SlideQPeaksVal,0)">
+      <cmd13 "storeparam startup file.relativePath(filefull()) true">
+      <cmd14 "spy.setAllMainToolbarTabButtons()">
 
-      <cmd16 "spy.reset_file_in_OFS(twinning-result.htm)">
-      <cmd17 "html.Update">
-      <cnd18 "if html.IsPopup(history-tree) then spy.popout_history_tree()">
+      <cmd15 "spy.reset_file_in_OFS(twinning-result.htm)">
+      <cmd16 "html.Update">
+      <cnd17 "if html.IsPopup(history-tree) then spy.popout_history_tree()">
   >
 <onabort
   <cmd "ceiling off">
+  <cmd "freeze false">
   <cmd "echo lasterror() -m=error">
   <cmd "echo 'There is something wrong with the input file you were trying to load. Please fix this error manually.'">
   <cmd "echo 'Have a look in the lines above - the error and the line number where it occurs are printed there.'">
@@ -82,7 +85,8 @@
   <body
     <args>
   <cmd
-    <cmd "if IsFileLoaded() then '@close>>html.ItemState index* 0 index-home
+    <cmd "if IsFileLoaded() then 'spy.saveHistory()>>spy.SaveStructureParams()>>
+	  spy.SaveCifInfo()>>@close>>html.ItemState index* 0 index-home
       1 info-title 0 logo 1>>html.Update>>echo File is closed'">
   >
 >

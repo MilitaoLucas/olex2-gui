@@ -1462,7 +1462,7 @@ def getReportImageData(size='w400', imageName=None):
         rv = rFile.read()
         rv += "<script type='application/json' id='model'>%s</script>" %(model)
         rv += "<script type='application/json' id='style'>%s</script>" %(
-          olx.ExportColors('', 'current'))
+          olex.f("ExportColors('', 'current')"))
         return rv
     except Exception, e:
       #print str(e)

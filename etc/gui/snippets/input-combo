@@ -5,12 +5,14 @@
 #onchangealways=false
 #setdefault=false
 #disabled=false
+#bgcolor=GetVar('HtmlInputBgColour')
+#fgcolor=GetVar('HtmlFontColour')
 
 <font size="$GetVar('HtmlFontSizeControls')">
 <input
   type="combo"
   height="GetVar('HtmlComboHeight')"
-  bgcolor="GetVar('HtmlInputBgColour')"
+  bgcolor="#bgcolor"
   fgcolor="GetVar(HtmlFontColour)"
   valign="center"
   name="#name"

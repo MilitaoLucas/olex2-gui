@@ -1,3 +1,5 @@
+<!-- #ignoreif not(IsFileType('ires'))
+
 $+
 run("SetVar(refinement_output, strcat(FileName(),_refinement_output.html))")
 $-
@@ -124,18 +126,21 @@ $spy.weightGuiDisplay()
     $xf.rm.Exti()
   </td>
 
+<td width='16%' align='right'>
+</td>
 
-  <!--<td width="4%">-->
-    <!--<input type="checkbox"-->
-      <!--fgcolor="GetVar('HtmlFontColour')"-->
-      <!--bgcolor="GetVar('HtmlTableFirstcolColour')"-->
-      <!--name="SNUM_REFINEMENT_ACTA"-->
-      <!--oncheck="spy.SetParam(user.auto_insert_acta_stuff,True)"-->
-      <!--onuncheck="spy.SetParam(user.auto_insert_acta_stuff,False)"-->
-      <!--checked="spy.GetParam(user.auto_insert_acta_stuff)"-->
-    <!-->-->
-  <!--</td>-->
-  <td width="22%"><b>Current ACTA status: $spy.actaGuiDisplay()</b></td>
+<td width='30%' align='right'>
+$+
+    html.Snippet("gui/snippets/input-combo",
+    "name=REFINEMENT_ACTA",
+    "items=No ACTA;ACTA NOHKL;ACTA",
+    "value=Ins('acta')",
+    "onchange=spy.actaGuiDisplay(html.GetValue('~name~'))",
+    "readonly=False",
+    "onchangealways=True",
+    "bgcolor=spy.refinement_acta_bg_colour()",
+      )
+  $-</td>
 
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -194,3 +199,10 @@ $spy.gui.tools.get_mask_info()
 <!-- #includeif fs.Exists('refinement-settings-extra.htm') refinement-settings-extra refinement-settings-extra.htm;gui\blocks\tool-h3-off.htm;image=h3-Refinement-Settings-Extra;colspan=4;onclick=;onclick=;2; -->
 <!-- #includeif fs.Exists('refinement_image.htm') refinement_image refinement_image.htm;1; -->
 </table>
+#ignoreif -->
+
+<!-- #ignoreif IsFileType('ires')
+<table border="0" width="100%" cellpadding="1" cellspacing="1" bgcolor="$GetVar(HtmlTableFirstcolColour)">
+$spy.gui.cif.check_for_embedded_hkl()
+</table>
+#ignoreif -->
