@@ -305,20 +305,30 @@ def SaveStructureParams():
     structure_phil_file = "%s/.olex/%s.phil" %(OV.FilePath(), OV.ModelSrc())
     olx.phil_handler.save_param_file(
       file_name=structure_phil_file, scope_name='snum', diff_only=True)
+    auto_save_view = OV.GetParam('user.auto_save_view', False)
+    if auto_save_view and olx.IsFileType('oxm') != 'true':
+      oxvf = os.sep.join([OV.StrDir(), OV.ModelSrc() + '.oxv'])
+      olex.m("save gview '%s'" %oxvf)
 OV.registerFunction(SaveStructureParams)
 
 def OnStructureLoaded(previous):
   if olx.IsFileLoaded() == 'false' or not OV.StrDir():
     return
+  auto_save_view = OV.GetParam('user.auto_save_view', False)
+  if auto_save_view and olx.IsFileType('oxm') != 'true':
+    oxvf = os.sep.join([OV.StrDir(), OV.ModelSrc() + '.oxv'])
+    if os.path.exists(oxvf):
+      olex.m("load gview '%s'" %oxvf)
   mf_name = "%s%s%s.metacif" %(OV.StrDir(), os.path.sep, OV.ModelSrc())
   cif_name = "%s%s%s.cif" %(OV.FilePath(), os.path.sep, OV.FileName())
   if not os.path.exists(mf_name) and os.path.exists(cif_name):
     olx.CifExtract(cif_name)
-  if previous != OV.FileFull():
+  if previous != OV.FileFull() and olx.FileExt() != "cif":
     import History
     History.hist.loadHistory()
   LoadStructureParams()
-  OV.SetParam("snum.refinement.use_solvent_mask", olx.Ins("ABIN") != "n/a")
+  if olx.IsFileType('ires') == 'true':
+    OV.SetParam("snum.refinement.use_solvent_mask", olx.Ins("ABIN") != "n/a")
   try:
     for l in olx.FileChangeListeners:
       l('structure')

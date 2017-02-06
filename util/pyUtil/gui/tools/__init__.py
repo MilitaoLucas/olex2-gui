@@ -15,6 +15,9 @@ have_found_python_error= False
 global last_formula
 last_formula = ""
 
+global last_element_html
+last_element_html = ""
+
 global current_sNum
 current_sNum = ""
 
@@ -323,15 +326,18 @@ OV.registerFunction(checkPlaton,True,'gui.tools')
 def MakeElementButtonsFromFormula(action='mode', scope = ""):
   ## Produces buttons for all atom types currently present in the model. Action 'mode' will go to 'change atom type' mode, action 'select' will simply select the atom types in question
 
-  t1 = time.time()
+  if debug:
+    print "--- Making Element Formulae"
+    t1 = time.time()
 
   from PilTools import TI
   global last_formula
-
+  global last_element_html
   current_formula = olexex.OlexRefinementModel().currentFormula()
 
-  #if current_formula == last_formula:
-    #return
+  if not debug:
+    if current_formula == last_formula:
+      return last_element_html
 
 #  from PilTools import ButtonMaker
 #  icon_size = OV.GetParam('gui.skin.icon_size')
@@ -351,19 +357,19 @@ def MakeElementButtonsFromFormula(action='mode', scope = ""):
 
   for element in f:
     symbol = element.split(':')[0]
-    max = float(element.split(':')[1])
-    max = round(max, 2)
+    max_ele = float(element.split(':')[1])
+    max_ele = round(max_ele, 2)
     present = round(current_formula.get(symbol,0),2)
     if symbol != "H":
-      totalcount += max
+      totalcount += max_ele
 
-    max = max*Z_prime
+    max_ele = max_ele*Z_prime
     c = ""
-    if present < max:
+    if present < max_ele:
       bgcolour = (250,250,250)
       c = 'b'
       isSame = False
-    elif present ==  max:
+    elif present ==  max_ele:
       bgcolour = (210,255,210)
       c = 'g'
     else:
@@ -394,8 +400,8 @@ def MakeElementButtonsFromFormula(action='mode', scope = ""):
     d.setdefault('bgcolor', OV.GetParam('gui.html.table_firstcol_colour'))
 
     control = "IMG_%s" %name.upper()
-    #print
-    #print "  EB1: %.5f" %(time.time() - t1)
+    if debug:
+      print "  EB1(%s): %.5f" %(control,(time.time() - t1))
     if olx.fs.Exists("%s.png" %img_name) != "true":
       TI.make_element_buttons(symbol)
 
@@ -440,6 +446,7 @@ def MakeElementButtonsFromFormula(action='mode', scope = ""):
     OV.SetImage("IMG_TOOLBAR-REFRESH","up=toolbar-refresh.png,down=toolbar-refresh.png,hover=toolbar-refresh.png")
 
   olexex.SetAtomicVolumeInSnumPhil(totalcount)
+  last_element_html = html
   return html
 
 def ElementButtonStates(symbol):
@@ -660,7 +667,8 @@ def makeFormulaForsNumInfo():
 
   update = '<table border="0" cellpadding="0" cellspacing="0"><tr><td>%s</td><td>%s</td></tr></table>'%(formula_string, refresh_button)
   OV.write_to_olex('snumformula.htm', update)
-  #print "Formula sNum (2): %.5f" %(time.time() - t1)
+  if debug:
+    print "Formula sNum (2): %.5f" %(time.time() - t1)
 
   return "<!-- #include snumformula snumformula.htm;1 -->"
 OV.registerFunction(makeFormulaForsNumInfo)
@@ -735,7 +743,8 @@ $spy.MakeHoverButton('btn-info@cell@%s',"spy.make_help_box -name=cell-not-quite-
   </tr>
   ''' %d
   OV.write_to_olex('celldimensiondisplay.htm', t)
-  #print "Cell: %.5f" %(time.time() - t1)
+  if debug:
+    print "Cell: %.5f" %(time.time() - t1)
   return "<!-- #include celldimensiondisplay celldimensiondisplay.htm;1 -->"
 
 OV.registerFunction(make_cell_dimensions_display,True,"gui.tools")
@@ -890,18 +899,19 @@ def get_regex_l(src_file):
   global regex_l
   if not src_file:
     return False
-  if not src_file in regex_l:
-    re_l = []
-    l = open(src_file, 'r').readlines()
-    for item in l:
-      item = item.strip()
-      if item.startswith('#') or not item:
-        continue
-      item_l = item.split("::")
-      find = item_l[0].strip().strip("%%")
-      replace = item_l[1].strip()
-      re_l.append((find,replace))
-    regex_l.setdefault('%s'%src_file,re_l)
+
+  #if not src_file in regex_l:
+  re_l = []
+  l = open(src_file, 'r').readlines()
+  for item in l:
+    item = item.strip()
+    if item.startswith('#') or not item:
+      continue
+    item_l = item.split("::")
+    find = item_l[0].strip().strip("%%")
+    replace = item_l[1].strip()
+    re_l.append((find,replace))
+  regex_l.setdefault('%s'%src_file,re_l)
   return regex_l[src_file]
 
 def run_regular_expressions(txt, src_file=None, re_l=None, specific=""):
@@ -957,7 +967,7 @@ class Templates():
     self.templates = {}
     self.get_all_templates()
 
-  def get_template(self, name, force=False, path=None, mask=None, marker='@B@-@E@'):
+  def get_template(self, name, force=False, path=None, mask="*.*", marker='{-}'):
     '''
     Returns a particular template from the Template.templates dictionary. If it doesn't exist, then it will try and get it, and return a 'not found' string if this does not succeed.
     -- if force==True, then the template will be reloaded
@@ -1020,3 +1030,16 @@ def _get_available_html_width(margin_adjust = True, first_col_width_adjust=True,
     max_width = 10
 
   return width, max_width
+
+def resize_pdf(f_in, setting='printer'):
+  if ".pdf" in f_in:
+    small_file = f_in.split(".")[0] + "_small" + f_in.split(".")[1]
+    big_file = f_in
+  else:
+    small_file = f_in + "_small.pdf"
+    big_file = f_in + ".pdf"
+
+  options = "-sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/%s -dNOPAUSE -dQUIET -dBATCH -sOutputFile=%s %s" %(setting, small_file, big_file)
+  cmd = r'"C:\Program Files\gs\gs9.06\bin\gswin64" ' + options
+  os.system(cmd)
+OV.registerFunction(resize_pdf,False,'gui.tools')

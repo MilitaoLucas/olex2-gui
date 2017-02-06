@@ -420,6 +420,13 @@ routines requiring structure refinement
     }
   }
 
+  display
+    .short_caption = Display styles for the molecule
+    {
+    collections = ""
+      .type = str
+    }
+
   shelx_output = True
     .type = bool
 
@@ -721,7 +728,6 @@ routines requiring structure refinement
       .type = float
   }
 
-
   olex_conres = RRINGS
     .type = str
   refinement_banner_slide = 82
@@ -877,6 +883,8 @@ user
   show_info = 0
     .type = int
   show_legend = True
+    .type = bool
+  auto_save_view = False
     .type = bool
   expert_level = 0
     .type = int

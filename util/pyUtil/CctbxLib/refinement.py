@@ -64,9 +64,10 @@ class olex2_normal_eqns(get_parent()):
 
   def show_cycle_summary(self, log=None):
     if log is None: log = sys.stdout
+    # self.reparametrisation.n_independents + OSF
     print >> log, "wR2 = %.4f for %i data and %i parameters" %(
       self.wR2(), self.observations.fo_sq.size(),
-      self.reparametrisation.n_independents)
+      self.reparametrisation.n_independents + 1)
     print >> log, "GooF = %.4f" %(self.goof(),)
     max_shift_site = self.max_shift_site()
     OV.SetParam('snum.refinement.max_shift_site', max_shift_site[0])
@@ -214,10 +215,11 @@ class olex2_normal_eqns(get_parent()):
         OV.SetFVar(var[0], 1.0-var[1].value.value*var[2])
     #update BASF
     if self.twin_fractions is not None:
-      basf = [fraction.value
-                      for fraction in self.twin_fractions
-                      if fraction.grad]
-      if basf: olx.AddIns('BASF', *basf)
+      idx = 0
+      for fraction in self.twin_fractions:
+        if fraction.grad:
+          olx.xf.rm.BASF(idx, fraction.value)
+          idx += 1
     #update EXTI
     if self.reparametrisation.extinction.grad:
       OV.SetExtinction(self.reparametrisation.extinction.value)
@@ -401,7 +403,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         su = math.sqrt(diag[dlen-1])
         OV.SetExtinction(self.reparametrisation.extinction.value, su)
         dlen -= 1
-      try: #remove me for new exe!
+      try:
         for i in xrange(dlen):
           olx.xf.rm.BASF(i, olx.xf.rm.BASF(i), math.sqrt(diag[i]))
       except:
@@ -711,9 +713,13 @@ class FullMatrixRefine(OlexCctbxAdapter):
     #cif_block['_refine_ls_hydrogen_treatment'] =
     cif_block['_refine_ls_matrix_type'] = 'full'
     cif_block['_refine_ls_number_constraints'] = self.n_constraints
-    cif_block['_refine_ls_number_parameters'] = self.reparametrisation.n_independents
+    # add the OSF!
+    cif_block['_refine_ls_number_parameters'] = self.reparametrisation.n_independents + 1
     cif_block['_refine_ls_number_reflns'] = self.reflections.f_sq_obs_filtered.size()
-    cif_block['_refine_ls_number_restraints'] = self.normal_eqns.n_restraints
+    # need to take the origin fixing restraint into the account!
+    n_restraints = self.normal_eqns.n_restraints +\
+      len(self.normal_eqns.origin_fixing_restraint.singular_directions)
+    cif_block['_refine_ls_number_restraints'] = n_restraints
     cif_block['_refine_ls_R_factor_all'] = fmt % self.r1_all_data[0]
     cif_block['_refine_ls_R_factor_gt'] = fmt % self.r1[0]
     cif_block['_refine_ls_restrained_S_all'] = fmt % self.normal_eqns.restrained_goof()
