@@ -295,15 +295,13 @@ def copy_datadir_items(force=False):
   '''
   import shutil
 
-  if sys.version_info[0] >= 2 and sys.version_info[1] >=6:
-    ignore_patterns = shutil.ignore_patterns('*.svn')
-  else:
-    ignore_patterns = None # back compatiblity for python < 2.6
+  ignore_patterns = shutil.ignore_patterns('*.svn')
 
   svn_samples_directory = '%s%ssample_data' %(OV.BaseDir(),os.sep)
   user_samples_directory = OV.GetParam('user.sample_dir')
   if not user_samples_directory:
     user_samples_directory = '%s%ssamples' %(OV.DataDir(),os.sep)
+    OV.SetParam('user.sample_dir', user_samples_directory)
 
   svn_customisation_directory = '%s%setc%scustomisation' %(OV.BaseDir(),os.sep,os.sep)
   user_customisation_directory = OV.GetParam('user.customisation_dir')
@@ -315,40 +313,24 @@ def copy_datadir_items(force=False):
   for src, dest in dirs:
     if not os.path.exists(dest):
       os.makedirs(dest)
-    else:
       if "sample_data" in src:
-        OV.SetParam('user.sample_data',dest)
         OV.SetVar('sample_dir', dest)
       elif "customisation" in src:
         OV.SetParam('user.customisation_dir',dest)
-      if not force:
-        continue
-    if "sample_data" in src:
-      if not os.path.exists(dest):
-        dest = src
-      OV.SetParam('user.sample_data',dest)
-      OV.SetVar('sample_dir', dest)
-
-    elif "customisation" in src:
-      if not os.path.exists(dest):
-        dest = src
-      OV.SetParam('user.customisation_dir',dest)
-    if dest == src:
-      continue
+    else:
+      if "sample_data" in src:
+        OV.SetVar('sample_dir', dest)
+      elif "customisation" in src:
+        OV.SetParam('user.customisation_dir',dest)
     things = os.listdir(src)
     for thing in things:
-      print thing
       if thing == '.svn': continue
       try:
         from_f = '%s%s%s' %(src,os.sep,thing)
         to_f = '%s%s%s' %(dest,os.sep,thing)
-        if os.path.isdir(from_f):
-          if ignore_patterns is not None:
-            copytree(from_f, to_f)
-          else:
-            copytree(from_f, to_f)
-        else:
-          copytree(from_f, to_f)
+        if not force and os.path.exists(to_f):
+          continue
+        copytree(from_f, to_f, ignore=ignore_patterns)
       except Exception, err:
         print err
         pass
