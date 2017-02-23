@@ -577,11 +577,6 @@ def FindZOfHeaviestAtomInFormua():
 
 OV.registerFunction(FindZOfHeaviestAtomInFormua)
 
-last_formula = None
-
-
-
-
 def SetAtomicVolumeInSnumPhil(totalcount):
   cell_volume = 0
   Z = 1
