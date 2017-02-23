@@ -2,16 +2,16 @@
 
 <tr>
  <td valign='top' width="8" align='center' bgcolor="$GetVar(HtmlTableFirstcolColour)">
-  <a href="spy.make_help_box -name='refine' -popout='False'" 
+  <a href="spy.make_help_box -name='refine' -popout='False'"
     target="Help me with this">
     <zimg border="0" src="info.png">
-  </a>	
+  </a>
  </td>
  <td VALIGN='center'  colspan='2'>
   <input
-   bgcolor="GetVar('HtmlTableBgColour')"  
-   type="button" 
-   name="RUN_REFINE" 
+   bgcolor="GetVar('HtmlTableBgColour')"
+   type="button"
+   name="RUN_REFINE"
    image="button-refine.png"
    onclick="refine>>echo 'Running Refinement Program'"
    >
@@ -26,6 +26,6 @@
 <!-- #include tool-table-header gui\blocks\tool-table-header.htm;1; -->
 
 
-<!-- #include refinement-settings-h3-refinement-settings gui\refinement-settings-h3-refinement-settings.htm;gui\blocks\tool-h3-off.htm;image=refinement-settings-h3_refinement_settings;colspan=4;onclick=;onclick=;1 2; -->
+<!-- #includeif IsFileType('ires') refinement-settings-h3-refinement-settings gui\refinement-settings-h3-refinement-settings.htm;gui\blocks\tool-h3-off.htm;image=refinement-settings-h3_refinement_settings;colspan=4;onclick=;onclick=;1 2; -->
 
 </table>
