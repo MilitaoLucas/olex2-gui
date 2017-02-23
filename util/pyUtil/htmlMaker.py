@@ -244,7 +244,7 @@ class GeneratedGuiMaker(object):
 
   def citationsMetadataHtmlMaker(self, ):
     txt = "<b>Current Citations</b>:<br>"
-    ref_l = OV.get_cif_item('_publ_section_references').split('\n')
+    ref_l = OV.get_cif_item('_publ_section_references').split('\n\n')
     if not ref_l:
       ref = "<b>_publ_section_references</b> is currently missing or empty."
     else:
