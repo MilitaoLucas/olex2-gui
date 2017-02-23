@@ -333,33 +333,35 @@ def MakeElementButtonsFromFormula(action='mode', scope = ""):
   from PilTools import TI
   global last_formula
   global last_element_html
-  current_formula = olexex.OlexRefinementModel().currentFormula()
+  model_formula = olexex.OlexRefinementModel().currentFormula()
+  mf = ["%s:%s" %(x, model_formula[x]) for x in model_formula.iterkeys()]
+  mf.sort()
 
-  if not debug:
-    if current_formula == last_formula:
+  formula = olx.xf.GetFormula('list')
+  if mf == last_formula:
+    if olx.fs.Exists("btn-elementHoff.png") == "true":
       return last_element_html
 
 #  from PilTools import ButtonMaker
 #  icon_size = OV.GetParam('gui.skin.icon_size')
   totalcount = 0
   btn_dict = {}
-  f = olx.xf.GetFormula('list')
-  if not f:
+  if not formula:
     return
-  f = f.split(',')
+  f = formula.split(',')
 
   Z_prime = float(olx.xf.au.GetZprime())
   Z = float(olx.xf.au.GetZ())
   html = ""
 
   isSame = True
-
-
+  formula_l = []
   for element in f:
     symbol = element.split(':')[0]
     max_ele = float(element.split(':')[1])
     max_ele = round(max_ele, 2)
-    present = round(current_formula.get(symbol,0),2)
+    present = round(model_formula.get(symbol,0),2)
+
     if symbol != "H":
       totalcount += max_ele
 
@@ -432,8 +434,6 @@ def MakeElementButtonsFromFormula(action='mode', scope = ""):
   >
   ''' %d
 
-  if current_formula != last_formula:
-    last_formula = current_formula
 
 #  OV.write_to_olex('element_buttons.htm', html, 0)
 
@@ -447,6 +447,8 @@ def MakeElementButtonsFromFormula(action='mode', scope = ""):
 
   olexex.SetAtomicVolumeInSnumPhil(totalcount)
   last_element_html = html
+  f.sort()
+  last_formula = f
   return html
 
 def ElementButtonStates(symbol):
