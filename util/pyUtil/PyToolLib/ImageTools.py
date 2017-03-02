@@ -95,6 +95,7 @@ class ImageTools(FontInstances):
     self.skin_width = w
     self.skin_width_margin = w - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
     self.skin_width_table = self.skin_width_margin - OV.GetParam('gui.html.table_firstcol_width')
+    self.history_width = self.skin_width_table - int(OV.GetParam('gui.html.table_firstcol_width'))
     self.max_width = w
 
     self.skin_width = self.skin_width_margin
