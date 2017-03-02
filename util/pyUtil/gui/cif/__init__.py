@@ -164,7 +164,7 @@ def check_for_embedded_hkl():
     d = {'reapfile': reapfile}
     retVal = gui.tools.TemplateProvider.get_template('cif_export_gui',force=debug)%d
   else:
-    retVal = gui.tools.TemplateProvider.get_template('cif_no_embedded_files',force=debug)%d
+    retVal = "No refinable data embedded"
 
   return retVal
 olex.registerFunction(check_for_embedded_hkl, False, "gui.cif")
