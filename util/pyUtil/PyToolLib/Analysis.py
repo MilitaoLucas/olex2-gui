@@ -2572,7 +2572,7 @@ class HistoryGraph(Analysis):
       node = node.active_child_node
     n_bars = len(bars)
     #width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
-    width = IT.skin_width_table
+    width = IT.skin_width_table - int(OV.GetParam('gui.html.table_firstcol_width')/2)
     size = (width, 100)
     self.params.size_x, self.params.size_y = size
     self.make_empty_graph(draw_title=False)
@@ -3436,6 +3436,7 @@ HOS_instance = HealthOfStructure()
 OV.registerFunction(HOS_instance.make_HOS)
 
 
+
 def title_replace(title):
   title = title.replace("sigma", "&sigma;")
   title = title.replace("two_theta", "2&Theta; / &deg;")
@@ -3445,3 +3446,6 @@ def title_replace(title):
   title = title.replace(" vs ", " <i>vs</i>")
   title = title.replace("_", "-")
   return title
+
+
+
