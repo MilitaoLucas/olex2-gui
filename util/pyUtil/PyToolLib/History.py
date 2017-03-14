@@ -74,10 +74,12 @@ class History(ArgumentParser):
       tree.add_node(OV.HKLSrc(), self.filefull, filefull_lst)
     self.his_file = tree.active_node.name
     OV.SetParam('snum.history.current_node', tree.active_node.name)
-    import time
-    t = time.time()
+    if timing:
+      import time
+      t = time.time()
     self._make_history_bars()
-    print time.time() - t
+    if timing:
+      print time.time() - t
     self.saveHistory()
     return tree.active_node.name
 
@@ -548,6 +550,9 @@ def decompressFile(fileData):
   return zlib.decompress(fileData)
 
 def make_history_bars():
+  if olx.GetVar("update_history_bars", 'true') == 'false':
+    olx.UnsetVar("update_history_bars")
+    return
 #  hist._make_history_bars()
   hist.make_graph()
 OV.registerFunction(make_history_bars)

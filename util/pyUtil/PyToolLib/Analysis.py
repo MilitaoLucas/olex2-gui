@@ -948,9 +948,9 @@ class Graph(ArgumentParser):
 <a href="spy.SetParam('user.graphs.program_analysis.all_in_one_history','True')>>spy._make_history_bars()>>html.Update">Show All Bars</a>&nbsp;
 <a href="reap '%s\%s.ins'">Reload INS</a>
 ''' %(OV.FilePath(), OV.FileName())
-          previous_img = '''<a href="spy.olex_fs_copy('history-info_%s.htm','history-info.htm')>>html.Update"><zimg src=previous.png></a>''' %(img_no -1)
+          previous_img = '''<a href="spy.olex_fs_copy('history-info_%s.htm','history-info.htm')>>SetVar('update_history_bars', 'false')>>html.Update"><zimg src=previous.png></a>''' %(img_no -1)
           #previous_img = "<a href='spy.write_to_olex(history-info.htm,Fred)'><zimg src=previous.png></a>"
-          next_img = '''<a href="spy.olex_fs_copy('history-info_%s.htm','history-info.htm')>>html.Update"><zimg src='next.png'></a>''' %(img_no + 1)
+          next_img = '''<a href="spy.olex_fs_copy('history-info_%s.htm','history-info.htm')>>SetVar('update_history_bars', 'false')>>html.Update"><zimg src='next.png'></a>''' %(img_no + 1)
 
         _ = '''
 <tr><td><table width='100%%' border='0' cellpadding='0'>
