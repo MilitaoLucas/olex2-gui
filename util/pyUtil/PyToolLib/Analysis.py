@@ -948,9 +948,9 @@ class Graph(ArgumentParser):
 <a href="spy.SetParam('user.graphs.program_analysis.all_in_one_history','True')>>spy._make_history_bars()>>html.Update">Show All Bars</a>&nbsp;
 <a href="reap '%s\%s.ins'">Reload INS</a>
 ''' %(OV.FilePath(), OV.FileName())
-          previous_img = '''<a href="spy.olex_fs_copy('history-info_%s.htm','history-info.htm')>>html.Update"><zimg src=previous.png></a>''' %(img_no -1)
+          previous_img = '''<a href="spy.olex_fs_copy('history-info_%s.htm','history-info.htm')>>SetVar('update_history_bars', 'false')>>html.Update"><zimg src=previous.png></a>''' %(img_no -1)
           #previous_img = "<a href='spy.write_to_olex(history-info.htm,Fred)'><zimg src=previous.png></a>"
-          next_img = '''<a href="spy.olex_fs_copy('history-info_%s.htm','history-info.htm')>>html.Update"><zimg src='next.png'></a>''' %(img_no + 1)
+          next_img = '''<a href="spy.olex_fs_copy('history-info_%s.htm','history-info.htm')>>SetVar('update_history_bars', 'false')>>html.Update"><zimg src='next.png'></a>''' %(img_no + 1)
 
         _ = '''
 <tr><td><table width='100%%' border='0' cellpadding='0'>
@@ -2572,7 +2572,7 @@ class HistoryGraph(Analysis):
       node = node.active_child_node
     n_bars = len(bars)
     #width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
-    width = IT.skin_width_table
+    width = IT.skin_width_table - int(OV.GetParam('gui.html.table_firstcol_width')/2)
     size = (width, 100)
     self.params.size_x, self.params.size_y = size
     self.make_empty_graph(draw_title=False)
@@ -3436,6 +3436,7 @@ HOS_instance = HealthOfStructure()
 OV.registerFunction(HOS_instance.make_HOS)
 
 
+
 def title_replace(title):
   title = title.replace("sigma", "&sigma;")
   title = title.replace("two_theta", "2&Theta; / &deg;")
@@ -3445,3 +3446,6 @@ def title_replace(title):
   title = title.replace(" vs ", " <i>vs</i>")
   title = title.replace("_", "-")
   return title
+
+
+
