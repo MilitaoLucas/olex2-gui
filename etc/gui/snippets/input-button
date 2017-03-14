@@ -4,7 +4,8 @@
 #fit=false
 #flat=false
 #disabled=false
-
+#bgcolor=
+#fgcolor=
 <font size="$GetVar('HtmlFontSizeControls')">
 
 <input
@@ -13,6 +14,8 @@
   value="#value"
   width="#width"
   onclick="#onclick"
+  bgcolor="#bgcolor"
+  fgcolor="#fgcolor"
   fit="#fit"
   flat="#flat"
   disabled="#disabled"
