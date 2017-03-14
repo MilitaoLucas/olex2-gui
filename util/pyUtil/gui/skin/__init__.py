@@ -214,6 +214,8 @@ def export_parameters(load_phil=True):
   OV.SetVar('HtmlFontColour', OV.GetParam('gui.html.font_colour').hexadecimal)
   OV.SetVar('HtmlPanelWidth', OV.GetParam('gui.htmlpanelwidth'))
   OV.SetVar('HtmlButtonHeight', OV.GetParam('gui.timage.button.height'))
+  OV.SetVar('history_width', IT.history_width)
+
 
   if timing:
     print "export_parameters took %.4fs" %(time.time()-t)

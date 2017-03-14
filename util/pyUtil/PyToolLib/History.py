@@ -49,6 +49,7 @@ class History(ArgumentParser):
     self.history_filepath = r'%s/%s.hist' %(self.strdir,self.filename)
     self.rename = OV.FindValue('rename')
     self.his_file = None
+    OV.registerFunction(self.make_graph,False,'History')
 
   def create_history(self, solution=False):
     self._getItems()
@@ -73,7 +74,12 @@ class History(ArgumentParser):
       tree.add_node(OV.HKLSrc(), self.filefull, filefull_lst)
     self.his_file = tree.active_node.name
     OV.SetParam('snum.history.current_node', tree.active_node.name)
+    if timing:
+      import time
+      t = time.time()
     self._make_history_bars()
+    if timing:
+      print time.time() - t
     self.saveHistory()
     return tree.active_node.name
 
@@ -245,6 +251,7 @@ class History(ArgumentParser):
     return tree
 
   def _make_history_bars(self):
+    return #HP this should be retired. Leave here for the moment, in case things go bad"
     if not OV.HasGUI():
       return
     try:
@@ -254,13 +261,20 @@ class History(ArgumentParser):
     #TODO must be a better way, this does not work when switching between upper
     #tabs like work and view while the history is still opened - loading another
     #structure does not update it
-    if state == u'0' or True:
+    if state == u'0' or state == None:
       full_tree = not OV.GetParam('snum.history.condensed_tree')
       OV.write_to_olex(
         'history_tree.ind', ''.join(make_html_tree(tree, [], 0, full_tree)))
       from Analysis import HistoryGraph
       HistoryGraph(tree)
     return
+
+  def make_graph(self):
+    full_tree = not OV.GetParam('snum.history.condensed_tree')
+    OV.write_to_olex(
+      'history_tree.ind', ''.join(make_html_tree(tree, [], 0, full_tree)))
+    from Analysis import HistoryGraph
+    HistoryGraph(tree)
 
   def _update_history_display(self):
     pass
@@ -536,7 +550,11 @@ def decompressFile(fileData):
   return zlib.decompress(fileData)
 
 def make_history_bars():
-  hist._make_history_bars()
+  if olx.GetVar("update_history_bars", 'true') == 'false':
+    olx.UnsetVar("update_history_bars")
+    return
+#  hist._make_history_bars()
+  hist.make_graph()
 OV.registerFunction(make_history_bars)
 
 def get(where, what):
