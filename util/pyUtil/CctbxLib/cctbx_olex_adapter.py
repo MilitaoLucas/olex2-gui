@@ -570,7 +570,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
                    use_space_group_symmetry=True)
       self.time_compute.stop()
       self.time_f_mask = time_log("f_mask calculation").start()
-      f_mask = mask.structure_factors()
+      f_mask = self.structure_factors(mask)
       self.time_f_mask.stop()
       olx.current_mask = mask
       if mask.flood_fill.n_voids() > 0:
@@ -638,6 +638,106 @@ class OlexCctbxMasks(OlexCctbxAdapter):
     if OV.HasGUI() and show:
       write_grid_to_olex(output_data)
     self.time_write_grid.stop()
+
+  def structure_factors(self, mask, max_cycles=100):
+    """P. van der Sluis and A. L. Spek, Acta Cryst. (1990). A46, 194-201."""
+    from scitbx.math import approx_equal_relatively
+    from libtbx.utils import xfrange
+    assert mask.mask is not None
+    if mask.n_voids() == 0: return
+    if mask.use_set_completion:
+      f_calc_set = mask.complete_set
+    else:
+      f_calc_set = mask.fo2.set()
+    mask.f_calc = f_calc_set.structure_factors_from_scatterers(
+      mask.xray_structure, algorithm="direct").f_calc()
+    f_obs = mask.f_obs()
+    mask.scale_factor = flex.sum(f_obs.data())/flex.sum(
+      flex.abs(mask.f_calc.data()))
+    f_obs_minus_f_calc = f_obs.f_obs_minus_f_calc(
+      1/mask.scale_factor, mask.f_calc)
+    mask.fft_scale = mask.xray_structure.unit_cell().volume()\
+        / mask.crystal_gridding.n_grid_points()
+    epsilon_for_min_residual = 2
+    grid_points_per_void = mask.flood_fill.grid_points_per_void()
+    n_solvent_grid_points = mask.n_solvent_grid_points()
+    prev_x = mask.n_voids() * [0]
+    mask._electron_counts_per_void = mask.n_voids() * [0]
+    grid_scale = mask.crystal_gridding.n_grid_points() /\
+      (mask.crystal_gridding.n_grid_points() - n_solvent_grid_points)
+    for i in range(max_cycles):
+      mask.diff_map = miller.fft_map(mask.crystal_gridding, f_obs_minus_f_calc)
+      mask.diff_map.apply_volume_scaling()
+      stats = mask.diff_map.statistics()
+      masked_diff_map = mask.diff_map.real_map_unpadded().set_selected(
+        mask.mask.data.as_double() == 0, 0)
+      mask.f_000 = 0
+      for j in range(mask.n_voids()):
+        # exclude voids with negative electron counts from the masked map
+        # set the electron density in those areas to be zero
+        selection = mask.mask.data == j+2
+        if mask.exclude_void_flags[j]:
+          masked_diff_map.set_selected(selection, 0)
+          continue
+        diff_map_ = masked_diff_map.deep_copy().set_selected(~selection, 0)
+        f_000 = flex.sum(diff_map_) * mask.fft_scale
+        f_000_s = f_000 * grid_scale
+        if i > 0:
+          if f_000_s - prev_x[j] < 0.1:
+            if f_000_s < 0:
+              masked_diff_map.set_selected(selection, 0)
+              mask.exclude_void_flags[j] = True
+              mask._electron_counts_per_void[j] = 0
+              n_solvent_grid_points -= grid_points_per_void[j]
+              grid_scale = mask.crystal_gridding.n_grid_points() /\
+                (mask.crystal_gridding.n_grid_points() - n_solvent_grid_points)
+            prev_x[j] = f_000_s
+            continue
+        mask.f_000 += f_000
+        prev_x[j] = f_000_s
+        mask._electron_counts_per_void[j] = f_000_s 
+
+      #mask.f_000 = flex.sum(masked_diff_map) * mask.fft_scale
+      f_000_s = mask.f_000 * grid_scale
+      if (mask.f_000_s is not None and
+          approx_equal_relatively(mask.f_000_s, f_000_s, 0.001)):
+        mask.f_000_s = f_000_s
+        break # we have reached convergence
+      else:
+        mask.f_000_s = f_000_s
+      masked_diff_map.add_selected(
+        mask.mask.data.as_double() > 0,
+        mask.f_000_s/mask.xray_structure.unit_cell().volume())
+      mask._f_mask = f_obs.structure_factors_from_map(map=masked_diff_map)
+      mask._f_mask *= mask.fft_scale
+      scales = []
+      residuals = []
+      min_residual = 1000
+      for epsilon in xfrange(epsilon_for_min_residual, 0.9, -0.2):
+        f_model_ = mask.f_model(epsilon=epsilon)
+        scale = flex.sum(f_obs.data())/flex.sum(flex.abs(f_model_.data()))
+        scaled_fobs_abs = 1/scale * flex.abs(f_obs.data())
+        residual = flex.sum(
+          flex.abs(scaled_fobs_abs- flex.abs(f_model_.data())))\
+           / flex.sum(scaled_fobs_abs)
+        scales.append(scale)
+        residuals.append(residual)
+        min_residual = min(min_residual, residual)
+        if min_residual == residual:
+          scale_for_min_residual = scale
+          epsilon_for_min_residual = epsilon
+      mask.scale_factor = scale_for_min_residual
+      f_model = mask.f_model(epsilon=epsilon_for_min_residual)
+      f_obs = mask.f_obs()
+      f_obs_minus_f_calc = f_obs.phase_transfer(f_model).f_obs_minus_f_calc(
+        1/mask.scale_factor, mask.f_calc)
+    #make sure sum matches the summary
+    mask.f_000_s = 0
+    for j in range(mask.n_voids()):
+      mask._electron_counts_per_void[j] = round(mask._electron_counts_per_void[j], 1)
+      mask.f_000_s += mask._electron_counts_per_void[j]
+    return mask._f_mask
+
 
   def __del__(self):
     OV.DeleteBitmap("working")
