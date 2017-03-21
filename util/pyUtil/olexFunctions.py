@@ -106,6 +106,16 @@ class OlexFunctions(inheritFunctions):
 
       retVal = handler.get_validated_param(variable)
 
+      if type(retVal) == str and "()" in retVal:
+        base = retVal.split('()')
+        try:
+          _ = getattr(OV, base[0])
+          path = _()
+          if os.path.exists(path):
+            retVal = os.sep.join([path, base[1]])
+        except:
+          pass
+
       #if not get_list:
         #retVal = handler.get_validated_param(variable)
       #else:
