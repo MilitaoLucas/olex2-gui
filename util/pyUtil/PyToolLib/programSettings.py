@@ -134,7 +134,7 @@ def makeArgumentsHTML(program, method, instruction):
     if option.name == 'nls':
       onchange = "%s>>spy.SetParam('snum.refinement.max_cycles',html.GetValue('SET_SETTINGS_%s_NLS'))>>html.Update" %(onchange, name.upper())
     elif option.name == 'npeaks':
-      onchange = "'%s'>>spy.SetParam('snum.refinement.max_peaks',html.GetValue('SET_SETTINGS_%s_NPEAKS'))>>html.Update" %(onchange, name.upper())
+      onchange = "%s>>spy.SetParam('snum.refinement.max_peaks',html.GetValue('SET_SETTINGS_%s_NPEAKS'))>>html.Update" %(onchange, name.upper())
     input_txt = ""
     if data_type in ("float", "int"):
       d = {'ctrl_name':ctrl_name,
