@@ -33,7 +33,7 @@
    <td width="40%">$+
      html.Snippet("gui/snippets/input-combo", "name=sorting_moiety",
       "value=spy.GetParam('user.sorting.moiety', 'Size')",
-      "items=Size<-s;Heaviest atom<-h;Mass<-m",
+      "items=None<-;From sort<-default;Size<-s;Heaviest atom<-h;Mass<-m",
       "onchange=spy.SetParam('user.sorting.moiety', html.GetValue('~name~'))")
     $-</td>
    <td width="35%" align='left'>Treat H atoms independently</td>
