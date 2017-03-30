@@ -26,7 +26,7 @@ class XPlain:
     cell_input_file = None
     hkl_file = olx.HKLSrc()
     if not os.path.exists(hkl_file):
-      hkl_file = file.ChangeExt(loaded_file, 'hkl')
+      hkl_file = olx.file.ChangeExt(loaded_file, 'hkl')
     if not os.path.exists(hkl_file):
       print 'Could not locate HKL file, aborting...'
       return False
