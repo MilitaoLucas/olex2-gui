@@ -1713,7 +1713,7 @@ user
       .type = str
     cat4 = ""
       .type = str
-    moiety = "s"
+    moiety = "default"
      .type = str
     h = False
       .type = bool

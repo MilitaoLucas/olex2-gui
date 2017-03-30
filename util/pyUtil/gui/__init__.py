@@ -227,9 +227,10 @@ def do_sort():
     args[0] += 'h'
   args += olx.GetVar("sorting.atom_order", "").split()
   arg3 = OV.GetParam("user.sorting.moiety")
-  if arg3:
+  if arg3 is not None:
     args.append("moiety")
-    args.append('+' + arg3)
+    if arg3 != 'default':
+      args.append('+' + arg3)
   args += olx.GetVar("sorting.moiety_order", "").split()
   olx.Sort(*args)
 olex.registerFunction(do_sort, False, "gui")
