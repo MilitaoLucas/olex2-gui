@@ -558,17 +558,18 @@ def make_history_bars():
 OV.registerFunction(make_history_bars)
 
 def get(where, what):
-  if where == 'solution':
-    acn = tree.active_child_node
-    solution = True
-  else:
-    acn = tree.active_node
-    solution = False
-  if acn and acn.is_solution == solution:
-    if what == 'program':
-      return acn.program
-    elif what == 'method':
-      return acn.method
+  if tree:
+    if where == 'solution':
+      acn = tree.active_child_node
+      solution = True
+    else:
+      acn = tree.active_node
+      solution = False
+    if acn and acn.is_solution == solution:
+      if what == 'program':
+        return acn.program
+      elif what == 'method':
+        return acn.method
   return 'Unknown'
 OV.registerFunction(get, namespace="history")
 
