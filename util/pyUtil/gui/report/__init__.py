@@ -177,9 +177,12 @@ def ResolvePrograms():
     return True
   import History
   import olex_gui
-  if not(History.get('solution', 'program') == 'Unknown' or\
-         History.get('refinement', 'program') == 'Unknown'):
+  hs = History.tree
+  if not hs:
     return True
+  if not(History.get('solution', 'program') == 'Unknown' or\
+     History.get('refinement', 'program') == 'Unknown'):
+      return True
   sz = [int(i) for i in olx.GetWindowSize().split(',')]
   w = int(olx.html.ClientWidth('self'))
   h = int(olx.html.ClientHeight('self'))
@@ -192,18 +195,18 @@ def ResolvePrograms():
   res = olx.html.ShowModal(pop_name)
   if not res or int(res) == 1:
     return False
-  hs = History.tree
-  if olex_gui.IsControl('solution_method', pop_name):
-    hs.active_child_node.is_solution = True
-    hs.active_child_node.program = olx.html.GetValue("%s.solution_program" %pop_name)
-    hs.active_child_node.method = olx.html.GetValue("%s.solution_method" %pop_name)
-  if olex_gui.IsControl('refinement_method', pop_name):
-    if hs.active_node.is_solution:
-      hs.add_node(OV.HKLSrc(), OV.FileFull(),
-                  os.path.splitext(OV.FileFull())[0] + '.lst')
-    hs.active_node.program = olx.html.GetValue("%s.refinement_program" %pop_name)
-    hs.active_node.method = olx.html.GetValue("%s.refinement_method" %pop_name)
-  History.make_history_bars()
+  if hs.active_child_node:
+    if olex_gui.IsControl('solution_method', pop_name):
+      hs.active_child_node.is_solution = True
+      hs.active_child_node.program = olx.html.GetValue("%s.solution_program" %pop_name)
+      hs.active_child_node.method = olx.html.GetValue("%s.solution_method" %pop_name)
+    if olex_gui.IsControl('refinement_method', pop_name):
+      if hs.active_node.is_solution:
+        hs.add_node(OV.HKLSrc(), OV.FileFull(),
+                    os.path.splitext(OV.FileFull())[0] + '.lst')
+      hs.active_node.program = olx.html.GetValue("%s.refinement_program" %pop_name)
+      hs.active_node.method = olx.html.GetValue("%s.refinement_method" %pop_name)
+    History.make_history_bars()
   return True
 
 def get_report_title():

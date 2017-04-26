@@ -585,6 +585,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cell_vcv = flex.pow2(matrix.diag(cell_errors).as_flex_double_matrix())
     xs = self.xray_structure()
     cif_block = xs.as_cif_block(
+      format="coreCIF",
       covariance_matrix=self.covariance_matrix_and_annotations.matrix,
       cell_covariance_matrix=cell_vcv.matrix_symmetric_as_packed_u())
     for i in range(3):
