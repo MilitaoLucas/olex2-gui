@@ -74,10 +74,17 @@ class Graph(ArgumentParser):
     self.max_y = None
     self.decorated = False
 
+    ## This used to just be the filename; not so good for mulit-structure CIFs!
+    _ = ""
+    _ = OV.ModelSrc()
+    if not _:
+      _ = self.filename
+    self.TopRightTitle = _
+
     self.guiParams = OV.GuiParams()
 
     self.graphInfo = {
-      "TopRightTitle":self.filename,
+      "TopRightTitle":self.TopRightTitle,
     }
 
   def plot_function(self, function, locals=None, width=1, n_points=50):
@@ -372,20 +379,32 @@ class Graph(ArgumentParser):
       IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.axislabelColour)
       i += 1
 
-  def draw_fit_line(self, slope, y_intercept, write_equation=True):
+  def draw_fit_line(self, slope, y_intercept, write_equation=True, x_intercept=None, write_text=False):
     if self.min_x is None: self.get_division_spacings_and_scale()
-    y1 = (slope * self.min_x + y_intercept)
-    y2 = (slope * self.max_x + y_intercept)
 
-    if y1 > self.max_y:
-      y1 = self.max_y
-    elif y1 < self.min_y:
-      y1 = self.min_y
+    if not x_intercept:
+      y1 = (slope * self.min_x + y_intercept)
+      y2 = (slope * self.max_x + y_intercept)
 
-    if slope == 0.0:
-      x1 = 0.0
+      if y1 > self.max_y:
+        y1 = self.max_y
+      elif y1 < self.min_y:
+        y1 = self.min_y
+
     else:
-      x1 = (y1-y_intercept)/slope
+      y1 = self.max_y
+      y2 = self.min_y
+
+    if x_intercept:
+      x1 = x_intercept
+      x2 = x_intercept
+    else:
+      if slope == 0.0:
+        x1 = 0.0
+      else:
+        x1 = (y1-y_intercept)/slope
+
+
     x1 = self.graph_left \
        + ((float(x1) * self.scale_x)) \
        + ((0 - self.max_x) * self.scale_x) \
@@ -396,14 +415,19 @@ class Graph(ArgumentParser):
     elif y2 < self.min_y:
       y2 = self.min_y
 
-    if slope == 0.0:
-      x2 = self.max_x
+
+    if not x_intercept:
+      if slope == 0.0:
+        x2 = self.max_x
+      else:
+        x2 = (y2-y_intercept)/slope
+
+      x2 = self.graph_left \
+         + ((float(x2) * self.scale_x)) \
+         + ((0 - self.max_x) * self.scale_x) \
+         + (self.delta_x * self.scale_x)
     else:
-      x2 = (y2-y_intercept)/slope
-    x2 = self.graph_left \
-       + ((float(x2) * self.scale_x)) \
-       + ((0 - self.max_x) * self.scale_x) \
-       + (self.delta_x * self.scale_x)
+      x2 = x1
 
     if self.reverse_y:
       y1 = (self.graph_top
@@ -427,10 +451,16 @@ class Graph(ArgumentParser):
             + (self.delta_y * self.scale_y))
 
     if slope == 0.0:
-      width = 4
+      width = 2
     else:
-      width = 5
-    self.draw.line((x1+2, y1, x2-2, y2), width=width, fill=self.fitlineColour)
+      width = 3
+
+    adj_x = 2
+    adj_y = 0
+    if x_intercept:
+      adj_x = 0
+      adj_y = 2
+    self.draw.line((x1+adj_x, y1+adj_y, x2-adj_x, y2-adj_y), width=width, fill=self.fitlineColour)
 
     if y_intercept >= 0: sign = '+'
     else: sign = '-'
@@ -447,6 +477,20 @@ class Graph(ArgumentParser):
       top_left = (x,y)
       IT.write_text_to_draw(
         self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
+
+    if write_text:
+      txt = write_text
+      adj_x = 7
+      adj_y = 7
+      if x1 > self.max_x*self.scale_x/2:
+        wX, wY = IT.textsize(self.draw, txt, font_size=self.font_size_small)
+        adj_x = -wX - 7
+      if y1 > self.max_y*self.scale_y/2:
+        adj_y = -20
+      top_left = (x1 + adj_x,y1 + adj_y)
+      IT.write_text_to_draw(
+        self.draw, txt, top_left=top_left, font_size=self.font_size_small, font_colour=self.grey)
+
 
   def test_plotly(self):
 
@@ -597,7 +641,7 @@ class Graph(ArgumentParser):
     #self.popout(htm_location=plot_url.replace(r"file://",''))
 
 
-  def draw_pairs(self, reverse_y=False, reverse_x=False, marker_size_factor=None):
+  def draw_pairs(self, reverse_y=False, reverse_x=False, marker_size_factor=None, lt=None):
     self.reverse_y = reverse_y
     self.reverse_x = reverse_x
     use_plotly = OV.GetParam('user.diagnostics.use_plotly')
@@ -618,7 +662,7 @@ class Graph(ArgumentParser):
         self.draw_fit_line(slope, y_intercept)
       self.draw_data_points(
         dataset.xy_pairs(), sigmas=dataset.sigmas, indices=dataset.indices,
-        marker_size_factor=marker_size_factor, hrefs=dataset.hrefs, targets=dataset.targets)
+        marker_size_factor=marker_size_factor, hrefs=dataset.hrefs, targets=dataset.targets, lt=lt)
 
   def map_txt(self):
     return '\n'.join(self.map_txt_list)
@@ -1010,7 +1054,7 @@ class Graph(ArgumentParser):
     top_left = (x, legend_top)
     IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=font_size, font_colour=self.axislabelColour)
 
-  def draw_data_points(self, xy_pairs, indices=None, sigmas=None, marker_size_factor=None, hrefs=None, targets=None):
+  def draw_data_points(self, xy_pairs, indices=None, sigmas=None, marker_size_factor=None, hrefs=None, targets=None, lt=None):
     min_x = self.min_x
     max_x = self.max_x
     scale_x = self.scale_x
@@ -1093,6 +1137,12 @@ class Graph(ArgumentParser):
 
       x = x_constant + xr * scale_x
       y = y_constant + yr * scale_y
+
+      if lt:
+        if float(yr) < float(lt):
+          fill = self.guiParams.red.hexadecimal
+        else:
+          fill = self.guiParams.green.hexadecimal
 
       if self.im.getpixel((x+half_marker_width, y+half_marker_width)) == fill:
         continue # avoid wasting time drawing points that overlap too much
@@ -1307,6 +1357,14 @@ class Analysis(Graph):
     self.filefull = OV.FileFull()
     self.filepath = OV.FilePath()
     self.filename = OV.FileName()
+
+    ## This used to just be the filename; not so good for mulit-structure CIFs!
+    _ = ""
+    _ = OV.ModelSrc()
+    if not _:
+      _ = self.filename
+    self.TopRightTitle = _
+
     self.datadir = OV.DataDir()
     self.gui_html_bg_colour = OV.GetParam('gui.html.bg_colour').rgb
     self.gui_html_highlight_colour = OV.GetParam('gui.html.highlight_colour').rgb
@@ -1585,7 +1643,7 @@ class PrgAnalysis(Analysis):
     self.item = program.name
     self.graphInfo["Title"] = self.item
     self.params.size_x, self.params.size_y = size
-    self.graphInfo["TopRightTitle"] = self.filename
+    self.graphInfo["TopRightTitle"] = self.TopRightTitle
     self.graphInfo["n_cycles"] = OV.GetParam("snum.refinement.max_cycles")
     self.program = program
     self.method = method
@@ -1723,7 +1781,7 @@ class WilsonPlot(Analysis):
     self.graphInfo["Title"] = OV.TranslatePhrase("Wilson Plot")
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
-    self.graphInfo["TopRightTitle"] = self.filename
+    self.graphInfo["TopRightTitle"] = self.TopRightTitle
     self.make_wilson_plot()
     self.popout()
 
@@ -2024,7 +2082,7 @@ class CumulativeIntensityDistribution(Analysis):
     self.graphInfo["Title"] = OV.TranslatePhrase("Cumulative Intensity Distribution")
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
-    self.graphInfo["TopRightTitle"] = self.filename
+    self.graphInfo["TopRightTitle"] = self.TopRightTitle
     self.auto_axes = False
     self.make_cumulative_intensity_distribution()
     self.popout()
@@ -2088,7 +2146,7 @@ class CompletenessPlot(Analysis):
     self.graphInfo["Title"] = OV.TranslatePhrase("Completeness Plot")
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
-    self.graphInfo["TopRightTitle"] = self.filename
+    self.graphInfo["TopRightTitle"] = self.TopRightTitle
     self.auto_axes = False
     self.reverse_x = self.params.completeness.resolution_as in ('d_spacing', 'd_star_sq')
     self.cctbx_completeness_statistics()
@@ -2121,7 +2179,7 @@ class SystematicAbsencesPlot(Analysis):
     self.graphInfo["Title"] = OV.TranslatePhrase("Systematic Absences Intensity Distribution")
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
-    self.graphInfo["TopRightTitle"] = self.filename
+    self.graphInfo["TopRightTitle"] = self.TopRightTitle
     self.auto_axes = True
     self.cctbx_systematic_absences_plot()
     self.popout()
@@ -2155,7 +2213,8 @@ class bijvoet_differences_scatter_plot(Analysis):
     self.item = "bijvoet_differences_scatter"
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
-    self.graphInfo["TopRightTitle"] = self.filename
+    self.graphInfo["TopRightTitle"] = self.TopRightTitle
+
     self.auto_axes = True
     import reflection_statistics
     use_students_t = self.params.bijvoet_differences_scatter_plot.use_students_t
@@ -2191,7 +2250,8 @@ class bijvoet_differences_NPP(Analysis):
     self.item = "bijvoet_differences_NPP"
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
-    self.graphInfo["TopRightTitle"] = self.filename
+    self.graphInfo["TopRightTitle"] = self.TopRightTitle
+
     self.auto_axes = True
     import reflection_statistics
     params = self.params.bijvoet_differences_probability_plot
@@ -2226,7 +2286,8 @@ class Normal_probability_plot(Analysis):
     self.graphInfo["Title"] = OV.TranslatePhrase("Normal Probability Plot")
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
-    self.graphInfo["TopRightTitle"] = self.filename
+    self.graphInfo["TopRightTitle"] = self.TopRightTitle
+
     self.auto_axes = True
     self.draw_origin = True
     self.make_normal_probability_plot()
@@ -2258,7 +2319,8 @@ class Fobs_Fcalc_plot(Analysis):
     self.graphInfo["Title"] = OV.TranslatePhrase("Fobs vs Fcalc")
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
-    self.graphInfo["TopRightTitle"] = self.filename
+    self.graphInfo["TopRightTitle"] = self.TopRightTitle
+
     self.auto_axes = False
     try:
       batch_number = int(batch_number)
@@ -2335,7 +2397,8 @@ class Fobs_over_Fcalc_plot(Analysis):
     self.graphInfo["Title"] = OV.TranslatePhrase("Fobs/Fcalc vs resolution")
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
-    self.graphInfo["TopRightTitle"] = self.filename
+    self.graphInfo["TopRightTitle"] = self.TopRightTitle
+
     self.auto_axes = False
     self.max_y = 1.05
     try:
@@ -2383,7 +2446,8 @@ class scale_factor_vs_resolution_plot(Analysis):
     self.graphInfo["Title"] = OV.TranslatePhrase("Scale factor vs resolution")
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
-    self.graphInfo["TopRightTitle"] = self.filename
+    self.graphInfo["TopRightTitle"] = self.TopRightTitle
+
     self.auto_axes = False
     self.max_y = 1.05
     try:
@@ -2423,7 +2487,8 @@ class item_vs_resolution_plot(Analysis):
     self.graphInfo["Title"] = params.title
     self.graphInfo["pop_html"] = self.item
     self.graphInfo["pop_name"] = self.item
-    self.graphInfo["TopRightTitle"] = self.filename
+    self.graphInfo["TopRightTitle"] = self.TopRightTitle
+
     self.auto_axes = False
     #self.max_y = 1.05
     try:
@@ -2454,9 +2519,9 @@ class item_vs_resolution_plot(Analysis):
     self.metadata.setdefault("x_label", xy_plot.xLegend)
     self.metadata.setdefault("shapes",[])
     cutoff_line = {'type':'line',
-                   'xy':('%(min_x)s','3','%(max_x)s','3'),
+                   'xy':('%(min_x)s','2','%(max_x)s','2'),
                    'line': {
-                     'color': 'rgb(100, 100, 100)',
+                     'color': 'rgb(255, 100, 100)',
                      'width': 1,
                      'dash':'dashdot'
                    }
@@ -2474,15 +2539,21 @@ class item_vs_resolution_plot(Analysis):
     self.metadata["shapes"].append(cutoff_line)
     self.metadata["shapes"].append(IUCr_limit)
 
-    metadata = {}
+    metadata = self.metadata
     data = Dataset(
       xy_plot.x, [y*y_factor for y in xy_plot.y], metadata=metadata)
     self.data.setdefault('dataset1', data)
     self.make_empty_graph(axis_x=True)
+
+    iucr = 135
+    if olx.xf.exptl.Radiation().startswith('0.710'):
+      iucr = 50
+
     if self.item == "i_over_sigma_vs_resolution":
-      self.draw_fit_line(slope=0, y_intercept=3, write_equation=False)
+      self.draw_fit_line(slope=0, y_intercept=2, write_equation=False, write_text="2 sigma line (noise below, data above)")
+      self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="min IUCr res")
     reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
-    self.draw_pairs(reverse_x=reverse_x)
+    self.draw_pairs(reverse_x=reverse_x, lt=2)
 
 
 class X_Y_plot(Analysis):
