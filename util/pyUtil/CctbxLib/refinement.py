@@ -584,9 +584,19 @@ class FullMatrixRefine(OlexCctbxAdapter):
     from scitbx import matrix
     cell_vcv = flex.pow2(matrix.diag(cell_errors).as_flex_double_matrix())
     xs = self.xray_structure()
-    cif_block = xs.as_cif_block(
-      covariance_matrix=self.covariance_matrix_and_annotations.matrix,
-      cell_covariance_matrix=cell_vcv.matrix_symmetric_as_packed_u())
+
+    import inspect #temporary measure for compatibility with old cctbx HP/OVD May 2017
+    if 'format' in inspect.getargspec(xs.as_cif_block):
+      cif_block = xs.as_cif_block(
+        format="coreCIF",
+        covariance_matrix=self.covariance_matrix_and_annotations.matrix,
+        cell_covariance_matrix=cell_vcv.matrix_symmetric_as_packed_u())
+    else:
+      cif_block = xs.as_cif_block(
+        covariance_matrix=self.covariance_matrix_and_annotations.matrix,
+        cell_covariance_matrix=cell_vcv.matrix_symmetric_as_packed_u())
+
+
     for i in range(3):
       for j in range(i+1,3):
         if (cell_params[i] == cell_params[j] and

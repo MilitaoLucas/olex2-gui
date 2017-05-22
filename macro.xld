@@ -67,6 +67,7 @@
       <cmd14 "spy.setAllMainToolbarTabButtons()">
 
       <cmd15 "spy.reset_file_in_OFS(twinning-result.htm)">
+      <cmd15 "spy.ExtractCifInfo(True,True)">
       <cmd16 "html.Update">
       <cnd17 "if html.IsPopup(history-tree) then spy.popout_history_tree()">
   >
@@ -370,9 +371,7 @@
       <cmd1 "ads elp">
       <cmd2 "arad isot">
       <cmd3 "mask atoms 5">
-      <cmd4 "mask bonds spy.GetParam('user.bonds.mask')">
       <cmd5 "if strcmp(%1,'-100') then 'telpv 50' else 'telpv %1'">
-      <cmd6 "brad math.eval(spy.GetParam('user.bonds.bzoom')/100)">
     >
   >
 >
@@ -406,8 +405,6 @@
       <cmd1 "ads sph">
       <cmd2 "arad pers">
       <cmd3 "mask atoms 1">
-      <cmd4 "mask bonds spy.GetParam('user.bonds.mask')">
-      <cmd6 "brad math.eval(spy.GetParam('user.bonds.bzoom')/100)">
     >
   >
 >

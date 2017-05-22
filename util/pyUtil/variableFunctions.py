@@ -289,7 +289,7 @@ def LoadStructureParams():
   #
   import CifInfo
   olx.cif_model = None #reset the cif model, #399
-  CifInfo.CifTools() # needed to load metacif items
+  #CifInfo.CifTools() # needed to load metacif items REALLY? HP 5/17
   if OV.IsFileType('ires'):
     if solutionMethod == 'Direct Methods' and olx.Ins('PATT') != 'n/a':
       solutionMethod = 'Patterson Method' # work-around for bug #48
