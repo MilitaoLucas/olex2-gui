@@ -279,7 +279,7 @@ class CifTools(ArgumentParser):
             if ID != None:
               email = userDictionaries.people.getPersonInfo(ID,'email')
               address = userDictionaries.people.getPersonInfo(ID,'address')
-              cif_loop.add_row((name, email, address))
+              cif_loop.add_row((unicode_to_cif(name), email, unicode_to_cif(address)))
             else:
               cif_loop.add_row((name, "?", "?"))
           if '_publ_author' in self.cif_block.loops:
@@ -455,10 +455,10 @@ class ExtractCifInfo(CifTools):
     self.metacif = {}
     self.metacifFiles = MetacifFiles()
     self.evaluate_conflicts=evaluate_conflicts
+    OV.registerFunction(self.conflict_evaluation,True,'extractcifinfo')
     if run:
       self.run()
     olx.cif_model = self.cif_model
-
 
   def run(self):
     import iotbx.cif
@@ -853,9 +853,29 @@ class ExtractCifInfo(CifTools):
       '_publ_section_references': '\n\n'.join(full_references)}, force=True)
 
     self.write_metacif_file()
-
     self.all_sources_d = all_sources_d
-    if self.evaluate_conflicts:
+    self.conflict_evaluation()
+
+  def conflict_evaluation(self, force=False):
+    if self.evaluate_conflicts or force:
+      ## Check for external CIF files that may want to be merged in as well.
+      ## These may not start with the 'data_' identifier, so add it when required.
+      l = OV.GetParam('snum.report.merge_these_cifs')
+      for item in l:
+        item = item.strip()
+        if not item:
+          continue
+        if not self.all_sources_d.has_key(item):
+          try:
+            f = open(item, 'rb')
+            _ = f.read()
+            if not _.startswith("data"):
+              _ = str("data_%s\r\n" %OV.ModelSrc() + _)
+            _ = iotbx.cif.reader(input_string=_).model().values()[0]
+            f.close()
+            self.all_sources_d.setdefault(item,_)
+          except:
+            pass
       self.sort_out_conflicting_sources()
 
   def sort_out_conflicting_sources(self):
@@ -1307,8 +1327,63 @@ def set_source_file(file_type, file_path):
     OV.SetParam('snum.metacif.%s_file' %file_type, file_path)
 OV.registerFunction(set_source_file)
 
+def unicode_to_cif(u):
+  d = {
+    u'\xe0':'\`a',
+    u'\xe8':'\`e',
+    u'\xec':'\`i',
+    u'\xf2':'\`o',
+    u'\xf9':'\`u',
 
+    u'\xc0':'\`A',
+    u'\xc8':'\`E',
+    u'\xcc':'\`I',
+    u'\xd2':'\`O',
+    u'\xd9':'\`U',
 
+    u'\xe1':'\'a',
+    u'\xe9':'\'e',
+    u'\xed':'\'i',
+    u'\xf3':'\'o',
+    u'\xfa':'\'u',
+    u'\xfd':'\'y',
+
+    u'\xc1':'\'A',
+    u'\xc9':'\'E',
+    u'\xed':'\'I',
+    u'\xd3':'\'O',
+    u'\xda':'\'U',
+    u'\xdd':'\'Y',
+
+    u'\xe2':'\^a',
+    u'\xea':'\^e',
+    u'\xee':'\^i',
+    u'\xf4':'\^o',
+    u'\xfb':'\^u',
+
+    u'\xc2':'\^A',
+    u'\xca':'\^E',
+    u'\xce':'\^I',
+    u'\xd4':'\^O',
+    u'\xdb':'\^U',
+
+    u'\xe3':'\^a',
+    u'\xf1':'\^n',
+    u'\xf5':'\^o',
+
+    u'\xc3':'\^A',
+    u'\xd1':'\^N',
+    u'\xd5':'\^O',
+
+    u'\xe7':'\,c',
+
+    u'\xc7':'\,C',
+
+ }
+  retVal = u''
+  for char in u:
+    retVal += d.get(char,char)
+  return retVal
 
 for item in timings:
   print item
