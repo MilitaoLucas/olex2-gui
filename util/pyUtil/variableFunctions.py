@@ -334,6 +334,9 @@ def OnStructureLoaded(previous):
       l('structure')
   except:
     pass
+
+  olex.m("spy.ExtractCifInfo(True,True)")
+
 OV.registerFunction(OnStructureLoaded)
 
 def OnHKLChange(hkl):
