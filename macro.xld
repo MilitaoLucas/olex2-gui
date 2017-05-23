@@ -65,9 +65,7 @@
       <cmd12 "SetVar(SlideQPeaksVal,0)">
       <cmd13 "storeparam startup file.relativePath(filefull()) true">
       <cmd14 "spy.setAllMainToolbarTabButtons()">
-
       <cmd15 "spy.reset_file_in_OFS(twinning-result.htm)">
-      <cmd15 "spy.ExtractCifInfo(True,True)">
       <cmd16 "html.Update">
       <cnd17 "if html.IsPopup(history-tree) then spy.popout_history_tree()">
   >
