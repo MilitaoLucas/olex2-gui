@@ -259,6 +259,7 @@ def LoadStructureParams():
   # Start backwards compatibility  2010-06-18
   #
   StrDir = OV.StrDir()
+  olx.cif_model = None #reset the cif model, #399
   metacif_path = '%s/%s.metacif' %(OV.StrDir(), model_src)
   if StrDir and not os.path.isfile(metacif_path) and structure_phil is not None:
     from iotbx.cif import model
@@ -281,15 +282,13 @@ def LoadStructureParams():
       for key, value in cif_items:
         cif_block[key] = value
       cif_model = model.cif({model_src: cif_block})
-      f = open(metacif_path, 'wb')
-      print >> f, cif_model
-      f.close()
+      with open(metacif_path, 'wb') as f:
+        print >> f, cif_model
   #
   # End backwards compatibility
   #
   import CifInfo
-  olx.cif_model = None #reset the cif model, #399
-  #CifInfo.CifTools() # needed to load metacif items REALLY? HP 5/17
+  CifInfo.reloadMetadata()
   if OV.IsFileType('ires'):
     if solutionMethod == 'Direct Methods' and olx.Ins('PATT') != 'n/a':
       solutionMethod = 'Patterson Method' # work-around for bug #48
