@@ -956,6 +956,18 @@ class OlexFunctions(inheritFunctions):
             }
     return prgs.get(name, name)
 
+
+  def runCommands(self,cmds):
+    """
+    This function takes a list of Olex2 commands and will execute these sequentially.
+    """
+    cmd = ">>".join(cmds)
+    try:
+      olx.Run(cmd)
+    except Exception, err:
+      print err
+
+
   def canNetwork(self, show_msg=True):
     if not OV.GetParam("olex2.network"):
       if show_msg:
@@ -985,6 +997,7 @@ def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
   return OV.GetParam_as_string(variable, default)
 
+
 OV = OlexFunctions()
 OV.registerFunction(GetParam)
 OV.registerFunction(OV.SetParam)
@@ -998,3 +1011,4 @@ OV.registerFunction(OV.SetHtmlFontSize,False,'gui')
 OV.registerFunction(OV.SetHtmlFontSizeControls,False,'gui')
 OV.registerFunction(OV.ModelSrc)
 OV.registerFunction(OV.GetCifMergeFilesList)
+OV.registerFunction(OV.runCommands)
