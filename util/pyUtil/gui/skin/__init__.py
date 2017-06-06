@@ -448,8 +448,21 @@ def change_bond_colour(scope, colour=""):
   if not colour:
     colour = OV.GetParam('user.bonds.colour', 'elements')
   if colour == 'elements':
-    OV.SetParam('user.bonds.mask', 48)
-    olex.m('mask bonds 48')
+    cmds = [
+      "showH a true",
+      "showH b false",
+      "sel svd",
+      "sel mvd",
+      "sel -i",
+      "sel atoms -u",
+      "mask 48",
+      "showH b true",
+    ]
+
+    OV.runCommands(cmds)
+    return
+    #OV.SetParam('user.bonds.mask', 48)
+    #olex.m('mask bonds 48')
   else:
     c = ""
     cc = ""
@@ -479,12 +492,31 @@ def change_bond_colour(scope, colour=""):
     _ = "%s@@%s" %(c.replace(";","@"), colour)
 
     OV.SetParam('user.bonds.colour', colour)
-    OV.SetParam('user.bonds.mask', 1)
-    olex.m("mask bonds 1")
-    olex.m("SetMaterial Singlecone '%s'" %c)
-    olex.m("sel -u")
-    olex.m("sel bonds where xbond.b.bai.z == -1")
-    olex.m("mask 48")
-    olex.m("sel -u")
+
+
+    cmds = [
+      "showH a true",
+      "showH b false",
+      "sel svd", # this comes from Drawplus - and contains the growing bonds.
+      "sel mvd", # this comes from Drawplus - and contains bonds to the metal.
+      "sel -i",
+      "sel atoms -u",
+      ]
+
+    if colour == 'elements':
+      pass
+
+    else:
+      cmds.append("SetMaterial Sel.* '%s'" %c)
+
+    cmds += [
+      "sel -u",
+      "sel bonds where xbond.b.bai.z == -1",
+      "sel -u",
+      "showH b true"
+      ]
+
+    OV.runCommands(cmds)
+
 
 OV.registerFunction(change_bond_colour, True, 'gui.skin')

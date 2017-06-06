@@ -334,6 +334,7 @@ def OnStructureLoaded(previous):
       l('structure')
   except:
     pass
+
 OV.registerFunction(OnStructureLoaded)
 
 def OnHKLChange(hkl):
