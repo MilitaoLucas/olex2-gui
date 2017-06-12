@@ -432,6 +432,37 @@ def define_new_bond_colour(name):
   pass
 
 
+def get_user_bond_colour(colour):
+  c = ""
+  cc = ""
+  _ = OV.GetParam('user.bonds.colour')
+  for item in OV.GetParam(variable='user.bonds.colours', default='[@@elements]'):
+    if item.split("@@")[1] == colour:
+      c = item.split("@@")[0].replace("@",";").replace("*","")
+    if item.split("@@")[1] == _:
+      cc = item.split("@@")[0].replace("@",";").replace("*","")
+  if not c:
+    res = olex.m("SetVar(temp,ChooseMaterial(%s))"%cc)
+    if not res: return
+    c = olx.GetVar('temp')
+    #c = '5;16744448;4294967168'
+    l = OV.GetParam(variable='user.bonds.colours',default=[])
+    _ = "%s@@%s" %(c.replace(";","@"), colour)
+    l.append(_)
+    t = ""
+    for item in l:
+      t += "%s;" %(item.split("@@")[1])
+    try:
+      olx.html.SetItems("BOND_COLOUR_COMBO", t)
+      olx.html.SetValue("BOND_COLOUR_COMBO", colour)
+    except:
+      pass
+    OV.SetParam('user.bonds.colours', l)
+  _ = "%s@@%s" %(c.replace(";","@"), colour)
+  OV.SetParam('user.bonds.colour', colour)
+  return c
+
+
 def change_bond_radius():
   rad = OV.GetParam('user.bonds.thickness')
   olex.m("brad %s" %rad)
@@ -447,76 +478,25 @@ def change_bond_colour(scope, colour=""):
 
   if not colour:
     colour = OV.GetParam('user.bonds.colour', 'elements')
+
+  olx.ShowH("a", True)
+  olx.ShowH("b", False)
+  olex.m("sel collections")
+  olex.m("sel -i")
+  olex.m("sel atoms -u")
   if colour == 'elements':
-    cmds = [
-      "showH a true",
-      "showH b false",
-      "sel svd",
-      "sel mvd",
-      "sel -i",
-      "sel atoms -u",
-      "mask 48",
-      "showH b true",
-    ]
+    olx.Mask(48)
+    olx.ShowH("b", True)
+    OV.SetParam('user.bonds.colour','elements')
 
-    OV.runCommands(cmds)
-    return
-    #OV.SetParam('user.bonds.mask', 48)
-    #olex.m('mask bonds 48')
   else:
-    c = ""
-    cc = ""
-    _ = OV.GetParam('user.bonds.colour')
-    for item in OV.GetParam(variable='user.bonds.colours', default='[@@elements]'):
-      if item.split("@@")[1] == colour:
-        c = item.split("@@")[0].replace("@",";").replace("*","")
-      if item.split("@@")[1] == _:
-        cc = item.split("@@")[0].replace("@",";").replace("*","")
-    if not c:
-      res = olex.m("SetVar(temp,ChooseMaterial(%s))"%cc)
-      if not res: return
-      c = olx.GetVar('temp')
-      #c = '5;16744448;4294967168'
-      l = OV.GetParam(variable='user.bonds.colours',default=[])
-      _ = "%s@@%s" %(c.replace(";","@"), colour)
-      l.append(_)
-      t = ""
-      for item in l:
-        t += "%s;" %(item.split("@@")[1])
-      try:
-        olx.html.SetItems("BOND_COLOUR_COMBO", t)
-        olx.html.SetValue("BOND_COLOUR_COMBO", colour)
-      except:
-        pass
-      OV.SetParam('user.bonds.colours', l)
-    _ = "%s@@%s" %(c.replace(";","@"), colour)
+    c = get_user_bond_colour(colour)
+    olx.Mask(1)
+    olx.SetMaterial("Singlecone", "%s" %str(c))
 
-    OV.SetParam('user.bonds.colour', colour)
-
-
-    cmds = [
-      "showH a true",
-      "showH b false",
-      "sel svd", # this comes from Drawplus - and contains the growing bonds.
-      "sel mvd", # this comes from Drawplus - and contains bonds to the metal.
-      "sel -i",
-      "sel atoms -u",
-      ]
-
-    if colour == 'elements':
-      pass
-
-    else:
-      cmds.append("SetMaterial Sel.* '%s'" %c)
-
-    cmds += [
-      "sel -u",
-      "sel bonds where xbond.b.bai.z == -1",
-      "sel -u",
-      "showH b true"
-      ]
-
-    OV.runCommands(cmds)
-
+  olex.m("sel -u")
+  olex.m("sel bonds where xbond.b.bai.z == -1")
+#  olx.Sel("-u")
+  olx.ShowH("b", True)
 
 OV.registerFunction(change_bond_colour, True, 'gui.skin')
