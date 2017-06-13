@@ -194,7 +194,17 @@ def make_single_gui_image(img_txt="", img_type='h2'):
     OlexVFS.save_image_to_olex(image, name, 0)
 
 
-def inject_into_tool(tool, t, where,befaf='before'):
+def inject_into_tool(tool, t, where, befaf='before'):
+  import OlexVFS
+  txt = OlexVFS.read_from_olex('%s/%s' %(OV.BaseDir(),tool))
+  if befaf == 'before':
+    txt = txt.replace(where, "%s%s" %(t, where))
+  else:
+    txt = txt.replace(where, "%s%s" %(where, t))
+  OlexVFS.write_to_olex('%s/%s' %(OV.BaseDir(), tool),txt)
+
+
+def __inject_into_tool(tool, t, where,befaf='before'):
   import OlexVFS
   txt = OlexVFS.read_from_olex('%s/%s' %(OV.BaseDir(),tool))
   if befaf == 'before':
