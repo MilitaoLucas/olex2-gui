@@ -182,7 +182,37 @@ html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')"
       Update mask
   </td>
 
-  <td ALIGN='left' width='44%'>
+  <td width="11%">solvent r</td>
+  <td width="10%">
+    <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type="text"
+      name = "SET_SNUM_MASKS_SOLVENT_RADIUS"
+      width="95%"
+      height="GetVar('HtmlInputHeight')"
+      valign="center"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      fgcolor="GetVar('HtmlFontColour')"
+      value="spy.GetParam('snum.masks.solvent_radius')"
+      onchange="spy.SetParam('snum.masks.solvent_radius',html.GetValue('~name~'))"
+    >
+    </font>
+  </td>
+  <td width="11%">truncation</td>
+  <td width="10%">
+    <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type="text"
+      name = "SET_SNUM_MASKS_SHRINK_TRUNCATION_RADIUS"
+      width="95%"
+      height="GetVar('HtmlInputHeight')"
+      valign="center"
+      bgcolor="GetVar('HtmlTableBgColour')"
+      fgcolor="GetVar('HtmlFontColour')"
+      value="spy.GetParam('snum.masks.shrink_truncation_radius')"
+      onchange="spy.SetParam('snum.masks.shrink_truncation_radius',html.GetValue('~name~'))"
+    >
+    </font>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
