@@ -372,6 +372,7 @@ class EditCifInfo(CifTools):
         OV.SetParam('snum.metacif.user_removed', user_removed)
       if user_added is not None:
         OV.SetParam('snum.metacif.user_added', user_added)
+      OV.update_crystal_size()
 
 OV.registerFunction(EditCifInfo)
 

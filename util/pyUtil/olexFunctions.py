@@ -225,6 +225,18 @@ class OlexFunctions(inheritFunctions):
     else:
       return default
 
+  def update_crystal_size(self):
+    vals = [self.get_cif_item('_exptl_crystal_size_min'),
+            self.get_cif_item('_exptl_crystal_size_mid'),
+            self.get_cif_item('_exptl_crystal_size_max')]
+    valid = True
+    for x in vals:
+      if x in (None, '?', '.', ''):
+        valid = False
+        break
+    if valid:
+      olx.xf.exptl.Size("%sx%sx%s" %(vals[0], vals[1], vals[2]))
+
   def set_cif_item(self, key, value):
     if olx.cif_model is not None:
       data_name = self.ModelSrc().replace(' ', '')
@@ -245,6 +257,8 @@ class OlexFunctions(inheritFunctions):
       if value not in ('?', '.'):
         if 'K' not in value: value += ' K'
         olx.xf.exptl.Temperature(value)
+    elif key.startswith('_exptl_crystal_size'):
+      self.update_crystal_size()
 
 
   def GuiParams(self):

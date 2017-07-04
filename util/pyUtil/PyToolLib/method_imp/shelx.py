@@ -249,13 +249,17 @@ class Method_shelxt(Method_shelx_solution):
 
       if not flack:
         flack = "---"
+
       else:
-        if 0.4 < float(flack) < 0.6:
-          flack = "<font color='red'>%s</font>" %flack
-        elif -0.1 < float(flack) < 0.1:
-          flack = "<font color='green'>%s</font>" %flack
-        elif float(flack) < -0.2:
-          flack = "<font color='red'>%s</font>" %flack
+        try:
+          if 0.4 < float(flack) < 0.6:
+            flack = "<font color='red'>%s</font>" %flack
+          elif -0.1 < float(flack) < 0.1:
+            flack = "<font color='green'>%s</font>" %flack
+          elif float(flack) < -0.2:
+            flack = "<font color='red'>%s</font>" %flack
+        except:
+          flack = "---"
 
       d = {
         'td1':"%s" %R1,
