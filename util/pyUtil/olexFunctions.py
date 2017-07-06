@@ -168,7 +168,7 @@ class OlexFunctions(inheritFunctions):
       if value < 10 or value == 0:
         value = 10.0
       OV.SetParam('user.bonds.thickness', value)
-      olx.html.SetValue('SLIDE_BRAD', value/10)
+      olx.html.SetValue('SLIDE_BZOOM', value/10)
       OV.cmd('brad {}'.format(value/100))
     else:
       return
