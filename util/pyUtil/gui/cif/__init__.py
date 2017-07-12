@@ -156,15 +156,18 @@ def check_for_embedded_hkl():
   hklfile = os.path.join(olx.FilePath(), "%s%s" %(olx.xf.DataName(olx.xf.CurrentData()),".hkl"))
   if os.path.exists(hklfile):
     return ""
-  res = olx.Cif('_shelx_hkl_file')
-  if res == 'n/a':
+  res = True
+  res1 = olx.Cif('_shelx_hkl_file')
+  res2 = olx.Cif('_iucr_refine_reflections_details')
+  if res1 == 'n/a' and res2 == 'n/a':
     res = olx.Cif('_refln', 0)
-  if res != "n/a":
+    res = False
+  if res:
     reapfile = "%s%s" %(olx.xf.DataName(olx.xf.CurrentData()),".res")
     d = {'reapfile': reapfile}
     retVal = gui.tools.TemplateProvider.get_template('cif_export_gui',force=debug)%d
   else:
-    retVal = "No refinable data embedded"
+    retVal = "No hkl data embedded"
 
   return retVal
 olex.registerFunction(check_for_embedded_hkl, False, "gui.cif")
