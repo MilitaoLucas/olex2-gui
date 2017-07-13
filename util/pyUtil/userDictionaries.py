@@ -139,7 +139,7 @@ class site:
 
   def get_address(self):
     return '\n'.join(filter(
-      None, (self.address, self.city, self.postcode, self.country)))
+      None, (self.name, self.department, self.address, self.city, self.postcode, self.country)))
 
   def update(self):
     cursor = DBConnection().conn.cursor()
@@ -237,7 +237,7 @@ class Affiliations:
 
   def getListAffiliations(self):
     cursor = DBConnection().conn.cursor()
-    sql = "SELECT * FROM affiliation"
+    sql = "SELECT * FROM affiliation ORDER BY name"
     cursor.execute(sql)
     all_affiliations = cursor.fetchall()
     retVal = ""
@@ -282,7 +282,7 @@ class Persons:
       show_affiliation = False
     else:
       show_affiliation = False
-      sql = "SELECT * FROM person where affiliationid=%s" %site_id
+      sql = "SELECT * FROM person where affiliationid=%s ORDER BY lastname" %site_id
     cursor.execute(sql)
     all_persons = cursor.fetchall()
     retVal_l = []

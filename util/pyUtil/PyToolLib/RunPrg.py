@@ -420,6 +420,8 @@ class RunRefinementPrg(RunPrg):
         self.setupRefine()
         self.setupFiles()
       except Exception, err:
+        sys.stderr.formatExceptionInfo()
+
         print err
         self.endRun()
         return False
