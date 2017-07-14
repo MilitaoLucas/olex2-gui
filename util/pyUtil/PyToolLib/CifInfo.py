@@ -1129,7 +1129,7 @@ If more than one file is present, the path of the most recent file is returned b
         directory = os.sep.join(directory_l[:-(3 - i)] + ["*.vzs"])
         g = glob.glob(directory)
         i += 1
-        if i == 3:
+        if i > 3:
           return None, None
 
       zip_file = g[0]
