@@ -786,7 +786,7 @@ if platforms.get("lin32"):
       bin_directory + '/linux-distro/usettings32.dat' : 'olex2/usettings.dat'
     }
   )
-if platforms.get("win64"):
+if platforms.get("lin64"):
   create_portable_distro(
     port_props=set([linux64_port_name]),
     zip_name=linux64_port_zip_name,
