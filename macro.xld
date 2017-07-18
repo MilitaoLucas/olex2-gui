@@ -399,7 +399,7 @@
     >
     <cmd
       <cmd3 "individualise">
-      <cmd3 "azoom 100">
+      <cmd3 "azoom spy.GetParam('user.atoms.azoom')">
       <cmd1 "ads sph">
       <cmd2 "arad pers">
       <cmd3 "mask atoms 1">
