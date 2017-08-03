@@ -133,7 +133,7 @@ If this is not the case, the HAR will not work properly. Continue?""", "YN", Fal
             fp_fdps[element_type] = (fpfdp.real, fpfdp.imag)
       disp_arg = " ".join(["%s %s %s" %(k, v[0], v[1]) for k,v in fp_fdps.iteritems()])
       args.append("-dispersion")
-      args.append('"%s"' %disp_arg)
+      args.append('%s' %disp_arg)
 
     for k,v in HARt.options.iteritems():
       val = olx.GetVar(k, None)
