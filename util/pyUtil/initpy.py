@@ -306,6 +306,7 @@ if OV.HasGUI():
   from gui.images import *
   from gui.skin import *
   from gui.db import *
+  from gui.help import *
   #import Tutorials
   #load_user_gui_phil()
   #export_parameters()

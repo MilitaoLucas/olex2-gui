@@ -9,15 +9,18 @@ import olx
 import olex
 import olexex
 import OlexVFS
+import gui
 
 import time
 from datetime import date
+
+
 #import sys
 #sys.path.append(r".\src")
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
-
+debug = bool(OV.GetParam("olex2.debug", False))
 
 last_mode = None
 last_mode_options = None
@@ -319,7 +322,217 @@ def make_gui_edit_link(name):
   return editLink
 OV.registerFunction(make_gui_edit_link)
 
+
 def make_help_box(args):
+  global tutorial_box_initialised
+  d = {}
+  name = args.get('name', None)
+  name = getGenericSwitchName(name).lstrip("h3-")
+  helpTxt = args.get('helpTxt', None)
+
+  _= ""
+  md_box = False
+  if helpTxt == '#helpTxt':
+    try:
+      _ = OV.GetVar(name.upper().replace("-", "_"))
+      if _:
+        md_box = True
+    except:
+      pass
+
+  if not _:
+    if helpTxt and os.path.exists(helpTxt):
+      _ = open(helpTxt, 'r').read()
+
+    elif helpTxt:
+      _ = olx.GetVar(helpTxt,None)
+
+    elif not helpTxt or helpTxt == "#helpTxt":
+      _ = olx.GetVar(name,None)
+      _ = olx.GetVar(name.upper().replace("-", "_"),None)
+
+  helpTxt = _
+
+  popout = args.get('popout', False)
+  box_type =args.get('type', 'help')
+  if popout == 'false':
+    popout = False
+  else:
+    popout = True
+
+  if not name:
+    return
+  if "-h3-" in name:
+    t = name.split("-h3-")
+    help_src = t[1]
+    title = help_src.replace("-", " ")
+
+  if "h3-" in name:
+    t = name.split("h3-")
+    help_src = name
+    title = t[1].replace("-", " ")
+
+  elif "-" in name:
+    title = name.replace("-", " ")
+    help_src = name
+  else:
+    title = name
+    help_src = name
+#  titleTxt = OV.TranslatePhrase("%s" %title.title())
+  titleTxt = title
+  if box_type == "tutorial":
+    titleTxt = titleTxt
+    t = titleTxt.split("_")
+    if len(t) > 1:
+      titleTxt = "%s: %s" %(t[0], t[1])
+
+  title = title.title()
+  if not helpTxt or helpTxt == "None":
+    helpTxt = OV.TranslatePhrase("%s-%s" %(help_src, box_type))
+  helpTxt = helpTxt.replace("\r", "")
+  helpTxt, d = format_help(helpTxt)
+  d.setdefault('next',name)
+  d.setdefault('previous',name)
+
+  editLink = make_edit_link(name, box_type)
+
+  if box_type != "help":
+    banner_include = "<zimg border='0' src='banner_%s.png' usemap='map_tutorial'>" %box_type
+    banner_include += """
+
+<map name="map_tutorial">
+<!-- Button PREVIOUS -->
+    <area shape="rect" usemap="#map_setup"
+      coords="290,0,340,60"
+      href='spy.make_help_box -name=%(previous)s -type=tutorial' target='%%previous%%: %(previous)s'>
+
+<!-- Button NEXT-->
+    <area shape="rect"
+      coords="340,0,400,60"
+      href='spy.make_help_box -name=%(next)s -type=tutorial' target='%%next%%: %(next)s'>
+</map>
+    """ %d
+
+  else:
+    banner_include = ""
+  if not popout:
+    return_items = r'''
+  <a href="spy.make_help_box -name='%s' -popout=True>>htmlhome">
+    <zimg border='0' src='popout.png'>
+  </a>
+  <a href=htmlhome><zimg border='0' src='return.png'>
+  </a>
+''' %name
+
+  else:
+    return_items = ""
+
+  if md_box:
+    d = {'title':titleTxt.replace("_", " "), 'body':helpTxt, 'font_size_base':OV.GetParam('gui.help.base_font_size','3')}
+    template = OV.GetParam('gui.help.pop_template', 'md_box').rstrip(".html").rstrip(".htm")
+    p = OV.GetParam('gui.help.src', os.sep.join([OV.BaseDir(), 'etc', 'help', 'gui']))
+    txt = get_template(template, base_path=p)%d
+
+  else:
+    txt = get_template('pop_help')
+    txt = txt %(banner_include, name, titleTxt, helpTxt, return_items, editLink)
+
+
+
+  wFilePath = r"%s-%s.htm" %(name, box_type)
+  wFilePath = wFilePath.replace(" ", "_")
+  #from ImageTools import ImageTools
+  #IT = ImageTools()
+  #txt = IT.get_unicode_characters(txt)
+  OV.write_to_olex(wFilePath, txt)
+
+  if box_type == 'help':
+    if md_box:
+      ws = olx.GetWindowSize('gl')
+      ws = ws.split(',')
+      boxWidth = int(int(ws[2])*OV.GetParam('gui.help.width_fraction',0.3))
+      boxHeight = int(ws[3]) - 30
+      x = int(ws[2]) - boxWidth -2
+      y = int(ws[1]) + 50
+
+    else:
+
+      boxWidth = OV.GetParam('gui.help_box.width')
+      length = len(helpTxt)
+      tr = helpTxt.count('<br>')
+
+      boxHeight = int(length/(boxWidth/OV.GetParam('gui.help_box.height_factor'))) + int(OV.GetParam('gui.help_box.height_constant') * (tr+2))
+      if boxHeight > OV.GetParam('gui.help_box.height_max'):
+        boxHeight = OV.GetParam('gui.help_box.height_max')
+      if boxHeight < 150:
+        boxHeight = 150
+
+      x = 10
+      y = 50
+      mouse = True
+      if mouse:
+        mouseX = int(olx.GetMouseX())
+        mouseY = int(olx.GetMouseY())
+        y = mouseY
+        if mouseX > 300:
+          x = mouseX + 10 - boxWidth
+        else:
+          x = mouseX - 10
+
+  else:
+    if box_type == 'tutorial' and tutorial_box_initialised:
+      pass
+    else:
+      ws = olx.GetWindowSize('gl')
+      ws = ws.split(',')
+      x = int(ws[0])
+      y = int(ws[1]) + 50
+      boxWidth = int(400)
+      boxHeight = int(ws[3]) - 90
+
+  if popout:
+    if box_type == 'tutorial':
+      pop_name = "Tutorial"
+      name = "Tutorial"
+    else:
+      pop_name = "%s-%s"%(name, box_type)
+    if box_type == 'tutorial' and tutorial_box_initialised:
+      olx.Popup(tutorial_box_initialised, wFilePath)
+    else:
+      if md_box:
+        pop_name = "md_box"
+      pop_name = pop_name.replace(" ", "_")
+      title = 'Olex2 Help'
+      webview = False
+      if webview:
+        t = '''
+        <input type=webview value='%s' width='%s' height='%s'>
+        ''' %(wFilePath, boxWidth, boxHeight)
+        webView = r"md_web.htm"
+        OV.write_to_olex(webView, t)
+        wFilePath = webView
+
+      if "true" in olx.html.IsPopup(pop_name).lower():
+        olx.Popup(pop_name, wFilePath)
+      else:
+
+        olx.Popup(pop_name, wFilePath,
+          b="tcr", t=title, w=boxWidth, h=boxHeight, x=x, y=y)
+        olx.html.SetBorders(pop_name,5)
+      if box_type == 'tutorial':
+        tutorial_box_initialised = pop_name
+
+  else:
+    olx.html.Load(wFilePath)
+#  popup '%1-tbxh' 'basedir()/etc/gui/help/%1.htm' -b=tc -t='%1' -w=%3 -h=%2 -x=%4 -y=%5">
+
+OV.registerMacro(make_help_box, '''name-Name of the Box&;popout-True/False&;
+type-Type of Box (help or tutorial)&;helpTxt-The help text to appear in the help box&;toolName-name of the tool where the help shall appear&'''
+)
+
+
+
+def __make_help_box(args):
   global tutorial_box_initialised
   d = {}
   name = args.get('name', None)
@@ -406,6 +619,7 @@ def make_help_box(args):
   txt = get_template('pop_help')
 
   txt = txt %(banner_include, name, titleTxt, helpTxt, return_items, editLink)
+  box_help_text = txt
   wFilePath = r"%s-%s.htm" %(name, box_type)
   wFilePath = wFilePath.replace(" ", "_")
   #from ImageTools import ImageTools
@@ -787,6 +1001,7 @@ def format_help(txt):
   txt = regex.sub(r"<font size=+1 color='$GetVar(HtmlHighlightColour)'>&#187;</font><a target='Show Me' href='\g<linkurl>'><b>\g<linktext></b></a>", txt)
   ## find all occurences of strings between XX. These are command line entities.
   width = int(OV.GetHtmlPanelwidth()) - 10
+
   regex = re.compile(r"  XX (.*?)( [^\XX\XX]* ) XX ", re.X)
   m = regex.findall(txt)
   code_bg_colour = OV.GetParam('gui.html.code.bg_colour').hexadecimal
@@ -797,6 +1012,20 @@ def format_help(txt):
   else:
     s = txt
   txt = s
+
+
+  regex = re.compile(r"  <code> (.*?) </code> ", re.X)
+  m = regex.findall(txt)
+  code_bg_colour = OV.GetParam('gui.html.code.bg_colour').hexadecimal
+  code_fg_colour = OV.GetParam('gui.html.code.fg_colour').hexadecimal
+  html_tag = OV.GetParam('gui.html.code.html_tag')
+  if m:
+    s = regex.sub(r" <font color='%s'><b><a href='\1'><%s>\1</%s></a></b></font>" %( code_fg_colour, html_tag, html_tag), txt)
+  else:
+    s = txt
+  txt = s
+
+
 
   ### find all occurences of strings between ~. These are the entries for the table.
   #regex = re.compile(r"  ~ (.*?)( [^\~\~]* ) ~ ", re.X)
@@ -996,8 +1225,10 @@ def getPopBoxPosition():
   sTop = int(ws[1])
   return (sX, sY, sTop)
 
-def get_template(name):
-  template = r"%s/etc/gui/blocks/templates/%s.htm" %(olx.BaseDir(),name)
+def get_template(name, base_path=None):
+  if not base_path:
+    base_path = os.sep.join([OV.BaseDir(), 'etc', 'gui', 'blocks', 'templates'])
+  template = r"%s%s%s.htm" %(base_path, os.sep, name)
   if os.path.exists(template):
     rFile = open(template, 'r')
     s = rFile.read()
