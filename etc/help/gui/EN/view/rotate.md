@@ -12,4 +12,4 @@ This automatically rotates the structure; x rotates the structure from top to bo
 This is maybe not very useful, but can be fun. 
 
 # Zoom Slider
-XXX
+This slider allows you to zoom in and out of your structure. Zooming can also be done by holding down the left mouse key and moving the mouse.

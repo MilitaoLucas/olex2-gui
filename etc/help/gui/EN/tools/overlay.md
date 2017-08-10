@@ -16,7 +16,7 @@ Select 3 atoms in the first fragment and then 3 atoms in the second fragment in 
 Enables the files for the second structure to be loaded, the two structures will then appear on the right and left hand side of the screen. A maximum of three pairs of atoms from the two structure can be selected. The first pair of atoms are superimposed, the second one causes the rotation to minimize the distance between the atoms of the second pair, the third pair causes rotation around the line formed by the first and second pair to minimize the difference between the atoms of the third pair. 
 
 ## Mode Match 
-This mode enables interactive matching by a maximum of three pairs of atoms. The first pair of atoms are superimposed, the second one causes the rotation to minimize the distance between the atoms of the second pair, the third pair causes rotation around the line formed by the first and second pair to minimize the difference between the atoms of the third pair. Type `Esc` to exit this mode.
+This mode enables interactive matching by a maximum of three pairs of atoms. The first pair of atoms are superimposed, the second one causes the rotation to minimize the distance between the atoms of the second pair, the third pair causes rotation around the line formed by the first and second pair to minimize the difference between the atoms of the third pair. Type **ESC** to exit this mode.
 
 ## Remove Overlay 
 Removes the second structure that has been added.

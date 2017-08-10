@@ -14,5 +14,5 @@ Keyboard: :: <br><b>Keyboard Command: </b>
 Options: :: <br><b>Command Options: </b>
 Note: :: <br><br><b><font color='$spy.GetParam(gui.red)'>Note: </font></b>
 
-<code>(.*?)</code> :: $+html.Snippet("gui/snippets/gui-link","value=\1","onclick=\1","flat=$spy.GetParam(gui.help.code_buttons_flat)")
+<code>(.*?)</code> :: "$+ html.Snippet("gui/snippets/gui-link","value=\1","onclick=\1","flat=true")"
 

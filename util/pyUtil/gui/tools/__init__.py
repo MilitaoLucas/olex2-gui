@@ -25,6 +25,7 @@ haveGUI = OV.HasGUI()
 
 import olexex
 import olex_gui
+import gui
 
 import re
 
@@ -797,85 +798,12 @@ def make_disorder_quicktools(scope='main'):
       sel = ">>sel part %s" %item
     if item == 0:
       continue
-    if item == 1 or item == 2:
-      parts_display += "<a href='ShowP 0 %s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%s)'><b>PART %s</b></a> | " %(item, item, item)
-    else:
-      parts_display += "<a href='ShowP 0 %s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%s)'><b>%s</b></a> | " %(item, item, item)
+    d = {'part':item}
+    parts_display += gui.tools.TemplateProvider.get_template('part_0_and_n', force=debug)%d
 
-  checkbox_unique = '''
-    <font size=$GetVar(HtmlFontSizeControls)>
-  <input
-    type='checkbox'
-    bgcolor="GetVar('HtmlTableBgColour')"
-    name='KEEP_UNIQUE@%s'
-    checked="spy.GetParam('user.parts.keep_unique')"
-    oncheck="spy.SetParam('user.parts.keep_unique','true')>>uniq"
-    onuncheck="spy.SetParam('user.parts.keep_unique','false')"
-    target="Keep showing single fragments when switching the PART view"
-    onclick=""
-    value=''
-  >
-  </font>'''%scope
+  d={'parts_display':parts_display, 'scope':scope}
+  return gui.tools.TemplateProvider.get_template('disorder_quicktool', force=debug)%d
 
-
-  checkbox_sel = '''
-    <font size=$GetVar(HtmlFontSizeControls)>
-  <input
-    type='checkbox'
-    bgcolor="GetVar('HtmlTableBgColour')"
-    name='SELECT_PARTS@%s'
-    checked="spy.GetParam('user.parts.select')"
-    oncheck="spy.SetParam('user.parts.select','true')"
-    onuncheck="spy.SetParam('user.parts.select','false')"
-    target="Auto-Select PARTS"
-    onclick=""
-    value=''
-  >
-  </font>'''%scope
-
-
-  txt = r'''
-  <td width='23%%'>
-    <b>Show PART 0 AND</b>
-  </td>
-  <td width='38%%' align='left'>
-  %s
-    <a href='ShowP'><b>All</b></a>
-  </td>
-
-  <td width='4%%' align='right'>
-  Sel
-  </td>
-
-  <td width='4%%' align='right'>
-  %s
-  </td>
-
-  <td width='5%%' align='right'>
-  Unique
-  </td>
-
-  <td width='4%%' align='right'>
-  %s
-  </td>
-
-  <td width='20%%' align='right'>
-  <font size="$GetVar('HtmlFontSizeControls')">
-  <input
-    type='combo'
-    width='100%%'
-    height="$GetVar('HtmlInputHeight')"
-    name='set_label_content_disorder@%s'
-    value='Labels'
-    items="Occupancy<-o;Chem Occ.<-co;PART No<-p;Link-Code<-v;Labels<-l"
-    bgcolor="$GetVar('HtmlInputBgColour')"
-    onchange="spy.ChooseLabelContent(html.GetValue('~name~'))"
-    readonly='readonly'
-  >
-  </font>
-  </td>
-  ''' %(parts_display, checkbox_sel, checkbox_unique, scope)
-  return txt
 OV.registerFunction(make_disorder_quicktools,False,'gui.tools')
 
 def deal_with_gui_phil(action):

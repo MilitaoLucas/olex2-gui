@@ -30,7 +30,7 @@ Deselects (unselects) the all selected atoms.
 Command: `sel -u` 
 
 ## Delete
-Deletes all selected atoms. Same as pressing the 'Delete' key. Undo with `Ctrl`+`Z`.
+Deletes all selected atoms. Same as pressing the 'Delete' key. Undo with **CTRL+Z**.
 
 Command: `kill sel` 
 
