@@ -107,12 +107,34 @@ If this is not the case, the HAR will not work properly. Continue?""", "YN", Fal
           i = f_sq_obs.data()[j]
           if i < 0: f_sq_obs.data()[j] = 0
         f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
-
     self.save()
-    args = [self.parent.exe, self.name+".cif",
+
+    args = [self.parent.exe, self.name+".cif", "-cif1", "t",
             "-basis-dir", self.parent.basis_dir,
              "-shelx-f2", self.name+".hkl"]
-    #print ' '.join(args)
+
+    disp = olx.GetVar("settings.tonto.HAR.dispersion", None)
+    if 'true' == disp:
+      import olexex
+      from cctbx.eltbx import henke
+      olex_refinement_model = OV.GetRefinementModel(False)
+      sfac = olex_refinement_model.get('sfac')
+      fp_fdps = {}
+      wavelength = olex_refinement_model['exptl']['radiation']
+      if sfac is not None:
+        for element, sfac_dict in sfac.iteritems():
+          custom_fp_fdps.setdefault(element, sfac_dict['fpfdp'])
+      asu = olex_refinement_model['aunit']
+      for residue in asu['residues']:
+        for atom in residue['atoms']:
+          element_type = atom['type']
+          if element_type not in fp_fdps:
+            fpfdp = henke.table(str(element_type)).at_angstrom(wavelength).as_complex()
+            fp_fdps[element_type] = (fpfdp.real, fpfdp.imag)
+      disp_arg = " ".join(["%s %s %s" %(k, v[0], v[1]) for k,v in fp_fdps.iteritems()])
+      args.append("-dispersion")
+      args.append('%s' %disp_arg)
+
     for k,v in HARt.options.iteritems():
       val = olx.GetVar(k, None)
       if len(v) == 2:
@@ -152,6 +174,7 @@ class HARt(object):
     "settings.tonto.HAR.convergence.value": ("0.0001", "dtol"),
     "settings.tonto.HAR.cluster.radius": ("0", "cluster-radius"),
     "settings.tonto.HAR.intensity_threshold.value": ("3", "fos"),
+    "settings.tonto.HAR.dispersion": ("false",),
   }
 
   def __init__(self):
