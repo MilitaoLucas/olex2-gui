@@ -5,7 +5,7 @@ This link will open in your default internet browser. Fragments contained in thi
 These will appear in a strange green colour, and you can then anchor them onto electron density peaks by first clicking on an atom in the imported fragment and then on the corresponding Q-peak. Repeat this progress with another atom/Q pair until a reasonable match is achieved.
 
 ## Exit matching mode  
-Press `Esc` repeatedly, or press the `Esc` link in the orange mode box to get out of this matching mode. 
+Press **ESC** repeatedly, or press the **ESC** link in the orange mode box to get out of this matching mode. 
 
 # Link Selected 
 **Two** Selected atoms will be 'linked' in the refinement.

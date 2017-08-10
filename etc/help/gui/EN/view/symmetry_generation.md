@@ -66,90 +66,66 @@ All symmetry equivalent atoms that are required to show the 'complete' structure
 
 Command: `grow` 
 
-# Growing 
-Olex2 shows the asymmetric unit by default. The tools combinded here in three drop-down boxes are very powerful, and will allow you to 'assemble' your structure in exactly the way you want it to be. In Olex2 you can keep refining your structure without 'destroying' the assembly you have created.
+# Growing
+Olex2 shows the asymmetric unit by default. The tools combined here in three drop-down boxes are very powerful, and will allow you to 'assemble' your structure in exactly the way you want it to be. In Olex2 you can keep refining your structure without 'destroying' the assembly you have created.
 
 ## Grow
 
 ### Grow All
-All 'missing' connected symmetry equivalent atoms will be generated. 
 
-Command: `grow`
+|`grow`|All 'missing' connected symmetry equivalent atoms will be generated.|
 
 ### Shells
-This will grow atoms shell-by-shell from the currently displayed image. 
-
-Command: `grow -s`
+|`grow -s`|This will grow atoms shell-by-shell from the currently displayed image.|
 
 ### Complete
-This will generate all missing symmetry equivalent atoms of an already grown structure, independent of whether these are bound to the main fragment or not. In other words: all solvent molecules and counter-ion will be generated according to what is already shown. 
-
-Command: `grow -w`
+|`grow -w`|This will generate all missing symmetry equivalent atoms of an already grown structure, independent of whether these are bound to the main fragment or not. In other words: all solvent molecules and counter-ion will be generated according to what is already shown.|
 
 ### Asym. Unit
-Removes all symmetry equivalent atoms and displays the asymmetric unit. 
-
-Command: `fuse`
+|`fuse`|Removes all symmetry equivalent atoms and displays the asymmetric unit.|
 
 ### Complete shown growing bonds
-If you are in a growing mode, then clickable growing bonds will be shown. All of these can be grown with this command:
+|`grow -b`|If you are in a growing mode, then clickable growing bonds will be shown. All of these can be grown|
 
-Command: `grow -b`
-
-## Mode Grow
-Similar to grow, but now this command will be executed only after you click on an object. When you enter a growing mode, clickable 'growing bonds' will sprout from atoms where the kind of growing you have asked for is applicable. 
-
-Command: `mode grow`
+# Mode Grow
+|`mode grow`|Similar to grow, but now this command will be executed only after you click on an object. When you enter a growing mode, clickable 'growing bonds' will sprout from atoms where the kind of growing you have asked for is applicable.|
 
 There are various modifiers for this command: 
 
 ### Short Contacts
-Will show these growable 'bonds' to those atoms where 'short interactions' exist. 
-
-Command: `mode grow -s` 
+|`mode grow -s`|Will show these growable 'bonds' to those atoms where 'short interactions' exist. 
 
 ### Selection
-Will show growable 'bonds' to other occurances of the currently selected atoms.
+|`mode grow -r`|Will show growable 'bonds' to other occurances of the currently selected atoms.|
 
-Command: `mode grow -r` 
 
-Van der Waals Radii
-Will show growable 'bonds' to other occurances of the currently selected atoms that are at least the indicated distance away from the selected atom. 
+###Van der Waals Radii
+|`mode grow -v 2.0`|Will show growable 'bonds' to other occurances of the currently selected atoms that are at least the indicated distance away from the selected atom.|
 
-Command: `mode grow -v 2.0`
 
 ### Move
-when you click on growable bonds the symmetry equivalent atom will be moved to the new position. This is really useful when you are trying to assemble a meaningful asymmetric unit for extended structures (polymers). 
+|`mode grow -a`|when you click on growable bonds the symmetry equivalent atom will be moved to the new position. This is really useful when you are trying to assemble a meaningful asymmetric unit for extended structures (polymers).|
 
-Command: `mode grow -a`
 
 ### Shells
-This will grow atoms shell-by-shell from the currently displayed image. 
-
-Command: `grow -s`
+|`grow -s`|This will grow atoms shell-by-shell from the currently displayed image.|
 
 ## Assemble
 This tool does not strictly belong to the 'growing' family of tools, but it is frequently used together with the growing tools. It allows you to re-arrange the asymmetric unit contents into a different configuration. 
 
 ### Broken Fragments
-Sometimes, your structure may become 'broken' - parts that should be bonded are shown as separate fragments. This tool will bring them back together. 
-
-Command: `compaq -a`
+|`compaq -a`|Sometimes, your structure may become 'broken' - parts that should be bonded are shown as separate fragments. This tool will bring them back together.|
 
 ### Atom-to-Atom
-Similar to the 'Broken Fragments' tool, but a different algorithm is used. 
-
-Command: `compaq -c` 
+|`compaq -c`|Similar to the 'Broken Fragments' tool, but a different algorithm is used.|
 
 ### Metal Last
-In this tool, metal ions are taken out of the equation at first (which is very useful when trying to assemble a ligand!) and then the metal ion is placed at the shortest possible distance. 
+|`compaq -m`|In this tool, metal ions are taken out of the equation at first (which is very useful when trying to assemble a ligand!) and then the metal ion is placed at the shortest possible distance.|
 
-Command: `compaq -m`
 
 ### Q-Peaks
-This will move all electron density peaks as closely to existing atoms as possible. 
+|`compaq -q`|This will move all electron density peaks as closely to existing atoms as possible.|
 
-Command: `compaq -q` 
 
 # Packing
 Packing options to display the packing of your structure. 

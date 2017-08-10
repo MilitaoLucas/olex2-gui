@@ -55,7 +55,28 @@ When you see the periodic table, type the word 'pers' - and you will see a spher
 XXX
 
 # Graphical objects
+Here are a number of functions one can use to help with arrangement of molecules:
+## Cell
+Toggles between showing the unit cell OFF/ON.
+
+## Base
+Toggles between showing the basis vectors OFF/ON.
+
+## Box Function 1
 XXX
 
+## Box Function 2
+Draws a box around your mocecule.
+
+## Align
+### View
+This shows the suggested best view of the molecule.
+
+### Plane
+Shows the mean square plane of the molecule.
+
+### Locking Functions
+These boxes can be ticked in order to stop the system from rotating, zooming or translating the molecule. You can also choose to lock them all or lock separate components.
+
 # Add Fog
-XXX
+These functions can add a fade to your molecule or the background in order to see the molecule better.

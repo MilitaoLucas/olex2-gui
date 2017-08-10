@@ -115,7 +115,7 @@ gui
         .type = bool
       bgcolor = #dedede
         .type = colour
-      fgcolor = #111111
+      fgcolor = #0064b4
         .type = colour
     }
 

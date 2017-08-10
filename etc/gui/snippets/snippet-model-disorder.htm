@@ -1,19 +1,35 @@
-  <td width='45%'>
-    &nbsp;%<b>Split</b> atoms you <b>click next</b> with% 
+  <td width='30%'>
+    &nbsp;<b>Split</b> atoms by <b>click</b> 
   </td>
 
-  <td width='18%' align='left'>
-  <a href = "mode split">No Restraint</a>
+  <td align='left'>
+    $+
+    html.Snippet("gui/snippets/gui-link",
+    "value=No Restraints",
+    "onclick=mode split",
+    )$-
   </td>
 
-  <td width='12%' align='center'>
-  <a href = "mode split -r=EADP">EADP</a>
+  <td align='center'>
+    $+
+    html.Snippet("gui/snippets/gui-link",
+    "value=EADP",
+    "onclick=mode split -r=EADP",
+    )$-
   </td>
 
-  <td width='13%' align='center'>
-  <a href = "mode split -r=ISOR">ISOR</a>
+  <td align='center'>
+    $+
+    html.Snippet("gui/snippets/gui-link",
+    "value=ISOR",
+    "onclick=mode split -r=ISOR",
+    )$-
   </td>
 
-  <td width='12%' align='right'>
-  <a href = "mode split -r=SIMU">SIMU</a>
+  <td align='right'>
+    $+
+    html.Snippet("gui/snippets/gui-link",
+    "value=SIMU",
+    "onclick=mode split -r=SIMU",
+    )$-
   </td>

@@ -105,6 +105,7 @@ class GetHelp(object):
           if "img" in html:
             src = os.sep.join(md_path.split("\\")[:-1])
             html = html.replace(r'<img src="', r'<zimg width="%s" src="%s%s'%(self.box_width, src , os.sep))
+          html = html.replace("\$", "$").replace("$", "\$").replace("\$spy", "$spy")
           help = self.format_html(html)
 
         help = help.strip().replace("<p>","").replace("</p>","")

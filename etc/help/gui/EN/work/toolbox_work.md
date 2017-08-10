@@ -36,9 +36,7 @@ Relative intensities of the Q-peaks will be displayed on the structure.
 This is a collection of three basic tools needed for model building.
 
 ## Assign Atom Types
-
 All atom types that are currently in your formula are represented as a small button.
-
 
 ### Using the GUI
 |$spy.MakeElementButtonsFromFormula('mode')|All atoms present in the model are shown.|
@@ -65,11 +63,10 @@ With these buttons, you can make atoms either isotropic or anisotropic. If there
 |`isot`|all selected atoms will be refined **isotropically**|
 |`anis`|all selected atoms will be refined **anisotropically** (ellipsoids will result)|
 
-Note: If the tickbox is ticked, then refinement will happen automatically after changing either `isot`/`anis` or `hadd`.
+Note: If the tickbox is ticked, then refinement will happen automatically after changing either **isot**, **anis** or **hadd**.
 
 # Quicktools
 This is a selection of the tools needed for model building.
-
 
 ## Affect atoms in the model or whether they are shown
 |`name \$Q C`|$spy.MakeHoverButton('toolbar-QC','name \$Q C')|This tool will change all visible electron density peaks to Carbon atoms, regardless of the peak height.|
@@ -84,7 +81,7 @@ This is a selection of the tools needed for model building.
 
 |`showH`|$spy.MakeHoverButton('toolbar-H','showH')|**CTRL+H**. Toggle between three states: Show H atoms, show them with H-bonds or hide them. Hydrogen atoms remain in the model.|
 
-|`center`|$spy.MakeHoverButton('toolbar-center','compaq>>compaq -a>>center')|Fragments will be assembled and the structure will be centered on the screen.|
+|`compaq>>compaq-a>>center`|$spy.MakeHoverButton('toolbar-center','compaq>>compaq -a>>center')|Fragments will be assembled and the structure will be centered on the screen.|
 
 ##Affect the fomula of the structure
 |Z'|Set the value of Z' here. For a molecular structure this is typically the sum formula of the molecule. If there are two independent molecules on the screen, Z' must be set to 2. If the molecule needs to be grown, Z' will smaller than one (often 0.5).|
@@ -93,9 +90,20 @@ This is a selection of the tools needed for model building.
 
 
 # Part Links
-This is a selection of quick-links regarding displaying of PARTS in your structure.The command-line equivalents are also very useful to know: `showp 0 1 showp`
+This is a selection of quick-links regarding displaying of PARTS in your structure. The command-line equivalents are also very useful to know:
 
-The use of the UP key is particularly useful in this context!
+| `showp 0 1` | Shows all atoms in no particular part and all atoms in PART 1 |
+
+| `showp 0 2` | Shows all atoms in no particular part and all atoms in PART 2 | 
+
+| `showp 1` | Shows only the atoms PART 1 | 
+
+| `showp` | Show all | 
+
+| `sel part 1` | Selects all atoms in PART 1 | 
+
+The use of the **UP** key is particularly useful in this context!
+
 
 # Split Group
 
@@ -104,39 +112,53 @@ The tools on this line will fully SPLIT the atom you click next into two atoms.
 ## No Restraints
 This will simply generate two atoms (at the focal points of the ellipsoids) and set the occupancies for each atom to 0.5. One of the atoms will be in PART 1, the other in PART 2. After the splitting has occured, you can move the newly 'generated' atoms to where you would like them to be (by holding the SHIFT key while moving them).
 
+| `mode split` | Splits subsequently clicked atoms | 
+
+
 ## EADP
-This will split the atom as above, but will restrain the ADP values for both atoms to be the same. This is useful early on, and should probably be removed once the disorder model is nearly complete. You might want to apply the DELU restraint instead.
+
+| `mode split -r=EADP` | This will split the atom as above, but will restrain the ADP values for both atoms to be the same. This is useful early on, and should probably be removed once the disorder model is nearly complete. You might want to apply the DELU restraint instead.| 
 
 ## ISOR
-This will split the atom as above, and reply an ISOR restraint to each of the two atoms.
+
+| `mode split -r=ISOR` | This will split the atom as above, and reply an ISOR restraint to each of the two atoms. | 
 
 ## SIMU
-As above, but with a SIMU restraint.
+
+| `mode split -r=SIMU` | As above, but with a SIMU restraint. | 
+
 
 # Fit Group
 
 This tool operates on a selection of atoms, which can consist of any number of atoms.
 
-## Move or Split One Atom
-Select one atom, then select whether you want to fit or split the atom. If you want to fit the atom, you can now move that atom with the left mouse to any position you like by pressing the `shift` key; when you are finished, press the `esc` button.
-If you want to split the atom, you will now see **two** atoms, both of which you can move with the left mouse while holding the `shift` key pressed. The occupancies of the two atoms are linked, and the atoms will now belong to different parts.
+## Fit or Split One Atom
+Select one atom, then select whether you want to fit or split the atom. If you want to **fit** the atom, you can now move that atom with the left mouse to any position you like by pressing the **SHIFT** key; when you are finished, press the **ESC** key.
 
-## Move or Split Two Atoms
+If you want to split the atom, you will now see **two** atoms, both of which you can move with the left mouse while holding the **SHIFT** key pressed. The occupancies of the two atoms are linked, and the atoms will now belong to different parts.
+
+## Fit or Split Two Atoms
 Select two atoms, then select whether you want to fit or split the group. Split will generate a duplicate group, fit will not.
-While pressing the `shift` key, you can move the selection as a group. While pressing the `Ctrl` key, you can rotate the group around the midpoint between the two atoms.
+While pressing the **SHIFT** key, you can move the selection as a group. While pressing the **CTRL** key, you can rotate the group around the midpoint between the two atoms.
 
-## Move or Split Three or more Atoms
+## Fit or Split Three or more Atoms
 Select three or more atoms, then select whether you want to fit or split the group. Split will generate a duplicate group, fit will not.
-While pressing the `shift` key, you can move the entire group. You can now activate any bond around which you wish to rotate the group by right-clicking on it. While pressing the `Ctrl` key, you can rotate the group around this activated bond.
-When you are done, press the `Esc` key.
 
-## Split or move with `shift`
-This tool can also be used to move any atom (including Hydrogen atoms) to any position. Left click on the atom while pressing the `shift` key - and you can move any atom where you would like it to be. Any constraints and restraints applied to that atom will still apply. **If you click on an atom without holding down the `shift` key, the atom will be split!** So take great care with this tool!
-When you are done, press the `Esc` key.
+While pressing the **SHIFT** key, you can move the entire group. You can now **activate** any bond around which you wish to rotate the group by **right-clicking** on it. While pressing the **CTRL** key, you can rotate the group around this activated bond.
+When you are done, press the **ESC** key.
+
+## Split SAME
+This is one of the most powerful tools in Olex2. If a grouping of atoms is disordered, and yoiu can model one of the parts (no matter how badly), this tool is what you need. Simply select the entire grouping you with to split, then press this button (or type **mode fit -s same**) and you can now generate a duplicate grouping. Everything will be constrained, so if this *can* be modelled, then the refinement will sort this out all by itself -- sometimes a large number of refinement cycles is needed.
+
+## Split or move with **SHIFT**
+This tool can also be used to move any atom (including Hydrogen atoms) to any position. Left click on the atom while pressing the **SHIFT** key - and you can move any atom where you would like it to be. Any constraints and restraints applied to that atom will still apply. When you are done, press the **ESC** key.
+
+Note: If you click on an atom without holding down the **SHIFT** key, the atom will be split! So take great care with this tool! 
+
 
 # Electron Density
-
-The electron density viewer will calculate various electron density maps and allowsthe display of these in a variety of formats. **Please Note**: Close to zero, these maps become very messy (and slow to display). Olex2 therefore does not display these regions.
+The electron density viewer will calculate various electron density maps and allowsthe display of these in a variety of formats.
+Note: Close to zero, these maps become very messy (and slow to display). Olex2 therefore does not display these regions.
 
 ## Available maps
 
@@ -157,8 +179,8 @@ Olex2 will calculate the structure factors.
 ### fcf
 The structure factors will be read from a ShelXL fcf.
 
-## Command Line
-Command: `CalcFourier`
+|`CalcFourier`|Calculates the map according to the settings set in the map tool.|
+
 
 # Peaks and USIO sliders
 
@@ -178,90 +200,62 @@ This will select atoms where the Ueq value is SMALLER than the value indicated b
 
 Command: `sel atoms where xatom.uiso`
 
+
 # Growing
-Olex2 shows the asymmetric unit by default. The tools combinded here in three drop-down boxes are very powerful, and will allow you to 'assemble' your structure in exactly the way you want it to be. In Olex2 you can keep refining your structure without 'destroying' the assembly you have created.
+Olex2 shows the asymmetric unit by default. The tools combined here in three drop-down boxes are very powerful, and will allow you to 'assemble' your structure in exactly the way you want it to be. In Olex2 you can keep refining your structure without 'destroying' the assembly you have created.
 
 ## Grow
 
 ### Grow All
-All 'missing' connected symmetry equivalent atoms will be generated.
 
-Command: `grow`
+|`grow`|All 'missing' connected symmetry equivalent atoms will be generated.|
 
 ### Shells
-This will grow atoms shell-by-shell from the currently displayed image.
-
-Command: `grow -s`
+|`grow -s`|This will grow atoms shell-by-shell from the currently displayed image.|
 
 ### Complete
-This will generate all missing symmetry equivalent atoms of an already grown structure, independent of whether these are bound to the main fragment or not. In other words: all solvent molecules and counter-ion will be generated according to what is already shown.
-
-Command: `grow -w`
+|`grow -w`|This will generate all missing symmetry equivalent atoms of an already grown structure, independent of whether these are bound to the main fragment or not. In other words: all solvent molecules and counter-ion will be generated according to what is already shown.|
 
 ### Asym. Unit
-Removes all symmetry equivalent atoms and displays the asymmetric unit.
-
-Command: `fuse`
+|`fuse`|Removes all symmetry equivalent atoms and displays the asymmetric unit.|
 
 ### Complete shown growing bonds
-If you are in a growing mode, then clickable growing bonds will be shown. All of these can be grown with this command:
-
-Command: `grow -b`
+|`grow -b`|If you are in a growing mode, then clickable growing bonds will be shown. All of these can be grown|
 
 ## Mode Grow
-Similar to grow, but now this command will be executed only after you click on an object. When you enter a growing mode, clickable 'growing bonds' will sprout from atoms where the kind of growing you have asked for is applicable.
+|`mode grow`|Similar to grow, but now this command will be executed only after you click on an object. When you enter a growing mode, clickable 'growing bonds' will sprout from atoms where the kind of growing you have asked for is applicable.|
 
-Command: `mode grow`
-
-There are various modifiers for this command:
+There are various modifiers for this command: 
 
 ### Short Contacts
-Will show these growable 'bonds' to those atoms where 'short interactions' exist.
-
-Command: `mode grow -s`
+|`mode grow -s`|Will show these growable 'bonds' to those atoms where 'short interactions' exist.|
 
 ### Selection
-Will show growable 'bonds' to other occurances of the currently selected atoms.
+|`mode grow -r`|Will show growable 'bonds' to other occurances of the currently selected atoms.|
 
-Command: `mode grow -r`
-
-Van der Waals Radii
-Will show growable 'bonds' to other occurances of the currently selected atoms that are at least the indicated distance away from the selected atom.
-
-Command: `mode grow -v 2.0`
+###Van der Waals Radii
+|`mode grow -v 2.0`|Will show growable 'bonds' to other occurances of the currently selected atoms that are at least the indicated distance away from the selected atom.|
 
 ### Move
-when you click on growable bonds the symmetry equivalent atom will be moved to the new position. This is really useful when you are trying to assemble a meaningful asymmetric unit for extended structures (polymers).
-
-Command: `mode grow -a`
+|`mode grow -a`|when you click on growable bonds the symmetry equivalent atom will be moved to the new position. This is really useful when you are trying to assemble a meaningful asymmetric unit for extended structures (polymers).|
 
 ### Shells
-This will grow atoms shell-by-shell from the currently displayed image.
-
-Command: `grow -s`
+See above.
 
 ## Assemble
-This tool does not strictly belong to the 'growing' family of tools, but it is frequently used together with the growing tools. It allows you to re-arrange the asymmetric unit contents into a different configuration.
+This tool does not strictly belong to the 'growing' family of tools, but it is frequently used together with the growing tools. It allows you to re-arrange the asymmetric unit contents into a different configuration. 
 
 ### Broken Fragments
-Sometimes, your structure may become 'broken' - parts that should be bonded are shown as separate fragments. This tool will bring them back together.
-
-Command: `compaq -a`
+|`compaq -a`|Sometimes, your structure may become 'broken' - parts that should be bonded are shown as separate fragments. This tool will bring them back together.|
 
 ### Atom-to-Atom
-Similar to the 'Broken Fragments' tool, but a different algorithm is used.
-
-Command: `compaq -c`
+|`compaq -c`|Similar to the 'Broken Fragments' tool, but a different algorithm is used.|
 
 ### Metal Last
-In this tool, metal ions are taken out of the equation at first (which is very useful when trying to assemble a ligand!) and then the metal ion is placed at the shortest possible distance.
-
-Command: `compaq -m`
+|`compaq -m`|In this tool, metal ions are taken out of the equation at first (which is very useful when trying to assemble a ligand!) and then the metal ion is placed at the shortest possible distance.|
 
 ### Q-Peaks
-This will move all electron density peaks as closely to existing atoms as possible.
-
-Command: `compaq -q`
+|`compaq -q`|This will move all electron density peaks as closely to existing atoms as possible.|
 
 # Finishing
 

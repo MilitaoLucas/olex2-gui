@@ -9,24 +9,28 @@
   <td width='23%'>
     <b>Background:</b>
   </td>
-  <td width='65%'>
-    <a
-      href="swapbg"
-      target="%swapbg-target%">
-      %swapbg%
-    </a>
-    &nbsp;
-    <a
-      href="grad -i"
-      target="%graduated-target%">
-      %graduated%
-    </a>
-    &nbsp;
-    <a
-      href="grad"
-      target="%choose-grad-colours-target%">
-      %choose grad colours%
-    </a>
+  <td width='25%'>
+    $+
+      html.Snippet("gui/snippets/gui-link",
+      "value=Colour/White [F2]",
+      "onclick=swapbg",
+    )$-
+  </td>
+
+  <td width='25%'>
+    $+
+      html.Snippet("gui/snippets/gui-link",
+      "value=Graduated [F4]",
+      "onclick=grad -i",
+    )$-
+  </td>
+
+  <td width='25%'>
+    $+
+      html.Snippet("gui/snippets/gui-link",
+      "value=Graduated Colours",
+      "onclick=grad",
+    )$-
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
@@ -34,11 +38,31 @@
   <td width='23%'>
     <b>%GUI Width%:</b>
   </td>
-  <td width='30%'>
-    <a href="skin spy.GetParam('gui.skin.name')"">%Default%</a>
-    <a href="panel 0.25">%Narrow%</a>
-    <a href="panel 0.4">%Wide%</a>
+
+  <td width='12%'>
+    $+
+      html.Snippet("gui/snippets/gui-link",
+      "value=Default",
+      "onclick=panel spy.GetParam('gui.skin.name')",
+    )$-
   </td>
+
+  <td width='12%'>
+    $+
+      html.Snippet("gui/snippets/gui-link",
+      "value=Narrow",
+      "onclick=panel 0.20",
+    )$-
+  </td>
+
+  <td width='12%'>
+    $+
+      html.Snippet("gui/snippets/gui-link",
+      "value=Wide",
+      "onclick=panel 0.40",
+    )$-
+  </td>
+
   <td width='30%' align='right'>
     Value (e.g. 520, or 0.3)
   </td>
@@ -62,11 +86,11 @@
     <b>GUI left/right</b>
   </td>
   <td width='65%'>
-    <a
-      href="htmlpanelswap"
-      target="%htmlpanelswap-target%">
-      %htmlpanelswap%
-    </a>
+    $+
+      html.Snippet("gui/snippets/gui-link",
+      "value=%htmlpanelswap%",
+      "onclick=htmlpanelswap",
+    )$-
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
@@ -139,11 +163,12 @@
   <td width='23%'>
     <b>%Alerts%:</b>
   </td>
-  <td ='55%' >
-    Reset all alerts
-  </td>
-  <td width='20%' align='right'>
-    <a href="spy.SwitchAllAlertsOn()" target="Switch all alerts on">%Reset%</a>
+  <td align='right'>
+    $+
+      html.Snippet("gui/snippets/gui-link",
+      "value=Reset All Alerts",
+      "onclick=spy.SwitchAllAlertsOn()",
+    )$-
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
@@ -296,13 +321,22 @@
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='UNITCELL_RENDERING';help_ext=Unitcell-rendering;1 -->
-  <td width='33%'><b>%Unit cell style%:</b></td>
-  <td width='16%'>
-    <a href="cell.Drawstyle cone">Cone</a>
+  <td width='23%'><b>%Unit cell style%:</b></td>
+  <td width='25%'>
+    $+
+      html.Snippet("gui/snippets/gui-link",
+      "value=Cone",
+      "onclick=cell.Drawstyle cone",
+    )$-
   </td>
-  <td width='16%'>
-    <a href="cell.Drawstyle line">Line</a>
+  <td width='25%'>
+    $+
+      html.Snippet("gui/snippets/gui-link",
+      "value=Line",
+      "onclick=cell.Drawstyle line",
+    )$-
   </td>
+
   <td>%Width%:</td>
   <td width="22%" align='right'>$+
     html.Snippet("gui/snippets/input-combo", "name=unitcell_width",
