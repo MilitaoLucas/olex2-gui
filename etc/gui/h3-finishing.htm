@@ -1,52 +1,71 @@
 <!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=FINISHING_QUICK_SORT; help_ext=Finishing_QuickSort;1; -->
-<td name=QuickImages width='20%'>
+<td width='20%'>
   <b>&nbsp;QuickSort</b>
 </td>
 
-<td name=QuickSort width='20%'>
-  <a href="spy.gui.do_sort()">Sort</a>
+<td width='60%'>
+    $+
+    html.Snippet("gui/snippets/gui-link",
+    "value=Sort with current settings",
+    "onclick=spy.gui.do_sort()",
+    )$-
 </td>
 
-<td name=QuickSort width='20%'>
-</td>
-
-<td name=QuickSort width='20%'>
-</td>
-
-
-<td name=QuickImage width='20%' align='right'>
-  <a href="spy.gui.SwitchTool(h2-work-sorting)">Settings</a>
+<td width='20%' align='right'>
+    $+
+    html.Snippet("gui/snippets/gui-link",
+    "value=Sort Settings",
+    "onclick=spy.gui.SwitchTool(h2-work-sorting)>>spy.gui.tools.flash_gui_control(h2-sorting)",
+    )$-
 <td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=FINISHING_QUICK_IMAGES; help_ext=Finishing_QuickImages;1; -->
-<td name=QuickImages width='20%'>
+<td width='20%'>
   <b>&nbsp;QuickImages</b>
 </td>
 
-<td name=QuickLabel width='40%'>
-  <b>Label</b>
-  <a href="label -type=spy.GetParam('user.image.label_symm_type') -symm=spy.GetParam('user.image.label_symm')">Selected</a> |
-  <a href="label $*-H,Q -type=spy.GetParam('user.image.label_symm_type') -symm=spy.GetParam('user.image.label_symm')">Non-H</a> |
-  <a href="kill labels">Delete</a>
+<td width='15%'>
+    $+
+    html.Snippet("gui/snippets/gui-link",
+    "value=Selected",
+    "onclick=label -type=spy.GetParam('user.image.label_symm_type') -symm=spy.GetParam('user.image.label_symm')",
+    )$-
 </td>
 
+<td width='15%'>
+    $+
+    html.Snippet("gui/snippets/gui-link",
+    "value=non-H",
+    "onclick=label \$*-H,Q -type=spy.GetParam('user.image.label_symm_type') -symm=spy.GetParam('user.image.label_symm')",
+    )$-
+</td>
 
-<td name=QuickImage width='20%'>
-  <a href="spy.gui.images.MakeBitmapImage()"><b>Make Image</b></a>
+<td width='15%'>
+    $+
+    html.Snippet("gui/snippets/gui-link",
+    "value=No Labels",
+    "onclick=kill labels",
+    )$-
+</td>
+
+<td width='15%'>
+    $+
+    html.Snippet("gui/snippets/gui-link",
+    "value=Go!",
+    "onclick=spy.gui.images.MakeBitmapImage()"",
+    )$-
 <td>
 
-<!--
-<td name=QuickImage width='7%' align='right'>
-  <a href="spy.gui.PopTool(gui\images.htm)">POP</a>
-<td>
--->
-
-<td name=QuickImage width='20%' align='right'>
-  <a href="spy.gui.SwitchTool(h2-tools-images)">Settings</a>
+<td width='20%' align='right'>
+    $+
+    html.Snippet("gui/snippets/gui-link",
+    "value=Img Settings",
+    "onclick=spy.gui.SwitchTool(h2-tools-images)>>spy.gui.tools.flash_gui_control(h2-images)",
+    )$-
 <td>
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
