@@ -1,0 +1,57 @@
+<font size='%(font_size_base)s' color='#333355' face='Vera'>
+
+<table width='100%%'>
+  <tr bgcolor='#004080'>
+    <td bgcolor='#004080'>
+      <font color='white' size='6' >
+      <b>
+      %(title)s
+      </b>
+      </font>
+    </td>
+  </tr>
+</table>
+
+<table width='100%%'>
+  <tr bgcolor='#000000'>
+    <td bgcolor='#efefef'>
+      %(body)s
+    </td>
+  </tr>
+</table>
+
+<p>
+
+<table width='100%%'>
+  <tr >
+  <td name='View on GITHUB' width='50%%'>
+  <font color=white><b>
+    $+
+    html.Snippet("gui/snippets/input-button",
+    "name=VIEW_HELP_ON_GITHUB",
+    "bgcolor=spy.GetParam(gui.light_blue)",
+    "height=GetVar('HtmlComboHeight')",
+    "width=100%%",
+    "flat=True",
+    "value=View on GitHub",
+    "onclick=shell https://github.com/Olex2/help/tree/master/gui/EN",
+    )$-
+  </b></font>
+  </td>
+
+  <td name='View on GITHUB' width='50%%'>
+  <font color=white><b>
+    $+
+    html.Snippet("gui/snippets/input-button",
+    "name=CONTRIBUTE_TO_HELP",
+    "bgcolor=spy.GetParam(gui.green)",
+    "height=GetVar('HtmlComboHeight')",
+    "width=100%%",
+    "flat=True",
+    "value=Contribute to the Help System",
+    "onclick=shell mailto:info@olexsys.org",
+    )$-
+  </b></font>
+  </td>
+  </tr>
+</table>
