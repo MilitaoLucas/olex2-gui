@@ -415,7 +415,7 @@ class OlexFunctions(inheritFunctions):
 
   def TranslatePhrase(self,text):
     try:
-      retStr = olx.TranslatePhrase(text)
+      retStr = olx.GetVar(text, olx.TranslatePhrase(text))
     except Exception, ex:
       print >> sys.stderr, "An error occured whilst translating %s" %(text)
       sys.stderr.formatExceptionInfo()

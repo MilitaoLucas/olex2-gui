@@ -26,6 +26,7 @@
       <cmd9 "bind wheel 'ShowQ -wheel='">
       <cmd12 "spy.settings_tree()">
       <cmd13 "deletemenu 'Structure;Export picture (experimental)'">
+      <cmd14 "spy.gui.get_help()'">
     >
 
   <onterminate

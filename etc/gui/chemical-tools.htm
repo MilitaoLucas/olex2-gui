@@ -1,57 +1,57 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=CHN; help_ext=Calculate-CHN-Analysis;1; -->
-  <td>
-    <a 
-      href="calcCHN"
-      target="%CHN Analysis-target%">
-        %CHN Analysis-href%
-    </a>
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=CHEMICAL_TOOLS_MASS; help_ext=Molecular_Mass;1; -->
+
+  <td name='CHEMICAL_TOOLS_CHN' width='50%'>
+    $+
+    html.Snippet("gui/snippets/gui-link",
+    "value=Elemental Analysis: CHN",
+    "onclick=calcCHN",
+    )$-
+  </td>
+
+  <td name='CHEMICAL_TOOLS_MOLECULAR_ISOTOPE_PATTERN' width='50%'>
+  <font color=white><b>
+    $+
+    html.Snippet("gui/snippets/gui-link",
+    "value=Molecular Isotope Pattern: Mass Spec",
+    "onclick=calcMS",
+    )$-
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=CHEMICAL_TOOLS_VOLUME; help_ext=Molecular_Volume;1; -->
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=MOLECULAR_ISOTOPE_PATTERN; help_ext=Calculate-Molecular-Isotope-Pattern;1; -->
-  <td>
-    <a 
-      href="calcms"
-      target="%Molecular Isotope Pattern-target%">
-        %Molecular Isotope Pattern%
-    </a>
+  <td name='CHEMICAL_TOOLS_MOLECULAR_VOLUME' width='50%'>
+    $+
+    html.Snippet("gui/snippets/gui-link",
+    "value=Molecular Volume",
+    "onclick=molinfo",
+    )$-
+  </td>
+
+  <td name='CHEMICAL_TOOLS_POLYHEDRAL_VOLUME' width='50%'>
+    $+
+    html.Snippet("gui/snippets/gui-link",
+    "value=Polyhedral Volume",
+    "onclick=calcVol sel",
+    )$-
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=MOLECULAR_VOLUME; help_ext=Calculate-Molecular-Volume;1; -->
-  <td>
-    <a 
-      href="molinfo"
-      target="%Molecular Volume-target%">
-        %Molecular Volume%
-    </a>
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=BOUNDING_BOX; help_ext=Molecular_Bounding_Box;1; -->
+  <td name='CHEMICAL_TOOLS_MOLECULAR_BOUNDING_BOX' width='50%'>
+    $+
+    html.Snippet("gui/snippets/gui-link",
+    "value=Molecular Bounding Box",
+    "onclick=wbox>>sfil",
+    )$-
   </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=CALCVOL; help_ext=Calculate-Polyhedral-Volume;1; -->
-  <td>
-    <a 
-      href="calcvol sel"
-      target="%calcvol-target%">
-        %calcvol-href%
-    </a>
-  </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=BOUNDING_BOX; help_ext=Calculate-Bounding-Box;1; -->
-  <td>
-    <a 
-      href="wbox>>sfil"
-      target="%bounding_box-target%">
-        %Bounding Box%
-    </a>
-  </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
