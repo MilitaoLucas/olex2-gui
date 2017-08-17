@@ -109,10 +109,10 @@ If this is not the case, the HAR will not work properly. Continue?""", "YN", Fal
         f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
     self.save()
 
-    args = [self.parent.exe, self.name+".cif", "-cif1", "t",
+    args = [self.parent.exe, self.name+".cif", "t",
             "-basis-dir", self.parent.basis_dir,
              "-shelx-f2", self.name+".hkl"]
-
+    #args.append("cif1")
     disp = olx.GetVar("settings.tonto.HAR.dispersion", None)
     if 'true' == disp:
       import olexex
