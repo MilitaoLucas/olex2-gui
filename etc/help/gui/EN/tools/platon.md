@@ -1,2 +1,0 @@
-# Platon 
-XXX Platon-help 
