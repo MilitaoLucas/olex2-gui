@@ -2032,9 +2032,9 @@ class ChargeFlippingPlot(PrgAnalysis):
       ccR = int(255*cc)
       ccG = int(255*(1.3-cc))
       ccB = 0
-      cc = height*(1-cc) + top
+      cc = int(height*(1-cc) + top)
       box = (x,cc,x+marker_width,cc+marker_width)
-      self.draw.rectangle(box, fill=(ccR, ccG, ccB), outline=(ccR/2, ccG/2, 0))
+      self.draw.rectangle(box, fill=(ccR, ccG, ccB), outline=(int(ccR/2), int(ccG/2), 0))
 
       ## Draw R1
       txt += ", R1=%.3f" %R1
@@ -2043,7 +2043,7 @@ class ChargeFlippingPlot(PrgAnalysis):
       rB = 0
       R1 = height*(1-R1) + top
       box = (x,R1,x+marker_width,R1+2)
-      self.draw.rectangle(box, fill=(rR, rG, rB), outline=(rR/2, rG/2, 0))
+      self.draw.rectangle(box, fill=(rR, rG, rB), outline=(int(rR/2), int(rG/2), 0))
       font_name = "Vera"
       font_size = 10
       font = IT.registerFontInstance(font_name, font_size)
@@ -2057,7 +2057,7 @@ class ChargeFlippingPlot(PrgAnalysis):
 
       ## Draw CC Legend
       box = (10,legend_top +m_offset,10+marker_width, legend_top+marker_width + m_offset)
-      self.draw.rectangle(box, fill=(ccR, ccG, ccB), outline=(ccR/2, ccG/2, 0))
+      self.draw.rectangle(box, fill=(ccR, ccG, ccB), outline=(int(ccR/2), int(ccG/2), 0))
       tt = "CC"
       top_left = (10+marker_width+3, legend_top)
       IT.write_text_to_draw(self.draw, txt, top_left=top_left, font_size=self.font_size_normal, font_colour=self.light_grey)
@@ -2065,7 +2065,7 @@ class ChargeFlippingPlot(PrgAnalysis):
 
       ## Draw R1 Legend
       box = (40,legend_top + m_offset + 1,40+marker_width,legend_top + m_offset + 3)
-      self.draw.rectangle(box, fill=(rR, rG, rB), outline=(rR/2, rG/2, 0))
+      self.draw.rectangle(box, fill=(rR, rG, rB), outline=(int(rR/2), int(rG/2), 0))
       tt = "R1"
       self.draw.text((40+marker_width+3, legend_top), "%s" %tt, font=self.font_large, fill="#888888")
 
@@ -2550,10 +2550,10 @@ class item_vs_resolution_plot(Analysis):
       iucr = 50
 
     if self.item == "i_over_sigma_vs_resolution":
-      self.draw_fit_line(slope=0, y_intercept=2, write_equation=False, write_text="2 sigma line (noise below, data above)")
+      self.draw_fit_line(slope=0, y_intercept=3, write_equation=False, write_text="3 sigma line (noise below, data above)")
       self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="min IUCr res")
     reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
-    self.draw_pairs(reverse_x=reverse_x, lt=2)
+    self.draw_pairs(reverse_x=reverse_x, lt=3)
 
 
 class X_Y_plot(Analysis):
@@ -3094,6 +3094,11 @@ class HealthOfStructure():
       d.setdefault(item, value)
       txt += "<tr><td>%s</td><td>%s</td></tr>" %(item, value)
     OV.write_to_olex("reflection-stats-summary.htm" , txt)
+
+    if olx.HKLSrc():
+      t =  time.ctime(os.path.getmtime(olx.HKLSrc()))
+      OV.write_to_olex("reflection-date.htm" , t)
+
     return d
 
   def is_in_cache(self, var, val):
