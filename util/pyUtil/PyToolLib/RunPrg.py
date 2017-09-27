@@ -22,6 +22,34 @@ import time
 
 import shutil
 
+# The listeners expect a function
+
+class ListenerManager(object):
+  def __init__(self):
+    self.onStart_listeners = []
+    self.onEnd_listeners = []
+  def register_listener(self, listener,event):
+    if event == "onEnd":
+      for l in self.onEnd_listeners:
+        if type(l.__self__) == type(listener.__self__):
+          return False
+      self.onEnd_listeners.append(listener)
+    elif event == "onStart":
+      for l in self.onStart_listeners:
+        if type(l.__self__) == type(listener.__self__):
+          return False
+      self.onStart_listeners.append(listener)
+
+  def startRun(self, caller):
+    for item in self.onStart_listeners:
+      item(caller)
+
+  def endRun(self, caller):
+    for item in self.onEnd_listeners:
+      item(caller)
+
+LM = ListenerManager()
+
 class RunPrg(ArgumentParser):
   running = False
 
@@ -31,7 +59,7 @@ class RunPrg(ArgumentParser):
     self.SPD, self.RPD = ExternalPrgParameters.get_program_dictionaries()
     self.terminate = False
     self.tidy = False
-    self.method = ""
+    self.method = None
     self.Ralpha = 0
     self.Nqual = 0
     self.CFOM = 0
@@ -44,6 +72,8 @@ class RunPrg(ArgumentParser):
 
     self.demo_mode = OV.FindValue('autochem_demo_mode',False)
     self.broadcast_mode = OV.FindValue('broadcast_mode',False)
+
+
     if self.demo_mode:
       OV.demo_mode = True
 
@@ -64,9 +94,10 @@ class RunPrg(ArgumentParser):
     os.environ['FORT_BUFFERED'] = 'TRUE'
     self.post_prg_output_html_message = ""
 
-
   def __del__(self):
-    if self.method is not None:
+    if self.method is not None and \
+       hasattr(self.method, "unregisterCallback") and \
+       callable(self.method.unregisterCallback):
       self.method.unregisterCallback()
 
   def run(self):
@@ -296,10 +327,13 @@ class RunPrg(ArgumentParser):
 
   def startRun(self):
     OV.CreateBitmap('%s' %self.bitmap)
+    LM.startRun(self)
 
   def endRun(self):
+    self.method.unregisterCallback()
     OV.DeleteBitmap('%s' %self.bitmap)
     OV.Cursor()
+    LM.endRun(self)
 
   def post_prg_html(self):
     if not OV.HasGUI():
@@ -350,6 +384,7 @@ class RunSolutionPrg(RunPrg):
     self.setupFiles()
     if self.terminate:
       self.endRun()
+      self.endHook()
       return
     if self.params.snum.solution.graphical_output and self.HasGUI:
       self.method.observe(self)
