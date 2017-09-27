@@ -8,59 +8,47 @@
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SAMPLE_STRUCTURES';help_ext=Sample_Structures;1 -->
 
-  <td>
     $+
-    html.Snippet("gui/snippets/gui-link",
+    html.Snippet("gui/snippets/"GetVar(link_type),
     "value=Sucrose",
     "onclick=reap GetVar(sample_dir)/sucrose/sucrose",
     )$-
 
-  </td>
-  <td>
-
     $+
-    html.Snippet("gui/snippets/gui-link",
+    html.Snippet("gui/snippets/"GetVar(link_type),
     "value=THPP",
     "onclick=reap GetVar(sample_dir)/THPP/THPP",
     )$-
 
-  </td>
-  <td>
+    $+
+    html.Snippet("gui/snippets/"GetVar(link_type),
+    "value=Co110",
+    "onclick=reap GetVar(sample_dir)/Co110/Co110",
+    )$-
 
     $+
-    html.Snippet("gui/snippets/gui-link",
+    html.Snippet("gui/snippets/"GetVar(link_type),
     "value=ZP2",
     "onclick=reap GetVar(sample_dir)/ZP2/ZP2",
     )$-
 
-  </td>
-  <td>
-
     $+
-    html.Snippet("gui/snippets/gui-link",
+    html.Snippet("gui/snippets/"GetVar(link_type),
     "value=Water",
     "onclick=reap GetVar(sample_dir)/Water/Water",
     )$-
 
-  </td>
-
-  <td>
     $+
-    html.Snippet("gui/snippets/gui-link",
+    html.Snippet("gui/snippets/"GetVar(link_type),
     "value=183",
     "onclick=reap GetVar(sample_dir)/183/183",
     )$-
-  </td>
 
-
-  <td>
     $+
-    html.Snippet("gui/snippets/gui-link",
+    html.Snippet("gui/snippets/"GetVar(link_type),
     "value=Timmy",
     "onclick=if File.Exists(GetVar(sample_dir)/timmy/timmy.res) then 'reap GetVar(sample_dir)/timmy/timmy.res' else 'reap GetVar(sample_dir)/timmy/timmy.cif'",
     )$-
-
-  </td>
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
@@ -70,7 +58,8 @@
     <b>%Documentation%</b>:
 
   <a target='Documentation' href="shell 'http://www.olex2.org/documentation'"><b>Online</b></a> |
-  <a target='Documentation' href="shell BaseDir()/etc/documentation/Commands.pdf">Static %PDF%</a>
+  <a target='Documentation' href="shell BaseDir()/etc/documentation/Commands.pdf">Static %PDF%</a> |
+  <a target='All Inline Help' href="spy.make_help_box -name=All-Inline-Help -helpTxt=BaseDir()/util/pyUtil/gui/help/gui/HELP_EN.htm">All Inline Help</a>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 

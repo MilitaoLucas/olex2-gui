@@ -9,29 +9,23 @@
   <td width='23%'>
     <b>Background:</b>
   </td>
-  <td width='25%'>
     $+
-      html.Snippet("gui/snippets/gui-link",
+    html.Snippet("gui/snippets/"GetVar(link_type),
       "value=Colour/White [F2]",
       "onclick=swapbg",
     )$-
-  </td>
 
-  <td width='25%'>
     $+
-      html.Snippet("gui/snippets/gui-link",
+    html.Snippet("gui/snippets/"GetVar(link_type),
       "value=Graduated [F4]",
       "onclick=grad -i",
     )$-
-  </td>
 
-  <td width='25%'>
     $+
-      html.Snippet("gui/snippets/gui-link",
+    html.Snippet("gui/snippets/"GetVar(link_type),
       "value=Graduated Colours",
       "onclick=grad",
     )$-
-  </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='GUI_WIDTH';help_ext=GUI_Width;1 -->
@@ -39,31 +33,25 @@
     <b>%GUI Width%:</b>
   </td>
 
-  <td width='12%'>
     $+
-      html.Snippet("gui/snippets/gui-link",
+    html.Snippet("gui/snippets/"GetVar(link_type),
       "value=Default",
       "onclick=panel spy.GetParam('gui.skin.name')",
     )$-
-  </td>
 
-  <td width='12%'>
     $+
-      html.Snippet("gui/snippets/gui-link",
+    html.Snippet("gui/snippets/"GetVar(link_type),
       "value=Narrow",
       "onclick=panel 0.20",
     )$-
-  </td>
 
-  <td width='12%'>
     $+
-      html.Snippet("gui/snippets/gui-link",
+    html.Snippet("gui/snippets/"GetVar(link_type),
       "value=Wide",
       "onclick=panel 0.40",
     )$-
-  </td>
 
-  <td width='30%' align='right'>
+  <td width='25%' align='right'>
     Value (e.g. 520, or 0.3)
   </td>
   <td>
@@ -81,17 +69,34 @@
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='GUI_SIDE';help_ext=GUI_left/right;1 -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='GUI_SIDE';help_ext=GUI_Side;1 -->
   <td width='23%'>
     <b>GUI left/right</b>
   </td>
-  <td width='65%'>
     $+
-      html.Snippet("gui/snippets/gui-link",
+    html.Snippet("gui/snippets/"GetVar(link_type),
       "value=%htmlpanelswap%",
       "onclick=htmlpanelswap",
     )$-
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='GUI_LINKS';help_ext=GUI_Links;1 -->
+  <td width='23%'>
+    <b>GUI Links</b>
   </td>
+    $+
+    html.Snippet("gui/snippets/"GetVar(link_type),
+      "value=HTML Links",
+      "onclick=spy.SetParam('gui.skin.link_type',gui-link-html)>>panel",
+    )$-
+
+    $+
+    html.Snippet("gui/snippets/"GetVar(link_type),
+      "value=Buttons",
+      "onclick=spy.SetParam('gui.skin.link_type',gui-link-button)>>panel",
+    )$-
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
@@ -138,9 +143,9 @@
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='INFO_BAR';help_ext=Info;1 -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='INFO_BAR';help_ext=Info_Bar;1 -->
   <td width='23%'>
-    <b>%Info%:</b>
+    <b>%Info Bar%:</b>
   </td>
   <td width='55%' >
     Show bar with structure info
@@ -159,17 +164,15 @@
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='RESET_ALERTS';help_ext=Alerts;1 -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='RESET_ALERTS';help_ext=Reset_Alerts;1 -->
   <td width='23%'>
-    <b>%Alerts%:</b>
+    <b>%Reset Alerts%:</b>
   </td>
-  <td align='right'>
     $+
-      html.Snippet("gui/snippets/gui-link",
+    html.Snippet("gui/snippets/"GetVar(link_type),
       "value=Reset All Alerts",
       "onclick=spy.SwitchAllAlertsOn()",
     )$-
-  </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='CONSOLE_LINES';help_ext=Console_Lines;1 -->
@@ -230,7 +233,7 @@
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SAVE_VIEW';help_ext=Save_View;1 -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SAVE_VIEW';help_ext=Auto_Save_View;1 -->
   <td width='23%'>
    <b>%Save View%:</b>
   </td>
@@ -245,9 +248,9 @@
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='START_OLEX2_IN';help_ext=Start_Olex2_in...;1 -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='START_OLEX2_IN';help_ext=Start_Olex2_in;1 -->
   <td width='23%'>
-    <b>%Start Olex2 in...%:</b>
+    <b>Start Olex2 in:</b>
   </td>
   <td width='55%'>
      Where Olex2 will open after restart
@@ -269,7 +272,7 @@
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='START_OLEX2_IN';help_ext=Solo Mode;1 -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='START_OLEX2_IN';help_ext=Solo_Mode;1 -->
   <td width='23%'>
     <b>%Solo Mode%:</b>
   </td>
@@ -289,7 +292,7 @@
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='START_OLEX2_IN';help_ext=Close Settings;1 -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='CLOSE_SETTINGS';help_ext=Close_Settings;1 -->
   <td width='23%'>
     <b>%Close Settings%:</b>
   </td>
@@ -320,37 +323,41 @@
    $-</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='UNITCELL_RENDERING';help_ext=Unitcell-rendering;1 -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='UNITCELL_RENDERING';help_ext=Unit_Cell_Style;1 -->
   <td width='23%'><b>%Unit cell style%:</b></td>
-  <td width='25%'>
     $+
-      html.Snippet("gui/snippets/gui-link",
-      "value=Cone",
+    html.Snippet("gui/snippets/"GetVar(link_type),
+      "value=Cylinder",
       "onclick=cell.Drawstyle cone",
     )$-
-  </td>
-  <td width='25%'>
     $+
-      html.Snippet("gui/snippets/gui-link",
+    html.Snippet("gui/snippets/"GetVar(link_type),
       "value=Line",
       "onclick=cell.Drawstyle line",
     )$-
-  </td>
 
-  <td>%Width%:</td>
-  <td width="22%" align='right'>$+
+  <td width='10%' align='right'>%Width%:</td>
+  <td width="12%" align='right'>$+
     html.Snippet("gui/snippets/input-combo", "name=unitcell_width",
      "items='1;2;3;4;5'", "value=cell.Thickness()",
      "onchange=cell.Thickness(html.GetValue('~name~'))")
    $-</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='USER_DB_LOCATION';help_ext=user-db-location;1 -->
-  <td width='25%'><b>%User Database%:</b></td>
-  <td width='75%'>
-  <a href="spy.EditParams(user.report)">Edit Settings (Restart required)</a> <b>or</b>
-  <a href="spy.gui.db.Manage()" target="Manage users and sites">Manage</a>
-  </td>
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='USER_DB_LOCATION';help_ext=User_Database;1 -->
+  <td width='23%'><b>%User Database%:</b></td>
+
+    $+
+    html.Snippet("gui/snippets/"GetVar(link_type),
+      "value=Location",
+      "onclick=spy.EditParams(user.report)",
+    )$-
+    $+
+    html.Snippet("gui/snippets/"GetVar(link_type),
+      "value=Manage",
+      "onclick=spy.gui.db.Manage()",
+    )$-
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MODULE-UPDATE';help_ext=Enable-Network;1 -->
@@ -366,7 +373,7 @@
    $-</td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='OLEX"_DEBUG';help_ext=Debug Mode;1 -->
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='OLEX"_DEBUG';help_ext=Debug_Mode;1 -->
   <td width='23%'><b>%Debug Mode%:</b></td>
   <td width='75%'>
   Start Olex2 in Debug Mode (Restart required)

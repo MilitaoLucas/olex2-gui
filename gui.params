@@ -109,9 +109,10 @@ gui
       .type = int
     icon_border_colour = #bcbcbc
       .type = colour
-
+    link_type = 'gui-link-button'
+      .type = str
     link_button{
-      flat = True
+      flat = False
         .type = bool
       bgcolor = #dedede
         .type = colour
@@ -663,7 +664,6 @@ gui
     code_buttons_flat = True
       .type = bool
   }
-
 
   help_box{
     width = 450

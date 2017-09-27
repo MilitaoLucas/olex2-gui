@@ -681,7 +681,8 @@ def makeFormulaForsNumInfo():
   update = '<table border="0" cellpadding="0" cellspacing="0"><tr><td>%s</td><td>%s</td></tr></table>'%(formula_string, refresh_button)
   OV.write_to_olex('snumformula.htm', update)
   if debug:
-    print "Formula sNum (2): %.5f" %(time.time() - t1)
+    pass
+    #print "Formula sNum (2): %.5f" %(time.time() - t1)
 
   return "<!-- #include snumformula snumformula.htm;1 -->"
 OV.registerFunction(makeFormulaForsNumInfo)
@@ -756,8 +757,8 @@ $spy.MakeHoverButton('btn-info@cell@%s',"spy.make_help_box -name=cell-not-quite-
   </tr>
   ''' %d
   OV.write_to_olex('celldimensiondisplay.htm', t)
-  if debug:
-    print "Cell: %.5f" %(time.time() - t1)
+  #if debug:
+    #print "Cell: %.5f" %(time.time() - t1)
   return "<!-- #include celldimensiondisplay celldimensiondisplay.htm;1 -->"
 
 OV.registerFunction(make_cell_dimensions_display,True,"gui.tools")

@@ -9,43 +9,42 @@ $-
 <tr ALIGN='left' NAME='SNUM_SOLUTION_PROGRAM' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Solution-Program;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width='35%'>
+  <td width='22%'>
     <b>Solution Program</b>
   </td>
-  <td ALIGN='right' width='65%'>
+  <td ALIGN='right' width='30%'>
 <!-- #include program gui\snippets\snippet-program.htm;scope=snum;prg_type=solution;1; -->
   </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
-<tr ALIGN='left' NAME='SNUM_SOLUTION_METHOD' width='100%'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Solution-Method;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width='35%'>
-    <b>%Solution Method%</b>
+  <td width='18%' align="right">
+    <b>Method</b>
   </td>
-  <td ALIGN='right' width='65%'>
+  <td ALIGN='right' width='30%'>
 <!-- #include program gui\snippets\snippet-method.htm;scope=snum;prg_type=solution;1; -->
   </td>
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <tr ALIGN='left' NAME='SET_REFLECTIONS' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Set-Reflection-File;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width='35%'>
-    <b>%Reflection File%</b>
+  <td width='22%'>
+    <b>Reflections</b>
   </td>
-  <td ALIGN='right' width='65%'>
+  <td ALIGN='right' width='42%'>
 <!-- #include tool-footer gui\snippets\snippet-reflection-file.htm;1; -->
+</td>
+<td align='right'>
+<!-- #includeif fs.Exists('reflection-date.htm') reflection-date reflection-date.htm;1; -->
 </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <tr ALIGN='left' NAME='SET_SNUM_REFINEMENT_FORMULA' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Chemical Formula;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width='35%'>
-    <b>%Chemical Composition%</b>
+  <td width='22%'>
+    <b>Composition</b>
   </td>
-  <td ALIGN='right' width='65%'>
+  <td ALIGN='right' width='42%'>
     <font size='$GetVar(HtmlFontSizeControls)'>
     <input
       type='combo'
@@ -60,9 +59,44 @@ $-
     >
     </font>
   </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- #include program gui\snippets\snippet-zandzprime.htm;1; -->
+  <td>
+  $spy.GetParam('snum.solution.current_atomic_volume')
+    &Aring;&sup3;
+  </td>
+
+    <td ALIGN='right' width='13%'>
+    <input
+      type='text'
+      width='50%'
+      height="$GetVar(HtmlInputHeight)"
+      bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+      name='SET_Z@#scope'
+      valign='center'
+      align='right'
+      value='xf.au.GetZ()'
+      onleave="xf.au.SetZ(html.GetValue(~name~))>>html.Update"
+      onreturn="html.Call(~name~.onleave)"
+      label="Z = "
+    >
+  </td>
+  <td ALIGN='right' width='13%'>
+    <input
+      type='text'
+      width="50%"
+      height="$GetVar(HtmlInputHeight)"
+      bgcolor="spy.GetParam(gui.html.input_bg_colour)"
+      name='SET_Z_PRIME#scope'
+      valign='center'
+      align='right'
+      value='xf.au.GetZprime()'
+      onleave="xf.au.SetZprime(html.GetValue(~name~))>>html.Update"
+      onreturn="html.Call(~name~.onleave)"
+      label="Z' = "
+    >
+  </td>
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #includeif not(spy.xplain.exists()) olex2_space_group gui\tools\olex2-space-group-row.htm;1; -->
 <!-- #includeif spy.xplain.exists() rigaku_xplain_tool gui\tools\rigaku-xplain.htm;1; -->
