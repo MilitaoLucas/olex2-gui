@@ -1,5 +1,5 @@
   <td width='30%'>
-    &nbsp;%<b>Select</b> atom(s) and then %
+    &nbsp;Select atom(s) and then
   </td>
 
   <td width='10%'>
@@ -22,14 +22,14 @@
     $+
     html.Snippet("gui/snippets/gui-link",
     "value=Split SAME",
-    "onclick='mode fit -s same'",
+    "onclick=if spy.check_for_selection() then 'mode fit -s same'",
     )$-
   </td>
-  
+
   <td width='20%' align='right'>
     $+
     html.Snippet("gui/snippets/gui-link",
     "value=Split with SHIFT",
-    "onclick=if spy.check_for_selection() then 'mode fit -s same rigu>>html.update'",
+    "onclick=mode split",
     )$-
   </td>

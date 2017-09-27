@@ -1,18 +1,19 @@
+DELETE?
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
 <tr>
 	<td valign='top' width="8" align='center' bgcolor="$GetVar(HtmlTableFirstcolColour)">
-		<a 
-			href="spy.make_help_box -name='solve' -popout='False'" 
+		<a
+			href="spy.make_help_box -name='solve' -popout='False'"
 			target="Help me with this">
 			<zimg border="0" src="info.png">
-		</a>	
+		</a>
 	</td>
 	<td VALIGN='center'  colspan='2'>
     <input
-			bgcolor="$GetVar(HtmlTableBgColour)"  
-			type="button" 
-			name="RUN_SOLVE" 
+			bgcolor="$GetVar(HtmlTableBgColour)"
+			type="button"
+			name="RUN_SOLVE"
 			image="button-solve.png"
 			onclick="solve>>echo 'Running Solution Program'"
 		>
@@ -26,6 +27,6 @@
 <!-- #include tool-table-header gui\blocks\tool-table-header.htm;1; -->
 
 <!-- #include solution-settings-h3-solution-settings gui\solution-settings-h3-solution-settings.htm;gui\blocks\tool-h3-off.htm;image=solution-settings-h3-solution-settings;colspan=4;onclick=;1 2; -->
-	
+
 
 </table>
