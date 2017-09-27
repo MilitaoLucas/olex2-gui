@@ -21,10 +21,10 @@ t:part_0_and_n{
 <font size="$GetVar('HtmlFontSizeControls')"><b>
 <input
   type="button"
-  name="PART 0 | %(part)s"
-  value="PART 0 | %(part)s"
+  name="0 | %(part)s"
+  value="0 | %(part)s"
   width="100%%"
-  onclick="ShowP 0 %(part)s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%(part)s)"
+  onclick="ShowP 0 %(part)s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%(part)s)>>focus"
   bgcolor="$GetVar('linkButton.bgcolor')"
   fgcolor="$GetVar('linkButton.fgcolor')"
   flat="$GetVar(linkButton.flat)"
@@ -109,4 +109,29 @@ t:disorder_quicktool{
   >
   </font>
   </td>
+}
+
+t:gui_link_button{
+#value=
+#width=100%
+#height=$GetVar('HtmlComboHeight')
+#name=#value
+#fit=false
+#flat=false
+#disabled=false
+#fgcolor=#0064b4
+<font size="$GetVar('HtmlFontSizeControls')"><b>
+<input
+  type="button"
+  name="#name"
+  value="#value"
+  width="#width"
+  height="#height"
+  onclick="#onclick"
+  fgcolor="#fgcolor"
+  fit="#fit"
+  flat="#flat"
+  disabled="#disabled"
+></b>
+</font>
 }

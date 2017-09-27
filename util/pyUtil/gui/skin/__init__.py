@@ -215,6 +215,7 @@ def export_parameters(load_phil=True):
   OV.SetVar('HtmlPanelWidth', OV.GetParam('gui.htmlpanelwidth'))
   OV.SetVar('HtmlButtonHeight', OV.GetParam('gui.timage.button.height'))
   OV.SetVar('history_width', IT.history_width)
+  OV.SetVar('link_type', OV.GetParam('gui.skin.link_type'))
   OV.SetVar('linkButton.flat', OV.GetParam('gui.skin.link_button.flat'))
   OV.SetVar('linkButton.fgcolor', OV.GetParam('gui.skin.link_button.fgcolor').hexadecimal)
   OV.SetVar('linkButton.bgcolor', OV.GetParam('gui.skin.link_button.bgcolor').hexadecimal)
