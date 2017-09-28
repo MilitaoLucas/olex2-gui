@@ -342,24 +342,20 @@
   >
 >
 
-<_isotropic help="Make atoms isotropic"
+
+<telp help="Default telp macro"
   <body
     <args
-      <arg0 name="type" def="-a">
+      <arg0 name="Prob_factor" def="-100">
     >
     <cmd
-      <cmd1 "sel %1">
-      <cmd2 "isot sel">
-      <cmd3 "refine">
-      <cmd4 "pers">
-      >
-    <onterminate
-      <cmd0 "sel -u">
+      <cmd3 "telp_a">
+      <cmd3 "telp_b">
     >
   >
 >
 
-<telp help="Default telp macro"
+<telp_a help="Default telp macro"
   <body
     <args
       <arg0 name="Prob_factor" def="-100">
@@ -375,7 +371,28 @@
   >
 >
 
+<telp_b help="Default telp macro"
+  <body
+    <cmd
+      <cmd1 "mask bonds 48">
+      <cmd2 "brad math.eval(spy.GetParam(user.bonds.bzoom)/100)">
+    >
+  >
+>
+
 <telph help="Default telph macro"
+  <body
+    <args
+      <arg0 name="Prob_factor" def="-100">
+    >
+    <cmd
+      <cmd3 "telph_a">
+      <cmd3 "telph_b">
+    >
+  >
+>
+
+<telph_a help="Default telph macro"
   <body
     <args
       <arg0 name="Prob_factor" def="-100">
@@ -386,14 +403,37 @@
       <cmd1 "ads elp">
       <cmd2 "arad isoth">
       <cmd3 "mask atoms 5">
-      <cmd4 "mask bonds spy.GetParam('user.bonds.mask')">
       <cmd5 "if strcmp(%1,'-100') then 'telpv 50' else 'telpv %1'">
-      <cmd6 "brad math.eval(spy.GetParam('user.bonds.bzoom')/100)">
     >
   >
 >
 
+<telph_b help="Default telph macro"
+  <body
+    <args
+      <arg0 name="Prob_factor" def="-100">
+    >
+    <cmd
+      <cmd4 "mask bonds spy.GetParam('user.bonds.mask')">
+      <cmd2 "brad math.eval(spy.GetParam(user.bonds.bzoom)/100)">
+    >
+  >
+>
+
+
 <pers help="Default pers macro"
+  <body
+    <args
+      <arg0 name="File extension" def="ins">
+    >
+    <cmd
+      <cmd3 "pers_a">
+      <cmd3 "pers_b">
+    >
+  >
+>
+
+<pers_a help="Default pers macro"
   <body
     <args
       <arg0 name="File extension" def="ins">
@@ -408,7 +448,25 @@
   >
 >
 
+<pers_b help="Default pers macro"
+  <body
+    <cmd
+      <cmd1 "mask bonds 48">
+      <cmd2 "brad math.eval(spy.GetParam(user.bonds.bzoom)/100)">
+    >
+  >
+>
+
 <sfil help="Default pers macro"
+  <body
+    <cmd
+      <cmd3 "sfil_a">
+      <cmd3 "sfil_b">
+    >
+  >
+>
+
+<sfil_a help="Default pers macro"
   <body
     <cmd
       <cmd3 "individualise">
@@ -416,12 +474,32 @@
       <cmd1 "ads sph">
       <cmd2 "arad sfil">
       <cmd3 "mask atoms 1">
+    >
+  >
+>
+
+<sfil_b help="Default pers macro"
+  <body
+    <cmd
       <cmd4 "mask bonds 0">
     >
   >
 >
 
+
 <proj help="Default wireframe macro"\
+  <body
+    <args
+      <arg0 name="File extension" def="ins">
+    >
+    <cmd
+      <cmd1 "proj_a">
+      <cmd1 "proj_b">
+    >
+  >
+>
+
+<proj_a help="Default wireframe macro"\
   <body
     <args
       <arg0 name="File extension" def="ins">
@@ -431,26 +509,60 @@
       <cmd2 "mask atoms 16">
       <cmd3 "ads std">
       <cmd4 "arad pers">
+    >
+  >
+>
+
+<proj_b help="Default wireframe macro"\
+  <body
+    <args
+      <arg0 name="File extension" def="ins">
+    >
+    <cmd
       <cmd5 "mask bonds 192">
     >
   >
 >
 
+
 <tubes help="Tubes bonds"
   <body
     <args
-      <arg0 name="radius" def="0.1">
+      <arg0 name="radius" def="math.eval(spy.GetParam(user.bonds.bzoom)/100)">
+    >
+    <cmd
+      <cmd3 "tubes_a(%1)">
+      <cmd3 "tubes_b(%1)">
+    >
+  >
+>
+
+<tubes_a help="Tubes bonds"
+  <body
+    <args
+      <arg0 name="radius" def="math.eval(spy.GetParam(user.bonds.bzoom)/100)">
     >
     <cmd
       <cmd3 "individualise">
       <cmd1 "ads sph">
       <cmd1 "mask atoms 1">
-      <cmd4 "mask bonds spy.GetParam('user.bonds.mask')">
-      <cmd2 "brad math.eval(%1*10)">
-      <cmd2 "arad math.eval(%1*1)">
+      <cmd2 "arad math.eval(%1/10)">
+    >
   >
 >
+
+<tubes_b help="Tubes bonds"
+  <body
+    <args
+      <arg0 name="radius" def="math.eval(spy.GetParam(user.bonds.bzoom)/100)">
+    >
+    <cmd
+      <cmd4 "mask bonds spy.GetParam('user.bonds.mask')">
+      <cmd2 "brad %1">
+    >
+  >
 >
+
 
 <_xphadd help="Run XP to do HADD"
   <body
