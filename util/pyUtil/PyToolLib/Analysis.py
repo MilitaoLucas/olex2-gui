@@ -2500,7 +2500,8 @@ class item_vs_resolution_plot(Analysis):
       else:
         raise
     self.popout()
-    if params.output_csv_file:
+    if OV.GetParam('user.diagnostics.save_file'):
+      res = self.im.save(OV.ModelSrc() + "_" + self.item + ".png",'PNG')
       self.output_data_as_csv()
 
   def make_plot(self):
