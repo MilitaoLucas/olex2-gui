@@ -9,7 +9,7 @@
       name="IMAGE_NAME"
       width="100%"
       height="math.eval(GetVar('HtmlInputHeight')*1.3)"
-      value="spy.GetParam('snum.image.name', FileName())"
+      value="spy.GetParam('snum.image.name', spy.ModelSrc())"
       onchange="spy.SetParam('snum.image.name',html.GetValue('~name~'))"
     >
     </font>
