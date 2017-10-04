@@ -349,7 +349,7 @@
       <arg0 name="Prob_factor" def="-100">
     >
     <cmd
-      <cmd3 "telp_a">
+      <cmd3 "telp_a %1">
       <cmd3 "telp_b">
     >
   >
