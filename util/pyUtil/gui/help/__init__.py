@@ -65,7 +65,8 @@ class GetHelp(object):
       var = help.split("</h1>")[0].strip()
       help = help.split("</h1>")[1].strip()
       OV.SetVar(var, help)
-      print "  - %s" %var
+      if debug:
+        print "  - %s" %var
 
 gh = GetHelp()
 
