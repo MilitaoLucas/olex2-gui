@@ -788,7 +788,7 @@ def sel_part(part,sel_bonds=True):
       olex.m("sel bonds where xbond.a.selected==true||xbond.b.selected==true")
 OV.registerFunction(sel_part,False,'gui.tools')
 
-def make_disorder_quicktools(scope='main'):
+def make_disorder_quicktools(scope='main', show_options=True):
   import olexex
   parts = set(olexex.OlexRefinementModel().disorder_parts())
   select = OV.GetParam('user.parts.select')
@@ -803,7 +803,11 @@ def make_disorder_quicktools(scope='main'):
     parts_display += gui.tools.TemplateProvider.get_template('part_0_and_n', force=debug)%d
 
   d={'parts_display':parts_display, 'scope':scope}
-  return gui.tools.TemplateProvider.get_template('disorder_quicktool', force=debug)%d
+  if show_options:
+    retVal = gui.tools.TemplateProvider.get_template('disorder_quicktool', force=debug)%d
+  else:
+    retVal = gui.tools.TemplateProvider.get_template('disorder_quicktool_no_options', force=debug)%d
+  return retVal
 
 OV.registerFunction(make_disorder_quicktools,False,'gui.tools')
 
