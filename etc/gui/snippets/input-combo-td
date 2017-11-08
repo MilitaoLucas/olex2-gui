@@ -1,0 +1,36 @@
+#value=
+#width=100%
+#readonly=true
+#manage=false
+#onchangealways=false
+#setdefault=false
+#disabled=false
+#bgcolor=GetVar('HtmlInputBgColour')
+#fgcolor=GetVar('HtmlFontColour')
+#td1=<td>
+#td2=</td>
+
+#td1
+  <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type="combo"
+      height="GetVar('HtmlComboHeight')"
+      bgcolor="#bgcolor"
+      fgcolor="GetVar(HtmlFontColour)"
+      valign="center"
+      name="#name"
+      width="#width"
+      value="#value"
+      setdefault="#setdefault"
+      items="#items"
+      disabled="#disabled"
+      onchange="#onchange"
+      onleave="#onleave"
+      readonly="#readonly"
+      onchangealways="#onchangealways"
+      manage="#manage"
+      onreturn="#onreturn"
+      onenter="#onenter"
+    >
+  </font>
+#td2

@@ -1,0 +1,27 @@
+#value=
+#width=100%
+#name=
+#fit=false
+#flat=false
+#disabled=false
+#bgcolor=
+#fgcolor=
+#td1=<td>
+#td2=</td>
+
+#td1
+  <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type="button"
+      name="#name"
+      value="#value"
+      width="#width"
+      onclick="#onclick"
+      bgcolor="#bgcolor"
+      fgcolor="#fgcolor"
+      fit="#fit"
+      flat="#flat"
+      disabled="#disabled"
+    >
+  </font>
+#td2
