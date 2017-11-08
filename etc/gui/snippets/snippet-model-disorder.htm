@@ -1,34 +1,31 @@
   <td width='30%'>
     &nbsp;Split &amp; restrain on click
-
-  <td align='left'>
-    $+
-    html.Snippet("gui/snippets/gui-link",
-    "value=None",
-    "onclick=mode split",
-    )$-
   </td>
 
-  <td align='center'>
     $+
-    html.Snippet("gui/snippets/gui-link",
+    html.Snippet(GetVar(default_link),
+    "value=Split",
+    "onclick=mode split",
+    "hint=mode split",
+    )$-
+
+    $+
+    html.Snippet(GetVar(default_link),
     "value=EADP",
     "onclick=mode split -r=EADP",
+    "hint=mode split -r=EADP",
     )$-
-  </td>
 
-  <td align='center'>
     $+
-    html.Snippet("gui/snippets/gui-link",
+    html.Snippet(GetVar(default_link),
     "value=ISOR",
     "onclick=mode split -r=ISOR",
+    "hint=mode split -r=ISOR",
     )$-
-  </td>
 
-  <td align='right'>
     $+
-    html.Snippet("gui/snippets/gui-link",
+    html.Snippet(GetVar(default_link),
     "value=SIMU",
     "onclick=mode split -r=SIMU",
+    "hint=mode split -r=SIMU",
     )$-
-  </td>

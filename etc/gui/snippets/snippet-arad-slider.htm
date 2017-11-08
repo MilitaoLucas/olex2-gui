@@ -1,13 +1,12 @@
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr>
-        <td align='right' width="12%">
           $+
-          html.Snippet("gui/snippets/gui-link",
+          html.Snippet(GetVar(default_link),
           "name=Set_arad",
           "value=Set",
           "onclick=spy.SetParam(user.atoms.azoom,math.eval(html.GetValue(AZOOMValue)))",
           )$-
-        </td>
+
         <td align='left' name=AZOOM_SLIDER width="73%">
           <font size='$GetVar(HtmlFontSizeControls)'>
           <input
