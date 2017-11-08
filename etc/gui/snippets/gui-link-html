@@ -8,7 +8,9 @@
 #disabled=false
 #bgcolor=$GetVar('linkButton.bgcolor')
 #fgcolor=$GetVar('linkButton.fgcolor')
+#td1=<td align="left" bgcolor="#bgcolor">
+#td2=</td>
 
-<td align="center" bgcolor="#bgcolor">
-    <a href="#onclick"><font color="#fgcolor">#value</font></a>
-</td>
+#td1
+   <a href="#onclick"><font color="#fgcolor">#value</font></a>
+#td2
