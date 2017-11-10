@@ -1,59 +1,60 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
 <!-- FIRST ROW -->
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MEAN_PLANE';help_ext=Calculate Mean Plane;1 -->
-  <td>
-    <a target="%mpln-target%" href="mpln sel">
-      %Mean Plane% (%of active selection%)
-    </a>
-  </td>
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MEAN_PLANE';help_ext=Mean Plane and Best Line;1 -->
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Mean Plane",
+    "hint=Select at least three atoms to calculate the mean plane",
+    "onclick=mpln sel",
+    )$-
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Best Line",
+    "hint=Select any number of atoms to calculate the best line",
+    "onclick=line sel",
+    )$-
+
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
 <!-- SECOND ROW -->
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='BEST_LINE';help_ext=Calculate Best Plane;1 -->
-  <td>
-    <a target="%line-target%" href="line sel">
-      %Best Line% (%of active selection%)
-    </a>
-  </td>
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='BEST_LINE';help_ext=Distances And Angles;1 -->
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Distances and Angles",
+    "hint=Select objects to calculate distances and angles",
+    "onclick=esd",
+    )$-
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Refine and Save e.s.d info",
+    "hint=Select any number of atoms to calculate the best line",
+    "onclick=delins more>>addins more -3>>refine",
+    )$-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- THIRD ROW -->
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='DISTANCES_AND_ANGLES';help_ext=Distances and Angles;1 -->
-  <td>
-    <a target="%sel-target%" href="sel">
-      %Distance and Angles% (%of selection%)
-    </a>
-  </td>
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='DISTANCES_AND_ANGLES';help_ext=Analyse Interactions;1 -->
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Analyse &pi;-&pi; Interactions",
+    "hint=Select objects to calculate distances and angles",
+    "onclick=fuse>>pipi -g",
+    )$-
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Analyse Hydrogen Bonds",
+    "hint=Select any number of atoms to calculate the best line",
+    "onclick=fuse>>htab -g",
+    )$-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- FOURTH ROW -->
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='REFINE_WITH_ESD_INFO';help_ext=Refine with e.s.d Info;1 -->
-  <td>
-    <a target="%esd-refine-target%" href="delins more>>addins more -3>>refine">
-      %Refine and save esd info%
-    </a>
-  </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
-<!-- FIFTH ROW -->
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='DISTANCES_AND_ANGLES_WITH_ESD';help_ext=Distances and Angles with e.s.d;1 -->
-  <td>
-    <a target="%esd-target%" href="esd">
-      %Distance and Angles with esd% (%of selection%)
-    </a>
-  </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
-<!-- FIFTH ROW -->
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='PI_PI_INTERACTIONS';help_ext=Pi Pi Interactions;1 -->
-  <td>
-    <a target="%esd-target%" href="PiPi -g">
-      Analyse &pi;-&pi; Interactions
-    </a>
-  </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->

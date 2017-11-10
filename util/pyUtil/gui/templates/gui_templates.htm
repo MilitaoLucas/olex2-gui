@@ -31,6 +31,15 @@ t:part_0_and_n{
 ></b>
 </font>
 </td>
+
+<!--
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=0 | %(part)s",
+    "onclick=ShowP 0 %(part)s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%(part)s)>>focus",
+    )$-
+-->
+
 }
 
 t:disorder_quicktool_no_options{
@@ -134,27 +143,21 @@ t:disorder_quicktool{
   </td>
 }
 
-t:gui_link_button{
-#value=
-#width=100%
-#height=$GetVar('HtmlComboHeight')
-#name=#value
-#fit=false
-#flat=false
-#disabled=false
-#fgcolor=#0064b4
-<font size="$GetVar('HtmlFontSizeControls')"><b>
-<input
-  type="button"
-  name="#name"
-  value="#value"
-  width="#width"
-  height="#height"
-  onclick="#onclick"
-  fgcolor="#fgcolor"
-  fit="#fit"
-  flat="#flat"
-  disabled="#disabled"
-></b>
-</font>
+t:minimal_gui_link_button{
+  <font size="$GetVar('HtmlFontSizeControls')"><b>
+    <input
+      type="button"
+      name="%(name)s"
+      value="%(value)s"
+      width="#width"
+      height="#height"
+      onclick="#onclick>>focus"
+      fgcolor="#fgcolor"
+      bgcolor="#bgcolor"
+      fit="#fit"
+      flat="#flat"
+      hint="#hint"
+      disabled="#disabled"
+    >
+  </font>
 }

@@ -401,4 +401,4 @@ print "\nDolomanov, O.V.; Bourhis, L.J.; Gildea, R.J.; Howard, J.A.K.; Puschmann
       "\nJ. Appl. Cryst., 42, 339-341.\n"
 ## These imports will register macros and functions for spy.
 from RunPrg import RunPrg
-from HARt import HARt
+#from HARt import HARt

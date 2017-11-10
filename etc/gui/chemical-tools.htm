@@ -5,7 +5,7 @@
 
   <td name='CHEMICAL_TOOLS_CHN' width='50%'>
     $+
-    html.Snippet("gui/snippets/gui-link",
+    html.Snippet(GetVar(default_link),
     "value=Elemental Analysis: CHN",
     "onclick=calcCHN",
     )$-
@@ -14,7 +14,7 @@
   <td name='CHEMICAL_TOOLS_MOLECULAR_ISOTOPE_PATTERN' width='50%'>
   <font color=white><b>
     $+
-    html.Snippet("gui/snippets/gui-link",
+    html.Snippet(GetVar(default_link),
     "value=Molecular Isotope Pattern: Mass Spec",
     "onclick=calcMS",
     )$-
@@ -26,7 +26,7 @@
 
   <td name='CHEMICAL_TOOLS_MOLECULAR_VOLUME' width='50%'>
     $+
-    html.Snippet("gui/snippets/gui-link",
+    html.Snippet(GetVar(default_link),
     "value=Molecular Volume",
     "onclick=molinfo",
     )$-
@@ -34,7 +34,7 @@
 
   <td name='CHEMICAL_TOOLS_POLYHEDRAL_VOLUME' width='50%'>
     $+
-    html.Snippet("gui/snippets/gui-link",
+    html.Snippet(GetVar(default_link),
     "value=Polyhedral Volume",
     "onclick=calcVol sel",
     )$-
@@ -45,14 +45,14 @@
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=BOUNDING_BOX; help_ext=Molecular_Bounding_Box;1; -->
   <td name='CHEMICAL_TOOLS_MOLECULAR_BOUNDING_BOX' width='50%'>
     $+
-    html.Snippet("gui/snippets/gui-link",
+    html.Snippet(GetVar(default_link),
     "value=Molecular Bounding Box",
     "onclick=wbox>>sfil",
     )$-
   </td>
 
 
-$+ html.Snippet("gui/snippets/gui-link","value=name \$Q C","onclick=name \$Q C",)
+$+ html.Snippet(GetVar(default_link),"value=name \$Q C","onclick=name \$Q C",)
 $-
 
 
