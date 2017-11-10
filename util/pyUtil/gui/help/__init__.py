@@ -1,10 +1,13 @@
 import os
 import fnmatch
 import re
-
+import glob
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 debug = bool(OV.GetParam("olex2.debug", False))
+
+
+import cPickle as pickle
 
 import olex
 import olx
@@ -12,6 +15,15 @@ import gui
 
 p_path = os.path.dirname(os.path.abspath(__file__))
 OV.SetVar('help_path', p_path)
+
+try:
+  import markdown2
+  print "markdown2 imported!"
+except Exception, err:
+  print err
+  with open(os.sep.join([p_path, 'markdown2.pyo']), 'r') as f:
+    markdown2 = imp.load_compiled('markdown2', os.sep.join([p_path, 'markdown2.pyo']))
+  print "markdown2 imported through imp."
 
 class GetHelp(object):
   def __init__(self):
@@ -35,7 +47,6 @@ class GetHelp(object):
   def format_html(self, txt):
     while "\n" in txt:
       txt = txt.replace("\n", "")
-    #regex_source = os.sep.join([self.source_dir, "regex_format_help.txt"])
     regex_source = os.sep.join([self.p_path, "regex_format_help.txt"])
     if os.path.exists(regex_source):
       txt = gui.tools.run_regular_expressions(txt, regex_source)
@@ -67,6 +78,153 @@ class GetHelp(object):
       OV.SetVar(var, help)
       if debug:
         print "  - %s" %var
+        
+  def format_html(self, txt):
+    while "\n" in txt:
+      txt = txt.replace("\n", "")
+    #regex_source = os.sep.join([self.source_dir, "regex_format_help.txt"])
+    regex_source = os.sep.join([self.p_path, "regex_format_help.txt"])
+    if os.path.exists(regex_source):
+      txt = gui.tools.run_regular_expressions(txt, regex_source)
+    gui_link = os.sep.join([p_path, 'gui-link'])
+    txt = txt.replace("GetVar(gui_link)",gui_link)
+    return txt
+
+  def git_help(self, quick=True, specific=False):
+    if specific:
+      self.source_dir = specific
+      all_help = ""
+    else:
+      builtin_help_location = os.sep.join([OV.BaseDir(), 'util', 'pyUtil', 'gui', 'help'])
+      all_help = os.sep.join([builtin_help_location, 'gui', 'HELP_EN.htm'])
+      if not hasattr(self, 'source_dir'):
+        self.source_dir = specific
+  
+      try:
+        copy_files = ("githelp_templates.html", "tutorials_templates.html")
+        for cp_file in copy_files:
+          copy_from = os.sep.join([self.p_path, cp_file])
+          copy_to = os.sep.join([builtin_help_location, cp_file])
+          copyfile(copy_from, copy_to)
+      except:
+        print "Can not copy files; most probably Olex2 was not started in Admin Mode"
+  
+      if "false" in repr(quick).lower():
+        quick = False
+      if quick:
+        try:
+          if os.path.exists(self.help_pickle_file):
+            self.help = pickle.load(open(self.help_pickle_file,'r'))
+            for item in self.help:
+              OV.SetVar(item, self.help[item])
+          return
+        except:
+          "Something went wrong with pickling the help file"
+
+
+      if os.path.exists(all_help):
+        print "Deleting builtin help at %s" %all_help
+        try:
+          os.remove(all_help)
+        except Exception, err:
+          print "Can not remove all_help: %s" %err
+
+    matches = []
+
+    for root, dirnames, filenames in os.walk(self.source_dir):
+      for filename in fnmatch.filter(filenames, '*.md'):
+        matches.append((root.replace(self.source_dir, 'help').replace("\\", "_") + "_" + filename.replace('.md', ""),os.path.join(root, filename)))
+
+    if not matches:
+      return
+
+    if debug:
+      print "Building help icon text"
+      print "======================="
+
+    for var,md_path in matches:
+      if debug:
+        print md_path
+      fc = (open(md_path,'r').read())
+      fc = fc.replace("####", "@@@@")
+      fc = fc.replace("###", "@@@")
+      fc = fc.replace("##", "@@")
+
+      l = fc.split("#")
+
+      help_type = ""
+      target_marker = "-target\n"
+      help_marker = "-help\n"
+      info_marker = "-info\n"
+      for item in l:
+        if not item:
+          continue
+        item = item.strip()
+        try:
+          var = item.split("\n")[0].lstrip("#").strip().replace(" ", "_").upper()
+          val = "\n".join(item.split("\n")[1:])
+        except:
+          var = md_path
+          val = item
+        if target_marker in item:
+          help_type = 'target'
+          help = item.split(target_marker)[1].strip()
+
+        else:
+          help_type = 'help'
+          val = val.replace("@@@@", "####").replace("@@@", "###").replace("@@", "##").replace("|", "||")
+          html = markdown2.markdown(val, extras=["wiki-tables"])
+          if "img" in html:
+            #src = os.sep.join(md_path.split("\\")[:-1])
+            #img_src = os.sep.join([builtin_help_location, 'images'])
+            img_src = os.sep.join(['BaseDir()', 'util', 'pyUtil', 'gui', 'help'])
+
+            #html = html.replace(r'<img src="', r'<zimg width="%s" src="%s%s'%(self.box_width, src , os.sep))
+
+            regex = re.compile(r'<img src\="(?P<URL>.*?)" alt\="(?P<ALT>.*?)" />', re.S)
+            m = regex.findall(html)
+            for url, alt in m:
+              width = alt.split(" ")[0]
+              try:
+                _ = float(width)
+                if float(width) < 1:
+                  width = self.box_width * float(width)
+                html = html.replace(r'<img src="', r'<br><br><zimg width="%s" src="%s%s' %(width, img_src, os.sep), 1)
+              except:
+                html = html.replace(r'<img src="', r'<zimg src="%s%s' %(img_src, os.sep), 1)
+          html = html.replace("\$", "$").replace("$", "\$").replace("\$spy", "$spy")
+          help = self.format_html(html)
+
+        help = help.strip().replace("<p>","").replace("</p>","")
+        help = help.replace("<zimg", "<zimg")
+        help = help.replace("<table><tbody><tr><td>", "<table width='100%%'><tbody><tr><td width='25%%'>")
+
+        if all_help:
+          try:
+            wFile = open(all_help, 'ab')
+            var_dis = "\n\n<h1>" + var + "</h1>\n"
+            wFile.write(var_dis)
+            wFile.write(help)
+            wFile.close()
+          except Exception, err:
+            print "-->> " + var + "--" + repr(err)
+            try:
+              wFile.write(repr(help))
+              wFile.close()
+            except:
+              pass
+
+        if debug and help_type == 'help':
+          edit_help = gui.tools.TemplateProvider.get_template('edit_help')%md_path
+          compile_help = gui.tools.TemplateProvider.get_template('compile_help')%md_path
+          help = edit_help + compile_help + help
+        OV.SetVar(var, help)
+#        self.help[var] = help
+        if debug:
+          print "  - %s" %var
+    #pickle.dump(self.help, open(self.help_pickle_file, 'wb'))
+          
+        
 
 gh = GetHelp()
 
@@ -198,6 +356,8 @@ def make_help_box(args):
       ws = olx.GetWindowSize('gl')
       ws = ws.split(',')
       boxWidth = int(int(ws[2])*OV.GetParam('gui.help.width_fraction',0.3))
+      if boxWidth < 500:
+        boxWidth = 500
       boxHeight = int(ws[3]) - 30
       x = int(ws[2]) - boxWidth -2
       y = int(ws[1]) + 50
@@ -289,6 +449,26 @@ class AutoDemoTemp(AutoDemo):
     self.source_dir = os.sep.join([self.source_base, 'tutorials', 'EN'])
     self.p_path = gh.p_path
     gui.tools.TemplateProvider.get_all_templates(path=self.p_path, mask="*.html")
+    self.make_tutorial_gui_html()
+
+  def make_tutorial_gui_html(self):
+    mask = "*.txt"
+    g = glob.glob("%s%s%s" %(self.source_dir,os.sep,mask))
+    t = ""
+    for item in g:
+      print item
+      item_name = os.path.basename(item).split(".txt")[0]
+
+      href = "spy.demo.run_autodemo(item_name)"
+      value = item_name
+      t += '''
+      $+
+      html.Snippet(GetVar(default_link),
+      "value=%s",
+      "onclick=%s",
+      )$-''' %(value, href)
+    olx.SetVar('tutorial_html', t)
+
 
 
   def make_tutbox_popup(self):

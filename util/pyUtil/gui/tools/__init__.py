@@ -912,12 +912,13 @@ class Templates():
     self.templates = {}
     self.get_all_templates()
 
-  def get_template(self, name, force=False, path=None, mask="*.*", marker='{-}'):
+  def get_template(self, name, force=debug, path=None, mask="*.*", marker='{-}'):
     '''
     Returns a particular template from the Template.templates dictionary. If it doesn't exist, then it will try and get it, and return a 'not found' string if this does not succeed.
     -- if force==True, then the template will be reloaded
     -- if path is provided, then this location will also be searched.
     '''
+
     retVal = self.templates.get(name, None)
     if not retVal or force:
       self.get_all_templates(path=path, mask=mask, marker=marker)
@@ -933,13 +934,19 @@ class Templates():
     '''
     if not path:
       path = os.sep.join([OV.BaseDir(), 'util', 'pyUtil', 'gui', 'templates'])
-
-    g = glob.glob("%s%s%s" %(path,os.sep,mask))
+    if path[-4:-3] != ".": #i.e. a specific template file has been provided
+      g = glob.glob("%s%s%s" %(path,os.sep,mask))
+    else:
+      g = [path]
+    _ = os.sep.join([OV.DataDir(), 'custom_templates.html'])
+    if os.path.exists(_): g.append(_)
     for f_path in g:
       fc = open(f_path, 'r').read()
       if not self._extract_templates_from_text(fc,marker=marker):
         name = os.path.basename(os.path.normpath(f_path))
         self.templates[name] = fc
+    #for name in self.templates:
+      #OlexVFS.write_to_olex(name, self.templates[name])
 
   def _extract_templates_from_text(self, t, marker):
     mark = marker.split('-')

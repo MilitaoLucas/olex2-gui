@@ -65,3 +65,29 @@ t:edit_help{
 t:compile_help{
 <a href="spy.githelp.git_help(False '%s')">Recompile</a><p>
 }
+
+t:gui_link{
+#value=
+#width=100%
+#height=$GetVar('HtmlComboHeight')
+#name=#value
+#fit=false
+#flat=false
+#disabled=false
+#fgcolor=#ffffbb
+#bgcolor=#222222
+<font size="$GetVar('HtmlFontSizeControls')"><b>
+<input
+  type="button"
+  name="#name"
+  value="#value"
+  width="#width"
+  height="#height"
+  onclick="#onclick"
+  fgcolor="#fgcolor"
+  bgcolor="#bgcolor"
+  fit="#fit"
+  flat="true"
+  disabled="#disabled"
+></b>
+</font>}

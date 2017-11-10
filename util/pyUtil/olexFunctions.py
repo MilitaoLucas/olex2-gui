@@ -707,6 +707,13 @@ class OlexFunctions(inheritFunctions):
       path = olx.FileName()
     return path
 
+  def HasCif(self):
+    if olx.cif_model is not None:
+      data_name = self.ModelSrc().replace(' ', '')
+      if data_name in olx.cif_model:
+        return True
+    return False
+
   def ModelSrc(self):
     try: #remove later!!HP
       model_src = olx.xf.rm.ModelSrc()
@@ -1024,5 +1031,6 @@ OV.registerFunction(OV.CopyVFSFile)
 OV.registerFunction(OV.SetHtmlFontSize,False,'gui')
 OV.registerFunction(OV.SetHtmlFontSizeControls,False,'gui')
 OV.registerFunction(OV.ModelSrc)
+OV.registerFunction(OV.HasCif)
 OV.registerFunction(OV.GetCifMergeFilesList)
 OV.registerFunction(OV.runCommands)

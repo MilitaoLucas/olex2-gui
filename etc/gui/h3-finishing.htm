@@ -7,7 +7,7 @@
 
 <td width='60%'>
     $+
-    html.Snippet("gui/snippets/gui-link",
+    html.Snippet(GetVar(default_link),
     "value=Sort with current settings",
     "onclick=spy.gui.do_sort()",
     )$-
@@ -15,7 +15,7 @@
 
 <td width='20%' align='right'>
     $+
-    html.Snippet("gui/snippets/gui-link",
+    html.Snippet(GetVar(default_link),
     "value=Sort Settings",
     "onclick=spy.gui.SwitchTool(h2-work-sorting)>>spy.gui.tools.flash_gui_control(h2-sorting)",
     )$-
@@ -30,7 +30,7 @@
 
 <td width='15%'>
     $+
-    html.Snippet("gui/snippets/gui-link",
+    html.Snippet(GetVar(default_link),
     "value=Selected",
     "onclick=label -type=spy.GetParam('user.image.label_symm_type') -symm=spy.GetParam('user.image.label_symm')",
     )$-
@@ -38,7 +38,7 @@
 
 <td width='15%'>
     $+
-    html.Snippet("gui/snippets/gui-link",
+    html.Snippet(GetVar(default_link),
     "value=non-H",
     "onclick=label \$*-H,Q -type=spy.GetParam('user.image.label_symm_type') -symm=spy.GetParam('user.image.label_symm')",
     )$-
@@ -46,7 +46,7 @@
 
 <td width='15%'>
     $+
-    html.Snippet("gui/snippets/gui-link",
+    html.Snippet(GetVar(default_link),
     "value=No Labels",
     "onclick=kill labels",
     )$-
@@ -54,7 +54,7 @@
 
 <td width='15%'>
     $+
-    html.Snippet("gui/snippets/gui-link",
+    html.Snippet(GetVar(default_link),
     "value=Go!",
     "onclick=spy.gui.images.MakeBitmapImage()"",
     )$-
@@ -62,7 +62,7 @@
 
 <td width='20%'>
     $+
-    html.Snippet("gui/snippets/gui-link",
+    html.Snippet(GetVar(default_link),
     "value=Img Settings",
     "onclick=spy.gui.SwitchTool(h2-tools-images)>>spy.gui.tools.flash_gui_control(h2-images)",
     )$-
