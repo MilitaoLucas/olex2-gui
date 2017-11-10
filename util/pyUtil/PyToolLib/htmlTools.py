@@ -304,7 +304,8 @@ def make_edit_link(name, box_type):
 def make_gui_edit_link(name):
   editLink = ""
   name = name.replace("\\", "/")
-  if OV.IsPluginInstalled('Olex2Portal') and OV.GetParam('olex2.is_logged_on'):
+  #if OV.IsPluginInstalled('Olex2Portal') and OV.GetParam('olex2.is_logged_on'):
+  if debug:
     if "index" in name:
       editLink ='''
       <hr>
@@ -321,6 +322,36 @@ def make_gui_edit_link(name):
 
   return editLink
 OV.registerFunction(make_gui_edit_link)
+
+def EditGuiItem(OXD,language="English"):
+  path = "etc"
+  if 'index' in OXD:
+    path = r"etc/gui/blocks"
+    tool_name = OXD
+    gui_file = r"%s/%s/%s.htm" % (olx.BaseDir(),path, OXD)
+  else:
+    if os.path.exists(OXD):
+      gui_file = OXD
+    else:
+      tool_name = OXD.split("/")[1].split(".")[0]
+      gui_file = r"%s/%s/%s" % (olx.BaseDir(),path, OXD)
+    
+  if not os.path.exists(gui_file):
+    return
+
+  rFile = open(gui_file,'r')
+  text = rFile.read()
+  if not text:
+    return
+
+  inputText = OV.GetUserInput(0,'Modify text for help entry %s in %s' %(OXD, language), text)
+  if inputText and inputText != text:
+    wFile = open(gui_file,'w')
+    wFile.write(inputText)
+    olx.html.Update
+  else:
+    inputText = text
+OV.registerFunction(EditGuiItem)
 
 
 def make_help_box(args):

@@ -111,11 +111,13 @@ gui
       .type = colour
     link_type = 'gui-link-button'
       .type = str
+    default_link = 'gui/snippets/gui-link-button'
+      .type = str
     link_button{
       flat = False
         .type = bool
-      bgcolor = #dedede
-        .type = colour
+      bgcolor = #transparent
+        .type = str
       fgcolor = #0064b4
         .type = colour
     }

@@ -62,13 +62,14 @@ class PluginTools(object):
       return
     from gui.tools import make_single_gui_image
     from gui.tools import add_tool_to_index
-
+    import gui.help
     for image, img_type in self.p_img:
       make_single_gui_image(image, img_type=img_type)
     olx.FlushFS()
 
     if self.p_htm:
       add_tool_to_index(scope=self.p_name, link=self.p_htm, path=self.p_path, location=self.params.gui.location, before=self.params.gui.before, filetype='')
+    gui.help.gh.git_help(quick=False, specific=self.p_path)
 
   def edit_customisation_folder(self,custom_name=None):
     self.get_customisation_path(custom_name=None)

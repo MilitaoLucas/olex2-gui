@@ -104,19 +104,19 @@ t:plugin_h3_extras{
 
 
     $+
-    html.Snippet("gui/snippets/"GetVar(link_type),
+    html.Snippet(GetVar(default_link),
     "value=Reload Plugin",
     "onclick=py.run %(plugin_base)s/plugin-%(name)s/%(name)s.py",
     )$-
 
     $+
-    html.Snippet("gui/snippets/"GetVar(link_type),
+    html.Snippet(GetVar(default_link),
     "value=Settings",
     "onclick=spy.EditParams(%(name_lower)s)",
     )$-
 
     $+
-    html.Snippet("gui/snippets/"GetVar(link_type),
+    html.Snippet(GetVar(default_link),
     "value=Open Folder",
     "onclick=shell %(plugin_base)s/plugin-%(name)s",
     )$-

@@ -1236,7 +1236,7 @@ If more than one file is present, the path of the most recent file is returned b
     if not returnvalue:
       returnvalue = info[0][1]
     if returnvalue:
-      returnvalur = OV.standardizePath(returnvalue)
+      returnvalue = OV.standardizePath(returnvalue)
     return returnvalue, pp
 
   def get_def(self):

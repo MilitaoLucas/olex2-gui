@@ -732,8 +732,8 @@ def weightGuiDisplay():
   txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update")
   txt_Weight = OV.TranslatePhrase("Weight")
   html = '''
-    <b>%s: <a target="%s" href="UpdateWght%s>>html.Update">%s</a></b>
-    ''' %(txt_Weight, "Update Weighting Scheme", wght_str, html_scheme)
+    <b><a target="%s" href="UpdateWght%s>>html.Update">%s</a></b>
+    ''' %("Update Weighting Scheme", wght_str, html_scheme)
   return html
 OV.registerFunction(weightGuiDisplay)
 
