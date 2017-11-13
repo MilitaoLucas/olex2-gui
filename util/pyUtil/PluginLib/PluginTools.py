@@ -68,7 +68,8 @@ class PluginTools(object):
     olx.FlushFS()
 
     if self.p_htm:
-      add_tool_to_index(scope=self.p_name, link=self.p_htm, path=self.p_path, location=self.params.gui.location, before=self.params.gui.before, filetype='')
+      image = self.p_img[0][0]
+      add_tool_to_index(scope=self.p_name, link=self.p_htm, path=self.p_path, location=self.params.gui.location, before=self.params.gui.before, filetype='', image=image)
     gui.help.gh.git_help(quick=False, specific=self.p_path)
 
   def edit_customisation_folder(self,custom_name=None):
