@@ -1243,7 +1243,7 @@ def InstalledPlugins():
   l = olex_core.GetPluginList()
   if l is None:
     l = []
-  return l
+  return list(l)
 
 def AvailablePlugins():
   plugins = {'ODSkin':

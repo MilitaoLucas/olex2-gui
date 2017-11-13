@@ -8,7 +8,7 @@
 #fgcolor=GetVar(HtmlFontColour)
 #disabled=false
 #oncheck="html.SetData(~name~,'True')"
-# onuncheck="html.SetData(~name~,' ')"
+#onuncheck="html.SetData(~name~,' ')"
 
 <font size="$GetVar('HtmlFontSizeControls')">
 <input
