@@ -215,7 +215,7 @@ def __inject_into_tool(tool, t, where,befaf='before'):
   OlexVFS.write_to_olex('%s%s' %(OV.BaseDir(), tool), u, txt)
 
 
-def add_tool_to_index(scope="", link="", path="", location="", before="", filetype="", level="h2", state="2"):
+def add_tool_to_index(scope="", link="", path="", location="", before="", filetype="", level="h2", state="2", image=""):
   import OlexVFS
   if not OV.HasGUI:
     return
@@ -253,10 +253,10 @@ def add_tool_to_index(scope="", link="", path="", location="", before="", filety
 
   if not filetype:
     t = r'''
-<!-- #include %s-%s-%s-%s "'%s/%s.htm'";gui\blocks\tool-off.htm;image=%s;onclick=;2; -->''' %(level, location, scope, link, path, link, link)
+<!-- #include %s-%s-%s-%s "'%s/%s.htm'";gui\blocks\tool-off.htm;image=%s;onclick=;%s; -->''' %(level, location, scope, link, path, link, image, state)
   else:
     t = r'''
-<!-- #includeif IsFileType('%s') %s-%s-%s-%s %s/%s.htm;gui\blocks\tool-off.htm;image=%s;onclick=;2; -->''' %(filetype, level, location, scope, link, path, link, link)
+<!-- #includeif IsFileType('%s') %s-%s-%s-%s %s/%s.htm;gui\blocks\tool-off.htm;image=%s;onclick=;%s; -->''' %(filetype, level, location, scope, link, path, link, image,state)
 
 
   index_text = ""

@@ -3,53 +3,43 @@
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=CHEMICAL_TOOLS_MASS; help_ext=Molecular_Mass;1; -->
 
-  <td name='CHEMICAL_TOOLS_CHN' width='50%'>
     $+
     html.Snippet(GetVar(default_link),
     "value=Elemental Analysis: CHN",
     "onclick=calcCHN",
     )$-
-  </td>
 
-  <td name='CHEMICAL_TOOLS_MOLECULAR_ISOTOPE_PATTERN' width='50%'>
   <font color=white><b>
     $+
     html.Snippet(GetVar(default_link),
     "value=Molecular Isotope Pattern: Mass Spec",
     "onclick=calcMS",
     )$-
-  </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=CHEMICAL_TOOLS_VOLUME; help_ext=Molecular_Volume;1; -->
 
-  <td name='CHEMICAL_TOOLS_MOLECULAR_VOLUME' width='50%'>
     $+
     html.Snippet(GetVar(default_link),
     "value=Molecular Volume",
     "onclick=molinfo",
     )$-
-  </td>
 
-  <td name='CHEMICAL_TOOLS_POLYHEDRAL_VOLUME' width='50%'>
     $+
     html.Snippet(GetVar(default_link),
     "value=Polyhedral Volume",
     "onclick=calcVol sel",
     )$-
-  </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=BOUNDING_BOX; help_ext=Molecular_Bounding_Box;1; -->
-  <td name='CHEMICAL_TOOLS_MOLECULAR_BOUNDING_BOX' width='50%'>
     $+
     html.Snippet(GetVar(default_link),
     "value=Molecular Bounding Box",
     "onclick=wbox>>sfil",
     )$-
-  </td>
 
 
 $+ html.Snippet(GetVar(default_link),"value=name \$Q C","onclick=name \$Q C",)
