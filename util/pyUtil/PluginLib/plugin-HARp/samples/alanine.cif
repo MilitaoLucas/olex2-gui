@@ -1,5 +1,5 @@
 data_alanine
-_audit_creation_date               2017-11-13
+_audit_creation_date               2017-11-10
 _audit_creation_method
 ;
 Olex2 1.2-dev
@@ -17,9 +17,6 @@ Dolomanov, O.V., Bourhis, L.J., Gildea, R.J, Howard, J.A.K. & Puschmann, H.
  (2009), J. Appl. Cryst. 42, 339-341.
 Dolomanov, O.V., Bourhis, L.J., Gildea, R.J, Howard, J.A.K. & Puschmann, H.
  (2009), J. Appl. Cryst. 42, 339-341.
-Dolomanov, O.V., Bourhis, L.J., Gildea, R.J, Howard, J.A.K. & Puschmann, H.
- (2009), J. Appl. Cryst. 42, 339-341.
-Sheldrick, G.M. (2015). Acta Cryst. C71, 3-8.
 Sheldrick, G.M. (2015). Acta Cryst. C71, 3-8.
 Sheldrick, G.M. (2015). Acta Cryst. C71, 3-8.
 ;
@@ -296,7 +293,7 @@ _shelx_res_file
 ;
 TITL alanine
     alanine.res
-    created by SHELXL-2017/1 at 14:10:03 on 13-Nov-2017
+    created by SHELXL-2017/1 at 10:49:03 on 10-Nov-2017
 CELL 1.54178 5.791 5.944 12.269 90 90 90
 ZERR 4 0.002 0.002 0.002 0 0 0
 LATT -1
@@ -366,7 +363,7 @@ Q18   1   0.7888  0.9287  0.5246  11.00000  0.05    0.08
 Q19   1   0.6943  1.4400  0.3615  11.00000  0.05    0.07
 Q20   1   0.1191  0.9160  0.2603  11.00000  0.05    0.07
 ;
-_shelx_res_checksum                73309
+_shelx_res_checksum                80139
 _shelx_hkl_file
 ;
   -6  -3  -4  140.66    4.32
