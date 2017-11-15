@@ -673,6 +673,18 @@ routines requiring structure refinement
       .type = float
     heat_colours = 2 3 5 *7
       .type = choice
+    contours = 8
+      .type = int
+    step = 0
+      .type = float
+    fix = 0
+      .type = float
+    slider_scale = 10
+      .type = int
+    depth = 0
+      .type = float
+    size = 10
+      .type = int
   }
 
   map {

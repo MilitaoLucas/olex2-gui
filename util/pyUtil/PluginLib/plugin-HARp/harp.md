@@ -15,7 +15,6 @@
 ## Videos
 From time to time we will make small videos, which will introduce HAR and explain the features. A slightly older overview video is available on our YouTube channel: URL[https://youtu.be/bjdSJWZa1gM,YOUTUBE]
 
-
 # Basis Sets and Method
 
 ## Basis
