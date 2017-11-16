@@ -49,7 +49,7 @@
           bgcolor="$GetVar(HtmlTableBgColour)"
           fgcolor="$GetVar(HtmlFontColour)"
           value="spy.GetParam(#param)"
-          onchange="html.SetValue($strcat(#name,_SLIDE),$math.eval(#scale*html.GetValue($strcat(#name,_VALUE))))>>#cmd(html.GetValue(~name~), html.GetValue($strcat(#name,_VALUE)))>>spy.SetParam(#param,html.GetValue($strcat(#name,_VALUE))"
+          onchange="html.SetValue($strcat(#name,_SLIDE),$math.eval(#scale*html.GetValue($strcat(#name,_VALUE))))>>#cmd>>spy.SetParam(#param,html.GetValue($strcat(#name,_VALUE)))"
         >
     </tr>
   </table>

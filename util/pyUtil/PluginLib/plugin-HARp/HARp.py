@@ -71,7 +71,7 @@ class HARp(PT):
     }
     self.options = options
 
-    self.jobs_dir = os.path.join(olx.DataDir(), "jobs")
+    self.jobs_dir = os.path.join(olx.DataDir(), "HAR_jobs")
     if not os.path.exists(self.jobs_dir):
       os.mkdir(self.jobs_dir)
 
@@ -146,6 +146,10 @@ class HARp(PT):
     is_anything_running = False
     for i in range(len(self.jobs)):
       OUT_file = self.jobs[i].out_fn
+      if os.path.exists(os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.cif")):
+        self.jobs[i].is_copied_back = True
+      else:
+        self.jobs[i].is_copied_back = False
 
       try:
         if not os.path.exists(OUT_file):
@@ -172,7 +176,7 @@ class HARp(PT):
           error = "<a target='Open .err file' href='exec -o getvar(defeditor) %s'>ERR</a>" %self.jobs[i].error_fn
           status = "<a target='Open .out file' href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_error)
       if self.jobs[i].is_copied_back:
-        input_structure = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_IAM.cif")
+        input_structure = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_input.cif")
       else:
         input_structure = os.path.join(self.jobs[i].full_dir, self.jobs[i].name + ".cif")
       arrow = "<a target='Open input .cif file' href='reap %s'>%s</a>" %(input_structure, load_input)
@@ -188,6 +192,7 @@ class HARp(PT):
         elif 'Structure refinement converged.' in open(self.jobs[i].out_fn).read():
           status = "<a target='Open .out file' href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_completed)
           if not self.jobs[i].is_copied_back:
+            shutil.copy(os.path.join(self.jobs[i].full_dir, self.jobs[i].name + ".cif"), os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_input.cif"))
             shutil.copy(os.path.join(self.jobs[i].full_dir, self.jobs[i].name + ".archive.cif"), os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.cif"))
             self.jobs[i].result_fn = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.cif")
             shutil.copy(os.path.join(self.jobs[i].full_dir, self.jobs[i].name + ".archive.fcf"), os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.fcf"))
@@ -516,10 +521,7 @@ class Job(object):
   def launch(self):
     import shutil
     #check whether ACTA was set, so the cif contains all necessary information to be copied back and forth
-    #if not olx.Ins('ACTA'):
-    #  olex.m('acta')
-    #  olex.m('refine')
-    
+        
     # Check if job folder already exists and (if needed) make the backup folders    
     if os.path.exists(self.full_dir):
       self.backup = os.path.join(self.full_dir, "backup")
@@ -553,27 +555,23 @@ class Job(object):
       
     time.sleep(0.1)
     self.origin_folder = OV.FilePath()
-	
-    # Get the original .cif file from the original directory and prepare it for HAR (autorefine, grow etc.)    
-    f_origin = os.path.join(self.origin_folder, self.name + ".cif")
-    f_work = os.path.join(self.full_dir, self.name + "_IAM.cif")
-    shutil.copy(f_origin,f_work)
-    load_input_cif="reap " + os.path.join(self.full_dir, self.name + "_IAM.cif")
-    olex.m(load_input_cif)
+    
+    if not olx.Ins('ACTA'):
+      olex.m('addins ACTA')
+      olex.m('refine')    
+    if olx.xf.latt.IsGrown() == 'true':
+      if olx.Alert("Please confirm",\
+"""This is a grown structure. If you have created a cluster of molecules, make sure 
+that the structure you see on the screen obeys the crystallographic symmetry. 
+If this is not the case, the HAR will not work properly. Continue?""", "YN", False) == 'N':
+        return      
+    elif olx.xf.au.GetZprime() != '1':
+      olx.Grow()
+      olex.m("grow -w")       
     autorefine = olx.GetVar("settings.tonto.HAR.autorefine", None)
     if autorefine == 'true':
       olex.m("refine")
-    if olx.xf.latt.IsGrown() == 'true':
-      if olx.Alert("Please confirm",\
-    """This is a grown structure. If you have created a cluster of molecules, make sure
-    that the structure you see on the screen obeys the crystallographic symmetry.
-    If this is not the case, the HAR will not work properly. Continue?""", "YN", False) == 'N':
-        return
-    elif olx.xf.au.GetZprime() != '1':
-      olx.Grow()
-      olex.m("grow -w")
-    
-
+      
     model_file_name = os.path.join(self.full_dir, self.name) + ".cif"
     olx.Kill("$Q")
     olx.File(model_file_name)

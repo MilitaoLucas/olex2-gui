@@ -1,6 +1,6 @@
 
 
-  <td width="10%">Contours</td>
+  <td width="14%">Contours</td>
 
   $+
     html.Snippet("gui/snippets/input-slider",
@@ -17,20 +17,42 @@
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MAP_2D_FIX';help_ext=map-2D-fix;1 -->
 
-  <td width="10%" align='left'>Scale</td>
+  <td width="14%" align='left'>Map Scale</td>
+
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=Scaled to Visible",
+    "onclick=xgrid.fix 1 0>>html.SetValue(SNUM_XGRID_STEP_VALUE,0)>>html.SetValue(SNUM_XGRID_STEP_SLIDE,0)",
+    "td1=<td width='43%'>",
+    )
+  $-
+
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=Scaled to Full Map",
+    "onclick=spy.gui.maps.get_best_contour_maps()",
+    "td1=<td width='43%'>",
+    )
+  $-
+
+
+<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MAP_2D_FIX';help_ext=map-2D-fix;1 -->
+  <td width="7%" align='left'>Scale</td>
+
 
   $+
     html.Snippet("gui/snippets/input-text-td",
     "param=snum.xgrid.slider_Scale",
     "name=SNUM_XGRID_SLIDER_SCALE",
     "value=spy.GetParam(snum.xgrid.slider_scale)",
-    "onchange=spy.SetParam(snum.xgrid.slider_scale,html.GetValue(~name~))>>SetVar(xgrid_slider_scale,html.GetValue(~name~))",
-    "td1=<td width='6%'>",
-    "swidth=80"
+    "onchange=spy.SetParam(snum.xgrid.slider_scale,html.GetValue(~name~))>>SetVar(xgrid_slider_scale,html.GetValue(~name~))>>html.Update()",
+    "td1=<td width='7%'>",
     )
   $-
 
-  <td width="6%"><a href="xgrid.fix 1 0>>html.SetValue(SNUM_XGRID_STEP_VALUE,0)>>html.SetValue(SNUM_XGRID_STEP_SLIDE,0)">Step</a></td>
 
   $+
     html.Snippet("gui/snippets/input-slider",
@@ -40,7 +62,7 @@
     "max=10",
     "scale=\$spy.GetParam(snum.xgrid.slider_scale)",
     "cmd=xgrid.fix(html.GetValue(SNUM_XGRID_FIX_VALUE),html.GetValue(SNUM_XGRID_STEP_VALUE))",
-    "td1=<td width='28%'>",
+    "td1=<td width='43%'>",
     "swidth=70"
     )
   $-
@@ -55,7 +77,7 @@
     "max=10",
     "scale=\$spy.GetParam(snum.xgrid.slider_scale)",
     "cmd=xgrid.fix(html.GetValue(SNUM_XGRID_FIX_VALUE),html.GetValue(SNUM_XGRID_STEP_VALUE))",
-    "td1=<td width='28%'>",
+    "td1=<td width='43%'>",
     "swidth=70"
     )
   $-

@@ -683,7 +683,7 @@ routines requiring structure refinement
       .type = int
     depth = 0
       .type = float
-    size = 10
+    size = 15
       .type = int
   }
 
