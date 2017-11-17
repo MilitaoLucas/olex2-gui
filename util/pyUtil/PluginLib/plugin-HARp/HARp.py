@@ -127,7 +127,7 @@ class HARp(PT):
     #cross check, whether all jobs in the list are still valid files, if yes load the job
     for j in range(len(self.jobs)):
       if os.path.exists(os.path.join(self.jobs_dir, self.jobs[j].name,"job.options")):
-        self.jobs[j].load()
+        self.jobs[j].load_origin()
 
     sorted(self.jobs, key=lambda s: s.date)
     rv = get_template('table_header', path=p_path)
@@ -183,7 +183,6 @@ class HARp(PT):
 
       analysis = "--"
       if os.path.exists(os.path.join(self.jobs[i].full_dir, "stdout.fit_analysis")):
-        #TO DO: go through .out and check, whether it actually worked
         analysis = "<a target='Open analysis file' href='exec -o getvar(defeditor) %s>>spy.tonto.HAR.getAnalysisPlotData(%s)'>Open</a>" %(
           self.jobs[i].analysis_fn, self.jobs[i].analysis_fn)
         if 'WARNING: refinement stopped: chi2 has increased.' in open(self.jobs[i].out_fn).read():
@@ -517,6 +516,27 @@ class Job(object):
       except:
         return False
     return False
+  
+  def load_origin(self):
+    options_fn = os.path.join(self.full_dir, "job.options")
+    if os.path.exists(options_fn):
+      self.date = os.path.getctime(self.full_dir)
+      try:
+        with open(options_fn, "r") as f:
+          for l in f:
+            l = l.strip()
+            if not l or ':' not in l: continue
+            toks = l.split(':')
+            if "origin_folder" == toks[0]: 
+              if sys.platform[:3] == 'win':
+                self.origin_folder = toks[1] + ":" + toks[2]
+              else:
+                self.origin_folder = toks[1]
+            else: continue
+        return True
+      except:
+        return False
+    return False  
 
   def launch(self):
     import shutil
