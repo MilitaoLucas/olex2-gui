@@ -53,7 +53,8 @@ class reader(object):
               i += 1
             i -= 1 #last cycle
             self._cifItems.setdefault("Rint_after", lines[i].split()[1].strip())
-          elif "Ratio of minimum" in line:
+
+          elif "Ratio of minimum" in line or "Minimum and maximum apparent transmission" in line:
             txt = line.split(':')
             self._cifItems.setdefault("ratiominmax", "%.4f" %float(txt[1].strip()))
             self._cifItems.setdefault("_exptl_absorpt_correction_T_min", txt[1].strip())
@@ -141,6 +142,7 @@ class reader(object):
             min = txt[0].strip()
             max = txt[2].strip()
             ratio = float(min)/float(max)
+            self._twin_cifItems.setdefault(twin_component,{})
             self._twin_cifItems["%s"%twin_component].setdefault("_exptl_absorpt_correction_T_min", "%s" %min)
             self._twin_cifItems["%s"%twin_component].setdefault("_exptl_absorpt_correction_T_max", "%s" %max)
             self._twin_cifItems["%s"%twin_component].setdefault("ratiominmax", "%.4f" %ratio)
