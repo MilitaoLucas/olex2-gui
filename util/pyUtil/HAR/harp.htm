@@ -141,20 +141,21 @@
         html.Snippet(GetVar(default_link),
         "name=update_info",
         "value=Check Output",
-        "onclick=html.Update"
+        "onclick=html.Update",
+        "td1=<td width='21%'>",
         )
       $-
 
-     <td width="20%" align='right'>
-       Check out every
+     <td width="8%" align='right'>
+      every
      </td>
 
-     <td width="10%" align='center'>
+     <td width="8%" align='center'>
      $+
        html.Snippet("gui/snippets/input-text",
        "name=checking_interval",
        "value=spy.GetParam(harp.check_output_interval)",
-       "onchange=spy.SetParam(harp.check_output_interval, html.GetValue('~name~'))>>html.Update"
+       "onleave=spy.SetParam(harp.check_output_interval, html.GetValue('~name~'))>>html.Update"
        )
       $-
      </td>
