@@ -164,7 +164,14 @@ class MapUtil:
     OV.SetParam('snum.xgrid.step',difference/contours)
     OV.SetParam('snum.xgrid.fix',minimum)
     OV.SetParam('snum.xgrid.step',step)
-#    OV.SetParam('snum.xgrid.slider_scale',5)
+
+    if difference < 1:
+      OV.SetParam('snum.xgrid.slider_scale',20)
+    elif difference < 2:
+      OV.SetParam('snum.xgrid.slider_scale',10)
+    elif difference < 5:
+      OV.SetParam('snum.xgrid.slider_scale',5)
+
     olx.xgrid.Fix(minimum, step)
     olx.html.Update()
 
