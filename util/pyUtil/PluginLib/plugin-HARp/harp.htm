@@ -30,7 +30,7 @@
    <td width="20%">
        Basis
      </td>
-     <td width="30%">
+     <td width="23%">
        $+
          html.Snippet("gui/snippets/input-combo",
          "name=tonto_har_basis",
@@ -39,7 +39,7 @@
          "onchange=SetVar('settings.tonto.HAR.basis.name', html.GetValue('~name~'))")
         $-
       </td>
-     <td width="20%" align='right'>
+     <td width="25%" align='right'>
        Method
      </td>
      <td width="30%">
@@ -55,14 +55,14 @@
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='HAR_HYDROGEN';help_ext=Hydrogen_Treatment;1; -->
   <td width="20%">Refine Hydrogen</td>
-  <td width="30%">$+
+  <td width="23%">$+
     html.Snippet("gui/snippets/input-combo", "name=tonto_har_h_refinement",
-      "items='positions only;positions+Uiso;positions+Uaniso;leave_alone'",
+      "items='positions only;isotropic;anisotropic;not'",
       "value=GetVar('settings.tonto.HAR.hydrogens')",
       "onchange=SetVar('settings.tonto.HAR.hydrogens', html.GetValue('~name~'))")
    $-</td>
 
-  <td width="20%" align="right"> Use dispersion  </td>
+  <td width="14%" align="right"> Dispersion </td>
   <td width="5%">
     $+
       html.Snippet("gui/snippets/input-checkbox",
@@ -71,7 +71,16 @@
       "onclick=SetVar('settings.tonto.HAR.dispersion', html.GetState('~name~'))")
     $-
   </td>
-  <td width="20%" align="right"> Initial IAM  </td>
+  <td width="14%" align="right"> Auto-Grow </td>
+  <td width="5%">
+    $+
+      html.Snippet("gui/snippets/input-checkbox",
+      "name=tonto_har_autogrow",
+      "checked=GetVar('settings.tonto.HAR.autogrow')",
+      "onclick=SetVar('settings.tonto.HAR.autogrow', html.GetState('~name~'))")
+    $-
+  </td>
+  <td width="14%" align="right"> Initial IAM </td>
   <td width="5%">
     $+
       html.Snippet("gui/snippets/input-checkbox",
@@ -84,7 +93,7 @@
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='HAR_CLUSTER_SIGNIFICANCE';help_ext=Cluster_Radius_and_Significance;1; -->
   <td width="20%" align="left">  Cluster radius  </td>
-  <td width="30%">
+  <td width="23%">
     $+
       html.Snippet("gui/snippets/input-text",
       "name=tonto_har_cluster_radius",
@@ -93,12 +102,13 @@
     $-
   </td>
 
-  <td width="20%" align="right"> I/sig threshold </td>
-  <td width="30%">$+
+  <td width="34%" align="right"> I/sig threshold </td>
+  <td width="23%">$+
     html.Snippet("gui/snippets/input-text", "name=tonto_i_threshold",
      "value=GetVar('settings.tonto.HAR.intensity_threshold.value')",
      "onchange=SetVar('settings.tonto.HAR.intensity_threshold.value', html.GetValue('~name~'))")
   $-</td>
+  
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
@@ -127,32 +137,32 @@
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='HAR_HEADER';help_ext=Running_HAR_Jobs;1; -->
 
-      <td width="25%" >
+      <td width="20%" >
       $+
         html.Snippet("gui/snippets/input-button",
         "name=update_info",
-        "value=Check Output NOW",
+        "value=Check Output",
         "onclick=html.Update"
         )
       $-
       </td>
 
-     <td width="20%" align='left'>
+     <td width="20%" align='right'>
        Check out every
      </td>
 
-     <td width="8%" align='center'>
+     <td width="10%" align='center'>
      $+
        html.Snippet("gui/snippets/input-text", "name=checking_interval",
         "value=spy.GetParam(harp.check_output_interval)",
         "onchange=spy.SetParam(harp.check_output_interval, html.GetValue('~name~'))")
       $-
      </td>
-     <td width="10%" align='right'>
+     <td width="27%" align='left'>
        seconds
      </td>
 
-      <td width="33%" >
+      <td width="23%" >
       $+
         html.Snippet("gui/snippets/input-button",
         "name=tonto_har_run",

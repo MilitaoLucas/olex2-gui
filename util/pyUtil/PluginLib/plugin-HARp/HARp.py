@@ -61,13 +61,14 @@ class HARp(PT):
     options = {
       "settings.tonto.HAR.basis.name": ("def2-SVP", "basis"),
       "settings.tonto.HAR.method": ("rhf", "scf"),
-      "settings.tonto.HAR.hydrogens": ("positions+Uaniso",),
+      "settings.tonto.HAR.hydrogens": ("anisotropic",),
       "settings.tonto.HAR.extinction.refine": ("False", "extinction"),
       "settings.tonto.HAR.convergence.value": ("0.0001", "dtol"),
       "settings.tonto.HAR.cluster.radius": ("0", "cluster-radius"),
       "settings.tonto.HAR.intensity_threshold.value": ("3", "fos"),
       "settings.tonto.HAR.dispersion": ("false",),
       "settings.tonto.HAR.autorefine": ("true",),
+      "settings.tonto.HAR.autogrow": ("true",),
     }
     self.options = options
 
@@ -576,22 +577,34 @@ class Job(object):
     time.sleep(0.1)
     self.origin_folder = OV.FilePath()
     
-    if not olx.Ins('ACTA'):
-      olex.m('addins ACTA')
-      olex.m('refine')    
+#    if not olx.Ins('ACTA'):
+#      olex.m('addins ACTA')
+#      olex.m('refine')    
+    autogrow = olx.GetVar("settings.tonto.HAR.autogrow", None)
     if olx.xf.latt.IsGrown() == 'true':
       if olx.Alert("Please confirm",\
 """This is a grown structure. If you have created a cluster of molecules, make sure 
 that the structure you see on the screen obeys the crystallographic symmetry. 
 If this is not the case, the HAR will not work properly. Continue?""", "YN", False) == 'N':
         return      
-    elif olx.xf.au.GetZprime() != '1':
+    elif olx.xf.au.GetZprime() != '1' and autogrow == 'true':
       olx.Grow()
       olex.m("grow -w")       
+    elif olx.xf.au.GetZprime() < '1' and autogrow == 'false':
+      if olx.Alert("Attention!",\
+"""This appears to be a z' < 1 structure.
+Autogrow is disabled and the structure is not grown.
+
+This is HIGHLY unrecomendet! 
+
+Please complete the molecule in a way it forms a full chemical entity. 
+Benzene would need to contain one complete 6-membered ring to work,
+otherwise the wavefunction can not be calculated properly!
+Are you sure you want to continue with this structure?""", "YN", False) == 'N':
+        return
     autorefine = olx.GetVar("settings.tonto.HAR.autorefine", None)
     if autorefine == 'true':
       olex.m("refine")
-      
     model_file_name = os.path.join(self.full_dir, self.name) + ".cif"
     olx.Kill("$Q")
     olx.File(model_file_name)
@@ -647,15 +660,15 @@ If this is not the case, the HAR will not work properly. Continue?""", "YN", Fal
         if val == 'positions only':
           args.append("-h-adps")
           args.append("f")
-        elif val == 'positions+Uiso':
+        elif val == 'isotropic':
           args.append("-h-adps")
           args.append("f")
           args.append("-h-iso")
           args.append("t")
-        elif val == "positions+Uaniso":
+        elif val == "anisotropic":
           args.append("-h-adps")
           args.append("t")
-        elif val == "leave_alone":
+        elif val == "not":
           args.append("-h-adps")
           args.append("f")
           args.append("-h-iso")
