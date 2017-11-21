@@ -1,0 +1,49 @@
+t:recent_jobs{
+<b>Recent jobs</b> (<a href=\"spy.tonto.HAR.view_all()\">View all jobs</a>)
+}
+
+t:table_header{
+<table width='100%'>
+<tr bgcolor='$GetVar(HtmlTableBgColour)'>
+    <th width='30%' align='center'>Job name</th>
+    <th width='18%' align='center'>Time</th>
+    <th width='14%' align='center'>Status</th>
+    <th width='12%' align='center'>ERR</th>
+    <th width='12%' align='center'>Input</th>
+    <th width='14%' align='center'>Analysis</th>
+    <th width='10%' align='center'>Del</th></tr>
+}
+
+t:job_line{
+<tr bgcolor='$GetVar(HtmlTableBgColour)'>
+    <td align='center'>
+      %(link)s
+    </td>
+    <td align='center'>
+      %(ct)s
+    </td>
+    <td align='center'>
+      %(status)s
+    </td>
+    <td align='center'>
+      %(error)s
+    </td>
+    <td align='center'>
+      %(arrow)s
+    </td>
+    <td align='center'>
+      %(analysis)s
+    </td>
+    <td align='center'>
+      %(delete)s
+    </td>
+  </tr>
+}
+
+t:processing_gif{
+<table cellspacing='1' cellpadding='0' width='100%%'><tr><td align='center'><img src='%(processing_gif_src)s'></td></tr></table>
+}
+
+t:processing_started{
+<table cellspacing='1' cellpadding='0' width='100%%'><tr><td align='center'>%(job_result_name)s</td></tr></table>
+}

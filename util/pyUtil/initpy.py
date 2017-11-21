@@ -198,10 +198,10 @@ def set_olex_paths():
   sys.path.append("%s/util/pyUtil/PyToolLib" %basedir)
   sys.path.append("%s/util/pyUtil/PyToolLib/FileReaders" %basedir)
   sys.path.append("%s/util/pyUtil/CctbxLib" %basedir)
+  sys.path.append("%s/util/pyUtil/HAR" %basedir)
 
 def set_plugins_paths():
   plugins = olexex.InstalledPlugins()
-  plugins.append('HARp')
   sys.path.append("%s/util/pyUtil/PluginLib" %(basedir))
   olx.InstalledPlugins = set()
   from PluginTools import PluginTools
@@ -402,4 +402,4 @@ print "\nDolomanov, O.V.; Bourhis, L.J.; Gildea, R.J.; Howard, J.A.K.; Puschmann
       "\nJ. Appl. Cryst., 42, 339-341.\n"
 ## These imports will register macros and functions for spy.
 from RunPrg import RunPrg
-#from HARt import HARt
+from HAR import HARp
