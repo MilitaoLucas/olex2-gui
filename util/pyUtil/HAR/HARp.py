@@ -193,27 +193,38 @@ class HARp(PT):
 
       analysis = "--"
       if os.path.exists(os.path.join(self.jobs[i].full_dir, "stdout.fit_analysis")):
-        analysis = "<a target='Open analysis file' href='exec -o getvar(defeditor) %s>>spy.tonto.HAR.getAnalysisPlotData(%s)'>Open</a>" %(
-          self.jobs[i].analysis_fn, self.jobs[i].analysis_fn)
-        if 'WARNING: refinement stopped: chi2 has increased.' in open(self.jobs[i].out_fn).read():
-          error = "<a target='Open .err file' href='exec -o getvar(defeditor) %s'>Chi2</a>" %self.jobs[i].error_fn
-          status = "<a target='Open .out file' href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_error)
-        elif 'Structure refinement converged.' in open(self.jobs[i].out_fn).read():
-          status = "<a target='Open .out file' href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_completed)
-          if not self.jobs[i].is_copied_back:
-            shutil.copy(os.path.join(self.jobs[i].full_dir, self.jobs[i].name + ".cif"), os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_input.cif"))
-            shutil.copy(os.path.join(self.jobs[i].full_dir, self.jobs[i].name + ".archive.cif"), os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.cif"))
-            self.jobs[i].result_fn = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.cif")
-            shutil.copy(os.path.join(self.jobs[i].full_dir, self.jobs[i].name + ".archive.fcf"), os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.fcf"))
-            shutil.copy(os.path.join(self.jobs[i].full_dir, self.jobs[i].name + ".archive.fco"), os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.fco"))
-            shutil.copy(os.path.join(self.jobs[i].full_dir, self.jobs[i].name + ".out"), os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.out"))
-            self.jobs[i].out_fn = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + ".out")
-            shutil.copy(os.path.join(self.jobs[i].full_dir, "stdout.fit_analysis"), os.path.join(self.jobs[i].origin_folder, "stdout.fit_analysis"))
-            self.jobs[i].analysis_fn = os.path.join(self.jobs[i].origin_folder, "stdout.fit_analysis")
-            self.jobs[i].is_copied_back = True
-        else:
-          error = "<a target='Open .err file' href='exec -o getvar(defeditor) %s'>Conv</a>" %self.jobs[i].error_fn
-          status = "<a target='Open .out file' href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_stopped)
+        try:
+          analysis = "<a target='Open analysis file' href='exec -o getvar(defeditor) %s>>spy.tonto.HAR.getAnalysisPlotData(%s)'>Open</a>" %(
+            self.jobs[i].analysis_fn, self.jobs[i].analysis_fn)
+          if 'WARNING: refinement stopped: chi2 has increased.' in open(self.jobs[i].out_fn).read():
+            error = "<a target='Open .err file' href='exec -o getvar(defeditor) %s'>Chi2</a>" %self.jobs[i].error_fn
+            status = "<a target='Open .out file' href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_error)
+          elif 'Structure refinement converged.' in open(self.jobs[i].out_fn).read():
+            status = "<a target='Open .out file' href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_completed)
+            if self.jobs[i].is_copied_back == False:
+              try:
+                shutil.copy(os.path.join(self.jobs[i].full_dir, self.jobs[i].name + ".cif"), os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_input.cif"))
+                shutil.copy(os.path.join(self.jobs[i].full_dir, self.jobs[i].name + ".archive.cif"), os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.cif"))
+                self.jobs[i].result_fn = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.cif")
+                shutil.copy(os.path.join(self.jobs[i].full_dir, self.jobs[i].name + ".archive.fcf"), os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.fcf"))
+                shutil.copy(os.path.join(self.jobs[i].full_dir, self.jobs[i].name + ".archive.fco"), os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.fco"))
+                shutil.copy(os.path.join(self.jobs[i].full_dir, self.jobs[i].name + ".out"), os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.out"))
+                self.jobs[i].out_fn = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + ".out")
+                shutil.copy(os.path.join(self.jobs[i].full_dir, "stdout.fit_analysis"), os.path.join(self.jobs[i].origin_folder, "stdout.fit_analysis"))
+                self.jobs[i].analysis_fn = os.path.join(self.jobs[i].origin_folder, "stdout.fit_analysis")
+                self.jobs[i].is_copied_back = True
+              except:
+                print "Something went wrong during copying back the results of job %s" %self.jobs[i].name
+                continue
+            else:
+              self.jobs[i].result_fn = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_HAR.cif")
+              self.jobs[i].out_fn = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + ".out")
+              self.jobs[i].analysis_fn = os.path.join(self.jobs[i].origin_folder, "stdout.fit_analysis")
+          else:
+            error = "<a target='Open .err file' href='exec -o getvar(defeditor) %s'>Conv</a>" %self.jobs[i].error_fn
+            status = "<a target='Open .out file' href='exec -o getvar(defeditor) %s'>%s</a>" %(self.jobs[i].out_fn, status_stopped)
+        except:
+          continue
 
       d['job_result_filename'] = self.jobs[i].result_fn
       d['job_result_name'] = self.jobs[i].name
@@ -592,9 +603,12 @@ class Job(object):
     autogrow = olx.GetVar("settings.tonto.HAR.autogrow", None)
     if olx.xf.latt.IsGrown() == 'true':
       if olx.Alert("Please confirm",\
-"""This is a grown structure. If you have created a cluster of molecules, make sure
-that the structure you see on the screen obeys the crystallographic symmetry.
-If this is not the case, the HAR will not work properly. Continue?""", "YN", False) == 'N':
+"""This is a grown structure. If you have created a cluster of molecules, make sure 
+that the structure you see on the screen obeys the crystallographic symmetry. 
+If this is not the case, the HAR will not work properly. 
+Make sure the cluster/moelcule is neutral and fully completed.
+
+Continue?""", "YN", False) == 'N':
         return
     elif olx.xf.au.GetZprime() != '1' and autogrow == 'true':
       olx.Grow()
