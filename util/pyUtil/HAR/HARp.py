@@ -189,7 +189,7 @@ class HARp(PT):
         input_structure = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_input.cif")
       else:
         input_structure = os.path.join(self.jobs[i].full_dir, self.jobs[i].name + ".cif")
-      arrow = "<a target='Open input .cif file' href=reap '%s'>%s</a>" %(input_structure, load_input)
+      arrow = """<a target='Open input .cif file' href='reap "%s"'>%s</a>""" %(input_structure, load_input)
 
       analysis = "--"
       if os.path.exists(os.path.join(self.jobs[i].full_dir, "stdout.fit_analysis")):
