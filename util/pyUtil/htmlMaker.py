@@ -695,47 +695,6 @@ def refinement_acta_bg_colour():
   return retVal
 OV.registerFunction(refinement_acta_bg_colour)
 
-def weightGuiDisplay():
-  if olx.IsFileType('ires').lower() == 'false':
-    return ''
-  longest = 0
-  retVal = ""
-  current_weight = olx.Ins('weight')
-  if current_weight == "n/a": return ""
-  current_weight = current_weight.split()
-  if len(current_weight) == 1:
-    current_weight = [current_weight[0], '0']
-  length_current = len(current_weight)
-  suggested_weight = OV.GetParam('snum.refinement.suggested_weight')
-  if suggested_weight is None: suggested_weight = []
-  if len(suggested_weight) < length_current:
-    for i in xrange (length_current - len(suggested_weight)):
-      suggested_weight.append(0)
-  if suggested_weight:
-    for curr, sugg in zip(current_weight, suggested_weight):
-      curr = float(curr)
-      if curr-curr*0.01 <= sugg <= curr+curr*0.01:
-        colour = gui_green
-      elif curr-curr*0.1 < sugg < curr+curr*0.1:
-        colour = gui_orange
-      else:
-        colour = gui_red
-      retVal += "<font color='%s'>%.3f(%.3f)</font> | " %(colour, curr, sugg)
-#      retVal += "<font color='%s'>%.3f(%s)</font> | " %(colour, curr, repr(sugg)[-2:])
-    html_scheme = retVal.strip("| ")
-  else:
-    html_scheme = current_weight
-
-  wght_str = ""
-  for i in suggested_weight:
-    wght_str += " %.3f" %i
-  txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update")
-  txt_Weight = OV.TranslatePhrase("Weight")
-  html = '''
-    <b><a target="%s" href="UpdateWght%s>>html.Update">%s</a></b>
-    ''' %("Update Weighting Scheme", wght_str, html_scheme)
-  return html
-OV.registerFunction(weightGuiDisplay)
 
 
 def refineDataMaker():

@@ -86,20 +86,20 @@ $-
      "onclick=spy.SetParam('snum.refinement.update_weight', html.GetState('~name~'))")
     $-
 
-  <td>$spy.weightGuiDisplay()</td>
+  <td>$spy.gui.tools.weightGuiDisplay()</td>
 
    $+
      html.Snippet("gui/snippets/input-checkbox-td",
      "name=SNUM_REFINEMENT_EXTI",
-     "checked=spy.GetParam('snum.refinement.update_weight')",
-     "oncheck=AddIns EXTI",
-     "onuncheck=DelIns EXTI",
-     "label=Extinction",
-     "onclick=spy.SetParam('snum.refinement.update_weight', html.GetState('~name~'))")
+     "oncheck=spy.SetParam('snum.refinement.refine_extinction',3)>>addins EXTI",
+     "onuncheck=spy.SetParam('snum.refinement.refine_extinction',0)>>delins EXTI",
+     "label=EXTI",
+     "manage=True",
+     )
     $-
 
   <td>
-    $xf.rm.Exti()
+    $spy.gui.tools.refine_extinction()
   </td>
 
   $+

@@ -34,6 +34,10 @@ import time
 global regex_l
 regex_l = {}
 
+gui_green = OV.GetParam('gui.green')
+gui_orange = OV.GetParam('gui.orange')
+gui_red = OV.GetParam('gui.red')
+
 
 class FolderView:
   root = None
@@ -763,6 +767,73 @@ $spy.MakeHoverButton('btn-info@cell@%s',"spy.make_help_box -name=cell-not-quite-
 
 OV.registerFunction(make_cell_dimensions_display,True,"gui.tools")
 
+
+def weightGuiDisplay():
+  if olx.IsFileType('ires').lower() == 'false':
+    return ''
+  longest = 0
+  retVal = ""
+  current_weight = olx.Ins('weight')
+  if current_weight == "n/a": return ""
+  current_weight = current_weight.split()
+  if len(current_weight) == 1:
+    current_weight = [current_weight[0], '0']
+  length_current = len(current_weight)
+  suggested_weight = OV.GetParam('snum.refinement.suggested_weight')
+  if suggested_weight is None: suggested_weight = []
+  if len(suggested_weight) < length_current:
+    for i in xrange (length_current - len(suggested_weight)):
+      suggested_weight.append(0)
+  if suggested_weight:
+    for curr, sugg in zip(current_weight, suggested_weight):
+      curr = float(curr)
+      if curr-curr*0.01 <= sugg <= curr+curr*0.01:
+        colour = gui_green
+      elif curr-curr*0.1 < sugg < curr+curr*0.1:
+        colour = gui_orange
+      else:
+        colour = gui_red
+      retVal += "<font color='%s'>%.3f(%.3f)</font> | " %(colour, curr, sugg)
+    html_scheme = retVal.strip("| ")
+  else:
+    html_scheme = current_weight
+
+  wght_str = ""
+  for i in suggested_weight:
+    wght_str += " %.3f" %i
+  txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update")
+  txt_Weight = OV.TranslatePhrase("Weight")
+  html = '''
+    <b><a target="%s" href="UpdateWght%s>>html.Update">%s</a></b>
+    ''' %("Update Weighting Scheme", wght_str, html_scheme)
+  return html
+OV.registerFunction(weightGuiDisplay,True,"gui.tools")
+
+
+
+def refine_extinction():
+  ## snmum.refine_extinction 0: DO NOT refine extinction AGAIN
+  ## snmum.refine_extinction 1: Try and refine extinction
+  ## snmum.refine_extinction 2: Refine in any case
+
+  retVal = "n/a"
+  _ = olx.xf.rm.Exti()
+  if "n/a" not in _.lower() and _ != '0':
+    _ = _.split('(')
+    exti = _[0]
+    esd = _[1].rstrip(')')
+    
+    if float(exti) < 0.001:
+      OV.GetParam('snum.refinement.refine_extincion',0)
+      retVal = "0"
+    else:
+      retVal = "%s(%s)"%(exti,esd)
+  else:
+    if OV.GetParam('snum.refinement.refine_extinction') == 1:
+      olex.m("AddIns EXTI")
+  return retVal
+
+OV.registerFunction(refine_extinction,True,"gui.tools")
 
 
 def hasDisorder():
