@@ -822,15 +822,21 @@ def refine_extinction():
     _ = _.split('(')
     exti = _[0]
     esd = _[1].rstrip(')')
-    
+
     if float(exti) < 0.001:
       OV.GetParam('snum.refinement.refine_extincion',0)
       retVal = "0"
     else:
       retVal = "%s(%s)"%(exti,esd)
   else:
-    if OV.GetParam('snum.refinement.refine_extinction') == 1:
+    if OV.GetParam('snum.refinement.refine_extinction',1) == 1:
       olex.m("AddIns EXTI")
+
+  _ = OV.GetParam('snum.refinement.refine_extinction',1)
+  if _ == 0:
+    olx.html.SetState('SNUM_REFINEMENT_EXTI',False)
+  else:
+    olx.html.SetState('SNUM_REFINEMENT_EXTI',True)
   return retVal
 
 OV.registerFunction(refine_extinction,True,"gui.tools")
