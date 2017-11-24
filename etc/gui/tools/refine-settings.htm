@@ -78,42 +78,50 @@ $-
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Weighting-Scheme;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
+  <td width='12%'><b>Weight</b></td>
+
+  <td width='5%'>
    $+
-     html.Snippet("gui/snippets/input-checkbox-td",
+     html.Snippet("gui/snippets/input-checkbox",
      "name=SET_SNUM_REFINEMENT_UPDATE_WEIGHT",
      "checked=spy.GetParam('snum.refinement.update_weight')",
-     "label=Auto Weight",
      "onclick=spy.SetParam('snum.refinement.update_weight', html.GetState('~name~'))")
     $-
+  </td>
 
   <td>$spy.gui.tools.weightGuiDisplay()</td>
 
+  <td><b>EXTI</b></td>
+
+  <td width='5%'>
    $+
-     html.Snippet("gui/snippets/input-checkbox-td",
+     html.Snippet("gui/snippets/input-checkbox",
      "name=SNUM_REFINEMENT_EXTI",
+     "checked=True",
      "oncheck=spy.SetParam('snum.refinement.refine_extinction',3)>>addins EXTI",
      "onuncheck=spy.SetParam('snum.refinement.refine_extinction',0)>>delins EXTI",
-     "label=EXTI",
      "manage=True",
      )
     $-
+  </td>
 
   <td>
     $spy.gui.tools.refine_extinction()
   </td>
 
-  $+
-    html.Snippet("gui/snippets/input-combo-td",
-    "name=REFINEMENT_ACTA",
-    "items=No ACTA;ACTA NOHKL;ACTA",
-    "value=Ins('acta')",
-    "onchange=spy.actaGuiDisplay(html.GetValue('~name~'))",
-    "readonly=False",
-    "onchangealways=True",
-    "bgcolor=spy.refinement_acta_bg_colour()",
-    "td1=<td width='15%'>"
+  <td width='22%'>
+    $+
+      html.Snippet("gui/snippets/input-combo",
+      "name=REFINEMENT_ACTA",
+      "items=No ACTA;ACTA NOHKL;ACTA",
+      "value=Ins('acta')",
+      "onchange=spy.actaGuiDisplay(html.GetValue('~name~'))",
+      "readonly=False",
+      "onchangealways=True",
+      "bgcolor=spy.refinement_acta_bg_colour()",
       )
-  $-
+    $-
+  </td>
 
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
