@@ -189,7 +189,7 @@ class HARp(PT):
         input_structure = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_input.cif")
       else:
         input_structure = os.path.join(self.jobs[i].full_dir, self.jobs[i].name + ".cif")
-      arrow = "<a target='Open input .cif file' href='reap %s'>%s</a>" %(input_structure, load_input)
+      arrow = "<a target='Open input .cif file' href=reap '%s'>%s</a>" %(input_structure, load_input)
 
       analysis = "--"
       if os.path.exists(os.path.join(self.jobs[i].full_dir, "stdout.fit_analysis")):
@@ -243,7 +243,7 @@ class HARp(PT):
   name="%(job_result_name)s"
   value="%(job_result_name)s"
   width="100%%"
-  onclick="reap %(job_result_filename)s>>calcFourier -diff -fcf -r=0.1 -m"
+  onclick="reap '%(job_result_filename)s'>>calcFourier -diff -fcf -r=0.05 -m"
 >''' %d
 
       else:
@@ -603,9 +603,9 @@ class Job(object):
     autogrow = olx.GetVar("settings.tonto.HAR.autogrow", None)
     if olx.xf.latt.IsGrown() == 'true':
       if olx.Alert("Please confirm",\
-"""This is a grown structure. If you have created a cluster of molecules, make sure 
-that the structure you see on the screen obeys the crystallographic symmetry. 
-If this is not the case, the HAR will not work properly. 
+"""This is a grown structure. If you have created a cluster of molecules, make sure
+that the structure you see on the screen obeys the crystallographic symmetry.
+If this is not the case, the HAR will not work properly.
 Make sure the cluster/moelcule is neutral and fully completed.
 
 Continue?""", "YN", False) == 'N':
