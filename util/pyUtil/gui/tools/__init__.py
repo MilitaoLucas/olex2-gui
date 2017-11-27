@@ -825,6 +825,7 @@ def refine_extinction():
 
     if float(exti) < 0.001:
       OV.GetParam('snum.refinement.refine_extincion',0)
+      olex.m("DelIns EXTI")
       retVal = "0"
     else:
       retVal = "%s(%s)"%(exti,esd)
