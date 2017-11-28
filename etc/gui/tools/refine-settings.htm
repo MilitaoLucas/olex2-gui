@@ -89,23 +89,23 @@ $-
     $-
   </td>
 
-  <td>$spy.gui.tools.weightGuiDisplay()</td>
+  <td width='35%'>$spy.gui.tools.weightGuiDisplay()</td>
 
-  <td><b>EXTI</b></td>
+  <td width='6%'><b>EXTI</b></td>
 
   <td width='5%'>
    $+
      html.Snippet("gui/snippets/input-checkbox",
      "name=SNUM_REFINEMENT_EXTI",
-     "checked=True",
-     "oncheck=spy.SetParam('snum.refinement.refine_extinction',3)>>addins EXTI",
-     "onuncheck=spy.SetParam('snum.refinement.refine_extinction',0)>>delins EXTI",
+     "checked=spy.GetParam(snum.refinement.refine_extinction_tickbox)",
+     "oncheck=spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI",
+     "onuncheck=spy.SetParam(snum.refinement.refine_extinction,0)>>delins EXTI",
      "manage=True",
      )
     $-
   </td>
 
-  <td>
+  <td width='12%'>
     $spy.gui.tools.refine_extinction()
   </td>
 
