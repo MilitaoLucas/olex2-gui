@@ -252,6 +252,10 @@ routines requiring structure refinement
       .type = floats(size=2)
       .help = The weighting scheme parameters suggested by the refinement \
         program in a previous cycle
+    refine_extinction = 1
+      .type = int
+    refine_extinction_tickbox = True
+      .type = bool
     original_formula = None
       .type = str
       .expert_level = 1
