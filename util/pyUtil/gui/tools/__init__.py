@@ -793,8 +793,22 @@ def weightGuiDisplay():
         colour = gui_orange
       else:
         colour = gui_red
-      retVal += "<font color='%s'>%.3f(%.3f)</font> | " %(colour, curr, sugg)
-    html_scheme = retVal.strip("| ")
+      sign = "+"
+      if curr-sugg == 0:
+        sign = "="
+        sugg = 0
+      elif curr-sugg > 0:
+        sign = "-"
+        sugg = sugg/curr
+      else:
+        sign = "+"
+        sugg = curr/sugg
+      if sugg != 0:
+        sugg_perc = "%s%.0f%%&nbsp;" %(sign, (100-sugg*100))
+      else:
+        sugg_perc = "OK"
+      retVal += "%.3f&nbsp;<font color='%s'>%s</font>&nbsp;|&nbsp;" %(curr, colour, sugg_perc)
+    html_scheme = retVal.strip("|&nbsp;")
   else:
     html_scheme = current_weight
 
@@ -802,10 +816,7 @@ def weightGuiDisplay():
   for i in suggested_weight:
     wght_str += " %.3f" %i
   txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update")
-  txt_Weight = OV.TranslatePhrase("Weight")
-  html = '''
-    <b><a target="%s" href="UpdateWght%s>>html.Update">%s</a></b>
-    ''' %("Update Weighting Scheme", wght_str, html_scheme)
+  html = "%s" %html_scheme
   return html
 OV.registerFunction(weightGuiDisplay,True,"gui.tools")
 
@@ -822,22 +833,27 @@ def refine_extinction():
     _ = _.split('(')
     exti = _[0]
     esd = _[1].rstrip(')')
+    exti_f = float(exti)
+    _ = len(exti) - len(esd) -2
+    esd_f = float("0.%s%s" %(_*"0", esd))
 
-    if float(exti) < 0.001:
-      OV.GetParam('snum.refinement.refine_extincion',0)
+    if exti_f/esd_f < 2:
+      print "Extinction was refined to %s(%s). From now on, it will no longer be refined, unless you tick the box in the refinement settings" %(exti, esd)
+
+      OV.SetParam('snum.refinement.refine_extinction',0)
       olex.m("DelIns EXTI")
       retVal = "0"
     else:
       retVal = "%s(%s)"%(exti,esd)
   else:
-    if OV.GetParam('snum.refinement.refine_extinction',1) == 1:
+    if OV.GetParam('snum.refinement.refine_extinction_tickbox') == 'true':
       olex.m("AddIns EXTI")
 
   _ = OV.GetParam('snum.refinement.refine_extinction',1)
   if _ == 0:
-    olx.html.SetState('SNUM_REFINEMENT_EXTI',False)
+    OV.SetParam('snum.refinement.refine_extinction_tickbox',False)
   else:
-    olx.html.SetState('SNUM_REFINEMENT_EXTI',True)
+    OV.SetParam('snum.refinement.refine_extinction_tickbox', True)
   return retVal
 
 OV.registerFunction(refine_extinction,True,"gui.tools")
