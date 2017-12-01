@@ -10,6 +10,7 @@
 #disabled=false
 #bgcolor=GetVar('HtmlInputBgColour')
 #fgcolor=GetVar('HtmlFontColour')
+#width='100%'
 #td1=<td>
 #td2=</td>
 
@@ -24,7 +25,7 @@
       min="#min"
       max="#max"
       name="#name"
-      width="#width"
+      width="100%"
       value="#value"
       label="#label"
       setdefault="#setdefault"

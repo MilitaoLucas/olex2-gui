@@ -14,5 +14,7 @@ harp{
     .type = str
   back_arrow = back.png
     .type = str
+  har_job_path = DataDir()/har_jobs
+    .type = str
     
 }

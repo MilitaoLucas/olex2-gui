@@ -807,7 +807,7 @@ def weightGuiDisplay():
         sugg_perc = "%s%.0f%%&nbsp;" %(sign, (100-sugg*100))
       else:
         sugg_perc = "OK"
-      retVal += "%.3f&nbsp;<font color='%s'>%s</font>&nbsp;|&nbsp;" %(curr, colour, sugg_perc)
+      retVal += "%.3f&nbsp;<font color='%s'><b>%s</b></font>&nbsp;|&nbsp;" %(curr, colour, sugg_perc)
     html_scheme = retVal.strip("|&nbsp;")
   else:
     html_scheme = current_weight
@@ -852,8 +852,12 @@ def refine_extinction():
   _ = OV.GetParam('snum.refinement.refine_extinction',1)
   if _ == 0:
     OV.SetParam('snum.refinement.refine_extinction_tickbox',False)
+    retVal="n/a<font color=%s><b>!&nbsp;</b></font>" %gui_red
   else:
     OV.SetParam('snum.refinement.refine_extinction_tickbox', True)
+  if _ == 3:
+    retVal += "<font color=%s><b>!&nbsp;</b></font>" %gui_green
+
   return retVal
 
 OV.registerFunction(refine_extinction,True,"gui.tools")
