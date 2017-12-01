@@ -5,6 +5,8 @@
 #password=false
 #multiline=false
 #disabled=false
+#onchange=
+#onleave=
 #td1=<td>
 #td2=</td>
 

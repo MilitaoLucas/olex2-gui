@@ -72,7 +72,8 @@ class HARp(PT):
     }
     self.options = options
 
-    self.jobs_dir = os.path.join(olx.DataDir(), "HAR_jobs")
+    self.jobs_dir = OV.GetParam('%s.har_job_path' %self.p_scope)
+   # self.jobs_dir = os.path.join(olx.DataDir(), "HAR_jobs")
     if not os.path.exists(self.jobs_dir):
       os.mkdir(self.jobs_dir)
 
@@ -495,6 +496,10 @@ class Job(object):
     self.parent = parent
     self.status = 0
     self.name = name
+    if self.name.endswith('_HAR'):
+      self.name = self.name[:-4]
+    elif self.name.endswith('_input'):
+      self.name = self.name[:-6]
     full_dir = os.path.join(parent.jobs_dir, self.name)
     self.full_dir = full_dir
     if not os.path.exists(full_dir):
@@ -694,8 +699,6 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
         elif val == "not":
           args.append("-h-adps")
           args.append("f")
-          args.append("-h-iso")
-          args.append("f")
           args.append("-h-pos")
           args.append("f")
         pass
@@ -733,7 +736,7 @@ def sample_folder(input_name):
   job_folder = job_folder + "_%d"%i
   os.mkdir(job_folder)
   shutil.copy(sample_file, job_folder)
-  load_input_cif="reap " + os.path.join(job_folder, input_name + ".cif")
+  load_input_cif="reap '%s.cif'" %os.path.join(job_folder, input_name)
   olex.m(load_input_cif)
 
 
