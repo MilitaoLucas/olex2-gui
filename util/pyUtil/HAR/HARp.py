@@ -69,6 +69,7 @@ class HARp(PT):
       "settings.tonto.HAR.dispersion": ("false",),
       "settings.tonto.HAR.autorefine": ("true",),
       "settings.tonto.HAR.autogrow": ("true",),
+      "settings.tonto.HAR.cluster-grow": ("true",),
     }
     self.options = options
 
@@ -702,6 +703,10 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
           args.append("-h-pos")
           args.append("f")
         pass
+    clustergrow = olx.GetVar("settings.tonto.HAR.cluster-grow", None)
+    if clustergrow == 'false':
+      args.append("-complete-mol")
+      args.append("f")
 
     self.result_fn = os.path.join(self.full_dir, self.name) + ".archive.cif"
     self.error_fn = os.path.join(self.full_dir, self.name) + ".err"
