@@ -18,22 +18,35 @@ From time to time we will make small videos, which will introduce HAR and explai
 # Basis Sets and Method
 
 ## Basis
-This specifies the basis set for the calculation of the theoretical density. The default basis set is **def2-SVP**. **STO-3G** is recommended only for test purposes.
+This specifies the basis set for the calculation of the theoretical density and wavefunction. The default basis set is **def2-SVP**. **STO-3G** is recommended only for test purposes.
 
 ## Method
 The default method used for the calculation of the theoretical density is **Restricted Hartee-Fock**. **Restricted Kohn-Sham** may be superior in some cases (especially for the treatment of hydrogen  atoms), but tends to be unstable in some cases.
 
 # Hydrogen_Treatment
 
+## Refine Hydrogen
 This option specifies how hydrogen atoms are treated in HAR. Hydrogens can be refined anisotropically, isotropically, only positions, or kept fixed.
+
+## Dispersion
+Enable this feature if you want to treat dispersion in you structure. Be aware that this feature is still in progress, so errors might occur. If that is the case rerun without dispersion correction.
+
+## Auto-Grow
+This will try to grow your structure if your Z' is smaller than 1. If your structure has a non integer Z' please try to grow it using the Olex2 grow tools, which can be accessed from HAR Extra, as well.
+
+## Initial IAM
+Enable/Disable a final cycle of IAM refinement prior to the start of HARt. This is highly recommended, since you should only start into HARt with a converged geometry after normal IAM refinement. If this causes trouble or leads to wrong geometries you can disable it.
 
 # Cluster Radius and Significance
 
 ## Cluster Radius
 Defines a radius around the asymmetric unit, in which implicit point charges and dipoles are used to mimmic the crystal effect. Minimal HAR is 0, reasonable values go to 8 Angstrom.
 
-## I/sig threshold
-Defines the significance criteria for data to be used in teh refinement. Default value is 3, should not be too big.
+## Complete Cluster
+In a normal case like a molecular structure this will make sure the cluster charges which are generated resemble the full molecule and leveled charges. If you want to refine a network compound (like a salt or bridged ions) where molecular boundaries are difficult to detect you might encounter errors. If that is the case try to turn this off.
+
+## F/sig threshold
+Defines the significance criteria for data to be used in the refinement. Default value is 3, should not be too big.
 
 # Running HAR Jobs
 Launch HAR jobs as a separate process. Olex2 can be closed and the process will continue to run. Please note, that HAR jobs can take a **very** long time -- from a few **hours** to a few **weeks**!

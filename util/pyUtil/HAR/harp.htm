@@ -93,7 +93,7 @@
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='HAR_CLUSTER_SIGNIFICANCE';help_ext=Cluster_Radius_and_Significance;1; -->
   <td width="20%" align="left">  Cluster radius  </td>
-  <td width="23%">
+  <td width="8%">
     $+
       html.Snippet("gui/snippets/input-text",
       "name=tonto_har_cluster_radius",
@@ -101,9 +101,19 @@
       "onchange=SetVar('settings.tonto.HAR.cluster.radius', html.GetValue('~name~'))")
     $-
   </td>
+  
+  <td width="29%" align="right"> Complete Cluster </td>
+  <td width="5%">
+    $+
+      html.Snippet("gui/snippets/input-checkbox",
+      "name=tonto_har_cluster_grow",
+      "checked=GetVar('settings.tonto.HAR.cluster-grow')",
+      "onclick=SetVar('settings.tonto.HAR.cluster-grow', html.GetState('~name~'))")
+    $-
+  </td>
 
-  <td width="34%" align="right"> f/sig threshold </td>
-  <td width="23%">$+
+  <td width="30%" align="right"> f/sig threshold </td>
+  <td width="8%">$+
     html.Snippet("gui/snippets/input-text", "name=tonto_i_threshold",
      "value=GetVar('settings.tonto.HAR.intensity_threshold.value')",
      "onchange=SetVar('settings.tonto.HAR.intensity_threshold.value', html.GetValue('~name~'))")
