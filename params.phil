@@ -223,6 +223,9 @@ routines requiring structure refinement
     last_R1 = n/a
       .type = str
       .expert_level = 2
+    last_wR2 = n/a
+      .type = str
+      .expert_level = 2
     graphical_output = False
       .type = bool
     program = ShelXL_ifc XL XH ShelXH-1997 XLMP ShelXL ShelXL-1997 '*olex2.refine' \
@@ -1203,9 +1206,9 @@ user
       flack_str{
         display = ""
           .type = str
-        href = Flack
+        href = ""
           .type = str
-        target = "Flack Parameter"
+        target = ""
           .type = str
       }
 
@@ -1251,8 +1254,6 @@ user
           .type = str
       }
 
-
-
       R1{
         op = "smaller"
           .type = str
@@ -1262,17 +1263,36 @@ user
           .type = float
         grade2 = 0.10
           .type = float
-        grade3 = 0.20
+        grade3 = 0.15
           .type = float
-        grade4 = 0.50
+        grade4 = 0.20
           .type = float
         top = 0.30
           .type = float
-        display = "Max Shift"
-          .type = str
-        href = atom
+        display = "R1"
           .type = str
       }
+
+      wR2{
+        op = "smaller"
+          .type = str
+        value_format= "3f"
+          .type = str
+        grade1  = 0.10
+          .type = float
+        grade2 = 0.20
+          .type = float
+        grade3 = 0.30
+          .type = float
+        grade4 = 0.40
+          .type = float
+        top = 0.50
+          .type = float
+        display = "wR2"
+          .type = str
+      }
+
+
       max_shift_site{
         op = "smaller"
           .type = str

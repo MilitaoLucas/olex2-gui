@@ -12,6 +12,7 @@ import olex_core
 import sys
 import programSettings
 from subprocess import *
+import gui
 
 import htmlTools
 import HttpTools
@@ -37,13 +38,12 @@ import threads_imp as olxth
 global cache
 cache = {}
 
-
-
 haveGUI = OV.HasGUI()
 if haveGUI:
   import olex_gui
 
 import Report
+
 
 def txt():
   try:
@@ -390,19 +390,17 @@ class OlexRefinementModel(object):
 
   def getExpectedPeaks(self):
     cell_volume = float(olx.xf.au.GetVolume())
-    expected_atoms = cell_volume/15
+    expected_atoms = cell_volume/17
     present_atoms = self.number_non_hydrogen_atoms()
     expected_peaks = expected_atoms - present_atoms
-    if expected_peaks < 5: expected_peaks = 5
-    return int(expected_peaks)
+    return int(round(expected_peaks))
 
   def getExpectedPeaks_and_AtomsPresent(self):
     cell_volume = float(olx.xf.au.GetVolume())
     expected_atoms = cell_volume/15
     present_atoms = self.number_non_hydrogen_atoms()
     expected_peaks = expected_atoms - present_atoms
-    if expected_peaks < 5: expected_peaks = 5
-    return int(expected_peaks), int(present_atoms)
+    return int(round(expected_peaks)), int(round(present_atoms))
 
 
 def get_refine_ls_hydrogen_treatment():
@@ -621,84 +619,6 @@ def GetHklFileList():
 if haveGUI:
   OV.registerFunction(GetHklFileList)
 
-def GetRInfo(txt="",format='html'):
-  if not OV.HasGUI():
-    return
-
-
-  use_history_for_R1_display = True
-  if use_history_for_R1_display:
-    if olx.IsFileType('cif') == "true":
-      R1 = olx.Cif('_refine_ls_R_factor_gt')
-    else:
-      R1 = OV.GetParam('snum.refinement.last_R1')
-      if not R1:
-        tree = History.tree
-        if tree.active_node is not None:
-          R1 = tree.active_node.R1
-        else:
-          R1 = 'n/a'
-    if R1 == cache.get('R1', None):
-      return cache.get('GetRInfo', 'XXX')
-
-    cache['R1'] = R1
-    font_size = olx.GetVar('HtmlFontSizeExtraLarge')
-    if 'html' in format:
-      try:
-        R1 = float(R1)
-        col = GetRcolour(R1)
-        R1 = "%.2f" %(R1*100)
-
-        if 'report' in format:
-          t = r"<font size='%s'><font color='%s'><b>%s%%</b></font></font>" %(font_size, col, R1)
-        else:
-          t = r"<font size='%s'><font color='%s'><b>%s%%</b></font></font>" %(font_size, col, R1)
-
-      except:
-        t = "<td colspan='2' align='right' rowspan='2' align='right'><font size='%s'><b>%s</b></font></td>" %(font_size, R1)
-      finally:
-        retVal = t
-
-    elif format == 'float':
-      try:
-        t = float(R1)
-      except:
-        t = 0
-      finally:
-        retVal = t
-
-  else:
-    if txt:
-      t = "<td colspan='1' rowspan='2' align='center'><font size='4'><b>%s</b></font></td>" %txt
-    else:
-      try:
-        look = olex.f('IsVar(snum_refinement_last_R1)')
-        if look == "true":
-          R1 = olex.f('GetVar(snum_refinement_last_R1)')
-        else:
-          if olx.IsFileType('cif') == "true":
-            R1 = olx.Cif('_refine_ls_R_factor_gt')
-          else:
-            R1 = olex.f('Lst(R1)')
-      except:
-        R1 = 0
-      try:
-        R1 = float(R1)
-        col = GetRcolour(R1)
-        R1 = "%.2f" %(R1*100)
-        t = r"""
-<td colspan='1' align='center' rowspan='2'>
-  <font size='%s' color='%s'>
-    <b>%s%%</b>
-  </font>
-</td>
-""" %(OV.GetParam('gui.html.font_size_extra_large'), col, R1)
-      except:
-        t = "<td colspan='1' rowspan='2' align='center'><font size='4'><b>%s</b></font></td>" %R1
-    retVal = t
-  cache['GetRInfo'] = retVal
-  return retVal
-OV.registerFunction(GetRInfo)
 
 def GetRcolour(R1):
   retVal = ""
@@ -1765,3 +1685,4 @@ def EditIns():
   OV.SetParam("snum.refinement.use_solvent_mask", olx.Ins("ABIN") != "n/a")
   olx.html.Update()
 OV.registerFunction(EditIns)
+

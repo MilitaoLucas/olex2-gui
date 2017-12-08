@@ -12,6 +12,8 @@ from PIL import ImageFilter
 from ArgumentParser import ArgumentParser
 import math
 import os
+import gui
+
 try:
   import olx
   import olex
@@ -3472,42 +3474,8 @@ class HealthOfStructure():
     return txt
 
   def get_bg_colour(self, item, val):
-    try:
-      val = float(val)
-      if val < 0:
-        val = -val
-    except:
-      val = 0
+    return gui.tools.get_diagnostics_colour(self.scope, item, val)
 
-    mindfac = 1
-    if item == 'MinD':
-      mindfac = float(olx.xf.exptl.Radiation())/0.71
-
-    op = OV.GetParam('user.diagnostics.%s.%s.op' %(self.scope, item))
-    if op == "between":
-      soll = OV.GetParam('user.diagnostics.%s.%s.soll' %(self.scope, item))
-    for i in xrange(4):
-      i += 1
-      if op == "greater":
-        if val >= OV.GetParam('user.diagnostics.%s.%s.grade%s' %(self.scope, item, i)) * mindfac:
-          break
-      elif op == 'smaller':
-        if val <= OV.GetParam('user.diagnostics.%s.%s.grade%s' %(self.scope, item, i)) * mindfac:
-          break
-      elif op == 'between':
-        if val - (OV.GetParam('user.diagnostics.%s.%s.grade%s' %(self.scope, item, i))) * mindfac <= soll <= val + (OV.GetParam('user.diagnostics.%s.%s.grade%s' %(self.scope, item, i))) * mindfac:
-          break
-
-    if i == 1:
-      retVal = self.grade_1_colour
-    elif i == 2:
-      retVal = self.grade_2_colour
-    elif i == 3:
-      retVal = self.grade_3_colour
-    elif i == 4:
-      retVal = self.grade_4_colour
-
-    return retVal
 
 HOS_instance = HealthOfStructure()
 OV.registerFunction(HOS_instance.make_HOS)
