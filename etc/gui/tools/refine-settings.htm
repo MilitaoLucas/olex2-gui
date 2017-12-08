@@ -11,136 +11,117 @@ $-
 <tr ALIGN='left' NAME='SNUM_REFINEMENT_PROGRAM' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Refinement-Program;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width='30%'>
-    <b>Refinement Program</b>
+  <td width='12%'>
+    <b>Program</b>
   </td>
-  <td ALIGN='right' width='28%'>
-<!-- #include program gui\snippets\snippet-program.htm;scope=snum;prg_type=refinement;1; -->
+
+  <td width='50%'>
+    <table cellpadding="0" cellspacing="0"><tr>
+      <td width='49%'>
+<!-- #include program gui\snippets\snippet-program.htm;scope=snum;prg_type=refinement;width='20%';1; -->
+      </td>
+      <td width='2%'>
+      </td>
+      <td width='49%'>
+<!-- #include method gui\snippets\snippet-method.htm;scope=snum;prg_type=refinement;width='20%';1; --></td>
+    </tr></table>
   </td>
-  <td align='right' width='14%'>
-    <b>Method</b>
+
+  <td align='right' width='10%'>
+  <b>Cycles</b>
   </td>
-  <td ALIGN='right' width='28%'>
-<!-- #include method gui\snippets\snippet-method.htm;scope=snum;prg_type=refinement;1; -->
+
+  $+
+    html.Snippet("gui/snippets/input-spin-td",
+    "value=spy.GetParam('snum.refinement.max_cycles')",
+    "name=SET_SNUM_REFINEMENT_MAX_CYCLES",
+    "onchange=spy.SetMaxCycles(html.GetValue('~name~'))",
+    )
+  $-
+
+  <td align='right' width='10%'>
+  <b>Peaks</b>
   </td>
+
+  $+
+    html.Snippet("gui/snippets/input-spin-td",
+    "value=math.eval(abs(spy.GetParam(snum.refinement.max_peaks)))",
+    "name=SET_SNUM_REFINEMENT_MAX_PEAKS",
+    "onchange=spy.SetMaxPeaks(html.GetValue('~name~'))",
+    )
+  $-
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <tr NAME='SET_REFLECTIONS' width='100%'>
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Set-Reflection-File;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td ALIGN='left' width='30%'>
-    <b>%Reflection File%</b>
+  <td ALIGN='left' width='12%'>
+    <b>hkl file</b>
   </td>
-  <td ALIGN='right' width='70%'>
-<!-- #include tool-footer gui\snippets\snippet-reflection-file.htm;1; -->
-</td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<tr ALIGN='left' NAME='SNUM_REFINEMENT_MAX_CYCLES'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Refinement-Max-Cycles;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
   <td ALIGN='left' width='50%'>
-    <b>Max. refinement cycles and peaks</b>
+<!-- #include reflection-file gui\snippets\snippet-reflection-file.htm;1; -->
   </td>
 
-  <td align='right' width='11%'>
-  <b>Cycles</b>
-  </td>
 
-  <td ALIGN='right' width='14%'>
-      <input
-        type='spin'
-        width="100%"
-        height="GetVar('HtmlSpinHeight')"
-        bgcolor="spy.GetParam('gui.html.input_bg_colour')"
-        name='SET_SNUM_REFINEMENT_MAX_CYCLES'
-        value="spy.GetParam('snum.refinement.max_cycles')"
-        onchange="spy.SetMaxCycles(html.GetValue('~name~'))"
-      >
-  </td>
 
-  <td align='right' width='11%'>
-  <b>Peaks</b>
+  <td ALIGN='center' width='39%'>
+<!-- #include reflection-date reflection-date.htm;1; -->
   </td>
-
-  <td ALIGN='right' width='14%'>
-      <input
-        type="spin"
-        bgcolor="spy.GetParam('gui.html.input_bg_colour')"
-        name="SET_SNUM_REFINEMENT_MAX_PEAKS"
-        width="100%"
-        height="GetVar('HtmlSPinHeight')"
-        max='1000'
-        value="math.eval(abs(spy.GetParam(snum.refinement.max_peaks)))"
-        onchange="spy.SetMaxPeaks(html.GetValue('~name~'))"
-      >
-  </td>
-
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
 
 
 <tr ALIGN='left' NAME='SNUM_WEIGHTING_SCHEME'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Weighting-Scheme;1; -->
+<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Weights,_Extinction_and_ACTA;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 
-<td width="50%">
-$spy.weightGuiDisplay()
-</td>
+  <td width='12%'><b>Weight</b></td>
 
-   <td width="4%">$+
-     html.Snippet("gui/snippets/input-checkbox", "name=SET_SNUM_REFINEMENT_UPDATE_WEIGHT",
-      "checked=spy.GetParam('snum.refinement.update_weight')",
-      "bgcolor=GetVar('HtmlTableFirstcolColour')",
-      "onclick=spy.SetParam('snum.refinement.update_weight', html.GetState('~name~'))")
-    $-</td>
-
-   <td width='32%'><b>Auto-update</b> when R1 &lt;</td>
-
-   <td width="10%">$+
-     html.Snippet("gui/snippets/input-text", "name=UPDATE_WEIGHT_MINR1",
-      "width=100%",
-      "value=spy.GetParam('snum.refinement.update_weight_maxR1')",
-      "onchange=spy.SetParam('snum.refinement.update_weight_maxR1',html.GetValue(~name~))")
-    $-</td>
-
-    <td width="1%">%</td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-
-<tr ALIGN='left' NAME='EXTINCTION'>
-<!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=Extinction-Correction;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width="4%">
-    <input type="checkbox"
-      fgcolor="GetVar('HtmlFontColour')"
-      bgcolor="GetVar('HtmlTableFirstcolColour')"
-      name="SNUM_REFINEMENT_EXTI"
-      oncheck="AddIns EXTI"
-      onuncheck="DelIns EXTI"
-      checked="not(strcmp(xf.rm.Exti(),'n/a'))"
-    >
-  </td>
-  <td width="28%"><b>Extinction correction</b></td>
-  <td width="22%">
-    $xf.rm.Exti()
+  <td width='5%'>
+   $+
+     html.Snippet("gui/snippets/input-checkbox",
+     "name=SET_SNUM_REFINEMENT_UPDATE_WEIGHT",
+     "checked=spy.GetParam('snum.refinement.update_weight')",
+     "onclick=spy.SetParam('snum.refinement.update_weight', html.GetState('~name~'))")
+    $-
   </td>
 
-<td width='16%' align='right'>
-</td>
+  <td width='30%'>$spy.gui.tools.weightGuiDisplay()</td>
 
-<td width='30%' align='right'>
-$+
-    html.Snippet("gui/snippets/input-combo",
-    "name=REFINEMENT_ACTA",
-    "items=No ACTA;ACTA NOHKL;ACTA",
-    "value=Ins('acta')",
-    "onchange=spy.actaGuiDisplay(html.GetValue('~name~'))",
-    "readonly=False",
-    "onchangealways=True",
-    "bgcolor=spy.refinement_acta_bg_colour()",
+  <td width='6%'><b>EXTI</b></td>
+
+  <td width='5%'>
+   $+
+     html.Snippet("gui/snippets/input-checkbox",
+     "name=SNUM_REFINEMENT_EXTI",
+     "checked=spy.GetParam(snum.refinement.refine_extinction_tickbox)",
+     "oncheck=spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI",
+     "onuncheck=spy.SetParam(snum.refinement.refine_extinction,0)>>delins EXTI",
+     "manage=True",
+     )
+    $-
+  </td>
+
+  <td width='17%'>
+    $spy.gui.tools.refine_extinction()
+  </td>
+
+  <td width='22%'>
+    $+
+      html.Snippet("gui/snippets/input-combo",
+      "name=REFINEMENT_ACTA",
+      "items=No ACTA;ACTA NOHKL;ACTA",
+      "value=Ins('acta')",
+      "onchange=spy.actaGuiDisplay(html.GetValue('~name~'))",
+      "readonly=False",
+      "onchangealways=True",
+      "bgcolor=spy.refinement_acta_bg_colour()",
       )
-  $-</td>
+    $-
+  </td>
 
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
@@ -148,39 +129,30 @@ $+
 <tr VALIGN="center" ALIGN="left" NAME="USE_SOLVENT_MASK">
 <!-- #include tool-help-first-column gui\blocks\tool-help-first-column.htm;help_ext=refinement-masks;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width='4%'>
-      <input
-        type="checkbox"
-        fgcolor="GetVar('HtmlFontColour')"
-        bgcolor="GetVar('HtmlTableFirstcolColour')"
-        name="SNUM_REFINEMENT_USE_SOLVENT_MASK"
-        checked="spy.GetParam('snum.refinement.use_solvent_mask')"
-        onclick="spy.SetMasking(html.GetState(~name~))"
-      >
-  </td>
-  <td ALIGN='left' width='24%'>
-    <b>
-      Use solvent mask
-    </b>
-  </td>
-  <td ALIGN='left' width='4%'>
-      <input
-        type="checkbox"
-        fgcolor="GetVar('HtmlFontColour')"
-        bgcolor="GetVar('HtmlTableFirstcolColour')"
-        name="SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT"
-        checked="spy.GetParam('snum.refinement.recompute_mask_before_refinement')"
-        oncheck="
-spy.SetMasking(html.GetState(~name~))>>
+
+
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=SNUM_REFINEMENT_USE_SOLVENT_MASK",
+    "label=Use Solvent Mask",
+    "name=SNUM_REFINEMENT_USE_SOLVENT_MASK",
+    "checked=spy.GetParam('snum.refinement.use_solvent_mask')",
+    "onclick=spy.SetMasking(html.GetState(~name~))"
+    )
+  $-
+
+  $+
+    html.Snippet("gui/snippets/input-checkbox-td",
+    "name=SNUM_REFINEMENT_USE_SOLVENT_MASK",
+    "label=Update Mask",
+    "name=SNUM_REFINEMENT_RECOMPUTE_MASK_BEFORE_REFINEMENT",
+    "checked=spy.GetParam('snum.refinement.recompute_mask_before_refinement')",
+    "oncheck=spy.SetMasking(html.GetState(~name~))>>
 spy.SetParam('snum.refinement.recompute_mask_before_refinement','true')>>
-html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')"
-        onuncheck="spy.SetParam('snum.refinement.recompute_mask_before_refinement','false')"
-      >
-  </td>
-  <td ALIGN='left' width='24%'>
-    <b>
-      Update mask
-  </td>
+html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')",
+     "onuncheck=spy.SetParam('snum.refinement.recompute_mask_before_refinement','false')"
+    )
+  $-
 
   <td width="11%">solvent r</td>
   <td width="10%">
@@ -218,7 +190,7 @@ html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')"
 
 
 <tr ALIGN='left' NAME='MASK_INFO'>
-<!-- #include tool-first-column gui\blocks\tool-first-column.htm;help_ext=Extinction-Correction;1; -->
+<!-- #include tool-first-column gui\blocks\tool-first-column.htm;help_ext=Mask_Info;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 $spy.gui.tools.get_mask_info()
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

@@ -1,0 +1,153 @@
+t:all_tutorials_end{
+END
+}
+
+t:all_tutorials_preamble{
+BEGIN
+#set:bg_colour=gui.html.bg_colour
+#set:font_colour=gui.html.font_colour
+
+set:font_colour_code=#aaaaff
+set:font_colour_bold=gui.html.highlight_colour
+c:html.ItemState index* 0
+c:html.ItemState index-home 1
+c:html.ItemState tab* 2
+#c:grad False
+c:showQ False
+#c:default
+c:clear
+c:lines 10
+}
+
+t:pop_tutorials_system{
+<body link="$GetVar(HtmlLinkColour)" bgcolor='%(bg_colour)s'>
+
+<!--+++++++++ SYSTEM BUTTONS-->
+<table bgcolor='%(button_bar_colour)s' border="0" VALIGN='left' style="border-collapse: collapse" width="100%%" cellpadding="5" cellspacing="1">
+
+<tr><td><a href="shell %(src)s">Edit</a></td></tr>
+
+
+  <tr align='center'>
+    <td valign='top'>
+      <input
+        type="button"
+        name=TUTORIAL_Back
+        bgcolor="$GetVar(HtmlInputBgColour)"
+        valign='center'
+        width="60"
+        height="22"
+        onclick="spy.demo.back_demo_item()"
+        value = "Back">&nbsp;
+    </td>
+    <td valign='top'>
+      <input
+        type="button"
+        name=TUTORIAL_CANCEL
+        bgcolor="$GetVar(HtmlInputBgColour)"
+        valign='center'
+        width="60"
+        height="22"
+        onclick="spy.demo.cancel_demo_item()"
+        value = "Cancel">&nbsp;
+    </td>
+    <td valign='top'>
+      <input
+        type="button"
+        name=TUTORIAL_NEXT
+        bgcolor="$GetVar(HtmlInputBgColour)"
+        valign='center'
+        width="60"
+        height="22"
+        onclick="spy.demo.next_demo_item()"
+        value = "Next">
+     </td>
+   </tr>
+</table>
+<!--+++++++++ SYSTEM BUTTONS-->
+}
+
+t:pop_tutorials{
+<body link="$GetVar(HtmlLinkColour)" bgcolor='%(bg_colour)s'>
+
+
+<table width='100%%'>
+  <tr bgcolor='#004080'>
+    <td bgcolor='#004080'>
+      <font color='white' size='6' >
+      <b>
+      %(title)s
+      </b>
+      </font>
+    </td>
+      %(edit_link)s
+  </tr>
+</table>
+
+
+<table bgcolor='%(button_bar_colour)s' border="0" VALIGN='left' style="border-collapse: collapse" width="100%%" cellpadding="5" cellspacing="1">
+<tr align='center'>
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Back",
+    "onclick=spy.demo.back_demo_item()",
+    "fit=True",
+    )$-
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Cancel",
+    "onclick=spy.demo.cancel_demo_item()",
+    "fit=True",
+    )$-
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Next",
+    "onclick=spy.demo.next_demo_item()",
+    "fit=True",
+    )$-
+
+  </tr>
+</table>
+
+
+<table bgcolor='%(bg_colour)s' border="0" VALIGN='left' style="border-collapse: collapse" width="100%%" cellpadding="5" cellspacing="1">
+
+  <tr align = 'left' bgcolor='%(bg_colour)s'>
+    <td><br>
+<font color='%(font_colour)s' size=4 face="$GetVar(HtmlFontName)">
+    %(txt)s
+</font>
+    </td>
+  </tr>
+</table>
+</body>
+}
+
+t:pop_tutorials_loop{
+<body link="$GetVar(HtmlLinkColour)" bgcolor='%(bg_colour)s'>
+<table bgcolor='#ababab' border="0" VALIGN='left' style="border-collapse: collapse" width="100%%" cellpadding="5" cellspacing="1">
+
+
+  <tr align = 'left' bgcolor='%(bg_colour)s'>
+    <td><br>
+<font color='%(font_colour)s' size=5 face="$GetVar(HtmlFontName)">
+    %(txt)s
+</font>
+    </td>
+  </tr>
+
+</table>
+</body>
+}
+
+t:tutorials_button{
+<!-- #include tool-h3 gui\blocks\tool-h3.htm;image=#image;colspan=1;1; -->
+
+<tr>
+<!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
+<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
+  <td>
+}

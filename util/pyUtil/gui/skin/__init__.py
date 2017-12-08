@@ -7,6 +7,7 @@ import olex
 import olex_fs
 import os
 from ImageTools import IT
+import gui
 
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
@@ -215,6 +216,14 @@ def export_parameters(load_phil=True):
   OV.SetVar('HtmlPanelWidth', OV.GetParam('gui.htmlpanelwidth'))
   OV.SetVar('HtmlButtonHeight', OV.GetParam('gui.timage.button.height'))
   OV.SetVar('history_width', IT.history_width)
+  OV.SetVar('link_type', OV.GetParam('gui.skin.link_type'))
+  OV.SetVar('default_link', OV.GetParam('gui.skin.default_link'))
+  OV.SetVar('linkButton.flat', OV.GetParam('gui.skin.link_button.flat'))
+  OV.SetVar('linkButton.fgcolor', OV.GetParam('gui.skin.link_button.fgcolor').hexadecimal)
+  try:
+    OV.SetVar('linkButton.bgcolor', OV.GetParam('gui.skin.link_button.bgcolor').hexadecimal)
+  except:
+    OV.SetVar('linkButton.bgcolor', OV.GetParam('gui.skin.link_button.bgcolor'))
 
 
   if timing:
@@ -318,7 +327,7 @@ class Skin():
       print "After 'Save PHIL': %.2f s (%.5f s)" % ((t - t1), (t - t2))
       t2 = t
 
-    export_parameters()
+    export_parameters(load_phil=False)
     deal_with_gui_phil('save')
 
     olex.m("spy.make_HOS()")

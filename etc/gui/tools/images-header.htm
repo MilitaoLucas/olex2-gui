@@ -9,14 +9,14 @@
       name="IMAGE_NAME"
       width="100%"
       height="math.eval(GetVar('HtmlInputHeight')*1.3)"
-      value="spy.GetParam('snum.image.name', FileName())"
+      value="spy.GetParam('snum.image.name', spy.ModelSrc())"
       onchange="spy.SetParam('snum.image.name',html.GetValue('~name~'))"
     >
     </font>
   </td>
 
   <td width='20%' align='right'>
-     If <b>NAME</b> exists
+     If <b>NNAME</b> exists
   </td>
 
   <td width="17%" align='left'>
@@ -59,16 +59,30 @@
 <!-- SECOND ROW: Deal with labels-->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='LABEL_SETTINGS';help_ext=Images;1 -->
-  <td name=HREF_MAKE_LABEL width='35%' align='left'>
+  <td name=HREF_MAKE_LABEL width='10%' align='left'>
     <b>Label:</b>
-    <a href="label -a -type=spy.GetParam('user.image.label_symm_type') -symm=spy.GetParam('user.image.label_symm') -resi=_#">selected</a>&nbsp;|
-    <a href="label -a $*-H,Q -type=spy.GetParam('user.image.label_symm_type') -symm=spy.GetParam('user.image.label_symm') -resi=_#">non-H</a>
-    <a href="label -a $*-H,Q,C -type=spy.GetParam('user.image.label_symm_type') -symm=spy.GetParam('user.image.label_symm') -resi=_#">hetero</a>
-  </td>
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=selected",
+    "onclick=label -a -type=spy.GetParam('user.image.label_symm_type') -symm=spy.GetParam('user.image.label_symm') -resi=_#",
+    )$-
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=non-H",
+    "onclick=label -a \$*-H,Q -type=spy.GetParam('user.image.label_symm_type') -symm=spy.GetParam('user.image.label_symm') -resi=_#",
+    )$-
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=hetero",
+    "onclick=label -a \$*-H,Q,C -type=spy.GetParam('user.image.label_symm_type') -symm=spy.GetParam('user.image.label_symm') -resi=_#",
+    )$-
 
   <td width='20%' align='right'>Symmetry label </td>
 
-  <td name=IMAGE_SETTINGS_LABEL_SYMM width='17%'>
+  <td name=IMAGE_SETTINGS_LABEL_SYMM width='12%'>
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="combo"
@@ -88,7 +102,7 @@
 
   <td width='10%' align='right'>%Style%</td>
 
-  <td name=IMAGE_SETTINGS_LABEL_TYPE width='10%' align='right'>
+  <td name=IMAGE_SETTINGS_LABEL_TYPE width='12%' align='right'>
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="combo"

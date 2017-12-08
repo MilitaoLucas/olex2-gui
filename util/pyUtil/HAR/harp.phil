@@ -1,0 +1,20 @@
+
+harp{
+  gui{
+    location = 'tools'
+      .type = str
+      .help = The tab item where the HARp GUI shall appear.
+    before = 'images'
+      .type = str
+      .help = The tool before which the HARp GUI shall appear.
+    }
+  check_output_interval = 0
+    .type = int
+  processing_gif = giphy.gif
+    .type = str
+  back_arrow = back.png
+    .type = str
+  har_job_path = DataDir()/har_jobs
+    .type = str
+    
+}

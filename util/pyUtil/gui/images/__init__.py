@@ -186,6 +186,9 @@ def MakePostScriptImage(notify_listener=True, output_folder=None):
          " " + colour_bond + \
          " " + image_perspective + \
          " " + colour_fill + \
+         " " + "-bond_outline_oversize=" + "20" + \
+         " " + "-atom_outline_color=" + "16777215" + \
+         " " + "-bond_outline_color=" + "15592941" + \
          " " + "-lw_ellipse=" + lw_ellipse + \
          " " + "-lw_octant=" + lw_octant + \
          " " + "-lw_pie=" + lw_pie + \

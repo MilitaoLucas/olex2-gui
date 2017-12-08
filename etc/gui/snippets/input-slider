@@ -1,0 +1,56 @@
+#value=
+#name=#value
+#width=100%
+#height=GetVar('HtmlInputHeight')
+#manage=false
+#password=false
+#multiline=false
+#disabled=false
+#td1=<td>
+#td2=</td>
+#td1
+#param=snum.xgrid.step
+#name=SNUM_XGRID_STEP
+#min=-10
+#max=10
+#scale=1
+#cmd = xgrid.fix
+#swidth=92
+
+#td1
+<table cellpadding="0" cellspacing="0" 'width=100%'>
+    <tr>
+      <td width="#swidth%">
+        <font size='$GetVar(HtmlFontSizeControls)'>
+        <input
+          align="right"
+          type="slider"
+          name="$strcat(#name,_SLIDE)"
+          width="100%"
+          height="18"
+          value="$math.eval(spy.GetParam(#param)*#scale)"
+          bgcolor="$GetVar(HtmlTableBgColour)"
+          fgcolor="$GetVar(HtmlFontColour)"
+          min="#min"
+          max="#max"
+          onchange="html.SetValue($strcat(#name,_VALUE),math.eval($math.eval(1/#scale)*html.GetValue($strcat(#name,_SLIDE))))>>#cmd>>spy.SetParam(#param,html.GetValue($strcat(#name,_VALUE)))"
+        >
+        </font>
+      </td>
+
+
+      <td width="$math.eval(100-#swidth)%">
+        <font size='$GetVar(HtmlFontSizeControls)'>
+        <input
+          type="text"
+          name="$strcat(#name,_VALUE)"
+          width="100%"
+          height="18"
+          bgcolor="$GetVar(HtmlTableBgColour)"
+          fgcolor="$GetVar(HtmlFontColour)"
+          value="spy.GetParam(#param)"
+          onchange="html.SetValue($strcat(#name,_SLIDE),$math.eval(#scale*html.GetValue($strcat(#name,_VALUE))))>>#cmd>>spy.SetParam(#param,html.GetValue($strcat(#name,_VALUE)))"
+        >
+    </tr>
+  </table>
+#td2

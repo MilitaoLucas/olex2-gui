@@ -7,80 +7,43 @@
 
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MAP_2D_DEPTH_SIZE';help_ext=map-2D-depth-size;1 -->
-  <td width="10%"><a href="mpln -n>>selback>>mpln">%Depth%</a></td>
-  <td width="82%">
-    <font size='$GetVar(HtmlFontSizeControls)'>
-    <input
-      align="right"
-      #label="depth"
-      type="slider"
-      name="SNUM_XGRID_DEPTH_SLIDE"
-      width="100%"
-      height="18"
-      value="math.eval(xgrid.Depth()*5)"
-      bgcolor="$GetVar(HtmlTableBgColour)"
-      fgcolor="$GetVar(HtmlFontColour)"
-      min="$math.eval(-2.5/gl.CalcZoom())"
-      max="$math.eval(2.5/gl.CalcZoom())"
-      onchange="
-xgrid.Depth(math.eval(html.GetValue(~name~)/5))>>
-html.SetValue(SNUM_XGRID_DEPTH_VALUE,math.eval(html.GetValue(~name~)/5))"
-    >
-    </font>
-  </td>
-  <td width="8%">
-    <font size='$GetVar(HtmlFontSizeControls)'>
-    <input
-      type="text"
-      name="SNUM_XGRID_DEPTH_VALUE"
-      width="100%"
-      height="18"
-      bgcolor="$GetVar(HtmlTableBgColour)"
-      fgcolor="$GetVar(HtmlFontColour)"
-      value="xgrid.Depth()"
-      onreturn="
-xgrid.Depth(html.GetValue(~name~))>>
-html.SetValue(SNUM_XGRID_DEPTH_SLIDE,math.eval(html.GetValue(~name~)*5))"
-    >
-    </font>
-  </td>
+
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=Depth",
+    "onclick=mpln -n>>selback>>mpln",
+    "td1=<td width='10%'>",
+    )
+  $-
+
+  $+
+    html.Snippet("gui/snippets/input-slider",
+    "param=snum.xgrid.depth",
+    "name=SNUM_XGRID_DEPTH",
+    "min=\$math.eval(-2.5/gl.CalcZoom())",
+    "max=\$math.eval(2.5/gl.CalcZoom())",
+    "cmd=xgrid.Depth(html.GetValue(SNUM_XGRID_DEPTH_VALUE))",
+    "td1=<td width='90%'>",
+    "scale=1",
+    "swidth=92"
+    )
+  $-
 </tr>
 
 <tr name=XGRID_SIZE_SLIDER>
   <td width="10%">%Size%</td>
-  <td width="82%">
-    <font size='$GetVar(HtmlFontSizeControls)'>
-    <input
-      align="right"
-      type="slider"
-      name="SNUM_XGRID_SIZE_SLIDE"
-      width="100%"
-      height="18"
-      value="xgrid.Size()"
-      bgcolor="$GetVar(HtmlTableBgColour)"
-      fgcolor="$GetVar(HtmlFontColour)"
-      min="1"
-      max="20"
-      onchange="
-xgrid.Size(html.GetValue(~name~))>>
-html.SetValue(SNUM_XGRID_SIZE_VALUE,html.GetValue(~name~))"
-    >
-    </font>
-  </td>
-  <td width="8%">
-    <font size='$GetVar(HtmlFontSizeControls)'>
-    <input
-      type="text"
-      name="SNUM_XGRID_SIZE_VALUE"
-      width="100%"
-      height="18"
-      bgcolor="$GetVar(HtmlTableBgColour)"
-      fgcolor="$GetVar(HtmlFontColour)"
-      value="html.GetValue(SNUM_XGRID_SIZE_SLIDE)"
-      onreturn="
-xgrid.Size(html.GetValue(~name~))>>
-html.SetValue(SNUM_XGRID_SIZE_SLIDE,html.GetValue(~name~))"
-    >
-    </font>
-  </td>
+
+  $+
+    html.Snippet("gui/snippets/input-slider",
+    "param=snum.xgrid.size",
+    "name=SNUM_XGRID_SIZE",
+    "min=1",
+    "max=50",
+    "cmd=xgrid.Size(html.GetValue(SNUM_XGRID_SIZE_VALUE))",
+    "td1=<td width='90%'>",
+    "scale=1",
+    "swidth=92"
+    )
+  $-
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->

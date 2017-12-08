@@ -6,7 +6,8 @@ import glob
 import shutil
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
-
+import gui
+debug = bool(OV.GetParam("olex2.debug", False))
 import HttpTools
 
 class PluginTools(object):
@@ -25,7 +26,7 @@ class PluginTools(object):
   def deal_with_phil(self, operation='read', which='user_local'):
     user_phil_file = "%s/%s.phil" %(OV.DataDir(),self.p_scope)
     phil_file_p = r"%s/%s.phil" %(self.p_path, self.p_scope)
-    gui_phil_file_p = r"%s/gui_%s.phil" %(self.p_path, self.p_name.lower())
+    gui_phil_file_p = r"%s/%s.phil" %(self.p_path, self.p_name.lower())
     if operation == "read":
       phil_file = open(phil_file_p, 'r')
       phil = phil_file.read()
@@ -40,6 +41,7 @@ class PluginTools(object):
         gui_phil_file.close()
 
         olx.gui_phil_handler.adopt_phil(phil_string=gui_phil)
+        olx.gui_phil_handler.merge_phil(phil_string=gui_phil)
         olx.gui_phil_handler.rebuild_index()
         self.g = getattr(olx.gui_phil_handler.get_python_object(), 'gui')
 
@@ -60,13 +62,15 @@ class PluginTools(object):
       return
     from gui.tools import make_single_gui_image
     from gui.tools import add_tool_to_index
-
+    import gui.help
     for image, img_type in self.p_img:
       make_single_gui_image(image, img_type=img_type)
     olx.FlushFS()
 
     if self.p_htm:
-      add_tool_to_index(scope=self.p_name, link=self.p_htm, path=self.p_path, location=self.params.gui.location, before=self.params.gui.before, filetype='')
+      image = self.p_img[0][0]
+      add_tool_to_index(scope=self.p_name, link=self.p_htm, path=self.p_path, location=self.params.gui.location, before=self.params.gui.before, filetype='', image=image)
+    gui.help.gh.git_help(quick=False, specific=self.p_path)
 
   def edit_customisation_folder(self,custom_name=None):
     self.get_customisation_path(custom_name=None)
@@ -117,111 +121,37 @@ def make_new_plugin(name,overwrite=False):
        'name_lower':name.lower(),
        'plugin_base':plugin_base,
        }
-
-  py = '''
-from olexFunctions import OlexFunctions
-OV = OlexFunctions()
-
-import os
-import htmlTools
-import olex
-import olx
-
-instance_path = OV.DataDir()
-
-p_path = os.path.dirname(os.path.abspath(__file__))
-
-l = open(os.sep.join([p_path, 'def.txt'])).readlines()
-d = {}
-for line in l:
-  line = line.strip()
-  if not line or line.startswith("#"):
-    continue
-  d[line.split("=")[0].strip()] = line.split("=")[1].strip()
-
-p_name = d['p_name']
-p_htm = d['p_htm']
-p_img = eval(d['p_img'])
-p_scope = d['p_scope']
-
-OV.SetVar('%(name)s_plugin_path', p_path)
-
-from PluginTools import PluginTools as PT
-
-class %(name)s(PT):
-
-  def __init__(self):
-    super(%(name)s, self).__init__()
-    self.p_name = p_name
-    self.p_path = p_path
-    self.p_scope = p_scope
-    self.p_htm = p_htm
-    self.p_img = p_img
-    self.deal_with_phil(operation='read')
-    self.print_version_date()
-    self.setup_gui()
-    OV.registerFunction(self.print_formula,True,"%(name)s")
-
-  def print_formula(self):
-    formula = {}
-    for element in str(olx.xf.GetFormula('list')).split(','):
-      element_type, n = element.split(':')
-      print "%%s: %%s" %%(element_type, n)
-      formula.setdefault(element_type, float(n))
-
-%(name)s_instance = %(name)s()
-print "OK."''' %d
+  template_src = os.sep.join([os.path.dirname(os.path.abspath(__file__)), 'plugin_skeleton.txt'])
+  py = gui.tools.TemplateProvider.get_template('plugin_skeleton_py', marker='@-@', path=template_src, force=debug)%d
 
   wFile = open("%(plugin_base)s/plugin-%(name)s/%(name)s.py"%d,'w')
   wFile.write(py)
   wFile.close()
 
-  phil = '''
-%(name_lower)s{
-  gui{
-    location = 'tools'
-      .type = str
-      .help = The tab item where the %(name)s GUI shall appear.
-    before = 'images'
-      .type = str
-      .help = The tool before which the %(name)s GUI shall appear.
-    }
-}
-''' %d
+  phil = gui.tools.TemplateProvider.get_template('plugin_skeleton_phil', marker='@-@', path=template_src, force=debug)%d
+
   wFile = open("%(plugin_base)s/plugin-%(name)s/%(name_lower)s.phil"%d,'w')
   wFile.write(phil)
   wFile.close()
 
-
-  html = r'''
-<!-- #include tool-top gui/blocks/tool-top.htm;image=#image;onclick=#onclick;1; -->
-<!-- #include tool-row-help gui/blocks/tool-row-help.htm;name=%(name)s_1; help_ext=%(name)s_1;1; -->
-  <td ALIGN='left' width='100%%'>
-    <b>Welcome to your new Plugin: %(name)s</b>
-  </td>
-<!-- #include row_table_off gui/blocks/row_table_off.htm;1; -->
-
-<!-- #include tool-row-help gui/blocks/tool-row-help.htm;name=%(name)s_2; help_ext=%(name)s_2;1; -->
-  <td ALIGN='left' width='100%%'>
-    <b><a href="spy.%(name)s.print_formula()">RUN</a>
-  </td>
-<!-- #include row_table_off gui/blocks/row_table_off.htm;1; -->
-
-<!-- #include tool-footer gui/blocks/tool-footer.htm;colspan=2;1; -->
-  ''' %d
+  html = gui.tools.TemplateProvider.get_template('plugin_skeleton_html', path=template_src, force=debug)%d
   wFile = open("%(plugin_base)s/plugin-%(name)s/%(name_lower)s.htm"%d,'w')
   wFile.write(html)
   wFile.close()
 
-  def_t = r'''
-  p_name = %(name)s
-  p_htm = %(name)s
-  p_img = [("%(name)s",'h1')]
-  p_scope = %(name_lower)s'''%d
+  def_t = gui.tools.TemplateProvider.get_template('plugin_skeleton_def', path=template_src, force=debug)%d
 
   wFile = open("%(plugin_base)s/plugin-%(name)s/def.txt"%d,'w')
   wFile.write(def_t)
   wFile.close()
+
+  h3_extras = gui.tools.TemplateProvider.get_template('plugin_h3_extras', path=template_src, force=debug)%d
+
+  wFile = open("%(plugin_base)s/plugin-%(name)s/h3-%(name)s-extras.htm"%d,'w')
+  wFile.write(h3_extras)
+  wFile.close()
+
+
 
   if not os.path.exists(xld):
     wFile = open(xld, 'w')

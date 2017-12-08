@@ -25,6 +25,7 @@ haveGUI = OV.HasGUI()
 
 import olexex
 import olex_gui
+import gui
 
 import re
 
@@ -32,6 +33,18 @@ import time
 
 global regex_l
 regex_l = {}
+
+global cache
+cache = {}
+
+gui_green = OV.GetParam('gui.green')
+gui_orange = OV.GetParam('gui.orange')
+gui_red = OV.GetParam('gui.red')
+gui_grey = OV.GetParam('gui.grey')
+grade_1_colour = OV.GetParam('gui.skin.diagnostics.colour_grade1').hexadecimal
+grade_2_colour = OV.GetParam('gui.skin.diagnostics.colour_grade2').hexadecimal
+grade_3_colour = OV.GetParam('gui.skin.diagnostics.colour_grade3').hexadecimal
+grade_4_colour = OV.GetParam('gui.skin.diagnostics.colour_grade4').hexadecimal
 
 
 class FolderView:
@@ -214,7 +227,7 @@ def __inject_into_tool(tool, t, where,befaf='before'):
   OlexVFS.write_to_olex('%s%s' %(OV.BaseDir(), tool), u, txt)
 
 
-def add_tool_to_index(scope="", link="", path="", location="", before="", filetype="", level="h2", state="2"):
+def add_tool_to_index(scope="", link="", path="", location="", before="", filetype="", level="h2", state="2", image=""):
   import OlexVFS
   if not OV.HasGUI:
     return
@@ -252,10 +265,10 @@ def add_tool_to_index(scope="", link="", path="", location="", before="", filety
 
   if not filetype:
     t = r'''
-<!-- #include %s-%s-%s-%s "'%s/%s.htm'";gui\blocks\tool-off.htm;image=%s;onclick=;2; -->''' %(level, location, scope, link, path, link, link)
+<!-- #include %s-%s-%s-%s "'%s/%s.htm'";gui\blocks\tool-off.htm;image=%s;onclick=;%s; -->''' %(level, location, scope, link, path, link, image, state)
   else:
     t = r'''
-<!-- #includeif IsFileType('%s') %s-%s-%s-%s %s/%s.htm;gui\blocks\tool-off.htm;image=%s;onclick=;2; -->''' %(filetype, level, location, scope, link, path, link, link)
+<!-- #includeif IsFileType('%s') %s-%s-%s-%s %s/%s.htm;gui\blocks\tool-off.htm;image=%s;onclick=;%s; -->''' %(filetype, level, location, scope, link, path, link, image,state)
 
 
   index_text = ""
@@ -680,7 +693,8 @@ def makeFormulaForsNumInfo():
   update = '<table border="0" cellpadding="0" cellspacing="0"><tr><td>%s</td><td>%s</td></tr></table>'%(formula_string, refresh_button)
   OV.write_to_olex('snumformula.htm', update)
   if debug:
-    print "Formula sNum (2): %.5f" %(time.time() - t1)
+    pass
+    #print "Formula sNum (2): %.5f" %(time.time() - t1)
 
   return "<!-- #include snumformula snumformula.htm;1 -->"
 OV.registerFunction(makeFormulaForsNumInfo)
@@ -755,12 +769,134 @@ $spy.MakeHoverButton('btn-info@cell@%s',"spy.make_help_box -name=cell-not-quite-
   </tr>
   ''' %d
   OV.write_to_olex('celldimensiondisplay.htm', t)
-  if debug:
-    print "Cell: %.5f" %(time.time() - t1)
+  #if debug:
+    #print "Cell: %.5f" %(time.time() - t1)
   return "<!-- #include celldimensiondisplay celldimensiondisplay.htm;1 -->"
 
 OV.registerFunction(make_cell_dimensions_display,True,"gui.tools")
 
+
+def weightGuiDisplay():
+  if olx.IsFileType('ires').lower() == 'false':
+    return ''
+  longest = 0
+  retVal = ""
+  current_weight = olx.Ins('weight')
+  if current_weight == "n/a": return ""
+  current_weight = current_weight.split()
+  if len(current_weight) == 1:
+    current_weight = [current_weight[0], '0']
+  length_current = len(current_weight)
+  suggested_weight = OV.GetParam('snum.refinement.suggested_weight')
+  if suggested_weight is None: suggested_weight = []
+  if len(suggested_weight) < length_current:
+    for i in xrange (length_current - len(suggested_weight)):
+      suggested_weight.append(0)
+  if suggested_weight:
+    for curr, sugg in zip(current_weight, suggested_weight):
+      curr = float(curr)
+      if curr-curr*0.01 <= sugg <= curr+curr*0.01:
+        colour = gui_green
+      elif curr-curr*0.1 < sugg < curr+curr*0.1:
+        colour = gui_orange
+      else:
+        colour = gui_red
+      sign = "+"
+      if curr-sugg == 0:
+        sign = "="
+        sugg = 0
+      elif curr-sugg > 0:
+        sign = "-"
+        sugg = sugg/curr
+      else:
+        sign = "+"
+        sugg = curr/sugg
+      if sugg != 0:
+        sugg_perc = "%s%.0f%%&nbsp;" %(sign, (100-sugg*100))
+      else:
+        sugg_perc = "--"
+      retVal += "%.3f&nbsp;<font color='%s'><b>%s</b></font>&nbsp;|&nbsp;" %(curr, colour, sugg_perc)
+    html_scheme = retVal.strip("|&nbsp;")
+  else:
+    html_scheme = current_weight
+
+  wght_str = ""
+  for i in suggested_weight:
+    wght_str += " %.3f" %i
+  txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update")
+  html = "%s" %html_scheme
+  return html
+OV.registerFunction(weightGuiDisplay,True,"gui.tools")
+
+
+def number_non_hydrogen_atoms():
+  return sum(atom['occu'][0] for atom in self.atoms() if atom['type'] not in ('H','Q'))
+
+def getExpectedPeaks():
+  orm = olexex.OlexRefinementModel()
+  return orm.getExpectedPeaks()
+
+def refine_extinction():
+
+  retVal = ""
+  _ = olx.xf.rm.Exti()
+
+  if "n/a" not in _.lower() and _ != '0':
+    _ = _.split('(')
+    exti = _[0]
+    esd = _[1].rstrip(')')
+    exti_f = float(exti)
+    _ = len(exti) - len(esd) -2
+    esd_f = float("0.%s%s" %(_*"0", esd))
+    retVal = "%s(%s)"%(exti,esd)
+  return retVal
+
+
+  ### The stuff below needs careful thinking about. For now, revert back to simple on/off operation. Sorry Guys!
+
+  ## snmum.refine_extinction 0: DO NOT refine extinction AGAIN
+  ## snmum.refine_extinction 1: Try and refine extinction
+  ## snmum.refine_extinction 2: Refine in any case
+
+  #if getExpectedPeaks() > 2:
+    #OV.SetParam('snum.refinement.refine_extinction',1)
+    #return "Not Tested"
+
+  #retVal = "n/a"
+  #_ = olx.xf.rm.Exti()
+  #if "n/a" not in _.lower() and _ != '0':
+    #_ = _.split('(')
+    #exti = _[0]
+    #esd = _[1].rstrip(')')
+    #exti_f = float(exti)
+    #_ = len(exti) - len(esd) -2
+    #esd_f = float("0.%s%s" %(_*"0", esd))
+
+
+    #_ = OV.GetParam('snum.refinement.refine_extinction',1)
+    #if _ == 3:
+      #retVal = "%s(%s)"%(exti,esd)
+      #retVal += "<font color=%s><b>*&nbsp;</b></font>" %gui_green
+    #if _ == 0:
+      #OV.SetParam('snum.refinement.refine_extinction_tickbox',False)
+      #retVal="not refined<font color=%s><b>*&nbsp;</b></font>" %gui_red
+    #else:
+      #OV.SetParam('snum.refinement.refine_extinction_tickbox', True)
+
+      #if exti_f/esd_f < 2:
+        #print "Extinction was refined to %s(%s). From now on, it will no longer be refined, unless you tick the box in the refinement settings" %(exti, esd)
+        #OV.SetParam('snum.refinement.refine_extinction',1)
+        #olex.m("DelIns EXTI")
+        #retVal = "%s(%s)"%(exti,esd)
+      #else:
+        #retVal = "%s(%s)"%(exti,esd)
+  #else:
+    #if OV.GetParam('snum.refinement.refine_extinction_tickbox'):
+      #olex.m("AddIns EXTI")
+
+  #return retVal
+
+OV.registerFunction(refine_extinction,True,"gui.tools")
 
 
 def hasDisorder():
@@ -786,7 +922,7 @@ def sel_part(part,sel_bonds=True):
       olex.m("sel bonds where xbond.a.selected==true||xbond.b.selected==true")
 OV.registerFunction(sel_part,False,'gui.tools')
 
-def make_disorder_quicktools(scope='main'):
+def make_disorder_quicktools(scope='main', show_options=True):
   import olexex
   parts = set(olexex.OlexRefinementModel().disorder_parts())
   select = OV.GetParam('user.parts.select')
@@ -797,85 +933,16 @@ def make_disorder_quicktools(scope='main'):
       sel = ">>sel part %s" %item
     if item == 0:
       continue
-    if item == 1 or item == 2:
-      parts_display += "<a href='ShowP 0 %s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%s)'><b>PART %s</b></a> | " %(item, item, item)
-    else:
-      parts_display += "<a href='ShowP 0 %s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%s)'><b>%s</b></a> | " %(item, item, item)
+    d = {'part':item}
+    parts_display += gui.tools.TemplateProvider.get_template('part_0_and_n', force=debug)%d
 
-  checkbox_unique = '''
-    <font size=$GetVar(HtmlFontSizeControls)>
-  <input
-    type='checkbox'
-    bgcolor="GetVar('HtmlTableBgColour')"
-    name='KEEP_UNIQUE@%s'
-    checked="spy.GetParam('user.parts.keep_unique')"
-    oncheck="spy.SetParam('user.parts.keep_unique','true')>>uniq"
-    onuncheck="spy.SetParam('user.parts.keep_unique','false')"
-    target="Keep showing single fragments when switching the PART view"
-    onclick=""
-    value=''
-  >
-  </font>'''%scope
+  d={'parts_display':parts_display, 'scope':scope}
+  if show_options:
+    retVal = gui.tools.TemplateProvider.get_template('disorder_quicktool', force=debug)%d
+  else:
+    retVal = gui.tools.TemplateProvider.get_template('disorder_quicktool_no_options', force=debug)%d
+  return retVal
 
-
-  checkbox_sel = '''
-    <font size=$GetVar(HtmlFontSizeControls)>
-  <input
-    type='checkbox'
-    bgcolor="GetVar('HtmlTableBgColour')"
-    name='SELECT_PARTS@%s'
-    checked="spy.GetParam('user.parts.select')"
-    oncheck="spy.SetParam('user.parts.select','true')"
-    onuncheck="spy.SetParam('user.parts.select','false')"
-    target="Auto-Select PARTS"
-    onclick=""
-    value=''
-  >
-  </font>'''%scope
-
-
-  txt = r'''
-  <td width='23%%'>
-    <b>Show PART 0 AND</b>
-  </td>
-  <td width='38%%' align='left'>
-  %s
-    <a href='ShowP'><b>All</b></a>
-  </td>
-
-  <td width='4%%' align='right'>
-  Sel
-  </td>
-
-  <td width='4%%' align='right'>
-  %s
-  </td>
-
-  <td width='5%%' align='right'>
-  Unique
-  </td>
-
-  <td width='4%%' align='right'>
-  %s
-  </td>
-
-  <td width='20%%' align='right'>
-  <font size="$GetVar('HtmlFontSizeControls')">
-  <input
-    type='combo'
-    width='100%%'
-    height="$GetVar('HtmlInputHeight')"
-    name='set_label_content_disorder@%s'
-    value='Labels'
-    items="Occupancy<-o;Chem Occ.<-co;PART No<-p;Link-Code<-v;Labels<-l"
-    bgcolor="$GetVar('HtmlInputBgColour')"
-    onchange="spy.ChooseLabelContent(html.GetValue('~name~'))"
-    readonly='readonly'
-  >
-  </font>
-  </td>
-  ''' %(parts_display, checkbox_sel, checkbox_unique, scope)
-  return txt
 OV.registerFunction(make_disorder_quicktools,False,'gui.tools')
 
 def deal_with_gui_phil(action):
@@ -979,12 +1046,13 @@ class Templates():
     self.templates = {}
     self.get_all_templates()
 
-  def get_template(self, name, force=False, path=None, mask="*.*", marker='{-}'):
+  def get_template(self, name, force=debug, path=None, mask="*.*", marker='{-}'):
     '''
     Returns a particular template from the Template.templates dictionary. If it doesn't exist, then it will try and get it, and return a 'not found' string if this does not succeed.
     -- if force==True, then the template will be reloaded
     -- if path is provided, then this location will also be searched.
     '''
+
     retVal = self.templates.get(name, None)
     if not retVal or force:
       self.get_all_templates(path=path, mask=mask, marker=marker)
@@ -1000,13 +1068,19 @@ class Templates():
     '''
     if not path:
       path = os.sep.join([OV.BaseDir(), 'util', 'pyUtil', 'gui', 'templates'])
-
-    g = glob.glob("%s%s%s" %(path,os.sep,mask))
+    if path[-4:-3] != ".": #i.e. a specific template file has been provided
+      g = glob.glob("%s%s%s" %(path,os.sep,mask))
+    else:
+      g = [path]
+    _ = os.sep.join([OV.DataDir(), 'custom_templates.html'])
+    if os.path.exists(_): g.append(_)
     for f_path in g:
       fc = open(f_path, 'r').read()
       if not self._extract_templates_from_text(fc,marker=marker):
         name = os.path.basename(os.path.normpath(f_path))
         self.templates[name] = fc
+    #for name in self.templates:
+      #OlexVFS.write_to_olex(name, self.templates[name])
 
   def _extract_templates_from_text(self, t, marker):
     mark = marker.split('-')
@@ -1043,6 +1117,146 @@ def _get_available_html_width(margin_adjust = True, first_col_width_adjust=True,
 
   return width, max_width
 
+
+def get_diagnostics_colour(scope, item, val):
+  try:
+    val = float(val)
+    #if val < 0:
+      #val = -val
+  except:
+    val = 0
+
+  mindfac = 1
+  if item == 'MinD':
+    mindfac = float(olx.xf.exptl.Radiation())/0.71
+
+  op = OV.GetParam('user.diagnostics.%s.%s.op' %(scope, item))
+  if op == "between":
+    soll = OV.GetParam('user.diagnostics.%s.%s.soll' %(scope, item))
+  for i in xrange(4):
+    i += 1
+    if op == "greater":
+      if val >= OV.GetParam('user.diagnostics.%s.%s.grade%s' %(scope, item, i)) * mindfac:
+        break
+    elif op == 'smaller':
+      if val <= OV.GetParam('user.diagnostics.%s.%s.grade%s' %(scope, item, i)) * mindfac:
+        break
+    elif op == 'between':
+      if val - (OV.GetParam('user.diagnostics.%s.%s.grade%s' %(scope, item, i))) * mindfac <= soll <= val + (OV.GetParam('user.diagnostics.%s.%s.grade%s' %(scope, item, i))) * mindfac:
+        break
+
+  if i == 1:
+    retVal = grade_1_colour
+  elif i == 2:
+    retVal = grade_2_colour
+  elif i == 3:
+    retVal = grade_3_colour
+  elif i == 4:
+    retVal = grade_4_colour
+
+  return retVal
+
+
+def GetRInfo(txt="",format='html'):
+  if not OV.HasGUI():
+    return
+
+  t = "ERROR!"
+  use_history_for_R1_display = True
+  if use_history_for_R1_display:
+    if olx.IsFileType('cif') == "true":
+      R1 = olx.Cif('_refine_ls_R_factor_gt')
+      wR2 = olx.Cif('_refine_ls_wR_factor_ref')
+    else:
+      R1 = OV.GetParam('snum.refinement.last_R1')
+      wR2 = OV.GetParam('snum.refinement.last_wR2')
+      if not R1:
+        tree = History.tree
+        if tree.active_node is not None:
+          R1 = tree.active_node.R1
+        else:
+          R1 = 'n/a'
+    if R1 == cache.get('R1', None):
+      return cache.get('GetRInfo', 'XXX')
+
+    cache['R1'] = R1
+    font_size_R1 = olx.GetVar('HtmlFontSizeExtraLarge')
+    font_size_wR2 = olx.GetVar('HtmlFontSizeMedium')
+    if 'html' in format:
+      try:
+        R1 = float(R1)
+        col_R1 = gui.tools.get_diagnostics_colour('refinement','R1', R1)
+        R1 = "%.2f" %(R1*100)
+
+        wR2 = float(wR2)
+        col_wR2 = gui.tools.get_diagnostics_colour('refinement','wR2', wR2)
+        wR2 = "%.2f" %(wR2*100)
+
+
+        if 'report' in format:
+          t = r"<font size='%s'><font color='%s'><b>%s%%</b></font></font>" %(font_size, col_wR2, R2)
+          t += r"<font size='%s'><font color='%s'><b>%s%%</b></font></font>" %(font_size, col_R1, R1)
+        else:
+          d = {
+            'R1':R1,
+            'wR2':wR2,
+            'font_size_R1':font_size_R1,
+            'font_size_wR2':font_size_wR2,
+            'font_size_label':str(int(font_size_wR2) - 1),
+            'font_colour_R1':col_R1,
+            'font_colour_wR2':col_wR2,
+            'grey':gui_grey
+          }
+          t =gett('R_factor_display')%d
+      except:
+        t = "<td colspan='2' align='right' rowspan='2' align='right'><font size='%s'><b>%s</b></font></td>" %(font_size_R1, R1)
+      finally:
+        retVal = t
+
+    elif format == 'float':
+      try:
+        t = float(R1)
+      except:
+        t = 0
+      finally:
+        retVal = t
+
+  else:
+    if txt:
+      t = "<td colspan='1' rowspan='2' align='center'><font size='4'><b>%s</b></font></td>" %txt
+    else:
+      try:
+        look = olex.f('IsVar(snum_refinement_last_R1)')
+        if look == "true":
+          R1 = olex.f('GetVar(snum_refinement_last_R1)')
+        else:
+          if olx.IsFileType('cif') == "true":
+            R1 = olx.Cif('_refine_ls_R_factor_gt')
+          else:
+            R1 = olex.f('Lst(R1)')
+      except:
+        R1 = 0
+      try:
+        R1 = float(R1)
+        col = GetRcolour(R1)
+        R1 = "%.2f" %(R1*100)
+        t = r"""
+<td colspan='1' align='center' rowspan='2'>
+  <font size='%s' color='%s'>
+    <b>%s%%</b>
+  </font>
+</td>
+""" %(OV.GetParam('gui.html.font_size_extra_large'), col, R1)
+      except:
+        t = "<td colspan='1' rowspan='2' align='center'><font size='4'><b>%s</b></font></td>" %R1
+    retVal = t
+  cache['GetRInfo'] = retVal
+  return retVal
+OV.registerFunction(GetRInfo)
+
+
+
+
 def resize_pdf(f_in, setting='printer'):
   if ".pdf" in f_in:
     small_file = f_in.split(".")[0] + "_small" + f_in.split(".")[1]
@@ -1055,3 +1269,5 @@ def resize_pdf(f_in, setting='printer'):
   cmd = r'"C:\Program Files\gs\gs9.06\bin\gswin64" ' + options
   os.system(cmd)
 OV.registerFunction(resize_pdf,False,'gui.tools')
+
+gett = TemplateProvider.get_template

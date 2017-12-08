@@ -33,7 +33,11 @@ gui
     .type = colour
   blue = #0033ff
     .type = colour
+  light_blue = #0080ff
+    .type = colour
   grey = #555555
+    .type = colour
+  light_grey = #dedede
     .type = colour
   orange = #ff8f00
     .type = colour
@@ -105,6 +109,19 @@ gui
       .type = int
     icon_border_colour = #bcbcbc
       .type = colour
+    link_type = 'gui-link-button'
+      .type = str
+    default_link = 'gui/snippets/gui-link-button'
+      .type = str
+    link_button{
+      flat = False
+        .type = bool
+      bgcolor = #transparent
+        .type = str
+      fgcolor = #0064b4
+        .type = colour
+    }
+
     diagnostics {
       colour_grade1 = #307125
         .type = colour
@@ -632,6 +649,23 @@ gui
     .type = strings
   archive_last = None
     .type = strings
+
+  help{
+    src = "BaseDir()\etc\help"
+      .type = str
+    width_fraction = 0.333
+      .type = float
+    font_size_base = 3
+      .type = int
+    pop_template = 'md_box'
+      .type = str
+    git_url = "https://github.com/Olex2/help/tree/master/gui/"
+      .type = str
+    language = "EN"
+      .type = str
+    code_buttons_flat = True
+      .type = bool
+  }
 
   help_box{
     width = 450

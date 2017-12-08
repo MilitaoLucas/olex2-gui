@@ -1,0 +1,42 @@
+#value=
+#label=
+#min=
+#max=
+#width=100%
+#readonly=true
+#manage=false
+#onchangealways=false
+#setdefault=false
+#disabled=false
+#bgcolor=GetVar('HtmlInputBgColour')
+#fgcolor=GetVar('HtmlFontColour')
+#width='100%'
+#td1=<td>
+#td2=</td>
+
+#td1
+  <font size="$GetVar('HtmlFontSizeControls')">
+    <input
+      type="spin"
+      height="GetVar('HtmlComboHeight')"
+      bgcolor="#bgcolor"
+      fgcolor="GetVar(HtmlFontColour)"
+      valign="center"
+      min="#min"
+      max="#max"
+      name="#name"
+      width="100%"
+      value="#value"
+      label="#label"
+      setdefault="#setdefault"
+      disabled="#disabled"
+      onchange="#onchange"
+      onleave="#onleave"
+      readonly="#readonly"
+      onchangealways="#onchangealways"
+      manage="#manage"
+      onreturn="#onreturn"
+      onenter="#onenter"
+    >
+  </font>
+#td2

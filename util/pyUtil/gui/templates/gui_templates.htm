@@ -14,3 +14,167 @@ t:cif_export_gui{
 
 t:cif_no_embedded_files{
 <font color=$GetVar(gui.orange)>You need a res/ins and hkl file to refine this structure</font>}
+
+
+t:part_0_and_n{
+<td align='left'>
+<font size="$GetVar('HtmlFontSizeControls')"><b>
+<input
+  type="button"
+  name="0 | %(part)s"
+  value="0 | %(part)s"
+  width="100%%"
+  onclick="ShowP 0 %(part)s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%(part)s)>>focus"
+  bgcolor="$GetVar('linkButton.bgcolor')"
+  fgcolor="$GetVar('linkButton.fgcolor')"
+  flat="$GetVar(linkButton.flat)"
+></b>
+</font>
+</td>
+
+<!--
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=0 | %(part)s",
+    "onclick=ShowP 0 %(part)s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%(part)s)>>focus",
+    )$-
+-->
+
+}
+
+t:disorder_quicktool_no_options{
+
+  %(parts_display)s
+
+  <td>
+
+<font size="$GetVar('HtmlFontSizeControls')"><b>
+<input
+  type="button"
+  name="ALL"
+  value="All"
+  width="100%%"
+  onclick="showP"
+  bgcolor="$GetVar('linkButton.bgcolor')"
+  fgcolor="$GetVar('linkButton.fgcolor')"
+  flat="$GetVar(linkButton.flat)"
+></b>
+</font>
+
+</td>
+}
+
+
+t:disorder_quicktool{
+
+  %(parts_display)s
+
+  <td>
+
+<font size="$GetVar('HtmlFontSizeControls')"><b>
+<input
+  type="button"
+  name="ALL"
+  value="All"
+  width="100%%"
+  onclick="showP"
+  bgcolor="$GetVar('linkButton.bgcolor')"
+  fgcolor="$GetVar('linkButton.fgcolor')"
+  flat="$GetVar(linkButton.flat)"
+></b>
+</font>
+
+  </td>
+
+  <td width='4%%' align='right'>
+  Sel
+  </td>
+
+  <td width='4%%' align='right'>
+    <font size=$GetVar(HtmlFontSizeControls)>
+    <input
+      type='checkbox'
+      bgcolor="GetVar('HtmlTableBgColour')"
+      name='SELECT_PARTS@%(scope)s'
+      checked="spy.GetParam('user.parts.select')"
+      oncheck="spy.SetParam('user.parts.select','true')"
+      onuncheck="spy.SetParam('user.parts.select','false')"
+      target="Auto-Select PARTS"
+      onclick=""
+      value=''
+    >
+    </font>
+  </td>
+
+  <td width='5%%' align='right'>
+  Unique
+  </td>
+
+  <td width='4%%' align='right'>
+    <font size=$GetVar(HtmlFontSizeControls)>
+    <input
+      type='checkbox'
+      bgcolor="GetVar('HtmlTableBgColour')"
+      name='KEEP_UNIQUE@%(scope)s'
+      checked="spy.GetParam('user.parts.keep_unique')"
+      oncheck="spy.SetParam('user.parts.keep_unique','true')>>uniq"
+      onuncheck="spy.SetParam('user.parts.keep_unique','false')"
+      target="Keep showing single fragments when switching the PART view"
+      onclick=""
+      value=''
+    >
+    </font>
+  </td>
+
+  <td width='20%%' align='right'>
+  <font size="$GetVar('HtmlFontSizeControls')">
+  <input
+    type='combo'
+    width='100%%'
+    height="$GetVar('HtmlInputHeight')"
+    name='set_label_content_disorder@%(scope)s'
+    value='Labels'
+    items="Occupancy<-o;Chem Occ.<-co;PART No<-p;Link-Code<-v;Labels<-l"
+    bgcolor="$GetVar('HtmlInputBgColour')"
+    onchange="spy.ChooseLabelContent(html.GetValue('~name~'))"
+    readonly='readonly'
+  >
+  </font>
+  </td>
+}
+
+t:minimal_gui_link_button{
+  <font size="$GetVar('HtmlFontSizeControls')"><b>
+    <input
+      type="button"
+      name="%(name)s"
+      value="%(value)s"
+      width="#width"
+      height="#height"
+      onclick="#onclick>>focus"
+      fgcolor="#fgcolor"
+      bgcolor="#bgcolor"
+      fit="#fit"
+      flat="#flat"
+      hint="#hint"
+      disabled="#disabled"
+    >
+  </font>
+}
+
+t:R_factor_display{
+<table width='100%%' cellspacing='0' cellpadding='0'>
+  <tr>
+    <td align='right'>
+      <font size='%(font_size_wR2)s' color='%(grey)s'><b><i>R</i><sub>1&nbsp;</sub>=</b>&nbsp;</font></td>
+    <td align='center'>
+      <font size='%(font_size_R1)s' color='%(font_colour_R1)s'><b>%(R1)s%%</b></font></td>
+  </tr>
+  <tr>
+    <td align='right'>
+      <font size='%(font_size_label)s' color='%(grey)s'><b><i>wR</i><sub>2&nbsp;</sub>=</b>&nbsp;</font></td>
+    <td align='center'>
+      <font size='%(font_size_wR2)s' color='%(font_colour_wR2)s'><b>%(wR2)s%%</b></font></td>
+  </tr>
+</table>
+}

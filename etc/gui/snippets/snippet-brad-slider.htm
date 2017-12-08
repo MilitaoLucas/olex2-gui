@@ -1,8 +1,11 @@
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr>
-        <td align='right' width="12%">
-            <a href=spy.SetParam(user.bonds.bzoom,math.eval(html.GetValue(BZOOMValue)))>SET</a>
-        </td>
+          $+
+          html.Snippet(GetVar(default_link),
+          "name=Set#scope",
+          "value=Set",
+          "onclick=spy.SetParam(user.bonds.bzoom,math.eval(html.GetValue(BZOOMValue)))",
+          )$-
 
         <td align='left' name=BZOOM_SLIDER width="73%">
           <font size='$GetVar(HtmlFontSizeControls)'>
