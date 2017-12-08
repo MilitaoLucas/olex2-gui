@@ -1,23 +1,33 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='OMIT_REFLECTIONS';help_ext=omit-reflections;1 -->
-  <td width="10%">
 
-$spy.MakeHoverButton('small-OMIT','Omit html.GetValue(omit_filter)')
 
-    <!--<input type="button" value="Omit" fit="true" onclick="Omit html.GetValue(omit_filter)"/>-->
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=OMIT",
+    "onclick=omit html.GetValue(omit_filter)",
+    )
+  $-
 
-  </td>
-  <td width="50%">
+  <td width="45%">
     all reflections where |Error/esd| > than
   </td>
-  <td width="10%">$+
-    html.Snippet("gui/snippets/input-text", "name=omit_filter",
-     "value=5")
-  $-</td>
-  <td align="right">
-    <input type="button" value="Clear omits" fit="true" onclick="DelIns OMIT"/>
-  </td>
+
+  $+
+    html.Snippet("gui/snippets/input-text-td",
+    "name=omit_filter",
+    "value=10"
+    )
+  $-
+
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=ClearOMITs",
+    "onclick=DelIns OMIT",
+    )
+  $-
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='BAD_REFLECTIONS_SORTING';help_ext=Bad-Reflections-Sorting;1 -->

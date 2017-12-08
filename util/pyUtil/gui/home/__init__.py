@@ -1,5 +1,6 @@
 import olex
 import olx
+import OlexVFS
 import os
 
 from olexFunctions import OlexFunctions
@@ -48,9 +49,21 @@ class MultipleDataset:
       if i == current:
         html += "<td align='center' width='25%'><b>" + display + "&nbsp;(*)</b></td>"
       else:
-        html += "<td align='center' width='25%'><a href='reap filename().cif#" + str(i) + "'>"\
-           + display + "</a></td>"
-    return html + "</tr></table>"
+        action = 'reap filename().cif#' + str(i)
+        #html += "<td align='center' width='25%'><a href='reap filename().cif#" + str(i) + "'>"\
+           #+ display + "</a></td>"
+        html += '''
+    $+
+      html.Snippet(GetVar(default_link),
+      "value=%s",
+      "onclick=%s",
+      )
+    $-''' %(display, action)
+
+    html + "</tr></table>"
+    name = 'multicif.htm'
+    OlexVFS.write_to_olex(name, html)
+    return "<!-- #include multicif %s;1; -->" %name
 
 mds = MultipleDataset()
 olex.registerFunction(mds.check, False, "gui.home.multiple_dataset")

@@ -1,19 +1,31 @@
-  <td width='45%'>
-    &nbsp;%<b>Split</b> atoms you <b>click next</b> with% 
+  <td width='30%'>
+    &nbsp;Split &amp; restrain on click
   </td>
 
-  <td width='18%' align='left'>
-  <a href = "mode split">No Restraint</a>
-  </td>
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Split",
+    "onclick=mode split",
+    "hint=mode split",
+    )$-
 
-  <td width='12%' align='center'>
-  <a href = "mode split -r=EADP">EADP</a>
-  </td>
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=EADP",
+    "onclick=mode split -r=EADP",
+    "hint=mode split -r=EADP",
+    )$-
 
-  <td width='13%' align='center'>
-  <a href = "mode split -r=ISOR">ISOR</a>
-  </td>
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=ISOR",
+    "onclick=mode split -r=ISOR",
+    "hint=mode split -r=ISOR",
+    )$-
 
-  <td width='12%' align='right'>
-  <a href = "mode split -r=SIMU">SIMU</a>
-  </td>
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=SIMU",
+    "onclick=mode split -r=SIMU",
+    "hint=mode split -r=SIMU",
+    )$-

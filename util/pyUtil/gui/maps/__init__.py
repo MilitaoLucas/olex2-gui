@@ -148,6 +148,34 @@ class MapUtil:
     return e%value
 
 
+  def get_best_contour_maps(self):
+    maximum = float(olx.xgrid.GetMax())
+    minimum = float(olx.xgrid.GetMin())
+    contours = OV.GetParam('snum.xgrid.contours') - 1
+    difference = maximum + minimum * -1
+
+    maximum = round(maximum,2)
+    minimum = round(minimum,2)
+
+    difference = abs(maximum) + abs(minimum)
+
+    step = round(difference/contours,3)
+
+    OV.SetParam('snum.xgrid.step',difference/contours)
+    OV.SetParam('snum.xgrid.fix',minimum)
+    OV.SetParam('snum.xgrid.step',step)
+
+    if difference < 1:
+      OV.SetParam('snum.xgrid.slider_scale',20)
+    elif difference < 2:
+      OV.SetParam('snum.xgrid.slider_scale',10)
+    elif difference < 5:
+      OV.SetParam('snum.xgrid.slider_scale',5)
+
+    olx.xgrid.Fix(minimum, step)
+    olx.html.Update()
+
+
 if OV.HasGUI():
   mu = MapUtil()
   OV.registerFunction(mu.VoidView, False, "gui.maps")
@@ -155,3 +183,4 @@ if OV.HasGUI():
   OV.registerFunction(mu.MapView, False, "gui.maps")
   OV.registerFunction(mu.MaskView, False, "gui.maps")
   OV.registerFunction(mu.Round, False, "gui.maps")
+  OV.registerFunction(mu.get_best_contour_maps, False, "gui.maps")

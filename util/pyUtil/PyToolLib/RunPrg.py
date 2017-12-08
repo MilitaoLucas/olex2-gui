@@ -22,6 +22,34 @@ import time
 
 import shutil
 
+# The listeners expect a function
+
+class ListenerManager(object):
+  def __init__(self):
+    self.onStart_listeners = []
+    self.onEnd_listeners = []
+  def register_listener(self, listener,event):
+    if event == "onEnd":
+      for l in self.onEnd_listeners:
+        if type(l.__self__) == type(listener.__self__):
+          return False
+      self.onEnd_listeners.append(listener)
+    elif event == "onStart":
+      for l in self.onStart_listeners:
+        if type(l.__self__) == type(listener.__self__):
+          return False
+      self.onStart_listeners.append(listener)
+
+  def startRun(self, caller):
+    for item in self.onStart_listeners:
+      item(caller)
+
+  def endRun(self, caller):
+    for item in self.onEnd_listeners:
+      item(caller)
+
+LM = ListenerManager()
+
 class RunPrg(ArgumentParser):
   running = False
 
@@ -31,7 +59,7 @@ class RunPrg(ArgumentParser):
     self.SPD, self.RPD = ExternalPrgParameters.get_program_dictionaries()
     self.terminate = False
     self.tidy = False
-    self.method = ""
+    self.method = None
     self.Ralpha = 0
     self.Nqual = 0
     self.CFOM = 0
@@ -44,6 +72,8 @@ class RunPrg(ArgumentParser):
 
     self.demo_mode = OV.FindValue('autochem_demo_mode',False)
     self.broadcast_mode = OV.FindValue('broadcast_mode',False)
+
+
     if self.demo_mode:
       OV.demo_mode = True
 
@@ -64,9 +94,10 @@ class RunPrg(ArgumentParser):
     os.environ['FORT_BUFFERED'] = 'TRUE'
     self.post_prg_output_html_message = ""
 
-
   def __del__(self):
-    if self.method is not None:
+    if self.method is not None and \
+       hasattr(self.method, "unregisterCallback") and \
+       callable(self.method.unregisterCallback):
       self.method.unregisterCallback()
 
   def run(self):
@@ -296,10 +327,13 @@ class RunPrg(ArgumentParser):
 
   def startRun(self):
     OV.CreateBitmap('%s' %self.bitmap)
+    LM.startRun(self)
 
   def endRun(self):
+    self.method.unregisterCallback()
     OV.DeleteBitmap('%s' %self.bitmap)
     OV.Cursor()
+    LM.endRun(self)
 
   def post_prg_html(self):
     if not OV.HasGUI():
@@ -350,6 +384,7 @@ class RunSolutionPrg(RunPrg):
     self.setupFiles()
     if self.terminate:
       self.endRun()
+      self.endHook()
       return
     if self.params.snum.solution.graphical_output and self.HasGUI:
       self.method.observe(self)
@@ -393,6 +428,7 @@ class RunSolutionPrg(RunPrg):
 
   def doHistoryCreation(self):
     OV.SetParam('snum.refinement.last_R1', 'Solution')
+    OV.SetParam('snum.refinement.last_wR2', 'Solution')
     self.his_file = hist.create_history(solution=True)
     OV.SetParam('snum.solution.current_history', self.his_file)
     return self.his_file
@@ -536,21 +572,23 @@ class RunRefinementPrg(RunPrg):
   def doHistoryCreation(self):
     R1 = 0
     self.his_file = ""
+
     if olx.IsVar('cctbx_R1') == 'true':
       R1 = float(olx.GetVar('cctbx_R1'))
       olx.UnsetVar('cctbx_R1')
-    elif olx.IsVar('tonto_R1') == 'true':
-      R1 = float(olx.GetVar('tonto_R1'))
-      olx.UnsetVar('tonto_R1')
+      wR2 = float(olx.GetVar('cctbx_wR2'))
+      olx.UnsetVar('cctbx_wR2')
+
     else:
       try:
         R1 = float(olx.Lst('R1'))
+        wR2 = float(olx.Lst('wR2'))
       except:
         pass
 
     if R1:
       OV.SetParam('snum.refinement.last_R1', str(R1))
-      #OV.SetParam('snum.refinement.last_wR2',self.wR2)
+      OV.SetParam('snum.refinement.last_wR2',wR2)
       if not self.params.snum.init.skip_routine:
         try:
           self.his_file = hist.create_history()
@@ -564,6 +602,7 @@ class RunRefinementPrg(RunPrg):
       self.his_file = None
       print "The refinement has failed, no R value was returned by the refinement."
     self.R1 = R1
+    self.wR2 = wR2
     OV.SetParam('snum.refinement.current_history', self.his_file)
     return self.his_file, R1
 

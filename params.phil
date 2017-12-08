@@ -223,6 +223,9 @@ routines requiring structure refinement
     last_R1 = n/a
       .type = str
       .expert_level = 2
+    last_wR2 = n/a
+      .type = str
+      .expert_level = 2
     graphical_output = False
       .type = bool
     program = ShelXL_ifc XL XH ShelXH-1997 XLMP ShelXL ShelXL-1997 '*olex2.refine' \
@@ -252,6 +255,10 @@ routines requiring structure refinement
       .type = floats(size=2)
       .help = The weighting scheme parameters suggested by the refinement \
         program in a previous cycle
+    refine_extinction = 1
+      .type = int
+    refine_extinction_tickbox = False
+      .type = bool
     original_formula = None
       .type = str
       .expert_level = 1
@@ -673,6 +680,18 @@ routines requiring structure refinement
       .type = float
     heat_colours = 2 3 5 *7
       .type = choice
+    contours = 8
+      .type = int
+    step = 0
+      .type = float
+    fix = 0
+      .type = float
+    slider_scale = 10
+      .type = int
+    depth = 0
+      .type = float
+    size = 15
+      .type = int
   }
 
   map {
@@ -1187,9 +1206,9 @@ user
       flack_str{
         display = ""
           .type = str
-        href = Flack
+        href = ""
           .type = str
-        target = "Flack Parameter"
+        target = ""
           .type = str
       }
 
@@ -1235,8 +1254,6 @@ user
           .type = str
       }
 
-
-
       R1{
         op = "smaller"
           .type = str
@@ -1246,17 +1263,36 @@ user
           .type = float
         grade2 = 0.10
           .type = float
-        grade3 = 0.20
+        grade3 = 0.15
           .type = float
-        grade4 = 0.50
+        grade4 = 0.20
           .type = float
         top = 0.30
           .type = float
-        display = "Max Shift"
-          .type = str
-        href = atom
+        display = "R1"
           .type = str
       }
+
+      wR2{
+        op = "smaller"
+          .type = str
+        value_format= "3f"
+          .type = str
+        grade1  = 0.10
+          .type = float
+        grade2 = 0.20
+          .type = float
+        grade3 = 0.30
+          .type = float
+        grade4 = 0.40
+          .type = float
+        top = 0.50
+          .type = float
+        display = "wR2"
+          .type = str
+      }
+
+
       max_shift_site{
         op = "smaller"
           .type = str
@@ -1650,10 +1686,10 @@ user
     finalise = *Ignore Include Exclude
       .type = choice
     checkcif{
-      url = http://vm02.iucr.org/cgi-bin/checkcif.pl
+      url = https://checkcif.iucr.org//cgi-bin/checkcif.pl
         .type = str
         .help = The URL to which the cif file will be sent
-      hkl_url = http://vm02b.iucr.org/cgi-bin/checkcif_hkl.pl
+      hkl_url = https://checkcif.iucr.org//cgi-bin/checkcif_hkl.pl
         .type = str
         .help = The URL to which the cif and fcf file will be sent
       format = *pdf html

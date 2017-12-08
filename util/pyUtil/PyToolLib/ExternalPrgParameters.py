@@ -424,6 +424,7 @@ def get_known(kind):
   rv = []
   for p in src:
     rv.append(p.name)
+  rv = sorted(rv, key=lambda s: s.lower())
   return ';'.join(rv)
 
 olex.registerFunction(get_known, False, "programs")

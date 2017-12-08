@@ -13,8 +13,9 @@ import RoundedCorners
 import sys
 #from olexex import OlexVariables
 #OV = OlexVariables()
-import olexex
 #OV = olexex.OlexFunctions()
+import gui
+import olexex
 from ImageTools import ImageTools
 from ImageTools import IT
 from olexFunctions import OlexFunctions

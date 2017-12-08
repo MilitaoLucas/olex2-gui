@@ -18,11 +18,13 @@ class OVModel(Model.StructureModel):
     pathInfo = {}
     arguments = []
     self.last_R1 = 0
+    self.last_wR2 = 0
 
   def on_sub_cycle_finished(self):
     r = self.R1
     if r != 0 and not (r - r*0.05) < self.last_R1 < (r + r*0.05):
       self.last_R1 = self.R1
+      self.last_wR2 = self.wR2
       hist = History('create', r)
       hist.run()
       K = Analysis('lst', None)

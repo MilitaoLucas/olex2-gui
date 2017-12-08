@@ -996,7 +996,9 @@ class ExtractCifInfo(CifTools):
     if ABS["abs_type"] == "TWINABS":
       t = ["%s was used for absorption correction.\n" %ABS['version']]
       txt = ""
-      for component in range(1, int(ABS["number_twin_components"])+1):
+      for component in ABS:
+        if type(component) is not dict:
+          continue
         # is single parameter set refined?
         if str(component) not in ABS: continue
         comp_d = ABS[str(component)]
@@ -1006,9 +1008,10 @@ class ExtractCifInfo(CifTools):
         ratiominmax = comp_d.setdefault("ratiominmax", None)
         if ratiominmax != None:
           t.append("The Ratio of minimum to maximum transmission is %.2f.\n" %(float(ratiominmax)))
-        else:
-          t.append("The Ratio of minimum to maximum transmission not present.\n")
-        t.append("The \l/2 correction factor is %s\n" %(ABS["lambda_correction"]))
+        #else:
+          #t.append("The Ratio of minimum to maximum transmission not present.\n")
+        if "Not present" not in ABS["lambda_correction"]:
+          t.append("The \l/2 correction factor is %s\n" %(ABS["lambda_correction"]))
       for me in t:
         txt = txt + " %s"%me
       if 'Rint_3sig' in ABS and 'Rint' in ABS:
@@ -1236,7 +1239,7 @@ If more than one file is present, the path of the most recent file is returned b
     if not returnvalue:
       returnvalue = info[0][1]
     if returnvalue:
-      returnvalur = OV.standardizePath(returnvalue)
+      returnvalue = OV.standardizePath(returnvalue)
     return returnvalue, pp
 
   def get_def(self):

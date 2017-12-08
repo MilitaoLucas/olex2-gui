@@ -1,24 +1,69 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='OPEN';help_ext=Open-A-Structure;1; -->
-  <td width='100%'>
-      <a href="reap"><b>%Open Existing Structure%</b></a>
-  </td>
+
+<td>
+<font size="+2">Welcome to Olex2!</font>
+</td>
+
+<td><a href='spy.make_help_box -name=ChangeLog'>CHANGELOG</a></td>
+<td></td>
+<td></td>
+<td></td>
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Open",
+    "onclick=reap",
+    "td1=<td width='29%'>"
+    )$-
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SAMPLE_STRUCTURES';help_ext=Sample-Structures;1 -->
-  <td>
-  <b>%Sample Structures%</b>:
-  <a href="reap GetVar(sample_dir)/sucrose/sucrose">%Sucrose%</a> |
-  <a href="reap GetVar(sample_dir)/THPP/thpp">THPP</a> |
-  <a href="reap GetVar(sample_dir)/Co110/Co110">Co110</a> |
-  <a href="reap GetVar(sample_dir)/ZP2/ZP2">ZP2</a> |
-  <a href="reap GetVar(sample_dir)/ZZULI2/ZZULI2">ZZULI2</a> |
-  <a href="reap GetVar(sample_dir)/water/water">Water</a> |
-  <a href="reap GetVar(sample_dir)/183/183">183</a> |
-  <a href="if File.Exists(GetVar(sample_dir)/timmy/timmy.res) then 'reap GetVar(sample_dir)/timmy/timmy.res' else 'reap GetVar(sample_dir)/timmy/timmy.cif'">Timmy</a>
+<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SAMPLE_STRUCTURES';help_ext=Sample_Structures;1 -->
 
-  </td>
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Sucrose",
+    "onclick=reap GetVar(sample_dir)/sucrose/sucrose",
+    )$-
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=THPP",
+    "onclick=reap GetVar(sample_dir)/THPP/THPP",
+    )$-
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Co110",
+    "onclick=reap GetVar(sample_dir)/Co110/Co110",
+    )$-
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=ZP2",
+    "onclick=reap GetVar(sample_dir)/ZP2/ZP2",
+    )$-
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Water",
+    "onclick=reap GetVar(sample_dir)/Water/Water",
+    )$-
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=183",
+    "onclick=reap GetVar(sample_dir)/183/183",
+    )$-
+
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Timmy",
+    "onclick=if File.Exists(GetVar(sample_dir)/timmy/timmy.res) then 'reap GetVar(sample_dir)/timmy/timmy.res' else 'reap GetVar(sample_dir)/timmy/timmy.cif'",
+    )$-
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
@@ -27,18 +72,10 @@
     <b>%Documentation%</b>:
 
   <a target='Documentation' href="shell 'http://www.olex2.org/documentation'"><b>Online</b></a> |
-  <a target='Documentation' href="shell BaseDir()/etc/documentation/Commands.pdf">Static %PDF%</a>
+  <a target='Documentation' href="shell BaseDir()/etc/documentation/Commands.pdf">Static %PDF%</a> |
+  <a target='All Inline Help' href="spy.make_help_box -name=All-Inline-Help -helpTxt=BaseDir()/util/pyUtil/gui/help/gui/HELP_EN.htm">All Inline Help</a>
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
-
-<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='GUI_WIDTH';help_ext=GUI-Width;scope=start;1 -->
-  <td width='100%' valign='center'>
-    <b>GUI Width</b>:
-
-  <a target='Change the width of the GUI panel to 340 pixel' href="echo 'This will take a while! Please be patient.'>>panel 340"><b>Narrow Panel</b></a> |
-  <a target='Change the width of the GUI panel' href="echo 'This will take a while! Please be patient.'>>skin spy.GetParam('gui.skin.name')"><b>Standard Panel</b></a>
-  </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->

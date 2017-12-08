@@ -142,15 +142,18 @@ If this is not the case, the HAR will not work properly. Continue?""", "YN", Fal
           args.append('-' + v[1])
           args.append(val)
       elif k == 'settings.tonto.HAR.hydrogens':
-        if k == 'positions only':
+        if val == 'positions only':
           args.append("-h-adps")
           args.append("f")
-        elif k == 'positions+Uiso':
+        elif val == 'positions+Uiso':
           args.append("-h-iso")
           args.append("t")
-        else:
+        elif val == "positions+Uaniso":
           args.append("-h-adps")
           args.append("t")
+        elif val == "leave_alone":
+          args.append("-h-pos")
+          args.append("f")
         pass
 
     os.environ['hart_cmd'] = '+&-'.join(args)

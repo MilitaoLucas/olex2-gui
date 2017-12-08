@@ -1,15 +1,35 @@
-  <td width='45%'>
-    &nbsp;%<b>Select</b> group or atom(s) and then %
+  <td width='30%'>
+    &nbsp;Select atom(s) and then
   </td>
 
-  <td width='8%'>
-  <a href = "if spy.check_for_selection() then 'mode fit -s=True'">Split</a>
-  </td>
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=mFit",
+    "hint=Mode Fit. Select atom(s) and then rotate/move to fit.",
+    "onclick=if spy.check_for_selection() then 'mode fit -s=False'",
+    )
+  $-
 
-  <td width='8%' align='center'>
-  <a href = "if spy.check_for_selection() then 'mode fit -s=False'">Fit</a>
-  </td>
-  
-  <td width='39%' align='right'>
-  <a href = "'mode split'"><b>Split</b> or <b>Move</b> with SHIFT key</a>
-  </td>
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=mSplit",
+    "hint=Mode Split. Same as mFit, but the group will actually be split into two PARTs",
+    "onclick=if spy.check_for_selection() then 'mode fit -s=True'",
+    )
+  $-
+
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=Split SAME",
+    "hint=Restrained Split. Same as mSplit, but restraints will be applied to the resulting PARTs",
+    "onclick=if spy.check_for_selection() then 'mode fit -s same'",
+    )
+  $-
+
+  $+
+    html.Snippet(GetVar(default_link),
+    "value=Split",
+	"hint=Simple Split. The atom clicked next will be split OR press SHIFT first to move an atom",
+    "onclick=mode split",
+    )
+  $-

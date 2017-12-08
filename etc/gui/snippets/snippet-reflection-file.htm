@@ -1,13 +1,11 @@
-<font size='$GetVar(HtmlFontSizeControls)'>
-<input
-  type='combo'
-  height='$GetVar(HtmlComboHeight)'
-  bgcolor='$GetVar(HtmlInputBgColour)'
-  width='100%'
-  name='SET_REFLECTIONS_#parent_name'
-  items="spy.GetHklFileList()"
-  onchange='spy.OnHKLChange(html.GetValue(~name~))>>html.Update'
-  value="FileName(HKLSrc())'.'FileExt(HKLSrc())"
-  readonly="true"
->
-</font>
+
+  $+
+    html.Snippet("gui/snippets/input-combo",
+    "value=FileName(HKLSrc())'.'FileExt(HKLSrc())",
+    "name=SET_REFLECTIONS_parent_name",
+    "items=spy.GetHklFileList()",
+    "onchange=spy.OnHKLChange(html.GetValue(~name~))>>html.Update",
+    "readonly=true"
+    )
+  $-
+

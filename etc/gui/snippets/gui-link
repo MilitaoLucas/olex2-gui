@@ -1,0 +1,30 @@
+#value=
+#width=100%
+#height=$GetVar('HtmlComboHeight')
+#name=#value
+#onclick=#onclick
+#fit=true
+#flat=$GetVar('linkButton.flat')
+#disabled=false
+#bgcolor=$GetVar('linkButton.bgcolor')
+#fgcolor=$GetVar('linkButton.fgcolor')
+<font size="$GetVar('HtmlFontSizeControls')"><b>
+
+#td1=<td>
+#td2=</td>
+
+#td1
+  <input
+    type="button"
+    name="#name"
+    value="#value"
+    width="#width"
+    height="#height"
+    onclick="#onclick>>focus"
+    fgcolor="#fgcolor"
+    fit="#fit"
+    flat="#flat"
+    disabled="#disabled"
+  >
+  </font>
+#td2

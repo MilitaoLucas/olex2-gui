@@ -198,6 +198,7 @@ def set_olex_paths():
   sys.path.append("%s/util/pyUtil/PyToolLib" %basedir)
   sys.path.append("%s/util/pyUtil/PyToolLib/FileReaders" %basedir)
   sys.path.append("%s/util/pyUtil/CctbxLib" %basedir)
+  sys.path.append("%s/util/pyUtil/HAR" %basedir)
 
 def set_plugins_paths():
   plugins = olexex.InstalledPlugins()
@@ -306,6 +307,7 @@ if OV.HasGUI():
   from gui.images import *
   from gui.skin import *
   from gui.db import *
+  from gui.help import *
   #import Tutorials
   #load_user_gui_phil()
   #export_parameters()
@@ -400,4 +402,4 @@ print "\nDolomanov, O.V.; Bourhis, L.J.; Gildea, R.J.; Howard, J.A.K.; Puschmann
       "\nJ. Appl. Cryst., 42, 339-341.\n"
 ## These imports will register macros and functions for spy.
 from RunPrg import RunPrg
-from HARt import HARt
+from HAR import HARp
