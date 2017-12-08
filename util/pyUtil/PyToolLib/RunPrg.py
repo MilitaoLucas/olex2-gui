@@ -428,6 +428,7 @@ class RunSolutionPrg(RunPrg):
 
   def doHistoryCreation(self):
     OV.SetParam('snum.refinement.last_R1', 'Solution')
+    OV.SetParam('snum.refinement.last_wR2', 'Solution')
     self.his_file = hist.create_history(solution=True)
     OV.SetParam('snum.solution.current_history', self.his_file)
     return self.his_file
@@ -571,21 +572,23 @@ class RunRefinementPrg(RunPrg):
   def doHistoryCreation(self):
     R1 = 0
     self.his_file = ""
+
     if olx.IsVar('cctbx_R1') == 'true':
       R1 = float(olx.GetVar('cctbx_R1'))
       olx.UnsetVar('cctbx_R1')
-    elif olx.IsVar('tonto_R1') == 'true':
-      R1 = float(olx.GetVar('tonto_R1'))
-      olx.UnsetVar('tonto_R1')
+      wR2 = float(olx.GetVar('cctbx_wR2'))
+      olx.UnsetVar('cctbx_wR2')
+
     else:
       try:
         R1 = float(olx.Lst('R1'))
+        wR2 = float(olx.Lst('wR2'))
       except:
         pass
 
     if R1:
       OV.SetParam('snum.refinement.last_R1', str(R1))
-      #OV.SetParam('snum.refinement.last_wR2',self.wR2)
+      OV.SetParam('snum.refinement.last_wR2',wR2)
       if not self.params.snum.init.skip_routine:
         try:
           self.his_file = hist.create_history()
@@ -599,6 +602,7 @@ class RunRefinementPrg(RunPrg):
       self.his_file = None
       print "The refinement has failed, no R value was returned by the refinement."
     self.R1 = R1
+    self.wR2 = wR2
     OV.SetParam('snum.refinement.current_history', self.his_file)
     return self.his_file, R1
 

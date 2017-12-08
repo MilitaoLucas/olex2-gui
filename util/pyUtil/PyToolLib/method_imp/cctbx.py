@@ -48,6 +48,7 @@ class Method_cctbx_refinement(Method_refinement):
       self.failure = cctbx.failure
       if not self.failure:
         OV.SetVar('cctbx_R1',cctbx.r1[0])
+        OV.SetVar('cctbx_wR2',cctbx.wR2_factor())
         OV.File('%s.res' %OV.FileName())
     finally:
       OV.DeleteBitmap('refine')
