@@ -90,7 +90,7 @@ class HARp(PT):
       if os.path.exists(_):
         self.exe = _
       else:
-        self.exe = olx.file.Which("hart.exe")
+        self.exe = olx.file.Which("hart")
     if os.path.exists(self.exe):
       self.basis_dir = os.path.join(os.path.split(self.exe)[0], "basis_sets").replace("\\", "/")
       if os.path.exists(self.basis_dir):

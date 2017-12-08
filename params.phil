@@ -257,7 +257,7 @@ routines requiring structure refinement
         program in a previous cycle
     refine_extinction = 1
       .type = int
-    refine_extinction_tickbox = True
+    refine_extinction_tickbox = False
       .type = bool
     original_formula = None
       .type = str
