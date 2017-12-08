@@ -335,6 +335,7 @@ class Node(object):
 
       try:
         self.R1 = float(OV.GetParam('snum.refinement.last_R1'))
+        self.wR2 = float(OV.GetParam('snum.refinement.last_wR2'))
       except:
         pass
       if self.is_solution:
@@ -695,6 +696,7 @@ class HistoryLeaf:
       self.refinement_method = OV.GetParam('snum.refinement.method')
       try:
         self.R1 = float(OV.GetParam('snum.refinement.last_R1'))
+        self.wR2 = float(OV.GetParam('snum.refinement.last_wR2'))
       except ValueError:
         pass
 
@@ -704,6 +706,7 @@ class HistoryLeaf:
     else:
       self.getLeafInfoFromRes(resPath)
     OV.SetParam('snum.refinement.last_R1', self.R1)
+    OV.SetParam('snum.refinement.last_wR2', self.wR2)
     if tree.current_refinement == 'solution':
       if self.solution_program is None:
         self.solution_program = OV.GetParam('snum.solution.program')

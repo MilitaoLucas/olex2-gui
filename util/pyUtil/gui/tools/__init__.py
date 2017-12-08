@@ -34,9 +34,17 @@ import time
 global regex_l
 regex_l = {}
 
+global cache
+cache = {}
+
 gui_green = OV.GetParam('gui.green')
 gui_orange = OV.GetParam('gui.orange')
 gui_red = OV.GetParam('gui.red')
+gui_grey = OV.GetParam('gui.grey')
+grade_1_colour = OV.GetParam('gui.skin.diagnostics.colour_grade1').hexadecimal
+grade_2_colour = OV.GetParam('gui.skin.diagnostics.colour_grade2').hexadecimal
+grade_3_colour = OV.GetParam('gui.skin.diagnostics.colour_grade3').hexadecimal
+grade_4_colour = OV.GetParam('gui.skin.diagnostics.colour_grade4').hexadecimal
 
 
 class FolderView:
@@ -821,14 +829,18 @@ def weightGuiDisplay():
 OV.registerFunction(weightGuiDisplay,True,"gui.tools")
 
 
+def number_non_hydrogen_atoms():
+  return sum(atom['occu'][0] for atom in self.atoms() if atom['type'] not in ('H','Q'))
+
+def getExpectedPeaks():
+  orm = olexex.OlexRefinementModel()
+  return orm.getExpectedPeaks()
 
 def refine_extinction():
-  ## snmum.refine_extinction 0: DO NOT refine extinction AGAIN
-  ## snmum.refine_extinction 1: Try and refine extinction
-  ## snmum.refine_extinction 2: Refine in any case
 
-  retVal = "n/a"
+  retVal = ""
   _ = olx.xf.rm.Exti()
+
   if "n/a" not in _.lower() and _ != '0':
     _ = _.split('(')
     exti = _[0]
@@ -836,29 +848,53 @@ def refine_extinction():
     exti_f = float(exti)
     _ = len(exti) - len(esd) -2
     esd_f = float("0.%s%s" %(_*"0", esd))
-
-    if exti_f/esd_f < 2:
-      print "Extinction was refined to %s(%s). From now on, it will no longer be refined, unless you tick the box in the refinement settings" %(exti, esd)
-
-      OV.SetParam('snum.refinement.refine_extinction',0)
-      olex.m("DelIns EXTI")
-      retVal = "0"
-    else:
-      retVal = "%s(%s)"%(exti,esd)
-  else:
-    if OV.GetParam('snum.refinement.refine_extinction_tickbox') == 'true':
-      olex.m("AddIns EXTI")
-
-  _ = OV.GetParam('snum.refinement.refine_extinction',1)
-  if _ == 0:
-    OV.SetParam('snum.refinement.refine_extinction_tickbox',False)
-    retVal="n/a<font color=%s><b>!&nbsp;</b></font>" %gui_red
-  else:
-    OV.SetParam('snum.refinement.refine_extinction_tickbox', True)
-  if _ == 3:
-    retVal += "<font color=%s><b>!&nbsp;</b></font>" %gui_green
-
+    retVal = "%s(%s)"%(exti,esd)
   return retVal
+
+
+  ### The stuff below needs careful thinking about. For now, revert back to simple on/off operation. Sorry Guys!
+
+  ## snmum.refine_extinction 0: DO NOT refine extinction AGAIN
+  ## snmum.refine_extinction 1: Try and refine extinction
+  ## snmum.refine_extinction 2: Refine in any case
+
+  #if getExpectedPeaks() > 2:
+    #OV.SetParam('snum.refinement.refine_extinction',1)
+    #return "Not Tested"
+
+  #retVal = "n/a"
+  #_ = olx.xf.rm.Exti()
+  #if "n/a" not in _.lower() and _ != '0':
+    #_ = _.split('(')
+    #exti = _[0]
+    #esd = _[1].rstrip(')')
+    #exti_f = float(exti)
+    #_ = len(exti) - len(esd) -2
+    #esd_f = float("0.%s%s" %(_*"0", esd))
+
+
+    #_ = OV.GetParam('snum.refinement.refine_extinction',1)
+    #if _ == 3:
+      #retVal = "%s(%s)"%(exti,esd)
+      #retVal += "<font color=%s><b>*&nbsp;</b></font>" %gui_green
+    #if _ == 0:
+      #OV.SetParam('snum.refinement.refine_extinction_tickbox',False)
+      #retVal="not refined<font color=%s><b>*&nbsp;</b></font>" %gui_red
+    #else:
+      #OV.SetParam('snum.refinement.refine_extinction_tickbox', True)
+
+      #if exti_f/esd_f < 2:
+        #print "Extinction was refined to %s(%s). From now on, it will no longer be refined, unless you tick the box in the refinement settings" %(exti, esd)
+        #OV.SetParam('snum.refinement.refine_extinction',1)
+        #olex.m("DelIns EXTI")
+        #retVal = "%s(%s)"%(exti,esd)
+      #else:
+        #retVal = "%s(%s)"%(exti,esd)
+  #else:
+    #if OV.GetParam('snum.refinement.refine_extinction_tickbox'):
+      #olex.m("AddIns EXTI")
+
+  #return retVal
 
 OV.registerFunction(refine_extinction,True,"gui.tools")
 
@@ -1081,6 +1117,146 @@ def _get_available_html_width(margin_adjust = True, first_col_width_adjust=True,
 
   return width, max_width
 
+
+def get_diagnostics_colour(scope, item, val):
+  try:
+    val = float(val)
+    #if val < 0:
+      #val = -val
+  except:
+    val = 0
+
+  mindfac = 1
+  if item == 'MinD':
+    mindfac = float(olx.xf.exptl.Radiation())/0.71
+
+  op = OV.GetParam('user.diagnostics.%s.%s.op' %(scope, item))
+  if op == "between":
+    soll = OV.GetParam('user.diagnostics.%s.%s.soll' %(scope, item))
+  for i in xrange(4):
+    i += 1
+    if op == "greater":
+      if val >= OV.GetParam('user.diagnostics.%s.%s.grade%s' %(scope, item, i)) * mindfac:
+        break
+    elif op == 'smaller':
+      if val <= OV.GetParam('user.diagnostics.%s.%s.grade%s' %(scope, item, i)) * mindfac:
+        break
+    elif op == 'between':
+      if val - (OV.GetParam('user.diagnostics.%s.%s.grade%s' %(scope, item, i))) * mindfac <= soll <= val + (OV.GetParam('user.diagnostics.%s.%s.grade%s' %(scope, item, i))) * mindfac:
+        break
+
+  if i == 1:
+    retVal = grade_1_colour
+  elif i == 2:
+    retVal = grade_2_colour
+  elif i == 3:
+    retVal = grade_3_colour
+  elif i == 4:
+    retVal = grade_4_colour
+
+  return retVal
+
+
+def GetRInfo(txt="",format='html'):
+  if not OV.HasGUI():
+    return
+
+  t = "ERROR!"
+  use_history_for_R1_display = True
+  if use_history_for_R1_display:
+    if olx.IsFileType('cif') == "true":
+      R1 = olx.Cif('_refine_ls_R_factor_gt')
+      wR2 = olx.Cif('_refine_ls_wR_factor_ref')
+    else:
+      R1 = OV.GetParam('snum.refinement.last_R1')
+      wR2 = OV.GetParam('snum.refinement.last_wR2')
+      if not R1:
+        tree = History.tree
+        if tree.active_node is not None:
+          R1 = tree.active_node.R1
+        else:
+          R1 = 'n/a'
+    if R1 == cache.get('R1', None):
+      return cache.get('GetRInfo', 'XXX')
+
+    cache['R1'] = R1
+    font_size_R1 = olx.GetVar('HtmlFontSizeExtraLarge')
+    font_size_wR2 = olx.GetVar('HtmlFontSizeMedium')
+    if 'html' in format:
+      try:
+        R1 = float(R1)
+        col_R1 = gui.tools.get_diagnostics_colour('refinement','R1', R1)
+        R1 = "%.2f" %(R1*100)
+
+        wR2 = float(wR2)
+        col_wR2 = gui.tools.get_diagnostics_colour('refinement','wR2', wR2)
+        wR2 = "%.2f" %(wR2*100)
+
+
+        if 'report' in format:
+          t = r"<font size='%s'><font color='%s'><b>%s%%</b></font></font>" %(font_size, col_wR2, R2)
+          t += r"<font size='%s'><font color='%s'><b>%s%%</b></font></font>" %(font_size, col_R1, R1)
+        else:
+          d = {
+            'R1':R1,
+            'wR2':wR2,
+            'font_size_R1':font_size_R1,
+            'font_size_wR2':font_size_wR2,
+            'font_size_label':str(int(font_size_wR2) - 1),
+            'font_colour_R1':col_R1,
+            'font_colour_wR2':col_wR2,
+            'grey':gui_grey
+          }
+          t =gett('R_factor_display')%d
+      except:
+        t = "<td colspan='2' align='right' rowspan='2' align='right'><font size='%s'><b>%s</b></font></td>" %(font_size_R1, R1)
+      finally:
+        retVal = t
+
+    elif format == 'float':
+      try:
+        t = float(R1)
+      except:
+        t = 0
+      finally:
+        retVal = t
+
+  else:
+    if txt:
+      t = "<td colspan='1' rowspan='2' align='center'><font size='4'><b>%s</b></font></td>" %txt
+    else:
+      try:
+        look = olex.f('IsVar(snum_refinement_last_R1)')
+        if look == "true":
+          R1 = olex.f('GetVar(snum_refinement_last_R1)')
+        else:
+          if olx.IsFileType('cif') == "true":
+            R1 = olx.Cif('_refine_ls_R_factor_gt')
+          else:
+            R1 = olex.f('Lst(R1)')
+      except:
+        R1 = 0
+      try:
+        R1 = float(R1)
+        col = GetRcolour(R1)
+        R1 = "%.2f" %(R1*100)
+        t = r"""
+<td colspan='1' align='center' rowspan='2'>
+  <font size='%s' color='%s'>
+    <b>%s%%</b>
+  </font>
+</td>
+""" %(OV.GetParam('gui.html.font_size_extra_large'), col, R1)
+      except:
+        t = "<td colspan='1' rowspan='2' align='center'><font size='4'><b>%s</b></font></td>" %R1
+    retVal = t
+  cache['GetRInfo'] = retVal
+  return retVal
+OV.registerFunction(GetRInfo)
+
+
+
+
 def resize_pdf(f_in, setting='printer'):
   if ".pdf" in f_in:
     small_file = f_in.split(".")[0] + "_small" + f_in.split(".")[1]
@@ -1093,3 +1269,5 @@ def resize_pdf(f_in, setting='printer'):
   cmd = r'"C:\Program Files\gs\gs9.06\bin\gswin64" ' + options
   os.system(cmd)
 OV.registerFunction(resize_pdf,False,'gui.tools')
+
+gett = TemplateProvider.get_template
