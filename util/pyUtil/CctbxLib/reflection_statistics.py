@@ -93,13 +93,10 @@ class item_vs_resolution(OlexCctbxAdapter):
       from iotbx.merging_statistics import *
       fo2 = self.reflections.f_sq_obs
       self.info = fo2.info()
-      result = iotbx.merging_statistics.dataset_statistics(fo2, n_bins=n_bins)
-      
-      result.show()
-      result.show_cc_star()
-      for b in result.bins:
-        print b.d_min, b.d_max, b.cc_one_half, b.r_merge      
-      
+      self.binned_data = iotbx.merging_statistics.dataset_statistics(fo2, n_bins=n_bins)
+      #for b in result.bins:
+        #print b.d_min, b.d_max, b.cc_one_half, b.r_merge
+
     if self.item == "i_over_sigma_vs_resolution":
       fo2 = self.reflections.f_sq_obs
       fo2.setup_binner(n_bins=n_bins)
@@ -132,7 +129,13 @@ class item_vs_resolution(OlexCctbxAdapter):
     r.title = self.item
     if (self.info is not None):
       r.title += ": " + str(self.info)
-    d_star_sq = self.binned_data.binner.bin_centers(2)
+    try:
+      d_star_sq = self.binned_data.binner.bin_centers(2)
+    except:
+      print "This seems to be the new kind of binned data."
+      print "While we learn how to plot this, please look at the table above."
+      return None
+
     if self.resolution_as == "two_theta":
       resolution = uctbx.d_star_sq_as_two_theta(
         d_star_sq, self.wavelength, deg=True)
@@ -145,6 +148,7 @@ class item_vs_resolution(OlexCctbxAdapter):
     elif self.resolution_as == "stol_sq":
       resolution = uctbx.d_star_sq_as_stol_sq(d_star_sq)
     r.x = resolution
+
     r.y = self.binned_data.data[1:-1]
     r.xLegend = self.resolution_as
     legend_y = "Y-Axis"
