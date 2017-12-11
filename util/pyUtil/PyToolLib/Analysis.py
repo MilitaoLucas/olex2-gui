@@ -2494,13 +2494,15 @@ class item_vs_resolution_plot(Analysis):
     self.auto_axes = False
     #self.max_y = 1.05
     try:
-      self.make_plot()
+      res = self.make_plot()
     except AssertionError, e:
       if str(e) == "model.scatterers().size() > 0":
         print "You need some scatterers to do this!"
         return
       else:
         raise
+    if not res:
+      return None
     self.popout()
     if OV.GetParam('user.diagnostics.save_file'):
       res = self.im.save(OV.ModelSrc() + "_" + self.item + ".png",'PNG')
@@ -2514,6 +2516,8 @@ class item_vs_resolution_plot(Analysis):
     from reflection_statistics import item_vs_resolution
     params = getattr(self.params, self.item)
     xy_plot = item_vs_resolution(item=self.item, n_bins=params.n_bins, resolution_as=params.resolution_as).xy_plot_info()
+    if not xy_plot:
+      return None
     while None in xy_plot.y:
       params.n_bins -= 1
       xy_plot = item_vs_resolution(item=self.item, n_bins=params.n_bins, resolution_as=params.resolution_as).xy_plot_info()
@@ -2567,7 +2571,7 @@ class item_vs_resolution_plot(Analysis):
 
     reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
     self.draw_pairs(reverse_x=reverse_x, lt=3)
-
+    return True
 
 class X_Y_plot(Analysis):
   def __init__(self):
@@ -3412,7 +3416,7 @@ class HealthOfStructure():
       fill = second_colour
       draw.rectangle(box, fill=fill)
       value_display = value_display.replace("0.",".")
-      
+
 
     if item == "Completeness":
       od_value = OV.get_cif_item('_reflns_odcompleteness_completeness')
