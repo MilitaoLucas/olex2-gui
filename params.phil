@@ -1138,6 +1138,42 @@ user
           .caption = "%Output% csv"
       }
 
+      cc_half_vs_resolution
+        .short_caption = "cc_half_vs_resolution"
+        .caption = "cc_half_vs_resolution"
+        .help = "cc_half_vs_resolution"
+      {
+        title = "cc_half_vs_resolution"
+          .type = str
+        resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
+          .type = choice
+          .caption = "Resolution as"
+        n_bins = 20
+          .type = int(value_min=1)
+          .help = Number of bins
+          .caption = %Bins%
+        output_csv_file = False
+          .type = bool
+          .caption = "%Output% csv"
+      }
+      rint_vs_resolution
+        .short_caption = "rint_vs_resolution"
+        .caption = "rint_vs_resolution"
+        .help = "rint_vs_resolution"
+      {
+        title = "rint_vs_resolution"
+          .type = str
+        resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
+          .type = choice
+          .caption = "Resolution as"
+        n_bins = 20
+          .type = int(value_min=1)
+          .help = Number of bins
+          .caption = %Bins%
+        output_csv_file = False
+          .type = bool
+          .caption = "%Output% csv"
+      }
 
       completeness
         .short_caption = "Completeness Plot"
@@ -1204,12 +1240,11 @@ user
     refinement{
 
       flack_str{
-        display = ""
+        display = "Flack"
           .type = str
-        href = "spy.make_reflection_graph(html.GetValue('SET_REFLECTION_STATISTICS'))
-wilson -b=10 -p>>popup wilson.htm wilson.htm -b=stcr -t=wilson.htm -w=929 -h=550 -x=1 -y=50"
+        href = "spy.make_reflection_graph(wilson_plot)>>spy.make_reflection_graph(cumulative_intensity)"
           .type = str
-        target = "Flack Parameter. This should be close to 0 with a very small e.s.d. value"
+        target = "Flack Parameter.&#013;- This should be close to 0 &#013;- The e.s.d. value must be small &#013;- 'inv -f' to invert"
           .type = str
       }
 
@@ -1313,7 +1348,7 @@ wilson -b=10 -p>>popup wilson.htm wilson.htm -b=stcr -t=wilson.htm -w=929 -h=550
           .type = str
         href = atom
           .type = str
-        target = "Select the site with the largest shift"
+        target = "Select the site with the largest shift. &#013; NOTE: The shift may be caused by EXTI!"
           .type = str
       }
 
@@ -1336,7 +1371,7 @@ wilson -b=10 -p>>popup wilson.htm wilson.htm -b=stcr -t=wilson.htm -w=929 -h=550
           .type = str
         href = atom
           .type = str
-        target = "Select the atom with the largest shift"
+        target = "Select the site with the largest shift. &#013; NOTE: The shift may be caused by EXTI!"
           .type = str
       }
 
@@ -1557,9 +1592,9 @@ wilson -b=10 -p>>popup wilson.htm wilson.htm -b=stcr -t=wilson.htm -w=929 -h=550
           .type = float
         top = 25
           .type = float
-        href = ""
+        href = "spy.make_reflection_graph(i_over_sigma_vs_resolution)"
           .type = str
-        target = "Signal to noise ratio"
+        target = "Mean signal to noise ratio. Click to see the graph"
           .type = str
       }
       Rint{
