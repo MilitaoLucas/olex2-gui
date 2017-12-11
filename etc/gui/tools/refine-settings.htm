@@ -67,6 +67,7 @@ $-
 
 
   <td ALIGN='center' width='39%'>
+<b>hkl</b>:   
 <!-- #include reflection-date reflection-date.htm;1; -->
   </td>
 
@@ -141,6 +142,8 @@ $-
     )
   $-
 
+<!-- #ignoreif not spy.GetParam('snum.refinement.use_solvent_mask')
+
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
     "name=SNUM_REFINEMENT_USE_SOLVENT_MASK",
@@ -193,7 +196,20 @@ html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')",
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;help_ext=Mask_Info;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 $spy.gui.tools.get_mask_info()
+
+#ignoreif -->
+
+
+<!-- #ignoreif spy.GetParam('snum.refinement.use_solvent_mask')
+
+<td>
+This is the Olex2 implementation of BYPASS (a.k.a. SQUEEZE)
+</td>
+#ignoreif -->
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
 
 </table>
 

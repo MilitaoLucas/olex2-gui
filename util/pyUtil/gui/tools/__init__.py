@@ -1121,8 +1121,9 @@ def _get_available_html_width(margin_adjust = True, first_col_width_adjust=True,
 def get_diagnostics_colour(scope, item, val):
   try:
     val = float(val)
-    #if val < 0:
-      #val = -val
+    if "shift" in item:
+      if val < 0:
+        val = -val
   except:
     val = 0
 
