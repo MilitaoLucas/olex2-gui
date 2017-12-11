@@ -1206,9 +1206,10 @@ user
       flack_str{
         display = ""
           .type = str
-        href = ""
+        href = "spy.make_reflection_graph(html.GetValue('SET_REFLECTION_STATISTICS'))
+wilson -b=10 -p>>popup wilson.htm wilson.htm -b=stcr -t=wilson.htm -w=929 -h=550 -x=1 -y=50"
           .type = str
-        target = ""
+        target = "Flack Parameter. This should be close to 0 with a very small e.s.d. value"
           .type = str
       }
 

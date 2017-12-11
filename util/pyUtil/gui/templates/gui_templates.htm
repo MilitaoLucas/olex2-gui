@@ -163,18 +163,20 @@ t:minimal_gui_link_button{
 }
 
 t:R_factor_display{
-<table width='100%%' cellspacing='0' cellpadding='0'>
+<table width='100%%' border='0' cellspacing='0' cellpadding='0'>
   <tr>
-    <td align='right'>
-      <font size='%(font_size_wR2)s' color='%(grey)s'><b><i>R</i><sub>1&nbsp;</sub>=</b>&nbsp;</font></td>
     <td align='center'>
-      <font size='%(font_size_R1)s' color='%(font_colour_R1)s'><b>%(R1)s%%</b></font></td>
+      <font size='%(font_size_wR2)s' color='$GetVar(gui.watermark)'><b><i>R</i><sub>1&nbsp;</sub></b></font>
+    </td>
+    <td align='right'>
+      <font size='%(font_size_R1)s' color='%(font_colour_R1)s'><b>%(R1)s</font> <font size='%(font_size_wR2)s' color='%(grey)s'>%%</b></font></td>
   </tr>
   <tr>
-    <td align='right'>
-      <font size='%(font_size_label)s' color='%(grey)s'><b><i>wR</i><sub>2&nbsp;</sub>=</b>&nbsp;</font></td>
     <td align='center'>
-      <font size='%(font_size_wR2)s' color='%(font_colour_wR2)s'><b>%(wR2)s%%</b></font></td>
+            <font size='%(font_size_wR2)s' color='$GetVar(gui.watermark)'><b><i>wR</i><sub>2&nbsp;</sub></b>&nbsp;</font>
+    </td>
+    <td align='right'>
+<font size='%(font_size_wR2)s' color='%(font_colour_wR2)s'><b>%(wR2)s&nbsp;</font> <font size='%(font_size_wR2)s' color='%(grey)s'>%%</b></font></td>
   </tr>
 </table>
 }

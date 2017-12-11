@@ -87,6 +87,19 @@ class item_vs_resolution(OlexCctbxAdapter):
     OlexCctbxAdapter.__init__(self)
     self.resolution_as = resolution_as
     self.item = item
+
+    if self.item == "rint_vs_resolution":
+      import iotbx
+      from iotbx.merging_statistics import *
+      fo2 = self.reflections.f_sq_obs
+      self.info = fo2.info()
+      result = iotbx.merging_statistics.dataset_statistics(fo2, n_bins=n_bins)
+      
+      result.show()
+      result.show_cc_star()
+      for b in result.bins:
+        print b.d_min, b.d_max, b.cc_one_half, b.r_merge      
+      
     if self.item == "i_over_sigma_vs_resolution":
       fo2 = self.reflections.f_sq_obs
       fo2.setup_binner(n_bins=n_bins)
@@ -95,6 +108,15 @@ class item_vs_resolution(OlexCctbxAdapter):
       fo2 = fo2.customized_copy(data=a)
       fo2.setup_binner(n_bins=n_bins)
       self.binned_data = fo2.mean(use_binning=True)
+      print "CC 1/2 = %.3f" %fo2.cc_one_half()
+    elif self.item == "cc_half_vs_resolution":
+      fo2 = self.reflections.f_sq_obs
+      fo2.setup_binner(n_bins=n_bins)
+      self.info = fo2.info()
+      a = fo2.data()/fo2.sigmas()
+      fo2 = fo2.customized_copy(data=a)
+      fo2.setup_binner(n_bins=n_bins)
+      self.binned_data = fo2.cc_one_half(use_binning=True)
     elif self.item == "r1_factor_vs_resolution":
       fo2, fc = self.get_fo_sq_fc()
       weights = self.compute_weights(fo2, fc)
@@ -130,6 +152,10 @@ class item_vs_resolution(OlexCctbxAdapter):
       legend_y = "R1"
     elif "i_over_sigma_vs_resolution" in self.item:
       legend_y = "I/sigma"
+    elif "cc_half_vs_resolution" in self.item:
+      legend_y = "CC 1/2"
+    elif "rint_vs_resolution" in self.item:
+      legend_y = "Rint"
     r.yLegend = legend_y
     return r
 

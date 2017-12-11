@@ -18,7 +18,8 @@ OV.SetVar('help_path', p_path)
 
 try:
   import markdown2
-  print "markdown2 imported!"
+  if debug:
+    print "markdown2 imported!"
 except Exception, err:
   print err
   with open(os.sep.join([p_path, 'markdown2.pyo']), 'r') as f:
@@ -78,7 +79,7 @@ class GetHelp(object):
       OV.SetVar(var, help)
       if debug:
         print "  - %s" %var
-        
+
   def format_html(self, txt):
     while "\n" in txt:
       txt = txt.replace("\n", "")
@@ -99,7 +100,7 @@ class GetHelp(object):
       all_help = os.sep.join([builtin_help_location, 'gui', 'HELP_EN.htm'])
       if not hasattr(self, 'source_dir'):
         self.source_dir = specific
-  
+
       try:
         copy_files = ("githelp_templates.html", "tutorials_templates.html")
         for cp_file in copy_files:
@@ -108,7 +109,7 @@ class GetHelp(object):
           copyfile(copy_from, copy_to)
       except:
         print "Can not copy files; most probably Olex2 was not started in Admin Mode"
-  
+
       if "false" in repr(quick).lower():
         quick = False
       if quick:
@@ -223,8 +224,8 @@ class GetHelp(object):
         if debug:
           print "  - %s" %var
     #pickle.dump(self.help, open(self.help_pickle_file, 'wb'))
-          
-        
+
+
 
 gh = GetHelp()
 
@@ -456,7 +457,8 @@ class AutoDemoTemp(AutoDemo):
     g = glob.glob("%s%s%s" %(self.source_dir,os.sep,mask))
     t = ""
     for item in g:
-      print item
+      if debug:
+        print item
       item_name = os.path.basename(item).split(".txt")[0]
 
       href = "spy.demo.run_autodemo(item_name)"
