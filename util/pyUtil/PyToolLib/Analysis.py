@@ -2555,6 +2555,16 @@ class item_vs_resolution_plot(Analysis):
     if self.item == "i_over_sigma_vs_resolution":
       self.draw_fit_line(slope=0, y_intercept=3, write_equation=False, write_text="3 sigma line (noise below, data above)")
       self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="min IUCr res")
+
+    if self.item == "cc_half_vs_resolution":
+      self.draw_fit_line(slope=0, y_intercept=0.15, write_equation=False, write_text="3 sigma line (noise below, data above)")
+      self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="min IUCr res")
+
+    if self.item == "rint_vs_resolution":
+      self.draw_fit_line(slope=0, y_intercept=0.15, write_equation=False, write_text="3 sigma line (noise below, data above)")
+      self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="min IUCr res")
+
+
     reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
     self.draw_pairs(reverse_x=reverse_x, lt=3)
 
@@ -2864,6 +2874,8 @@ def makeReflectionGraphGui():
              "%Completeness%;%Normal Probability%;" +\
              "%Scale factor vs resolution%;%R1 factor vs resolution%;" +\
              "%I/sigma vs resolution%;" +\
+             "%cc_half_vs_resolution%;" +\
+             "%rint_vs_resolution%;" +\
              "%Bijvoet Differences% %Probability Plot%;" +\
              "%Bijvoet Differences% %Scatter Plot%",
      'height':guiParams.html.combo_height,
@@ -2908,6 +2920,11 @@ def makeReflectionGraphGui():
 OV.registerFunction(makeReflectionGraphGui)
 
 def make_reflection_graph(name):
+  if not OV.HKLSrc():
+    print "To make the %s graph, the reflection file must be accessible." %name
+    print "Are you looking at a CIF file?"
+    print "Try typing 'export' to extract the embedded files from the CIF."
+    return
   name = name.lower().replace(" ", "_").replace("-", "_")
   run_d = {'wilson_plot': WilsonPlot,
            'cumulative_intensity': CumulativeIntensityDistribution,
@@ -2919,6 +2936,8 @@ def make_reflection_graph(name):
            'r1_factor_vs_resolution': (item_vs_resolution_plot, "r1_factor_vs_resolution"),
            'i/sigma_vs_resolution': (item_vs_resolution_plot, "i_over_sigma_vs_resolution"),
            'i_over_sigma_vs_resolution': (item_vs_resolution_plot, "i_over_sigma_vs_resolution"),
+           'cc_half_vs_resolution': (item_vs_resolution_plot, "cc_half_vs_resolution"),
+           'rint_vs_resolution': (item_vs_resolution_plot, "rint_vs_resolution"),
            'scale_factor_vs_resolution': scale_factor_vs_resolution_plot,
            'bijvoet_differences_probability_plot': bijvoet_differences_NPP,
            'bijvoet_differences_scatter_plot': bijvoet_differences_scatter_plot,
@@ -3392,6 +3411,8 @@ class HealthOfStructure():
       box = (x,0,boxWidth,boxHeight)
       fill = second_colour
       draw.rectangle(box, fill=fill)
+      value_display = value_display.replace("0.",".")
+      
 
     if item == "Completeness":
       od_value = OV.get_cif_item('_reflns_odcompleteness_completeness')
