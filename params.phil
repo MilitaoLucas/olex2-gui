@@ -1156,12 +1156,12 @@ user
           .type = bool
           .caption = "%Output% csv"
       }
-      rint_vs_resolution
-        .short_caption = "rint_vs_resolution"
-        .caption = "rint_vs_resolution"
-        .help = "rint_vs_resolution"
+      rmerge_vs_resolution
+        .short_caption = "Rmerge vs resolution"
+        .caption = "Rmerge vs resolution"
+        .help = "Rmerge vs resolution"
       {
-        title = "rint_vs_resolution"
+        title = "Rmerge vs resolution"
           .type = str
         resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
           .type = choice
