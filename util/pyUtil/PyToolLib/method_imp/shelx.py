@@ -85,6 +85,8 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       modified_intensities = None
       modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
       fab_path = "%s/%s.fab" %(OV.FilePath(), OV.FileName())
+      if not os.path.exists(fab_path):
+        OV.SetParam("snum.refinement.recompute_mask_before_refinement", True)
       f_mask, f_model = None, None
       # backward compatibility - just in case
       if not OV.HKLSrc() == modified_hkl_path:
