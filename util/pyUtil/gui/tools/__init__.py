@@ -842,13 +842,22 @@ def refine_extinction():
   _ = olx.xf.rm.Exti()
 
   if "n/a" not in _.lower() and _ != '0':
-    _ = _.split('(')
-    exti = _[0]
-    esd = _[1].rstrip(')')
-    exti_f = float(exti)
-    _ = len(exti) - len(esd) -2
-    esd_f = float("0.%s%s" %(_*"0", esd))
+    if "(" in _:
+      _ = _.split('(')
+      exti = _[0]
+      esd = _[1].rstrip(')')
+      exti_f = float(exti)
+      _ = len(exti) - len(esd) -2
+      esd_f = float("0.%s%s" %(_*"0", esd))
+    else:
+      exti = _
+      esd = ""
+      OV.SetParam('snum.refinement.refine_extinction',1)
+      OV.SetParam('snum.refinement.refine_extinction_tickbox', True)
     retVal = "%s(%s)"%(exti,esd)
+  else:
+    OV.SetParam('snum.refinement.refine_extinction',0)
+    OV.SetParam('snum.refinement.refine_extinction_tickbox', False)
   return retVal
 
 
@@ -1254,8 +1263,6 @@ def GetRInfo(txt="",format='html'):
   cache['GetRInfo'] = retVal
   return retVal
 OV.registerFunction(GetRInfo)
-
-
 
 
 def resize_pdf(f_in, setting='printer'):
