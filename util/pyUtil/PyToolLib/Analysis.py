@@ -2560,13 +2560,13 @@ class item_vs_resolution_plot(Analysis):
       self.draw_fit_line(slope=0, y_intercept=3, write_equation=False, write_text="3 sigma line (noise below, data above)")
       self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="min IUCr res")
 
-    if self.item == "cc_half_vs_resolution":
-      self.draw_fit_line(slope=0, y_intercept=0.15, write_equation=False, write_text="3 sigma line (noise below, data above)")
-      self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="min IUCr res")
+    #if self.item == "cc_half_vs_resolution":
+      #self.draw_fit_line(slope=0, y_intercept=0.15, write_equation=False, write_text="3 sigma line (noise below, data above)")
+      #self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="min IUCr res")
 
-    if self.item == "rint_vs_resolution":
-      self.draw_fit_line(slope=0, y_intercept=0.15, write_equation=False, write_text="3 sigma line (noise below, data above)")
-      self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="min IUCr res")
+    #if self.item == "rmerge_vs_resolution":
+      #self.draw_fit_line(slope=0, y_intercept=0.15, write_equation=False, write_text="3 sigma line (noise below, data above)")
+      #self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="min IUCr res")
 
 
     reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
@@ -2873,15 +2873,21 @@ def makeReflectionGraphGui():
   gui_d['help'] = htmlTools.make_table_first_col(
     help_name=help_name, popout=False)
   d = {'ctrl_name':'SET_REFLECTION_STATISTICS',
-     'items':"-- %Please Select% --;%Wilson Plot%;%Cumulative Intensity%;" +\
-             "%Systematic Absences%;%Fobs-Fcalc%;%Fobs over Fcalc%;" +\
-             "%Completeness%;%Normal Probability%;" +\
-             "%Scale factor vs resolution%;%R1 factor vs resolution%;" +\
-             "%I/sigma vs resolution%;" +\
-             "%cc_half_vs_resolution%;" +\
-             "%rint_vs_resolution%;" +\
-             "%Bijvoet Differences% %Probability Plot%;" +\
-             "%Bijvoet Differences% %Scatter Plot%",
+     'items':"-- %Please Select% --;" +\
+             "Wilson Plot;" +\
+             "Cumulative Intensity;" +\
+             "Systematic Absences;" +\
+             "Fobs-Fcalc;" +\
+             "I/sigma vs resolution;" +\
+             "cc_half_vs_resolution;" +\
+             "Rmerge vs resolution;" +\
+             "Fobs over Fcalc;" +\
+             "Completeness%;" +\
+             "Normal Probability;" +\
+             "Scale factor vs resolution;" +\
+             "R1 factor vs resolution;" +\
+             "Bijvoet Differences %Probability Plot%;" +\
+             "Bijvoet Differences %Scatter Plot%",
      'height':guiParams.html.combo_height,
      'bgcolor':guiParams.html.input_bg_colour,
      'value':value,
@@ -2941,7 +2947,7 @@ def make_reflection_graph(name):
            'i/sigma_vs_resolution': (item_vs_resolution_plot, "i_over_sigma_vs_resolution"),
            'i_over_sigma_vs_resolution': (item_vs_resolution_plot, "i_over_sigma_vs_resolution"),
            'cc_half_vs_resolution': (item_vs_resolution_plot, "cc_half_vs_resolution"),
-           'rint_vs_resolution': (item_vs_resolution_plot, "rint_vs_resolution"),
+           'rmerge_vs_resolution': (item_vs_resolution_plot, "rmerge_vs_resolution"),
            'scale_factor_vs_resolution': scale_factor_vs_resolution_plot,
            'bijvoet_differences_probability_plot': bijvoet_differences_NPP,
            'bijvoet_differences_scatter_plot': bijvoet_differences_scatter_plot,
