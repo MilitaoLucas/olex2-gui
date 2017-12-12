@@ -9,6 +9,9 @@ from cctbx import statistics
 from cctbx.array_family import flex
 from cctbx import uctbx
 
+import iotbx
+from iotbx.merging_statistics import *
+
 import math
 
 class empty: pass
@@ -83,17 +86,23 @@ class OlexCctbxReflectionStats(OlexCctbxAdapter):
       OV.DeleteBitmap(bitmap)
 
 class item_vs_resolution(OlexCctbxAdapter):
+
   def __init__(self, item="r1_factor_vs_resolution", n_bins=10, resolution_as="two_theta"):
     OlexCctbxAdapter.__init__(self)
     self.resolution_as = resolution_as
     self.item = item
 
-    if self.item == "rint_vs_resolution":
-      import iotbx
-      from iotbx.merging_statistics import *
+    if self.item == "rmerge_vs_resolution":
       fo2 = self.reflections.f_sq_obs
       self.info = fo2.info()
-      self.binned_data = iotbx.merging_statistics.dataset_statistics(fo2, n_bins=n_bins)
+      stats = iotbx.merging_statistics.dataset_statistics(fo2, n_bins=n_bins)
+      fo2.setup_binner(n_bins=n_bins)
+      self.binned_data = empty()
+      self.binned_data.data = [x.r_merge for x in stats.bins]
+      self.binned_data.data.append('0')
+      self.binned_data.data.insert(0,'0')
+      self.binned_data.binner = fo2.binner()
+      self.binned_data.show = stats.show
       #for b in result.bins:
         #print b.d_min, b.d_max, b.cc_one_half, b.r_merge
 
@@ -122,7 +131,10 @@ class item_vs_resolution(OlexCctbxAdapter):
       fo.setup_binner(n_bins=n_bins)
       self.info = fo.info()
       self.binned_data = fo.r1_factor(fc, scale_factor=math.sqrt(scale_factor), use_binning=True)
-    self.binned_data.show()
+    try:
+      self.binned_data.show()
+    except:
+      pass
 
   def xy_plot_info(self):
     r = empty()
@@ -158,8 +170,8 @@ class item_vs_resolution(OlexCctbxAdapter):
       legend_y = "I/sigma"
     elif "cc_half_vs_resolution" in self.item:
       legend_y = "CC 1/2"
-    elif "rint_vs_resolution" in self.item:
-      legend_y = "Rint"
+    elif "rmerge_vs_resolution" in self.item:
+      legend_y = "R_merge"
     r.yLegend = legend_y
     return r
 
@@ -569,8 +581,8 @@ class completeness_statistics(object):
       resolutions = missing_set.sin_theta_over_lambda_sq().data()
     self.missing_set = missing_set
     if missing_set.size() > 0:
-      print "Missing data:"
-      print "  h  k  l  %s" %bin_range_as
+      print "Missing data: %s" %missing_set.size()
+      #print "  h  k  l  %s" %bin_range_as
     else:
       print "No missing data"
     for indices, resolution in zip(missing_set.indices(), resolutions):
