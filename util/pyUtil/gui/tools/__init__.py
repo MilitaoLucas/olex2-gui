@@ -801,21 +801,21 @@ def weightGuiDisplay():
         colour = gui_orange
       else:
         colour = gui_red
-      sign = "+"
+      sign = "&#9650;"
       if curr-sugg == 0:
-        sign = "="
+        sign = ""
         sugg = 0
       elif curr-sugg > 0:
-        sign = "-"
+        sign = "&#9660;"
         sugg = sugg/curr
       else:
-        sign = "+"
+        sign = "&#9650;"
         sugg = curr/sugg
       if sugg != 0:
         sugg_perc = "%s%.0f%%&nbsp;" %(sign, (100-sugg*100))
       else:
         sugg_perc = "--"
-      retVal += "%.3f&nbsp;<font color='%s'><b>%s</b></font>&nbsp;|&nbsp;" %(curr, colour, sugg_perc)
+      retVal += "%.3f&nbsp;<font color='%s'><b>%s</b></font>&nbsp;|&nbsp;" %(curr, colour, sign)
     html_scheme = retVal.strip("|&nbsp;")
   else:
     html_scheme = current_weight
@@ -840,6 +840,8 @@ def refine_extinction():
 
   retVal = ""
   _ = olx.xf.rm.Exti()
+
+
 
   if "n/a" not in _.lower() and _ != '0':
     if "(" in _:
