@@ -67,7 +67,7 @@ $-
 
 
   <td ALIGN='center' width='39%'>
-<b>hkl</b>:   
+<b>hkl</b>:
 <!-- #include reflection-date reflection-date.htm;1; -->
   </td>
 
@@ -98,10 +98,9 @@ $-
    $+
      html.Snippet("gui/snippets/input-checkbox",
      "name=SNUM_REFINEMENT_EXTI",
-     "checked=spy.GetParam(snum.refinement.refine_extinction_tickbox)",
+     "checked=not(strcmp(xf.rm.Exti(),'n/a'))",
      "oncheck=spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI",
      "onuncheck=spy.SetParam(snum.refinement.refine_extinction,0)>>delins EXTI",
-     "manage=True",
      )
     $-
   </td>
