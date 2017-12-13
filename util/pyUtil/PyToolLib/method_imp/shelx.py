@@ -85,23 +85,24 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       modified_intensities = None
       modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
       fab_path = "%s/%s.fab" %(OV.FilePath(), OV.FileName())
-      if not os.path.exists(fab_path):
-        OV.SetParam("snum.refinement.recompute_mask_before_refinement", True)
       f_mask, f_model = None, None
       # backward compatibility - just in case
       if not OV.HKLSrc() == modified_hkl_path:
         olx.SetVar('snum.masks.original_hklsrc', OV.HKLSrc())
       else:
         olx.SetVar('snum.masks.original_hklsrc', '')
-      if OV.GetParam("snum.refinement.recompute_mask_before_refinement"):
+      if OV.GetParam("snum.refinement.recompute_mask_before_refinement") or not os.path.exists(fab_path):
         if OV.HKLSrc() == modified_hkl_path:
           raise Exception("You can't calculate a mask on an already masked file!")
         cctbx_olex_adapter.OlexCctbxMasks()
         if olx.current_mask.flood_fill.n_voids() > 0:
           f_mask = olx.current_mask.f_mask()
           f_model = olx.current_mask.f_model()
-      elif os.path.exists(fab_path):
-        pass
+        else:
+          print "There are no voids!"
+          OV.SetParam("snum.refinement.use_solvent_mask", False)
+          olex.m('delins ABIN')
+
       elif os.path.exists("%s/%s-f_mask.pickle" %(filepath, OV.FileName())):
         f_mask = easy_pickle.load("%s/%s-f_mask.pickle" %(filepath, OV.FileName()))
         f_model = easy_pickle.load("%s/%s-f_model.pickle" %(filepath, OV.FileName()))
