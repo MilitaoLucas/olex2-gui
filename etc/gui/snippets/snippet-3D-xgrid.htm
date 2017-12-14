@@ -8,11 +8,11 @@
       name="SNUM_XGRID_SLIDE"
       width="100%"
       height="18"
-      value="$spy.gui.maps.Round(xgrid.Scale(),3)"
+      value="$math.eval($spy.gui.maps.Round(xgrid.Scale(),3)*10)"
       bgcolor="$GetVar(HtmlTableBgColour)"
       fgcolor="$GetVar(HtmlFontColour)"
       min="$math.eval(xgrid.GetMin()*10)"
-      max="$math.eval(xgrid.Getmax()*10)"
+      max="-0.1"
       onchange="spy.SetParam(snum.xgrid.value,math.eval(html.GetValue(~name~)/10))>>
 html.SetValue(SNUM_XGRID_VALUE,spy.GetParam(snum.xgrid.value))>>
 xgrid.Scale(html.GetValue(SNUM_XGRID_VALUE))>>"

@@ -235,7 +235,8 @@ class RunPrg(ArgumentParser):
     if not os.path.exists(copy_to):
       shutil.copyfile(copy_from, copy_to)
     #fab file...
-    copy_from = "%s%s%s.fab" %(self.filePath, os.sep, self.curr_file)
+#    copy_from = "%s%s%s.fab" %(self.filePath, os.sep, self.curr_file)
+    copy_from = ".".join(OV.HKLSrc().split(".")[:-1]) + ".fab"
     copy_to = "%s%s%s.fab" %(self.tempPath, os.sep, self.shelx_alias)
     if os.path.exists(copy_from):
       if not os.path.exists(copy_to):
