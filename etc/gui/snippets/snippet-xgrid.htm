@@ -106,8 +106,12 @@ Extended
 #ignoreif -->
 
 
-
 <td align='right'>
-  <a href="editmaterial XGrid">%Edit% %style%</a>
-  <!--<a href="sel WBox">%Select% %Volume%</a>-->
+    $+
+    html.Snippet("gui/snippets/input-button",
+    "value=Edit",
+    "onclick=editmaterial XGrid",
+    )$-
 </td>
+
+  <!--<a href="sel WBox">%Select% %Volume%</a>-->
