@@ -195,16 +195,25 @@ html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')",
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;help_ext=Mask_Info;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 $spy.gui.tools.get_mask_info()
-
 #ignoreif -->
+
+
 
 
 <!-- #ignoreif spy.GetParam('snum.refinement.use_solvent_mask')
-
 <td>
+
+<!-- #ignoreif fs.Exists(mask_notification.htm)
 This is the Olex2 implementation of BYPASS (a.k.a. SQUEEZE)
+#ignoreif -->
+<!-- #includeif fs.Exists(mask_notification.htm) mask_note mask_notification.htm;1; -->
+
 </td>
 #ignoreif -->
+
+
+
+
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 

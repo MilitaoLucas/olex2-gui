@@ -1,37 +1,22 @@
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MAP_3D';help_ext=map-3D;1 -->
+
+$spy.gui.tools.get_map_scale()
+
   <td width="15%">%Level%&nbsp;/e&Aring;<sup>-3</sup></td>
-  <td width="75%">
-    <font size='$GetVar(HtmlFontSizeControls)'>
-    <input
-      align="right"
-      type="slider"
-      name="SNUM_XGRID_SLIDE"
-      width="100%"
-      height="18"
-      value="$math.eval($spy.gui.maps.Round(xgrid.Scale(),3)*10)"
-      bgcolor="$GetVar(HtmlTableBgColour)"
-      fgcolor="$GetVar(HtmlFontColour)"
-      min="$math.eval(xgrid.GetMin()*10)"
-      max="-0.1"
-      onchange="spy.SetParam(snum.xgrid.value,math.eval(html.GetValue(~name~)/10))>>
-html.SetValue(SNUM_XGRID_VALUE,spy.GetParam(snum.xgrid.value))>>
-xgrid.Scale(html.GetValue(SNUM_XGRID_VALUE))>>"
-    >
-    </font>
-  </td>
-  <td width="8%" align='right'>
-    <font size='$GetVar(HtmlFontSizeControls)'>
-    <input
-      type="text"
-      name = "SNUM_XGRID_VALUE"
-      width="100%"
-      height="18"
-      bgcolor="$GetVar(HtmlTableBgColour)"
-      fgcolor="$GetVar(HtmlFontColour)"
-      value="$spy.GetParam(snum.xgrid.value)"
-      onreturn="spy.SetParam(snum.xgrid.value,html.GetValue(~name~))>>
-xgrid.Scale(html.GetValue(~name~))>>
-html.SetValue(SNUM_XGRID_SLIDE,math.eval(XGrid.Scale()*10))"
-    >
-    </font>
+
+  $+
+    html.Snippet("gui/snippets/input-slider",
+    "param=snum.xgrid.scale",
+    "name=SNUM_XGRID_SCALE",
+    "min=\$GetVar(map_min)",
+    "max=0",
+    "value=\$GetVar(map_value)",
+    "scale=\$GetVar(map_slider_scale)",
+    "cmd=xgrid.scale(html.GetValue(SNUM_XGRID_SCALE_VALUE))",
+    "td1=<td width='43%'>",
+    "swidth=90"
+    )
+  $-
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
