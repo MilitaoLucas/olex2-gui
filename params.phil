@@ -264,7 +264,7 @@ routines requiring structure refinement
       .expert_level = 1
     use_solvent_mask = False
       .type = bool
-    recompute_mask_before_refinement = True
+    recompute_mask_before_refinement = False
       .type = bool
     check_absolute_structure_after_refinement = True
       .type = bool
@@ -692,6 +692,8 @@ routines requiring structure refinement
       .type = float
     size = 15
       .type = int
+    scale = 0.1
+      .type = float
   }
 
   map {

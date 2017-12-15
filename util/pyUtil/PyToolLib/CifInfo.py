@@ -781,15 +781,37 @@ class ExtractCifInfo(CifTools):
         #print "Error reading local diffractometer definition file %s" %p
 
     # smtbx solvent masks output file
-    mask_cif_path = '%s/%s-mask.cif' %(OV.StrDir(), OV.FileName())
-    if (os.path.isfile(mask_cif_path)
-        and OV.GetParam('snum.refinement.use_solvent_mask')
-        and (OV.GetParam('snum.masks.update_cif')
-             or '_smtbx_masks_void' not in self.cif_block)):
+#    mask_cif_path = '%s/%s-mask.cif' %(OV.StrDir(), OV.FileName())
+    mask_cif_path = ".".join(OV.HKLSrc().split(".")[:-1]) + ".sqf"
+    if os.path.isfile(mask_cif_path)\
+    and OV.GetParam('snum.refinement.use_solvent_mask'):
+    #and OV.GetParam('snum.masks.update_cif'):
+             #or '_smtbx_masks_void' not in self.cif_block)):
       import iotbx.cif
-      f = open(mask_cif_path, 'rb')
+      f = open(mask_cif_path, 'rb').read()
+      add = ""
+      if not f.strip().startswith("data"): # PLATON sqf files don't start with the data block line
+        add = "tmp"
+        writeFile = open(mask_cif_path + add, 'w')
+        writeFile.write("data_" + self.data_name + "\r\n")
+        writeFile.write(f)
+        writeFile.close()
+
+      f = open(mask_cif_path + add, 'rb')            
       cif_block = iotbx.cif.reader(file_object=f).model().get(self.data_name)
       f.close()
+      if add:
+        os.remove(mask_cif_path + add)
+        if '_smtbx_masks_void' in self.cif_block:
+          del self.cif_block['_smtbx_masks_void']
+        if '_smtbx_masks_special_details' in self.cif_block:
+          del self.cif_block['_smtbx_masks_special_details']
+      else:
+        if '_platon_squeeze_void' in self.cif_block:
+          del self.cif_block['_platon_squeeze_void']
+        if '_platon_squeeze_details' in self.cif_block:
+          del self.cif_block['_platon_squeeze_details']
+                
       if cif_block is not None:
         self.cif_block.update(cif_block)
         OV.SetParam('snum.masks.update_cif', False)
@@ -798,6 +820,11 @@ class ExtractCifInfo(CifTools):
       del self.cif_block['_smtbx_masks_void']
       if '_smtbx_masks_special_details' in self.cif_block:
         del self.cif_block['_smtbx_masks_special_details']
+    elif (not OV.GetParam('snum.refinement.use_solvent_mask')
+          and '_platon_squeeze_void' in self.cif_block):
+      del self.cif_block['_platon_squeeze_void']
+      if '_platon_squeeze_details' in self.cif_block:
+        del self.cif_block['_platon_squeeze_details']
 
     ## I introduced this condition in order NOT to overwrite the temperature value
     if '_diffrn_ambient_temperature' not in self.cif_block:

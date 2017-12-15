@@ -612,7 +612,11 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       cif = model.cif()
       data_name = OV.FileName().replace(' ', '')
       cif[data_name] = cif_block
-      f = open('%s/%s-mask.cif' %(filepath, OV.FileName()),'w')
+
+      mask_cif_path = ".".join(OV.HKLSrc().split(".")[:-1]) + ".sqf"
+      f = open(mask_cif_path, 'w')
+#      f = open('%s/%s-mask.cif' %(filepath, OV.FileName()),'w')
+
       print >> f, cif
       f.close()
       OV.SetParam('snum.masks.update_cif', True)
