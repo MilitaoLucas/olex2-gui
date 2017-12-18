@@ -42,7 +42,7 @@ class MapUtil:
                           float(olx.xgrid.GetMax())*self.scale))
       olx.html.SetValue('SNUM_XGRID_SLIDE', '%f'
                         %(float(olx.xgrid.Scale())*self.scale))
-
+    self.get_map_scale()
 
   def VoidView(self, recalculate='0', onoff=None):
     img_bases = ['small-Void']
@@ -124,7 +124,10 @@ class MapUtil:
       olex.m("calcFourier -%s -%s -r=%s %s" %(map_type, map_source, map_resolution, mask_val))
 
     self.deal_with_controls()
+
     OV.SetVar('olex2.map_type', 'eden')
+
+
 
   def SetXgridView(self, update_controls=True):
     view = OV.GetParam("snum.xgrid.view")
