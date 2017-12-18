@@ -36,6 +36,8 @@ $-
     "value=spy.GetParam('snum.refinement.max_cycles')",
     "name=SET_SNUM_REFINEMENT_MAX_CYCLES",
     "onchange=spy.SetMaxCycles(html.GetValue('~name~'))",
+    "min=0",
+    "max=99",
     )
   $-
 
@@ -47,6 +49,8 @@ $-
     html.Snippet("gui/snippets/input-spin-td",
     "value=math.eval(abs(spy.GetParam(snum.refinement.max_peaks)))",
     "name=SET_SNUM_REFINEMENT_MAX_PEAKS",
+    "min=0",
+    "max=99",
     "onchange=spy.SetMaxPeaks(html.GetValue('~name~'))",
     )
   $-
