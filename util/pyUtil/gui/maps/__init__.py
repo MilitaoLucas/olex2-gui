@@ -191,15 +191,22 @@ class MapUtil:
 
   def get_map_scale(self):
 
+    olx.SetVar('map_slider_scale', 10)
+    olx.SetVar('map_min',1)
+    olx.SetVar('map_max',0)
+    olx.SetVar('map_value',0)
+
     if olx.xgrid.Visible() == "false":
-      olex.m("calcFourier -diff -r=0.1 -m")
+      return
 
     val_min = float(olx.xgrid.GetMin())
     print "val_min: %s" %val_min
 
+    if val_min > 0.01:
+      val_min = 0.01
+
     slider_scale = int(40/val_min * -1)
-    print slider_scale
-    slider_scale = int(round(slider_scale/100)) * 100
+
     olx.SetVar('map_slider_scale', slider_scale)
     print "slider_scale: %s" %slider_scale
 
@@ -216,7 +223,27 @@ class MapUtil:
 
     map_value = int(round(float(olx.xgrid.Scale()) * slider_scale))
     olx.SetVar('map_value',map_value)
+    olx.SetVar('map_value', olx.xgrid.Scale())
 
+    if 0 <= slider_scale < 15:
+      slider_scale = 10
+    elif  15 <= slider_scale < 25:
+      slider_scale = 20
+    elif 25 <= slider_scale < 75:
+      slider_scale = 50
+    elif 75 <= slider_scale < 125:
+      slider_scale = 100
+    elif 125 <= slider_scale < 175:
+      slider_scale = 150
+    elif 175 <= slider_scale < 225:
+      slider_scale = 200
+    elif 225 <= slider_scale < 275:
+      slider_scale = 250
+    elif 275 <= slider_scale < 325:
+      slider_scale = 300
+
+    #olx.html.SetValue('SNUM_XGRID_SCALE_SLIDE', map_value)
+    #olx.html.SetValue('SNUM_XGRID_SCALE_VALUE', olx.xgrid.Scale())
     olx.SetVar('snum.xgrid.scale', olx.xgrid.Scale())
 
 
