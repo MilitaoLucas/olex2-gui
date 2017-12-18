@@ -598,6 +598,11 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       if merging: #HKLF5 will not have one
         cif_block['_diffrn_reflns_av_R_equivalents'] = "%.4f" %merging.r_int()
         cif_block['_diffrn_reflns_av_sigmaI/netI'] = "%.4f" %merging.r_sigma()
+
+      try:
+        cif_block['_smtbx_masks_void_content'] = olx.cif_model[OV.ModelSrc()].get('_smtbx_masks_void_content')
+      except:
+        pass
       cif_block['_diffrn_reflns_limit_h_min'] = h_min
       cif_block['_diffrn_reflns_limit_h_max'] = h_max
       cif_block['_diffrn_reflns_limit_k_min'] = k_min
@@ -608,7 +613,12 @@ class OlexCctbxMasks(OlexCctbxAdapter):
         0.5 * uctbx.d_star_sq_as_two_theta(min_d_star_sq, self.wavelength, deg=True))
       cif_block['_diffrn_reflns_theta_max'] = "%.2f" %(
         0.5 * uctbx.d_star_sq_as_two_theta(max_d_star_sq, self.wavelength, deg=True))
-      cif_block.update(mask.as_cif_block())
+
+      mdict = mask.as_cif_block()
+      _ = olx.cif_model[OV.ModelSrc()].get('_smtbx_masks_void_content')
+      if _:
+        mdict['_smtbx_masks_void_content'] = _
+      cif_block.update(mdict)
       cif = model.cif()
       data_name = OV.FileName().replace(' ', '')
       cif[data_name] = cif_block
