@@ -1,6 +1,6 @@
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MAP_3D';help_ext=map-3D;1 -->
 
-$spy.gui.tools.get_map_scale()
+$spy.gui.maps.get_map_scale()
 
   <td width="15%">%Level%&nbsp;/e&Aring;<sup>-3</sup></td>
 
@@ -9,12 +9,12 @@ $spy.gui.tools.get_map_scale()
     "param=snum.xgrid.scale",
     "name=SNUM_XGRID_SCALE",
     "min=\$GetVar(map_min)",
-    "max=0",
+    "max=\$GetVar(map_max)",
     "value=\$GetVar(map_value)",
     "scale=\$GetVar(map_slider_scale)",
     "cmd=xgrid.scale(html.GetValue(SNUM_XGRID_SCALE_VALUE))",
     "td1=<td width='43%'>",
-    "swidth=90"
+    "swidth=85"
     )
   $-
 

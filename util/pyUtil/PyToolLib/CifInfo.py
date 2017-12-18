@@ -797,21 +797,21 @@ class ExtractCifInfo(CifTools):
         writeFile.write(f)
         writeFile.close()
 
-      f = open(mask_cif_path + add, 'rb')            
+      f = open(mask_cif_path + add, 'rb')
       cif_block = iotbx.cif.reader(file_object=f).model().get(self.data_name)
       f.close()
-      if add:
+      if add: #i.e. we have a PLATON file
         os.remove(mask_cif_path + add)
         if '_smtbx_masks_void' in self.cif_block:
           del self.cif_block['_smtbx_masks_void']
         if '_smtbx_masks_special_details' in self.cif_block:
           del self.cif_block['_smtbx_masks_special_details']
-      else:
+      else: # i.e. we have an smbtx file
         if '_platon_squeeze_void' in self.cif_block:
           del self.cif_block['_platon_squeeze_void']
         if '_platon_squeeze_details' in self.cif_block:
           del self.cif_block['_platon_squeeze_details']
-                
+
       if cif_block is not None:
         self.cif_block.update(cif_block)
         OV.SetParam('snum.masks.update_cif', False)
