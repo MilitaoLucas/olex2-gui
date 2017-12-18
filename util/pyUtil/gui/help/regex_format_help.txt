@@ -21,6 +21,7 @@ Note: :: <br><br><b><font color='$spy.GetParam(gui.red)'>Note: </font></b>
 URL\[\s*(?P<URL>.*?),(?P<TXT>.*?)] :: <b><a href='shell \g<URL>'><font color='#205c90'>\g<TXT></font></a></b>
 
 YOUTUBE :: <zimg src='$GetVar(help_path)/images/youtube_s.png'>
+VIMEO :: <zimg src='$GetVar(help_path)/images/vimeo_s.png'>
 
 <code>(.*?)</code> :: $+ html.Snippet("GetVar(gui_link)","value=\1","hint=\1","onclick=\1","flat=True",td1=, td2=, "fgcolor=#ffffff","bgcolor=#222244")
 
