@@ -1267,26 +1267,6 @@ def GetRInfo(txt="",format='html'):
 OV.registerFunction(GetRInfo)
 
 
-def get_map_scale():
-
-  if olx.xgrid.Visible() == "false":
-    olex.m("calcFourier -diff -r=0.1 -m")
-
-  val_min = float(olx.xgrid.GetMin())
-  print val_min
-
-  slider_scale = int(val_min * 100 * -1)
-  olx.SetVar('map_slider_scale', slider_scale)
-
-  map_min =  int(round((val_min * slider_scale),0))
-  olx.SetVar('map_min',map_min)
-
-  map_value = float(olx.xgrid.Scale())
-  #olx.SetVar('map_value',map_value)
-
-OV.registerFunction(get_map_scale,True,'gui.tools')
-
-
 def resize_pdf(f_in, setting='printer'):
   if ".pdf" in f_in:
     small_file = f_in.split(".")[0] + "_small" + f_in.split(".")[1]

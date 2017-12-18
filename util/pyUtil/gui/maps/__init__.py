@@ -3,6 +3,8 @@ import olx
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
+debug = bool(OV.GetParam("olex2.debug", False))
+
 class MapUtil:
 
   def __init__(self):
@@ -154,26 +156,70 @@ class MapUtil:
     contours = OV.GetParam('snum.xgrid.contours') - 1
     difference = maximum + minimum * -1
 
-    maximum = round(maximum,2)
-    minimum = round(minimum,2)
+    map_maximum = round(maximum*10,0)/10
+    map_minimum = round(minimum*10,0)/10
 
-    difference = abs(maximum) + abs(minimum)
+    if debug:
+      print "Map Maximum = %s (%s)" %(map_maximum, maximum)
+      print "Map Minimum = %s (%s)" %(map_minimum, minimum)
 
-    step = round(difference/contours,3)
 
-    OV.SetParam('snum.xgrid.step',difference/contours)
-    OV.SetParam('snum.xgrid.fix',minimum)
+    if maximum > 0 and minimum < 0:
+      difference = abs(maximum) + abs(minimum)
+    else:
+      difference = abs(maximum - minimum)
+
+    step = round((difference/contours) * 100, 0)/100
+    if debug:
+      print "Map Step = %s" %(step)
+
     OV.SetParam('snum.xgrid.step',step)
+    OV.SetParam('snum.xgrid.fix',map_minimum)
 
-    if difference < 1:
-      OV.SetParam('snum.xgrid.slider_scale',20)
-    elif difference < 2:
-      OV.SetParam('snum.xgrid.slider_scale',10)
-    elif difference < 5:
-      OV.SetParam('snum.xgrid.slider_scale',5)
+    slider_scale = int(40/difference)
+    OV.SetParam('snum.xgrid.slider_scale',slider_scale)
 
-    olx.xgrid.Fix(minimum, step)
+    #if difference < 1:
+      #OV.SetParam('snum.xgrid.slider_scale',20)
+    #elif difference < 2:
+      #OV.SetParam('snum.xgrid.slider_scale',10)
+    #elif difference < 5:
+      #OV.SetParam('snum.xgrid.slider_scale',5)
+
+    olx.xgrid.Fix(map_minimum, step)
     olx.html.Update()
+
+  def get_map_scale(self):
+
+    if olx.xgrid.Visible() == "false":
+      olex.m("calcFourier -diff -r=0.1 -m")
+
+    val_min = float(olx.xgrid.GetMin())
+    print "val_min: %s" %val_min
+
+    slider_scale = int(40/val_min * -1)
+    print slider_scale
+    slider_scale = int(round(slider_scale/100)) * 100
+    olx.SetVar('map_slider_scale', slider_scale)
+    print "slider_scale: %s" %slider_scale
+
+    map_min =  int(round((val_min * slider_scale * 0.1),0)) * 10
+    print "map_min: %s" %map_min
+    olx.SetVar('map_min',map_min)
+
+    map_max =  int(round((val_min/3 * slider_scale * 0.1),0)) * 10
+    print "map_max: %s" %map_max
+    olx.SetVar('map_max',map_max)
+
+    #map_max = 0
+    #olx.SetVar('map_max',map_max)
+
+    map_value = int(round(float(olx.xgrid.Scale()) * slider_scale))
+    olx.SetVar('map_value',map_value)
+
+    olx.SetVar('snum.xgrid.scale', olx.xgrid.Scale())
+
+
 
 
 if OV.HasGUI():
@@ -184,3 +230,4 @@ if OV.HasGUI():
   OV.registerFunction(mu.MaskView, False, "gui.maps")
   OV.registerFunction(mu.Round, False, "gui.maps")
   OV.registerFunction(mu.get_best_contour_maps, False, "gui.maps")
+  OV.registerFunction(mu.get_map_scale, False, "gui.maps")

@@ -680,7 +680,7 @@ routines requiring structure refinement
       .type = float
     heat_colours = 2 3 5 *7
       .type = choice
-    contours = 8
+    contours = 15
       .type = int
     step = 0
       .type = float
