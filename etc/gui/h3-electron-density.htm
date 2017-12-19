@@ -3,61 +3,41 @@
 <tr bgcolor="$GetVar(HtmlTableBgColour)">
 <!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width="20%">%Map%</td>
-  <td width="30%">
-    <font "size=$GetVar('HtmlFontSizeControls')">
-    <input
-      type="combo"
-      height="GetVar('HtmlComboHeight')"
-      bgcolor="GetVar('HtmlInputBgColour')"
-      name="SET_SNUM_MAP_TYPE"
-      items="'diff;fcalc;2Fo-Fc<-tomc;fobs'"
-      value="spy.GetParam('snum.map.type')"
-      width="95%"
-      onchange="spy.SetParam('snum.map.type',html.GetValue('~name~'))>>spy.gui.maps.MapView('off')"
-      valign="center"
-      readonly
-    >
-    </font>
+  <td align='center' width="8%">%Map%</td>
+  <td width="15%">
+    $+
+      html.Snippet("gui/snippets/input-combo",
+      "name=SET_SNUM_MAP_TYPE",
+      "items=diff;fcalc;2Fo-Fc<-tomc;fobs",
+      "value=spy.GetParam('snum.map.type')",
+      "onchange=spy.SetParam('snum.map.type',html.GetValue('~name~'))>>spy.gui.maps.MapView('off')",
+      "onchangealways=True",
+      )
+    $-
   </td>
-  <td width="20%">%Source%</td>
-  <td width="30%">
+  <td align='center' width="10%">%Source%</td>
+  <td width="15%">
+    $+
+      html.Snippet("gui/snippets/input-combo",
+      "name=SET_SNUM_MAP_SOURCE",
+      "items=olex;fcf;",
+      "value=spy.GetParam('snum.map.source')",
+      "onchange=spy.SetParam('snum.map.source',html.GetValue('~name~'))>>spy.gui.maps.MapView('off')",
+      "onchangealways=True",
+      )
+    $-
+  <td align='center' width="10%">%Res%/&Aring</td>
+  <td width="10%">
     <font size="$GetVar('HtmlFontSizeControls')">
-    <input
-      type="combo"
-      height="GetVar('HtmlComboHeight')"
-      bgcolor="GetVar('HtmlInputBgColour')"
-      name="SET_SNUM_MAP_SOURCE"
-      items="'olex;fcf;'"
-      value="spy.GetParam('snum.map.source')"
-      width="95%"
-      onchange="spy.SetParam('snum.map.source',html.GetValue('~name~'))>>spy.gui.maps.MapView('off')"
-      valign="center"
-      readonly
-    >
-    </font>
+    $+
+      html.Snippet("gui/snippets/input-text",
+      "name=SET_SNUM_MAP_RESOLUTION",
+      "value=spy.GetParam(snum.map.resolution)",
+      "onchange=spy.SetParam(snum.map.resolution,html.GetValue(~name~))>>spy.gui.maps.MapView(off)",
+      )
+    $-
   </td>
-<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
-<tr bgcolor="$GetVar(HtmlTableBgColour)">
-<!-- #include tool-column gui\blocks\tool-first-column.htm;1; -->
-<!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
-  <td width="20%">%Res%/&Aring</td>
-  <td width="30%">
-    <font size="$GetVar('HtmlFontSizeControls')">
-    <input
-      type="text"
-      name = "SET_SNUM_MAP_RESOLUTION"
-      width="95%"
-      height="GetVar('HtmlInputHeight')"
-      valign="center"
-      bgcolor="GetVar('HtmlTableBgColour')"
-      fgcolor="GetVar('HtmlFontColour')"
-      value="spy.GetParam('snum.map.resolution')"
-      onchange="spy.SetParam('snum.map.resolution',html.GetValue('~name~'))>>spy.gui.maps.MapView('off'))"
-    >
-    </font>
-  </td>
-  <td valign='bottom' width="20%">
+  <td width="10%">
     <font size="$GetVar('HtmlFontSizeControls')">
     <input
       bgcolor="GetVar('HtmlTableBgColour')"
@@ -72,8 +52,14 @@
     >
     </font>
   </td>
-  <td valign='bottom' align="right">
-$spy.MakeHoverButton('small-Map@maps','spy.gui.maps.MapView()')
+  <td align="right" width="20%">
+    $+
+      html.Snippet("gui/snippets/input-button",
+      "name=MAKE_EDEN_MAP",
+      "value=GO",
+      "onclick=spy.gui.maps.MapView()",
+      )
+    $-
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 

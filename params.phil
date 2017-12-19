@@ -1616,9 +1616,9 @@ user
           .type = float
         top = 0.15
           .type = float
-        href = ""
+        href = "spy.make_reflection_graph(rmerge_vs_resolution)"
           .type = str
-        target = "Internal R factor"
+        target = "Internal R factors. Click to see the graph"
           .type = str
       }
       Completeness{

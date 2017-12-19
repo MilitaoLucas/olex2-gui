@@ -1,14 +1,16 @@
 <!-- #include tool-top gui\blocks\tool-top.htm;image=#image;onclick=#onclick;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='MAP_HEADER';help_ext=map-header;1 -->
-
 $spy.gui.maps.SetXgridView()
 <!-- #include xgrid gui\snippets\snippet-xgrid.htm;suffix=maps;1; -->
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #ignoreif or(strcmp(xgrid.RenderMode(),'contour'),strcmp(xgrid.RenderMode(),'contour+plane'),strcmp(xgrid.RenderMode(),'plane'))
 <tr bgcolor="$GetVar(HtmlTableBgColour)">
+
+<!-- #ignoreif strcmp(xgrid.Visible(), false)
 <!-- #include xgrid gui\snippets\snippet-3D-xgrid.htm;1; -->
+#ignoreif -->
 #ignoreif -->
 
 <!-- #ignoreif not(or(strcmp(xgrid.RenderMode(),'contour'),strcmp(xgrid.RenderMode(),'contour+plane'),strcmp(xgrid.RenderMode(),'plane')))
@@ -17,11 +19,11 @@ $spy.gui.maps.SetXgridView()
 #ignoreif -->
 
 
+<!-- #includeif file.Exists(HKLSrc()) h3-electron-density gui\h3-electron-density.htm;gui\blocks\tool-h3-off.htm;image=h3-Electron-Density;onclick="html.ItemState h3-calculate-voids 2>>html.ItemState h3-masks 2";1; -->
+
 <!-- #include h3-calculate-voids gui\h3-calculate-voids.htm;gui\blocks\tool-h3-off.htm;image=h3-Calculate-Voids;onclick="if file.Exists(HKLSrc()) then 'html.ItemState h3-masks 2' else none>>if file.Exists(HKLSrc()) then 'html.ItemState h3-electron-density 2' else none";2; -->
 
 <!-- #include h3-calculate-solvent-accessible-voids gui\h3-calculate-solvent-accessible-voids.htm;gui\blocks\tool-h3-off.htm;image=h3-Calculate-Solvent-Accessible-Voids;onclick="if file.Exists(HKLSrc()) then 'html.ItemState h3-masks 2' else none>>if file.Exists(HKLSrc()) then 'html.ItemState h3-electron-density 2' else none";2; -->
-
-<!-- #includeif file.Exists(HKLSrc()) h3-electron-density gui\h3-electron-density.htm;gui\blocks\tool-h3-off.htm;image=h3-Electron-Density;onclick="html.ItemState h3-calculate-voids 2>>html.ItemState h3-masks 2";2; -->
 
 <!-- #includeif file.Exists(HKLSrc()) h3-masks gui\h3-masks.htm;gui\blocks\tool-h3-off.htm;image=h3-Masks;onclick="html.ItemState h3-calculate-voids 2>>if file.Exists(HKLSrc()) then 'html.ItemState h3-electron-density 2' else none";2; -->
 
