@@ -212,7 +212,7 @@ class MapUtil:
     map_max = int(round(difference * slider_scale))
 
     if self.map_type == 'eden':
-      map_min =  abs(int(round(val_min/4 * slider_scale)))
+      map_min =  abs(int(round(val_min/5 * slider_scale)))
     else:
       map_min = 0
 
