@@ -195,62 +195,62 @@ class MapUtil:
     if olx.xgrid.Visible() == "false":
       return
 
-    val_min = float(olx.xgrid.GetMin())
-    val_max = float(olx.xgrid.GetMax())
+    val_min = float(olx.xgrid.GetMin()) * -1
+    val_max = float(olx.xgrid.GetMax()) * -1
 
-    if self.map_type == 'void':
-      if val_max > 0 and val_min< 0:
-        difference = abs(val_max) + abs(val_min)
-      else:
-        difference = abs(val_max - val_min)
-    elif self.map_type == 'eden':
-      print "val_min: %s" %val_min
-      if val_min > 0 and val_min < 0.01:
-        val_min = 0.01
-      if val_min > 0.01:
-        val_min = -0.01
-      difference = val_min * -1
+    if abs(val_min) > abs(val_max):
+      difference = val_min
+      val_min = val_max
+    else:
+      difference = val_max
 
     slider_scale = int(SCALED_TO/difference)
     olx.SetVar('map_slider_scale', slider_scale)
-    print "slider_scale: %s" %slider_scale
     self.scale = slider_scale
 
-    map_min =  int(round((val_min * slider_scale * 0.1),0)) * 10
-    print "map_min: %s" %map_min
-    olx.SetVar('map_min',map_min)
+    map_max = int(round((val_min * slider_scale * 0.1),0)) * 10
+    map_max = int(round(difference * slider_scale))
 
     if self.map_type == 'eden':
-      map_max =  int(round((val_min/4 * slider_scale * 0.1),0)) * 10
+      map_min =  abs(int(round(val_min/4 * slider_scale)))
     else:
-      map_max = int(round(val_max * slider_scale))
-    print "map_max: %s" %map_max
+      map_min = 0
+
     olx.SetVar('map_max',map_max)
+    olx.SetVar('map_min',map_min)
 
     map_value = int(round(float(olx.xgrid.Scale()) * slider_scale))
     self.value = map_value
+
+    print "slider_scale: %s" %slider_scale
+    print "map_min: %s" %map_min
+    print "map_max: %s" %map_max
+    print "map_value: %s" %map_value
+
+    s = abs(slider_scale)
+    if 0 <= s < 15:
+      slider_scale = 10
+    elif  15 <= s < 25:
+      slider_scale = 20
+    elif 25 <= s < 75:
+      slider_scale = 50
+    elif 75 <= s < 125:
+      slider_scale = 100
+    elif 125 <= s < 175:
+      slider_scale = 150
+    elif 175 <= s < 225:
+      slider_scale = 200
+    elif 225 <= s < 275:
+      slider_scale = 250
+    elif 275 <= s < 325:
+      slider_scale = 300
+
+    olx.SetVar('map_slider_scale', slider_scale* -1)
+
+    _ = round(float(olx.xgrid.Scale()),3)
+    OV.SetParam('snum.xgrid.scale', _)
+    olx.SetVar('snum.xgrid.scale', _)
     olx.SetVar('map_value', olx.xgrid.Scale())
-    OV.SetParam('snum.xgrid.scale', olx.xgrid.Scale())
-
-
-    #if 0 <= slider_scale < 15:
-      #slider_scale = 10
-    #elif  15 <= slider_scale < 25:
-      #slider_scale = 20
-    #elif 25 <= slider_scale < 75:
-      #slider_scale = 50
-    #elif 75 <= slider_scale < 125:
-      #slider_scale = 100
-    #elif 125 <= slider_scale < 175:
-      #slider_scale = 150
-    #elif 175 <= slider_scale < 225:
-      #slider_scale = 200
-    #elif 225 <= slider_scale < 275:
-      #slider_scale = 250
-    #elif 275 <= slider_scale < 325:
-      #slider_scale = 300
-
-    olx.SetVar('snum.xgrid.scale', olx.xgrid.Scale())
 
 
 

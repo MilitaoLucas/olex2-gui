@@ -807,14 +807,6 @@ def weightGuiDisplay():
         sugg = 0
       elif curr-sugg > 0:
         sign = "&#9660;"
-        sugg = sugg/curr
-      else:
-        sign = "&#9650;"
-        sugg = curr/sugg
-      if sugg != 0:
-        sugg_perc = "%s%.0f%%&nbsp;" %(sign, (100-sugg*100))
-      else:
-        sugg_perc = "--"
       retVal += "%.3f&nbsp;<font color='%s'><b>%s</b></font>&nbsp;|&nbsp;" %(curr, colour, sign)
     html_scheme = retVal.strip("|&nbsp;")
   else:

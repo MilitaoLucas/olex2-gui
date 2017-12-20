@@ -8,11 +8,11 @@
     "name=SNUM_XGRID_SCALE",
     "min=\$GetVar(map_min)",
     "max=\$GetVar(map_max)",
-    "value=\$GetVar(map_value)",
     "scale=\$GetVar(map_slider_scale)",
-    "cmd=xgrid.scale(html.GetValue(SNUM_XGRID_SCALE_VALUE))",
+    "cmd=xgrid.scale(math.eval(html.GetValue(SNUM_XGRID_SCALE_VALUE)*-1))",
     "td1=<td width='43%'>",
-    "swidth=85"
+    "invert=-1",
+    "swidth=90"
     )
   $-
 
