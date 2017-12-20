@@ -678,7 +678,7 @@ routines requiring structure refinement
       .type = bool
     value = 0.0
       .type = float
-    heat_colours = 2 3 5 *7
+    heat_colours = 2 3 *5 7
       .type = choice
     contours = 15
       .type = int
