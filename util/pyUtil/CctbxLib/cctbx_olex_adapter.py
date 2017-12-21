@@ -603,6 +603,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
         cif_block['_smtbx_masks_void_content'] = olx.cif_model[OV.ModelSrc()].get('_smtbx_masks_void_content')
       except:
         pass
+
       cif_block['_diffrn_reflns_limit_h_min'] = h_min
       cif_block['_diffrn_reflns_limit_h_max'] = h_max
       cif_block['_diffrn_reflns_limit_k_min'] = k_min
@@ -616,7 +617,7 @@ class OlexCctbxMasks(OlexCctbxAdapter):
 
       mdict = mask.as_cif_block()
       _ = olx.cif_model[OV.ModelSrc()].get('_smtbx_masks_void_content')
-      if _:
+      if _ and len(_) == len(mdict['_smtbx_masks_void_content']):
         mdict['_smtbx_masks_void_content'] = _
       cif_block.update(mdict)
       cif = model.cif()
