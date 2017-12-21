@@ -21,47 +21,22 @@ t:part_0_and_n{
 <font size="$GetVar('HtmlFontSizeControls')"><b>
 <input
   type="button"
-  name="0 | %(part)s"
-  value="0 | %(part)s"
+  name="0|%(part)s"
+  value="0| %(part)s"
   width="100%%"
-  onclick="ShowP 0 %(part)s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%(part)s)>>focus"
+  onclick="ShowP 0 %(parts)s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%(parts)s)>>focus"
   bgcolor="$GetVar('linkButton.bgcolor')"
   fgcolor="$GetVar('linkButton.fgcolor')"
   flat="$GetVar(linkButton.flat)"
 ></b>
 </font>
 </td>
-
-<!--
-    $+
-    html.Snippet(GetVar(default_link),
-    "value=0 | %(part)s",
-    "onclick=ShowP 0 %(part)s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%(part)s)>>focus",
-    )$-
--->
-
 }
 
 t:disorder_quicktool_no_options{
 
   %(parts_display)s
 
-  <td>
-
-<font size="$GetVar('HtmlFontSizeControls')"><b>
-<input
-  type="button"
-  name="ALL"
-  value="All"
-  width="100%%"
-  onclick="showP"
-  bgcolor="$GetVar('linkButton.bgcolor')"
-  fgcolor="$GetVar('linkButton.fgcolor')"
-  flat="$GetVar(linkButton.flat)"
-></b>
-</font>
-
-</td>
 }
 
 
