@@ -931,7 +931,7 @@ user
   report_label_style = 0
     .type = int
   parts{
-    keep_unique = False
+    keep_unique = True
       .type = bool
     select = True
       .type = bool
