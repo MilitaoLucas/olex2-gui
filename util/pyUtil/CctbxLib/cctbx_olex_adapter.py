@@ -600,7 +600,10 @@ class OlexCctbxMasks(OlexCctbxAdapter):
         cif_block['_diffrn_reflns_av_sigmaI/netI'] = "%.4f" %merging.r_sigma()
 
       try:
-        cif_block['_smtbx_masks_void_content'] = olx.cif_model[OV.ModelSrc()].get('_smtbx_masks_void_content')
+        _ = olx.cif_model[OV.ModelSrc()].get('_smtbx_masks_void_content')
+        if _:
+          if not _.is_trivial_1d():
+            cif_block['_smtbx_masks_void_content'] = _
       except:
         pass
 
@@ -617,7 +620,8 @@ class OlexCctbxMasks(OlexCctbxAdapter):
 
       mdict = mask.as_cif_block()
       _ = olx.cif_model[OV.ModelSrc()].get('_smtbx_masks_void_content')
-      if _ and len(_) == len(mdict['_smtbx_masks_void_content']):
+
+      if _ and mdict.has_key('_smtbx_masks_void_content') and len(_) == len(mdict['_smtbx_masks_void_content']):
         mdict['_smtbx_masks_void_content'] = _
       cif_block.update(mdict)
       cif = model.cif()

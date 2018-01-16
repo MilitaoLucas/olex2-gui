@@ -425,8 +425,8 @@ def MakeElementButtonsFromFormula(action='mode', scope = ""):
     d.setdefault('bgcolor', OV.GetParam('gui.html.table_firstcol_colour'))
 
     control = "IMG_%s" %name.upper()
-    #if debug:
-      #print "  EB1(%s): %.5f" %(control,(time.time() - t1))
+    if debug:
+      print "  EB1(%s): %.5f" %(control,(time.time() - t1))
     if olx.fs.Exists("%s.png" %img_name) != "true":
       TI.make_element_buttons(symbol)
 
@@ -932,17 +932,17 @@ def make_disorder_quicktools(scope='main', show_options=True):
   parts_display = ""
   sel = ""
   for item in parts:
-    d = {}
     _ = None
+    d = {}
     if item == 0:
-      item =  ' '.join(str(s) for s in parts)
-      d['part'] = "All"
+      continue
+      #item =  ' '.join(str(s) for s in parts)
+      #d['part'] = "All"
     else:
       d['part'] = item
     d['parts'] = item
     if select:
       sel = ">>sel part %s" %item
-    d['sel'] = sel
 
     parts_display += gui.tools.TemplateProvider.get_template('part_0_and_n', force=debug)%d
 
