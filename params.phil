@@ -28,6 +28,27 @@ routines requiring structure refinement
       .expert_level = 1
     }
 
+  bonds
+  {
+  mask = 48
+    .type = int
+  bzoom = 100
+    .type = int
+  colour = elements
+    .type = str
+  colours = @@elements 5@4278223103@4278255615@@orange  '5@4282071867@4286611584@@dark grey'
+    .type = strings
+  }
+
+  atoms
+  {
+  style = matt.glds
+    .type = str
+  azoom = 100
+    .type = int
+  }
+
+
   metadata{
     resolved_conflict_items = ""
       .type = strings
@@ -1701,7 +1722,7 @@ user
     .type = int
   colour = elements
     .type = str
-  colours = @@elements 5@4278223103@4278255615@@orange '5@4282071867@4286611584@@dark grey'
+  colours = @@elements 5@4278223103@4278255615@@orange  '5@4282071867@4286611584@@dark grey'
     .type = strings
   }
 
