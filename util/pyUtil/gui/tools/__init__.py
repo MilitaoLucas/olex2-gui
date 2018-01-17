@@ -46,6 +46,9 @@ grade_2_colour = OV.GetParam('gui.skin.diagnostics.colour_grade2').hexadecimal
 grade_3_colour = OV.GetParam('gui.skin.diagnostics.colour_grade3').hexadecimal
 grade_4_colour = OV.GetParam('gui.skin.diagnostics.colour_grade4').hexadecimal
 
+import subprocess
+
+
 
 class FolderView:
   root = None
@@ -1264,6 +1267,13 @@ def GetRInfo(txt="",format='html'):
   cache['GetRInfo'] = retVal
   return retVal
 OV.registerFunction(GetRInfo)
+
+
+def launchWithoutConsole(command, args):
+    """Launches 'command' windowless and waits until finished"""
+    startupinfo = subprocess.STARTUPINFO()
+    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    return subprocess.Popen([command] + args, startupinfo=startupinfo).wait()
 
 
 def resize_pdf(f_in, setting='printer'):

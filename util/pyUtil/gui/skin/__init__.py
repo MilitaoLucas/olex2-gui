@@ -477,7 +477,11 @@ def change_bond_radius():
   rad = OV.GetParam('user.bonds.thickness')
   olex.m("brad %s" %rad)
 
-def change_bond_colour(scope, colour=""):
+def change_bond_colour(scope="", colour=""):
+  if not colour:
+    colour = OV.GetParam('snum.bonds.colour')
+  if not colour:
+    colour = OV.GetParam('user.bonds.colour')
   import shlex
   if "[" in colour:
     olx.html.SetValue('BOND_COLOUR_COMBO%s' %scope,"")
@@ -491,18 +495,25 @@ def change_bond_colour(scope, colour=""):
 
   olx.ShowH("a", True)
   olx.ShowH("b", False)
+
+
   olex.m("sel collections")
   olex.m("sel -i")
   olex.m("sel atoms -u")
+
+
   if colour == 'elements':
     olx.Mask(48)
+    OV.SetParam('snum.bonds.mask', 48)
     olx.ShowH("b", True)
-    OV.SetParam('user.bonds.colour','elements')
+    OV.SetParam('snum.bonds.colour','elements')
 
   else:
     c = get_user_bond_colour(colour)
     olx.Mask(1)
+    OV.SetParam('snum.bonds.mask', 1)
     olx.SetMaterial("Singlecone", "%s" %str(c))
+    OV.SetParam('snum.bonds.colour', colour)
 
   olex.m("sel -u")
   olex.m("sel bonds where xbond.b.bai.z == -1")
