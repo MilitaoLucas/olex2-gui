@@ -1,4 +1,24 @@
 
-<td align='center'>
-    $spy.MakeHoverButton('full-Electron_Density_Map','spy.gui.maps.MapView()')
+
+<td width='20%'>
+  <b>&nbsp;MAP</b>
 </td>
+
+<td width='60%'>
+    $+
+    html.Snippet("gui/snippets/input-button",
+    "value=Electron Density Map",
+    "onclick=spy.gui.maps.MapView()",
+    )$-
+</td>
+
+<td>
+</td>
+
+<td width='20%' align='right'>
+    $+
+    html.Snippet("gui/snippets/input-button",
+    "value=Map Settings",
+    "onclick=spy.gui.SwitchTool(h2-tools-maps)>>spy.gui.tools.flash_gui_control(h2-Maps)>>spy.gui.SwitchTool(h3-electron-density)",
+    )$-
+<td>

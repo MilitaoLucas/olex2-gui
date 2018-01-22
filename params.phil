@@ -28,6 +28,27 @@ routines requiring structure refinement
       .expert_level = 1
     }
 
+  bonds
+  {
+  mask = 48
+    .type = int
+  bzoom = 100
+    .type = int
+  colour = elements
+    .type = str
+  colours = @@elements 5@4278223103@4278255615@@orange  '5@4282071867@4286611584@@dark grey'
+    .type = strings
+  }
+
+  atoms
+  {
+  style = matt.glds
+    .type = str
+  azoom = 100
+    .type = int
+  }
+
+
   metadata{
     resolved_conflict_items = ""
       .type = strings
@@ -678,9 +699,9 @@ routines requiring structure refinement
       .type = bool
     value = 0.0
       .type = float
-    heat_colours = 2 3 5 *7
+    heat_colours = 2 3 *5 7
       .type = choice
-    contours = 8
+    contours = 15
       .type = int
     step = 0
       .type = float
@@ -692,6 +713,8 @@ routines requiring structure refinement
       .type = float
     size = 15
       .type = int
+    scale = 0.1
+      .type = float
   }
 
   map {
@@ -929,7 +952,7 @@ user
   report_label_style = 0
     .type = int
   parts{
-    keep_unique = False
+    keep_unique = True
       .type = bool
     select = True
       .type = bool
@@ -1138,6 +1161,42 @@ user
           .caption = "%Output% csv"
       }
 
+      cc_half_vs_resolution
+        .short_caption = "cc_half_vs_resolution"
+        .caption = "cc_half_vs_resolution"
+        .help = "cc_half_vs_resolution"
+      {
+        title = "cc_half_vs_resolution"
+          .type = str
+        resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
+          .type = choice
+          .caption = "Resolution as"
+        n_bins = 20
+          .type = int(value_min=1)
+          .help = Number of bins
+          .caption = %Bins%
+        output_csv_file = False
+          .type = bool
+          .caption = "%Output% csv"
+      }
+      rmerge_vs_resolution
+        .short_caption = "Rmerge vs resolution"
+        .caption = "Rmerge vs resolution"
+        .help = "Rmerge vs resolution"
+      {
+        title = "Rmerge vs resolution"
+          .type = str
+        resolution_as = *two_theta d_spacing d_star_sq stol stol_sq
+          .type = choice
+          .caption = "Resolution as"
+        n_bins = 20
+          .type = int(value_min=1)
+          .help = Number of bins
+          .caption = %Bins%
+        output_csv_file = False
+          .type = bool
+          .caption = "%Output% csv"
+      }
 
       completeness
         .short_caption = "Completeness Plot"
@@ -1204,11 +1263,11 @@ user
     refinement{
 
       flack_str{
-        display = ""
+        display = "Flack"
           .type = str
-        href = ""
+        href = "spy.make_reflection_graph(wilson_plot)>>spy.make_reflection_graph(cumulative_intensity)"
           .type = str
-        target = ""
+        target = "Flack Parameter.&#013;- This should be close to 0 &#013;- The e.s.d. value must be small &#013;- 'inv -f' to invert"
           .type = str
       }
 
@@ -1312,7 +1371,7 @@ user
           .type = str
         href = atom
           .type = str
-        target = "Select the site with the largest shift"
+        target = "Select the site with the largest shift. &#013; NOTE: The shift may be caused by EXTI!"
           .type = str
       }
 
@@ -1335,7 +1394,7 @@ user
           .type = str
         href = atom
           .type = str
-        target = "Select the atom with the largest shift"
+        target = "Select the site with the largest shift. &#013; NOTE: The shift may be caused by EXTI!"
           .type = str
       }
 
@@ -1556,9 +1615,9 @@ user
           .type = float
         top = 25
           .type = float
-        href = ""
+        href = "spy.make_reflection_graph(i_over_sigma_vs_resolution)"
           .type = str
-        target = "Signal to noise ratio"
+        target = "Mean signal to noise ratio. Click to see the graph"
           .type = str
       }
       Rint{
@@ -1578,9 +1637,9 @@ user
           .type = float
         top = 0.15
           .type = float
-        href = ""
+        href = "spy.make_reflection_graph(rmerge_vs_resolution)"
           .type = str
-        target = "Internal R factor"
+        target = "Internal R factors. Click to see the graph"
           .type = str
       }
       Completeness{
@@ -1663,7 +1722,7 @@ user
     .type = int
   colour = elements
     .type = str
-  colours = @@elements 5@4278223103@4278255615@@orange '5@4282071867@4286611584@@dark grey'
+  colours = @@elements 5@4278223103@4278255615@@orange  '5@4282071867@4286611584@@dark grey'
     .type = strings
   }
 

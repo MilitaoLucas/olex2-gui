@@ -36,6 +36,8 @@ $-
     "value=spy.GetParam('snum.refinement.max_cycles')",
     "name=SET_SNUM_REFINEMENT_MAX_CYCLES",
     "onchange=spy.SetMaxCycles(html.GetValue('~name~'))",
+    "min=0",
+    "max=99",
     )
   $-
 
@@ -47,6 +49,8 @@ $-
     html.Snippet("gui/snippets/input-spin-td",
     "value=math.eval(abs(spy.GetParam(snum.refinement.max_peaks)))",
     "name=SET_SNUM_REFINEMENT_MAX_PEAKS",
+    "min=0",
+    "max=99",
     "onchange=spy.SetMaxPeaks(html.GetValue('~name~'))",
     )
   $-
@@ -67,6 +71,7 @@ $-
 
 
   <td ALIGN='center' width='39%'>
+<b>hkl</b>:
 <!-- #include reflection-date reflection-date.htm;1; -->
   </td>
 
@@ -97,10 +102,9 @@ $-
    $+
      html.Snippet("gui/snippets/input-checkbox",
      "name=SNUM_REFINEMENT_EXTI",
-     "checked=spy.GetParam(snum.refinement.refine_extinction_tickbox)",
+     "checked=not(strcmp(xf.rm.Exti(),'n/a'))",
      "oncheck=spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI",
      "onuncheck=spy.SetParam(snum.refinement.refine_extinction,0)>>delins EXTI",
-     "manage=True",
      )
     $-
   </td>
@@ -140,6 +144,8 @@ $-
     "onclick=spy.SetMasking(html.GetState(~name~))"
     )
   $-
+
+<!-- #ignoreif not spy.GetParam('snum.refinement.use_solvent_mask')
 
   $+
     html.Snippet("gui/snippets/input-checkbox-td",
@@ -193,7 +199,29 @@ html.SetState('SNUM_REFINEMENT_USE_SOLVENT_MASK', 'true')",
 <!-- #include tool-first-column gui\blocks\tool-first-column.htm;help_ext=Mask_Info;1; -->
 <!-- #include row_table_on gui\blocks\row_table_on.htm;1; -->
 $spy.gui.tools.get_mask_info()
+#ignoreif -->
+
+
+
+
+<!-- #ignoreif spy.GetParam('snum.refinement.use_solvent_mask')
+<td>
+
+<!-- #ignoreif fs.Exists(mask_notification.htm)
+This is the Olex2 implementation of BYPASS (a.k.a. SQUEEZE)
+#ignoreif -->
+<!-- #includeif fs.Exists(mask_notification.htm) mask_note mask_notification.htm;1; -->
+
+</td>
+#ignoreif -->
+
+
+
+
+
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+
 
 </table>
 

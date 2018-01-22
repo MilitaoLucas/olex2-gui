@@ -9,6 +9,9 @@ from cctbx import statistics
 from cctbx.array_family import flex
 from cctbx import uctbx
 
+import iotbx
+from iotbx.merging_statistics import *
+
 import math
 
 class empty: pass
@@ -83,10 +86,26 @@ class OlexCctbxReflectionStats(OlexCctbxAdapter):
       OV.DeleteBitmap(bitmap)
 
 class item_vs_resolution(OlexCctbxAdapter):
+
   def __init__(self, item="r1_factor_vs_resolution", n_bins=10, resolution_as="two_theta"):
     OlexCctbxAdapter.__init__(self)
     self.resolution_as = resolution_as
     self.item = item
+
+    if self.item == "rmerge_vs_resolution":
+      fo2 = self.reflections.f_sq_obs
+      self.info = fo2.info()
+      stats = iotbx.merging_statistics.dataset_statistics(fo2, n_bins=n_bins)
+      fo2.setup_binner(n_bins=n_bins)
+      self.binned_data = empty()
+      self.binned_data.data = [x.r_merge for x in stats.bins]
+      self.binned_data.data.append('0')
+      self.binned_data.data.insert(0,'0')
+      self.binned_data.binner = fo2.binner()
+      self.binned_data.show = stats.show
+      #for b in result.bins:
+        #print b.d_min, b.d_max, b.cc_one_half, b.r_merge
+
     if self.item == "i_over_sigma_vs_resolution":
       fo2 = self.reflections.f_sq_obs
       fo2.setup_binner(n_bins=n_bins)
@@ -95,6 +114,15 @@ class item_vs_resolution(OlexCctbxAdapter):
       fo2 = fo2.customized_copy(data=a)
       fo2.setup_binner(n_bins=n_bins)
       self.binned_data = fo2.mean(use_binning=True)
+      print "CC 1/2 = %.3f" %fo2.cc_one_half()
+    elif self.item == "cc_half_vs_resolution":
+      fo2 = self.reflections.f_sq_obs
+      fo2.setup_binner(n_bins=n_bins)
+      self.info = fo2.info()
+      a = fo2.data()/fo2.sigmas()
+      fo2 = fo2.customized_copy(data=a)
+      fo2.setup_binner(n_bins=n_bins)
+      self.binned_data = fo2.cc_one_half(use_binning=True)
     elif self.item == "r1_factor_vs_resolution":
       fo2, fc = self.get_fo_sq_fc()
       weights = self.compute_weights(fo2, fc)
@@ -103,14 +131,23 @@ class item_vs_resolution(OlexCctbxAdapter):
       fo.setup_binner(n_bins=n_bins)
       self.info = fo.info()
       self.binned_data = fo.r1_factor(fc, scale_factor=math.sqrt(scale_factor), use_binning=True)
-    self.binned_data.show()
+    try:
+      self.binned_data.show()
+    except:
+      pass
 
   def xy_plot_info(self):
     r = empty()
     r.title = self.item
     if (self.info is not None):
       r.title += ": " + str(self.info)
-    d_star_sq = self.binned_data.binner.bin_centers(2)
+    try:
+      d_star_sq = self.binned_data.binner.bin_centers(2)
+    except:
+      print "This seems to be the new kind of binned data."
+      print "While we learn how to plot this, please look at the table above."
+      return None
+
     if self.resolution_as == "two_theta":
       resolution = uctbx.d_star_sq_as_two_theta(
         d_star_sq, self.wavelength, deg=True)
@@ -123,6 +160,7 @@ class item_vs_resolution(OlexCctbxAdapter):
     elif self.resolution_as == "stol_sq":
       resolution = uctbx.d_star_sq_as_stol_sq(d_star_sq)
     r.x = resolution
+
     r.y = self.binned_data.data[1:-1]
     r.xLegend = self.resolution_as
     legend_y = "Y-Axis"
@@ -130,6 +168,10 @@ class item_vs_resolution(OlexCctbxAdapter):
       legend_y = "R1"
     elif "i_over_sigma_vs_resolution" in self.item:
       legend_y = "I/sigma"
+    elif "cc_half_vs_resolution" in self.item:
+      legend_y = "CC 1/2"
+    elif "rmerge_vs_resolution" in self.item:
+      legend_y = "R_merge"
     r.yLegend = legend_y
     return r
 
@@ -539,8 +581,8 @@ class completeness_statistics(object):
       resolutions = missing_set.sin_theta_over_lambda_sq().data()
     self.missing_set = missing_set
     if missing_set.size() > 0:
-      print "Missing data:"
-      print "  h  k  l  %s" %bin_range_as
+      print "Missing data: %s" %missing_set.size()
+      #print "  h  k  l  %s" %bin_range_as
     else:
       print "No missing data"
     for indices, resolution in zip(missing_set.indices(), resolutions):

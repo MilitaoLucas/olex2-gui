@@ -46,6 +46,9 @@ grade_2_colour = OV.GetParam('gui.skin.diagnostics.colour_grade2').hexadecimal
 grade_3_colour = OV.GetParam('gui.skin.diagnostics.colour_grade3').hexadecimal
 grade_4_colour = OV.GetParam('gui.skin.diagnostics.colour_grade4').hexadecimal
 
+import subprocess
+
+
 
 class FolderView:
   root = None
@@ -801,21 +804,13 @@ def weightGuiDisplay():
         colour = gui_orange
       else:
         colour = gui_red
-      sign = "+"
+      sign = "&#9650;"
       if curr-sugg == 0:
-        sign = "="
+        sign = ""
         sugg = 0
       elif curr-sugg > 0:
-        sign = "-"
-        sugg = sugg/curr
-      else:
-        sign = "+"
-        sugg = curr/sugg
-      if sugg != 0:
-        sugg_perc = "%s%.0f%%&nbsp;" %(sign, (100-sugg*100))
-      else:
-        sugg_perc = "--"
-      retVal += "%.3f&nbsp;<font color='%s'><b>%s</b></font>&nbsp;|&nbsp;" %(curr, colour, sugg_perc)
+        sign = "&#9660;"
+      retVal += "%.3f&nbsp;<font color='%s'><b>%s</b></font>&nbsp;|&nbsp;" %(curr, colour, sign)
     html_scheme = retVal.strip("|&nbsp;")
   else:
     html_scheme = current_weight
@@ -841,14 +836,25 @@ def refine_extinction():
   retVal = ""
   _ = olx.xf.rm.Exti()
 
+
+
   if "n/a" not in _.lower() and _ != '0':
-    _ = _.split('(')
-    exti = _[0]
-    esd = _[1].rstrip(')')
-    exti_f = float(exti)
-    _ = len(exti) - len(esd) -2
-    esd_f = float("0.%s%s" %(_*"0", esd))
+    if "(" in _:
+      _ = _.split('(')
+      exti = _[0]
+      esd = _[1].rstrip(')')
+      exti_f = float(exti)
+      _ = len(exti) - len(esd) -2
+      esd_f = float("0.%s%s" %(_*"0", esd))
+    else:
+      exti = _
+      esd = ""
+      OV.SetParam('snum.refinement.refine_extinction',1)
+      OV.SetParam('snum.refinement.refine_extinction_tickbox', True)
     retVal = "%s(%s)"%(exti,esd)
+  else:
+    OV.SetParam('snum.refinement.refine_extinction',0)
+    OV.SetParam('snum.refinement.refine_extinction_tickbox', False)
   return retVal
 
 
@@ -929,11 +935,18 @@ def make_disorder_quicktools(scope='main', show_options=True):
   parts_display = ""
   sel = ""
   for item in parts:
-    if select:
-      sel = ">>sel part %s" %item
+    _ = None
+    d = {}
     if item == 0:
       continue
-    d = {'part':item}
+      #item =  ' '.join(str(s) for s in parts)
+      #d['part'] = "All"
+    else:
+      d['part'] = item
+    d['parts'] = item
+    if select:
+      sel = ">>sel part %s" %item
+
     parts_display += gui.tools.TemplateProvider.get_template('part_0_and_n', force=debug)%d
 
   d={'parts_display':parts_display, 'scope':scope}
@@ -1121,8 +1134,9 @@ def _get_available_html_width(margin_adjust = True, first_col_width_adjust=True,
 def get_diagnostics_colour(scope, item, val):
   try:
     val = float(val)
-    #if val < 0:
-      #val = -val
+    if "shift" in item:
+      if val < 0:
+        val = -val
   except:
     val = 0
 
@@ -1255,6 +1269,11 @@ def GetRInfo(txt="",format='html'):
 OV.registerFunction(GetRInfo)
 
 
+def launchWithoutConsole(command, args):
+    """Launches 'command' windowless and waits until finished"""
+    startupinfo = subprocess.STARTUPINFO()
+    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    return subprocess.Popen([command] + args, startupinfo=startupinfo).wait()
 
 
 def resize_pdf(f_in, setting='printer'):

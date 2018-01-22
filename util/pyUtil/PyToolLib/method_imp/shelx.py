@@ -84,25 +84,41 @@ class Method_shelx_refinement(Method_shelx, Method_refinement):
       filepath = OV.StrDir()
       modified_intensities = None
       modified_hkl_path = "%s/%s-mask.hkl" %(OV.FilePath(), OV.FileName())
-      fab_path = "%s/%s.fab" %(OV.FilePath(), OV.FileName())
+      if OV.HKLSrc():
+        fab_path = ".".join(OV.HKLSrc().split(".")[:-1]) + ".fab"
+      method = "smbtx"
+      if "_sq" in fab_path:
+        method="SQUEEZE"
       f_mask, f_model = None, None
       # backward compatibility - just in case
       if not OV.HKLSrc() == modified_hkl_path:
         olx.SetVar('snum.masks.original_hklsrc', OV.HKLSrc())
       else:
         olx.SetVar('snum.masks.original_hklsrc', '')
-      if OV.GetParam("snum.refinement.recompute_mask_before_refinement"):
+      if OV.GetParam("snum.refinement.recompute_mask_before_refinement") or not os.path.exists(fab_path):
         if OV.HKLSrc() == modified_hkl_path:
-          raise Exception("You can't calculate a mask on an already masked file!")
+          _ = "You can't calculate a mask on an already masked file!"
+          OlexVFS.write('mask_notification.htm',_,1)
+          raise Exception(_)
+
+        if method == "SQUEEZE":
+          olex.m("spy.OlexPlaton(q)")
+          Method_refinement.pre_refinement(self, RunPrgObject)
+          return
+
         cctbx_olex_adapter.OlexCctbxMasks()
         if olx.current_mask.flood_fill.n_voids() > 0:
           f_mask = olx.current_mask.f_mask()
           f_model = olx.current_mask.f_model()
-      elif os.path.exists(fab_path):
-        pass
-      elif os.path.exists("%s/%s-f_mask.pickle" %(filepath, OV.FileName())):
-        f_mask = easy_pickle.load("%s/%s-f_mask.pickle" %(filepath, OV.FileName()))
-        f_model = easy_pickle.load("%s/%s-f_model.pickle" %(filepath, OV.FileName()))
+        else:
+          _ = "There are no voids!"
+          print _
+          OV.SetParam("snum.refinement.use_solvent_mask", False)
+          olex.m('delins ABIN')
+          OlexVFS.write_to_olex('mask_notification.htm',_,1)
+      #elif os.path.exists("%s/%s-f_mask.pickle" %(filepath, OV.FileName())):
+        #f_mask = easy_pickle.load("%s/%s-f_mask.pickle" %(filepath, OV.FileName()))
+        #f_model = easy_pickle.load("%s/%s-f_model.pickle" %(filepath, OV.FileName()))
       if f_mask is not None:
         cctbx_adapter = cctbx_olex_adapter.OlexCctbxAdapter()
         fo2 = cctbx_adapter.reflections.f_sq_obs_filtered

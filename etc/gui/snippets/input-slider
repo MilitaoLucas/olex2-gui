@@ -16,6 +16,7 @@
 #scale=1
 #cmd = xgrid.fix
 #swidth=92
+#invert=1
 
 #td1
 <table cellpadding="0" cellspacing="0" 'width=100%'>
@@ -33,7 +34,7 @@
           fgcolor="$GetVar(HtmlFontColour)"
           min="#min"
           max="#max"
-          onchange="html.SetValue($strcat(#name,_VALUE),math.eval($math.eval(1/#scale)*html.GetValue($strcat(#name,_SLIDE))))>>#cmd>>spy.SetParam(#param,html.GetValue($strcat(#name,_VALUE)))"
+          onchange="spy.SetParam(#param,math.eval($math.eval(1/#scale*#invert)*html.GetValue($strcat(#name,_SLIDE))))>>html.SetValue($strcat(#name,_VALUE),spy.GetParam(#param))>>#cmd"
         >
         </font>
       </td>
@@ -48,8 +49,8 @@
           height="18"
           bgcolor="$GetVar(HtmlTableBgColour)"
           fgcolor="$GetVar(HtmlFontColour)"
-          value="spy.GetParam(#param)"
-          onchange="html.SetValue($strcat(#name,_SLIDE),$math.eval(#scale*html.GetValue($strcat(#name,_VALUE))))>>#cmd>>spy.SetParam(#param,html.GetValue($strcat(#name,_VALUE)))"
+          value="math.eval(#invert * spy.GetParam(#param))"
+          onreturn="html.SetValue($strcat(#name,_SLIDE),$math.eval(#invert*#scale*html.GetValue($strcat(#name,_VALUE))))>>#cmd>>spy.SetParam(#param,html.GetValue($strcat(#name,_VALUE)))"
         >
     </tr>
   </table>

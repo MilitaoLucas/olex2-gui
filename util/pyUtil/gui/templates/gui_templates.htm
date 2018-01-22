@@ -21,70 +21,28 @@ t:part_0_and_n{
 <font size="$GetVar('HtmlFontSizeControls')"><b>
 <input
   type="button"
-  name="0 | %(part)s"
-  value="0 | %(part)s"
+  name="0|%(part)s"
+  value="0| %(part)s"
   width="100%%"
-  onclick="ShowP 0 %(part)s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%(part)s)>>focus"
+  onclick="ShowP 0 %(parts)s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%(parts)s)>>focus"
   bgcolor="$GetVar('linkButton.bgcolor')"
   fgcolor="$GetVar('linkButton.fgcolor')"
   flat="$GetVar(linkButton.flat)"
 ></b>
 </font>
 </td>
-
-<!--
-    $+
-    html.Snippet(GetVar(default_link),
-    "value=0 | %(part)s",
-    "onclick=ShowP 0 %(part)s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%(part)s)>>focus",
-    )$-
--->
-
 }
 
 t:disorder_quicktool_no_options{
 
   %(parts_display)s
 
-  <td>
-
-<font size="$GetVar('HtmlFontSizeControls')"><b>
-<input
-  type="button"
-  name="ALL"
-  value="All"
-  width="100%%"
-  onclick="showP"
-  bgcolor="$GetVar('linkButton.bgcolor')"
-  fgcolor="$GetVar('linkButton.fgcolor')"
-  flat="$GetVar(linkButton.flat)"
-></b>
-</font>
-
-</td>
 }
 
 
 t:disorder_quicktool{
 
   %(parts_display)s
-
-  <td>
-
-<font size="$GetVar('HtmlFontSizeControls')"><b>
-<input
-  type="button"
-  name="ALL"
-  value="All"
-  width="100%%"
-  onclick="showP"
-  bgcolor="$GetVar('linkButton.bgcolor')"
-  fgcolor="$GetVar('linkButton.fgcolor')"
-  flat="$GetVar(linkButton.flat)"
-></b>
-</font>
-
-  </td>
 
   <td width='4%%' align='right'>
   Sel
@@ -163,18 +121,20 @@ t:minimal_gui_link_button{
 }
 
 t:R_factor_display{
-<table width='100%%' cellspacing='0' cellpadding='0'>
+<table width='100%%' border='0' cellspacing='0' cellpadding='0'>
   <tr>
-    <td align='right'>
-      <font size='%(font_size_wR2)s' color='%(grey)s'><b><i>R</i><sub>1&nbsp;</sub>=</b>&nbsp;</font></td>
     <td align='center'>
-      <font size='%(font_size_R1)s' color='%(font_colour_R1)s'><b>%(R1)s%%</b></font></td>
+      <font size='%(font_size_wR2)s' color='$GetVar(gui.watermark)'><b><i>R</i><sub>1&nbsp;</sub></b></font>
+    </td>
+    <td align='right'>
+      <font size='%(font_size_R1)s' color='%(font_colour_R1)s'><b>%(R1)s</font> <font size='%(font_size_wR2)s' color='%(grey)s'>%%</b></font></td>
   </tr>
   <tr>
-    <td align='right'>
-      <font size='%(font_size_label)s' color='%(grey)s'><b><i>wR</i><sub>2&nbsp;</sub>=</b>&nbsp;</font></td>
     <td align='center'>
-      <font size='%(font_size_wR2)s' color='%(font_colour_wR2)s'><b>%(wR2)s%%</b></font></td>
+            <font size='%(font_size_wR2)s' color='$GetVar(gui.watermark)'><b><i>wR</i><sub>2&nbsp;</sub></b>&nbsp;</font>
+    </td>
+    <td align='right'>
+<font size='%(font_size_wR2)s' color='%(font_colour_wR2)s'><b>%(wR2)s&nbsp;</font> <font size='%(font_size_wR2)s' color='%(grey)s'>%%</b></font></td>
   </tr>
 </table>
 }
