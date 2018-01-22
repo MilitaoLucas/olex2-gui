@@ -120,6 +120,7 @@ class MapUtil:
     OV.SetVar('olex2.map_type', 'eden')
 
   def SetXgridView(self, update_controls=False):
+    update_controls = bool(update_controls)
     view = OV.GetParam("snum.xgrid.view")
     extended = OV.GetParam("snum.xgrid.extended")
     if view == "2D":
@@ -134,7 +135,12 @@ class MapUtil:
       view += " " + OV.GetParam("snum.xgrid.heat_colours","")
       olex.m("xgrid.RenderMode %s" %view)
     olex.m("xgrid.Extended(%s)" %extended)
-    if update_controls in (True, 'true'):
+    try:
+      _ = olx.GetVar('map_slider_scale')
+    except:
+      _ = None
+    if update_controls in (True, 'true') or not _:
+
       self.deal_with_controls()
       olx.html.Update()
 

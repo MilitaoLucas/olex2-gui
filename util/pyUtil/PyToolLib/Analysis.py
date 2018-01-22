@@ -3040,10 +3040,13 @@ class HealthOfStructure():
         self.hkl_stats = olex_core.GetHklStat()
       else:
         try:
-          self.hkl_stats['Completeness'] = float(olx.Cif('_diffrn_measured_fraction_theta_max'))
           wl = float(olx.Cif('_diffrn_radiation_wavelength'))
-          twotheta = 2* (float(olx.Cif('_diffrn_reflns_theta_max')))
-          self.hkl_stats['MinD'] = uctbx.two_theta_as_d(twotheta ,wl, True)
+          _ = olx.Cif('_diffrn_measured_fraction_theta_max')
+          if _ != "n/a":
+            self.hkl_stats['Completeness'] = float(_)
+            twotheta = 2* (float(olx.Cif('_diffrn_reflns_theta_max')))
+            self.hkl_stats['MinD'] = uctbx.two_theta_as_d(twotheta ,wl, True)
+
           ##The following items can have alternate/deprecated identifiers
           l = ['_diffrn_reflns_av_unetI/netI', '_diffrn_reflns_av_sigmaI/netI']
           self.hkl_stats['MeanIOverSigma'] = 0
