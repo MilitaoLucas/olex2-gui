@@ -39,6 +39,8 @@ gui
     .type = colour
   light_grey = #dedede
     .type = colour
+  watermark = #ababab
+    .type = colour
   orange = #ff8f00
     .type = colour
   image_highlight = None

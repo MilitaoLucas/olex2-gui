@@ -47,6 +47,7 @@ Colours
 
 
 
+<!-- #ignoreif strcmp(xgrid.Visible(), false)
 <td width='15%'>
 min:
 <b>
@@ -60,6 +61,19 @@ max:
 $spy.gui.maps.Round(xgrid.GetMax(),3)
 </b>
 </td>
+#ignoreif -->
+
+
+<!-- #ignoreif strcmp(xgrid.Visible(), true)
+
+<td width='30%'>
+<b>
+No map loaded!
+</b>
+</td>
+
+#ignoreif -->
+
 
 
 <!--<td width='10%' align='centre'>-->
@@ -106,8 +120,12 @@ Extended
 #ignoreif -->
 
 
-
 <td align='right'>
-  <a href="editmaterial XGrid">%Edit% %style%</a>
-  <!--<a href="sel WBox">%Select% %Volume%</a>-->
+    $+
+    html.Snippet("gui/snippets/input-button",
+    "value=Edit",
+    "onclick=editmaterial XGrid",
+    )$-
 </td>
+
+  <!--<a href="sel WBox">%Select% %Volume%</a>-->

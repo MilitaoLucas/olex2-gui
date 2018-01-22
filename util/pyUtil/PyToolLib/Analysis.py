@@ -2494,13 +2494,15 @@ class item_vs_resolution_plot(Analysis):
     self.auto_axes = False
     #self.max_y = 1.05
     try:
-      self.make_plot()
+      res = self.make_plot()
     except AssertionError, e:
       if str(e) == "model.scatterers().size() > 0":
         print "You need some scatterers to do this!"
         return
       else:
         raise
+    if not res:
+      return None
     self.popout()
     if OV.GetParam('user.diagnostics.save_file'):
       res = self.im.save(OV.ModelSrc() + "_" + self.item + ".png",'PNG')
@@ -2514,6 +2516,8 @@ class item_vs_resolution_plot(Analysis):
     from reflection_statistics import item_vs_resolution
     params = getattr(self.params, self.item)
     xy_plot = item_vs_resolution(item=self.item, n_bins=params.n_bins, resolution_as=params.resolution_as).xy_plot_info()
+    if not xy_plot:
+      return None
     while None in xy_plot.y:
       params.n_bins -= 1
       xy_plot = item_vs_resolution(item=self.item, n_bins=params.n_bins, resolution_as=params.resolution_as).xy_plot_info()
@@ -2555,9 +2559,19 @@ class item_vs_resolution_plot(Analysis):
     if self.item == "i_over_sigma_vs_resolution":
       self.draw_fit_line(slope=0, y_intercept=3, write_equation=False, write_text="3 sigma line (noise below, data above)")
       self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="min IUCr res")
+
+    #if self.item == "cc_half_vs_resolution":
+      #self.draw_fit_line(slope=0, y_intercept=0.15, write_equation=False, write_text="3 sigma line (noise below, data above)")
+      #self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="min IUCr res")
+
+    #if self.item == "rmerge_vs_resolution":
+      #self.draw_fit_line(slope=0, y_intercept=0.15, write_equation=False, write_text="3 sigma line (noise below, data above)")
+      #self.draw_fit_line(slope=0, y_intercept=0, x_intercept=iucr, write_equation=False, write_text="min IUCr res")
+
+
     reverse_x = params.resolution_as in ('d_spacing', 'd_star_sq')
     self.draw_pairs(reverse_x=reverse_x, lt=3)
-
+    return True
 
 class X_Y_plot(Analysis):
   def __init__(self):
@@ -2859,13 +2873,21 @@ def makeReflectionGraphGui():
   gui_d['help'] = htmlTools.make_table_first_col(
     help_name=help_name, popout=False)
   d = {'ctrl_name':'SET_REFLECTION_STATISTICS',
-     'items':"-- %Please Select% --;%Wilson Plot%;%Cumulative Intensity%;" +\
-             "%Systematic Absences%;%Fobs-Fcalc%;%Fobs over Fcalc%;" +\
-             "%Completeness%;%Normal Probability%;" +\
-             "%Scale factor vs resolution%;%R1 factor vs resolution%;" +\
-             "%I/sigma vs resolution%;" +\
-             "%Bijvoet Differences% %Probability Plot%;" +\
-             "%Bijvoet Differences% %Scatter Plot%",
+     'items':"-- %Please Select% --;" +\
+             "Wilson Plot;" +\
+             "Cumulative Intensity;" +\
+             "Systematic Absences;" +\
+             "Fobs-Fcalc;" +\
+             "I/sigma vs resolution;" +\
+             "cc_half_vs_resolution;" +\
+             "Rmerge vs resolution;" +\
+             "Fobs over Fcalc;" +\
+             "Completeness%;" +\
+             "Normal Probability;" +\
+             "Scale factor vs resolution;" +\
+             "R1 factor vs resolution;" +\
+             "Bijvoet Differences %Probability Plot%;" +\
+             "Bijvoet Differences %Scatter Plot%",
      'height':guiParams.html.combo_height,
      'bgcolor':guiParams.html.input_bg_colour,
      'value':value,
@@ -2908,6 +2930,11 @@ def makeReflectionGraphGui():
 OV.registerFunction(makeReflectionGraphGui)
 
 def make_reflection_graph(name):
+  if not OV.HKLSrc():
+    print "To make the %s graph, the reflection file must be accessible." %name
+    print "Are you looking at a CIF file?"
+    print "Try typing 'export' to extract the embedded files from the CIF."
+    return
   name = name.lower().replace(" ", "_").replace("-", "_")
   run_d = {'wilson_plot': WilsonPlot,
            'cumulative_intensity': CumulativeIntensityDistribution,
@@ -2919,6 +2946,8 @@ def make_reflection_graph(name):
            'r1_factor_vs_resolution': (item_vs_resolution_plot, "r1_factor_vs_resolution"),
            'i/sigma_vs_resolution': (item_vs_resolution_plot, "i_over_sigma_vs_resolution"),
            'i_over_sigma_vs_resolution': (item_vs_resolution_plot, "i_over_sigma_vs_resolution"),
+           'cc_half_vs_resolution': (item_vs_resolution_plot, "cc_half_vs_resolution"),
+           'rmerge_vs_resolution': (item_vs_resolution_plot, "rmerge_vs_resolution"),
            'scale_factor_vs_resolution': scale_factor_vs_resolution_plot,
            'bijvoet_differences_probability_plot': bijvoet_differences_NPP,
            'bijvoet_differences_scatter_plot': bijvoet_differences_scatter_plot,
@@ -3011,10 +3040,13 @@ class HealthOfStructure():
         self.hkl_stats = olex_core.GetHklStat()
       else:
         try:
-          self.hkl_stats['Completeness'] = float(olx.Cif('_diffrn_measured_fraction_theta_max'))
           wl = float(olx.Cif('_diffrn_radiation_wavelength'))
-          twotheta = 2* (float(olx.Cif('_diffrn_reflns_theta_max')))
-          self.hkl_stats['MinD'] = uctbx.two_theta_as_d(twotheta ,wl, True)
+          _ = olx.Cif('_diffrn_measured_fraction_theta_max')
+          if _ != "n/a":
+            self.hkl_stats['Completeness'] = float(_)
+            twotheta = 2* (float(olx.Cif('_diffrn_reflns_theta_max')))
+            self.hkl_stats['MinD'] = uctbx.two_theta_as_d(twotheta ,wl, True)
+
           ##The following items can have alternate/deprecated identifiers
           l = ['_diffrn_reflns_av_unetI/netI', '_diffrn_reflns_av_sigmaI/netI']
           self.hkl_stats['MeanIOverSigma'] = 0
@@ -3392,6 +3424,8 @@ class HealthOfStructure():
       box = (x,0,boxWidth,boxHeight)
       fill = second_colour
       draw.rectangle(box, fill=fill)
+      value_display = value_display.replace("0.",".")
+
 
     if item == "Completeness":
       od_value = OV.get_cif_item('_reflns_odcompleteness_completeness')
