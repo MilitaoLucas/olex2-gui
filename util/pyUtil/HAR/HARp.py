@@ -245,7 +245,7 @@ class HARp(PT):
   name="%(job_result_name)s"
   value="%(job_result_name)s"
   width="100%%"
-  onclick="reap '%(job_result_filename)s'>>calcFourier -diff -fcf -r=0.05 -m"
+  onclick="reap '%(job_result_filename)s'"
 >''' %d
 
       else:
