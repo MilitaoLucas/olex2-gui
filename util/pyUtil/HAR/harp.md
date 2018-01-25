@@ -10,7 +10,8 @@
 * Capelli et al., IUCrJ. 2014, 1, 361
 &nbsp; URL[http://journals.iucr.org/m/issues/2014/05/00/fc5002/index.html,PAPER]
 
-* Fugel et al., IUCrJ. 2017, accepted
+* Fugel et al., IUCrJ. 2018, 5, 32
+&nbsp; URL[http://journals.iucr.org/m/issues/2018/01/00/lc5093/lc5093.pdf,PAPER]
 
 ## Videos
 From time to time we will make small videos, which will introduce HAR and explain the features. A slightly older overview video is available on our YouTube channel: URL[https://youtu.be/bjdSJWZa1gM,YOUTUBE]
