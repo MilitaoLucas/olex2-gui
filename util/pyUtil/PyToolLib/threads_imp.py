@@ -31,8 +31,13 @@ class NewsImageRetrivalThread(ThreadEx):
         if not NewsImageRetrivalThread.active_image_list:
           NewsImageRetrivalThread.active_image_list = copy.copy(NewsImageRetrivalThread.image_list)
           random.shuffle(NewsImageRetrivalThread.active_image_list)
-        img_url, url = self.get_image_from_list()
+        img_url = None
+        i = 0
+        while not img_url and i < 20:
+          img_url, url = self.get_image_from_list()
+          i += 1
         #print img_url, url
+
         if olex_fs.Exists(img_url):
           img_data = olex_fs.ReadFile(img_url)
         else:
@@ -53,11 +58,19 @@ class NewsImageRetrivalThread(ThreadEx):
     if not NewsImageRetrivalThread.active_image_list:
       return
     res = NewsImageRetrivalThread.active_image_list.pop(0)
+    tag = None
     if "," in res:
-      img_url, url = res.split(',')
+      _ = res.split(',')
+      if len(_) == 2:
+        img_url, url = res.split(',')
+      elif len(_) == 3:
+        img_url, url, tag = res.split(',')
     else:
       img_url = res
       url = "www.olex2.org"
+    if tag:
+      if tag.strip() != olx.olex2_tag:
+        return None, None
     if "://" not in img_url:
       return "http://%s" %(img_url.strip()), url.strip()
     return img_url.strip(), url.strip()
