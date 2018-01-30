@@ -25,7 +25,7 @@ class NewsImageRetrivalThread(ThreadEx):
     import olex_fs
     try:
       if not NewsImageRetrivalThread.image_list:
-        NewsImageRetrivalThread.image_list = self.get_list_from_server()
+        NewsImageRetrivalThread.image_list = self.get_list_from_server(list_name=self.name)
 
       if NewsImageRetrivalThread.image_list:
         if not NewsImageRetrivalThread.active_image_list:
@@ -44,11 +44,20 @@ class NewsImageRetrivalThread(ThreadEx):
           img = self.make_call(img_url)
           if img:
             img_data = img.read()
-            olex.writeImage(img_url, img_data)
+            if self.name == "splash":
+              wFile = open(os.sep.join([olx.app.SharedDir(), 'splash.jpg']),'wb')
+              wFile.write(img_data)
+              wFile.close()
+              wFile = open(os.sep.join([olx.app.SharedDir(), 'splash.url']),'w')
+              wFile.write(url)
+              wFile.close()
+            elif self.name == "news":
+              olex.writeImage(img_url, img_data)
         tag = OV.GetTag().split('-')[0]
-        olex.writeImage("news/news-%s_tmp" %tag, img_data)
-        OV.SetParam('olex2.news_img_link_url', url)
-        olx.Schedule(1, "spy.internal.resizeNewsImage()")
+        if self.name == "news":
+          olex.writeImage("news/news-%s_tmp" %tag, img_data)
+          OV.SetParam('olex2.news_img_link_url', url)
+          olx.Schedule(1, "spy.internal.resizeNewsImage()")
     except:
       pass
     finally:
@@ -75,8 +84,11 @@ class NewsImageRetrivalThread(ThreadEx):
       return "http://%s" %(img_url.strip()), url.strip()
     return img_url.strip(), url.strip()
 
-  def get_list_from_server(self):
-    url = 'http://www.olex2.org/adverts/olex2adverts.txt'
+  def get_list_from_server(self, list_name='news'):
+    if list_name == "news":
+      url = 'http://www.olex2.org/adverts/olex2adverts.txt'
+    elif list_name == "splash":
+      url = 'http://www.olex2.org/adverts/splash.txt'
     l = self.make_call(url).readlines()
     _ = []
     for line in l:
