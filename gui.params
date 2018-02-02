@@ -118,7 +118,7 @@ gui
     link_button{
       flat = False
         .type = bool
-      bgcolor = #transparent
+      bgcolor = ""
         .type = str
       fgcolor = #0064b4
         .type = colour
