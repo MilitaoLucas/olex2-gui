@@ -25,25 +25,39 @@ class NewsImageRetrivalThread(ThreadEx):
     import olex_fs
     try:
       if not NewsImageRetrivalThread.image_list:
-        NewsImageRetrivalThread.image_list = self.get_list_from_server()
+        NewsImageRetrivalThread.image_list = self.get_list_from_server(list_name=self.name)
 
       if NewsImageRetrivalThread.image_list:
         if not NewsImageRetrivalThread.active_image_list:
           NewsImageRetrivalThread.active_image_list = copy.copy(NewsImageRetrivalThread.image_list)
           random.shuffle(NewsImageRetrivalThread.active_image_list)
-        img_url, url = self.get_image_from_list()
+        img_url = None
+        i = 0
+        while not img_url and i < 20:
+          img_url, url = self.get_image_from_list()
+          i += 1
         #print img_url, url
+
         if olex_fs.Exists(img_url):
           img_data = olex_fs.ReadFile(img_url)
         else:
           img = self.make_call(img_url)
           if img:
             img_data = img.read()
-            olex.writeImage(img_url, img_data)
+            if self.name == "splash":
+              wFile = open(os.sep.join([olx.app.SharedDir(), 'splash.jpg']),'wb')
+              wFile.write(img_data)
+              wFile.close()
+              wFile = open(os.sep.join([olx.app.SharedDir(), 'splash.url']),'w')
+              wFile.write(url)
+              wFile.close()
+            elif self.name == "news":
+              olex.writeImage(img_url, img_data)
         tag = OV.GetTag().split('-')[0]
-        olex.writeImage("news/news-%s_tmp" %tag, img_data)
-        OV.SetParam('olex2.news_img_link_url', url)
-        olx.Schedule(1, "spy.internal.resizeNewsImage()")
+        if self.name == "news":
+          olex.writeImage("news/news-%s_tmp" %tag, img_data)
+          OV.SetParam('olex2.news_img_link_url', url)
+          olx.Schedule(1, "spy.internal.resizeNewsImage()")
     except:
       pass
     finally:
@@ -53,17 +67,28 @@ class NewsImageRetrivalThread(ThreadEx):
     if not NewsImageRetrivalThread.active_image_list:
       return
     res = NewsImageRetrivalThread.active_image_list.pop(0)
+    tag = None
     if "," in res:
-      img_url, url = res.split(',')
+      _ = res.split(',')
+      if len(_) == 2:
+        img_url, url = res.split(',')
+      elif len(_) == 3:
+        img_url, url, tag = res.split(',')
     else:
       img_url = res
       url = "www.olex2.org"
+    if tag:
+      if tag.strip() != olx.olex2_tag:
+        return None, None
     if "://" not in img_url:
       return "http://%s" %(img_url.strip()), url.strip()
     return img_url.strip(), url.strip()
 
-  def get_list_from_server(self):
-    url = 'http://www.olex2.org/adverts/olex2adverts.txt'
+  def get_list_from_server(self, list_name='news'):
+    if list_name == "news":
+      url = 'http://www.olex2.org/adverts/olex2adverts.txt'
+    elif list_name == "splash":
+      url = 'http://www.olex2.org/adverts/splash.txt'
     l = self.make_call(url).readlines()
     _ = []
     for line in l:
