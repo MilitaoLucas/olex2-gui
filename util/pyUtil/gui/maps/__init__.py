@@ -189,6 +189,12 @@ class MapUtil:
     olx.xgrid.Fix(map_minimum, step)
     olx.html.Update()
 
+  def getActionString(self, what="Map"):
+    if olx.xgrid.Visible() == "false":
+      return "Show %s" %what
+    else:
+      return "Hide %s" %what
+ 
   def get_map_scale(self):
     SCALED_TO = 50
 
@@ -270,3 +276,4 @@ if OV.HasGUI():
   OV.registerFunction(mu.Round, False, "gui.maps")
   OV.registerFunction(mu.get_best_contour_maps, False, "gui.maps")
   OV.registerFunction(mu.get_map_scale, False, "gui.maps")
+  OV.registerFunction(mu.getActionString, False, "gui.maps")

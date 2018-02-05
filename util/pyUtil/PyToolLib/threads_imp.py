@@ -8,8 +8,8 @@ from threads import ThreadRegistry
 
 class NewsImageRetrivalThread(ThreadEx):
   instance = None
-  image_list = None
-  active_image_list = None
+  image_list = {}
+  active_image_list = {}
 
   def __init__(self, name):
     ThreadRegistry().register(NewsImageRetrivalThread)
@@ -24,20 +24,17 @@ class NewsImageRetrivalThread(ThreadEx):
     import random
     import olex_fs
     try:
-      if not NewsImageRetrivalThread.image_list:
-        NewsImageRetrivalThread.image_list = self.get_list_from_server(list_name=self.name)
+      if not NewsImageRetrivalThread.image_list.get(self.name,None):
+        NewsImageRetrivalThread.image_list[self.name] = self.get_list_from_server(list_name=self.name)
 
-      if NewsImageRetrivalThread.image_list:
-        if not NewsImageRetrivalThread.active_image_list:
-          NewsImageRetrivalThread.active_image_list = copy.copy(NewsImageRetrivalThread.image_list)
-          random.shuffle(NewsImageRetrivalThread.active_image_list)
-        img_url = None
-        i = 0
-        while not img_url and i < 20:
-          img_url, url = self.get_image_from_list()
-          i += 1
-        #print img_url, url
+      if NewsImageRetrivalThread.image_list.get(self.name,None):
+        if not NewsImageRetrivalThread.active_image_list.get(self.name,None):
+          NewsImageRetrivalThread.active_image_list[self.name] = copy.copy(NewsImageRetrivalThread.image_list[self.name])
 
+        img_url, url = self.get_image_from_list()
+        if not img_url:
+          return
+        
         if olex_fs.Exists(img_url):
           img_data = olex_fs.ReadFile(img_url)
         else:
@@ -64,22 +61,24 @@ class NewsImageRetrivalThread(ThreadEx):
       NewsImageRetrivalThread.instance = None
 
   def get_image_from_list(self):
-    if not NewsImageRetrivalThread.active_image_list:
+    img_url = None
+    if not NewsImageRetrivalThread.active_image_list.get(self.name,None):
       return
-    res = NewsImageRetrivalThread.active_image_list.pop(0)
-    tag = None
-    if "," in res:
-      _ = res.split(',')
-      if len(_) == 2:
-        img_url, url = res.split(',')
-      elif len(_) == 3:
-        img_url, url, tag = res.split(',')
-    else:
-      img_url = res
-      url = "www.olex2.org"
-    if tag:
-      if tag.strip() != olx.olex2_tag:
-        return None, None
+    while not img_url:
+      res = self.active_image_list[self.name].pop(0)
+      tag = None
+      if "," in res:
+        _ = res.split(',')
+        if len(_) == 2:
+          img_url, url = res.split(',')
+        elif len(_) == 3:
+          img_url, url, tag = res.split(',')
+      else:
+        img_url = res
+        url = "www.olex2.org"
+      if tag:
+        if tag.strip() != olx.olex2_tag:
+          img_url = None
     if "://" not in img_url:
       return "http://%s" %(img_url.strip()), url.strip()
     return img_url.strip(), url.strip()
