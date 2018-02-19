@@ -177,12 +177,16 @@ def export_parameters(load_phil=True):
 
 
   ##Stepwise ajust relative font size according to cut-off
+
+  ppi = olex_gui.GetPPI()[0]
   font_size_steps = OV.GetParam('gui.font_size_steps')
   font_size_rel_size = OV.GetParam('gui.font_size_rel_size')
   _ = int(olx.html.ClientWidth('self'))
   for step, s in zip(font_size_steps, font_size_rel_size):
     step = int(step)
     s = int(s)
+    if ppi > 96:
+      s += OV.GetParam('gui.ppi_font_adjust_amount')
     if _ >= step:
       OV.SetVar('HtmlGuiFontSize',OV.GetParam('gui.html.font_size')+s)
       OV.SetVar('HtmlFontSizeControls',OV.GetParam('gui.html.font_size_controls')+s)
@@ -242,6 +246,7 @@ class Skin():
     import PilTools
     self.TI = PilTools.TI
     OV.registerFunction(self.change_skin)
+    OV.registerFunction(self.adjust_font_size_for_ppi,True,'gui.skin')
     #self.change()
 
   def change_skin(self, info, internal_change=False):
@@ -365,7 +370,7 @@ class Skin():
     self.GuiSkinChanger_instance.run_GuiSkinChanger()
     OV.SetVar('olex2_sNum_id_string',"")
     self.sNumTitle_instance = PilTools.sNumTitle()
-    #self.adjust_font_size_for_ppi()
+    self.adjust_font_size_for_ppi()
 
   def run_skin(self, f, args=None):
     new_width = OV.GetParam('gui.htmlpanelwidth')
