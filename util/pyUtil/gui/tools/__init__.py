@@ -779,7 +779,7 @@ $spy.MakeHoverButton('btn-info@cell@%s',"spy.make_help_box -name=cell-not-quite-
 OV.registerFunction(make_cell_dimensions_display,True,"gui.tools")
 
 
-def weightGuiDisplay():
+def weightGuiDisplay_new():
   if olx.IsFileType('ires').lower() == 'false':
     return ''
   longest = 0
@@ -821,7 +821,50 @@ def weightGuiDisplay():
   txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update")
   html = "%s" %html_scheme
   return html
+OV.registerFunction(weightGuiDisplay_new,True,"gui.tools")
+
+
+def weightGuiDisplay():
+  if olx.IsFileType('ires').lower() == 'false':
+    return ''
+  longest = 0
+  retVal = ""
+  current_weight = olx.Ins('weight')
+  if current_weight == "n/a": return ""
+  current_weight = current_weight.split()
+  if len(current_weight) == 1:
+    current_weight = [current_weight[0], '0']
+  length_current = len(current_weight)
+  suggested_weight = OV.GetParam('snum.refinement.suggested_weight')
+  if suggested_weight is None: suggested_weight = []
+  if len(suggested_weight) < length_current:
+    for i in xrange (length_current - len(suggested_weight)):
+      suggested_weight.append(0)
+  if suggested_weight:
+    for curr, sugg in zip(current_weight, suggested_weight):
+      curr = float(curr)
+      if curr-curr*0.01 <= sugg <= curr+curr*0.01:
+        colour = gui_green
+      elif curr-curr*0.1 < sugg < curr+curr*0.1:
+        colour = gui_orange
+      else:
+        colour = gui_red
+      retVal += "<font color='%s'>%.3f(%.3f)&nbsp;</font>|" %(colour, curr, sugg)
+    html_scheme = retVal.strip("| ").replace("0.", ".")
+  else:
+    html_scheme = current_weight
+  wght_str = ""
+  for i in suggested_weight:
+    wght_str += " %.3f" %i
+  txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update")
+  txt_Weight = OV.TranslatePhrase("Weight")
+  html = '''
+    <a target="%s" href="UpdateWght%s>>html.Update">%s</a>
+    ''' %("Update Weighting Scheme", wght_str, html_scheme)
+  return html
 OV.registerFunction(weightGuiDisplay,True,"gui.tools")
+
+
 
 
 def number_non_hydrogen_atoms():
