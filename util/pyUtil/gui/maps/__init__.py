@@ -189,12 +189,19 @@ class MapUtil:
     olx.xgrid.Fix(map_minimum, step)
     olx.html.Update()
 
-  def getActionString(self, what="Map"):
+  def getActionString(self, what="Map", control=""):
+    control = control.strip("'")
     if olx.xgrid.Visible() == "false":
-      return "Show %s" %what
+      retVal =  "Show %s" %what
     else:
-      return "Hide %s" %what
- 
+      retVal = "Hide %s" %what
+
+    if control:
+      if OV.IsControl(control):
+        olx.html.SetLabel(control, retVal)
+
+    return retVal
+
   def get_map_scale(self):
     SCALED_TO = 50
 
