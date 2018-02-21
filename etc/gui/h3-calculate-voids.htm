@@ -55,8 +55,8 @@
     $+
       html.Snippet("gui/snippets/input-button",
       "name=MAKE_VOID_MAP",
-      "value='\$spy.gui.maps.getActionString('Void')'",
-      "onclick=spy.gui.maps.VoidView()",
+      "value='\$spy.gui.maps.getActionString(Void,MAKE_VOID_MAP)'",
+      "onclick=spy.gui.maps.VoidView(),spy.gui.maps.getActionString(Void,MAKE_VOID_MAP)",
       )
     $-
   </td>
