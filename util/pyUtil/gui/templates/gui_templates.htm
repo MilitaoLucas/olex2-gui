@@ -24,7 +24,7 @@ t:part_0_and_n{
   name="0 | %(part)s#scope"
   value="0 | %(part)s"
   width="100%%"
-  onclick="ShowP 0 %(parts)s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%(part)s)>>focus"
+  onclick="freeze true>>spy.gui.tools.show_unique_only()>>ShowP 0 %(parts)s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%(part)s)>>freeze false>>focus"
   bgcolor="$GetVar('linkButton.bgcolor')"
   fgcolor="$GetVar('linkButton.fgcolor')"
   flat="$GetVar(linkButton.flat)"
@@ -117,7 +117,7 @@ t:disorder_quicktool{
       bgcolor="GetVar('HtmlTableBgColour')"
       name='KEEP_UNIQUE@%(scope)s'
       checked="spy.GetParam('user.parts.keep_unique')"
-      oncheck="spy.SetParam('user.parts.keep_unique','true')>>uniq"
+      oncheck="spy.SetParam('user.parts.keep_unique','true')>>spy.gui.tools.make_unique()"
       onuncheck="spy.SetParam('user.parts.keep_unique','false')"
       target="Keep showing single fragments when switching the PART view"
       onclick=""

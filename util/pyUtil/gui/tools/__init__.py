@@ -21,6 +21,9 @@ last_element_html = ""
 global current_sNum
 current_sNum = ""
 
+global unique_selection
+unique_selection = ""
+
 haveGUI = OV.HasGUI()
 
 import olexex
@@ -961,6 +964,40 @@ def hasDisorder():
       return True
 OV.registerFunction(hasDisorder,False,'gui.tools')
 
+def show_unique_only():
+  global unique_selection
+  if OV.GetParam('user.parts.keep_unique') == True:
+    make_unique(add_to=True)
+    if unique_selection:
+      olex.m('Sel -u')
+      olx.Uniq()
+      olx.Sel(unique_selection)
+      olx.Uniq()
+OV.registerFunction(show_unique_only,False,'gui.tools')
+
+def make_unique(add_to=False):
+  global unique_selection
+
+  if not unique_selection:
+    add_to = True
+  if add_to:
+    olex.m('sel -a')
+  _ = " ".join(scrub('Sel'))
+  _ = _.replace('Sel',' ')
+  while "  " in _:
+    _ = _.replace("  ", " ").strip()
+
+  _l = _.split()
+  if _:
+    if add_to and unique_selection:
+      _l += unique_selection.split()
+      _l = list(set(_l))
+    unique_selection = " ".join(_l)
+
+  olx.Sel(unique_selection)
+  olx.Uniq()
+OV.registerFunction(make_unique,False,'gui.tools')
+
 def sel_part(part,sel_bonds=True):
   select = OV.GetParam('user.parts.select')
   if not select:
@@ -1333,3 +1370,9 @@ def resize_pdf(f_in, setting='printer'):
 OV.registerFunction(resize_pdf,False,'gui.tools')
 
 gett = TemplateProvider.get_template
+
+
+def scrub(cmd):
+  log = gui.tools.LogListen()
+  olex.m(cmd)
+  return log.endListen()
