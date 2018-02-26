@@ -82,8 +82,12 @@ class MapUtil:
       return
     self.SetXgridView(False)
     olex.m('spy.OlexCctbxMasks(True, True)')
-    self.deal_with_controls()
+    self.map_type = 'mask'
     OV.SetVar('olex2.map_type', 'mask')
+    self.deal_with_controls()
+    #map_source =  OV.GetParam("snum.map.source")
+    #map_resolution = OV.GetParam("snum.map.resolution")
+    #mask = OV.GetParam("snum.map.mask")
 
   def MapView(self, onoff=None):
     img_bases = ['full-Electron_Density_Map', 'small-Map']
