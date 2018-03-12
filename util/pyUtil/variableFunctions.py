@@ -226,10 +226,16 @@ def LoadStructureParams():
   ExternalPrgParameters.definedControls = [] # reset defined controls
   olx.current_mask = None
   # read current setting - to use for the new structures
-  solutionPrg = olx.phil_handler.get_validated_param('snum.solution.program')
-  solutionMethod = olx.phil_handler.get_validated_param('snum.solution.method')
-  refinementPrg = olx.phil_handler.get_validated_param('snum.refinement.program')
-  refinementMethod = olx.phil_handler.get_validated_param('snum.refinement.method')
+  solutionPrg = OV.GetParam('user.solution.default_program')
+  solutionMethod = OV.GetParam('user.solution.default_method')
+  if not solutionPrg:
+    solutionPrg = olx.phil_handler.get_validated_param('snum.solution.program')
+    solutionMethod = olx.phil_handler.get_validated_param('snum.solution.method')
+  refinementPrg = OV.GetParam('user.refinement.default_program')
+  refinementMethod = OV.GetParam('user.refinement.default_method')
+  if not refinementPrg:
+    refinementPrg = olx.phil_handler.get_validated_param('snum.refinement.program')
+    refinementMethod = olx.phil_handler.get_validated_param('snum.refinement.method')
   olx.phil_handler.reset_scope('snum', rebuild_index=True)
   model_src = OV.ModelSrc()
   structure_phil_path = u"%s/.olex/%s.phil" %(OV.FilePath(), model_src)
