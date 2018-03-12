@@ -242,6 +242,8 @@ class CifTools(ArgumentParser):
     user_removed = OV.GetParam('snum.metacif.user_removed')
     user_added = OV.GetParam('snum.metacif.user_added')
     for key, value in dictionary.iteritems():
+      if not isinstance(key, basestring):
+        continue
       if key.startswith('_') and value not in ('?', '.'):
         if force:
           self.cif_block[key] = value
@@ -927,20 +929,22 @@ class ExtractCifInfo(CifTools):
     already_resolved = 0
     conflict_count = 0
     for k in k_l:
+      if not isinstance(k, basestring):
+        continue
       l = []
       if k in resolved:
         already_resolved += 1
       for ld in self.all_sources_d:
         try:
           val = self.all_sources_d[ld].get(k,'')
-          if type(val) == str:
+          if isinstance(val, basestring):
             val = val.strip("'")
+            l.append(val)
           else:
             #print "k is %s" %k
             continue
         except Exception, err:
           print err
-        l.append(val)
       ll = set()
       for tem in l:
         if not tem: continue
@@ -954,11 +958,11 @@ class ExtractCifInfo(CifTools):
         for ld in self.all_sources_d:
           try:
             val = self.all_sources_d[ld].get(k,'')
-            if type(val) == str:
+            if isinstance(val, basestring):
               val = val.strip("'")
+            self.conflict_d[k].setdefault(ld, val)
           except Exception, err:
             print err
-          self.conflict_d[k].setdefault(ld,val)
 
     if conflict_count and not already_resolved:
       print "There is conflicting information in the sources of metadata"

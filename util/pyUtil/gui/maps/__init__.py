@@ -82,8 +82,12 @@ class MapUtil:
       return
     self.SetXgridView(False)
     olex.m('spy.OlexCctbxMasks(True, True)')
-    self.deal_with_controls()
+    self.map_type = 'mask'
     OV.SetVar('olex2.map_type', 'mask')
+    self.deal_with_controls()
+    #map_source =  OV.GetParam("snum.map.source")
+    #map_resolution = OV.GetParam("snum.map.resolution")
+    #mask = OV.GetParam("snum.map.mask")
 
   def MapView(self, onoff=None):
     img_bases = ['full-Electron_Density_Map', 'small-Map']
@@ -189,12 +193,19 @@ class MapUtil:
     olx.xgrid.Fix(map_minimum, step)
     olx.html.Update()
 
-  def getActionString(self, what="Map"):
+  def getActionString(self, what="Map", control=""):
+    control = control.strip("'")
     if olx.xgrid.Visible() == "false":
-      return "Show %s" %what
+      retVal =  "Show %s" %what
     else:
-      return "Hide %s" %what
- 
+      retVal = "Hide %s" %what
+
+    if control:
+      if OV.IsControl(control):
+        olx.html.SetLabel(control, retVal)
+
+    return retVal
+
   def get_map_scale(self):
     SCALED_TO = 50
 
