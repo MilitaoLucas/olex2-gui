@@ -1270,10 +1270,11 @@ def GetRInfo(txt="",format='html'):
           R1 = tree.active_node.R1
         else:
           R1 = 'n/a'
-    if R1 == cache.get('R1', None):
+    if R1 == cache.get('R1', None) and wR2 == cache.get('wR2', None):
       return cache.get('GetRInfo', 'XXX')
 
     cache['R1'] = R1
+    cache['wR2'] = wR2
     font_size_R1 = olx.GetVar('HtmlFontSizeExtraLarge')
     font_size_wR2 = olx.GetVar('HtmlFontSizeMedium')
     if 'html' in format:
