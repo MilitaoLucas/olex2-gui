@@ -961,6 +961,17 @@ user
   solution{
     run_auto_vss = False
       .type = bool
+    default_program = ""
+      .type = str
+    default_method = ""
+      .type = str
+  }
+
+  refinement{
+    default_program = ""
+      .type = str
+    default_method = ""
+      .type = str
   }
 
   graphs
