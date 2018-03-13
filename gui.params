@@ -11,7 +11,7 @@ gui
     .type = strings
   font_size_rel_size = '+3' '+2' '+1' '0' '-1' '-2'
     .type = strings
-  gui.ppi_font_adjust_amount = -2
+  ppi_font_adjust_amount = -2
     .type = int
   internal_scale = 2
     .type = int
