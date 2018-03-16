@@ -3041,11 +3041,15 @@ class HealthOfStructure():
       else:
         try:
           wl = float(olx.Cif('_diffrn_radiation_wavelength'))
-          _ = olx.Cif('_diffrn_measured_fraction_theta_max')
+          _ = olx.Cif('_diffrn_measured_fraction_theta_full')
           if _ != "n/a":
             self.hkl_stats['Completeness'] = float(_)
-            twotheta = 2* (float(olx.Cif('_diffrn_reflns_theta_max')))
+
+            twotheta = 2* (float(olx.Cif('_diffrn_measured_fraction_theta_full')))
             self.hkl_stats['MinD'] = uctbx.two_theta_as_d(twotheta ,wl, True)
+          else:
+            self.hkl_stats['MinD'] = 0
+            self.hkl_stats['Completeness'] = 0
 
           ##The following items can have alternate/deprecated identifiers
           l = ['_diffrn_reflns_av_unetI/netI', '_diffrn_reflns_av_sigmaI/netI']
@@ -3054,6 +3058,10 @@ class HealthOfStructure():
             _ = olx.Cif(item)
             if _ != "n/a":
               self.hkl_stats['MeanIOverSigma'] = 1/float(_)
+              break
+            else:
+              self.hkl_stats['MeanIOverSigma'] = 0
+              break
 
           l = ['_diffrn_reflns_av_R_equivalents',]
           self.hkl_stats['Rint'] = 0
@@ -3061,6 +3069,9 @@ class HealthOfStructure():
             _ = olx.Cif(item)
             if _ != "n/a":
               self.hkl_stats['Rint'] = float(_)
+            else:
+              self.hkl_stats['Rint'] = 1
+
         except Exception, err:
           print "Something could not be evaluated [Analysis.py]: %s" %err
 
@@ -3401,6 +3412,14 @@ class HealthOfStructure():
           od_2theta = float(od_2theta) * 2
           value_display_extra = "at 2Theta=%.0fdegrees" %(od_2theta)
           value_display_extra = IT.get_unicode_characters(value_display_extra)
+      iucr_value = OV.get_cif_item('_diffrn_measured_fraction_theta_full')
+      if iucr_value:
+        value_raw = float(iucr_value)
+        iucr_2theta = OV.get_cif_item('_diffrn_reflns_theta_full')
+        iucr_2theta = "IUCr"
+        if iucr_2theta:
+          value_display_extra = "%.0f%% (IUCr)" %(value_raw *100)
+
 
     if type(colour) == tuple:
       fill = colour[0]
