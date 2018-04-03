@@ -10,6 +10,7 @@
   <shortcut key="Ctrl+I" macro="sel -i">
   <shortcut key="Ctrl+Shift+G" macro="group sel">
   <shortcut key="del" macro="kill sel">
+  <shortcut key="Alt+back" macro="selback">
   <shortcut key="Ctrl+back" macro="kill sel">
   <shortcut key="F2" macro="swapbg">
   <shortcut key="F3" macro="labels">

@@ -586,7 +586,7 @@ class DBConnection():
     import sqlite3
     db_path = olex.f(OV.GetParam('user.report.db_location'))
     db_name = OV.GetParam('user.report.db_name')
-    db_file = "%s/%s" %(db_path, db_name)
+    db_file = os.path.join(db_path, db_name)
     if not os.path.exists(db_path):
       os.makedirs(db_path)
     exists = os.path.exists(db_file)
