@@ -3033,19 +3033,34 @@ class HealthOfStructure():
       return (False, True)
     self.is_CIF = (olx.IsFileType('cif') == 'true')
     try:
-      if not self.is_CIF:
-        hkl = OV.HKLSrc()
-        if not hkl or not os.path.exists(hkl):
-          return (False, True)
-        self.hkl_stats = olex_core.GetHklStat()
-      else:
+      radiation = float(olx.xf.exptl.Radiation())
+      theta_full = math.asin(radiation*0.6)*180/math.pi
+      self.hkl_stats = olex_core.GetHklStat()
+      if self.hkl_stats['DataCount'] == 0:
+        self.hkl_stats = {}
+      resolution_type = OV.GetParam("user.diagnostics.hkl.Completeness.resolution")
+      if self.hkl_stats:
+        self.hkl_stats['MeanIOverSigma'] = 1/self.hkl_stats['Rsigma']
+        if resolution_type == "full":
+          if olx.IsFileType("ires") == 'true':
+            try:
+              acta = float(olx.Ins("ACTA"))/2
+              if acta < theta_full:
+                theta_full = acta/2
+            except:
+              pass
+          # adjust to the dataset theta max if needed
+          theta_full1 = math.asin(radiation/(2*self.hkl_stats['MinD']))*180/math.pi
+          if theta_full1 < theta_full:
+            theta_full = theta_full1
+          self.hkl_stats['Completeness'] = float(olx.xf.rm.Completeness(theta_full*2))
+      if not self.hkl_stats and self.is_CIF:
         try:
           wl = float(olx.Cif('_diffrn_radiation_wavelength'))
-          _ = olx.Cif('_diffrn_measured_fraction_theta_full')
+          _ = olx.Cif('_diffrn_measured_fraction_theta_%s' %resolution_type)
           if _ != "n/a":
             self.hkl_stats['Completeness'] = float(_)
-
-            twotheta = 2* (float(olx.Cif('_diffrn_measured_fraction_theta_full')))
+            twotheta = 2* (float(olx.Cif('_diffrn_measured_fraction_theta_%s' %resolution_type)))
             self.hkl_stats['MinD'] = uctbx.two_theta_as_d(twotheta ,wl, True)
           else:
             self.hkl_stats['MinD'] = 0
@@ -3053,7 +3068,7 @@ class HealthOfStructure():
 
           ##The following items can have alternate/deprecated identifiers
           l = ['_diffrn_reflns_av_unetI/netI', '_diffrn_reflns_av_sigmaI/netI']
-          self.hkl_stats['MeanIOverSigma'] = 0
+          self.hkl_stats[''] = 0
           for item in l:
             _ = olx.Cif(item)
             if _ != "n/a":
