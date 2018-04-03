@@ -7,6 +7,7 @@ import sys
 import htmlTools
 import olex
 import olx
+import olex_core
 import gui
 
 
@@ -191,7 +192,7 @@ class HARp(PT):
         input_structure = os.path.join(self.jobs[i].origin_folder, self.jobs[i].name + "_input.cif")
       else:
         input_structure = os.path.join(self.jobs[i].full_dir, self.jobs[i].name + ".cif")
-      arrow = """<a target='Open input .cif file' href='reap "%s"'>%s</a>""" %(input_structure, load_input)
+      arrow = """<a target='Open input .cif file: %s' href='reap "%s"'>%s</a>""" %(input_structure, input_structure, load_input)
 
       analysis = "--"
       if os.path.exists(os.path.join(self.jobs[i].full_dir, "stdout.fit_analysis")):
@@ -724,6 +725,26 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
     Popen([pyl,
            os.path.join(p_path, "HARt-launch.py")])
 
+def deal_with_har_cif():
+  ''' Tries to complete what it can from the existing IAM cif'''
+  har_cif = os.path.join(OV.FilePath(), OV.FileName() + ".cif")
+  if not os.path.exists(har_cif):
+    print "The file %s does not exist. It doesn't look like HAR has been run here." %har_cif
+    return
+  iam_cif = os.path.join(OV.FilePath(), OV.FileName().rstrip("_HAR") + ".cif")
+  if not os.path.exists(iam_cif):
+    print "The file %s does not exist. It doesn't look a CIF file for the IAM refinement exists" %iam_cif
+    return
+
+  hkl_stats = olex_core.GetHklStat()
+
+  OV.set_cif_item('_diffrn_measured_fraction_theta_full', "%.3f" %hkl_stats.get('Completeness'))
+  OV.set_cif_item('_diffrn_reflns_av_unetI/netI', "%.3f" %hkl_stats.get('MeanIOverSigma'))
+  OV.set_cif_item('_diffrn_reflns_av_R_equivalents', "%.3f" %hkl_stats.get('Rint'))
+  olex.m("cifmerge")
+  olex.m("cifmerge '%s' '%s'" %(iam_cif, har_cif))
+
+OV.registerFunction(deal_with_har_cif)
 
 def del_dir(directory):
   import shutil
