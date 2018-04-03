@@ -91,34 +91,33 @@ class MapUtil:
 
   def MapView(self, onoff=None):
     img_bases = ['full-Electron_Density_Map', 'small-Map']
-    if not self.deal_with_map_buttons(onoff, img_bases, 'eden'):
-      update_controls = True
-      if OV.IsControl('SNUM_CALCVOID_BUTTON'):
-        # set calcvoid button to 'up' state
-        olx.html.SetState('SNUM_CALCVOID_BUTTON','up')
-        olx.html.SetLabel('SNUM_CALCVOID_BUTTON',OV.Translate('Calculate Voids'))
+    if self.deal_with_map_buttons(onoff, img_bases, 'eden'):
+      return
+    update_controls = True
+    if OV.IsControl('SNUM_CALCVOID_BUTTON'):
+      # set calcvoid button to 'up' state
+      olx.html.SetState('SNUM_CALCVOID_BUTTON','up')
+      olx.html.SetLabel('SNUM_CALCVOID_BUTTON',OV.Translate('Calculate Voids'))
 
-      map_type =  OV.GetParam("snum.map.type")
-      map_source =  OV.GetParam("snum.map.source")
-      map_resolution = OV.GetParam("snum.map.resolution")
-      mask = OV.GetParam("snum.map.mask")
+    map_type =  OV.GetParam("snum.map.type")
+    map_source =  OV.GetParam("snum.map.source")
+    map_resolution = OV.GetParam("snum.map.resolution")
+    mask = OV.GetParam("snum.map.mask")
 
-      if map_type == "fcalc":
-        map_type = "calc"
-      elif map_type == "fobs":
-        map_type = "obs"
+    if map_type == "fcalc":
+      map_type = "calc"
+    elif map_type == "fobs":
+      map_type = "obs"
 
-      if mask:
-        mask_val = "-m"
-      else:
-        mask_val = ""
-
-      if map_source == "olex":
-        olex.m("calcFourier -%s -r=%s %s" %(map_type, map_resolution, mask_val))
-      else:
-        olex.m("calcFourier -%s -%s -r=%s %s" %(map_type, map_source, map_resolution, mask_val))
+    if mask:
+      mask_val = "-m"
     else:
-      update_controls = True
+      mask_val = ""
+
+    if map_source == "olex":
+      olex.m("calcFourier -%s -r=%s %s" %(map_type, map_resolution, mask_val))
+    else:
+      olex.m("calcFourier -%s -%s -r=%s %s" %(map_type, map_source, map_resolution, mask_val))
     self.map_type = 'eden'
     self.SetXgridView(update_controls)
     OV.SetVar('olex2.map_type', 'eden')
