@@ -3060,7 +3060,7 @@ class HealthOfStructure():
           _ = olx.Cif('_diffrn_measured_fraction_theta_%s' %resolution_type)
           if _ != "n/a":
             self.hkl_stats['Completeness'] = float(_)
-            twotheta = 2* (float(olx.Cif('_diffrn_measured_fraction_theta_%s' %resolution_type)))
+            twotheta = 2* (float(olx.Cif('_diffrn_reflns_theta_%s' %resolution_type)))
             self.hkl_stats['MinD'] = uctbx.two_theta_as_d(twotheta ,wl, True)
           else:
             self.hkl_stats['MinD'] = 0
