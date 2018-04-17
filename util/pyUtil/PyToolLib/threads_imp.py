@@ -34,7 +34,7 @@ class NewsImageRetrivalThread(ThreadEx):
         img_url, url = self.get_image_from_list()
         if not img_url:
           return
-        
+
         if olex_fs.Exists(img_url):
           img_data = olex_fs.ReadFile(img_url)
         else:
@@ -47,6 +47,9 @@ class NewsImageRetrivalThread(ThreadEx):
               wFile.close()
               wFile = open(os.sep.join([olx.app.SharedDir(), 'splash.url']),'w')
               wFile.write(url)
+              wFile.close()
+              wFile = open(os.sep.join([olx.app.SharedDir(), 'splash.id']),'w')
+              wFile.write(img_url)
               wFile.close()
             elif self.name == "news":
               olex.writeImage(img_url, img_data)
@@ -64,9 +67,25 @@ class NewsImageRetrivalThread(ThreadEx):
     img_url = None
     if not NewsImageRetrivalThread.active_image_list.get(self.name,None):
       return
+    first_res = self.active_image_list[self.name][0]
     while not img_url:
       res = self.active_image_list[self.name].pop(0)
       tag = None
+
+      if self.name == 'splash':
+        _ = os.sep.join([olx.app.SharedDir(), 'splash.id'])
+        if not os.path.exists(_):
+          wFile = open(_,'w')
+          wFile.write('splash.jpg')
+        img_id = open(_,'r').read().strip().strip("http://")
+        if img_id not in res:
+          continue
+        else:
+          if len(self.active_image_list[self.name]) > 0:
+            res = self.active_image_list[self.name][0]
+          else:
+            res = first_res
+
       if "," in res:
         _ = res.split(',')
         if len(_) == 2:
@@ -76,9 +95,12 @@ class NewsImageRetrivalThread(ThreadEx):
       else:
         img_url = res
         url = "www.olex2.org"
+
+
       if tag:
         if tag.strip() != olx.olex2_tag:
           img_url = None
+
     if "://" not in img_url:
       return "http://%s" %(img_url.strip()), url.strip()
     return img_url.strip(), url.strip()
