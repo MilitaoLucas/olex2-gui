@@ -56,7 +56,7 @@ class NewsImageRetrivalThread(ThreadEx):
         tag = OV.GetTag().split('-')[0]
         if self.name == "news":
           olex.writeImage("news/news-%s_tmp" %tag, img_data)
-          OV.SetParam('olex2.news_img_link_url', url)
+          olx.SetVar('olex2.news_img_link_url', url)
           olx.Schedule(1, "spy.internal.resizeNewsImage()")
     except:
       pass
@@ -155,6 +155,12 @@ olex.registerFunction(get_news_image_from_server)
 def resizeNewsImage():
   from PilTools import TI
   TI.resize_news_image(vfs=True)
+  img_url = olx.GetVar('olex2.news_img_link_url', '')
+  if img_url:
+    from olexFunctions import OlexFunctions
+    OV = OlexFunctions()
+    OV.SetParam('olex2.news_img_link_url', img_url)
+    olx.UnsetVar('olex2.news_img_link_url')
 olex.registerFunction(resizeNewsImage, False, 'internal')
 
 
