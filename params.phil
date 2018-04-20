@@ -1672,7 +1672,7 @@ user
           .type = float
         href = HklStat
           .type = str
-        resolution = *max full
+        resolution = max *full
            .type = choice
         target = "Show reflection statistics - hkl file must be present"
           .type = str

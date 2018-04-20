@@ -3033,6 +3033,7 @@ class HealthOfStructure():
       return (False, True)
     self.is_CIF = (olx.IsFileType('cif') == 'true')
     try:
+      self.hkl_stats['IsCentrosymmetric'] = olex_core.SGInfo()['Centrosymmetric']
       radiation = float(olx.xf.exptl.Radiation())
       theta_full = math.asin(radiation*0.6)*180/math.pi
       self.hkl_stats = olex_core.GetHklStat()
@@ -3053,7 +3054,16 @@ class HealthOfStructure():
           theta_full1 = math.asin(radiation/(2*self.hkl_stats['MinD']))*180/math.pi
           if theta_full1 < theta_full:
             theta_full = theta_full1
-          self.hkl_stats['Completeness'] = float(olx.xf.rm.Completeness(theta_full*2))
+        self.hkl_stats['Completeness'] = float(olx.xf.rm.Completeness(theta_full*2))
+        self.hkl_stats['Completeness_laue'] = float(olx.xf.rm.Completeness(theta_full*2,True))
+        self.hkl_stats['Completeness_point'] = float(olx.xf.rm.Completeness(theta_full*2,False))
+
+        l = ["- Point Group Completeness: %.2f" %self.hkl_stats['Completeness_point'],
+             "Laue Group Completeness: %.2f" %self.hkl_stats['Completeness_laue'],
+             ]
+        target = "&#013;- ".join(l)
+        OV.SetParam('user.diagnostics.hkl.Completeness.target', target)
+
       if not self.hkl_stats and self.is_CIF:
         try:
           wl = float(olx.Cif('_diffrn_radiation_wavelength'))
@@ -3468,14 +3478,26 @@ class HealthOfStructure():
         if od_2theta:
           od_2theta = float(od_2theta) * 2
 
-      ## Theoretical Limit
-      _ = int(boxWidth * (1-theoretical_val))
+      ## Point Group value!
+      _ = int(boxWidth * (1-self.hkl_stats['Completeness_point']))
       if _ == 0 and theoretical_val < 0.95:
         _ = 1
       if _ != 0:
         x = boxWidth - _
         box = (x,0,boxWidth,boxHeight)
         fill = OV.GetParam('gui.red').hexadecimal
+        draw.rectangle(box, fill=fill)
+
+      laue = float(self.hkl_stats['Completeness_laue'])
+      _ = int(boxWidth * (1-laue))
+      if _ == 0 and theoretical_val < 0.95:
+        _ = 1
+      if _ != 0:
+        col = self.get_bg_colour(item, laue)
+        right = int(laue * boxWidth)
+        #box = (x,int(boxHeight/2),x+right,boxHeight)
+        box = (0,int(boxHeight/2),right,boxHeight)
+        fill = col
         draw.rectangle(box, fill=fill)
 
       top = OV.GetParam('user.diagnostics.hkl.%s.top' %item)
