@@ -3058,18 +3058,14 @@ class HealthOfStructure():
         self.hkl_stats['Completeness_laue'] = float(olx.xf.rm.Completeness(theta_full*2,True))
         self.hkl_stats['Completeness_point'] = float(olx.xf.rm.Completeness(theta_full*2,False))
 
-        l = ["- Point Group Completeness: %.2f" %self.hkl_stats['Completeness_point'],
-             "Laue Group Completeness: %.2f" %self.hkl_stats['Completeness_laue'],
-             ]
-        target = "&#013;- ".join(l)
-        OV.SetParam('user.diagnostics.hkl.Completeness.target', target)
-
       if not self.hkl_stats and self.is_CIF:
         try:
           wl = float(olx.Cif('_diffrn_radiation_wavelength'))
           _ = olx.Cif('_diffrn_measured_fraction_theta_%s' %resolution_type)
           if _ != "n/a":
             self.hkl_stats['Completeness'] = float(_)
+            self.hkl_stats['Completeness_laue'] = self.hkl_stats.get('Completeness_laue',float(_))
+            self.hkl_stats['Completeness_point'] = self.hkl_stats.get('Completeness_point',0)
             twotheta = 2* (float(olx.Cif('_diffrn_reflns_theta_%s' %resolution_type)))
             self.hkl_stats['MinD'] = uctbx.two_theta_as_d(twotheta ,wl, True)
           else:
@@ -3099,6 +3095,13 @@ class HealthOfStructure():
 
         except Exception, err:
           print "Something could not be evaluated [Analysis.py]: %s" %err
+
+      l = ["- Point Group Completeness: %.2f" %self.hkl_stats['Completeness_point'],
+           "Laue Group Completeness: %.2f" %self.hkl_stats['Completeness_laue'],
+           ]
+      target = "&#013;- ".join(l)
+      OV.SetParam('user.diagnostics.hkl.Completeness.target', target)
+
 
     except Exception, err:
       print err
