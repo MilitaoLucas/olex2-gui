@@ -523,7 +523,7 @@
       <arg0 name="File extension" def="ins">
     >
     <cmd
-      <cmd5 "mask bonds 192">
+      <cmd5 "mask bonds 4096">
       <cmd1 "spy.gui.skin.change_bond_colour()">
     >
   >
