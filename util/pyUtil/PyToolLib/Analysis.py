@@ -3493,7 +3493,7 @@ class HealthOfStructure():
 
       laue = float(self.hkl_stats['Completeness_laue'])
       _ = int(boxWidth * (1-laue))
-      if _ == 0 and theoretical_val < 0.95:
+      if _ == 0 and theoretical_val < 0.99:
         _ = 1
       if _ != 0:
         col = self.get_bg_colour(item, laue)
