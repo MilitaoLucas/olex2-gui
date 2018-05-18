@@ -862,19 +862,10 @@ def weightGuiDisplay():
         colour = gui_orange
       else:
         colour = gui_red
-        
-      if prec == 0:
-        curr = "%.0f" %curr
-        sugg = "%.0f" %sugg
-      elif prec == 1:
-        curr = "%.1f" %curr
-        sugg = "%.1f" %sugg
-      elif prec == 2:
-        curr = "%.2f" %curr
-        sugg = "%.2f" %sugg
-      elif prec == 3:
-        curr = "%.3f" %curr
-        sugg = "%.3f" %sugg
+
+      _ = "%%.%sf"%prec
+      curr = _ %curr
+      sugg = _ %sugg
         
       retVal += "<font color='%s'>%s(%s)&nbsp;</font>|&nbsp;" %(colour, curr, sugg)
     html_scheme = retVal.strip("|&nbsp;").replace("0.", ".")
@@ -882,14 +873,8 @@ def weightGuiDisplay():
     html_scheme = current_weight
   wght_str = ""
   for i in suggested_weight:
-    if prec == 0:
-      wght_str += " %.0f" %i
-    elif prec == 1:
-      wght_str += " %.1f" %i
-    elif prec == 2:
-      wght_str += " %.2f" %i
-    elif prec == 3:
-      wght_str += " %.3f" %i
+    _ = " %%.%sf" %prec
+    wght_str += _%i
       
   wght_str = "<b>%s</b>"%wght_str
   html_scheme= "<b>%s</b>"%html_scheme
