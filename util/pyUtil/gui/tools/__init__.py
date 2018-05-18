@@ -27,7 +27,6 @@ unique_selection = ""
 haveGUI = OV.HasGUI()
 
 import olexex
-import olex_gui
 import gui
 
 import re
@@ -44,6 +43,7 @@ gui_green = OV.GetParam('gui.green')
 gui_orange = OV.GetParam('gui.orange')
 gui_red = OV.GetParam('gui.red')
 gui_grey = OV.GetParam('gui.grey')
+
 grade_1_colour = OV.GetParam('gui.skin.diagnostics.colour_grade1').hexadecimal
 grade_2_colour = OV.GetParam('gui.skin.diagnostics.colour_grade2').hexadecimal
 grade_3_colour = OV.GetParam('gui.skin.diagnostics.colour_grade3').hexadecimal
@@ -846,19 +846,39 @@ def weightGuiDisplay():
   if suggested_weight:
     for curr, sugg in zip(current_weight, suggested_weight):
       curr = float(curr)
+      
+      if curr < 1:
+        prec = 3
+      elif curr < 10:
+        prec = 2
+      elif curr < 100:
+        prec = 1
+      else:
+        prec = 0
+      
       if curr-curr*0.01 <= sugg <= curr+curr*0.01:
         colour = gui_green
       elif curr-curr*0.1 < sugg < curr+curr*0.1:
         colour = gui_orange
       else:
         colour = gui_red
-      retVal += "<font color='%s'>%.3f(%.3f)&nbsp;</font>|" %(colour, curr, sugg)
-    html_scheme = retVal.strip("| ").replace("0.", ".")
+
+      _ = "%%.%sf"%prec
+      curr = _ %curr
+      sugg = _ %sugg
+        
+      retVal += "<font color='%s'>%s(%s)&nbsp;</font>|&nbsp;" %(colour, curr, sugg)
+    html_scheme = retVal.strip("|&nbsp;").replace("0.", ".")
   else:
     html_scheme = current_weight
   wght_str = ""
   for i in suggested_weight:
-    wght_str += " %.3f" %i
+    _ = " %%.%sf" %prec
+    wght_str += _%i
+      
+  wght_str = "<b>%s</b>"%wght_str
+  html_scheme= "<b>%s</b>"%html_scheme
+
   txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update")
   txt_Weight = OV.TranslatePhrase("Weight")
   html = '''
@@ -1189,26 +1209,6 @@ class Templates():
       return False
 
 TemplateProvider = Templates()
-
-def _get_available_html_width(margin_adjust = True, first_col_width_adjust=True, ppi_aware=True):
-  width = int(olx.html.ClientWidth('self'))
-  max_width = width
-  if width < 100:
-    width = OV.GetParam('gui.htmlpanelwidth')
-  if margin_adjust:
-    width = width - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
-  if first_col_width_adjust:
-    width = width - OV.GetParam('gui.html.table_firstcol_width')
-  if ppi_aware:
-    width = int(width * olex_gui.GetPPI()[0]/96)
-    max_width = int(max_width * olex_gui.GetPPI()[0]/96)
-
-  if width <= 0:
-    width = 10
-  if max_width <= 0:
-    max_width = 10
-
-  return width, max_width
 
 
 def get_diagnostics_colour(scope, item, val):
