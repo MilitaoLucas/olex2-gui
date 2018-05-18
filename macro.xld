@@ -1562,6 +1562,20 @@
   >
 >
 
+<getID help="Get the machine ID and copy it to the clipboard."
+  <body
+    <cmd
+      <cmd1 '@py "import _plgl\nimport olx\nolx.Echo(_plgl.createAuthenticationToken(), c=True)"'>
+      <cmd1 'echo "The machine ID has been copied to your clipboard."'>
+    >
+  >
+>
+
+
+
+
+
+
 <user_onstartup help="dummy definition" <body > >
 <custom_on_report help="dummy definition" <body > >
 
