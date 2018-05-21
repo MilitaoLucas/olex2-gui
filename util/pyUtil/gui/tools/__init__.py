@@ -32,7 +32,7 @@ import gui
 import re
 
 import time
-
+import math
 global regex_l
 regex_l = {}
 
@@ -846,7 +846,6 @@ def weightGuiDisplay():
   if suggested_weight:
     for curr, sugg in zip(current_weight, suggested_weight):
       curr = float(curr)
-      
       if curr < 1:
         prec = 3
       elif curr < 10:
@@ -876,7 +875,7 @@ def weightGuiDisplay():
     _ = " %%.%sf" %prec
     wght_str += _%i
       
-  wght_str = "<b>%s</b>"%wght_str
+  wght_str = "%s"%wght_str
   html_scheme= "<b>%s</b>"%html_scheme
 
   txt_tick_the_box = OV.TranslatePhrase("Tick the box to automatically update")
