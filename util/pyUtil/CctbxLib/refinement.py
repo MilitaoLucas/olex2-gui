@@ -250,7 +250,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
     elif sec_ch2_treatment == 'refine':
       self.refine_secondary_xh2_angle = True
 
-  def run(self):
+  def run(self, build_only=False):
+    """ If build_only is True - this method initialises and returns the normal
+     equations object
+    """
     self.reflections.show_summary(log=self.log)
     wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
     filepath = OV.StrDir()
@@ -364,6 +367,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     )
     self.normal_eqns.shared_param_constraints = self.shared_param_constraints
     self.normal_eqns.shared_rotated_adps = self.shared_rotated_adps
+    if build_only:
+      return self.normal_eqns
     method = OV.GetParam('snum.refinement.method')
     iterations = solvers.get(method)
     if iterations == None:
