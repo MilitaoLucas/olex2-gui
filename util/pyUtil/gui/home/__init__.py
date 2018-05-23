@@ -55,8 +55,8 @@ class MultipleDataset:
         html += '''
     $+
       html.Snippet(GetVar(default_link),
-      "value=%s",
-      "onclick=%s",
+      "value='%s'",
+      "onclick=%s"
       )
     $-''' %(display, action)
 
