@@ -1758,10 +1758,10 @@ user
     finalise = *Ignore Include Exclude
       .type = choice
     checkcif{
-      url = https://checkcif.iucr.org//cgi-bin/checkcif.pl
+      url = https://checkcif.iucr.org/cgi-bin/checkcif_hkl.pl
         .type = str
         .help = The URL to which the cif file will be sent
-      hkl_url = https://checkcif.iucr.org//cgi-bin/checkcif_hkl.pl
+      hkl_url = https://checkcif.iucr.org/cgi-bin/checkcif_hkl.pl
         .type = str
         .help = The URL to which the cif and fcf file will be sent
       format = *pdf html
