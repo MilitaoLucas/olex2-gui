@@ -867,7 +867,7 @@ def weightGuiDisplay():
       sugg = (_ %sugg).lstrip('0')
       if html_scheme:
         html_scheme += "|&nbsp;"
-      html_scheme += "<font color='%s'>%s(%s)&nbsp;</font>" %(colour, curr, sugg)
+      html_scheme += "<font color='%s'>%s(%s)</font>" %(colour, curr, sugg)
   else:
     html_scheme = current_weight
   html_scheme= "<b>%s</b>"%html_scheme
