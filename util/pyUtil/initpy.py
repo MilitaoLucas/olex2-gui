@@ -1,7 +1,7 @@
 # initpy.py
 import olex
 import sys
-
+import os
 import time
 timer = True
 if timer:
@@ -14,7 +14,11 @@ datadir = olex.f("DataDir()")
 basedir = olex.f("BaseDir()")
 if sys.platform[:3] == 'win':
   sys.path = [''] # first should be empty string to avoid problem if cctbx needs cold start
-  python_dir = r"%s\Python27" %basedir
+  _ = os.environ.get("PYTHONHOME")
+  if _:
+    python_dir = _
+  else:
+    python_dir = r"%s\Python27" %basedir
   sys.path.append(python_dir)
   sys.path.append(r"%s\DLLs" %python_dir)
   sys.path.append(r"%s\Lib" %python_dir)
