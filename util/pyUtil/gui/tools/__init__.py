@@ -863,8 +863,8 @@ def weightGuiDisplay():
         colour = gui_red
 
       _ = "%%.%sf"%prec
-      curr = _ %curr
-      sugg = _ %sugg
+      curr = (_ %curr).lstrip('0')
+      sugg = (_ %sugg).lstrip('0')
       if html_scheme:
         html_scheme += "|&nbsp;"
       html_scheme += "<font color='%s'>%s(%s)&nbsp;</font>" %(colour, curr, sugg)
