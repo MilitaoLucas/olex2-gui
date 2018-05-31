@@ -209,7 +209,7 @@ def set_plugins_paths():
   sys.path.append("%s/util/pyUtil/PluginLib" %(basedir))
   olx.InstalledPlugins = set()
   from PluginTools import PluginTools
-  import AC3
+  import AC4
   for plugin in plugins:
     sys.path.append("%s/util/pyUtil/PluginLib/plugin-%s" %(basedir,plugin))
   for plugin in plugins:
@@ -317,6 +317,7 @@ if OV.HasGUI():
   #export_parameters()
   from Analysis import Analysis
 
+import leverage
 if timer:
   tt.append("%.3f s == GUI Imports" %(time.time() - t))
   t = time.time()
