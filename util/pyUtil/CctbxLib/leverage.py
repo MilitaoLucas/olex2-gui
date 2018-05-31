@@ -12,8 +12,6 @@ from scitbx.lstbx import normal_eqns
 from scitbx.array_family import flex
 from smtbx.structure_factors import direct
 from smtbx.refinement.restraints import origin_fixing_restraints
-import numpy as np
-import scipy.linalg as scla
 import math
 
 import olex
@@ -60,6 +58,9 @@ def parameter_labels(self, n_params):
   return labels
 
 def calculate(self, threshold, params):
+  import numpy as np
+  import scipy.linalg as scla
+
   if self.f_mask is not None:
     f_mask = self.f_mask.data()
   else:
