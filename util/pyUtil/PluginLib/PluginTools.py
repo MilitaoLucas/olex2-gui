@@ -69,7 +69,10 @@ class PluginTools(object):
 
     if self.p_htm:
       image = self.p_img[0][0]
-      add_tool_to_index(scope=self.p_name, link=self.p_htm, path=self.p_path, location=self.params.gui.location, before=self.params.gui.before, filetype='', image=image)
+      try:
+        add_tool_to_index(scope=self.p_name, link=self.p_htm, path=self.p_path, location=self.params.gui.location, before=self.params.gui.before, filetype='', image=image)
+      except:
+        pass
     gui.help.gh.git_help(quick=False, specific=self.p_path)
 
   def edit_customisation_folder(self,custom_name=None):
@@ -99,7 +102,7 @@ class PluginTools(object):
     else: self.customisation_path = None
 
 def make_new_plugin(name,overwrite=False):
-  plugin_base = "%s/util/pyUtil/pluginLib/" %OV.BaseDir()
+  plugin_base = "%s/util/pyUtil/PluginLib/" %OV.BaseDir()
   path = "%s/plugin-%s" %(plugin_base, name)
   xld = "%s/plugins.xld" %OV.BaseDir()
 
