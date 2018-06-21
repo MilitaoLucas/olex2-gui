@@ -594,11 +594,27 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       print >> f, out.getvalue()
       f.close()
       print out.getvalue()
-      cif_block['_diffrn_reflns_number'] = fo2.size()
-      if merging: #HKLF5 will not have one
-        cif_block['_diffrn_reflns_av_R_equivalents'] = "%.4f" %merging.r_int()
-        cif_block['_diffrn_reflns_av_sigmaI/netI'] = "%.4f" %merging.r_sigma()
+      #cif_block['_diffrn_reflns_number'] = fo2.size()
+      #if merging: #HKLF5 will not have one
+        #cif_block['_diffrn_reflns_av_R_equivalents'] = "%.4f" %merging.r_int()
+        #cif_block['_diffrn_reflns_av_sigmaI/netI'] = "%.4f" %merging.r_sigma()
 
+
+      #cif_block['_diffrn_reflns_limit_h_min'] = h_min
+      #cif_block['_diffrn_reflns_limit_h_max'] = h_max
+      #cif_block['_diffrn_reflns_limit_k_min'] = k_min
+      #cif_block['_diffrn_reflns_limit_k_max'] = k_max
+      #cif_block['_diffrn_reflns_limit_l_min'] = l_min
+      #cif_block['_diffrn_reflns_limit_l_max'] = l_max
+      #cif_block['_diffrn_reflns_theta_min'] = "%.2f" %(
+        #0.5 * uctbx.d_star_sq_as_two_theta(min_d_star_sq, self.wavelength, deg=True))
+      #cif_block['_diffrn_reflns_theta_max'] = "%.2f" %(
+        #0.5 * uctbx.d_star_sq_as_two_theta(max_d_star_sq, self.wavelength, deg=True))
+      cif_block['_smtbx_masks_void_probe_radius'] = self.params.solvent_radius
+      cif_block['_smtbx_masks_void_truncation_radius'] = self.params.shrink_truncation_radius
+
+      mdict = mask.as_cif_block()
+      _ = None
       try:
         _ = olx.cif_model[OV.ModelSrc()].get('_smtbx_masks_void_content')
         if _:
@@ -607,22 +623,10 @@ class OlexCctbxMasks(OlexCctbxAdapter):
       except:
         pass
 
-      cif_block['_diffrn_reflns_limit_h_min'] = h_min
-      cif_block['_diffrn_reflns_limit_h_max'] = h_max
-      cif_block['_diffrn_reflns_limit_k_min'] = k_min
-      cif_block['_diffrn_reflns_limit_k_max'] = k_max
-      cif_block['_diffrn_reflns_limit_l_min'] = l_min
-      cif_block['_diffrn_reflns_limit_l_max'] = l_max
-      cif_block['_diffrn_reflns_theta_min'] = "%.2f" %(
-        0.5 * uctbx.d_star_sq_as_two_theta(min_d_star_sq, self.wavelength, deg=True))
-      cif_block['_diffrn_reflns_theta_max'] = "%.2f" %(
-        0.5 * uctbx.d_star_sq_as_two_theta(max_d_star_sq, self.wavelength, deg=True))
-
-      mdict = mask.as_cif_block()
-      _ = olx.cif_model[OV.ModelSrc()].get('_smtbx_masks_void_content')
-
       if _ and mdict.has_key('_smtbx_masks_void_content') and len(_) == len(mdict['_smtbx_masks_void_content']):
         mdict['_smtbx_masks_void_content'] = _
+
+
       cif_block.update(mdict)
       cif = model.cif()
       data_name = OV.FileName().replace(' ', '')
