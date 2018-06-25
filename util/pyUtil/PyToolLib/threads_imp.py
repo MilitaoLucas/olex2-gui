@@ -42,15 +42,12 @@ class NewsImageRetrivalThread(ThreadEx):
           if img:
             img_data = img.read()
             if self.name == "splash":
-              wFile = open(os.sep.join([olx.app.SharedDir(), 'splash.jpg']),'wb')
-              wFile.write(img_data)
-              wFile.close()
-              wFile = open(os.sep.join([olx.app.SharedDir(), 'splash.url']),'w')
-              wFile.write(url)
-              wFile.close()
-              wFile = open(os.sep.join([olx.app.SharedDir(), 'splash.id']),'w')
-              wFile.write(img_url)
-              wFile.close()
+              with open(os.sep.join([olx.app.SharedDir(), 'splash.jpg']),'wb') as wFile:
+                wFile.write(img_data)
+              with open(os.sep.join([olx.app.SharedDir(), 'splash.url']),'w') as wFile:
+                wFile.write(url)
+              with open(os.sep.join([olx.app.SharedDir(), 'splash.id']),'w') as wFile:
+                wFile.write(img_url)
             elif self.name == "news":
               olex.writeImage(img_url, img_data)
         tag = OV.GetTag().split('-')[0]
@@ -65,41 +62,43 @@ class NewsImageRetrivalThread(ThreadEx):
 
   def get_image_from_list(self):
     img_url = None
-    if not NewsImageRetrivalThread.active_image_list.get(self.name,None):
+    img_list = NewsImageRetrivalThread.active_image_list.get(self.name,None)
+    if not img_list:
       return
-    first_res = self.active_image_list[self.name][0]
-    while not img_url:
-      res = self.active_image_list[self.name].pop(0)
-      tag = None
-
-      if self.name == 'splash':
-        _ = os.sep.join([olx.app.SharedDir(), 'splash.id'])
-        if not os.path.exists(_):
-          wFile = open(_,'w')
-          wFile.write('splash.jpg')
-        img_id = open(_,'r').read().strip().strip("http://")
-        if img_id not in res:
-          continue
-        else:
-          if len(self.active_image_list[self.name]) > 0:
-            res = self.active_image_list[self.name][0]
-          else:
-            res = first_res
-
-      if "," in res:
-        _ = res.split(',')
-        if len(_) == 2:
-          img_url, url = res.split(',')
-        elif len(_) == 3:
-          img_url, url, tag = res.split(',')
+    img_id = ""
+    tag = None
+    res = None
+    if self.name == 'splash':
+      _ = os.sep.join([olx.app.SharedDir(), 'splash.id'])
+      if not os.path.exists(_):
+        with open(_,'w') as wFile:
+          img_id = "splash.jpg"
+          wFile.write(img_id)
       else:
-        img_url = res
-        url = "www.olex2.org"
+        img_id = open(_,'r').read().strip().strip("http://")
+      first_res = img_list[0]
+      for idx, l in enumerate(img_list):
+        if img_id in l:
+          if (idx +1) < len(img_list):
+            res = img_list[idx+1]
+            break
+      if not res:
+        res = first_res
+    else:
+      res = img_list.pop(0)
+    if "," in res:
+      _ = res.split(',')
+      if len(_) == 2:
+        img_url, url = res.split(',')
+      elif len(_) == 3:
+        img_url, url, tag = res.split(',')
+    else:
+      img_url = res
+      url = "www.olex2.org"
 
-
-      if tag:
-        if tag.strip() != olx.olex2_tag:
-          img_url = None
+    if tag:
+      if tag.strip() != olx.olex2_tag:
+        img_url = None
 
     if "://" not in img_url:
       return "http://%s" %(img_url.strip()), url.strip()
