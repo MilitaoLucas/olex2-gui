@@ -14,7 +14,7 @@
       <pivot "_audit_creation">
       <pivot "_shelxl_version_number"> <pivot "_shelx_SHELXL_version_number">
       <pivot "_audit">
-	  <pivot "_publ">
+      <pivot "_publ">
       <pivot "_chemical_name">  <pivot "_chemical_formula">  <pivot "_chemical">
       <pivot "_atom_type">
       <pivot "_shelx_space_group">
@@ -90,6 +90,10 @@
     <_reflns_special_details skip="true">
     <_olex2_refinement_description skip="true">
     <_iucr_refine_instructions_details skip="true">
+    <_smtbx_masks_void>
+    <_platon_squeeze_void>
+    <_platon_squeeze_*>
+    <_smtbx_masks_*>
   >
   <#include "app.ConfigDir()/cif_customisation.xld" extend='false'>
 >
