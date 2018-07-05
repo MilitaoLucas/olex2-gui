@@ -84,8 +84,7 @@ class GuiFunctions(object):
     #olx.Listen(listenFile)
 
   def SetGrad(self, f=None):
-    from ImageTools import ImageTools
-    IT = ImageTools()
+    from ImageTools import IT
     l = ['top_right', 'top_left', 'bottom_right', 'bottom_left']
     v = []
     for i in xrange(4):
