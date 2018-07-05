@@ -1,6 +1,7 @@
 import olex
 import olx
 import os
+import OlexVFS
 import time
 import glob
 import shutil
@@ -16,6 +17,13 @@ class PluginTools(object):
       from gui.tools import deal_with_gui_phil
       deal_with_gui_phil('load')
       olx.InstalledPlugins.add(self)
+
+  def endKickstarter(self):
+    _ = '%s/%s.htm' %(self.p_path, self.p_htm)
+    t = open(_, 'r').read()
+    OlexVFS.write_to_olex(_, t)
+    if OV.HasGUI():
+      olx.html.Update()
 
   def get_plugin_date(self):
     return time.ctime(os.path.getmtime(self.p_path))
@@ -58,6 +66,9 @@ class PluginTools(object):
         #file_name=user_phil_file, scope_name='snum.%s' %self.p_name, diff_only=True)
 
   def setup_gui(self):
+    
+    if not hasattr(self, 'p_onclick'):
+        self.p_onclick = ""
     if olx.HasGUI() != 'true':
       return
     from gui.tools import make_single_gui_image
@@ -70,7 +81,13 @@ class PluginTools(object):
     if self.p_htm:
       image = self.p_img[0][0]
       try:
-        add_tool_to_index(scope=self.p_name, link=self.p_htm, path=self.p_path, location=self.params.gui.location, before=self.params.gui.before, filetype='', image=image)
+        location = self.p_location
+        before = self.p_before
+      except:
+        location = self.params.gui.location
+        before = self.params.gui.before
+      try:
+        add_tool_to_index(scope=self.p_name, link=self.p_htm, path=self.p_path, location=location, before=before, filetype='', image=image, onclick=self.p_onclick)
       except:
         pass
     gui.help.gh.git_help(quick=False, specific=self.p_path)
