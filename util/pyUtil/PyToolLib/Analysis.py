@@ -48,7 +48,8 @@ PreviousHistoryNode = None
 global cache
 cache = {}
 
-import olex_gui
+if OV.HasGUI():
+  import olex_gui
 
 silent = True
 
