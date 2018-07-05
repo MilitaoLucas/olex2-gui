@@ -14,7 +14,8 @@ import gui
 import time
 debug = bool(OV.GetParam("olex2.debug", False))
 
-get_template = gui.tools.TemplateProvider.get_template
+if OV.HasGUI():
+  get_template = gui.tools.TemplateProvider.get_template
 
 instance_path = OV.DataDir()
 

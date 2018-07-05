@@ -210,7 +210,7 @@ def LoadParams():
   olx.phil_handler = phil_handler
 
   # GUI Phil
-  if OV.HasGUI():
+  if OV.HasGUI() or True:
     try:
       master_gui_phil = phil_interface.parse(file_name="%s/gui.params" %OV.BaseDir())
       gui_phil_handler = phil_interface.phil_handler(
