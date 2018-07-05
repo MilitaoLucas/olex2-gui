@@ -5,6 +5,8 @@ import glob
 import sys
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+from ImageTools import IT
+
 import htmlTools
 
 
@@ -337,3 +339,11 @@ def copy_datadir_items(force=False):
         pass
 
 olex.registerFunction(copy_datadir_items, False, "gui")
+
+
+def escape_for_html(s):
+  s = s.replace("(", "&#40;")
+  s = s.replace(")", "&#41;")
+  return s
+olex.registerFunction(escape_for_html, False, "gui")
+  
