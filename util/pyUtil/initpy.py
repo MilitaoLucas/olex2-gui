@@ -24,6 +24,9 @@ if sys.platform[:3] == 'win':
   sys.path.append(r"%s\Lib" %python_dir)
   sys.path.append(r"%s\Lib\site-packages" %python_dir)
   sys.path.append(r"%s\Lib\site-packages\PIL" %python_dir)
+  sys.path.append(r"%s\Lib\site-packages\win32" %python_dir)
+  sys.path.append(r"%s\Lib\site-packages\win32\lib" %python_dir)
+  
 else:
   set_sys_path = True
   try:
@@ -209,7 +212,7 @@ def set_plugins_paths():
   sys.path.append("%s/util/pyUtil/PluginLib" %(basedir))
   olx.InstalledPlugins = set()
   from PluginTools import PluginTools
-  import AC4
+#  import AC3
   for plugin in plugins:
     sys.path.append("%s/util/pyUtil/PluginLib/plugin-%s" %(basedir,plugin))
   for plugin in plugins:
@@ -300,16 +303,16 @@ if timer:
   tt.append("%.3f s == olxFunctions" %(time.time() - t))
   t = time.time()
 
+from gui.tools import *
 if OV.HasGUI():
   import htmlMaker
   from gui.home import *
   from gui.report import *
   from gui.cif import *
-  from gui.tools import *
   from gui.metadata import *
   from gui.maps import *
   from gui.images import *
-  from gui.skin import *
+#  from gui.skin import *
   from gui.db import *
   from gui.help import *
   #import Tutorials
@@ -317,7 +320,8 @@ if OV.HasGUI():
   #export_parameters()
   from Analysis import Analysis
 
-import leverage
+from gui.skin import *
+
 if timer:
   tt.append("%.3f s == GUI Imports" %(time.time() - t))
   t = time.time()
@@ -393,6 +397,20 @@ except ImportError, err:
 if timer:
   tt.append("%.3f s == Custom and User Scripts" %(time.time() - t))
   t = time.time()
+  
+def pip(package):
+  import sys
+  sys.stdout.isatty = lambda: False
+  sys.stdout.encoding = sys.getdefaultencoding()
+  import pip
+  try:
+    from pip import main as pipmain
+  except:
+    from pip._internal import main as pipmain    
+  pipmain(['install', '--user', package])
+#  pip.main(['install', package])
+OV.registerFunction(pip,False)
+ 
 
 if timer:
   tt.append("InitPy took %s s" %(time.time() - beginning_of_t))
