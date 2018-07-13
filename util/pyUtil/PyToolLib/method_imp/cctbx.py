@@ -22,7 +22,13 @@ class Method_cctbx_refinement(Method_refinement):
     from refinement import FullMatrixRefine
     from smtbx.refinement.constraints import InvalidConstraint
     self.failure = True
-    print 'STARTING cctbx refinement'
+    import os
+    _ = os.environ.get('OLEX2_CCTBX_DIR')
+    if _ is not None:
+      version = _
+    else:
+      version = '(default)'
+    print '\n+++ STARTING olex2.refine +++++ %s' %version
     verbose = OV.GetParam('olex2.verbose')
     cctbx = FullMatrixRefine(
       max_cycles=RunPrgObject.params.snum.refinement.max_cycles,
@@ -51,6 +57,7 @@ class Method_cctbx_refinement(Method_refinement):
         OV.SetVar('cctbx_wR2',cctbx.wR2_factor())
         OV.File('%s.res' %OV.FileName())
     finally:
+      print '+++ FINISHED olex2.refine ++++++++++++++++++++++++++++++++++++\n'
       OV.DeleteBitmap('refine')
 
   def getFlack(self):
@@ -97,7 +104,7 @@ class Method_cctbx_ChargeFlip(Method_solution):
   def do_run(self, RunPrgObject):
     from cctbx_olex_adapter import OlexCctbxSolve
     import traceback
-    print 'STARTING cctbx Charge Flip'
+    print '+++ STARTING olex2.solve ++++++++++++++++++++++++++++++++++++'
     RunPrgObject.solve = True
     cctbx = OlexCctbxSolve()
 
