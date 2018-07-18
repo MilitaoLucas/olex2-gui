@@ -37,11 +37,11 @@ $-
     "name=SET_SNUM_REFINEMENT_MAX_CYCLES",
     "onchange=spy.SetMaxCycles(html.GetValue('~name~'))",
     "min=0",
-    "max=99",
+    "max=200",
     )
   $-
 
-  <td align='right' width='11%'>
+  <td align='right' width='12%'>
   <b>Peaks</b>
   </td>
 
@@ -50,7 +50,7 @@ $-
     "value=math.eval(abs(spy.GetParam(snum.refinement.max_peaks)))",
     "name=SET_SNUM_REFINEMENT_MAX_PEAKS",
     "min=0",
-    "max=200",
+    "max=99",
     "onchange=spy.SetMaxPeaks(html.GetValue('~name~'))",
     )
   $-
