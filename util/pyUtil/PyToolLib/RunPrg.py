@@ -244,7 +244,7 @@ class RunPrg(ArgumentParser):
 
   def runCctbxAutoChem(self):
     from AutoChem import OlexSetupRefineCctbxAuto
-    print 'STARTING cctbx refinement'
+    print '+++ STARTING olex2.refine ++++++++++++++++++++++++++++++++++++'
     OV.reloadStructureAtreap(self.filePath, self.curr_file)
     #olx.Atreap(r"%s" %(r"%s/%s.ins" %(self.filePath, self.curr_file)))
     cctbx = OlexSetupRefineCctbxAuto('refine', self.params.snum.refinement.max_cycles)
@@ -253,6 +253,7 @@ class RunPrg(ArgumentParser):
     except Exception, err:
       print err
     olex.f('GetVar(cctbx_R1)')
+    print '+++ END olex2.refine +++++++++++++++++++++++++++++++++++++++++'
 
   def runAfterProcess(self):
     #olex.m("spy.run_skin sNumTitle")
@@ -668,14 +669,18 @@ class RunRefinementPrg(RunPrg):
 
 
 def AnalyseRefinementSource():
-  file_name = OV.FileFull()
+  file_name = OV.ModelSrc()
   ins_file_name = olx.file.ChangeExt(file_name, 'ins')
   res_file_name = olx.file.ChangeExt(file_name, 'res')
   hkl_file_name = olx.file.ChangeExt(file_name, 'hkl')
   if olx.IsFileType('cif') == 'true':
     if os.path.exists(ins_file_name) or os.path.exists(res_file_name):
-      print 'Please load a RES or INS file to perform the refinement'
-      return False
+      olex.m('reap "%s"' %ins_file_name)
+      if os.path.exists(hkl_file_name):
+        olx.HKLSrc(hkl_file_name)
+        return True
+      else:
+        return False
     fn = os.path.normpath("%s/%s" %(olx.FilePath(), olx.xf.DataName(olx.xf.CurrentData())))
     ins_file_name = fn + '.ins'
     res_file_name = fn + '.res'
