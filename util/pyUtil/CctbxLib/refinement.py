@@ -491,7 +491,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
   
   def print_table_header(self, log=None):
     if log is None: log = sys.stdout
-    print >>log, "Parameters: %s, Data: %s, Constraints: %s, Restraints: %s" %(self.normal_eqns.n_parameters, self.normal_eqns.observations.data.all()[0], self.n_constraints, self.normal_eqns.n_restraints)
+    restraints = self.normal_eqns.n_restraints
+    if not restraints:
+      restraints = "n/a"
+    print >>log, "Parameters: %s, Data: %s, Constraints: %s, Restraints: %s" %(self.normal_eqns.n_parameters, self.normal_eqns.observations.data.all()[0], self.n_constraints, restraints)
     print >>log, "  ---------  --------  ------------------  ------------------"
     print >>log, "     wR2       GooF      Max Shift Site       Max Shift U   "
     print >>log, "  ---------  --------  ------------------  ------------------"
