@@ -48,7 +48,8 @@ PreviousHistoryNode = None
 global cache
 cache = {}
 
-import olex_gui
+if OV.HasGUI():
+  import olex_gui
 
 silent = True
 
@@ -648,10 +649,12 @@ class Graph(ArgumentParser):
     self.reverse_x = reverse_x
     use_plotly = OV.GetParam('user.diagnostics.use_plotly')
     if use_plotly:
-      if olx.IsPluginInstalled('plotly').lower() == 'false':
+      try:
+        import plotly
+        self.test_plotly()
+      except:
         print("Please install the plotly extension for Olex2 to make plots using plotly")
-        return
-      self.test_plotly()
+        print("Olex2 built-in plots will be made")
 
     self.ax_marker_length = int(self.imX * 0.006)
     self.get_division_spacings_and_scale()
@@ -1245,7 +1248,7 @@ class Graph(ArgumentParser):
     x = 0
     y = 0
     draw.text((x, y), "%s" %txt, font=self.font_small, fill=self.axislabelColour)
-    new = new.rotate(90)
+    new = new.rotate(90, expand=1)
     self.im.paste(new, (int(self.xSpace+self.bSides + wY/2), int(self.graph_top +wY/2)))
 
   def draw_x_axis(self):

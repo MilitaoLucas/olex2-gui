@@ -1231,9 +1231,7 @@ def getReportTitleSrc():
   import StringIO
   import base64
   from PIL import EpsImagePlugin
-  from ImageTools import ImageTools
-  IT = ImageTools()
-
+  from ImageTools import IT
   width = OV.GetParam('gui.report.width')
   height = OV.GetParam('gui.report.title.height')
   colour = OV.GetParam('gui.report.title.colour').rgb
@@ -1276,8 +1274,7 @@ def getReportTitleSrc():
 OV.registerFunction(getReportTitleSrc)
 
 def dealWithReportImage():
-  from ImageTools import ImageTools
-  IT = ImageTools()
+  from ImageTools import IT
   image_name = OV.GetParam('snum.report.image')
   if image_name == "No Image":
 #    OV.SetParam('snum.report.image',None)
@@ -1408,8 +1405,7 @@ def getReportImageData(size='w400', imageName=None):
       IM = IM.resize((nWidth, nHeight), Image.BICUBIC)
 
   if make_border:
-    from ImageTools import ImageTools
-    IT = ImageTools()
+    from ImageTools import IT
     draw = ImageDraw.Draw(IM)
     fill = '#ababab'
     width, height = IM.size

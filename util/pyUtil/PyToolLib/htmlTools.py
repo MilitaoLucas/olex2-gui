@@ -1276,8 +1276,7 @@ def makeHtmlBottomPop(args, pb_height = 50, y = 0):
   modequalifiers = args.get('modequalifiers',None)
 
   import OlexVFS
-  from ImageTools import ImageTools
-  IM = ImageTools()
+  from ImageTools import IT
   metric = getPopBoxPosition()
   if not txt:
     txt = get_template(name)

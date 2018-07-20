@@ -24,7 +24,14 @@ from ImageTools import IT
 
 OV = OlexFunctions()
 import olex_fs
-import olex_gui
+
+global dpi_scale
+if OV.HasGUI():
+  import olex_gui
+  dpi_scale = olex_gui.GetPPI()[0]/96
+else:
+  dpi_scale = 1
+
 import olx
 import time
 global isPro
@@ -34,8 +41,6 @@ timage_blanks = {}
 #debug = bool(OV.GetParam('olex2.debug',False))
 debug = False
 
-global dpi_scale
-dpi_scale = olex_gui.GetPPI()[0]/96
 
 global dpi_scaling
 dpi_scaling = OV.GetParam('gui.dpi_scaling')

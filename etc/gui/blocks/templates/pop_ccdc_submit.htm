@@ -1,9 +1,9 @@
 <html>
-<body link='$GetVar(HtmlLinkColour)' bgcolor='$GetVar(HtmlHighlightColour)'>
+<body link='$GetVar(HtmlLinkColour)' bgcolor='$GetVar(HtmlTableFirstcolColour)'>
   <font color='#003c78' size='4' face="$GetVar(HtmlFontName)">
   
 <table border="0" style="border-collapse: collapse" width="100%" id="#tool" cellpadding="4" cellspacing="2" >
-  <tr bgcolor='#ffffff'>
+  <tr>
     <td colspan='2' >
       <zimg border="0" src="gui/images/src/ccdc_logo.png">
     </td>
@@ -13,7 +13,7 @@
 <table>
   <tr>
       <td colspan=2>
-On pressing OK, your cif file together with the structure factor file will be sent to the CCDC. After your structure has been processed in Cambridge, you will receive an e-mail with the CCDC Number of this structure.
+On pressing OK, your cif file will be sent to the CCDC. After your structure has been processed in Cambridge, you will receive an e-mail with the CCDC Number of this structure.
         </td>
       <tr>
         <td width=150 valign='top'>
@@ -51,41 +51,50 @@ On pressing OK, your cif file together with the structure factor file will be se
 
       <table>
 <!-- #include cif gui\snippets\snippet-choose-file.htm;file_type=cif;var_base=snum.current_result;pop_name=ccdc;1; -->
-<!-- #include fcf gui\snippets\snippet-choose-file.htm;file_type=fcf;var_base=snum.current_result;pop_name=ccdc;1; -->
+  <!-- #include fcf gui\snippets\snippet-choose-file.htm;file_type=fcf;var_base=snum.current_result;pop_name=ccdc;1; -->
       </table>
 
-<table border="0"  width="100%" id="#tool" bgcolor='#ffdede' >
-  <tr width='100%' bgcolor='#dedede'>
-    <td bgcolor="#eeb403" colspan='5'>
-      <font size=1>
-Data are accepted either in conjunction with <b>publication</b> of crystal structures or as <b>personal communications</b> to the Cambridge Structural Database.All data deposited with the CCDC prior to publication will be held securely in the CCDC Supplementary Data Archive, and in the case of participating publishers will be made available to referees as part of the publication process. The CCDC deposition numbers supplied should be included in the manuscript.Following publication, deposited CIF files will be transferred to the CCDC CIF Archive for public access and processed for distribution with the Cambridge Structural Database.
-      </font>
-    </td>
-  </tr>
+<table border="0"  width="100%" id="#tool" >
 <font size='3'>
-  <tr width='100%' bgcolor="#eeb403">
-     <td width=30% valign='center' bgcolor="#aab403">
-       <input
-         type="combo"
-         bgcolor="$GetVar(HtmlInputBgColour)"
-         valign='center'
-         items='OlexSys Testing;Private Communication;Ready to Publish;Unsure'
-         width='160'
-         height="22"
-         name="CCDC_SUBMISSION_TYPE"
-         value="$spy.GetParam(snum.ccdc.submission_type)"
-         onchange="spy.SetParam(snum.ccdc.submission_type,html.GetValue(~name~))"
-        >
-     </td>
-  <td bgcolor="#aab403">
-<!-- #include tool-help-button gui\blocks\tool-help-button.htm;help_ext=ccdc-submission-options;1; -->
-  </td>     
-     <td width=50%>
+  <tr width='100%'>
+    <td colspan='5'>
        <input
          type="text"
          bgcolor="$GetVar(HtmlInputBgColour)"
          valign='center'
-         width='274'
+         width='100%'
+         height="70"
+         multiline='True'
+         name="CCDC_HELP"
+         value=""
+        >
+    </td>
+  </tr>
+
+
+  <tr width='100%'>
+    <td>
+<!-- #include tool-help-button gui\blocks\tool-help-button.htm;help_ext=CCDC_Deposition_Options;1; -->
+    </td>     
+     <td width=40% valign='center' >
+       <input
+         type="combo"
+         bgcolor="$GetVar(HtmlInputBgColour)"
+         valign='center'
+         items='Request CSD Number;Publish as CSD Communications;'
+         width='100%'
+         height="22"
+         name="CCDC_SUBMISSION_TYPE"
+         value="$spy.GetParam(snum.ccdc.submission_type)"
+         onchange="spy.SetParam(snum.ccdc.submission_type,html.GetValue(~name~))>>html.SetValue(ccdc.CCDC_HELP, spy.gui.get_help_item(html.GetValue(~name~)))"
+        >
+     </td>
+     <td width=40%>
+       <input
+         type="text"
+         bgcolor="$GetVar(HtmlInputBgColour)"
+         valign='center'
+         width='100%'
          height="22"
          name="CCDC_NOTE_TO_STAFF"
          value="$spy.GetParam(snum.ccdc.note_to_staff)"
@@ -115,6 +124,8 @@ Data are accepted either in conjunction with <b>publication</b> of crystal struc
         value = "Cancel">
     </td>
   </tr>
+
+
 </font>
 
   </table>
