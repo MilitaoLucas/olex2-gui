@@ -35,6 +35,8 @@ class GetHelp(object):
       self.language = "DE"
 
     olex.registerFunction(self.get_help, False, "gui")
+    olex.registerFunction(self.get_help_item, False, "gui")
+    
     ws = olx.GetWindowSize('gl')
     ws = ws.split(',')
     self.box_width = int(int(ws[2])*OV.GetParam('gui.help.width_fraction') - 40)
@@ -44,6 +46,11 @@ class GetHelp(object):
       self.get_help()
     except:
       pass
+
+  def get_help_item(self, help_id):
+    help_id = help_id.replace(" ", "_")
+    help_id = help_id.upper()
+    return olx.GetVar(help_id,"No Help Here!")
 
   def format_html(self, txt):
     while "\n" in txt:

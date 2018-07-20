@@ -83,8 +83,7 @@ OV.registerFunction(GetBitmapSize,False,'gui.images')
 
 
 def MakeBitmapImage(notify_listener=True, output_folder=None):
-  from ImageTools import ImageTools
-  IT = ImageTools()
+  from ImageTools import IT
   filefull, filename, fileext = GetImageFilename(image_type = "BITMAP")
   if not filefull:
     return

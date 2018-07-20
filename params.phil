@@ -59,7 +59,7 @@ routines requiring structure refinement
   }
 
   ccdc{
-    note_to_staff = +++ Optional Note To Staff +++
+    note_to_staff = ++ Thank you! ++
       .type = str
     submission_type = +++ Please Choose +++
       .type = str
@@ -825,11 +825,11 @@ olex2
         .type = str
       htm = \etc\gui\blocks\templates\pop_ccdc_submit.htm
         .type = str
-      width = 600
+      width = 610
         .type = int
       height = automatic
         .type = str
-      auto_height_constant = 310
+      auto_height_constant = 280
         .type = int
       auto_height_line = 20
         .type = int

@@ -65,19 +65,46 @@ class olex2_normal_eqns(get_parent()):
   def show_cycle_summary(self, log=None):
     if log is None: log = sys.stdout
     # self.reparametrisation.n_independents + OSF
-    print >> log, "wR2 = %.4f for %i data and %i parameters" %(
-      self.wR2(), self.observations.fo_sq.size(),
-      self.reparametrisation.n_independents + 1)
-    print >> log, "GooF = %.4f" %(self.goof(),)
     max_shift_site = self.max_shift_site()
     OV.SetParam('snum.refinement.max_shift_site', max_shift_site[0])
     OV.SetParam('snum.refinement.max_shift_site_atom', max_shift_site[1].label)
     max_shift_u = self.max_shift_u()
     OV.SetParam('snum.refinement.max_shift_u', max_shift_u[0])
     OV.SetParam('snum.refinement.max_shift_u_atom', max_shift_u[1].label)
-    print >> log, "Max shift site: %.4f A for %s" %(
-      max_shift_site[0], max_shift_site[1].label)
-    print >> log, "Max dU: %.4f for %s" %(max_shift_u[0], max_shift_u[1].label)
+    
+    print_tabular = True
+
+    if print_tabular:
+      print >>log, "   %.4f     %.4f    %.4f A for %s  %s  %.4f for %s" %(
+        self.wR2(),
+        self.goof(),
+        max_shift_site[0],
+        max_shift_site[1].label,
+        " "*(4-len(max_shift_site[1].label)),
+        max_shift_u[0],
+        max_shift_u[1].label,        
+      )  
+
+    else:
+      print >> log, "wR2 = %.4f | GooF = %.4f for %i data and %i parameters" %(
+        self.wR2(),
+        self.goof(),
+        self.observations.fo_sq.size(),
+        self.reparametrisation.n_independents + 1,
+      )
+  
+      print >> log, "Max shifts: ",
+  
+      print >> log, "Site: %.4f A for %s |" %(
+        max_shift_site[0],
+        max_shift_site[1].label
+      ),
+      print >> log, "dU = %.4f for %s" %(
+        max_shift_u[0],
+        max_shift_u[1].label,
+      )
+       
+    
 
   def max_shift_site(self):
     return self.iter_shifts_sites(max_items=1).next()
@@ -379,6 +406,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
     assert iterations is not None
     try:
       damping = OV.GetDampingParams()
+      
+      self.print_table_header()
+      self.print_table_header(self.log)
+      
       self.cycles = iterations(self.normal_eqns,
                                n_max_iterations=self.max_cycles,
                                track_all=True,
@@ -457,6 +488,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
     finally:
       sys.stdout.refresh = True
       self.log.close()
+  
+  def print_table_header(self, log=None):
+    if log is None: log = sys.stdout
+    restraints = self.normal_eqns.n_restraints
+    if not restraints:
+      restraints = "n/a"
+    print >>log, "Parameters: %s, Data: %s, Constraints: %s, Restraints: %s" %(self.normal_eqns.n_parameters, self.normal_eqns.observations.data.all()[0], self.n_constraints, restraints)
+    print >>log, "  ---------  --------  ------------------  ------------------"
+    print >>log, "     wR2       GooF      Max Shift Site       Max Shift U   "
+    print >>log, "  ---------  --------  ------------------  ------------------"
 
   def get_twin_fractions(self):
     rv = None
@@ -1135,7 +1176,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       verify_symmetry=False
       ).all()
     i = 0
-    olx.Kill('$Q', '-au')
+    #olx.Kill('$Q', '-au') #HP-JUL18 -- Why kill the peaks?
     for xyz, height in izip(peaks.sites(), peaks.heights()):
       if i < 3:
         if self.verbose: print "Position of peak %s = %s, Height = %s" %(i, xyz, height)
@@ -1157,15 +1198,39 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
   def show_summary(self, log=None):
     import sys
+    
+    _ = self.cycles.n_iterations
+    plural = "s"
+    if _ == 1:
+      plural = ""
+    
     if log is None: log = sys.stdout
-    print >> log, str(self.cycles)
-    print >> log, "Summary after %i cycles:" %self.cycles.n_iterations
-    print >> log, "R1 (all data): %.4f for %i reflections" % self.r1_all_data
-    print >> log, "R1: %.4f for %i reflections I >= 2u(I)" % self.r1
-    print >> log, "wR2 = %.4f, GooF: %.4f" % (
-      self.normal_eqns.wR2(), self.normal_eqns.goof())
-    print >> log, "Difference map: max=%.2f, min=%.2f" %(
-      self.diff_stats.max(), self.diff_stats.min())
+    print >> log, "\n++++ Summary after %i cycle%s ++++" %(self.cycles.n_iterations, plural)
+    print >> log, "| R1 (all data): %.4f for %i reflections | " %self.r1_all_data,
+    print >> log, " R1: %.4f for %i reflections I >= 2u(I)" %self.r1
+    
+    print >> log, "| wR2 = %.4f, GooF: %.4f" % (
+      self.normal_eqns.wR2(),
+      self.normal_eqns.goof()
+    )
+    print >> log, "| Difference map: max=%.2f, min=%.2f" %(
+      self.diff_stats.max(),
+      self.diff_stats.min()
+    )
+
+    print >> log, "| Max Shifts: ",
+
+    max_shift_site = self.normal_eqns.max_shift_site()
+    max_shift_u = self.normal_eqns.max_shift_u()
+    print >> log, "Site: %.4f A for %s |" %(
+    max_shift_site[0],
+    max_shift_site[1].label
+    ),
+    print >> log, "dU: %.4f A for %s" %(
+    max_shift_u[0],
+    max_shift_u[1].label
+    )
+
     OV.SetParam('snum.refinement.max_peak', self.diff_stats.max())
     OV.SetParam('snum.refinement.max_hole', self.diff_stats.min())
     OV.SetParam('snum.refinement.goof', "%.4f" %self.normal_eqns.goof())

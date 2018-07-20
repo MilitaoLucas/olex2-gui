@@ -17,17 +17,21 @@ import os
 global sizedraw
 sizedraw_dummy_draw = ImageDraw.Draw(Image.new('RGBA', (300, 300)))
 import olx
-import olex_gui
 import math
 
 #debug = bool(OV.GetParam('olex2.debug',False))
 debug = False
 
-global dpi_scale
-dpi_scale = olex_gui.GetPPI()[0]/96
 
+global dpi_scale
 global dpi_scaling
-dpi_scaling = OV.GetParam('gui.dpi_scaling')
+
+if OV.HasGUI():
+  import olex_gui
+  dpi_scale = olex_gui.GetPPI()[0]/96
+else:
+  dpi_scale = 1
+  dpi_scaling = OV.GetParam('gui.dpi_scaling')
 
 
 
@@ -61,6 +65,8 @@ class ImageTools(FontInstances):
     self.gui_language_encoding = olx.CurrentLanguageEncoding()
     if OV.HasGUI():
       self.gui_current_language = olx.CurrentLanguage()
+    else:
+      self.gui_current_language = u'English'
 
     self.get_font_peculiarities()
 
@@ -83,7 +89,6 @@ class ImageTools(FontInstances):
 
   def get_available_width(self):
     global dpi_scale
-
     global dpi_scaling
     dpi_scaling = OV.GetParam('gui.dpi_scaling')
 
@@ -99,8 +104,13 @@ class ImageTools(FontInstances):
     self.max_width = w
 
     self.skin_width = self.skin_width_margin
+    
+    if OV.HasGUI():
+      client_width = int(olx.html.ClientWidth('self'))
+    else:
+      client_width = 800
 
-    self.dpi_scale = (int(olx.html.ClientWidth('self'))-OV.GetParam('gui.htmlpanelwidth_margin_adjust'))/self.skin_width
+    self.dpi_scale = (client_width-OV.GetParam('gui.htmlpanelwidth_margin_adjust'))/self.skin_width
 
     if debug:
       print("====== dpi_scaling set to %s ======" %self.dpi_scale)
@@ -293,8 +303,6 @@ class ImageTools(FontInstances):
 
 
   def getOlexVariables(self):
-    if olx.HasGUI() != "true":
-      return
     # self.encoding = self.test_encoding(self.gui_language_encoding) ##Language
     # self.language = "English" ##Language
     # if olx.IsCurrentLanguage('Chinese') == "true":
@@ -422,10 +430,11 @@ class ImageTools(FontInstances):
     new_width = float(new_width)
     #if dpi_scaling:
       #new_width = int(round(new_width*dpi_scale))
-    if new_width <=1:
-      olx.HtmlPanelWidth("%i %%" %int(new_width*100))
-    else:
-      olx.HtmlPanelWidth(new_width)
+    if OV.HasGUI():
+      if new_width <=1:
+        olx.HtmlPanelWidth("%i %%" %int(new_width*100))
+      else:
+        olx.HtmlPanelWidth(new_width)
     self.get_available_width()
     if debug:
       print("============== resized panel to %s, using dpi_scaling: %s ==============" %(new_width, repr(dpi_scaling)))
@@ -1745,8 +1754,8 @@ class ImageTools(FontInstances):
     return map
 
 IT = ImageTools()
+IT.get_available_width()
 if olx.HasGUI() == 'true':
-  IT.get_available_width()
   OV.registerMacro(IT.resize_to_panelwidth, 'i-Image&;c-Colourize')
   OV.registerFunction(IT.make_pie_graph, False, 'it')
 OV.registerFunction(IT.trim_image, False, 'it')

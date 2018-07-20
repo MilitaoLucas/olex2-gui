@@ -1,7 +1,6 @@
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 import sys
-import olex_gui
 import olx
 import olex
 import olex_fs
@@ -15,6 +14,14 @@ OV = OlexFunctions()
 import OlexVFS
 
 import time
+
+global ppi
+if OV.HasGUI():
+  import olex_gui
+  ppi = olex_gui.GetPPI()[0]
+else:
+  ppi = 92
+
 
 timing = False #bool(OV.GetParam('gui.timing'))
 
@@ -114,7 +121,7 @@ def check_for_first_run():
   first_run = not os.path.exists("%s/global.odb" %OV.DataDir())
 ## 2016-07-26 do we need changing skin on update any longer? I doubt
 ## With the new scalable skins it should now be OK to run this.
-  if first_run:
+  if first_run and OV.HasGUI():
     try:
       # olx.SkinUpdated is intentionally not there:
       olx.SkinUpdated
@@ -175,25 +182,23 @@ def export_parameters(load_phil=True):
   if load_phil:
     deal_with_gui_phil(action='load')
 
-
-  ##Stepwise ajust relative font size according to cut-off
-
-  ppi = olex_gui.GetPPI()[0]
-  font_size_steps = OV.GetParam('gui.font_size_steps')
-  font_size_rel_size = OV.GetParam('gui.font_size_rel_size')
-  _ = int(olx.html.ClientWidth('self'))
-  for step, s in zip(font_size_steps, font_size_rel_size):
-    step = int(step)
-    s = int(s)
-    if ppi > 96:
-      s += OV.GetParam('gui.ppi_font_adjust_amount')
-    if _ >= step:
-      OV.SetVar('HtmlGuiFontSize',OV.GetParam('gui.html.font_size')+s)
-      OV.SetVar('HtmlFontSizeControls',OV.GetParam('gui.html.font_size_controls')+s)
-      OV.SetVar('HtmlFontSizeLarge',OV.GetParam('gui.html.font_size_large')+s)
-      OV.SetVar('HtmlFontSizeMedium',OV.GetParam('gui.html.font_size_medium')+s)
-      OV.SetVar('HtmlFontSizeExtraLarge',OV.GetParam('gui.html.font_size_extra_large')+s)
-      break
+  if OV.HasGUI():
+    ##Stepwise ajust relative font size according to cut-off
+    font_size_steps = OV.GetParam('gui.font_size_steps')
+    font_size_rel_size = OV.GetParam('gui.font_size_rel_size')
+    _ = int(olx.html.ClientWidth('self'))
+    for step, s in zip(font_size_steps, font_size_rel_size):
+      step = int(step)
+      s = int(s)
+      if ppi > 96:
+        s += OV.GetParam('gui.ppi_font_adjust_amount')
+      if _ >= step:
+        OV.SetVar('HtmlGuiFontSize',OV.GetParam('gui.html.font_size')+s)
+        OV.SetVar('HtmlFontSizeControls',OV.GetParam('gui.html.font_size_controls')+s)
+        OV.SetVar('HtmlFontSizeLarge',OV.GetParam('gui.html.font_size_large')+s)
+        OV.SetVar('HtmlFontSizeMedium',OV.GetParam('gui.html.font_size_medium')+s)
+        OV.SetVar('HtmlFontSizeExtraLarge',OV.GetParam('gui.html.font_size_extra_large')+s)
+        break
 
   OV.SetVar('HtmlTableFirstcolColour', OV.GetParam('gui.html.table_firstcol_colour').hexadecimal)
   OV.SetVar('HtmlTableFirstcolWidth', OV.GetParam('gui.html.table_firstcol_width'))
@@ -220,13 +225,13 @@ def export_parameters(load_phil=True):
   OV.SetVar('HtmlFontColour', OV.GetParam('gui.html.font_colour').hexadecimal)
   OV.SetVar('HtmlPanelWidth', OV.GetParam('gui.htmlpanelwidth'))
   OV.SetVar('HtmlButtonHeight', OV.GetParam('gui.timage.button.height'))
-  OV.SetVar('history_width', IT.history_width)
   OV.SetVar('link_type', OV.GetParam('gui.skin.link_type'))
   OV.SetVar('default_link', OV.GetParam('gui.skin.default_link'))
   OV.SetVar('linkButton.flat', OV.GetParam('gui.skin.link_button.flat'))
   OV.SetVar('linkButton.fgcolor', OV.GetParam('gui.skin.link_button.fgcolor').hexadecimal)
   try:
     OV.SetVar('linkButton.bgcolor', OV.GetParam('gui.skin.link_button.bgcolor').hexadecimal)
+    OV.SetVar('history_width', IT.history_width)
   except:
     OV.SetVar('linkButton.bgcolor', OV.GetParam('gui.skin.link_button.bgcolor'))
 
@@ -252,7 +257,10 @@ class Skin():
   def change_skin(self, info, internal_change=False):
     new_width = None
     if not info:
-      info = olx.html.ClientWidth('self')
+      if OV.HasGUI():
+        info = olx.html.ClientWidth('self')
+      else:
+        info = OV.GetParam('gui.skin.base_width')
 
     if not internal_change:
       try:
@@ -419,7 +427,6 @@ class Skin():
     olx.FlushFS()
 
   def adjust_font_size_for_ppi(self):
-    ppi = olex_gui.GetPPI()[0]
     html_font_size = int(OV.FindValue('gui_html_font_size').strip())
     if ppi > 96:
       OV.SetVar('gui_html_font_size',html_font_size -1)
@@ -526,3 +533,26 @@ def change_bond_colour(scope="", colour=""):
   olx.ShowH("b", True)
 
 OV.registerFunction(change_bond_colour, True, 'gui.skin')
+
+
+def _get_available_html_width(margin_adjust = True, first_col_width_adjust=True, ppi_aware=True):
+  width = int(olx.html.ClientWidth('self'))
+  max_width = width
+  if width < 100:
+    width = OV.GetParam('gui.htmlpanelwidth')
+  if margin_adjust:
+    width = width - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
+  if first_col_width_adjust:
+    width = width - OV.GetParam('gui.html.table_firstcol_width')
+  if ppi_aware:
+    width = int(width * ppi/96)
+    max_width = int(max_width * ppi/96)
+
+  if width <= 0:
+    width = 10
+  if max_width <= 0:
+    max_width = 10
+
+  return width, max_width
+
+
