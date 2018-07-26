@@ -212,7 +212,7 @@ def set_plugins_paths():
   sys.path.append("%s/util/pyUtil/PluginLib" %(basedir))
   olx.InstalledPlugins = set()
   from PluginTools import PluginTools
-#  import AC3
+  import AC4
   for plugin in plugins:
     sys.path.append("%s/util/pyUtil/PluginLib/plugin-%s" %(basedir,plugin))
   for plugin in plugins:
@@ -331,6 +331,7 @@ def onstartup():
   OV.SetVar('cbtn_refine_on','false')
   OV.SetVar('cbtn_report_on','false')
 
+  import leverage
   import userDictionaries
   if not userDictionaries.people:
     userDictionaries.init_userDictionaries()
