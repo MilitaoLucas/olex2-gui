@@ -45,7 +45,9 @@ def getAuthenticationToken():
   if os.path.exists(tfn):
     with open(tfn, "r") as tf:
       at = tf.readline().strip()
-  else:
+    if _plgl.doesNeedUpdating(at):
+      at = None
+  if not at:
     ats = _plgl.createAuthenticationTokens()
     if ';' in ats:
       try:
@@ -64,6 +66,7 @@ def getAuthenticationToken():
           at = ats.split(";")[-1]
       except Exception, e:
         print("Failed to match the authentication tokens %s" %str(e))
+        at = _plgl.createAuthenticationToken()
     else:
       at = ats
     if at:
