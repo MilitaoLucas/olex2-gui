@@ -43,10 +43,15 @@ def getAuthenticationToken():
     return at
   tfn = os.path.join(olx.app.SharedDir(), "ext.token")
   if os.path.exists(tfn):
-    with open(tfn, "r") as tf:
-      at = tf.readline().strip()
-    if _plgl.doesNeedUpdating(at):
-      at = None
+    import time
+    fst = os.stat(tfn)
+    tdiff = long(time.time()) - fst.st_ctime
+    #read cache only if within 36 days of creation
+    if tdiff < 60*60*24*36:
+      with open(tfn, "r") as tf:
+        at = tf.readline().strip()
+      if _plgl.doesNeedUpdating(at):
+        at = None
   if not at:
     ats = _plgl.createAuthenticationTokens()
     if ';' in ats:
