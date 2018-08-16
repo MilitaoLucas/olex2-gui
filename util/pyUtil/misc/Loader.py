@@ -41,7 +41,7 @@ def getAuthenticationToken():
   global at
   if at:
     return at
-  tfn = os.path.join(olx.app.SharedDir(), "ext.token")
+  tfn = os.path.join(olx.app.SharedDir(), "ext1.token")
   if os.path.exists(tfn):
     import time
     fst = os.stat(tfn)
