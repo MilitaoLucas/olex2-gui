@@ -275,24 +275,31 @@ class OlexCctbxAdapter(object):
              ignore_inversion_twin=False,
              algorithm="direct"):
     assert self.xray_structure().scatterers().size() > 0, "n_scatterers > 0"
-    if (    ignore_inversion_twin
+    if not miller_set:
+      miller_set_ = self.reflections.f_sq_obs.unique_under_symmetry().map_to_asu()
+    else:
+      miller_set_ = miller_set
+    if (ignore_inversion_twin
         and self.twin_components is not None
         and self.twin_components[0].twin_law == sgtbx.rot_mx((-1,0,0,0,-1,0,0,0,-1))):
       apply_twin_law = False
-    if (    apply_twin_law
+    if (apply_twin_law
         and self.twin_components is not None
         and self.twin_components[0].value > 0):
       twin_component = self.twin_components[0]
       twinning = cctbx_controller.hemihedral_twinning(
-        twin_component.twin_law.as_double(), miller_set)
+        twin_component.twin_law.as_double(), miller_set_)
       twin_set = twinning.twin_complete_set
       fc = twin_set.structure_factors_from_scatterers(
         self.xray_structure(), algorithm=algorithm).f_calc()
       twinned_fc2 = twinning.twin_with_twin_fraction(
         fc.as_intensity_array(), twin_component.value)
-      fc = twinned_fc2.f_sq_as_f().phase_transfer(fc).common_set(miller_set)
+      if miller_set:
+        fc = twinned_fc2.f_sq_as_f().phase_transfer(fc).common_set(miller_set)
+      else:
+        fc = twinned_fc2.f_sq_as_f().phase_transfer(fc)
     else:
-      fc = miller_set.structure_factors_from_scatterers(
+      fc = miller_set_.structure_factors_from_scatterers(
         self.xray_structure(), algorithm=algorithm).f_calc()
     if apply_extinction_correction and self.exti is not None:
       fc = fc.apply_shelxl_extinction_correction(self.exti, self.wavelength)
@@ -312,19 +319,21 @@ class OlexCctbxAdapter(object):
 
   def get_fo_sq_fc(self):
     fo2 = self.reflections.f_sq_obs_filtered
-    unique = self.reflections.f_sq_obs.unique_under_symmetry().map_to_asu()
-    fc = unique.structure_factors_from_scatterers(
-      self.xray_structure(), algorithm="direct").f_calc()
-    i_dtw, s_dtw = self.observations.detwin(
+    fc = self.f_calc(None, self.exti is not None, True, True)
+    obs = self.observations.detwin(
       fo2.crystal_symmetry().space_group(),
       fo2.anomalous_flag(),
-      unique.indices(),
+      fc.indices(),
       fc.as_intensity_array().data())
-    fo2 = fo2.customized_copy(data=i_dtw, sigmas=s_dtw)
+    fo2 = miller.array(
+        miller_set=miller.set(
+          crystal_symmetry=fo2.crystal_symmetry(),
+          indices=obs.indices,
+          anomalous_flag=fo2.anomalous_flag()),
+        data=obs.data,
+        sigmas=obs.sigmas).set_observation_type(fo2)
     fo2 = fo2.merge_equivalents(algorithm="shelx").array().map_to_asu()
     fc = fc.common_set(fo2)
-    if self.exti is not None:
-      fc = fc.apply_shelxl_extinction_correction(self.exti, self.wavelength)
     return (fo2, fc)
 
   def update_twinning(self, tw_f, tw_c):

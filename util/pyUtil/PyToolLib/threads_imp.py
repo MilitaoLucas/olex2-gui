@@ -75,7 +75,7 @@ class NewsImageRetrivalThread(ThreadEx):
           img_id = "splash.jpg"
           wFile.write(img_id)
       else:
-        img_id = open(_,'r').read().strip().strip("http://")
+        img_id = open(_,'r').read().strip().replace("http://", "")
       first_res = img_list[0]
       for idx, l in enumerate(img_list):
         if img_id in l:
