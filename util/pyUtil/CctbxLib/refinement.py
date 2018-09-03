@@ -71,7 +71,7 @@ class olex2_normal_eqns(get_parent()):
     max_shift_u = self.max_shift_u()
     OV.SetParam('snum.refinement.max_shift_u', max_shift_u[0])
     OV.SetParam('snum.refinement.max_shift_u_atom', max_shift_u[1].label)
-    
+
     print_tabular = True
 
     if print_tabular:
@@ -82,8 +82,7 @@ class olex2_normal_eqns(get_parent()):
         max_shift_site[1].label,
         " "*(4-len(max_shift_site[1].label)),
         max_shift_u[0],
-        max_shift_u[1].label,        
-      )  
+        max_shift_u[1].label)
 
     else:
       print >> log, "wR2 = %.4f | GooF = %.4f for %i data and %i parameters" %(
@@ -92,9 +91,9 @@ class olex2_normal_eqns(get_parent()):
         self.observations.fo_sq.size(),
         self.reparametrisation.n_independents + 1,
       )
-  
+
       print >> log, "Max shifts: ",
-  
+
       print >> log, "Site: %.4f A for %s |" %(
         max_shift_site[0],
         max_shift_site[1].label
@@ -103,8 +102,7 @@ class olex2_normal_eqns(get_parent()):
         max_shift_u[0],
         max_shift_u[1].label,
       )
-       
-    
+
 
   def max_shift_site(self):
     return self.iter_shifts_sites(max_items=1).next()
@@ -406,10 +404,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
     assert iterations is not None
     try:
       damping = OV.GetDampingParams()
-      
+
       self.print_table_header()
       self.print_table_header(self.log)
-      
+
       self.cycles = iterations(self.normal_eqns,
                                n_max_iterations=self.max_cycles,
                                track_all=True,
@@ -488,13 +486,14 @@ class FullMatrixRefine(OlexCctbxAdapter):
     finally:
       sys.stdout.refresh = True
       self.log.close()
-  
+
   def print_table_header(self, log=None):
     if log is None: log = sys.stdout
     restraints = self.normal_eqns.n_restraints
     if not restraints:
       restraints = "n/a"
-    print >>log, "Parameters: %s, Data: %s, Constraints: %s, Restraints: %s" %(self.normal_eqns.n_parameters, self.normal_eqns.observations.data.all()[0], self.n_constraints, restraints)
+    print >>log, "Parameters: %s, Data: %s, Constraints: %s, Restraints: %s"\
+     %(self.normal_eqns.n_parameters, self.normal_eqns.observations.data.all()[0], self.n_constraints, restraints)
     print >>log, "  ---------  --------  ------------------  ------------------"
     print >>log, "     wR2       GooF      Max Shift Site       Max Shift U   "
     print >>log, "  ---------  --------  ------------------  ------------------"
@@ -520,10 +519,14 @@ class FullMatrixRefine(OlexCctbxAdapter):
           su = math.sqrt(self.twin_covariance_matrix.matrix_packed_u_diagonal()[0])
           self.flack = utils.format_float_with_standard_uncertainty(flack, su)
       else:
+        if self.observations.merohedral_components or self.observations.twin_fractions:
+          obs_ = self.get_fo_sq_fc()[0].as_xray_observations()
+        else:
+          obs_ = self.observations
         from smtbx import absolute_structure
         flack = absolute_structure.flack_analysis(
           self.normal_eqns.xray_structure,
-          self.observations,
+          obs_,
           self.extinction,
           connectivity_table=self.connectivity_table
         )
@@ -631,16 +634,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cell_vcv = flex.pow2(matrix.diag(cell_errors).as_flex_double_matrix())
     xs = self.xray_structure()
 
-    import inspect #temporary measure for compatibility with old cctbx HP/OVD May 2017
-    if 'format' in inspect.getargspec(xs.as_cif_block):
-      cif_block = xs.as_cif_block(
-        format="coreCIF",
-        covariance_matrix=self.covariance_matrix_and_annotations.matrix,
-        cell_covariance_matrix=cell_vcv.matrix_symmetric_as_packed_u())
-    else:
-      cif_block = xs.as_cif_block(
-        covariance_matrix=self.covariance_matrix_and_annotations.matrix,
-        cell_covariance_matrix=cell_vcv.matrix_symmetric_as_packed_u())
+    cif_block = xs.as_cif_block(
+      format="coreCIF",
+      covariance_matrix=self.covariance_matrix_and_annotations.matrix,
+      cell_covariance_matrix=cell_vcv.matrix_symmetric_as_packed_u())
 
 
     for i in range(3):
@@ -828,7 +825,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         sigmas=fo_sq.sigmas()*(1/self.scale_factor))
 
       mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
-        fc_sq, array_type='calc')
+        fc_sq, array_type='calc', format="coreCIF")
       mas_as_cif_block.add_miller_array(fo_sq, array_type='meas')
 
       if add_weights:
@@ -865,7 +862,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         fo = fo_sq.as_amplitude_array().sort(by_value="packed_indices")
         fc, fo = fc.map_to_asu().common_sets(fo)
       mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
-        fo, array_type='meas')
+        fo, array_type='meas', format="coreCIF")
       mas_as_cif_block.add_miller_array(
         fc, column_names=['_refln_A_calc', '_refln_B_calc'])
       if fixed_format:
