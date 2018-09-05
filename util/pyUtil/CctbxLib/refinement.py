@@ -632,11 +632,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     OV.SetParam("snum.refinement.max_shift_over_esd", None)
     OV.SetParam("snum.refinement.max_shift_over_esd_atom", None)
 
-    shifts_over_su = flex.abs(self.normal_eqns.step() /
-      flex.sqrt(self.normal_eqns.covariance_matrix().matrix_packed_u_diagonal()))
+    shifts = self.cycles.shifts_over_su
     try:
-      jac_tr = self.normal_eqns.reparametrisation.jacobian_transpose_matching_grad_fc()
-      shifts = jac_tr.transpose() * shifts_over_su
       max_shift_idx = 0
       for i, s in enumerate(shifts):
         if (shifts[max_shift_idx] < s):
@@ -799,8 +796,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
     cif_block['_refine_ls_R_factor_all'] = fmt % self.r1_all_data[0]
     cif_block['_refine_ls_R_factor_gt'] = fmt % self.r1[0]
     cif_block['_refine_ls_restrained_S_all'] = fmt % self.normal_eqns.restrained_goof()
-    cif_block['_refine_ls_shift/su_max'] = "%.4f" % flex.max(shifts_over_su)
-    cif_block['_refine_ls_shift/su_mean'] = "%.4f" % flex.mean(shifts_over_su)
+    cif_block['_refine_ls_shift/su_max'] = "%.4f" % flex.max(shifts)
+    cif_block['_refine_ls_shift/su_mean'] = "%.4f" % flex.mean(shifts)
     cif_block['_refine_ls_structure_factor_coef'] = 'Fsqd'
     cif_block['_refine_ls_weighting_details'] = str(
       self.normal_eqns.weighting_scheme)
