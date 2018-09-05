@@ -893,6 +893,7 @@ class ImageTools(FontInstances):
 
   def get_valign_font_modifications(self):
     if not self.valign:
+      self.txt_top += self.top_adjust + OV.GetParam('gui.font_top_system_adjust', 0)
       return
     try:
       letting_width, lettering_height = self.draw.textsize(self.txt, font=self.font)
@@ -1138,9 +1139,11 @@ class ImageTools(FontInstances):
     if not font:
       font = self.registerFontInstance(font_name, font_size)
     wX, wY = sizedraw_dummy_draw.textsize(txt, font=font)
-    return wX, wY
+    offset = font.getoffset(txt)[1]
+    return wX, wY, offset
 
   def get_font(self, font_name=None, font_size=None):
+    system_top_adjust = OV.GetParam('gui.font_top_system_adjust', 0)
     if not font_name: font_name = self.font_name
     if not font_size: font_size = self.font_size
     try:
@@ -1150,8 +1153,8 @@ class ImageTools(FontInstances):
       self.top_adjust = 0
       self.rel_adjust = 0
       if self.font_peculiarities.get(font_name):
-        self.top_adjust = self.font_peculiarities[self.font_name].get('top_adjust', 0)
-        self.rel_adjust = self.font_peculiarities[self.font_name].get('rel_adjust', 0)
+        self.top_adjust = self.font_peculiarities[self.font_name].get('top_adjust', 0) + system_top_adjust
+        self.rel_adjust = self.font_peculiarities[self.font_name].get('rel_adjust', 0) + system_top_adjust
     except:
       pass
     self.font = font

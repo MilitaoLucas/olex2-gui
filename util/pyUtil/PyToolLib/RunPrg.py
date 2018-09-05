@@ -617,22 +617,26 @@ class RunRefinementPrg(RunPrg):
     from libtbx.utils import format_float_with_standard_uncertainty
     from cctbx import sgtbx
     from libtbx.utils import Sorry
-    print "Checking absolute structure..."
+    if debug:
+      print "Checking absolute structure..."
     inversion_needed = False
     possible_racemic_twin = False
     inversion_warning = "WARNING: Structure should be inverted (inv -f), unless there is a good reason not to do so."
     racemic_twin_warning = "WARNING: Structure may be an inversion twin"
     flack = self.method.getFlack()
 
+    hooft_display = flack_display = ""
+
     try:
       hooft = hooft_analysis()
     except Sorry, e:
       print e
+      
     else:
       if hooft.reflections.f_sq_obs_filtered.anomalous_flag():
         s = format_float_with_standard_uncertainty(
           hooft.hooft_y, hooft.sigma_y)
-        print "Hooft y: %s" %s
+        hooft_display = "Hooft y: %s" %s
         OV.SetParam('snum.refinement.hooft_str', s)
         if (hooft.p3_racemic_twin is not None and
             round(hooft.p3_racemic_twin, 3) == 1):
@@ -643,7 +647,7 @@ class RunRefinementPrg(RunPrg):
         OV.SetParam('snum.refinement.hooft_str', None)
 
     if flack:
-      print "Flack x: %s" %flack
+      flack_display = "Flack x: %s" %flack
       fs = flack.split("(")
       flack_val = float(fs[0])
       if len(fs) > 1:
@@ -652,6 +656,9 @@ class RunRefinementPrg(RunPrg):
         flack_esd = None
       if flack_val > 0.8:
         inversion_needed = True
+        
+    print "%s, %s" %(hooft_display, flack_display)
+        
     if force and inversion_needed:
       olex.m('Inv -f')
       OV.File('%s.res' %OV.FileName())

@@ -3547,8 +3547,8 @@ class HealthOfStructure():
 
     y += 0
     if value_display_extra:
-      dxs,dxy = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=int(font_size_s * scale))
-    dx,dy = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=int(font_size * scale))
+      dxs,dxy, offset = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=int(font_size_s * scale))
+    dx,dy, offset = IT.getTxtWidthAndHeight(value_display, font_name=font_name, font_size=int(font_size * scale))
     x = boxWidth - dx - 7 #right inside margin
     draw.text((x, y), "%s" %value_display, font=font, fill=fill)
     if value_display_extra:
