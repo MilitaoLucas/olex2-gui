@@ -11,6 +11,8 @@ gui
     .type = strings
   font_size_rel_size = '+3' '+2' '+1' '0' '-1' '-2'
     .type = strings
+  font_top_system_adjust = 0
+    .type = int
   ppi_font_adjust_amount = -2
     .type = int
   internal_scale = 2
@@ -148,7 +150,7 @@ gui
       .caption = "Background colour"
     font_colour = #442244
       .type = colour
-    font_name = Arial
+    font_name = Noto
       .type = str
     font_size = 2
       .type = int

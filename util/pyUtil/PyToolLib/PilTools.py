@@ -2579,7 +2579,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
       font_name = self.params.timage.font_name
     if not font_size:
       font_size = self.params.timage.font_size
-
+      valign = ('middle',0.7,)
 
     if font_size is None:
       valign = ('middle',0.7,)
@@ -2836,6 +2836,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
     ## Prepare text for printing on the new image. If '-' is present in the string, this will
     ## be replaced with a space and the parts will be made into title case.
     draw = ImageDraw.Draw(image)
+    top += OV.GetParam('gui.font_top_system_adjust',0) #HP beginning of proper fontadjust
     t = item.split("-")
     txt = ""
     if len(t) > 1:
@@ -3084,7 +3085,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                        )
 
 
-  def drawSpaceGroupInfo(self, draw, luminosity=1.9, right_margin=8, font_name="Times Bold",):
+  def drawSpaceGroupInfo(self, draw, luminosity=1.9, right_margin=8, font_name="Serif",):
     dr = draw
     im = Image.new('RGBA', (self.width, 30 * self.scale), (0,0,0,0))
     draw = ImageDraw.Draw(im)
@@ -3117,11 +3118,11 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
         font_sub = IT.registerFontInstance("%s Bold" %font_base, int(14 * fscale))
         norm_kern = 2 * fscale
         sub_kern = -1 * fscale
-        sub_lower = 10 * fscale
+        sub_lower = 10 * fscale - IT.top_adjust
         p_higher = 0
         bar_higher = -11 * fscale
         ls = 0
-        ts = 3
+        ts = 3 - IT.top_adjust
       except:
         font_name = "Arial"
         font_bar = IT.registerFontInstance("%s Bold" %font_base, 14 * fscale)
