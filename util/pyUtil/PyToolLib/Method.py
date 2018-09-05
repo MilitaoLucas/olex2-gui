@@ -288,17 +288,17 @@ class Method_refinement(Method):
 #      radiation = olx.xf.exptl.Radiation()
 
       # Check whether these are present. If so, do nothing.
-      #more = olx.Ins('MORE')
-      #if more == "n/a":
-        #OV.AddIns("MORE -1")
-      #bond = olx.Ins('BOND')
-      #if bond == "n/a" or not bond:
-        #OV.AddIns("BOND $H", quiet=True)
+      more = olx.Ins('MORE')
+      if more == "n/a":
+        OV.AddIns("MORE -1")
+      bond = olx.Ins('BOND')
+      if bond == "n/a" or not bond:
+        OV.AddIns("BOND $H", quiet=True)
       acta= olx.Ins('ACTA')
       if acta == "n/a":
- #       if radiation == "0.71073":
-        OV.AddIns("ACTA")
-      #OV.AddIns('CONF', quiet=True)
+        if olx.GetVar('refinement_acta', None) != "No ACTA":
+          OV.AddIns("ACTA")
+      OV.AddIns('CONF', quiet=True)
 
     if RunPrgObject.make_unique_names:
       pass
