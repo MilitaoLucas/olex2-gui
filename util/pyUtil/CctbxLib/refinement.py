@@ -421,7 +421,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.print_table_header(self.log)
       
 
-      self.cycles = iterations(self.normal_eqns,
+      if(method=='Levenberg-Marquardt'):
+        self.cycles = iterations(self.normal_eqns,
+                               n_max_iterations=self.max_cycles,
+                               track_all=True,
+                               gradient_threshold=1e-8,
+                               step_threshold=1e-8)
+                               #gradient_threshold=1e-5,
+                               #step_threshold=1e-5)
+      else:
+        self.cycles = iterations(self.normal_eqns,
                                n_max_iterations=self.max_cycles,
                                track_all=True,
                                damping_value=damping[0],
@@ -431,6 +440,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
                                step_threshold=1e-8)
                                #gradient_threshold=1e-5,
                                #step_threshold=1e-5)
+                               
       self.scale_factor = self.cycles.scale_factor_history[-1]
       self.covariance_matrix_and_annotations=self.normal_eqns.covariance_matrix_and_annotations()
       self.twin_covariance_matrix = self.normal_eqns.covariance_matrix(
@@ -1232,14 +1242,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.diff_stats.min()
     )
 
-    max_shift_site = self.normal_eqns.max_shift_site()
-    max_shift_u = self.normal_eqns.max_shift_u()
-    print >> log, "  +  Shifts:   xyz: %.4f for %s, U: %.4f for %s" %(
-    max_shift_site[0],
-    max_shift_site[1].label,
-    max_shift_u[0],
-    max_shift_u[1].label
-    )
+    if(self.cycles.n_iterations>0):
+      max_shift_site = self.normal_eqns.max_shift_site()
+      max_shift_u = self.normal_eqns.max_shift_u()
+      print >> log, "  +  Shifts:   xyz: %.4f for %s, U: %.4f for %s" %(
+      max_shift_site[0],
+      max_shift_site[1].label,
+      max_shift_u[0],
+      max_shift_u[1].label
+      )
     
     pad = 9 - len(str(self.n_constraints)) - len(str(self.normal_eqns.n_restraints)) - len(str(self.normal_eqns.n_parameters))
     print >> log, "  ++++++++++++ %i Constraints | %i Restraints | %i Parameters +++++++++%s" %(self.n_constraints, self.normal_eqns.n_restraints, self.normal_eqns.n_parameters, "+"*pad)
