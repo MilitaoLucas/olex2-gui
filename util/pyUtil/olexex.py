@@ -205,11 +205,12 @@ class OlexRefinementModel(object):
   restraint_types = {
     'dfix':'bond',
     'dang':'bond',
-    'flat':'planarity',
+    'flat':'plane_chiv',
     'chiv':'chirality',
     'sadi':'bond_similarity',
     'simu':'adp_similarity',
     'delu':'rigid_bond',
+    'rigu':'rigu',
     'isor':'isotropic_adp',
     'olex2.restraint.angle':'angle',
     'olex2.restraint.dihedral':'dihedral',
@@ -292,7 +293,7 @@ class OlexRefinementModel(object):
         kwds = dict(i_seqs=i_seqs)
         if restraint_type not in (
           'adp_similarity', 'adp_u_eq_similarity', 'adp_volume_similarity',
-          'rigid_bond', 'isotropic_adp', 'fixed_u_eq_adp'):
+          'rigid_bond', 'rigu', 'isotropic_adp', 'fixed_u_eq_adp'):
           kwds['sym_ops'] = [
             (sgtbx.rt_mx(flat_list(i[1][:-1]), i[1][-1]) if i[1] is not None else None)
             for i in restraint['atoms']]
@@ -311,13 +312,16 @@ class OlexRefinementModel(object):
         elif restraint_type == 'rigid_bond':
           kwds['sigma_12'] = restraint['esd1']
           kwds['sigma_13'] = restraint['esd2'] if restraint['esd2'] != 0 else None
+        elif restraint_type == 'rigu':
+          kwds['sigma_12'] = restraint['esd1']
+          kwds['sigma_13'] = restraint['esd2'] if restraint['esd2'] != 0 else None
         if restraint_type == 'bond':
           kwds['distance_ideal'] = value
         elif restraint_type in ('angle', 'dihedral'):
           kwds['angle_ideal'] = value
         elif restraint_type in ('fixed_u_eq_adp',):
           kwds['u_eq_ideal'] = value
-        elif restraint_type in ('bond_similarity', 'planarity'):
+        elif restraint_type in ('bond_similarity', 'plane_vhiv'):
           kwds['weights'] = [kwds['weight']]*len(i_seqs)
           if restraint_type == 'bond_similarity':
             sym_ops = kwds['sym_ops']
@@ -325,7 +329,7 @@ class OlexRefinementModel(object):
                                      for i in range(int(len(i_seqs)/2))]
             kwds['sym_ops'] = [[sym_op for sym_op in sym_ops[i*2:(i+1)*2]]
                                        for i in range(int(len(sym_ops)/2))]
-        if restraint_type in ('adp_similarity', 'isotropic_adp', 'rigid_bond'):
+        if restraint_type in ('adp_similarity', 'isotropic_adp', 'rigid_bond', 'rigu'):
           kwds['pair_sym_table'] = pair_sym_table
         if 'weights' in kwds:
           del kwds['weight']
@@ -1231,7 +1235,9 @@ def getReportTitleSrc():
   import StringIO
   import base64
   from PIL import EpsImagePlugin
-  from ImageTools import IT
+  from ImageTools import ImageTools
+  IT = ImageTools()
+
   width = OV.GetParam('gui.report.width')
   height = OV.GetParam('gui.report.title.height')
   colour = OV.GetParam('gui.report.title.colour').rgb
@@ -1274,7 +1280,8 @@ def getReportTitleSrc():
 OV.registerFunction(getReportTitleSrc)
 
 def dealWithReportImage():
-  from ImageTools import IT
+  from ImageTools import ImageTools
+  IT = ImageTools()
   image_name = OV.GetParam('snum.report.image')
   if image_name == "No Image":
 #    OV.SetParam('snum.report.image',None)
@@ -1405,7 +1412,8 @@ def getReportImageData(size='w400', imageName=None):
       IM = IM.resize((nWidth, nHeight), Image.BICUBIC)
 
   if make_border:
-    from ImageTools import IT
+    from ImageTools import ImageTools
+    IT = ImageTools()
     draw = ImageDraw.Draw(IM)
     fill = '#ababab'
     width, height = IM.size
