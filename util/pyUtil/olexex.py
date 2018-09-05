@@ -289,7 +289,20 @@ class OlexRefinementModel(object):
       for restraint in self.model.get(shelxl_restraint, ()):
         restraint_type = self.restraint_types.get(shelxl_restraint)
         if restraint_type is None: continue
-        i_seqs = [i[0] for i in restraint['atoms']]
+
+        if restraint_type == 'rigu':
+          # removed isotropic atoms from RIGU restraint
+          i_seqs = []
+          for atom_restraint in restraint['atoms']:
+            for residue in self.model['aunit']['residues']:
+              for atom in residue['atoms']:
+                if(atom['aunit_id']==atom_restraint[0]):
+                  if 'adp' in atom:
+                    i_seqs.append(atom_restraint[0])
+                  break
+        else:
+          i_seqs = [i[0] for i in restraint['atoms']]
+          
         kwds = dict(i_seqs=i_seqs)
         if restraint_type not in (
           'adp_similarity', 'adp_u_eq_similarity', 'adp_volume_similarity',
