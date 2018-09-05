@@ -453,7 +453,8 @@ class OlexFunctions(inheritFunctions):
       else:
         olx.CifMerge(filepath, f=finalise_value, u=update_atoms_loop)
       if report:
-        print "Refinement CIF file has been merged with the meta-data cif file"
+        pass
+        #print "Refinement CIF file has been merged with the meta-data cif file"
     except Exception, ex:
       print >> sys.stderr, "An error occurred whilst trying to find merge cif files"
       sys.stderr.formatExceptionInfo()

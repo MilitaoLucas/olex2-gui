@@ -57,7 +57,7 @@ class Method_cctbx_refinement(Method_refinement):
         OV.SetVar('cctbx_wR2',cctbx.wR2_factor())
         OV.File('%s.res' %OV.FileName())
     finally:
-      print '+++ FINISHED olex2.refine ++++++++++++++++++++++++++++++++++++\n'
+      #print '+++ FINISHED olex2.refine ++++++++++++++++++++++++++++++++++++\n'
       OV.DeleteBitmap('refine')
 
   def getFlack(self):
