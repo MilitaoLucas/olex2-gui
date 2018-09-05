@@ -1139,7 +1139,11 @@ class ImageTools(FontInstances):
     if not font:
       font = self.registerFontInstance(font_name, font_size)
     wX, wY = sizedraw_dummy_draw.textsize(txt, font=font)
-    offset = font.getoffset(txt)[1]
+    try:
+      offset = font.getoffset(txt)[1]
+    except Exception as e:
+      print e
+      offset = 0
     return wX, wY, offset
 
   def get_font(self, font_name=None, font_size=None):
