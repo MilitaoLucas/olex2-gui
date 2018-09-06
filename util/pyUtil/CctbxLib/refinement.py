@@ -91,15 +91,15 @@ class olex2_normal_eqns(get_parent()):
     OV.SetParam('snum.refinement.max_shift_u_atom', max_shift_u[1].label)
 
     shifts = self.get_shifts()
-    max_shift = 0
-    max_shift_item = "n/a"
+    max_shift_esd = 0
+    max_shift_esd_item = "n/a"
     try:
       max_shift_idx = 0
       for i, s in enumerate(shifts):
         if (shifts[max_shift_idx] < s):
           max_shift_idx = i
-      max_shift = shifts[max_shift_idx]
-      max_shift_item = self.reparametrisation.component_annotations[max_shift_idx]
+      max_shift_esd = shifts[max_shift_idx]
+      max_shift_esd_item = self.reparametrisation.component_annotations[max_shift_idx]
     except Exception as s:
       print s
 
@@ -112,10 +112,10 @@ class olex2_normal_eqns(get_parent()):
       pad_R1 = spacing - len(R1_print)
       wR2_print = "%.2f" %(self.wR2()*100)
       pad_wR2 = spacing - len(wR2_print) + 2
-      max_shift_print = "%.5f" %max_shift
-      pad_max_shift = (spacing + 4) - len(max_shift_print)
+      max_shift_esd_print = "%.5f" %max_shift_esd
+      pad_max_shift_esd = (spacing + 4) - len(max_shift_esd_print)
 
-      print >>log, "     %i %s %s %s %s %s %s %.4f %s %.5f %s %s" %(
+      print >>log, "     %i %s %s %s %s %s %s %.4f %s %.4f (%s) \t %.4f (%s) \t %.4f (%s)"%(
         self.n_current_cycle,
         " "*pad_cycle,
         " "*pad_R1,
@@ -124,10 +124,14 @@ class olex2_normal_eqns(get_parent()):
         wR2_print,
         " "*(spacing-3),
         self.goof(),
-        " "*pad_max_shift,
-        max_shift,
-        " "*(spacing-1),
-        max_shift_item,
+        " "*pad_max_shift_esd,
+        max_shift_esd,
+        max_shift_esd_item,
+        max_shift_site[0],
+        max_shift_site[1].label,
+        max_shift_u[0],
+        max_shift_u[1].label,
+        
       )
 
     else:
@@ -552,9 +556,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
       #restraints = "n/a"
     #print >>log, "Parameters: %s, Data: %s, Constraints: %s, Restraints: %s"\
      #%(self.normal_eqns.n_parameters, self.normal_eqns.observations.data.all()[0], self.n_constraints, restraints)
-    print >>log, "  -------  --------  --------  --------  -----------  ----------- "
-    print >>log, "   Cycle      R1       wR_2      GooF     Max Shift      Param    "
-    print >>log, "  -------  --------  --------  --------  -----------  ----------- "
+    print >>log, "  -------  --------  --------  --------  --------------------  ---------------  ---------------"
+    print >>log, "   Cycle      R1       wR_2      GooF          Shift/esd          Shift xyx         Shift U    "
+    print >>log, "  -------  --------  --------  --------  --------------------  ---------------  ---------------"
 
   def get_twin_fractions(self):
     rv = None
