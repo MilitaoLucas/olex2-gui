@@ -205,7 +205,7 @@ class OlexRefinementModel(object):
   restraint_types = {
     'dfix':'bond',
     'dang':'bond',
-    'flat':'plane_chiv',
+    'flat':'planarity',
     'chiv':'chirality',
     'sadi':'bond_similarity',
     'simu':'adp_similarity',
@@ -334,7 +334,7 @@ class OlexRefinementModel(object):
           kwds['angle_ideal'] = value
         elif restraint_type in ('fixed_u_eq_adp',):
           kwds['u_eq_ideal'] = value
-        elif restraint_type in ('bond_similarity', 'plane_vhiv'):
+        elif restraint_type in ('bond_similarity', 'planarity'):
           kwds['weights'] = [kwds['weight']]*len(i_seqs)
           if restraint_type == 'bond_similarity':
             sym_ops = kwds['sym_ops']
