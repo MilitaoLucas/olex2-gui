@@ -53,8 +53,8 @@ class olex2_normal_eqns(get_parent()):
       observations, reparametrisation, initial_scale_factor=OV.GetOSF(), **kwds)
     self.olx_atoms = olx_atoms
     self.n_current_cycle = 0
-    olex.m("showq a false")
-    olex.m("showq b false")
+    #olex.m("showq a false")
+    #olex.m("showq b false")
 
     #print self.__class__.__bases__[0].__bases__
 
@@ -70,6 +70,16 @@ class olex2_normal_eqns(get_parent()):
     self.feed_olex()
     return self
 
+  #compatibility...
+  def get_shifts(self):
+    try:
+      return self.cycles.shifts_over_su
+    except:
+      shifts_over_su = flex.abs(self.step() /
+        flex.sqrt(self.covariance_matrix().matrix_packed_u_diagonal()))
+      jac_tr = self.reparametrisation.jacobian_transpose_matching_grad_fc()
+      return jac_tr.transpose() * shifts_over_su
+
   def show_cycle_summary(self, log=None):
     if log is None: log = sys.stdout
     # self.reparametrisation.n_independents + OSF
@@ -80,20 +90,45 @@ class olex2_normal_eqns(get_parent()):
     OV.SetParam('snum.refinement.max_shift_u', max_shift_u[0])
     OV.SetParam('snum.refinement.max_shift_u_atom', max_shift_u[1].label)
 
+    shifts = self.get_shifts()
+    max_shift = 0
+    max_shift_item = "n/a"
+    try:
+      max_shift_idx = 0
+      for i, s in enumerate(shifts):
+        if (shifts[max_shift_idx] < s):
+          max_shift_idx = i
+      max_shift = shifts[max_shift_idx]
+      max_shift_item = self.reparametrisation.component_annotations[max_shift_idx]
+    except Exception as s:
+      print s
+
     print_tabular = True
 
     if print_tabular:
-      pad = 4 - len(str(self.n_current_cycle))
-      print >>log, "      %i  %s  %.4f    %.4f    %.4f A for %s  %s %.4f for %s" %(
+      spacing = 6
+      pad_cycle = spacing - len(str(self.n_current_cycle)) - 3
+      R1_print = "%.2f" %(self.r1_factor()[0]*100)
+      pad_R1 = spacing - len(R1_print)
+      wR2_print = "%.2f" %(self.wR2()*100)
+      pad_wR2 = spacing - len(wR2_print) + 2
+      max_shift_print = "%.5f" %max_shift
+      pad_max_shift = (spacing + 4) - len(max_shift_print)
+
+      print >>log, "     %i %s %s %s %s %s %s %.4f %s %.5f %s %s" %(
         self.n_current_cycle,
-        " "*pad,
-        self.wR2(),
+        " "*pad_cycle,
+        " "*pad_R1,
+        R1_print,
+        " "*pad_wR2,
+        wR2_print,
+        " "*(spacing-3),
         self.goof(),
-        max_shift_site[0],
-        max_shift_site[1].label,
-        " "*(4-len(max_shift_site[1].label)),
-        max_shift_u[0],
-        max_shift_u[1].label)
+        " "*pad_max_shift,
+        max_shift,
+        " "*(spacing-1),
+        max_shift_item,
+      )
 
     else:
       print >> log, "wR2 = %.4f | GooF = %.4f for %i data and %i parameters" %(
@@ -517,9 +552,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
       #restraints = "n/a"
     #print >>log, "Parameters: %s, Data: %s, Constraints: %s, Restraints: %s"\
      #%(self.normal_eqns.n_parameters, self.normal_eqns.observations.data.all()[0], self.n_constraints, restraints)
-    print >>log, "  ---------  ---------  --------  ------------------  ------------------"
-    print >>log, "    Cycle       wR2       GooF      Max Shift Site       Max Shift U   "
-    print >>log, "  ---------  ---------  --------  ------------------  ------------------"
+    print >>log, "  -------  --------  --------  --------  -----------  ----------- "
+    print >>log, "   Cycle      R1       wR_2      GooF     Max Shift      Param    "
+    print >>log, "  -------  --------  --------  --------  -----------  ----------- "
 
   def get_twin_fractions(self):
     rv = None
@@ -599,16 +634,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
 #      print d_idx[i], d
     return wR2
 
-  #compatibility...
-  def get_shifts(self):
-    try:
-      return self.cycles.shifts_over_su
-    except:
-      shifts_over_su = flex.abs(self.normal_eqns.step() /
-        flex.sqrt(self.normal_eqns.covariance_matrix().matrix_packed_u_diagonal()))
-      jac_tr = self.normal_eqns.reparametrisation.jacobian_transpose_matching_grad_fc()
-      return jac_tr.transpose() * shifts_over_su
-
   def as_cif_block(self):
     def format_type_count(type, count):
       if round(count, 1) == round(count):
@@ -642,7 +667,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     OV.SetParam("snum.refinement.max_shift_over_esd", None)
     OV.SetParam("snum.refinement.max_shift_over_esd_atom", None)
 
-    shifts = self.get_shifts()
+    shifts = self.normal_eqns.get_shifts()
     try:
       max_shift_idx = 0
       for i, s in enumerate(shifts):
@@ -1230,11 +1255,11 @@ class FullMatrixRefine(OlexCctbxAdapter):
     plural = "S"
     if _ == 1:
       plural = ""
-    
+
     if log is None: log = sys.stdout
     
     pad = 2 - len(str(self.cycles.n_iterations)) 
-    print >> log, "\n  ++++++++++++ %i CYCLE%s ++++++++++++++++++++++++++++++++++++%s++++ R1=%.2f%%" %(self.cycles.n_iterations, plural, "+" *pad, self.r1[0]*100)
+    print >> log, "\n  ++++++++++++++++++++++++++++++++++++++++++++++++%s+++ After %i CYCLE%s +++" %(pad*"+", self.cycles.n_iterations, plural)
     #print >> log, " +"
     print >> log, "  +  R1:       %.4f for %i reflections I >= 2u(I)" %self.r1
     print >> log, "  +  R1 (all): %.4f for %i reflections" %self.r1_all_data
