@@ -599,6 +599,16 @@ class FullMatrixRefine(OlexCctbxAdapter):
 #      print d_idx[i], d
     return wR2
 
+  #compatibility...
+  def get_shifts(self):
+    try:
+      return self.cycles.shifts_over_su
+    except:
+      shifts_over_su = flex.abs(self.normal_eqns.step() /
+        flex.sqrt(self.normal_eqns.covariance_matrix().matrix_packed_u_diagonal()))
+      jac_tr = self.normal_eqns.reparametrisation.jacobian_transpose_matching_grad_fc()
+      return jac_tr.transpose() * shifts_over_su
+
   def as_cif_block(self):
     def format_type_count(type, count):
       if round(count, 1) == round(count):
@@ -632,7 +642,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     OV.SetParam("snum.refinement.max_shift_over_esd", None)
     OV.SetParam("snum.refinement.max_shift_over_esd_atom", None)
 
-    shifts = self.cycles.shifts_over_su
+    shifts = self.get_shifts()
     try:
       max_shift_idx = 0
       for i, s in enumerate(shifts):
