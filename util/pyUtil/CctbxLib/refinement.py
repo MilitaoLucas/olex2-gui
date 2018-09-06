@@ -106,33 +106,18 @@ class olex2_normal_eqns(get_parent()):
     print_tabular = True
 
     if print_tabular:
-      spacing = 6
-      pad_cycle = spacing - len(str(self.n_current_cycle)) - 3
-      R1_print = "%.2f" %(self.r1_factor()[0]*100)
-      pad_R1 = spacing - len(R1_print)
-      wR2_print = "%.2f" %(self.wR2()*100)
-      pad_wR2 = spacing - len(wR2_print) + 2
-      max_shift_esd_print = "%.5f" %max_shift_esd
-      pad_max_shift_esd = (spacing + 4) - len(max_shift_esd_print)
-
-      print >>log, "     %i %s %s %s %s %s %s %.4f %s %.4f (%s) \t %.4f (%s) \t %.4f (%s)"%(
+      print >>log, "  % 5i    % 6.2f    % 6.2f    % 6.2f    % 8.2f %-11s  % 8.2e %-11s  % 8.2e %-11s" %(
         self.n_current_cycle,
-        " "*pad_cycle,
-        " "*pad_R1,
-        R1_print,
-        " "*pad_wR2,
-        wR2_print,
-        " "*(spacing-3),
+        self.r1_factor()[0]*100,
+        self.wR2()*100,
         self.goof(),
-        " "*pad_max_shift_esd,
         max_shift_esd,
-        max_shift_esd_item,
+        '('+max_shift_esd_item+')',
         max_shift_site[0],
-        max_shift_site[1].label,
+        '('+max_shift_site[1].label+')',
         max_shift_u[0],
-        max_shift_u[1].label,
-        
-      )
+        '('+max_shift_u[1].label+')',
+      )      
 
     else:
       print >> log, "wR2 = %.4f | GooF = %.4f for %i data and %i parameters" %(
@@ -556,9 +541,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
       #restraints = "n/a"
     #print >>log, "Parameters: %s, Data: %s, Constraints: %s, Restraints: %s"\
      #%(self.normal_eqns.n_parameters, self.normal_eqns.observations.data.all()[0], self.n_constraints, restraints)
-    print >>log, "  -------  --------  --------  --------  --------------------  ---------------  ---------------"
-    print >>log, "   Cycle      R1       wR_2      GooF          Shift/esd          Shift xyx         Shift U    "
-    print >>log, "  -------  --------  --------  --------  --------------------  ---------------  ---------------"
+    print >>log, "  -------  --------  --------  --------  --------------------  --------------------  --------------------"
+    print >>log, "   Cycle      R1       wR_2      GooF          Shift/esd            Shift xyx               Shift U      "
+    print >>log, "  -------  --------  --------  --------  --------------------  --------------------  --------------------"
 
   def get_twin_fractions(self):
     rv = None
