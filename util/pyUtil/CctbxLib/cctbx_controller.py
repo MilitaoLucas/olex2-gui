@@ -290,7 +290,10 @@ class create_cctbx_xray_structure(object):
           uiso_owner['id'], uiso_owner['k'])
     if restraints_iter is not None:
       for restraint_type, kwds in restraints_iter:
-        builder.process_restraint(restraint_type, **kwds)
+        try:
+          builder.process_restraint(restraint_type, **kwds)
+        except:
+          print 'Your version of cctbx is too old for the restraint %s'%restraint_type
     if constraints_iter is not None:
       for constraint_type, kwds in constraints_iter:
         builder.process_constraint(constraint_type, **kwds)
