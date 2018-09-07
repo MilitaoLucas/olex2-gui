@@ -117,7 +117,7 @@ class olex2_normal_eqns(get_parent()):
         '('+max_shift_site[1].label+')',
         max_shift_u[0],
         '('+max_shift_u[1].label+')',
-      )      
+      )
 
     else:
       print >> log, "wR2 = %.4f | GooF = %.4f for %i data and %i parameters" %(
@@ -314,7 +314,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     """ If build_only is True - this method initialises and returns the normal
      equations object
     """
-    
+
     self.reflections.show_summary(log=self.log)
     wavelength = self.olx_atoms.exptl.get('radiation', 0.71073)
     filepath = OV.StrDir()
@@ -424,7 +424,8 @@ class FullMatrixRefine(OlexCctbxAdapter):
       f_mask=self.f_mask,
       restraints_manager=restraints_manager,
       weighting_scheme=weighting,
-      log=self.log
+      log=self.log,
+      may_parallelise=True
     )
     self.normal_eqns.shared_param_constraints = self.shared_param_constraints
     self.normal_eqns.shared_rotated_adps = self.shared_rotated_adps
@@ -443,7 +444,6 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
       self.print_table_header()
       self.print_table_header(self.log)
-      
 
       if(method=='Levenberg-Marquardt'):
         self.cycles = iterations(self.normal_eqns,
@@ -464,7 +464,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
                                step_threshold=1e-8)
                                #gradient_threshold=1e-5,
                                #step_threshold=1e-5)
-                               
+
       self.scale_factor = self.cycles.scale_factor_history[-1]
       self.covariance_matrix_and_annotations=self.normal_eqns.covariance_matrix_and_annotations()
       self.twin_covariance_matrix = self.normal_eqns.covariance_matrix(
