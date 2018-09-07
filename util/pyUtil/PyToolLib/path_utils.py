@@ -92,7 +92,7 @@ Current cctbx build: '%s'
 def cold_start(cctbx_sources, build_path):
   saved_cwd = os.getcwdu()
   os.chdir(build_path)
-  sys.argv = ['%s/libtbx/configure.py' % cctbx_sources, 'smtbx', 'iotbx']
+  sys.argv = ['%s/libtbx/configure.py' % cctbx_sources, 'smtbx', 'iotbx', 'fast_linalg']
   #execfile(sys.argv[0])
   import libtbx.configure
   libtbx.configure.run()
