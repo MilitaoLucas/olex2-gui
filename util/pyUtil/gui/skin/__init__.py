@@ -229,9 +229,9 @@ def export_parameters(load_phil=True):
   OV.SetVar('default_link', OV.GetParam('gui.skin.default_link'))
   OV.SetVar('linkButton.flat', OV.GetParam('gui.skin.link_button.flat'))
   OV.SetVar('linkButton.fgcolor', OV.GetParam('gui.skin.link_button.fgcolor').hexadecimal)
+  OV.SetVar('history_width', IT.history_width)
   try:
     OV.SetVar('linkButton.bgcolor', OV.GetParam('gui.skin.link_button.bgcolor').hexadecimal)
-    OV.SetVar('history_width', IT.history_width)
   except:
     OV.SetVar('linkButton.bgcolor', OV.GetParam('gui.skin.link_button.bgcolor'))
 
@@ -531,7 +531,6 @@ def change_bond_colour(scope="", colour=""):
   olex.m("sel bonds where xbond.b.bai.z == -1")
 #  olx.Sel("-u")
   olx.ShowH("b", True)
-
 OV.registerFunction(change_bond_colour, True, 'gui.skin')
 
 
