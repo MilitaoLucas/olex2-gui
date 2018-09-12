@@ -19,6 +19,8 @@ class PeriodicTable(object):
       pt[el].setdefault('Z', i-1)
     rFile.close()
     return pt
+  
+PT = PeriodicTable()
       
 if __name__ == "__main__":
   a = PeriodicTable()

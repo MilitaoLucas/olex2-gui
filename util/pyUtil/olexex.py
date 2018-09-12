@@ -573,23 +573,23 @@ def ChooseLabelContent(cmd):
 OV.registerFunction(ChooseLabelContent)
 
 def FindZOfHeaviestAtomInFormua():
-  from PeriodicTable import PeriodicTable
+  from PeriodicTable import PT
   retVal = 0
-  PT = PeriodicTable()
   pt = PT.PeriodicTable()
   f = olx.xf.GetFormula('list')
   if not f:
     return retVal
   f = f.split(',')
   largestZ = 0
+  largestEle = ""
   for element in f:
     ele = element.split(":")[0]
     Z = int(pt[ele].get('Z'))
     if Z > largestZ:
       largestZ = Z
-  retVal = largestZ
+      largestEle = ele
+  retVal = (largestZ,largestEle)
   return retVal
-
 OV.registerFunction(FindZOfHeaviestAtomInFormua)
 
 def SetAtomicVolumeInSnumPhil(totalcount):
