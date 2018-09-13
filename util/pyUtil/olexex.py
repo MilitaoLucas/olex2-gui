@@ -285,7 +285,7 @@ class OlexRefinementModel(object):
   def restraints_iterator(self, pair_sym_table=None):
     from libtbx.utils import flat_list
     from cctbx import sgtbx
-    for shelxl_restraint in (self.restraint_types):
+    for shelxl_restraint in self.restraint_types:
       for restraint in self.model.get(shelxl_restraint, ()):
         restraint_type = self.restraint_types.get(shelxl_restraint)
         if restraint_type is None: continue
@@ -332,9 +332,11 @@ class OlexRefinementModel(object):
           kwds['distance_ideal'] = value
         elif restraint_type in ('angle', 'dihedral'):
           kwds['angle_ideal'] = value
+        elif restraint_type == 'chirality':
+          kwds['volume_ideal'] = value
         elif restraint_type in ('fixed_u_eq_adp',):
           kwds['u_eq_ideal'] = value
-        elif restraint_type in ('bond_similarity', 'planarity'):
+        elif restraint_type in ('bond_similarity'):
           kwds['weights'] = [kwds['weight']]*len(i_seqs)
           if restraint_type == 'bond_similarity':
             sym_ops = kwds['sym_ops']
@@ -367,6 +369,45 @@ class OlexRefinementModel(object):
               angle_ideal=kwds['angle_ideal'],
               i_seqs=kwds['i_seqs'][i*4:(i+1)*4],
               sym_ops=kwds['sym_ops'][i*4:(i+1)*4])
+        elif restraint_type == 'chirality':
+          # Expand atom list to include the 3 neighbours
+          for atom_restraint in restraint['atoms']:
+            i_seqs = []
+            for residue in self.model['aunit']['residues']:
+              for atom in residue['atoms']:
+                if(atom['aunit_id']==atom_restraint[0]):
+                  i_seqs.append(atom_restraint[0])                  
+                  for neighbour in atom['neighbours']:
+                    
+                    for residuebis in self.model['aunit']['residues']:
+                      for atombis in residuebis['atoms']:
+                        if(atombis['aunit_id']==neighbour):
+                          if(atombis['type']!='H'):
+                            i_seqs.append(neighbour)
+                            break
+            yield restraint_type, dict(
+              i_seqs=i_seqs,
+              volume_ideal=kwds['volume_ideal'],
+              both_signs=False,
+              weight=kwds['weight'],
+              )
+        elif restraint_type == 'planarity':
+          # The planarity restraint is implemented using the CHIV restraint
+          # len(i_seqs)-3 CHIV restraints are necessary and used in shelxl
+          # here, all possible tetrahedrons are used instead (more robust):
+          # len(i_seqs)!/(4!*(len(i_seqs)-4)! with ! the factorial
+          # the weight is adjusted to give more or less the same strength as in shelx
+          from itertools import combinations 
+          n = math.factorial(len(i_seqs)) / (math.factorial(4) * math.factorial(len(i_seqs)-4))
+          f = float(len(i_seqs)-3)/float(n)
+          tetrahedrons = combinations(i_seqs, 4)  
+          for one_tetrahedron in tetrahedrons:                    
+            yield 'chirality', dict(
+              i_seqs=one_tetrahedron,
+              volume_ideal=0.0,
+              both_signs=False,
+              weight=kwds['weight']*f,
+              )
         else:
           yield restraint_type, kwds
 
