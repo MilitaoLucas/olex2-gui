@@ -613,7 +613,7 @@ def ChooseLabelContent(cmd):
   return ""
 OV.registerFunction(ChooseLabelContent)
 
-def FindZOfHeaviestAtomInFormua():
+def FindZOfHeaviestAtomInFormula():
   from PeriodicTable import PT
   retVal = 0
   pt = PT.PeriodicTable()
@@ -631,7 +631,11 @@ def FindZOfHeaviestAtomInFormua():
       largestEle = ele
   retVal = (largestZ,largestEle)
   return retVal
-OV.registerFunction(FindZOfHeaviestAtomInFormua)
+OV.registerFunction(FindZOfHeaviestAtomInFormula)
+
+def FindZOfHeaviestAtomInFormua():
+  #for compatibility of old AC versions
+  return FindZOfHeaviestAtomInFormula()
 
 def SetAtomicVolumeInSnumPhil(totalcount):
   cell_volume = 0
