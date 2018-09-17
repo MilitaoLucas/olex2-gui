@@ -669,6 +669,7 @@ def actaGuiDisplay(val=None):
   olx.html.SetItems('REFINEMENT_ACTA','No ACTA;ACTA NOHKL;ACTA')
   olx.html.SetValue('REFINEMENT_ACTA', val)
   olx.html.SetBG('REFINEMENT_ACTA',refinement_acta_bg_colour())
+  olx.SetVar('refinement_acta', val)
 
 OV.registerFunction(actaGuiDisplay)
 
