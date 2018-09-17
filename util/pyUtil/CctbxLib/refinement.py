@@ -470,7 +470,19 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.twin_covariance_matrix = self.normal_eqns.covariance_matrix(
         jacobian_transpose=self.reparametrisation.jacobian_transpose_matching(
           self.reparametrisation.mapping_to_grad_fc_independent_scalars))
-      self.export_var_covar(self.covariance_matrix_and_annotations)
+      _ = olx.Ins('ACTA')
+      if _ == "n/a":
+        acta_stuff = False
+      else:
+        acta_stuff = True
+      _ = olx.Ins('MORE')
+      if "-" in _:
+        fcf_stuff = True
+      else:
+        fcf_stuff = False
+      if acta_stuff == "n/a": acta_stuff = ""
+      if fcf_stuff:
+        self.export_var_covar(self.covariance_matrix_and_annotations)
       self.r1 = self.normal_eqns.r1_factor(cutoff_factor=2)
       self.r1_all_data = self.normal_eqns.r1_factor()
       self.check_flack()
@@ -506,11 +518,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
       self.post_peaks(fo_minus_fc, max_peaks=self.max_peaks)
       self.show_summary()
       self.show_comprehensive_summary(log=self.log)
-
-      block_name = OV.FileName().replace(' ', '')
-      cif = iotbx.cif.model.cif()
-      cif[block_name] = self.as_cif_block()
-      if olx.Ins('ACTA') != 'n/a':
+      if acta_stuff:
+        block_name = OV.FileName().replace(' ', '')
+        cif = iotbx.cif.model.cif()
+        cif[block_name] = self.as_cif_block()
         f = open(OV.file_ChangeExt(OV.FileFull(), 'cif'), 'w')
         print >> f, cif
         f.close()
@@ -525,7 +536,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
         self.reparametrisation.n_independents)
       OV.SetParam(
         'snum.refinement.suggested_weight', "%s %s" %(new_weighting.a, new_weighting.b))
-      if self.on_completion:
+      if self.on_completion and acta_stuff:
         self.on_completion(cif[block_name])
       if olx.HasGUI() == 'true':
         olx.UpdateQPeakTable()
