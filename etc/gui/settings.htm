@@ -214,23 +214,44 @@
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='FADER';help_ext=Fader;1 -->
   <td width='23%'>
-   <b>%Use Fader%:</b>
+   <b>%Auto MORE%:</b>
   </td>
   <td width='55%'>
-    Structures will fade in and out
+    Add MORE -1, CONF, BOND $H automatically
   </td>
   <td width='20%' align='right'>
     <input
       type="checkbox"
-      name="USE_FADER"
+      name="AUTO_INSERT_ACTA_STUFF"
       fgcolor="GetVar(HtmlFontColour)"
       bgcolor="GetVar('HtmlInputBgColour')"
-      checked="not(strcmp(spy.GetParam(user.use_fader),0.0))"
-      oncheck="spy.SetParam(user.use_fader,0.4)"
-      onuncheck="spy.SetParam(user.use_fader,0)"
+      checked="spy.GetParam(user.auto_insert_acta_stuff)"
+      oncheck="spy.SetParam(user.auto_insert_acta_stuff,True)"
+      onuncheck="spy.SetParam(user.auto_insert_acta_stuff,False)"
     >
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
+
+<!--<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='FADER';help_ext=Fader;1 -->-->
+  <!--<td width='23%'>-->
+   <!--<b>%Use Fader%:</b>-->
+  <!--</td>-->
+  <!--<td width='55%'>-->
+    <!--Structures will fade in and out-->
+  <!--</td>-->
+  <!--<td width='20%' align='right'>-->
+    <!--<input-->
+      <!--type="checkbox"-->
+      <!--name="USE_FADER"-->
+      <!--fgcolor="GetVar(HtmlFontColour)"-->
+      <!--bgcolor="GetVar('HtmlInputBgColour')"-->
+      <!--checked="not(strcmp(spy.GetParam(user.use_fader),0.0))"-->
+      <!--oncheck="spy.SetParam(user.use_fader,0.4)"-->
+      <!--onuncheck="spy.SetParam(user.use_fader,0)"-->
+    <!-->-->
+  <!--</td>-->
+<!--<!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->-->
+
 
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='SAVE_VIEW';help_ext=Auto_Save_View;1 -->
