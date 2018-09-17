@@ -509,7 +509,7 @@ class ImageTools(FontInstances):
     colourize = args.get('c', False)
     if not width:
       #width = int(olx.html.ClientWidth('self')) - OV.GetParam('gui.htmlpanelwidth_margin_adjust')
-      width = int(IT.skin_width*0.97)
+      width = int(self.skin_width*0.97)
 
     if im:
       if colourize:
@@ -1142,7 +1142,7 @@ class ImageTools(FontInstances):
     try:
       offset = font.getoffset(txt)[1]
     except Exception as e:
-      print e
+      #print e
       offset = 0
     return wX, wY, offset
 
