@@ -202,7 +202,7 @@ class RunPrg(ArgumentParser):
     olx.User("%s" %OV.FilePath())
     self.filePath = OV.FilePath()
     self.fileName = OV.FileName()
-    self.tempPath = "%s/.olex/temp" %OV.FilePath()
+    self.tempPath = "%s/temp" %OV.StrDir()
     if not os.path.exists(self.tempPath):
       os.mkdir(self.tempPath)
 
