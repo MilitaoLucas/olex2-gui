@@ -83,7 +83,7 @@ class FolderView:
         fname = self.name
       for i in os.listdir(fname):
         dn = os.path.normpath(fname + '/' + i)
-        if os.path.isdir(dn) and i != '.olex':
+        if os.path.isdir(dn) and i != '.olex' and i != 'olex2':
           dr = FolderView.node(i, dn)
           dr.expand(mask, dn)
           if len(dr.content):
