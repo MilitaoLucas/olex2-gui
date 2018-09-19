@@ -121,9 +121,9 @@ OV.registerFunction(SwitchAllAlertsOn)
 
 def VVD_to_phil():
   phil_strings = []
-  structureVVDPath = r"%s/.olex/%s.vvd" %(OV.FilePath(),OV.FileName())
+  structureVVDPath = r"%s/%s.vvd" %(OV.StrDir(),OV.FileName())
   # Changed pickle file name from 'vvd.pickle' to 'OV.FileName().vvd'
-  oldPicklePath = r"%s/.olex/vvd.pickle" %OV.FilePath()
+  oldPicklePath = r"%s/vvd.pickle" %OV.StrDir()
   #snum_scopes = ('refinement','dimas','metacif','history','solution','report','workflow')
   snum_scopes = ('refinement','metacif','history','solution','report')
 
@@ -238,7 +238,7 @@ def LoadStructureParams():
     refinementMethod = olx.phil_handler.get_validated_param('snum.refinement.method')
   olx.phil_handler.reset_scope('snum', rebuild_index=True)
   model_src = OV.ModelSrc()
-  structure_phil_path = u"%s/.olex/%s.phil" %(OV.FilePath(), model_src)
+  structure_phil_path = u"%s/%s.phil" %(OV.StrDir(), model_src)
   if os.path.isfile(structure_phil_path):
     structure_phil_file = open(structure_phil_path, 'r')
     structure_phil = structure_phil_file.read()
@@ -307,7 +307,7 @@ OV.registerFunction(LoadStructureParams)
 
 def SaveStructureParams():
   if OV.FileName() != 'none':
-    structure_phil_file = "%s/.olex/%s.phil" %(OV.FilePath(), OV.ModelSrc())
+    structure_phil_file = "%s/%s.phil" %(OV.StrDir(), OV.ModelSrc())
     olx.phil_handler.save_param_file(
       file_name=structure_phil_file, scope_name='snum', diff_only=True)
     auto_save_view = OV.GetParam('user.auto_save_view', False)

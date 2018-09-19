@@ -1567,7 +1567,7 @@ OV.registerFunction(isPro)
 def revert_to_original():
   extensions = ['res','ins','cif']
   for extension in extensions:
-    path = "%s/.olex/originals/%s.%s" %(OV.FilePath(), OV.FileName(), extension)
+    path = os.path.join(olx.StrDir(), 'originals', "%s.%s" %(OV.FileName(), extension))
     if os.path.exists(path):
       rFile = open(path,'rb')
       txt = rFile.read()
