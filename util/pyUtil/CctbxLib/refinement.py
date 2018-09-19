@@ -924,6 +924,24 @@ class FullMatrixRefine(OlexCctbxAdapter):
         fmt_str="%4i"*3 + "%12.4f"*4
       else:
         fmt_str = "%i %i %i %f %f %f %f"
+    elif list_code == 6:
+      if self.hklf_code == 5:
+        fo_sq, fc = self.get_fo_sq_fc()
+      else:
+        fc = self.normal_eqns.f_calc.customized_copy(anomalous_flag=False)
+        fo_sq = self.normal_eqns.observations.fo_sq.customized_copy(
+          data=self.normal_eqns.observations.fo_sq.data()*(1/self.scale_factor),
+          sigmas=self.normal_eqns.observations.fo_sq.sigmas()*(1/self.scale_factor),
+          anomalous_flag=False)
+        fc = fc.sort(by_value="packed_indices")
+        fo_sq = fo_sq.sort(by_value="packed_indices")
+        #fc, fo_sq = fo_sq.common_sets(fc)
+      mas_as_cif_block = iotbx.cif.miller_arrays_as_cif_block(
+        fo_sq, column_names=['_refln_F_squared_meas', '_refln_F_squared_sigma'],
+        format="coreCIF")
+      mas_as_cif_block.add_miller_array(
+        fc, column_names=['_refln_F_calc', '_refln_phase_calc'])
+      fmt_str = "%i %i %i %.3f %.3f %.3f %.3f"
 
     else:
       print "LIST code %i not supported" %list_code
