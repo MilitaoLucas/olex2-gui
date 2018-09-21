@@ -43,6 +43,7 @@ if haveGUI:
   import olex_gui
 
 import Report
+import random
 
 
 def txt():
@@ -370,43 +371,73 @@ class OlexRefinementModel(object):
               i_seqs=kwds['i_seqs'][i*4:(i+1)*4],
               sym_ops=kwds['sym_ops'][i*4:(i+1)*4])
         elif restraint_type == 'chirality':
-          # Expand atom list to include the 3 neighbours
+          # Expand each atom in the list to include the 3 neighbours
           for atom_restraint in restraint['atoms']:
             i_seqs = []
+            sym_ops = []
+            # looking for the pivot atom in the model
             for residue in self.model['aunit']['residues']:
               for atom in residue['atoms']:
-                if(atom['aunit_id']==atom_restraint[0]):
-                  i_seqs.append(atom_restraint[0])                  
-                  for neighbour in atom['neighbours']:
+                if(atom['aunit_id']==atom_restraint[0]): 
+                  # found the pivot atom
+                  i_seqs.append(atom_restraint[0])
+                  sym_ops.append( (sgtbx.rt_mx(flat_list(atom_restraint[1][:-1]), atom_restraint[1][-1]) 
+                    if atom_restraint[1] is not None else None) )
+                  pivot_name = atom['label']
+                  
+                  # if symmetry related we have a tuple, not an int
+                  for neighbour in atom['neighbours']: 
+                    if(type(neighbour)==type(())):
+                      neighbour_id=neighbour[0]
+                    else:
+                      neighbour_id=neighbour
                     
+                    # now finding the type of the neighbour
+                    getmeout=False
                     for residuebis in self.model['aunit']['residues']:
                       for atombis in residuebis['atoms']:
-                        if(atombis['aunit_id']==neighbour):
-                          if(atombis['type']!='H'):
-                            i_seqs.append(neighbour)
+                        if(atombis['aunit_id']==neighbour_id):
+                          if(atombis['type']!='H'): # only non hydrogen atom are considered
+                            i_seqs.append(neighbour_id)
+                            if(type(neighbour)==type(())):
+                              sym_ops.append( (sgtbx.rt_mx(flat_list(neighbour[2][:-1]), neighbour[2][-1])) )
+                            else:
+                              sym_ops.append(None)
+                            getmeout=True                            
                             break
-            yield restraint_type, dict(
-              i_seqs=i_seqs,
-              volume_ideal=kwds['volume_ideal'],
-              both_signs=False,
-              weight=kwds['weight'],
-              )
+                      if(getmeout): break
+                  # end loop over neighbours
+            # end search of pivot atom
+                            
+            if(len(i_seqs)==4):
+              yield restraint_type, dict(
+                i_seqs=i_seqs,
+                sym_ops=sym_ops,
+                volume_ideal=-1.0*kwds['volume_ideal'], # cctbx has opposite site compare to shelxl
+                both_signs=False,
+                weight=kwds['weight'],
+                )
+            else:
+              print("Warning: Invalid chirality (CHIV) restraint. "+ 
+                "%s needs exactly 3 neighbours"%pivot_name)
+          # end loop over each atom of chiv restraint
+          
         elif restraint_type == 'planarity':
           # The planarity restraint is implemented using the CHIV restraint
-          # len(i_seqs)-3 CHIV restraints are necessary and used in shelxl
-          # here, all possible tetrahedrons are used instead (more robust):
-          # len(i_seqs)!/(4!*(len(i_seqs)-4)! with ! the factorial
-          # the weight is adjusted to give more or less the same strength as in shelx
-          from itertools import combinations 
-          n = math.factorial(len(i_seqs)) / (math.factorial(4) * math.factorial(len(i_seqs)-4))
-          f = float(len(i_seqs)-3)/float(n)
-          tetrahedrons = combinations(i_seqs, 4)  
-          for one_tetrahedron in tetrahedrons:                    
+          # len(i_seqs)-3 CHIV restraints are necessary and used
+          
+          # list of atom often is ordered, shuffle the list to give a random set of tetrahedron
+          # this step is not done in shelx
+          shuffle_ids=[i for i in range(len(i_seqs))]
+          random.seed('Use of a fixed seed for a consistent set of indices')
+          random.shuffle(shuffle_ids)
+          for i in xrange(len(i_seqs)-3):
             yield 'chirality', dict(
-              i_seqs=one_tetrahedron,
+              i_seqs=[i_seqs[i] for i in shuffle_ids[i:i+4]],
+              sym_ops=[kwds['sym_ops'][i] for i in shuffle_ids[i:i+4]],
               volume_ideal=0.0,
               both_signs=False,
-              weight=kwds['weight']*f,
+              weight=kwds['weight'],
               )
         else:
           yield restraint_type, kwds

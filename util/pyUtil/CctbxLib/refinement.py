@@ -30,8 +30,6 @@ from smtbx.refinement.constraints import occupancy
 from smtbx.refinement.constraints import rigid
 import smtbx.utils
 
-import numpy
-
 solvers = {
   'Gauss-Newton': normal_eqns_solving.naive_iterations_with_damping_and_shift_limit,
   'Levenberg-Marquardt': normal_eqns_solving.levenberg_marquardt_iterations
@@ -425,7 +423,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
       restraints_manager=restraints_manager,
       weighting_scheme=weighting,
       log=self.log,
-      may_parallelise=True
+      #may_parallelise=True
     )
     self.normal_eqns.shared_param_constraints = self.shared_param_constraints
     self.normal_eqns.shared_rotated_adps = self.shared_rotated_adps
