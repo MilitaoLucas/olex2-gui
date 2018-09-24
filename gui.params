@@ -25,6 +25,12 @@ gui
     .type = colour
   logo_colour = #777777
     .type = colour
+  dev_colour = #ea4335
+    .type = colour
+  alpha_colour = #fbbc05 
+    .type = colour
+  beta_colour = #1fc432
+    .type = colour
   image_font_name = Vera
     .type = str
   purple = #a245a2
