@@ -86,19 +86,32 @@ class NewsImageRetrivalThread(ThreadEx):
         res = first_res
     else:
       res = img_list.pop(0)
-    if "," in res:
-      _ = res.split(',')
-      if len(_) == 2:
-        img_url, url = res.split(',')
-      elif len(_) == 3:
-        img_url, url, tag = res.split(',')
-    else:
-      img_url = res
-      url = "www.olex2.org"
-
-    if tag:
-      if tag.strip() != olx.olex2_tag:
-        img_url = None
+      
+    while res:
+      if "," in res:
+        _ = res.split(',')
+        if len(_) == 2:
+          img_url, url = res.split(',')
+        elif len(_) == 3:
+          img_url, url, tag = res.split(',')
+      else:
+        img_url = res
+        url = "www.olex2.org"
+  
+      if tag:
+        if tag.strip() != olx.olex2_tag:
+          img_url = None
+      else:
+        if "-ac" in olx.olex2_tag:
+          img_url = None
+      
+      if not img_url:
+        res = img_list.pop(0)
+      else:
+        res = None
+      
+    if not img_url:    
+      return None, None
 
     if "://" not in img_url:
       return "http://%s" %(img_url.strip()), url.strip()
