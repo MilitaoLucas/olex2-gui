@@ -40,7 +40,7 @@ try:
       files = [x for x in os.listdir(ob_path) if 'openblas' in x and '.dll' in x]
     else:
       ob_path = os.path.join(olx.BaseDir(), 'lib')
-      files = [x for x in os.listdir(ob_path) if 'openblas' in x and '.so' in x]
+      files = [x for x in os.listdir(ob_path) if 'openblas' in x and ('.so' in x or '.dylib' in x)]
     if files:
       env.initialise(os.path.join(ob_path, files[0]).encode("utf-8"))
       if env.initialised:
