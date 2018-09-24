@@ -53,6 +53,8 @@ class NewsImageRetrivalThread(ThreadEx):
         tag = OV.GetTag().split('-')[0]
         if self.name == "news":
           olex.writeImage("news/news-%s_tmp" %tag, img_data)
+          if not url.startswith("http"):
+            url = "http://" + url
           olx.SetVar('olex2.news_img_link_url', url)
           olx.Schedule(1, "spy.internal.resizeNewsImage()")
     except:
