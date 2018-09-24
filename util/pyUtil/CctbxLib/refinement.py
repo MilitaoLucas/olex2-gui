@@ -30,6 +30,25 @@ from smtbx.refinement.constraints import occupancy
 from smtbx.refinement.constraints import rigid
 import smtbx.utils
 
+# try to initialise openblas
+try:
+  import fast_linalg
+  from fast_linalg import env
+  if not env.initialised:
+    if sys.platform[:3] == "win":
+      ob_path = olx.BaseDir()
+      files = [x for x in os.listdir(ob_path) if 'openblas' in x and '.dll' in x]
+    else:
+      ob_path = os.path.join(olx.BaseDir(), 'lib')
+      files = [x for x in os.listdir(ob_path) if 'openblas' in x and '.so' in x]
+    if files:
+      env.initialise(os.path.join(ob_path, files[0]).encode("utf-8"))
+      if env.initialised:
+        print("Successfully initialised SciPy OpenBlas:")
+        print(env.build_config)
+except Exception, e:
+  print("Could not initialise OpenBlas: %s" %e)
+
 solvers = {
   'Gauss-Newton': normal_eqns_solving.naive_iterations_with_damping_and_shift_limit,
   'Levenberg-Marquardt': normal_eqns_solving.levenberg_marquardt_iterations
@@ -449,19 +468,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
                                track_all=True,
                                gradient_threshold=1e-8,
                                step_threshold=1e-8)
-                               #gradient_threshold=1e-5,
-                               #step_threshold=1e-5)
       else:
         self.cycles = iterations(self.normal_eqns,
                                n_max_iterations=self.max_cycles,
                                track_all=True,
                                damping_value=damping[0],
                                max_shift_over_esd=damping[1],
-                               convergence_as_shift_over_esd=1e-5,
+                               convergence_as_shift_over_esd=1e-3,
                                gradient_threshold=1e-8,
                                step_threshold=1e-8)
-                               #gradient_threshold=1e-5,
-                               #step_threshold=1e-5)
 
       self.scale_factor = self.cycles.scale_factor_history[-1]
       self.covariance_matrix_and_annotations=self.normal_eqns.covariance_matrix_and_annotations()
