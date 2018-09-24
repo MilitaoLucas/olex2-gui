@@ -1,14 +1,16 @@
 <tr>
-  <td align='center' bgcolor="$GetVar(HtmlHighlightColour)">
-  
+  <td align='center'>
   <table cellpadding="4" cellspacing="1" width='100%'>
     <tr>
-      <td bgcolor="#eeb403">
-  
+      <td>
+        <zimg border="0" width="$math.eval(GetVar(htmlpanelwidth)/10)" height="$math.eval(GetVar(htmlpanelwidth)/10)" src="news/icon-$spy.GetTag().png">
+      </td>
+    
+      <td>
         <b>
-        You are running the alpha version of Olex2-$spy.GetTag(). This is generally not a good idea. Unless you specifically
+        You are running the <font color="$spy.GetParam(gui.dev_colour)">alpha version of Olex2-$spy.GetTag().</font> This is generally not a good idea. Unless you specifically
         want to test this highly experimental version, please install the release version of Olex2.
-        <font color ='#ff0000'> Please go to <a href='shell http://www.olex2.org'>www.olex2.org</a> to download the latest installer.</font>
+        Please go to <a href='shell http://www.olex2.org'>www.olex2.org</a> to download the latest installer.
         </b>
 
       </td>
