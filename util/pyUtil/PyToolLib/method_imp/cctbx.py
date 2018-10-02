@@ -12,6 +12,8 @@ class Method_cctbx_refinement(Method_refinement):
   def pre_refinement(self, RunPrgObject):
     RunPrgObject.make_unique_names = True
     self.cycles = OV.GetParam('snum.refinement.max_cycles')
+    if OV.GetParam("snum.refinement.use_solvent_mask"):
+      RunPrgObject.mask_and_fab() 
     Method_refinement.pre_refinement(self, RunPrgObject)
 
   def do_run(self, RunPrgObject):
