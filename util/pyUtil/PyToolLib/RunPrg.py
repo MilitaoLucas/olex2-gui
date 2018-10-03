@@ -675,6 +675,9 @@ class RunRefinementPrg(RunPrg):
       pass
 
   def mask_and_fab(self):
+    if not OV.GetParam("snum.refinement.use_solvent_mask"):
+      return None
+    
     import cctbx_olex_adapter
     from smtbx import masks
     from libtbx import easy_pickle
@@ -733,6 +736,7 @@ class RunRefinementPrg(RunPrg):
           line = "%d %d %d " %h + "%.4f %.4f" % (f_mask.data()[i].real, f_mask.data()[i].imag)
           print >> f, line
         print >> f, "0 0 0 0.0 0.0"
+      return f_mask
 
 
 
