@@ -94,6 +94,7 @@ class NewsImageRetrivalThread(ThreadEx):
         _ = res.split(',')
         if len(_) == 2:
           img_url, url = res.split(',')
+          tag = None
         elif len(_) == 3:
           img_url, url, tag = res.split(',')
       else:
