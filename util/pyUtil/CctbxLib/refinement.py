@@ -30,6 +30,8 @@ from smtbx.refinement.constraints import occupancy
 from smtbx.refinement.constraints import rigid
 import smtbx.utils
 
+import numpy
+
 # try to initialise openblas
 try:
   import fast_linalg
