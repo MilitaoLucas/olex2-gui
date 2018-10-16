@@ -519,6 +519,15 @@ class FullMatrixRefine(OlexCctbxAdapter):
         print "Refinement failed to converge"
       elif "SCITBX_ASSERT(!cholesky.failure) failure" in str(e):
         print "Cholesky failure"
+        i = str(e).rfind(' ')
+        index = int(str(e)[i:])
+        if(index > 0):
+          print "the leading minor of order %i is not positive definite"%index
+          jac_tr = self.reparametrisation.jacobian_transpose_matching_grad_fc().as_dense_matrix().as_numpy_array()
+          listi = numpy.argwhere(jac_tr[index, :]!=0)
+          print "Crystallographic parameters linked:"
+          for i in listi:
+            print i, self.reparametrisation.component_annotations[i]
       else:
         print "Refinement failed"
         import traceback
