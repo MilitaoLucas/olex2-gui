@@ -63,7 +63,7 @@ Please update to cctbx build '%s' or later.
 Current cctbx build: '%s'
 """ %(cctbx_compatible_version, cctbx_compile_date))
   if need_cold_start:
-    cold_start(cctbxSources, build_path, '%s/modules'%cctbxRoot)
+    cold_start(cctbxSources, build_path)
     import libtbx.load_env
     reload(libtbx.load_env)
   for i in libtbx.env.pythonpath:
@@ -89,14 +89,10 @@ Current cctbx build: '%s'
   else:
     os.environ[lib_path] = abs(libtbx.env.lib_path)
 
-def cold_start(cctbx_sources, build_path, cctbx_modules):
+def cold_start(cctbx_sources, build_path):
   saved_cwd = os.getcwdu()
   os.chdir(build_path)
-  if(os.path.isdir(cctbx_sources+'/fast_linalg')):
-    sys.argv = ['%s/libtbx/configure.py' % cctbx_sources, '-r', cctbx_modules, '--build=debug', '--no_bin_python', 'cctbx', 'smtbx', 'iotbx', 'fast_linalg']
-    print sys.argv
-  else:
-    sys.argv = ['%s/libtbx/configure.py' % cctbx_sources, '--build=debug', '--no_bin_python', 'cctbx', 'smtbx', 'iotbx']
+  sys.argv = ['%s/libtbx/configure.py' % cctbx_sources, 'smtbx', 'iotbx', 'fast_linalg']
   #execfile(sys.argv[0])
   import libtbx.configure
   libtbx.configure.run()
