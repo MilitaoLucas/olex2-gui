@@ -1207,9 +1207,9 @@ class FullMatrixRefine(OlexCctbxAdapter):
     wFile = open("%s/%s.vcov" %(OV.FilePath(),OV.FileName()),'wb')
     wFile.write("VCOV\n")
     wFile.write(" ".join(matrix.annotations) + "\n")
-    for item in matrix.matrix:
-      wFile.write(str(item) + " ")
     wFile.close()
+    
+    numpy.save("%s/%s.npy" %(OV.FilePath(),OV.FileName()), matrix.matrix.as_numpy_array())
 
   def f_obs_minus_f_calc_map(self, resolution):
     scale_factor = self.scale_factor
