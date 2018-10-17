@@ -136,7 +136,7 @@ class NewsImageRetrivalThread(ThreadEx):
   def make_call(self, url):
     import HttpTools
     try:
-      res = HttpTools.make_url_call(url, values = '', http_timeout=0.2)
+      res = HttpTools.make_url_call(url, values = '', http_timeout=5)
     except Exception, err:
       return None
     return res
