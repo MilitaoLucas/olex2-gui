@@ -1204,12 +1204,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
     return geometrical_constraints
 
   def export_var_covar(self, matrix):
-    wFile = open("%s/%s.vcov" %(OV.FilePath(),OV.FileName()),'wb')
-    wFile.write("VCOV\n")
-    wFile.write(" ".join(matrix.annotations) + "\n")
-    wFile.close()
-    
-    numpy.save("%s/%s.npy" %(OV.FilePath(),OV.FileName()), matrix.matrix.as_numpy_array())
+    with open(os.path.join(OV.FilePath(),OV.FileName()+".npy"), "wb") as wFile:
+      wFile.write("VCOV\n")
+      wFile.write(" ".join(matrix.annotations) + "\n")
+      numpy.save(wFile, matrix.matrix.as_numpy_array())
 
   def f_obs_minus_f_calc_map(self, resolution):
     scale_factor = self.scale_factor
