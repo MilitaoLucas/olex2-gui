@@ -162,7 +162,7 @@ gui
       .caption = "Background colour"
     font_colour = #442244
       .type = colour
-    font_name = Noto
+    font_name = Arial
       .type = str
     font_size = 2
       .type = int
