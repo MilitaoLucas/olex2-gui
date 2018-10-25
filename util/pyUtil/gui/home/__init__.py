@@ -34,7 +34,7 @@ class MultipleDataset:
     current = None
     html = '<table border="0" VALIGN="center" width="100%" cellpadding="1" cellspacing="0" bgcolor="$GetVar(HtmlTableRowBgColour)"><tr>'
     
-    if olx.IsFileType('cif'):
+    if olx.IsFileType('cif') == 'true':
       if CURR_CIF_FILE_NAME != OV.FileFull():
         CURR_CIF_FILE_NAME = None
         CURR_CIF_FILE_LIST = []
