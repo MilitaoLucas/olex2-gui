@@ -4,24 +4,27 @@
 #############################################################
 
 gui {
-  base_colour = #222222
+  base_colour = #666666
   logo_colour = #999999
   red = #aa0000
   orange = #ff740e
-  green = #00aa00
-  htmlpanelwidth = 400
+  dark_green = #00aa00
+  green = #a6cf4d
+
+  htmlpanelwidth = 520
 
   html {
-    base_colour = #444444
-    bg_colour = #444444
-    font_colour = #dedede
+    base_colour = #666666
+    bg_colour = #666666
+    font_colour = #efefef
     formula_colour = #dedede
     formula_size = 5
     highlight_colour = #ff8800
-    input_bg_colour = #888888
+    input_bg_colour = #666666
     link_colour = #ababab
-    table_bg_colour = #555555
+    table_bg_colour = #666666
     table_firstcol_colour = #666666
+    table_row_bg_colour = #666666
     htmlpanelwidth = 500
   }
   skin {
@@ -32,6 +35,14 @@ gui {
     logo_is_colourised = False
     size_factor = 1.0
     clearcolor = 3223857
+    link_button{
+      flat = True
+        .type = bool
+      bgcolor = #555555
+        .type = colour
+      fgcolor = #dedede
+        .type = colour
+    }
   }
 
   htmlpanelwidth = 500
@@ -43,51 +54,62 @@ gui {
     }
 
     tab{
+      height = 35
+      base_colour = #555555
+      grad_colour = #555555
+      grad_colour_L = 0.9
       off_L = 0.6
       on_L = 1.0
       hover_L = 1.5
+      border_colour = #656565
     }  
   
     cbtn{
-      height = 26
+      height = 30
+      font_size = 18
       base_colour = #555555
-      grad_colour = #777777
+      grad_colour = #555555
+      grad_colour_L = 0.9
       font_colour_L = 1.4
       off_L = 1.2
       on_L = 1.0
       hover_L = 1.1
+      arrows = "bar:right:32,arrow_right:onup:offdown:hoverdown:hoveronup"
+      border_colour = #656565
       }
 
     h1{
-      height = 26
-      font_size = 18
+      height = 28
+      font_size = 19
       top = 2
-      left = 9
+      left = 19
       font_colour = #dedede
       font_colour_L = 1.4
-      base_colour = #666666
-      grad_colour = #666666
-      grad_colour_L = 0.3
-      off_L = 1.3
+      base_colour = #555555
+      grad_colour = #555555
+      grad_colour_L = 0.9
+      off_L = 0.6
       on_L = 1.0
       hover_L = 1.7
-      border = 1
-      border_colour = #333333
+      border = 0
+      border_colour = #656565
       shadow = False
-      rounded = 1010
-      arrows = "bar:left:7"
+      corner_rad = 3
+      rounded = 1000
+      arrows = "bar:left:12"
       
       
     }
 
     h3{
-      height = 22
+      height = 24
+      width_adjust = 10
       font_colour = #dedede
       font_colour_L = 1.4
-      top = 3
-      left = 8
-      base_colour = #555555
-      grad_colour = #555555
+      top = 4
+      left = 15
+      base_colour = #777777
+      grad_colour = #666666
       grad_colour_L = 0.3
       off_L = 1.1
       on_L = 1.0
@@ -95,8 +117,9 @@ gui {
       border = 1
       border_colour = #333333
       shadow = False
-      rounded = 1010
-      arrows = "bar:left:5"
+      corner_rad = 3
+      rounded = 1000
+      arrows = "bar:left:10"
     }
 
     button{
