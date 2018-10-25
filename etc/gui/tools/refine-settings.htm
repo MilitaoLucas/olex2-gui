@@ -90,7 +90,9 @@ $-
      html.Snippet("gui/snippets/input-checkbox",
      "name=SET_SNUM_REFINEMENT_UPDATE_WEIGHT",
      "checked=spy.GetParam('snum.refinement.update_weight')",
-     "onclick=spy.SetParam('snum.refinement.update_weight', html.GetState('~name~'))")
+     "bgcolor=GetVar(HtmlTableFirstcolColour)",
+     "onclick=spy.SetParam('snum.refinement.update_weight', html.GetState('~name~'))"
+     )
     $-
   </td>
 
@@ -105,6 +107,7 @@ $-
      "checked=not(strcmp(xf.rm.Exti(),'n/a'))",
      "oncheck=spy.SetParam(snum.refinement.refine_extinction,3)>>addins EXTI",
      "onuncheck=spy.SetParam(snum.refinement.refine_extinction,0)>>delins EXTI",
+     "bgcolor=GetVar(HtmlTableFirstcolColour)",
      )
     $-
   </td>
@@ -141,7 +144,9 @@ $-
     "label=Use Solvent Mask",
     "name=SNUM_REFINEMENT_USE_SOLVENT_MASK",
     "checked=spy.GetParam('snum.refinement.use_solvent_mask')",
-    "onclick=spy.SetMasking(html.GetState(~name~))"
+    "onclick=spy.SetMasking(html.GetState(~name~))",
+    "bgcolor=GetVar(HtmlTableFirstcolColour)",
+
     )
   $-
 
