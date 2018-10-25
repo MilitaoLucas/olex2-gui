@@ -212,6 +212,8 @@ def export_parameters(load_phil=True):
   OV.SetVar('gui.watermark', OV.GetParam('gui.watermark').hexadecimal)
   OV.SetVar('gui.grey', OV.GetParam('gui.grey').hexadecimal)
   OV.SetVar('gui.green', OV.GetParam('gui.green').hexadecimal)
+  OV.SetVar('gui.dark_green', OV.GetParam('gui.dark_green').hexadecimal)
+  OV.SetVar('gui.green_text', OV.GetParam('gui.green_text').hexadecimal)
   OV.SetVar('gui.orange', OV.GetParam('gui.orange').hexadecimal)
   OV.SetVar('gui.red', OV.GetParam('gui.red').hexadecimal)
   OV.SetVar('HtmlCheckboxHeight', OV.GetParam('gui.html.checkbox_height'))
@@ -230,6 +232,8 @@ def export_parameters(load_phil=True):
   OV.SetVar('linkButton.flat', OV.GetParam('gui.skin.link_button.flat'))
   OV.SetVar('linkButton.fgcolor', OV.GetParam('gui.skin.link_button.fgcolor').hexadecimal)
   OV.SetVar('history_width', IT.history_width)
+  OV.SetVar('button.highlight.lightness', OV.GetParam('gui.skin.button.highlight.lightness'))
+  OV.SetVar('button.border.lightness', OV.GetParam('gui.skin.button.border.lightness'))
   try:
     OV.SetVar('linkButton.bgcolor', OV.GetParam('gui.skin.link_button.bgcolor').hexadecimal)
   except:
