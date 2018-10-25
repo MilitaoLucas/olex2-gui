@@ -41,6 +41,8 @@ gui
     .type = colour
   dark_green = #307125
     .type = colour
+  green_text = #307125
+    .type = colour
   blue = #0033ff
     .type = colour
   light_blue = #0080ff
@@ -121,15 +123,19 @@ gui
       .type = int
     icon_border_colour = #bcbcbc
       .type = colour
+    button.highlight.lightness = 120
+      .type = int
+    button.border.lightness = 90
+      .type = int
     link_type = 'gui-link-button'
       .type = str
     default_link = 'gui/snippets/gui-link-button'
       .type = str
     link_button{
-      flat = False
+      flat = True
         .type = bool
-      bgcolor = ""
-        .type = str
+      bgcolor = #dddddd
+        .type = colour
       fgcolor = #0064b4
         .type = colour
     }
