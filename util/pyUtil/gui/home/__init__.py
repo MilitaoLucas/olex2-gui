@@ -30,8 +30,15 @@ class MultipleDataset:
 
   def generateHtml(self,make_always=False):
     global CURR_CIF_FILE_NAME
+    global CURR_CIF_FILE_LIST
     current = None
     html = '<table border="0" VALIGN="center" width="100%" cellpadding="1" cellspacing="0" bgcolor="$GetVar(HtmlTableRowBgColour)"><tr>'
+    
+    if olx.IsFileType('cif'):
+      if CURR_CIF_FILE_NAME != OV.FileFull():
+        CURR_CIF_FILE_NAME = None
+        CURR_CIF_FILE_LIST = []
+
     if not CURR_CIF_FILE_NAME:
       if olx.IsFileType('cif') == 'true':
         CURR_CIF_FILE_NAME = OV.FileFull()
@@ -62,20 +69,20 @@ class MultipleDataset:
           current = i
           break
 
+
+    if (cnt%3) == 0:
+      td_width='33'
+    elif (cnt%4) == 0:
+      td_width='25'
+    elif (cnt%2) == 0:
+      td_width='50'
+    else:
+      td_width='25'
+
     for i in xrange(0, cnt):
       name = CURR_CIF_FILE_LIST[i][1]
       display = CURR_CIF_FILE_LIST[i][2]
-
-      if (cnt%3) == 0:
-        td_width='33'
-      elif (cnt%4) == 0:
-        td_width='25'
-      elif (cnt%2) == 0:
-        td_width='50'
-      else:
-        td_width='25'
-
-      if i > 0 and (cnt%4) == 0:
+      if i > 0 and (i%4) == 0:
         html += "</tr><tr width=100%>"
       if i == current:
         bgcolour=OV.GetVar('HtmlBgColour')
