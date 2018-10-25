@@ -1,0 +1,152 @@
+t:mask_output_table_header_rp{
+<tr width='100%%'  bgcolor='%(table_bg)s'>
+    <td align='center' width='5%%'>
+       <b>&#35;</b>
+    </td>
+    <td align='center' width='12%%'>
+       <b>V (A<sup>3</sup>)</b>
+    </td>
+    <td align='center' width='12%%'>
+       <b>e<sup>-</sup></b>
+    </td>
+    <td align='center' width='12%%'>
+       <b>e/V</b>
+    </td>
+    <td align='center' width='40%%'>
+       <b>Content</b>
+    </td>
+    <td align='center' width='12%%'>
+       <b>e<sup>-</sup></b>
+    </td>
+    <td align='center' width='7%%'>
+       <b>m</b>
+    </td>
+</tr>}
+
+
+t:mask_output_table_row_rp{
+<tr width='100%%' bgcolor='%(table_bg)s'>
+    <td align='center' width='5%%'>
+       <b>%(number)s
+    </td>
+    <td align='center' width='12%%'>
+       %(volume)s
+    </td>
+    <td align='center' width='12%%'>
+       %(electron)s
+    </td>
+    <td align='center' width='12%%'>
+       %(v_over_e)s
+    </td>
+    <td align='center' width='40%%'>
+       %(content)s
+    </td>
+    <td align='center' width='12%%'>
+       %(e_accounted_for)s
+    </td>
+    <td align='center' width='7%%'>
+       %(multiplicity)s
+    </td>
+</tr>}
+
+t:mask_output_end_rp{
+  <table>
+  <tr>
+
+  <td width=20%% align='left'>
+    <input
+      type="button"
+      name="ADD_TO_MASK_FORMULA"
+      value="Add to Formula"
+      bgcolor="GetVar('linkButton.bgcolor')"
+      fgcolor="GetVar('linkButton.fgcolor')"
+      onclick="fixunit xf.au.GetZprime()>>xf.SetFormula(%(suggested_sum)s)>>html.Update()"
+    >
+  </td>
+  <td width=30%%>
+      <b>%(add_to_formula)s</b>
+  </td>
+
+  <td width=50%%>
+      <b>%(formula)s </b>
+  </td>
+
+
+  <tr>
+
+  <td width=20%%>
+    <input
+      type="button"
+      name="ADD_TO_MASK_MOIETY"
+      bgcolor="GetVar('linkButton.bgcolor')"
+      fgcolor="GetVar('linkButton.fgcolor')"
+      value="Add to Moiety"
+      onclick="spy.set_cif_item(_chemical_formula_moiety,'$xf.latt.GetMoiety()')>>spy.set_cif_item(_chemical_formula_moiety,'%(suggested_moiety)s')>>html.Update()"
+    >
+  </td>
+  <td width=30%%>
+      <b>%(add_to_moiety)s</b>
+  </td>
+
+  <td width=50%%>
+      <b>%(moiety)s</b>
+  </td>
+
+
+</tr>
+  </table>
+}
+
+
+t:_mask_output_end_rp{
+  <table>
+  <tr>
+
+  <td width=20%%>
+   <b>Sum Formula</b>
+  </td>
+
+  <td width=80%%>
+      <b>%(formula)s </b>
+  </td>
+
+
+  <tr>
+  <td width=20%%>
+   <b>Moiety</b>
+  </td>
+  
+  <td width=80%%>
+      <b>%(moiety)s</b>
+  </td>
+
+</tr>
+  </table>
+}
+
+t:mask_special_details{
+  <table width=100%%>
+  <tr>
+  <td width=8%%>
+    <input
+      type="button"
+      height="math.eval(GetVar('HtmlComboHeight')*2)"
+      name="EDIT_MASK_SPECIAL_DETAILS"
+      value="Edit"
+      bgcolor="GetVar('linkButton.bgcolor')"
+      fgcolor="GetVar('linkButton.fgcolor')"
+      onclick="spy.edit_mask_special_details('%(mask_special_details)s',%(base)s,%(current_sNum)s)"
+    >
+  </td>
+  <td width=92%%>
+      %(mask_special_details)s
+  </td></tr>
+  </table>}
+  
+t:mask_special_detail_default{"A solvent mask was calculated and %(total_void_electrons).0f electrons were 
+found in a volume of %(total_void_volume).0f\%%A^3 in %(total_void_no)s void%(total_void_no_plural)s. 
+This is consistent with the presence of 
+%(add_to_moiety)s per formula unit 
+which account for %(total_void_accounted_for_electrons).1f electrons."
+}
+
