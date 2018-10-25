@@ -8,8 +8,8 @@
 #onchangealways=false
 #setdefault=false
 #disabled=false
-#bgcolor=GetVar('HtmlInputBgColour')
-#fgcolor=GetVar('HtmlFontColour')
+#bgcolor='GetVar(HtmlInputBgColour)'
+#fgcolor='GetVar(HtmlFontColour)'
 #width='100%'
 #td1=<td>
 #td2=</td>
@@ -20,7 +20,7 @@
       type="spin"
       height="GetVar('HtmlComboHeight')"
       bgcolor="#bgcolor"
-      fgcolor="GetVar(HtmlFontColour)"
+      fgcolor="#fgcolor"
       valign="center"
       min="#min"
       max="#max"

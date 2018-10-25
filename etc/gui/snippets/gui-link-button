@@ -13,7 +13,7 @@
 #td2=</td>
 
 #td1
-  <font size="$GetVar('HtmlFontSizeControls')"><b>
+  <font size="$GetVar('HtmlFontSizeControls')">
     <input
       type="button"
       name="#name"
@@ -21,8 +21,8 @@
       width="#width"
       height="#height"
       onclick="#onclick>>focus"
-      fgcolor="#fgcolor"
       bgcolor="#bgcolor"
+      fgcolor="#fgcolor"
       fit="#fit"
       flat="#flat"
       hint="#hint"
