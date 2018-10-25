@@ -6,6 +6,7 @@ import sys
 import OlexVFS
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
+
 debug = bool(OV.GetParam('olex2.debug',False))
 timer = debug
 import glob
@@ -34,6 +35,7 @@ import re
 import time
 import math
 global regex_l
+
 regex_l = {}
 
 global cache
@@ -553,7 +555,8 @@ def copy_mask_infro_from_comment():
   pass
 
 
-def get_mask_info():
+def get_mask_info_old():
+  
   global current_sNum
   import gui
   current_sNum = OV.ModelSrc()
@@ -628,7 +631,7 @@ def get_mask_info():
 #  t += "<tr><td>%(details)s</td></tr></table>" %d
   t += "</table>"
   return t
-OV.registerFunction(get_mask_info, False, 'gui.tools')
+OV.registerFunction(get_mask_info_old, False, 'gui.tools')
 
 
 def makeFormulaForsNumInfo():
@@ -1369,3 +1372,5 @@ def scrub(cmd):
   log = gui.tools.LogListen()
   olex.m(cmd)
   return log.endListen()
+
+from GetMaskInfo import get_mask_info
