@@ -80,6 +80,7 @@ class MultipleDataset:
       td_width='25'
 
     for i in xrange(0, cnt):
+      index = CURR_CIF_FILE_LIST[i][0]
       name = CURR_CIF_FILE_LIST[i][1]
       display = CURR_CIF_FILE_LIST[i][2]
       if i > 0 and (i%4) == 0:
@@ -89,13 +90,13 @@ class MultipleDataset:
         if OV.FileExt() == "cif":
           action = "refine"
           highlight = olx.GetVar('HtmlHighlightColour')
-          display = "Refine %s" %display
+          display = "** Refine **"
         else:
-          action = 'reap %s#'%(CURR_CIF_FILE_NAME) + str(i+1)
+          action = 'reap %s#'%(CURR_CIF_FILE_NAME) + str(index)
           highlight = OV.GetParam('gui.green')
           display = "CIF %s" %display
       else:
-        action = 'reap %s#'%(CURR_CIF_FILE_NAME) + str(i+1)
+        action = 'reap %s#'%(CURR_CIF_FILE_NAME) + str(index)
         highlight = olx.GetVar('linkButton.bgcolor')
       html += '''
     $+
