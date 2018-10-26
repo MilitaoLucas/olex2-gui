@@ -234,6 +234,8 @@ def export_parameters(load_phil=True):
   OV.SetVar('history_width', IT.history_width)
   OV.SetVar('button.highlight.lightness', OV.GetParam('gui.skin.button.highlight.lightness'))
   OV.SetVar('button.border.lightness', OV.GetParam('gui.skin.button.border.lightness'))
+  OV.SetVar('custom_button', 'border.lightness: %s;highlight.lightness: %s'%(
+    OV.GetParam('gui.skin.button.highlight.lightness'), OV.GetParam('gui.skin.button.border.lightness')))
   try:
     OV.SetVar('linkButton.bgcolor', OV.GetParam('gui.skin.link_button.bgcolor').hexadecimal)
   except:

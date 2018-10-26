@@ -16,6 +16,7 @@ gui {
   html {
     base_colour = #666666
     bg_colour = #666666
+    font_name = Arial
     font_colour = #efefef
     formula_colour = #dedede
     formula_size = 5
@@ -24,8 +25,10 @@ gui {
     link_colour = #ababab
     table_bg_colour = #666666
     table_firstcol_colour = #666666
-    table_row_bg_colour = #666666
+    table_row_bg_colour = #555555
     htmlpanelwidth = 500
+    combo_height = 24
+
   }
   skin {
     materials_have_been_set = False
@@ -50,7 +53,7 @@ gui {
   timage{
     snumtitle{
       sg_L = 0.8
-      grad_colour = #666666
+      grad_colour = #205c90
     }
 
     tab{
