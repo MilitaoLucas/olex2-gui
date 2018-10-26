@@ -301,6 +301,8 @@ class OlexRefinementModel(object):
                   if 'adp' in atom:
                     i_seqs.append(atom_restraint[0])
                   break
+          if(len(i_seqs)==0):
+            continue
         else:
           i_seqs = [i[0] for i in restraint['atoms']]
           
