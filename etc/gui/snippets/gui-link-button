@@ -1,14 +1,15 @@
 #value=
 #hint=
 #width=100%
-#height=$GetVar('HtmlComboHeight')
+#height=GetVar(HtmlComboHeight)
 #name=#value
 #onclick=#onclick
 #fit=false
-#flat=$GetVar('linkButton.flat')
+#flat=GetVar(linkButton.flat)
 #disabled=false
-#bgcolor=GetVar('linkButton.bgcolor')
-#fgcolor=GetVar('linkButton.fgcolor')
+#bgcolor=GetVar(linkButton.bgcolor)
+#fgcolor=GetVar(linkButton.fgcolor)
+#custom=$GetVar(custom_button)
 #td1=<td>
 #td2=</td>
 
@@ -27,6 +28,7 @@
       flat="#flat"
       hint="#hint"
       disabled="#disabled"
+      custom="#custom"
     >
   </font>
 #td2

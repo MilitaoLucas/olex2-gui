@@ -5,18 +5,11 @@
 gui {
 
   skin {
-    materials_have_been_set = False
-    name = default
-    extension = None
-    logo_name= None
     size_factor = 1.5
-    clearcolor = 8404992
     icon_size = 40
     }
 
   html {
-    font_size = 4
-    font_size_large = 6
     input_height = 30
     checkbox_height = 30
     checkbox_width = 30
@@ -62,7 +55,6 @@ gui {
       rounded = 0101
       arrows = "bar:right:44,arrow_right:onup:offdown:hoverdown:hoveronup,buttonmark:54"
       vline = 44
-
       dot_size = 6
       dot_pad = 8
       dot_left = 6
@@ -92,7 +84,7 @@ gui {
     }
 
     h1{
-      height = 30
+      height = 35
       corner_rad = 3
       rounded = 1111
       font_size = 14
@@ -103,7 +95,7 @@ gui {
     }
 
     h3{
-      height = 25
+      height = 30
       corner_rad = 3
       rounded = 1111
       font_size = 13
@@ -113,27 +105,6 @@ gui {
       shadow = False
     }
   }
-  lines_of_cmd_text = 10
-  button_colouring = #ababab
-  button_writing = #00ff00
-  button_font_name = Vera
-  tab_colour = #ff0000
-  tab_font_colour = #ff0000
-  infobox_text = '2053;2143326838;2143979345'
-  infobox_plane = '2053;2136422952;2137144606'
-  console_font = #olex2.fnt:frb_16
-  labels_font = #olex2.fnt:frb_20
-  htmlpanelwidth = 620
-  htmlpanelwidth_margin_adjust = 22
-  grad_top_left = #1f3257
-  grad_top_right = #1f3257
-  grad_bottom_left = #ffffff
-  grad_bottom_right = #ffffff
-  use_fader=False
-  shelx_restraints = None
-  shelx_constraints = None
-  archive_last = None
-
   help_box{
     width = 450
     height_factor = 120
@@ -152,12 +123,8 @@ gui {
     width = 800
     title{
       height = 50
-      colour = #326496
-      font_name = Georgia Bold
       font_size = 35
-      font_colour = #ffffff
     }
   }
-
 }
 
