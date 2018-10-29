@@ -21,7 +21,7 @@
       value="#value"
       width="#width"
       height="#height"
-      onclick="#onclick>>focus"
+      onclick="focus>>#onclick"
       bgcolor="#bgcolor"
       fgcolor="#fgcolor"
       fit="#fit"
