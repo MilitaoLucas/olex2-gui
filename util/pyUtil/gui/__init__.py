@@ -340,7 +340,16 @@ def copy_datadir_items(force=False):
 
 olex.registerFunction(copy_datadir_items, False, "gui")
 
-
+def focus_on_control():
+  control = OV.GetVar('set_focus_on_control_please',None)
+  if control == "None": control = None
+  if control:
+    print "focus on %s" %control
+    if olx.html.IsEnabled(control) == 'true':
+      olx.html.SetBG(control,OV.GetVar('HtmlHighlightColour'))
+      olx.html.SetFocus(control)
+olex.registerFunction(focus_on_control, False, "gui")
+  
 def escape_for_html(s):
   s = s.replace("(", "&#40;")
   s = s.replace(")", "&#41;")
