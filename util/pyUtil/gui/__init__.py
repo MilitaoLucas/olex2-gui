@@ -7,6 +7,7 @@ from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 from ImageTools import IT
 
+
 import htmlTools
 
 
@@ -341,13 +342,17 @@ def copy_datadir_items(force=False):
 olex.registerFunction(copy_datadir_items, False, "gui")
 
 def focus_on_control():
+  highlight = OV.GetVar('HtmlHighlightColour')
   control = OV.GetVar('set_focus_on_control_please',None)
   if control == "None": control = None
   if control:
     print "focus on %s" %control
-    if olx.html.IsEnabled(control) == 'true':
-      olx.html.SetBG(control,OV.GetVar('HtmlHighlightColour'))
+    if OV.IsControl(control):
+      olx.html.SetBG(control,highlight)
       olx.html.SetFocus(control)
+      OV.SetVar('set_focus_on_control_please','None')
+      return
+  olx.Focus()
 olex.registerFunction(focus_on_control, False, "gui")
   
 def escape_for_html(s):
