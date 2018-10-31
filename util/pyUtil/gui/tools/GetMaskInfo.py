@@ -31,14 +31,19 @@ def get_mask_info():
   if not os.path.exists(template_path):
     template_path = os.sep.join([p_path, 'mask_output.htm'])
     
+  
 #  print ".. %s .." %template_path
   global current_sNum
   current_sNum = OV.ModelSrc()
+  if OV.HKLSrc().rstrip(".hkl").endswith("_sq"):
+    base = "platon_squeeze"
+  else:
+    base = "smtbx_masks"
+  
   d = {}
 #  d['table_bg'] =  OV.GetParam('gui.html.table_firstcol_colour')
   d['table_bg'] =  olx.GetVar('HtmlTableBgColour')
-  bases = ['smtbx_masks', 'platon_squeeze']
-  base = bases[0]
+  
   is_CIF = (olx.IsFileType('cif') == 'true')
 
   numbers = olx.cif_model[current_sNum].get('_%s_void_nr' %base, None)
@@ -47,7 +52,6 @@ def get_mask_info():
     return "no mask info"
 
   if not numbers:
-    base = bases[1]
     numbers = olx.cif_model[current_sNum].get('_%s_void_nr' %base)
     if not numbers:
       if is_CIF:
@@ -70,7 +74,8 @@ def get_mask_info():
     electrons = olx.cif_model[current_sNum].get('_%s_void_count_electrons' %base)
     contents = olx.cif_model[current_sNum].get('_%s_void_content' %base)
     details = olx.cif_model[current_sNum].get('_%s_details' %base)
-    mask_special_details = olx.cif_model[current_sNum].get('_%s_special_details' %base).strip()
+    mask_special_details = olx.cif_model[current_sNum].get('_%s_special_details' %base)
+    if mask_special_details: mask_special_details = mask_special_details.strip()
 
   Z =float(olx.xf.au.GetZ())
   Zprime = float(olx.xf.au.GetZprime())
@@ -155,6 +160,7 @@ def get_mask_info():
     for entry in _:
       sum_content.append((factor, entry))
       entity, multi = split_entity(entry)
+      multi = float(multi)
       ent = moieties.get(entity.lower(), entity)
       ent = formula_cleaner(unicode(ent))
 
@@ -211,6 +217,7 @@ def get_mask_info():
     if "?" in entity:
       continue
     entity, multi = split_entity(entity)
+    multi = float(multi)
     #head = entity.lstrip('0123456789./')
     #multi = entity[:(len(entity)-len(head))]
     #if not multi: multi = 1
@@ -227,7 +234,7 @@ def get_mask_info():
     except:
       total_electrons_accounted_for += 0
 
-    factor = round(multi/Zprime,3)
+    factor = round(float(multi)/Zprime,3)
     total_formula = _add_formula(total_formula, ent, factor)
     add_to_formula = _add_formula(add_to_formula, ent, factor)
     
@@ -261,7 +268,8 @@ def get_mask_info():
     else:
       mask_special_details = ""
     mask_info_has_updated = False
-  mask_special_details = mask_special_details.strip().lstrip('"').rstrip('"').replace("\r","")
+  if mask_special_details:
+    mask_special_details = mask_special_details.strip().lstrip('"').rstrip('"').replace("\r","")
   if mask_info_has_updated:
     olx.cif_model[current_sNum]['_%s_special_details' %base] = mask_special_details
     update_sqf_file(current_sNum, '_%s_special_details' %base)
@@ -440,7 +448,7 @@ def update_metacif(sNum, file_name):
 
 def get_sqf_name(full=True):
   if full:
-    retVal = os.sep.join([OV.FilePath(), "%s.sqf" %(current_sNum)  ])
+    retVal = OV.HKLSrc().replace(".hkl", ".sqf")
   else:
     retVal = "%s.sqf" %(current_sNum)  
   return retVal
@@ -450,7 +458,6 @@ def edit_mask_special_details(txt,base,sNum):
   if user_value == "None":
     return
   if user_value:
-    
     olx.cif_model[current_sNum]['_%s_special_details' %base] = user_value
     model_src = OV.ModelSrc()
     update_sqf_file(current_sNum, '_%s_special_details' %base)
@@ -462,6 +469,8 @@ OV.registerFunction(edit_mask_special_details)
 def update_sqf_file(current_sNum, scope, scope2=None):
   sqf_file = get_sqf_name()
   if os.path.exists(sqf_file):
+    with file(sqf_file, 'r') as original: data = original.read()
+    with file(sqf_file, 'w') as modified: modified.write("data_%s\n"%OV.ModelSrc() + data)    
     with open(sqf_file, 'rb') as f:
       cif_block = iotbx.cif.reader(file_object=f).model()
 
@@ -481,22 +490,22 @@ def update_sqf_file(current_sNum, scope, scope2=None):
 
 def add_mask_content(i,which):
   global mask_info_has_updated
+  if current_sNum.endswith("_sq"):
+    base = "platon_squeeze"
+  else:
+    base = "smtbx_masks"
+  
   is_CIF = (olx.IsFileType('cif') == 'true')
   if ":" not in i:
     i_l = [str(i)]
   else:
     i_l = i.split(":")
   global current_sNum
-  bases = ['smtbx', 'squeeze']
-  base = bases[0]
   current_sNum = OV.ModelSrc()
-  contents = olx.cif_model[current_sNum].get('_%s_masks_void_%s' %(base,which))
+  contents = olx.cif_model[current_sNum].get('_%s_void_%s' %(base, which))
   if not contents:
-    base = bases[1]
-    contents = olx.cif_model[current_sNum].get('_%s_masks_void_%s' %(base,which))
-    if not contents:
-      if is_CIF:
-        contents = olx.Cif('_%s_void_nr' %base).split(",")
+    if is_CIF:
+      contents = olx.Cif('_%s_void_nr' %base).split(",")
   try:
     disp = ",".join(i_l)
   except:
@@ -515,9 +524,10 @@ def add_mask_content(i,which):
   for idx in i_l:
     idx = int(idx) - 1
     _[idx] = user_value
-  mask = OV.get_cif_item('_%s_masks_void' %base)
-  olx.cif_model[current_sNum]['_%s_masks_void' %base]['_smtbx_masks_void_content'] = _
-  update_sqf_file(current_sNum, '_%s_masks_void' %base, '_smtbx_masks_void_content')
+    
+  mask = OV.get_cif_item('_%s_void' %base)
+  olx.cif_model[current_sNum]['_%s_void' %base]['_%s_void_content' %base] = _
+  update_sqf_file(current_sNum, '_%s_void' %base, '_%s_void_content' %base)
   mask_info_has_updated = True
   olx.html.Update()
   
