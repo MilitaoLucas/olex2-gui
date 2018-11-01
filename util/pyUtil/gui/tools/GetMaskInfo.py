@@ -23,6 +23,11 @@ gui_orange = OV.GetParam('gui.orange')
 gui_red = OV.GetParam('gui.red')
 gui_grey = OV.GetParam('gui.grey')
 
+from PeriodicTable import PeriodicTable
+PT = PeriodicTable()
+pt = PT.PeriodicTable()
+
+
 def get_mask_info():
   global mask_info_has_updated
   import gui
@@ -79,7 +84,6 @@ def get_mask_info():
 
   Z =float(olx.xf.au.GetZ())
   Zprime = float(olx.xf.au.GetZprime())
-
   number_of_symm_op = round(Z/Zprime)
   Z = round(Z)
   Zprime = Z/number_of_symm_op
@@ -136,8 +140,8 @@ def get_mask_info():
     d['number'] = number
     electron = float(electron) * multiplicity
     volume = float(volume) * multiplicity
-    d['electron'] = electron
-    d['volume'] = volume
+    d['electron'] = "%.0f" %float(electron)
+    d['volume'] = "%.0f" %float(volume)
     d['multiplicity'] = format_number(multiplicity)
     d['formula'] = get_rounded_formula(as_string_sep=" ")
     d['moiety'] = moiety
@@ -157,6 +161,7 @@ def get_mask_info():
     _ = content.split(",")
 
     electrons_accounted_for = 0
+    non_h_accounted_for = 0
     for entry in _:
       sum_content.append((factor, entry))
       entity, multi = split_entity(entry)
@@ -164,9 +169,10 @@ def get_mask_info():
       ent = moieties.get(entity.lower(), entity)
       ent = formula_cleaner(unicode(ent))
 
-
       try:
-        electrons_accounted_for += get_sum_electrons_from_formula(ent) * multi * factor
+        Z, N = get_sum_electrons_from_formula(ent)
+        electrons_accounted_for += Z * multi * factor
+        non_h_accounted_for += N * multi * factor
       except:
         electrons_accounted_for += 0
 
@@ -188,14 +194,28 @@ def get_mask_info():
     if float(electron) != 0:
       v_over_e  = float(volume)/float(electron)
       if v_over_e < 3:
-        v_over_e_html = "<font color='%s'><b>%.2f</b></font>" %(gui_red,v_over_e)
+        v_over_e_html = "<font color='%s'><b>%.1f</b></font>" %(gui_red,v_over_e)
       elif v_over_e > 7:
-        v_over_e_html = "<font color='%s'><b>%.2f</b></font>" %(gui_red,v_over_e)
+        v_over_e_html = "<font color='%s'><b>%.1f</b></font>" %(gui_red,v_over_e)
       else:
-        v_over_e_html = "<font color='%s'><b>%.2f</b></font>" %(gui_green,v_over_e)
+        v_over_e_html = "<font color='%s'><b>%.1f</b></font>" %(gui_green,v_over_e)
     else: v_over_e_html = "n/a"
-
     d['v_over_e'] = v_over_e_html
+
+
+    if float(volume) != 0:
+      
+      v_over_n  = float(volume)/non_h_accounted_for
+      if v_over_n < 20:
+        v_over_n_html = "<font color='%s'><b>%.1f</b></font>" %(gui_red,v_over_n)
+      elif v_over_n > 50:
+        v_over_n_html = "<font color='%s'><b>%.1f</b></font>" %(gui_red,v_over_n)
+      else:
+        v_over_n_html = "<font color='%s'><b>%.1f</b></font>" %(gui_green,v_over_n)
+    else: v_over_n_html = "n/a"
+
+    d['v_over_n'] = v_over_n_html
+
 
     content = '%s <a target="Please enter the contents that are present in this void." href="spy.add_mask_content(%s,content)">(Edit)</a>' %(content, ":".join(multi_idx))
     details = '<a href="spy.add_mask_content(%s,detail)"> (Edit)</a>' %":".join(multi_idx)
@@ -235,6 +255,7 @@ def get_mask_info():
       total_electrons_accounted_for += 0
 
     factor = round(float(multi)/Zprime,3)
+
     total_formula = _add_formula(total_formula, ent, factor)
     add_to_formula = _add_formula(add_to_formula, ent, factor)
     
@@ -310,26 +331,14 @@ def get_rounded_formula(rnd=2, as_string_sep=""):
   if as_string_sep:
     formula = formula.split(",")
     formula = as_string_sep.join(formula).replace(":","")
-
   return formula
-
-
-  t = ""
-  _ = olx.xf.GetFormula('list').split(",")
-  for item in _:
-    var, val = item.split(":")[0], item.split(":")[1]
-    t += "%s:%2f"%(var, float(val))
-  return t
-
 
 def format_number(num):
   return round(num,3)
 
 def get_sum_electrons_from_formula(f):
-  from PeriodicTable import PeriodicTable
   Z = 0
-  PT = PeriodicTable()
-  pt = PT.PeriodicTable()
+  N = 0
   if not f:
     return retVal
   f = f.split()
@@ -340,7 +349,9 @@ def get_sum_electrons_from_formula(f):
     except:
       number = 1
     Z += int(pt[element].get('Z')) * number
-  return Z
+    if element != "H":
+      N += number
+  return Z,N
 
 def split_entity(entry):
   try:
@@ -490,7 +501,8 @@ def update_sqf_file(current_sNum, scope, scope2=None):
 
 def add_mask_content(i,which):
   global mask_info_has_updated
-  if current_sNum.endswith("_sq"):
+  current_sNum = OV.ModelSrc()
+  if OV.HKLSrc().rstrip(".hkl").endswith("_sq"):
     base = "platon_squeeze"
   else:
     base = "smtbx_masks"
