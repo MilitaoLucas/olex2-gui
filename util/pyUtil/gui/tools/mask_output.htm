@@ -3,19 +3,22 @@ t:mask_output_table_header_rp{
     <td align='center' width='5%%'>
        <b>&#35;</b>
     </td>
-    <td align='center' width='12%%'>
+    <td align='center' width='10%%'>
        <b>V (A<sup>3</sup>)</b>
     </td>
-    <td align='center' width='12%%'>
+    <td align='center' width='10%%'>
        <b>e<sup>-</sup></b>
     </td>
-    <td align='center' width='12%%'>
+    <td align='center' width='10%%'>
        <b>e/V</b>
     </td>
-    <td align='center' width='40%%'>
+    <td align='center' width='10%%'>
+       <b>V/at.</b>
+    </td>
+    <td align='center' width='36%%'>
        <b>Content</b>
     </td>
-    <td align='center' width='12%%'>
+    <td align='center' width='10%%'>
        <b>e<sup>-</sup></b>
     </td>
     <td align='center' width='7%%'>
@@ -26,25 +29,28 @@ t:mask_output_table_header_rp{
 
 t:mask_output_table_row_rp{
 <tr width='100%%' bgcolor='%(table_bg)s'>
-    <td align='center' width='5%%'>
+    <td align='center'>
        <b>%(number)s
     </td>
-    <td align='center' width='12%%'>
+    <td align='center'>
        %(volume)s
     </td>
-    <td align='center' width='12%%'>
+    <td align='center'>
        %(electron)s
     </td>
-    <td align='center' width='12%%'>
+    <td align='center'>
        %(v_over_e)s
     </td>
-    <td align='center' width='40%%'>
+    <td align='center'>
+       %(v_over_n)s
+    </td>
+    <td align='center'>
        %(content)s
     </td>
-    <td align='center' width='12%%'>
+    <td align='center'>
        %(e_accounted_for)s
     </td>
-    <td align='center' width='7%%'>
+    <td align='center'>
        %(multiplicity)s
     </td>
 </tr>}
@@ -61,6 +67,7 @@ t:mask_output_end_rp{
       bgcolor="GetVar('linkButton.bgcolor')"
       fgcolor="GetVar('linkButton.fgcolor')"
       onclick="fixunit xf.au.GetZprime()>>xf.SetFormula(%(suggested_sum)s)>>html.Update()"
+      custom="#custom"
     >
   </td>
   <td width=30%%>
@@ -82,6 +89,7 @@ t:mask_output_end_rp{
       fgcolor="GetVar('linkButton.fgcolor')"
       value="Add to Moiety"
       onclick="spy.set_cif_item(_chemical_formula_moiety,'$xf.latt.GetMoiety()')>>spy.set_cif_item(_chemical_formula_moiety,'%(suggested_moiety)s')>>html.Update()"
+      custom="#custom"
     >
   </td>
   <td width=30%%>
@@ -136,6 +144,7 @@ t:mask_special_details{
       bgcolor="GetVar('linkButton.bgcolor')"
       fgcolor="GetVar('linkButton.fgcolor')"
       onclick="spy.edit_mask_special_details('%(mask_special_details)s',%(base)s,%(current_sNum)s)"
+      custom="#custom"
     >
   </td>
   <td width=92%%>
