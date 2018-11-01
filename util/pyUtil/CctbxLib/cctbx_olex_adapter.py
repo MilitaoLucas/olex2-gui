@@ -41,10 +41,25 @@ from cctbx import sgtbx, xray
 from cctbx.array_family import flex
 import smtbx.utils
 
+import numpy
+import itertools
+import operator
+import fractions
+
 def rt_mx_from_olx(olx_input):
   from libtbx.utils import flat_list
   return sgtbx.rt_mx(flat_list(olx_input[:-1]), olx_input[-1])
-
+  
+class twin_domains:
+  def __init__(self, twin_axis, space, twin_law, twin_fraction, angle, fom, hklf5):
+    self.space = space
+    self.twin_axis = twin_axis
+    self.twin_law = twin_law
+    self.twin_fraction = twin_fraction
+    self.angle = angle
+    self.fom = fom
+    self.hklf5 = hklf5
+    
 class OlexCctbxAdapter(object):
   def __init__(self):
     import olexex
@@ -800,7 +815,41 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
       OV.write_to_olex('twinning-result.htm', html, False)
       OV.UpdateHtml()
       return
+      
+    # Get Fobs and Fcalc
+    f_obs_merged = self.reflections.f_sq_obs_merged 
+    sf = xray.structure_factors.from_scatterers(miller_set=f_obs_merged,cos_sin_table=True)
+    model = self.xray_structure()
+    f_calc_merged = sf(model,f_obs_merged).f_calc()
+        
+    length = f_obs_merged.size()
+    hkl = numpy.zeros((length, 3))
+    hkl_all = numpy.zeros((length, 3))
+    f_obs_sq = numpy.zeros((length, 2))
+    f_obs_sq_all = numpy.zeros((length, 2))
+    f_calc_sq = numpy.zeros((length), dtype=numpy.complex128)
 
+    # put these in numpy array plus filter I/sigma
+    i = -1
+    for j, (fc, fo) in enumerate(zip(f_calc_merged, f_obs_merged)):
+      if(fo[2]>0.0):
+        if(fo[1]/fo[2]>3.0):
+          i+=1
+          hkl[i,:]=numpy.array(fo[0])
+          f_obs_sq[i,:] = numpy.array([fo[1], fo[2]])
+          f_calc_sq[i]=fc[1]
+      f_obs_sq_all[j]=numpy.array([fo[1], fo[2]])
+      hkl_all[j]=numpy.array(fo[0])
+          
+    hkl = hkl[:i+1,:]
+    f_obs_sq = f_obs_sq[:i+1,:]
+    f_calc_sq = f_calc_sq[:i+1]
+    f_calc_sq = numpy.abs(f_calc_sq)**2   
+    scale = numpy.sum(f_obs_sq)/numpy.sum(f_calc_sq)
+    f_obs_sq = 1.0/scale * f_obs_sq
+    
+    twin_domains_list = self.rotax(hkl, f_calc_sq, f_obs_sq)
+  
     lawcount = 0
     self.twin_laws_d = {}
     law_txt = ""
@@ -808,13 +857,29 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     twin_double_laws = []
     for twin_law in twin_laws:
       law_double = twin_law.as_double_array()
-      twin_double_laws.append(law_double)
+      twin_double_laws.append(law_double[0:9])
+      
+    for t in twin_domains_list:
+      twin_double_laws.append(numpy.reshape(t.twin_law,(9)).tolist())
     twin_double_laws.append((1, 0, 0, 0, 1, 0, 0, 0, 1))
-    for twin_law in twin_double_laws:
+      
+    for i, twin_law in enumerate(twin_double_laws):
+      if(twin_law != (1, 0, 0, 0, 1, 0, 0, 0, 1)):
+        basf, r = self.basf_estimate(twin_law, hkl, f_calc_sq, f_obs_sq[:,0])
+        if(basf<0.05):
+          continue
+      else:
+        basf = "n/a"
+        r = olx.Lst("R1")
+        
       lawcount += 1
+      filename="%s_twin%02d.hkl"%(OV.FileName(), lawcount)
+      self.make_hklf5(filename, twin_law, basf, hkl_all, f_obs_sq_all)
       self.twin_laws_d.setdefault(lawcount, {})
       self.twin_law_gui_txt = ""
-      r, basf, f_data, history = self.run_twin_ref_shelx(twin_law)
+
+      r_no, basf_no, f_data, history = self.run_twin_ref_shelx(twin_law, basf)
+        
       try:
         float(r)
       except:
@@ -894,14 +959,14 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     olx.DelIns("BASF")
     olx.File("%s/notwin.ins" %olx.FilePath())
 
-  def run_twin_ref_shelx(self, law):
+  def run_twin_ref_shelx(self, law, basf):
     law_ins = ' '.join(str(i) for i in law[:9])
     print "Testing: %s" %law_ins
     file_path = olx.FilePath()
     olx.Atreap("%s/notwin.ins" %file_path, b=True)
     if law != (1, 0, 0, 0, 1, 0, 0, 0, 1):
-      OV.AddIns("TWIN " + law_ins)
-      OV.AddIns("BASF 0.5")
+      OV.AddIns("TWIN " + law_ins+" 2")
+      OV.AddIns("BASF %f"%basf)
     else:
       OV.DelIns("TWIN")
       OV.DelIns("BASF")
@@ -909,7 +974,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     curr_prg = OV.GetParam('snum.refinement.program')
     curr_method = OV.GetParam('snum.refinement.method')
     curr_cycles = OV.GetParam('snum.refinement.max_cycles')
-    OV.SetMaxCycles(1)
+    OV.SetMaxCycles(5)
     if curr_prg != 'olex2.refine':
       OV.set_refinement_program(curr_prg, 'CGLS')
     OV.File("%s.ins" %self.filename)
@@ -921,17 +986,18 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     OV.SetParam('snum.refinement.program','olex2.refine')
     OV.SetParam('snum.refinement.method','Gauss-Newton')
 
-    try:
-      from RunPrg import RunRefinementPrg
-      a = RunRefinementPrg()
-      self.R1 = a.R1
-      self.wR2 = a.wR2
-      his_file = a.his_file
+#    try:
+#      from RunPrg import RunRefinementPrg
+#      a = RunRefinementPrg()
+#      self.R1 = a.R1
+#      self.wR2 = a.wR2
+#      his_file = a.his_file
+#
+#      OV.SetMaxCycles(curr_cycles)
+#      OV.set_refinement_program(curr_prg, curr_method)
+#    finally:
+#      OV.SetParam('snum.init.skip_routine','False')
 
-      OV.SetMaxCycles(curr_cycles)
-      OV.set_refinement_program(curr_prg, curr_method)
-    finally:
-      OV.SetParam('snum.init.skip_routine','False')
 
     r = olx.Lst("R1")
     olex_refinement_model = OV.GetRefinementModel(False)
@@ -940,7 +1006,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     else:
       basf = "n/a"
 
-    return self.R1, basf, f_data, his_file
+    return None, None, f_data, None
 
   def twinning_gui_def(self):
     if not self.twin_law_gui_txt:
@@ -985,6 +1051,336 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
     a = MakeGuiTools(tool_fun="single", tool_param=gui)
     a.run()
     OV.UpdateHtml()
+    
+  def rotax(self,hkl, f_calc_sq, f_obs_sq):
+    """
+    Search for twin laws
+    Based on ROTAX : Simon Parsons & Bob Gould, University of Edinburgh
+    from the crystals implementation by Richard Cooper.
+    """
+   
+    size = 5  # max(h,k,l) for the calculation of the twin axis
+    num_theta_step = 24 # Number of steps for the rotation angle
+    hkl_sel_num = 50 # number of reflections to use
+    best_num = 5 # number of candidates to return
+                  
+    # get some useful transformation matrices
+    model = self.xray_structure()
+    gl = model.unit_cell().metrical_matrix()
+    g = numpy.zeros((3,3))
+    for i in range(3):
+      g[i,i] = gl[i]
+    g[0,1] = gl[3]
+    g[0,2] = gl[4]
+    g[1,2] = gl[5]
+    g[1,0] = gl[3]
+    g[2,0] = gl[4]
+    g[2,1] = gl[5]
+    g_i = numpy.linalg.inv(g)
+    
+    vol = math.sqrt ( numpy.linalg.det(g) )
+    p = self.make_p(vol)    
+    
+    ortho = numpy.array(model.unit_cell().orthogonalization_matrix())
+    ortho = numpy.reshape(ortho,(3,3))
+    ortho_i = numpy.linalg.inv(ortho)
+
+    # calculate ratio
+    ratio = (f_obs_sq[:,0]-f_calc_sq)/f_obs_sq[:,1]
+    # rank the result
+    rank = numpy.argsort(ratio)[::-1]
+
+    # take out the hkl_sel_num first 
+    hkl_sel = numpy.copy(hkl[rank[:hkl_sel_num],:])
+          
+    d_min = 1000.0
+    twin_domains_list = []
+    
+    for twin_axis in itertools.combinations_with_replacement(numpy.arange(-size,size+1),3):
+      if(twin_axis[2]<0):
+        continue
+      if(twin_axis[2]==0 and twin_axis[1]<0):
+        continue
+      if(twin_axis[2]<0):
+        continue
+      skip = False
+      for i in range(2,size+1):
+        if(numpy.all(numpy.mod(twin_axis,i)==0)):
+          skip = True
+          break
+      if(skip):
+        continue
+      if(twin_axis[2]==0 and twin_axis[1]==0 and twin_axis[0]<1):
+        continue
+        
+      if(numpy.all(twin_axis==0)):
+        continue
+        
+      twin_axis = twin_axis/fractions.gcd(fractions.gcd(twin_axis[0],twin_axis[1]), twin_axis[2])
+      twin_axis_c = numpy.dot(ortho_i.T, twin_axis)
+      
+      twin_axis_reciproc = numpy.dot(g, twin_axis)
+      twin_axis_reciproc_c = numpy.dot(ortho_i.T, twin_axis_reciproc)
+
+      if(numpy.all(twin_axis_c==0)):
+        continue
+      twin_axis_c = twin_axis_c/numpy.linalg.norm(twin_axis_c)
+
+      if(numpy.all(twin_axis_reciproc_c==0)):
+        continue
+      twin_axis_reciproc_c = twin_axis_reciproc_c/numpy.linalg.norm(twin_axis_reciproc_c)
+      
+      # axis in reciprocal space
+      fom_min = 100.0
+      for theta_step in xrange(1,num_theta_step):
+        theta = theta_step*math.pi*2/float(num_theta_step)
+        
+        M = self.twin_rotation_mat(theta,twin_axis,-1,g,g_i,p)
+        new_hkl = numpy.dot(M, hkl_sel.T).T
+
+        fom = self.figure_of_merit(new_hkl,g_i) 
+        if(fom<3.0):
+          if(fom<fom_min):
+            fom_min = fom
+            M_min = M
+            theta_min = theta
+
+      if(fom_min<3.0):
+        skip = False
+        for i, t in enumerate(twin_domains_list):
+          t_c = numpy.dot(ortho_i.T, t.twin_axis)
+          cross = numpy.cross(twin_axis_c,t_c)
+          angle = numpy.math.atan2(numpy.linalg.norm(cross),numpy.dot(twin_axis_c,t_c))
+          if(angle<0.08):
+            # similar axis
+            if(t.fom>fom_min): 
+              #better solution, replacing
+              skip = True
+              twin_domains_list[i] = twin_domains(twin_axis, 'r', numpy.around(M_min,3), None, theta_min*180.0/math.pi, fom_min, None) 
+              break
+              
+        if(not skip): # new twin law
+          twin_domains_list += [ twin_domains(twin_axis, 'r', numpy.around(M_min,3), None, theta_min*180.0/math.pi, fom_min, None) ]
+
+      # axis in direct space
+      fom_min = 100.0
+      for theta_step in xrange(1,num_theta_step):
+        theta = theta_step*math.pi*2/float(num_theta_step)
+        
+        M = self.twin_rotation_mat(theta,twin_axis,1,g,g_i,p)
+        new_hkl = numpy.dot(M, hkl_sel.T).T
+
+        fom = self.figure_of_merit(new_hkl,g_i) 
+        if(fom<3.0):
+          if(fom<fom_min):
+            fom_min = fom
+            M_min = M
+            theta_min = theta
+
+      if(fom_min<3.0):
+        skip = False
+        for i, t in enumerate(twin_domains_list):
+          t_c = numpy.dot(ortho_i.T, t.twin_axis)
+          cross = numpy.cross(twin_axis_reciproc_c,t_c)
+          angle = numpy.math.atan2(numpy.linalg.norm(cross),numpy.dot(twin_axis_reciproc_c,t_c))
+          if(angle<0.08):
+            # similar axis
+            if(t.fom>fom_min): 
+              #better solution, replacing
+              skip = True
+              twin_domains_list[i] = twin_domains(twin_axis_reciproc, 'd', numpy.around(M_min,3), None, theta_min*180.0/math.pi, fom_min, None) 
+              
+        if(not skip): # new twin law
+          twin_domains_list += [ twin_domains(twin_axis_reciproc, 'd', numpy.around(M_min,3), None, theta_min*180.0/math.pi, fom_min, None) ]
+    
+    twin_domains_list.sort(key=operator.attrgetter('fom'))
+    return twin_domains_list[:best_num]
+          
+  def twin_rotation_mat(self, phir,x,dorr,G,GS,p):
+    """
+    x = direct or reciprocal lattice direction
+    If x is direct (dorr=d) this subroutine normalises it, and works out the 
+    covariant components.
+    If x is reciprocal (dorr=r) this subroutine normalises it, and works out the 
+    contravariant components.
+    The rotation matrix is then worked out in subroutine eqn442 (see
+    Sands' book eqn 4-42.
+    
+    phir: rotation angle (radian)
+    x: lattice direction
+    dorr: flag for space (direct>0 or reciprocal<0)
+    G: metric tensor
+    GS: reciprocal metric tensor
+    M: rotationmatrix
+    p: permutation matrix (epsilon_klj)
+    """
+    
+    if(dorr>0): # direct
+      d = numpy.copy(x)
+      temp = numpy.dot(G, d)
+      mag = numpy.dot(d, temp)
+      mag = numpy.sqrt(mag)
+      d = d/mag
+      r = numpy.dot(G, d)
+      M = self.eqn442(phir,d,r,p,GS)
+    elif(dorr<0): # reciprocal
+      r = numpy.copy(x)
+      temp = numpy.dot(GS, r)
+      mag = numpy.dot(r, temp)
+      mag = numpy.sqrt(mag)
+      r = r/mag
+      d = numpy.dot(GS, r)
+      M = self.eqn442(phir,d,r,p,GS)
+          
+    return M
+  
+  def eqn442(self, phir,d,r,p,GS):
+    """
+    Applies Sands' eqn 4-42. Note that Sands' eqn refers to rotations of 
+    coordinates, so the equation we need has the sine term made negative;
+    the inverse transpose of the resulting matrix is then taken.
+    All of this is simply the transpose of Sands' original matrix!
+    """
+    
+    M = numpy.zeros((3,3))
+    cosphir = math.cos(phir)
+    sinphir = math.sin(phir)
+    delta_33 = numpy.eye(3)
+    d_outer_r = numpy.outer(d, r)
+    
+
+    N = numpy.zeros((3,3))
+    for i in range(3):
+      for j in range(3):        
+        for k  in range(3):
+          for l in range(3):
+            N[i,j] =  N[i,j] + GS[i,k]*p[k,l,j]*d[l]
+
+    M = d_outer_r + (delta_33 - d_outer_r)*cosphir + N*sinphir
+
+    return M.T
+
+  def make_p(self, v):
+    """
+    calulates elements of the permutation tensor
+    """
+  
+    p = numpy.zeros((3,3,3))
+    p[0,1,2]=v
+    p[1,2,0]=v
+    p[2,0,1]=v
+    p[0,2,1]=-v
+    p[1,0,2]=-v
+    p[2,1,0]=-v
+    
+    return p
+    
+  def figure_of_merit(self, mdisag,GS):
+    """
+    works out the figure of merit
+    """
+    q = numpy.zeros((15))
+    dcopy = numpy.zeros((numpy.shape(mdisag)[0]))
+    fom = 0.0
+    bc = 0
+
+    #bad = numpy.rint(hkl)+numpy.rint(v) - hkl
+    neighbours = list(itertools.combinations_with_replacement(numpy.arange(-1,2,dtype=numpy.float64),3))
+    bad = numpy.zeros((len(neighbours), numpy.shape(mdisag)[0], 3))
+    d1s = numpy.zeros((len(neighbours), numpy.shape(mdisag)[0]))
+    mdisag_rint = numpy.rint(mdisag)
+    for i, neighbour in enumerate(neighbours):
+      bad[i,:,:] = numpy.dot(mdisag_rint+neighbour - mdisag, GS.T)
+      d1s[i,:] = numpy.sqrt(numpy.sum(bad[i,:,:]*bad[i,:,:], axis=1))
+
+    neighbours_min = numpy.zeros((numpy.shape(mdisag)[0], 3), dtype=numpy.float64)
+    for i in range(numpy.shape(mdisag)[0]):
+      neighbours_min[i,:] = bad[numpy.argmin(d1s[:,i]),i,:]
+      
+    bad_min = numpy.dot(mdisag_rint+neighbours_min - mdisag, GS.T)
+    d_min = numpy.sqrt(numpy.sum(bad_min*bad_min, axis=1))      
+    
+    dcopy = numpy.copy(d_min)
+    dsum = numpy.sum(dcopy)
+    
+    for i, q_i in enumerate(q):
+      q[i]=dsum/(float(numpy.shape(mdisag)[0])-float(bc))
+      fom=q[i]
+      if (fom<.002):
+        break
+      else:
+        bc+=1
+        jp = numpy.argmax(dcopy)         
+        dsum = dsum - dcopy[jp]
+        dcopy[jp] = 0.
+
+    fom=1000.*fom
+    q=1000.0*q      
+    
+    return fom
+    
+  def basf_estimate(self, twin_law, hkl, Fc_sq, Fo_sq):
+    """
+    Estimate R-factor and basf from twin law
+    """
+    
+    basf_num = 100.0 # Number of step for basf
+    
+    twin_law = numpy.reshape(numpy.array(twin_law),(3,3))
+    hkl_new = numpy.dot(twin_law, hkl.T).T
+
+    basf = numpy.arange(0,int(basf_num))/basf_num
+    num_data = numpy.shape(hkl)[0]
+    a = numpy.zeros((num_data,basf_num))
+    for i, hkl_new_i in enumerate(hkl_new):
+      a[i,:] = (1.0-basf)*Fc_sq[i]
+      if(numpy.any(numpy.abs(numpy.rint(hkl_new_i)-hkl_new_i)>0.1)):
+        # if result is non integer no point to continue
+        continue
+      # looking where is the overlap
+      diff = numpy.sum(numpy.abs(hkl_new[i,:] - hkl),axis=1)
+      loc = numpy.argmin(diff)
+      if(diff[loc]<0.1):
+        # adding contribution from overlap
+        a[i,:]=a[i,:]+basf*Fc_sq[loc]
+        
+    R = numpy.zeros((int(basf_num)))
+    for i in xrange(int(basf_num)):
+      scale = numpy.sum(Fo_sq)/numpy.sum(a[:,i])
+      a[:,i] = scale * a[:,i]
+      R[i] = numpy.sum(numpy.abs(numpy.sqrt(Fo_sq)-numpy.sqrt(a[:,i])))/numpy.sum(numpy.sqrt(Fo_sq))
+      
+    minloc = numpy.argmin(R)
+    return (minloc/basf_num, R[minloc])
+    
+  def make_hklf5(self, filename, twin_law, basf, hkl, fo):
+    """
+    convert hklf4 file to hklf5 file
+    """
+    
+    hklf = open(filename,'w')
+    twin_law = numpy.reshape(numpy.array(twin_law),(3,3))
+    hkl_new = numpy.dot(twin_law, hkl.T).T
+    
+    scale = 99999.99/numpy.max(fo[:,0]) # keep Fo in the scale of F8.2
+        
+    for i, hkl_new_i in enumerate(hkl_new):
+      if(numpy.any(numpy.abs(numpy.rint(hkl_new_i)-hkl_new_i)>0.1)):
+        hklf.write("%4d%4d%4d%8.2f%8.2f%4d\n"%(hkl[i,0],hkl[i,1], hkl[i,2], fo[i,0]*scale, fo[i,1]*scale, 1))
+        continue
+      # looking where is the overlap
+      diff = numpy.sum(numpy.abs(hkl_new[i,:] - hkl),axis=1)
+      loc = numpy.argmin(diff)
+      if(diff[loc]<0.1):
+        # adding contribution from overlap
+        hklf.write("%4d%4d%4d%8.2f%8.2f%4d\n"%(hkl[loc,0],hkl[loc,1], hkl[loc,2], fo[i,0]*scale, fo[i,1]*scale, -2))
+        hklf.write("%4d%4d%4d%8.2f%8.2f%4d\n"%(hkl[i,0],hkl[i,1], hkl[i,2], fo[i,0]*scale, fo[i,1]*scale, 1))
+      else:
+        hklf.write("%4d%4d%4d%8.2f%8.2f%4d\n"%(hkl[i,0],hkl[i,1], hkl[i,2], fo[i,0]*scale, fo[i,1]*scale, 1))
+      
+    hklf.write("%4d%4d%4d\n"%(0,0,0))
+    hklf.close()
+         
 OV.registerFunction(OlexCctbxTwinLaws)
 
 
@@ -1061,6 +1457,16 @@ def on_twin_image_click(run_number):
   wFile.writelines(file_data)
   wFile.close()
   olx.Atreap(olx.FileFull())
+  twin_law = numpy.array(twin_laws_d[int(run_number)]['law'])
+  twin_law_rnd = numpy.rint(twin_law)
+  if(numpy.any(numpy.abs(twin_law-twin_law_rnd)>0.05)):
+    print "Using twin law: ", twin_law
+    # non integral twin law, need hklf5
+    OV.DelIns("TWIN")
+    OV.DelIns("HKLF")
+    OV.AddIns("HKLF 5")
+    hklname="%s_twin%02d.hkl"%(OV.FileName(), int(run_number))
+    OV.HKLSrc(hklname)
   OV.UpdateHtml()
 OV.registerFunction(on_twin_image_click)
 
