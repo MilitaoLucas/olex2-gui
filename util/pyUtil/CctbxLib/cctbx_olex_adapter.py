@@ -1101,8 +1101,6 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
         continue
       if(twin_axis[2]==0 and twin_axis[1]<0):
         continue
-      if(twin_axis[2]<0):
-        continue
       skip = False
       for i in range(2,size+1):
         if(numpy.all(numpy.mod(twin_axis,i)==0)):
@@ -1331,7 +1329,7 @@ class OlexCctbxTwinLaws(OlexCctbxAdapter):
 
     basf = numpy.arange(0,int(basf_num))/basf_num
     num_data = numpy.shape(hkl)[0]
-    a = numpy.zeros((num_data,basf_num))
+    a = numpy.zeros((num_data,int(basf_num)))
     for i, hkl_new_i in enumerate(hkl_new):
       a[i,:] = (1.0-basf)*Fc_sq[i]
       if(numpy.any(numpy.abs(numpy.rint(hkl_new_i)-hkl_new_i)>0.1)):
