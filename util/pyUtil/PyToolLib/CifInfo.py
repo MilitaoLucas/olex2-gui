@@ -796,6 +796,7 @@ class ExtractCifInfo(CifTools):
         add = "tmp"
         writeFile = open(mask_cif_path + add, 'w')
         writeFile.write("data_" + self.data_name + "\r\n")
+        writeFile.write("_platon_squeeze_special_details" + " ?" + "\r\n")
         writeFile.write(f)
         writeFile.close()
 

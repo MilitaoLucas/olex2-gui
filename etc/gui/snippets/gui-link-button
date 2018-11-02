@@ -28,7 +28,7 @@
       flat="#flat"
       hint="#hint"
       disabled="#disabled"
-      custom="#custom"
+      custom="GetVar(custom_button)"
     >
   </font>
 #td2
