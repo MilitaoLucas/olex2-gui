@@ -125,7 +125,7 @@ gui
       .type = colour
     button.highlight.lightness = 120
       .type = int
-    button.border.lightness = 20
+    button.border.lightness = 95
       .type = int
     link_type = 'gui-link-button'
       .type = str
@@ -580,7 +580,7 @@ gui
         .type = int
       height = 19
         .type = int
-      width_adjust = 4
+      width_adjust = 10
         .type = int
       base_colour = #aaaaaa
         .type = colour
