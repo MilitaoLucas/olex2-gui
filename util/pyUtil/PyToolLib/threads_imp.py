@@ -69,8 +69,10 @@ class NewsImageRetrivalThread(ThreadEx):
       return
     img_id = ""
     tag = None
-    res = None
+    res_idx = -1
     if self.name == 'splash':
+      if "-ac" in olx.olex2_tag:
+        return None,None
       _ = os.sep.join([olx.app.SharedDir(), 'splash.id'])
       if not os.path.exists(_):
         with open(_,'w') as wFile:
@@ -78,18 +80,15 @@ class NewsImageRetrivalThread(ThreadEx):
           wFile.write(img_id)
       else:
         img_id = open(_,'r').read().strip().replace("http://", "")
-      first_res = img_list[0]
       for idx, l in enumerate(img_list):
         if img_id in l:
           if (idx +1) < len(img_list):
-            res = img_list[idx+1]
+            res_idx = idx
             break
-      if not res:
-        res = first_res
-    else:
-      res = img_list.pop(0)
-      
-    while res:
+
+    while res_idx+1 < len(img_list):
+      res_idx += 1
+      res = img_list[res_idx]
       if "," in res:
         _ = res.split(',')
         if len(_) == 2:
@@ -100,20 +99,15 @@ class NewsImageRetrivalThread(ThreadEx):
       else:
         img_url = res
         url = "www.olex2.org"
-  
+
       if tag:
         if tag.strip() != olx.olex2_tag:
           img_url = None
+          continue
       else:
-        if "-ac" in olx.olex2_tag:
-          img_url = None
-      
-      if not img_url:
-        res = img_list.pop(0)
-      else:
-        res = None
-      
-    if not img_url:    
+        break
+
+    if not img_url:
       return None, None
 
     if "://" not in img_url:
