@@ -86,26 +86,45 @@ class NewsImageRetrivalThread(ThreadEx):
             res_idx = idx
             break
 
-    while res_idx+1 < len(img_list):
-      res_idx += 1
-      res = img_list[res_idx]
-      if "," in res:
-        _ = res.split(',')
-        if len(_) == 2:
-          img_url, url = res.split(',')
-          tag = None
-        elif len(_) == 3:
-          img_url, url, tag = res.split(',')
-      else:
-        img_url = res
-        url = "www.olex2.org"
-
-      if tag:
-        if tag.strip() != olx.olex2_tag:
-          img_url = None
-          continue
-      else:
-        break
+      while res_idx+1 < len(img_list):
+        res_idx += 1
+        res = img_list[res_idx]
+        if "," in res:
+          _ = res.split(',')
+          if len(_) == 2:
+            img_url, url = res.split(',')
+            tag = None
+          elif len(_) == 3:
+            img_url, url, tag = res.split(',')
+        else:
+          img_url = res
+          url = "www.olex2.org"
+  
+        if tag:
+          if tag.strip() != olx.olex2_tag:
+            img_url = None
+            continue
+        else:
+          break
+    else:
+      while img_list:
+        res = img_list.pop(0)
+        if "," in res:
+          _ = res.split(',')
+          if len(_) == 2:
+            img_url, url = res.split(',')
+            tag = None
+          elif len(_) == 3:
+            img_url, url, tag = res.split(',')
+        else:
+          img_url = res
+          url = "www.olex2.org"
+        if tag:
+          if tag.strip() != olx.olex2_tag:
+            img_url = None
+            continue
+        else:
+          break
 
     if not img_url:
       return None, None
