@@ -169,8 +169,20 @@
        )
       $-
      </td>
-     <td width="27%" align='left'>
+     <td width="10%" align='left'>
        seconds
+     </td>
+     <td width="9%" align='right'>
+       CPUs:
+     </td>
+     <td width="8%" align='center'>
+     $+
+         html.Snippet("gui/snippets/input-combo",
+         "name=har_cpus",
+         "items=spy.tonto.HAR.getCPUListStr()",
+         "value=GetVar('settings.tonto.HAR.ncpus')",
+         "onchange=SetVar('settings.tonto.HAR.ncpus', html.GetValue('~name~'))")
+        $-
      </td>
 
       $+
