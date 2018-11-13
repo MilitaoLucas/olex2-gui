@@ -204,16 +204,15 @@ def get_mask_info():
 
 
     if float(volume) != 0:
-      
-      v_over_n  = float(volume)/non_h_accounted_for
-      if v_over_n < 20:
-        v_over_n_html = "<font color='%s'><b>%.1f</b></font>" %(gui_red,v_over_n)
-      elif v_over_n > 50:
-        v_over_n_html = "<font color='%s'><b>%.1f</b></font>" %(gui_red,v_over_n)
-      else:
-        v_over_n_html = "<font color='%s'><b>%.1f</b></font>" %(gui_green,v_over_n)
-    else: v_over_n_html = "n/a"
-
+      v_over_n_html = "n/a"
+      if non_h_accounted_for != 0:
+        v_over_n  = float(volume)/non_h_accounted_for
+        if v_over_n < 20:
+          v_over_n_html = "<font color='%s'><b>%.1f</b></font>" %(gui_red,v_over_n)
+        elif v_over_n > 50:
+          v_over_n_html = "<font color='%s'><b>%.1f</b></font>" %(gui_red,v_over_n)
+        else:
+          v_over_n_html = "<font color='%s'><b>%.1f</b></font>" %(gui_green,v_over_n)
     d['v_over_n'] = v_over_n_html
 
 
