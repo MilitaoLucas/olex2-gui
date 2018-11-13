@@ -31,6 +31,8 @@ from smtbx.refinement.constraints import rigid
 import smtbx.utils
 
 import numpy
+import scipy.linalg
+
 
 # try to initialise openblas
 try:
@@ -387,7 +389,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.constraints += self.setup_rigid_body_constraints(
       self.olx_atoms.afix_iterator())
     self.constraints += self.setup_geometrical_constraints(
-      self.olx_atoms.afix_iterator())
+      self.olx_atoms.afix_iterator())      
     self.n_constraints = len(self.constraints)
 
     temp = self.olx_atoms.exptl['temperature']
@@ -413,7 +415,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     )
     self.reparametrisation.fixed_distances.update(self.fixed_distances)
     self.reparametrisation.fixed_angles.update(self.fixed_angles)
-
+    
     #===========================================================================
     # for l,p in self.reparametrisation.fixed_distances.iteritems():
     #  label = ""
@@ -1024,19 +1026,87 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
     self.shared_param_constraints = []
     vars = self.olx_atoms.model['variables']['variables']
+    equations = self.olx_atoms.model['variables']['equations']
+    
+    idslist = []
+    if(len(equations)>0):
+      # number of free variables
+      FvarNum=0
+      while OV.GetFVar(FvarNum) is not None:
+        FvarNum+=1
+      
+      # Building matrix of equations
+      lineareq = numpy.zeros((0,FvarNum))
+      rowheader = {}
+      nextfree = -1
+      ignored = False
+      idslist = []
+      for equation in equations:
+        ignored = False
+        row = numpy.zeros((FvarNum))
+        for variable in equation['variables']:
+          label = "%s %d %d"%(variable[0]['references'][-1]['name'], variable[0]['references'][-1]['id'],variable[0]['references'][-1]['index'])
+          if(variable[0]['references'][-1]['index']==4):
+            if(label not in rowheader):
+              nextfree+=1
+              rowheader[label]=nextfree
+              idslist += [variable[0]['references'][-1]['id']]
+              key=nextfree
+            else:
+              key=rowheader[label]
+            row[key]=variable[1]
+          else:
+            ignored = True
+        row[FvarNum-1]=equation['value']
+        if(not ignored):
+          lineareq=numpy.append(lineareq, [row], axis=0)
+        
+      # LU decomposition to find incompatible or redundant constraints
+      l,u = scipy.linalg.lu(lineareq, permute_l=True)
+      
+      Oops = False
+      if(numpy.shape(u)[0]>1):
+        previous = u[-2,:]
+        for row in numpy.flipud(u):
+          if(numpy.all(row[0:-1]==0.0) and row[-1]!=0):
+            # incompatible set of constraints
+            print "Oops"
+            Oops = True
+            break
+          if(numpy.all(row[0:-1]==previous[0:-1]) and row[-1]!=previous[-1]):
+            # incompatible set of constraints
+            print "Oops"
+            Oops = True
+            break
+          previous = row
+      
+      if(not Oops):
+        # setting up constraints
+        for row in numpy.flipud(u):
+          if(numpy.all(row==0.0)):
+            print "Warning: one or more equations are not independant"
+            exit
+          else:
+            a = numpy.copy(row[:-1])
+            current = occupancy.occupancy_affine_constraint(idslist, a, row[-1])
+            #a = ((row[-3], row[-2]), row[-1])
+            #current = occupancy.occupancy_pair_affine_constraint(idslist[-2:], a)
+            constraints.append(current)
+
     for i, var in enumerate(vars):
       refs = var['references']
       as_var = []
       as_var_minus_one = []
       eadp = []
       for ref in refs:
-        if ref['index'] == 4 and ref['relation'] == "var":
-          as_var.append((ref['id'], ref['k']))
-        if ref['index'] == 4 and ref['relation'] == "one_minus_var":
-          as_var_minus_one.append((ref['id'], ref['k']))
+        if(ref['id'] not in idslist):
+          if ref['index'] == 4 and ref['relation'] == "var":
+            as_var.append((ref['id'], ref['k']))
+          if ref['index'] == 4 and ref['relation'] == "one_minus_var":
+            as_var_minus_one.append((ref['id'], ref['k']))
         if ref['index'] == 5 and ref['relation'] == "var":
           eadp.append(ref['id'])
-      if (len(as_var) + len(as_var_minus_one)) != 0:
+      if (len(as_var) + len(as_var_minus_one)) > 0:
         if len(eadp) != 0:
           print "Invalid variable use - mixes occupancy and U"
           continue
