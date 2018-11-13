@@ -57,11 +57,13 @@ class HARp(PT):
     self.deal_with_phil(operation='read')
     self.print_version_date()
     self.jobs = []
+    self.parallel = False
     if not from_outside:
       self.setup_gui()
     # END Generated =======================================
     options = {
       "settings.tonto.HAR.basis.name": ("def2-SVP", "basis"),
+      "settings.tonto.HAR.ncpus": ("1",),
       "settings.tonto.HAR.method": ("rhf", "scf"),
       "settings.tonto.HAR.hydrogens": ("anisotropic",),
       "settings.tonto.HAR.extinction.refine": ("False", "extinction"),
@@ -82,17 +84,55 @@ class HARp(PT):
 
     self.exe = None
     if sys.platform[:3] == 'win':
+      mpiloc = os.sep.join([self.p_path, "mpiexec.exe"])
+      if os.path.exists(mpiloc):
+        self.mpiexec = mpiloc
+      else: 
+        self.mpiexec = olx.file.Which("mpiexec.exe")
+        
+      _ = os.sep.join([self.p_path, "hart_mpi.exe"])
+      if os.path.exists(_):
+        self.mpi_har = _
+      else:
+        self.mpi_har = olx.file.Which("hart_mpi.exe")
+        
       _ = os.sep.join([self.p_path, "hart.exe"])
       if os.path.exists(_):
         self.exe = _
       else:
-        self.exe = olx.file.Which("hart.exe")
+        self.exe = olx.file.Which("hart.exe")       
+        
     else:
+      mpiloc = os.sep.join([self.p_path, "mpiexec"])
+      if os.path.exists(mpiloc):
+        self.mpiexec = mpiloc
+      else: 
+        self.mpiexec = olx.file.Which("openmpi/bin/mpiexec")
+      self.mpihome = self.mpiexec[:-11]
+      if 'LD_LIBRARY_PATH' in os.environ:
+        if self.mpihome + 'lib' not in os.environ['LD_LIBRARY_PATH']:
+          os.environ['LD_LIBRARY_PATH'] = self.mpihome + 'lib:' + self.mpihome + 'lib/openmpi' + os.environ['LD_LIBRARY_PATH']
+      else:
+        os.environ['LD_LIBRARY_PATH'] = self.mpihome + 'lib:' + self.mpihome + 'lib/openmpi'
+      if 'LD_RUN_PATH' in os.environ:
+        if self.mpihome + 'lib/openmpi' not in os.environ['LD_RUN_PATH']:
+          os.environ['LD_RUN_PATH'] = self.mpihome + 'lib/openmpi' + os.environ['LD_RUN_PATH']
+      else:
+        os.environ['LD_RUN_PATH'] = self.mpihome + 'lib/openmpi'
+        
+      _ = os.sep.join([self.p_path, "hart_mpi"])
+      if os.path.exists(_):
+        self.mpi_har = _
+      else:
+        self.mpi_har = olx.file.Which("hart_mpi")
+        
       _ = os.sep.join([self.p_path, "hart"])
       if os.path.exists(_):
         self.exe = _
       else:
-        self.exe = olx.file.Which("hart")
+        self.exe = olx.file.Which("hart")   
+        
+        
     if os.path.exists(self.exe):
       self.basis_dir = os.path.join(os.path.split(self.exe)[0], "basis_sets").replace("\\", "/")
       if os.path.exists(self.basis_dir):
@@ -104,6 +144,20 @@ class HARp(PT):
     else:
       self.basis_list_str = None
       self.basis_dir = None
+    if os.path.exists(self.mpiexec) and os.path.exists(self.mpi_har):
+      self.parallel = True
+      import multiprocessing
+      max_cpu = multiprocessing.cpu_count()
+      print """
+      Number of CPUs Detected for parallel calculations: """ + str(max_cpu)
+      cpu_list = ['1',]
+      for n in range(1,max_cpu):
+        cpu_list.append(str(n+1))
+        self.cpu_list_str = ';'.join(cpu_list)
+    else:
+      print """
+      No MPI implementation found in PATH!"""
+      self.cpu_list_str = '1'
 
     self.set_defaults()
 
@@ -121,6 +175,9 @@ class HARp(PT):
 
   def getBasisListStr(self):
     return self.basis_list_str
+  
+  def getCPUListStr(self):
+    return self.cpu_list_str
 
   def list_jobs(self):
     import shutil
@@ -249,6 +306,8 @@ class HARp(PT):
   width="100%%"
   onclick="reap '%(job_result_filename)s'"
 >''' %d
+        #  onclick="reap '%(job_result_filename)s'>>calcFourier -diff -fcf -r=0.05 -m"
+
 
       else:
         d['processing_gif_src'] = os.sep.join([self.p_path, OV.GetParam('harp.processing_gif')])
@@ -499,6 +558,7 @@ class Job(object):
     self.parent = parent
     self.status = 0
     self.name = name
+    self.parallel = parent.parallel
     if self.name.endswith('_HAR'):
       self.name = self.name[:-4]
     elif self.name.endswith('_input'):
@@ -619,6 +679,7 @@ Make sure the cluster/moelcule is neutral and fully completed.
 Continue?""", "YN", False) == 'N':
         return
     elif olx.xf.au.GetZprime() != '1' and autogrow == 'true':
+      olex.m("kill $q")
       olx.Grow()
       olex.m("grow -w")
     elif olx.xf.au.GetZprime() < '1' and autogrow == 'false':
@@ -626,7 +687,7 @@ Continue?""", "YN", False) == 'N':
 """This appears to be a z' < 1 structure.
 Autogrow is disabled and the structure is not grown.
 
-This is HIGHLY unrecomendet!
+This is HIGHLY unrecommendet!
 
 Please complete the molecule in a way it forms a full chemical entity.
 Benzene would need to contain one complete 6-membered ring to work,
@@ -655,9 +716,14 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
         f_sq_obs.export_as_shelx_hklf(out, normalise_if_format_overflow=True)
     self.save()
 
-    args = [self.parent.exe, self.name+".cif",
+    args = [self.name+".cif",
             "-basis-dir", self.parent.basis_dir,
              "-shelx-f2", self.name+".hkl"]
+    
+    if olx.GetVar('settings.tonto.HAR.ncpus', None) != '1':
+      args = [self.parent.mpiexec, "-np", olx.GetVar("settings.tonto.HAR.ncpus", None), self.parent.mpi_har] + args
+    else:
+      args = [self.parent.exe] + args
 
     disp = olx.GetVar("settings.tonto.HAR.dispersion", None)
     if 'true' == disp:
@@ -725,28 +791,27 @@ Are you sure you want to continue with this structure?""", "YN", False) == 'N':
       return
     Popen([pyl,
            os.path.join(p_path, "HARt-launch.py")])
-
+    
 def deal_with_har_cif():
   ''' Tries to complete what it can from the existing IAM cif'''
   har_cif = os.path.join(OV.FilePath(), OV.FileName() + ".cif")
   if not os.path.exists(har_cif):
     print "The file %s does not exist. It doesn't look like HAR has been run here." %har_cif
     return
-  iam_cif = os.path.join(OV.FilePath(), OV.FileName().rstrip("_HAR") + ".cif")
+  iam_cif = os.path.join(OV.FilePath(), OV.FileName().rstrip("_HAR") + ".cif") 
   if not os.path.exists(iam_cif):
     print "The file %s does not exist. It doesn't look a CIF file for the IAM refinement exists" %iam_cif
     return
-
-  hkl_stats = olex_core.GetHklStat()
-
+  
+  hkl_stats = olex.core.GetHklStat()
   OV.set_cif_item('_diffrn_measured_fraction_theta_full', "%.3f" %hkl_stats.get('Completeness'))
   OV.set_cif_item('_diffrn_reflns_av_unetI/netI', "%.3f" %hkl_stats.get('MeanIOverSigma'))
   OV.set_cif_item('_diffrn_reflns_av_R_equivalents', "%.3f" %hkl_stats.get('Rint'))
   olex.m("cifmerge")
-  olex.m("cifmerge '%s' '%s'" %(iam_cif, har_cif))
-
+  olex.m("cifmerge '%s' '%s'" %(iam_cif, har_cif)) 
+  
 OV.registerFunction(deal_with_har_cif)
-
+  
 def del_dir(directory):
   import shutil
   shutil.rmtree(directory)
@@ -774,8 +839,9 @@ OV.registerFunction(HARp_instance.list_jobs, False, "tonto.HAR")
 OV.registerFunction(HARp_instance.view_all, False, "tonto.HAR")
 OV.registerFunction(HARp_instance.launch, False, "tonto.HAR")
 OV.registerFunction(HARp_instance.getBasisListStr, False, "tonto.HAR")
+OV.registerFunction(HARp_instance.getCPUListStr, False, "tonto.HAR")
 OV.registerFunction(getAnalysisPlotData, False, "tonto.HAR")
 OV.registerFunction(makePlotlyGraph, False, "tonto.HAR")
 OV.registerFunction(del_dir, False, "tonto.HAR")
 OV.registerFunction(sample_folder, False, "tonto.HAR")
-print "OK."
+#print "OK."
