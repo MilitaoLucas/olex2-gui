@@ -389,7 +389,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.constraints += self.setup_rigid_body_constraints(
       self.olx_atoms.afix_iterator())
     self.constraints += self.setup_geometrical_constraints(
-      self.olx_atoms.afix_iterator())      
+      self.olx_atoms.afix_iterator())
     self.n_constraints = len(self.constraints)
 
     temp = self.olx_atoms.exptl['temperature']
@@ -415,7 +415,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     )
     self.reparametrisation.fixed_distances.update(self.fixed_distances)
     self.reparametrisation.fixed_angles.update(self.fixed_angles)
-    
+
     #===========================================================================
     # for l,p in self.reparametrisation.fixed_distances.iteritems():
     #  label = ""
@@ -1027,14 +1027,14 @@ class FullMatrixRefine(OlexCctbxAdapter):
     self.shared_param_constraints = []
     vars = self.olx_atoms.model['variables']['variables']
     equations = self.olx_atoms.model['variables']['equations']
-    
+
     idslist = []
     if(len(equations)>0):
       # number of free variables
       FvarNum=0
       while OV.GetFVar(FvarNum) is not None:
         FvarNum+=1
-      
+
       # Building matrix of equations
       lineareq = numpy.zeros((0,FvarNum))
       rowheader = {}
@@ -1060,38 +1060,29 @@ class FullMatrixRefine(OlexCctbxAdapter):
         row[FvarNum-1]=equation['value']
         if(not ignored):
           lineareq=numpy.append(lineareq, [row], axis=0)
-        
+
       # LU decomposition to find incompatible or redundant constraints
       l,u = scipy.linalg.lu(lineareq, permute_l=True)
-      
-      Oops = False
-      if(numpy.shape(u)[0]>1):
+
+      if numpy.shape(u)[0] > 1:
         previous = u[-2,:]
         for row in numpy.flipud(u):
           if(numpy.all(row[0:-1]==0.0) and row[-1]!=0):
-            # incompatible set of constraints
-            print "Oops"
-            Oops = True
-            break
+            raise Exception("One or more equations are not independent")
           if(numpy.all(row[0:-1]==previous[0:-1]) and row[-1]!=previous[-1]):
-            # incompatible set of constraints
-            print "Oops"
-            Oops = True
-            break
+            raise Exception("One or more equations are not independent")
           previous = row
-      
-      if(not Oops):
-        # setting up constraints
-        for row in numpy.flipud(u):
-          if(numpy.all(row==0.0)):
-            print "Warning: one or more equations are not independant"
-            exit
-          else:
-            a = numpy.copy(row[:-1])
-            current = occupancy.occupancy_affine_constraint(idslist, a, row[-1])
-            #a = ((row[-3], row[-2]), row[-1])
-            #current = occupancy.occupancy_pair_affine_constraint(idslist[-2:], a)
-            constraints.append(current)
+
+      # setting up constraints
+      for row in numpy.flipud(u):
+        if(numpy.all(row==0.0)):
+          raise Exception("One or more equations are not independent")
+        else:
+          a = numpy.copy(row[:-1])
+          current = occupancy.occupancy_affine_constraint(idslist, a, row[-1])
+          #a = ((row[-3], row[-2]), row[-1])
+          #current = occupancy.occupancy_pair_affine_constraint(idslist[-2:], a)
+          constraints.append(current)
 
     for i, var in enumerate(vars):
       refs = var['references']
