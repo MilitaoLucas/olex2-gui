@@ -34,7 +34,7 @@
     <cmd1 cmd1="clear">
     <cmd2 "echo filepath()">
   >
->
+ >
 >
 
 
@@ -120,19 +120,19 @@
 
 <onexit help="Executes on program exit"
   <body
-    <args>
   <cmd
-    <cmd1 "stop logging">
-    <cmd2 "flush history">
-    <cmd3 "if IsFileLoaded() then 'spy.saveHistory()>>spy.SaveStructureParams()>>
-	  spy.SaveCifInfo()>>mode off'">
-    <cmd4 "spy.SaveUserParams()">
-    <cmd5 "spy.SaveOlex2Params()">
-    <cmd6 "storeparam startup file.relativePath(filefull())">
-    <cmd7 "storeparam last_version GetVar(last_version, '')">
-    <cmd8 "spy.threading.joinAll()">
-    <cmd8 "spy.onexit()">
-    <cmd9 "echo Good Bye">
+    <cmd "stop logging">
+    <cmd "flush history">
+    <cmd "if IsFileLoaded() then 'spy.saveHistory()>>spy.SaveStructureParams()>>
+          spy.SaveCifInfo()>>mode off'">
+    <cmd "spy.SaveUserParams()">
+    <cmd "spy.SaveOlex2Params()">
+    <cmd "storeparam startup file.relativePath(filefull())">
+    <cmd "storeparam last_version GetVar(last_version, '')">
+    <cmd "spy.threading.joinAll()">
+    <cmd "user_onexit">
+    <cmd "spy.onexit()">
+    <cmd "echo Good Bye">
   >
  >
 >
@@ -282,14 +282,14 @@
   <body
     <args
       <arg1 name="cutoff" def='0.07'>
-    />
+    >
     <cmd
       <cmd1 "sel atoms where xatom.uiso > %1">
       <cmd2 "sel atoms where xatom.peak<2&&xatom.peak>0">
       <cmd3 "html.Update">
-    />
-  />
-/>
+    >
+  >
+>
 
 <sadabs help="Run SADABS"
   <body
@@ -360,14 +360,15 @@
   <body
     <args
       <arg0 name="Prob_factor" def="-100">
+      <arg0 name="ARAD" def="isot">
     >
     <cmd
-      <cmd3 "individualise">
-      <cmd3 "azoom 100">
-      <cmd1 "ads elp">
-      <cmd2 "arad isot">
-      <cmd3 "mask atoms 5">
-      <cmd5 "if strcmp(%1,'-100') then 'telpv 50' else 'telpv %1'">
+      <cmd "individualise">
+      <cmd "azoom 100">
+      <cmd "ads elp">
+      <cmd "arad %2">
+      <cmd "mask atoms 5">
+      <cmd "if strcmp(%1,'-100') then 'telpv 50' else 'telpv %1'">
     >
   >
 >
@@ -375,60 +376,27 @@
 <telp_b help="Default telp macro"
   <body
     <cmd
-      <cmd1 "mask bonds 48">
-      <cmd1 "spy.gui.skin.change_bond_colour()">
-      <cmd2 "brad math.eval(spy.GetParam(user.bonds.bzoom)/100)">
+      <cmd "mask bonds 48">
+      <cmd "spy.gui.skin.change_bond_colour()">
+      <cmd "brad math.eval(spy.GetParam(user.bonds.bzoom)/100)">
     >
   >
 >
 
-<telph help="Default telph macro"
+<telph help="Default telp + 'real' H Uiso macro"
   <body
     <args
       <arg0 name="Prob_factor" def="-100">
     >
     <cmd
-      <cmd3 "telph_a">
-      <cmd3 "telph_b">
+      <cmd "telp_a %1 isoth">
+      <cmd "telp_b">
     >
   >
 >
-
-<telph_a help="Default telph macro"
-  <body
-    <args
-      <arg0 name="Prob_factor" def="-100">
-    >
-    <cmd
-      <cmd3 "individualise">
-      <cmd3 "azoom 100">
-      <cmd1 "ads elp">
-      <cmd2 "arad isoth">
-      <cmd3 "mask atoms 5">
-      <cmd5 "if strcmp(%1,'-100') then 'telpv 50' else 'telpv %1'">
-    >
-  >
->
-
-<telph_b help="Default telph macro"
-  <body
-    <args
-      <arg0 name="Prob_factor" def="-100">
-    >
-    <cmd
-      <cmd4 "mask bonds spy.GetParam('user.bonds.mask')">
-      <cmd1 "spy.gui.skin.change_bond_colour()">
-      <cmd2 "brad math.eval(spy.GetParam(user.bonds.bzoom)/100)">
-    >
-  >
->
-
 
 <pers help="Default pers macro"
   <body
-    <args
-      <arg0 name="File extension" def="ins">
-    >
     <cmd
       <cmd3 "pers_a">
       <cmd3 "pers_b">
@@ -438,15 +406,12 @@
 
 <pers_a help="Default pers macro"
   <body
-    <args
-      <arg0 name="File extension" def="ins">
-    >
     <cmd
-      <cmd3 "individualise">
-      <cmd3 "azoom spy.GetParam('user.atoms.azoom')">
-      <cmd1 "ads sph">
-      <cmd2 "arad pers">
-      <cmd3 "mask atoms 1">
+      <cmd "individualise">
+      <cmd "azoom spy.GetParam('user.atoms.azoom')">
+      <cmd "ads sph">
+      <cmd "arad pers">
+      <cmd "mask atoms 1">
     >
   >
 >
@@ -454,9 +419,9 @@
 <pers_b help="Default pers macro"
   <body
     <cmd
-      <cmd1 "mask bonds 48">
-      <cmd1 "spy.gui.skin.change_bond_colour()">
-      <cmd2 "brad math.eval(spy.GetParam(user.bonds.bzoom)/100)">
+      <cmd "mask bonds 48">
+      <cmd "spy.gui.skin.change_bond_colour()">
+      <cmd "brad math.eval(spy.GetParam(user.bonds.bzoom)/100)">
     >
   >
 >
@@ -464,8 +429,8 @@
 <sfil help="Default pers macro"
   <body
     <cmd
-      <cmd3 "sfil_a">
-      <cmd3 "sfil_b">
+      <cmd "sfil_a">
+      <cmd "sfil_b">
     >
   >
 >
@@ -473,11 +438,11 @@
 <sfil_a help="Default pers macro"
   <body
     <cmd
-      <cmd3 "individualise">
-      <cmd3 "azoom 100">
-      <cmd1 "ads sph">
-      <cmd2 "arad sfil">
-      <cmd3 "mask atoms 1">
+      <cmd "individualise">
+      <cmd "azoom 100">
+      <cmd "ads sph">
+      <cmd "arad sfil">
+      <cmd "mask atoms 1">
     >
   >
 >
@@ -490,41 +455,33 @@
   >
 >
 
-
-<proj help="Default wireframe macro"\
+<proj help="Default wireframe macro"
   <body
-    <args
-      <arg0 name="File extension" def="ins">
-    >
+    <args>
     <cmd
-      <cmd1 "proj_a">
-      <cmd1 "proj_b">
+      <cmd "proj_a">
+      <cmd "proj_b">
     >
   >
 >
 
-<proj_a help="Default wireframe macro"\
+<proj_a help="Default wireframe macro"
   <body
-    <args
-      <arg0 name="File extension" def="ins">
-    >
+    <args>
     <cmd
-      <cmd1 "individualise">
-      <cmd2 "mask atoms 16">
-      <cmd3 "ads std">
-      <cmd4 "arad pers">
+      <cmd "individualise">
+      <cmd "mask atoms 16">
+      <cmd "ads std">
+      <cmd "arad pers">
     >
   >
 >
 
-<proj_b help="Default wireframe macro"\
+<proj_b help="Default wireframe macro"
   <body
-    <args
-      <arg0 name="File extension" def="ins">
-    >
+    <args>
     <cmd
-      <cmd5 "mask bonds 4096">
-      <cmd1 "spy.gui.skin.change_bond_colour()">
+      <cmd "mask bonds 4096">
     >
   >
 >
@@ -536,8 +493,8 @@
       <arg0 name="radius" def="math.eval(spy.GetParam(user.bonds.bzoom)/100)">
     >
     <cmd
-      <cmd3 "tubes_a(%1)">
-      <cmd3 "tubes_b(%1)">
+      <cmd "tubes_a %1">
+      <cmd "tubes_b %1">
     >
   >
 >
@@ -548,10 +505,10 @@
       <arg0 name="radius" def="math.eval(spy.GetParam(user.bonds.bzoom)/100)">
     >
     <cmd
-      <cmd3 "individualise">
-      <cmd1 "ads sph">
-      <cmd1 "mask atoms 1">
-      <cmd2 "arad math.eval(%1/10)">
+      <cmd "individualise">
+      <cmd "ads sph">
+      <cmd "mask atoms 1">
+      <cmd "arad math.eval(%1/10)">
     >
   >
 >
@@ -562,13 +519,12 @@
       <arg0 name="radius" def="math.eval(spy.GetParam(user.bonds.bzoom)/100)">
     >
     <cmd
-      <cmd4 "mask bonds spy.GetParam('user.bonds.mask')">
-      <cmd1 "spy.gui.skin.change_bond_colour()">
-      <cmd2 "brad %1">
+      <cmd "mask bonds spy.GetParam('user.bonds.mask')">
+      <cmd "spy.gui.skin.change_bond_colour()">
+      <cmd "brad %1">
     >
   >
 >
-
 
 <_xphadd help="Run XP to do HADD"
   <body
@@ -646,8 +602,6 @@
   >
 >
 
-
-
 <external_edit help="Open file in an external text editor"
   <body
     <args
@@ -690,7 +644,7 @@
       <cmd2 "html.update">
     >
   >
-\ >
+>
 
 <_report help="Creates a Structure Report"
   <body
@@ -910,15 +864,15 @@
   <body
     <args
       <arg1 name="name" def="">
-    />
+    >
     <cmd
       <cmd1 "cursor(busy,'Please Wait ... for a very long time')">
       <cmd2 "spy.change_skin(%1)">
       <cmd3 "html.load Basedir()/etc/index.htm">
       <cmd4 "cursor()">
-    />
-  />
-/>
+    >
+  >
+>
 
 
 <startupPanel help="Set the width of the Control Panel"
@@ -933,9 +887,9 @@
       <cmd5 "htmlpanelwidth %1">
       <cmd4 "spy.resize_skin_logo(%1)">
       <cmd4 "spy.resize_to_panelwidth -i='news/news.png'">
-    />
-  />
-/>
+    >
+  >
+>
 
 <panel help="Set the width of the Control Panel"
   <body
@@ -945,9 +899,9 @@
     >
     <cmd
       <cmd2 "skin %1">
-    />
-  />
-/>
+    >
+  >
+>
 
 
 <edthelp help="Invokes the help editor"
@@ -1169,36 +1123,6 @@
 
 
 
-<odemo help="Launches OD Demo"
-  <body
-    <args
-      <arg1 name="single" def="DataDir()/ODemo.zip">
-    >
-    <cmd
-      <cmd1 "user BaseDir()">
-      <cmd2 "html.ItemState * 0 tab* 0 logo1 1 index-info* 1 info-title 1">
-      <cmd3 "html.ItemState info-history 0">
-      <cmd4 "html.ItemState info-reflection-statistics 0">
-      <cmd5 "html.ItemState info-bad-reflections 0">
-      <cmd6 "html.ItemState info-electron-density-peaks 0">
-      <cmd7 "html.ItemState info-autochem 0">
-      <cmd8 "html.ItemState info-refinement-indicators 0">
-      <cmd9 "html.ItemState info-recent-files 0">
-      <cmd10 "spy.SetParam(autochem.batch.directory,'%1')">
-      <cmd11 "spy.SetParam(autochem.solution_program,Auto)">
-      <cmd12 XXX="spy.SetParam(autochem.solution_method,Auto)">
-      <cmd13 XXX="spy.SetParam(autochem.refinement_program,Auto)">
-      <cmd14 XXX="spy.SetParam(autochem.refinement_method,Auto)">
-      <cmd15 XXX="spy.SetParam(autochem.durham_structures,False)">
-      <cmd16 "spy.SetParam(autochem.demo_mode,True)">
-      <cmd17 XXX="spy.SetParam(autochem.cutoff1_type,--)">
-      <cmd17 XXX="spy.SetParam(autochem.cutoff2_type,--)">
-      <cmd18 "spy.ac_run solveit">
-    >
-  >
->
-
-
 <dire help="Opens the current directory in Explorer"
   <body
     <cmd
@@ -1221,12 +1145,11 @@
     <args
       <arg1 name="setup_page" def="0">
     >
-
-  <cmd
-    <cmd0 cmd="spy.tbxs -n=%1">
-  />
-/>
-/>
+    <cmd
+      <cmd0 cmd="spy.tbxs -n=%1">
+    >
+  >
+>
 
 
 <wilson_plot help="Creates and displays a Wilson Plot"
@@ -1340,92 +1263,6 @@
   >
 >
 
-<gui2 help="Switch to Gui2"
-  <body
-    <cmd
-      <cmd2 "SetVar('user_refinement_gui2',True)">
-      <cmd2 "spy.makeTestbanner()">
-      <cmd2 "html.ItemState * 0">
-      <cmd2 "html.ItemState logo1 1">
-      <cmd2 "html.ItemState info-title 1">
-      <cmd2 "html.ItemState index-all-in-one 1">
-      <cmd2 "html.ItemState aio-* 0">
-      <cmd2 "spy.doBanner(spy.GetParam(snum.refinement.banner_slide))">
-      <cmd2 "SetImage(BANNER_IMAGE,strcat(banner_,spy.GetParam(snum.refinement.banner_slide).png))">
-    >
-  >
->
-
-<g3 help="Switch to Gui3"
-  <body
-    <cmd
-      <cmd2 "clear">
-      <cmd2 "html.ItemState * 0">
-      <cmd2 "html.ItemState logo1 1">
-      <cmd2 "html.ItemState info-title 1">
-      <cmd2 "html.ItemState index-g3 1">
-      <cmd2 "html.ItemState g3-* 0">
-      <cmd2 "html.ItemState tasks 1">
-      <cmd2 "html.ItemState *tab-g3 2">
-    >
-  >
->
-
-<g4 help="Switch to Gui4"
-  <body
-    <cmd
-      <cmd2 "clear">
-      <cmd2 "html.ItemState * 0">
-      <cmd2 "html.ItemState logo1 1">
-      <cmd2 "html.ItemState info-title 1">
-      <cmd2 "html.ItemState index-g4 1">
-      <cmd2 "html.ItemState g4-* 1">
-      <cmd2 "spy.g4.sel_evaluate_selection()">
-      <cmd2 "html.ItemState g4-tasks 1">
-      <cmd2 "html.ItemState g4-status 1">
-      <cmd2 "html.ItemState *tab-g4 1">
-    >
-  >
->
-
-<g1 help="Switch to default GUI"
-  <body
-    <cmd
-	  <cmd2 "clear">
-	  <cmd2	html.load Basedir()/etc/index.htm>
- 	  >
-  >
->
-
-<gg help="Switch to Images Reports GUI"
-  <body
-    <cmd
-      <cmd2 "clear">
-      <cmd2 "html.ItemState * 0">
-      <cmd2 "html.ItemState logo1 1">
-      <cmd2 "html.ItemState info-title 1">
-      <cmd2 "html.ItemState tools-images 1">
-
-	  >
-  >
->
-
-
-<tool help="Show grouped gui tools"
-  <body
-    <args
-      <arg1 name="tools" def="">
-    >
-    <cmd
-      <cmd1 "gui2">
-      <cmd1 "html.ItemState aio* 0">
-      <cmd2 "html.ItemState aio-%1* 1">
-    >
-  >
->
-
-
-
 <edt help="Edits a particular atom"
   <body
     <args
@@ -1479,19 +1316,6 @@
     >
   >
 >
-
-<getAutoChem help="Get AutoChem"
-  <body
-    <args
-      <arg1 name="username" def="">
-      <arg1 name="password" def="">
-    >
-    <cmd
-      <cmd1 'spy.register_new_odac(%1,%2)'>
-    >
-  >
->
-
 
 <dires help="open the directory using explorer"
   <body
@@ -1571,14 +1395,9 @@
   >
 >
 
-
-
-
-
-
 <user_onstartup help="dummy definition" <body > >
+<user_onexit help="dummy definition" <body > >
 <custom_on_report help="dummy definition" <body > >
-
 
 
 <#include "custom.xld">
