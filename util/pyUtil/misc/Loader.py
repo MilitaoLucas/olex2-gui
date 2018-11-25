@@ -546,18 +546,22 @@ class ModuleListThread(ThreadEx):
 
 def getAvailableModules(in_thread=True):
   global avaialbaleModulesRetrieved
+  OV.Cursor("Getting information about available modules. Please Wait...")
   if avaialbaleModulesRetrieved:
+    OV.Cursor()
     return
   if ModuleListThread.instance:
     if not in_thread:
       ModuleListThread.instance.join()
     else:
+      OV.Cursor()
       return
   else:
     if in_thread:
       ModuleListThread().start()
     else:
       ModuleListThread().run()
+  OV.Cursor()
 
 # GUI specific functions
 def getModuleCaption(m):
