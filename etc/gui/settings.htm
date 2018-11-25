@@ -107,19 +107,16 @@
   <td width='55%' >
     Show tooltips when hovering
   </td>
-  <td width='20%' align='right'>
-    <input
-      type="checkbox"
-      name="SHOW_TOOLTIPS"
-      fgcolor="GetVar(HtmlFontColour)"
-      bgcolor="GetVar('HtmlInputBgColour')"
-      checked="CheckState(htmlttvis)"
-      oncheck="spy.SetParam(user.show_tooltips,1)>>html.tooltips true"
-      onuncheck="spy.SetParam(user.show_tooltips,0)>>html.tooltips false"
-      target="Show tooltips when hovering over a control"
-      statedependent="htmlttvis"
-    >
-  </td>
+  <td width="22%" align='right'>
+    $+
+      html.Snippet("gui/snippets/input-checkbox",
+      "name=SHOW_TOOLTIPS",
+      "checked=CheckState(htmlttvis)",
+      "oncheck=spy.SetParam(user.show_tooltips,1)>>html.tooltips true",
+      "onuncheck=spy.SetParam(user.show_tooltips,0)>>html.tooltips false",
+      "target=Show tooltips when hovering over a control",
+      )
+     $-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='LEGEND';help_ext=Legend;1 -->
@@ -129,17 +126,16 @@
   <td width='55%' >
     Show the legend of atom types
   </td>
-  <td width='20%' align='right'>
-    <input
-      type="checkbox"
-      name="LEGEND"
-      fgcolor="GetVar(HtmlFontColour)"
-      bgcolor="GetVar('HtmlInputBgColour')"
-      checked="spy.GetParam(user.show_legend)"
-      onclick="spy.SetParam(user.show_legend,html.GetState(~name~))>>legend spy.GetParam(user.show_legend)"
-      target="Show or hide the atom type legend"
-    >
-  </td>
+  <td width="22%" align='right'>
+    $+
+      html.Snippet("gui/snippets/input-checkbox",
+      "name=LEGEND",
+      "checked=spy.GetParam(user.show_legend)",
+      "oncheck=spy.SetParam(user.show_tooltips,1)>>html.tooltips true",
+      "onclick=spy.SetParam(user.show_legend,html.GetState(~name~))>>legend spy.GetParam(user.show_legend)",
+      "target=Show or hide the atom type legend",
+      )
+     $-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
@@ -150,17 +146,15 @@
   <td width='55%' >
     Show bar with structure info
   </td>
-  <td width='20%' align='right'>
-    <input
-      type="checkbox"
-      name="SHOW_INFO"
-      fgcolor="GetVar(HtmlFontColour)"
-      bgcolor="GetVar('HtmlInputBgColour')"
-      checked="not(strcmp(spy.GetParam(user.show_info),0))"
-      oncheck="spy.SetParam(user.show_info,1)>>showwindow info true"
-      onuncheck="spy.SetParam(user.show_info,0)>>showwindow info false"
-    >
-  </td>
+  <td width="22%" align='right'>
+    $+
+      html.Snippet("gui/snippets/input-checkbox",
+      "name=SHOW_INFO",
+      "checked=not(strcmp(spy.GetParam(user.show_info),0))",
+      "oncheck=spy.SetParam(user.show_info,1)>>showwindow info true",
+      "onuncheck=spy.SetParam(user.show_info,0)>>showwindow info false",
+      )
+    $-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
@@ -219,17 +213,15 @@
   <td width='55%'>
     Add MORE -1, CONF, BOND $H automatically
   </td>
-  <td width='20%' align='right'>
-    <input
-      type="checkbox"
-      name="AUTO_INSERT_ACTA_STUFF"
-      fgcolor="GetVar(HtmlFontColour)"
-      bgcolor="GetVar('HtmlInputBgColour')"
-      checked="spy.GetParam(user.auto_insert_acta_stuff)"
-      oncheck="spy.SetParam(user.auto_insert_acta_stuff,True)"
-      onuncheck="spy.SetParam(user.auto_insert_acta_stuff,False)"
-    >
-  </td>
+  <td width="22%" align='right'>
+    $+
+      html.Snippet("gui/snippets/input-checkbox",
+      "name=AUTO_INSERT_ACTA_STUFF",
+      "checked=spy.GetParam(user.auto_insert_acta_stuff)",
+      "oncheck=spy.SetParam(user.auto_insert_acta_stuff,True)",
+      "onuncheck=spy.SetParam(user.auto_insert_acta_stuff,False)",
+      )
+    $-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!--<!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='FADER';help_ext=Fader;1 -->-->
@@ -300,17 +292,15 @@
   <td width='55%'>
      Only one top-level tool open at a time
   </td>
-  <td width='20%' align='right'>
-    <input
-      type="checkbox"
-      name="SOLO_MODE"
-      fgcolor="GetVar(HtmlFontColour)"
-      bgcolor="GetVar('HtmlInputBgColour')"
-      checked="not(strcmp(spy.GetParam(user.solo),False))"
-      oncheck="spy.SetParam(user.solo,True)"
-      onuncheck="spy.SetParam(user.solo,False)"
-    >
-  </td>
+  <td width="22%" align='right'>
+    $+
+      html.Snippet("gui/snippets/input-checkbox",
+      "name=SOLO_MODE",
+      "checked=not(strcmp(spy.GetParam(user.solo),False))",
+      "oncheck=spy.SetParam(user.solo,True)",
+      "onuncheck=spy.SetParam(user.solo,False)",
+      )
+    $-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='CLOSE_SETTINGS';help_ext=Close_Settings;1 -->
@@ -320,15 +310,14 @@
   <td width='55%'>
      Solve, Refine and Report panels
   </td>
-  <td width='22%' align='right'>
-    <input
-      type="checkbox"
-      name="AUTO_CLOSE_SETTINGS_PANEL"
-      fgcolor="GetVar(HtmlFontColour)"
-      bgcolor="GetVar('HtmlInputBgColour')"
-      checked="not(strcmp(spy.GetParam(user.auto_close_settings_panel),False))"
-      onclick="spy.SetParam(user.auto_close_settings_panel,html.GetState('~name~'))"
-    >
+  <td width="22%" align='right'>
+    $+
+      html.Snippet("gui/snippets/input-checkbox",
+      "name=AUTO_CLOSE_SETTINGS_PANEL",
+      "checked=not(strcmp(spy.GetParam(user.auto_close_settings_panel),False))",
+      "onclick=spy.SetParam(user.auto_close_settings_panel,html.GetState('~name~'))",
+      )
+    $-
   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
@@ -337,11 +326,14 @@
   <td width='55%'>
     Display a notification dialogue when module updates available
   </td>
-  <td width="22%" align='right'>$+
-    html.Snippet("gui/snippets/input-checkbox", "name=modules_notification",
-     "checked=not(spy.GetParam('user.modules.manual_update', 'false'))",
-     "onclick=spy.SetParam('user.modules.manual_update', not(html.GetState('~name~')))")
-   $-</td>
+  <td width="22%" align='right'>
+    $+
+      html.Snippet("gui/snippets/input-checkbox",
+      "name=modules_notification",
+      "checked=not(spy.GetParam('user.modules.manual_update', 'false'))",
+      "onclick=spy.SetParam('user.modules.manual_update', not(html.GetState('~name~')))")
+     $-
+   </td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name='UNITCELL_RENDERING';help_ext=Unit_Cell_Style;1 -->
