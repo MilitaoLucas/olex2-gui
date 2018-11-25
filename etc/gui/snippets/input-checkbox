@@ -4,11 +4,13 @@
 #height=0
 #manage=false
 #right=false
-#bgcolor='GetVar(HtmlInputBgColour)'
-#fgcolor='GetVar(HtmlFontColour)'
+#bgcolor=GetVar(HtmlInputBgColour)
+#fgcolor=GetVar(HtmlFontColour)
 #disabled=false
 #oncheck="html.SetData(~name~,'True')"
 #onuncheck="html.SetData(~name~,' ')"
+#target=
+
 
 <font size="$GetVar('HtmlFontSizeControls')">
 <input
@@ -26,5 +28,6 @@
   right="#right"
   manage="#manage"
   disabled="#disabled"
+  target="#target"
 >
 </font>
