@@ -645,7 +645,7 @@ def update(idx):
 def getAction():
   global current_module
   if current_module is None:
-    action = 'Please choose a module'
+    action = 'Please Choose'
     try:
       if olx.html.GetValue('available_modules') != "":
         action = 'Install Custom Module'
