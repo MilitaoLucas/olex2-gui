@@ -2,76 +2,56 @@
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=FINISHING_QUICK_SORT; help_ext=Finishing_QuickSort;1; -->
 <td width='20%'>
-  <b>&nbsp;QuickSort</b>
+  <b>QuickSort</b>
 </td>
-
-<td width='60%'>
     $+
-    html.Snippet("gui/snippets/input-button",
-    "value=Sort with current settings",
+    html.Snippet(GetVar(default_link),
+    "value=Sort with Current Settings",
     "onclick=spy.gui.do_sort()",
     )$-
-</td>
 
 
-<td>
-</td>
+  <td ALIGN='left' width='5%'>
+$spy.gui.images.get_action_button_html('edit', "spy.gui.SwitchTool(h2-work-sorting)>>spy.gui.tools.flash_gui_control(h2-sorting)","Edit Sort Settings")
+  </td>
 
-
-<td width='20%' align='right'>
-    $+
-    html.Snippet("gui/snippets/input-button",
-    "value=Sort Settings",
-    "onclick=spy.gui.SwitchTool(h2-work-sorting)>>spy.gui.tools.flash_gui_control(h2-sorting)",
-    )$-
-<td>
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 
 <!-- #include tool-row-help gui\blocks\tool-row-help.htm;name=FINISHING_QUICK_IMAGES; help_ext=Finishing_QuickImages;1; -->
 <td width='20%'>
-  <b>&nbsp;QuickImages</b>
+  <b>QuickImages</b>
 </td>
 
-<td width='15%'>
     $+
-    html.Snippet("gui/snippets/input-button",
+    html.Snippet(GetVar(default_link),
     "value=Selected",
     "onclick=label -type=spy.GetParam('user.image.label_symm_type') -symm=spy.GetParam('user.image.label_symm')",
     )$-
-</td>
 
-<td width='15%'>
     $+
-    html.Snippet("gui/snippets/input-button",
+    html.Snippet(GetVar(default_link),
     "value=non-H",
     "onclick=label \$*-H,Q -type=spy.GetParam('user.image.label_symm_type') -symm=spy.GetParam('user.image.label_symm')",
     )$-
-</td>
 
-<td width='15%'>
     $+
-    html.Snippet("gui/snippets/input-button",
+    html.Snippet(GetVar(default_link),
     "value=No Labels",
     "onclick=kill labels",
     )$-
-</td>
 
-<td width='15%'>
     $+
-    html.Snippet("gui/snippets/input-button",
-    "value=Go!",
-    "onclick=spy.gui.images.MakeBitmapImage()"",
+    html.Snippet(GetVar(default_link),
+    "value=Go",
+    "bgcolor=GetVar(gui.green)",
+    "fgcolor=#ffffff",
+    "onclick=spy.gui.images.MakeBitmapImage()",
     )$-
-<td>
 
-<td width='20%'>
-    $+
-    html.Snippet("gui/snippets/input-button",
-    "value=Img Settings",
-    "onclick=spy.gui.SwitchTool(h2-tools-images)>>spy.gui.tools.flash_gui_control(h2-images)",
-    )$-
-<td>
+  <td ALIGN='left' width='5%'>
+$spy.gui.images.get_action_button_html('edit', "spy.gui.SwitchTool(h2-tools-images)>>spy.gui.tools.flash_gui_control(h2-images)","Edit Image Settings")
+  </td>
 
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
