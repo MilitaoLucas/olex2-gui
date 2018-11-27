@@ -41,18 +41,12 @@ contact you in the case of new releases or features update.
       "onreturn=html.call(~name~.onchange)",
       "readonly=false")
   $-</td>
-  <td width='35%'>
-    <font size='2'>
-    <input
-      name="MODULES_ACTION"
-      type='button'
-      value='spy.plugins.gui.getAction()'
-      width="100%"
-      bgcolor="spy.GetParam('gui.html.input_bg_colour')"
-      onclick="spy.plugins.gui.doAct()"
-    >
-    </font>
-  </td>
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=spy.plugins.gui.getAction()",
+    "onclick=spy.plugins.gui.doAct()",
+    "td1=<td width='29%'>"
+    )$-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-row gui\blocks\tool-row.htm;name=MODULES_INFO;1; -->
@@ -66,12 +60,15 @@ contact you in the case of new releases or features update.
 #ignoreif -->
 
 <!-- #include tool-row gui\blocks\tool-row.htm;name=MODULES_OFFLINE;1; -->
-  <td width='100%'>
+  <td width='65%'>
   Install offline module in ZIP format.
   </td>
-  <td>
-    <input type="button" value="Install offline" onclick="spy.plugins.offlineInstall()"/>
-  </td>
+    $+
+    html.Snippet(GetVar(default_link),
+    "value=Install Offline",
+    "onclick=spy.plugins.offlineInstall()",
+    "td1=<td width='29%'>"
+    )$-
 <!-- #include row_table_off gui\blocks\row_table_off.htm;1; -->
 
 <!-- #include tool-footer gui\blocks\tool-footer.htm;colspan=2;1; -->
