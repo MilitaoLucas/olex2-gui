@@ -33,22 +33,20 @@ build_def = {
     (('~/cctbx-build/cctbx_build/', '~/cctbx-build/cctbx_sources/',
       '~/tmp/cctbx/', 'cctbx-linux32.zip', '-j4'),),
   'linux2-64bit':
-    (('~/build/svn/cctbx/cctbx_build/', '~/cctbx-build/cctbx_sources/',
-      '~/tmp/cctbx/', 'cctbx-linux64.zip', '-j4'),),
+    (('/mnt/hgfs/cctbx/cctbx_lastest/build_lin64/', '/mnt/hgfs/cctbx/cctbx_lastest/modules/cctbx_project/',
+      '/tmp/cctbx/', 'cctbx-linux64.zip', '-j4'),),
   'darwin-32bit':
     (('~/cctbx-build/cctbx_build/', '~/cctbx-build/cctbx_sources/',
       '~/tmp/cctbx/', 'cctbx-mac32.zip', '-j2'),),
   'darwin-64bit':
-    (('~/cctbx-build/cctbx_build/', '~/cctbx-build/cctbx_sources/',
-      '~/tmp/cctbx/', 'cctbx-mac64.zip', '-j2'),),
+    (('~/build/svn/cctbx/build_max64/', '~/build/svn/cctbx/modules/cctbx_project/',
+      '/tmp/cctbx/', 'cctbx-mac64.zip', '-j4'),),
 
   'win32-32bit':
-    (('e:/cctbx/build_32_sse2/', 'e:/cctbx/cctbx_sources/',
-      'e:/tmp/cctbx/', 'cctbx-win32-sse2.zip', '-j6'),
-     ('e:/cctbx/build_32_sse/', 'e:/cctbx/cctbx_sources/',
-      'e:/tmp/cctbx/', 'cctbx-win32-sse.zip', '-j6')),
+    [('e:/cctbx/cctbx_latest/build_win32/', 'e:/cctbx/cctbx_latest/modules/cctbx_project/',
+      'e:/tmp/cctbx/', 'cctbx-win32.zip', '-j6')],
   'win32-64bit':
-    [('e:/cctbx/build_64/', 'e:/cctbx/cctbx_sources/',
+    [('e:/cctbx/cctbx_latest/build_win64/', 'e:/cctbx/cctbx_latest/modules/cctbx_project/',
       'e:/tmp/cctbx/', 'cctbx-win64.zip', '-j6')],
 }
 # build ALL win on win64
@@ -76,6 +74,7 @@ def compile(_platform):
       if os.system(bin_dir+'libtbx.python ' + src_dir + 'libtbx/bundle/copy_all.py cctbx') != 0:
         print 'Failed to create a distribution...'
         return False
+      shutil.copytree(src_dir + "boost", "cctbx_sources/boost")
 
       zip_name = tmp_dir + d[3]
       print 'Creating ' +  zip_name + ':'
