@@ -109,20 +109,6 @@
 >
 
 
-<sgd help="Determine the Space Group"
-  <body
-    <args
-    >
-
-  <cmd
-    <cmd1 "cursor(busy,'Determining the Space Group...')">
-    <cmd2 "sg">
-    <cmd3 "cursor()">
-  >
->
->
-
-
 <report help="Creates structure report"
   <body
     <args
@@ -152,12 +138,6 @@
       <cmd6 "if strcmp(%2,'-1') then None else spy.SetMaxPeaks(%2)">
       <cmd10 "spy.RunRefinementPrg()">
     >
-    <onterminate
-      <cmd0 "cursor()">
-    >
-    <onabort
-      <cmd0 "cursor()">
-    >
   >
 >
 
@@ -169,6 +149,7 @@
     >
     <cmd
       <cmd10 "spy.RunSolutionPrg()">
+    >
   >
 >
 
@@ -205,31 +186,8 @@
       <cmd0 "silent off">
       <cmd1 "stop">
     >
-    <onlisten
-      <cmd1 cmdXXX="'SetVar(snum_refinement_max_peaks,Ins(QNUM))'">
-      <cmd1 cmdXXX="'SetVar(snum_refinement_max_cycles,Ins(LS))'">
-      <cmd1 cmdXXX="spy.doProgramSettings(GetVar(snum_refinement_program),GetVar(snum_refinement_method))">
-      <cmd0 cmdXXX="updatehtml">
-    >
   >
 >
-
-
-
-<atreap_no_fader help="Load a Crystallographic File"
-  <body
-    <args
-      <arg0 name="file name" def="">
-      <arg1 name="options" def="">
-    >
-    <cmd
-      <cmd1 "@reap %1">
-    >
-    <onabort
-    >
-  >
->
-
 
 </ help="Add command to the ins file"
   <body
@@ -313,7 +271,7 @@
 >
 
 
-<ac2 help="Launches ac_run"
+<ac4 help="Launches ac_run"
   <body
     <args
       <arg1 name="single" def="">
