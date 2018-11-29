@@ -529,8 +529,6 @@ def getAvailableModules_():
     avaialbaleModulesRetrieved = True
     olx.Schedule(1, "spy.plugins.updateKeys()", g=False)
 
-
-
 class ModuleListThread(ThreadEx):
   instance = None
   def __init__(self):
@@ -539,29 +537,27 @@ class ModuleListThread(ThreadEx):
     ModuleListThread.instance = self
 
   def run(self):
-    import time
-    time.sleep(3)
     getAvailableModules_()
     ModuleListThread.instance = None
 
 def getAvailableModules(in_thread=True):
   global avaialbaleModulesRetrieved
   OV.Cursor("Getting information about available modules. Please Wait...")
-  if avaialbaleModulesRetrieved:
-    OV.Cursor()
-    return
-  if ModuleListThread.instance:
-    if not in_thread:
-      ModuleListThread.instance.join()
-    else:
-      OV.Cursor()
+  try:
+    if avaialbaleModulesRetrieved:
       return
-  else:
-    if in_thread:
-      ModuleListThread().start()
+    if ModuleListThread.instance:
+      if not in_thread:
+        ModuleListThread.instance.join()
+      else:
+        return
     else:
-      ModuleListThread().run()
-  OV.Cursor()
+      if in_thread:
+        ModuleListThread().start()
+      else:
+        ModuleListThread().run()
+  finally:
+    OV.Cursor()
 
 # GUI specific functions
 def getModuleCaption(m):
