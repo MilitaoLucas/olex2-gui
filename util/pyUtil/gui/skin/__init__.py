@@ -519,7 +519,6 @@ def change_bond_colour(scope="", colour=""):
   olex.m("sel -i")
   olex.m("sel atoms -u")
 
-
   if colour == 'elements':
     olx.Mask(48)
     OV.SetParam('snum.bonds.mask', 48)
