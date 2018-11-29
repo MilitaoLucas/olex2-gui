@@ -331,7 +331,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     elif sec_ch2_treatment == 'refine':
       self.refine_secondary_xh2_angle = True
 
-  def run(self, build_only=False):
+  def run(self, build_only=False, normal_equations_class=olex2_normal_eqns):
     """ If build_only is True - this method initialises and returns the normal
      equations object
     """
@@ -438,7 +438,7 @@ class FullMatrixRefine(OlexCctbxAdapter):
     weighting = least_squares.mainstream_shelx_weighting(**params)
     #self.reflections.f_sq_obs_filtered = self.reflections.f_sq_obs_filtered.sort(
     #  by_value="resolution")
-    self.normal_eqns = olex2_normal_eqns(
+    self.normal_eqns = normal_equations_class(
       self.observations,
       self.reparametrisation,
       self.olx_atoms,
@@ -1351,20 +1351,20 @@ class FullMatrixRefine(OlexCctbxAdapter):
 
   def show_summary(self, log=None):
     import sys
-    
+
     _ = self.cycles.n_iterations
     plural = "S"
     if _ == 1:
       plural = ""
 
     if log is None: log = sys.stdout
-    
+
     pad = 2 - len(str(self.cycles.n_iterations)) 
     print >> log, "\n  ++++++++++++++++++++++++++++++++++++++++++++++++%s+++ After %i CYCLE%s +++" %(pad*"+", self.cycles.n_iterations, plural)
     #print >> log, " +"
     print >> log, "  +  R1:       %.4f for %i reflections I >= 2u(I)" %self.r1
     print >> log, "  +  R1 (all): %.4f for %i reflections" %self.r1_all_data
-    
+
     print >> log, "  +  wR2:      %.4f, GooF:  %.4f" % (
       self.normal_eqns.wR2(),
       self.normal_eqns.goof()
@@ -1384,9 +1384,10 @@ class FullMatrixRefine(OlexCctbxAdapter):
       max_shift_u[0],
       max_shift_u[1].label
       )
-    
+
     pad = 9 - len(str(self.n_constraints)) - len(str(self.normal_eqns.n_restraints)) - len(str(self.normal_eqns.n_parameters))
-    print >> log, "  ++++++++++++ %i Constraints | %i Restraints | %i Parameters +++++++++%s" %(self.n_constraints, self.normal_eqns.n_restraints, self.normal_eqns.n_parameters, "+"*pad)
+    print >> log, "  ++++++++++++ %i Constraints | %i Restraints | %i Parameters +++++++++%s"\
+      %(self.n_constraints, self.normal_eqns.n_restraints, self.normal_eqns.n_parameters, "+"*pad)
 
 
     OV.SetParam('snum.refinement.max_peak', self.diff_stats.max())
