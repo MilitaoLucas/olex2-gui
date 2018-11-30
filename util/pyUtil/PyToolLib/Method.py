@@ -294,7 +294,7 @@ class Method_refinement(Method):
       if olx.Ins('ACTA') == "n/a":
         if olx.GetVar('refinement_acta', None) != "No ACTA":
           OV.AddIns("ACTA")
-      if olx.Ins("CONF") != "n/a":
+      if olx.Ins("CONF") == "n/a":
         OV.AddIns('CONF')
 
     if RunPrgObject.make_unique_names:
