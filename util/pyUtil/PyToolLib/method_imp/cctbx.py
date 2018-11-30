@@ -6,8 +6,15 @@ import olx
 import olex
 
 class Method_cctbx_refinement(Method_refinement):
-
   flack = None
+  version = "(default)"
+
+  def __init__(self, phil_object):
+    import os
+    super(Method_cctbx_refinement, self).__init__(phil_object)
+    _ = os.environ.get('OLEX2_CCTBX_DIR')
+    if _ is not None:
+      self.version = _
 
   def pre_refinement(self, RunPrgObject):
     RunPrgObject.make_unique_names = True
@@ -15,20 +22,13 @@ class Method_cctbx_refinement(Method_refinement):
     Method_refinement.pre_refinement(self, RunPrgObject)
 
   def do_run(self, RunPrgObject):
-    debug = bool(OV.GetParam('olex2.debug',False))
-    timer = debug
     import time
-
     from refinement import FullMatrixRefine
     from smtbx.refinement.constraints import InvalidConstraint
+
+    timer = debug = bool(OV.GetParam('olex2.debug',False))
     self.failure = True
-    import os
-    _ = os.environ.get('OLEX2_CCTBX_DIR')
-    if _ is not None:
-      version = _
-    else:
-      version = '(default)'
-    print '\n+++ STARTING olex2.refine +++++ %s' %version
+    print '\n+++ STARTING olex2.refine +++++ %s' %self.version
     verbose = OV.GetParam('olex2.verbose')
     cctbx = FullMatrixRefine(
       max_cycles=RunPrgObject.params.snum.refinement.max_cycles,
@@ -65,11 +65,7 @@ class Method_cctbx_refinement(Method_refinement):
 
   def post_refinement(self, RunPrgObject):
     OV.SetParam('snum.refinement.max_cycles',self.cycles)
-    _ = olx.Ins('ACTA')
-    if _ == "n/a":
-      acta_stuff = False
-    else:
-      acta_stuff = True
+    acta_stuff = olx.Ins('ACTA') != "n/a"
     if acta_stuff:
       self.writeRefinementInfoIntoRes(self.cif)
       txt = '''
