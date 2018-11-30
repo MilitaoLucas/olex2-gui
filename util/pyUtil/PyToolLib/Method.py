@@ -244,7 +244,7 @@ class Method_solution(Method):
         else:
           d.setdefault(item[:2],1.0)
       except Exception, ex:
-        print >> sys.stderr, "An error occured in the function getFormulaAsDict."+\
+        print >> sys.stderr, "An error occurred in the function getFormulaAsDict."+\
           "\nFormula: %s, item: %s" %(formula, item)
         sys.stderr.formatExceptionInfo()
     return d
@@ -259,7 +259,8 @@ class Method_refinement(Method):
     """
     for arg in self.getArgs():
       argName = arg.split()[0]
-      olx.DelIns(argName)
+      if olx.Ins(argName) != "n/a":
+        olx.DelIns(argName)
       OV.AddIns(arg)
 
   def pre_refinement(self, RunPrgObject):
@@ -285,20 +286,16 @@ class Method_refinement(Method):
           olx.UpdateWght(*suggested_weight)
 
     if RunPrgObject.params.user.auto_insert_acta_stuff:
-#      radiation = olx.xf.exptl.Radiation()
-
-      # Check whether these are present. If so, do nothing.
-      more = olx.Ins('MORE')
-      if more == "n/a":
+      if olx.Ins('MORE') == "n/a":
         OV.AddIns("MORE -1")
       bond = olx.Ins('BOND')
       if bond == "n/a" or not bond:
         OV.AddIns("BOND $H", quiet=True)
-      acta= olx.Ins('ACTA')
-      if acta == "n/a":
+      if olx.Ins('ACTA') == "n/a":
         if olx.GetVar('refinement_acta', None) != "No ACTA":
           OV.AddIns("ACTA")
-      OV.AddIns('CONF', quiet=True)
+      if olx.Ins("CONF") != "n/a":
+        OV.AddIns('CONF')
 
     if RunPrgObject.make_unique_names:
       pass
@@ -347,6 +344,9 @@ class Method_refinement(Method):
   ''' %d
     if not file_name:
       file_name = '%s/%s.res' %(OV.FilePath(), OV.FileName())
-    wFile = open(file_name, 'a')
-    wFile.write(txt)
-    wFile.close()
+    file_lock = OV.createFileLock(file_name)
+    try:
+      with open(file_name, 'a') as wFile:
+        wFile.write(txt)
+    finally:
+      OV.deleteFileLock(file_lock)
