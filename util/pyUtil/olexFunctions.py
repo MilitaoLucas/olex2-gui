@@ -1015,6 +1015,24 @@ class OlexFunctions(inheritFunctions):
           return None
     return pyl
 
+  def createFileLock(self, fileName):
+    lockName = olx.file.ChangeExt(fileName, "lock")
+    cnt = 0
+    while os.path.exists(lockName):
+      try:
+        os.remove(lockName)
+      except:
+        cnt += 1
+        if cnt > 5:
+          raise IOError("Failed to remove the lock file: %s" %lockName)
+        time.sleep(1)
+    return (lockName, open(lockName, "w+"))
+
+  def deleteFileLock(self, lock):
+    lock[1].close();
+    os.remove(lock[0])
+
+
 def GetParam(variable, default=None):
   # A wrapper for the function spy.GetParam() as exposed to the GUI.
   return OV.GetParam_as_string(variable, default)

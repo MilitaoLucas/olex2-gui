@@ -107,6 +107,7 @@ class RunPrg(ArgumentParser):
       print("Already running. Please wait...")
       return
     RunPrg.running = True
+    caught_exception = None
     try:
       token = TimeWatch.start("Running %s" %self.program.name)
       if timer:
@@ -124,14 +125,15 @@ class RunPrg(ArgumentParser):
           print "runAfterProcess: %.3f" %(time.time() - t1)
       if timer:
         t1 = time.time()
+    except Exception, e:
+      caught_exception = e
+    finally:
       self.endRun()
-      if timer:
-        print "endRun: %.3f" %(time.time() - t1)
-
       TimeWatch.finish(token)
       sys.stdout.refresh = False
       sys.stdout.graph = False
-    finally:
+      if timer:
+        print "endRun: %.3f" %(time.time() - t1)
       if self.HasGUI:
         pass
         #olx.html.Update()
@@ -139,6 +141,8 @@ class RunPrg(ArgumentParser):
 
       if self.please_run_auto_vss:
         self.run_auto_vss()
+      if caught_exception:
+        raise caught_exception
 
   def run_auto_vss(self):
     olx.Freeze(True)
@@ -161,10 +165,7 @@ class RunPrg(ArgumentParser):
     return a
 
   def doBroadcast(self):
-    if "smtbx" not in self.program.name:
-      ext = "res"
-    else:
-      ext = "res"
+    ext = "res"
     copy_from = "%s/%s.%s" %(self.tempPath, self.shelx_alias, ext)
     copy_to = "%s/listen.res" %(self.datadir)
     if os.path.isfile(copy_from):
@@ -172,24 +173,29 @@ class RunPrg(ArgumentParser):
         shutil.copyfile(copy_from, copy_to)
 
   def doFileResInsMagic(self):
-    extensions = ['res', 'lst', 'cif', 'fcf', 'mat', 'pdb']
-    if "xt" in self.program.name.lower():
-      extensions.append('hkl')
-    if self.broadcast_mode:
-      self.doBroadcast()
-    for ext in extensions:
-      if timer:
-        t = time.time()
-      if "xt" in self.program.name.lower() and ext != 'lst':
-        copy_from = "%s/%s_a.%s" %(self.tempPath, self.shelx_alias, ext)
-      else:
-        copy_from = "%s/%s.%s" %(self.tempPath, self.shelx_alias, ext)
-      copy_to = "%s/%s.%s" %(self.filePath, self.original_filename, ext)
-      if os.path.isfile(copy_from):
-        if copy_from.lower() != copy_to.lower():
-          shutil.copyfile(copy_from, copy_to)
-      if timer:
-        print "---- copying %s: %.3f" %(copy_from, time.time() -t)
+    file_lock = OV.createFileLock(os.path.join(self.filePath, self.original_filename))
+    try:
+      extensions = ['res', 'lst', 'cif', 'fcf', 'mat', 'pdb']
+      if "xt" in self.program.name.lower():
+        extensions.append('hkl')
+      if self.broadcast_mode:
+        self.doBroadcast()
+      for ext in extensions:
+        if timer:
+          t = time.time()
+        if "xt" in self.program.name.lower() and ext != 'lst':
+          copy_from = "%s/%s_a.%s" %(self.tempPath, self.shelx_alias, ext)
+        else:
+          copy_from = "%s/%s.%s" %(self.tempPath, self.shelx_alias, ext)
+        copy_to = "%s/%s.%s" %(self.filePath, self.original_filename, ext)
+        if os.path.isfile(copy_from):
+          if copy_from.lower() != copy_to.lower():
+            shutil.copyfile(copy_from, copy_to)
+        if timer:
+          print "---- copying %s: %.3f" %(copy_from, time.time() -t)
+    finally:
+      OV.deleteFileLock(file_lock)
+
   def doHistoryCreation(self, type="normal"):
     if type == "first":
       historyPath = "%s/%s.history" %(OV.StrDir(), OV.FileName())
@@ -368,7 +374,6 @@ class RunPrg(ArgumentParser):
 #    olx.html.Update()
 
 
-
 class RunSolutionPrg(RunPrg):
   def __init__(self):
     RunPrg.__init__(self)
@@ -476,9 +481,8 @@ class RunRefinementPrg(RunPrg):
   def setupRefine(self):
     self.method.pre_refinement(self)
     self.shelx = self.which_shelx(self.program)
-    if olx.LSM().upper() == "CGLS":
-      olx.DelIns('ACTA')
-    OV.File()
+    if olx.LSM().upper() == "CGLS" and olx.Ins("ACTA") != "n/a":
+      olx.DelIns("ACTA")
 
   def doAutoTidyBefore(self):
     olx.Clean('-npd -aq=0.1 -at')
@@ -631,7 +635,7 @@ class RunRefinementPrg(RunPrg):
       hooft = hooft_analysis()
     except Sorry, e:
       print e
-      
+
     else:
       if hooft.reflections.f_sq_obs_filtered.anomalous_flag():
         s = format_float_with_standard_uncertainty(
@@ -656,9 +660,9 @@ class RunRefinementPrg(RunPrg):
         flack_esd = None
       if flack_val > 0.8:
         inversion_needed = True
-        
+
     print "%s, %s" %(hooft_display, flack_display)
-        
+
     if force and inversion_needed:
       olex.m('Inv -f')
       OV.File('%s.res' %OV.FileName())
@@ -677,7 +681,7 @@ class RunRefinementPrg(RunPrg):
   def mask_and_fab(self):
     if not OV.GetParam("snum.refinement.use_solvent_mask"):
       return None
-    
+
     import cctbx_olex_adapter
     from smtbx import masks
     from libtbx import easy_pickle
@@ -715,7 +719,7 @@ class RunRefinementPrg(RunPrg):
         OV.SetParam("snum.refinement.use_solvent_mask", False)
         olex.m('delins ABIN')
         OlexVFS.write_to_olex('mask_notification.htm',_,1)
-    
+
     if f_mask is not None:
       cctbx_adapter = cctbx_olex_adapter.OlexCctbxAdapter()
       fo2 = cctbx_adapter.reflections.f_sq_obs_filtered
@@ -737,7 +741,6 @@ class RunRefinementPrg(RunPrg):
           print >> f, line
         print >> f, "0 0 0 0.0 0.0"
       return f_mask
-
 
 
 def AnalyseRefinementSource():
@@ -772,8 +775,6 @@ def AnalyseRefinementSource():
       print('HKL file is not in the CIF')
       return False
   return True
-
-
 
 
 OV.registerFunction(AnalyseRefinementSource)
