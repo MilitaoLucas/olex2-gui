@@ -382,12 +382,10 @@ OV.registerFunction(EditCifInfo)
 class MergeCif(CifTools):
   def __init__(self, edit=False, force_create=True, evaluate_conflicts=True):
     ext = OV.FileExt()
-    if ext and ext.lower() == "cif":
-      return
     super(MergeCif, self).__init__()
     edit = (edit not in ('False','false',False))
     # check if cif exists and is up-to-date
-    cif_path = '%s%s%s.cif' %(OV.FilePath(), os.sep, OV.FileName())
+    cif_path = os.path.join(OV.FilePath(), OV.FileName()) + ".cif"
     file_full = OV.FileFull()
     if (not os.path.isfile(cif_path) or
         os.path.getmtime(file_full) > os.path.getmtime(cif_path) + 10):
@@ -414,8 +412,9 @@ class MergeCif(CifTools):
         print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         return
 
-    ECI = ExtractCifInfo(evaluate_conflicts=evaluate_conflicts)
-    ECI.run()
+    if ext and ext.lower() != "cif":
+      ECI = ExtractCifInfo(evaluate_conflicts=evaluate_conflicts)
+      ECI.run()
     self.write_metacif_file()
     ## merge metacif file with cif file from refinement
     merge_with = []
