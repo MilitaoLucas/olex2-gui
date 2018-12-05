@@ -1017,6 +1017,9 @@ class OlexFunctions(inheritFunctions):
 
   def createFileLock(self, fileName):
     lockName = olx.file.ChangeExt(fileName, "lock")
+    if sys.platform[:3] == 'win':
+      import olex_core
+      return olex_core.CreateLock(lockName, 5000)
     cnt = 0
     while os.path.exists(lockName):
       try:
@@ -1029,6 +1032,9 @@ class OlexFunctions(inheritFunctions):
     return (lockName, open(lockName, "w+"))
 
   def deleteFileLock(self, lock):
+    if sys.platform[:3] == 'win':
+      import olex_core
+      return olex_core.DeleteLock(lock)
     lock[1].close();
     os.remove(lock[0])
 
