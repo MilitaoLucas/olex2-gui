@@ -1019,7 +1019,10 @@ class OlexFunctions(inheritFunctions):
     lockName = olx.file.ChangeExt(fileName, "lock")
     if sys.platform[:3] == 'win':
       import olex_core
-      return olex_core.CreateLock(lockName, 5000)
+      lock =  olex_core.CreateLock(lockName, 5000)
+      if lock is None:
+        raise IOError("Failed to acquire file lock!")
+      return lock
     cnt = 0
     while os.path.exists(lockName):
       try:
