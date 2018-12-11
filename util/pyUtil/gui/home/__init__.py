@@ -21,6 +21,7 @@ def BGColorForValue(value):
 class MultipleDataset:
   def check(self):
     if CURR_CIF_FILE_NAME:
+      self.CURR_CIF_FILE_NAME = CURR_CIF_FILE_NAME
       return True
     if olx.IsFileType('cif') == 'false':
       return False
