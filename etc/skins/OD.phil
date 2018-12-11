@@ -1,26 +1,35 @@
 gui {
   base_colour = #b6b6b6
   logo_colour = #014e8f
-  htmlpanelwidth = 540
+  htmlpanelwidth = 530
   red = #aa0000
   orange = #ff740e
   green = #00aa00
+  watermark = #777777
 
   skin {
     name = "OD"
     logo_name = None
     icon_size = 28
     icon_border_colour = #dddddd
+
+    diagnostics {
+      colour_grade1 = #307125
+      colour_grade2 = #6e9619
+      colour_grade3 = #fe8b0d
+      colour_grade4 = #d62613
+      colour_grade5 = #660066
+      }
   }
 
   html {
     base_colour = #b6b6b6
     font_colour = #222244
-    bg_colour = #cecece
+    bg_colour = #dddddd
     highlight_colour = #ff7800
     input_bg_colour = #ffffff
     link_colour = #585886
-    table_bg_colour = #bcbcbc
+    table_bg_colour = #cccccc
     table_firstcol_colour = #bbbbbb
     input_height = 20
     checkbox_height = 20
@@ -89,12 +98,14 @@ gui {
       height = 26
       font_size = 16
       top = 4
-      left = 10
+      left = 13
       bg_colour_L = 1.2
       grad_colour_L = 0.9
       font_colour_L = 1.5
+      corner_rad = 5
+      rounded = 1100
       font_colour = #ffffff
-      arrows = "bar:left:6"
+      arrows = "bar:left:8"
       off_L = 0.8
     }
     h3 {
@@ -106,8 +117,8 @@ gui {
       font_colour = #ffffff
       corner_rad = 3
       top = 1
-      left = 8
-      arrows = "bar:left:5"
+      left = 10
+      arrows = "bar:left:6"
       off_L = 0.6
     }
     tinybutton{
