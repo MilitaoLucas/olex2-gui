@@ -5,7 +5,7 @@
 #height=0
 #manage=false
 #right=false
-#bgcolor=GetVar('HtmlInputBgColour')
+#bgcolor=GetVar(HtmlInputBgColour)
 #fgcolor=GetVar(HtmlFontColour)
 #disabled=false
 #oncheck="html.SetData(~name~,'True')"
@@ -21,8 +21,8 @@
           <input
             type="checkbox"
             height="#height"
-            fgcolor="#fgcolor"
-            bgcolor="#bgcolor"
+            fgcolor="'#fgcolor'"
+            bgcolor="'#bgcolor'"
             name="#name"
             label="#label"
             value="#value"
