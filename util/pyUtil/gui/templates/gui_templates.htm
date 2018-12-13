@@ -24,10 +24,10 @@ t:part_0_and_n{
   name="0 | %(part)s#scope"
   value="0 | %(part)s"
   width="100%%"
-  onclick="freeze true>>spy.gui.tools.show_unique_only()>>ShowP 0 %(parts)s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%(part)s)>>freeze false>>focus"
+  onclick="freeze true>>spy.gui.tools.show_unique_only()>>ShowP 0 %(parts)s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%(part)s)>>freeze false"
   bgcolor="$GetVar('linkButton.bgcolor')"
   fgcolor="$GetVar('linkButton.fgcolor')"
-  flat="$GetVar(linkButton.flat)"
+  custom="#custom"
 ></b>
 </font>
 </td>
@@ -57,7 +57,7 @@ t:disorder_quicktool_no_options{
   onclick="showP"
   bgcolor="$GetVar('linkButton.bgcolor')"
   fgcolor="$GetVar('linkButton.fgcolor')"
-  flat="$GetVar(linkButton.flat)"
+  custom="#custom"
 ></b>
 </font>
 
@@ -80,7 +80,7 @@ t:disorder_quicktool{
   onclick="showP"
   bgcolor="$GetVar('linkButton.bgcolor')"
   fgcolor="$GetVar('linkButton.fgcolor')"
-  flat="$GetVar(linkButton.flat)"
+  custom="#custom"
 ></b>
 </font>
 
@@ -151,7 +151,7 @@ t:minimal_gui_link_button{
       value="%(value)s"
       width="#width"
       height="#height"
-      onclick="#onclick>>focus"
+      onclick="#onclick"
       fgcolor="#fgcolor"
       bgcolor="#bgcolor"
       fit="#fit"
@@ -169,7 +169,7 @@ t:R_factor_display{
       <font size='%(font_size_wR2)s' color='$GetVar(gui.watermark)'><b><i>R</i><sub>1&nbsp;</sub></b></font>
     </td>
     <td align='right'>
-      <font size='%(font_size_R1)s' color='%(font_colour_R1)s'><b>%(R1)s</font> <font size='%(font_size_wR2)s' color='%(grey)s'><a href="spy.make_reflection_graph(fobs_fcalc)">%%</a></b></font></td>
+      <font size='%(font_size_R1)s' color='%(font_colour_R1)s'><b>%(R1)s</font> <font size='%(font_size_wR2)s' color='%(grey)s'><a href="spy.make_reflection_graph(fobs_fcalc)"><font size='+1'>%%</font></a></b></font></td>
   </tr>
   <tr>
     <td align='center'>
