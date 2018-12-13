@@ -359,7 +359,7 @@ class MatrixMaker(ImageTools):
       bgcolor = OV.GetParam('gui.html.highlight_colour').rgb
     if state == "off":
       bgcolor = '#dedede'
-    width = 52
+    width = 100
     height = 55
     size = (width, height)
     font_name = "Arial"
@@ -374,22 +374,34 @@ class MatrixMaker(ImageTools):
     for item in matrix:
       if i == 9: break
       try:
-        item = int(item)
+        item = round(item,3)
       except:
         item = item
+      if str(item) == "0.0":
+        item = "0"
+      if str(item) == "1.0":
+        item = "1"
+      if str(item) == "-1.0":
+        item = "-1"
       txt_size = draw.textsize(str(item), font=font)
       w = txt_size[0]
       if w > max_width:
         max_width = w
       i += 1
-    if max_width < 15: max_width = 15
+    #if max_width < 15: max_width = 15
     i = 0
     for item in matrix:
       if i == 9: break
       try:
-        item = int(item)
+        item = round(item,3)
       except:
         item = item
+      if str(item) == "0.0":
+        item = "0"
+      if str(item) == "1.0":
+        item = "1"
+      if str(item) == "-1.0":
+        item = "-1"
       m.append(item)
       i += 1
 
@@ -602,7 +614,7 @@ class BarGenerator(ArgumentParser):
       grad_colour = IT.adjust_colour(colour_a, luminosity = 1)
       draw = ImageDraw.Draw(image)
       IT.gradient_bgr(draw, height, width, colour = grad_colour, fraction=1, step=0.8) # width and height are swapped!
-      image = image.rotate(90)
+      image = image.rotate(90, expand=1)
       draw = ImageDraw.Draw(image)
 
     adjustment_bottom = (1.1, 1.3, 2)
@@ -1845,7 +1857,7 @@ spy.doBanner(GetVar(snum_refinement_banner_slide))
                  font_size=43,
                  font_colour='#ffffff')
 
-    new = new.rotate(90)
+    new = new.rotate(90,expand=1)
     IM.paste(new, (0, 0))
     name = r"logo.png"
     IM = IT.resize_image(IM, (IT.skin_width,55), name=name)
