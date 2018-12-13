@@ -5,6 +5,8 @@ from cctbx_olex_adapter import OlexCctbxAdapter
 from olexFunctions import OlexFunctions
 OV = OlexFunctions()
 
+import olx
+
 from cctbx import statistics
 from cctbx.array_family import flex
 from cctbx import uctbx
@@ -107,7 +109,7 @@ class item_vs_resolution(OlexCctbxAdapter):
         #print b.d_min, b.d_max, b.cc_one_half, b.r_merge
 
     if self.item == "i_over_sigma_vs_resolution":
-      fo2 = self.reflections.f_sq_obs
+      fo2 = self.reflections.f_sq_obs_merged
       fo2.setup_binner(n_bins=n_bins)
       self.info = fo2.info()
       a = fo2.data()/fo2.sigmas()
