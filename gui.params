@@ -125,7 +125,7 @@ gui
       .type = colour
     button.highlight.lightness = 120
       .type = int
-    button.border.lightness = 95
+    button.border.lightness = 120
       .type = int
     link_type = 'gui-link-button'
       .type = str
@@ -741,7 +741,7 @@ gui
       .type = colour
     outline_colour = #666666
       .type = colour
-    fitline_colour = #eeeeee
+    fitline_colour = #b40000
       .type = colour
     page_colour = #ffffff
       .type = colour
