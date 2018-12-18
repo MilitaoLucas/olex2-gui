@@ -24,21 +24,13 @@ t:part_0_and_n{
   name="0 | %(part)s#scope"
   value="0 | %(part)s"
   width="100%%"
-  onclick="freeze true>>spy.gui.tools.show_unique_only()>>ShowP 0 %(parts)s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%(part)s)>>freeze false"
+  onclick="freeze true>>spy.gui.tools.show_unique_only()>>ShowP 0 %(parts)s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%(part)s)>>freeze false>>focus"
   bgcolor="$GetVar('linkButton.bgcolor')"
   fgcolor="$GetVar('linkButton.fgcolor')"
   custom="#custom"
 ></b>
 </font>
 </td>
-
-<!--
-    $+
-    html.Snippet(GetVar(default_link),
-    "value=0 | %(part)s",
-    "onclick=ShowP 0 %(part)s -v=spy.GetParam(user.parts.keep_unique)>>spy.gui.tools.sel_part(%(part)s)>>focus",
-    )$-
--->
 
 }
 
@@ -48,13 +40,15 @@ t:disorder_quicktool_no_options{
 
   <td>
 
+
+
 <font size="$GetVar('HtmlFontSizeControls')"><b>
 <input
   type="button"
   name="ALL#scope"
   value="All"
   width="100%%"
-  onclick="showP"
+  onclick="showP>>focus"
   bgcolor="$GetVar('linkButton.bgcolor')"
   fgcolor="$GetVar('linkButton.fgcolor')"
   custom="#custom"
@@ -77,7 +71,7 @@ t:disorder_quicktool{
   name="ALL#scope"
   value="All"
   width="100%%"
-  onclick="showP"
+  onclick="showP>>focus"
   bgcolor="$GetVar('linkButton.bgcolor')"
   fgcolor="$GetVar('linkButton.fgcolor')"
   custom="#custom"
