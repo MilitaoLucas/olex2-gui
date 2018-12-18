@@ -90,10 +90,14 @@ class UsersDB:
     affiliations.deleteSiteById(self.site.id)
     olx.html.SetItems(self.ctrl("Sites"), self.getSiteList())
     self.setSite(None)
-
+    
   def getPeopleList(self, t):
     from userDictionaries import persons
     return persons.getListPeople(site_id=t, edit=False)
+
+  def getPerson(self, t):
+    from userDictionaries import persons
+    return persons.get_person(id=t)
 
   def setPerson(self, t):
     if not t:
@@ -155,6 +159,7 @@ olex.registerFunction(db.updateSite, False, "gui.db")
 olex.registerFunction(db.deleteSite, False, "gui.db")
 olex.registerFunction(db.getPeopleList, False, "gui.db")
 olex.registerFunction(db.setPerson, False, "gui.db")
+olex.registerFunction(db.getPerson, False, "gui.db")
 olex.registerFunction(db.addPerson, False, "gui.db")
 olex.registerFunction(db.updatePerson, False, "gui.db")
 olex.registerFunction(db.deletePerson, False, "gui.db")
