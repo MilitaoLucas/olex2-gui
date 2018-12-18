@@ -29,14 +29,20 @@ def BGColorForValue(value):
 
 class publication:
 
-  def OnPersonChange(self, box, param=None):
+  def OnPersonChange(self, box, param=None, person_id=None):
     import userDictionaries
     from  gui.db import userdb
     #pid = int(olx.html.GetValue(box))
-    person = userdb.db.Manage()
+    new = False
+    if person_id:
+      person = userdb.db.getPerson(int(person_id))
+    else:
+      person = userdb.db.Manage()
+      new=True
     if person:
       rv = person.get_display_name()
-      olx.html.SetValue(box, rv)
+      if new:
+        olx.html.SetValue(box, rv)
       if param:
         OV.SetParam(param, person.id)
       return rv
@@ -84,8 +90,8 @@ class publication:
       OV.SetParam("snum.metacif.publ_author_names", newValue)
     return changed
 
-  def OnAddNameToAuthorList(self, box_name):
-    value = self.OnPersonChange(box_name)
+  def OnAddNameToAuthorList(self, box_name,person_id=None):
+    value = self.OnPersonChange(box_name, person_id=person_id)
     if self.AddNameToAuthorList(value):
       olx.html.Update()
 
