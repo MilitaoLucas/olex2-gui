@@ -4,7 +4,7 @@
 #height=0
 #manage=false
 #right=false
-#bgcolor=GetVar(HtmlInputBgColour)
+#bgcolor=GetVar(HtmlTableBgColour)
 #fgcolor=GetVar(HtmlFontColour)
 #disabled=false
 #oncheck="html.SetData(~name~,'True')"
@@ -13,21 +13,21 @@
 
 
 <font size="$GetVar('HtmlFontSizeControls')">
-<input
-  type="checkbox"
-  height="#height"
-  fgcolor="#fgcolor"
-  bgcolor="#bgcolor"
-  name="#name"
-  width="#width"
-  value="#value"
-  checked="#checked"
-  onclick="#onclick"
-  oncheck="#oncheck"
-  onuncheck="#onuncheck"
-  right="#right"
-  manage="#manage"
-  disabled="#disabled"
-  target="#target"
->
+  <input
+    type="checkbox"
+    height="#height"
+    fgcolor="#fgcolor"
+    bgcolor="#bgcolor"
+    name="#name"
+    width="#width"
+    value="#value"
+    checked="#checked"
+    onclick="#onclick"
+    oncheck="#oncheck"
+    onuncheck="#onuncheck"
+    right="#right"
+    manage="#manage"
+    disabled="#disabled"
+    target="#target"
+  >
 </font>
