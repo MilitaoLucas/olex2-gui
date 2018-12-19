@@ -481,6 +481,8 @@ class RunRefinementPrg(RunPrg):
   def setupRefine(self):
     self.method.pre_refinement(self)
     self.shelx = self.which_shelx(self.program)
+    if self.params.snum.refinement.auto.assignQ:  
+      olexex.get_auto_q_peaks()
     if olx.LSM().upper() == "CGLS" and olx.Ins("ACTA") != "n/a":
       olx.DelIns("ACTA")
 
@@ -555,6 +557,7 @@ class RunRefinementPrg(RunPrg):
 
     if self.R1 == 'n/a':
       return
+
     if self.params.snum.refinement.auto.tidy:
       self.doAutoTidyAfter()
       OV.File()
